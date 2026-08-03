@@ -2569,13 +2569,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-75. Advertising Identifier Assumptions”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-75. advertising identifier assumptions after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "No advertising identifier is enabled by the checked-in analytics configuration; third-party policy remains external."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-76",
@@ -2588,13 +2603,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-76. HTTPS Optional”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-76. https optional after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The configured canonical site and links use HTTPS; transport enforcement at GitHub Pages/domain infrastructure remains external evidence."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-77",
@@ -2607,13 +2637,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-77. Mixed Content”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-77. mixed content after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Checked-in first-party URLs and CSP allowlists use HTTPS where external transport is required; browser/provider behavior remains review scope."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-78",
@@ -2626,13 +2671,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-78. Dangling Custom Domain”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-78. dangling custom domain after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Custom-domain dangling state cannot be proven from repository files; the configured canonical host is GitHub Pages and DNS remains deferred."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-79",
@@ -2645,13 +2705,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-79. DNS Change Without Verification”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-79. dns change without verification after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "DNS changes require external verification and are not inferred from Astro configuration or repository state."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-80",
@@ -2664,13 +2739,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-80. Preview Domain Indexed”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-80. preview domain indexed after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Preview/random and admin surfaces use noindex or artifact exclusion boundaries; sitemap generation excludes admin routes."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-81",
@@ -2683,13 +2773,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-81. Source Map Exposure Without Need”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-81. source map exposure without need after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Astro/Vite production builds explicitly disable source maps."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-82",
@@ -2702,13 +2807,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-82. Backup Files in Public Output”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-82. backup files in public output after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "The deployment uploads only the verified dist artifact and release checks inspect the generated output."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-83",
@@ -2721,13 +2841,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-83. Internal Log Publication”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-83. internal log publication after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Operational reports remain repository-side evidence and are not intentionally published through content routes; artifact boundary checks remain required."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-84",
@@ -2740,13 +2875,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-84. Screenshot Metadata Leakage”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-84. screenshot metadata leakage after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Image metadata leakage is not globally proven by static source checks; media review remains targeted and preservation-first."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-85",
@@ -2759,13 +2909,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-85. Image EXIF Leakage”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-85. image exif leakage after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "EXIF removal is not inferred from file existence; original media preservation and metadata review remain an explicit manual lane."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-86",
@@ -2778,13 +2943,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-86. Repository URL Leakage”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-86. repository url leakage after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Repository URLs in public links are intentional first-party references; secret/token exposure is separately scanned."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-87",
@@ -2797,13 +2977,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-87. Personal Path Leakage”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-87. personal path leakage after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Credential/path scans run across source and generated artifacts and currently report no findings."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-88",
@@ -2816,13 +3011,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-88. Real Token in Tutorial”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-88. real token in tutorial after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Secret scanning covers content, public, and dist trees and reports no credential-shaped tutorial tokens."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-89",
@@ -2835,13 +3045,28 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-89. Secret Redaction by Partial Mask”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-89. secret redaction by partial mask after host, artifact, media, or deployment changes.",
+      "scope": "Checked-in transport, artifact, and media boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "astro.config.mjs",
+            "src/layouts/BaseLayout.astro",
+            "src/pages/random.astro",
+            "scripts/scan-secrets.mjs",
+            "scripts/audit-repository-resilience.mjs",
+            "scripts/verify-release.mjs",
+            ".github/workflows/deploy.yml",
+            "src/content/blog"
+          ],
+          "verification": "npm run gate:secrets && npm run audit:security-admin -- --artifact dist && npm run verify:release",
+          "result": "Secret redaction is not treated as safe based on partial masking; the scanner requires credential-shaped patterns to be absent."
+        }
+      ],
+      "residualRisk": "DNS/domain ownership, browser transport enforcement, hosted logs, and image metadata require external or targeted manual verification."
     },
     {
       "id": "AP-SEC-90",
