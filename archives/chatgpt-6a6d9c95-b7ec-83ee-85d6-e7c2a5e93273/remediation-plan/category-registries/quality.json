@@ -1705,13 +1705,24 @@
           "6b50b77f-95eb-4b63-ac9b-f126f6312eb4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “T-57. Accessibility Test on Homepage Only”?",
-      "scope": null,
+      "reviewQuestion": "Reassess representative article, search, archive, topic, admin, and error routes after template or accessibility changes.",
+      "scope": "Repository route-wide accessibility assurance; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-product-experience.mjs",
+            "scripts/verify-release.mjs",
+            "src/pages"
+          ],
+          "verification": "npm run audit:diagram-accessibility && npm run audit:product-experience && npm run verify:release",
+          "result": "Static asset and product contracts operate across the repository corpus and generated routes rather than only the homepage; browser assistive-technology coverage remains explicitly separate."
+        }
+      ],
+      "residualRisk": "Route-specific keyboard and screen-reader regressions can remain undetected without representative browser checks across templates."
     },
     {
       "id": "AP-T-58",
