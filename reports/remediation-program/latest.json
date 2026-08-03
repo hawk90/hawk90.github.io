@@ -1,0 +1,282 @@
+{
+  "generatedAt": "2026-08-03T02:43:22.944Z",
+  "categories": [
+    {
+      "id": "methodology",
+      "label": "AP-D 방법론",
+      "status": "completed",
+      "expectedApCount": 125,
+      "counts": {
+        "unassessed": 0,
+        "remediated": 100,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 25
+      },
+      "dependencies": [],
+      "ready": false,
+      "closure": [
+        "Every AP-D item is dispositioned with AP ID, scope, decision, and residual risk.",
+        "The remediation workflow rejects work without task-level evidence."
+      ]
+    },
+    {
+      "id": "repository",
+      "label": "AP-R 저장소·운영",
+      "status": "remediation_in_progress",
+      "expectedApCount": 100,
+      "counts": {
+        "unassessed": 0,
+        "remediated": 43,
+        "accepted": 57,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "methodology"
+      ],
+      "ready": true,
+      "closure": [
+        "Every AP-R item is dispositioned.",
+        "CI, dependency, artifact, and rollback evidence are recorded."
+      ]
+    },
+    {
+      "id": "quality",
+      "label": "AP-T 품질·테스트",
+      "status": "remediation_in_progress",
+      "expectedApCount": 100,
+      "counts": {
+        "unassessed": 0,
+        "remediated": 61,
+        "accepted": 39,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "methodology",
+        "repository"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-T item is dispositioned.",
+        "Required regression and release checks pass."
+      ]
+    },
+    {
+      "id": "security",
+      "label": "AP-SEC 보안",
+      "status": "baseline_established",
+      "expectedApCount": 100,
+      "counts": {
+        "unassessed": 0,
+        "remediated": 35,
+        "accepted": 65,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "methodology",
+        "repository",
+        "quality"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-SEC item is dispositioned.",
+        "Static-admin, secrets, supply-chain, and production-artifact checks pass."
+      ]
+    },
+    {
+      "id": "metadata",
+      "label": "AP-M 메타데이터",
+      "status": "baseline_established",
+      "expectedApCount": 90,
+      "counts": {
+        "unassessed": 90,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "methodology",
+        "quality"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-M item is dispositioned.",
+        "Metadata lifecycle decisions are evidence-backed; no bulk verification claims."
+      ]
+    },
+    {
+      "id": "information_architecture",
+      "label": "AP-I 정보구조",
+      "status": "baseline_established",
+      "expectedApCount": 160,
+      "counts": {
+        "unassessed": 160,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "metadata",
+        "quality"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-I item is dispositioned.",
+        "Taxonomy and relation decisions are reviewed rather than inferred from paths."
+      ]
+    },
+    {
+      "id": "localization",
+      "label": "AP-L 로컬라이제이션",
+      "status": "baseline_established",
+      "expectedApCount": 100,
+      "counts": {
+        "unassessed": 100,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "metadata",
+        "information_architecture"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-L item is dispositioned.",
+        "Locale coverage and terminology decisions are verified."
+      ]
+    },
+    {
+      "id": "search_seo",
+      "label": "AP-S 검색·SEO",
+      "status": "baseline_established",
+      "expectedApCount": 75,
+      "counts": {
+        "unassessed": 75,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "metadata",
+        "information_architecture",
+        "localization"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-S item is dispositioned.",
+        "Search, canonical, sitemap, and indexability contracts pass."
+      ]
+    },
+    {
+      "id": "ux",
+      "label": "AP-U UX",
+      "status": "baseline_established",
+      "expectedApCount": 103,
+      "counts": {
+        "unassessed": 103,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "information_architecture",
+        "localization",
+        "search_seo"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-U item is dispositioned.",
+        "Shared and article-level interaction contracts pass."
+      ]
+    },
+    {
+      "id": "performance",
+      "label": "AP-P 성능",
+      "status": "baseline_established",
+      "expectedApCount": 80,
+      "counts": {
+        "unassessed": 80,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "repository",
+        "quality",
+        "ux"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-P item is dispositioned.",
+        "Performance budgets and representative production measurements are recorded."
+      ]
+    },
+    {
+      "id": "observability",
+      "label": "AP-O 관측성",
+      "status": "baseline_established",
+      "expectedApCount": 100,
+      "counts": {
+        "unassessed": 100,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "security",
+        "repository",
+        "performance"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-O item is dispositioned.",
+        "Collection policy, privacy boundary, and operational response evidence are recorded."
+      ]
+    },
+    {
+      "id": "content",
+      "label": "AP-A 콘텐츠",
+      "status": "baseline_established",
+      "expectedApCount": 239,
+      "counts": {
+        "unassessed": 239,
+        "remediated": 0,
+        "accepted": 0,
+        "superseded": 0,
+        "routed": 0
+      },
+      "dependencies": [
+        "metadata",
+        "information_architecture",
+        "localization",
+        "search_seo",
+        "ux",
+        "performance",
+        "observability",
+        "quality",
+        "security"
+      ],
+      "ready": false,
+      "closure": [
+        "Every AP-A item is dispositioned.",
+        "Content decisions have source/evidence or explicit editorial rationale.",
+        "Readiness queues are reduced according to an approved batch plan, not bulk-marked."
+      ]
+    }
+  ],
+  "findings": [
+    "repository: external recovery evidence is deferred; AP-R closure is prohibited by the runbook"
+  ],
+  "externalRecoveryDeferred": true
+}
