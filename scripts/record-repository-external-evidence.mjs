@@ -10,8 +10,13 @@ const option = (name) => {
 const apply = process.argv.includes('--apply');
 const control = option('--control');
 const reference = option('--evidence-reference');
-if (!control || !reference || reference.startsWith('--')) throw new Error('Usage: node scripts/record-repository-external-evidence.mjs --control <name> --evidence-reference <non-secret record> [--apply]');
-if (/\r|\n|(?:gh[pousr]_|github_pat_|AIza|-----BEGIN)/i.test(reference)) throw new Error('Evidence reference must not contain a secret or multiline value.');
+const date = option('--date');
+const owner = option('--owner');
+const result = option('--result');
+if (!control || !reference || reference.startsWith('--') || !date || date.startsWith('--') || !owner || owner.startsWith('--') || !result || result.startsWith('--')) throw new Error('Usage: node scripts/record-repository-external-evidence.mjs --control <name> --evidence-reference <non-secret record> --date <YYYY-MM-DD> --owner <name-or-role> --result passed [--apply]');
+if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T00:00:00Z`))) throw new Error('--date must be a valid YYYY-MM-DD date.');
+if (result !== 'passed') throw new Error('--result must be passed; record failed exercises separately as findings rather than marking completion.');
+if ([reference, owner, result].some((value) => /\r|\n|(?:gh[pousr]_|github_pat_|AIza|-----BEGIN)/i.test(value))) throw new Error('Evidence fields must not contain secrets or multiline values.');
 const archive = 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273';
 const registryPath = `${archive}/remediation-plan/category-registries/repository.json`;
 const registry = JSON.parse(await readFile(registryPath, 'utf8'));
@@ -44,7 +49,7 @@ for (const item of targets) {
   item.disposition = 'remediated'; item.nextAction = 'manual-review';
   item.reviewQuestion = `Does the recorded ${control} exercise remain current and cover this item without exposing a secret?`;
   item.scope = 'External recovery exercise attested by a non-secret evidence reference; repository files alone were not used to infer this result.';
-  item.evidence = [{ files: [`${archive}/remediation-plan/repository-recovery-runbook.md`], verification: 'npm run audit:repository-external-evidence', result: `${mapping.result} Evidence reference: ${reference}` }];
+  item.evidence = [{ files: [`${archive}/remediation-plan/repository-recovery-runbook.md`], verification: 'npm run audit:repository-external-evidence', result: `${mapping.result} Date: ${date}; owner: ${owner}; result: passed; evidence reference: ${reference}` }];
   item.residualRisk = 'External providers, owners, and recovery procedures can change; repeat the exercise on the recorded reassessment schedule.';
 }
 await writeFile(registryPath, `${JSON.stringify(registry, null, 2)}\n`);
