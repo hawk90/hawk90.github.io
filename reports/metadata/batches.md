@@ -1,30 +1,12 @@
 # metadata review batches
 
 - Category state: baseline_established
-- Dependencies not complete: quality
-- Unassessed items: 90
+- Dependencies not complete: none
+- Unassessed items: 75
 - Maximum batch size: 15
-- Batches: 6
+- Batches: 5
 
 ## metadata-01 — metadata-01.md
-
-- AP-M-01 (P1, L) — M-01. Schema Drift
-- AP-M-02 (P1, M) — M-02. Optional Field Explosion
-- AP-M-03 (P1, M) — M-03. Required Field Inflation
-- AP-M-04 (P1, L) — M-04. One Schema for Every Content Type
-- AP-M-05 (P1, M) — M-05. Free-Text Enum
-- AP-M-06 (P1, M) — M-06. Taxonomy Without Registry
-- AP-M-07 (P1, M) — M-07. Series Metadata Duplication
-- AP-M-08 (P1, M) — M-08. Derived Data Stored Manually
-- AP-M-09 (P1, M) — M-09. Generated Field Committed as Source
-- AP-M-10 (P1, M) — M-10. Hidden Defaults
-- AP-M-11 (P1, M) — M-11. Forever Backward Compatibility
-- AP-M-12 (P1, L) — M-12. Big-Bang Migration
-- AP-M-13 (P1, L) — M-13. Migration Without Dry Run
-- AP-M-14 (P1, L) — M-14. Migration Without Idempotency
-- AP-M-15 (P1, L) — M-15. Migration Without Backup Boundary
-
-## metadata-02 — metadata-01.md
 
 - AP-M-16 (P1, L) — M-16. Semantic Migration by Regex
 - AP-M-17 (P1, L) — M-17. Path Migration Without Redirects
@@ -42,7 +24,7 @@
 - AP-M-29 (P1, M) — M-29. Rule Explosion
 - AP-M-30 (P1, M) — M-30. Linter as Editorial Authority
 
-## metadata-03 — metadata-01.md
+## metadata-02 — metadata-01.md
 
 - AP-M-31 (P1, M) — M-31. CI as the Only Reproducible Environment
 - AP-M-32 (P1, M) — M-32. Local and CI Command Divergence
@@ -60,7 +42,7 @@
 - AP-M-44 (P1, M) — M-44. Dependency for a Trivial Function
 - AP-M-45 (P1, M) — M-45. Multiple Libraries for the Same Job
 
-## metadata-04 — metadata-01.md
+## metadata-03 — metadata-01.md
 
 - AP-M-46 (P1, M) — M-46. Unbounded Plugin Stack
 - AP-M-47 (P1, M) — M-47. Major Upgrade by Habit
@@ -78,7 +60,7 @@
 - AP-M-59 (P1, M) — M-59. No Content Authoring Guide
 - AP-M-60 (P1, M) — M-60. Documentation Without Deletion
 
-## metadata-05 — metadata-02.md
+## metadata-04 — metadata-02.md
 
 - AP-M-61 (P1, M) — M-61. Source–Artifact Ambiguity
 - AP-M-62 (P1, M) — M-62. Generated File Modified Manually
@@ -96,7 +78,7 @@
 - AP-M-74 (P1, M) — M-74. New Content Before Existing Debt
 - AP-M-75 (P1, M) — M-75. No Merge Policy for Similar Articles
 
-## metadata-06 — metadata-02.md
+## metadata-05 — metadata-02.md
 
 - AP-M-76 (P1, M) — M-76. Deletion Aversion
 - AP-M-77 (P1, M) — M-77. Update Without Revalidation

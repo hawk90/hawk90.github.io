@@ -19,13 +19,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-01. Schema Drift”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-01. schema drift after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "The Astro content schema and knowledge-model audit provide one checked-in schema contract with regression checks."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-02",
@@ -38,13 +55,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-02. Optional Field Explosion”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-02. optional field explosion after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Optional metadata is retained where content types differ; the schema does not claim every field applies to every document."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-03",
@@ -57,13 +91,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-03. Required Field Inflation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-03. required field inflation after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Required fields are limited to title, date, and explicit topics; the required set is enforced by schema and classification tests."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-04",
@@ -76,13 +127,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-04. One Schema for Every Content Type”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-04. one schema for every content type after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "A shared collection schema models common fields with bounded optional type-specific fields; introducing separate collections remains a future design decision."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-05",
@@ -95,13 +163,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-05. Free-Text Enum”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-05. free-text enum after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Content type and review status use explicit enums and topic values resolve through the canonical registry."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-06",
@@ -114,13 +199,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-06. Taxonomy Without Registry”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-06. taxonomy without registry after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "The topic registry validates duplicate IDs, missing parents, cycles, and unknown explicit topic values."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-07",
@@ -133,13 +235,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-07. Series Metadata Duplication”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-07. series metadata duplication after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Series identity remains source frontmatter while the series lens registry provides presentation metadata; duplication is audited rather than silently merged."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-08",
@@ -152,13 +271,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-08. Derived Data Stored Manually”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-08. derived data stored manually after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Normalized categories and public URLs are derived at runtime from stable IDs and explicit metadata rather than manually duplicated fields."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-09",
@@ -171,13 +307,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-09. Generated Field Committed as Source”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-09. generated field committed as source after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Generated search/feed/artifact data is treated as derived output with source manifests; no generated field is promoted to editorial source automatically."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-10",
@@ -190,13 +343,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-10. Hidden Defaults”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-10. hidden defaults after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Schema defaults for author, tags, type, draft, featured, and review status are explicit and covered by the content contract."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-11",
@@ -209,13 +379,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-11. Forever Backward Compatibility”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-11. forever backward compatibility after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Legacy categories remain a compatibility field while explicit topics are canonical; removal requires a separately reviewed migration."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-12",
@@ -228,13 +415,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-12. Big-Bang Migration”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-12. big-bang migration after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Topic migration defaults to dry-run and preserves source bodies; no big-bang write is authorized implicitly."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-13",
@@ -247,13 +451,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-13. Migration Without Dry Run”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-13. migration without dry run after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "The migration script emits conflict/unclassified reports before any --apply write."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-14",
@@ -266,13 +487,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-14. Migration Without Idempotency”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-14. migration without idempotency after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Migration compares existing explicit topics and only writes missing metadata under explicit --apply, making reruns no-ops for already classified documents."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-15",
@@ -285,13 +523,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-15. Migration Without Backup Boundary”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-15. migration without backup boundary after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Migration and export policies are additive, but external backup/recovery evidence remains separately deferred and is not inferred from a metadata script."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-16",

@@ -1,304 +1,11 @@
 {
   "category": "metadata",
   "state": "baseline_established",
-  "blockedBy": [
-    "quality"
-  ],
+  "blockedBy": [],
   "batchSize": 15,
   "batches": [
     {
       "id": "metadata-01",
-      "source": "metadata-01.md",
-      "items": [
-        {
-          "id": "AP-M-01",
-          "title": "M-01. Schema Drift",
-          "priority": "P1",
-          "effort": "L",
-          "source": {
-            "file": "metadata-01.md#ap-m-01",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-01. Schema Drift”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-02",
-          "title": "M-02. Optional Field Explosion",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-02",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-02. Optional Field Explosion”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-03",
-          "title": "M-03. Required Field Inflation",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-03",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-03. Required Field Inflation”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-04",
-          "title": "M-04. One Schema for Every Content Type",
-          "priority": "P1",
-          "effort": "L",
-          "source": {
-            "file": "metadata-01.md#ap-m-04",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-04. One Schema for Every Content Type”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-05",
-          "title": "M-05. Free-Text Enum",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-05",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-05. Free-Text Enum”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-06",
-          "title": "M-06. Taxonomy Without Registry",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-06",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-06. Taxonomy Without Registry”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-07",
-          "title": "M-07. Series Metadata Duplication",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-07",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-07. Series Metadata Duplication”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-08",
-          "title": "M-08. Derived Data Stored Manually",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-08",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-08. Derived Data Stored Manually”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-09",
-          "title": "M-09. Generated Field Committed as Source",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-09",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-09. Generated Field Committed as Source”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-10",
-          "title": "M-10. Hidden Defaults",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-10",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-10. Hidden Defaults”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-11",
-          "title": "M-11. Forever Backward Compatibility",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-11",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-11. Forever Backward Compatibility”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-12",
-          "title": "M-12. Big-Bang Migration",
-          "priority": "P1",
-          "effort": "L",
-          "source": {
-            "file": "metadata-01.md#ap-m-12",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-12. Big-Bang Migration”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-13",
-          "title": "M-13. Migration Without Dry Run",
-          "priority": "P1",
-          "effort": "L",
-          "source": {
-            "file": "metadata-01.md#ap-m-13",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-13. Migration Without Dry Run”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-14",
-          "title": "M-14. Migration Without Idempotency",
-          "priority": "P1",
-          "effort": "L",
-          "source": {
-            "file": "metadata-01.md#ap-m-14",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-14. Migration Without Idempotency”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-15",
-          "title": "M-15. Migration Without Backup Boundary",
-          "priority": "P1",
-          "effort": "L",
-          "source": {
-            "file": "metadata-01.md#ap-m-15",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-15. Migration Without Backup Boundary”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "metadata-02",
       "source": "metadata-01.md",
       "items": [
         {
@@ -589,7 +296,7 @@
       ]
     },
     {
-      "id": "metadata-03",
+      "id": "metadata-02",
       "source": "metadata-01.md",
       "items": [
         {
@@ -880,7 +587,7 @@
       ]
     },
     {
-      "id": "metadata-04",
+      "id": "metadata-03",
       "source": "metadata-01.md",
       "items": [
         {
@@ -1171,7 +878,7 @@
       ]
     },
     {
-      "id": "metadata-05",
+      "id": "metadata-04",
       "source": "metadata-02.md",
       "items": [
         {
@@ -1462,7 +1169,7 @@
       ]
     },
     {
-      "id": "metadata-06",
+      "id": "metadata-05",
       "source": "metadata-02.md",
       "items": [
         {
