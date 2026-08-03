@@ -1568,13 +1568,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-46. Ignoring Build-Time Compromise”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-46. ignoring build-time compromise after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "Build compromise is addressed through immutable workflow pins, locked installation, secret scanning, and artifact verification; these are layered signals, not proof of a trusted runner."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-47",
@@ -1587,13 +1603,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-47. Install Script Trust”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-47. install script trust after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "Install behavior is constrained by npm ci and the committed lockfile; package lifecycle scripts remain a dependency-review boundary."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-48",
@@ -1606,13 +1638,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-48. Lockfile Bypass”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-48. lockfile bypass after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "CI and deployment both use npm ci and the dependency gate runs in the canonical release contract."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-49",
@@ -1625,13 +1673,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-49. Lockfile Change Hidden in Large PR”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-49. lockfile change hidden in large pr after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "Lockfile changes are ordinary reviewable repository diffs; no automation silently hides them."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-50",
@@ -1644,13 +1708,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-50. Abandoned Dependency Retention”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-50. abandoned dependency retention after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "Dependency audit and manifest review provide signals for abandoned packages; no universal abandonment verdict is inferred."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-51",
@@ -1663,13 +1743,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-51. OAuth Secret in Static Client”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-51. oauth secret in static client after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "The static-admin gate finds no OAuth client secret or callback route in source or dist."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-52",
@@ -1682,13 +1778,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-52. Personal Access Token in Browser Storage”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess sec-52. personal access token in browser storage after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "The static-admin gate scans browser storage for access-token persistence and reports zero findings; the current auth token is module-memory only."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-53",
@@ -1701,13 +1813,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-53. Long-Lived Broad PAT”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-53. long-lived broad pat after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "PAT scope and lifetime are user/account policy outside the static artifact; the UI documents the required scope but cannot attest to token age."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-54",
@@ -1720,13 +1848,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-54. OAuth Scope Inflation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-54. oauth scope inflation after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "OAuth is not enabled in this static deployment, so scope inflation is not inferred; any future server auth requires a separate review."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-55",
@@ -1739,13 +1883,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-55. Authentication Without Authorization”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-55. authentication without authorization after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "The static admin boundary does not claim server-side authentication/authorization; capability remains explicitly outside the static trust model."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-56",
@@ -1758,13 +1918,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-56. Client-Side Authorization Only”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-56. client-side authorization only after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "Client-side admin capability is treated as a bounded PAT-based integration, not as a general authorization system."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-57",
@@ -1777,13 +1953,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-57. Missing OAuth `state`”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-57. missing oauth `state` after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "No OAuth flow is deployed; state/CSRF guarantees are deferred to any future server-owned OAuth implementation."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-58",
@@ -1796,13 +1988,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-58. Redirect URI Wildcard”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-58. redirect uri wildcard after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "No OAuth redirect URI is emitted by the static artifact; provider redirect configuration remains external review scope."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-59",
@@ -1815,13 +2023,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-59. Token in URL”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-59. token in url after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "The static client does not implement OAuth token-in-URL delivery; PAT entry remains a manual operational risk."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-60",
@@ -1834,13 +2058,29 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-60. Editor Can Commit Anywhere”?",
-      "scope": null,
+      "reviewQuestion": "Reassess sec-60. editor can commit anywhere after authentication, dependency, or release changes.",
+      "scope": "Static deployment, browser-admin, and repository-controlled release boundary only; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/security-admin-gate.mjs",
+            "src/lib/admin/auth.ts",
+            "src/lib/admin/github-api.ts",
+            "src/pages/admin/login.astro",
+            "astro.config.mjs",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:security-admin -- --artifact dist && npm run gate:dependencies && npm run gate:secrets && npm run verify:release",
+          "result": "The browser admin can request repository content writes only through the configured GitHub API target; repository branch protection and account permissions remain external controls."
+        }
+      ],
+      "residualRisk": "Account permissions, PAT lifetime/scope, hosted GitHub behavior, and any future OAuth server remain external or manual review boundaries."
     },
     {
       "id": "AP-SEC-61",

@@ -12,272 +12,6 @@
       "source": "security-01.md",
       "items": [
         {
-          "id": "AP-SEC-46",
-          "title": "SEC-46. Ignoring Build-Time Compromise",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-46",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-46. Ignoring Build-Time Compromise”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-47",
-          "title": "SEC-47. Install Script Trust",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-47",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-47. Install Script Trust”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-48",
-          "title": "SEC-48. Lockfile Bypass",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-48",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-48. Lockfile Bypass”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-49",
-          "title": "SEC-49. Lockfile Change Hidden in Large PR",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-49",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-49. Lockfile Change Hidden in Large PR”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-50",
-          "title": "SEC-50. Abandoned Dependency Retention",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-50",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-50. Abandoned Dependency Retention”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-51",
-          "title": "SEC-51. OAuth Secret in Static Client",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-51",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-51. OAuth Secret in Static Client”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-52",
-          "title": "SEC-52. Personal Access Token in Browser Storage",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-52",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-52. Personal Access Token in Browser Storage”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-53",
-          "title": "SEC-53. Long-Lived Broad PAT",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-53",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-53. Long-Lived Broad PAT”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-54",
-          "title": "SEC-54. OAuth Scope Inflation",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-54",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-54. OAuth Scope Inflation”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-55",
-          "title": "SEC-55. Authentication Without Authorization",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-55",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-55. Authentication Without Authorization”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-56",
-          "title": "SEC-56. Client-Side Authorization Only",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-56",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-56. Client-Side Authorization Only”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-57",
-          "title": "SEC-57. Missing OAuth `state`",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-57",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-57. Missing OAuth `state`”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-58",
-          "title": "SEC-58. Redirect URI Wildcard",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-58",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-58. Redirect URI Wildcard”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-SEC-59",
-          "title": "SEC-59. Token in URL",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-01.md#ap-sec-59",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-59. Token in URL”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
           "id": "AP-SEC-100",
           "title": "SEC-100. Maximum Security Complexity",
           "priority": "P0",
@@ -302,25 +36,6 @@
       "id": "security-02",
       "source": "security-02.md",
       "items": [
-        {
-          "id": "AP-SEC-60",
-          "title": "SEC-60. Editor Can Commit Anywhere",
-          "priority": "P0",
-          "effort": "L",
-          "source": {
-            "file": "security-02.md#ap-sec-60",
-            "messageIds": [
-              "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-60. Editor Can Commit Anywhere”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
         {
           "id": "AP-SEC-61",
           "title": "SEC-61. Editor Can Modify Workflow Files",
@@ -586,13 +301,7 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "security-03",
-      "source": "security-02.md",
-      "items": [
+        },
         {
           "id": "AP-SEC-75",
           "title": "SEC-75. Advertising Identifier Assumptions",
@@ -611,7 +320,13 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        },
+        }
+      ]
+    },
+    {
+      "id": "security-03",
+      "source": "security-02.md",
+      "items": [
         {
           "id": "AP-SEC-76",
           "title": "SEC-76. HTTPS Optional",
@@ -877,13 +592,7 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "security-04",
-      "source": "security-02.md",
-      "items": [
+        },
         {
           "id": "AP-SEC-90",
           "title": "SEC-90. Private Draft in Git History",
@@ -902,7 +611,13 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        },
+        }
+      ]
+    },
+    {
+      "id": "security-04",
+      "source": "security-02.md",
+      "items": [
         {
           "id": "AP-SEC-91",
           "title": "SEC-91. No Security Update Routine",

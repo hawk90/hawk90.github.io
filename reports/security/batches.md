@@ -2,31 +2,16 @@
 
 - Category state: baseline_established
 - Dependencies not complete: repository, quality
-- Unassessed items: 55
+- Unassessed items: 40
 - Maximum batch size: 15
 - Batches: 4
 
 ## security-01 — security-01.md
 
-- AP-SEC-46 (P0, L) — SEC-46. Ignoring Build-Time Compromise
-- AP-SEC-47 (P0, L) — SEC-47. Install Script Trust
-- AP-SEC-48 (P0, L) — SEC-48. Lockfile Bypass
-- AP-SEC-49 (P0, L) — SEC-49. Lockfile Change Hidden in Large PR
-- AP-SEC-50 (P0, L) — SEC-50. Abandoned Dependency Retention
-- AP-SEC-51 (P0, L) — SEC-51. OAuth Secret in Static Client
-- AP-SEC-52 (P0, L) — SEC-52. Personal Access Token in Browser Storage
-- AP-SEC-53 (P0, L) — SEC-53. Long-Lived Broad PAT
-- AP-SEC-54 (P0, L) — SEC-54. OAuth Scope Inflation
-- AP-SEC-55 (P0, L) — SEC-55. Authentication Without Authorization
-- AP-SEC-56 (P0, L) — SEC-56. Client-Side Authorization Only
-- AP-SEC-57 (P0, L) — SEC-57. Missing OAuth `state`
-- AP-SEC-58 (P0, L) — SEC-58. Redirect URI Wildcard
-- AP-SEC-59 (P0, L) — SEC-59. Token in URL
 - AP-SEC-100 (P0, L) — SEC-100. Maximum Security Complexity
 
 ## security-02 — security-02.md
 
-- AP-SEC-60 (P0, L) — SEC-60. Editor Can Commit Anywhere
 - AP-SEC-61 (P0, L) — SEC-61. Editor Can Modify Workflow Files
 - AP-SEC-62 (P0, L) — SEC-62. Unsanitized Commit Message
 - AP-SEC-63 (P0, L) — SEC-63. No Conflict Detection
@@ -41,10 +26,10 @@
 - AP-SEC-72 (P0, L) — SEC-72. Error Logging with Page Content
 - AP-SEC-73 (P0, L) — SEC-73. Giscus as a First-Party Comment Store
 - AP-SEC-74 (P0, L) — SEC-74. Loading Comments Before User Intent
+- AP-SEC-75 (P0, L) — SEC-75. Advertising Identifier Assumptions
 
 ## security-03 — security-02.md
 
-- AP-SEC-75 (P0, L) — SEC-75. Advertising Identifier Assumptions
 - AP-SEC-76 (P0, L) — SEC-76. HTTPS Optional
 - AP-SEC-77 (P0, L) — SEC-77. Mixed Content
 - AP-SEC-78 (P0, L) — SEC-78. Dangling Custom Domain
@@ -59,10 +44,10 @@
 - AP-SEC-87 (P0, L) — SEC-87. Personal Path Leakage
 - AP-SEC-88 (P0, L) — SEC-88. Real Token in Tutorial
 - AP-SEC-89 (P0, L) — SEC-89. Secret Redaction by Partial Mask
+- AP-SEC-90 (P0, L) — SEC-90. Private Draft in Git History
 
 ## security-04 — security-02.md
 
-- AP-SEC-90 (P0, L) — SEC-90. Private Draft in Git History
 - AP-SEC-91 (P0, L) — SEC-91. No Security Update Routine
 - AP-SEC-92 (P0, L) — SEC-92. Alert Fatigue
 - AP-SEC-93 (P0, L) — SEC-93. Security Scanner as Proof of Safety
