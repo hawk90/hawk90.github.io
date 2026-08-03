@@ -1,0 +1,1467 @@
+{
+  "category": "search_seo",
+  "state": "baseline_established",
+  "blockedBy": [
+    "metadata",
+    "information_architecture",
+    "localization"
+  ],
+  "batchSize": 15,
+  "batches": [
+    {
+      "id": "search_seo-01",
+      "source": "search_seo-01.md",
+      "items": [
+        {
+          "id": "AP-S-01",
+          "title": "S-01. Search-First Content",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-01",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-01. Search-First Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-02",
+          "title": "S-02. Content Quantity Fallacy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-02",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-02. Content Quantity Fallacy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-03",
+          "title": "S-03. Word-Count Padding",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-03",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-03. Word-Count Padding”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-04",
+          "title": "S-04. Generic AI Prose",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-04",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-04. Generic AI Prose”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-05",
+          "title": "S-05. AI Rewrite Without Added Value",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-05",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-05. AI Rewrite Without Added Value”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-06",
+          "title": "S-06. Specification Translation Site",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-06",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-06. Specification Translation Site”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-07",
+          "title": "S-07. Aggregation Without Synthesis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-07",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-07. Aggregation Without Synthesis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-08",
+          "title": "S-08. Experience-Free Expertise",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-08",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-08. Experience-Free Expertise”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-09",
+          "title": "S-09. Authority by Bio Only",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-09",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-09. Authority by Bio Only”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-10",
+          "title": "S-10. No Editorial Purpose",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-10",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-10. No Editorial Purpose”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-11",
+          "title": "S-11. Thin Article",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-11",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-11. Thin Article”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-12",
+          "title": "S-12. Thin Tag Page",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-12",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-12. Thin Tag Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-13",
+          "title": "S-13. Thin Series Page",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-13",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-13. Thin Series Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-14",
+          "title": "S-14. Thin Category Page",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-14",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-14. Thin Category Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-15",
+          "title": "S-15. Empty Search Page Indexing",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-15",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-15. Empty Search Page Indexing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "search_seo-02",
+      "source": "search_seo-01.md",
+      "items": [
+        {
+          "id": "AP-S-16",
+          "title": "S-16. Filter Combination Indexing",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-16",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-16. Filter Combination Indexing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-17",
+          "title": "S-17. Pagination Duplication",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-17",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-17. Pagination Duplication”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-18",
+          "title": "S-18. Placeholder Page Exposure",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-18",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-18. Placeholder Page Exposure”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-19",
+          "title": "S-19. Tool Page Without Publisher Content",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-19",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-19. Tool Page Without Publisher Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-20",
+          "title": "S-20. Image Gallery Without Explanation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-20",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-20. Image Gallery Without Explanation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-21",
+          "title": "S-21. Duplicate URL Variants",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-21",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-21. Duplicate URL Variants”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-22",
+          "title": "S-22. Canonical to the Homepage",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-22",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-22. Canonical to the Homepage”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-23",
+          "title": "S-23. Canonical to a Non-Equivalent Page",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-23",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-23. Canonical to a Non-Equivalent Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-24",
+          "title": "S-24. Canonical and Noindex Conflict",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-24",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-24. Canonical and Noindex Conflict”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-25",
+          "title": "S-25. Canonical Blocked by robots.txt",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-25",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-25. Canonical Blocked by robots.txt”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-26",
+          "title": "S-26. Duplicate Excerpts",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-26",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-26. Duplicate Excerpts”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-27",
+          "title": "S-27. Topic Cannibalization",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-27",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-27. Topic Cannibalization”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-28",
+          "title": "S-28. Old and New Article Competition",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-28",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-28. Old and New Article Competition”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-29",
+          "title": "S-29. Copying Content Across Series",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-29",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-29. Copying Content Across Series”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-30",
+          "title": "S-30. Multi-Language Duplication Without hreflang",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-30",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-30. Multi-Language Duplication Without hreflang”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "search_seo-03",
+      "source": "search_seo-01.md",
+      "items": [
+        {
+          "id": "AP-S-31",
+          "title": "S-31. Sitemap as a Dump",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-31",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-31. Sitemap as a Dump”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-32",
+          "title": "S-32. Noindex but Included in Sitemap",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-32",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-32. Noindex but Included in Sitemap”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-33",
+          "title": "S-33. Draft Leakage",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-33",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-33. Draft Leakage”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-34",
+          "title": "S-34. Missing Canonical in Generated Pages",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-34",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-34. Missing Canonical in Generated Pages”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-35",
+          "title": "S-35. Soft 404 Article",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-35",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-35. Soft 404 Article”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-36",
+          "title": "S-36. Redirect Chain",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-36",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-36. Redirect Chain”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-37",
+          "title": "S-37. Internal Links to Redirects",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-37",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-37. Internal Links to Redirects”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-38",
+          "title": "S-38. Uncrawlable Navigation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-38",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-38. Uncrawlable Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-39",
+          "title": "S-39. Orphan Canonical Content",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-39",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-39. Orphan Canonical Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-40",
+          "title": "S-40. Indexing Everything by Default",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-40",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-40. Indexing Everything by Default”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-41",
+          "title": "S-41. Title Template Duplication",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-41",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-41. Title Template Duplication”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-42",
+          "title": "S-42. Keyword-Stuffed Title",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-42",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-42. Keyword-Stuffed Title”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-43",
+          "title": "S-43. Duplicate Meta Description",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-43",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-43. Duplicate Meta Description”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-44",
+          "title": "S-44. Automated First-Sentence Description",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-44",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-44. Automated First-Sentence Description”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-45",
+          "title": "S-45. Empty Description",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-45",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-45. Empty Description”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "search_seo-04",
+      "source": "search_seo-01.md",
+      "items": [
+        {
+          "id": "AP-S-46",
+          "title": "S-46. Multiple H1",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-46",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-46. Multiple H1”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-47",
+          "title": "S-47. Heading for Styling",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-47",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-47. Heading for Styling”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-48",
+          "title": "S-48. Structured Data Decoration",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-48",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-48. Structured Data Decoration”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-49",
+          "title": "S-49. Fabricated Structured Data",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-49",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-49. Fabricated Structured Data”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-50",
+          "title": "S-50. One Schema Type Everywhere",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "search_seo-01.md#ap-s-50",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-50. One Schema Type Everywhere”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-51",
+          "title": "S-51. Anonymous Expert Content",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-51",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-51. Anonymous Expert Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-52",
+          "title": "S-52. Inflated Author Claim",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-52",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-52. Inflated Author Claim”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-53",
+          "title": "S-53. No Contact Path",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-53",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-53. No Contact Path”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-54",
+          "title": "S-54. Missing Privacy Policy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-54",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-54. Missing Privacy Policy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-55",
+          "title": "S-55. Template Privacy Policy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-55",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-55. Template Privacy Policy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-56",
+          "title": "S-56. Missing Content Update Policy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-56",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-56. Missing Content Update Policy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-57",
+          "title": "S-57. No Correction History",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-57",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-57. No Correction History”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-58",
+          "title": "S-58. Broken About Page",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-58",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-58. Broken About Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-59",
+          "title": "S-59. Missing Ownership Signal",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-59",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-59. Missing Ownership Signal”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-60",
+          "title": "S-60. Unclear Affiliate or Sponsorship Disclosure",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-01.md#ap-s-60",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-60. Unclear Affiliate or Sponsorship Disclosure”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "search_seo-05",
+      "source": "search_seo-02.md",
+      "items": [
+        {
+          "id": "AP-S-61",
+          "title": "S-61. Ads on Non-Content Pages",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-61",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-61. Ads on Non-Content Pages”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-62",
+          "title": "S-62. Ads Before Primary Content",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-62",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-62. Ads Before Primary Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-63",
+          "title": "S-63. Ads Between Explanation and Evidence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-63",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-63. Ads Between Explanation and Evidence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-64",
+          "title": "S-64. Ads Inside Code Walkthrough",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-64",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-64. Ads Inside Code Walkthrough”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-65",
+          "title": "S-65. Ads Inside Step-by-Step Procedure",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-65",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-65. Ads Inside Step-by-Step Procedure”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-66",
+          "title": "S-66. Auto Ads Without Exclusion Zones",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-66",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-66. Auto Ads Without Exclusion Zones”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-67",
+          "title": "S-67. Maximum Ad Density",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-67",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-67. Maximum Ad Density”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-68",
+          "title": "S-68. Ad-Shaped Navigation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-68",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-68. Ad-Shaped Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-69",
+          "title": "S-69. Accidental Click Layout",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-69",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-69. Accidental Click Layout”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-70",
+          "title": "S-70. Ad-Induced CLS",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-70",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-70. Ad-Induced CLS”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-71",
+          "title": "S-71. Sticky Ad Competition",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-71",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-71. Sticky Ad Competition”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-72",
+          "title": "S-72. Auto-Refreshing Ads",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-72",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-72. Auto-Refreshing Ads”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-73",
+          "title": "S-73. Ads on Draft or Preview",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-73",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-73. Ads on Draft or Preview”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-74",
+          "title": "S-74. Ads on Superseded Content",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-74",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-74. Ads on Superseded Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-S-75",
+          "title": "S-75. Monetization Before Page Quality",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "search_seo-02.md#ap-s-75",
+            "messageIds": [
+              "f5f2581f-3744-41b0-a106-96d642f2a0c9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “S-75. Monetization Before Page Quality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    }
+  ]
+}

@@ -1,0 +1,4655 @@
+{
+  "category": "content",
+  "state": "baseline_established",
+  "blockedBy": [
+    "metadata",
+    "information_architecture",
+    "localization",
+    "search_seo",
+    "ux",
+    "performance",
+    "observability",
+    "quality",
+    "security"
+  ],
+  "batchSize": 15,
+  "batches": [
+    {
+      "id": "content-01",
+      "source": "content-01.md",
+      "items": [
+        {
+          "id": "AP-A-01",
+          "title": "A-01. Article Warehouse",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-01",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-01. Article Warehouse”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-01-2",
+          "title": "A-01. 저장소의 1차 목적 선언",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-01-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-01. 저장소의 1차 목적 선언”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-01",
+          "title": "C-01. Topic-Only Title",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-01",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-01. Topic-Only Title”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-01-2",
+          "title": "C-01. 콘텐츠 상태 모델 확정",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-01-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-01. 콘텐츠 상태 모델 확정”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-02",
+          "title": "A-02. Chronological Architecture",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-01.md#ap-a-02",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-02. Chronological Architecture”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-02-2",
+          "title": "A-02. 홈 Hero 문구 재정의",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-02-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-02. 홈 Hero 문구 재정의”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-02",
+          "title": "C-02. Keyword Stack Title",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-02",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-02. Keyword Stack Title”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-02-2",
+          "title": "C-02. 상태별 노출 정책 정의",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-02-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-02. 상태별 노출 정책 정의”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-03",
+          "title": "A-03. Flat Knowledge Model",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-03",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-03. Flat Knowledge Model”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-03-2",
+          "title": "A-03. 홈 정보 구조 변경",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-03-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-03. 홈 정보 구조 변경”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-03",
+          "title": "C-03. Part-Number Naming",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-03",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-03. Part-Number Naming”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-03-2",
+          "title": "C-03. 최소 metadata schema 도입",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-01.md#ap-c-03-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-03. 최소 metadata schema 도입”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-04",
+          "title": "A-04. Missing Topic Hub",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-04",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-04. Missing Topic Hub”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-04-2",
+          "title": "A-04. Core Topics 영역 추가",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-04-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-04. Core Topics 영역 추가”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-04",
+          "title": "C-04. Delayed Value Proposition",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-04",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-04. Delayed Value Proposition”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-02",
+      "source": "content-01.md",
+      "items": [
+        {
+          "id": "AP-C-04-2",
+          "title": "C-04. `updated`와 `lastVerified` 분리",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-04-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-04. `updated`와 `lastVerified` 분리”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-05",
+          "title": "A-05. Article-First Design",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-05",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-05. Article-First Design”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-05-2",
+          "title": "A-05. Featured Guides 영역 추가",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-05-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-05. Featured Guides 영역 추가”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-05",
+          "title": "C-05. Dictionary Opening",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-05",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-05. Dictionary Opening”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-05-2",
+          "title": "C-05. 콘텐츠 타입 확정",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-05-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-05. 콘텐츠 타입 확정”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-06",
+          "title": "A-06. Mega-Article Architecture",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-01.md#ap-a-06",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-06. Mega-Article Architecture”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-06-2",
+          "title": "A-06. Latest Posts 역할 축소",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-06-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-06. Latest Posts 역할 축소”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-06",
+          "title": "C-06. Generic Importance Claim",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-06",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-06. Generic Importance Claim”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-06-2",
+          "title": "C-06. 타입별 최소 품질 기준",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-06-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-06. 타입별 최소 품질 기준”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-07",
+          "title": "A-07. Fragmentation by Default",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-07",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-07. Fragmentation by Default”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-07-2",
+          "title": "A-07. 홈의 사이트 신뢰 신호 추가",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-07-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-07. 홈의 사이트 신뢰 신호 추가”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-07",
+          "title": "C-07. Background Inflation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-07",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-07. Background Inflation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-07-2",
+          "title": "C-07. 대표 문서 20개 감사표 생성",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-07-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-07. 대표 문서 20개 감사표 생성”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-08",
+          "title": "A-08. Framework-Centric Architecture",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-01.md#ap-a-08",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-08. Framework-Centric Architecture”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-08-2",
+          "title": "A-08. 홈 SEO metadata 정비",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-08-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-08. 홈 SEO metadata 정비”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-03",
+      "source": "content-01.md",
+      "items": [
+        {
+          "id": "AP-C-08",
+          "title": "C-08. Repeated Context Boilerplate",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-08",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-08. Repeated Context Boilerplate”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-08-2",
+          "title": "C-08. 대표 문서의 상단 신뢰 블록",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-08-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-08. 대표 문서의 상단 신뢰 블록”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-09",
+          "title": "A-09. Theme Product Convergence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-09",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-09. Theme Product Convergence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-09-2",
+          "title": "A-09. 홈 컴포넌트 경계 단순화",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-09-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-09. 홈 컴포넌트 경계 단순화”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-09",
+          "title": "C-09. Scope Creep Article",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-09",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-09. Scope Creep Article”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-09-2",
+          "title": "C-09. 상태 배너 설계",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-09-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-09. 상태 배너 설계”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-10",
+          "title": "A-10. Configuration-Driven Everything",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-10",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-10. Configuration-Driven Everything”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-10-2",
+          "title": "A-10. 홈 개편의 완료 기준",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-10-2",
+            "messageIds": [
+              "f9081919-335b-4876-8c62-d7793d412fc1"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-10. 홈 개편의 완료 기준”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-10",
+          "title": "C-10. One Article, Multiple Audiences",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-10",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-10. One Article, Multiple Audiences”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-10-2",
+          "title": "C-10. 근거·관찰·추론 구분",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-10-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-10. 근거·관찰·추론 구분”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-11",
+          "title": "A-11. Static Site with SPA Ambition",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-11",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-11. Static Site with SPA Ambition”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-11",
+          "title": "C-11. Undefined Reader Prerequisite",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-11",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-11. Undefined Reader Prerequisite”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-11-2",
+          "title": "C-11. 가설을 사실로 바꾸는 자동 문체 수정 금지",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-11-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-11. 가설을 사실로 바꾸는 자동 문체 수정 금지”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-12",
+          "title": "A-12. Hydration Without Interaction",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-12",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-12. Hydration Without Interaction”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-12",
+          "title": "C-12. Post Homogeneity",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-12",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-12. Post Homogeneity”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-04",
+      "source": "content-01.md",
+      "items": [
+        {
+          "id": "AP-C-12-2",
+          "title": "C-12. 테스트 환경 템플릿",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-12-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-12. 테스트 환경 템플릿”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-13",
+          "title": "A-13. Content and Rendering Coupling",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-13",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-13. Content and Rendering Coupling”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-13",
+          "title": "C-13. Tutorial Without Outcome",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-13",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-13. Tutorial Without Outcome”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-13-2",
+          "title": "C-13. 소스코드 분석 글에 commit 기준 추가",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-13-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-13. 소스코드 분석 글에 commit 기준 추가”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-14",
+          "title": "A-14. Custom Markdown Language",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-14",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-14. Custom Markdown Language”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-14",
+          "title": "C-14. Command Dump",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-14",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-14. Command Dump”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-14-2",
+          "title": "C-14. 사양 기반 글에 revision 추가",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-14-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-14. 사양 기반 글에 revision 추가”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-15",
+          "title": "A-15. URL–Taxonomy Coupling",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-15",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-15. URL–Taxonomy Coupling”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-15",
+          "title": "C-15. Magic Fix",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-15",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-15. Magic Fix”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-15-2",
+          "title": "C-15. 디버깅 글의 실패 과정 복원",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-c-15-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-15. 디버깅 글의 실패 과정 복원”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-16",
+          "title": "A-16. Navigation as a File Browser",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-16",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-16. Navigation as a File Browser”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-17",
+          "title": "A-17. Search as Primary Navigation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-17",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-17. Search as Primary Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-18",
+          "title": "A-18. Integration Entanglement",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-18",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-18. Integration Entanglement”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-19",
+          "title": "A-19. Generated Asset Dependency",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-19",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-19. Generated Asset Dependency”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-A-20",
+          "title": "A-20. Internal Platform Before User Value",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-01.md#ap-a-20",
+            "messageIds": [
+              "d23c12f4-bf60-4ada-a60b-7a6c9976c2c3"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “A-20. Internal Platform Before User Value”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-05",
+      "source": "content-02.md",
+      "items": [
+        {
+          "id": "AP-G-01",
+          "title": "G-01. Topic Impulse Publishing",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-01",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-01. Topic Impulse Publishing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-01-2",
+          "title": "G-01. 공개 사이트와 관리자 기능 경계 확정",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-01-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-01. 공개 사이트와 관리자 기능 경계 확정”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-02",
+          "title": "G-02. Backlog as a Graveyard",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-02",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-02. Backlog as a Graveyard”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-02-2",
+          "title": "G-02. Production 빌드에서 관리자 코드 제거",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-02-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-02. Production 빌드에서 관리자 코드 제거”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-03",
+          "title": "G-03. SEO Query Becomes Editorial Strategy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-03",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-03. SEO Query Becomes Editorial Strategy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-03-2",
+          "title": "G-03. Workflow별 권한 전수 조사",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-02.md#ap-g-03-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-03. Workflow별 권한 전수 조사”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-04",
+          "title": "G-04. Trend Chasing",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-04",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-04. Trend Chasing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-04-2",
+          "title": "G-04. Build와 Deploy 권한 분리",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-04-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-04. Build와 Deploy 권한 분리”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-05",
+          "title": "G-05. Coverage Anxiety",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-05",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-05. Coverage Anxiety”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-05-2",
+          "title": "G-05. Action 참조 고정",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-05-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-05. Action 참조 고정”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-06",
+          "title": "G-06. Publication Cadence Fetish",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-06",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-06. Publication Cadence Fetish”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-06-2",
+          "title": "G-06. 제3자 Action 최소화",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-06-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-06. 제3자 Action 최소화”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-07",
+          "title": "G-07. Draft Too Early",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-07",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-07. Draft Too Early”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-07-2",
+          "title": "G-07. Secret Inventory 작성",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-07-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-07. Secret Inventory 작성”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-08",
+          "title": "G-08. Draft Forever",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-g-08",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-08. Draft Forever”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-06",
+      "source": "content-02.md",
+      "items": [
+        {
+          "id": "AP-C-16",
+          "title": "C-16. Fix-Only Debugging Note",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-16",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-16. Fix-Only Debugging Note”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-16-2",
+          "title": "C-16. 실험 글의 baseline과 반복 보완",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-16-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-16. 실험 글의 baseline과 반복 보완”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-17",
+          "title": "C-17. Log Dump Without Interpretation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-17",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-17. Log Dump Without Interpretation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-17-2",
+          "title": "C-17. 대표 글의 범위와 한계 추가",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-17-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-17. 대표 글의 범위와 한계 추가”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-18",
+          "title": "C-18. Screenshot as Evidence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-18",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-18. Screenshot as Evidence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-18-2",
+          "title": "C-18. 대표 글 결론 재작성",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-18-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-18. 대표 글 결론 재작성”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-19",
+          "title": "C-19. Evidence Blending",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-19",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-19. Evidence Blending”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-19-2",
+          "title": "C-19. 대표 글의 하단 관계 추가",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-02.md#ap-c-19-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-19. 대표 글의 하단 관계 추가”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-20",
+          "title": "C-20. Unmarked Hypothesis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-20",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-20. Unmarked Hypothesis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-20-2",
+          "title": "C-20. 대표 글 보완 순서",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-20-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-20. 대표 글 보완 순서”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-21",
+          "title": "C-21. Citation Dump",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-21",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-21. Citation Dump”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-21-2",
+          "title": "C-21. 대표 글 리뷰 체크리스트",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-21-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-21. 대표 글 리뷰 체크리스트”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-22",
+          "title": "C-22. Specification Paraphrase",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-22",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-22. Specification Paraphrase”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-22-2",
+          "title": "C-22. 자동 검사와 사람 검토의 경계",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-22-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-22. 자동 검사와 사람 검토의 경계”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-23",
+          "title": "C-23. Documentation Summary Article",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-23",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-23. Documentation Summary Article”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-07",
+      "source": "content-02.md",
+      "items": [
+        {
+          "id": "AP-C-23-2",
+          "title": "C-23. `needs-review` 큐 운영",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-23-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-23. `needs-review` 큐 운영”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-24",
+          "title": "C-24. Code-as-Explanation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-24",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-24. Code-as-Explanation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-24-2",
+          "title": "C-24. 구판 문서 처리",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-24-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-24. 구판 문서 처리”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-25",
+          "title": "C-25. Full Source Embedding",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-25",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-25. Full Source Embedding”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-25-2",
+          "title": "C-25. 대표 글 보완과 AdSense 연결",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-25-2",
+            "messageIds": [
+              "6c73b6f1-f444-44c3-bda2-4196ea9f48f9"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-25. 대표 글 보완과 AdSense 연결”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-26",
+          "title": "C-26. Example Without Production Boundary",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-26",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-26. Example Without Production Boundary”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-27",
+          "title": "C-27. Benchmark Without Baseline",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-27",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-27. Benchmark Without Baseline”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-28",
+          "title": "C-28. Benchmark Without Workload",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-28",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-28. Benchmark Without Workload”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-29",
+          "title": "C-29. Single-Run Benchmark",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-29",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-29. Single-Run Benchmark”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-30",
+          "title": "C-30. Benchmark Graph Without Raw Data",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-02.md#ap-c-30",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-30. Benchmark Graph Without Raw Data”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-31",
+          "title": "C-31. Experiment Without Hypothesis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-31",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-31. Experiment Without Hypothesis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-32",
+          "title": "C-32. Correlation as Causation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-32",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-32. Correlation as Causation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-33",
+          "title": "C-33. Success-Path-Only Tutorial",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-33",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-33. Success-Path-Only Tutorial”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-34",
+          "title": "C-34. Environment Omission",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-34",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-34. Environment Omission”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-35",
+          "title": "C-35. Versionless Technical Article",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-35",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-35. Versionless Technical Article”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-08",
+      "source": "content-02.md",
+      "items": [
+        {
+          "id": "AP-C-36",
+          "title": "C-36. Timeless Article Illusion",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-36",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-36. Timeless Article Illusion”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-37",
+          "title": "C-37. Silent Update",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-37",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-37. Silent Update”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-38",
+          "title": "C-38. Unsupported Universal Claim",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-38",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-38. Unsupported Universal Claim”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-39",
+          "title": "C-39. Missing Limitation Section",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-39",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-39. Missing Limitation Section”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-40",
+          "title": "C-40. Missing Counterexample",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-40",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-40. Missing Counterexample”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-41",
+          "title": "C-41. Trade-off Omission",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-41",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-41. Trade-off Omission”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-42",
+          "title": "C-42. One Correct Architecture",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-02.md#ap-c-42",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-42. One Correct Architecture”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-43",
+          "title": "C-43. No Decision Criteria",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-43",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-43. No Decision Criteria”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-44",
+          "title": "C-44. Diagram Without Purpose",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-44",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-44. Diagram Without Purpose”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-45",
+          "title": "C-45. Unlabeled Arrow Diagram",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-45",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-45. Unlabeled Arrow Diagram”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-46",
+          "title": "C-46. Screenshot-Heavy Explanation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-46",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-46. Screenshot-Heavy Explanation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-47",
+          "title": "C-47. Uncaptioned Figure",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-47",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-47. Uncaptioned Figure”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-48",
+          "title": "C-48. Abrupt Ending",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-48",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-48. Abrupt Ending”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-49",
+          "title": "C-49. Summary Repetition",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-49",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-49. Summary Repetition”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-C-50",
+          "title": "C-50. No Next Action",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-02.md#ap-c-50",
+            "messageIds": [
+              "bd5012a2-ecde-4821-87a1-d92f6b433abf"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “C-50. No Next Action”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-09",
+      "source": "content-03.md",
+      "items": [
+        {
+          "id": "AP-G-08-2",
+          "title": "G-08. Secret 전달 범위 축소",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-08-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-08. Secret 전달 범위 축소”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-09",
+          "title": "G-09. Research Without a Question",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-09",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-09. Research Without a Question”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-09-2",
+          "title": "G-09. 노출된 Secret 대응 절차",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-09-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-09. 노출된 Secret 대응 절차”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-10",
+          "title": "G-10. Research Scope Inflation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-10",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-10. Research Scope Inflation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-10-2",
+          "title": "G-10. 외부 PR과 배포 흐름 분리",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-10-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-10. 외부 PR과 배포 흐름 분리”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-11",
+          "title": "G-11. Source Collection Without Hierarchy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-11",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-11. Source Collection Without Hierarchy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-11-2",
+          "title": "G-11. `pull_request_target` 제한",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-11-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-11. `pull_request_target` 제한”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-12",
+          "title": "G-12. Citation as Decoration",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-12",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-12. Citation as Decoration”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-12-2",
+          "title": "G-12. Dependency 역할 분류",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-12-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-12. Dependency 역할 분류”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-13",
+          "title": "G-13. Secondary Source Cascade",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-13",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-13. Secondary Source Cascade”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-13-2",
+          "title": "G-13. Install Script 감사",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-13-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-13. Install Script 감사”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-14",
+          "title": "G-14. Version-Mismatched Evidence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-14",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-14. Version-Mismatched Evidence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-14-2",
+          "title": "G-14. Lockfile 변경 분리",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-14-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-14. Lockfile 변경 분리”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-15",
+          "title": "G-15. Source Code Snapshot Without Commit",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-15",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-15. Source Code Snapshot Without Commit”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-15-2",
+          "title": "G-15. 취약점 알림 우선순위화",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-15-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-15. 취약점 알림 우선순위화”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-10",
+      "source": "content-03.md",
+      "items": [
+        {
+          "id": "AP-G-16",
+          "title": "G-16. Experiment After Conclusion",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-16",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-16. Experiment After Conclusion”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-16-2",
+          "title": "G-16. 외부 Integration Inventory",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-16-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-16. 외부 Integration Inventory”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-17",
+          "title": "G-17. Only Successful Evidence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-17",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-17. Only Successful Evidence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-17-2",
+          "title": "G-17. 핵심 콘텐츠와 외부 Script 분리",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-17-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-17. 핵심 콘텐츠와 외부 Script 분리”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-18",
+          "title": "G-18. Unreproducible Private Evidence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-18",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-18. Unreproducible Private Evidence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-18-2",
+          "title": "G-18. 댓글 지연 로딩",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-18-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-18. 댓글 지연 로딩”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-19",
+          "title": "G-19. Outline as a Table of Contents Only",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-19",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-19. Outline as a Table of Contents Only”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-19-2",
+          "title": "G-19. 분석 이벤트 최소화",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-19-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-19. 분석 이벤트 최소화”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-20",
+          "title": "G-20. Introduction Written First and Never Revised",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-20",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-20. Introduction Written First and Never Revised”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-20-2",
+          "title": "G-20. Privacy Policy와 실제 동작 일치 검사",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-20-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-20. Privacy Policy와 실제 동작 일치 검사”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-21",
+          "title": "G-21. Conclusion Written from Memory",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-21",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-21. Conclusion Written from Memory”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-21-2",
+          "title": "G-21. CSP 적용 가능성 조사",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-21-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-21. CSP 적용 가능성 조사”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-22",
+          "title": "G-22. Section-by-Section Isolation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-22",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-22. Section-by-Section Isolation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-22-2",
+          "title": "G-22. Inline Script 최소화",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-22-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-22. Inline Script 최소화”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-23",
+          "title": "G-23. Writing Around Missing Evidence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-23",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-23. Writing Around Missing Evidence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-11",
+      "source": "content-03.md",
+      "items": [
+        {
+          "id": "AP-G-23-2",
+          "title": "G-23. `innerHTML`과 검색 Highlight 감사",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-23-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-23. `innerHTML`과 검색 Highlight 감사”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-24",
+          "title": "G-24. Tone Uniformity by Automation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-24",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-24. Tone Uniformity by Automation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-24-2",
+          "title": "G-24. Raw HTML 허용 정책",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-24-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-24. Raw HTML 허용 정책”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-25",
+          "title": "G-25. Excessive Personal Narrative",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-25",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-25. Excessive Personal Narrative”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-25-2",
+          "title": "G-25. Iframe 허용 목록",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-25-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-25. Iframe 허용 목록”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-26",
+          "title": "G-26. No Personal Context at All",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-26",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-26. No Personal Context at All”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-26-2",
+          "title": "G-26. 콘텐츠 Secret Scan",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-26-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-26. 콘텐츠 Secret Scan”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-27",
+          "title": "G-27. Emotional Certainty",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-27",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-27. Emotional Certainty”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-27-2",
+          "title": "G-27. 로그와 스크린샷 Redaction Checklist",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-27-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-27. 로그와 스크린샷 Redaction Checklist”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-28",
+          "title": "G-28. Unreviewed Terminology",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-28",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-28. Unreviewed Terminology”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-28-2",
+          "title": "G-28. 민감 파일 Artifact Allowlist",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-28-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-28. 민감 파일 Artifact Allowlist”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-29",
+          "title": "G-29. Acronym Saturation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-29",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-29. Acronym Saturation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-29-2",
+          "title": "G-29. Source Map 공개 정책",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-29-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-29. Source Map 공개 정책”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-30",
+          "title": "G-30. Translation Residue",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-30",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-30. Translation Residue”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-30-2",
+          "title": "G-30. HTTPS·Canonical·Domain 점검",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-03.md#ap-g-30-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-30. HTTPS·Canonical·Domain 점검”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-12",
+      "source": "content-03.md",
+      "items": [
+        {
+          "id": "AP-G-31",
+          "title": "G-31. Proofreading Equals Review",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-31",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-31. Proofreading Equals Review”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-31-2",
+          "title": "G-31. Domain Takeover 방지 운영",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-03.md#ap-g-31-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-31. Domain Takeover 방지 운영”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-32",
+          "title": "G-32. Self-Review Immediately After Writing",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-32",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-32. Self-Review Immediately After Writing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-32-2",
+          "title": "G-32. 최소 보안 Runbook",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-03.md#ap-g-32-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-32. 최소 보안 Runbook”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-33",
+          "title": "G-33. Review Without Reader Simulation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-33",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-33. Review Without Reader Simulation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-33-2",
+          "title": "G-33. 정기 보안 감사 범위",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-03.md#ap-g-33-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-33. 정기 보안 감사 범위”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-34",
+          "title": "G-34. Review Against Style, Not Purpose",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-34",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-34. Review Against Style, Not Purpose”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-34-2",
+          "title": "G-34. 보안 수준의 종료 조건",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "content-03.md#ap-g-34-2",
+            "messageIds": [
+              "e03e77c0-719d-46b1-b37d-c7f01262d26e"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-34. 보안 수준의 종료 조건”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-35",
+          "title": "G-35. Technical Claim Without Verification Marker",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-35",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-35. Technical Claim Without Verification Marker”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-36",
+          "title": "G-36. Review Checklist Inflation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-36",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-36. Review Checklist Inflation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-37",
+          "title": "G-37. No Regression Review",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-37",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-37. No Regression Review”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-38",
+          "title": "G-38. Link Check as Content Review",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-38",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-38. Link Check as Content Review”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-39",
+          "title": "G-39. AI Review as Final Authority",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-39",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-39. AI Review as Final Authority”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-40",
+          "title": "G-40. No Adversarial Review",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-40",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-40. No Adversarial Review”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-100",
+          "title": "G-100. Editorial System Becomes the Product",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-03.md#ap-g-100",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-100. Editorial System Becomes the Product”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-13",
+      "source": "content-04.md",
+      "items": [
+        {
+          "id": "AP-G-41",
+          "title": "G-41. Publish Without a Canonical Role",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-41",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-41. Publish Without a Canonical Role”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-42",
+          "title": "G-42. Publish Without Parent Topic",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-42",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-42. Publish Without Parent Topic”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-43",
+          "title": "G-43. Publish Without Internal Links",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-43",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-43. Publish Without Internal Links”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-44",
+          "title": "G-44. Publish Without Search Preview Review",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-44",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-44. Publish Without Search Preview Review”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-45",
+          "title": "G-45. Publish Without Mobile Review",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-45",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-45. Publish Without Mobile Review”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-46",
+          "title": "G-46. Publish Without Production Build",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-46",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-46. Publish Without Production Build”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-47",
+          "title": "G-47. Publish Without Content Diff",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-47",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-47. Publish Without Content Diff”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-48",
+          "title": "G-48. Publication Date Manipulation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-48",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-48. Publication Date Manipulation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-49",
+          "title": "G-49. Bulk Publication Burst",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-49",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-49. Bulk Publication Burst”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-50",
+          "title": "G-50. Announcement Without Discovery Integration",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-50",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-50. Announcement Without Discovery Integration”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-51",
+          "title": "G-51. Update Trigger Is Only Age",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-51",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-51. Update Trigger Is Only Age”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-52",
+          "title": "G-52. Update Means Rewrite",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-52",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-52. Update Means Rewrite”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-53",
+          "title": "G-53. Cosmetic Update as Freshness",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-53",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-53. Cosmetic Update as Freshness”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-54",
+          "title": "G-54. Update Without Change Summary",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-54",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-54. Update Without Change Summary”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-55",
+          "title": "G-55. Update Breaks Incoming Search Intent",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-55",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-55. Update Breaks Incoming Search Intent”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-14",
+      "source": "content-04.md",
+      "items": [
+        {
+          "id": "AP-G-56",
+          "title": "G-56. New Version Replaces Historical Evidence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-56",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-56. New Version Replaces Historical Evidence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-57",
+          "title": "G-57. New Findings Not Propagated",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-57",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-57. New Findings Not Propagated”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-58",
+          "title": "G-58. Update Only High-Traffic Pages",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-58",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-58. Update Only High-Traffic Pages”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-59",
+          "title": "G-59. Update Without Rechecking Links",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-59",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-59. Update Without Rechecking Links”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-60",
+          "title": "G-60. Perpetual Needs Review",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-60",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-60. Perpetual Needs Review”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-61",
+          "title": "G-61. Merge by Length Alone",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-61",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-61. Merge by Length Alone”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-62",
+          "title": "G-62. Merge Without Information Mapping",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-62",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-62. Merge Without Information Mapping”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-63",
+          "title": "G-63. Delete Without Replacement Analysis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-63",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-63. Delete Without Replacement Analysis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-64",
+          "title": "G-64. Redirect Everything to Homepage",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-64",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-64. Redirect Everything to Homepage”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-65",
+          "title": "G-65. Superseded but Still Featured",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-65",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-65. Superseded but Still Featured”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-66",
+          "title": "G-66. Historical Content Hidden",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-66",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-66. Historical Content Hidden”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-67",
+          "title": "G-67. No Tombstone Page",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-67",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-67. No Tombstone Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-68",
+          "title": "G-68. Duplicate Content Kept for Sentiment",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-68",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-68. Duplicate Content Kept for Sentiment”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-69",
+          "title": "G-69. Content Retirement Without Link Cleanup",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-69",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-69. Content Retirement Without Link Cleanup”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-70",
+          "title": "G-70. No Retirement Record",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-70",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-70. No Retirement Record”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-15",
+      "source": "content-04.md",
+      "items": [
+        {
+          "id": "AP-G-71",
+          "title": "G-71. AI Topic Factory",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-71",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-71. AI Topic Factory”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-72",
+          "title": "G-72. AI Outline Determines the Argument",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-72",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-72. AI Outline Determines the Argument”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-73",
+          "title": "G-73. AI Fills Unknowns",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-73",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-73. AI Fills Unknowns”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-74",
+          "title": "G-74. AI Citation Hallucination",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-74",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-74. AI Citation Hallucination”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-75",
+          "title": "G-75. AI Makes Every Article Complete",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-75",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-75. AI Makes Every Article Complete”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-76",
+          "title": "G-76. AI Removes Authorial Uncertainty",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-76",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-76. AI Removes Authorial Uncertainty”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-77",
+          "title": "G-77. AI Normalizes Specialized Terminology",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-77",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-77. AI Normalizes Specialized Terminology”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-78",
+          "title": "G-78. AI Rewrite Erases Failure History",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-78",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-78. AI Rewrite Erases Failure History”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-79",
+          "title": "G-79. AI Review Confirms Existing Bias",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-79",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-79. AI Review Confirms Existing Bias”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-80",
+          "title": "G-80. No AI Usage Boundary",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-80",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-80. No AI Usage Boundary”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-81",
+          "title": "G-81. New Article Bias",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-81",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-81. New Article Bias”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-82",
+          "title": "G-82. Visible Work Bias",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-82",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-82. Visible Work Bias”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-83",
+          "title": "G-83. Easy Fix Queue Dominance",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-83",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-83. Easy Fix Queue Dominance”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-84",
+          "title": "G-84. Everything Is P0",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-84",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-84. Everything Is P0”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-85",
+          "title": "G-85. No Editorial Roadmap",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-85",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-85. No Editorial Roadmap”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "content-16",
+      "source": "content-04.md",
+      "items": [
+        {
+          "id": "AP-G-86",
+          "title": "G-86. Roadmap as a Promise",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-86",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-86. Roadmap as a Promise”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-87",
+          "title": "G-87. No Capacity for Maintenance",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-87",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-87. No Capacity for Maintenance”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-88",
+          "title": "G-88. Tooling Work Disguised as Editorial Work",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-88",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-88. Tooling Work Disguised as Editorial Work”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-89",
+          "title": "G-89. No Stop Condition",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-89",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-89. No Stop Condition”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-90",
+          "title": "G-90. Perfection Blocks Publication",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-90",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-90. Perfection Blocks Publication”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-91",
+          "title": "G-91. Single Quality Score",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-91",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-91. Single Quality Score”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-92",
+          "title": "G-92. Checklist Completion Equals Quality",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-92",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-92. Checklist Completion Equals Quality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-93",
+          "title": "G-93. Readability Over Accuracy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-93",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-93. Readability Over Accuracy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-94",
+          "title": "G-94. Accuracy Over Usability",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-94",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-94. Accuracy Over Usability”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-95",
+          "title": "G-95. Originality Means Never Explaining Basics",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-95",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-95. Originality Means Never Explaining Basics”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-96",
+          "title": "G-96. Evergreen as a Requirement",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-96",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-96. Evergreen as a Requirement”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-97",
+          "title": "G-97. Every Article Must Be Comprehensive",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-97",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-97. Every Article Must Be Comprehensive”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-98",
+          "title": "G-98. Every Article Must Be Searchable Alone",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-98",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-98. Every Article Must Be Searchable Alone”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-G-99",
+          "title": "G-99. No Editorial Principles",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "content-04.md#ap-g-99",
+            "messageIds": [
+              "64380e9f-5fe2-49a6-bf78-99986e16bd56"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “G-99. No Editorial Principles”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    }
+  ]
+}

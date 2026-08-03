@@ -1,0 +1,1912 @@
+{
+  "category": "localization",
+  "dispositionScale": [
+    "unassessed",
+    "remediated",
+    "accepted",
+    "superseded",
+    "routed"
+  ],
+  "items": [
+    {
+      "id": "AP-L-01",
+      "title": "L-01. Korean–English Term Drift",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-01",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-01. Korean–English Term Drift”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-02",
+      "title": "L-02. Acronym-Only Writing",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-02",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-02. Acronym-Only Writing”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-03",
+      "title": "L-03. Full Name Every Time",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-03",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-03. Full Name Every Time”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-04",
+      "title": "L-04. Inconsistent Acronym Expansion",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-04",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-04. Inconsistent Acronym Expansion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-05",
+      "title": "L-05. Translation by Sound",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-05",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-05. Translation by Sound”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-06",
+      "title": "L-06. Translation by Dictionary",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-06",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-06. Translation by Dictionary”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-07",
+      "title": "L-07. Over-Translation",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-07",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-07. Over-Translation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-08",
+      "title": "L-08. Under-Translation",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-08",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-08. Under-Translation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-09",
+      "title": "L-09. Half-Translated Phrase",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-09",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-09. Half-Translated Phrase”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-10",
+      "title": "L-10. English Noun Chain in Korean",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-10",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-10. English Noun Chain in Korean”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-100",
+      "title": "L-100. Localization System Becomes the Product",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-100",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-100. Localization System Becomes the Product”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-11",
+      "title": "L-11. No Search Alias",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-11",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-11. No Search Alias”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-12",
+      "title": "L-12. Korean–English Search Split",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-12",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-12. Korean–English Search Split”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-13",
+      "title": "L-13. Transliteration Search Failure",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-13",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-13. Transliteration Search Failure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-14",
+      "title": "L-14. Symbol Search Failure",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-14",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-14. Symbol Search Failure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-15",
+      "title": "L-15. Case-Sensitive Technical Search",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-15",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-15. Case-Sensitive Technical Search”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-16",
+      "title": "L-16. Version Search Ambiguity",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-16",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-16. Version Search Ambiguity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-17",
+      "title": "L-17. Alias Explosion",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-17",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-17. Alias Explosion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-18",
+      "title": "L-18. Search Alias Changes Display Text",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-18",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-18. Search Alias Changes Display Text”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-19",
+      "title": "L-19. Korean Slug Everywhere",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-19",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-19. Korean Slug Everywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-20",
+      "title": "L-20. English Slug Without Meaning",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-20",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-20. English Slug Without Meaning”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-21",
+      "title": "L-21. Translated Slug Drift",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-21",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-21. Translated Slug Drift”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-22",
+      "title": "L-22. Mixed Slug Policy",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-22",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-22. Mixed Slug Policy”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-23",
+      "title": "L-23. Acronym-Only Slug",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-23",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-23. Acronym-Only Slug”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-24",
+      "title": "L-24. Locale Prefix Without Multilingual Content",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-24",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-24. Locale Prefix Without Multilingual Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-25",
+      "title": "L-25. Duplicate Language URLs",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-25",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-25. Duplicate Language URLs”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-26",
+      "title": "L-26. Translation as Duplicate Publication",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-26",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-26. Translation as Duplicate Publication”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-27",
+      "title": "L-27. Asymmetric Translation",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-27",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-27. Asymmetric Translation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-28",
+      "title": "L-28. Translation Lag",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-28",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-28. Translation Lag”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-29",
+      "title": "L-29. Translation Without Technical Review",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-29",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-29. Translation Without Technical Review”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-30",
+      "title": "L-30. Machine Translation of Code Comments",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-30",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-30. Machine Translation of Code Comments”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-31",
+      "title": "L-31. Translated Error Messages",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-31",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-31. Translated Error Messages”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-32",
+      "title": "L-32. Translated Command Output",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-32",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-32. Translated Command Output”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-33",
+      "title": "L-33. Translation Without `hreflang`",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-33",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-33. Translation Without `hreflang`”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-34",
+      "title": "L-34. Canonical All Translations to One Language",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-34",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-34. Canonical All Translations to One Language”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-35",
+      "title": "L-35. Partial Translation Presented as Complete",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-35",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-35. Partial Translation Presented as Complete”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-36",
+      "title": "L-36. No Terminology Registry",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-36",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-36. No Terminology Registry”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-37",
+      "title": "L-37. Glossary as a Dictionary Dump",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-37",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-37. Glossary as a Dictionary Dump”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-38",
+      "title": "L-38. Glossary Duplicates Articles",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-38",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-38. Glossary Duplicates Articles”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-39",
+      "title": "L-39. Terminology Change Without Migration",
+      "priority": "P2",
+      "effort": "L",
+      "source": {
+        "file": "localization-01.md#ap-l-39",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-39. Terminology Change Without Migration”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-40",
+      "title": "L-40. One Korean Translation per English Term",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-40",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-40. One Korean Translation per English Term”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-41",
+      "title": "L-41. Same Korean Word for Distinct Terms",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-41",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-41. Same Korean Word for Distinct Terms”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-42",
+      "title": "L-42. Coherence–Consistency Collapse",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-42",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-42. Coherence–Consistency Collapse”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-43",
+      "title": "L-43. Ordering–Order Confusion",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-43",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-43. Ordering–Order Confusion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-44",
+      "title": "L-44. Translation Hides Specification Terms",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-44",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-44. Translation Hides Specification Terms”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-45",
+      "title": "L-45. Vendor Terminology Normalization",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-45",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-45. Vendor Terminology Normalization”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-46",
+      "title": "L-46. Translating Identifiers",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-46",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-46. Translating Identifiers”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-47",
+      "title": "L-47. Identifier Formatting Drift",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-47",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-47. Identifier Formatting Drift”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-48",
+      "title": "L-48. Code Comments Language Switching",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-48",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-48. Code Comments Language Switching”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-49",
+      "title": "L-49. Korean Identifier Examples",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-49",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-49. Korean Identifier Examples”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-50",
+      "title": "L-50. Translated File Names",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-50",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-50. Translated File Names”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-51",
+      "title": "L-51. Error Code Localization",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-51",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-51. Error Code Localization”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-52",
+      "title": "L-52. Case Normalization of Identifiers",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-52",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-52. Case Normalization of Identifiers”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-53",
+      "title": "L-53. Bilingual Title Overload",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-53",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-53. Bilingual Title Overload”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-54",
+      "title": "L-54. English Title, Korean Body",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-54",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-54. English Title, Korean Body”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-55",
+      "title": "L-55. Korean Title Without Searchable English Term",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-55",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-55. Korean Title Without Searchable English Term”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-56",
+      "title": "L-56. Meta Description Language Mismatch",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-56",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-56. Meta Description Language Mismatch”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-57",
+      "title": "L-57. Mixed-Language Open Graph",
+      "priority": "P2",
+      "effort": "L",
+      "source": {
+        "file": "localization-01.md#ap-l-57",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-57. Mixed-Language Open Graph”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-58",
+      "title": "L-58. Locale-Free Dates",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-58",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-58. Locale-Free Dates”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-59",
+      "title": "L-59. Localized Slug and Canonical Mismatch",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-01.md#ap-l-59",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-59. Localized Slug and Canonical Mismatch”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-60",
+      "title": "L-60. Subject Omission Ambiguity",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-60",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-60. Subject Omission Ambiguity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-61",
+      "title": "L-61. Pronoun Ambiguity",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-61",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-61. Pronoun Ambiguity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-62",
+      "title": "L-62. Passive Voice Import",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-62",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-62. Passive Voice Import”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-63",
+      "title": "L-63. Nominalization Overload",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-63",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-63. Nominalization Overload”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-64",
+      "title": "L-64. English Sentence Order in Korean",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-64",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-64. English Sentence Order in Korean”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-65",
+      "title": "L-65. Connector Overuse",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-65",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-65. Connector Overuse”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-66",
+      "title": "L-66. False Friend Translation",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-66",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-66. False Friend Translation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-67",
+      "title": "L-67. Modal Verb Loss",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-67",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-67. Modal Verb Loss”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-68",
+      "title": "L-68. Specification Normative Language Collapse",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-68",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-68. Specification Normative Language Collapse”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-69",
+      "title": "L-69. Untranslated Idiom",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-69",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-69. Untranslated Idiom”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-70",
+      "title": "L-70. Korean Explanation Becomes More Ambiguous Than English",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-70",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-70. Korean Explanation Becomes More Ambiguous Than English”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-71",
+      "title": "L-71. Diagram Labels in Mixed Languages",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-71",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-71. Diagram Labels in Mixed Languages”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-72",
+      "title": "L-72. Diagram Translation Diverges from Text",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-72",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-72. Diagram Translation Diverges from Text”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-73",
+      "title": "L-73. Table Header Translation Drift",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-73",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-73. Table Header Translation Drift”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-74",
+      "title": "L-74. Translated Register Names",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-74",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-74. Translated Register Names”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-75",
+      "title": "L-75. Unit Localization Error",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-75",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-75. Unit Localization Error”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-76",
+      "title": "L-76. Binary–Decimal Unit Collapse",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-76",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-76. Binary–Decimal Unit Collapse”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-77",
+      "title": "L-77. Full-Width Character in Code Context",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-77",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-77. Full-Width Character in Code Context”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-78",
+      "title": "L-78. Translate Everything Strategy",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-78",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-78. Translate Everything Strategy”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-79",
+      "title": "L-79. No Translation Priority",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-79",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-79. No Translation Priority”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-80",
+      "title": "L-80. Translation Before Source Stabilization",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-80",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-80. Translation Before Source Stabilization”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-81",
+      "title": "L-81. Separate Translation Workflow Without Sync",
+      "priority": "P2",
+      "effort": "L",
+      "source": {
+        "file": "localization-02.md#ap-l-81",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-81. Separate Translation Workflow Without Sync”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-82",
+      "title": "L-82. Automatic Translation Publication",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-82",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-82. Automatic Translation Publication”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-83",
+      "title": "L-83. One Locale Sitemap",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-83",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-83. One Locale Sitemap”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-84",
+      "title": "L-84. Language Switch Loses Context",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-84",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-84. Language Switch Loses Context”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-85",
+      "title": "L-85. Missing Translation Fallback",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-85",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-85. Missing Translation Fallback”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-86",
+      "title": "L-86. Automatic Locale Detection Override",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-86",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-86. Automatic Locale Detection Override”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-87",
+      "title": "L-87. Locale Stored Forever",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-87",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-87. Locale Stored Forever”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-88",
+      "title": "L-88. Translated Function in Heading",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-88",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-88. Translated Function in Heading”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-89",
+      "title": "L-89. Error Message Omitted from Title and Heading",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-89",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-89. Error Message Omitted from Title and Heading”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-90",
+      "title": "L-90. Searchable English Terms Hidden in Images",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-90",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-90. Searchable English Terms Hidden in Images”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-91",
+      "title": "L-91. Code Symbol Tokenization Failure",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-91",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-91. Code Symbol Tokenization Failure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-92",
+      "title": "L-92. Punctuation-Normalized Wrongly",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-92",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-92. Punctuation-Normalized Wrongly”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-93",
+      "title": "L-93. English Summary Without Substance",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-93",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-93. English Summary Without Substance”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-94",
+      "title": "L-94. Mixed Language Screen Reader Issue",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-94",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-94. Mixed Language Screen Reader Issue”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-95",
+      "title": "L-95. Translation Hides Cultural Context",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-95",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-95. Translation Hides Cultural Context”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-96",
+      "title": "L-96. Local Assumptions in Global Guide",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-96",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-96. Local Assumptions in Global Guide”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-97",
+      "title": "L-97. Locale-Specific Screenshot",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-97",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-97. Locale-Specific Screenshot”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-98",
+      "title": "L-98. Date Ambiguity Across Locales",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-98",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-98. Date Ambiguity Across Locales”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-L-99",
+      "title": "L-99. Locale Changes Technical Meaning",
+      "priority": "P2",
+      "effort": "S",
+      "source": {
+        "file": "localization-02.md#ap-l-99",
+        "messageIds": [
+          "1f017420-aeaa-4cd3-8f6f-bf0ee1178ae9"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “L-99. Locale Changes Technical Meaning”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    }
+  ]
+}

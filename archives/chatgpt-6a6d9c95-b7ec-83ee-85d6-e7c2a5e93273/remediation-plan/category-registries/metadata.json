@@ -1,0 +1,1722 @@
+{
+  "category": "metadata",
+  "dispositionScale": [
+    "unassessed",
+    "remediated",
+    "accepted",
+    "superseded",
+    "routed"
+  ],
+  "items": [
+    {
+      "id": "AP-M-01",
+      "title": "M-01. Schema Drift",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-01",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-01. Schema Drift”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-02",
+      "title": "M-02. Optional Field Explosion",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-02",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-02. Optional Field Explosion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-03",
+      "title": "M-03. Required Field Inflation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-03",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-03. Required Field Inflation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-04",
+      "title": "M-04. One Schema for Every Content Type",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-04",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-04. One Schema for Every Content Type”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-05",
+      "title": "M-05. Free-Text Enum",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-05",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-05. Free-Text Enum”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-06",
+      "title": "M-06. Taxonomy Without Registry",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-06",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-06. Taxonomy Without Registry”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-07",
+      "title": "M-07. Series Metadata Duplication",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-07",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-07. Series Metadata Duplication”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-08",
+      "title": "M-08. Derived Data Stored Manually",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-08",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-08. Derived Data Stored Manually”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-09",
+      "title": "M-09. Generated Field Committed as Source",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-09",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-09. Generated Field Committed as Source”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-10",
+      "title": "M-10. Hidden Defaults",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-10",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-10. Hidden Defaults”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-11",
+      "title": "M-11. Forever Backward Compatibility",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-11",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-11. Forever Backward Compatibility”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-12",
+      "title": "M-12. Big-Bang Migration",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-12",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-12. Big-Bang Migration”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-13",
+      "title": "M-13. Migration Without Dry Run",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-13",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-13. Migration Without Dry Run”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-14",
+      "title": "M-14. Migration Without Idempotency",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-14",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-14. Migration Without Idempotency”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-15",
+      "title": "M-15. Migration Without Backup Boundary",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-15",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-15. Migration Without Backup Boundary”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-16",
+      "title": "M-16. Semantic Migration by Regex",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-16",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-16. Semantic Migration by Regex”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-17",
+      "title": "M-17. Path Migration Without Redirects",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-17",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-17. Path Migration Without Redirects”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-18",
+      "title": "M-18. Migration Without Validation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-18",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-18. Migration Without Validation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-19",
+      "title": "M-19. One Script per Symptom",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-19",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-19. One Script per Symptom”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-20",
+      "title": "M-20. Every Script Parses Markdown Differently",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-20",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-20. Every Script Parses Markdown Differently”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-21",
+      "title": "M-21. Script as Undocumented Tribal Knowledge",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-21",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-21. Script as Undocumented Tribal Knowledge”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-22",
+      "title": "M-22. Hidden Script Side Effects",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-22",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-22. Hidden Script Side Effects”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-23",
+      "title": "M-23. Auto-Fix Without Confidence",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-23",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-23. Auto-Fix Without Confidence”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-24",
+      "title": "M-24. No Fixture Tests for Content Tools",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-24",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-24. No Fixture Tests for Content Tools”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-25",
+      "title": "M-25. Full Repository Scan for Every Command",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-25",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-25. Full Repository Scan for Every Command”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-26",
+      "title": "M-26. Tool Output as Unstructured Text",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-26",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-26. Tool Output as Unstructured Text”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-27",
+      "title": "M-27. No Severity Model",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-27",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-27. No Severity Model”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-28",
+      "title": "M-28. Rule Without Rationale",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-28",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-28. Rule Without Rationale”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-29",
+      "title": "M-29. Rule Explosion",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-29",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-29. Rule Explosion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-30",
+      "title": "M-30. Linter as Editorial Authority",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-30",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-30. Linter as Editorial Authority”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-31",
+      "title": "M-31. CI as the Only Reproducible Environment",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-31",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-31. CI as the Only Reproducible Environment”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-32",
+      "title": "M-32. Local and CI Command Divergence",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-32",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-32. Local and CI Command Divergence”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-33",
+      "title": "M-33. Hidden Environment Dependency",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-33",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-33. Hidden Environment Dependency”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-34",
+      "title": "M-34. Floating Tool Versions",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-34",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-34. Floating Tool Versions”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-35",
+      "title": "M-35. CI Workflow Logic Duplication",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-35",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-35. CI Workflow Logic Duplication”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-36",
+      "title": "M-36. Deploy on Every Branch Push",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-36",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-36. Deploy on Every Branch Push”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-37",
+      "title": "M-37. No Path-Based Trigger",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-37",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-37. No Path-Based Trigger”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-38",
+      "title": "M-38. CI Cache as a Mystery",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-38",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-38. CI Cache as a Mystery”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-39",
+      "title": "M-39. Flaky Build Accepted as Normal",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-39",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-39. Flaky Build Accepted as Normal”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-40",
+      "title": "M-40. No Post-Deploy Verification",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-40",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-40. No Post-Deploy Verification”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-41",
+      "title": "M-41. Dependency Archaeology",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-41",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-41. Dependency Archaeology”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-42",
+      "title": "M-42. Feature Removed, Dependency Retained",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-42",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-42. Feature Removed, Dependency Retained”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-43",
+      "title": "M-43. Production and Tooling Dependencies Mixed",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-43",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-43. Production and Tooling Dependencies Mixed”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-44",
+      "title": "M-44. Dependency for a Trivial Function",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-44",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-44. Dependency for a Trivial Function”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-45",
+      "title": "M-45. Multiple Libraries for the Same Job",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-45",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-45. Multiple Libraries for the Same Job”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-46",
+      "title": "M-46. Unbounded Plugin Stack",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-46",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-46. Unbounded Plugin Stack”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-47",
+      "title": "M-47. Major Upgrade by Habit",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-47",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-47. Major Upgrade by Habit”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-48",
+      "title": "M-48. Frozen Dependencies Forever",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-48",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-48. Frozen Dependencies Forever”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-49",
+      "title": "M-49. Lockfile Without Reproducibility",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-49",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-49. Lockfile Without Reproducibility”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-50",
+      "title": "M-50. Vulnerability Scanner as Upgrade Bot",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-50",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-50. Vulnerability Scanner as Upgrade Bot”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-51",
+      "title": "M-51. README as Marketing Copy",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-51",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-51. README as Marketing Copy”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-52",
+      "title": "M-52. Feature List Without Ownership",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-52",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-52. Feature List Without Ownership”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-53",
+      "title": "M-53. Stale Setup Guide",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-53",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-53. Stale Setup Guide”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-54",
+      "title": "M-54. Architecture in Comments Only",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-01.md#ap-m-54",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-54. Architecture in Comments Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-55",
+      "title": "M-55. ADR Without Consequences",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-55",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-55. ADR Without Consequences”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-56",
+      "title": "M-56. ADR as Immutable Law",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-56",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-56. ADR as Immutable Law”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-57",
+      "title": "M-57. Documentation Duplication",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-57",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-57. Documentation Duplication”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-58",
+      "title": "M-58. No Operational Runbook",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-58",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-58. No Operational Runbook”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-59",
+      "title": "M-59. No Content Authoring Guide",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-59",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-59. No Content Authoring Guide”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-60",
+      "title": "M-60. Documentation Without Deletion",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-01.md#ap-m-60",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-60. Documentation Without Deletion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-61",
+      "title": "M-61. Source–Artifact Ambiguity",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-61",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-61. Source–Artifact Ambiguity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-62",
+      "title": "M-62. Generated File Modified Manually",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-62",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-62. Generated File Modified Manually”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-63",
+      "title": "M-63. Artifact Naming by Display Title",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-63",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-63. Artifact Naming by Display Title”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-64",
+      "title": "M-64. No Artifact Manifest",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-64",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-64. No Artifact Manifest”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-65",
+      "title": "M-65. Stale Artifact Preservation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-65",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-65. Stale Artifact Preservation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-66",
+      "title": "M-66. Over-Aggressive Prune",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-66",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-66. Over-Aggressive Prune”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-67",
+      "title": "M-67. Generator Version Not Recorded",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-67",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-67. Generator Version Not Recorded”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-68",
+      "title": "M-68. Non-Deterministic Asset Generation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-68",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-68. Non-Deterministic Asset Generation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-69",
+      "title": "M-69. Generated Asset Review Blind Spot",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-69",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-69. Generated Asset Review Blind Spot”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-70",
+      "title": "M-70. Asset Pipeline Owns Publishing",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-70",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-70. Asset Pipeline Owns Publishing”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-71",
+      "title": "M-71. Publish-and-Forget",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-71",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-71. Publish-and-Forget”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-72",
+      "title": "M-72. Date-Based Review Only",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-72",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-72. Date-Based Review Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-73",
+      "title": "M-73. No Content Ownership",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-73",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-73. No Content Ownership”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-74",
+      "title": "M-74. New Content Before Existing Debt",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-74",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-74. New Content Before Existing Debt”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-75",
+      "title": "M-75. No Merge Policy for Similar Articles",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-75",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-75. No Merge Policy for Similar Articles”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-76",
+      "title": "M-76. Deletion Aversion",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-76",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-76. Deletion Aversion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-77",
+      "title": "M-77. Update Without Revalidation",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-77",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-77. Update Without Revalidation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-78",
+      "title": "M-78. Bulk AI Refresh",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-78",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-78. Bulk AI Refresh”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-79",
+      "title": "M-79. Editorial Template Lock-In",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-79",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-79. Editorial Template Lock-In”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-80",
+      "title": "M-80. No Content Retirement Workflow",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "metadata-02.md#ap-m-80",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-80. No Content Retirement Workflow”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-81",
+      "title": "M-81. Content and Platform Changes Mixed",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-81",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-81. Content and Platform Changes Mixed”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-82",
+      "title": "M-82. Giant Refactor Commit",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-82",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-82. Giant Refactor Commit”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-83",
+      "title": "M-83. Formatting Noise in Semantic Change",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-83",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-83. Formatting Noise in Semantic Change”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-84",
+      "title": "M-84. No Rollback Plan",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-84",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-84. No Rollback Plan”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-85",
+      "title": "M-85. Preview Not Representative",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-85",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-85. Preview Not Representative”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-86",
+      "title": "M-86. Feature Flag Cemetery",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-86",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-86. Feature Flag Cemetery”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-87",
+      "title": "M-87. Permanent Compatibility Layer",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-87",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-87. Permanent Compatibility Layer”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-88",
+      "title": "M-88. Release Notes Without User Impact",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-88",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-88. Release Notes Without User Impact”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-89",
+      "title": "M-89. No Baseline Before Refactor",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-89",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-89. No Baseline Before Refactor”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-M-90",
+      "title": "M-90. Completion Defined as Code Merge",
+      "priority": "P1",
+      "effort": "M",
+      "source": {
+        "file": "metadata-02.md#ap-m-90",
+        "messageIds": [
+          "f181338c-9c17-48e6-8abd-1c47ae2559d6"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-90. Completion Defined as Code Merge”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    }
+  ]
+}

@@ -1,0 +1,1568 @@
+{
+  "category": "performance",
+  "state": "baseline_established",
+  "blockedBy": [
+    "repository",
+    "quality",
+    "ux"
+  ],
+  "batchSize": 15,
+  "batches": [
+    {
+      "id": "performance-01",
+      "source": "performance-01.md",
+      "items": [
+        {
+          "id": "AP-P-01",
+          "title": "P-01. Full Corpus Rebuild",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-01",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-01. Full Corpus Rebuild”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-02",
+          "title": "P-02. Heap Expansion as Optimization",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-02",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-02. Heap Expansion as Optimization”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-03",
+          "title": "P-03. Build Pipeline Monolith",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-03",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-03. Build Pipeline Monolith”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-04",
+          "title": "P-04. Every Audit Is a Release Blocker",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-04",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-04. Every Audit Is a Release Blocker”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-05",
+          "title": "P-05. Parse the Same Content Repeatedly",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-05",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-05. Parse the Same Content Repeatedly”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-06",
+          "title": "P-06. AST Retention Explosion",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-06",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-06. AST Retention Explosion”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-07",
+          "title": "P-07. Build-Time Everything",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-07",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-07. Build-Time Everything”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-08",
+          "title": "P-08. No Build Budget",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-08",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-08. No Build Budget”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-09",
+          "title": "P-09. No Build Regression Tracking",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-09",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-09. No Build Regression Tracking”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-10",
+          "title": "P-10. Content Count as the Only Scale Metric",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-10",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-10. Content Count as the Only Scale Metric”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-11",
+          "title": "P-11. Highlight Everything",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-11",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-11. Highlight Everything”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-12",
+          "title": "P-12. Load Every Language Grammar",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-12",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-12. Load Every Language Grammar”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-13",
+          "title": "P-13. Grammar Alias Duplication",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-13",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-13. Grammar Alias Duplication”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-14",
+          "title": "P-14. Unknown Language Fallback to Heavy Parser",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-14",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-14. Unknown Language Fallback to Heavy Parser”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-15",
+          "title": "P-15. Dual-Theme HTML Duplication",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-15",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-15. Dual-Theme HTML Duplication”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "performance-02",
+      "source": "performance-01.md",
+      "items": [
+        {
+          "id": "AP-P-16",
+          "title": "P-16. Runtime Highlighting",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-16",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-16. Runtime Highlighting”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-17",
+          "title": "P-17. Line-Level Feature Everywhere",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-17",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-17. Line-Level Feature Everywhere”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-18",
+          "title": "P-18. Full Source in Article",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-18",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-18. Full Source in Article”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-19",
+          "title": "P-19. Full Body Search Index",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-19",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-19. Full Body Search Index”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-20",
+          "title": "P-20. Eager Search Index Loading",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-20",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-20. Eager Search Index Loading”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-21",
+          "title": "P-21. Single Giant Search Index",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-21",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-21. Single Giant Search Index”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-22",
+          "title": "P-22. Search Index Includes HTML",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-22",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-22. Search Index Includes HTML”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-23",
+          "title": "P-23. Search Snippet Generated at Runtime",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-23",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-23. Search Snippet Generated at Runtime”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-24",
+          "title": "P-24. Search Ranking on Main Thread",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-24",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-24. Search Ranking on Main Thread”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-25",
+          "title": "P-25. Index Invalidated by Any Change",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-25",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-25. Index Invalidated by Any Change”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-26",
+          "title": "P-26. Original PNG Everywhere",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-26",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-26. Original PNG Everywhere”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-27",
+          "title": "P-27. SVG Without Optimization",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-27",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-27. SVG Without Optimization”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-28",
+          "title": "P-28. Rasterized Technical Diagram",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-28",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-28. Rasterized Technical Diagram”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-29",
+          "title": "P-29. No Intrinsic Image Dimensions",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-29",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-29. No Intrinsic Image Dimensions”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-30",
+          "title": "P-30. Lazy Loading the LCP Image",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-30",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-30. Lazy Loading the LCP Image”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "performance-03",
+      "source": "performance-01.md",
+      "items": [
+        {
+          "id": "AP-P-31",
+          "title": "P-31. Eager Loading Every Image",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-31",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-31. Eager Loading Every Image”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-32",
+          "title": "P-32. One Image Size for Every Viewport",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-32",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-32. One Image Size for Every Viewport”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-33",
+          "title": "P-33. Generated Asset Staleness",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-33",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-33. Generated Asset Staleness”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-34",
+          "title": "P-34. Generated Assets Committed Indefinitely",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-34",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-34. Generated Assets Committed Indefinitely”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-35",
+          "title": "P-35. Prune by Filename Only",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-35",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-35. Prune by Filename Only”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-36",
+          "title": "P-36. Diagram Toolchain in Critical Path",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-36",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-36. Diagram Toolchain in Critical Path”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-37",
+          "title": "P-37. JavaScript for Static Metadata",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-37",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-37. JavaScript for Static Metadata”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-38",
+          "title": "P-38. Global Bundle for Page-Specific Features",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-38",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-38. Global Bundle for Page-Specific Features”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-39",
+          "title": "P-39. ClientRouter Tax on Every Page",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-39",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-39. ClientRouter Tax on Every Page”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-40",
+          "title": "P-40. Duplicate Event Registration After Navigation",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-40",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-40. Duplicate Event Registration After Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-41",
+          "title": "P-41. Third-Party Script Eager Loading",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-41",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-41. Third-Party Script Eager Loading”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-42",
+          "title": "P-42. All Icons in One Library",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-42",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-42. All Icons in One Library”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-43",
+          "title": "P-43. Runtime Theme Initialization Flash",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-43",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-43. Runtime Theme Initialization Flash”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-44",
+          "title": "P-44. Font Loading Cascade",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-44",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-44. Font Loading Cascade”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-45",
+          "title": "P-45. Local Font Without Subsetting",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-45",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-45. Local Font Without Subsetting”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "performance-04",
+      "source": "performance-01.md",
+      "items": [
+        {
+          "id": "AP-P-46",
+          "title": "P-46. Preload Everything",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-46",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-46. Preload Everything”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-47",
+          "title": "P-47. Prefetch Every Link",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-47",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-47. Prefetch Every Link”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-48",
+          "title": "P-48. No JavaScript Failure Fallback",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-48",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-48. No JavaScript Failure Fallback”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-49",
+          "title": "P-49. Utility Class Duplication",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-49",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-49. Utility Class Duplication”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-50",
+          "title": "P-50. DOM Inflation by Decorative Wrappers",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-50",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-50. DOM Inflation by Decorative Wrappers”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-51",
+          "title": "P-51. Heading Anchor DOM Bloat",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-51",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-51. Heading Anchor DOM Bloat”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-52",
+          "title": "P-52. Table Wrapper Everywhere",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-52",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-52. Table Wrapper Everywhere”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-53",
+          "title": "P-53. Permanent Offscreen UI",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-53",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-53. Permanent Offscreen UI”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-54",
+          "title": "P-54. Cold Install Every Build",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-54",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-54. Cold Install Every Build”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-55",
+          "title": "P-55. Cache Without Correct Key",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-55",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-55. Cache Without Correct Key”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-56",
+          "title": "P-56. Cache Generated Output Blindly",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-56",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-56. Cache Generated Output Blindly”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-57",
+          "title": "P-57. Duplicate Work Across Jobs",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-57",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-57. Duplicate Work Across Jobs”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-58",
+          "title": "P-58. Matrix Build Without Value",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-58",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-58. Matrix Build Without Value”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-59",
+          "title": "P-59. Heavy Audit on Every Commit",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-59",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-59. Heavy Audit on Every Commit”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-60",
+          "title": "P-60. No Changed-File Awareness",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-01.md#ap-p-60",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-60. No Changed-File Awareness”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "performance-05",
+      "source": "performance-02.md",
+      "items": [
+        {
+          "id": "AP-P-61",
+          "title": "P-61. Build Artifact Recompression",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-61",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-61. Build Artifact Recompression”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-62",
+          "title": "P-62. Deploy Before Smoke Test",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-62",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-62. Deploy Before Smoke Test”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-63",
+          "title": "P-63. No Preview Deployment",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-63",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-63. No Preview Deployment”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-64",
+          "title": "P-64. CI Logs as Profiling",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-64",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-64. CI Logs as Profiling”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-65",
+          "title": "P-65. Heavy Homepage",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-65",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-65. Heavy Homepage”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-66",
+          "title": "P-66. Render Every Archive Item",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-66",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-66. Render Every Archive Item”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-67",
+          "title": "P-67. Huge In-Page TOC",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-67",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-67. Huge In-Page TOC”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-68",
+          "title": "P-68. Sticky Everything",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-68",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-68. Sticky Everything”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-69",
+          "title": "P-69. Code Block Width Breakout",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-69",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-69. Code Block Width Breakout”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-70",
+          "title": "P-70. Math Layout Shift",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-70",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-70. Math Layout Shift”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-71",
+          "title": "P-71. Comments in Critical Rendering Path",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-71",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-71. Comments in Critical Rendering Path”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-72",
+          "title": "P-72. Ads Before Content Stability",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-72",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-72. Ads Before Content Stability”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-73",
+          "title": "P-73. Analytics Overcollection",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-73",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-73. Analytics Overcollection”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-74",
+          "title": "P-74. Performance Score Theater",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-74",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-74. Performance Score Theater”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-75",
+          "title": "P-75. Non-Deterministic Build",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-75",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-75. Non-Deterministic Build”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "performance-06",
+      "source": "performance-02.md",
+      "items": [
+        {
+          "id": "AP-P-76",
+          "title": "P-76. Network-Dependent Build",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-76",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-76. Network-Dependent Build”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-77",
+          "title": "P-77. Locale-Dependent Sorting",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-77",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-77. Locale-Dependent Sorting”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-78",
+          "title": "P-78. Timezone-Dependent Dates",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-78",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-78. Timezone-Dependent Dates”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-79",
+          "title": "P-79. Silent Partial Generation",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-79",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-79. Silent Partial Generation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-P-80",
+          "title": "P-80. Output Growth Without Alarm",
+          "priority": "P1",
+          "effort": "L",
+          "source": {
+            "file": "performance-02.md#ap-p-80",
+            "messageIds": [
+              "db03d878-4086-406a-be8c-82f75efe9c64"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “P-80. Output Growth Without Alarm”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    }
+  ]
+}

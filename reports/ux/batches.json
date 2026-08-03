@@ -1,0 +1,2011 @@
+{
+  "category": "ux",
+  "state": "baseline_established",
+  "blockedBy": [
+    "information_architecture",
+    "localization",
+    "search_seo"
+  ],
+  "batchSize": 15,
+  "batches": [
+    {
+      "id": "ux-01",
+      "source": "ux-01.md",
+      "items": [
+        {
+          "id": "AP-U-01",
+          "title": "U-01. Design Before Reading",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-01",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-01. Design Before Reading”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-02",
+          "title": "U-02. Portfolio–Knowledge Base Confusion",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-02",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-02. Portfolio–Knowledge Base Confusion”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-03",
+          "title": "U-03. Hero Dominance",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-03",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-03. Hero Dominance”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-04",
+          "title": "U-04. Latest Card Wall",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-04",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-04. Latest Card Wall”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-05",
+          "title": "U-05. Card Metadata Overload",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-05",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-05. Card Metadata Overload”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-06",
+          "title": "U-06. Badge Confetti",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-06",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-06. Badge Confetti”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-07",
+          "title": "U-07. Everything Is a Card",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-07",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-07. Everything Is a Card”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-08",
+          "title": "U-08. Visual Hierarchy Flattening",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-08",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-08. Visual Hierarchy Flattening”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-09",
+          "title": "U-09. Full-Width Prose",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-09",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-09. Full-Width Prose”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-10",
+          "title": "U-10. Over-Narrow Technical Prose",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-10",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-10. Over-Narrow Technical Prose”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-11",
+          "title": "U-11. Tiny Body Text",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-11",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-11. Tiny Body Text”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-12",
+          "title": "U-12. Oversized Heading Cascade",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-12",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-12. Oversized Heading Cascade”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-13",
+          "title": "U-13. Weak Paragraph Separation",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "ux-01.md#ap-u-13",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-13. Weak Paragraph Separation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-14",
+          "title": "U-14. Excessive Paragraph Fragmentation",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "ux-01.md#ap-u-14",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-14. Excessive Paragraph Fragmentation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-15",
+          "title": "U-15. Decorative Font for Technical Content",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-15",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-15. Decorative Font for Technical Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "ux-02",
+      "source": "ux-01.md",
+      "items": [
+        {
+          "id": "AP-U-16",
+          "title": "U-16. Too Many Font Families",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-16",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-16. Too Many Font Families”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-17",
+          "title": "U-17. Weight Inflation",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-17",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-17. Weight Inflation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-18",
+          "title": "U-18. Inline Code Noise",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-18",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-18. Inline Code Noise”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-19",
+          "title": "U-19. Low-Contrast Metadata",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-19",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-19. Low-Contrast Metadata”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-20",
+          "title": "U-20. Pure Black Dark Mode",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-20",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-20. Pure Black Dark Mode”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-21",
+          "title": "U-21. Code Block as a Black Box",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-21",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-21. Code Block as a Black Box”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-22",
+          "title": "U-22. Always-On Line Numbers",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-22",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-22. Always-On Line Numbers”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-23",
+          "title": "U-23. Unclear Code Language",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-23",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-23. Unclear Code Language”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-24",
+          "title": "U-24. Copy Button Everywhere",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-24",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-24. Copy Button Everywhere”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-25",
+          "title": "U-25. Copy Button Covers Code",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-25",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-25. Copy Button Covers Code”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-26",
+          "title": "U-26. Horizontal Scroll Ambiguity",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-26",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-26. Horizontal Scroll Ambiguity”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-27",
+          "title": "U-27. Forced Code Wrapping",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-27",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-27. Forced Code Wrapping”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-28",
+          "title": "U-28. No Wrap Option",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-28",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-28. No Wrap Option”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-29",
+          "title": "U-29. Syntax Color Overload",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-29",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-29. Syntax Color Overload”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-30",
+          "title": "U-30. Theme Switching as a Primary Feature",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-30",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-30. Theme Switching as a Primary Feature”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "ux-03",
+      "source": "ux-01.md",
+      "items": [
+        {
+          "id": "AP-U-31",
+          "title": "U-31. Highlighted Lines Without Explanation",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-31",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-31. Highlighted Lines Without Explanation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-32",
+          "title": "U-32. Long Code Without Navigation",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-32",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-32. Long Code Without Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-33",
+          "title": "U-33. Code and Explanation Distance",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-33",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-33. Code and Explanation Distance”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-34",
+          "title": "U-34. Desktop-Only Table",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-34",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-34. Desktop-Only Table”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-35",
+          "title": "U-35. Hidden Horizontal Table Scroll",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-35",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-35. Hidden Horizontal Table Scroll”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-36",
+          "title": "U-36. Table as Paragraph Replacement",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "ux-01.md#ap-u-36",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-36. Table as Paragraph Replacement”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-37",
+          "title": "U-37. Giant Comparison Table",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-37",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-37. Giant Comparison Table”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-38",
+          "title": "U-38. Unresponsive Diagram",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-38",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-38. Unresponsive Diagram”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-39",
+          "title": "U-39. Zoom Without Pan Clarity",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-39",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-39. Zoom Without Pan Clarity”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-40",
+          "title": "U-40. Color-Only Diagram Semantics",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-40",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-40. Color-Only Diagram Semantics”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-41",
+          "title": "U-41. Diagram–Text Mismatch",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-41",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-41. Diagram–Text Mismatch”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-42",
+          "title": "U-42. Screenshot Text Too Small",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-42",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-42. Screenshot Text Too Small”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-43",
+          "title": "U-43. Diagram Without Accessible Alternative",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-43",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-43. Diagram Without Accessible Alternative”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-44",
+          "title": "U-44. TOC as a Mirror",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-44",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-44. TOC as a Mirror”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-45",
+          "title": "U-45. Sticky TOC Without Current Context",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-45",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-45. Sticky TOC Without Current Context”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "ux-04",
+      "source": "ux-01.md",
+      "items": [
+        {
+          "id": "AP-U-46",
+          "title": "U-46. Aggressive Scroll Spy",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-46",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-46. Aggressive Scroll Spy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-47",
+          "title": "U-47. TOC Covers Content",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-47",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-47. TOC Covers Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-48",
+          "title": "U-48. No Reading Progress Context",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-48",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-48. No Reading Progress Context”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-49",
+          "title": "U-49. Misleading Reading Time",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-49",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-49. Misleading Reading Time”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-50",
+          "title": "U-50. Zen Mode Hides Necessary Context",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-50",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-50. Zen Mode Hides Necessary Context”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-51",
+          "title": "U-51. No Section Permalink",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-51",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-51. No Section Permalink”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-52",
+          "title": "U-52. Anchor Scroll Under Header",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-52",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-52. Anchor Scroll Under Header”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-53",
+          "title": "U-53. Back-to-Top as a Substitute",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-53",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-53. Back-to-Top as a Substitute”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-54",
+          "title": "U-54. Desktop Shrunk to Mobile",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-54",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-54. Desktop Shrunk to Mobile”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-55",
+          "title": "U-55. Mobile Header Overload",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-55",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-55. Mobile Header Overload”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-56",
+          "title": "U-56. Tiny Touch Targets",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-56",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-56. Tiny Touch Targets”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-100",
+          "title": "U-100. Printed Code Clipping",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-100",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-100. Printed Code Clipping”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-101",
+          "title": "U-101. Dark Background Printing",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-101",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-101. Dark Background Printing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-102",
+          "title": "U-102. Shared Link Without Section Context",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-102",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-102. Shared Link Without Section Context”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-103",
+          "title": "U-103. Social Share Button Wall",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-01.md#ap-u-103",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-103. Social Share Button Wall”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "ux-05",
+      "source": "ux-02.md",
+      "items": [
+        {
+          "id": "AP-U-57",
+          "title": "U-57. Hover-Only Interaction",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-57",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-57. Hover-Only Interaction”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-58",
+          "title": "U-58. Swipe Conflict",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-58",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-58. Swipe Conflict”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-59",
+          "title": "U-59. Sticky Footer or Ad on Small Screen",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-59",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-59. Sticky Footer or Ad on Small Screen”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-60",
+          "title": "U-60. Mobile Search Modal as Desktop Dialog",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-60",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-60. Mobile Search Modal as Desktop Dialog”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-61",
+          "title": "U-61. Interaction Without Feedback",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-61",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-61. Interaction Without Feedback”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-62",
+          "title": "U-62. Toast Spam",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-62",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-62. Toast Spam”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-63",
+          "title": "U-63. Animation as Confirmation",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-63",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-63. Animation as Confirmation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-64",
+          "title": "U-64. Page Transition Disorientation",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-64",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-64. Page Transition Disorientation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-65",
+          "title": "U-65. Broken Back Navigation",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-65",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-65. Broken Back Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-66",
+          "title": "U-66. Modal Focus Escape",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-66",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-66. Modal Focus Escape”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-67",
+          "title": "U-67. Escape Key Inconsistency",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-67",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-67. Escape Key Inconsistency”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-68",
+          "title": "U-68. Hidden State Persistence",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-68",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-68. Hidden State Persistence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-69",
+          "title": "U-69. No Loading Strategy",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-69",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-69. No Loading Strategy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-70",
+          "title": "U-70. Skeleton for Instant Content",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-70",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-70. Skeleton for Instant Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-71",
+          "title": "U-71. Div-Based Links",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-71",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-71. Div-Based Links”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "ux-06",
+      "source": "ux-02.md",
+      "items": [
+        {
+          "id": "AP-U-72",
+          "title": "U-72. Button–Link Confusion",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-72",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-72. Button–Link Confusion”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-73",
+          "title": "U-73. Missing Focus Indicator",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-73",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-73. Missing Focus Indicator”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-74",
+          "title": "U-74. Focus Style Removed for Aesthetics",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-74",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-74. Focus Style Removed for Aesthetics”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-75",
+          "title": "U-75. Incorrect Heading Hierarchy",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-75",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-75. Incorrect Heading Hierarchy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-76",
+          "title": "U-76. Skipped Heading Levels",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-76",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-76. Skipped Heading Levels”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-77",
+          "title": "U-77. Empty Link Label",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-77",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-77. Empty Link Label”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-78",
+          "title": "U-78. Redundant ARIA",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-78",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-78. Redundant ARIA”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-79",
+          "title": "U-79. Dark Mode Contrast Failure",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-79",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-79. Dark Mode Contrast Failure”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-80",
+          "title": "U-80. Color-Only Link Identification",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-80",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-80. Color-Only Link Identification”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-81",
+          "title": "U-81. Reduced Motion Ignored",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-81",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-81. Reduced Motion Ignored”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-82",
+          "title": "U-82. Auto-Focus Surprise",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-82",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-82. Auto-Focus Surprise”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-83",
+          "title": "U-83. Keyboard-Inaccessible Code Controls",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-83",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-83. Keyboard-Inaccessible Code Controls”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-84",
+          "title": "U-84. No Skip Link",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-84",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-84. No Skip Link”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-85",
+          "title": "U-85. Language Not Declared",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-85",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-85. Language Not Declared”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-86",
+          "title": "U-86. Mixed-Language Pronunciation Failure",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-86",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-86. Mixed-Language Pronunciation Failure”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "ux-07",
+      "source": "ux-02.md",
+      "items": [
+        {
+          "id": "AP-U-87",
+          "title": "U-87. Alt Text as Filename",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-87",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-87. Alt Text as Filename”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-88",
+          "title": "U-88. Alt Text as Full Diagram Dump",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-88",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-88. Alt Text as Full Diagram Dump”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-89",
+          "title": "U-89. Inaccessible Tables",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-89",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-89. Inaccessible Tables”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-90",
+          "title": "U-90. Visual Order–DOM Order Mismatch",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-90",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-90. Visual Order–DOM Order Mismatch”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-91",
+          "title": "U-91. Hidden Publication Status",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-91",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-91. Hidden Publication Status”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-92",
+          "title": "U-92. Metadata Wall Before Content",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-92",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-92. Metadata Wall Before Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-93",
+          "title": "U-93. Warning Banner Fatigue",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-93",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-93. Warning Banner Fatigue”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-94",
+          "title": "U-94. Citation Link Clutter",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-94",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-94. Citation Link Clutter”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-95",
+          "title": "U-95. External Link Surprise",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-95",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-95. External Link Surprise”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-96",
+          "title": "U-96. No Error Reporting Path",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-96",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-96. No Error Reporting Path”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-97",
+          "title": "U-97. Comment Section as Support Desk",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-97",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-97. Comment Section as Support Desk”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-98",
+          "title": "U-98. Comment Dominance",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-98",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-98. Comment Dominance”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-U-99",
+          "title": "U-99. Print as Screenshot",
+          "priority": "P2",
+          "effort": "S",
+          "source": {
+            "file": "ux-02.md#ap-u-99",
+            "messageIds": [
+              "10da89a9-5fc2-4b7e-bb09-c7d954102fb2"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “U-99. Print as Screenshot”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    }
+  ]
+}

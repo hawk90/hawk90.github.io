@@ -1,0 +1,3052 @@
+{
+  "category": "information_architecture",
+  "dispositionScale": [
+    "unassessed",
+    "remediated",
+    "accepted",
+    "superseded",
+    "routed"
+  ],
+  "items": [
+    {
+      "id": "AP-I-01",
+      "title": "I-01. Category Explosion",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-01",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-01. Category Explosion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-02",
+      "title": "I-02. Category Overlap",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-02",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-02. Category Overlap”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-03",
+      "title": "I-03. Category as Storage Location",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-03",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-03. Category as Storage Location”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-04",
+      "title": "I-04. Category as Identity",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-04",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-04. Category as Identity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-05",
+      "title": "I-05. Empty Category",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-05",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-05. Empty Category”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-06",
+      "title": "I-06. Tag Explosion",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-06",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-06. Tag Explosion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-07",
+      "title": "I-07. Synonym Tag Drift",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-07",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-07. Synonym Tag Drift”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-08",
+      "title": "I-08. Version-as-Tag Abuse",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-08",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-08. Version-as-Tag Abuse”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-09",
+      "title": "I-09. Tag as Category",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-09",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-09. Tag as Category”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-10",
+      "title": "I-10. Tag Cloud Navigation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-10",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-10. Tag Cloud Navigation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-11",
+      "title": "I-11. Series as Folder",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-11",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-11. Series as Folder”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-12",
+      "title": "I-12. Series Order Fragility",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-12",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-12. Series Order Fragility”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-13",
+      "title": "I-13. Series Without Entry Point",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-13",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-13. Series Without Entry Point”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-14",
+      "title": "I-14. Series Without Exit",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-14",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-14. Series Without Exit”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-15",
+      "title": "I-15. Series and Topic Duplication",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-15",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-15. Series and Topic Duplication”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-16",
+      "title": "I-16. Archive-First Navigation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-16",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-16. Archive-First Navigation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-17",
+      "title": "I-17. Pagination as Discovery",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-17",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-17. Pagination as Discovery”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-18",
+      "title": "I-18. Infinite Scroll Archive",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-18",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-18. Infinite Scroll Archive”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-19",
+      "title": "I-19. Latest-Only Homepage",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-19",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-19. Latest-Only Homepage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-20",
+      "title": "I-20. Popularity-Only Homepage",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-20",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-20. Popularity-Only Homepage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-21",
+      "title": "I-21. No Start Here",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-21",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-21. No Start Here”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-22",
+      "title": "I-22. Start Here Overload",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-22",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-22. Start Here Overload”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-23",
+      "title": "I-23. Missing Breadcrumb",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-23",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-23. Missing Breadcrumb”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-24",
+      "title": "I-24. Fake Breadcrumb",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-24",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-24. Fake Breadcrumb”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-25",
+      "title": "I-25. Breadcrumb Without Links",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-25",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-25. Breadcrumb Without Links”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-26",
+      "title": "I-26. Orphan Article",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-26",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-26. Orphan Article”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-27",
+      "title": "I-27. Dead-End Article",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-27",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-27. Dead-End Article”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-28",
+      "title": "I-28. Related Posts by Shared Tag Only",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-28",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-28. Related Posts by Shared Tag Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-29",
+      "title": "I-29. Random Related Posts",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-29",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-29. Random Related Posts”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-30",
+      "title": "I-30. Circular Recommendation Trap",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-30",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-30. Circular Recommendation Trap”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-31",
+      "title": "I-31. Internal Link as “Click Here”",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-31",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-31. Internal Link as “Click Here””?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-32",
+      "title": "I-32. Excessive Inline Linking",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-32",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-32. Excessive Inline Linking”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-33",
+      "title": "I-33. Link Without Context",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-33",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-33. Link Without Context”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-34",
+      "title": "I-34. Link Rot Inside the Site",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-34",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-34. Link Rot Inside the Site”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-35",
+      "title": "I-35. External-Link-Only Context",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-35",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-35. External-Link-Only Context”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-36",
+      "title": "I-36. Search as Exact Match",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-36",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-36. Search as Exact Match”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-37",
+      "title": "I-37. Acronym Search Failure",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-37",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-37. Acronym Search Failure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-38",
+      "title": "I-38. Korean-English Search Split",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-38",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-38. Korean-English Search Split”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-39",
+      "title": "I-39. Search Result Without Context",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-39",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-39. Search Result Without Context”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-40",
+      "title": "I-40. Search Result Without Match Highlight",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-40",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-40. Search Result Without Match Highlight”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-41",
+      "title": "I-41. Search Ranking by Frequency",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-41",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-41. Search Ranking by Frequency”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-42",
+      "title": "I-42. Code Noise in Search",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-42",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-42. Code Noise in Search”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-43",
+      "title": "I-43. Full Index Eager Loading",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-43",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-43. Full Index Eager Loading”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-44",
+      "title": "I-44. Search Without Filters",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-44",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-44. Search Without Filters”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-45",
+      "title": "I-45. Filter Explosion",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-45",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-45. Filter Explosion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-46",
+      "title": "I-46. No Zero-Result Recovery",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-46",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-46. No Zero-Result Recovery”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-47",
+      "title": "I-47. Search Hides Canonical Guides",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-47",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-47. Search Hides Canonical Guides”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-48",
+      "title": "I-48. Topic Hub as Article List",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-48",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-48. Topic Hub as Article List”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-49",
+      "title": "I-49. Topic Hub as Mega-Article",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-49",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-49. Topic Hub as Mega-Article”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-50",
+      "title": "I-50. Stale Topic Hub",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-50",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-50. Stale Topic Hub”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-51",
+      "title": "I-51. Missing Cross-Topic Links",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-51",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-51. Missing Cross-Topic Links”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-52",
+      "title": "I-52. Knowledge Graph Without Editorial Judgment",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-52",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-52. Knowledge Graph Without Editorial Judgment”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-53",
+      "title": "I-53. Backlink Overload",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-53",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-53. Backlink Overload”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-54",
+      "title": "I-54. No Content Status in Navigation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-54",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-54. No Content Status in Navigation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-55",
+      "title": "I-55. No Difficulty Signal",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-55",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-55. No Difficulty Signal”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-56",
+      "title": "I-56. Difficulty as Absolute Truth",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-56",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-56. Difficulty as Absolute Truth”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-57",
+      "title": "I-57. Audience-Free Navigation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-57",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-57. Audience-Free Navigation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-58",
+      "title": "I-58. Mobile Navigation Collapse",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-58",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-58. Mobile Navigation Collapse”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-59",
+      "title": "I-59. Sidebar Overload",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-59",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-59. Sidebar Overload”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-I-60",
+      "title": "I-60. TOC as Heading Dump",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-01.md#ap-i-60",
+        "messageIds": [
+          "46954a3f-1f11-41f5-a399-16d345f231b4"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-60. TOC as Heading Dump”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-01",
+      "title": "K-01. Related Posts by Tag Count",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-01",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-01. Related Posts by Tag Count”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-02",
+      "title": "K-02. Semantic Similarity Equals Relevance",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-02",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-02. Semantic Similarity Equals Relevance”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-03",
+      "title": "K-03. Recommendation Without Purpose",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-03",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-03. Recommendation Without Purpose”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-04",
+      "title": "K-04. Same Recommendation Everywhere",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-04",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-04. Same Recommendation Everywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-05",
+      "title": "K-05. Popularity Bias",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-05",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-05. Popularity Bias”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-06",
+      "title": "K-06. Recency Bias",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-06",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-06. Recency Bias”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-07",
+      "title": "K-07. Engagement Optimization",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-07",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-07. Engagement Optimization”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-08",
+      "title": "K-08. Recommendation Echo Chamber",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-08",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-08. Recommendation Echo Chamber”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-09",
+      "title": "K-09. Random Exploration Slot",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-09",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-09. Random Exploration Slot”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-10",
+      "title": "K-10. Too Many Recommendations",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-10",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-10. Too Many Recommendations”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-100",
+      "title": "K-100. Knowledge Graph Becomes the Product",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-100",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-100. Knowledge Graph Becomes the Product”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-11",
+      "title": "K-11. One Generic Relation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-11",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-11. One Generic Relation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-12",
+      "title": "K-12. Relation Type Explosion",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-12",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-12. Relation Type Explosion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-13",
+      "title": "K-13. Directionless Relationship",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-13",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-13. Directionless Relationship”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-14",
+      "title": "K-14. Symmetric Relation Assumption",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-14",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-14. Symmetric Relation Assumption”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-15",
+      "title": "K-15. Missing Inverse Relation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-15",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-15. Missing Inverse Relation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-16",
+      "title": "K-16. Relation Stored in Multiple Places",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-16",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-16. Relation Stored in Multiple Places”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-17",
+      "title": "K-17. Relation Inferred from Folder",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-17",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-17. Relation Inferred from Folder”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-18",
+      "title": "K-18. Relation Inferred from Title",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-18",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-18. Relation Inferred from Title”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-19",
+      "title": "K-19. Relation Without Evidence",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-19",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-19. Relation Without Evidence”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-20",
+      "title": "K-20. Stale Relation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-20",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-20. Stale Relation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-21",
+      "title": "K-21. Linear Learning Path Assumption",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-21",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-21. Linear Learning Path Assumption”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-22",
+      "title": "K-22. One Start Point for Everyone",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-22",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-22. One Start Point for Everyone”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-23",
+      "title": "K-23. Path Without Goal",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-23",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-23. Path Without Goal”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-24",
+      "title": "K-24. Path Without Exit",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-24",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-24. Path Without Exit”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-25",
+      "title": "K-25. Path Locked to Publication Order",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-25",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-25. Path Locked to Publication Order”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-26",
+      "title": "K-26. Prerequisite Chain Too Deep",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-26",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-26. Prerequisite Chain Too Deep”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-27",
+      "title": "K-27. Circular Prerequisites",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-27",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-27. Circular Prerequisites”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-28",
+      "title": "K-28. Hidden Prerequisite",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-28",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-28. Hidden Prerequisite”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-29",
+      "title": "K-29. Difficulty as Path",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-29",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-29. Difficulty as Path”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-30",
+      "title": "K-30. Completing the Path Becomes the Goal",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-30",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-30. Completing the Path Becomes the Goal”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-31",
+      "title": "K-31. Backlink Dump",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-31",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-31. Backlink Dump”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-32",
+      "title": "K-32. Backlink Without Relation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-32",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-32. Backlink Without Relation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-33",
+      "title": "K-33. Self-Generated Backlink Noise",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-33",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-33. Self-Generated Backlink Noise”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-34",
+      "title": "K-34. Navigation Links Counted as Knowledge Edges",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-34",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-34. Navigation Links Counted as Knowledge Edges”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-35",
+      "title": "K-35. Backlink as Popularity Score",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-35",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-35. Backlink as Popularity Score”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-36",
+      "title": "K-36. Missing Backlink for Renamed Pages",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-36",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-36. Missing Backlink for Renamed Pages”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-37",
+      "title": "K-37. Backlink Page Indexed as Thin Content",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-37",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-37. Backlink Page Indexed as Thin Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-38",
+      "title": "K-38. Topic Equals Tag",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-38",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-38. Topic Equals Tag”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-39",
+      "title": "K-39. Topic Hierarchy as a Tree Only",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-39",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-39. Topic Hierarchy as a Tree Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-40",
+      "title": "K-40. Graph Without Canonical Nodes",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-40",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-40. Graph Without Canonical Nodes”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-41",
+      "title": "K-41. Node for Every Tag",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-41",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-41. Node for Every Tag”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-42",
+      "title": "K-42. Article as Every Node",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-42",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-42. Article as Every Node”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-43",
+      "title": "K-43. Graph Density as Quality",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-43",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-43. Graph Density as Quality”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-44",
+      "title": "K-44. Disconnected Node Panic",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-44",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-44. Disconnected Node Panic”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-45",
+      "title": "K-45. Centrality as Editorial Importance",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-45",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-45. Centrality as Editorial Importance”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-46",
+      "title": "K-46. Graph Generated Once",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-46",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-46. Graph Generated Once”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-47",
+      "title": "K-47. Graph Without State",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-47",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-47. Graph Without State”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-48",
+      "title": "K-48. Graph Without Edge Provenance",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-48",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-48. Graph Without Edge Provenance”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-49",
+      "title": "K-49. Hairball Graph",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-49",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-49. Hairball Graph”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-50",
+      "title": "K-50. Force-Directed Layout as Structure",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-50",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-50. Force-Directed Layout as Structure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-51",
+      "title": "K-51. Animation-Heavy Graph",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-51",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-51. Animation-Heavy Graph”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-52",
+      "title": "K-52. Zoom-Only Navigation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-52",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-52. Zoom-Only Navigation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-53",
+      "title": "K-53. Color-Only Node Types",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-53",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-53. Color-Only Node Types”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-54",
+      "title": "K-54. Tiny Labels",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-54",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-54. Tiny Labels”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-55",
+      "title": "K-55. Graph Replaces Navigation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-55",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-55. Graph Replaces Navigation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-56",
+      "title": "K-56. Graph Has No User Question",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-56",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-56. Graph Has No User Question”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-57",
+      "title": "K-57. Graph on Mobile by Default",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-57",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-57. Graph on Mobile by Default”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-58",
+      "title": "K-58. Graph State Not Shareable",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-58",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-58. Graph State Not Shareable”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-59",
+      "title": "K-59. Graph Requires Heavy Client Runtime",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-02.md#ap-k-59",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-59. Graph Requires Heavy Client Runtime”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-60",
+      "title": "K-60. Graph Analytics Becomes a Product",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-60",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-60. Graph Analytics Becomes a Product”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-61",
+      "title": "K-61. AI Recommendation as Truth",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-61",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-61. AI Recommendation as Truth”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-62",
+      "title": "K-62. LLM Reads Only Titles",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-62",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-62. LLM Reads Only Titles”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-63",
+      "title": "K-63. LLM Reads Full Raw Article",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-63",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-63. LLM Reads Full Raw Article”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-64",
+      "title": "K-64. Embedding Model Lock-In",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-64",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-64. Embedding Model Lock-In”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-65",
+      "title": "K-65. Similarity Threshold by Guess",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-65",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-65. Similarity Threshold by Guess”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-66",
+      "title": "K-66. No Negative Examples",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-66",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-66. No Negative Examples”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-67",
+      "title": "K-67. AI Generates Missing Links Everywhere",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-67",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-67. AI Generates Missing Links Everywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-68",
+      "title": "K-68. Generated Link Text",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-68",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-68. Generated Link Text”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-69",
+      "title": "K-69. Recommendation Feedback Loop",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-69",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-69. Recommendation Feedback Loop”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-70",
+      "title": "K-70. Cold-Start Neglect",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-70",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-70. Cold-Start Neglect”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-71",
+      "title": "K-71. Model Upgrade Changes Site Structure",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-71",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-71. Model Upgrade Changes Site Structure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-72",
+      "title": "K-72. No Recommendation Versioning",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-72",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-72. No Recommendation Versioning”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-73",
+      "title": "K-73. No Canonical Node",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-73",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-73. No Canonical Node”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-74",
+      "title": "K-74. Canonical Guide Dominates Everything",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-74",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-74. Canonical Guide Dominates Everything”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-75",
+      "title": "K-75. Duplicate Articles Linked as Related",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-75",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-75. Duplicate Articles Linked as Related”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-76",
+      "title": "K-76. Superseded Article Recommended",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-76",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-76. Superseded Article Recommended”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-77",
+      "title": "K-77. Related Content Competes with Canonical",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-77",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-77. Related Content Competes with Canonical”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-78",
+      "title": "K-78. Same Recommendation for All Entry Points",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-78",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-78. Same Recommendation for All Entry Points”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-79",
+      "title": "K-79. Personalization Before Need",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-79",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-79. Personalization Before Need”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-80",
+      "title": "K-80. Persistent Reading Profile",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-80",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-80. Persistent Reading Profile”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-81",
+      "title": "K-81. Resume Reading Without Consent",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-81",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-81. Resume Reading Without Consent”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-82",
+      "title": "K-82. “You May Also Like” Without Explanation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-82",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-82. “You May Also Like” Without Explanation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-83",
+      "title": "K-83. Click-Through Rate as Relevance",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-83",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-83. Click-Through Rate as Relevance”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-84",
+      "title": "K-84. Manual Curation Without Review",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-84",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-84. Manual Curation Without Review”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-85",
+      "title": "K-85. Auto Recommendation Without Evaluation Set",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-85",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-85. Auto Recommendation Without Evaluation Set”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-86",
+      "title": "K-86. No Explanation for Exclusion",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-86",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-86. No Explanation for Exclusion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-87",
+      "title": "K-87. Recommendation Metrics Without Editorial Value",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-87",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-87. Recommendation Metrics Without Editorial Value”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-88",
+      "title": "K-88. Graph Completeness as Quality",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-88",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-88. Graph Completeness as Quality”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-89",
+      "title": "K-89. Recommendation System Without Failure Fallback",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-89",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-89. Recommendation System Without Failure Fallback”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-90",
+      "title": "K-90. Recommendation UI Dominates Conclusion",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-90",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-90. Recommendation UI Dominates Conclusion”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-91",
+      "title": "K-91. Relationship Editing Requires Code Change",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-91",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-91. Relationship Editing Requires Code Change”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-92",
+      "title": "K-92. Relationship Stored Only in Front Matter",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-92",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-92. Relationship Stored Only in Front Matter”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-93",
+      "title": "K-93. Central Graph File Merge Conflicts",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-93",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-93. Central Graph File Merge Conflicts”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-94",
+      "title": "K-94. Graph Schema Without Validation",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-94",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-94. Graph Schema Without Validation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-95",
+      "title": "K-95. Relation Migration Forgotten",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-95",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-95. Relation Migration Forgotten”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-96",
+      "title": "K-96. Manual and Automatic Relations Mixed",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-96",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-96. Manual and Automatic Relations Mixed”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-97",
+      "title": "K-97. Automatic Relations Committed as Source",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-97",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-97. Automatic Relations Committed as Source”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-98",
+      "title": "K-98. No Editorial Override",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-98",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-98. No Editorial Override”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-K-99",
+      "title": "K-99. Override Cemetery",
+      "priority": "P1",
+      "effort": "L",
+      "source": {
+        "file": "information_architecture-03.md#ap-k-99",
+        "messageIds": [
+          "2ad6b12b-39f6-4074-91f7-c9390693b4da"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “K-99. Override Cemetery”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    }
+  ]
+}

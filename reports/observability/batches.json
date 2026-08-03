@@ -1,0 +1,1954 @@
+{
+  "category": "observability",
+  "state": "baseline_established",
+  "blockedBy": [
+    "security",
+    "repository",
+    "performance"
+  ],
+  "batchSize": 15,
+  "batches": [
+    {
+      "id": "observability-01",
+      "source": "observability-01.md",
+      "items": [
+        {
+          "id": "AP-O-01",
+          "title": "O-01. Analytics Without a Question",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-01",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-01. Analytics Without a Question”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-02",
+          "title": "O-02. Pageview as Success",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-02",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-02. Pageview as Success”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-03",
+          "title": "O-03. Traffic Without Intent",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-03",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-03. Traffic Without Intent”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-04",
+          "title": "O-04. Sitewide Average Trap",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-04",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-04. Sitewide Average Trap”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-05",
+          "title": "O-05. Bounce Rate Panic",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-05",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-05. Bounce Rate Panic”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-06",
+          "title": "O-06. Time-on-Page as Understanding",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-06",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-06. Time-on-Page as Understanding”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-07",
+          "title": "O-07. Scroll Depth as Completion",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-07",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-07. Scroll Depth as Completion”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-08",
+          "title": "O-08. Event Everything",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-08",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-08. Event Everything”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-09",
+          "title": "O-09. Event Naming Drift",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-09",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-09. Event Naming Drift”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-10",
+          "title": "O-10. Analytics Schema Without Versioning",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "observability-01.md#ap-o-10",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-10. Analytics Schema Without Versioning”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-11",
+          "title": "O-11. Impression Obsession",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-11",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-11. Impression Obsession”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-12",
+          "title": "O-12. CTR Without Position Context",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-12",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-12. CTR Without Position Context”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-13",
+          "title": "O-13. Average Position Worship",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-13",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-13. Average Position Worship”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-14",
+          "title": "O-14. Query Chasing",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-14",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-14. Query Chasing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-15",
+          "title": "O-15. Zero-Click Misdiagnosis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-15",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-15. Zero-Click Misdiagnosis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "observability-02",
+      "source": "observability-01.md",
+      "items": [
+        {
+          "id": "AP-O-16",
+          "title": "O-16. Index Coverage as a Score",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-16",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-16. Index Coverage as a Score”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-17",
+          "title": "O-17. “Crawled, Not Indexed” Mass Fix",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-17",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-17. “Crawled, Not Indexed” Mass Fix”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-18",
+          "title": "O-18. URL Inspection as a Workflow",
+          "priority": "P2",
+          "effort": "L",
+          "source": {
+            "file": "observability-01.md#ap-o-18",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-18. URL Inspection as a Workflow”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-19",
+          "title": "O-19. Search Console Without Change Log",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-19",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-19. Search Console Without Change Log”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-20",
+          "title": "O-20. Short Evaluation Window",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-20",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-20. Short Evaluation Window”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-21",
+          "title": "O-21. Lab Data as Reality",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-21",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-21. Lab Data as Reality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-22",
+          "title": "O-22. Field Data Without Page Type",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-22",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-22. Field Data Without Page Type”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-23",
+          "title": "O-23. Lighthouse 100 Theater",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-23",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-23. Lighthouse 100 Theater”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-24",
+          "title": "O-24. Synthetic Benchmark Drift",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-24",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-24. Synthetic Benchmark Drift”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-25",
+          "title": "O-25. Homepage-Only Performance",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-25",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-25. Homepage-Only Performance”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-26",
+          "title": "O-26. Best-Case Page Benchmark",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-26",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-26. Best-Case Page Benchmark”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-27",
+          "title": "O-27. No Performance Regression Baseline",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-27",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-27. No Performance Regression Baseline”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-28",
+          "title": "O-28. Single Run Performance Test",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-28",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-28. Single Run Performance Test”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-29",
+          "title": "O-29. Bundle Size Without Execution Cost",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-29",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-29. Bundle Size Without Execution Cost”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-30",
+          "title": "O-30. Performance Dashboard Without Ownership",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-30",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-30. Performance Dashboard Without Ownership”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "observability-03",
+      "source": "observability-01.md",
+      "items": [
+        {
+          "id": "AP-O-31",
+          "title": "O-31. Search Usage as Success",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-31",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-31. Search Usage as Success”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-32",
+          "title": "O-32. No-Result Query Ignored",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-32",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-32. No-Result Query Ignored”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-33",
+          "title": "O-33. Search Query Collection Without Privacy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-33",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-33. Search Query Collection Without Privacy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-34",
+          "title": "O-34. Search Click Without Success Signal",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-34",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-34. Search Click Without Success Signal”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-35",
+          "title": "O-35. Search Ranking Changed Without Evaluation Set",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-35",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-35. Search Ranking Changed Without Evaluation Set”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-36",
+          "title": "O-36. Popular Query Bias",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-36",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-36. Popular Query Bias”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-37",
+          "title": "O-37. Search Metrics Distorted by Author",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-37",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-37. Search Metrics Distorted by Author”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-38",
+          "title": "O-38. Search Index Size Without Query Quality",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-38",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-38. Search Index Size Without Query Quality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-39",
+          "title": "O-39. Search Quality by Anecdote",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-39",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-39. Search Quality by Anecdote”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-40",
+          "title": "O-40. Zero-Result Auto-Content Generation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-40",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-40. Zero-Result Auto-Content Generation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-41",
+          "title": "O-41. Every Article Needs Traffic",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-41",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-41. Every Article Needs Traffic”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-42",
+          "title": "O-42. Low Traffic Means Delete",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-42",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-42. Low Traffic Means Delete”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-43",
+          "title": "O-43. High Traffic Means Good",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-43",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-43. High Traffic Means Good”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-44",
+          "title": "O-44. Traffic-Only Featured Content",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-44",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-44. Traffic-Only Featured Content”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-45",
+          "title": "O-45. No Content Cohort Analysis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-45",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-45. No Content Cohort Analysis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "observability-04",
+      "source": "observability-01.md",
+      "items": [
+        {
+          "id": "AP-O-46",
+          "title": "O-46. New vs Updated Content Confusion",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-46",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-46. New vs Updated Content Confusion”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-47",
+          "title": "O-47. No Internal Journey Analysis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-47",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-47. No Internal Journey Analysis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-48",
+          "title": "O-48. Funnel Thinking for Every Reader",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-48",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-48. Funnel Thinking for Every Reader”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-49",
+          "title": "O-49. Completion Rate Without Content Type",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-49",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-49. Completion Rate Without Content Type”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-50",
+          "title": "O-50. No Qualitative Feedback",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-50",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-50. No Qualitative Feedback”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-51",
+          "title": "O-51. RPM as the Primary Product Metric",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-51",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-51. RPM as the Primary Product Metric”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-52",
+          "title": "O-52. Revenue Without Page-Type Segmentation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-52",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-52. Revenue Without Page-Type Segmentation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-53",
+          "title": "O-53. High Revenue, Poor Experience Ignored",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-53",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-53. High Revenue, Poor Experience Ignored”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-54",
+          "title": "O-54. Ad Click Optimization",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-54",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-54. Ad Click Optimization”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-55",
+          "title": "O-55. Auto Ads as a Black Box",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-55",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-55. Auto Ads as a Black Box”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-56",
+          "title": "O-56. Revenue Data Without Traffic Quality",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-56",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-56. Revenue Data Without Traffic Quality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-57",
+          "title": "O-57. Ad Experiment Without Guardrails",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-57",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-57. Ad Experiment Without Guardrails”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-58",
+          "title": "O-58. Short-Term Revenue Winner",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-58",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-58. Short-Term Revenue Winner”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-59",
+          "title": "O-59. AdSense Rejection as Analytics Problem",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-59",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-59. AdSense Rejection as Analytics Problem”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-100",
+          "title": "O-100. Measurement as Product",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-01.md#ap-o-100",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-100. Measurement as Product”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "observability-05",
+      "source": "observability-02.md",
+      "items": [
+        {
+          "id": "AP-O-60",
+          "title": "O-60. Revenue Attribution to a Single Change",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-60",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-60. Revenue Attribution to a Single Change”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-61",
+          "title": "O-61. A/B Test Before Enough Traffic",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-61",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-61. A/B Test Before Enough Traffic”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-62",
+          "title": "O-62. Testing Cosmetic Details First",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-62",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-62. Testing Cosmetic Details First”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-63",
+          "title": "O-63. Multiple Variables in One Experiment",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-63",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-63. Multiple Variables in One Experiment”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-64",
+          "title": "O-64. No Experiment Hypothesis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-64",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-64. No Experiment Hypothesis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-65",
+          "title": "O-65. No Primary Metric",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-65",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-65. No Primary Metric”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-66",
+          "title": "O-66. Metric Shopping",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-66",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-66. Metric Shopping”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-67",
+          "title": "O-67. Stopping When It Looks Good",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-67",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-67. Stopping When It Looks Good”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-68",
+          "title": "O-68. Experiment Contamination",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-68",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-68. Experiment Contamination”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-69",
+          "title": "O-69. No Segment Analysis",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-69",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-69. No Segment Analysis”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-70",
+          "title": "O-70. Segment Fishing",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-70",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-70. Segment Fishing”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-71",
+          "title": "O-71. Novelty Effect Ignored",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-71",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-71. Novelty Effect Ignored”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-72",
+          "title": "O-72. A/B Test Adds Permanent Complexity",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-72",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-72. A/B Test Adds Permanent Complexity”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-73",
+          "title": "O-73. Feature Flag Cemetery",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-73",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-73. Feature Flag Cemetery”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-74",
+          "title": "O-74. Experiment Without Accessibility Check",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-74",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-74. Experiment Without Accessibility Check”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "observability-06",
+      "source": "observability-02.md",
+      "items": [
+        {
+          "id": "AP-O-75",
+          "title": "O-75. Dark Pattern Experimentation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-75",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-75. Dark Pattern Experimentation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-76",
+          "title": "O-76. Build Time Without Stage Breakdown",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-76",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-76. Build Time Without Stage Breakdown”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-77",
+          "title": "O-77. Memory Peak Without Context",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-77",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-77. Memory Peak Without Context”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-78",
+          "title": "O-78. No Artifact Size Tracking",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-78",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-78. No Artifact Size Tracking”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-79",
+          "title": "O-79. CI Success Rate Ignored",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-79",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-79. CI Success Rate Ignored”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-80",
+          "title": "O-80. Mean Build Time Only",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-80",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-80. Mean Build Time Only”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-81",
+          "title": "O-81. No Changed-File Correlation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-81",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-81. No Changed-File Correlation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-82",
+          "title": "O-82. Tooling Metrics Without Action Threshold",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-82",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-82. Tooling Metrics Without Action Threshold”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-83",
+          "title": "O-83. Dashboard Graveyard",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-83",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-83. Dashboard Graveyard”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-84",
+          "title": "O-84. Manual Spreadsheet Metrics",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-84",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-84. Manual Spreadsheet Metrics”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-85",
+          "title": "O-85. Observability Platform Before Need",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-85",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-85. Observability Platform Before Need”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-86",
+          "title": "O-86. Collect Now, Decide Later",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-86",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-86. Collect Now, Decide Later”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-87",
+          "title": "O-87. No Data Retention Policy",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-87",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-87. No Data Retention Policy”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-88",
+          "title": "O-88. Raw Query Logging",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-88",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-88. Raw Query Logging”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-89",
+          "title": "O-89. Full IP Dependence",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-89",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-89. Full IP Dependence”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    },
+    {
+      "id": "observability-07",
+      "source": "observability-02.md",
+      "items": [
+        {
+          "id": "AP-O-90",
+          "title": "O-90. Author Traffic Pollution",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-90",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-90. Author Traffic Pollution”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-91",
+          "title": "O-91. Bot Traffic as Popularity",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-91",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-91. Bot Traffic as Popularity”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-92",
+          "title": "O-92. Duplicate Pageview After Client Navigation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-92",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-92. Duplicate Pageview After Client Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-93",
+          "title": "O-93. Missing Pageview After Client Navigation",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-93",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-93. Missing Pageview After Client Navigation”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-94",
+          "title": "O-94. URL Fragment Cardinality",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-94",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-94. URL Fragment Cardinality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-95",
+          "title": "O-95. Query Parameter Cardinality",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-95",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-95. Query Parameter Cardinality”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-96",
+          "title": "O-96. Metrics Without Editorial Judgment",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-96",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-96. Metrics Without Editorial Judgment”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-97",
+          "title": "O-97. Editorial Judgment Without Metrics",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-97",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-97. Editorial Judgment Without Metrics”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-98",
+          "title": "O-98. No Decision Log",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-98",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-98. No Decision Log”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        },
+        {
+          "id": "AP-O-99",
+          "title": "O-99. Constant Optimization",
+          "priority": "P2",
+          "effort": "M",
+          "source": {
+            "file": "observability-02.md#ap-o-99",
+            "messageIds": [
+              "95281689-fcc5-4aaa-a656-841196372a9d"
+            ]
+          },
+          "disposition": "unassessed",
+          "nextAction": "manual-review",
+          "reviewQuestion": "Which repository finding and verification would justify a disposition for “O-99. Constant Optimization”?",
+          "scope": null,
+          "dependsOn": [],
+          "evidence": [],
+          "residualRisk": null
+        }
+      ]
+    }
+  ]
+}

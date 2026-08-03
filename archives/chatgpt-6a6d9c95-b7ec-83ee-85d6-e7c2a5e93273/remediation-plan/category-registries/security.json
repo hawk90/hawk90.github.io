@@ -1,0 +1,1912 @@
+{
+  "category": "security",
+  "dispositionScale": [
+    "unassessed",
+    "remediated",
+    "accepted",
+    "superseded",
+    "routed"
+  ],
+  "items": [
+    {
+      "id": "AP-SEC-01",
+      "title": "SEC-01. Static Means Secure",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-01",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-01. Static Means Secure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-02",
+      "title": "SEC-02. No Backend, No Sensitive Data",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-02",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-02. No Backend, No Sensitive Data”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-03",
+      "title": "SEC-03. Public Repository as a Secret Store",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-03",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-03. Public Repository as a Secret Store”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-04",
+      "title": "SEC-04. Security by Obscurity",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-04",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-04. Security by Obscurity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-05",
+      "title": "SEC-05. Development Feature in Production",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-05",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-05. Development Feature in Production”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-06",
+      "title": "SEC-06. Trust Every Third-Party Script",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-06",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-06. Trust Every Third-Party Script”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-07",
+      "title": "SEC-07. Third-Party Script Accumulation",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-07",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-07. Third-Party Script Accumulation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-08",
+      "title": "SEC-08. Third-Party Script in Critical Path",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-08",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-08. Third-Party Script in Critical Path”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-09",
+      "title": "SEC-09. No Content Security Policy",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-09",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-09. No Content Security Policy”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-10",
+      "title": "SEC-10. CSP Added After Everything",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-10",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-10. CSP Added After Everything”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-100",
+      "title": "SEC-100. Maximum Security Complexity",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-100",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-100. Maximum Security Complexity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-11",
+      "title": "SEC-11. CSP with `unsafe-inline` Everywhere",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-11",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-11. CSP with `unsafe-inline` Everywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-12",
+      "title": "SEC-12. CSP Report Ignored",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-12",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-12. CSP Report Ignored”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-13",
+      "title": "SEC-13. No Subresource Integrity",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-13",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-13. No Subresource Integrity”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-14",
+      "title": "SEC-14. SRI Without `crossorigin`",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-14",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-14. SRI Without `crossorigin`”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-15",
+      "title": "SEC-15. Script Version Floating",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-15",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-15. Script Version Floating”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-16",
+      "title": "SEC-16. Same-Origin Proxy as Automatic Trust",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-16",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-16. Same-Origin Proxy as Automatic Trust”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-17",
+      "title": "SEC-17. Markdown Is Trusted HTML",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-17",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-17. Markdown Is Trusted HTML”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-18",
+      "title": "SEC-18. Raw HTML Everywhere",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-18",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-18. Raw HTML Everywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-19",
+      "title": "SEC-19. Unsafe HTML Injection",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-19",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-19. Unsafe HTML Injection”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-20",
+      "title": "SEC-20. Search Highlight via String Replacement",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-20",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-20. Search Highlight via String Replacement”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-21",
+      "title": "SEC-21. Unescaped Front Matter",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-21",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-21. Unescaped Front Matter”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-22",
+      "title": "SEC-22. Trusting Generated Content",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-22",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-22. Trusting Generated Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-23",
+      "title": "SEC-23. Unsafe URL Scheme",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-23",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-23. Unsafe URL Scheme”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-24",
+      "title": "SEC-24. Unrestricted Iframe Embedding",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-24",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-24. Unrestricted Iframe Embedding”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-25",
+      "title": "SEC-25. Overpowered Iframe Sandbox",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-25",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-25. Overpowered Iframe Sandbox”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-26",
+      "title": "SEC-26. Untrusted SVG as Image",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-26",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-26. Untrusted SVG as Image”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-27",
+      "title": "SEC-27. Generated SVG Injection",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-27",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-27. Generated SVG Injection”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-28",
+      "title": "SEC-28. Actions Pinned by Mutable Tag",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-28",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-28. Actions Pinned by Mutable Tag”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-29",
+      "title": "SEC-29. Arbitrary Third-Party Action",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-29",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-29. Arbitrary Third-Party Action”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-30",
+      "title": "SEC-30. Default Broad Workflow Permissions",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-30",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-30. Default Broad Workflow Permissions”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-31",
+      "title": "SEC-31. Write Token in Build Job",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-31",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-31. Write Token in Build Job”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-32",
+      "title": "SEC-32. Secrets Available to Every Step",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-32",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-32. Secrets Available to Every Step”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-33",
+      "title": "SEC-33. Secret Printed Through Debug Logging",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-33",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-33. Secret Printed Through Debug Logging”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-34",
+      "title": "SEC-34. Secret in Build Artifact",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-34",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-34. Secret in Build Artifact”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-35",
+      "title": "SEC-35. Pull Request Workflow with Secrets",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-35",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-35. Pull Request Workflow with Secrets”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-36",
+      "title": "SEC-36. Unsafe `pull_request_target`",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-36",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-36. Unsafe `pull_request_target`”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-37",
+      "title": "SEC-37. Branch Name Injection",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-37",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-37. Branch Name Injection”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-38",
+      "title": "SEC-38. Untrusted Markdown Executed During Build",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-38",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-38. Untrusted Markdown Executed During Build”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-39",
+      "title": "SEC-39. Build Tool with Repository Write Access",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-39",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-39. Build Tool with Repository Write Access”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-40",
+      "title": "SEC-40. Deployment From Unreviewed Commit",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-40",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-40. Deployment From Unreviewed Commit”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-41",
+      "title": "SEC-41. Blind Dependency Installation",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-41",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-41. Blind Dependency Installation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-42",
+      "title": "SEC-42. Dependency for Minor Convenience",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-42",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-42. Dependency for Minor Convenience”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-43",
+      "title": "SEC-43. Transitive Dependency Blindness",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-43",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-43. Transitive Dependency Blindness”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-44",
+      "title": "SEC-44. Automatic Major Update Merge",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-44",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-44. Automatic Major Update Merge”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-45",
+      "title": "SEC-45. Vulnerability Count Theater",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-45",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-45. Vulnerability Count Theater”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-46",
+      "title": "SEC-46. Ignoring Build-Time Compromise",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-46",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-46. Ignoring Build-Time Compromise”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-47",
+      "title": "SEC-47. Install Script Trust",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-47",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-47. Install Script Trust”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-48",
+      "title": "SEC-48. Lockfile Bypass",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-48",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-48. Lockfile Bypass”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-49",
+      "title": "SEC-49. Lockfile Change Hidden in Large PR",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-49",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-49. Lockfile Change Hidden in Large PR”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-50",
+      "title": "SEC-50. Abandoned Dependency Retention",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-50",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-50. Abandoned Dependency Retention”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-51",
+      "title": "SEC-51. OAuth Secret in Static Client",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-51",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-51. OAuth Secret in Static Client”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-52",
+      "title": "SEC-52. Personal Access Token in Browser Storage",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-52",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-52. Personal Access Token in Browser Storage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-53",
+      "title": "SEC-53. Long-Lived Broad PAT",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-53",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-53. Long-Lived Broad PAT”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-54",
+      "title": "SEC-54. OAuth Scope Inflation",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-54",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-54. OAuth Scope Inflation”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-55",
+      "title": "SEC-55. Authentication Without Authorization",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-55",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-55. Authentication Without Authorization”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-56",
+      "title": "SEC-56. Client-Side Authorization Only",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-56",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-56. Client-Side Authorization Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-57",
+      "title": "SEC-57. Missing OAuth `state`",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-57",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-57. Missing OAuth `state`”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-58",
+      "title": "SEC-58. Redirect URI Wildcard",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-58",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-58. Redirect URI Wildcard”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-59",
+      "title": "SEC-59. Token in URL",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-01.md#ap-sec-59",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-59. Token in URL”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-60",
+      "title": "SEC-60. Editor Can Commit Anywhere",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-60",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-60. Editor Can Commit Anywhere”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-61",
+      "title": "SEC-61. Editor Can Modify Workflow Files",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-61",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-61. Editor Can Modify Workflow Files”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-62",
+      "title": "SEC-62. Unsanitized Commit Message",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-62",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-62. Unsanitized Commit Message”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-63",
+      "title": "SEC-63. No Conflict Detection",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-63",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-63. No Conflict Detection”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-64",
+      "title": "SEC-64. Analytics Without Data Inventory",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-64",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-64. Analytics Without Data Inventory”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-65",
+      "title": "SEC-65. Privacy Policy by Template",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-65",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-65. Privacy Policy by Template”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-66",
+      "title": "SEC-66. Privacy Policy Drift",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-66",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-66. Privacy Policy Drift”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-67",
+      "title": "SEC-67. Consent Banner Theater",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-67",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-67. Consent Banner Theater”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-68",
+      "title": "SEC-68. Consent for Everything",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-68",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-68. Consent for Everything”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-69",
+      "title": "SEC-69. Local Storage Without Disclosure",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-69",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-69. Local Storage Without Disclosure”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-70",
+      "title": "SEC-70. Persistent Search History",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-70",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-70. Persistent Search History”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-71",
+      "title": "SEC-71. Full URL Analytics Leakage",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-71",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-71. Full URL Analytics Leakage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-72",
+      "title": "SEC-72. Error Logging with Page Content",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-72",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-72. Error Logging with Page Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-73",
+      "title": "SEC-73. Giscus as a First-Party Comment Store",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-73",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-73. Giscus as a First-Party Comment Store”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-74",
+      "title": "SEC-74. Loading Comments Before User Intent",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-74",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-74. Loading Comments Before User Intent”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-75",
+      "title": "SEC-75. Advertising Identifier Assumptions",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-75",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-75. Advertising Identifier Assumptions”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-76",
+      "title": "SEC-76. HTTPS Optional",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-76",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-76. HTTPS Optional”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-77",
+      "title": "SEC-77. Mixed Content",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-77",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-77. Mixed Content”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-78",
+      "title": "SEC-78. Dangling Custom Domain",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-78",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-78. Dangling Custom Domain”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-79",
+      "title": "SEC-79. DNS Change Without Verification",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-79",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-79. DNS Change Without Verification”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-80",
+      "title": "SEC-80. Preview Domain Indexed",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-80",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-80. Preview Domain Indexed”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-81",
+      "title": "SEC-81. Source Map Exposure Without Need",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-81",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-81. Source Map Exposure Without Need”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-82",
+      "title": "SEC-82. Backup Files in Public Output",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-82",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-82. Backup Files in Public Output”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-83",
+      "title": "SEC-83. Internal Log Publication",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-83",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-83. Internal Log Publication”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-84",
+      "title": "SEC-84. Screenshot Metadata Leakage",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-84",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-84. Screenshot Metadata Leakage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-85",
+      "title": "SEC-85. Image EXIF Leakage",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-85",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-85. Image EXIF Leakage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-86",
+      "title": "SEC-86. Repository URL Leakage",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-86",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-86. Repository URL Leakage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-87",
+      "title": "SEC-87. Personal Path Leakage",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-87",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-87. Personal Path Leakage”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-88",
+      "title": "SEC-88. Real Token in Tutorial",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-88",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-88. Real Token in Tutorial”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-89",
+      "title": "SEC-89. Secret Redaction by Partial Mask",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-89",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-89. Secret Redaction by Partial Mask”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-90",
+      "title": "SEC-90. Private Draft in Git History",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-90",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-90. Private Draft in Git History”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-91",
+      "title": "SEC-91. No Security Update Routine",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-91",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-91. No Security Update Routine”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-92",
+      "title": "SEC-92. Alert Fatigue",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-92",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-92. Alert Fatigue”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-93",
+      "title": "SEC-93. Security Scanner as Proof of Safety",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-93",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-93. Security Scanner as Proof of Safety”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-94",
+      "title": "SEC-94. No Integration Inventory",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-94",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-94. No Integration Inventory”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-95",
+      "title": "SEC-95. No Secret Rotation Plan",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-95",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-95. No Secret Rotation Plan”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-96",
+      "title": "SEC-96. Incident Means Site Defacement Only",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-96",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-96. Incident Means Site Defacement Only”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-97",
+      "title": "SEC-97. No Deployment Provenance",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-97",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-97. No Deployment Provenance”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-98",
+      "title": "SEC-98. Manual Emergency Edit",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-98",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-98. Manual Emergency Edit”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    },
+    {
+      "id": "AP-SEC-99",
+      "title": "SEC-99. Security Controls Without Tests",
+      "priority": "P0",
+      "effort": "L",
+      "source": {
+        "file": "security-02.md#ap-sec-99",
+        "messageIds": [
+          "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
+        ]
+      },
+      "disposition": "unassessed",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Which repository finding and verification would justify a disposition for “SEC-99. Security Controls Without Tests”?",
+      "scope": null,
+      "dependsOn": [],
+      "evidence": [],
+      "residualRisk": null
+    }
+  ]
+}
