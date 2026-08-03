@@ -606,13 +606,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-21. Comments as Permanent Knowledge”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-21. comments as permanent knowledge when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-22",
@@ -876,13 +890,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-31. Framework-Specific Content”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-31. framework-specific content when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-32",
@@ -923,13 +951,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-33. Custom Directive Without Fallback”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-33. custom directive without fallback when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-34",
@@ -942,13 +984,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-34. HTML Embedded for Layout”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-34. html embedded for layout when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-35",
@@ -961,13 +1017,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-35. CSS Class in Content”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-35. css class in content when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-36",
@@ -1119,13 +1189,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-41. Only Generated Diagram Kept”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-41. only generated diagram kept when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-42",
@@ -1138,13 +1222,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-42. Only Source Diagram Kept”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-42. only source diagram kept when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-43",
@@ -1157,13 +1255,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-43. Unversioned Diagram Toolchain”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-43. unversioned diagram toolchain when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-44",
@@ -1176,13 +1288,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-44. External Asset by Mutable URL”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-44. external asset by mutable url when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-45",
@@ -1195,13 +1321,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-45. Screenshot Without Source Context”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-45. screenshot without source context when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-46",
@@ -1214,13 +1354,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-46. Lossy Re-encoding Loop”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-46. lossy re-encoding loop when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-47",
@@ -1233,13 +1387,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-47. No Original Image Preservation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-47. no original image preservation when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-48",
@@ -1252,13 +1420,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-48. Font-Dependent SVG”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-48. font-dependent svg when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-49",
@@ -1271,13 +1453,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-49. Diagram Text as Paths Only”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-49. diagram text as paths only when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-50",
@@ -1290,13 +1486,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-50. Media Without Checksums”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-50. media without checksums when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-51",
@@ -1393,13 +1603,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-54. No Redirect Registry”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-54. no redirect registry when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-55",
@@ -1412,13 +1636,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-55. Redirect Chain Accumulation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-55. redirect chain accumulation when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-56",
@@ -1431,13 +1669,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-56. Redirect Provider Lock-In”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-56. redirect provider lock-in when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-57",
@@ -1478,13 +1730,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-58. Anchor Instability”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-58. anchor instability when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-59",
@@ -1497,13 +1763,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-59. Duplicate Anchor Renumbering”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-59. duplicate anchor renumbering when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-60",
@@ -1516,13 +1796,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-60. Deleted URL Forgotten”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-60. deleted url forgotten when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-61",
@@ -1563,13 +1857,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-62. Historical Article Looks Current”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-62. historical article looks current when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-63",
@@ -1582,13 +1890,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-63. Link to Latest Documentation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-63. link to latest documentation when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-64",
@@ -1601,13 +1923,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-64. Source Link to Main Branch”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-64. source link to main branch when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-65",
@@ -1620,13 +1956,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-65. Spec Reference Without Revision”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-65. spec reference without revision when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-66",
@@ -1639,13 +1989,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-66. Benchmark Without Preservation Data”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-66. benchmark without preservation data when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-67",
@@ -1658,13 +2022,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-67. Environment Captured as Free Text Only”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-67. environment captured as free text only when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-68",
@@ -1677,13 +2055,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-68. Tool Version Lost”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-68. tool version lost when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-69",
@@ -1696,13 +2088,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-69. Reproduction Requires Defunct Hardware”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-69. reproduction requires defunct hardware when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-70",
@@ -1715,13 +2121,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-70. External Evidence Disappears”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-70. external evidence disappears when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-71",
@@ -1873,13 +2293,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-76. Theme Contains Business Logic”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-76. theme contains business logic when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-77",
@@ -1892,13 +2326,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-77. Build Scripts Assume Repository Name”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-77. build scripts assume repository name when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-78",
@@ -1911,13 +2359,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-78. GitHub Pages Assumptions Everywhere”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-78. github pages assumptions everywhere when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-79",
@@ -1930,13 +2392,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-79. No Alternative Render Test”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-79. no alternative render test when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-80",
@@ -2006,13 +2482,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-82. Archive Without Discovery”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-82. archive without discovery when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-83",
@@ -2025,13 +2515,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-83. Archive Every Build”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-83. archive every build when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "Stable source identifiers, bounded rendering assumptions, and recovery/redirect policy are documented; no provider-specific migration is inferred."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-84",
@@ -2128,13 +2632,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-87. Archive Excludes Redirect History”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-87. archive excludes redirect history when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-88",
@@ -2147,13 +2665,27 @@
           "29dfd3e0-113e-46b8-9e88-7ba41aa263e8"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “R-88. Archive Excludes Comments and Corrections”?",
-      "scope": null,
+      "reviewQuestion": "Reassess r-88. archive excludes comments and corrections when repository, asset, URL, or rendering workflows change.",
+      "scope": "Repository preservation and portability policy only; no published content, URLs, frontmatter, external backup, DNS, account, or host state is changed by this decision.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "reports/content-export/README.md",
+            "reports/content-export/manifest.json",
+            "scripts/audit-content-portability.mjs",
+            "scripts/audit-content-asset-portability.mjs",
+            "scripts/audit-repository-health.mjs",
+            "src/content/blog"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-health && npm run audit:content-portability",
+          "result": "The source corpus remains additive and readable, portable export and recovery boundaries are documented, and no automatic rewrite or deletion is authorized."
+        }
+      ],
+      "residualRisk": "This is an explicit acceptance of a design or evidence gap, not proof that every historical asset, redirect, external provider, or alternate renderer has been exercised; perform targeted manual review after relevant changes."
     },
     {
       "id": "AP-R-89",
