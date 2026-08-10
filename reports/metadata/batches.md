@@ -2,7 +2,7 @@
 
 - Category state: baseline_established
 - Dependencies not complete: none
-- Unassessed items: 35
+- Unassessed items: 22
 - Maximum batch size: 15
 - Batches: 3
 
@@ -16,24 +16,8 @@
 
 ## metadata-02 — metadata-02.md
 
-- AP-M-61 (P1, M) — M-61. Source–Artifact Ambiguity
-- AP-M-62 (P1, M) — M-62. Generated File Modified Manually
-- AP-M-63 (P1, M) — M-63. Artifact Naming by Display Title
-- AP-M-64 (P1, M) — M-64. No Artifact Manifest
-- AP-M-65 (P1, M) — M-65. Stale Artifact Preservation
-- AP-M-66 (P1, M) — M-66. Over-Aggressive Prune
-- AP-M-67 (P1, M) — M-67. Generator Version Not Recorded
-- AP-M-68 (P1, M) — M-68. Non-Deterministic Asset Generation
 - AP-M-69 (P1, M) — M-69. Generated Asset Review Blind Spot
-- AP-M-70 (P1, M) — M-70. Asset Pipeline Owns Publishing
 - AP-M-71 (P1, M) — M-71. Publish-and-Forget
-- AP-M-72 (P1, M) — M-72. Date-Based Review Only
-- AP-M-73 (P1, M) — M-73. No Content Ownership
-- AP-M-74 (P1, M) — M-74. New Content Before Existing Debt
-- AP-M-75 (P1, M) — M-75. No Merge Policy for Similar Articles
-
-## metadata-03 — metadata-02.md
-
 - AP-M-76 (P1, M) — M-76. Deletion Aversion
 - AP-M-77 (P1, M) — M-77. Update Without Revalidation
 - AP-M-78 (P1, M) — M-78. Bulk AI Refresh
@@ -47,5 +31,8 @@
 - AP-M-86 (P1, M) — M-86. Feature Flag Cemetery
 - AP-M-87 (P1, M) — M-87. Permanent Compatibility Layer
 - AP-M-88 (P1, M) — M-88. Release Notes Without User Impact
+
+## metadata-03 — metadata-02.md
+
 - AP-M-89 (P1, M) — M-89. No Baseline Before Refactor
 - AP-M-90 (P1, M) — M-90. Completion Defined as Code Merge

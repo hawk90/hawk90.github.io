@@ -1984,13 +1984,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-61. Source–Artifact Ambiguity”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the source-to-artifact direction still hold for every committed asset, including the 35 SVGs that have no sibling TeX source?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run verify:release",
+          "result": "The boundary is explicit: dist/ is ignored with zero tracked files, TikZ .tex sources are authoritative and .svg artifacts are regenerated from them by build-diagrams.sh, and reports/diagrams/assets.md separates the 35 imported assets that have no sibling source from the generated ones."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-62",
@@ -2003,13 +2018,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-62. Generated File Modified Manually”?",
-      "scope": null,
+      "reviewQuestion": "Has any committed SVG diverged from its TeX source, given that the incremental build skips any artifact newer than its source?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run audit:diagram-quality",
+          "result": "Manual edits are possible but bounded: the TeX source is authoritative, audit:diagrams reports 0 structural findings and 0 temporary build files, and diagrams:force rebuilds everything. The mtime rule in build-diagrams.sh means a hand-edited artifact is preserved silently rather than flagged, which is accepted while diagrams remain reviewed visually."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-63",
@@ -2022,13 +2052,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-63. Artifact Naming by Display Title”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do artifact names still survive a post title change without breaking references?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams",
+          "result": "Artifacts are named by stable structural slugs, not display titles: diagram files use chapter and figure identifiers such as part9-01-int128-bit-layout and ch05-hierarchy-depth, and OG images are keyed by post id in the build manifest. Renaming a post title does not rename an artifact."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-64",
@@ -2041,13 +2086,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-64. No Artifact Manifest”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the asset manifest still enumerate every generated artifact after new asset types are added?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams",
+          "result": "Both pipelines carry a manifest: reports/diagrams/assets.md enumerates 1038 SVG assets against 1007 TeX sources with orphan and temp-file counts, and build-og.mjs keeps .cache/og-manifest.json keyed by a frontmatter hash plus a themes version."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-65",
@@ -2060,13 +2120,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-65. Stale Artifact Preservation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Are orphaned artifacts still surfaced when a post is deleted or renamed?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams",
+          "result": "Stale artifacts are detected rather than accumulated: build-og.mjs --prune deletes PNGs whose source post no longer exists, and audit:diagrams reports SVGs with no sibling TeX source (35) and temporary build files (0) on every run."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-66",
@@ -2079,13 +2154,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-66. Over-Aggressive Prune”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does pruning still require an explicit flag, and are imported assets still reported rather than deleted?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams",
+          "result": "Pruning cannot run by accident: --prune is opt-in and separate from the default og build, and the 35 sibling-less SVGs are reported as manual or imported assets rather than deleted, so the audit never removes what it cannot regenerate."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-67",
@@ -2098,13 +2188,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-67. Generator Version Not Recorded”?",
-      "scope": null,
+      "reviewQuestion": "Would a xelatex or pdftocairo upgrade be noticed, given that cached SVGs are invalidated by modification time rather than by toolchain version?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run audit:diagram-quality",
+          "result": "Version recording is partial and the gap is stated: build-og.mjs folds a themes version into its manifest hash, while build-diagrams.sh records no xelatex or pdftocairo version and invalidates only on source and design-token modification times. diagrams:force is the manual escape hatch, and the accepted blast radius is limited because SVGs are committed and reviewed."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-68",
@@ -2117,13 +2222,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-68. Non-Deterministic Asset Generation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does regenerating an unchanged source still produce byte-identical output after a renderer change?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run verify:release",
+          "result": "Generation is reproducible for equal inputs: build-og.mjs re-renders only when the frontmatter hash or themes version changes, so identical input yields a cache hit, and sampled SVG output carries no creation date or timestamp metadata that would differ between runs."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-69",
@@ -2137,8 +2257,8 @@
         ]
       },
       "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-69. Generated Asset Review Blind Spot”?",
+      "nextAction": "implementation",
+      "reviewQuestion": "audit:diagram-accessibility reports that 1038 of 1038 SVGs are missing a <title> or <desc>, and fix:diagram-accessibility --apply has never been run; audit:diagram-quality lists 71 heuristic candidates. Should the accessibility metadata be backfilled from the TeX captions in one reviewed pass, and what keeps new diagrams from re-entering the same blind spot?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
@@ -2155,13 +2275,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-70. Asset Pipeline Owns Publishing”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does publishing still succeed without a TeX toolchain present on the runner?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The asset pipeline does not own publishing: deploy.yml installs and runs verify:release only, the TikZ build never runs in CI because SVGs are committed pre-built, and OG generation is incremental and cached so publication is not gated on a full asset rebuild."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-71",
@@ -2175,8 +2310,8 @@
         ]
       },
       "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-71. Publish-and-Forget”?",
+      "nextAction": "implementation",
+      "reviewQuestion": "audit:lifecycle inventories 3387 posts of which 0 carry lastVerified, 0 carry evidenceStatus, and 3387 fall in needsReview, so no post records that it was ever revisited even though the content-derived freshness audits run. Which posts warrant a recorded review state, and can it be populated without a bulk frontmatter rewrite?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
@@ -2193,13 +2328,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-72. Date-Based Review Only”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do review signals still come from content comparison rather than from elapsed time alone?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run audit:content-readiness && npm run audit:upstream",
+          "result": "Review is not date-driven: freshness comes from upstream commit drift, cited-symbol existence, prose future tense, fact density, image coverage, and series integrity. audit:roadmap is the only date-based check and is scoped to review dates of SKUs registered in known-facts.yaml."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-73",
@@ -2212,13 +2362,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-73. No Content Ownership”?",
-      "scope": null,
+      "reviewQuestion": "Do the 3387 inventoried posts still have a single accountable maintainer, or have external contributors made ownership ambiguous?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run audit:lifecycle",
+          "result": "Ownership is unambiguous in a single-maintainer repository, so the failure this item targets, content that no one is accountable for, does not currently apply. The acceptance expires if additional maintainers or external contributions arrive."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-74",
@@ -2231,13 +2396,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-74. New Content Before Existing Debt”?",
-      "scope": null,
+      "reviewQuestion": "Is the existing-debt queue still consulted before new chapters are written, given that no gate enforces the order?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run audit:content-readiness && npm run check:duplicate -- --help",
+          "result": "Existing debt is ranked before it is chosen: audit:content-readiness emits a priority queue of staleness, fact-density, draft-only series, and visual-aid candidates, and CLAUDE.md section 14 routes each lifecycle stage to its tool. No gate blocks new content on outstanding debt, so ordering stays an editorial judgement and is accepted as such."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-75",
@@ -2250,13 +2430,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-75. No Merge Policy for Similar Articles”?",
-      "scope": null,
+      "reviewQuestion": "When two published articles are found to overlap, which procedure decides whether they merge, cross-link, or stay separate?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run check:duplicate -- --help",
+          "result": "Duplication is prevented at creation time rather than resolved after the fact: check-duplicate-topic.py scores title, tag, description, and body overlap with a documented threshold and a non-zero exit, and CLAUDE.md section 14 places it at the structural-integrity stage. No written procedure covers merging two already-published overlapping articles, which is accepted while cross-linking remains the default remedy."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-76",

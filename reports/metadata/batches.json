@@ -110,158 +110,6 @@
       "source": "metadata-02.md",
       "items": [
         {
-          "id": "AP-M-61",
-          "title": "M-61. Source–Artifact Ambiguity",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-61",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-61. Source–Artifact Ambiguity”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-62",
-          "title": "M-62. Generated File Modified Manually",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-62",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-62. Generated File Modified Manually”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-63",
-          "title": "M-63. Artifact Naming by Display Title",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-63",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-63. Artifact Naming by Display Title”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-64",
-          "title": "M-64. No Artifact Manifest",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-64",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-64. No Artifact Manifest”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-65",
-          "title": "M-65. Stale Artifact Preservation",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-65",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-65. Stale Artifact Preservation”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-66",
-          "title": "M-66. Over-Aggressive Prune",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-66",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-66. Over-Aggressive Prune”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-67",
-          "title": "M-67. Generator Version Not Recorded",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-67",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-67. Generator Version Not Recorded”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-68",
-          "title": "M-68. Non-Deterministic Asset Generation",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-68",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-68. Non-Deterministic Asset Generation”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
           "id": "AP-M-69",
           "title": "M-69. Generated Asset Review Blind Spot",
           "priority": "P1",
@@ -273,27 +121,8 @@
             ]
           },
           "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-69. Generated Asset Review Blind Spot”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-70",
-          "title": "M-70. Asset Pipeline Owns Publishing",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-70",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-70. Asset Pipeline Owns Publishing”?",
+          "nextAction": "implementation",
+          "reviewQuestion": "audit:diagram-accessibility reports that 1038 of 1038 SVGs are missing a <title> or <desc>, and fix:diagram-accessibility --apply has never been run; audit:diagram-quality lists 71 heuristic candidates. Should the accessibility metadata be backfilled from the TeX captions in one reviewed pass, and what keeps new diagrams from re-entering the same blind spot?",
           "scope": null,
           "dependsOn": [],
           "evidence": [],
@@ -311,95 +140,13 @@
             ]
           },
           "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-71. Publish-and-Forget”?",
+          "nextAction": "implementation",
+          "reviewQuestion": "audit:lifecycle inventories 3387 posts of which 0 carry lastVerified, 0 carry evidenceStatus, and 3387 fall in needsReview, so no post records that it was ever revisited even though the content-derived freshness audits run. Which posts warrant a recorded review state, and can it be populated without a bulk frontmatter rewrite?",
           "scope": null,
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
         },
-        {
-          "id": "AP-M-72",
-          "title": "M-72. Date-Based Review Only",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-72",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-72. Date-Based Review Only”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-73",
-          "title": "M-73. No Content Ownership",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-73",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-73. No Content Ownership”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-74",
-          "title": "M-74. New Content Before Existing Debt",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-74",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-74. New Content Before Existing Debt”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-75",
-          "title": "M-75. No Merge Policy for Similar Articles",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-02.md#ap-m-75",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-75. No Merge Policy for Similar Articles”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        }
-      ]
-    },
-    {
-      "id": "metadata-03",
-      "source": "metadata-02.md",
-      "items": [
         {
           "id": "AP-M-76",
           "title": "M-76. Deletion Aversion",
@@ -646,7 +393,13 @@
           "dependsOn": [],
           "evidence": [],
           "residualRisk": null
-        },
+        }
+      ]
+    },
+    {
+      "id": "metadata-03",
+      "source": "metadata-02.md",
+      "items": [
         {
           "id": "AP-M-89",
           "title": "M-89. No Baseline Before Refactor",
