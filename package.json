@@ -120,6 +120,7 @@
     "audit:staleness:all": "python3 scripts/audit-prose-staleness.py --include-drafts --json reports/content-readiness/staleness.json",
     "audit:links:fix": "python3 scripts/resolve-internal-links.py --apply",
     "audit:series": "python3 scripts/audit-series-integrity.py",
+    "audit:series-structure": "node scripts/audit-series-structure.mjs",
     "audit:images": "python3 scripts/audit-image-coverage.py --top 30",
     "audit:roadmap": "python3 scripts/audit-roadmap-staleness.py",
     "audit:staleness": "python3 scripts/audit-prose-staleness.py",

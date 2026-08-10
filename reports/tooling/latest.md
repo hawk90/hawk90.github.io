@@ -1,5 +1,5 @@
 # Tooling audit report
 
-- Script files scanned: 144
-- npm scripts declared: 102
+- Script files scanned: 145
+- npm scripts declared: 103
 - Blocking findings: 0
