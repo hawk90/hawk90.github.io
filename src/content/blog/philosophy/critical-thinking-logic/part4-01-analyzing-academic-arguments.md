@@ -2,7 +2,7 @@
 title: "Part 4-1: 학술 / 기술 글의 논증 구조 분석"
 date: 2026-05-14T14:00:00
 description: "논문 / 기술 문서의 논증 추출. thesis / 근거 / 반론 식별."
-tags: [Logic, Academic Writing, Application]
+tags: [Logic, academic-writing, Application]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 14
 draft: true

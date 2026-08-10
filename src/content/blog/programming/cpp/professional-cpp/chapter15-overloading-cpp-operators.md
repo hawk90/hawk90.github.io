@@ -2,7 +2,7 @@
 title: "Ch 15: Overloading C++ Operators"
 date: 2026-05-05T15:00:00
 description: "연산자 오버로드 — 산술 / 비교 / 첨자 / 함수 호출. spaceship (C++20)."
-tags: [C++, Operator Overloading]
+tags: [C++, operator-overloading]
 series: "전문가를 위한 C++"
 seriesOrder: 15
 draft: true

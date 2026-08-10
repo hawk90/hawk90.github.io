@@ -2,7 +2,7 @@
 title: "Part 3-5: page cache"
 date: 2026-05-12T15:00:00
 description: "파일 시스템 캐시 — read / write 가속. address_space. write-back."
-tags: [Linux, Kernel, Memory, Page Cache]
+tags: [Linux, Kernel, Memory, page-cache]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 15
 draft: true

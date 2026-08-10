@@ -7,11 +7,11 @@
 - Tag URL keys in published content: 1465
 - Tag pages actually generated (2+ published posts): 468
 - Keys below the page threshold (no page generated, by design): 997
-- Keys appearing only in drafts (will render when published): 3311
+- Keys appearing only in drafts (will render when published): 3305
 
 - **Concepts split across different URLs: 10**
 - Label inconsistencies inside one URL: 30
-- Tags containing whitespace: 11
+- Tags containing whitespace: 0
 
 ## Concepts split across different URLs
 
@@ -64,17 +64,3 @@ label depends on which spelling the build happened to see first.
 - `/tags/sbom` (2) — `SBOM`, `sbom`
 - `/tags/scripting` (2) — `Scripting`, `scripting`
 - `/tags/tui` (2) — `TUI`, `tui`
-
-## Tags containing whitespace
-
-- `embedded security`
-- `firmware update`
-- `iec 62443`
-- `power analysis`
-- `remote debug`
-- `reverse engineering`
-- `root of trust`
-- `supply chain`
-- `threat model`
-- `threat modeling`
-- `timing attack`

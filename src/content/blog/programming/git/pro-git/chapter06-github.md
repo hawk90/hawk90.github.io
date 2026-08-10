@@ -2,7 +2,7 @@
 title: "Ch 6: GitHub"
 date: 2026-05-17T06:00:00
 description: "GitHub 워크플로우 — fork / PR / 코드 리뷰 / Issues / Actions."
-tags: [Git, GitHub, Pull Request]
+tags: [Git, GitHub, pull-request]
 series: "Pro Git"
 seriesOrder: 6
 draft: true

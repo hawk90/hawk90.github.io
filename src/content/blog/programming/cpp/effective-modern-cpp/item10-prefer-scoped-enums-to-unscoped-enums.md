@@ -2,7 +2,7 @@
 title: "항목 10: 범위 없는 enum보다 범위 있는 enum(`enum class`)을 선호하라"
 date: 2026-05-04T10:00:00
 description: "enum class가 unscoped enum의 3가지 문제(이름 오염, 암묵 정수 변환, 전방 선언 불가)를 모두 해결."
-tags: [C++, Enum, modern-cpp, Scoped Enum]
+tags: [C++, Enum, modern-cpp, scoped-enum]
 series: "Effective Modern C++"
 seriesOrder: 10
 draft: true

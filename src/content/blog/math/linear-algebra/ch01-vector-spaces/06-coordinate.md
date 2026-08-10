@@ -2,7 +2,7 @@
 title: "1.6 좌표(coordinate)"
 date: 2026-05-15T06:56:16
 description: "§1.5 에서 모든 유한차원 공간이 기저(basis)를 가진다는 사실을 보았다. 이제 그 기저로 추상에 옷을 입혀 숫자 세계로 끌어내린다."
-tags: [linear-algebra, Mathematics, Hoffman & Kunze]
+tags: [linear-algebra, Mathematics, hoffman-kunze]
 series: "Linear Algebra"
 seriesOrder: 106
 draft: true

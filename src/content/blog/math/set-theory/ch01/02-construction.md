@@ -2,7 +2,7 @@
 title: "1.2 더 큰 집합을 짓는 법"
 date: 2026-05-15T15:51:06
 description: "짝 공리로는 두 개씩만 묶을 수 있다."
-tags: ["Set Theory", "Mathematics", "Enderton"]
+tags: [set-theory, Mathematics, Enderton]
 series: "Set Theory"
 seriesOrder: 102
 draft: true

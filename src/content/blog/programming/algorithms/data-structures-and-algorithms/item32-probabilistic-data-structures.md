@@ -2,7 +2,7 @@
 title: "DSA 32: 확률적 자료구조 — Bloom Filter, Count-Min Sketch, HyperLogLog"
 date: 2026-05-15T08:00:00
 description: "정확성 약간 포기 + 메모리 폭소 — 빅데이터 시대의 필수 도구."
-tags: [Data Structure, Algorithm, Probabilistic, Bloom Filter, HyperLogLog]
+tags: [data-structure, Algorithm, Probabilistic, bloom-filter, HyperLogLog]
 series: "Data Structures and Algorithms"
 seriesOrder: 32
 draft: true

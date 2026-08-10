@@ -2,7 +2,7 @@
 title: "DSA 12: 힙 / 우선순위 큐"
 date: 2026-05-15T12:00:00
 description: "완전 이진 트리 + 부모-자식 순서 = 힙. 우선순위 큐의 표준 구현."
-tags: [Data Structure, Algorithm, Heap, priority-queue]
+tags: [data-structure, Algorithm, Heap, priority-queue]
 series: "Data Structures and Algorithms"
 seriesOrder: 12
 draft: true

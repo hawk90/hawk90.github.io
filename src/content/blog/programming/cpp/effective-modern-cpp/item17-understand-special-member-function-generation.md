@@ -2,7 +2,7 @@
 title: "항목 17: 특수 멤버 함수의 자동 생성 규칙을 이해하라"
 date: 2026-05-04T17:00:00
 description: "C++11+ move 생성자/대입 추가 — 자동 생성 규칙의 미묘한 함정과 Rule of Zero/Five."
-tags: [C++, Special Member Functions, Move Semantics, modern-cpp]
+tags: [C++, special-member-functions, move-semantics, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 17
 draft: true

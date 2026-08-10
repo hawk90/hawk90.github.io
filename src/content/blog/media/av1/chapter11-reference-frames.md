@@ -2,7 +2,7 @@
 title: "Ch 11: 참조 프레임"
 date: 2026-05-16T12:00:00
 description: "AV1의 참조 프레임 시스템 — 8개 슬롯, 7개 명명된 참조, ALTREF, refresh_frame_flags."
-tags: [AV1, Video, Codec, Reference Frame, ALTREF]
+tags: [AV1, Video, Codec, reference-frame, ALTREF]
 series: "AV1"
 seriesOrder: 11
 draft: true

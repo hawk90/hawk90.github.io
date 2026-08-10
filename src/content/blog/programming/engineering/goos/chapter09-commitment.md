@@ -2,7 +2,7 @@
 title: "Ch 9: Commitment: The Sniper Project"
 date: 2026-05-10T09:00:00
 description: "책의 Worked Example 소개 — 경매 sniper 시스템. Part 3 시작."
-tags: [TDD, case-study, Auction Sniper]
+tags: [TDD, case-study, auction-sniper]
 series: "Growing Object-Oriented Software"
 seriesOrder: 9
 draft: true

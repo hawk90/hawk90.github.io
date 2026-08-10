@@ -2,7 +2,7 @@
 title: "항목 54: 표준 라이브러리(TR1 포함)에 익숙해져라"
 date: 2026-05-04T06:00:00
 description: "C++98 표준 라이브러리, TR1, 그리고 C++11~23에서 추가된 항목들 — 직접 만들기 전에 표준 검토."
-tags: [C++, Effective C++, standard-library, TR1]
+tags: [C++, effective-c++, standard-library, TR1]
 series: "Effective C++"
 seriesOrder: 54
 draft: true

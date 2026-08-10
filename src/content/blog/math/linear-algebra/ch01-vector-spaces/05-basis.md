@@ -2,7 +2,7 @@
 title: "1.5 기저(basis)와 차원(dimension)"
 date: 2026-05-15T06:54:33
 description: "1장의 중심. 여기서 만나는 사실 하나가 1장 전체를 묶어 준다 — 기저는 어떻게 잡아도 같은 크기다."
-tags: [linear-algebra, Mathematics, Hoffman & Kunze]
+tags: [linear-algebra, Mathematics, hoffman-kunze]
 series: "Linear Algebra"
 seriesOrder: 105
 draft: true

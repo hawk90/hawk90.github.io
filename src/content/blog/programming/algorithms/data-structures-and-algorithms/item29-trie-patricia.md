@@ -2,7 +2,7 @@
 title: "DSA 29: Trie / Patricia"
 date: 2026-05-15T05:00:00
 description: "문자열을 문자 단위로 트리에 — 접두사 검색·자동 완성의 표준."
-tags: [Data Structure, Algorithm, Trie, String]
+tags: [data-structure, Algorithm, Trie, String]
 series: "Data Structures and Algorithms"
 seriesOrder: 29
 draft: true

@@ -5,10 +5,10 @@
   "publishedUrlKeys": 1465,
   "renderedTagPages": 468,
   "keysBelowPageThreshold": 997,
-  "keysOnlyInDrafts": 3311,
+  "keysOnlyInDrafts": 3305,
   "conceptSplits": 10,
   "labelInconsistencies": 30,
-  "tagsWithWhitespace": 11,
+  "tagsWithWhitespace": 0,
   "splits": [
     {
       "concept": "cpp",
@@ -393,17 +393,5 @@
       ]
     }
   ],
-  "whitespaceTags": [
-    "embedded security",
-    "firmware update",
-    "iec 62443",
-    "power analysis",
-    "remote debug",
-    "reverse engineering",
-    "root of trust",
-    "supply chain",
-    "threat model",
-    "threat modeling",
-    "timing attack"
-  ]
+  "whitespaceTags": []
 }

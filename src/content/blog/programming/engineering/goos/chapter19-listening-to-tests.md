@@ -2,7 +2,7 @@
 title: "Ch 19: Listening to the Tests"
 date: 2026-05-10T12:00:00
 description: "테스트가 어렵다 = 디자인이 어렵다. 신호 / 해석 / 액션."
-tags: [TDD, Test Smells]
+tags: [TDD, test-smells]
 series: "Growing Object-Oriented Software"
 seriesOrder: 19
 draft: true

@@ -2,7 +2,7 @@
 title: "항목 11: operator=에서 자기 대입을 처리하라"
 date: 2026-05-04T11:00:00
 description: "x = x; 자기 대입 — 별칭으로도 발생. identity check / 순서 변경 / copy-and-swap의 트레이드오프."
-tags: [C++, Effective C++, Operator Overloading, exception-safety]
+tags: [C++, effective-c++, operator-overloading, exception-safety]
 series: "Effective C++"
 seriesOrder: 11
 draft: true
