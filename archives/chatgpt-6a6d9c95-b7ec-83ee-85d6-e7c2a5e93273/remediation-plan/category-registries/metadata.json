@@ -2258,7 +2258,7 @@
       },
       "disposition": "unassessed",
       "nextAction": "implementation",
-      "reviewQuestion": "audit:diagram-accessibility reports that 1038 of 1038 SVGs are missing a <title> or <desc>, and fix:diagram-accessibility --apply has never been run; audit:diagram-quality lists 71 heuristic candidates. Should the accessibility metadata be backfilled from the TeX captions in one reviewed pass, and what keeps new diagrams from re-entering the same blind spot?",
+      "reviewQuestion": "The previous review question assumed 1038 SVGs needed internal <title>/<desc>; that premise was wrong, because every diagram is embedded through <img> and the alt attribute is the accessible name. Corrected measurement: alt coverage is 837 of 837 references, 1 reference is broken (embedded/hardware/hbm/chapter09-cxl-mem.md points at a missing ch09-cxl-mem-tier.svg on a published post), and 223 SVGs are unreferenced. Should the broken diagram be authored or its reference removed, and are the unreferenced artifacts retired or kept as imported assets?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],

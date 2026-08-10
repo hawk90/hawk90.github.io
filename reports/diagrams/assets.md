@@ -3,46 +3,11 @@
 - TeX sources: 1007
 - SVG assets: 1038
 - Structural findings: 0
-- Accessibility findings: 1038
 - Temporary build files: 0
 - SVGs without a sibling TeX source (manual/imported assets): 35
 
 ## Structural findings
 
-
-## Accessibility findings
-
-- public/images/blog/abseil/diagrams/part1-02-design-philosophy.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part10-01-absl-hash-value.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part14-01-cleanup-raii.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part15-01-cord-tree.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part16-02-crc32c-hardware.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part3-01-status-codes.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part3-02-status-or-states.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part4-01-string-view-lifetime.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part4-06-str-format-spec.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part5-01-flat-hash-map-layout.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part5-04-btree-map-node.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part5-05-fixed-array-stack.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part5-06-inlined-vector-soo.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part5-07-swiss-table-internals.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part6-01-mutex-vs-std-perf.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part6-05-mutex-tsa-flow.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part7-01-time-vs-chrono.svg: missing <title>/<desc>
-- public/images/blog/abseil/diagrams/part9-01-int128-bit-layout.svg: missing <title>/<desc>
-- public/images/blog/autosar-cpp/diagrams/ch05-hierarchy-depth.svg: missing <title>/<desc>
-- public/images/blog/av1/chapter0/fig-0-1-resolution.svg: missing <title>/<desc>
-- public/images/blog/av1/chapter0/fig-0-2-rgb-cube.svg: missing <title>/<desc>
-- public/images/blog/av1/chapter0/fig-0-3-ycbcr-channels.svg: missing <title>/<desc>
-- public/images/blog/av1/chapter0/fig-0-4-chroma-subsampling.svg: missing <title>/<desc>
-- public/images/blog/av1/chapter0/fig-0-5-frame-diff.svg: missing <title>/<desc>
-- public/images/blog/av1/chapter0/fig-0-6-bitrate-chart.svg: missing <title>/<desc>
-- public/images/blog/av1/diagrams/ch00-banding.svg: missing <title>/<desc>
-- public/images/blog/av1/diagrams/ch00-pixel-grid.svg: missing <title>/<desc>
-- public/images/blog/av1/diagrams/ch00-progressive-interlaced.svg: missing <title>/<desc>
-- public/images/blog/av1/diagrams/ch00-temporal-redundancy.svg: missing <title>/<desc>
-- public/images/blog/av1/diagrams/ch00-ycbcr-420-layout.svg: missing <title>/<desc>
-- … +1008 more
 
 ## Orphan SVG candidates
 
@@ -82,4 +47,4 @@
 - public/images/blog/set-theory/ch01/von-neumann.svg
 - public/images/blog/set-theory/ch01/zfc-comparison.svg
 
-> Accessibility metadata is reported without rewriting SVGs. Use an explicit reviewed migration before adding titles/descriptions in bulk.
+> Accessibility lives at the reference site: see reports/diagrams/references.md.

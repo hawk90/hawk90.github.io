@@ -1,7 +1,7 @@
 # Tooling command overlap
 
-- Package scripts: 100
-- Shared command profiles: 8
+- Package scripts: 99
+- Shared command profiles: 7
 - Unclassified profiles: 0
 
 Shared command profiles are not automatically duplicates. Audit/gate and preview/apply variants are intentional; unclassified profiles require review before adding another alias.
@@ -17,10 +17,6 @@ Shared command profiles are not automatically duplicates. Audit/gate and preview
 ## Expected variant — audit:classification, gate:classification
 
 - Normalized command: `node scripts/audit-content-classification.mjs`
-
-## Expected variant — audit:diagram-accessibility, fix:diagram-accessibility
-
-- Normalized command: `node scripts/audit-svg-accessibility.mjs`
 
 ## Expected variant — audit:tooling, gate:tooling
 

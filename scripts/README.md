@@ -8,9 +8,8 @@ All diagrams live as `.tex` next to their compiled `.svg` under `public/images/b
 npm run diagrams         # incremental — only rebuild changed .tex
 npm run diagrams:force   # full rebuild
 npm run diagrams:watch   # auto-rebuild on .tex save (requires fswatch)
-npm run audit:diagrams   # verify .tex/.svg structure and report accessibility gaps
-npm run audit:diagram-accessibility # read-only title/desc metadata check
-npm run fix:diagram-accessibility   # add fallback metadata only with explicit apply
+npm run audit:diagrams   # verify .tex/.svg structure and orphan artifacts
+npm run audit:diagram-accessibility # alt coverage, broken refs, unreferenced SVGs
 npm run review:diagrams  # build a human review sheet for visual candidates
 npm run audit:diagram-quality # rank palette/effect candidates for visual review
 
@@ -28,6 +27,13 @@ import Diagram from '@components/blog/Diagram.astro';
 <Diagram src="dsa/diagrams/item20-quicksort-partition" alt="Quicksort partition" />
 <Diagram src="gof/relationships" alt="GoF 23 patterns" caption="패턴 관계도" />
 ```
+
+The `alt` text is the diagram's entire accessibility surface. Both embedding
+paths render `<img src="...svg">`, and a browser loading an SVG through `<img>`
+never exposes the file's internal DOM to assistive technology, so a `<title>` or
+`<desc>` inside the `.svg` is not announced. `audit:diagram-accessibility`
+therefore checks alt coverage at the reference site along with broken references
+and unreferenced artifacts; it does not inspect SVG internals and never writes.
 
 The `src` is the path under `/images/blog/`, with or without `.svg`.
 
