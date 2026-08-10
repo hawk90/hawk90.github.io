@@ -9,101 +9,6 @@
       "source": "metadata-01.md",
       "items": [
         {
-          "id": "AP-M-46",
-          "title": "M-46. Unbounded Plugin Stack",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-46",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-46. Unbounded Plugin Stack”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-47",
-          "title": "M-47. Major Upgrade by Habit",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-47",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-47. Major Upgrade by Habit”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-48",
-          "title": "M-48. Frozen Dependencies Forever",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-48",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-48. Frozen Dependencies Forever”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-49",
-          "title": "M-49. Lockfile Without Reproducibility",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-49",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-49. Lockfile Without Reproducibility”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-50",
-          "title": "M-50. Vulnerability Scanner as Upgrade Bot",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-50",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-50. Vulnerability Scanner as Upgrade Bot”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
           "id": "AP-M-51",
           "title": "M-51. README as Marketing Copy",
           "priority": "P1",
@@ -115,27 +20,8 @@
             ]
           },
           "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-51. README as Marketing Copy”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-52",
-          "title": "M-52. Feature List Without Ownership",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-52",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-52. Feature List Without Ownership”?",
+          "nextAction": "implementation",
+          "reviewQuestion": "CHANGELOG records README, LICENSE, and CHANGELOG as written for marketplace listings, but the repository now operates as a personal blog with 100 package scripts and a publish gate. Should the README serve the theme audience, the operating audience, or split into two documents?",
           "scope": null,
           "dependsOn": [],
           "evidence": [],
@@ -153,65 +39,8 @@
             ]
           },
           "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-53. Stale Setup Guide”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-54",
-          "title": "M-54. Architecture in Comments Only",
-          "priority": "P1",
-          "effort": "L",
-          "source": {
-            "file": "metadata-01.md#ap-m-54",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-54. Architecture in Comments Only”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-55",
-          "title": "M-55. ADR Without Consequences",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-55",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-55. ADR Without Consequences”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-56",
-          "title": "M-56. ADR as Immutable Law",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-56",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-56. ADR as Immutable Law”?",
+          "nextAction": "implementation",
+          "reviewQuestion": "README states Astro 6 while package.json depends on astro ^7.1.6, and its Scripts table lists 6 of 100 scripts without the audit:gate step that CLAUDE.md requires before publishing. Which setup path is the supported one, and what keeps the stated versions in step with the manifest?",
           "scope": null,
           "dependsOn": [],
           "evidence": [],
@@ -229,8 +58,8 @@
             ]
           },
           "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-57. Documentation Duplication”?",
+          "nextAction": "implementation",
+          "reviewQuestion": "The script surface is described in README.md, scripts/README.md, and CLAUDE.md section 14, and the README copy has already drifted. Which of the three is canonical, and can the other two reference it instead of restating it?",
           "scope": null,
           "dependsOn": [],
           "evidence": [],
@@ -248,27 +77,8 @@
             ]
           },
           "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-58. No Operational Runbook”?",
-          "scope": null,
-          "dependsOn": [],
-          "evidence": [],
-          "residualRisk": null
-        },
-        {
-          "id": "AP-M-59",
-          "title": "M-59. No Content Authoring Guide",
-          "priority": "P1",
-          "effort": "M",
-          "source": {
-            "file": "metadata-01.md#ap-m-59",
-            "messageIds": [
-              "f181338c-9c17-48e6-8abd-1c47ae2559d6"
-            ]
-          },
-          "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-59. No Content Authoring Guide”?",
+          "nextAction": "implementation",
+          "reviewQuestion": "Deployment and rollback steps exist only inside per-phase remediation packets, not as a standing runbook. What is the minimum operational procedure a reader needs when a deploy fails or a published page must be reverted?",
           "scope": null,
           "dependsOn": [],
           "evidence": [],
@@ -286,8 +96,8 @@
             ]
           },
           "disposition": "unassessed",
-          "nextAction": "manual-review",
-          "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-60. Documentation Without Deletion”?",
+          "nextAction": "implementation",
+          "reviewQuestion": "The CHANGELOG Unreleased section still lists theme-marketplace work from the 1.0.0 era that was never released or withdrawn. Should those entries ship, move to a historical note, or be deleted?",
           "scope": null,
           "dependsOn": [],
           "evidence": [],

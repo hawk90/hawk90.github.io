@@ -2,26 +2,16 @@
 
 - Category state: baseline_established
 - Dependencies not complete: none
-- Unassessed items: 45
+- Unassessed items: 35
 - Maximum batch size: 15
 - Batches: 3
 
 ## metadata-01 — metadata-01.md
 
-- AP-M-46 (P1, M) — M-46. Unbounded Plugin Stack
-- AP-M-47 (P1, M) — M-47. Major Upgrade by Habit
-- AP-M-48 (P1, M) — M-48. Frozen Dependencies Forever
-- AP-M-49 (P1, M) — M-49. Lockfile Without Reproducibility
-- AP-M-50 (P1, M) — M-50. Vulnerability Scanner as Upgrade Bot
 - AP-M-51 (P1, M) — M-51. README as Marketing Copy
-- AP-M-52 (P1, M) — M-52. Feature List Without Ownership
 - AP-M-53 (P1, M) — M-53. Stale Setup Guide
-- AP-M-54 (P1, L) — M-54. Architecture in Comments Only
-- AP-M-55 (P1, M) — M-55. ADR Without Consequences
-- AP-M-56 (P1, M) — M-56. ADR as Immutable Law
 - AP-M-57 (P1, M) — M-57. Documentation Duplication
 - AP-M-58 (P1, M) — M-58. No Operational Runbook
-- AP-M-59 (P1, M) — M-59. No Content Authoring Guide
 - AP-M-60 (P1, M) — M-60. Documentation Without Deletion
 
 ## metadata-02 — metadata-02.md

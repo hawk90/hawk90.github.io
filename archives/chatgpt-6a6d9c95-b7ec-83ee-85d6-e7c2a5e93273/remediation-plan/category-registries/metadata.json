@@ -1564,13 +1564,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-46. Unbounded Plugin Stack”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does every remark/rehype plugin and Shiki grammar in astro.config.mjs still have a used-by-content justification after new fence labels appear?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run verify:release",
+          "result": "The plugin stack is bounded and justified in place: astro.config.mjs pins the Shiki grammar bundle to 23 languages against a ~200-language default with a stated heap reason, and the eight remark/rehype plugins each back a documented authoring feature (math, directives, callouts, slugs, autolinks, lazy images). The manifest carries 21 runtime and 3 dev dependencies."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-47",
@@ -1583,13 +1597,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-47. Major Upgrade by Habit”?",
-      "scope": null,
+      "reviewQuestion": "If an automated upgrade bot is ever added, does a major version bump still require an explicit reviewed commit rather than an auto-merge?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run verify:release",
+          "result": "No Renovate or Dependabot configuration exists, so no upgrade lands by habit; every version change is an explicit manifest or lockfile edit reviewed in its own commit. The cost of manual upgrades is accepted for a single-maintainer repository."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-48",
@@ -1602,13 +1630,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-48. Frozen Dependencies Forever”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the weekly advisory cron still run, and is there a review point for dependencies that are outdated without being vulnerable?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:dependencies && npm run verify:release",
+          "result": "Dependencies are not frozen: ci.yml carries a weekly cron that re-checks advisories and the production build while the repository is idle, and the dompurify 3.4.12 to 3.4.13 and nanoid 3.3.16 to 3.3.18 bumps were applied from that signal."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-49",
@@ -1621,13 +1663,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-49. Lockfile Without Reproducibility”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do CI, deployment, and local installs still resolve identically from the committed lockfile after a Node or npm major change?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The lockfile is reproducible: lockfileVersion 3 is committed, both ci.yml and deploy.yml install with npm ci, and the runtime is pinned by engines node >=22.12.0, .nvmrc, and workflow node-version 22. A local npm ci reproduced the tree and the release gate passed."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-50",
@@ -1640,13 +1696,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-50. Vulnerability Scanner as Upgrade Bot”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the dependency gate still block on findings without any path that upgrades packages automatically?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:dependencies && npm run verify:release",
+          "result": "The scanner reports and blocks but never upgrades: gate:dependencies runs npm audit --omit=dev --audit-level=high as a separate release gate, installs use --no-audit, and the two advisories found were resolved by a reviewed minimal lockfile patch rather than npm audit fix, which would also have dropped unrelated libc platform metadata."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-51",
@@ -1660,8 +1730,8 @@
         ]
       },
       "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-51. README as Marketing Copy”?",
+      "nextAction": "implementation",
+      "reviewQuestion": "CHANGELOG records README, LICENSE, and CHANGELOG as written for marketplace listings, but the repository now operates as a personal blog with 100 package scripts and a publish gate. Should the README serve the theme audience, the operating audience, or split into two documents?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
@@ -1678,13 +1748,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-52. Feature List Without Ownership”?",
-      "scope": null,
+      "reviewQuestion": "Do the README feature claims still have a single accountable maintainer, or have external contributors made ownership ambiguous?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Ownership is unambiguous in a single-maintainer repository, so the failure this item targets, features that no one is accountable for, does not currently apply. The acceptance expires if additional maintainers or external contributions arrive."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-53",
@@ -1698,8 +1781,8 @@
         ]
       },
       "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-53. Stale Setup Guide”?",
+      "nextAction": "implementation",
+      "reviewQuestion": "README states Astro 6 while package.json depends on astro ^7.1.6, and its Scripts table lists 6 of 100 scripts without the audit:gate step that CLAUDE.md requires before publishing. Which setup path is the supported one, and what keeps the stated versions in step with the manifest?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
@@ -1716,13 +1799,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-54. Architecture in Comments Only”?",
-      "scope": null,
+      "reviewQuestion": "When the src/ layer structure changes, is the reasoning still recoverable from documentation rather than from component comments alone?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Process and tooling architecture is documented outside code: CLAUDE.md section 14 maps each content lifecycle stage to its tool, scripts/README.md documents the script surface, and claude/WORKFLOW.md documents the remediation flow. The src/ component layering itself remains documented only in code and is accepted as reviewable."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-55",
@@ -1735,13 +1831,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-55. ADR Without Consequences”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does every non-unassessed remediation entry still carry residual risk and a re-review condition rather than a bare verdict?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Decision records here are the remediation registries, and .claude/rules/06-remediation-evidence.md requires consequences on every one: residual risk, a smallest-safe-change boundary, and an expiry or re-review condition for accepted decisions. audit-category-registry.mjs rejects entries missing a next action or review question."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-56",
@@ -1754,13 +1863,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-56. ADR as Immutable Law”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Can a recorded decision still be reopened from its own review question when the underlying evidence changes?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "No decision is immutable: every registry entry keeps a reviewQuestion and a nextAction so it can be reopened, accepted decisions require an expiry or re-review condition, and AP-M-31..45 were re-recorded from unassessed under the same schema."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-57",
@@ -1774,8 +1896,8 @@
         ]
       },
       "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-57. Documentation Duplication”?",
+      "nextAction": "implementation",
+      "reviewQuestion": "The script surface is described in README.md, scripts/README.md, and CLAUDE.md section 14, and the README copy has already drifted. Which of the three is canonical, and can the other two reference it instead of restating it?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
@@ -1793,8 +1915,8 @@
         ]
       },
       "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-58. No Operational Runbook”?",
+      "nextAction": "implementation",
+      "reviewQuestion": "Deployment and rollback steps exist only inside per-phase remediation packets, not as a standing runbook. What is the minimum operational procedure a reader needs when a deploy fails or a published page must be reverted?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
@@ -1811,13 +1933,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-59. No Content Authoring Guide”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the authoring guide still match the gate that enforces it after tone, structure, or visual rules change?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:gate",
+          "result": "A content authoring guide exists and is enforced: CLAUDE.md inlines .claude/rules/01 through 05 covering tone, structure, frontmatter, code blocks, visuals, linking, and quality, and lefthook runs the publish gate on staged markdown at commit and push."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-60",
@@ -1831,8 +1966,8 @@
         ]
       },
       "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-60. Documentation Without Deletion”?",
+      "nextAction": "implementation",
+      "reviewQuestion": "The CHANGELOG Unreleased section still lists theme-marketplace work from the 1.0.0 era that was never released or withdrawn. Should those entries ship, move to a historical note, or be deleted?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
