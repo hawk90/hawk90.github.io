@@ -1916,7 +1916,7 @@
       },
       "disposition": "unassessed",
       "nextAction": "implementation",
-      "reviewQuestion": "Deployment and rollback steps exist only inside per-phase remediation packets, not as a standing runbook. What is the minimum operational procedure a reader needs when a deploy fails or a published page must be reverted?",
+      "reviewQuestion": "A standing recovery runbook exists at archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md, covering recovery priority, required external evidence, and pass conditions, so the earlier claim that rollback lives only in per-phase packets was wrong. It sits inside the archive rather than a maintained operations surface, and it states that recovery has not been tested. Should it be promoted out of the archive, and which of its external controls gets exercised first?",
       "scope": null,
       "dependsOn": [],
       "evidence": [],
@@ -2156,26 +2156,23 @@
       },
       "disposition": "remediated",
       "nextAction": "verify",
-      "reviewQuestion": "Does pruning still require an explicit flag, and are imported assets still reported rather than deleted?",
+      "reviewQuestion": "Pruning runs on every build through prebuild, so the safety argument rests on the pruned artifacts being disposable. Does public/og/ remain gitignored and fully regenerable, and does anything irreplaceable ever land under it?",
       "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
             ".gitignore",
-            "scripts/build-diagrams.sh",
+            "package.json",
             "scripts/build-og.mjs",
             "scripts/audit-diagram-assets.mjs",
-            "scripts/audit-svg-accessibility.mjs",
-            "scripts/audit-diagram-quality.mjs",
-            "reports/diagrams/assets.md",
-            ".github/workflows/deploy.yml"
+            "reports/diagrams/assets.md"
           ],
-          "verification": "npm run audit:diagrams",
-          "result": "Pruning cannot run by accident: --prune is opt-in and separate from the default og build, and the 35 sibling-less SVGs are reported as manual or imported assets rather than deleted, so the audit never removes what it cannot regenerate."
+          "verification": "npm run audit:diagrams && npm run verify:release",
+          "result": "Pruning is not opt-in: prebuild runs build-og.mjs --prune, so every npm run build prunes. It is nonetheless bounded, because public/og/ is gitignored with 0 tracked files and every PNG under it is regenerable from frontmatter, deletion is keyed to the ids present in the current content set, and the diagram audit reports sibling-less SVGs rather than deleting them."
         }
       ],
-      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
+      "residualRisk": "A future artifact placed under public/og/ that is not regenerable would be deleted by any build; keep that directory limited to generated OG images."
     },
     {
       "id": "AP-M-67",
@@ -2464,13 +2461,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-76. Deletion Aversion”?",
-      "scope": null,
+      "reviewQuestion": "Has any content actually been retired under the approval-plus-evidence path, or has preservation become the only outcome the process can produce?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:lifecycle",
+          "result": "Preservation is a stated policy rather than an unexamined reflex: claude/WORKFLOW.md makes published content preservation-first and requires explicit approval plus per-document evidence before deleting, drafting, merging, or archiving. The cost is visible, with 2661 of 3387 posts held as drafts, and is accepted while the approval path stays open."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-77",
@@ -2483,13 +2494,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-77. Update Without Revalidation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does an edited document still get revalidated before it lands after hook or gate changes?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:gate && npm run verify:release",
+          "result": "Edits cannot land unvalidated: lefthook runs the publish gate and frontmatter checks on staged markdown at commit and on changed files at push, audit:gate sweeps the whole corpus, and verify:release rebuilds and re-gates in CI before deployment."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-78",
@@ -2502,13 +2529,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-78. Bulk AI Refresh”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the preview-by-default contract still hold mechanically for every script that can write to content?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:tooling && npm run audit:methodology-policy",
+          "result": "Bulk rewriting is blocked by rule and by machine: claude/WORKFLOW.md and .claude/rules/06 forbid bulk rewrite or mass drafting to clear an anti-pattern queue, frontmatter changes are script-only with preview-by-default and explicit --apply, and audit-tooling.mjs enforces that contract across 138 script files rather than trusting the convention."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-79",
@@ -2521,13 +2564,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-79. Editorial Template Lock-In”?",
-      "scope": null,
+      "reviewQuestion": "Has the standard section flow started producing interchangeable articles, or does per-article judgement still vary the structure?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:series",
+          "result": "The template is a default, not a lock: CLAUDE.md defines a standard flow and required frontmatter, but explicitly delegates paragraph flow, section splitting, and table use to per-article judgement, and two tones coexist with a documented selection table. No gate enforces section order."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-80",
@@ -2540,13 +2597,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-80. No Content Retirement Workflow”?",
-      "scope": null,
+      "reviewQuestion": "Retirement is defined as a policy but has never been exercised; when the first article is retired, does it archive with its URL intact or disappear as a draft flip?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:lifecycle",
+          "result": "A retirement decision rule exists without a worked procedure: claude/WORKFLOW.md requires explicit approval and per-document evidence, and audit-content-lifecycle.mjs already counts a reviewStatus of archived. That status is used by 0 of 3387 posts, so the de facto path is a draft flip, which removes the URL rather than archiving it. Accepted while no retirement is pending."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-81",
@@ -2559,13 +2630,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-81. Content and Platform Changes Mixed”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do content sweeps still land separately from platform changes as the repository grows?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:repository",
+          "result": "Content and platform changes are separated in practice: over the last 300 commits exactly one touches both src/content and the platform directories, and that commit is a documented content sweep. Commit subjects carry scoped prefixes such as chore(content), fix(blog), and docs."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-82",
@@ -2578,13 +2665,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-82. Giant Refactor Commit”?",
-      "scope": null,
+      "reviewQuestion": "Do the large sweeps still stay single-purpose, or has a mixed-intent commit appeared since ac24bb76 combined a rename with a date normalization?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:repository",
+          "result": "Commits are small by default and large only mechanically: the last 200 commits have a median of 3 files changed and a 90th percentile of 24, and the outliers are single-purpose script-driven sweeps such as recording topic metadata or unpublishing a series. One 685-file commit combined a chapter rename with a date normalization, which is the accepted exception."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-83",
@@ -2597,13 +2700,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-83. Formatting Noise in Semantic Change”?",
-      "scope": null,
+      "reviewQuestion": "Is a semantic content edit still readable in a diff without a formatter having rewritten the surrounding lines?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:repository",
+          "result": "Mechanical rewrites are isolated into their own commits rather than mixed into semantic edits: the ASCII-to-TikZ conversion, code-block cleanup, and broken-link repair each landed as separate batches, and no formatter runs automatically over markdown, so reformatting noise is not injected into unrelated changes. No written rule enforces the separation."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-84",
@@ -2616,13 +2735,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-84. No Rollback Plan”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do the runbook recovery priorities still match the deployment workflow, and has any of its external controls been exercised yet?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run verify:release",
+          "result": "A rollback plan exists and states its own limits: the repository recovery runbook defines the recovery priority as source first, then a readable static site with canonical URLs unchanged, then redirects and discovery, then optional integrations, and names required evidence and pass conditions per control. It declares that it is a checklist rather than proof recovery was tested, and the deployed site is a rebuildable artifact from committed source."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-85",
@@ -2635,13 +2770,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-85. Preview Not Representative”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does preview still serve the same artifact the deployment publishes after build or workflow changes?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run verify:release",
+          "result": "Preview is representative because it serves the production artifact: npm run preview serves the output of astro build, the same build that verify:release runs and that CI and deploy execute, and prebuild generates OG images on both paths. Preview still runs against a local build rather than the deployed host."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-86",
@@ -2654,13 +2805,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-86. Feature Flag Cemetery”?",
-      "scope": null,
+      "reviewQuestion": "Do the disabled configuration toggles still have a live purpose, or has a commented block outlived the integration it described?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run check",
+          "result": "Toggles are enumerated and typed rather than scattered: src/consts/config.ts holds the full set behind define* helpers, and the disabled ones carry inline instructions for enabling instead of dead code branches. Commented configuration blocks accumulate without an expiry, which is the accepted residue."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-87",
@@ -2673,13 +2838,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-87. Permanent Compatibility Layer”?",
-      "scope": null,
+      "reviewQuestion": "Does the tech-to-article type alias still have callers, and can it be retired once no content uses the legacy value?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run check && npm run gate:classification",
+          "result": "Only one compatibility shim exists and it is a single line: normalize.ts maps the legacy content type tech to article. It is bounded and typed, and is accepted rather than removed because removing it would require revalidating the affected documents."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-88",
@@ -2692,13 +2871,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-88. Release Notes Without User Impact”?",
-      "scope": null,
+      "reviewQuestion": "When the next release ships, do its notes still describe user-visible effects rather than internal refactors?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Release notes are written in user-visible terms: CHANGELOG follows Keep a Changelog and its Added and Fixed entries name reader-facing behavior such as reading mode, math scrolling, and fixed layout defects. The Unreleased section has not shipped since 1.0.0 and is tracked separately as AP-M-60."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-89",
@@ -2711,13 +2904,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-89. No Baseline Before Refactor”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Is a findings baseline still recorded before implementation once phases run less formally?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "A baseline is required before changes: claude/WORKFLOW.md orders the loop as read the packet, inspect the current implementation and record concrete findings, then implement only the named task IDs. Each phase packet carries CONTEXT, FINDINGS, CHANGES, and VERIFICATION, and the remediation graph tracks a per-category baseline state."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-90",
@@ -2730,13 +2939,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-90. Completion Defined as Code Merge”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the program still refuse to read an enabling baseline as category completion?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:remediation-graph && npm run audit:methodology-policy",
+          "result": "Completion is defined by evidence, not by a merge: the remediation graph report states that baseline_established means enabling work exists and is never category completion, WORKFLOW.md requires running the listed verification commands and forbids claiming success for a failed command, and audit-category-registry.mjs rejects any recorded decision whose evidence files or npm commands do not exist."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     }
   ]
 }
