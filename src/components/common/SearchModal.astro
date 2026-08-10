@@ -7,6 +7,10 @@ const searchSelect = t('search_select');
 const searchNavigate = t('search_navigate');
 const searchEmpty = t('search_empty');
 const searchNoResults = t('search_no_results');
+const searchNoResultsHint = t('search_no_results_hint');
+const searchClearFilter = t('search_clear_filter');
+const searchBrowsePaths = t('search_browse_paths');
+const searchBrowseArchive = t('search_browse_archive');
 const searchLoading = t('search_loading');
 const searchError = t('search_error');
 const searchResultsCount = t('search_results_count');
@@ -22,6 +26,10 @@ const filterSeriesLabel = t('search_filter_series');
   aria-labelledby="search-title"
   data-i18n-empty={searchEmpty}
   data-i18n-no-results={searchNoResults}
+  data-i18n-no-results-hint={searchNoResultsHint}
+  data-i18n-clear-filter={searchClearFilter}
+  data-i18n-browse-paths={searchBrowsePaths}
+  data-i18n-browse-archive={searchBrowseArchive}
   data-i18n-loading={searchLoading}
   data-i18n-error={searchError}
   data-i18n-results-count={searchResultsCount}
@@ -183,6 +191,10 @@ const filterSeriesLabel = t('search_filter_series');
     return {
       emptyMessage: d.i18nEmpty || 'Type to search',
       noResultsMessage: d.i18nNoResults || 'No results',
+      noResultsHint: d.i18nNoResultsHint || 'Try a different spelling or another wording.',
+      clearFilter: d.i18nClearFilter || 'Search again without the filter',
+      browsePaths: d.i18nBrowsePaths || 'Browse learning paths',
+      browseArchive: d.i18nBrowseArchive || 'Browse all posts',
       loadingMessage: d.i18nLoading || 'Loading...',
       errorMessage: d.i18nError || 'Error loading search',
       resultsCount: d.i18nResultsCount || ' results',
@@ -252,6 +264,55 @@ const filterSeriesLabel = t('search_filter_series');
       }
       messageEl.append(message);
       results.replaceChildren(messageEl);
+    }
+
+    // A dead "No results" is a dead end. Offer the ways out that actually exist:
+    // drop a filter that is hiding matches, or leave search for a browse surface.
+    function showNoResults(query: string) {
+      const wrap = document.createElement('div');
+      wrap.className = 'p-8 text-center text-[var(--color-text-muted)]';
+
+      const headline = document.createElement('div');
+      headline.textContent = i18n.noResultsMessage;
+      wrap.append(headline);
+
+      // Does the active filter explain the emptiness?
+      let unfilteredCount = 0;
+      if (currentFilter && query) {
+        unfilteredCount = searchPosts(searchIndex, { query }).length;
+      }
+
+      const hint = document.createElement('div');
+      hint.className = 'mt-2 text-sm';
+      hint.textContent = i18n.noResultsHint;
+      wrap.append(hint);
+
+      const actions = document.createElement('div');
+      actions.className = 'mt-4 flex flex-wrap items-center justify-center gap-3 text-sm';
+
+      if (unfilteredCount > 0) {
+        const retry = document.createElement('button');
+        retry.type = 'button';
+        retry.className = 'underline text-[var(--color-accent)]';
+        retry.textContent = `${i18n.clearFilter} (${unfilteredCount}${i18n.resultsCount})`;
+        retry.addEventListener('click', () => {
+          setFilter(null);
+          renderResults(input.value || '');
+          input.focus();
+        });
+        actions.append(retry);
+      }
+
+      for (const [href, label] of [['/paths', i18n.browsePaths], ['/archive', i18n.browseArchive]] as const) {
+        const link = document.createElement('a');
+        link.href = href;
+        link.className = 'underline hover:text-[var(--color-accent)]';
+        link.textContent = label;
+        actions.append(link);
+      }
+
+      wrap.append(actions);
+      results.replaceChildren(wrap);
     }
 
     function setFilter(filter: { type: 'tag' | 'series'; value: string } | null) {
@@ -339,7 +400,7 @@ const filterSeriesLabel = t('search_filter_series');
           ? { filterTag: currentFilter.value }
           : { filterSeries: currentFilter.value };
         const matches = searchPosts(searchIndex, options);
-        if (matches.length === 0) showMessage(i18n.noResultsMessage);
+        if (matches.length === 0) showNoResults('');
         else renderMatchList(matches, '');
         return;
       }
@@ -356,7 +417,7 @@ const filterSeriesLabel = t('search_filter_series');
       }
 
       const matches = searchPosts(searchIndex, options);
-      if (matches.length === 0) showMessage(i18n.noResultsMessage);
+      if (matches.length === 0) showNoResults(q);
       else renderMatchList(matches, q);
     }
 
