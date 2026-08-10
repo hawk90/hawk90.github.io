@@ -2,7 +2,7 @@
 title: "Ch 16: SerialDate 리팩토링"
 date: 2026-05-11T16:00:00
 description: "오픈소스 SerialDate 클래스의 본격 리팩토링 — 가장 긴 사례 연구. 코드 리뷰의 정석."
-tags: [CleanCode, Refactoring, Code Review, Robert Martin]
+tags: [CleanCode, Refactoring, code-review, Robert Martin]
 series: "Clean Code"
 seriesOrder: 16
 draft: true

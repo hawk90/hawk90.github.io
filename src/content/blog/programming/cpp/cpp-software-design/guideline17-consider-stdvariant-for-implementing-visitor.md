@@ -2,7 +2,7 @@
 title: "가이드라인 17: Visitor 구현에 std::variant를 고려하라"
 date: 2026-05-02T17:00:00
 description: "GoF Visitor의 모던 대안 — std::variant와 std::visit. 보일러플레이트가 없고 값 의미론을 지키며 vtable 비용도 없다."
-tags: [C++, Software Design, Visitor, std::variant, Modern C++]
+tags: [C++, Software Design, Visitor, "std::variant", modern-cpp]
 series: "C++ Software Design"
 seriesOrder: 17
 draft: true

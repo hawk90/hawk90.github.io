@@ -2,7 +2,7 @@
 title: "Ch 7: 코드 리뷰 통합"
 date: 2026-05-17T07:00:00
 description: "Pull Request / Merge Request 워크플로우. 리뷰어 / 작성자 책임. stacked PR."
-tags: [Git, Code Review, Pull Request]
+tags: [Git, code-review, Pull Request]
 series: "Git Flow"
 seriesOrder: 7
 draft: true

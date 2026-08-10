@@ -4,14 +4,14 @@
 > not raw frontmatter. Nothing here is applied automatically.
 
 - Published posts: 726 of 3387
-- Tag URL keys in published content: 1469
+- Tag URL keys in published content: 1465
 - Tag pages actually generated (2+ published posts): 468
-- Keys below the page threshold (no page generated, by design): 1001
-- Keys appearing only in drafts (will render when published): 3376
+- Keys below the page threshold (no page generated, by design): 997
+- Keys appearing only in drafts (will render when published): 3311
 
-- **Concepts split across different URLs: 14**
+- **Concepts split across different URLs: 10**
 - Label inconsistencies inside one URL: 30
-- Tags containing whitespace: 16
+- Tags containing whitespace: 11
 
 ## Concepts split across different URLs
 
@@ -19,13 +19,9 @@ One concept, two tag pages, readers landing on whichever the article chose.
 The first key holds the most posts and is the obvious merge target.
 
 - `/tags/cpp` (219) · `/tags/c++` (9) — 228 uses
-- `/tags/u-boot` (28) · `/tags/uboot` (1) — 29 uses
 - `/tags/bare-metal` (14) · `/tags/baremetal` (2) — 16 uses
-- `/tags/secure-boot` (7) · `/tags/secure boot` (1) — 8 uses
 - `/tags/device-tree` (3) · `/tags/devicetree` (3) — 6 uses
 - `/tags/riscv` (4) · `/tags/risc-v` (2) — 6 uses
-- `/tags/core-dump` (4) · `/tags/core dump` (1) — 5 uses
-- `/tags/realtime` (3) · `/tags/real-time` (1) — 4 uses
 - `/tags/async-io` (1) · `/tags/asyncio` (1) — 2 uses
 - `/tags/debug-info` (1) · `/tags/debuginfo` (1) — 2 uses
 - `/tags/hot-plug` (1) · `/tags/hotplug` (1) — 2 uses
@@ -71,18 +67,13 @@ label depends on which spelling the build happened to see first.
 
 ## Tags containing whitespace
 
-- `core dump`
 - `embedded security`
-- `fault injection`
 - `firmware update`
-- `github actions`
 - `iec 62443`
 - `power analysis`
 - `remote debug`
 - `reverse engineering`
 - `root of trust`
-- `secure boot`
-- `secure world`
 - `supply chain`
 - `threat model`
 - `threat modeling`

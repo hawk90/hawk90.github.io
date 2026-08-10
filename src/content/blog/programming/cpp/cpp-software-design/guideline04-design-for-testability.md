@@ -2,7 +2,7 @@
 title: "가이드라인 4: 테스트 가능성을 위한 디자인"
 date: 2026-05-02T04:00:00
 description: "테스트 가능성은 디자인 품질의 척도다. 의존성 주입, 인터페이스 분리, 그리고 private 멤버는 테스트 대상이 아니다."
-tags: [C++, Software Design, Testing, Dependency Injection]
+tags: [C++, Software Design, Testing, dependency-injection]
 series: "C++ Software Design"
 seriesOrder: 4
 draft: true

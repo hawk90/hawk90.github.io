@@ -2,7 +2,7 @@
 title: "가이드라인 21: 무엇을 하는가의 격리에 Command를 사용하라"
 date: 2026-05-02T21:00:00
 description: "Command 패턴은 동작을 객체로 만든다. undo / redo / queue / log / async 모두 std::function이 모던 구현이다."
-tags: [C++, Software Design, Command, Design Patterns]
+tags: [C++, Software Design, Command, design-patterns]
 series: "C++ Software Design"
 seriesOrder: 21
 draft: true

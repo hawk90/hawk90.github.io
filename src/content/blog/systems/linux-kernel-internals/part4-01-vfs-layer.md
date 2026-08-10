@@ -2,7 +2,7 @@
 title: "Part 4-1: VFS 계층"
 date: 2026-05-12T17:00:00
 description: "Virtual File System — 추상 인터페이스. inode / dentry / file / super_block."
-tags: [Linux, Kernel, VFS, File System]
+tags: [Linux, Kernel, VFS, filesystem]
 series: "리눅스 커널의 구조와 원리"
 seriesOrder: 17
 draft: true

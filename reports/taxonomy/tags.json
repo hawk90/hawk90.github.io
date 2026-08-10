@@ -2,13 +2,13 @@
   "publishedPosts": 726,
   "totalPosts": 3387,
   "pageMin": 2,
-  "publishedUrlKeys": 1469,
+  "publishedUrlKeys": 1465,
   "renderedTagPages": 468,
-  "keysBelowPageThreshold": 1001,
-  "keysOnlyInDrafts": 3376,
-  "conceptSplits": 14,
+  "keysBelowPageThreshold": 997,
+  "keysOnlyInDrafts": 3311,
+  "conceptSplits": 10,
   "labelInconsistencies": 30,
-  "tagsWithWhitespace": 16,
+  "tagsWithWhitespace": 11,
   "splits": [
     {
       "concept": "cpp",
@@ -25,20 +25,6 @@
       "total": 228
     },
     {
-      "concept": "uboot",
-      "keys": [
-        {
-          "key": "u-boot",
-          "count": 28
-        },
-        {
-          "key": "uboot",
-          "count": 1
-        }
-      ],
-      "total": 29
-    },
-    {
       "concept": "baremetal",
       "keys": [
         {
@@ -51,20 +37,6 @@
         }
       ],
       "total": 16
-    },
-    {
-      "concept": "secureboot",
-      "keys": [
-        {
-          "key": "secure-boot",
-          "count": 7
-        },
-        {
-          "key": "secure boot",
-          "count": 1
-        }
-      ],
-      "total": 8
     },
     {
       "concept": "devicetree",
@@ -93,34 +65,6 @@
         }
       ],
       "total": 6
-    },
-    {
-      "concept": "coredump",
-      "keys": [
-        {
-          "key": "core-dump",
-          "count": 4
-        },
-        {
-          "key": "core dump",
-          "count": 1
-        }
-      ],
-      "total": 5
-    },
-    {
-      "concept": "realtime",
-      "keys": [
-        {
-          "key": "realtime",
-          "count": 3
-        },
-        {
-          "key": "real-time",
-          "count": 1
-        }
-      ],
-      "total": 4
     },
     {
       "concept": "asyncio",
@@ -450,18 +394,13 @@
     }
   ],
   "whitespaceTags": [
-    "core dump",
     "embedded security",
-    "fault injection",
     "firmware update",
-    "github actions",
     "iec 62443",
     "power analysis",
     "remote debug",
     "reverse engineering",
     "root of trust",
-    "secure boot",
-    "secure world",
     "supply chain",
     "threat model",
     "threat modeling",

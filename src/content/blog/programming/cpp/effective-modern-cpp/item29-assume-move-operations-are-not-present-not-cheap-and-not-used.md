@@ -2,7 +2,7 @@
 title: "항목 29: move 연산이 없거나, 저렴하지 않거나, 사용되지 않는다고 가정하라"
 date: 2026-05-04T05:00:00
 description: "C++11 move semantics가 항상 성능 향상은 아닌 4가지 이유."
-tags: [C++, Move Semantics, Performance, Modern C++]
+tags: [C++, Move Semantics, Performance, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 29
 draft: true

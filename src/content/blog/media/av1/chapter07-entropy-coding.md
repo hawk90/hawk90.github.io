@@ -2,7 +2,7 @@
 title: "Ch 7: 엔트로피 디코딩"
 date: 2026-05-16T08:00:00
 description: "AV1의 Multi-Symbol Arithmetic Coder — CDF 기반 산술 코딩과 적응적 확률 업데이트."
-tags: [AV1, Video, Codec, Entropy, Arithmetic Coding, MSAC]
+tags: [AV1, Video, Codec, Entropy, arithmetic-coding, MSAC]
 series: "AV1"
 seriesOrder: 7
 draft: true

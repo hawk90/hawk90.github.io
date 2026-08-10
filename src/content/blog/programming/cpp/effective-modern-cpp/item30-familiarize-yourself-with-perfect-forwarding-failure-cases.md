@@ -2,7 +2,7 @@
 title: "항목 30: perfect forwarding이 실패하는 경우에 익숙해져라"
 date: 2026-05-04T06:00:00
 description: "보편 참조 + std::forward로도 전달되지 않는 5가지 표현식 패턴."
-tags: [C++, Perfect Forwarding, Template, Modern C++]
+tags: [C++, Perfect Forwarding, Template, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 30
 draft: true

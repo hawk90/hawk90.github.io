@@ -15,7 +15,7 @@
 // different URLs, such as /tags/cpp and /tags/c++. Those are reported first.
 
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
-import { join, relative } from 'node:path';
+import { join } from 'node:path';
 import yaml from 'js-yaml';
 
 const contentRoot = 'src/content/blog';

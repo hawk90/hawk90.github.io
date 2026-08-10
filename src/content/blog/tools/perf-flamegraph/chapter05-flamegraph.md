@@ -2,7 +2,7 @@
 title: "Ch 5: FlameGraph — Brendan Gregg"
 date: 2026-05-17T05:00:00
 description: "Brendan Gregg의 시각화 — perf script → stackcollapse → flamegraph.pl."
-tags: [FlameGraph, Brendan Gregg, Visualization]
+tags: [FlameGraph, brendan-gregg, Visualization]
 series: "perf and FlameGraph"
 seriesOrder: 5
 draft: true

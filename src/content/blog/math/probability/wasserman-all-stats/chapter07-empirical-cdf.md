@@ -4,7 +4,7 @@ date: 2026-05-16T07:00:00
 description: "분포에서 추정으로 — F̂_n과 plug-in estimator."
 series: "All of Statistics"
 seriesOrder: 7
-tags: [empirical-cdf, plug-in, functional, dkw]
+tags: [empirical-cdf, plugin, functional, dkw]
 draft: true
 topics: ["math", "math/probability"]
 ---

@@ -45,6 +45,7 @@
     "audit:antipatterns": "node scripts/audit-antipatterns.mjs",
     "audit:classification": "node scripts/audit-content-classification.mjs",
     "audit:tags": "node scripts/audit-tag-vocabulary.mjs",
+    "fix:tags": "node scripts/normalize-tag-spellings.mjs",
     "audit:content-readiness": "node scripts/audit-content-readiness.mjs",
     "audit:coverage": "python3 scripts/audit-content-coverage.py --json reports/content-readiness/coverage.json",
     "audit:resource-freshness": "python3 scripts/audit-resource-freshness.py --json reports/resource-freshness/latest.json",
