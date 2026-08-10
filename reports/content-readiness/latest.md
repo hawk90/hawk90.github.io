@@ -2,19 +2,172 @@
 
 > Review queue only. Signals indicate where to inspect; they do not establish a factual correction, a required illustration, or a lifecycle status. Published content and URLs are preservation-first: this queue never authorizes deletion, consolidation, drafting, archiving, renaming, moving, or bulk rewriting.
 
-- P1 staleness candidates: 6
+- P1 staleness candidates: 7
 - P2 fact-dense candidates: 102
 - P3 visual-aid candidates: 118
 - Series integrity issues: 0
+- Draft-only series: 151
 
 ## Priority queue
 
+- **P1** `staleness:future` — `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter09-tool-qualification.md`:308: 미래 시제 — 이미 출시/확정됐는지 확인
 - **P1** `staleness:dated` — `src/content/blog/embedded/embedded-security/chapter05-tee.md`:357: 날짜 앵커 2026 — 기준 연도 경과 시 갱신
 - **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md`:174: 미래 시제 + 제품/spec 토큰 — 현재 상태 확인
 - **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md`:27: 미래 시제 — 이미 출시/확정됐는지 확인
 - **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md`:174: 미래 시제 + 제품/spec 토큰 — 현재 상태 확인
 - **P1** `staleness:future` — `src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md`:262: 미래 시제 + 제품/spec 토큰 — 현재 상태 확인
 - **P1** `staleness:dated` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md`:50: 날짜 앵커 2026 — 기준 연도 경과 시 갱신
+- **P2** `draft-only-series` — `(unassigned)` [5]: 5 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `A First Course in Bayesian Statistical Methods` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `A Primer on Memory Consistency and Cache Coherence` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `A Tour of C++` [19]: 19 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `APUE` [21]: 21 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `ARMv8-A Architecture Reference Manual` [2]: 2 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `AUTOSAR C++14` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `AV1` [40]: 40 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Academic Writing for Graduate Students` [30]: 30 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Agile & Lean Software Engineering` [156]: 156 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `All of Statistics` [15]: 15 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Apple Metal Stack` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Bayesian Data Analysis (3rd ed)` [23]: 23 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Beautiful C++` [30]: 30 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `BoW 개요` [6]: 6 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `C++ Concurrency in Action` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `C++ Software Design` [39]: 39 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `CAN Bus 심화` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `CERT C` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Causality: Models, Reasoning, and Inference` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Clean Architecture` [34]: 34 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Clean Code` [17]: 17 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Code Complete` [35]: 35 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Code: The Hidden Language` [25]: 25 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Computer Systems: A Programmer's Perspective` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Concurrency Debugging` [5]: 5 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Convex Optimization (Boyd)` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Core ML 심화` [6]: 6 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `DDR Memory Deep Dive` [16]: 16 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `DO-178C` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Data Structures and Algorithms` [40]: 40 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Debugging: The 9 Indispensable Rules` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Designing Data-Intensive Applications` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Designing Machine Learning Systems` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Developing Safety-Critical Software` [15]: 15 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Digital Avionics Handbook` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Distributed Systems` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Doing Bayesian Data Analysis (2nd ed, core)` [15]: 15 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Domain-Driven Design` [17]: 17 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `ECSS-Q-ST-80C` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Effective C++` [55]: 55 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Effective Modern C++` [42]: 42 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Elements of Information Theory` [16]: 16 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Embedded Protocols 심화` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `FPGA Driver via QEMU+VFIO` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Fluent Python` [24]: 24 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Getting Started with BLE` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Git Conventions` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Git Flow` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `GoF Design Patterns` [25]: 25 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Google C++ Style` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Growing Object-Oriented Software` [16]: 16 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Hackers and Painters` [15]: 15 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `High-Dimensional Probability` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Information Theory, Inference, and Learning Algorithms` [15]: 15 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Introduction to Parallel Computing` [13]: 13 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Introduction to Probability` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `JSF C++` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Khorikov Unit Testing` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Launch Vehicle Flight Software` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Linear Algebra` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Linux Device Drivers (LDD3)` [19]: 19 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Linux Kernel Coding Style` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `MIPI 심화` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `MISRA C` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `ML 디자인 패턴` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `ML 시스템 프로파일링` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `ML 컴파일러` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `MLIR 심화` [16]: 16 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Mastering the FreeRTOS Real Time Kernel` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Mathematics and Plausible Reasoning, Vol I` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Mathematics and Plausible Reasoning, Vol II` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `NASA JPL Power of 10` [1]: 1 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `NPU 드라이버 개발` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `NPU 아키텍처` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `NVMe Deep Dive` [17]: 17 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `ONNX Runtime 심화` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `ONNX 실전` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Object-Oriented Analysis and Design with Applications` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Object-Oriented Software Construction` [36]: 36 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `On Writing Well` [24]: 24 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Operating Systems: Three Easy Pieces` [28]: 28 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Pattern Recognition and Machine Learning` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Patterns for Parallel Programming` [6]: 6 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Peopleware` [20]: 20 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Practical Test Engineering` [1]: 1 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Practical Vim` [21]: 21 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Pro Git` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Probabilistic Graphical Models (Koller & Friedman)` [21]: 21 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Probabilistic Machine Learning: Advanced Topics` [36]: 36 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Probabilistic Machine Learning: An Introduction` [23]: 23 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Probabilistic Reasoning in Intelligent Systems` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Probability Theory: The Logic of Science` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Probability: Theory and Examples` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Programming Pearls` [15]: 15 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `PyTorch Internals` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Python Style Guide (PEP 8)` [7]: 7 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `QEMU Embedded Emulation` [20]: 20 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `QEMU Fake Device Driver` [22]: 22 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `QEMU Internals` [22]: 22 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `RISC-V ISA 해부` [18]: 18 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `RISC-V QEMU 심화` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `RISC-V Vector Extension` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `RISC-V 베어메탈 부트` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `RISC-V 임베디드 실습` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Reasoning About Uncertainty` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Refactoring` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Refactoring Catalog (Fowler 2nd ed)` [61]: 61 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `SICP` [5]: 5 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Science Research Writing` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Set Theory` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Seven Concurrency Models in Seven Weeks` [7]: 7 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Statistical Inference` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Statistical Rethinking` [17]: 17 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Structured Parallel Programming` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Style: Lessons in Clarity and Grace` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `System Tracing` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `TDD by Example` [32]: 32 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `TDD by Example — Patterns Deep Dive` [53]: 53 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `TensorRT 심화` [8]: 8 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Algebra of Probable Inference` [5]: 5 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Art of Concurrency` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Art of Multiprocessor Programming` [18]: 18 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Art of UNIX Programming` [20]: 20 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Bayesian Choice` [11]: 11 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Design of Everyday Things` [7]: 7 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Elements of Style` [51]: 51 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Mythical Man-Month` [19]: 19 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Only Grammar Book You'll Ever Need` [30]: 30 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Pragmatic Programmer` [100]: 100 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Structure of Scientific Revolutions` [14]: 14 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `The Zynq Book` [13]: 13 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `TinyML·Edge AI` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Triton DSL` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `UALink 심화` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `UCIe 심화` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `UML 2.5.1` [35]: 35 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Understanding Philosophy of Science` [5]: 5 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Vim 마스터하기` [9]: 9 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Working Effectively with Legacy Code` [25]: 25 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `XLA·OpenXLA 심화` [12]: 12 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `Yocto Deep Dive` [1]: 1 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `gtest 심화` [18]: 18 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `perf and FlameGraph` [10]: 10 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `pytest 심화` [18]: 18 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `고종석의 문장` [16]: 16 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `리눅스 커널의 구조와 원리` [25]: 25 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `비판적 사고를 위한 논리` [16]: 16 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `우리글 바로쓰기` [20]: 20 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `전문가를 위한 C` [23]: 23 unpublished draft(s); decide publish order or mark as planned.
+- **P2** `draft-only-series` — `전문가를 위한 C++` [33]: 33 unpublished draft(s); decide publish order or mark as planned.
 - **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md` [261]: 261 concrete-claim signals; verify against primary sources before marking current.
 - **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage.md` [181]: 181 concrete-claim signals; verify against primary sources before marking current.
 - **P2** `fact-density` — `src/content/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck.md` [136]: 136 concrete-claim signals; verify against primary sources before marking current.

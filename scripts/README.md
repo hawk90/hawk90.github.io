@@ -62,6 +62,10 @@ npm run audit:lifecycle      # review/evidence lifecycle inventory
 npm run build:governance-queue # bounded Claude review queue from all inventories
 npm run audit:knowledge-model # verifies terminology, taxonomy, relations, and refreshes governance reports
 npm run audit:content-readiness # refreshes global staleness, fact-density, image, and series review queue
+npm run audit:coverage          # counts published + draft content and flags draft-only series
+npm run audit:staleness:all    # detects stale date/future-tense claims in published + draft content
+npm run audit:resource-freshness # finds curated books/sites due for a fresh web review
+npm run audit:industry-watch    # reads feeds, GitHub releases, and arXiv into an industry-change queue
 npm run migrate:topics       # preview path → explicit topic migration (add -- --apply to write)
 ```
 
@@ -72,6 +76,27 @@ explicit manual reviews in the report.
 `audit:content-readiness` is deliberately informational: its P1/P2/P3 signals
 rank review work but never assert a correction or bulk-change frontmatter. Its
 companion Claude command is `.claude/commands/content-readiness-run.md`.
+
+`audit:content-readiness` includes draft content when running prose staleness
+checks. Unpublished manuscripts can contain expired dates, future-tense claims,
+and obsolete recommendations before publication. The coverage report separates
+published, draft, and draft-only series; it never publishes or changes frontmatter.
+
+`audit:resource-freshness` and `audit:industry-watch` are discovery aids, not
+automatic recommendation engines. The former schedules a fresh review of the
+curated inventory in `data/resource-tracking.yaml`; the latter collects recent
+items from `data/industry-watch.json` and writes a queue under
+`reports/industry-watch/`, while `state.json` remembers items already seen.
+A reviewer still verifies edition, authority,
+relevance, and overlap before updating `READING_ROADMAP.md`.
+
+For a recurring weekly pass:
+
+```bash
+npm run audit:industry-watch -- --since-days 14
+npm run audit:resource-freshness
+npm run audit:content-readiness
+```
 
 ### Secret scan
 
