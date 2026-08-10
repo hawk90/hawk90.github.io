@@ -67,6 +67,7 @@ npm run gate:classification  # fails if a document falls back to legacy/path tax
 npm run audit:lifecycle      # review/evidence lifecycle inventory
 npm run build:governance-queue # bounded Claude review queue from all inventories
 npm run audit:knowledge-model # verifies terminology, taxonomy, relations, and refreshes governance reports
+npm run audit:tags           # tag vocabulary baseline — spelling variants, single-post tags
 npm run audit:content-readiness # refreshes global staleness, fact-density, image, and series review queue
 npm run audit:coverage          # counts published + draft content and flags draft-only series
 npm run audit:staleness:all    # detects stale date/future-tense claims in published + draft content

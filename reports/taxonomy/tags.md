@@ -1,0 +1,204 @@
+# Tag vocabulary baseline
+
+> Informational. Every distinct tag is a page under /tags/[tag], so merging or
+> removing a tag removes a URL. Nothing here is applied automatically.
+
+- Posts: 3387
+- Distinct tags: 5313
+- Total tag uses: 14450 (4.27 per post)
+- Posts with no tags: 0
+- Tags used once (single-post tag pages): 3595
+- Tags used 10+ times (navigable core): 221
+- Spelling-variant groups: 556 covering 1130 tags
+
+## Spelling-variant groups
+
+Each group is one concept split across several tag pages. The variant listed
+first carries the most posts and is the obvious merge target, but each group
+still needs review: some pairs are genuinely different concepts.
+
+- `C++` (290) · `cpp` (238) — 528 uses
+- `writing` (192) · `Writing` (1) — 193 uses
+- `embedded` (132) · `Embedded` (3) — 135 uses
+- `tdd` (82) · `TDD` (25) — 107 uses
+- `C` (82) · `c` (19) — 101 uses
+- `QEMU` (88) · `qemu` (4) — 92 uses
+- `linux` (49) · `Linux` (42) — 91 uses
+- `refactoring` (68) · `Refactoring` (18) — 86 uses
+- `concurrency` (60) · `Concurrency` (25) — 85 uses
+- `fowler` (61) · `Fowler` (13) — 74 uses
+- `debugging` (56) · `Debugging` (17) — 73 uses
+- `RISC-V` (64) · `riscv` (5) · `risc-v` (2) — 71 uses
+- `testing` (58) · `Testing` (11) — 69 uses
+- `memory` (49) · `Memory` (17) — 66 uses
+- `oop` (54) · `OOP` (8) — 62 uses
+- `parallel` (59) · `Parallel` (1) — 60 uses
+- `Architecture` (43) · `architecture` (15) — 58 uses
+- `Kernel` (36) · `kernel` (20) — 56 uses
+- `design` (40) · `Design` (7) — 47 uses
+- `performance` (32) · `Performance` (14) — 46 uses
+- `python` (36) · `Python` (10) — 46 uses
+- `style` (43) · `Style` (2) — 45 uses
+- `Algorithm` (38) · `algorithm` (4) — 42 uses
+- `bootloader` (39) · `Bootloader` (2) — 41 uses
+- `Modern C++` (39) · `modern-cpp` (1) — 40 uses
+- `UML` (35) · `uml` (1) — 36 uses
+- `GoF` (30) · `gof` (5) — 35 uses
+- `kent-beck` (33) · `Kent Beck` (1) — 34 uses
+- `u-boot` (29) · `U-Boot` (4) · `uboot` (1) — 34 uses
+- `pcie` (31) · `PCIe` (2) — 33 uses
+- `build` (24) · `Build` (6) — 30 uses
+- `Vim` (21) · `vim` (9) — 30 uses
+- `Design Pattern` (27) · `design-pattern` (1) — 28 uses
+- `gdb` (24) · `GDB` (3) — 27 uses
+- `buildroot` (22) · `Buildroot` (2) — 24 uses
+- `freertos` (22) · `FreeRTOS` (2) — 24 uses
+- `inheritance` (12) · `Inheritance` (12) — 24 uses
+- `algorithms` (22) · `Algorithms` (1) — 23 uses
+- `arm` (19) · `ARM` (4) — 23 uses
+- `bare-metal` (14) · `baremetal` (6) · `Bare-metal` (1) · `Bare-Metal` (1) · `Baremetal` (1) — 23 uses
+- `case-study` (17) · `Case Study` (4) · `CaseStudy` (2) — 23 uses
+- `driver` (21) · `Driver` (2) — 23 uses
+- `RAII` (12) · `raii` (11) — 23 uses
+- `rtos` (21) · `RTOS` (2) — 23 uses
+- `DDR` (17) · `ddr` (5) — 22 uses
+- `patterns` (21) · `Patterns` (1) — 22 uses
+- `composition` (16) · `Composition` (5) — 21 uses
+- `container` (16) · `Container` (5) — 21 uses
+- `nvme` (19) · `NVMe` (2) — 21 uses
+- `optimization` (17) · `Optimization` (3) — 20 uses
+- `software-engineering` (19) · `Software Engineering` (1) — 20 uses
+- `cache` (18) · `Cache` (1) — 19 uses
+- `dma` (18) · `DMA` (1) — 19 uses
+- `mutex` (16) · `Mutex` (3) — 19 uses
+- `security` (18) · `Security` (1) — 19 uses
+- `DDD` (17) · `ddd` (1) — 18 uses
+- `cmake` (15) · `CMake` (2) — 17 uses
+- `Logic` (16) · `logic` (1) — 17 uses
+- `pipeline` (16) · `Pipeline` (1) — 17 uses
+- `queue` (16) · `Queue` (1) — 17 uses
+- `Template` (13) · `template` (4) — 17 uses
+- `tools` (14) · `Tools` (3) — 17 uses
+- `atomic` (11) · `Atomic` (5) — 16 uses
+- `error-handling` (11) · `Error Handling` (3) · `Error-Handling` (2) — 16 uses
+- `esp32-c3` (12) · `ESP32-C3` (4) — 16 uses
+- `lock-free` (14) · `Lock-free` (2) — 16 uses
+- `future` (13) · `Future` (2) — 15 uses
+- `paradigm` (14) · `Paradigm` (1) — 15 uses
+- `Google` (10) · `google` (4) — 14 uses
+- `interrupt` (10) · `Interrupt` (4) — 14 uses
+- `Linear Algebra` (12) · `linear-algebra` (2) — 14 uses
+- `STL` (10) · `stl` (4) — 14 uses
+- `Naming` (7) · `naming` (6) — 13 uses
+- `process` (8) · `Process` (5) — 13 uses
+- `profiling` (11) · `Profiling` (2) — 13 uses
+- `scheduler` (11) · `Scheduler` (2) — 13 uses
+- `simd` (9) · `SIMD` (4) — 13 uses
+- `toolchain` (12) · `Toolchain` (1) — 13 uses
+- `Vector` (11) · `vector` (2) — 13 uses
+- `deployment` (9) · `Deployment` (3) — 12 uses
+- `Design Patterns` (11) · `design-patterns` (1) — 12 uses
+- `Encapsulation` (8) · `encapsulation` (4) — 12 uses
+- `Polymorphism` (7) · `polymorphism` (5) — 12 uses
+- `requirements` (10) · `Requirements` (2) — 12 uses
+- `Smart Pointer` (7) · `smart-pointer` (4) · `Smart-Pointer` (1) — 12 uses
+- `templates` (6) · `Templates` (6) — 12 uses
+- `uart` (10) · `UART` (2) — 12 uses
+- `ci` (7) · `CI` (4) — 11 uses
+- `code-review` (9) · `Code Review` (2) — 11 uses
+- `communication` (8) · `Communication` (3) — 11 uses
+- `exception` (6) · `Exception` (5) — 11 uses
+- `Graph` (6) · `graph` (5) — 11 uses
+- `Initialization` (7) · `initialization` (4) — 11 uses
+- `library` (9) · `Library` (2) — 11 uses
+- `overview` (7) · `Overview` (4) — 11 uses
+- `smp` (9) · `SMP` (2) — 11 uses
+- `Style-Guide` (10) · `style-guide` (1) — 11 uses
+- `Virtual` (7) · `virtual` (4) — 11 uses
+- `boot` (5) · `Boot` (5) — 10 uses
+- `device-tree` (5) · `devicetree` (3) · `Device-Tree` (1) · `DeviceTree` (1) — 10 uses
+- `distributed-systems` (9) · `Distributed Systems` (1) — 10 uses
+- `gpu` (9) · `GPU` (1) — 10 uses
+- `i2c` (9) · `I2C` (1) — 10 uses
+- `migration` (8) · `Migration` (2) — 10 uses
+- `mmio` (8) · `MMIO` (2) — 10 uses
+- `onnxruntime` (9) · `onnx-runtime` (1) — 10 uses
+- `secure-boot` (9) · `Secure Boot` (1) — 10 uses
+- `abstraction` (8) · `Abstraction` (1) — 9 uses
+- `allocator` (8) · `Allocator` (1) — 9 uses
+- `elf` (6) · `ELF` (3) — 9 uses
+- `gpio` (7) · `GPIO` (2) — 9 uses
+- `numa` (6) · `NUMA` (3) — 9 uses
+- `quantization` (7) · `Quantization` (2) — 9 uses
+- `spi` (8) · `SPI` (1) — 9 uses
+- `synchronization` (5) · `Synchronization` (4) — 9 uses
+- `verification` (8) · `Verification` (1) — 9 uses
+- `bar` (5) · `BAR` (3) — 8 uses
+- `concepts` (4) · `Concepts` (4) — 8 uses
+- `conditional` (7) · `Conditional` (1) — 8 uses
+- `C++20` (4) · `cpp20` (4) — 8 uses
+
+… +436 more groups (see tags.json)
+
+## Navigable core
+
+- `C++` — 290
+- `cpp` — 238
+- `writing` — 192
+- `recipes` — 152
+- `embedded` — 132
+- `pragmatic-programmer` — 100
+- `folly` — 89
+- `QEMU` — 88
+- `C` — 82
+- `tdd` — 82
+- `abseil` — 80
+- `agile` — 70
+- `refactoring` — 68
+- `RISC-V` — 64
+- `fowler` — 61
+- `concurrency` — 60
+- `parallel` — 59
+- `testing` — 58
+- `debugging` — 56
+- `Effective C++` — 55
+- `oop` — 54
+- `beck` — 53
+- `grammar` — 51
+- `strunk` — 51
+- `white` — 51
+- `memory` — 49
+- `linux` — 49
+- `Architecture` — 43
+- `style` — 43
+- `Linux` — 42
+- `unix` — 42
+- `academic` — 41
+- `design` — 40
+- `AV1` — 40
+- `Codec` — 40
+- `Video` — 40
+- `avionics` — 39
+- `bootloader` — 39
+- `Data Structure` — 39
+- `classics` — 39
+- `Software Design` — 39
+- `Modern C++` — 39
+- `Algorithm` — 38
+- `cxl` — 37
+- `python` — 36
+- `Kernel` — 36
+- `meyer` — 36
+- `korean` — 36
+- `UML` — 35
+- `code-complete` — 35
+- `McConnell` — 35
+- `team` — 34
+- `kent-beck` — 33
+- `performance` — 32
+- `pcie` — 31
+- `computer-science` — 30
+- `GoF` — 30
+- `u-boot` — 29
+- `Git` — 28
+- `ostep` — 28

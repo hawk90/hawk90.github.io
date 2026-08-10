@@ -1,6 +1,6 @@
 # Tooling command overlap
 
-- Package scripts: 99
+- Package scripts: 100
 - Shared command profiles: 7
 - Unclassified profiles: 0
 
