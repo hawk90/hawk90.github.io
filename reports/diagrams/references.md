@@ -1,9 +1,9 @@
 # Diagram reference audit
 
-- SVG assets on disk: 1038
+- SVG assets on disk: 1039
 - References from content: 837
 - References with missing or too-short alt: 0
-- References to a missing SVG: 1
+- References to a missing SVG: 0
 - SVGs never referenced: 223
 
 Diagrams are embedded through <img>, so the alt attribute is the accessible
@@ -14,7 +14,6 @@ name. Internal <title>/<desc> elements are not announced and are not checked.
 
 ## Broken references
 
-- src/content/blog/embedded/hardware/hbm/chapter09-cxl-mem.md → public/images/blog/hardware/hbm/diagrams/ch09-cxl-mem-tier.svg (alt: "메모리 계층에서 CXL.mem의 자리")
 
 ## Unreferenced SVGs
 
