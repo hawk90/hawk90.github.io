@@ -700,3 +700,9 @@ Ch 5에서는 `find_package`와 외부 의존성을 다룹니다. 시스템 라�
 - [CMake - set](https://cmake.org/cmake/help/latest/command/set.html)
 - [CMake - option](https://cmake.org/cmake/help/latest/command/option.html)
 - [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
+
+## 관련 항목
+
+- [Ch 3: CMake 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 옵션이 붙는 대상인 타겟
+- [Ch 5: find_package와 외부 의존성](/blog/tools/build/cmake/chapter05-find-package) — 옵션으로 의존성 탐색을 제어하는 법
+- [GNU Make 소개](/blog/tools/build/gnu-make/chapter01-intro) — 조건부 변수를 Make에서는 어떻게 다루는가

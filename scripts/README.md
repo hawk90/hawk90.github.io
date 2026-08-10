@@ -70,6 +70,7 @@ npm run audit:knowledge-model # verifies terminology, taxonomy, relations, and r
 npm run audit:tags           # tag vocabulary baseline — URL splits, label drift, malformed tags
 npm run fix:tags             # preview tag repairs (add -- --apply to write)
 npm run audit:series-structure # series identity, entry point, continuity, exit link
+npm run audit:connectivity   # dead-end / unreachable articles, bare "여기" anchors
 npm run audit:content-readiness # refreshes global staleness, fact-density, image, and series review queue
 npm run audit:coverage          # counts published + draft content and flags draft-only series
 npm run audit:staleness:all    # detects stale date/future-tense claims in published + draft content
