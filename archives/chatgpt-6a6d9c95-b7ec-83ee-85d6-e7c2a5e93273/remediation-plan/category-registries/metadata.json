@@ -1054,13 +1054,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-31. CI as the Only Reproducible Environment”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-31. ci as the only reproducible environment after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "CI and local release use the same package scripts and lockfile-based installation; environment differences remain visible in workflow configuration."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-32",
@@ -1073,13 +1088,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-32. Local and CI Command Divergence”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-32. local and ci command divergence after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "The canonical verify:release contract is invoked by both CI and deployment workflows and can be run locally."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-33",
@@ -1092,13 +1122,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-33. Hidden Environment Dependency”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-33. hidden environment dependency after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Node version, memory options, and telemetry settings are explicit in workflows/release commands; host-specific behavior remains review scope."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-34",
@@ -1111,13 +1156,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-34. Floating Tool Versions”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-34. floating tool versions after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Runtime versions are pinned by engines/workflow major versions and dependency lockfile; exact runner image evolution remains external."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-35",
@@ -1130,13 +1190,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-35. CI Workflow Logic Duplication”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-35. ci workflow logic duplication after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "CI/deploy intentionally share the release contract while keeping build/deploy permissions separate; duplication is bounded and audited."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-36",
@@ -1149,13 +1224,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-36. Deploy on Every Branch Push”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-36. deploy on every branch push after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Deployment triggers only on main and workflow dispatch, not every branch push."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-37",
@@ -1168,13 +1258,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-37. No Path-Based Trigger”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-37. no path-based trigger after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Deployment uses paths-ignore for documentation-only changes while CI covers pull requests and non-main pushes."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-38",
@@ -1187,13 +1292,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-38. CI Cache as a Mystery”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-38. ci cache as a mystery after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Cache keys include runner and source/config hashes, with documented restore keys in deploy workflow."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-39",
@@ -1206,13 +1326,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-39. Flaky Build Accepted as Normal”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-39. flaky build accepted as normal after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Release checks fail on findings; flaky behavior is not silently accepted, but hosted runner variance remains a manual observation."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-40",
@@ -1225,13 +1360,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-40. No Post-Deploy Verification”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-40. no post-deploy verification after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Artifact verification occurs before upload; post-deploy provider availability is external and not inferred from build success."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-41",
@@ -1244,13 +1394,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-41. Dependency Archaeology”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-41. dependency archaeology after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "package.json, lockfile, tooling audit, and dependency audit provide an inventory baseline; historical dependency intent remains reviewable."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-42",
@@ -1263,13 +1428,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-42. Feature Removed, Dependency Retained”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-42. feature removed, dependency retained after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Unused dependency removal is not inferred automatically; manifest changes require a separately reviewed semantic commit."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-43",
@@ -1282,13 +1462,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-43. Production and Tooling Dependencies Mixed”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-43. production and tooling dependencies mixed after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Runtime/dev dependency boundaries are explicit in package.json, while actual bundle usage remains a future dependency review surface."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-44",
@@ -1301,13 +1496,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-44. Dependency for a Trivial Function”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-44. dependency for a trivial function after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "No blanket trivial-function exemption is claimed; dependency additions remain subject to manifest and lockfile review."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-45",
@@ -1320,13 +1530,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-45. Multiple Libraries for the Same Job”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-45. multiple libraries for the same job after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Overlapping libraries are surfaced by tooling/manifest review; automatic consolidation would risk unrelated behavior and is not authorized."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-46",

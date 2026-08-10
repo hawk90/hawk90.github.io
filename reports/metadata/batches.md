@@ -2,29 +2,11 @@
 
 - Category state: baseline_established
 - Dependencies not complete: none
-- Unassessed items: 60
+- Unassessed items: 45
 - Maximum batch size: 15
-- Batches: 4
+- Batches: 3
 
 ## metadata-01 — metadata-01.md
-
-- AP-M-31 (P1, M) — M-31. CI as the Only Reproducible Environment
-- AP-M-32 (P1, M) — M-32. Local and CI Command Divergence
-- AP-M-33 (P1, M) — M-33. Hidden Environment Dependency
-- AP-M-34 (P1, M) — M-34. Floating Tool Versions
-- AP-M-35 (P1, L) — M-35. CI Workflow Logic Duplication
-- AP-M-36 (P1, M) — M-36. Deploy on Every Branch Push
-- AP-M-37 (P1, M) — M-37. No Path-Based Trigger
-- AP-M-38 (P1, M) — M-38. CI Cache as a Mystery
-- AP-M-39 (P1, M) — M-39. Flaky Build Accepted as Normal
-- AP-M-40 (P1, M) — M-40. No Post-Deploy Verification
-- AP-M-41 (P1, M) — M-41. Dependency Archaeology
-- AP-M-42 (P1, M) — M-42. Feature Removed, Dependency Retained
-- AP-M-43 (P1, M) — M-43. Production and Tooling Dependencies Mixed
-- AP-M-44 (P1, M) — M-44. Dependency for a Trivial Function
-- AP-M-45 (P1, M) — M-45. Multiple Libraries for the Same Job
-
-## metadata-02 — metadata-01.md
 
 - AP-M-46 (P1, M) — M-46. Unbounded Plugin Stack
 - AP-M-47 (P1, M) — M-47. Major Upgrade by Habit
@@ -42,7 +24,7 @@
 - AP-M-59 (P1, M) — M-59. No Content Authoring Guide
 - AP-M-60 (P1, M) — M-60. Documentation Without Deletion
 
-## metadata-03 — metadata-02.md
+## metadata-02 — metadata-02.md
 
 - AP-M-61 (P1, M) — M-61. Source–Artifact Ambiguity
 - AP-M-62 (P1, M) — M-62. Generated File Modified Manually
@@ -60,7 +42,7 @@
 - AP-M-74 (P1, M) — M-74. New Content Before Existing Debt
 - AP-M-75 (P1, M) — M-75. No Merge Policy for Similar Articles
 
-## metadata-04 — metadata-02.md
+## metadata-03 — metadata-02.md
 
 - AP-M-76 (P1, M) — M-76. Deletion Aversion
 - AP-M-77 (P1, M) — M-77. Update Without Revalidation
