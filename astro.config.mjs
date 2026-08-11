@@ -110,9 +110,13 @@ export default defineConfig({
   output: 'static',
   compressHTML: true,
 
-  // Trim whitespace and merge similar nodes when emitting HTML.
-  // Astro 5/6 default — explicitly set to confirm.
   build: {
-    inlineStylesheets: 'auto',
+    // `auto` inlined expressive-code's ~26 KB stylesheet into every one of the
+    // 1478 pages — 9% of each page's bytes, re-sent on every navigation, for
+    // rules that never change. `never` emits 8 shared files instead, so the
+    // second chapter a reader opens pays nothing for them. Total HTML dropped
+    // from 298.7 MB to 280.5 MB. The cost is one extra render-blocking request
+    // on the first page only; this is a site people read several pages of.
+    inlineStylesheets: 'never',
   },
 });
