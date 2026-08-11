@@ -69,7 +69,9 @@ export default defineConfig({
     // Admin pages are not public. Author archives are noindex while there is a
     // single author, because they re-list exactly what /blog already lists;
     // keep the sitemap and the robots directive saying the same thing.
-    filter: (page) => !page.includes('/admin') && !page.includes('/authors/'),
+    // /random is a noindex redirect shim; listing it would contradict its own
+    // robots directive.
+    filter: (page) => !page.includes('/admin') && !page.includes('/authors/') && !page.endsWith('/random/'),
   }),
   ],
 

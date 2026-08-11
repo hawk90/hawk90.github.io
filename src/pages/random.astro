@@ -14,7 +14,13 @@ const buildPick = slugs[Math.floor(Math.random() * slugs.length)] ?? '';
     <meta charset="utf-8" />
     <title>Random Post</title>
     <meta name="robots" content="noindex" />
-    <link rel="canonical" href={`/blog/${buildPick}`} />
+    {/*
+      Self-canonical, not a canonical to buildPick. Pointing it at the picked
+      post claimed this page *is* that post, which is false: the destination
+      differs on every build and again on every visit. Self plus noindex says
+      the true thing — this URL is itself, and it is not for the index.
+    */}
+    <link rel="canonical" href={new URL('/random', Astro.site).toString()} />
     <meta http-equiv="refresh" content={`0; url=/blog/${buildPick}`} />
     <script is:inline type="application/json" id="random-slugs" set:html={JSON.stringify(slugs)}></script>
     <script is:inline>

@@ -38,7 +38,12 @@ interface Props {
 const { tag, allPosts, page } = Astro.props;
 ---
 
-<BaseLayout title={`#${tag} - Tags${page.currentPage > 1 ? ` (Page ${page.currentPage})` : ''}`} description={`${tag} 태그가 붙은 글`}>
+<BaseLayout
+  title={`#${tag} - Tags${page.currentPage > 1 ? ` (Page ${page.currentPage})` : ''}`}
+  description={page.currentPage > 1
+    ? `${tag} 태그가 붙은 글 — ${page.currentPage}/${page.lastPage} 페이지`
+    : `${tag} 태그가 붙은 글`}
+>
   <section class="py-16">
     <div class="container">
       <div class="lg:flex lg:gap-12">
