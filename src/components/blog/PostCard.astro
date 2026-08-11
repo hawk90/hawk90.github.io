@@ -7,9 +7,17 @@ import { t } from '../../consts/ui-strings';
 interface Props {
   post: CollectionEntry<'blog'>;
   showImage?: boolean;
+  /**
+   * Heading level for the card title. A card grid placed directly under the
+   * page `h1` needs `2`; one nested under a series/chapter heading keeps the
+   * default `3`. Screen-reader users navigate by heading, and a level skipped
+   * on the way down reads as a missing section that never existed.
+   */
+  headingLevel?: 2 | 3 | 4;
 }
 
-const { post, showImage = true } = Astro.props;
+const { post, showImage = true, headingLevel = 3 } = Astro.props;
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
 const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail } = getPostMeta(post);
 ---
 
@@ -38,12 +46,12 @@ const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail 
         {post.data.series}
       </div>
     )}
-    <h3
+    <Heading
       class="text-lg font-semibold mb-2 group-hover:text-[var(--color-accent)] transition-colors line-clamp-2"
       transition:name={`title-${post.id}`}
     >
       {post.data.title}
-    </h3>
+    </Heading>
     {wasUpdated && (
       <div class="mb-2">
         <span class="inline-flex items-center rounded-full bg-[var(--color-accent)]/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide text-[var(--color-accent)]">
