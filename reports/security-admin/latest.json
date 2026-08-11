@@ -82,6 +82,7 @@
     "src/lib/og-themes.ts",
     "src/lib/posts.ts",
     "src/lib/rehype-image-lazy.mjs",
+    "src/lib/rehype-table-scroll.mjs",
     "src/lib/remark-callouts.mjs",
     "src/lib/search-aliases.ts",
     "src/lib/search.ts",
