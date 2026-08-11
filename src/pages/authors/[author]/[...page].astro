@@ -33,9 +33,20 @@ interface Props {
 }
 
 const { author, page } = Astro.props;
+
+// With a single author, this archive lists exactly what /blog already lists,
+// only paginated differently: 61 pages here against 73 there, over the same
+// posts. Both being indexable splits crawl budget across near-duplicate
+// listings. The pages stay reachable — only the indexing claim is dropped.
+// Revisit when a second author exists, since the split then carries meaning.
+const isSoleAuthor = AUTHORS.length === 1;
 ---
 
-<BaseLayout title={`${author.name} - Posts${page.currentPage > 1 ? ` (Page ${page.currentPage})` : ''}`} description={author.bio ?? ''}>
+<BaseLayout
+  title={`${author.name} - Posts${page.currentPage > 1 ? ` (Page ${page.currentPage})` : ''}`}
+  description={author.bio ?? ''}
+  noIndex={isSoleAuthor}
+>
   <section class="py-16">
     <div class="container">
       <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: author.name }]} />

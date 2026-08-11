@@ -66,8 +66,10 @@ export default defineConfig({
     // mdx() integration dropped — repo has 0 .mdx files; pure .md only.
     // Removing saves parser load + memory during build.
     sitemap({
-    // Exclude admin pages from sitemap (they're not public).
-    filter: (page) => !page.includes('/admin'),
+    // Admin pages are not public. Author archives are noindex while there is a
+    // single author, because they re-list exactly what /blog already lists;
+    // keep the sitemap and the robots directive saying the same thing.
+    filter: (page) => !page.includes('/admin') && !page.includes('/authors/'),
   }),
   ],
 
