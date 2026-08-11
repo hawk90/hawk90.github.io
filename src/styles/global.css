@@ -35,6 +35,9 @@
   --color-border:       #2d2839;
   --color-border-hover: #403a52;
   --color-border-faint: rgba(45, 40, 57, 0.5);
+  /* Right/left edge hint on a scrollable table. Written as a literal rgba
+     rather than color-mix so the compiled fallback is not an opaque bar. */
+  --scroll-shadow:      rgba(255, 255, 255, 0.16);
 
   --color-code-bg:   #1c1825;
   --color-code-text: #7dd3fc;
@@ -77,6 +80,7 @@ html.light {
   --color-border:       #e0dce8;
   --color-border-hover: #cdc7d9;
   --color-border-faint: rgba(224, 220, 232, 0.5);
+  --scroll-shadow:      rgba(26, 22, 37, 0.16);
 
   --color-code-bg:   #f0edf5;
   --color-code-text: #6d28d9;
@@ -528,12 +532,37 @@ code, pre, kbd, samp, tt {
 }
 
 /* Tables — clean horizontal-rule style */
+
+/* Wrapper injected by rehype-table-scroll. `html`/`body` clip horizontal
+   overflow, so a table wider than the content box lost its rightmost columns
+   with no way to reach them. Scrolling happens here instead of on the page.
+   The right-edge shading is a scroll shadow: the white pair is painted in
+   local coordinates and scrolls away, uncovering the gradient underneath, so
+   the hint appears only while there is more table to the right. */
+.prose .table-scroll {
+  overflow-x: auto;
+  overflow-y: hidden;
+  margin: 1.5em 0;
+  background:
+    linear-gradient(to right, var(--color-bg-primary) 30%, transparent) left center / 24px 100% no-repeat local,
+    linear-gradient(to left,  var(--color-bg-primary) 30%, transparent) right center / 24px 100% no-repeat local,
+    linear-gradient(to right, var(--scroll-shadow), transparent) left center / 12px 100% no-repeat scroll,
+    linear-gradient(to left,  var(--scroll-shadow), transparent) right center / 12px 100% no-repeat scroll;
+}
+.prose .table-scroll::-webkit-scrollbar { height: 4px; }
+.prose .table-scroll:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+}
+
 .prose table {
   width: 100%;
   border-collapse: collapse;
   margin: 1.5em 0;
   font-size: 0.95em;
 }
+/* The wrapper owns the vertical rhythm once it is present. */
+.prose .table-scroll > table { margin: 0; }
 
 .prose thead {
   border-bottom: 2px solid var(--color-border);
@@ -638,6 +667,11 @@ code, pre, kbd, samp, tt {
   /* Pre-wrap so wide code doesn't get cut */
   pre, code { font-size: 9.5pt; }
   pre { white-space: pre-wrap; word-break: break-word; }
+
+  /* Paper cannot be scrolled, so the table wrapper must not clip. Let the
+     columns break onto the page instead of disappearing at the margin. */
+  .prose .table-scroll { overflow: visible; background: none; }
+  .prose table { table-layout: fixed; word-break: break-word; }
 
   /* Headings: avoid orphans, slight underline */
   .prose h1, .prose h2, .prose h3 {

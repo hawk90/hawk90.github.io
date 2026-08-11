@@ -11,6 +11,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeImageLazy from './src/lib/rehype-image-lazy.mjs';
+import rehypeTableScroll from './src/lib/rehype-table-scroll.mjs';
 
 // This site is intentionally static and PAT-only. OAuth needs a separately
 // deployed server boundary; do not add OAuth callback routes to this project.
@@ -91,6 +92,7 @@ export default defineConfig({
         // `audit:math-unicode` report remains the review surface.
         [rehypeKatex, { strict: false }],
         rehypeImageLazy,
+        rehypeTableScroll,
       ],
     }),
   },
