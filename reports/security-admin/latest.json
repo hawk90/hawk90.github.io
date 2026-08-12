@@ -167,6 +167,14 @@
       "remediation": "Production artifact must not contain /api/auth routes when this project builds as a static site.",
       "evidence": [],
       "status": "passed"
+    },
+    {
+      "id": "SEC-ADMIN-07",
+      "priority": "P1",
+      "title": "Cross-origin subresource without integrity",
+      "remediation": "Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.",
+      "evidence": [],
+      "status": "passed"
     }
   ]
 }
