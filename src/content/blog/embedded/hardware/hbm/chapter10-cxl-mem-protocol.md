@@ -202,3 +202,4 @@ CXL 3.0의 *256 B flit*은 *throughput에 유리*하지만 *latency는 더 큽�
 - [Ch 12: 메모리 풀링과 데이터센터 토폴로지](/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric)
 - [Embedded Performance Engineering Ch 54: CXL.mem 지연·대역폭 실측](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)
 - [Modern Embedded Recipes Ch 149: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
+- [CXL 4.0 Internals Ch 8: CXL.mem — M2S·S2M·HDM Decoder](/blog/embedded/hardware/cxl/chapter08-cxl-mem) — 같은 프로토콜을 CXL 시리즈 쪽에서 더 깊이. Interleave granularity, HDM-DB의 BISnp 동작, Linux region 생성까지

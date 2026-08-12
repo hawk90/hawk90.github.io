@@ -142,27 +142,31 @@ CXL Composable 모델은 자원을 종류별 풀로 분리합니다.
 
 이 비전은 *CXL fabric + Fabric Manager + composable OS*가 *모두 성숙*해야 가능합니다. *2026~2028*에 *부분적 실현*, *2030+에 본격 도입* 예상.
 
-## 자주 하는 실수
+## 메모리 계층에서 자주 어긋나는 판단
 
-### "CXL 2.0 pooling = CXL 3.0 fabric"
+이 시리즈는 on-package HBM에서 출발해 여기까지 왔습니다. 그래서 마지막으로 짚을 것은 fabric의 동작 방식이 아니라, *풀링된 메모리를 계층 어디에 놓을 것인가*에서 어긋나는 판단들입니다.
 
-*완전히 다릅니다*. 2.0 pooling은 *time-share* — *한 시점에 한 host*. 3.0 fabric은 *coherent multi-host* — *동시 다중 접근*. coherency 메커니즘이 *완전히 다릅니다*.
+### "풀에서 가져온 메모리도 결국 DDR이니 성능은 비슷하다"
 
-### "GFAM은 멀티 host가 자유롭게 read/write"
+용량은 늘지만 *지연은 늘어납니다*. Direct-attach CXL 메모리부터가 로컬 DDR보다 한 단계 먼 자리이고, switch를 한 단 거치면 그만큼 더 멀어집니다. 대역폭이 아니라 *지연에 민감한 워크로드*를 풀 메모리 위에 올리면, 용량이 넉넉해졌는데 처리량은 떨어지는 결과가 나옵니다. 풀은 *cold tier*로 두고 hot working set은 로컬에 남기는 배치가 기본입니다.
 
-*가능하지만 비용 큽니다*. *cache invalidation 트래픽*이 *워크로드 throughput을 무너뜨릴 수 있음*. *coordination protocol*(database transaction 등)이 *application 측에서 필요*합니다.
+### "HBM이 있으니 CXL 풀은 필요 없다"
 
-### "Fabric Manager는 single point of failure"
+두 메모리는 *경쟁 관계가 아닙니다*. HBM은 on-package라 용량이 스택 수에 묶이고, 그 한계가 곧 모델 크기의 한계가 됩니다. CXL 풀은 그 한계 밖의 용량을 맡습니다. [Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)에서 본 NPU·GPU 구성이 HBM과 CXL을 함께 쓰는 이유가 이것입니다. 대역폭은 HBM이, 용량은 풀이 담당하는 분업입니다.
 
-*맞고 틀립니다*. FM 다운 시 *기존 할당은 유지*되고 *데이터 평면은 동작*. *동적 재할당만 정지*. *FM redundancy*가 production 권장. *완전한 SPOF는 아님*.
+### "풀링하면 메모리를 산 만큼 다 쓴다"
 
-### "PBR로 모든 토폴로지 OK"
+*할당 단위가 발목을 잡습니다*. CXL 2.0 pooling은 LD 단위로 host에 붙입니다. 워크로드가 요구하는 크기가 LD 경계와 맞지 않으면 남는 조각이 생기고, 그 조각은 다른 host가 쓰지 못합니다. 실제 이용률은 LD 분할 설계에 좌우되므로, 도입 전에 *워크로드의 메모리 요구 분포*를 먼저 봐야 합니다.
 
-*deadlock 위험*. *PBR fabric 토폴로지 설계*는 *Clos·Dragonfly·Fat-tree* 같은 *deadlock-free topology*를 골라야 합니다. *임의 mesh*는 위험.
+### "tiering은 OS가 알아서 해 준다"
+
+*자동 승격·강등은 접근 패턴을 뒤늦게 따라갑니다*. 페이지가 hot으로 판정돼 로컬로 올라올 때쯤 워크로드의 관심은 이미 다른 곳에 가 있는 경우가 흔합니다. Meta의 Memory Tiering 사례처럼, 실제 운영에서는 *워크로드가 자기 데이터의 성격을 알려 주는* 힌트가 함께 있어야 이득이 납니다.
 
 ### "CXL fabric이 NVLink을 대체한다"
 
-*용도가 다릅니다*. NVLink는 *GPU 간 고대역폭·저지연 (900 GB/s, 5 ns)*. CXL fabric은 *general purpose 메모리 공유 (~100 GB/s, ~300 ns)*. *공존*이 *현실*입니다.
+*용도가 다릅니다*. NVLink는 GPU 사이의 고대역폭·저지연 경로이고, CXL fabric은 범용 메모리 공유 경로입니다. 대역폭과 지연의 자릿수가 다르기 때문에 한쪽이 다른 쪽을 흡수하지 않습니다. 공존이 현실입니다.
+
+> **메모**: fabric 자체의 오해 — 2.0 pooling과 3.0 fabric의 coherency 차이, GFAM의 invalidation 비용, Fabric Manager의 SPOF 여부, PBR 토폴로지의 deadlock 조건 — 은 [CXL 4.0 Internals Ch 4](/blog/embedded/hardware/cxl/chapter04-pooling-gfam#자주-하는-실수)에 정리돼 있습니다.
 
 ## 정리
 
@@ -193,3 +197,4 @@ CXL 관련 다음 깊이는 *기존 다른 시리즈*에 *분산 추가*된 챕�
 - [Ch 10: CXL.mem 프로토콜 분해](/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol)
 - [Ch 11: CXL Type 1·2·3 디바이스 분류](/blog/embedded/hardware/hbm/chapter11-cxl-device-types)
 - [Embedded Performance Engineering Ch 29: CXL Interconnect 분석](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)
+- [CXL 4.0 Internals Ch 4: Pooling·GFAM·Fabric](/blog/embedded/hardware/cxl/chapter04-pooling-gfam) — GFAM·PBR·Coherency Domain ID의 메커니즘

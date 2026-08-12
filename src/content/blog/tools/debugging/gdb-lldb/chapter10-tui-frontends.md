@@ -133,13 +133,7 @@ class MyPanel(Dashboard.Module):
 
 ## gef / pwndbg / peda — 보안·exploit 디버깅
 
-세 가지 모두 보안 분석가의 작업을 GDB 위에서 빠르게 하기 위한 Python 확장입니다.
-
-| | 특징 | 권장 |
-|---|------|------|
-| **gef** | 한 파일 스크립트, 가벼움, ARM/MIPS/PPC도 지원 | 일반 보안 |
-| **pwndbg** | 가장 활발한 유지보수, 힙 분석 깊음 | CTF/exploit |
-| **peda** | 가장 오래됨, x86 중심 | 레거시 자료 호환 |
+세 가지 모두 보안 분석가의 작업을 GDB 위에서 빠르게 하기 위한 Python 확장입니다. 설치하면 정지할 때마다 레지스터·스택·디스어셈블·코드 컨텍스트가 자동으로 한 화면에 뜹니다.
 
 ```bash
 # gef
@@ -151,27 +145,11 @@ $ git clone https://github.com/pwndbg/pwndbg
 $ cd pwndbg && ./setup.sh
 ```
 
-설치 후 정지할 때마다 레지스터·스택·디스어셈블·코드 컨텍스트가 자동으로 한 화면에 뜹니다. CTF·exploit 분석에 사실상 표준.
+이 장의 관심사는 *TUI*이므로 여기서는 셋의 성격만 구분해 둡니다. gef는 한 파일짜리라 가볍고 ARM·MIPS·PPC까지 따라오며, pwndbg는 힙 분석이 가장 깊어 CTF·exploit에서 사실상 표준입니다. peda는 x86 중심의 오래된 도구라 지금은 옛 자료를 따라갈 때 씁니다.
 
-### 자주 쓰는 명령 (pwndbg/gef 공통)
+셋의 상세 비교와 `context`·`vmmap`·`heap`·`checksec` 같은 공통 명령표는 [GDB Extension and IDE Ch 6: GDB 프런트엔드 비교](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 정리돼 있습니다.
 
-| 명령 | 용도 |
-|------|------|
-| `context` | 종합 컨텍스트 다시 그리기 |
-| `vmmap` | 매핑된 메모리 영역 |
-| `heap` | glibc heap의 청크 / bin / arena |
-| `bins` | tcache / fastbin / smallbin / largebin |
-| `xinfo <addr>` | 주소가 어떤 영역인지 |
-| `pattern create 100` | cyclic pattern 생성 (BOF 오프셋용) |
-| `pattern search 0x6161616a` | 패턴에서 오프셋 검색 |
-| `checksec` | NX / PIE / Canary / RELRO 확인 |
-| `ropper / ropgadget` | gadget 검색 |
-| `aslr` | ASLR on/off |
-| `dt <struct>` | 구조체 시각화 |
-
-CTF에서는 거의 `pwndbg + pwntools`가 표준 조합. exploit 스크립트와 디버거가 한 워크플로에 묶입니다.
-
-> 일반 애플리케이션 디버깅에는 다소 시끄러울 수 있습니다. 보안 분석·CTF 외에는 gdb-dashboard나 cgdb가 더 어울립니다.
+주의할 점은 하나입니다. 이 확장들은 매 정지마다 큰 컨텍스트를 쏟아내기 때문에, 보안 분석이 아닌 일반 애플리케이션 디버깅에서는 화면이 오히려 시끄러워집니다. 그럴 때는 아래의 gdb-dashboard나 cgdb 쪽이 맞습니다.보안 분석·CTF 외에는 gdb-dashboard나 cgdb가 더 어울립니다.
 
 ## VSCode + cppdbg / CodeLLDB
 
