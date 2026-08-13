@@ -608,3 +608,11 @@ GNU Make는 1976년 Stuart Feldman이 만든 도구입니다. 50년 가까이 �
 - [Makefile Tutorial by Example](https://makefiletutorial.com/)
 - [Recursive Make Considered Harmful](http://aegis.sourceforge.net/auug97.pdf) — Peter Miller, 1997
 - [GNU Coding Standards — Makefile Conventions](https://www.gnu.org/prep/standards/html_node/Makefile-Conventions.html) — install / DESTDIR / 표준 타겟
+
+## 관련 항목
+
+- [Ch 6: 조건문과 include](/blog/tools/build/gnu-make/chapter06-conditionals) — 이 장의 골격을 떠받치는 모드 분기와 자동 의존성 패턴.
+- [Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions) — 소스 목록을 만드는 `wildcard`·`shell`·`filter-out`의 상세.
+- [CMake Ch 7: 설치와 패키징](/blog/tools/build/cmake/chapter07-install) — 여기서 손으로 적은 `install`·`DESTDIR`을 CMake는 어떻게 자동화하는지.
+- [Buildroot Ch 11: Toolchain 선택](/blog/embedded/buildroot/chapter11-toolchain) — `CROSS_COMPILE` 접두사 뒤에 있는 크로스 툴체인 자체의 선택 기준.
+- [GNU Make Manual](https://www.gnu.org/software/make/manual/) — 공식 매뉴얼.

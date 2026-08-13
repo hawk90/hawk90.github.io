@@ -460,3 +460,11 @@ OpenMP·MPI·OpenSSL 같은 라이브러리는 *내부 동기화*가 복잡해 f
 - [Helgrind Manual](https://valgrind.org/docs/manual/hg-manual.html)
 - [DRD Manual](https://valgrind.org/docs/manual/drd-manual.html)
 - [Helgrind vs DRD 비교 (논문)](https://valgrind.org/docs/manual/drd-manual.html#drd-manual.intro) — DRD 매뉴얼 안에 비교 섹션
+
+## 관련 항목
+
+- [Ch 3: Valgrind Leak Report 분석](/blog/tools/debugging/valgrind/chapter03-leak-report) — 이전 글. Memcheck 보고서 읽기
+- [Ch 5: Valgrind Suppression과 실무 운용](/blog/tools/debugging/valgrind/chapter05-suppressions) — 다음 글. 여기서 나온 false positive를 정리하는 방법
+- [TSan으로 데이터 레이스 디버깅 — Happens-before 추적](/blog/tools/debugging/sanitizers/chapter04-tsan) — Helgrind·DRD와 같은 레이스를 훨씬 빠르게 잡는 쪽. PR 빌드는 이쪽이 맞습니다
+- [멀티스레드·멀티프로세스 디버깅](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess) — 잡힌 레이스를 디버거에서 재현할 때
+- [Helgrind Manual](https://valgrind.org/docs/manual/hg-manual.html) — 옵션과 `ANNOTATE_*` 매크로 공식 설명

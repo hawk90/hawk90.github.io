@@ -448,3 +448,11 @@ echo 'kernel.yama.ptrace_scope = 0' | sudo tee -a /etc/sysctl.conf
 - [LLDB Tutorial](https://lldb.llvm.org/use/tutorial.html)
 - [GDB to LLDB Command Map](https://lldb.llvm.org/use/map.html) — 명령 대조표
 - [DWARF Debugging Standard](http://dwarfstd.org/)
+
+## 관련 항목
+
+- [Ch 2: 기본 명령 — 10가지](/blog/tools/debugging/gdb-lldb/chapter02-basic-commands) — 다음 장, 매일 쓰는 명령
+- [Ch 11: 실무 팁](/blog/tools/debugging/gdb-lldb/chapter11-practical-tips) — `.gdbinit`으로 설치 이후 환경 굳히기
+- [ELF 포맷 분해](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview) — `-g`가 만들어 넣는 디버그 섹션의 정체
+- [ASan과 UBSan 실전 설정](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) — 같은 디버그 빌드에 얹는 자동 검출
+- [GDB 공식 매뉴얼](https://sourceware.org/gdb/current/onlinedocs/gdb.html) — 명령·옵션의 정본

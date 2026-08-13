@@ -476,3 +476,11 @@ command alias bfl breakpoint set --file %1 --line %2
 - [GDB Command Reference](https://sourceware.org/gdb/current/onlinedocs/gdb.html/)
 - [LLDB Tutorial](https://lldb.llvm.org/use/tutorial.html)
 - [GDB Cheat Sheet (DarkDust)](https://darkdust.net/files/GDB%20Cheat%20Sheet.pdf)
+
+## 관련 항목
+
+- [Ch 1: 소개와 설치](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 이전 장, 설치와 컴파일 옵션
+- [Ch 3: 상태 검사](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state) — 다음 장, `print`로 부족한 자리
+- [Ch 11: 실무 팁](/blog/tools/debugging/gdb-lldb/chapter11-practical-tips) — `.gdbinit`으로 명령을 손에 맞추기
+- [pdb 기본 사용법](/blog/tools/debugging/python/chapter01-pdb-basics) — 같은 명령 체계를 Python에서
+- [GDB to LLDB 명령 대조표](https://lldb.llvm.org/use/map.html) — 두 디버거 명령 매핑

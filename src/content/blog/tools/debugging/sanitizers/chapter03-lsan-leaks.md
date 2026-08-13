@@ -392,3 +392,11 @@ const char* get_config_path() {
 - [LeakSanitizer Wiki](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer)
 - [LSan Flags](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer#flags)
 - [Memory Leak Detection in Practice (Google)](https://research.google/pubs/pub37752/) — LSan 디자인 배경
+
+## 관련 항목
+
+- [Ch 2: ASan과 UBSan 실전 설정](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) — LSan을 켜는 ASan 빌드 설정
+- [Ch 4: TSan으로 데이터 레이스 디버깅](/blog/tools/debugging/sanitizers/chapter04-tsan) — 멀티스레드 코드로 넘어가는 다음 단계
+- [Valgrind Ch 3: Leak Report 분석](/blog/tools/debugging/valgrind/chapter03-leak-report) — definitely·indirectly·possibly 분류와 Direct/Indirect leak 대응
+- [Valgrind Ch 5: Suppression과 실무 운용](/blog/tools/debugging/valgrind/chapter05-suppressions) — 같은 고민을 Valgrind 쪽 문법으로
+- [LeakSanitizer Wiki](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer) — LSan 플래그와 동작 원문

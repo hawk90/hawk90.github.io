@@ -548,8 +548,11 @@ Sanitizer는 *컴파일러 한 옵션*으로 *수많은 런타임 버그를 잡�
 - [GitLab CI/CD Reference](https://docs.gitlab.com/ee/ci/yaml/)
 - [CMakePresets v6 Spec](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
 
-## 관련 시리즈
+## 관련 항목
 
-- [Valgrind](/blog/tools/debugging/valgrind/chapter01-intro) — sanitizer 보완
-- [CMake](/blog/tools/build/cmake/chapter01-intro) — 빌드 통합 기초
-- [GNU Make](/blog/tools/build/gnu-make/chapter01-intro) — 더 단순한 빌드
+- [Ch 4: TSan으로 데이터 레이스 디버깅](/blog/tools/debugging/sanitizers/chapter04-tsan) — 이 장에서 별도 job으로 분리한 TSan 빌드의 내용
+- [Ch 1: Sanitizer 종류 비교](/blog/tools/debugging/sanitizers/chapter01-intro) — 시리즈 출발점, 어떤 sanitizer를 켤지 결정
+- [CMake Ch 6: 테스트와 CTest](/blog/tools/build/cmake/chapter06-testing) — sanitizer job이 호출하는 `ctest` 쪽 설정
+- [Valgrind Ch 5: Suppression과 실무 운용](/blog/tools/debugging/valgrind/chapter05-suppressions) — 야간 빌드에서 Valgrind를 함께 돌릴 때의 CI 통합
+- [Sanitizers wiki: SanitizerCommonFlags](https://github.com/google/sanitizers/wiki/SanitizerCommonFlags) — CI 환경 변수에 쓰는 공통 플래그 원문
+- [GNU Make 시리즈](/blog/tools/build/gnu-make/chapter01-intro) — CMake를 안 쓰는 프로젝트에 같은 sanitizer 플래그를 붙일 때

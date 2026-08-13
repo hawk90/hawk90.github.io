@@ -505,8 +505,11 @@ Valgrind 시리즈 다섯 챕터를 마칩니다.
 - [Default Suppressions File](https://sourceware.org/git/?p=valgrind.git;a=blob;f=glibc-2.X.supp)
 - [Memcheck Manual: Suppressions](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.suppfiles)
 
-## 관련 시리즈
+## 관련 항목
 
-- [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-intro) — 짝을 이루는 도구
-- [GDB / LLDB](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 인터랙티브 디버깅
-- perf / flamegraph — 성능 분석
+- [Ch 4: Valgrind Helgrind와 DRD](/blog/tools/debugging/valgrind/chapter04-helgrind-drd) — 이전 글. `Helgrind:Race` suppression이 필요해지는 자리
+- [Ch 1: Valgrind 도구 개요](/blog/tools/debugging/valgrind/chapter01-intro) — 시리즈 첫 글. 전체 그림을 다시 볼 때
+- [Sanitizer를 CMake와 CI에 통합](/blog/tools/debugging/sanitizers/chapter05-cmake-ci) — PR 빌드 쪽 CI 구성. 야간 Valgrind 작업과 짝을 이룹니다
+- [heaptrack 분석 — 가벼운 heap profiler 활용](/blog/tools/debugging/memory/chapter02-heaptrack) — Valgrind가 너무 느린 시나리오의 대안
+- [Valgrind Suppression Format](https://valgrind.org/docs/manual/manual-core.html#manual-core.suppress) — suppression 문법 공식 정의
+- [GDB / LLDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — suppression으로 걸러 낸 뒤 남은 진짜 버그를 붙잡을 때

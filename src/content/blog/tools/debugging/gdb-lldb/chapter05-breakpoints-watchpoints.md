@@ -475,3 +475,12 @@ Catchpoint 1 (exception thrown), ...
 - [GDB Breakpoints](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Breakpoints.html)
 - [GDB Watchpoints](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Set-Watchpoints.html)
 - [LLDB Breakpoint Commands](https://lldb.llvm.org/use/tutorial.html#setting-breakpoints)
+
+## 관련 항목
+
+- [Ch 4: 콜스택과 프레임](/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames) — 이전 장, 멈춘 뒤 스택 읽기
+- [Ch 6: 멀티스레드 / 멀티프로세스](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess) — 다음 장, 스레드별 멈춤 제어
+- [Ch 9: Python 스크립팅](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting) — `commands` 대신 Python stop hook
+- [GDB 커스텀 명령·Event 훅·Breakpoint](/blog/tools/debugging/gdb-extension/chapter02-commands-events) — Breakpoint를 코드로 다루기
+- [JTAG·SWD·CoreSight 분석](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight) — hardware breakpoint를 떠받치는 디버그 레지스터
+- [GDB to LLDB 명령 대조표](https://lldb.llvm.org/use/map.html) — breakpoint·watchpoint 명령 매핑

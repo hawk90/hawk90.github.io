@@ -485,3 +485,12 @@ $1 = <optimized out>
 - [GDB Examining Memory](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Memory.html)
 - [LLDB Memory Read](https://lldb.llvm.org/use/tutorial.html#examining-memory)
 - [GDB Pretty Printers](https://sourceware.org/gdb/wiki/STLSupport)
+
+## 관련 항목
+
+- [Ch 2: 기본 명령 — 10가지](/blog/tools/debugging/gdb-lldb/chapter02-basic-commands) — 이전 장, `print`와 `info`의 기본
+- [Ch 4: 콜스택과 프레임](/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames) — 다음 장, 어느 프레임의 변수인가
+- [Ch 9: Python 스크립팅](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting) — pretty-printer를 직접 작성
+- [GDB Pretty-Printer 심화](/blog/tools/debugging/gdb-extension/chapter03-pretty-printers) — STL·커스텀 타입 시각화
+- [리눅스 메모리 회계](/blog/tools/debugging/memory/chapter01-memory-accounting) — `x`로 본 주소가 어느 매핑인지
+- [GDB 공식 매뉴얼](https://sourceware.org/gdb/current/onlinedocs/gdb.html) — 식 평가와 데이터 검사 정본

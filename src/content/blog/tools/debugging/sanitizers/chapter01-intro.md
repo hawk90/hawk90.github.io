@@ -252,3 +252,10 @@ Valgrind Memcheck는 ASan과 *비슷한 버그*를 잡지만, 동작 방식이 �
 - [Clang AddressSanitizer Manual](https://clang.llvm.org/docs/AddressSanitizer.html)
 - [GCC Sanitizer Options](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)
 - [ThreadSanitizer 설계 논문 (Google, 2009)](https://research.google/pubs/pub35604/)
+
+## 관련 항목
+
+- [Ch 2: ASan과 UBSan 실전 설정](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) — 황금 조합을 실제 프로젝트에서 운영하는 방법
+- [Valgrind Ch 1: 도구 개요](/blog/tools/debugging/valgrind/chapter01-intro) — Memcheck·Helgrind·DRD와의 역할 대응
+- [GDB·LLDB Ch 1: 두 디버거의 차이와 선택](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — sanitizer가 잡은 자리를 이어서 추적할 때
+- [Google Sanitizers Wiki](https://github.com/google/sanitizers/wiki) — 다섯 sanitizer의 공식 문서 모음

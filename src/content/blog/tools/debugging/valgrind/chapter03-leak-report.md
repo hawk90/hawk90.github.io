@@ -417,3 +417,11 @@ void process_request(const char* input) {
 
 - [Memcheck Leak Detection](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.leaks)
 - [Loss Record Output Format](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.leaks-displaying-output)
+
+## 관련 항목
+
+- [Ch 2: Valgrind Memcheck 실전](/blog/tools/debugging/valgrind/chapter02-memcheck) — 이전 글. 이 보고서를 만들어 내는 옵션들
+- [Ch 4: Valgrind Helgrind와 DRD](/blog/tools/debugging/valgrind/chapter04-helgrind-drd) — 다음 글. 메모리에서 동시성으로
+- [LSan 누수 분석 — Stop-the-world Leak Detection 메커니즘](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks) — 같은 누수를 Sanitizer 쪽에서 보는 방법. `still reachable` 판정 차이가 흥미롭습니다
+- [운영 메모리 누수 진단](/blog/tools/debugging/memory/chapter05-prod-leak-diagnosis) — Valgrind를 붙일 수 없는 long-running 프로세스의 대안
+- [Memcheck Leak Detection](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.leaks) — 네 가지 누수 분류의 공식 정의

@@ -436,3 +436,12 @@ sudo dnf debuginfo-install glibc libstdc++
 
 - [GDB Backtrace](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Backtrace.html)
 - [LLDB Examining Thread State](https://lldb.llvm.org/use/tutorial.html#examining-thread-state)
+
+## 관련 항목
+
+- [Ch 3: 상태 검사](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state) — 이전 장, 프레임 안 변수 읽기
+- [Ch 5: 브레이크포인트와 워치포인트](/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints) — 다음 장, 멈출 자리 정하기
+- [Ch 7: core dump 분석](/blog/tools/debugging/gdb-lldb/chapter07-core-dump) — 죽은 프로세스의 backtrace
+- [DWARF Call Frame Information](/blog/tools/debugging/dwarf-elf/chapter05-cfi-eh-frame) — unwinding이 실제로 도는 방식
+- [GDB로 Core 분석](/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis) — 사후 스택 복원 워크플로
+- [DWARF Debugging Standard](https://dwarfstd.org/) — CFI 규격 원문

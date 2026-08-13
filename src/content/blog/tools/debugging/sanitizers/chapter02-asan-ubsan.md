@@ -375,3 +375,11 @@ SUMMARY: AddressSanitizer: stack-buffer-overflow on main.c:4 in main
 - [Clang AddressSanitizer Manual](https://clang.llvm.org/docs/AddressSanitizer.html)
 - [Clang UndefinedBehaviorSanitizer Manual](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
 - [Sanitizers wiki: AddressSanitizerFlags](https://github.com/google/sanitizers/wiki/AddressSanitizerFlags)
+
+## 관련 항목
+
+- [Ch 1: Sanitizer 종류 비교](/blog/tools/debugging/sanitizers/chapter01-intro) — 다섯 sanitizer의 역할과 호환성
+- [Ch 3: LSan 누수 분석](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks) — ASan에 딸려 오는 누수 검사 읽기
+- [Valgrind Ch 2: Memcheck 실전](/blog/tools/debugging/valgrind/chapter02-memcheck) — 같은 메모리 오류를 재컴파일 없이 잡는 쪽
+- [GDB·LLDB Ch 7: Core Dump 분석](/blog/tools/debugging/gdb-lldb/chapter07-core-dump) — `abort_on_error=1`이 남긴 코어를 여는 방법
+- [Clang AddressSanitizer Manual](https://clang.llvm.org/docs/AddressSanitizer.html) — 옵션과 런타임 동작 원문

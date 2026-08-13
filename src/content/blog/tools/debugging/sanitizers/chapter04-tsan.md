@@ -428,3 +428,11 @@ TSan은 *실행 중에 발생할 가능성이 있는* 레이스만 감지합니�
 - [TSan Flags](https://github.com/google/sanitizers/wiki/ThreadSanitizerFlags)
 - [Memory Model Synchronization Modes](https://en.cppreference.com/w/cpp/atomic/memory_order)
 - *C++ Concurrency in Action* (Anthony Williams) — 메모리 모델 깊이 이해
+
+## 관련 항목
+
+- [Ch 3: LSan 누수 분석](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks) — ASan 계열 빌드에서 다루는 누수 쪽
+- [Ch 5: Sanitizer를 CMake와 CI에 통합](/blog/tools/debugging/sanitizers/chapter05-cmake-ci) — TSan 전용 빌드를 파이프라인에 얹기
+- [Valgrind Ch 4: Helgrind와 DRD](/blog/tools/debugging/valgrind/chapter04-helgrind-drd) — 같은 레이스를 재컴파일 없이 진단하는 도구
+- [GDB·LLDB Ch 6: 멀티스레드·멀티프로세스 디버깅](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess) — 레이스가 잡힌 뒤 스레드 상태를 직접 들여다볼 때
+- [ThreadSanitizer Manual (Clang)](https://clang.llvm.org/docs/ThreadSanitizer.html) — TSan 옵션과 제약 원문
