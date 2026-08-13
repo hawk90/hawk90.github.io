@@ -585,6 +585,7 @@ Ch 3 — `.debug_line` 바이트코드 VM. 어떻게 *수천 줄의 PC↔소스 
 
 - [Ch 1: ELF 포맷](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview)
 - [Ch 3: .debug_line 바이트코드 VM](/blog/tools/debugging/dwarf-elf/chapter03-debug-line)
+- [GDB and LLDB Ch 12: DWARF 디버그 정보](/blog/tools/debugging/gdb-lldb/chapter12-dwarf) — 같은 포맷을 *디버거가 쓰는 쪽*에서. 이 시리즈는 포맷 자체를 분해합니다
 - [DWARF 5 표준 PDF](https://dwarfstd.org/doc/DWARF5.pdf)
 - [llvm-dwarfdump](https://llvm.org/docs/CommandGuide/llvm-dwarfdump.html)
 - [pyelftools 문서](https://github.com/eliben/pyelftools)

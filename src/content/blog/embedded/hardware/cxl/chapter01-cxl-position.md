@@ -77,15 +77,9 @@ CXL Consortium의 *공개 발표·press release·white paper 자료*가 강조�
 
 ## Bundled Port — 4.0의 가시적 변화
 
-*Bundled Port*는 *데이터센터 운용자 입장에서 가장 가시적*인 새 기능입니다. *디바이스가 multiple upstream port*를 가질 때, 그것들을 *논리적으로 하나의 port group*으로 묶어 *host에 노출*합니다.
+4.0에서 운용자 눈에 가장 먼저 띄는 변화가 *Bundled Port*입니다. 디바이스가 여러 upstream port를 가질 때 그것들을 *논리적으로 한 port group*으로 묶어 host에 노출하는 기능입니다.
 
-기대 효과:
-
-- **Latency 감소** — 트래픽이 *덜 혼잡한 port로 dynamic routing*.
-- **Bandwidth 증가** — 여러 port를 *aggregated bandwidth*로 활용.
-- **QoS 개선** — port 별로 *traffic class 분리* 가능.
-
-운용 사례는 *대용량 메모리 디바이스가 16-lane link 하나로 부족할 때* *여러 link을 묶어 사용*하는 방식. 또는 *서로 다른 VH (virtual hierarchy)에 별도 port*를 *동시 노출*해 *fan-out 효율*을 높이는 방식.
+이 시리즈의 흐름에서 중요한 것은 이것이 *link 한 가닥의 속도를 올리는 방향(128 GT/s)과는 다른 축*이라는 점입니다. 한쪽은 파이프를 굵게 하고, 다른 쪽은 파이프를 여러 개 묶습니다. 4.0이 두 축을 동시에 건드렸다는 사실이 이 장에서 잡아 둘 지점이고, 묶었을 때 실제로 무엇이 좋아지는지는 [Ch 5: CXL 4.0의 핵심 새 기능](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 봅니다.
 
 ## Flex Bus — 같은 PHY로 PCIe·CXL 둘 다
 
