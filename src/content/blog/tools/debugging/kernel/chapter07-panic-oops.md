@@ -25,7 +25,7 @@ topics: ["tools", "tools/debugging"]
 
 ## Oops 메시지 구조
 
-```
+```text
 BUG: kernel NULL pointer dereference, address: 0000000000000010
 #PF: supervisor read access in kernel mode
 #PF: error_code(0x0000) - not-present page
@@ -64,7 +64,7 @@ CR2: 0000000000000010
 
 ## 1. 첫 줄 — 원인
 
-```
+```text
 BUG: kernel NULL pointer dereference, address: 0000000000000010
 ```
 
@@ -88,7 +88,7 @@ BUG: kernel NULL pointer dereference, address: 0000000000000010
 
 ## 2. Page Fault 정보
 
-```
+```text
 #PF: supervisor read access in kernel mode
 #PF: error_code(0x0000) - not-present page
 ```
@@ -106,7 +106,7 @@ BUG: kernel NULL pointer dereference, address: 0000000000000010
 
 ## 3. Tainted
 
-```
+```text
 CPU: 2 PID: 1234 Comm: myprog Tainted: G        W  OE     6.5.0-...
 ```
 
@@ -119,7 +119,7 @@ CPU: 2 PID: 1234 Comm: myprog Tainted: G        W  OE     6.5.0-...
 
 ## 4. RIP — 죽은 명령
 
-```
+```text
 RIP: 0010:my_function+0x42/0x80 [my_module]
 ```
 
@@ -145,7 +145,7 @@ $ objdump -d /lib/modules/.../my_module.ko --start-address=0xN --stop-address=0x
 
 ## 5. Code — 명령 hex dump
 
-```
+```text
 Code: 41 57 41 56 41 55 41 54 53 48 83 ec 28 ...
 ```
 
@@ -162,7 +162,7 @@ $ objdump -D -b binary -m i386:x86-64 -M intel /tmp/code.bin
 
 ## 6. 레지스터
 
-```
+```text
 RAX: 0000000000000000  ← NULL!
 RDI: ffff...
 ...
@@ -175,7 +175,7 @@ CR2: 0000000000000010  ← page fault 주소
 
 ## 7. Call Trace — 콜스택
 
-```
+```text
 Call Trace:
  <TASK>
  ? show_regs+0x6e/0x80
@@ -212,7 +212,7 @@ $ ./scripts/decode_stacktrace.sh vmlinux < dmesg.txt
 
 ## 8. Modules linked in
 
-```
+```text
 Modules linked in: my_module xfs nf_conntrack ...
 ```
 
@@ -220,7 +220,7 @@ panic 시 로드된 *모든 모듈*. 의심되는 모듈 (my_module) 외에 *최
 
 ## 9. CR2
 
-```
+```text
 CR2: 0000000000000010
 ```
 
@@ -228,7 +228,7 @@ CR2: 0000000000000010
 
 ## Soft Lockup
 
-```
+```text
 watchdog: BUG: soft lockup - CPU#2 stuck for 22s! [myprog:1234]
 [register dump]
 RIP: 0010:my_busy_loop+0x10/0x40 [my_module]
@@ -241,7 +241,7 @@ RIP: 0010:my_busy_loop+0x10/0x40 [my_module]
 
 ## Hard Lockup
 
-```
+```text
 NMI watchdog: Watchdog detected hard LOCKUP on cpu 3
 [NMI로 강제 진입한 콜스택]
 ```
@@ -250,7 +250,7 @@ NMI watchdog: Watchdog detected hard LOCKUP on cpu 3
 
 ## Hung Task
 
-```
+```text
 INFO: task myprog:1234 blocked for more than 120 seconds.
 [register dump]
 RIP: 0010:schedule+0x...
@@ -265,7 +265,7 @@ D state로 *120초 이상*. dead lock 또는 *외부 응답 대기 무한*. `/pr
 
 ## KASAN report
 
-```
+```text
 ==================================================================
 BUG: KASAN: use-after-free in my_function+0x42 [my_module]
 Read of size 8 at addr ffff... by task myprog/1234
@@ -312,7 +312,7 @@ $ ./decode_stacktrace.sh /usr/lib/debug/.../vmlinux \
 
 상황: 운영 서버에서 random oops. dmesg에:
 
-```
+```text
 Oops: 0000 [#1] PREEMPT SMP PTI
 RIP: 0010:btrfs_submit_bio+0x42/0x180 [btrfs]
 RAX: 0000000000000000
@@ -323,7 +323,7 @@ RDI: ffff883456789abc
 1. `btrfs_submit_bio` 위치 = btrfs 모듈.
 2. RAX=NULL → 보통 *반환값 체크 빼먹은* 함수의 결과.
 3. `addr2line`:
-   ```
+   ```text
    fs/btrfs/disk-io.c:1234
    ```
 4. 그 소스:

@@ -432,7 +432,7 @@ CI에서 sanitizer가 깨지면 보통 다음 단계로 진단합니다.
 
 ### "Sanitizer가 동작하는데 줄 번호가 안 나옴"
 
-```
+```text
 #0 0x4012a3 in main
 #1 0x401aef in __libc_start_main
 ```

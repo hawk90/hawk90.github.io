@@ -94,7 +94,7 @@ $ llvm-dwarfdump --debug-frame my_prog | head -30
 
 각 PC 위치마다 *CFA 정의*가 바뀝니다 (프롤로그 진행).
 
-```
+```text
 PC          CFA         rbp (r6) 위치     rip (r16) 위치
 0x401130    rsp+8       (still in caller)  CFA-8
 0x401131    rsp+16      CFA-16             CFA-8     ← push rbp 후
@@ -219,7 +219,7 @@ PC 진행만 표시 → 그 PC 직전까지의 CFI는 *이전 명령*까지 유�
 
 `DW_CFA_advance_loc`이 *6-bit 인라인*. opcode 한 바이트의 *상위 2비트 = 0x40* + 하위 6비트가 delta.
 
-```
+```text
 0x40 | (delta & 0x3F)  → DW_CFA_advance_loc with small delta
 ```
 
@@ -227,7 +227,7 @@ PC 진행만 표시 → 그 PC 직전까지의 CFI는 *이전 명령*까지 유�
 
 `DW_CFA_offset`도 비슷하게 *6-bit 인라인 register*:
 
-```
+```text
 0x80 | (reg & 0x3F), uleb128 offset
 ```
 

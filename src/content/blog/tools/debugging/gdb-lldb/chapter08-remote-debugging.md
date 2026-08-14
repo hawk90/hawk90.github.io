@@ -29,7 +29,7 @@ RSP는 1989년 GDB 4.x 시절 도입된 ASCII 패킷 기반 텍스트 프로토�
 
 ### 패킷 형식
 
-```
+```text
 $<payload>#<checksum>
 ```
 
@@ -66,7 +66,7 @@ $<payload>#<checksum>
 
 `break main` + `continue`를 친 직후의 RSP 트래픽(GDB `set debug remote 1`로 노출).
 
-```
+```text
 Sending: "qSupported:multiprocess+;swbreak+;hwbreak+;..."
 Got:     "PacketSize=3fff;qXfer:features:read+;..."
 Sending: "vMustReplyEmpty"
@@ -91,7 +91,7 @@ Got:     "T05swbreak:;thread:p3039.3039;"
 
 연결 직후 첫 패킷이 `qSupported`. 상호 능력을 협상합니다.
 
-```
+```text
 GDB:  qSupported:multiprocess+;swbreak+;hwbreak+;qRelocInsn+;fork-events+;
       vfork-events+;exec-events+;vContSupported+;QThreadEvents+;no-resumed+;
       memory-tagging+;xmlRegisters=i386
@@ -288,7 +288,7 @@ ARM이 핀 수를 줄이기 위해 만든 2핀 대체. JTAG 5핀 → SWD 2핀(SW
 
 JTAG의 TAP 상태 머신 대신 *패킷 기반*. 패킷 한 단위는.
 
-```
+```text
 [Start=1][APnDP][RnW][A2..A3][Parity][Stop=0][Park=1][TRN]
 [ACK 3-bit]
 [Data 32-bit][Parity]
@@ -329,7 +329,7 @@ JTAG/SWD가 *물리 인터페이스*라면 그 위에 칩 안에서 실제 일�
 
 `monitor halt`는 *외부에서* DHCSR.C_HALT = 1을 강제로 써서 CPU를 멈추는 것.
 
-```
+```text
 DHCSR (0xE000EDF0)
 [31:16] DBGKEY (0xA05F to write)
 [25]    S_RESET_ST  (reset since last read)
@@ -619,7 +619,7 @@ ARM의 호출 규약(AAPCS):
 
 ISR(인터럽트 서비스 루틴) 진입 시 하드웨어가 stack에 *exception frame* 8개 워드를 자동 push.
 
-```
+```text
 [stack 위] xPSR
            PC
            LR
@@ -632,7 +632,7 @@ ISR(인터럽트 서비스 루틴) 진입 시 하드웨어가 stack에 *exceptio
 
 그래서 ISR 안에서 `bt`하면 정확한 frame을 풀어낼 수 있습니다. LR이 *EXC_RETURN* 값(`0xFFFFFFF9` 등)이면 ISR 안. EXC_RETURN의 비트가 *어떤 stack을 쓸지*(MSP vs PSP), *어떤 모드로 돌아갈지*를 결정.
 
-```
+```text
 EXC_RETURN 비트:
 [3] Mode   — 0=Handler, 1=Thread
 [2] SPSEL  — 0=MSP, 1=PSP
@@ -643,7 +643,7 @@ EXC_RETURN 비트:
 
 ## 베어메탈 디버깅 흐름 (한 장 요약)
 
-```
+```text
 [작성] main.c → arm-none-eabi-gcc → firmware.elf + firmware.map
 [연결] PC → USB → 프로브(ST-Link/J-Link) → SWD/JTAG → 칩 디버그 모듈
 [데몬] openocd 또는 JLinkGDBServer 가동, TCP 3333/2331 리슨

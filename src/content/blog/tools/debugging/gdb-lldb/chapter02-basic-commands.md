@@ -32,7 +32,7 @@ topics: ["tools", "tools/debugging"]
 
 ## `run` / `continue` — 시작과 진행
 
-```
+```text
 (gdb) run                    # 인자 없이 실행
 (gdb) run input.txt --verbose
 (gdb) r                      # 약어
@@ -44,7 +44,7 @@ topics: ["tools", "tools/debugging"]
 `run`은 *처음부터*, `continue`는 *멈춘 자리부터*. `continue N`으로 *N번 무시*하고 진행 가능.
 
 LLDB:
-```
+```text
 (lldb) run input.txt --verbose
 (lldb) continue
 ```
@@ -57,7 +57,7 @@ LLDB:
 
 ### 함수 이름
 
-```
+```text
 (gdb) break main             # main 함수 시작에서 멈춤
 (gdb) b main                 # 약어
 (gdb) b MyClass::method      # C++ 메서드
@@ -65,27 +65,27 @@ LLDB:
 ```
 
 LLDB:
-```
+```text
 (lldb) breakpoint set --name main
 (lldb) b main                # alias
 ```
 
 ### 파일과 줄 번호
 
-```
+```text
 (gdb) break main.c:42        # main.c의 42번째 줄
 (gdb) b parser.c:128
 ```
 
 LLDB:
-```
+```text
 (lldb) breakpoint set --file main.c --line 42
 (lldb) b main.c:42
 ```
 
 ### 조건부
 
-```
+```text
 (gdb) break main.c:42 if x > 10
 (gdb) b factorial if n == 0
 (gdb) b parser.c:50 if strcmp(buf, "ERROR") == 0
@@ -95,18 +95,18 @@ LLDB:
 
 ### 일회성 (Temporary)
 
-```
+```text
 (gdb) tbreak main           # 한 번 멈추면 자동 삭제
 ```
 
 LLDB:
-```
+```text
 (lldb) breakpoint set --one-shot --name main
 ```
 
 ### 모든 함수에 자동
 
-```
+```text
 (gdb) rbreak factorial.*    # 정규식 매칭 모든 함수에 break
 ```
 
@@ -114,7 +114,7 @@ LLDB:
 
 ### Breakpoint 관리
 
-```
+```text
 (gdb) info breakpoints      # 목록
 (gdb) i b                   # 약어
 (gdb) delete 1              # 1번 삭제
@@ -124,7 +124,7 @@ LLDB:
 ```
 
 LLDB:
-```
+```text
 (lldb) breakpoint list
 (lldb) breakpoint delete 1
 (lldb) breakpoint disable 1
@@ -173,7 +173,7 @@ int main() {
 
 ### 명령어 단위 진행
 
-```
+```text
 (gdb) stepi    # 어셈블리 한 명령씩 진입
 (gdb) si
 (gdb) nexti    # 어셈블리 한 명령 (call은 통째)
@@ -184,7 +184,7 @@ C/C++ 줄이 아니라 *기계어 한 줄*씩. *최적화된 코드*나 *디스�
 
 ### `until` — 같은 위치 반복 무시
 
-```
+```text
 (gdb) until 50    # 50번 줄까지 같은 자리에 안 멈춤
 ```
 
@@ -196,7 +196,7 @@ C/C++ 줄이 아니라 *기계어 한 줄*씩. *최적화된 코드*나 *디스�
 
 ### 기본
 
-```
+```text
 (gdb) print x
 $1 = 42
 
@@ -207,7 +207,7 @@ $2 = 100
 
 C/C++ *식 전부*가 평가 가능. 함수 호출도 됩니다 (side effect 주의).
 
-```
+```text
 (gdb) print strlen(str)
 $3 = 13
 ```
@@ -216,7 +216,7 @@ $3 = 13
 
 `$1`, `$2`처럼 *결과가 자동 번호*됩니다. 이후 참조 가능.
 
-```
+```text
 (gdb) print my_struct
 $1 = {field1 = 10, field2 = 20}
 (gdb) print $1.field1     # 이전 결과 재사용
@@ -225,7 +225,7 @@ $2 = 10
 
 ### 포맷 지정자
 
-```
+```text
 (gdb) p/x x           # 16진수
 (gdb) p/d x           # 10진수 (기본)
 (gdb) p/o x           # 8진수
@@ -236,7 +236,7 @@ $2 = 10
 ```
 
 LLDB:
-```
+```text
 (lldb) print x
 (lldb) p/x x          # 16진수
 (lldb) print --format hex x
@@ -244,14 +244,14 @@ LLDB:
 
 ### 배열·메모리
 
-```
+```text
 (gdb) print *arr@10   # arr의 10개 원소 (배열로 출력)
 (gdb) p *(int*)0x7fff1234@5  # 주소에서 5개 int
 ```
 
 ### 포인터 따라가기
 
-```
+```text
 (gdb) p *ptr          # 포인터가 가리키는 곳
 (gdb) p ptr->field    # 구조체 멤버
 (gdb) p *node->next   # 체이닝
@@ -259,7 +259,7 @@ LLDB:
 
 ### `set var` — 변수 수정
 
-```
+```text
 (gdb) set variable x = 100
 (gdb) set var x = 100        # 약어
 ```
@@ -276,7 +276,7 @@ if (x > 0) {
 
 ### `display` — 자동 출력
 
-```
+```text
 (gdb) display x
 1: x = 5
 
@@ -287,7 +287,7 @@ if (x > 0) {
 
 매 step마다 *자동으로 x값*을 보여 줌. 변수 변화를 *연속 추적*.
 
-```
+```text
 (gdb) info display     # 등록된 목록
 (gdb) undisplay 1      # 삭제
 ```
@@ -298,7 +298,7 @@ if (x > 0) {
 
 `info`는 *서브 명령*이 많습니다.
 
-```
+```text
 (gdb) info breakpoints      # 또는 i b
 (gdb) info args             # 현재 함수의 인자
 (gdb) info locals           # 현재 함수의 지역 변수
@@ -311,7 +311,7 @@ if (x > 0) {
 ```
 
 LLDB:
-```
+```text
 (lldb) breakpoint list      # = info breakpoints
 (lldb) frame variable       # = info locals + info args
 (lldb) register read        # = info registers
@@ -325,7 +325,7 @@ LLDB:
 
 ## `list` — 소스 코드 보기
 
-```
+```text
 (gdb) list           # 현재 자리 ± 5줄
 (gdb) l
 
@@ -336,7 +336,7 @@ LLDB:
 ```
 
 LLDB:
-```
+```text
 (lldb) source list
 (lldb) l --line 42 --count 20
 ```
@@ -349,7 +349,7 @@ LLDB:
 
 ### `jump` — *실행 위치 강제 변경*
 
-```
+```text
 (gdb) jump 42    # 42번 줄로 점프
 ```
 
@@ -357,7 +357,7 @@ LLDB:
 
 ### `return` — 함수 *조기 종료*
 
-```
+```text
 (gdb) return 0   # 0을 반환하고 함수 즉시 종료
 ```
 
@@ -367,7 +367,7 @@ LLDB:
 
 ## `quit` — 종료
 
-```
+```text
 (gdb) quit
 A debugging session is active.
 ...
@@ -382,14 +382,14 @@ Quit anyway? (y or n) y
 
 ## *모르는 명령일 때* — `help`
 
-```
+```text
 (gdb) help
 (gdb) help break          # 'break' 명령 상세
 (gdb) help info breakpoints
 ```
 
 LLDB:
-```
+```text
 (lldb) help
 (lldb) help breakpoint set
 (lldb) apropos crash      # crash 관련 명령 검색
@@ -427,7 +427,7 @@ end
 
 ### `~/.lldbinit`
 
-```
+```text
 settings set target.x86-disassembly-flavor intel
 settings set stop-disassembly-display always
 command alias bfl breakpoint set --file %1 --line %2

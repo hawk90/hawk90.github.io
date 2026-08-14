@@ -85,7 +85,7 @@ cgdb는 GDB를 *서브프로세스*로 띄우고 stdin/stdout을 가로챕니다
 
 GDB 내장 TUI보다 *훨씬* 안정적입니다. 패키지 매니저로 바로 설치되므로 첫 선택지로 추천.
 
-```
+```text
 ~/.cgdb/cgdbrc            # 설정
 set winminheight=3
 set winsplit=top_big
@@ -227,7 +227,7 @@ Neovim 안에서 디버그 패널 띄우고, REPL로 표현식 평가. Vim 키�
 
 VSCode·Neovim·Emacs(dap-mode)·Sublime·Helix가 모두 *같은* DAP를 씁니다. 따라서 한 어댑터(`cppdbg`)를 설치하면 어느 에디터든 동일한 디버깅 경험을 얻을 수 있습니다. RSP가 *디버거 ↔ 타깃* 표준이라면 DAP는 *IDE ↔ 디버거* 표준.
 
-```
+```text
 [에디터] ← DAP → [adapter (예: cppdbg)] ← MI → [GDB]
                                               ↑ RSP
                                             [gdbserver / OpenOCD]

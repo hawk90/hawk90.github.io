@@ -133,7 +133,7 @@ $1 = {si_signo = 11, si_errno = 0, si_code = 1,
 
 ### 정확한 진단
 
-```
+```text
 SIGSEGV + si_code=1 (MAPERR) + si_addr=0x0  → NULL 역참조
 SIGSEGV + si_code=1 + si_addr=high address  → 손상된 포인터
 SIGSEGV + si_code=2 (ACCERR)                → 권한 (RO에 쓰기)

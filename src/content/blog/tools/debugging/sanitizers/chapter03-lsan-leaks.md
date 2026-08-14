@@ -23,7 +23,7 @@ void leak_demo() {
 
 LSan(`LeakSanitizer`)은 *프로세스 종료 시점*에 살아 있는 모든 할당을 검사해 *어떤 할당이 회수되지 않았는지* 보고합니다.
 
-```
+```text
 =================================================================
 ==12345==ERROR: LeakSanitizer: detected memory leaks
 
@@ -150,7 +150,7 @@ ASAN_OPTIONS=detect_leaks=1 ./myapp
 
 ### LSan suppression 파일
 
-```
+```text
 # lsan.supp
 leak:libcrypto.so
 leak:libssl.so
@@ -166,7 +166,7 @@ LSAN_OPTIONS=suppressions=lsan.supp ./myapp
 
 ### 패턴
 
-```
+```text
 # 함수명
 leak:my_known_leaking_function
 
@@ -188,7 +188,7 @@ LSAN_OPTIONS=suppressions=lsan.supp:print_suppressions=1 ./myapp
 
 이렇게 하면 *suppression에 의해 가려진 누수의 개수*가 출력됩니다. 어느 라이브러리에서 얼마나 누수가 발생하는지 *통계*는 보고 싶을 때 유용합니다.
 
-```
+```text
 -----------------------------------------------------
 Suppressions used:
   count      bytes template

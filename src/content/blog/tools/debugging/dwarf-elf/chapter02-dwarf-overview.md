@@ -177,7 +177,7 @@ DWARF 4까지는 `version=4, abbrev, addr_size`. DWARF 5에서 `unit_type` 추�
 
 ### CU 종류 (DWARF 5)
 
-```
+```text
 DW_UT_compile      일반
 DW_UT_type         타입 정의 전용 (.debug_types)
 DW_UT_partial      partial CU (include)
@@ -458,7 +458,7 @@ C++ 특수.
 
 DWARF는 *작은 정수를 짧게* 표현하려고 LEB128(Little Endian Base 128)을 광범위 사용.
 
-```
+```text
 값을 7-bit 청크로 나누어 little-endian으로:
   마지막 청크는 MSB=0
   나머지는 MSB=1 (continue)

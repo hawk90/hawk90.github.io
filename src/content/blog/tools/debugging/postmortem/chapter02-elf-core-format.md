@@ -280,7 +280,7 @@ $ readelf -n core | grep -A 30 NT_AUXV
 
 각 PT_LOAD가 *한 메모리 영역*. `coredump_filter`로 결정된 영역들.
 
-```
+```text
 PT_LOAD                     ← 한 매핑 영역
   Offset:    파일 오프셋
   VirtAddr:  메모리 주소

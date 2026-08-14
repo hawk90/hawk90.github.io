@@ -13,7 +13,7 @@ topics: ["tools", "tools/debugging"]
 
 Valgrind를 실제 프로젝트에서 돌리면 *반드시* 만나는 패턴이 있습니다.
 
-```
+```text
 ==12345== Conditional jump or move depends on uninitialised value(s)
 ==12345==    at 0x4012A3: do_handshake
 ==12345==    by 0x40128F: OpenSSL_init
@@ -30,7 +30,7 @@ Valgrind를 실제 프로젝트에서 돌리면 *반드시* 만나는 패턴이 
 
 ## Suppression 문법
 
-```
+```text
 {
    <suppression name>
    <error kind>
@@ -46,7 +46,7 @@ Valgrind를 실제 프로젝트에서 돌리면 *반드시* 만나는 패턴이 
 
 ### 첫 줄 — 이름
 
-```
+```text
 {
    IgnoreOpenSSL_HandshakeUninit
    ...
@@ -86,7 +86,7 @@ Valgrind를 실제 프로젝트에서 돌리면 *반드시* 만나는 패턴이 
 
 `Memcheck:Leak`만 별도 옵션을 받습니다.
 
-```
+```text
 Memcheck:Leak
 match-leak-kinds: definite,indirect,possible,reachable
 ```
@@ -95,7 +95,7 @@ match-leak-kinds: definite,indirect,possible,reachable
 
 ### 호출 트레이스
 
-```
+```text
 fun:OpenSSL_init
 fun:main
 ```
@@ -121,7 +121,7 @@ fun:main
 
 ### 예 1: 외부 라이브러리 누수 무시
 
-```
+```text
 {
    OpenSSL Leak in libcrypto
    Memcheck:Leak
@@ -136,7 +136,7 @@ fun:main
 
 ### 예 2: 특정 함수의 미초기화 무시
 
-```
+```text
 {
    ThirdParty UninitValue
    Memcheck:Cond
@@ -148,7 +148,7 @@ fun:main
 
 ### 예 3: 시스템 라이브러리 전체 무시
 
-```
+```text
 {
    GLIBC dl_init
    Memcheck:Cond
@@ -161,7 +161,7 @@ glibc의 동적 로더 초기화 자리. *프로세스 시작 시 한 번* 등�
 
 ### 예 4: pthread 자체의 race
 
-```
+```text
 {
    pthread internal race
    Helgrind:Race
@@ -184,7 +184,7 @@ valgrind --leak-check=full --gen-suppressions=all ./myapp 2>&1 | tee vg.out
 
 각 보고서 끝에 *suppression 템플릿*이 같이 출력됩니다.
 
-```
+```text
 ==12345== 40 bytes in 1 blocks are definitely lost in loss record 1 of 1
 ==12345==    at 0x483977F: malloc
 ==12345==    by 0x10918A: main (leak.c:5)
@@ -203,7 +203,7 @@ valgrind --leak-check=full --gen-suppressions=all ./myapp 2>&1 | tee vg.out
 2. *프레임을 좁히거나 넓힘* (필요에 따라).
 3. *와일드카드*로 일반화.
 
-```
+```text
 {
    IgnoreThirdPartyInit
    Memcheck:Leak
@@ -217,7 +217,7 @@ valgrind --leak-check=full --gen-suppressions=all ./myapp 2>&1 | tee vg.out
 
 ## *너무 넓은* suppression의 위험
 
-```
+```text
 {
    IgnoreAllMallocFromMain
    Memcheck:Leak
@@ -236,7 +236,7 @@ valgrind --leak-check=full --gen-suppressions=all ./myapp 2>&1 | tee vg.out
 
 좋은 suppression:
 
-```
+```text
 {
    libcrypto_OpenSSL_init_known_leak
    Memcheck:Leak
@@ -262,7 +262,7 @@ valgrind --leak-check=full \
 
 출력 끝에:
 
-```
+```text
 ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 47 from 12)
 ```
 
@@ -276,7 +276,7 @@ ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 47 from 12)
 
 Valgrind는 *시스템 라이브러리의 알려진 false positive*에 대한 *기본 suppression*을 가지고 있습니다.
 
-```
+```text
 /usr/lib/valgrind/default.supp
 ```
 

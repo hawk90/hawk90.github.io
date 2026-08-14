@@ -330,7 +330,7 @@ Value run_expr_vm(Bytes expr) {
 
 이전 DWARF는 *모든 산술이 generic 64-bit*. DWARF 5는 *typed* opcode:
 
-```
+```text
 DW_OP_const_type    <type_die>, <byte_size>, <bytes>
 DW_OP_regval_type   <reg>, <type_die>
 DW_OP_deref_type    <byte_size>, <type_die>

@@ -69,7 +69,7 @@ valgrind --tool=helgrind ./myapp
 
 ### 보고서 예시 — 데이터 레이스
 
-```
+```text
 Possible data race during write of size 4 at 0x10c020 by thread #2
    at 0x40119A: increment (race.c:8)
    by 0x40120F: thread_run (race.c:15)
@@ -103,7 +103,7 @@ void buggy() {
 
 Helgrind는 *unlock 안 된 락*을 추적합니다.
 
-```
+```text
 Thread #1's call to pthread_mutex_lock failed
    ...
 ```
@@ -122,7 +122,7 @@ std::lock_guard<std::mutex> b(m2);
 std::lock_guard<std::mutex> a(m1);   // m2 → m1 ← 데드락 위험
 ```
 
-```
+```text
 Thread #2: lock order "m1 before m2" violated
    ...
 This required order was established by acquisition of lock at 0x... 
@@ -137,7 +137,7 @@ This required order was established by acquisition of lock at 0x...
 
 DRD는 *Lamport's vector clock* 알고리즘으로 *시간 순서*를 추적합니다.
 
-```
+```text
        T1: a=1
         \
          sem_post
@@ -208,7 +208,7 @@ valgrind --tool=drd ./myapp 2>&1 | tee drd.log
 
 Helgrind와 DRD는 *Memcheck보다 약간 더 느림*. 보통 20~50× 정도.
 
-```
+```text
 일반 실행:           1초
 Memcheck:           10~50초
 Helgrind:           30~100초
@@ -270,7 +270,7 @@ pthread_detach(t);
 pthread_join(t, NULL);    // ❌ 이미 detach됨
 ```
 
-```
+```text
 Thread #1: pthread_join: error code 22 (EINVAL): joining a detached thread
 ```
 

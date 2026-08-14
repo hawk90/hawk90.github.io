@@ -181,7 +181,7 @@ class VectorPrinter:
 
 `libfoo.so`와 같은 디렉터리에 `libfoo.so-gdb.py` 두면 GDB가 라이브러리 로드 시 *자동 source*.
 
-```
+```text
 /usr/lib/libfoo.so
 /usr/lib/libfoo.so-gdb.py    ← 자동 로드
 ```

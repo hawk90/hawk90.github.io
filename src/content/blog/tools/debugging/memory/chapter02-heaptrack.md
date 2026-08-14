@@ -61,7 +61,7 @@ $ heaptrack_gui heaptrack.myprog.12345.zst
 
 ## heaptrack_print 출력
 
-```
+```text
 MOST CALLED FUNCTIONS
 1234567 calls to:
     operator new(unsigned long)

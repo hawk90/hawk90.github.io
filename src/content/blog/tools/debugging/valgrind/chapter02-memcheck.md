@@ -82,7 +82,7 @@ if (x > 0) { /* ... */ }   // Memcheck: Conditional jump depends on uninitialize
 valgrind --track-origins=yes ./myapp
 ```
 
-```
+```text
 Conditional jump or move depends on uninitialised value(s)
    at 0x40115E: main (test.c:5)
  Uninitialised value was created by a stack allocation
@@ -137,7 +137,7 @@ valgrind --gen-suppressions=all ./myapp
 
 각 보고서마다 *suppression 템플릿*을 함께 출력합니다.
 
-```
+```text
 {
    <insert_a_suppression_name_here>
    Memcheck:Leak
@@ -233,7 +233,7 @@ gcc -O2 main.c -o myapp        # 최적화 → 줄 번호가 부정확
 
 `-g`가 *필수*입니다. 없으면 보고서가 *주소만* 나옵니다.
 
-```
+```text
 ==12345== at 0x4012a3: ??? (in /path/to/myapp)
 ```
 
@@ -299,7 +299,7 @@ p[10] = 'x';   // ❌ off-by-one
 free(p);
 ```
 
-```
+```text
 ==12345== Invalid write of size 1
 ==12345==    at 0x10918A: main (main.c:5)
 ==12345==  Address 0x4a0c04a is 0 bytes after a block of size 10 alloc'd

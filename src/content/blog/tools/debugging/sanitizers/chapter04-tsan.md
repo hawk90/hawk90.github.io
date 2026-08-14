@@ -27,7 +27,7 @@ std::cout << counter;   // 2 또는 1
 
 `ThreadSanitizer(TSan)`은 이런 *잠재된 데이터 레이스*를 *실행 중에* 감지합니다.
 
-```
+```text
 WARNING: ThreadSanitizer: data race (pid=12345)
   Write of size 4 at 0x7f8c1a000000 by thread T2:
     #0 increment_counter main.cc:5 (myapp+0x4012a3)
@@ -127,7 +127,7 @@ int main() {
 }
 ```
 
-```
+```text
 WARNING: ThreadSanitizer: data race (pid=12345)
   Write of size 8 at 0x7f8c... by thread T2:
     #0 std::_Rb_tree_insert in <header>
@@ -180,7 +180,7 @@ TSan은 *모든 코드가 계측되어 있다고 가정*합니다. 외부 라이
 - **libstdc++/libc++**: 보통 잘 동작. 안 되면 *TSan-instrumented 빌드*가 필요.
 - **외부 C 라이브러리**: suppression으로 해당 라이브러리 무시.
 
-```
+```text
 # tsan.supp
 race:libcurl.so
 race:OpenSSL_*
@@ -258,7 +258,7 @@ std::cout << g_config.name;  // 동기화 없는 읽기
 
 ## Suppression — TSan용
 
-```
+```text
 # tsan.supp
 race:race_in_third_party_lib
 deadlock:Foo::lock
@@ -358,7 +358,7 @@ void thread_b() {
 
 TSan은 *락 순서의 일관성*을 추적해 *역순*이 가능한 자리를 경고합니다.
 
-```
+```text
 WARNING: ThreadSanitizer: lock-order-inversion (potential deadlock)
 ```
 

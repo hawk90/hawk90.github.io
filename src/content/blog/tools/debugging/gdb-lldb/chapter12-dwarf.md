@@ -284,7 +284,7 @@ GDB는 `print x`에 `42`로 답합니다. 메모리 어디에도 없지만 값�
 
 각 PC 위치에서.
 
-```
+```text
 CFA (Canonical Frame Address) = rsp + offset
 또는 = rbp + offset
 또는 = 다른 표현식

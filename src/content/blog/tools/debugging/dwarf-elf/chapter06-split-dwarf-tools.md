@@ -450,7 +450,7 @@ DWARF 6는 2024년 작성 중 (작은 변경). DWARF 7은 *형식 인덱싱*과 
 대규모 운영 환경의 표준.
 
 1. **빌드 옵션**
-   ```
+   ```text
    -g3 -gdwarf-5 -gsplit-dwarf
    -fno-omit-frame-pointer
    --build-id=sha1

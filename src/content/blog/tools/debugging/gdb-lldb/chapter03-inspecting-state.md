@@ -27,7 +27,7 @@ topics: ["tools", "tools/debugging"]
 
 GDB의 가장 강력한 명령 중 하나. *임의 주소의 메모리*를 *원하는 형식*으로 봅니다.
 
-```
+```text
 x/[N][f][u] addr
 
 N: 출력 개수
@@ -37,7 +37,7 @@ u: 단위 (b=byte, h=halfword, w=word, g=giant)
 
 ### 예시
 
-```
+```text
 (gdb) x/16xb 0x7fff1234       # 16바이트를 byte 단위 16진수로
 0x7fff1234:  0x48  0x65  0x6c  0x6c  0x6f  0x2c  0x20  0x77
 0x7fff123c:  0x6f  0x72  0x6c  0x64  0x00  0x00  0x00  0x00
@@ -80,7 +80,7 @@ u: 단위 (b=byte, h=halfword, w=word, g=giant)
 
 ### LLDB의 동등 명령
 
-```
+```text
 (lldb) memory read --format hex --size 1 --count 16 0x7fff1234
 (lldb) memory read --format string 0x7fff1234
 (lldb) memory read -fc 0x7fff1234     # alias
@@ -93,7 +93,7 @@ LLDB는 *GDB의 `x` 문법을 alias로 지원*합니다. 같은 문자열을 양
 
 ## `ptype` / `whatis` — 타입 정보
 
-```
+```text
 (gdb) ptype my_struct
 type = struct Point {
     int x;
@@ -110,7 +110,7 @@ type = std::vector<int, std::allocator<int>>
 
 `ptype`은 *전체 정의*, `whatis`는 *타입 이름만*. 외부 라이브러리의 구조체를 *처음 만났을 때* 매우 유용.
 
-```
+```text
 (gdb) ptype /o my_struct      # offset 함께 (멤버 위치)
 type = struct Point {
 /*  0     |     4 */    int x;
@@ -123,7 +123,7 @@ type = struct Point {
 `/o` 옵션이 *각 멤버의 byte offset*과 *크기*를 같이 보여 줍니다. *메모리 레이아웃 디버깅*에 결정적.
 
 LLDB:
-```
+```text
 (lldb) type lookup Point
 (lldb) frame variable --raw my_struct
 ```
@@ -132,7 +132,7 @@ LLDB:
 
 ## `info registers` — 레지스터
 
-```
+```text
 (gdb) info registers
 rax  0x55555555515f  93824992293215
 rbx  0x0  0
@@ -160,7 +160,7 @@ ss  0x2b  43
 - **`rax`** — *반환값* 자리 (System V ABI).
 - **`rdi`, `rsi`, `rdx`, `rcx`, `r8`, `r9`** — *함수 인자* 1~6번째.
 
-```
+```text
 (gdb) print $rax              # 레지스터를 변수처럼 참조
 $1 = 0x55555555515f
 
@@ -168,7 +168,7 @@ $1 = 0x55555555515f
 ```
 
 LLDB:
-```
+```text
 (lldb) register read
 (lldb) register read rax rip
 (lldb) print $rax             # 동일
@@ -176,7 +176,7 @@ LLDB:
 
 ### 어셈블리 + 레지스터 보기
 
-```
+```text
 (gdb) disassemble
 Dump of assembler code for function main:
    0x000055555555513f <+0>:     push   %rbp
@@ -200,7 +200,7 @@ std::vector<int> v = {1, 2, 3, 4, 5};
 
 기본 `print`로 보면:
 
-```
+```text
 (gdb) print v
 $1 = std::vector of length 5, capacity 5 = {1, 2, 3, 4, 5}
 ```
@@ -209,14 +209,14 @@ $1 = std::vector of length 5, capacity 5 = {1, 2, 3, 4, 5}
 
 ### pretty printer가 안 보일 때
 
-```
+```text
 (gdb) print v
 $1 = {_M_impl = {<std::allocator<int>> = {<__gnu_cxx::new_allocator<int>>...
 ```
 
 이런 *내부 구현 그대로* 나오면 pretty printer 비활성화 상태.
 
-```
+```text
 (gdb) info pretty-printer
 ```
 
@@ -224,7 +224,7 @@ $1 = {_M_impl = {<std::allocator<int>> = {<__gnu_cxx::new_allocator<int>>...
 
 ### LLDB의 STL
 
-```
+```text
 (lldb) print v
 (std::vector<int, std::allocator<int> >) $0 = size=5 {
   [0] = 1
@@ -239,7 +239,7 @@ LLDB는 *기본 빌트인 formatter*가 있어 별도 설정 불필요. *libc++*
 
 ### 자주 보는 STL 컨테이너
 
-```
+```text
 (gdb) print my_map
 $1 = std::map with 3 elements = {[1] = "one", [2] = "two", [3] = "three"}
 
@@ -261,7 +261,7 @@ $6 = std::unique_ptr<int> = {get() = 0x55555555a2b0}
 
 `std::unique_ptr` 안의 값 보기:
 
-```
+```text
 (gdb) print *my_unique_ptr
 $7 = 42
 ```
@@ -279,7 +279,7 @@ struct Node {
 };
 ```
 
-```
+```text
 (gdb) print head
 $1 = (Node *) 0x55555555a000
 
@@ -295,7 +295,7 @@ $4 = {value = 3, next = 0x0}
 
 *하나씩 따라가는 게 귀찮으면* — GDB 스크립트 사용 ([Ch 9](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting)).
 
-```
+```text
 (gdb) set $p = head
 (gdb) while $p != 0
  >print $p->value
@@ -312,7 +312,7 @@ $7 = 3
 
 ## *연결 리스트 길이* 측정
 
-```
+```text
 (gdb) set $count = 0
 (gdb) set $p = head
 (gdb) while $p != 0
@@ -338,14 +338,14 @@ Base* p = new Derived();
 
 `p`를 print하면 *Base 멤버만* 보입니다.
 
-```
+```text
 (gdb) print *p
 $1 = {_vptr.Base = 0x...}
 ```
 
 *실제 타입은 Derived*인데. *동적 타입 캐스트*로 해결.
 
-```
+```text
 (gdb) set print object on
 (gdb) print *p
 $2 = (Derived) {<Base> = {_vptr.Base = 0x...}, extra = 42}
@@ -355,7 +355,7 @@ $2 = (Derived) {<Base> = {_vptr.Base = 0x...}, extra = 42}
 
 또는:
 
-```
+```text
 (gdb) print *(Derived*)p
 $3 = {<Base> = ..., extra = 42}
 ```
@@ -366,7 +366,7 @@ $3 = {<Base> = ..., extra = 42}
 
 ## 메모리 *비교* — `compare-sections`
 
-```
+```text
 (gdb) compare-sections
 ```
 
@@ -376,7 +376,7 @@ $3 = {<Base> = ..., extra = 42}
 
 ## `find` — *값으로 메모리 검색*
 
-```
+```text
 (gdb) find 0x7fff1000, 0x7fff2000, 0x12345678
 0x7fff1234
 1 pattern found.
@@ -384,7 +384,7 @@ $3 = {<Base> = ..., extra = 42}
 
 `0x7fff1000`부터 `0x7fff2000`까지 *4바이트 값 `0x12345678`*을 검색.
 
-```
+```text
 (gdb) find /b 0x7fff1000, +1024, 'A', 'B', 'C'
 0x7fff1456
 ```
@@ -392,7 +392,7 @@ $3 = {<Base> = ..., extra = 42}
 `/b`(byte)로 *바이트 시퀀스 "ABC"*를 검색. 패턴 매칭으로 *메모리에서 알려진 값* 찾기.
 
 LLDB:
-```
+```text
 (lldb) memory find -s "ABC" 0x7fff1000 0x7fff2000
 ```
 
@@ -400,7 +400,7 @@ LLDB:
 
 ## 문자열 안의 문자 코드
 
-```
+```text
 (gdb) print "hello"[2]
 $1 = 0x6c 'l'
 
@@ -414,13 +414,13 @@ C/C++ 문자열을 *코드 포인트*로 보고 싶을 때. ASCII 코드를 알�
 
 ## `dump` / `restore` — 메모리 *저장과 복원*
 
-```
+```text
 (gdb) dump binary memory dump.bin 0x7fff1000 0x7fff2000
 ```
 
 *0x7fff1000 ~ 0x7fff2000* 메모리를 *binary 파일*로 저장. 나중에 *외부 도구로 분석*하거나 *디버깅 세션 간 복원*.
 
-```
+```text
 (gdb) restore dump.bin binary 0x7fff1000
 ```
 
@@ -436,7 +436,7 @@ size_t length(const char* s);
 
 GDB에서 `print length(my_str)`을 하면 *진짜 함수가 호출*됩니다. 디버거 안에서 *Side effect*가 생길 수 있음:
 
-```
+```text
 (gdb) print add(1, 2)      # 정상
 $1 = 3
 
@@ -449,7 +449,7 @@ $1 = 3
 
 ## *최적화된 변수* — "optimized out"
 
-```
+```text
 (gdb) print x
 $1 = <optimized out>
 ```

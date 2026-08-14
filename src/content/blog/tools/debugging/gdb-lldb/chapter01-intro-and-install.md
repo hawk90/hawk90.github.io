@@ -262,7 +262,7 @@ $ gcc -g -O0 hello.c -o hello
 
 ### GDB 세션
 
-```
+```text
 $ gdb ./hello
 GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
 ...
@@ -306,7 +306,7 @@ Continuing.
 
 ### LLDB 세션
 
-```
+```text
 $ lldb ./hello
 (lldb) target create "./hello"
 Current executable set to '/tmp/hello' (x86_64).
@@ -362,7 +362,7 @@ Process 12345 exited with status = 0
 
 ### "No symbol table is loaded"
 
-```
+```text
 (gdb) break main
 No symbol table is loaded.  Use the "file" command.
 ```
@@ -382,7 +382,7 @@ gcc -g hello.c -o hello
 
 ### macOS GDB의 "unable to find Mach task port"
 
-```
+```text
 $ gdb ./hello
 (gdb) run
 Unable to find Mach task port for process-id...
@@ -394,7 +394,7 @@ Unable to find Mach task port for process-id...
 
 ### "Operation not permitted"
 
-```
+```text
 $ gdb -p 12345
 ptrace: Operation not permitted.
 ```

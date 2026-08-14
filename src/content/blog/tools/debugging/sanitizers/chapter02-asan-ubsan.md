@@ -65,7 +65,7 @@ Sanitizer가 에러를 보고할 때, *어디서 발생했는지*를 알려면 �
 
 `-fno-omit-frame-pointer`는 이걸 강제로 끄고 *완전한 트레이스*를 보장합니다.
 
-```
+```text
 ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
     #0 main.c:42 in process_data
     #1 main.c:67 in run_pipeline
@@ -90,7 +90,7 @@ ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
 
 Sanitizer 보고서가 *파일명·줄 번호*를 보여 주려면 `-g`가 필요합니다. 없으면 주소만 찍힙니다.
 
-```
+```text
 # -g 없이
 #0 0x40123f in process_data
 #1 0x401aef in run_pipeline
