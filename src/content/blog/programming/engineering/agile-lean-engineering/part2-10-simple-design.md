@@ -1,8 +1,8 @@
 ---
 title: "Part 2-10: Simple Design — 4 rules"
 date: 2026-05-20T18:00:00
-description: "Beck의 4 simple design rules — passes tests, reveals intention, no duplication, fewest elements.'
-series: 'Agile & Lean Software Engineering"
+description: "Beck의 4 simple design rules — passes tests, reveals intention, no duplication, fewest elements."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 18
 tags: [agile, xp, simple-design, ooaod]
 type: book-review

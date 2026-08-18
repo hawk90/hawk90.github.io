@@ -1,8 +1,8 @@
 ---
 title: "Agile & Lean Software Engineering: 서문"
 date: 2026-05-20T00:00:00
-description: "Agile Manifesto부터 XP·Scrum·Kanban·Lean·CD·DevOps·Accelerate·Team Topologies까지 155편 종합 시리즈. 30+권 정전(canon)을 한 자리에 묶어 실무에 즉시 적용할 수 있는 cookbook.'
-series: 'Agile & Lean Software Engineering"
+description: "Agile Manifesto부터 XP·Scrum·Kanban·Lean·CD·DevOps·Accelerate·Team Topologies까지 155편 종합 시리즈. 30+권 정전(canon)을 한 자리에 묶어 실무에 즉시 적용할 수 있는 cookbook."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 0
 tags: [agile, lean, xp, scrum, kanban, devops, cd, accelerate]
 type: tech

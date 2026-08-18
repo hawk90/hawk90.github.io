@@ -1,8 +1,8 @@
 ---
 title: "Part 6-10: Release Planning — velocity 기반"
 date: 2026-05-23T17:00:00
-description: "velocity로 release date 예측 — burndown forecast.'
-series: 'Agile & Lean Software Engineering"
+description: "velocity로 release date 예측 — burndown forecast."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 89
 tags: [agile, release-planning, velocity]
 type: book-review

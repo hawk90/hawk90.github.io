@@ -1,8 +1,8 @@
 ---
 title: "Part 2-13: Collective Code Ownership"
 date: 2026-05-20T21:00:00
-description: "모두가 모든 코드를 고칠 수 있다 — 함정과 대안.'
-series: 'Agile & Lean Software Engineering"
+description: "모두가 모든 코드를 고칠 수 있다 — 함정과 대안."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 21
 tags: [agile, xp, collective-ownership, code-review]
 type: book-review

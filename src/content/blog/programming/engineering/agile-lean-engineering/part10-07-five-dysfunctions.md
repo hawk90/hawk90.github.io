@@ -1,8 +1,8 @@
 ---
 title: "Part 10-07: Five Dysfunctions of a Team"
 date: 2026-05-20T13:00:00
-description: "Absence of Trust·Fear of Conflict·Lack of Commitment·Avoidance of Accountability·Inattention to Results.'
-series: 'Agile & Lean Software Engineering"
+description: "Absence of Trust·Fear of Conflict·Lack of Commitment·Avoidance of Accountability·Inattention to Results."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 136
 tags: [team, lencioni, dysfunctions]
 type: book-review

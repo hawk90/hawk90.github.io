@@ -11,14 +11,14 @@
 - Unknown metadata values: 0
 - Explicit/path conflicts: 0
 - Unregistered path buckets: 175
-- Review as series: 173
-- Review as topic: 2
+- Review as series: 174
+- Review as topic: 1
 
 ## Taxonomy expansion candidates
 
 > These are folder buckets below the deepest registered topic. They are candidates, not automatic categories: create one only when it represents a stable reader-facing domain.
 
-- `programming/engineering/agile-lean-engineering` — 156 documents; 1 series; review-as-topic (Agile & Lean Software Engineering: 3/156, 1.9%); 153 without a series. No single named series accounts for 80% of documents; review as a potential stable reader-facing topic before creating a category.
+- `programming/engineering/agile-lean-engineering` — 156 documents; 1 series; review-as-series (Agile & Lean Software Engineering: 156/156, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `embedded/modern-recipes` — 152 documents; 1 series; review-as-series (Modern Embedded Recipes: 152/152, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/engineering/pragmatic-programmer` — 100 documents; 1 series; review-as-series (The Pragmatic Programmer: 100/100, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/code-review/folly` — 89 documents; 1 series; review-as-series (Folly Code Review: 89/89, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.

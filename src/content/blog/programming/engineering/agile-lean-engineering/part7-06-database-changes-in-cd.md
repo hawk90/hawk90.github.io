@@ -1,8 +1,8 @@
 ---
 title: "Part 7-06: Database Changes in CD — schema migration"
 date: 2026-05-23T23:00:00
-description: "DB schema의 zero-downtime migration — expand-contract 패턴.'
-series: 'Agile & Lean Software Engineering"
+description: "DB schema의 zero-downtime migration — expand-contract 패턴."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 95
 tags: [cd, database, migration]
 type: book-review
