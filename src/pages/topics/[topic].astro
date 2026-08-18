@@ -1,37 +1,48 @@
 ---
-import BaseLayout from '../../layouts/BaseLayout.astro';
-import TopicHub from '../../components/topics/TopicHub.astro';
-import {
-  getBlogContentManifest,
-  assertTopicHubIntegrity,
-  getTopicHubQuery,
-  getTopicHubDefinition,
-  TOPIC_HUBS,
-} from '../../lib/content';
+import { SITE_CONFIG } from '../../consts/config';
 
-export async function getStaticPaths() {
-  return TOPIC_HUBS.filter((hub) => hub.isPublished).map((hub) => ({
-    params: { topic: hub.id },
-    props: { hubId: hub.id },
+/**
+ * Retired Topic Hub URLs.
+ *
+ * `/topics/pcie-cxl/` was published, so it stays reachable. The hub itself is
+ * gone: it was a second cross-series curation axis next to learning paths, and
+ * its one published page duplicated part 9 of the computer-from-scratch path —
+ * same series, same Enumeration → BAR → DMA → Interrupt framing.
+ *
+ * GitHub Pages has no server-side redirects, so this is a meta-refresh shim of
+ * the same shape as /random. It carries a canonical to the destination rather
+ * than to itself, because unlike /random this URL really is a stand-in for one
+ * specific page, and noindex so the shim does not compete with it.
+ */
+export function getStaticPaths() {
+  // Declared inside getStaticPaths: Astro compiles it into its own chunk, so a
+  // const in the frontmatter is not in scope there.
+  const retiredHubs: Record<string, string> = {
+    'pcie-cxl': '/paths/computer-from-scratch',
+  };
+  return Object.entries(retiredHubs).map(([topic, destination]) => ({
+    params: { topic },
+    props: { destination },
   }));
 }
 
-interface Props {
-  hubId: string;
-}
-
-const { hubId } = Astro.props;
-const hub = getTopicHubDefinition(hubId);
-if (!hub) throw new Error(`Unknown Topic Hub: ${hubId}`);
-
-const manifest = await getBlogContentManifest();
-assertTopicHubIntegrity(manifest);
-const query = getTopicHubQuery(manifest, hub.id, hub.categoryIds, hub.startHereIds);
-const relatedHubs = hub.relatedTopicIds
-  .map((id) => getTopicHubDefinition(id))
-  .filter((related): related is NonNullable<typeof related> => Boolean(related?.isPublished));
+const { destination } = Astro.props;
+const canonical = new URL(destination, SITE_CONFIG.url).toString();
 ---
 
-<BaseLayout title={hub.label} description={hub.summary}>
-  <TopicHub hub={hub} query={query} relatedHubs={relatedHubs} />
-</BaseLayout>
+<!doctype html>
+<html lang="ko">
+  <head>
+    <meta charset="utf-8" />
+    <title>학습경로로 이동합니다</title>
+    <meta name="robots" content="noindex" />
+    <link rel="canonical" href={canonical} />
+    <meta http-equiv="refresh" content={`0; url=${destination}`} />
+  </head>
+  <body>
+    <p>
+      이 주제 페이지는 학습경로로 합쳐졌습니다 —
+      <a href={destination}>이어서 보기</a>.
+    </p>
+  </body>
+</html>

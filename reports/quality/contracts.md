@@ -7,7 +7,7 @@
 - PASS search-publication-filter
 - PASS search-canonical-id
 - PASS verification-separate-from-updated
-- PASS published-hub-draft-guard
+- PASS curated-guides-must-resolve
 - PASS search-escape-close
 - PASS reduced-motion-contract
 - PASS preview-production-contract
