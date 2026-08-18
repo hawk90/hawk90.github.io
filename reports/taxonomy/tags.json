@@ -1,0 +1,397 @@
+{
+  "publishedPosts": 726,
+  "totalPosts": 3387,
+  "pageMin": 2,
+  "publishedUrlKeys": 1465,
+  "renderedTagPages": 468,
+  "keysBelowPageThreshold": 997,
+  "keysOnlyInDrafts": 3305,
+  "conceptSplits": 10,
+  "labelInconsistencies": 30,
+  "tagsWithWhitespace": 0,
+  "splits": [
+    {
+      "concept": "cpp",
+      "keys": [
+        {
+          "key": "cpp",
+          "count": 219
+        },
+        {
+          "key": "c++",
+          "count": 9
+        }
+      ],
+      "total": 228
+    },
+    {
+      "concept": "baremetal",
+      "keys": [
+        {
+          "key": "bare-metal",
+          "count": 14
+        },
+        {
+          "key": "baremetal",
+          "count": 2
+        }
+      ],
+      "total": 16
+    },
+    {
+      "concept": "devicetree",
+      "keys": [
+        {
+          "key": "device-tree",
+          "count": 3
+        },
+        {
+          "key": "devicetree",
+          "count": 3
+        }
+      ],
+      "total": 6
+    },
+    {
+      "concept": "riscv",
+      "keys": [
+        {
+          "key": "riscv",
+          "count": 4
+        },
+        {
+          "key": "risc-v",
+          "count": 2
+        }
+      ],
+      "total": 6
+    },
+    {
+      "concept": "asyncio",
+      "keys": [
+        {
+          "key": "async-io",
+          "count": 1
+        },
+        {
+          "key": "asyncio",
+          "count": 1
+        }
+      ],
+      "total": 2
+    },
+    {
+      "concept": "debuginfo",
+      "keys": [
+        {
+          "key": "debug-info",
+          "count": 1
+        },
+        {
+          "key": "debuginfo",
+          "count": 1
+        }
+      ],
+      "total": 2
+    },
+    {
+      "concept": "hotplug",
+      "keys": [
+        {
+          "key": "hot-plug",
+          "count": 1
+        },
+        {
+          "key": "hotplug",
+          "count": 1
+        }
+      ],
+      "total": 2
+    },
+    {
+      "concept": "stacktrace",
+      "keys": [
+        {
+          "key": "stack-trace",
+          "count": 1
+        },
+        {
+          "key": "stacktrace",
+          "count": 1
+        }
+      ],
+      "total": 2
+    },
+    {
+      "concept": "tfm",
+      "keys": [
+        {
+          "key": "tf-m",
+          "count": 1
+        },
+        {
+          "key": "tfm",
+          "count": 1
+        }
+      ],
+      "total": 2
+    },
+    {
+      "concept": "typeid",
+      "keys": [
+        {
+          "key": "type-id",
+          "count": 1
+        },
+        {
+          "key": "typeid",
+          "count": 1
+        }
+      ],
+      "total": 2
+    }
+  ],
+  "labels": [
+    {
+      "key": "debugging",
+      "count": 36,
+      "spellings": [
+        "Debugging",
+        "debugging"
+      ]
+    },
+    {
+      "key": "memory",
+      "count": 23,
+      "spellings": [
+        "Memory",
+        "memory"
+      ]
+    },
+    {
+      "key": "arm",
+      "count": 19,
+      "spellings": [
+        "ARM",
+        "arm"
+      ]
+    },
+    {
+      "key": "cmake",
+      "count": 15,
+      "spellings": [
+        "CMake",
+        "cmake"
+      ]
+    },
+    {
+      "key": "python",
+      "count": 12,
+      "spellings": [
+        "Python",
+        "python"
+      ]
+    },
+    {
+      "key": "c",
+      "count": 11,
+      "spellings": [
+        "C",
+        "c"
+      ]
+    },
+    {
+      "key": "concurrency",
+      "count": 11,
+      "spellings": [
+        "Concurrency",
+        "concurrency"
+      ]
+    },
+    {
+      "key": "optimization",
+      "count": 8,
+      "spellings": [
+        "Optimization",
+        "optimization"
+      ]
+    },
+    {
+      "key": "elf",
+      "count": 7,
+      "spellings": [
+        "ELF",
+        "elf"
+      ]
+    },
+    {
+      "key": "dwarf",
+      "count": 6,
+      "spellings": [
+        "DWARF",
+        "dwarf"
+      ]
+    },
+    {
+      "key": "jtag",
+      "count": 5,
+      "spellings": [
+        "JTAG",
+        "jtag"
+      ]
+    },
+    {
+      "key": "trustzone",
+      "count": 5,
+      "spellings": [
+        "TrustZone",
+        "trustzone"
+      ]
+    },
+    {
+      "key": "openocd",
+      "count": 4,
+      "spellings": [
+        "OpenOCD",
+        "openocd"
+      ]
+    },
+    {
+      "key": "ota",
+      "count": 4,
+      "spellings": [
+        "OTA",
+        "ota"
+      ]
+    },
+    {
+      "key": "stack",
+      "count": 4,
+      "spellings": [
+        "Stack",
+        "stack"
+      ]
+    },
+    {
+      "key": "stl",
+      "count": 4,
+      "spellings": [
+        "STL",
+        "stl"
+      ]
+    },
+    {
+      "key": "ci",
+      "count": 3,
+      "spellings": [
+        "CI",
+        "ci"
+      ]
+    },
+    {
+      "key": "mcu",
+      "count": 3,
+      "spellings": [
+        "MCU",
+        "mcu"
+      ]
+    },
+    {
+      "key": "breakpoint",
+      "count": 2,
+      "spellings": [
+        "Breakpoint",
+        "breakpoint"
+      ]
+    },
+    {
+      "key": "crash",
+      "count": 2,
+      "spellings": [
+        "Crash",
+        "crash"
+      ]
+    },
+    {
+      "key": "dap",
+      "count": 2,
+      "spellings": [
+        "DAP",
+        "dap"
+      ]
+    },
+    {
+      "key": "frontend",
+      "count": 2,
+      "spellings": [
+        "Frontend",
+        "frontend"
+      ]
+    },
+    {
+      "key": "gitlab",
+      "count": 2,
+      "spellings": [
+        "GitLab",
+        "gitlab"
+      ]
+    },
+    {
+      "key": "iot",
+      "count": 2,
+      "spellings": [
+        "IoT",
+        "iot"
+      ]
+    },
+    {
+      "key": "mcuboot",
+      "count": 2,
+      "spellings": [
+        "MCUboot",
+        "mcuboot"
+      ]
+    },
+    {
+      "key": "mender",
+      "count": 2,
+      "spellings": [
+        "Mender",
+        "mender"
+      ]
+    },
+    {
+      "key": "op-tee",
+      "count": 2,
+      "spellings": [
+        "OP-TEE",
+        "op-tee"
+      ]
+    },
+    {
+      "key": "sbom",
+      "count": 2,
+      "spellings": [
+        "SBOM",
+        "sbom"
+      ]
+    },
+    {
+      "key": "scripting",
+      "count": 2,
+      "spellings": [
+        "Scripting",
+        "scripting"
+      ]
+    },
+    {
+      "key": "tui",
+      "count": 2,
+      "spellings": [
+        "TUI",
+        "tui"
+      ]
+    }
+  ],
+  "whitespaceTags": []
+}

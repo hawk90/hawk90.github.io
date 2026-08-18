@@ -2,7 +2,7 @@
 title: "항목 2: 선택의 여지가 있다면 오버로딩 대신 기본 인수를 사용하라"
 date: 2026-05-05T02:00:00
 description: "함수 오버로딩과 기본 인수를 언제, 어떻게 선택해야 하는지"
-tags: [C++, API Design, Default Arguments]
+tags: [C++, api-design, default-arguments]
 series: "Beautiful C++"
 seriesOrder: 2
 draft: true

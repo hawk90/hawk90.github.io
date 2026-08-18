@@ -52,14 +52,11 @@ uint8_t ring_pop(void) {
 
 ## 가설 정리
 
-```text
-[가설 A] head 갱신이 atomic하지 않음
-  → STM32 16-bit aligned uint16_t write는 atomic. 기각.
-[가설 B] tail update 시점에 ISR이 끼어 ring 깨짐
-  → 가능. 측정 필요.
-[가설 C] DMA가 ring을 같이 쓰는데 sync 안 됨
-  → 코드 상 DMA 없음. 기각.
-```
+| 가설 | 검토 | 판정 |
+|------|------|------|
+| A. head 갱신이 atomic하지 않다 | STM32에서 16-bit aligned `uint16_t` write는 atomic입니다 | 기각 |
+| B. tail update 시점에 ISR이 끼어들어 ring이 깨진다 | 가능성이 있어 측정이 필요합니다 | 보류 |
+| C. DMA가 ring을 같이 쓰는데 sync가 안 된다 | 코드 상 DMA를 쓰지 않습니다 | 기각 |
 
 가설 B를 측정합니다.
 

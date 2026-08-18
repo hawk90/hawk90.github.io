@@ -177,7 +177,7 @@ while (1) {
 malloc_stats();
 ```
 
-```
+```text
 Arena 0:
 system bytes     =     135168
 in use bytes     =      90112

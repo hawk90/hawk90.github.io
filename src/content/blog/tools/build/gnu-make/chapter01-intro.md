@@ -477,3 +477,10 @@ clean:
 - [GNU Make Manual](https://www.gnu.org/software/make/manual/make.html) — 공식 매뉴얼. 한 번은 끝까지 훑어볼 가치가 있습니다.
 - [Recursive Make Considered Harmful](http://aegis.sourceforge.net/auug97.pdf) — Peter Miller, 1997. Make 사용 패턴에 대한 고전적 비판.
 - [Makefile Tutorial by Example](https://makefiletutorial.com/) — 예제 중심 입문서.
+
+## 관련 항목
+
+- [Ch 2: 규칙](/blog/tools/build/gnu-make/chapter02-rules) — 여기서 본 `타겟: 의존성` 한 줄을 order-only·이중 콜론·특수 타겟까지 넓힙니다.
+- [Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables) — 마지막 예시에 등장한 `$@`·`$^`·`$<` 자동 변수의 정확한 동작.
+- [CMake Ch 1: 소개와 첫 프로젝트](/blog/tools/build/cmake/chapter01-intro) — Makefile을 직접 적는 대신 생성해 주는 메타 빌드 시스템.
+- [GNU Make Manual — Phony Targets](https://www.gnu.org/software/make/manual/html_node/Phony-Targets.html) — `.PHONY`의 공식 설명.

@@ -22,18 +22,15 @@ Spinlock은 짧은 critical section에 적합하지만 hold time이 µs 단위�
 
 ## Mutex 비용 분해
 
-```text
-Uncontended (waiter 없음):
-  - atomic CAS         5-20 cycle
-  - 함수 호출 overhead 10 cycle
-  - 총 ~30 cycle ≈ 10-100 ns
-
-Contended (waiter 있음):
-  - waiter park (syscall)   1-3 µs
-  - holder unlock + wake    1-3 µs
-  - context switch          1-3 µs
-  - 총 ~10 µs
-```
+| 경로 | 항목 | 비용 |
+|------|------|------|
+| Uncontended (waiter 없음) | atomic CAS | 5-20 cycle |
+| | 함수 호출 overhead | 10 cycle |
+| | **총합** | ~30 cycle ≈ 10-100 ns |
+| Contended (waiter 있음) | waiter park (syscall) | 1-3 µs |
+| | holder unlock + wake | 1-3 µs |
+| | context switch | 1-3 µs |
+| | **총합** | ~10 µs |
 
 Uncontended path는 lock-free 수준으로 빠릅니다. 비용은 contention에서만 발생합니다. 따라서 같은 mutex라도 contention rate에 따라 100배 이상 비용이 달라집니다.
 
@@ -228,16 +225,15 @@ Low priority task가 mutex를 잡고 있을 때 medium이 CPU를 점유하면 hi
 
 Cortex-A53 4-core, glibc futex mutex의 결과입니다.
 
-```text
-                       Latency      비고
-Uncontended lock        30 ns       atomic CAS만
-Uncontended unlock      20 ns       atomic store
-Contended lock          8 µs        futex_wait + switch
-Contended unlock        3 µs        futex_wake
-Adaptive spin success  200 ns       spin 단계에서 성공
-PI inherit (depth 1)    1 µs        priority boost
-PI inherit (depth 3)    4 µs        chain propagation
-```
+| 항목 | Latency | 비고 |
+|------|---------|------|
+| Uncontended lock | 30 ns | atomic CAS만 |
+| Uncontended unlock | 20 ns | atomic store |
+| Contended lock | 8 µs | `futex_wait` + switch |
+| Contended unlock | 3 µs | `futex_wake` |
+| Adaptive spin success | 200 ns | spin 단계에서 성공 |
+| PI inherit (depth 1) | 1 µs | priority boost |
+| PI inherit (depth 3) | 4 µs | chain propagation |
 
 Uncontended path와 contended path가 100배 이상 차이가 납니다. Contention이 빈번한 lock은 lock-free나 striping으로 분산하는 것이 필요합니다.
 

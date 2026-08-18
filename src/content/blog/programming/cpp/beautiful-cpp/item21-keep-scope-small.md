@@ -2,7 +2,7 @@
 title: "항목 21: 범위는 작게 유지하라"
 date: 2026-05-05T21:00:00
 description: "변수 수명을 짧게 — 사용 직전에 선언, if/for 초기화 절, 가독성과 디버깅 모두 개선."
-tags: [C++, Scope, Code Style]
+tags: [C++, Scope, code-style]
 series: "Beautiful C++"
 seriesOrder: 21
 draft: true

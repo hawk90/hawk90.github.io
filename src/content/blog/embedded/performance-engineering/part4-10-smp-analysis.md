@@ -61,17 +61,12 @@ Affinity의 장점은 다음과 같습니다.
 
 ## Linux CFS Load Balancing
 
-```text
-주기적 (매 ms 또는 tick):
-  - 가장 loaded 코어 → 가장 idle 코어
-  - Task의 cache footprint 고려 (hot task는 안 옮김)
+Balancing은 주기적으로(매 ms 또는 tick) 일어나며 두 가지를 봅니다.
 
-Domain hierarchy:
-  - SMT pair (hyperthread)
-  - Core (within cluster)
-  - Cluster (LLC)
-  - NUMA node
-```
+- 가장 loaded된 코어에서 가장 idle한 코어로 task를 옮깁니다.
+- Task의 cache footprint를 고려해 hot task는 옮기지 않습니다.
+
+이때 domain hierarchy는 SMT pair(hyperthread), core(cluster 내), cluster(LLC), NUMA node 순으로 올라갑니다.
 
 낮은 domain 내 balancing이 우선이며 cache 보존을 위해 가급적 같은 cluster 안에서 처리합니다. NUMA 경계를 넘는 migration은 가장 마지막에 시도됩니다.
 
@@ -152,13 +147,13 @@ Core 0이 Core 1에 signal:
 
 ## Scheduling Class
 
-```text
-SCHED_FIFO       real-time, 같은 priority는 voluntary yield까지 실행
-SCHED_RR         round-robin RT
-SCHED_DEADLINE   EDF (Earliest Deadline First)
-SCHED_OTHER      normal CFS
-SCHED_IDLE       lowest
-```
+| Class | 특성 |
+|-------|------|
+| `SCHED_FIFO` | real-time, 같은 priority는 voluntary yield까지 실행 |
+| `SCHED_RR` | round-robin RT |
+| `SCHED_DEADLINE` | EDF (Earliest Deadline First) |
+| `SCHED_OTHER` | normal CFS |
+| `SCHED_IDLE` | lowest |
 
 ```c
 struct sched_param sp = { .sched_priority = 99 };
@@ -228,12 +223,7 @@ USL은 coherency overhead 때문에 어느 시점부터 코어를 늘릴수록 �
 
 ## Power Capping과 Thermal
 
-```text
-TDP 65 W 시스템:
-  4 core × 16 W = 64 W (saturated)
-  → 6 core 모두 100% 못 함
-  → 일부 core throttle 또는 모두 절반 freq
-```
+TDP 65 W 시스템을 예로 들어 봅니다. 4 core × 16 W = 64 W로 이미 saturated이므로 6 core를 모두 100%로 돌릴 수 없습니다. 결국 일부 core를 throttle하거나, 모든 core를 절반 freq로 떨어뜨리게 됩니다.
 
 전력과 발열 제약 때문에 모든 코어가 동시에 max를 낼 수 없는 경우가 흔합니다. 워크로드를 일부 코어에 boost로 몰고 나머지를 idle로 두는 것이 평균 throughput에 유리하기도 합니다.
 

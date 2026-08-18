@@ -173,9 +173,24 @@ const jsonLd = type === 'article'
     {/* Fonts — Pretendard via CDN dynamic subset (Korean unicode-range optimized).
         JetBrains Mono self-hosted (see /src/styles/global.css @font-face). */}
     <link rel="preconnect" href="https://cdn.jsdelivr.net" crossorigin />
+    {/*
+      SRI on the one third-party resource that is neither optional nor gated.
+      AP-SEC-06/08/13 were accepted on the grounds that third-party code here
+      is optional and the article renders without it — true of comments and
+      analytics, not of this. It is render-blocking in the head of all 1478
+      pages, so a compromised CDN response would be styling every one of them.
+
+      The hash is over the decoded bytes, so it holds for the gzip and brotli
+      variants alike. It is pinned to the @v1.3.9 tag; bump both together, and
+      recompute with:
+        curl -s --compressed <url> | openssl dgst -sha384 -binary | openssl base64 -A
+      If the bytes ever stop matching, the browser drops the stylesheet and
+      falls back to the system font stack — degraded, not broken.
+    */}
     <link
       rel="stylesheet"
       href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.min.css"
+      integrity="sha384-GIdEBaqGN9mNkDkMkzMHW8EKUqtpPIe/sLj1X7DIrnc9uPtLROJgmuDlh+3rBw0j"
       crossorigin="anonymous"
     />
     <link rel="preload" href="/fonts/JetBrainsMono-Variable.woff2" as="font" type="font/woff2" crossorigin="anonymous" />

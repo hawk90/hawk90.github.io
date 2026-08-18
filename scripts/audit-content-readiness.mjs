@@ -16,26 +16,30 @@ function run(name, command, args, allowedStatuses = [0]) {
   return output;
 }
 
-const stalenessOutput = run('prose staleness audit', 'python3', ['scripts/audit-prose-staleness.py', '--json', `${reportDir}/staleness.json`], [0, 1]);
+const stalenessOutput = run('prose staleness audit', 'python3', ['scripts/audit-prose-staleness.py', '--include-drafts', '--json', `${reportDir}/staleness.json`], [0, 1]);
+const coverageOutput = run('content coverage audit', 'python3', ['scripts/audit-content-coverage.py', '--json', `${reportDir}/coverage.json`]);
 const imageOutput = run('image coverage audit', 'python3', ['scripts/audit-image-coverage.py', '--json', `${reportDir}/images.json`, '--top', '0']);
 const seriesOutput = run('series integrity audit', 'python3', ['scripts/audit-series-integrity.py', '--json', `${reportDir}/series.json`, '--quiet']);
 const factOutput = run('fact-density audit', 'bash', ['scripts/audit-fact-density.sh', '--threshold', '30']);
 await Promise.all([
   writeFile(`${reportDir}/staleness.txt`, stalenessOutput),
+  writeFile(`${reportDir}/coverage.txt`, coverageOutput),
   writeFile(`${reportDir}/images.txt`, imageOutput),
   writeFile(`${reportDir}/series.txt`, seriesOutput),
   writeFile(`${reportDir}/fact-density.txt`, factOutput),
 ]);
 
-const [staleness, images, series] = await Promise.all([
+const [staleness, coverage, images, series] = await Promise.all([
   readFile(`${reportDir}/staleness.json`, 'utf8').then(JSON.parse),
+  readFile(`${reportDir}/coverage.json`, 'utf8').then(JSON.parse),
   readFile(`${reportDir}/images.json`, 'utf8').then(JSON.parse),
   readFile(`${reportDir}/series.json`, 'utf8').then(JSON.parse),
 ]);
 const factCandidates = [...factOutput.matchAll(/^\s*(\d+)\s+(src\/content\/blog\/[^\s]+\.md)$/gm)]
   .map(([, density, path]) => ({ path, density: Number(density) }));
 const queue = [
-  ...staleness.findings.map(({ file, line, kind, note, text }) => ({ priority: 'P1', kind: `staleness:${kind}`, path: file, line, reason: note, excerpt: text })),
+  ...staleness.findings.map(({ file, line, kind, note, text, status }) => ({ priority: 'P1', kind: `staleness:${kind}`, path: file, line, status, reason: note, excerpt: text })),
+  ...coverage.draftOnlySeries.map(({ series: seriesName, draft }) => ({ priority: 'P2', kind: 'draft-only-series', path: seriesName, score: draft, reason: `${draft} unpublished draft(s); decide publish order or mark as planned.` })),
   ...factCandidates.map(({ path, density }) => ({ priority: 'P2', kind: 'fact-density', path, score: density, reason: `${density} concrete-claim signals; verify against primary sources before marking current.` })),
   ...images.candidates.map(({ path, distinct_keyword_count, keyword_count, top_keywords }) => ({ priority: 'P3', kind: 'visual-aid', path, score: distinct_keyword_count, reason: `${distinct_keyword_count} abstract concepts / ${keyword_count} hits with no image`, keywords: top_keywords })),
 ];
@@ -46,6 +50,7 @@ const report = {
     factDensityCandidates: factCandidates.length,
     imageCandidates: images.candidates.length,
     seriesWithIntegrityIssues: series.length,
+    draftOnlySeries: coverage.draftOnlySeries.length,
   },
   queue,
 };
@@ -60,6 +65,7 @@ await Promise.all([
     `- P2 fact-dense candidates: ${report.summary.factDensityCandidates}`,
     `- P3 visual-aid candidates: ${report.summary.imageCandidates}`,
     `- Series integrity issues: ${report.summary.seriesWithIntegrityIssues}`,
+    `- Draft-only series: ${report.summary.draftOnlySeries}`,
     '',
     '## Priority queue',
     '',
@@ -68,5 +74,5 @@ await Promise.all([
   ].join('\n')),
 ]);
 
-console.log(`Content readiness: ${queue.length} candidates (P1 ${staleness.findings.length}, P2 ${factCandidates.length}, P3 ${images.candidates.length}); ${series.length} series integrity issue(s).`);
+console.log(`Content readiness: ${queue.length} candidates (P1 ${staleness.findings.length}, P2 ${factCandidates.length + coverage.draftOnlySeries.length}, P3 ${images.candidates.length}); ${series.length} series integrity issue(s).`);
 console.log(`Report: ${reportDir}/latest.md`);

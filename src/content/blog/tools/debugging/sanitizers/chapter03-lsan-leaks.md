@@ -23,7 +23,7 @@ void leak_demo() {
 
 LSan(`LeakSanitizer`)은 *프로세스 종료 시점*에 살아 있는 모든 할당을 검사해 *어떤 할당이 회수되지 않았는지* 보고합니다.
 
-```
+```text
 =================================================================
 ==12345==ERROR: LeakSanitizer: detected memory leaks
 
@@ -150,7 +150,7 @@ ASAN_OPTIONS=detect_leaks=1 ./myapp
 
 ### LSan suppression 파일
 
-```
+```text
 # lsan.supp
 leak:libcrypto.so
 leak:libssl.so
@@ -166,7 +166,7 @@ LSAN_OPTIONS=suppressions=lsan.supp ./myapp
 
 ### 패턴
 
-```
+```text
 # 함수명
 leak:my_known_leaking_function
 
@@ -188,7 +188,7 @@ LSAN_OPTIONS=suppressions=lsan.supp:print_suppressions=1 ./myapp
 
 이렇게 하면 *suppression에 의해 가려진 누수의 개수*가 출력됩니다. 어느 라이브러리에서 얼마나 누수가 발생하는지 *통계*는 보고 싶을 때 유용합니다.
 
-```
+```text
 -----------------------------------------------------
 Suppressions used:
   count      bytes template
@@ -392,3 +392,11 @@ const char* get_config_path() {
 - [LeakSanitizer Wiki](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer)
 - [LSan Flags](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer#flags)
 - [Memory Leak Detection in Practice (Google)](https://research.google/pubs/pub37752/) — LSan 디자인 배경
+
+## 관련 항목
+
+- [Ch 2: ASan과 UBSan 실전 설정](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) — LSan을 켜는 ASan 빌드 설정
+- [Ch 4: TSan으로 데이터 레이스 디버깅](/blog/tools/debugging/sanitizers/chapter04-tsan) — 멀티스레드 코드로 넘어가는 다음 단계
+- [Valgrind Ch 3: Leak Report 분석](/blog/tools/debugging/valgrind/chapter03-leak-report) — definitely·indirectly·possibly 분류와 Direct/Indirect leak 대응
+- [Valgrind Ch 5: Suppression과 실무 운용](/blog/tools/debugging/valgrind/chapter05-suppressions) — 같은 고민을 Valgrind 쪽 문법으로
+- [LeakSanitizer Wiki](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer) — LSan 플래그와 동작 원문

@@ -36,16 +36,18 @@ PSR 0x01000003
 
 Cortex-M은 예외 진입 시 다음 8 word를 *자동으로* stack에 push합니다.
 
-```text
-SP →  R0
-      R1
-      R2
-      R3
-      R12
-      LR     ← fault 직전 함수의 return address
-      PC     ← fault 발생 명령 주소
-      xPSR
-```
+SP가 가리키는 낮은 주소부터 차례로 다음과 같이 쌓입니다.
+
+| 순서 | 레지스터 | 의미 |
+|------|----------|------|
+| 1 | R0 | |
+| 2 | R1 | |
+| 3 | R2 | |
+| 4 | R3 | |
+| 5 | R12 | |
+| 6 | LR | fault 직전 함수의 return address |
+| 7 | PC | fault 발생 명령 주소 |
+| 8 | xPSR | |
 
 EXC_RETURN의 LR (`0xFFFFFFF9`, `0xFFFFFFFD` 등)으로 *어느 stack에 push되었는지*를 알 수 있습니다.
 
@@ -104,42 +106,32 @@ void hardfault_report(uint32_t *sp) {
 
 CFSR(Configurable Fault Status Register, `0xE000ED28`) 32비트는 세 sub-register로 나뉩니다.
 
-```text
-[31:16] UFSR — Usage Fault
-  bit 16  UNDEFINSTR    정의되지 않은 명령
-  bit 17  INVSTATE      Thumb 비트 0
-  bit 18  INVPC         예외 return 시 잘못된 EXC_RETURN
-  bit 19  NOCP          코프로세서 없음
-  bit 24  UNALIGNED     unaligned access
-  bit 25  DIVBYZERO     0으로 나눔
+`[31:16]`은 UFSR(Usage Fault), `[15:8]`은 BFSR(Bus Fault), `[7:0]`은 MMFSR(MemManage Fault, MPU)입니다.
 
-[15:8] BFSR — Bus Fault
-  bit 8   IBUSERR       명령 fetch
-  bit 9   PRECISERR     precise data bus error (BFAR 유효)
-  bit 10  IMPRECISERR   imprecise (BFAR 무효, 위치 부정확)
-  bit 11  UNSTKERR      exception entry stacking
-  bit 12  STKERR        exception exit unstacking
-  bit 15  BFARVALID     BFAR에 주소 적힘
+| Sub-register | 비트 | 이름 | 의미 |
+|--------------|------|------|------|
+| UFSR `[31:16]` | bit 16 | `UNDEFINSTR` | 정의되지 않은 명령 |
+| UFSR `[31:16]` | bit 17 | `INVSTATE` | Thumb 비트 0 |
+| UFSR `[31:16]` | bit 18 | `INVPC` | 예외 return 시 잘못된 EXC_RETURN |
+| UFSR `[31:16]` | bit 19 | `NOCP` | 코프로세서 없음 |
+| UFSR `[31:16]` | bit 24 | `UNALIGNED` | unaligned access |
+| UFSR `[31:16]` | bit 25 | `DIVBYZERO` | 0으로 나눔 |
+| BFSR `[15:8]` | bit 8 | `IBUSERR` | 명령 fetch |
+| BFSR `[15:8]` | bit 9 | `PRECISERR` | precise data bus error (BFAR 유효) |
+| BFSR `[15:8]` | bit 10 | `IMPRECISERR` | imprecise (BFAR 무효, 위치 부정확) |
+| BFSR `[15:8]` | bit 11 | `UNSTKERR` | exception entry stacking |
+| BFSR `[15:8]` | bit 12 | `STKERR` | exception exit unstacking |
+| BFSR `[15:8]` | bit 15 | `BFARVALID` | BFAR에 주소 적힘 |
+| MMFSR `[7:0]` | bit 0 | `IACCVIOL` | 명령 fetch MPU violation |
+| MMFSR `[7:0]` | bit 1 | `DACCVIOL` | data access MPU violation |
+| MMFSR `[7:0]` | bit 7 | `MMARVALID` | MMAR에 주소 적힘 |
 
-[7:0]  MMFSR — MemManage Fault (MPU)
-  bit 0   IACCVIOL      명령 fetch MPU violation
-  bit 1   DACCVIOL      data access MPU violation
-  bit 7   MMARVALID     MMAR에 주소 적힘
-```
+현장에서 가장 자주 마주치는 값은 두 개입니다.
 
-가장 흔한 두 패턴.
-
-```text
-CFSR = 0x00008200
-  → BFSR bit 9 (PRECISERR) + bit 15 (BFARVALID)
-  → BFAR 주소에 *유효한 fault 위치* 있음
-  → 보통: null pointer dereference, peripheral 미초기화
-
-CFSR = 0x00020000
-  → UFSR bit 17 (INVSTATE)
-  → 함수 포인터 호출 시 LSB가 0 (Thumb 비트 누락)
-  → 보통: function pointer 깨짐
-```
+| CFSR 값 | 세워진 비트 | 해석 | 흔한 원인 |
+|---------|-------------|------|-----------|
+| `0x00008200` | BFSR bit 9 (`PRECISERR`) + bit 15 (`BFARVALID`) | BFAR 주소에 *유효한 fault 위치*가 있습니다 | null pointer dereference, peripheral 미초기화 |
+| `0x00020000` | UFSR bit 17 (`INVSTATE`) | 함수 포인터 호출 시 LSB가 0입니다 (Thumb 비트 누락) | function pointer 깨짐 |
 
 ## Step 3 — PC를 source line으로
 

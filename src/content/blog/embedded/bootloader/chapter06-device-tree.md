@@ -68,8 +68,10 @@ U-Boot binary와 DTB가 *별도 파일*입니다. 빌드 후 *concat*합니다.
 ```text
 u-boot.bin (1.2 MB)
 u-boot.dtb (50 KB)
-u-boot-dtb.bin = u-boot.bin + u-boot.dtb  ← 이걸 부트 미디어에
+u-boot-dtb.bin = u-boot.bin + u-boot.dtb
 ```
+
+부트 미디어에 실제로 쓰는 것은 concat 결과물인 `u-boot-dtb.bin`입니다.
 
 장점: *DTB만 수정해 교체* 가능.
 단점: 빌드 단계에서 *concat 필요*.

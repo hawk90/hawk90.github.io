@@ -656,3 +656,11 @@ endif
 - [GNU Make Manual — Functions](https://www.gnu.org/software/make/manual/html_node/Functions.html)
 - [GNU Make Manual — Text Functions](https://www.gnu.org/software/make/manual/html_node/Text-Functions.html)
 - [GNU Make Manual — Foreach Function](https://www.gnu.org/software/make/manual/html_node/Foreach-Function.html)
+
+## 관련 항목
+
+- [Ch 4: 패턴 규칙](/blog/tools/build/gnu-make/chapter04-pattern-rules) — `patsubst`로 만든 오브젝트 목록을 받아 실제로 컴파일하는 규칙.
+- [Ch 6: 조건문과 include](/blog/tools/build/gnu-make/chapter06-conditionals) — 파싱 시점 지시자 `ifeq`와 이 장의 `$(if ...)` 함수의 시점 차이.
+- [Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables) — `$(shell ...)`·`wildcard`를 `:=`로 묶어야 하는 이유인 확장 시점 이야기.
+- [CMake Ch 2: 언어](/blog/tools/build/cmake/chapter02-language) — 같은 목적의 문자열·리스트 조작을 CMake는 어떤 명령으로 푸는지.
+- [GNU Make Manual](https://www.gnu.org/software/make/manual/) — 내장 함수 전체 목록의 원문.

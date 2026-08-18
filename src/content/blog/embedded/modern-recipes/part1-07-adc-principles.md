@@ -26,11 +26,7 @@ topics: ["embedded"]
 
 연속 신호를 일정 간격으로 sampling 해 이산 신호로 만듭니다. Nyquist 정리에 따르면 **신호 최대 주파수 × 2** 이상으로 sampling 해야 원래 신호를 복원할 수 있습니다.
 
-```text
-1 kHz sine wave를 1.5 kHz로 sampling하면?
-→ 1.5 - 1 = 0.5 kHz의 alias 신호로 보임
-(원본보다 더 낮은 가짜 신호)
-```
+이 조건을 어기면 없던 신호가 만들어집니다. 1 kHz sine wave를 1.5 kHz로 sampling하면 1.5 - 1 = 0.5 kHz의 alias 신호로 보입니다. 원본보다 더 낮은 가짜 신호가 관측되는 것입니다.
 
 10 kHz 오디오를 잡으려면 최소 20 kHz sampling이 필요합니다. 보통은 안전 마진으로 2.5 ~ 4 배를 씁니다.
 

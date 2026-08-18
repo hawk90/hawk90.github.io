@@ -39,3 +39,9 @@ Generated deterministically from the current source tree and `dist`.
 - Priority: P1
 - OAuth endpoint in production artifact
 - Required remediation: Production artifact must not contain /api/auth routes when this project builds as a static site.
+
+## SEC-ADMIN-07 — passed
+
+- Priority: P1
+- Cross-origin subresource without integrity
+- Required remediation: Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.

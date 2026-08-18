@@ -1,0 +1,69 @@
+{
+  "sources": [
+    {
+      "id": "zephyr-blog",
+      "kind": "rss",
+      "url": "https://zephyrproject.org/feed/",
+      "topics": ["rtos", "mcu", "security", "fuzzing", "wireless"]
+    },
+    {
+      "id": "memfault-interrupt",
+      "kind": "rss",
+      "url": "https://interrupt.memfault.com/feed.xml",
+      "topics": ["firmware", "debugging", "ota", "observability", "iot"]
+    },
+    {
+      "id": "embedded-artistry",
+      "kind": "rss",
+      "url": "https://embeddedartistry.com/feed/",
+      "topics": ["architecture", "testing", "build", "security", "embedded-linux"]
+    },
+    {
+      "id": "bootlin",
+      "kind": "rss",
+      "url": "https://bootlin.com/blog/feed/",
+      "topics": ["linux", "bsp", "bootloader", "device-tree", "buildroot", "networking"]
+    },
+    {
+      "id": "embeddedrelated",
+      "kind": "rss",
+      "url": "https://www.embeddedrelated.com/blogs-1/nf/all/Firmware_and_Programming.php?format=rss",
+      "topics": ["firmware", "rtos", "testing", "reliability"]
+    },
+    {
+      "id": "zephyr-releases",
+      "kind": "github-releases",
+      "repo": "zephyrproject-rtos/zephyr",
+      "topics": ["rtos", "mcu", "security"]
+    },
+    {
+      "id": "mcuboot-releases",
+      "kind": "github-releases",
+      "repo": "mcu-tools/mcuboot",
+      "topics": ["bootloader", "secure-boot", "ota"]
+    },
+    {
+      "id": "u-boot-releases",
+      "kind": "github-releases",
+      "repo": "u-boot/u-boot",
+      "topics": ["bootloader", "bsp", "device-tree"]
+    },
+    {
+      "id": "embedded-arxiv",
+      "kind": "atom",
+      "url": "https://export.arxiv.org/api/query?search_query=cat:cs.ES&start=0&max_results=30&sortBy=submittedDate&sortOrder=descending",
+      "topics": ["research", "embedded", "robotics", "real-time", "security"]
+    }
+  ],
+  "keywords": {
+    "bootloader": ["bootloader", "secure boot", "u-boot", "uefi", "mcuboot", "firmware update"],
+    "rtos": ["rtos", "zephyr", "freertos", "threadx", "scheduler", "real-time"],
+    "security": ["secure", "security", "cve", "vulnerability", "pqc", "key rotation", "cyber resilience"],
+    "embedded-linux": ["yocto", "buildroot", "linux", "device tree", "bsp", "kernel"],
+    "networking": ["ethernet", "tsn", "tcp/ip", "matter", "thread", "mqtt", "opc ua"],
+    "hardware": ["usb", "pcie", "cxl", "mipi", "can fd", "ethercat", "memory"],
+    "robotics": ["ros 2", "micro-ros", "robot", "sensor fusion", "control loop"],
+    "testing": ["fuzz", "hil", "hardware-in-the-loop", "test", "verification", "fault injection"],
+    "operations": ["ota", "observability", "crash", "logging", "telemetry", "fleet"]
+  }
+}

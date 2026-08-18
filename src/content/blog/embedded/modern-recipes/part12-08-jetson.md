@@ -48,22 +48,12 @@ JetPack 6.x
 
 DLA·VIC·PVA가 Jetson의 *숨은 가속기*입니다.
 
-```text
-DLA (Deep Learning Accelerator)
-  fixed-function INT8 conv·activation 가속기
-  Xavier·Orin에 2개 — TensorRT에서 분리 사용 가능
-  GPU 대비 더 낮은 전력으로 INT8 추론
-
-VIC (Video Image Compositor)
-  color conversion·resize·blending fixed-function
-  GStreamer nvvidconv plugin이 사용
-
-PVA (Programmable Vision Accelerator)
-  Vision DSP — VPI의 일부 알고리즘 backend
-
-NVENC/NVDEC
-  H.264/H.265/AV1 인코더·디코더 hardware
-```
+| 가속기 | 역할 |
+|--------|------|
+| DLA (Deep Learning Accelerator) | fixed-function INT8 conv·activation 가속기입니다. Xavier·Orin에는 2개가 있고 TensorRT에서 따로 떼어 쓸 수 있습니다. GPU보다 낮은 전력으로 INT8 추론을 돌립니다 |
+| VIC (Video Image Compositor) | color conversion·resize·blending을 fixed-function으로 처리합니다. GStreamer의 `nvvidconv` plugin이 이 블록을 씁니다 |
+| PVA (Programmable Vision Accelerator) | Vision DSP입니다. VPI의 일부 알고리즘이 이 backend로 떨어집니다 |
+| NVENC/NVDEC | H.264/H.265/AV1 하드웨어 인코더·디코더입니다 |
 
 자율주행처럼 GPU·DLA를 같이 쓰면 *세 개의 추론 instance*가 병렬로 굴러갑니다.
 
@@ -279,12 +269,7 @@ Production은 thermal·power·fps trend logging이 필수입니다.
 
 > Devkit·production module 혼동
 
-```text
-Devkit 보드 thermal·power 측정 → production module도 동일하다고 가정
-→ production carrier board에서는 다름
-```
-
-Devkit과 production carrier board는 thermal design이 다릅니다. 양쪽 모두 측정합니다.
+Devkit 보드에서 thermal·power를 측정해 놓고 production module도 같을 것이라고 가정하면 어긋납니다. Devkit과 production carrier board는 thermal design이 다르므로 양쪽 모두 측정합니다.
 
 ## 정리
 

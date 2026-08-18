@@ -27,7 +27,7 @@ topics: ["tools", "tools/debugging"]
 
 ## `definitely lost` — 진짜 누수
 
-```
+```text
 40 bytes in 1 blocks are definitely lost in loss record 1 of 1
    at 0x483977F: malloc
    by 0x10918A: main (leak.c:5)
@@ -80,7 +80,7 @@ head->next->next = NULL;
 2. 각 definite의 *자식 그래프*가 indirect로 묶임.
 3. definite를 고치면 indirect도 같이 해소.
 
-```
+```text
 40 bytes in 1 blocks are definitely lost in loss record X
    at 0x483977F: malloc
    by 0x10918A: main (list.c:10)
@@ -225,7 +225,7 @@ public:
 
 LEAK SUMMARY가 다음과 같다고 합시다.
 
-```
+```text
    definitely lost: 240 bytes in 6 blocks
    indirectly lost: 1024 bytes in 12 blocks
      possibly lost: 80 bytes in 2 blocks
@@ -245,7 +245,7 @@ LEAK SUMMARY가 다음과 같다고 합시다.
 
 ## *loss record* — 같은 자리의 누수를 묶음
 
-```
+```text
 40 bytes in 5 blocks are definitely lost in loss record 3 of 8
    at 0x483977F: malloc
    by 0x10918A: alloc_node (list.c:5)
@@ -270,7 +270,7 @@ LEAK SUMMARY가 다음과 같다고 합시다.
 
 같은 *스택 트레이스*는 한 loss record로 묶입니다. 다른 트레이스는 *다른 record*.
 
-```
+```text
 == loss record 1 ==
 malloc → alloc_node → list_push → main           (5 blocks)
 
@@ -310,7 +310,7 @@ void recursive(int depth) {
 
 Valgrind는 *재귀의 각 깊이*를 *다른 호출자 컨텍스트*로 봅니다. 깊이 10이면 10개의 *서로 다른 loss record*가 생길 수 있습니다.
 
-```
+```text
 40 bytes in 1 blocks definitely lost
    at malloc
    by recursive (depth 1)
@@ -333,7 +333,7 @@ Valgrind는 *재귀의 각 깊이*를 *다른 호출자 컨텍스트*로 봅니�
 
 `--show-reachable=yes`(또는 `--show-leak-kinds=reachable`)로 reachable 보고를 켜면, *어디서 가리키고 있는지*도 함께 보입니다.
 
-```
+```text
 256 bytes in 1 blocks are still reachable in loss record 1
    at 0x483977F: malloc
    by 0x10918A: init_config (config.c:10)
@@ -372,7 +372,7 @@ valgrind --leak-check=full --show-leak-kinds=all \
 
 ### 3. 보고서 분석
 
-```
+```text
 40000 bytes in 1000 blocks are definitely lost in loss record 5 of 7
    at malloc
    by parse_header (parser.c:42)
@@ -417,3 +417,11 @@ void process_request(const char* input) {
 
 - [Memcheck Leak Detection](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.leaks)
 - [Loss Record Output Format](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.leaks-displaying-output)
+
+## 관련 항목
+
+- [Ch 2: Valgrind Memcheck 실전](/blog/tools/debugging/valgrind/chapter02-memcheck) — 이전 글. 이 보고서를 만들어 내는 옵션들
+- [Ch 4: Valgrind Helgrind와 DRD](/blog/tools/debugging/valgrind/chapter04-helgrind-drd) — 다음 글. 메모리에서 동시성으로
+- [LSan 누수 분석 — Stop-the-world Leak Detection 메커니즘](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks) — 같은 누수를 Sanitizer 쪽에서 보는 방법. `still reachable` 판정 차이가 흥미롭습니다
+- [운영 메모리 누수 진단](/blog/tools/debugging/memory/chapter05-prod-leak-diagnosis) — Valgrind를 붙일 수 없는 long-running 프로세스의 대안
+- [Memcheck Leak Detection](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.leaks) — 네 가지 누수 분류의 공식 정의

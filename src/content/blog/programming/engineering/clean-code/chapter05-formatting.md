@@ -2,7 +2,7 @@
 title: "Ch 5: 포맷팅"
 date: 2026-05-11T05:00:00
 description: "포맷은 코드를 통해 의도를 전달하는 시각적 구조. 신문 기사 비유, 수직·수평 거리, 팀 규칙."
-tags: [CleanCode, Formatting, Robert Martin]
+tags: [CleanCode, Formatting, robert-martin]
 series: "Clean Code"
 seriesOrder: 5
 draft: true

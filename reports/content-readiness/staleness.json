@@ -1,47 +1,62 @@
 {
-  "asOf": "2026-08-02",
+  "asOf": "2026-08-18",
+  "includeDrafts": true,
   "findings": [
+    {
+      "file": "src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter09-tool-qualification.md",
+      "line": 308,
+      "kind": "future",
+      "note": "미래 시제 — 이미 출시/확정됐는지 확인",
+      "text": "- LLVM/Clang (research, qualification 진행 중)",
+      "status": "draft"
+    },
     {
       "file": "src/content/blog/embedded/embedded-security/chapter05-tee.md",
       "line": 357,
       "kind": "dated",
       "note": "날짜 앵커 2026 — 기준 연도 경과 시 갱신",
-      "text": "CCA는 2026년 현재 ARMv9.2-A 일부 SoC에 처음 양산되기 시작했고, 향후 5~10년에 걸쳐 모바일·서버 양 쪽에 확산할 것으로 예상됩니다."
+      "text": "CCA는 2026년 현재 ARMv9.2-A 일부 SoC에 처음 양산되기 시작했고, 향후 5~10년에 걸쳐 모바일·서버 양 쪽에 확산할 것으로 예상됩니다.",
+      "status": "published"
     },
     {
       "file": "src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md",
       "line": 174,
       "kind": "future",
       "note": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
-      "text": "12-Hi → 16-Hi는 *capacity 33%* 증가지만 *yield가 18% 떨어집니다*. 게다가 *발열·신호 무결성*도 악화됩니다. *HBM3E는 12-Hi가 sweet "
+      "text": "12-Hi → 16-Hi는 *capacity 33%* 증가지만 *yield가 18% 떨어집니다*. 게다가 *발열·신호 무결성*도 악화됩니다. *HBM3E는 12-Hi가 sweet ",
+      "status": "published"
     },
     {
       "file": "src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md",
       "line": 27,
       "kind": "future",
       "note": "미래 시제 — 이미 출시/확정됐는지 확인",
-      "text": "| HBM4 | JESD270-4 | 2026 (양산 램프) | 6.4~8.0 Gbps | 1.6~2.0 TB/s+ | 36~64 GB | 2048-bit | 1.0 V |"
+      "text": "| HBM4 | JESD270-4 | 2026 (양산 램프) | 6.4~8.0 Gbps | 1.6~2.0 TB/s+ | 36~64 GB | 2048-bit | 1.0 V |",
+      "status": "published"
     },
     {
       "file": "src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md",
       "line": 174,
       "kind": "future",
       "note": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
-      "text": "**채택 예정 칩** — NVIDIA Rubin (R100, 2026), AMD MI400 (2026), 차세대 TPU."
+      "text": "**채택 예정 칩** — NVIDIA Rubin (R100, 2026), AMD MI400 (2026), 차세대 TPU.",
+      "status": "published"
     },
     {
       "file": "src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md",
       "line": 262,
       "kind": "future",
       "note": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
-      "text": "| 삼성SDS / SK텔레콤 | B200 도입 예정, full liquid cooling 준비, 시설 retrofit 진행 | — |"
+      "text": "| 삼성SDS / SK텔레콤 | B200 도입 예정, full liquid cooling 준비, 시설 retrofit 진행 | — |",
+      "status": "published"
     },
     {
       "file": "src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md",
       "line": 50,
       "kind": "dated",
       "note": "날짜 앵커 2026 — 기준 연도 경과 시 갱신",
-      "text": "2026년 현재의 상황:"
+      "text": "2026년 현재의 상황:",
+      "status": "published"
     }
   ]
 }

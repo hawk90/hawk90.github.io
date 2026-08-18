@@ -2,7 +2,7 @@
 title: "GoF 20: State"
 date: 2026-05-01T20:00:00
 description: "객체의 내부 상태에 따라 동작이 변하도록 — if/switch 대신 상태 객체."
-tags: [Design Pattern, GoF, C++, C, Behavioral]
+tags: [design-pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 20
 draft: true

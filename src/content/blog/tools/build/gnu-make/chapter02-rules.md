@@ -601,3 +601,11 @@ clean::
 - [GNU Make Manual — Writing Rules](https://www.gnu.org/software/make/manual/html_node/Rules.html)
 - [GNU Make Manual — Recipes](https://www.gnu.org/software/make/manual/html_node/Recipes.html)
 - [GNU Make Manual — Special Targets](https://www.gnu.org/software/make/manual/html_node/Special-Targets.html) (`.PHONY`, `.ONESHELL` 등)
+
+## 관련 항목
+
+- [Ch 1: GNU Make 소개](/blog/tools/build/gnu-make/chapter01-intro) — 규칙·mtime 비교·`.PHONY`의 기본기.
+- [Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables) — 이 장의 레시피에 등장한 `$<`·`$@`와 `SHELL := ...`의 `:=` 확장 규칙.
+- [Ch 4: 패턴 규칙](/blog/tools/build/gnu-make/chapter04-pattern-rules) — 다중 타겟이 두 규칙으로 펼쳐지는 문제와 grouped target `&:`의 해결.
+- [CMake Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 같은 "타겟"이라는 단어를 CMake가 어떻게 다른 의미로 쓰는지.
+- [GNU Make Manual — Types of Prerequisites](https://www.gnu.org/software/make/manual/html_node/Prerequisite-Types.html) — order-only 의존성 `|`의 공식 정의.

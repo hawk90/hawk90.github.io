@@ -53,16 +53,7 @@ Thread 1.3에는 TCPlp(low-power TCP)와 Thread Domain(multi-network)이 들어�
 
 Multi-fabric은 Matter의 *killer feature*입니다.
 
-```text
-같은 device가 동시에:
-  Apple Home fabric에 등록
-  Google Home fabric에 등록
-  Amazon Alexa fabric에 등록
-  Samsung SmartThings fabric에 등록
-
-각 fabric = 별도 NOC(Node Operational Certificate)
-각 fabric은 자기 controller에서만 control 가능
-```
+같은 device 하나가 Apple Home, Google Home, Amazon Alexa, Samsung SmartThings fabric에 *동시에* 등록될 수 있습니다. 각 fabric은 별도의 NOC(Node Operational Certificate)를 가지며, 자기 fabric의 controller에서만 그 device를 제어할 수 있습니다.
 
 Vendor lock-in이 종료됩니다. 사용자가 어느 ecosystem을 골라도 같은 device를 쓸 수 있습니다.
 
@@ -292,21 +283,11 @@ Battery 운영 device는 사실상 *Thread*가 강제됩니다.
 
 > Border Router 없이 Thread
 
-```text
-mesh만 구성, BR 0개
-→ device들 끼리는 통신, cloud·controller 접근 0
-```
-
-Apple TV·Nest Hub·OpenThread BR 중 하나가 필요합니다.
+Border Router 없이 mesh만 구성하면 device끼리는 통신이 되지만 cloud와 controller로는 아예 닿지 못합니다. Apple TV·Nest Hub·OpenThread BR 중 하나가 필요합니다.
 
 > 동일 SoC에서 Wi-Fi + 802.15.4 동시 전송
 
-```text
-ESP32-C6 — Wi-Fi 2.4 GHz + 802.15.4 2.4 GHz
-→ 같은 antenna 시간 분할 → packet loss
-```
-
-Coexistence config(`CONFIG_ESP_COEX_*`)로 time-sharing을 설정합니다.
+ESP32-C6처럼 Wi-Fi 2.4 GHz와 802.15.4 2.4 GHz를 한 칩에서 돌리면 같은 antenna를 시간으로 나눠 쓰게 되고, 그 과정에서 packet loss가 생깁니다. Coexistence config(`CONFIG_ESP_COEX_*`)로 time-sharing을 설정합니다.
 
 > Sleepy device poll period 너무 짧음
 

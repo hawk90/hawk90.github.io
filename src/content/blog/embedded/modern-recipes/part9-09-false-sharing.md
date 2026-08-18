@@ -32,11 +32,7 @@ Cache line은 코어가 한 번에 fetch/invalidate하는 단위다.
 
 같은 line에 있는 두 변수는 SMP 관점에서 *하나*처럼 움직인다. 한 코어가 write하면 다른 코어의 그 line은 invalidate된다.
 
-해결책은 한 줄로 정리됩니다.
-
-```text
-hot 공유 변수 사이에 padding을 넣어 *다른 line*에 두기
-```
+해결책은 한 줄로 정리됩니다. hot 공유 변수 사이에 padding을 넣어 서로 *다른 line*에 두면 됩니다.
 
 ## 코드 / 실제 사용 예
 

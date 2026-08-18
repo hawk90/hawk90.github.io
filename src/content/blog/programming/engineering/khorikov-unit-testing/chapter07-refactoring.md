@@ -2,7 +2,7 @@
 title: "Ch 7: Refactoring Toward Valuable Unit Tests"
 date: 2026-05-10T07:00:00
 description: "코드를 Domain, Trivial, Controller, Overcomplicated의 4사분면으로 나누고 각각의 테스트 전략을 잡는다."
-tags: [TDD, Refactoring, Code Categories]
+tags: [TDD, Refactoring, code-categories]
 series: "Khorikov Unit Testing"
 seriesOrder: 7
 draft: true

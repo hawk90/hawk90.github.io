@@ -56,7 +56,7 @@ GDB 빌드 시 `--with-python` 옵션이 켜져 있어야 합니다. 모든 배�
 
 `.gdbinit`에 자동 로드:
 
-```
+```text
 python
 import sys
 sys.path.insert(0, '/home/me/gdb-helpers')

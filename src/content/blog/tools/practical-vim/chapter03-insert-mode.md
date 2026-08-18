@@ -2,7 +2,7 @@
 title: "Ch 3: Insert Mode"
 date: 2026-05-17T03:00:00
 description: "삽입 모드 — 텍스트 입력. 오타 즉시 수정, replace 모드, paste from register."
-tags: [Vim, Insert Mode]
+tags: [Vim, insert-mode]
 series: "Practical Vim"
 seriesOrder: 3
 draft: true

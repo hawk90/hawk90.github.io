@@ -2,7 +2,7 @@
 title: "DSA 20: 효율 정렬 — Quick, Merge, Heap"
 date: 2026-05-15T20:00:00
 description: "O(n log n) 정렬 3종 — 분할 정복(Quick, Merge) + 힙 기반(Heap)."
-tags: [Data Structure, Algorithm, Sort, QuickSort, MergeSort, HeapSort]
+tags: [data-structure, Algorithm, Sort, QuickSort, MergeSort, HeapSort]
 series: "Data Structures and Algorithms"
 seriesOrder: 20
 draft: true

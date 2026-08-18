@@ -2,7 +2,7 @@
 title: "Ch 10: The Walking Skeleton"
 date: 2026-05-10T10:00:00
 description: "Sniper의 최소 e2e — 한 경매 join → loss 알림."
-tags: [TDD, Walking Skeleton]
+tags: [TDD, walking-skeleton]
 series: "Growing Object-Oriented Software"
 seriesOrder: 10
 draft: true

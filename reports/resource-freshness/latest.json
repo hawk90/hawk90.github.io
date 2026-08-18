@@ -1,0 +1,106 @@
+{
+  "asOf": "2026-08-10",
+  "fresh": [
+    {
+      "id": "zephyr-blog",
+      "kind": "blog",
+      "topic": "embedded/rtos",
+      "url": "https://zephyrproject.org/blog/",
+      "cadence_days": "30",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2026-09-01",
+      "daysOverdue": -22
+    },
+    {
+      "id": "memfault-interrupt",
+      "kind": "blog",
+      "topic": "embedded/firmware-operations",
+      "url": "https://interrupt.memfault.com/blog/",
+      "cadence_days": "30",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2026-09-01",
+      "daysOverdue": -22
+    },
+    {
+      "id": "bootlin-training",
+      "kind": "training",
+      "topic": "embedded/linux-bsp",
+      "url": "https://bootlin.com/docs/",
+      "cadence_days": "90",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2026-10-31",
+      "daysOverdue": -82
+    },
+    {
+      "id": "yocto-learn",
+      "kind": "documentation",
+      "topic": "embedded/yocto",
+      "url": "https://www.yoctoproject.org/community/learn/",
+      "cadence_days": "90",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2026-10-31",
+      "daysOverdue": -82
+    },
+    {
+      "id": "buildroot-docs",
+      "kind": "documentation",
+      "topic": "embedded/buildroot",
+      "url": "https://buildroot.org/docs.html",
+      "cadence_days": "90",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2026-10-31",
+      "daysOverdue": -82
+    },
+    {
+      "id": "ros2-docs",
+      "kind": "documentation",
+      "topic": "embedded/robotics",
+      "url": "https://docs.ros.org/",
+      "cadence_days": "90",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2026-10-31",
+      "daysOverdue": -82
+    },
+    {
+      "id": "engineering-secure-devices",
+      "kind": "book",
+      "topic": "embedded/security",
+      "url": "https://nostarch.com/node/768",
+      "cadence_days": "180",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2027-01-29",
+      "daysOverdue": -172
+    },
+    {
+      "id": "arm-programming-optimization",
+      "kind": "book",
+      "topic": "embedded/performance",
+      "url": "https://www.educate.elsevier.com/book/details/9780128225752",
+      "cadence_days": "180",
+      "last_reviewed": "2026-08-02",
+      "primary": "true",
+      "due": "2027-01-29",
+      "daysOverdue": -172
+    },
+    {
+      "id": "mastering-embedded-linux",
+      "kind": "book",
+      "topic": "embedded/linux-bsp",
+      "url": "https://www.packtpub.com/en-us/product/mastering-embedded-linux-development-9781803232591",
+      "cadence_days": "180",
+      "last_reviewed": "2026-08-02",
+      "primary": "false",
+      "due": "2027-01-29",
+      "daysOverdue": -172
+    }
+  ],
+  "due": [],
+  "invalid": []
+}

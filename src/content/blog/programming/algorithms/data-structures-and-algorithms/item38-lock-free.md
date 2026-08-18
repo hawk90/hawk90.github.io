@@ -2,7 +2,7 @@
 title: "DSA 38: Lock-free 자료구조 입문"
 date: 2026-05-15T14:00:00
 description: "atomic·CAS로 mutex 없이 — 단순 lock-free queue부터."
-tags: [Data Structure, Algorithm, Concurrency, Lock-free, Atomic]
+tags: [data-structure, Algorithm, Concurrency, Lock-free, Atomic]
 series: "Data Structures and Algorithms"
 seriesOrder: 38
 draft: true

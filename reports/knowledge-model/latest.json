@@ -1,41 +1,41 @@
 {
-  "generatedAt": "2026-08-02T06:41:02.869Z",
+  "generatedAt": "2026-08-18T05:20:57.552Z",
   "results": [
     {
       "name": "search terminology dictionary",
       "command": "npm run test:search",
       "passed": true,
-      "durationMs": 306
+      "durationMs": 308
     },
     {
       "name": "canonical topic registry",
       "command": "npm run test:topics",
       "passed": true,
-      "durationMs": 281
+      "durationMs": 275
     },
     {
       "name": "explicit classification contract",
       "command": "npm run gate:classification",
       "passed": true,
-      "durationMs": 552
+      "durationMs": 530
     },
     {
       "name": "curated content relations",
       "command": "npm run test:relations",
       "passed": true,
-      "durationMs": 281
+      "durationMs": 285
     },
     {
       "name": "content lifecycle inventory",
       "command": "npm run audit:lifecycle",
       "passed": true,
-      "durationMs": 463
+      "durationMs": 532
     },
     {
       "name": "content governance queue",
       "command": "npm run build:governance-queue",
       "passed": true,
-      "durationMs": 118
+      "durationMs": 136
     }
   ]
 }

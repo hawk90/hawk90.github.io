@@ -20,10 +20,12 @@ LED를 250 ms마다 깜빡이게 하고, 사용자가 30초 동안 입력이 없
 
 ## 핵심 개념
 
-```text
-HW timer        peripheral 한 개 = timer 한 개, µs 정밀
-SW timer        timer task 한 개 = N개 가상 timer, tick 정밀(보통 1 ms)
-```
+Hardware timer와 software timer는 개수와 정밀도에서 정반대입니다.
+
+| 종류 | 특성 |
+|------|------|
+| HW timer | peripheral 한 개 = timer 한 개, µs 정밀 |
+| SW timer | timer task 한 개 = N개 가상 timer, tick 정밀(보통 1 ms) |
 
 FreeRTOS software timer 구조입니다.
 

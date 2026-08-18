@@ -172,12 +172,19 @@ function isNavActive(href: string, match: ReadonlyArray<string> | undefined): bo
       menu.classList.remove('hidden');
       (menu.querySelector('a') as HTMLElement | null)?.focus();
     };
+    // Opening moves focus into the menu, so Escape has to bring it back out.
+    // Without this a keyboard user is stuck inside an expanded menu.
+    const onKeydown = (event: KeyboardEvent) => {
+      if (event.key === 'Escape' && trigger.getAttribute('aria-expanded') === 'true') close();
+    };
     const links = menu.querySelectorAll('a');
     trigger.addEventListener('click', onTrigger);
     links.forEach((l) => l.addEventListener('click', close));
+    document.addEventListener('keydown', onKeydown);
     return () => {
       trigger.removeEventListener('click', onTrigger);
       links.forEach((l) => l.removeEventListener('click', close));
+      document.removeEventListener('keydown', onKeydown);
     };
   });
 

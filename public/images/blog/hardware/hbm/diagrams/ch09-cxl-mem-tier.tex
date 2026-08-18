@@ -1,0 +1,60 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  axisLine/.style={draw=inkc, line width=0.6pt, -{Stealth[length=2.2mm]}},
+  tick/.style={draw=mutec, line width=0.4pt},
+  ticklabel/.style={font=\sffamily\footnotesize, text=mutec},
+  gapband/.style={draw=none, fill=neutfill},
+  pt/.style={circle, draw=#1, fill=#1!25, line width=0.6pt, inner sep=0pt, minimum size=3.4mm},
+  ptlab/.style={font=\sffamily\scriptsize, text=#1, anchor=west, align=left},
+  cxllab/.style={font=\sffamily\scriptsize\bfseries, text=focusc, anchor=west, align=left}
+]
+
+% --- gap band: DDR급 지연에서 SSD급 지연까지 비어 있던 구간 ---
+\fill[gapband] (0.63, 0) rectangle (6.72, 4.35);
+\node[font=\sffamily\footnotesize, text=mutec, align=center] at (5.2, 0.65)
+  {DDR과 SSD 사이\\[2pt]지연 3 decade가 비어 있던 구간};
+
+% --- axes ---
+\draw[axisLine] (0, 0) -- (8.3, 0);
+\node[ticklabel, anchor=north] at (4.15, -0.9) {접근 지연 (로그 축)};
+\draw[axisLine] (0, 0) -- (0, 4.35);
+\node[ticklabel, anchor=south, rotate=90] at (-1.05, 2.2) {용량 (로그 축)};
+
+\foreach \x/\lab in {0.24/100~ns, 2.64/1~$\mu$s, 5.04/10~$\mu$s, 7.44/100~$\mu$s} {
+  \draw[tick] (\x, -0.1) -- (\x, 0.1);
+  \node[ticklabel, anchor=north] at (\x, -0.18) {\lab};
+}
+\foreach \y/\lab in {0/100~GB, 1.3/1~TB, 2.6/10~TB, 3.9/100~TB} {
+  \draw[tick] (-0.1, \y) -- (0.1, \y);
+  \node[ticklabel, anchor=east] at (-0.18, \y) {\lab};
+}
+
+% --- tiers ---
+\node[pt=absbord] (hbm) at (0.47, 0.37) {};
+\node[ptlab=absbord] at (0.82, 0.37) {HBM \textperiodcentered{} 192 GB\\[2pt]100--150 ns};
+
+\node[pt=impbord] (ddr) at (0.24, 2.31) {};
+\node[ptlab=impbord] at (0.59, 2.31) {DDR DIMM \textperiodcentered{} 6 TB\\[2pt]80--120 ns};
+
+\node[pt=clibord] (ssd) at (7.14, 3.65) {};
+\node[ptlab=clibord, anchor=east] at (6.79, 3.65) {NAND SSD \textperiodcentered{} 64 TB\\[2pt]50--100 $\mu$s};
+
+\node[pt=focusc] (cxl) at (1.06, 1.10) {};
+\node[cxllab] at (1.41, 1.10) {CXL.mem \textperiodcentered{} 256 GB--2 TB\\[2pt]150--300 ns};
+
+% --- the point: CXL.mem extends load/store to the near edge of the gap ---
+\draw[draw=focusc, line width=0.5pt, dashed] (1.06, 0) -- (1.06, 4.35);
+\node[font=\sffamily\scriptsize, text=focusc, anchor=north west] at (1.16, 4.05)
+  {여기까지 load/store};
+
+\node[font=\sffamily\bfseries\small, text=inkc] at (4.15, 4.95) {메모리 계층에서 CXL.mem의 자리};
+
+\end{tikzpicture}
+\end{document}

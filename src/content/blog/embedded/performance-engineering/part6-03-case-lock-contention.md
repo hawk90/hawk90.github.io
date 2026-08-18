@@ -101,13 +101,10 @@ Hold time은 짧지만 호출 빈도가 극도로 높아 cache line이 코어 �
 
 좀 더 깊게 들여다 봅니다. `stats_mutex`와 `global_stats`는 같은 cache line 또는 인접 cache line에 위치해 있습니다. 한 thread가 mutex를 잡으면 다음 동작이 일어납니다.
 
-```text
-1. mutex의 cache line을 자기 코어 L1으로 Exclusive 상태로 가져옴
-2. 다른 코어의 L1에 있던 같은 line은 Invalid로 전환
-3. global_stats 업데이트도 동일 패턴
-4. mutex release 후 다른 thread가 동일 line 요청
-   → 직전 코어 L1에서 inter-core 전송
-```
+1. mutex의 cache line을 자기 코어 L1으로 Exclusive 상태로 가져옵니다.
+2. 다른 코어의 L1에 있던 같은 line은 Invalid로 전환됩니다.
+3. `global_stats` 업데이트도 동일한 패턴으로 진행됩니다.
+4. mutex release 후 다른 thread가 같은 line을 요청하면, 직전 코어의 L1에서 inter-core 전송이 일어납니다.
 
 코어 1개당 매 패킷마다 이 절차가 일어납니다. 8 코어가 같은 cache line을 두고 ping-pong하면 한 acquire-release cycle에 수백 ns의 coherency overhead가 추가됩니다. 처리할 패킷이 많을수록 이 overhead가 누적되어 코어를 추가하는 의미가 사라집니다.
 

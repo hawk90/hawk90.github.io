@@ -61,7 +61,7 @@ for (size_t i = 0; i < payload_len; i++)
 
 핸드셰이크가 *왕복 1회*씩 추가되는 오버헤드. RSP는 `qSupported`에서 `QStartNoAckMode+`로 *ACK 생략* 협상이 가능합니다.
 
-```
+```text
 호스트 → 스텁: QStartNoAckMode
 스텁 → 호스트: OK
 [이후 ACK 생략, 한 방향씩만 전송]
@@ -99,7 +99,7 @@ TCP/USB 환경의 거의 모든 현대 스텁이 이걸 켭니다. 성능 차이
 
 ### 1. 정지 사유 보고 — `?`
 
-```
+```text
 $? → $T05thread:p1.1;
 ```
 
@@ -134,13 +134,13 @@ GDB는 이 셀렉터를 보고 `info breakpoints`의 *Hit*를 올리거나 `catc
 
 ### 2. 모든 레지스터 — `g` / `G`
 
-```
+```text
 $g → $0000000000000000ffffffffffffffff...      ← x86-64 모든 GPR + RIP + FLAGS
 ```
 
 응답은 *바이트 순서대로* 16진. 길이는 아키텍처별로 다르고, `qXfer:features:read:target.xml`로 받은 XML이 각 레지스터의 *offset/size*를 정의.
 
-```
+```text
 $G<hex> → $OK                                   ← 전체 쓰기
 ```
 
@@ -170,7 +170,7 @@ $G<hex> → $OK                                   ← 전체 쓰기
 
 `M`은 hex라 *바이트당 2글자*. `X`(uppercase 다른 명령)는 *바이너리 직송* — 2배 효율적.
 
-```
+```text
 $X400000,4:<raw 4 bytes>           ← OpenOCD/J-Link가 일반적으로 선호
 ```
 
@@ -178,7 +178,7 @@ $X400000,4:<raw 4 bytes>           ← OpenOCD/J-Link가 일반적으로 선호
 
 ### 5. 실행 제어 — `c` / `s` / `vCont`
 
-```
+```text
 $c → (실행 후 정지 시 stop 패킷)              ← continue
 $c401200 → ...                                ← 0x401200부터 continue
 $s → ...                                       ← single step
@@ -187,7 +187,7 @@ $s401200 → ...                                ← 그 주소부터 step
 
 `c`/`s`는 *현재 스레드*만 다룸. 멀티스레드를 정교하게 제어하려면 `vCont`.
 
-```
+```text
 $vCont;c                          ← 모든 스레드 continue
 $vCont;c:p1.2                     ← thread 2만 continue, 나머지 정지
 $vCont;s:p1.2;c                   ← thread 2만 step, 나머지 continue
@@ -198,7 +198,7 @@ $vCont;t                          ← 모든 스레드 정지
 
 `vCont?`로 스텁이 무엇을 지원하는지.
 
-```
+```text
 $vCont? → $vCont;c;C;s;S;t;r
 ```
 
@@ -206,7 +206,7 @@ $vCont? → $vCont;c;C;s;S;t;r
 
 ### 6. 브레이크포인트 — `Z` / `z`
 
-```
+```text
 $Z0,401200,1 → $OK            ← software BP at 0x401200, 1-byte instruction
 $Z1,401200,4 → $OK            ← hardware BP
 $Z2,7fff0000,4 → $OK          ← write watchpoint, 4 bytes
@@ -236,7 +236,7 @@ GDB의 `info threads`가 이 셋(`qfThreadInfo` + `qsThreadInfo` + `qThreadExtra
 
 연결 직후 첫 패킷이 `qSupported`. 상호 능력을 협상합니다.
 
-```
+```text
 GDB:  qSupported:multiprocess+;swbreak+;hwbreak+;qRelocInsn+;fork-events+;
       vfork-events+;exec-events+;vContSupported+;QThreadEvents+;no-resumed+;
       memory-tagging+;xmlRegisters=i386
@@ -276,7 +276,7 @@ Stub: PacketSize=2000;QPassSignals+;QProgramSignals+;QStartupWithShell+;
 
 ### 9. 임의 XML 전송 — `qXfer`
 
-```
+```text
 $qXfer:features:read:target.xml:0,ffb → $l<target><architecture>i386:x86-64</architecture>...
 ```
 
@@ -312,7 +312,7 @@ GDB가 `load` 시 *주소가 flash인지 RAM인지*를 이걸 보고 결정. fla
 
 `qRcmd` 패킷 한 줄로 monitor 명령을 보낸다.
 
-```
+```text
 $qRcmd,72657365742068616c74 → $OK
 ```
 
@@ -330,7 +330,7 @@ OpenOCD의 `monitor flash erase_address`, J-Link의 `monitor reg`, gdbserver의 
 
 ### 11. extended-remote 명령 — `R` / `vAttach` / `vRun`
 
-```
+```text
 $R0 → (응답 없음)                  ← restart (extended only)
 $vAttach;1234 → $T05thread:p1.1;   ← PID 1234에 attach
 $vRun;<arg0>;<arg1> → $T05...      ← 새 프로세스 시작
@@ -344,7 +344,7 @@ OpenOCD에서 `monitor reset` + `load` + `monitor reset` 시퀀스가 일반적�
 
 레지스터 같은 *반복 바이트가 많은* 응답에는 RLE(Run-Length Encoding)이 적용됩니다.
 
-```
+```text
 $0000000000000000000000000000000000000000  ← 일반
 $0000000000000000*0d                        ← RLE
                   ↑
@@ -359,7 +359,7 @@ ASCII 32~127 사이를 쓰기 위해 +29 오프셋. 디코딩이 복잡하지만
 
 `X` 패킷(binary memory write) 등에서 *프로토콜 메타 바이트*(`$`, `#`, `*`, `}`)가 데이터 안에 있으면 *escape*.
 
-```
+```text
 data byte X (= $, #, *, } 중 하나):
   와이어 위에 '}' (0x7d) + (X XOR 0x20)
   
@@ -373,7 +373,7 @@ GDB와 스텁 모두 디코더가 필요. 자체 스텁 구현 시 자주 빼먹
 
 `qSupported`의 `PacketSize=<hex>`가 양쪽이 *받을 수 있는 최대*. 보내는 쪽이 한 패킷을 그 크기로 잘라야 합니다.
 
-```
+```text
 PacketSize=400        ← 1024 바이트 (32-bit MCU 흔함)
 PacketSize=2000       ← 8192 (PC gdbserver)
 PacketSize=10000      ← 65536 (USB 고속)
@@ -390,7 +390,7 @@ set _PacketSize 0x4000
 
 `semihosting`이나 `qFileIO`로 *스텁 측에서* 호스트의 파일 시스템에 접근하는 메커니즘.
 
-```
+```text
 스텁 → 호스트: $Fopen,filename,flags,mode#cs
 호스트 → 스텁: $F<fd>#cs                    ← 호스트가 open 결과 반환
 ```
@@ -399,7 +399,7 @@ ARM semihosting의 `SYS_OPEN` 등이 결국 이 패킷으로 변환됩니다.
 
 ## 에러 응답
 
-```
+```text
 $E01 → ...              ← 일반 오류 (1번)
 $ENN → ...              ← errno 인코딩
 $E.<error_text>         ← textual error (GDB 12+)

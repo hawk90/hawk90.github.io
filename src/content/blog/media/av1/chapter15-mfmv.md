@@ -2,7 +2,7 @@
 title: "Ch 15: MFMV"
 date: 2026-05-16T16:00:00
 description: "AV1의 MFMV — Motion Field Motion Vectors, 시간적 MV 전파와 스케일링 메커니즘."
-tags: [AV1, Video, Codec, MFMV, Motion Vector]
+tags: [AV1, Video, Codec, MFMV, motion-vector]
 series: "AV1"
 seriesOrder: 15
 draft: true

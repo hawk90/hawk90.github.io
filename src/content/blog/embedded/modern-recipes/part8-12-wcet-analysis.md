@@ -199,11 +199,7 @@ aiT static analysis    11400 cycles (증명된 상한)
 
 > ACET로 마감 계산
 
-```text
-"평균 50 µs인 loop을 100 µs 주기로" → 가끔 fail
-```
-
-deadline 계산은 *WCET 기반*입니다. 평균이 아닙니다.
+평균 50 µs인 loop을 100 µs 주기로 돌리면 가끔 fail합니다. deadline 계산은 *WCET 기반*입니다. 평균이 아닙니다.
 
 > Hot cache로만 측정
 

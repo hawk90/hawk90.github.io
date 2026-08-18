@@ -1,4 +1,5 @@
 ---
+import { getPostUrl } from '../lib/utils';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { getPublishedPosts, type BlogPost } from '../lib/posts';
 
@@ -43,7 +44,7 @@ const dayLabel = (d: Date) => String(d.getDate()).padStart(2, '0');
                 {posts.map((p) => (
                   <li>
                     <a
-                      href={`/blog/${p.id}`}
+                      href={getPostUrl(p)}
                       class="group grid grid-cols-[3rem_1fr] sm:grid-cols-[5rem_1fr_auto] items-baseline gap-3 sm:gap-4 py-2.5 px-3 -mx-2 rounded-xl hover:bg-[var(--color-bg-tertiary)] transition-colors"
                     >
                       <time

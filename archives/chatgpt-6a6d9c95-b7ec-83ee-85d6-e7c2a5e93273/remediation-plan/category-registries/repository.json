@@ -1841,10 +1841,10 @@
             "reports/repository-health/latest.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
-          "result": "Repository object connectivity and a recovery remote are verified; the current source is retained as Git history rather than a single overwritten snapshot."
+          "result": "Repository object connectivity is verified and the current source is retained as Git history rather than a single overwritten snapshot. The earlier wording also claimed a verified recovery remote; that came from a check which passed on any configured remote, so a single origin counted as its own backup. The check now requires two distinct remote hosts and fails at one, and this record no longer claims otherwise."
         }
       ],
-      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+      "residualRisk": "History is retained on one host with one local clone, so the objects survive a bad commit but not the loss of the account. External recovery and the recovery-remote control remain open; rerun the listed verification after changing the control."
     },
     {
       "id": "AP-R-62",

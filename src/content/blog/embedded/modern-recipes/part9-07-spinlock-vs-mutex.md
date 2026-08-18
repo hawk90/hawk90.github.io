@@ -20,18 +20,12 @@ Linux kernel처럼 ISR과 process context, multi-CPU가 섞인 환경에서 둘�
 
 ## 핵심 개념
 
-```text
-mutex (sleep lock)
-  contention 시 caller가 sleep → context switch
-  hold time이 길수록 유리
-  ISR에서 사용 금지
+| 종류 | contention 시 동작 | 유리한 hold time | context 제약 |
+|------|-------------------|-----------------|--------------|
+| mutex (sleep lock) | caller가 sleep하고 context switch가 일어남 | 길수록 유리 | ISR에서 사용 금지 |
+| spinlock (busy lock) | caller가 busy wait | 매우 짧을 때만 유리 | ISR과 process context 모두 사용 가능 |
 
-spinlock (busy lock)
-  contention 시 caller가 busy wait
-  hold time이 매우 짧을 때만 유리
-  ISR과 process context 모두 사용 가능
-  Linux: spin_lock_irqsave가 IRQ까지 disable
-```
+Linux에서는 `spin_lock_irqsave`가 IRQ까지 disable합니다.
 
 판단 기준입니다.
 
@@ -174,20 +168,17 @@ Linux는 4.2부터 qspinlock이 표준입니다. 일반 코드는 그냥 spin_lo
 
 ### Decision tree
 
-```text
-질문 1: 작업이 sleep 가능한가?
-   no → spinlock (ISR/atomic context)
-   yes → 질문 2
+첫 질문은 "작업이 sleep 가능한가"입니다. ISR이나 atomic context라서 sleep이 불가능하면 선택지는 spinlock뿐입니다. sleep이 가능하면 다음 질문으로 넘어갑니다.
 
-질문 2: hold time이 얼마인가?
-   < 1 µs    spinlock 또는 atomic 직접
-   1~10 µs   spinlock (SMP에서만)
-   > 10 µs   mutex
+두 번째 질문은 hold time입니다.
 
-질문 3: contention이 큰가? (코어 ≥ 8, 동시 thread > 4)
-   yes      MCS / qspinlock 사용
-   no       기본 spinlock으로 충분
-```
+| hold time | 선택 |
+|-----------|------|
+| < 1 µs | spinlock 또는 atomic 직접 |
+| 1~10 µs | spinlock (SMP에서만) |
+| > 10 µs | mutex |
+
+세 번째 질문은 contention 규모입니다. 코어가 8개 이상이고 동시 thread가 4개를 넘으면 MCS나 qspinlock을 쓰고, 그렇지 않으면 기본 spinlock으로 충분합니다.
 
 ## 측정 / 성능 비교
 

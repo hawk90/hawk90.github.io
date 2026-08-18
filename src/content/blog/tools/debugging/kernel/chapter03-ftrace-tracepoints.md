@@ -179,7 +179,7 @@ syscalls:sys_exit_openat
 
 결과:
 
-```
+```text
        <idle>-0   [002] d.s.  101.234: sched_switch: prev_comm=swapper/2 prev_pid=0 prev_state=R ==> next_comm=kworker/2:1 next_pid=42 next_prio=120
 ```
 
@@ -378,7 +378,7 @@ ftrace는 *exploratory*, eBPF는 *분석*. 둘 다 활용.
 
 ## 부팅 시 활성화
 
-```
+```text
 boot cmdline:
 trace_event=sched:sched_switch,sched:sched_wakeup
 ftrace=function_graph

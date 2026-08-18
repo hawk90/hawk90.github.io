@@ -98,7 +98,7 @@ A-8-6  SCI (Software Configuration Index) 작성
 
 **Naming convention:**
 
-- <PROJECT>-<MODULE>-<TYPE>-<NUMBER>-<VERSION>
+- `<PROJECT>-<MODULE>-<TYPE>-<NUMBER>-<VERSION>`
 
 **Examples:**
 

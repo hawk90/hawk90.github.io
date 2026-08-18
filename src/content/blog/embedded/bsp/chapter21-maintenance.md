@@ -288,17 +288,9 @@ BSP Development 시리즈가 21장에 걸쳐 다룬 내용을 한눈에 정리�
 
 ## BSP 엔지니어의 다음 단계
 
-BSP를 한 번 완성한 엔지니어는 다음 방향으로 깊이를 만들 수 있습니다.
+BSP를 한 번 완성하고 나면 깊이를 만들 방향이 갈립니다. 가장 자연스러운 쪽은 *보안*입니다. secure boot, OP-TEE, attestation, supply chain 보안은 양산 BSP가 끝나는 자리에서 곧바로 이어지는 주제입니다. 자동차나 산업용 도메인이라면 *real-time*과 *functional safety*가 그다음 layer가 됩니다.
 
-| 방향 | 추천 시리즈 |
-|------|------------|
-| 빌드 시스템 깊이 | [Buildroot Practical](/blog/embedded/buildroot/chapter01-problem) |
-| RTOS 영역 | [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface), FreeRTOS Mastering |
-| recipe 묶음 | [Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface) |
-| 보안 깊이 | [Embedded Security](/blog/embedded/embedded-security/chapter01-threat-model) |
-| 작은 MCU/SoC | ESP32-C3 Mastering |
-
-BSP의 다음 자연스러운 방향은 *보안*입니다. secure boot, OP-TEE, attestation, supply chain 보안 같은 영역이 양산 BSP의 다음 챕터가 됩니다. 동시에 자동차/산업용 도메인에서는 *real-time*과 *functional safety*도 중요한 layer입니다.
+구체적으로 어느 시리즈로 이어지는지는 이 글 끝의 [추천 다음 시리즈](#추천-다음-시리즈)에 정리했습니다.
 
 ## 자주 하는 실수 (시리즈 통합)
 

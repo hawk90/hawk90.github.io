@@ -1,0 +1,56 @@
+---
+import type { CollectionEntry } from 'astro:content';
+import { getPostUrl } from '../../lib/utils';
+
+interface Props {
+  post: CollectionEntry<'blog'>;
+  /** Number shown in the leading badge. Falls back to the post's seriesOrder. */
+  index?: number;
+  /**
+   * Heading level for the title. The series page puts these rows directly
+   * under its `h1` and needs `2`; the category index nests them under a series
+   * `h2` and a chapter `h3`, so `3` is right there. Hard-coding either one
+   * reintroduces a skipped level on the other page.
+   */
+  headingLevel?: 2 | 3 | 4;
+}
+
+const { post, index, headingLevel = 3 } = Astro.props;
+const badge = index ?? post.data.seriesOrder ?? '';
+const Heading = `h${headingLevel}` as 'h2' | 'h3' | 'h4';
+---
+
+{/*
+  A directory row, not a feed card.
+
+  PostCard answers "what should I read next" — it earns a thumbnail, a date,
+  and a reading time because the reader is browsing. A series page and a
+  category index answer a different question: the reader already knows roughly
+  what they want and is looking for the entry that matches it. There, the
+  thumbnail is noise and the weight is real — /blog/embedded lists 464 posts,
+  where a card costs 1.6 KB and this row costs a fraction of it.
+
+  Shared by both pages so the two directory listings cannot drift apart.
+*/}
+<a
+  href={getPostUrl(post)}
+  class="series-item block p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-accent)] hover:shadow-md transition-all duration-200 group"
+>
+  <div class="flex items-start gap-4">
+    {badge !== '' && (
+      <div class="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-semibold rounded-lg text-sm group-hover:bg-[var(--color-accent)] group-hover:text-white transition-colors">
+        {badge}
+      </div>
+    )}
+    <div class="flex-1 min-w-0">
+      <Heading class="text-base sm:text-lg font-semibold group-hover:text-[var(--color-accent)] transition-colors leading-snug">
+        {post.data.title}
+      </Heading>
+      {post.data.description && (
+        <p class="text-sm text-[var(--color-text-secondary)] mt-1.5 line-clamp-2 leading-relaxed">
+          {post.data.description}
+        </p>
+      )}
+    </div>
+  </div>
+</a>

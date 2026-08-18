@@ -11,6 +11,7 @@ import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
 import rehypeImageLazy from './src/lib/rehype-image-lazy.mjs';
+import rehypeTableScroll from './src/lib/rehype-table-scroll.mjs';
 
 // This site is intentionally static and PAT-only. OAuth needs a separately
 // deployed server boundary; do not add OAuth callback routes to this project.
@@ -66,8 +67,12 @@ export default defineConfig({
     // mdx() integration dropped — repo has 0 .mdx files; pure .md only.
     // Removing saves parser load + memory during build.
     sitemap({
-    // Exclude admin pages from sitemap (they're not public).
-    filter: (page) => !page.includes('/admin'),
+    // Admin pages are not public. Author archives are noindex while there is a
+    // single author, because they re-list exactly what /blog already lists;
+    // keep the sitemap and the robots directive saying the same thing.
+    // /random is a noindex redirect shim; listing it would contradict its own
+    // robots directive.
+    filter: (page) => !page.includes('/admin') && !page.includes('/authors/') && !page.endsWith('/random/'),
   }),
   ],
 
@@ -87,6 +92,7 @@ export default defineConfig({
         // `audit:math-unicode` report remains the review surface.
         [rehypeKatex, { strict: false }],
         rehypeImageLazy,
+        rehypeTableScroll,
       ],
     }),
   },
@@ -104,9 +110,13 @@ export default defineConfig({
   output: 'static',
   compressHTML: true,
 
-  // Trim whitespace and merge similar nodes when emitting HTML.
-  // Astro 5/6 default — explicitly set to confirm.
   build: {
-    inlineStylesheets: 'auto',
+    // `auto` inlined expressive-code's ~26 KB stylesheet into every one of the
+    // 1478 pages — 9% of each page's bytes, re-sent on every navigation, for
+    // rules that never change. `never` emits 8 shared files instead, so the
+    // second chapter a reader opens pays nothing for them. Total HTML dropped
+    // from 298.7 MB to 280.5 MB. The cost is one extra render-blocking request
+    // on the first page only; this is a site people read several pages of.
+    inlineStylesheets: 'never',
   },
 });

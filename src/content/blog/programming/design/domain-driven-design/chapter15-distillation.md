@@ -2,7 +2,7 @@
 title: "Ch 15: Distillation"
 date: 2026-05-01T15:00:00
 description: "Core Domain / Generic Subdomain / Supporting Subdomain — 핵심 식별."
-tags: [DDD, Core Domain, Distillation]
+tags: [DDD, core-domain, Distillation]
 series: "Domain-Driven Design"
 seriesOrder: 15
 draft: true

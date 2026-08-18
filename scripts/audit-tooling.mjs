@@ -81,7 +81,6 @@ const isExpectedVariant = ({ names }) => {
     || has('audit:tooling', 'gate:tooling')
     || has('audit:secrets', 'gate:secrets')
     || has('audit:security-admin', 'gate:security-admin')
-    || has('audit:diagram-accessibility', 'fix:diagram-accessibility')
     || has('audit:upstream', 'audit:upstream:json')
     || has('diagrams', 'diagrams:force')
     || has('prebuild', 'og', 'og:force', 'og:prune');

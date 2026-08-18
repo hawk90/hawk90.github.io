@@ -16,15 +16,16 @@ topics: ["embedded"]
 
 카메라 영상을 캡처해 디스크에 저장하는 프로토타입에서 frame drop이 보고됐습니다.
 
-```text
-HW: Cortex-A53 quad-core, 1.2 GHz, MIPI CSI-2 input
-요구: 1080p (1920×1080) YUV422, 60 fps
-       → 1920 × 1080 × 2 × 60 = 248 MB/s
+| 항목 | 값 |
+|------|-----|
+| HW | Cortex-A53 quad-core, 1.2 GHz, MIPI CSI-2 input |
+| 요구 | 1080p (1920×1080) YUV422, 60 fps → 1920 × 1080 × 2 × 60 = 248 MB/s |
 
-증상: 안정적으로 30 fps만 캡처
-       60 fps 설정 시 50% frame drop
-       CPU idle 70% 이상으로 여유 많음
-```
+증상은 다음 세 가지였습니다.
+
+- 안정적으로 캡처되는 것은 30 fps까지였습니다.
+- 60 fps로 설정하면 frame drop이 50%에 달했습니다.
+- 그런데도 CPU idle이 70% 이상으로 여유가 많았습니다.
 
 CPU가 한가한데 throughput이 모자라는 전형적인 비-CPU bound 문제였습니다. 처음에는 카메라 센서나 ISP 자체의 한계를 의심했지만, 데이터시트상 센서는 60 fps를 지원했습니다.
 

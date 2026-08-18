@@ -367,6 +367,7 @@ PCIe는 *CXL·UCIe·NVMe의 토대*이고 *2025~2026 datacenter interconnect의 
 ## 관련 항목
 
 - [Ch 1: PCIe Fundamentals](/blog/embedded/hardware/pcie/chapter01-fundamentals) — 시리즈 시작
+- [Ch 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space) — 같은 헤더를 *처음 배울 때* 보는 쪽. 이 장은 비트 단위로 찾아볼 때
 - [CXL Internals Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position) — PCIe 위 alternate protocol
 - [HBM·GDDR 심화 Ch 9: CXL.mem](/blog/embedded/hardware/hbm/chapter09-cxl-mem)
 - [Embedded Performance Engineering Ch 29: CXL Interconnect](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)
