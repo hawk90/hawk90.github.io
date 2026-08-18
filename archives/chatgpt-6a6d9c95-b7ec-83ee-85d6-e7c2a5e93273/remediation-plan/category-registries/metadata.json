@@ -1964,10 +1964,10 @@
             "scripts/audit-repository-resilience.mjs"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:repository-resilience",
-          "result": "The runbook moved from archives/…/remediation-plan/ to docs/runbooks/repository-recovery.md, and README links it from the deployment section. The two audits that read it were updated to the new path and both pass: repository controls 43/43 verified, resilience 8/8 local controls with 4 external pending. The document still states that recovery has not been tested, and that statement was left intact rather than softened by the move. Which external control to exercise first remains open and is tracked by the four pending external controls, not by this item."
+          "result": "The runbook moved from archives/…/remediation-plan/ to docs/runbooks/repository-recovery.md, and README links it from the deployment section. The two audits that read it were updated to the new path; repository controls verify 43/43. The resilience audit was corrected at the same time and now reports 7/8 local controls, with recovery-remote failing at one configured remote, 3 external controls pending, and domain-dns-recovery not applicable because the site is served from a github.io subdomain. An earlier version of this record quoted the pre-correction 8/8 and 4 pending. The document still states that recovery has not been tested, and that statement was left intact rather than softened by the move."
         }
       ],
-      "residualRisk": "Promotion changes where the runbook lives, not whether it works. Every step in it remains unexercised, and two audits now depend on the new path."
+      "residualRisk": "Promotion changes where the runbook lives, not whether it works. Every step in it remains unexercised, two audits now depend on the new path, and the runbook itself is only tracked because .gitignore was amended to stop /docs/ from swallowing it."
     },
     {
       "id": "AP-M-59",
