@@ -21,6 +21,7 @@
     "src/components/blog/Pagination.astro",
     "src/components/blog/PostCard.astro",
     "src/components/blog/PostListPanel.astro",
+    "src/components/blog/PostRow.astro",
     "src/components/blog/ReadingProgress.astro",
     "src/components/blog/RelatedPosts.astro",
     "src/components/blog/SeriesNav.astro",

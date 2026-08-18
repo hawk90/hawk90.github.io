@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../../layouts/BaseLayout.astro';
-import PostCard from '../../../components/blog/PostCard.astro';
+import PostRow from '../../../components/blog/PostRow.astro';
 import BlogSidebar from '../../../components/blog/BlogSidebar.astro';
 import Breadcrumb from '../../../components/common/Breadcrumb.astro';
 import { CATEGORIES } from '../../../consts/categories';
@@ -113,9 +113,9 @@ function formatChapter(key: string): string {
                             {ch.label}
                           </h3>
                         )}
-                        <div class="grid gap-6 md:grid-cols-2">
+                        <div class="space-y-2.5">
                           {ch.posts.map((post) => (
-                            <PostCard post={post} />
+                            <PostRow post={post} />
                           ))}
                         </div>
                       </div>
