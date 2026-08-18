@@ -36,14 +36,14 @@ $ gdb --interpreter=mi3 ./my_prog
 
 ### 명령 형식
 
-```
+```text
 [token]-command [args]
 ```
 
 - `token` — 옵션. 응답에서 같이 돌아와 *비동기 매핑*에 사용.
 - `command` — MI 명령 (`-exec-run`, `-break-insert` 등).
 
-```
+```text
 (gdb)
 2-exec-run
 2^running
@@ -70,7 +70,7 @@ $ gdb --interpreter=mi3 ./my_prog
 
 ### 자주 쓰이는 명령
 
-```
+```text
 -exec-run                    : run
 -exec-continue               : continue
 -exec-interrupt              : 정지
@@ -112,7 +112,7 @@ $ gdb --interpreter=mi3 ./my_prog
 
 ### 응답 예 — backtrace
 
-```
+```text
 3-stack-list-frames
 3^done,stack=[
   frame={level="0",addr="0x000055555555581a",func="process",
@@ -128,7 +128,7 @@ IDE는 이 구조에서 *각 frame*을 추출해 콜스택 패널에 표시.
 
 ### 응답 — 변수 트리
 
-```
+```text
 4-var-create v1 * vec
 4^done,name="v1",numchild="3",value="std::vector of size 3",
        type="std::vector<int, std::allocator<int> >",
@@ -139,7 +139,7 @@ IDE는 이 구조에서 *각 frame*을 추출해 콜스택 패널에 표시.
 
 사용자가 노드 펼치면.
 
-```
+```text
 5-var-list-children v1
 5^done,numchild="3",children=[
   child={name="v1.0",exp="[0]",numchild="0",value="1",type="int"},
@@ -152,7 +152,7 @@ IDE는 이 구조에서 *각 frame*을 추출해 콜스택 패널에 표시.
 
 ### Asynchronous notifications
 
-```
+```text
 *stopped,reason="breakpoint-hit",disp="keep",bkptno="1",
    thread-id="1",frame={addr="0x...",func="main",file="main.cpp",line="10"},
    stopped-threads="all",core="3"
@@ -186,7 +186,7 @@ MI가 *GDB 측*이라면 DAP는 *IDE 측*. Microsoft가 2016년 도입, 이제 �
 
 JSON-RPC over TCP/stdio. 메시지는 *길이 header + JSON body*.
 
-```
+```text
 Content-Length: 119\r\n
 \r\n
 {"seq":1,"type":"request","command":"initialize",
@@ -195,7 +195,7 @@ Content-Length: 119\r\n
 
 ### 메시지 종류
 
-```
+```text
 request   : 클라이언트 → 어댑터, 응답 기대
 response  : 어댑터 → 클라이언트, request에 대한 답
 event     : 어댑터 → 클라이언트, 비동기 알림
@@ -408,7 +408,7 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 VSCode의 *cppdbg* 어댑터가 어떻게 동작하는가.
 
-```
+```text
 VSCode  ─DAP─>  cppdbg adapter  ─MI─>  gdb (--interpreter=mi3)
                                           │
                                           ▼
@@ -421,7 +421,7 @@ VSCode  ─DAP─>  cppdbg adapter  ─MI─>  gdb (--interpreter=mi3)
 
 `CodeLLDB` 어댑터는 *직접 LLDB SB API*를 호출. MI를 거치지 않음. 그래서 macOS·Rust·Swift 환경에서 더 빠르고 안정.
 
-```
+```text
 VSCode  ─DAP─>  CodeLLDB adapter  ─SB API─>  lldb
 ```
 
@@ -429,7 +429,7 @@ VSCode  ─DAP─>  CodeLLDB adapter  ─SB API─>  lldb
 
 Python의 `debugpy`도 DAP 어댑터 + Python 디버거 내장.
 
-```
+```text
 VSCode  ─DAP─>  debugpy  ─PyFrame inspection─>  사용자 Python 코드
 ```
 

@@ -8,9 +8,8 @@ All diagrams live as `.tex` next to their compiled `.svg` under `public/images/b
 npm run diagrams         # incremental — only rebuild changed .tex
 npm run diagrams:force   # full rebuild
 npm run diagrams:watch   # auto-rebuild on .tex save (requires fswatch)
-npm run audit:diagrams   # verify .tex/.svg structure and report accessibility gaps
-npm run audit:diagram-accessibility # read-only title/desc metadata check
-npm run fix:diagram-accessibility   # add fallback metadata only with explicit apply
+npm run audit:diagrams   # verify .tex/.svg structure and orphan artifacts
+npm run audit:diagram-accessibility # alt coverage, broken refs, unreferenced SVGs
 npm run review:diagrams  # build a human review sheet for visual candidates
 npm run audit:diagram-quality # rank palette/effect candidates for visual review
 
@@ -28,6 +27,13 @@ import Diagram from '@components/blog/Diagram.astro';
 <Diagram src="dsa/diagrams/item20-quicksort-partition" alt="Quicksort partition" />
 <Diagram src="gof/relationships" alt="GoF 23 patterns" caption="패턴 관계도" />
 ```
+
+The `alt` text is the diagram's entire accessibility surface. Both embedding
+paths render `<img src="...svg">`, and a browser loading an SVG through `<img>`
+never exposes the file's internal DOM to assistive technology, so a `<title>` or
+`<desc>` inside the `.svg` is not announced. `audit:diagram-accessibility`
+therefore checks alt coverage at the reference site along with broken references
+and unreferenced artifacts; it does not inspect SVG internals and never writes.
 
 The `src` is the path under `/images/blog/`, with or without `.svg`.
 
@@ -61,7 +67,15 @@ npm run gate:classification  # fails if a document falls back to legacy/path tax
 npm run audit:lifecycle      # review/evidence lifecycle inventory
 npm run build:governance-queue # bounded Claude review queue from all inventories
 npm run audit:knowledge-model # verifies terminology, taxonomy, relations, and refreshes governance reports
+npm run audit:tags           # tag vocabulary baseline — URL splits, label drift, malformed tags
+npm run fix:tags             # preview tag repairs (add -- --apply to write)
+npm run audit:series-structure # series identity, entry point, continuity, exit link
+npm run audit:connectivity   # dead-end / unreachable articles, bare "여기" anchors
 npm run audit:content-readiness # refreshes global staleness, fact-density, image, and series review queue
+npm run audit:coverage          # counts published + draft content and flags draft-only series
+npm run audit:staleness:all    # detects stale date/future-tense claims in published + draft content
+npm run audit:resource-freshness # finds curated books/sites due for a fresh web review
+npm run audit:industry-watch    # reads feeds, GitHub releases, and arXiv into an industry-change queue
 npm run migrate:topics       # preview path → explicit topic migration (add -- --apply to write)
 ```
 
@@ -72,6 +86,27 @@ explicit manual reviews in the report.
 `audit:content-readiness` is deliberately informational: its P1/P2/P3 signals
 rank review work but never assert a correction or bulk-change frontmatter. Its
 companion Claude command is `.claude/commands/content-readiness-run.md`.
+
+`audit:content-readiness` includes draft content when running prose staleness
+checks. Unpublished manuscripts can contain expired dates, future-tense claims,
+and obsolete recommendations before publication. The coverage report separates
+published, draft, and draft-only series; it never publishes or changes frontmatter.
+
+`audit:resource-freshness` and `audit:industry-watch` are discovery aids, not
+automatic recommendation engines. The former schedules a fresh review of the
+curated inventory in `data/resource-tracking.yaml`; the latter collects recent
+items from `data/industry-watch.json` and writes a queue under
+`reports/industry-watch/`, while `state.json` remembers items already seen.
+A reviewer still verifies edition, authority,
+relevance, and overlap before updating `READING_ROADMAP.md`.
+
+For a recurring weekly pass:
+
+```bash
+npm run audit:industry-watch -- --since-days 14
+npm run audit:resource-freshness
+npm run audit:content-readiness
+```
 
 ### Secret scan
 

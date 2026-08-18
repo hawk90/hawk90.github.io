@@ -729,3 +729,11 @@ Ch 4에서는 옵션과 캐시 변수를 다룹니다. `option()`, `set(... CACH
 - [CMake - add_library](https://cmake.org/cmake/help/latest/command/add_library.html)
 - [CMake - target_link_libraries](https://cmake.org/cmake/help/latest/command/target_link_libraries.html)
 - [It's Time To Do CMake Right](https://pabloariasal.github.io/2018/02/19/its-time-to-do-cmake-right/)
+
+## 관련 항목
+
+- [Ch 2: CMake 언어](/blog/tools/build/cmake/chapter02-language) — 타겟 명령에 들어가는 변수·제너레이터 식
+- [Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options) — 타겟 구성을 사용자가 고를 수 있게 만들기
+- [Ch 8: Modern CMake 베스트 프랙티스](/blog/tools/build/cmake/chapter08-best-practices) — 타겟 중심 설계를 프로젝트 규모로 확장한 정리
+- [GNU Make 규칙 분석](/blog/tools/build/gnu-make/chapter02-rules) — Make의 타겟은 파일, CMake의 타겟은 속성 묶음이라는 차이
+- [cmake-buildsystem(7)](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html) — 타겟과 사용 요구사항(usage requirements)의 공식 설명

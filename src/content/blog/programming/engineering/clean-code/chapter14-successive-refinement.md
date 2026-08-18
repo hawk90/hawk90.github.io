@@ -2,7 +2,7 @@
 title: "Ch 14: 점진적 개선"
 date: 2026-05-11T14:00:00
 description: "Args 명령행 파서를 점진적으로 다듬는 사례 — 작동하게 → 깨끗하게. 매 단계마다 테스트가 유지된다."
-tags: [CleanCode, Refactoring, Robert Martin]
+tags: [CleanCode, Refactoring, robert-martin]
 series: "Clean Code"
 seriesOrder: 14
 draft: true

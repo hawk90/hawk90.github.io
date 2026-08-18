@@ -2,7 +2,7 @@
 title: "Ch 3: 함수"
 date: 2026-05-11T03:00:00
 description: "함수는 작아야 한다. 한 가지 일을 해야 한다. 한 추상 수준을 유지해야 한다. 클린 코드의 가장 압축된 규칙."
-tags: [CleanCode, Functions, Robert Martin]
+tags: [CleanCode, Functions, robert-martin]
 series: "Clean Code"
 seriesOrder: 3
 draft: true

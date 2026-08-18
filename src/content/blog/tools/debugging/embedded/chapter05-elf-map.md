@@ -296,7 +296,7 @@ g_buffer                                          ./build/main.o
 
 링크 실패.
 
-```
+```text
 arm-none-eabi-ld: firmware.elf section `.bss' will not fit in region `RAM'
 arm-none-eabi-ld: region `RAM' overflowed by 4096 bytes
 ```

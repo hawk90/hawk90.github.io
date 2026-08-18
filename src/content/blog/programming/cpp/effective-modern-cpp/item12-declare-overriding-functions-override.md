@@ -2,7 +2,7 @@
 title: "항목 12: 재정의 함수에는 override를 선언하라"
 date: 2026-05-04T12:00:00
 description: "override 키워드로 가상 함수 재정의의 미묘한 실수를 컴파일 타임에 잡아낸다. 참조 한정자도 함께."
-tags: [C++, virtual, override, Modern C++]
+tags: [C++, virtual, override, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 12
 draft: true

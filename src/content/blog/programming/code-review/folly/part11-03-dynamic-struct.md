@@ -27,7 +27,7 @@ dynamic을 코드 깊숙이 흘려보내면 다음이 발생한다.
 
 해법은 boundary에서 한 번 parse해서 struct로 넘기는 것이다. 이후는 모두 type-safe 코드.
 
-```
+```text
 [ JSON string ]
         ↓ parseJson
 [ dynamic ]                  ← 여기까지가 boundary

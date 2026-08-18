@@ -2,7 +2,7 @@
 title: "Ch 8: perf script / 커스텀 처리"
 date: 2026-05-17T08:00:00
 description: "perf script — 원시 샘플 텍스트. Perl / Python 후처리."
-tags: [perf, perf script, Custom Analysis]
+tags: [perf, perf-script, custom-analysis]
 series: "perf and FlameGraph"
 seriesOrder: 8
 draft: true

@@ -20,7 +20,12 @@ export default defineEcConfig({
   // sidesteps an expressive-code selector-merge quirk that produced
   // `.expressive-codehtml:not(...)` (mashed together, never matched).
   themeCssSelector: (theme) => `[data-code-theme="${theme.name}"]`,
-  emitExternalStylesheet: false,
+  // Must stay true: the page always emits a <link> to `/_astro/ec.*.css`, and
+  // with this off the file is never written, so every code block loses its
+  // styling. Paired with `build.inlineStylesheets: 'never'` in astro.config,
+  // this keeps the stylesheet in one cacheable file instead of inlining it
+  // into all 1478 pages.
+  emitExternalStylesheet: true,
   styleOverrides: {
     borderRadius: '0.5rem',
     codeFontFamily: 'var(--font-mono)',

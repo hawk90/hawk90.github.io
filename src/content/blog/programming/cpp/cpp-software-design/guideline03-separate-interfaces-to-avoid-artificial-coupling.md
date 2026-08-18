@@ -2,7 +2,7 @@
 title: "가이드라인 3: 인공적 결합을 피하기 위해 인터페이스를 분리하라"
 date: 2026-05-02T03:00:00
 description: "Interface Segregation Principle. 뚱뚱한 인터페이스가 만드는 우연한 결합을 작은 인터페이스로 끊는다."
-tags: [C++, Software Design, SOLID, ISP, Concepts]
+tags: [C++, software-design, SOLID, ISP, Concepts]
 series: "C++ Software Design"
 seriesOrder: 3
 draft: true

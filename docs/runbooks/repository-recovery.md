@@ -2,6 +2,12 @@
 
 This is an operational checklist, not evidence that recovery has already been tested. It deliberately contains no credentials, token values, DNS secrets, or account-recovery codes.
 
+> Moved here from `archives/…/remediation-plan/` so it lives on a maintained
+> surface rather than inside a frozen archive. `npm run audit:repository-controls`
+> and `npm run audit:repository-resilience` read this file at this path; moving it
+> again means updating them. The statement above still holds — nothing in here has
+> been exercised.
+
 ## Scope and ownership
 
 - Source of truth: the Git repository and its verified default branch.

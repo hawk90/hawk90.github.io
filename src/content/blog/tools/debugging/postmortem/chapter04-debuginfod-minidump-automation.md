@@ -63,7 +63,7 @@ The directory where separate debug symbols are searched for is "/usr/lib/debug".
 
 ## Build-ID 디렉터리 구조
 
-```
+```text
 /usr/lib/debug/.build-id/
 ├── 8d/
 │   ├── 3a91f0e5a3b2c1d4e6.....debug    # myapp

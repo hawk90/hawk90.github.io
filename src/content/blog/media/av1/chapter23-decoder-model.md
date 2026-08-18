@@ -2,7 +2,7 @@
 title: "Ch 23: Decoder Model"
 date: 2026-05-16T00:00:00
 description: "AV1의 Decoder Model — Smoothing Buffer, Frame Buffer, 타이밍, Level 적합성 검증."
-tags: [AV1, Video, Codec, Decoder Model, Conformance]
+tags: [AV1, Video, Codec, decoder-model, Conformance]
 series: "AV1"
 seriesOrder: 23
 draft: true

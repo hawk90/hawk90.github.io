@@ -39,6 +39,38 @@ export function getTagUrl(tagName: string): string {
 }
 
 /**
+ * The canonical URL of a post.
+ *
+ * Every link to a post goes through here, including the route that generates
+ * it, so there is exactly one definition of where a post lives. It currently
+ * derives from the entry id, which is the file path — meaning a published URL
+ * and a folder are the same fact, and moving a file breaks its links.
+ *
+ * That coupling is the reason this function exists. Changing the rule here is
+ * a one-line edit; changing it in fourteen template literals scattered across
+ * components is how a site ends up with two URLs for one post. The
+ * `stable-url` control in `audit-content-portability.mjs` fails the build if a
+ * caller starts building the path by hand again.
+ *
+ * Accepts anything carrying an `id`, so collection entries, the normalized
+ * document model, and plain search-index rows all use the same path.
+ */
+export function getPostUrl(post: { id: string } | string): string {
+  return `/blog/${getPostRouteParam(post)}`;
+}
+
+/**
+ * The `[...slug]` param for a post's page.
+ *
+ * Split from `getPostUrl` so the route that *creates* the page and every link
+ * that *points at* it read the same definition. Two expressions that happen to
+ * agree today are how a link starts 404ing the day one of them changes.
+ */
+export function getPostRouteParam(post: { id: string } | string): string {
+  return typeof post === 'string' ? post : post.id;
+}
+
+/**
  * Escape HTML special characters.
  *
  * Apostrophe is intentionally omitted: numeric entities like &#039; are not

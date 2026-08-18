@@ -2,7 +2,7 @@
 title: "임베디드 보안 개발 라이프사이클 — Secure SDLC 적용"
 date: 2026-05-21T09:10:00
 description: "Microsoft SDL, threat modeling, SBOM, supply chain, 사고 대응. 시리즈 마무리."
-tags: [SDLC, SDL, SBOM, Threat Modeling, Supply Chain]
+tags: [SDLC, SDL, SBOM, threat-modeling, supply-chain]
 series: "Embedded Security"
 seriesOrder: 10
 draft: false

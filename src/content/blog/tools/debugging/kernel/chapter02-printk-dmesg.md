@@ -136,7 +136,7 @@ printk.time=0  # off
 WARN_ON(some_invariant_broken);
 ```
 
-```
+```text
 WARNING: CPU: 2 PID: 1234 at drivers/foo.c:42 my_function+0x10/0x80
 [hardware info]
 RIP: 0010:my_function+0x10/0x80
@@ -194,14 +194,14 @@ $ echo 'module btrfs +pfml' | sudo tee /sys/kernel/debug/dynamic_debug/control
 
 ### 부팅 시
 
-```
+```text
 boot cmdline:
 dyndbg="module btrfs +p; module xfs +p"
 ```
 
 또는 module 로드 시.
 
-```
+```bash
 $ sudo modprobe btrfs dyndbg=+p
 ```
 
@@ -251,7 +251,7 @@ Ch 3에서 자세히.
 
 ## printk 출력 destination — 부팅 옵션
 
-```
+```text
 console=ttyS0,115200    # serial port
 console=tty0            # vga
 console=ttyUSB0

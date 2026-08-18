@@ -21,7 +21,7 @@ void deep()    { deeper(); }
 int main()     { deep(); return 0; }
 ```
 
-```
+```text
 (gdb) run
 Program received signal SIGSEGV, Segmentation fault.
 0x000055555555512e in deepest () at crash.c:1
@@ -39,7 +39,7 @@ Program received signal SIGSEGV, Segmentation fault.
 
 ## `backtrace` 변형
 
-```
+```text
 (gdb) backtrace         # 전체 스택
 (gdb) bt                # 약어
 (gdb) bt 5              # 안쪽 5 프레임만
@@ -49,7 +49,7 @@ Program received signal SIGSEGV, Segmentation fault.
 ```
 
 LLDB:
-```
+```text
 (lldb) thread backtrace
 (lldb) bt
 (lldb) bt 5
@@ -58,7 +58,7 @@ LLDB:
 
 ### `bt full` — 변수 포함
 
-```
+```text
 (gdb) bt full
 #0  factorial (n=3) at hello.c:4
         result = <optimized out>
@@ -79,7 +79,7 @@ LLDB:
 
 ## `frame` — *특정 프레임 이동*
 
-```
+```text
 (gdb) frame 2           # 2번 프레임으로
 (gdb) f 2               # 약어
 
@@ -88,7 +88,7 @@ LLDB:
 
 프레임을 *현재 위치*로 설정. 그 프레임 안의 *변수와 인자*를 볼 수 있게 됩니다.
 
-```
+```text
 (gdb) frame 2
 (gdb) info locals
 (gdb) info args
@@ -96,7 +96,7 @@ LLDB:
 ```
 
 LLDB:
-```
+```text
 (lldb) frame select 2
 (lldb) f 2
 (lldb) frame variable       # = info locals + info args
@@ -104,7 +104,7 @@ LLDB:
 
 ### `up` / `down` — 상대적 이동
 
-```
+```text
 (gdb) up        # 한 단계 위 (호출자)
 (gdb) up 3      # 3단계 위
 (gdb) down      # 한 단계 아래 (피호출자)
@@ -121,7 +121,7 @@ LLDB:
 
 ## `info frame` — 프레임 *상세 정보*
 
-```
+```text
 (gdb) info frame
 Stack level 0, frame at 0x7fffffffe340:
  rip = 0x55555555512e in deepest (crash.c:1); saved rip = 0x555555555145
@@ -143,7 +143,7 @@ Stack level 0, frame at 0x7fffffffe340:
 이 정보는 *프레임 포인터를 따라가는* low-level 디버깅에서 필요. 보통은 `bt`로 충분.
 
 LLDB:
-```
+```text
 (lldb) frame info
 ```
 
@@ -162,7 +162,7 @@ int main() {
 
 `-O2`에서 `small()`이 *인라인*되면, 디버거가 *현재 자리가 어디인지* 헷갈릴 수 있습니다.
 
-```
+```text
 (gdb) bt
 #0  small () at inline.c:1
 #1  main () at inline.c:5
@@ -170,7 +170,7 @@ int main() {
 
 GDB 7+는 *인라인 표시*를 잘합니다. `#0`이 *진짜 스택 프레임이 아니라* "*main 안의 인라인된 자리*"라는 의미.
 
-```
+```text
 (gdb) info frame
 Inlined frame, no frame info.
 ```
@@ -179,7 +179,7 @@ Inlined frame, no frame info.
 
 ### `set print frame-info source-and-location`
 
-```
+```text
 (gdb) bt
 #0  0x... small () at inline.c:1
 #1  0x... main () at inline.c:5
@@ -199,7 +199,7 @@ int helper() { return compute(); }   // tail call
 int main() { return helper(); }
 ```
 
-```
+```text
 (gdb) bt
 #0  compute () at opt.c:5
 #1  main () at opt.c:8         # ← helper가 사라짐!
@@ -215,7 +215,7 @@ int main() { return helper(); }
 
 ## *재귀의 backtrace*
 
-```
+```text
 (gdb) bt
 #0  factorial (n=0) at fact.c:4
 #1  factorial (n=1) at fact.c:5
@@ -228,7 +228,7 @@ int main() { return helper(); }
 
 각 재귀 호출이 *별도 프레임*. 깊은 재귀에서 *스택 오버플로*가 나면 backtrace에서 *수천 프레임* 보일 수 있습니다.
 
-```
+```text
 (gdb) bt 20      # 안쪽 20만
 ```
 
@@ -238,7 +238,7 @@ int main() { return helper(); }
 
 ## *모든 스레드의 backtrace*
 
-```
+```text
 (gdb) thread apply all backtrace
 Thread 4 (Thread 0x7fff...):
 #0  ...
@@ -258,7 +258,7 @@ Thread 1 (Thread 0x7fff...):
 *모든 스레드의 현재 위치*. *데드락*이나 *어느 스레드에서 멈췄는지* 모를 때 결정적.
 
 LLDB:
-```
+```text
 (lldb) thread backtrace all
 (lldb) bt all
 ```
@@ -271,7 +271,7 @@ LLDB:
 
 스택이 *심하게 손상*되면 GDB가 깊이 따라가지 못합니다.
 
-```
+```text
 (gdb) bt
 #0  0x000055555555512e in deepest () at crash.c:1
 Backtrace stopped: previous frame inner to this frame (corrupt stack?)
@@ -290,14 +290,14 @@ Backtrace stopped: previous frame inner to this frame (corrupt stack?)
 
 ## *외부 라이브러리* 프레임 숨기기
 
-```
+```text
 (gdb) skip function pthread_*
 (gdb) skip function __libc_*
 ```
 
 `bt`에서 *pthread_* 와 __libc_* 프레임을 숨김. *우리 코드만* 보고 싶을 때.
 
-```
+```text
 (gdb) info skip
 (gdb) skip disable 1     # 임시 비활성화
 (gdb) skip enable 1
@@ -393,7 +393,7 @@ Thread 3: 멈춰 있음
 
 ## *공유 라이브러리* 프레임의 함정
 
-```
+```text
 (gdb) bt
 #0  0x00007ffff7d... in malloc () from /lib/x86_64-linux-gnu/libc.so.6
 #1  0x00007ffff7d... in operator new (sz=24) at libsupc++/new_op.cc:50
@@ -436,3 +436,12 @@ sudo dnf debuginfo-install glibc libstdc++
 
 - [GDB Backtrace](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Backtrace.html)
 - [LLDB Examining Thread State](https://lldb.llvm.org/use/tutorial.html#examining-thread-state)
+
+## 관련 항목
+
+- [Ch 3: 상태 검사](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state) — 이전 장, 프레임 안 변수 읽기
+- [Ch 5: 브레이크포인트와 워치포인트](/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints) — 다음 장, 멈출 자리 정하기
+- [Ch 7: core dump 분석](/blog/tools/debugging/gdb-lldb/chapter07-core-dump) — 죽은 프로세스의 backtrace
+- [DWARF Call Frame Information](/blog/tools/debugging/dwarf-elf/chapter05-cfi-eh-frame) — unwinding이 실제로 도는 방식
+- [GDB로 Core 분석](/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis) — 사후 스택 복원 워크플로
+- [DWARF Debugging Standard](https://dwarfstd.org/) — CFI 규격 원문

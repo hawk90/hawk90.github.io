@@ -2,7 +2,7 @@
 title: "Ch 3: Sequence Header와 공간 구조"
 date: 2026-05-16T04:00:00
 description: "AV1의 전역 설정과 공간 분할 구조 — Sequence Header, Color Config, 타일, 슈퍼블록, 좌표 시스템."
-tags: [AV1, Video, Codec, Sequence Header, Tile, Superblock]
+tags: [AV1, Video, Codec, sequence-header, Tile, Superblock]
 series: "AV1"
 seriesOrder: 3
 draft: true

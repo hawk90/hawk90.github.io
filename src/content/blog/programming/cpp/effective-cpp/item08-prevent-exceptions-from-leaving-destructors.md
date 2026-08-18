@@ -2,7 +2,7 @@
 title: "항목 8: 소멸자에서 예외가 나가지 않게 하라"
 date: 2026-05-04T08:00:00
 description: "예외 진행 중 소멸자에서 또 예외 → terminate. 자원 정리 실패 처리 패턴과 C++11 noexcept 기본."
-tags: [C++, Effective C++, Destructor, Exception]
+tags: [C++, effective-c++, Destructor, Exception]
 series: "Effective C++"
 seriesOrder: 8
 draft: true

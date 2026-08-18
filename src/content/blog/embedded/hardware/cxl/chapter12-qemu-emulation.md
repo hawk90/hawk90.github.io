@@ -313,7 +313,7 @@ FMW는 *interleave를 위한 예약 영역*도 포함해야. *device size의 2�
 ## 관련 항목
 
 - [Ch 11: Linux drivers/cxl/ 분석](/blog/embedded/hardware/cxl/chapter11-linux-driver)
-- [Modern Embedded Recipes Ch 150: QEMU CXL Type 3 디바이스 에뮬레이션](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)
+- [Modern Embedded Recipes Ch 150: QEMU CXL Type 3 디바이스 에뮬레이션](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation) — 환경을 세우는 절차와 처음 걸리는 함정
 - [QEMU 공식 CXL 문서](https://qemu.readthedocs.io/en/latest/system/devices/cxl.html)
 
 ## 시리즈 자료 출처 안내

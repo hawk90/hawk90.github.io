@@ -35,23 +35,15 @@ Cache coherence protocol은 이 문제를 hardware 차원에서 자동으로 해
 
 ## MESI 상태 전이
 
-```text
-Read miss:
-  - 다른 cache에 M? → flush + → I, this → S, memory updated
-  - 다른 cache에 E? → both → S
-  - 다른 cache에 S? → this → S
-  - 어떤 cache에도 없음? → memory에서 → E
-
-Write to S:
-  - 다른 cache S → Invalidate broadcast → I
-  - this → M
-
-Write to M: 그냥 cache에 (이미 exclusive)
-
-Write to I (write miss):
-  - RFO (Read For Ownership) → 다른 cache invalidate
-  - this → M, memory not updated
-```
+| 동작 | 조건 | 전이 |
+|------|------|------|
+| Read miss | 다른 cache에 M | 그 cache가 flush 후 I, this → S, memory 갱신 |
+| Read miss | 다른 cache에 E | 양쪽 모두 → S |
+| Read miss | 다른 cache에 S | this → S |
+| Read miss | 어떤 cache에도 없음 | memory에서 읽어 → E |
+| Write to S | 다른 cache가 S | Invalidate broadcast로 그쪽은 → I, this → M |
+| Write to M | — | 이미 exclusive이므로 cache에 그냥 write |
+| Write to I (write miss) | — | RFO(Read For Ownership)로 다른 cache invalidate, this → M, memory는 갱신하지 않음 |
 
 RFO는 write 직전에 발생하는 read입니다. Write할 cache line을 먼저 자기 cache로 가져오면서 다른 cache의 동일 line을 invalidate합니다. 이 트래픽이 false sharing의 주범입니다.
 
@@ -85,12 +77,7 @@ ARM CCI-400(Cluster Coherence Interconnect)이 snoop-based이며 최대 5 master
 
 ## Directory-Based
 
-```text
-각 line의 home directory가 누가 cache 보유 중인지 기록
-  Cache A miss → home directory query
-  Home: cache B,C in S state
-  → direct request to B (or C)
-```
+각 line의 home directory가 누가 그 line을 cache에 보유 중인지 기록합니다. Cache A가 miss를 내면 먼저 home directory에 질의하고, home이 "cache B와 C가 S 상태"라고 응답하면 A는 B(또는 C)에 직접 요청을 보냅니다.
 
 각 cache line마다 home node가 있어 어느 코어가 그 line을 가지고 있는지 추적합니다. Bus broadcast 대신 point-to-point 메시지로 처리하므로 scalability가 훨씬 좋습니다.
 
@@ -150,12 +137,10 @@ numactl --cpunodebind=0 --membind=0 ./prog
 
 CXL 2.0과 3.0은 PCIe 기반의 cache coherent interconnect입니다.
 
-```text
-CXL.cache — accelerator가 host memory를 coherent하게 access
-CXL.mem   — host가 device memory를 coherent하게 access
+- **CXL.cache** — accelerator가 host memory를 coherent하게 access합니다.
+- **CXL.mem** — host가 device memory를 coherent하게 access합니다.
 
-GPU, FPGA, CXL DDR module이 모두 같은 메모리 공간
-```
+이렇게 되면 GPU, FPGA, CXL DDR module이 모두 같은 메모리 공간을 공유합니다.
 
 CXL pool은 수 TB의 unified coherent memory를 만들 수 있어 데이터센터의 차세대 메모리 아키텍처로 주목받고 있습니다.
 
@@ -199,14 +184,7 @@ HITM(Hit in Modified)은 다른 코어가 Modified 상태로 가지고 있는 li
 
 ## ASIL Lock-Step
 
-```text
-ASIL-D ECU:
-  Lock-step dual core (CPU0 + CPU0_redundant)
-  두 코어가 cycle 단위로 동일한 명령을 실행
-  Cache 상태도 동기 유지
-```
-
-자동차의 brake나 steering 같은 ASIL-D 시스템에서는 Cortex-R52의 DCLS(Dual-Core Lock Step) 옵션을 사용합니다. 두 코어가 같은 명령을 cycle 단위로 동기 실행하고, cache 상태도 함께 유지해 결정성을 보장합니다.
+자동차의 brake나 steering 같은 ASIL-D ECU는 lock-step dual core(CPU0 + CPU0_redundant)로 구성됩니다. Cortex-R52의 DCLS(Dual-Core Lock Step) 옵션이 대표적입니다. 두 코어가 cycle 단위로 동일한 명령을 실행하고, cache 상태도 동기로 유지해 결정성을 보장합니다.
 
 ## 자주 보는 함정과 안티패턴
 

@@ -19,13 +19,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-01. Schema Drift”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-01. schema drift after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "The Astro content schema and knowledge-model audit provide one checked-in schema contract with regression checks."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-02",
@@ -38,13 +55,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-02. Optional Field Explosion”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-02. optional field explosion after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Optional metadata is retained where content types differ; the schema does not claim every field applies to every document."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-03",
@@ -57,13 +91,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-03. Required Field Inflation”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-03. required field inflation after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Required fields are limited to title, date, and explicit topics; the required set is enforced by schema and classification tests."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-04",
@@ -76,13 +127,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-04. One Schema for Every Content Type”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-04. one schema for every content type after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "A shared collection schema models common fields with bounded optional type-specific fields; introducing separate collections remains a future design decision."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-05",
@@ -95,13 +163,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-05. Free-Text Enum”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-05. free-text enum after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Content type and review status use explicit enums and topic values resolve through the canonical registry."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-06",
@@ -114,13 +199,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-06. Taxonomy Without Registry”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-06. taxonomy without registry after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "The topic registry validates duplicate IDs, missing parents, cycles, and unknown explicit topic values."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-07",
@@ -133,13 +235,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-07. Series Metadata Duplication”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-07. series metadata duplication after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Series identity remains source frontmatter while the series lens registry provides presentation metadata; duplication is audited rather than silently merged."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-08",
@@ -152,13 +271,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-08. Derived Data Stored Manually”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-08. derived data stored manually after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Normalized categories and public URLs are derived at runtime from stable IDs and explicit metadata rather than manually duplicated fields."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-09",
@@ -171,13 +307,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-09. Generated Field Committed as Source”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-09. generated field committed as source after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Generated search/feed/artifact data is treated as derived output with source manifests; no generated field is promoted to editorial source automatically."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-10",
@@ -190,13 +343,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-10. Hidden Defaults”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-10. hidden defaults after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Schema defaults for author, tags, type, draft, featured, and review status are explicit and covered by the content contract."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-11",
@@ -209,13 +379,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-11. Forever Backward Compatibility”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-11. forever backward compatibility after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Legacy categories remain a compatibility field while explicit topics are canonical; removal requires a separately reviewed migration."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-12",
@@ -228,13 +415,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-12. Big-Bang Migration”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-12. big-bang migration after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Topic migration defaults to dry-run and preserves source bodies; no big-bang write is authorized implicitly."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-13",
@@ -247,13 +451,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-13. Migration Without Dry Run”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-13. migration without dry run after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "The migration script emits conflict/unclassified reports before any --apply write."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-14",
@@ -266,13 +487,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-14. Migration Without Idempotency”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-14. migration without idempotency after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Migration compares existing explicit topics and only writes missing metadata under explicit --apply, making reruns no-ops for already classified documents."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-15",
@@ -285,13 +523,30 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-15. Migration Without Backup Boundary”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-15. migration without backup boundary after schema, taxonomy, or migration changes.",
+      "scope": "Metadata/schema/tooling boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/content/topics.ts",
+            "src/consts/series.ts",
+            "scripts/audit-knowledge-model.mjs",
+            "scripts/verify-topic-registry.mjs",
+            "scripts/verify-content-classification.mjs",
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/export-portable-content.mjs",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
+          "result": "Migration and export policies are additive, but external backup/recovery evidence remains separately deferred and is not inferred from a metadata script."
+        }
+      ],
+      "residualRisk": "Metadata semantics and external recovery can change; any frontmatter migration requires preview, explicit approval, additive backup, and post-change verification."
     },
     {
       "id": "AP-M-16",
@@ -304,13 +559,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-16. Semantic Migration by Regex”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-16. semantic migration by regex after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Topic migration parses YAML frontmatter and compares semantic arrays; it does not use regex to rewrite document meaning."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-17",
@@ -323,13 +592,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-17. Path Migration Without Redirects”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-17. path migration without redirects after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Public URLs derive from stable content IDs and are independent of taxonomy paths; path changes do not silently rewrite URLs."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-18",
@@ -342,13 +625,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-18. Migration Without Validation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-18. migration without validation after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Migration emits conflicts/unclassified results and post-change classification audits before a release can pass."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-19",
@@ -361,13 +658,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-19. One Script per Symptom”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-19. one script per symptom after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "The repository keeps focused tools with explicit scopes; overlap and shared evidence are audited rather than forcing unrelated concerns into one command."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-20",
@@ -380,13 +691,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-20. Every Script Parses Markdown Differently”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-20. every script parses markdown differently after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Content tools use the Astro schema or js-yaml portability parser according to scope; no universal parser equivalence is claimed."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-21",
@@ -399,13 +724,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-21. Script as Undocumented Tribal Knowledge”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-21. script as undocumented tribal knowledge after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Scripts expose usage comments, package commands, README entries, and evidence reports rather than relying on undocumented tribal knowledge."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-22",
@@ -418,13 +757,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-22. Hidden Script Side Effects”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-22. hidden script side effects after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Mutating scripts default to preview/dry-run and require explicit --apply; affected-file reports make side effects visible."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-23",
@@ -437,13 +790,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-23. Auto-Fix Without Confidence”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-23. auto-fix without confidence after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Auto-fix paths require explicit apply and refuse conflicts/unclassified records instead of guessing."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-24",
@@ -456,13 +823,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-24. No Fixture Tests for Content Tools”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-24. no fixture tests for content tools after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Representative regression commands exist, while exhaustive fixtures for every content tool remain a targeted follow-up rather than an implied guarantee."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-25",
@@ -475,13 +856,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-25. Full Repository Scan for Every Command”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-25. full repository scan for every command after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Scans are scoped per command and report their corpus; a full repository scan is not treated as universally necessary for every rule."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-26",
@@ -494,13 +889,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-26. Tool Output as Unstructured Text”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-26. tool output as unstructured text after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Machine-readable JSON and human-readable Markdown reports are emitted for migration and audit commands."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-27",
@@ -513,13 +922,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-27. No Severity Model”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-27. no severity model after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "The remediation triage and category registries carry priority/effort scales and disposition fields."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-28",
@@ -532,13 +955,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-28. Rule Without Rationale”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-28. rule without rationale after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Rules retain source IDs, scope, review questions, evidence, and rationale; a new rule still requires semantic review."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-29",
@@ -551,13 +988,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-29. Rule Explosion”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-29. rule explosion after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "The registry preserves atomic IDs for traceability while overlap audits identify shared evidence without silently merging distinct claims."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-30",
@@ -570,13 +1021,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-30. Linter as Editorial Authority”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-30. linter as editorial authority after tooling or migration changes.",
+      "scope": "Metadata/tooling safety boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/migrate-explicit-topics.mjs",
+            "scripts/audit-content-classification.mjs",
+            "scripts/audit-category-registry.mjs",
+            "scripts/audit-remediation-program.mjs",
+            "scripts/README.md",
+            "package.json",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/priority-decision-policy.json"
+          ],
+          "verification": "npm run audit:category-registry -- --category metadata --evidence && npm run audit:knowledge-model && npm run gate:tooling",
+          "result": "Lint/audit output is a review signal; editorial decisions remain explicit metadata/governance decisions and are not auto-published."
+        }
+      ],
+      "residualRisk": "Tool semantics and coverage can drift; any mutating command requires preview, explicit apply, affected-file review, and post-change verification."
     },
     {
       "id": "AP-M-31",
@@ -589,13 +1054,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-31. CI as the Only Reproducible Environment”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-31. ci as the only reproducible environment after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "CI and local release use the same package scripts and lockfile-based installation; environment differences remain visible in workflow configuration."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-32",
@@ -608,13 +1088,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-32. Local and CI Command Divergence”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-32. local and ci command divergence after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "The canonical verify:release contract is invoked by both CI and deployment workflows and can be run locally."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-33",
@@ -627,13 +1122,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-33. Hidden Environment Dependency”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-33. hidden environment dependency after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Node version, memory options, and telemetry settings are explicit in workflows/release commands; host-specific behavior remains review scope."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-34",
@@ -646,13 +1156,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-34. Floating Tool Versions”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-34. floating tool versions after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Runtime versions are pinned by engines/workflow major versions and dependency lockfile; exact runner image evolution remains external."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-35",
@@ -665,13 +1190,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-35. CI Workflow Logic Duplication”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-35. ci workflow logic duplication after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "CI/deploy intentionally share the release contract while keeping build/deploy permissions separate; duplication is bounded and audited."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-36",
@@ -684,13 +1224,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-36. Deploy on Every Branch Push”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-36. deploy on every branch push after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Deployment triggers only on main and workflow dispatch, not every branch push."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-37",
@@ -703,13 +1258,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-37. No Path-Based Trigger”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-37. no path-based trigger after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Deployment uses paths-ignore for documentation-only changes while CI covers pull requests and non-main pushes."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-38",
@@ -722,13 +1292,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-38. CI Cache as a Mystery”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess m-38. ci cache as a mystery after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Cache keys include runner and source/config hashes, with documented restore keys in deploy workflow."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-39",
@@ -741,13 +1326,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-39. Flaky Build Accepted as Normal”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-39. flaky build accepted as normal after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Release checks fail on findings; flaky behavior is not silently accepted, but hosted runner variance remains a manual observation."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-40",
@@ -760,13 +1360,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-40. No Post-Deploy Verification”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-40. no post-deploy verification after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Artifact verification occurs before upload; post-deploy provider availability is external and not inferred from build success."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-41",
@@ -779,13 +1394,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-41. Dependency Archaeology”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-41. dependency archaeology after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "package.json, lockfile, tooling audit, and dependency audit provide an inventory baseline; historical dependency intent remains reviewable."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-42",
@@ -798,13 +1428,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-42. Feature Removed, Dependency Retained”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-42. feature removed, dependency retained after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Unused dependency removal is not inferred automatically; manifest changes require a separately reviewed semantic commit."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-43",
@@ -817,13 +1462,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-43. Production and Tooling Dependencies Mixed”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-43. production and tooling dependencies mixed after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Runtime/dev dependency boundaries are explicit in package.json, while actual bundle usage remains a future dependency review surface."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-44",
@@ -836,13 +1496,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-44. Dependency for a Trivial Function”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-44. dependency for a trivial function after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "No blanket trivial-function exemption is claimed; dependency additions remain subject to manifest and lockfile review."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-45",
@@ -855,13 +1530,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-45. Multiple Libraries for the Same Job”?",
-      "scope": null,
+      "reviewQuestion": "Reassess m-45. multiple libraries for the same job after CI, runner, or dependency changes.",
+      "scope": "CI/environment/dependency metadata boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-ci-security.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run gate:ci-security && npm run gate:repository && npm run verify:release",
+          "result": "Overlapping libraries are surfaced by tooling/manifest review; automatic consolidation would risk unrelated behavior and is not authorized."
+        }
+      ],
+      "residualRisk": "Hosted runner, provider, and transitive dependency behavior can change; rerun the listed checks after workflow or manifest changes."
     },
     {
       "id": "AP-M-46",
@@ -874,13 +1564,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-46. Unbounded Plugin Stack”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does every remark/rehype plugin and Shiki grammar in astro.config.mjs still have a used-by-content justification after new fence labels appear?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run verify:release",
+          "result": "The plugin stack is bounded and justified in place: astro.config.mjs pins the Shiki grammar bundle to 23 languages against a ~200-language default with a stated heap reason, and the eight remark/rehype plugins each back a documented authoring feature (math, directives, callouts, slugs, autolinks, lazy images). The manifest carries 21 runtime and 3 dev dependencies."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-47",
@@ -893,13 +1597,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-47. Major Upgrade by Habit”?",
-      "scope": null,
+      "reviewQuestion": "If an automated upgrade bot is ever added, does a major version bump still require an explicit reviewed commit rather than an auto-merge?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:tooling && npm run verify:release",
+          "result": "No Renovate or Dependabot configuration exists, so no upgrade lands by habit; every version change is an explicit manifest or lockfile edit reviewed in its own commit. The cost of manual upgrades is accepted for a single-maintainer repository."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-48",
@@ -912,13 +1630,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-48. Frozen Dependencies Forever”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the weekly advisory cron still run, and is there a review point for dependencies that are outdated without being vulnerable?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:dependencies && npm run verify:release",
+          "result": "Dependencies are not frozen: ci.yml carries a weekly cron that re-checks advisories and the production build while the repository is idle, and the dompurify 3.4.12 to 3.4.13 and nanoid 3.3.16 to 3.3.18 bumps were applied from that signal."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-49",
@@ -931,13 +1663,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-49. Lockfile Without Reproducibility”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do CI, deployment, and local installs still resolve identically from the committed lockfile after a Node or npm major change?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The lockfile is reproducible: lockfileVersion 3 is committed, both ci.yml and deploy.yml install with npm ci, and the runtime is pinned by engines node >=22.12.0, .nvmrc, and workflow node-version 22. A local npm ci reproduced the tree and the release gate passed."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-50",
@@ -950,13 +1696,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-50. Vulnerability Scanner as Upgrade Bot”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the dependency gate still block on findings without any path that upgrades packages automatically?",
+      "scope": "Dependency lifecycle and build-plugin metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "package.json",
+            "package-lock.json",
+            "astro.config.mjs",
+            ".nvmrc",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run gate:dependencies && npm run verify:release",
+          "result": "The scanner reports and blocks but never upgrades: gate:dependencies runs npm audit --omit=dev --audit-level=high as a separate release gate, installs use --no-audit, and the two advisories found were resolved by a reviewed minimal lockfile patch rather than npm audit fix, which would also have dropped unrelated libc platform metadata."
+        }
+      ],
+      "residualRisk": "Transitive dependency, advisory, and upstream release behavior changes outside this repository; rerun the listed checks after manifest or workflow changes."
     },
     {
       "id": "AP-M-51",
@@ -969,13 +1729,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-51. README as Marketing Copy”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the README still describe the audience it is actually written for after the next change of purpose?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run audit:content-portability",
+          "result": "The owner decided the documentation serves the operator, not a theme buyer. README was rewritten around running and maintaining this repository: install and build, where content lives and the file-path-is-URL rule, what blocks a commit or a publish, the handful of scripts worth remembering, and the deployment boundary. Marketplace framing — the premium-theme pitch, the Vercel and Netlify deploy buttons, and the clone-as-my-blog quick start — is gone. LICENSE is deliberately untouched, since its terms are a legal statement rather than a documentation choice."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-52",
@@ -988,13 +1760,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-52. Feature List Without Ownership”?",
-      "scope": null,
+      "reviewQuestion": "Do the README feature claims still have a single accountable maintainer, or have external contributors made ownership ambiguous?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Ownership is unambiguous in a single-maintainer repository, so the failure this item targets, features that no one is accountable for, does not currently apply. The acceptance expires if additional maintainers or external contributions arrive."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-53",
@@ -1007,13 +1792,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-53. Stale Setup Guide”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "What keeps the stated stack version in step with package.json when the next major lands?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run check && npm run audit:content-portability",
+          "result": "The README claimed Astro 6 while package.json depends on astro ^7.1.6, and listed 6 of roughly 100 scripts without the audit:gate step CLAUDE.md requires before publishing. The rewritten README no longer carries a version-pinned stack list at all, and its gate section names audit:gate and verify:release explicitly. Removing the restated facts removes the thing that drifted; the remaining pointer is to CLAUDE.md section 14, which is maintained."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-54",
@@ -1026,13 +1823,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-54. Architecture in Comments Only”?",
-      "scope": null,
+      "reviewQuestion": "When the src/ layer structure changes, is the reasoning still recoverable from documentation rather than from component comments alone?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Process and tooling architecture is documented outside code: CLAUDE.md section 14 maps each content lifecycle stage to its tool, scripts/README.md documents the script surface, and claude/WORKFLOW.md documents the remediation flow. The src/ component layering itself remains documented only in code and is accepted as reviewable."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-55",
@@ -1045,13 +1855,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-55. ADR Without Consequences”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does every non-unassessed remediation entry still carry residual risk and a re-review condition rather than a bare verdict?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Decision records here are the remediation registries, and .claude/rules/06-remediation-evidence.md requires consequences on every one: residual risk, a smallest-safe-change boundary, and an expiry or re-review condition for accepted decisions. audit-category-registry.mjs rejects entries missing a next action or review question."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-56",
@@ -1064,13 +1887,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-56. ADR as Immutable Law”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Can a recorded decision still be reopened from its own review question when the underlying evidence changes?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "No decision is immutable: every registry entry keeps a reviewQuestion and a nextAction so it can be reopened, accepted decisions require an expiry or re-review condition, and AP-M-31..45 were re-recorded from unassessed under the same schema."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-57",
@@ -1083,13 +1919,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-57. Documentation Duplication”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Has any of the three documents started restating the script surface again instead of pointing at it?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run audit:content-portability",
+          "result": "CLAUDE.md section 14 is canonical for the stage-to-tool map and scripts/README.md for per-script detail. The README now says so in its opening paragraph and keeps only a six-row table of the commands used day to day, so the drift-prone full listing exists in one place instead of three."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-58",
@@ -1102,13 +1950,24 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-58. No Operational Runbook”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Which external control gets exercised first, and what records the result?",
+      "scope": "Operational documentation location and the audits that read it; no content or deployment behaviour changes.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "docs/runbooks/repository-recovery.md",
+            "README.md",
+            "scripts/audit-repository-controls.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-resilience",
+          "result": "The runbook moved from archives/…/remediation-plan/ to docs/runbooks/repository-recovery.md, and README links it from the deployment section. The two audits that read it were updated to the new path; repository controls verify 43/43. The resilience audit was corrected at the same time and now reports 7/8 local controls, with recovery-remote failing at one configured remote, 3 external controls pending, and domain-dns-recovery not applicable because the site is served from a github.io subdomain. An earlier version of this record quoted the pre-correction 8/8 and 4 pending. The document still states that recovery has not been tested, and that statement was left intact rather than softened by the move."
+        }
+      ],
+      "residualRisk": "Promotion changes where the runbook lives, not whether it works. Every step in it remains unexercised, two audits now depend on the new path, and the runbook itself is only tracked because .gitignore was amended to stop /docs/ from swallowing it."
     },
     {
       "id": "AP-M-59",
@@ -1121,13 +1980,26 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-59. No Content Authoring Guide”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the authoring guide still match the gate that enforces it after tone, structure, or visual rules change?",
+      "scope": "Repository documentation surfaces only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md"
+          ],
+          "verification": "npm run audit:gate",
+          "result": "A content authoring guide exists and is enforced: CLAUDE.md inlines .claude/rules/01 through 05 covering tone, structure, frontmatter, code blocks, visuals, linking, and quality, and lefthook runs the publish gate on staged markdown at commit and push."
+        }
+      ],
+      "residualRisk": "Documentation drifts silently because no gate compares prose against the manifest; recheck when the stack, script surface, or distribution intent changes."
     },
     {
       "id": "AP-M-60",
@@ -1140,13 +2012,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-60. Documentation Without Deletion”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the Unreleased section stay empty, or does it start collecting work that will not ship again?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run audit:content-portability",
+          "result": "The Unreleased section held 1.0.0-era theme-marketplace work that was never released or withdrawn, which read as a shipping queue. Those entries moved to a dated historical section that says plainly that theme distribution did not happen and the repository runs as a personal blog. Nothing was deleted: the Newsletter component and the define* helpers are still in use and are recorded as such, so the note explains the code rather than orphaning it. Unreleased is now empty."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-61",
@@ -1159,13 +2043,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-61. Source–Artifact Ambiguity”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the source-to-artifact direction still hold for every committed asset, including the 35 SVGs that have no sibling TeX source?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run verify:release",
+          "result": "The boundary is explicit: dist/ is ignored with zero tracked files, TikZ .tex sources are authoritative and .svg artifacts are regenerated from them by build-diagrams.sh, and reports/diagrams/assets.md separates the 35 imported assets that have no sibling source from the generated ones."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-62",
@@ -1178,13 +2077,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-62. Generated File Modified Manually”?",
-      "scope": null,
+      "reviewQuestion": "Has any committed SVG diverged from its TeX source, given that the incremental build skips any artifact newer than its source?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run audit:diagram-quality",
+          "result": "Manual edits are possible but bounded: the TeX source is authoritative, audit:diagrams reports 0 structural findings and 0 temporary build files, and diagrams:force rebuilds everything. The mtime rule in build-diagrams.sh means a hand-edited artifact is preserved silently rather than flagged, which is accepted while diagrams remain reviewed visually."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-63",
@@ -1197,13 +2111,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-63. Artifact Naming by Display Title”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do artifact names still survive a post title change without breaking references?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams",
+          "result": "Artifacts are named by stable structural slugs, not display titles: diagram files use chapter and figure identifiers such as part9-01-int128-bit-layout and ch05-hierarchy-depth, and OG images are keyed by post id in the build manifest. Renaming a post title does not rename an artifact."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-64",
@@ -1216,13 +2145,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-64. No Artifact Manifest”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the asset manifest still enumerate every generated artifact after new asset types are added?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams",
+          "result": "Both pipelines carry a manifest: reports/diagrams/assets.md enumerates 1038 SVG assets against 1007 TeX sources with orphan and temp-file counts, and build-og.mjs keeps .cache/og-manifest.json keyed by a frontmatter hash plus a themes version."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-65",
@@ -1235,13 +2179,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-65. Stale Artifact Preservation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Are orphaned artifacts still surfaced when a post is deleted or renamed?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams",
+          "result": "Stale artifacts are detected rather than accumulated: build-og.mjs --prune deletes PNGs whose source post no longer exists, and audit:diagrams reports SVGs with no sibling TeX source (35) and temporary build files (0) on every run."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-66",
@@ -1254,13 +2213,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-66. Over-Aggressive Prune”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Pruning runs on every build through prebuild, so the safety argument rests on the pruned artifacts being disposable. Does public/og/ remain gitignored and fully regenerable, and does anything irreplaceable ever land under it?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "package.json",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "reports/diagrams/assets.md"
+          ],
+          "verification": "npm run audit:diagrams && npm run verify:release",
+          "result": "Pruning is not opt-in: prebuild runs build-og.mjs --prune, so every npm run build prunes. It is nonetheless bounded, because public/og/ is gitignored with 0 tracked files and every PNG under it is regenerable from frontmatter, deletion is keyed to the ids present in the current content set, and the diagram audit reports sibling-less SVGs rather than deleting them."
+        }
+      ],
+      "residualRisk": "A future artifact placed under public/og/ that is not regenerable would be deleted by any build; keep that directory limited to generated OG images."
     },
     {
       "id": "AP-M-67",
@@ -1273,13 +2244,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-67. Generator Version Not Recorded”?",
-      "scope": null,
+      "reviewQuestion": "Would a xelatex or pdftocairo upgrade be noticed, given that cached SVGs are invalidated by modification time rather than by toolchain version?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run audit:diagram-quality",
+          "result": "Version recording is partial and the gap is stated: build-og.mjs folds a themes version into its manifest hash, while build-diagrams.sh records no xelatex or pdftocairo version and invalidates only on source and design-token modification times. diagrams:force is the manual escape hatch, and the accepted blast radius is limited because SVGs are committed and reviewed."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-68",
@@ -1292,13 +2278,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-68. Non-Deterministic Asset Generation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does regenerating an unchanged source still produce byte-identical output after a renderer change?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run audit:diagrams && npm run verify:release",
+          "result": "Generation is reproducible for equal inputs: build-og.mjs re-renders only when the frontmatter hash or themes version changes, so identical input yields a cache hit, and sampled SVG output carries no creation date or timestamp metadata that would differ between runs."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-69",
@@ -1311,13 +2312,23 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-69. Generated Asset Review Blind Spot”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "When a drafted series is published, does its diagram inventory get rechecked, or do the built-but-unwired ones stay invisible?",
+      "scope": "Generated diagram inventory and its audit only; no SVG or .tex file is deleted.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-svg-accessibility.mjs",
+            "reports/diagrams/references.md",
+            "src/content.config.ts"
+          ],
+          "verification": "npm run audit:diagram-accessibility",
+          "result": "The original premise was wrong twice. Internal <title>/<desc> was never the accessible name, because every diagram is embedded through <img> and alt carries it. And the corrected count of 223 unreferenced artifacts measured references from published posts only, so it counted draft-series assets as orphans. Measured against all posts: 298 SVGs are referenced by published posts, 656 by drafts alone and become live when those series publish, and 85 are referenced by nothing. All 85 retain their .tex sources and sit in drafted book series — Domain-Driven Design 27, Refactoring Catalog 24, TDD Patterns 15, DSA 10 — so they are diagrams built ahead of the chapter that would use them, not abandoned output. Nothing is retired. The broken reference this item also named, a published HBM chapter pointing at a missing ch09-cxl-mem-tier.svg, was authored and the audit now reports 0 broken with alt coverage complete at 837 of 837."
+        }
+      ],
+      "residualRisk": "The 85 built-but-unwired diagrams stay on disk with their .tex sources. If the drafted series they belong to are never published, the inventory grows without a forcing function beyond this report."
     },
     {
       "id": "AP-M-70",
@@ -1330,13 +2341,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-70. Asset Pipeline Owns Publishing”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does publishing still succeed without a TeX toolchain present on the runner?",
+      "scope": "Generated asset pipeline and artifact boundary only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            ".gitignore",
+            "scripts/build-diagrams.sh",
+            "scripts/build-og.mjs",
+            "scripts/audit-diagram-assets.mjs",
+            "scripts/audit-svg-accessibility.mjs",
+            "scripts/audit-diagram-quality.mjs",
+            "reports/diagrams/assets.md",
+            ".github/workflows/deploy.yml"
+          ],
+          "verification": "npm run verify:release",
+          "result": "The asset pipeline does not own publishing: deploy.yml installs and runs verify:release only, the TikZ build never runs in CI because SVGs are committed pre-built, and OG generation is incremental and cached so publication is not gated on a full asset rebuild."
+        }
+      ],
+      "residualRisk": "The incremental build compares modification times rather than content hashes, so an artifact edited after its source is never regenerated; rerun the listed audits after toolchain or design-token changes."
     },
     {
       "id": "AP-M-71",
@@ -1349,13 +2375,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-71. Publish-and-Forget”?",
-      "scope": null,
+      "reviewQuestion": "Has a post gone stale in a way the content-derived audits cannot see — sources unchanged, but the judgement in the prose aged?",
+      "scope": "Post-level review metadata policy only; no frontmatter is written.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-prose-staleness.py",
+            "scripts/audit-upstream-freshness.py",
+            "CLAUDE.md"
+          ],
+          "verification": "npm run audit:lifecycle && npm run audit:staleness && npm run audit:upstream",
+          "result": "The owner decided not to record per-post review state. The schema keeps reviewStatus, lastVerified, and evidenceStatus, and 0 of 3387 posts populate them, but no UI reads them and populating them would be a bulk frontmatter rewrite whose initial values would all be identical — a field that says nothing while looking authoritative. Freshness is instead derived from the content: audit:upstream reports drift against tracked upstream repositories and specs, audit-cited-symbols checks that cited symbols still exist, audit:roadmap watches review dates on registered facts, and audit:staleness reads the prose itself for future tense and dated anchors. The accepted cost is named in the residual risk and this item is the review trigger if it starts to bite."
+        }
+      ],
+      "residualRisk": "Freshness is inferred from content and upstream drift, not from a human attestation. A post whose sources are stable but whose judgement has aged will not surface."
     },
     {
       "id": "AP-M-72",
@@ -1368,13 +2406,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-72. Date-Based Review Only”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do review signals still come from content comparison rather than from elapsed time alone?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run audit:content-readiness && npm run audit:upstream",
+          "result": "Review is not date-driven: freshness comes from upstream commit drift, cited-symbol existence, prose future tense, fact density, image coverage, and series integrity. audit:roadmap is the only date-based check and is scoped to review dates of SKUs registered in known-facts.yaml."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-73",
@@ -1387,13 +2440,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-73. No Content Ownership”?",
-      "scope": null,
+      "reviewQuestion": "Do the 3387 inventoried posts still have a single accountable maintainer, or have external contributors made ownership ambiguous?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run audit:lifecycle",
+          "result": "Ownership is unambiguous in a single-maintainer repository, so the failure this item targets, content that no one is accountable for, does not currently apply. The acceptance expires if additional maintainers or external contributions arrive."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-74",
@@ -1406,13 +2474,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-74. New Content Before Existing Debt”?",
-      "scope": null,
+      "reviewQuestion": "Is the existing-debt queue still consulted before new chapters are written, given that no gate enforces the order?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run audit:content-readiness && npm run check:duplicate -- --help",
+          "result": "Existing debt is ranked before it is chosen: audit:content-readiness emits a priority queue of staleness, fact-density, draft-only series, and visual-aid candidates, and CLAUDE.md section 14 routes each lifecycle stage to its tool. No gate blocks new content on outstanding debt, so ordering stays an editorial judgement and is accepted as such."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-75",
@@ -1425,13 +2508,28 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-75. No Merge Policy for Similar Articles”?",
-      "scope": null,
+      "reviewQuestion": "When two published articles are found to overlap, which procedure decides whether they merge, cross-link, or stay separate?",
+      "scope": "Content lifecycle and review metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-content-readiness.mjs",
+            "scripts/audit-upstream-freshness.py",
+            "scripts/audit-prose-staleness.py",
+            "scripts/check-duplicate-topic.py",
+            "reports/content-lifecycle/latest.json",
+            "reports/content-readiness/latest.md"
+          ],
+          "verification": "npm run check:duplicate -- --help",
+          "result": "Duplication is prevented at creation time rather than resolved after the fact: check-duplicate-topic.py scores title, tag, description, and body overlap with a documented threshold and a non-zero exit, and CLAUDE.md section 14 places it at the structural-integrity stage. No written procedure covers merging two already-published overlapping articles, which is accepted while cross-linking remains the default remedy."
+        }
+      ],
+      "residualRisk": "Freshness is derived from content scans rather than recorded per-post review state, so a queue that stops being worked degrades silently; rerun the listed audits after upstream or content changes."
     },
     {
       "id": "AP-M-76",
@@ -1444,13 +2542,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-76. Deletion Aversion”?",
-      "scope": null,
+      "reviewQuestion": "Has any content actually been retired under the approval-plus-evidence path, or has preservation become the only outcome the process can produce?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:lifecycle",
+          "result": "Preservation is a stated policy rather than an unexamined reflex: claude/WORKFLOW.md makes published content preservation-first and requires explicit approval plus per-document evidence before deleting, drafting, merging, or archiving. The cost is visible, with 2661 of 3387 posts held as drafts, and is accepted while the approval path stays open."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-77",
@@ -1463,13 +2575,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-77. Update Without Revalidation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does an edited document still get revalidated before it lands after hook or gate changes?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:gate && npm run verify:release",
+          "result": "Edits cannot land unvalidated: lefthook runs the publish gate and frontmatter checks on staged markdown at commit and on changed files at push, audit:gate sweeps the whole corpus, and verify:release rebuilds and re-gates in CI before deployment."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-78",
@@ -1482,13 +2610,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-78. Bulk AI Refresh”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the preview-by-default contract still hold mechanically for every script that can write to content?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:tooling && npm run audit:methodology-policy",
+          "result": "Bulk rewriting is blocked by rule and by machine: claude/WORKFLOW.md and .claude/rules/06 forbid bulk rewrite or mass drafting to clear an anti-pattern queue, frontmatter changes are script-only with preview-by-default and explicit --apply, and audit-tooling.mjs enforces that contract across 138 script files rather than trusting the convention."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-79",
@@ -1501,13 +2645,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-79. Editorial Template Lock-In”?",
-      "scope": null,
+      "reviewQuestion": "Has the standard section flow started producing interchangeable articles, or does per-article judgement still vary the structure?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:series",
+          "result": "The template is a default, not a lock: CLAUDE.md defines a standard flow and required frontmatter, but explicitly delegates paragraph flow, section splitting, and table use to per-article judgement, and two tones coexist with a documented selection table. No gate enforces section order."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-80",
@@ -1520,13 +2678,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-80. No Content Retirement Workflow”?",
-      "scope": null,
+      "reviewQuestion": "Retirement is defined as a policy but has never been exercised; when the first article is retired, does it archive with its URL intact or disappear as a draft flip?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:lifecycle",
+          "result": "A retirement decision rule exists without a worked procedure: claude/WORKFLOW.md requires explicit approval and per-document evidence, and audit-content-lifecycle.mjs already counts a reviewStatus of archived. That status is used by 0 of 3387 posts, so the de facto path is a draft flip, which removes the URL rather than archiving it. Accepted while no retirement is pending."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-81",
@@ -1539,13 +2711,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-81. Content and Platform Changes Mixed”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do content sweeps still land separately from platform changes as the repository grows?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:repository",
+          "result": "Content and platform changes are separated in practice: over the last 300 commits exactly one touches both src/content and the platform directories, and that commit is a documented content sweep. Commit subjects carry scoped prefixes such as chore(content), fix(blog), and docs."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-82",
@@ -1558,13 +2746,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-82. Giant Refactor Commit”?",
-      "scope": null,
+      "reviewQuestion": "Do the large sweeps still stay single-purpose, or has a mixed-intent commit appeared since ac24bb76 combined a rename with a date normalization?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:repository",
+          "result": "Commits are small by default and large only mechanically: the last 200 commits have a median of 3 files changed and a 90th percentile of 24, and the outliers are single-purpose script-driven sweeps such as recording topic metadata or unpublishing a series. One 685-file commit combined a chapter rename with a date normalization, which is the accepted exception."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-83",
@@ -1577,13 +2781,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-83. Formatting Noise in Semantic Change”?",
-      "scope": null,
+      "reviewQuestion": "Is a semantic content edit still readable in a diff without a formatter having rewritten the surrounding lines?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run gate:repository",
+          "result": "Mechanical rewrites are isolated into their own commits rather than mixed into semantic edits: the ASCII-to-TikZ conversion, code-block cleanup, and broken-link repair each landed as separate batches, and no formatter runs automatically over markdown, so reformatting noise is not injected into unrelated changes. No written rule enforces the separation."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-84",
@@ -1596,13 +2816,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-84. No Rollback Plan”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Do the runbook recovery priorities still match the deployment workflow, and has any of its external controls been exercised yet?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run verify:release",
+          "result": "A rollback plan exists and states its own limits: the repository recovery runbook defines the recovery priority as source first, then a readable static site with canonical URLs unchanged, then redirects and discovery, then optional integrations, and names required evidence and pass conditions per control. It declares that it is a checklist rather than proof recovery was tested, and the deployed site is a rebuildable artifact from committed source."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-85",
@@ -1615,13 +2851,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-85. Preview Not Representative”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does preview still serve the same artifact the deployment publishes after build or workflow changes?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run verify:release",
+          "result": "Preview is representative because it serves the production artifact: npm run preview serves the output of astro build, the same build that verify:release runs and that CI and deploy execute, and prebuild generates OG images on both paths. Preview still runs against a local build rather than the deployed host."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-86",
@@ -1634,13 +2886,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-86. Feature Flag Cemetery”?",
-      "scope": null,
+      "reviewQuestion": "Do the disabled configuration toggles still have a live purpose, or has a commented block outlived the integration it described?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run check",
+          "result": "Toggles are enumerated and typed rather than scattered: src/consts/config.ts holds the full set behind define* helpers, and the disabled ones carry inline instructions for enabling instead of dead code branches. Commented configuration blocks accumulate without an expiry, which is the accepted residue."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-87",
@@ -1653,13 +2919,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-87. Permanent Compatibility Layer”?",
-      "scope": null,
+      "reviewQuestion": "Does the tech-to-article type alias still have callers, and can it be retired once no content uses the legacy value?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run check && npm run gate:classification",
+          "result": "Only one compatibility shim exists and it is a single line: normalize.ts maps the legacy content type tech to article. It is bounded and typed, and is accepted rather than removed because removing it would require revalidating the affected documents."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-88",
@@ -1672,13 +2952,27 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-88. Release Notes Without User Impact”?",
-      "scope": null,
+      "reviewQuestion": "When the next release ships, do its notes still describe user-visible effects rather than internal refactors?",
+      "scope": "Content retirement and editorial policy metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "CLAUDE.md",
+            "CHANGELOG.md",
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "scripts/audit-content-lifecycle.mjs",
+            "src/consts/config.ts",
+            "src/lib/content/normalize.ts"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "Release notes are written in user-visible terms: CHANGELOG follows Keep a Changelog and its Added and Fixed entries name reader-facing behavior such as reading mode, math scrolling, and fixed layout defects. The Unreleased section has not shipped since 1.0.0 and is tracked separately as AP-M-60."
+        }
+      ],
+      "residualRisk": "Preservation-first policy grows the unpublished inventory over time, so navigation, search, and review cost need rechecking as it grows."
     },
     {
       "id": "AP-M-89",
@@ -1691,13 +2985,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-89. No Baseline Before Refactor”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Is a findings baseline still recorded before implementation once phases run less formally?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:remediation-graph",
+          "result": "A baseline is required before changes: claude/WORKFLOW.md orders the loop as read the packet, inspect the current implementation and record concrete findings, then implement only the named task IDs. Each phase packet carries CONTEXT, FINDINGS, CHANGES, and VERIFICATION, and the remediation graph tracks a per-category baseline state."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     },
     {
       "id": "AP-M-90",
@@ -1710,13 +3020,29 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “M-90. Completion Defined as Code Merge”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the program still refuse to read an enabling baseline as category completion?",
+      "scope": "Change-management and release metadata only; article bodies, published URLs, and bulk frontmatter rewrites are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "claude/WORKFLOW.md",
+            ".claude/rules/06-remediation-evidence.md",
+            "lefthook.yml",
+            "package.json",
+            "scripts/audit-tooling.mjs",
+            "scripts/audit-publish-gate.sh",
+            ".github/workflows/ci.yml",
+            ".github/workflows/deploy.yml",
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+          ],
+          "verification": "npm run audit:remediation-graph && npm run audit:methodology-policy",
+          "result": "Completion is defined by evidence, not by a merge: the remediation graph report states that baseline_established means enabling work exists and is never category completion, WORKFLOW.md requires running the listed verification commands and forbids claiming success for a failed command, and audit-category-registry.mjs rejects any recorded decision whose evidence files or npm commands do not exist."
+        }
+      ],
+      "residualRisk": "Commit and release discipline is enforced by convention plus hooks that can be bypassed with --no-verify; recheck after workflow, hook, or release-contract changes."
     }
   ]
 }

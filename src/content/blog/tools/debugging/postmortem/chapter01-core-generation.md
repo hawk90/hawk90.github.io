@@ -153,7 +153,7 @@ $ echo '|/usr/bin/my-coredump-handler %P' | sudo tee /proc/sys/kernel/core_patte
 
 ### 파이프 핸들러의 함정
 
-```
+```text
 |/path/to/handler %P
 ```
 

@@ -2,7 +2,7 @@
 title: "항목 47: 타입 정보 획득에는 traits 클래스를 사용하라"
 date: 2026-05-04T23:00:00
 description: "iterator_traits 같은 traits 패턴 — 컴파일 타임에 타입별 분기 + tag dispatch. C++20 concepts와의 결합."
-tags: [C++, Effective C++, Template, Traits]
+tags: [C++, effective-c++, Template, Traits]
 series: "Effective C++"
 seriesOrder: 47
 draft: true

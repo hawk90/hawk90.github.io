@@ -507,3 +507,11 @@ Make는 내장 규칙으로 빌드해 주지만, 변수가 비어 있어 *경고
 - [GNU Make Manual — Static Pattern Rules](https://www.gnu.org/software/make/manual/html_node/Static-Pattern.html)
 - [GNU Make Manual — Implicit Rules](https://www.gnu.org/software/make/manual/html_node/Implicit-Rules.html)
 - [GNU Make 4.3 Release Notes](https://lists.gnu.org/archive/html/info-gnu/2020-01/msg00004.html) — grouped target 포함
+
+## 관련 항목
+
+- [Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables) — 패턴 규칙 레시피를 떠받치는 `$@`·`$<`와 `CC`/`CFLAGS` 표준 어휘.
+- [Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions) — 실전 예시의 `wildcard`·`patsubst`로 타겟 목록 자체를 만드는 방법.
+- [Ch 2: 규칙](/blog/tools/build/gnu-make/chapter02-rules) — 다중 타겟이 독립 규칙으로 펼쳐지는 이유와 grouped target `&:`의 배경.
+- [CMake Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 파일별 규칙 대신 타겟에 소스를 등록하고 컴파일 규칙은 생성기에 맡기는 방식.
+- [Makefile Tutorial by Example](https://makefiletutorial.com/) — 패턴 규칙·자동 변수 예제가 많은 입문서.

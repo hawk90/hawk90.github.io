@@ -2,7 +2,7 @@
 title: "임베디드 Side-channel 공격 — Power·Timing·EM 분석"
 date: 2026-05-21T09:07:00
 description: "DPA / SPA / EM / fault injection. constant-time, masking, hiding 방어."
-tags: [Side-channel, Power Analysis, Timing Attack, Fault Injection, ChipWhisperer]
+tags: [Side-channel, power-analysis, timing-attack, fault-injection, ChipWhisperer]
 series: "Embedded Security"
 seriesOrder: 7
 draft: false

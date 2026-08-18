@@ -205,10 +205,10 @@ DW_AT_location = DW_OP_entry_value <block: DW_OP_reg0> DW_OP_stack_value
 
 ```text
 (gdb) print arg
-$1 = 42         ← 본문에선 r0이 사라졌어도 entry value로 복원
+$1 = 42
 ```
 
-GCC 8+ / Clang 11+가 광범위 사용. `<optimized out>` 발생률이 크게 줄어듭니다.
+본문에서 r0이 이미 사라졌어도 entry value로 원래 인자값이 복원됩니다. GCC 8+ / Clang 11+가 광범위 사용. `<optimized out>` 발생률이 크게 줄어듭니다.
 
 ## DW_OP_implicit_pointer — 포인터가 사라짐
 
@@ -330,7 +330,7 @@ Value run_expr_vm(Bytes expr) {
 
 이전 DWARF는 *모든 산술이 generic 64-bit*. DWARF 5는 *typed* opcode:
 
-```
+```text
 DW_OP_const_type    <type_die>, <byte_size>, <bytes>
 DW_OP_regval_type   <reg>, <type_die>
 DW_OP_deref_type    <byte_size>, <type_die>

@@ -90,7 +90,7 @@ class OrderEntity:
 - README 섹션
 - 별도 문서 (GLOSSARY.md)
 - Notion/Confluence 페이지
-- 코드 주석 (/// <summary>)
+- 코드 주석 (`/// <summary>`)
 
 접근하기 쉬운 곳에 둔다.
 

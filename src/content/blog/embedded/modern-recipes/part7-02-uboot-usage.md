@@ -4,7 +4,7 @@ date: 2026-04-16T09:01:00
 description: "U-Boot environment, script, bootcmd, TFTP/Fastboot, UEFI 모드까지 현장에서 쓰는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 76
-tags: [recipes, linux, uboot]
+tags: [recipes, linux, u-boot]
 topics: ["embedded"]
 ---
 

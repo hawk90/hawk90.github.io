@@ -715,3 +715,9 @@ Ch 6에서는 테스트와 CTest를 다룹니다. `enable_testing()`, `add_test(
 - [CMake - find_package](https://cmake.org/cmake/help/latest/command/find_package.html)
 - [CMake - FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html)
 - [cmake-packages(7)](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html)
+
+## 관련 항목
+
+- [Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options) — 탐색 경로와 동작을 옵션으로 제어하기
+- [Ch 6: 테스트와 CTest](/blog/tools/build/cmake/chapter06-testing) — 찾아온 테스트 프레임워크를 실제로 붙이기
+- [Ch 8: Modern CMake 모범 사례](/blog/tools/build/cmake/chapter08-best-practices) — 의존성 선언을 타겟 중심으로 정리하는 기준

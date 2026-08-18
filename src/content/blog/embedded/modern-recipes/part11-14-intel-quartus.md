@@ -242,16 +242,9 @@ Vivado ILA의 Intel 버전.
 
 ## ModelSim 통합
 
-```text
-Tools → Launch Simulation Library Compiler
-  → Quartus 라이브러리를 ModelSim용으로 빌드
-
-Project → Settings → EDA Tool Settings → Simulation:
-  - Tool: ModelSim-Intel FPGA
-  - Format: Verilog HDL
-
-Tools → Run Simulation Tool → RTL Simulation
-```
+- **Tools → Launch Simulation Library Compiler** 로 Quartus 라이브러리를 ModelSim용으로 빌드합니다.
+- **Project → Settings → EDA Tool Settings → Simulation** 에서 Tool을 ModelSim-Intel FPGA로, Format을 Verilog HDL로 지정합니다.
+- **Tools → Run Simulation Tool → RTL Simulation** 으로 시뮬레이션을 띄웁니다.
 
 Testbench 작성 후 sim:
 

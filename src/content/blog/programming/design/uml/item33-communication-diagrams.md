@@ -2,7 +2,7 @@
 title: "UML 33: 커뮤니케이션 다이어그램 — 시퀀스의 공간적 자매"
 date: 2026-05-03T04:30:00
 description: "메시지를 시간 축이 아닌 공간(객체 배치)에 놓고 본다. UML 1.x의 'Collaboration Diagram'이 2.0에서 개명됐다."
-tags: [UML, Communication Diagram, Interaction, Message]
+tags: [UML, communication-diagram, Interaction, Message]
 series: "UML 2.5.1"
 seriesOrder: 33
 draft: true

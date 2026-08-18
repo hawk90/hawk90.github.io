@@ -633,6 +633,10 @@ Modern find 모듈은 imported 타겟을 제공합니다. 타겟을 링크하면
 
 ---
 
-## 관련 시리즈
+## 관련 항목
 
-- [GNU Make 시리즈](/blog/tools/build/gnu-make/chapter01-intro) — Make 기초
+- [Ch 7: 설치와 패키징](/blog/tools/build/cmake/chapter07-install) — 모범 사례대로 만든 타겟을 밖으로 내보내기
+- [Ch 9: Modern CMake 고급](/blog/tools/build/cmake/chapter09-modern-advanced) — 이 원칙 위에 얹는 고급 도구 모음
+- [Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 타겟 중심 설계의 출발점
+- [실전 Makefile 예제](/blog/tools/build/gnu-make/chapter07-practical) — 같은 운영 패턴을 Make로 구성했을 때의 골격
+- [cmake-toolchains(7)](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html) — 크로스 플랫폼·크로스 컴파일 설정의 공식 기준

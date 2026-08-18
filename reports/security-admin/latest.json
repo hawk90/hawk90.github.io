@@ -21,6 +21,7 @@
     "src/components/blog/Pagination.astro",
     "src/components/blog/PostCard.astro",
     "src/components/blog/PostListPanel.astro",
+    "src/components/blog/PostRow.astro",
     "src/components/blog/ReadingProgress.astro",
     "src/components/blog/RelatedPosts.astro",
     "src/components/blog/SeriesNav.astro",
@@ -82,6 +83,7 @@
     "src/lib/og-themes.ts",
     "src/lib/posts.ts",
     "src/lib/rehype-image-lazy.mjs",
+    "src/lib/rehype-table-scroll.mjs",
     "src/lib/remark-callouts.mjs",
     "src/lib/search-aliases.ts",
     "src/lib/search.ts",
@@ -164,6 +166,14 @@
       "priority": "P1",
       "title": "OAuth endpoint in production artifact",
       "remediation": "Production artifact must not contain /api/auth routes when this project builds as a static site.",
+      "evidence": [],
+      "status": "passed"
+    },
+    {
+      "id": "SEC-ADMIN-07",
+      "priority": "P1",
+      "title": "Cross-origin subresource without integrity",
+      "remediation": "Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.",
       "evidence": [],
       "status": "passed"
     }

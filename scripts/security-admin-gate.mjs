@@ -22,6 +22,9 @@ const sources = new Map(await Promise.all(files.map(async (file) => [file, await
 const adminConfig = sources.get('src/consts/config.ts') ?? '';
 const astroConfig = await readFile('astro.config.mjs', 'utf8');
 const staticOutput = /output:\s*['"]static['"]/.test(astroConfig);
+// Read the origin from the build config rather than hardcoding it, so a move
+// to another domain does not silently turn every canonical into a finding.
+const SITE_ORIGIN = astroConfig.match(/site:\s*['"](https?:\/\/[^'"/]+)/)?.[1] ?? '';
 const patOnly = !/authMode\s*:/.test(adminConfig);
 
 function evidenceFor(pattern, predicate = () => true) {
@@ -55,6 +58,44 @@ async function artifactEvidence(directory) {
 }
 
 const artifactAuthFiles = artifactDir ? await artifactEvidence(artifactDir) : [];
+
+/**
+ * Cross-origin subresources that arrive without an integrity hash. A CDN that
+ * serves different bytes than the ones reviewed here gets to run or style the
+ * page, and nothing in the build would notice. Reported per unique URL rather
+ * than per page — one bad href reaches every page that includes the layout.
+ */
+async function unpinnedSubresources(directory) {
+  const seen = new Map();
+  async function visit(current) {
+    for (const entry of (await readdir(current, { withFileTypes: true })).sort((left, right) => left.name.localeCompare(right.name))) {
+      const file = join(current, entry.name);
+      if (entry.isDirectory()) { await visit(file); continue; }
+      if (!file.endsWith('.html')) continue;
+      const html = await readFile(file, 'utf8');
+      for (const match of html.matchAll(/<(link|script)\b[^>]*>/gi)) {
+        const tag = match[0];
+        const href = tag.match(/\b(?:href|src)\s*=\s*"(https?:\/\/[^"]+)"/i);
+        if (!href) continue;
+        // The site's own absolute URLs are same-origin, whatever the tag says.
+        if (href[1].startsWith(SITE_ORIGIN)) continue;
+        // Only tags that actually fetch and execute. `canonical`, `alternate`,
+        // `preconnect` and friends either declare a relationship or open a
+        // socket; none of them brings back bytes the page then runs.
+        if (match[1].toLowerCase() === 'link'
+          && !/rel\s*=\s*"(?:stylesheet|preload|modulepreload)"/i.test(tag)) continue;
+        if (/\bintegrity\s*=/i.test(tag)) continue;
+        if (!seen.has(href[1])) {
+          seen.set(href[1], { file, line: 1, excerpt: `Cross-origin subresource without integrity: ${href[1]}` });
+        }
+      }
+    }
+  }
+  await visit(directory);
+  return [...seen.values()];
+}
+
+const unpinnedFiles = artifactDir ? await unpinnedSubresources(artifactDir) : [];
 
 const rules = [
   {
@@ -102,6 +143,13 @@ const rules = [
     title: 'OAuth endpoint in production artifact',
     remediation: 'Production artifact must not contain /api/auth routes when this project builds as a static site.',
     evidence: staticOutput ? artifactAuthFiles : [],
+  },
+  {
+    id: 'SEC-ADMIN-07',
+    priority: 'P1',
+    title: 'Cross-origin subresource without integrity',
+    remediation: 'Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.',
+    evidence: unpinnedFiles,
   },
 ];
 

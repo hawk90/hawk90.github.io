@@ -1,17 +1,28 @@
 {
-  "generatedAt": "2026-08-02T06:41:00.618Z",
+  "generatedAt": "2026-08-18T05:21:37.311Z",
   "summary": {
-    "stalenessCandidates": 6,
+    "stalenessCandidates": 7,
     "factDensityCandidates": 102,
-    "imageCandidates": 118,
-    "seriesWithIntegrityIssues": 0
+    "imageCandidates": 119,
+    "seriesWithIntegrityIssues": 0,
+    "draftOnlySeries": 151
   },
   "queue": [
+    {
+      "priority": "P1",
+      "kind": "staleness:future",
+      "path": "src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter09-tool-qualification.md",
+      "line": 308,
+      "status": "draft",
+      "reason": "미래 시제 — 이미 출시/확정됐는지 확인",
+      "excerpt": "- LLVM/Clang (research, qualification 진행 중)"
+    },
     {
       "priority": "P1",
       "kind": "staleness:dated",
       "path": "src/content/blog/embedded/embedded-security/chapter05-tee.md",
       "line": 357,
+      "status": "published",
       "reason": "날짜 앵커 2026 — 기준 연도 경과 시 갱신",
       "excerpt": "CCA는 2026년 현재 ARMv9.2-A 일부 SoC에 처음 양산되기 시작했고, 향후 5~10년에 걸쳐 모바일·서버 양 쪽에 확산할 것으로 예상됩니다."
     },
@@ -20,6 +31,7 @@
       "kind": "staleness:future",
       "path": "src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md",
       "line": 174,
+      "status": "published",
       "reason": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
       "excerpt": "12-Hi → 16-Hi는 *capacity 33%* 증가지만 *yield가 18% 떨어집니다*. 게다가 *발열·신호 무결성*도 악화됩니다. *HBM3E는 12-Hi가 sweet "
     },
@@ -28,6 +40,7 @@
       "kind": "staleness:future",
       "path": "src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md",
       "line": 27,
+      "status": "published",
       "reason": "미래 시제 — 이미 출시/확정됐는지 확인",
       "excerpt": "| HBM4 | JESD270-4 | 2026 (양산 램프) | 6.4~8.0 Gbps | 1.6~2.0 TB/s+ | 36~64 GB | 2048-bit | 1.0 V |"
     },
@@ -36,6 +49,7 @@
       "kind": "staleness:future",
       "path": "src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md",
       "line": 174,
+      "status": "published",
       "reason": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
       "excerpt": "**채택 예정 칩** — NVIDIA Rubin (R100, 2026), AMD MI400 (2026), 차세대 TPU."
     },
@@ -44,6 +58,7 @@
       "kind": "staleness:future",
       "path": "src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md",
       "line": 262,
+      "status": "published",
       "reason": "미래 시제 + 제품/spec 토큰 — 현재 상태 확인",
       "excerpt": "| 삼성SDS / SK텔레콤 | B200 도입 예정, full liquid cooling 준비, 시설 retrofit 진행 | — |"
     },
@@ -52,8 +67,1066 @@
       "kind": "staleness:dated",
       "path": "src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md",
       "line": 50,
+      "status": "published",
       "reason": "날짜 앵커 2026 — 기준 연도 경과 시 갱신",
       "excerpt": "2026년 현재의 상황:"
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "(unassigned)",
+      "score": 5,
+      "reason": "5 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "A First Course in Bayesian Statistical Methods",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "A Primer on Memory Consistency and Cache Coherence",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "A Tour of C++",
+      "score": 19,
+      "reason": "19 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "APUE",
+      "score": 21,
+      "reason": "21 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "ARMv8-A Architecture Reference Manual",
+      "score": 2,
+      "reason": "2 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "AUTOSAR C++14",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "AV1",
+      "score": 40,
+      "reason": "40 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Academic Writing for Graduate Students",
+      "score": 30,
+      "reason": "30 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Agile & Lean Software Engineering",
+      "score": 156,
+      "reason": "156 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "All of Statistics",
+      "score": 15,
+      "reason": "15 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Apple Metal Stack",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Bayesian Data Analysis (3rd ed)",
+      "score": 23,
+      "reason": "23 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Beautiful C++",
+      "score": 30,
+      "reason": "30 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "BoW 개요",
+      "score": 6,
+      "reason": "6 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "C++ Concurrency in Action",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "C++ Software Design",
+      "score": 39,
+      "reason": "39 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "CAN Bus 심화",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "CERT C",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Causality: Models, Reasoning, and Inference",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Clean Architecture",
+      "score": 34,
+      "reason": "34 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Clean Code",
+      "score": 17,
+      "reason": "17 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Code Complete",
+      "score": 35,
+      "reason": "35 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Code: The Hidden Language",
+      "score": 25,
+      "reason": "25 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Computer Systems: A Programmer's Perspective",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Concurrency Debugging",
+      "score": 5,
+      "reason": "5 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Convex Optimization (Boyd)",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Core ML 심화",
+      "score": 6,
+      "reason": "6 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "DDR Memory Deep Dive",
+      "score": 16,
+      "reason": "16 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "DO-178C",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Data Structures and Algorithms",
+      "score": 40,
+      "reason": "40 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Debugging: The 9 Indispensable Rules",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Designing Data-Intensive Applications",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Designing Machine Learning Systems",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Developing Safety-Critical Software",
+      "score": 15,
+      "reason": "15 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Digital Avionics Handbook",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Distributed Systems",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Doing Bayesian Data Analysis (2nd ed, core)",
+      "score": 15,
+      "reason": "15 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Domain-Driven Design",
+      "score": 17,
+      "reason": "17 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "ECSS-Q-ST-80C",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Effective C++",
+      "score": 55,
+      "reason": "55 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Effective Modern C++",
+      "score": 42,
+      "reason": "42 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Elements of Information Theory",
+      "score": 16,
+      "reason": "16 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Embedded Protocols 심화",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "FPGA Driver via QEMU+VFIO",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Fluent Python",
+      "score": 24,
+      "reason": "24 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Getting Started with BLE",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Git Conventions",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Git Flow",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "GoF Design Patterns",
+      "score": 25,
+      "reason": "25 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Google C++ Style",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Growing Object-Oriented Software",
+      "score": 16,
+      "reason": "16 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Hackers and Painters",
+      "score": 15,
+      "reason": "15 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "High-Dimensional Probability",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Information Theory, Inference, and Learning Algorithms",
+      "score": 15,
+      "reason": "15 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Introduction to Parallel Computing",
+      "score": 13,
+      "reason": "13 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Introduction to Probability",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "JSF C++",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Khorikov Unit Testing",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Launch Vehicle Flight Software",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Linear Algebra",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Linux Device Drivers (LDD3)",
+      "score": 19,
+      "reason": "19 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Linux Kernel Coding Style",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "MIPI 심화",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "MISRA C",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "ML 디자인 패턴",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "ML 시스템 프로파일링",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "ML 컴파일러",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "MLIR 심화",
+      "score": 16,
+      "reason": "16 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Mastering the FreeRTOS Real Time Kernel",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Mathematics and Plausible Reasoning, Vol I",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Mathematics and Plausible Reasoning, Vol II",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "NASA JPL Power of 10",
+      "score": 1,
+      "reason": "1 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "NPU 드라이버 개발",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "NPU 아키텍처",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "NVMe Deep Dive",
+      "score": 17,
+      "reason": "17 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "ONNX Runtime 심화",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "ONNX 실전",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Object-Oriented Analysis and Design with Applications",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Object-Oriented Software Construction",
+      "score": 36,
+      "reason": "36 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "On Writing Well",
+      "score": 24,
+      "reason": "24 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Operating Systems: Three Easy Pieces",
+      "score": 28,
+      "reason": "28 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Pattern Recognition and Machine Learning",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Patterns for Parallel Programming",
+      "score": 6,
+      "reason": "6 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Peopleware",
+      "score": 20,
+      "reason": "20 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Practical Test Engineering",
+      "score": 1,
+      "reason": "1 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Practical Vim",
+      "score": 21,
+      "reason": "21 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Pro Git",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Probabilistic Graphical Models (Koller & Friedman)",
+      "score": 21,
+      "reason": "21 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Probabilistic Machine Learning: Advanced Topics",
+      "score": 36,
+      "reason": "36 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Probabilistic Machine Learning: An Introduction",
+      "score": 23,
+      "reason": "23 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Probabilistic Reasoning in Intelligent Systems",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Probability Theory: The Logic of Science",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Probability: Theory and Examples",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Programming Pearls",
+      "score": 15,
+      "reason": "15 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "PyTorch Internals",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Python Style Guide (PEP 8)",
+      "score": 7,
+      "reason": "7 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "QEMU Embedded Emulation",
+      "score": 20,
+      "reason": "20 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "QEMU Fake Device Driver",
+      "score": 22,
+      "reason": "22 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "QEMU Internals",
+      "score": 22,
+      "reason": "22 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "RISC-V ISA 해부",
+      "score": 18,
+      "reason": "18 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "RISC-V QEMU 심화",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "RISC-V Vector Extension",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "RISC-V 베어메탈 부트",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "RISC-V 임베디드 실습",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Reasoning About Uncertainty",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Refactoring",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Refactoring Catalog (Fowler 2nd ed)",
+      "score": 61,
+      "reason": "61 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "SICP",
+      "score": 5,
+      "reason": "5 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Science Research Writing",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Set Theory",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Seven Concurrency Models in Seven Weeks",
+      "score": 7,
+      "reason": "7 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Statistical Inference",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Statistical Rethinking",
+      "score": 17,
+      "reason": "17 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Structured Parallel Programming",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Style: Lessons in Clarity and Grace",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "System Tracing",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "TDD by Example",
+      "score": 32,
+      "reason": "32 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "TDD by Example — Patterns Deep Dive",
+      "score": 53,
+      "reason": "53 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "TensorRT 심화",
+      "score": 8,
+      "reason": "8 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Algebra of Probable Inference",
+      "score": 5,
+      "reason": "5 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Art of Concurrency",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Art of Multiprocessor Programming",
+      "score": 18,
+      "reason": "18 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Art of UNIX Programming",
+      "score": 20,
+      "reason": "20 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Bayesian Choice",
+      "score": 11,
+      "reason": "11 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Design of Everyday Things",
+      "score": 7,
+      "reason": "7 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Elements of Style",
+      "score": 51,
+      "reason": "51 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Mythical Man-Month",
+      "score": 19,
+      "reason": "19 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Only Grammar Book You'll Ever Need",
+      "score": 30,
+      "reason": "30 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Pragmatic Programmer",
+      "score": 100,
+      "reason": "100 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Structure of Scientific Revolutions",
+      "score": 14,
+      "reason": "14 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "The Zynq Book",
+      "score": 13,
+      "reason": "13 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "TinyML·Edge AI",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Triton DSL",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "UALink 심화",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "UCIe 심화",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "UML 2.5.1",
+      "score": 35,
+      "reason": "35 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Understanding Philosophy of Science",
+      "score": 5,
+      "reason": "5 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Vim 마스터하기",
+      "score": 9,
+      "reason": "9 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Working Effectively with Legacy Code",
+      "score": 25,
+      "reason": "25 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "XLA·OpenXLA 심화",
+      "score": 12,
+      "reason": "12 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "Yocto Deep Dive",
+      "score": 1,
+      "reason": "1 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "gtest 심화",
+      "score": 18,
+      "reason": "18 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "perf and FlameGraph",
+      "score": 10,
+      "reason": "10 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "pytest 심화",
+      "score": 18,
+      "reason": "18 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "고종석의 문장",
+      "score": 16,
+      "reason": "16 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "리눅스 커널의 구조와 원리",
+      "score": 25,
+      "reason": "25 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "비판적 사고를 위한 논리",
+      "score": 16,
+      "reason": "16 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "우리글 바로쓰기",
+      "score": 20,
+      "reason": "20 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "전문가를 위한 C",
+      "score": 23,
+      "reason": "23 unpublished draft(s); decide publish order or mark as planned."
+    },
+    {
+      "priority": "P2",
+      "kind": "draft-only-series",
+      "path": "전문가를 위한 C++",
+      "score": 33,
+      "reason": "33 unpublished draft(s); decide publish order or mark as planned."
     },
     {
       "priority": "P2",
@@ -297,8 +1370,8 @@
       "priority": "P2",
       "kind": "fact-density",
       "path": "src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md",
-      "score": 45,
-      "reason": "45 concrete-claim signals; verify against primary sources before marking current."
+      "score": 44,
+      "reason": "44 concrete-claim signals; verify against primary sources before marking current."
     },
     {
       "priority": "P2",
@@ -1381,64 +2454,6 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
-      "path": "src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md",
-      "score": 5,
-      "reason": "5 abstract concepts / 10 hits with no image",
-      "keywords": [
-        [
-          "NUMA",
-          4
-        ],
-        [
-          "mailbox",
-          3
-        ],
-        [
-          "interrupt",
-          1
-        ],
-        [
-          "HBM",
-          1
-        ],
-        [
-          "stack",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
-      "path": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
-      "score": 5,
-      "reason": "5 abstract concepts / 8 hits with no image",
-      "keywords": [
-        [
-          "HBM",
-          4
-        ],
-        [
-          "transaction",
-          1
-        ],
-        [
-          "NUMA",
-          1
-        ],
-        [
-          "TPU",
-          1
-        ],
-        [
-          "mesh",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
       "path": "src/content/blog/embedded/rtos/practical-internals/part1-01-why-rtos.md",
       "score": 5,
       "reason": "5 abstract concepts / 7 hits with no image",
@@ -1468,13 +2483,42 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "QoS",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md",
       "score": 4,
-      "reason": "4 abstract concepts / 52 hits with no image",
+      "reason": "4 abstract concepts / 51 hits with no image",
       "keywords": [
         [
           "spinlock",
-          29
+          28
         ],
         [
           "mutex",
@@ -2193,6 +3237,31 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 9 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          4
+        ],
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/embedded/modern-recipes/part9-05-cas-patterns.md",
       "score": 4,
       "reason": "4 abstract concepts / 8 hits with no image",
@@ -2286,31 +3355,6 @@
         ],
         [
           "interrupt",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
-      "path": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
-      "score": 4,
-      "reason": "4 abstract concepts / 7 hits with no image",
-      "keywords": [
-        [
-          "HBM",
-          3
-        ],
-        [
-          "lane",
-          2
-        ],
-        [
-          "transaction",
-          1
-        ],
-        [
-          "QoS",
           1
         ]
       ]
@@ -2486,31 +3530,6 @@
         ],
         [
           "TCP",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
-      "path": "src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md",
-      "score": 4,
-      "reason": "4 abstract concepts / 4 hits with no image",
-      "keywords": [
-        [
-          "transaction",
-          1
-        ],
-        [
-          "NUMA",
-          1
-        ],
-        [
-          "HBM",
-          1
-        ],
-        [
-          "mesh",
           1
         ]
       ]
@@ -2833,27 +3852,6 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
-      "path": "src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md",
-      "score": 3,
-      "reason": "3 abstract concepts / 15 hits with no image",
-      "keywords": [
-        [
-          "mailbox",
-          8
-        ],
-        [
-          "NUMA",
-          6
-        ],
-        [
-          "HBM",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
       "path": "src/content/blog/embedded/modern-recipes/part7-11-uio-vfio.md",
       "score": 3,
       "reason": "3 abstract concepts / 15 hits with no image",
@@ -2917,27 +3915,6 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
-      "path": "src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md",
-      "score": 3,
-      "reason": "3 abstract concepts / 11 hits with no image",
-      "keywords": [
-        [
-          "rcu",
-          8
-        ],
-        [
-          "stack",
-          2
-        ],
-        [
-          "epoch",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
       "path": "src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md",
       "score": 3,
       "reason": "3 abstract concepts / 11 hits with no image",
@@ -2973,6 +3950,48 @@
         ],
         [
           "channel",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          5
+        ],
+        [
+          "mailbox",
+          4
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          8
+        ],
+        [
+          "epoch",
+          1
+        ],
+        [
+          "stack",
           1
         ]
       ]
@@ -3190,6 +4209,27 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter14-security.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "channel",
+          5
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "interposer",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/programming/code-review/folly/part9-05-pico-spin-lock.md",
       "score": 3,
       "reason": "3 abstract concepts / 7 hits with no image",
@@ -3274,6 +4314,27 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 6 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          4
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "TPU",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/embedded/performance-engineering/part3-03-dma-performance.md",
       "score": 3,
       "reason": "3 abstract concepts / 5 hits with no image",
@@ -3351,6 +4412,27 @@
         ],
         [
           "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          3
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "lane",
           1
         ]
       ]

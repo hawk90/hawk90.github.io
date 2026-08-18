@@ -29,11 +29,11 @@ Scheduler가 호출되는 시점은 정확히 네 가지입니다.
 
 이 네 시점에서만 가장 높은 priority의 ready task를 골라 실행합니다. 그 사이에는 현재 task가 계속 돕니다.
 
-```text
-preemptive            higher priority가 ready 되면 즉시 빼앗음
-cooperative           yield하지 않으면 영원히 안 바뀜
-time-slice            같은 priority에서 tick마다 round-robin
-```
+| 방식 | 동작 |
+|------|------|
+| preemptive | higher priority가 ready 되면 즉시 빼앗음 |
+| cooperative | yield하지 않으면 영원히 안 바뀜 |
+| time-slice | 같은 priority에서 tick마다 round-robin |
 
 FreeRTOS는 기본이 preemptive와 time-slice이고, Zephyr와 ThreadX도 마찬가지입니다. Cooperative는 디버깅이 단순하지만 단일 task의 무한 루프가 전체를 멈춥니다.
 

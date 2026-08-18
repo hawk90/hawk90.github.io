@@ -3,8 +3,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import PostCard from '../components/blog/PostCard.astro';
 import Breadcrumb from '../components/common/Breadcrumb.astro';
 import { getPublishedPosts, getRecentlyUpdatedPosts, isUpdatedPost } from '../lib/posts';
-import { formatDate } from '../lib/utils';
-
+import { formatDate, getPostUrl } from '../lib/utils';
 const allPosts = await getPublishedPosts();
 
 const updatedPosts = getRecentlyUpdatedPosts(allPosts, 30);
@@ -38,7 +37,7 @@ const recentPosts = allPosts
             {updatedPosts.map((post) => (
               <li>
                 <a
-                  href={`/blog/${post.id}`}
+                  href={getPostUrl(post)}
                   class="flex items-baseline justify-between gap-4 py-2.5 px-3 rounded-xl hover:bg-[var(--color-bg-tertiary)] transition-colors"
                 >
                   <div class="min-w-0 flex-1">

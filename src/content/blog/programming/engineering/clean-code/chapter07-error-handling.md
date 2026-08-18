@@ -2,7 +2,7 @@
 title: "Ch 7: 에러 처리"
 date: 2026-05-11T07:00:00
 description: "예외를 던져라. 에러 코드를 반환하지 마라. null을 반환하지 마라. null을 전달하지 마라. Special Case 패턴."
-tags: [CleanCode, Error Handling, Exceptions, Robert Martin]
+tags: [CleanCode, error-handling, Exceptions, robert-martin]
 series: "Clean Code"
 seriesOrder: 7
 draft: true

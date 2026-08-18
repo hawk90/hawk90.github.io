@@ -2,7 +2,7 @@
 title: "DSA 25: Leftist / Binomial / Fibonacci Heap"
 date: 2026-05-15T01:00:00
 description: "두 힙을 효율적으로 병합 — Dijkstra, Prim의 점근 개선."
-tags: [Data Structure, Algorithm, Heap, Mergeable Heap]
+tags: [data-structure, Algorithm, Heap, mergeable-heap]
 series: "Data Structures and Algorithms"
 seriesOrder: 25
 draft: true

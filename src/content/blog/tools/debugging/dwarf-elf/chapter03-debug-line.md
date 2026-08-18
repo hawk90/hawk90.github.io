@@ -149,7 +149,7 @@ MD5 hash가 있어 *디버거가 소스 파일의 변경을 검출* 가능. `lis
 
 `opcode_base` 이상의 값. *한 바이트로* address 증분 + line 증분 + copy를 모두 수행. *압축의 핵심*.
 
-```
+```text
 adjusted_opcode = opcode - opcode_base
 operation_advance = adjusted_opcode / line_range
 line_increment    = line_base + (adjusted_opcode % line_range)
@@ -163,7 +163,7 @@ copy
 
 예: `opcode_base=13, line_base=-5, line_range=14, min_inst_len=1`인 헤더 — 한 바이트로 *(address 증분 0-17, line 증분 -5 ~ +8)*의 거의 모든 조합을 표현.
 
-```
+```text
 opcode 0x10 → adjusted = 3
               operation_advance = 3 / 14 = 0  → address += 0
               line_increment = -5 + (3 % 14) = -2  → line -= 2
@@ -207,7 +207,7 @@ int square(int x) {        // 1
 
 DWARF line program (의사 코드).
 
-```
+```text
 DW_LNE_set_address    0x401120
 DW_LNS_advance_line   1        ; line = 2
 DW_LNS_set_prologue_end
@@ -238,7 +238,7 @@ int addr2line(elf *e, uint64_t target_pc) {
 
 VM을 실행하면서 각 *emit*마다 target_pc와 비교. *target_pc 이상의 첫 번째 행 직전*이 답.
 
-```
+```text
 PC          file:line
 0x401120    main.cpp:2
 0x401127    main.cpp:2
@@ -300,7 +300,7 @@ int x = a() + b() + c();    // line 5
 
 세 호출 모두 line 5이지만 *다른 명령어*. 각 호출 사이트의 `discriminator`를 다른 값으로 두면 GDB가 구분 가능.
 
-```
+```text
 PC          file:line:discriminator
 0x401120    main.cpp:5:0     ← line 시작
 0x401130    main.cpp:5:1     ← a() 호출 후

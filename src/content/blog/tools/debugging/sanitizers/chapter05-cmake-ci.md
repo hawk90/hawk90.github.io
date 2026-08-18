@@ -2,7 +2,7 @@
 title: "Sanitizer를 CMake와 CI에 통합 — Multi-config 빌드 전략"
 date: 2026-05-29T09:05:00
 description: "Sanitizer 빌드를 프로젝트에 자연스럽게 통합 — CMake 옵션, GitHub Actions, GitLab CI 실전 예시."
-tags: [Sanitizer, CMake, CI, GitHub Actions, GitLab, Debugging]
+tags: [Sanitizer, CMake, CI, github-actions, GitLab, Debugging]
 series: "Sanitizers"
 seriesOrder: 5
 draft: false
@@ -432,7 +432,7 @@ CI에서 sanitizer가 깨지면 보통 다음 단계로 진단합니다.
 
 ### "Sanitizer가 동작하는데 줄 번호가 안 나옴"
 
-```
+```text
 #0 0x4012a3 in main
 #1 0x401aef in __libc_start_main
 ```
@@ -548,8 +548,11 @@ Sanitizer는 *컴파일러 한 옵션*으로 *수많은 런타임 버그를 잡�
 - [GitLab CI/CD Reference](https://docs.gitlab.com/ee/ci/yaml/)
 - [CMakePresets v6 Spec](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
 
-## 관련 시리즈
+## 관련 항목
 
-- [Valgrind](/blog/tools/debugging/valgrind/chapter01-intro) — sanitizer 보완
-- [CMake](/blog/tools/build/cmake/chapter01-intro) — 빌드 통합 기초
-- [GNU Make](/blog/tools/build/gnu-make/chapter01-intro) — 더 단순한 빌드
+- [Ch 4: TSan으로 데이터 레이스 디버깅](/blog/tools/debugging/sanitizers/chapter04-tsan) — 이 장에서 별도 job으로 분리한 TSan 빌드의 내용
+- [Ch 1: Sanitizer 종류 비교](/blog/tools/debugging/sanitizers/chapter01-intro) — 시리즈 출발점, 어떤 sanitizer를 켤지 결정
+- [CMake Ch 6: 테스트와 CTest](/blog/tools/build/cmake/chapter06-testing) — sanitizer job이 호출하는 `ctest` 쪽 설정
+- [Valgrind Ch 5: Suppression과 실무 운용](/blog/tools/debugging/valgrind/chapter05-suppressions) — 야간 빌드에서 Valgrind를 함께 돌릴 때의 CI 통합
+- [Sanitizers wiki: SanitizerCommonFlags](https://github.com/google/sanitizers/wiki/SanitizerCommonFlags) — CI 환경 변수에 쓰는 공통 플래그 원문
+- [GNU Make 시리즈](/blog/tools/build/gnu-make/chapter01-intro) — CMake를 안 쓰는 프로젝트에 같은 sanitizer 플래그를 붙일 때

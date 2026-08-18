@@ -232,27 +232,13 @@ dtoverlay=vc4-kms-v3d
 
 흐름은 다음과 같습니다.
 
-```text
-[전원]
-   │
-   ▼
-[VideoCore GPU 부트]
-   - SoC ROM 안의 GPU firmware
-   - bootcode.bin → start.elf 로딩
-   │
-   ▼
-[GPU가 config.txt 읽음]
-   - kernel= 지시자 따라 파일 선택
-   - device_tree= dtb 적재
-   - dtoverlay= overlay 머지
-   │
-   ▼
-[ARM 코어 reset deassert]
-   - kernel= 파일이 ARM 진입점
-   │
-   ▼
-[U-Boot 또는 Linux 직접 실행]
-```
+| 순서 | 단계 | 하는 일 |
+|---|---|---|
+| 1 | 전원 인가 | 부팅 시작 |
+| 2 | VideoCore GPU 부트 | SoC ROM 안의 GPU firmware가 `bootcode.bin` → `start.elf` 순으로 로딩 |
+| 3 | GPU가 `config.txt` 읽음 | `kernel=` 지시자를 따라 파일 선택, `device_tree=`로 dtb 적재, `dtoverlay=`로 overlay 머지 |
+| 4 | ARM 코어 reset deassert | `kernel=` 파일이 ARM 진입점 |
+| 5 | U-Boot 또는 Linux 직접 실행 | ARM 코어에서 실행 시작 |
 
 `kernel=u-boot.bin`을 두면 U-Boot이 ARM에서 동작하고, 그 다음부터는 *위의 Distro Boot/extlinux 흐름*과 같습니다. `kernel=Image`로 두면 U-Boot 없이 GPU firmware가 *직접 Linux로 점프*합니다.
 

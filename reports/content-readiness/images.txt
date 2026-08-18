@@ -1,6 +1,6 @@
 === Image Coverage Audit ===
   Total series: 28
-  Candidates (image=0, distinct keyword≥3): 118
+  Candidates (image=0, distinct keyword≥3): 119
 
 === 시리즈별 평균 이미지 ===
    0.00 img/ch   15편     0개  CXL 4.0 Internals

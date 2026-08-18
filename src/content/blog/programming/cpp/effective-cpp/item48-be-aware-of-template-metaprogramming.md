@@ -2,7 +2,7 @@
 title: "항목 48: 템플릿 메타프로그래밍을 인식하라"
 date: 2026-05-04T00:00:00
 description: "TMP — 컴파일 타임에 계산·코드 생성. C++11+ constexpr과 if constexpr이 많이 대체했지만 여전히 유효한 도구."
-tags: [C++, Effective C++, Template, TMP]
+tags: [C++, effective-c++, Template, TMP]
 series: "Effective C++"
 seriesOrder: 48
 draft: true

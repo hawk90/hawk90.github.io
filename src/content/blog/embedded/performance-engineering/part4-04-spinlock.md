@@ -168,16 +168,9 @@ spin_unlock_irqrestore(&mylock, flags);
 
 ## Cortex-M에서의 Spinlock
 
-```text
-Cortex-M3/M4 single core:
-  spinlock은 의미가 없습니다. 다른 task가 lock을 풀려면 CPU가 필요한데
-  spin이 CPU를 점유하므로 영원히 풀리지 않습니다.
-  → IRQ disable 또는 BASEPRI로 critical section을 보호합니다.
+Cortex-M3/M4 같은 single core에서는 spinlock이 의미가 없습니다. 다른 task가 lock을 풀려면 CPU가 필요한데, spin이 CPU를 점유하므로 영원히 풀리지 않습니다. 이때는 IRQ disable 또는 `BASEPRI`로 critical section을 보호합니다.
 
-SMP Cortex-M (RP2040, Cortex-M55+M85):
-  cross-core spinlock이 필요합니다.
-  CMSIS RTOS와 Zephyr가 atomic API를 제공합니다.
-```
+반대로 SMP Cortex-M(RP2040, Cortex-M55+M85)에서는 cross-core spinlock이 필요합니다. CMSIS RTOS와 Zephyr가 atomic API를 제공합니다.
 
 Zephyr SMP의 사용 예입니다.
 

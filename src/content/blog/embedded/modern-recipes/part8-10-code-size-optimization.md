@@ -193,11 +193,7 @@ __attribute__((noinline)) void big_func(void) { ... }
 
 다섯 옵션의 합성 효과로 60%까지 줄어들 수 있습니다.
 
-```text
-빌드 시간 비교
--Os                  baseline
-+ -flto              + 30~80% (link 단계가 김)
-```
+빌드 시간은 반대로 늘어납니다. `-Os` 단독을 baseline으로 보면 `-flto`를 더할 때 link 단계가 길어져 30~80%가 추가됩니다.
 
 LTO의 비용은 link 시간뿐, runtime에는 오히려 더 빠른 경우도 많습니다.
 
