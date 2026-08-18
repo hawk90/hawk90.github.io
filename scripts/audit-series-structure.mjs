@@ -18,7 +18,9 @@
 
 import { readdir, readFile } from 'node:fs/promises';
 import { dirname, join, relative } from 'node:path';
-import yaml from 'js-yaml';
+// Namespace import, not default: js-yaml 5 drops the default export, and this
+// form resolves under both 4 and 5.
+import * as yaml from 'js-yaml';
 
 const contentRoot = 'src/content/blog';
 const registryPath = 'src/consts/series.ts';

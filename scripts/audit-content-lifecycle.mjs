@@ -3,7 +3,9 @@
 
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
-import yaml from 'js-yaml';
+// Namespace import, not default: js-yaml 5 drops the default export, and this
+// form resolves under both 4 and 5.
+import * as yaml from 'js-yaml';
 
 const root = process.cwd();
 const contentRoot = join(root, 'src/content/blog');
