@@ -1,0 +1,27 @@
+{
+  "schemaVersion": 1,
+  "decision": "accepted-risk",
+  "supersedes": "accepted-risk-deferral for independent-backup-and-restore-test",
+  "authority": "Owner decided a third copy is unnecessary: the full history is already in two independently-failing places, the local working clone and the GitHub remote, and either restores from a known commit.",
+  "rationale": [
+    "Every source file, diagram, script, and config is tracked — 7852 files, including public/images.",
+    "dist/ and public/og/ are gitignored but regenerate from source via npm run build and npm run og.",
+    "There is no custom domain, so no DNS state exists outside the repository."
+  ],
+  "notCovered": "Both copies depend on one machine and one account. Simultaneous loss — an account taken away while the local disk is gone — destroys everything, and no commit hash helps without objects. account-recovery is deliberately left open because this acceptance leans on it.",
+  "reassessmentTrigger": "If the local working clone stops being kept, if the repository gains state that is not in git, or before an ownership change.",
+  "controls": {
+    "independent-backup-and-restore-test": [
+      "AP-R-01",
+      "AP-R-02",
+      "AP-R-03",
+      "AP-R-07",
+      "AP-R-08",
+      "AP-R-09",
+      "AP-R-10",
+      "AP-R-12",
+      "AP-R-13",
+      "AP-R-14"
+    ]
+  }
+}

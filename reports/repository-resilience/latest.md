@@ -1,7 +1,7 @@
 # Repository resilience audit
 
 - PASS — git-object-integrity
-- FAIL — recovery-remote
+- ACCEPTED — recovery-remote (would fail; covered by the backup risk acceptance)
 - PASS — pinned-ci-actions
 - PASS — reproducible-install
 - PASS — build-once-artifact
@@ -13,9 +13,12 @@
 
 ## External evidence required
 
-- PENDING — independent-backup-and-restore-test
 - PENDING — account-recovery
 - PENDING — emergency-static-host
+
+## Accepted
+
+- ACCEPTED — independent-backup-and-restore-test. Not covered: Both copies depend on one machine and one account. Simultaneous loss — an account taken away while the local disk is gone — destroys everything, and no commit hash helps without objects. account-recovery is deliberately left open because this acceptance leans on it.
 
 ## Not applicable
 

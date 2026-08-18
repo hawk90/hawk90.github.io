@@ -20,21 +20,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-02",
@@ -48,21 +49,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-03",
@@ -76,21 +78,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-04",
@@ -188,21 +191,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-08",
@@ -216,21 +220,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-09",
@@ -244,21 +249,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-10",
@@ -272,21 +278,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-100",
@@ -355,21 +362,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-13",
@@ -383,21 +391,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-14",
@@ -411,21 +420,22 @@
         ]
       },
       "disposition": "accepted",
-      "nextAction": "external-review",
-      "reviewQuestion": "Has independent-backup-and-restore-test been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?",
-      "scope": "User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Is the two-copy assumption still true — is a local working clone still kept, and is anything now held outside git?",
+      "scope": "Owner-accepted exposure for the independent backup control; no recovery outcome is inferred from repository files.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json",
+            "docs/runbooks/repository-recovery.md",
+            "scripts/audit-repository-resilience.mjs"
           ],
-          "verification": "npm run audit:repository-external-evidence",
-          "result": "Accepted risk deferral for independent-backup-and-restore-test; actual exercise remains pending."
+          "verification": "npm run audit:repository-external-evidence && npm run audit:repository-resilience",
+          "result": "Accepted exposure for independent-backup-and-restore-test: history exists in the local clone and the GitHub remote, both restorable from a known commit, and nothing of value lives outside git. This supersedes the earlier deferral, which said only that the exercise could not be performed yet."
         }
       ],
-      "residualRisk": "The external recovery path remains untested and may fail when needed; reassess on the recorded trigger."
+      "residualRisk": "Two copies, one owner, one account. Losing the account removes the remote and the published site together; if the local clone is gone at the same moment, nothing remains. account-recovery is the control this acceptance depends on and is deliberately still open."
     },
     {
       "id": "AP-R-15",

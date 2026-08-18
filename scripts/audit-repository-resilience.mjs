@@ -50,23 +50,53 @@ if (!hasCustomDomain) {
   notApplicable.set('domain-dns-recovery', 'no public/CNAME — the site is served from a github.io subdomain, so there is no DNS to recover. Becomes pending again if a custom domain is added.');
 }
 
-const failed = policy.localControls.filter((key) => !checks[key]);
-const pending = policy.externalEvidenceRequired.filter((key) => !notApplicable.has(key));
+/**
+ * Controls the owner has accepted rather than deferred.
+ *
+ * Kept separate from "pending" because the two mean different things: pending
+ * is work not done yet, accepted is a decision with a reason. Collapsing them
+ * makes the list look like a backlog and hides which control the accepted ones
+ * are leaning on.
+ */
+const accepted = new Map();
+const backupDecision = await readFile('archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-backup-risk-acceptance.json', 'utf8').then(JSON.parse, () => null);
+if (backupDecision?.decision === 'accepted-risk') {
+  for (const control of Object.keys(backupDecision.controls)) accepted.set(control, backupDecision.notCovered);
+}
+
+/**
+ * `recovery-remote` is the local reading of the same exposure the owner
+ * accepted: a second host for the objects. Once that acceptance exists the
+ * control cannot pass, so leaving it FAIL would make this audit red forever
+ * over a settled decision. It is reported as accepted instead — with the
+ * finding it would otherwise have raised kept visible, because an accepted
+ * risk that stops being legible stops being a decision.
+ */
+const acceptedLocally = new Set(
+  accepted.has('independent-backup-and-restore-test') && !checks['recovery-remote'] ? ['recovery-remote'] : [],
+);
+const failed = policy.localControls.filter((key) => !checks[key] && !acceptedLocally.has(key));
+const pending = policy.externalEvidenceRequired.filter((key) => !notApplicable.has(key) && !accepted.has(key));
 
 await mkdir('reports/repository-resilience', { recursive: true });
 await writeFile('reports/repository-resilience/latest.md', [
   '# Repository resilience audit',
   '',
-  ...policy.localControls.map((key) => `- ${checks[key] ? 'PASS' : 'FAIL'} — ${key}`),
+  ...policy.localControls.map((key) => {
+    if (checks[key]) return `- PASS — ${key}`;
+    return acceptedLocally.has(key) ? `- ACCEPTED — ${key} (would fail; covered by the backup risk acceptance)` : `- FAIL — ${key}`;
+  }),
   ...(hasRecoveryRemote ? [] : ['', `  Remotes configured: ${remoteUrls.size}. Recovery needs the objects on a second host, not a second name for the same one.`]),
   '',
   '## External evidence required',
   '',
   ...pending.map((key) => `- PENDING — ${key}`),
+  ...(accepted.size ? ['', '## Accepted', '', ...[...accepted].map(([key, why]) => `- ACCEPTED — ${key}. Not covered: ${why}`)] : []),
   ...(notApplicable.size ? ['', '## Not applicable', '', ...[...notApplicable].map(([key, why]) => `- N/A — ${key}: ${why}`)] : []),
   '',
 ].join('\n'));
 
-console.log(`Repository resilience: ${policy.localControls.length - failed.length}/${policy.localControls.length} local controls pass; ${pending.length} external pending${notApplicable.size ? `, ${notApplicable.size} not applicable` : ''}.`);
+const passing = policy.localControls.filter((key) => checks[key]).length;
+console.log(`Repository resilience: ${passing}/${policy.localControls.length} local controls pass${acceptedLocally.size ? `, ${acceptedLocally.size} accepted` : ''}; ${pending.length} external pending${accepted.size ? `, ${accepted.size} accepted` : ''}${notApplicable.size ? `, ${notApplicable.size} not applicable` : ''}.`);
 for (const key of failed) console.log(`  FAIL — ${key}`);
 if (failed.length) process.exitCode = 1;
