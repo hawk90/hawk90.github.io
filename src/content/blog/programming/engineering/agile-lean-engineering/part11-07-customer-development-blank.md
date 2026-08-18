@@ -1,8 +1,8 @@
 ---
 title: "Part 11-07: Customer Development — Steve Blank"
 date: 2026-05-20T14:00:00
-description: "Discovery·Validation·Creation·Building — 4 단계 customer development.'
-series: 'Agile & Lean Software Engineering"
+description: "Discovery·Validation·Creation·Building — 4 단계 customer development."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 146
 tags: [lean-startup, customer-development, blank]
 type: book-review

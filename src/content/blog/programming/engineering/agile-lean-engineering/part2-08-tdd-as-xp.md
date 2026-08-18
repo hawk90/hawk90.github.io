@@ -1,8 +1,8 @@
 ---
 title: "Part 2-08: Test-Driven Development as XP Practice"
 date: 2026-05-20T16:00:00
-description: "XP에서 TDD가 차지하는 자리 — TDD by Example과의 연결.'
-series: 'Agile & Lean Software Engineering"
+description: "XP에서 TDD가 차지하는 자리 — TDD by Example과의 연결."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 16
 tags: [agile, xp, tdd, test-driven-development]
 type: book-review

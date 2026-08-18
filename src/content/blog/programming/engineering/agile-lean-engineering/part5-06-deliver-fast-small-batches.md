@@ -1,8 +1,8 @@
 ---
 title: "Part 5-06: Deliver Fast — small batches"
 date: 2026-05-23T01:00:00
-description: "queueing theory와 batch size — 작게 자주 배달하는 것이 빠르다.'
-series: 'Agile & Lean Software Engineering"
+description: "queueing theory와 batch size — 작게 자주 배달하는 것이 빠르다."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 73
 tags: [lean, delivery, batch-size, queueing-theory]
 type: book-review

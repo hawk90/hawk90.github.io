@@ -1,8 +1,8 @@
 ---
 title: "Part 8-15: Platform Engineering — Team Topologies 연계"
 date: 2026-05-20T11:00:00
-description: "Internal Developer Platform — Skelton·Humanitec의 platform.'
-series: 'Agile & Lean Software Engineering"
+description: "Internal Developer Platform — Skelton·Humanitec의 platform."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 119
 tags: [devops, platform-engineering, team-topologies]
 type: book-review

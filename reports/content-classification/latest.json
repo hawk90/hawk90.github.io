@@ -15,11 +15,11 @@
       "documents": 156,
       "seriesCount": 1,
       "dominantSeries": "Agile & Lean Software Engineering",
-      "dominantSeriesDocuments": 3,
-      "dominantSeriesShare": 0.019,
-      "ungroupedDocuments": 153,
-      "recommendation": "review-as-topic",
-      "rationale": "No single named series accounts for 80% of documents; review as a potential stable reader-facing topic before creating a category."
+      "dominantSeriesDocuments": 156,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
     },
     {
       "path": "embedded/modern-recipes",
@@ -1937,7 +1937,7 @@
     }
   ],
   "taxonomySummary": {
-    "review-as-topic": 2,
-    "review-as-series": 173
+    "review-as-series": 174,
+    "review-as-topic": 1
   }
 }

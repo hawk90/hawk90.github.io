@@ -1,8 +1,8 @@
 ---
 title: "Part 2-07: Pair Programming — 진짜로 효과 있나"
 date: 2026-05-20T15:00:00
-description: "Pair programming의 실증 연구와 반론 — Williams·Cockburn 연구.'
-series: 'Agile & Lean Software Engineering"
+description: "Pair programming의 실증 연구와 반론 — Williams·Cockburn 연구."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 15
 tags: [agile, xp, pair-programming, research]
 type: book-review

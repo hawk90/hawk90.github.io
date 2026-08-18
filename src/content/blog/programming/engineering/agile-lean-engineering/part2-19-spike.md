@@ -1,8 +1,8 @@
 ---
 title: "Part 2-19: Spike — 위험 줄이기 위한 mini-investigation"
 date: 2026-05-21T03:00:00
-description: "Spike solution — 불확실성 제거를 위한 짧은 탐색 작업.'
-series: 'Agile & Lean Software Engineering"
+description: "Spike solution — 불확실성 제거를 위한 짧은 탐색 작업."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 27
 tags: [agile, xp, spike, risk-management]
 type: book-review

@@ -4,9 +4,10 @@ import PostCard from '../components/blog/PostCard.astro';
 import { BRAND_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
 import { getBlogContentManifest, getHomepageCuration } from '../lib/content';
+import { LEARNING_PATHS } from '../consts/learning-paths';
 
 const manifest = await getBlogContentManifest();
-const { latest, guides, topicHubs } = getHomepageCuration(manifest);
+const { latest, guides } = getHomepageCuration(manifest);
 const latestPosts = latest.slice(0, 3).map((document) => document.source);
 const guidePosts = guides.map((document) => document.source);
 ---
@@ -26,7 +27,7 @@ const guidePosts = guides.map((document) => document.source);
             {BRAND_CONFIG.heroDescription}
           </p>
           <div class="flex flex-wrap gap-3 text-sm">
-            <a href={topicHubs[0]?.href ?? '/blog'} class="btn btn-primary rounded-xl px-5 py-3">Explore learning paths</a>
+            <a href="/paths" class="btn btn-primary rounded-xl px-5 py-3">Explore learning paths</a>
             <a href="/about" class="btn btn-ghost rounded-xl border border-[var(--color-border)] px-5 py-3">About the author</a>
           </div>
         </div>
@@ -68,17 +69,23 @@ const guidePosts = guides.map((document) => document.source);
     }
   </style>
 
-  {topicHubs.length > 0 && (
+  {/*
+    One curation axis, not two. This section used to list Topic Hubs under the
+    heading "Core Topics" while the nav offered "Paths" — two cross-series
+    entry layers a reader had to tell apart, when the single published hub was
+    a duplicate of part 9 of the computer-from-scratch path.
+  */}
+  {LEARNING_PATHS.length > 0 && (
     <section class="py-16">
       <div class="container">
         <div class="section-eyebrow mb-2">Knowledge Map</div>
-        <h2 class="text-2xl font-bold mb-8">Core Topics</h2>
+        <h2 class="text-2xl font-bold mb-8">학습경로</h2>
         <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
-          {topicHubs.map((hub) => (
-            <a href={hub.href} class="block rounded-xl border border-[var(--color-border)] p-6 hover:border-[var(--color-accent)] transition-colors">
-              <h3 class="text-lg font-semibold mb-3 text-[var(--color-accent)]">{hub.label}</h3>
-              <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-4">{hub.summary}</p>
-              <span class="text-sm font-medium">{hub.audience} →</span>
+          {LEARNING_PATHS.map((path) => (
+            <a href={`/paths/${path.id}`} class="block rounded-xl border border-[var(--color-border)] p-6 hover:border-[var(--color-accent)] transition-colors">
+              <h3 class="text-lg font-semibold mb-3 text-[var(--color-accent)]">{path.name}</h3>
+              <p class="text-sm text-[var(--color-text-secondary)] leading-relaxed mb-4">{path.description}</p>
+              <span class="text-sm font-medium">{path.parts.length}부 구성 →</span>
             </a>
           ))}
         </div>

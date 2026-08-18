@@ -1,8 +1,8 @@
 ---
 title: "Part 6-09: Planning Poker"
 date: 2026-05-23T16:00:00
-description: "Wideband Delphi의 변형 — James Grenning이 만든 planning poker.'
-series: 'Agile & Lean Software Engineering"
+description: "Wideband Delphi의 변형 — James Grenning이 만든 planning poker."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 88
 tags: [agile, estimation, planning-poker]
 type: book-review

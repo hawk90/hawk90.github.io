@@ -7,7 +7,7 @@ const files = Object.fromEntries(await Promise.all([
   ['searchPage', 'src/pages/search.json.ts'],
   ['schema', 'src/content.config.ts'],
   ['lifecycle', 'scripts/audit-content-lifecycle.mjs'],
-  ['hubs', 'src/lib/content/hubs.ts'],
+  ['homepageGuides', 'src/consts/homepage-guides.ts'],
   ['curation', 'src/lib/content/curation.ts'],
   ['globalCss', 'src/styles/global.css'],
   ['package', 'package.json'],
@@ -28,7 +28,11 @@ const checks = [
   ['search-publication-filter', /\.filter\(\(document\) => getPublicationDecision\(document\)\.search\)/.test(files.searchPage)],
   ['search-canonical-id', /slug: document\.id/.test(files.searchPage) && /encodeURI\(item\.slug\)/.test(files.searchModal)],
   ['verification-separate-from-updated', /updated: z\.coerce\.date\(\)\.optional\(\)/.test(files.schema) && /lastVerified: z\.coerce\.date\(\)\.optional\(\)/.test(files.schema) && /data\.lastVerified/.test(files.lifecycle)],
-  ['published-hub-draft-guard', /if \(!hub\.isPublished\) continue/.test(files.hubs) && /getPublicationDecision\(document\)\.render/.test(files.hubs) && /assertTopicHubIntegrity\(manifest\)/.test(files.curation)],
+  // Was `published-hub-draft-guard`, which checked that a published Topic Hub's
+  // start-here posts had to be published too. Hubs are gone; the same guarantee
+  // now covers the homepage's curated entry points, and it fails the build
+  // rather than rendering an empty section.
+  ['curated-guides-must-resolve', /HOMEPAGE_GUIDE_IDS/.test(files.homepageGuides) && /assertHomepageGuidesExist\(manifest\)/.test(files.curation) && /throw new Error/.test(files.curation)],
   ['search-escape-close', /case 'Escape'/.test(files.searchModal) && /closeModal\(\)/.test(files.searchModal)],
   ['reduced-motion-contract', /prefers-reduced-motion: reduce/.test(files.searchModal) && /prefers-reduced-motion: reduce/.test(files.globalCss)],
   ['preview-production-contract', /"preview":\s*"astro preview"/.test(files.package) && /output:\s*'static'/.test(files.astroConfig)],

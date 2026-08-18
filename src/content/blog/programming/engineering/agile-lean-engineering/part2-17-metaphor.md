@@ -1,8 +1,8 @@
 ---
 title: "Part 2-17: Metaphor — 가장 논란 많은 practice"
 date: 2026-05-21T01:00:00
-description: "XP의 metaphor practice — 왜 자주 빠지는가.'
-series: 'Agile & Lean Software Engineering"
+description: "XP의 metaphor practice — 왜 자주 빠지는가."
+series: "Agile & Lean Software Engineering"
 seriesOrder: 25
 tags: [agile, xp, metaphor, system-design]
 type: book-review
