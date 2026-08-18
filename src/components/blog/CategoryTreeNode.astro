@@ -1,4 +1,5 @@
 ---
+import { getPostUrl } from '../../lib/utils';
 interface SeriesLink {
   name: string;
   slug: string;
@@ -69,7 +70,7 @@ const seriesLinkClass = isNested
         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M9 5l7 7-7 7" />
       </svg>
     </button>
-    <a href={`/blog/${node.id}`} data-astro-prefetch="viewport" class={linkClass}>
+    <a href={getPostUrl(node)} data-astro-prefetch="viewport" class={linkClass}>
       <span class="flex items-center gap-1.5 truncate">
         <span class={iconClass}>{node.icon}</span>
         <span class="truncate">{node.name}</span>

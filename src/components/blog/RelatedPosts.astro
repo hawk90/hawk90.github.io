@@ -1,6 +1,6 @@
 ---
 import type { RelatedPost } from '../../lib/posts';
-import { formatDate } from '../../lib/utils';
+import { formatDate, getPostUrl } from '../../lib/utils';
 import { t } from '../../consts/ui-strings';
 
 interface Props {
@@ -16,7 +16,7 @@ const { posts } = Astro.props;
     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
       {posts.map(({ post, reason }) => (
         <a
-          href={`/blog/${post.id}`}
+          href={getPostUrl(post)}
           class="block p-4 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-lg hover:border-[var(--color-border-hover)] transition-colors group"
         >
           <h3 class="font-semibold mb-2 group-hover:text-[var(--color-accent)] transition-colors line-clamp-2">
