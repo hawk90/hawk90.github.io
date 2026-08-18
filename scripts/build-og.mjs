@@ -16,7 +16,9 @@ import fs from 'node:fs/promises';
 import path from 'node:path';
 import crypto from 'node:crypto';
 import { fileURLToPath } from 'node:url';
-import yaml from 'js-yaml';
+// Namespace import, not default: js-yaml 5 drops the default export, and this
+// form resolves under both 4 and 5.
+import * as yaml from 'js-yaml';
 import satori from 'satori';
 import { html } from 'satori-html';
 import { Resvg } from '@resvg/resvg-js';
