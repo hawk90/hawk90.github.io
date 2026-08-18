@@ -25,11 +25,7 @@ bool compare_exchange_strong(T &expected, T desired);
 bool compare_exchange_weak  (T &expected, T desired);
 ```
 
-```text
-expected에 현재 *p를 in/out로 받음
-*p == expected이면 *p = desired, return true
-아니면 expected = *p, return false (재시도용)
-```
+`expected`는 현재 `*p` 값을 in/out으로 받습니다. `*p == expected`이면 `*p = desired`로 바꾸고 true를 반환하고, 아니면 `expected`에 현재 `*p`를 담아 false를 반환합니다. 실패했을 때 갱신된 `expected`가 그대로 재시도용 값이 됩니다.
 
 `weak`는 spurious failure(거짓 실패)가 가능하지만 LL/SC architecture(ARM)에서 더 빠릅니다. loop 안에서는 항상 `weak`를 씁니다.
 

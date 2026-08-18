@@ -219,11 +219,7 @@ result = cloud_api(image) if online else local_model(image)
 
 > Model 한 개로 모든 device
 
-```text
-서버에서 학습한 ResNet-50을 그대로 Pi에 → OOM
-```
-
-Device-tier별 model variant(`nano`/`small`/`medium`)를 따로 두고 deploy합니다.
+서버에서 학습한 ResNet-50을 그대로 Raspberry Pi에 올리면 OOM으로 죽습니다. Device-tier별 model variant(`nano`/`small`/`medium`)를 따로 두고 deploy합니다.
 
 > Preprocess CPU·inference GPU 비대칭
 
@@ -236,11 +232,7 @@ NEON·DSP·VIC로 preprocess를 옮기면 두 stage가 같은 시간 안에 끝�
 
 > Quantization을 마지막에 시도
 
-```text
-deploy 직전 INT8 변환 → accuracy 5% drop → 다시 train
-```
-
-처음부터 INT8 target을 두고 calibration data를 모아야 합니다.
+deploy 직전에 INT8로 변환하면 accuracy가 5% 떨어지고, 결국 다시 학습해야 합니다. 처음부터 INT8 target을 두고 calibration data를 모아야 합니다.
 
 ## 정리
 

@@ -24,12 +24,10 @@ bpftrace는 awk와 비슷한 DSL로 eBPF를 손쉽게 작성하는 도구이며,
 
 eBPF 프로그램은 64-bit register 10개의 가상 머신에서 실행됩니다. 커널이 bytecode를 로드할 때 verifier가 다음을 검사합니다.
 
-```text
 - 모든 분기가 유한 시간 안에 종료되는가
 - 모든 메모리 접근이 유효한 범위 안인가
 - Loop은 bounded인가 (5.3+ bounded loop 허용)
 - 사용 가능한 helper function만 호출하는가
-```
 
 검증을 통과한 BPF는 JIT 컴파일되어 native 속도로 실행됩니다. 따라서 잘못 짠 BPF는 시스템을 죽이지 않고 로드 자체가 실패합니다.
 
@@ -128,15 +126,14 @@ flamegraph.pl < out.stacks > flame.svg
 
 ## perf vs eBPF — Overhead 비교
 
-```text
-도구                  Overhead    수집 데이터
-perf record -F 4000   3-5%        sample stack
-ftrace function       10-30%      전 함수 진입
-ftrace tracepoint     1-5%        선택 event
-bpftrace tracepoint   0.5-2%      집계된 결과
-bpftrace kprobe       1-3%        집계된 결과
-BCC profile           1-2%        sample stack
-```
+| 도구 | Overhead | 수집 데이터 |
+|------|----------|-------------|
+| `perf record -F 4000` | 3-5% | sample stack |
+| ftrace function | 10-30% | 전 함수 진입 |
+| ftrace tracepoint | 1-5% | 선택 event |
+| bpftrace tracepoint | 0.5-2% | 집계된 결과 |
+| bpftrace kprobe | 1-3% | 집계된 결과 |
+| BCC profile | 1-2% | sample stack |
 
 eBPF의 핵심 이득은 raw event를 dump하지 않고 커널 안에서 집계하는 점입니다. 100만 event를 1000 bucket histogram으로 압축하면 사용자 공간으로 가는 데이터는 수 KB로 끝납니다.
 

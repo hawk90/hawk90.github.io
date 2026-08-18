@@ -35,23 +35,12 @@ memory_order_seq_cst    /* 모든 thread가 같은 순서로 관찰 */
 
 가장 비싼 것이 `seq_cst`이며 기본값이기도 합니다. 의도적으로 약한 order를 지정해야 성능 이점을 얻습니다.
 
-## 6가지 Order의 시각화
+## 각 Order가 막는 방향
 
-```text
-relaxed:
-  A B C atomic operations — 순서 보장 0
-
-acquire:
-  [load A] | B C ...
-           ↑ 이후 access가 위로 못 감
-
-release:
-  ... B C | [store A]
-          ↑ 이전 access가 아래로 못 감
-
-seq_cst:
-  모든 atomic의 global total order 존재
-```
+- **relaxed** — atomic 연산 `A`, `B`, `C` 사이에 순서 보장이 전혀 없습니다. atomicity만 지켜집니다.
+- **acquire** — `load A` 뒤에 오는 access가 그 load보다 위로 올라가지 못합니다.
+- **release** — `store A` 앞에 있는 access가 그 store보다 아래로 내려가지 못합니다.
+- **seq_cst** — 모든 atomic 연산에 대해 global total order가 존재합니다.
 
 Acquire와 release는 한쪽 방향만 막는 half-fence입니다. 두 개가 짝을 이루어야 synchronization이 성립합니다.
 

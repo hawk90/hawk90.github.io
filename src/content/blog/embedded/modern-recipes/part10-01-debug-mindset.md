@@ -102,11 +102,7 @@ git diff HEAD@{2.days} -- src/
 
 문제를 *소리 내어* 다른 사람에게 설명하면 절반은 설명 도중에 답이 나옵니다. 들어 줄 사람이 없으면 노란 고무 오리에게 말합니다.
 
-```text
-"이 ISR이 안 들어와요. NVIC enable 했고, IRQn 번호 맞고,
-priority도 5로 줬고, GPIO interrupt mask 풀었고...
-잠깐, EXTI line mask 풀었나? 안 풀었네."
-```
+> "이 ISR이 안 들어와요. NVIC enable 했고, IRQn 번호 맞고, priority도 5로 줬고, GPIO interrupt mask 풀었고... 잠깐, EXTI line mask 풀었나? 안 풀었네."
 
 말로 옮기는 순간 머릿속 모델의 빈 칸이 드러납니다. 코드 리뷰 부탁 메시지를 길게 적다가 *보내기 전*에 스스로 답을 찾는 일이 잦은 이유도 같습니다.
 
@@ -124,10 +120,7 @@ priority도 5로 줬고, GPIO interrupt mask 풀었고...
 
 ## "어제는 됐다"의 함정
 
-```text
-가정: 어제와 오늘 같은 코드, 같은 환경
-현실: 한 가지가 다르다 — 무엇이?
-```
+"어제와 오늘이 같은 코드, 같은 환경"이라는 것은 가정일 뿐입니다. 현실에서는 반드시 한 가지가 다르고, 그 한 가지가 무엇인지 찾아내는 것이 일의 전부입니다.
 
 `git status`, `git diff`, toolchain version, board revision, 충전 케이블, 외부 sensor, OS update를 모두 확인합니다. 가장 자주 잡히는 범인은 *내가 모르게 바뀐* 것입니다.
 
@@ -135,17 +128,13 @@ priority도 5로 줬고, GPIO interrupt mask 풀었고...
 
 긴 디버깅 세션은 *기록 없이는* 진척이 없습니다.
 
-```markdown
-## 2026-05-16 SPI flash 간헐 쓰기 실패
+실제 노트는 이런 모양입니다. 2026년 5월 16일에 겪은 "SPI flash 간헐 쓰기 실패" 건을 예로 들면, 증상은 1000회 중 3~5회 erase 후 verify 불일치였고 환경은 STM32F407 + W25Q64에 SPI1을 21 MHz로 돌리던 상황이었습니다. 가설은 세 개를 세워 차례로 검증했습니다.
 
-증상: 1000회 중 3~5회 erase 후 verify 불일치.
-환경: STM32F407 + W25Q64, SPI1 @ 21 MHz.
-
-가설 A: clock 너무 빠름. → 5 MHz로 낮춤. 발생함. 기각.
-가설 B: WIP bit 안 기다림. → 추가. 발생함. 기각.
-가설 C: VCC 전압 dip. → 오실로스코프. 3.27V → 3.05V dip 관찰.
-  decoupling cap 0.1µF 추가. 1만 회 fail 없음. 해결.
-```
+| 가설 | 검증 방법 | 결과 |
+|------|-----------|------|
+| A. clock이 너무 빠르다 | 5 MHz로 낮춤 | 그래도 발생. 기각 |
+| B. WIP bit를 안 기다린다 | 대기 코드 추가 | 그래도 발생. 기각 |
+| C. VCC 전압이 dip 한다 | 오실로스코프로 관찰. 3.27V → 3.05V dip 확인 | decoupling cap 0.1µF 추가 후 1만 회 fail 없음. 해결 |
 
 다음에 같은 류 버그를 만나면 이 노트가 30분을 살려 줍니다.
 

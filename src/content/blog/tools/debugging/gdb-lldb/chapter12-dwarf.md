@@ -282,20 +282,17 @@ GDB는 `print x`에 `42`로 답합니다. 메모리 어디에도 없지만 값�
 
 ### CFI 모델
 
-각 PC 위치에서.
+각 PC 위치마다 기준점 하나를 정합니다. 그것이 CFA(Canonical Frame Address)이고, `rsp + offset`이나 `rbp + offset`, 또는 임의의 표현식으로 정의됩니다.
+
+기준점이 정해지면 각 레지스터의 복원 규칙이 CFA를 기준으로 붙습니다.
 
 ```text
-CFA (Canonical Frame Address) = rsp + offset
-또는 = rbp + offset
-또는 = 다른 표현식
-
-각 레지스터:
-  rsp = CFA
-  rip = *(CFA - 8)   ; return address
-  rbp = *(CFA - 16)  ; saved by prologue
-  rbx = *(CFA - 24)
-  r12 = *(CFA - 32)
-  ...
+rsp = CFA
+rip = *(CFA - 8)   ; return address
+rbp = *(CFA - 16)  ; saved by prologue
+rbx = *(CFA - 24)
+r12 = *(CFA - 32)
+...
 ```
 
 이 정보가 PC 변화에 따라 바뀝니다(프롤로그 진행 중 rsp가 변하면 CFA 계산식도 변함). CFI는 *바이트코드*로 PC별 차이를 표현합니다 — `DW_CFA_advance_loc`, `DW_CFA_def_cfa`, `DW_CFA_offset` 등.

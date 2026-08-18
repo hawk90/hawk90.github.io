@@ -22,14 +22,11 @@ ARM IP를 가져다 쓰는 SoC라면 PCIe 영역을 제외한 거의 모든 내�
 
 세 변종을 한 줄로 정리합니다.
 
-```text
-AXI4 (full)    address + 5 channel, burst 1-256, OoO, outstanding
-               메모리·DMA 같은 대용량 transfer
-AXI4-Lite      address + 5 channel, single-beat only, no burst/ID
-               control register (HLS s_axilite)
-AXI-Stream     address 없음, valid/ready/last/keep/user
-               video·audio·sensor·DMA의 data plane
-```
+| 변종 | 구조 | 주 용도 |
+|------|------|---------|
+| AXI4 (full) | address + 5 channel, burst 1-256, OoO, outstanding | 메모리·DMA 같은 대용량 transfer |
+| AXI4-Lite | address + 5 channel, single-beat only, burst·ID 없음 | control register (HLS `s_axilite`) |
+| AXI-Stream | address 없음, valid/ready/last/keep/user | video·audio·sensor·DMA의 data plane |
 
 AXI4 full의 5 channel은 모두 *VALID·READY handshake*로 움직입니다.
 
@@ -99,11 +96,10 @@ AXI4 burst는 최대 256 beat입니다. 64-bit data bus라면 한 transaction에
 
 ### 4 KB boundary 회피
 
-```text
-AXI burst rule:
-- 한 burst는 4 KB boundary를 넘으면 안 된다
-- DMA controller가 자동 split, 손수 master는 직접 split
-```
+AXI burst에는 지켜야 할 규칙이 있습니다.
+
+- 한 burst는 4 KB boundary를 넘으면 안 됩니다.
+- DMA controller는 이 split을 자동으로 처리하지만, 손수 만든 master는 직접 split해야 합니다.
 
 ```c
 /* Pseudo — 4 KB 안에 맞춰 split */
@@ -149,13 +145,14 @@ void parser(hls::stream<pkt_t> &in, hls::stream<pkt_t> &out) {
 
 ### Outstanding transactions
 
-```text
-Master가 응답 받기 전 새 요청 발사 가능
+Master는 앞선 요청의 응답을 받기 전에 다음 요청을 발사할 수 있습니다.
 
+```text
 Time:   AR0  AR1  AR2  AR3
                        R0   R1   R2   R3
-Outstanding 4 = 동시 미응답 4개
 ```
+
+이때 outstanding 4는 응답을 아직 받지 못한 요청이 동시에 4개 떠 있다는 뜻입니다.
 
 ```cpp
 #pragma HLS INTERFACE m_axi port=buf max_read_outstanding=16 \
@@ -166,13 +163,7 @@ DDR controller는 latency가 보통 100-200 ns입니다. Outstanding 1이면 매
 
 ### AXI ID 분리로 deadlock 회피
 
-```text
-Same ID에 다른 slave:
-  AR(id=0) → slave A (빠름)
-  AR(id=0) → slave B (느림)
-  → slave B 응답이 늦으면 같은 ID FIFO 순서 때문에 A 응답도 대기
-  → deadlock 가능
-```
+같은 ID로 서로 다른 slave를 때리면 문제가 생깁니다. `AR(id=0)`을 빠른 slave A에 보내고 같은 `AR(id=0)`을 느린 slave B에 또 보내면, B의 응답이 늦을 때 같은 ID FIFO의 순서 보장 때문에 A의 응답까지 함께 묶여 대기합니다. 이 상태가 길어지면 deadlock으로도 갑니다.
 
 Master는 slave별로 ID를 다르게 발사합니다.
 
@@ -279,11 +270,7 @@ DMA가 packet 끝을 못 잡아 transfer가 계속 대기 상태로 남습니다
 
 > Cache coherent 영역에 ACP 대신 HP
 
-```text
-CPU가 share하는 영역인데 HP로 접근하면 cache flush가 매번 필요
-```
-
-CPU와 가속기가 같은 buffer를 자주 주고받으면 ACP·HPC를 씁니다. 매번 cache 관리하는 비용보다 hardware coherency가 훨씬 쌉니다.
+CPU와 공유하는 영역인데 HP 포트로 접근하면 접근할 때마다 cache flush를 해야 합니다. CPU와 가속기가 같은 buffer를 자주 주고받으면 ACP·HPC를 씁니다. 매번 cache 관리하는 비용보다 hardware coherency가 훨씬 쌉니다.
 
 ## 정리
 

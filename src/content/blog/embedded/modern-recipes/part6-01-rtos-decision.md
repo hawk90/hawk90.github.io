@@ -22,12 +22,12 @@ topics: ["embedded"]
 
 판단 기준은 동시에 살아있는 마감의 수입니다.
 
-```text
-마감 1개          → super-loop + ISR
-마감 2~3개 + 주기 ms 단위 → super-loop + state machine
-마감 4개 이상 + jitter 요구 → RTOS
-HW 차원의 동시성 (BLE, USB stack) → RTOS 또는 bare-metal stack
-```
+| 조건 | 권장 구조 |
+|------|-----------|
+| 마감 1개 | super-loop + ISR |
+| 마감 2~3개 + 주기 ms 단위 | super-loop + state machine |
+| 마감 4개 이상 + jitter 요구 | RTOS |
+| HW 차원의 동시성 (BLE, USB stack) | RTOS 또는 bare-metal stack |
 
 RTOS가 주는 것은 time-slicing이 아니라 blocking primitive입니다. `wait_for_event(timeout)`을 한 줄로 쓰는 능력이 본질이고, 그 대가로 stack 메모리와 context-switch 시간을 지불합니다.
 

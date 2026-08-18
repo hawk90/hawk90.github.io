@@ -241,21 +241,11 @@ Tj 한계 대비 15~20°C margin을 두고 enclosure·workload를 설계합니�
 
 > Enclosure ventilation 부족
 
-```text
-완전 밀폐 IP67 box → 내부 ambient SoC + 20°C
-→ heatsink 무용지물
-```
-
-IP rating이 필요하면 *conduction*으로 외부 panel에 열을 전달하는 설계가 필요합니다. 위성·자동차 ECU의 표준 방식입니다.
+완전 밀폐된 IP67 box는 내부 ambient가 20°C쯤 더 올라가고, SoC는 그만큼 높아진 온도 위에서 동작합니다. 이 상태에서는 heatsink를 달아도 무용지물입니다. IP rating이 필요하면 *conduction*으로 외부 panel에 열을 전달하는 설계가 필요합니다. 위성·자동차 ECU의 표준 방식입니다.
 
 > Workload가 transient burst만 큼
 
-```text
-30 fps × 1 batch → 매 frame burst → 평균 80°C
-1 fps × 30 batch → 같은 일이지만 burst가 더 큼 → throttle
-```
-
-Batch 크기와 분배를 조절해 *순간 power spike*를 줄입니다.
+30 fps에 batch 1이면 매 frame마다 짧은 burst가 반복되어 평균 80°C 정도에 머뭅니다. 반대로 1 fps에 batch 30이면 총 연산량은 같지만 한 번의 burst가 훨씬 커져 throttle에 걸립니다. Batch 크기와 분배를 조절해 *순간 power spike*를 줄입니다.
 
 ## 정리
 

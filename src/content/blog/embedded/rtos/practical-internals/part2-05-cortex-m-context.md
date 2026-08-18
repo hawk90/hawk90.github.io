@@ -60,18 +60,12 @@ ISR이 진입할 때 SP는 *자동으로 MSP로 전환*되고, 예외 return 때
 
 전환 흐름은 이렇습니다.
 
-```text
-Reset    → MSP 사용 → main()
-              ↓
-RTOS init  → 첫 task 시작을 위해 SVC trigger
-              ↓
-SVC handler → PSP 설정 + CONTROL.SPSEL = 1
-              ↓
-Exception return → PSP로 task code 진입
+1. **Reset** — MSP를 쓰면서 `main()`으로 들어갑니다.
+2. **RTOS init** — 첫 task를 시작하려고 SVC를 trigger합니다.
+3. **SVC handler** — PSP를 설정하고 `CONTROL.SPSEL`을 1로 만듭니다.
+4. **Exception return** — PSP로 task 코드에 진입합니다.
 
-이후 ISR 진입 → 자동으로 MSP로 전환
-이후 ISR 종료 → 원래 (PSP)로 복귀
-```
+이후로는 ISR이 진입할 때마다 자동으로 MSP로 전환되고, ISR이 끝나면 원래의 PSP로 복귀합니다.
 
 CONTROL register의 *bit 1 (SPSEL)* 이 0이면 MSP, 1이면 PSP입니다.
 

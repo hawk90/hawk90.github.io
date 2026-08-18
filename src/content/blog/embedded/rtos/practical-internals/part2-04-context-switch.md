@@ -73,15 +73,13 @@ SP (낮은 주소)
 
 context switch 한 번이 진행되는 순서를 풀어보면 이렇게 됩니다.
 
-```text
-1. HW 예외 진입  → R0-R3, R12, LR, PC, xPSR 자동 push (current task SP에)
-2. SW 핸들러    → R4-R11 push, 새 SP 값 확보
-3. TCB 갱신    → 현재 task의 pxTopOfStack = 새 SP
-4. 스케줄러 호출 → pxCurrentTCB를 다음 task로 교체
-5. 새 SP 로드   → 다음 task의 pxTopOfStack
-6. SW 핸들러    → R4-R11 pop
-7. HW 예외 종료 → R0-R3, R12, LR, PC, xPSR 자동 pop, PC가 새 task의 코드로
-```
+1. **HW 예외 진입** — R0-R3, R12, LR, PC, xPSR을 current task SP에 자동 push합니다.
+2. **SW 핸들러** — R4-R11을 push하고 새 SP 값을 확보합니다.
+3. **TCB 갱신** — 현재 task의 `pxTopOfStack`에 새 SP를 씁니다.
+4. **스케줄러 호출** — `pxCurrentTCB`를 다음 task로 교체합니다.
+5. **새 SP 로드** — 다음 task의 `pxTopOfStack`을 가져옵니다.
+6. **SW 핸들러** — R4-R11을 pop합니다.
+7. **HW 예외 종료** — R0-R3, R12, LR, PC, xPSR이 자동 pop되고 PC가 새 task의 코드로 넘어갑니다.
 
 3번에서 6번이 *스택을 갈아끼우는* 한순간입니다. 그 외에는 전부 push/pop의 대칭입니다.
 

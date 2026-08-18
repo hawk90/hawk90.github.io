@@ -91,18 +91,15 @@ L1 miss rate 90%. 거의 모든 load가 캐시를 빗나가고 있었습니다. 
 
 문제를 정리해 봅니다. C는 row-major 저장입니다. `B[k * N + j]`에서 inner loop가 k에 대해 도는데, k가 1 증가하면 주소는 한 행을 통째로 건너뜁니다.
 
+1024×1024 크기의 `B` 행렬은 row-major이므로 메모리에 이렇게 놓입니다.
+
 ```text
-B 행렬 (row-major, 1024×1024):
-
-  B[0][j], B[0][j+1], ... (64 byte 한 line)
-  B[1][j], B[1][j+1], ...
-  B[2][j], B[2][j+1], ...
-
-inner loop가 k에 대해 돌면서 B[k][j]를 읽으면
-→ 한 cache line에서 B[k][j] 1 element만 사용
-→ 다음 k에서 또 다른 line fetch
-→ cache hit 거의 0
+B[0][j], B[0][j+1], ...   (64 byte 한 line)
+B[1][j], B[1][j+1], ...
+B[2][j], B[2][j+1], ...
 ```
+
+inner loop가 k에 대해 돌면서 `B[k][j]`를 읽으면, 한 cache line에서 element 하나만 쓰고 다음 k에서 또 다른 line을 fetch합니다. 이렇게 되면 cache hit이 거의 0에 수렴합니다.
 
 게다가 L1D가 32 KB인데 B 한 column을 읽으려면 1024 line × 64 byte = 64 KB가 필요합니다. L1에 들어가지도 않습니다. L2(1 MB)에도 A와 B 두 행렬의 일부만 들어갑니다.
 

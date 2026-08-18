@@ -108,11 +108,9 @@ MEMORY
     APP_B (rx) : ORIGIN = 0x08084000, LENGTH = 496K
     SRAM  (rwx): ORIGIN = 0x20000000, LENGTH = 128K
 }
-
-/* 같은 binary가 A 또는 B에 들어가도록 -DSLOT=A 매크로로 빌드 */
 ```
 
-빌드 시 어느 slot에 들어갈지 옵션으로 결정합니다.
+같은 binary가 A에도 B에도 들어가도록 `-DSLOT=A` 같은 매크로를 주고 빌드합니다. 빌드 시 어느 slot에 들어갈지 옵션으로 결정하는 방식입니다.
 
 ### 5) Overlay
 

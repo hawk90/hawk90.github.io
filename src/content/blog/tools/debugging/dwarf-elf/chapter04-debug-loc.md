@@ -205,10 +205,10 @@ DW_AT_location = DW_OP_entry_value <block: DW_OP_reg0> DW_OP_stack_value
 
 ```text
 (gdb) print arg
-$1 = 42         ← 본문에선 r0이 사라졌어도 entry value로 복원
+$1 = 42
 ```
 
-GCC 8+ / Clang 11+가 광범위 사용. `<optimized out>` 발생률이 크게 줄어듭니다.
+본문에서 r0이 이미 사라졌어도 entry value로 원래 인자값이 복원됩니다. GCC 8+ / Clang 11+가 광범위 사용. `<optimized out>` 발생률이 크게 줄어듭니다.
 
 ## DW_OP_implicit_pointer — 포인터가 사라짐
 

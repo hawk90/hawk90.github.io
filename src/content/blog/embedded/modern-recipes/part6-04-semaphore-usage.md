@@ -28,10 +28,10 @@ ADC 변환이 끝났음을 task에 알리고 싶을 때, EXTI button 한 번 눌
 
 Semaphore의 두 가지 핵심 동작입니다.
 
-```text
-take    count > 0이면 count--, 아니면 block (timeout 가능)
-give    count++, wait중인 task가 있으면 가장 높은 priority를 깨움
-```
+| 동작 | 의미 |
+|------|------|
+| take | count > 0이면 count--, 아니면 block (timeout 가능) |
+| give | count++, wait중인 task가 있으면 가장 높은 priority를 깨움 |
 
 Mutex와 달리 어떤 task든 give 할 수 있고, ISR에서도 `*FromISR` 변종으로 give 할 수 있습니다. 대신 priority inheritance가 없어 long hold가 우선순위 역전을 일으킵니다.
 
