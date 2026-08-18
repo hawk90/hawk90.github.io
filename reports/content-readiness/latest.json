@@ -1,9 +1,9 @@
 {
-  "generatedAt": "2026-08-02T10:51:52.404Z",
+  "generatedAt": "2026-08-18T05:21:37.311Z",
   "summary": {
     "stalenessCandidates": 7,
     "factDensityCandidates": 102,
-    "imageCandidates": 118,
+    "imageCandidates": 119,
     "seriesWithIntegrityIssues": 0,
     "draftOnlySeries": 151
   },
@@ -1370,8 +1370,8 @@
       "priority": "P2",
       "kind": "fact-density",
       "path": "src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md",
-      "score": 45,
-      "reason": "45 concrete-claim signals; verify against primary sources before marking current."
+      "score": 44,
+      "reason": "44 concrete-claim signals; verify against primary sources before marking current."
     },
     {
       "priority": "P2",
@@ -2454,64 +2454,6 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
-      "path": "src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md",
-      "score": 5,
-      "reason": "5 abstract concepts / 10 hits with no image",
-      "keywords": [
-        [
-          "NUMA",
-          4
-        ],
-        [
-          "mailbox",
-          3
-        ],
-        [
-          "interrupt",
-          1
-        ],
-        [
-          "HBM",
-          1
-        ],
-        [
-          "stack",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
-      "path": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
-      "score": 5,
-      "reason": "5 abstract concepts / 8 hits with no image",
-      "keywords": [
-        [
-          "HBM",
-          4
-        ],
-        [
-          "transaction",
-          1
-        ],
-        [
-          "NUMA",
-          1
-        ],
-        [
-          "TPU",
-          1
-        ],
-        [
-          "mesh",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
       "path": "src/content/blog/embedded/rtos/practical-internals/part1-01-why-rtos.md",
       "score": 5,
       "reason": "5 abstract concepts / 7 hits with no image",
@@ -2541,13 +2483,42 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md",
+      "score": 5,
+      "reason": "5 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "transaction",
+          1
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "QoS",
+          1
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "mesh",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md",
       "score": 4,
-      "reason": "4 abstract concepts / 52 hits with no image",
+      "reason": "4 abstract concepts / 51 hits with no image",
       "keywords": [
         [
           "spinlock",
-          29
+          28
         ],
         [
           "mutex",
@@ -3266,6 +3237,31 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md",
+      "score": 4,
+      "reason": "4 abstract concepts / 9 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          4
+        ],
+        [
+          "mailbox",
+          3
+        ],
+        [
+          "HBM",
+          1
+        ],
+        [
+          "stack",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/embedded/modern-recipes/part9-05-cas-patterns.md",
       "score": 4,
       "reason": "4 abstract concepts / 8 hits with no image",
@@ -3359,31 +3355,6 @@
         ],
         [
           "interrupt",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
-      "path": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
-      "score": 4,
-      "reason": "4 abstract concepts / 7 hits with no image",
-      "keywords": [
-        [
-          "HBM",
-          3
-        ],
-        [
-          "lane",
-          2
-        ],
-        [
-          "transaction",
-          1
-        ],
-        [
-          "QoS",
           1
         ]
       ]
@@ -3559,31 +3530,6 @@
         ],
         [
           "TCP",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
-      "path": "src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md",
-      "score": 4,
-      "reason": "4 abstract concepts / 4 hits with no image",
-      "keywords": [
-        [
-          "transaction",
-          1
-        ],
-        [
-          "NUMA",
-          1
-        ],
-        [
-          "HBM",
-          1
-        ],
-        [
-          "mesh",
           1
         ]
       ]
@@ -3906,27 +3852,6 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
-      "path": "src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md",
-      "score": 3,
-      "reason": "3 abstract concepts / 15 hits with no image",
-      "keywords": [
-        [
-          "mailbox",
-          8
-        ],
-        [
-          "NUMA",
-          6
-        ],
-        [
-          "HBM",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
       "path": "src/content/blog/embedded/modern-recipes/part7-11-uio-vfio.md",
       "score": 3,
       "reason": "3 abstract concepts / 15 hits with no image",
@@ -3990,27 +3915,6 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
-      "path": "src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md",
-      "score": 3,
-      "reason": "3 abstract concepts / 11 hits with no image",
-      "keywords": [
-        [
-          "rcu",
-          8
-        ],
-        [
-          "stack",
-          2
-        ],
-        [
-          "epoch",
-          1
-        ]
-      ]
-    },
-    {
-      "priority": "P3",
-      "kind": "visual-aid",
       "path": "src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md",
       "score": 3,
       "reason": "3 abstract concepts / 11 hits with no image",
@@ -4046,6 +3950,48 @@
         ],
         [
           "channel",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "NUMA",
+          5
+        ],
+        [
+          "mailbox",
+          4
+        ],
+        [
+          "HBM",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 10 hits with no image",
+      "keywords": [
+        [
+          "rcu",
+          8
+        ],
+        [
+          "epoch",
+          1
+        ],
+        [
+          "stack",
           1
         ]
       ]
@@ -4263,6 +4209,27 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter14-security.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 7 hits with no image",
+      "keywords": [
+        [
+          "channel",
+          5
+        ],
+        [
+          "mailbox",
+          1
+        ],
+        [
+          "interposer",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/programming/code-review/folly/part9-05-pico-spin-lock.md",
       "score": 3,
       "reason": "3 abstract concepts / 7 hits with no image",
@@ -4347,6 +4314,27 @@
     {
       "priority": "P3",
       "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 6 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          4
+        ],
+        [
+          "NUMA",
+          1
+        ],
+        [
+          "TPU",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
       "path": "src/content/blog/embedded/performance-engineering/part3-03-dma-performance.md",
       "score": 3,
       "reason": "3 abstract concepts / 5 hits with no image",
@@ -4424,6 +4412,27 @@
         ],
         [
           "scheduler",
+          1
+        ]
+      ]
+    },
+    {
+      "priority": "P3",
+      "kind": "visual-aid",
+      "path": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
+      "score": 3,
+      "reason": "3 abstract concepts / 5 hits with no image",
+      "keywords": [
+        [
+          "HBM",
+          3
+        ],
+        [
+          "transaction",
+          1
+        ],
+        [
+          "lane",
           1
         ]
       ]

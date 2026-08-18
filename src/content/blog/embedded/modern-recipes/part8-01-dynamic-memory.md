@@ -20,18 +20,18 @@ topics: ["embedded"]
 
 ## 핵심 개념
 
-```text
-malloc 문제
-- 비결정성     free list scan, coalesce, fragmentation 처리
-- fragmentation 사용 가능 메모리가 작은 hole로 흩어짐
-- 실패 처리    NULL 반환을 모든 호출자가 처리해야 함
+malloc이 만드는 문제는 세 가지입니다.
 
-대안
-- static       모든 자원을 컴파일 시 결정 — 0 byte heap
-- pool         같은 크기 N개 — fragmentation 0
-- arena        한 lifetime에 묶인 군집 — 한 번에 reset
-- slab         OS 커널식 — 같은 size 캐싱
-```
+- **비결정성** — free list scan, coalesce, fragmentation 처리에 시간이 걸립니다.
+- **fragmentation** — 사용 가능 메모리가 작은 hole로 흩어집니다.
+- **실패 처리** — NULL 반환을 모든 호출자가 처리해야 합니다.
+
+대안은 네 가지입니다.
+
+- **static** — 모든 자원을 컴파일 시 결정하므로 heap이 0 byte입니다.
+- **pool** — 같은 크기 N개만 다루므로 fragmentation이 0입니다.
+- **arena** — 한 lifetime에 묶인 군집을 한 번에 reset합니다.
+- **slab** — OS 커널식으로 같은 size를 캐싱합니다.
 
 각 대안의 적합한 상황입니다.
 

@@ -45,12 +45,10 @@ void critical_section(void) {
 
 이 방법의 강점은 다음과 같습니다.
 
-```text
-- 측정 overhead 1-2 cycle (예: 168 MHz에서 12 ns)
-- 코어와 완전 독립적으로 측정 (오실로스코프가 별도 장비)
-- 인터럽트와 메인 코드의 간섭을 외부에서 관찰
-- 100 MHz 로직 분석기면 10 ns resolution
-```
+- 측정 overhead가 1-2 cycle입니다 (168 MHz에서 12 ns).
+- 코어와 완전히 독립적으로 측정합니다 (오실로스코프가 별도 장비).
+- 인터럽트와 메인 코드의 간섭을 외부에서 관찰할 수 있습니다.
+- 100 MHz 로직 분석기면 10 ns resolution을 얻습니다.
 
 여러 GPIO를 동시에 사용하면 인터럽트 진입과 main task 실행을 같은 timeline에 겹쳐 볼 수 있습니다.
 
@@ -196,16 +194,15 @@ void EXTI0_IRQHandler(void) {
 
 ## 측정 — 정확도 비교
 
-```text
-방법             Overhead    Resolution   범위
-GPIO + scope      1-2 cycle   10 ns        무제한
-DWT CYCCNT        1-2 cycle   1 cycle      25초 (168 MHz)
-SysTick           1-2 cycle   1 cycle      233 ms (72 MHz)
-ITM printf        ~100 ns     단방향       유사 무제한
-SystemView RTT    ~0.5 us     1 us         buffer 의존
-SWO trace         ~10 ns      cycle        수신 대역폭 의존
-ETM (외부 probe)   0           cycle        buffer 의존
-```
+| 방법 | Overhead | Resolution | 범위 |
+|------|----------|------------|------|
+| GPIO + scope | 1-2 cycle | 10 ns | 무제한 |
+| DWT CYCCNT | 1-2 cycle | 1 cycle | 25초 (168 MHz) |
+| SysTick | 1-2 cycle | 1 cycle | 233 ms (72 MHz) |
+| ITM printf | ~100 ns | 단방향 | 유사 무제한 |
+| SystemView RTT | ~0.5 us | 1 us | buffer 의존 |
+| SWO trace | ~10 ns | cycle | 수신 대역폭 의존 |
+| ETM (외부 probe) | 0 | cycle | buffer 의존 |
 
 가장 가벼우면서 정확한 조합은 GPIO toggle과 DWT cycle counter입니다. 두 가지를 같이 사용하면 인터럽트 latency와 함수 실행 시간을 동시에 측정할 수 있습니다.
 
@@ -232,9 +229,7 @@ for (int i = 0; i < 100; i++)
 
 > ⚠️ ITM과 SWO의 baud rate mismatch
 
-```text
-ST-Link Configuration에서 SWO 속도가 코어 클럭과 정수배로 나뉘어야 함
-```
+ST-Link Configuration에서 SWO 속도는 코어 클럭과 정수배로 나뉘어야 합니다.
 
 mismatch 시 character가 깨져 출력됩니다. 디버거의 SWO speed 설정과 시스템 클럭을 맞춰야 합니다.
 

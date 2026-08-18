@@ -1,4 +1,5 @@
 ---
+import { getPostUrl } from '../../lib/utils';
 import type { CollectionEntry } from 'astro:content';
 import { getPostMeta } from '../../lib/posts';
 import { BLOG_CONFIG } from '../../consts/config';
@@ -22,7 +23,7 @@ const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail 
 ---
 
 <article class="card card-feed group overflow-hidden">
-  <a href={`/blog/${post.id}`} class="block">
+  <a href={getPostUrl(post)} class="block">
     {showImage && (
       <div class="relative aspect-[16/9] -mx-5 -mt-5 mb-5 overflow-hidden bg-[var(--color-bg-tertiary)]">
         <img
@@ -46,9 +47,17 @@ const { formattedDate, formattedUpdatedDate, readingTime, wasUpdated, thumbnail 
         {post.data.series}
       </div>
     )}
+    {/*
+      No `transition:name` here. Astro emits ~2.6 KB of scoped CSS per named
+      transition, and a card grid pays that per card: 464 cards on
+      /blog/embedded came to 1.2 MB, 58% of the page, so that one title out of
+      464 could fade with continuity into the article heading. The page-level
+      transition from ClientRouter is untouched and is what a reader actually
+      perceives; the article heading keeps its own name and still animates on
+      entry.
+    */}
     <Heading
       class="text-lg font-semibold mb-2 group-hover:text-[var(--color-accent)] transition-colors line-clamp-2"
-      transition:name={`title-${post.id}`}
     >
       {post.data.title}
     </Heading>

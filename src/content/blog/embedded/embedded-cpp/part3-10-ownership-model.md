@@ -96,19 +96,13 @@ C++에서 borrowing은 다음과 같이 표현합니다.
 
 ## 결정 — 어느 모델
 
-```text
-이 함수/객체가 ...
+지금 다루는 함수나 객체를 놓고 위에서부터 차례로 답합니다.
 
-1. 이 객체를 소유해야 하나?
-   YES → unique_ptr (단일) 또는 shared_ptr (공유, 드물게)
-
-2. 객체 lifetime이 외부에서 관리되나?
-   YES → 매개변수: const T& 또는 T*
-        멤버: T*
-
-3. 함수 호출 동안만 필요하나?
-   YES → 매개변수 (const T&, T*, std::span, std::string_view)
-```
+| 질문 | YES일 때 |
+| --- | --- |
+| 1. 이 객체를 소유해야 하는가? | `unique_ptr` (단일) 또는 `shared_ptr` (공유, 드물게) |
+| 2. 객체 lifetime을 외부에서 관리하는가? | 매개변수는 `const T&` 또는 `T*`, 멤버는 `T*` |
+| 3. 함수 호출 동안만 필요한가? | 매개변수 (`const T&`, `T*`, `std::span`, `std::string_view`) |
 
 ## 임베디드 패턴 — Device class
 

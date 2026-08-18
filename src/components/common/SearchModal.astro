@@ -175,6 +175,7 @@ const filterSeriesLabel = t('search_filter_series');
   import { searchPosts, type SearchItem } from '../../lib/search';
   import { isInputElement } from '../../lib/keyboard';
   import { onPageLoad } from '../../lib/lifecycle';
+  import { getPostUrl } from '../../lib/utils';
 
   let searchIndex: SearchItem[] = [];
   let isLoaded = false;
@@ -433,7 +434,7 @@ const filterSeriesLabel = t('search_filter_series');
 
     function createResultItem(item: SearchItem, index: number, query: string, showContext: boolean): HTMLAnchorElement {
       const link = document.createElement('a');
-      link.href = `/blog/${encodeURI(item.slug)}`;
+      link.href = getPostUrl(encodeURI(item.slug));
       link.id = `search-opt-${index}`;
       link.setAttribute('role', 'option');
       link.setAttribute('aria-selected', 'false');

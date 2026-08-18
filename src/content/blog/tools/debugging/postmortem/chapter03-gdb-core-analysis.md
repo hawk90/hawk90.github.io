@@ -133,15 +133,15 @@ $1 = {si_signo = 11, si_errno = 0, si_code = 1,
 
 ### 정확한 진단
 
-```text
-SIGSEGV + si_code=1 (MAPERR) + si_addr=0x0  → NULL 역참조
-SIGSEGV + si_code=1 + si_addr=high address  → 손상된 포인터
-SIGSEGV + si_code=2 (ACCERR)                → 권한 (RO에 쓰기)
-SIGBUS  + si_code=1 (ADRALN)                → unaligned access (ARM에서 흔함)
-SIGFPE  + si_code=1 (INTDIV)                → 정수 / 0
-SIGABRT                                     → assert(), abort(), 또는 Sanitizer
-SIGILL  + si_code=1                         → 손상된 함수 포인터 또는 코드
-```
+| 시그널 조합 | 진단 |
+|-------------|------|
+| `SIGSEGV` + `si_code=1` (MAPERR) + `si_addr=0x0` | NULL 역참조 |
+| `SIGSEGV` + `si_code=1` + `si_addr` = high address | 손상된 포인터 |
+| `SIGSEGV` + `si_code=2` (ACCERR) | 권한 (RO에 쓰기) |
+| `SIGBUS` + `si_code=1` (ADRALN) | unaligned access (ARM에서 흔함) |
+| `SIGFPE` + `si_code=1` (INTDIV) | 정수 / 0 |
+| `SIGABRT` | `assert()`, `abort()`, 또는 Sanitizer |
+| `SIGILL` + `si_code=1` | 손상된 함수 포인터 또는 코드 |
 
 `si_addr`이 *프로그램 주소*면 *그 메모리에 무엇이 있나* 확인.
 

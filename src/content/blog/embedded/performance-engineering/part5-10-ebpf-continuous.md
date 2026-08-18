@@ -22,25 +22,22 @@ eBPF의 등장으로 이 방식이 실용적이 되었습니다. 이 글에서�
 
 ## Continuous Profiling이란
 
-```text
-일회성 profiling          continuous profiling
-----------------          ---------------------
-perf record 30s           1% overhead, 24/7 sampling
-local file                중앙 저장소(시계열)
-재현 어려움                과거 시점 조회
-한 instance               fleet 전체 aggregate
-flamegraph 1장             시간 슬라이드 + diff
-```
+| 항목 | 일회성 profiling | Continuous profiling |
+|------|------------------|----------------------|
+| 수집 방식 | `perf record` 30s | 1% overhead, 24/7 sampling |
+| 저장 위치 | local file | 중앙 저장소(시계열) |
+| 재현 | 재현 어려움 | 과거 시점 조회 |
+| 범위 | 한 instance | fleet 전체 aggregate |
+| 결과물 | flamegraph 1장 | 시간 슬라이드 + diff |
 
 eBPF의 BPF profile sampler가 stack을 hash map에 집계하므로 raw event를 dump하지 않습니다. 그 결과 overhead가 매우 낮습니다.
 
-```text
-도구                  Overhead    수집 방식
-perf record           3-5%        sample → file
-BCC profile           1-2%        sample → console
-Parca agent           <1%         sample → server (시계열)
-Pyroscope agent       <1%         sample → server (시계열)
-```
+| 도구 | Overhead | 수집 방식 |
+|------|----------|-----------|
+| `perf record` | 3-5% | sample → file |
+| BCC profile | 1-2% | sample → console |
+| Parca agent | `<1%` | sample → server (시계열) |
+| Pyroscope agent | `<1%` | sample → server (시계열) |
 
 ## Parca — CNCF eBPF 기반
 
@@ -200,19 +197,19 @@ Parca agent는 ARM aarch64 binary가 제공되며 Linux를 실행하는 임베�
 
 ## Privacy와 보안 고려
 
-```text
-Stack trace에 포함될 수 있는 정보
-├── 함수 이름 (대체로 안전)
-├── source file path (드물게 회사 정보 노출)
-├── inline된 상수 (key, password 위험)
-└── 사용자 데이터 (drop)
+Stack trace에는 다음 정보가 포함될 수 있습니다.
 
-권장
-- profile 데이터를 외부로 보내기 전 inline 상수 scrubbing
-- internal network에만 전송
-- TLS 필수, 인증 토큰 필수
-- 보존 기간 정책 (기본 30일 권장)
-```
+- **함수 이름** — 대체로 안전합니다.
+- **source file path** — 드물게 회사 정보가 노출됩니다.
+- **inline된 상수** — key나 password가 새어 나갈 위험이 있습니다.
+- **사용자 데이터** — 수집 단계에서 drop해야 합니다.
+
+그래서 다음을 권장합니다.
+
+- profile 데이터를 외부로 보내기 전에 inline 상수를 scrubbing합니다.
+- internal network에만 전송합니다.
+- TLS와 인증 토큰을 필수로 둡니다.
+- 보존 기간 정책을 정합니다 (기본 30일 권장).
 
 eBPF로 사용자 메모리에 접근 가능하므로 SOC 2, ISO 27001 같은 인증 환경에서는 agent 권한과 데이터 흐름을 명시적으로 문서화해야 합니다.
 
@@ -220,10 +217,7 @@ eBPF로 사용자 메모리에 접근 가능하므로 SOC 2, ISO 27001 같은 �
 
 > ⚠️ Frame pointer 없는 binary에 continuous profiler 적용
 
-```text
-JVM, glibc, libssl 등이 frame pointer 없이 빌드됨
-→ stack이 5단계 이상 깨져 flamegraph가 무의미
-```
+JVM, glibc, libssl 등이 frame pointer 없이 빌드되면 stack이 5단계 이상 깨져 flamegraph가 무의미해집니다.
 
 Ubuntu 24.04 또는 frame pointer 빌드된 distro를 사용하거나, sFrame을 지원하는 toolchain으로 빌드합니다.
 
@@ -246,9 +240,7 @@ Stack frame에 api_key가 inline되면 profile에 노출됩니다. Secret은 환
 
 > ⚠️ Per-process tagging 누락
 
-```text
-모든 process가 같은 label로 들어옴 → 어느 service인지 구분 불가
-```
+모든 process가 같은 label로 들어와 어느 service의 profile인지 구분할 수 없게 됩니다.
 
 Pyroscope의 `application_name`, Parca의 `service.name` label을 명시적으로 설정합니다.
 

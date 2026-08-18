@@ -108,16 +108,10 @@ void *p = dma_alloc_coherent(dev, 16 * 1024 * 1024, &handle, GFP_KERNEL);
 
 ### IOMMU/SMMU
 
-```text
-IOMMU 없음
-  DMA address = physical address
-  device가 임의 physical memory 접근 가능 (보안 약함)
-
-IOMMU 있음 (ARM SMMU)
-  DMA address = IOVA
-  SMMU page table이 허용된 영역만 translate
-  container/VM 격리 가능
-```
+| 구성 | DMA address | 특성 |
+|------|-------------|------|
+| IOMMU 없음 | physical address | device가 임의 physical memory에 접근할 수 있어 보안이 약합니다 |
+| IOMMU 있음 (ARM SMMU) | IOVA | SMMU page table이 허용된 영역만 translate하고, container/VM 격리가 가능합니다 |
 
 ```c
 dma_addr_t iova = dma_map_single(dev, kbuf, len, DMA_TO_DEVICE);

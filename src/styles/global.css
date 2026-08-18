@@ -893,6 +893,17 @@ html.reading-mode .prose h2 { margin-top: 2.5em; }
   box-shadow: var(--shadow-sm);
 }
 
+/* ─── Directory row (PostRow) ────────────────────────────── */
+/* Shared by the series page and the category index. Lived in the series
+   page's scoped <style> until the category index started using the same
+   component, at which point a scoped rule would style one page and not the
+   other. */
+.series-item {
+  transform: translateX(0);
+  transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
+}
+.series-item:hover { transform: translateX(2px); }
+
 /* ─── Author bio card hover ─────────────────────────────── */
 .author-bio { transition: border-color 0.2s var(--ease-out); }
 .author-bio:hover { border-color: var(--color-border-hover); }

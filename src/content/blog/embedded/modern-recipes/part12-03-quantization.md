@@ -34,17 +34,10 @@ Symmetric은 `z = 0`으로 두고 `[-128, 127]` 범위를 씁니다. 곱셈에 z
 
 적용 시점은 두 가지입니다.
 
-```text
-PTQ (Post-Training Quantization)
-  학습 끝난 모델에 calibration data 100~1000장 흘려 scale 결정
-  장점 빠름, 재학습 불필요
-  단점 accuracy 손실 1~5%
-
-QAT (Quantization-Aware Training)
-  학습 중 fake-quant node 삽입, gradient는 float·forward는 quantized
-  장점 accuracy FP32에 근접
-  단점 재학습 필요 (epoch 수 ~ 5)
-```
+| 방식 | 동작 | 장점 | 단점 |
+|------|------|------|------|
+| PTQ (Post-Training Quantization) | 학습이 끝난 모델에 calibration data 100~1000장을 흘려 scale을 결정합니다 | 빠르고 재학습이 필요 없습니다 | accuracy 손실이 1~5% |
+| QAT (Quantization-Aware Training) | 학습 중 fake-quant node를 삽입해 gradient는 float로, forward는 quantized로 돌립니다 | accuracy가 FP32에 근접합니다 | 재학습이 필요합니다 (epoch 5 내외) |
 
 세 번째 축은 *granularity*입니다.
 
@@ -238,29 +231,15 @@ representative_dataset = [single_image]   # 1장
 
 > Calibration data가 deploy와 다름
 
-```text
-실내 calibration → 야외 deploy → 5% accuracy 손실
-```
-
-Day/night, indoor/outdoor, multiple devices에서 골고루 sampling합니다.
+실내에서 모은 데이터로 calibration한 모델을 야외에 deploy하면 accuracy가 5% 가까이 떨어집니다. Day/night, indoor/outdoor, multiple devices에서 골고루 sampling합니다.
 
 > First/last layer까지 INT8
 
-```text
-입력 normalize layer 또는 출력 logit layer를 INT8화
-→ accuracy 크게 손해
-```
-
-Mixed precision으로 입출력 layer를 FP16에 두면 회복됩니다.
+입력 normalize layer나 출력 logit layer까지 INT8로 바꾸면 accuracy가 크게 손해를 봅니다. Mixed precision으로 입출력 layer를 FP16에 두면 회복됩니다.
 
 > Batch norm fusion 누락
 
-```text
-Conv → BN → ReLU 분리된 채 quantize
-→ BN folding 안 되어 scale 추정 부정확
-```
-
-Quantize 전에 *BN folding*을 먼저 수행합니다. 대부분 toolchain이 자동으로 처리하지만 custom path에서는 직접 확인이 필요합니다.
+`Conv → BN → ReLU`가 분리된 채로 quantize되면 BN folding이 일어나지 않아 scale 추정이 부정확해집니다. Quantize 전에 *BN folding*을 먼저 수행합니다. 대부분 toolchain이 자동으로 처리하지만 custom path에서는 직접 확인이 필요합니다.
 
 > LLM activation outlier 무시
 

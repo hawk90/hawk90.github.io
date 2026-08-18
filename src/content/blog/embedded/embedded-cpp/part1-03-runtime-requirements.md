@@ -127,30 +127,20 @@ C++ 표준 라이브러리입니다. 대부분의 bloat가 여기서 나옵니�
 
 임베디드 C++ 프로그램의 부트 흐름은 다음과 같습니다.
 
-```text
-Reset Vector
-    ↓
-Reset_Handler (어셈블리 or C)
-    ↓
-1. .data 섹션 복사 (Flash → RAM)
-2. .bss 섹션 0으로 초기화
-3. (선택) FPU 활성화, MMU 설정
-    ↓
-__libc_init_array  ← C++ 진입 직전 핵심
-    ↓
-    .preinit_array 호출
-    _init() 호출 (legacy GNU)
-    .init_array 호출  ← static C++ 객체의 생성자
-    ↓
-main()
-    ↓
-(main이 return하면)
-__libc_fini_array
-    .fini_array 호출  ← static 객체 소멸자
-    _fini()
-    ↓
-exit()
-```
+1. **Reset Vector** — 리셋 직후 진입 지점입니다.
+2. **`Reset_Handler`** (어셈블리 또는 C)
+   - `.data` 섹션 복사 (Flash → RAM)
+   - `.bss` 섹션 0으로 초기화
+   - (선택) FPU 활성화, MMU 설정
+3. **`__libc_init_array`** — C++ 진입 직전의 핵심입니다.
+   - `.preinit_array` 호출
+   - `_init()` 호출 (legacy GNU)
+   - `.init_array` 호출 — static C++ 객체의 생성자가 여기서 돕니다
+4. **`main()`**
+5. **`__libc_fini_array`** — `main`이 return하면 실행됩니다.
+   - `.fini_array` 호출 — static 객체 소멸자
+   - `_fini()` 호출
+6. **`exit()`**
 
 핵심은 `__libc_init_array`가 static C++ 객체 생성자를 호출한다는 점입니다. 이 시점 이전에는 C++ 객체를 만들 수 없습니다.
 

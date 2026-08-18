@@ -1729,13 +1729,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "implementation",
-      "reviewQuestion": "CHANGELOG records README, LICENSE, and CHANGELOG as written for marketplace listings, but the repository now operates as a personal blog with 100 package scripts and a publish gate. Should the README serve the theme audience, the operating audience, or split into two documents?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the README still describe the audience it is actually written for after the next change of purpose?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run audit:content-portability",
+          "result": "The owner decided the documentation serves the operator, not a theme buyer. README was rewritten around running and maintaining this repository: install and build, where content lives and the file-path-is-URL rule, what blocks a commit or a publish, the handful of scripts worth remembering, and the deployment boundary. Marketplace framing — the premium-theme pitch, the Vercel and Netlify deploy buttons, and the clone-as-my-blog quick start — is gone. LICENSE is deliberately untouched, since its terms are a legal statement rather than a documentation choice."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-52",
@@ -1780,13 +1792,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "implementation",
-      "reviewQuestion": "README states Astro 6 while package.json depends on astro ^7.1.6, and its Scripts table lists 6 of 100 scripts without the audit:gate step that CLAUDE.md requires before publishing. Which setup path is the supported one, and what keeps the stated versions in step with the manifest?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "What keeps the stated stack version in step with package.json when the next major lands?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run check && npm run audit:content-portability",
+          "result": "The README claimed Astro 6 while package.json depends on astro ^7.1.6, and listed 6 of roughly 100 scripts without the audit:gate step CLAUDE.md requires before publishing. The rewritten README no longer carries a version-pinned stack list at all, and its gate section names audit:gate and verify:release explicitly. Removing the restated facts removes the thing that drifted; the remaining pointer is to CLAUDE.md section 14, which is maintained."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-54",
@@ -1895,13 +1919,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "implementation",
-      "reviewQuestion": "The script surface is described in README.md, scripts/README.md, and CLAUDE.md section 14, and the README copy has already drifted. Which of the three is canonical, and can the other two reference it instead of restating it?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Has any of the three documents started restating the script surface again instead of pointing at it?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run audit:content-portability",
+          "result": "CLAUDE.md section 14 is canonical for the stage-to-tool map and scripts/README.md for per-script detail. The README now says so in its opening paragraph and keeps only a six-row table of the commands used day to day, so the drift-prone full listing exists in one place instead of three."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-58",
@@ -1914,13 +1950,24 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "implementation",
-      "reviewQuestion": "A standing recovery runbook exists at archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md, covering recovery priority, required external evidence, and pass conditions, so the earlier claim that rollback lives only in per-phase packets was wrong. It sits inside the archive rather than a maintained operations surface, and it states that recovery has not been tested. Should it be promoted out of the archive, and which of its external controls gets exercised first?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Which external control gets exercised first, and what records the result?",
+      "scope": "Operational documentation location and the audits that read it; no content or deployment behaviour changes.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "docs/runbooks/repository-recovery.md",
+            "README.md",
+            "scripts/audit-repository-controls.mjs",
+            "scripts/audit-repository-resilience.mjs"
+          ],
+          "verification": "npm run audit:repository-controls && npm run audit:repository-resilience",
+          "result": "The runbook moved from archives/…/remediation-plan/ to docs/runbooks/repository-recovery.md, and README links it from the deployment section. The two audits that read it were updated to the new path; repository controls verify 43/43. The resilience audit was corrected at the same time and now reports 7/8 local controls, with recovery-remote failing at one configured remote, 3 external controls pending, and domain-dns-recovery not applicable because the site is served from a github.io subdomain. An earlier version of this record quoted the pre-correction 8/8 and 4 pending. The document still states that recovery has not been tested, and that statement was left intact rather than softened by the move."
+        }
+      ],
+      "residualRisk": "Promotion changes where the runbook lives, not whether it works. Every step in it remains unexercised, two audits now depend on the new path, and the runbook itself is only tracked because .gitignore was amended to stop /docs/ from swallowing it."
     },
     {
       "id": "AP-M-59",
@@ -1965,13 +2012,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "implementation",
-      "reviewQuestion": "The CHANGELOG Unreleased section still lists theme-marketplace work from the 1.0.0 era that was never released or withdrawn. Should those entries ship, move to a historical note, or be deleted?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the Unreleased section stay empty, or does it start collecting work that will not ship again?",
+      "scope": "Repository documentation only; no article body, published URL, or frontmatter is changed.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "README.md",
+            "CHANGELOG.md",
+            "CLAUDE.md",
+            "scripts/README.md",
+            "package.json"
+          ],
+          "verification": "npm run audit:content-portability",
+          "result": "The Unreleased section held 1.0.0-era theme-marketplace work that was never released or withdrawn, which read as a shipping queue. Those entries moved to a dated historical section that says plainly that theme distribution did not happen and the repository runs as a personal blog. Nothing was deleted: the Newsletter component and the define* helpers are still in use and are recorded as such, so the note explains the code rather than orphaning it. Unreleased is now empty."
+        }
+      ],
+      "residualRisk": "The README now states versions and a canonical pointer rather than restating the script surface, so drift is reduced but not mechanically prevented; recheck after an Astro major upgrade or a change to the CLAUDE.md workflow table."
     },
     {
       "id": "AP-M-61",
@@ -2253,13 +2312,23 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "implementation",
-      "reviewQuestion": "The previous review question assumed 1038 SVGs needed internal <title>/<desc>; that premise was wrong, because every diagram is embedded through <img> and the alt attribute is the accessible name. Corrected measurement: alt coverage is 837 of 837 references, 1 reference is broken (embedded/hardware/hbm/chapter09-cxl-mem.md points at a missing ch09-cxl-mem-tier.svg on a published post), and 223 SVGs are unreferenced. Should the broken diagram be authored or its reference removed, and are the unreferenced artifacts retired or kept as imported assets?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "When a drafted series is published, does its diagram inventory get rechecked, or do the built-but-unwired ones stay invisible?",
+      "scope": "Generated diagram inventory and its audit only; no SVG or .tex file is deleted.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-svg-accessibility.mjs",
+            "reports/diagrams/references.md",
+            "src/content.config.ts"
+          ],
+          "verification": "npm run audit:diagram-accessibility",
+          "result": "The original premise was wrong twice. Internal <title>/<desc> was never the accessible name, because every diagram is embedded through <img> and alt carries it. And the corrected count of 223 unreferenced artifacts measured references from published posts only, so it counted draft-series assets as orphans. Measured against all posts: 298 SVGs are referenced by published posts, 656 by drafts alone and become live when those series publish, and 85 are referenced by nothing. All 85 retain their .tex sources and sit in drafted book series — Domain-Driven Design 27, Refactoring Catalog 24, TDD Patterns 15, DSA 10 — so they are diagrams built ahead of the chapter that would use them, not abandoned output. Nothing is retired. The broken reference this item also named, a published HBM chapter pointing at a missing ch09-cxl-mem-tier.svg, was authored and the audit now reports 0 broken with alt coverage complete at 837 of 837."
+        }
+      ],
+      "residualRisk": "The 85 built-but-unwired diagrams stay on disk with their .tex sources. If the drafted series they belong to are never published, the inventory grows without a forcing function beyond this report."
     },
     {
       "id": "AP-M-70",
@@ -2306,13 +2375,25 @@
           "f181338c-9c17-48e6-8abd-1c47ae2559d6"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "implementation",
-      "reviewQuestion": "audit:lifecycle inventories 3387 posts of which 0 carry lastVerified, 0 carry evidenceStatus, and 3387 fall in needsReview, so no post records that it was ever revisited even though the content-derived freshness audits run. Which posts warrant a recorded review state, and can it be populated without a bulk frontmatter rewrite?",
-      "scope": null,
+      "disposition": "accepted",
+      "nextAction": "manual-review",
+      "reviewQuestion": "Has a post gone stale in a way the content-derived audits cannot see — sources unchanged, but the judgement in the prose aged?",
+      "scope": "Post-level review metadata policy only; no frontmatter is written.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "scripts/audit-content-lifecycle.mjs",
+            "scripts/audit-prose-staleness.py",
+            "scripts/audit-upstream-freshness.py",
+            "CLAUDE.md"
+          ],
+          "verification": "npm run audit:lifecycle && npm run audit:staleness && npm run audit:upstream",
+          "result": "The owner decided not to record per-post review state. The schema keeps reviewStatus, lastVerified, and evidenceStatus, and 0 of 3387 posts populate them, but no UI reads them and populating them would be a bulk frontmatter rewrite whose initial values would all be identical — a field that says nothing while looking authoritative. Freshness is instead derived from the content: audit:upstream reports drift against tracked upstream repositories and specs, audit-cited-symbols checks that cited symbols still exist, audit:roadmap watches review dates on registered facts, and audit:staleness reads the prose itself for future tense and dated anchors. The accepted cost is named in the residual risk and this item is the review trigger if it starts to bite."
+        }
+      ],
+      "residualRisk": "Freshness is inferred from content and upstream drift, not from a human attestation. A post whose sources are stable but whose judgement has aged will not surface."
     },
     {
       "id": "AP-M-72",

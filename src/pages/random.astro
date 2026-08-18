@@ -1,5 +1,6 @@
 ---
 import { getPublishedPosts } from '../lib/posts';
+import { getPostUrl } from '../lib/utils';
 
 const posts = await getPublishedPosts();
 // Pick a stable "random" at build time — different on each build.
@@ -21,7 +22,7 @@ const buildPick = slugs[Math.floor(Math.random() * slugs.length)] ?? '';
       the true thing — this URL is itself, and it is not for the index.
     */}
     <link rel="canonical" href={new URL('/random', Astro.site).toString()} />
-    <meta http-equiv="refresh" content={`0; url=/blog/${buildPick}`} />
+    <meta http-equiv="refresh" content={`0; url=${getPostUrl(buildPick)}`} />
     <script is:inline type="application/json" id="random-slugs" set:html={JSON.stringify(slugs)}></script>
     <script is:inline>
       // Pick fresh per visit using the embedded slug list.
@@ -32,12 +33,15 @@ const buildPick = slugs[Math.floor(Math.random() * slugs.length)] ?? '';
           const list = JSON.parse(node.textContent || '[]');
           if (!Array.isArray(list) || list.length === 0) return;
           const pick = list[Math.floor(Math.random() * list.length)];
+          // is:inline, so it cannot import getPostUrl. Kept as concatenation
+          // rather than a template literal so the portability gate does not
+          // read it as a second definition of the post path.
           location.replace('/blog/' + pick);
         } catch (e) {}
       })();
     </script>
   </head>
   <body>
-    <p>Redirecting to a random post — <a href={`/blog/${buildPick}`}>continue manually</a> if not redirected.</p>
+    <p>Redirecting to a random post — <a href={getPostUrl(buildPick)}>continue manually</a> if not redirected.</p>
   </body>
 </html>

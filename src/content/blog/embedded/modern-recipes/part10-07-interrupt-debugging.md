@@ -180,10 +180,11 @@ USART error/event도 같은 IRQ인 chip이 있습니다. `SR` 전체를 확인�
 
 ## 사례 6 — Tail-chaining으로 보이는 누락
 
-```text
-ISR A 진입 → 실행 중 ISR A 다시 trigger → pending 1로 set
-ISR A 종료 → 즉시 ISR A 재진입 (tail-chain)
-```
+순서는 이렇습니다.
+
+1. ISR A에 진입합니다.
+2. 실행 중에 ISR A가 다시 trigger되어 pending 비트가 1로 set됩니다.
+3. ISR A가 종료되자마자 ISR A로 재진입합니다 (tail-chain).
 
 이 자체는 정상입니다. 문제는 *코드가 두 번 처리하길 기대하지 않은* 경우입니다.
 

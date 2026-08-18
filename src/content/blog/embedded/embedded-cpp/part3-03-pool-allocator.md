@@ -49,14 +49,13 @@ free_list_head → block0 → block1 → block2 → block3 → nullptr
 
 block0 할당 후:
 free_list_head → block1 → block2 → block3 → nullptr
-반환된 block0의 메모리는 사용자가 사용
 
 block0 해제 후:
 free_list_head → block0 → block1 → block2 → block3 → nullptr
 (또는 LIFO: block0 → block1 → block2 → ...)
 ```
 
-포인터 하나만 보유하면 O(1) push/pop이 가능합니다.
+free list에서 빠져나온 `block0`의 메모리는 그 순간부터 사용자 몫입니다. 포인터 하나만 보유하면 O(1) push/pop이 가능합니다.
 
 ## 기본 구현
 

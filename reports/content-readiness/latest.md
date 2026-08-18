@@ -4,7 +4,7 @@
 
 - P1 staleness candidates: 7
 - P2 fact-dense candidates: 102
-- P3 visual-aid candidates: 118
+- P3 visual-aid candidates: 119
 - Series integrity issues: 0
 - Draft-only series: 151
 
@@ -202,7 +202,7 @@
 - **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part2-06-arm-cache.md` [46]: 46 concrete-claim signals; verify against primary sources before marking current.
 - **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part1-01-digital-signal-basics.md` [46]: 46 concrete-claim signals; verify against primary sources before marking current.
 - **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part4-12-amp-openamp.md` [45]: 45 concrete-claim signals; verify against primary sources before marking current.
-- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md` [45]: 45 concrete-claim signals; verify against primary sources before marking current.
+- **P2** `fact-density` — `src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md` [44]: 44 concrete-claim signals; verify against primary sources before marking current.
 - **P2** `fact-density` — `src/content/blog/embedded/rtos/practical-internals/part4-03-tlsf.md` [43]: 43 concrete-claim signals; verify against primary sources before marking current.
 - **P2** `fact-density` — `src/content/blog/embedded/modern-recipes/part5-04-servo-motor.md` [43]: 43 concrete-claim signals; verify against primary sources before marking current.
 - **P2** `fact-density` — `src/content/blog/embedded/embedded-security/chapter03-mcu-crypto.md` [43]: 43 concrete-claim signals; verify against primary sources before marking current.
@@ -291,10 +291,9 @@
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part3-01-critical-section.md` [5]: 5 abstract concepts / 14 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part8-04-dma-allocator.md` [5]: 5 abstract concepts / 13 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md` [5]: 5 abstract concepts / 10 hits with no image
-- **P3** `visual-aid` — `src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md` [5]: 5 abstract concepts / 10 hits with no image
-- **P3** `visual-aid` — `src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md` [5]: 5 abstract concepts / 8 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part1-01-why-rtos.md` [5]: 5 abstract concepts / 7 hits with no image
-- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md` [4]: 4 abstract concepts / 52 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md` [5]: 5 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md` [4]: 4 abstract concepts / 51 hits with no image
 - **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/part15-05-coro-baton-mutex.md` [4]: 4 abstract concepts / 38 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter08-dllp.md` [4]: 4 abstract concepts / 30 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part2-08-arm-mmu.md` [4]: 4 abstract concepts / 27 hits with no image
@@ -323,11 +322,11 @@
 - **P3** `visual-aid` — `src/content/blog/embedded/bootloader/chapter26-ddr-training.md` [4]: 4 abstract concepts / 10 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md` [4]: 4 abstract concepts / 10 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-04-hazard-pointer.md` [4]: 4 abstract concepts / 9 hits with no image
+- **P3** `visual-aid` — `src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md` [4]: 4 abstract concepts / 9 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-05-cas-patterns.md` [4]: 4 abstract concepts / 8 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-09-false-sharing.md` [4]: 4 abstract concepts / 8 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-09-software-timer.md` [4]: 4 abstract concepts / 8 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-09-pcie-streaming.md` [4]: 4 abstract concepts / 7 hits with no image
-- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md` [4]: 4 abstract concepts / 7 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md` [4]: 4 abstract concepts / 7 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part10-09-timing-race-diag.md` [4]: 4 abstract concepts / 6 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md` [4]: 4 abstract concepts / 6 hits with no image
@@ -335,7 +334,6 @@
 - **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/00-preface.md` [4]: 4 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md` [4]: 4 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-11-timer-services.md` [4]: 4 abstract concepts / 4 hits with no image
-- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md` [4]: 4 abstract concepts / 4 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part8-09-stack-analysis.md` [3]: 3 abstract concepts / 38 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-04-semaphore-usage.md` [3]: 3 abstract concepts / 28 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/bootloader/chapter36-boot-memory-topology.md` [3]: 3 abstract concepts / 23 hits with no image
@@ -351,13 +349,13 @@
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-04-static-allocation.md` [3]: 3 abstract concepts / 17 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part3-02-semaphore-impl.md` [3]: 3 abstract concepts / 16 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction.md` [3]: 3 abstract concepts / 15 hits with no image
-- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md` [3]: 3 abstract concepts / 15 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part7-11-uio-vfio.md` [3]: 3 abstract concepts / 15 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter08-cxl-mem.md` [3]: 3 abstract concepts / 13 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md` [3]: 3 abstract concepts / 11 hits with no image
-- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md` [3]: 3 abstract concepts / 11 hits with no image
 - **P3** `visual-aid` — `src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md` [3]: 3 abstract concepts / 11 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md` [3]: 3 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md` [3]: 3 abstract concepts / 10 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md` [3]: 3 abstract concepts / 10 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter16-troubleshooting.md` [3]: 3 abstract concepts / 10 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-05-memory-pool.md` [3]: 3 abstract concepts / 9 hits with no image
 - **P3** `visual-aid` — `src/content/blog/tools/debugging/memory/chapter07-tiered-memory-diagnostics.md` [3]: 3 abstract concepts / 9 hits with no image
@@ -368,14 +366,17 @@
 - **P3** `visual-aid` — `src/content/blog/embedded/bootloader/chapter35-uefi-cxl-init.md` [3]: 3 abstract concepts / 7 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part5-01-freertos-source.md` [3]: 3 abstract concepts / 7 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter09-flit-format.md` [3]: 3 abstract concepts / 7 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter14-security.md` [3]: 3 abstract concepts / 7 hits with no image
 - **P3** `visual-aid` — `src/content/blog/programming/code-review/folly/part9-05-pico-spin-lock.md` [3]: 3 abstract concepts / 7 hits with no image
 - **P3** `visual-aid` — `src/content/blog/programming/code-review/abseil/00-preface.md` [3]: 3 abstract concepts / 7 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md` [3]: 3 abstract concepts / 6 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part6-02-task-design.md` [3]: 3 abstract concepts / 6 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md` [3]: 3 abstract concepts / 6 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/performance-engineering/part3-03-dma-performance.md` [3]: 3 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md` [3]: 3 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part3-10-deadlock.md` [3]: 3 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/rtos/practical-internals/part4-10-syscall.md` [3]: 3 abstract concepts / 5 hits with no image
+- **P3** `visual-aid` — `src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md` [3]: 3 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter10-linux-basics.md` [3]: 3 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/embedded/hardware/pcie/chapter07-error-handling.md` [3]: 3 abstract concepts / 5 hits with no image
 - **P3** `visual-aid` — `src/content/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem.md` [3]: 3 abstract concepts / 5 hits with no image

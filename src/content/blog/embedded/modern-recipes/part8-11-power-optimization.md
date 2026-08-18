@@ -22,11 +22,12 @@ topics: ["embedded"]
 
 ```text
 power 소비 = V × I = V × (I_active × t_active + I_sleep × t_sleep) / t_total
-
-핵심은 두 가지
-- t_sleep을 최대화
-- I_sleep을 최소화
 ```
+
+이 식에서 손댈 수 있는 축은 두 가지뿐입니다.
+
+- `t_sleep`을 최대화합니다.
+- `I_sleep`을 최소화합니다.
 
 대표 ARM Cortex-M sleep 단계입니다.
 
@@ -39,14 +40,11 @@ power 소비 = V × I = V × (I_active × t_active + I_sleep × t_sleep) / t_tot
 
 각 칩별 mode는 datasheet의 "Power modes" 표가 가장 정확합니다.
 
-```text
-peripheral clock gating
-  쓰지 않는 SPI/I2C/UART의 clock을 꺼서 µA 단위 절약
-DVFS
-  동적으로 voltage와 frequency를 낮춰 active power 절감
-tickless idle
-  RTOS tick interrupt를 멈춰 sleep 시간을 늘림
-```
+Mode 전환 외에 자주 쓰는 절감 기법은 세 가지입니다.
+
+- **peripheral clock gating** — 쓰지 않는 SPI/I2C/UART의 clock을 꺼서 µA 단위를 절약합니다.
+- **DVFS** — 동적으로 voltage와 frequency를 낮춰 active power를 줄입니다.
+- **tickless idle** — RTOS tick interrupt를 멈춰 sleep 시간을 늘립니다.
 
 ## 코드 / 실제 사용 예
 
@@ -225,11 +223,7 @@ stop mode에서 깨어나면 일부 clock이 default로 돌아가 있습니다. 
 
 > µA를 multimeter로 측정
 
-```text
-DMM 0.1 µA 단위 → noise로 결과 부정확
-```
-
-전용 power profiler를 사용해야 µA 정밀도가 나옵니다.
+일반 DMM은 0.1 µA 단위라 noise 때문에 결과가 부정확합니다. 전용 power profiler를 사용해야 µA 정밀도가 나옵니다.
 
 ## 정리
 

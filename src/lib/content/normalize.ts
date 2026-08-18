@@ -1,5 +1,6 @@
 import type { CollectionEntry } from 'astro:content';
 import { TOPIC_REGISTRY } from './topics';
+import { getPostUrl } from '../utils';
 import type { ContentDocument, ContentType } from './types';
 
 function contentType(type: CollectionEntry<'blog'>['data']['type']): ContentType {
@@ -27,7 +28,7 @@ export function normalizeBlogEntry(entry: CollectionEntry<'blog'>): ContentDocum
 
   return {
     id: entry.id,
-    url: `/blog/${entry.id}`,
+    url: getPostUrl(entry),
     contentType: contentType(entry.data.type),
     status: entry.data.draft ? 'draft' : 'published',
     title: entry.data.title,

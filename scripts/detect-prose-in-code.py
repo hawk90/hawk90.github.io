@@ -18,12 +18,18 @@ BOLD_LABEL = re.compile(r"^\*\*[^*]+\*\*\s*$")
 KOREAN_BULLET = re.compile(r"^\s*[-*]\s+[가-힣]")
 CODE_CUE = re.compile(r"^\s*(?:#|//|--|;)|[#:;{}()\[\]<>|`]")
 TREE_CUE = re.compile(r"[├└│─┌┐┘┬┴┼╰╯╭╮]")
+# A Kconfig `menuconfig` screen uses `[ ]` for an unselected boolean, which is
+# indistinguishable from a Markdown task list one line at a time. These markers
+# only appear in the real thing, so their presence anywhere in the block means
+# the checkbox rule would be reading a tool's UI as a checklist.
+MENUCONFIG_CUE = re.compile(r"\[\*\]|<\*>|<\s>|--->|^\s*\(\S+\)\s", re.M)
 
 
 def prose_reason(lines):
     reasons, snippet = [], ""
+    menuconfig = bool(MENUCONFIG_CUE.search("\n".join(lines)))
     for line in lines:
-        if CHECKBOX.search(line):
+        if CHECKBOX.search(line) and not menuconfig:
             reasons.append("checkbox")
             snippet = snippet or line.strip()
         if BOLD_LABEL.search(line):

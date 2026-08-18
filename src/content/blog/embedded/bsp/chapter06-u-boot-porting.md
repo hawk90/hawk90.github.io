@@ -137,12 +137,12 @@ i.MX 8M Plus용 defconfig에서 보드별로 *반드시* 확인할 항목입니�
 ```text
 CONFIG_ARM=y
 CONFIG_ARCH_IMX8M=y
-CONFIG_SYS_TEXT_BASE=0x40200000   ← U-Boot 적재 주소 (DDR 안)
-CONFIG_TARGET_ACME_CAM=y          ← 우리 보드 선택
+CONFIG_SYS_TEXT_BASE=0x40200000
+CONFIG_TARGET_ACME_CAM=y
 
 # SPL
 CONFIG_SPL=y
-CONFIG_SPL_TEXT_BASE=0x920000     ← SoC SRAM 안
+CONFIG_SPL_TEXT_BASE=0x920000
 CONFIG_SPL_MAX_SIZE=0x25000
 CONFIG_SPL_STACK=0x96fff0
 CONFIG_SPL_BSS_START_ADDR=0x95e000
@@ -154,7 +154,7 @@ CONFIG_SPL_OF_CONTROL=y
 
 # Console / Debug UART
 CONFIG_DEBUG_UART=y
-CONFIG_DEBUG_UART_BASE=0x30890000   ← UART2 base (보드별 확인)
+CONFIG_DEBUG_UART_BASE=0x30890000
 CONFIG_DEBUG_UART_CLOCK=24000000
 CONFIG_DEBUG_UART_IMX=y
 CONFIG_BAUDRATE=115200
@@ -188,6 +188,15 @@ CONFIG_SYS_MMC_ENV_PART=1
 CONFIG_ENV_OFFSET=0x400000
 CONFIG_ENV_SIZE=0x2000
 ```
+
+이 중 보드마다 값이 달라지는 네 항목의 의미는 다음과 같습니다.
+
+| 옵션 | 값 | 의미 |
+|---|---|---|
+| `CONFIG_SYS_TEXT_BASE` | `0x40200000` | U-Boot 적재 주소이며 DDR 안이어야 합니다 |
+| `CONFIG_TARGET_ACME_CAM` | `y` | 우리 보드를 타깃으로 선택합니다 |
+| `CONFIG_SPL_TEXT_BASE` | `0x920000` | SPL 적재 주소이며 SoC SRAM 안입니다 |
+| `CONFIG_DEBUG_UART_BASE` | `0x30890000` | UART2 base 주소이며 보드별로 확인해야 합니다 |
 
 `CONFIG_DEBUG_UART_*` 네 줄이 *첫 시리얼 출력*을 결정합니다. base address, clock 주파수, baud rate가 정확해야 합니다.
 

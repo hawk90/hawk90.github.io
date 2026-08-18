@@ -30,7 +30,7 @@ for (const { control, item } of targets) {
   item.disposition = 'accepted'; item.nextAction = 'external-review';
   item.reviewQuestion = `Has ${control} been exercised with non-secret evidence, or must this accepted risk be renewed explicitly?`;
   item.scope = 'User-approved temporary deferral of an external recovery control; no recovery outcome is inferred from repository files.';
-  item.evidence = [{ files: [decisionPath, `${archive}/remediation-plan/repository-recovery-runbook.md`], verification: 'npm run audit:repository-external-evidence', result: `Accepted risk deferral for ${control}; actual exercise remains pending.` }];
+  item.evidence = [{ files: [decisionPath, 'docs/runbooks/repository-recovery.md'], verification: 'npm run audit:repository-external-evidence', result: `Accepted risk deferral for ${control}; actual exercise remains pending.` }];
   item.residualRisk = 'The external recovery path remains untested and may fail when needed; reassess on the recorded trigger.';
 }
 await Promise.all([
