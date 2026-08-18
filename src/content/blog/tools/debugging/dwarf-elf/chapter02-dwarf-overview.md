@@ -177,7 +177,7 @@ DWARF 4까지는 `version=4, abbrev, addr_size`. DWARF 5에서 `unit_type` 추�
 
 ### CU 종류 (DWARF 5)
 
-```
+```text
 DW_UT_compile      일반
 DW_UT_type         타입 정의 전용 (.debug_types)
 DW_UT_partial      partial CU (include)
@@ -458,16 +458,18 @@ C++ 특수.
 
 DWARF는 *작은 정수를 짧게* 표현하려고 LEB128(Little Endian Base 128)을 광범위 사용.
 
-```
-값을 7-bit 청크로 나누어 little-endian으로:
-  마지막 청크는 MSB=0
-  나머지는 MSB=1 (continue)
+인코딩은 값을 7비트 청크로 나눠 little-endian 순서로 늘어놓는 방식입니다. 각 바이트의 MSB가 continue 비트 역할을 합니다.
 
-예: 624485 = 0b100110000111011100101
-  7-bit 청크 (LE): 0100101, 0001110, 0100110
-  바이트:          11100101, 10001110, 00100110
-                   (0xE5,    0x8E,    0x26)
-```
+- 마지막 청크는 MSB=0.
+- 나머지 청크는 MSB=1 (continue).
+
+`624485`(`0b100110000111011100101`)를 인코딩하면 이렇게 됩니다.
+
+| 단계 | 값 |
+|------|-----|
+| 7-bit 청크 (LE) | `0100101`, `0001110`, `0100110` |
+| MSB를 붙인 바이트 | `11100101`, `10001110`, `00100110` |
+| 16진수 | `0xE5`, `0x8E`, `0x26` |
 
 작은 값(0-127)은 1바이트, 큰 값은 가변.
 
@@ -585,6 +587,7 @@ Ch 3 — `.debug_line` 바이트코드 VM. 어떻게 *수천 줄의 PC↔소스 
 
 - [Ch 1: ELF 포맷](/blog/tools/debugging/dwarf-elf/chapter01-elf-overview)
 - [Ch 3: .debug_line 바이트코드 VM](/blog/tools/debugging/dwarf-elf/chapter03-debug-line)
+- [GDB and LLDB Ch 12: DWARF 디버그 정보](/blog/tools/debugging/gdb-lldb/chapter12-dwarf) — 같은 포맷을 *디버거가 쓰는 쪽*에서. 이 시리즈는 포맷 자체를 분해합니다
 - [DWARF 5 표준 PDF](https://dwarfstd.org/doc/DWARF5.pdf)
 - [llvm-dwarfdump](https://llvm.org/docs/CommandGuide/llvm-dwarfdump.html)
 - [pyelftools 문서](https://github.com/eliben/pyelftools)

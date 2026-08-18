@@ -47,7 +47,7 @@ SkipBoostFilter()
 
 여러 필터가 등록되면 *priority 순*으로 chain.
 
-```
+```text
 frame_iter → filter1 → filter2 → filter3 → 사용자
 ```
 
@@ -327,7 +327,7 @@ reason = f.unwind_stop_reason()
 print(gdb.frame_stop_reason_string(reason))
 ```
 
-```
+```text
 UNWIND_NO_REASON           정상
 UNWIND_NULL_ID             null frame ID
 UNWIND_OUTERMOST           바깥 끝

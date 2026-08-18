@@ -141,6 +141,9 @@ async function fetchUser(id: number): Promise<User> {
         </p>
 
         <h2>Table</h2>
+        {/* Markdown tables get this wrapper from rehype-table-scroll; hand-written
+            ones in .astro have to opt in, or they clip on a narrow viewport. */}
+        <div class="table-scroll" tabindex="0">
         <table>
           <thead>
             <tr><th>Feature</th><th>Status</th><th>Notes</th></tr>
@@ -151,6 +154,7 @@ async function fetchUser(id: number): Promise<User> {
             <tr><td>Newsletter</td><td>5 providers</td><td>Beehiiv, Substack, ConvertKit, Buttondown, custom</td></tr>
           </tbody>
         </table>
+        </div>
 
         <h2>Horizontal rule</h2>
         <hr />

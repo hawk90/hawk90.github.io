@@ -1,0 +1,1529 @@
+{
+  "root": "src/content/blog",
+  "includeNonBlog": false,
+  "totalFiles": 3387,
+  "domains": {
+    "design": {
+      "draft": 7,
+      "all": 7
+    },
+    "embedded": {
+      "draft": 269,
+      "all": 733,
+      "published": 464
+    },
+    "math": {
+      "draft": 260,
+      "all": 260
+    },
+    "media": {
+      "draft": 40,
+      "all": 40
+    },
+    "ml": {
+      "draft": 258,
+      "all": 258
+    },
+    "parallel": {
+      "draft": 97,
+      "all": 97
+    },
+    "philosophy": {
+      "draft": 35,
+      "all": 35
+    },
+    "programming": {
+      "draft": 1167,
+      "all": 1335,
+      "published": 168
+    },
+    "systems": {
+      "draft": 184,
+      "all": 184
+    },
+    "tools": {
+      "published": 94,
+      "all": 246,
+      "draft": 152
+    },
+    "writing": {
+      "draft": 192,
+      "all": 192
+    }
+  },
+  "series": {
+    "(unassigned)": {
+      "draft": 5,
+      "all": 5
+    },
+    "A First Course in Bayesian Statistical Methods": {
+      "draft": 11,
+      "all": 11
+    },
+    "A Primer on Memory Consistency and Cache Coherence": {
+      "draft": 11,
+      "all": 11
+    },
+    "A Tour of C++": {
+      "draft": 19,
+      "all": 19
+    },
+    "APUE": {
+      "draft": 21,
+      "all": 21
+    },
+    "ARMv8-A Architecture Reference Manual": {
+      "draft": 2,
+      "all": 2
+    },
+    "AUTOSAR C++14": {
+      "draft": 14,
+      "all": 14
+    },
+    "AV1": {
+      "draft": 40,
+      "all": 40
+    },
+    "Abseil Code Review": {
+      "published": 79,
+      "all": 79
+    },
+    "Academic Writing for Graduate Students": {
+      "draft": 30,
+      "all": 30
+    },
+    "Agile & Lean Software Engineering": {
+      "draft": 156,
+      "all": 156
+    },
+    "All of Statistics": {
+      "draft": 15,
+      "all": 15
+    },
+    "Apple Metal Stack": {
+      "draft": 10,
+      "all": 10
+    },
+    "BSP Development": {
+      "published": 21,
+      "all": 21
+    },
+    "Bayesian Data Analysis (3rd ed)": {
+      "draft": 23,
+      "all": 23
+    },
+    "Beautiful C++": {
+      "draft": 30,
+      "all": 30
+    },
+    "BoW 개요": {
+      "draft": 6,
+      "all": 6
+    },
+    "Bootloader Internals": {
+      "published": 37,
+      "all": 37
+    },
+    "Buildroot Practical": {
+      "published": 20,
+      "all": 20
+    },
+    "C++ Concurrency in Action": {
+      "draft": 11,
+      "all": 11
+    },
+    "C++ Software Design": {
+      "draft": 39,
+      "all": 39
+    },
+    "CAN Bus 심화": {
+      "draft": 12,
+      "all": 12
+    },
+    "CERT C": {
+      "draft": 14,
+      "all": 14
+    },
+    "CMake": {
+      "published": 9,
+      "all": 9
+    },
+    "CXL 4.0 Internals": {
+      "published": 15,
+      "all": 15
+    },
+    "Causality: Models, Reasoning, and Inference": {
+      "draft": 11,
+      "all": 11
+    },
+    "Clean Architecture": {
+      "draft": 34,
+      "all": 34
+    },
+    "Clean Code": {
+      "draft": 17,
+      "all": 17
+    },
+    "Code Complete": {
+      "draft": 35,
+      "all": 35
+    },
+    "Code: The Hidden Language": {
+      "draft": 25,
+      "all": 25
+    },
+    "Computer Systems: A Programmer's Perspective": {
+      "draft": 12,
+      "all": 12
+    },
+    "Concurrency Debugging": {
+      "draft": 5,
+      "all": 5
+    },
+    "Convex Optimization (Boyd)": {
+      "draft": 11,
+      "all": 11
+    },
+    "Core ML 심화": {
+      "draft": 6,
+      "all": 6
+    },
+    "DDR Memory Deep Dive": {
+      "draft": 16,
+      "all": 16
+    },
+    "DO-178C": {
+      "draft": 12,
+      "all": 12
+    },
+    "DWARF and ELF Internals": {
+      "published": 6,
+      "all": 6
+    },
+    "Data Structures and Algorithms": {
+      "draft": 40,
+      "all": 40
+    },
+    "Debugging: The 9 Indispensable Rules": {
+      "draft": 9,
+      "all": 9
+    },
+    "Designing Data-Intensive Applications": {
+      "draft": 12,
+      "all": 12
+    },
+    "Designing Machine Learning Systems": {
+      "draft": 11,
+      "all": 11
+    },
+    "Developing Safety-Critical Software": {
+      "draft": 15,
+      "all": 15
+    },
+    "Digital Avionics Handbook": {
+      "draft": 14,
+      "all": 14
+    },
+    "Distributed Systems": {
+      "draft": 9,
+      "all": 9
+    },
+    "Doing Bayesian Data Analysis (2nd ed, core)": {
+      "draft": 15,
+      "all": 15
+    },
+    "Domain-Driven Design": {
+      "draft": 17,
+      "all": 17
+    },
+    "Driver-RTL Co-simulation": {
+      "published": 8,
+      "all": 8
+    },
+    "ECSS-Q-ST-80C": {
+      "draft": 10,
+      "all": 10
+    },
+    "ESP32-C3 Mastering": {
+      "published": 12,
+      "all": 12
+    },
+    "Effective C++": {
+      "draft": 55,
+      "all": 55
+    },
+    "Effective Modern C++": {
+      "draft": 42,
+      "all": 42
+    },
+    "Elements of Information Theory": {
+      "draft": 16,
+      "all": 16
+    },
+    "Embedded C++ for Real Systems": {
+      "published": 41,
+      "all": 41
+    },
+    "Embedded Debugging": {
+      "published": 9,
+      "all": 9
+    },
+    "Embedded Performance Engineering": {
+      "published": 57,
+      "all": 57
+    },
+    "Embedded Protocols 심화": {
+      "draft": 12,
+      "all": 12
+    },
+    "Embedded Security": {
+      "published": 13,
+      "all": 13
+    },
+    "FPGA Driver via QEMU+VFIO": {
+      "draft": 14,
+      "all": 14
+    },
+    "Fluent Python": {
+      "draft": 24,
+      "all": 24
+    },
+    "Folly Code Review": {
+      "published": 89,
+      "all": 89
+    },
+    "GDB Extension and IDE": {
+      "published": 6,
+      "all": 6
+    },
+    "GDB and LLDB": {
+      "published": 12,
+      "all": 12
+    },
+    "GNU Make": {
+      "published": 7,
+      "all": 7
+    },
+    "Getting Started with BLE": {
+      "draft": 12,
+      "all": 12
+    },
+    "Git Conventions": {
+      "draft": 9,
+      "all": 9
+    },
+    "Git Flow": {
+      "draft": 9,
+      "all": 9
+    },
+    "GoF Design Patterns": {
+      "draft": 25,
+      "all": 25
+    },
+    "Google C++ Style": {
+      "draft": 10,
+      "all": 10
+    },
+    "Growing Object-Oriented Software": {
+      "draft": 16,
+      "all": 16
+    },
+    "HBM·GDDR 심화": {
+      "published": 12,
+      "all": 12
+    },
+    "Hackers and Painters": {
+      "draft": 15,
+      "all": 15
+    },
+    "High-Dimensional Probability": {
+      "draft": 11,
+      "all": 11
+    },
+    "Industrial Ethernet 심화": {
+      "published": 12,
+      "all": 12
+    },
+    "Information Theory, Inference, and Learning Algorithms": {
+      "draft": 15,
+      "all": 15
+    },
+    "Introduction to Parallel Computing": {
+      "draft": 13,
+      "all": 13
+    },
+    "Introduction to Probability": {
+      "draft": 9,
+      "all": 9
+    },
+    "JSF C++": {
+      "draft": 12,
+      "all": 12
+    },
+    "Kernel Debugging": {
+      "published": 9,
+      "all": 9
+    },
+    "Khorikov Unit Testing": {
+      "draft": 11,
+      "all": 11
+    },
+    "Launch Vehicle Flight Software": {
+      "draft": 10,
+      "all": 10
+    },
+    "Linear Algebra": {
+      "draft": 12,
+      "all": 12
+    },
+    "Linux Device Drivers (LDD3)": {
+      "draft": 19,
+      "all": 19
+    },
+    "Linux Kernel Coding Style": {
+      "draft": 9,
+      "all": 9
+    },
+    "MIPI 심화": {
+      "draft": 12,
+      "all": 12
+    },
+    "MISRA C": {
+      "draft": 14,
+      "all": 14
+    },
+    "ML 디자인 패턴": {
+      "draft": 10,
+      "all": 10
+    },
+    "ML 시스템 프로파일링": {
+      "draft": 8,
+      "all": 8
+    },
+    "ML 컴파일러": {
+      "draft": 12,
+      "all": 12
+    },
+    "MLIR 심화": {
+      "draft": 16,
+      "all": 16
+    },
+    "Mastering the FreeRTOS Real Time Kernel": {
+      "draft": 14,
+      "all": 14
+    },
+    "Mathematics and Plausible Reasoning, Vol I": {
+      "draft": 8,
+      "all": 8
+    },
+    "Mathematics and Plausible Reasoning, Vol II": {
+      "draft": 8,
+      "all": 8
+    },
+    "Memory Diagnostics": {
+      "published": 7,
+      "all": 7
+    },
+    "Modern Embedded Recipes": {
+      "published": 152,
+      "all": 152
+    },
+    "NASA JPL Power of 10": {
+      "draft": 1,
+      "all": 1
+    },
+    "NPU 드라이버 개발": {
+      "draft": 12,
+      "all": 12
+    },
+    "NPU 아키텍처": {
+      "draft": 10,
+      "all": 10
+    },
+    "NVMe Deep Dive": {
+      "draft": 17,
+      "all": 17
+    },
+    "ONNX Runtime 심화": {
+      "draft": 8,
+      "all": 8
+    },
+    "ONNX 실전": {
+      "draft": 8,
+      "all": 8
+    },
+    "Object-Oriented Analysis and Design with Applications": {
+      "draft": 12,
+      "all": 12
+    },
+    "Object-Oriented Software Construction": {
+      "draft": 36,
+      "all": 36
+    },
+    "On Writing Well": {
+      "draft": 24,
+      "all": 24
+    },
+    "Operating Systems: Three Easy Pieces": {
+      "draft": 28,
+      "all": 28
+    },
+    "PCIe Deep Dive": {
+      "published": 19,
+      "all": 19
+    },
+    "Pattern Recognition and Machine Learning": {
+      "draft": 14,
+      "all": 14
+    },
+    "Patterns for Parallel Programming": {
+      "draft": 6,
+      "all": 6
+    },
+    "Peopleware": {
+      "draft": 20,
+      "all": 20
+    },
+    "Postmortem Debugging": {
+      "published": 6,
+      "all": 6
+    },
+    "Practical RTOS Internals": {
+      "published": 53,
+      "all": 53
+    },
+    "Practical Test Engineering": {
+      "draft": 1,
+      "all": 1
+    },
+    "Practical Vim": {
+      "draft": 21,
+      "all": 21
+    },
+    "Pro Git": {
+      "draft": 10,
+      "all": 10
+    },
+    "Probabilistic Graphical Models (Koller & Friedman)": {
+      "draft": 21,
+      "all": 21
+    },
+    "Probabilistic Machine Learning: Advanced Topics": {
+      "draft": 36,
+      "all": 36
+    },
+    "Probabilistic Machine Learning: An Introduction": {
+      "draft": 23,
+      "all": 23
+    },
+    "Probabilistic Reasoning in Intelligent Systems": {
+      "draft": 10,
+      "all": 10
+    },
+    "Probability Theory: The Logic of Science": {
+      "draft": 12,
+      "all": 12
+    },
+    "Probability: Theory and Examples": {
+      "draft": 8,
+      "all": 8
+    },
+    "Programming Pearls": {
+      "draft": 15,
+      "all": 15
+    },
+    "PyTorch Internals": {
+      "draft": 12,
+      "all": 12
+    },
+    "Python Debugging": {
+      "published": 5,
+      "all": 5
+    },
+    "Python Style Guide (PEP 8)": {
+      "draft": 7,
+      "all": 7
+    },
+    "QEMU Embedded Emulation": {
+      "draft": 20,
+      "all": 20
+    },
+    "QEMU Fake Device Driver": {
+      "draft": 22,
+      "all": 22
+    },
+    "QEMU Internals": {
+      "draft": 22,
+      "all": 22
+    },
+    "RISC-V ISA 해부": {
+      "draft": 18,
+      "all": 18
+    },
+    "RISC-V QEMU 심화": {
+      "draft": 10,
+      "all": 10
+    },
+    "RISC-V Vector Extension": {
+      "draft": 10,
+      "all": 10
+    },
+    "RISC-V 베어메탈 부트": {
+      "draft": 12,
+      "all": 12
+    },
+    "RISC-V 임베디드 실습": {
+      "draft": 12,
+      "all": 12
+    },
+    "Reasoning About Uncertainty": {
+      "draft": 12,
+      "all": 12
+    },
+    "Refactoring": {
+      "draft": 12,
+      "all": 12
+    },
+    "Refactoring Catalog (Fowler 2nd ed)": {
+      "draft": 61,
+      "all": 61
+    },
+    "SICP": {
+      "draft": 5,
+      "all": 5
+    },
+    "Sanitizers": {
+      "published": 5,
+      "all": 5
+    },
+    "Science Research Writing": {
+      "draft": 11,
+      "all": 11
+    },
+    "Set Theory": {
+      "draft": 8,
+      "all": 8
+    },
+    "Seven Concurrency Models in Seven Weeks": {
+      "draft": 7,
+      "all": 7
+    },
+    "Statistical Inference": {
+      "draft": 12,
+      "all": 12
+    },
+    "Statistical Rethinking": {
+      "draft": 17,
+      "all": 17
+    },
+    "Structured Parallel Programming": {
+      "draft": 10,
+      "all": 10
+    },
+    "Style: Lessons in Clarity and Grace": {
+      "draft": 10,
+      "all": 10
+    },
+    "System Tracing": {
+      "draft": 10,
+      "all": 10
+    },
+    "TDD by Example": {
+      "draft": 32,
+      "all": 32
+    },
+    "TDD by Example — Patterns Deep Dive": {
+      "draft": 53,
+      "all": 53
+    },
+    "TensorRT 심화": {
+      "draft": 8,
+      "all": 8
+    },
+    "The Algebra of Probable Inference": {
+      "draft": 5,
+      "all": 5
+    },
+    "The Art of Concurrency": {
+      "draft": 11,
+      "all": 11
+    },
+    "The Art of Multiprocessor Programming": {
+      "draft": 18,
+      "all": 18
+    },
+    "The Art of UNIX Programming": {
+      "draft": 20,
+      "all": 20
+    },
+    "The Bayesian Choice": {
+      "draft": 11,
+      "all": 11
+    },
+    "The Design of Everyday Things": {
+      "draft": 7,
+      "all": 7
+    },
+    "The Elements of Style": {
+      "draft": 51,
+      "all": 51
+    },
+    "The Mythical Man-Month": {
+      "draft": 19,
+      "all": 19
+    },
+    "The Only Grammar Book You'll Ever Need": {
+      "draft": 30,
+      "all": 30
+    },
+    "The Pragmatic Programmer": {
+      "draft": 100,
+      "all": 100
+    },
+    "The Structure of Scientific Revolutions": {
+      "draft": 14,
+      "all": 14
+    },
+    "The Zynq Book": {
+      "draft": 13,
+      "all": 13
+    },
+    "TinyML·Edge AI": {
+      "draft": 12,
+      "all": 12
+    },
+    "Triton DSL": {
+      "draft": 9,
+      "all": 9
+    },
+    "UALink 심화": {
+      "draft": 10,
+      "all": 10
+    },
+    "UCIe 심화": {
+      "draft": 12,
+      "all": 12
+    },
+    "UML 2.5.1": {
+      "draft": 35,
+      "all": 35
+    },
+    "Understanding Philosophy of Science": {
+      "draft": 5,
+      "all": 5
+    },
+    "Valgrind": {
+      "published": 5,
+      "all": 5
+    },
+    "Vim 마스터하기": {
+      "draft": 9,
+      "all": 9
+    },
+    "Working Effectively with Legacy Code": {
+      "draft": 25,
+      "all": 25
+    },
+    "XLA·OpenXLA 심화": {
+      "draft": 12,
+      "all": 12
+    },
+    "Yocto Deep Dive": {
+      "draft": 1,
+      "all": 1
+    },
+    "gtest 심화": {
+      "draft": 18,
+      "all": 18
+    },
+    "perf and FlameGraph": {
+      "draft": 10,
+      "all": 10
+    },
+    "pytest 심화": {
+      "draft": 18,
+      "all": 18
+    },
+    "고종석의 문장": {
+      "draft": 16,
+      "all": 16
+    },
+    "리눅스 커널의 구조와 원리": {
+      "draft": 25,
+      "all": 25
+    },
+    "비판적 사고를 위한 논리": {
+      "draft": 16,
+      "all": 16
+    },
+    "우리글 바로쓰기": {
+      "draft": 20,
+      "all": 20
+    },
+    "전문가를 위한 C": {
+      "draft": 23,
+      "all": 23
+    },
+    "전문가를 위한 C++": {
+      "draft": 33,
+      "all": 33
+    }
+  },
+  "draftOnlySeries": [
+    {
+      "series": "(unassigned)",
+      "draft": 5,
+      "all": 5
+    },
+    {
+      "series": "A First Course in Bayesian Statistical Methods",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "A Primer on Memory Consistency and Cache Coherence",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "A Tour of C++",
+      "draft": 19,
+      "all": 19
+    },
+    {
+      "series": "APUE",
+      "draft": 21,
+      "all": 21
+    },
+    {
+      "series": "ARMv8-A Architecture Reference Manual",
+      "draft": 2,
+      "all": 2
+    },
+    {
+      "series": "AUTOSAR C++14",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "AV1",
+      "draft": 40,
+      "all": 40
+    },
+    {
+      "series": "Academic Writing for Graduate Students",
+      "draft": 30,
+      "all": 30
+    },
+    {
+      "series": "Agile & Lean Software Engineering",
+      "draft": 156,
+      "all": 156
+    },
+    {
+      "series": "All of Statistics",
+      "draft": 15,
+      "all": 15
+    },
+    {
+      "series": "Apple Metal Stack",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "Bayesian Data Analysis (3rd ed)",
+      "draft": 23,
+      "all": 23
+    },
+    {
+      "series": "Beautiful C++",
+      "draft": 30,
+      "all": 30
+    },
+    {
+      "series": "BoW 개요",
+      "draft": 6,
+      "all": 6
+    },
+    {
+      "series": "C++ Concurrency in Action",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "C++ Software Design",
+      "draft": 39,
+      "all": 39
+    },
+    {
+      "series": "CAN Bus 심화",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "CERT C",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "Causality: Models, Reasoning, and Inference",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "Clean Architecture",
+      "draft": 34,
+      "all": 34
+    },
+    {
+      "series": "Clean Code",
+      "draft": 17,
+      "all": 17
+    },
+    {
+      "series": "Code Complete",
+      "draft": 35,
+      "all": 35
+    },
+    {
+      "series": "Code: The Hidden Language",
+      "draft": 25,
+      "all": 25
+    },
+    {
+      "series": "Computer Systems: A Programmer's Perspective",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Concurrency Debugging",
+      "draft": 5,
+      "all": 5
+    },
+    {
+      "series": "Convex Optimization (Boyd)",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "Core ML 심화",
+      "draft": 6,
+      "all": 6
+    },
+    {
+      "series": "DDR Memory Deep Dive",
+      "draft": 16,
+      "all": 16
+    },
+    {
+      "series": "DO-178C",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Data Structures and Algorithms",
+      "draft": 40,
+      "all": 40
+    },
+    {
+      "series": "Debugging: The 9 Indispensable Rules",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "Designing Data-Intensive Applications",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Designing Machine Learning Systems",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "Developing Safety-Critical Software",
+      "draft": 15,
+      "all": 15
+    },
+    {
+      "series": "Digital Avionics Handbook",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "Distributed Systems",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "Doing Bayesian Data Analysis (2nd ed, core)",
+      "draft": 15,
+      "all": 15
+    },
+    {
+      "series": "Domain-Driven Design",
+      "draft": 17,
+      "all": 17
+    },
+    {
+      "series": "ECSS-Q-ST-80C",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "Effective C++",
+      "draft": 55,
+      "all": 55
+    },
+    {
+      "series": "Effective Modern C++",
+      "draft": 42,
+      "all": 42
+    },
+    {
+      "series": "Elements of Information Theory",
+      "draft": 16,
+      "all": 16
+    },
+    {
+      "series": "Embedded Protocols 심화",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "FPGA Driver via QEMU+VFIO",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "Fluent Python",
+      "draft": 24,
+      "all": 24
+    },
+    {
+      "series": "Getting Started with BLE",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Git Conventions",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "Git Flow",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "GoF Design Patterns",
+      "draft": 25,
+      "all": 25
+    },
+    {
+      "series": "Google C++ Style",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "Growing Object-Oriented Software",
+      "draft": 16,
+      "all": 16
+    },
+    {
+      "series": "Hackers and Painters",
+      "draft": 15,
+      "all": 15
+    },
+    {
+      "series": "High-Dimensional Probability",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "Information Theory, Inference, and Learning Algorithms",
+      "draft": 15,
+      "all": 15
+    },
+    {
+      "series": "Introduction to Parallel Computing",
+      "draft": 13,
+      "all": 13
+    },
+    {
+      "series": "Introduction to Probability",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "JSF C++",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Khorikov Unit Testing",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "Launch Vehicle Flight Software",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "Linear Algebra",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Linux Device Drivers (LDD3)",
+      "draft": 19,
+      "all": 19
+    },
+    {
+      "series": "Linux Kernel Coding Style",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "MIPI 심화",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "MISRA C",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "ML 디자인 패턴",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "ML 시스템 프로파일링",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "ML 컴파일러",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "MLIR 심화",
+      "draft": 16,
+      "all": 16
+    },
+    {
+      "series": "Mastering the FreeRTOS Real Time Kernel",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "Mathematics and Plausible Reasoning, Vol I",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "Mathematics and Plausible Reasoning, Vol II",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "NASA JPL Power of 10",
+      "draft": 1,
+      "all": 1
+    },
+    {
+      "series": "NPU 드라이버 개발",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "NPU 아키텍처",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "NVMe Deep Dive",
+      "draft": 17,
+      "all": 17
+    },
+    {
+      "series": "ONNX Runtime 심화",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "ONNX 실전",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "Object-Oriented Analysis and Design with Applications",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Object-Oriented Software Construction",
+      "draft": 36,
+      "all": 36
+    },
+    {
+      "series": "On Writing Well",
+      "draft": 24,
+      "all": 24
+    },
+    {
+      "series": "Operating Systems: Three Easy Pieces",
+      "draft": 28,
+      "all": 28
+    },
+    {
+      "series": "Pattern Recognition and Machine Learning",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "Patterns for Parallel Programming",
+      "draft": 6,
+      "all": 6
+    },
+    {
+      "series": "Peopleware",
+      "draft": 20,
+      "all": 20
+    },
+    {
+      "series": "Practical Test Engineering",
+      "draft": 1,
+      "all": 1
+    },
+    {
+      "series": "Practical Vim",
+      "draft": 21,
+      "all": 21
+    },
+    {
+      "series": "Pro Git",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "Probabilistic Graphical Models (Koller & Friedman)",
+      "draft": 21,
+      "all": 21
+    },
+    {
+      "series": "Probabilistic Machine Learning: Advanced Topics",
+      "draft": 36,
+      "all": 36
+    },
+    {
+      "series": "Probabilistic Machine Learning: An Introduction",
+      "draft": 23,
+      "all": 23
+    },
+    {
+      "series": "Probabilistic Reasoning in Intelligent Systems",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "Probability Theory: The Logic of Science",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Probability: Theory and Examples",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "Programming Pearls",
+      "draft": 15,
+      "all": 15
+    },
+    {
+      "series": "PyTorch Internals",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Python Style Guide (PEP 8)",
+      "draft": 7,
+      "all": 7
+    },
+    {
+      "series": "QEMU Embedded Emulation",
+      "draft": 20,
+      "all": 20
+    },
+    {
+      "series": "QEMU Fake Device Driver",
+      "draft": 22,
+      "all": 22
+    },
+    {
+      "series": "QEMU Internals",
+      "draft": 22,
+      "all": 22
+    },
+    {
+      "series": "RISC-V ISA 해부",
+      "draft": 18,
+      "all": 18
+    },
+    {
+      "series": "RISC-V QEMU 심화",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "RISC-V Vector Extension",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "RISC-V 베어메탈 부트",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "RISC-V 임베디드 실습",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Reasoning About Uncertainty",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Refactoring",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Refactoring Catalog (Fowler 2nd ed)",
+      "draft": 61,
+      "all": 61
+    },
+    {
+      "series": "SICP",
+      "draft": 5,
+      "all": 5
+    },
+    {
+      "series": "Science Research Writing",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "Set Theory",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "Seven Concurrency Models in Seven Weeks",
+      "draft": 7,
+      "all": 7
+    },
+    {
+      "series": "Statistical Inference",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Statistical Rethinking",
+      "draft": 17,
+      "all": 17
+    },
+    {
+      "series": "Structured Parallel Programming",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "Style: Lessons in Clarity and Grace",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "System Tracing",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "TDD by Example",
+      "draft": 32,
+      "all": 32
+    },
+    {
+      "series": "TDD by Example — Patterns Deep Dive",
+      "draft": 53,
+      "all": 53
+    },
+    {
+      "series": "TensorRT 심화",
+      "draft": 8,
+      "all": 8
+    },
+    {
+      "series": "The Algebra of Probable Inference",
+      "draft": 5,
+      "all": 5
+    },
+    {
+      "series": "The Art of Concurrency",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "The Art of Multiprocessor Programming",
+      "draft": 18,
+      "all": 18
+    },
+    {
+      "series": "The Art of UNIX Programming",
+      "draft": 20,
+      "all": 20
+    },
+    {
+      "series": "The Bayesian Choice",
+      "draft": 11,
+      "all": 11
+    },
+    {
+      "series": "The Design of Everyday Things",
+      "draft": 7,
+      "all": 7
+    },
+    {
+      "series": "The Elements of Style",
+      "draft": 51,
+      "all": 51
+    },
+    {
+      "series": "The Mythical Man-Month",
+      "draft": 19,
+      "all": 19
+    },
+    {
+      "series": "The Only Grammar Book You'll Ever Need",
+      "draft": 30,
+      "all": 30
+    },
+    {
+      "series": "The Pragmatic Programmer",
+      "draft": 100,
+      "all": 100
+    },
+    {
+      "series": "The Structure of Scientific Revolutions",
+      "draft": 14,
+      "all": 14
+    },
+    {
+      "series": "The Zynq Book",
+      "draft": 13,
+      "all": 13
+    },
+    {
+      "series": "TinyML·Edge AI",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Triton DSL",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "UALink 심화",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "UCIe 심화",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "UML 2.5.1",
+      "draft": 35,
+      "all": 35
+    },
+    {
+      "series": "Understanding Philosophy of Science",
+      "draft": 5,
+      "all": 5
+    },
+    {
+      "series": "Vim 마스터하기",
+      "draft": 9,
+      "all": 9
+    },
+    {
+      "series": "Working Effectively with Legacy Code",
+      "draft": 25,
+      "all": 25
+    },
+    {
+      "series": "XLA·OpenXLA 심화",
+      "draft": 12,
+      "all": 12
+    },
+    {
+      "series": "Yocto Deep Dive",
+      "draft": 1,
+      "all": 1
+    },
+    {
+      "series": "gtest 심화",
+      "draft": 18,
+      "all": 18
+    },
+    {
+      "series": "perf and FlameGraph",
+      "draft": 10,
+      "all": 10
+    },
+    {
+      "series": "pytest 심화",
+      "draft": 18,
+      "all": 18
+    },
+    {
+      "series": "고종석의 문장",
+      "draft": 16,
+      "all": 16
+    },
+    {
+      "series": "리눅스 커널의 구조와 원리",
+      "draft": 25,
+      "all": 25
+    },
+    {
+      "series": "비판적 사고를 위한 논리",
+      "draft": 16,
+      "all": 16
+    },
+    {
+      "series": "우리글 바로쓰기",
+      "draft": 20,
+      "all": 20
+    },
+    {
+      "series": "전문가를 위한 C",
+      "draft": 23,
+      "all": 23
+    },
+    {
+      "series": "전문가를 위한 C++",
+      "draft": 33,
+      "all": 33
+    }
+  ]
+}

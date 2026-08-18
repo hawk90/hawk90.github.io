@@ -2,7 +2,7 @@
 title: "UML 30: 배포 다이어그램 — 노드와 아티팩트의 물리 토폴로지"
 date: 2026-05-03T06:00:00
 description: "3D 박스, 통신 경로, 그 위의 아티팩트 — 운영팀과 개발팀이 같이 보는 다이어그램."
-tags: [UML, Deployment Diagram, Infrastructure, Production]
+tags: [UML, deployment-diagram, Infrastructure, Production]
 series: "UML 2.5.1"
 seriesOrder: 30
 draft: true

@@ -149,11 +149,11 @@ Hard real-time은 *max ≤ deadline*을 요구합니다. Soft는 *p99·p999 ≤ 
 
 `PMU CPU_CYCLES`와 `INST_RETIRED`의 ratio입니다.
 
-```text
-IPC = 0.5  — 스트레스 (memory bound, stall)
-IPC = 1.0  — 정상
-IPC = 2.0+ — 슈퍼스칼라 활용
-```
+| IPC | 해석 |
+|-----|------|
+| 0.5 | 스트레스 (memory bound, stall) |
+| 1.0 | 정상 |
+| 2.0+ | 슈퍼스칼라 활용 |
 
 IPC가 낮으면 *왜 낮은지* 분석합니다. 원인은 cache miss, branch mispredict, stall 등입니다.
 

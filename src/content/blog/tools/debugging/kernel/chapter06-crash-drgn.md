@@ -102,7 +102,7 @@ crash>
 
 ### 기본 명령
 
-```
+```text
 crash> bt                       # 현재 task의 콜스택
 crash> bt -a                    # 모든 CPU
 crash> ps                       # 프로세스 목록
@@ -128,7 +128,7 @@ crash> tree <addr>              # tree 순회 (rbtree)
 
 ### 한 예 — panic 원인 추적
 
-```
+```text
 crash> bt
 PID: 1234     TASK: ffff... CPU: 2  COMMAND: "myprog"
  #0 [ffff...] machine_kexec at ffffffff8104a123
@@ -159,7 +159,7 @@ NULL 역참조 위치 + 소스 줄. `my_module.c:42`의 `*(p + 0x10)`에서 `p =
 
 ### list 순회 — 자료구조
 
-```
+```text
 crash> p init_task
 init_task = $1 = {
   state = 0,
@@ -320,7 +320,7 @@ vmcore 없이 *동작 중 시스템* 분석. 커널 패닉 안 일으키므로 �
 
 ### NULL 역참조
 
-```
+```text
 PANIC: "BUG: kernel NULL pointer dereference, address: 0000000000000010"
 ```
 
@@ -328,7 +328,7 @@ PANIC: "BUG: kernel NULL pointer dereference, address: 0000000000000010"
 
 ### Soft lockup
 
-```
+```text
 PANIC: "Kernel panic - not syncing: softlockup: hung tasks"
 ```
 
@@ -336,7 +336,7 @@ PANIC: "Kernel panic - not syncing: softlockup: hung tasks"
 
 ### Hung task
 
-```
+```text
 PANIC: "Kernel panic - not syncing: hung_task: blocked tasks"
 ```
 
@@ -344,7 +344,7 @@ PANIC: "Kernel panic - not syncing: hung_task: blocked tasks"
 
 ### Use-after-free
 
-```
+```text
 PANIC: "BUG: KASAN: use-after-free in ..."
 ```
 
@@ -352,7 +352,7 @@ PANIC: "BUG: KASAN: use-after-free in ..."
 
 ### Out of memory
 
-```
+```text
 PANIC: "Out of memory: Killed process N (myprog) ..."
 ```
 

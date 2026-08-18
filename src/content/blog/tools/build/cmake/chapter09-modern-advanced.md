@@ -389,6 +389,10 @@ CMake 시리즈는 여기서 마칩니다. Ch 1의 세 줄짜리 CMakeLists.txt�
 - [Modern CMake — Henry Schreiner](https://cliutils.gitlab.io/modern-cmake/) — 가장 권장하는 자료
 - [Professional CMake — Craig Scott](https://crascit.com/professional-cmake/) — 책
 
-## 관련 시리즈
+## 관련 항목
 
-- [GNU Make](/blog/tools/build/gnu-make/chapter01-intro) — CMake가 생성하는 빌드 파일의 기본 모델
+- [Ch 8: Modern CMake 베스트 프랙티스](/blog/tools/build/cmake/chapter08-best-practices) — 이 고급 도구들이 서 있는 설계 원칙
+- [Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — `target_*` 패밀리와 가시성 키워드의 기초
+- [Ch 7: 설치와 패키징](/blog/tools/build/cmake/chapter07-install) — `INSTALL_INTERFACE`가 실제로 쓰이는 export 과정
+- [GNU Make 규칙 분석](/blog/tools/build/gnu-make/chapter02-rules) — `add_custom_command`가 결국 만들어 내는 규칙과 레시피
+- [add_custom_command](https://cmake.org/cmake/help/latest/command/add_custom_command.html) — 출력·의존성 인자의 공식 문서

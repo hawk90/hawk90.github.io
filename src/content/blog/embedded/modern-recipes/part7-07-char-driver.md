@@ -209,14 +209,13 @@ static int my_open(struct inode *ino, struct file *f) {
 
 ## 측정 / 성능 비교
 
-```text
-연산                              시간 (x86_64)
-syscall (open/close)              ~600 ns
-read (1 byte from char driver)    ~700 ns
-copy_to_user (1 KB)               ~400 ns
-ioctl                             ~500 ns
-mmap → user 직접 접근             initial 1 µs, 이후 0
-```
+| 연산 | 시간 (x86_64) |
+|------|---------------|
+| syscall (open/close) | ~600 ns |
+| read (1 byte from char driver) | ~700 ns |
+| copy_to_user (1 KB) | ~400 ns |
+| ioctl | ~500 ns |
+| mmap → user 직접 접근 | initial 1 µs, 이후 0 |
 
 대용량 데이터는 read/write보다 mmap이 거의 항상 더 빠릅니다. Char driver의 read/write는 *작은 메시지나 control용*입니다.
 

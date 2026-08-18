@@ -1,4 +1,5 @@
 ---
+import { getPostUrl } from '../../lib/utils';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -19,7 +20,7 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
     <div class="flex items-center justify-between gap-4">
       {prevPost ? (
         <a
-          href={`/blog/${prevPost.id}`}
+          href={getPostUrl(prevPost)}
           class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
           data-prev-post
         >
@@ -34,7 +35,7 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
 
       {nextPost ? (
         <a
-          href={`/blog/${nextPost.id}`}
+          href={getPostUrl(nextPost)}
           class="flex items-center gap-2 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors"
           data-next-post
         >
@@ -52,7 +53,7 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
     >
       {prevPost ? (
         <a
-          href={`/blog/${prevPost.id}`}
+          href={getPostUrl(prevPost)}
           data-prev-post
           class="series-nav-card group flex flex-col p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-accent)] transition-all"
         >
@@ -72,7 +73,7 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
 
       {nextPost ? (
         <a
-          href={`/blog/${nextPost.id}`}
+          href={getPostUrl(nextPost)}
           data-next-post
           class="series-nav-card group flex flex-col p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-accent)] transition-all sm:items-end sm:text-right"
         >
@@ -101,7 +102,7 @@ const nextPost = currentIndex < posts.length - 1 ? posts[currentIndex + 1] : nul
           return (
             <li>
               <a
-                href={`/blog/${post.id}`}
+                href={getPostUrl(post)}
                 class:list={[
                   'flex items-start gap-2 py-1.5 px-2 -mx-2 text-sm rounded-md transition-colors',
                   isCurrent

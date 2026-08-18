@@ -111,11 +111,10 @@ bootargs=console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait
 
 ### Initramfs vs root on storage
 
-```text
-initramfs       부팅 시 cpio.gz를 RAM에 풀어 임시 rootfs
-                modules 로드 후 진짜 root로 pivot_root
-root direct     U-Boot가 mmcblk0p2를 root로 직접 mount
-```
+| 방식 | 동작 |
+|------|------|
+| initramfs | 부팅 시 cpio.gz를 RAM에 풀어 임시 rootfs를 만들고, modules 로드 후 진짜 root로 pivot_root |
+| root direct | U-Boot가 mmcblk0p2를 root로 직접 mount |
 
 초기 driver 로드 순서가 까다로운 환경(NVMe, NFS root)은 initramfs가 필수입니다.
 
@@ -159,11 +158,7 @@ Silent mode, console 비활성, 비핵심 driver 제거, 최소 init 적용으�
 
 > Boot mode pin strapping 오류
 
-```text
-BOOT_SEL을 잘못 stuff → BootROM이 다른 device에서 무한 retry
-```
-
-증상은 "전원만 들어오고 console에 아무것도 안 나옴"입니다. SoC datasheet의 pin table을 다시 확인합니다.
+BOOT_SEL을 잘못 stuff하면 BootROM이 다른 device에서 무한 retry를 돕니다. 증상은 "전원만 들어오고 console에 아무것도 안 나옴"입니다. SoC datasheet의 pin table을 다시 확인합니다.
 
 > DRAM training 실패
 

@@ -1,14 +1,14 @@
 #!/usr/bin/env node
 // Validate the TikZ -> SVG asset contract without rewriting diagram content.
-// Structural defects fail; accessibility metadata is reported separately so a
-// future metadata migration can be reviewed instead of silently changing 1k files.
+// Structural defects fail. Accessibility is not checked here: diagrams are
+// embedded through <img>, so the accessible name comes from the alt attribute
+// at the reference site, which audit:diagram-accessibility audits instead.
 
 import { mkdir, readdir, readFile, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { load } from 'cheerio';
 
 const root = 'public/images/blog';
-const enforceAccessibility = process.argv.includes('--enforce-accessibility');
 const texFiles = [];
 const svgFiles = [];
 const tempFiles = [];
@@ -35,7 +35,6 @@ const findings = [];
 const orphanSvg = svgFiles
   .filter((file) => !texSet.has(file.replace(/\.svg$/, '')))
   .map((file) => relative('.', file));
-const accessibility = [];
 for (const file of svgFiles) {
   const rel = relative('.', file);
   const source = await readFile(file, 'utf8');
@@ -44,7 +43,6 @@ for (const file of svgFiles) {
   if (!svg.length) findings.push(`${rel}: missing root <svg>`);
   if (!svg.attr('viewBox')) findings.push(`${rel}: missing viewBox`);
   if (!source.includes('xmlns="http://www.w3.org/2000/svg"')) findings.push(`${rel}: missing SVG namespace`);
-  if (!$('title').length && !$('desc').length) accessibility.push(`${rel}: missing <title>/<desc>`);
 }
 for (const file of missingGenerated) findings.push(`${file}: missing generated SVG`);
 
@@ -54,7 +52,6 @@ await writeFile('reports/diagrams/assets.md', [
   `- TeX sources: ${texFiles.length}`,
   `- SVG assets: ${svgFiles.length}`,
   `- Structural findings: ${findings.length}`,
-  `- Accessibility findings: ${accessibility.length}`,
   `- Temporary build files: ${tempFiles.length}`,
   `- SVGs without a sibling TeX source (manual/imported assets): ${orphanSvg.length}`,
   '',
@@ -62,15 +59,11 @@ await writeFile('reports/diagrams/assets.md', [
   ...findings.slice(0, 200).map((item) => `- ${item}`),
   ...(findings.length > 200 ? [`- … +${findings.length - 200} more`] : []),
   '',
-  '## Accessibility findings', '',
-  ...accessibility.slice(0, 30).map((item) => `- ${item}`),
-  ...(accessibility.length > 30 ? [`- … +${accessibility.length - 30} more`] : []),
-  '',
   '## Orphan SVG candidates', '',
   ...orphanSvg.slice(0, 100).map((item) => `- ${item}`),
   ...(orphanSvg.length > 100 ? [`- … +${orphanSvg.length - 100} more`] : []),
   '',
-  '> Accessibility metadata is reported without rewriting SVGs. Use an explicit reviewed migration before adding titles/descriptions in bulk.',
+  '> Accessibility lives at the reference site: see reports/diagrams/references.md.',
 ].join('\n'));
-console.log(`Diagram assets: ${svgFiles.length} SVG, ${findings.length} structural finding(s), ${accessibility.length} accessibility finding(s), ${tempFiles.length} temp file(s).`);
-if (findings.length || (enforceAccessibility && accessibility.length)) process.exitCode = 1;
+console.log(`Diagram assets: ${svgFiles.length} SVG, ${findings.length} structural finding(s), ${tempFiles.length} temp file(s).`);
+if (findings.length) process.exitCode = 1;

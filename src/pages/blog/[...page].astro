@@ -43,7 +43,17 @@ export async function getStaticPaths() {
 const { posts, allPosts, currentPage, totalPages } = Astro.props;
 ---
 
-<BaseLayout title={`Blog - ${SITE_CONFIG.author}`} description={SITE_CONFIG.description}>
+{/*
+  Every page of this archive used to carry the same title and description, so
+  all 73 of them looked identical to a crawler. The page number is the only
+  thing that distinguishes them, so it belongs in both.
+*/}
+<BaseLayout
+  title={`Blog - ${SITE_CONFIG.author}${currentPage > 1 ? ` (${currentPage}/${totalPages})` : ''}`}
+  description={currentPage > 1
+    ? `${SITE_CONFIG.description} — ${currentPage}/${totalPages} 페이지`
+    : SITE_CONFIG.description}
+>
   <section class="py-16">
     <div class="container">
       <div class="lg:flex lg:gap-12">
@@ -65,7 +75,7 @@ const { posts, allPosts, currentPage, totalPages } = Astro.props;
           <!-- Posts Grid -->
           <div class="grid gap-6 md:grid-cols-2">
             {posts.map((post) => (
-              <PostCard post={post} />
+              <PostCard post={post} headingLevel={2} />
             ))}
           </div>
 

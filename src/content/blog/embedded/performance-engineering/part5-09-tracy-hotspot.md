@@ -85,14 +85,14 @@ hotspot perf.data
 
 GUI는 다음 view를 한 화면에 띄웁니다.
 
-```text
-Summary       — 전체 통계, 시스템 정보
-Bottom-Up     — leaf 함수 순위
-Top-Down      — root부터 호출 트리
-Flamegraph    — 내장 flamegraph (수집 없이 즉시)
-Caller/Callee — 특정 함수의 호출 관계
-Off-CPU       — sched switch가 같이 수집되면 표시
-```
+| View | 내용 |
+|------|------|
+| Summary | 전체 통계, 시스템 정보 |
+| Bottom-Up | leaf 함수 순위 |
+| Top-Down | root부터 호출 트리 |
+| Flamegraph | 내장 flamegraph (수집 없이 즉시) |
+| Caller/Callee | 특정 함수의 호출 관계 |
+| Off-CPU | sched switch가 같이 수집되면 표시 |
 
 Flamegraph를 별도 스크립트 없이 GUI에서 바로 그릴 수 있고, 클릭으로 source line까지 navigate됩니다. perf 결과를 자주 본다면 작업 효율이 크게 올라갑니다.
 
@@ -209,22 +209,11 @@ macOS와 iOS에는 Instruments가 표준 도구입니다. Time Profiler, System 
 
 ## 시나리오 — 미디어 처리 pipeline 튜닝
 
-```text
-1. perf record로 hot 함수 식별
-   → decoder, filter, encoder가 골고루 hot
-
-2. Coz로 어디가 진짜 병목인지 확인
-   → encoder를 10% 빠르게 하면 전체 8% 향상
-      decoder를 10% 빠르게 해도 전체 1% 향상
-
-3. encoder에 Tracy ZoneScoped 심기
-   → 어느 phase가 ns 단위로 오래 걸리는지
-
-4. 발견한 phase를 uftrace로 호출 흐름 추적
-   → 의외의 memcpy가 보임
-
-5. memcpy 제거 후 다시 1번부터 측정
-```
+1. **`perf record`로 hot 함수 식별** — decoder, filter, encoder가 골고루 hot하게 나옵니다.
+2. **Coz로 어디가 진짜 병목인지 확인** — encoder를 10% 빠르게 하면 전체가 8% 향상되지만, decoder를 10% 빠르게 해도 전체는 1%만 향상됩니다.
+3. **encoder에 Tracy `ZoneScoped` 심기** — 어느 phase가 ns 단위로 오래 걸리는지 확인합니다.
+4. **발견한 phase를 uftrace로 호출 흐름 추적** — 의외의 `memcpy`가 보입니다.
+5. **`memcpy` 제거 후 다시 1번부터 측정합니다.**
 
 이 흐름이 일반적인 모던 profiling cycle입니다.
 

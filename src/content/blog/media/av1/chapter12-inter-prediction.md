@@ -2,7 +2,7 @@
 title: "Ch 12: Inter 예측"
 date: 2026-05-16T13:00:00
 description: "AV1의 Inter 예측 — Motion Vector, 1/8 픽셀 정밀도, 보간 필터, MV 예측 시스템."
-tags: [AV1, Video, Codec, Inter, Motion Vector]
+tags: [AV1, Video, Codec, Inter, motion-vector]
 series: "AV1"
 seriesOrder: 12
 draft: true

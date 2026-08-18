@@ -17,6 +17,6 @@
 | AP-O 관측성 | baseline_established | security, repository, performance |
 | AP-A 콘텐츠 | baseline_established | metadata, information_architecture, localization, search_seo, ux, performance, observability, quality, security |
 
-- Ready to activate: AP-R 저장소·운영, AP-T 품질·테스트
-- Activation exceptions: 1
+- Ready to activate: AP-R 저장소·운영, AP-T 품질·테스트, AP-M 메타데이터
+- Activation exceptions: 2
 - Graph findings: 0

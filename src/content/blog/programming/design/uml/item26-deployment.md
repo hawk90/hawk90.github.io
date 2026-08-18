@@ -2,7 +2,7 @@
 title: "UML 26: 배포 — 물리 토폴로지와 노드"
 date: 2026-05-03T02:00:00
 description: "코드가 실제로 도는 곳 — 노드, 통신 경로, 그리고 그 위의 아티팩트."
-tags: [UML, Deployment, Architecture, Distributed Systems]
+tags: [UML, Deployment, Architecture, distributed-systems]
 series: "UML 2.5.1"
 seriesOrder: 26
 draft: true

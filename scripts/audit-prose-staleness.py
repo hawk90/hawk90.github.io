@@ -23,6 +23,7 @@ qualification 진행" 같은 *이미 지난 미래 시제*가 어떤 자동화�
 
 Usage:
   audit-prose-staleness.py                      # 전체 published
+  audit-prose-staleness.py --include-drafts     # published + draft 원고
   audit-prose-staleness.py <path> [<path> ...]  # 특정 파일·디렉토리
   audit-prose-staleness.py --as-of 2027-01-01   # 가상 기준일(테스트)
 
@@ -54,7 +55,7 @@ TOKEN = re.compile(
 DATED = re.compile(r"((?:19|20)[0-9]{2})\s*년\s*현재|[Aa]s of\s+((?:19|20)[0-9]{2})")
 
 
-def iter_published(targets):
+def iter_content(targets, include_drafts=False):
     for t in targets:
         p = Path(t).resolve()
         files = [p] if p.is_file() else sorted(p.rglob("*.md"))
@@ -63,9 +64,10 @@ def iter_published(targets):
                 text = f.read_text(encoding="utf-8")
             except (OSError, UnicodeDecodeError):
                 continue
-            if re.search(r"^draft:\s*true", text, re.MULTILINE):
+            is_draft = bool(re.search(r"^draft:\s*true", text, re.MULTILINE))
+            if is_draft and not include_drafts:
                 continue
-            yield f, text
+            yield f, text, "draft" if is_draft else "published"
 
 
 def prose_lines(text):
@@ -107,26 +109,28 @@ def main():
     ap.add_argument("targets", nargs="*", help="파일·디렉토리 (기본=전체 published)")
     ap.add_argument("--as-of", help="기준일 YYYY-MM-DD (기본=오늘)")
     ap.add_argument("--json", help="결과 JSON 출력 경로")
+    ap.add_argument("--include-drafts", action="store_true", help="미공개 draft 원고도 검사")
     args = ap.parse_args()
     as_of = date.fromisoformat(args.as_of) if args.as_of else date.today()
     targets = args.targets or [DEFAULT_TARGET]
 
     hits = []  # (relpath, lineno, reason, note, text)
-    for f, text in iter_published(targets):
+    for f, text, status in iter_content(targets, args.include_drafts):
         rel = f.relative_to(REPO_ROOT)
         for i, line in prose_lines(text):
             r = scan_line(line, as_of)
             if r:
-                hits.append((str(rel), i, r[0], r[1], line.strip()[:100]))
+                hits.append((str(rel), i, r[0], r[1], line.strip()[:100], status))
 
     print("=== Prose Staleness Audit ===")
     print(f"  기준일: {as_of.isoformat()}   후보: {len(hits)}")
     if args.json:
         Path(args.json).write_text(json.dumps({
             "asOf": as_of.isoformat(),
+            "includeDrafts": args.include_drafts,
             "findings": [
-                {"file": rel, "line": line, "kind": kind, "note": note, "text": text}
-                for rel, line, kind, note, text in hits
+                {"file": rel, "line": line, "kind": kind, "note": note, "text": text, "status": status}
+                for rel, line, kind, note, text, status in hits
             ],
         }, ensure_ascii=False, indent=2) + "\n", encoding="utf-8")
     if not hits:
@@ -137,13 +141,13 @@ def main():
     dat = [h for h in hits if h[2] == "dated"]
     if fut:
         print(f"\n--- ⏳ 미래 시제 ({len(fut)}) — 이미 지났는지 확인 ---")
-        for rel, ln, _, note, txt in fut:
-            print(f"  {rel}:{ln}  [{note}]")
+        for rel, ln, _, note, txt, status in fut:
+            print(f"  {rel}:{ln}  [{status}; {note}]")
             print(f"      {txt}")
     if dat:
         print(f"\n--- 📅 날짜 앵커 ({len(dat)}) ---")
-        for rel, ln, _, note, txt in dat:
-            print(f"  {rel}:{ln}  [{note}]")
+        for rel, ln, _, note, txt, status in dat:
+            print(f"  {rel}:{ln}  [{status}; {note}]")
             print(f"      {txt}")
 
     print("\n후보 = 오류 아님. 각 위치를 열어 *지금도 유효한지* 확인 후 갱신.")

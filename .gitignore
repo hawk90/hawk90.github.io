@@ -28,7 +28,13 @@ texput.log
 /RISCV_STORYBOARD.md
 /INTERACTIVE_VISUALIZATIONS.md
 /READING_ROADMAP.md
-/docs/
+# Personal working notes (storyboards, reading inventories) stay untracked.
+# Written as `/docs/*` rather than `/docs/`: git does not descend into an
+# excluded directory, so a negation below it would never be read.
+/docs/*
+# Runbooks are an operational surface, not notes. The recovery runbook lives
+# here and two audits read it, so it has to survive a fresh clone.
+!/docs/runbooks/
 
 
 # environment variables

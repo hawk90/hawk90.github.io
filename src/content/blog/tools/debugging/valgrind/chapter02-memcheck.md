@@ -82,7 +82,7 @@ if (x > 0) { /* ... */ }   // Memcheck: Conditional jump depends on uninitialize
 valgrind --track-origins=yes ./myapp
 ```
 
-```
+```text
 Conditional jump or move depends on uninitialised value(s)
    at 0x40115E: main (test.c:5)
  Uninitialised value was created by a stack allocation
@@ -137,7 +137,7 @@ valgrind --gen-suppressions=all ./myapp
 
 각 보고서마다 *suppression 템플릿*을 함께 출력합니다.
 
-```
+```text
 {
    <insert_a_suppression_name_here>
    Memcheck:Leak
@@ -233,7 +233,7 @@ gcc -O2 main.c -o myapp        # 최적화 → 줄 번호가 부정확
 
 `-g`가 *필수*입니다. 없으면 보고서가 *주소만* 나옵니다.
 
-```
+```text
 ==12345== at 0x4012a3: ??? (in /path/to/myapp)
 ```
 
@@ -299,7 +299,7 @@ p[10] = 'x';   // ❌ off-by-one
 free(p);
 ```
 
-```
+```text
 ==12345== Invalid write of size 1
 ==12345==    at 0x10918A: main (main.c:5)
 ==12345==  Address 0x4a0c04a is 0 bytes after a block of size 10 alloc'd
@@ -392,3 +392,11 @@ int x = uninitialized_func();   // -O2가 사용처 없으면 호출도 제거
 - [Memcheck User Manual](https://valgrind.org/docs/manual/mc-manual.html)
 - [Valgrind Core Options](https://valgrind.org/docs/manual/manual-core.html)
 - [Memcheck Command-line Options](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.options)
+
+## 관련 항목
+
+- [Ch 1: Valgrind 도구 개요](/blog/tools/debugging/valgrind/chapter01-intro) — 이전 글. Memcheck·Helgrind·DRD의 역할 분담
+- [Ch 3: Valgrind Leak Report 분석](/blog/tools/debugging/valgrind/chapter03-leak-report) — 다음 글. `--leak-check=full`이 뱉은 네 가지 누수 분류 읽기
+- [ASan과 UBSan 실전 설정](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan) — Memcheck와 같은 오류를 재컴파일 방식으로 잡는 쪽. 컴파일 옵션 비교에 좋습니다
+- [GDB vs LLDB 분석](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — `--vgdb=yes`로 붙일 디버거 쪽 준비
+- [Memcheck User Manual](https://valgrind.org/docs/manual/mc-manual.html) — 옵션의 정확한 의미와 기본값

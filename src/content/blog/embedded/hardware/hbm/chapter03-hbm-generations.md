@@ -181,7 +181,6 @@ HBM4는 *흐름을 바꿉니다*. *pin rate를 더 끌어올리지 않고*, *bus
 |------|------|------|
 | 1. per-pin 14~16 Gbps + PAM | 포기 | PAM4 SerDes로 power·area 폭증, DRAM die의 IO 회로가 GDDR6X 수준으로 복잡, 발열·yield 모두 악화 |
 | 2. bus 2048-bit + per-pin 그대로 | 채택 | microbump pitch 55 → 30 μm 축소, hybrid bonding으로 9 μm까지 가능(HBM4P), 면적·전력 부담 분산 |
-```
 
 hybrid bonding은 *솔더 없이 구리끼리 접합*하는 기술입니다. *microbump pitch*가 *9 μm*로 줄어 *같은 면적에 2048 신호*가 들어갑니다. Samsung·SK Hynix·TSMC가 모두 *2025년 양산*을 목표로 합니다.
 

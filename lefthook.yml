@@ -18,6 +18,15 @@ pre-commit:
         규칙을 위반한 파일이 있습니다 (CLAUDE.md §6·§10 참조).
         긴급 시 `git commit --no-verify`로 우회 가능 (CLAUDE.md 위반 책임 본인).
 
+    # 태그는 URL 세그먼트다. "Secure Boot"는 /tags/secure%20boot로 나간다.
+    # 막지 않고 고친다 — 의도는 분명하고 수리는 기계적이다. 바뀐 내용은
+    # 출력에 남고 stage_fixed로 같은 커밋에 포함된다.
+    tag-shape:
+      glob:
+        - "src/content/blog/**/*.md"
+      run: node scripts/normalize-tag-shape.mjs --apply --quiet {staged_files}
+      stage_fixed: true
+
     # 새로 추가된 챕터에 draft·series·title 기본 frontmatter 누락 검사
     frontmatter-required:
       glob:

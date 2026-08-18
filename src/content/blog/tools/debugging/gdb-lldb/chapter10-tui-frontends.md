@@ -85,7 +85,7 @@ cgdb는 GDB를 *서브프로세스*로 띄우고 stdin/stdout을 가로챕니다
 
 GDB 내장 TUI보다 *훨씬* 안정적입니다. 패키지 매니저로 바로 설치되므로 첫 선택지로 추천.
 
-```
+```text
 ~/.cgdb/cgdbrc            # 설정
 set winminheight=3
 set winsplit=top_big
@@ -133,13 +133,7 @@ class MyPanel(Dashboard.Module):
 
 ## gef / pwndbg / peda — 보안·exploit 디버깅
 
-세 가지 모두 보안 분석가의 작업을 GDB 위에서 빠르게 하기 위한 Python 확장입니다.
-
-| | 특징 | 권장 |
-|---|------|------|
-| **gef** | 한 파일 스크립트, 가벼움, ARM/MIPS/PPC도 지원 | 일반 보안 |
-| **pwndbg** | 가장 활발한 유지보수, 힙 분석 깊음 | CTF/exploit |
-| **peda** | 가장 오래됨, x86 중심 | 레거시 자료 호환 |
+세 가지 모두 보안 분석가의 작업을 GDB 위에서 빠르게 하기 위한 Python 확장입니다. 설치하면 정지할 때마다 레지스터·스택·디스어셈블·코드 컨텍스트가 자동으로 한 화면에 뜹니다.
 
 ```bash
 # gef
@@ -151,122 +145,21 @@ $ git clone https://github.com/pwndbg/pwndbg
 $ cd pwndbg && ./setup.sh
 ```
 
-설치 후 정지할 때마다 레지스터·스택·디스어셈블·코드 컨텍스트가 자동으로 한 화면에 뜹니다. CTF·exploit 분석에 사실상 표준.
+이 장의 관심사는 *TUI*이므로 여기서는 셋의 성격만 구분해 둡니다. gef는 한 파일짜리라 가볍고 ARM·MIPS·PPC까지 따라오며, pwndbg는 힙 분석이 가장 깊어 CTF·exploit에서 사실상 표준입니다. peda는 x86 중심의 오래된 도구라 지금은 옛 자료를 따라갈 때 씁니다.
 
-### 자주 쓰는 명령 (pwndbg/gef 공통)
+셋의 상세 비교와 `context`·`vmmap`·`heap`·`checksec` 같은 공통 명령표는 [GDB Extension and IDE Ch 6: GDB 프런트엔드 비교](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 정리돼 있습니다.
 
-| 명령 | 용도 |
-|------|------|
-| `context` | 종합 컨텍스트 다시 그리기 |
-| `vmmap` | 매핑된 메모리 영역 |
-| `heap` | glibc heap의 청크 / bin / arena |
-| `bins` | tcache / fastbin / smallbin / largebin |
-| `xinfo <addr>` | 주소가 어떤 영역인지 |
-| `pattern create 100` | cyclic pattern 생성 (BOF 오프셋용) |
-| `pattern search 0x6161616a` | 패턴에서 오프셋 검색 |
-| `checksec` | NX / PIE / Canary / RELRO 확인 |
-| `ropper / ropgadget` | gadget 검색 |
-| `aslr` | ASLR on/off |
-| `dt <struct>` | 구조체 시각화 |
-
-CTF에서는 거의 `pwndbg + pwntools`가 표준 조합. exploit 스크립트와 디버거가 한 워크플로에 묶입니다.
-
-> 일반 애플리케이션 디버깅에는 다소 시끄러울 수 있습니다. 보안 분석·CTF 외에는 gdb-dashboard나 cgdb가 더 어울립니다.
+주의할 점은 하나입니다. 이 확장들은 매 정지마다 큰 컨텍스트를 쏟아내기 때문에, 보안 분석이 아닌 일반 애플리케이션 디버깅에서는 화면이 오히려 시끄러워집니다. 그럴 때는 앞의 gdb-dashboard나 cgdb 쪽이 맞습니다.
 
 ## VSCode + cppdbg / CodeLLDB
 
-가장 많이 쓰는 IDE 프런트엔드. `launch.json` 한 파일로 설정.
+터미널을 벗어나면 VSCode가 가장 많이 쓰는 프런트엔드입니다. GDB 사용자 입장에서 알아 둘 것은 *두 익스텐션이 GDB와 대화하는 방식이 다르다*는 점입니다.
 
-```json
-{
-  "version": "0.2.0",
-  "configurations": [
-    {
-      "name": "GDB launch",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/my_program",
-      "args": ["arg1"],
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "MIMode": "gdb",
-      "setupCommands": [
-        { "text": "set print pretty on" },
-        { "text": "-enable-pretty-printing", "ignoreFailures": true }
-      ],
-      "environment": [
-        { "name": "ASAN_OPTIONS", "value": "halt_on_error=1" }
-      ]
-    },
-    {
-      "name": "LLDB launch",
-      "type": "lldb",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/my_program",
-      "args": [],
-      "cwd": "${workspaceFolder}"
-    },
-    {
-      "name": "GDB attach to PID",
-      "type": "cppdbg",
-      "request": "attach",
-      "program": "${workspaceFolder}/build/my_program",
-      "processId": "${command:pickProcess}",
-      "MIMode": "gdb"
-    },
-    {
-      "name": "GDB remote (gdbserver)",
-      "type": "cppdbg",
-      "request": "launch",
-      "program": "${workspaceFolder}/build/my_program",
-      "MIMode": "gdb",
-      "miDebuggerServerAddress": "192.168.1.20:2345",
-      "stopAtEntry": false,
-      "cwd": "${workspaceFolder}",
-      "setupCommands": [
-        { "text": "set sysroot /opt/target-rootfs" }
-      ]
-    }
-  ]
-}
-```
+`cppdbg`는 Microsoft가 만든 C/C++ 익스텐션으로, GDB와 *MI 프로토콜*로 통신합니다. GDB의 명령이 그대로 전달되므로 `.gdbinit`의 pretty-printer 설정이 살아 있고, `setupCommands`로 GDB 명령을 직접 밀어 넣을 수도 있습니다. `CodeLLDB`는 LLDB의 DAP 서버를 직접 띄우는 쪽이라 macOS·Rust·Swift에서 강합니다.
 
-- `cppdbg` 익스텐션(C/C++) — Microsoft가 만든 cppdbg는 GDB/LLDB를 둘 다 다루지만 *MI 프로토콜*로 통신. 그래서 GDB와 더 잘 맞습니다.
-- `CodeLLDB` 익스텐션 — LLDB의 *DAP 서버*를 직접 띄움. macOS·Rust·Swift 디버깅에 우수.
+MI를 한 겹 거치기 때문에 생기는 어긋남도 있습니다. 조건부 breakpoint의 표현식이 GDB에서 직접 칠 때와 미묘하게 다르게 평가되는 경우가 있고, `fork` 추적은 GDB에서 `set follow-fork-mode`로 다루던 만큼 정교하지 않습니다. 콘솔 입력이 필요한 프로그램은 `"externalConsole": true`가 필요하고, core dump는 `coreDumpPath`를 따로 줘야 합니다.
 
-### 단축키
-
-| 단축키 | 동작 |
-|--------|------|
-| `F5` | 시작/계속 |
-| `F10` | next |
-| `F11` | step in |
-| `Shift+F11` | step out (finish) |
-| `F9` | 줄에 브레이크포인트 토글 |
-| `Shift+F5` | 종료 |
-| `Ctrl+Shift+F5` | 재시작 |
-| `Ctrl+K Ctrl+I` | 호버 |
-
-### 조건부 BP / Logpoint (VSCode 고유)
-
-소스 줄 옆 BP 점을 우클릭 → Edit Breakpoint.
-
-- **Expression** — `count > 10 && status == "error"` 같은 조건.
-- **Hit Count** — `>= 5`, `% 10` 등.
-- **Log Message** — 메시지를 평가만 하고 *멈추지 않음*. `{varname}` 형태로 표현식 보간.
-
-코드를 *전혀 수정하지 않고* 임시 로깅을 추가할 수 있어 운영에서도 강력. GDB 측에서는 `commands silent printf`로 자동 변환되어 들어갑니다.
-
-### Watch / Data Inspection
-
-좌측 Variables 패널에 *Locals*, *Args*, *Static*, *Registers*가 자동 분류. 마우스 호버로 변수 표시. 큰 구조체는 트리 펼치기. pretty-printer가 활성화되어 있으면 *그 출력*이 트리 노드로 보입니다.
-
-### 한계
-
-- 콘솔 입력이 필요한 프로그램(stdin)이 까다로움. `"externalConsole": true`로 별도 터미널.
-- Conditional breakpoint의 표현식이 GDB와 미묘하게 다를 때가 있음 (cppdbg가 MI를 통해 전달하면서 일부 평가 차이).
-- 멀티프로세스(fork) 추적은 cppdbg가 GDB만큼 정교하지 못함.
-- core dump 분석은 별 설정 필요 (`coreDumpPath` 옵션).
+`launch.json` 전체 예시(launch·attach·gdbserver 원격), 단축키표, Logpoint와 Watch 패널 사용법은 [GDB Extension and IDE Ch 6](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 정리돼 있습니다.
 
 ## Neovim — nvim-dap
 
@@ -334,7 +227,7 @@ Neovim 안에서 디버그 패널 띄우고, REPL로 표현식 평가. Vim 키�
 
 VSCode·Neovim·Emacs(dap-mode)·Sublime·Helix가 모두 *같은* DAP를 씁니다. 따라서 한 어댑터(`cppdbg`)를 설치하면 어느 에디터든 동일한 디버깅 경험을 얻을 수 있습니다. RSP가 *디버거 ↔ 타깃* 표준이라면 DAP는 *IDE ↔ 디버거* 표준.
 
-```
+```text
 [에디터] ← DAP → [adapter (예: cppdbg)] ← MI → [GDB]
                                               ↑ RSP
                                             [gdbserver / OpenOCD]
@@ -438,38 +331,13 @@ ViewImage()
 
 컴퓨터 비전·비디오 코덱·머신러닝 디버깅에서 가시화는 *콜스택을 100번 들여다보는 것보다* 빠릅니다.
 
-## Cortex-Debug — VSCode의 임베디드 확장
+## Cortex-Debug — Cortex-M을 붙일 때
 
-[Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)가 OpenOCD/J-Link/ST-Link/Black Magic Probe를 *자동으로* 띄우고 GDB를 연결합니다.
+Cortex-M 펌웨어라면 [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)가 IDE 쪽 표준입니다. OpenOCD·J-Link·ST-Link·Black Magic Probe를 자동으로 띄우고 GDB를 붙여 주므로, [Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)에서 손으로 하던 gdbserver 연결이 설정 한 덩어리로 줄어듭니다.
 
-```json
-{
-  "type": "cortex-debug",
-  "request": "launch",
-  "name": "Debug nRF52",
-  "executable": "${workspaceFolder}/build/firmware.elf",
-  "servertype": "jlink",
-  "device": "nRF52840_xxAA",
-  "interface": "swd",
-  "rtos": "FreeRTOS",
-  "svdFile": "${workspaceFolder}/svd/nrf52840.svd",
-  "rttConfig": {
-    "enabled": true,
-    "decoders": [
-      { "port": 0, "type": "console", "label": "RTT0" }
-    ]
-  }
-}
-```
+이 시리즈의 관심사는 GDB 쪽이므로 여기서는 GDB 사용자가 얻는 것만 짚습니다. SVD 파일을 읽어 peripheral 레지스터를 비트 단위로 펼쳐 주고, Segger RTT 출력을 콘솔에 얹어 주며, J-Link에서는 CPU를 세우지 않고도 변수를 갱신합니다.
 
-핵심 기능.
-
-- **SVD 파싱** — `nrf52840.svd` 같은 ARM SVD 파일에서 peripheral 레지스터를 자동 인식. RCC, GPIO, USART 같은 MMIO를 *비트 단위로* 펼쳐 보여 줍니다.
-- **RTT 콘솔** — 위 설정으로 Segger RTT가 IDE 내장 콘솔에 자동 출력.
-- **Live Watch** — CPU 정지 없이 백그라운드 SWD로 변수 갱신 (J-Link 한정).
-- **Disassembly + Source 동기** — `-Og`에서도 비교적 안정.
-
-Cortex-M 펌웨어 디버깅의 IDE 표준 도구.
+`launch.json` 전체 예시와 servertype별 차이는 [GDB Extension and IDE Ch 6](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 있습니다.
 
 ## 어느 걸 골라야 하나
 

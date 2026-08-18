@@ -94,7 +94,7 @@ Liu & Layland (1973)에 따르면 **짧은 주기 task에 더 높은 priority**�
 
 n개 task의 utilization 합이 다음 한계 안이면 **항상 deadline 만족이 보장됩니다**.
 
-```
+```text
 U = Σ (Ci / Ti) ≤ n × (2^(1/n) − 1)
 ```
 

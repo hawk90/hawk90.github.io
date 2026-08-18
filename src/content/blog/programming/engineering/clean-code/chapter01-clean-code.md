@@ -2,7 +2,7 @@
 title: "Ch 1: 클린 코드"
 date: 2026-05-11T01:00:00
 description: "코드는 사라지지 않는다. 좋은 코드를 정의하려는 거장들의 답을 모은 첫 챕터. 보이스카우트 규칙."
-tags: [CleanCode, Engineering, Robert Martin]
+tags: [CleanCode, Engineering, robert-martin]
 series: "Clean Code"
 seriesOrder: 1
 draft: true

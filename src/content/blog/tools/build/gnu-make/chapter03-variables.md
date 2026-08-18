@@ -594,3 +594,12 @@ SOURCES += $(wildcard *.cpp)  # 이제 `:=`
 - [GNU Make Manual — Using Variables](https://www.gnu.org/software/make/manual/html_node/Using-Variables.html)
 - [GNU Make Manual — Automatic Variables](https://www.gnu.org/software/make/manual/html_node/Automatic-Variables.html)
 - [GNU Make Manual — Special Variables](https://www.gnu.org/software/make/manual/html_node/Special-Variables.html)
+
+## 관련 항목
+
+- [Ch 2: 규칙](/blog/tools/build/gnu-make/chapter02-rules) — 변수가 들어갈 자리인 타겟·의존성·레시피의 구조.
+- [Ch 4: 패턴 규칙](/blog/tools/build/gnu-make/chapter04-pattern-rules) — 여기서 미룬 stem `$*`과 자동 변수가 패턴과 만나는 자리.
+- [Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions) — 실전 예시에 미리 등장한 `wildcard`와 `$(SRCS:%.c=%.o)` 치환의 상세.
+- [CMake Ch 2: 언어](/blog/tools/build/cmake/chapter02-language) — CMake의 `set`·리스트·캐시가 Make의 `=`/`:=`와 어떻게 다른지.
+- [CMake Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options) — `make CC=clang` 같은 명령줄 덮어쓰기에 대응하는 CMake 쪽 장치.
+- [GNU Make Manual](https://www.gnu.org/software/make/manual/) — 변수 확장 규칙의 원문.

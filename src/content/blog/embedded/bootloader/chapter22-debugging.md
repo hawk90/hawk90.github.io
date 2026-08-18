@@ -248,48 +248,60 @@ reserved-memory {
 
 **정보:**
 
-- bdinfo                # 보드 정보·메모리 맵
-- version               # U-Boot 버전
-- coninfo               # 콘솔 device 정보
-- env info              # env 저장 상태
-- fdt addr ${fdt_addr_r}; fdt print /  # DTB 트리
+```text
+bdinfo                # 보드 정보·메모리 맵
+version               # U-Boot 버전
+coninfo               # 콘솔 device 정보
+env info              # env 저장 상태
+fdt addr ${fdt_addr_r}; fdt print /  # DTB 트리
+```
 
 **메모리:**
 
-- md.l <addr> <count>   # 32-bit 단위 read
-- mw.l <addr> <val>     # 32-bit 단위 write
-- mtest <start> <end>   # 패턴 테스트
-- cmp.l <a> <b> <count> # 두 영역 비교
+```text
+md.l <addr> <count>   # 32-bit 단위 read
+mw.l <addr> <val>     # 32-bit 단위 write
+mtest <start> <end>   # 패턴 테스트
+cmp.l <a> <b> <count> # 두 영역 비교
+```
 
 **저장 매체:**
 
-- mmc list / mmc info / mmc part
-- mmc read <addr> <blk> <cnt>
-- fatls mmc 0:1
-- ext4ls mmc 0:2 /boot/
+```text
+mmc list / mmc info / mmc part
+mmc read <addr> <blk> <cnt>
+fatls mmc 0:1
+ext4ls mmc 0:2 /boot/
+```
 
 **env:**
 
-- printenv [var]
-- setenv var "value"
-- saveenv
-- env default -f -a    # factory env로 복구
+```text
+printenv [var]
+setenv var "value"
+saveenv
+env default -f -a    # factory env로 복구
+```
 
 **부팅:**
 
-- bootm <addr>          # uImage/FIT
-- booti <kernel> <ramdisk:size> <fdt>   # ARM64 raw Image
-- bootz <kernel> <ramdisk:size> <fdt>   # ARM32 zImage
-- bootefi <addr> [fdt]  # EFI PE
-- reset                 # 재부팅
+```text
+bootm <addr>          # uImage/FIT
+booti <kernel> <ramdisk:size> <fdt>   # ARM64 raw Image
+bootz <kernel> <ramdisk:size> <fdt>   # ARM32 zImage
+bootefi <addr> [fdt]  # EFI PE
+reset                 # 재부팅
+```
 
 **진단:**
 
-- go <addr>             # raw 점프 (디버깅 전용)
-- bdinfo
-- date                  # RTC 확인
-- i2c probe             # I2C 버스 스캔
-- usb start; usb tree
+```text
+go <addr>             # raw 점프 (디버깅 전용)
+bdinfo
+date                  # RTC 확인
+i2c probe             # I2C 버스 스캔
+usb start; usb tree
+```
 
 ## 시리즈 마무리
 

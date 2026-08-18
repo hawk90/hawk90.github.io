@@ -2,7 +2,7 @@
 title: "항목 4: 추론된 타입을 확인하는 방법을 알아두라"
 date: 2026-05-04T04:00:00
 description: "IDE 호버부터 컴파일 에러 트릭, Boost.TypeIndex, godbolt, static_assert + concepts까지. 상황별 타입 확인 도구 모음."
-tags: [C++, Type Deduction, Debugging]
+tags: [C++, type-deduction, Debugging]
 series: "Effective Modern C++"
 seriesOrder: 4
 draft: true

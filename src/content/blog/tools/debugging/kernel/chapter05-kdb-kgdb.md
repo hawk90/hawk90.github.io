@@ -26,7 +26,7 @@ kdb는 *간단한 명령* (bt, ps, mem 등). kgdb는 *full gdb*. 함께 활성�
 
 ## 빌드 옵션
 
-```
+```text
 CONFIG_KGDB=y
 CONFIG_KGDB_SERIAL_CONSOLE=y
 CONFIG_KGDB_KDB=y          # kdb도
@@ -97,7 +97,7 @@ user-space gdb와 *같은 인터페이스*. step/next/bt/print 모두.
 
 타깃의 `/etc/default/grub`에 옵션 추가:
 
-```
+```text
 GRUB_CMDLINE_LINUX="kgdboc=ttyS0,115200 console=ttyS0,115200"
 ```
 
@@ -178,7 +178,7 @@ GUI 없는 임베디드·서버 디버깅에서 *시리얼 콘솔만으로* 분�
 
 VMware에서 *named pipe* 시리얼:
 
-```
+```text
 # .vmx
 serial0.present = "TRUE"
 serial0.fileType = "pipe"
@@ -220,7 +220,7 @@ $ cat /sys/fs/pstore/dmesg-ramoops-0
 
 시리얼 대신 *UDP over Ethernet*. 매우 빠름.
 
-```
+```text
 kgdbwait kgdboe=@<host-ip>/eth0,@<target-ip>
 ```
 

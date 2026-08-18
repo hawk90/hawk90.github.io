@@ -38,13 +38,12 @@ routing table, config object, kernel module 목록처럼 *읽기는 자주, 쓰�
 
 핵심 보장은 *모든 진행 중 reader가 끝난 후*에만 옛 객체가 free된다는 점입니다.
 
-```text
-RCU의 trade-off
-- reader O(1), 0 contention
-- writer는 grace period 만큼 wait
-- 메모리 사용량 (한순간 old + new 동시 존재)
-- writer가 빈번하면 RWLock이 더 나음
-```
+RCU의 trade-off는 네 가지로 정리됩니다.
+
+- reader는 O(1)이고 contention이 0입니다.
+- writer는 grace period 만큼 기다립니다.
+- 한순간 old와 new가 동시에 존재하므로 메모리를 더 씁니다.
+- writer가 빈번하면 RWLock이 더 낫습니다.
 
 ## 코드 / 실제 사용 예
 

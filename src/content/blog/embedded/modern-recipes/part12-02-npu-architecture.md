@@ -29,12 +29,9 @@ Fully connected: sum(w_i × x_i) over i
 
 NPU는 *수백~수천 개의 MAC unit*을 격자로 배치하고 cycle마다 한 번씩 굴립니다.
 
-```text
-Systolic array (TPU style):
-  Weight가 미리 load됨
-  Input이 한쪽에서 흘러 들어와 격자를 통과
-  각 cell에서 MAC, 결과는 옆 cell로
+TPU 계열의 systolic array는 weight를 격자에 미리 load해 둡니다. Input은 한쪽 끝에서 흘러 들어와 격자를 통과하고, 각 cell은 자기 자리에서 MAC 연산을 한 뒤 결과를 옆 cell로 넘깁니다.
 
+```text
   X X X X
   X X X X     ← 16 MAC 격자
   X X X X     매 cycle 16 × 1 = 16 MAC
@@ -253,12 +250,7 @@ With Ethos-U55:        ~6 ms inference, 80 mW
 
 > 모든 layer가 NPU에서 돌아간다는 가정
 
-```text
-Unsupported op (예: Custom activation) → CPU fallback
-→ NPU·CPU 사이 데이터 이동 비용으로 oh 무 의미
-```
-
-Vela report로 *어느 layer가 fallback*인지 확인. 모델을 NPU-friendly로 재설계.
+Custom activation처럼 지원되지 않는 op가 하나라도 끼면 그 layer는 CPU로 fallback합니다. 이렇게 되면 NPU와 CPU 사이를 오가는 데이터 이동 비용 때문에 가속 자체가 무의미해집니다. Vela report로 *어느 layer가 fallback*인지 확인하고, 모델을 NPU-friendly하게 재설계합니다.
 
 > Memory size 부족
 

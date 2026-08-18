@@ -2,7 +2,7 @@
 title: "DSA 15: 그래프 표현 + DFS/BFS"
 date: 2026-05-15T15:00:00
 description: "인접 행렬 vs 인접 리스트 선택, DFS와 BFS의 두 순회."
-tags: [Data Structure, Algorithm, Graph, DFS, BFS]
+tags: [data-structure, Algorithm, Graph, DFS, BFS]
 series: "Data Structures and Algorithms"
 seriesOrder: 15
 draft: true

@@ -2,7 +2,7 @@
 title: "Ch 27: GOP, Key Frame, LTR"
 date: 2026-05-16T04:00:00
 description: "AV1 인코더의 GOP 구조 — Hierarchical GOP, Forced Key Frame, Scene Change, Long Term Reference."
-tags: [AV1, Video, Codec, Encoder, GOP, Key Frame, LTR]
+tags: [AV1, Video, Codec, Encoder, GOP, key-frame, LTR]
 series: "AV1"
 seriesOrder: 27
 draft: true

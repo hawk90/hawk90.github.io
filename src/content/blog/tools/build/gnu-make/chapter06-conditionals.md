@@ -646,3 +646,11 @@ CFLAGS += -MMD
 - [GNU Make Manual — Include](https://www.gnu.org/software/make/manual/html_node/Include.html)
 - [Auto-Dependency Generation](http://make.mad-scientist.net/papers/advanced-auto-dependency-generation/) — Paul D. Smith의 고전 글
 - [Recursive Make Considered Harmful](http://aegis.sourceforge.net/auug97.pdf) — Peter Miller, 1997
+
+## 관련 항목
+
+- [Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions) — 이 장의 `ifeq`와 대비되는 `$(if ...)` 함수, 그리고 `$(MAKEFILE_LIST)` 관용구.
+- [Ch 7: 실전 Makefile](/blog/tools/build/gnu-make/chapter07-practical) — 모드 분기와 `-MMD -MP` 패턴을 실제 프로젝트 골격에 넣은 모습.
+- [Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables) — 타겟별 변수가 뒤집는 전역 변수의 우선순위 규칙.
+- [CMake Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options) — `DEBUG=1` 같은 모드 분기를 CMake는 캐시 변수로 다룹니다.
+- [GNU Make Manual](https://www.gnu.org/software/make/manual/) — 조건 지시자와 `include`의 원문.

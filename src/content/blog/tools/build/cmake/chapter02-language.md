@@ -830,3 +830,11 @@ FetchContent_Declare(...)
 - [CMake Language](https://cmake.org/cmake/help/latest/manual/cmake-language.7.html)
 - [CMake Variables](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)
 - [Generator Expressions](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)
+
+## 관련 항목
+
+- [Ch 1: CMake 소개와 첫 프로젝트](/blog/tools/build/cmake/chapter01-intro) — 이 문법이 실제로 놓이는 자리
+- [Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 변수 대신 타겟에 정보를 붙이는 방식
+- [Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options) — 일반 변수와 캐시 변수의 차이를 더 파고드는 장
+- [GNU Make 변수와 자동 변수](/blog/tools/build/gnu-make/chapter03-variables) — 재귀 확장과 단순 확장, 같은 문제를 Make는 어떻게 푸는가
+- [cmake-policies(7)](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html) — `cmake_policy()`가 다루는 정책 목록

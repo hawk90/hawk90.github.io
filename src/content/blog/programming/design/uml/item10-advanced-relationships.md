@@ -2,7 +2,7 @@
 title: "UML 10: 고급 관계 — Composition · Qualified · N-ary · Association Class"
 date: 2026-05-03T10:00:00
 description: "관계는 4종이 기본 — 그 위에 composition·한정자·n항·연관 클래스를 얹는다."
-tags: [UML, Class Diagram, Relationships, Composition]
+tags: [UML, class-diagram, Relationships, Composition]
 series: "UML 2.5.1"
 seriesOrder: 10
 draft: true

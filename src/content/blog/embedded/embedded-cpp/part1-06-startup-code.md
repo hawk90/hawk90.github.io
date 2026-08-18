@@ -43,37 +43,24 @@ ARM Cortex-M 기준입니다. 다른 아키텍처도 개념은 동일합니다.
 ![부트 시퀀스 — Reset에서 main까지](/images/blog/embedded-cpp/diagrams/part1-06-boot-sequence.svg)
 
 
-```text
-[전원 ON / Reset 핀]
-    ↓
-[ROM의 boot ROM 실행 — vendor]
-    ↓
-[Reset Vector 읽음]
-    ↓
-Reset_Handler  (어셈블리 또는 C)
-    ↓
-1. SP 초기화 (stack pointer를 vector table의 첫 값으로)
-2. .data 섹션 복사 (Flash → RAM)
-3. .bss 섹션 0으로 초기화
-4. FPU 활성화 (있다면)
-5. 시스템 클럭 설정 (선택, 보통 SystemInit())
-    ↓
-__libc_init_array()   ← C++ 진입의 핵심
-    ↓
-    .preinit_array 순회 호출
-    _init() 호출 (legacy)
-    .init_array 순회 호출  ← *C++ static 객체 생성자*
-    ↓
-main()
-    ↓
-(main return)
-    ↓
-__libc_fini_array() (보통 안 호출됨, 임베디드는 main 무한루프)
-    ↓
-exit() → 무한 루프
-```
+1. **전원 ON 또는 Reset 핀** 입력으로 시작합니다.
+2. **ROM의 boot ROM 실행** — vendor가 넣어 둔 코드입니다.
+3. **Reset Vector 읽음**
+4. **`Reset_Handler`** (어셈블리 또는 C)
+   - SP 초기화 — stack pointer를 vector table의 첫 값으로 맞춥니다
+   - `.data` 섹션 복사 (Flash → RAM)
+   - `.bss` 섹션 0으로 초기화
+   - FPU 활성화 (있다면)
+   - 시스템 클럭 설정 (선택, 보통 `SystemInit()`)
+5. **`__libc_init_array()`** — C++ 진입의 핵심입니다.
+   - `.preinit_array` 순회 호출
+   - `_init()` 호출 (legacy)
+   - `.init_array` 순회 호출 — *C++ static 객체 생성자*가 여기서 돕니다
+6. **`main()`**
+7. **`__libc_fini_array()`** — `main`이 return할 때 도는데, 임베디드는 `main`이 무한루프라 보통 호출되지 않습니다.
+8. **`exit()`** — 그대로 무한 루프에 들어갑니다.
 
-핵심은 2번 .bss 초기화 → .init_array 호출 → main 순서입니다. 이 순서를 깨뜨려서는 안 됩니다.
+핵심은 `.bss` 초기화 → `.init_array` 호출 → `main` 순서입니다. 이 순서를 깨뜨려서는 안 됩니다.
 
 ## Vector Table — Reset의 시작점
 

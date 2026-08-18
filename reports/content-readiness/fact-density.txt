@@ -35,7 +35,7 @@
    46 src/content/blog/embedded/modern-recipes/part2-06-arm-cache.md
    46 src/content/blog/embedded/modern-recipes/part1-01-digital-signal-basics.md
    45 src/content/blog/embedded/rtos/practical-internals/part4-12-amp-openamp.md
-   45 src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md
+   44 src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md
    43 src/content/blog/embedded/rtos/practical-internals/part4-03-tlsf.md
    43 src/content/blog/embedded/modern-recipes/part5-04-servo-motor.md
    43 src/content/blog/embedded/embedded-security/chapter03-mcu-crypto.md

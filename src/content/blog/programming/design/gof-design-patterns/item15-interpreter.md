@@ -2,7 +2,7 @@
 title: "GoF 15: Interpreter"
 date: 2026-05-01T15:00:00
 description: "단순한 언어의 문법을 클래스 계층으로 — 단순 DSL과 표현식 평가."
-tags: [Design Pattern, GoF, C++, C, Behavioral]
+tags: [design-pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 15
 draft: true

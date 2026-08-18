@@ -2,7 +2,7 @@
 title: "항목 10: 대입 연산자는 *this의 참조를 반환하라"
 date: 2026-05-04T10:00:00
 description: "체인 대입(x = y = z) 지원을 위한 표준 관용구 — 모든 compound assignment에 적용."
-tags: [C++, Effective C++, Operator Overloading]
+tags: [C++, effective-c++, operator-overloading]
 series: "Effective C++"
 seriesOrder: 10
 draft: true

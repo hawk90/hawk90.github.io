@@ -2,7 +2,7 @@
 title: "Part 3-1: 형식적 오류"
 date: 2026-05-14T10:00:00
 description: "후건 긍정 / 전건 부정 / 매개념 부주연 등 — 형식이 잘못된 논증."
-tags: [Logic, Formal Fallacy]
+tags: [Logic, formal-fallacy]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 10
 draft: true

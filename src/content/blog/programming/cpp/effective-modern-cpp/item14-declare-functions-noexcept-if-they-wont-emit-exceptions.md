@@ -2,7 +2,7 @@
 title: "항목 14: 예외를 방출하지 않을 함수는 noexcept로 선언하라"
 date: 2026-05-04T14:00:00
 description: "noexcept는 단순 문서가 아니라 컴파일러·라이브러리 활용 — 특히 vector::push_back의 강력한 예외 보증."
-tags: [C++, noexcept, Exception, Move Semantics, Modern C++]
+tags: [C++, noexcept, Exception, move-semantics, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 14
 draft: true

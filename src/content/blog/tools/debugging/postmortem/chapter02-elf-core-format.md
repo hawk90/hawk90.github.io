@@ -278,16 +278,15 @@ $ readelf -n core | grep -A 30 NT_AUXV
 
 ## PT_LOAD — 메모리 내용
 
-각 PT_LOAD가 *한 메모리 영역*. `coredump_filter`로 결정된 영역들.
+각 PT_LOAD가 *한 매핑 영역*. `coredump_filter`로 결정된 영역들입니다. 프로그램 헤더는 그 영역을 다음 필드로 기술합니다.
 
-```
-PT_LOAD                     ← 한 매핑 영역
-  Offset:    파일 오프셋
-  VirtAddr:  메모리 주소
-  FileSiz:   파일에 저장된 크기
-  MemSiz:    메모리에서의 크기
-  Flags:     R/W/E
-```
+| 필드 | 의미 |
+|------|------|
+| `Offset` | 파일 오프셋 |
+| `VirtAddr` | 메모리 주소 |
+| `FileSiz` | 파일에 저장된 크기 |
+| `MemSiz` | 메모리에서의 크기 |
+| `Flags` | R/W/E |
 
 `FileSiz < MemSiz`이면 *부분 저장* — 나머지는 zero (`.bss` 같은 zero-init 영역).
 

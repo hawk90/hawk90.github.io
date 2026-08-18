@@ -2,7 +2,7 @@
 title: "Ch 7: 디바이스 트리"
 date: 2026-05-17T07:00:00
 description: "QEMU가 생성하는 디바이스 트리를 이해하고 커스터마이징한다."
-tags: [QEMU, DeviceTree, DTB, dtc, overlay]
+tags: [QEMU, device-tree, DTB, dtc, overlay]
 series: "QEMU Embedded Emulation"
 seriesOrder: 7
 draft: true

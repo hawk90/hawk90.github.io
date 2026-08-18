@@ -257,7 +257,9 @@ valgrind-3.22.0
 - [Memcheck User Manual](https://valgrind.org/docs/manual/mc-manual.html)
 - [Valgrind QuickStart](https://valgrind.org/docs/manual/quick-start.html)
 
-## 관련 시리즈
+## 관련 항목
 
-- [Sanitizers](/blog/tools/debugging/sanitizers/chapter01-intro) — Valgrind와 보완
-- [GDB / LLDB](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 인터랙티브 디버깅
+- [Ch 2: Valgrind Memcheck 실전](/blog/tools/debugging/valgrind/chapter02-memcheck) — 다음 글. Memcheck 옵션과 워크플로
+- [Sanitizer 종류 비교 — ASan·UBSan·LSan·TSan·MSan](/blog/tools/debugging/sanitizers/chapter01-intro) — 재컴파일 기반 도구 쪽의 전체 지도. Memcheck ↔ ASan·MSan 대응 관계
+- [GDB vs LLDB 분석](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — 탐지한 버그를 실제로 들여다볼 때 붙이는 디버거
+- [Valgrind Manual](https://valgrind.org/docs/manual/manual.html) — 도구별 공식 매뉴얼 목차

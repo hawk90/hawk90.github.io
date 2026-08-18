@@ -99,7 +99,7 @@ Liu & Layland 1973 논문에서 출발했습니다.
 - 각 task에 주기 inverse priority를 부여합니다(짧은 주기 = 높은 priority).
 - Utilization bound는 다음과 같습니다.
 
-```
+```text
 U = Σ (Ci / Ti) ≤ n × (2^(1/n) − 1)
 ```
 

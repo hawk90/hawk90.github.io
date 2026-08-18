@@ -163,7 +163,7 @@ $ sudo cat /proc/12345/smaps | awk '
 
 ## RssAnon vs RssFile vs RssShmem
 
-```
+```text
 RssAnon:   105000 kB    # heap + stack + anonymous mmap
 RssFile:    20000 kB    # 파일 매핑 (실행 + 공유 라이브러리)
 RssShmem:    3000 kB    # tmpfs / POSIX shared memory
@@ -192,7 +192,7 @@ $ echo -1000 | sudo tee /proc/12345/oom_score_adj   # 절대 안 죽음
 
 ## OOM 로그 — dmesg
 
-```
+```text
 Out of memory: Killed process 12345 (myprog) total-vm:8000000kB, anon-rss:7000000kB, file-rss:50000kB, shmem-rss:0kB
 [oom selection scoring]
 [memory state at OOM time]

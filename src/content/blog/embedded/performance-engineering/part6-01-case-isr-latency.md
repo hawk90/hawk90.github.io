@@ -16,18 +16,19 @@ topics: ["embedded"]
 
 산업용 진동 센서 보드에서 사용 현장에서 산발적인 데이터 드롭이 보고됐습니다.
 
-```text
-HW: Cortex-A53 quad-core, Linux 5.10, PREEMPT
-센서: vibration sensor, 10 kHz sampling
-요구: sample → user buffer 전달 deadline 100 µs
-SLA: 99.99% 만족
+| 항목 | 값 |
+|------|-----|
+| HW | Cortex-A53 quad-core, Linux 5.10, PREEMPT |
+| 센서 | vibration sensor, 10 kHz sampling |
+| 요구 | sample → user buffer 전달 deadline 100 µs |
+| SLA | 99.99% 만족 |
 
-현장 보고:
-  - 평균 latency 25 µs (여유 충분)
-  - 그러나 시간당 수십 회 deadline miss
-  - 미스 발생 시 latency 200~500 µs까지 spike
-  - 재현 시점이 일정하지 않음
-```
+현장 보고 내용은 다음과 같았습니다.
+
+- 평균 latency는 25 µs로 여유가 충분했습니다.
+- 그런데도 시간당 수십 회 deadline miss가 발생했습니다.
+- 미스가 나면 latency가 200~500 µs까지 spike했습니다.
+- 재현 시점이 일정하지 않았습니다.
 
 평균은 한참 여유였지만 worst case가 spec을 깨고 있었습니다. 평균 metric만 보면 절대 발견할 수 없는 형태의 문제입니다.
 
