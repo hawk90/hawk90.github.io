@@ -4,7 +4,7 @@ const policy = JSON.parse(await readFile('archives/chatgpt-6a6d9c95-b7ec-83ee-85
 const health = await readFile('reports/repository-health/latest.md', 'utf8').catch(() => '');
 const ci = await readFile('.github/workflows/ci.yml', 'utf8');
 const deploy = await readFile('.github/workflows/deploy.yml', 'utf8');
-const runbook = await readFile('archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md', 'utf8');
+const runbook = await readFile('docs/runbooks/repository-recovery.md', 'utf8');
 const checks = {
   'git-object-integrity': /Git object connectivity: pass/.test(health), 'recovery-remote': /Recovery remotes configured: yes/.test(health),
   'pinned-ci-actions': /uses: actions\/checkout@[a-f0-9]{40}/.test(ci) && /uses: actions\/deploy-pages@[a-f0-9]{40}/.test(deploy),
