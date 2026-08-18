@@ -105,27 +105,13 @@ watermark가 *총 stack의 10% 이하*로 떨어지면 *위험*입니다. stack�
 
 ## 정적 분석 — `-fstack-usage`
 
-운영 시 측정과 *컴파일 타임 분석*은 서로 보완합니다. GCC `-fstack-usage`는 함수별 *최악 stack 사용량*을 파일로 떨어뜨립니다.
+운영 시 측정과 *컴파일 타임 분석*은 서로 보완합니다. 지금까지의 watermark·canary는 *이미 쓴 만큼*을 알려 주지만, 아직 타지 않은 경로가 얼마를 쓸지는 말해 주지 못합니다. 그 빈칸을 GCC `-fstack-usage`가 채웁니다.
 
-```bash
-$ gcc -fstack-usage -c handler.c
-$ cat handler.su
-handler.c:42:6:task_entry    128  static
-handler.c:55:6:process       256  static
-handler.c:78:6:compute       512  static
-```
+`.su` 파일을 읽어 call graph의 worst path를 합산하는 절차는 [Ch 4-4: 정적 할당](/blog/embedded/rtos/practical-internals/part4-04-static-allocation#stack-size-계산---fstack-usage)에서 예제와 함께 다뤘습니다. 여기서는 그 값을 *overflow 대응에 어떻게 쓰는지*만 봅니다.
 
-call graph를 따라 *worst path*를 합산합니다.
+핵심은 두 숫자를 나란히 놓는 것입니다. 정적 분석이 낸 worst path와 `uxTaskGetStackHighWaterMark`가 낸 실측 최대치가 *2배 이상 벌어지면* 둘 중 하나가 틀렸습니다. 실측이 훨씬 작다면 아직 worst path를 타 보지 않은 것이고 — 그 경로가 필드에서 처음 실행되는 날 overflow가 납니다. 실측이 정적 분석보다 크다면 `.su`에 안 잡히는 무언가가 있습니다. 재귀, 함수 포인터를 통한 간접 호출, 또는 `alloca`·가변 길이 배열입니다.
 
-| 항목 | Byte |
-|---|---|
-| `task_entry(128) → process(256) → compute(512)` | 896 |
-| ISR worst case path | +192 |
-| context switch overhead | +64 |
-| safety margin (25%) | +288 |
-| **total** | ≈ 1440 → 2048 |
-
-수동으로 트리를 따라가는 것이 번거롭다면 *Memfault puncover* 같은 도구가 자동화해 줍니다. ELF와 `.su` 파일을 입력으로 받아 *call graph + stack 합산*을 보여 줍니다.
+수동으로 트리를 따라가는 것이 번거롭다면 *Memfault puncover* 같은 도구가 자동화해 줍니다. ELF와 `.su` 파일을 입력으로 받아 call graph와 stack 합산을 보여 줍니다.
 
 ## Stack을 패턴으로 채워 측정
 

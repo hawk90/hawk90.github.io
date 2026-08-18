@@ -1,5 +1,5 @@
 {
-  "generatedAt": "2026-08-02T06:46:25.557Z",
+  "generatedAt": "2026-08-18T05:18:17.202Z",
   "categories": [
     {
       "id": "methodology",
@@ -240,6 +240,10 @@
     {
       "id": "quality",
       "label": "AP-T 품질·테스트"
+    },
+    {
+      "id": "metadata",
+      "label": "AP-M 메타데이터"
     }
   ],
   "findings": []

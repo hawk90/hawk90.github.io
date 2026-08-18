@@ -4,7 +4,7 @@ date: 2026-05-17T21:00:00
 description: "RISC-V 하트 관리 — mhartid, 멀티하트 부팅, 파킹 루프를 다룬다."
 series: "RISC-V 베어메탈 부트"
 seriesOrder: 3
-tags: [RISC-V, Hart, SMP, Multi-Core]
+tags: [RISC-V, Hart, SMP, multicore]
 draft: true
 topics: ["systems", "systems/riscv"]
 ---

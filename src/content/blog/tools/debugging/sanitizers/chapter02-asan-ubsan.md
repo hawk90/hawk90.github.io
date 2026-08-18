@@ -65,7 +65,7 @@ Sanitizer가 에러를 보고할 때, *어디서 발생했는지*를 알려면 �
 
 `-fno-omit-frame-pointer`는 이걸 강제로 끄고 *완전한 트레이스*를 보장합니다.
 
-```
+```text
 ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
     #0 main.c:42 in process_data
     #1 main.c:67 in run_pipeline
@@ -90,7 +90,7 @@ ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
 
 Sanitizer 보고서가 *파일명·줄 번호*를 보여 주려면 `-g`가 필요합니다. 없으면 주소만 찍힙니다.
 
-```
+```text
 # -g 없이
 #0 0x40123f in process_data
 #1 0x401aef in run_pipeline
@@ -375,3 +375,11 @@ SUMMARY: AddressSanitizer: stack-buffer-overflow on main.c:4 in main
 - [Clang AddressSanitizer Manual](https://clang.llvm.org/docs/AddressSanitizer.html)
 - [Clang UndefinedBehaviorSanitizer Manual](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html)
 - [Sanitizers wiki: AddressSanitizerFlags](https://github.com/google/sanitizers/wiki/AddressSanitizerFlags)
+
+## 관련 항목
+
+- [Ch 1: Sanitizer 종류 비교](/blog/tools/debugging/sanitizers/chapter01-intro) — 다섯 sanitizer의 역할과 호환성
+- [Ch 3: LSan 누수 분석](/blog/tools/debugging/sanitizers/chapter03-lsan-leaks) — ASan에 딸려 오는 누수 검사 읽기
+- [Valgrind Ch 2: Memcheck 실전](/blog/tools/debugging/valgrind/chapter02-memcheck) — 같은 메모리 오류를 재컴파일 없이 잡는 쪽
+- [GDB·LLDB Ch 7: Core Dump 분석](/blog/tools/debugging/gdb-lldb/chapter07-core-dump) — `abort_on_error=1`이 남긴 코어를 여는 방법
+- [Clang AddressSanitizer Manual](https://clang.llvm.org/docs/AddressSanitizer.html) — 옵션과 런타임 동작 원문

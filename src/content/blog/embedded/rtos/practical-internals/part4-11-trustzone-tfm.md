@@ -89,16 +89,13 @@ void sau_init(void) {
 
 NS 코드가 Secure 함수를 호출하려면 *Non-Secure Callable* 영역에 놓인 veneer를 거쳐야 합니다. veneer 안에는 `SG`(Secure Gateway) 명령이 있고, 이 명령만이 NS → S 전환의 합법 진입점입니다.
 
-```text
-NS 코드가 secure_function() 호출
-  ↓
-NSC 영역의 veneer 진입 (SG instruction)
-  ↓ hardware가 secure mode로 전환
-  ↓
-실제 Secure 함수 실행
-  ↓
-BXNS 명령으로 NS 복귀
-```
+호출은 다음 순서로 진행됩니다.
+
+1. NS 코드가 `secure_function()`을 호출합니다.
+2. NSC 영역의 veneer로 진입합니다 (`SG` instruction).
+3. hardware가 secure mode로 전환합니다.
+4. 실제 Secure 함수가 실행됩니다.
+5. `BXNS` 명령으로 NS 측에 복귀합니다.
 
 컴파일러가 이 과정을 자동화합니다.
 

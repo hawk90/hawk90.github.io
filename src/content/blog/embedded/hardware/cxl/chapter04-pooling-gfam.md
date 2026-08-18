@@ -113,17 +113,11 @@ PBR이 있어야 *수십~수백 디바이스의 fabric*이 *실용적*이 됩니
 
 ## Fabric Manager — Out-of-band Control
 
-*Fabric Manager (FM)*는 *out-of-band control plane*입니다.
+지금까지 본 pooling에는 *누가 LD를 어느 host에 붙일지 정하는가*라는 빈칸이 있습니다. 그 자리를 채우는 것이 *Fabric Manager (FM)*입니다.
 
-| 책임 | 역할 |
-|------|------|
-| Topology discovery | 모든 switch·device 등록·인식 |
-| LD allocation | host별 메모리 할당·해제·migration |
-| Hot-plug | device 추가·제거 처리 |
-| Health monitoring | RAS 이벤트 수집·정책 적용 |
-| Security policies | host별 권한·access control |
+FM에서 이 장에 필요한 성질은 하나입니다. FM은 *out-of-band control plane*이라서, 별도 네트워크나 전용 BMC link로 동작하고 *데이터 평면(CXL link)과 분리*돼 있습니다. 그래서 FM이 죽어도 이미 붙어 있는 LD는 계속 동작하고, 멈추는 것은 *동적 재할당*뿐입니다. pooling의 가용성을 따질 때 이 구분이 결론을 가릅니다.
 
-FM은 *별도 네트워크* 또는 *전용 BMC link*로 동작. *데이터 평면(CXL link)과 분리*되어 *FM 다운에도 기존 할당은 동작*하지만 *동적 재할당은 정지*합니다.
+FM의 전체 책임 범위 — topology discovery, hot-plug, health monitoring, security policy, QoS — 와 redundancy 구성은 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric#fabric-manager--out-of-band-control-plane)에서 다룹니다.
 
 ## Coherency Domain ID
 

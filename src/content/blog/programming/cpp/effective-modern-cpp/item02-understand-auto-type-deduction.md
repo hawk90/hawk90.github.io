@@ -2,7 +2,7 @@
 title: "항목 2: auto의 타입 추론 규칙을 이해하라"
 date: 2026-05-04T02:00:00
 description: "auto 타입 추론은 템플릿 타입 추론과 거의 같다. 단 하나의 예외 — 중괄호 초기화."
-tags: [C++, auto, Type Deduction]
+tags: [C++, auto, type-deduction]
 series: "Effective Modern C++"
 seriesOrder: 2
 draft: true

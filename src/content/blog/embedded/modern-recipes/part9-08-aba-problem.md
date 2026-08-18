@@ -181,25 +181,21 @@ RCU도 free를 grace period까지 지연하므로 ABA가 발생할 수 없습니
 
 ### 실제 사례 — IBM의 lock-free queue
 
-```text
-원본 paper Michael & Scott (1996)
-  CAS 두 번으로 enqueue/dequeue
-  ABA 회피를 위해 tagged pointer 필수
-  C++ 구현은 보통 atomic<__int128> 사용
-```
+Michael & Scott의 원본 paper(1996)는 enqueue와 dequeue를 CAS 두 번으로 처리합니다. ABA를 피하려면 tagged pointer가 필수이고, C++ 구현은 보통 `atomic<__int128>`을 사용합니다.
 
 기록된 거의 모든 lock-free queue가 tagged pointer 또는 RCU를 가집니다.
 
 ## 측정 / 성능 비교
 
-```text
-ABA 발생률 (8 thread stack, 1M op)
-대처 없음                   매 100K op 중 ~수십 회 corruption
-16-bit tag (packed)         양산 환경에서 거의 0 (wraparound risk)
-64-bit tag (DCAS)           0
-hazard pointer              0 (memory 약간 증가)
-RCU                         0 (memory 더 증가)
-```
+8 thread stack에서 1M op을 돌렸을 때의 ABA 발생률입니다.
+
+| 대처 | 발생률 |
+|------|--------|
+| 대처 없음 | 매 100K op 중 ~수십 회 corruption |
+| 16-bit tag (packed) | 양산 환경에서 거의 0 (wraparound risk) |
+| 64-bit tag (DCAS) | 0 |
+| hazard pointer | 0 (memory 약간 증가) |
+| RCU | 0 (memory 더 증가) |
 
 ```text
 연산 비용

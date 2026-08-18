@@ -736,3 +736,11 @@ Ch 8에서는 **Modern CMake 베스트 프랙티스**를 다룹니다. 타겟 �
 - [CMake - CPack](https://cmake.org/cmake/help/latest/module/CPack.html)
 - [CMake - 패키지 생성](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html)
 - [GNUInstallDirs 모듈](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html)
+
+## 관련 항목
+
+- [Ch 6: 테스트와 CTest](/blog/tools/build/cmake/chapter06-testing) — 설치 전에 통과시켜야 할 검증 단계
+- [Ch 8: Modern CMake 베스트 프랙티스](/blog/tools/build/cmake/chapter08-best-practices) — 설치까지 고려한 프로젝트 구조 정리
+- [Ch 5: find_package와 외부 의존성](/blog/tools/build/cmake/chapter05-find-package) — 내가 export한 패키지를 남이 찾아 쓰는 반대편 시점
+- [실전 Makefile 예제](/blog/tools/build/gnu-make/chapter07-practical) — `install` 타겟과 DESTDIR을 Make에서 직접 쓰는 방식
+- [CPackComponent 모듈](https://cmake.org/cmake/help/latest/module/CPackComponent.html) — 컴포넌트 기반 패키징 옵션 전체

@@ -29,7 +29,7 @@ topics: ["embedded"]
 
 여기에 watchdog과 fault handler까지 더하면 양산 사고가 분석 가능한 형태로 남습니다.
 
-```text
+```c
 configCHECK_FOR_STACK_OVERFLOW  2  /* canary 방식 — 비싸지만 정확 */
 configUSE_MALLOC_FAILED_HOOK    1
 configUSE_TRACE_FACILITY        1
@@ -195,11 +195,7 @@ Trace recorder는 RAM이 크게 필요하므로 디버깅 빌드에만 켜는 �
 
 > 디버거에서만 잡으려 함
 
-```text
-"양산기에서 reset이 가끔 일어나요" → debugger 없이 분석 불가
-```
-
-Flash에 panic info를 남기는 인프라 없이는 reset 원인을 추정만 하게 됩니다. minimum panic record를 미리 만들어 둡니다.
+"양산기에서 reset이 가끔 일어나요"라는 보고는 debugger 없이는 분석할 방법이 없습니다. Flash에 panic info를 남기는 인프라 없이는 reset 원인을 추정만 하게 됩니다. minimum panic record를 미리 만들어 둡니다.
 
 > Heap fragmentation 무시
 

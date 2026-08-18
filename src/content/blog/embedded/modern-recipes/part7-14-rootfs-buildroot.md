@@ -102,17 +102,20 @@ board별 defconfig을 commit하면 다른 사람이 `make myboard_defconfig`로 
 
 ### Toolchain 선택
 
-```text
-make menuconfig → Toolchain →
-  Toolchain type:
-    [*] Buildroot toolchain     # source부터 빌드 (재현성 최고)
-    [ ] External toolchain      # ARM, Linaro 등 prebuilt 사용
+`make menuconfig`의 Toolchain 메뉴에서 두 가지를 고릅니다. 먼저 toolchain 자체를 어디서 가져올지 정합니다.
 
-  C library:
-    glibc     일반 distro와 호환
-    musl      작고 깨끗
-    uclibc-ng 최소
-```
+| Toolchain type | 설명 |
+|----------------|------|
+| Buildroot toolchain | source부터 빌드해 재현성이 가장 높습니다 (기본 선택) |
+| External toolchain | ARM, Linaro 등 prebuilt를 가져다 씁니다 |
+
+그다음 C library를 고릅니다.
+
+| C library | 설명 |
+|-----------|------|
+| glibc | 일반 distro와 호환 |
+| musl | 작고 깨끗 |
+| uclibc-ng | 최소 |
 
 External toolchain은 빌드 시간을 크게 줄이지만 reproducibility가 낮아집니다. 양산은 Buildroot toolchain이 표준입니다.
 
@@ -120,12 +123,12 @@ External toolchain은 빌드 시간을 크게 줄이지만 reproducibility가 �
 
 ```text
 board/vendor/myboard/
-  overlay/              rootfs에 그대로 복사할 파일
-    etc/init.d/S99myapp
-    etc/network/interfaces
-  post-build.sh         build 직전 hook
-  post-image.sh         image 생성 직전 hook
-  genimage.cfg          SD image partition layout
+├── overlay/              # rootfs에 그대로 복사할 파일
+│   ├── etc/init.d/S99myapp
+│   └── etc/network/interfaces
+├── post-build.sh         # build 직전 hook
+├── post-image.sh         # image 생성 직전 hook
+└── genimage.cfg          # SD image partition layout
 ```
 
 ```sh
@@ -181,14 +184,15 @@ $(eval $(generic-package))
 
 ### Init 시스템 선택
 
-```text
-make menuconfig → System configuration → Init system
-  [*] BusyBox       기본 — 작고 빠름
-  [ ] systemV       전통적
-  [ ] systemd       풀스택 — RAM 비용 큼
-  [ ] OpenRC        gentoo 스타일
-  [ ] None          custom init
-```
+`make menuconfig`의 System configuration → Init system에서 다섯 가지 중 하나를 고릅니다.
+
+| Init system | 특성 |
+|-------------|------|
+| BusyBox | 기본 선택입니다. 작고 빠릅니다 |
+| systemV | 전통적인 방식입니다 |
+| systemd | 풀스택이라 RAM 비용이 큽니다 |
+| OpenRC | gentoo 스타일입니다 |
+| None | custom init을 직접 넣습니다 |
 
 작은 device는 BusyBox init이 가장 단순합니다. systemd는 ~30 MB 이상의 RAM을 추가로 씁니다.
 
@@ -249,11 +253,7 @@ You must install m4 ...
 
 > Overlay 권한 누락
 
-```text
-rootfs에 파일은 있는데 실행 안 됨
-```
-
-`overlay/`의 파일은 git에서 mode가 보존되지 않습니다. `post-build.sh`에서 `chmod`로 명시합니다.
+rootfs에 파일은 올라가 있는데 실행이 되지 않는 증상이 나옵니다. `overlay/`의 파일은 git에서 mode가 보존되지 않습니다. `post-build.sh`에서 `chmod`로 명시합니다.
 
 > rootfs.tar 크기 초과
 

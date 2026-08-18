@@ -41,7 +41,7 @@ hello, Mr. Smith
 
 `help <category>`로 분류 보기.
 
-```
+```text
 COMMAND_NONE        분류 없음
 COMMAND_RUNNING     run, step, continue 류
 COMMAND_DATA        print, x 류
@@ -346,7 +346,7 @@ super().__init__("malloc", internal=True)
 
 ## .gdbinit으로 자동 로드
 
-```
+```text
 # ~/.gdbinit
 set history save on
 set print pretty on
@@ -361,13 +361,13 @@ end
 
 또는 *프로젝트별 .gdbinit* (GDB 8.0+, 보안상 `add-auto-load-safe-path`).
 
-```
+```text
 # project/.gdbinit
 add-auto-load-safe-path .
 source ./gdb-helpers/init.py
 ```
 
-```
+```text
 (gdb) set auto-load local-gdbinit on
 ```
 

@@ -28,15 +28,14 @@ Host와 device가 SQ·CQ 두 ring과 doorbell을 어떻게 주고받는지 그�
 
 기본 구조는 두 ring입니다.
 
-```text
-SQ (Submission Queue)   host writes ─→ device reads
-CQ (Completion Queue)   device writes ─→ host reads
-
-Tail pointer            producer가 다음 쓸 자리
-Head pointer            consumer가 다음 읽을 자리
-Doorbell                상대편 pointer를 device에 알림 (MMIO write)
-Phase bit               wrap-around에서 새/stale 구분
-```
+| 요소 | 역할 |
+|------|------|
+| SQ (Submission Queue) | host가 쓰고 device가 읽습니다 |
+| CQ (Completion Queue) | device가 쓰고 host가 읽습니다 |
+| Tail pointer | producer가 다음에 쓸 자리를 가리킵니다 |
+| Head pointer | consumer가 다음에 읽을 자리를 가리킵니다 |
+| Doorbell | 갱신된 pointer를 device에 알립니다 (MMIO write) |
+| Phase bit | wrap-around 시 새 entry와 stale entry를 구분합니다 |
 
 Tail = Head이면 비어 있고, (Tail + 1) % depth = Head이면 가득 차 있습니다. Producer가 entry 한 개를 채울 때마다 도어벨을 치면 MMIO 비용이 너무 큽니다. 따라서 batched submit이 표준입니다.
 

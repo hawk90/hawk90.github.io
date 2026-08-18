@@ -2,7 +2,7 @@
 title: "Ch 16: Large-Scale Structure"
 date: 2026-05-01T16:00:00
 description: "Evolving Order / System Metaphor / Responsibility Layers / Knowledge Level / Pluggable."
-tags: [DDD, Large-Scale Structure]
+tags: [DDD, large-scale-structure]
 series: "Domain-Driven Design"
 seriesOrder: 16
 draft: true

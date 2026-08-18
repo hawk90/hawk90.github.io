@@ -120,18 +120,18 @@ target_id  region(KB)  access(%)  node
 
 ## 자주 만나는 함정
 
+이 장이 다루는 것은 *메모리로서의 CXL*이므로, 여기서는 용량이 보이지 않거나 통계가 어긋나는 쪽의 함정을 모읍니다.
+
 | 증상 | 원인 |
 |------|------|
 | CXL 노드 메모리 안 보임 | `cxl create-region` 안 함 — region 생성해야 사용 가능 |
 | `numastat`에 node 2 없음 | `daxctl reconfigure-device -m system-ram` 누락 |
-| Poison list 늘어남 | media wear 또는 ECC marginal — 디바이스 교체 검토 |
-| Health "warning"으로 떨어짐 | `life_used_percent` 또는 dirty_shutdown 증가 — log 확인 |
-| `cxl monitor` 무응답 | event interrupt 비활성. `cxl set-event-irq -m memX` |
+| region은 있는데 노드 용량이 예상보다 작음 | interleave 설정에서 일부 디바이스가 빠짐 — `cxl list -RT`로 endpoint 수 확인 |
 | DAMON CXL 노드 무시 | DAMON 6.2+ tiered memory awareness 활성 확인 |
-| `temperature` 비현실적 (255 또는 0) | 디바이스 firmware bug — sensor 미초기화 |
-| 갑작스러운 throughput 저하 | thermal throttling 가능 — `cxl health` 확인 |
-| Multi-host pool에서 access 실패 | LD(Logical Device) 할당 충돌 — Fabric Manager 확인 |
-| Page offline 빈번 | bad media 진행 — poison rate 모니터링 |
+| 승격·강등이 일어나지 않음 | `numa_balancing`이 꺼져 있거나 tiering 정책 미설정 |
+| 대역폭은 정상인데 지연만 나쁨 | 원격 노드 접근 — `numactl --membind`로 배치 확인 |
+
+디바이스 자체의 이상 — health가 warning으로 떨어지거나, poison rate가 뛰거나, `cxl monitor`가 응답하지 않거나, temperature가 비현실적인 값을 내는 경우 — 는 [Embedded Debugging Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot#자주-만나는-함정)에 정리돼 있습니다.
 
 ## 진단 워크플로
 

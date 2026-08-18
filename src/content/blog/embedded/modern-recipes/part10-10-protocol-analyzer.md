@@ -87,27 +87,18 @@ NACK이 의도되지 않은 자리에 보이면 slave가 *준비 안 되었거�
 
 ## CAN decode
 
+신호는 CAN_H 하나, 또는 transceiver 후단의 logic-level CAN_TX 하나면 충분합니다. 설정에서는 250 kbps, 500 kbps, 1 Mbps 가운데 하나를 고르고 standard/extended를 지정합니다. 캡쳐 결과는 이렇게 나옵니다.
+
 ```text
-신호 1개: CAN_H 또는 logic-level CAN_TX (transceiver 후단)
-
-설정: 250 kbps / 500 kbps / 1 Mbps, standard/extended
-
-캡쳐 결과:
-  ID 0x123, DLC 8, data 11 22 33 44 55 66 77 88, ACK
-  ID 0x123, DLC 8, data 11 22 33 44 55 66 77 88, NO ACK   ← 다른 노드 없음
+ID 0x123, DLC 8, data 11 22 33 44 55 66 77 88, ACK
+ID 0x123, DLC 8, data 11 22 33 44 55 66 77 88, NO ACK
 ```
 
-CAN bus에 *수신 노드가 없으면* sender가 NO ACK으로 영원히 재전송합니다. CAN_H/CAN_L 사이의 차동 전압을 oscilloscope로 보면 *전기적 문제*도 잡힙니다.
+두 번째 프레임의 NO ACK은 버스에 응답할 다른 노드가 하나도 없다는 뜻입니다. 이렇게 *수신 노드가 없으면* sender가 NO ACK 상태로 영원히 재전송합니다. CAN_H/CAN_L 사이의 차동 전압을 oscilloscope로 보면 *전기적 문제*도 잡힙니다.
 
 ## 사례 — UART 깨진 byte
 
-```text
-캡쳐: 1 bit가 idle 중에 가끔 0으로 떨어짐
-    → start bit로 잘못 인식 → 1 byte 깨짐
-
-원인: TX/RX 핀 옆에 GPIO toggle 신호가 *crosstalk*
-해결: GND 라인 강화, 와이어 길이 단축
-```
+캡쳐를 보면 idle 구간에서 1 bit가 가끔 0으로 떨어집니다. 수신기는 이 순간을 start bit로 잘못 인식하고, 그 뒤 1 byte가 통째로 깨집니다. 원인은 TX/RX 핀 옆을 지나는 GPIO toggle 신호의 *crosstalk*였습니다. GND 라인을 강화하고 와이어 길이를 줄여 해결했습니다.
 
 신호선과 GND가 *나란히* 가지 않으면 noise pickup이 흔합니다. Twisted pair나 shielded cable 사용.
 
@@ -128,17 +119,19 @@ Sector erase는 *수십~수백 ms*가 정상. 코드의 timeout이 너무 짧았
 
 ## 사례 — I2C NACK
 
-```text
-캡쳐:
-  Start
-  Write addr 0x69 NACK              ← slave가 응답 안 함
-  Stop
+캡쳐는 다음과 같습니다.
 
-확인:
-1. addr 0x69 맞나? 데이터시트 보니 0x68.
-2. SDO 핀 pull-up이 0xAA를 만들어서 LSB 1 → 0x69 보낸 것.
-3. SDO를 GND로 → 0x68 정상 응답.
+```text
+Start
+Write addr 0x69 NACK
+Stop
 ```
+
+주소를 보내자마자 NACK이 떨어졌으니 slave가 응답하지 않은 것입니다. 확인은 세 단계로 진행했습니다.
+
+1. `0x69`가 맞는 주소인지 데이터시트를 봤더니 `0x68`이었습니다.
+2. SDO 핀 pull-up이 `0xAA`를 만들면서 LSB가 1이 되어 `0x69`로 나가고 있었습니다.
+3. SDO를 GND로 내리자 `0x68`로 정상 응답했습니다.
 
 I2C address는 데이터시트의 *7 bit address*에서 SDO/SDA1 핀 상태로 LSB가 바뀌는 경우가 있습니다.
 
@@ -176,16 +169,11 @@ Logic analyzer가 잡지 못하는 것.
 - Ground bounce
 - Crosstalk
 
-```text
-신호 ringing: rising edge 후 oscillation
-  → 임피던스 mismatch, 종단저항 필요
-
-Slow slew rate: rising에 100 ns 걸림
-  → driver strength 부족, 또는 line capacitance 큼
-
-Voltage level: high가 2.8V (3.3V 기대)
-  → driver는 3.3V인데 receiver가 1.8V로 잡아당김 → level mismatch
-```
+| 관측되는 파형 | 유력한 원인 |
+|---------------|-------------|
+| 신호 ringing: rising edge 후 oscillation | 임피던스 mismatch. 종단저항이 필요합니다 |
+| Slow slew rate: rising에 100 ns가 걸림 | driver strength 부족, 또는 line capacitance가 큼 |
+| Voltage level: high가 2.8V (3.3V 기대) | driver는 3.3V인데 receiver가 1.8V로 잡아당기는 level mismatch |
 
 Oscilloscope는 *Y축이 전압*입니다. Digital decode는 logic analyzer가 빠르지만, 전기적 문제는 DSO 없이는 못 봅니다.
 

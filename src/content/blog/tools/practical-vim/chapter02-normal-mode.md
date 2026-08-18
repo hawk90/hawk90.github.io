@@ -2,7 +2,7 @@
 title: "Ch 2: Normal Mode"
 date: 2026-05-17T02:00:00
 description: "노멀 모드 — 기본 시작점. 연산자 + 동작 결합. count prefix."
-tags: [Vim, Normal Mode]
+tags: [Vim, normal-mode]
 series: "Practical Vim"
 seriesOrder: 2
 draft: true

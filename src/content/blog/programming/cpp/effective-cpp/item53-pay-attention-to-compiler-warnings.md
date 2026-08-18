@@ -2,7 +2,7 @@
 title: "항목 53: 컴파일러 경고를 진지하게 받아들여라"
 date: 2026-05-04T05:00:00
 description: "경고는 잠재 버그의 가장 저렴한 신호 — 권장 옵션, CI에서 -Werror, sanitizer 결합."
-tags: [C++, Effective C++, Warnings]
+tags: [C++, effective-c++, Warnings]
 series: "Effective C++"
 seriesOrder: 53
 draft: true

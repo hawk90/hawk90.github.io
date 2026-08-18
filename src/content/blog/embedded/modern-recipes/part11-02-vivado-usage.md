@@ -116,16 +116,17 @@ Number of failing hold paths:   0
 
 WNS 음수면 setup time 위반. WHS 음수면 hold time 위반. Setup은 *clock 낮추기·pipeline 추가·routing 최적화*로 해결. Hold는 보통 tool이 처리하지만 가끔 buffer 삽입이 필요.
 
+실패한 path는 다음처럼 읽습니다.
+
 ```text
-실패 path 분석:
 Path:        4.825 ns (required 10.000 - clock skew, setup time = 4.611 ns)
 Source:      cpu/reg_file_reg[0]/C
 Destination: alu/result_reg[0]/D
 Data Path Delay: 4.611 ns (LUT × 8 + net × 7)
 Logic Levels: 8
-
-→ LUT depth가 8단계. Pipeline register 추가로 4-4 분할.
 ```
+
+Logic Levels가 8이라는 것은 LUT depth가 8단계라는 뜻입니다. 중간에 pipeline register를 넣어 4단계씩 둘로 나누면 slack이 회복됩니다.
 
 ## Bitstream 생성
 

@@ -248,6 +248,16 @@
       "closureImpact": "none",
       "closureBoundary": "AP-R and AP-T cannot be declared complete from this exception.",
       "reassessmentTrigger": "Before a material deployment-platform change, ownership change, or the next planned recovery exercise."
+    },
+    {
+      "id": "quality-deferral-for-metadata-only-remediation",
+      "dependency": "quality",
+      "allowedDependent": "metadata",
+      "authority": "User approved immediate AP-M activation because it changes metadata/schema/tooling boundaries, not article bodies.",
+      "scope": "Allows AP-M metadata remediation to activate while AP-R/AP-T closure remains unresolved; article bodies, published URLs, and bulk frontmatter rewrites remain out of scope.",
+      "closureImpact": "none",
+      "closureBoundary": "AP-R, AP-T, and AP-M cannot be declared complete from this activation exception alone; AP-M still requires every item dispositioned and its own evidence checks.",
+      "reassessmentTrigger": "Before a material deployment-platform change, ownership change, or the next planned recovery exercise."
     }
   ]
 }

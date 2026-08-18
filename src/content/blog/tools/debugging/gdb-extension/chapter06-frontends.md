@@ -98,7 +98,7 @@ $ gdb ./my_prog
 
 ### 명령
 
-```
+```text
 >>> dashboard -layout source assembly stack registers variables
 >>> dashboard memory watch 0x7fff0000 64
 >>> dashboard expressions watch "i + j" "buffer.size"

@@ -13,7 +13,7 @@ import StickyTitle from '../../components/blog/StickyTitle.astro';
 import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
-import { formatDate, getTagUrl } from '../../lib/utils';
+import { formatDate, getTagUrl, getPostUrl, getPostRouteParam } from '../../lib/utils';
 import { getPostMeta, getPublishedPosts, getRelatedPosts, type RelatedPost } from '../../lib/posts';
 import { getBlogContentManifest, getContentRelations } from '../../lib/content';
 import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
@@ -22,7 +22,7 @@ import { t } from '../../consts/ui-strings';
 export async function getStaticPaths() {
   const posts = await getPublishedPosts();
   return posts.map((post) => ({
-    params: { slug: post.id },
+    params: { slug: getPostRouteParam(post) },
     props: { post },
   }));
 }
@@ -63,7 +63,7 @@ if (RELATED_POSTS_CONFIG.enabled) {
 }
 
 const formattedDate = formatDate(post.data.date);
-const postUrl = new URL(`/blog/${post.id}`, SITE_CONFIG.url).toString();
+const postUrl = new URL(getPostUrl(post), SITE_CONFIG.url).toString();
 
 // Detect math content for conditional KaTeX CSS loading.
 // Unambiguous math delimiters: $$...$$ block, \(...\) inline, \[...\] block.

@@ -2,7 +2,7 @@
 title: "Ch 9: Making Implicit Concepts Explicit"
 date: 2026-05-01T09:00:00
 description: "암묵 개념을 객체로 — Specification, 제약, 프로세스, 정책."
-tags: [DDD, Explicit Concepts, Specification]
+tags: [DDD, explicit-concepts, Specification]
 series: "Domain-Driven Design"
 seriesOrder: 9
 draft: true

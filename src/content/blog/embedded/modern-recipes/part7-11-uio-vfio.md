@@ -22,15 +22,10 @@ NIC·NVMe 같은 고성능 device를 다룰 때도 user space driver가 표준�
 
 UIO와 VFIO는 layer가 다릅니다.
 
-```text
-UIO  : MMIO 영역과 IRQ를 /dev/uioN으로 노출
-       DMA는 user가 알아서 (보통은 안 한다)
-       작은 PCI/Platform device, FPGA bring-up
-
-VFIO : IOMMU group 단위로 device를 user에 위임
-       DMA address를 IOMMU가 변환·보호
-       DPDK·SPDK·KVM passthrough 표준
-```
+| 인터페이스 | 노출 방식 | DMA | 대표 용도 |
+|---|---|---|---|
+| UIO | MMIO 영역과 IRQ를 `/dev/uioN`으로 노출 | user가 알아서 (보통은 안 한다) | 작은 PCI/Platform device, FPGA bring-up |
+| VFIO | IOMMU group 단위로 device를 user에 위임 | DMA address를 IOMMU가 변환·보호 | DPDK·SPDK·KVM passthrough 표준 |
 
 UIO는 kernel side가 매우 얇습니다. `uio_register_device` 한 번이면 충분합니다. VFIO는 IOMMU·container·group이라는 세 가지 객체를 ioctl로 조립해야 합니다. Setup 복잡도가 늘어나는 대신, user process가 임의 physical memory에 DMA를 거는 사고를 원천 차단합니다.
 

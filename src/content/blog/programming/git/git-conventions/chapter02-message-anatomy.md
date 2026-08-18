@@ -2,7 +2,7 @@
 title: "Ch 2: 메시지 구조 — subject / body / footer"
 date: 2026-05-17T02:00:00
 description: "잘 쓴 커밋 메시지의 형태 — 50/72 규칙, 명령형, why over what."
-tags: [Git, Commit Message]
+tags: [Git, commit-message]
 series: "Git Conventions"
 seriesOrder: 2
 draft: true

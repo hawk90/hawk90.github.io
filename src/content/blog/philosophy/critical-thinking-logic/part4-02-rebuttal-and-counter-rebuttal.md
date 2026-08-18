@@ -2,7 +2,7 @@
 title: "Part 4-2: 반론과 재반론"
 date: 2026-05-14T15:00:00
 description: "반론 다루기 — Toulmin 모델. 논증의 강화."
-tags: [Logic, Rebuttal, Toulmin Model]
+tags: [Logic, Rebuttal, toulmin-model]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 15
 draft: true

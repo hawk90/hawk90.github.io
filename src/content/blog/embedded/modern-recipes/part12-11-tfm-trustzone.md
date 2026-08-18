@@ -28,17 +28,10 @@ US Cyber Trust Mark 2024-25 점진 적용
 
 Cortex-M33/M55/M85는 *TrustZone-M*이라는 hardware mechanism으로 *Secure*와 *Non-Secure* 두 world를 가집니다.
 
-```text
-Secure Processing Environment (SPE)
-  TF-M core + secure partitions
-  Crypto, Internal Trusted Storage, Protected Storage, Attestation
-  Boot ROM에서 첫 부팅, 메모리·peripheral 일부를 secure로 표시
-
-Non-Secure Processing Environment (NSPE)
-  RTOS (FreeRTOS, Zephyr, mbedOS)
-  Application
-  PSA API client로 SPE 서비스 호출
-```
+| World | 구성 | 하는 일 |
+|-------|------|---------|
+| Secure Processing Environment (SPE) | TF-M core + secure partitions (Crypto, Internal Trusted Storage, Protected Storage, Attestation) | Boot ROM에서 가장 먼저 부팅해 메모리와 peripheral 일부를 secure로 표시합니다 |
+| Non-Secure Processing Environment (NSPE) | RTOS (FreeRTOS, Zephyr, mbedOS) + application | PSA API client로 SPE의 서비스를 호출합니다 |
 
 Memory와 peripheral은 *SAU/IDAU + MPC/PPC*로 region별 secure 여부를 표시합니다. NSPE가 secure 영역에 접근하면 MemManageFault가 발생합니다.
 

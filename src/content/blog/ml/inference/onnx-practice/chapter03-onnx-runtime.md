@@ -4,7 +4,7 @@ date: 2026-05-16T03:00:00
 description: "InferenceSession·SessionOptions·EP — ORT 사용 흐름."
 series: "ONNX 실전"
 seriesOrder: 3
-tags: [onnx-runtime, ort, inference-session]
+tags: [onnxruntime, ort, inference-session]
 draft: true
 topics: ["ml", "ml/inference"]
 ---

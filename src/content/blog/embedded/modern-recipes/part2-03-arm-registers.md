@@ -86,12 +86,12 @@ T bit이 0이면 illegal state(Cortex-M은 항상 Thumb)이므로 hardfault가 �
 
 ### 5) Special registers — CONTROL, PRIMASK, BASEPRI, FAULTMASK
 
-```text
-CONTROL    — privilege level, SP 선택, FPU active
-PRIMASK    — bit 0 = 1이면 모든 configurable IRQ 차단 (NMI/HardFault 제외)
-FAULTMASK  — bit 0 = 1이면 NMI 제외 모든 fault/IRQ 차단
-BASEPRI    — 8-bit, 이 값 이상의 priority는 차단 (M3+, 0이면 disable)
-```
+| 레지스터 | 역할 |
+|----------|------|
+| `CONTROL` | privilege level, SP 선택, FPU active |
+| `PRIMASK` | bit 0 = 1이면 모든 configurable IRQ 차단 (NMI/HardFault 제외) |
+| `FAULTMASK` | bit 0 = 1이면 NMI 제외 모든 fault/IRQ 차단 |
+| `BASEPRI` | 8-bit, 이 값 이상의 priority는 차단 (M3+, 0이면 disable) |
 
 ```c
 // Critical section — IRQ 차단

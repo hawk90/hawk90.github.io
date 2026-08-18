@@ -52,22 +52,11 @@ CXL 환경의 *주요 위협*:
 | 용도 | 디바이스 인증·키 교환·session 협상 |
 | CXL 사용 | DOE channel로 SPDM 메시지 흐름 |
 
-표준 메시지 시퀀스 (요약):
+메시지 시퀀스 자체는 CXL 고유가 아닙니다. 버전 협상에서 시작해 알고리즘 합의, 인증서 chain 확보, nonce 기반 challenge, firmware measurement, session 키 확립으로 끝나는 흐름은 PCIe·MCTP·USB 어디에 얹든 같습니다. 그 전체 시퀀스는 [Embedded Security Ch 12: SPDM과 CMA 인증 흐름](/blog/embedded/embedded-security/chapter12-spdm-cma)에 단계별로 정리돼 있습니다.
 
-| 단계 | 메시지 | 방향 |
-|------|--------|------|
-| 1 | GET_VERSION / VERSION | host ↔ device |
-| 2 | GET_CAPABILITIES / CAPABILITIES | host ↔ device |
-| 3 | NEGOTIATE_ALGORITHMS / ALGORITHMS | algorithm 협상 |
-| 4 | GET_DIGESTS / DIGESTS | 인증서 chain hash |
-| 5 | GET_CERTIFICATE / CERTIFICATE | X.509 chain |
-| 6 | CHALLENGE / CHALLENGE_AUTH | nonce 기반 proof of possession |
-| 7 | GET_MEASUREMENTS / MEASUREMENTS | firmware hash |
-| 8 | KEY_EXCHANGE / FINISH | session 키 |
+CXL에서 달라지는 것은 *어디에 실려 가는가*입니다. SPDM 메시지는 [Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 본 *DOE (Data Object Exchange) mailbox*를 통해 오갑니다. CXL.io의 config space 위에 얹힌 채널이므로, 링크가 완전히 올라오기 전 — 즉 아직 신뢰할 수 없는 디바이스와 대화하는 시점 — 에도 쓸 수 있습니다. 인증이 링크 협상보다 앞서야 한다는 요구가 이 선택을 만들었습니다.
 
-이 흐름 끝에 *host·device가 서로 신원 확인 + 공유 session 키*를 가집니다.
-
-자세한 내용은 [Embedded Security Ch 12 SPDM과 CMA 인증](/blog/embedded/embedded-security/chapter12-spdm-cma).
+여기서 얻은 session 키가 곧 아래 IDE의 재료가 됩니다. SPDM이 *누구인지*를 확인하고, IDE가 그 결과로 *오가는 데이터*를 암호화하는 분업입니다.
 
 ## IDE — Link 암호화
 

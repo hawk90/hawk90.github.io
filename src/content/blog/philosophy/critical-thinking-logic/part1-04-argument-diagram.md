@@ -2,7 +2,7 @@
 title: "Part 1-4: 논증 다이어그램 / 구조 분석"
 date: 2026-05-14T04:00:00
 description: "논증의 시각화 — 전제 ↓ 결론. 독립 / 연쇄 / 결합 논증."
-tags: [Logic, Argument Structure]
+tags: [Logic, argument-structure]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 4
 draft: true

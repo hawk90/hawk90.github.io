@@ -2,7 +2,7 @@
 title: "Ch 4: 주석"
 date: 2026-05-11T04:00:00
 description: "주석은 필요악이다. 좋은 주석과 나쁜 주석을 구분하고, 가능하면 코드 자체로 의도를 표현하라."
-tags: [CleanCode, Comments, Robert Martin]
+tags: [CleanCode, Comments, robert-martin]
 series: "Clean Code"
 seriesOrder: 4
 draft: true

@@ -811,3 +811,9 @@ Ch 7에서는 **설치와 패키징**을 다룹니다. `install()` 명령으로 
 - [CMake - GoogleTest 모듈](https://cmake.org/cmake/help/latest/module/GoogleTest.html)
 - [Google Test 문서](https://google.github.io/googletest/)
 - [Catch2 문서](https://github.com/catchorg/Catch2/blob/devel/docs/Readme.md)
+
+## 관련 항목
+
+- [Ch 5: find_package와 외부 의존성](/blog/tools/build/cmake/chapter05-find-package) — GoogleTest·Catch2를 가져오는 경로
+- [Ch 7: 설치와 패키징](/blog/tools/build/cmake/chapter07-install) — 테스트를 통과한 결과물을 배포 형태로 만들기
+- [Ch 8: Modern CMake 모범 사례](/blog/tools/build/cmake/chapter08-best-practices) — 테스트를 포함한 프로젝트 구조 정리

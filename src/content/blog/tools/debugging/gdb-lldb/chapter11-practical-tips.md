@@ -161,7 +161,7 @@ end
 
 LLDB는 `~/.lldbinit`.
 
-```
+```text
 settings set target.skip-prologue false
 settings set stop-line-count-after 5
 settings set stop-line-count-before 5

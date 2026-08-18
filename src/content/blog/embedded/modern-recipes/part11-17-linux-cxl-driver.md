@@ -1,7 +1,7 @@
 ---
 title: "Linux CXL 드라이버 분석 — cxl_pci·cxl_core·region·DAX"
 date: 2026-06-18T09:03:00
-description: "Linux kernel 6.x의 CXL 서브시스템 — cxl_pci·cxl_core·cxl_mem·region·DAX 모듈의 역할과 probe 흐름."
+description: "CXL 디바이스가 메모리로 안 올라올 때 모듈 체인·sysfs·mailbox 중 어디서 끊겼는지 좁혀 가는 절차."
 series: "Modern Embedded Recipes"
 seriesOrder: 151
 tags: [recipes, linux, cxl, kernel-driver, dax, sysfs]
@@ -13,338 +13,158 @@ topics: ["embedded"]
 
 > **"Linux CXL 드라이버는 *cxl_acpi → cxl_pci → cxl_core → cxl_mem*의 의존성 체인으로 동작합니다."** 어느 한 모듈만 로딩 안 돼도 *침묵하며 동작 안* 합니다.
 
-## drivers/cxl/ 디렉터리
+## 이 레시피가 푸는 것
 
-mainline kernel 6.x의 `drivers/cxl/` 대략 구조:
+CXL 디바이스가 안 올라올 때 가장 곤란한 점은 *에러가 안 난다*는 것입니다. `lspci`에는 보이는데 `/sys/bus/cxl/devices/`가 비어 있거나, memdev는 있는데 `numactl --hardware`에 노드가 안 생기거나, region은 만들어졌는데 commit이 거부됩니다. 각 경우가 서로 다른 층에서 끊긴 것인데 증상만 보면 구분이 안 갑니다.
 
-```text
-drivers/cxl/
-├── Kconfig·Makefile
-├── acpi.c        — cxl_acpi: ACPI CEDT 파싱, root port 등록
-├── pci.c         — cxl_pci: PCI subsystem 통합, MMIO 매핑
-├── mem.c         — cxl_mem: memory device driver
-├── pmem.c        — cxl_pmem: persistent CXL
-├── port.c        — cxl_port: switch·root port driver
-└── core/         — cxl_core: 공통 베이스
-    ├── port.c    — CXL port·decoder 객체 관리
-    ├── region.c  — region 생성·관리
-    ├── memdev.c  — memory device 추상화
-    ├── hdm.c     — HDM Decoder 프로그래밍
-    ├── mbox.c    — Mailbox API
-    ├── regs.c    — register access helpers
-    └── pmem.c    — persistent memory 통합
-```
+이 글은 그 층을 아래에서 위로 하나씩 짚어 *어디서 끊겼는지* 좁히는 절차입니다. 각 층의 커널 코드가 실제로 무엇을 하는지는 [CXL 4.0 Internals Ch 11: Linux drivers/cxl/ 분석](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서 `cxl_pci_probe`부터 `cxl_region_attach`까지 따라갑니다.
 
-총 *50개 이상의 .c·.h 파일*. *cxl_core가 모든 모듈의 공통 베이스*입니다.
+## 층 구분
 
-## 모듈 의존성 체인
+먼저 지도를 잡습니다. 디바이스가 메모리로 쓰이기까지 통과하는 층은 다섯입니다.
 
-CXL 모듈들은 *순서대로 로딩*되어야 합니다.
+| 층 | 확인 지점 | 끊기면 |
+|----|----------|--------|
+| 1. PCI 열거 | `lspci`에 CXL 디바이스 | 물리·링크 문제 |
+| 2. 모듈 로딩 | `lsmod \| grep cxl` | 서브시스템 자체가 안 뜸 |
+| 3. CXL 등록 | `/sys/bus/cxl/devices/` | probe가 중간에 멈춤 |
+| 4. Region | `cxl list -RT`의 region | decoder·interleave 설정 문제 |
+| 5. NUMA | `numactl --hardware` | DAX 모드 전환 누락 |
 
-| 순서 | 모듈 | 역할 |
-|------|------|------|
-| 1 | cxl_core | 다른 모듈이 사용할 *base infrastructure* |
-| 2 | cxl_acpi | ACPI CEDT 파싱, root port·decoder 등록 |
-| 3 | cxl_pci | PCI subsystem에서 *CXL DVSEC 발견*, MMIO 매핑 |
-| 4 | cxl_mem | memory device 드라이버, `mem0`·`mem1` 등록 |
-| 5 | cxl_port | switch·root port 드라이버 |
-| 6 | cxl_pmem | persistent memory가 있을 때만 |
+아래로 내려갈수록 원인이 물리에 가깝습니다. 그래서 *위에서부터 확인하되 실패한 지점의 한 층 아래를 의심*하는 것이 빠릅니다.
+
+## 1층 — PCI에 보이는가
+
+가장 먼저 디바이스가 PCI 레벨에서 열거됐는지 봅니다.
 
 ```bash
-# 의존성 확인
-$ modinfo cxl_mem | grep depends
-depends: cxl_core
-
-$ modinfo cxl_acpi | grep depends
-depends: cxl_core,cxl_acpi_table
-
-# 모듈 자동 로딩 (CEDT가 있으면)
-$ modprobe cxl_acpi
-# → cxl_core 먼저 로딩 → cxl_acpi 로딩
+$ lspci -nn | grep -i cxl
+$ lspci -vv -s 0c:00.0 | grep -A4 "Designated Vendor-Specific"
 ```
 
-## 핵심 자료 구조
+CXL 디바이스는 *DVSEC*(Designated Vendor-Specific Extended Capability)로 자신이 CXL임을 알립니다. `lspci`에는 뜨는데 DVSEC가 없으면 커널은 그냥 PCI 디바이스로 취급하고 CXL 경로를 아예 타지 않습니다. 이 경우 CXL 모듈을 아무리 로딩해도 소용없습니다.
 
-drivers/cxl 코드의 중심 객체:
+## 2층 — 모듈 체인이 다 올라왔는가
 
-| 구조체 | 역할 |
-|--------|------|
-| `struct cxl_port` | CXL 토폴로지 노드 (Root·Switch·Endpoint) |
-| `struct cxl_decoder` | HDM Decoder, *SPA → DPA 매핑* |
-| `struct cxl_region` | interleave된 *연속 메모리 영역* |
-| `struct cxl_memdev` | memory device 추상화, `mem0`·`mem1` |
-| `struct cxl_mailbox` | mailbox 명령 큐 |
-| `struct cxl_root_decoder` | root port의 decoder (CFMWS) |
-| `struct cxl_endpoint_decoder` | endpoint의 decoder (실 DRAM 매핑) |
-| `struct cxl_event_state` | RAS 이벤트 추적 |
-
-각 객체는 *device model의 device로 등록*되어 *sysfs에 노출*됩니다.
-
-## cxl_pci_probe 흐름
-
-`cxl_pci`의 *probe 함수*가 *디바이스 등록의 핵심*입니다.
-
-```c
-// drivers/cxl/pci.c (개념적, 단순화)
-static int cxl_pci_probe(struct pci_dev *pdev, ...)
-{
-    struct cxl_dev_state *cxlds;
-
-    // 1. CXL DVSEC 확인 (없으면 일반 PCI device로 처리)
-    if (!is_cxl_device(pdev))
-        return -ENODEV;
-
-    // 2. cxl_dev_state 할당 (모든 CXL 디바이스 공통 base)
-    cxlds = cxl_dev_state_create(&pdev->dev);
-
-    // 3. CXL MMIO BAR 매핑
-    rc = cxl_pci_setup_regs(pdev, cxlds);
-
-    // 4. Mailbox 초기화
-    rc = cxl_pci_setup_mailbox(cxlds);
-
-    // 5. CXL DVSEC capability 읽기
-    rc = cxl_dvsec_init(pdev, cxlds);
-
-    // 6. AER·RAS handler 등록
-    rc = cxl_pci_setup_aer(pdev);
-
-    // 7. memdev 등록 → cxl_mem 드라이버가 binding
-    rc = cxl_memdev_register(cxlds);
-
-    return 0;
-}
-```
-
-각 단계가 *분리*되어 *디버깅 시 어느 단계까지 진행됐는지* 추적 가능. [Kernel Debugging Ch 8](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)의 ftrace로 봤듯 *probe 함수가 호출 순서*를 명확히 보여 줍니다.
-
-## HDM Decoder 프로그래밍
-
-CXL 디바이스가 *실 메모리로 사용*되려면 *HDM Decoder 프로그래밍*이 필요합니다.
-
-```c
-// drivers/cxl/core/hdm.c (개념적)
-int cxl_decoder_commit(struct cxl_decoder *cxld)
-{
-    // 1. Decoder가 disable 상태인지 확인
-    if (cxld->flags & CXL_DECODER_F_ENABLE)
-        return -EBUSY;
-
-    // 2. 매핑할 SPA range 설정
-    write_mmio(cxld->base_lo, cxld->hpa_range.start & 0xFFFFFFFF);
-    write_mmio(cxld->base_hi, cxld->hpa_range.start >> 32);
-    write_mmio(cxld->size_lo, (cxld->size) & 0xFFFFFFFF);
-    write_mmio(cxld->size_hi, (cxld->size) >> 32);
-
-    // 3. Interleave 설정
-    write_mmio(cxld->control,
-        FIELD_PREP(CXL_DECODER_IW, cxld->interleave_ways) |
-        FIELD_PREP(CXL_DECODER_IG, cxld->interleave_granularity));
-
-    // 4. Decoder 활성화 (Commit)
-    set_bit(CXL_DECODER_F_ENABLE, &cxld->flags);
-    write_mmio(cxld->control, control_val | CXL_DECODER_ENABLE);
-
-    return 0;
-}
-```
-
-*Commit*은 *되돌릴 수 없는 작업*입니다. *region을 잘못 만들면 reset*만이 답.
-
-## sysfs Path — Region 생성
-
-사용자가 region을 만들 때의 *전체 path*:
-
-| 단계 | sysfs path |
-|------|-----------|
-| 1. 사용자 명령 | `cxl create-region -d decoder0.0 -t ram -s 128G` |
-| 2. cxl-cli write | `echo region0 > /sys/bus/cxl/devices/decoder0.0/create_ram_region` |
-| 3. 커널 콜백 | `region_create_store()` in `core/region.c` |
-| 4. cxl_region 객체 생성 | `devm_cxl_add_region()` |
-| 5. 사용자가 mapping 추가 | `echo mem0 > /sys/bus/cxl/devices/region0/target0` |
-| 6. 사용자가 size·interleave 설정 | `echo 137438953472 > /sys/bus/cxl/devices/region0/size` |
-| 7. Commit | `echo 1 > /sys/bus/cxl/devices/region0/commit` |
-| 8. HDM Decoder 활성화 | `cxl_decoder_commit()` (위 코드) |
-| 9. System RAM 노출 | `daxctl reconfigure-device dax0.0 -m system-ram` |
-| 10. NUMA 노드 등록 | kernel이 *별도 노드* 생성 |
-
-각 단계에서 *오류 시 errno*가 return되어 sysfs write가 실패합니다.
-
-## Mailbox API
-
-CXL 디바이스 명령은 *mailbox를 통해* 보냅니다.
-
-```c
-// drivers/cxl/core/mbox.c (개념적)
-int cxl_mbox_send_cmd(struct cxl_dev_state *cxlds,
-                      u16 opcode,
-                      void *in_payload, size_t in_size,
-                      void *out_payload, size_t out_size)
-{
-    struct cxl_mbox_cmd mbox_cmd = {
-        .opcode = opcode,
-        .payload_in = in_payload,
-        .size_in = in_size,
-        .payload_out = out_payload,
-        .size_out = out_size,
-    };
-
-    // 1. Mailbox lock
-    mutex_lock(&cxlds->mbox_mutex);
-
-    // 2. Payload 작성
-    cxl_setup_mbox_cmd(cxlds, &mbox_cmd);
-
-    // 3. Command 보내기
-    write_mmio(cxlds->mbox_regs->command, opcode);
-
-    // 4. Response 기다림 (timeout 포함)
-    rc = wait_for_completion_timeout(&cxlds->mbox_done, MBOX_TIMEOUT_MS);
-
-    // 5. Result 읽기
-    if (rc > 0)
-        rc = cxl_read_mbox_response(cxlds, &mbox_cmd);
-
-    mutex_unlock(&cxlds->mbox_mutex);
-    return rc;
-}
-```
-
-자주 쓰는 opcode:
-
-| Opcode | 명령 |
-|--------|------|
-| 0x0001 | Identify (디바이스 정보) |
-| 0x4400 | Get Health Info |
-| 0x4300 | Get LSA (Label Storage Area) |
-| 0x4302 | Set LSA |
-| 0x4500 | Get Event Records |
-| 0x4501 | Clear Event Records |
-| 0x4700 | Set Shutdown State |
-| 0x4800 | Get Poison List |
-
-## NUMA 노드 등록
-
-CXL region이 commit되면 *별도 NUMA 노드*로 등록:
-
-```c
-// drivers/cxl/core/region.c (개념적)
-static int cxl_region_attach(struct cxl_region *cxlr)
-{
-    // 1. SRAT 기반 또는 동적 노드 할당
-    int target_nid = cxl_region_pick_node(cxlr);
-
-    // 2. memory hot-add
-    rc = add_memory_driver_managed(target_nid, cxlr->res.start,
-                                    cxlr->res.end - cxlr->res.start,
-                                    "System RAM (CXL)",
-                                    MHP_MERGE_RESOURCE);
-
-    // 3. NUMA 노드 sysfs 등록
-    register_one_node(target_nid);
-
-    return 0;
-}
-```
-
-*동적으로 추가*되어 `numactl --hardware`에 새 노드로 등장.
-
-## 에러 처리·RAS
-
-CXL 디바이스의 *RAS 이벤트*는 *pci_error_handlers를 통해 호스트 측*에 전달:
-
-```c
-// drivers/cxl/pci.c (개념적)
-static const struct pci_error_handlers cxl_pci_err_handlers = {
-    .error_detected = cxl_pci_error_detected,
-    .mmio_enabled = cxl_pci_mmio_enabled,
-    .slot_reset = cxl_pci_slot_reset,
-    .resume = cxl_pci_resume,
-    .cor_error_reported = cxl_cor_error_reported,
-};
-
-static pci_ers_result_t cxl_pci_error_detected(struct pci_dev *pdev, ...)
-{
-    struct cxl_dev_state *cxlds = pci_get_drvdata(pdev);
-
-    // 1. 에러 등급 분류
-    if (state == pci_channel_io_perm_failure) {
-        // Fatal — 디바이스 격리, region remove
-        cxl_memdev_set_offline(cxlds);
-        return PCI_ERS_RESULT_DISCONNECT;
-    }
-
-    // 2. AER 이벤트 처리
-    cxl_aer_handle(cxlds);
-
-    // 3. 권장 동작 return
-    return PCI_ERS_RESULT_NEED_RESET;
-}
-```
-
-*Fatal 이벤트*는 *디바이스를 offline*시키고 *NUMA 노드를 자동 제거*. *guest 측 워크로드*는 *해당 메모리에 접근 시 SIGBUS*.
-
-## 자주 하는 실수
-
-> ⚠️ cxl_core 미로딩 상태에서 cxl_mem 시도
+CXL 모듈은 순서가 있고, 아래 것이 없으면 위 것이 조용히 실패합니다.
 
 ```bash
-$ modprobe cxl_mem
-modprobe: FATAL: Module cxl_mem not found in directory ...
-# 실은 cxl_core가 먼저 로딩되어야 함
-$ modprobe cxl_core
-$ modprobe cxl_mem
-# OK
+$ lsmod | grep cxl
+cxl_mem      cxl_core
+cxl_pci      cxl_core
+cxl_acpi     cxl_core
+cxl_core
 ```
 
-*Linux 모듈 system이 의존성 해결*해야 정상. *manual modprobe*는 *순서 신경* 써야.
+`cxl_core`가 베이스이고 나머지가 그 위에 얹힙니다. 정상적인 시스템에서는 CEDT가 있으면 `modprobe cxl_acpi` 한 번으로 의존성이 자동 해결됩니다. 손으로 하나씩 올리다 `cxl_mem not found`가 나온다면 대개 순서 문제입니다.
 
-> ⚠️ Region commit 전 access 시도
+`cxl_acpi`가 안 올라온다면 펌웨어 쪽을 봅니다. CEDT 테이블이 없으면 root port를 등록할 근거가 없습니다.
 
 ```bash
-$ cat /dev/mem | ...   # CXL region 영역 read
-# → 0xFF 또는 fault
+$ ls /sys/firmware/acpi/tables/CEDT
 ```
 
-*region commit이 끝나야* SPA가 *실 DRAM에 매핑*됩니다. 그 전에는 *읽기·쓰기 모두 무효*.
+## 3층 — CXL 서브시스템에 등록됐는가
 
-> ⚠️ Mailbox timeout 너무 짧게 설정
-
-```c
-#define MBOX_TIMEOUT_MS 100   // 너무 짧음
-```
-
-CXL 디바이스의 *firmware update·flash 명령*은 *수십 초*도 걸립니다. *명령별로 다른 timeout*이 권장. 기본은 *2000ms* 이상.
-
-> ⚠️ AER 활성화 안 함
+모듈이 다 올라왔는데 아래가 비어 있다면 probe가 중간에 멈춘 것입니다.
 
 ```bash
-$ cat /proc/cmdline
-... pci=noaer ...   # AER 비활성!
+$ ls /sys/bus/cxl/devices/
+mem0/  decoder0.0/  port0/  root0/
+
+$ dmesg | grep -i cxl | tail -20
 ```
 
-AER 없으면 *CXL RAS 이벤트가 안 보임*. *조용한 corruption*. `pci=noaer` 옵션은 *디버깅 후 반드시 제거*.
+`mem0`은 있는데 `decoder0.0`이 없는 식으로 *일부만* 등록되는 경우가 실제로 자주 나옵니다. probe가 어느 단계에서 멈췄는지는 ftrace로 잡는 것이 가장 빠릅니다.
 
-> ⚠️ Hot-remove 중 region access
+```bash
+$ echo 'cxl_*' > /sys/kernel/debug/tracing/set_ftrace_filter
+$ echo function > /sys/kernel/debug/tracing/current_tracer
+$ echo 1 > /sys/kernel/debug/tracing/tracing_on
+$ modprobe -r cxl_pci && modprobe cxl_pci
+$ cat /sys/kernel/debug/tracing/trace | grep cxl
+```
 
-CXL 디바이스 hot-remove 시 *region cleanup*에 시간이 걸립니다. *removal 진행 중 region에 접근하는 워크로드*는 *SIGBUS·OOPS* 위험. *graceful unmount*가 권장.
+마지막으로 호출된 `cxl_*` 함수가 멈춘 지점입니다. 그 함수가 무엇을 하려던 것인지는 [Kernel Debugging Ch 8](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)에서 다룹니다.
+
+## 4층 — region이 만들어지고 commit되는가
+
+여기가 가장 많이 막히는 층입니다. region 생성은 sysfs write의 연속이고, 각 write가 실패하면 그 자리에서 errno를 돌려줍니다.
+
+```bash
+$ cxl create-region -d decoder0.0 -t ram -s 128G
+# 실패하면 어느 write에서 났는지 확인
+$ dmesg | tail -5
+```
+
+`cxl-cli`가 하는 일은 결국 sysfs에 값을 쓰는 것이라, 막히면 손으로 한 단계씩 밟아 어디서 거부되는지 볼 수 있습니다.
+
+```bash
+$ echo region0 > /sys/bus/cxl/devices/decoder0.0/create_ram_region
+$ echo mem0   > /sys/bus/cxl/devices/region0/target0
+$ echo 137438953472 > /sys/bus/cxl/devices/region0/size
+$ echo 1      > /sys/bus/cxl/devices/region0/commit
+```
+
+**commit은 되돌릴 수 없습니다.** decoder를 잘못 프로그래밍한 채 commit하면 그 decoder는 reboot 전까지 그 상태입니다. size와 target을 확인하고 마지막 줄을 실행합니다.
+
+commit이 `-EBUSY`로 거부되면 decoder가 이미 enable 상태입니다. 앞선 시도가 절반쯤 성공한 채 남아 있는 경우가 대부분입니다.
+
+## 5층 — NUMA 노드로 올라오는가
+
+region까지 됐는데 `numactl`에 안 보인다면 대개 DAX 모드 전환이 빠진 것입니다.
+
+```bash
+$ daxctl list
+$ daxctl reconfigure-device dax0.0 -m system-ram
+$ numactl --hardware
+```
+
+`devdax` 모드는 `/dev/dax0.0` 문자 디바이스로만 보이고 일반 메모리로는 안 잡힙니다. `system-ram`으로 바꿔야 커널이 hot-add해 NUMA 노드가 생깁니다.
+
+## mailbox가 응답하지 않을 때
+
+디바이스 상태를 물어보는 명령(`cxl health`, poison list 조회 등)이 멈춘다면 mailbox 층입니다.
+
+명령마다 걸리는 시간이 크게 다르다는 점이 함정입니다. Identify는 즉시 돌아오지만 firmware update나 flash 계열은 수십 초가 걸립니다. 드라이버의 mailbox timeout이 짧게 잡혀 있으면 정상 동작 중인 명령을 timeout으로 죽입니다. 기본값은 2000 ms 이상을 씁니다.
+
+## RAS 이벤트가 안 보일 때
+
+CXL의 에러는 PCIe AER 경로를 타고 올라옵니다. 그래서 AER이 꺼져 있으면 *에러가 조용히 사라집니다*.
+
+```bash
+$ cat /proc/cmdline | grep -o 'pci=noaer'
+```
+
+`pci=noaer`는 다른 문제를 디버깅하다 넣어 두고 잊는 대표적인 옵션입니다. 이게 남아 있으면 CXL 디바이스가 media error를 내고 있어도 호스트는 모릅니다.
+
+## Hot-remove 전에
+
+디바이스를 뽑기 전에 region을 쓰는 워크로드를 먼저 정리합니다. hot-remove 중 region cleanup에는 시간이 걸리고, 그 사이 접근하는 프로세스는 SIGBUS를 받거나 최악의 경우 OOPS로 이어집니다.
+
+```bash
+$ umount /mnt/cxl-backed   # 있다면 먼저
+$ cxl disable-region region0
+$ cxl destroy-region region0
+```
 
 ## 정리
 
-- `drivers/cxl/`는 *cxl_core를 베이스로 cxl_acpi·cxl_pci·cxl_mem 등이 의존*하는 구조입니다.
-- 디바이스 인식은 *cxl_pci_probe*가 *DVSEC 확인 → MMIO 매핑 → mailbox 초기화 → memdev 등록* 순으로 진행.
-- *HDM Decoder는 commit 후 되돌릴 수 없음*. region 잘못 만들면 reboot만이 답.
-- Region 생성은 *sysfs에서 10단계*. *각 단계에서 errno 가능*.
-- Mailbox API로 *모든 디바이스 명령*을 보냄. *timeout·lock·payload 관리*가 driver의 핵심 로직.
-- NUMA 노드 등록·hot-add가 *region commit과 함께* 자동 진행됩니다.
-- RAS 이벤트는 *pci_error_handlers를 통해 host*에 전달되어 *Fatal 시 offline*.
+- 층을 나눠 좁힙니다. PCI 열거 → 모듈 체인 → CXL 등록 → region → NUMA 순서로, 실패 지점의 *한 층 아래*를 의심합니다.
+- `lspci`에 보여도 DVSEC가 없으면 커널은 CXL 경로를 타지 않습니다.
+- `cxl_core`가 베이스입니다. 손으로 modprobe하면 순서를 맞춰야 합니다.
+- region commit은 되돌릴 수 없습니다. `-EBUSY`는 앞선 시도가 절반 남아 있다는 뜻입니다.
+- region이 있는데 NUMA 노드가 없으면 `daxctl reconfigure-device -m system-ram`이 빠진 것입니다.
+- mailbox timeout은 2000 ms 이상. firmware 계열 명령은 수십 초가 정상입니다.
+- `pci=noaer`가 남아 있으면 RAS 이벤트가 통째로 사라집니다.
 
-다음 편은 Modern Embedded Recipes 시리즈의 *Part 12 (Edge AI·IoT)* 영역으로 자연 이어집니다. CXL 관련 다음 깊이는 [Kernel Debugging Ch 8·9](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)와 [Embedded Debugging Ch 8·9](/blog/tools/debugging/embedded/chapter08-cxl-link-debug)에 *분산 추가*된 챕터들이 받습니다.
+다음 편은 Modern Embedded Recipes 시리즈의 *Part 12 (Edge AI·IoT)* 영역으로 이어집니다.
 
 ## 관련 항목
 
 - [Ch 149: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
 - [Ch 150: QEMU CXL Type 3 디바이스 에뮬레이션](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)
+- [CXL 4.0 Internals Ch 11: Linux drivers/cxl/ 분석](/blog/embedded/hardware/cxl/chapter11-linux-driver) — 각 층의 커널 코드가 실제로 하는 일
 - [Kernel Debugging Ch 8: CXL 커널 드라이버 디버깅](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)
 - [Kernel Debugging Ch 9: drivers/cxl 코드 분석](/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough)
 - [Bootloader Internals Ch 35: EFI·UEFI에서 CXL 초기화](/blog/embedded/bootloader/chapter35-uefi-cxl-init)

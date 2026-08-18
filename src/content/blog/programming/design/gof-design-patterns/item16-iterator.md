@@ -2,7 +2,7 @@
 title: "GoF 16: Iterator"
 date: 2026-05-01T16:00:00
 description: "컬렉션 내부 구조 노출 없이 순회 — STL의 토대."
-tags: [Design Pattern, GoF, C++, C, Behavioral]
+tags: [design-pattern, GoF, C++, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 16
 draft: true

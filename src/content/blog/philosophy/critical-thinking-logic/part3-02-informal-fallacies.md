@@ -2,7 +2,7 @@
 title: "Part 3-2: 비형식적 오류 — 관련성 / 모호성 / 가정"
 date: 2026-05-14T11:00:00
 description: "인신공격 / 권위 호소 / 허수아비 / 모호어 / 선결 문제 요구."
-tags: [Logic, Informal Fallacy]
+tags: [Logic, informal-fallacy]
 series: "비판적 사고를 위한 논리"
 seriesOrder: 11
 draft: true

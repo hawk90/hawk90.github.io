@@ -2,7 +2,7 @@
 title: "Ch 8: CI/CD 통합"
 date: 2026-05-17T08:00:00
 description: "브랜치 → CI 트리거 → 배포. GitHub Actions / GitLab CI / Jenkins."
-tags: [Git, CI/CD, GitHub Actions]
+tags: [Git, ci-cd, github-actions]
 series: "Git Flow"
 seriesOrder: 8
 draft: true

@@ -2,7 +2,7 @@
 title: "Ch 19: Single-Host IPC"
 date: 2026-05-05T19:00:00
 description: "단일 호스트 IPC — pipe / FIFO / 메시지 큐 / 공유 메모리 / Unix socket."
-tags: [C, IPC, pipe, Shared Memory]
+tags: [C, IPC, pipe, shared-memory]
 series: "전문가를 위한 C"
 seriesOrder: 19
 draft: true

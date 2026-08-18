@@ -2,7 +2,7 @@
 title: "Ch 2: GitHub Flow — 단일 main"
 date: 2026-05-17T02:00:00
 description: "단순한 GitHub Flow — main + 토픽 브랜치. PR 통합 / CI 통과 / 즉시 배포."
-tags: [Git, GitHub Flow]
+tags: [Git, github-flow]
 series: "Git Flow"
 seriesOrder: 2
 draft: true

@@ -1,9 +1,10 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import TagBadge from '../../components/blog/TagBadge.astro';
+import PostRow from '../../components/blog/PostRow.astro';
 import BlogSidebar from '../../components/blog/BlogSidebar.astro';
 import Breadcrumb from '../../components/common/Breadcrumb.astro';
-import { toSlug, getTagUrl } from '../../lib/utils';
+import { toSlug, getTagUrl, getPostUrl } from '../../lib/utils';
 import { getPublishedPosts, getAllSeries, getAllTags, type BlogPost } from '../../lib/posts';
 import { getSeriesMetadata } from '../../consts/series';
 
@@ -90,29 +91,11 @@ function formatChapter(key: string): string {
               const items = (
                 <div class:list={['space-y-2.5 mt-3', hasChapters && chapter.label ? 'sm:pl-4 border-l border-[var(--color-border)]/60 ml-1.5' : '']}>
                   {chapter.posts.map((post, index) => (
-                    <a
-                      href={`/blog/${post.id}`}
-                      class="series-item block p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl hover:border-[var(--color-accent)] hover:shadow-md transition-all duration-200 group"
-                    >
-                      <div class="flex items-start gap-4">
-                        <div class="flex-shrink-0 w-9 h-9 flex items-center justify-center bg-[var(--color-accent)]/15 text-[var(--color-accent)] font-semibold rounded-lg text-sm group-hover:bg-[var(--color-accent)] group-hover:text-white transition-colors">
-                          {hasChapters ? index + 1 : post.data.seriesOrder || index + 1}
-                        </div>
-                        <div class="flex-1 min-w-0">
-                          <h3
-                            class="text-base sm:text-lg font-semibold group-hover:text-[var(--color-accent)] transition-colors leading-snug"
-                            transition:name={`title-${post.id}`}
-                          >
-                            {post.data.title}
-                          </h3>
-                          {post.data.description && (
-                            <p class="text-sm text-[var(--color-text-secondary)] mt-1.5 line-clamp-2 leading-relaxed">
-                              {post.data.description}
-                            </p>
-                          )}
-                        </div>
-                      </div>
-                    </a>
+                    <PostRow
+                      post={post}
+                      index={hasChapters ? index + 1 : post.data.seriesOrder || index + 1}
+                      headingLevel={2}
+                    />
                   ))}
                 </div>
               );
@@ -159,15 +142,6 @@ function formatChapter(key: string): string {
   /* Hide the native marker (Safari renders ▸ by default even with list-none) */
   .series-chapter > summary::-webkit-details-marker { display: none; }
   .series-chapter > summary::marker { content: ''; }
-
-  /* Subtle slide on item hover — affords "drilling in" */
-  .series-item {
-    transform: translateX(0);
-    transition: transform 0.2s ease, border-color 0.2s ease, box-shadow 0.2s ease;
-  }
-  .series-item:hover {
-    transform: translateX(2px);
-  }
 
   /* Fade-in items when chapter opens (no JS needed; details exposes :state) */
   @media (prefers-reduced-motion: no-preference) {

@@ -105,12 +105,11 @@ end
 
 ## Clock Region — 시간의 단위
 
-```text
-Clock region (Xilinx 7-series):
-  ~50 CLB 폭 × ~50 CLB 높이
-  자체 clock buffer (BUFR, BUFH)
-  하나의 region은 같은 clock skew
-```
+Xilinx 7-series의 clock region은 다음 성질을 갖습니다.
+
+- 크기는 대략 50 CLB 폭 × 50 CLB 높이입니다.
+- region마다 자체 clock buffer(`BUFR`, `BUFH`)를 갖습니다.
+- 하나의 region 안에서는 clock skew가 같습니다.
 
 FPGA는 *전체*에 하나의 clock을 깔지 않고 *region 단위*로 나눕니다. 큰 design은 여러 clock domain을 갖고, 도메인 사이는 *clock domain crossing (CDC)* 처리가 필수.
 
@@ -128,12 +127,9 @@ end
 
 ## IO Bank
 
-```text
-한 IO bank는 같은 VCCIO 전압 (1.8V / 2.5V / 3.3V)
-같은 bank의 핀들은 *같은 logic level standard*
-
-다양한 standard: LVCMOS, LVDS, SSTL, HSTL, LVPECL
-```
+- 한 IO bank는 하나의 VCCIO 전압(1.8V / 2.5V / 3.3V)을 공유합니다.
+- 같은 bank에 속한 핀들은 *같은 logic level standard*를 따릅니다.
+- 고를 수 있는 standard는 LVCMOS, LVDS, SSTL, HSTL, LVPECL 등으로 다양합니다.
 
 PCB 설계 시 *어느 핀이 어느 bank에 속하는지*를 알아야 합니다. 한 bank에 3.3V CMOS와 1.8V DDR 신호를 섞을 수 없습니다.
 

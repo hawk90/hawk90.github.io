@@ -17,7 +17,7 @@ topics: ["tools", "tools/debugging"]
 
 ## 조건부 Breakpoint — `if`
 
-```
+```text
 (gdb) break 42 if x > 100
 (gdb) b factorial if n == 0
 (gdb) b parser.c:50 if strcmp(buf, "ERROR") == 0
@@ -33,7 +33,7 @@ for (int i = 0; i < 10000; i++) {
 }
 ```
 
-```
+```text
 (gdb) b 4 if i == 5234 && data[i].value == 0
 ```
 
@@ -41,7 +41,7 @@ for (int i = 0; i < 10000; i++) {
 
 ### 조건 표현식 — *어디까지 가능한가*
 
-```
+```text
 b 42 if x > 100 && y < 0          # 논리 연산
 b 42 if my_func(x) != 0           # 함수 호출 (side effect 주의)
 b 42 if strcmp(s, "key") == 0     # 문자열
@@ -53,7 +53,7 @@ C/C++ *식 전부*가 조건. 단점은 *조건 평가 비용*입니다. 매 bre
 
 ### `commands` — Breakpoint에 *동작 첨부*
 
-```
+```text
 (gdb) break 42
 Breakpoint 1 at ...
 
@@ -71,7 +71,7 @@ Breakpoint 1 at ...
 
 ***디버거를 printf로 활용*하는 강력한 트릭**. 코드 수정 없이 *로깅을 동적으로 추가*.
 
-```
+```text
 (gdb) commands 1
 > silent
 > printf "Loop %d: x=%d y=%d\n", i, x, y
@@ -81,7 +81,7 @@ Breakpoint 1 at ...
 
 `silent`로 *Breakpoint 도달 메시지*를 끄고, `printf`로 직접 포맷. 결과:
 
-```
+```text
 Loop 1: x=10 y=20
 Loop 2: x=15 y=18
 Loop 3: x=22 y=15
@@ -92,7 +92,7 @@ Loop 3: x=22 y=15
 
 ### Ignore Count — *N번 무시*
 
-```
+```text
 (gdb) break 42
 (gdb) ignore 1 1000      # 1번 breakpoint를 1000번 무시
 ```
@@ -105,7 +105,7 @@ Loop 3: x=22 y=15
 
 ## 임시 / 일회성 Breakpoint
 
-```
+```text
 (gdb) tbreak main       # 한 번 멈추면 자동 삭제
 (gdb) tb main           # 약어
 ```
@@ -113,14 +113,14 @@ Loop 3: x=22 y=15
 `run`을 자주 할 때 *시작점 잡기*. `break`로 등록하면 매번 정리해야 하는데, `tbreak`는 자동.
 
 LLDB:
-```
+```text
 (lldb) breakpoint set --one-shot --name main
 (lldb) b -o main
 ```
 
 ### `rbreak` — 정규식 매칭
 
-```
+```text
 (gdb) rbreak handle_.*
 Breakpoint 1 at ...: file foo.c, line 10.
 Breakpoint 2 at ...: file foo.c, line 25.
@@ -135,7 +135,7 @@ Breakpoint 2 at ...: file foo.c, line 25.
 
 가장 강력한 디버깅 도구 중 하나. 변수의 *값이 변할 때마다* 자동 정지.
 
-```
+```text
 (gdb) watch x          # x가 변경될 때 멈춤
 (gdb) watch -location my_struct.field   # 주소 기준
 ```
@@ -150,7 +150,7 @@ void process() {
 }
 ```
 
-```
+```text
 (gdb) watch balance
 (gdb) run
 ...
@@ -172,7 +172,7 @@ bug_function () at bug.c:18
 
 ### 종류 — `rwatch`, `awatch`
 
-```
+```text
 (gdb) watch x          # 쓰기에만 (변경)
 (gdb) rwatch x         # 읽기에만
 (gdb) awatch x         # 읽기 + 쓰기 (access)
@@ -186,14 +186,14 @@ bug_function () at bug.c:18
 
 ### Hardware vs Software Watchpoint
 
-```
+```text
 (gdb) watch x
 Hardware watchpoint 1: x        # 빠름!
 ```
 
 CPU의 *디버그 레지스터*를 사용. 보통 *x86은 4개, ARM은 더 많음*. 빠르고 *프로그램이 거의 느려지지 않습니다*.
 
-```
+```text
 (gdb) watch (long array)[100]   # 큰 영역
 Hardware watchpoint 2: ...
 warning: Could not insert hardware watchpoint 2.
@@ -201,7 +201,7 @@ warning: Could not insert hardware watchpoint 2.
 
 *하드웨어 한도 초과* 또는 *추적 영역 너무 큼*. 그러면 GDB가 *software watchpoint*로 대체:
 
-```
+```text
 (gdb) set can-use-hw-watchpoints 0   # software 강제
 (gdb) watch big_array
 Watchpoint 3: big_array
@@ -225,7 +225,7 @@ void outer() {
 
 지역 변수에 watch를 걸면, *함수가 끝나면서 watchpoint도 사라집니다*. 변수가 *스택에서 해제*되어서.
 
-```
+```text
 Watchpoint 1 deleted because the program has left the block in
 which its expression is valid.
 ```
@@ -236,7 +236,7 @@ GDB가 알려 줍니다. 전역 변수나 *생존 기간이 긴* 변수에 watch
 
 ## Catchpoint — *예외와 시그널*
 
-```
+```text
 (gdb) catch throw       # 모든 C++ 예외 throw
 (gdb) catch catch       # 모든 catch
 (gdb) catch signal SIGSEGV    # SIGSEGV 발생 시
@@ -248,7 +248,7 @@ GDB가 알려 줍니다. 전역 변수나 *생존 기간이 긴* 변수에 watch
 
 C++ 예외 디버깅:
 
-```
+```text
 (gdb) catch throw
 Catchpoint 1 (throw)
 
@@ -263,19 +263,19 @@ Catchpoint 1 (exception thrown), 0x... in __cxa_throw () from libstdc++
 
 *어디서 던졌는지* 즉시 알 수 있습니다. *Stack unwinding 전*에 멈추므로 *완전한 호출 스택*을 봅니다.
 
-```
+```text
 (gdb) catch throw std::runtime_error    # 특정 예외만
 ```
 
 LLDB:
-```
+```text
 (lldb) breakpoint set --name __cxa_throw
 (lldb) breakpoint set -E c++
 ```
 
 ### `catch syscall` — 시스템 콜 추적
 
-```
+```text
 (gdb) catch syscall open
 Catchpoint 1 (syscall 'open' [2])
 
@@ -289,7 +289,7 @@ Catchpoint 1 (call to syscall open), 0x... in open ()
 
 ## Breakpoint *명시적 비활성화 / 활성화*
 
-```
+```text
 (gdb) disable 1         # 1번 비활성 (안 삭제)
 (gdb) enable 1          # 다시 활성
 (gdb) disable 1-5       # 1~5 일괄
@@ -303,7 +303,7 @@ Catchpoint 1 (call to syscall open), 0x... in open ()
 
 ## Hardware Breakpoint
 
-```
+```text
 (gdb) hbreak main       # hardware breakpoint
 ```
 
@@ -324,7 +324,7 @@ CPU의 *디버그 레지스터* 사용. 일반 `break`와 차이:
 
 ### 예 1: 로깅 + 자동 계속
 
-```
+```text
 (gdb) break parse_data
 (gdb) commands
 > silent
@@ -337,7 +337,7 @@ CPU의 *디버그 레지스터* 사용. 일반 `break`와 차이:
 
 ### 예 2: 조건부 메모리 dump
 
-```
+```text
 (gdb) break 50 if error_count > 0
 (gdb) commands
 > print error_message
@@ -351,7 +351,7 @@ CPU의 *디버그 레지스터* 사용. 일반 `break`와 차이:
 
 ### 예 3: 변수 수정 후 계속
 
-```
+```text
 (gdb) break race_condition_func
 (gdb) commands
 > set var shared_state = 0    # 강제 초기화
@@ -365,7 +365,7 @@ CPU의 *디버그 레지스터* 사용. 일반 `break`와 차이:
 
 ## *시그널* 처리
 
-```
+```text
 (gdb) info signals
 Signal       Stop  Print Pass  Description
 SIGHUP       Yes   Yes   Yes   Hangup
@@ -380,7 +380,7 @@ SIGPIPE      No    Yes   Yes   Broken pipe
 - **Print** — *메시지 출력*.
 - **Pass** — *프로그램에 전달*.
 
-```
+```text
 (gdb) handle SIGPIPE nostop noprint
 (gdb) handle SIGSEGV stop print pass
 ```
@@ -401,7 +401,7 @@ Breakpoint 1 (my_plugin_function) pending.
 
 라이브러리가 *나중에 dlopen*될 때 자동으로 등록. 플러그인 시스템 디버깅.
 
-```
+```text
 (gdb) set breakpoint pending on    # 자동으로 pending 만들기
 ```
 
@@ -475,3 +475,12 @@ Catchpoint 1 (exception thrown), ...
 - [GDB Breakpoints](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Breakpoints.html)
 - [GDB Watchpoints](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Set-Watchpoints.html)
 - [LLDB Breakpoint Commands](https://lldb.llvm.org/use/tutorial.html#setting-breakpoints)
+
+## 관련 항목
+
+- [Ch 4: 콜스택과 프레임](/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames) — 이전 장, 멈춘 뒤 스택 읽기
+- [Ch 6: 멀티스레드 / 멀티프로세스](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess) — 다음 장, 스레드별 멈춤 제어
+- [Ch 9: Python 스크립팅](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting) — `commands` 대신 Python stop hook
+- [GDB 커스텀 명령·Event 훅·Breakpoint](/blog/tools/debugging/gdb-extension/chapter02-commands-events) — Breakpoint를 코드로 다루기
+- [JTAG·SWD·CoreSight 분석](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight) — hardware breakpoint를 떠받치는 디버그 레지스터
+- [GDB to LLDB 명령 대조표](https://lldb.llvm.org/use/map.html) — breakpoint·watchpoint 명령 매핑

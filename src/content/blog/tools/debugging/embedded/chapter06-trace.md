@@ -45,7 +45,7 @@ void main() {
 
 OpenOCD:
 
-```
+```text
 (openocd) arm semihosting enable
 ```
 

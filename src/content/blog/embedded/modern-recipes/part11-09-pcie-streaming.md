@@ -176,13 +176,12 @@ Kernel block layer를 거치지 않으므로 io_uring 대비 latency가 절반 �
 
 PCIe Gen3 x16 카드(이론 15.75 GB/s effective) 위에서 BAR 접근과 streaming throughput을 측정한 예입니다.
 
-```text
-동작                             지연/대역
-BAR0 register read (host MMIO)   ~1.5 µs
-BAR0 register write (posted)     ~80 ns submit, 실제 보임 ~1 µs
-PCIe DMA 64 KB read (host→card)  ~13 GB/s
-PCIe DMA 64 KB write (card→host) ~12 GB/s
-```
+| 동작 | 지연/대역 |
+|------|-----------|
+| BAR0 register read (host MMIO) | ~1.5 µs |
+| BAR0 register write (posted) | submit은 ~80 ns, 실제로 보이기까지는 ~1 µs |
+| PCIe DMA 64 KB read (host→card) | ~13 GB/s |
+| PCIe DMA 64 KB write (card→host) | ~12 GB/s |
 
 NVMe 4 KB read를 host stack에 따라 비교한 결과입니다.
 

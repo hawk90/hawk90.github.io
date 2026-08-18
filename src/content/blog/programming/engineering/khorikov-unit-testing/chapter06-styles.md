@@ -2,7 +2,7 @@
 title: "Ch 6: Styles of Unit Testing"
 date: 2026-05-10T06:00:00
 description: "Output, State, Communication 세 가지 스타일. Functional Core와 Imperative Shell."
-tags: [TDD, Styles, Functional Core]
+tags: [TDD, Styles, functional-core]
 series: "Khorikov Unit Testing"
 seriesOrder: 6
 draft: true

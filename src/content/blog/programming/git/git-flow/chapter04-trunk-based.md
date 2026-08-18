@@ -2,7 +2,7 @@
 title: "Ch 4: Trunk-based Development"
 date: 2026-05-17T04:00:00
 description: "단일 trunk + 짧은 feature 브랜치 (또는 직접 커밋). 매우 빠른 통합."
-tags: [Git, Trunk-based, Continuous Integration]
+tags: [Git, Trunk-based, continuous-integration]
 series: "Git Flow"
 seriesOrder: 4
 draft: true

@@ -522,3 +522,10 @@ target_compile_definitions(app PRIVATE DEBUG)
 - [Modern CMake](https://cliutils.gitlab.io/modern-cmake/) — Henry Schreiner의 무료 책. Modern CMake 가이드의 정전.
 - [CMake Documentation](https://cmake.org/cmake/help/latest/) — 매뉴얼 검색의 출발점
 - [Effective Modern CMake (gist)](https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1) — 한 페이지 요약
+
+## 관련 항목
+
+- [Ch 2: CMake 언어](/blog/tools/build/cmake/chapter02-language) — 첫 프로젝트에서 쓴 명령들의 문법 자체
+- [Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 프로젝트 구조를 확장할 때 기준이 되는 단위
+- [GNU Make 소개](/blog/tools/build/gnu-make/chapter01-intro) — CMake가 생성해 주는 빌드 파일을 직접 쓰면 어떤 모습인가
+- [cmake(1) 매뉴얼](https://cmake.org/cmake/help/latest/manual/cmake.1.html) — configure·build·install 명령행 옵션 전체

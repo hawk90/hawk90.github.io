@@ -2,7 +2,7 @@
 title: "Ch 9: Mocking Best Practices"
 date: 2026-05-10T09:00:00
 description: "시스템 경계에서만 Mock한다. 자체 Wrapper, Mock 수 제한, Verify 최소화, Loose Mock을 기본으로."
-tags: [Testing, Mock, Best Practices]
+tags: [Testing, Mock, best-practices]
 series: "Khorikov Unit Testing"
 seriesOrder: 9
 draft: true
