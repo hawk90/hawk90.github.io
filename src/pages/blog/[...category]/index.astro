@@ -8,7 +8,16 @@ import { getPublishedPosts, filterByCategory } from '../../../lib/posts';
 
 export async function getStaticPaths() {
   const allPosts = await getPublishedPosts();
-  return CATEGORIES.map((cat) => ({
+  // A category with nothing published is a publishing plan, not a page. Built
+  // anyway, 54 of the 65 entries became pages whose only content was "No posts
+  // in this category yet." — each one linked from the sidebar of every page and
+  // submitted in the sitemap, and the sidebar suppresses the count badge at
+  // zero, so the emptiness was invisible until the click.
+  //
+  // Gating here rather than pruning `categories.ts` keeps the plan intact: the
+  // drafts under those paths are real, and the page comes back on its own the
+  // moment one of them publishes.
+  return CATEGORIES.filter((cat) => filterByCategory(allPosts, cat.id).length > 0).map((cat) => ({
     params: { category: cat.id },
     props: { categoryInfo: cat, allPosts },
   }));
@@ -98,9 +107,10 @@ function formatChapter(key: string): string {
             </p>
           </div>
 
-          {categoryPosts.length > 0 ? (
-            <div class="space-y-12">
-              {seriesList.map((s) => (
+          {/* No empty state: getStaticPaths only builds categories that have
+              published posts, so this list is never empty. */}
+          <div class="space-y-12">
+            {seriesList.map((s) => (
                 <div>
                   <h2 class="text-2xl font-bold mb-6 pb-2 border-b border-[var(--color-border)]">
                     {s.name}
@@ -122,13 +132,8 @@ function formatChapter(key: string): string {
                     ))}
                   </div>
                 </div>
-              ))}
-            </div>
-          ) : (
-            <p class="text-[var(--color-text-muted)] text-center py-12">
-              No posts in this category yet.
-            </p>
-          )}
+            ))}
+          </div>
         </div>
 
         <!-- Sidebar -->

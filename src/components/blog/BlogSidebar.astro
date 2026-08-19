@@ -3,7 +3,7 @@ import CategoryTreeNode, { type CategoryTreeNodeData } from './CategoryTreeNode.
 import TagBadge from './TagBadge.astro';
 import { CATEGORIES, getTopLevelCategories, getSubCategories } from '../../consts/categories';
 import { BLOG_CONFIG } from '../../consts/config';
-import { getTagsWithCount, getRoutableTagKeys, type BlogPost } from '../../lib/posts';
+import { getTagsWithCount, getRoutableTagKeys, categoryIdsOf, type BlogPost } from '../../lib/posts';
 import { toSlug, getTagUrl } from '../../lib/utils';
 
 interface Props {
@@ -26,15 +26,11 @@ const childrenByParent = new Map(CATEGORIES.map((category) => [category.id, getS
 const subCategoryIdsByParent = new Map(
   [...childrenByParent.entries()].map(([id, children]) => [id, children.map((sub) => sub.id)]),
 );
-const postsByCategoryPrefix = new Map(CATEGORIES.map((category) => [category.id, [] as BlogPost[]]));
+// Bucketed by declared topic, not by slicing the post id. The id is the frozen
+// URL, so splitting it on '/' made the tree a picture of the folder layout.
+const postsByCategory = new Map(CATEGORIES.map((category) => [category.id, [] as BlogPost[]]));
 for (const post of allPosts) {
-  const segments = post.id.split('/');
-  let current = '';
-  for (let i = 0; i < segments.length - 1; i++) {
-    current = i === 0 ? segments[i] : `${current}/${segments[i]}`;
-    const bucket = postsByCategoryPrefix.get(current);
-    if (bucket) bucket.push(post);
-  }
+  for (const categoryId of categoryIdsOf(post)) postsByCategory.get(categoryId)?.push(post);
 }
 
 interface SeriesLink {
@@ -58,9 +54,9 @@ function isActiveCategory(categoryId: string): boolean {
 
 function postsDirectlyIn(catId: string) {
   const subCatIds = subCategoryIdsByParent.get(catId) ?? [];
-  const prefixedPosts = postsByCategoryPrefix.get(catId) ?? [];
-  return prefixedPosts.filter((p) => {
-    return !subCatIds.some((sub) => p.id.startsWith(sub + '/'));
+  return (postsByCategory.get(catId) ?? []).filter((post) => {
+    const ids = categoryIdsOf(post);
+    return !subCatIds.some((sub) => ids.has(sub));
   });
 }
 
@@ -78,13 +74,27 @@ function buildSeriesLinks(posts: typeof allPosts): SeriesLink[] {
   }));
 }
 
+/**
+ * Whether a category has anything published under it, itself or below.
+ *
+ * The tree used to render all 65 registry entries, 54 of which had no published
+ * post — and the count badge is hidden at zero (CategoryTreeNode), so an empty
+ * branch looked exactly like an unexpanded one until the click. Those pages are
+ * no longer built either, so linking them here would also be a 404.
+ */
+function hasPublished(categoryId: string): boolean {
+  return (postsByCategory.get(categoryId) ?? []).length > 0;
+}
+
 function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
   const category = categoryById.get(categoryId);
   if (!category) {
     throw new Error(`Unknown category: ${categoryId}`);
   }
 
-  const children = (childrenByParent.get(category.id) ?? []).map((child) => buildCategoryNode(child.id));
+  const children = (childrenByParent.get(category.id) ?? [])
+    .filter((child) => hasPublished(child.id))
+    .map((child) => buildCategoryNode(child.id));
   const directPosts = postsDirectlyIn(category.id);
   const hasActiveDescendant = children.some((child) => child.isActive || child.initiallyOpen);
 
@@ -92,7 +102,7 @@ function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
     id: category.id,
     name: category.name,
     icon: category.icon ?? '',
-    count: (postsByCategoryPrefix.get(category.id) ?? []).length,
+    count: (postsByCategory.get(category.id) ?? []).length,
     isActive: isActiveCategory(category.id),
     initiallyOpen: isActiveCategory(category.id) || hasActiveDescendant,
     children,
@@ -100,7 +110,7 @@ function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
   };
 }
 
-const categoryTree = topCats.map((category) => buildCategoryNode(category.id));
+const categoryTree = topCats.filter((category) => hasPublished(category.id)).map((category) => buildCategoryNode(category.id));
 ---
 
 <aside class="hidden lg:block w-72 shrink-0">

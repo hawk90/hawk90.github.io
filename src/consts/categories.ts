@@ -111,28 +111,37 @@ export function getSubCategories(parentId: string): Category[] {
 }
 
 /**
- * The categories a post sits under, outermost first.
+ * A category and its ancestors, outermost first.
  *
- * A post id starts with its category path, so the deepest category whose id
- * prefixes it is the one that owns the post, and `parent` walks back up from
- * there. Matching on a `/` boundary keeps `embedded` from claiming a post
- * under a hypothetical `embedded-tools`.
- *
- * Returns [] when no category matches, which is a real possibility for a post
- * filed somewhere `categories.ts` does not describe — callers render nothing
+ * Returns [] for an id the registry does not describe — callers render nothing
  * rather than inventing a parent.
  */
-export function getCategoryTrail(postId: string): Category[] {
-  const owner = CATEGORIES
-    .filter((cat) => postId.startsWith(`${cat.id}/`))
-    .sort((a, b) => b.id.length - a.id.length)[0];
-
+export function getCategoryTrail(categoryId: string): Category[] {
   const trail: Category[] = [];
-  for (let cat: Category | undefined = owner; cat; cat = cat.parent ? getCategoryById(cat.parent) : undefined) {
+  let cat: Category | undefined = getCategoryById(categoryId);
+  while (cat) {
     trail.unshift(cat);
     // `parent` is asserted acyclic by the topic registry, but a trail that
     // repeats itself would loop forever here, so stop if it ever does.
     if (trail.length > CATEGORIES.length) break;
+    cat = cat.parent ? getCategoryById(cat.parent) : undefined;
   }
   return trail;
+}
+
+/**
+ * The breadcrumb trail for a post, outermost first.
+ *
+ * Derived from the post's declared `topics`, not from its id. The id is the
+ * frozen URL; taking the trail from it meant the breadcrumb described where the
+ * file happens to sit, so a post could not be reclassified without moving it.
+ *
+ * A post may declare several topics — it is a taxonomy, not a folder — but a
+ * breadcrumb is a single path upward, so the deepest declared topic wins. That
+ * is the most specific claim the post makes about itself, and every shallower
+ * topic it declares is already on that trail in the corpus today.
+ */
+export function getPostCategoryTrail(topics: readonly string[] = []): Category[] {
+  const trails = topics.map((topic) => getCategoryTrail(topic)).filter((trail) => trail.length > 0);
+  return trails.sort((a, b) => b.length - a.length)[0] ?? [];
 }

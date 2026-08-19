@@ -1,5 +1,6 @@
 import { type CollectionEntry } from 'astro:content';
 import { SITE_CONFIG } from '../consts/config';
+import { getCategoryTrail } from '../consts/categories';
 import { getBlogContentManifest, getPublicationDecision } from './content';
 import { formatDate } from './utils';
 
@@ -173,9 +174,30 @@ export function getAllSeries(posts: BlogPost[]): string[] {
 
 /**
  * 카테고리별 포스트 필터링
+ *
+ * Reads the declared `topics`, not the post's id. The id is the frozen URL, and
+ * routing membership off it made the folder, the URL and the taxonomy one
+ * string: a post could not be reclassified without moving the file, and moving
+ * the file changed the URL. `topics` is the field that already exists for this
+ * — required on every post and validated against the same registry — and it
+ * was being written by every post while no page read it.
+ *
+ * A topic implies its ancestors, so a post declaring `embedded/hardware` still
+ * appears under `embedded`. At the switchover the two rules agreed on all 726
+ * published posts, so this changed nothing visible; what it changes is that
+ * they can now disagree, which is the point.
  */
 export function filterByCategory(posts: BlogPost[], categoryId: string): BlogPost[] {
-  return posts.filter((p) => p.id.startsWith(categoryId + '/'));
+  return posts.filter((p) => categoryIdsOf(p).has(categoryId));
+}
+
+/** Every category a post belongs to: its declared topics plus their ancestors. */
+export function categoryIdsOf(post: BlogPost): Set<string> {
+  const ids = new Set<string>();
+  for (const topic of post.data.topics ?? []) {
+    for (const category of getCategoryTrail(topic)) ids.add(category.id);
+  }
+  return ids;
 }
 
 /**

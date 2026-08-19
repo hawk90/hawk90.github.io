@@ -68,6 +68,11 @@ export const SOCIAL_CONFIG = defineSocial([
 // Extra links shown in footer (separate from main nav)
 export const FOOTER_LINKS = [
   { href: '/archive', label: 'Archive' },
+  // `/recently-updated` was built and put in the sitemap with no inbound link
+  // anywhere on the site — a page submitted for indexing that no reader could
+  // reach. It sits next to Archive because it answers the other chronological
+  // question: not "what exists" but "what changed".
+  { href: '/recently-updated', label: 'Updated' },
   { href: '/now', label: 'Now' },
   { href: '/uses', label: 'Uses' },
   { href: '/stats', label: 'Stats' },

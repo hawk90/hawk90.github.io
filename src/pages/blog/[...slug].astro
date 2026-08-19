@@ -15,7 +15,7 @@ import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
 import { formatDate, getTagUrl, getPostUrl, getPostRouteParam, getSeriesUrl, getCategoryUrl } from '../../lib/utils';
 import Breadcrumb from '../../components/common/Breadcrumb.astro';
-import { getCategoryTrail } from '../../consts/categories';
+import { getPostCategoryTrail } from '../../consts/categories';
 import { getPostMeta, getPublishedPosts, getRelatedPosts, getRoutableTagKeys, type RelatedPost } from '../../lib/posts';
 import { getBlogContentManifest, getContentRelations } from '../../lib/content';
 import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
@@ -37,7 +37,7 @@ const routableTags = await getRoutableTagKeys();
 // type with no way back up: no breadcrumb, and a series name in plain text.
 const breadcrumbs = [
   { label: 'Blog', href: '/blog' },
-  ...getCategoryTrail(post.id).map((category) => ({ label: category.name, href: getCategoryUrl(category.id) })),
+  ...getPostCategoryTrail(post.data.topics).map((category) => ({ label: category.name, href: getCategoryUrl(category.id) })),
 ];
 const needsRelatedOrSeries = !!post.data.series || RELATED_POSTS_CONFIG.enabled;
 const allPosts = needsRelatedOrSeries
