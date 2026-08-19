@@ -37,6 +37,24 @@ NUM_ANY = re.compile(r"(chapter|ch|item|lesson|rule|reminder|unit|day|week)(\d+)
 
 
 def slug_of(md: Path) -> str:
+    """A post's URL.
+
+    The path is only the default. Frontmatter ``slug:`` overrides it, because
+    Astro's loader substitutes it for the entry id. This script *rewrites*
+    links, so inferring from the path alone would turn working links into
+    broken ones the day slugs are frozen.
+    """
+    try:
+        head = md.read_text(encoding="utf-8", errors="ignore")
+        block = re.match(r"---\n(.*?)\n---", head, re.S)
+        if block:
+            declared = re.search(r"^slug:\s*(.+)$", block.group(1), re.M)
+            if declared:
+                value = declared.group(1).strip().strip("\"'").strip()
+                if value:
+                    return "/blog/" + value
+    except OSError:
+        pass
     rel = md.relative_to(CONTENT_DIR).as_posix()
     rel = re.sub(r"\.md$", "", rel)
     rel = re.sub(r"/index$", "", rel)

@@ -6,12 +6,6 @@ function newestFirst(documents: readonly ContentDocument[]): ContentDocument[] {
   return [...documents].sort((a, b) => b.publishedAt.valueOf() - a.publishedAt.valueOf());
 }
 
-function updatedFirst(documents: readonly ContentDocument[]): ContentDocument[] {
-  return [...documents].sort(
-    (a, b) => (b.updatedAt ?? b.publishedAt).valueOf() - (a.updatedAt ?? a.publishedAt).valueOf(),
-  );
-}
-
 function renderable(documents: readonly ContentDocument[]): ContentDocument[] {
   return documents.filter((document) => getPublicationDecision(document).render);
 }

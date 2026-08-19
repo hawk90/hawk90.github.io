@@ -27,8 +27,16 @@ async function collectFiles() {
   return files;
 }
 
-function slugFromPath(absPath) {
-  // /.../src/content/blog/a/b/c.md → /blog/a/b/c
+/**
+ * A post's URL. The path is only the default — frontmatter `slug:` overrides
+ * it, because Astro's loader substitutes it for the entry id. This script
+ * *deletes* links it judges dead, so inferring the URL from the path alone
+ * would remove live links the day slugs are frozen.
+ */
+function slugFromPath(absPath, source) {
+  const frontmatter = source?.match(/^---\n([\s\S]*?)\n---/)?.[1];
+  const declared = frontmatter?.match(/^slug:\s*(.+)$/m)?.[1]?.trim().replace(/^['"]|['"]$/g, '').trim();
+  if (declared) return '/blog/' + declared;
   let rel = absPath.slice(BLOG_ROOT.length + 1);
   rel = rel.replace(/\.(md|mdx)$/, '');
   return '/blog/' + rel;
@@ -39,7 +47,7 @@ async function main() {
   const draftedSlugs = new Set();
   for (const f of files) {
     const raw = readFileSync(f, 'utf8');
-    if (isDraft(raw)) draftedSlugs.add(slugFromPath(f));
+    if (isDraft(raw)) draftedSlugs.add(slugFromPath(f, raw));
   }
 
   let scannedFiles = 0;

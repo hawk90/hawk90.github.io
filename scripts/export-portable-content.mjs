@@ -24,7 +24,10 @@ for (const path of files) {
     schemaVersion: 1,
     id: path.replace(/\.md$/, ''),
     sourcePath: path,
-    url: `/blog/${path.replace(/\.md$/, '')}`,
+    // `slug:` wins over the path. Astro's loader substitutes it for the entry
+    // id, so a frozen slug is the URL and the folder is only where the file
+    // happens to sit.
+    url: `/blog/${(typeof frontmatter?.slug === 'string' && frontmatter.slug.trim()) || path.replace(/\.md$/, '')}`,
     frontmatter,
     body: match[2],
     sha256: createHash('sha256').update(source).digest('hex'),

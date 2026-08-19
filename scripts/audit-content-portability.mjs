@@ -34,6 +34,27 @@ if (!slugRoute.includes('params: { slug: getPostRouteParam(post) }')) findings.p
  */
 const sourceRoots = ['src/components', 'src/pages', 'src/layouts', 'src/lib'];
 const handBuilt = [];
+
+/**
+ * Tools that turn a file path into a post URL without reading `slug:`.
+ *
+ * Two of these rewrite or delete links in published content, so a wrong URL
+ * does not merely mislead — it edits. They are correct only while URL and path
+ * are the same fact; the day a slug is frozen they silently disagree with the
+ * site. Each must consult frontmatter, so the check is that they mention it.
+ */
+const PATH_TO_URL_TOOLS = [
+  'scripts/strip-dead-links.mjs',
+  'scripts/resolve-internal-links.py',
+  'scripts/export-portable-content.mjs',
+];
+const pathInferred = [];
+for (const tool of PATH_TO_URL_TOOLS) {
+  const text = await readFile(tool, 'utf8').catch(() => null);
+  if (text === null) { pathInferred.push(`${tool} (missing)`); continue; }
+  if (!/slug/.test(text)) pathInferred.push(tool);
+}
+if (pathInferred.length) findings.push(`path-inferred-post-url (${pathInferred.length})`);
 async function scan(dir) {
   let entries;
   try { entries = await readdir(dir, { withFileTypes: true }); } catch { return; }
@@ -59,9 +80,11 @@ await writeFile('reports/content-portability/latest.md', [
   `- Findings: ${findings.length}`,
   ...findings.map((x) => `- ${x}`),
   ...(handBuilt.length ? ['', '## Hand-built post URLs', ...handBuilt.map((x) => `- \`${x}\``)] : []),
+  ...(pathInferred.length ? ['', '## Path-inferred post URLs', ...pathInferred.map((x) => `- \`${x}\``)] : []),
   '',
 ].join('\n'));
 
 console.log(`Content portability: ${findings.length} finding(s).`);
 for (const site of handBuilt) console.log(`  hand-built post URL: ${site}`);
+for (const tool of pathInferred) console.log(`  derives post URL from path without reading slug: ${tool}`);
 if (findings.length) process.exitCode = 1;
