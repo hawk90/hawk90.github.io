@@ -6,43 +6,42 @@ import { ABOUT_DATA } from '../consts/about';
 <BaseLayout title={`Who Am I - ${ABOUT_DATA.name}`} description={ABOUT_DATA.title}>
   <section class="py-16 lg:py-24">
     <div class="container">
-      <div class="max-w-4xl mx-auto">
-        <div class="grid lg:grid-cols-5 gap-8 lg:gap-12 items-center mb-16">
-          <div class="lg:col-span-2 flex justify-center lg:justify-start">
-            <img
-              src={ABOUT_DATA.photo}
-              alt={ABOUT_DATA.name}
-              class="w-48 h-48 lg:w-56 lg:h-56 object-cover rounded-3xl"
-              width="224"
-              height="224"
-              loading="eager"
-              decoding="async"
-            />
-          </div>
+      <div class="grid lg:grid-cols-5 gap-8 lg:gap-12 items-center mb-16">
+        <div class="lg:col-span-2 flex justify-center lg:justify-start">
+          <img
+            src={ABOUT_DATA.photo}
+            alt={ABOUT_DATA.name}
+            class="w-48 h-48 lg:w-56 lg:h-56 object-cover rounded-3xl"
+            width="224"
+            height="224"
+            loading="eager"
+            decoding="async"
+          />
+        </div>
 
-          <div class="lg:col-span-3">
-            <div class="section-eyebrow mb-4">About</div>
-            <h1 class="text-3xl lg:text-4xl font-bold mb-4">
-              Hi, I'm <span class="text-[var(--color-accent)]">{ABOUT_DATA.name}</span>
-            </h1>
-            <p class="text-xl text-[var(--color-text-secondary)] leading-relaxed mb-6">
-              {ABOUT_DATA.tagline}
-            </p>
-            <div class="flex flex-wrap gap-2.5">
-              {ABOUT_DATA.skills.map((skill) => (
-                <span
-                  class:list={[
-                    'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border transition-transform hover:-translate-y-0.5',
-                    `skill-chip skill-${skill.color}`,
-                  ]}
-                >
-                  <span aria-hidden="true">{skill.icon}</span>
-                  <span>{skill.label}</span>
-                </span>
-              ))}
-            </div>
+        <div class="lg:col-span-3">
+          <div class="section-eyebrow mb-4">About</div>
+          <h1 class="text-3xl lg:text-4xl font-bold mb-4">
+            Hi, I'm <span class="text-[var(--color-accent)]">{ABOUT_DATA.name}</span>
+          </h1>
+          <p class="text-xl text-[var(--color-text-secondary)] leading-relaxed mb-6">
+            {ABOUT_DATA.tagline}
+          </p>
+          <div class="flex flex-wrap gap-2.5">
+            {ABOUT_DATA.skills.map((skill) => (
+              <span
+                class:list={[
+                  'inline-flex items-center gap-1.5 px-3 py-1.5 text-sm font-medium rounded-full border transition-transform hover:-translate-y-0.5',
+                  `skill-chip skill-${skill.color}`,
+                ]}
+              >
+                <span aria-hidden="true">{skill.icon}</span>
+                <span>{skill.label}</span>
+              </span>
+            ))}
           </div>
         </div>
+      </div>
 
       <div class="space-y-10">
         {ABOUT_DATA.sections.map((section) => (
@@ -73,7 +72,6 @@ import { ABOUT_DATA } from '../consts/about';
             </div>
           </section>
         )}
-      </div>
       </div>
     </div>
   </section>

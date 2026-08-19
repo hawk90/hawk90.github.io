@@ -220,6 +220,34 @@ body {
 
 }
 
+/*
+  Reading width, left-aligned inside the 1200px rail.
+
+  `.container-narrow` centers itself, so on an article page the text started
+  ~240px in while every list page started at the container's own gutter — two
+  different left edges as you navigated. Pairing it with `.measure-left` keeps
+  the 720px measure but drops the centering and the second padding, so the
+  article body begins on the same line as the header nav.
+
+  Placed *after* the mobile block on purpose: `.container-narrow` re-asserts
+  `padding-inline: 1rem` there, and a later rule wins at equal specificity.
+  Declared earlier, this would leave phones with 1rem inside the container's
+  own 1rem — the doubled gutter this is meant to remove.
+*/
+.measure-left {
+  margin-inline: 0;
+  padding-inline: 0;
+}
+
+/* Below the sidebar breakpoint there is no second column to leave room for, so
+   the body takes the full rail. Two classes, because `.prose` sets the same
+   property later in this file and would otherwise pin it back to 720px. */
+@media (max-width: 1024px) {
+  .container-narrow.measure-left {
+    max-width: none;
+  }
+}
+
 /* ─── Card ────────────────────────────────────────────────── */
 .card {
   background-color: var(--color-bg-secondary);

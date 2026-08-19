@@ -15,8 +15,8 @@ const recentPosts = allPosts
 ---
 
 <BaseLayout title="Recently Updated" description="최근 수정·발행된 글">
-  <section class="py-16">
-    <div class="container max-w-5xl">
+  <section class="py-16 lg:py-24">
+    <div class="container">
       <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: 'Recently Updated' }]} />
 
       <div class="mb-12">
@@ -66,7 +66,7 @@ const recentPosts = allPosts
           ✨ Recently Published
           <span class="text-sm text-[var(--color-text-muted)] font-normal ml-2">{recentPosts.length}</span>
         </h2>
-        <div class="grid gap-6 md:grid-cols-2">
+        <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
           {recentPosts.map((post) => (
             <PostCard post={post} />
           ))}

@@ -68,8 +68,8 @@ const partsWithStatus = path.parts.map((part) => ({
 ---
 
 <BaseLayout title={`${path.name} — 학습경로`} description={path.description}>
-  <section class="py-16">
-    <div class="container max-w-4xl">
+  <section class="py-16 lg:py-24">
+    <div class="container">
       <Breadcrumb items={[{ label: 'Paths', href: '/paths' }, { label: path.name }]} />
 
       <div class="mb-8">

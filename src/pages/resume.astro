@@ -6,8 +6,8 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
 ---
 
 <BaseLayout title={`Resume - ${nameEn}`} description={`${title} with expertise in C++, CUDA, and parallel computing`}>
-  <section class="py-16">
-    <div class="container-narrow">
+  <section class="py-16 lg:py-24">
+    <div class="container">
       <!-- Header -->
       <header class="mb-16 text-center">
         <h1 class="text-4xl font-bold mb-2">{nameKo}</h1>
@@ -107,7 +107,7 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
         <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
           Education
         </h2>
-        <div class="space-y-6">
+        <div class="grid gap-6 md:grid-cols-2">
           {education.map((edu) => (
             <div class="card">
               <div class="flex flex-col md:flex-row md:items-start md:justify-between gap-2">
@@ -130,7 +130,7 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
         <h2 class="text-2xl font-bold mb-8 pb-2 border-b border-[var(--color-border)]">
           Publications & Patents
         </h2>
-        <div class="space-y-4">
+        <div class="grid gap-6 md:grid-cols-2">
           {publications.map((pub) => (
             <div class="card">
               <span class={`inline-block text-xs px-2 py-0.5 rounded mb-2 ${pub.type === 'paper' ? 'bg-blue-100 text-blue-800 dark:bg-blue-900 dark:text-blue-200' : 'bg-green-100 text-green-800 dark:bg-green-900 dark:text-green-200'}`}>

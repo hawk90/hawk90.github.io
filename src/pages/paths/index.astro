@@ -29,8 +29,8 @@ const paths = LEARNING_PATHS.map((path) => {
 ---
 
 <BaseLayout title="학습경로 — 주제로 읽는 인덱스" description="책·출처별 시리즈를 하나의 주제 흐름으로 꿰는 큐레이션 학습경로.">
-  <section class="py-16">
-    <div class="container max-w-4xl">
+  <section class="py-16 lg:py-24">
+    <div class="container">
       <Breadcrumb items={[{ label: 'Paths' }]} />
 
       <div class="mb-10">
@@ -41,7 +41,7 @@ const paths = LEARNING_PATHS.map((path) => {
         </p>
       </div>
 
-      <div class="space-y-4">
+      <div class="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
         {paths.map((path) => (
           <a
             href={`/paths/${path.id}`}

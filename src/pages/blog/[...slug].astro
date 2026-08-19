@@ -105,13 +105,13 @@ const hasMath = /\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(rawBod
     seriesTotal={seriesPosts.length || undefined}
   />
 
-  <article class="py-16">
+  <article class="py-16 lg:py-24">
     <div class="container">
       <div class="lg:flex lg:gap-12">
         <!-- Main Content -->
         <div class="flex-1 min-w-0">
           <!-- Header -->
-          <header class="container-narrow mb-12">
+          <header class="container-narrow measure-left mb-12">
             <Breadcrumb items={breadcrumbs} />
             {post.data.series && (
               <div class="text-sm text-[var(--color-accent)] font-medium mb-2">
@@ -163,7 +163,7 @@ const hasMath = /\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(rawBod
 
           <!-- Mobile TOC Toggle -->
           {headings.filter((h) => h.depth >= 2 && h.depth <= 3).length > 0 && (
-            <div class="container-narrow mb-6 lg:hidden">
+            <div class="container-narrow measure-left mb-6 lg:hidden">
               <button
                 type="button"
                 id="mobile-toc-toggle"
@@ -199,41 +199,41 @@ const hasMath = /\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(rawBod
           )}
 
           <!-- Content -->
-          <div class="container-narrow prose">
+          <div class="container-narrow measure-left prose">
             <Content />
           </div>
 
           <!-- Newsletter signup (renders only when enabled in config) -->
-          <div class="container-narrow">
+          <div class="container-narrow measure-left">
             <Newsletter />
           </div>
 
           <!-- Author bio -->
-          <div class="container-narrow">
+          <div class="container-narrow measure-left">
             <AuthorBio post={post} />
           </div>
 
           <!-- Series Navigation (Bottom) -->
           {seriesPosts.length > 1 && (
-            <div class="container-narrow mt-12">
+            <div class="container-narrow measure-left mt-12">
               <SeriesNav posts={seriesPosts} currentSlug={post.id} showAll />
             </div>
           )}
 
           <!-- Related Posts -->
           {RELATED_POSTS_CONFIG.enabled && relatedPosts.length > 0 && (
-            <div class="container-narrow">
+            <div class="container-narrow measure-left">
               <RelatedPosts posts={relatedPosts} />
             </div>
           )}
 
           <!-- Backlinks (posts that reference this one) -->
-          <div class="container-narrow">
+          <div class="container-narrow measure-left">
             <Backlinks currentId={post.id} posts={allPosts} />
           </div>
 
           <!-- Comments -->
-          <div class="container-narrow mt-16">
+          <div class="container-narrow measure-left mt-16">
             <Comments />
           </div>
         </div>
