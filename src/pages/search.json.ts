@@ -17,6 +17,9 @@ export async function GET(_context: APIContext) {
     tags: document.tags.slice(0, 5),
     date: document.publishedAt.valueOf(),
     series: document.series || null,
+    // Reading order, so a result set inside one series can be ranked by where
+    // a chapter sits rather than by when it happened to be written.
+    order: document.seriesOrder ?? null,
   }));
 
   return new Response(JSON.stringify(searchIndex), {

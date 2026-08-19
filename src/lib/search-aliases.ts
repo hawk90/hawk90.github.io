@@ -16,13 +16,13 @@ export const SEARCH_TERMS: readonly SearchTermDefinition[] = [
   // Languages, operating systems, and core systems terms.
   { canonical: 'C++', aliases: ['cpp', 'c plus plus', 'cplusplus'] },
   { canonical: 'RISC-V', aliases: ['riscv'] },
-  { canonical: 'RTOS', expansion: 'Real-Time Operating System', aliases: ['realtime operating system'] },
+  { canonical: 'RTOS', expansion: 'Real-Time Operating System', aliases: ['realtime operating system', '실시간 운영체제', '실시간 os'] },
   { canonical: 'PREEMPT_RT', aliases: ['preempt realtime'] },
-  { canonical: 'Device Tree', aliases: ['devicetree', 'device tree blob', 'dtb'] },
+  { canonical: 'Device Tree', aliases: ['devicetree', 'device tree blob', 'dtb', '디바이스 트리'] },
   { canonical: 'RAII', expansion: 'Resource Acquisition Is Initialization', aliases: [] },
   { canonical: 'ABI', expansion: 'Application Binary Interface', aliases: [] },
   { canonical: 'API', expansion: 'Application Programming Interface', aliases: [] },
-  { canonical: 'IPC', expansion: 'Inter-Process Communication', aliases: [] },
+  { canonical: 'IPC', expansion: 'Inter-Process Communication', aliases: ['프로세스 간 통신', '프로세스간 통신'] },
   { canonical: 'SMP', expansion: 'Symmetric Multiprocessing', aliases: [] },
   { canonical: 'NUMA', expansion: 'Non-Uniform Memory Access', aliases: [] },
   { canonical: 'ELF', expansion: 'Executable and Linkable Format', aliases: [] },
@@ -60,7 +60,7 @@ export const SEARCH_TERMS: readonly SearchTermDefinition[] = [
   { canonical: 'TDD', expansion: 'Test-Driven Development', aliases: ['test driven development'] },
   { canonical: 'BDD', expansion: 'Behavior-Driven Development', aliases: ['behavior driven development'] },
   { canonical: 'DDD', expansion: 'Domain-Driven Design', aliases: ['domain driven design'] },
-  { canonical: 'OOP', expansion: 'Object-Oriented Programming', aliases: ['object oriented programming'] },
+  { canonical: 'OOP', expansion: 'Object-Oriented Programming', aliases: ['object oriented programming', '객체지향', '객체 지향', '객체 지향 프로그래밍'] },
   { canonical: 'CI', expansion: 'Continuous Integration', aliases: ['continuous integration'] },
   { canonical: 'CD', expansion: 'Continuous Delivery', aliases: ['continuous delivery'] },
   { canonical: 'ML', expansion: 'Machine Learning', aliases: ['machine learning'] },
@@ -87,6 +87,16 @@ export const SEARCH_TERMS: readonly SearchTermDefinition[] = [
   { canonical: 'MISRA C', aliases: ['misra'] },
 
   // Video codec names have established, interchangeable standards names.
+  // Concepts whose posts are titled in English while a Korean reader reaches
+  // for the Korean name. Measured against the built index before adding: each
+  // of these returned results in one language and nothing in the other.
+  { canonical: 'Cache Coherence', aliases: ['캐시 일관성', 'cache 일관성', '캐시 코히런스'] },
+  { canonical: 'Memory Model', aliases: ['메모리 모델'] },
+  { canonical: 'Memory Consistency', aliases: ['메모리 일관성'] },
+  { canonical: 'Deadlock', aliases: ['교착', '교착 상태', '데드락'] },
+  { canonical: 'Context Switch', aliases: ['문맥 교환', '컨텍스트 스위치'] },
+  { canonical: 'Atomic', aliases: ['원자적', '원자성'] },
+  { canonical: 'Lock', aliases: ['잠금'] },
   { canonical: 'H.264', expansion: 'Advanced Video Coding', aliases: ['h264', 'avc'] },
   { canonical: 'H.265', expansion: 'High Efficiency Video Coding', aliases: ['h265', 'hevc'] },
   { canonical: 'AV1', aliases: ['aomedia video 1'] },

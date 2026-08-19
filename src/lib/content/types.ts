@@ -56,6 +56,7 @@ export interface ContentDocument {
   categories: readonly string[];
   tags: readonly string[];
   series?: string;
+  seriesOrder?: number;
   isFeatured: boolean;
   noIndex: boolean;
   source: CollectionEntry<'blog'>;

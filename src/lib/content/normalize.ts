@@ -43,6 +43,7 @@ export function normalizeBlogEntry(entry: CollectionEntry<'blog'>): ContentDocum
     categories,
     tags: entry.data.tags,
     series: entry.data.series,
+    seriesOrder: entry.data.seriesOrder,
     isFeatured: entry.data.featured,
     noIndex: entry.data.seo?.noindex === true,
     source: entry,

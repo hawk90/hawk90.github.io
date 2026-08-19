@@ -8,6 +8,8 @@ export interface SearchItem {
   tags: string[];
   date: number;
   series: string | null;
+  /** Position within the series, when the post belongs to one. */
+  order?: number | null;
 }
 
 interface ScoredItem {
@@ -104,9 +106,15 @@ export function searchPosts(items: SearchItem[], options: SearchOptions | string
     .map((item) => ({ item, score: calculateScore(item, q) }))
     .filter((s) => s.score > 0);
 
-  // 스코어 내림차순, 같으면 최신순
+  // Score first. Equal scores are the normal case inside one series — every
+  // chapter carries the same terms — and breaking that tie by date is reverse
+  // reading order, which put chapter 12 above chapter 1 for a query like
+  // "cxl". Reading order decides instead, and date only settles what is left.
   scored.sort((a, b) => {
     if (b.score !== a.score) return b.score - a.score;
+    const orderA = a.item.order ?? Number.POSITIVE_INFINITY;
+    const orderB = b.item.order ?? Number.POSITIVE_INFINITY;
+    if (orderA !== orderB) return orderA - orderB;
     return b.item.date - a.item.date;
   });
 
