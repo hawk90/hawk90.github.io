@@ -20,6 +20,9 @@ const checks = [
   ['post URL single definition', ['npm', 'run', 'audit:content-portability']],
   ['series structure', ['npm', 'run', 'audit:series-structure']],
   ['article connectivity', ['npm', 'run', 'audit:connectivity']],
+  // Report-only: where a series belongs in a reading order is editorial, so
+  // this prints the coverage gap rather than blocking a deploy on it.
+  ['learning path coverage', ['npm', 'run', 'audit:paths']],
   ['diagram references', ['npm', 'run', 'audit:diagram-accessibility']],
   ['diagram asset contract', ['npm', 'run', 'audit:diagrams']],
   ['Astro type and template diagnostics', ['npm', 'run', 'check']],
