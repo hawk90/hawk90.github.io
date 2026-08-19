@@ -1,5 +1,6 @@
 ---
 title: "루트 파일시스템 구축 — Buildroot 기초·Package·Toolchain"
+slug: "embedded/modern-recipes/part7-14-rootfs-buildroot"
 date: 2026-04-16T09:13:00
 description: "Buildroot 설정, package 추가, post-build script, toolchain 선택, Yocto와의 trade-off를 정리합니다."
 series: "Modern Embedded Recipes"

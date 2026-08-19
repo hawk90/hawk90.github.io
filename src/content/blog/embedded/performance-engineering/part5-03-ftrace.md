@@ -1,5 +1,6 @@
 ---
 title: "ftrace 활용 — function·function_graph·latency tracer"
+slug: "embedded/performance-engineering/part5-03-ftrace"
 date: 2026-04-27T09:02:00
 description: "ftrace의 function tracer, function_graph, irqsoff·preemptoff latency tracer 활용."
 series: "Embedded Performance Engineering"

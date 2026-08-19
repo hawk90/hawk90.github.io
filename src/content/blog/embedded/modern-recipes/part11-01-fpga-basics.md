@@ -1,5 +1,6 @@
 ---
 title: "FPGA 기초 분석 — LUT·FF·BRAM·DSP 자원 구조"
+slug: "embedded/modern-recipes/part11-01-fpga-basics"
 date: 2026-04-20T09:00:00
 description: "LUT·Flip-Flop·BRAM·DSP slice·clock region·IO bank — FPGA 구성 요소를 임베디드 관점에서 정리합니다."
 series: "Modern Embedded Recipes"

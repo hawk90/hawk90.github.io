@@ -1,5 +1,6 @@
 ---
 title: "Das U-Boot vs TF-A vs EDK II — 임베디드 부트로더 생태계 비교"
+slug: "embedded/bootloader/chapter02-u-boot-position"
 date: 2026-05-09T09:02:00
 description: "임베디드 부트로더 생태계 — Das U-Boot, ARM Trusted Firmware, EDK II의 역할 분담."
 series: "Bootloader Internals"

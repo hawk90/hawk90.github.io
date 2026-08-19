@@ -1,5 +1,6 @@
 ---
 title: "absl::Time·Duration 분석 — 단단한 type"
+slug: "programming/code-review/abseil/part7-01-time-duration-overview"
 date: 2026-06-11T09:07:00
 description: "absl::Time과 absl::Duration — std::chrono의 위에 한 겹을 더 씌워 단위 혼동과 부호 오류를 컴파일러가 잡아내게 만든 layer."
 series: "Abseil Code Review"

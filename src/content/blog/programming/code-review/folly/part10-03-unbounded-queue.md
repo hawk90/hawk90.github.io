@@ -1,5 +1,6 @@
 ---
 title: "folly::UnboundedQueue — 동적 크기 lock-free"
+slug: "programming/code-review/folly/part10-03-unbounded-queue"
 date: 2026-06-06T09:11:00
 description: "Part 10-03: UnboundedQueue — linked segment 기반 동적 크기 lock-free 큐. SPSC 모드에선 거의 무비용으로 성장한다."
 series: "Folly Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "CXL 디바이스 Core Dump 분석 — Device State·Mailbox Log·NUMA 토폴로지"
+slug: "tools/debugging/postmortem/chapter05-cxl-device-postmortem"
 date: 2026-06-18T09:07:00
 description: "CXL 디바이스가 fail한 후 core dump에서 device state·mailbox 명령 이력·NUMA 토폴로지를 복원하는 분석 흐름."
 series: "Postmortem Debugging"

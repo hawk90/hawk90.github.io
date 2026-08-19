@@ -1,5 +1,6 @@
 ---
 title: "Type-safe Flags 패턴 — Enum Class·Strong Typedef·Tag"
+slug: "embedded/embedded-cpp/part4-05-type-safe-flags"
 date: 2026-05-01T09:33:00
 description: "enum class + bit operators — type-safe 비트 플래그. 의도하지 않은 변환 차단."
 series: "Embedded C++ for Real Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: CXL.cache — D2H·H2D 흐름과 coherency state"
+slug: "embedded/hardware/cxl/chapter07-cxl-cache"
 date: 2026-05-16T09:07:00
 description: "디바이스가 호스트 메모리를 캐시하는 프로토콜."
 series: "CXL 4.0 Internals"

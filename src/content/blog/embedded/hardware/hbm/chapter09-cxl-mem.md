@@ -1,5 +1,6 @@
 ---
 title: "CXL.mem 분석 — HBM·GDDR·DDR 다음의 메모리 계층"
+slug: "embedded/hardware/hbm/chapter09-cxl-mem"
 date: 2026-06-15T09:01:00
 description: "CXL.mem이 메모리 계층에 끼어드는 자리 — on-package HBM과 DRAM DIMM 사이의 새 tier."
 series: "HBM·GDDR 심화"

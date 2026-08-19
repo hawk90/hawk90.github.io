@@ -1,5 +1,6 @@
 ---
 title: "GPIO 내부 구조 분해 — Push-Pull·Open-Drain·Schmitt Trigger"
+slug: "embedded/modern-recipes/part1-03-gpio-internals"
 date: 2026-04-10T09:03:00
 description: "Push-pull·open-drain·pull-up/down·drive strength·slew rate."
 series: "Modern Embedded Recipes"

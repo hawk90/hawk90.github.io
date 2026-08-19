@@ -1,5 +1,6 @@
 ---
 title: "CAN 버스 전기적 특성 — Differential·Termination·Dominant/Recessive"
+slug: "embedded/modern-recipes/part1-10-can-electrical"
 date: 2026-04-10T09:10:00
 description: "CAN_H/CAN_L 차동 신호·120Ω termination·1Mbit 한계."
 series: "Modern Embedded Recipes"

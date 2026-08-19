@@ -1,5 +1,6 @@
 ---
 title: "DC 모터 제어 — H-Bridge·PWM Duty·Encoder Feedback"
+slug: "embedded/modern-recipes/part5-02-dc-motor"
 date: 2026-04-14T09:50:00
 description: "H-bridge·PWM·방향·역기전력 보호."
 series: "Modern Embedded Recipes"

@@ -1,5 +1,6 @@
 ---
 title: "Vitis AI 분석 — DPU·xmodel·VART"
+slug: "embedded/modern-recipes/part11-12-vitis-ai"
 date: 2026-04-20T09:11:00
 description: "Xilinx Vitis AI로 TensorFlow/PyTorch 모델을 DPU용 xmodel로 quantize·compile하고 VART로 실행하는 흐름."
 series: "Modern Embedded Recipes"

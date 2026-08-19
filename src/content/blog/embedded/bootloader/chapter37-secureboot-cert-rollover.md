@@ -1,5 +1,6 @@
 ---
 title: "UEFI Secure Boot 인증서 만료 — 2011→2023 CA 롤오버와 PQC 대비"
+slug: "embedded/bootloader/chapter37-secureboot-cert-rollover"
 date: 2026-06-19T09:04:00
 description: "2026년 6월부터 시작되는 Microsoft Secure Boot 2011 인증서 만료 — PK·KEK·db·dbx 계층, 2023 CA 체인과 Option ROM CA 분리, 임베디드 기기 영향, 그리고 post-quantum 서명으로의 길."
 series: "Bootloader Internals"

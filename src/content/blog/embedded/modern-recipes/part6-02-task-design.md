@@ -1,5 +1,6 @@
 ---
 title: "RTOS Task 설계 패턴 — 우선순위·스택·State Machine"
+slug: "embedded/modern-recipes/part6-02-task-design"
 date: 2026-04-15T09:01:00
 description: "Periodic, event-driven, state machine 세 가지 task 패턴과 priority 산정 기준을 정리합니다."
 series: "Modern Embedded Recipes"

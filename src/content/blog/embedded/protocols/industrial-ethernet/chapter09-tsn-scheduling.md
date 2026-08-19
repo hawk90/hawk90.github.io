@@ -1,5 +1,6 @@
 ---
 title: "TSN 스케줄링 메커니즘 — Qbv·Qbu·gPTP 동기화 분석"
+slug: "embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling"
 date: 2026-05-13T09:09:00
 description: "Gate Control List 설계부터 ILP 기반 스케줄 합성·실제 도구·CNC YANG까지."
 series: "Industrial Ethernet 심화"

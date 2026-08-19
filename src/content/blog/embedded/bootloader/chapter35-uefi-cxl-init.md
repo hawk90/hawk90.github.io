@@ -1,5 +1,6 @@
 ---
 title: "EFI·UEFI에서 CXL 초기화 — CEDT 생성과 HDM Decoder 사전 설정"
+slug: "embedded/bootloader/chapter35-uefi-cxl-init"
 date: 2026-06-19T09:02:00
 description: "EDK II 기반 UEFI에서 CXL 디바이스 초기화 — CEDT(CXL Early Discovery Table) 생성, HDM Decoder 사전 설정, ACPI handoff."
 series: "Bootloader Internals"

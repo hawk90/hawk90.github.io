@@ -1,5 +1,6 @@
 ---
 title: "Abseil HashState chaining"
+slug: "programming/code-review/abseil/part10-02-hash-state-chaining"
 date: 2026-06-12T09:09:00
 description: "H::combine의 진짜 동작 — HashState로 필드를 chain해 한 번에 좋은 분포를 얻는 방법."
 series: "Abseil Code Review"

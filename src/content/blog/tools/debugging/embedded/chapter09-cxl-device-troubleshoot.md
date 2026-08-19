@@ -1,5 +1,6 @@
 ---
 title: "CXL 디바이스 트러블슈팅 — RAS 이벤트·Poison List·Media Error 추적"
+slug: "tools/debugging/embedded/chapter09-cxl-device-troubleshoot"
 date: 2026-06-18T09:02:00
 description: "CXL 디바이스의 RAS(Reliability·Availability·Serviceability) 이벤트와 poison list·media error를 추적하는 진단 흐름."
 series: "Embedded Debugging"

@@ -1,5 +1,6 @@
 ---
 title: "메모리 풀링과 데이터센터 토폴로지 — 용량을 서버 밖에서 빌리는 일"
+slug: "embedded/hardware/hbm/chapter12-cxl-pooling-fabric"
 date: 2026-06-15T09:04:00
 description: "on-package HBM의 용량 상한 밖을 CXL 풀이 맡는 방식 — 빌린 용량의 지연 값, hot/cold 구분이라는 전제, 서버당 고정 구성에서 풀 조달로의 전환."
 series: "HBM·GDDR 심화"

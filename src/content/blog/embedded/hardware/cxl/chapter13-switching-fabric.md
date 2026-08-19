@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Switching·Fabric Manager — 2.0 pooling에서 3.x fabric까지"
+slug: "embedded/hardware/cxl/chapter13-switching-fabric"
 date: 2026-05-16T09:13:00
 description: "CXL switch의 진화와 Fabric Manager의 역할."
 series: "CXL 4.0 Internals"

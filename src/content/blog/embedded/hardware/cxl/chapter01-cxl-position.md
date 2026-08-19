@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: CXL의 자리와 진화 — 1.1에서 4.0까지"
+slug: "embedded/hardware/cxl/chapter01-cxl-position"
 date: 2026-05-16T09:01:00
 description: "CXL이 푸는 문제, 세대별 진화, 4.0의 핵심 변경 (128 GT/s·Bundled Port)."
 series: "CXL 4.0 Internals"

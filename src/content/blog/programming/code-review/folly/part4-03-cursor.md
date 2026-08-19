@@ -1,5 +1,6 @@
 ---
 title: "folly::io::Cursor·RWCursor — chain 위의 stream"
+slug: "programming/code-review/folly/part4-03-cursor"
 date: 2026-06-05T09:02:00
 description: "Cursor는 IOBuf chain을 단일 stream처럼 읽고 쓰는 추상화. endian-safe primitive read와 chain 자동 순회를 제공한다."
 series: "Folly Code Review"

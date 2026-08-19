@@ -1,5 +1,6 @@
 ---
 title: "LSan 누수 분석 — Stop-the-world Leak Detection 메커니즘"
+slug: "tools/debugging/sanitizers/chapter03-lsan-leaks"
 date: 2026-05-29T09:03:00
 description: "LeakSanitizer로 메모리 누수 추적 — 보고서 해석, suppression, 일회성·반복 분석 패턴."
 tags: [Sanitizer, LSan, MemoryLeak, Debugging, C, C++]

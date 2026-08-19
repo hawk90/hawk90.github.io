@@ -1,5 +1,6 @@
 ---
 title: "absl::compare — three-way 비교"
+slug: "programming/code-review/abseil/part9-07-compare"
 date: 2026-06-12T09:06:00
 description: "absl::weak_ordering, strong_ordering, partial_ordering — C++20 spaceship의 polyfill과 비교 helper."
 series: "Abseil Code Review"

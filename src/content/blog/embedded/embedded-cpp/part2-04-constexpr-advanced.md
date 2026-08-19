@@ -1,5 +1,6 @@
 ---
 title: "constexpr 고급 활용 — 룩업 테이블·CRC·해시 컴파일 타임 생성"
+slug: "embedded/embedded-cpp/part2-04-constexpr-advanced"
 date: 2026-04-29T09:12:00
 description: "컴파일 타임 sort, search, 문자열 — constexpr 알고리즘의 한계와 가능성."
 series: "Embedded C++ for Real Systems"

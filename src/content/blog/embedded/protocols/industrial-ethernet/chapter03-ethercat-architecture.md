@@ -1,5 +1,6 @@
 ---
 title: "EtherCAT 아키텍처 분해 — Processing on the Fly 메커니즘"
+slug: "embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture"
 date: 2026-05-13T09:03:00
 description: "Slave가 프레임을 통과시키면서 읽고 쓴다 — EtherCAT 핵심."
 series: "Industrial Ethernet 심화"

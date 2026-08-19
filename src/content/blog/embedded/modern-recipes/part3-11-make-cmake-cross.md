@@ -1,5 +1,6 @@
 ---
 title: "Make·CMake 크로스 컴파일 — Toolchain File·Sysroot 통합"
+slug: "embedded/modern-recipes/part3-11-make-cmake-cross"
 date: 2026-04-12T09:33:00
 description: "Embedded 빌드 시스템 — toolchain file·target_link_options."
 series: "Modern Embedded Recipes"

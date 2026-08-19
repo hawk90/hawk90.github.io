@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Linux drivers/cxl/ 분석 — Mainline kernel CXL 구현"
+slug: "embedded/hardware/cxl/chapter11-linux-driver"
 date: 2026-05-16T09:11:00
 description: "Linux 6.x의 CXL subsystem 코드 구조와 probe 흐름."
 series: "CXL 4.0 Internals"

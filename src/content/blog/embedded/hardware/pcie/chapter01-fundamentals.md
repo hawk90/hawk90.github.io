@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: PCIe Fundamentals — 계층 구조와 토폴로지"
+slug: "embedded/hardware/pcie/chapter01-fundamentals"
 date: 2026-05-19T09:01:00
 description: "PCIe 아키텍처의 기초 — point-to-point 직렬 링크, 3-Layer 모델, Root Complex·Switch·Endpoint 토폴로지, Gen 1부터 7.0까지의 진화."
 series: "PCIe Deep Dive"

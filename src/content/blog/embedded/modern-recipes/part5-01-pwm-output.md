@@ -1,5 +1,6 @@
 ---
 title: "PWM 출력 실전 — LED 밝기·모터 속도 제어"
+slug: "embedded/modern-recipes/part5-01-pwm-output"
 date: 2026-04-14T09:49:00
 description: "Timer로 PWM 생성·duty 변경·complementary 출력."
 series: "Modern Embedded Recipes"

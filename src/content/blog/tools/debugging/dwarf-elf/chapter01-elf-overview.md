@@ -1,5 +1,6 @@
 ---
 title: "ELF 포맷 분해 — Section·Segment·Symbol Table 구조 추적"
+slug: "tools/debugging/dwarf-elf/chapter01-elf-overview"
 date: 2026-05-23T09:01:00
 description: "ELF 헤더, Program Header / Section Header, dynamic linking, build-id."
 tags: [elf, binary, linker]

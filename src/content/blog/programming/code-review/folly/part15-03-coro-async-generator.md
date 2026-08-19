@@ -1,5 +1,6 @@
 ---
 title: "folly::coro::AsyncGenerator — 비동기 스트림"
+slug: "programming/code-review/folly/part15-03-coro-async-generator"
 date: 2026-06-07T09:12:00
 description: "AsyncGenerator<T>의 pull-based 모델, co_yield, for co_await — 비동기 iterator의 표준 후보 패턴."
 series: "Folly Code Review"

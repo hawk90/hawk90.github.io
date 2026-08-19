@@ -1,5 +1,6 @@
 ---
 title: "Abseil LOG·VLOG·CHECK 분석"
+slug: "programming/code-review/abseil/part11-01-log-vlog-check"
 date: 2026-06-12T09:11:00
 description: "Abseil logging 기본 매크로 — severity, verbose level, fatal check. glog의 후속이자 Google 표준."
 series: "Abseil Code Review"

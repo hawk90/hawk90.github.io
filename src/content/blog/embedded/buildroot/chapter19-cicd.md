@@ -1,5 +1,6 @@
 ---
 title: "Buildroot CI/CD 구축 — Container Build와 Cache 공유"
+slug: "embedded/buildroot/chapter19-cicd"
 date: 2026-05-19T09:19:00
 description: "GitLab/GitHub Actions에서 Buildroot 트리를 컨테이너로 빌드하고 dl·ccache를 팀이 공유하는 패턴."
 series: "Buildroot Practical"

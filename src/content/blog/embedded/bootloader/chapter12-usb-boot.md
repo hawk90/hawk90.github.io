@@ -1,5 +1,6 @@
 ---
 title: "U-Boot USB 부팅 — fastboot·UMS·USB host 메커니즘"
+slug: "embedded/bootloader/chapter12-usb-boot"
 date: 2026-05-09T09:12:00
 description: "USB를 통한 부팅과 flash — fastboot, USB Mass Storage(UMS), USB host 부팅 흐름."
 series: "Bootloader Internals"

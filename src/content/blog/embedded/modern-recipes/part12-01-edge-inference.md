@@ -1,5 +1,6 @@
 ---
 title: "Edge Inference 분석 — Cloud vs Edge·Latency·Privacy"
+slug: "embedded/modern-recipes/part12-01-edge-inference"
 date: 2026-04-21T09:00:00
 description: "Edge inference가 cloud 대비 언제 답인지, MCU부터 server-class edge까지 하드웨어 스펙트럼과 프레임워크 선택, 3-stage pipeline 설계를 정리합니다."
 series: "Modern Embedded Recipes"

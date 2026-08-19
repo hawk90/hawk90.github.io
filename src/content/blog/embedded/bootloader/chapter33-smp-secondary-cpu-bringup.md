@@ -1,5 +1,6 @@
 ---
 title: "ARM64 Secondary Core Bring-up — PSCI CPU_ON 호출부터 EL1 진입까지"
+slug: "embedded/bootloader/chapter33-smp-secondary-cpu-bringup"
 date: 2026-05-22T09:33:00
 description: "ARM64 secondary CPU 깨우기 — spin-table 옛 방식과 PSCI CPU_ON 표준 방식, secondary_startup 어셈블리, percpu 초기화, hotplug 흐름."
 series: "Bootloader Internals"

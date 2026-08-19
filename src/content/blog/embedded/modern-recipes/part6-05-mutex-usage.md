@@ -1,5 +1,6 @@
 ---
 title: "RTOS Mutex 활용 — Recursive·Priority Inheritance 적용"
+slug: "embedded/modern-recipes/part6-05-mutex-usage"
 date: 2026-04-15T09:04:00
 description: "Mutex와 binary semaphore의 차이, priority inheritance, recursive lock, timeout, ownership 규칙을 정리합니다."
 series: "Modern Embedded Recipes"

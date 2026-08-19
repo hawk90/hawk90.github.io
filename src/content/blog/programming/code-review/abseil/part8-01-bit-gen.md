@@ -1,5 +1,6 @@
 ---
 title: "absl::BitGen — 모던 난수 생성기"
+slug: "programming/code-review/abseil/part8-01-bit-gen"
 date: 2026-06-11T09:12:00
 description: "absl::BitGen — std::mt19937 + std::uniform_int_distribution의 길고 verbose한 조합을 단일 호출로 압축한 random engine."
 series: "Abseil Code Review"

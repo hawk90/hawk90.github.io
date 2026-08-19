@@ -1,5 +1,6 @@
 ---
 title: "Type Traits 임베디드 활용 — SFINAE·is_pod·컴파일 타임 검사"
+slug: "embedded/embedded-cpp/part2-09-type-traits"
 date: 2026-04-29T09:17:00
 description: "std::is_*, std::enable_if, SFINAE — 컴파일 타임 type 정보로 코드 분기와 검증."
 series: "Embedded C++ for Real Systems"

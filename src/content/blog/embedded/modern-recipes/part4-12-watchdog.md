@@ -1,5 +1,6 @@
 ---
 title: "IWDG·WWDG 워치독 구현 — Independent vs Window 비교"
+slug: "embedded/modern-recipes/part4-12-watchdog"
 date: 2026-04-13T09:46:00
 description: "Independent vs Window·refresh 전략·debug 모드 freeze."
 series: "Modern Embedded Recipes"

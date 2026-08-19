@@ -1,5 +1,6 @@
 ---
 title: "folly::Range — 일반 iterator pair"
+slug: "programming/code-review/folly/part17-01-range"
 date: 2026-06-08T09:00:00
 description: "Range<Iter>의 설계, StringPiece의 일반화, std::span / std::string_view와의 관계."
 series: "Folly Code Review"

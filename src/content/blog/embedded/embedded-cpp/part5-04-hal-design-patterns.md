@@ -1,5 +1,6 @@
 ---
 title: "임베디드 HAL 설계 패턴 — Static·Dynamic·Hybrid 비교"
+slug: "embedded/embedded-cpp/part5-04-hal-design-patterns"
 date: 2026-05-02T09:40:00
 description: "범용 HAL 구조 — 벤더 종속성 격리, 다중 보드/MCU 지원, 시리즈 마무리."
 series: "Embedded C++ for Real Systems"

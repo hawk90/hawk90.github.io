@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Troubleshooting — 실무 시나리오북"
+slug: "embedded/hardware/pcie/chapter16-troubleshooting"
 date: 2026-05-19T09:16:00
 description: "Device not visible·link training fail·downgrade·CE storm·hang·ACS group·hot-plug·성능 미달·lane reversal·power budget."
 series: "PCIe Deep Dive"

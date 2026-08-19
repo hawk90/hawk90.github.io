@@ -1,5 +1,6 @@
 ---
 title: "CXL.mem 지연·대역폭 실측 — Direct·Switch·Pooled 토폴로지 비교"
+slug: "embedded/performance-engineering/part3-12-cxl-mem-latency"
 date: 2026-06-16T09:01:00
 description: "CXL.mem 토폴로지별 실측 — Direct attach·Single switch·Multi-host pool의 지연·대역폭 비용 측정."
 series: "Embedded Performance Engineering"

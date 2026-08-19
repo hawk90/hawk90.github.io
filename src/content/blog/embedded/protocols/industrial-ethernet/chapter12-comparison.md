@@ -1,5 +1,6 @@
 ---
 title: "산업용 이더넷 프로토콜 비교 — EtherCAT·PROFINET·POWERLINK·TSN 선택"
+slug: "embedded/protocols/industrial-ethernet/chapter12-comparison"
 date: 2026-05-13T09:12:00
 description: "EtherCAT·PROFINET·EtherNet/IP·POWERLINK·SERCOS III·TSN — 시나리오별 선택 가이드와 한국 산업 현장 적용 사례."
 series: "Industrial Ethernet 심화"

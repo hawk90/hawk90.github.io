@@ -1,5 +1,6 @@
 ---
 title: "Abseil utility — apply·in_place"
+slug: "programming/code-review/abseil/part9-08-utility"
 date: 2026-06-12T09:07:00
 description: "absl::apply, in_place_t, integer_sequence — std 미도착 또는 가독성 보강 헬퍼 모음."
 series: "Abseil Code Review"

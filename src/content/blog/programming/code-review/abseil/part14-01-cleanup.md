@@ -1,5 +1,6 @@
 ---
 title: "absl::Cleanup — 함수 종료 시 실행 보장"
+slug: "programming/code-review/abseil/part14-01-cleanup"
 date: 2026-06-13T09:05:00
 description: "absl::Cleanup — lambda 기반 RAII scope guard. 임시 객체로도 동작하는 ergonomic API, folly::ScopeGuard와의 비교."
 series: "Abseil Code Review"

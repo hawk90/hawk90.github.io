@@ -1,5 +1,6 @@
 ---
 title: "No-Exception C++ 설계 — 코드 크기·결정성 트레이드오프"
+slug: "embedded/embedded-cpp/part3-05-no-exception-design"
 date: 2026-04-30T09:23:00
 description: "-fno-exceptions 환경에서 에러 처리 — error code, std::optional, std::expected."
 series: "Embedded C++ for Real Systems"

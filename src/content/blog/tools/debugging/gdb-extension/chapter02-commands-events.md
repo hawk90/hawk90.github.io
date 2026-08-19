@@ -1,5 +1,6 @@
 ---
 title: "GDB 커스텀 명령·Convenience Function·Event 훅·Breakpoint"
+slug: "tools/debugging/gdb-extension/chapter02-commands-events"
 date: 2026-05-27T09:02:00
 description: "사용자 정의 명령, $name(...) 함수, stop hook, 자동 BP 액션 패턴."
 tags: [gdb, python, command, event, breakpoint]

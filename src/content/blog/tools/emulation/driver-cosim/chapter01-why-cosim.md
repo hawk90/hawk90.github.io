@@ -1,5 +1,6 @@
 ---
 title: "Pre-Silicon Driver Verification — RTL Co-simulation이 푸는 문제"
+slug: "tools/emulation/driver-cosim/chapter01-why-cosim"
 date: 2026-05-22T09:01:00
 description: "Silicon 없이 driver 검증 — co-simulation의 의미."
 series: "Driver-RTL Co-simulation"

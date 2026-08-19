@@ -1,5 +1,6 @@
 ---
 title: "임베디드 C++ vs C — 런타임·코드 크기·ABI 관점 비교"
+slug: "embedded/embedded-cpp/part1-01-cpp-vs-c"
 date: 2026-04-28T09:01:00
 description: "임베디드에서 C++가 진짜로 무거운가? 측정 가능한 비교와, C가 여전히 옳은 자리들."
 series: "Embedded C++ for Real Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Pooling·GFAM·Fabric — Multi-host 메모리 공유"
+slug: "embedded/hardware/cxl/chapter04-pooling-gfam"
 date: 2026-05-16T09:04:00
 description: "CXL 2.0 pooling, CXL 3.x fabric, GFAM (Global Fabric Attached Memory)."
 series: "CXL 4.0 Internals"

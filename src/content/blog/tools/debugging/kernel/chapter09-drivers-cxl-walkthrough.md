@@ -1,5 +1,6 @@
 ---
 title: "drivers/cxl 코드 분석 — 진입점부터 sysfs까지"
+slug: "tools/debugging/kernel/chapter09-drivers-cxl-walkthrough"
 date: 2026-06-18T09:04:00
 description: "Linux kernel drivers/cxl/ 디렉터리 — 모듈별 entry point·핵심 자료구조·sysfs interface 코드 워크스루."
 series: "Kernel Debugging"

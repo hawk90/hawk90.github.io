@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Configuration Space — 4 KB ECAM·Capability Linked List"
+slug: "embedded/hardware/pcie/chapter03-config-space"
 date: 2026-05-19T09:03:00
 description: "PCIe Configuration Space — 256 byte PCI 영역 + 4 KB Extended·Type 0/1 header·Capability chain·ECAM 메모리 매핑."
 series: "PCIe Deep Dive"

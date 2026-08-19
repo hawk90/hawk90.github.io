@@ -1,5 +1,6 @@
 ---
 title: "absl::Status ↔ exception 변환 패턴"
+slug: "programming/code-review/abseil/part3-05-status-exception-conversion"
 date: 2026-06-10T09:02:00
 description: "Part 3-05: Status와 exception/std::error_code/gRPC status 사이 변환 — 라이브러리 경계에서의 안전한 처리."
 series: "Abseil Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "HBM 3D 스택 구조 분해 — TSV·Microbump·Base Die의 역할"
+slug: "embedded/hardware/hbm/chapter02-hbm-stack"
 date: 2026-05-16T09:02:00
 description: "Base die + DRAM die stack — 3D 메모리의 구성요소와 TSV·microbump의 역할."
 series: "HBM·GDDR 심화"

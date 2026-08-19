@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Linux PCI Basics — Enumeration·Driver Model·sysfs"
+slug: "embedded/hardware/pcie/chapter10-linux-basics"
 date: 2026-05-19T09:10:00
 description: "Linux kernel의 PCIe — boot enumeration·struct pci_dev·driver matching·probe/remove·sysfs entry·ACPI 통합."
 series: "PCIe Deep Dive"

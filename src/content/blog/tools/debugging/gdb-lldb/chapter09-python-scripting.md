@@ -1,5 +1,6 @@
 ---
 title: "GDB·LLDB Python 스크립팅 — Pretty-Printer·Custom Command"
+slug: "tools/debugging/gdb-lldb/chapter09-python-scripting"
 date: 2026-05-24T09:09:00
 description: "GDB / LLDB Python API. pretty-printer 작성, 커스텀 명령, 자동화, MI."
 tags: [gdb, lldb, Python, Scripting]

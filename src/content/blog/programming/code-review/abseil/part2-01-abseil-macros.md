@@ -1,5 +1,6 @@
 ---
 title: "Abseil 매크로 — ABSL_HAVE_*·ABSL_ATTRIBUTE_*"
+slug: "programming/code-review/abseil/part2-01-abseil-macros"
 date: 2026-06-09T09:06:00
 description: "Part 2-01: feature detection과 attribute 매크로 — 컴파일러·플랫폼 차이를 흡수하는 Abseil의 기반."
 series: "Abseil Code Review"

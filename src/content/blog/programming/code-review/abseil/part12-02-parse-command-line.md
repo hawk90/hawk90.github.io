@@ -1,5 +1,6 @@
 ---
 title: "Abseil ParseCommandLine 동작"
+slug: "programming/code-review/abseil/part12-02-parse-command-line"
 date: 2026-06-13T09:00:00
 description: "absl::ParseCommandLine — argv를 flag로 분리하고 positional 인자를 돌려주는 단일 진입점."
 series: "Abseil Code Review"

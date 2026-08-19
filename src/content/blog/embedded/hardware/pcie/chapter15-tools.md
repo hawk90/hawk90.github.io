@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Tools — lspci·setpci·pcimem·protocol analyzer"
+slug: "embedded/hardware/pcie/chapter15-tools"
 date: 2026-05-19T09:15:00
 description: "PCIe 디버깅 도구 — lspci 전체 옵션·setpci raw access·pcimem BAR R/W·protocol analyzer·debugfs."
 series: "PCIe Deep Dive"

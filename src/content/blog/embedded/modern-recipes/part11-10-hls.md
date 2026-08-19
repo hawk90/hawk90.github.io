@@ -1,5 +1,6 @@
 ---
 title: "Vitis HLS 분석 — Pragma·Pipeline II·Dataflow 실전 감각"
+slug: "embedded/modern-recipes/part11-10-hls"
 date: 2026-04-20T09:09:00
 description: "Vitis HLS로 C++ 코드를 RTL로 합성할 때 II=1을 끌어내는 pragma 조합, dataflow, AXI 인터페이스 결정을 실전 패턴 중심으로 정리합니다."
 series: "Modern Embedded Recipes"

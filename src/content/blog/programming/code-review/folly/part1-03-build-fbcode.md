@@ -1,5 +1,6 @@
 ---
 title: "Folly 빌드와 fbcode 환경 — monorepo의 그림자"
+slug: "programming/code-review/folly/part1-03-build-fbcode"
 date: 2026-06-04T09:03:00
 description: "Folly의 빌드 구조 — Meta 내부 fbcode/Buck, OSS는 CMake. 외부 빌드에서 마주치는 함정."
 series: "Folly Code Review"

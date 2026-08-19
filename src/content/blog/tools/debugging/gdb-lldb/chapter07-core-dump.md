@@ -1,5 +1,6 @@
 ---
 title: "Core Dump 분석 기법 — gcore·coredumpctl·디버거 활용"
+slug: "tools/debugging/gdb-lldb/chapter07-core-dump"
 date: 2026-05-24T09:07:00
 description: "ulimit / core_pattern. gdb -c. ELF core 포맷, NT_PRSTATUS, systemd-coredump."
 tags: [gdb, core-dump, Crash, ELF]

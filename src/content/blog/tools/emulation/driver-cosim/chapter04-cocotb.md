@@ -1,5 +1,6 @@
 ---
 title: "CocoTB 분석 — Python으로 작성하는 RTL Testbench"
+slug: "tools/emulation/driver-cosim/chapter04-cocotb"
 date: 2026-05-22T09:04:00
 description: "Python coroutine으로 RTL testbench — productivity gain."
 series: "Driver-RTL Co-simulation"

@@ -1,5 +1,6 @@
 ---
 title: "Cache Line Alignment — alignas·Padding·SoA 적용"
+slug: "embedded/modern-recipes/part8-03-cache-alignment"
 date: 2026-04-17T09:02:00
 description: "Cache line 정렬과 false sharing 회피, hot/cold 분리, SoA 변환을 코드와 측정으로 정리합니다."
 series: "Modern Embedded Recipes"

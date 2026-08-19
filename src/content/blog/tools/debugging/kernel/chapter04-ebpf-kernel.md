@@ -1,5 +1,6 @@
 ---
 title: "eBPF·bpftrace로 커널 디버깅 — 동적 관측의 신세대"
+slug: "tools/debugging/kernel/chapter04-ebpf-kernel"
 date: 2026-05-25T09:04:00
 description: "kprobe/uprobe/tracepoint 위에 표현력 있는 trace 언어. bpftrace 원-라이너부터 BCC까지."
 tags: [kernel, ebpf, bpftrace, kprobe, bcc]

@@ -1,5 +1,6 @@
 ---
 title: "LVDS 차동 신호 분석 — Common-Mode·Impedance·Eye Pattern"
+slug: "embedded/modern-recipes/part1-12-lvds-differential"
 date: 2026-04-10T09:12:00
 description: "고속 차동 신호 (LVDS·LVPECL·CML)·impedance matching."
 series: "Modern Embedded Recipes"

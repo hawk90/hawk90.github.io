@@ -1,5 +1,6 @@
 ---
 title: "folly::Lazy — 지연 초기화 wrapper"
+slug: "programming/code-review/folly/part13-05-lazy"
 date: 2026-06-07T09:06:00
 description: "Part 13-05: folly::Lazy — once_flag/call_once 패턴을 type level로. 무거운 객체의 첫 사용까지 초기화 연기."
 series: "Folly Code Review"

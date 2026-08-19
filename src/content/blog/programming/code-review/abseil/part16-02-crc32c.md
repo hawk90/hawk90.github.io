@@ -1,5 +1,6 @@
 ---
 title: "absl::ComputeCrc32c — 하드웨어 가속 체크섬"
+slug: "programming/code-review/abseil/part16-02-crc32c"
 date: 2026-06-13T09:13:00
 description: "absl::ComputeCrc32c — SSE4.2 CRC32, ARM CRC 명령어로 가속된 CRC32C 구현. iSCSI·Btrfs·protobuf에서 표준화된 무결성 검사."
 series: "Abseil Code Review"

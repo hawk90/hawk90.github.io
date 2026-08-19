@@ -1,5 +1,6 @@
 ---
 title: "SMP RTOS 설계 — Ready List·Affinity·IPI·Load Balancing"
+slug: "embedded/rtos/practical-internals/part4-07-smp-rtos"
 date: 2026-05-07T09:39:00
 description: "FreeRTOS 11 SMP와 Zephyr SMP를 단일 ready list와 per-CPU ready list 두 축으로 비교합니다. task affinity, IPI, cross-core wake, cache coherency 경계까지 설계 관점에서 정리합니다."
 series: "Practical RTOS Internals"

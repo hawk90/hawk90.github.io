@@ -1,5 +1,6 @@
 ---
 title: "Cache Line 최적화 — Alignment·Prefetch·False Sharing 처리"
+slug: "embedded/performance-engineering/part2-07-cache-line"
 date: 2026-04-24T09:06:00
 description: "64-byte line alignment, software prefetch, false sharing 회피, SoA·AoS 선택."
 series: "Embedded Performance Engineering"

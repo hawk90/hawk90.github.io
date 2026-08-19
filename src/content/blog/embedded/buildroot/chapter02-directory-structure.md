@@ -1,5 +1,6 @@
 ---
 title: "Buildroot 디렉터리 구조 분해 — board·configs·dl·output"
+slug: "embedded/buildroot/chapter02-directory-structure"
 date: 2026-05-19T09:02:00
 description: "Buildroot 트리 — package, board, configs, fs, output, dl 디렉터리의 역할."
 series: "Buildroot Practical"

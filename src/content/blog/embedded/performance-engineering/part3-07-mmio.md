@@ -1,5 +1,6 @@
 ---
 title: "MMIO 접근 성능 — Cache Policy·Write-Combining·Volatile·Barrier"
+slug: "embedded/performance-engineering/part3-07-mmio"
 date: 2026-04-25T09:06:00
 description: "MMIO uncached strongly-ordered. Write-combining for PCIe BAR. Volatile, DMB·DSB·ISB."
 series: "Embedded Performance Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Hazard Pointer 분석 — Lock-Free Memory Reclamation"
+slug: "embedded/modern-recipes/part9-04-hazard-pointer"
 date: 2026-04-18T09:03:00
 description: "Lock-free 메모리 회수, ABA 회피, RCU와의 비교, C++ proposal까지 hazard pointer의 원리와 구현을 정리합니다."
 series: "Modern Embedded Recipes"

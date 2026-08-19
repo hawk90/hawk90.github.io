@@ -1,5 +1,6 @@
 ---
 title: "U-Boot Verified Boot — RSA 서명과 public key 임베딩 흐름"
+slug: "embedded/bootloader/chapter16-verified-boot"
 date: 2026-05-09T09:16:00
 description: "U-Boot Verified Boot — FIT 서명, public key를 U-Boot DT에 박는 워크플로."
 series: "Bootloader Internals"

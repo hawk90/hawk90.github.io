@@ -1,5 +1,6 @@
 ---
 title: "실전 사례 — Matrix Multiply가 예상의 10배 느린 이유"
+slug: "embedded/performance-engineering/part6-02-case-cache-thrashing"
 date: 2026-04-28T09:01:00
 description: "1024×1024 matrix multiply가 이론값의 10배 느렸다. SIMD부터 의심했지만 진짜 범인은 캐시 미스 90%였다."
 series: "Embedded Performance Engineering"

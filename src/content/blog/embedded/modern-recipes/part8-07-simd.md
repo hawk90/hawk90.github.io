@@ -1,5 +1,6 @@
 ---
 title: "SIMD 활용 분석 — Intrinsics·Auto-Vectorization·OpenMP SIMD"
+slug: "embedded/modern-recipes/part8-07-simd"
 date: 2026-04-17T09:06:00
 description: "Auto-vectorize, intrinsics, OpenMP SIMD pragma 세 갈래를 데이터 layout과 함께 정리합니다."
 series: "Modern Embedded Recipes"

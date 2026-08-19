@@ -1,5 +1,6 @@
 ---
 title: "SoC 데이터시트 읽기 — Pin Mux·Clock·Memory Map 파악법"
+slug: "embedded/bsp/chapter02-datasheet"
 date: 2026-05-18T09:02:00
 description: "Reference Manual에서 BSP에 필요한 정보를 찾는 방법 — clock tree, memory map, pin mux."
 series: "BSP Development"

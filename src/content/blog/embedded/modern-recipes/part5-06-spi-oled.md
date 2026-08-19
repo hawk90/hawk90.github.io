@@ -1,5 +1,6 @@
 ---
 title: "SPI OLED 제어 — SSD1306·Frame Buffer·Page 단위 갱신"
+slug: "embedded/modern-recipes/part5-06-spi-oled"
 date: 2026-04-14T09:54:00
 description: "128×64 OLED·framebuffer·page mode·partial update."
 series: "Modern Embedded Recipes"

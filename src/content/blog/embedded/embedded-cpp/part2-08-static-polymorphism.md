@@ -1,5 +1,6 @@
 ---
 title: "CRTP 패턴 분석 — vtable 없는 정적 다형성"
+slug: "embedded/embedded-cpp/part2-08-static-polymorphism"
 date: 2026-04-29T09:16:00
 description: "Curiously Recurring Template Pattern — virtual 함수 없이 컴파일 타임 다형성. vtable 0, 간접 호출 0."
 series: "Embedded C++ for Real Systems"

@@ -1,5 +1,6 @@
 ---
 title: "포스트모템 자동화 — debuginfod·Minidump 파이프라인"
+slug: "tools/debugging/postmortem/chapter04-debuginfod-minidump-automation"
 date: 2026-06-01T09:04:00
 description: "build-id로 자동 debuginfo 매칭, Breakpad/crashpad minidump, CI 자동 사후 분석."
 tags: [debuginfod, minidump, breakpad, sentry, automation, postmortem]

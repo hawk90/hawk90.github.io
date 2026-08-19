@@ -1,5 +1,6 @@
 ---
 title: "EtherCAT Master 구현 비교 — SOEM·IgH·TwinCAT 분석"
+slug: "embedded/protocols/industrial-ethernet/chapter05-ethercat-master"
 date: 2026-05-13T09:05:00
 description: "SOEM·IgH·TwinCAT — 오픈소스와 상용 master 구현."
 series: "Industrial Ethernet 심화"

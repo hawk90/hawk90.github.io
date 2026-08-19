@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Register Maps — Config Space·Capability 비트 reference"
+slug: "embedded/hardware/pcie/chapter18-register-maps"
 date: 2026-05-19T09:18:00
 description: "PCIe register reference — Type 0/1 header·PCIe Cap·AER·MSI·MSI-X·SR-IOV·ACS·LTR의 주요 비트 layout."
 series: "PCIe Deep Dive"

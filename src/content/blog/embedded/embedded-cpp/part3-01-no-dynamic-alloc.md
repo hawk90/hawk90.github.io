@@ -1,5 +1,6 @@
 ---
 title: "동적 할당 없는 임베디드 C++ — placement new·정적 객체·풀"
+slug: "embedded/embedded-cpp/part3-01-no-dynamic-alloc"
 date: 2026-04-30T09:19:00
 description: "임베디드의 첫 번째 원칙 — new/malloc 없이 modern C++의 STL 같은 컨테이너 활용."
 series: "Embedded C++ for Real Systems"

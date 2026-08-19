@@ -1,5 +1,6 @@
 ---
 title: "Template 비용 분석 — 코드 폭증·인스턴스화·디버그 정보 측정"
+slug: "embedded/embedded-cpp/part2-07-templates-cost"
 date: 2026-04-29T09:15:00
 description: "Template instantiation의 코드 bloat — 추적, 통제, 공통 부분 분리 패턴."
 series: "Embedded C++ for Real Systems"

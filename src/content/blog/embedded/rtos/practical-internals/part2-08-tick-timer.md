@@ -1,5 +1,6 @@
 ---
 title: "RTOS Tick과 타이머 — SysTick·Generic Timer·configTICK_RATE_HZ"
+slug: "embedded/rtos/practical-internals/part2-08-tick-timer"
 date: 2026-05-05T09:18:00
 description: "RTOS의 심장 박동. SysTick 1 kHz가 표준 — Hz 선택의 trade-off."
 series: "Practical RTOS Internals"

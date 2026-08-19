@@ -1,5 +1,6 @@
 ---
 title: "성능 측정의 기본 — Wall-Clock·CPU Cycle·Instruction Count"
+slug: "embedded/performance-engineering/part1-03-measurement"
 date: 2026-04-23T09:03:00
 description: "어떻게 측정하나. DWT, PMU, clock_gettime, GPIO + 로직 분석기. Overhead 줄이기."
 series: "Embedded Performance Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "UART 하드웨어 동작 분석 — Baud Rate·Framing·FIFO"
+slug: "embedded/modern-recipes/part1-04-uart-hardware"
 date: 2026-04-10T09:04:00
 description: "Baud·framing·parity·FIFO·RS-232 레벨까지 UART 회로의 동작 원리."
 series: "Modern Embedded Recipes"

@@ -1,5 +1,6 @@
 ---
 title: "U-Boot Falcon Mode — SPL이 U-Boot Proper 없이 커널 직접 부팅"
+slug: "embedded/bootloader/chapter05-falcon-mode"
 date: 2026-05-09T09:05:00
 description: "U-Boot Falcon Mode — SPL이 U-Boot Proper를 건너뛰고 커널을 직접 부트. 부트 시간 단축의 핵심."
 series: "Bootloader Internals"

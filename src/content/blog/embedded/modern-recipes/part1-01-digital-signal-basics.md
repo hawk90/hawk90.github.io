@@ -1,5 +1,6 @@
 ---
 title: "디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석"
+slug: "embedded/modern-recipes/part1-01-digital-signal-basics"
 date: 2026-04-10T09:01:00
 description: "Voltage level·rise/fall time·noise margin·신호 무결성의 기본기."
 series: "Modern Embedded Recipes"

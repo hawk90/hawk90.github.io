@@ -1,5 +1,6 @@
 ---
 title: "Abseil Flag introspection·validation"
+slug: "programming/code-review/abseil/part12-03-flag-introspection"
 date: 2026-06-13T09:01:00
 description: "Flag validator, custom type AbslParseFlag/AbslUnparseFlag, introspection API — flag 정확성과 동적 조회."
 series: "Abseil Code Review"

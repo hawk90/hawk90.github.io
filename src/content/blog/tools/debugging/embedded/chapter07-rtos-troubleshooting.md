@@ -1,5 +1,6 @@
 ---
 title: "RTOS-aware 디버깅과 트러블슈팅 — Task·Queue·Stack 분석"
+slug: "tools/debugging/embedded/chapter07-rtos-troubleshooting"
 date: 2026-05-26T09:07:00
 description: "FreeRTOS/Zephyr task 콜스택, Hardfault 분석, MPU, 신호 무결성, 보안 lock 해제."
 tags: [rtos, freertos, zephyr, hardfault, mpu, troubleshooting, embedded]

@@ -1,5 +1,6 @@
 ---
 title: "I2C 하드웨어 분석 — Open-Drain·Clock Stretching·Arbitration"
+slug: "embedded/modern-recipes/part1-06-i2c-hardware"
 date: 2026-04-10T09:06:00
 description: "SDA/SCL·7/10-bit addressing·ACK/NACK·clock stretching·풀업 크기 선정."
 series: "Modern Embedded Recipes"

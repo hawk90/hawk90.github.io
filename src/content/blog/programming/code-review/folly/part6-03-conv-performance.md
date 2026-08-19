@@ -1,5 +1,6 @@
 ---
 title: "folly Conv 성능 비교 — sprintf·stringstream 대비"
+slug: "programming/code-review/folly/part6-03-conv-performance"
 date: 2026-06-05T09:11:00
 description: "folly::to의 성능 — lookup table itoa, SWAR atoi, sprintf/iostream과의 5-10배 차이."
 series: "Folly Code Review"

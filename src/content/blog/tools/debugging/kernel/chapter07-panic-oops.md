@@ -1,5 +1,6 @@
 ---
 title: "Kernel Panic·Oops 메시지 해석 — Decoder Ring 만들기"
+slug: "tools/debugging/kernel/chapter07-panic-oops"
 date: 2026-05-25T09:07:00
 description: "dmesg 한 줄로 정확한 위치 찾기. RIP, Call Trace, BUG, Tainted 디코딩."
 tags: [kernel, panic, oops, dmesg, addr2line]

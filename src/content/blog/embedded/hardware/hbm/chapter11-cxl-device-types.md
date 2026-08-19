@@ -1,5 +1,6 @@
 ---
 title: "CXL Type 1·2·3 디바이스 분류 — 이 중 무엇이 나에게 메모리인가"
+slug: "embedded/hardware/hbm/chapter11-cxl-device-types"
 date: 2026-06-15T09:03:00
 description: "CXL 세 유형을 메모리 계층 관점에서 다시 읽습니다. 어떤 유형이 호스트 용량을 늘려 주고, 어떤 유형이 늘려 주지 않는지, NUMA와 대역폭에서 무엇이 달라지는지."
 series: "HBM·GDDR 심화"

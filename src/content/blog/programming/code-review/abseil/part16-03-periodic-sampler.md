@@ -1,5 +1,6 @@
 ---
 title: "absl::PeriodicSampler — 적응형 샘플링·jitter 회피"
+slug: "programming/code-review/abseil/part16-03-periodic-sampler"
 date: 2026-06-13T09:14:00
 description: "absl::profiling_internal::PeriodicSampler — sampling rate를 동적으로 조정, geometric distribution으로 jitter 회피. 메모리 할당 추적·profiling 인프라의 기반."
 series: "Abseil Code Review"

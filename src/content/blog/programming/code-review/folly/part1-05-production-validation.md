@@ -1,5 +1,6 @@
 ---
 title: "Folly production validation 문화 — peta-scale에서 단련된 코드"
+slug: "programming/code-review/folly/part1-05-production-validation"
 date: 2026-06-04T09:05:00
 description: "Folly 컴포넌트가 Meta production scale에서 어떻게 검증되는가 — 외부 사용자가 신뢰해도 되는 부분과 주의할 부분."
 series: "Folly Code Review"

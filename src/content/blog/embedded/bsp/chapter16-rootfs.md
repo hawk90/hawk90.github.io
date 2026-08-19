@@ -1,5 +1,6 @@
 ---
 title: "BSP RootFS 통합 — Buildroot·Yocto와 보드별 패키지 묶기"
+slug: "embedded/bsp/chapter16-rootfs"
 date: 2026-05-18T09:16:00
 description: "BSP에서 rootfs 빌드 시스템 선택과 통합 — Buildroot 외부 트리, Yocto 메타레이어."
 series: "BSP Development"

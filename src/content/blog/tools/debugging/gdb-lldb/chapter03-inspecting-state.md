@@ -1,5 +1,6 @@
 ---
 title: "디버거로 상태 들여다보기 — 변수·메모리·레지스터·STL 추적"
+slug: "tools/debugging/gdb-lldb/chapter03-inspecting-state"
 date: 2026-05-24T09:03:00
 description: "print 만으로 부족한 자리들 — x/memory examine, ptype, STL 컨테이너, pretty printer."
 tags: [gdb, lldb, Memory, Inspection, STL]

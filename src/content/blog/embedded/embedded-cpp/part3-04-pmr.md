@@ -1,5 +1,6 @@
 ---
 title: "std::pmr 임베디드 활용 — Polymorphic Memory Resource 분석"
+slug: "embedded/embedded-cpp/part3-04-pmr"
 date: 2026-04-30T09:22:00
 description: "C++17 polymorphic allocator — 같은 컨테이너 타입에 다른 메모리 출처 주입."
 series: "Embedded C++ for Real Systems"

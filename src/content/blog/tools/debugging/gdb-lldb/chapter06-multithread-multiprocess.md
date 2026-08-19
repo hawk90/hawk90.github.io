@@ -1,5 +1,6 @@
 ---
 title: "멀티스레드·멀티프로세스 디버깅 — Non-Stop·Scheduler-Locking·Fork"
+slug: "tools/debugging/gdb-lldb/chapter06-multithread-multiprocess"
 date: 2026-05-24T09:06:00
 description: "thread / process apply. scheduler-locking. follow-fork. rr 시간 역행 디버깅."
 tags: [gdb, Multithread, Multiprocess]

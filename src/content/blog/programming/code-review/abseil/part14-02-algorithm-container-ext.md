@@ -1,5 +1,6 @@
 ---
 title: "Abseil algorithm container 확장 — c_sort·c_find_if·c_count_if"
+slug: "programming/code-review/abseil/part14-02-algorithm-container-ext"
 date: 2026-06-13T09:06:00
 description: "absl::c_* algorithm wrapper — container 전체를 받아 begin/end 자동 처리, STL algorithm의 한 줄 boilerplate를 제거."
 series: "Abseil Code Review"

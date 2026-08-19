@@ -1,5 +1,6 @@
 ---
 title: "folly::Promise·makeFuture — Future를 만드는 두 길"
+slug: "programming/code-review/folly/part2-02-promise-make-future"
 date: 2026-06-04T09:07:00
 description: "folly::Promise로 비동기 완료를 표현하고, makeFuture/makeSemiFuture로 이미 결정된 값을 Future 인터페이스에 올린다."
 series: "Folly Code Review"

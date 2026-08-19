@@ -1,5 +1,6 @@
 ---
 title: "성능 데이터 통계적 분석 — Percentile·Histogram·평균의 함정"
+slug: "embedded/performance-engineering/part1-04-statistics"
 date: 2026-04-23T09:04:00
 description: "평균은 거짓말. p99·p999·max·long tail. HdrHistogram·임베디드 fixed-bucket."
 series: "Embedded Performance Engineering"

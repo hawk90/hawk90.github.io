@@ -1,5 +1,6 @@
 ---
 title: "저전력 모드 분석 — Sleep·Stop·Standby·Wake-up Source"
+slug: "embedded/modern-recipes/part4-11-low-power-modes"
 date: 2026-04-13T09:45:00
 description: "Sleep/Stop/Standby·wake-up source·전류 측정."
 series: "Modern Embedded Recipes"

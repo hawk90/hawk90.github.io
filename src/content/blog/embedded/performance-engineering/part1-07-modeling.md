@@ -1,5 +1,6 @@
 ---
 title: "성능 모델링 — Amdahl·Gustafson·Roofline Model 적용"
+slug: "embedded/performance-engineering/part1-07-modeling"
 date: 2026-04-23T09:07:00
 description: "최적화 한계를 예측하는 수학 모델. Serial 부분이 결정. Memory-bound vs Compute-bound."
 series: "Embedded Performance Engineering"

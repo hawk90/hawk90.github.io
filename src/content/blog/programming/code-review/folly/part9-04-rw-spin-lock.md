@@ -1,5 +1,6 @@
 ---
 title: "folly::RWSpinLock 분석"
+slug: "programming/code-review/folly/part9-04-rw-spin-lock"
 date: 2026-06-06T09:07:00
 description: "folly::RWSpinLock — spin-only reader-writer lock, 매우 짧은 critical section에 SharedMutex보다 빠르다."
 series: "Folly Code Review"

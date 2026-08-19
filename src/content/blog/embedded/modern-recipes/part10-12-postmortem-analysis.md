@@ -1,5 +1,6 @@
 ---
 title: "임베디드 포스트모템 분석 — Core Dump와 Field Crash"
+slug: "embedded/modern-recipes/part10-12-postmortem-analysis"
 date: 2026-04-19T09:11:00
 description: "Linux coredump·gdb 분석부터 MCU 환경의 mini-dump(Memfault)·last-gasp logging·field debug 패턴까지."
 series: "Modern Embedded Recipes"

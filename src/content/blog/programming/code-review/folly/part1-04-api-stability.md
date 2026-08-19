@@ -1,5 +1,6 @@
 ---
 title: "Folly API stability 정책 — 어떤 보장도 없다는 솔직함"
+slug: "programming/code-review/folly/part1-04-api-stability"
 date: 2026-06-04T09:04:00
 description: "Folly의 API/ABI 안정성 정책 — Meta의 입장과 외부 사용자가 따라야 할 전략."
 series: "Folly Code Review"

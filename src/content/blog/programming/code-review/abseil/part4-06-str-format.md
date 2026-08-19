@@ -1,5 +1,6 @@
 ---
 title: "absl::StrFormat — type-safe printf·FormatSpec"
+slug: "programming/code-review/abseil/part4-06-str-format"
 date: 2026-06-10T09:08:00
 description: "Part 4-06: absl::StrFormat — printf 호환 syntax의 type-safe 포맷팅, FormatSpec 컴파일 타임 검증, FormatUntyped."
 series: "Abseil Code Review"

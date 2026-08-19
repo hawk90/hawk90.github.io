@@ -1,5 +1,6 @@
 ---
 title: "ARM 임베디드 부트 4단계 분해 — BL1·SPL·TPL·U-Boot Proper의 역할"
+slug: "embedded/bootloader/chapter04-boot-stages"
 date: 2026-05-09T09:04:00
 description: "ARM64와 RISC-V의 다단 부트 — BL1·BL2·BL31·BL33, SPL·TPL·U-Boot Proper의 책임 분할."
 series: "Bootloader Internals"

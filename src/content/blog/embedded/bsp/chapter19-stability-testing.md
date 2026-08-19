@@ -1,5 +1,6 @@
 ---
 title: "BSP Stability Testing — Stress·Soak·Power Cycle 시나리오"
+slug: "embedded/bsp/chapter19-stability-testing"
 date: 2026-05-18T09:19:00
 description: "양산 BSP의 안정성 검증 — stress 도구, 장기간 soak, thermal 사이클, EMC 영향."
 series: "BSP Development"

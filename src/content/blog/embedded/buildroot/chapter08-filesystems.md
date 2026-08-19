@@ -1,5 +1,6 @@
 ---
 title: "Buildroot 출력 파일시스템 — initramfs·squashfs·ext4·cpio 선택"
+slug: "embedded/buildroot/chapter08-filesystems"
 date: 2026-05-19T09:08:00
 description: "Buildroot가 생성하는 파일시스템 형식 비교 — 언제 무엇을, 크기·읽기성능·쓰기 가능성."
 series: "Buildroot Practical"

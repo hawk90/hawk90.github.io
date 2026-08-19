@@ -1,5 +1,6 @@
 ---
 title: "Bare-metal 프로파일링 — GPIO·DWT·SysTick·ITM 활용"
+slug: "embedded/performance-engineering/part5-07-baremetal-profiling"
 date: 2026-04-27T09:06:00
 description: "OS도 perf도 없는 환경에서 GPIO, DWT cycle counter, SysTick, ITM으로 측정하기."
 series: "Embedded Performance Engineering"

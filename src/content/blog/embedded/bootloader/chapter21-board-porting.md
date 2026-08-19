@@ -1,5 +1,6 @@
 ---
 title: "새 보드 U-Boot 포팅 실전 — defconfig 작성부터 첫 부팅까지"
+slug: "embedded/bootloader/chapter21-board-porting"
 date: 2026-05-09T09:21:00
 description: "U-Boot에 새 보드를 추가하는 전체 워크플로 — configs·board·dts·MAINTAINERS."
 series: "Bootloader Internals"

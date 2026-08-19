@@ -1,5 +1,6 @@
 ---
 title: "USB Device 기초 — Descriptor·Enumeration·Endpoint·HID/CDC"
+slug: "embedded/modern-recipes/part5-11-usb-device"
 date: 2026-04-14T09:59:00
 description: "CDC·HID class — STM32 USB stack 활용."
 series: "Modern Embedded Recipes"

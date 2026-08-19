@@ -1,5 +1,6 @@
 ---
 title: "임베디드 벤치마킹 기초 — 재현성·Warmup·노이즈 제거"
+slug: "embedded/performance-engineering/part1-06-benchmark"
 date: 2026-04-23T09:06:00
 description: "신뢰할 수 있는 벤치마크는 warmup, isolation, multi-run이 필요합니다. CoreMark·Dhrystone·SPEC을 살펴봅니다."
 series: "Embedded Performance Engineering"

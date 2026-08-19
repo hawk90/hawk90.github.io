@@ -1,5 +1,6 @@
 ---
 title: "JTAG·SWD 안 붙을 때 — 핀·전압·속도·세션 진단"
+slug: "embedded/modern-recipes/part10-02-jtag-swd"
 date: 2026-04-19T09:01:00
 description: "JTAG·SWD 디버깅 체크리스트. Pin·voltage·clock·daisy chain·security 잠금."
 series: "Modern Embedded Recipes"

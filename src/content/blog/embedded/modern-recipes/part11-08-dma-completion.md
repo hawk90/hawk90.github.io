@@ -1,5 +1,6 @@
 ---
 title: "DMA Completion 메커니즘 — Interrupt·Polling·Completion Ring"
+slug: "embedded/modern-recipes/part11-08-dma-completion"
 date: 2026-04-20T09:07:00
 description: "DMA가 끝났음을 알려주는 세 가지 방식을 비교합니다. Interrupt, polling, completion ring과 IRQ coalescing의 trade-off를 정리합니다."
 series: "Modern Embedded Recipes"

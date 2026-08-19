@@ -1,5 +1,6 @@
 ---
 title: "SystemVerilog DPI-C 기초 — C와 RTL을 잇는 표준 인터페이스"
+slug: "tools/emulation/driver-cosim/chapter02-dpi-c-basics"
 date: 2026-05-22T09:02:00
 description: "Import·export·data type — SV와 C 사이의 다리."
 series: "Driver-RTL Co-simulation"

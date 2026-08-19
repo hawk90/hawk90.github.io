@@ -1,5 +1,6 @@
 ---
 title: "folly::io::Compression — zstd·lz4·snappy wrapper"
+slug: "programming/code-review/folly/part20-02-compression"
 date: 2026-06-08T09:12:00
 description: "folly::io::Codec — IOBuf 기반 통합 compression API. zstd/lz4/snappy를 같은 인터페이스로."
 series: "Folly Code Review"

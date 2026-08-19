@@ -1,5 +1,6 @@
 ---
 title: "ESP32-C3 RISC-V 코어 분석 — RV32IMC·PMP·인터럽트 컨트롤러"
+slug: "embedded/riscv/esp32-c3-mastering/chapter02-riscv-core"
 date: 2026-05-20T09:02:00
 description: "ESP32-C3 코어의 ISA·특권 모델·인터럽트. 32-bit IMC, M-mode only, PMP 16 entries."
 series: "ESP32-C3 Mastering"

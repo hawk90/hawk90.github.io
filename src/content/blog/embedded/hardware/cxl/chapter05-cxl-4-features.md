@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: CXL 4.0의 핵심 새 기능 — 128 GT/s·Bundled Port"
+slug: "embedded/hardware/cxl/chapter05-cxl-4-features"
 date: 2026-05-16T09:05:00
 description: "PCIe 7.0 기반 128 GT/s, Bundled Port·Streamlined Port의 동기와 효과."
 series: "CXL 4.0 Internals"

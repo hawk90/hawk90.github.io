@@ -1,5 +1,6 @@
 ---
 title: "임베디드 스타트업 코드 분석 — Reset_Handler·Vector Table·SystemInit"
+slug: "embedded/modern-recipes/part3-06-startup-code"
 date: 2026-04-12T09:28:00
 description: "Reset_Handler·vector table·__libc_init_array·main 진입."
 series: "Modern Embedded Recipes"

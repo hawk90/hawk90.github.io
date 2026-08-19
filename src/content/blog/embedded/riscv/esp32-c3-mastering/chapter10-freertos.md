@@ -1,5 +1,6 @@
 ---
 title: "ESP32-C3 위 FreeRTOS — 단일 코어 RTOS 활용 전략"
+slug: "embedded/riscv/esp32-c3-mastering/chapter10-freertos"
 date: 2026-05-20T09:10:00
 description: "ESP-IDF의 modified FreeRTOS. 우선순위 25 단계, tickless idle, software timer."
 series: "ESP32-C3 Mastering"

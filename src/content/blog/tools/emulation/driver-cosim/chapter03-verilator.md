@@ -1,5 +1,6 @@
 ---
 title: "Verilator 분석 — Open Source SystemVerilog Simulator"
+slug: "tools/emulation/driver-cosim/chapter03-verilator"
 date: 2026-05-22T09:03:00
 description: "RTL → C++ — driver code와 link되는 가장 빠른 simulator."
 series: "Driver-RTL Co-simulation"

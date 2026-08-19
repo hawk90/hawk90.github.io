@@ -1,5 +1,6 @@
 ---
 title: "Make 규칙 분석 — 타겟·의존성·레시피의 평가"
+slug: "tools/build/gnu-make/chapter02-rules"
 date: 2026-06-03T09:02:00
 description: "Makefile 규칙의 구성 요소와 동작 방식 — 다중 타겟, order-only, 레시피 접두사, 이중 콜론까지."
 tags: [make, build, Makefile, rules]

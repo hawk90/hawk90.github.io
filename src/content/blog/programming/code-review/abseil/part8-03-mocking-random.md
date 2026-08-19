@@ -1,5 +1,6 @@
 ---
 title: "Abseil Mocking Random — 테스트 결정성"
+slug: "programming/code-review/abseil/part8-03-mocking-random"
 date: 2026-06-11T09:14:00
 description: "MockingBitGen — 분포 호출의 결과값을 결정적으로 강제. flaky random 테스트를 끝낸다."
 series: "Abseil Code Review"

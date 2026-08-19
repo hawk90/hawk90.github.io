@@ -1,5 +1,6 @@
 ---
 title: "임베디드 메모리 레이아웃 — .text·.rodata·.data·.bss·.heap·.stack"
+slug: "embedded/modern-recipes/part3-08-memory-layout"
 date: 2026-04-12T09:30:00
 description: "Stack/heap/static — 누가 어디 사는가."
 series: "Modern Embedded Recipes"

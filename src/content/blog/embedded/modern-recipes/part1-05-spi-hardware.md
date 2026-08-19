@@ -1,5 +1,6 @@
 ---
 title: "SPI 하드웨어 분석 — Clock Mode·MOSI/MISO·Chip Select"
+slug: "embedded/modern-recipes/part1-05-spi-hardware"
 date: 2026-04-10T09:05:00
 description: "MOSI/MISO/SCK/CS·CPOL/CPHA 4 모드·daisy-chain·high-speed signal 고려사항."
 series: "Modern Embedded Recipes"

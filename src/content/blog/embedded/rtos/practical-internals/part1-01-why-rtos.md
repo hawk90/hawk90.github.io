@@ -1,5 +1,6 @@
 ---
 title: "RTOS가 필요한 이유 — 일반 OS와의 결정적 차이"
+slug: "embedded/rtos/practical-internals/part1-01-why-rtos"
 date: 2026-05-04T09:01:00
 description: "Super-loop는 모든 작업이 직렬화되어 deadline을 보장하지 못합니다. RTOS는 preemption과 우선순위로 실시간성을 확보합니다."
 series: "Practical RTOS Internals"

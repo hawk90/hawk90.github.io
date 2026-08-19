@@ -1,5 +1,6 @@
 ---
 title: "eBPF·bpftrace 동적 트레이싱 — 커널 무수정 관측"
+slug: "embedded/performance-engineering/part5-04-ebpf"
 date: 2026-04-27T09:03:00
 description: "eBPF VM과 verifier, bpftrace one-liner, BCC tools, kprobe·uprobe·USDT 비교."
 series: "Embedded Performance Engineering"

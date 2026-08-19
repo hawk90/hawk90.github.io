@@ -1,5 +1,6 @@
 ---
 title: "OpenCL on FPGA — Kernel·Channel·Burst Memory 분석"
+slug: "embedded/modern-recipes/part11-13-opencl-fpga"
 date: 2026-04-20T09:12:00
 description: "Intel/AMD FPGA에서 OpenCL kernel·channel·burst memory를 활용하는 패턴과 SYCL/oneAPI FPGA backend."
 series: "Modern Embedded Recipes"

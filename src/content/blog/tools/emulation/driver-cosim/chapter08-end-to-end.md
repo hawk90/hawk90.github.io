@@ -1,5 +1,6 @@
 ---
 title: "End-to-End Driver + RTL Co-simulation — 실전 통합 흐름"
+slug: "tools/emulation/driver-cosim/chapter08-end-to-end"
 date: 2026-05-22T09:08:00
 description: "Verilator + DPI-C + Linux driver — 통합 cosim flow."
 series: "Driver-RTL Co-simulation"

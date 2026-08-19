@@ -1,5 +1,6 @@
 ---
 title: "임베디드 Flash 프로그래밍 — Erase·Program·Read While Write"
+slug: "embedded/modern-recipes/part4-13-flash-programming"
 date: 2026-04-13T09:47:00
 description: "내부 erase/write·dual bank·EEPROM emulation."
 series: "Modern Embedded Recipes"

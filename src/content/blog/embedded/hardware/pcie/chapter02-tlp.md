@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: TLP — Transaction Layer Packet"
+slug: "embedded/hardware/pcie/chapter02-tlp"
 date: 2026-05-19T09:02:00
 description: "PCIe의 기본 packet인 TLP — 3/4 DW header·5 가족·split transaction·라우팅 3 방식·Producer-Consumer ordering."
 series: "PCIe Deep Dive"

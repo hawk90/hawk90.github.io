@@ -1,5 +1,6 @@
 ---
 title: "GDDR6·GDDR6X·GDDR7 분석 — PAM 신호로 32 Gbps 도달한 경로"
+slug: "embedded/hardware/hbm/chapter04-gddr"
 date: 2026-05-16T09:04:00
 description: "고속 그래픽 메모리 — clock·PAM 신호의 진화로 32 Gbps에 도달한 경로."
 series: "HBM·GDDR 심화"

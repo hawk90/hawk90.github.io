@@ -1,5 +1,6 @@
 ---
 title: "folly::Future thenValue·thenError·thenTry — continuation 체인 분석"
+slug: "programming/code-review/folly/part2-04-then-value-error"
 date: 2026-06-04T09:09:00
 description: "Future continuation API의 세 변형 — 정상값, 예외, 통합 처리. .then은 deprecated."
 series: "Folly Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "Abseil ABSL_PREDICT_TRUE/FALSE — branch hint"
+slug: "programming/code-review/abseil/part2-02-predict-branch-hint"
 date: 2026-06-09T09:07:00
 description: "Part 2-02: ABSL_PREDICT_TRUE/FALSE — 분기 예측 힌트의 실제 효과, 코드 레이아웃 영향."
 series: "Abseil Code Review"

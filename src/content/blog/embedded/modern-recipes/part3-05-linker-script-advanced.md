@@ -1,5 +1,6 @@
 ---
 title: "링커 스크립트 고급 — Overlay·BSS·init_array·LMA/VMA"
+slug: "embedded/modern-recipes/part3-05-linker-script-advanced"
 date: 2026-04-12T09:27:00
 description: "LMA vs VMA·KEEP·AT>·overlay·custom section."
 series: "Modern Embedded Recipes"

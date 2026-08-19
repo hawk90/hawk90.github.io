@@ -1,5 +1,6 @@
 ---
 title: "TFT 디스플레이 구동 — RGB565·FSMC·LTDC·DMA2D"
+slug: "embedded/modern-recipes/part5-07-tft-display"
 date: 2026-04-14T09:55:00
 description: "Parallel RGB·framebuffer·LTDC·tearing 방지."
 series: "Modern Embedded Recipes"

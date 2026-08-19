@@ -1,5 +1,6 @@
 ---
 title: "WCET 분석 기법 — Static·Measurement·Hybrid 방법론"
+slug: "embedded/modern-recipes/part8-12-wcet-analysis"
 date: 2026-04-17T09:11:00
 description: "WCET와 ACET의 차이, 측정 기반과 static analysis, cache 영향, hard real-time 요구사항을 정리합니다."
 series: "Modern Embedded Recipes"

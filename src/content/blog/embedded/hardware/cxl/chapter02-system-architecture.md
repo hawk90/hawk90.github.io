@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: System Architecture — Type 1·2·3·MLD·MH-MLD"
+slug: "embedded/hardware/cxl/chapter02-system-architecture"
 date: 2026-05-16T09:02:00
 description: "CXL 디바이스 분류와 multi-LD·multi-head 구조."
 series: "CXL 4.0 Internals"

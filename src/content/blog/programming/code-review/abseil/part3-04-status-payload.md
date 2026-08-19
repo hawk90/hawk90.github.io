@@ -1,5 +1,6 @@
 ---
 title: "absl::Status payload — 구조화된 에러 컨텍스트"
+slug: "programming/code-review/abseil/part3-04-status-payload"
 date: 2026-06-10T09:01:00
 description: "Part 3-04: Status payload — URL-based key로 구조화된 컨텍스트를 첨부, gRPC error_details와 연동."
 series: "Abseil Code Review"

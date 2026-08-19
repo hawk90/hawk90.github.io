@@ -1,5 +1,6 @@
 ---
 title: "folly Fingerprint64·128 — 분산 hash"
+slug: "programming/code-review/folly/part17-03-hash-fingerprint"
 date: 2026-06-08T09:02:00
 description: "Fingerprint의 polynomial Rabin-Karp 기반 hash — sharding, dedup, content addressing."
 series: "Folly Code Review"

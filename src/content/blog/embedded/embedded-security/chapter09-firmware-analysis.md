@@ -1,5 +1,6 @@
 ---
 title: "펌웨어 분석과 리버싱 — Binwalk·Ghidra·radare2 활용"
+slug: "embedded/embedded-security/chapter09-firmware-analysis"
 date: 2026-05-21T09:09:00
 description: "JTAG / SPI flash dump / binwalk / Ghidra / radare2. 펌웨어 정적·동적 분석."
 tags: [Firmware, reverse-engineering, Ghidra, binwalk, JTAG]

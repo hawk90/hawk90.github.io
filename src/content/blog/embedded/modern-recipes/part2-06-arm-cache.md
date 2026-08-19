@@ -1,5 +1,6 @@
 ---
 title: "ARM L1·L2 캐시 분석 — Set Associative·Inclusive·Maintenance"
+slug: "embedded/modern-recipes/part2-06-arm-cache"
 date: 2026-04-11T09:18:00
 description: "I-Cache/D-Cache·write-through vs write-back·invalidate/clean."
 series: "Modern Embedded Recipes"

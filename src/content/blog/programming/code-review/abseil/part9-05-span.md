@@ -1,5 +1,6 @@
 ---
 title: "absl::span 분석"
+slug: "programming/code-review/abseil/part9-05-span"
 date: 2026-06-12T09:04:00
 description: "absl::Span — 연속 메모리의 non-owning view. std::span의 친척이자 더 일찍 도착한 polyfill."
 series: "Abseil Code Review"

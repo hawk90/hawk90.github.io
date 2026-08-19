@@ -1,5 +1,6 @@
 ---
 title: "실시간 스케줄링 알고리즘 비교 — RR·Priority·EDF·RMS"
+slug: "embedded/rtos/practical-internals/part1-03-scheduling-algorithms"
 date: 2026-05-04T09:03:00
 description: "Round Robin, Priority-based preemptive, Earliest Deadline First, Rate Monotonic을 다룹니다. 임베디드 RTOS는 대부분 fixed-priority preemptive를 씁니다."
 series: "Practical RTOS Internals"

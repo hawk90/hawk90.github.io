@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Power Management — D-state·L-state·ASPM"
+slug: "embedded/hardware/pcie/chapter06-power-management"
 date: 2026-05-19T09:06:00
 description: "PCIe 전력 관리 — Device D0~D3·Link L0~L3·ASPM·L1 substates·CLKREQ·PME 흐름."
 series: "PCIe Deep Dive"

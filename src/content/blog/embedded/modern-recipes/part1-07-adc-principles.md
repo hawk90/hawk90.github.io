@@ -1,5 +1,6 @@
 ---
 title: "ADC 동작 원리 — SAR·Sigma-Delta·Pipelined 비교"
+slug: "embedded/modern-recipes/part1-07-adc-principles"
 date: 2026-04-10T09:07:00
 description: "Sampling·quantization·SAR vs sigma-delta·SNR·ENOB·aliasing."
 series: "Modern Embedded Recipes"

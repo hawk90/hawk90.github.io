@@ -1,5 +1,6 @@
 ---
 title: "Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice"
+slug: "embedded/modern-recipes/part8-05-zero-copy"
 date: 2026-04-17T09:04:00
 description: "Camera→GPU→Encoder→Network pipeline에서 memcpy를 모두 제거하는 패턴을 모았습니다."
 series: "Modern Embedded Recipes"

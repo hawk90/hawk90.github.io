@@ -1,5 +1,6 @@
 ---
 title: "Buildroot 커널 Customize — defconfig fragment와 DTS 통합"
+slug: "embedded/buildroot/chapter12-kernel-customize"
 date: 2026-05-19T09:12:00
 description: "Buildroot에서 mainline 커널을 vendor 트리·custom config·in-tree DTS로 customize하는 패턴."
 series: "Buildroot Practical"

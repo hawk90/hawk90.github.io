@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Error Handling — Correctable·Uncorrectable·AER·DPC"
+slug: "embedded/hardware/pcie/chapter07-error-handling"
 date: 2026-05-19T09:07:00
 description: "PCIe 에러 분류·계층별 처리·AER capability·DPC containment·Linux 복구 callback."
 series: "PCIe Deep Dive"

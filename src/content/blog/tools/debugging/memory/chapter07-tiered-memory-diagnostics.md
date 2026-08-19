@@ -1,5 +1,6 @@
 ---
 title: "Tiered Memory 진단 — DAMON·DAMOS·Promotion/Demotion 디버깅"
+slug: "tools/debugging/memory/chapter07-tiered-memory-diagnostics"
 date: 2026-06-18T09:06:00
 description: "DDR + CXL.mem 계층화 환경에서 DAMON·DAMOS 동작 분석 — page promotion/demotion 추적, hot/cold 분류 디버깅."
 series: "Memory Diagnostics"

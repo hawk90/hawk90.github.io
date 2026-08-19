@@ -1,5 +1,6 @@
 ---
 title: "folly::RecordIO — append-only 로그 파일 포맷"
+slug: "programming/code-review/folly/part20-01-record-io"
 date: 2026-06-08T09:11:00
 description: "RecordIO의 frame 포맷, checksum, mid-file 복구 — append-only log 파일의 표준 패턴."
 series: "Folly Code Review"

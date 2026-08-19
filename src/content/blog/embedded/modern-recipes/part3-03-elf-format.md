@@ -1,5 +1,6 @@
 ---
 title: "ELF 파일 구조 분석 — Section·Segment·Symbol Table·DWARF"
+slug: "embedded/modern-recipes/part3-03-elf-format"
 date: 2026-04-12T09:25:00
 description: "Header·sections·symbols — `readelf`로 dissect."
 series: "Modern Embedded Recipes"

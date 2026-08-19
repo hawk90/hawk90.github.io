@@ -1,5 +1,6 @@
 ---
 title: "Abseil 설계 철학 — std 호환과 추가 기능의 균형"
+slug: "programming/code-review/abseil/part1-02-design-philosophy"
 date: 2026-06-09T09:02:00
 description: "Part 1-02: Abseil 설계 철학 — std 호환, ABI 안정성 정책, Live at Head 모델."
 series: "Abseil Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "메모리 대역폭 분석 — STREAM·Roofline·Bus Saturation 측정"
+slug: "embedded/performance-engineering/part2-08-memory-bandwidth"
 date: 2026-04-24T09:07:00
 description: "STREAM benchmark (Copy·Scale·Add·Triad). Roofline. PMU BUS_ACCESS · DDR bandwidth."
 series: "Embedded Performance Engineering"

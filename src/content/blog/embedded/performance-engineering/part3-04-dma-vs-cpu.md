@@ -1,5 +1,6 @@
 ---
 title: "DMA vs CPU Copy 성능 비교 — Break-even·Setup Overhead 실측"
+slug: "embedded/performance-engineering/part3-04-dma-vs-cpu"
 date: 2026-04-25T09:03:00
 description: "DMA setup overhead. CPU memcpy 최적화. Break-even size. 실측 데이터."
 series: "Embedded Performance Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "BSP Thermal과 Watchdog — Trip Point·Cooling Device·Hardware Reset"
+slug: "embedded/bsp/chapter14-thermal-watchdog"
 date: 2026-05-18T09:14:00
 description: "보드 안전 장치를 정리합니다. thermal zone과 trip point, hardware watchdog 통합을 살펴봅니다."
 series: "BSP Development"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Interrupts — INTx·MSI·MSI-X·Interrupt Remapping"
+slug: "embedded/hardware/pcie/chapter05-interrupts"
 date: 2026-05-19T09:05:00
 description: "PCIe 인터럽트 메커니즘 3가지 — Legacy INTx·MSI 32 vector·MSI-X 2048 vector·IOMMU Interrupt Remapping."
 series: "PCIe Deep Dive"

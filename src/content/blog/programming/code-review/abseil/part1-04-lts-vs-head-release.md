@@ -1,5 +1,6 @@
 ---
 title: "Abseil LTS vs HEAD 릴리스 모델 분석"
+slug: "programming/code-review/abseil/part1-04-lts-vs-head-release"
 date: 2026-06-09T09:04:00
 description: "Part 1-04: LTS vs HEAD — Abseil의 두 가지 릴리스 모델, breaking change 정책, 마이그레이션 비용."
 series: "Abseil Code Review"

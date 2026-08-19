@@ -1,5 +1,6 @@
 ---
 title: "리눅스 커널 디버깅 개론 — User/Kernel 경계와 도구 선택"
+slug: "tools/debugging/kernel/chapter01-user-kernel-boundary"
 date: 2026-05-25T09:01:00
 description: "user-space와 kernel-space 디버깅의 차이. /proc, kallsyms, kernel debug info."
 tags: [kernel, linux, debugging, proc]

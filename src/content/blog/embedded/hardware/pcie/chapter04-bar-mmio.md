@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: BAR & MMIO — Device 자원의 호스트 주소 매핑"
+slug: "embedded/hardware/pcie/chapter04-bar-mmio"
 date: 2026-05-19T09:04:00
 description: "Base Address Register — Memory·I/O·64-bit·Prefetchable·size 결정·ReBAR·SR-IOV VF BAR."
 series: "PCIe Deep Dive"

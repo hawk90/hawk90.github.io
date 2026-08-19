@@ -1,5 +1,6 @@
 ---
 title: "ARM Cortex-A 시리즈 비교 — A53·A55·A72·A78·X1 분석"
+slug: "embedded/modern-recipes/part2-02-cortex-a-comparison"
 date: 2026-04-11T09:14:00
 description: "A53/A72/A78/Neoverse — 임베디드 Linux용 application 코어."
 series: "Modern Embedded Recipes"

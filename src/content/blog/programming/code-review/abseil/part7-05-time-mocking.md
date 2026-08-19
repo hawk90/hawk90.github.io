@@ -1,5 +1,6 @@
 ---
 title: "absl::Time mocking — 테스트 친화 시간"
+slug: "programming/code-review/abseil/part7-05-time-mocking"
 date: 2026-06-11T09:11:00
 description: "테스트에서 절대 시간을 통제하기 — clock 주입 패턴과 absl::Now() 대체 전략."
 series: "Abseil Code Review"

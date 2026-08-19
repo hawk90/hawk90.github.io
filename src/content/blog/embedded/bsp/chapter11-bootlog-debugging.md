@@ -1,5 +1,6 @@
 ---
 title: "부트로그 디버깅 — earlyprintk·loglevel·serial 추적"
+slug: "embedded/bsp/chapter11-bootlog-debugging"
 date: 2026-05-18T09:11:00
 description: "부트 실패 패턴을 카탈로그로 정리합니다. 시리얼 garbage, hang, panic, late hang의 진단과 대응을 살펴봅니다."
 series: "BSP Development"

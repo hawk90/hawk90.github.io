@@ -1,5 +1,6 @@
 ---
 title: "Lock-free Container 구현 — SPSC Queue·Ring Buffer"
+slug: "embedded/embedded-cpp/part4-04-lock-free-container"
 date: 2026-05-01T09:32:00
 description: "SPSC queue, MPMC stack, ring buffer — lock-free 자료구조 구현 패턴."
 series: "Embedded C++ for Real Systems"

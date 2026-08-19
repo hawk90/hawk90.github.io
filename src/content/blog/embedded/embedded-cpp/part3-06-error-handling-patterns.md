@@ -1,5 +1,6 @@
 ---
 title: "임베디드 에러 처리 패턴 — Result·errno·optional 비교"
+slug: "embedded/embedded-cpp/part3-06-error-handling-patterns"
 date: 2026-04-30T09:24:00
 description: "Result types, error chains, exception-free RAII — 실용적 에러 시스템 구축 패턴."
 series: "Embedded C++ for Real Systems"

@@ -1,5 +1,6 @@
 ---
 title: "메모리 정렬과 패딩 분석 — Natural·Strict Alignment·Trap"
+slug: "embedded/modern-recipes/part8-02-memory-alignment"
 date: 2026-04-17T09:01:00
 description: "Natural alignment, struct padding 규칙, packed의 unaligned access penalty, offsetof와 alignof 사용을 정리합니다."
 series: "Modern Embedded Recipes"

@@ -1,5 +1,6 @@
 ---
 title: "SPDM과 CMA 인증 흐름 — 디바이스 신원과 펌웨어 측정 검증"
+slug: "embedded/embedded-security/chapter12-spdm-cma"
 date: 2026-06-17T09:02:00
 description: "SPDM(Security Protocol Data Model) 메시지 흐름, CMA(Component Measurement Attestation) — PCIe·CXL 디바이스 신원 확인과 firmware integrity 검증."
 series: "Embedded Security"

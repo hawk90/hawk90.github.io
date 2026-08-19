@@ -1,5 +1,6 @@
 ---
 title: "TLSF Allocator 분석 — Two-Level Segregated Fit O(1)"
+slug: "embedded/rtos/practical-internals/part4-03-tlsf"
 date: 2026-05-07T09:35:00
 description: "Masmano 2004의 TLSF 알고리즘을 풀어봅니다. Bitmap과 CLZ 명령으로 alloc·free·coalesce 모두 O(1)을 보장하며, 자동차·로봇·RT 게임의 표준 dynamic allocator가 된 이유를 살펴봅니다."
 series: "Practical RTOS Internals"

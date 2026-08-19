@@ -1,5 +1,6 @@
 ---
 title: "Abseil 빌드와 의존성 — Bazel vs CMake"
+slug: "programming/code-review/abseil/part1-03-build-dependency-bazel"
 date: 2026-06-09T09:03:00
 description: "Part 1-03: Abseil 빌드 — Bazel(WORKSPACE/MODULE) vs CMake(FetchContent), vcpkg/Conan 패키지 매니저."
 series: "Abseil Code Review"

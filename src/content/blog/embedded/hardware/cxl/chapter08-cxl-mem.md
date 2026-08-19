@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: CXL.mem — M2S·S2M·HDM Decoder"
+slug: "embedded/hardware/cxl/chapter08-cxl-mem"
 date: 2026-05-16T09:08:00
 description: "호스트가 디바이스 메모리를 load/store하는 프로토콜."
 series: "CXL 4.0 Internals"

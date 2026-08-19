@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Linux Operations — Hot-plug·AER Recovery·DPC·ARI"
+slug: "embedded/hardware/pcie/chapter14-linux-operations"
 date: 2026-05-19T09:14:00
 description: "PCIe 운영 — pciehp surprise·orderly hot-plug·AER recovery callback chain·DPC integration·ARI 256+ function·EEH."
 series: "PCIe Deep Dive"

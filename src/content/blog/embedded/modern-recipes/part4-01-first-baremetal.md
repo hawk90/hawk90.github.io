@@ -1,5 +1,6 @@
 ---
 title: "첫 bare-metal 프로그램 작성 — Linker·Startup·main의 최소 구성"
+slug: "embedded/modern-recipes/part4-01-first-baremetal"
 date: 2026-04-13T09:35:00
 description: "LED toggle — 최소한의 startup·main·loop."
 series: "Modern Embedded Recipes"

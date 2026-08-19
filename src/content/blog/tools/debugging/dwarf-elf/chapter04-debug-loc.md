@@ -1,5 +1,6 @@
 ---
 title: "DWARF .debug_loc 분석 — Variable Location Expression VM"
+slug: "tools/debugging/dwarf-elf/chapter04-debug-loc"
 date: 2026-05-23T09:04:00
 description: "변수가 어디 있는지의 표현. 스택 머신 opcode, location list, DW_OP_entry_value."
 tags: [dwarf, debug-loc, expression-vm, optimization]

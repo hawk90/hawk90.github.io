@@ -1,5 +1,6 @@
 ---
 title: "SIMD·NEON 활용 — 128-bit Vector·Auto-Vectorization·SVE/SVE2"
+slug: "embedded/performance-engineering/part2-09-simd-neon"
 date: 2026-04-24T09:08:00
 description: "ARM NEON 128-bit, SVE 가변폭. Auto-vectorize (-O3). Intrinsics. Cortex-M Helium (MVE)."
 series: "Embedded Performance Engineering"

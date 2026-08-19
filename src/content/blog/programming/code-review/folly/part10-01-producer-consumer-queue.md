@@ -1,5 +1,6 @@
 ---
 title: "folly::ProducerConsumerQueue — SPSC 큐 분석"
+slug: "programming/code-review/folly/part10-01-producer-consumer-queue"
 date: 2026-06-06T09:09:00
 description: "Part 10-01: ProducerConsumerQueue — SPSC lock-free ring buffer. cache line padding, acquire/release만으로 RTT을 줄이는 패턴."
 series: "Folly Code Review"

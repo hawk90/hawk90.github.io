@@ -1,5 +1,6 @@
 ---
 title: "Buildroot 첫 빌드 — QEMU에서 동작하는 시스템 만들기"
+slug: "embedded/buildroot/chapter04-first-build"
 date: 2026-05-19T09:04:00
 description: "qemu_aarch64_virt_defconfig로 첫 시스템을 빌드하고 QEMU에서 부팅하는 전체 흐름."
 series: "Buildroot Practical"

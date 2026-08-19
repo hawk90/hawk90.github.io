@@ -1,5 +1,6 @@
 ---
 title: "U-Boot Distro Boot — extlinux·boot.scr 표준화 분석"
+slug: "embedded/bootloader/chapter29-distro-boot"
 date: 2026-05-19T09:29:00
 description: "보드별 다른 부트 스크립트를 표준화 — U-Boot Distro Boot, extlinux.conf, boot.scr의 차이와 선택."
 series: "Bootloader Internals"

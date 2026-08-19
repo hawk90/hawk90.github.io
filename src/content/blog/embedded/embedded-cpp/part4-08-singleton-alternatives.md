@@ -1,5 +1,6 @@
 ---
 title: "Singleton 대안 패턴 — Service Locator·Static Init·Phantom"
+slug: "embedded/embedded-cpp/part4-08-singleton-alternatives"
 date: 2026-05-01T09:36:00
 description: "임베디드의 DI 패턴 — Construct-On-First-Use, static dependency injection, service locator."
 series: "Embedded C++ for Real Systems"

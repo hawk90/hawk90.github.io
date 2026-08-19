@@ -1,5 +1,6 @@
 ---
 title: "CXL Fabric Postmortem — 분산 디바이스·Multi-Host Pool 장애 추적"
+slug: "tools/debugging/postmortem/chapter06-cxl-fabric-postmortem"
 date: 2026-06-18T09:08:00
 description: "CXL 2.0/3.x fabric에서 multi-host pooled 디바이스 fail 분석 — Fabric Manager log·LD 상태·cross-host correlation."
 series: "Postmortem Debugging"

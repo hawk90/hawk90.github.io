@@ -1,5 +1,6 @@
 ---
 title: "absl::Cord — 분산 시스템용 대용량 문자열"
+slug: "programming/code-review/abseil/part15-01-cord"
 date: 2026-06-13T09:09:00
 description: "absl::Cord — tree 구조로 표현되는 immutable-ish 문자열. zero-copy concat, shared substring, Google 내부 RPC payload의 기본 표현."
 series: "Abseil Code Review"

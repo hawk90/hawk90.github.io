@@ -1,5 +1,6 @@
 ---
 title: "임베디드 보안 위협 모델 — STRIDE·DFD·자산 식별 흐름"
+slug: "embedded/embedded-security/chapter01-threat-model"
 date: 2026-05-21T09:01:00
 description: "STRIDE / DREAD. 임베디드 특수 — 물리 접근 / 자원 제약."
 tags: [embedded-security, threat-model, STRIDE]

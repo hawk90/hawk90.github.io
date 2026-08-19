@@ -1,5 +1,6 @@
 ---
 title: "CPU 파이프라인 분석 — 5-stage·Cortex-M·Cortex-A 비교"
+slug: "embedded/performance-engineering/part2-01-pipeline"
 date: 2026-04-24T09:00:00
 description: "Fetch·Decode·Execute·Memory·Writeback의 5-stage 파이프라인을 봅니다. Cortex-M3/M4는 3-stage, Cortex-A는 8~15-stage입니다."
 series: "Embedded Performance Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: DMA·IOMMU — Coherent·Streaming·ATS·PRI·PASID·IOMMUFD"
+slug: "embedded/hardware/pcie/chapter11-linux-dma"
 date: 2026-05-19T09:11:00
 description: "Linux DMA API — coherent·streaming·scatter-gather·IOMMU mapping·ATS·PRI·PASID·SVM·IOMMUFD."
 series: "PCIe Deep Dive"

@@ -1,5 +1,6 @@
 ---
 title: "Abseil Versioning과 ABI 호환성 정책"
+slug: "programming/code-review/abseil/part1-05-versioning-abi"
 date: 2026-06-09T09:05:00
 description: "Part 1-05: Abseil의 versioning 정책 — inline namespace, ABI 호환 범위, prebuilt 사용 시 함정."
 series: "Abseil Code Review"

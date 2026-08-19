@@ -1,5 +1,6 @@
 ---
 title: "임베디드 코드 크기 최적화 — -Os·LTO·Section Garbage Collection"
+slug: "embedded/modern-recipes/part8-10-code-size-optimization"
 date: 2026-04-17T09:09:00
 description: "-Os, LTO, function-sections, --gc-sections, strip, newlib-nano, printf-tiny까지 펌웨어 binary 크기를 줄이는 단계별 기법을 정리합니다."
 series: "Modern Embedded Recipes"

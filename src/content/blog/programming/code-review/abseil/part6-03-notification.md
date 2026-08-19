@@ -1,5 +1,6 @@
 ---
 title: "absl::Notification — once-only signal"
+slug: "programming/code-review/abseil/part6-03-notification"
 date: 2026-06-11T09:04:00
 description: "Part 6-03: absl::Notification — 한 번만 발생하는 이벤트를 위한 가벼운 signal primitive. atomic flag보다 안전, condition variable보다 단순."
 series: "Abseil Code Review"

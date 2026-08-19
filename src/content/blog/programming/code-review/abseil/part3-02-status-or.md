@@ -1,5 +1,6 @@
 ---
 title: "absl::StatusOr<T> — 값 또는 에러"
+slug: "programming/code-review/abseil/part3-02-status-or"
 date: 2026-06-09T09:15:00
 description: "Part 3-02: absl::StatusOr<T> — 값과 에러를 한 type에 묶는 패턴, 내부 메모리 레이아웃, monadic 스타일."
 series: "Abseil Code Review"

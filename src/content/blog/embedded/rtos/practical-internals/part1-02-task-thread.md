@@ -1,5 +1,6 @@
 ---
 title: "Task와 Thread 개념 — TCB·상태 머신·생명 주기 분석"
+slug: "embedded/rtos/practical-internals/part1-02-task-thread"
 date: 2026-05-04T09:02:00
 description: "Task는 stack과 TCB, 상태로 구성됩니다. 5상태 머신(Running·Ready·Blocked·Suspended·Deleted)과 그 전이를 다룹니다."
 series: "Practical RTOS Internals"

@@ -1,5 +1,6 @@
 ---
 title: "ETL 라이브러리 분석 — Embedded Template Library의 STL 대체"
+slug: "embedded/embedded-cpp/part4-02-etl-library"
 date: 2026-05-01T09:30:00
 description: "Embedded Template Library — heap 없는 STL 대체, fsm, message router 포함."
 series: "Embedded C++ for Real Systems"

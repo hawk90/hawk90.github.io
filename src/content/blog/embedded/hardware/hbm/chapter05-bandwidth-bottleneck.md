@@ -1,5 +1,6 @@
 ---
 title: "메모리 대역폭 병목 분석 — Theoretical vs Achievable·Roofline·Memory Wall"
+slug: "embedded/hardware/hbm/chapter05-bandwidth-bottleneck"
 date: 2026-05-16T09:05:00
 description: "Theoretical vs achievable — 메모리 대역폭의 실제와 roofline·memory wall."
 series: "HBM·GDDR 심화"

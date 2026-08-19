@@ -1,5 +1,6 @@
 ---
 title: "임베디드 스마트 포인터 선택 — unique·shared·custom 비교"
+slug: "embedded/embedded-cpp/part3-09-smart-pointer-choice"
 date: 2026-04-30T09:27:00
 description: "unique_ptr vs shared_ptr vs raw pointer — 임베디드의 소유권 모델 선택."
 series: "Embedded C++ for Real Systems"

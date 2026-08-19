@@ -1,5 +1,6 @@
 ---
 title: "Scheduler Latency 측정 기법 — GPIO Toggle·DWT·ftrace·cyclictest"
+slug: "embedded/rtos/practical-internals/part2-10-scheduler-latency"
 date: 2026-05-05T09:20:00
 description: "ISR 종료 → ready task 실행까지의 시간. 측정 방법과 worst-case 추적."
 series: "Practical RTOS Internals"

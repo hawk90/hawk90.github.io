@@ -1,5 +1,6 @@
 ---
 title: "Modern CMake 고급 — BUILD/INSTALL_INTERFACE·Presets·cmake -E"
+slug: "tools/build/cmake/chapter09-modern-advanced"
 date: 2026-06-02T09:09:00
 description: "Modern CMake의 고급 도구 모음 — 자주 안 보이지만 실무에서 결정적인 기능들."
 tags: [cmake, build, cpp, advanced, presets]

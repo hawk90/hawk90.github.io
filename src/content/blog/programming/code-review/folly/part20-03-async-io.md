@@ -1,5 +1,6 @@
 ---
 title: "folly::AsyncIO — io_uring·Linux AIO"
+slug: "programming/code-review/folly/part20-03-async-io"
 date: 2026-06-08T09:13:00
 description: "folly::AsyncIO와 IoUringBackend — kernel async disk I/O, callback과 coroutine 통합."
 series: "Folly Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "커널 모듈 기초 — init/exit·Parameter·KBuild·DKMS"
+slug: "embedded/modern-recipes/part7-06-kernel-module"
 date: 2026-04-16T09:05:00
 description: "Linux kernel module의 진입점, 모듈 파라미터, KBuild Makefile, insmod 흐름, DKMS 배포까지 한 번에 정리합니다."
 series: "Modern Embedded Recipes"

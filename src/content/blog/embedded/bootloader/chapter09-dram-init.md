@@ -1,5 +1,6 @@
 ---
 title: "DDR Controller 프로그래밍과 PHY Training — SPL의 가장 어려운 작업"
+slug: "embedded/bootloader/chapter09-dram-init"
 date: 2026-05-09T09:09:00
 description: "DDR controller 초기화 시퀀스 — 레지스터 프로그래밍, training, 보드별 파라미터의 위치."
 series: "Bootloader Internals"

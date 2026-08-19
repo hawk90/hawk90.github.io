@@ -1,5 +1,6 @@
 ---
 title: "folly SpookyHashV2 — fast non-crypto hash"
+slug: "programming/code-review/folly/part17-04-spooky-hash"
 date: 2026-06-08T09:03:00
 description: "SpookyHashV2의 ARX (Add/Rotate/Xor) 기반 빠른 hash — F14의 hasher 기본 후보."
 series: "Folly Code Review"

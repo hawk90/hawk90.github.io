@@ -1,5 +1,6 @@
 ---
 title: "ARM TrustZone 분석 — Cortex-A·Cortex-M 격리 메커니즘"
+slug: "embedded/embedded-security/chapter04-trustzone"
 date: 2026-05-21T09:04:00
 description: "ARM TrustZone — Secure / Non-Secure World 분리. SMC, NSC."
 tags: [TrustZone, ARM, secure-world]

@@ -1,5 +1,6 @@
 ---
 title: "GDB FrameDecorator·Unwinder — 콜스택 가공과 JIT 지원"
+slug: "tools/debugging/gdb-extension/chapter04-frame-unwinder"
 date: 2026-05-27T09:04:00
 description: "Frame filter, FrameDecorator로 콜스택 변형, custom unwinder로 JIT 코드 추적."
 tags: [gdb, python, frame, unwinder, jit]

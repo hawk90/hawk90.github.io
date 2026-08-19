@@ -1,5 +1,6 @@
 ---
 title: "RTOS Software Timer 활용 — One-shot·Auto-reload·Daemon Task"
+slug: "embedded/modern-recipes/part6-08-software-timer"
 date: 2026-04-15T09:07:00
 description: "Software timer와 hardware timer의 분기점, one-shot/auto-reload, timer task context, delete 시 race를 정리합니다."
 series: "Modern Embedded Recipes"

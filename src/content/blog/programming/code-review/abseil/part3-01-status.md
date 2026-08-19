@@ -1,5 +1,6 @@
 ---
 title: "absl::Status — exception-free error handling"
+slug: "programming/code-review/abseil/part3-01-status"
 date: 2026-06-09T09:14:00
 description: "Part 3-01: absl::Status — Google이 exception 없이 production C++ 에러를 다루는 방법. canonical error code, payload, 내부 표현."
 series: "Abseil Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "J-Link 도구 체인 분석 — JLinkExe·RTT·GDB Server 활용"
+slug: "tools/debugging/embedded/chapter04-jlink"
 date: 2026-05-26T09:04:00
 description: "JLinkGDBServer, JLinkExe, J-Run, J-Trace, Unlimited Flash BP, RTT, Ozone."
 tags: [jlink, segger, embedded, rtt]

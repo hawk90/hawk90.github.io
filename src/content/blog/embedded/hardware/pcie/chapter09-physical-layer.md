@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Physical Layer — LTSSM·Equalization·SerDes"
+slug: "embedded/hardware/pcie/chapter09-physical-layer"
 date: 2026-05-19T09:09:00
 description: "PCIe Physical Layer — LTSSM 11 state·link training timeline·4-phase equalization·TS1/TS2·SKP·encoding 진화."
 series: "PCIe Deep Dive"

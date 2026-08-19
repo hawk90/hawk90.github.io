@@ -1,5 +1,6 @@
 ---
 title: "부트 시 메모리 토폴로지 결정 — DDR + CXL.mem 통합 인식"
+slug: "embedded/bootloader/chapter36-boot-memory-topology"
 date: 2026-06-19T09:03:00
 description: "부트로더가 DDR DIMM·CXL.mem·HBM을 하나의 메모리 토폴로지로 통합하는 흐름 — SRAT·HMAT·SLIT 생성과 NUMA 노드 매핑."
 series: "Bootloader Internals"

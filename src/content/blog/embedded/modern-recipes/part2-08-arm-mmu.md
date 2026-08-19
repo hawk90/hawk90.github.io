@@ -1,5 +1,6 @@
 ---
 title: "ARM MMU 기초 분석 — Translation Table·TLB·ASID"
+slug: "embedded/modern-recipes/part2-08-arm-mmu"
 date: 2026-04-11T09:20:00
 description: "Page table·TLB·virtual address·Linux의 4-level paging."
 series: "Modern Embedded Recipes"

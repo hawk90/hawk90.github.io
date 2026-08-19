@@ -1,5 +1,6 @@
 ---
 title: "NVIDIA Nsight Systems — GPU·NPU 포함 시스템 분석"
+slug: "embedded/performance-engineering/part5-08-nsight"
 date: 2026-04-27T09:07:00
 description: "NVIDIA Nsight Systems로 CPU·GPU·메모리 통합 timeline 분석. Jetson 임베디드 활용."
 series: "Embedded Performance Engineering"

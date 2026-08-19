@@ -1,5 +1,6 @@
 ---
 title: "Secure Boot 분석 — 부트 체인 서명 검증과 RoT 구축"
+slug: "embedded/embedded-security/chapter02-secure-boot"
 date: 2026-05-21T09:02:00
 description: "ROM → bootloader → kernel → app. 각 단계 서명 검증. Root of Trust."
 tags: [secure-boot, root-of-trust, Cryptography]

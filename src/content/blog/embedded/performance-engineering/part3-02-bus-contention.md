@@ -1,5 +1,6 @@
 ---
 title: "Bus Contention 진단 — Arbitration·QoS·Starvation 측정"
+slug: "embedded/performance-engineering/part3-02-bus-contention"
 date: 2026-04-25T09:01:00
 description: "Round-robin·priority·QoS arbitration. Master 다수 시 starvation. AXI QoS·BUSY counter."
 series: "Embedded Performance Engineering"

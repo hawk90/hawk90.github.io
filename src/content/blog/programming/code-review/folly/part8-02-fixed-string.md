@@ -1,5 +1,6 @@
 ---
 title: "folly::FixedString — compile-time string"
+slug: "programming/code-review/folly/part8-02-fixed-string"
 date: 2026-06-06T09:00:00
 description: "FixedString — fixed capacity, fully constexpr 문자열 type. compile-time concat과 hash가 가능."
 series: "Folly Code Review"

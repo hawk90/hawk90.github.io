@@ -1,5 +1,6 @@
 ---
 title: "DDR 초기화 실패 진단 — Timing·Calibration·Walking Bit Test"
+slug: "embedded/modern-recipes/part4-14-ddr-init-failure"
 date: 2026-04-13T09:48:00
 description: "DDR3/4 초기화 sequence. ZQ calibration, write leveling, walking bit test, JESD79 사양."
 series: "Modern Embedded Recipes"

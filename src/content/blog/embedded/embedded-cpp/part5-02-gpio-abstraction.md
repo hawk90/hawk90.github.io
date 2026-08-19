@@ -1,5 +1,6 @@
 ---
 title: "GPIO 추상화 패턴 — Template·Concept으로 보드 독립성"
+slug: "embedded/embedded-cpp/part5-02-gpio-abstraction"
 date: 2026-05-02T09:38:00
 description: "GPIO pin = type — 컴파일 타임에 핀 설정 검증, runtime 비용 0."
 series: "Embedded C++ for Real Systems"

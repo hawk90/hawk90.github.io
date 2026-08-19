@@ -1,5 +1,6 @@
 ---
 title: "임베디드 State Machine 패턴 — Variant·Visitor·Table-driven 비교"
+slug: "embedded/embedded-cpp/part4-06-state-machine"
 date: 2026-05-01T09:34:00
 description: "타입 안전한 상태 머신 — enum + switch부터 std::variant, etl::fsm까지."
 series: "Embedded C++ for Real Systems"

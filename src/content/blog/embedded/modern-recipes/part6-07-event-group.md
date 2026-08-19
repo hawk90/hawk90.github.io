@@ -1,5 +1,6 @@
 ---
 title: "RTOS Event Group 활용 — Bit Wait·Sync·Notify"
+slug: "embedded/modern-recipes/part6-07-event-group"
 date: 2026-04-15T09:06:00
 description: "Event group bit, set/clear, AND/OR 조건 wait, broadcast로 다중 task synchronization을 정리합니다."
 series: "Modern Embedded Recipes"

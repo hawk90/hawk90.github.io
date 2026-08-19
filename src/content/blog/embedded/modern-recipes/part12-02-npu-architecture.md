@@ -1,5 +1,6 @@
 ---
 title: "NPU 아키텍처 분석 — Ethos·Hexagon·Systolic Array 비교"
+slug: "embedded/modern-recipes/part12-02-npu-architecture"
 date: 2026-04-21T09:01:00
 description: "Arm Ethos·Qualcomm Hexagon·Apple Neural Engine 등 NPU 내부 구조와 systolic MAC array·INT8·memory hierarchy."
 series: "Modern Embedded Recipes"

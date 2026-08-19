@@ -1,5 +1,6 @@
 ---
 title: "ESP32-C3 BLE 5.0 분석 — GAP·GATT·Coded PHY"
+slug: "embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt"
 date: 2026-05-20T09:08:00
 description: "BLE 5.0 — 2M PHY로 2배 처리량, Coded PHY로 4배 거리. GATT 서버 만들기."
 series: "ESP32-C3 Mastering"

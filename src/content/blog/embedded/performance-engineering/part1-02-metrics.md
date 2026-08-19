@@ -1,5 +1,6 @@
 ---
 title: "성능 지표 정의 — Latency·Throughput·Utilization 분석"
+slug: "embedded/performance-engineering/part1-02-metrics"
 date: 2026-04-23T09:02:00
 description: "3 핵심 지표 + 임베디드 추가 — Jitter·Deadline. Service time vs Response time."
 series: "Embedded Performance Engineering"

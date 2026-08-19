@@ -1,5 +1,6 @@
 ---
 title: "임베디드 RAII 기초 — 리소스 안전성과 결정적 소멸 보장"
+slug: "embedded/embedded-cpp/part2-01-raii-basics"
 date: 2026-04-29T09:09:00
 description: "Resource Acquisition Is Initialization — 자원 생명주기를 객체 생명주기에 묶는 C++의 핵심 idiom."
 series: "Embedded C++ for Real Systems"

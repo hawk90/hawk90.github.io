@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Security — IDE·SPDM·TSP·CXL TEE"
+slug: "embedded/hardware/cxl/chapter14-security"
 date: 2026-05-16T09:14:00
 description: "CXL 보안 메커니즘 4종의 위치와 관계."
 series: "CXL 4.0 Internals"

@@ -1,5 +1,6 @@
 ---
 title: "RTOS Semaphore 활용 — Binary·Counting·ISR Give"
+slug: "embedded/modern-recipes/part6-04-semaphore-usage"
 date: 2026-04-15T09:03:00
 description: "Binary semaphore signaling, counting semaphore resource pool, ISR-to-task wake-up 패턴을 정리합니다."
 series: "Modern Embedded Recipes"

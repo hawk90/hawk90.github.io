@@ -1,5 +1,6 @@
 ---
 title: "RTOS 디버깅 기법 — Tracealyzer·SystemView·Stack 추적"
+slug: "embedded/modern-recipes/part6-12-rtos-debugging"
 date: 2026-04-15T09:11:00
 description: "Stack high-water mark, overflow hook, deadlock 탐지, heap 분석, trace 도구까지 RTOS 디버깅을 한 자리에 정리합니다."
 series: "Modern Embedded Recipes"

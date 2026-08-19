@@ -1,5 +1,6 @@
 ---
 title: "Abseil Escape — CEscape·HexEscape·Base64"
+slug: "programming/code-review/abseil/part4-08-escaping-base64"
 date: 2026-06-10T09:10:00
 description: "Part 4-08: absl::CEscape / CHexEscape / Base64Escape / WebSafeBase64Escape — 안전한 문자열 이스케이프와 base64 인코딩의 모든 변형."
 series: "Abseil Code Review"

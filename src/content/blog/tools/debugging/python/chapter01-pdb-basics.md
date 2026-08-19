@@ -1,5 +1,6 @@
 ---
 title: "pdb 기본 사용법과 breakpoint() 빌트인 — 스크립트 디버깅"
+slug: "tools/debugging/python/chapter01-pdb-basics"
 date: 2026-05-30T09:01:00
 description: "표준 라이브러리 pdb. breakpoint(), 핵심 명령, ipdb, postmortem."
 tags: [python, debugging, pdb]

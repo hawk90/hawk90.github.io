@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: CXL.io — PCIe와의 차이·DOE·DVSEC"
+slug: "embedded/hardware/cxl/chapter06-cxl-io"
 date: 2026-05-16T09:06:00
 description: "CXL.io 프로토콜의 PCIe 호환성과 CXL 고유 확장."
 series: "CXL 4.0 Internals"

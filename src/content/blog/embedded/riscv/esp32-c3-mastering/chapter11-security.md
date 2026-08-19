@@ -1,5 +1,6 @@
 ---
 title: "ESP32-C3 보안 분석 — Secure Boot·Flash Encryption·eFuse"
+slug: "embedded/riscv/esp32-c3-mastering/chapter11-security"
 date: 2026-05-20T09:11:00
 description: "ECDSA 기반 Secure Boot V2, AES-256 Flash Encryption, eFuse 키 보관."
 series: "ESP32-C3 Mastering"

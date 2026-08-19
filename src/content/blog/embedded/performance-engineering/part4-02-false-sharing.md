@@ -1,5 +1,6 @@
 ---
 title: "False Sharing 진단 — Cache Line Ping-Pong·Padding·측정"
+slug: "embedded/performance-engineering/part4-02-false-sharing"
 date: 2026-04-26T09:01:00
 description: "False sharing 원인. Cache coherence ping-pong. Padding으로 line 분리. 측정 방법."
 series: "Embedded Performance Engineering"

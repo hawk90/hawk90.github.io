@@ -1,5 +1,6 @@
 ---
 title: "IRQ Affinity 튜닝 — smp_affinity·isolcpus·irqbalance"
+slug: "embedded/modern-recipes/part7-13-irq-affinity"
 date: 2026-04-16T09:12:00
 description: "IRQ를 코어에 고정하는 방법과 isolcpus·irqbalance·threaded IRQ의 상호작용을 측정과 함께 정리합니다."
 series: "Modern Embedded Recipes"

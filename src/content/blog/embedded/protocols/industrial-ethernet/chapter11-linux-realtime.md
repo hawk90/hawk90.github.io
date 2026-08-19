@@ -1,5 +1,6 @@
 ---
 title: "리눅스 실시간 산업 통신 — PREEMPT_RT·EtherCAT Master 운영"
+slug: "embedded/protocols/industrial-ethernet/chapter11-linux-realtime"
 date: 2026-05-13T09:11:00
 description: "PREEMPT_RT mainline·CPU isolation·NIC tuning·IgH EtherCAT 마스터까지 — Linux 위에서 산업 이더넷을 굴리는 모든 단계."
 series: "Industrial Ethernet 심화"

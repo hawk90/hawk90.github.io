@@ -1,5 +1,6 @@
 ---
 title: "ARM Cortex-M 시리즈 비교 — M0·M3·M4·M7·M33·M55 분석"
+slug: "embedded/modern-recipes/part2-01-cortex-m-comparison"
 date: 2026-04-11T09:13:00
 description: "M0/M0+/M3/M4/M7/M33/M55/M85 — 어느 코어를 언제 쓰나."
 series: "Modern Embedded Recipes"

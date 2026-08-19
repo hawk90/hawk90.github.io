@@ -1,5 +1,6 @@
 ---
 title: "실전 사례 — CXL.mem 추가로 LLM inference KV cache 처리량 회복"
+slug: "embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache"
 date: 2026-06-16T09:03:00
 description: "70B 모델 KV cache가 HBM 한계를 넘어 throughput이 무너졌을 때, CXL.mem 256 GB pool 추가로 회복한 실전 케이스."
 series: "Embedded Performance Engineering"

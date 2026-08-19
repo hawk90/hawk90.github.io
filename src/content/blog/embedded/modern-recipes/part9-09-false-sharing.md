@@ -1,5 +1,6 @@
 ---
 title: "False Sharing 해결 — Cache Line Padding·SoA 적용"
+slug: "embedded/modern-recipes/part9-09-false-sharing"
 date: 2026-04-18T09:08:00
 description: "False sharing의 원리와 영향, perf c2c 감지, alignas(64) padding, per-CPU 변수, thread-local까지 해결 전략을 정리합니다."
 series: "Modern Embedded Recipes"

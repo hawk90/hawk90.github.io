@@ -1,5 +1,6 @@
 ---
 title: "folly의 fmt::format 통합 — 모던 포맷팅 채택"
+slug: "programming/code-review/folly/part5-02-fmt-format-integration"
 date: 2026-06-05T09:06:00
 description: "Folly가 fmt 라이브러리를 채택한 이유, formatter customization, sformat/format 차이."
 series: "Folly Code Review"

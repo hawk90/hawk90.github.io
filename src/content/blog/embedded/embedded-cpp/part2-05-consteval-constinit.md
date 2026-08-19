@@ -1,5 +1,6 @@
 ---
 title: "consteval과 constinit 분석 — C++20 컴파일 타임 강제 메커니즘"
+slug: "embedded/embedded-cpp/part2-05-consteval-constinit"
 date: 2026-04-29T09:13:00
 description: "C++20의 컴파일 타임 강제 — consteval은 함수 호출을, constinit은 변수 초기화를 컴파일 타임에 강제합니다."
 series: "Embedded C++ for Real Systems"

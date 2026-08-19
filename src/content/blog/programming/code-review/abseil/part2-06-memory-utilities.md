@@ -1,5 +1,6 @@
 ---
 title: "Abseil Memory utilities 분석"
+slug: "programming/code-review/abseil/part2-06-memory-utilities"
 date: 2026-06-09T09:11:00
 description: "Part 2-06: absl::memory — make_unique polyfill, allocator_traits, RawPtr, uninitialized helpers."
 series: "Abseil Code Review"

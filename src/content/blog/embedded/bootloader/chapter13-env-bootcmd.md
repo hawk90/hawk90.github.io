@@ -1,5 +1,6 @@
 ---
 title: "U-Boot 환경 변수와 bootcmd — 부팅 시나리오 정의하기"
+slug: "embedded/bootloader/chapter13-env-bootcmd"
 date: 2026-05-09T09:13:00
 description: "U-Boot 환경 변수 시스템 — saveenv·bootcmd·bootargs·distro_bootcmd 패턴."
 series: "Bootloader Internals"

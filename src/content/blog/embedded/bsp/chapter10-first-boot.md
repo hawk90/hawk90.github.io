@@ -1,5 +1,6 @@
 ---
 title: "첫 부팅 추적 — 0%부터 login prompt까지의 단계 분석"
+slug: "embedded/bsp/chapter10-first-boot"
 date: 2026-05-18T09:10:00
 description: "보드 켜는 순간부터 login prompt까지의 단계별 체크포인트를 정리합니다. 어디서 멈추는지를 미리 알아 둡니다."
 series: "BSP Development"

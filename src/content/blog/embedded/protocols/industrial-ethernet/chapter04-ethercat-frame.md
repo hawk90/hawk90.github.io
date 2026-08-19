@@ -1,5 +1,6 @@
 ---
 title: "EtherCAT 프레임 구조 분석 — Datagram·WKC·Address 모드"
+slug: "embedded/protocols/industrial-ethernet/chapter04-ethercat-frame"
 date: 2026-05-13T09:04:00
 description: "EtherCAT frame이 standard Ethernet 위에 어떻게 얹히는가."
 series: "Industrial Ethernet 심화"

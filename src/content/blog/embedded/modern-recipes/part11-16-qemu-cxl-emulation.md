@@ -1,5 +1,6 @@
 ---
 title: "QEMU CXL Type 3 디바이스 에뮬레이션 — 노트북에서 CXL 개발 환경 구축"
+slug: "embedded/modern-recipes/part11-16-qemu-cxl-emulation"
 date: 2026-06-18T09:02:00
 description: "QEMU 8.0+로 CXL Type 3 개발 환경을 30분 안에 세우는 레시피 — 한 번에 붙여넣는 실행 명령, 부팅 후 검증 순서, 처음 세울 때 걸리는 함정."
 series: "Modern Embedded Recipes"

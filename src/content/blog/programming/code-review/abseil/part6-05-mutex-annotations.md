@@ -1,5 +1,6 @@
 ---
 title: "absl::Mutex annotations — clang thread-safety로 race를 컴파일 타임에"
+slug: "programming/code-review/abseil/part6-05-mutex-annotations"
 date: 2026-06-11T09:06:00
 description: "Part 6-05: ABSL_GUARDED_BY, ABSL_LOCKS_EXCLUDED, ABSL_EXCLUSIVE_LOCKS_REQUIRED — clang -Wthread-safety와 결합해 lock 누락을 정적 검출."
 series: "Abseil Code Review"

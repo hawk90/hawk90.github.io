@@ -1,5 +1,6 @@
 ---
 title: "PCIe·CXL IDE 분석 — 링크 무결성과 데이터 암호화"
+slug: "embedded/embedded-security/chapter11-pcie-cxl-ide"
 date: 2026-06-17T09:01:00
 description: "PCIe·CXL IDE (Integrity and Data Encryption) — 링크 sniff·MITM 위협, AES-GCM 암호화, Selective vs Link IDE, 키 관리, 성능 영향."
 series: "Embedded Security"

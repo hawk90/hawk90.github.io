@@ -1,5 +1,6 @@
 ---
 title: "SMP 성능 분석 — Per-Core·Affinity·Load Balance·Scalability"
+slug: "embedded/performance-engineering/part4-10-smp-analysis"
 date: 2026-04-26T09:09:00
 description: "Per-core utilization과 CPU affinity, NUMA, migration cost, Amdahl 한계."
 series: "Embedded Performance Engineering"

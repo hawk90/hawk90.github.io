@@ -1,5 +1,6 @@
 ---
 title: "folly::ScopeGuard·SCOPE_EXIT — RAII cleanup"
+slug: "programming/code-review/folly/part13-02-scope-guard"
 date: 2026-06-07T09:03:00
 description: "Part 13-02: ScopeGuard / SCOPE_EXIT — RAII로 cleanup 보장. C에서 넘어온 코드 정리에 강력하다."
 series: "Folly Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "CMake 설치와 패키징 — install·EXPORT·CPack"
+slug: "tools/build/cmake/chapter07-install"
 date: 2026-06-02T09:07:00
 description: "install 명령으로 빌드 결과물 배포, CPack으로 플랫폼별 패키지 생성."
 tags: [cmake, build, cpp, install, cpack]

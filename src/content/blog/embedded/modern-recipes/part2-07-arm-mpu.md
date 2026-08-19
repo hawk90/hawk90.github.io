@@ -1,5 +1,6 @@
 ---
 title: "ARM MPU 활용 — Region·Attribute·Privilege Separation"
+slug: "embedded/modern-recipes/part2-07-arm-mpu"
 date: 2026-04-11T09:19:00
 description: "Region setup·attributes·fault analysis — 메모리 보호의 실전."
 series: "Modern Embedded Recipes"

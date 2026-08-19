@@ -1,5 +1,6 @@
 ---
 title: "absl::variant 분석"
+slug: "programming/code-review/abseil/part9-04-variant"
 date: 2026-06-12T09:03:00
 description: "absl::variant — std::variant의 polyfill. 타입-안전 union과 visitor 패턴."
 series: "Abseil Code Review"

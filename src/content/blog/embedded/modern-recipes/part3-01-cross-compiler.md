@@ -1,5 +1,6 @@
 ---
 title: "임베디드 크로스 컴파일러 분석 — GCC·Clang·Sysroot 구성"
+slug: "embedded/modern-recipes/part3-01-cross-compiler"
 date: 2026-04-12T09:23:00
 description: "arm-none-eabi-gcc/clang — 호스트와 타겟이 다른 컴파일러 체인."
 series: "Modern Embedded Recipes"

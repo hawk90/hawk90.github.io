@@ -1,5 +1,6 @@
 ---
 title: "absl::string_view 함정 — dangling·c_str·임시 객체"
+slug: "programming/code-review/abseil/part4-02-string-view-pitfalls"
 date: 2026-06-10T09:04:00
 description: "Part 4-02: string_view를 실전에서 잘못 쓰는 패턴 — dangling reference, c_str 변환 비용, 임시 std::string 바인딩."
 series: "Abseil Code Review"

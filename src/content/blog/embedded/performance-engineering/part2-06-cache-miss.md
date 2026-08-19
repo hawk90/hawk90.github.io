@@ -1,5 +1,6 @@
 ---
 title: "Cache Miss 3C Model 분석 — Compulsory·Capacity·Conflict"
+slug: "embedded/performance-engineering/part2-06-cache-miss"
 date: 2026-04-24T09:05:00
 description: "Cold/Compulsory, Capacity (working set > cache), Conflict (associativity 한계)."
 series: "Embedded Performance Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "IMU 센서 활용 — MPU6050·LSM6DSO·Sensor Fusion"
+slug: "embedded/modern-recipes/part5-09-imu-sensor"
 date: 2026-04-14T09:57:00
 description: "MPU6050·BMI270 — sensor fusion 입력 단계."
 series: "Modern Embedded Recipes"

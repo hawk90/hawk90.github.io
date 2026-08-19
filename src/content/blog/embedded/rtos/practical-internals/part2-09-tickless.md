@@ -1,5 +1,6 @@
 ---
 title: "Tickless 모드 구현 — Idle Tick Suppression·Sleep·Wake 보정"
+slug: "embedded/rtos/practical-internals/part2-09-tickless"
 date: 2026-05-05T09:19:00
 description: "Idle 시 SysTick 멈춤 + CPU sleep. 다음 task wake 시점까지 동적 timer 설정. 배터리 IoT 핵심."
 series: "Practical RTOS Internals"

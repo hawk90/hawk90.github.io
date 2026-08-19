@@ -1,5 +1,6 @@
 ---
 title: "HBM2·HBM2E·HBM3·HBM3E 세대 비교 — JEDEC 표준 진화 흐름"
+slug: "embedded/hardware/hbm/chapter03-hbm-generations"
 date: 2026-05-16T09:03:00
 description: "세대별 bandwidth·capacity·signaling — JEDEC 표준의 진화 흐름."
 series: "HBM·GDDR 심화"

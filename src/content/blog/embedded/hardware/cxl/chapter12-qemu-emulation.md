@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: QEMU CXL 에뮬레이션 — 노트북에서 CXL 개발"
+slug: "embedded/hardware/cxl/chapter12-qemu-emulation"
 date: 2026-05-16T09:12:00
 description: "QEMU 8.0+의 CXL Type 3 에뮬레이션과 드라이버 검증 워크플로."
 series: "CXL 4.0 Internals"

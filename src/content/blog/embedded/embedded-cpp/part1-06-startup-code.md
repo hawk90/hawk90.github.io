@@ -1,5 +1,6 @@
 ---
 title: "C++ 스타트업 코드 분석 — .init_array·전역 생성자 호출 순서"
+slug: "embedded/embedded-cpp/part1-06-startup-code"
 date: 2026-04-28T09:06:00
 description: "Reset에서 main까지 — vector table, .data 복사, .bss 초기화, __libc_init_array가 호출하는 C++ static 생성자."
 series: "Embedded C++ for Real Systems"

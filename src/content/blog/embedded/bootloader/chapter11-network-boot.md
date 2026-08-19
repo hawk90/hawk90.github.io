@@ -1,5 +1,6 @@
 ---
 title: "임베디드 네트워크 부팅 — TFTP·PXE·BOOTP 시퀀스 분석"
+slug: "embedded/bootloader/chapter11-network-boot"
 date: 2026-05-09T09:11:00
 description: "네트워크를 통한 부팅 — DHCP/BOOTP·TFTP·PXE의 단계와 U-Boot 명령."
 series: "Bootloader Internals"

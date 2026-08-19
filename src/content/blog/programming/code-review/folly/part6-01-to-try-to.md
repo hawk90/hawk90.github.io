@@ -1,5 +1,6 @@
 ---
 title: "folly::to·tryTo — text↔num 변환 분석"
+slug: "programming/code-review/folly/part6-01-to-try-to"
 date: 2026-06-05T09:09:00
 description: "folly::to의 throw-on-error 변환, tryTo의 Expected 반환, 양방향 string/number 처리."
 series: "Folly Code Review"

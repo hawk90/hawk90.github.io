@@ -1,5 +1,6 @@
 ---
 title: "Linux 커널 BSP 설정 — defconfig·Kconfig·DT 통합"
+slug: "embedded/bsp/chapter08-kernel-config"
 date: 2026-05-18T09:08:00
 description: "BSP에서 커널을 빌드합니다. defconfig 선택과 커스터마이즈, DT 통합, 모듈 vs 빌트인 결정을 정리합니다."
 series: "BSP Development"

@@ -1,5 +1,6 @@
 ---
 title: "GDB Pretty-Printer 심화 — STL·커스텀 타입 시각화"
+slug: "tools/debugging/gdb-extension/chapter03-pretty-printers"
 date: 2026-05-27T09:03:00
 description: "to_string / children / display_hint, MI 출력, auto-load, libstdc++ printer 분석."
 tags: [gdb, python, pretty-printer, stl]

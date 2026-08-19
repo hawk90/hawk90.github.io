@@ -1,5 +1,6 @@
 ---
 title: "folly::F14ValueMap vs std::unordered_map"
+slug: "programming/code-review/folly/part7-01-f14-value-map"
 date: 2026-06-05T09:12:00
 description: "F14ValueMap의 in-place value 저장과 std::unordered_map node-based의 차이, 성능과 reference 안정성."
 series: "Folly Code Review"

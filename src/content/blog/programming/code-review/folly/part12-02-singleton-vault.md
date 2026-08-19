@@ -1,5 +1,6 @@
 ---
 title: "folly::SingletonVault 분석 — 등록·소멸·의존성"
+slug: "programming/code-review/folly/part12-02-singleton-vault"
 date: 2026-06-07T09:00:00
 description: "Part 12-02: SingletonVault — 모든 singleton의 통합 관리. 등록 순서, 의존성 그래프, eager/lazy 전략."
 series: "Folly Code Review"

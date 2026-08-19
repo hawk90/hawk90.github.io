@@ -1,5 +1,6 @@
 ---
 title: "BSP 드라이버 추가 — 보드별 Peripheral 통합 흐름"
+slug: "embedded/bsp/chapter12-driver-add"
 date: 2026-05-18T09:12:00
 description: "BSP에서 새 드라이버 통합 — 기존 드라이버 활용, DT binding 추가, 새 드라이버 작성 결정 기준을 정리합니다."
 series: "BSP Development"

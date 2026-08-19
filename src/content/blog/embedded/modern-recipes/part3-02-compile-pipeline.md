@@ -1,5 +1,6 @@
 ---
 title: "C 컴파일 4단계 — Preprocess·Compile·Assemble·Link 추적"
+slug: "embedded/modern-recipes/part3-02-compile-pipeline"
 date: 2026-04-12T09:24:00
 description: "Preprocess·compile·assemble·link — `-E -S -c` 분해."
 series: "Modern Embedded Recipes"

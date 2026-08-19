@@ -1,5 +1,6 @@
 ---
 title: "MMIO Register 추상화 — 타입 안전한 비트 필드 접근"
+slug: "embedded/embedded-cpp/part5-01-register-abstraction"
 date: 2026-05-02T09:37:00
 description: "MMIO를 type-safe하게 — volatile, bit field, register wrapper class."
 series: "Embedded C++ for Real Systems"

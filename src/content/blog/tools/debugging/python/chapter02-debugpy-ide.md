@@ -1,5 +1,6 @@
 ---
 title: "debugpy 활용 — VSCode·PyCharm·원격 attach 통합"
+slug: "tools/debugging/python/chapter02-debugpy-ide"
 date: 2026-05-30T09:02:00
 description: "debugpy로 IDE 디버깅, 원격 프로세스 attach, justMyCode, 멀티프로세스."
 tags: [python, debugging, debugpy, vscode]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: ARB/MUX — 세 프로토콜의 PHY 다중화"
+slug: "embedded/hardware/cxl/chapter10-arb-mux"
 date: 2026-05-16T09:10:00
 description: "같은 PHY에 CXL.io·CXL.cache·CXL.mem을 시분할로 흘리는 layer."
 series: "CXL 4.0 Internals"

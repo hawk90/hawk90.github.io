@@ -1,5 +1,6 @@
 ---
 title: "C 런타임 crt0 분석 — Stack·BSS Zero·Data Copy·atexit"
+slug: "embedded/modern-recipes/part3-07-c-runtime"
 date: 2026-04-12T09:29:00
 description: "crt0·.data 복사·.bss 클리어·ctors·atexit."
 series: "Modern Embedded Recipes"

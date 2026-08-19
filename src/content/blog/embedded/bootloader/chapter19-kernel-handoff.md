@@ -1,5 +1,6 @@
 ---
 title: "Linux Boot ABI — ARM/ARM64 커널 진입 규약 추적"
+slug: "embedded/bootloader/chapter19-kernel-handoff"
 date: 2026-05-09T09:19:00
 description: "부트로더 → 커널 인계 — ARM64·RISC-V·x86 boot ABI, 인자 전달, 레지스터 상태."
 series: "Bootloader Internals"

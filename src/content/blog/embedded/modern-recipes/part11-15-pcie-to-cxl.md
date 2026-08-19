@@ -1,5 +1,6 @@
 ---
 title: "PCIe → CXL 진화 — 같은 PHY 위 cache-coherent 프로토콜 추가"
+slug: "embedded/modern-recipes/part11-15-pcie-to-cxl"
 date: 2026-06-18T09:01:00
 description: "PCIe 5.0/6.0 PHY 위에서 CXL이 어떻게 cache coherency를 얹는지 — Flex Bus, 세 프로토콜 다중화, Type 1/2/3 디바이스 구분."
 series: "Modern Embedded Recipes"

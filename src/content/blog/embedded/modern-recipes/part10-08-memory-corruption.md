@@ -1,5 +1,6 @@
 ---
 title: "메모리 오버플로우·오염 진단 — Canary·MPU·Pattern 분석"
+slug: "embedded/modern-recipes/part10-08-memory-corruption"
 date: 2026-04-19T09:07:00
 description: "Heap canary·MPU guard·data watchpoint·desktop ASan — 임베디드 메모리 오염을 잡는 도구를 정리합니다."
 series: "Modern Embedded Recipes"

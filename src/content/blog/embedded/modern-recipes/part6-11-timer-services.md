@@ -1,5 +1,6 @@
 ---
 title: "Timer Wheel 분석 — Hashed·Hierarchical·O(1) Tick"
+slug: "embedded/modern-recipes/part6-11-timer-services"
 date: 2026-04-15T09:10:00
 description: "Timer wheel 자료구조. Hashed wheel·hierarchical wheel·O(1) tick·Linux jiffies."
 series: "Modern Embedded Recipes"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Data Link Layer — DLLP·ACK/NAK·Flow Control·FLIT Mode"
+slug: "embedded/hardware/pcie/chapter08-dllp"
 date: 2026-05-19T09:08:00
 description: "PCIe DLL — ACK/NAK·replay buffer·credit-based flow control·LCRC·Gen 6+ FLIT mode."
 series: "PCIe Deep Dive"

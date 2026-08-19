@@ -1,5 +1,6 @@
 ---
 title: "ARM Memory Barrier 실전 — DMB·DSB·ISB·DMA·MMIO"
+slug: "embedded/modern-recipes/part2-10-memory-barrier"
 date: 2026-04-11T09:22:00
 description: "ARM memory barrier 실전. DMB/DSB/ISB 사용 시점. DMA·MMIO·self-modifying code."
 series: "Modern Embedded Recipes"

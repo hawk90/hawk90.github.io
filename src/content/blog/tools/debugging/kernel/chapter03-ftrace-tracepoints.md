@@ -1,5 +1,6 @@
 ---
 title: "ftrace와 tracepoints 활용 — 커널 함수 호출 트레이싱"
+slug: "tools/debugging/kernel/chapter03-ftrace-tracepoints"
 date: 2026-05-25T09:03:00
 description: "함수 단위 trace, 이벤트 trace, 정적 tracepoint, function graph."
 tags: [kernel, ftrace, tracepoint, tracing]

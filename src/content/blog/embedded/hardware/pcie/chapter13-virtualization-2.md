@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Virtualization II — vIOMMU·Scalable IOV·VirtIO·IDE·TDISP"
+slug: "embedded/hardware/pcie/chapter13-virtualization-2"
 date: 2026-05-19T09:13:00
 description: "Guest 측 vIOMMU·Intel S-IOV·VirtIO·vDPA·live migration·Confidential I/O (IDE·TDISP·CMA-SPDM)."
 series: "PCIe Deep Dive"

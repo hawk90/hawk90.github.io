@@ -1,5 +1,6 @@
 ---
 title: "HBM 열 설계와 전력 관리 — Stack 열 부하·Refresh Cost·냉각 솔루션"
+slug: "embedded/hardware/hbm/chapter06-thermal-power"
 date: 2026-05-16T09:06:00
 description: "HBM stack의 열 부하·power state·refresh의 cost와 냉각 솔루션."
 series: "HBM·GDDR 심화"

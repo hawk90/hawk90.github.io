@@ -1,5 +1,6 @@
 ---
 title: "HBM 메모리 컨트롤러 분석 — Bank·Row·Column·Address Mapping·Scheduling"
+slug: "embedded/hardware/hbm/chapter07-memory-controller"
 date: 2026-05-16T09:07:00
 description: "Bank·row·column·command — 컨트롤러가 보는 HBM과 scheduling·address mapping."
 series: "HBM·GDDR 심화"

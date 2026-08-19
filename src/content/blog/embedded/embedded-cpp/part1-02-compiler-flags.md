@@ -1,5 +1,6 @@
 ---
 title: "임베디드 C++ 컴파일러 플래그 분석 — -fno-rtti·-fno-exceptions·-Os"
+slug: "embedded/embedded-cpp/part1-02-compiler-flags"
 date: 2026-04-28T09:02:00
 description: "C++를 임베디드 모드로 — -fno-exceptions, -fno-rtti, -Os, -flto. 각 플래그가 실제 바이너리에 무엇을 하는가."
 series: "Embedded C++ for Real Systems"

@@ -1,5 +1,6 @@
 ---
 title: "CXL 커널 드라이버 디버깅 — ftrace·bpftrace·drgn 활용"
+slug: "tools/debugging/kernel/chapter08-cxl-driver-debug"
 date: 2026-06-18T09:03:00
 description: "Linux drivers/cxl/ 서브시스템 디버깅 — ftrace로 probe 흐름 추적, bpftrace로 mailbox 명령 캡처, drgn으로 커널 상태 검사."
 series: "Kernel Debugging"

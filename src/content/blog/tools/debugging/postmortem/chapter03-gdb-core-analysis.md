@@ -1,5 +1,6 @@
 ---
 title: "GDB로 Core 분석 — backtrace·info threads·py 활용"
+slug: "tools/debugging/postmortem/chapter03-gdb-core-analysis"
 date: 2026-06-01T09:03:00
 description: "core 열기, siginfo 해독, 콜스택 분석, 변수 검사, 자주 만나는 패턴."
 tags: [gdb, core-dump, postmortem, siginfo]

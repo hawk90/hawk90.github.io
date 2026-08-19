@@ -1,5 +1,6 @@
 ---
 title: "absl::BlockingCounter·Barrier — 다중 thread 조율"
+slug: "programming/code-review/abseil/part6-04-blocking-counter-barrier"
 date: 2026-06-11T09:05:00
 description: "Part 6-04: absl::BlockingCounter와 absl::Barrier — N개 작업 완료 대기, N개 thread 동기 합류, fanout-fanin 패턴."
 series: "Abseil Code Review"

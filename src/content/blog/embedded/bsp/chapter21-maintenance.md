@@ -1,5 +1,6 @@
 ---
 title: "BSP 유지보수 — 업스트림 기여·커널 버전업·LTS 전략"
+slug: "embedded/bsp/chapter21-maintenance"
 date: 2026-05-18T09:21:00
 description: "BSP의 장기 유지 — 업스트림 기여로 부담 줄이기, LTS 버전 선택, 커널 버전업 전략."
 series: "BSP Development"

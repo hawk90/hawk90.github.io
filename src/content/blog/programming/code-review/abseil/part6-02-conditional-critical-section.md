@@ -1,5 +1,6 @@
 ---
 title: "absl::Mutex Conditional Critical Section — Await로 cv 없애기"
+slug: "programming/code-review/abseil/part6-02-conditional-critical-section"
 date: 2026-06-11T09:03:00
 description: "Part 6-02: Mutex::Await로 함수형 condition을 정의해 condition_variable, notify, spurious wakeup 관용구를 모두 제거."
 series: "Abseil Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "ROM부터 init까지 — 임베디드 부팅 단계의 빈자리 분석"
+slug: "embedded/bootloader/chapter01-boot-problem"
 date: 2026-05-09T09:01:00
 description: "ROM부터 init까지의 전체 흐름과, 부트로더가 그 사이에서 채우는 자리."
 series: "Bootloader Internals"

@@ -1,5 +1,6 @@
 ---
 title: "GDB vs LLDB 분석 — 두 디버거의 설치·차이·선택 기준"
+slug: "tools/debugging/gdb-lldb/chapter01-intro-and-install"
 date: 2026-05-24T09:01:00
 description: "네이티브 디버거의 메커니즘, gdb·lldb 차이, 설치, 첫 세션."
 tags: [gdb, lldb, Setup]

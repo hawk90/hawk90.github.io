@@ -1,5 +1,6 @@
 ---
 title: "NUMA Memory Topology — numactl·numa_alloc·HBM 적용"
+slug: "embedded/modern-recipes/part8-06-numa"
 date: 2026-04-17T09:05:00
 description: "NUMA node topology, numactl 운영, libnuma API, HBM/CXL tier, 자동차 ECU의 mini-NUMA까지 정리합니다."
 series: "Modern Embedded Recipes"

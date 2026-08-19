@@ -1,5 +1,6 @@
 ---
 title: "GDB·LLDB 실전 팁 — STL·최적화 코드·시간 역행 디버깅"
+slug: "tools/debugging/gdb-lldb/chapter11-practical-tips"
 date: 2026-05-24T09:11:00
 description: "STL pretty-printers, -O2 디버깅, .gdbinit 추천, rr time-travel. 시리즈 마무리."
 tags: [gdb, STL, Optimization, rr]

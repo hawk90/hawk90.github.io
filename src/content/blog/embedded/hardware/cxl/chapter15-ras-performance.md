@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: RAS·Performance·Compliance — 운용·검증의 마지막 단계"
+slug: "embedded/hardware/cxl/chapter15-ras-performance"
 date: 2026-05-16T09:15:00
 description: "Reliability·Availability·Serviceability, 성능 고려사항, Compliance Testing."
 series: "CXL 4.0 Internals"

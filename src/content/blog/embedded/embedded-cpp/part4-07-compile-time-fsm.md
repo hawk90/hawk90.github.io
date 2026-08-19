@@ -1,5 +1,6 @@
 ---
 title: "Compile-time FSM 구현 — 템플릿으로 상태 전이 검증"
+slug: "embedded/embedded-cpp/part4-07-compile-time-fsm"
 date: 2026-05-01T09:35:00
 description: "constexpr state machine — 컴파일 타임에 전이 검증, runtime 코드 0."
 series: "Embedded C++ for Real Systems"

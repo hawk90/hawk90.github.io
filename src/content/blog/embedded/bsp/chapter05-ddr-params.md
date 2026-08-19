@@ -1,5 +1,6 @@
 ---
 title: "DDR 매개변수 결정 — 보드별 Timing·Training 추출"
+slug: "embedded/bsp/chapter05-ddr-params"
 date: 2026-05-18T09:05:00
 description: "DDR controller 설정값이 어디서 오는지 — vendor tool, SPD, 데이터시트 timing 표."
 series: "BSP Development"

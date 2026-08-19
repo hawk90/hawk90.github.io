@@ -1,5 +1,6 @@
 ---
 title: "실전 사례 — 8-core가 4-core를 넘으면 throughput이 떨어지는 이유"
+slug: "embedded/performance-engineering/part6-03-case-lock-contention"
 date: 2026-04-28T09:02:00
 description: "8-core 서버에서 thread를 늘릴수록 throughput이 오히려 감소. 단일 global mutex가 cache invalidation 폭주를 일으킨 사례."
 series: "Embedded Performance Engineering"

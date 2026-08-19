@@ -1,5 +1,6 @@
 ---
 title: "Abseil LogEntry·structured logging"
+slug: "programming/code-review/abseil/part11-03-log-entry-structured"
 date: 2026-06-12T09:13:00
 description: "absl::LogEntry — 한 로그 항목의 메타데이터(severity, timestamp, source location, message). 구조화 로깅의 기반."
 series: "Abseil Code Review"

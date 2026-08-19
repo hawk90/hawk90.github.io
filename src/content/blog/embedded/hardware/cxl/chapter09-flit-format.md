@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Flit Format — 68B vs 256B vs Latency-Optimized"
+slug: "embedded/hardware/cxl/chapter09-flit-format"
 date: 2026-05-16T09:09:00
 description: "Flit 단위 구조의 세대 별 변화."
 series: "CXL 4.0 Internals"

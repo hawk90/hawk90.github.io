@@ -1,5 +1,6 @@
 ---
 title: "absl::FixedArray — 런타임 크기 stack 배열"
+slug: "programming/code-review/abseil/part5-05-fixed-array"
 date: 2026-06-10T09:15:00
 description: "Part 5-05: absl::FixedArray — 런타임 결정 크기지만 작으면 stack, 크면 heap. VLA의 안전한 대체."
 series: "Abseil Code Review"

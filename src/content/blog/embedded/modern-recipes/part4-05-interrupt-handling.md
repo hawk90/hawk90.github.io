@@ -1,5 +1,6 @@
 ---
 title: "Cortex-M 인터럽트 핸들링 — NVIC·Priority·Vector·EXTI"
+slug: "embedded/modern-recipes/part4-05-interrupt-handling"
 date: 2026-04-13T09:39:00
 description: "NVIC 설정·ISR 작성·prologue/epilogue·priority."
 series: "Modern Embedded Recipes"

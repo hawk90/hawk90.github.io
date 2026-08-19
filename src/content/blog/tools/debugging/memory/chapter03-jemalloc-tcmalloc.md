@@ -1,5 +1,6 @@
 ---
 title: "jemalloc·tcmalloc Profiling — 운영 allocator의 진단 기능"
+slug: "tools/debugging/memory/chapter03-jemalloc-tcmalloc"
 date: 2026-05-31T09:03:00
 description: "표준 glibc malloc 대체 + 내장 profiler. pprof로 시각화."
 tags: [memory, jemalloc, tcmalloc, malloc, pprof]

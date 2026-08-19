@@ -1,5 +1,6 @@
 ---
 title: "ARM 레지스터 구조 분석 — R0~R15·CPSR·SPSR·Banked Registers"
+slug: "embedded/modern-recipes/part2-03-arm-registers"
 date: 2026-04-11T09:15:00
 description: "R0-R15·xPSR·CONTROL·PRIMASK·BASEPRI — register set 전체 지도."
 series: "Modern Embedded Recipes"

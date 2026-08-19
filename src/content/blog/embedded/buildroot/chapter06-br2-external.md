@@ -1,5 +1,6 @@
 ---
 title: "Buildroot 외부 트리 — BR2_EXTERNAL 구성과 활용"
+slug: "embedded/buildroot/chapter06-br2-external"
 date: 2026-05-19T09:06:00
 description: "회사·팀의 패키지·보드 정의를 Buildroot 본체와 분리하는 BR2_EXTERNAL 메커니즘."
 series: "Buildroot Practical"

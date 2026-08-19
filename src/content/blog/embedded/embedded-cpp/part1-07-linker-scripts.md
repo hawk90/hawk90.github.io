@@ -1,5 +1,6 @@
 ---
 title: "임베디드 C++ 링커 스크립트 — vtable·정적 객체 배치 추적"
+slug: "embedded/embedded-cpp/part1-07-linker-scripts"
 date: 2026-04-28T09:07:00
 description: "MEMORY와 SECTIONS — Flash와 RAM에 C++ 객체와 코드를 정확한 위치에 두는 법."
 series: "Embedded C++ for Real Systems"

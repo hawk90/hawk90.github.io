@@ -1,5 +1,6 @@
 ---
 title: "absl::bind_front와 Overload — 함수 객체 보조 도구"
+slug: "programming/code-review/abseil/part14-04-bind-front-overload"
 date: 2026-06-13T09:08:00
 description: "absl::bind_front — std::bind의 후속, 정적 분석 친화. absl::Overload — variant visitor 작성을 줄이는 도우미."
 series: "Abseil Code Review"

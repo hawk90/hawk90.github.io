@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: 고급 기능 — Lane Margining·10-bit Tag·TPH·ACS·L0p"
+slug: "embedded/hardware/pcie/chapter19-advanced-features"
 date: 2026-05-19T09:19:00
 description: "코어 동작 너머의 PCIe spec 기능들 — Lane Margining(신호 마진 측정)·10-bit Tag(outstanding 확장)·TPH(캐시 주입 힌트)·ACS(격리)·L0p(부분폭 저전력)을 실무 관점에서 정리합니다."
 series: "PCIe Deep Dive"

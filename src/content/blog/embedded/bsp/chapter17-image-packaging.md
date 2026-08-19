@@ -1,5 +1,6 @@
 ---
 title: "BSP 이미지 패키징 — Flash Layout·Partition·GPT 설계"
+slug: "embedded/bsp/chapter17-image-packaging"
 date: 2026-05-18T09:17:00
 description: "최종 이미지 조립 — 파티션 테이블, flash layout, SD/eMMC/UFS 굽기 워크플로."
 series: "BSP Development"

@@ -1,5 +1,6 @@
 ---
 title: "임베디드 C++ 소유권 모델 — single·shared·borrow 패턴"
+slug: "embedded/embedded-cpp/part3-10-ownership-model"
 date: 2026-04-30T09:28:00
 description: "Owner, observer, borrower — 객체 lifetime의 명확한 책임 할당."
 series: "Embedded C++ for Real Systems"

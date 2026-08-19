@@ -1,5 +1,6 @@
 ---
 title: "absl::Mutex — reader-writer·fairness·deadlock 검출"
+slug: "programming/code-review/abseil/part6-01-mutex"
 date: 2026-06-11T09:02:00
 description: "Part 6-01: absl::Mutex — std::mutex/shared_mutex 통합, contention profiler, deadlock 검출, fairness 정책."
 series: "Abseil Code Review"

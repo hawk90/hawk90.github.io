@@ -1,5 +1,6 @@
 ---
 title: "RISC-V Context Switch 분석 — ECALL·mret·CSR"
+slug: "embedded/rtos/practical-internals/part2-07-riscv-context"
 date: 2026-05-05T09:17:00
 description: "RISC-V는 모든 레지스터 SW save. ECALL/mret + CSR (mscratch/mepc/mcause/mstatus)."
 series: "Practical RTOS Internals"

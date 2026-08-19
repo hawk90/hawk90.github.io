@@ -1,5 +1,6 @@
 ---
 title: "Lock-Free Ring Buffer 구현 — SPSC·Power-of-2·Memory Order"
+slug: "embedded/modern-recipes/part9-01-lock-free-ring"
 date: 2026-04-18T09:00:00
 description: "SPSC ring 구현. Power-of-2 size, head/tail atomic, memory order release/acquire."
 series: "Modern Embedded Recipes"

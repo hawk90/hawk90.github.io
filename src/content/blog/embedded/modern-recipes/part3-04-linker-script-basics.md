@@ -1,5 +1,6 @@
 ---
 title: "링커 스크립트 기초 — SECTIONS·MEMORY·entry point"
+slug: "embedded/modern-recipes/part3-04-linker-script-basics"
 date: 2026-04-12T09:26:00
 description: "MEMORY·SECTIONS·alignment·기본 layout."
 series: "Modern Embedded Recipes"

@@ -1,5 +1,6 @@
 ---
 title: "Python faulthandler·tracemalloc·objgraph — 죽음과 누수 진단"
+slug: "tools/debugging/python/chapter05-faulthandler-tracemalloc"
 date: 2026-05-30T09:05:00
 description: "세그폴트 트레이스백, 메모리 할당 추적, 객체 그래프 시각화."
 tags: [python, debugging, faulthandler, tracemalloc, objgraph]

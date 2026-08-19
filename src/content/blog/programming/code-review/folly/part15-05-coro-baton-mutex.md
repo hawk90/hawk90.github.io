@@ -1,5 +1,6 @@
 ---
 title: "folly::coro::Baton·Mutex — 코루틴-aware 동기화"
+slug: "programming/code-review/folly/part15-05-coro-baton-mutex"
 date: 2026-06-07T09:14:00
 description: "coro::Baton과 coro::Mutex — thread를 block하지 않고 코루틴만 suspend하는 동기화 프리미티브."
 series: "Folly Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "Custom Allocator 기초 — std::allocator 인터페이스 분석"
+slug: "embedded/embedded-cpp/part3-02-custom-allocator-basics"
 date: 2026-04-30T09:20:00
 description: "STL allocator interface — 표준 컨테이너의 메모리 출처를 제어."
 series: "Embedded C++ for Real Systems"

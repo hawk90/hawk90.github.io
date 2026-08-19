@@ -1,5 +1,6 @@
 ---
 title: "Abseil ASCII 함수 — locale-free 분류·대소문자 변환"
+slug: "programming/code-review/abseil/part4-07-ascii-functions"
 date: 2026-06-10T09:09:00
 description: "Part 4-07: absl::ascii_* — locale 독립 ASCII 분류, AsciiStrToLower / AsciiStrToUpper / StripAsciiWhitespace."
 series: "Abseil Code Review"

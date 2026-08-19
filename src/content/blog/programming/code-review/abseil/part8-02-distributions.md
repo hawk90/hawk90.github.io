@@ -1,5 +1,6 @@
 ---
 title: "Abseil Random Distributions — Uniform·Exponential"
+slug: "programming/code-review/abseil/part8-02-distributions"
 date: 2026-06-11T09:13:00
 description: "absl::Uniform, Gaussian, Exponential, Poisson 등 — std::*_distribution의 클래스 객체를 함수 호출로 평탄화."
 series: "Abseil Code Review"

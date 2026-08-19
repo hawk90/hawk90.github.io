@@ -1,5 +1,6 @@
 ---
 title: "Make 조건문과 include — ifeq·ifdef·include·-include"
+slug: "tools/build/gnu-make/chapter06-conditionals"
 date: 2026-06-03T09:06:00
 description: "파싱 시점 조건 분기, Makefile 분할, 그리고 -MMD -MP로 헤더 의존성을 자동 추적하는 표준 패턴."
 tags: [make, build, Makefile, conditional]

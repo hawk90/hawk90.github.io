@@ -1,5 +1,6 @@
 ---
 title: "folly::PicoSpinLock — 1-byte spinlock"
+slug: "programming/code-review/folly/part9-05-pico-spin-lock"
 date: 2026-06-06T09:08:00
 description: "PicoSpinLock — integer type의 한 bit을 lock으로 사용. 객체 안에 lock을 끼워 넣어 메모리 절약."
 series: "Folly Code Review"

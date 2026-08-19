@@ -1,5 +1,6 @@
 ---
 title: "RTC 활용 — Calendar·Alarm·Wake-up Timer·Backup Domain"
+slug: "embedded/modern-recipes/part5-14-rtc-utilization"
 date: 2026-04-14T10:02:00
 description: "Battery backup·alarm·calendar·tamper."
 series: "Modern Embedded Recipes"

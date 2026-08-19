@@ -1,5 +1,6 @@
 ---
 title: "딥러닝 Quantization 분석 — PTQ·QAT·INT8·INT4·Calibration"
+slug: "embedded/modern-recipes/part12-03-quantization"
 date: 2026-04-21T09:02:00
 description: "FP32→INT8/INT4 양자화의 수식, PTQ와 QAT 차이, per-channel·per-tensor 선택, LLM용 GPTQ·AWQ까지 실전 패턴을 정리합니다."
 series: "Modern Embedded Recipes"

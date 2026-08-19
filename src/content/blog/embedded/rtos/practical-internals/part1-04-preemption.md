@@ -1,5 +1,6 @@
 ---
 title: "Preemption과 Cooperation — 강제 전환 vs 자발 양보"
+slug: "embedded/rtos/practical-internals/part1-04-preemption"
 date: 2026-05-04T09:04:00
 description: "Preemptive는 tick과 IRQ에서 강제로 전환합니다. Cooperative는 yield를 명시해야 합니다. latency와 predictability의 trade-off를 다룹니다."
 series: "Practical RTOS Internals"

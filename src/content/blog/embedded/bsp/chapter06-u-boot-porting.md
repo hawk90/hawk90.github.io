@@ -1,5 +1,6 @@
 ---
 title: "U-Boot 새 보드 포팅 — defconfig·board.c·DTS 작성 흐름"
+slug: "embedded/bsp/chapter06-u-boot-porting"
 date: 2026-05-18T09:06:00
 description: "BSP 관점에서의 U-Boot 추가 — defconfig·board.c·DT 통합 흐름."
 series: "BSP Development"

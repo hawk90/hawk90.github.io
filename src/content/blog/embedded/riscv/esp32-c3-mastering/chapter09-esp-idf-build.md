@@ -1,5 +1,6 @@
 ---
 title: "ESP-IDF 빌드 시스템 분석 — 컴포넌트 구조와 CMake 통합"
+slug: "embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build"
 date: 2026-05-20T09:09:00
 description: "CMake 기반 ESP-IDF 빌드. 컴포넌트(component) 모델로 라이브러리 모듈화."
 series: "ESP32-C3 Mastering"

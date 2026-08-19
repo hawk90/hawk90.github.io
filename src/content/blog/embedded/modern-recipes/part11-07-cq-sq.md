@@ -1,5 +1,6 @@
 ---
 title: "Command Queue·Submission Queue — NVMe·XDMA 공통 패턴"
+slug: "embedded/modern-recipes/part11-07-cq-sq"
 date: 2026-04-20T09:06:00
 description: "Submission/Completion Queue 패턴을 NVMe·io_uring·Xilinx XDMA·Vulkan 사례로 묶어 정리합니다. Doorbell, phase bit, multi-queue 확장까지."
 series: "Modern Embedded Recipes"

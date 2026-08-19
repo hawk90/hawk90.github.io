@@ -1,5 +1,6 @@
 ---
 title: "folly::coro 개요 — production C++20 코루틴 어댑터"
+slug: "programming/code-review/folly/part15-01-coro-overview"
 date: 2026-06-07T09:10:00
 description: "folly::coro의 위치 — std 코루틴 위에 Task/AsyncGenerator/Mutex를 쌓아 production async를 가능하게 한 이유."
 series: "Folly Code Review"

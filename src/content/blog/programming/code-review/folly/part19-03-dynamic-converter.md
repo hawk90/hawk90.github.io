@@ -1,5 +1,6 @@
 ---
 title: "folly::DynamicConverter — dynamic ↔ struct"
+slug: "programming/code-review/folly/part19-03-dynamic-converter"
 date: 2026-06-08T09:10:00
 description: "DynamicConverter의 역할 — folly::dynamic과 user struct 사이 boilerplate 없는 양방향 변환."
 series: "Folly Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "ARM 메모리 맵 분석 — Normal·Device·Strongly-Ordered Region"
+slug: "embedded/modern-recipes/part2-05-arm-memory-map"
 date: 2026-04-11T09:17:00
 description: "Code·SRAM·Peripheral·System 영역 — bitband·MPU 활용."
 series: "Modern Embedded Recipes"

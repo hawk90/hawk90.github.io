@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 메모리 일관성 모델 — HDM-DB·HDM-D·Bias·BISnp"
+slug: "embedded/hardware/cxl/chapter03-coherency-model"
 date: 2026-05-16T09:03:00
 description: "Host-managed Device Memory 두 종류와 일관성 메커니즘."
 series: "CXL 4.0 Internals"

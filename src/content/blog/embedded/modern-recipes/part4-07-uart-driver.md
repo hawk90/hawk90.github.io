@@ -1,5 +1,6 @@
 ---
 title: "UART 드라이버 구현 — polling·interrupt·DMA 3가지 방식 비교"
+slug: "embedded/modern-recipes/part4-07-uart-driver"
 date: 2026-04-13T09:41:00
 description: "3가지 모드의 trade-off — CPU 사용량·latency·throughput."
 series: "Modern Embedded Recipes"

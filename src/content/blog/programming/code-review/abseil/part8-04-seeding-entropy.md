@@ -1,5 +1,6 @@
 ---
 title: "Abseil Random Seeding·Entropy"
+slug: "programming/code-review/abseil/part8-04-seeding-entropy"
 date: 2026-06-11T09:15:00
 description: "BitGen 시드 관리 — OS entropy, SeedSeq, 결정적 재현성. 그리고 보안 한계."
 series: "Abseil Code Review"

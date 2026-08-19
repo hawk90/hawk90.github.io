@@ -1,5 +1,6 @@
 ---
 title: "Abseil AbslHashValue 분석"
+slug: "programming/code-review/abseil/part10-01-abseil-hash-value"
 date: 2026-06-12T09:08:00
 description: "AbslHashValue — std::hash 특수화 대신 ADL 기반 friend 함수로 hash를 정의하는 Abseil의 방식."
 series: "Abseil Code Review"

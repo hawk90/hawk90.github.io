@@ -1,5 +1,6 @@
 ---
 title: "absl::InlinedVector — small buffer optimization"
+slug: "programming/code-review/abseil/part5-06-inlined-vector"
 date: 2026-06-11T09:00:00
 description: "Part 5-06: absl::InlinedVector — std::vector + 작으면 stack, 커지면 heap. SBO 패턴의 표준 도구."
 series: "Abseil Code Review"

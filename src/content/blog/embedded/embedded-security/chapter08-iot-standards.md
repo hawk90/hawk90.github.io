@@ -1,5 +1,6 @@
 ---
 title: "IoT 보안 표준 비교 — ETSI EN 303 645·IEC 62443·NIST 8259·EU CRA"
+slug: "embedded/embedded-security/chapter08-iot-standards"
 date: 2026-05-21T09:08:00
 description: "IoT 소비자·산업·자동차 보안 표준. 한국 KISA·KICS 포함."
 tags: [IoT, ETSI, iec-62443, NIST, CRA, Standards]

@@ -1,5 +1,6 @@
 ---
 title: "CXL 메모리 진단 — RAS·Poison List·Media Error 추적"
+slug: "tools/debugging/memory/chapter06-cxl-memory-diagnostics"
 date: 2026-06-18T09:05:00
 description: "CXL.mem 디바이스 메모리 상태 진단 — cxl-cli·poison list·event log로 RAS 이벤트 추적, NUMA node별 사용량 분석."
 series: "Memory Diagnostics"

@@ -1,5 +1,6 @@
 ---
 title: "Buildroot 빌드 캐싱 분석 — dl·ccache·per-package"
+slug: "embedded/buildroot/chapter14-build-caching"
 date: 2026-05-19T09:14:00
 description: "Buildroot의 캐싱 계층 — dl/ source 캐시, ccache compile 캐시, BR2_PER_PACKAGE_DIRECTORIES와 sstate가 없는 이유."
 series: "Buildroot Practical"

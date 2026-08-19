@@ -1,5 +1,6 @@
 ---
 title: "임베디드 Flash Layout 설계 — partition·NAND·eMMC·UBI 비교"
+slug: "embedded/bootloader/chapter28-flash-layout"
 date: 2026-05-19T09:28:00
 description: "양산 firmware의 flash layout 설계 — 부트로더·env·kernel·rootfs·OTA slot의 sizing과 NAND/eMMC/UBI 차이."
 series: "Bootloader Internals"

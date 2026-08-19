@@ -1,5 +1,6 @@
 ---
 title: "Lock-Free 자료구조 성능 — CAS·ABA·Hazard Pointer·Epoch Reclamation"
+slug: "embedded/performance-engineering/part4-07-lock-free"
 date: 2026-04-26T09:06:00
 description: "CAS 기반 lock-free와 ABA 문제, hazard pointer와 epoch reclamation 비교."
 series: "Embedded Performance Engineering"

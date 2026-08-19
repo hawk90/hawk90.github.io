@@ -1,5 +1,6 @@
 ---
 title: "Priority Inversion 문제 — Mars Pathfinder 사례·Bounded vs Unbounded"
+slug: "embedded/rtos/practical-internals/part3-04-priority-inversion"
 date: 2026-05-06T09:25:00
 description: "고우선 task가 저우선 task 때문에 막힘. 1997 화성 탐사선 reset의 원인."
 series: "Practical RTOS Internals"

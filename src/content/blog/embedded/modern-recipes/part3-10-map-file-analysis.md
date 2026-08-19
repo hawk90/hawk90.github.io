@@ -1,5 +1,6 @@
 ---
 title: "Map 파일 분석 — Symbol·Section·Size 추적으로 코드 크기 진단"
+slug: "embedded/modern-recipes/part3-10-map-file-analysis"
 date: 2026-04-12T09:32:00
 description: "메모리 사용·심볼 위치·dead code 추적."
 series: "Modern Embedded Recipes"

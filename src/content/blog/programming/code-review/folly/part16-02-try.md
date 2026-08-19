@@ -1,5 +1,6 @@
 ---
 title: "folly::Try — Future 결과 wrapper"
+slug: "programming/code-review/folly/part16-02-try"
 date: 2026-06-07T09:16:00
 description: "Try<T>의 세 상태 (value/exception/empty), Future 내부에서의 역할, exception_wrapper와의 관계."
 series: "Folly Code Review"

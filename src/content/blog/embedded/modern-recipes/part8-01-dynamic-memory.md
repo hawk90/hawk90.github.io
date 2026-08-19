@@ -1,5 +1,6 @@
 ---
 title: "임베디드 동적 메모리 — malloc 위험·결정성·대안 분석"
+slug: "embedded/modern-recipes/part8-01-dynamic-memory"
 date: 2026-04-17T09:00:00
 description: "Malloc의 fragmentation과 비결정성, pool/arena/slab 대안, FreeRTOS heap_4/5와 정적 대안까지 임베디드의 메모리 전략을 정리합니다."
 series: "Modern Embedded Recipes"

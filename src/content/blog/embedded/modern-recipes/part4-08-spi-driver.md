@@ -1,5 +1,6 @@
 ---
 title: "SPI 드라이버 구현 — Master·Slave·CRC·DMA"
+slug: "embedded/modern-recipes/part4-08-spi-driver"
 date: 2026-04-13T09:42:00
 description: "Master/slave·CPOL/CPHA·DMA·multi-slave CS."
 series: "Modern Embedded Recipes"

@@ -1,5 +1,6 @@
 ---
 title: "TEE 비교 분석 — OP-TEE·ARM CCA·SGX"
+slug: "embedded/embedded-security/chapter05-tee"
 date: 2026-05-21T09:05:00
 description: "Trusted Execution Environment. OP-TEE, TA, GlobalPlatform API."
 tags: [TEE, OP-TEE, GlobalPlatform]

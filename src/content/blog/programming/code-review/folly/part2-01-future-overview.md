@@ -1,5 +1,6 @@
 ---
 title: "folly::Future 분석 — std::future의 한계를 넘는 composable async"
+slug: "programming/code-review/folly/part2-01-future-overview"
 date: 2026-06-04T09:06:00
 description: "folly::Future가 std::future의 어떤 한계를 해결하는가 — continuation, executor binding, exception 전파."
 series: "Folly Code Review"

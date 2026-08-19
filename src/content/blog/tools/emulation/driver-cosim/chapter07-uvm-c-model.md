@@ -1,5 +1,6 @@
 ---
 title: "UVM C Reference Model 통합 — DUT와 황금 모델 비교 검증"
+slug: "tools/emulation/driver-cosim/chapter07-uvm-c-model"
 date: 2026-05-22T09:07:00
 description: "UVM testbench의 reference model을 C로 — driver와 공유."
 series: "Driver-RTL Co-simulation"

@@ -1,5 +1,6 @@
 ---
 title: "ESP32-C3 메모리 맵과 플래시 — SPIFFS·LittleFS 파일시스템 선택"
+slug: "embedded/riscv/esp32-c3-mastering/chapter03-memory-flash"
 date: 2026-05-20T09:03:00
 description: "ESP32-C3 메모리 구조 — 400KB SRAM, 4MB SPI flash, MMU. 파일시스템 선택."
 series: "ESP32-C3 Mastering"

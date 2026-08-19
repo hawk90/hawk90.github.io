@@ -1,5 +1,6 @@
 ---
 title: "Abseil 개요 — Google이 std를 보완한 이유"
+slug: "programming/code-review/abseil/part1-01-overview"
 date: 2026-06-09T09:01:00
 description: "Part 1-01: Abseil 개요 — Google이 std의 한계를 보완하기 위해 만든 industrial-grade C++ 라이브러리."
 series: "Abseil Code Review"

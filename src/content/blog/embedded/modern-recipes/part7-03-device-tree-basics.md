@@ -1,5 +1,6 @@
 ---
 title: "Device Tree 실전 — DTS·DTB·Overlay·Phandle 추적"
+slug: "embedded/modern-recipes/part7-03-device-tree-basics"
 date: 2026-04-16T09:02:00
 description: "Device Tree Source 문법. DTC 컴파일. Overlay로 dynamic 변경. Linux driver match."
 series: "Modern Embedded Recipes"

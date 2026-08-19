@@ -1,5 +1,6 @@
 ---
 title: "OTA Update 보안 — 서명·Rollback 방지·롤백 카운터"
+slug: "embedded/embedded-security/chapter06-ota-update"
 date: 2026-05-21T09:06:00
 description: "안전한 펌웨어 업데이트. A/B 슬롯, delta update, 서명 검증, rollback 방지."
 tags: [OTA, firmware-update, Rollback, MCUboot, Mender]

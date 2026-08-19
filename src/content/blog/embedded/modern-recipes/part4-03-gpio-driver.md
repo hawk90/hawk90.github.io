@@ -1,5 +1,6 @@
 ---
 title: "GPIO 드라이버 직접 구현 — STM32 HAL 없이 레지스터로"
+slug: "embedded/modern-recipes/part4-03-gpio-driver"
 date: 2026-04-13T09:37:00
 description: "Mode/speed/pull/AF — STM32 기준 register-level driver."
 series: "Modern Embedded Recipes"

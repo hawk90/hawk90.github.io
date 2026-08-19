@@ -1,5 +1,6 @@
 ---
 title: "SystemC TLM 분석 — Transaction-Level Modeling으로 빠른 검증"
+slug: "tools/emulation/driver-cosim/chapter05-systemc-tlm"
 date: 2026-05-22T09:05:00
 description: "Cycle-accurate 너머 — high-speed virtual platform."
 series: "Driver-RTL Co-simulation"

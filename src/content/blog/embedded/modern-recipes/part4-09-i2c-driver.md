@@ -1,5 +1,6 @@
 ---
 title: "I2C 드라이버 구현 — Master·7-bit/10-bit·Clock Stretching 처리"
+slug: "embedded/modern-recipes/part4-09-i2c-driver"
 date: 2026-04-13T09:43:00
 description: "Master·repeated start·NACK 처리·timeout."
 series: "Modern Embedded Recipes"

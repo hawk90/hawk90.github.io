@@ -1,5 +1,6 @@
 ---
 title: "py-spy 운영 분석 — 코드 수정 없이 프로세스 검사"
+slug: "tools/debugging/python/chapter04-py-spy"
 date: 2026-05-30T09:04:00
 description: "py-spy로 콜스택 dump, 샘플링 프로파일링, flamegraph, 외부 attach."
 tags: [python, debugging, py-spy, profiling]

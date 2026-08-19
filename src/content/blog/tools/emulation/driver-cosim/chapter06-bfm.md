@@ -1,5 +1,6 @@
 ---
 title: "C로 구현하는 Bus Functional Model — Driver 검증용 BFM 설계"
+slug: "tools/emulation/driver-cosim/chapter06-bfm"
 date: 2026-05-22T09:06:00
 description: "Driver와 RTL 사이의 protocol-aware adapter."
 series: "Driver-RTL Co-simulation"

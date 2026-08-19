@@ -1,5 +1,6 @@
 ---
 title: "CXL.mem 프로토콜 분해 — 왕복 횟수가 만드는 지연, 링크가 만드는 대역폭"
+slug: "embedded/hardware/hbm/chapter10-cxl-mem-protocol"
 date: 2026-06-15T09:02:00
 description: "Ch 9의 지연·대역폭 수치가 왜 그렇게 나오는지 — 왕복 횟수로 본 지연 예산, 링크에 묶인 대역폭, credit 고갈이 만드는 throughput 절벽, interleave granularity의 유불리."
 series: "HBM·GDDR 심화"

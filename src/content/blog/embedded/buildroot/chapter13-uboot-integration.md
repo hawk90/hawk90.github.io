@@ -1,5 +1,6 @@
 ---
 title: "Buildroot U-Boot 통합 — 빌드·env·fw_env 흐름"
+slug: "embedded/buildroot/chapter13-uboot-integration"
 date: 2026-05-19T09:13:00
 description: "Buildroot가 U-Boot를 가져와 빌드·패키징하는 방식과 env·fw_env.config로 런타임에 접근하는 패턴."
 series: "Buildroot Practical"

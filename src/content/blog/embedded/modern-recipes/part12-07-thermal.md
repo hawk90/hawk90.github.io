@@ -1,5 +1,6 @@
 ---
 title: "Edge Thermal Management — Throttling·DVFS·Fan Curve·Sustained"
+slug: "embedded/modern-recipes/part12-07-thermal"
 date: 2026-04-21T09:06:00
 description: "Edge AI 보드의 sustained 성능을 결정하는 thermal 한계. throttle trip, DVFS, fan curve, nvpmodel, passive cooling 설계를 정리합니다."
 series: "Modern Embedded Recipes"

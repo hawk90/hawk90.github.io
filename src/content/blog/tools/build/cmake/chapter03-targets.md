@@ -1,5 +1,6 @@
 ---
 title: "CMake 타겟과 라이브러리 — INTERFACE·PUBLIC·PRIVATE 전파"
+slug: "tools/build/cmake/chapter03-targets"
 date: 2026-06-02T09:03:00
 description: "Modern CMake의 핵심: 타겟 중심 접근법과 라이브러리 생성."
 tags: [cmake, build, cpp, library, target]

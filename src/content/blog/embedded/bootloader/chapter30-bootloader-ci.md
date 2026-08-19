@@ -1,5 +1,6 @@
 ---
 title: "부트로더 CI 구축 — build matrix와 자동 부팅 테스트"
+slug: "embedded/bootloader/chapter30-bootloader-ci"
 date: 2026-05-19T09:30:00
 description: "여러 보드의 U-Boot/TF-A를 PR마다 빌드하고, QEMU·real board에서 boot까지 자동 검증하는 CI 패턴."
 series: "Bootloader Internals"

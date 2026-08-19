@@ -1,5 +1,6 @@
 ---
 title: "folly::EventBase 분석 — libevent 이벤트 루프의 핵심"
+slug: "programming/code-review/folly/part3-05-event-base"
 date: 2026-06-04T09:17:00
 description: "EventBase는 libevent의 event_base를 wrap한 단일 thread event loop. file descriptor, timer, cross-thread message를 한 번에 처리한다."
 series: "Folly Code Review"

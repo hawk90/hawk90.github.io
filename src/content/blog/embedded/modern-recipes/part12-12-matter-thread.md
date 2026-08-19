@@ -1,5 +1,6 @@
 ---
 title: "Matter·Thread 분석 — IoT 통합 표준·Commissioning·Multi-Fabric"
+slug: "embedded/modern-recipes/part12-12-matter-thread"
 date: 2026-04-21T09:11:00
 description: "Apple·Google·Amazon·Samsung이 공동으로 만든 Matter 1.3/1.4와 Thread 1.3 mesh를 합쳐 IoT device를 한 번에 모든 ecosystem에 등록하는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"

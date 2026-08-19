@@ -1,5 +1,6 @@
 ---
 title: "TF-A BL31 EL3 Runtime 분석 — PSCI·SDEI·RAS dispatcher 추적"
+slug: "embedded/bootloader/chapter31-tfa-bl31-runtime"
 date: 2026-05-22T09:31:00
 description: "TF-A BL31의 EL3 runtime service 구조 — runtime_svc 등록 모델, vector entry, PSCI·SDEI·RAS dispatcher, SMC call latency."
 series: "Bootloader Internals"

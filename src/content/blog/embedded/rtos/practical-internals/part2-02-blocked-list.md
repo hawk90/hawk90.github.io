@@ -1,5 +1,6 @@
 ---
 title: "Blocked List 자료구조 — Timeout 정렬·Delta List·Two-List Scheme"
+slug: "embedded/rtos/practical-internals/part2-02-blocked-list"
 date: 2026-05-05T09:12:00
 description: "Blocked task의 timeout 관리. Sorted list + tick wraparound 처리. FreeRTOS의 2-list scheme."
 series: "Practical RTOS Internals"

@@ -1,5 +1,6 @@
 ---
 title: "Linux CXL 드라이버 분석 — cxl_pci·cxl_core·region·DAX"
+slug: "embedded/modern-recipes/part11-17-linux-cxl-driver"
 date: 2026-06-18T09:03:00
 description: "CXL 디바이스가 메모리로 안 올라올 때 모듈 체인·sysfs·mailbox 중 어디서 끊겼는지 좁혀 가는 절차."
 series: "Modern Embedded Recipes"

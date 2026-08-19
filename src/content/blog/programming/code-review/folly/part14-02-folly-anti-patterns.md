@@ -1,5 +1,6 @@
 ---
 title: "folly anti-patterns — 잘못 쓰면 std보다 느림"
+slug: "programming/code-review/folly/part14-02-folly-anti-patterns"
 date: 2026-06-07T09:08:00
 description: "Part 14-02: Folly 오용 패턴 정리 — SemiFuture without via, fbstring small case, F14 잘못된 default, 등."
 series: "Folly Code Review"

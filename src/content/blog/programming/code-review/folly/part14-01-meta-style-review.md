@@ -1,5 +1,6 @@
 ---
 title: "folly Meta 스타일 code review 패턴"
+slug: "programming/code-review/folly/part14-01-meta-style-review"
 date: 2026-06-07T09:07:00
 description: "Part 14-01: Meta(Facebook) 사내 code review 문화 — performance-first lens."
 series: "Folly Code Review"

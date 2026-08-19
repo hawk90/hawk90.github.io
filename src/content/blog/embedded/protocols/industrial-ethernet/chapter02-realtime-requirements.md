@@ -1,5 +1,6 @@
 ---
 title: "산업용 통신 실시간 요구사항 — Determinism·Jitter·Cycle Time"
+slug: "embedded/protocols/industrial-ethernet/chapter02-realtime-requirements"
 date: 2026-05-13T09:02:00
 description: "Soft·Firm·Hard real-time — 산업 자동화의 시간 등급."
 series: "Industrial Ethernet 심화"

@@ -1,5 +1,6 @@
 ---
 title: "CXL 성능 프로파일링 도구 — cxl-cli·DAMON·perf-mem 활용"
+slug: "embedded/performance-engineering/part5-11-cxl-profiling-tools"
 date: 2026-06-16T09:02:00
 description: "CXL.mem 환경 성능 도구 — cxl-cli 토폴로지·DAMON page activity·perf-mem로 보는 CXL 트래픽·numastat 통계."
 series: "Embedded Performance Engineering"

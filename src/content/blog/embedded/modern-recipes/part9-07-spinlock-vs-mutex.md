@@ -1,5 +1,6 @@
 ---
 title: "Spinlock vs Mutex 결정 가이드 — Context Switch·Hold Time"
+slug: "embedded/modern-recipes/part9-07-spinlock-vs-mutex"
 date: 2026-04-18T09:06:00
 description: "Lock hold time, 코어 수, preemption, real-time 요구사항에 따라 spinlock과 mutex를 어떻게 고를지 ticket lock과 MCS lock까지 함께 정리합니다."
 series: "Modern Embedded Recipes"

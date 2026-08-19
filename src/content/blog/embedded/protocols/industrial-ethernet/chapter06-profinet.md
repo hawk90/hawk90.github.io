@@ -1,5 +1,6 @@
 ---
 title: "PROFINET 개요 분석 — RT·IRT 클래스와 실시간 등급"
+slug: "embedded/protocols/industrial-ethernet/chapter06-profinet"
 date: 2026-05-13T09:06:00
 description: "Siemens 표준 산업 이더넷 — RT vs IRT."
 series: "Industrial Ethernet 심화"

@@ -1,5 +1,6 @@
 ---
 title: "임베디드 Bus Architecture — AHB·AXI·CHI 진화와 5-Channel"
+slug: "embedded/performance-engineering/part3-01-bus-architecture"
 date: 2026-04-25T09:00:00
 description: "ARM AMBA — AHB·APB·AXI·ACE·CHI. AXI 5 channel, burst, outstanding transaction."
 series: "Embedded Performance Engineering"

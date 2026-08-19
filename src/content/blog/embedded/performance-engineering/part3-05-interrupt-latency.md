@@ -1,5 +1,6 @@
 ---
 title: "Interrupt Latency 분석 — 진입·종료·Tail-Chaining·Late Arrival"
+slug: "embedded/performance-engineering/part3-05-interrupt-latency"
 date: 2026-04-25T09:04:00
 description: "Cortex-M 12-cycle latency. Tail-chaining 6-cycle. Late arrival, lazy stacking, FreeRTOS hooks."
 series: "Embedded Performance Engineering"

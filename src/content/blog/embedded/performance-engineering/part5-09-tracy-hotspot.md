@@ -1,5 +1,6 @@
 ---
 title: "모던 프로파일러 비교 — Tracy·Hotspot·uftrace·Coz"
+slug: "embedded/performance-engineering/part5-09-tracy-hotspot"
 date: 2026-04-27T09:08:00
 description: "Tracy nanosecond instrumentation, Hotspot GUI, uftrace function trace, Coz causal profiler."
 series: "Embedded Performance Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "printk·dmesg·dynamic_debug 분석 — 커널 로그 추적"
+slug: "tools/debugging/kernel/chapter02-printk-dmesg"
 date: 2026-05-25T09:02:00
 description: "커널 로깅의 모든 것. log level, ring buffer, ratelimit, 런타임 토글."
 tags: [kernel, printk, dmesg, dynamic-debug]

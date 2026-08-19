@@ -1,5 +1,6 @@
 ---
 title: "Scheduler 알고리즘 구현 추적 — Next-Task Selection 로직"
+slug: "embedded/rtos/practical-internals/part2-03-scheduler-algorithm"
 date: 2026-05-05T09:13:00
 description: "FreeRTOS pxCurrentTCB 결정. CLZ 최적화, tie-breaking, scheduler entry points."
 series: "Practical RTOS Internals"

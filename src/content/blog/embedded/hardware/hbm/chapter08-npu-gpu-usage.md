@@ -1,5 +1,6 @@
 ---
 title: "NPU·GPU에서의 HBM 활용 — Weight·Activation·KV Cache 배치 분석"
+slug: "embedded/hardware/hbm/chapter08-npu-gpu-usage"
 date: 2026-05-16T09:08:00
 description: "Weight·activation·KV cache — HBM 자리잡기와 시리즈 마무리."
 series: "HBM·GDDR 심화"

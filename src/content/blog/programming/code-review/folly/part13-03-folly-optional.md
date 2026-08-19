@@ -1,5 +1,6 @@
 ---
 title: "folly::Optional vs std::optional"
+slug: "programming/code-review/folly/part13-03-folly-optional"
 date: 2026-06-07T09:04:00
 description: "Part 13-03: folly::Optional — std::optional와의 차이, 역사적 배경, monadic op과 std 호환."
 series: "Folly Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "No-RTTI C++ 설계 — dynamic_cast 제거와 정적 타입 분기"
+slug: "embedded/embedded-cpp/part3-08-no-rtti-design"
 date: 2026-04-30T09:26:00
 description: "-fno-rtti 환경에서 type info 없이 다형성 — enum tag, std::variant, CRTP."
 series: "Embedded C++ for Real Systems"

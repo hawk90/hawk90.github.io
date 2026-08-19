@@ -1,5 +1,6 @@
 ---
 title: "OpenOCD 심화 분석 — Configuration·Adapter·Target 통합"
+slug: "tools/debugging/embedded/chapter03-openocd"
 date: 2026-05-26T09:03:00
 description: "TCL 인터프리터, target/interface 설정, flash driver, custom 명령, multi-core."
 tags: [openocd, embedded, tcl, flash]

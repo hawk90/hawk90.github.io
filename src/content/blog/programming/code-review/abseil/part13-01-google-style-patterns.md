@@ -1,5 +1,6 @@
 ---
 title: "Google 스타일의 Abseil 사용 패턴"
+slug: "programming/code-review/abseil/part13-01-google-style-patterns"
 date: 2026-06-13T09:02:00
 description: "Part 13-01: Google이 사내에서 Abseil을 어떻게 쓰는지 — code review에서 자주 보는 권장 패턴."
 series: "Abseil Code Review"

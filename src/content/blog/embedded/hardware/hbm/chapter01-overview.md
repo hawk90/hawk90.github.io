@@ -1,5 +1,6 @@
 ---
 title: "HBM과 GDDR 분기점 분석 — Bandwidth·Capacity·Cost 트레이드오프"
+slug: "embedded/hardware/hbm/chapter01-overview"
 date: 2026-05-16T09:01:00
 description: "HBM과 GDDR의 분기점 — bandwidth·capacity·cost의 트레이드오프와 시장 분할."
 series: "HBM·GDDR 심화"

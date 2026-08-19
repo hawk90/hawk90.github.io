@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Performance — Bandwidth·Latency·Tuning"
+slug: "embedded/hardware/pcie/chapter17-performance"
 date: 2026-05-19T09:17:00
 description: "PCIe 성능 — theoretical vs effective BW·MaxPayload·MaxReadReq·latency breakdown·NUMA·P2P·ASPM 영향·tuning."
 series: "PCIe Deep Dive"

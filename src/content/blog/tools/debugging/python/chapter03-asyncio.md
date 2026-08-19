@@ -1,5 +1,6 @@
 ---
 title: "asyncio 디버깅 — 짧은 콜스택과 slow callback 추적"
+slug: "tools/debugging/python/chapter03-asyncio"
 date: 2026-05-30T09:03:00
 description: "코루틴 콜스택 추적, asyncio debug=True, slow callback, race condition."
 tags: [python, debugging, asyncio]

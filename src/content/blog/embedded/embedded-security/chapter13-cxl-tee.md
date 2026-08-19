@@ -1,5 +1,6 @@
 ---
 title: "CXL TEE 확장 — Trusted Execution을 메모리 디바이스까지"
+slug: "embedded/embedded-security/chapter13-cxl-tee"
 date: 2026-06-17T09:03:00
 description: "TDISP·TVM·CXL TEE — Confidential Computing이 메모리 디바이스·가속기로 확장되는 표준 흐름."
 series: "Embedded Security"

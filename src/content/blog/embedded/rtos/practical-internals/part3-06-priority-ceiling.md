@@ -1,5 +1,6 @@
 ---
 title: "Priority Ceiling Protocol — Immediate vs Original 비교"
+slug: "embedded/rtos/practical-internals/part3-06-priority-ceiling"
 date: 2026-05-06T09:27:00
 description: "PI의 대안. 각 mutex에 정적 ceiling — take 즉시 boost. Deadlock 방지."
 series: "Practical RTOS Internals"

@@ -1,5 +1,6 @@
 ---
 title: "TensorRT 분석 — ONNX→Engine·FP16·INT8·DLA·Multi-Stream"
+slug: "embedded/modern-recipes/part12-04-tensorrt"
 date: 2026-04-21T09:03:00
 description: "NVIDIA TensorRT로 ONNX 모델을 engine으로 빌드하고 FP16·INT8·DLA·multi-stream으로 throughput을 끌어올리는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"

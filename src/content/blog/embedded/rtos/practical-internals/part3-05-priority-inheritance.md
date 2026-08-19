@@ -1,5 +1,6 @@
 ---
 title: "Priority Inheritance 구현 — Inherit·Disinherit·Chain"
+slug: "embedded/rtos/practical-internals/part3-05-priority-inheritance"
 date: 2026-05-06T09:26:00
 description: "FreeRTOS PI 코드 분석 — vTaskPriorityInherit, vTaskPriorityDisinherit, chain handling."
 series: "Practical RTOS Internals"

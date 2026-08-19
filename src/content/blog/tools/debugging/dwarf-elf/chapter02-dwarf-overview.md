@@ -1,5 +1,6 @@
 ---
 title: "DWARF 디버그 정보 분해 — DIE 트리와 .debug_abbrev"
+slug: "tools/debugging/dwarf-elf/chapter02-dwarf-overview"
 date: 2026-05-23T09:02:00
 description: "DWARF의 정체. DIE/abbrev 인코딩, 컴파일 유닛, TAG/AT/FORM 카탈로그."
 tags: [dwarf, debug-info, elf]

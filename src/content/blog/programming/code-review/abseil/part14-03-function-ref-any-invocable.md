@@ -1,5 +1,6 @@
 ---
 title: "absl::function_ref와 any_invocable — 함수 객체 전달의 두 축"
+slug: "programming/code-review/abseil/part14-03-function-ref-any-invocable"
 date: 2026-06-13T09:07:00
 description: "absl::FunctionRef는 non-owning callable view, absl::AnyInvocable는 std::function 대체 movable owner. 둘의 차이와 선택 기준."
 series: "Abseil Code Review"

@@ -1,5 +1,6 @@
 ---
 title: "ARM DS·Lauterbach 분석 — Hardware Trace 전문 도구"
+slug: "embedded/performance-engineering/part5-06-arm-ds-lauterbach"
 date: 2026-04-27T09:05:00
 description: "ARM Development Studio Streamline, Lauterbach TRACE32, ETM·PTM hardware trace."
 series: "Embedded Performance Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "U-Boot PCIe Enumeration — 부트로더가 디바이스를 찾는 흐름 분석"
+slug: "embedded/bootloader/chapter34-pcie-enumeration"
 date: 2026-06-19T09:01:00
 description: "U-Boot PCIe 열거 과정 — Root Complex 초기화·Config Space scan·BAR sizing·resource 할당, CXL DVSEC 인식까지."
 series: "Bootloader Internals"

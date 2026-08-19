@@ -1,5 +1,6 @@
 ---
 title: "CXL Link Training 디버깅 — LTSSM 상태와 Protocol Analyzer 활용"
+slug: "tools/debugging/embedded/chapter08-cxl-link-debug"
 date: 2026-06-18T09:01:00
 description: "CXL 링크가 안 올라올 때 LTSSM 상태 분석, Protocol Analyzer 캡처, lspci·cxl-cli·dmesg 진단 흐름."
 series: "Embedded Debugging"

@@ -1,5 +1,6 @@
 ---
 title: "SPL·TPL 내부 해부 — 가장 작은 부트 단계의 동작 추적"
+slug: "embedded/bootloader/chapter24-spl-deep"
 date: 2026-05-19T09:24:00
 description: "SPL과 TPL의 정확한 역할, SRAM 안에 들어가는 코드 구조, DDR이 없는 환경에서 어떻게 동작하는가."
 series: "Bootloader Internals"
