@@ -1,0 +1,3401 @@
+# URL freeze preview
+
+- Posts scanned: 3387
+- Would freeze: 726
+- Already frozen: 0
+- Skipped, draft — no published URL yet: 2661
+- Collisions: 0
+- Problems: 0
+
+## Would freeze
+- `src/content/blog/embedded/bootloader/chapter01-boot-problem.md` → `/blog/embedded/bootloader/chapter01-boot-problem`
+- `src/content/blog/embedded/bootloader/chapter02-u-boot-position.md` → `/blog/embedded/bootloader/chapter02-u-boot-position`
+- `src/content/blog/embedded/bootloader/chapter03-build-system.md` → `/blog/embedded/bootloader/chapter03-build-system`
+- `src/content/blog/embedded/bootloader/chapter04-boot-stages.md` → `/blog/embedded/bootloader/chapter04-boot-stages`
+- `src/content/blog/embedded/bootloader/chapter05-falcon-mode.md` → `/blog/embedded/bootloader/chapter05-falcon-mode`
+- `src/content/blog/embedded/bootloader/chapter06-device-tree.md` → `/blog/embedded/bootloader/chapter06-device-tree`
+- `src/content/blog/embedded/bootloader/chapter07-driver-model.md` → `/blog/embedded/bootloader/chapter07-driver-model`
+- `src/content/blog/embedded/bootloader/chapter08-board-init.md` → `/blog/embedded/bootloader/chapter08-board-init`
+- `src/content/blog/embedded/bootloader/chapter09-dram-init.md` → `/blog/embedded/bootloader/chapter09-dram-init`
+- `src/content/blog/embedded/bootloader/chapter10-storage-boot.md` → `/blog/embedded/bootloader/chapter10-storage-boot`
+- `src/content/blog/embedded/bootloader/chapter11-network-boot.md` → `/blog/embedded/bootloader/chapter11-network-boot`
+- `src/content/blog/embedded/bootloader/chapter12-usb-boot.md` → `/blog/embedded/bootloader/chapter12-usb-boot`
+- `src/content/blog/embedded/bootloader/chapter13-env-bootcmd.md` → `/blog/embedded/bootloader/chapter13-env-bootcmd`
+- `src/content/blog/embedded/bootloader/chapter14-bootflow-bootmeth.md` → `/blog/embedded/bootloader/chapter14-bootflow-bootmeth`
+- `src/content/blog/embedded/bootloader/chapter15-fit-image.md` → `/blog/embedded/bootloader/chapter15-fit-image`
+- `src/content/blog/embedded/bootloader/chapter16-verified-boot.md` → `/blog/embedded/bootloader/chapter16-verified-boot`
+- `src/content/blog/embedded/bootloader/chapter17-ab-update.md` → `/blog/embedded/bootloader/chapter17-ab-update`
+- `src/content/blog/embedded/bootloader/chapter18-efi-in-uboot.md` → `/blog/embedded/bootloader/chapter18-efi-in-uboot`
+- `src/content/blog/embedded/bootloader/chapter19-kernel-handoff.md` → `/blog/embedded/bootloader/chapter19-kernel-handoff`
+- `src/content/blog/embedded/bootloader/chapter20-rauc-swupdate.md` → `/blog/embedded/bootloader/chapter20-rauc-swupdate`
+- `src/content/blog/embedded/bootloader/chapter21-board-porting.md` → `/blog/embedded/bootloader/chapter21-board-porting`
+- `src/content/blog/embedded/bootloader/chapter22-debugging.md` → `/blog/embedded/bootloader/chapter22-debugging`
+- `src/content/blog/embedded/bootloader/chapter23-bootrom-efuse-otp.md` → `/blog/embedded/bootloader/chapter23-bootrom-efuse-otp`
+- `src/content/blog/embedded/bootloader/chapter24-spl-deep.md` → `/blog/embedded/bootloader/chapter24-spl-deep`
+- `src/content/blog/embedded/bootloader/chapter25-tfa-optee.md` → `/blog/embedded/bootloader/chapter25-tfa-optee`
+- `src/content/blog/embedded/bootloader/chapter26-ddr-training.md` → `/blog/embedded/bootloader/chapter26-ddr-training`
+- `src/content/blog/embedded/bootloader/chapter27-chain-of-trust.md` → `/blog/embedded/bootloader/chapter27-chain-of-trust`
+- `src/content/blog/embedded/bootloader/chapter28-flash-layout.md` → `/blog/embedded/bootloader/chapter28-flash-layout`
+- `src/content/blog/embedded/bootloader/chapter29-distro-boot.md` → `/blog/embedded/bootloader/chapter29-distro-boot`
+- `src/content/blog/embedded/bootloader/chapter30-bootloader-ci.md` → `/blog/embedded/bootloader/chapter30-bootloader-ci`
+- `src/content/blog/embedded/bootloader/chapter31-tfa-bl31-runtime.md` → `/blog/embedded/bootloader/chapter31-tfa-bl31-runtime`
+- `src/content/blog/embedded/bootloader/chapter32-psci-smccc.md` → `/blog/embedded/bootloader/chapter32-psci-smccc`
+- `src/content/blog/embedded/bootloader/chapter33-smp-secondary-cpu-bringup.md` → `/blog/embedded/bootloader/chapter33-smp-secondary-cpu-bringup`
+- `src/content/blog/embedded/bootloader/chapter34-pcie-enumeration.md` → `/blog/embedded/bootloader/chapter34-pcie-enumeration`
+- `src/content/blog/embedded/bootloader/chapter35-uefi-cxl-init.md` → `/blog/embedded/bootloader/chapter35-uefi-cxl-init`
+- `src/content/blog/embedded/bootloader/chapter36-boot-memory-topology.md` → `/blog/embedded/bootloader/chapter36-boot-memory-topology`
+- `src/content/blog/embedded/bootloader/chapter37-secureboot-cert-rollover.md` → `/blog/embedded/bootloader/chapter37-secureboot-cert-rollover`
+- `src/content/blog/embedded/bsp/chapter01-what-is-bsp.md` → `/blog/embedded/bsp/chapter01-what-is-bsp`
+- `src/content/blog/embedded/bsp/chapter02-datasheet.md` → `/blog/embedded/bsp/chapter02-datasheet`
+- `src/content/blog/embedded/bsp/chapter03-device-tree-design.md` → `/blog/embedded/bsp/chapter03-device-tree-design`
+- `src/content/blog/embedded/bsp/chapter04-pinmux-clock.md` → `/blog/embedded/bsp/chapter04-pinmux-clock`
+- `src/content/blog/embedded/bsp/chapter05-ddr-params.md` → `/blog/embedded/bsp/chapter05-ddr-params`
+- `src/content/blog/embedded/bsp/chapter06-u-boot-porting.md` → `/blog/embedded/bsp/chapter06-u-boot-porting`
+- `src/content/blog/embedded/bsp/chapter07-tfa-trustzone.md` → `/blog/embedded/bsp/chapter07-tfa-trustzone`
+- `src/content/blog/embedded/bsp/chapter08-kernel-config.md` → `/blog/embedded/bsp/chapter08-kernel-config`
+- `src/content/blog/embedded/bsp/chapter09-smp-bringup.md` → `/blog/embedded/bsp/chapter09-smp-bringup`
+- `src/content/blog/embedded/bsp/chapter10-first-boot.md` → `/blog/embedded/bsp/chapter10-first-boot`
+- `src/content/blog/embedded/bsp/chapter11-bootlog-debugging.md` → `/blog/embedded/bsp/chapter11-bootlog-debugging`
+- `src/content/blog/embedded/bsp/chapter12-driver-add.md` → `/blog/embedded/bsp/chapter12-driver-add`
+- `src/content/blog/embedded/bsp/chapter13-power-management.md` → `/blog/embedded/bsp/chapter13-power-management`
+- `src/content/blog/embedded/bsp/chapter14-thermal-watchdog.md` → `/blog/embedded/bsp/chapter14-thermal-watchdog`
+- `src/content/blog/embedded/bsp/chapter15-boot-time-optimization.md` → `/blog/embedded/bsp/chapter15-boot-time-optimization`
+- `src/content/blog/embedded/bsp/chapter16-rootfs.md` → `/blog/embedded/bsp/chapter16-rootfs`
+- `src/content/blog/embedded/bsp/chapter17-image-packaging.md` → `/blog/embedded/bsp/chapter17-image-packaging`
+- `src/content/blog/embedded/bsp/chapter18-ota-recovery.md` → `/blog/embedded/bsp/chapter18-ota-recovery`
+- `src/content/blog/embedded/bsp/chapter19-stability-testing.md` → `/blog/embedded/bsp/chapter19-stability-testing`
+- `src/content/blog/embedded/bsp/chapter20-production.md` → `/blog/embedded/bsp/chapter20-production`
+- `src/content/blog/embedded/bsp/chapter21-maintenance.md` → `/blog/embedded/bsp/chapter21-maintenance`
+- `src/content/blog/embedded/buildroot/chapter01-problem.md` → `/blog/embedded/buildroot/chapter01-problem`
+- `src/content/blog/embedded/buildroot/chapter02-directory-structure.md` → `/blog/embedded/buildroot/chapter02-directory-structure`
+- `src/content/blog/embedded/buildroot/chapter03-kconfig.md` → `/blog/embedded/buildroot/chapter03-kconfig`
+- `src/content/blog/embedded/buildroot/chapter04-first-build.md` → `/blog/embedded/buildroot/chapter04-first-build`
+- `src/content/blog/embedded/buildroot/chapter05-package-system.md` → `/blog/embedded/buildroot/chapter05-package-system`
+- `src/content/blog/embedded/buildroot/chapter06-br2-external.md` → `/blog/embedded/buildroot/chapter06-br2-external`
+- `src/content/blog/embedded/buildroot/chapter07-board-customize.md` → `/blog/embedded/buildroot/chapter07-board-customize`
+- `src/content/blog/embedded/buildroot/chapter08-filesystems.md` → `/blog/embedded/buildroot/chapter08-filesystems`
+- `src/content/blog/embedded/buildroot/chapter09-new-package.md` → `/blog/embedded/buildroot/chapter09-new-package`
+- `src/content/blog/embedded/buildroot/chapter10-real-board.md` → `/blog/embedded/buildroot/chapter10-real-board`
+- `src/content/blog/embedded/buildroot/chapter11-toolchain.md` → `/blog/embedded/buildroot/chapter11-toolchain`
+- `src/content/blog/embedded/buildroot/chapter12-kernel-customize.md` → `/blog/embedded/buildroot/chapter12-kernel-customize`
+- `src/content/blog/embedded/buildroot/chapter13-uboot-integration.md` → `/blog/embedded/buildroot/chapter13-uboot-integration`
+- `src/content/blog/embedded/buildroot/chapter14-build-caching.md` → `/blog/embedded/buildroot/chapter14-build-caching`
+- `src/content/blog/embedded/buildroot/chapter15-post-build-deep.md` → `/blog/embedded/buildroot/chapter15-post-build-deep`
+- `src/content/blog/embedded/buildroot/chapter16-ota.md` → `/blog/embedded/buildroot/chapter16-ota`
+- `src/content/blog/embedded/buildroot/chapter17-sdk.md` → `/blog/embedded/buildroot/chapter17-sdk`
+- `src/content/blog/embedded/buildroot/chapter18-security-cve.md` → `/blog/embedded/buildroot/chapter18-security-cve`
+- `src/content/blog/embedded/buildroot/chapter19-cicd.md` → `/blog/embedded/buildroot/chapter19-cicd`
+- `src/content/blog/embedded/buildroot/chapter20-yocto-migration.md` → `/blog/embedded/buildroot/chapter20-yocto-migration`
+- `src/content/blog/embedded/embedded-cpp/00-preface.md` → `/blog/embedded/embedded-cpp/00-preface`
+- `src/content/blog/embedded/embedded-cpp/part1-01-cpp-vs-c.md` → `/blog/embedded/embedded-cpp/part1-01-cpp-vs-c`
+- `src/content/blog/embedded/embedded-cpp/part1-02-compiler-flags.md` → `/blog/embedded/embedded-cpp/part1-02-compiler-flags`
+- `src/content/blog/embedded/embedded-cpp/part1-03-runtime-requirements.md` → `/blog/embedded/embedded-cpp/part1-03-runtime-requirements`
+- `src/content/blog/embedded/embedded-cpp/part1-04-code-size-analysis.md` → `/blog/embedded/embedded-cpp/part1-04-code-size-analysis`
+- `src/content/blog/embedded/embedded-cpp/part1-05-abi-compatibility.md` → `/blog/embedded/embedded-cpp/part1-05-abi-compatibility`
+- `src/content/blog/embedded/embedded-cpp/part1-06-startup-code.md` → `/blog/embedded/embedded-cpp/part1-06-startup-code`
+- `src/content/blog/embedded/embedded-cpp/part1-07-linker-scripts.md` → `/blog/embedded/embedded-cpp/part1-07-linker-scripts`
+- `src/content/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice.md` → `/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice`
+- `src/content/blog/embedded/embedded-cpp/part2-01-raii-basics.md` → `/blog/embedded/embedded-cpp/part2-01-raii-basics`
+- `src/content/blog/embedded/embedded-cpp/part2-02-raii-patterns.md` → `/blog/embedded/embedded-cpp/part2-02-raii-patterns`
+- `src/content/blog/embedded/embedded-cpp/part2-03-constexpr-basics.md` → `/blog/embedded/embedded-cpp/part2-03-constexpr-basics`
+- `src/content/blog/embedded/embedded-cpp/part2-04-constexpr-advanced.md` → `/blog/embedded/embedded-cpp/part2-04-constexpr-advanced`
+- `src/content/blog/embedded/embedded-cpp/part2-05-consteval-constinit.md` → `/blog/embedded/embedded-cpp/part2-05-consteval-constinit`
+- `src/content/blog/embedded/embedded-cpp/part2-06-templates-basics.md` → `/blog/embedded/embedded-cpp/part2-06-templates-basics`
+- `src/content/blog/embedded/embedded-cpp/part2-07-templates-cost.md` → `/blog/embedded/embedded-cpp/part2-07-templates-cost`
+- `src/content/blog/embedded/embedded-cpp/part2-08-static-polymorphism.md` → `/blog/embedded/embedded-cpp/part2-08-static-polymorphism`
+- `src/content/blog/embedded/embedded-cpp/part2-09-type-traits.md` → `/blog/embedded/embedded-cpp/part2-09-type-traits`
+- `src/content/blog/embedded/embedded-cpp/part2-10-concepts.md` → `/blog/embedded/embedded-cpp/part2-10-concepts`
+- `src/content/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc.md` → `/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc`
+- `src/content/blog/embedded/embedded-cpp/part3-02-custom-allocator-basics.md` → `/blog/embedded/embedded-cpp/part3-02-custom-allocator-basics`
+- `src/content/blog/embedded/embedded-cpp/part3-03-pool-allocator.md` → `/blog/embedded/embedded-cpp/part3-03-pool-allocator`
+- `src/content/blog/embedded/embedded-cpp/part3-04-pmr.md` → `/blog/embedded/embedded-cpp/part3-04-pmr`
+- `src/content/blog/embedded/embedded-cpp/part3-05-no-exception-design.md` → `/blog/embedded/embedded-cpp/part3-05-no-exception-design`
+- `src/content/blog/embedded/embedded-cpp/part3-06-error-handling-patterns.md` → `/blog/embedded/embedded-cpp/part3-06-error-handling-patterns`
+- `src/content/blog/embedded/embedded-cpp/part3-07-expected.md` → `/blog/embedded/embedded-cpp/part3-07-expected`
+- `src/content/blog/embedded/embedded-cpp/part3-08-no-rtti-design.md` → `/blog/embedded/embedded-cpp/part3-08-no-rtti-design`
+- `src/content/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice.md` → `/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice`
+- `src/content/blog/embedded/embedded-cpp/part3-10-ownership-model.md` → `/blog/embedded/embedded-cpp/part3-10-ownership-model`
+- `src/content/blog/embedded/embedded-cpp/part4-01-intrusive-containers.md` → `/blog/embedded/embedded-cpp/part4-01-intrusive-containers`
+- `src/content/blog/embedded/embedded-cpp/part4-02-etl-library.md` → `/blog/embedded/embedded-cpp/part4-02-etl-library`
+- `src/content/blog/embedded/embedded-cpp/part4-03-lock-free-basics.md` → `/blog/embedded/embedded-cpp/part4-03-lock-free-basics`
+- `src/content/blog/embedded/embedded-cpp/part4-04-lock-free-container.md` → `/blog/embedded/embedded-cpp/part4-04-lock-free-container`
+- `src/content/blog/embedded/embedded-cpp/part4-05-type-safe-flags.md` → `/blog/embedded/embedded-cpp/part4-05-type-safe-flags`
+- `src/content/blog/embedded/embedded-cpp/part4-06-state-machine.md` → `/blog/embedded/embedded-cpp/part4-06-state-machine`
+- `src/content/blog/embedded/embedded-cpp/part4-07-compile-time-fsm.md` → `/blog/embedded/embedded-cpp/part4-07-compile-time-fsm`
+- `src/content/blog/embedded/embedded-cpp/part4-08-singleton-alternatives.md` → `/blog/embedded/embedded-cpp/part4-08-singleton-alternatives`
+- `src/content/blog/embedded/embedded-cpp/part5-01-register-abstraction.md` → `/blog/embedded/embedded-cpp/part5-01-register-abstraction`
+- `src/content/blog/embedded/embedded-cpp/part5-02-gpio-abstraction.md` → `/blog/embedded/embedded-cpp/part5-02-gpio-abstraction`
+- `src/content/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction.md` → `/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction`
+- `src/content/blog/embedded/embedded-cpp/part5-04-hal-design-patterns.md` → `/blog/embedded/embedded-cpp/part5-04-hal-design-patterns`
+- `src/content/blog/embedded/embedded-security/chapter01-threat-model.md` → `/blog/embedded/embedded-security/chapter01-threat-model`
+- `src/content/blog/embedded/embedded-security/chapter02-secure-boot.md` → `/blog/embedded/embedded-security/chapter02-secure-boot`
+- `src/content/blog/embedded/embedded-security/chapter03-mcu-crypto.md` → `/blog/embedded/embedded-security/chapter03-mcu-crypto`
+- `src/content/blog/embedded/embedded-security/chapter04-trustzone.md` → `/blog/embedded/embedded-security/chapter04-trustzone`
+- `src/content/blog/embedded/embedded-security/chapter05-tee.md` → `/blog/embedded/embedded-security/chapter05-tee`
+- `src/content/blog/embedded/embedded-security/chapter06-ota-update.md` → `/blog/embedded/embedded-security/chapter06-ota-update`
+- `src/content/blog/embedded/embedded-security/chapter07-side-channel.md` → `/blog/embedded/embedded-security/chapter07-side-channel`
+- `src/content/blog/embedded/embedded-security/chapter08-iot-standards.md` → `/blog/embedded/embedded-security/chapter08-iot-standards`
+- `src/content/blog/embedded/embedded-security/chapter09-firmware-analysis.md` → `/blog/embedded/embedded-security/chapter09-firmware-analysis`
+- `src/content/blog/embedded/embedded-security/chapter10-sdlc.md` → `/blog/embedded/embedded-security/chapter10-sdlc`
+- `src/content/blog/embedded/embedded-security/chapter11-pcie-cxl-ide.md` → `/blog/embedded/embedded-security/chapter11-pcie-cxl-ide`
+- `src/content/blog/embedded/embedded-security/chapter12-spdm-cma.md` → `/blog/embedded/embedded-security/chapter12-spdm-cma`
+- `src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md` → `/blog/embedded/embedded-security/chapter13-cxl-tee`
+- `src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md` → `/blog/embedded/hardware/cxl/chapter01-cxl-position`
+- `src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md` → `/blog/embedded/hardware/cxl/chapter02-system-architecture`
+- `src/content/blog/embedded/hardware/cxl/chapter03-coherency-model.md` → `/blog/embedded/hardware/cxl/chapter03-coherency-model`
+- `src/content/blog/embedded/hardware/cxl/chapter04-pooling-gfam.md` → `/blog/embedded/hardware/cxl/chapter04-pooling-gfam`
+- `src/content/blog/embedded/hardware/cxl/chapter05-cxl-4-features.md` → `/blog/embedded/hardware/cxl/chapter05-cxl-4-features`
+- `src/content/blog/embedded/hardware/cxl/chapter06-cxl-io.md` → `/blog/embedded/hardware/cxl/chapter06-cxl-io`
+- `src/content/blog/embedded/hardware/cxl/chapter07-cxl-cache.md` → `/blog/embedded/hardware/cxl/chapter07-cxl-cache`
+- `src/content/blog/embedded/hardware/cxl/chapter08-cxl-mem.md` → `/blog/embedded/hardware/cxl/chapter08-cxl-mem`
+- `src/content/blog/embedded/hardware/cxl/chapter09-flit-format.md` → `/blog/embedded/hardware/cxl/chapter09-flit-format`
+- `src/content/blog/embedded/hardware/cxl/chapter10-arb-mux.md` → `/blog/embedded/hardware/cxl/chapter10-arb-mux`
+- `src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md` → `/blog/embedded/hardware/cxl/chapter11-linux-driver`
+- `src/content/blog/embedded/hardware/cxl/chapter12-qemu-emulation.md` → `/blog/embedded/hardware/cxl/chapter12-qemu-emulation`
+- `src/content/blog/embedded/hardware/cxl/chapter13-switching-fabric.md` → `/blog/embedded/hardware/cxl/chapter13-switching-fabric`
+- `src/content/blog/embedded/hardware/cxl/chapter14-security.md` → `/blog/embedded/hardware/cxl/chapter14-security`
+- `src/content/blog/embedded/hardware/cxl/chapter15-ras-performance.md` → `/blog/embedded/hardware/cxl/chapter15-ras-performance`
+- `src/content/blog/embedded/hardware/hbm/chapter01-overview.md` → `/blog/embedded/hardware/hbm/chapter01-overview`
+- `src/content/blog/embedded/hardware/hbm/chapter02-hbm-stack.md` → `/blog/embedded/hardware/hbm/chapter02-hbm-stack`
+- `src/content/blog/embedded/hardware/hbm/chapter03-hbm-generations.md` → `/blog/embedded/hardware/hbm/chapter03-hbm-generations`
+- `src/content/blog/embedded/hardware/hbm/chapter04-gddr.md` → `/blog/embedded/hardware/hbm/chapter04-gddr`
+- `src/content/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck.md` → `/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck`
+- `src/content/blog/embedded/hardware/hbm/chapter06-thermal-power.md` → `/blog/embedded/hardware/hbm/chapter06-thermal-power`
+- `src/content/blog/embedded/hardware/hbm/chapter07-memory-controller.md` → `/blog/embedded/hardware/hbm/chapter07-memory-controller`
+- `src/content/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage.md` → `/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage`
+- `src/content/blog/embedded/hardware/hbm/chapter09-cxl-mem.md` → `/blog/embedded/hardware/hbm/chapter09-cxl-mem`
+- `src/content/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol.md` → `/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol`
+- `src/content/blog/embedded/hardware/hbm/chapter11-cxl-device-types.md` → `/blog/embedded/hardware/hbm/chapter11-cxl-device-types`
+- `src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md` → `/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric`
+- `src/content/blog/embedded/hardware/pcie/chapter01-fundamentals.md` → `/blog/embedded/hardware/pcie/chapter01-fundamentals`
+- `src/content/blog/embedded/hardware/pcie/chapter02-tlp.md` → `/blog/embedded/hardware/pcie/chapter02-tlp`
+- `src/content/blog/embedded/hardware/pcie/chapter03-config-space.md` → `/blog/embedded/hardware/pcie/chapter03-config-space`
+- `src/content/blog/embedded/hardware/pcie/chapter04-bar-mmio.md` → `/blog/embedded/hardware/pcie/chapter04-bar-mmio`
+- `src/content/blog/embedded/hardware/pcie/chapter05-interrupts.md` → `/blog/embedded/hardware/pcie/chapter05-interrupts`
+- `src/content/blog/embedded/hardware/pcie/chapter06-power-management.md` → `/blog/embedded/hardware/pcie/chapter06-power-management`
+- `src/content/blog/embedded/hardware/pcie/chapter07-error-handling.md` → `/blog/embedded/hardware/pcie/chapter07-error-handling`
+- `src/content/blog/embedded/hardware/pcie/chapter08-dllp.md` → `/blog/embedded/hardware/pcie/chapter08-dllp`
+- `src/content/blog/embedded/hardware/pcie/chapter09-physical-layer.md` → `/blog/embedded/hardware/pcie/chapter09-physical-layer`
+- `src/content/blog/embedded/hardware/pcie/chapter10-linux-basics.md` → `/blog/embedded/hardware/pcie/chapter10-linux-basics`
+- `src/content/blog/embedded/hardware/pcie/chapter11-linux-dma.md` → `/blog/embedded/hardware/pcie/chapter11-linux-dma`
+- `src/content/blog/embedded/hardware/pcie/chapter12-virtualization-1.md` → `/blog/embedded/hardware/pcie/chapter12-virtualization-1`
+- `src/content/blog/embedded/hardware/pcie/chapter13-virtualization-2.md` → `/blog/embedded/hardware/pcie/chapter13-virtualization-2`
+- `src/content/blog/embedded/hardware/pcie/chapter14-linux-operations.md` → `/blog/embedded/hardware/pcie/chapter14-linux-operations`
+- `src/content/blog/embedded/hardware/pcie/chapter15-tools.md` → `/blog/embedded/hardware/pcie/chapter15-tools`
+- `src/content/blog/embedded/hardware/pcie/chapter16-troubleshooting.md` → `/blog/embedded/hardware/pcie/chapter16-troubleshooting`
+- `src/content/blog/embedded/hardware/pcie/chapter17-performance.md` → `/blog/embedded/hardware/pcie/chapter17-performance`
+- `src/content/blog/embedded/hardware/pcie/chapter18-register-maps.md` → `/blog/embedded/hardware/pcie/chapter18-register-maps`
+- `src/content/blog/embedded/hardware/pcie/chapter19-advanced-features.md` → `/blog/embedded/hardware/pcie/chapter19-advanced-features`
+- `src/content/blog/embedded/modern-recipes/00-preface.md` → `/blog/embedded/modern-recipes/00-preface`
+- `src/content/blog/embedded/modern-recipes/part1-01-digital-signal-basics.md` → `/blog/embedded/modern-recipes/part1-01-digital-signal-basics`
+- `src/content/blog/embedded/modern-recipes/part1-02-clock-timing.md` → `/blog/embedded/modern-recipes/part1-02-clock-timing`
+- `src/content/blog/embedded/modern-recipes/part1-03-gpio-internals.md` → `/blog/embedded/modern-recipes/part1-03-gpio-internals`
+- `src/content/blog/embedded/modern-recipes/part1-04-uart-hardware.md` → `/blog/embedded/modern-recipes/part1-04-uart-hardware`
+- `src/content/blog/embedded/modern-recipes/part1-05-spi-hardware.md` → `/blog/embedded/modern-recipes/part1-05-spi-hardware`
+- `src/content/blog/embedded/modern-recipes/part1-06-i2c-hardware.md` → `/blog/embedded/modern-recipes/part1-06-i2c-hardware`
+- `src/content/blog/embedded/modern-recipes/part1-07-adc-principles.md` → `/blog/embedded/modern-recipes/part1-07-adc-principles`
+- `src/content/blog/embedded/modern-recipes/part1-08-dac-principles.md` → `/blog/embedded/modern-recipes/part1-08-dac-principles`
+- `src/content/blog/embedded/modern-recipes/part1-09-pwm-signal.md` → `/blog/embedded/modern-recipes/part1-09-pwm-signal`
+- `src/content/blog/embedded/modern-recipes/part1-10-can-electrical.md` → `/blog/embedded/modern-recipes/part1-10-can-electrical`
+- `src/content/blog/embedded/modern-recipes/part1-11-rs485-rs422.md` → `/blog/embedded/modern-recipes/part1-11-rs485-rs422`
+- `src/content/blog/embedded/modern-recipes/part1-12-lvds-differential.md` → `/blog/embedded/modern-recipes/part1-12-lvds-differential`
+- `src/content/blog/embedded/modern-recipes/part10-01-debug-mindset.md` → `/blog/embedded/modern-recipes/part10-01-debug-mindset`
+- `src/content/blog/embedded/modern-recipes/part10-02-jtag-swd.md` → `/blog/embedded/modern-recipes/part10-02-jtag-swd`
+- `src/content/blog/embedded/modern-recipes/part10-03-gdb-remote-debug.md` → `/blog/embedded/modern-recipes/part10-03-gdb-remote-debug`
+- `src/content/blog/embedded/modern-recipes/part10-04-hardfault-analysis.md` → `/blog/embedded/modern-recipes/part10-04-hardfault-analysis`
+- `src/content/blog/embedded/modern-recipes/part10-05-uart-not-printing.md` → `/blog/embedded/modern-recipes/part10-05-uart-not-printing`
+- `src/content/blog/embedded/modern-recipes/part10-06-boot-failure.md` → `/blog/embedded/modern-recipes/part10-06-boot-failure`
+- `src/content/blog/embedded/modern-recipes/part10-07-interrupt-debugging.md` → `/blog/embedded/modern-recipes/part10-07-interrupt-debugging`
+- `src/content/blog/embedded/modern-recipes/part10-08-memory-corruption.md` → `/blog/embedded/modern-recipes/part10-08-memory-corruption`
+- `src/content/blog/embedded/modern-recipes/part10-09-timing-race-diag.md` → `/blog/embedded/modern-recipes/part10-09-timing-race-diag`
+- `src/content/blog/embedded/modern-recipes/part10-10-protocol-analyzer.md` → `/blog/embedded/modern-recipes/part10-10-protocol-analyzer`
+- `src/content/blog/embedded/modern-recipes/part10-11-logging-system.md` → `/blog/embedded/modern-recipes/part10-11-logging-system`
+- `src/content/blog/embedded/modern-recipes/part10-12-postmortem-analysis.md` → `/blog/embedded/modern-recipes/part10-12-postmortem-analysis`
+- `src/content/blog/embedded/modern-recipes/part11-01-fpga-basics.md` → `/blog/embedded/modern-recipes/part11-01-fpga-basics`
+- `src/content/blog/embedded/modern-recipes/part11-02-vivado-usage.md` → `/blog/embedded/modern-recipes/part11-02-vivado-usage`
+- `src/content/blog/embedded/modern-recipes/part11-03-pcie-bar.md` → `/blog/embedded/modern-recipes/part11-03-pcie-bar`
+- `src/content/blog/embedded/modern-recipes/part11-04-axi.md` → `/blog/embedded/modern-recipes/part11-04-axi`
+- `src/content/blog/embedded/modern-recipes/part11-05-ps-pl-communication.md` → `/blog/embedded/modern-recipes/part11-05-ps-pl-communication`
+- `src/content/blog/embedded/modern-recipes/part11-06-mailbox.md` → `/blog/embedded/modern-recipes/part11-06-mailbox`
+- `src/content/blog/embedded/modern-recipes/part11-07-cq-sq.md` → `/blog/embedded/modern-recipes/part11-07-cq-sq`
+- `src/content/blog/embedded/modern-recipes/part11-08-dma-completion.md` → `/blog/embedded/modern-recipes/part11-08-dma-completion`
+- `src/content/blog/embedded/modern-recipes/part11-09-pcie-streaming.md` → `/blog/embedded/modern-recipes/part11-09-pcie-streaming`
+- `src/content/blog/embedded/modern-recipes/part11-10-hls.md` → `/blog/embedded/modern-recipes/part11-10-hls`
+- `src/content/blog/embedded/modern-recipes/part11-11-hls-optimization.md` → `/blog/embedded/modern-recipes/part11-11-hls-optimization`
+- `src/content/blog/embedded/modern-recipes/part11-12-vitis-ai.md` → `/blog/embedded/modern-recipes/part11-12-vitis-ai`
+- `src/content/blog/embedded/modern-recipes/part11-13-opencl-fpga.md` → `/blog/embedded/modern-recipes/part11-13-opencl-fpga`
+- `src/content/blog/embedded/modern-recipes/part11-14-intel-quartus.md` → `/blog/embedded/modern-recipes/part11-14-intel-quartus`
+- `src/content/blog/embedded/modern-recipes/part11-15-pcie-to-cxl.md` → `/blog/embedded/modern-recipes/part11-15-pcie-to-cxl`
+- `src/content/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation.md` → `/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation`
+- `src/content/blog/embedded/modern-recipes/part11-17-linux-cxl-driver.md` → `/blog/embedded/modern-recipes/part11-17-linux-cxl-driver`
+- `src/content/blog/embedded/modern-recipes/part12-01-edge-inference.md` → `/blog/embedded/modern-recipes/part12-01-edge-inference`
+- `src/content/blog/embedded/modern-recipes/part12-02-npu-architecture.md` → `/blog/embedded/modern-recipes/part12-02-npu-architecture`
+- `src/content/blog/embedded/modern-recipes/part12-03-quantization.md` → `/blog/embedded/modern-recipes/part12-03-quantization`
+- `src/content/blog/embedded/modern-recipes/part12-04-tensorrt.md` → `/blog/embedded/modern-recipes/part12-04-tensorrt`
+- `src/content/blog/embedded/modern-recipes/part12-05-tflite-micro.md` → `/blog/embedded/modern-recipes/part12-05-tflite-micro`
+- `src/content/blog/embedded/modern-recipes/part12-06-onnx-runtime.md` → `/blog/embedded/modern-recipes/part12-06-onnx-runtime`
+- `src/content/blog/embedded/modern-recipes/part12-07-thermal.md` → `/blog/embedded/modern-recipes/part12-07-thermal`
+- `src/content/blog/embedded/modern-recipes/part12-08-jetson.md` → `/blog/embedded/modern-recipes/part12-08-jetson`
+- `src/content/blog/embedded/modern-recipes/part12-09-zero-copy-camera.md` → `/blog/embedded/modern-recipes/part12-09-zero-copy-camera`
+- `src/content/blog/embedded/modern-recipes/part12-10-on-device-llm.md` → `/blog/embedded/modern-recipes/part12-10-on-device-llm`
+- `src/content/blog/embedded/modern-recipes/part12-11-tfm-trustzone.md` → `/blog/embedded/modern-recipes/part12-11-tfm-trustzone`
+- `src/content/blog/embedded/modern-recipes/part12-12-matter-thread.md` → `/blog/embedded/modern-recipes/part12-12-matter-thread`
+- `src/content/blog/embedded/modern-recipes/part2-01-cortex-m-comparison.md` → `/blog/embedded/modern-recipes/part2-01-cortex-m-comparison`
+- `src/content/blog/embedded/modern-recipes/part2-02-cortex-a-comparison.md` → `/blog/embedded/modern-recipes/part2-02-cortex-a-comparison`
+- `src/content/blog/embedded/modern-recipes/part2-03-arm-registers.md` → `/blog/embedded/modern-recipes/part2-03-arm-registers`
+- `src/content/blog/embedded/modern-recipes/part2-04-cortex-m-exceptions.md` → `/blog/embedded/modern-recipes/part2-04-cortex-m-exceptions`
+- `src/content/blog/embedded/modern-recipes/part2-05-arm-memory-map.md` → `/blog/embedded/modern-recipes/part2-05-arm-memory-map`
+- `src/content/blog/embedded/modern-recipes/part2-06-arm-cache.md` → `/blog/embedded/modern-recipes/part2-06-arm-cache`
+- `src/content/blog/embedded/modern-recipes/part2-07-arm-mpu.md` → `/blog/embedded/modern-recipes/part2-07-arm-mpu`
+- `src/content/blog/embedded/modern-recipes/part2-08-arm-mmu.md` → `/blog/embedded/modern-recipes/part2-08-arm-mmu`
+- `src/content/blog/embedded/modern-recipes/part2-09-trustzone-m.md` → `/blog/embedded/modern-recipes/part2-09-trustzone-m`
+- `src/content/blog/embedded/modern-recipes/part2-10-memory-barrier.md` → `/blog/embedded/modern-recipes/part2-10-memory-barrier`
+- `src/content/blog/embedded/modern-recipes/part3-01-cross-compiler.md` → `/blog/embedded/modern-recipes/part3-01-cross-compiler`
+- `src/content/blog/embedded/modern-recipes/part3-02-compile-pipeline.md` → `/blog/embedded/modern-recipes/part3-02-compile-pipeline`
+- `src/content/blog/embedded/modern-recipes/part3-03-elf-format.md` → `/blog/embedded/modern-recipes/part3-03-elf-format`
+- `src/content/blog/embedded/modern-recipes/part3-04-linker-script-basics.md` → `/blog/embedded/modern-recipes/part3-04-linker-script-basics`
+- `src/content/blog/embedded/modern-recipes/part3-05-linker-script-advanced.md` → `/blog/embedded/modern-recipes/part3-05-linker-script-advanced`
+- `src/content/blog/embedded/modern-recipes/part3-06-startup-code.md` → `/blog/embedded/modern-recipes/part3-06-startup-code`
+- `src/content/blog/embedded/modern-recipes/part3-07-c-runtime.md` → `/blog/embedded/modern-recipes/part3-07-c-runtime`
+- `src/content/blog/embedded/modern-recipes/part3-08-memory-layout.md` → `/blog/embedded/modern-recipes/part3-08-memory-layout`
+- `src/content/blog/embedded/modern-recipes/part3-09-compiler-optimization.md` → `/blog/embedded/modern-recipes/part3-09-compiler-optimization`
+- `src/content/blog/embedded/modern-recipes/part3-10-map-file-analysis.md` → `/blog/embedded/modern-recipes/part3-10-map-file-analysis`
+- `src/content/blog/embedded/modern-recipes/part3-11-make-cmake-cross.md` → `/blog/embedded/modern-recipes/part3-11-make-cmake-cross`
+- `src/content/blog/embedded/modern-recipes/part3-12-bootloader-chain.md` → `/blog/embedded/modern-recipes/part3-12-bootloader-chain`
+- `src/content/blog/embedded/modern-recipes/part4-01-first-baremetal.md` → `/blog/embedded/modern-recipes/part4-01-first-baremetal`
+- `src/content/blog/embedded/modern-recipes/part4-02-mmio-access.md` → `/blog/embedded/modern-recipes/part4-02-mmio-access`
+- `src/content/blog/embedded/modern-recipes/part4-03-gpio-driver.md` → `/blog/embedded/modern-recipes/part4-03-gpio-driver`
+- `src/content/blog/embedded/modern-recipes/part4-04-clock-setup.md` → `/blog/embedded/modern-recipes/part4-04-clock-setup`
+- `src/content/blog/embedded/modern-recipes/part4-05-interrupt-handling.md` → `/blog/embedded/modern-recipes/part4-05-interrupt-handling`
+- `src/content/blog/embedded/modern-recipes/part4-06-systick-timer.md` → `/blog/embedded/modern-recipes/part4-06-systick-timer`
+- `src/content/blog/embedded/modern-recipes/part4-07-uart-driver.md` → `/blog/embedded/modern-recipes/part4-07-uart-driver`
+- `src/content/blog/embedded/modern-recipes/part4-08-spi-driver.md` → `/blog/embedded/modern-recipes/part4-08-spi-driver`
+- `src/content/blog/embedded/modern-recipes/part4-09-i2c-driver.md` → `/blog/embedded/modern-recipes/part4-09-i2c-driver`
+- `src/content/blog/embedded/modern-recipes/part4-10-dma-basics.md` → `/blog/embedded/modern-recipes/part4-10-dma-basics`
+- `src/content/blog/embedded/modern-recipes/part4-11-low-power-modes.md` → `/blog/embedded/modern-recipes/part4-11-low-power-modes`
+- `src/content/blog/embedded/modern-recipes/part4-12-watchdog.md` → `/blog/embedded/modern-recipes/part4-12-watchdog`
+- `src/content/blog/embedded/modern-recipes/part4-13-flash-programming.md` → `/blog/embedded/modern-recipes/part4-13-flash-programming`
+- `src/content/blog/embedded/modern-recipes/part4-14-ddr-init-failure.md` → `/blog/embedded/modern-recipes/part4-14-ddr-init-failure`
+- `src/content/blog/embedded/modern-recipes/part5-01-pwm-output.md` → `/blog/embedded/modern-recipes/part5-01-pwm-output`
+- `src/content/blog/embedded/modern-recipes/part5-02-dc-motor.md` → `/blog/embedded/modern-recipes/part5-02-dc-motor`
+- `src/content/blog/embedded/modern-recipes/part5-03-stepper-motor.md` → `/blog/embedded/modern-recipes/part5-03-stepper-motor`
+- `src/content/blog/embedded/modern-recipes/part5-04-servo-motor.md` → `/blog/embedded/modern-recipes/part5-04-servo-motor`
+- `src/content/blog/embedded/modern-recipes/part5-05-character-lcd.md` → `/blog/embedded/modern-recipes/part5-05-character-lcd`
+- `src/content/blog/embedded/modern-recipes/part5-06-spi-oled.md` → `/blog/embedded/modern-recipes/part5-06-spi-oled`
+- `src/content/blog/embedded/modern-recipes/part5-07-tft-display.md` → `/blog/embedded/modern-recipes/part5-07-tft-display`
+- `src/content/blog/embedded/modern-recipes/part5-08-environmental-sensors.md` → `/blog/embedded/modern-recipes/part5-08-environmental-sensors`
+- `src/content/blog/embedded/modern-recipes/part5-09-imu-sensor.md` → `/blog/embedded/modern-recipes/part5-09-imu-sensor`
+- `src/content/blog/embedded/modern-recipes/part5-10-can-communication.md` → `/blog/embedded/modern-recipes/part5-10-can-communication`
+- `src/content/blog/embedded/modern-recipes/part5-11-usb-device.md` → `/blog/embedded/modern-recipes/part5-11-usb-device`
+- `src/content/blog/embedded/modern-recipes/part5-12-ethernet-mac-phy.md` → `/blog/embedded/modern-recipes/part5-12-ethernet-mac-phy`
+- `src/content/blog/embedded/modern-recipes/part5-13-sd-card-fatfs.md` → `/blog/embedded/modern-recipes/part5-13-sd-card-fatfs`
+- `src/content/blog/embedded/modern-recipes/part5-14-rtc-utilization.md` → `/blog/embedded/modern-recipes/part5-14-rtc-utilization`
+- `src/content/blog/embedded/modern-recipes/part6-01-rtos-decision.md` → `/blog/embedded/modern-recipes/part6-01-rtos-decision`
+- `src/content/blog/embedded/modern-recipes/part6-02-task-design.md` → `/blog/embedded/modern-recipes/part6-02-task-design`
+- `src/content/blog/embedded/modern-recipes/part6-03-scheduler-internals.md` → `/blog/embedded/modern-recipes/part6-03-scheduler-internals`
+- `src/content/blog/embedded/modern-recipes/part6-04-semaphore-usage.md` → `/blog/embedded/modern-recipes/part6-04-semaphore-usage`
+- `src/content/blog/embedded/modern-recipes/part6-05-mutex-usage.md` → `/blog/embedded/modern-recipes/part6-05-mutex-usage`
+- `src/content/blog/embedded/modern-recipes/part6-06-queue-usage.md` → `/blog/embedded/modern-recipes/part6-06-queue-usage`
+- `src/content/blog/embedded/modern-recipes/part6-07-event-group.md` → `/blog/embedded/modern-recipes/part6-07-event-group`
+- `src/content/blog/embedded/modern-recipes/part6-08-software-timer.md` → `/blog/embedded/modern-recipes/part6-08-software-timer`
+- `src/content/blog/embedded/modern-recipes/part6-09-isr-api.md` → `/blog/embedded/modern-recipes/part6-09-isr-api`
+- `src/content/blog/embedded/modern-recipes/part6-10-priority-inversion.md` → `/blog/embedded/modern-recipes/part6-10-priority-inversion`
+- `src/content/blog/embedded/modern-recipes/part6-11-timer-services.md` → `/blog/embedded/modern-recipes/part6-11-timer-services`
+- `src/content/blog/embedded/modern-recipes/part6-12-rtos-debugging.md` → `/blog/embedded/modern-recipes/part6-12-rtos-debugging`
+- `src/content/blog/embedded/modern-recipes/part7-01-linux-boot-flow.md` → `/blog/embedded/modern-recipes/part7-01-linux-boot-flow`
+- `src/content/blog/embedded/modern-recipes/part7-02-uboot-usage.md` → `/blog/embedded/modern-recipes/part7-02-uboot-usage`
+- `src/content/blog/embedded/modern-recipes/part7-03-device-tree-basics.md` → `/blog/embedded/modern-recipes/part7-03-device-tree-basics`
+- `src/content/blog/embedded/modern-recipes/part7-04-device-tree-overlay.md` → `/blog/embedded/modern-recipes/part7-04-device-tree-overlay`
+- `src/content/blog/embedded/modern-recipes/part7-05-kernel-build.md` → `/blog/embedded/modern-recipes/part7-05-kernel-build`
+- `src/content/blog/embedded/modern-recipes/part7-06-kernel-module.md` → `/blog/embedded/modern-recipes/part7-06-kernel-module`
+- `src/content/blog/embedded/modern-recipes/part7-07-char-driver.md` → `/blog/embedded/modern-recipes/part7-07-char-driver`
+- `src/content/blog/embedded/modern-recipes/part7-08-platform-driver.md` → `/blog/embedded/modern-recipes/part7-08-platform-driver`
+- `src/content/blog/embedded/modern-recipes/part7-09-mmap.md` → `/blog/embedded/modern-recipes/part7-09-mmap`
+- `src/content/blog/embedded/modern-recipes/part7-10-epoll.md` → `/blog/embedded/modern-recipes/part7-10-epoll`
+- `src/content/blog/embedded/modern-recipes/part7-11-uio-vfio.md` → `/blog/embedded/modern-recipes/part7-11-uio-vfio`
+- `src/content/blog/embedded/modern-recipes/part7-12-sysfs.md` → `/blog/embedded/modern-recipes/part7-12-sysfs`
+- `src/content/blog/embedded/modern-recipes/part7-13-irq-affinity.md` → `/blog/embedded/modern-recipes/part7-13-irq-affinity`
+- `src/content/blog/embedded/modern-recipes/part7-14-rootfs-buildroot.md` → `/blog/embedded/modern-recipes/part7-14-rootfs-buildroot`
+- `src/content/blog/embedded/modern-recipes/part8-01-dynamic-memory.md` → `/blog/embedded/modern-recipes/part8-01-dynamic-memory`
+- `src/content/blog/embedded/modern-recipes/part8-02-memory-alignment.md` → `/blog/embedded/modern-recipes/part8-02-memory-alignment`
+- `src/content/blog/embedded/modern-recipes/part8-03-cache-alignment.md` → `/blog/embedded/modern-recipes/part8-03-cache-alignment`
+- `src/content/blog/embedded/modern-recipes/part8-04-dma-allocator.md` → `/blog/embedded/modern-recipes/part8-04-dma-allocator`
+- `src/content/blog/embedded/modern-recipes/part8-05-zero-copy.md` → `/blog/embedded/modern-recipes/part8-05-zero-copy`
+- `src/content/blog/embedded/modern-recipes/part8-06-numa.md` → `/blog/embedded/modern-recipes/part8-06-numa`
+- `src/content/blog/embedded/modern-recipes/part8-07-simd.md` → `/blog/embedded/modern-recipes/part8-07-simd`
+- `src/content/blog/embedded/modern-recipes/part8-08-neon.md` → `/blog/embedded/modern-recipes/part8-08-neon`
+- `src/content/blog/embedded/modern-recipes/part8-09-stack-analysis.md` → `/blog/embedded/modern-recipes/part8-09-stack-analysis`
+- `src/content/blog/embedded/modern-recipes/part8-10-code-size-optimization.md` → `/blog/embedded/modern-recipes/part8-10-code-size-optimization`
+- `src/content/blog/embedded/modern-recipes/part8-11-power-optimization.md` → `/blog/embedded/modern-recipes/part8-11-power-optimization`
+- `src/content/blog/embedded/modern-recipes/part8-12-wcet-analysis.md` → `/blog/embedded/modern-recipes/part8-12-wcet-analysis`
+- `src/content/blog/embedded/modern-recipes/part9-01-lock-free-ring.md` → `/blog/embedded/modern-recipes/part9-01-lock-free-ring`
+- `src/content/blog/embedded/modern-recipes/part9-02-wait-free.md` → `/blog/embedded/modern-recipes/part9-02-wait-free`
+- `src/content/blog/embedded/modern-recipes/part9-03-rcu-basics.md` → `/blog/embedded/modern-recipes/part9-03-rcu-basics`
+- `src/content/blog/embedded/modern-recipes/part9-04-hazard-pointer.md` → `/blog/embedded/modern-recipes/part9-04-hazard-pointer`
+- `src/content/blog/embedded/modern-recipes/part9-05-cas-patterns.md` → `/blog/embedded/modern-recipes/part9-05-cas-patterns`
+- `src/content/blog/embedded/modern-recipes/part9-06-atomic-cost.md` → `/blog/embedded/modern-recipes/part9-06-atomic-cost`
+- `src/content/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex.md` → `/blog/embedded/modern-recipes/part9-07-spinlock-vs-mutex`
+- `src/content/blog/embedded/modern-recipes/part9-08-aba-problem.md` → `/blog/embedded/modern-recipes/part9-08-aba-problem`
+- `src/content/blog/embedded/modern-recipes/part9-09-false-sharing.md` → `/blog/embedded/modern-recipes/part9-09-false-sharing`
+- `src/content/blog/embedded/modern-recipes/part9-10-mpmc-queue.md` → `/blog/embedded/modern-recipes/part9-10-mpmc-queue`
+- `src/content/blog/embedded/performance-engineering/00-preface.md` → `/blog/embedded/performance-engineering/00-preface`
+- `src/content/blog/embedded/performance-engineering/part1-01-methodology.md` → `/blog/embedded/performance-engineering/part1-01-methodology`
+- `src/content/blog/embedded/performance-engineering/part1-02-metrics.md` → `/blog/embedded/performance-engineering/part1-02-metrics`
+- `src/content/blog/embedded/performance-engineering/part1-03-measurement.md` → `/blog/embedded/performance-engineering/part1-03-measurement`
+- `src/content/blog/embedded/performance-engineering/part1-04-statistics.md` → `/blog/embedded/performance-engineering/part1-04-statistics`
+- `src/content/blog/embedded/performance-engineering/part1-05-realtime.md` → `/blog/embedded/performance-engineering/part1-05-realtime`
+- `src/content/blog/embedded/performance-engineering/part1-06-benchmark.md` → `/blog/embedded/performance-engineering/part1-06-benchmark`
+- `src/content/blog/embedded/performance-engineering/part1-07-modeling.md` → `/blog/embedded/performance-engineering/part1-07-modeling`
+- `src/content/blog/embedded/performance-engineering/part1-08-profiling-overview.md` → `/blog/embedded/performance-engineering/part1-08-profiling-overview`
+- `src/content/blog/embedded/performance-engineering/part2-01-pipeline.md` → `/blog/embedded/performance-engineering/part2-01-pipeline`
+- `src/content/blog/embedded/performance-engineering/part2-02-pipeline-stall.md` → `/blog/embedded/performance-engineering/part2-02-pipeline-stall`
+- `src/content/blog/embedded/performance-engineering/part2-03-branch-prediction.md` → `/blog/embedded/performance-engineering/part2-03-branch-prediction`
+- `src/content/blog/embedded/performance-engineering/part2-04-speculative-execution.md` → `/blog/embedded/performance-engineering/part2-04-speculative-execution`
+- `src/content/blog/embedded/performance-engineering/part2-05-cache-basics.md` → `/blog/embedded/performance-engineering/part2-05-cache-basics`
+- `src/content/blog/embedded/performance-engineering/part2-06-cache-miss.md` → `/blog/embedded/performance-engineering/part2-06-cache-miss`
+- `src/content/blog/embedded/performance-engineering/part2-07-cache-line.md` → `/blog/embedded/performance-engineering/part2-07-cache-line`
+- `src/content/blog/embedded/performance-engineering/part2-08-memory-bandwidth.md` → `/blog/embedded/performance-engineering/part2-08-memory-bandwidth`
+- `src/content/blog/embedded/performance-engineering/part2-09-simd-neon.md` → `/blog/embedded/performance-engineering/part2-09-simd-neon`
+- `src/content/blog/embedded/performance-engineering/part2-10-pmu.md` → `/blog/embedded/performance-engineering/part2-10-pmu`
+- `src/content/blog/embedded/performance-engineering/part3-01-bus-architecture.md` → `/blog/embedded/performance-engineering/part3-01-bus-architecture`
+- `src/content/blog/embedded/performance-engineering/part3-02-bus-contention.md` → `/blog/embedded/performance-engineering/part3-02-bus-contention`
+- `src/content/blog/embedded/performance-engineering/part3-03-dma-performance.md` → `/blog/embedded/performance-engineering/part3-03-dma-performance`
+- `src/content/blog/embedded/performance-engineering/part3-04-dma-vs-cpu.md` → `/blog/embedded/performance-engineering/part3-04-dma-vs-cpu`
+- `src/content/blog/embedded/performance-engineering/part3-05-interrupt-latency.md` → `/blog/embedded/performance-engineering/part3-05-interrupt-latency`
+- `src/content/blog/embedded/performance-engineering/part3-06-interrupt-storm.md` → `/blog/embedded/performance-engineering/part3-06-interrupt-storm`
+- `src/content/blog/embedded/performance-engineering/part3-07-mmio.md` → `/blog/embedded/performance-engineering/part3-07-mmio`
+- `src/content/blog/embedded/performance-engineering/part3-08-peripheral-clock.md` → `/blog/embedded/performance-engineering/part3-08-peripheral-clock`
+- `src/content/blog/embedded/performance-engineering/part3-09-power-vs-performance.md` → `/blog/embedded/performance-engineering/part3-09-power-vs-performance`
+- `src/content/blog/embedded/performance-engineering/part3-10-thermal.md` → `/blog/embedded/performance-engineering/part3-10-thermal`
+- `src/content/blog/embedded/performance-engineering/part3-11-cxl-interconnect.md` → `/blog/embedded/performance-engineering/part3-11-cxl-interconnect`
+- `src/content/blog/embedded/performance-engineering/part3-12-cxl-mem-latency.md` → `/blog/embedded/performance-engineering/part3-12-cxl-mem-latency`
+- `src/content/blog/embedded/performance-engineering/part4-01-concurrency-basics.md` → `/blog/embedded/performance-engineering/part4-01-concurrency-basics`
+- `src/content/blog/embedded/performance-engineering/part4-02-false-sharing.md` → `/blog/embedded/performance-engineering/part4-02-false-sharing`
+- `src/content/blog/embedded/performance-engineering/part4-03-lock-contention.md` → `/blog/embedded/performance-engineering/part4-03-lock-contention`
+- `src/content/blog/embedded/performance-engineering/part4-04-spinlock.md` → `/blog/embedded/performance-engineering/part4-04-spinlock`
+- `src/content/blog/embedded/performance-engineering/part4-05-mutex.md` → `/blog/embedded/performance-engineering/part4-05-mutex`
+- `src/content/blog/embedded/performance-engineering/part4-06-rw-lock.md` → `/blog/embedded/performance-engineering/part4-06-rw-lock`
+- `src/content/blog/embedded/performance-engineering/part4-07-lock-free.md` → `/blog/embedded/performance-engineering/part4-07-lock-free`
+- `src/content/blog/embedded/performance-engineering/part4-08-memory-ordering.md` → `/blog/embedded/performance-engineering/part4-08-memory-ordering`
+- `src/content/blog/embedded/performance-engineering/part4-09-cache-coherency.md` → `/blog/embedded/performance-engineering/part4-09-cache-coherency`
+- `src/content/blog/embedded/performance-engineering/part4-10-smp-analysis.md` → `/blog/embedded/performance-engineering/part4-10-smp-analysis`
+- `src/content/blog/embedded/performance-engineering/part5-01-perf-basics.md` → `/blog/embedded/performance-engineering/part5-01-perf-basics`
+- `src/content/blog/embedded/performance-engineering/part5-02-perf-advanced.md` → `/blog/embedded/performance-engineering/part5-02-perf-advanced`
+- `src/content/blog/embedded/performance-engineering/part5-03-ftrace.md` → `/blog/embedded/performance-engineering/part5-03-ftrace`
+- `src/content/blog/embedded/performance-engineering/part5-04-ebpf.md` → `/blog/embedded/performance-engineering/part5-04-ebpf`
+- `src/content/blog/embedded/performance-engineering/part5-05-flamegraph.md` → `/blog/embedded/performance-engineering/part5-05-flamegraph`
+- `src/content/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach.md` → `/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach`
+- `src/content/blog/embedded/performance-engineering/part5-07-baremetal-profiling.md` → `/blog/embedded/performance-engineering/part5-07-baremetal-profiling`
+- `src/content/blog/embedded/performance-engineering/part5-08-nsight.md` → `/blog/embedded/performance-engineering/part5-08-nsight`
+- `src/content/blog/embedded/performance-engineering/part5-09-tracy-hotspot.md` → `/blog/embedded/performance-engineering/part5-09-tracy-hotspot`
+- `src/content/blog/embedded/performance-engineering/part5-10-ebpf-continuous.md` → `/blog/embedded/performance-engineering/part5-10-ebpf-continuous`
+- `src/content/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools.md` → `/blog/embedded/performance-engineering/part5-11-cxl-profiling-tools`
+- `src/content/blog/embedded/performance-engineering/part6-01-case-isr-latency.md` → `/blog/embedded/performance-engineering/part6-01-case-isr-latency`
+- `src/content/blog/embedded/performance-engineering/part6-02-case-cache-thrashing.md` → `/blog/embedded/performance-engineering/part6-02-case-cache-thrashing`
+- `src/content/blog/embedded/performance-engineering/part6-03-case-lock-contention.md` → `/blog/embedded/performance-engineering/part6-03-case-lock-contention`
+- `src/content/blog/embedded/performance-engineering/part6-04-case-dma-tuning.md` → `/blog/embedded/performance-engineering/part6-04-case-dma-tuning`
+- `src/content/blog/embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache.md` → `/blog/embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter01-overview.md` → `/blog/embedded/protocols/industrial-ethernet/chapter01-overview`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements.md` → `/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture.md` → `/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame.md` → `/blog/embedded/protocols/industrial-ethernet/chapter04-ethercat-frame`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master.md` → `/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter06-profinet.md` → `/blog/embedded/protocols/industrial-ethernet/chapter06-profinet`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter07-profinet-io.md` → `/blog/embedded/protocols/industrial-ethernet/chapter07-profinet-io`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter08-tsn.md` → `/blog/embedded/protocols/industrial-ethernet/chapter08-tsn`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling.md` → `/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink.md` → `/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime.md` → `/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime`
+- `src/content/blog/embedded/protocols/industrial-ethernet/chapter12-comparison.md` → `/blog/embedded/protocols/industrial-ethernet/chapter12-comparison`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter02-riscv-core.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter02-riscv-core`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter04-gpio-ledc-pwm.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter04-gpio-ledc-pwm`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter06-adc-touch.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter06-adc-touch`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter07-wifi-stack.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter07-wifi-stack`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter11-security.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter11-security`
+- `src/content/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management.md` → `/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management`
+- `src/content/blog/embedded/rtos/practical-internals/00-preface.md` → `/blog/embedded/rtos/practical-internals/00-preface`
+- `src/content/blog/embedded/rtos/practical-internals/part1-01-why-rtos.md` → `/blog/embedded/rtos/practical-internals/part1-01-why-rtos`
+- `src/content/blog/embedded/rtos/practical-internals/part1-02-task-thread.md` → `/blog/embedded/rtos/practical-internals/part1-02-task-thread`
+- `src/content/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms.md` → `/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms`
+- `src/content/blog/embedded/rtos/practical-internals/part1-04-preemption.md` → `/blog/embedded/rtos/practical-internals/part1-04-preemption`
+- `src/content/blog/embedded/rtos/practical-internals/part1-05-interrupts-rtos.md` → `/blog/embedded/rtos/practical-internals/part1-05-interrupts-rtos`
+- `src/content/blog/embedded/rtos/practical-internals/part1-06-sync-basics.md` → `/blog/embedded/rtos/practical-internals/part1-06-sync-basics`
+- `src/content/blog/embedded/rtos/practical-internals/part1-07-semaphore.md` → `/blog/embedded/rtos/practical-internals/part1-07-semaphore`
+- `src/content/blog/embedded/rtos/practical-internals/part1-08-mutex.md` → `/blog/embedded/rtos/practical-internals/part1-08-mutex`
+- `src/content/blog/embedded/rtos/practical-internals/part1-09-queues.md` → `/blog/embedded/rtos/practical-internals/part1-09-queues`
+- `src/content/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis.md` → `/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis`
+- `src/content/blog/embedded/rtos/practical-internals/part2-01-ready-list.md` → `/blog/embedded/rtos/practical-internals/part2-01-ready-list`
+- `src/content/blog/embedded/rtos/practical-internals/part2-02-blocked-list.md` → `/blog/embedded/rtos/practical-internals/part2-02-blocked-list`
+- `src/content/blog/embedded/rtos/practical-internals/part2-03-scheduler-algorithm.md` → `/blog/embedded/rtos/practical-internals/part2-03-scheduler-algorithm`
+- `src/content/blog/embedded/rtos/practical-internals/part2-04-context-switch.md` → `/blog/embedded/rtos/practical-internals/part2-04-context-switch`
+- `src/content/blog/embedded/rtos/practical-internals/part2-05-cortex-m-context.md` → `/blog/embedded/rtos/practical-internals/part2-05-cortex-m-context`
+- `src/content/blog/embedded/rtos/practical-internals/part2-06-cortex-a-context.md` → `/blog/embedded/rtos/practical-internals/part2-06-cortex-a-context`
+- `src/content/blog/embedded/rtos/practical-internals/part2-07-riscv-context.md` → `/blog/embedded/rtos/practical-internals/part2-07-riscv-context`
+- `src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md` → `/blog/embedded/rtos/practical-internals/part2-08-tick-timer`
+- `src/content/blog/embedded/rtos/practical-internals/part2-09-tickless.md` → `/blog/embedded/rtos/practical-internals/part2-09-tickless`
+- `src/content/blog/embedded/rtos/practical-internals/part2-10-scheduler-latency.md` → `/blog/embedded/rtos/practical-internals/part2-10-scheduler-latency`
+- `src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md` → `/blog/embedded/rtos/practical-internals/part2-11-tracing-observability`
+- `src/content/blog/embedded/rtos/practical-internals/part3-01-critical-section.md` → `/blog/embedded/rtos/practical-internals/part3-01-critical-section`
+- `src/content/blog/embedded/rtos/practical-internals/part3-02-semaphore-impl.md` → `/blog/embedded/rtos/practical-internals/part3-02-semaphore-impl`
+- `src/content/blog/embedded/rtos/practical-internals/part3-03-mutex-impl.md` → `/blog/embedded/rtos/practical-internals/part3-03-mutex-impl`
+- `src/content/blog/embedded/rtos/practical-internals/part3-04-priority-inversion.md` → `/blog/embedded/rtos/practical-internals/part3-04-priority-inversion`
+- `src/content/blog/embedded/rtos/practical-internals/part3-05-priority-inheritance.md` → `/blog/embedded/rtos/practical-internals/part3-05-priority-inheritance`
+- `src/content/blog/embedded/rtos/practical-internals/part3-06-priority-ceiling.md` → `/blog/embedded/rtos/practical-internals/part3-06-priority-ceiling`
+- `src/content/blog/embedded/rtos/practical-internals/part3-07-queue-impl.md` → `/blog/embedded/rtos/practical-internals/part3-07-queue-impl`
+- `src/content/blog/embedded/rtos/practical-internals/part3-08-event-group.md` → `/blog/embedded/rtos/practical-internals/part3-08-event-group`
+- `src/content/blog/embedded/rtos/practical-internals/part3-09-isr-safe-api.md` → `/blog/embedded/rtos/practical-internals/part3-09-isr-safe-api`
+- `src/content/blog/embedded/rtos/practical-internals/part3-10-deadlock.md` → `/blog/embedded/rtos/practical-internals/part3-10-deadlock`
+- `src/content/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer.md` → `/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer`
+- `src/content/blog/embedded/rtos/practical-internals/part4-01-realtime-memory.md` → `/blog/embedded/rtos/practical-internals/part4-01-realtime-memory`
+- `src/content/blog/embedded/rtos/practical-internals/part4-02-freertos-heap.md` → `/blog/embedded/rtos/practical-internals/part4-02-freertos-heap`
+- `src/content/blog/embedded/rtos/practical-internals/part4-03-tlsf.md` → `/blog/embedded/rtos/practical-internals/part4-03-tlsf`
+- `src/content/blog/embedded/rtos/practical-internals/part4-04-static-allocation.md` → `/blog/embedded/rtos/practical-internals/part4-04-static-allocation`
+- `src/content/blog/embedded/rtos/practical-internals/part4-05-memory-pool.md` → `/blog/embedded/rtos/practical-internals/part4-05-memory-pool`
+- `src/content/blog/embedded/rtos/practical-internals/part4-06-stack-overflow.md` → `/blog/embedded/rtos/practical-internals/part4-06-stack-overflow`
+- `src/content/blog/embedded/rtos/practical-internals/part4-07-smp-rtos.md` → `/blog/embedded/rtos/practical-internals/part4-07-smp-rtos`
+- `src/content/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp.md` → `/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp`
+- `src/content/blog/embedded/rtos/practical-internals/part4-09-software-timer.md` → `/blog/embedded/rtos/practical-internals/part4-09-software-timer`
+- `src/content/blog/embedded/rtos/practical-internals/part4-10-syscall.md` → `/blog/embedded/rtos/practical-internals/part4-10-syscall`
+- `src/content/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm.md` → `/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm`
+- `src/content/blog/embedded/rtos/practical-internals/part4-12-amp-openamp.md` → `/blog/embedded/rtos/practical-internals/part4-12-amp-openamp`
+- `src/content/blog/embedded/rtos/practical-internals/part4-13-cpp-in-rtos.md` → `/blog/embedded/rtos/practical-internals/part4-13-cpp-in-rtos`
+- `src/content/blog/embedded/rtos/practical-internals/part5-01-freertos-source.md` → `/blog/embedded/rtos/practical-internals/part5-01-freertos-source`
+- `src/content/blog/embedded/rtos/practical-internals/part5-02-zephyr-source.md` → `/blog/embedded/rtos/practical-internals/part5-02-zephyr-source`
+- `src/content/blog/embedded/rtos/practical-internals/part5-03-rt-thread.md` → `/blog/embedded/rtos/practical-internals/part5-03-rt-thread`
+- `src/content/blog/embedded/rtos/practical-internals/part5-04-porting.md` → `/blog/embedded/rtos/practical-internals/part5-04-porting`
+- `src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md` → `/blog/embedded/rtos/practical-internals/part5-05-selection-guide`
+- `src/content/blog/embedded/rtos/practical-internals/part5-06-nuttx.md` → `/blog/embedded/rtos/practical-internals/part5-06-nuttx`
+- `src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md` → `/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux`
+- `src/content/blog/programming/code-review/abseil/00-preface.md` → `/blog/programming/code-review/abseil/00-preface`
+- `src/content/blog/programming/code-review/abseil/part1-01-overview.md` → `/blog/programming/code-review/abseil/part1-01-overview`
+- `src/content/blog/programming/code-review/abseil/part1-02-design-philosophy.md` → `/blog/programming/code-review/abseil/part1-02-design-philosophy`
+- `src/content/blog/programming/code-review/abseil/part1-03-build-dependency-bazel.md` → `/blog/programming/code-review/abseil/part1-03-build-dependency-bazel`
+- `src/content/blog/programming/code-review/abseil/part1-04-lts-vs-head-release.md` → `/blog/programming/code-review/abseil/part1-04-lts-vs-head-release`
+- `src/content/blog/programming/code-review/abseil/part1-05-versioning-abi.md` → `/blog/programming/code-review/abseil/part1-05-versioning-abi`
+- `src/content/blog/programming/code-review/abseil/part10-01-abseil-hash-value.md` → `/blog/programming/code-review/abseil/part10-01-abseil-hash-value`
+- `src/content/blog/programming/code-review/abseil/part10-02-hash-state-chaining.md` → `/blog/programming/code-review/abseil/part10-02-hash-state-chaining`
+- `src/content/blog/programming/code-review/abseil/part10-03-custom-hashable.md` → `/blog/programming/code-review/abseil/part10-03-custom-hashable`
+- `src/content/blog/programming/code-review/abseil/part11-01-log-vlog-check.md` → `/blog/programming/code-review/abseil/part11-01-log-vlog-check`
+- `src/content/blog/programming/code-review/abseil/part11-02-log-sink.md` → `/blog/programming/code-review/abseil/part11-02-log-sink`
+- `src/content/blog/programming/code-review/abseil/part11-03-log-entry-structured.md` → `/blog/programming/code-review/abseil/part11-03-log-entry-structured`
+- `src/content/blog/programming/code-review/abseil/part11-04-stack-trace-handler.md` → `/blog/programming/code-review/abseil/part11-04-stack-trace-handler`
+- `src/content/blog/programming/code-review/abseil/part12-01-absl-flag-define.md` → `/blog/programming/code-review/abseil/part12-01-absl-flag-define`
+- `src/content/blog/programming/code-review/abseil/part12-02-parse-command-line.md` → `/blog/programming/code-review/abseil/part12-02-parse-command-line`
+- `src/content/blog/programming/code-review/abseil/part12-03-flag-introspection.md` → `/blog/programming/code-review/abseil/part12-03-flag-introspection`
+- `src/content/blog/programming/code-review/abseil/part13-01-google-style-patterns.md` → `/blog/programming/code-review/abseil/part13-01-google-style-patterns`
+- `src/content/blog/programming/code-review/abseil/part13-02-anti-patterns.md` → `/blog/programming/code-review/abseil/part13-02-anti-patterns`
+- `src/content/blog/programming/code-review/abseil/part13-03-std-to-absl-migration.md` → `/blog/programming/code-review/abseil/part13-03-std-to-absl-migration`
+- `src/content/blog/programming/code-review/abseil/part14-01-cleanup.md` → `/blog/programming/code-review/abseil/part14-01-cleanup`
+- `src/content/blog/programming/code-review/abseil/part14-02-algorithm-container-ext.md` → `/blog/programming/code-review/abseil/part14-02-algorithm-container-ext`
+- `src/content/blog/programming/code-review/abseil/part14-03-function-ref-any-invocable.md` → `/blog/programming/code-review/abseil/part14-03-function-ref-any-invocable`
+- `src/content/blog/programming/code-review/abseil/part14-04-bind-front-overload.md` → `/blog/programming/code-review/abseil/part14-04-bind-front-overload`
+- `src/content/blog/programming/code-review/abseil/part15-01-cord.md` → `/blog/programming/code-review/abseil/part15-01-cord`
+- `src/content/blog/programming/code-review/abseil/part15-02-charconv.md` → `/blog/programming/code-review/abseil/part15-02-charconv`
+- `src/content/blog/programming/code-review/abseil/part15-03-cord-vs-string.md` → `/blog/programming/code-review/abseil/part15-03-cord-vs-string`
+- `src/content/blog/programming/code-review/abseil/part16-01-stacktrace-symbolize.md` → `/blog/programming/code-review/abseil/part16-01-stacktrace-symbolize`
+- `src/content/blog/programming/code-review/abseil/part16-02-crc32c.md` → `/blog/programming/code-review/abseil/part16-02-crc32c`
+- `src/content/blog/programming/code-review/abseil/part16-03-periodic-sampler.md` → `/blog/programming/code-review/abseil/part16-03-periodic-sampler`
+- `src/content/blog/programming/code-review/abseil/part2-01-abseil-macros.md` → `/blog/programming/code-review/abseil/part2-01-abseil-macros`
+- `src/content/blog/programming/code-review/abseil/part2-02-predict-branch-hint.md` → `/blog/programming/code-review/abseil/part2-02-predict-branch-hint`
+- `src/content/blog/programming/code-review/abseil/part2-03-log-severity.md` → `/blog/programming/code-review/abseil/part2-03-log-severity`
+- `src/content/blog/programming/code-review/abseil/part2-04-type-traits.md` → `/blog/programming/code-review/abseil/part2-04-type-traits`
+- `src/content/blog/programming/code-review/abseil/part2-05-conformance-policy.md` → `/blog/programming/code-review/abseil/part2-05-conformance-policy`
+- `src/content/blog/programming/code-review/abseil/part2-06-memory-utilities.md` → `/blog/programming/code-review/abseil/part2-06-memory-utilities`
+- `src/content/blog/programming/code-review/abseil/part2-07-raw-logging.md` → `/blog/programming/code-review/abseil/part2-07-raw-logging`
+- `src/content/blog/programming/code-review/abseil/part2-08-thread-annotations.md` → `/blog/programming/code-review/abseil/part2-08-thread-annotations`
+- `src/content/blog/programming/code-review/abseil/part3-01-status.md` → `/blog/programming/code-review/abseil/part3-01-status`
+- `src/content/blog/programming/code-review/abseil/part3-02-status-or.md` → `/blog/programming/code-review/abseil/part3-02-status-or`
+- `src/content/blog/programming/code-review/abseil/part3-03-status-macros.md` → `/blog/programming/code-review/abseil/part3-03-status-macros`
+- `src/content/blog/programming/code-review/abseil/part3-04-status-payload.md` → `/blog/programming/code-review/abseil/part3-04-status-payload`
+- `src/content/blog/programming/code-review/abseil/part3-05-status-exception-conversion.md` → `/blog/programming/code-review/abseil/part3-05-status-exception-conversion`
+- `src/content/blog/programming/code-review/abseil/part4-01-string-view.md` → `/blog/programming/code-review/abseil/part4-01-string-view`
+- `src/content/blog/programming/code-review/abseil/part4-02-string-view-pitfalls.md` → `/blog/programming/code-review/abseil/part4-02-string-view-pitfalls`
+- `src/content/blog/programming/code-review/abseil/part4-03-str-cat.md` → `/blog/programming/code-review/abseil/part4-03-str-cat`
+- `src/content/blog/programming/code-review/abseil/part4-04-str-split.md` → `/blog/programming/code-review/abseil/part4-04-str-split`
+- `src/content/blog/programming/code-review/abseil/part4-05-str-join.md` → `/blog/programming/code-review/abseil/part4-05-str-join`
+- `src/content/blog/programming/code-review/abseil/part4-06-str-format.md` → `/blog/programming/code-review/abseil/part4-06-str-format`
+- `src/content/blog/programming/code-review/abseil/part4-07-ascii-functions.md` → `/blog/programming/code-review/abseil/part4-07-ascii-functions`
+- `src/content/blog/programming/code-review/abseil/part4-08-escaping-base64.md` → `/blog/programming/code-review/abseil/part4-08-escaping-base64`
+- `src/content/blog/programming/code-review/abseil/part5-01-flat-hash-map.md` → `/blog/programming/code-review/abseil/part5-01-flat-hash-map`
+- `src/content/blog/programming/code-review/abseil/part5-02-flat-hash-set.md` → `/blog/programming/code-review/abseil/part5-02-flat-hash-set`
+- `src/content/blog/programming/code-review/abseil/part5-03-node-hash-map.md` → `/blog/programming/code-review/abseil/part5-03-node-hash-map`
+- `src/content/blog/programming/code-review/abseil/part5-04-btree-map.md` → `/blog/programming/code-review/abseil/part5-04-btree-map`
+- `src/content/blog/programming/code-review/abseil/part5-05-fixed-array.md` → `/blog/programming/code-review/abseil/part5-05-fixed-array`
+- `src/content/blog/programming/code-review/abseil/part5-06-inlined-vector.md` → `/blog/programming/code-review/abseil/part5-06-inlined-vector`
+- `src/content/blog/programming/code-review/abseil/part5-07-swiss-table-internals.md` → `/blog/programming/code-review/abseil/part5-07-swiss-table-internals`
+- `src/content/blog/programming/code-review/abseil/part6-01-mutex.md` → `/blog/programming/code-review/abseil/part6-01-mutex`
+- `src/content/blog/programming/code-review/abseil/part6-02-conditional-critical-section.md` → `/blog/programming/code-review/abseil/part6-02-conditional-critical-section`
+- `src/content/blog/programming/code-review/abseil/part6-03-notification.md` → `/blog/programming/code-review/abseil/part6-03-notification`
+- `src/content/blog/programming/code-review/abseil/part6-04-blocking-counter-barrier.md` → `/blog/programming/code-review/abseil/part6-04-blocking-counter-barrier`
+- `src/content/blog/programming/code-review/abseil/part6-05-mutex-annotations.md` → `/blog/programming/code-review/abseil/part6-05-mutex-annotations`
+- `src/content/blog/programming/code-review/abseil/part7-01-time-duration-overview.md` → `/blog/programming/code-review/abseil/part7-01-time-duration-overview`
+- `src/content/blog/programming/code-review/abseil/part7-02-format-parse.md` → `/blog/programming/code-review/abseil/part7-02-format-parse`
+- `src/content/blog/programming/code-review/abseil/part7-03-civil-time.md` → `/blog/programming/code-review/abseil/part7-03-civil-time`
+- `src/content/blog/programming/code-review/abseil/part7-04-time-zone.md` → `/blog/programming/code-review/abseil/part7-04-time-zone`
+- `src/content/blog/programming/code-review/abseil/part7-05-time-mocking.md` → `/blog/programming/code-review/abseil/part7-05-time-mocking`
+- `src/content/blog/programming/code-review/abseil/part8-01-bit-gen.md` → `/blog/programming/code-review/abseil/part8-01-bit-gen`
+- `src/content/blog/programming/code-review/abseil/part8-02-distributions.md` → `/blog/programming/code-review/abseil/part8-02-distributions`
+- `src/content/blog/programming/code-review/abseil/part8-03-mocking-random.md` → `/blog/programming/code-review/abseil/part8-03-mocking-random`
+- `src/content/blog/programming/code-review/abseil/part8-04-seeding-entropy.md` → `/blog/programming/code-review/abseil/part8-04-seeding-entropy`
+- `src/content/blog/programming/code-review/abseil/part9-01-int128.md` → `/blog/programming/code-review/abseil/part9-01-int128`
+- `src/content/blog/programming/code-review/abseil/part9-02-bits.md` → `/blog/programming/code-review/abseil/part9-02-bits`
+- `src/content/blog/programming/code-review/abseil/part9-03-optional.md` → `/blog/programming/code-review/abseil/part9-03-optional`
+- `src/content/blog/programming/code-review/abseil/part9-04-variant.md` → `/blog/programming/code-review/abseil/part9-04-variant`
+- `src/content/blog/programming/code-review/abseil/part9-05-span.md` → `/blog/programming/code-review/abseil/part9-05-span`
+- `src/content/blog/programming/code-review/abseil/part9-06-any.md` → `/blog/programming/code-review/abseil/part9-06-any`
+- `src/content/blog/programming/code-review/abseil/part9-07-compare.md` → `/blog/programming/code-review/abseil/part9-07-compare`
+- `src/content/blog/programming/code-review/abseil/part9-08-utility.md` → `/blog/programming/code-review/abseil/part9-08-utility`
+- `src/content/blog/programming/code-review/folly/00-preface.md` → `/blog/programming/code-review/folly/00-preface`
+- `src/content/blog/programming/code-review/folly/part1-01-overview.md` → `/blog/programming/code-review/folly/part1-01-overview`
+- `src/content/blog/programming/code-review/folly/part1-02-folly-vs-abseil-philosophy.md` → `/blog/programming/code-review/folly/part1-02-folly-vs-abseil-philosophy`
+- `src/content/blog/programming/code-review/folly/part1-03-build-fbcode.md` → `/blog/programming/code-review/folly/part1-03-build-fbcode`
+- `src/content/blog/programming/code-review/folly/part1-04-api-stability.md` → `/blog/programming/code-review/folly/part1-04-api-stability`
+- `src/content/blog/programming/code-review/folly/part1-05-production-validation.md` → `/blog/programming/code-review/folly/part1-05-production-validation`
+- `src/content/blog/programming/code-review/folly/part10-01-producer-consumer-queue.md` → `/blog/programming/code-review/folly/part10-01-producer-consumer-queue`
+- `src/content/blog/programming/code-review/folly/part10-02-mpmc-queue.md` → `/blog/programming/code-review/folly/part10-02-mpmc-queue`
+- `src/content/blog/programming/code-review/folly/part10-03-unbounded-queue.md` → `/blog/programming/code-review/folly/part10-03-unbounded-queue`
+- `src/content/blog/programming/code-review/folly/part10-04-fibers-channel.md` → `/blog/programming/code-review/folly/part10-04-fibers-channel`
+- `src/content/blog/programming/code-review/folly/part11-01-dynamic.md` → `/blog/programming/code-review/folly/part11-01-dynamic`
+- `src/content/blog/programming/code-review/folly/part11-02-json-conversion.md` → `/blog/programming/code-review/folly/part11-02-json-conversion`
+- `src/content/blog/programming/code-review/folly/part11-03-dynamic-struct.md` → `/blog/programming/code-review/folly/part11-03-dynamic-struct`
+- `src/content/blog/programming/code-review/folly/part11-04-dynamic-visitor.md` → `/blog/programming/code-review/folly/part11-04-dynamic-visitor`
+- `src/content/blog/programming/code-review/folly/part12-01-singleton-vs-meyers.md` → `/blog/programming/code-review/folly/part12-01-singleton-vs-meyers`
+- `src/content/blog/programming/code-review/folly/part12-02-singleton-vault.md` → `/blog/programming/code-review/folly/part12-02-singleton-vault`
+- `src/content/blog/programming/code-review/folly/part12-03-try-get-fast.md` → `/blog/programming/code-review/folly/part12-03-try-get-fast`
+- `src/content/blog/programming/code-review/folly/part13-01-exception-wrapper.md` → `/blog/programming/code-review/folly/part13-01-exception-wrapper`
+- `src/content/blog/programming/code-review/folly/part13-02-scope-guard.md` → `/blog/programming/code-review/folly/part13-02-scope-guard`
+- `src/content/blog/programming/code-review/folly/part13-03-folly-optional.md` → `/blog/programming/code-review/folly/part13-03-folly-optional`
+- `src/content/blog/programming/code-review/folly/part13-04-folly-function.md` → `/blog/programming/code-review/folly/part13-04-folly-function`
+- `src/content/blog/programming/code-review/folly/part13-05-lazy.md` → `/blog/programming/code-review/folly/part13-05-lazy`
+- `src/content/blog/programming/code-review/folly/part14-01-meta-style-review.md` → `/blog/programming/code-review/folly/part14-01-meta-style-review`
+- `src/content/blog/programming/code-review/folly/part14-02-folly-anti-patterns.md` → `/blog/programming/code-review/folly/part14-02-folly-anti-patterns`
+- `src/content/blog/programming/code-review/folly/part14-03-std-vs-folly-choice.md` → `/blog/programming/code-review/folly/part14-03-std-vs-folly-choice`
+- `src/content/blog/programming/code-review/folly/part15-01-coro-overview.md` → `/blog/programming/code-review/folly/part15-01-coro-overview`
+- `src/content/blog/programming/code-review/folly/part15-02-coro-task.md` → `/blog/programming/code-review/folly/part15-02-coro-task`
+- `src/content/blog/programming/code-review/folly/part15-03-coro-async-generator.md` → `/blog/programming/code-review/folly/part15-03-coro-async-generator`
+- `src/content/blog/programming/code-review/folly/part15-04-coro-blocking-wait.md` → `/blog/programming/code-review/folly/part15-04-coro-blocking-wait`
+- `src/content/blog/programming/code-review/folly/part15-05-coro-baton-mutex.md` → `/blog/programming/code-review/folly/part15-05-coro-baton-mutex`
+- `src/content/blog/programming/code-review/folly/part16-01-expected.md` → `/blog/programming/code-review/folly/part16-01-expected`
+- `src/content/blog/programming/code-review/folly/part16-02-try.md` → `/blog/programming/code-review/folly/part16-02-try`
+- `src/content/blog/programming/code-review/folly/part16-03-try-vs-expected.md` → `/blog/programming/code-review/folly/part16-03-try-vs-expected`
+- `src/content/blog/programming/code-review/folly/part17-01-range.md` → `/blog/programming/code-review/folly/part17-01-range`
+- `src/content/blog/programming/code-review/folly/part17-02-uri.md` → `/blog/programming/code-review/folly/part17-02-uri`
+- `src/content/blog/programming/code-review/folly/part17-03-hash-fingerprint.md` → `/blog/programming/code-review/folly/part17-03-hash-fingerprint`
+- `src/content/blog/programming/code-review/folly/part17-04-spooky-hash.md` → `/blog/programming/code-review/folly/part17-04-spooky-hash`
+- `src/content/blog/programming/code-review/folly/part18-01-init.md` → `/blog/programming/code-review/folly/part18-01-init`
+- `src/content/blog/programming/code-review/folly/part18-02-indestructible.md` → `/blog/programming/code-review/folly/part18-02-indestructible`
+- `src/content/blog/programming/code-review/folly/part18-03-micro-lock.md` → `/blog/programming/code-review/folly/part18-03-micro-lock`
+- `src/content/blog/programming/code-review/folly/part18-04-micro-spin-lock.md` → `/blog/programming/code-review/folly/part18-04-micro-spin-lock`
+- `src/content/blog/programming/code-review/folly/part19-01-format-legacy.md` → `/blog/programming/code-review/folly/part19-01-format-legacy`
+- `src/content/blog/programming/code-review/folly/part19-02-demangle.md` → `/blog/programming/code-review/folly/part19-02-demangle`
+- `src/content/blog/programming/code-review/folly/part19-03-dynamic-converter.md` → `/blog/programming/code-review/folly/part19-03-dynamic-converter`
+- `src/content/blog/programming/code-review/folly/part2-01-future-overview.md` → `/blog/programming/code-review/folly/part2-01-future-overview`
+- `src/content/blog/programming/code-review/folly/part2-02-promise-make-future.md` → `/blog/programming/code-review/folly/part2-02-promise-make-future`
+- `src/content/blog/programming/code-review/folly/part2-03-semi-future-vs-future.md` → `/blog/programming/code-review/folly/part2-03-semi-future-vs-future`
+- `src/content/blog/programming/code-review/folly/part2-04-then-value-error.md` → `/blog/programming/code-review/folly/part2-04-then-value-error`
+- `src/content/blog/programming/code-review/folly/part2-05-collect.md` → `/blog/programming/code-review/folly/part2-05-collect`
+- `src/content/blog/programming/code-review/folly/part2-06-retry-window-via.md` → `/blog/programming/code-review/folly/part2-06-retry-window-via`
+- `src/content/blog/programming/code-review/folly/part2-07-fibers.md` → `/blog/programming/code-review/folly/part2-07-fibers`
+- `src/content/blog/programming/code-review/folly/part20-01-record-io.md` → `/blog/programming/code-review/folly/part20-01-record-io`
+- `src/content/blog/programming/code-review/folly/part20-02-compression.md` → `/blog/programming/code-review/folly/part20-02-compression`
+- `src/content/blog/programming/code-review/folly/part20-03-async-io.md` → `/blog/programming/code-review/folly/part20-03-async-io`
+- `src/content/blog/programming/code-review/folly/part20-04-cancellation-token.md` → `/blog/programming/code-review/folly/part20-04-cancellation-token`
+- `src/content/blog/programming/code-review/folly/part21-01-observer.md` → `/blog/programming/code-review/folly/part21-01-observer`
+- `src/content/blog/programming/code-review/folly/part21-02-fbcode-patterns.md` → `/blog/programming/code-review/folly/part21-02-fbcode-patterns`
+- `src/content/blog/programming/code-review/folly/part3-01-inline-executor.md` → `/blog/programming/code-review/folly/part3-01-inline-executor`
+- `src/content/blog/programming/code-review/folly/part3-02-cpu-thread-pool-executor.md` → `/blog/programming/code-review/folly/part3-02-cpu-thread-pool-executor`
+- `src/content/blog/programming/code-review/folly/part3-03-io-thread-pool-executor.md` → `/blog/programming/code-review/folly/part3-03-io-thread-pool-executor`
+- `src/content/blog/programming/code-review/folly/part3-04-manual-executor.md` → `/blog/programming/code-review/folly/part3-04-manual-executor`
+- `src/content/blog/programming/code-review/folly/part3-05-event-base.md` → `/blog/programming/code-review/folly/part3-05-event-base`
+- `src/content/blog/programming/code-review/folly/part4-01-iobuf.md` → `/blog/programming/code-review/folly/part4-01-iobuf`
+- `src/content/blog/programming/code-review/folly/part4-02-iobuf-queue.md` → `/blog/programming/code-review/folly/part4-02-iobuf-queue`
+- `src/content/blog/programming/code-review/folly/part4-03-cursor.md` → `/blog/programming/code-review/folly/part4-03-cursor`
+- `src/content/blog/programming/code-review/folly/part4-04-zero-copy-patterns.md` → `/blog/programming/code-review/folly/part4-04-zero-copy-patterns`
+- `src/content/blog/programming/code-review/folly/part4-05-iobuf-shared-semantics.md` → `/blog/programming/code-review/folly/part4-05-iobuf-shared-semantics`
+- `src/content/blog/programming/code-review/folly/part5-01-fbstring.md` → `/blog/programming/code-review/folly/part5-01-fbstring`
+- `src/content/blog/programming/code-review/folly/part5-02-fmt-format-integration.md` → `/blog/programming/code-review/folly/part5-02-fmt-format-integration`
+- `src/content/blog/programming/code-review/folly/part5-03-string-piece.md` → `/blog/programming/code-review/folly/part5-03-string-piece`
+- `src/content/blog/programming/code-review/folly/part5-04-join-split.md` → `/blog/programming/code-review/folly/part5-04-join-split`
+- `src/content/blog/programming/code-review/folly/part6-01-to-try-to.md` → `/blog/programming/code-review/folly/part6-01-to-try-to`
+- `src/content/blog/programming/code-review/folly/part6-02-conv-customization.md` → `/blog/programming/code-review/folly/part6-02-conv-customization`
+- `src/content/blog/programming/code-review/folly/part6-03-conv-performance.md` → `/blog/programming/code-review/folly/part6-03-conv-performance`
+- `src/content/blog/programming/code-review/folly/part7-01-f14-value-map.md` → `/blog/programming/code-review/folly/part7-01-f14-value-map`
+- `src/content/blog/programming/code-review/folly/part7-02-f14-node-map.md` → `/blog/programming/code-review/folly/part7-02-f14-node-map`
+- `src/content/blog/programming/code-review/folly/part7-03-f14-vector-map.md` → `/blog/programming/code-review/folly/part7-03-f14-vector-map`
+- `src/content/blog/programming/code-review/folly/part7-04-f14-fast-map.md` → `/blog/programming/code-review/folly/part7-04-f14-fast-map`
+- `src/content/blog/programming/code-review/folly/part7-05-f14-internals.md` → `/blog/programming/code-review/folly/part7-05-f14-internals`
+- `src/content/blog/programming/code-review/folly/part8-01-small-vector.md` → `/blog/programming/code-review/folly/part8-01-small-vector`
+- `src/content/blog/programming/code-review/folly/part8-02-fixed-string.md` → `/blog/programming/code-review/folly/part8-02-fixed-string`
+- `src/content/blog/programming/code-review/folly/part8-03-atomic-hash-map.md` → `/blog/programming/code-review/folly/part8-03-atomic-hash-map`
+- `src/content/blog/programming/code-review/folly/part8-04-concurrent-hash-map.md` → `/blog/programming/code-review/folly/part8-04-concurrent-hash-map`
+- `src/content/blog/programming/code-review/folly/part8-05-evicting-cache-map.md` → `/blog/programming/code-review/folly/part8-05-evicting-cache-map`
+- `src/content/blog/programming/code-review/folly/part9-01-synchronized.md` → `/blog/programming/code-review/folly/part9-01-synchronized`
+- `src/content/blog/programming/code-review/folly/part9-02-shared-mutex.md` → `/blog/programming/code-review/folly/part9-02-shared-mutex`
+- `src/content/blog/programming/code-review/folly/part9-03-baton.md` → `/blog/programming/code-review/folly/part9-03-baton`
+- `src/content/blog/programming/code-review/folly/part9-04-rw-spin-lock.md` → `/blog/programming/code-review/folly/part9-04-rw-spin-lock`
+- `src/content/blog/programming/code-review/folly/part9-05-pico-spin-lock.md` → `/blog/programming/code-review/folly/part9-05-pico-spin-lock`
+- `src/content/blog/tools/build/cmake/chapter01-intro.md` → `/blog/tools/build/cmake/chapter01-intro`
+- `src/content/blog/tools/build/cmake/chapter02-language.md` → `/blog/tools/build/cmake/chapter02-language`
+- `src/content/blog/tools/build/cmake/chapter03-targets.md` → `/blog/tools/build/cmake/chapter03-targets`
+- `src/content/blog/tools/build/cmake/chapter04-options.md` → `/blog/tools/build/cmake/chapter04-options`
+- `src/content/blog/tools/build/cmake/chapter05-find-package.md` → `/blog/tools/build/cmake/chapter05-find-package`
+- `src/content/blog/tools/build/cmake/chapter06-testing.md` → `/blog/tools/build/cmake/chapter06-testing`
+- `src/content/blog/tools/build/cmake/chapter07-install.md` → `/blog/tools/build/cmake/chapter07-install`
+- `src/content/blog/tools/build/cmake/chapter08-best-practices.md` → `/blog/tools/build/cmake/chapter08-best-practices`
+- `src/content/blog/tools/build/cmake/chapter09-modern-advanced.md` → `/blog/tools/build/cmake/chapter09-modern-advanced`
+- `src/content/blog/tools/build/gnu-make/chapter01-intro.md` → `/blog/tools/build/gnu-make/chapter01-intro`
+- `src/content/blog/tools/build/gnu-make/chapter02-rules.md` → `/blog/tools/build/gnu-make/chapter02-rules`
+- `src/content/blog/tools/build/gnu-make/chapter03-variables.md` → `/blog/tools/build/gnu-make/chapter03-variables`
+- `src/content/blog/tools/build/gnu-make/chapter04-pattern-rules.md` → `/blog/tools/build/gnu-make/chapter04-pattern-rules`
+- `src/content/blog/tools/build/gnu-make/chapter05-functions.md` → `/blog/tools/build/gnu-make/chapter05-functions`
+- `src/content/blog/tools/build/gnu-make/chapter06-conditionals.md` → `/blog/tools/build/gnu-make/chapter06-conditionals`
+- `src/content/blog/tools/build/gnu-make/chapter07-practical.md` → `/blog/tools/build/gnu-make/chapter07-practical`
+- `src/content/blog/tools/debugging/dwarf-elf/chapter01-elf-overview.md` → `/blog/tools/debugging/dwarf-elf/chapter01-elf-overview`
+- `src/content/blog/tools/debugging/dwarf-elf/chapter02-dwarf-overview.md` → `/blog/tools/debugging/dwarf-elf/chapter02-dwarf-overview`
+- `src/content/blog/tools/debugging/dwarf-elf/chapter03-debug-line.md` → `/blog/tools/debugging/dwarf-elf/chapter03-debug-line`
+- `src/content/blog/tools/debugging/dwarf-elf/chapter04-debug-loc.md` → `/blog/tools/debugging/dwarf-elf/chapter04-debug-loc`
+- `src/content/blog/tools/debugging/dwarf-elf/chapter05-cfi-eh-frame.md` → `/blog/tools/debugging/dwarf-elf/chapter05-cfi-eh-frame`
+- `src/content/blog/tools/debugging/dwarf-elf/chapter06-split-dwarf-tools.md` → `/blog/tools/debugging/dwarf-elf/chapter06-split-dwarf-tools`
+- `src/content/blog/tools/debugging/embedded/chapter01-rsp-protocol.md` → `/blog/tools/debugging/embedded/chapter01-rsp-protocol`
+- `src/content/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight.md` → `/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight`
+- `src/content/blog/tools/debugging/embedded/chapter03-openocd.md` → `/blog/tools/debugging/embedded/chapter03-openocd`
+- `src/content/blog/tools/debugging/embedded/chapter04-jlink.md` → `/blog/tools/debugging/embedded/chapter04-jlink`
+- `src/content/blog/tools/debugging/embedded/chapter05-elf-map.md` → `/blog/tools/debugging/embedded/chapter05-elf-map`
+- `src/content/blog/tools/debugging/embedded/chapter06-trace.md` → `/blog/tools/debugging/embedded/chapter06-trace`
+- `src/content/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting.md` → `/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting`
+- `src/content/blog/tools/debugging/embedded/chapter08-cxl-link-debug.md` → `/blog/tools/debugging/embedded/chapter08-cxl-link-debug`
+- `src/content/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot.md` → `/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot`
+- `src/content/blog/tools/debugging/gdb-extension/chapter01-python-api-basics.md` → `/blog/tools/debugging/gdb-extension/chapter01-python-api-basics`
+- `src/content/blog/tools/debugging/gdb-extension/chapter02-commands-events.md` → `/blog/tools/debugging/gdb-extension/chapter02-commands-events`
+- `src/content/blog/tools/debugging/gdb-extension/chapter03-pretty-printers.md` → `/blog/tools/debugging/gdb-extension/chapter03-pretty-printers`
+- `src/content/blog/tools/debugging/gdb-extension/chapter04-frame-unwinder.md` → `/blog/tools/debugging/gdb-extension/chapter04-frame-unwinder`
+- `src/content/blog/tools/debugging/gdb-extension/chapter05-mi-dap-protocol.md` → `/blog/tools/debugging/gdb-extension/chapter05-mi-dap-protocol`
+- `src/content/blog/tools/debugging/gdb-extension/chapter06-frontends.md` → `/blog/tools/debugging/gdb-extension/chapter06-frontends`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install.md` → `/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter02-basic-commands.md` → `/blog/tools/debugging/gdb-lldb/chapter02-basic-commands`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state.md` → `/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames.md` → `/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints.md` → `/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess.md` → `/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter07-core-dump.md` → `/blog/tools/debugging/gdb-lldb/chapter07-core-dump`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging.md` → `/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter09-python-scripting.md` → `/blog/tools/debugging/gdb-lldb/chapter09-python-scripting`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends.md` → `/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter11-practical-tips.md` → `/blog/tools/debugging/gdb-lldb/chapter11-practical-tips`
+- `src/content/blog/tools/debugging/gdb-lldb/chapter12-dwarf.md` → `/blog/tools/debugging/gdb-lldb/chapter12-dwarf`
+- `src/content/blog/tools/debugging/kernel/chapter01-user-kernel-boundary.md` → `/blog/tools/debugging/kernel/chapter01-user-kernel-boundary`
+- `src/content/blog/tools/debugging/kernel/chapter02-printk-dmesg.md` → `/blog/tools/debugging/kernel/chapter02-printk-dmesg`
+- `src/content/blog/tools/debugging/kernel/chapter03-ftrace-tracepoints.md` → `/blog/tools/debugging/kernel/chapter03-ftrace-tracepoints`
+- `src/content/blog/tools/debugging/kernel/chapter04-ebpf-kernel.md` → `/blog/tools/debugging/kernel/chapter04-ebpf-kernel`
+- `src/content/blog/tools/debugging/kernel/chapter05-kdb-kgdb.md` → `/blog/tools/debugging/kernel/chapter05-kdb-kgdb`
+- `src/content/blog/tools/debugging/kernel/chapter06-crash-drgn.md` → `/blog/tools/debugging/kernel/chapter06-crash-drgn`
+- `src/content/blog/tools/debugging/kernel/chapter07-panic-oops.md` → `/blog/tools/debugging/kernel/chapter07-panic-oops`
+- `src/content/blog/tools/debugging/kernel/chapter08-cxl-driver-debug.md` → `/blog/tools/debugging/kernel/chapter08-cxl-driver-debug`
+- `src/content/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough.md` → `/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough`
+- `src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md` → `/blog/tools/debugging/memory/chapter01-memory-accounting`
+- `src/content/blog/tools/debugging/memory/chapter02-heaptrack.md` → `/blog/tools/debugging/memory/chapter02-heaptrack`
+- `src/content/blog/tools/debugging/memory/chapter03-jemalloc-tcmalloc.md` → `/blog/tools/debugging/memory/chapter03-jemalloc-tcmalloc`
+- `src/content/blog/tools/debugging/memory/chapter04-glibc-tools.md` → `/blog/tools/debugging/memory/chapter04-glibc-tools`
+- `src/content/blog/tools/debugging/memory/chapter05-prod-leak-diagnosis.md` → `/blog/tools/debugging/memory/chapter05-prod-leak-diagnosis`
+- `src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md` → `/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics`
+- `src/content/blog/tools/debugging/memory/chapter07-tiered-memory-diagnostics.md` → `/blog/tools/debugging/memory/chapter07-tiered-memory-diagnostics`
+- `src/content/blog/tools/debugging/postmortem/chapter01-core-generation.md` → `/blog/tools/debugging/postmortem/chapter01-core-generation`
+- `src/content/blog/tools/debugging/postmortem/chapter02-elf-core-format.md` → `/blog/tools/debugging/postmortem/chapter02-elf-core-format`
+- `src/content/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis.md` → `/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis`
+- `src/content/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation.md` → `/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation`
+- `src/content/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem.md` → `/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem`
+- `src/content/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem.md` → `/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem`
+- `src/content/blog/tools/debugging/python/chapter01-pdb-basics.md` → `/blog/tools/debugging/python/chapter01-pdb-basics`
+- `src/content/blog/tools/debugging/python/chapter02-debugpy-ide.md` → `/blog/tools/debugging/python/chapter02-debugpy-ide`
+- `src/content/blog/tools/debugging/python/chapter03-asyncio.md` → `/blog/tools/debugging/python/chapter03-asyncio`
+- `src/content/blog/tools/debugging/python/chapter04-py-spy.md` → `/blog/tools/debugging/python/chapter04-py-spy`
+- `src/content/blog/tools/debugging/python/chapter05-faulthandler-tracemalloc.md` → `/blog/tools/debugging/python/chapter05-faulthandler-tracemalloc`
+- `src/content/blog/tools/debugging/sanitizers/chapter01-intro.md` → `/blog/tools/debugging/sanitizers/chapter01-intro`
+- `src/content/blog/tools/debugging/sanitizers/chapter02-asan-ubsan.md` → `/blog/tools/debugging/sanitizers/chapter02-asan-ubsan`
+- `src/content/blog/tools/debugging/sanitizers/chapter03-lsan-leaks.md` → `/blog/tools/debugging/sanitizers/chapter03-lsan-leaks`
+- `src/content/blog/tools/debugging/sanitizers/chapter04-tsan.md` → `/blog/tools/debugging/sanitizers/chapter04-tsan`
+- `src/content/blog/tools/debugging/sanitizers/chapter05-cmake-ci.md` → `/blog/tools/debugging/sanitizers/chapter05-cmake-ci`
+- `src/content/blog/tools/debugging/valgrind/chapter01-intro.md` → `/blog/tools/debugging/valgrind/chapter01-intro`
+- `src/content/blog/tools/debugging/valgrind/chapter02-memcheck.md` → `/blog/tools/debugging/valgrind/chapter02-memcheck`
+- `src/content/blog/tools/debugging/valgrind/chapter03-leak-report.md` → `/blog/tools/debugging/valgrind/chapter03-leak-report`
+- `src/content/blog/tools/debugging/valgrind/chapter04-helgrind-drd.md` → `/blog/tools/debugging/valgrind/chapter04-helgrind-drd`
+- `src/content/blog/tools/debugging/valgrind/chapter05-suppressions.md` → `/blog/tools/debugging/valgrind/chapter05-suppressions`
+- `src/content/blog/tools/emulation/driver-cosim/chapter01-why-cosim.md` → `/blog/tools/emulation/driver-cosim/chapter01-why-cosim`
+- `src/content/blog/tools/emulation/driver-cosim/chapter02-dpi-c-basics.md` → `/blog/tools/emulation/driver-cosim/chapter02-dpi-c-basics`
+- `src/content/blog/tools/emulation/driver-cosim/chapter03-verilator.md` → `/blog/tools/emulation/driver-cosim/chapter03-verilator`
+- `src/content/blog/tools/emulation/driver-cosim/chapter04-cocotb.md` → `/blog/tools/emulation/driver-cosim/chapter04-cocotb`
+- `src/content/blog/tools/emulation/driver-cosim/chapter05-systemc-tlm.md` → `/blog/tools/emulation/driver-cosim/chapter05-systemc-tlm`
+- `src/content/blog/tools/emulation/driver-cosim/chapter06-bfm.md` → `/blog/tools/emulation/driver-cosim/chapter06-bfm`
+- `src/content/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model.md` → `/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model`
+- `src/content/blog/tools/emulation/driver-cosim/chapter08-end-to-end.md` → `/blog/tools/emulation/driver-cosim/chapter08-end-to-end`
+
+## Skipped
+
+### draft — no published URL yet (2661)
+- `src/content/blog/design/design-everyday-things/ch01.md`
+- `src/content/blog/design/design-everyday-things/ch02.md`
+- `src/content/blog/design/design-everyday-things/ch03.md`
+- `src/content/blog/design/design-everyday-things/ch04.md`
+- `src/content/blog/design/design-everyday-things/ch05.md`
+- `src/content/blog/design/design-everyday-things/ch06.md`
+- `src/content/blog/design/design-everyday-things/ch07.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter01-overview.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter02-dal-and-objectives.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter03-planning-phase.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter04-software-requirements.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter05-software-design.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter06-source-code-standards.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter07-integration-build.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter08-verification-rat.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter09-coverage-mcdc.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter10-cm-sqa.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter11-tool-qualification-do330.md`
+- `src/content/blog/embedded/aerospace-standards/do-178c/chapter12-formal-methods-security.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter01-introduction.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter02-process-assurance.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter03-product-properties.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter04-configuration-management.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter05-non-conformance.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter06-procurement.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter07-isvv.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter08-ecss-e-st-40c.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter09-tool-qualification.md`
+- `src/content/blog/embedded/aerospace-standards/ecss-q-st-80c/chapter10-korea-application.md`
+- `src/content/blog/embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter01-introduction.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter02-environment-language.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter03-lexical-naming.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter04-macros-types-constants.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter05-declarations-casts.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter06-statements-functions.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter07-classes-basic.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter08-classes-inheritance.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter09-templates.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter10-exceptions-memory-library.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter11-comparison.md`
+- `src/content/blog/embedded/aerospace-standards/jsf-cpp/chapter12-tools-certification.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter01-intro.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter02-language-build.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter03-expressions-conversions.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter04-functions-lambdas.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter05-classes-inheritance.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter06-templates.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter07-exceptions.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter08-stl.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter09-concurrency-memory.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter10-tools-cert.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter11-raii-pattern-catalog.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter12-compile-time-cpp.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter13-gsl-safety-types.md`
+- `src/content/blog/embedded/automotive/autosar-cpp/chapter14-cpp17-20-23-migration.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter01-intro-vs-misra.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter02-preprocessor.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter03-declarations-init.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter04-expressions.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter05-integers.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter06-floating-point.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter07-arrays-strings.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter08-memory.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter09-io-env-signals.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter10-posix-concurrency.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter11-integer-cve-deep-dive.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter12-hardening-options.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter13-fuzzing-pipeline.md`
+- `src/content/blog/embedded/automotive/cert-c/chapter14-sanitizer-suite.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter01-introduction.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter02-classification.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter03-directives.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter04-syntax-format.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter05-expressions-types.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter06-pointers-arrays.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter07-control-flow.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter08-functions.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter09-memory-library.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter10-tools-certification.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter11-iso26262-audit-walkthrough.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter12-essential-type-deep-dive.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter13-helix-qac-deep.md`
+- `src/content/blog/embedded/automotive/misra-c/chapter14-cross-standard-integration.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter01-assurance-overview.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter02-do-178c-overview.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter03-plans.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter04-requirements.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter05-design.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter06-coding-standards.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter07-verification.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter08-coverage.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter09-tool-qualification.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter10-reusable-software.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter11-mbd.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter12-oop.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter13-formal-methods.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter14-certification-artifacts.md`
+- `src/content/blog/embedded/avionics/developing-safety-critical/chapter15-korea-defense.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter01-avionics-overview.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter02-ima.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter03-arinc-653.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter04-computer-architecture.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter05-buses.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter06-sensors.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter07-actuators.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter08-fms.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter09-fault-tolerance.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter10-fdir.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter11-rtos.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter12-vv.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter13-do-160.md`
+- `src/content/blog/embedded/avionics/digital-avionics-handbook/chapter14-future-trends.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter01-lv-vs-aircraft.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter02-fcc-architecture.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter03-multiprocessor.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter04-control-and-signal.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter05-fpga-sw-interface.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter06-ccsds-space-packet.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter07-ccsds-data-link.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter08-cfs.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter09-fprime.md`
+- `src/content/blog/embedded/avionics/launch-vehicle-flight-sw/chapter10-kslv-case-study.md`
+- `src/content/blog/embedded/hardware/bow/chapter01-overview.md`
+- `src/content/blog/embedded/hardware/bow/chapter02-architecture.md`
+- `src/content/blog/embedded/hardware/bow/chapter03-vs-ucie.md`
+- `src/content/blog/embedded/hardware/bow/chapter04-bow-memory.md`
+- `src/content/blog/embedded/hardware/bow/chapter05-bow-flexi.md`
+- `src/content/blog/embedded/hardware/bow/chapter06-packaging.md`
+- `src/content/blog/embedded/hardware/ddr/chapter01-architecture.md`
+- `src/content/blog/embedded/hardware/ddr/chapter02-commands.md`
+- `src/content/blog/embedded/hardware/ddr/chapter03-timing-basic.md`
+- `src/content/blog/embedded/hardware/ddr/chapter04-timing-advanced.md`
+- `src/content/blog/embedded/hardware/ddr/chapter05-initialization.md`
+- `src/content/blog/embedded/hardware/ddr/chapter06-write-leveling.md`
+- `src/content/blog/embedded/hardware/ddr/chapter07-read-training.md`
+- `src/content/blog/embedded/hardware/ddr/chapter08-ca-training.md`
+- `src/content/blog/embedded/hardware/ddr/chapter09-ecc.md`
+- `src/content/blog/embedded/hardware/ddr/chapter10-power-management.md`
+- `src/content/blog/embedded/hardware/ddr/chapter11-controller.md`
+- `src/content/blog/embedded/hardware/ddr/chapter12-linux-memory.md`
+- `src/content/blog/embedded/hardware/ddr/chapter13-linux-edac.md`
+- `src/content/blog/embedded/hardware/ddr/chapter14-ddr5.md`
+- `src/content/blog/embedded/hardware/ddr/chapter15-debugging.md`
+- `src/content/blog/embedded/hardware/ddr/chapter16-register-maps.md`
+- `src/content/blog/embedded/hardware/ddr/STORYBOARD.md`
+- `src/content/blog/embedded/hardware/nvme/chapter01-architecture.md`
+- `src/content/blog/embedded/hardware/nvme/chapter02-controller.md`
+- `src/content/blog/embedded/hardware/nvme/chapter03-namespace.md`
+- `src/content/blog/embedded/hardware/nvme/chapter04-queue-mechanism.md`
+- `src/content/blog/embedded/hardware/nvme/chapter05-admin-commands.md`
+- `src/content/blog/embedded/hardware/nvme/chapter06-io-commands.md`
+- `src/content/blog/embedded/hardware/nvme/chapter07-prp-sgl.md`
+- `src/content/blog/embedded/hardware/nvme/chapter08-completion.md`
+- `src/content/blog/embedded/hardware/nvme/chapter09-multiqueue.md`
+- `src/content/blog/embedded/hardware/nvme/chapter10-error-handling.md`
+- `src/content/blog/embedded/hardware/nvme/chapter11-linux-overview.md`
+- `src/content/blog/embedded/hardware/nvme/chapter12-linux-io-path.md`
+- `src/content/blog/embedded/hardware/nvme/chapter13-linux-admin.md`
+- `src/content/blog/embedded/hardware/nvme/chapter14-nvme-cli.md`
+- `src/content/blog/embedded/hardware/nvme/chapter15-performance.md`
+- `src/content/blog/embedded/hardware/nvme/chapter16-firmware.md`
+- `src/content/blog/embedded/hardware/nvme/chapter17-register-maps.md`
+- `src/content/blog/embedded/hardware/nvme/STORYBOARD.md`
+- `src/content/blog/embedded/hardware/pcie/STORYBOARD.md`
+- `src/content/blog/embedded/hardware/ualink/chapter01-overview.md`
+- `src/content/blog/embedded/hardware/ualink/chapter02-vs-nvlink.md`
+- `src/content/blog/embedded/hardware/ualink/chapter03-physical-layer.md`
+- `src/content/blog/embedded/hardware/ualink/chapter04-link-configuration.md`
+- `src/content/blog/embedded/hardware/ualink/chapter05-topology.md`
+- `src/content/blog/embedded/hardware/ualink/chapter06-switch.md`
+- `src/content/blog/embedded/hardware/ualink/chapter07-cxl-cooperation.md`
+- `src/content/blog/embedded/hardware/ualink/chapter08-ai-cluster.md`
+- `src/content/blog/embedded/hardware/ualink/chapter09-roadmap.md`
+- `src/content/blog/embedded/hardware/ualink/chapter10-case-studies.md`
+- `src/content/blog/embedded/hardware/ucie/chapter01-overview.md`
+- `src/content/blog/embedded/hardware/ucie/chapter02-architecture.md`
+- `src/content/blog/embedded/hardware/ucie/chapter03-physical-layer.md`
+- `src/content/blog/embedded/hardware/ucie/chapter04-d2d-adapter.md`
+- `src/content/blog/embedded/hardware/ucie/chapter05-version-comparison.md`
+- `src/content/blog/embedded/hardware/ucie/chapter06-2-5d-packaging.md`
+- `src/content/blog/embedded/hardware/ucie/chapter07-3d-packaging.md`
+- `src/content/blog/embedded/hardware/ucie/chapter08-runtime-recalibration.md`
+- `src/content/blog/embedded/hardware/ucie/chapter09-cxl-over-ucie.md`
+- `src/content/blog/embedded/hardware/ucie/chapter10-pcie-over-ucie.md`
+- `src/content/blog/embedded/hardware/ucie/chapter11-ecosystem.md`
+- `src/content/blog/embedded/hardware/ucie/chapter12-case-studies.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter01-zynq-introduction.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter02-system-architecture.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter03-ps-pl-interface.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter04-tools-overview.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter05-boot-process.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter06-baremetal-app.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter07-freertos-on-zynq.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter08-linux-on-zynq.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter09-userspace-pl-access.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter10-pl-acceleration.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter11-amp-openamp.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter12-security.md`
+- `src/content/blog/embedded/hardware/zynq-book/chapter13-case-study.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter01-overview.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter02-physical.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter03-frame.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter04-arbitration.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter05-error-handling.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter06-can-fd.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter07-can-fd-frame.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter08-can-xl.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter09-canopen.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter10-j1939.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter11-socketcan.md`
+- `src/content/blog/embedded/protocols/can-bus/chapter12-debugging.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter01-overview.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter02-spi-basics.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter03-spi-advanced.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter04-i2c-basics.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter05-i2c-advanced.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter06-i2c-debugging.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter07-uart-basics.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter08-uart-advanced.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter09-rs232-rs485.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter10-linux-device-tree.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter11-linux-drivers.md`
+- `src/content/blog/embedded/protocols/embedded-serial/chapter12-debugging.md`
+- `src/content/blog/embedded/protocols/mipi/chapter01-overview.md`
+- `src/content/blog/embedded/protocols/mipi/chapter02-d-phy.md`
+- `src/content/blog/embedded/protocols/mipi/chapter03-c-phy.md`
+- `src/content/blog/embedded/protocols/mipi/chapter04-csi2-basics.md`
+- `src/content/blog/embedded/protocols/mipi/chapter05-csi2-data-types.md`
+- `src/content/blog/embedded/protocols/mipi/chapter06-csi2-v4.md`
+- `src/content/blog/embedded/protocols/mipi/chapter07-dsi.md`
+- `src/content/blog/embedded/protocols/mipi/chapter08-dsi2.md`
+- `src/content/blog/embedded/protocols/mipi/chapter09-a-phy.md`
+- `src/content/blog/embedded/protocols/mipi/chapter10-linux-media.md`
+- `src/content/blog/embedded/protocols/mipi/chapter11-camera-driver.md`
+- `src/content/blog/embedded/protocols/mipi/chapter12-debugging.md`
+- `src/content/blog/embedded/riscv-practice/chapter01-toolchain.md`
+- `src/content/blog/embedded/riscv-practice/chapter02-board-selection.md`
+- `src/content/blog/embedded/riscv-practice/chapter03-dev-environment.md`
+- `src/content/blog/embedded/riscv-practice/chapter04-esp32c3-overview.md`
+- `src/content/blog/embedded/riscv-practice/chapter05-esp32c3-baremetal.md`
+- `src/content/blog/embedded/riscv-practice/chapter06-esp-idf-freertos.md`
+- `src/content/blog/embedded/riscv-practice/chapter07-bl602-overview.md`
+- `src/content/blog/embedded/riscv-practice/chapter08-bl602-sdk.md`
+- `src/content/blog/embedded/riscv-practice/chapter09-zephyr-bl602.md`
+- `src/content/blog/embedded/riscv-practice/chapter10-sifive-freedom.md`
+- `src/content/blog/embedded/riscv-practice/chapter11-freedom-metal.md`
+- `src/content/blog/embedded/riscv-practice/chapter12-linux-hifive.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter01-distribution.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter02-heap-memory.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter03-task-management.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter04-queue-management.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter05-software-timers.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter06-interrupt-management.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter07-resource-management.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter08-event-groups.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter09-task-notifications.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter10-stream-message-buffers.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter11-low-power.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter12-mpu-support.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter13-smp-support.md`
+- `src/content/blog/embedded/rtos/freertos-mastering/chapter14-trouble-shooting.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter01-why-ble.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter02-spec-evolution.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter03-protocol-stack.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter04-gap.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter05-gatt.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter06-services-characteristics.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter07-pairing-bonding.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter08-advertising-scanning.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter09-connection-management.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter10-ble5-features.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter11-nrf-connect-sdk.md`
+- `src/content/blog/embedded/wireless/getting-started-with-ble/chapter12-debugging.md`
+- `src/content/blog/embedded/yocto/ch01-linux-for-embedded-systems.md`
+- `src/content/blog/embedded/yocto/STORYBOARD.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/00-warmup.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/01-vector-space.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/02-subspace.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/03-span.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/04-independence.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/05-basis.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/06-coordinate.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/07-direct-sum.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/examples.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/exercises.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/self-check.md`
+- `src/content/blog/math/linear-algebra/ch01-vector-spaces/summary.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter01-introduction.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter02-convex-sets.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter03-convex-functions.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter04-problems.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter05-duality.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter06-approximation-fitting.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter07-statistical-estimation.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter08-geometric-problems.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter09-unconstrained.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter10-equality-constrained.md`
+- `src/content/blog/math/optimization/boyd-convex/chapter11-interior-point.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter01-sample-space.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter02-discrete-rv.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter03-general-rv.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter04-further-rv.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter05-limit-theorems.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter06-bernoulli-poisson.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter07-markov-chains.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter08-bayesian-inference.md`
+- `src/content/blog/math/probability/bertsekas-tsitsiklis/chapter09-classical-inference.md`
+- `src/content/blog/math/probability/casella-berger/chapter01-probability-theory.md`
+- `src/content/blog/math/probability/casella-berger/chapter02-transformations.md`
+- `src/content/blog/math/probability/casella-berger/chapter03-distributions.md`
+- `src/content/blog/math/probability/casella-berger/chapter04-multiple-rvs.md`
+- `src/content/blog/math/probability/casella-berger/chapter05-random-samples.md`
+- `src/content/blog/math/probability/casella-berger/chapter06-data-reduction.md`
+- `src/content/blog/math/probability/casella-berger/chapter07-point-estimation.md`
+- `src/content/blog/math/probability/casella-berger/chapter08-hypothesis-testing.md`
+- `src/content/blog/math/probability/casella-berger/chapter09-interval-estimation.md`
+- `src/content/blog/math/probability/casella-berger/chapter10-asymptotic.md`
+- `src/content/blog/math/probability/casella-berger/chapter11-anova.md`
+- `src/content/blog/math/probability/casella-berger/chapter12-regression.md`
+- `src/content/blog/math/probability/cover-thomas/chapter01-introduction.md`
+- `src/content/blog/math/probability/cover-thomas/chapter02-entropy-mi.md`
+- `src/content/blog/math/probability/cover-thomas/chapter03-aep.md`
+- `src/content/blog/math/probability/cover-thomas/chapter04-entropy-rates.md`
+- `src/content/blog/math/probability/cover-thomas/chapter05-data-compression.md`
+- `src/content/blog/math/probability/cover-thomas/chapter06-gambling.md`
+- `src/content/blog/math/probability/cover-thomas/chapter07-channel-capacity.md`
+- `src/content/blog/math/probability/cover-thomas/chapter08-differential-entropy.md`
+- `src/content/blog/math/probability/cover-thomas/chapter09-gaussian-channel.md`
+- `src/content/blog/math/probability/cover-thomas/chapter10-rate-distortion.md`
+- `src/content/blog/math/probability/cover-thomas/chapter11-info-statistics.md`
+- `src/content/blog/math/probability/cover-thomas/chapter12-maximum-entropy.md`
+- `src/content/blog/math/probability/cover-thomas/chapter13-universal-coding.md`
+- `src/content/blog/math/probability/cover-thomas/chapter14-kolmogorov.md`
+- `src/content/blog/math/probability/cover-thomas/chapter15-network-info.md`
+- `src/content/blog/math/probability/cover-thomas/chapter16-portfolio.md`
+- `src/content/blog/math/probability/cox-algebra/chapter01-problem.md`
+- `src/content/blog/math/probability/cox-algebra/chapter02-probability.md`
+- `src/content/blog/math/probability/cox-algebra/chapter03-algebra.md`
+- `src/content/blog/math/probability/cox-algebra/chapter04-entropy.md`
+- `src/content/blog/math/probability/cox-algebra/chapter05-application.md`
+- `src/content/blog/math/probability/durrett-pte/chapter01-measure-theory.md`
+- `src/content/blog/math/probability/durrett-pte/chapter02-laws-large-numbers.md`
+- `src/content/blog/math/probability/durrett-pte/chapter03-clt.md`
+- `src/content/blog/math/probability/durrett-pte/chapter04-random-walks.md`
+- `src/content/blog/math/probability/durrett-pte/chapter05-martingales.md`
+- `src/content/blog/math/probability/durrett-pte/chapter06-markov-chains.md`
+- `src/content/blog/math/probability/durrett-pte/chapter07-ergodic.md`
+- `src/content/blog/math/probability/durrett-pte/chapter08-brownian.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter01-probability-inference.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter02-single-parameter.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter03-multi-parameter.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter04-asymptotics.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter05-hierarchical.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter06-model-checking.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter07-comparing-models.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter08-data-collection.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter09-decision-analysis.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter10-computation-intro.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter11-mcmc-basics.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter12-efficient-mcmc.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter13-approximations.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter14-regression.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter15-hierarchical-linear.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter16-glm.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter17-robust.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter18-missing.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter19-parametric-nonlinear.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter20-basis-function.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter21-gaussian-process.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter22-finite-mixture.md`
+- `src/content/blog/math/probability/gelman-bda3/chapter23-dirichlet-process.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter01-introduction.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter02-representing.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter03-updating.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter04-independence-bayes-net.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter05-expectation.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter06-multi-agent.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter07-logic-uncertainty.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter08-defaults-counterfactuals.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter09-belief-revision.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter10-first-order.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter11-statistics-to-beliefs.md`
+- `src/content/blog/math/probability/halpern-uncertainty/chapter12-final-words.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter01-introduction.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter02-belief-exchangeability.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter03-one-parameter.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter04-monte-carlo.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter05-normal.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter06-gibbs.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter07-multivariate-normal.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter08-hierarchical.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter09-regression.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter10-metropolis-hastings.md`
+- `src/content/blog/math/probability/hoff-bayesian/chapter11-mixed-effects.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter01-plausible-reasoning.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter02-quantitative-rules.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter03-sampling.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter04-hypothesis-testing.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter05-parameter-estimation.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter06-gaussian.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter07-sufficiency.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter08-frequency.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter09-max-entropy-prior.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter10-ignorance-priors.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter11-orthodox-pathology.md`
+- `src/content/blog/math/probability/jaynes-logic/chapter12-model-comparison.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter01-introduction.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter02-foundations.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter03-bayes-net.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter04-mrf.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter05-local-models.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter06-template-models.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter07-gaussian-network.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter08-exponential-family.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter09-variable-elimination.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter10-clique-tree.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter11-inference-optimization.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter12-sampling.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter13-map-inference.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter14-temporal-models.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter15-learning-overview.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter16-param-estimation-bn.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter17-param-estimation-mn.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter18-structure-learning.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter19-partial-data.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter20-causality.md`
+- `src/content/blog/math/probability/koller-friedman-pgm/chapter21-utilities-decisions.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter01-credibility-models.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter02-probability.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter03-bayes-rule.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter04-binomial-exact.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter05-mcmc.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter06-jags-stan.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter07-hierarchical.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter08-model-comparison.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter09-bayesian-testing.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter10-power-sample-size.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter11-glm.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter12-metric-regression.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter13-dichotomous.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter14-ordinal.md`
+- `src/content/blog/math/probability/kruschke-dba/chapter15-count.md`
+- `src/content/blog/math/probability/mackay-itila/chapter01-introduction.md`
+- `src/content/blog/math/probability/mackay-itila/chapter02-probability-inference.md`
+- `src/content/blog/math/probability/mackay-itila/chapter03-more-inference.md`
+- `src/content/blog/math/probability/mackay-itila/chapter04-source-coding.md`
+- `src/content/blog/math/probability/mackay-itila/chapter05-symbol-stream-codes.md`
+- `src/content/blog/math/probability/mackay-itila/chapter06-noisy-channel.md`
+- `src/content/blog/math/probability/mackay-itila/chapter07-message-passing.md`
+- `src/content/blog/math/probability/mackay-itila/chapter08-clustering.md`
+- `src/content/blog/math/probability/mackay-itila/chapter09-graph-inference.md`
+- `src/content/blog/math/probability/mackay-itila/chapter10-laplace.md`
+- `src/content/blog/math/probability/mackay-itila/chapter11-model-comparison.md`
+- `src/content/blog/math/probability/mackay-itila/chapter12-monte-carlo.md`
+- `src/content/blog/math/probability/mackay-itila/chapter13-variational.md`
+- `src/content/blog/math/probability/mackay-itila/chapter14-neural-networks.md`
+- `src/content/blog/math/probability/mackay-itila/chapter15-gaussian-process.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter01-golem.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter02-small-worlds.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter03-sampling.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter04-geocentric.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter05-spurious-waffles.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter06-haunted-dag.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter07-ulysses-compass.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter08-conditional-manatees.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter09-mcmc.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter10-big-entropy.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter11-spiked-integers.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter12-monsters-mixtures.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter13-models-memory.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter14-adventures-covariance.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter15-missing-data.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter16-glm-madness.md`
+- `src/content/blog/math/probability/mcelreath-rethinking/chapter17-horoscopes.md`
+- `src/content/blog/math/probability/polya-vol1/chapter01-induction.md`
+- `src/content/blog/math/probability/polya-vol1/chapter02-analogy.md`
+- `src/content/blog/math/probability/polya-vol1/chapter03-solid-geometry.md`
+- `src/content/blog/math/probability/polya-vol1/chapter04-number-theory.md`
+- `src/content/blog/math/probability/polya-vol1/chapter05-examples.md`
+- `src/content/blog/math/probability/polya-vol1/chapter06-general-statement.md`
+- `src/content/blog/math/probability/polya-vol1/chapter07-mathematical-induction.md`
+- `src/content/blog/math/probability/polya-vol1/chapter08-maxima-minima.md`
+- `src/content/blog/math/probability/polya-vol2/chapter01-patterns.md`
+- `src/content/blog/math/probability/polya-vol2/chapter02-further-patterns.md`
+- `src/content/blog/math/probability/polya-vol2/chapter03-random-mass.md`
+- `src/content/blog/math/probability/polya-vol2/chapter04-chance.md`
+- `src/content/blog/math/probability/polya-vol2/chapter05-kinds.md`
+- `src/content/blog/math/probability/polya-vol2/chapter06-research-method.md`
+- `src/content/blog/math/probability/polya-vol2/chapter07-number-theory-research.md`
+- `src/content/blog/math/probability/polya-vol2/chapter08-final-remarks.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter01-notions.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter02-decision-foundations.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter03-priors.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter04-point-estimation.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter05-tests-confidence.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter06-calculations.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter07-model-choice.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter08-admissibility.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter09-invariance.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter10-hierarchical-empirical.md`
+- `src/content/blog/math/probability/robert-bayesian-choice/chapter11-defense.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter01-preliminaries.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter02-concentration-sums.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter03-random-vectors.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter04-random-matrices.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter05-concentration-no-independence.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter06-quadratic-forms.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter07-random-processes.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter08-chaining.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter09-matrix-deviations.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter10-sparse-recovery.md`
+- `src/content/blog/math/probability/vershynin-hdp/chapter11-dvoretzky-milman.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter01-probability.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter02-random-variables.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter03-expectation.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter04-inequalities.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter05-convergence.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter06-inference-models.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter07-empirical-cdf.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter08-bootstrap.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter09-parametric.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter10-hypothesis-testing.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter11-bayesian.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter12-decision-theory.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter13-regression.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter14-nonparametric.md`
+- `src/content/blog/math/probability/wasserman-all-stats/chapter15-classification.md`
+- `src/content/blog/math/set-theory/ch01/00-overview.md`
+- `src/content/blog/math/set-theory/ch01/01-basic.md`
+- `src/content/blog/math/set-theory/ch01/02-construction.md`
+- `src/content/blog/math/set-theory/ch01/03-schemas.md`
+- `src/content/blog/math/set-theory/ch01/04-infinity.md`
+- `src/content/blog/math/set-theory/ch01/05-foundation.md`
+- `src/content/blog/math/set-theory/ch01/06-choice.md`
+- `src/content/blog/math/set-theory/ch01/07-summary.md`
+- `src/content/blog/media/av1/00-overview.md`
+- `src/content/blog/media/av1/chapter00-digital-video.md`
+- `src/content/blog/media/av1/chapter01-history-tools.md`
+- `src/content/blog/media/av1/chapter02-bitstream/00-overview.md`
+- `src/content/blog/media/av1/chapter02-bitstream/01-hierarchy.md`
+- `src/content/blog/media/av1/chapter02-bitstream/02-obu.md`
+- `src/content/blog/media/av1/chapter02-bitstream/03-parsing.md`
+- `src/content/blog/media/av1/chapter02-bitstream/04-temporal-frame.md`
+- `src/content/blog/media/av1/chapter02-bitstream/05-sequence-header.md`
+- `src/content/blog/media/av1/chapter02-bitstream/06-profiles-levels.md`
+- `src/content/blog/media/av1/chapter02-bitstream/07-notation.md`
+- `src/content/blog/media/av1/chapter02-bitstream/08-format.md`
+- `src/content/blog/media/av1/chapter02-bitstream/09-trailing.md`
+- `src/content/blog/media/av1/chapter03-tiles-superblocks.md`
+- `src/content/blog/media/av1/chapter04-partitioning.md`
+- `src/content/blog/media/av1/chapter05-prediction-overview.md`
+- `src/content/blog/media/av1/chapter06-block-structure.md`
+- `src/content/blog/media/av1/chapter07-entropy-coding.md`
+- `src/content/blog/media/av1/chapter08-intra-prediction.md`
+- `src/content/blog/media/av1/chapter09-transform-quantization.md`
+- `src/content/blog/media/av1/chapter10-frame-assembly.md`
+- `src/content/blog/media/av1/chapter11-reference-frames.md`
+- `src/content/blog/media/av1/chapter12-inter-prediction.md`
+- `src/content/blog/media/av1/chapter13-compound-prediction.md`
+- `src/content/blog/media/av1/chapter14-global-warped-motion.md`
+- `src/content/blog/media/av1/chapter15-mfmv.md`
+- `src/content/blog/media/av1/chapter16-deblocking.md`
+- `src/content/blog/media/av1/chapter17-cdef.md`
+- `src/content/blog/media/av1/chapter18-loop-restoration.md`
+- `src/content/blog/media/av1/chapter19-film-grain.md`
+- `src/content/blog/media/av1/chapter20-tiles-parallel.md`
+- `src/content/blog/media/av1/chapter21-superres-scalability.md`
+- `src/content/blog/media/av1/chapter22-metadata.md`
+- `src/content/blog/media/av1/chapter23-decoder-model.md`
+- `src/content/blog/media/av1/chapter24-error-resilience.md`
+- `src/content/blog/media/av1/chapter25-container-transport.md`
+- `src/content/blog/media/av1/chapter26-rate-control.md`
+- `src/content/blog/media/av1/chapter27-gop-keyframe-ltr.md`
+- `src/content/blog/media/av1/chapter28-temporal-filter-aq.md`
+- `src/content/blog/media/av1/chapter29-test-vectors.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter01-accelerator-evolution.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter02-simd-systolic.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter03-tpu.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter04-apple-ane.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter05-hexagon.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter06-intel-npu.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter07-memory-bandwidth.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter08-quantization.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter09-power-thermal.md`
+- `src/content/blog/ml/accelerators/npu-architecture/chapter10-programming-models.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter01-metal-position.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter02-msl-basics.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter03-queue-encoder.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter04-unified-memory.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter05-mps.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter06-mpsgraph.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter07-air.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter08-performance.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter09-ml-workloads.md`
+- `src/content/blog/ml/compilers/apple-metal/chapter10-coreml-backend.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter01-why-ml-compiler.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter02-ir-design.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter03-tvm-architecture.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter04-graph-opt.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter05-tensor-scheduling.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter06-autotuning.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter07-mlir-dialect.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter08-iree.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter09-quantization-compile.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter10-byoc.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter11-profiling-debugging.md`
+- `src/content/blog/ml/compilers/ml-compilers-intro/chapter12-mobile-deploy.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter01-mlir-position.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter02-dialect-design.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter03-op-type-attr.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter04-pass-rewriter.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter05-conversion-lowering.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter06-linalg.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter07-tosa-stablehlo.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter08-vector-affine-scf.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter09-llvm-lowering.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter10-bufferization.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter11-async-gpu-spirv.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter12-custom-dialect.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter13-tablegen.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter14-tools.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter15-debugging.md`
+- `src/content/blog/ml/compilers/mlir-deep/chapter16-case-studies.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter01-eager-mode.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter02-cpp-backend.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter03-dispatch-key.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter04-torchscript.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter05-torchdynamo.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter06-aotautograd.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter07-inductor.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter08-torch-compile-usage.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter09-distributed.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter10-quantization.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter11-executorch.md`
+- `src/content/blog/ml/compilers/pytorch-internals/chapter12-mobile-deploy.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter01-triton-position.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter02-programming-model.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter03-tiled-matmul.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter04-flash-attention.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter05-compiler-flow.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter06-autotuning.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter07-backends.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter08-inductor.md`
+- `src/content/blog/ml/compilers/triton-dsl/chapter09-limits.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter01-xla-position.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter02-stablehlo.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter03-hlo-ir.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter04-pass-pipeline.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter05-fusion.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter06-layout-assignment.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter07-backends.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter08-pjrt.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter09-sharding-spmd.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter10-autotuning.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter11-jax-xla.md`
+- `src/content/blog/ml/compilers/xla-deep/chapter12-tf-pytorch-xla.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter01-drm-subsystem.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter02-dma-buf.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter03-iommu.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter04-ioctl.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter05-mmap.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter06-command-submission.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter07-interrupts.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter08-fence-syncobj.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter09-runtime-pm.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter10-firmware-loading.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter11-userspace-lib.md`
+- `src/content/blog/ml/drivers/npu-drivers/chapter12-case-study.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter01-introduction.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter02-distributions.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter03-regression.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter04-classification.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter05-neural-networks.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter06-kernel.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter07-sparse-kernel.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter08-graphical-models.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter09-mixture-em.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter10-approximate-inference.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter11-sampling.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter12-continuous-latent.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter13-sequential-data.md`
+- `src/content/blog/ml/foundations/bishop-prml/chapter14-combining-models.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter01-introduction.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter02-probability-univariate.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter03-probability-multivariate.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter04-statistics.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter05-decision-theory.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter06-information-theory.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter07-linear-algebra.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter08-optimization.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter09-lda.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter10-logistic.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter11-linear-regression.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter12-glm.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter13-nn-tabular.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter14-nn-images.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter15-nn-sequences.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter16-exemplar.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter17-kernel.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter18-trees-boosting.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter19-fewer-labels.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter20-dim-reduction.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter21-clustering.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter22-recommender.md`
+- `src/content/blog/ml/foundations/murphy-ml1/chapter23-graph-embeddings.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter01-introduction.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter02-probability.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter03-statistics.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter04-pgm.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter05-information-theory.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter06-optimization.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter07-inference-overview.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter08-gaussian-filter.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter09-message-passing.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter10-variational.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter11-monte-carlo.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter12-mcmc.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter13-smc.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter14-predictive-overview.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter15-glm.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter16-dnn.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter17-bnn.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter18-gaussian-process.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter19-beyond-iid.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter20-gen-overview.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter21-vae.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter22-autoregressive.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter23-normalizing-flows.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter24-ebm.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter25-diffusion.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter26-gan.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter27-discovery-overview.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter28-latent-factor.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter29-state-space.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter30-graph-learning.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter31-nonparametric-bayes.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter32-representation.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter33-interpretability.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter34-decision-making.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter35-rl.md`
+- `src/content/blog/ml/foundations/murphy-ml2/chapter36-causality.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter01-intro.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter02-inferred-causation.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter03-identification.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter04-actions.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter05-sem.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter06-simpson.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter07-counterfactuals.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter08-imperfect-experiments.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter09-probability-causation.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter10-actual-cause.md`
+- `src/content/blog/ml/foundations/pearl-causality/chapter11-reflections.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter01-uncertainty-ai.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter02-bayesian-inference.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter03-markov-bayes-networks.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter04-belief-propagation.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter05-composite-belief.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter06-decision-control.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter07-taxonomy.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter08-learning-structure.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter09-non-bayesian.md`
+- `src/content/blog/ml/foundations/pearl-pris/chapter10-logic-probability.md`
+- `src/content/blog/ml/inference/coreml/chapter01-overview.md`
+- `src/content/blog/ml/inference/coreml/chapter02-ane-mpsgraph.md`
+- `src/content/blog/ml/inference/coreml/chapter03-conversion.md`
+- `src/content/blog/ml/inference/coreml/chapter04-stateful-programs.md`
+- `src/content/blog/ml/inference/coreml/chapter05-personalization.md`
+- `src/content/blog/ml/inference/coreml/chapter06-performance.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter01-format.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter02-conversion.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter03-onnx-runtime.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter04-tensorrt.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter05-coreml.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter06-optimization-passes.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter07-opset-compatibility.md`
+- `src/content/blog/ml/inference/onnx-practice/chapter08-deployment-patterns.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter01-ep-architecture.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter02-graph-optimizer.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter03-custom-op.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter04-session-iobinding.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter05-io-memory-opt.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter06-quantization-tools.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter07-mobile-web.md`
+- `src/content/blog/ml/inference/onnx-runtime/chapter08-genai.md`
+- `src/content/blog/ml/inference/tensorrt/chapter01-engine-builder.md`
+- `src/content/blog/ml/inference/tensorrt/chapter02-plugin-api.md`
+- `src/content/blog/ml/inference/tensorrt/chapter03-int8-calibration.md`
+- `src/content/blog/ml/inference/tensorrt/chapter04-dynamic-shape.md`
+- `src/content/blog/ml/inference/tensorrt/chapter05-multi-stream.md`
+- `src/content/blog/ml/inference/tensorrt/chapter06-refit.md`
+- `src/content/blog/ml/inference/tensorrt/chapter07-timing-cache.md`
+- `src/content/blog/ml/inference/tensorrt/chapter08-model-patterns.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter01-overview.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter02-system-design-intro.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter03-data-engineering.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter04-training-data.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter05-feature-engineering.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter06-model-eval.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter07-deployment-prediction.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter08-data-drift.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter09-continual-learning.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter10-infra-mlops.md`
+- `src/content/blog/ml/systems/designing-ml-systems/chapter11-human-side.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter01-overview.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter02-data-representation.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter03-feature-engineering.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter04-problem-representation.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter05-training.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter06-reproducibility.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter07-responsible-ai.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter08-connected.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter09-serving.md`
+- `src/content/blog/ml/systems/ml-design-patterns/chapter10-mlops.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter01-workload-analysis.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter02-npu-profiler.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter03-layer-latency.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter04-memory-bandwidth.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter05-power-profiling.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter06-ftrace-perf.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter07-lttng.md`
+- `src/content/blog/ml/systems/ml-profiling/chapter08-bottleneck-optimization.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter01-overview.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter02-tflite-micro.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter03-interpreter-memory.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter04-quantization.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter05-cmsis-nn.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter06-power-design.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter07-memory-design.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter08-sensor-preprocess.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter09-wake-word.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter10-image-classification.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter11-anomaly-detection.md`
+- `src/content/blog/ml/tinyml/tinyml-edge-ai/chapter12-microtvm.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter01-introduction.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter02-concurrent-or-not.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter03-correctness-performance.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter04-eight-rules.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter05-threading-libraries.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter06-parallel-sum-prefix.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter07-mapreduce.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter08-sorting.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter09-searching.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter10-graph-algorithms.md`
+- `src/content/blog/parallel/art-of-concurrency/chapter11-threading-tools.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter01-hello-concurrent-world.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter02-managing-threads.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter03-sharing-data-between-threads.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter04-synchronizing-concurrent-operations.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter05-the-cpp-memory-model-and-operations-on-atomic-types.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter06-designing-lock-based-concurrent-data-structures.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter07-designing-lock-free-concurrent-data-structures.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter08-designing-concurrent-code.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter09-advanced-thread-management.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter10-parallel-algorithms.md`
+- `src/content/blog/parallel/cpp-concurrency-in-action/chapter11-testing-and-debugging-multithreaded-applications.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter01-reliable-scalable-maintainable.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter02-data-models-and-query-languages.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter03-storage-and-retrieval.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter04-encoding-and-evolution.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter05-replication.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter06-partitioning.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter07-transactions.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter08-the-trouble-with-distributed-systems.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter09-consistency-and-consensus.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter10-batch-processing.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter11-stream-processing.md`
+- `src/content/blog/parallel/designing-data-intensive-applications/chapter12-the-future-of-data-systems.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter01-introduction.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter02-architectures.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter03-processes.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter04-communication.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter05-naming.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter06-coordination.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter07-consistency-replication.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter08-fault-tolerance.md`
+- `src/content/blog/parallel/distributed-systems-tanenbaum/chapter09-security.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter01-introduction.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter02-platforms.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter03-algorithm-design.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter04-communication.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter05-analytical-modeling.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter06-mpi.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter07-shared-memory.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter08-dense-matrix.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter09-sorting.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter10-graph-algorithms.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter11-search.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter12-dynamic-programming.md`
+- `src/content/blog/parallel/intro-to-parallel-computing/chapter13-fft.md`
+- `src/content/blog/parallel/parallel-principles/ch01-introduction.md`
+- `src/content/blog/parallel/parallel-principles/ch02-mutual-exclusion.md`
+- `src/content/blog/parallel/parallel-principles/ch03-concurrent-objects.md`
+- `src/content/blog/parallel/parallel-principles/ch04-foundations-of-shared-memory.md`
+- `src/content/blog/parallel/parallel-principles/ch05-relative-power-of-synchronization.md`
+- `src/content/blog/parallel/parallel-principles/ch06-universality-of-consensus.md`
+- `src/content/blog/parallel/parallel-principles/ch07-spin-locks-and-contention.md`
+- `src/content/blog/parallel/parallel-principles/ch08-monitors-and-blocking-synchronization.md`
+- `src/content/blog/parallel/parallel-principles/ch09-linked-lists-the-role-of-locking.md`
+- `src/content/blog/parallel/parallel-principles/ch10-concurrent-queues-and-the-aba-problem.md`
+- `src/content/blog/parallel/parallel-principles/ch11-concurrent-stacks-and-elimination.md`
+- `src/content/blog/parallel/parallel-principles/ch12-counting-sorting-and-distributed-coordination.md`
+- `src/content/blog/parallel/parallel-principles/ch13-concurrent-hashing-and-natural-parallelism.md`
+- `src/content/blog/parallel/parallel-principles/ch14-skiplists-and-balanced-search.md`
+- `src/content/blog/parallel/parallel-principles/ch15-priority-queues.md`
+- `src/content/blog/parallel/parallel-principles/ch16-futures-scheduling-work-distribution.md`
+- `src/content/blog/parallel/parallel-principles/ch17-barriers.md`
+- `src/content/blog/parallel/parallel-principles/ch18-transactional-memory.md`
+- `src/content/blog/parallel/patterns-for-parallel-programming/chapter01-pattern-language.md`
+- `src/content/blog/parallel/patterns-for-parallel-programming/chapter02-background.md`
+- `src/content/blog/parallel/patterns-for-parallel-programming/chapter03-finding-concurrency.md`
+- `src/content/blog/parallel/patterns-for-parallel-programming/chapter04-algorithm-structure.md`
+- `src/content/blog/parallel/patterns-for-parallel-programming/chapter05-supporting-structures.md`
+- `src/content/blog/parallel/patterns-for-parallel-programming/chapter06-implementation-mechanisms.md`
+- `src/content/blog/parallel/seven-concurrency-models/ch01-threads-and-locks.md`
+- `src/content/blog/parallel/seven-concurrency-models/ch02-functional-programming.md`
+- `src/content/blog/parallel/seven-concurrency-models/ch03-the-clojure-way.md`
+- `src/content/blog/parallel/seven-concurrency-models/ch04-actors.md`
+- `src/content/blog/parallel/seven-concurrency-models/ch05-csp.md`
+- `src/content/blog/parallel/seven-concurrency-models/ch06-data-parallelism.md`
+- `src/content/blog/parallel/seven-concurrency-models/ch07-lambda-architecture.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter01-introduction.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter02-background.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter03-patterns.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter04-map.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter05-collectives.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter06-data-reorganization.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter07-stencil-recurrence.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter08-fork-join.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter09-pipeline.md`
+- `src/content/blog/parallel/structured-parallel-programming/chapter10-conclusion.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part1-01-what-is-argument.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part1-02-deductive-vs-inductive.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part1-03-validity-soundness-strength.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part1-04-argument-diagram.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part2-01-propositional-logic.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part2-02-natural-deduction.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part2-03-validity-proof.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part2-04-predicate-logic.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part2-05-quantifiers.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part3-01-formal-fallacies.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part3-02-informal-fallacies.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part3-03-inductive-evaluation.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part3-04-causal-analogy-hypothesis.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part4-01-analyzing-academic-arguments.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part4-02-rebuttal-and-counter-rebuttal.md`
+- `src/content/blog/philosophy/critical-thinking-logic/part4-03-critical-reading-writing.md`
+- `src/content/blog/philosophy/philosophy-of-science/ch01-scientific-revolution.md`
+- `src/content/blog/philosophy/philosophy-of-science/ch02-induction-falsification.md`
+- `src/content/blog/philosophy/philosophy-of-science/ch03-theories-realism.md`
+- `src/content/blog/philosophy/philosophy-of-science/ch04-scientific-method.md`
+- `src/content/blog/philosophy/philosophy-of-science/ch05-recent-developments.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch01-introduction.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch02-normal-science-route.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch03-normal-science-nature.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch04-puzzle-solving.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch05-paradigms.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch06-anomaly.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch07-crisis-theories.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch08-response-crisis.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch09-revolutions-necessity.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch10-world-view.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch11-invisibility.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch12-resolution.md`
+- `src/content/blog/philosophy/scientific-revolutions/ch13-progress.md`
+- `src/content/blog/philosophy/scientific-revolutions/postscript.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item01-what-is-algorithm.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item02-asymptotic-analysis.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item03-recursion-and-divide-conquer.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item04-arrays.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item05-structures-polynomials-sparse-matrix.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item06-stack.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item07-queue-deque.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item08-linked-list.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item09-linked-list-applications.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item10-binary-tree-traversal.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item11-threaded-tree-expression.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item12-heap-priority-queue.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item13-binary-search-tree.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item14-selection-tree-forest-set.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item15-graph-traversal.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item16-connected-components-mst.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item17-shortest-path.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item18-aov-aoe-network.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item19-simple-sort.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item20-efficient-sort.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item21-non-comparison-external-sort.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item22-static-hashing.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item23-dynamic-hashing.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item24-min-max-heap-deap.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item25-mergeable-heaps.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item26-avl-tree.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item27-red-black-tree.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item28-b-tree.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item29-trie-patricia.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item30-skip-list.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item31-disjoint-set-detail.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item32-probabilistic-data-structures.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item33-modern-graph.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item34-dp-patterns.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item35-backtracking.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item36-modern-cpp-containers.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item37-cache-friendly.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item38-lock-free.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item39-selection-guide.md`
+- `src/content/blog/programming/algorithms/data-structures-and-algorithms/item40-series-overview.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col01.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col02.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col03.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col04.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col05.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col06.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col07.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col08.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col09.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col10.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col11.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col12.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col13.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col14.md`
+- `src/content/blog/programming/algorithms/programming-pearls/col15.md`
+- `src/content/blog/programming/algorithms/sicp/ch01.md`
+- `src/content/blog/programming/algorithms/sicp/ch02.md`
+- `src/content/blog/programming/algorithms/sicp/ch03.md`
+- `src/content/blog/programming/algorithms/sicp/ch04.md`
+- `src/content/blog/programming/algorithms/sicp/ch05.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter01-basics.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter02-user-defined-types.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter03-modularity.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter04-error-handling.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter05-classes.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter06-essential-operations.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter07-templates.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter08-concepts.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter09-library-overview.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter10-strings-regex.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter11-io.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter12-containers.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter13-algorithms.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter14-ranges.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter15-pointers-containers.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter16-utilities.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter17-numerics.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter18-concurrency.md`
+- `src/content/blog/programming/cpp/a-tour-of-cpp/chapter19-history.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item01-use-iso-standard-cpp.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item02-prefer-default-arguments.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item03-use-default-member-initializers.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item04-avoid-trivial-getters-setters.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item05-one-declaration-per-name.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item06-dont-insist-on-single-return.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item07-encapsulate-messy-structs.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item08-keep-function-arguments-minimal.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item09-use-c-subset-for-cross-compiler-abi.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item10-init-members-in-declaration-order.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item11-minimize-explicit-data-sharing.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item12-use-template-metaprogramming-sparingly.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item13-never-transfer-ownership-via-raw-pointer.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item14-avoid-singletons.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item15-use-constructors-not-memset-memcpy.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item16-dont-cast-away-const.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item17-avoid-global-state-error-handling.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item18-no-using-namespace-in-headers.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item19-return-struct-for-multiple-outputs.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item20-prefer-enum-class.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item21-keep-scope-small.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item22-use-constexpr-for-compile-time.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item23-use-templates-for-abstraction.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item24-specify-concepts-for-template-args.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item25-static-type-safety.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item26-prefer-immutable-data.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item27-encapsulate-rule-violations.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item28-dont-declare-before-init.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item29-design-for-optimization.md`
+- `src/content/blog/programming/cpp/beautiful-cpp/item30-use-raii-to-prevent-leaks.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline01-understand-the-importance-of-software-design.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline02-design-for-change.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline03-separate-interfaces-to-avoid-artificial-coupling.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline04-design-for-testability.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline05-design-for-extension.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline06-adhere-to-the-expected-behavior-of-abstractions.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline07-understand-the-similarities-between-base-classes-and-concepts.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline08-understand-the-semantic-requirements-of-overload-sets.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline09-pay-attention-to-the-ownership-of-abstractions.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline10-consider-creating-an-architectural-document.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline11-understand-the-purpose-of-design-patterns.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline12-beware-of-design-pattern-misconceptions.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline13-design-patterns-are-everywhere.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline14-use-a-design-patterns-name-to-communicate-intent.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline15-design-for-the-addition-of-types-or-operations.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline16-use-visitor-to-extend-operations.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline17-consider-stdvariant-for-implementing-visitor.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline18-beware-the-performance-of-acyclic-visitor.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline19-use-strategy-to-isolate-how-things-are-done.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline20-favor-composition-over-inheritance.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline21-use-command-to-isolate-what-things-are-done.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline22-prefer-value-semantics-over-reference-semantics.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline23-prefer-a-value-based-implementation-of-strategy-and-command.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline24-use-adapters-to-standardize-interfaces.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline25-apply-observers-as-an-abstract-notification-mechanism.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline26-use-crtp-to-introduce-static-type-categories.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline27-use-crtp-for-static-mixin-classes.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline28-build-bridges-to-remove-physical-dependencies.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline29-be-aware-of-bridge-performance-gains-and-losses.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline30-apply-prototype-for-abstract-copy-operations.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline31-use-external-polymorphism-for-nonintrusive-runtime-polymorphism.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline32-consider-replacing-inheritance-hierarchies-with-type-erasure.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline33-be-aware-of-the-optimization-potential-of-type-erasure.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline34-be-aware-of-the-setup-costs-of-owning-type-erasure-wrappers.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline35-use-decorators-to-add-customization-hierarchically.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline36-understand-the-trade-off-between-runtime-and-compile-time-abstraction.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline37-treat-singleton-as-an-implementation-pattern-not-a-design-pattern.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline38-design-singletons-for-change-and-testability.md`
+- `src/content/blog/programming/cpp/cpp-software-design/guideline39-continue-to-learn-about-design-patterns.md`
+- `src/content/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages.md`
+- `src/content/blog/programming/cpp/effective-cpp/item02-prefer-consts-enums-and-inlines-to-defines.md`
+- `src/content/blog/programming/cpp/effective-cpp/item03-use-const-whenever-possible.md`
+- `src/content/blog/programming/cpp/effective-cpp/item04-make-sure-objects-are-initialized-before-use.md`
+- `src/content/blog/programming/cpp/effective-cpp/item05-know-what-functions-cpp-silently-writes.md`
+- `src/content/blog/programming/cpp/effective-cpp/item06-explicitly-disallow-compiler-generated-functions.md`
+- `src/content/blog/programming/cpp/effective-cpp/item07-declare-destructors-virtual-in-polymorphic-base-classes.md`
+- `src/content/blog/programming/cpp/effective-cpp/item08-prevent-exceptions-from-leaving-destructors.md`
+- `src/content/blog/programming/cpp/effective-cpp/item09-never-call-virtual-functions-during-construction-or-destruction.md`
+- `src/content/blog/programming/cpp/effective-cpp/item10-have-assignment-operators-return-reference-to-this.md`
+- `src/content/blog/programming/cpp/effective-cpp/item11-handle-assignment-to-self-in-operator-equals.md`
+- `src/content/blog/programming/cpp/effective-cpp/item12-copy-all-parts-of-an-object.md`
+- `src/content/blog/programming/cpp/effective-cpp/item13-use-objects-to-manage-resources.md`
+- `src/content/blog/programming/cpp/effective-cpp/item14-think-carefully-about-copying-behavior-in-resource-managing-classes.md`
+- `src/content/blog/programming/cpp/effective-cpp/item15-provide-access-to-raw-resources-in-resource-managing-classes.md`
+- `src/content/blog/programming/cpp/effective-cpp/item16-use-the-same-form-in-corresponding-uses-of-new-and-delete.md`
+- `src/content/blog/programming/cpp/effective-cpp/item17-store-newed-objects-in-smart-pointers-in-standalone-statements.md`
+- `src/content/blog/programming/cpp/effective-cpp/item18-make-interfaces-easy-to-use-correctly-and-hard-to-use-incorrectly.md`
+- `src/content/blog/programming/cpp/effective-cpp/item19-treat-class-design-as-type-design.md`
+- `src/content/blog/programming/cpp/effective-cpp/item20-prefer-pass-by-reference-to-const-to-pass-by-value.md`
+- `src/content/blog/programming/cpp/effective-cpp/item21-dont-try-to-return-a-reference-when-you-must-return-an-object.md`
+- `src/content/blog/programming/cpp/effective-cpp/item22-declare-data-members-private.md`
+- `src/content/blog/programming/cpp/effective-cpp/item23-prefer-non-member-non-friend-functions-to-member-functions.md`
+- `src/content/blog/programming/cpp/effective-cpp/item24-declare-non-member-functions-when-type-conversions-should-apply.md`
+- `src/content/blog/programming/cpp/effective-cpp/item25-consider-support-for-a-non-throwing-swap.md`
+- `src/content/blog/programming/cpp/effective-cpp/item26-postpone-variable-definitions-as-long-as-possible.md`
+- `src/content/blog/programming/cpp/effective-cpp/item27-minimize-casting.md`
+- `src/content/blog/programming/cpp/effective-cpp/item28-avoid-returning-handles-to-object-internals.md`
+- `src/content/blog/programming/cpp/effective-cpp/item29-strive-for-exception-safe-code.md`
+- `src/content/blog/programming/cpp/effective-cpp/item30-understand-the-ins-and-outs-of-inlining.md`
+- `src/content/blog/programming/cpp/effective-cpp/item31-minimize-compilation-dependencies-between-files.md`
+- `src/content/blog/programming/cpp/effective-cpp/item32-make-sure-public-inheritance-models-is-a.md`
+- `src/content/blog/programming/cpp/effective-cpp/item33-avoid-hiding-inherited-names.md`
+- `src/content/blog/programming/cpp/effective-cpp/item34-differentiate-between-inheritance-of-interface-and-inheritance-of-implementation.md`
+- `src/content/blog/programming/cpp/effective-cpp/item35-consider-alternatives-to-virtual-functions.md`
+- `src/content/blog/programming/cpp/effective-cpp/item36-never-redefine-an-inherited-non-virtual-function.md`
+- `src/content/blog/programming/cpp/effective-cpp/item37-never-redefine-a-functions-inherited-default-parameter-value.md`
+- `src/content/blog/programming/cpp/effective-cpp/item38-model-has-a-or-implemented-in-terms-of-through-composition.md`
+- `src/content/blog/programming/cpp/effective-cpp/item39-use-private-inheritance-judiciously.md`
+- `src/content/blog/programming/cpp/effective-cpp/item40-use-multiple-inheritance-judiciously.md`
+- `src/content/blog/programming/cpp/effective-cpp/item41-understand-implicit-interfaces-and-compile-time-polymorphism.md`
+- `src/content/blog/programming/cpp/effective-cpp/item42-understand-the-two-meanings-of-typename.md`
+- `src/content/blog/programming/cpp/effective-cpp/item43-know-how-to-access-names-in-templatized-base-classes.md`
+- `src/content/blog/programming/cpp/effective-cpp/item44-factor-parameter-independent-code-out-of-templates.md`
+- `src/content/blog/programming/cpp/effective-cpp/item45-use-member-function-templates-to-accept-all-compatible-types.md`
+- `src/content/blog/programming/cpp/effective-cpp/item46-define-non-member-functions-inside-templates-when-type-conversions-are-desired.md`
+- `src/content/blog/programming/cpp/effective-cpp/item47-use-traits-classes-for-information-about-types.md`
+- `src/content/blog/programming/cpp/effective-cpp/item48-be-aware-of-template-metaprogramming.md`
+- `src/content/blog/programming/cpp/effective-cpp/item49-understand-the-behavior-of-the-new-handler.md`
+- `src/content/blog/programming/cpp/effective-cpp/item50-understand-when-it-makes-sense-to-replace-new-and-delete.md`
+- `src/content/blog/programming/cpp/effective-cpp/item51-adhere-to-convention-when-writing-new-and-delete.md`
+- `src/content/blog/programming/cpp/effective-cpp/item52-write-placement-delete-if-you-write-placement-new.md`
+- `src/content/blog/programming/cpp/effective-cpp/item53-pay-attention-to-compiler-warnings.md`
+- `src/content/blog/programming/cpp/effective-cpp/item54-familiarize-yourself-with-the-standard-library-including-tr1.md`
+- `src/content/blog/programming/cpp/effective-cpp/item55-familiarize-yourself-with-boost.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item02-understand-auto-type-deduction.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item03-understand-decltype.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item04-know-how-to-view-deduced-types.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item05-prefer-auto.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item06-use-explicit-typed-initializer.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item07-distinguish-paren-and-brace-when-creating-objects.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item08-prefer-nullptr-to-0-and-null.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item09-prefer-alias-declarations-to-typedefs.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item10-prefer-scoped-enums-to-unscoped-enums.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item11-prefer-deleted-functions-to-private-undefined.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item12-declare-overriding-functions-override.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item13-prefer-const-iterators-to-iterators.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item14-declare-functions-noexcept-if-they-wont-emit-exceptions.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item15-use-constexpr-whenever-possible.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item16-make-const-member-functions-thread-safe.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item17-understand-special-member-function-generation.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item19-use-shared-ptr-for-shared-ownership.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item20-use-weak-ptr-for-shared-ptr-like-pointers-that-can-dangle.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item21-prefer-make-unique-and-make-shared-to-direct-new.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item23-understand-std-move-and-std-forward.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item25-use-move-on-rvalue-refs-and-forward-on-universal-refs.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item26-avoid-overloading-on-universal-references.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item27-familiarize-yourself-with-alternatives-to-overloading-on-universal-references.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item28-understand-reference-collapsing.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item29-assume-move-operations-are-not-present-not-cheap-and-not-used.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item30-familiarize-yourself-with-perfect-forwarding-failure-cases.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item31-avoid-default-capture-modes.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item32-use-init-capture-to-move-objects-into-closures.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item33-use-decltype-on-auto-parameters-when-forwarding.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item34-prefer-lambdas-to-std-bind.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item35-prefer-task-based-programming-to-thread-based.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item36-specify-launch-async-if-asynchronicity-is-essential.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item37-make-std-threads-unjoinable-on-all-paths.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item38-be-aware-of-varying-thread-handle-destructor-behavior.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item39-consider-void-futures-for-one-shot-event-communication.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item40-use-std-atomic-for-concurrency-volatile-for-special-memory.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params.md`
+- `src/content/blog/programming/cpp/effective-modern-cpp/item42-consider-emplacement-instead-of-insertion.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter01-essential-features.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter02-from-source-to-binary.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter03-object-files.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter04-process-memory-structure.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter05-stack-and-heap.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter06-oop-and-encapsulation.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter07-composition-and-aggregation.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter08-inheritance.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter09-polymorphism.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter10-unit-testing-and-debugging.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter11-system-calls-and-kernels.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter12-the-most-recent-c.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter13-concurrency.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter14-synchronization.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter15-thread-execution.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter16-thread-synchronization.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter17-process-execution.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter18-process-synchronization.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter19-single-host-ipc.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter20-socket-programming.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter21-integration-with-other-languages.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter22-advanced-topics.md`
+- `src/content/blog/programming/cpp/extreme-c/chapter23-build-systems.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter01-crash-course-cpp-and-stl.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter02-strings-and-string-views.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter03-coding-with-style.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter04-designing-professional-cpp-programs.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter05-designing-with-objects.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter06-designing-for-reuse.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter07-memory-management.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter08-gaining-proficiency-with-classes-and-objects.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter09-mastering-classes-and-objects.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter10-discovering-inheritance-techniques.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter11-modules-headers-namespaces.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter12-writing-generic-code-with-templates.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter13-demystifying-cpp-io.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter14-handling-errors.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter15-overloading-cpp-operators.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter16-overview-of-the-cpp-standard-library.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter17-understanding-containers-and-iterators.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter18-stl-algorithms.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter19-string-localization-and-regex.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter20-additional-library-utilities.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter21-date-time-random-filesystem.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter22-customizing-and-extending-the-stl.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter23-ranges-and-views.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter24-function-pointers-objects-lambdas.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter25-template-techniques.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter26-multithreaded-programming-overview.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter27-coroutines.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter28-c-interfacing.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter29-writing-efficient-cpp.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter30-becoming-adept-at-testing.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter31-conquering-debugging.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter32-design-patterns.md`
+- `src/content/blog/programming/cpp/professional-cpp/chapter33-applying-design-patterns.md`
+- `src/content/blog/programming/design/clean-architecture/chapter01-what-is-design-and-architecture.md`
+- `src/content/blog/programming/design/clean-architecture/chapter02-a-tale-of-two-values.md`
+- `src/content/blog/programming/design/clean-architecture/chapter03-paradigm-overview.md`
+- `src/content/blog/programming/design/clean-architecture/chapter04-structured-programming.md`
+- `src/content/blog/programming/design/clean-architecture/chapter05-object-oriented-programming.md`
+- `src/content/blog/programming/design/clean-architecture/chapter06-functional-programming.md`
+- `src/content/blog/programming/design/clean-architecture/chapter07-srp-the-single-responsibility-principle.md`
+- `src/content/blog/programming/design/clean-architecture/chapter08-ocp-the-open-closed-principle.md`
+- `src/content/blog/programming/design/clean-architecture/chapter09-lsp-the-liskov-substitution-principle.md`
+- `src/content/blog/programming/design/clean-architecture/chapter10-isp-the-interface-segregation-principle.md`
+- `src/content/blog/programming/design/clean-architecture/chapter11-dip-the-dependency-inversion-principle.md`
+- `src/content/blog/programming/design/clean-architecture/chapter12-components.md`
+- `src/content/blog/programming/design/clean-architecture/chapter13-component-cohesion.md`
+- `src/content/blog/programming/design/clean-architecture/chapter14-component-coupling.md`
+- `src/content/blog/programming/design/clean-architecture/chapter15-what-is-architecture.md`
+- `src/content/blog/programming/design/clean-architecture/chapter16-independence.md`
+- `src/content/blog/programming/design/clean-architecture/chapter17-boundaries-drawing-lines.md`
+- `src/content/blog/programming/design/clean-architecture/chapter18-boundary-anatomy.md`
+- `src/content/blog/programming/design/clean-architecture/chapter19-policy-and-level.md`
+- `src/content/blog/programming/design/clean-architecture/chapter20-business-rules.md`
+- `src/content/blog/programming/design/clean-architecture/chapter21-screaming-architecture.md`
+- `src/content/blog/programming/design/clean-architecture/chapter22-the-clean-architecture.md`
+- `src/content/blog/programming/design/clean-architecture/chapter23-presenters-and-humble-objects.md`
+- `src/content/blog/programming/design/clean-architecture/chapter24-partial-boundaries.md`
+- `src/content/blog/programming/design/clean-architecture/chapter25-layers-and-boundaries.md`
+- `src/content/blog/programming/design/clean-architecture/chapter26-the-main-component.md`
+- `src/content/blog/programming/design/clean-architecture/chapter27-services-great-and-small.md`
+- `src/content/blog/programming/design/clean-architecture/chapter28-the-test-boundary.md`
+- `src/content/blog/programming/design/clean-architecture/chapter29-clean-embedded-architecture.md`
+- `src/content/blog/programming/design/clean-architecture/chapter30-the-database-is-a-detail.md`
+- `src/content/blog/programming/design/clean-architecture/chapter31-the-web-is-a-detail.md`
+- `src/content/blog/programming/design/clean-architecture/chapter32-frameworks-are-details.md`
+- `src/content/blog/programming/design/clean-architecture/chapter33-case-study-video-sales.md`
+- `src/content/blog/programming/design/clean-architecture/chapter34-the-missing-chapter.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter01-crunching-knowledge.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter02-ubiquitous-language.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter03-binding-model-implementation.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter04-isolating-domain.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter05-model-expressed-in-software.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter06-life-cycle-domain-object.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter07-extended-example.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter08-breakthrough.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter09-implicit-concepts-explicit.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter10-supple-design.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter11-analysis-patterns.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter12-design-patterns-and-model.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter13-refactoring-deeper-insight.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter14-maintaining-model-integrity.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter15-distillation.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter16-large-scale-structure.md`
+- `src/content/blog/programming/design/domain-driven-design/chapter17-bringing-strategy-together.md`
+- `src/content/blog/programming/design/gof-design-patterns/item00-mental-models.md`
+- `src/content/blog/programming/design/gof-design-patterns/item01-abstract-factory.md`
+- `src/content/blog/programming/design/gof-design-patterns/item02-builder.md`
+- `src/content/blog/programming/design/gof-design-patterns/item03-factory-method.md`
+- `src/content/blog/programming/design/gof-design-patterns/item04-prototype.md`
+- `src/content/blog/programming/design/gof-design-patterns/item05-singleton.md`
+- `src/content/blog/programming/design/gof-design-patterns/item06-adapter.md`
+- `src/content/blog/programming/design/gof-design-patterns/item07-bridge.md`
+- `src/content/blog/programming/design/gof-design-patterns/item08-composite.md`
+- `src/content/blog/programming/design/gof-design-patterns/item09-decorator.md`
+- `src/content/blog/programming/design/gof-design-patterns/item10-facade.md`
+- `src/content/blog/programming/design/gof-design-patterns/item11-flyweight.md`
+- `src/content/blog/programming/design/gof-design-patterns/item12-proxy.md`
+- `src/content/blog/programming/design/gof-design-patterns/item13-chain-of-responsibility.md`
+- `src/content/blog/programming/design/gof-design-patterns/item14-command.md`
+- `src/content/blog/programming/design/gof-design-patterns/item15-interpreter.md`
+- `src/content/blog/programming/design/gof-design-patterns/item16-iterator.md`
+- `src/content/blog/programming/design/gof-design-patterns/item17-mediator.md`
+- `src/content/blog/programming/design/gof-design-patterns/item18-memento.md`
+- `src/content/blog/programming/design/gof-design-patterns/item19-observer.md`
+- `src/content/blog/programming/design/gof-design-patterns/item20-state.md`
+- `src/content/blog/programming/design/gof-design-patterns/item21-strategy.md`
+- `src/content/blog/programming/design/gof-design-patterns/item22-template-method.md`
+- `src/content/blog/programming/design/gof-design-patterns/item23-visitor.md`
+- `src/content/blog/programming/design/gof-design-patterns/item24-pattern-relationships-overview.md`
+- `src/content/blog/programming/design/ooad/chapter01-complexity.md`
+- `src/content/blog/programming/design/ooad/chapter02-the-object-model.md`
+- `src/content/blog/programming/design/ooad/chapter03-classes-and-objects.md`
+- `src/content/blog/programming/design/ooad/chapter04-classification.md`
+- `src/content/blog/programming/design/ooad/chapter05-notation.md`
+- `src/content/blog/programming/design/ooad/chapter06-process.md`
+- `src/content/blog/programming/design/ooad/chapter07-pragmatics.md`
+- `src/content/blog/programming/design/ooad/chapter08-satellite-based-navigation.md`
+- `src/content/blog/programming/design/ooad/chapter09-traffic-management.md`
+- `src/content/blog/programming/design/ooad/chapter10-cryptanalysis.md`
+- `src/content/blog/programming/design/ooad/chapter11-weather-monitoring-station.md`
+- `src/content/blog/programming/design/ooad/chapter12-vacation-tracking-system.md`
+- `src/content/blog/programming/design/oosc/chapter01-software-quality.md`
+- `src/content/blog/programming/design/oosc/chapter02-criteria-of-object-orientation.md`
+- `src/content/blog/programming/design/oosc/chapter03-modularity.md`
+- `src/content/blog/programming/design/oosc/chapter04-approaches-to-reusability.md`
+- `src/content/blog/programming/design/oosc/chapter05-towards-object-technology.md`
+- `src/content/blog/programming/design/oosc/chapter06-abstract-data-types.md`
+- `src/content/blog/programming/design/oosc/chapter07-the-static-structure-classes.md`
+- `src/content/blog/programming/design/oosc/chapter08-the-run-time-structure-objects.md`
+- `src/content/blog/programming/design/oosc/chapter09-memory-management.md`
+- `src/content/blog/programming/design/oosc/chapter10-genericity.md`
+- `src/content/blog/programming/design/oosc/chapter11-design-by-contract.md`
+- `src/content/blog/programming/design/oosc/chapter12-exception-handling.md`
+- `src/content/blog/programming/design/oosc/chapter13-supporting-mechanisms.md`
+- `src/content/blog/programming/design/oosc/chapter14-introduction-to-inheritance.md`
+- `src/content/blog/programming/design/oosc/chapter15-multiple-inheritance.md`
+- `src/content/blog/programming/design/oosc/chapter16-inheritance-and-assertions.md`
+- `src/content/blog/programming/design/oosc/chapter17-typing.md`
+- `src/content/blog/programming/design/oosc/chapter18-global-objects-and-constants.md`
+- `src/content/blog/programming/design/oosc/chapter19-on-methodology.md`
+- `src/content/blog/programming/design/oosc/chapter20-design-pattern-multi-panel.md`
+- `src/content/blog/programming/design/oosc/chapter21-inheritance-case-study-undo.md`
+- `src/content/blog/programming/design/oosc/chapter22-how-to-find-the-classes.md`
+- `src/content/blog/programming/design/oosc/chapter23-principles-of-class-design.md`
+- `src/content/blog/programming/design/oosc/chapter24-using-inheritance-well.md`
+- `src/content/blog/programming/design/oosc/chapter25-useful-techniques.md`
+- `src/content/blog/programming/design/oosc/chapter26-a-sense-of-style.md`
+- `src/content/blog/programming/design/oosc/chapter27-object-oriented-analysis.md`
+- `src/content/blog/programming/design/oosc/chapter28-the-software-construction-process.md`
+- `src/content/blog/programming/design/oosc/chapter29-teaching-the-method.md`
+- `src/content/blog/programming/design/oosc/chapter30-concurrency-distribution-client-server.md`
+- `src/content/blog/programming/design/oosc/chapter31-object-persistence-and-databases.md`
+- `src/content/blog/programming/design/oosc/chapter32-oo-techniques-for-gui.md`
+- `src/content/blog/programming/design/oosc/chapter33-oo-programming-and-ada.md`
+- `src/content/blog/programming/design/oosc/chapter34-emulating-oo-in-non-oo.md`
+- `src/content/blog/programming/design/oosc/chapter35-simula-to-java-and-beyond.md`
+- `src/content/blog/programming/design/oosc/chapter36-an-object-oriented-environment.md`
+- `src/content/blog/programming/design/refactoring/ch01.md`
+- `src/content/blog/programming/design/refactoring/ch02.md`
+- `src/content/blog/programming/design/refactoring/ch03.md`
+- `src/content/blog/programming/design/refactoring/ch04.md`
+- `src/content/blog/programming/design/refactoring/ch05.md`
+- `src/content/blog/programming/design/refactoring/ch06.md`
+- `src/content/blog/programming/design/refactoring/ch07.md`
+- `src/content/blog/programming/design/refactoring/ch08.md`
+- `src/content/blog/programming/design/refactoring/ch09.md`
+- `src/content/blog/programming/design/refactoring/ch10.md`
+- `src/content/blog/programming/design/refactoring/ch11.md`
+- `src/content/blog/programming/design/refactoring/ch12.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern01-extract-function.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern02-inline-function.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern03-extract-variable.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern04-inline-variable.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern05-change-function-declaration.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern06-encapsulate-variable.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern07-rename-variable.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern08-introduce-parameter-object.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern09-combine-functions-into-class.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern10-combine-functions-into-transform.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern11-split-phase.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern12-encapsulate-record.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern13-encapsulate-collection.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern14-replace-primitive-with-object.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern15-replace-temp-with-query.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern16-extract-class.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern17-inline-class.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern18-hide-delegate.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern19-remove-middle-man.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern20-substitute-algorithm.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern21-move-function.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern22-move-field.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern23-move-statements-into-function.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern24-move-statements-to-callers.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern25-replace-inline-code-with-function-call.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern26-slide-statements.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern27-split-loop.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern28-replace-loop-with-pipeline.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern29-remove-dead-code.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern30-split-variable.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern31-rename-field.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern32-replace-derived-variable-with-query.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern33-change-reference-to-value.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern34-change-value-to-reference.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern35-decompose-conditional.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern36-consolidate-conditional-expression.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern37-replace-nested-conditional-with-guard-clauses.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern38-replace-conditional-with-polymorphism.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern39-introduce-special-case.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern40-introduce-assertion.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern41-separate-query-from-modifier.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern42-parameterize-function.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern43-remove-flag-argument.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern44-preserve-whole-object.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern45-replace-parameter-with-query.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern46-replace-query-with-parameter.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern47-remove-setting-method.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern48-replace-constructor-with-factory-function.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern49-replace-function-with-command.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern50-replace-command-with-function.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern51-pull-up-method.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern52-pull-up-field.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern53-pull-up-constructor-body.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern54-push-down-method.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern55-push-down-field.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern56-replace-type-code-with-subclasses.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern57-remove-subclass.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern58-extract-superclass.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern59-collapse-hierarchy.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern60-replace-subclass-with-delegate.md`
+- `src/content/blog/programming/design/refactoring-catalog/pattern61-replace-superclass-with-delegate.md`
+- `src/content/blog/programming/design/uml/item01-why-we-model.md`
+- `src/content/blog/programming/design/uml/item02-introducing-the-uml.md`
+- `src/content/blog/programming/design/uml/item03-hello-world.md`
+- `src/content/blog/programming/design/uml/item04-classes.md`
+- `src/content/blog/programming/design/uml/item05-relationships.md`
+- `src/content/blog/programming/design/uml/item06-common-mechanisms.md`
+- `src/content/blog/programming/design/uml/item07-diagrams.md`
+- `src/content/blog/programming/design/uml/item08-class-diagrams.md`
+- `src/content/blog/programming/design/uml/item09-advanced-classes.md`
+- `src/content/blog/programming/design/uml/item10-advanced-relationships.md`
+- `src/content/blog/programming/design/uml/item11-interfaces-types-roles.md`
+- `src/content/blog/programming/design/uml/item12-packages.md`
+- `src/content/blog/programming/design/uml/item13-instances.md`
+- `src/content/blog/programming/design/uml/item14-object-diagrams.md`
+- `src/content/blog/programming/design/uml/item15-interactions.md`
+- `src/content/blog/programming/design/uml/item16-use-cases.md`
+- `src/content/blog/programming/design/uml/item17-use-case-diagrams.md`
+- `src/content/blog/programming/design/uml/item18-sequence-diagrams.md`
+- `src/content/blog/programming/design/uml/item19-activity-diagrams.md`
+- `src/content/blog/programming/design/uml/item20-events-and-signals.md`
+- `src/content/blog/programming/design/uml/item21-state-machines.md`
+- `src/content/blog/programming/design/uml/item22-processes-and-threads.md`
+- `src/content/blog/programming/design/uml/item23-state-and-activity-diagrams.md`
+- `src/content/blog/programming/design/uml/item24-time-and-space.md`
+- `src/content/blog/programming/design/uml/item25-components.md`
+- `src/content/blog/programming/design/uml/item26-deployment.md`
+- `src/content/blog/programming/design/uml/item27-collaborations.md`
+- `src/content/blog/programming/design/uml/item28-patterns-and-frameworks.md`
+- `src/content/blog/programming/design/uml/item29-component-diagrams.md`
+- `src/content/blog/programming/design/uml/item30-deployment-diagrams.md`
+- `src/content/blog/programming/design/uml/item31-profile-diagrams.md`
+- `src/content/blog/programming/design/uml/item32-composite-structure-diagrams.md`
+- `src/content/blog/programming/design/uml/item33-communication-diagrams.md`
+- `src/content/blog/programming/design/uml/item34-interaction-overview-and-timing.md`
+- `src/content/blog/programming/design/uml/item35-systems-and-models.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/00-preface.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-01-agile-manifesto-4-values.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-02-twelve-principles.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-03-waterfall-to-agile-history.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-04-agile-methods-compared.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-05-iterative-vs-incremental.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-06-empiricism-inspect-adapt.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-07-sustainable-pace-meaning.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part1-08-customer-collaboration-over-contract.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-01-conways-law.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-02-team-topologies-4-types.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-03-team-interaction-modes.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-04-cognitive-load.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-05-spotify-model.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-06-psychological-safety-edmondson.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-07-five-dysfunctions.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-08-tuckman-model.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-09-long-lived-stable-teams.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part10-10-engineering-culture.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-01-lean-startup-build-measure-learn.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-02-mvp-real-meaning.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-03-validated-learning.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-04-pivot-vs-persevere.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-05-innovation-accounting.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-06-ab-testing-split-run.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-07-customer-development-blank.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part11-08-lean-enterprise.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-01-scaling-agile-overview.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-02-safe-framework.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-03-less-less-huge.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-04-nexus-framework.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-05-disciplined-agile-pmi.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-06-distributed-remote-teams.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-07-cultural-transformation.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part12-08-series-conclusion.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-01-xp-overview.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-02-iterative-development.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-03-five-values.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-04-feedback-value.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-05-xp-principles.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-06-thirteen-primary-practices.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-07-pair-programming.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-08-tdd-as-xp.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-09-refactoring-as-xp.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-10-simple-design.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-11-continuous-integration.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-12-small-releases.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-13-collective-ownership.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-14-coding-standard.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-15-sustainable-pace.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-16-whole-team-onsite-customer.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-17-metaphor.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-18-planning-game-poker.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-19-spike.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-20-xp-team-roles.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-21-distilled-xp-clean-agile.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-22-xp-antipatterns.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-23-xp-vs-scrum-vs-kanban.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part2-24-xp-scaling-attempts.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-01-scrum-overview-history.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-02-three-pillars.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-03-scrum-values.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-04-product-owner-role.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-05-scrum-master-role.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-06-development-team-self-organization.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-07-product-backlog-deep.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-08-sprint-backlog-increment-done.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-09-definition-of-done.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-10-sprint-timebox.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-11-sprint-planning.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-12-daily-scrum.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-13-sprint-review.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-14-sprint-retrospective.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-15-backlog-refinement.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-16-sprint-goal.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-17-burndown-burnup-chart.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-18-scrum-antipatterns.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-19-nexus-scrum-at-scale.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part3-20-less-overview.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-01-kanban-origin-tps.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-02-software-kanban-anderson.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-03-six-core-practices.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-04-visualize-work-board.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-05-limit-wip-littles-law.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-06-manage-flow-bottleneck.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-07-make-policies-explicit.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-08-implement-feedback-loops.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-09-improve-collaboratively-statik.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-10-wip-limit-decision.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-11-cycle-time-lead-time-throughput.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-12-cumulative-flow-diagram.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-13-class-of-service.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-14-personal-kanban.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part4-15-scrumban.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-01-lean-origin-tps.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-02-eliminate-waste-7-wastes.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-03-build-quality-in.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-04-create-knowledge.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-05-defer-commitment.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-06-deliver-fast-small-batches.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-07-respect-people.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-08-optimize-the-whole.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-09-value-stream-mapping.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-10-theory-of-constraints.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-11-just-in-time-vs-just-in-case.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part5-12-lean-and-agile-relationship.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-01-user-story-basics.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-02-invest-principle.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-03-three-c-card-conversation-confirmation.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-04-acceptance-criteria-bdd.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-05-story-mapping-patton.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-06-epic-theme-story-task.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-07-splitting-stories-spidr.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-08-story-point-estimation.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-09-planning-poker-grenning.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part6-10-release-planning-velocity.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-01-ci-cd-continuous-deployment.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-02-deployment-pipeline.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-03-build-automation-10-min.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-04-testing-pyramid-in-cd.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-05-configuration-management.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-06-database-changes-in-cd.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-07-trunk-based-vs-gitflow.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-08-feature-flags-toggle.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-09-blue-green-deployment.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-10-canary-release.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-11-dark-launch.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-12-rolling-update-vs-recreate.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-13-rollback-strategy.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-14-pipeline-as-code.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part7-15-deployment-frequency-optimization.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-01-devops-definition.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-02-three-ways.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-03-phoenix-project.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-04-unicorn-project.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-05-infrastructure-as-code.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-06-configuration-management-tools.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-07-containerization-docker.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-08-orchestration-kubernetes.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-09-observability-logs-metrics-traces.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-10-sre-overview-google.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-11-error-budget.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-12-blameless-postmortem.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-13-chatops.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-14-gitops.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part8-15-platform-engineering.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-01-accelerate-book-summary.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-02-dora-4-key-metrics.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-03-high-vs-low-performer.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-04-24-capabilities.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-05-westrum-organizational-culture.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-06-organizational-performance.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-07-space-framework.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-08-dora-measurement-instrumenting.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-09-dora-improvement-roadmap.md`
+- `src/content/blog/programming/engineering/agile-lean-engineering/part9-10-dora-criticism.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch01.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch02.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch03.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch04.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch05.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch06.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch07.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch08.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch09.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch10.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch11.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch12.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch13.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch14.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch15.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch16.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch17.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch18.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch19.md`
+- `src/content/blog/programming/engineering/art-of-unix/ch20.md`
+- `src/content/blog/programming/engineering/clean-code/chapter01-clean-code.md`
+- `src/content/blog/programming/engineering/clean-code/chapter02-meaningful-names.md`
+- `src/content/blog/programming/engineering/clean-code/chapter03-functions.md`
+- `src/content/blog/programming/engineering/clean-code/chapter04-comments.md`
+- `src/content/blog/programming/engineering/clean-code/chapter05-formatting.md`
+- `src/content/blog/programming/engineering/clean-code/chapter06-objects-and-data-structures.md`
+- `src/content/blog/programming/engineering/clean-code/chapter07-error-handling.md`
+- `src/content/blog/programming/engineering/clean-code/chapter08-boundaries.md`
+- `src/content/blog/programming/engineering/clean-code/chapter09-unit-tests.md`
+- `src/content/blog/programming/engineering/clean-code/chapter10-classes.md`
+- `src/content/blog/programming/engineering/clean-code/chapter11-systems.md`
+- `src/content/blog/programming/engineering/clean-code/chapter12-emergence.md`
+- `src/content/blog/programming/engineering/clean-code/chapter13-concurrency.md`
+- `src/content/blog/programming/engineering/clean-code/chapter14-successive-refinement.md`
+- `src/content/blog/programming/engineering/clean-code/chapter15-junit-internals.md`
+- `src/content/blog/programming/engineering/clean-code/chapter16-refactoring-serialdate.md`
+- `src/content/blog/programming/engineering/clean-code/chapter17-smells-and-heuristics.md`
+- `src/content/blog/programming/engineering/code-complete/ch01-Welcome-to-Software-Construction.md`
+- `src/content/blog/programming/engineering/code-complete/ch02-Metaphors-for-a-Richer-Understanding.md`
+- `src/content/blog/programming/engineering/code-complete/ch03--Upstream-Prerequisites.md`
+- `src/content/blog/programming/engineering/code-complete/ch04-Key-Construction-Decisions.md`
+- `src/content/blog/programming/engineering/code-complete/ch05-Design-in-Construction.md`
+- `src/content/blog/programming/engineering/code-complete/ch06-Working-Classes.md`
+- `src/content/blog/programming/engineering/code-complete/ch07-High-Quality-Routines.md`
+- `src/content/blog/programming/engineering/code-complete/ch08-Defensive-Programming.md`
+- `src/content/blog/programming/engineering/code-complete/ch09-The-Pseudocode-Programming-Process.md`
+- `src/content/blog/programming/engineering/code-complete/ch10-General-Issues-in-Using-Variables.md`
+- `src/content/blog/programming/engineering/code-complete/ch11-The-Power-of-Variable-Names.md`
+- `src/content/blog/programming/engineering/code-complete/ch12-Fundamental-Data-Types.md`
+- `src/content/blog/programming/engineering/code-complete/ch13-Unusual-Data-Types.md`
+- `src/content/blog/programming/engineering/code-complete/ch14-Organizing-Straight-Line-Code.md`
+- `src/content/blog/programming/engineering/code-complete/ch15-Using-Conditionals.md`
+- `src/content/blog/programming/engineering/code-complete/ch16-Controlling-Loops.md`
+- `src/content/blog/programming/engineering/code-complete/ch17-Unusual-Control-Structures.md`
+- `src/content/blog/programming/engineering/code-complete/ch18-Table-Driven-Methods.md`
+- `src/content/blog/programming/engineering/code-complete/ch19-General-Control-Issues.md`
+- `src/content/blog/programming/engineering/code-complete/ch20-The-Software-Quality-Landscape.md`
+- `src/content/blog/programming/engineering/code-complete/ch21-Collaborative-Construction.md`
+- `src/content/blog/programming/engineering/code-complete/ch22-Developer-Testing.md`
+- `src/content/blog/programming/engineering/code-complete/ch23-Debugging.md`
+- `src/content/blog/programming/engineering/code-complete/ch24-Refactoring.md`
+- `src/content/blog/programming/engineering/code-complete/ch25-Code-Tuning-Strategies.md`
+- `src/content/blog/programming/engineering/code-complete/ch26-Code-Tuning-Techniques.md`
+- `src/content/blog/programming/engineering/code-complete/ch27-How-Program-Size-Affects-Construction.md`
+- `src/content/blog/programming/engineering/code-complete/ch28-Managing-Construction.md`
+- `src/content/blog/programming/engineering/code-complete/ch29-Integration.md`
+- `src/content/blog/programming/engineering/code-complete/ch30-Programming-Tools.md`
+- `src/content/blog/programming/engineering/code-complete/ch31-Layout-and-Style.md`
+- `src/content/blog/programming/engineering/code-complete/ch32-Self-Documenting-Code.md`
+- `src/content/blog/programming/engineering/code-complete/ch33-Personal-Character.md`
+- `src/content/blog/programming/engineering/code-complete/ch34-Themes-in-Software-Craftsmanship.md`
+- `src/content/blog/programming/engineering/code-complete/ch35-Where-to-Find-More-Information.md`
+- `src/content/blog/programming/engineering/goos/chapter01-what-is-tdd.md`
+- `src/content/blog/programming/engineering/goos/chapter02-test-driven-with-objects.md`
+- `src/content/blog/programming/engineering/goos/chapter03-tools-techniques.md`
+- `src/content/blog/programming/engineering/goos/chapter04-kick-starting.md`
+- `src/content/blog/programming/engineering/goos/chapter05-maintaining-control.md`
+- `src/content/blog/programming/engineering/goos/chapter06-object-oriented-style.md`
+- `src/content/blog/programming/engineering/goos/chapter07-achieving-design.md`
+- `src/content/blog/programming/engineering/goos/chapter08-building-on-third-party.md`
+- `src/content/blog/programming/engineering/goos/chapter09-commitment.md`
+- `src/content/blog/programming/engineering/goos/chapter10-walking-skeleton.md`
+- `src/content/blog/programming/engineering/goos/chapter11-passing-first-test.md`
+- `src/content/blog/programming/engineering/goos/chapter19-listening-to-tests.md`
+- `src/content/blog/programming/engineering/goos/chapter20-test-readability.md`
+- `src/content/blog/programming/engineering/goos/chapter21-test-flexibility.md`
+- `src/content/blog/programming/engineering/goos/chapter22-test-diagnostics.md`
+- `src/content/blog/programming/engineering/goos/chapter23-persistence.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch01.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch02.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch03.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch04.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch05.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch06.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch07.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch08.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch09.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch10.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch11.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch12.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch13.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch14.md`
+- `src/content/blog/programming/engineering/hackers-painters/ch15.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter01-goal-of-unit-testing.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter03-anatomy.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter04-four-pillars.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter06-styles.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter07-refactoring.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter08-why-integration.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter09-mocking-best-practices.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter10-testing-database.md`
+- `src/content/blog/programming/engineering/khorikov-unit-testing/chapter11-anti-patterns.md`
+- `src/content/blog/programming/engineering/legacy-code/ch01.md`
+- `src/content/blog/programming/engineering/legacy-code/ch02.md`
+- `src/content/blog/programming/engineering/legacy-code/ch03.md`
+- `src/content/blog/programming/engineering/legacy-code/ch04.md`
+- `src/content/blog/programming/engineering/legacy-code/ch05.md`
+- `src/content/blog/programming/engineering/legacy-code/ch06.md`
+- `src/content/blog/programming/engineering/legacy-code/ch07.md`
+- `src/content/blog/programming/engineering/legacy-code/ch08.md`
+- `src/content/blog/programming/engineering/legacy-code/ch09.md`
+- `src/content/blog/programming/engineering/legacy-code/ch10.md`
+- `src/content/blog/programming/engineering/legacy-code/ch11.md`
+- `src/content/blog/programming/engineering/legacy-code/ch12.md`
+- `src/content/blog/programming/engineering/legacy-code/ch13.md`
+- `src/content/blog/programming/engineering/legacy-code/ch14.md`
+- `src/content/blog/programming/engineering/legacy-code/ch15.md`
+- `src/content/blog/programming/engineering/legacy-code/ch16.md`
+- `src/content/blog/programming/engineering/legacy-code/ch17.md`
+- `src/content/blog/programming/engineering/legacy-code/ch18.md`
+- `src/content/blog/programming/engineering/legacy-code/ch19.md`
+- `src/content/blog/programming/engineering/legacy-code/ch20.md`
+- `src/content/blog/programming/engineering/legacy-code/ch21.md`
+- `src/content/blog/programming/engineering/legacy-code/ch22.md`
+- `src/content/blog/programming/engineering/legacy-code/ch23.md`
+- `src/content/blog/programming/engineering/legacy-code/ch24.md`
+- `src/content/blog/programming/engineering/legacy-code/ch25.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch01.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch02.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch03.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch04.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch05.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch06.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch07.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch08.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch09.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch10.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch11.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch12.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch13.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch14.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch15.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch16.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch17.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch18.md`
+- `src/content/blog/programming/engineering/mythical-man-month/ch19.md`
+- `src/content/blog/programming/engineering/peopleware/ch01.md`
+- `src/content/blog/programming/engineering/peopleware/ch02.md`
+- `src/content/blog/programming/engineering/peopleware/ch03.md`
+- `src/content/blog/programming/engineering/peopleware/ch04.md`
+- `src/content/blog/programming/engineering/peopleware/ch05.md`
+- `src/content/blog/programming/engineering/peopleware/ch06.md`
+- `src/content/blog/programming/engineering/peopleware/ch07.md`
+- `src/content/blog/programming/engineering/peopleware/ch08.md`
+- `src/content/blog/programming/engineering/peopleware/ch09.md`
+- `src/content/blog/programming/engineering/peopleware/ch10.md`
+- `src/content/blog/programming/engineering/peopleware/ch11.md`
+- `src/content/blog/programming/engineering/peopleware/ch12.md`
+- `src/content/blog/programming/engineering/peopleware/ch13.md`
+- `src/content/blog/programming/engineering/peopleware/ch14.md`
+- `src/content/blog/programming/engineering/peopleware/ch15.md`
+- `src/content/blog/programming/engineering/peopleware/ch16.md`
+- `src/content/blog/programming/engineering/peopleware/ch17.md`
+- `src/content/blog/programming/engineering/peopleware/ch18.md`
+- `src/content/blog/programming/engineering/peopleware/ch19.md`
+- `src/content/blog/programming/engineering/peopleware/ch20.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip01.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip02.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip03.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip04.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip05.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip06.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip07.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip08.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip09.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip10.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip100.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip11.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip12.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip13.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip14.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip15.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip16.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip17.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip18.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip19.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip20.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip21.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip22.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip23.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip24.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip25.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip26.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip27.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip28.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip29.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip30.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip31.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip32.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip33.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip34.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip35.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip36.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip37.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip38.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip39.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip40.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip41.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip42.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip43.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip44.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip45.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip46.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip47.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip48.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip49.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip50.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip51.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip52.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip53.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip54.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip55.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip56.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip57.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip58.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip59.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip60.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip61.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip62.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip63.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip64.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip65.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip66.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip67.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip68.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip69.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip70.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip71.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip72.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip73.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip74.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip75.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip76.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip77.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip78.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip79.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip80.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip81.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip82.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip83.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip84.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip85.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip86.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip87.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip88.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip89.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip90.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip91.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip92.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip93.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip94.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip95.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip96.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip97.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip98.md`
+- `src/content/blog/programming/engineering/pragmatic-programmer/tip99.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch01.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch02.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch03.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch04.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch05.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch06.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch07.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch08.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch09.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch10.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch11.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch12.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch13.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch14.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch15.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch16.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch17.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch18.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch19.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch20.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch21.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch22.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch23.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch24.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch25.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch26.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch27.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch28.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch29.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch30.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch31.md`
+- `src/content/blog/programming/engineering/tdd-by-example/ch32.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern01-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern02-isolated-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern03-test-list.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern04-test-first.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern05-assert-first.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern06-test-data.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern07-evident-data.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern08-one-step-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern09-starter-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern10-explanation-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern11-learning-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern12-another-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern13-regression-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern14-break.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern15-do-over.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern16-child-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern17-mock-object.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern18-self-shunt.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern19-log-string.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern20-crash-test-dummy.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern21-broken-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern22-clean-check-in.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern23-fake-it.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern24-triangulate.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern25-obvious-implementation.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern26-one-to-many.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern27-assertion.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern28-fixture.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern29-external-fixture.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern30-test-method.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern31-exception-test.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern32-all-tests.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern33-command.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern34-value-object.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern35-null-object.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern36-template-method.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern37-pluggable-object.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern38-pluggable-selector.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern39-factory-method.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern40-imposter.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern41-composite.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern42-collecting-parameter.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern43-singleton.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern44-reconcile-differences.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern45-isolate-change.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern46-migrate-data.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern47-extract-method.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern48-inline-method.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern49-extract-interface.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern50-move-method.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern51-method-object.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern52-add-parameter.md`
+- `src/content/blog/programming/engineering/tdd-patterns/pattern53-method-parameter-to-constructor-parameter.md`
+- `src/content/blog/programming/engineering/test-engineering/00-series-plan.md`
+- `src/content/blog/programming/git/git-conventions/chapter01-conventional-commits.md`
+- `src/content/blog/programming/git/git-conventions/chapter02-message-anatomy.md`
+- `src/content/blog/programming/git/git-conventions/chapter03-type-scope-catalog.md`
+- `src/content/blog/programming/git/git-conventions/chapter04-breaking-changes.md`
+- `src/content/blog/programming/git/git-conventions/chapter05-semantic-versioning.md`
+- `src/content/blog/programming/git/git-conventions/chapter06-commit-signing.md`
+- `src/content/blog/programming/git/git-conventions/chapter07-pre-commit-hooks.md`
+- `src/content/blog/programming/git/git-conventions/chapter08-commitlint-commitizen.md`
+- `src/content/blog/programming/git/git-conventions/chapter09-changelog-automation.md`
+- `src/content/blog/programming/git/git-flow/chapter01-gitflow.md`
+- `src/content/blog/programming/git/git-flow/chapter02-github-flow.md`
+- `src/content/blog/programming/git/git-flow/chapter03-gitlab-flow.md`
+- `src/content/blog/programming/git/git-flow/chapter04-trunk-based.md`
+- `src/content/blog/programming/git/git-flow/chapter05-release-strategy.md`
+- `src/content/blog/programming/git/git-flow/chapter06-hotfix-patterns.md`
+- `src/content/blog/programming/git/git-flow/chapter07-code-review-integration.md`
+- `src/content/blog/programming/git/git-flow/chapter08-ci-cd-integration.md`
+- `src/content/blog/programming/git/git-flow/chapter09-monorepo-vs-polyrepo.md`
+- `src/content/blog/programming/git/pro-git/chapter01-getting-started.md`
+- `src/content/blog/programming/git/pro-git/chapter02-git-basics.md`
+- `src/content/blog/programming/git/pro-git/chapter03-git-branching.md`
+- `src/content/blog/programming/git/pro-git/chapter04-git-on-the-server.md`
+- `src/content/blog/programming/git/pro-git/chapter05-distributed-git.md`
+- `src/content/blog/programming/git/pro-git/chapter06-github.md`
+- `src/content/blog/programming/git/pro-git/chapter07-git-tools.md`
+- `src/content/blog/programming/git/pro-git/chapter08-customizing-git.md`
+- `src/content/blog/programming/git/pro-git/chapter09-git-and-other-systems.md`
+- `src/content/blog/programming/git/pro-git/chapter10-git-internals.md`
+- `src/content/blog/programming/python/fluent-python/ch01-data-model.md`
+- `src/content/blog/programming/python/fluent-python/ch02-array-of-sequences.md`
+- `src/content/blog/programming/python/fluent-python/ch03-dictionaries-sets.md`
+- `src/content/blog/programming/python/fluent-python/ch04-unicode-bytes.md`
+- `src/content/blog/programming/python/fluent-python/ch05-data-class-builders.md`
+- `src/content/blog/programming/python/fluent-python/ch06-object-references.md`
+- `src/content/blog/programming/python/fluent-python/ch07-functions-first-class.md`
+- `src/content/blog/programming/python/fluent-python/ch08-type-hints.md`
+- `src/content/blog/programming/python/fluent-python/ch09-decorators-closures.md`
+- `src/content/blog/programming/python/fluent-python/ch10-design-patterns-functions.md`
+- `src/content/blog/programming/python/fluent-python/ch11-pythonic-object.md`
+- `src/content/blog/programming/python/fluent-python/ch12-special-methods-sequences.md`
+- `src/content/blog/programming/python/fluent-python/ch13-interfaces-protocols-abcs.md`
+- `src/content/blog/programming/python/fluent-python/ch14-inheritance.md`
+- `src/content/blog/programming/python/fluent-python/ch15-more-type-hints.md`
+- `src/content/blog/programming/python/fluent-python/ch16-operator-overloading.md`
+- `src/content/blog/programming/python/fluent-python/ch17-iterators-generators.md`
+- `src/content/blog/programming/python/fluent-python/ch18-with-match-else.md`
+- `src/content/blog/programming/python/fluent-python/ch19-concurrency-models.md`
+- `src/content/blog/programming/python/fluent-python/ch20-concurrent-executors.md`
+- `src/content/blog/programming/python/fluent-python/ch21-asynchronous-programming.md`
+- `src/content/blog/programming/python/fluent-python/ch22-dynamic-attributes.md`
+- `src/content/blog/programming/python/fluent-python/ch23-attribute-descriptors.md`
+- `src/content/blog/programming/python/fluent-python/ch24-class-metaprogramming.md`
+- `src/content/blog/programming/standards/google-cpp/chapter01-background-version-magic.md`
+- `src/content/blog/programming/standards/google-cpp/chapter02-header-files.md`
+- `src/content/blog/programming/standards/google-cpp/chapter03-scoping.md`
+- `src/content/blog/programming/standards/google-cpp/chapter04-classes.md`
+- `src/content/blog/programming/standards/google-cpp/chapter05-functions.md`
+- `src/content/blog/programming/standards/google-cpp/chapter06-features-memory-exceptions.md`
+- `src/content/blog/programming/standards/google-cpp/chapter07-features-const-macros.md`
+- `src/content/blog/programming/standards/google-cpp/chapter08-deduction-templates-lambdas.md`
+- `src/content/blog/programming/standards/google-cpp/chapter09-naming.md`
+- `src/content/blog/programming/standards/google-cpp/chapter10-comments-formatting-closing.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter01-indentation-braces.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter02-naming-typedefs.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter03-functions.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter04-comments.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter05-macros-inline.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter06-memory-returns.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter07-data-structures.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter08-kconfig-modules.md`
+- `src/content/blog/programming/standards/linux-kernel/chapter09-tools-docs.md`
+- `src/content/blog/programming/standards/python-pep8/chapter01-code-layout.md`
+- `src/content/blog/programming/standards/python-pep8/chapter02-naming.md`
+- `src/content/blog/programming/standards/python-pep8/chapter03-imports.md`
+- `src/content/blog/programming/standards/python-pep8/chapter04-expressions.md`
+- `src/content/blog/programming/standards/python-pep8/chapter05-comments.md`
+- `src/content/blog/programming/standards/python-pep8/chapter06-type-hints.md`
+- `src/content/blog/programming/standards/python-pep8/chapter07-tools.md`
+- `src/content/blog/programming/testing/gtest/chapter01-position.md`
+- `src/content/blog/programming/testing/gtest/chapter02-cmake-integration.md`
+- `src/content/blog/programming/testing/gtest/chapter03-test-and-fixture.md`
+- `src/content/blog/programming/testing/gtest/chapter04-assertions.md`
+- `src/content/blog/programming/testing/gtest/chapter05-custom-assertions.md`
+- `src/content/blog/programming/testing/gtest/chapter06-float-string.md`
+- `src/content/blog/programming/testing/gtest/chapter07-parameterized.md`
+- `src/content/blog/programming/testing/gtest/chapter08-typed.md`
+- `src/content/blog/programming/testing/gtest/chapter09-death-tests.md`
+- `src/content/blog/programming/testing/gtest/chapter10-gmock-basics.md`
+- `src/content/blog/programming/testing/gtest/chapter11-gmock-matchers.md`
+- `src/content/blog/programming/testing/gtest/chapter12-gmock-advanced.md`
+- `src/content/blog/programming/testing/gtest/chapter13-fixtures-patterns.md`
+- `src/content/blog/programming/testing/gtest/chapter14-discovery-sharding.md`
+- `src/content/blog/programming/testing/gtest/chapter15-custom-printers.md`
+- `src/content/blog/programming/testing/gtest/chapter16-coverage.md`
+- `src/content/blog/programming/testing/gtest/chapter17-sanitizers.md`
+- `src/content/blog/programming/testing/gtest/chapter18-ci.md`
+- `src/content/blog/programming/testing/pytest/chapter01-ecosystem.md`
+- `src/content/blog/programming/testing/pytest/chapter02-first-steps.md`
+- `src/content/blog/programming/testing/pytest/chapter03-unittest-stdlib.md`
+- `src/content/blog/programming/testing/pytest/chapter04-assertions.md`
+- `src/content/blog/programming/testing/pytest/chapter05-fixtures-basics.md`
+- `src/content/blog/programming/testing/pytest/chapter06-fixtures-advanced.md`
+- `src/content/blog/programming/testing/pytest/chapter07-parametrize.md`
+- `src/content/blog/programming/testing/pytest/chapter08-markers.md`
+- `src/content/blog/programming/testing/pytest/chapter09-mock-basics.md`
+- `src/content/blog/programming/testing/pytest/chapter10-mock-advanced.md`
+- `src/content/blog/programming/testing/pytest/chapter11-hypothesis-basics.md`
+- `src/content/blog/programming/testing/pytest/chapter12-hypothesis-advanced.md`
+- `src/content/blog/programming/testing/pytest/chapter13-coverage.md`
+- `src/content/blog/programming/testing/pytest/chapter14-plugins.md`
+- `src/content/blog/programming/testing/pytest/chapter15-async.md`
+- `src/content/blog/programming/testing/pytest/chapter16-tox-nox.md`
+- `src/content/blog/programming/testing/pytest/chapter17-benchmark.md`
+- `src/content/blog/programming/testing/pytest/chapter18-ci.md`
+- `src/content/blog/systems/apue/ch01.md`
+- `src/content/blog/systems/apue/ch02.md`
+- `src/content/blog/systems/apue/ch03.md`
+- `src/content/blog/systems/apue/ch04.md`
+- `src/content/blog/systems/apue/ch05.md`
+- `src/content/blog/systems/apue/ch06.md`
+- `src/content/blog/systems/apue/ch07.md`
+- `src/content/blog/systems/apue/ch08.md`
+- `src/content/blog/systems/apue/ch09.md`
+- `src/content/blog/systems/apue/ch10.md`
+- `src/content/blog/systems/apue/ch11.md`
+- `src/content/blog/systems/apue/ch12.md`
+- `src/content/blog/systems/apue/ch13.md`
+- `src/content/blog/systems/apue/ch14.md`
+- `src/content/blog/systems/apue/ch15.md`
+- `src/content/blog/systems/apue/ch16.md`
+- `src/content/blog/systems/apue/ch17.md`
+- `src/content/blog/systems/apue/ch18.md`
+- `src/content/blog/systems/apue/ch19.md`
+- `src/content/blog/systems/apue/ch20.md`
+- `src/content/blog/systems/apue/ch21.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter01-introduction.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter02-coherence-basics.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter03-sequential-consistency.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter04-tso-x86.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter05-relaxed-models.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter06-coherence-protocols.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter07-snooping.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter08-directory.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter09-advanced-coherence.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter10-heterogeneous.md`
+- `src/content/blog/systems/architecture/cache-coherence/chapter11-validation.md`
+- `src/content/blog/systems/arm/armv8-a-spec/chapter01-overview.md`
+- `src/content/blog/systems/arm/armv8-a-spec/chapter02-aarch64-app-model.md`
+- `src/content/blog/systems/code-petzold/ch01.md`
+- `src/content/blog/systems/code-petzold/ch02.md`
+- `src/content/blog/systems/code-petzold/ch03.md`
+- `src/content/blog/systems/code-petzold/ch04.md`
+- `src/content/blog/systems/code-petzold/ch05.md`
+- `src/content/blog/systems/code-petzold/ch06.md`
+- `src/content/blog/systems/code-petzold/ch07.md`
+- `src/content/blog/systems/code-petzold/ch08.md`
+- `src/content/blog/systems/code-petzold/ch09.md`
+- `src/content/blog/systems/code-petzold/ch10.md`
+- `src/content/blog/systems/code-petzold/ch11.md`
+- `src/content/blog/systems/code-petzold/ch12.md`
+- `src/content/blog/systems/code-petzold/ch13.md`
+- `src/content/blog/systems/code-petzold/ch14.md`
+- `src/content/blog/systems/code-petzold/ch15.md`
+- `src/content/blog/systems/code-petzold/ch16.md`
+- `src/content/blog/systems/code-petzold/ch17.md`
+- `src/content/blog/systems/code-petzold/ch18.md`
+- `src/content/blog/systems/code-petzold/ch19.md`
+- `src/content/blog/systems/code-petzold/ch20.md`
+- `src/content/blog/systems/code-petzold/ch21.md`
+- `src/content/blog/systems/code-petzold/ch22.md`
+- `src/content/blog/systems/code-petzold/ch23.md`
+- `src/content/blog/systems/code-petzold/ch24.md`
+- `src/content/blog/systems/code-petzold/ch25.md`
+- `src/content/blog/systems/csapp/ch01.md`
+- `src/content/blog/systems/csapp/ch02.md`
+- `src/content/blog/systems/csapp/ch03.md`
+- `src/content/blog/systems/csapp/ch04.md`
+- `src/content/blog/systems/csapp/ch05.md`
+- `src/content/blog/systems/csapp/ch06.md`
+- `src/content/blog/systems/csapp/ch07.md`
+- `src/content/blog/systems/csapp/ch08.md`
+- `src/content/blog/systems/csapp/ch09.md`
+- `src/content/blog/systems/csapp/ch10.md`
+- `src/content/blog/systems/csapp/ch11.md`
+- `src/content/blog/systems/csapp/ch12.md`
+- `src/content/blog/systems/io-uring/STORYBOARD.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter01-introduction.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter02-building-modules.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter03-char-drivers.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter04-debugging.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter05-concurrency.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter06-advanced-char.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter07-time-delay.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter08-memory.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter09-hardware.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter10-interrupt-handling.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter11-data-types.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter12-pci-drivers.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter13-usb-drivers.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter14-device-model.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter15-1-mmap.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter15-2-dma.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter16-block-drivers.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter17-network-drivers.md`
+- `src/content/blog/systems/linux-drivers/ldd3-modern/chapter18-tty-drivers.md`
+- `src/content/blog/systems/linux-kernel-internals/part1-01-bootloader-to-kernel.md`
+- `src/content/blog/systems/linux-kernel-internals/part1-02-kernel-init-sequence.md`
+- `src/content/blog/systems/linux-kernel-internals/part1-03-memory-map-construction.md`
+- `src/content/blog/systems/linux-kernel-internals/part1-04-init-systemd-pid1.md`
+- `src/content/blog/systems/linux-kernel-internals/part2-01-task-struct.md`
+- `src/content/blog/systems/linux-kernel-internals/part2-02-fork-exec-exit.md`
+- `src/content/blog/systems/linux-kernel-internals/part2-03-scheduler-cfs-rt.md`
+- `src/content/blog/systems/linux-kernel-internals/part2-04-context-switch.md`
+- `src/content/blog/systems/linux-kernel-internals/part2-05-signal-handling.md`
+- `src/content/blog/systems/linux-kernel-internals/part2-06-namespace-cgroup.md`
+- `src/content/blog/systems/linux-kernel-internals/part3-01-page-zone-node.md`
+- `src/content/blog/systems/linux-kernel-internals/part3-02-buddy-allocator.md`
+- `src/content/blog/systems/linux-kernel-internals/part3-03-slab-slub-slob.md`
+- `src/content/blog/systems/linux-kernel-internals/part3-04-vmalloc.md`
+- `src/content/blog/systems/linux-kernel-internals/part3-05-page-cache.md`
+- `src/content/blog/systems/linux-kernel-internals/part3-06-swap.md`
+- `src/content/blog/systems/linux-kernel-internals/part4-01-vfs-layer.md`
+- `src/content/blog/systems/linux-kernel-internals/part4-02-ext4-btrfs-xfs.md`
+- `src/content/blog/systems/linux-kernel-internals/part4-03-block-io-layer.md`
+- `src/content/blog/systems/linux-kernel-internals/part4-04-direct-io-and-sync.md`
+- `src/content/blog/systems/linux-kernel-internals/part4-05-io-uring.md`
+- `src/content/blog/systems/linux-kernel-internals/part5-01-sync-primitives.md`
+- `src/content/blog/systems/linux-kernel-internals/part5-02-interrupt-softirq-tasklet.md`
+- `src/content/blog/systems/linux-kernel-internals/part5-03-ftrace-perf-ebpf.md`
+- `src/content/blog/systems/linux-kernel-internals/part5-04-crash-dump-analysis.md`
+- `src/content/blog/systems/ostep/ch01.md`
+- `src/content/blog/systems/ostep/ch02.md`
+- `src/content/blog/systems/ostep/ch03.md`
+- `src/content/blog/systems/ostep/ch04.md`
+- `src/content/blog/systems/ostep/ch05.md`
+- `src/content/blog/systems/ostep/ch06.md`
+- `src/content/blog/systems/ostep/ch07.md`
+- `src/content/blog/systems/ostep/ch08.md`
+- `src/content/blog/systems/ostep/ch09.md`
+- `src/content/blog/systems/ostep/ch10.md`
+- `src/content/blog/systems/ostep/ch11.md`
+- `src/content/blog/systems/ostep/ch12.md`
+- `src/content/blog/systems/ostep/ch13.md`
+- `src/content/blog/systems/ostep/ch14.md`
+- `src/content/blog/systems/ostep/ch15.md`
+- `src/content/blog/systems/ostep/ch16.md`
+- `src/content/blog/systems/ostep/ch17.md`
+- `src/content/blog/systems/ostep/ch18.md`
+- `src/content/blog/systems/ostep/ch19.md`
+- `src/content/blog/systems/ostep/ch20.md`
+- `src/content/blog/systems/ostep/ch21.md`
+- `src/content/blog/systems/ostep/ch22.md`
+- `src/content/blog/systems/ostep/ch23.md`
+- `src/content/blog/systems/ostep/ch24.md`
+- `src/content/blog/systems/ostep/ch25.md`
+- `src/content/blog/systems/ostep/ch26.md`
+- `src/content/blog/systems/ostep/ch27.md`
+- `src/content/blog/systems/ostep/ch28.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter01-boot-overview.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter02-machine-mode-init.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter03-hart-management.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter04-memory-map-dtb.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter05-opensbi-overview.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter06-opensbi-build.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter07-sbi-calling-convention.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter08-sbi-extensions.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter09-uboot-riscv.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter10-uboot-spl.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter11-kernel-boot.md`
+- `src/content/blog/systems/riscv/baremetal-boot/chapter12-boot-debugging.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter01-what-is-riscv.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter02-registers-abi.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter03-rv32i-rv64i.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter04-memory-access.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter05-instruction-encoding.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter06-m-extension.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter07-a-extension.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter08-f-extension.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter09-d-extension.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter10-c-extension.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter11-privilege-modes.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter12-csr.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter13-exceptions-traps.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter14-interrupts.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter15-virtual-memory.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter16-memory-model.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter17-debug-extension.md`
+- `src/content/blog/systems/riscv/isa-anatomy/chapter18-extension-roadmap.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter01-overview.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter02-registers-csr.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter03-vsetvl.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter04-memory-access.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter05-integer-ops.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter06-fixed-point.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter07-floating-point.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter08-masking.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter09-intrinsics.md`
+- `src/content/blog/systems/riscv/vector-extension/chapter10-autovectorization.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter01-understand-system.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter02-make-it-fail.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter03-quit-thinking-look.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter04-divide-conquer.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter05-change-one-thing.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter06-audit-trail.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter07-check-plug.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter08-fresh-view.md`
+- `src/content/blog/tools/debugging/agans-9-rules/chapter09-if-not-fixed.md`
+- `src/content/blog/tools/debugging/concurrency/chapter01-linux-threads-futex.md`
+- `src/content/blog/tools/debugging/concurrency/chapter02-gdb-threads.md`
+- `src/content/blog/tools/debugging/concurrency/chapter03-fork-multiprocess.md`
+- `src/content/blog/tools/debugging/concurrency/chapter04-deadlock-race-methodology.md`
+- `src/content/blog/tools/debugging/concurrency/chapter05-rr-tsan-workflow.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter01-overview.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter02-arm-virt.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter03-riscv-virt.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter04-uboot.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter05-linux-kernel.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter06-rootfs.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter07-device-tree.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter08-peripherals.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter09-networking.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter10-gdb-remote.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter11-baremetal.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter12-rtos.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter13-vendor-machines.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter14-semihosting.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter15-openamp-rpmsg.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter16-trustzone.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter17-hypervisor.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter18-board-bringup.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter19-fault-injection.md`
+- `src/content/blog/tools/emulation/qemu-embedded/chapter20-ci-matrix.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter01-overview.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter02-install-build.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter03-qom-basics.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter04-simple-pci.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter05-mmio-registers.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter06-interrupts.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter07-dma.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter08-linux-driver.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter09-debugging.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter10-test-automation.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter11-advanced-scenarios.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter12-case-study-nvme.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter13-register-bank.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter14-scatter-gather-dma.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter15-virtio-basics.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter16-virtio-advanced.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter17-fuzzing.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter18-performance-modeling.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter19-multi-function.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter20-hotplug.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter21-aer-emulation.md`
+- `src/content/blog/tools/emulation/qemu-fake-device/chapter22-cross-architecture.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter01-fpga-driver-challenge.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter02-fpga-architecture.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter03-qemu-fake-fpga.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter04-axi-pcie-bridge.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter05-irq-model.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter06-dma-descriptor-ring.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter07-bitstream-loading.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter08-partial-reconfig.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter09-vfio-basics.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter10-vfio-pci-passthrough.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter11-sriov-mdev.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter12-opae-dfl.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter13-xilinx-xrt.md`
+- `src/content/blog/tools/emulation/qemu-fpga-driver/chapter14-cxl-coherent.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter01-architecture.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter02-qom-deep-dive.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter03-memory-model.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter04-event-loop.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter05-block-layer.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter06-network-layer.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter07-pci-subsystem.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter08-interrupt-controller.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter09-timers.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter10-migration.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter11-custom-machine.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter12-contributing.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter13-tcg-deep.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter14-kvm-accel.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter15-coroutine.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter16-aio.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter17-block-io.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter18-virtio-impl.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter19-vhost.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter20-microvm.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter21-confidential.md`
+- `src/content/blog/tools/emulation/qemu-internals/chapter22-snapshot-vs-migration.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter01-overview.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter02-virt-machine.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter03-gdb-debugging.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter04-sifive-e.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter05-sifive-u.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter06-opentitan.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter07-spike-vs-qemu.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter08-custom-device.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter09-full-stack-boot.md`
+- `src/content/blog/tools/emulation/qemu-riscv/chapter10-tracing.md`
+- `src/content/blog/tools/perf-flamegraph/chapter01-perf-overview.md`
+- `src/content/blog/tools/perf-flamegraph/chapter02-perf-list-stat.md`
+- `src/content/blog/tools/perf-flamegraph/chapter03-perf-record-report.md`
+- `src/content/blog/tools/perf-flamegraph/chapter04-perf-annotate.md`
+- `src/content/blog/tools/perf-flamegraph/chapter05-flamegraph.md`
+- `src/content/blog/tools/perf-flamegraph/chapter06-off-cpu.md`
+- `src/content/blog/tools/perf-flamegraph/chapter07-kernel-tracepoint.md`
+- `src/content/blog/tools/perf-flamegraph/chapter08-perf-script.md`
+- `src/content/blog/tools/perf-flamegraph/chapter09-alternatives.md`
+- `src/content/blog/tools/perf-flamegraph/chapter10-case-studies.md`
+- `src/content/blog/tools/practical-vim/chapter01-the-vim-way.md`
+- `src/content/blog/tools/practical-vim/chapter02-normal-mode.md`
+- `src/content/blog/tools/practical-vim/chapter03-insert-mode.md`
+- `src/content/blog/tools/practical-vim/chapter04-visual-mode.md`
+- `src/content/blog/tools/practical-vim/chapter05-command-line-mode.md`
+- `src/content/blog/tools/practical-vim/chapter06-manage-multiple-files.md`
+- `src/content/blog/tools/practical-vim/chapter07-open-files-save.md`
+- `src/content/blog/tools/practical-vim/chapter08-motions.md`
+- `src/content/blog/tools/practical-vim/chapter09-jumps.md`
+- `src/content/blog/tools/practical-vim/chapter10-copy-and-paste.md`
+- `src/content/blog/tools/practical-vim/chapter11-macros.md`
+- `src/content/blog/tools/practical-vim/chapter12-patterns.md`
+- `src/content/blog/tools/practical-vim/chapter13-search.md`
+- `src/content/blog/tools/practical-vim/chapter14-substitution.md`
+- `src/content/blog/tools/practical-vim/chapter16-global-commands.md`
+- `src/content/blog/tools/practical-vim/chapter17-index-with-ctags.md`
+- `src/content/blog/tools/practical-vim/chapter18-quickfix-list.md`
+- `src/content/blog/tools/practical-vim/chapter19-search-project-wide.md`
+- `src/content/blog/tools/practical-vim/chapter20-autocompletion.md`
+- `src/content/blog/tools/practical-vim/chapter21-spell-checker.md`
+- `src/content/blog/tools/practical-vim/chapter24-whats-next.md`
+- `src/content/blog/tools/strace-tracing/chapter01-tracing-overview.md`
+- `src/content/blog/tools/strace-tracing/chapter02-strace-basic.md`
+- `src/content/blog/tools/strace-tracing/chapter03-strace-advanced.md`
+- `src/content/blog/tools/strace-tracing/chapter04-ltrace.md`
+- `src/content/blog/tools/strace-tracing/chapter05-ebpf-overview.md`
+- `src/content/blog/tools/strace-tracing/chapter06-bpftrace-basics.md`
+- `src/content/blog/tools/strace-tracing/chapter07-bpftrace-practical.md`
+- `src/content/blog/tools/strace-tracing/chapter08-bcc.md`
+- `src/content/blog/tools/strace-tracing/chapter09-ftrace.md`
+- `src/content/blog/tools/strace-tracing/chapter10-wrap-up.md`
+- `src/content/blog/tools/vim/ch01-basics.md`
+- `src/content/blog/tools/vim/ch02-editing.md`
+- `src/content/blog/tools/vim/ch03-motions.md`
+- `src/content/blog/tools/vim/ch04-search.md`
+- `src/content/blog/tools/vim/ch05-registers-macros.md`
+- `src/content/blog/tools/vim/ch06-buffers-windows.md`
+- `src/content/blog/tools/vim/ch07-configuration.md`
+- `src/content/blog/tools/vim/ch08-plugins.md`
+- `src/content/blog/tools/vim/ch09-tips.md`
+- `src/content/blog/writing/academic-writing/unit01-1-audience-purpose.md`
+- `src/content/blog/writing/academic-writing/unit01-2-organization.md`
+- `src/content/blog/writing/academic-writing/unit01-3-vocabulary.md`
+- `src/content/blog/writing/academic-writing/unit01-4-stylistic-features.md`
+- `src/content/blog/writing/academic-writing/unit01-5-flow-linking.md`
+- `src/content/blog/writing/academic-writing/unit01-6-positioning.md`
+- `src/content/blog/writing/academic-writing/unit02-1-openings.md`
+- `src/content/blog/writing/academic-writing/unit02-2-sentence-definitions.md`
+- `src/content/blog/writing/academic-writing/unit02-3-extended-definitions.md`
+- `src/content/blog/writing/academic-writing/unit02-4-specific-to-general.md`
+- `src/content/blog/writing/academic-writing/unit03-1-spse-structure.md`
+- `src/content/blog/writing/academic-writing/unit03-2-cause-effect.md`
+- `src/content/blog/writing/academic-writing/unit03-3-process-passive.md`
+- `src/content/blog/writing/academic-writing/unit03-4-introducing-solution.md`
+- `src/content/blog/writing/academic-writing/unit04-1-structure-location.md`
+- `src/content/blog/writing/academic-writing/unit04-2-strength-of-claim.md`
+- `src/content/blog/writing/academic-writing/unit04-3-comparisons-organization.md`
+- `src/content/blog/writing/academic-writing/unit04-4-graphs-conclusion.md`
+- `src/content/blog/writing/academic-writing/unit05-1-considerations-plagiarism.md`
+- `src/content/blog/writing/academic-writing/unit05-2-paraphrasing.md`
+- `src/content/blog/writing/academic-writing/unit05-3-source-synthesis.md`
+- `src/content/blog/writing/academic-writing/unit06-1-book-reviews-opinions.md`
+- `src/content/blog/writing/academic-writing/unit06-2-evaluative-critical.md`
+- `src/content/blog/writing/academic-writing/unit06-3-reaction-journal.md`
+- `src/content/blog/writing/academic-writing/unit07-1-publication-types.md`
+- `src/content/blog/writing/academic-writing/unit07-2-methods.md`
+- `src/content/blog/writing/academic-writing/unit07-3-results.md`
+- `src/content/blog/writing/academic-writing/unit08-1-introductions-cars.md`
+- `src/content/blog/writing/academic-writing/unit08-2-citation-tense.md`
+- `src/content/blog/writing/academic-writing/unit08-3-discussion.md`
+- `src/content/blog/writing/elements-of-style/ch01/00-intro.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule01-possessive.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule02-serial-comma.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule03-parenthetic.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule04-conjunction.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule05-comma-splice.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule06-sentence-fragment.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule07-colon.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule08-dash.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule09-subject-verb.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule10-pronoun-case.md`
+- `src/content/blog/writing/elements-of-style/ch01/rule11-dangling.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule12-design.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule13-paragraph.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule14-active-voice.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule15-positive.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule16-specific.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule17-omit.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule18-loose.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule19-parallel.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule20-word-order.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule21-tense.md`
+- `src/content/blog/writing/elements-of-style/ch02/rule22-emphasis.md`
+- `src/content/blog/writing/elements-of-style/ch03/form.md`
+- `src/content/blog/writing/elements-of-style/ch04/words-a-c.md`
+- `src/content/blog/writing/elements-of-style/ch04/words-d-f.md`
+- `src/content/blog/writing/elements-of-style/ch04/words-g-i.md`
+- `src/content/blog/writing/elements-of-style/ch04/words-k-n.md`
+- `src/content/blog/writing/elements-of-style/ch04/words-o-s.md`
+- `src/content/blog/writing/elements-of-style/ch04/words-t-z.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder01-background.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder02-naturally.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder03-design.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder04-nouns-verbs.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder05-revise.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder06-overwrite.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder07-overstate.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder08-qualifiers.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder09-breezy.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder10-spelling.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder11-explain.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder12-adverbs.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder13-speaker.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder14-fancy.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder15-dialect.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder16-clarity.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder17-opinion.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder18-figures.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder19-shortcuts.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder20-foreign.md`
+- `src/content/blog/writing/elements-of-style/ch05/reminder21-standard.md`
+- `src/content/blog/writing/gojongseok-munjang/ch01-what-is-sentence.md`
+- `src/content/blog/writing/gojongseok-munjang/ch02-subject-predicate.md`
+- `src/content/blog/writing/gojongseok-munjang/ch03-length.md`
+- `src/content/blog/writing/gojongseok-munjang/ch04-rhythm.md`
+- `src/content/blog/writing/gojongseok-munjang/ch05-word-choice.md`
+- `src/content/blog/writing/gojongseok-munjang/ch06-word-order.md`
+- `src/content/blog/writing/gojongseok-munjang/ch07-conjunction.md`
+- `src/content/blog/writing/gojongseok-munjang/ch08-modification.md`
+- `src/content/blog/writing/gojongseok-munjang/ch09-clarity.md`
+- `src/content/blog/writing/gojongseok-munjang/ch10-concision.md`
+- `src/content/blog/writing/gojongseok-munjang/ch11-precision.md`
+- `src/content/blog/writing/gojongseok-munjang/ch12-dignity.md`
+- `src/content/blog/writing/gojongseok-munjang/ch13-expository.md`
+- `src/content/blog/writing/gojongseok-munjang/ch14-argumentative.md`
+- `src/content/blog/writing/gojongseok-munjang/ch15-narrative.md`
+- `src/content/blog/writing/gojongseok-munjang/ch16-translation.md`
+- `src/content/blog/writing/on-writing-well/ch01-transaction.md`
+- `src/content/blog/writing/on-writing-well/ch02-simplicity.md`
+- `src/content/blog/writing/on-writing-well/ch03-clutter.md`
+- `src/content/blog/writing/on-writing-well/ch04-style.md`
+- `src/content/blog/writing/on-writing-well/ch05-audience.md`
+- `src/content/blog/writing/on-writing-well/ch06-words.md`
+- `src/content/blog/writing/on-writing-well/ch07-usage.md`
+- `src/content/blog/writing/on-writing-well/ch08-unity.md`
+- `src/content/blog/writing/on-writing-well/ch09-lead-ending.md`
+- `src/content/blog/writing/on-writing-well/ch10-bits-pieces.md`
+- `src/content/blog/writing/on-writing-well/ch11-nonfiction-literature.md`
+- `src/content/blog/writing/on-writing-well/ch12-people.md`
+- `src/content/blog/writing/on-writing-well/ch13-places.md`
+- `src/content/blog/writing/on-writing-well/ch14-yourself.md`
+- `src/content/blog/writing/on-writing-well/ch15-science-tech.md`
+- `src/content/blog/writing/on-writing-well/ch16-business.md`
+- `src/content/blog/writing/on-writing-well/ch17-sports.md`
+- `src/content/blog/writing/on-writing-well/ch18-arts.md`
+- `src/content/blog/writing/on-writing-well/ch19-humor.md`
+- `src/content/blog/writing/on-writing-well/ch20-voice.md`
+- `src/content/blog/writing/on-writing-well/ch21-confidence.md`
+- `src/content/blog/writing/on-writing-well/ch22-tyranny.md`
+- `src/content/blog/writing/on-writing-well/ch23-decisions.md`
+- `src/content/blog/writing/on-writing-well/ch24-best.md`
+- `src/content/blog/writing/only-grammar-book/ch01-1-nouns.md`
+- `src/content/blog/writing/only-grammar-book/ch01-2-pronouns.md`
+- `src/content/blog/writing/only-grammar-book/ch01-3-verbs.md`
+- `src/content/blog/writing/only-grammar-book/ch01-4-adjectives.md`
+- `src/content/blog/writing/only-grammar-book/ch01-5-adverbs.md`
+- `src/content/blog/writing/only-grammar-book/ch01-6-prepositions.md`
+- `src/content/blog/writing/only-grammar-book/ch01-7-conjunctions.md`
+- `src/content/blog/writing/only-grammar-book/ch01-8-interjections.md`
+- `src/content/blog/writing/only-grammar-book/ch01-parts-of-speech.md`
+- `src/content/blog/writing/only-grammar-book/ch02-1-phrases.md`
+- `src/content/blog/writing/only-grammar-book/ch02-2-clauses.md`
+- `src/content/blog/writing/only-grammar-book/ch02-3-sentence-types.md`
+- `src/content/blog/writing/only-grammar-book/ch02-4-subject-verb-agreement.md`
+- `src/content/blog/writing/only-grammar-book/ch02-sentence-structure.md`
+- `src/content/blog/writing/only-grammar-book/ch03-1-end-marks.md`
+- `src/content/blog/writing/only-grammar-book/ch03-2-comma.md`
+- `src/content/blog/writing/only-grammar-book/ch03-3-semicolon-colon.md`
+- `src/content/blog/writing/only-grammar-book/ch03-4-dash-hyphen.md`
+- `src/content/blog/writing/only-grammar-book/ch03-5-apostrophe.md`
+- `src/content/blog/writing/only-grammar-book/ch03-6-quotation-marks.md`
+- `src/content/blog/writing/only-grammar-book/ch03-punctuation.md`
+- `src/content/blog/writing/only-grammar-book/ch04-1-verb-tense.md`
+- `src/content/blog/writing/only-grammar-book/ch04-2-pronoun-reference.md`
+- `src/content/blog/writing/only-grammar-book/ch04-3-modifier-placement.md`
+- `src/content/blog/writing/only-grammar-book/ch04-4-fragment-runon.md`
+- `src/content/blog/writing/only-grammar-book/ch04-common-mistakes.md`
+- `src/content/blog/writing/only-grammar-book/ch05-1-confused-words.md`
+- `src/content/blog/writing/only-grammar-book/ch05-2-wordiness-redundancy.md`
+- `src/content/blog/writing/only-grammar-book/ch05-word-usage.md`
+- `src/content/blog/writing/only-grammar-book/ch06-style-clarity.md`
+- `src/content/blog/writing/science-research-writing/unit1-1-structure-moves.md`
+- `src/content/blog/writing/science-research-writing/unit1-2-grammar-vocabulary.md`
+- `src/content/blog/writing/science-research-writing/unit2-1-structure-vocabulary.md`
+- `src/content/blog/writing/science-research-writing/unit2-2-grammar.md`
+- `src/content/blog/writing/science-research-writing/unit3-1-structure-vocabulary.md`
+- `src/content/blog/writing/science-research-writing/unit3-2-grammar.md`
+- `src/content/blog/writing/science-research-writing/unit4-1-structure-vocabulary.md`
+- `src/content/blog/writing/science-research-writing/unit4-2-grammar.md`
+- `src/content/blog/writing/science-research-writing/unit5-1-abstract.md`
+- `src/content/blog/writing/science-research-writing/unit5-2-title-closing.md`
+- `src/content/blog/writing/science-research-writing/unit6-sentence-level.md`
+- `src/content/blog/writing/style-williams/lesson01-understanding.md`
+- `src/content/blog/writing/style-williams/lesson02-correctness.md`
+- `src/content/blog/writing/style-williams/lesson03-actions.md`
+- `src/content/blog/writing/style-williams/lesson04-characters.md`
+- `src/content/blog/writing/style-williams/lesson05-cohesion.md`
+- `src/content/blog/writing/style-williams/lesson06-emphasis.md`
+- `src/content/blog/writing/style-williams/lesson07-concision.md`
+- `src/content/blog/writing/style-williams/lesson08-shape.md`
+- `src/content/blog/writing/style-williams/lesson09-elegance.md`
+- `src/content/blog/writing/style-williams/lesson10-ethics.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol1-ch01.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol1-ch02.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol1-ch03.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol1-ch04.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol2-ch01.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol2-ch02.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol2-ch03.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol2-ch04.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol3-ch01.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol3-ch02.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol3-ch03.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol3-ch04.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol4-ch01.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol4-ch02.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol4-ch03.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol4-ch04.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol5-ch01.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol5-ch02.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol5-ch03.md`
+- `src/content/blog/writing/uri-geul-baro-sseugi/vol5-ch04.md`
