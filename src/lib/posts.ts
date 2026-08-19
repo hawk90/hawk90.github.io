@@ -231,42 +231,72 @@ export function getRelatedPosts(
 
   const selectedIds = new Set([currentPost.id, ...selected.map(({ post }) => post.id)]);
   const candidates = allPosts.filter((p) => !selectedIds.has(p.id));
+  const currentTags = new Set(currentPost.data.tags.map((t) => t.toLowerCase()));
 
   const scored = candidates.map((post) => {
-    let score = 0;
-
-    // Same series gets highest priority
-    if (currentPost.data.series && post.data.series === currentPost.data.series) {
-      score += 10;
-    }
-
-    // Tag overlap
-    const currentTags = new Set(currentPost.data.tags.map((t) => t.toLowerCase()));
-    for (const tag of post.data.tags) {
-      if (currentTags.has(tag.toLowerCase())) {
-        score += 3;
-      }
-    }
-
-    // Same type
-    if (post.data.type === currentPost.data.type) {
-      score += 1;
-    }
-
-    return { post, score };
+    const sameSeries = !!currentPost.data.series && post.data.series === currentPost.data.series;
+    const sharedTags = post.data.tags.filter((tag) => currentTags.has(tag.toLowerCase())).length;
+    const sameType = post.data.type === currentPost.data.type;
+    return {
+      post,
+      sameSeries,
+      sharedTags,
+      score: (sameSeries ? 10 : 0) + sharedTags * 3 + (sameType ? 1 : 0),
+    };
   });
 
-  const fallback = scored
-    .filter((s) => s.score > 0)
-    .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf())
-    .slice(0, maxPosts - selected.length)
-    .map(({ post }) => ({
-      post,
-      reason: currentPost.data.series && post.data.series === currentPost.data.series
-        ? '같은 시리즈에서 이어 읽기'
-        : '공통 태그 기반 추천',
-      source: 'inferred' as const,
-    }));
+  const remaining = maxPosts - selected.length;
+
+  /**
+   * Within a series, "related" means what to read next — not what was written
+   * most recently. Ranking by date sent every reader to the end of the book:
+   * chapter 1 of the PCIe series recommended chapters 19, 18 and 17, because
+   * every sibling scores the same and the newest chapter won the tiebreak.
+   * Ordering by distance in reading order, with later chapters ahead of
+   * earlier ones, makes chapter 1 point at chapter 2.
+   */
+  const readingDistance = (post: BlogPost) => {
+    const here = currentPost.data.seriesOrder ?? 0;
+    const there = post.data.seriesOrder ?? 0;
+    // Earlier chapters are still useful, just after everything still ahead.
+    return there > here ? there - here : here - there + 1_000;
+  };
+
+  const sameSeries = scored
+    .filter((s) => s.sameSeries)
+    .sort((a, b) => readingDistance(a.post) - readingDistance(b.post));
+
+  /**
+   * One slot is held for a post outside the current series, because the block
+   * sits directly under the full chapter list — three same-series cards there
+   * repeat what the reader can already see and offer no way out of the series.
+   * Shared tags are required: `type` matches almost everything, so allowing a
+   * type-only match would fill the slot with an unrelated post.
+   */
+  const crossSeries = scored
+    .filter((s) => !s.sameSeries && s.sharedTags > 0)
+    .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf());
+
+  const picks: typeof scored = [];
+  const crossQuota = sameSeries.length && crossSeries.length ? 1 : 0;
+  picks.push(...sameSeries.slice(0, Math.max(0, remaining - crossQuota)));
+  picks.push(...crossSeries.slice(0, remaining - picks.length));
+  // Whichever list ran short, the other one finishes the row.
+  if (picks.length < remaining) {
+    const taken = new Set(picks.map(({ post }) => post.id));
+    picks.push(
+      ...scored
+        .filter((s) => s.score > 0 && !taken.has(s.post.id))
+        .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf())
+        .slice(0, remaining - picks.length),
+    );
+  }
+
+  const fallback = picks.map(({ post, sameSeries: isSibling }) => ({
+    post,
+    reason: isSibling ? '같은 시리즈에서 이어 읽기' : '공통 태그 기반 추천',
+    source: 'inferred' as const,
+  }));
 
   return [...selected, ...fallback];
 }
