@@ -50,14 +50,18 @@
 | ② 시각화 | ASCII 다이어그램, TikZ 겹침, 코드 블록 산문 | `npm run diagrams` · `detect-ascii-diagrams.sh` · `detect-text-overlap.py` · `detect-prose-in-code.sh` |
 | ③ 사실 검증 | hallucination 후보, known-fact, 인용 심볼 존재, upstream drift | `audit-suspect-claims.sh` · `verify-known-facts.sh` · `audit-cited-symbols.py` · `audit:upstream` |
 | ④ 발행 게이트 | ①③의 blocking 부분을 한 번에 | `npm run audit:gate` (= `audit-publish-gate.sh`) |
-| ⑤ 구조 무결성 | seriesOrder gap·draft 혼합·링크 rot·중복 | `audit:series` · `audit:links` · `check:duplicate` |
+| ⑤ 구조 무결성 | seriesOrder gap·draft 혼합·링크 rot·중복 | `audit:series` · `audit:links` · `check:duplicate` · `audit:series-structure` · `audit:connectivity` |
 | ⑥ 유지보수 (발행 후) | upstream 코드·spec 변화, 인용 심볼 rename, 로드맵 만료, 산문 미래 시제·날짜 앵커 stale | `audit:upstream` · `audit-cited-symbols.py` · `audit:roadmap` · `audit:staleness` |
+| ⑦ URL·경로 | 두 글이 같은 URL을 주장, 손으로 조립한 post URL | `audit:routes` · `audit:content-portability` |
+| ⑧ 렌더된 결과 | 표 잘림·제목 계층 건너뜀·alt 누락·링크 이름 없음 (빌드된 HTML 대상) | `audit:reading` |
+| ⑨ 자산 | 다이어그램 참조 rot, alt 커버리지, 미참조 SVG | `audit:diagram-accessibility` · `audit:diagrams` |
 
 ### Dispatch — 언제 자동으로 도는가
 
 - **commit 시**: lefthook `pre-commit`이 staged `.md`에 `audit-publish-gate.sh` + frontmatter 검사.
 - **push 시**: lefthook `pre-push`가 push되는 commit의 변경 파일에 gate.
-- **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (fetch 포함 drift), `npm run audit:staleness` (산문 미래 시제·날짜 앵커).
+- **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (fetch 포함 drift), `npm run audit:staleness` (산문 미래 시제·날짜 앵커), `npm run audit:tags` (태그 어휘 — 리포트형이라 pass/fail 아님).
+- **`npm run verify:release`**: ⑤⑦⑧⑨를 포함한 20단계를 한 번에. ⑧은 `dist/`를 읽으므로 빌드 *뒤*에 돕니다 — 표 잘림·제목 계층은 마크다운 원본에는 없고 렌더된 HTML에만 있습니다. CI가 배포 전 이걸 돌립니다.
 - **staleness 두 도구 구분**: `audit:roadmap`은 `known-facts.yaml`에 *등재된 SKU*의 `review:` 날짜만, `audit:staleness`는 *본문 산문 자체*의 미래 시제(`예정`·`미발표`)·날짜 앵커(`YYYY년 현재`)를 훑는다. 등재 안 된 주장은 후자만 잡는다.
 - **게이트가 느릴 때**: `git commit/push --no-verify`로 우회하되 *책임 본인* — 우회했으면 `npm run audit:gate`를 별도로 돌린다.
 

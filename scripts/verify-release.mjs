@@ -17,9 +17,17 @@ const checks = [
   // Runs before the build, because the build is where a collision stops being
   // visible: the loader drops one of the two posts with a warning and succeeds.
   ['route collisions', ['npm', 'run', 'audit:routes']],
+  ['post URL single definition', ['npm', 'run', 'audit:content-portability']],
+  ['series structure', ['npm', 'run', 'audit:series-structure']],
+  ['article connectivity', ['npm', 'run', 'audit:connectivity']],
+  ['diagram references', ['npm', 'run', 'audit:diagram-accessibility']],
   ['diagram asset contract', ['npm', 'run', 'audit:diagrams']],
   ['Astro type and template diagnostics', ['npm', 'run', 'check']],
   ['production build', ['npm', 'run', 'build']],
+  // Reads dist/, so it can only run once the build has produced it. Table
+  // clipping, heading skips, and alt coverage are properties of the rendered
+  // HTML — the markdown source shows none of them.
+  ['rendered reading experience', ['npm', 'run', 'audit:reading']],
   ['static admin boundary', ['npm', 'run', 'gate:security-admin', '--', '--artifact', 'dist']],
   ['production secret scan', ['npm', 'run', 'gate:secrets']],
 ];
