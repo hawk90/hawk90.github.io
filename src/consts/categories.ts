@@ -109,3 +109,30 @@ export function getTopLevelCategories(): Category[] {
 export function getSubCategories(parentId: string): Category[] {
   return CATEGORIES.filter((cat) => cat.parent === parentId);
 }
+
+/**
+ * The categories a post sits under, outermost first.
+ *
+ * A post id starts with its category path, so the deepest category whose id
+ * prefixes it is the one that owns the post, and `parent` walks back up from
+ * there. Matching on a `/` boundary keeps `embedded` from claiming a post
+ * under a hypothetical `embedded-tools`.
+ *
+ * Returns [] when no category matches, which is a real possibility for a post
+ * filed somewhere `categories.ts` does not describe — callers render nothing
+ * rather than inventing a parent.
+ */
+export function getCategoryTrail(postId: string): Category[] {
+  const owner = CATEGORIES
+    .filter((cat) => postId.startsWith(`${cat.id}/`))
+    .sort((a, b) => b.id.length - a.id.length)[0];
+
+  const trail: Category[] = [];
+  for (let cat: Category | undefined = owner; cat; cat = cat.parent ? getCategoryById(cat.parent) : undefined) {
+    trail.unshift(cat);
+    // `parent` is asserted acyclic by the topic registry, but a trail that
+    // repeats itself would loop forever here, so stop if it ever does.
+    if (trail.length > CATEGORIES.length) break;
+  }
+  return trail;
+}

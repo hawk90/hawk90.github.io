@@ -252,5 +252,7 @@ printf("%f", 3.14);   // → ""  (newlib-nano 기본)
 
 ## 관련 항목
 
+- [UART 하드웨어 동작 분석 — Baud Rate·Framing·FIFO](/blog/embedded/modern-recipes/part1-04-uart-hardware) — 체크리스트 3·6번(baud·8N1·오차 3%)이 왜 그 값인지
+- [UART 드라이버 구현 — polling·interrupt·DMA 3가지 방식 비교](/blog/embedded/modern-recipes/part4-07-uart-driver) — 9번 "polling으로 우선 검증" 다음 단계
 - 1-02: DDR 초기화
 - Embedded Serial Ch 1: UART

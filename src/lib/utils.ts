@@ -32,6 +32,18 @@ export function getSeriesUrl(seriesName: string): string {
 }
 
 /**
+ * The index page for a category.
+ *
+ * Shares the `/blog/` prefix with post URLs but is a different route: category
+ * ids come from `categories.ts`, post routes from frontmatter `slug:`. Kept
+ * here so the prefix has one definition per kind of thing rather than one per
+ * call site.
+ */
+export function getCategoryUrl(categoryId: string): string {
+  return `/blog/${categoryId}`;
+}
+
+/**
  * Get tag URL from tag name
  */
 export function getTagUrl(tagName: string): string {

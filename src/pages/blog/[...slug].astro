@@ -13,7 +13,9 @@ import StickyTitle from '../../components/blog/StickyTitle.astro';
 import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
-import { formatDate, getTagUrl, getPostUrl, getPostRouteParam } from '../../lib/utils';
+import { formatDate, getTagUrl, getPostUrl, getPostRouteParam, getSeriesUrl, getCategoryUrl } from '../../lib/utils';
+import Breadcrumb from '../../components/common/Breadcrumb.astro';
+import { getCategoryTrail } from '../../consts/categories';
 import { getPostMeta, getPublishedPosts, getRelatedPosts, getRoutableTagKeys, type RelatedPost } from '../../lib/posts';
 import { getBlogContentManifest, getContentRelations } from '../../lib/content';
 import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
@@ -31,6 +33,12 @@ const { post } = Astro.props;
 const { Content, headings } = await render(post);
 // Which of this post's tags have a page to link to (see getRoutableTagKeys).
 const routableTags = await getRoutableTagKeys();
+// An article is where search and external links land, and it was the one page
+// type with no way back up: no breadcrumb, and a series name in plain text.
+const breadcrumbs = [
+  { label: 'Blog', href: '/blog' },
+  ...getCategoryTrail(post.id).map((category) => ({ label: category.name, href: getCategoryUrl(category.id) })),
+];
 const needsRelatedOrSeries = !!post.data.series || RELATED_POSTS_CONFIG.enabled;
 const allPosts = needsRelatedOrSeries
   ? await getPublishedPosts()
@@ -104,9 +112,11 @@ const hasMath = /\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(rawBod
         <div class="flex-1 min-w-0">
           <!-- Header -->
           <header class="container-narrow mb-12">
+            <Breadcrumb items={breadcrumbs} />
             {post.data.series && (
               <div class="text-sm text-[var(--color-accent)] font-medium mb-2">
-                {post.data.series} · {post.data.seriesOrder}/{seriesPosts.length}
+                <a href={getSeriesUrl(post.data.series)} class="hover:underline">{post.data.series}</a>
+                {' · '}{post.data.seriesOrder}/{seriesPosts.length}
               </div>
             )}
             <h1 class="text-3xl lg:text-4xl font-bold leading-tight mb-4" transition:name={`title-${post.id}`}>
