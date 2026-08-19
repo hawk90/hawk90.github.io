@@ -67,6 +67,8 @@ export function getPostUrl(post: { id: string } | string): string {
  * agree today are how a link starts 404ing the day one of them changes.
  */
 export function getPostRouteParam(post: { id: string } | string): string {
+  // `id` is already the frozen value when a post sets `slug:` in frontmatter —
+  // Astro's glob loader substitutes it there, so nothing extra is needed here.
   return typeof post === 'string' ? post : post.id;
 }
 

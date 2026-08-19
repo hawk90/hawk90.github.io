@@ -119,6 +119,7 @@
     "audit:links": "python3 scripts/audit-internal-links.py",
     "audit:connectivity": "node scripts/audit-article-connectivity.mjs",
     "audit:reading": "node scripts/audit-reading-experience.mjs",
+    "audit:routes": "node scripts/audit-route-collisions.mjs",
     "audit:staleness:all": "python3 scripts/audit-prose-staleness.py --include-drafts --json reports/content-readiness/staleness.json",
     "audit:links:fix": "python3 scripts/resolve-internal-links.py --apply",
     "audit:series": "python3 scripts/audit-series-integrity.py",

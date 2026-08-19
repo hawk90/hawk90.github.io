@@ -14,6 +14,9 @@ const checks = [
   ['editorial relations', ['npm', 'run', 'test:relations']],
   ['shared product experience', ['npm', 'run', 'audit:product-experience']],
   ['internal links', ['npm', 'run', 'audit:links', '--', '--by-type']],
+  // Runs before the build, because the build is where a collision stops being
+  // visible: the loader drops one of the two posts with a warning and succeeds.
+  ['route collisions', ['npm', 'run', 'audit:routes']],
   ['diagram asset contract', ['npm', 'run', 'audit:diagrams']],
   ['Astro type and template diagnostics', ['npm', 'run', 'check']],
   ['production build', ['npm', 'run', 'build']],
