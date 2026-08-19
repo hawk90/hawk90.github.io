@@ -86,7 +86,44 @@ export type CommentsConfig =
       /** Your Disqus shortname (the part before .disqus.com) */
       shortname: string;
     };
-export const defineComments = (c: CommentsConfig): CommentsConfig => c;
+/**
+ * Credentials each provider cannot render without. `repo` alone is not enough
+ * for giscus: the widget is addressed by the opaque `repoId`/`categoryId` that
+ * giscus.app issues, and a human-readable repo slug will not substitute.
+ */
+const COMMENT_CREDENTIALS = {
+  giscus: ['repo', 'repoId', 'category', 'categoryId'],
+  utterances: ['repo'],
+  disqus: ['shortname'],
+} as const;
+
+/**
+ * `enabled: true` with a blank credential is the failure this guards.
+ *
+ * The type admits `repoId: ''`, and every consumer only checked `enabled`, so
+ * the half-configured state reached production: each article mounted the
+ * widget, the client found no ids, and revealed a setup notice written for the
+ * site owner to 726 published pages. Nothing failed — not the build, not the
+ * release gate, not the rendered-HTML audit, because a page telling readers to
+ * go configure giscus is still valid HTML.
+ *
+ * So the check belongs here, where the config is declared. Comments are either
+ * off or usable; there is no third state to ship.
+ */
+export const defineComments = (c: CommentsConfig): CommentsConfig => {
+  if (!c.enabled) return c;
+  const missing = COMMENT_CREDENTIALS[c.provider].filter(
+    (key) => !String((c as Record<string, unknown>)[key] ?? '').trim(),
+  );
+  if (missing.length) {
+    throw new Error(
+      `COMMENTS_CONFIG enables ${c.provider} but leaves ${missing.join(', ')} blank. ` +
+        'Fill them in, or set { enabled: false } — a half-configured provider ' +
+        'shows setup instructions to readers on every article.',
+    );
+  }
+  return c;
+};
 
 // ─── Analytics ──────────────────────────────────────────────
 export type AnalyticsConfig =
