@@ -234,4 +234,4 @@ dynamic은 hash를 지원하지만 비교 비용이 비싸고 의미가 불분�
 
 - [Part 11-03 Dynamic ↔ struct](/blog/programming/code-review/folly/part11-03-dynamic-struct) — type-safe 변환
 - [Part 7-01 F14ValueMap](/blog/programming/code-review/folly/part7-01-f14-value-map) — object의 내부 저장소
-- [Effective Modern C++ Item 18](/blog/programming/cpp/effective-modern-cpp/item18-use-unique-ptr-for-exclusive-ownership) — type erasure 패턴
+- Effective Modern C++ Item 18 — type erasure 패턴

@@ -28,6 +28,9 @@ const checks = [
   // clipping, heading skips, and alt coverage are properties of the rendered
   // HTML — the markdown source shows none of them.
   ['rendered reading experience', ['npm', 'run', 'audit:reading']],
+  // Reads dist/, so it must follow the build: a link is only broken once you
+  // know which pages were actually generated.
+  ['rendered link resolution', ['npm', 'run', 'audit:rendered-links']],
   ['static admin boundary', ['npm', 'run', 'gate:security-admin', '--', '--artifact', 'dist']],
   ['production secret scan', ['npm', 'run', 'gate:secrets']],
 ];

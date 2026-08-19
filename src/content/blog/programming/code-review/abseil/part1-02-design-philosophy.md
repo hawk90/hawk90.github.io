@@ -216,5 +216,5 @@ Part 1-03에서 빌드 시스템을 본다. Bazel과 CMake에서 Abseil을 가�
 - [Part 1-03: Build & dependency (Bazel vs CMake)](/blog/programming/code-review/abseil/part1-03-build-dependency-bazel)
 - [Part 1-04: LTS vs HEAD release model](/blog/programming/code-review/abseil/part1-04-lts-vs-head-release)
 - [Part 1-05: Versioning & ABI 호환성](/blog/programming/code-review/abseil/part1-05-versioning-abi)
-- [Effective Modern C++: Item 22 — Pimpl idiom](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) — ABI와 컴파일 시간의 트레이드오프
+- Effective Modern C++: Item 22 — Pimpl idiom — ABI와 컴파일 시간의 트레이드오프
 - [원문 — Abseil compatibility guidelines](https://abseil.io/about/compatibility)

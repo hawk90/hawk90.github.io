@@ -185,6 +185,6 @@ Part 1-02에서는 Abseil의 설계 철학을 본다. "std 호환 + 추가 기�
 - [Part 1-05: Versioning & ABI 호환성](/blog/programming/code-review/abseil/part1-05-versioning-abi)
 - [Part 3-01: absl::Status — exception-free error handling](/blog/programming/code-review/abseil/part3-01-status)
 - [Part 13-01: Google 스타일의 Abseil 사용 패턴](/blog/programming/code-review/abseil/part13-01-google-style-patterns)
-- [Effective Modern C++ 시리즈](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
+- Effective Modern C++ 시리즈
 - [원문 — abseil.io](https://abseil.io/)
 - [Abseil GitHub](https://github.com/abseil/abseil-cpp)

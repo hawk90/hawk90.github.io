@@ -5,10 +5,10 @@
 ## Lifecycle review (top 25)
 
 - [110] `embedded/modern-recipes/00-preface` — Modern Embedded Recipes — 모던 임베디드 실전 레시피 시리즈 소개
-- [110] `embedded/rtos/practical-internals/00-preface` — Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개
 - [110] `embedded/performance-engineering/00-preface` — Embedded Performance Engineering — 임베디드 성능 엔지니어링 시리즈 소개
-- [110] `programming/code-review/folly/00-preface` — Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석
 - [110] `embedded/embedded-cpp/00-preface` — Embedded C++ for Real Systems — 임베디드 모던 C++ 시리즈 소개
+- [110] `embedded/rtos/practical-internals/00-preface` — Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개
+- [110] `programming/code-review/folly/00-preface` — Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석
 - [110] `programming/code-review/abseil/00-preface` — Abseil Code Review — Google production-grade C++ 라이브러리 분석
 - [10] `embedded/modern-recipes/part1-01-digital-signal-basics` — 디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석
 - [10] `embedded/modern-recipes/part1-02-clock-timing` — 임베디드 클럭과 타이밍 — Skew·Jitter·PLL·MMCM 분석
@@ -22,17 +22,17 @@
 - [10] `embedded/modern-recipes/part1-10-can-electrical` — CAN 버스 전기적 특성 — Differential·Termination·Dominant/Recessive
 - [10] `embedded/modern-recipes/part1-11-rs485-rs422` — RS-485·RS-422 차동 신호 분석 — Termination·Biasing·Topology
 - [10] `embedded/modern-recipes/part1-12-lvds-differential` — LVDS 차동 신호 분석 — Common-Mode·Impedance·Eye Pattern
-- [10] `embedded/modern-recipes/part8-01-dynamic-memory` — 임베디드 동적 메모리 — malloc 위험·결정성·대안 분석
-- [10] `embedded/modern-recipes/part8-02-memory-alignment` — 메모리 정렬과 패딩 분석 — Natural·Strict Alignment·Trap
-- [10] `embedded/modern-recipes/part8-03-cache-alignment` — Cache Line Alignment — alignas·Padding·SoA 적용
-- [10] `embedded/modern-recipes/part8-04-dma-allocator` — DMA-Friendly Allocator — dma_alloc_coherent·IOMMU·Pool
-- [10] `embedded/modern-recipes/part8-05-zero-copy` — Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice
-- [10] `embedded/modern-recipes/part8-06-numa` — NUMA Memory Topology — numactl·numa_alloc·HBM 적용
-- [10] `embedded/modern-recipes/part8-07-simd` — SIMD 활용 분석 — Intrinsics·Auto-Vectorization·OpenMP SIMD
+- [10] `embedded/modern-recipes/part2-01-cortex-m-comparison` — ARM Cortex-M 시리즈 비교 — M0·M3·M4·M7·M33·M55 분석
+- [10] `embedded/modern-recipes/part2-02-cortex-a-comparison` — ARM Cortex-A 시리즈 비교 — A53·A55·A72·A78·X1 분석
+- [10] `embedded/modern-recipes/part2-03-arm-registers` — ARM 레지스터 구조 분석 — R0~R15·CPSR·SPSR·Banked Registers
+- [10] `embedded/modern-recipes/part2-04-cortex-m-exceptions` — Cortex-M 예외 처리 — Vector Table·NVIC·Tail-Chaining 추적
+- [10] `embedded/modern-recipes/part2-05-arm-memory-map` — ARM 메모리 맵 분석 — Normal·Device·Strongly-Ordered Region
+- [10] `embedded/modern-recipes/part2-06-arm-cache` — ARM L1·L2 캐시 분석 — Set Associative·Inclusive·Maintenance
+- [10] `embedded/modern-recipes/part2-07-arm-mpu` — ARM MPU 활용 — Region·Attribute·Privilege Separation
 
 ## Taxonomy candidates (top 50)
 
-- `programming/engineering/agile-lean-engineering` — 156 documents; **review-as-topic**; dominant series: Agile & Lean Software Engineering (1.9%). No single named series accounts for 80% of documents; review as a potential stable reader-facing topic before creating a category.
+- `programming/engineering/agile-lean-engineering` — 156 documents; **review-as-series**; dominant series: Agile & Lean Software Engineering (100.0%). One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `embedded/modern-recipes` — 152 documents; **review-as-series**; dominant series: Modern Embedded Recipes (100.0%). One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/engineering/pragmatic-programmer` — 100 documents; **review-as-series**; dominant series: The Pragmatic Programmer (100.0%). One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/code-review/folly` — 89 documents; **review-as-series**; dominant series: Folly Code Review (100.0%). One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.

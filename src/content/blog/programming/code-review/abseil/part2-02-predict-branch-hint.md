@@ -277,5 +277,5 @@ Part 2-03에서 `absl::LogSeverity`를 본다. 로깅의 첫 단계인 severity�
 - [Part 2-01: ABSL_HAVE_* / ABSL_ATTRIBUTE_*](/blog/programming/code-review/abseil/part2-01-abseil-macros)
 - [Part 2-03: absl::LogSeverity](/blog/programming/code-review/abseil/part2-03-log-severity)
 - [Part 3-01: absl::Status](/blog/programming/code-review/abseil/part3-01-status) — PREDICT_TRUE가 자주 쓰이는 패턴
-- [Beautiful C++: branch hint와 성능](/blog/programming/cpp/beautiful-cpp/item01-use-iso-standard-cpp)
+- Beautiful C++: branch hint와 성능
 - [원문 — absl/base/optimization.h](https://github.com/abseil/abseil-cpp/blob/master/absl/base/optimization.h)

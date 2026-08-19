@@ -27,7 +27,7 @@ Folly는 Abseil과 비교되는 일이 많다. 둘 다 std::을 보완하지만 
 - 메모리/네트워크 성능에 민감한 시스템을 만드는 사람 (IOBuf)
 - "folly::dynamic은 std::any와 뭐가 달라?"가 궁금한 사람
 
-C++ 초심자는 먼저 [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) 시리즈를 권한다.
+C++ 초심자는 먼저 Effective Modern C++ 시리즈를 권한다.
 
 ## 시리즈 구성
 
@@ -189,9 +189,9 @@ Folly가 왜 존재하는지, Abseil과의 차이부터.
 
 ## 자매 시리즈
 
-- [Effective C++](/blog/programming/cpp/effective-cpp/item01-view-cpp-as-a-federation-of-languages) — 언어 feature 위주
-- [Effective Modern C++](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction) — C++11/14 언어 feature
-- [Beautiful C++](/blog/programming/cpp/beautiful-cpp/item01-use-iso-standard-cpp) — modern 스타일 가이드
+- Effective C++ — 언어 feature 위주
+- Effective Modern C++ — C++11/14 언어 feature
+- Beautiful C++ — modern 스타일 가이드
 - [Abseil Code Review](/blog/programming/code-review/abseil/00-preface) — Google의 industrial library
 
 이 시리즈와의 차이: 위 셋은 *언어 feature*를 다루고, 이 시리즈는 *industrial library를 reading lens로* 다룬다. Folly와 Abseil은 같은 문제에 다른 답을 내놓은 라이브러리다. 둘을 나란히 읽으면 production C++의 트레이드오프가 보인다.

@@ -241,7 +241,7 @@ ESP32-C3는 *작고 저렴한 칩*이지만 *진지한 IoT 제품*을 만들 수
 - **[Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model)** — Secure Boot V2를 *공격 모델 수준*에서 더 깊이. fault injection, side-channel, glitching에 대한 방어를 다룹니다. C3 같은 양산 제품의 *보안 인증* 절차도.
 - **[Practical RTOS Internals 시리즈](/blog/embedded/rtos/practical-internals/00-preface)** — FreeRTOS의 *내부 자료구조와 스케줄링 정책*. C3의 *단일 코어 시분할*이 vanilla FreeRTOS와 *어디서 다른지* 명확해집니다.
 - **[Modern Embedded Recipes 시리즈](/blog/embedded/modern-recipes/00-preface)** — *CMake·동기화 패턴·IRQ 설계*의 모범 사례. ESP-IDF 코드를 *더 깔끔하게* 쓰는 데 직접 도움이 됩니다.
-- **[FreeRTOS Mastering 시리즈](/blog/embedded/rtos/freertos-mastering/chapter01-distribution)** — vanilla FreeRTOS를 *처음부터* 손에 익히는 코스. Espressif fork와의 차이점을 이해하는 데 좋습니다.
+- **FreeRTOS Mastering 시리즈** — vanilla FreeRTOS를 *처음부터* 손에 익히는 코스. Espressif fork와의 차이점을 이해하는 데 좋습니다.
 
 ESP32-S3(2 코어·ULP·USB OTG)나 *ESP32-H2(Thread·Zigbee)*로 확장하려면 *지금까지 손에 익은 ESP-IDF 지식*이 그대로 통합니다. 이 시리즈가 *그 출발점*이 되었기를 바랍니다.
 

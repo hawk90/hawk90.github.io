@@ -14,7 +14,7 @@ import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
 import { formatDate, getTagUrl, getPostUrl, getPostRouteParam } from '../../lib/utils';
-import { getPostMeta, getPublishedPosts, getRelatedPosts, type RelatedPost } from '../../lib/posts';
+import { getPostMeta, getPublishedPosts, getRelatedPosts, getRoutableTagKeys, type RelatedPost } from '../../lib/posts';
 import { getBlogContentManifest, getContentRelations } from '../../lib/content';
 import { SHARE_CONFIG, RELATED_POSTS_CONFIG, SITE_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
@@ -29,6 +29,8 @@ export async function getStaticPaths() {
 
 const { post } = Astro.props;
 const { Content, headings } = await render(post);
+// Which of this post's tags have a page to link to (see getRoutableTagKeys).
+const routableTags = await getRoutableTagKeys();
 const needsRelatedOrSeries = !!post.data.series || RELATED_POSTS_CONFIG.enabled;
 const allPosts = needsRelatedOrSeries
   ? await getPublishedPosts()
@@ -121,9 +123,12 @@ const hasMath = /\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(rawBod
             </div>
             <div class="flex flex-wrap gap-2 mt-4">
               {post.data.tags.map((tag) => (
-                <a href={getTagUrl(tag)}>
-                  <TagBadge tag={tag} />
-                </a>
+                routableTags.has(tag.toLocaleLowerCase())
+                  ? <a href={getTagUrl(tag)}><TagBadge tag={tag} /></a>
+                  /* A tag only this post carries has no page. It still says
+                     something about the article, so it stays visible — as
+                     text, not as a link to a 404. */
+                  : <TagBadge tag={tag} />
               ))}
             </div>
 

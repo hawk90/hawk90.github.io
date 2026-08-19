@@ -272,4 +272,4 @@ absl::SimpleHexAtoi("0xff", &v);  // true → 255
 - [Part 4-03 — StrCat](/blog/programming/code-review/abseil/part4-03-str-cat) — 숫자 → 문자열
 - [Part 4-06 — StrFormat](/blog/programming/code-review/abseil/part4-06-str-format)
 - Folly Part 5-04 — to/from — Meta의 동급 도구
-- [EMC++ Item 11 — 예외 비용](/blog/programming/cpp/effective-modern-cpp/item11-prefer-deleted-functions-to-private-undefined)
+- EMC++ Item 11 — 예외 비용

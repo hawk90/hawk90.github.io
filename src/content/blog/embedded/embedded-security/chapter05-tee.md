@@ -403,4 +403,4 @@ Intel SGX의 한 시기 큰 인기에 비해, 산업의 흐름은 *VM 단위 con
 - [Ch 7: 사이드채널 공격](/blog/embedded/embedded-security/chapter07-side-channel)
 - [Practical RTOS Internals — Part 4-11: TrustZone & TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm)
 - AUTOSAR Adaptive — 차량 보안
-- [DO-178C — 항공 SW 보증](/blog/embedded/aerospace-standards/do-178c/chapter01-overview)
+- DO-178C — 항공 SW 보증

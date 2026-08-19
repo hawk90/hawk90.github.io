@@ -312,6 +312,6 @@ Part 3-04에서 Status payload를 본다. 에러 메시지 외에 구조화된 �
 - [Part 3-04: Status payload](/blog/programming/code-review/abseil/part3-04-status-payload)
 - [Part 3-05: Status ↔ exception](/blog/programming/code-review/abseil/part3-05-status-exception-conversion)
 - [Part 2-02: ABSL_PREDICT_TRUE/FALSE](/blog/programming/code-review/abseil/part2-02-predict-branch-hint)
-- [Effective Modern C++: Item 7 — uniform initialization](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
+- Effective Modern C++: Item 7 — uniform initialization
 - [원문 — TensorFlow status_macros](https://github.com/tensorflow/tensorflow/blob/master/tensorflow/core/platform/status_macros.h)
 - [원문 — gRPC status_macros](https://github.com/grpc/grpc/blob/master/src/core/lib/iomgr/error.h)

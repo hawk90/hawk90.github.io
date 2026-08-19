@@ -429,7 +429,7 @@ HAL implementation만 다릅니다. application 코드는 변경되지 않습니
 - **[Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)** — FreeRTOS/Zephyr/RT-Thread 소스 분석 (45 chapters)
 - **[Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface)** — 일상 recipe 모음 (145 recipes)
 - **Refactoring Catalog** — Fowler 61 패턴
-- **[GoF Design Patterns](/blog/programming/design/gof-design-patterns/item00-mental-models)** — 23 패턴
+- **GoF Design Patterns** — 23 패턴
 
 ## 자주 보는 함정과 안티패턴
 

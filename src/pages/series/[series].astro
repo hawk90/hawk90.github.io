@@ -5,7 +5,7 @@ import PostRow from '../../components/blog/PostRow.astro';
 import BlogSidebar from '../../components/blog/BlogSidebar.astro';
 import Breadcrumb from '../../components/common/Breadcrumb.astro';
 import { toSlug, getTagUrl } from '../../lib/utils';
-import { getPublishedPosts, getAllSeries, getAllTags, type BlogPost } from '../../lib/posts';
+import { getPublishedPosts, getAllSeries, getAllTags, getRoutableTagKeys, type BlogPost } from '../../lib/posts';
 import { getSeriesMetadata } from '../../consts/series';
 
 export async function getStaticPaths() {
@@ -32,6 +32,8 @@ interface Props {
 
 const { seriesName, posts, allPosts } = Astro.props;
 const allTags = getAllTags(posts);
+// Only tags with a page may be rendered as links (see getRoutableTagKeys).
+const routableTags = await getRoutableTagKeys();
 const seriesLens = getSeriesMetadata(seriesName)?.lens;
 
 const chapterMap = new Map<string, BlogPost[]>();
@@ -79,9 +81,9 @@ function formatChapter(key: string): string {
             )}
             <div class="flex flex-wrap gap-2">
               {allTags.map((tag) => (
-                <a href={getTagUrl(tag)}>
-                  <TagBadge tag={tag} />
-                </a>
+                routableTags.has(tag.toLocaleLowerCase())
+                  ? <a href={getTagUrl(tag)}><TagBadge tag={tag} /></a>
+                  : <TagBadge tag={tag} />
               ))}
             </div>
           </div>

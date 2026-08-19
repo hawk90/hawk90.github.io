@@ -118,6 +118,7 @@
     "audit:upstream:json": "python3 scripts/audit-upstream-freshness.py --top 50 --json reports/upstream-freshness.json",
     "audit:links": "python3 scripts/audit-internal-links.py",
     "audit:connectivity": "node scripts/audit-article-connectivity.mjs",
+    "audit:rendered-links": "node scripts/audit-rendered-links.mjs",
     "audit:reading": "node scripts/audit-reading-experience.mjs",
     "audit:routes": "node scripts/audit-route-collisions.mjs",
     "audit:staleness:all": "python3 scripts/audit-prose-staleness.py --include-drafts --json reports/content-readiness/staleness.json",

@@ -179,7 +179,7 @@ EU·일본·한국에서 *2022년 7월 이후 신차 type approval*에 필수. *
 
 R155는 *차량 자체*의 보안뿐 아니라 *OEM의 조직과 프로세스*를 평가합니다. ISO/SAE 21434가 R155 준수의 사실상 *기술적 표준*입니다. R156은 [Ch 6의 OTA](/blog/embedded/embedded-security/chapter06-ota-update) 요건을 강제합니다.
 
-자동차 분야는 [Embedded Automotive 시리즈](/blog/embedded/automotive/misra-c/chapter01-introduction)와 깊게 연결됩니다.
+자동차 분야는 Embedded Automotive 시리즈와 깊게 연결됩니다.
 
 ## 항공·우주 — 별도 트랙
 

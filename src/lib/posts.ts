@@ -138,6 +138,30 @@ export function getTagsForPageGeneration(posts: BlogPost[], minPosts = 2): strin
     .sort((a, b) => a.localeCompare(b));
 }
 
+let routableTagKeysPromise: Promise<Set<string>> | null = null;
+
+/**
+ * The tags that actually have a page, keyed the way the URL is.
+ *
+ * Anything rendering a tag as a link has to ask this first. The threshold in
+ * `getTagsForPageGeneration` used to be applied only where routes are made,
+ * so every post linked all of its tags while only the shared ones existed:
+ * 1465 tags were linked and 468 had pages, leaving 997 hrefs that 404'd. The
+ * threshold is right — most tags are carried by a single post and a page for
+ * each is thin — but a rule about which pages exist has to reach the code
+ * that points at them, or it is a rule about nothing.
+ *
+ * Derived from the same function the route uses, so the two cannot drift.
+ */
+export async function getRoutableTagKeys(): Promise<Set<string>> {
+  if (!routableTagKeysPromise) {
+    routableTagKeysPromise = getPublishedPosts().then(
+      (posts) => new Set(getTagsForPageGeneration(posts).map((tag) => tag.toLocaleLowerCase())),
+    );
+  }
+  return routableTagKeysPromise;
+}
+
 /**
  * 포스트에서 모든 고유 시리즈 추출 (알파벳순)
  */

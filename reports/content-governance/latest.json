@@ -1,154 +1,154 @@
 {
-  "generatedAt": "2026-08-18T05:20:57.544Z",
+  "generatedAt": "2026-08-19T12:53:12.687Z",
   "lifecycle": [
     {
       "id": "embedded/modern-recipes/00-preface",
       "title": "Modern Embedded Recipes — 모던 임베디드 실전 레시피 시리즈 소개",
-      "date": "2026-04-10T09:00:00.000Z",
-      "score": 110
-    },
-    {
-      "id": "embedded/rtos/practical-internals/00-preface",
-      "title": "Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개",
-      "date": "2026-05-04T09:00:00.000Z",
+      "date": "2026-04-10T09:00:00",
       "score": 110
     },
     {
       "id": "embedded/performance-engineering/00-preface",
       "title": "Embedded Performance Engineering — 임베디드 성능 엔지니어링 시리즈 소개",
-      "date": "2026-04-23T09:00:00.000Z",
-      "score": 110
-    },
-    {
-      "id": "programming/code-review/folly/00-preface",
-      "title": "Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석",
-      "date": "2026-06-04T09:00:00.000Z",
+      "date": "2026-04-23T09:00:00",
       "score": 110
     },
     {
       "id": "embedded/embedded-cpp/00-preface",
       "title": "Embedded C++ for Real Systems — 임베디드 모던 C++ 시리즈 소개",
-      "date": "2026-04-28T09:00:00.000Z",
+      "date": "2026-04-28T09:00:00",
+      "score": 110
+    },
+    {
+      "id": "embedded/rtos/practical-internals/00-preface",
+      "title": "Practical RTOS Internals — 실시간 커널 내부 분석 시리즈 소개",
+      "date": "2026-05-04T09:00:00",
+      "score": 110
+    },
+    {
+      "id": "programming/code-review/folly/00-preface",
+      "title": "Folly Code Review — Meta의 production-grade C++ 라이브러리 코드 분석",
+      "date": "2026-06-04T09:00:00",
       "score": 110
     },
     {
       "id": "programming/code-review/abseil/00-preface",
       "title": "Abseil Code Review — Google production-grade C++ 라이브러리 분석",
-      "date": "2026-06-09T09:00:00.000Z",
+      "date": "2026-06-09T09:00:00",
       "score": 110
     },
     {
       "id": "embedded/modern-recipes/part1-01-digital-signal-basics",
       "title": "디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석",
-      "date": "2026-04-10T09:01:00.000Z",
+      "date": "2026-04-10T09:01:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-02-clock-timing",
       "title": "임베디드 클럭과 타이밍 — Skew·Jitter·PLL·MMCM 분석",
-      "date": "2026-04-10T09:02:00.000Z",
+      "date": "2026-04-10T09:02:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-03-gpio-internals",
       "title": "GPIO 내부 구조 분해 — Push-Pull·Open-Drain·Schmitt Trigger",
-      "date": "2026-04-10T09:03:00.000Z",
+      "date": "2026-04-10T09:03:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-04-uart-hardware",
       "title": "UART 하드웨어 동작 분석 — Baud Rate·Framing·FIFO",
-      "date": "2026-04-10T09:04:00.000Z",
+      "date": "2026-04-10T09:04:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-05-spi-hardware",
       "title": "SPI 하드웨어 분석 — Clock Mode·MOSI/MISO·Chip Select",
-      "date": "2026-04-10T09:05:00.000Z",
+      "date": "2026-04-10T09:05:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-06-i2c-hardware",
       "title": "I2C 하드웨어 분석 — Open-Drain·Clock Stretching·Arbitration",
-      "date": "2026-04-10T09:06:00.000Z",
+      "date": "2026-04-10T09:06:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-07-adc-principles",
       "title": "ADC 동작 원리 — SAR·Sigma-Delta·Pipelined 비교",
-      "date": "2026-04-10T09:07:00.000Z",
+      "date": "2026-04-10T09:07:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-08-dac-principles",
       "title": "DAC 동작 원리 — R-2R Ladder·Sigma-Delta·Settling Time",
-      "date": "2026-04-10T09:08:00.000Z",
+      "date": "2026-04-10T09:08:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-09-pwm-signal",
       "title": "PWM 신호 생성 분석 — Duty·Frequency·Dead Time·Center-Aligned",
-      "date": "2026-04-10T09:09:00.000Z",
+      "date": "2026-04-10T09:09:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-10-can-electrical",
       "title": "CAN 버스 전기적 특성 — Differential·Termination·Dominant/Recessive",
-      "date": "2026-04-10T09:10:00.000Z",
+      "date": "2026-04-10T09:10:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-11-rs485-rs422",
       "title": "RS-485·RS-422 차동 신호 분석 — Termination·Biasing·Topology",
-      "date": "2026-04-10T09:11:00.000Z",
+      "date": "2026-04-10T09:11:00",
       "score": 10
     },
     {
       "id": "embedded/modern-recipes/part1-12-lvds-differential",
       "title": "LVDS 차동 신호 분석 — Common-Mode·Impedance·Eye Pattern",
-      "date": "2026-04-10T09:12:00.000Z",
+      "date": "2026-04-10T09:12:00",
       "score": 10
     },
     {
-      "id": "embedded/modern-recipes/part8-01-dynamic-memory",
-      "title": "임베디드 동적 메모리 — malloc 위험·결정성·대안 분석",
-      "date": "2026-04-17T09:00:00.000Z",
+      "id": "embedded/modern-recipes/part2-01-cortex-m-comparison",
+      "title": "ARM Cortex-M 시리즈 비교 — M0·M3·M4·M7·M33·M55 분석",
+      "date": "2026-04-11T09:13:00",
       "score": 10
     },
     {
-      "id": "embedded/modern-recipes/part8-02-memory-alignment",
-      "title": "메모리 정렬과 패딩 분석 — Natural·Strict Alignment·Trap",
-      "date": "2026-04-17T09:01:00.000Z",
+      "id": "embedded/modern-recipes/part2-02-cortex-a-comparison",
+      "title": "ARM Cortex-A 시리즈 비교 — A53·A55·A72·A78·X1 분석",
+      "date": "2026-04-11T09:14:00",
       "score": 10
     },
     {
-      "id": "embedded/modern-recipes/part8-03-cache-alignment",
-      "title": "Cache Line Alignment — alignas·Padding·SoA 적용",
-      "date": "2026-04-17T09:02:00.000Z",
+      "id": "embedded/modern-recipes/part2-03-arm-registers",
+      "title": "ARM 레지스터 구조 분석 — R0~R15·CPSR·SPSR·Banked Registers",
+      "date": "2026-04-11T09:15:00",
       "score": 10
     },
     {
-      "id": "embedded/modern-recipes/part8-04-dma-allocator",
-      "title": "DMA-Friendly Allocator — dma_alloc_coherent·IOMMU·Pool",
-      "date": "2026-04-17T09:03:00.000Z",
+      "id": "embedded/modern-recipes/part2-04-cortex-m-exceptions",
+      "title": "Cortex-M 예외 처리 — Vector Table·NVIC·Tail-Chaining 추적",
+      "date": "2026-04-11T09:16:00",
       "score": 10
     },
     {
-      "id": "embedded/modern-recipes/part8-05-zero-copy",
-      "title": "Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice",
-      "date": "2026-04-17T09:04:00.000Z",
+      "id": "embedded/modern-recipes/part2-05-arm-memory-map",
+      "title": "ARM 메모리 맵 분석 — Normal·Device·Strongly-Ordered Region",
+      "date": "2026-04-11T09:17:00",
       "score": 10
     },
     {
-      "id": "embedded/modern-recipes/part8-06-numa",
-      "title": "NUMA Memory Topology — numactl·numa_alloc·HBM 적용",
-      "date": "2026-04-17T09:05:00.000Z",
+      "id": "embedded/modern-recipes/part2-06-arm-cache",
+      "title": "ARM L1·L2 캐시 분석 — Set Associative·Inclusive·Maintenance",
+      "date": "2026-04-11T09:18:00",
       "score": 10
     },
     {
-      "id": "embedded/modern-recipes/part8-07-simd",
-      "title": "SIMD 활용 분석 — Intrinsics·Auto-Vectorization·OpenMP SIMD",
-      "date": "2026-04-17T09:06:00.000Z",
+      "id": "embedded/modern-recipes/part2-07-arm-mpu",
+      "title": "ARM MPU 활용 — Region·Attribute·Privilege Separation",
+      "date": "2026-04-11T09:19:00",
       "score": 10
     }
   ],
@@ -158,11 +158,11 @@
       "documents": 156,
       "seriesCount": 1,
       "dominantSeries": "Agile & Lean Software Engineering",
-      "dominantSeriesDocuments": 3,
-      "dominantSeriesShare": 0.019,
-      "ungroupedDocuments": 153,
-      "recommendation": "review-as-topic",
-      "rationale": "No single named series accounts for 80% of documents; review as a potential stable reader-facing topic before creating a category."
+      "dominantSeriesDocuments": 156,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
     },
     {
       "path": "embedded/modern-recipes",

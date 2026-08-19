@@ -383,6 +383,6 @@ Part 3을 마치고 Part 4로 넘어간다. Part 4-01에서 `absl::string_view`�
 - [Part 3-04: Status payload](/blog/programming/code-review/abseil/part3-04-status-payload)
 - [Part 4-01: string_view 개요](/blog/programming/code-review/abseil/part4-01-string-view)
 - [Part 11-01: LOG, VLOG, CHECK](/blog/programming/code-review/abseil/part11-01-log-vlog-check)
-- [Effective Modern C++: noexcept](/blog/programming/cpp/effective-modern-cpp/item01-understand-template-type-deduction)
+- Effective Modern C++: noexcept
 - [원문 — absl/status/status.h ErrnoToStatus](https://github.com/abseil/abseil-cpp/blob/master/absl/status/status.h)
 - [원문 — gRPC status codes](https://grpc.io/docs/guides/status-codes/)

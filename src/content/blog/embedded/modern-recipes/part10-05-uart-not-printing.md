@@ -253,4 +253,4 @@ printf("%f", 3.14);   // → ""  (newlib-nano 기본)
 ## 관련 항목
 
 - 1-02: DDR 초기화
-- [Embedded Serial Ch 1: UART](/blog/embedded/protocols/embedded-serial/chapter01-overview)
+- Embedded Serial Ch 1: UART
