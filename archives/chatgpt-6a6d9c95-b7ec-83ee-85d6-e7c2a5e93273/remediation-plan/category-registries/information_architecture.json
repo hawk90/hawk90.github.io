@@ -510,9 +510,9 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "accepted",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Has the number of category pages that exactly duplicate a series page grown?",
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does any category page still render the exact post set of a series page or of its own parent, and does every chevron in the sidebar open onto something?",
       "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
       "evidence": [
@@ -529,10 +529,21 @@
             "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
             "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
             "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
-          ]
+          ],
+          "supersededOn": "2026-08-20"
+        },
+        {
+          "files": [
+            "src/components/blog/BlogSidebar.astro",
+            "src/components/blog/CategoryTreeNode.astro"
+          ],
+          "verification": "npm run build && npm run audit:sitemap && npm run audit:rendered-links && npm run verify:release",
+          "result": "Five pairs, not four: /blog/embedded/protocols, /blog/embedded/rtos, /blog/embedded/riscv and /blog/tools/emulation each rendered the exact post set of one series page, and /blog/programming rendered the exact post set of /blog/programming/code-review (168 posts) because only one child category is published. In the sidebar both halves of a pair appeared as sibling rows in the same indented list with the same styling, differing only by a chevron — so the row that left the /blog/ tree for /series/ was indistinguishable from a subcategory. Fixed by two render-time rules rather than by editing the taxonomy: a branch whose whole content is one series drops the redundant series row, and a branch that only forwards to a single child folds into one row. Rows 39 -> 34, category rows 11 -> 10, series rows 28 -> 24. Both URLs in every pair still exist and stay linked, because each post carries the full category trail in its breadcrumb and each series page holds 90-140 inbound links from its own chapters. Collapsing left four category rows with a chevron opening onto nothing — the dead affordance AP-I-01 removed from empty categories — so a node with no children and no series now renders without a disclosure control: chevrons 11 -> 6, each opening onto something.",
+          "supersedes": "Accepted on 2026-08-20 as additive noise, on the grounds that the series page was the richer half of each duplicate pair. That compared the two destinations and never compared the two sidebar rows leading to them, which is where the reader actually meets the duplication.",
+          "verifiedOn": "2026-08-20"
         }
       ],
-      "residualRisk": "embedded/rtos, embedded/riscv, embedded/protocols and tools/emulation are single-series folders promoted to categories, which is the same registry-versus-content mismatch as AP-I-03. Re-open if a fifth appears, or if any duplicated tag page gains its own description and ordering."
+      "residualRisk": "The rules are derived from published content, so they un-apply on their own: publishing a second series under embedded/rtos restores its series rows, and publishing a sibling of programming/code-review splits that row back in two. What they do not address is the level that carries no grouping at all — 341 of the 464 posts under embedded (73%) hang off series directly at the top level, beside four subcategories that cover the other 123. Whether those seven series deserve subcategories is a taxonomy decision for the author, not a defect to fix in a template."
     },
     {
       "id": "AP-I-16",
