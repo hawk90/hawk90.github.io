@@ -200,16 +200,90 @@ const categoryTree = topCats.filter((category) => hasPublished(category.id)).map
 <script>
   import { onPageLoad } from '../../lib/lifecycle';
 
+  /**
+   * Which branches the reader has open, for as long as the tab is open.
+   *
+   * The tree's open state is rendered per page from the post being viewed, so
+   * every navigation used to rebuild it as "only the branch containing this
+   * page". Expanding a branch to look around, then clicking anything, closed
+   * it again — from the reader's side, opening one place closed another. The
+   * nodes were never wired to each other; the whole tree was simply reset on
+   * every page.
+   *
+   * sessionStorage, not localStorage: this is where the reader is in one
+   * browsing session, not a setting they chose.
+   */
+  const STORAGE_KEY = 'blog-sidebar-open';
+
+  const readStored = (): Set<string> | null => {
+    try {
+      const raw = sessionStorage.getItem(STORAGE_KEY);
+      return raw ? new Set(JSON.parse(raw) as string[]) : null;
+    } catch {
+      // Private mode and disabled storage both throw. The tree still works;
+      // it just forgets, which is the behaviour it had before.
+      return null;
+    }
+  };
+
+  const writeStored = (open: Set<string>) => {
+    try {
+      sessionStorage.setItem(STORAGE_KEY, JSON.stringify([...open]));
+    } catch { /* see readStored */ }
+  };
+
   onPageLoad(() => {
+    const nodes = [...document.querySelectorAll<HTMLDetailsElement>('.cat-tree')];
+    if (!nodes.length) return;
+
+    const idOf = (details: HTMLDetailsElement) => details.dataset.category ?? '';
+    const syncAria = (details: HTMLDetailsElement) => {
+      details.querySelector<HTMLButtonElement>('.cat-toggle')?.setAttribute('aria-expanded', String(details.open));
+    };
+
+    // Read before touching anything: this is the server's answer, i.e. the
+    // trail down to the page being viewed.
+    const activeTrail = new Set(nodes.filter((details) => details.open).map(idOf));
+
+    let restoring = false;
+    const persist = () => {
+      if (restoring) return;
+      writeStored(new Set(nodes.filter((details) => details.open).map(idOf)));
+    };
+
+    const stored = readStored();
+    if (stored) {
+      // The reader's branches, plus the trail to where they are now — so the
+      // current page is always visible without reopening what they collapsed.
+      restoring = true;
+      for (const details of nodes) {
+        details.open = stored.has(idOf(details)) || activeTrail.has(idOf(details));
+        syncAria(details);
+      }
+      restoring = false;
+    }
+    // Deliberately not seeded here. With nothing stored the tree behaves
+    // exactly as it did before — the server's shape — and only starts
+    // remembering once the reader actually opens or closes something.
+
     const applyAll = (open: boolean) => {
-      document.querySelectorAll<HTMLDetailsElement>('.cat-tree').forEach((details) => {
+      for (const details of nodes) {
         details.open = open;
-        const toggle = details.querySelector<HTMLButtonElement>('.cat-toggle');
-        toggle?.setAttribute('aria-expanded', String(open));
-      });
+        syncAria(details);
+      }
+      persist();
     };
 
     const cleanups: Array<() => void> = [];
+
+    // The `toggle` event fires however the branch was opened — the chevron, the
+    // summary itself, or find-in-page. Listening here rather than on the button
+    // is what keeps the stored state and the DOM from drifting apart.
+    for (const details of nodes) {
+      const onToggle = () => { syncAria(details); persist(); };
+      details.addEventListener('toggle', onToggle);
+      cleanups.push(() => details.removeEventListener('toggle', onToggle));
+    }
 
     document.querySelectorAll<HTMLButtonElement>('.cat-toggle').forEach((button) => {
       const onClick = (e: MouseEvent) => {
@@ -218,7 +292,6 @@ const categoryTree = topCats.filter((category) => hasPublished(category.id)).map
         const details = button.closest<HTMLDetailsElement>('.cat-tree');
         if (!details) return;
         details.open = !details.open;
-        button.setAttribute('aria-expanded', String(details.open));
       };
       button.addEventListener('click', onClick);
       cleanups.push(() => button.removeEventListener('click', onClick));

@@ -59,7 +59,7 @@ const seriesLinkClass = isNested
     ];
 ---
 
-<details class="cat-tree" open={node.initiallyOpen}>
+<details class="cat-tree" data-category={node.id} open={node.initiallyOpen}>
   <summary class:list={rowClass}>
     <button
       type="button"
