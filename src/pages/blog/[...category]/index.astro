@@ -30,8 +30,15 @@ export async function getStaticPaths() {
 const { category } = Astro.params;
 const { categoryInfo, allPosts } = Astro.props;
 
-// Same leaf name under a different parent means an ambiguous title; qualify
-// only those, so unique names keep their short form.
+// Two category names repeat under different parents — Systems lives at both
+// `systems` and `ml/systems`, Compilers at `programming/compilers` and
+// `ml/compilers`. Unqualified, each pair renders the same title, so a crawler
+// sees two pages claiming to be the same thing. The parent is what tells them
+// apart, so it goes in the title whenever the name is not unique.
+//
+// Neither pair is built today: all four categories are draft-only, and
+// getStaticPaths above gates on published content. This is the rule waiting for
+// them, not a fix for a live collision.
 const sameName = categoryInfo ? CATEGORIES.filter((entry) => entry.name === categoryInfo.name) : [];
 const parentName = categoryInfo?.parent ? getCategoryById(categoryInfo.parent)?.name : undefined;
 const qualifiedName = sameName.length > 1 && parentName && categoryInfo
@@ -85,13 +92,6 @@ function formatChapter(key: string): string {
 }
 ---
 
-/*
-    Two category names repeat under different parents — Systems lives at both
-    `systems` and `ml/systems`, Compilers at `programming/compilers` and
-    `ml/compilers`. Unqualified, each pair renders the same title, so a crawler
-    sees two pages claiming to be the same thing. The parent is what tells them
-    apart, so it goes in the title whenever the name is not unique.
-*/
 <BaseLayout title={`${qualifiedName} - Blog`} description={categoryInfo!.description}>
   <section class="py-16 lg:py-24">
     <div class="container">

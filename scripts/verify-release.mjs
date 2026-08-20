@@ -30,6 +30,12 @@ const checks = [
   // Reads dist/, so it can only run once the build has produced it. Table
   // clipping, heading skips, and alt coverage are properties of the rendered
   // HTML — the markdown source shows none of them.
+  // First of the dist/ checks on purpose: it reads the bytes, while every gate
+  // below it reads a DOM the parser has already repaired. A stray `/* ... */`
+  // left in an .astro template body serialises between the doctype and <html>,
+  // which relocates the whole <head> into the body — and passes `astro check`,
+  // the build, and all of the checks below.
+  ['document prologue', ['npm', 'run', 'audit:prologue']],
   ['rendered reading experience', ['npm', 'run', 'audit:reading']],
   // Reads dist/, so it must follow the build: a link is only broken once you
   // know which pages were actually generated.
