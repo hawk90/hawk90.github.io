@@ -5,7 +5,7 @@ date: 2026-04-21T09:10:00
 description: "Cortex-M33+ TrustZone-M 위에 TF-M으로 secure firmware를 구성하는 패턴. SPE/NSPE, PSA Crypto/ITS/Attestation, MCUboot secure boot를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 147
-tags: [recipes, security, tfm, trustzone, psa, cortex-m33, mcuboot]
+tags: [recipes, security, tf-m, trustzone, psa, cortex-m33, mcuboot]
 topics: ["embedded"]
 ---
 

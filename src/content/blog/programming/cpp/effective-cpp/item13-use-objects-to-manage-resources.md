@@ -2,7 +2,7 @@
 title: "항목 13: 자원 관리에는 객체를 사용하라"
 date: 2026-05-04T13:00:00
 description: "RAII — 자원의 획득은 곧 초기화. 스마트 포인터·lock_guard·컨테이너로 누수 없는 자원 관리."
-tags: [C++, effective-c++, RAII, smart-pointer]
+tags: [cpp, effective-c++, RAII, smart-pointer]
 series: "Effective C++"
 seriesOrder: 13
 draft: true

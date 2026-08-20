@@ -4,7 +4,7 @@ date: 2026-05-06T17:00:00
 description: "Barrier 동기화 — 여러 스레드가 같은 지점에서 만남. Sense-reversing, combining tree, dissemination."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 17
-tags: [parallel, concurrency, book-review, amp, barrier, C++, C]
+tags: [parallel, concurrency, book-review, amp, barrier, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

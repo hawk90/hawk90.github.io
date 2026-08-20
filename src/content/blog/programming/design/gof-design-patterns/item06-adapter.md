@@ -2,7 +2,7 @@
 title: "GoF 6: Adapter"
 date: 2026-05-01T06:00:00
 description: "호환되지 않는 인터페이스를 클라이언트가 기대하는 형태로 변환."
-tags: [design-pattern, GoF, C++, C, Structural]
+tags: [design-pattern, GoF, cpp, C, Structural]
 series: "GoF Design Patterns"
 seriesOrder: 6
 draft: true

@@ -4,7 +4,7 @@ date: 2026-05-06T16:00:00
 description: "Future로 동시성 표현, work stealing으로 부하 분산. Fork-Join 패턴."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 16
-tags: [parallel, concurrency, book-review, amp, future, work-stealing, fork-join, C++, C]
+tags: [parallel, concurrency, book-review, amp, future, work-stealing, fork-join, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

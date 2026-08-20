@@ -2,7 +2,7 @@
 title: "Ch 7: Designing lock-free concurrent data structures"
 date: 2026-05-06T07:00:00
 description: "lock-free / wait-free 정의, compare-and-swap, ABA 문제, hazard pointer, reference counting, Michael-Scott 큐."
-tags: [C++, C, Concurrency, Lock-free, Atomic, CAS]
+tags: [cpp, C, Concurrency, Lock-free, Atomic, CAS]
 series: "C++ Concurrency in Action"
 seriesOrder: 7
 draft: true

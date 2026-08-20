@@ -2,7 +2,7 @@
 title: "Ch 25: Advanced Template Techniques"
 date: 2026-05-05T01:00:00
 description: "고급 템플릿 — variadic, SFINAE, concept, CRTP, fold expression."
-tags: [C++, Templates, Variadic, SFINAE, Concept]
+tags: [cpp, Templates, Variadic, SFINAE, Concept]
 series: "전문가를 위한 C++"
 seriesOrder: 25
 draft: true

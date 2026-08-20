@@ -3,7 +3,7 @@ title: "Sanitizer 종류 비교 — ASan·UBSan·LSan·TSan·MSan"
 slug: "tools/debugging/sanitizers/chapter01-intro"
 date: 2026-05-29T09:01:00
 description: "C/C++ 런타임 검사 도구 Sanitizer 계열의 역할, 종류별 선택, 실무 도입 순서."
-tags: [Sanitizer, ASan, UBSan, TSan, LSan, MSan, Debugging, C, C++]
+tags: [Sanitizer, ASan, UBSan, TSan, LSan, MSan, Debugging, C, cpp]
 series: "Sanitizers"
 seriesOrder: 1
 draft: false

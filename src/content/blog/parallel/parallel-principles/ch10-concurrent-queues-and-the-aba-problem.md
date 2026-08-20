@@ -4,7 +4,7 @@ date: 2026-05-06T10:00:00
 description: "Michael-Scott Lock-Free Queue. ABA 문제와 그 해법 — version counter, hazard pointer, epoch."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 10
-tags: [parallel, concurrency, book-review, amp, queue, michael-scott, aba, hazard-pointer, C++, C]
+tags: [parallel, concurrency, book-review, amp, queue, michael-scott, aba, hazard-pointer, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

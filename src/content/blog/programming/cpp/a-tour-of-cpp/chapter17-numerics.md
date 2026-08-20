@@ -4,7 +4,7 @@ date: 2026-05-22T17:00:00
 description: "수치 연산 — 수학 함수, complex, random, valarray"
 series: "A Tour of C++"
 seriesOrder: 17
-tags: [C++, numerics, math, random]
+tags: [cpp, numerics, math, random]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

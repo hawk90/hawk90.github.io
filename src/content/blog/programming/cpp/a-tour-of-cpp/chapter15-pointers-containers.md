@@ -4,7 +4,7 @@ date: 2026-05-22T15:00:00
 description: "포인터와 컨테이너 — unique_ptr, shared_ptr, span"
 series: "A Tour of C++"
 seriesOrder: 15
-tags: [C++, smart-pointers, unique_ptr, shared_ptr, span]
+tags: [cpp, smart-pointers, unique_ptr, shared_ptr, span]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

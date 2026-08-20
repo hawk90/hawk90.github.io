@@ -2,7 +2,7 @@
 title: "GoF 17: Mediator"
 date: 2026-05-01T17:00:00
 description: "객체들의 상호작용을 중재자에 캡슐화 — N×N 결합을 N으로."
-tags: [design-pattern, GoF, C++, C, Behavioral]
+tags: [design-pattern, GoF, cpp, C, Behavioral]
 series: "GoF Design Patterns"
 seriesOrder: 17
 draft: true

@@ -4,7 +4,7 @@ date: 2026-05-22T06:00:00
 description: "필수 연산 — 복사, 이동, RAII, Rule of Five"
 series: "A Tour of C++"
 seriesOrder: 6
-tags: [C++, copy, move, RAII, rule-of-five]
+tags: [cpp, copy, move, RAII, rule-of-five]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

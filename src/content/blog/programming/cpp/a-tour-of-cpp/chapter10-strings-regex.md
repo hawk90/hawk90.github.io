@@ -4,7 +4,7 @@ date: 2026-05-22T10:00:00
 description: "문자열과 정규 표현식 — string, string_view, regex"
 series: "A Tour of C++"
 seriesOrder: 10
-tags: [C++, string, regex, string_view]
+tags: [cpp, string, regex, string_view]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

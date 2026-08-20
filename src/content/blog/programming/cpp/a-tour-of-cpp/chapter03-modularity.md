@@ -4,7 +4,7 @@ date: 2026-05-22T03:00:00
 description: "모듈성 — 헤더, C++20 모듈, 네임스페이스"
 series: "A Tour of C++"
 seriesOrder: 3
-tags: [C++, modules, headers, namespaces]
+tags: [cpp, modules, headers, namespaces]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

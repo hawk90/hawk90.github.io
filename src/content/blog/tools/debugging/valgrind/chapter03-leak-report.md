@@ -3,7 +3,7 @@ title: "Valgrind Leak Report 분석 — definitely·indirectly·possibly·still 
 slug: "tools/debugging/valgrind/chapter03-leak-report"
 date: 2026-05-28T09:03:00
 description: "Memcheck의 네 가지 누수 분류 — definitely/indirectly/possibly/still reachable — 정확한 의미와 우선순위."
-tags: [Valgrind, Memcheck, MemoryLeak, Debugging, C, C++]
+tags: [Valgrind, Memcheck, MemoryLeak, Debugging, C, cpp]
 series: "Valgrind"
 seriesOrder: 3
 draft: false

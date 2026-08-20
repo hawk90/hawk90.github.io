@@ -1,0 +1,83 @@
+# Canonical tag spellings, and the aliases that must fold into them.
+#
+# A tag is a URL segment: `/tags/<tag.toLowerCase()>`. Two spellings of one
+# concept therefore publish two pages, and a reader lands on whichever the
+# article happened to choose. `audit-tag-vocabulary.mjs` detects that; this file
+# is what resolves it, and `merge-tag-aliases.mjs` applies it.
+#
+# Why a dictionary rather than a rule. `normalize-tag-shape.mjs` already folds
+# spellings that cannot make a clean URL, and deliberately leaves well-formed
+# ones alone — so `C++`, `RISC-V` and `Makefile` all survive it, correctly. The
+# remaining merges are editorial: nothing mechanical can know that `Makefile`
+# and `make` are the same tag, or which side of `cpp` / `c++` should win. Those
+# judgements live here, once, where they can be read and argued with.
+#
+# Selection rule, applied in order:
+#   1. A spelling that makes a bad URL loses regardless of how common it is.
+#      `+` is ambiguous in a path segment and percent-encodes to %2B.
+#   2. The official name of the thing: `RISC-V`, `TF-M`.
+#   3. The spelling its own domain uses — kernel and QEMU write `hotplug`.
+#   4. Otherwise the hyphenated form, the corpus's settled shape (see SETTLED
+#      in normalize-tag-shape.mjs), and among equals the one already dominant.
+#
+# What does NOT belong here: two spellings that mean two different things.
+# `typeid` is the C++ operator, tagged on a folly::demangle post; `type-id` is a
+# hand-rolled type identifier, tagged on a no-RTTI design post. Likewise
+# `async-io` is folly::AsyncIO and `asyncio` is the Python module. Both pairs
+# look like splits to an orthographic detector and are not.
+#
+# Aliases are matched case-insensitively, so `C++`, `c++` and `C++` all fold.
+# Applies to drafts as well as published posts: 281 drafts carry `C++`, and
+# fixing only what renders today would let the split return on publish.
+#
+# Adding an entry: put the winning spelling on the left, under `canonical:`.
+# Re-run
+#   node scripts/merge-tag-aliases.mjs            # preview
+#   node scripts/merge-tag-aliases.mjs --apply
+# and `npm run audit:tags` to confirm the split is gone.
+
+canonical:
+  # --- Symbol vs. spelled-out -------------------------------------------------
+  # `+` in a path segment is ambiguous and percent-encodes to %2B; `cpp` is the
+  # spelling the rest of the corpus and the category tree already use.
+  cpp: [c++, cplusplus, cxx]
+
+  # --- Same concept, different word -------------------------------------------
+  # The GNU Make series tagged every chapter `make, build, Makefile` — the tool
+  # and its input file, as two tags, on the same 7 posts. `/tags/make` and
+  # `/tags/makefile` rendered byte-identical lists. The tool is the subject.
+  make: [makefile]
+
+  # --- Separator dropped ------------------------------------------------------
+  # One concept, hyphen present in one spelling and absent in the other. The
+  # hyphenated form wins as the corpus's settled shape, and in each of these it
+  # is also the one already more used.
+  bare-metal: [baremetal]      # "bare metal" is two words
+  device-tree: [devicetree]    # corpus 7 : 3
+  debug-info: [debuginfo, DebugInfo]
+  stack-trace: [stacktrace]
+
+  # --- Where the domain's own spelling wins over the hyphen rule --------------
+  # The kernel and QEMU both write it as one word (CONFIG_HOTPLUG, the QEMU
+  # hotplug API); only the PCIe spec hyphenates it.
+  hotplug: [hot-plug]
+
+  # --- Official names ---------------------------------------------------------
+  # `RISC-V` is the ISA's own name, hyphenated, and it makes a perfectly clean
+  # URL. Folding the other way would rewrite 66 files to match 5. The category
+  # ids `embedded/riscv` and `systems/riscv` are a separate namespace and do not
+  # decide this.
+  risc-v: [riscv]
+
+  # Trusted Firmware-M calls itself TF-M.
+  tf-m: [tfm]
+
+# Pairs an orthographic detector reports as one concept split across two URLs,
+# which are actually two concepts. Listed so the audit stops reporting them and
+# nobody merges them later by reading the count alone.
+distinct:
+  # The C++ `typeid` operator (folly::demangle) vs. a hand-rolled type
+  # identifier for no-RTTI designs. Different mechanisms, opposite intents.
+  - [typeid, type-id]
+  # folly::AsyncIO (io_uring / Linux AIO) vs. Python's asyncio module.
+  - [async-io, asyncio]

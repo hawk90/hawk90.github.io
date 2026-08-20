@@ -4,29 +4,38 @@
 > not raw frontmatter. Nothing here is applied automatically.
 
 - Published posts: 726 of 3387
-- Tag URL keys in published content: 1465
-- Tag pages actually generated (2+ published posts): 468
-- Keys below the page threshold (no page generated, by design): 997
+- Tag URL keys in published content: 1456
+- Tag pages actually generated (2+ published posts): 467
+- Keys below the page threshold (no page generated, by design): 989
 - Keys appearing only in drafts (will render when published): 3305
 
-- **Concepts split across different URLs: 10**
+- **Concepts split across different URLs: 0**
+- Tag pages holding an identical post set: 0
+- Declared distinct in data/tag-aliases.yaml (not debt): 2
 - Label inconsistencies inside one URL: 30
 - Tags containing whitespace: 0
 
 ## Concepts split across different URLs
 
 One concept, two tag pages, readers landing on whichever the article chose.
-The first key holds the most posts and is the obvious merge target.
+Resolve by adding the winning spelling to `data/tag-aliases.yaml` and running
+`node scripts/merge-tag-aliases.mjs --apply`.
 
-- `/tags/cpp` (219) · `/tags/c++` (9) — 228 uses
-- `/tags/bare-metal` (14) · `/tags/baremetal` (2) — 16 uses
-- `/tags/device-tree` (3) · `/tags/devicetree` (3) — 6 uses
-- `/tags/riscv` (4) · `/tags/risc-v` (2) — 6 uses
+_None._
+
+## Tag pages holding an identical post set
+
+Two URLs over the same list of posts, where one key begins the other — the
+shape `make` / `makefile` had. Identical sets alone are not enough: `asan`
+and `ubsan` cover the same two posts and are two different things.
+
+_None._
+
+## Look alike, are not
+
+Held out by the `distinct:` list in `data/tag-aliases.yaml`. Do not merge these.
+
 - `/tags/async-io` (1) · `/tags/asyncio` (1) — 2 uses
-- `/tags/debug-info` (1) · `/tags/debuginfo` (1) — 2 uses
-- `/tags/hot-plug` (1) · `/tags/hotplug` (1) — 2 uses
-- `/tags/stack-trace` (1) · `/tags/stacktrace` (1) — 2 uses
-- `/tags/tf-m` (1) · `/tags/tfm` (1) — 2 uses
 - `/tags/type-id` (1) · `/tags/typeid` (1) — 2 uses
 
 ## Label inconsistencies inside one URL

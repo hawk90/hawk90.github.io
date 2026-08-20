@@ -4,7 +4,7 @@ date: 2026-05-22T18:00:00
 description: "동시성 — thread, mutex, future, async, atomic"
 series: "A Tour of C++"
 seriesOrder: 18
-tags: [C++, concurrency, thread, mutex, future]
+tags: [cpp, concurrency, thread, mutex, future]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

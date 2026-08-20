@@ -4,7 +4,7 @@ date: 2026-05-22T07:00:00
 description: "템플릿 — 함수 템플릿, 클래스 템플릿, 가변 템플릿"
 series: "A Tour of C++"
 seriesOrder: 7
-tags: [C++, templates, generic-programming, variadic]
+tags: [cpp, templates, generic-programming, variadic]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

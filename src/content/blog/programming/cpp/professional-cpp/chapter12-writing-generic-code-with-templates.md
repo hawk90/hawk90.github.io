@@ -2,7 +2,7 @@
 title: "Ch 12: Writing Generic Code with Templates"
 date: 2026-05-05T12:00:00
 description: "템플릿 기초 — 클래스 / 함수 템플릿. 인스턴스화 / 특수화."
-tags: [C++, Templates]
+tags: [cpp, Templates]
 series: "전문가를 위한 C++"
 seriesOrder: 12
 draft: true

@@ -3,7 +3,7 @@ title: "Valgrind Suppression과 실무 운용 — 노이즈 제거와 CI 통합"
 slug: "tools/debugging/valgrind/chapter05-suppressions"
 date: 2026-05-28T09:05:00
 description: "Valgrind suppression 문법, 외부 라이브러리 우회, Sanitizer와의 분담, CI 통합 실전."
-tags: [Valgrind, Suppression, CI, Debugging, C, C++]
+tags: [Valgrind, Suppression, CI, Debugging, C, cpp]
 series: "Valgrind"
 seriesOrder: 5
 draft: false

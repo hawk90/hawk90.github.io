@@ -4,7 +4,7 @@ date: 2026-05-16T02:00:00
 description: "Bare-metal interpreter — no malloc·no OS."
 series: "TinyML·Edge AI"
 seriesOrder: 2
-tags: [tflite-micro, interpreter, baremetal]
+tags: [tflite-micro, interpreter, bare-metal]
 draft: true
 topics: ["ml", "ml/tinyml"]
 ---

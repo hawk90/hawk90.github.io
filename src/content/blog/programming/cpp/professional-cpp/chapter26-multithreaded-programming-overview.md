@@ -2,7 +2,7 @@
 title: "Ch 26: Multithreaded Programming Overview"
 date: 2026-05-05T02:00:00
 description: "동시성 한눈에 — std::thread / mutex / future. 깊은 다룸은 별도 시리즈."
-tags: [C++, Concurrency, std::thread]
+tags: [cpp, Concurrency, "std::thread"]
 series: "전문가를 위한 C++"
 seriesOrder: 26
 draft: true

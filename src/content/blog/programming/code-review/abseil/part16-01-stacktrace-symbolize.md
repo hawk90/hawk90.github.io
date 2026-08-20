@@ -5,7 +5,7 @@ date: 2026-06-13T09:12:00
 description: "absl::GetStackTrace로 PC 배열을 받고 absl::Symbolize로 함수 이름·파일·라인으로 변환. signal handler 안에서도 동작하는 async-safe API."
 series: "Abseil Code Review"
 seriesOrder: 76
-tags: [cpp, abseil, stacktrace, symbolize, debugging]
+tags: [cpp, abseil, stack-trace, symbolize, debugging]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"

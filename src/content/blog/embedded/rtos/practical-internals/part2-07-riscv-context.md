@@ -5,7 +5,7 @@ date: 2026-05-05T09:17:00
 description: "RISC-V는 모든 레지스터 SW save. ECALL/mret + CSR (mscratch/mepc/mcause/mstatus)."
 series: "Practical RTOS Internals"
 seriesOrder: 17
-tags: [riscv, ecall, mret, csr, mscratch, mepc]
+tags: [risc-v, ecall, mret, csr, mscratch, mepc]
 draft: false
 topics: ["embedded", "embedded/rtos"]
 ---

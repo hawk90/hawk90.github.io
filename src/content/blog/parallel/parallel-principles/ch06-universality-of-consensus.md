@@ -4,7 +4,7 @@ date: 2026-05-06T06:00:00
 description: "CAS가 universal한 이유 — Universal Construction. 어떤 순차 객체든 wait-free 동시 객체로 변환 가능."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 6
-tags: [parallel, concurrency, book-review, amp, universal-construction, cas, C++, C]
+tags: [parallel, concurrency, book-review, amp, universal-construction, cas, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

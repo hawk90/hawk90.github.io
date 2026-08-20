@@ -4,7 +4,7 @@ date: 2026-05-19T06:00:00
 description: "standalone BSP·Xil*** API — RTOS 없이 Zynq 위에서 코드를 돌려보자."
 series: "The Zynq Book"
 seriesOrder: 6
-tags: [zynq, baremetal, bsp, standalone]
+tags: [zynq, bare-metal, bsp, standalone]
 draft: true
 topics: ["embedded", "embedded/hardware"]
 ---

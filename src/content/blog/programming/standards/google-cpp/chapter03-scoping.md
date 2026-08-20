@@ -2,7 +2,7 @@
 title: "Ch 3: Scoping"
 date: 2026-05-18T03:00:00
 description: "Namespaces / Internal Linkage / Nonmember-Static / Local Variables / Static-Global / thread_local."
-tags: [Google, C++, Style-Guide, Scoping, Namespace]
+tags: [Google, cpp, Style-Guide, Scoping, Namespace]
 series: "Google C++ Style"
 seriesOrder: 3
 draft: true

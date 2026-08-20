@@ -4,7 +4,7 @@ date: 2026-05-22T04:00:00
 description: "에러 처리 — 예외, assert, 계약, 불변 조건"
 series: "A Tour of C++"
 seriesOrder: 4
-tags: [C++, exceptions, error-handling, assert]
+tags: [cpp, exceptions, error-handling, assert]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

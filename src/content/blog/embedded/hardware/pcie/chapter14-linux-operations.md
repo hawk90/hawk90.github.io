@@ -5,7 +5,7 @@ date: 2026-05-19T09:14:00
 description: "PCIe 운영 — pciehp surprise·orderly hot-plug·AER recovery callback chain·DPC integration·ARI 256+ function·EEH."
 series: "PCIe Deep Dive"
 seriesOrder: 14
-tags: [pcie, hot-plug, aer-recovery, dpc, ari, linux-operations]
+tags: [pcie, hotplug, aer-recovery, dpc, ari, linux-operations]
 draft: false
 topics: ["embedded", "embedded/hardware"]
 ---

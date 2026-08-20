@@ -3,7 +3,7 @@ title: "실전 Makefile 예제 — C/C++ 프로젝트용 기본 골격"
 slug: "tools/build/gnu-make/chapter07-practical"
 date: 2026-06-03T09:07:00
 description: "기본 C/C++부터 라이브러리, 크로스 컴파일, 테스트 통합까지 — 실제 프로젝트에 그대로 쓰는 Makefile 패턴."
-tags: [make, build, Makefile, practical]
+tags: [make, build, practical]
 series: "GNU Make"
 seriesOrder: 7
 draft: false

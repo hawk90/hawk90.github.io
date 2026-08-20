@@ -2,7 +2,7 @@
 title: "항목 31: 기본 캡처 모드를 피하라"
 date: 2026-05-04T07:00:00
 description: "[&]·[=]가 만드는 댕글링 참조와 의외의 캡처 — 명시 캡처가 안전."
-tags: [C++, Lambda, Capture, modern-cpp]
+tags: [cpp, Lambda, Capture, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 31
 draft: true

@@ -2,7 +2,7 @@
 title: "Ch 5: The C++ memory model and operations on atomic types"
 date: 2026-05-06T05:00:00
 description: "memory order — relaxed / acquire / release / seq_cst. std::atomic, fence, happens-before."
-tags: [C++, Concurrency, memory-model, Atomic, memory-order]
+tags: [cpp, Concurrency, memory-model, Atomic, memory-order]
 series: "C++ Concurrency in Action"
 seriesOrder: 5
 draft: true

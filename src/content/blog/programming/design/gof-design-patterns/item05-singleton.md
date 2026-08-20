@@ -2,7 +2,7 @@
 title: "GoF 5: Singleton"
 date: 2026-05-01T05:00:00
 description: "유일한 인스턴스 보장 — 그러나 사용 시 신중히. 많은 경우 안티패턴."
-tags: [design-pattern, GoF, C++, C, Creational]
+tags: [design-pattern, GoF, cpp, C, Creational]
 series: "GoF Design Patterns"
 seriesOrder: 5
 draft: true

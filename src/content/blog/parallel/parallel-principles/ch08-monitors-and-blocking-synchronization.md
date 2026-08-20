@@ -4,7 +4,7 @@ date: 2026-05-06T08:00:00
 description: "Monitor 패턴, condition variable, semaphore, reader-writer lock. 스핀이 아닌 sleep 기반 동기화."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 8
-tags: [parallel, concurrency, book-review, amp, monitor, condition-variable, semaphore, C++, C]
+tags: [parallel, concurrency, book-review, amp, monitor, condition-variable, semaphore, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

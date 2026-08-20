@@ -5,7 +5,7 @@ date: 2026-04-16T09:03:00
 description: "DT overlay의 fragment, target, symbol, dtoverlay 명령, Raspberry Pi 적용 예까지 동적 device 활성화를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 78
-tags: [recipes, linux, devicetree, overlay]
+tags: [recipes, linux, device-tree, overlay]
 topics: ["embedded"]
 ---
 

@@ -4,7 +4,7 @@ date: 2026-05-22T05:00:00
 description: "클래스 — 생성자, 소멸자, 멤버 함수, 접근 제어"
 series: "A Tour of C++"
 seriesOrder: 5
-tags: [C++, classes, constructors, destructors]
+tags: [cpp, classes, constructors, destructors]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

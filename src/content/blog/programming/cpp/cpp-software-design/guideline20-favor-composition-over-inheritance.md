@@ -2,7 +2,7 @@
 title: "가이드라인 20: 상속보다 합성을 선호하라"
 date: 2026-05-02T20:00:00
 description: "Composition over Inheritance — GoF의 핵심 메시지이자 모던 C++의 정설. 상속은 강결합이고 composition은 유연하다."
-tags: [C++, software-design, Composition, Inheritance]
+tags: [cpp, software-design, Composition, Inheritance]
 series: "C++ Software Design"
 seriesOrder: 20
 draft: true

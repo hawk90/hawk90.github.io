@@ -2,7 +2,7 @@
 title: "항목 12: 객체의 모든 부분을 복사하라"
 date: 2026-05-04T12:00:00
 description: "복사 함수에서 멤버와 base 부분을 빠뜨리지 않는 법. 멤버 추가 시 컴파일러는 침묵한다."
-tags: [C++, effective-c++, copy-constructor]
+tags: [cpp, effective-c++, copy-constructor]
 series: "Effective C++"
 seriesOrder: 12
 draft: true

@@ -2,7 +2,7 @@
 title: "Ch 2: Working with Strings and String Views"
 date: 2026-05-05T02:00:00
 description: "std::string / std::string_view. raw string literal. format / println (C++20/23)."
-tags: [C++, String, string_view, format]
+tags: [cpp, String, string_view, format]
 series: "전문가를 위한 C++"
 seriesOrder: 2
 draft: true

@@ -2,7 +2,7 @@
 title: "항목 21: new보다 std::make_unique와 std::make_shared를 선호하라"
 date: 2026-05-04T21:00:00
 description: "make 함수가 안전·효율·가독성 모두 우월. 사용 못 하는 예외 케이스도."
-tags: [C++, smart-pointer, make_unique, make_shared, modern-cpp]
+tags: [cpp, smart-pointer, make_unique, make_shared, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 21
 draft: true

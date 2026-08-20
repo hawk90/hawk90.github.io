@@ -3,7 +3,7 @@ title: "Make 변수와 자동 변수 — $@·$<·$^·재귀 vs 단순 할당"
 slug: "tools/build/gnu-make/chapter03-variables"
 date: 2026-06-03T09:03:00
 description: "Make 변수의 두 가지 확장 방식, 자동 변수, 우선순위 — 같은 코드가 미묘하게 다르게 도는 9할의 원인."
-tags: [make, build, Makefile, variables]
+tags: [make, build, variables]
 series: "GNU Make"
 seriesOrder: 3
 draft: false

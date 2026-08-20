@@ -2,7 +2,7 @@
 title: "Ch 5: Functions"
 date: 2026-05-18T05:00:00
 description: "Inputs and Outputs / Short Functions / Overloading / Default Arguments / Trailing Return Type."
-tags: [Google, C++, Style-Guide, Function]
+tags: [Google, cpp, Style-Guide, Function]
 series: "Google C++ Style"
 seriesOrder: 5
 draft: true

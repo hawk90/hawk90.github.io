@@ -2,7 +2,7 @@
 title: "항목 9: 생성·소멸 중에는 가상 함수를 호출하지 말라"
 date: 2026-05-04T09:00:00
 description: "생성/소멸 중 vtable이 현재 클래스를 가리키는 이유 — derived 오버라이드는 호출되지 않는다."
-tags: [C++, effective-c++, Virtual, Constructor, Destructor]
+tags: [cpp, effective-c++, Virtual, Constructor, Destructor]
 series: "Effective C++"
 seriesOrder: 9
 draft: true

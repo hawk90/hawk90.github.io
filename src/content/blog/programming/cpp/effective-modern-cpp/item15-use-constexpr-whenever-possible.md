@@ -2,7 +2,7 @@
 title: "항목 15: 가능하다면 constexpr를 사용하라"
 date: 2026-05-04T15:00:00
 description: "컴파일 타임 평가 가능 — 상수 표현식 자리, 성능, 그리고 인터페이스 계약."
-tags: [C++, constexpr, modern-cpp, compile-time]
+tags: [cpp, constexpr, modern-cpp, compile-time]
 series: "Effective Modern C++"
 seriesOrder: 15
 draft: true

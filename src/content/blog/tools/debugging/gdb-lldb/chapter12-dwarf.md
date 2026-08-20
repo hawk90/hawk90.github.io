@@ -3,7 +3,7 @@ title: "DWARF 디버그 정보 — 디버거가 변수와 라인을 찾는 방�
 slug: "tools/debugging/gdb-lldb/chapter12-dwarf"
 date: 2026-05-24T09:12:00
 description: "DWARF 표준, DIE / abbrev / line / location, expression VM, CFI, split-DWARF."
-tags: [gdb, lldb, DWARF, ELF, DebugInfo]
+tags: [gdb, lldb, DWARF, ELF, debug-info]
 series: "GDB and LLDB"
 seriesOrder: 12
 draft: false

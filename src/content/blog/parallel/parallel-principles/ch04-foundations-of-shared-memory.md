@@ -4,7 +4,7 @@ date: 2026-05-06T04:00:00
 description: "공유 메모리의 기초 — 레지스터의 정확성 정의. Safe, Regular, Atomic. SRSW에서 MRMW까지."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 4
-tags: [parallel, concurrency, book-review, amp, register, atomic, safe, regular, C++, C]
+tags: [parallel, concurrency, book-review, amp, register, atomic, safe, regular, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

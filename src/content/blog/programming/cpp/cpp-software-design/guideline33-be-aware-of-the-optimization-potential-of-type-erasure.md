@@ -2,7 +2,7 @@
 title: "가이드라인 33: Type Erasure의 최적화 잠재력을 인식하라"
 date: 2026-05-02T09:00:00
 description: "Type Erasure는 SBO, 매뉴얼 vtable, 인라이닝으로 비용을 크게 낮출 수 있다. std::function의 실제 구현을 통해 그 패턴을 살펴본다."
-tags: [C++, software-design, type-erasure, Performance]
+tags: [cpp, software-design, type-erasure, Performance]
 series: "C++ Software Design"
 seriesOrder: 33
 draft: true

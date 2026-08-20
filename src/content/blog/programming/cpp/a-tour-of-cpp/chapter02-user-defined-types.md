@@ -4,7 +4,7 @@ date: 2026-05-22T02:00:00
 description: "사용자 정의 타입 — struct, class, enum, union"
 series: "A Tour of C++"
 seriesOrder: 2
-tags: [C++, struct, class, enum, union]
+tags: [cpp, struct, class, enum, union]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

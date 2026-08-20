@@ -2,7 +2,7 @@
 title: "GoF 12: Proxy"
 date: 2026-05-01T12:00:00
 description: "다른 객체에 대한 대리·접근 제어 — virtual·remote·protection·smart proxy."
-tags: [design-pattern, GoF, C++, C, Structural]
+tags: [design-pattern, GoF, cpp, C, Structural]
 series: "GoF Design Patterns"
 seriesOrder: 12
 draft: true

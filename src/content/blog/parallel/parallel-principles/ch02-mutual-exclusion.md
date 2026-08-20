@@ -4,7 +4,7 @@ date: 2026-05-06T02:00:00
 description: "상호 배제 문제와 해결책. Peterson, Filter, Bakery 알고리즘. 하한 증명과 불가능성 결과."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 2
-tags: [parallel, concurrency, book-review, amp, mutual-exclusion, peterson, bakery, C++, C]
+tags: [parallel, concurrency, book-review, amp, mutual-exclusion, peterson, bakery, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

@@ -5,7 +5,7 @@ date: 2026-05-20T09:02:00
 description: "ESP32-C3 코어의 ISA·특권 모델·인터럽트. 32-bit IMC, M-mode only, PMP 16 entries."
 series: "ESP32-C3 Mastering"
 seriesOrder: 2
-tags: [riscv, isa, pmp, interrupt, esp32-c3]
+tags: [risc-v, isa, pmp, interrupt, esp32-c3]
 draft: false
 topics: ["embedded", "embedded/riscv"]
 ---

@@ -2,70 +2,19 @@
   "publishedPosts": 726,
   "totalPosts": 3387,
   "pageMin": 2,
-  "publishedUrlKeys": 1465,
-  "renderedTagPages": 468,
-  "keysBelowPageThreshold": 997,
+  "publishedUrlKeys": 1456,
+  "renderedTagPages": 467,
+  "keysBelowPageThreshold": 989,
   "keysOnlyInDrafts": 3305,
-  "conceptSplits": 10,
+  "conceptSplits": 0,
+  "splitRegressions": 0,
+  "declaredDistinctPairs": 2,
+  "identicalPostSets": 0,
   "labelInconsistencies": 30,
   "tagsWithWhitespace": 0,
-  "splits": [
-    {
-      "concept": "cpp",
-      "keys": [
-        {
-          "key": "cpp",
-          "count": 219
-        },
-        {
-          "key": "c++",
-          "count": 9
-        }
-      ],
-      "total": 228
-    },
-    {
-      "concept": "baremetal",
-      "keys": [
-        {
-          "key": "bare-metal",
-          "count": 14
-        },
-        {
-          "key": "baremetal",
-          "count": 2
-        }
-      ],
-      "total": 16
-    },
-    {
-      "concept": "devicetree",
-      "keys": [
-        {
-          "key": "device-tree",
-          "count": 3
-        },
-        {
-          "key": "devicetree",
-          "count": 3
-        }
-      ],
-      "total": 6
-    },
-    {
-      "concept": "riscv",
-      "keys": [
-        {
-          "key": "riscv",
-          "count": 4
-        },
-        {
-          "key": "risc-v",
-          "count": 2
-        }
-      ],
-      "total": 6
-    },
+  "splits": [],
+  "regressions": [],
+  "distinctPairs": [
     {
       "concept": "asyncio",
       "keys": [
@@ -78,63 +27,8 @@
           "count": 1
         }
       ],
-      "total": 2
-    },
-    {
-      "concept": "debuginfo",
-      "keys": [
-        {
-          "key": "debug-info",
-          "count": 1
-        },
-        {
-          "key": "debuginfo",
-          "count": 1
-        }
-      ],
-      "total": 2
-    },
-    {
-      "concept": "hotplug",
-      "keys": [
-        {
-          "key": "hot-plug",
-          "count": 1
-        },
-        {
-          "key": "hotplug",
-          "count": 1
-        }
-      ],
-      "total": 2
-    },
-    {
-      "concept": "stacktrace",
-      "keys": [
-        {
-          "key": "stack-trace",
-          "count": 1
-        },
-        {
-          "key": "stacktrace",
-          "count": 1
-        }
-      ],
-      "total": 2
-    },
-    {
-      "concept": "tfm",
-      "keys": [
-        {
-          "key": "tf-m",
-          "count": 1
-        },
-        {
-          "key": "tfm",
-          "count": 1
-        }
-      ],
-      "total": 2
+      "total": 2,
+      "verdict": "distinct"
     },
     {
       "concept": "typeid",
@@ -148,9 +42,11 @@
           "count": 1
         }
       ],
-      "total": 2
+      "total": 2,
+      "verdict": "distinct"
     }
   ],
+  "identicalSets": [],
   "labels": [
     {
       "key": "debugging",

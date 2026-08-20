@@ -4,7 +4,7 @@ date: 2026-05-22T08:00:00
 description: "Concepts와 제네릭 프로그래밍 — C++20 Concepts, requires"
 series: "A Tour of C++"
 seriesOrder: 8
-tags: [C++, concepts, generic-programming, C++20]
+tags: [cpp, concepts, generic-programming, C++20]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

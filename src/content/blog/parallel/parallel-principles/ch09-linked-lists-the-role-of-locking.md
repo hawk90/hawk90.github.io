@@ -4,7 +4,7 @@ date: 2026-05-06T09:00:00
 description: "동시성 리스트의 진화 — 거대 락, 미세 락, optimistic, lazy, lock-free."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 9
-tags: [parallel, concurrency, book-review, amp, linked-list, lock-free, C++, C]
+tags: [parallel, concurrency, book-review, amp, linked-list, lock-free, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

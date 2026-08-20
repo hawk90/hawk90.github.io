@@ -2,7 +2,7 @@
 title: "Ch 9: Mastering Classes and Objects"
 date: 2026-05-05T09:00:00
 description: "클래스 고급 — 정적 멤버, mutable, nested class, rule of zero/five."
-tags: [C++, Class, rule-of-five]
+tags: [cpp, Class, rule-of-five]
 series: "전문가를 위한 C++"
 seriesOrder: 9
 draft: true

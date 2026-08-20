@@ -3,7 +3,7 @@ title: "GNU Make 소개와 첫 Makefile — 설치부터 첫 빌드까지"
 slug: "tools/build/gnu-make/chapter01-intro"
 date: 2026-06-03T09:01:00
 description: "GNU Make의 역할, 설치 방법, 첫 Makefile 작성과 실행."
-tags: [make, build, Makefile]
+tags: [make, build]
 series: "GNU Make"
 seriesOrder: 1
 draft: false

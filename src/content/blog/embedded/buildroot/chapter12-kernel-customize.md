@@ -5,7 +5,7 @@ date: 2026-05-19T09:12:00
 description: "Buildroot에서 mainline 커널을 vendor 트리·custom config·in-tree DTS로 customize하는 패턴."
 series: "Buildroot Practical"
 seriesOrder: 12
-tags: [embedded, buildroot, linux-kernel, defconfig, devicetree]
+tags: [embedded, buildroot, linux-kernel, defconfig, device-tree]
 draft: false
 topics: ["embedded"]
 ---

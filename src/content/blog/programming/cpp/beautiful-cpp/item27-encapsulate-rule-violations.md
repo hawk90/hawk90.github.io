@@ -2,7 +2,7 @@
 title: "항목 27: 규칙 위반을 캡슐화하라"
 date: 2026-05-05T03:00:00
 description: "규칙을 어겨야 할 때 — 위반을 한 곳에 가두고 안전한 인터페이스로 외부 노출. const_cast, reinterpret_cast, 저수준 메모리 조작."
-tags: [C++, Encapsulation]
+tags: [cpp, Encapsulation]
 series: "Beautiful C++"
 seriesOrder: 27
 draft: true

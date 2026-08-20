@@ -4,7 +4,7 @@ date: 2026-05-22T11:00:00
 description: "입출력 — iostream, fstream, std::format"
 series: "A Tour of C++"
 seriesOrder: 11
-tags: [C++, iostream, format, io]
+tags: [cpp, iostream, format, io]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

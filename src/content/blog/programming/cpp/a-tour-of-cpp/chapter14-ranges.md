@@ -4,7 +4,7 @@ date: 2026-05-22T14:00:00
 description: "Ranges — C++20 Ranges, views, 파이프라인"
 series: "A Tour of C++"
 seriesOrder: 14
-tags: [C++, ranges, views, C++20, pipeline]
+tags: [cpp, ranges, views, C++20, pipeline]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

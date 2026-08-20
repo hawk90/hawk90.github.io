@@ -3,7 +3,7 @@ title: "Valgrind Helgrind와 DRD — 멀티스레드 레이스 진단"
 slug: "tools/debugging/valgrind/chapter04-helgrind-drd"
 date: 2026-05-28T09:04:00
 description: "Valgrind의 두 동시성 분석 도구 비교 — Helgrind의 락 추적과 DRD의 vector clock, 언제 무엇을."
-tags: [Valgrind, Helgrind, DRD, Concurrency, DataRace, Debugging, C, C++]
+tags: [Valgrind, Helgrind, DRD, Concurrency, DataRace, Debugging, C, cpp]
 series: "Valgrind"
 seriesOrder: 4
 draft: false

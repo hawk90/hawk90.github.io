@@ -3,7 +3,7 @@ title: "ELF와 MAP 파일 분석 — 베어메탈 메모리 레이아웃 추적"
 slug: "tools/debugging/embedded/chapter05-elf-map"
 date: 2026-05-26T09:05:00
 description: "ELF의 LMA/VMA, 링커 스크립트, MAP 파일로 메모리 진단, startup 코드의 정체."
-tags: [elf, map, linker, embedded, baremetal]
+tags: [elf, map, linker, embedded, bare-metal]
 series: "Embedded Debugging"
 seriesOrder: 5
 draft: false

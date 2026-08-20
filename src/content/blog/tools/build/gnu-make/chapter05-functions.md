@@ -3,7 +3,7 @@ title: "Make 함수 분석 — wildcard·patsubst·foreach·shell"
 slug: "tools/build/gnu-make/chapter05-functions"
 date: 2026-06-03T09:05:00
 description: "내장 함수로 텍스트·파일·조건을 다루기 — wildcard / patsubst / filter / shell / foreach / call / eval."
-tags: [make, build, Makefile, functions]
+tags: [make, build, functions]
 series: "GNU Make"
 seriesOrder: 5
 draft: false

@@ -2,7 +2,7 @@
 title: "항목 4: 자명한 getter와 setter는 피하라"
 date: 2026-05-05T04:00:00
 description: "자명한 접근자는 캡슐화의 환상 — 진짜 불변식을 보호하는 인터페이스를 설계하라."
-tags: [C++, Encapsulation, class-design]
+tags: [cpp, Encapsulation, class-design]
 series: "Beautiful C++"
 seriesOrder: 4
 draft: true

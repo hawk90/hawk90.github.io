@@ -4,7 +4,7 @@ date: 2026-05-22T19:00:00
 description: "역사와 호환성 — C++ 진화, C 호환성, 마이그레이션"
 series: "A Tour of C++"
 seriesOrder: 19
-tags: [C++, history, compatibility, C, evolution]
+tags: [cpp, history, compatibility, C, evolution]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

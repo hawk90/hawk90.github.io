@@ -3,7 +3,7 @@ title: "ASan과 UBSan 실전 설정 — 컴파일 옵션과 런타임 동작"
 slug: "tools/debugging/sanitizers/chapter02-asan-ubsan"
 date: 2026-05-29T09:02:00
 description: "황금 조합 -fsanitize=address,undefined를 실제로 켜고 운영하는 자세한 방법 — 옵션, 환경 변수, suppression, 흔한 오탐."
-tags: [Sanitizer, ASan, UBSan, Debugging, C, C++]
+tags: [Sanitizer, ASan, UBSan, Debugging, C, cpp]
 series: "Sanitizers"
 seriesOrder: 2
 draft: false

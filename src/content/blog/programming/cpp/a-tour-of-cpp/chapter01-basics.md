@@ -4,7 +4,7 @@ date: 2026-05-22T01:00:00
 description: "C++ 기초 — 타입, 변수, 연산자, 제어문, 함수"
 series: "A Tour of C++"
 seriesOrder: 1
-tags: [C++, basics, types, variables, functions]
+tags: [cpp, basics, types, variables, functions]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

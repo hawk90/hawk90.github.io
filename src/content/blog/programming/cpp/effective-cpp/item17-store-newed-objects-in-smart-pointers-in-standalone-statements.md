@@ -2,7 +2,7 @@
 title: "항목 17: new로 만든 객체는 독립 문장에서 스마트 포인터에 담아라"
 date: 2026-05-04T17:00:00
 description: "함수 인자 평가 순서 함정과 자원 누수 방지 — C++17에서 완화됐지만 make_* 사용이 정답."
-tags: [C++, effective-c++, smart-pointer, exception-safety]
+tags: [cpp, effective-c++, smart-pointer, exception-safety]
 series: "Effective C++"
 seriesOrder: 17
 draft: true

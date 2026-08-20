@@ -4,7 +4,7 @@ date: 2026-05-22T16:00:00
 description: "유틸리티 — pair, tuple, variant, optional, any"
 series: "A Tour of C++"
 seriesOrder: 16
-tags: [C++, utilities, optional, variant, tuple]
+tags: [cpp, utilities, optional, variant, tuple]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

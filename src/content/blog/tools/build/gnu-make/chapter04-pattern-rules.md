@@ -3,7 +3,7 @@ title: "Make 패턴 규칙과 암시적 규칙 — % 매칭 동작"
 slug: "tools/build/gnu-make/chapter04-pattern-rules"
 date: 2026-06-03T09:04:00
 description: "% 한 글자로 100개의 규칙을 줄이는 패턴 규칙, Make 내장 암시적 규칙, 그리고 둘의 충돌·우선순위."
-tags: [make, build, Makefile, pattern]
+tags: [make, build, pattern]
 series: "GNU Make"
 seriesOrder: 4
 draft: false

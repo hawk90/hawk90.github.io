@@ -2,7 +2,7 @@
 title: "항목 34: 인터페이스 상속과 구현 상속을 구분하라"
 date: 2026-05-04T10:00:00
 description: "pure virtual / simple virtual / non-virtual — base가 derived에 무엇을 강제·제공하는지의 차이."
-tags: [C++, effective-c++, Inheritance, Virtual]
+tags: [cpp, effective-c++, Inheritance, Virtual]
 series: "Effective C++"
 seriesOrder: 34
 draft: true

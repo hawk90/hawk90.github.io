@@ -4,7 +4,7 @@ date: 2026-05-06T11:00:00
 description: "Lock-Free Treiber Stack. Elimination 기법으로 push/pop이 서로 상쇄되어 스택을 안 거치게."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 11
-tags: [parallel, concurrency, book-review, amp, stack, treiber, elimination, C++, C]
+tags: [parallel, concurrency, book-review, amp, stack, treiber, elimination, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

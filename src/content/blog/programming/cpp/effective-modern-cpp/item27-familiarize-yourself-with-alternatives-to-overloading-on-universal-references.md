@@ -2,7 +2,7 @@
 title: "항목 27: 보편 참조 오버로딩 대안에 익숙해져라"
 date: 2026-05-04T03:00:00
 description: "tag dispatch, enable_if, pass by value, concepts — 보편 참조 함정 회피 5가지 기법."
-tags: [C++, universal-reference, SFINAE, tag-dispatch, modern-cpp]
+tags: [cpp, universal-reference, SFINAE, tag-dispatch, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 27
 draft: true

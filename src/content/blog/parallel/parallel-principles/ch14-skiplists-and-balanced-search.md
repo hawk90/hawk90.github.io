@@ -4,7 +4,7 @@ date: 2026-05-06T14:00:00
 description: "Skiplist의 동시성 친화성. Lock-Free Skiplist. 균형 트리(BST)가 동시성에 부적합한 이유."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 14
-tags: [parallel, concurrency, book-review, amp, skiplist, lock-free, C++, C]
+tags: [parallel, concurrency, book-review, amp, skiplist, lock-free, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

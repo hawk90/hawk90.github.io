@@ -2,7 +2,7 @@
 title: "가이드라인 27: 정적 Mixin 클래스에 CRTP를 사용하라"
 date: 2026-05-02T03:00:00
 description: "Mixin 패턴은 능력을 추가하는 작은 클래스다. CRTP로 구현하면 컴파일 타임 다형성과 다중 상속을 0 비용으로 결합할 수 있다."
-tags: [C++, software-design, CRTP, Mixin]
+tags: [cpp, software-design, CRTP, Mixin]
 series: "C++ Software Design"
 seriesOrder: 27
 draft: true

@@ -5,7 +5,7 @@ date: 2026-04-24T09:09:00
 description: "ARMv8 PMU 6+ counter, RISC-V HPM. CYCLE·INST_RETIRED·CACHE·BRANCH. perf 활용."
 series: "Embedded Performance Engineering"
 seriesOrder: 18
-tags: [pmu, hardware-counter, arm, riscv, perf]
+tags: [pmu, hardware-counter, arm, risc-v, perf]
 draft: false
 topics: ["embedded"]
 ---

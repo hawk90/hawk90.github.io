@@ -2,7 +2,7 @@
 title: "가이드라인 26: 정적 타입 카테고리 도입에 CRTP를 사용하라"
 date: 2026-05-02T02:00:00
 description: "CRTP는 Curiously Recurring Template Pattern이다. 컴파일 타임 다형성, vtable 비용 0, mixin 패턴."
-tags: [C++, software-design, CRTP, Templates]
+tags: [cpp, software-design, CRTP, Templates]
 series: "C++ Software Design"
 seriesOrder: 26
 draft: true

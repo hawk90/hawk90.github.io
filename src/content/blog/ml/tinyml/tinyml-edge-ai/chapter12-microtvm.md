@@ -4,7 +4,7 @@ date: 2026-05-16T12:00:00
 description: "TFLM 대안 — TVM이 만든 MCU 컴파일러 경로."
 series: "TinyML·Edge AI"
 seriesOrder: 12
-tags: [microtvm, tvm, mcu, baremetal]
+tags: [microtvm, tvm, mcu, bare-metal]
 draft: true
 topics: ["ml", "ml/tinyml"]
 ---

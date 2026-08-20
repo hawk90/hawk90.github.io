@@ -4,7 +4,7 @@ date: 2026-05-06T12:00:00
 description: "Counting Network, Bitonic Sorting Network. Combining Tree로 카운터 경합 분산."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 12
-tags: [parallel, concurrency, book-review, amp, counting-network, combining-tree, C++, C]
+tags: [parallel, concurrency, book-review, amp, counting-network, combining-tree, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

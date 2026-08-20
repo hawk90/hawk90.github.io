@@ -4,7 +4,7 @@ date: 2026-05-06T05:00:00
 description: "Consensus 문제로 동기화 도구의 위계를 정의한다. read/write는 0, FAA/test-and-set는 2, CAS는 무한대."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 5
-tags: [parallel, concurrency, book-review, amp, consensus, cas, C++, C]
+tags: [parallel, concurrency, book-review, amp, consensus, cas, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

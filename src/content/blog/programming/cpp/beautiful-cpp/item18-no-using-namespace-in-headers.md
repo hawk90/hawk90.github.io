@@ -2,7 +2,7 @@
 title: "항목 18: 헤더 파일의 전역 범위에 using namespace를 사용하지 말라"
 date: 2026-05-05T18:00:00
 description: "헤더의 using namespace는 모든 사용자 파일을 오염시킴 — 이름 충돌, 오버로드 해석 변경, ODR 위반."
-tags: [C++, Headers, Namespaces]
+tags: [cpp, Headers, Namespaces]
 series: "Beautiful C++"
 seriesOrder: 18
 draft: true

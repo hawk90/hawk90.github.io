@@ -4,7 +4,7 @@ date: 2026-05-06T15:00:00
 description: "동시 우선순위 큐 — Heap 기반 / Skiplist 기반 / Linden-Jonsson Relaxed PQ."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 15
-tags: [parallel, concurrency, book-review, amp, priority-queue, heap, C++, C]
+tags: [parallel, concurrency, book-review, amp, priority-queue, heap, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

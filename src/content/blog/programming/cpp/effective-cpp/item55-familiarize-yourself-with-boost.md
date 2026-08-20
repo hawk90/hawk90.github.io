@@ -2,7 +2,7 @@
 title: "항목 55: Boost에 익숙해져라"
 date: 2026-05-04T07:00:00
 description: "Boost — 표준의 인큐베이터이자 production-quality 라이브러리 모음. 어느 영역에서 여전히 가치가 있는가."
-tags: [C++, effective-c++, Boost]
+tags: [cpp, effective-c++, Boost]
 series: "Effective C++"
 seriesOrder: 55
 draft: true

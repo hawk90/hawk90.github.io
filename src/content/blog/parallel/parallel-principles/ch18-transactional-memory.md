@@ -4,7 +4,7 @@ date: 2026-05-06T18:00:00
 description: "락 없는 atomic block의 약속. Software TM, Hardware TM (Intel TSX, IBM POWER). 합성성과 진행 보장."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 18
-tags: [parallel, concurrency, book-review, amp, transactional-memory, stm, htm, C++, C]
+tags: [parallel, concurrency, book-review, amp, transactional-memory, stm, htm, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

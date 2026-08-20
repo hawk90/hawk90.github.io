@@ -4,7 +4,7 @@ date: 2026-05-06T01:00:00
 description: "멀티프로세서 프로그래밍이 왜 필요한가. 공유 메모리와 메시지 전달. 병렬 프로그래밍의 어려움."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 1
-tags: [parallel, concurrency, book-review, amp, introduction, C++, C]
+tags: [parallel, concurrency, book-review, amp, introduction, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

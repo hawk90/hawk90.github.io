@@ -4,7 +4,7 @@ date: 2026-05-22T12:00:00
 description: "컨테이너 — vector, list, map, set, unordered_map"
 series: "A Tour of C++"
 seriesOrder: 12
-tags: [C++, containers, vector, map, STL]
+tags: [cpp, containers, vector, map, STL]
 draft: true
 type: book-review
 bookTitle: "A Tour of C++"

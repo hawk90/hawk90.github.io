@@ -5,7 +5,7 @@ date: 2026-05-20T09:01:00
 description: "Espressif가 Tensilica Xtensa에서 RISC-V로 전환한 첫 SoC. WiFi 4 + BLE 5.0, 32-bit RV32IMC."
 series: "ESP32-C3 Mastering"
 seriesOrder: 1
-tags: [esp32-c3, riscv, mcu, wifi, ble]
+tags: [esp32-c3, risc-v, mcu, wifi, ble]
 draft: false
 topics: ["embedded", "embedded/riscv"]
 ---

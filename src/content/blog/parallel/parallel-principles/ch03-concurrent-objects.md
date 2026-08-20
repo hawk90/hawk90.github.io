@@ -4,7 +4,7 @@ date: 2026-05-06T03:00:00
 description: "동시성 객체의 정확성 정의. Sequential Consistency와 Linearizability. 진행 조건: wait-free, lock-free."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 3
-tags: [parallel, concurrency, book-review, amp, linearizability, sequential-consistency, C++, C]
+tags: [parallel, concurrency, book-review, amp, linearizability, sequential-consistency, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

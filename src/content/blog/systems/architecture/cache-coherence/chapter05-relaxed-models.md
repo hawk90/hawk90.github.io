@@ -4,7 +4,7 @@ date: 2026-05-19T05:00:00
 description: "ARM·Power의 weak model — 거의 모든 reorder 허용."
 series: "A Primer on Memory Consistency and Cache Coherence"
 seriesOrder: 5
-tags: [relaxed-memory, arm, riscv, fence]
+tags: [relaxed-memory, arm, risc-v, fence]
 draft: true
 topics: ["systems", "systems/architecture"]
 ---

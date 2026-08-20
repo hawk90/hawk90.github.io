@@ -2,7 +2,7 @@
 title: "항목 22: 컴파일 타임에 계산할 수 있는 값은 constexpr를 사용하라"
 date: 2026-05-05T22:00:00
 description: "constexpr — 런타임 비용 0, 상수 표현식, 타입 안전성. const vs constexpr vs consteval vs constinit."
-tags: [C++, constexpr, consteval]
+tags: [cpp, constexpr, consteval]
 series: "Beautiful C++"
 seriesOrder: 22
 draft: true

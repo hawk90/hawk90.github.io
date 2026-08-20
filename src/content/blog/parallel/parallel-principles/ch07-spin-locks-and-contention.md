@@ -4,7 +4,7 @@ date: 2026-05-06T07:00:00
 description: "스핀 락의 설계 — TAS, TTAS, exponential backoff, queue locks (Anderson, CLH, MCS)."
 series: "The Art of Multiprocessor Programming"
 seriesOrder: 7
-tags: [parallel, concurrency, book-review, amp, spinlock, mcs, clh, cache, C++, C]
+tags: [parallel, concurrency, book-review, amp, spinlock, mcs, clh, cache, cpp, C]
 type: book-review
 bookTitle: "The Art of Multiprocessor Programming"
 bookAuthor: "Maurice Herlihy, Nir Shavit"

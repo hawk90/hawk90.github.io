@@ -2,7 +2,7 @@
 title: "항목 18: 독점 소유 자원 관리에는 std::unique_ptr를 사용하라"
 date: 2026-05-04T18:00:00
 description: "독점 소유의 표준 — 일반 포인터 크기, 자동 해제, 팩토리 함수 반환의 default."
-tags: [C++, smart-pointer, unique_ptr, RAII, modern-cpp]
+tags: [cpp, smart-pointer, unique_ptr, RAII, modern-cpp]
 series: "Effective Modern C++"
 seriesOrder: 18
 draft: true
