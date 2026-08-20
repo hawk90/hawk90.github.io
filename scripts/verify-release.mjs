@@ -34,6 +34,7 @@ const checks = [
   // Reads dist/, so it must follow the build: a link is only broken once you
   // know which pages were actually generated.
   ['rendered link resolution', ['npm', 'run', 'audit:rendered-links']],
+  ['sitemap vs. robots', ['npm', 'run', 'audit:sitemap']],
   ['static admin boundary', ['npm', 'run', 'gate:security-admin', '--', '--artifact', 'dist']],
   ['production secret scan', ['npm', 'run', 'gate:secrets']],
 ];

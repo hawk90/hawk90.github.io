@@ -11,7 +11,14 @@ async function fetchUser(id: number): Promise<User> {
 }`;
 ---
 
-<BaseLayout title="Components" description="Every block this theme renders, on one page.">
+{/*
+  noindex: this is a theme reference for working on the site, not something a
+  reader searched for. It was built, submitted in the sitemap, and linked from
+  nowhere — reachable only by typing the URL or arriving from search results it
+  should never have been in. Keeping it unlinked is right; asking Google to
+  index it was not.
+*/}
+<BaseLayout title="Components" description="Every block this theme renders, on one page." noIndex>
   <article class="py-16 lg:py-24">
     <div class="container">
       <header class="container-narrow measure-left mb-12">

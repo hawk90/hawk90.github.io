@@ -1,4 +1,6 @@
 // @ts-check
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { defineConfig } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
 import tailwindcss from '@tailwindcss/vite';
@@ -15,6 +17,57 @@ import rehypeTableScroll from './src/lib/rehype-table-scroll.mjs';
 
 // This site is intentionally static and PAT-only. OAuth needs a separately
 // deployed server boundary; do not add OAuth callback routes to this project.
+
+/**
+ * The `/blog/<prefix>/` URLs that are noindex redirect shims to a series page.
+ *
+ * These are the prefixes inside post URLs — `/blog/embedded/modern-recipes/` is
+ * what a reader gets by trimming a post URL — and the route builds a shim at
+ * each so it resolves instead of 404ing. Being noindex, they must stay out of
+ * the sitemap, and the filter below cannot recognise them by shape: they look
+ * exactly like category URLs.
+ *
+ * Derived here by reading frontmatter directly, because astro:content is not
+ * available in the config. `audit-sitemap-robots.mjs` fails the release if this
+ * ever disagrees with what the pages actually declare, so the duplicated rule
+ * cannot drift silently.
+ */
+function seriesPrefixShimUrls() {
+  const root = 'src/content/blog';
+  const seriesByPrefix = new Map();
+  /** @param {string} dir */
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const file = join(dir, entry.name);
+      if (entry.isDirectory()) { walk(file); continue; }
+      if (!entry.name.endsWith('.md')) continue;
+      const frontmatter = readFileSync(file, 'utf8').match(/^---\s*\n([\s\S]*?)\n---/)?.[1];
+      if (!frontmatter || /^draft:\s*true\s*$/m.test(frontmatter)) continue;
+      const series = frontmatter.match(/^series:\s*(.+)$/m)?.[1]?.trim().replace(/^['"]|['"]$/g, '');
+      if (!series) continue;
+      const id = frontmatter.match(/^slug:\s*(.+)$/m)?.[1]?.trim().replace(/^['"]|['"]$/g, '')
+        ?? relative(root, file).replace(/\.md$/, '');
+      const segments = id.split('/');
+      for (let i = 1; i < segments.length; i++) {
+        const prefix = segments.slice(0, i).join('/');
+        if (!seriesByPrefix.has(prefix)) seriesByPrefix.set(prefix, new Set());
+        seriesByPrefix.get(prefix).add(series);
+      }
+    }
+  };
+  walk(root);
+  // A prefix that is also a category id addresses a real page, and one holding
+  // two series has no unambiguous destination — neither gets a shim.
+  const categoryIds = new Set(
+    [...readFileSync('src/consts/categories.ts', 'utf8').matchAll(/id:\s*'([^']+)'/g)].map((m) => m[1]),
+  );
+  return new Set(
+    [...seriesByPrefix.entries()]
+      .filter(([prefix, series]) => series.size === 1 && !categoryIds.has(prefix))
+      .map(([prefix]) => `/blog/${prefix}/`),
+  );
+}
+const shimUrls = seriesPrefixShimUrls();
 
 // https://astro.build/config
 export default defineConfig({
@@ -70,13 +123,16 @@ export default defineConfig({
     // Admin pages are not public. Author archives are noindex while there is a
     // single author, because they re-list exactly what /blog already lists;
     // keep the sitemap and the robots directive saying the same thing.
-    // /random and the retired /topics/ hub URLs are noindex redirect shims;
-    // listing them would contradict their own robots directive.
+    // /random, the retired /topics/ hub URLs, and the series URL-prefix shims
+    // are all noindex redirects; listing them would contradict their own robots
+    // directive.
     filter: (page) =>
       !page.includes('/admin') &&
       !page.includes('/authors/') &&
       !page.includes('/topics/') &&
-      !page.endsWith('/random/'),
+      !page.endsWith('/random/') &&
+      !page.endsWith('/components/') &&
+      !shimUrls.has(new URL(page).pathname),
   }),
   ],
 

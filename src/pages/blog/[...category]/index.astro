@@ -3,8 +3,10 @@ import BaseLayout from '../../../layouts/BaseLayout.astro';
 import PostRow from '../../../components/blog/PostRow.astro';
 import BlogSidebar from '../../../components/blog/BlogSidebar.astro';
 import Breadcrumb from '../../../components/common/Breadcrumb.astro';
-import { CATEGORIES } from '../../../consts/categories';
-import { getPublishedPosts, filterByCategory } from '../../../lib/posts';
+import { CATEGORIES, getCategoryById } from '../../../consts/categories';
+import { getPublishedPosts, filterByCategory, getSeriesUrlPrefixes } from '../../../lib/posts';
+import { getSeriesUrl } from '../../../lib/utils';
+import { SITE_CONFIG } from '../../../consts/config';
 
 export async function getStaticPaths() {
   const allPosts = await getPublishedPosts();
@@ -17,25 +19,41 @@ export async function getStaticPaths() {
   // Gating here rather than pruning `categories.ts` keeps the plan intact: the
   // drafts under those paths are real, and the page comes back on its own the
   // moment one of them publishes.
-  return CATEGORIES.filter((cat) => filterByCategory(allPosts, cat.id).length > 0).map((cat) => ({
-    params: { category: cat.id },
-    props: { categoryInfo: cat, allPosts },
-  }));
+  const categoryPages = CATEGORIES
+    .filter((cat) => filterByCategory(allPosts, cat.id).length > 0)
+    .map((cat) => ({
+      params: { category: cat.id },
+      props: { categoryInfo: cat, allPosts, destination: null as string | null },
+    }));
+
+  // The other thing living in this URL space: the prefixes inside post URLs
+  // that address a series rather than a category. They belong on this route
+  // because they occupy the same `/blog/<path>/` slot, and building them here
+  // keeps one definition of what `/blog/<path>/` can mean.
+  const addressable = new Set(CATEGORIES.map((cat) => cat.id));
+  const seriesPages = getSeriesUrlPrefixes(allPosts, (prefix) => addressable.has(prefix)).map(
+    ({ prefix, series }) => ({
+      params: { category: prefix },
+      props: { categoryInfo: null, allPosts, destination: getSeriesUrl(series) },
+    }),
+  );
+
+  return [...categoryPages, ...seriesPages];
 }
 
 const { category } = Astro.params;
-const { categoryInfo, allPosts } = Astro.props;
+const { categoryInfo, allPosts, destination } = Astro.props;
+const redirectCanonical = destination ? new URL(destination, SITE_CONFIG.url).toString() : null;
 
 // Same leaf name under a different parent means an ambiguous title; qualify
 // only those, so unique names keep their short form.
-const sameName = CATEGORIES.filter((entry) => entry.name === categoryInfo.name);
-const parentName = categoryInfo.parent
-  ? CATEGORIES.find((entry) => entry.id === categoryInfo.parent)?.name
-  : undefined;
-const qualifiedName = sameName.length > 1 && parentName
-  ? `${categoryInfo.name} (${parentName})`
-  : categoryInfo.name;
-const categoryPosts = filterByCategory(allPosts, category!);
+const sameName = categoryInfo ? CATEGORIES.filter((entry) => entry.name === categoryInfo.name) : [];
+const parentName = categoryInfo?.parent ? getCategoryById(categoryInfo.parent)?.name : undefined;
+const qualifiedName = sameName.length > 1 && parentName && categoryInfo
+  ? `${categoryInfo!.name} (${parentName})`
+  : categoryInfo?.name ?? '';
+// Empty on a redirect entry, which leaves the listing below a no-op.
+const categoryPosts = categoryInfo ? filterByCategory(allPosts, category!) : [];
 
 type Post = (typeof categoryPosts)[number];
 
@@ -83,27 +101,51 @@ function formatChapter(key: string): string {
 ---
 
 {/*
-  Two category names repeat under different parents — Systems lives at both
-  `systems` and `ml/systems`, Compilers at `programming/compilers` and
-  `ml/compilers`. Unqualified, each pair renders the same title, so a crawler
-  sees two pages claiming to be the same thing. The parent is what tells them
-  apart, so it goes in the title whenever the name is not unique.
+  A series URL prefix, not a category. GitHub Pages has no server-side
+  redirects, so this is a meta-refresh shim of the same shape as
+  /topics/[topic]. It carries a canonical to the series page and noindex, so the
+  prefix resolves for a reader who trims the URL without competing with the hub
+  it points at.
 */}
-<BaseLayout title={`${qualifiedName} - Blog`} description={categoryInfo.description}>
+{destination ? (
+  <html lang="ko">
+    <head>
+      <meta charset="utf-8" />
+      <title>시리즈 페이지로 이동합니다</title>
+      <meta name="robots" content="noindex" />
+      <link rel="canonical" href={redirectCanonical} />
+      <meta http-equiv="refresh" content={`0; url=${destination}`} />
+    </head>
+    <body>
+      <p>
+        이 주소는 시리즈 전체를 가리킵니다 —
+        <a href={destination}>이어서 보기</a>.
+      </p>
+    </body>
+  </html>
+) : (
+  /*
+    Two category names repeat under different parents — Systems lives at both
+    `systems` and `ml/systems`, Compilers at `programming/compilers` and
+    `ml/compilers`. Unqualified, each pair renders the same title, so a crawler
+    sees two pages claiming to be the same thing. The parent is what tells them
+    apart, so it goes in the title whenever the name is not unique.
+  */
+<BaseLayout title={`${qualifiedName} - Blog`} description={categoryInfo!.description}>
   <section class="py-16 lg:py-24">
     <div class="container">
       <div class="lg:flex lg:gap-12">
         <!-- Main Content -->
         <div class="flex-1 min-w-0">
-          <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: categoryInfo.name }]} />
+          <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: categoryInfo!.name }]} />
 
           <div class="mb-8">
             <h1 class="text-4xl font-bold mb-4 flex items-center gap-3">
-              <span>{categoryInfo.icon}</span>
-              {categoryInfo.name}
+              <span>{categoryInfo!.icon}</span>
+              {categoryInfo!.name}
             </h1>
             <p class="text-lg text-[var(--color-text-secondary)]">
-              {categoryInfo.description}
+              {categoryInfo!.description}
             </p>
           </div>
 
@@ -142,3 +184,4 @@ function formatChapter(key: string): string {
     </div>
   </section>
 </BaseLayout>
+)}
