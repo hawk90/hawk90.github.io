@@ -19,13 +19,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-01. Category Explosion”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Reassess category explosion when the drafted content under systems/, ml/, and parallel/ publishes and those branches populate.",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/blog/[...category]/index.astro",
+            "src/components/blog/BlogSidebar.astro",
+            "src/consts/categories.ts"
+          ],
+          "verification": "npm run build && npm run audit:sitemap && npm run audit:rendered-links",
+          "result": "54 of 65 registry entries had no published post and were still built as pages, linked from the sidebar of every page and submitted in the sitemap. Page generation and the sidebar tree are now gated on having published content: category pages 65 -> 11, sidebar category links 65 -> 11, empty pages 54 -> 0. The registry keeps all 65 entries, so the drafted plan is intact and a category returns on its own when a post under it publishes.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "The gate is structural — a category with no posts cannot produce a page — so this cannot regress silently. What is still unmeasured is whether 14 top-level categories is the right shape once the drafts publish; that is a taxonomy decision, not a defect."
     },
     {
       "id": "AP-I-02",
@@ -38,13 +54,28 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-02. Category Overlap”?",
-      "scope": null,
+      "reviewQuestion": "Do any two categories with the same or overlapping name both hold published posts?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/consts/categories.ts",
+            "src/pages/blog/[...category]/index.astro"
+          ],
+          "verification": "npm run build && npm run audit:reading",
+          "result": "Two category names repeat under different parents (Systems, Compilers) and seven leaf names collide. The page title already qualifies the ambiguous ones with their parent, and in every overlapping pair at most one side holds published content, so no reader can currently face two populated menus with the same name.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Re-open the moment both members of any overlapping pair hold published posts. systems/wireless vs embedded/wireless and systems/riscv vs embedded/riscv are the likeliest, since drafts exist on both sides."
     },
     {
       "id": "AP-I-03",
@@ -57,13 +88,30 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-03. Category as Storage Location”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does any navigation surface still derive a post's classification from its id rather than from `topics`?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/posts.ts",
+            "src/consts/categories.ts",
+            "src/components/blog/BlogSidebar.astro",
+            "src/pages/blog/[...slug].astro"
+          ],
+          "verification": "npm run build && npm run audit:classification && npm run audit:rendered-links",
+          "result": "Category membership, the sidebar tree, and breadcrumbs were all string prefixes of the post id, which is the frozen URL — so the folder, the URL, and the taxonomy were one fact and a post could not be reclassified without moving the file. All three now read the declared `topics`. Measured before switching: path-derived and topics-derived buckets agreed on 726 of 726 published posts, so nothing visible changed; what changed is that they can now disagree.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Post URLs are still frozen snapshots of the original folder layout, so moving a file keeps its URL but does not yet change its classification automatically — that is now a frontmatter edit, which is the intended separation rather than a leftover coupling."
     },
     {
       "id": "AP-I-04",
@@ -76,13 +124,30 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-04. Category as Identity”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Are there posts that belong under more than one branch, and do their `topics` say so?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/content/normalize.ts",
+            "src/lib/posts.ts",
+            "src/components/blog/BlogSidebar.astro"
+          ],
+          "verification": "npm run build && npm run audit:classification",
+          "result": "`topics` was required on all 3387 posts and validated against the topic registry, and no page read it — ContentDocument.topicIds had zero consumers, and category membership came from the path prefix instead. It is now the field that decides category membership, sidebar buckets, and breadcrumbs for all 726 published posts.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Every published post still declares only its own folder and that folder's parent as topics, so the multi-classification the field allows is available but unused. Nothing is wrong; the capability is simply not yet exercised."
     },
     {
       "id": "AP-I-05",
@@ -95,12 +160,28 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-05. Empty Category”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does any built category page render an empty post list?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
+      "evidence": [
+        {
+          "files": [
+            "src/pages/blog/[...category]/index.astro",
+            "src/components/blog/BlogSidebar.astro",
+            "src/components/blog/CategoryTreeNode.astro"
+          ],
+          "verification": "npm run build && npm run audit:sitemap",
+          "result": "Fixed with AP-I-01: the 54 pages whose only content was \"No posts in this category yet.\" are no longer built, so they are out of the sitemap and off the sidebar. The count badge that was suppressed at zero — making an empty branch look like an unexpanded one — no longer has a zero case to hide.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
       "residualRisk": null
     },
     {
@@ -114,13 +195,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-06. Tag Explosion”?",
-      "scope": null,
+      "reviewQuestion": "Has the tag page population shifted toward the minimum threshold since the last measurement?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/posts.ts",
+            "scripts/normalize-tag-shape.mjs",
+            "lefthook.yml"
+          ],
+          "verification": "npm run audit:tags && npm run audit:rendered-links",
+          "result": "997 of 1456 tag URL keys are carried by exactly one published post, but the page threshold means none of them renders: no page, no link, no 404. getRoutableTagKeys derives the link set from the same function the route uses, so the two cannot drift, and the pre-commit normalizer snaps new spellings onto existing corpus tags.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Nothing gates tag creation, and 237 of 467 tag pages hold exactly two posts. Re-open if two-post pages exceed 60% of all tag pages, or if tag keys per published post rise above ~2.5 (currently 2.0)."
     },
     {
       "id": "AP-I-07",
@@ -133,13 +230,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-07. Synonym Tag Drift”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does audit:tags report any concept split, and is any of them a regression against the dictionary?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "data/tag-aliases.yaml",
+            "scripts/merge-tag-aliases.mjs",
+            "scripts/audit-tag-vocabulary.mjs"
+          ],
+          "verification": "npm run audit:tags",
+          "result": "Ten concepts each reached readers through two tag pages, worst /tags/cpp (219 posts) against /tags/c++ (9). A canonical dictionary now states the merge decisions and a preview-first script applies them, across drafts as well as published posts — 281 drafts carried `C++`, so a published-only fix would have let the split return. Splits 10 -> 0. The audit reads the same dictionary, so a folded spelling coming back is reported as a regression rather than as untouched backlog.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "audit:tags is report-only and not in verify:release, so a new split cannot fail a build — it is visible in reports/taxonomy/tags.md but not blocking. The dry run also showed the dictionary is where judgement lives: two proposed merges were wrong and were recorded as `distinct:` instead."
     },
     {
       "id": "AP-I-08",
@@ -152,13 +265,28 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-08. Version-as-Tag Abuse”?",
-      "scope": null,
+      "reviewQuestion": "Has any product other than the C++ standard accumulated a ladder of version tags?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/content.config.ts",
+            "src/lib/posts.ts"
+          ],
+          "verification": "npm run audit:tags",
+          "result": "Version-shaped tags are 3 of 467 generated pages (0.64%): cpp17, cpp20, cpp23. The one multi-version family is the C++ standard, where the version is the topic rather than an environment detail, and the singletons fall below the page threshold. There is no product version ladder of the kind the pattern describes.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Re-open if any single product accumulates three or more version-numbered tag pages, or if version-shaped keys exceed 2% of generated tag pages."
     },
     {
       "id": "AP-I-09",
@@ -171,13 +299,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "routed",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-09. Tag as Category”?",
-      "scope": null,
+      "reviewQuestion": "Once the learning-path scope is decided, does a cross-series entry point exist for the C++ corpus?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/consts/series.ts",
+            "src/consts/learning-paths.ts",
+            "src/pages/tags/[tag]/[...page].astro"
+          ],
+          "verification": "npm run audit:paths && npm run audit:tags",
+          "result": "Four of the five field-sized tags reach a described hub — a series lens or a populated category page. `cpp` does not: 219 published posts across 5 series and 3 top-level categories, whose only cross-series view is an undescribed paginated tag list. The category that would name that field holds no published posts, because the C++ content is filed under embedded/embedded-cpp, programming/code-review and tools/build.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Routed to the pending learning-path decision rather than fixed here. Building a cpp hub is the same work as placing the unplaced series, and doing it twice would recreate the second curation axis that was deliberately retired. Blocked on a publishing-policy decision that is the site owner's, not a technical one."
     },
     {
       "id": "AP-I-10",
@@ -190,13 +334,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-10. Tag Cloud Navigation”?",
-      "scope": null,
+      "reviewQuestion": "Has tag navigation been promoted to a primary surface?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/components/blog/BlogSidebar.astro",
+            "src/components/blog/TagBadge.astro",
+            "src/consts/config.ts"
+          ],
+          "verification": "npm run build && npm run audit:reading",
+          "result": "There is no tag cloud: no /tags index page, no frequency-scaled sizing, and at most 12 uniform chips in a sidebar block that sits below the category tree. Tag navigation is already the auxiliary role the pattern prescribes.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "The 12 chips are picked by raw frequency, so they do carry a \"most written means most important\" signal, at a scale too small to drive navigation. Re-open if a /tags index is added, if TagBadge gains frequency-dependent styling, or if maxTagsInSidebar rises above ~30."
     },
     {
       "id": "AP-I-11",
@@ -209,13 +369,30 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-11. Series as Folder”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does a series hub state what a reader needs first and what to read next?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/consts/series.ts",
+            "src/pages/series/[series].astro",
+            "scripts/audit-series-structure.mjs",
+            "scripts/verify-release.mjs"
+          ],
+          "verification": "npm run audit:series-structure",
+          "result": "Series identity is a registry entry rather than a folder: 178 series, 178 registered lenses, no folder holding two series, 0 findings, and the check is a release gate so it cannot regress silently. The hub renders the lens, groups chapters, and carries a per-post description.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Two of the elements the pattern prescribes are absent from the hub: prerequisites, and where to go after finishing. The lens is one sentence of positioning, not a stated learning objective, and neither gap is machine-detectable today."
     },
     {
       "id": "AP-I-12",
@@ -228,13 +405,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-12. Series Order Fragility”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Is the ordering audit part of a gate yet, or still manual?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-series-integrity.py",
+            "scripts/audit-series-structure.mjs",
+            "src/pages/blog/[...slug].astro"
+          ],
+          "verification": "npm run audit:series && npm run audit:series-structure",
+          "result": "Independently recounted rather than taken from the audit: all 28 published series are contiguous 1..N with no duplicate and no gap across 726 posts, and every published post carries both `series` and `seriesOrder`. The post header prints seriesOrder over a computed count, so a break would surface directly to readers as a wrong fraction.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "audit:series is manual-only — it is not in lefthook, not in CI, and not in verify:release, which runs audit:series-structure instead, and that script assumes ordering is covered elsewhere. A duplicate or gap introduced in a commit would reach dist. Adding it to verify:release is a one-line follow-up."
     },
     {
       "id": "AP-I-13",
@@ -247,13 +440,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-13. Series Without Entry Point”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does every series post still render position, previous, next, and a series link?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/blog/[...slug].astro",
+            "src/components/blog/SeriesNav.astro",
+            "src/components/common/Breadcrumb.astro"
+          ],
+          "verification": "npm run build && npm run audit:reading && npm run audit:rendered-links",
+          "result": "All four elements the pattern asks for are present above the fold and repeated at the foot: position in series, previous, next, and a link to the whole series, plus a breadcrumb restoring the path upward. An article is where search and external links land, and it was the one page type with no way back up.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "The position indicator prints frontmatter over a computed length, so it inherits AP-I-12's ungated ordering. The sticky sidebar is desktop-only, but SeriesNav is unconditional, so mobile keeps the full ordered list."
     },
     {
       "id": "AP-I-14",
@@ -266,13 +475,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-14. Series Without Exit”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Does the last chapter of every published series still link outside its own series in the rendered page?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "scripts/audit-series-structure.mjs",
+            "src/pages/blog/[...slug].astro",
+            "src/components/blog/RelatedPosts.astro"
+          ],
+          "verification": "npm run audit:series-structure && npm run audit:connectivity",
+          "result": "Checked on the built site rather than in source, because the source gate only requires any /blog/ link and a link back into the same series would satisfy it: for each of the 28 published series, the highest-order chapter's main column was stripped of header, footer and aside, and its own series URLs subtracted. Last chapters with no link outside their own series: 0.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "The rendered result is stronger than the gate only because RelatedPosts reserves a cross-series slot. If RELATED_POSTS_CONFIG were disabled the gate would still pass while real exits disappeared. Only 8 of 28 series sit in a learning path, so the exits are algorithmic rather than curated."
     },
     {
       "id": "AP-I-15",
@@ -285,13 +510,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-15. Series and Topic Duplication”?",
-      "scope": null,
+      "reviewQuestion": "Has the number of category pages that exactly duplicate a series page grown?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/topics/[topic].astro",
+            "src/pages/blog/[...category]/index.astro",
+            "src/pages/series/[series].astro"
+          ],
+          "verification": "npm run audit:routes && npm run audit:rendered-links",
+          "result": "The worst instance was retired with its reasoning recorded in code: the Topic hub was a second cross-series axis beside learning paths and its one published page duplicated a path section. What remains is measurable — 4 category pages are exact set-duplicates of a series page and 11 tag pages match one at 0.9 or above. The series page is strictly the richer of each pair, so the duplicate is additive noise rather than a wrong answer. The same principle now governs new URLs: the 28 series URL prefixes redirect to the series hub instead of rendering a second listing.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "embedded/rtos, embedded/riscv, embedded/protocols and tools/emulation are single-series folders promoted to categories, which is the same registry-versus-content mismatch as AP-I-03. Re-open if a fifth appears, or if any duplicated tag page gains its own description and ordering."
     },
     {
       "id": "AP-I-16",
@@ -304,13 +545,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-16. Archive-First Navigation”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Has chronology been promoted above topic navigation anywhere?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/archive.astro",
+            "src/consts/config.ts",
+            "src/pages/index.astro"
+          ],
+          "verification": "npm run build && npm run audit:reading",
+          "result": "Chronological navigation exists exactly once, in the footer of every page, while topic and path navigation own the header and the homepage. There are no year or month index routes, and the homepage leads with learning paths rather than a date-ordered list.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "dist/archive/index.html inlines all 726 posts at roughly 535 KB. That is the unpaginated-index payload concern already recorded for the category indexes, not an information-architecture one. Re-open if /archive enters the header nav or per-year routes appear."
     },
     {
       "id": "AP-I-17",
@@ -323,13 +580,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-17. Pagination as Discovery”?",
-      "scope": null,
+      "reviewQuestion": "Does a mobile reader on a /blog list page have any route to an older post other than paging?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/blog/[...page].astro",
+            "src/components/blog/BlogSidebar.astro",
+            "src/pages/archive.astro"
+          ],
+          "verification": "npm run build && npm run audit:reading && npm run audit:rendered-links",
+          "result": "Pagination is one route among five on desktop: the same page carries a 65-link category tree, 28 series links, 12 tag links, header search, /paths, and a footer /archive holding the complete index. Nobody has to page to page 37 to reach an old post. Each page also carries its own title and description, so the 73 pages are not identical to a crawler.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "The block carrying all the alternatives is `hidden lg:block`. Measured on a deep list page with the aside removed: 0 series links and 17 blog links, all of them the 10 post cards plus pagination targets. Below the lg breakpoint a /blog list page degrades to the pattern, leaving only header search, /paths, and the footer archive. Re-open as a mobile-navigation task rather than a pagination one."
     },
     {
       "id": "AP-I-18",
@@ -342,13 +615,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-18. Infinite Scroll Archive”?",
-      "scope": null,
+      "reviewQuestion": "Has any list surface gained client-side appending?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/components/blog/Pagination.astro",
+            "src/pages/blog/[...page].astro",
+            "src/pages/tags/[tag]/[...page].astro"
+          ],
+          "verification": "npm run build && npm run audit:rendered-links",
+          "result": "Not applicable: there is no infinite scroll anywhere in the codebase. Every match for infinite/IntersectionObserver/load-more in src/ is prose inside post markdown. Every list page is a pre-rendered static route with its own URL, so back navigation is an ordinary document load and a bookmarked page identifies itself.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "Re-open if any list surface gains client-side appending without a URL per page — detectable by grepping src/pages, src/components and src/lib for IntersectionObserver or a load-more control."
     },
     {
       "id": "AP-I-19",
@@ -361,13 +650,30 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
-      "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-19. Latest-Only Homepage”?",
-      "scope": null,
+      "disposition": "remediated",
+      "nextAction": "verify",
+      "reviewQuestion": "Are the three homepage guide ids still the right entry points, and when were they last reviewed?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/pages/index.astro",
+            "src/lib/content/curation.ts",
+            "src/consts/config.ts",
+            "src/pages/recently-updated.astro"
+          ],
+          "verification": "npm run build && npm run audit:sitemap",
+          "result": "The homepage leads with learning paths and hand-picked guides and gives chronology three cards in third position, which is the inversion the pattern asks for, and a build-time assertion fails if a curated id stops resolving. The one tier that was missing was already built and unreachable: /recently-updated had zero inbound links anywhere in dist while being submitted for indexing. It is now in the footer beside /archive — inbound links 0 -> 1421.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "The curated tier is narrow: 3 guide ids and 4 paths covering 8 of 28 published series, so 69% of the corpus is reachable from the homepage only through /blog. HOMEPAGE_GUIDE_IDS has no review date, and the build assertion checks that the picks resolve, not that they are still the right picks."
     },
     {
       "id": "AP-I-20",
@@ -380,13 +686,29 @@
           "46954a3f-1f11-41f5-a399-16d345f231b4"
         ]
       },
-      "disposition": "unassessed",
+      "disposition": "accepted",
       "nextAction": "manual-review",
-      "reviewQuestion": "Which repository finding and verification would justify a disposition for “I-20. Popularity-Only Homepage”?",
-      "scope": null,
+      "reviewQuestion": "Has any ranking surface started reading a popularity or engagement metric?",
+      "scope": "Information architecture surfaces only: the category registry and the navigation built from it, tag vocabulary and tag pages, series hubs and in-series navigation, the homepage tiers, and the /blog URL space. Article bodies and published post URLs are out of scope.",
       "dependsOn": [],
-      "evidence": [],
-      "residualRisk": null
+      "evidence": [
+        {
+          "files": [
+            "src/lib/content/curation.ts",
+            "src/consts/homepage-guides.ts",
+            "src/pages/index.astro"
+          ],
+          "verification": "npm run audit:product-experience",
+          "result": "Not applicable: the site collects no popularity signal at all — analytics is explicitly disabled — so the feedback loop from traffic to placement cannot form. Every homepage slot is either hand-picked by id or ordered by date; the curation module exposes only newest-first, an author-set frontmatter flag, and a literal id list.",
+          "verifiedOn": "2026-08-20",
+          "commits": [
+            "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",
+            "3232b1be — split tag spellings folded onto one canonical URL via data/tag-aliases.yaml",
+            "0dda5355 — the 28 URL prefixes inside post URLs resolve; sitemap/robots agreement enforced"
+          ]
+        }
+      ],
+      "residualRisk": "The opposite failure applies instead: pure editorial selection going stale. Re-open if analytics or a view counter is introduced and any ordering starts reading it, or if the guide ids go unchanged for a year while the published corpus grows past ~1000 posts."
     },
     {
       "id": "AP-I-21",
