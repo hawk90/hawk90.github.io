@@ -13,7 +13,7 @@ import StickyTitle from '../../components/blog/StickyTitle.astro';
 import ReadingProgress from '../../components/blog/ReadingProgress.astro';
 import AuthorBio from '../../components/blog/AuthorBio.astro';
 import Newsletter from '../../components/blog/Newsletter.astro';
-import { formatDate, getTagUrl, getPostUrl, getPostRouteParam, getSeriesUrl, getCategoryUrl } from '../../lib/utils';
+import { formatDate, getTagUrl, getPostUrl, getPostRouteParam, getCategoryUrl } from '../../lib/utils';
 import Breadcrumb from '../../components/common/Breadcrumb.astro';
 import { getPostCategoryTrail } from '../../consts/categories';
 import { getPostMeta, getPublishedPosts, getRelatedPosts, getRoutableTagKeys, type RelatedPost } from '../../lib/posts';
@@ -114,8 +114,8 @@ const hasMath = /\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(rawBod
           <header class="container-narrow measure-left mb-12">
             <Breadcrumb items={breadcrumbs} />
             {post.data.series && (
-              <div class="text-sm text-[var(--color-accent)] font-medium mb-2">
-                <a href={getSeriesUrl(post.data.series)} class="hover:underline">{post.data.series}</a>
+              <div class="text-sm text-[var(--color-text-muted)] mb-2">
+                <span>{post.data.series}</span>
                 {' · '}{post.data.seriesOrder}/{seriesPosts.length}
               </div>
             )}

@@ -40,7 +40,7 @@ export const BRAND_CONFIG = defineBranding({
 // --- Navigation ---
 export const NAV_CONFIG = defineNav([
   { href: '/about', label: 'About' },
-  { href: '/blog', label: 'Blog', match: ['/blog', '/tags', '/series'] },
+  { href: '/blog', label: 'Blog', match: ['/blog', '/tags'] },
   { href: '/paths', label: 'Paths' },
   { href: '/resume', label: 'Resume' },
 ]);

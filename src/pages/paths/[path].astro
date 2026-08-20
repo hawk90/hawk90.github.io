@@ -1,28 +1,35 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/common/Breadcrumb.astro';
-import { toSlug } from '../../lib/utils';
 import { getSeriesMetadata } from '../../consts/series';
 import { LEARNING_PATHS, type LearningPath, type PathNode } from '../../consts/learning-paths';
 import { getBlogContentManifest, getPublicationDecision } from '../../lib/content';
+import { getPostUrl } from '../../lib/utils';
 
 export async function getStaticPaths() {
   const manifest = await getBlogContentManifest();
 
   // series id → { total, published } 카운트
   const counts = new Map<string, { total: number; pub: number }>();
+  const firstPublished = new Map<string, { id: string; seriesOrder?: number }>();
   for (const document of manifest.documents) {
     const s = document.series;
     if (!s) continue;
     const c = counts.get(s) ?? { total: 0, pub: 0 };
     c.total += 1;
-    if (getPublicationDecision(document).render) c.pub += 1;
+    if (getPublicationDecision(document).render) {
+      c.pub += 1;
+      const current = firstPublished.get(s);
+      if (!current || (document.seriesOrder ?? Number.MAX_SAFE_INTEGER) < (current.seriesOrder ?? Number.MAX_SAFE_INTEGER)) {
+        firstPublished.set(s, { id: document.source.id, seriesOrder: document.seriesOrder });
+      }
+    }
     counts.set(s, c);
   }
 
   return LEARNING_PATHS.map((path) => ({
     params: { path: path.id },
-    props: { path, counts: Object.fromEntries(counts) },
+    props: { path, counts: Object.fromEntries(counts), firstPublished: Object.fromEntries(firstPublished) },
   }));
 }
 
@@ -34,9 +41,10 @@ type NodeStatus =
 interface Props {
   path: LearningPath;
   counts: Record<string, { total: number; pub: number }>;
+  firstPublished: Record<string, { id: string; seriesOrder?: number }>;
 }
 
-const { path, counts } = Astro.props;
+const { path, counts, firstPublished } = Astro.props;
 
 function classify(node: PathNode): NodeStatus {
   if (!node.series) return { kind: 'planned' };
@@ -47,7 +55,10 @@ function classify(node: PathNode): NodeStatus {
     return { kind: 'planned' };
   }
   if (c.pub > 0) {
-    return { kind: 'published', href: `/series/${toSlug(node.series)}`, count: c.pub, total: c.total };
+    const first = firstPublished[node.series];
+    return first
+      ? { kind: 'published', href: getPostUrl(first.id), count: c.pub, total: c.total }
+      : { kind: 'draft', total: c.total };
   }
   return { kind: 'draft', total: c.total };
 }

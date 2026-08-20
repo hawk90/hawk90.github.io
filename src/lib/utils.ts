@@ -25,13 +25,6 @@ export function toSlug(str: string): string {
 }
 
 /**
- * Get series URL from series name
- */
-export function getSeriesUrl(seriesName: string): string {
-  return `/series/${toSlug(seriesName)}`;
-}
-
-/**
  * The index page for a category.
  *
  * Shares the `/blog/` prefix with post URLs but is a different route: category

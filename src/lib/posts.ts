@@ -164,46 +164,6 @@ export async function getRoutableTagKeys(): Promise<Set<string>> {
 }
 
 /**
- * URL prefixes that appear inside post URLs but address nothing.
- *
- * Every post URL is a path, so every prefix of it looks like a place: a reader
- * who trims `/blog/embedded/modern-recipes/part10-05-uart-not-printing` back to
- * `/blog/embedded/modern-recipes/` is asking for the 152 posts under it. On a
- * static host that request 404s unless something is built there, and 28 such
- * prefixes covering all 726 published posts were dead.
- *
- * They are not categories — `categories.ts` describes a level above, so
- * `embedded` has a page and `embedded/modern-recipes` does not. What each one
- * actually corresponds to is a series, and today every one of the 28 holds
- * exactly one. So the prefix is not a missing page; it is a second address for
- * a page that exists, and the caller renders a redirect rather than a copy —
- * two URLs listing the same posts is the duplication this avoids.
- *
- * A prefix holding two series has no unambiguous destination and is skipped
- * rather than guessed at.
- */
-export function getSeriesUrlPrefixes(
-  posts: BlogPost[],
-  isAddressable: (prefix: string) => boolean,
-): Array<{ prefix: string; series: string }> {
-  const seriesByPrefix = new Map<string, Set<string>>();
-  for (const post of posts) {
-    if (!post.data.series) continue;
-    const segments = post.id.split('/');
-    for (let i = 1; i < segments.length; i++) {
-      const prefix = segments.slice(0, i).join('/');
-      if (isAddressable(prefix)) continue;
-      if (!seriesByPrefix.has(prefix)) seriesByPrefix.set(prefix, new Set());
-      seriesByPrefix.get(prefix)!.add(post.data.series);
-    }
-  }
-  return [...seriesByPrefix.entries()]
-    .filter(([, series]) => series.size === 1)
-    .map(([prefix, series]) => ({ prefix, series: [...series][0] }))
-    .sort((a, b) => a.prefix.localeCompare(b.prefix));
-}
-
-/**
  * 포스트에서 모든 고유 시리즈 추출 (알파벳순)
  */
 export function getAllSeries(posts: BlogPost[]): string[] {

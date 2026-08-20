@@ -4,12 +4,12 @@ import TagBadge from './TagBadge.astro';
 import { CATEGORIES, getTopLevelCategories, getSubCategories } from '../../consts/categories';
 import { BLOG_CONFIG } from '../../consts/config';
 import { getTagsWithCount, getRoutableTagKeys, categoryIdsOf, type BlogPost } from '../../lib/posts';
-import { toSlug, getTagUrl } from '../../lib/utils';
+import { getTagUrl } from '../../lib/utils';
 
 interface Props {
   posts: BlogPost[];
   activeFilter?: {
-    type: 'tag' | 'series' | 'category';
+    type: 'tag' | 'category';
     value: string;
   };
 }
@@ -23,9 +23,6 @@ const { maxTagsInSidebar } = BLOG_CONFIG;
 const topCats = getTopLevelCategories();
 const categoryById = new Map(CATEGORIES.map((category) => [category.id, category]));
 const childrenByParent = new Map(CATEGORIES.map((category) => [category.id, getSubCategories(category.id)]));
-const subCategoryIdsByParent = new Map(
-  [...childrenByParent.entries()].map(([id, children]) => [id, children.map((sub) => sub.id)]),
-);
 // Bucketed by declared topic, not by slicing the post id. The id is the frozen
 // URL, so splitting it on '/' made the tree a picture of the folder layout.
 const postsByCategory = new Map(CATEGORIES.map((category) => [category.id, [] as BlogPost[]]));
@@ -33,45 +30,12 @@ for (const post of allPosts) {
   for (const categoryId of categoryIdsOf(post)) postsByCategory.get(categoryId)?.push(post);
 }
 
-interface SeriesLink {
-  name: string;
-  slug: string;
-  count: number;
-  isActive: boolean;
-}
-
 function isActiveTag(tag: string): boolean {
   return activeFilter?.type === 'tag' && activeFilter.value.toLowerCase() === tag.toLowerCase();
 }
 
-function isActiveSeries(series: string): boolean {
-  return activeFilter?.type === 'series' && activeFilter.value === series;
-}
-
 function isActiveCategory(categoryId: string): boolean {
   return activeFilter?.type === 'category' && activeFilter.value === categoryId;
-}
-
-function postsDirectlyIn(catId: string) {
-  const subCatIds = subCategoryIdsByParent.get(catId) ?? [];
-  return (postsByCategory.get(catId) ?? []).filter((post) => {
-    const ids = categoryIdsOf(post);
-    return !subCatIds.some((sub) => ids.has(sub));
-  });
-}
-
-function buildSeriesLinks(posts: typeof allPosts): SeriesLink[] {
-  const counts = new Map<string, number>();
-  posts.forEach((post) => {
-    if (!post.data.series) return;
-    counts.set(post.data.series, (counts.get(post.data.series) ?? 0) + 1);
-  });
-  return [...counts.entries()].map(([series, count]) => ({
-    name: series,
-    slug: toSlug(series),
-    count,
-    isActive: isActiveSeries(series),
-  }));
 }
 
 /**
@@ -95,27 +59,15 @@ function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
   const children = (childrenByParent.get(category.id) ?? [])
     .filter((child) => hasPublished(child.id))
     .map((child) => buildCategoryNode(child.id));
-  const directPosts = postsDirectlyIn(category.id);
   const hasActiveDescendant = children.some((child) => child.isActive || child.initiallyOpen);
-  const series = buildSeriesLinks(directPosts);
-
-  // A branch whose entire content is one series *is* that series. Rendering
-  // both rows put the same post list at two URLs one line apart, and the two
-  // rows are near-identical in the tree, so it read as a subcategory that
-  // happened to lead somewhere else. Four branches were in this shape.
-  // The series page keeps its inbound links from its own chapters (measured
-  // 90-140 each), so dropping the row here orphans nothing.
-  const soleSeries = children.length === 0 && series.length === 1;
 
   return {
     id: category.id,
     name: category.name,
-    icon: category.icon ?? '',
     count: (postsByCategory.get(category.id) ?? []).length,
     isActive: isActiveCategory(category.id),
     initiallyOpen: isActiveCategory(category.id) || hasActiveDescendant,
     children,
-    series: soleSeries ? [] : series,
   };
 }
 
@@ -128,17 +80,16 @@ function buildCategoryNode(categoryId: string): CategoryTreeNodeData {
  * the whole corpus including drafts — this shape is a fact about what is
  * published today, and it un-folds by itself the moment a sibling publishes.
  *
- * Both URLs stay: every post carries the full category trail in its breadcrumb,
- * so the folded-away parent keeps its inbound links.
+ * Both category URLs stay: every post carries the full category trail in its
+ * breadcrumb, so the folded-away parent keeps its inbound links.
  */
 function collapsePassthrough(node: CategoryTreeNodeData): CategoryTreeNodeData {
   const children = node.children.map(collapsePassthrough);
-  if (node.series.length === 0 && children.length === 1) {
+  if (children.length === 1) {
     const only = children[0];
     return {
       ...only,
       name: `${node.name} / ${only.name}`,
-      icon: node.icon || only.icon,
       isActive: node.isActive || only.isActive,
       initiallyOpen: node.initiallyOpen || only.initiallyOpen,
     };
@@ -158,15 +109,12 @@ const categoryTree = topCats
         href="/blog"
         data-astro-prefetch="viewport"
         class:list={[
-          'inline-flex items-center gap-2 text-sm font-medium transition-colors',
+          'inline-flex items-center text-sm font-medium transition-colors',
           !activeFilter
             ? 'text-[var(--color-accent)]'
             : 'text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]',
         ]}
       >
-        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0l-4-4m4 4l-4 4" />
-        </svg>
         All Posts
       </a>
 
