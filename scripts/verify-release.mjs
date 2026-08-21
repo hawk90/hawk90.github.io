@@ -41,6 +41,11 @@ const checks = [
   // know which pages were actually generated.
   ['rendered link resolution', ['npm', 'run', 'audit:rendered-links']],
   ['sitemap vs. robots', ['npm', 'run', 'audit:sitemap']],
+  // Reads dist/ against data/published-urls.json. `slug:` being required stops
+  // a URL from being lost by deleting the field; this is what stops it being
+  // lost by changing the value, unpublishing, or a route that quietly stops
+  // generating the page.
+  ['published URL continuity', ['npm', 'run', 'audit:published-urls']],
   ['static admin boundary', ['npm', 'run', 'gate:security-admin', '--', '--artifact', 'dist']],
   ['production secret scan', ['npm', 'run', 'gate:secrets']],
 ];

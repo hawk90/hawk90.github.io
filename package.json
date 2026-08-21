@@ -121,6 +121,7 @@
     "audit:connectivity": "node scripts/audit-article-connectivity.mjs",
     "audit:rendered-links": "node scripts/audit-rendered-links.mjs",
     "audit:prologue": "node scripts/audit-document-prologue.mjs",
+    "audit:published-urls": "node scripts/audit-published-urls.mjs",
     "audit:sitemap": "node scripts/audit-sitemap-robots.mjs",
     "audit:paths": "node scripts/audit-learning-path-coverage.mjs",
     "audit:reading": "node scripts/audit-reading-experience.mjs",
