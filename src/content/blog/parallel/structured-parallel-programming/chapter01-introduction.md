@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction"
+slug: "parallel/structured-parallel-programming/chapter01-introduction"
 date: 2026-05-21T20:00:00
 description: "구조적 병렬 프로그래밍이란 — 패턴 기반 병렬화의 필요성"
 series: "Structured Parallel Programming"

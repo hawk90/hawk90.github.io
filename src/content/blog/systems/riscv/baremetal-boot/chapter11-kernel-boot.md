@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 커널 부팅"
+slug: "systems/riscv/baremetal-boot/chapter11-kernel-boot"
 date: 2026-05-17T05:00:00
 description: "U-Boot에서 Linux 커널 부팅 — booti/bootm, FDT 전달, 커널 요구사항을 다룬다."
 series: "RISC-V 베어메탈 부트"

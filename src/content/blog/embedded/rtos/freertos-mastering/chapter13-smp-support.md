@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: SMP Support"
+slug: "embedded/rtos/freertos-mastering/chapter13-smp-support"
 date: 2026-05-09T13:00:00
 description: "configNUMBER_OF_CORES·core affinity — FreeRTOS의 멀티코어 스케줄링."
 series: "Mastering the FreeRTOS Real Time Kernel"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction to Parallel Computing"
+slug: "parallel/intro-to-parallel-computing/chapter01-introduction"
 date: 2026-05-21T01:00:00
 description: "병렬 컴퓨팅이 왜 필요한가 — 무어의 법칙, 전력 장벽, 멀티코어 시대"
 series: "Introduction to Parallel Computing"

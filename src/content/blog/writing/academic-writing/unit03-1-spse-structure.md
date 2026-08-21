@@ -1,5 +1,6 @@
 ---
 title: "Unit 3.1: SPSE 구조 — Situation, Problem, Solution, Evaluation"
+slug: "writing/academic-writing/unit03-1-spse-structure"
 date: 2026-05-14T11:00:00
 description: "문제-해결 텍스트의 표준 구조 — Situation / Problem / Solution / Evaluation 네 단계와 mid-position 부사."
 series: "Academic Writing for Graduate Students"

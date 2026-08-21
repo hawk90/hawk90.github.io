@@ -1,5 +1,6 @@
 ---
 title: "Chapter 26: Code-Tuning Techniques"
+slug: "programming/engineering/code-complete/ch26-Code-Tuning-Techniques"
 date: 2026-05-11T02:00:00
 description: "구체적 코드 튜닝 기법 — 루프, 자료구조, 산술, 표현식. 각 기법의 효과와 비용."
 series: "Code Complete"

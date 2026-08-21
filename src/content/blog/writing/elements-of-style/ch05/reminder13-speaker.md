@@ -1,5 +1,6 @@
 ---
 title: "Ch 5 Reminder 13: 화자가 누구인지 분명히"
+slug: "writing/elements-of-style/ch05/reminder13-speaker"
 date: 2026-05-14T21:00:00
 description: "긴 대화 단락에서 화자 표시가 없으면 독자는 길을 잃는다."
 series: "The Elements of Style"

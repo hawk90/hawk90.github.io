@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Queue Management"
+slug: "embedded/rtos/freertos-mastering/chapter04-queue-management"
 date: 2026-05-09T04:00:00
 description: "xQueueCreate·블로킹·queue set·mailbox — 태스크 간 메시지 전달의 기본."
 series: "Mastering the FreeRTOS Real Time Kernel"

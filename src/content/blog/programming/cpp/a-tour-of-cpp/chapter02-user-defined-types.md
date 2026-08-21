@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: User-Defined Types"
+slug: "programming/cpp/a-tour-of-cpp/chapter02-user-defined-types"
 date: 2026-05-22T02:00:00
 description: "사용자 정의 타입 — struct, class, enum, union"
 series: "A Tour of C++"

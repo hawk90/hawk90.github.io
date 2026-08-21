@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: CXL.cache·CCI-P — FPGA Host-Coherent"
+slug: "tools/emulation/qemu-fpga-driver/chapter14-cxl-coherent"
 date: 2026-05-17T14:00:00
 description: "FPGA가 host CPU cache에 직접 — coherent accelerator."
 tags: [QEMU, cxl-cache, cci-p, coherent-fpga, npu]

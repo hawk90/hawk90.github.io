@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Convex Sets"
+slug: "math/optimization/boyd-convex/chapter02-convex-sets"
 date: 2026-05-15T02:00:00
 description: "Affine·convex·conic — 다양한 convex set과 보존 연산."
 series: "Convex Optimization (Boyd)"

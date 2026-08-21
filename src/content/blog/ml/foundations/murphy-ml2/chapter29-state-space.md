@@ -1,5 +1,6 @@
 ---
 title: "Ch 29: State-Space Models"
+slug: "ml/foundations/murphy-ml2/chapter29-state-space"
 date: 2026-05-16T05:00:00
 description: "HMM·LDS·deep SSM·Mamba — sequence의 잠재 state."
 series: "Probabilistic Machine Learning: Advanced Topics"

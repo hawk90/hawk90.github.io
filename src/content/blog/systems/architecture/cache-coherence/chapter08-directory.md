@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Directory Coherence Protocols"
+slug: "systems/architecture/cache-coherence/chapter08-directory"
 date: 2026-05-19T08:00:00
 description: "Directory — broadcast 대신 sharers를 추적한다."
 series: "A Primer on Memory Consistency and Cache Coherence"

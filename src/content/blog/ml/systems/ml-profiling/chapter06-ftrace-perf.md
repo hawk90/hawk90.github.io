@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: ftrace·perf for ML"
+slug: "ml/systems/ml-profiling/chapter06-ftrace-perf"
 date: 2026-05-16T06:00:00
 description: "Linux native tracing — ML host-side bottleneck."
 series: "ML 시스템 프로파일링"

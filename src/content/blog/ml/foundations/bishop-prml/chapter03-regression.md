@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Linear Models for Regression"
+slug: "ml/foundations/bishop-prml/chapter03-regression"
 date: 2026-05-16T03:00:00
 description: "Basis function·MLE·MAP·Bayesian linear regression·evidence."
 series: "Pattern Recognition and Machine Learning"

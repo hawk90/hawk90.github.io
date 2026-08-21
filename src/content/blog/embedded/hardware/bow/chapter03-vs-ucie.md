@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: BoW 2.0 vs UCIe 비교"
+slug: "embedded/hardware/bow/chapter03-vs-ucie"
 date: 2026-05-16T03:00:00
 description: "Bandwidth density·packaging·생태계 — 두 D2D 표준을 정량으로 비교하고 선택 기준을 정리합니다."
 series: "BoW 개요"

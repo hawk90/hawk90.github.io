@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Sampling Methods"
+slug: "ml/foundations/bishop-prml/chapter11-sampling"
 date: 2026-05-16T11:00:00
 description: "Basic·MCMC·Gibbs·slice·HMC — stochastic approximation."
 series: "Pattern Recognition and Machine Learning"

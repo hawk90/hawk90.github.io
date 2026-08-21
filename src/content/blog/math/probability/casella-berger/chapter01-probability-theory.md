@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Probability Theory"
+slug: "math/probability/casella-berger/chapter01-probability-theory"
 date: 2026-05-16T01:00:00
 description: "Probability·conditional·independence — 수리통계의 토대."
 series: "Statistical Inference"

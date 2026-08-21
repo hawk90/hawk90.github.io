@@ -1,5 +1,6 @@
 ---
 title: "Part 1-02: 12 원칙 깊이 보기"
+slug: "programming/engineering/agile-lean-engineering/part1-02-twelve-principles"
 date: 2026-05-20T02:00:00
 description: "Agile Manifesto의 12 원칙 — 각 원칙의 함의와 흔한 오해."
 series: "Agile & Lean Software Engineering"

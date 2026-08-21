@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: HLO IR — 내부 표현"
+slug: "ml/compilers/xla-deep/chapter03-hlo-ir"
 date: 2026-05-16T03:00:00
 description: "XLA의 일관 표현 — operation·shape·layout."
 series: "XLA·OpenXLA 심화"

@@ -1,5 +1,6 @@
 ---
 title: "항목 39: 일회성 이벤트 통신에는 void future를 고려하라"
+slug: "programming/cpp/effective-modern-cpp/item39-consider-void-futures-for-one-shot-event-communication"
 date: 2026-05-04T15:00:00
 description: "condition_variable·atomic·void future — 일회성 통보의 세 옵션 비교."
 tags: [cpp, Concurrency, "std::future", "std::condition_variable", modern-cpp]

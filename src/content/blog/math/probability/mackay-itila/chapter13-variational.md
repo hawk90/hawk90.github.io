@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Variational Methods"
+slug: "math/probability/mackay-itila/chapter13-variational"
 date: 2026-05-16T13:00:00
 description: "Sampling이 너무 느릴 때 — optimization으로 posterior 근사."
 series: "Information Theory, Inference, and Learning Algorithms"

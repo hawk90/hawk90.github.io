@@ -1,5 +1,6 @@
 ---
 title: "Part 2-02: Iterative Development의 본질"
+slug: "programming/engineering/agile-lean-engineering/part2-02-iterative-development"
 date: 2026-05-20T10:00:00
 description: "feedback loop를 짧게 — Iterative development가 XP에서 작동하는 원리."
 series: "Agile & Lean Software Engineering"

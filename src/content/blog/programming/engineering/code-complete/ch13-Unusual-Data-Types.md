@@ -1,5 +1,6 @@
 ---
 title: "Chapter 13: Unusual Data Types"
+slug: "programming/engineering/code-complete/ch13-Unusual-Data-Types"
 date: 2026-05-11T13:00:00
 description: "덜 흔한 데이터 타입 — struct, 포인터, 전역 변수. 각각의 함정과 안전한 사용."
 series: "Code Complete"

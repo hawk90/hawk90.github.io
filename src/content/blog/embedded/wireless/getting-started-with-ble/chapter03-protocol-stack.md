@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 프로토콜 스택 — PHY·LL·HCI·L2CAP·ATT·GATT·GAP"
+slug: "embedded/wireless/getting-started-with-ble/chapter03-protocol-stack"
 date: 2026-05-08T03:00:00
 description: "BLE 스택 7층. Controller(PHY/LL)와 Host(HCI 이상) 분리, GATT가 사용자 인터페이스."
 series: "Getting Started with BLE"

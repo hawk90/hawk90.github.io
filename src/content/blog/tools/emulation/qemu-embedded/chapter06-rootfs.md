@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 루트 파일시스템"
+slug: "tools/emulation/qemu-embedded/chapter06-rootfs"
 date: 2026-05-17T06:00:00
 description: "Buildroot/Yocto로 루트 파일시스템을 만들고 QEMU에서 사용한다."
 tags: [QEMU, Buildroot, Yocto, Rootfs, initramfs, ext4]

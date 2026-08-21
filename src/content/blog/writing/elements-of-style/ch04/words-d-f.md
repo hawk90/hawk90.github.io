@@ -1,5 +1,6 @@
 ---
 title: "Ch 4 Words: D–F"
+slug: "writing/elements-of-style/ch04/words-d-f"
 date: 2026-05-14T03:00:00
 description: "자주 오용되는 단어와 표현 — Data부터 Fortuitous까지."
 series: "The Elements of Style"

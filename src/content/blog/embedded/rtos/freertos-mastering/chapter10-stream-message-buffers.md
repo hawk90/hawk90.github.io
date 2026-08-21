@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Stream and Message Buffers"
+slug: "embedded/rtos/freertos-mastering/chapter10-stream-message-buffers"
 date: 2026-05-09T10:00:00
 description: "xStreamBufferSend·xMessageBufferSend — 단일 reader/writer용 lock-free 버퍼."
 series: "Mastering the FreeRTOS Real Time Kernel"

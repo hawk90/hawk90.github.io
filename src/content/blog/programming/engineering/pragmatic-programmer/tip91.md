@@ -1,5 +1,6 @@
 ---
 title: "Tip 91: Use Saboteurs to Test Your Testing"
+slug: "programming/engineering/pragmatic-programmer/tip91"
 date: 2026-05-12T19:00:00
 description: "테스트를 테스트하기 위해 사보타주를 사용하라. 버그를 일부러 넣어서 테스트가 잡는지 확인한다."
 series: "The Pragmatic Programmer"

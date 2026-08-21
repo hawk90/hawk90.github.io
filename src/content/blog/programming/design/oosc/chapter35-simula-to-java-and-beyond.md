@@ -1,5 +1,6 @@
 ---
 title: "Ch 35: Simula to Java and Beyond: Major O-O Languages and Environments"
+slug: "programming/design/oosc/chapter35-simula-to-java-and-beyond"
 date: 2026-05-19T11:00:00
 description: "주요 OO 언어들 — Simula, Smalltalk, C++, Java, Eiffel 비교."
 series: "Object-Oriented Software Construction"

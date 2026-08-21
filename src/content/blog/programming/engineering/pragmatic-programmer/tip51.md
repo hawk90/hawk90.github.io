@@ -1,5 +1,6 @@
 ---
 title: "Tip 51: Don't Pay Inheritance Tax"
+slug: "programming/engineering/pragmatic-programmer/tip51"
 date: 2026-05-11T03:00:00
 description: "상속세를 내지 마라. 상속은 강결합을 만든다. 인터페이스, 합성, 믹스인이 거의 항상 더 낫다."
 series: "The Pragmatic Programmer"

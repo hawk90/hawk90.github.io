@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Metric Predicted Variable — Regression"
+slug: "math/probability/kruschke-dba/chapter12-metric-regression"
 date: 2026-05-15T12:00:00
 description: "Continuous outcome — Bayesian linear regression 깊이."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

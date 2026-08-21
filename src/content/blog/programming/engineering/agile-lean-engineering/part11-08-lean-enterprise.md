@@ -1,5 +1,6 @@
 ---
 title: "Part 11-08: Lean Enterprise — 대규모 조직에서의 Lean Startup"
+slug: "programming/engineering/agile-lean-engineering/part11-08-lean-enterprise"
 date: 2026-05-20T14:00:00
 description: "Lean Startup 원칙을 large enterprise에 — Humble·Molesky·O'Reilly."
 series: "Agile & Lean Software Engineering"

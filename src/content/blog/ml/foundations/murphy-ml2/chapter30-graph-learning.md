@@ -1,5 +1,6 @@
 ---
 title: "Ch 30: Graph Learning"
+slug: "ml/foundations/murphy-ml2/chapter30-graph-learning"
 date: 2026-05-16T06:00:00
 description: "Structure learning·GNN·heterogeneous — graph 데이터 ML."
 series: "Probabilistic Machine Learning: Advanced Topics"

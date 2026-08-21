@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 메모리 매핑 (mmap)"
+slug: "ml/drivers/npu-drivers/chapter05-mmap"
 date: 2026-05-16T05:00:00
 description: "Driver의 buffer를 userspace VMA에 매핑."
 series: "NPU 드라이버 개발"

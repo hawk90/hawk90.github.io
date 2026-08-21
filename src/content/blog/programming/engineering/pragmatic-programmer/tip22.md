@@ -1,5 +1,6 @@
 ---
 title: "Tip 22: Program Close to the Problem Domain"
+slug: "programming/engineering/pragmatic-programmer/tip22"
 date: 2026-05-11T22:00:00
 description: "문제 도메인 가까이에서 프로그램하라 — 도메인 언어를 — 코드에 반영하라."
 series: "The Pragmatic Programmer"

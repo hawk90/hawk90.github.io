@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Information Theory and Portfolio Theory"
+slug: "math/probability/cover-thomas/chapter16-portfolio"
 date: 2026-05-16T16:00:00
 description: "Investment·log-optimal portfolio — Kelly의 일반화."
 series: "Elements of Information Theory"

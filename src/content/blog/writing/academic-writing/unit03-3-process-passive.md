@@ -1,5 +1,6 @@
 ---
 title: "Unit 3.3: Process Description과 Passive Voice"
+slug: "writing/academic-writing/unit03-3-process-passive"
 date: 2026-05-14T13:00:00
 description: "과정을 묘사하는 학술 영어의 관습 — 수동태가 자주 쓰이는 이유, 능동태가 적절한 자리, 그리고 흐름의 도구들."
 series: "Academic Writing for Graduate Students"

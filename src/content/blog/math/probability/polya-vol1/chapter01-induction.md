@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Induction"
+slug: "math/probability/polya-vol1/chapter01-induction"
 date: 2026-05-16T01:00:00
 description: "관찰에서 일반화로 — 수학에서의 inductive reasoning."
 series: "Mathematics and Plausible Reasoning, Vol I"

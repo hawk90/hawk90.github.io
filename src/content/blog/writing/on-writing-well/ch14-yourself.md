@@ -1,5 +1,6 @@
 ---
 title: "Chapter 14: Writing About Yourself — The Memoir"
+slug: "writing/on-writing-well/ch14-yourself"
 date: 2026-05-14T14:00:00
 description: "Memoir의 기술 — 자기 인생 전체가 아닌 한 슬라이스. 정직한 회상이 가장 강한 글을 만듭니다."
 series: "On Writing Well"

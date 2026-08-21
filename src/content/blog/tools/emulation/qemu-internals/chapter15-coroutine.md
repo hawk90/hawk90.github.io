@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Coroutine 서브시스템"
+slug: "tools/emulation/qemu-internals/chapter15-coroutine"
 date: 2026-05-17T15:00:00
 description: "qemu_coroutine_*·yield/resume — async without callback hell."
 tags: [QEMU, coroutine, async, block-io, fiber]

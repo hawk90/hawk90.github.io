@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Git Internals"
+slug: "programming/git/pro-git/chapter10-git-internals"
 date: 2026-05-17T10:00:00
 description: "Git의 본질 — content-addressable filesystem. blob / tree / commit / tag 객체."
 tags: [Git, Internals, Plumbing]

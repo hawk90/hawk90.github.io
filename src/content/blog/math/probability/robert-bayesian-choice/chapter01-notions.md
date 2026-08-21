@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introductory Notions"
+slug: "math/probability/robert-bayesian-choice/chapter01-notions"
 date: 2026-05-15T01:00:00
 description: "Robert의 decision-theoretic Bayesian — 이론 깊이의 시작."
 series: "The Bayesian Choice"

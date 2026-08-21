@@ -1,5 +1,6 @@
 ---
 title: "Part 2-2: fork / exec / exit"
+slug: "systems/linux-kernel-internals/part2-02-fork-exec-exit"
 date: 2026-05-12T06:00:00
 description: "프로세스 라이프사이클 — fork (COW), exec (이미지 교체), exit (좀비)."
 tags: [Linux, Kernel, fork, exec]

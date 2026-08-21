@@ -1,5 +1,6 @@
 ---
 title: "Unit 1.5: Flow와 Linking"
+slug: "writing/academic-writing/unit01-5-flow-linking"
 date: 2026-05-14T05:00:00
 description: "학술 영어 단락의 흐름 만들기 — Old-to-New 정보 패턴과 linking words / phrases."
 series: "Academic Writing for Graduate Students"

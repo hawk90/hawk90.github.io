@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Noisy-Channel Coding"
+slug: "math/probability/mackay-itila/chapter06-noisy-channel"
 date: 2026-05-16T06:00:00
 description: "Channel capacity와 Shannon 둘째 정리 — 노이즈 너머 신호."
 series: "Information Theory, Inference, and Learning Algorithms"

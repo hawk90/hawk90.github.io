@@ -1,5 +1,6 @@
 ---
 title: "Part 7-05: Configuration Management — code·app·infra·system"
+slug: "programming/engineering/agile-lean-engineering/part7-05-configuration-management"
 date: 2026-05-23T22:00:00
 description: "네 가지 configuration의 layer — version control 대상."
 series: "Agile & Lean Software Engineering"

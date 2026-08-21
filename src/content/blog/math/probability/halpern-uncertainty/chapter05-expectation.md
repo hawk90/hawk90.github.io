@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Expectation"
+slug: "math/probability/halpern-uncertainty/chapter05-expectation"
 date: 2026-05-16T05:00:00
 description: "기댓값의 generalization — Choquet·lower previsions."
 series: "Reasoning About Uncertainty"

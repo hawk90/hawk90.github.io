@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Entropy Rates of a Stochastic Process"
+slug: "math/probability/cover-thomas/chapter04-entropy-rates"
 date: 2026-05-16T04:00:00
 description: "Stationary process의 정보 생성률 — Markov chain·HMM 기초."
 series: "Elements of Information Theory"

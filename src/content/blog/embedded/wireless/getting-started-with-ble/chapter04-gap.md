@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: GAP — Generic Access Profile, 4가지 역할"
+slug: "embedded/wireless/getting-started-with-ble/chapter04-gap"
 date: 2026-05-08T04:00:00
 description: "Broadcaster·Observer·Peripheral·Central 4역. 디바이스 발견·연결의 거시 정책."
 series: "Getting Started with BLE"

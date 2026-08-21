@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Core ML Backend로서의 Metal"
+slug: "ml/compilers/apple-metal/chapter10-coreml-backend"
 date: 2026-05-16T10:00:00
 description: "ANE·GPU·CPU 자동 분배 — Core ML이 본 Metal."
 series: "Apple Metal Stack"

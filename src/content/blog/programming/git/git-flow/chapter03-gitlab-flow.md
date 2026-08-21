@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: GitLab Flow"
+slug: "programming/git/git-flow/chapter03-gitlab-flow"
 date: 2026-05-17T03:00:00
 description: "GitLab Flow — environment 브랜치 / release 브랜치 변형. 두 변형."
 tags: [Git, gitlab-flow]

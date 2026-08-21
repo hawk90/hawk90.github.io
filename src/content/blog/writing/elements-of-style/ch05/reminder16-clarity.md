@@ -1,5 +1,6 @@
 ---
 title: "Ch 5 Reminder 16: 명료하게 쓰라"
+slug: "writing/elements-of-style/ch05/reminder16-clarity"
 date: 2026-05-14T00:00:00
 description: "글은 전달이므로 명료함은 거의 항상 미덕이다. 문장 속에서 길을 잃었을 때 가장 좋은 해결은 새로 시작하는 것."
 series: "The Elements of Style"

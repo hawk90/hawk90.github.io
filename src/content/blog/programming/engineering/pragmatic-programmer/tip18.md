@@ -1,5 +1,6 @@
 ---
 title: "Tip 18: There Are No Final Decisions"
+slug: "programming/engineering/pragmatic-programmer/tip18"
 date: 2026-05-11T18:00:00
 description: "최종 결정은 없다 — 모든 결정은 가역적이라 가정하고 설계하라."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Benchmark와 profiling"
+slug: "programming/testing/pytest/chapter17-benchmark"
 date: 2026-05-10T17:00:00
 description: "pytest-benchmark·pyinstrument — 성능 회귀 감지와 hotspot 찾기."
 series: "pytest 심화"

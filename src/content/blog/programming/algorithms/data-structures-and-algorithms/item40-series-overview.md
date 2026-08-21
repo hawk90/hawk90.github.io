@@ -1,5 +1,6 @@
 ---
 title: "DSA 40: 시리즈 Overview — 자료구조와 알고리즘 한눈에"
+slug: "programming/algorithms/data-structures-and-algorithms/item40-series-overview"
 date: 2026-05-15T16:00:00
 description: "39개 항목 전체 관계도와 학습 순서 가이드."
 tags: [data-structure, Algorithm, Overview]

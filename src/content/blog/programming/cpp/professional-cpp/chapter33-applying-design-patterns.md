@@ -1,5 +1,6 @@
 ---
 title: "Ch 33: Applying Design Patterns — Iterator / Singleton / Observer"
+slug: "programming/cpp/professional-cpp/chapter33-applying-design-patterns"
 date: 2026-05-05T09:00:00
 description: "패턴 실전 적용 — Iterator (range), Observer (signal), Singleton (피해야 할)."
 tags: [cpp, design-patterns, Observer, Iterator]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: FPGA-SW Interface — AXI·Register Map·IRQ·DMA Descriptor"
+slug: "embedded/avionics/launch-vehicle-flight-sw/chapter05-fpga-sw-interface"
 date: 2026-05-18T05:00:00
 description: "FPGA-CPU 통합 SW 관점. AXI4/Lite/Stream, register map, IRQ, DMA descriptor ring."
 series: "Launch Vehicle Flight Software"

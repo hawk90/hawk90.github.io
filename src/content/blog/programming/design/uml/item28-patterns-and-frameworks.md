@@ -1,5 +1,6 @@
 ---
 title: "UML 28: 패턴과 프레임워크 — 매개변수화된 협력"
+slug: "programming/design/uml/item28-patterns-and-frameworks"
 date: 2026-05-03T04:00:00
 description: "GoF 패턴을 UML로 — 매개변수화된 협력으로 디자인 솔루션 재사용."
 tags: [UML, design-pattern, Framework, Collaboration]

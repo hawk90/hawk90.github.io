@@ -1,5 +1,6 @@
 ---
 title: "Ch 23: Principles of Class Design"
+slug: "programming/design/oosc/chapter23-principles-of-class-design"
 date: 2026-05-19T23:00:00
 description: "클래스 설계 원칙 — 응집도, 일관성, 최소 인터페이스."
 series: "Object-Oriented Software Construction"

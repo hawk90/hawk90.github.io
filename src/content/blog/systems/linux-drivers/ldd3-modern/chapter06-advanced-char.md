@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Advanced Char Driver Operations"
+slug: "systems/linux-drivers/ldd3-modern/chapter06-advanced-char"
 date: 2026-05-13T06:00:00
 description: "ioctl·blocking I/O·poll·async notification·seek·access control — char driver 심화."
 series: "Linux Device Drivers (LDD3)"

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3.5: Apostrophe"
+slug: "writing/only-grammar-book/ch03-5-apostrophe"
 date: 2026-05-14T03:50:00
 description: "아포스트로피의 사용 — 소유격, 축약, 흔한 함정 (its/it's, 복수 표시 오류)."
 series: "The Only Grammar Book You'll Ever Need"

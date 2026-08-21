@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Sampling the Imaginary"
+slug: "math/probability/mcelreath-rethinking/chapter03-sampling"
 date: 2026-05-16T03:00:00
 description: "Posterior sampling — point estimate·interval·prediction."
 series: "Statistical Rethinking"

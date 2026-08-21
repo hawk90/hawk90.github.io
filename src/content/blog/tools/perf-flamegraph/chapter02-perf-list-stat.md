@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: perf list / perf stat — 카운터"
+slug: "tools/perf-flamegraph/chapter02-perf-list-stat"
 date: 2026-05-17T02:00:00
 description: "perf stat — 정적 카운터. cycles per instruction, cache miss rate."
 tags: [perf, perf-stat, Counters]

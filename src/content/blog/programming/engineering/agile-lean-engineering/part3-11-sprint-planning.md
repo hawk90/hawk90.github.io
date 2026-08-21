@@ -1,5 +1,6 @@
 ---
 title: "Part 3-11: Sprint Planning 진행법"
+slug: "programming/engineering/agile-lean-engineering/part3-11-sprint-planning"
 date: 2026-05-21T19:00:00
 description: "Sprint Planning의 What part와 How part — 시간 분배와 산출물."
 series: "Agile & Lean Software Engineering"

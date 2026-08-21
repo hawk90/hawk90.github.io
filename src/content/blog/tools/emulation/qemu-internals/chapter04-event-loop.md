@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 이벤트 루프"
+slug: "tools/emulation/qemu-internals/chapter04-event-loop"
 date: 2026-05-17T04:00:00
 description: "QEMU의 메인 루프, AIO, coroutine을 이해한다."
 tags: [QEMU, EventLoop, Coroutine, AIO, BottomHalf]

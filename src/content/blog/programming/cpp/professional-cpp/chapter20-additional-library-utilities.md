@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Additional Library Utilities"
+slug: "programming/cpp/professional-cpp/chapter20-additional-library-utilities"
 date: 2026-05-05T20:00:00
 description: "tuple / optional / variant / any / pair. utility 헤더 한눈에."
 tags: [cpp, Utility, optional, variant]

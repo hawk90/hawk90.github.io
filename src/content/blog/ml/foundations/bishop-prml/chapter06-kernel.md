@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Kernel Methods"
+slug: "ml/foundations/bishop-prml/chapter06-kernel"
 date: 2026-05-16T06:00:00
 description: "Dual representation·kernel construction·Gaussian Process."
 series: "Pattern Recognition and Machine Learning"

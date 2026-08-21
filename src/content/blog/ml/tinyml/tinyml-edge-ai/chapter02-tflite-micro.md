@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: TensorFlow Lite Micro 아키텍처"
+slug: "ml/tinyml/tinyml-edge-ai/chapter02-tflite-micro"
 date: 2026-05-16T02:00:00
 description: "Bare-metal interpreter — no malloc·no OS."
 series: "TinyML·Edge AI"

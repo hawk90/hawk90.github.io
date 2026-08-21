@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 저장과 검색"
+slug: "parallel/designing-data-intensive-applications/chapter03-storage-and-retrieval"
 date: 2026-05-12T03:00:00
 description: "DB의 내부 — Log-structured (LSM, SSTable) vs Page-oriented (B-tree). OLTP vs OLAP. Column store."
 tags: [DDIA, Storage, LSM, BTree, OLTP, OLAP]

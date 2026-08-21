@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Neural Networks as Inference"
+slug: "math/probability/mackay-itila/chapter14-neural-networks"
 date: 2026-05-16T14:00:00
 description: "Single neuron·multilayer·Bayesian neural network."
 series: "Information Theory, Inference, and Learning Algorithms"

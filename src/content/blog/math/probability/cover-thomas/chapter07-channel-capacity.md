@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Channel Capacity"
+slug: "math/probability/cover-thomas/chapter07-channel-capacity"
 date: 2026-05-16T07:00:00
 description: "Shannon channel coding theorem — 노이즈 채널의 전송 한계."
 series: "Elements of Information Theory"

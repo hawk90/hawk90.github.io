@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Tool Qualification (DO-330)"
+slug: "embedded/avionics/developing-safety-critical/chapter09-tool-qualification"
 date: 2026-05-18T09:00:00
 description: "DO-330 — 도구를 신뢰할 수 있는지의 표준. TQL-1~5의 의미."
 series: "Developing Safety-Critical Software"

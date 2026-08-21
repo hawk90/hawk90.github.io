@@ -1,5 +1,6 @@
 ---
 title: "Ch 31: Nonparametric Bayesian Models"
+slug: "ml/foundations/murphy-ml2/chapter31-nonparametric-bayes"
 date: 2026-05-16T07:00:00
 description: "Dirichlet process·CRP·IBP — infinite-dimensional Bayes."
 series: "Probabilistic Machine Learning: Advanced Topics"

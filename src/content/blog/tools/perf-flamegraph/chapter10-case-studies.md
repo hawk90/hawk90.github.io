@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 실전 사례 + 시리즈 마무리"
+slug: "tools/perf-flamegraph/chapter10-case-studies"
 date: 2026-05-17T10:00:00
 description: "캐시 미스 / 락 컨텐션 / I/O 블로킹 실제 분석. 시리즈 마무리."
 tags: [perf, case-study]

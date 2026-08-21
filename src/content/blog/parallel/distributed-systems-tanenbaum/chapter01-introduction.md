@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction"
+slug: "parallel/distributed-systems-tanenbaum/chapter01-introduction"
 date: 2025-05-20T01:00:00
 description: "분산 시스템의 정의, 목표, 유형 — 투명성, 개방성, 확장성의 핵심 개념"
 series: "Distributed Systems"

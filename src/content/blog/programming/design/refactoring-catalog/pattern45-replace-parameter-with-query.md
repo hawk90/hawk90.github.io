@@ -1,5 +1,6 @@
 ---
 title: "Pattern 45: Replace Parameter with Query"
+slug: "programming/design/refactoring-catalog/pattern45-replace-parameter-with-query"
 date: 2026-05-02T21:00:00
 description: "함수가 스스로 알 수 있는 값을 매개변수로 받지 않는다 — caller 부담 제거."
 series: "Refactoring Catalog (Fowler 2nd ed)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Achieving Object-Oriented Design"
+slug: "programming/engineering/goos/chapter07-achieving-design"
 date: 2026-05-10T07:00:00
 description: "TDD가 디자인을 이끄는 방법 — 인터페이스 발견, 역할 진화."
 tags: [TDD, Design]

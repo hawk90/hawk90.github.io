@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Classes 기본"
+slug: "embedded/aerospace-standards/jsf-cpp/chapter07-classes-basic"
 date: 2026-05-18T08:00:00
 description: "JSF C++ — class vs struct, encapsulation, friend 회피, operator overload 정책, special member functions."
 tags: [jsf-cpp, classes, struct, encapsulation, friend, operator-overload, raii]

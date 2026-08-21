@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: The Quantitative Rules"
+slug: "math/probability/jaynes-logic/chapter02-quantitative-rules"
 date: 2026-05-16T02:00:00
 description: "Cox의 정리 — product rule과 sum rule이 유일하다."
 series: "Probability Theory: The Logic of Science"

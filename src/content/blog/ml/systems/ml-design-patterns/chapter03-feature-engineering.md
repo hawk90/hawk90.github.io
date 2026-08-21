@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 피처 엔지니어링 패턴"
+slug: "ml/systems/ml-design-patterns/chapter03-feature-engineering"
 date: 2026-05-16T03:00:00
 description: "Feature store·training-serving skew — 피처 일관성."
 series: "ML 디자인 패턴"

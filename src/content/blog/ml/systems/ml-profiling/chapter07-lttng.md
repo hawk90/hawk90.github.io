@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: 시스템 트레이싱 — LTTng"
+slug: "ml/systems/ml-profiling/chapter07-lttng"
 date: 2026-05-16T07:00:00
 description: "Low-overhead production tracing — LTTng·Perfetto."
 series: "ML 시스템 프로파일링"

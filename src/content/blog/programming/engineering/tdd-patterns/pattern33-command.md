@@ -1,5 +1,6 @@
 ---
 title: "Pattern 33: Command (in TDD)"
+slug: "programming/engineering/tdd-patterns/pattern33-command"
 date: 2026-05-10T09:00:00
 description: "Operation을 object로 — undo·queue·log 가능. TDD에서 의도 명확."
 series: "TDD by Example — Patterns Deep Dive"

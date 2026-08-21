@@ -1,5 +1,6 @@
 ---
 title: "Part 3-2: buddy allocator"
+slug: "systems/linux-kernel-internals/part3-02-buddy-allocator"
 date: 2026-05-12T12:00:00
 description: "물리 페이지 할당자 — 2^order 블록. fragmentation 회피."
 tags: [Linux, Kernel, Memory, Buddy]

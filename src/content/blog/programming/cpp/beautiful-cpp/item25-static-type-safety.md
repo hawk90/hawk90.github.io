@@ -1,5 +1,6 @@
 ---
 title: "항목 25: 프로그램은 최대한 정적으로 타입에 안전해야 한다"
+slug: "programming/cpp/beautiful-cpp/item25-static-type-safety"
 date: 2026-05-05T01:00:00
 description: "타입 시스템에 의미를 담아 컴파일러에게 검사를 맡기는 법 — strong types, std::optional, enum class."
 tags: [cpp, type-safety, strong-types]

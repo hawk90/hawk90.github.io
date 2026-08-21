@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Learning with Fewer Labeled Examples"
+slug: "ml/foundations/murphy-ml1/chapter19-fewer-labels"
 date: 2026-05-16T19:00:00
 description: "Semi-supervised·active·weak·self-supervised — label 부족 시 모든 길."
 series: "Probabilistic Machine Learning: An Introduction"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Synchronization"
+slug: "programming/cpp/extreme-c/chapter14-synchronization"
 date: 2026-05-05T14:00:00
 description: "동기화 primitives — mutex / semaphore / condition variable. atomic 연산."
 tags: [C, Synchronization, Mutex, Atomic]

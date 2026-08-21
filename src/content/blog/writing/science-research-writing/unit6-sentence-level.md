@@ -1,5 +1,6 @@
 ---
 title: "Unit 6: 문장 단위 편집·문체"
+slug: "writing/science-research-writing/unit6-sentence-level"
 date: 2026-05-14T12:00:00
 description: "section을 다 쓴 후 문장 단위에서 다듬는 단계 — 문법·문체·간결성·일관성."
 series: "Science Research Writing"

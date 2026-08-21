@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Heap Memory Management"
+slug: "embedded/rtos/freertos-mastering/chapter02-heap-memory"
 date: 2026-05-09T02:00:00
 description: "heap_1·heap_2·heap_3·heap_4·heap_5 — 다섯 가지 메모리 할당 전략과 static allocation."
 series: "Mastering the FreeRTOS Real Time Kernel"

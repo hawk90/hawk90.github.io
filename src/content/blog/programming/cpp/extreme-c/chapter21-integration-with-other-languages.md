@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Integration with Other Languages"
+slug: "programming/cpp/extreme-c/chapter21-integration-with-other-languages"
 date: 2026-05-05T21:00:00
 description: "C ↔ Python / Java / Go / Rust FFI. C가 시스템의 lingua franca인 이유."
 tags: [C, FFI, Python, Java, Rust]

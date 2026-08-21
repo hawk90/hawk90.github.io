@@ -1,5 +1,6 @@
 ---
 title: "Tip 76: Requirements Are Learned in a Feedback Loop"
+slug: "programming/engineering/pragmatic-programmer/tip76"
 date: 2026-05-12T04:00:00
 description: "요구사항은 피드백 루프에서 학습된다. 만들고, 보여주고, 배우고, 반복한다."
 series: "The Pragmatic Programmer"

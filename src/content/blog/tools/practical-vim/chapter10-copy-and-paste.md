@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Copy and Paste"
+slug: "tools/practical-vim/chapter10-copy-and-paste"
 date: 2026-05-17T10:00:00
 description: "레지스터 — 26+. y / p / P. 명명 / 무명 / 시스템 클립보드 / 블랙홀."
 tags: [Vim, Register, Yank, Paste]

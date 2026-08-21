@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 한국 우주 산업 — 시리즈 마무리"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter10-korea-application"
 date: 2026-05-18T11:00:00
 description: "한국 우주 산업의 공개된 사실 정리, ECSS 시리즈 마무리."
 tags: [ecss, korea, kari, kompsat, nuri]

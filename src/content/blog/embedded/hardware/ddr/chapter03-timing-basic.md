@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 기본 타이밍 — tCL, tRCD, tRP, tRAS"
+slug: "embedded/hardware/ddr/chapter03-timing-basic"
 date: 2026-05-16T04:00:00
 description: "DDR 메모리의 핵심 타이밍 파라미터: CAS Latency, RAS to CAS Delay, Row Precharge, Row Active Time"
 series: "DDR Memory Deep Dive"

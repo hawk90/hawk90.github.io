@@ -1,5 +1,6 @@
 ---
 title: "Ch 24: Function Pointers, Function Objects, Lambdas"
+slug: "programming/cpp/professional-cpp/chapter24-function-pointers-objects-lambdas"
 date: 2026-05-05T00:00:00
 description: "function pointer / 함수 객체 / 람다. std::function / function_ref."
 tags: [cpp, Lambda, "std::function", function-object]

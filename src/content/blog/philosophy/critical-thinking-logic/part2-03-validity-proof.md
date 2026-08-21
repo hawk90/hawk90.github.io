@@ -1,5 +1,6 @@
 ---
 title: "Part 2-3: 명제 논리 타당성 증명"
+slug: "philosophy/critical-thinking-logic/part2-03-validity-proof"
 date: 2026-05-14T07:00:00
 description: "진리표 / 진리수목 / 자연 연역 — 세 가지 타당성 증명법."
 tags: [Logic, Validity, truth-tree]

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 12: Encapsulate Record"
+slug: "programming/design/refactoring-catalog/pattern12-encapsulate-record"
 date: 2026-05-02T12:00:00
 description: "Record를 class로 감싸 접근을 통제하고 미래 변화에 대비한다."
 series: "Refactoring Catalog (Fowler 2nd ed)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Parallel Sum and Prefix Scan"
+slug: "parallel/art-of-concurrency/chapter06-parallel-sum-prefix"
 date: 2025-05-20T06:00:00
 description: "병렬 합과 프리픽스 스캔 — 기본 병렬 패턴"
 series: "The Art of Concurrency"

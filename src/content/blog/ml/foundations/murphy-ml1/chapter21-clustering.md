@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Clustering"
+slug: "ml/foundations/murphy-ml1/chapter21-clustering"
 date: 2026-05-16T21:00:00
 description: "K-means·EM·hierarchical·spectral — 비지도 군집화."
 series: "Probabilistic Machine Learning: An Introduction"

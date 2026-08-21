@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: CI/CD 통합"
+slug: "programming/git/git-flow/chapter08-ci-cd-integration"
 date: 2026-05-17T08:00:00
 description: "브랜치 → CI 트리거 → 배포. GitHub Actions / GitLab CI / Jenkins."
 tags: [Git, ci-cd, github-actions]

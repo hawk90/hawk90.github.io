@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Sparse Kernel Machines"
+slug: "ml/foundations/bishop-prml/chapter07-sparse-kernel"
 date: 2026-05-16T07:00:00
 description: "SVM·Relevance Vector Machine — sparse 솔루션."
 series: "Pattern Recognition and Machine Learning"

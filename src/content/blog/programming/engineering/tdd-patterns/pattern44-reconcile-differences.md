@@ -1,5 +1,6 @@
 ---
 title: "Pattern 44: Reconcile Differences"
+slug: "programming/engineering/tdd-patterns/pattern44-reconcile-differences"
 date: 2026-05-10T20:00:00
 description: "거의 동일한 두 method — 점진적으로 같게 만들어 통합. Big-bang 회피."
 series: "TDD by Example — Patterns Deep Dive"

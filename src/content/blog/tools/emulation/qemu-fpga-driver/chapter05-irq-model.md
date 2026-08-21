@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: FPGA 인터럽트 모델"
+slug: "tools/emulation/qemu-fpga-driver/chapter05-irq-model"
 date: 2026-05-17T05:00:00
 description: "MSI-X·user IRQ multiplexing — FPGA의 IRQ 토폴로지."
 tags: [QEMU, msi-x, fpga, user-irq]

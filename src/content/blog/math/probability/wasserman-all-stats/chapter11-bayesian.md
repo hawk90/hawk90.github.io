@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Bayesian Inference"
+slug: "math/probability/wasserman-all-stats/chapter11-bayesian"
 date: 2026-05-16T11:00:00
 description: "Prior·posterior·credible interval — Bayesian의 정수."
 series: "All of Statistics"

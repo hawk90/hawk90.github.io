@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Theories and Realism"
+slug: "philosophy/philosophy-of-science/ch03-theories-realism"
 date: 2026-05-15T03:00:00
 description: "이론과 실재론 — 과학 이론은 세계를 기술하는가."
 series: "Understanding Philosophy of Science"

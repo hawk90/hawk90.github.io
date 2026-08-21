@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Big Entropy and the Generalized Linear Model"
+slug: "math/probability/mcelreath-rethinking/chapter10-big-entropy"
 date: 2026-05-16T10:00:00
 description: "Max entropy → exponential family → GLM의 자연성."
 series: "Statistical Rethinking"

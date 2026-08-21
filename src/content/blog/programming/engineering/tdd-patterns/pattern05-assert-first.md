@@ -1,5 +1,6 @@
 ---
 title: "Pattern 5: Assert First"
+slug: "programming/engineering/tdd-patterns/pattern05-assert-first"
 date: 2026-05-10T05:00:00
 description: "테스트에서 assertion부터 — 거꾸로 코딩으로 의도를 명확히."
 series: "TDD by Example — Patterns Deep Dive"

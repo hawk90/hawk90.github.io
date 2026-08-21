@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: 트랜잭션"
+slug: "parallel/designing-data-intensive-applications/chapter07-transactions"
 date: 2026-05-12T07:00:00
 description: "ACID의 정확한 의미. Isolation level — Read Committed / Snapshot / Serializable. 동시 실행의 함정들."
 tags: [DDIA, Transaction, ACID, Isolation, Serializable]

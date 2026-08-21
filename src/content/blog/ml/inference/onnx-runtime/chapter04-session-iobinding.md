@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Session·IO Binding"
+slug: "ml/inference/onnx-runtime/chapter04-session-iobinding"
 date: 2026-05-16T04:00:00
 description: "Pre-allocated buffer로 copy 최소화."
 series: "ONNX Runtime 심화"

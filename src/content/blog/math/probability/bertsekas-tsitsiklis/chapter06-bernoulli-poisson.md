@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Bernoulli and Poisson Processes"
+slug: "math/probability/bertsekas-tsitsiklis/chapter06-bernoulli-poisson"
 date: 2026-05-16T06:00:00
 description: "Counting process·inter-arrival·merging·splitting."
 series: "Introduction to Probability"

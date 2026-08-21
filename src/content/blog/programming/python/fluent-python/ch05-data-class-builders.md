@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Data Class Builders"
+slug: "programming/python/fluent-python/ch05-data-class-builders"
 date: 2026-05-15T05:00:00
 description: "데이터 클래스 — namedtuple, typing.NamedTuple, @dataclass."
 series: "Fluent Python"

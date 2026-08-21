@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: The Nature of Normal Science"
+slug: "philosophy/scientific-revolutions/ch03-normal-science-nature"
 date: 2026-05-14T04:00:00
 description: "정상 과학의 본질 — 퍼즐 풀이로서의 연구."
 series: "The Structure of Scientific Revolutions"

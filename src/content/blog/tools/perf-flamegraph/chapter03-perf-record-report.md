@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: perf record / report"
+slug: "tools/perf-flamegraph/chapter03-perf-record-report"
 date: 2026-05-17T03:00:00
 description: "샘플링 프로파일링 — perf record. perf report로 분석."
 tags: [perf, Sampling, Profile]

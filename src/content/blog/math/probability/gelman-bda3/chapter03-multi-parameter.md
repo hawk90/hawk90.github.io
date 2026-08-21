@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Introduction to Multiparameter Models"
+slug: "math/probability/gelman-bda3/chapter03-multi-parameter"
 date: 2026-05-16T03:00:00
 description: "Normal with unknown σ²·multinomial·multivariate normal."
 series: "Bayesian Data Analysis (3rd ed)"

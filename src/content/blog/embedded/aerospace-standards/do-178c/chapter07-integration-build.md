@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Integration·Build·Executable Object Code 검증"
+slug: "embedded/aerospace-standards/do-178c/chapter07-integration-build"
 date: 2026-05-18T08:00:00
 description: "통합 빌드 절차, linker script, memory map 분석, EOC traceability, deactivated code, target에서의 검증."
 tags: [do-178c, integration, build, eoc, linker, memory-map, deactivated-code]

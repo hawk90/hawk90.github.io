@@ -1,5 +1,6 @@
 ---
 title: "Part 6-07: Splitting Stories — SPIDR 패턴"
+slug: "programming/engineering/agile-lean-engineering/part6-07-splitting-stories-spidr"
 date: 2026-05-23T14:00:00
 description: "Spike·Path·Interface·Data·Rules — Richard Lawrence의 SPIDR 카탈로그."
 series: "Agile & Lean Software Engineering"

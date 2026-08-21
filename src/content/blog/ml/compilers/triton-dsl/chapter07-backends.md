@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Backend — PTX·AMDGCN·기타"
+slug: "ml/compilers/triton-dsl/chapter07-backends"
 date: 2026-05-16T07:00:00
 description: "NVIDIA·AMD·Intel·Apple — Triton의 target 확장."
 series: "Triton DSL"

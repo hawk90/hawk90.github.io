@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: NVMe 아키텍처"
+slug: "embedded/hardware/nvme/chapter01-architecture"
 date: 2026-05-16T02:00:00
 description: "AHCI와 NVMe의 근본적인 차이를 비교하고 NVMe 아키텍처의 전체 구조를 분석한다"
 series: "NVMe Deep Dive"

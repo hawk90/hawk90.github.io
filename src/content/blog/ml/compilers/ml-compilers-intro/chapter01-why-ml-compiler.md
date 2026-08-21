@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: ML 컴파일러 개요 — 왜 필요한가"
+slug: "ml/compilers/ml-compilers-intro/chapter01-why-ml-compiler"
 date: 2026-05-16T01:00:00
 description: "PyTorch가 있으면 끝 아닌가 — ML 컴파일러의 의미."
 series: "ML 컴파일러"

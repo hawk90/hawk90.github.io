@@ -1,5 +1,6 @@
 ---
 title: "항목 35: 스레드 기반보다 태스크 기반 프로그래밍을 선호하라"
+slug: "programming/cpp/effective-modern-cpp/item35-prefer-task-based-programming-to-thread-based"
 date: 2026-05-04T11:00:00
 description: "std::async가 std::thread보다 안전·유연 — 결과 받기, 예외 전파, 자원 관리."
 tags: [cpp, Concurrency, "std::async", "std::thread", modern-cpp]

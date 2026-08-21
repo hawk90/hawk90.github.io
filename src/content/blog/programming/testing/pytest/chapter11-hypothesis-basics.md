@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Property-based — Hypothesis 기초"
+slug: "programming/testing/pytest/chapter11-hypothesis-basics"
 date: 2026-05-10T11:00:00
 description: "strategies·examples·settings — example-based 테스트를 property-based로."
 series: "pytest 심화"

@@ -1,5 +1,6 @@
 ---
 title: "DSA 13: 이진 탐색 트리 (BST)"
+slug: "programming/algorithms/data-structures-and-algorithms/item13-binary-search-tree"
 date: 2026-05-15T13:00:00
 description: "왼쪽 < 루트 < 오른쪽 — 평균 O(log n) 검색·삽입·삭제, 그러나 최악 O(n)."
 tags: [data-structure, Algorithm, BST, Tree]

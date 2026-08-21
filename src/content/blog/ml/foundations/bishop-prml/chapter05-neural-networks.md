@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Neural Networks"
+slug: "ml/foundations/bishop-prml/chapter05-neural-networks"
 date: 2026-05-16T05:00:00
 description: "Feed-forward·backprop·Bayesian NN — 2006년 시각의 NN."
 series: "Pattern Recognition and Machine Learning"

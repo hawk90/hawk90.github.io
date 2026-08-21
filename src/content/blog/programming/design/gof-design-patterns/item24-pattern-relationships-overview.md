@@ -1,5 +1,6 @@
 ---
 title: "GoF: 23 패턴 전체 — 관계도 + Atlas"
+slug: "programming/design/gof-design-patterns/item24-pattern-relationships-overview"
 date: 2026-05-01T00:00:00
 description: "GoF 23 패턴의 관계 다이어그램과 각 패턴의 한눈 atlas. 책 원본 스타일."
 tags: [design-pattern, GoF, Overview, Atlas]

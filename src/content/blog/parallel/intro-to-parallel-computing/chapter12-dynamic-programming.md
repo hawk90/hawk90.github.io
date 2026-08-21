@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Dynamic Programming"
+slug: "parallel/intro-to-parallel-computing/chapter12-dynamic-programming"
 date: 2026-05-21T12:00:00
 description: "병렬 동적 프로그래밍 — 의존성 분석, 파이프라이닝, 웨이브프론트"
 series: "Introduction to Parallel Computing"

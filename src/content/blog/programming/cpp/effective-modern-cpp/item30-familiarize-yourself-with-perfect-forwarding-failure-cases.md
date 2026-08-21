@@ -1,5 +1,6 @@
 ---
 title: "항목 30: perfect forwarding이 실패하는 경우에 익숙해져라"
+slug: "programming/cpp/effective-modern-cpp/item30-familiarize-yourself-with-perfect-forwarding-failure-cases"
 date: 2026-05-04T06:00:00
 description: "보편 참조 + std::forward로도 전달되지 않는 5가지 표현식 패턴."
 tags: [cpp, perfect-forwarding, Template, modern-cpp]

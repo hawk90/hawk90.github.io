@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Background and Jargon of Parallel Computing"
+slug: "parallel/patterns-for-parallel-programming/chapter02-background"
 date: 2026-05-21T15:00:00
 description: "병렬 컴퓨팅 배경 — 플린 분류, 메모리 모델, 성능 지표"
 series: "Patterns for Parallel Programming"

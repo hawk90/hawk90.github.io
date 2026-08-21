@@ -1,5 +1,6 @@
 ---
 title: "Part 2-18: Planning Game · Planning Poker"
+slug: "programming/engineering/agile-lean-engineering/part2-18-planning-game-poker"
 date: 2026-05-21T02:00:00
 description: "XP의 release planning과 iteration planning — Planning Poker의 기원."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "항목 6: 자동 생성 함수가 싫으면 명시적으로 금지하라"
+slug: "programming/cpp/effective-cpp/item06-explicitly-disallow-compiler-generated-functions"
 date: 2026-05-04T06:00:00
 description: "복사를 막아야 하는 클래스 — C++98 private 트릭, Uncopyable base, C++11 = delete."
 tags: [cpp, effective-c++, special-member-functions]

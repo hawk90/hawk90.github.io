@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: async·gpu·spir-v dialect"
+slug: "ml/compilers/mlir-deep/chapter11-async-gpu-spirv"
 date: 2026-05-16T11:00:00
 description: "비동기·GPU·Vulkan/SPIR-V를 위한 dialect들."
 series: "MLIR 심화"

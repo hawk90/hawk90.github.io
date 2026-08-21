@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: 비트스트림 로딩"
+slug: "tools/emulation/qemu-fpga-driver/chapter07-bitstream-loading"
 date: 2026-05-17T07:00:00
 description: "Driver의 firmware push — FPGA Manager subsystem."
 tags: [QEMU, bitstream, fpga-manager, firmware-load]

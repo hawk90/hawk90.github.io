@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Asymptotics and Connections to Non-Bayesian"
+slug: "math/probability/gelman-bda3/chapter04-asymptotics"
 date: 2026-05-16T04:00:00
 description: "Posterior가 점근적으로 normal — Bernstein-von Mises."
 series: "Bayesian Data Analysis (3rd ed)"

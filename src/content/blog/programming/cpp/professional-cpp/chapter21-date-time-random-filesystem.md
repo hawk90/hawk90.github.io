@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Date, Time, Random, Filesystem"
+slug: "programming/cpp/professional-cpp/chapter21-date-time-random-filesystem"
 date: 2026-05-05T21:00:00
 description: "std::chrono / random / filesystem. 표준이 제공하는 일상 유틸리티."
 tags: [cpp, chrono, random, filesystem]

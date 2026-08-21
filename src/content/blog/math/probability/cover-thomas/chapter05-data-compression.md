@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Data Compression"
+slug: "math/probability/cover-thomas/chapter05-data-compression"
 date: 2026-05-16T05:00:00
 description: "Kraft·Huffman·Shannon-Fano-Elias — 압축 코드의 정수."
 series: "Elements of Information Theory"

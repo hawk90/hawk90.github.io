@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Memory Management"
+slug: "programming/design/oosc/chapter09-memory-management"
 date: 2026-05-19T09:00:00
 description: "메모리 관리 — 가비지 컬렉션, 참조 카운팅, 수동 관리의 위험."
 series: "Object-Oriented Software Construction"

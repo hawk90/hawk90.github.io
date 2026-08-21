@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Quantization Tools"
+slug: "ml/inference/onnx-runtime/chapter06-quantization-tools"
 date: 2026-05-16T06:00:00
 description: "PTQ·QAT·QDQ — ORT가 제공하는 quantization 도구."
 series: "ONNX Runtime 심화"

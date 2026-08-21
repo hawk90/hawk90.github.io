@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Pairing·Bonding — BLE 보안의 핵심"
+slug: "embedded/wireless/getting-started-with-ble/chapter07-pairing-bonding"
 date: 2026-05-08T07:00:00
 description: "Just Works·Passkey·Numeric Comparison·OOB 4가지 페어링 방법. LE Secure Connections."
 series: "Getting Started with BLE"

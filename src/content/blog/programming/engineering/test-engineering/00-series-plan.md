@@ -1,5 +1,6 @@
 ---
 title: "Practical Test Engineering - Series Plan"
+slug: "programming/engineering/test-engineering/00-series-plan"
 date: 2026-05-22T00:00:00
 description: "테스트 설계 실무 시리즈 기획안"
 series: "Practical Test Engineering"

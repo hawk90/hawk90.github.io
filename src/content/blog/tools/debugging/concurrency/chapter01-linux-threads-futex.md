@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Linux 스레드의 정체 — clone / pthread / futex"
+slug: "tools/debugging/concurrency/chapter01-linux-threads-futex"
 date: 2026-05-17T01:00:00
 description: "Linux 스레드는 실은 프로세스. clone() 옵션, pthread_create의 안쪽, futex 메커니즘."
 tags: [linux, threads, clone, futex, pthread]

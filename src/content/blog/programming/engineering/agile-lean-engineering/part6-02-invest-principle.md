@@ -1,5 +1,6 @@
 ---
 title: "Part 6-02: INVEST 원칙"
+slug: "programming/engineering/agile-lean-engineering/part6-02-invest-principle"
 date: 2026-05-23T09:00:00
 description: "Independent·Negotiable·Valuable·Estimable·Small·Testable — 건강한 story의 속성."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 컨트롤러 — Arbiter, Scheduler, Interleaving"
+slug: "embedded/hardware/ddr/chapter11-controller"
 date: 2026-05-16T12:00:00
 description: "DDR 컨트롤러 아키텍처: 요청 중재, 명령 스케줄링, 주소 인터리빙 전략"
 series: "DDR Memory Deep Dive"

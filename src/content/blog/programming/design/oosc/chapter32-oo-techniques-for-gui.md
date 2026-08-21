@@ -1,5 +1,6 @@
 ---
 title: "Ch 32: Some O-O Techniques for Graphical Interactive Applications"
+slug: "programming/design/oosc/chapter32-oo-techniques-for-gui"
 date: 2026-05-19T08:00:00
 description: "GUI를 위한 OO 기법 — 이벤트 루프, MVC의 대안."
 series: "Object-Oriented Software Construction"

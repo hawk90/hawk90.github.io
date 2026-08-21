@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Searching"
+slug: "parallel/art-of-concurrency/chapter09-searching"
 date: 2025-05-20T09:00:00
 description: "병렬 검색 알고리즘 — 선형 검색, 이진 검색, 트리 검색"
 series: "The Art of Concurrency"

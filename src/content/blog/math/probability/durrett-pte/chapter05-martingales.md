@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Martingales"
+slug: "math/probability/durrett-pte/chapter05-martingales"
 date: 2026-05-16T05:00:00
 description: "Conditional expectation·stopping·convergence — martingale의 거의 모든 것."
 series: "Probability: Theory and Examples"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Genericity"
+slug: "programming/design/oosc/chapter10-genericity"
 date: 2026-05-19T10:00:00
 description: "제네릭 — 타입 매개변수화, 제약 제네릭, 컨테이너 설계."
 series: "Object-Oriented Software Construction"

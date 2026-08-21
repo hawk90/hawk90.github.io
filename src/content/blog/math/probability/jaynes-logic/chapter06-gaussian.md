@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: The Gaussian Distribution"
+slug: "math/probability/jaynes-logic/chapter06-gaussian"
 date: 2026-05-16T06:00:00
 description: "Central place·CLT·왜 Gaussian이 'normal'인가."
 series: "Probability Theory: The Logic of Science"

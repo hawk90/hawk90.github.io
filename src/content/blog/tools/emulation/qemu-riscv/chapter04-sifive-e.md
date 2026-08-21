@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: sifive_e 머신"
+slug: "tools/emulation/qemu-riscv/chapter04-sifive-e"
 date: 2026-05-17T22:00:00
 description: "QEMU sifive_e — E31 코어 에뮬레이션, 주변장치 모델을 다룬다."
 series: "RISC-V QEMU 심화"

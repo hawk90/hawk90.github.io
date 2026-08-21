@@ -1,5 +1,6 @@
 ---
 title: "Ch 28: Interfacing with C"
+slug: "programming/cpp/professional-cpp/chapter28-c-interfacing"
 date: 2026-05-05T04:00:00
 description: "C ↔ C++ — extern \"C\". name mangling. ABI 호환."
 tags: [cpp, C, FFI, ABI]

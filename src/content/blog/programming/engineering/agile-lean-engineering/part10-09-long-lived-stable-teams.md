@@ -1,5 +1,6 @@
 ---
 title: "Part 10-09: Long-lived Stable Teams — pizza two-team"
+slug: "programming/engineering/agile-lean-engineering/part10-09-long-lived-stable-teams"
 date: 2026-05-20T13:00:00
 description: "Bezos memo·long-lived team의 가치."
 series: "Agile & Lean Software Engineering"

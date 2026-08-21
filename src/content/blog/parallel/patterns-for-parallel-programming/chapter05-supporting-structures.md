@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: The Supporting Structures Design Space"
+slug: "parallel/patterns-for-parallel-programming/chapter05-supporting-structures"
 date: 2026-05-21T18:00:00
 description: "지원 구조 패턴 — SPMD, Master-Worker, Loop Parallelism, Fork-Join"
 series: "Patterns for Parallel Programming"

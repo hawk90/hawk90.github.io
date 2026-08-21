@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Concurrent Executors"
+slug: "programming/python/fluent-python/ch20-concurrent-executors"
 date: 2026-05-15T20:00:00
 description: "concurrent.futures — ThreadPoolExecutor / ProcessPoolExecutor."
 series: "Fluent Python"

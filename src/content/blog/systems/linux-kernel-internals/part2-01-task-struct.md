@@ -1,5 +1,6 @@
 ---
 title: "Part 2-1: task_struct 자세히"
+slug: "systems/linux-kernel-internals/part2-01-task-struct"
 date: 2026-05-12T05:00:00
 description: "프로세스 디스크립터 task_struct — PID / 상태 / 시그널 / 자원 등 핵심 필드."
 tags: [Linux, Kernel, Process, task_struct]

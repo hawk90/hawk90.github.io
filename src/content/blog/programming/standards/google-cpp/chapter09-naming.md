@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Naming"
+slug: "programming/standards/google-cpp/chapter09-naming"
 date: 2026-05-18T09:00:00
 description: "File / Type / Variable / Constant / Function / Namespace / Enum / Macro / Aliases — 모든 식별자의 명명 규칙."
 tags: [Google, cpp, Style-Guide, Naming]

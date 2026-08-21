@@ -1,5 +1,6 @@
 ---
 title: "Tip 42: Take Small Steps—Always"
+slug: "programming/engineering/pragmatic-programmer/tip42"
 date: 2026-05-11T18:00:00
 description: "항상 작은 걸음을 걸어라. 큰 걸음은 큰 위험이고, 작은 걸음은 빠른 피드백이다."
 series: "The Pragmatic Programmer"

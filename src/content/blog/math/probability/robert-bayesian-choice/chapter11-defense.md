@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: A Defense of the Bayesian Choice"
+slug: "math/probability/robert-bayesian-choice/chapter11-defense"
 date: 2026-05-15T11:00:00
 description: "Bayesian이 *그저 한 selection이 아니라* 합리적 선택인 이유."
 series: "The Bayesian Choice"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 32: Incorporating Design Techniques and Frameworks"
+slug: "programming/cpp/professional-cpp/chapter32-design-patterns"
 date: 2026-05-05T08:00:00
 description: "GoF 패턴 + 모던 C++ 변형. 깊은 다룸은 GoF / C++ Software Design 시리즈."
 tags: [cpp, design-patterns, GoF]

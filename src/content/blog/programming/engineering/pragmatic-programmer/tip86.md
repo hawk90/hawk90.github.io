@@ -1,5 +1,6 @@
 ---
 title: "Tip 86: Do What Works, Not What's Fashionable"
+slug: "programming/engineering/pragmatic-programmer/tip86"
 date: 2026-05-12T14:00:00
 description: "유행이 아니라 효과를 따르라. 맥락에 맞는 도구와 방법을 선택한다."
 series: "The Pragmatic Programmer"

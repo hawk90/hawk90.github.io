@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Probability and Inference"
+slug: "math/probability/gelman-bda3/chapter01-probability-inference"
 date: 2026-05-16T01:00:00
 description: "Bayesian framework 정의 — likelihood·prior·posterior."
 series: "Bayesian Data Analysis (3rd ed)"

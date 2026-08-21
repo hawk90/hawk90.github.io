@@ -1,5 +1,6 @@
 ---
 title: "Chapter 1.3: Verbs"
+slug: "writing/only-grammar-book/ch01-3-verbs"
 date: 2026-05-14T01:30:00
 description: "동사의 시제, 상, 법, 태 — 12 시제 체계, 능동·수동, 가정법, 조동사."
 series: "The Only Grammar Book You'll Ever Need"

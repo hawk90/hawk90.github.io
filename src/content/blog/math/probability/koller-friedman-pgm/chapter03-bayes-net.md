@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: The Bayesian Network Representation"
+slug: "math/probability/koller-friedman-pgm/chapter03-bayes-net"
 date: 2026-05-16T03:00:00
 description: "DAG·CPD·d-separation·I-map — Bayesian network 본격."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

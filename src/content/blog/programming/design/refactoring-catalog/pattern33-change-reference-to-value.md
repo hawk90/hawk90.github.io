@@ -1,5 +1,6 @@
 ---
 title: "Pattern 33: Change Reference to Value"
+slug: "programming/design/refactoring-catalog/pattern33-change-reference-to-value"
 date: 2026-05-02T09:00:00
 description: "Reference 객체를 immutable value로 — sharing 없는 데이터에 identity는 부담."
 series: "Refactoring Catalog (Fowler 2nd ed)"

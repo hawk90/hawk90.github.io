@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Modularity"
+slug: "programming/design/oosc/chapter03-modularity"
 date: 2026-05-19T03:00:00
 description: "모듈성의 5가지 기준과 5가지 원칙 — 분해, 조합, 이해, 연속성, 보호."
 series: "Object-Oriented Software Construction"

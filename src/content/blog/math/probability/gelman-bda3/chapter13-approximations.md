@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Modal and Distributional Approximations"
+slug: "math/probability/gelman-bda3/chapter13-approximations"
 date: 2026-05-16T13:00:00
 description: "Laplace·VI·EP·INLA — MCMC 대안의 deterministic approx."
 series: "Bayesian Data Analysis (3rd ed)"

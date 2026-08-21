@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Statistics"
+slug: "ml/foundations/murphy-ml1/chapter04-statistics"
 date: 2026-05-16T04:00:00
 description: "MLE·MAP·Bayes·bootstrap — 추론의 도구함."
 series: "Probabilistic Machine Learning: An Introduction"

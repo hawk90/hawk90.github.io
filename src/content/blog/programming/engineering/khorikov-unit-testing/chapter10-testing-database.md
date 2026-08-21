@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Testing the Database"
+slug: "programming/engineering/khorikov-unit-testing/chapter10-testing-database"
 date: 2026-05-10T10:00:00
 description: "DB 통합 테스트의 원칙. 실제 DB, 격리 전략, 테스트 데이터 관리, CI/CD 통합."
 tags: [Testing, Database]

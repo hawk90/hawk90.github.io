@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 특권 모드 개요"
+slug: "systems/riscv/isa-anatomy/chapter11-privilege-modes"
 date: 2026-05-17T11:00:00
 description: "RISC-V 특권 모드 — M/S/U 모드, 모드 전환 메커니즘, 특권 레벨을 다룬다."
 series: "RISC-V ISA 해부"

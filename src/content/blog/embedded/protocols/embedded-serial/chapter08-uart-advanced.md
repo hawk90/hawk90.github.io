@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: UART 심화 — RTS/CTS, DMA + IDLE, FIFO, Multi-Drop"
+slug: "embedded/protocols/embedded-serial/chapter08-uart-advanced"
 date: 2026-05-16T08:00:00
 description: "흐름 제어로 overrun 방지, DMA + IDLE 라인 인터럽트로 가변 길이 프레임 수신."
 series: "Embedded Protocols 심화"

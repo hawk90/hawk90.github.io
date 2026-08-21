@@ -1,5 +1,6 @@
 ---
 title: "Tip 27: Achieve Editor Fluency"
+slug: "programming/engineering/pragmatic-programmer/tip27"
 date: 2026-05-12T03:00:00
 description: "에디터 유창성을 달성하라 — 가장 자주 쓰는 도구. 손이 — 생각의 속도를 따라가야."
 series: "The Pragmatic Programmer"

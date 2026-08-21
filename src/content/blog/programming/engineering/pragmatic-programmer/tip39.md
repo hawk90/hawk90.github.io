@@ -1,5 +1,6 @@
 ---
 title: "Tip 39: Use Assertions to Prevent the Impossible"
+slug: "programming/engineering/pragmatic-programmer/tip39"
 date: 2026-05-11T15:00:00
 description: "단정으로 불가능을 막아라. '절대 일어날 리 없다'고 생각하는 조건을 코드로 명시한다."
 series: "The Pragmatic Programmer"

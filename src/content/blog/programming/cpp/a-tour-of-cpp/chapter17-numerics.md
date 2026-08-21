@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Numerics"
+slug: "programming/cpp/a-tour-of-cpp/chapter17-numerics"
 date: 2026-05-22T17:00:00
 description: "수치 연산 — 수학 함수, complex, random, valarray"
 series: "A Tour of C++"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Breaking Changes"
+slug: "programming/git/git-conventions/chapter04-breaking-changes"
 date: 2026-05-17T04:00:00
 description: "BREAKING CHANGE 표기 — body footer / type! 형태. semver와 연동."
 tags: [Git, breaking-change, Semver]

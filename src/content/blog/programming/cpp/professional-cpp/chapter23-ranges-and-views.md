@@ -1,5 +1,6 @@
 ---
 title: "Ch 23: Ranges and Views (C++20/23)"
+slug: "programming/cpp/professional-cpp/chapter23-ranges-and-views"
 date: 2026-05-05T23:00:00
 description: "std::ranges — pipeline. std::views — lazy. C++23 추가 view."
 tags: [cpp, Ranges, Views, C++20, C++23]

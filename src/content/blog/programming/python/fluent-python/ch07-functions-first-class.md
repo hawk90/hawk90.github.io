@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Functions as First-Class Objects"
+slug: "programming/python/fluent-python/ch07-functions-first-class"
 date: 2026-05-15T07:00:00
 description: "일급 함수 — 함수형 프로그래밍 패턴."
 series: "Fluent Python"

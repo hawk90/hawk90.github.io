@@ -1,5 +1,6 @@
 ---
 title: "DSA 7: 큐 / 원형 큐 / 덱"
+slug: "programming/algorithms/data-structures-and-algorithms/item07-queue-deque"
 date: 2026-05-15T07:00:00
 description: "FIFO 큐, 원형 버퍼의 wrap-around 트릭, 양쪽 끝 모두 가능한 덱."
 tags: [data-structure, Algorithm, Queue, Deque]

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 7: Usage"
+slug: "writing/on-writing-well/ch07-usage"
 date: 2026-05-14T07:00:00
 description: "용법의 권위는 누가 결정하는가. 사전과 작가 사이에서 — Usage Panel의 변화하는 합의."
 series: "On Writing Well"

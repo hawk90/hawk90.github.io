@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Communicating with Hardware"
+slug: "systems/linux-drivers/ldd3-modern/chapter09-hardware"
 date: 2026-05-13T09:00:00
 description: "ioport·ioremap·MMIO·barriers — 커널이 HW와 대화하는 표준 인터페이스."
 series: "Linux Device Drivers (LDD3)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Typed / type-parameterized tests"
+slug: "programming/testing/gtest/chapter08-typed"
 date: 2026-05-10T08:00:00
 description: "TYPED_TEST와 TYPED_TEST_SUITE_P — 같은 테스트를 여러 타입에 적용."
 series: "gtest 심화"

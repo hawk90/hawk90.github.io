@@ -1,5 +1,6 @@
 ---
 title: "Ch 4 Words: K–N"
+slug: "writing/elements-of-style/ch04/words-k-n"
 date: 2026-05-14T05:00:00
 description: "자주 오용되는 단어와 표현 — Kind of부터 Nor까지."
 series: "The Elements of Style"

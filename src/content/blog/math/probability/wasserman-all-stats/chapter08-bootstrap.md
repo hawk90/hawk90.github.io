@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: The Bootstrap"
+slug: "math/probability/wasserman-all-stats/chapter08-bootstrap"
 date: 2026-05-16T08:00:00
 description: "Resample — 분포 모를 때 standard error를 얻는다."
 series: "All of Statistics"

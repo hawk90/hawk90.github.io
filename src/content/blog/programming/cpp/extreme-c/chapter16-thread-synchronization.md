@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Thread Synchronization"
+slug: "programming/cpp/extreme-c/chapter16-thread-synchronization"
 date: 2026-05-05T16:00:00
 description: "스레드 동기화 — pthread_mutex / cond / barrier. reader-writer lock."
 tags: [C, pthread, Synchronization]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Process"
+slug: "programming/design/ooad/chapter06-process"
 date: 2026-05-19T06:00:00
 description: "프로세스 — 반복적 개발, 마이크로/매크로 프로세스."
 series: "Object-Oriented Analysis and Design with Applications"

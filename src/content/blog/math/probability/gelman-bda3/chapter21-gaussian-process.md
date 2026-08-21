@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Gaussian Process Models"
+slug: "math/probability/gelman-bda3/chapter21-gaussian-process"
 date: 2026-05-16T21:00:00
 description: "BDA3 시각의 GP — spatial·temporal·geostatistics."
 series: "Bayesian Data Analysis (3rd ed)"

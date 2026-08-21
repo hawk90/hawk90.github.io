@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Independence and Bayesian Networks"
+slug: "math/probability/halpern-uncertainty/chapter04-independence-bayes-net"
 date: 2026-05-16T04:00:00
 description: "Conditional independence·d-separation·각 framework의 BN."
 series: "Reasoning About Uncertainty"

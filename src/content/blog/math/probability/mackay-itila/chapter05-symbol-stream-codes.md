@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Symbol·Stream Codes"
+slug: "math/probability/mackay-itila/chapter05-symbol-stream-codes"
 date: 2026-05-16T05:00:00
 description: "Huffman·arithmetic·LZ — 압축 알고리즘의 정수."
 series: "Information Theory, Inference, and Learning Algorithms"

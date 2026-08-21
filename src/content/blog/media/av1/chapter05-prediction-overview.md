@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Frame Header"
+slug: "media/av1/chapter05-prediction-overview"
 date: 2026-05-16T06:00:00
 description: "AV1 Frame Header 구조 — 프레임 타입, 양자화, 세그멘테이션, 필터 파라미터."
 tags: [AV1, Video, Codec, frame-header, Quantization]

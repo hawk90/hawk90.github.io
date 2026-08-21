@@ -1,5 +1,6 @@
 ---
 title: "Pattern 45: Isolate Change"
+slug: "programming/engineering/tdd-patterns/pattern45-isolate-change"
 date: 2026-05-10T21:00:00
 description: "변경 영역을 격리 — 리팩터링 위험 감소, 테스트 가능 단위 확보."
 series: "TDD by Example — Patterns Deep Dive"

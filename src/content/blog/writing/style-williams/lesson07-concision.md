@@ -1,5 +1,6 @@
 ---
 title: "Lesson 7: Concision"
+slug: "writing/style-williams/lesson07-concision"
 date: 2026-05-14T07:00:00
 description: "불필요한 단어를 잘라내는 6개의 진단 패턴. Redundant pair, meaningless modifier, obvious belabored."
 series: "Style: Lessons in Clarity and Grace"

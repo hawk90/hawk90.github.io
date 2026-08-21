@@ -1,5 +1,6 @@
 ---
 title: "Part 3-18: Scrum 안티패턴 — Cargo Cult Scrum"
+slug: "programming/engineering/agile-lean-engineering/part3-18-scrum-antipatterns"
 date: 2026-05-22T02:00:00
 description: "절차만 따라하고 empiricism을 놓치는 패턴 — Schwaber의 비판."
 series: "Agile & Lean Software Engineering"

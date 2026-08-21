@@ -1,5 +1,6 @@
 ---
 title: "Part 2-04: Feedback Value 깊이 — cost of change 곡선"
+slug: "programming/engineering/agile-lean-engineering/part2-04-feedback-value"
 date: 2026-05-20T12:00:00
 description: "왜 feedback이 다른 가치들의 핵심인가 — cost of change 곡선과 함께."
 series: "Agile & Lean Software Engineering"

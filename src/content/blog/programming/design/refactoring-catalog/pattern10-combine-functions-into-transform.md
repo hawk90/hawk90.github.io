@@ -1,5 +1,6 @@
 ---
 title: "Pattern 10: Combine Functions into Transform"
+slug: "programming/design/refactoring-catalog/pattern10-combine-functions-into-transform"
 date: 2026-05-02T10:00:00
 description: "파생값을 한 transform 함수로 모은다 — 함수형 / immutable 스타일."
 series: "Refactoring Catalog (Fowler 2nd ed)"

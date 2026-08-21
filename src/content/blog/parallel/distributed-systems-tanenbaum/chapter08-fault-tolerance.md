@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Fault Tolerance"
+slug: "parallel/distributed-systems-tanenbaum/chapter08-fault-tolerance"
 date: 2025-05-20T08:00:00
 description: "장애 유형, 프로세스 복원, 신뢰성 있는 통신, 분산 커밋, 복구"
 series: "Distributed Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Header Files"
+slug: "programming/standards/google-cpp/chapter02-header-files"
 date: 2026-05-18T02:00:00
 description: "Self-contained / #define guard / IWYU / Forward declaration / Inline / Include 순서."
 tags: [Google, cpp, Style-Guide, Header, Include]

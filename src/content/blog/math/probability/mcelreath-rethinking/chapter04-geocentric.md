@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Geocentric Models"
+slug: "math/probability/mcelreath-rethinking/chapter04-geocentric"
 date: 2026-05-16T04:00:00
 description: "Linear regression — 천동설처럼 틀려도 유용한 model."
 series: "Statistical Rethinking"

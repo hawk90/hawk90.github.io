@@ -1,5 +1,6 @@
 ---
 title: "Chapter 1.1: Nouns"
+slug: "writing/only-grammar-book/ch01-1-nouns"
 date: 2026-05-14T01:10:00
 description: "명사의 종류와 사용 — 보통명사, 고유명사, 집합명사, 가산·불가산, 복수 형성, 소유격."
 series: "The Only Grammar Book You'll Ever Need"

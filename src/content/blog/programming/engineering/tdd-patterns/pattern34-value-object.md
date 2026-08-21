@@ -1,5 +1,6 @@
 ---
 title: "Pattern 34: Value Object"
+slug: "programming/engineering/tdd-patterns/pattern34-value-object"
 date: 2026-05-10T10:00:00
 description: "Immutable·equality·hash — value-based 객체로 안전한 코드."
 series: "TDD by Example — Patterns Deep Dive"

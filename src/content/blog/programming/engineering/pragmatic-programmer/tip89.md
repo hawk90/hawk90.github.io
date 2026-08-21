@@ -1,5 +1,6 @@
 ---
 title: "Tip 89: Test Early, Test Often, Test Automatically"
+slug: "programming/engineering/pragmatic-programmer/tip89"
 date: 2026-05-12T17:00:00
 description: "일찍 테스트하고, 자주 테스트하고, 자동으로 테스트하라. 버그는 빨리 발견할수록 고치기 쉽다."
 series: "The Pragmatic Programmer"

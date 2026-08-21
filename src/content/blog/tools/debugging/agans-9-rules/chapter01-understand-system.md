@@ -1,5 +1,6 @@
 ---
 title: "Rule 1: Understand the System"
+slug: "tools/debugging/agans-9-rules/chapter01-understand-system"
 date: 2026-05-17T01:00:00
 description: "버그를 찾기 전에 시스템을 먼저 안다 — 디버깅의 첫 원칙."
 series: "Debugging: The 9 Indispensable Rules"

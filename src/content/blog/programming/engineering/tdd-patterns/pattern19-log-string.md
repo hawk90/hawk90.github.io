@@ -1,5 +1,6 @@
 ---
 title: "Pattern 19: Log String"
+slug: "programming/engineering/tdd-patterns/pattern19-log-string"
 date: 2026-05-10T19:00:00
 description: "상호작용 순서를 string/list에 기록 — 단순하고 명확한 sequence 검증."
 series: "TDD by Example — Patterns Deep Dive"

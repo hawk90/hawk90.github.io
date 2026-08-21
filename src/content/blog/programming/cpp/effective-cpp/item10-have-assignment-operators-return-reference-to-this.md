@@ -1,5 +1,6 @@
 ---
 title: "항목 10: 대입 연산자는 *this의 참조를 반환하라"
+slug: "programming/cpp/effective-cpp/item10-have-assignment-operators-return-reference-to-this"
 date: 2026-05-04T10:00:00
 description: "체인 대입(x = y = z) 지원을 위한 표준 관용구 — 모든 compound assignment에 적용."
 tags: [cpp, effective-c++, operator-overloading]

@@ -1,5 +1,6 @@
 ---
 title: "Part 3-01: Scrum 개요와 역사"
+slug: "programming/engineering/agile-lean-engineering/part3-01-scrum-overview-history"
 date: 2026-05-21T09:00:00
 description: "Takeuchi/Nonaka 럭비 1986 → Sutherland 1995 → Scrum Guide."
 series: "Agile & Lean Software Engineering"

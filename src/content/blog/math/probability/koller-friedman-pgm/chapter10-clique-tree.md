@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Clique Tree Algorithm"
+slug: "math/probability/koller-friedman-pgm/chapter10-clique-tree"
 date: 2026-05-16T10:00:00
 description: "Junction tree·message passing·marginal in single shot."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

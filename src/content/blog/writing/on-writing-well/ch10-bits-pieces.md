@@ -1,5 +1,6 @@
 ---
 title: "Chapter 10: Bits and Pieces"
+slug: "writing/on-writing-well/ch10-bits-pieces"
 date: 2026-05-14T10:00:00
 description: "글쓰기의 작은 디테일들 — 동사, 부사, 형용사, qualifier, punctuation, show vs tell. Part 1의 마무리."
 series: "On Writing Well"

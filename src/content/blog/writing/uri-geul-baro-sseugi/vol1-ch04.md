@@ -1,5 +1,6 @@
 ---
 title: "제1권 4장: 생각을 키우는 글"
+slug: "writing/uri-geul-baro-sseugi/vol1-ch04"
 date: 2026-05-14T04:00:00
 description: "사고력과 글쓰기의 관계. 글을 쓰면서 생각을 깊게 하는 법."
 series: "우리글 바로쓰기"

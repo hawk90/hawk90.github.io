@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Hello, concurrent world!"
+slug: "parallel/cpp-concurrency-in-action/chapter01-hello-concurrent-world"
 date: 2026-05-06T01:00:00
 description: "동시성과 병렬성의 차이, C++11 std::thread 첫 사용, 동시성을 사용해야 할 이유."
 tags: [cpp, Concurrency, "std::thread"]

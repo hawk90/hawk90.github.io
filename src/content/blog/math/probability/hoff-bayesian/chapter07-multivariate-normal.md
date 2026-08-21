@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: The Multivariate Normal Model"
+slug: "math/probability/hoff-bayesian/chapter07-multivariate-normal"
 date: 2026-05-15T07:00:00
 description: "MVN·Inverse-Wishart·multivariate posterior."
 series: "A First Course in Bayesian Statistical Methods"

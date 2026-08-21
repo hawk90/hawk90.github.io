@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Hypothesis Testing and p-values"
+slug: "math/probability/wasserman-all-stats/chapter10-hypothesis-testing"
 date: 2026-05-16T10:00:00
 description: "Type I·II error·Wald·LRT·permutation."
 series: "All of Statistics"

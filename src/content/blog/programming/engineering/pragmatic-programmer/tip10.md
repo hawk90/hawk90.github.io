@@ -1,5 +1,6 @@
 ---
 title: "Tip 10: Critically Analyze What You Read and Hear"
+slug: "programming/engineering/pragmatic-programmer/tip10"
 date: 2026-05-11T10:00:00
 description: "읽고 듣는 것을 비판적으로 분석하라 — 권위와 유행에 휩쓸리지 말고 자기 맥락에서 평가하라."
 series: "The Pragmatic Programmer"

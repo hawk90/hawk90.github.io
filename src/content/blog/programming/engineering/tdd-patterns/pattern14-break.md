@@ -1,5 +1,6 @@
 ---
 title: "Pattern 14: Break"
+slug: "programming/engineering/tdd-patterns/pattern14-break"
 date: 2026-05-10T14:00:00
 description: "지쳤거나 막히면 — 휴식. 피곤한 상태로 짠 코드가 가장 비싸다."
 series: "TDD by Example — Patterns Deep Dive"

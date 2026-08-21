@@ -1,5 +1,6 @@
 ---
 title: "Ch 25: Diffusion Models"
+slug: "ml/foundations/murphy-ml2/chapter25-diffusion"
 date: 2026-05-16T01:00:00
 description: "Forward·reverse SDE·score matching — modern generative의 정점."
 series: "Probabilistic Machine Learning: Advanced Topics"

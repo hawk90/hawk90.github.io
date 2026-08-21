@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: The Exponential Family"
+slug: "math/probability/koller-friedman-pgm/chapter08-exponential-family"
 date: 2026-05-16T08:00:00
 description: "Natural parameter·log partition·sufficient statistic — exponential family 통합."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

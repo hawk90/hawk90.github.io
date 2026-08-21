@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: A Role for History"
+slug: "philosophy/scientific-revolutions/ch01-introduction"
 date: 2026-05-14T02:00:00
 description: "역사가 과학을 다시 본다 — 누적적 과학사관의 한계."
 series: "The Structure of Scientific Revolutions"

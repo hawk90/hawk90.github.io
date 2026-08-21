@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: 창발 (Emergence)"
+slug: "programming/engineering/clean-code/chapter12-emergence"
 date: 2026-05-11T12:00:00
 description: "Kent Beck의 네 가지 단순한 규칙 — 테스트 통과, 중복 없음, 의도 표현, 클래스/메서드 최소화. 좋은 디자인이 창발한다."
 tags: [CleanCode, Design, simple-design, kent-beck, robert-martin]

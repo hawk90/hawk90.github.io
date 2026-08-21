@@ -1,5 +1,6 @@
 ---
 title: "Pattern 15: Do Over"
+slug: "programming/engineering/tdd-patterns/pattern15-do-over"
 date: 2026-05-10T15:00:00
 description: "막혔을 때 — 처음부터 다시. Sunk cost fallacy를 거부하는 용기."
 series: "TDD by Example — Patterns Deep Dive"

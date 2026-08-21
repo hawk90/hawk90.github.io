@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: fork / vfork / 멀티프로세스 디버깅"
+slug: "tools/debugging/concurrency/chapter03-fork-multiprocess"
 date: 2026-05-17T03:00:00
 description: "follow-fork-mode, detach-on-fork, exec 추적, namespace, 컨테이너 디버깅."
 tags: [fork, vfork, multiprocess, namespace, container]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Navigate Between Files with Jumps"
+slug: "tools/practical-vim/chapter09-jumps"
 date: 2026-05-17T09:00:00
 description: "jump list (Ctrl+o / Ctrl+i). changes list. tag jumps."
 tags: [Vim, Jump, Tag]

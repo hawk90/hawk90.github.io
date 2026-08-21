@@ -1,5 +1,6 @@
 ---
 title: "Column 13: Searching"
+slug: "programming/algorithms/programming-pearls/col13"
 date: 2026-05-11T13:00:00
 description: "Searching"
 series: "Programming Pearls"

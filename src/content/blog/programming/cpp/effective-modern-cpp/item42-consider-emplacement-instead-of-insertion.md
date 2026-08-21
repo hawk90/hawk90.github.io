@@ -1,5 +1,6 @@
 ---
 title: "항목 42: 삽입(insertion) 대신 안치(emplacement)를 고려하라"
+slug: "programming/cpp/effective-modern-cpp/item42-consider-emplacement-instead-of-insertion"
 date: 2026-05-04T18:00:00
 description: "emplace_back 등 emplace API가 push_back보다 효율적인 시점과 주의점."
 tags: [cpp, Container, Performance, modern-cpp]

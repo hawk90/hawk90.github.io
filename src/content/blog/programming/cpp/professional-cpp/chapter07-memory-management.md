@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Memory Management"
+slug: "programming/cpp/professional-cpp/chapter07-memory-management"
 date: 2026-05-05T07:00:00
 description: "RAII, smart pointer, new / delete 회피. 메모리 풀."
 tags: [cpp, Memory, RAII, smart-pointer]

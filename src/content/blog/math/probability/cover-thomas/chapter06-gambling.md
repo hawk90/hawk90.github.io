@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Gambling and Data Compression"
+slug: "math/probability/cover-thomas/chapter06-gambling"
 date: 2026-05-16T06:00:00
 description: "Kelly betting과 doubling rate — 압축의 쌍둥이."
 series: "Elements of Information Theory"

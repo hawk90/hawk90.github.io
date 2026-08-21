@@ -1,5 +1,6 @@
 ---
 title: "Ch 34: Emulating Object Technology in Non-O-O Environments"
+slug: "programming/design/oosc/chapter34-emulating-oo-in-non-oo"
 date: 2026-05-19T10:00:00
 description: "비OO 환경에서의 OO 에뮬레이션 — C, Fortran에서 OO 패턴."
 series: "Object-Oriented Software Construction"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: The Many Variables and the Spurious Waffles"
+slug: "math/probability/mcelreath-rethinking/chapter05-spurious-waffles"
 date: 2026-05-16T05:00:00
 description: "Multiple regression·spurious correlation·confounding."
 series: "Statistical Rethinking"

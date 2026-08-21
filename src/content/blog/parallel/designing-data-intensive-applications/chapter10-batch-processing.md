@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Batch 처리"
+slug: "parallel/designing-data-intensive-applications/chapter10-batch-processing"
 date: 2026-05-12T10:00:00
 description: "MapReduce, Hadoop, Spark. 대량 데이터의 배치 처리 — 입력 partition, sort, reduce."
 tags: [DDIA, Batch, MapReduce, Hadoop, Spark]

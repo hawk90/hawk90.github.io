@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Random Vectors in High Dimensions"
+slug: "math/probability/vershynin-hdp/chapter03-random-vectors"
 date: 2026-05-16T03:00:00
 description: "Concentration of norm·thin shell·high-d Gaussian geometry."
 series: "High-Dimensional Probability"

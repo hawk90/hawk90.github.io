@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: From Prior Information to Prior Distributions"
+slug: "math/probability/robert-bayesian-choice/chapter03-priors"
 date: 2026-05-15T03:00:00
 description: "Subjective·conjugate·noninformative·reference prior."
 series: "The Bayesian Choice"

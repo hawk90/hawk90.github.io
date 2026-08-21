@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Utilities and Decisions"
+slug: "math/probability/koller-friedman-pgm/chapter21-utilities-decisions"
 date: 2026-05-16T21:00:00
 description: "Influence diagram·decision-theoretic PGM·value of information."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

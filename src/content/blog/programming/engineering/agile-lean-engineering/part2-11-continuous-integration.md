@@ -1,5 +1,6 @@
 ---
 title: "Part 2-11: Continuous Integration — XP의 정의"
+slug: "programming/engineering/agile-lean-engineering/part2-11-continuous-integration"
 date: 2026-05-20T19:00:00
 description: "XP의 CI — 매일 multiple times integrate. 현대 CI/CD와의 차이와 공통점."
 series: "Agile & Lean Software Engineering"

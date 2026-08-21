@@ -1,5 +1,6 @@
 ---
 title: "Chapter 2.2: Clauses"
+slug: "writing/only-grammar-book/ch02-2-clauses"
 date: 2026-05-14T02:20:00
 description: "절의 종류 — 독립절·종속절, 명사절·형용사절·부사절."
 series: "The Only Grammar Book You'll Ever Need"

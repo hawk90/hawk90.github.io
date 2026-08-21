@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: ONNX Runtime GenAI·LLM Serving"
+slug: "ml/inference/onnx-runtime/chapter08-genai"
 date: 2026-05-16T08:00:00
 description: "onnxruntime-genai — LLM 추론 고수준 API."
 series: "ONNX Runtime 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Tip 73: Name Well; Rename When Needed"
+slug: "programming/engineering/pragmatic-programmer/tip73"
 date: 2026-05-12T01:00:00
 description: "이름을 잘 짓고, 필요하면 바꿔라. 이름은 의도를 드러내야 한다."
 series: "The Pragmatic Programmer"

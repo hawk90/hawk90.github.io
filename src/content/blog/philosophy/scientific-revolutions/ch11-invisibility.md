@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: The Invisibility of Revolutions"
+slug: "philosophy/scientific-revolutions/ch11-invisibility"
 date: 2026-05-14T12:00:00
 description: "혁명의 비가시성 — 교과서가 가린 단절."
 series: "The Structure of Scientific Revolutions"

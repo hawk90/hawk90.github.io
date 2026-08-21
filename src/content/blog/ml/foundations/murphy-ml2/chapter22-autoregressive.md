@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Auto-regressive Models"
+slug: "ml/foundations/murphy-ml2/chapter22-autoregressive"
 date: 2026-05-16T22:00:00
 description: "PixelCNN·WaveNet·GPT — tractable likelihood·sequential decode."
 series: "Probabilistic Machine Learning: Advanced Topics"

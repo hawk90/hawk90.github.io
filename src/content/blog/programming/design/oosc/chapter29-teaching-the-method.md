@@ -1,5 +1,6 @@
 ---
 title: "Ch 29: Teaching the Method"
+slug: "programming/design/oosc/chapter29-teaching-the-method"
 date: 2026-05-19T05:00:00
 description: "방법론 교육 — 객체지향을 어떻게 가르칠 것인가."
 series: "Object-Oriented Software Construction"

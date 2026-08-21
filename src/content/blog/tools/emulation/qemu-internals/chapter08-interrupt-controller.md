@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: 인터럽트 컨트롤러"
+slug: "tools/emulation/qemu-internals/chapter08-interrupt-controller"
 date: 2026-05-17T08:00:00
 description: "GIC, APIC 인터럽트 컨트롤러 에뮬레이션을 이해한다."
 tags: [QEMU, GIC, APIC, PLIC, Interrupt, MSI]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Empirical CDF and Functionals"
+slug: "math/probability/wasserman-all-stats/chapter07-empirical-cdf"
 date: 2026-05-16T07:00:00
 description: "분포에서 추정으로 — F̂_n과 plug-in estimator."
 series: "All of Statistics"

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 31: Exception Test"
+slug: "programming/engineering/tdd-patterns/pattern31-exception-test"
 date: 2026-05-10T07:00:00
 description: "Exception·error 경로 검증 — robustness의 절반."
 series: "TDD by Example — Patterns Deep Dive"

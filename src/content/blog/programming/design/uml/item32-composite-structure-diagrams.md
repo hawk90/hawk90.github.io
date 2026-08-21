@@ -1,5 +1,6 @@
 ---
 title: "UML 32: 컴포지트 구조 다이어그램 — 클래스 내부의 부품·포트·연결"
+slug: "programming/design/uml/item32-composite-structure-diagrams"
 date: 2026-05-03T04:00:00
 description: "클래스 다이어그램은 '무엇이 누구를 안다'까지, 컴포지트 구조는 '내부가 어떻게 연결됐다'까지. UML 2.0 신규, 임베디드·아키텍처에서 핵심."
 tags: [UML, composite-structure, Part, Port, Connector]

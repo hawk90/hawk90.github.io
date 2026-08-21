@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: 실전 — CI·pre-commit·coverage gate"
+slug: "programming/testing/pytest/chapter18-ci"
 date: 2026-05-10T18:00:00
 description: "GitHub Actions·pre-commit·flaky test 감지 — pytest를 양산 환경에."
 series: "pytest 심화"

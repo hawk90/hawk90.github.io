@@ -1,5 +1,6 @@
 ---
 title: "UML 14: 객체 다이어그램 — 시스템의 스냅샷"
+slug: "programming/design/uml/item14-object-diagrams"
 date: 2026-05-03T14:00:00
 description: "특정 시점의 객체 그래프 — 디버깅·시나리오·테스트 케이스 시각화의 결정타."
 tags: [UML, object-diagram, Snapshot, Debugging]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: The Static Structure: Classes"
+slug: "programming/design/oosc/chapter07-the-static-structure-classes"
 date: 2026-05-19T07:00:00
 description: "클래스 — 객체지향의 핵심 구성 단위, 속성과 루틴."
 series: "Object-Oriented Software Construction"

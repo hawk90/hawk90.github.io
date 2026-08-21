@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: 검증 — Reviews·Analyses·Testing"
+slug: "embedded/avionics/developing-safety-critical/chapter07-verification"
 date: 2026-05-18T07:00:00
 description: "DO-178C verification process — review·analysis·test의 3축과 trace 요구."
 series: "Developing Safety-Critical Software"

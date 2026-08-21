@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Single-Host IPC"
+slug: "programming/cpp/extreme-c/chapter19-single-host-ipc"
 date: 2026-05-05T19:00:00
 description: "단일 호스트 IPC — pipe / FIFO / 메시지 큐 / 공유 메모리 / Unix socket."
 tags: [C, IPC, pipe, shared-memory]

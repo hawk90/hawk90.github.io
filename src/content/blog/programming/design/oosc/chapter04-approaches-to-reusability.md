@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Approaches to Reusability"
+slug: "programming/design/oosc/chapter04-approaches-to-reusability"
 date: 2026-05-19T04:00:00
 description: "재사용성의 목표와 장애물 — 왜 소프트웨어 재사용은 어려운가."
 series: "Object-Oriented Software Construction"

@@ -1,5 +1,6 @@
 ---
 title: "항목 12: 재정의 함수에는 override를 선언하라"
+slug: "programming/cpp/effective-modern-cpp/item12-declare-overriding-functions-override"
 date: 2026-05-04T12:00:00
 description: "override 키워드로 가상 함수 재정의의 미묘한 실수를 컴파일 타임에 잡아낸다. 참조 한정자도 함께."
 tags: [cpp, virtual, override, modern-cpp]

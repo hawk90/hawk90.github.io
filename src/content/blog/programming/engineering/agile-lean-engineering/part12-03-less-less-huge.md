@@ -1,5 +1,6 @@
 ---
 title: "Part 12-03: LeSS · LeSS Huge"
+slug: "programming/engineering/agile-lean-engineering/part12-03-less-less-huge"
 date: 2026-05-20T15:00:00
 description: "Larman·Vodde의 LeSS — single product backlog·feature team."
 series: "Agile & Lean Software Engineering"

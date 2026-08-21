@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 데이터 엔지니어링 기초"
+slug: "ml/systems/designing-ml-systems/chapter03-data-engineering"
 date: 2026-05-16T03:00:00
 description: "Sources·formats·models·storage·ETL — ML의 절반은 데이터."
 series: "Designing Machine Learning Systems"

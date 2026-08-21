@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Directives D1~D4 — 도구가 보지 못하는 영역"
+slug: "embedded/automotive/misra-c/chapter03-directives"
 date: 2026-05-18T04:00:00
 description: "환경 가정, 외부 코드 통합, 코드 표현, 언어 사용 — 16개 Directive의 의미와 실전 적용."
 tags: [misra, c, directives, implementation-defined, traceability, header-guard]

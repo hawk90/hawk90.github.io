@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: 모바일·임베디드 배포"
+slug: "ml/compilers/pytorch-internals/chapter12-mobile-deploy"
 date: 2026-05-16T12:00:00
 description: "Android·iOS·MCU — PyTorch 모델을 어디든."
 series: "PyTorch Internals"

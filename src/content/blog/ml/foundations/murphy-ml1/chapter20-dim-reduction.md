@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Dimensionality Reduction"
+slug: "ml/foundations/murphy-ml1/chapter20-dim-reduction"
 date: 2026-05-16T20:00:00
 description: "PCA·Factor·autoencoder·UMAP·t-SNE — 차원 축소 zoo."
 series: "Probabilistic Machine Learning: An Introduction"

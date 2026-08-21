@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Lexical + Naming Conventions"
+slug: "embedded/aerospace-standards/jsf-cpp/chapter03-lexical-naming"
 date: 2026-05-18T04:00:00
 description: "JSF C++ — 주석, 식별자, Hungarian-like prefix (m_, s_, p_, l_) 패턴."
 tags: [jsf-cpp, lexical, comments, naming, hungarian, prefix, identifier]

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 27: Assertion"
+slug: "programming/engineering/tdd-patterns/pattern27-assertion"
 date: 2026-05-10T03:00:00
 description: "Test의 boolean 검증 — assertion API와 실패 메시지의 기술."
 series: "TDD by Example — Patterns Deep Dive"

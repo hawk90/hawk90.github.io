@@ -1,5 +1,6 @@
 ---
 title: "Part 2-16: Whole Team / On-site Customer"
+slug: "programming/engineering/agile-lean-engineering/part2-16-whole-team-onsite-customer"
 date: 2026-05-21T00:00:00
 description: "XP의 '고객이 자리에 함께' — Product Owner 역할의 원형."
 series: "Agile & Lean Software Engineering"

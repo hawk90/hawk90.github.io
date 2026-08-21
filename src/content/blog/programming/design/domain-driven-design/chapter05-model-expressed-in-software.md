@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: A Model Expressed in Software"
+slug: "programming/design/domain-driven-design/chapter05-model-expressed-in-software"
 date: 2026-05-01T05:00:00
 description: "Entity / Value Object / Service / Module — 빌딩 블록 4가지."
 tags: [DDD, Entity, value-object, Service, Module]

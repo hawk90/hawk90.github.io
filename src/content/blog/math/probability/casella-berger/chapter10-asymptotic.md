@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Asymptotic Evaluations"
+slug: "math/probability/casella-berger/chapter10-asymptotic"
 date: 2026-05-16T10:00:00
 description: "Consistency·asymptotic normality·efficiency·bootstrap."
 series: "Statistical Inference"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Reusable Software"
+slug: "embedded/avionics/developing-safety-critical/chapter10-reusable-software"
 date: 2026-05-18T10:00:00
 description: "COTS·SOI·기존 SW 재사용 — DO-178C가 허용하는 방식."
 series: "Developing Safety-Critical Software"

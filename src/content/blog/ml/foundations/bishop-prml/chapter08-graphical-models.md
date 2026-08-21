@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Graphical Models"
+slug: "ml/foundations/bishop-prml/chapter08-graphical-models"
 date: 2026-05-16T08:00:00
 description: "Bayesian network·Markov random field·factor graph·inference."
 series: "Pattern Recognition and Machine Learning"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Neural Networks for Sequences"
+slug: "ml/foundations/murphy-ml1/chapter15-nn-sequences"
 date: 2026-05-16T15:00:00
 description: "RNN·LSTM·Transformer·attention의 modern 정점."
 series: "Probabilistic Machine Learning: An Introduction"

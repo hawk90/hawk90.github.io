@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: 방사청 SW 신뢰성시험 + KARI"
+slug: "embedded/avionics/developing-safety-critical/chapter15-korea-defense"
 date: 2026-05-18T15:00:00
 description: "한국 방산·항공우주 — 방위사업청·KARI의 SW 표준과 DO-178C와의 매핑."
 series: "Developing Safety-Critical Software"

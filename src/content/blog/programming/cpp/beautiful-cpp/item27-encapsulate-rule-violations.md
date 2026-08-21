@@ -1,5 +1,6 @@
 ---
 title: "항목 27: 규칙 위반을 캡슐화하라"
+slug: "programming/cpp/beautiful-cpp/item27-encapsulate-rule-violations"
 date: 2026-05-05T03:00:00
 description: "규칙을 어겨야 할 때 — 위반을 한 곳에 가두고 안전한 인터페이스로 외부 노출. const_cast, reinterpret_cast, 저수준 메모리 조작."
 tags: [cpp, Encapsulation]

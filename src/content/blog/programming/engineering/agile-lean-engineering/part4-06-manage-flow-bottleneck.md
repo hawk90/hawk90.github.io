@@ -1,5 +1,6 @@
 ---
 title: "Part 4-06: Manage Flow — bottleneck 식별"
+slug: "programming/engineering/agile-lean-engineering/part4-06-manage-flow-bottleneck"
 date: 2026-05-22T10:00:00
 description: "Theory of Constraints와 Kanban — bottleneck 식별과 해소."
 series: "Agile & Lean Software Engineering"

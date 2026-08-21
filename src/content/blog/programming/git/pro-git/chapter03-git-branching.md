@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Git Branching"
+slug: "programming/git/pro-git/chapter03-git-branching"
 date: 2026-05-17T03:00:00
 description: "Git의 핵심 — 가벼운 브랜치. branch / checkout / merge / rebase / 충돌 해결."
 tags: [Git, Branching, Merge, Rebase]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: off-CPU FlameGraph"
+slug: "tools/perf-flamegraph/chapter06-off-cpu"
 date: 2026-05-17T06:00:00
 description: "blocking 시간 분석. sched_switch tracepoint 활용."
 tags: [perf, off-CPU, Blocking]

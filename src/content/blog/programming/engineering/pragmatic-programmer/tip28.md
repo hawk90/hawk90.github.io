@@ -1,5 +1,6 @@
 ---
 title: "Tip 28: Always Use Version Control"
+slug: "programming/engineering/pragmatic-programmer/tip28"
 date: 2026-05-12T04:00:00
 description: "항상 버전 관리를 써라 — 코드만이 아니라, 글·설정·문서까지."
 series: "The Pragmatic Programmer"

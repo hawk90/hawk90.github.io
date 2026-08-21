@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: 가상 메모리"
+slug: "systems/riscv/isa-anatomy/chapter15-virtual-memory"
 date: 2026-05-17T15:00:00
 description: "RISC-V 가상 메모리 — Sv32/Sv39/Sv48/Sv57, 페이지 테이블, satp, TLB를 다룬다."
 series: "RISC-V ISA 해부"

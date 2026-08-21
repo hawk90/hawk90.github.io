@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Optimization"
+slug: "ml/foundations/murphy-ml1/chapter08-optimization"
 date: 2026-05-16T08:00:00
 description: "SGD·Adam·second-order — ML training의 엔진."
 series: "Probabilistic Machine Learning: An Introduction"

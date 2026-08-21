@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Verification — Review, Analysis, Test (RAT)"
+slug: "embedded/aerospace-standards/do-178c/chapter08-verification-rat"
 date: 2026-05-18T09:00:00
 description: "3가지 verification 방법의 분류·적용·증거. HIL/SIL 환경, robustness testing."
 tags: [do-178c, verification, review, analysis, test, hil, sil, robustness]

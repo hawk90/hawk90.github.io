@@ -1,5 +1,6 @@
 ---
 title: "Tip 78: Policy Is Metadata"
+slug: "programming/engineering/pragmatic-programmer/tip78"
 date: 2026-05-12T06:00:00
 description: "정책은 메타데이터다. 비즈니스 규칙을 코드가 아닌 설정으로 분리한다."
 series: "The Pragmatic Programmer"

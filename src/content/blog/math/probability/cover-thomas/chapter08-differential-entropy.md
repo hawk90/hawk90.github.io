@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Differential Entropy"
+slug: "math/probability/cover-thomas/chapter08-differential-entropy"
 date: 2026-05-16T08:00:00
 description: "연속 분포의 entropy — 이산과의 미묘한 차이."
 series: "Elements of Information Theory"

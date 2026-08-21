@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: microTVM — TVM 베어메탈 타깃"
+slug: "ml/tinyml/tinyml-edge-ai/chapter12-microtvm"
 date: 2026-05-16T12:00:00
 description: "TFLM 대안 — TVM이 만든 MCU 컴파일러 경로."
 series: "TinyML·Edge AI"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Random Matrices"
+slug: "math/probability/vershynin-hdp/chapter04-random-matrices"
 date: 2026-05-16T04:00:00
 description: "Singular value concentration·Marchenko-Pastur·Tracy-Widom."
 series: "High-Dimensional Probability"

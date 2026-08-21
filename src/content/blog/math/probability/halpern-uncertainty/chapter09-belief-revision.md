@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Belief Revision"
+slug: "math/probability/halpern-uncertainty/chapter09-belief-revision"
 date: 2026-05-16T09:00:00
 description: "AGM postulates — qualitative belief change."
 series: "Reasoning About Uncertainty"

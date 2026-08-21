@@ -1,5 +1,6 @@
 ---
 title: "Tip 55: Analyze Workflow to Improve Concurrency"
+slug: "programming/engineering/pragmatic-programmer/tip55"
 date: 2026-05-11T07:00:00
 description: "워크플로를 분석해 동시성을 개선하라. 의존성을 파악하면 병렬 처리 기회가 보인다."
 series: "The Pragmatic Programmer"

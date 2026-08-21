@@ -1,5 +1,6 @@
 ---
 title: "Tip 67: Build End-to-End, Not Top-Down or Bottom-Up"
+slug: "programming/engineering/pragmatic-programmer/tip67"
 date: 2026-05-11T19:00:00
 description: "끝에서 끝까지 만들어라. 위에서 아래로, 아래에서 위로가 아니다."
 series: "The Pragmatic Programmer"

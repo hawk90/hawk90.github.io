@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: TensorRT와 ONNX"
+slug: "ml/inference/onnx-practice/chapter04-tensorrt"
 date: 2026-05-16T04:00:00
 description: "ONNX → TensorRT engine — NVIDIA inference 최적화."
 series: "ONNX 실전"

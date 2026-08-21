@@ -1,5 +1,6 @@
 ---
 title: "Ch 28: 테스트 경계"
+slug: "programming/design/clean-architecture/chapter28-the-test-boundary"
 date: 2026-05-01T04:00:00
 description: "테스트도 시스템의 일부다. Fragile test 문제 — 시스템 변경에 테스트가 무너지지 않게 경계를 설계한다."
 tags: [Architecture, Testing, TestBoundary]

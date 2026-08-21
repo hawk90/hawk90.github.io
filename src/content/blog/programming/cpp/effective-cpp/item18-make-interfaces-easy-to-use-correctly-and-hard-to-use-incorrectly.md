@@ -1,5 +1,6 @@
 ---
 title: "항목 18: 인터페이스는 올바르게 쓰기 쉽고 잘못 쓰기 어렵게 만들라"
+slug: "programming/cpp/effective-cpp/item18-make-interfaces-easy-to-use-correctly-and-hard-to-use-incorrectly"
 date: 2026-05-04T18:00:00
 description: "타입 시스템·기본값·반환 타입·표준 관습으로 사용자 실수를 컴파일 타임에 차단하는 API 설계."
 tags: [cpp, effective-c++, api-design]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: ISP — 인터페이스 분리 원칙"
+slug: "programming/design/clean-architecture/chapter10-isp-the-interface-segregation-principle"
 date: 2026-05-01T10:00:00
 description: "클라이언트가 사용하지 않는 메서드에 의존하게 두지 마라. 거대한 인터페이스는 인위적 결합을 만든다."
 tags: [Architecture, SOLID, ISP]

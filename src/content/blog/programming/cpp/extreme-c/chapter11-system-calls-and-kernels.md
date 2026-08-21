@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: System Calls and Kernels"
+slug: "programming/cpp/extreme-c/chapter11-system-calls-and-kernels"
 date: 2026-05-05T11:00:00
 description: "시스템 콜 메커니즘 — syscall / int 0x80. 사용자 vs 커널 공간."
 tags: [C, system-calls, Kernel]

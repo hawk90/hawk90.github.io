@@ -1,5 +1,6 @@
 ---
 title: "Pattern 30: Test Method"
+slug: "programming/engineering/tdd-patterns/pattern30-test-method"
 date: 2026-05-10T06:00:00
 description: "Test 한 case = 한 method — naming·구조·AAA로 의도 표현."
 series: "TDD by Example — Patterns Deep Dive"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Rate Distortion Theory"
+slug: "math/probability/cover-thomas/chapter10-rate-distortion"
 date: 2026-05-16T10:00:00
 description: "Lossy compression의 한계 — R(D) function."
 series: "Elements of Information Theory"

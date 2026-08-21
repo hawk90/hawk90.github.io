@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Classes and Objects"
+slug: "programming/design/ooad/chapter03-classes-and-objects"
 date: 2026-05-19T03:00:00
 description: "클래스와 객체 — 객체의 본질, 상태·행동·정체성."
 series: "Object-Oriented Analysis and Design with Applications"

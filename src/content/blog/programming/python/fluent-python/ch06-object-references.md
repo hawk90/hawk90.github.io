@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Object References, Mutability, and Recycling"
+slug: "programming/python/fluent-python/ch06-object-references"
 date: 2026-05-15T06:00:00
 description: "참조와 가변성 — 별칭, 얕은/깊은 복사, 가비지 컬렉션."
 series: "Fluent Python"

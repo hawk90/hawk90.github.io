@@ -1,5 +1,6 @@
 ---
 title: "Ch 34: Decision Making under Uncertainty"
+slug: "ml/foundations/murphy-ml2/chapter34-decision-making"
 date: 2026-05-16T10:00:00
 description: "Bandit·POMDP·exploration-exploitation."
 series: "Probabilistic Machine Learning: Advanced Topics"

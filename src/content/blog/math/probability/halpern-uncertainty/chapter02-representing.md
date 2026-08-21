@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Representing Uncertainty"
+slug: "math/probability/halpern-uncertainty/chapter02-representing"
 date: 2026-05-16T02:00:00
 description: "확률·set·plausibility·ranking — uncertainty 표현 5종."
 series: "Reasoning About Uncertainty"

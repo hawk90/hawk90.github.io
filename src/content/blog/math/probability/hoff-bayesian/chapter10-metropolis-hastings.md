@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Nonconjugate Priors and Metropolis-Hastings"
+slug: "math/probability/hoff-bayesian/chapter10-metropolis-hastings"
 date: 2026-05-15T10:00:00
 description: "Non-conjugate model에 대한 일반 sampling — MH algorithm."
 series: "A First Course in Bayesian Statistical Methods"

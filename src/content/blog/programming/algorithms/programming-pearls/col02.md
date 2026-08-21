@@ -1,5 +1,6 @@
 ---
 title: "Column 2: Aha! Algorithms"
+slug: "programming/algorithms/programming-pearls/col02"
 date: 2026-05-11T02:00:00
 description: "Aha! Algorithms"
 series: "Programming Pearls"

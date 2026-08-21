@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: 성능 모델링"
+slug: "tools/emulation/qemu-fake-device/chapter18-performance-modeling"
 date: 2026-05-17T18:00:00
 description: "Latency·throughput injection·QoS — 가상 디바이스 성능 시뮬레이션."
 tags: [QEMU, performance, latency-injection, qos]

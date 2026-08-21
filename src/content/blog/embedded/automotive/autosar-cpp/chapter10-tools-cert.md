@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 도구, 인증, MISRA C++:2023 마이그레이션"
+slug: "embedded/automotive/autosar-cpp/chapter10-tools-cert"
 date: 2026-05-18T11:00:00
 description: "AUTOSAR 분석기 비교, Compliance Matrix, ISO 26262 인증, MISRA C++:2023 통합 후계, High Integrity C++."
 tags: [autosar, cpp, tools, certification, misra-cpp-2023, polyspace, helix-qac]

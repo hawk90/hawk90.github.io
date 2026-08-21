@@ -1,5 +1,6 @@
 ---
 title: "Tip 61: Don't Program by Coincidence"
+slug: "programming/engineering/pragmatic-programmer/tip61"
 date: 2026-05-11T13:00:00
 description: "우연에 의존해 프로그래밍하지 마라. 왜 동작하는지 이해하고, 의도적으로 코드를 작성한다."
 series: "The Pragmatic Programmer"

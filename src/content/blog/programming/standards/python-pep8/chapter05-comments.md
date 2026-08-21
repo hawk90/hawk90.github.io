@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Comments & Docstrings"
+slug: "programming/standards/python-pep8/chapter05-comments"
 date: 2026-05-18T05:00:00
 description: "블록 주석, 인라인 주석, docstring 규칙. PEP 257, Google/NumPy 스타일."
 tags: [Python, PEP8, Comments, Docstrings, Documentation]

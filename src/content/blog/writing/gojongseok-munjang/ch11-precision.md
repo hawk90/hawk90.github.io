@@ -1,5 +1,6 @@
 ---
 title: "제11장: 정확함"
+slug: "writing/gojongseok-munjang/ch11-precision"
 date: 2026-05-14T11:00:00
 description: "사실과 논리에 부합하는 정확한 표현"
 series: "고종석의 문장"

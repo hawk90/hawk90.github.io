@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Generalized Linear Models"
+slug: "math/probability/gelman-bda3/chapter16-glm"
 date: 2026-05-16T16:00:00
 description: "Logistic·Poisson·ordinal — Bayesian GLM 전반."
 series: "Bayesian Data Analysis (3rd ed)"

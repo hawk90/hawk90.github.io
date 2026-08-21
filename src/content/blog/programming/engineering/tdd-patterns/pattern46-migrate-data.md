@@ -1,5 +1,6 @@
 ---
 title: "Pattern 46: Migrate Data"
+slug: "programming/engineering/tdd-patterns/pattern46-migrate-data"
 date: 2026-05-10T22:00:00
 description: "Data representation 변경 — 양쪽 유지하며 점진적 이전. Expand-Migrate-Contract."
 series: "TDD by Example — Patterns Deep Dive"

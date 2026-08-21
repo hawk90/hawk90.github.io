@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Apple AIR — Apple Intermediate Representation"
+slug: "ml/compilers/apple-metal/chapter07-air"
 date: 2026-05-16T07:00:00
 description: "MSL을 AIR로, AIR를 GPU binary로 — Metal의 compile pipeline."
 series: "Apple Metal Stack"

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 46: Replace Query with Parameter"
+slug: "programming/design/refactoring-catalog/pattern46-replace-query-with-parameter"
 date: 2026-05-02T22:00:00
 description: "함수 내부의 implicit 의존을 parameter로 — 순수성과 테스트성 회복."
 series: "Refactoring Catalog (Fowler 2nd ed)"

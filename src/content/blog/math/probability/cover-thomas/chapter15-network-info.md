@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Network Information Theory"
+slug: "math/probability/cover-thomas/chapter15-network-info"
 date: 2026-05-16T15:00:00
 description: "Multi-user channel — multiple access·broadcast·relay."
 series: "Elements of Information Theory"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Inferring a Binomial Probability"
+slug: "math/probability/kruschke-dba/chapter04-binomial-exact"
 date: 2026-05-15T04:00:00
 description: "Beta-binomial conjugate — 분석적 Bayesian 한 사례."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

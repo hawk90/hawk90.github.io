@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Conclusion"
+slug: "parallel/structured-parallel-programming/chapter10-conclusion"
 date: 2026-05-22T05:00:00
 description: "결론과 미래 방향 — 이기종 컴퓨팅, GPU, 미래의 병렬 패턴"
 series: "Structured Parallel Programming"

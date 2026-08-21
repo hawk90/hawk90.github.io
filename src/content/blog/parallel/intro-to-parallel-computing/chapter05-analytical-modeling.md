@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Analytical Modeling of Parallel Programs"
+slug: "parallel/intro-to-parallel-computing/chapter05-analytical-modeling"
 date: 2026-05-21T05:00:00
 description: "병렬 성능 분석 — 속도 향상, 효율, Amdahl 법칙, Gustafson 법칙, 확장성"
 series: "Introduction to Parallel Computing"

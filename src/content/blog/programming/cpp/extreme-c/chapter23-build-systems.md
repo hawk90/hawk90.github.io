@@ -1,5 +1,6 @@
 ---
 title: "Ch 23: Build Systems"
+slug: "programming/cpp/extreme-c/chapter23-build-systems"
 date: 2026-05-05T23:00:00
 description: "Make / CMake / Bazel / Meson — 빌드 시스템 진화. 의존성 / 캐시 / 재현성."
 tags: [C, Build, Make, CMake, Bazel]

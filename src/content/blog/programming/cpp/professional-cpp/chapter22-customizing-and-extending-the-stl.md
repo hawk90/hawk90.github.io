@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Customizing and Extending the STL"
+slug: "programming/cpp/professional-cpp/chapter22-customizing-and-extending-the-stl"
 date: 2026-05-05T22:00:00
 description: "사용자 정의 allocator, 사용자 컨테이너 / 알고리즘. iterator trait."
 tags: [cpp, STL, Allocator, Custom]

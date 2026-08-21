@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: On Methodology"
+slug: "programming/design/oosc/chapter19-on-methodology"
 date: 2026-05-19T19:00:00
 description: "방법론에 대하여 — 소프트웨어 방법론의 역할과 한계."
 series: "Object-Oriented Software Construction"

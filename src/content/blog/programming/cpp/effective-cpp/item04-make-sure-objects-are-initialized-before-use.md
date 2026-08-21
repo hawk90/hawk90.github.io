@@ -1,5 +1,6 @@
 ---
 title: "항목 4: 사용 전에 객체를 반드시 초기화하라"
+slug: "programming/cpp/effective-cpp/item04-make-sure-objects-are-initialized-before-use"
 date: 2026-05-04T04:00:00
 description: "내장 타입 비초기화 함정, 멤버 초기화 리스트, 초기화 순서, static 초기화 순서 fiasco와 Meyers' singleton."
 tags: [cpp, effective-c++, Initialization]

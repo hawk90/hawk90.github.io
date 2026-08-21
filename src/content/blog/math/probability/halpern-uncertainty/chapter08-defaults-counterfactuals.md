@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Beliefs, Defaults, and Counterfactuals"
+slug: "math/probability/halpern-uncertainty/chapter08-defaults-counterfactuals"
 date: 2026-05-16T08:00:00
 description: "Default reasoning·conditional·Pearl과 Halpern의 만남."
 series: "Reasoning About Uncertainty"

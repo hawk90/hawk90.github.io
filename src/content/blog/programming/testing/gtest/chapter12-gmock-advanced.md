@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: gMock advanced"
+slug: "programming/testing/gtest/chapter12-gmock-advanced"
 date: 2026-05-10T12:00:00
 description: "sequences, ON_CALL, mock actions, NiceMock/StrictMock 패턴."
 series: "gtest 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Open Files and Save Them"
+slug: "tools/practical-vim/chapter07-open-files-save"
 date: 2026-05-17T07:00:00
 description: ":edit / :find. netrw. :write 변형. 권한 없을 때 sudo trick."
 tags: [Vim, File, netrw]

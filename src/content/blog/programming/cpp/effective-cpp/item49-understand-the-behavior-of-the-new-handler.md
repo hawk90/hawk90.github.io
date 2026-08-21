@@ -1,5 +1,6 @@
 ---
 title: "항목 49: new-handler의 동작을 이해하라"
+slug: "programming/cpp/effective-cpp/item49-understand-the-behavior-of-the-new-handler"
 date: 2026-05-04T01:00:00
 description: "operator new 실패 시 호출되는 핸들러 — 설치, 동작 규칙, 클래스별 핸들러, nothrow 패턴."
 tags: [cpp, effective-c++, new, Memory]

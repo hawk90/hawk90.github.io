@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: History and Compatibility"
+slug: "programming/cpp/a-tour-of-cpp/chapter19-history"
 date: 2026-05-22T19:00:00
 description: "역사와 호환성 — C++ 진화, C 호환성, 마이그레이션"
 series: "A Tour of C++"

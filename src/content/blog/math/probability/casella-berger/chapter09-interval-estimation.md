@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Interval Estimation"
+slug: "math/probability/casella-berger/chapter09-interval-estimation"
 date: 2026-05-16T09:00:00
 description: "Confidence interval·pivot·inversion·Bayesian credible."
 series: "Statistical Inference"

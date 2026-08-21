@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: BLE 표준 변천 — 4.0 → 5.4까지"
+slug: "embedded/wireless/getting-started-with-ble/chapter02-spec-evolution"
 date: 2026-05-08T02:00:00
 description: "Bluetooth 4.0(2010) BLE 도입 → 5.0(2016) 4×2× 거리/속도 → 5.4(2023) 주기적 PAwR."
 series: "Getting Started with BLE"

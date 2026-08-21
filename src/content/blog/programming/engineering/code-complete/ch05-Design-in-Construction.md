@@ -1,5 +1,6 @@
 ---
 title: "Chapter 5: Design in Construction"
+slug: "programming/engineering/code-complete/ch05-Design-in-Construction"
 date: 2026-05-11T05:00:00
 description: "construction 단계의 설계 — wicked problem, 본질·우연 복잡성, 5 레벨, 다발의 휴리스틱, BDUF vs ENUF."
 series: "Code Complete"

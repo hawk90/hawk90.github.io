@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Neural Networks for Images"
+slug: "ml/foundations/murphy-ml1/chapter14-nn-images"
 date: 2026-05-16T14:00:00
 description: "CNN·ResNet·ViT — vision의 진화 한 장."
 series: "Probabilistic Machine Learning: An Introduction"

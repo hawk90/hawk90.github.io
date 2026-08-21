@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Laplace's Method"
+slug: "math/probability/mackay-itila/chapter10-laplace"
 date: 2026-05-16T10:00:00
 description: "Gaussian approximation around MAP — 가장 빠른 Bayesian approx."
 series: "Information Theory, Inference, and Learning Algorithms"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Discovering Inheritance Techniques"
+slug: "programming/cpp/professional-cpp/chapter10-discovering-inheritance-techniques"
 date: 2026-05-05T10:00:00
 description: "상속 — virtual, override, final. 다중 상속, virtual 상속. abstract 클래스."
 tags: [cpp, Inheritance, Virtual]

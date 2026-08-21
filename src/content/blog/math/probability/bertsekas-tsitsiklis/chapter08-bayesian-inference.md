@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Bayesian Statistical Inference"
+slug: "math/probability/bertsekas-tsitsiklis/chapter08-bayesian-inference"
 date: 2026-05-16T08:00:00
 description: "MAP·LMS·linear MMSE — Bayesian의 응용 시각."
 series: "Introduction to Probability"

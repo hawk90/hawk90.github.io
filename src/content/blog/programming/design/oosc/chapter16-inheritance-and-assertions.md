@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Inheritance and Assertions"
+slug: "programming/design/oosc/chapter16-inheritance-and-assertions"
 date: 2026-05-19T16:00:00
 description: "상속과 단언 — 리스코프 치환 원칙, 계약의 상속."
 series: "Object-Oriented Software Construction"

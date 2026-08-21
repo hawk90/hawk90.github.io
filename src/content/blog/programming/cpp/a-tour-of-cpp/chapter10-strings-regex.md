@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Strings and Regular Expressions"
+slug: "programming/cpp/a-tour-of-cpp/chapter10-strings-regex"
 date: 2026-05-22T10:00:00
 description: "문자열과 정규 표현식 — string, string_view, regex"
 series: "A Tour of C++"

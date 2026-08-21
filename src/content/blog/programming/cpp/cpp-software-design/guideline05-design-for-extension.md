@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 5: 확장을 위한 디자인"
+slug: "programming/cpp/cpp-software-design/guideline05-design-for-extension"
 date: 2026-05-02T05:00:00
 description: "Open-Closed Principle. 새 기능 추가가 기존 코드 수정 없이 끝나도록, 다형성과 템플릿과 std::variant로."
 tags: [cpp, software-design, SOLID, OCP, Open-Closed]

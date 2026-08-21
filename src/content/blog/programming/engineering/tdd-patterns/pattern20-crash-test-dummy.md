@@ -1,5 +1,6 @@
 ---
 title: "Pattern 20: Crash Test Dummy"
+slug: "programming/engineering/tdd-patterns/pattern20-crash-test-dummy"
 date: 2026-05-10T20:00:00
 description: "Error 경로를 테스트할 때 — 예외를 던지는 fake로 강제 재현."
 series: "TDD by Example — Patterns Deep Dive"

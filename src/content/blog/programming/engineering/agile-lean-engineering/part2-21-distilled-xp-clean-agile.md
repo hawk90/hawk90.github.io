@@ -1,5 +1,6 @@
 ---
 title: "Part 2-21: Distilled XP — Clean Agile 관점"
+slug: "programming/engineering/agile-lean-engineering/part2-21-distilled-xp-clean-agile"
 date: 2026-05-21T05:00:00
 description: "Uncle Bob이 Clean Agile에서 추려낸 XP 핵심 — 무엇이 빠지지 않아야 하는가."
 series: "Agile & Lean Software Engineering"

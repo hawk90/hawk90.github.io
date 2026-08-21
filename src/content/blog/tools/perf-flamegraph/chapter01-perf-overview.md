@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: perf 개요 — HW PMU + SW 이벤트"
+slug: "tools/perf-flamegraph/chapter01-perf-overview"
 date: 2026-05-17T01:00:00
 description: "Linux perf의 본질 — perf_event_open syscall, PMU 카운터, 소프트웨어 이벤트."
 tags: [perf, PMU, Profiling]

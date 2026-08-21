@@ -1,5 +1,6 @@
 ---
 title: "Lesson 8: The Shape of Sentences"
+slug: "writing/style-williams/lesson08-shape"
 date: 2026-05-14T08:00:00
 description: "긴 문장의 구조 — Resumptive, Summative, Free modifier. 복잡한 생각을 우아하게 전달."
 series: "Style: Lessons in Clarity and Grace"

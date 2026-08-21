@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Hierarchical Linear Models"
+slug: "math/probability/gelman-bda3/chapter15-hierarchical-linear"
 date: 2026-05-16T15:00:00
 description: "Multi-level model·varying intercept·varying slope."
 series: "Bayesian Data Analysis (3rd ed)"

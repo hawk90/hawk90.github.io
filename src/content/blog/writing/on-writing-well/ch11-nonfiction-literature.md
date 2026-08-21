@@ -1,5 +1,6 @@
 ---
 title: "Chapter 11: Nonfiction as Literature"
+slug: "writing/on-writing-well/ch11-nonfiction-literature"
 date: 2026-05-14T11:00:00
 description: "Nonfiction은 문학이 될 수 있습니다. 사실에 기반하면서도 시각, 어조, 구성으로 예술이 됩니다."
 series: "On Writing Well"

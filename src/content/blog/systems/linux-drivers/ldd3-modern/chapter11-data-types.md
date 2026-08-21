@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Data Types in the Kernel"
+slug: "systems/linux-drivers/ldd3-modern/chapter11-data-types"
 date: 2026-05-13T11:00:00
 description: "u8·u32·size_t·loff_t — 커널 스타일의 데이터 타입과 endianness."
 series: "Linux Device Drivers (LDD3)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Refactoring Toward Deeper Insight"
+slug: "programming/design/domain-driven-design/chapter13-refactoring-deeper-insight"
 date: 2026-05-01T13:00:00
 description: "발견 → 리팩토링 → 깊이. 지속적 정제 사이클."
 tags: [DDD, Refactoring, Continuous]

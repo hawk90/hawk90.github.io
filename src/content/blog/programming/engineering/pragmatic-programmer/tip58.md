@@ -1,5 +1,6 @@
 ---
 title: "Tip 58: Use Actors For Concurrency Without Shared State"
+slug: "programming/engineering/pragmatic-programmer/tip58"
 date: 2026-05-11T10:00:00
 description: "액터로 공유 상태 없이 동시성을 구현하라. 메시지 전달로 안전하게 병렬 처리한다."
 series: "The Pragmatic Programmer"

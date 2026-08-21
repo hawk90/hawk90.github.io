@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Model Comparison"
+slug: "math/probability/jaynes-logic/chapter12-model-comparison"
 date: 2026-05-16T12:00:00
 description: "Evidence·Occam·hypothesis testing의 일반화."
 series: "Probability Theory: The Logic of Science"

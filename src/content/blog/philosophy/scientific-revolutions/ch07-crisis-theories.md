@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Crisis and the Emergence of Theories"
+slug: "philosophy/scientific-revolutions/ch07-crisis-theories"
 date: 2026-05-14T08:00:00
 description: "위기 — 새 이론이 나타나는 자리."
 series: "The Structure of Scientific Revolutions"

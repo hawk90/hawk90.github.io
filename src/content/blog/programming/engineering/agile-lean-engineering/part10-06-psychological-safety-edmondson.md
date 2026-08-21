@@ -1,5 +1,6 @@
 ---
 title: "Part 10-06: Psychological Safety — Edmondson 연구"
+slug: "programming/engineering/agile-lean-engineering/part10-06-psychological-safety-edmondson"
 date: 2026-05-20T13:00:00
 description: "심리적 안전 — Amy Edmondson 25년 연구."
 series: "Agile & Lean Software Engineering"

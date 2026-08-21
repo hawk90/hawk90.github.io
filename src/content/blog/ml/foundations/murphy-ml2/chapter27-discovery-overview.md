@@ -1,5 +1,6 @@
 ---
 title: "Ch 27: Discovery Methods — Overview"
+slug: "ml/foundations/murphy-ml2/chapter27-discovery-overview"
 date: 2026-05-16T03:00:00
 description: "Latent·state·graph·representation — unsupervised discovery 지도."
 series: "Probabilistic Machine Learning: Advanced Topics"

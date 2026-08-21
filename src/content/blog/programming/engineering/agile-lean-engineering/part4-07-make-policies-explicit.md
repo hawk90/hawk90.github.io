@@ -1,5 +1,6 @@
 ---
 title: "Part 4-07: Make Policies Explicit"
+slug: "programming/engineering/agile-lean-engineering/part4-07-make-policies-explicit"
 date: 2026-05-22T11:00:00
 description: "카드 진입·종료 기준을 명시 — 암묵적 정책의 위험."
 series: "Agile & Lean Software Engineering"

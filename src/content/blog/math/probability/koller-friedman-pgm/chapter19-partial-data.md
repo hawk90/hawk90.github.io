@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Partially Observed Data"
+slug: "math/probability/koller-friedman-pgm/chapter19-partial-data"
 date: 2026-05-16T19:00:00
 description: "EM·structural EM·Bayesian — hidden variable learning."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Asynchronous Programming"
+slug: "programming/python/fluent-python/ch21-asynchronous-programming"
 date: 2026-05-15T21:00:00
 description: "비동기 프로그래밍 — async/await, asyncio."
 series: "Fluent Python"

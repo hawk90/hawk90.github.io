@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 복제"
+slug: "parallel/designing-data-intensive-applications/chapter05-replication"
 date: 2026-05-12T05:00:00
 description: "데이터 복제의 세 모델 — Single-leader, Multi-leader, Leaderless. 복제 지연과 일관성 문제."
 tags: [DDIA, Replication, SingleLeader, MultiLeader, Leaderless]

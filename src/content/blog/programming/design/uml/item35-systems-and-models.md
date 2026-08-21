@@ -1,5 +1,6 @@
 ---
 title: "UML 35: 시스템과 모델 — 시리즈를 마무리하며"
+slug: "programming/design/uml/item35-systems-and-models"
 date: 2026-05-03T07:00:00
 description: "35편의 UML 2.5.1 시리즈 정리. System은 Models를 포함하고, Models는 Diagrams를 가집니다."
 tags: [UML, Modeling, Summary, System]

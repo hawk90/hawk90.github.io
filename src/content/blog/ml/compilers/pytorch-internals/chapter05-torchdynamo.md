@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: TorchDynamo — Python Frame 추적"
+slug: "ml/compilers/pytorch-internals/chapter05-torchdynamo"
 date: 2026-05-16T05:00:00
 description: "CPython bytecode를 가로채서 graph를 만든다."
 series: "PyTorch Internals"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Plausible Reasoning"
+slug: "math/probability/jaynes-logic/chapter01-plausible-reasoning"
 date: 2026-05-16T01:00:00
 description: "Aristotle 논리의 확장 — 부분 정보 하의 추론."
 series: "Probability Theory: The Logic of Science"

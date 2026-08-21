@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: The Walking Skeleton"
+slug: "programming/engineering/goos/chapter10-walking-skeleton"
 date: 2026-05-10T10:00:00
 description: "Sniper의 최소 e2e — 한 경매 join → loss 알림."
 tags: [TDD, walking-skeleton]

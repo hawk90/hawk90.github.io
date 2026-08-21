@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Bayes' Rule"
+slug: "math/probability/kruschke-dba/chapter03-bayes-rule"
 date: 2026-05-15T03:00:00
 description: "Posterior = prior × likelihood / evidence — Bayes 본체."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

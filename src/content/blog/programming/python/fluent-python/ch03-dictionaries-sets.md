@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Dictionaries and Sets"
+slug: "programming/python/fluent-python/ch03-dictionaries-sets"
 date: 2026-05-15T03:00:00
 description: "사전과 집합 — 해시 테이블, 컴프리헨션, dict 변종."
 series: "Fluent Python"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Linear Discriminant Analysis"
+slug: "ml/foundations/murphy-ml1/chapter09-lda"
 date: 2026-05-16T09:00:00
 description: "Generative classifier — Gaussian class-conditional의 LDA·QDA."
 series: "Probabilistic Machine Learning: An Introduction"

@@ -1,5 +1,6 @@
 ---
 title: "DSA 4: 배열 — 1차원·다차원, 행 우선·열 우선"
+slug: "programming/algorithms/data-structures-and-algorithms/item04-arrays"
 date: 2026-05-15T04:00:00
 description: "배열의 인덱스 계산, 다차원 표현, 행 우선/열 우선 차이가 캐시에 미치는 영향."
 tags: [data-structure, Algorithm, Array]

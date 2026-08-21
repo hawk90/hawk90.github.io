@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Avionics Software — RTOS 선택과 통합"
+slug: "embedded/avionics/digital-avionics-handbook/chapter11-rtos"
 date: 2026-05-18T11:00:00
 description: "VxWorks·RTEMS·INTEGRITY — avionics용 RTOS 비교와 통합 고려사항."
 series: "Digital Avionics Handbook"

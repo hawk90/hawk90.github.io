@@ -1,5 +1,6 @@
 ---
 title: "DSA 17: 최단 경로 — Dijkstra, Bellman-Ford, Floyd-Warshall"
+slug: "programming/algorithms/data-structures-and-algorithms/item17-shortest-path"
 date: 2026-05-15T17:00:00
 description: "한 노드에서 / 모든 쌍 사이의 최단 경로 세 알고리즘."
 tags: [data-structure, Algorithm, Graph, shortest-path]

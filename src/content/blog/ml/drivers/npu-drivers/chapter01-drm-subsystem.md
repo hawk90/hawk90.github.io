@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 가속기 드라이버 개요 — DRM Subsystem"
+slug: "ml/drivers/npu-drivers/chapter01-drm-subsystem"
 date: 2026-05-16T01:00:00
 description: "왜 NPU 드라이버를 DRM 위에 만드나."
 series: "NPU 드라이버 개발"

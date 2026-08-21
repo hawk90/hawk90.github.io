@@ -1,5 +1,6 @@
 ---
 title: "Pattern 24: Move Statements to Callers"
+slug: "programming/design/refactoring-catalog/pattern24-move-statements-to-callers"
 date: 2026-05-02T00:00:00
 description: "함수 일부가 호출자별로 달라야 한다면 statement를 밖으로."
 series: "Refactoring Catalog (Fowler 2nd ed)"

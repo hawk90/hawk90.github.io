@@ -1,5 +1,6 @@
 ---
 title: "항목 40: 동시성에는 std::atomic을, 특수 메모리에는 volatile을 사용하라"
+slug: "programming/cpp/effective-modern-cpp/item40-use-std-atomic-for-concurrency-volatile-for-special-memory"
 date: 2026-05-04T16:00:00
 description: "atomic과 volatile은 다른 도구 — 자주 혼동되는 두 키워드 정확히 구분."
 tags: [cpp, "std::atomic", volatile, Concurrency, modern-cpp]

@@ -1,5 +1,6 @@
 ---
 title: "GoF 18: Memento"
+slug: "programming/design/gof-design-patterns/item18-memento"
 date: 2026-05-01T18:00:00
 description: "객체 상태를 캡슐화해 외부에 저장 — undo/snapshot 가능."
 tags: [design-pattern, GoF, cpp, C, Behavioral]

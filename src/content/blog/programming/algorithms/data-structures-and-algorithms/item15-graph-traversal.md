@@ -1,5 +1,6 @@
 ---
 title: "DSA 15: 그래프 표현 + DFS/BFS"
+slug: "programming/algorithms/data-structures-and-algorithms/item15-graph-traversal"
 date: 2026-05-15T15:00:00
 description: "인접 행렬 vs 인접 리스트 선택, DFS와 BFS의 두 순회."
 tags: [data-structure, Algorithm, Graph, DFS, BFS]

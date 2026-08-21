@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: From Source to Binary"
+slug: "programming/cpp/extreme-c/chapter02-from-source-to-binary"
 date: 2026-05-05T02:00:00
 description: "컴파일 파이프라인 — preprocessor / compiler / assembler / linker."
 tags: [C, Compilation, Linker]

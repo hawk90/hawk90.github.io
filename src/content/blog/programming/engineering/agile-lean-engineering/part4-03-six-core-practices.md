@@ -1,5 +1,6 @@
 ---
 title: "Part 4-03: 6 핵심 practices"
+slug: "programming/engineering/agile-lean-engineering/part4-03-six-core-practices"
 date: 2026-05-22T07:00:00
 description: "Visualize·Limit WIP·Manage Flow·Make Policies Explicit·Feedback Loops·Improve."
 series: "Agile & Lean Software Engineering"

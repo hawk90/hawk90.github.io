@@ -1,5 +1,6 @@
 ---
 title: "DSA 10: 이진 트리 — 정의와 순회"
+slug: "programming/algorithms/data-structures-and-algorithms/item10-binary-tree-traversal"
 date: 2026-05-15T10:00:00
 description: "이진 트리의 정의와 4가지 순회 (preorder, inorder, postorder, level-order)."
 tags: [data-structure, Algorithm, binary-tree, Traversal]

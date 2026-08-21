@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Artificial Intelligence: Cryptanalysis"
+slug: "programming/design/ooad/chapter10-cryptanalysis"
 date: 2026-05-19T10:00:00
 description: "케이스 스터디 — 암호 분석 AI 시스템."
 series: "Object-Oriented Analysis and Design with Applications"

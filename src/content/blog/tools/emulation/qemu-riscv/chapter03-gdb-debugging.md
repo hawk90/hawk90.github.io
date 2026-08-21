@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: QEMU + GDB 디버깅"
+slug: "tools/emulation/qemu-riscv/chapter03-gdb-debugging"
 date: 2026-05-17T21:00:00
 description: "QEMU GDB 연동 — 브레이크포인트, 레지스터 검사, 싱글 스텝을 다룬다."
 series: "RISC-V QEMU 심화"

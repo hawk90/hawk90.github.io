@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: BCC — Python + C 프레임워크"
+slug: "tools/strace-tracing/chapter08-bcc"
 date: 2026-05-17T08:00:00
 description: "BPF Compiler Collection — Python wrapping + C kernel program."
 tags: [BCC, eBPF, Python]

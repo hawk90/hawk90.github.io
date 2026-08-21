@@ -1,5 +1,6 @@
 ---
 title: "Chapter 22: The Tyranny of the Final Product"
+slug: "writing/on-writing-well/ch22-tyranny"
 date: 2026-05-14T22:00:00
 description: "완벽함의 폭정에서 벗어나세요. Process를 즐기는 작가가 좋은 글을 만듭니다."
 series: "On Writing Well"

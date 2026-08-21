@@ -1,5 +1,6 @@
 ---
 title: "Ch 28: The Software Construction Process"
+slug: "programming/design/oosc/chapter28-the-software-construction-process"
 date: 2026-05-19T04:00:00
 description: "소프트웨어 구축 프로세스 — 클러스터 모델, 반복 개발."
 series: "Object-Oriented Software Construction"

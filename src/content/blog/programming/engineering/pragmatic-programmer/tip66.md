@@ -1,5 +1,6 @@
 ---
 title: "Tip 66: A Test Is the First User of Your Code"
+slug: "programming/engineering/pragmatic-programmer/tip66"
 date: 2026-05-11T18:00:00
 description: "테스트는 코드의 첫 번째 사용자다. 테스트가 어려우면 실제 사용자도 어렵다."
 series: "The Pragmatic Programmer"

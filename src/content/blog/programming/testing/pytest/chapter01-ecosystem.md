@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Python 테스트 생태계"
+slug: "programming/testing/pytest/chapter01-ecosystem"
 date: 2026-05-10T01:00:00
 description: "unittest·pytest·nose·Hypothesis — 생태계 지도와 pytest를 선택하는 이유."
 series: "pytest 심화"

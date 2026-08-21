@@ -1,5 +1,6 @@
 ---
 title: "Part 12-06: Distributed · Remote Teams — agile 실천"
+slug: "programming/engineering/agile-lean-engineering/part12-06-distributed-remote-teams"
 date: 2026-05-20T15:00:00
 description: "Sutherland·Forsgren의 remote agile 연구."
 series: "Agile & Lean Software Engineering"

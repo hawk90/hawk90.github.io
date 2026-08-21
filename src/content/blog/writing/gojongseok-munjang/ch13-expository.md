@@ -1,5 +1,6 @@
 ---
 title: "제13장: 설명문"
+slug: "writing/gojongseok-munjang/ch13-expository"
 date: 2026-05-14T13:00:00
 description: "정보를 명확하게 전달하는 설명문 작성법"
 series: "고종석의 문장"

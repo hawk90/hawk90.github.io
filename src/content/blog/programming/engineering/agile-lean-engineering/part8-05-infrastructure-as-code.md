@@ -1,5 +1,6 @@
 ---
 title: "Part 8-05: Infrastructure as Code — Terraform/Pulumi"
+slug: "programming/engineering/agile-lean-engineering/part8-05-infrastructure-as-code"
 date: 2026-05-20T10:00:00
 description: "IaC의 의미와 도구 — declarative vs imperative."
 series: "Agile & Lean Software Engineering"

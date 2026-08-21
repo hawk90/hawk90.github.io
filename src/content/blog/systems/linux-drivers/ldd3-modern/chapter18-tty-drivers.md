@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: TTY and Serial Drivers"
+slug: "systems/linux-drivers/ldd3-modern/chapter18-tty-drivers"
 date: 2026-05-13T18:00:00
 description: "tty_driver·uart_driver·line discipline — 직렬·터미널 드라이버."
 series: "Linux Device Drivers (LDD3)"

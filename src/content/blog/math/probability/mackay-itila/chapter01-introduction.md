@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction to Information Theory"
+slug: "math/probability/mackay-itila/chapter01-introduction"
 date: 2026-05-16T01:00:00
 description: "통신 채널에서 inference·learning으로 — MacKay의 시각."
 series: "Information Theory, Inference, and Learning Algorithms"

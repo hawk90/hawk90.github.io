@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Coverage Analysis — Statement, Decision, MC/DC 완전 해부"
+slug: "embedded/aerospace-standards/do-178c/chapter09-coverage-mcdc"
 date: 2026-05-18T10:00:00
 description: "MC/DC truth table 작성, 도구 검출, untestable code 처리, structural coverage analysis."
 tags: [do-178c, coverage, mc-dc, statement, decision, truth-table, structural]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Background"
+slug: "parallel/structured-parallel-programming/chapter02-background"
 date: 2026-05-21T21:00:00
 description: "병렬 하드웨어 배경 — 캐시, 메모리 계층, 벡터화, 성능 모델"
 series: "Structured Parallel Programming"

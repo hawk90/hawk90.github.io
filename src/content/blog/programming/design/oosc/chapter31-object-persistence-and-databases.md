@@ -1,5 +1,6 @@
 ---
 title: "Ch 31: Object Persistence and Databases"
+slug: "programming/design/oosc/chapter31-object-persistence-and-databases"
 date: 2026-05-19T07:00:00
 description: "객체 영속성과 데이터베이스 — OODBMS, O/R 매핑."
 series: "Object-Oriented Software Construction"

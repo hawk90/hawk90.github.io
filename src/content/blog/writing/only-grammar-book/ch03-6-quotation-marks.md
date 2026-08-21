@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3.6: Quotation Marks"
+slug: "writing/only-grammar-book/ch03-6-quotation-marks"
 date: 2026-05-14T04:00:00
 description: "따옴표와 괄호류 — 직접 인용, 작품 제목, 미국식과 영국식 차이, 괄호의 사용."
 series: "The Only Grammar Book You'll Ever Need"

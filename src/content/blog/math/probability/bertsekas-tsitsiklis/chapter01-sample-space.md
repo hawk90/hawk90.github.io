@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Sample Space and Probability"
+slug: "math/probability/bertsekas-tsitsiklis/chapter01-sample-space"
 date: 2026-05-16T01:00:00
 description: "Sample space·event·conditional·Bayes — MIT 학부 표준."
 series: "Introduction to Probability"

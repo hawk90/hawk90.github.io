@@ -1,5 +1,6 @@
 ---
 title: "Pattern 18: Self Shunt"
+slug: "programming/engineering/tdd-patterns/pattern18-self-shunt"
 date: 2026-05-10T18:00:00
 description: "Test class 자신이 collaborator 인터페이스 구현 — mock framework 없이 minimal stub."
 series: "TDD by Example — Patterns Deep Dive"

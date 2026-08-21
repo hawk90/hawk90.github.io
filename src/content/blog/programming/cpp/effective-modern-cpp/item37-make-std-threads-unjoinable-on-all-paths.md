@@ -1,5 +1,6 @@
 ---
 title: "항목 37: 모든 경로에서 std::thread를 unjoinable하게 만들라"
+slug: "programming/cpp/effective-modern-cpp/item37-make-std-threads-unjoinable-on-all-paths"
 date: 2026-05-04T13:00:00
 description: "joinable thread 소멸 = std::terminate. RAII wrapper / C++20 std::jthread로 해결."
 tags: [cpp, Concurrency, "std::thread", RAII, jthread, modern-cpp]

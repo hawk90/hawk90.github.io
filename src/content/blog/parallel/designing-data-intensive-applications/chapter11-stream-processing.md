@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Stream 처리"
+slug: "parallel/designing-data-intensive-applications/chapter11-stream-processing"
 date: 2026-05-12T11:00:00
 description: "Kafka, Flink, Storm. 무한 입력의 즉시 처리. Event time vs Processing time, Exactly-once semantics."
 tags: [DDIA, Stream, Kafka, Flink, EventTime, ExactlyOnce]

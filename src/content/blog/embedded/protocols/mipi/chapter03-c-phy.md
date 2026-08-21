@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: C-PHY — 3-Wire Trio, 7개 심볼, 2.28 bit/symbol"
+slug: "embedded/protocols/mipi/chapter03-c-phy"
 date: 2026-05-16T03:00:00
 description: "D-PHY (clock+data 2 pair = 4 wire/lane)보다 3 wire로 같은 처리량. 라인 절약 트릭."
 series: "MIPI 심화"

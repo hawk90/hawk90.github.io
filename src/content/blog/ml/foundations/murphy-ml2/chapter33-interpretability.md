@@ -1,5 +1,6 @@
 ---
 title: "Ch 33: Interpretability"
+slug: "ml/foundations/murphy-ml2/chapter33-interpretability"
 date: 2026-05-16T09:00:00
 description: "Saliency·SHAP·mechanistic — model을 이해하기."
 series: "Probabilistic Machine Learning: Advanced Topics"

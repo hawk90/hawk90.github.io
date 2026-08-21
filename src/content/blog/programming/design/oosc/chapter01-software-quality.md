@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Software Quality"
+slug: "programming/design/oosc/chapter01-software-quality"
 date: 2026-05-19T01:00:00
 description: "소프트웨어 품질의 외적·내적 요소 — 정확성, 견고성, 확장성, 재사용성."
 series: "Object-Oriented Software Construction"

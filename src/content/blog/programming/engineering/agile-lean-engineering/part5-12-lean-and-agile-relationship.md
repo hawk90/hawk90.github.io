@@ -1,5 +1,6 @@
 ---
 title: "Part 5-12: Lean과 Agile의 관계"
+slug: "programming/engineering/agile-lean-engineering/part5-12-lean-and-agile-relationship"
 date: 2026-05-23T07:00:00
 description: "두 운동의 overlap과 차이 — 공통 뿌리와 강조점."
 series: "Agile & Lean Software Engineering"

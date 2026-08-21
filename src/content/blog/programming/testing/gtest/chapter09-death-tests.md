@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Death tests"
+slug: "programming/testing/gtest/chapter09-death-tests"
 date: 2026-05-10T09:00:00
 description: "EXPECT_DEATH·ASSERT_DEATH — 의도된 종료(assert/abort/exit) 검증."
 series: "gtest 심화"

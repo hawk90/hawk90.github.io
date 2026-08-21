@@ -1,5 +1,6 @@
 ---
 title: "Ch 29: Writing Efficient C++"
+slug: "programming/cpp/professional-cpp/chapter29-writing-efficient-cpp"
 date: 2026-05-05T05:00:00
 description: "성능 최적화 — 메모리 / 캐시 / 인라인. 측정 우선 원칙."
 tags: [cpp, Performance, Optimization]

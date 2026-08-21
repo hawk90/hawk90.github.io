@@ -1,5 +1,6 @@
 ---
 title: "1.5 우주에는 바닥이 있다"
+slug: "math/set-theory/ch01/05-foundation"
 date: 2026-05-15T15:53:15
 description: "지금까지의 일곱 공리는 모두 한 가지 형태였다."
 tags: [set-theory, Mathematics, Enderton]

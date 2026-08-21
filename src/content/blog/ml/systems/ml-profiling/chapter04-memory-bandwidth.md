@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 메모리 대역폭 병목"
+slug: "ml/systems/ml-profiling/chapter04-memory-bandwidth"
 date: 2026-05-16T04:00:00
 description: "HBM·L2·SRAM — bandwidth가 어디서 막히는가."
 series: "ML 시스템 프로파일링"

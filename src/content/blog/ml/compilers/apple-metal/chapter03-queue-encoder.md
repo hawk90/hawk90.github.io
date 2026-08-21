@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Command Queue·Buffer·Encoder"
+slug: "ml/compilers/apple-metal/chapter03-queue-encoder"
 date: 2026-05-16T03:00:00
 description: "Metal API의 실행 모델 — host에서 GPU로 명령 보내기."
 series: "Apple Metal Stack"

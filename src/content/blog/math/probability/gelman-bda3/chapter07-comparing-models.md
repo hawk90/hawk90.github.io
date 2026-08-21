@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Evaluating, Comparing, and Expanding Models"
+slug: "math/probability/gelman-bda3/chapter07-comparing-models"
 date: 2026-05-16T07:00:00
 description: "WAIC·LOO·marginal likelihood — model comparison 방법론."
 series: "Bayesian Data Analysis (3rd ed)"

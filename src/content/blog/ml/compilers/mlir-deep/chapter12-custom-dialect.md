@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: 나만의 Dialect 작성"
+slug: "ml/compilers/mlir-deep/chapter12-custom-dialect"
 date: 2026-05-16T12:00:00
 description: "ODS·TableGen·C++ 코드로 dialect 만들기."
 series: "MLIR 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Part 2-12: Small Releases"
+slug: "programming/engineering/agile-lean-engineering/part2-12-small-releases"
 date: 2026-05-20T20:00:00
 description: "한 달 이내·가능하면 매주·매일 — XP의 small release 원칙."
 series: "Agile & Lean Software Engineering"

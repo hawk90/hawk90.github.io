@@ -1,5 +1,6 @@
 ---
 title: "Part 3-10: Sprint — time-box의 핵심"
+slug: "programming/engineering/agile-lean-engineering/part3-10-sprint-timebox"
 date: 2026-05-21T18:00:00
 description: "1~4주 sprint의 의미·왜 보통 2주를 권장하나."
 series: "Agile & Lean Software Engineering"

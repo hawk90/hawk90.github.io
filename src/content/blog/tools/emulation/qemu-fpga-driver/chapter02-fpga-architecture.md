@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: FPGA 아키텍처 Review"
+slug: "tools/emulation/qemu-fpga-driver/chapter02-fpga-architecture"
 date: 2026-05-17T02:00:00
 description: "Shell·user logic·AXI·PCIe bridge — driver가 봐야 할 layer."
 tags: [QEMU, fpga, shell, axi, pcie-bridge]

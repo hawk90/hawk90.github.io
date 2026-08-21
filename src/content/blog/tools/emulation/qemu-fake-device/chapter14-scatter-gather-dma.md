@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Scatter-Gather DMA 깊이"
+slug: "tools/emulation/qemu-fake-device/chapter14-scatter-gather-dma"
 date: 2026-05-17T14:00:00
 description: "Descriptor ring·partial transfer·error injection — SG-DMA 정복."
 tags: [QEMU, dma, scatter-gather, descriptor-ring]

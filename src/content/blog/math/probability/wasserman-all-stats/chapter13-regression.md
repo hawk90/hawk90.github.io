@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Linear and Logistic Regression"
+slug: "math/probability/wasserman-all-stats/chapter13-regression"
 date: 2026-05-16T13:00:00
 description: "OLS·logistic·variable selection — 가장 많이 쓰이는 모델."
 series: "All of Statistics"

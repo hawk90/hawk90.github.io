@@ -1,5 +1,6 @@
 ---
 title: "Rule 3: Quit Thinking and Look"
+slug: "tools/debugging/agans-9-rules/chapter03-quit-thinking-look"
 date: 2026-05-17T03:00:00
 description: "추측 그만하고 데이터를 본다."
 series: "Debugging: The 9 Indispensable Rules"

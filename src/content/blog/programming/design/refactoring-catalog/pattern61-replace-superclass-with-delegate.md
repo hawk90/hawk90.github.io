@@ -1,5 +1,6 @@
 ---
 title: "Pattern 61: Replace Superclass with Delegate"
+slug: "programming/design/refactoring-catalog/pattern61-replace-superclass-with-delegate"
 date: 2026-05-02T13:00:00
 description: "Inheritance가 안 맞으면 — Superclass도 delegate로. 카탈로그 마무리."
 series: "Refactoring Catalog (Fowler 2nd ed)"

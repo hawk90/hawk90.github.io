@@ -1,5 +1,6 @@
 ---
 title: "Part 10-02: Team Topologies — 4 fundamental team types"
+slug: "programming/engineering/agile-lean-engineering/part10-02-team-topologies-4-types"
 date: 2026-05-20T13:00:00
 description: "Stream-aligned·Platform·Enabling·Complicated-subsystem."
 series: "Agile & Lean Software Engineering"

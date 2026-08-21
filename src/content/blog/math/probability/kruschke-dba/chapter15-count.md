@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Count Predicted Variable"
+slug: "math/probability/kruschke-dba/chapter15-count"
 date: 2026-05-15T15:00:00
 description: "Poisson·negative binomial·zero-inflated — count data."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

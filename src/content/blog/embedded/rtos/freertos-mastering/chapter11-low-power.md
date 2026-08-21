@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Low Power Support"
+slug: "embedded/rtos/freertos-mastering/chapter11-low-power"
 date: 2026-05-09T11:00:00
 description: "tickless idle·sleep modes — RTOS에서 전력 소비 줄이기."
 series: "Mastering the FreeRTOS Real Time Kernel"

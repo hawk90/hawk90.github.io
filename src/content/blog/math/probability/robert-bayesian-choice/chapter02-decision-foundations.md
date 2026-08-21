@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Decision-Theoretic Foundations"
+slug: "math/probability/robert-bayesian-choice/chapter02-decision-foundations"
 date: 2026-05-15T02:00:00
 description: "Loss·risk·minimax·admissibility — decision theory axioms."
 series: "The Bayesian Choice"

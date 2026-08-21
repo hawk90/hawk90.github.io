@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Probability — Multivariate Models"
+slug: "ml/foundations/murphy-ml1/chapter03-probability-multivariate"
 date: 2026-05-16T03:00:00
 description: "Joint·multivariate Gaussian·copula·mixture model."
 series: "Probabilistic Machine Learning: An Introduction"

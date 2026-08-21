@@ -1,5 +1,6 @@
 ---
 title: "Column 4: Writing Correct Programs"
+slug: "programming/algorithms/programming-pearls/col04"
 date: 2026-05-11T04:00:00
 description: "Writing Correct Programs"
 series: "Programming Pearls"

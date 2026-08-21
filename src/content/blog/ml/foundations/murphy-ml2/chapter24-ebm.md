@@ -1,5 +1,6 @@
 ---
 title: "Ch 24: Energy-based Models"
+slug: "ml/foundations/murphy-ml2/chapter24-ebm"
 date: 2026-05-17T00:00:00
 description: "Boltzmann·score matching·MCMC training — unnormalized density."
 series: "Probabilistic Machine Learning: Advanced Topics"

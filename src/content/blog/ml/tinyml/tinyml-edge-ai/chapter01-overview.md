@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: TinyML 개요 — 왜 MCU에서 ML인가"
+slug: "ml/tinyml/tinyml-edge-ai/chapter01-overview"
 date: 2026-05-16T01:00:00
 description: "100 mW 미만에서 inference — TinyML의 동기."
 series: "TinyML·Edge AI"

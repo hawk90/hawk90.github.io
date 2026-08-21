@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Tool Qualification (Annex Q) — ECSS의 도구 자격"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter09-tool-qualification"
 date: 2026-05-18T10:00:00
 description: "ECSS Tool Class 1/2/3, Vendor qualification kit, ESA approved tool catalog. DO-330과 비교."
 tags: [ecss, tool-qualification, annex-q, compiler, static-analysis, polyspace]

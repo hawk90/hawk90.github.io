@@ -1,5 +1,6 @@
 ---
 title: "Ch 27: Object-Oriented Analysis"
+slug: "programming/design/oosc/chapter27-object-oriented-analysis"
 date: 2026-05-19T03:00:00
 description: "객체지향 분석 — 요구사항에서 클래스 도출, 시스템 모델링."
 series: "Object-Oriented Software Construction"

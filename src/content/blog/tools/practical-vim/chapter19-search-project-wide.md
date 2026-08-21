@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Search Project-Wide with grep, vimgrep"
+slug: "tools/practical-vim/chapter19-search-project-wide"
 date: 2026-05-17T18:00:00
 description: ":grep / :vimgrep / :Ack / :Rg — 프로젝트 검색. quickfix 통합."
 tags: [Vim, grep, vimgrep, ripgrep]

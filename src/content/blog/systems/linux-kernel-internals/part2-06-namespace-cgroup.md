@@ -1,5 +1,6 @@
 ---
 title: "Part 2-6: namespace / cgroup"
+slug: "systems/linux-kernel-internals/part2-06-namespace-cgroup"
 date: 2026-05-12T10:00:00
 description: "namespace — 리소스 격리. cgroup — 리소스 제한. 컨테이너의 토대."
 tags: [Linux, Kernel, namespace, cgroup, Container]

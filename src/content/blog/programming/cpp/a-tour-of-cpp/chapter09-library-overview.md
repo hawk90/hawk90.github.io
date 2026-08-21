@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Library Overview"
+slug: "programming/cpp/a-tour-of-cpp/chapter09-library-overview"
 date: 2026-05-22T09:00:00
 description: "표준 라이브러리 개요 — 헤더, 네임스페이스, 구성"
 series: "A Tour of C++"

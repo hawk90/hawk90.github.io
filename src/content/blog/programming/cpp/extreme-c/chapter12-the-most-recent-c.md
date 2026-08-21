@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: The Most Recent C"
+slug: "programming/cpp/extreme-c/chapter12-the-most-recent-c"
 date: 2026-05-05T12:00:00
 description: "C11 / C17 / C23 — _Generic, _Static_assert, threads.h, atomic, attribute."
 tags: [C, C11, C17, C23, modern-c]

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 4: Inline Variable"
+slug: "programming/design/refactoring-catalog/pattern04-inline-variable"
 date: 2026-05-02T04:00:00
 description: "변수 이름이 원래 표현식보다 정보를 더 주지 못할 때 — Extract Variable의 역연산."
 series: "Refactoring Catalog (Fowler 2nd ed)"

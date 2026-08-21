@@ -1,5 +1,6 @@
 ---
 title: "Tip 98: Don't Enable Scoundrels"
+slug: "programming/engineering/pragmatic-programmer/tip98"
 date: 2026-05-13T02:00:00
 description: "나쁜 사람을 돕지 마라. 우리가 만드는 것이 어떻게 쓰일지 고려한다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Decision and Control"
+slug: "ml/foundations/pearl-pris/chapter06-decision-control"
 date: 2026-05-16T06:00:00
 description: "Influence diagram·utility — 추론에서 결정으로."
 series: "Probabilistic Reasoning in Intelligent Systems"

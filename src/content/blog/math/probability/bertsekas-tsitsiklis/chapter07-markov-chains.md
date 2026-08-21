@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Markov Chains"
+slug: "math/probability/bertsekas-tsitsiklis/chapter07-markov-chains"
 date: 2026-05-16T07:00:00
 description: "Discrete·continuous time Markov chain — 응용 시각."
 series: "Introduction to Probability"

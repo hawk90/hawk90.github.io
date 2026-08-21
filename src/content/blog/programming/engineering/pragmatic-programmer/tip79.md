@@ -1,5 +1,6 @@
 ---
 title: "Tip 79: Use a Project Glossary"
+slug: "programming/engineering/pragmatic-programmer/tip79"
 date: 2026-05-12T07:00:00
 description: "프로젝트 용어집을 사용하라. 같은 단어가 같은 의미를 가져야 소통이 된다."
 series: "The Pragmatic Programmer"

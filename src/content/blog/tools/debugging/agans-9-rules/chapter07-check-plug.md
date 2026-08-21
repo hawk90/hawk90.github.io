@@ -1,5 +1,6 @@
 ---
 title: "Rule 7: Check the Plug"
+slug: "tools/debugging/agans-9-rules/chapter07-check-plug"
 date: 2026-05-17T07:00:00
 description: "Obvious assumption을 의심한다."
 series: "Debugging: The 9 Indispensable Rules"

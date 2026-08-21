@@ -1,5 +1,6 @@
 ---
 title: "Part 10-03: Team Interaction Modes"
+slug: "programming/engineering/agile-lean-engineering/part10-03-team-interaction-modes"
 date: 2026-05-20T13:00:00
 description: "Collaboration·X-as-a-Service·Facilitating — 세 가지 상호작용."
 series: "Agile & Lean Software Engineering"

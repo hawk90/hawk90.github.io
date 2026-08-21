@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: ExecuTorch — 추론용"
+slug: "ml/compilers/pytorch-internals/chapter11-executorch"
 date: 2026-05-16T11:00:00
 description: "Mobile·embedded inference — PyTorch의 새로운 배포 경로."
 series: "PyTorch Internals"

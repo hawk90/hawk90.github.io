@@ -1,5 +1,6 @@
 ---
 title: "Part 7-02: Deployment Pipeline — 핵심 패턴"
+slug: "programming/engineering/agile-lean-engineering/part7-02-deployment-pipeline"
 date: 2026-05-23T19:00:00
 description: "commit → build → test → deploy — deployment pipeline의 단계."
 series: "Agile & Lean Software Engineering"

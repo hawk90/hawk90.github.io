@@ -1,5 +1,6 @@
 ---
 title: "항목 31: 기본 캡처 모드를 피하라"
+slug: "programming/cpp/effective-modern-cpp/item31-avoid-default-capture-modes"
 date: 2026-05-04T07:00:00
 description: "[&]·[=]가 만드는 댕글링 참조와 의외의 캡처 — 명시 캡처가 안전."
 tags: [cpp, Lambda, Capture, modern-cpp]

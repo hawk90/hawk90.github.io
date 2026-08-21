@@ -1,5 +1,6 @@
 ---
 title: "Pattern 52: Add Parameter"
+slug: "programming/engineering/tdd-patterns/pattern52-add-parameter"
 date: 2026-05-10T04:00:00
 description: "Function signature에 안전하게 parameter 추가 — 기본값으로 점진 이전."
 series: "TDD by Example — Patterns Deep Dive"

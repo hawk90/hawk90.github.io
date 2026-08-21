@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: INT8 Calibration"
+slug: "ml/inference/tensorrt/chapter03-int8-calibration"
 date: 2026-05-16T03:00:00
 description: "Entropy calibrator·MinMax — INT8 변환 정확도 보존."
 series: "TensorRT 심화"

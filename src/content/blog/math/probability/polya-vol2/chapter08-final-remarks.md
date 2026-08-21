@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Final Remarks on the Logic of Plausible Inference"
+slug: "math/probability/polya-vol2/chapter08-final-remarks"
 date: 2026-05-16T08:00:00
 description: "Pólya가 남긴 미해결 문제 — plausible reasoning의 logic화."
 series: "Mathematics and Plausible Reasoning, Vol II"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Optimization"
+slug: "ml/foundations/murphy-ml2/chapter06-optimization"
 date: 2026-05-16T06:00:00
 description: "Stochastic·natural gradient·constrained — modern ML optimizer."
 series: "Probabilistic Machine Learning: Advanced Topics"

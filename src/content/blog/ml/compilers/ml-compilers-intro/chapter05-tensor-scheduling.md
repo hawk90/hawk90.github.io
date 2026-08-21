@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 텐서 스케줄링"
+slug: "ml/compilers/ml-compilers-intro/chapter05-tensor-scheduling"
 date: 2026-05-16T05:00:00
 description: "Loop-level transformation — tiling·vectorization·parallel."
 series: "ML 컴파일러"

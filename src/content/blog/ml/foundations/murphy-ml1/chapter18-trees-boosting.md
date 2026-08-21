@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Trees·Forests·Boosting"
+slug: "ml/foundations/murphy-ml1/chapter18-trees-boosting"
 date: 2026-05-16T18:00:00
 description: "Decision tree·random forest·XGBoost — tabular의 강자."
 series: "Probabilistic Machine Learning: An Introduction"

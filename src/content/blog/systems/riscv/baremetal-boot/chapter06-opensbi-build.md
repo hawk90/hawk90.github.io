@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: OpenSBI 빌드와 구성"
+slug: "systems/riscv/baremetal-boot/chapter06-opensbi-build"
 date: 2026-05-17T00:00:00
 description: "OpenSBI 빌드 — 플랫폼 포팅, 설정 옵션, 커스터마이징을 다룬다."
 series: "RISC-V 베어메탈 부트"

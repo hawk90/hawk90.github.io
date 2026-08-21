@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Anomaly and the Emergence of Discoveries"
+slug: "philosophy/scientific-revolutions/ch06-anomaly"
 date: 2026-05-14T07:00:00
 description: "변칙과 과학적 발견의 출현."
 series: "The Structure of Scientific Revolutions"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Fork-Join"
+slug: "parallel/structured-parallel-programming/chapter08-fork-join"
 date: 2026-05-22T03:00:00
 description: "Fork-Join 패턴 — 분할 정복, 재귀 병렬, Work-Stealing"
 series: "Structured Parallel Programming"

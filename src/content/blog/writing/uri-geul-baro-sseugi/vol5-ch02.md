@@ -1,5 +1,6 @@
 ---
 title: "제5권 2장: 아이들 글 지도"
+slug: "writing/uri-geul-baro-sseugi/vol5-ch02"
 date: 2026-05-14T18:00:00
 description: "실제 글쓰기 지도법. 아이들의 삶을 담은 글을 이끌어내는 방법."
 series: "우리글 바로쓰기"

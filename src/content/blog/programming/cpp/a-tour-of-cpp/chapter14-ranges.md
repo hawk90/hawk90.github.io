@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Ranges"
+slug: "programming/cpp/a-tour-of-cpp/chapter14-ranges"
 date: 2026-05-22T14:00:00
 description: "Ranges — C++20 Ranges, views, 파이프라인"
 series: "A Tour of C++"

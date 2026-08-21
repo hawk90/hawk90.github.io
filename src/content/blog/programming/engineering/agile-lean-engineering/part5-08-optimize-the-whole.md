@@ -1,5 +1,6 @@
 ---
 title: "Part 5-08: Optimize the Whole — value stream"
+slug: "programming/engineering/agile-lean-engineering/part5-08-optimize-the-whole"
 date: 2026-05-23T03:00:00
 description: "부분 최적화의 위험 — value stream 전체를 보아야 한다."
 series: "Agile & Lean Software Engineering"

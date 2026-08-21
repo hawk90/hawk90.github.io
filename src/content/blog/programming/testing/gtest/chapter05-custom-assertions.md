@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Custom assertions"
+slug: "programming/testing/gtest/chapter05-custom-assertions"
 date: 2026-05-10T05:00:00
 description: "predicate matcher와 custom failure message로 도메인 친화적 assertion 만들기."
 series: "gtest 심화"

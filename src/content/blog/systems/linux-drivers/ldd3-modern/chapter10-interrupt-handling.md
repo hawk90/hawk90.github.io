@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Interrupt Handling"
+slug: "systems/linux-drivers/ldd3-modern/chapter10-interrupt-handling"
 date: 2026-05-13T10:00:00
 description: "request_irq·top half·bottom half·threaded IRQ — 인터럽트 처리의 정석."
 series: "Linux Device Drivers (LDD3)"

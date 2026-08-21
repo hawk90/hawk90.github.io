@@ -1,5 +1,6 @@
 ---
 title: "Pattern 3: Extract Variable"
+slug: "programming/design/refactoring-catalog/pattern03-extract-variable"
 date: 2026-05-02T03:00:00
 description: "복잡한 표현식에 이름을 붙여 의도를 드러낸다 — Introduce Explaining Variable."
 series: "Refactoring Catalog (Fowler 2nd ed)"

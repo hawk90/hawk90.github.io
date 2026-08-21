@@ -1,5 +1,6 @@
 ---
 title: "Vim 마스터하기: 기초"
+slug: "tools/vim/ch01-basics"
 date: 2026-05-17T01:00:00
 description: "Vim의 모드, 기본 이동, 시작과 종료"
 series: "Vim 마스터하기"

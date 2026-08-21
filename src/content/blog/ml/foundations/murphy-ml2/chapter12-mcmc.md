@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Markov Chain Monte Carlo"
+slug: "ml/foundations/murphy-ml2/chapter12-mcmc"
 date: 2026-05-16T12:00:00
 description: "Metropolis·Gibbs·HMC·NUTS — Bayesian computation의 엔진."
 series: "Probabilistic Machine Learning: Advanced Topics"

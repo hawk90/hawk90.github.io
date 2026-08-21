@@ -1,5 +1,6 @@
 ---
 title: "DSA 34: DP 패턴 카탈로그 — LIS, LCS, Knapsack, Edit Distance"
+slug: "programming/algorithms/data-structures-and-algorithms/item34-dp-patterns"
 date: 2026-05-15T10:00:00
 description: "DP의 5가지 표준 패턴과 의사결정 트리."
 tags: [data-structure, Algorithm, dynamic-programming, DP]

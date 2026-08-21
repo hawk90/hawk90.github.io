@@ -1,5 +1,6 @@
 ---
 title: "Tip 56: Shared State Is Incorrect State"
+slug: "programming/engineering/pragmatic-programmer/tip56"
 date: 2026-05-11T08:00:00
 description: "공유 상태는 잘못된 상태다. 여러 스레드가 같은 데이터에 접근하면 문제가 생긴다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Belief, Probability, and Exchangeability"
+slug: "math/probability/hoff-bayesian/chapter02-belief-exchangeability"
 date: 2026-05-15T02:00:00
 description: "De Finetti·exchangeability — Bayesian의 측도론적 토대."
 series: "A First Course in Bayesian Statistical Methods"

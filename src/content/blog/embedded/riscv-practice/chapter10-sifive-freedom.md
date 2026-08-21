@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: SiFive Freedom 보드"
+slug: "embedded/riscv-practice/chapter10-sifive-freedom"
 date: 2026-05-17T16:00:00
 description: "SiFive Freedom — E310, U540, 메모리 맵, 개발 환경을 다룬다."
 series: "RISC-V 임베디드 실습"

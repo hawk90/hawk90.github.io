@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Invariance, Haar Measures, Equivariant Estimators"
+slug: "math/probability/robert-bayesian-choice/chapter09-invariance"
 date: 2026-05-15T09:00:00
 description: "Symmetry·invariance — non-informative prior의 깊은 이유."
 series: "The Bayesian Choice"

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 8: Monitors와 Blocking Synchronization"
+slug: "parallel/parallel-principles/ch08-monitors-and-blocking-synchronization"
 date: 2026-05-06T08:00:00
 description: "Monitor 패턴, condition variable, semaphore, reader-writer lock. 스핀이 아닌 sleep 기반 동기화."
 series: "The Art of Multiprocessor Programming"

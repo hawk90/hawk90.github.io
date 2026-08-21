@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: MPS — Built-in 커널들"
+slug: "ml/compilers/apple-metal/chapter05-mps"
 date: 2026-05-16T05:00:00
 description: "Metal Performance Shaders — cuDNN/cuBLAS 등가물."
 series: "Apple Metal Stack"

@@ -1,5 +1,6 @@
 ---
 title: "Tip 43: Avoid Fortune-Telling"
+slug: "programming/engineering/pragmatic-programmer/tip43"
 date: 2026-05-11T19:00:00
 description: "점치지 마라. 미래의 요구를 지금 설계에 넣지 마라. YAGNI."
 series: "The Pragmatic Programmer"

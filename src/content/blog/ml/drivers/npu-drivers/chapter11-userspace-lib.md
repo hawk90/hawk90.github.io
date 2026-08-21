@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 유저스페이스 라이브러리 설계"
+slug: "ml/drivers/npu-drivers/chapter11-userspace-lib"
 date: 2026-05-16T11:00:00
 description: "Kernel UAPI 위에 — UMD·runtime·compiler integration."
 series: "NPU 드라이버 개발"

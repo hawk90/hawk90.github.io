@@ -1,5 +1,6 @@
 ---
 title: "Pattern 38: Pluggable Selector"
+slug: "programming/engineering/tdd-patterns/pattern38-pluggable-selector"
 date: 2026-05-10T14:00:00
 description: "Method name을 string으로 — reflection 기반 dispatch. xUnit 러너의 핵심."
 series: "TDD by Example — Patterns Deep Dive"

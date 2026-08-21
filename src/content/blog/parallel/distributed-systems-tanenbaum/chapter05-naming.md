@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Naming"
+slug: "parallel/distributed-systems-tanenbaum/chapter05-naming"
 date: 2025-05-20T05:00:00
 description: "이름, 식별자, 주소 — 플랫 네이밍, 구조적 네이밍, 속성 기반 네이밍"
 series: "Distributed Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Thread Execution"
+slug: "programming/cpp/extreme-c/chapter15-thread-execution"
 date: 2026-05-05T15:00:00
 description: "POSIX threads — pthread_create / join. 스레드 attribute. detached / joinable."
 tags: [C, POSIX, pthread]

@@ -1,5 +1,6 @@
 ---
 title: "1.6 마지막 약속"
+slug: "math/set-theory/ch01/06-choice"
 date: 2026-05-15T15:54:10
 description: "ZF 까지 오는 길에서 우리는 늘 구체적 규칙 으로 집합을 만들었다."
 tags: [set-theory, Mathematics, Enderton]

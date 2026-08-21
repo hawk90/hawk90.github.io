@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Classes"
+slug: "programming/cpp/a-tour-of-cpp/chapter05-classes"
 date: 2026-05-22T05:00:00
 description: "클래스 — 생성자, 소멸자, 멤버 함수, 접근 제어"
 series: "A Tour of C++"

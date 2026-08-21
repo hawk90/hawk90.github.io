@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 오토튜닝 — AutoTVM·Ansor"
+slug: "ml/compilers/ml-compilers-intro/chapter06-autotuning"
 date: 2026-05-16T06:00:00
 description: "Schedule 공간 탐색 — heuristic vs ML guided."
 series: "ML 컴파일러"

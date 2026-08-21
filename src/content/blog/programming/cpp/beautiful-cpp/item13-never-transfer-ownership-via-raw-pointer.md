@@ -1,5 +1,6 @@
 ---
 title: "항목 13: 원시 포인터나 참조로 소유권을 넘기지 말라"
+slug: "programming/cpp/beautiful-cpp/item13-never-transfer-ownership-via-raw-pointer"
 date: 2026-05-05T13:00:00
 description: "소유권을 타입으로 표현하기 — unique_ptr, shared_ptr, 관찰 포인터의 의도 명확화."
 tags: [cpp, Ownership, smart-pointers]

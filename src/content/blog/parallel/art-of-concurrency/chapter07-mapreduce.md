@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: MapReduce"
+slug: "parallel/art-of-concurrency/chapter07-mapreduce"
 date: 2025-05-20T07:00:00
 description: "MapReduce 패턴 — 대규모 데이터 병렬 처리의 핵심"
 series: "The Art of Concurrency"

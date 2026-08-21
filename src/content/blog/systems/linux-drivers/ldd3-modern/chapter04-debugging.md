@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Debugging Techniques"
+slug: "systems/linux-drivers/ldd3-modern/chapter04-debugging"
 date: 2026-05-13T04:00:00
 description: "Kernel debug — printk, dmesg, /proc·/sys, oops 분석, kdb, ftrace, kprobes."
 series: "Linux Device Drivers (LDD3)"

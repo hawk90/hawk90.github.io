@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Error Handling"
+slug: "programming/cpp/a-tour-of-cpp/chapter04-error-handling"
 date: 2026-05-22T04:00:00
 description: "에러 처리 — 예외, assert, 계약, 불변 조건"
 series: "A Tour of C++"

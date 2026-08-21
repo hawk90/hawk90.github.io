@@ -1,5 +1,6 @@
 ---
 title: "Chapter 5.1: Confused Words"
+slug: "writing/only-grammar-book/ch05-1-confused-words"
 date: 2026-05-14T05:10:00
 description: "헷갈리는 단어 — their/there/they're, affect/effect, who/whom, less/fewer, 그리고 더 많은 쌍."
 series: "The Only Grammar Book You'll Ever Need"

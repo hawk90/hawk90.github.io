@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: 확장 로드맵"
+slug: "systems/riscv/isa-anatomy/chapter18-extension-roadmap"
 date: 2026-05-17T18:00:00
 description: "RISC-V 확장 로드맵 — V(벡터), B(비트조작), H(하이퍼바이저), Zicsr, Zifencei, 프로파일을 다룬다."
 series: "RISC-V ISA 해부"

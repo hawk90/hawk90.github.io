@@ -1,5 +1,6 @@
 ---
 title: "제10장: 간결함"
+slug: "writing/gojongseok-munjang/ch10-concision"
 date: 2026-05-14T10:00:00
 description: "군더더기 없는 간결한 문장 쓰기"
 series: "고종석의 문장"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Completion"
+slug: "embedded/hardware/nvme/chapter08-completion"
 date: 2026-05-16T09:00:00
 description: "NVMe Completion Queue Entry 구조와 Status Code 체계를 분석한다"
 series: "NVMe Deep Dive"

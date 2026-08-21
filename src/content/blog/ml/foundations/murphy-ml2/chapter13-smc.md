@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Sequential Monte Carlo"
+slug: "ml/foundations/murphy-ml2/chapter13-smc"
 date: 2026-05-16T13:00:00
 description: "Particle filter·SMC sampler — 시계열·sequential inference."
 series: "Probabilistic Machine Learning: Advanced Topics"

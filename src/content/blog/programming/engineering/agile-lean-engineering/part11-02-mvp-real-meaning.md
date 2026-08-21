@@ -1,5 +1,6 @@
 ---
 title: "Part 11-02: MVP — 진짜 의미"
+slug: "programming/engineering/agile-lean-engineering/part11-02-mvp-real-meaning"
 date: 2026-05-20T14:00:00
 description: "Concierge·Wizard of Oz·Smoke test — MVP의 다양한 형태."
 series: "Agile & Lean Software Engineering"

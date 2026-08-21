@@ -1,5 +1,6 @@
 ---
 title: "Pattern 11: Split Phase"
+slug: "programming/design/refactoring-catalog/pattern11-split-phase"
 date: 2026-05-02T11:00:00
 description: "처리를 두 단계로 — 한 함수가 여러 의무를 다할 때."
 series: "Refactoring Catalog (Fowler 2nd ed)"

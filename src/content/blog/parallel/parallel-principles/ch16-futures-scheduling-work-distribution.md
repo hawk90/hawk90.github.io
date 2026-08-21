@@ -1,5 +1,6 @@
 ---
 title: "Chapter 16: Future, Scheduling, Work Distribution"
+slug: "parallel/parallel-principles/ch16-futures-scheduling-work-distribution"
 date: 2026-05-06T16:00:00
 description: "Future로 동시성 표현, work stealing으로 부하 분산. Fork-Join 패턴."
 series: "The Art of Multiprocessor Programming"

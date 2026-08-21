@@ -1,5 +1,6 @@
 ---
 title: "1장 풀이 예제 (Worked Examples)"
+slug: "math/linear-algebra/ch01-vector-spaces/examples"
 date: 2026-05-15T14:16:44
 description: "문제. 다음 부분집합이 의 부분공간인지 판정하라. 1. 2. 3. 4."
 tags: [linear-algebra, Mathematics, hoffman-kunze]

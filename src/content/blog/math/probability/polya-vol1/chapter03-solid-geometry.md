@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Induction in Solid Geometry"
+slug: "math/probability/polya-vol1/chapter03-solid-geometry"
 date: 2026-05-16T03:00:00
 description: "Euler 다면체 공식 V-E+F=2의 발견 과정."
 series: "Mathematics and Plausible Reasoning, Vol I"

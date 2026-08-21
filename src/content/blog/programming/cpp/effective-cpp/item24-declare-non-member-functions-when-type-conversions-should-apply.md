@@ -1,5 +1,6 @@
 ---
 title: "항목 24: 모든 매개변수에 타입 변환이 필요하면 비-멤버 함수로 선언하라"
+slug: "programming/cpp/effective-cpp/item24-declare-non-member-functions-when-type-conversions-should-apply"
 date: 2026-05-04T00:00:00
 description: "operator*의 양쪽 피연산자 변환 — 멤버 함수로는 lhs 변환 불가. 비-멤버로 대칭성 확보."
 tags: [cpp, effective-c++, operator-overloading, implicit-conversion]

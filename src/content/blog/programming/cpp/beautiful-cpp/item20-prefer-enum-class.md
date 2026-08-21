@@ -1,5 +1,6 @@
 ---
 title: "항목 20: 단순 열거형보다는 클래스 열거형을 택하라"
+slug: "programming/cpp/beautiful-cpp/item20-prefer-enum-class"
 date: 2026-05-05T20:00:00
 description: "enum class — 스코프 안에 갇히고, 정수 변환은 명시적. 새 코드에서 일반 enum을 쓸 이유는 거의 없다."
 tags: [cpp, Enums, type-safety]

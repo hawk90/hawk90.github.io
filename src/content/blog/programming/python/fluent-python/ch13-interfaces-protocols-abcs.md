@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Interfaces, Protocols, and ABCs"
+slug: "programming/python/fluent-python/ch13-interfaces-protocols-abcs"
 date: 2026-05-15T13:00:00
 description: "인터페이스 — 덕 타이핑, 정적 프로토콜, 추상 베이스 클래스."
 series: "Fluent Python"

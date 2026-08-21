@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: 코드 리뷰 통합"
+slug: "programming/git/git-flow/chapter07-code-review-integration"
 date: 2026-05-17T07:00:00
 description: "Pull Request / Merge Request 워크플로우. 리뷰어 / 작성자 책임. stacked PR."
 tags: [Git, code-review, pull-request]

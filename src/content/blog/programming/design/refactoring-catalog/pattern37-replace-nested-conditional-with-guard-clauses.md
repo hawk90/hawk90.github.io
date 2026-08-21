@@ -1,5 +1,6 @@
 ---
 title: "Pattern 37: Replace Nested Conditional with Guard Clauses"
+slug: "programming/design/refactoring-catalog/pattern37-replace-nested-conditional-with-guard-clauses"
 date: 2026-05-02T13:00:00
 description: "Nested if 피라미드를 early return으로 평탄화 — main path가 한눈에."
 series: "Refactoring Catalog (Fowler 2nd ed)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Information Theory"
+slug: "ml/foundations/murphy-ml1/chapter06-information-theory"
 date: 2026-05-16T06:00:00
 description: "Entropy·KL·cross-entropy — ML loss의 정보이론적 뿌리."
 series: "Probabilistic Machine Learning: An Introduction"

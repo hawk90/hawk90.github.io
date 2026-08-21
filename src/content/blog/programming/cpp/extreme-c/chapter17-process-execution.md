@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Process Execution"
+slug: "programming/cpp/extreme-c/chapter17-process-execution"
 date: 2026-05-05T17:00:00
 description: "fork / exec / wait. 프로세스 생성, 종료 코드, 좀비 / 고아."
 tags: [C, Process, fork, exec]

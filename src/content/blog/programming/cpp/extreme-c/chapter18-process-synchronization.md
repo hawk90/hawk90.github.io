@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Process Synchronization"
+slug: "programming/cpp/extreme-c/chapter18-process-synchronization"
 date: 2026-05-05T18:00:00
 description: "프로세스 간 동기화 — named semaphore, shared mutex, file lock."
 tags: [C, Process, Synchronization, IPC]

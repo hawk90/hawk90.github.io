@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Generalized Linear Madness"
+slug: "math/probability/mcelreath-rethinking/chapter16-glm-madness"
 date: 2026-05-16T16:00:00
 description: "Scientific model > statistical model — McElreath의 핵심 주장."
 series: "Statistical Rethinking"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Designing with Objects"
+slug: "programming/cpp/professional-cpp/chapter05-designing-with-objects"
 date: 2026-05-05T05:00:00
 description: "객체 설계 — has-a vs is-a. 컴포넌트 식별. 책임 할당."
 tags: [cpp, OOP, Design]

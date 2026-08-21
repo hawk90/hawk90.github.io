@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: AArch64 Application-Level Programmers' Model"
+slug: "systems/arm/armv8-a-spec/chapter02-aarch64-app-model"
 date: 2026-05-17T02:00:00
 description: "Part A — X0-X30·SP·PC·PSTATE·NZCV."
 series: "ARMv8-A Architecture Reference Manual"

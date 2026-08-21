@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Type Hints in Functions"
+slug: "programming/python/fluent-python/ch08-type-hints"
 date: 2026-05-15T08:00:00
 description: "타입 힌트 — 함수 시그니처에 의도 명시."
 series: "Fluent Python"

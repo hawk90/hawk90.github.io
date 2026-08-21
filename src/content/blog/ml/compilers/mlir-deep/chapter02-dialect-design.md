@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Dialect 개념과 설계 원칙"
+slug: "ml/compilers/mlir-deep/chapter02-dialect-design"
 date: 2026-05-16T02:00:00
 description: "Dialect — MLIR의 modular IR 단위."
 series: "MLIR 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 인코딩과 진화"
+slug: "parallel/designing-data-intensive-applications/chapter04-encoding-and-evolution"
 date: 2026-05-12T04:00:00
 description: "데이터 직렬화 — JSON / Protobuf / Avro / Thrift. 스키마 진화와 forward / backward 호환성."
 tags: [DDIA, Encoding, Protobuf, Avro, SchemaEvolution]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Monte Carlo Inference"
+slug: "ml/foundations/murphy-ml2/chapter11-monte-carlo"
 date: 2026-05-16T11:00:00
 description: "Importance·rejection·SMC 기반·variance reduction."
 series: "Probabilistic Machine Learning: Advanced Topics"

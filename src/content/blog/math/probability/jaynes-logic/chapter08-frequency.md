@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Probability and Frequency"
+slug: "math/probability/jaynes-logic/chapter08-frequency"
 date: 2026-05-16T08:00:00
 description: "왜 frequency가 probability가 아닌가."
 series: "Probability Theory: The Logic of Science"

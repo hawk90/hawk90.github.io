@@ -1,5 +1,6 @@
 ---
 title: "Part 12-08: 시리즈 마무리 — 자신의 컨텍스트에 맞게 골라 쓰기"
+slug: "programming/engineering/agile-lean-engineering/part12-08-series-conclusion"
 date: 2026-05-20T15:00:00
 description: "155편을 회고하고 — 컨텍스트별 추천 학습 경로."
 series: "Agile & Lean Software Engineering"

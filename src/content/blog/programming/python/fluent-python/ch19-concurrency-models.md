@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Concurrency Models in Python"
+slug: "programming/python/fluent-python/ch19-concurrency-models"
 date: 2026-05-15T19:00:00
 description: "동시성 모델 — 스레드, 프로세스, asyncio 개관."
 series: "Fluent Python"

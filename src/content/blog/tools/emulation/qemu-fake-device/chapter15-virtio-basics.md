@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: VirtIO 디바이스 기초"
+slug: "tools/emulation/qemu-fake-device/chapter15-virtio-basics"
 date: 2026-05-17T15:00:00
 description: "virtio-pci·virtqueue·feature bits — VirtIO의 본질."
 tags: [QEMU, virtio, virtqueue, virtio-pci]

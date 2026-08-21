@@ -1,5 +1,6 @@
 ---
 title: "GoF 17: Mediator"
+slug: "programming/design/gof-design-patterns/item17-mediator"
 date: 2026-05-01T17:00:00
 description: "객체들의 상호작용을 중재자에 캡슐화 — N×N 결합을 N으로."
 tags: [design-pattern, GoF, cpp, C, Behavioral]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Polymorphism"
+slug: "programming/cpp/extreme-c/chapter09-polymorphism"
 date: 2026-05-05T09:00:00
 description: "C 다형성 — 함수 포인터 / vtable. 수동 OO의 정점."
 tags: [C, OOP, Polymorphism, vtable]

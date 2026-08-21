@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: System Architecture: Satellite-Based Navigation"
+slug: "programming/design/ooad/chapter08-satellite-based-navigation"
 date: 2026-05-19T08:00:00
 description: "케이스 스터디 — 위성 기반 항법 시스템 아키텍처."
 series: "Object-Oriented Analysis and Design with Applications"

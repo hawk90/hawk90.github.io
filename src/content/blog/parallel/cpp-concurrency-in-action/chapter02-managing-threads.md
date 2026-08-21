@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Managing threads"
+slug: "parallel/cpp-concurrency-in-action/chapter02-managing-threads"
 date: 2026-05-06T02:00:00
 description: "std::thread 라이프사이클, join/detach, 인자 전달, 소유권 이전, 스레드 수 결정, 스레드 식별."
 tags: [cpp, Concurrency, "std::thread", thread_guard, scoped_thread]

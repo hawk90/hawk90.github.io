@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Generative Models — Overview"
+slug: "ml/foundations/murphy-ml2/chapter20-gen-overview"
 date: 2026-05-16T20:00:00
 description: "Likelihood-based·implicit·diffusion — generative model 분류학."
 series: "Probabilistic Machine Learning: Advanced Topics"

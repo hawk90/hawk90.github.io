@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Understanding Containers and Iterators"
+slug: "programming/cpp/professional-cpp/chapter17-understanding-containers-and-iterators"
 date: 2026-05-05T17:00:00
 description: "표준 컨테이너 — vector / list / map / unordered_map / array / span."
 tags: [cpp, Containers, Iterator]

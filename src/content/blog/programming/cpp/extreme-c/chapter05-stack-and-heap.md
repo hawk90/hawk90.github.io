@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Stack and Heap"
+slug: "programming/cpp/extreme-c/chapter05-stack-and-heap"
 date: 2026-05-05T05:00:00
 description: "스택 vs 힙 — 라이프타임 / 성능 / 안전. malloc / free 내부."
 tags: [C, Memory, Stack, Heap, malloc]

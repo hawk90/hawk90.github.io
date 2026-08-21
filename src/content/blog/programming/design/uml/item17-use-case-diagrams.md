@@ -1,5 +1,6 @@
 ---
 title: "UML 17: 유스케이스 다이어그램 — 시스템 경계와 외부 행위자"
+slug: "programming/design/uml/item17-use-case-diagrams"
 date: 2026-05-03T17:00:00
 description: "System boundary box, actor, use case, include/extend — 시스템 스코프를 한 장에."
 tags: [UML, use-case-diagram, Requirements, Scope]

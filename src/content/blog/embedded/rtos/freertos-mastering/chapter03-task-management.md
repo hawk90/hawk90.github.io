@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Task Management"
+slug: "embedded/rtos/freertos-mastering/chapter03-task-management"
 date: 2026-05-09T03:00:00
 description: "xTaskCreate·priority·state — FreeRTOS 태스크의 생성·상태·스케줄링."
 series: "Mastering the FreeRTOS Real Time Kernel"

@@ -1,5 +1,6 @@
 ---
 title: "Part 4-05: Limit WIP — 왜 핵심인가"
+slug: "programming/engineering/agile-lean-engineering/part4-05-limit-wip-littles-law"
 date: 2026-05-22T09:00:00
 description: "Little's Law(WIP = throughput × cycle time)와 WIP 제한의 효과."
 series: "Agile & Lean Software Engineering"

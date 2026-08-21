@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Further Patterns and First Links"
+slug: "math/probability/polya-vol2/chapter02-further-patterns"
 date: 2026-05-16T02:00:00
 description: "Verification·refutation·comparison — plausibility 변화 패턴."
 series: "Mathematics and Plausible Reasoning, Vol II"

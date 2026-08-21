@@ -1,5 +1,6 @@
 ---
 title: "항목 23: 템플릿을 사용하여 코드의 추상화 수준을 높이라"
+slug: "programming/cpp/beautiful-cpp/item23-use-templates-for-abstraction"
 date: 2026-05-05T23:00:00
 description: "타입별 복붙을 템플릿으로 일반화 — 컴파일 타임 다형성, 런타임 비용 0, C++20 concepts로 안전성."
 tags: [cpp, Templates, generic-programming]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Hierarchical and Empirical Bayes·Stein Effect"
+slug: "math/probability/robert-bayesian-choice/chapter10-hierarchical-empirical"
 date: 2026-05-15T10:00:00
 description: "Shrinkage·hyperprior·empirical Bayes — Stein paradox 해석."
 series: "The Bayesian Choice"

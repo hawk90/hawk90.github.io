@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 임베디드 Linux와 Yocto의 위치"
+slug: "embedded/yocto/ch01-linux-for-embedded-systems"
 date: 2026-05-15T01:00:00
 description: "임베디드 시스템에서 Linux를 쓴다는 것의 의미와 빌드 시스템 Yocto의 자리 — 공식 Mega-Manual + scarthgap LTS 기준."
 series: "Yocto Deep Dive"

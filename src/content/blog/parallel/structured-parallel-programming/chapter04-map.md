@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Map"
+slug: "parallel/structured-parallel-programming/chapter04-map"
 date: 2026-05-21T23:00:00
 description: "Map 패턴 — 독립 원소에 함수 적용, 가장 기본적인 데이터 병렬"
 series: "Structured Parallel Programming"

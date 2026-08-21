@@ -1,5 +1,6 @@
 ---
 title: "Chapter 10: General Issues in Using Variables"
+slug: "programming/engineering/code-complete/ch10-General-Issues-in-Using-Variables"
 date: 2026-05-11T10:00:00
 description: "변수 — Data Literacy, 초기화 13 가이드, span/live time, binding time, hybrid coupling 회피."
 series: "Code Complete"

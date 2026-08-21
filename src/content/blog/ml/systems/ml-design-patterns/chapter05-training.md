@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 모델 학습 패턴"
+slug: "ml/systems/ml-design-patterns/chapter05-training"
 date: 2026-05-16T05:00:00
 description: "Distribution strategy·hyperparameter tuning·transfer learning."
 series: "ML 디자인 패턴"

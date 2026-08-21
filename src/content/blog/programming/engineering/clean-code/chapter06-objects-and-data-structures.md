@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 객체와 자료구조"
+slug: "programming/engineering/clean-code/chapter06-objects-and-data-structures"
 date: 2026-05-11T06:00:00
 description: "객체와 자료구조의 본질적 대립 — 데이터를 감추는가 노출하는가. Law of Demeter, DTO."
 tags: [CleanCode, OOP, data-structures, robert-martin]

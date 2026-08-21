@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Parametric Inference"
+slug: "math/probability/wasserman-all-stats/chapter09-parametric"
 date: 2026-05-16T09:00:00
 description: "MLE·method of moments·Fisher information."
 series: "All of Statistics"

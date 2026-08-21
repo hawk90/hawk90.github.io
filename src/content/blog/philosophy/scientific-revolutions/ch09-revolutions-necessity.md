@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: The Nature and Necessity of Scientific Revolutions"
+slug: "philosophy/scientific-revolutions/ch09-revolutions-necessity"
 date: 2026-05-14T10:00:00
 description: "과학혁명의 본질과 필연성."
 series: "The Structure of Scientific Revolutions"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: PJRT — Pluggable Runtime"
+slug: "ml/compilers/xla-deep/chapter08-pjrt"
 date: 2026-05-16T08:00:00
 description: "Frontend (JAX·PyTorch) ↔ Backend의 표준 인터페이스."
 series: "XLA·OpenXLA 심화"

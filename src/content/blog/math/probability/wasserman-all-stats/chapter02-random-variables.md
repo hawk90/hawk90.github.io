@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Random Variables"
+slug: "math/probability/wasserman-all-stats/chapter02-random-variables"
 date: 2026-05-16T02:00:00
 description: "CDF·PDF·PMF·transform — 확률변수 일주."
 series: "All of Statistics"

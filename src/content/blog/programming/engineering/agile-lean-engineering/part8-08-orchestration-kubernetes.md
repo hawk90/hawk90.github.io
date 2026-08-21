@@ -1,5 +1,6 @@
 ---
 title: "Part 8-08: Orchestration — Kubernetes"
+slug: "programming/engineering/agile-lean-engineering/part8-08-orchestration-kubernetes"
 date: 2026-05-20T11:00:00
 description: "Kubernetes의 핵심 추상 — Pod·Deployment·Service·Ingress."
 series: "Agile & Lean Software Engineering"

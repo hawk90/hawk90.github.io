@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: 블록 I/O Lifecycle"
+slug: "tools/emulation/qemu-internals/chapter17-block-io"
 date: 2026-05-17T17:00:00
 description: "BDS·request stack·throttling·caching — block I/O 일대기."
 tags: [QEMU, block-layer, bds, throttling, write-cache, write-back]

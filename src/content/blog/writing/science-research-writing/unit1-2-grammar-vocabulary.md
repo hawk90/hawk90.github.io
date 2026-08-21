@@ -1,5 +1,6 @@
 ---
 title: "Unit 1.2: Introduction의 문법과 어휘"
+slug: "writing/science-research-writing/unit1-2-grammar-vocabulary"
 date: 2026-05-14T03:00:00
 description: "시제 쌍 — Present Simple / Past Simple / Present Perfect. Signalling language 5 그룹. Passive vs Active. Introduction 핵심 동사."
 series: "Science Research Writing"

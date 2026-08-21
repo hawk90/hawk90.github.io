@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: QEMU 아키텍처 개요"
+slug: "tools/emulation/qemu-internals/chapter01-architecture"
 date: 2026-05-17T01:00:00
 description: "QEMU의 전체 아키텍처 — TCG, KVM, 디바이스 모델을 이해한다."
 tags: [QEMU, Architecture, TCG, KVM, accelerator]

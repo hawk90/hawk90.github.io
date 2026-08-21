@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Horoscopes"
+slug: "math/probability/mcelreath-rethinking/chapter17-horoscopes"
 date: 2026-05-16T17:00:00
 description: "Final thoughts — Bayesian workflow의 종합."
 series: "Statistical Rethinking"

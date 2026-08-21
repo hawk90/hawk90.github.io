@@ -1,5 +1,6 @@
 ---
 title: "Chapter 5.2: Wordiness and Redundancy"
+slug: "writing/only-grammar-book/ch05-2-wordiness-redundancy"
 date: 2026-05-14T05:20:00
 description: "군더더기 제거 — 불필요한 단어, 반복적 표현, 약한 동사, 명사화의 과도한 사용."
 series: "The Only Grammar Book You'll Ever Need"

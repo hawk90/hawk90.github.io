@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Recommender Systems"
+slug: "ml/foundations/murphy-ml1/chapter22-recommender"
 date: 2026-05-16T22:00:00
 description: "Collaborative filtering·matrix factorization·neural recsys."
 series: "Probabilistic Machine Learning: An Introduction"

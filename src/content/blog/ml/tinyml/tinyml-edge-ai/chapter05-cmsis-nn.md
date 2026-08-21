@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: CMSIS-NN 최적화 커널"
+slug: "ml/tinyml/tinyml-edge-ai/chapter05-cmsis-nn"
 date: 2026-05-16T05:00:00
 description: "Cortex-M 최적화 — SIMD·MVE·Helium 활용."
 series: "TinyML·Edge AI"

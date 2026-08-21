@@ -1,5 +1,6 @@
 ---
 title: "항목 25: rvalue 참조에는 std::move를, 보편 참조에는 std::forward를 사용하라"
+slug: "programming/cpp/effective-modern-cpp/item25-use-move-on-rvalue-refs-and-forward-on-universal-refs"
 date: 2026-05-04T01:00:00
 description: "참조 종류별 올바른 캐스팅 — RVO/NRVO와 충돌 회피하는 return 패턴까지."
 tags: [cpp, "std::move", "std::forward", RVO, move-semantics, modern-cpp]

@@ -1,5 +1,6 @@
 ---
 title: "항목 32: public 상속은 'is-a'를 모델링해야 한다"
+slug: "programming/cpp/effective-cpp/item32-make-sure-public-inheritance-models-is-a"
 date: 2026-05-04T08:00:00
 description: "Liskov Substitution Principle — derived는 base가 쓰이는 모든 곳에서 동작해야. 직관적 분류와 LSP의 충돌."
 tags: [cpp, effective-c++, Inheritance, LSP]

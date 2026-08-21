@@ -1,5 +1,6 @@
 ---
 title: "Tip 84: Schedule It to Make It Happen"
+slug: "programming/engineering/pragmatic-programmer/tip84"
 date: 2026-05-12T12:00:00
 description: "일정에 넣어야 실행된다. 중요하지만 급하지 않은 일은 명시적으로 시간을 확보해야 한다."
 series: "The Pragmatic Programmer"

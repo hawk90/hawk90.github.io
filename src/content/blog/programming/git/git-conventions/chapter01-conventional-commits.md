@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Conventional Commits — 사양"
+slug: "programming/git/git-conventions/chapter01-conventional-commits"
 date: 2026-05-17T01:00:00
 description: "Conventional Commits 1.0 표준. type / scope / description / body / footer."
 tags: [Git, conventional-commits]

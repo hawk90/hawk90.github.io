@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: OCP — 개방-폐쇄 원칙"
+slug: "programming/design/clean-architecture/chapter08-ocp-the-open-closed-principle"
 date: 2026-05-01T08:00:00
 description: "확장에는 열려 있고 변경에는 닫혀 있어야 한다. OCP의 본질은 의존성 방향을 통제해 변경의 영향 범위를 차단하는 것."
 tags: [Architecture, SOLID, OCP]

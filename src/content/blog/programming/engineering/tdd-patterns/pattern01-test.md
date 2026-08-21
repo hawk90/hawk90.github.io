@@ -1,5 +1,6 @@
 ---
 title: "Pattern 1: Test"
+slug: "programming/engineering/tdd-patterns/pattern01-test"
 date: 2026-05-10T01:00:00
 description: "자동화된 테스트가 TDD의 원자 — 두려움을 자신감으로."
 series: "TDD by Example — Patterns Deep Dive"

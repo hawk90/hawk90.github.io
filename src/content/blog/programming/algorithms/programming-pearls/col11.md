@@ -1,5 +1,6 @@
 ---
 title: "Column 11: Sorting"
+slug: "programming/algorithms/programming-pearls/col11"
 date: 2026-05-11T11:00:00
 description: "Sorting"
 series: "Programming Pearls"

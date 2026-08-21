@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Tiled Matmul 예제"
+slug: "ml/compilers/triton-dsl/chapter03-tiled-matmul"
 date: 2026-05-16T03:00:00
 description: "K-loop·accumulator·shared memory — Triton matmul anatomy."
 series: "Triton DSL"

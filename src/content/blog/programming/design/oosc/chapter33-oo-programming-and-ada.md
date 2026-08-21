@@ -1,5 +1,6 @@
 ---
 title: "Ch 33: O-O Programming and Ada"
+slug: "programming/design/oosc/chapter33-oo-programming-and-ada"
 date: 2026-05-19T09:00:00
 description: "Ada에서의 OO 프로그래밍 — 패키지, 태그 타입."
 series: "Object-Oriented Software Construction"

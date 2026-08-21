@@ -1,5 +1,6 @@
 ---
 title: "Ch 2 Rule 14: 능동태를 쓸 것"
+slug: "writing/elements-of-style/ch02/rule14-active-voice"
 date: 2026-05-14T16:00:00
 description: "능동태는 보통 수동태보다 직접적이고 활기차다."
 series: "The Elements of Style"

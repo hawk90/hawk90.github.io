@@ -1,5 +1,6 @@
 ---
 title: "Chapter 35: Where to Find More Information"
+slug: "programming/engineering/code-complete/ch35-Where-to-Find-More-Information"
 date: 2026-05-11T11:00:00
 description: "다음 단계 — McConnell이 추천하는 더 깊은 자원들. 책·논문·도구."
 series: "Code Complete"

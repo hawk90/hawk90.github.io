@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Attention 구현 — FlashAttention 스타일"
+slug: "ml/compilers/triton-dsl/chapter04-flash-attention"
 date: 2026-05-16T04:00:00
 description: "Online softmax·tiling — 메모리에서 자유로운 attention."
 series: "Triton DSL"

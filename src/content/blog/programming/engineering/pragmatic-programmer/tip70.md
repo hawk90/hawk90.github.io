@@ -1,5 +1,6 @@
 ---
 title: "Tip 70: Use Property-Based Tests to Validate Your Assumptions"
+slug: "programming/engineering/pragmatic-programmer/tip70"
 date: 2026-05-11T22:00:00
 description: "속성 기반 테스트로 가정을 검증하라. 무작위 입력으로 예상치 못한 버그를 찾는다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3.1: End Marks"
+slug: "writing/only-grammar-book/ch03-1-end-marks"
 date: 2026-05-14T03:10:00
 description: "문장의 종지부 — 마침표, 물음표, 느낌표. 직접 의문문과 간접 의문문 구분."
 series: "The Only Grammar Book You'll Ever Need"

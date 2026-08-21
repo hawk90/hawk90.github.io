@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 릴리스 전략 — 태그 / 버저닝"
+slug: "programming/git/git-flow/chapter05-release-strategy"
 date: 2026-05-17T05:00:00
 description: "tag로 릴리스 마커. annotated vs lightweight. 자동 릴리스."
 tags: [Git, Release, Tagging, Versioning]

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 4.4: Fragments and Run-ons"
+slug: "writing/only-grammar-book/ch04-4-fragment-runon"
 date: 2026-05-14T04:40:00
 description: "단편 문장과 런온 문장 — 식별, 회피, 수정 전략."
 series: "The Only Grammar Book You'll Ever Need"

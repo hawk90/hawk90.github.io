@@ -1,5 +1,6 @@
 ---
 title: "Pattern 15: Replace Temp with Query"
+slug: "programming/design/refactoring-catalog/pattern15-replace-temp-with-query"
 date: 2026-05-02T15:00:00
 description: "임시 변수를 query function으로 — Extract Function의 전 단계."
 series: "Refactoring Catalog (Fowler 2nd ed)"

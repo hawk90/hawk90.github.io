@@ -1,5 +1,6 @@
 ---
 title: "Tip 87: Deliver When Users Need It"
+slug: "programming/engineering/pragmatic-programmer/tip87"
 date: 2026-05-12T15:00:00
 description: "사용자가 필요할 때 전달하라. 완벽보다 시의적절한 전달이 가치 있다."
 series: "The Pragmatic Programmer"

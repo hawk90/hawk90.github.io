@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Working with Strings and String Views"
+slug: "programming/cpp/professional-cpp/chapter02-strings-and-string-views"
 date: 2026-05-05T02:00:00
 description: "std::string / std::string_view. raw string literal. format / println (C++20/23)."
 tags: [cpp, String, string_view, format]

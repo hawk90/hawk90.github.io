@@ -1,5 +1,6 @@
 ---
 title: "Part 5-3: ftrace / perf / eBPF"
+slug: "systems/linux-kernel-internals/part5-03-ftrace-perf-ebpf"
 date: 2026-05-12T00:00:00
 description: "커널 트레이싱 / 프로파일링 / 동적 계측. 디버깅과 성능 분석."
 tags: [Linux, Kernel, ftrace, perf, eBPF]

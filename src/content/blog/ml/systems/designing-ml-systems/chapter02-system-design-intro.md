@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: ML 시스템 설계 소개"
+slug: "ml/systems/designing-ml-systems/chapter02-system-design-intro"
 date: 2026-05-16T02:00:00
 description: "Business goal·ML objective·constraints — 설계의 출발점."
 series: "Designing Machine Learning Systems"

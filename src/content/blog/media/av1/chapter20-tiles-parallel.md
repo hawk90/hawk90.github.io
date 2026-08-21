@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: 타일과 병렬 디코딩"
+slug: "media/av1/chapter20-tiles-parallel"
 date: 2026-05-16T21:00:00
 description: "AV1의 타일 시스템 — 독립적 디코딩, Tile Group OBU, 세그멘테이션."
 tags: [AV1, Video, Codec, Tile, Parallel, Segmentation]

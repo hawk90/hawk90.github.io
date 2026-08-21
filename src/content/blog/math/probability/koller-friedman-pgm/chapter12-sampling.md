@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Particle-Based Approximate Inference"
+slug: "math/probability/koller-friedman-pgm/chapter12-sampling"
 date: 2026-05-16T12:00:00
 description: "Sampling·MCMC·SMC — particle inference 종합."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

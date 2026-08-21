@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: mlir-opt·mlir-translate 도구"
+slug: "ml/compilers/mlir-deep/chapter14-tools"
 date: 2026-05-16T14:00:00
 description: "MLIR 개발의 일상 도구 — opt·translate·tblgen."
 series: "MLIR 심화"

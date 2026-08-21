@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Commitment: The Sniper Project"
+slug: "programming/engineering/goos/chapter09-commitment"
 date: 2026-05-10T09:00:00
 description: "책의 Worked Example 소개 — 경매 sniper 시스템. Part 3 시작."
 tags: [TDD, case-study, auction-sniper]

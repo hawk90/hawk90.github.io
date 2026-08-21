@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: The Four Pillars of a Good Unit Test"
+slug: "programming/engineering/khorikov-unit-testing/chapter04-four-pillars"
 date: 2026-05-10T04:00:00
 description: "회귀 보호, 리팩토링 내성, 빠른 피드백, 유지보수성. 4가지 기둥과 트레이드오프."
 tags: [TDD, four-pillars]

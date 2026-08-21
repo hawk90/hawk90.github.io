@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Dichotomous Predicted Variable"
+slug: "math/probability/kruschke-dba/chapter13-dichotomous"
 date: 2026-05-15T13:00:00
 description: "Logistic regression·prediction·classification."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

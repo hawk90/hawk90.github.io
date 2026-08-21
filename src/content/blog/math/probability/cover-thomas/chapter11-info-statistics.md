@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Information Theory and Statistics"
+slug: "math/probability/cover-thomas/chapter11-info-statistics"
 date: 2026-05-16T11:00:00
 description: "Hypothesis testing·Fisher information·large deviation."
 series: "Elements of Information Theory"

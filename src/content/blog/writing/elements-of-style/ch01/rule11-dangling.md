@@ -1,5 +1,6 @@
 ---
 title: "Ch 1 Rule 11: 현수 분사 (Dangling Participle)"
+slug: "writing/elements-of-style/ch01/rule11-dangling"
 date: 2026-05-14T12:00:00
 description: "문장 앞의 분사구는 문장의 주어를 수식해야 한다."
 series: "The Elements of Style"

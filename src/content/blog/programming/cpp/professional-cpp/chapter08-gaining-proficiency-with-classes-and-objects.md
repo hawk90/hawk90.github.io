@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Gaining Proficiency with Classes and Objects"
+slug: "programming/cpp/professional-cpp/chapter08-gaining-proficiency-with-classes-and-objects"
 date: 2026-05-05T08:00:00
 description: "클래스 기초 심화 — 생성자 / 소멸자 / 멤버 / 접근 제어."
 tags: [cpp, Class, Constructor]

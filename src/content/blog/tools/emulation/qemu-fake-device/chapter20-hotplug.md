@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: 핫플러그/핫언플러그"
+slug: "tools/emulation/qemu-fake-device/chapter20-hotplug"
 date: 2026-05-17T20:00:00
 description: "device_add·device_del·refcount — runtime device dynamics."
 tags: [QEMU, hotplug, pcie, hot-add]

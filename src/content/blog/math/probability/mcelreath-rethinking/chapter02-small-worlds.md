@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Small Worlds and Large Worlds"
+slug: "math/probability/mcelreath-rethinking/chapter02-small-worlds"
 date: 2026-05-16T02:00:00
 description: "Garden of forking data — Bayesian counting."
 series: "Statistical Rethinking"

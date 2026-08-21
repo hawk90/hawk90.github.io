@@ -1,5 +1,6 @@
 ---
 title: "Pattern 12: Another Test"
+slug: "programming/engineering/tdd-patterns/pattern12-another-test"
 date: 2026-05-10T12:00:00
 description: "Tangent 아이디어 — test list에 추가하고 현재 작업 유지. Squirrel Effect 회피."
 series: "TDD by Example — Patterns Deep Dive"

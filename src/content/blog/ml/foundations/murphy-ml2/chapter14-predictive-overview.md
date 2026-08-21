@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Predictive Models — Overview"
+slug: "ml/foundations/murphy-ml2/chapter14-predictive-overview"
 date: 2026-05-16T14:00:00
 description: "Conditional p(y|x) 모델링 — supervised learning 통합."
 series: "Probabilistic Machine Learning: Advanced Topics"

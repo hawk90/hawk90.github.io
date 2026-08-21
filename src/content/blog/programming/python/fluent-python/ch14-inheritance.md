@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Inheritance: For Better or for Worse"
+slug: "programming/python/fluent-python/ch14-inheritance"
 date: 2026-05-15T14:00:00
 description: "상속 — MRO, 다중 상속, 믹스인의 위험과 활용."
 series: "Fluent Python"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Multiple Random Variables"
+slug: "math/probability/casella-berger/chapter04-multiple-rvs"
 date: 2026-05-16T04:00:00
 description: "Joint·conditional·multivariate transformation."
 series: "Statistical Inference"

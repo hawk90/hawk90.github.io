@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: General Random Variables"
+slug: "math/probability/bertsekas-tsitsiklis/chapter03-general-rv"
 date: 2026-05-16T03:00:00
 description: "Continuous RV·joint density·multivariate normal."
 series: "Introduction to Probability"

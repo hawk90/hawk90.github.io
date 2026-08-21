@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 초기화 — Power-up, MRS, ZQ Calibration"
+slug: "embedded/hardware/ddr/chapter05-initialization"
 date: 2026-05-16T06:00:00
 description: "DDR 메모리 초기화 시퀀스: 전원 투입, Mode Register 설정, 임피던스 캘리브레이션"
 series: "DDR Memory Deep Dive"

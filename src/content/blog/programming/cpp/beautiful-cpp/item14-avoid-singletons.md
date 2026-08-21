@@ -1,5 +1,6 @@
 ---
 title: "항목 14: 싱글턴을 피하라"
+slug: "programming/cpp/beautiful-cpp/item14-avoid-singletons"
 date: 2026-05-05T14:00:00
 description: "싱글턴 = 전역 변수 + OOP 위장. 의존성 주입으로 결합도·테스트·동시성 모두 해결."
 tags: [cpp, design-patterns, dependency-injection]

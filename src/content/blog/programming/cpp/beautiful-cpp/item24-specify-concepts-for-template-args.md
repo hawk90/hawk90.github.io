@@ -1,5 +1,6 @@
 ---
 title: "항목 24: 모든 템플릿 인수의 콘셉트를 명시하라"
+slug: "programming/cpp/beautiful-cpp/item24-specify-concepts-for-template-args"
 date: 2026-05-05T00:00:00
 description: "C++20 콘셉트 — 템플릿 요구사항을 시그니처에 명시. 친절한 에러, 문서, 오버로드 해결을 동시에."
 tags: [cpp, Concepts, Templates]

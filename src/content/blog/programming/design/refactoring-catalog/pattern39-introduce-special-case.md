@@ -1,5 +1,6 @@
 ---
 title: "Pattern 39: Introduce Special Case"
+slug: "programming/design/refactoring-catalog/pattern39-introduce-special-case"
 date: 2026-05-02T15:00:00
 description: "Null·missing·unknown 처리를 special case object로 — caller가 분기에서 해방."
 series: "Refactoring Catalog (Fowler 2nd ed)"

@@ -1,5 +1,6 @@
 ---
 title: "DSA 24: Min-Max Heap, Deap"
+slug: "programming/algorithms/data-structures-and-algorithms/item24-min-max-heap-deap"
 date: 2026-05-15T00:00:00
 description: "양 끝 (최솟값·최댓값) 모두 O(log n)에 접근하는 이중 우선순위 큐."
 tags: [data-structure, Algorithm, Heap, priority-queue]

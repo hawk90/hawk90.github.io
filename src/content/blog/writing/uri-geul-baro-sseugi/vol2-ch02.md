@@ -1,5 +1,6 @@
 ---
 title: "제2권 2장: 일본글 투"
+slug: "writing/uri-geul-baro-sseugi/vol2-ch02"
 date: 2026-05-14T06:00:00
 description: "일본어 문장 구조의 영향. '~하는 것이 가능하다', '~에 있어서' 같은 표현 교정."
 series: "우리글 바로쓰기"

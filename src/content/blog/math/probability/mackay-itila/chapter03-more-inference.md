@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: More about Inference"
+slug: "math/probability/mackay-itila/chapter03-more-inference"
 date: 2026-05-16T03:00:00
 description: "Box·bent coin·forensic — Bayesian 추론 case study."
 series: "Information Theory, Inference, and Learning Algorithms"

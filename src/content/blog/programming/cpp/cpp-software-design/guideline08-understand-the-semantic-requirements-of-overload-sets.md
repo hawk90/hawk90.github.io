@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 8: 오버로드 집합의 의미적 요구사항을 이해하라"
+slug: "programming/cpp/cpp-software-design/guideline08-understand-the-semantic-requirements-of-overload-sets"
 date: 2026-05-02T08:00:00
 description: "함수 오버로드도 인터페이스다. 같은 이름은 같은 의미여야 하고, std::swap이나 std::begin 같은 customization point도 같은 원칙을 따른다."
 tags: [cpp, software-design, Overloading, customization-point]

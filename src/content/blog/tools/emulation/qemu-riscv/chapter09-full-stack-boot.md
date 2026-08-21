@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: 풀 스택 부팅"
+slug: "tools/emulation/qemu-riscv/chapter09-full-stack-boot"
 date: 2026-05-17T03:00:00
 description: "QEMU 풀 스택 — OpenSBI + U-Boot + Linux 부팅을 다룬다."
 series: "RISC-V QEMU 심화"

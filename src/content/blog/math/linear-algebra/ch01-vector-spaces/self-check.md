@@ -1,5 +1,6 @@
 ---
 title: "1장 자기점검 답안 (Self-Check Answers)"
+slug: "math/linear-algebra/ch01-vector-spaces/self-check"
 date: 2026-05-15T14:14:49
 description: "A. 덧셈에 대한 역원 존재 (V4) 가 결정적이다."
 tags: [linear-algebra, Mathematics, hoffman-kunze]

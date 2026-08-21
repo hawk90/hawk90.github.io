@@ -1,5 +1,6 @@
 ---
 title: "Ch 25: Container와 Transport"
+slug: "media/av1/chapter25-container-transport"
 date: 2026-05-16T02:00:00
 description: "AV1의 컨테이너와 전송 — Length-Delimited, MP4, WebM, AVIF, RTP, Large Scale Tiles."
 tags: [AV1, Video, Codec, Container, MP4, WebM, AVIF, RTP]

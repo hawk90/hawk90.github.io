@@ -1,5 +1,6 @@
 ---
 title: "Part 1-3: 타당성 / 건전성 / 강도"
+slug: "philosophy/critical-thinking-logic/part1-03-validity-soundness-strength"
 date: 2026-05-14T03:00:00
 description: "연역 — 타당 / 건전. 귀납 — 강도 / 신뢰성. 평가 기준의 차이."
 tags: [Logic, Validity, Soundness]

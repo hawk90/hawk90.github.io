@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Criteria of Object Orientation"
+slug: "programming/design/oosc/chapter02-criteria-of-object-orientation"
 date: 2026-05-19T02:00:00
 description: "객체지향의 7가지 핵심 기준 — 무엇이 진정한 OO를 만드는가."
 series: "Object-Oriented Software Construction"

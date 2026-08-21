@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: CDEF"
+slug: "media/av1/chapter17-cdef"
 date: 2026-05-16T18:00:00
 description: "AV1의 CDEF — Constrained Directional Enhancement Filter, 에지 방향 감지와 비선형 필터."
 tags: [AV1, Video, Codec, CDEF, Filter]

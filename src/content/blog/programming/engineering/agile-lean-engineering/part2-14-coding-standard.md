@@ -1,5 +1,6 @@
 ---
 title: "Part 2-14: Coding Standard"
+slug: "programming/engineering/agile-lean-engineering/part2-14-coding-standard"
 date: 2026-05-20T22:00:00
 description: "강제 vs 자율 — XP에서 coding standard의 자리."
 series: "Agile & Lean Software Engineering"

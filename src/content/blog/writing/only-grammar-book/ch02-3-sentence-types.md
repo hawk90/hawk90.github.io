@@ -1,5 +1,6 @@
 ---
 title: "Chapter 2.3: Sentence Types"
+slug: "writing/only-grammar-book/ch02-3-sentence-types"
 date: 2026-05-14T02:30:00
 description: "문장의 네 가지 종류 — 단순·중문·복문·중복문. 구조에 따른 분류와 문체적 효과."
 series: "The Only Grammar Book You'll Ever Need"

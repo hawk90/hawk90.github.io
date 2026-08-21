@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Iterators, Generators, and Classic Coroutines"
+slug: "programming/python/fluent-python/ch17-iterators-generators"
 date: 2026-05-15T17:00:00
 description: "이터레이터, 제너레이터, 고전 코루틴 — yield의 두 얼굴."
 series: "Fluent Python"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction and Overview"
+slug: "math/probability/halpern-uncertainty/chapter01-introduction"
 date: 2026-05-16T01:00:00
 description: "불확실성의 다양한 형식 — Halpern의 통합 framework."
 series: "Reasoning About Uncertainty"

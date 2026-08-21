@@ -1,5 +1,6 @@
 ---
 title: "Chapter 2.4: Subject-Verb Agreement"
+slug: "writing/only-grammar-book/ch02-4-subject-verb-agreement"
 date: 2026-05-14T02:40:00
 description: "주어와 동사의 수 일치 — 단복수 규칙, 까다로운 주어, 자주 마주치는 함정."
 series: "The Only Grammar Book You'll Ever Need"

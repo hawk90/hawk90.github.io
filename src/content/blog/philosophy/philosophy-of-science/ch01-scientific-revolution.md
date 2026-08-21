@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: The Scientific Revolution"
+slug: "philosophy/philosophy-of-science/ch01-scientific-revolution"
 date: 2026-05-15T01:00:00
 description: "과학혁명 — 16~17세기 자연관의 변혁과 과학의 출현."
 series: "Understanding Philosophy of Science"

@@ -1,5 +1,6 @@
 ---
 title: "DSA 3: 재귀와 분할 정복 — Tower of Hanoi"
+slug: "programming/algorithms/data-structures-and-algorithms/item03-recursion-and-divide-conquer"
 date: 2026-05-15T03:00:00
 description: "재귀의 본질: 작은 문제로 줄이기. Tower of Hanoi와 마스터 정리 입문."
 tags: [data-structure, Algorithm, Recursion, divide-and-conquer]

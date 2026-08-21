@@ -1,5 +1,6 @@
 ---
 title: "Chapter 6: Style and Clarity"
+slug: "writing/only-grammar-book/ch06-style-clarity"
 date: 2026-05-14T06:00:00
 description: "문법을 넘어선 문체와 명확성 — 능동태, 간결성, 구체성, 평행 구조, 적절한 어조."
 series: "The Only Grammar Book You'll Ever Need"

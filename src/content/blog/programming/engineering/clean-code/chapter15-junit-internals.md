@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: JUnit 내부 들여다보기"
+slug: "programming/engineering/clean-code/chapter15-junit-internals"
 date: 2026-05-11T15:00:00
 description: "JUnit의 ComparisonCompactor 코드 리팩토링 — 이미 잘 쓰여진 코드도 더 깨끗하게 만들 자리가 있다."
 tags: [CleanCode, Refactoring, JUnit, robert-martin]

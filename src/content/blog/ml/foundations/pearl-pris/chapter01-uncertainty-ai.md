@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Uncertainty in AI Systems"
+slug: "ml/foundations/pearl-pris/chapter01-uncertainty-ai"
 date: 2026-05-16T01:00:00
 description: "AI에서 불확실성 — Pearl이 본 1988년 풍경."
 series: "Probabilistic Reasoning in Intelligent Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: GATT — Generic Attribute Profile, 데이터 모델"
+slug: "embedded/wireless/getting-started-with-ble/chapter05-gatt"
 date: 2026-05-08T05:00:00
 description: "Service → Characteristic → Descriptor 3층. 모든 BLE 애플리케이션 데이터의 골격."
 series: "Getting Started with BLE"

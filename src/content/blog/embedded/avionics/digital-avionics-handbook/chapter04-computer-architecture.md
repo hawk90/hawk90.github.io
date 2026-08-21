@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Avionics Computer Architecture"
+slug: "embedded/avionics/digital-avionics-handbook/chapter04-computer-architecture"
 date: 2026-05-18T04:00:00
 description: "ARM·PowerPC·RAD 류 우주용 프로세서 — 신뢰성과 성능의 트레이드오프."
 series: "Digital Avionics Handbook"

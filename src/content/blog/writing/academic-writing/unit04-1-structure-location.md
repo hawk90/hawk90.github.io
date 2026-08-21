@@ -1,5 +1,6 @@
 ---
 title: "Unit 4.1: Data Commentary의 구조와 Location Statements"
+slug: "writing/academic-writing/unit04-1-structure-location"
 date: 2026-05-14T15:00:00
 description: "Data Commentary의 표준 구조 — Location statement / Highlighting / Discussion. Indicative vs Informative location, as clauses, 동사 선택."
 series: "Academic Writing for Graduate Students"

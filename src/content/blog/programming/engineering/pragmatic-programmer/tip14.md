@@ -1,5 +1,6 @@
 ---
 title: "Tip 14: Good Design Is Easier to Change Than Bad Design"
+slug: "programming/engineering/pragmatic-programmer/tip14"
 date: 2026-05-11T14:00:00
 description: "좋은 설계는 변경하기 쉽다 — 변경 비용이 설계 품질의 척도다."
 series: "The Pragmatic Programmer"

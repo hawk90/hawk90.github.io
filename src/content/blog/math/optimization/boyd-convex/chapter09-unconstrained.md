@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Unconstrained Minimization"
+slug: "math/optimization/boyd-convex/chapter09-unconstrained"
 date: 2026-05-15T09:00:00
 description: "Gradient·Newton·BFGS — 제약 없는 문제의 수치 알고리즘."
 series: "Convex Optimization (Boyd)"

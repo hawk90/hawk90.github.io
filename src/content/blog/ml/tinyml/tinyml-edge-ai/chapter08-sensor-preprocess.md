@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: 센서 데이터 전처리"
+slug: "ml/tinyml/tinyml-edge-ai/chapter08-sensor-preprocess"
 date: 2026-05-16T08:00:00
 description: "Window·FFT·normalize — raw sensor → model input."
 series: "TinyML·Edge AI"

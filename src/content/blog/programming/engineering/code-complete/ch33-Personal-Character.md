@@ -1,5 +1,6 @@
 ---
 title: "Chapter 33: Personal Character"
+slug: "programming/engineering/code-complete/ch33-Personal-Character"
 date: 2026-05-11T09:00:00
 description: "프로그래머의 개인 특성 — 지능보다 끈기·겸손·호기심·태도. 직업의 정신적 측면."
 series: "Code Complete"

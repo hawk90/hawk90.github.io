@@ -1,5 +1,6 @@
 ---
 title: "Chapter 7: High-Quality Routines"
+slug: "programming/engineering/code-complete/ch07-High-Quality-Routines"
 date: 2026-05-11T07:00:00
 description: "고품질 루틴 — 14 정당한 이유, functional cohesion, 좋은 이름, 길이 100~200줄, 7 이하 매개변수."
 series: "Code Complete"

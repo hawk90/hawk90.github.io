@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: KVM Accelerator Interface"
+slug: "tools/emulation/qemu-internals/chapter14-kvm-accel"
 date: 2026-05-17T14:00:00
 description: "Accel ops·KVM_RUN·MMIO trap — KVM과 QEMU의 만남."
 tags: [QEMU, kvm, accelerator, kvm-run, irqfd]

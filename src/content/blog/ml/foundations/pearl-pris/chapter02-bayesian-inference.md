@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Bayesian Inference"
+slug: "ml/foundations/pearl-pris/chapter02-bayesian-inference"
 date: 2026-05-16T02:00:00
 description: "Bayes' rule·prior·likelihood — 추론의 단단한 기반."
 series: "Probabilistic Reasoning in Intelligent Systems"

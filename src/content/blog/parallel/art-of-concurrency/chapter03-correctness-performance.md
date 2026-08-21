@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Proving Correctness and Measuring Performance"
+slug: "parallel/art-of-concurrency/chapter03-correctness-performance"
 date: 2025-05-20T03:00:00
 description: "동시성 프로그램의 정확성 증명과 성능 측정 — Amdahl, Gustafson, 효율성"
 series: "The Art of Concurrency"

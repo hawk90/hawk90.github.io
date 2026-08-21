@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: AV1의 역사와 도구 체인"
+slug: "media/av1/chapter01-history-tools"
 date: 2026-05-16T02:00:00
 description: "AOM 컨소시엄의 탄생, AV1의 위치, libaom·dav1d·SVT-AV1·rav1e 도구 체인, HEVC/VVC와의 비교."
 tags: [AV1, Video, Codec, libaom, dav1d, SVT-AV1]

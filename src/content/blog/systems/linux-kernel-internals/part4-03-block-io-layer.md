@@ -1,5 +1,6 @@
 ---
 title: "Part 4-3: 블록 I/O 계층"
+slug: "systems/linux-kernel-internals/part4-03-block-io-layer"
 date: 2026-05-12T19:00:00
 description: "bio / request — 블록 디바이스 추상. I/O 스케줄러 (BFQ / mq-deadline)."
 tags: [Linux, Kernel, block-io, Scheduler]

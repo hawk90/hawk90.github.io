@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Ignorance Priors·Transformation Groups"
+slug: "math/probability/jaynes-logic/chapter10-ignorance-priors"
 date: 2026-05-16T10:00:00
 description: "'아무것도 모를 때'의 prior — uniform 너머의 답."
 series: "Probability Theory: The Logic of Science"

@@ -1,5 +1,6 @@
 ---
 title: "Tip 95: Delight Users, Don't Just Deliver Code"
+slug: "programming/engineering/pragmatic-programmer/tip95"
 date: 2026-05-12T23:00:00
 description: "코드를 전달하지 말고 사용자를 기쁘게 하라. 우리의 목표는 비즈니스 문제 해결이다."
 series: "The Pragmatic Programmer"

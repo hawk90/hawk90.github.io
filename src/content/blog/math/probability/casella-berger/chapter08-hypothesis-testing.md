@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Hypothesis Testing"
+slug: "math/probability/casella-berger/chapter08-hypothesis-testing"
 date: 2026-05-16T08:00:00
 description: "Neyman-Pearson·LRT·UMP — 가설검정의 정통."
 series: "Statistical Inference"

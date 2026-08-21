@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Multiple Inheritance"
+slug: "programming/design/oosc/chapter15-multiple-inheritance"
 date: 2026-05-19T15:00:00
 description: "다중 상속 — 필요성, 다이아몬드 문제, 이름 충돌 해결."
 series: "Object-Oriented Software Construction"

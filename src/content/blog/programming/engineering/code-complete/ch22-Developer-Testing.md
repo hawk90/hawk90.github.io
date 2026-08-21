@@ -1,5 +1,6 @@
 ---
 title: "Chapter 22: Developer Testing"
+slug: "programming/engineering/code-complete/ch22-Developer-Testing"
 date: 2026-05-11T22:00:00
 description: "개발자가 짜는 테스트 — TDD, 단위 테스트, 경계 조건, 테스트의 발견적 가치."
 series: "Code Complete"

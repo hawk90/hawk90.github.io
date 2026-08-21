@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Nonparametric Curve Estimation"
+slug: "math/probability/wasserman-all-stats/chapter14-nonparametric"
 date: 2026-05-16T14:00:00
 description: "Kernel·spline·local regression — 분포 가정 없이 함수 추정."
 series: "All of Statistics"

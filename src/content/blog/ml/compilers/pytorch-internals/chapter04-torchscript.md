@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: TorchScript"
+slug: "ml/compilers/pytorch-internals/chapter04-torchscript"
 date: 2026-05-16T04:00:00
 description: "Trace·script·graph — torch.jit의 두 가지 길."
 series: "PyTorch Internals"

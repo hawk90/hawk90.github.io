@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Monte Carlo Methods"
+slug: "math/probability/mackay-itila/chapter12-monte-carlo"
 date: 2026-05-16T12:00:00
 description: "Importance·rejection·MCMC — 샘플링으로 적분."
 series: "Information Theory, Inference, and Learning Algorithms"

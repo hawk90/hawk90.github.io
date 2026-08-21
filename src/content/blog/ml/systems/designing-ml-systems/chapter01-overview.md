@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: ML 시스템 개요"
+slug: "ml/systems/designing-ml-systems/chapter01-overview"
 date: 2026-05-16T01:00:00
 description: "Chip Huyen — research ML vs production ML의 결정적 차이."
 series: "Designing Machine Learning Systems"

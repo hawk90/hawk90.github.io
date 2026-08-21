@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Handling Errors"
+slug: "programming/cpp/professional-cpp/chapter14-handling-errors"
 date: 2026-05-05T14:00:00
 description: "예외 / 에러 코드 / std::expected (C++23). 예외 안전성 보장."
 tags: [cpp, error-handling, Exception, "std::expected"]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1 Rule 4: 등위 접속사 앞에 쉼표"
+slug: "writing/elements-of-style/ch01/rule04-conjunction"
 date: 2026-05-14T05:00:00
 description: "두 독립절을 잇는 등위 접속사(and, but, or 등) 앞에 쉼표를 둔다."
 series: "The Elements of Style"

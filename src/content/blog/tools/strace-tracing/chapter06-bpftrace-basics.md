@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: bpftrace 기초 — 언어 / probe"
+slug: "tools/strace-tracing/chapter06-bpftrace-basics"
 date: 2026-05-17T06:00:00
 description: "bpftrace — awk-like DSL. probe 타입, 변수, map, action."
 tags: [bpftrace, eBPF, DSL]

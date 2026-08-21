@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Further Topics on Random Variables"
+slug: "math/probability/bertsekas-tsitsiklis/chapter04-further-rv"
 date: 2026-05-16T04:00:00
 description: "Transform·conditional expectation·covariance·correlation."
 series: "Introduction to Probability"

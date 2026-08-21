@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: 데이터 분포 시프트와 모니터링"
+slug: "ml/systems/designing-ml-systems/chapter08-data-drift"
 date: 2026-05-16T08:00:00
 description: "Covariate·label·concept drift — production 모델의 적."
 series: "Designing Machine Learning Systems"

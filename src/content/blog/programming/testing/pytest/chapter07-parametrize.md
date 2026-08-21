@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: parametrize"
+slug: "programming/testing/pytest/chapter07-parametrize"
 date: 2026-05-10T07:00:00
 description: "@pytest.mark.parametrize — 매개변수화, indirect, stacking, ID 만들기."
 series: "pytest 심화"

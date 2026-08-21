@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Process Memory Structure"
+slug: "programming/cpp/extreme-c/chapter04-process-memory-structure"
 date: 2026-05-05T04:00:00
 description: "프로세스 메모리 레이아웃 — text / data / bss / heap / stack."
 tags: [C, Memory, Process]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Chaining"
+slug: "math/probability/vershynin-hdp/chapter08-chaining"
 date: 2026-05-16T08:00:00
 description: "Dudley·Talagrand chaining — sup over function class."
 series: "High-Dimensional Probability"

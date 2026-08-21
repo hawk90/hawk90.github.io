@@ -1,5 +1,6 @@
 ---
 title: "Tip 83: Maintain Small, Stable Teams"
+slug: "programming/engineering/pragmatic-programmer/tip83"
 date: 2026-05-12T11:00:00
 description: "작고 안정적인 팀을 유지하라. 팀원이 자주 바뀌면 신뢰와 효율이 무너진다."
 series: "The Pragmatic Programmer"

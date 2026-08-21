@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: The Resolution of Revolutions"
+slug: "philosophy/scientific-revolutions/ch12-resolution"
 date: 2026-05-14T13:00:00
 description: "혁명의 해소 — 새 패러다임의 수용."
 series: "The Structure of Scientific Revolutions"

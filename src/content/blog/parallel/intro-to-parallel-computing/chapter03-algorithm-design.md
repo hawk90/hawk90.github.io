@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Principles of Parallel Algorithm Design"
+slug: "parallel/intro-to-parallel-computing/chapter03-algorithm-design"
 date: 2026-05-21T03:00:00
 description: "병렬 알고리즘 설계의 핵심 — 분해, 태스크 그래프, 매핑, 부하 균형"
 series: "Introduction to Parallel Computing"

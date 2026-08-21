@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Sensors — IMU·GPS·Star tracker·Pressure"
+slug: "embedded/avionics/digital-avionics-handbook/chapter06-sensors"
 date: 2026-05-18T06:00:00
 description: "Avionics 센서 — 관성·항법·환경 측정의 원리와 인터페이스."
 series: "Digital Avionics Handbook"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Missing Data and Other Opportunities"
+slug: "math/probability/mcelreath-rethinking/chapter15-missing-data"
 date: 2026-05-16T15:00:00
 description: "Measurement error·imputation·dependencies — model을 확장."
 series: "Statistical Rethinking"

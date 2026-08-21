@@ -1,5 +1,6 @@
 ---
 title: "Part 8-11: Error Budget — 신뢰성과 속도 trade-off"
+slug: "programming/engineering/agile-lean-engineering/part8-11-error-budget"
 date: 2026-05-20T11:00:00
 description: "SLO·SLI·error budget — 신뢰성을 정량적으로 관리."
 series: "Agile & Lean Software Engineering"

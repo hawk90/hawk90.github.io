@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Design by Contract"
+slug: "programming/design/oosc/chapter11-design-by-contract"
 date: 2026-05-19T11:00:00
 description: "계약에 의한 설계 — 사전조건, 사후조건, 불변식으로 신뢰성 구축."
 series: "Object-Oriented Software Construction"

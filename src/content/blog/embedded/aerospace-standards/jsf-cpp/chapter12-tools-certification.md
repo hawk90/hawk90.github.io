@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Tools + 시리즈 마무리"
+slug: "embedded/aerospace-standards/jsf-cpp/chapter12-tools-certification"
 date: 2026-05-18T13:00:00
 description: "JSF C++ 정적 분석 도구, JSF C++ 원문 자료, 시리즈 전체 정리."
 tags: [jsf-cpp, tools, ldra, helix-qac, certification]

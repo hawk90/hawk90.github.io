@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: vector·affine·scf·memref"
+slug: "ml/compilers/mlir-deep/chapter08-vector-affine-scf"
 date: 2026-05-16T08:00:00
 description: "Loop·memory·SIMD를 추상하는 mid-level dialect 4종."
 series: "MLIR 심화"

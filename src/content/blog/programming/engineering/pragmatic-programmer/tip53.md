@@ -1,5 +1,6 @@
 ---
 title: "Tip 53: Delegate to Services: Has-A Trumps Is-A"
+slug: "programming/engineering/pragmatic-programmer/tip53"
 date: 2026-05-11T05:00:00
 description: "서비스에 위임하라. Has-A가 Is-A를 이긴다. 합성이 상속보다 거의 항상 더 낫다."
 series: "The Pragmatic Programmer"

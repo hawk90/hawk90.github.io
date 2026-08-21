@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Unicode Text Versus Bytes"
+slug: "programming/python/fluent-python/ch04-unicode-bytes"
 date: 2026-05-15T04:00:00
 description: "유니코드 — str과 bytes, 인코딩, 정규화."
 series: "Fluent Python"

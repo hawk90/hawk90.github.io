@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 이미지 분류 on MCU"
+slug: "ml/tinyml/tinyml-edge-ai/chapter10-image-classification"
 date: 2026-05-16T10:00:00
 description: "96×96 grayscale·MobileNet 최소 — vision on Cortex-M."
 series: "TinyML·Edge AI"

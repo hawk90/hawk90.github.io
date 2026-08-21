@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Test Diagnostics"
+slug: "programming/engineering/goos/chapter22-test-diagnostics"
 date: 2026-05-10T15:00:00
 description: "실패하는 테스트는 좋은 진단 메시지 — assert 메시지, dump."
 tags: [TDD, Diagnostics]

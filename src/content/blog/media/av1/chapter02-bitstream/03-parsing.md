@@ -1,5 +1,6 @@
 ---
 title: "Ch 2.3: OBU 파싱 흐름"
+slug: "media/av1/chapter02-bitstream/03-parsing"
 date: 2026-05-16T03:03:00
 description: "디코더 메인 루프가 OBU를 어떻게 분배하는지 — 실제 hexdump 파싱과 obu_parse() 의사 코드."
 tags: [AV1, Video, Codec, OBU, Parser]

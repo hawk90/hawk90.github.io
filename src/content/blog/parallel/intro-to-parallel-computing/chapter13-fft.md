@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Fast Fourier Transform"
+slug: "parallel/intro-to-parallel-computing/chapter13-fft"
 date: 2026-05-21T13:00:00
 description: "병렬 FFT — Cooley-Tukey, 비트 역순, 전치 기반 분할"
 series: "Introduction to Parallel Computing"

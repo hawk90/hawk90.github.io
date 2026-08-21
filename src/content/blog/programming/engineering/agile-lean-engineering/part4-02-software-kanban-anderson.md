@@ -1,5 +1,6 @@
 ---
 title: "Part 4-02: 소프트웨어 Kanban — Anderson 2010"
+slug: "programming/engineering/agile-lean-engineering/part4-02-software-kanban-anderson"
 date: 2026-05-22T06:00:00
 description: "David Anderson이 Microsoft XIT에서 적용한 소프트웨어 Kanban 사례."
 series: "Agile & Lean Software Engineering"

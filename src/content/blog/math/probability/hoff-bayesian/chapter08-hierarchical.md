@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Group Comparisons and Hierarchical Modeling"
+slug: "math/probability/hoff-bayesian/chapter08-hierarchical"
 date: 2026-05-15T08:00:00
 description: "Multi-group·varying parameters·shrinkage 효과."
 series: "A First Course in Bayesian Statistical Methods"

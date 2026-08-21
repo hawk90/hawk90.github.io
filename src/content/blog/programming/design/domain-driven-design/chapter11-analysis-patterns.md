@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Applying Analysis Patterns"
+slug: "programming/design/domain-driven-design/chapter11-analysis-patterns"
 date: 2026-05-01T11:00:00
 description: "Fowler의 Analysis Patterns 활용 — 도메인 모델의 공통 추상."
 tags: [DDD, analysis-patterns, Fowler]

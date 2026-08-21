@@ -1,5 +1,6 @@
 ---
 title: "Pattern 1: Extract Function"
+slug: "programming/design/refactoring-catalog/pattern01-extract-function"
 date: 2026-05-02T01:00:00
 description: "긴 함수에서 의도를 드러내는 작은 함수로 — Fowler가 가장 자주 쓰는 리팩터링."
 series: "Refactoring Catalog (Fowler 2nd ed)"

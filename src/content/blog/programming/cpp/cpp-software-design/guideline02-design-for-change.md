@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 2: 변화를 위한 디자인"
+slug: "programming/cpp/cpp-software-design/guideline02-design-for-change"
 date: 2026-05-02T02:00:00
 description: "변화의 축을 찾아 캡슐화한다. Single Responsibility와 DRY, 변경 가능성이 디자인의 목표라는 이야기."
 tags: [cpp, software-design, SOLID, SRP, DRY]

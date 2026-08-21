@@ -1,5 +1,6 @@
 ---
 title: "GoF 23: Visitor"
+slug: "programming/design/gof-design-patterns/item23-visitor"
 date: 2026-05-01T23:00:00
 description: "객체 구조와 그 위 연산을 분리 — double dispatch로 새 연산 추가."
 tags: [design-pattern, GoF, cpp, C, Behavioral]

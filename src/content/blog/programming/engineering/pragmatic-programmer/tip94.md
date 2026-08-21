@@ -1,5 +1,6 @@
 ---
 title: "Tip 94: Don't Use Manual Procedures"
+slug: "programming/engineering/pragmatic-programmer/tip94"
 date: 2026-05-12T22:00:00
 description: "수동 절차를 사용하지 마라. 반복되는 작업은 자동화하여 실수를 줄인다."
 series: "The Pragmatic Programmer"

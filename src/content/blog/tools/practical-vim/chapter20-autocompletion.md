@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Dial X for Autocompletion"
+slug: "tools/practical-vim/chapter20-autocompletion"
 date: 2026-05-17T19:00:00
 description: "Ctrl+n / Ctrl+p — 단어 / 라인 / 파일명 / omni / 사전 완성."
 tags: [Vim, Autocompletion]

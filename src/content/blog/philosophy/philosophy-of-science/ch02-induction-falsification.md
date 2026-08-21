@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Inductivism, Falsificationism and Kuhn"
+slug: "philosophy/philosophy-of-science/ch02-induction-falsification"
 date: 2026-05-15T02:00:00
 description: "귀납주의, 반증주의(포퍼), 그리고 쿤 — 과학 방법론의 세 입장."
 series: "Understanding Philosophy of Science"

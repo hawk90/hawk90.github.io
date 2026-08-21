@@ -1,5 +1,6 @@
 ---
 title: "Ch 23: Dirichlet Process Models"
+slug: "math/probability/gelman-bda3/chapter23-dirichlet-process"
 date: 2026-05-16T23:00:00
 description: "DP·HDP·infinite mixture — nonparametric Bayes."
 series: "Bayesian Data Analysis (3rd ed)"

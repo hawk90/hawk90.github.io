@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Boot Process — BootROM·FSBL·U-Boot"
+slug: "embedded/hardware/zynq-book/chapter05-boot-process"
 date: 2026-05-19T05:00:00
 description: "Zynq 부팅 단계별 설명 — BootROM에서 Linux kernel까지."
 series: "The Zynq Book"

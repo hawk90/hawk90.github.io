@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: strace 기초 — syscall 트레이싱"
+slug: "tools/strace-tracing/chapter02-strace-basic"
 date: 2026-05-17T02:00:00
 description: "ptrace 기반. strace 옵션 — -e, -p, -f, -o, -tt -T."
 tags: [strace, ptrace, syscall]

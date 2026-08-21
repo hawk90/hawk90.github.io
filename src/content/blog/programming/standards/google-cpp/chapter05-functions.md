@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Functions"
+slug: "programming/standards/google-cpp/chapter05-functions"
 date: 2026-05-18T05:00:00
 description: "Inputs and Outputs / Short Functions / Overloading / Default Arguments / Trailing Return Type."
 tags: [Google, cpp, Style-Guide, Function]

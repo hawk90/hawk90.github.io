@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Beyond the iid Assumption"
+slug: "ml/foundations/murphy-ml2/chapter19-beyond-iid"
 date: 2026-05-16T19:00:00
 description: "Time series·spatial·hierarchical — iid 가정을 깬다."
 series: "Probabilistic Machine Learning: Advanced Topics"

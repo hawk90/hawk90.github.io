@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Revolutions as Changes of World View"
+slug: "philosophy/scientific-revolutions/ch10-world-view"
 date: 2026-05-14T11:00:00
 description: "세계관의 변화로서의 혁명 — 게슈탈트 전환."
 series: "The Structure of Scientific Revolutions"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Basic Communication Operations"
+slug: "parallel/intro-to-parallel-computing/chapter04-communication"
 date: 2026-05-21T04:00:00
 description: "집합 통신의 기초 — Broadcast, Reduce, Scatter, Gather, All-to-All"
 series: "Introduction to Parallel Computing"

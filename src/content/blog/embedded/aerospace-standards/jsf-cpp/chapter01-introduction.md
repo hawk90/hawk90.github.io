@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: JSF C++ — F-35 코딩 표준"
+slug: "embedded/aerospace-standards/jsf-cpp/chapter01-introduction"
 date: 2026-05-18T02:00:00
 description: "Lockheed Martin이 F-35 Joint Strike Fighter용으로 발행한 C++ 코딩 표준 (2005). 항공 SW 코딩 가이드의 한 대표."
 tags: [jsf-cpp, lockheed-martin, f-35, joint-strike-fighter, cpp, aerospace, dod]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: BYOC — NPU 백엔드 통합"
+slug: "ml/compilers/ml-compilers-intro/chapter10-byoc"
 date: 2026-05-16T10:00:00
 description: "기존 ML compiler에 vendor 가속기 끼우기."
 series: "ML 컴파일러"

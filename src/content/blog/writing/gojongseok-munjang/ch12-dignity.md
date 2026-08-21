@@ -1,5 +1,6 @@
 ---
 title: "제12장: 품위"
+slug: "writing/gojongseok-munjang/ch12-dignity"
 date: 2026-05-14T12:00:00
 description: "글의 격을 높이는 품위 있는 문장"
 series: "고종석의 문장"

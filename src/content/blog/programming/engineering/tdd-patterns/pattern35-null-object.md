@@ -1,5 +1,6 @@
 ---
 title: "Pattern 35: Null Object"
+slug: "programming/engineering/tdd-patterns/pattern35-null-object"
 date: 2026-05-10T11:00:00
 description: "Null check 없애기 — 동일 인터페이스의 do-nothing 객체."
 series: "TDD by Example — Patterns Deep Dive"

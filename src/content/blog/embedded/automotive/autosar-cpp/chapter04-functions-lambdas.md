@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 함수, 람다, noexcept, default argument"
+slug: "embedded/automotive/autosar-cpp/chapter04-functions-lambdas"
 date: 2026-05-18T05:00:00
 description: "함수 정의 정책(A8), 반환 타입 추론(A7-1-5), default argument 제한, noexcept 명시, lambda 안전 캡처."
 tags: [autosar, cpp, function, lambda, noexcept, default-argument]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Containers"
+slug: "programming/cpp/a-tour-of-cpp/chapter12-containers"
 date: 2026-05-22T12:00:00
 description: "컨테이너 — vector, list, map, set, unordered_map"
 series: "A Tour of C++"

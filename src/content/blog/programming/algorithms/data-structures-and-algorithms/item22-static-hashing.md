@@ -1,5 +1,6 @@
 ---
 title: "DSA 22: 정적 해싱 — 체이닝과 개방 주소법"
+slug: "programming/algorithms/data-structures-and-algorithms/item22-static-hashing"
 date: 2026-05-15T22:00:00
 description: "키 → 인덱스 변환으로 O(1) 평균 검색. 충돌 처리 두 방식."
 tags: [data-structure, Algorithm, Hashing, hash-table]

@@ -1,5 +1,6 @@
 ---
 title: "Part 7-15: Deployment Frequency 최적화"
+slug: "programming/engineering/agile-lean-engineering/part7-15-deployment-frequency-optimization"
 date: 2026-05-20T10:00:00
 description: "DORA elite 기준 daily 이상 — 어떻게 도달하나."
 series: "Agile & Lean Software Engineering"

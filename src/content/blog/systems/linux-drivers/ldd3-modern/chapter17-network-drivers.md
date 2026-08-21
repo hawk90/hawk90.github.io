@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Network Drivers"
+slug: "systems/linux-drivers/ldd3-modern/chapter17-network-drivers"
 date: 2026-05-13T17:00:00
 description: "net_device·NAPI·sk_buff — 네트워크 드라이버의 송수신 경로."
 series: "Linux Device Drivers (LDD3)"

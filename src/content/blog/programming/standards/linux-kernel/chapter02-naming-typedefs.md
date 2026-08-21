@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Naming & Typedefs"
+slug: "programming/standards/linux-kernel/chapter02-naming-typedefs"
 date: 2026-05-18T02:00:00
 description: "snake_case 명명, 전역은 서술적으로, 지역은 짧게. typedef는 숨기지 말고 드러내라."
 tags: [Linux, Kernel, Naming, typedef]

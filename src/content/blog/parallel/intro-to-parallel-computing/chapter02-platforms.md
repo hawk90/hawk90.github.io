@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Parallel Programming Platforms"
+slug: "parallel/intro-to-parallel-computing/chapter02-platforms"
 date: 2026-05-21T02:00:00
 description: "병렬 하드웨어 아키텍처 — SMP, NUMA, 분산 메모리, 인터커넥트"
 series: "Introduction to Parallel Computing"

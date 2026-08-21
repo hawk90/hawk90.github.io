@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Mastering STL Algorithms"
+slug: "programming/cpp/professional-cpp/chapter18-stl-algorithms"
 date: 2026-05-05T18:00:00
 description: "표준 알고리즘 — find / sort / transform / accumulate. execution policy (C++17)."
 tags: [cpp, STL, Algorithms]

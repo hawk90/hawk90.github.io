@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Variational Inference"
+slug: "ml/foundations/murphy-ml2/chapter10-variational"
 date: 2026-05-16T10:00:00
 description: "ELBO·mean-field·amortized·SVI — VI 통합."
 series: "Probabilistic Machine Learning: Advanced Topics"

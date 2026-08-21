@@ -1,5 +1,6 @@
 ---
 title: "Vim 마스터하기: 설정 (vimrc)"
+slug: "tools/vim/ch07-configuration"
 date: 2026-05-17T07:00:00
 description: "vimrc 설정, 키 매핑, 옵션 커스터마이징"
 series: "Vim 마스터하기"

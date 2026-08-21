@@ -1,5 +1,6 @@
 ---
 title: "Pattern 11: Learning Test"
+slug: "programming/engineering/tdd-patterns/pattern11-learning-test"
 date: 2026-05-10T11:00:00
 description: "외부 라이브러리·API를 사용하기 전에 — 작은 테스트로 학습하고 안전망 확보."
 series: "TDD by Example — Patterns Deep Dive"

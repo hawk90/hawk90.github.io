@@ -1,5 +1,6 @@
 ---
 title: "Part 3-04: Product Owner 역할 깊이"
+slug: "programming/engineering/agile-lean-engineering/part3-04-product-owner-role"
 date: 2026-05-21T12:00:00
 description: "value 책임자로서 PO — backlog 관리·stakeholder 조율."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1 Rule 8: 대시의 용법"
+slug: "writing/elements-of-style/ch01/rule08-dash"
 date: 2026-05-14T09:00:00
 description: "대시는 갑작스러운 단절, 긴 동격, 요약에 사용한다."
 series: "The Elements of Style"

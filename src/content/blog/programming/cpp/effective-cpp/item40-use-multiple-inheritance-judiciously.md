@@ -1,5 +1,6 @@
 ---
 title: "항목 40: 다중 상속을 신중하게 사용하라"
+slug: "programming/cpp/effective-cpp/item40-use-multiple-inheritance-judiciously"
 date: 2026-05-04T16:00:00
 description: "ambiguity, diamond, virtual base — 다중 상속의 함정과 인터페이스+구현 분리의 정당한 활용."
 tags: [cpp, effective-c++, multiple-inheritance]

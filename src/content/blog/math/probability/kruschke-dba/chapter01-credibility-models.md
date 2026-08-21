@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Credibility, Models, and Parameters"
+slug: "math/probability/kruschke-dba/chapter01-credibility-models"
 date: 2026-05-15T01:00:00
 description: "Kruschke의 강아지 책 — Bayesian의 그림 친화적 입문."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

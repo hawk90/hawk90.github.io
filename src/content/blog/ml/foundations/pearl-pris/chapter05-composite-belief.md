@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Distributed Revision of Composite Beliefs"
+slug: "ml/foundations/pearl-pris/chapter05-composite-belief"
 date: 2026-05-16T05:00:00
 description: "MAP 추론·most probable explanation — diagnosis 문제."
 series: "Probabilistic Reasoning in Intelligent Systems"

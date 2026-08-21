@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Sequential Data"
+slug: "ml/foundations/bishop-prml/chapter13-sequential-data"
 date: 2026-05-16T13:00:00
 description: "Markov chain·HMM·LDS — sequence model 통합."
 series: "Pattern Recognition and Machine Learning"

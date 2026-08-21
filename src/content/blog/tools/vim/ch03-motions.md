@@ -1,5 +1,6 @@
 ---
 title: "Vim 마스터하기: 모션과 텍스트 객체"
+slug: "tools/vim/ch03-motions"
 date: 2026-05-17T03:00:00
 description: "효율적인 이동과 텍스트 객체를 활용한 편집"
 series: "Vim 마스터하기"

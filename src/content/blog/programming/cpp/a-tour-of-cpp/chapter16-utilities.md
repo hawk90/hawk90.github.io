@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Utilities"
+slug: "programming/cpp/a-tour-of-cpp/chapter16-utilities"
 date: 2026-05-22T16:00:00
 description: "유틸리티 — pair, tuple, variant, optional, any"
 series: "A Tour of C++"

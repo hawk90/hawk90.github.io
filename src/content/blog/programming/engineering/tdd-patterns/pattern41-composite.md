@@ -1,5 +1,6 @@
 ---
 title: "Pattern 41: Composite (in TDD)"
+slug: "programming/engineering/tdd-patterns/pattern41-composite"
 date: 2026-05-10T17:00:00
 description: "Single·collection 같은 interface — 재귀 처리. xUnit Test/TestSuite의 원형."
 series: "TDD by Example — Patterns Deep Dive"

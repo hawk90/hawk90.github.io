@@ -1,5 +1,6 @@
 ---
 title: "제5권 1장: 글쓰기 교육의 방향"
+slug: "writing/uri-geul-baro-sseugi/vol5-ch01"
 date: 2026-05-14T17:00:00
 description: "글쓰기 교육의 철학. 형식보다 내용, 기교보다 진실을 가르치는 교육."
 series: "우리글 바로쓰기"

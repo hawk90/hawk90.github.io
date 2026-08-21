@@ -1,5 +1,6 @@
 ---
 title: "Unit 3.2: Results의 문법"
+slug: "writing/science-research-writing/unit3-2-grammar"
 date: 2026-05-14T07:00:00
 description: "Results의 시제 결정, 비교급과 최상급, 정도 표현. 부정 결과를 보고하는 방법."
 series: "Science Research Writing"

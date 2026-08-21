@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 펌웨어 로딩"
+slug: "ml/drivers/npu-drivers/chapter10-firmware-loading"
 date: 2026-05-16T10:00:00
 description: "request_firmware·signed firmware·secure boot — 펌웨어의 일생."
 series: "NPU 드라이버 개발"

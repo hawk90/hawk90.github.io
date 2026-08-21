@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Git Basics"
+slug: "programming/git/pro-git/chapter02-git-basics"
 date: 2026-05-17T02:00:00
 description: "기본 워크플로우 — status / add / commit / log / diff / remote / tag."
 tags: [Git, Basics]

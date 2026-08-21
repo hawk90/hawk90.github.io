@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Programming Using the Message-Passing Paradigm"
+slug: "parallel/intro-to-parallel-computing/chapter06-mpi"
 date: 2026-05-21T06:00:00
 description: "MPI 프로그래밍 — Send/Recv, 집합 통신, 커뮤니케이터"
 series: "Introduction to Parallel Computing"

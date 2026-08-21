@@ -1,5 +1,6 @@
 ---
 title: "Part 2-08: Test-Driven Development as XP Practice"
+slug: "programming/engineering/agile-lean-engineering/part2-08-tdd-as-xp"
 date: 2026-05-20T16:00:00
 description: "XP에서 TDD가 차지하는 자리 — TDD by Example과의 연결."
 series: "Agile & Lean Software Engineering"

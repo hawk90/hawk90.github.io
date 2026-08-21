@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Kernel Methods"
+slug: "ml/foundations/murphy-ml1/chapter17-kernel"
 date: 2026-05-16T17:00:00
 description: "RKHS·SVM·GP — kernel의 통일된 시각."
 series: "Probabilistic Machine Learning: An Introduction"

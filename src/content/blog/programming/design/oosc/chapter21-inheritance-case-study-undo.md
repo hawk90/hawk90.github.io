@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Inheritance Case Study: Undo"
+slug: "programming/design/oosc/chapter21-inheritance-case-study-undo"
 date: 2026-05-19T21:00:00
 description: "상속 케이스 스터디: Undo — Command 패턴의 OO 구현."
 series: "Object-Oriented Software Construction"

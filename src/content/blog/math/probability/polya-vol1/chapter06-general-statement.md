@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: A More General Statement"
+slug: "math/probability/polya-vol1/chapter06-general-statement"
 date: 2026-05-16T06:00:00
 description: "Plausibility의 정도 — Pólya 패턴의 도입."
 series: "Mathematics and Plausible Reasoning, Vol I"

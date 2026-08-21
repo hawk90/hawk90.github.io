@@ -1,5 +1,6 @@
 ---
 title: "Unit 8.1: Introductions와 CARS 모델"
+slug: "writing/academic-writing/unit08-1-introductions-cars"
 date: 2026-05-14T04:00:00
 description: "연구 논문 Introduction의 표준 구조 — Swales의 CARS 모델. Territory, Niche, Occupying the Niche의 세 Move."
 series: "Academic Writing for Graduate Students"

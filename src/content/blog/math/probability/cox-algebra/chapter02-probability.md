@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Probability"
+slug: "math/probability/cox-algebra/chapter02-probability"
 date: 2026-05-15T02:00:00
 description: "확률 함수의 유도 — sum·product rule이 유일하다."
 series: "The Algebra of Probable Inference"

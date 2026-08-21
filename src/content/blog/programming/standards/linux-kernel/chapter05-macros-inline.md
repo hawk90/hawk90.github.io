@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Macros & Inline"
+slug: "programming/standards/linux-kernel/chapter05-macros-inline"
 date: 2026-05-18T05:00:00
 description: "매크로는 대문자, 부작용 주의. 인라인은 작은 함수만. 복잡한 매크로는 do { } while (0)로 감싼다."
 tags: [Linux, Kernel, Macros, Inline, Preprocessor]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction and Examples"
+slug: "math/probability/hoff-bayesian/chapter01-introduction"
 date: 2026-05-15T01:00:00
 description: "Hoff의 *First Course in Bayesian Statistics* — Gibbs 중심 입문."
 series: "A First Course in Bayesian Statistical Methods"

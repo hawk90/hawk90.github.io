@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Normal Science as Puzzle-solving"
+slug: "philosophy/scientific-revolutions/ch04-puzzle-solving"
 date: 2026-05-14T05:00:00
 description: "퍼즐 풀이 — 정상 과학의 활동 양상."
 series: "The Structure of Scientific Revolutions"

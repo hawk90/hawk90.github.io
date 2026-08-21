@@ -1,5 +1,6 @@
 ---
 title: "Part 5-1: 동기화 primitives — spinlock / mutex / rwsem / RCU"
+slug: "systems/linux-kernel-internals/part5-01-sync-primitives"
 date: 2026-05-12T22:00:00
 description: "커널 동기화 도구. spinlock vs mutex 선택. RCU의 lock-free 읽기."
 tags: [Linux, Kernel, Synchronization, RCU]

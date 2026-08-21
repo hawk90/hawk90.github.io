@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: type / scope 카탈로그"
+slug: "programming/git/git-conventions/chapter03-type-scope-catalog"
 date: 2026-05-17T03:00:00
 description: "feat / fix / docs / style / refactor / perf / test / chore / build / ci. scope 정의."
 tags: [Git, commit-type, Scope]

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 50: Replace Command with Function"
+slug: "programming/design/refactoring-catalog/pattern50-replace-command-with-function"
 date: 2026-05-02T02:00:00
 description: "Command가 단순해졌다면 — 다시 함수로 돌려 over-engineering 제거."
 series: "Refactoring Catalog (Fowler 2nd ed)"

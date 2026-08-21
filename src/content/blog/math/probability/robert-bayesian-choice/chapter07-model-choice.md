@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Model Choice"
+slug: "math/probability/robert-bayesian-choice/chapter07-model-choice"
 date: 2026-05-15T07:00:00
 description: "Bayes factor·posterior model probability·DIC·WAIC."
 series: "The Bayesian Choice"

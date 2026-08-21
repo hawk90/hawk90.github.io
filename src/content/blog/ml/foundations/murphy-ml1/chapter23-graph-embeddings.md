@@ -1,5 +1,6 @@
 ---
 title: "Ch 23: Graph Embeddings"
+slug: "ml/foundations/murphy-ml1/chapter23-graph-embeddings"
 date: 2026-05-16T23:00:00
 description: "Node2vec·GNN·heterogeneous graph — relational data의 ML."
 series: "Probabilistic Machine Learning: An Introduction"

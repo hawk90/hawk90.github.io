@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: AUTOSAR C++14, MISRA C++:2008/2023과의 비교"
+slug: "embedded/aerospace-standards/jsf-cpp/chapter11-comparison"
 date: 2026-05-18T12:00:00
 description: "JSF C++ → MISRA C++:2008 → AUTOSAR C++14 → MISRA C++:2023 표준 비교."
 tags: [jsf-cpp, autosar, misra-cpp, comparison, evolution]

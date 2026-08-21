@@ -1,5 +1,6 @@
 ---
 title: "Ch 30: Becoming Adept at Testing"
+slug: "programming/cpp/professional-cpp/chapter30-becoming-adept-at-testing"
 date: 2026-05-05T06:00:00
 description: "단위 테스트 — Google Test / Catch2 / doctest. coverage. 모킹."
 tags: [cpp, Testing, gtest, Catch2]

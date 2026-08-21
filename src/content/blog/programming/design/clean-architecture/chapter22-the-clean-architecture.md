@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: The Clean Architecture"
+slug: "programming/design/clean-architecture/chapter22-the-clean-architecture"
 date: 2026-05-01T22:00:00
 description: "책의 이름이자 책 전체의 시각적 요약. 4겹 동심원, 의존성은 안쪽으로만. Hexagonal / Onion과 같은 본질의 변형."
 tags: [Architecture, CleanArchitecture, DependencyRule]

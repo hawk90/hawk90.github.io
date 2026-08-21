@@ -1,5 +1,6 @@
 ---
 title: "Tip 52: Prefer Interfaces to Express Polymorphism"
+slug: "programming/engineering/pragmatic-programmer/tip52"
 date: 2026-05-11T04:00:00
 description: "다형성은 인터페이스로 표현하라. 추상 클래스보다 인터페이스가 더 가볍고 유연하다."
 series: "The Pragmatic Programmer"

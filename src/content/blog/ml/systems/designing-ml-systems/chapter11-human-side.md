@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: ML 시스템의 인간적 측면"
+slug: "ml/systems/designing-ml-systems/chapter11-human-side"
 date: 2026-05-16T11:00:00
 description: "User experience·team structure·responsible AI — 기술 외 문제들."
 series: "Designing Machine Learning Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: UART 기초 — 비동기, Baud Rate, Frame 형식, Oversampling"
+slug: "embedded/protocols/embedded-serial/chapter07-uart-basics"
 date: 2026-05-16T07:00:00
 description: "Start·Data·Parity·Stop. 클럭 공유 없이 양단 baud rate만 맞으면 동작하는 비동기 직렬."
 series: "Embedded Protocols 심화"

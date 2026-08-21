@@ -1,5 +1,6 @@
 ---
 title: "Unit 7.2: Methods Section 작성"
+slug: "writing/academic-writing/unit07-2-methods"
 date: 2026-05-14T02:00:00
 description: "Methods 섹션의 표준 구조 — 재료, 절차, 분석. 수동태와 과거 시제, 그리고 핵심 표현들."
 series: "Academic Writing for Graduate Students"

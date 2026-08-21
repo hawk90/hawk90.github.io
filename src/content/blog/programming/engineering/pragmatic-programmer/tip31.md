@@ -1,5 +1,6 @@
 ---
 title: "Tip 31: Failing Test Before Fixing Code"
+slug: "programming/engineering/pragmatic-programmer/tip31"
 date: 2026-05-11T07:00:00
 description: "코드를 고치기 전에 실패하는 테스트를 먼저 작성하라. 버그를 고정시키고 회귀를 막는 안전망이다."
 series: "The Pragmatic Programmer"

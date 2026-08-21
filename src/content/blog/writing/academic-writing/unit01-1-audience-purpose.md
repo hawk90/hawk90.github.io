@@ -1,5 +1,6 @@
 ---
 title: "Unit 1.1: Audience, Purpose, and Strategy"
+slug: "writing/academic-writing/unit01-1-audience-purpose"
 date: 2026-05-14T01:00:00
 description: "학술 글쓰기의 출발점 — 독자가 누구이며, 무엇을 목적으로 어떤 전략을 쓸지."
 series: "Academic Writing for Graduate Students"

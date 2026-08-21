@@ -1,5 +1,6 @@
 ---
 title: "Tip 69: Test Your Software, or Your Users Will"
+slug: "programming/engineering/pragmatic-programmer/tip69"
 date: 2026-05-11T21:00:00
 description: "소프트웨어를 테스트하라, 아니면 사용자가 테스트할 것이다."
 series: "The Pragmatic Programmer"

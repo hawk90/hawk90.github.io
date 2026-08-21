@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Bayesian Point Estimation"
+slug: "math/probability/robert-bayesian-choice/chapter04-point-estimation"
 date: 2026-05-15T04:00:00
 description: "Bayes estimator·loss-specific·robust."
 series: "The Bayesian Choice"

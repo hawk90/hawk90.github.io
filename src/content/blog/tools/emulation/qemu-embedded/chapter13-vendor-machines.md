@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: 벤더 머신 — STM32·i.MX·BCM"
+slug: "tools/emulation/qemu-embedded/chapter13-vendor-machines"
 date: 2026-05-17T13:00:00
 description: "Generic virt 너머 — 실제 보드 에뮬레이션."
 tags: [QEMU, stm32, imx, raspberry-pi, bcm, sifive, zynq]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: The Route to Normal Science"
+slug: "philosophy/scientific-revolutions/ch02-normal-science-route"
 date: 2026-05-14T03:00:00
 description: "정상 과학에 이르는 길 — 패러다임의 형성."
 series: "The Structure of Scientific Revolutions"

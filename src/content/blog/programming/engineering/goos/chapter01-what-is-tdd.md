@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: What Is TDD?"
+slug: "programming/engineering/goos/chapter01-what-is-tdd"
 date: 2026-05-10T01:00:00
 description: "TDD 정의 — Red/Green/Refactor 사이클. 단순 테스트 우선 vs 디자인 도구."
 tags: [TDD, Red-Green-Refactor]

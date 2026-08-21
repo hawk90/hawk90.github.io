@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Inference in Temporal Models"
+slug: "math/probability/koller-friedman-pgm/chapter14-temporal-models"
 date: 2026-05-16T14:00:00
 description: "HMM·DBN·Kalman·particle filter — temporal inference."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

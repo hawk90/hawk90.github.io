@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Deviations of Random Matrices and Geometric Consequences"
+slug: "math/probability/vershynin-hdp/chapter09-matrix-deviations"
 date: 2026-05-16T09:00:00
 description: "Random matrix concentration·random projection geometric impact."
 series: "High-Dimensional Probability"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: MAP Inference"
+slug: "math/probability/koller-friedman-pgm/chapter13-map-inference"
 date: 2026-05-16T13:00:00
 description: "Max-product·LP relaxation·dual decomposition."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

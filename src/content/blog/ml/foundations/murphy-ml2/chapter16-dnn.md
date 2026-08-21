@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Deep Neural Networks"
+slug: "ml/foundations/murphy-ml2/chapter16-dnn"
 date: 2026-05-16T16:00:00
 description: "Modern DL — transformer·diffusion·foundation model."
 series: "Probabilistic Machine Learning: Advanced Topics"

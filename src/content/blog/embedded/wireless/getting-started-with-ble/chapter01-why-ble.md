@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 왜 BLE인가 — 클래식 BT와의 결별"
+slug: "embedded/wireless/getting-started-with-ble/chapter01-why-ble"
 date: 2026-05-08T01:00:00
 description: "Bluetooth Low Energy는 클래식 BT의 호환 확장이 아닌 별도 프로토콜. 코인셀 1년 운용."
 series: "Getting Started with BLE"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: SW Process Assurance — 개발 절차 보증"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter02-process-assurance"
 date: 2026-05-18T03:00:00
 description: "ECSS-Q-ST-80C — SPA Plan 작성, process metrics, periodic audit, tailoring."
 tags: [ecss, spa, process-assurance, audit, review, tailoring]

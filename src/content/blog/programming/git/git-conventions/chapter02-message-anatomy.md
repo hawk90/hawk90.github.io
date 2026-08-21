@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: 메시지 구조 — subject / body / footer"
+slug: "programming/git/git-conventions/chapter02-message-anatomy"
 date: 2026-05-17T02:00:00
 description: "잘 쓴 커밋 메시지의 형태 — 50/72 규칙, 명령형, why over what."
 tags: [Git, commit-message]

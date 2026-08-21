@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: QOM 심화 — 타입 시스템"
+slug: "tools/emulation/qemu-internals/chapter02-qom-deep-dive"
 date: 2026-05-17T02:00:00
 description: "QEMU Object Model의 타입 시스템, 속성, 인터페이스를 깊이 이해한다."
 tags: [QEMU, QOM, TypeSystem, Object, Property]

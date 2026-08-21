@@ -1,5 +1,6 @@
 ---
 title: "Tip 71: Keep It Simple and Minimize Attack Surfaces"
+slug: "programming/engineering/pragmatic-programmer/tip71"
 date: 2026-05-11T23:00:00
 description: "단순하게 유지하고 공격 표면을 최소화하라. 복잡성이 보안 취약점을 만든다."
 series: "The Pragmatic Programmer"

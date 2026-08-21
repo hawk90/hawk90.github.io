@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Eager Mode — Autograd·Dispatcher"
+slug: "ml/compilers/pytorch-internals/chapter01-eager-mode"
 date: 2026-05-16T01:00:00
 description: "Tensor 연산이 Python에서 C++로 가는 길."
 series: "PyTorch Internals"

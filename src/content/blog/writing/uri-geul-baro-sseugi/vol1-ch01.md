@@ -1,5 +1,6 @@
 ---
 title: "제1권 1장: 우리 글의 첫걸음"
+slug: "writing/uri-geul-baro-sseugi/vol1-ch01"
 date: 2026-05-14T01:00:00
 description: "글쓰기의 출발점. 우리말로 생각하고, 우리말로 쓰는 법의 기초를 다진다."
 series: "우리글 바로쓰기"

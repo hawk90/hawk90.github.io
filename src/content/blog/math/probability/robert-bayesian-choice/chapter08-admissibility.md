@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Admissibility and Complete Classes"
+slug: "math/probability/robert-bayesian-choice/chapter08-admissibility"
 date: 2026-05-15T08:00:00
 description: "Bayes estimator의 admissibility — decision theory 정점."
 series: "The Bayesian Choice"

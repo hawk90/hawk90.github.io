@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Point Estimation"
+slug: "math/probability/casella-berger/chapter07-point-estimation"
 date: 2026-05-16T07:00:00
 description: "MLE·method of moments·UMVUE·Bayesian — 추정량 비교."
 series: "Statistical Inference"

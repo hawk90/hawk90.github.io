@@ -1,5 +1,6 @@
 ---
 title: "Part 9-10: DORA 비판과 한계"
+slug: "programming/engineering/agile-lean-engineering/part9-10-dora-criticism"
 date: 2026-05-20T12:00:00
 description: "Goodhart's law·컨텍스트 차이 — DORA의 한계와 비판적 시각."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5 Reminder 17: 의견을 끼워 넣지 말라"
+slug: "writing/elements-of-style/ch05/reminder17-opinion"
 date: 2026-05-14T01:00:00
 description: "특별한 이유가 없다면 글에 자기 의견을 함부로 끼워 넣지 마라."
 series: "The Elements of Style"

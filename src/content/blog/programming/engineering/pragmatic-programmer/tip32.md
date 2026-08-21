@@ -1,5 +1,6 @@
 ---
 title: "Tip 32: Read the Damn Error Message"
+slug: "programming/engineering/pragmatic-programmer/tip32"
 date: 2026-05-11T08:00:00
 description: "에러 메시지를 정말로 읽어라. 가장 값진 정보가 가장 자주 무시된다."
 series: "The Pragmatic Programmer"

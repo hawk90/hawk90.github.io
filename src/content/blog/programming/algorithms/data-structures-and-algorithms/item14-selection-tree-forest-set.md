@@ -1,5 +1,6 @@
 ---
 title: "DSA 14: 선택 트리·포레스트·집합 표현 (Union-Find 입문)"
+slug: "programming/algorithms/data-structures-and-algorithms/item14-selection-tree-forest-set"
 date: 2026-05-15T14:00:00
 description: "k-way merge용 selection tree, 포레스트로 표현하는 disjoint set."
 tags: [data-structure, Algorithm, Tournament, Union-Find]

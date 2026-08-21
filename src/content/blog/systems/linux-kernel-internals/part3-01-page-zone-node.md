@@ -1,5 +1,6 @@
 ---
 title: "Part 3-1: 페이지 / zone / node"
+slug: "systems/linux-kernel-internals/part3-01-page-zone-node"
 date: 2026-05-12T11:00:00
 description: "메모리 계층 — node (NUMA) → zone → page. struct page 자세히."
 tags: [Linux, Kernel, Memory, NUMA, Page]

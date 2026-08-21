@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Operator·Dispatch Key"
+slug: "ml/compilers/pytorch-internals/chapter03-dispatch-key"
 date: 2026-05-16T03:00:00
 description: "Tensor 메소드 호출이 어디로 routed되는가."
 series: "PyTorch Internals"

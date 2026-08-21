@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 테스트 자동화"
+slug: "tools/emulation/qemu-fake-device/chapter10-test-automation"
 date: 2026-05-17T10:00:00
 description: "CI 파이프라인에서 QEMU를 활용해 드라이버 테스트를 자동화한다."
 tags: [QEMU, CI, Testing, qtest, pytest, GitHub-Actions]

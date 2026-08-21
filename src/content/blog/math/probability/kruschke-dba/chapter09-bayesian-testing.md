@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Bayesian Approaches to Testing"
+slug: "math/probability/kruschke-dba/chapter09-bayesian-testing"
 date: 2026-05-15T09:00:00
 description: "ROPE·NHST 대체·Kruschke의 시그니처 주장."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

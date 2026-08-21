@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: PRP와 SGL"
+slug: "embedded/hardware/nvme/chapter07-prp-sgl"
 date: 2026-05-16T08:00:00
 description: "NVMe의 데이터 버퍼 지정 방식인 PRP List와 SGL Segment를 분석한다"
 series: "NVMe Deep Dive"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Coverage"
+slug: "programming/testing/pytest/chapter13-coverage"
 date: 2026-05-10T13:00:00
 description: "pytest-cov·branch coverage·--cov-fail-under — coverage 측정과 게이트."
 series: "pytest 심화"

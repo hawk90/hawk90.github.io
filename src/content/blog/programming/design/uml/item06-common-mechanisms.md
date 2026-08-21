@@ -1,5 +1,6 @@
 ---
 title: "UML 6: 공통 메커니즘 — 명세 · 꾸밈 · 분류 · 확장"
+slug: "programming/design/uml/item06-common-mechanisms"
 date: 2026-05-03T06:00:00
 description: "UML이 30년 가까이 살아남는 이유 — 표준 어휘를 도메인에 맞게 늘릴 수 있다."
 tags: [UML, Stereotype, tag-value, Constraint, Extensibility]

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 4.3: Modifier Placement"
+slug: "writing/only-grammar-book/ch04-3-modifier-placement"
 date: 2026-05-14T04:30:00
 description: "수식어 위치 오류 — 잘못 놓인 수식어, 모호한 수식어, 현수 분사, 분리 수식어."
 series: "The Only Grammar Book You'll Ever Need"

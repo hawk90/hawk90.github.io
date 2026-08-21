@@ -1,5 +1,6 @@
 ---
 title: "제4권 1장: 주어 바로쓰기"
+slug: "writing/uri-geul-baro-sseugi/vol4-ch01"
 date: 2026-05-14T13:00:00
 description: "주어의 생략과 명시. 한국어다운 주어 사용법과 불필요한 주어 줄이기."
 series: "우리글 바로쓰기"

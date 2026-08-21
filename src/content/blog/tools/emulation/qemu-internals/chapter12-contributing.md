@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: QEMU 기여하기"
+slug: "tools/emulation/qemu-internals/chapter12-contributing"
 date: 2026-05-17T12:00:00
 description: "QEMU 프로젝트에 코드 기여하는 방법 — 코드 스타일, 패치 제출."
 tags: [QEMU, Contributing, OpenSource, mailing-list, patch]

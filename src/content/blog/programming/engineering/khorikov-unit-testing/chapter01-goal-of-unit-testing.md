@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: The Goal of Unit Testing"
+slug: "programming/engineering/khorikov-unit-testing/chapter01-goal-of-unit-testing"
 date: 2026-05-10T01:00:00
 description: "테스트의 목적은 지속 가능한 소프트웨어 성장이다. 가치와 비용의 균형으로 좋은 테스트를 판단한다."
 tags: [TDD, unit-testing, Goal]

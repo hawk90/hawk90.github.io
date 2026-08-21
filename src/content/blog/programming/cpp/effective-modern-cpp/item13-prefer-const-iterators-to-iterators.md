@@ -1,5 +1,6 @@
 ---
 title: "항목 13: iterator보다 const_iterator를 선호하라"
+slug: "programming/cpp/effective-modern-cpp/item13-prefer-const-iterators-to-iterators"
 date: 2026-05-04T13:00:00
 description: "수정 의도가 없는 자리에는 const_iterator. C++11/14의 cbegin/cend로 사용성 개선."
 tags: [cpp, Iterator, const, modern-cpp]

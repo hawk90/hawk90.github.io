@@ -1,5 +1,6 @@
 ---
 title: "항목 16: const를 형 변환하지 말라"
+slug: "programming/cpp/beautiful-cpp/item16-dont-cast-away-const"
 date: 2026-05-05T16:00:00
 description: "const_cast는 약속을 깨는 신호 — mutable 캐시, API 재설계로 풀어라."
 tags: [cpp, const-correctness, mutable]

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 4.1: Verb Tense Errors"
+slug: "writing/only-grammar-book/ch04-1-verb-tense"
 date: 2026-05-14T04:10:00
 description: "시제 오류 — 시제 일치, 현재완료 vs 과거, 시제 전환, 가정법 시제."
 series: "The Only Grammar Book You'll Ever Need"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Model Comparison·Occam's Razor"
+slug: "math/probability/mackay-itila/chapter11-model-comparison"
 date: 2026-05-16T11:00:00
 description: "Marginal likelihood가 자동으로 단순한 모델을 선호한다."
 series: "Information Theory, Inference, and Learning Algorithms"

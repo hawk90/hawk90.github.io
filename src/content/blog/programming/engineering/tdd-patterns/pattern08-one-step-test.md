@@ -1,5 +1,6 @@
 ---
 title: "Pattern 8: One Step Test"
+slug: "programming/engineering/tdd-patterns/pattern08-one-step-test"
 date: 2026-05-10T08:00:00
 description: "다음 test는 한 걸음만 더 — 통과시킬 자신 있는 가장 작은 테스트."
 series: "TDD by Example — Patterns Deep Dive"

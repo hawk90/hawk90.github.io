@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: PyTorch Inductor와의 통합"
+slug: "ml/compilers/triton-dsl/chapter08-inductor"
 date: 2026-05-16T08:00:00
 description: "torch.compile이 Triton kernel을 생성한다."
 series: "Triton DSL"

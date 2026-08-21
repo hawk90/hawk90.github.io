@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Formal Methods (DO-333) & 보안 (DO-326A) — 시리즈 마무리"
+slug: "embedded/aerospace-standards/do-178c/chapter12-formal-methods-security"
 date: 2026-05-18T13:00:00
 description: "수학적 증명으로 verification 충족 — SPARK Ada, Frama-C, Astrée. 항공 보안 supplement. 시리즈 마무리·산업 전망."
 tags: [do-178c, do-333, do-326a, formal-methods, spark-ada, frama-c, security]

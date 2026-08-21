@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Ergodic Theorems"
+slug: "math/probability/durrett-pte/chapter07-ergodic"
 date: 2026-05-16T07:00:00
 description: "Stationary process·Birkhoff·subadditive ergodic."
 series: "Probability: Theory and Examples"

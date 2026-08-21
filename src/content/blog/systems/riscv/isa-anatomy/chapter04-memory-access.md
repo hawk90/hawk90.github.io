@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 메모리 접근"
+slug: "systems/riscv/isa-anatomy/chapter04-memory-access"
 date: 2026-05-17T04:00:00
 description: "RISC-V load/store 명령어, 주소 지정 모드, 정렬 요구사항을 다룬다."
 series: "RISC-V ISA 해부"

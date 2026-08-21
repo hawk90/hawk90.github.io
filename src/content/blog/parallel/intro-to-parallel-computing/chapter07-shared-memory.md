@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Programming Shared Address Space Platforms"
+slug: "parallel/intro-to-parallel-computing/chapter07-shared-memory"
 date: 2026-05-21T07:00:00
 description: "공유 메모리 프로그래밍 — Pthreads, OpenMP, 동기화 프리미티브"
 series: "Introduction to Parallel Computing"

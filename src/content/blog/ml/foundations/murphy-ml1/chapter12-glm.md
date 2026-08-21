@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Generalized Linear Models"
+slug: "ml/foundations/murphy-ml1/chapter12-glm"
 date: 2026-05-16T12:00:00
 description: "Exponential family + link function — linear model의 통일 framework."
 series: "Probabilistic Machine Learning: An Introduction"

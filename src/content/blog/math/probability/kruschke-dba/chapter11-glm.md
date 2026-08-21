@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Overview of the Generalized Linear Model"
+slug: "math/probability/kruschke-dba/chapter11-glm"
 date: 2026-05-15T11:00:00
 description: "Link·noise·predictor — GLM의 통합 그림."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

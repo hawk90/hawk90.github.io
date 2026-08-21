@@ -1,5 +1,6 @@
 ---
 title: "Pattern 59: Collapse Hierarchy"
+slug: "programming/design/refactoring-catalog/pattern59-collapse-hierarchy"
 date: 2026-05-02T11:00:00
 description: "Superclass와 subclass가 거의 동일 — 계층을 합쳐 단순화."
 series: "Refactoring Catalog (Fowler 2nd ed)"

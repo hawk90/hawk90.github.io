@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Progress through Revolutions"
+slug: "philosophy/scientific-revolutions/ch13-progress"
 date: 2026-05-14T14:00:00
 description: "혁명을 통한 진보 — 진리 수렴 아닌 문제 해결력의 진보."
 series: "The Structure of Scientific Revolutions"

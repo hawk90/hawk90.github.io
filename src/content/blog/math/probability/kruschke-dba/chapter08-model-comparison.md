@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Model Comparison"
+slug: "math/probability/kruschke-dba/chapter08-model-comparison"
 date: 2026-05-15T08:00:00
 description: "Bayes factor·hierarchical structure로 model을 선택."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

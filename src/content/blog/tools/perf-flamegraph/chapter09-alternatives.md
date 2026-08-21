@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: 통합 — pprof / hotspot / Tracy 비교"
+slug: "tools/perf-flamegraph/chapter09-alternatives"
 date: 2026-05-17T09:00:00
 description: "perf 외 도구 — pprof (Go), hotspot (KDAB GUI), Tracy, Intel VTune."
 tags: [Profiling, hotspot, Tracy, VTune]

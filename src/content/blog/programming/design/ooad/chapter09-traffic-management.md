@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Control System: Traffic Management"
+slug: "programming/design/ooad/chapter09-traffic-management"
 date: 2026-05-19T09:00:00
 description: "케이스 스터디 — 교통 관리 제어 시스템."
 series: "Object-Oriented Analysis and Design with Applications"

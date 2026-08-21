@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Communication"
+slug: "parallel/distributed-systems-tanenbaum/chapter04-communication"
 date: 2025-05-20T04:00:00
 description: "RPC, 메시지 지향 통신, 멀티캐스트 — 분산 시스템의 통신 기초"
 series: "Distributed Systems"

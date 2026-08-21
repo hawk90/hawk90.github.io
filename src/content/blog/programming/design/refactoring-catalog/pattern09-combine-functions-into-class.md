@@ -1,5 +1,6 @@
 ---
 title: "Pattern 9: Combine Functions into Class"
+slug: "programming/design/refactoring-catalog/pattern09-combine-functions-into-class"
 date: 2026-05-02T09:00:00
 description: "같은 데이터를 다루는 함수들을 한 클래스로 모은다 — 도메인 모델 발견."
 series: "Refactoring Catalog (Fowler 2nd ed)"

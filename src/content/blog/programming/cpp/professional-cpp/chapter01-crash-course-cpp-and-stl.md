@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: A Crash Course in C++ and the STL"
+slug: "programming/cpp/professional-cpp/chapter01-crash-course-cpp-and-stl"
 date: 2026-05-05T01:00:00
 description: "C++ 단축 입문 — 핵심 언어 + STL. 시리즈의 시작점."
 tags: [cpp, STL, crash-course]

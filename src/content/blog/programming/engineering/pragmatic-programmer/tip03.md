@@ -1,5 +1,6 @@
 ---
 title: "Tip 3: You Have Agency"
+slug: "programming/engineering/pragmatic-programmer/tip03"
 date: 2026-05-11T03:00:00
 description: "환경의 피해자가 되지 마라. 일도 인생도 당신이 스스로 만든다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "1.1 첫 약속들"
+slug: "math/set-theory/ch01/01-basic"
 date: 2026-05-15T15:50:30
 description: "집합을 가지고 무언가 하려면, 먼저 두 가지를 정해야 한다."
 tags: [set-theory, Mathematics, Enderton]

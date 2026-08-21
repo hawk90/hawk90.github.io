@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: I²C 심화 — Repeated Start, 10-bit, Clock Stretching, Multi-Master"
+slug: "embedded/protocols/embedded-serial/chapter05-i2c-advanced"
 date: 2026-05-16T05:00:00
 description: "Repeated Start로 read, 10-bit 주소로 1024 슬레이브, clock stretching으로 느린 슬레이브 대응."
 series: "Embedded Protocols 심화"

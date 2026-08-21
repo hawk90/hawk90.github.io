@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Approximation and Fitting"
+slug: "math/optimization/boyd-convex/chapter06-approximation-fitting"
 date: 2026-05-15T06:00:00
 description: "Least-squares·robust·sparse — 데이터 fitting의 convex 형식."
 series: "Convex Optimization (Boyd)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1 서문: 원전 8 규칙 + 자주 틀리는 3 규칙"
+slug: "writing/elements-of-style/ch01/00-intro"
 date: 2026-05-14T01:00:00
 description: "Strunk & White 1장 원전 8 규칙에 자주 틀리는 grammar 3 규칙(주어-동사 일치 / 대명사 격 / 현수 분사)을 보강해 11 규칙으로 다룹니다."
 series: "The Elements of Style"

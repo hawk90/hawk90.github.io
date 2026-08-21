@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Coordination"
+slug: "parallel/distributed-systems-tanenbaum/chapter06-coordination"
 date: 2025-05-20T06:00:00
 description: "클럭 동기화, 논리 클럭, 상호 배제, 선거 알고리즘"
 series: "Distributed Systems"

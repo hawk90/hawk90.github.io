@@ -1,5 +1,6 @@
 ---
 title: "Part 3-6: swap"
+slug: "systems/linux-kernel-internals/part3-06-swap"
 date: 2026-05-12T16:00:00
 description: "swap — 디스크에 페이지 저장. LRU / kswapd / 메모리 압박."
 tags: [Linux, Kernel, Memory, Swap]

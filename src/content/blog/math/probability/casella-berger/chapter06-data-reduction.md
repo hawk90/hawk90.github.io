@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Principles of Data Reduction"
+slug: "math/probability/casella-berger/chapter06-data-reduction"
 date: 2026-05-16T06:00:00
 description: "Sufficient·ancillary·complete — sample을 요약하는 방법."
 series: "Statistical Inference"

@@ -1,5 +1,6 @@
 ---
 title: "Part 3-4: 인과 / 유비 / 가설 논증"
+slug: "philosophy/critical-thinking-logic/part3-04-causal-analogy-hypothesis"
 date: 2026-05-14T13:00:00
 description: "Mill의 방법 — 일치 / 차이 / 잔여. 유비 강도. 최선의 설명 추론."
 tags: [Logic, Causal, Analogy, Hypothesis]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Kolmogorov Complexity"
+slug: "math/probability/cover-thomas/chapter14-kolmogorov"
 date: 2026-05-16T14:00:00
 description: "객체의 'algorithmic information' — 가장 짧은 description의 길이."
 series: "Elements of Information Theory"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: CAN 디버깅 — CANalyzer, DBC, Trigger, Bus Load"
+slug: "embedded/protocols/can-bus/chapter12-debugging"
 date: 2026-05-16T12:00:00
 description: "Vector·PCAN·Kvaser 상용 도구 vs 오픈소스. DBC 파일과 시나리오별 디버깅 절차."
 series: "CAN Bus 심화"

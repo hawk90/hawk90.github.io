@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Mock 심화"
+slug: "programming/testing/pytest/chapter10-mock-advanced"
 date: 2026-05-10T10:00:00
 description: "patch decorators·monkeypatch·pytest-mock — *어디서* mocking을 적용할지."
 series: "pytest 심화"

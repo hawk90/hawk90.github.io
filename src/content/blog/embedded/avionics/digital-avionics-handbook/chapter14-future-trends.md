@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Future Trends — open architecture·SDR·AI"
+slug: "embedded/avionics/digital-avionics-handbook/chapter14-future-trends"
 date: 2026-05-18T14:00:00
 description: "FACE·OMS·SDR·AI/ML이 가져오는 avionics 추세."
 series: "Digital Avionics Handbook"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Causality and Structural Models in Social Science"
+slug: "ml/foundations/pearl-causality/chapter05-sem"
 date: 2026-05-16T05:00:00
 description: "SEM (Structural Equation Modeling) — Pearl의 graph 시각으로."
 series: "Causality: Models, Reasoning, and Inference"

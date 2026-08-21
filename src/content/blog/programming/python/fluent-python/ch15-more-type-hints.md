@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: More About Type Hints"
+slug: "programming/python/fluent-python/ch15-more-type-hints"
 date: 2026-05-15T15:00:00
 description: "고급 타입 힌트 — TypeVar, Protocol, overload, Callable."
 series: "Fluent Python"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: NPU 프로파일러 활용"
+slug: "ml/systems/ml-profiling/chapter02-npu-profiler"
 date: 2026-05-16T02:00:00
 description: "Vendor profiler — Nsight·rocprof·QPM·Xcode Instruments."
 series: "ML 시스템 프로파일링"

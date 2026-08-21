@@ -1,5 +1,6 @@
 ---
 title: "AV1: 시리즈 개요"
+slug: "media/av1/00-overview"
 date: 2026-05-16T00:00:00
 description: "AV1 코덱 완전 정복. 비트스트림 구조부터 디코더 구현, 인코더 전략까지."
 series: "AV1"

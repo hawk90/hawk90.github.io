@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Advanced Topics"
+slug: "programming/cpp/extreme-c/chapter22-advanced-topics"
 date: 2026-05-05T22:00:00
 description: "고급 주제 — WebAssembly, embedded, cross-compilation, security."
 tags: [C, WebAssembly, Embedded, Cross-compilation]

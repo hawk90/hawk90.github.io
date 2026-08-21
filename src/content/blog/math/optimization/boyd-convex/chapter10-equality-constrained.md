@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Equality Constrained Minimization"
+slug: "math/optimization/boyd-convex/chapter10-equality-constrained"
 date: 2026-05-15T10:00:00
 description: "등식 제약·KKT 시스템·Newton method 확장."
 series: "Convex Optimization (Boyd)"

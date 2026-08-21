@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 인터프리터와 메모리 할당"
+slug: "ml/tinyml/tinyml-edge-ai/chapter03-interpreter-memory"
 date: 2026-05-16T03:00:00
 description: "Tensor arena·greedy allocator — 메모리를 어떻게 짜는가."
 series: "TinyML·Edge AI"

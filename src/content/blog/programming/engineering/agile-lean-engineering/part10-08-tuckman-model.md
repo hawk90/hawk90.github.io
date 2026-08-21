@@ -1,5 +1,6 @@
 ---
 title: "Part 10-08: Tuckman 모델 — Forming/Storming/Norming/Performing"
+slug: "programming/engineering/agile-lean-engineering/part10-08-tuckman-model"
 date: 2026-05-20T13:00:00
 description: "Bruce Tuckman 1965의 단계 모델 — 팀 발달."
 series: "Agile & Lean Software Engineering"

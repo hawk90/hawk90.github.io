@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: DO-178C란 무엇이고 왜 항공 SW의 표준이 됐는가"
+slug: "embedded/aerospace-standards/do-178c/chapter01-overview"
 date: 2026-05-18T02:00:00
 description: "RTCA DO-178C / EUROCAE ED-12C — 항공 SW 인증의 모표준. 역사, 구조, ISO 26262와의 비교."
 tags: [do-178c, ed-12c, rtca, eurocae, airworthiness, faa, easa, certification]

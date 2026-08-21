@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Designing for Reuse"
+slug: "programming/cpp/professional-cpp/chapter06-designing-for-reuse"
 date: 2026-05-05T06:00:00
 description: "재사용 가능한 코드 — 라이브러리 설계 원칙. 일반화 vs 특수화."
 tags: [cpp, Reuse, library-design]

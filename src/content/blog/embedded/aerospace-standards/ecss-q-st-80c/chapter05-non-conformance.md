@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: SW Non-Conformance Control — NCR Workflow + Root Cause Analysis"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter05-non-conformance"
 date: 2026-05-18T06:00:00
 description: "ECSS-Q-ST-80C §5.6 — NCR 등록·분류·추적·종결. Root cause analysis 방법 (5-Why, Fishbone, FTA). Corrective Action Plan."
 tags: [ecss, non-conformance, ncr, rca, fishbone, fta, corrective-action]

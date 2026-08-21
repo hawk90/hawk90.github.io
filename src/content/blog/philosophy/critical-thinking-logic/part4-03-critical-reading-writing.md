@@ -1,5 +1,6 @@
 ---
 title: "Part 4-3: 비판적 읽기 / 쓰기 종합"
+slug: "philosophy/critical-thinking-logic/part4-03-critical-reading-writing"
 date: 2026-05-14T16:00:00
 description: "체크리스트 — 어떤 글이든 비판적으로 평가하는 절차. 시리즈 마무리."
 tags: [Logic, critical-reading, Writing]

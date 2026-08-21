@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Global Commands"
+slug: "tools/practical-vim/chapter16-global-commands"
 date: 2026-05-17T15:00:00
 description: ":global / :vglobal — 패턴 매칭 라인에 명령 일괄. 검색 + 명령 결합."
 tags: [Vim, Global, Batch]

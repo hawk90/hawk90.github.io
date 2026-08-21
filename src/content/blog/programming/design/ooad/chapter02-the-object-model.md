@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: The Object Model"
+slug: "programming/design/ooad/chapter02-the-object-model"
 date: 2026-05-19T02:00:00
 description: "객체 모델 — OOP의 4대 요소: 추상화, 캡슐화, 모듈성, 계층."
 series: "Object-Oriented Analysis and Design with Applications"

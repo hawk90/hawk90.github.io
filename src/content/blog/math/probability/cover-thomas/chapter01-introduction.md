@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction and Preview"
+slug: "math/probability/cover-thomas/chapter01-introduction"
 date: 2026-05-16T01:00:00
 description: "정보이론이 답하는 두 질문 — 압축 한계·전송 한계."
 series: "Elements of Information Theory"

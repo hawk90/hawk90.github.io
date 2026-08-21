@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Complexity"
+slug: "programming/design/ooad/chapter01-complexity"
 date: 2026-05-19T01:00:00
 description: "복잡성 — 소프트웨어 본질적 복잡성, 분해와 추상화로 대응."
 series: "Object-Oriented Analysis and Design with Applications"

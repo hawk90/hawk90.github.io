@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: CA Training — Command/Address (LPDDR)"
+slug: "embedded/hardware/ddr/chapter08-ca-training"
 date: 2026-05-16T09:00:00
 description: "LPDDR의 CA Training: Command/Address 버스 타이밍 정렬과 신호 무결성"
 series: "DDR Memory Deep Dive"

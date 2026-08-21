@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Global Objects and Constants"
+slug: "programming/design/oosc/chapter18-global-objects-and-constants"
 date: 2026-05-19T18:00:00
 description: "전역 객체와 상수 — once 함수, 공유 객체, 상수 정의."
 series: "Object-Oriented Software Construction"

@@ -1,5 +1,6 @@
 ---
 title: "항목 41: 복사 가능하고 이동 비용이 저렴하며 항상 복사되는 매개변수는 값 전달을 고려하라"
+slug: "programming/cpp/effective-modern-cpp/item41-consider-pass-by-value-for-copyable-cheap-to-move-always-copied-params"
 date: 2026-05-04T17:00:00
 description: "pass by value + std::move 패턴이 lvalue/rvalue 오버로드보다 나은 시점."
 tags: [cpp, Performance, move-semantics, modern-cpp]

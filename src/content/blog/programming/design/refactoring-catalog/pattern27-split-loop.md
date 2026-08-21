@@ -1,5 +1,6 @@
 ---
 title: "Pattern 27: Split Loop"
+slug: "programming/design/refactoring-catalog/pattern27-split-loop"
 date: 2026-05-02T03:00:00
 description: "한 loop가 *두 가지 일*을 하면 분리한다 — Extract Function의 전 단계."
 series: "Refactoring Catalog (Fowler 2nd ed)"

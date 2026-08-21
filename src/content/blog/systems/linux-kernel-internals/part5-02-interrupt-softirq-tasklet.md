@@ -1,5 +1,6 @@
 ---
 title: "Part 5-2: 인터럽트 / softirq / tasklet / workqueue"
+slug: "systems/linux-kernel-internals/part5-02-interrupt-softirq-tasklet"
 date: 2026-05-12T23:00:00
 description: "인터럽트 처리 계층 — top half / bottom half. workqueue."
 tags: [Linux, Kernel, Interrupt, softirq, workqueue]

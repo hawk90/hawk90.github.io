@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Plugin API — 커스텀 Op"
+slug: "ml/inference/tensorrt/chapter02-plugin-api"
 date: 2026-05-16T02:00:00
 description: "지원되지 않는 op·custom kernel — IPluginV3로 확장."
 series: "TensorRT 심화"

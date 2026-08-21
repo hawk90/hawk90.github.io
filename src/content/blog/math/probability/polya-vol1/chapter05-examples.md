@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Examples in Induction and Analogy"
+slug: "math/probability/polya-vol1/chapter05-examples"
 date: 2026-05-16T05:00:00
 description: "유추의 사례 — Archimedes·Galileo·Newton의 추론."
 series: "Mathematics and Plausible Reasoning, Vol I"

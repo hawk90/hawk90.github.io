@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: 예외와 트랩"
+slug: "systems/riscv/isa-anatomy/chapter13-exceptions-traps"
 date: 2026-05-17T13:00:00
 description: "RISC-V 예외 처리 — 동기/비동기 예외, 트랩 벡터, 핸들러 진입/복귀를 다룬다."
 series: "RISC-V ISA 해부"

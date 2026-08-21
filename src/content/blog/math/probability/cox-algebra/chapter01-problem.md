@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: The Problem"
+slug: "math/probability/cox-algebra/chapter01-problem"
 date: 2026-05-15T01:00:00
 description: "Plausibility의 정량화 가능성 — Cox 문제 설정."
 series: "The Algebra of Probable Inference"

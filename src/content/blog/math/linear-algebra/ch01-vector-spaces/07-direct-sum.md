@@ -1,5 +1,6 @@
 ---
 title: "1.7 부분공간(subspace)의 합·직합(direct sum)과 차원 정리(dimension formula)"
+slug: "math/linear-algebra/ch01-vector-spaces/07-direct-sum"
 date: 2026-05-15T06:57:40
 description: "1장의 마지막 절. 두 부분공간(subspace)이 만났을 때 무슨 일이 벌어지는가, 그리고 그 만남의 차원(dimension)은 어떻게 결정되는가."
 tags: [linear-algebra, Mathematics, hoffman-kunze]

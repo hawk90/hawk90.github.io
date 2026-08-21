@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: What is This Stuff Called Probability?"
+slug: "math/probability/kruschke-dba/chapter02-probability"
 date: 2026-05-15T02:00:00
 description: "확률의 두 해석·distribution·random variable 토대."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

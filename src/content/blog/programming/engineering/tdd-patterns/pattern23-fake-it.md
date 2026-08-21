@@ -1,5 +1,6 @@
 ---
 title: "Pattern 23: Fake It (Til You Make It)"
+slug: "programming/engineering/tdd-patterns/pattern23-fake-it"
 date: 2026-05-10T23:00:00
 description: "Constant return부터 — 가장 빠른 green bar."
 series: "TDD by Example — Patterns Deep Dive"

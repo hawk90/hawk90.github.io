@@ -1,5 +1,6 @@
 ---
 title: "Lesson 9: Elegance"
+slug: "writing/style-williams/lesson09-elegance"
 date: 2026-05-14T09:00:00
 description: "Balance, rhythm, climactic emphasis. 명확함을 넘어 즐거움을 주는 글의 도구들."
 series: "Style: Lessons in Clarity and Grace"

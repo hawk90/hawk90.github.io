@@ -1,5 +1,6 @@
 ---
 title: "Chapter 5: 동기화 프리미티브의 상대적 능력"
+slug: "parallel/parallel-principles/ch05-relative-power-of-synchronization"
 date: 2026-05-06T05:00:00
 description: "Consensus 문제로 동기화 도구의 위계를 정의한다. read/write는 0, FAA/test-and-set는 2, CAS는 무한대."
 series: "The Art of Multiprocessor Programming"

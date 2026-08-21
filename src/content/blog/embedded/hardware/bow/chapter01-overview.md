@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: BoW 개요 — 오픈소스 칩렛 인터페이스"
+slug: "embedded/hardware/bow/chapter01-overview"
 date: 2026-05-16T01:00:00
 description: "Bunch of Wires — OCP ODSA가 만든 royalty-free D2D 표준, organic substrate에서도 동작하는 저비용 칩렛 인터페이스."
 series: "BoW 개요"

@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 10: 아키텍처 문서 작성을 고려하라"
+slug: "programming/cpp/cpp-software-design/guideline10-consider-creating-an-architectural-document"
 date: 2026-05-02T10:00:00
 description: "코드만으로는 디자인의 의도가 드러나지 않는다. ADR, C4 모델, 의존성 다이어그램으로 명시한다."
 tags: [cpp, software-design, Architecture, Documentation]

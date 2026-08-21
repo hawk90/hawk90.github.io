@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: A Pattern Language for Parallel Programming"
+slug: "parallel/patterns-for-parallel-programming/chapter01-pattern-language"
 date: 2026-05-21T14:00:00
 description: "병렬 패턴 언어 개요 — OPL의 4개 설계 공간과 패턴 계층"
 series: "Patterns for Parallel Programming"

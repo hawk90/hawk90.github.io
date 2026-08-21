@@ -1,5 +1,6 @@
 ---
 title: "UML 4: 클래스 — 책임을 가진 가장 중요한 building block"
+slug: "programming/design/uml/item04-classes"
 date: 2026-05-03T04:00:00
 description: "클래스는 단순한 직사각형이 아니다 — 이름·속성·연산·책임·스테레오타입의 종합 패키지."
 tags: [UML, class-diagram, OOP, Fundamentals]

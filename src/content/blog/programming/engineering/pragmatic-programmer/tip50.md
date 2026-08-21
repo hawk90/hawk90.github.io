@@ -1,5 +1,6 @@
 ---
 title: "Tip 50: Don't Hoard State; Pass It Around"
+slug: "programming/engineering/pragmatic-programmer/tip50"
 date: 2026-05-11T02:00:00
 description: "상태를 쌓아두지 말고 전달하라. 함수형 사고로 추론과 테스트를 쉽게 만든다."
 series: "The Pragmatic Programmer"

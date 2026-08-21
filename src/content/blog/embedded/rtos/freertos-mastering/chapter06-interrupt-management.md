@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Interrupt Management"
+slug: "embedded/rtos/freertos-mastering/chapter06-interrupt-management"
 date: 2026-05-09T06:00:00
 description: "FromISR·deferred processing·Cortex-M NVIC — ISR과 태스크의 안전한 다리."
 series: "Mastering the FreeRTOS Real Time Kernel"

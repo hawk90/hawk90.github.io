@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 시스템"
+slug: "programming/engineering/clean-code/chapter11-systems"
 date: 2026-05-11T11:00:00
 description: "시스템 수준의 클린함 — 구성과 사용의 분리, DI, 도메인-특화 언어로 추상 수준 일관성."
 tags: [CleanCode, Systems, DI, robert-martin]

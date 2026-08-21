@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: CAN 2.0 물리 계층 — Dominant/Recessive, 종단, Bit Timing"
+slug: "embedded/protocols/can-bus/chapter02-physical"
 date: 2026-05-16T02:00:00
 description: "CAN_H·CAN_L의 차이로 비트. Dominant(0)가 Recessive(1)를 덮는 wired-AND가 중재의 핵심."
 series: "CAN Bus 심화"

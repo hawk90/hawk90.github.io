@@ -1,5 +1,6 @@
 ---
 title: "Pattern 51: Pull Up Method"
+slug: "programming/design/refactoring-catalog/pattern51-pull-up-method"
 date: 2026-05-02T03:00:00
 description: "Subclass 여러 곳에 같은 method가 있으면 — superclass로 올려 DRY."
 series: "Refactoring Catalog (Fowler 2nd ed)"

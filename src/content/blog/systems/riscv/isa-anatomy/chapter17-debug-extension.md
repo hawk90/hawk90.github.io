@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: 디버그 확장"
+slug: "systems/riscv/isa-anatomy/chapter17-debug-extension"
 date: 2026-05-17T17:00:00
 description: "RISC-V 디버그 확장 — 트리거 모듈, 디버그 모드, JTAG/cJTAG 연동을 다룬다."
 series: "RISC-V ISA 해부"

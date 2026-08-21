@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Composition and Aggregation"
+slug: "programming/cpp/extreme-c/chapter07-composition-and-aggregation"
 date: 2026-05-05T07:00:00
 description: "C에서 composition / aggregation — has-a 관계 구조화."
 tags: [C, OOP, Composition]

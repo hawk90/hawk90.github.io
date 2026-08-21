@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Exemplar-based Methods"
+slug: "ml/foundations/murphy-ml1/chapter16-exemplar"
 date: 2026-05-16T16:00:00
 description: "K-NN·kernel density·sample-based의 본질."
 series: "Probabilistic Machine Learning: An Introduction"

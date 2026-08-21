@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: The Run-Time Structure: Objects"
+slug: "programming/design/oosc/chapter08-the-run-time-structure-objects"
 date: 2026-05-19T08:00:00
 description: "객체 — 런타임의 주역, 생성, 참조, 동등성."
 series: "Object-Oriented Software Construction"

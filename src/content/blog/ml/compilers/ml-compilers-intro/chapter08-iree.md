@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: IREE — MLIR 기반 런타임"
+slug: "ml/compilers/ml-compilers-intro/chapter08-iree"
 date: 2026-05-16T08:00:00
 description: "Compile + runtime — IREE의 end-to-end 솔루션."
 series: "ML 컴파일러"

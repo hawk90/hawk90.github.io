@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: PCIe over UCIe — I/O 확장"
+slug: "embedded/hardware/ucie/chapter10-pcie-over-ucie"
 date: 2026-05-19T10:00:00
 description: "I/O 칩렛을 UCIe로 — root complex와 endpoint를 분리."
 series: "UCIe 심화"

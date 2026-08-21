@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: BoW Flexi — 저비용 구현"
+slug: "embedded/hardware/bow/chapter05-bow-flexi"
 date: 2026-05-16T05:00:00
 description: "Organic substrate에서도 동작하는 BoW의 최저비용 프로파일 — 130μm bump pitch, 긴 reach, 엣지·임베디드 칩렛."
 series: "BoW 개요"

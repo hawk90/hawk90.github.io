@@ -1,5 +1,6 @@
 ---
 title: "Part 5-04: Create Knowledge"
+slug: "programming/engineering/agile-lean-engineering/part5-04-create-knowledge"
 date: 2026-05-22T23:00:00
 description: "set-based design·learning loop — 지식이 곧 progress."
 series: "Agile & Lean Software Engineering"

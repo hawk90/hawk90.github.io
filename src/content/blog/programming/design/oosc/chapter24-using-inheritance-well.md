@@ -1,5 +1,6 @@
 ---
 title: "Ch 24: Using Inheritance Well"
+slug: "programming/design/oosc/chapter24-using-inheritance-well"
 date: 2026-05-19T00:00:00
 description: "상속의 올바른 사용 — 12가지 상속 분류, 남용 방지."
 series: "Object-Oriented Software Construction"

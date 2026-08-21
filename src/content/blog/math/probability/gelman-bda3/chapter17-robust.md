@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Models for Robust Inference"
+slug: "math/probability/gelman-bda3/chapter17-robust"
 date: 2026-05-16T17:00:00
 description: "Student-t·heavy tail·mixture model — outlier에 강건."
 series: "Bayesian Data Analysis (3rd ed)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: God Spiked the Integers"
+slug: "math/probability/mcelreath-rethinking/chapter11-spiked-integers"
 date: 2026-05-16T11:00:00
 description: "Binomial·Poisson — count data의 Bayesian."
 series: "Statistical Rethinking"

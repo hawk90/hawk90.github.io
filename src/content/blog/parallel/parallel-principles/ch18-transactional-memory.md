@@ -1,5 +1,6 @@
 ---
 title: "Chapter 18: Transactional Memory"
+slug: "parallel/parallel-principles/ch18-transactional-memory"
 date: 2026-05-06T18:00:00
 description: "락 없는 atomic block의 약속. Software TM, Hardware TM (Intel TSX, IBM POWER). 합성성과 진행 보장."
 series: "The Art of Multiprocessor Programming"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 블록 파티셔닝"
+slug: "media/av1/chapter04-partitioning"
 date: 2026-05-16T05:00:00
 description: "AV1의 10가지 파티션 모드 — SPLIT, HORZ, VERT, T-shape, 4-way와 재귀적 분할 구조."
 tags: [AV1, Video, Codec, Partitioning, Block]

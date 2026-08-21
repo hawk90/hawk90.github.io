@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Logistic Regression"
+slug: "ml/foundations/murphy-ml1/chapter10-logistic"
 date: 2026-05-16T10:00:00
 description: "Sigmoid·softmax·MLE — ML 분류의 출발점."
 series: "Probabilistic Machine Learning: An Introduction"

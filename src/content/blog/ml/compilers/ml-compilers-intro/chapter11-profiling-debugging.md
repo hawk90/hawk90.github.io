@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 프로파일링과 디버깅"
+slug: "ml/compilers/ml-compilers-intro/chapter11-profiling-debugging"
 date: 2026-05-16T11:00:00
 description: "ML 컴파일러의 성능 회귀·정확도 회귀 잡기."
 series: "ML 컴파일러"

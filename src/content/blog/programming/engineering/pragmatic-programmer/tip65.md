@@ -1,5 +1,6 @@
 ---
 title: "Tip 65: Testing Is Not About Finding Bugs"
+slug: "programming/engineering/pragmatic-programmer/tip65"
 date: 2026-05-11T17:00:00
 description: "테스트는 버그 찾기가 아니다. 테스트는 설계를 이끌고, 문서화하고, 확신을 준다."
 series: "The Pragmatic Programmer"

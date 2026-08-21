@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Task Notifications"
+slug: "embedded/rtos/freertos-mastering/chapter09-task-notifications"
 date: 2026-05-09T09:00:00
 description: "xTaskNotify·NotifyValue — 큐/세마포보다 가볍고 빠른 알림 방식."
 series: "Mastering the FreeRTOS Real Time Kernel"

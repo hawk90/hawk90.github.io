@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Random Mass Phenomena"
+slug: "math/probability/polya-vol2/chapter03-random-mass"
 date: 2026-05-16T03:00:00
 description: "확률의 빈도주의 직관 — Pólya의 frequency 관점."
 series: "Mathematics and Plausible Reasoning, Vol II"

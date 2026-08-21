@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Design Pattern: Multi-Panel Interactive Systems"
+slug: "programming/design/oosc/chapter20-design-pattern-multi-panel"
 date: 2026-05-19T20:00:00
 description: "다중 패널 인터랙티브 시스템 — 상태 전이와 이벤트 처리."
 series: "Object-Oriented Software Construction"

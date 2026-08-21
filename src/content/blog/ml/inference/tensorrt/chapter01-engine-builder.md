@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: TensorRT Engine Builder"
+slug: "ml/inference/tensorrt/chapter01-engine-builder"
 date: 2026-05-16T01:00:00
 description: "Network·BuilderConfig·Engine — TensorRT compile flow."
 series: "TensorRT 심화"

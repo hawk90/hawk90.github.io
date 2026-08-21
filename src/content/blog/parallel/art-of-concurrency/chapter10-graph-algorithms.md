@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Graph Algorithms"
+slug: "parallel/art-of-concurrency/chapter10-graph-algorithms"
 date: 2025-05-20T10:00:00
 description: "병렬 그래프 알고리즘 — BFS, DFS, 최단 경로, 연결 요소"
 series: "The Art of Concurrency"

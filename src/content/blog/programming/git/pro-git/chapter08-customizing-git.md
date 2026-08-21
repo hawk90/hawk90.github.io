@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Customizing Git"
+slug: "programming/git/pro-git/chapter08-customizing-git"
 date: 2026-05-17T08:00:00
 description: "Git 설정 / attribute / hook. pre-commit / pre-push / commit-msg."
 tags: [Git, Configuration, Hooks]

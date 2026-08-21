@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Security"
+slug: "parallel/distributed-systems-tanenbaum/chapter09-security"
 date: 2025-05-20T09:00:00
 description: "보안 채널, 접근 제어, 보안 관리 — 분산 시스템 보안의 핵심"
 series: "Distributed Systems"

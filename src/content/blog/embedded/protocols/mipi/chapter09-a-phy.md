@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: A-PHY — 자동차 SerDes, 15m, 단일 케이블"
+slug: "embedded/protocols/mipi/chapter09-a-phy"
 date: 2026-05-16T09:00:00
 description: "MIPI 자동차 PHY. 16 Gbps 단일 coax/STP, 15m, 전원·신호 통합. GMSL/FPD-Link III와 경쟁."
 series: "MIPI 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Convergence of Random Variables"
+slug: "math/probability/wasserman-all-stats/chapter05-convergence"
 date: 2026-05-16T05:00:00
 description: "LLN·CLT·Delta method — asymptotic statistics 기초."
 series: "All of Statistics"

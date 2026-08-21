@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Random Walks"
+slug: "math/probability/durrett-pte/chapter04-random-walks"
 date: 2026-05-16T04:00:00
 description: "Recurrence·transience·hitting time — 1d·high-d random walk."
 series: "Probability: Theory and Examples"

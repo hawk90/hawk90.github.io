@@ -1,5 +1,6 @@
 ---
 title: "Pattern 10: Explanation Test"
+slug: "programming/engineering/tdd-patterns/pattern10-explanation-test"
 date: 2026-05-10T10:00:00
 description: "TDD를 설명할 때 — 함께 테스트를 작성하며 시연한다."
 series: "TDD by Example — Patterns Deep Dive"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4 Words: O–S"
+slug: "writing/elements-of-style/ch04/words-o-s"
 date: 2026-05-14T06:00:00
 description: "자주 오용되는 단어와 표현 — Noun used as verb부터 Student body까지."
 series: "The Elements of Style"

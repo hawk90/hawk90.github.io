@@ -1,5 +1,6 @@
 ---
 title: "항목 6: 함수에 단일 반환문을 고집하지 마라"
+slug: "programming/cpp/beautiful-cpp/item06-dont-insist-on-single-return"
 date: 2026-05-05T06:00:00
 description: "C 시절의 단일 반환 규칙이 더는 유효하지 않은 이유 — RAII와 가드 절로 자연스러운 흐름 만들기."
 tags: [cpp, control-flow, RAII]

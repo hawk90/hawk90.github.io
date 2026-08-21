@@ -1,5 +1,6 @@
 ---
 title: "DSA 27: Red-Black Tree, Splay Tree"
+slug: "programming/algorithms/data-structures-and-algorithms/item27-red-black-tree"
 date: 2026-05-15T03:00:00
 description: "C++/Java 표준 컨테이너의 토대 RB 트리 + 자주 접근한 노드를 빠르게 하는 Splay."
 tags: [data-structure, Algorithm, BST, Red-Black, Splay]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: 크로스 플랫폼 CI 매트릭스"
+slug: "tools/emulation/qemu-embedded/chapter20-ci-matrix"
 date: 2026-05-17T20:00:00
 description: "ARM·RISC-V·x86 동시 검증 — embedded software CI."
 tags: [QEMU, ci, matrix-build, github-actions, gitlab-ci]

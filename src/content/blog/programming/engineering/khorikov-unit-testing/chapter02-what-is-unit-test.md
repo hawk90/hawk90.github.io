@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: What Is a Unit Test?"
+slug: "programming/engineering/khorikov-unit-testing/chapter02-what-is-unit-test"
 date: 2026-05-10T02:00:00
 description: "London 학파와 Classical 학파의 차이. Khorikov가 Classical을 선호하는 이유와 테스트 단위의 정의."
 tags: [TDD, London, Classical, School]

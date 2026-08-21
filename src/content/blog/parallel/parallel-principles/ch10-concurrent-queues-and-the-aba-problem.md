@@ -1,5 +1,6 @@
 ---
 title: "Chapter 10: Concurrent Queue와 ABA 문제"
+slug: "parallel/parallel-principles/ch10-concurrent-queues-and-the-aba-problem"
 date: 2026-05-06T10:00:00
 description: "Michael-Scott Lock-Free Queue. ABA 문제와 그 해법 — version counter, hazard pointer, epoch."
 series: "The Art of Multiprocessor Programming"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Generalized Linear Models"
+slug: "ml/foundations/murphy-ml2/chapter15-glm"
 date: 2026-05-16T15:00:00
 description: "Advanced GLM — Bayesian·hierarchical·heteroscedastic."
 series: "Probabilistic Machine Learning: Advanced Topics"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Controller"
+slug: "embedded/hardware/nvme/chapter02-controller"
 date: 2026-05-16T03:00:00
 description: "NVMe Controller의 Capabilities 레지스터와 Identify Controller 구조체를 분석한다"
 series: "NVMe Deep Dive"

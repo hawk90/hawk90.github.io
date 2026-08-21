@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: The Logic of Structure-Based Counterfactuals"
+slug: "ml/foundations/pearl-causality/chapter07-counterfactuals"
 date: 2026-05-16T07:00:00
 description: "Counterfactual — '만약 ~했다면' 의 정확한 의미."
 series: "Causality: Models, Reasoning, and Inference"

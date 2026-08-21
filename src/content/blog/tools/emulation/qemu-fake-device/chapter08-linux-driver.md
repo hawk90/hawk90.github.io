@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: 리눅스 드라이버 작성"
+slug: "tools/emulation/qemu-fake-device/chapter08-linux-driver"
 date: 2026-05-17T08:00:00
 description: "가상 디바이스용 리눅스 PCI 드라이버를 작성한다."
 tags: [QEMU, Linux, Driver, kernel-module, ioctl, sysfs]

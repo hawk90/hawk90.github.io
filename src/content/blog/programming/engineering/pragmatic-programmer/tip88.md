@@ -1,5 +1,6 @@
 ---
 title: "Tip 88: Use Version Control to Drive Builds, Tests, and Releases"
+slug: "programming/engineering/pragmatic-programmer/tip88"
 date: 2026-05-12T16:00:00
 description: "버전 관리를 빌드, 테스트, 릴리스의 중심에 두라. 커밋이 모든 자동화의 트리거다."
 series: "The Pragmatic Programmer"

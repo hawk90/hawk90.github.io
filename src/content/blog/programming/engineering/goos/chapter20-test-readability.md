@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Test Readability"
+slug: "programming/engineering/goos/chapter20-test-readability"
 date: 2026-05-10T13:00:00
 description: "Test as documentation. AAA / Given-When-Then. Helper / Builder 패턴."
 tags: [TDD, Readability, Builder]

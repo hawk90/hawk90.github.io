@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Crunching Knowledge"
+slug: "programming/design/domain-driven-design/chapter01-crunching-knowledge"
 date: 2026-05-01T01:00:00
 description: "도메인 지식을 코드로 — 끊임없는 학습 / 모델링 / 정제."
 tags: [DDD, Knowledge, Modeling]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Git Tools"
+slug: "programming/git/pro-git/chapter07-git-tools"
 date: 2026-05-17T07:00:00
 description: "고급 도구 — stash / bisect / submodule / reflog / cherry-pick / worktree."
 tags: [Git, Tools, Bisect, Stash]

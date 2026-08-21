@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Multi-Agent Systems"
+slug: "math/probability/halpern-uncertainty/chapter06-multi-agent"
 date: 2026-05-16T06:00:00
 description: "Common knowledge·distributed belief — multi-agent reasoning."
 series: "Reasoning About Uncertainty"

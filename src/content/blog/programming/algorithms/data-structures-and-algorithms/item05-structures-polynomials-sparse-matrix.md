@@ -1,5 +1,6 @@
 ---
 title: "DSA 5: 구조체 — 다항식과 희소 행렬"
+slug: "programming/algorithms/data-structures-and-algorithms/item05-structures-polynomials-sparse-matrix"
 date: 2026-05-15T05:00:00
 description: "구조체 활용 — 다항식 표현, 희소 행렬 압축으로 0이 많은 데이터 효율 처리."
 tags: [data-structure, Algorithm, sparse-matrix, Polynomial]

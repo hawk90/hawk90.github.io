@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3.2: Comma"
+slug: "writing/only-grammar-book/ch03-2-comma"
 date: 2026-05-14T03:20:00
 description: "쉼표의 표준 용법 — 직렬, 등위접속사, 종속절, 도입구, 동격, 인용. Oxford comma와 comma splice."
 series: "The Only Grammar Book You'll Ever Need"

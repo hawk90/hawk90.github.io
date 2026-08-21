@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Plugin 생태계"
+slug: "programming/testing/pytest/chapter14-plugins"
 date: 2026-05-10T14:00:00
 description: "pytest-xdist·pytest-rerunfailures·pytest-timeout — 자주 쓰이는 핵심 plugin들."
 series: "pytest 심화"

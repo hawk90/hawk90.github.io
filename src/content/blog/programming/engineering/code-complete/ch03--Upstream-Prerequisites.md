@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3: Measure Twice, Cut Once — Upstream Prerequisites"
+slug: "programming/engineering/code-complete/ch03--Upstream-Prerequisites"
 date: 2026-05-11T03:00:00
 description: "construction 시작 전 준비 — 문제 정의·요구사항·아키텍처. 잘 운영되는 프로젝트는 노력의 10~20%, 일정의 20~30%를 사전 작업에."
 series: "Code Complete"

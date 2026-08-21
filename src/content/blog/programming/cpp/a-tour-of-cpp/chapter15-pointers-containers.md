@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Pointers and Containers"
+slug: "programming/cpp/a-tour-of-cpp/chapter15-pointers-containers"
 date: 2026-05-22T15:00:00
 description: "포인터와 컨테이너 — unique_ptr, shared_ptr, span"
 series: "A Tour of C++"

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 58: Extract Superclass"
+slug: "programming/design/refactoring-catalog/pattern58-extract-superclass"
 date: 2026-05-02T10:00:00
 description: "두 class에 공통 부분 — 공통 superclass 추출해 *is-a* 관계 명시."
 series: "Refactoring Catalog (Fowler 2nd ed)"

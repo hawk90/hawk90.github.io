@@ -1,5 +1,6 @@
 ---
 title: "Part 4-12: Cumulative Flow Diagram (CFD)"
+slug: "programming/engineering/agile-lean-engineering/part4-12-cumulative-flow-diagram"
 date: 2026-05-22T16:00:00
 description: "CFD 읽는 법 — bottleneck·WIP 증가·throughput을 한눈에."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Tip 99: It's Your Life"
+slug: "programming/engineering/pragmatic-programmer/tip99"
 date: 2026-05-13T03:00:00
 description: "당신의 인생이다. 기술, 프로젝트, 일하는 방식을 스스로 선택한다."
 series: "The Pragmatic Programmer"

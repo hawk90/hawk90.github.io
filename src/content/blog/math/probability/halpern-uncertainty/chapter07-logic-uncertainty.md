@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Logics for Reasoning about Uncertainty"
+slug: "math/probability/halpern-uncertainty/chapter07-logic-uncertainty"
 date: 2026-05-16T07:00:00
 description: "Probabilistic logic·sound·complete — formal system."
 series: "Reasoning About Uncertainty"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Concurrent or Not Concurrent?"
+slug: "parallel/art-of-concurrency/chapter02-concurrent-or-not"
 date: 2025-05-20T02:00:00
 description: "동시성 기회 식별 — 작업 분해, 데이터 분해, 파이프라인"
 series: "The Art of Concurrency"

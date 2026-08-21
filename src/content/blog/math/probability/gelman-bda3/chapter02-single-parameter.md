@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Single-Parameter Models"
+slug: "math/probability/gelman-bda3/chapter02-single-parameter"
 date: 2026-05-16T02:00:00
 description: "Beta-Binomial·Normal·Poisson — 1-parameter Bayesian의 기본기."
 series: "Bayesian Data Analysis (3rd ed)"

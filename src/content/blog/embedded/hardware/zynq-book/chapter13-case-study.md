@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Case Study — Image Pipeline on Zynq"
+slug: "embedded/hardware/zynq-book/chapter13-case-study"
 date: 2026-05-19T13:00:00
 description: "센서 → PL ISP → DDR → CPU → 표시 — Zynq에서 풀 SW 스택 한 번 보기."
 series: "The Zynq Book"

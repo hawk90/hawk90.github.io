@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: C++ Backend — ATen·c10"
+slug: "ml/compilers/pytorch-internals/chapter02-cpp-backend"
 date: 2026-05-16T02:00:00
 description: "PyTorch의 심장 — Tensor 라이브러리와 core."
 series: "PyTorch Internals"

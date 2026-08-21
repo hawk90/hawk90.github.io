@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Gaussian Processes"
+slug: "math/probability/mackay-itila/chapter15-gaussian-process"
 date: 2026-05-16T15:00:00
 description: "Infinite-width neural network·kernel method의 만남."
 series: "Information Theory, Inference, and Learning Algorithms"

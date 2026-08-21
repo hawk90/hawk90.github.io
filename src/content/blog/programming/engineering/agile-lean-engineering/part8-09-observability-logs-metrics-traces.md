@@ -1,5 +1,6 @@
 ---
 title: "Part 8-09: Observability — logs·metrics·traces"
+slug: "programming/engineering/agile-lean-engineering/part8-09-observability-logs-metrics-traces"
 date: 2026-05-20T11:00:00
 description: "3 pillars of observability — Charity Majors의 정의."
 series: "Agile & Lean Software Engineering"

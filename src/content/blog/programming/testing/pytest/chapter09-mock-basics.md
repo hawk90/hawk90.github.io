@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Mock 기초"
+slug: "programming/testing/pytest/chapter09-mock-basics"
 date: 2026-05-10T09:00:00
 description: "unittest.mock·MagicMock·side_effect — Python mock의 기본기."
 series: "pytest 심화"

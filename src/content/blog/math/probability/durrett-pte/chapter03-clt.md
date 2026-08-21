@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Central Limit Theorems"
+slug: "math/probability/durrett-pte/chapter03-clt"
 date: 2026-05-16T03:00:00
 description: "CLT·characteristic function·Lévy theorem."
 series: "Probability: Theory and Examples"

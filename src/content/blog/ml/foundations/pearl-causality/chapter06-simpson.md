@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Simpson's Paradox, Confounding, Collapsibility"
+slug: "ml/foundations/pearl-causality/chapter06-simpson"
 date: 2026-05-16T06:00:00
 description: "전체와 부분의 모순 — causal 시각으로 해소."
 series: "Causality: Models, Reasoning, and Inference"

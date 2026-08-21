@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Scientific Method"
+slug: "philosophy/philosophy-of-science/ch04-scientific-method"
 date: 2026-05-15T04:00:00
 description: "과학의 방법 — 설명, 인과, 법칙."
 series: "Understanding Philosophy of Science"

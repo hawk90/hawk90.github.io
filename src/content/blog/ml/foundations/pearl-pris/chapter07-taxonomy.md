@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Taxonomy of Bayesian Belief Networks"
+slug: "ml/foundations/pearl-pris/chapter07-taxonomy"
 date: 2026-05-16T07:00:00
 description: "Singly·multiply connected·complexity 분류학."
 series: "Probabilistic Reasoning in Intelligent Systems"

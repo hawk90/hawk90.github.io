@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3: The Clojure Way — Identity와 State 분리"
+slug: "parallel/seven-concurrency-models/ch03-the-clojure-way"
 date: 2026-05-06T03:00:00
 description: "Clojure의 atom / ref (STM) / agent — identity와 value의 명시적 분리. 합성 가능한 동시성."
 series: "Seven Concurrency Models in Seven Weeks"

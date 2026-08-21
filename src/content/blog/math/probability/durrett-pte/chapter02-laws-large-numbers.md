@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Laws of Large Numbers"
+slug: "math/probability/durrett-pte/chapter02-laws-large-numbers"
 date: 2026-05-16T02:00:00
 description: "Weak·Strong LLN — i.i.d. 평균의 수렴."
 series: "Probability: Theory and Examples"

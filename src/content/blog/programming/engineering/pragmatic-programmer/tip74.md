@@ -1,5 +1,6 @@
 ---
 title: "Tip 74: No One Knows Exactly What They Want"
+slug: "programming/engineering/pragmatic-programmer/tip74"
 date: 2026-05-12T02:00:00
 description: "아무도 정확히 원하는 것을 모른다. 요구사항은 발견되는 것이지 수집되는 것이 아니다."
 series: "The Pragmatic Programmer"

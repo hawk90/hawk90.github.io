@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3.4: Dash and Hyphen"
+slug: "writing/only-grammar-book/ch03-4-dash-hyphen"
 date: 2026-05-14T03:40:00
 description: "대시와 하이픈 — em dash, en dash, hyphen의 세 가지 가로선과 각각의 용도."
 series: "The Only Grammar Book You'll Ever Need"

@@ -1,5 +1,6 @@
 ---
 title: "Part 6-05: Story Mapping — Jeff Patton 기법"
+slug: "programming/engineering/agile-lean-engineering/part6-05-story-mapping-patton"
 date: 2026-05-23T12:00:00
 description: "backbone + walking skeleton — story map 그리는 단계."
 series: "Agile & Lean Software Engineering"

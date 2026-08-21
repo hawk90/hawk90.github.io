@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: UALink 스위치 아키텍처"
+slug: "embedded/hardware/ualink/chapter06-switch"
 date: 2026-05-19T06:00:00
 description: "Radix·routing·QoS — UALink switch silicon."
 series: "UALink 심화"

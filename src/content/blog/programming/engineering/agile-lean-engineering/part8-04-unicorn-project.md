@@ -1,5 +1,6 @@
 ---
 title: "Part 8-04: The Unicorn Project 줄거리 + 교훈"
+slug: "programming/engineering/agile-lean-engineering/part8-04-unicorn-project"
 date: 2026-05-20T10:00:00
 description: "Maxine의 시점 — developer 관점에서 본 같은 회사."
 series: "Agile & Lean Software Engineering"

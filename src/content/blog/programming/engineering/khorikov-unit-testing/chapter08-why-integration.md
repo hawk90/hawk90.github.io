@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Why Integration Testing?"
+slug: "programming/engineering/khorikov-unit-testing/chapter08-why-integration"
 date: 2026-05-10T08:00:00
 description: "통합 테스트의 역할과 테스트 피라미드. Managed 의존은 실제 사용하고 Unmanaged는 Mock한다."
 tags: [Testing, Integration]

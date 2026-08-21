@@ -1,5 +1,6 @@
 ---
 title: "Pattern 3: Test List"
+slug: "programming/engineering/tdd-patterns/pattern03-test-list"
 date: 2026-05-10T03:00:00
 description: "코드 작성 전에 — 어떤 테스트를 쓸지 목록부터. 작업 메모리의 외부화."
 series: "TDD by Example — Patterns Deep Dive"

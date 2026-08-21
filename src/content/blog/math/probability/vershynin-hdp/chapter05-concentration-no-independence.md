@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Concentration without Independence"
+slug: "math/probability/vershynin-hdp/chapter05-concentration-no-independence"
 date: 2026-05-16T05:00:00
 description: "Talagrand·log-Sobolev·entropy method — independence 없이 concentration."
 series: "High-Dimensional Probability"

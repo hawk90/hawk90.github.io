@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Normal Mode"
+slug: "tools/practical-vim/chapter02-normal-mode"
 date: 2026-05-17T02:00:00
 description: "노멀 모드 — 기본 시작점. 연산자 + 동작 결합. count prefix."
 tags: [Vim, normal-mode]

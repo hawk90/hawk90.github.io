@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 물리 계층 — 802.3 이더넷 PHY 기반"
+slug: "embedded/hardware/ualink/chapter03-physical-layer"
 date: 2026-05-19T03:00:00
 description: "200G PAM4 PHY를 그대로 사용 — 이미 검증된 SerDes."
 series: "UALink 심화"

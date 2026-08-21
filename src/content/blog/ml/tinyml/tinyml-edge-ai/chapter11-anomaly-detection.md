@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 이상 탐지 패턴"
+slug: "ml/tinyml/tinyml-edge-ai/chapter11-anomaly-detection"
 date: 2026-05-16T11:00:00
 description: "Autoencoder·OC-SVM — 정상에서 벗어남을 잡는다."
 series: "TinyML·Edge AI"

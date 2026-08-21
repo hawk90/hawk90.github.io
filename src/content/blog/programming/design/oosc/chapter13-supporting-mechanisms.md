@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Supporting Mechanisms"
+slug: "programming/design/oosc/chapter13-supporting-mechanisms"
 date: 2026-05-19T13:00:00
 description: "지원 메커니즘 — 외부 루틴, 인라인, 디버깅, 문서화."
 series: "Object-Oriented Software Construction"

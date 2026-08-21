@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: nRF Connect SDK 실습 — Zephyr + SoftDevice 후속"
+slug: "embedded/wireless/getting-started-with-ble/chapter11-nrf-connect-sdk"
 date: 2026-05-08T11:00:00
 description: "Nordic의 nRF52/nRF53. Zephyr RTOS 기반 nRF Connect SDK로 BLE 펌웨어."
 series: "Getting Started with BLE"

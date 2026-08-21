@@ -1,5 +1,6 @@
 ---
 title: "Part 9-01: Accelerate 책 요약"
+slug: "programming/engineering/agile-lean-engineering/part9-01-accelerate-book-summary"
 date: 2026-05-20T12:00:00
 description: "Forsgren·Humble·Kim의 research — 6년 데이터의 결론."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Index and Navigate Source Code with ctags"
+slug: "tools/practical-vim/chapter17-index-with-ctags"
 date: 2026-05-17T16:00:00
 description: "ctags / Universal Ctags. Ctrl+] / Ctrl+t. tagstack."
 tags: [Vim, ctags, code-navigation]

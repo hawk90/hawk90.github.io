@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Firmware와 Format"
+slug: "embedded/hardware/nvme/chapter16-firmware"
 date: 2026-05-16T17:00:00
 description: "NVMe Firmware 업데이트, Format NVM, Secure Erase 절차를 분석한다"
 series: "NVMe Deep Dive"

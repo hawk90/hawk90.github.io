@@ -1,5 +1,6 @@
 ---
 title: "UML 13: 인스턴스 — 특정 시점의 객체, 밑줄과 콜론 표기"
+slug: "programming/design/uml/item13-instances"
 date: 2026-05-03T13:00:00
 description: "클래스가 아니라 객체. 밑줄·콜론 두 기호로 표현하는 인스턴스의 모든 것."
 tags: [UML, Object, Instance, Snapshot]

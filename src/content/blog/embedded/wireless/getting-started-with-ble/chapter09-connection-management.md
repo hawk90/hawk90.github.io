@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Connection 관리 — Interval·Latency·Supervision Timeout"
+slug: "embedded/wireless/getting-started-with-ble/chapter09-connection-management"
 date: 2026-05-08T09:00:00
 description: "3가지 connection parameter가 처리량과 배터리를 결정한다."
 series: "Getting Started with BLE"

@@ -1,5 +1,6 @@
 ---
 title: "항목 25: 예외를 던지지 않는 swap 지원을 고려하라"
+slug: "programming/cpp/effective-cpp/item25-consider-support-for-a-non-throwing-swap"
 date: 2026-05-04T01:00:00
 description: "사용자 정의 swap의 효율과 ADL 패턴 — 멤버 swap, 같은 네임스페이스 비-멤버 swap, std::swap 특수화."
 tags: [cpp, effective-c++, exception-safety, swap]

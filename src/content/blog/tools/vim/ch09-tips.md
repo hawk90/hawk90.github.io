@@ -1,5 +1,6 @@
 ---
 title: "Vim 마스터하기: 실전 팁"
+slug: "tools/vim/ch09-tips"
 date: 2026-05-17T09:00:00
 description: "생산성을 높이는 워크플로우와 팁"
 series: "Vim 마스터하기"

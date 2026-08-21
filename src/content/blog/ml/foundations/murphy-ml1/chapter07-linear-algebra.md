@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Linear Algebra"
+slug: "ml/foundations/murphy-ml1/chapter07-linear-algebra"
 date: 2026-05-16T07:00:00
 description: "Vector·matrix·decomposition — ML-friendly 선형대수."
 series: "Probabilistic Machine Learning: An Introduction"

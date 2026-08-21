@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Processes"
+slug: "parallel/distributed-systems-tanenbaum/chapter03-processes"
 date: 2025-05-20T03:00:00
 description: "스레드, 가상화, 클라이언트-서버 조직, 코드 마이그레이션"
 series: "Distributed Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Search Algorithms for Discrete Optimization Problems"
+slug: "parallel/intro-to-parallel-computing/chapter11-search"
 date: 2026-05-21T11:00:00
 description: "이산 최적화 탐색 — 분기 한정, 병렬 DFS, IDA*, 게임 트리"
 series: "Introduction to Parallel Computing"

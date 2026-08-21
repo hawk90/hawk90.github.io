@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Monsters and Mixtures"
+slug: "math/probability/mcelreath-rethinking/chapter12-monsters-mixtures"
 date: 2026-05-16T12:00:00
 description: "Over-dispersed·zero-inflated·ordered categorical."
 series: "Statistical Rethinking"

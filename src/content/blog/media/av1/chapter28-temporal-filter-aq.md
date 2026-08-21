@@ -1,5 +1,6 @@
 ---
 title: "Ch 28: Temporal Filtering과 Adaptive QP"
+slug: "media/av1/chapter28-temporal-filter-aq"
 date: 2026-05-16T05:00:00
 description: "AV1 인코더의 화질 최적화 — RDO, Temporal Filtering, Variance AQ, Delta Q, ROI."
 tags: [AV1, Video, Codec, Encoder, RDO, temporal-filter, AQ]

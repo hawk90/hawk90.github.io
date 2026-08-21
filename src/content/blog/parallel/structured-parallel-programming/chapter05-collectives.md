@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Collectives"
+slug: "parallel/structured-parallel-programming/chapter05-collectives"
 date: 2026-05-22T00:00:00
 description: "Collectives 패턴 — Reduce, Scan (Prefix Sum), 병렬 합계"
 series: "Structured Parallel Programming"

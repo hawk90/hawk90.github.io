@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Changelog 자동 생성"
+slug: "programming/git/git-conventions/chapter09-changelog-automation"
 date: 2026-05-17T09:00:00
 description: "conventional-changelog / git-cliff / release-please. Conventional Commits → CHANGELOG.md / 릴리스."
 tags: [Git, Changelog, Release]

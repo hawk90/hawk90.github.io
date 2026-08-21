@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: microvm Machine"
+slug: "tools/emulation/qemu-internals/chapter20-microvm"
 date: 2026-05-17T20:00:00
 description: "virtio-mmio·minimal boot·serverless VM."
 tags: [QEMU, microvm, serverless, firecracker, fast-boot]

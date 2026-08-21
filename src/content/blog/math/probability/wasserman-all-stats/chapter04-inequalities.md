@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Inequalities"
+slug: "math/probability/wasserman-all-stats/chapter04-inequalities"
 date: 2026-05-16T04:00:00
 description: "Markov·Chebyshev·Hoeffding·Jensen — 확률의 무기."
 series: "All of Statistics"

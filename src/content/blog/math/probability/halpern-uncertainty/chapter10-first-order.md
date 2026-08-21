@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: First-Order Modal Logic of Probability"
+slug: "math/probability/halpern-uncertainty/chapter10-first-order"
 date: 2026-05-16T10:00:00
 description: "Quantifier + probability — 전제·conditional의 정형 표현."
 series: "Reasoning About Uncertainty"

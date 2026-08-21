@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Dense Matrix Algorithms"
+slug: "parallel/intro-to-parallel-computing/chapter08-dense-matrix"
 date: 2026-05-21T08:00:00
 description: "밀집 행렬 병렬 알고리즘 — 행렬-벡터 곱, 행렬 곱셈, LU 분해"
 series: "Introduction to Parallel Computing"

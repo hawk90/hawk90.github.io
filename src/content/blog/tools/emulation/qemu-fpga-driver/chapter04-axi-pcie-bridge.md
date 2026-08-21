@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: AXI ↔ PCIe Bridge 모방"
+slug: "tools/emulation/qemu-fpga-driver/chapter04-axi-pcie-bridge"
 date: 2026-05-17T04:00:00
 description: "Register map·DMA engine emulation — FPGA shell의 핵심 부분."
 tags: [QEMU, axi, pcie-bridge, dma-engine]

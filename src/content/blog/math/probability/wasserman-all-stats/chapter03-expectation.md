@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Expectation"
+slug: "math/probability/wasserman-all-stats/chapter03-expectation"
 date: 2026-05-16T03:00:00
 description: "Mean·variance·covariance·conditional expectation."
 series: "All of Statistics"

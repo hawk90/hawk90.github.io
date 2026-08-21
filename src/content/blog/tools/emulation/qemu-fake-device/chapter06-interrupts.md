@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 인터럽트 (MSI/MSI-X) 구현"
+slug: "tools/emulation/qemu-fake-device/chapter06-interrupts"
 date: 2026-05-17T06:00:00
 description: "PCI 디바이스에서 MSI/MSI-X 인터럽트를 구현한다."
 tags: [QEMU, MSI, Interrupt, MSI-X, irqfd]

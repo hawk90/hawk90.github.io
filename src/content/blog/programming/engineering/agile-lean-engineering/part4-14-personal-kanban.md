@@ -1,5 +1,6 @@
 ---
 title: "Part 4-14: Personal Kanban"
+slug: "programming/engineering/agile-lean-engineering/part4-14-personal-kanban"
 date: 2026-05-22T18:00:00
 description: "개인 work 관리 — Benson·Barry의 Personal Kanban."
 series: "Agile & Lean Software Engineering"

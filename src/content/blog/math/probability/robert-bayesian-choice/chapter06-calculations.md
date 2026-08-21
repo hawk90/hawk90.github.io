@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Bayesian Calculations"
+slug: "math/probability/robert-bayesian-choice/chapter06-calculations"
 date: 2026-05-15T06:00:00
 description: "Analytic·Laplace·MCMC — posterior 계산 방법론."
 series: "The Bayesian Choice"

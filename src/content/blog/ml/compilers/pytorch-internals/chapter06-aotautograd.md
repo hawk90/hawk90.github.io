@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: AOTAutograd"
+slug: "ml/compilers/pytorch-internals/chapter06-aotautograd"
 date: 2026-05-16T06:00:00
 description: "Forward + backward graph를 미리 만든다."
 series: "PyTorch Internals"

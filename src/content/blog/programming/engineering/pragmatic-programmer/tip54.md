@@ -1,5 +1,6 @@
 ---
 title: "Tip 54: Parameterize Your App Using External Configuration"
+slug: "programming/engineering/pragmatic-programmer/tip54"
 date: 2026-05-11T06:00:00
 description: "외부 설정으로 앱을 파라미터화하라. 코드를 바꾸지 않고 동작을 조정한다."
 series: "The Pragmatic Programmer"

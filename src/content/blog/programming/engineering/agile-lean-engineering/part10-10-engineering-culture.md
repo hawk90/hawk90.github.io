@@ -1,5 +1,6 @@
 ---
 title: "Part 10-10: Engineering Culture 만들기 — Netflix·Pixar·Spotify 사례"
+slug: "programming/engineering/agile-lean-engineering/part10-10-engineering-culture"
 date: 2026-05-20T13:00:00
 description: "Hastings No Rules·Patty McCord·Spotify guild — 문화 사례 비교."
 series: "Agile & Lean Software Engineering"

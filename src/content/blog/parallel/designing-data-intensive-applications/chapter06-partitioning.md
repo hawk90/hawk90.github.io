@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 파티셔닝"
+slug: "parallel/designing-data-intensive-applications/chapter06-partitioning"
 date: 2026-05-12T06:00:00
 description: "데이터를 노드들에 어떻게 나눌 것인가 — Key range, Hash, Hotspot 처리, Secondary index, Rebalancing."
 tags: [DDIA, Partitioning, Sharding, consistent-hashing]

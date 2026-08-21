@@ -1,5 +1,6 @@
 ---
 title: "Ch 26: A Sense of Style"
+slug: "programming/design/oosc/chapter26-a-sense-of-style"
 date: 2026-05-19T02:00:00
 description: "스타일 감각 — 명명 규칙, 레이아웃, 주석, 헤더."
 series: "Object-Oriented Software Construction"

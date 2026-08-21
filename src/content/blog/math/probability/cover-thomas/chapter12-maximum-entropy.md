@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Maximum Entropy"
+slug: "math/probability/cover-thomas/chapter12-maximum-entropy"
 date: 2026-05-16T12:00:00
 description: "제약 하에서 가장 'unbiased' 분포 — exponential family의 자연 출생지."
 series: "Elements of Information Theory"

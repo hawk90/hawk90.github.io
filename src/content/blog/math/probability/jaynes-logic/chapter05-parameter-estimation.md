@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Elementary Parameter Estimation"
+slug: "math/probability/jaynes-logic/chapter05-parameter-estimation"
 date: 2026-05-16T05:00:00
 description: "Posterior over parameter — Bayesian estimation의 정수."
 series: "Probability Theory: The Logic of Science"

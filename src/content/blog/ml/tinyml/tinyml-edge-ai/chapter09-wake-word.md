@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: 웨이크워드·키워드 검출"
+slug: "ml/tinyml/tinyml-edge-ai/chapter09-wake-word"
 date: 2026-05-16T09:00:00
 description: "Hey Siri·OK Google — always-on keyword spotting."
 series: "TinyML·Edge AI"

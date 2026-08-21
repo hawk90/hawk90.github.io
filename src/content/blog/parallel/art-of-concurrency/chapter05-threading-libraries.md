@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Threading Libraries"
+slug: "parallel/art-of-concurrency/chapter05-threading-libraries"
 date: 2025-05-20T05:00:00
 description: "스레딩 라이브러리 개요 — 공통 개념과 추상화"
 series: "The Art of Concurrency"

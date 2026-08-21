@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 그래프 최적화 — 연산자 융합·상수 폴딩"
+slug: "ml/compilers/ml-compilers-intro/chapter04-graph-opt"
 date: 2026-05-16T04:00:00
 description: "Graph-level pass — fusion·folding·layout 변환."
 series: "ML 컴파일러"

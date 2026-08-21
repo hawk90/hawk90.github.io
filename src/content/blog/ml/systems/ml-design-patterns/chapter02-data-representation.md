@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: 데이터 표현 패턴"
+slug: "ml/systems/ml-design-patterns/chapter02-data-representation"
 date: 2026-05-16T02:00:00
 description: "Hashed feature·embedding·feature cross — raw data를 ML 친화적으로."
 series: "ML 디자인 패턴"

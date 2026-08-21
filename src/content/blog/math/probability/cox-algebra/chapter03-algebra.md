@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: The Algebra of Probable Inference"
+slug: "math/probability/cox-algebra/chapter03-algebra"
 date: 2026-05-15T03:00:00
 description: "Boolean algebra·proposition·plausibility의 대수 구조."
 series: "The Algebra of Probable Inference"

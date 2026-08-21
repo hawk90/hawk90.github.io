@@ -1,5 +1,6 @@
 ---
 title: "Pattern 13: Encapsulate Collection"
+slug: "programming/design/refactoring-catalog/pattern13-encapsulate-collection"
 date: 2026-05-02T13:00:00
 description: "Collection을 method 뒤로 — 변경 통로를 단일화한다."
 series: "Refactoring Catalog (Fowler 2nd ed)"

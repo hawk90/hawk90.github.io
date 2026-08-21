@@ -1,5 +1,6 @@
 ---
 title: "항목 4: 자명한 getter와 setter는 피하라"
+slug: "programming/cpp/beautiful-cpp/item04-avoid-trivial-getters-setters"
 date: 2026-05-05T04:00:00
 description: "자명한 접근자는 캡슐화의 환상 — 진짜 불변식을 보호하는 인터페이스를 설계하라."
 tags: [cpp, Encapsulation, class-design]

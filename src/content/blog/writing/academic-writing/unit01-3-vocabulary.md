@@ -1,5 +1,6 @@
 ---
 title: "Unit 1.3: Vocabulary Shift — Verb / Noun / Nominalization"
+slug: "writing/academic-writing/unit01-3-vocabulary"
 date: 2026-05-14T03:00:00
 description: "학술 영어 어휘의 두 축 — phrasal verb를 단일 라틴 동사로, 동사 표현을 명사구로 (nominalization)."
 series: "Academic Writing for Graduate Students"

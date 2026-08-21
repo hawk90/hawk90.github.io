@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: OOP and Encapsulation"
+slug: "programming/cpp/extreme-c/chapter06-oop-and-encapsulation"
 date: 2026-05-05T06:00:00
 description: "C에서 OO — 캡슐화. opaque pointer, 모듈 / 헤더로 정보 은닉."
 tags: [C, OOP, Encapsulation]

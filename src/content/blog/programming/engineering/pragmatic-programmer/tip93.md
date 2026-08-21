@@ -1,5 +1,6 @@
 ---
 title: "Tip 93: Find Bugs Once"
+slug: "programming/engineering/pragmatic-programmer/tip93"
 date: 2026-05-12T21:00:00
 description: "버그는 한 번만 찾는다. 같은 버그가 다시 발생하면 테스트를 추가해서 영원히 잡는다."
 series: "The Pragmatic Programmer"

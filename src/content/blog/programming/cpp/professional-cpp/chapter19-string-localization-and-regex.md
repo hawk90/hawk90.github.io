@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: String Localization and Regular Expressions"
+slug: "programming/cpp/professional-cpp/chapter19-string-localization-and-regex"
 date: 2026-05-05T19:00:00
 description: "wchar / char8_t / char16_t / char32_t. std::locale. std::regex."
 tags: [cpp, Localization, Regex, Unicode]

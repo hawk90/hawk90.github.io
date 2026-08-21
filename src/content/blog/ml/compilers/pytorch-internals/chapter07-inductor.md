@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: TorchInductor — Triton·C++ Codegen"
+slug: "ml/compilers/pytorch-internals/chapter07-inductor"
 date: 2026-05-16T07:00:00
 description: "FX graph → Triton kernel·C++ — PyTorch의 backend compiler."
 series: "PyTorch Internals"

@@ -1,5 +1,6 @@
 ---
 title: "Tip 57: Random Failures Are Often Concurrency Issues"
+slug: "programming/engineering/pragmatic-programmer/tip57"
 date: 2026-05-11T09:00:00
 description: "무작위 실패는 종종 동시성 문제다. 재현이 어려운 버그는 타이밍을 의심한다."
 series: "The Pragmatic Programmer"

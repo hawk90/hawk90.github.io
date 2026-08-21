@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Essential Operations"
+slug: "programming/cpp/a-tour-of-cpp/chapter06-essential-operations"
 date: 2026-05-22T06:00:00
 description: "필수 연산 — 복사, 이동, RAII, Rule of Five"
 series: "A Tour of C++"

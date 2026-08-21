@@ -1,5 +1,6 @@
 ---
 title: "Part 12-04: Nexus"
+slug: "programming/engineering/agile-lean-engineering/part12-04-nexus-framework"
 date: 2026-05-20T15:00:00
 description: "Schwaber의 Nexus — Nexus Integration Team의 자리."
 series: "Agile & Lean Software Engineering"

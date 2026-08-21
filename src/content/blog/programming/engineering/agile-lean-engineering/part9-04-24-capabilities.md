@@ -1,5 +1,6 @@
 ---
 title: "Part 9-04: 24 Capabilities Driving Performance"
+slug: "programming/engineering/agile-lean-engineering/part9-04-24-capabilities"
 date: 2026-05-20T12:00:00
 description: "Accelerate appendix의 24가지 capability — 측정 가능한 driver."
 series: "Agile & Lean Software Engineering"

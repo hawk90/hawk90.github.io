@@ -1,5 +1,6 @@
 ---
 title: "항목 15: 자원 관리 클래스에서 원시 자원에 대한 접근을 제공하라"
+slug: "programming/cpp/effective-cpp/item15-provide-access-to-raw-resources-in-resource-managing-classes"
 date: 2026-05-04T15:00:00
 description: "RAII 객체에서 raw pointer/handle을 꺼내는 두 방식 — 명시적 .get()과 암묵 변환 연산자의 트레이드오프."
 tags: [cpp, effective-c++, RAII, api-design]

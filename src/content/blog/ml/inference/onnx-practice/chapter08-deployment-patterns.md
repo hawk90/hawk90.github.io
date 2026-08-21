@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: 배포 패턴"
+slug: "ml/inference/onnx-practice/chapter08-deployment-patterns"
 date: 2026-05-16T08:00:00
 description: "Server·edge·mobile — ONNX 배포 환경별 best practice."
 series: "ONNX 실전"

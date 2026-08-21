@@ -1,5 +1,6 @@
 ---
 title: "Ch 36: An Object-Oriented Environment"
+slug: "programming/design/oosc/chapter36-an-object-oriented-environment"
 date: 2026-05-19T12:00:00
 description: "객체지향 환경 — 통합 개발 환경, 라이브러리, 도구."
 series: "Object-Oriented Software Construction"

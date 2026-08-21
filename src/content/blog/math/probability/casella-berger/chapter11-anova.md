@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Analysis of Variance and Regression"
+slug: "math/probability/casella-berger/chapter11-anova"
 date: 2026-05-16T11:00:00
 description: "One-way·two-way ANOVA·simple linear regression."
 series: "Statistical Inference"

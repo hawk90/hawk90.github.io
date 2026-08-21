@@ -1,5 +1,6 @@
 ---
 title: "DSA 29: Trie / Patricia"
+slug: "programming/algorithms/data-structures-and-algorithms/item29-trie-patricia"
 date: 2026-05-15T05:00:00
 description: "문자열을 문자 단위로 트리에 — 접두사 검색·자동 완성의 표준."
 tags: [data-structure, Algorithm, Trie, String]

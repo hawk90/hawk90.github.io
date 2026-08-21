@@ -1,5 +1,6 @@
 ---
 title: "Pattern 4: Test First"
+slug: "programming/engineering/tdd-patterns/pattern04-test-first"
 date: 2026-05-10T04:00:00
 description: "프로덕션 코드를 작성하기 직전에 테스트를 먼저 — TDD의 정의."
 series: "TDD by Example — Patterns Deep Dive"

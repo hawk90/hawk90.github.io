@@ -1,5 +1,6 @@
 ---
 title: "Tip 75: Programmers Help People Understand What They Want"
+slug: "programming/engineering/pragmatic-programmer/tip75"
 date: 2026-05-12T03:00:00
 description: "프로그래머는 사람들이 원하는 것을 이해하도록 돕는다. 질문하고, 보여주고, 탐험한다."
 series: "The Pragmatic Programmer"

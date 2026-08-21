@@ -1,5 +1,6 @@
 ---
 title: "Chapter 32: Self-Documenting Code"
+slug: "programming/engineering/code-complete/ch32-Self-Documenting-Code"
 date: 2026-05-11T08:00:00
 description: "자기 문서화 코드 — 좋은 이름·구조가 가장 좋은 문서. 주석은 보충."
 series: "Code Complete"

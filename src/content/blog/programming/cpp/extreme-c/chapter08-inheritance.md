@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Inheritance"
+slug: "programming/cpp/extreme-c/chapter08-inheritance"
 date: 2026-05-05T08:00:00
 description: "C로 상속 — struct 내부에 base 임베드. memory layout."
 tags: [C, OOP, Inheritance]

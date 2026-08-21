@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Mathematical Induction"
+slug: "math/probability/polya-vol1/chapter07-mathematical-induction"
 date: 2026-05-16T07:00:00
 description: "Strict 수학적 귀납법 — plausible과 demonstrative의 다리."
 series: "Mathematics and Plausible Reasoning, Vol I"

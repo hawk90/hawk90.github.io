@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Message Passing Algorithms"
+slug: "ml/foundations/murphy-ml2/chapter09-message-passing"
 date: 2026-05-16T09:00:00
 description: "BP·EP·loopy BP — graph 위의 추론 통합."
 series: "Probabilistic Machine Learning: Advanced Topics"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Classes"
+slug: "programming/standards/google-cpp/chapter04-classes"
 date: 2026-05-18T04:00:00
 description: "Constructors / Implicit Conversion / Copyable-Movable / Struct vs Class / Inheritance / Operator Overloading / Access / Declaration Order."
 tags: [Google, cpp, Style-Guide, Class, Inheritance]

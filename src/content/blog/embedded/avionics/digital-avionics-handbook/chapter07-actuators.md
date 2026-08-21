@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Actuators — TVC·RCS·서보"
+slug: "embedded/avionics/digital-avionics-handbook/chapter07-actuators"
 date: 2026-05-18T07:00:00
 description: "추진·자세 제어 액추에이터 — TVC gimbal·RCS thruster·전기 서보."
 series: "Digital Avionics Handbook"

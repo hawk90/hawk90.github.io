@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: 데이터 모델과 질의 언어"
+slug: "parallel/designing-data-intensive-applications/chapter02-data-models-and-query-languages"
 date: 2026-05-12T02:00:00
 description: "데이터를 어떻게 표현할 것인가 — Relational, Document, Graph. 각 모델의 강점과 한계."
 tags: [DDIA, DataModel, Relational, Document, Graph]

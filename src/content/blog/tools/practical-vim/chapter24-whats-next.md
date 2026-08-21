@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Now What?"
+slug: "tools/practical-vim/chapter24-whats-next"
 date: 2026-05-17T21:00:00
 description: "Vim 학습 지속 — 도움말 활용, 플러그인 관리, Neovim으로 진화."
 tags: [Vim, Learning]

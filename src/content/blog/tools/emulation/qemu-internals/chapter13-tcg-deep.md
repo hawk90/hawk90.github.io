@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: TCG 심화"
+slug: "tools/emulation/qemu-internals/chapter13-tcg-deep"
 date: 2026-05-17T13:00:00
 description: "Tiny Code Generator — block translation·IR·backend."
 tags: [QEMU, tcg, dynamic-translation, code-cache, mttcg]

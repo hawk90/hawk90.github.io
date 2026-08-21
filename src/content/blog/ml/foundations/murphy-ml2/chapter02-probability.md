@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Probability"
+slug: "ml/foundations/murphy-ml2/chapter02-probability"
 date: 2026-05-16T02:00:00
 description: "Advanced 확률 — exponential family·copula·exchangeable."
 series: "Probabilistic Machine Learning: Advanced Topics"

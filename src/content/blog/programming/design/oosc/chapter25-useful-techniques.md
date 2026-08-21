@@ -1,5 +1,6 @@
 ---
 title: "Ch 25: Useful Techniques"
+slug: "programming/design/oosc/chapter25-useful-techniques"
 date: 2026-05-19T01:00:00
 description: "유용한 기법들 — 참조 vs 값, 복제, 동등성 비교."
 series: "Object-Oriented Software Construction"

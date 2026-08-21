@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Naming Conventions"
+slug: "programming/standards/python-pep8/chapter02-naming"
 date: 2026-05-18T02:00:00
 description: "snake_case 함수/변수, PascalCase 클래스, UPPER_CASE 상수. _private, __mangled."
 tags: [Python, PEP8, Naming, Conventions, snake_case]

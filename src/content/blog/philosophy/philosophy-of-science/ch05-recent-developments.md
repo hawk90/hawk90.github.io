@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Recent Developments"
+slug: "philosophy/philosophy-of-science/ch05-recent-developments"
 date: 2026-05-15T05:00:00
 description: "최근 흐름 — 사회구성주의, 페미니즘 과학철학, 자연주의."
 series: "Understanding Philosophy of Science"

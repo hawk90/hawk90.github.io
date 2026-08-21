@@ -1,5 +1,6 @@
 ---
 title: "Chapter 6: Working Classes"
+slug: "programming/engineering/code-complete/ch06-Working-Classes"
 date: 2026-05-11T06:00:00
 description: "좋은 클래스 — ADT 기반, 좋은 인터페이스, 포함 vs 상속, 13 정당한 이유, Law of Demeter."
 series: "Code Complete"

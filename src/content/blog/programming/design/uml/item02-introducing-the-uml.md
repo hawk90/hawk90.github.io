@@ -1,5 +1,6 @@
 ---
 title: "UML 2: UML 소개 — 어휘·규칙·공통 메커니즘"
+slug: "programming/design/uml/item02-introducing-the-uml"
 date: 2026-05-03T02:00:00
 description: "UML은 세 덩어리로 구성된다 — building blocks, rules, common mechanisms. 이 셋만 잡으면 14개 다이어그램이 한 뿌리에서 보입니다."
 tags: [UML, Modeling, Notation, Fundamentals]

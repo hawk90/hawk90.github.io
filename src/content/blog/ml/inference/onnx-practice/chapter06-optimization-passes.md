@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 최적화 패스"
+slug: "ml/inference/onnx-practice/chapter06-optimization-passes"
 date: 2026-05-16T06:00:00
 description: "onnx·onnx-simplifier·onnxoptimizer — model을 줄이는 도구."
 series: "ONNX 실전"

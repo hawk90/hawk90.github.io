@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: The FreeRTOS Distribution"
+slug: "embedded/rtos/freertos-mastering/chapter01-distribution"
 date: 2026-05-09T01:00:00
 description: "FreeRTOS 소스 트리, 포팅 레이어, FreeRTOSConfig.h, MIT 라이선스, LTS — 시작 전에 알아둘 것."
 series: "Mastering the FreeRTOS Real Time Kernel"

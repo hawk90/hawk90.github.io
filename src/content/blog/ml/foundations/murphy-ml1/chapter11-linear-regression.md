@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Linear Regression"
+slug: "ml/foundations/murphy-ml1/chapter11-linear-regression"
 date: 2026-05-16T11:00:00
 description: "OLS·ridge·Bayesian linear regression — 가장 기본의 깊이."
 series: "Probabilistic Machine Learning: An Introduction"

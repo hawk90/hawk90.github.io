@@ -1,5 +1,6 @@
 ---
 title: "제2장: 주어와 서술어"
+slug: "writing/gojongseok-munjang/ch02-subject-predicate"
 date: 2026-05-14T02:00:00
 description: "문장의 핵심 구성 요소인 주어와 서술어의 관계"
 series: "고종석의 문장"

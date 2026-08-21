@@ -1,5 +1,6 @@
 ---
 title: "Tip 90: Coding Ain't Done 'Til All the Tests Run"
+slug: "programming/engineering/pragmatic-programmer/tip90"
 date: 2026-05-12T18:00:00
 description: "테스트가 모두 통과해야 코딩이 끝난 것이다. '일단 돌아가니까'는 완료가 아니다."
 series: "The Pragmatic Programmer"

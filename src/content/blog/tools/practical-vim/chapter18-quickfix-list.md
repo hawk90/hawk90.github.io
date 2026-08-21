@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Compile Code and Navigate Errors with Quickfix"
+slug: "tools/practical-vim/chapter18-quickfix-list"
 date: 2026-05-17T17:00:00
 description: ":make / quickfix list — 빌드 에러 / 검색 결과 일괄 탐색."
 tags: [Vim, Quickfix, Build]

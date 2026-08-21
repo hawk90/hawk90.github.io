@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Pipeline"
+slug: "parallel/structured-parallel-programming/chapter09-pipeline"
 date: 2026-05-22T04:00:00
 description: "Pipeline 패턴 — 스테이지 병렬, 스트리밍, 지연 숨기기"
 series: "Structured Parallel Programming"

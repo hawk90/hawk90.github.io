@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Inductive Research in Number Theory"
+slug: "math/probability/polya-vol2/chapter07-number-theory-research"
 date: 2026-05-16T07:00:00
 description: "수론 연구의 inductive 사례 — Gauss·Riemann."
 series: "Mathematics and Plausible Reasoning, Vol II"

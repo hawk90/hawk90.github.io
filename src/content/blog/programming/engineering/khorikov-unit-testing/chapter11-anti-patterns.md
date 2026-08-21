@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Unit Testing Anti-Patterns"
+slug: "programming/engineering/khorikov-unit-testing/chapter11-anti-patterns"
 date: 2026-05-10T11:00:00
 description: "Private 메서드 테스트, 시간 누수, 코드 오염, 구체 클래스 Mock 등 흔한 안티패턴과 해결책."
 tags: [TDD, Anti-Patterns]

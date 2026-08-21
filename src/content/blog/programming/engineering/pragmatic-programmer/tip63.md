@@ -1,5 +1,6 @@
 ---
 title: "Tip 63: Test Your Estimates"
+slug: "programming/engineering/pragmatic-programmer/tip63"
 date: 2026-05-11T15:00:00
 description: "추정을 테스트하라. 이론적 복잡도와 실제 성능을 비교해서 검증한다."
 series: "The Pragmatic Programmer"

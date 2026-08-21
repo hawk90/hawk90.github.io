@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Linear and Generalized Linear Mixed Effects Models"
+slug: "math/probability/hoff-bayesian/chapter11-mixed-effects"
 date: 2026-05-15T11:00:00
 description: "LMM·GLMM·latent ordinal — applied Bayesian의 마무리."
 series: "A First Course in Bayesian Statistical Methods"

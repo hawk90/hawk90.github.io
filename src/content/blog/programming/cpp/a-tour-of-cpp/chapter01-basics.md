@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: The Basics"
+slug: "programming/cpp/a-tour-of-cpp/chapter01-basics"
 date: 2026-05-22T01:00:00
 description: "C++ 기초 — 타입, 변수, 연산자, 제어문, 함수"
 series: "A Tour of C++"

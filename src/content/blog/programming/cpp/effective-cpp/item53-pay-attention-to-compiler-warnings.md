@@ -1,5 +1,6 @@
 ---
 title: "항목 53: 컴파일러 경고를 진지하게 받아들여라"
+slug: "programming/cpp/effective-cpp/item53-pay-attention-to-compiler-warnings"
 date: 2026-05-04T05:00:00
 description: "경고는 잠재 버그의 가장 저렴한 신호 — 권장 옵션, CI에서 -Werror, sanitizer 결합."
 tags: [cpp, effective-c++, Warnings]

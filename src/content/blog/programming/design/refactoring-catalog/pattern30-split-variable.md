@@ -1,5 +1,6 @@
 ---
 title: "Pattern 30: Split Variable"
+slug: "programming/design/refactoring-catalog/pattern30-split-variable"
 date: 2026-05-02T06:00:00
 description: "한 변수가 두 의미로 쓰이면 둘로 나눈다 — 한 변수 한 책임."
 series: "Refactoring Catalog (Fowler 2nd ed)"

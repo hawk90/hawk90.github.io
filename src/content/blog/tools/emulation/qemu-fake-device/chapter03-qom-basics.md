@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: QEMU 디바이스 모델 기초 — QOM"
+slug: "tools/emulation/qemu-fake-device/chapter03-qom-basics"
 date: 2026-05-17T03:00:00
 description: "QEMU Object Model (QOM) 타입 시스템과 디바이스 모델 프레임워크."
 tags: [QEMU, QOM, DeviceModel, TypeInfo, realize]

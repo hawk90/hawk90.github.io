@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Data Acquisition: Weather Monitoring Station"
+slug: "programming/design/ooad/chapter11-weather-monitoring-station"
 date: 2026-05-19T11:00:00
 description: "케이스 스터디 — 기상 모니터링 스테이션 데이터 수집."
 series: "Object-Oriented Analysis and Design with Applications"

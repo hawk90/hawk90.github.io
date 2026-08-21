@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Scoping"
+slug: "programming/standards/google-cpp/chapter03-scoping"
 date: 2026-05-18T03:00:00
 description: "Namespaces / Internal Linkage / Nonmember-Static / Local Variables / Static-Global / thread_local."
 tags: [Google, cpp, Style-Guide, Scoping, Namespace]

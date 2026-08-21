@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: SW Configuration Management"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter04-configuration-management"
 date: 2026-05-18T05:00:00
 description: "ECSS-Q-ST-80C §5.5 — SCM Plan, identification, baseline, change control, status accounting, audits."
 tags: [ecss, scm, configuration-management, baseline, ccb, change-control, audit]

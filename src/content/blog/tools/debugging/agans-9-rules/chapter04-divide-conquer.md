@@ -1,5 +1,6 @@
 ---
 title: "Rule 4: Divide and Conquer"
+slug: "tools/debugging/agans-9-rules/chapter04-divide-conquer"
 date: 2026-05-17T04:00:00
 description: "Binary search로 buggy 영역을 좁힌다."
 series: "Debugging: The 9 Indispensable Rules"

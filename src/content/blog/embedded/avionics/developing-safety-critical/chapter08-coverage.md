@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Coverage — Statement·Decision·MC/DC"
+slug: "embedded/avionics/developing-safety-critical/chapter08-coverage"
 date: 2026-05-18T08:00:00
 description: "DAL별 structural coverage 요구 — statement·decision·MC/DC의 정의와 도구."
 series: "Developing Safety-Critical Software"

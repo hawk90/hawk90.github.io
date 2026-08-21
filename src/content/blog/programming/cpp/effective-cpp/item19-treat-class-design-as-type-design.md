@@ -1,5 +1,6 @@
 ---
 title: "항목 19: 클래스 설계는 타입 설계로 다루라"
+slug: "programming/cpp/effective-cpp/item19-treat-class-design-as-type-design"
 date: 2026-05-04T19:00:00
 description: "새 클래스 = 새 타입. 생성·소멸·복사·연산자·변환·상속까지 점검해야 할 12가지 질문."
 tags: [cpp, effective-c++, api-design]

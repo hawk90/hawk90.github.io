@@ -1,5 +1,6 @@
 ---
 title: "Rule 8: Get a Fresh View"
+slug: "tools/debugging/agans-9-rules/chapter08-fresh-view"
 date: 2026-05-17T08:00:00
 description: "다른 사람의 시선으로 — rubber duck부터 expert까지."
 series: "Debugging: The 9 Indispensable Rules"

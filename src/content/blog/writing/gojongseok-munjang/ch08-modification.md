@@ -1,5 +1,6 @@
 ---
 title: "제8장: 수식"
+slug: "writing/gojongseok-munjang/ch08-modification"
 date: 2026-05-14T08:00:00
 description: "수식어의 올바른 사용과 배치"
 series: "고종석의 문장"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Decision Analysis"
+slug: "math/probability/gelman-bda3/chapter09-decision-analysis"
 date: 2026-05-16T09:00:00
 description: "Utility·expected loss·VoI — Bayesian decision making."
 series: "Bayesian Data Analysis (3rd ed)"

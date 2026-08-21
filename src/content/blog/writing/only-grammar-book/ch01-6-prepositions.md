@@ -1,5 +1,6 @@
 ---
 title: "Chapter 1.6: Prepositions"
+slug: "writing/only-grammar-book/ch01-6-prepositions"
 date: 2026-05-14T02:00:00
 description: "전치사의 종류와 관용 — 시간·장소·방향 전치사, 흔한 함정, 전치사구."
 series: "The Only Grammar Book You'll Ever Need"

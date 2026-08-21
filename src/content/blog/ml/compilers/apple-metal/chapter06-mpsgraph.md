@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: MPSGraph — Graph-based ML"
+slug: "ml/compilers/apple-metal/chapter06-mpsgraph"
 date: 2026-05-16T06:00:00
 description: "Compute graph로 ML 워크로드 표현·실행."
 series: "Apple Metal Stack"

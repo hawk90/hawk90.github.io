@@ -1,5 +1,6 @@
 ---
 title: "Pattern 43: Singleton (avoid)"
+slug: "programming/engineering/tdd-patterns/pattern43-singleton"
 date: 2026-05-10T19:00:00
 description: "Beck도 추천하지 않는 패턴 — global state 회피, DI 우선."
 series: "TDD by Example — Patterns Deep Dive"

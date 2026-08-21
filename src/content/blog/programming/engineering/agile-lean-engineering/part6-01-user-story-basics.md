@@ -1,5 +1,6 @@
 ---
 title: "Part 6-01: User Story 기본 — As a / I want / So that"
+slug: "programming/engineering/agile-lean-engineering/part6-01-user-story-basics"
 date: 2026-05-23T08:00:00
 description: "User Story 템플릿의 기원과 적용."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Tip 81: Don't Go into the Code Alone"
+slug: "programming/engineering/pragmatic-programmer/tip81"
 date: 2026-05-12T09:00:00
 description: "혼자 코딩하지 마라. 짝 프로그래밍, 몹 프로그래밍, 코드 리뷰로 더 나은 코드를 만든다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: UALink vs NVLink 비교"
+slug: "embedded/hardware/ualink/chapter02-vs-nvlink"
 date: 2026-05-19T02:00:00
 description: "표준 vs proprietary·이더넷 PHY vs custom — 두 인터커넥트의 차이."
 series: "UALink 심화"

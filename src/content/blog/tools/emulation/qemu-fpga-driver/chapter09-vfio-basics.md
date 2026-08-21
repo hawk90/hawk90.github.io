@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: VFIO 기초"
+slug: "tools/emulation/qemu-fpga-driver/chapter09-vfio-basics"
 date: 2026-05-17T09:00:00
 description: "Userspace driver framework·IOMMU group — VFIO 첫 걸음."
 tags: [QEMU, vfio, iommu-group, userspace-driver]

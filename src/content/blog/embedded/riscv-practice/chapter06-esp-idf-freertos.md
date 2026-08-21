@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: ESP-IDF + FreeRTOS"
+slug: "embedded/riscv-practice/chapter06-esp-idf-freertos"
 date: 2026-05-17T12:00:00
 description: "ESP-IDF — 빌드 시스템, FreeRTOS 태스크, Wi-Fi 기초를 다룬다."
 series: "RISC-V 임베디드 실습"

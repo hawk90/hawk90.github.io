@@ -1,5 +1,6 @@
 ---
 title: "Tip 72: Apply Security Patches Quickly"
+slug: "programming/engineering/pragmatic-programmer/tip72"
 date: 2026-05-12T00:00:00
 description: "보안 패치를 빠르게 적용하라. 알려진 취약점은 빠르게 악용된다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Eight Simple Rules for Designing Multithreaded Applications"
+slug: "parallel/art-of-concurrency/chapter04-eight-rules"
 date: 2025-05-20T04:00:00
 description: "멀티스레드 설계 8가지 규칙 — 실용적인 동시성 설계 지침"
 series: "The Art of Concurrency"

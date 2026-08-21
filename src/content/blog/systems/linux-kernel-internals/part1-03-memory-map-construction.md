@@ -1,5 +1,6 @@
 ---
 title: "Part 1-3: 메모리 맵 구성"
+slug: "systems/linux-kernel-internals/part1-03-memory-map-construction"
 date: 2026-05-12T03:00:00
 description: "E820 / DTB → 물리 메모리 맵. memblock → buddy 전환."
 tags: [Linux, Kernel, memory-map, memblock]

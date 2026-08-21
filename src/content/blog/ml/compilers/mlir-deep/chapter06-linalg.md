@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: linalg dialect — 핵심 추상"
+slug: "ml/compilers/mlir-deep/chapter06-linalg"
 date: 2026-05-16T06:00:00
 description: "Structured op·named op·generic — linalg가 푸는 문제."
 series: "MLIR 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: JAX와 XLA 통합"
+slug: "ml/compilers/xla-deep/chapter11-jax-xla"
 date: 2026-05-16T11:00:00
 description: "jit·grad·vmap·pjit — JAX trace가 XLA에 들어가는 길."
 series: "XLA·OpenXLA 심화"

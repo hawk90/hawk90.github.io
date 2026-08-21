@@ -1,5 +1,6 @@
 ---
 title: "Chapter 3.3: Semicolon and Colon"
+slug: "writing/only-grammar-book/ch03-3-semicolon-colon"
 date: 2026-05-14T03:30:00
 description: "세미콜론과 콜론의 정확한 사용 — 독립절 연결, 접속 부사, 목록 도입, 부연·설명."
 series: "The Only Grammar Book You'll Ever Need"

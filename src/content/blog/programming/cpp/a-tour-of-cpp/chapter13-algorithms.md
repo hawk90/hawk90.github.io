@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Algorithms"
+slug: "programming/cpp/a-tour-of-cpp/chapter13-algorithms"
 date: 2026-05-22T13:00:00
 description: "알고리즘 — STL 알고리즘, 반복자, 람다"
 series: "A Tour of C++"

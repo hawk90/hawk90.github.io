@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Architectures"
+slug: "parallel/distributed-systems-tanenbaum/chapter02-architectures"
 date: 2025-05-20T02:00:00
 description: "분산 시스템 아키텍처 스타일 — 계층, P2P, 마이크로서비스, 자기 관리 시스템"
 series: "Distributed Systems"

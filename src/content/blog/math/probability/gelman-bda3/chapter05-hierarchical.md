@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Hierarchical Models"
+slug: "math/probability/gelman-bda3/chapter05-hierarchical"
 date: 2026-05-16T05:00:00
 description: "Partial pooling — Bayesian의 가장 강력한 도구."
 series: "Bayesian Data Analysis (3rd ed)"

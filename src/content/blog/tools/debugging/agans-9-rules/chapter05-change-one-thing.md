@@ -1,5 +1,6 @@
 ---
 title: "Rule 5: Change One Thing at a Time"
+slug: "tools/debugging/agans-9-rules/chapter05-change-one-thing"
 date: 2026-05-17T05:00:00
 description: "한 번에 한 변수만 — 인과를 끊지 않기."
 series: "Debugging: The 9 Indispensable Rules"

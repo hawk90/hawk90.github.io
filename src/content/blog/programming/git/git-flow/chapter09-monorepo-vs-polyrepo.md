@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Monorepo vs Polyrepo"
+slug: "programming/git/git-flow/chapter09-monorepo-vs-polyrepo"
 date: 2026-05-17T09:00:00
 description: "단일 저장소 vs 여러 저장소. 빌드 도구 / 의존성 / 협업 트레이드오프."
 tags: [Git, Monorepo, Polyrepo, Build]

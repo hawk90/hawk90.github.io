@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: SW Product Properties Assurance — 코드 quality metric"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter03-product-properties"
 date: 2026-05-18T04:00:00
 description: "ECSS-Q-ST-80C §5.3 — Code metrics, maintainability, testability, reliability. SonarQube/Understand 활용."
 tags: [ecss, product-properties, metrics, maintainability, testability, sonarqube]

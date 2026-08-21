@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Patterns"
+slug: "parallel/structured-parallel-programming/chapter03-patterns"
 date: 2026-05-21T22:00:00
 description: "병렬 패턴 개요 — 직렬 패턴에서 병렬 패턴으로의 전환"
 series: "Structured Parallel Programming"

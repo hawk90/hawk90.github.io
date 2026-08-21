@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Models with Memory"
+slug: "math/probability/mcelreath-rethinking/chapter13-models-memory"
 date: 2026-05-16T13:00:00
 description: "Multi-level model의 본격적 도입 — varying intercepts."
 series: "Statistical Rethinking"

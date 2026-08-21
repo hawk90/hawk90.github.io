@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 메모리 맵과 디바이스 트리"
+slug: "systems/riscv/baremetal-boot/chapter04-memory-map-dtb"
 date: 2026-05-17T22:00:00
 description: "RISC-V 메모리 맵 — 주소 공간 레이아웃, DTB 전달, FDT 파싱을 다룬다."
 series: "RISC-V 베어메탈 부트"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 36: Causality"
+slug: "ml/foundations/murphy-ml2/chapter36-causality"
 date: 2026-05-16T12:00:00
 description: "Pearl·potential outcome·SCM·do-calculus — causal ML."
 series: "Probabilistic Machine Learning: Advanced Topics"

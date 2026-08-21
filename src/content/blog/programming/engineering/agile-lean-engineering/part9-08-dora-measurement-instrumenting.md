@@ -1,5 +1,6 @@
 ---
 title: "Part 9-08: DORA 측정 — 실제 instrumenting"
+slug: "programming/engineering/agile-lean-engineering/part9-08-dora-measurement-instrumenting"
 date: 2026-05-20T12:00:00
 description: "Four Keys project로 DORA 4 metric을 어떻게 측정하나."
 series: "Agile & Lean Software Engineering"

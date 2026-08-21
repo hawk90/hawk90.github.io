@@ -1,5 +1,6 @@
 ---
 title: "Chapter 4.2: Pronoun Reference"
+slug: "writing/only-grammar-book/ch04-2-pronoun-reference"
 date: 2026-05-14T04:20:00
 description: "대명사 참조 오류 — 모호한 참조, 일치 오류, 성별·인칭 문제, singular they."
 series: "The Only Grammar Book You'll Ever Need"

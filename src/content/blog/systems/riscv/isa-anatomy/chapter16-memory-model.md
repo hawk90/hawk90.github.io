@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: 메모리 모델 (RVWMO)"
+slug: "systems/riscv/isa-anatomy/chapter16-memory-model"
 date: 2026-05-17T16:00:00
 description: "RISC-V 메모리 모델 — RVWMO 순서 규칙, fence, acquire/release, 다른 모델과 비교를 다룬다."
 series: "RISC-V ISA 해부"

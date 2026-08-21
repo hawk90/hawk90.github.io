@@ -1,5 +1,6 @@
 ---
 title: "Chapter 1.2: Pronouns"
+slug: "writing/only-grammar-book/ch01-2-pronouns"
 date: 2026-05-14T01:20:00
 description: "대명사의 종류와 격 — 인칭, 소유, 재귀, 지시, 의문, 관계, 부정대명사. who vs whom."
 series: "The Only Grammar Book You'll Ever Need"

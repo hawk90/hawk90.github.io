@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Mixture Models and EM"
+slug: "ml/foundations/bishop-prml/chapter09-mixture-em"
 date: 2026-05-16T09:00:00
 description: "K-means·Gaussian mixture·EM algorithm·variational EM."
 series: "Pattern Recognition and Machine Learning"

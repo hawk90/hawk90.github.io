@@ -1,5 +1,6 @@
 ---
 title: "Tip 64: Refactor Early, Refactor Often"
+slug: "programming/engineering/pragmatic-programmer/tip64"
 date: 2026-05-11T16:00:00
 description: "일찍, 자주 리팩터링하라. 코드를 깨끗하게 유지하는 것은 지속적인 과정이다."
 series: "The Pragmatic Programmer"

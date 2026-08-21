@@ -1,5 +1,6 @@
 ---
 title: "Ch 34: 빠진 챕터"
+slug: "programming/design/clean-architecture/chapter34-the-missing-chapter"
 date: 2026-05-01T10:00:00
 description: "Simon Brown이 쓴 보너스 장. 패키징 전략 — Package by layer / feature / component / Ports & Adapters."
 tags: [Architecture, Packaging, SimonBrown]

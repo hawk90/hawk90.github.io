@@ -1,5 +1,6 @@
 ---
 title: "Tip 48: If It's Important Enough to Be Global, Wrap It in an API"
+slug: "programming/engineering/pragmatic-programmer/tip48"
 date: 2026-05-11T00:00:00
 description: "전역으로 둘 만큼 중요하면 API로 감싸라. 직접 접근 대신 메서드를 통해 접근한다."
 series: "The Pragmatic Programmer"

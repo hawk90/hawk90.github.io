@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 14: 패턴 이름을 의도 전달에 사용하라"
+slug: "programming/cpp/cpp-software-design/guideline14-use-a-design-patterns-name-to-communicate-intent"
 date: 2026-05-02T14:00:00
 description: "이름이 어휘다. Strategy, Observer, Factory가 코드에 드러나면 의도가 즉시 전달된다."
 tags: [cpp, software-design, Naming, Communication]

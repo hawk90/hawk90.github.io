@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Binding Model and Implementation"
+slug: "programming/design/domain-driven-design/chapter03-binding-model-implementation"
 date: 2026-05-01T03:00:00
 description: "Model-Driven Design — 모델과 구현 일치. Hands-on Modelers."
 tags: [DDD, model-driven-design, hands-on-modelers]

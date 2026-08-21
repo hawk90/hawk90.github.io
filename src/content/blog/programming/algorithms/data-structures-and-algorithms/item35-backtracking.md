@@ -1,5 +1,6 @@
 ---
 title: "DSA 35: 백트래킹 — N-Queens, 부분집합, 분기 한정"
+slug: "programming/algorithms/data-structures-and-algorithms/item35-backtracking"
 date: 2026-05-15T11:00:00
 description: "모든 경우 시도 + 가지치기 — 조합·순열·제약 만족 문제의 표준."
 tags: [data-structure, Algorithm, Backtracking, N-Queens]

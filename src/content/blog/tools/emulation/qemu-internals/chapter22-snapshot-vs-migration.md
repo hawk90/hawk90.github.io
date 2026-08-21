@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Snapshot vs Live Migration"
+slug: "tools/emulation/qemu-internals/chapter22-snapshot-vs-migration"
 date: 2026-05-17T22:00:00
 description: "savevm·migrate·VMState — 두 메커니즘의 차이."
 tags: [QEMU, snapshot, live-migration, vmstate, savevm]

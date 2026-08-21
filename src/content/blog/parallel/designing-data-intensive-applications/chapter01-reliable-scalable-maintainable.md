@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 신뢰할 수 있고, 확장 가능하고, 유지보수 가능한 애플리케이션"
+slug: "parallel/designing-data-intensive-applications/chapter01-reliable-scalable-maintainable"
 date: 2026-05-12T01:00:00
 description: "데이터 집약 애플리케이션의 세 가지 품질 — Reliability, Scalability, Maintainability. 각 단어가 무엇을 의미하는가."
 tags: [DDIA, Reliability, Scalability, Maintainability]

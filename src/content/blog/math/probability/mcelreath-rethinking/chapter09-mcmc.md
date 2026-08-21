@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Markov Chain Monte Carlo"
+slug: "math/probability/mcelreath-rethinking/chapter09-mcmc"
 date: 2026-05-16T09:00:00
 description: "HMC·Stan·NUTS — MCMC를 직관적으로."
 series: "Statistical Rethinking"

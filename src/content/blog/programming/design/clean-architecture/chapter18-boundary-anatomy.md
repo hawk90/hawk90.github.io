@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: 경계의 해부"
+slug: "programming/design/clean-architecture/chapter18-boundary-anatomy"
 date: 2026-05-01T18:00:00
 description: "경계가 실제로 어떻게 생겼는가. 함수 호출에서 네트워크 호출까지 — 격리 강도와 비용의 스펙트럼."
 tags: [Architecture, Boundaries, Process, Service]

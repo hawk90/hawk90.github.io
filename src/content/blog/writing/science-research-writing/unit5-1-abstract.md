@@ -1,5 +1,6 @@
 ---
 title: "Unit 5.1: Abstract의 구조와 어휘"
+slug: "writing/science-research-writing/unit5-1-abstract"
 date: 2026-05-14T10:00:00
 description: "200-300 단어로 논문 전체를 압축 — Abstract의 4 부분 구조와 시제 결정."
 series: "Science Research Writing"

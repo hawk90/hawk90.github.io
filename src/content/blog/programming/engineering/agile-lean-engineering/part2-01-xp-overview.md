@@ -1,5 +1,6 @@
 ---
 title: "Part 2-01: XP 개요 — 왜 \"extreme\"인가"
+slug: "programming/engineering/agile-lean-engineering/part2-01-xp-overview"
 date: 2026-05-20T09:00:00
 description: "good practice를 극단까지 — XP가 'extreme'이라는 이름을 단 이유와 Beck의 핵심 통찰."
 series: "Agile & Lean Software Engineering"

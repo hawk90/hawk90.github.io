@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Linux Admin 처리"
+slug: "embedded/hardware/nvme/chapter13-linux-admin"
 date: 2026-05-16T14:00:00
 description: "Linux NVMe 드라이버의 Admin Queue 처리, Identify, Features 구현을 분석한다"
 series: "NVMe Deep Dive"

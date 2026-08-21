@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: HLO 패스 파이프라인"
+slug: "ml/compilers/xla-deep/chapter04-pass-pipeline"
 date: 2026-05-16T04:00:00
 description: "Algebraic simplifier·CSE·DCE·constant folding — HLO 최적화 단계."
 series: "XLA·OpenXLA 심화"

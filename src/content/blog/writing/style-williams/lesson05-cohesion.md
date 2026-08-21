@@ -1,5 +1,6 @@
 ---
 title: "Lesson 5: Cohesion and Coherence"
+slug: "writing/style-williams/lesson05-cohesion"
 date: 2026-05-14T05:00:00
 description: "문장 사이의 연결 — Old-to-New 원칙. 단락 차원의 일관성 — 한 화제 / 한 시점."
 series: "Style: Lessons in Clarity and Grace"

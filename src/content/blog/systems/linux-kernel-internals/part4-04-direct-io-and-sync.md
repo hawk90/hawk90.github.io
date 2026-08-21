@@ -1,5 +1,6 @@
 ---
 title: "Part 4-4: Direct I/O / O_SYNC"
+slug: "systems/linux-kernel-internals/part4-04-direct-io-and-sync"
 date: 2026-05-12T20:00:00
 description: "캐시 우회 (Direct I/O) / 동기 쓰기 (O_SYNC). DB / 고성능 I/O."
 tags: [Linux, Kernel, io, direct-io, fsync]

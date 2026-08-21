@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Fence·Sync 객체"
+slug: "ml/drivers/npu-drivers/chapter08-fence-syncobj"
 date: 2026-05-16T08:00:00
 description: "Cross-device synchronization — DMA fence·syncobj·timeline."
 series: "NPU 드라이버 개발"

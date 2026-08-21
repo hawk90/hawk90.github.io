@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Coverage — gcov·lcov·llvm-cov"
+slug: "programming/testing/gtest/chapter16-coverage"
 date: 2026-05-10T16:00:00
 description: "line vs branch coverage, 도구 비교, CI 게이트 설정."
 series: "gtest 심화"

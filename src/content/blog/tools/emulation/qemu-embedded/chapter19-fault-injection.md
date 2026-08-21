@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: 임베디드 Fault Injection"
+slug: "tools/emulation/qemu-embedded/chapter19-fault-injection"
 date: 2026-05-17T19:00:00
 description: "Clock skew·power glitch·watchdog — embedded fault 시뮬레이션."
 tags: [QEMU, fault-injection, watchdog, robustness, ASIL]

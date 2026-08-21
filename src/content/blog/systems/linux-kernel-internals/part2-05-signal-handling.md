@@ -1,5 +1,6 @@
 ---
 title: "Part 2-5: 시그널 처리"
+slug: "systems/linux-kernel-internals/part2-05-signal-handling"
 date: 2026-05-12T09:00:00
 description: "시그널 — 비동기 알림. signal_pending / handler / sigreturn."
 tags: [Linux, Kernel, Signal]

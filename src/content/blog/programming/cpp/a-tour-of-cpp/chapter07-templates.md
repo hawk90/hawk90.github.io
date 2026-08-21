@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Templates"
+slug: "programming/cpp/a-tour-of-cpp/chapter07-templates"
 date: 2026-05-22T07:00:00
 description: "템플릿 — 함수 템플릿, 클래스 템플릿, 가변 템플릿"
 series: "A Tour of C++"

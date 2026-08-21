@@ -1,5 +1,6 @@
 ---
 title: "1장 요약 카드"
+slug: "math/linear-algebra/ch01-vector-spaces/summary"
 date: 2026-05-15T14:13:21
 description: "순서 기저(ordered basis) 을 고정하면 $"
 tags: [linear-algebra, Mathematics, hoffman-kunze]

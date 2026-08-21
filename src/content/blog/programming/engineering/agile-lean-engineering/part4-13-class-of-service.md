@@ -1,5 +1,6 @@
 ---
 title: "Part 4-13: Class of Service"
+slug: "programming/engineering/agile-lean-engineering/part4-13-class-of-service"
 date: 2026-05-22T17:00:00
 description: "Expedite·Fixed Date·Standard·Intangible — 작업 분류와 우선순위."
 series: "Agile & Lean Software Engineering"

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 53: Method Parameter to Constructor Parameter"
+slug: "programming/engineering/tdd-patterns/pattern53-method-parameter-to-constructor-parameter"
 date: 2026-05-10T05:00:00
 description: "모든 호출에 같은 값 전달 — constructor로 옮기기. DI의 기초. 시리즈 마무리."
 series: "TDD by Example — Patterns Deep Dive"

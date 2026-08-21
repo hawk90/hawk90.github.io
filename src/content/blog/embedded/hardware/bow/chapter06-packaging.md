@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 패키징 요구사항"
+slug: "embedded/hardware/bow/chapter06-packaging"
 date: 2026-05-16T06:00:00
 description: "Substrate·bump·EDA flow·DFT — BoW를 실제 양산하는 조건과 known good die 전략."
 series: "BoW 개요"

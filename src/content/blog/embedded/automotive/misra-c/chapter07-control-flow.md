@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Rules 14~16 — 제어흐름, goto, switch"
+slug: "embedded/automotive/misra-c/chapter07-control-flow"
 date: 2026-05-18T08:00:00
 description: "조건문 본질(R14), goto 정책(R15), switch 엄격성(R16) — 분기를 예측 가능하게 만드는 규칙들."
 tags: [misra, c, control-flow, switch, goto, fallthrough]

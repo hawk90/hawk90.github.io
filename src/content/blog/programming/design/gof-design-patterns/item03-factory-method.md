@@ -1,5 +1,6 @@
 ---
 title: "GoF 3: Factory Method"
+slug: "programming/design/gof-design-patterns/item03-factory-method"
 date: 2026-05-01T03:00:00
 description: "객체 생성을 서브클래스에 맡기기 — 어떤 타입을 만들지 derived가 결정한다."
 tags: [design-pattern, GoF, cpp, C, Creational]

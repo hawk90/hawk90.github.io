@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: LSP — 리스코프 치환 원칙"
+slug: "programming/design/clean-architecture/chapter09-lsp-the-liskov-substitution-principle"
 date: 2026-05-01T09:00:00
 description: "서브타입은 부모타입의 자리에 그대로 대체 가능해야 한다. 어기면 특수 케이스의 폭발이 시작된다."
 tags: [Architecture, SOLID, LSP]

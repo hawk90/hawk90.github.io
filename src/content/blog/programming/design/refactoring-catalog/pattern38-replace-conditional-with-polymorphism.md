@@ -1,5 +1,6 @@
 ---
 title: "Pattern 38: Replace Conditional with Polymorphism"
+slug: "programming/design/refactoring-catalog/pattern38-replace-conditional-with-polymorphism"
 date: 2026-05-02T14:00:00
 description: "타입별 분기 — switch가 여러 곳에 흩어진다면 다형성에게."
 series: "Refactoring Catalog (Fowler 2nd ed)"

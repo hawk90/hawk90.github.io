@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 2.5D 패키징 — 인터포저와 실리콘 브릿지"
+slug: "embedded/hardware/ucie/chapter06-2-5d-packaging"
 date: 2026-05-19T06:00:00
 description: "CoWoS·EMIB·organic — 2.5D 패키지 옵션."
 series: "UCIe 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: The Implementation Mechanisms Design Space"
+slug: "parallel/patterns-for-parallel-programming/chapter06-implementation-mechanisms"
 date: 2026-05-21T19:00:00
 description: "구현 메커니즘 패턴 — Thread, Process, Synchronization, Communication"
 series: "Patterns for Parallel Programming"

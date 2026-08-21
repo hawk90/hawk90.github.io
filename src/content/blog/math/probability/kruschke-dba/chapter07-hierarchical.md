@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Hierarchical Models"
+slug: "math/probability/kruschke-dba/chapter07-hierarchical"
 date: 2026-05-15T07:00:00
 description: "Subject-level + group-level — partial pooling 그림으로."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

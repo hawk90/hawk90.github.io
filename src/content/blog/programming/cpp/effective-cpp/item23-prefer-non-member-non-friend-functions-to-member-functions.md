@@ -1,5 +1,6 @@
 ---
 title: "항목 23: 멤버 함수보다 비-멤버 비-friend 함수를 선호하라"
+slug: "programming/cpp/effective-cpp/item23-prefer-non-member-non-friend-functions-to-member-functions"
 date: 2026-05-04T23:00:00
 description: "캡슐화는 클래스 내부에 접근하는 코드가 적을수록 강해진다 — 네임스페이스 활용과 확장성의 이득."
 tags: [cpp, effective-c++, Encapsulation, api-design]

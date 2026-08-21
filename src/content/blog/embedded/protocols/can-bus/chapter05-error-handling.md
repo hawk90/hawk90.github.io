@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 에러 처리 — Counter, Active·Passive·Bus-Off, Fault Confinement"
+slug: "embedded/protocols/can-bus/chapter05-error-handling"
 date: 2026-05-16T05:00:00
 description: "결함 노드가 버스를 막지 못하게 — TEC/REC 카운터로 자동 격리하는 우아한 상태기계."
 series: "CAN Bus 심화"

@@ -1,5 +1,6 @@
 ---
 title: "NASA JPL Power of 10 — Curiosity, Perseverance 로버의 10가지 규칙"
+slug: "embedded/aerospace-standards/jpl-power-of-ten/chapter01-the-ten-rules"
 date: 2026-05-18T01:00:00
 description: "Gerard Holzmann이 정리한 *단 10개 규칙*으로 NASA JPL이 화성 로버·우주 탐사선 펌웨어를 안전하게 작성하는 방법."
 tags: [jpl, nasa, c, power-of-ten, holzmann, curiosity, perseverance, safety]

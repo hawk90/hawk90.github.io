@@ -1,5 +1,6 @@
 ---
 title: "Ch 31: Conquering Debugging"
+slug: "programming/cpp/professional-cpp/chapter31-conquering-debugging"
 date: 2026-05-05T07:00:00
 description: "gdb / lldb / Visual Studio. core dump / sanitizer / Valgrind."
 tags: [cpp, Debugging, gdb, Sanitizer]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Parametric Nonlinear Models"
+slug: "math/probability/gelman-bda3/chapter19-parametric-nonlinear"
 date: 2026-05-16T19:00:00
 description: "Nonlinear regression·pharmacokinetic·dose-response."
 series: "Bayesian Data Analysis (3rd ed)"

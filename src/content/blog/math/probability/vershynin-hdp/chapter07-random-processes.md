@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Random Processes"
+slug: "math/probability/vershynin-hdp/chapter07-random-processes"
 date: 2026-05-16T07:00:00
 description: "Empirical process·Gaussian process·Slepian·Sudakov-Fernique."
 series: "High-Dimensional Probability"

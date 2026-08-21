@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Exact Inference in Graphs"
+slug: "math/probability/mackay-itila/chapter09-graph-inference"
 date: 2026-05-16T09:00:00
 description: "Sum-product on tree·junction tree·trellis."
 series: "Information Theory, Inference, and Learning Algorithms"

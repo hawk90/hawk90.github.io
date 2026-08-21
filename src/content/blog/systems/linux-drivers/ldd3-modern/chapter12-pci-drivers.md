@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: PCI Drivers"
+slug: "systems/linux-drivers/ldd3-modern/chapter12-pci-drivers"
 date: 2026-05-13T12:00:00
 description: "pci_driver·BAR·MSI/MSI-X — PCIe 디바이스 드라이버 모델."
 series: "Linux Device Drivers (LDD3)"

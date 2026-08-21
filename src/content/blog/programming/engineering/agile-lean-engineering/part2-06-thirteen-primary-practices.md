@@ -1,5 +1,6 @@
 ---
 title: "Part 2-06: 13 Primary Practices 한눈에"
+slug: "programming/engineering/agile-lean-engineering/part2-06-thirteen-primary-practices"
 date: 2026-05-20T14:00:00
 description: "XP의 13가지 주 실천 — 각 practice의 위치와 시너지."
 series: "Agile & Lean Software Engineering"

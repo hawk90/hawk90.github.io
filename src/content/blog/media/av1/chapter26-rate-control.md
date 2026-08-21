@@ -1,5 +1,6 @@
 ---
 title: "Ch 26: Rate Control"
+slug: "media/av1/chapter26-rate-control"
 date: 2026-05-16T03:00:00
 description: "AV1 인코더의 Rate Control — CRF, CBR, VBR, 2-Pass, R-λ 모델."
 tags: [AV1, Video, Codec, Encoder, rate-control]

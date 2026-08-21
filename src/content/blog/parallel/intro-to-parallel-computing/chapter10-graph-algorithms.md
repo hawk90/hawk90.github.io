@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Graph Algorithms"
+slug: "parallel/intro-to-parallel-computing/chapter10-graph-algorithms"
 date: 2026-05-21T10:00:00
 description: "병렬 그래프 알고리즘 — BFS, 최단 경로, MST, 연결 요소"
 series: "Introduction to Parallel Computing"

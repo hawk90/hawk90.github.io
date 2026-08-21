@@ -1,5 +1,6 @@
 ---
 title: "항목 42: typename의 두 가지 의미를 이해하라"
+slug: "programming/cpp/effective-cpp/item42-understand-the-two-meanings-of-typename"
 date: 2026-05-04T18:00:00
 description: "템플릿 매개변수 선언과 의존 타입(dependent type) 명시 — 같은 키워드, 두 용도. C++20에서의 완화."
 tags: [cpp, effective-c++, Template, typename]

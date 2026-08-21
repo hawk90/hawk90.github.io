@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Combining Models"
+slug: "ml/foundations/bishop-prml/chapter14-combining-models"
 date: 2026-05-16T14:00:00
 description: "Bayesian model averaging·committee·boosting·tree·conditional mixture."
 series: "Pattern Recognition and Machine Learning"

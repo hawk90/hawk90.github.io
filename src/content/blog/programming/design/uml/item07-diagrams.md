@@ -1,5 +1,6 @@
 ---
 title: "UML 7: 다이어그램 — 14종을 한 페이지에 정리"
+slug: "programming/design/uml/item07-diagrams"
 date: 2026-05-03T07:00:00
 description: "구조 7 + 행위 7. UML 2.5.1의 14개 다이어그램은 시스템의 다른 면을 보여주는 카메라 앵글입니다."
 tags: [UML, diagram-types, Overview]

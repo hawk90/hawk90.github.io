@@ -27,7 +27,14 @@ const SERIES = [
     name: 'Linear Algebra',
     sourceSlug: 'linear-algebra',
     destSlug: 'linear-algebra',
-    tags: ['Linear Algebra', 'Mathematics', 'Hoffman & Kunze'],
+    // Must match the tag keys already on disk: these become /tags/<key>
+    // URLs, and 'Linear Algebra' would fold to a different key than the
+    // 'linear-algebra' the published posts use, splitting one concept in two.
+    tags: ['linear-algebra', 'Mathematics', 'hoffman-kunze'],
+    // Required by the content schema and validated against the category
+    // registry. Declared per series because it is a classification decision,
+    // not something derivable from the source tree.
+    topics: ['math'],
     chapterRe: /^(\d+)-(.+)$/,
     sectionRe: /^(\d+)\.(\d+)-(.+)\.md$/,
     sectionPick: (m, chapterNum) => {
@@ -41,7 +48,8 @@ const SERIES = [
     name: 'Set Theory',
     sourceSlug: 'set-theory',
     destSlug: 'set-theory',
-    tags: ['Set Theory', 'Mathematics', 'Enderton'],
+    tags: ['set-theory', 'Mathematics', 'Enderton'],
+    topics: ['math'],
     chapterRe: /^ch(\d+)$/,
     sectionRe: /^(\d+)-(.+)\.md$/,
     sectionPick: (m) => {
@@ -118,6 +126,7 @@ async function syncChapter(series, { num, slug, dir }, destPosts, destImages) {
     const raw = await fs.readFile(srcPath, 'utf-8');
     const stat = await fs.stat(srcPath);
     const { title, description, body } = transform(raw, series.destSlug, chNum);
+    const outPath = path.join(destPosts, chFolder, meta.name);
     const frontmatter = buildFrontmatter({
       title,
       description,
@@ -125,8 +134,10 @@ async function syncChapter(series, { num, slug, dir }, destPosts, destImages) {
       tags: series.tags,
       seriesName: series.name,
       seriesOrder: num * 100 + meta.order,
+      slug: `math/${series.destSlug}/${chFolder}/${meta.name.replace(/\.md$/, '')}`,
+      topics: series.topics,
+      draft: await existingDraftFlag(outPath),
     });
-    const outPath = path.join(destPosts, chFolder, meta.name);
     if (APPLY) await fs.writeFile(outPath, `${frontmatter}\n${body}`);
     console.log(`  ${APPLY ? 'wrote' : 'would write'}: ${chFolder}/${meta.name}`);
     written++;
@@ -198,19 +209,52 @@ function extractDescription(body) {
   return '';
 }
 
-function buildFrontmatter({ title, description, date, tags, seriesName, seriesOrder }) {
+/**
+ * The frontmatter for one synced section.
+ *
+ * Three fields here are not cosmetic:
+ *
+ * `slug` freezes the URL at the path this file is being written to, the same
+ * way every hand-authored post does it. Without it the URL is the file path,
+ * so a rename in ../book-notes would move a published URL — and the rename
+ * happens in a repository where nothing knows this blog exists.
+ *
+ * `topics` is required by the content schema and validated against the
+ * category registry. It was absent here while every file on disk carried it,
+ * which means the output had been corrected by hand and the next sync would
+ * have written files the build rejects.
+ *
+ * `draft` is carried over from the file being replaced rather than asserted.
+ * Publishing is the author's decision (CLAUDE.md 13), and this function had
+ * been emitting `draft: false` against 12 files on disk that all say `true` —
+ * one sync would have published a chapter series nobody chose to publish.
+ * Unknown means unpublished.
+ */
+function buildFrontmatter({ title, description, date, tags, seriesName, seriesOrder, slug, topics, draft }) {
   const dt = (date instanceof Date ? date : new Date()).toISOString().slice(0, 19);
-  const lines = ['---', `title: ${yaml(title)}`, `date: ${dt}`];
+  const lines = ['---', `title: ${yaml(title)}`, `slug: ${yaml(slug)}`, `date: ${dt}`];
   if (description) lines.push(`description: ${yaml(description)}`);
   lines.push(
     `tags: [${tags.map((t) => yaml(t)).join(', ')}]`,
     `series: ${yaml(seriesName)}`,
     `seriesOrder: ${seriesOrder}`,
-    'draft: false',
+    `draft: ${draft}`,
+    `topics: [${topics.map((t) => yaml(t)).join(', ')}]`,
     '---',
     '',
   );
   return lines.join('\n');
+}
+
+/** The `draft:` of the file about to be overwritten; true when there is none. */
+async function existingDraftFlag(outPath) {
+  try {
+    const raw = await fs.readFile(outPath, 'utf-8');
+    const frontmatter = raw.match(/^---\r?\n([\s\S]*?)\r?\n---/)?.[1] ?? '';
+    return !/^draft:\s*false\s*$/m.test(frontmatter);
+  } catch {
+    return true;
+  }
 }
 
 function yaml(s) {

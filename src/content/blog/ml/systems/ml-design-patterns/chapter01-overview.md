@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 왜 ML 디자인 패턴인가"
+slug: "ml/systems/ml-design-patterns/chapter01-overview"
 date: 2026-05-16T01:00:00
 description: "Lakshmanan·Robinson·Munn — ML 시스템의 반복되는 문제."
 series: "ML 디자인 패턴"

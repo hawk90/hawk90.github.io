@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Socket Programming"
+slug: "programming/cpp/extreme-c/chapter20-socket-programming"
 date: 2026-05-05T20:00:00
 description: "TCP / UDP 소켓. listen / accept / connect. select / poll / epoll."
 tags: [C, Socket, TCP, UDP, epoll]

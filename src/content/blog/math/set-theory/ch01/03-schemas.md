@@ -1,5 +1,6 @@
 ---
 title: "1.3 조심스레 자르기"
+slug: "math/set-theory/ch01/03-schemas"
 date: 2026-05-15T15:51:52
 description: "수학에서 집합을 정의하는 가장 자연스러운 방식은 조건 이다."
 tags: [set-theory, Mathematics, Enderton]

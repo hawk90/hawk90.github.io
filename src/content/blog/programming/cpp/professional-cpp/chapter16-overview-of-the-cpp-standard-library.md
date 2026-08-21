@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: Overview of the C++ Standard Library"
+slug: "programming/cpp/professional-cpp/chapter16-overview-of-the-cpp-standard-library"
 date: 2026-05-05T16:00:00
 description: "표준 라이브러리 한눈에 — 컨테이너 / 알고리즘 / 유틸리티."
 tags: [cpp, standard-library, STL]

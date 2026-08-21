@@ -1,5 +1,6 @@
 ---
 title: "Tip 80: Don't Think Outside the Box—Find the Box"
+slug: "programming/engineering/pragmatic-programmer/tip80"
 date: 2026-05-12T08:00:00
 description: "상자 밖에서 생각하지 말고 상자를 찾아라. 진짜 제약과 가짜 제약을 구분한다."
 series: "The Pragmatic Programmer"

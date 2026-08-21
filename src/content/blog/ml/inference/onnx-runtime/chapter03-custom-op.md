@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Custom Op·Custom Kernel"
+slug: "ml/inference/onnx-runtime/chapter03-custom-op"
 date: 2026-05-16T03:00:00
 description: "ORT가 모르는 op·새로운 kernel을 끼우기."
 series: "ONNX Runtime 심화"

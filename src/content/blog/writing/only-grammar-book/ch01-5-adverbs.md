@@ -1,5 +1,6 @@
 ---
 title: "Chapter 1.5: Adverbs"
+slug: "writing/only-grammar-book/ch01-5-adverbs"
 date: 2026-05-14T01:50:00
 description: "부사의 형성, 종류, 위치, 비교급. -ly 형태와 예외."
 series: "The Only Grammar Book You'll Ever Need"

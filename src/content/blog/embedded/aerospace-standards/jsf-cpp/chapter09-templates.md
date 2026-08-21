@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Templates"
+slug: "embedded/aerospace-standards/jsf-cpp/chapter09-templates"
 date: 2026-05-18T10:00:00
 description: "JSF C++ 일반 template 정책 — 단순 generic, metaprogramming 회피, code bloat 신중."
 tags: [jsf-cpp, templates, generic, code-bloat, metaprogramming, cpp03]

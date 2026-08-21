@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: When the Contract is Broken: Exception Handling"
+slug: "programming/design/oosc/chapter12-exception-handling"
 date: 2026-05-19T12:00:00
 description: "예외 처리 — 계약 위반 시 대응, 재시도와 조직적 패닉."
 series: "Object-Oriented Software Construction"

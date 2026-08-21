@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: The Algorithm Structure Design Space"
+slug: "parallel/patterns-for-parallel-programming/chapter04-algorithm-structure"
 date: 2026-05-21T17:00:00
 description: "알고리즘 구조 패턴 — Task Parallelism, Divide and Conquer, Pipeline, Geometric Decomposition"
 series: "Patterns for Parallel Programming"

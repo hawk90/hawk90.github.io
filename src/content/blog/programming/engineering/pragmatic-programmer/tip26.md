@@ -1,5 +1,6 @@
 ---
 title: "Tip 26: Use the Power of Command Shells"
+slug: "programming/engineering/pragmatic-programmer/tip26"
 date: 2026-05-12T02:00:00
 description: "셸의 힘을 써라 — GUI는 1대 1, 셸은 N개 도구의 조합."
 series: "The Pragmatic Programmer"

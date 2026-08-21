@@ -1,5 +1,6 @@
 ---
 title: "Part 2-05: XP Principles 14가지"
+slug: "programming/engineering/agile-lean-engineering/part2-05-xp-principles"
 date: 2026-05-20T13:00:00
 description: "humanity·economics·mutual benefit·self-similarity·improvement·diversity·reflection·flow·opportunity·redundancy·failure·quality·baby-steps·accepted-responsibility."
 series: "Agile & Lean Software Engineering"

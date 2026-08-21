@@ -1,5 +1,6 @@
 ---
 title: "Chapter 1.4: Adjectives"
+slug: "writing/only-grammar-book/ch01-4-adjectives"
 date: 2026-05-14T01:40:00
 description: "형용사의 위치, 비교급·최상급, 형용사 순서, 관사의 사용."
 series: "The Only Grammar Book You'll Ever Need"

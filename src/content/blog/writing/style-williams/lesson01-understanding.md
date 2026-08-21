@@ -1,5 +1,6 @@
 ---
 title: "Lesson 1: Understanding Style"
+slug: "writing/style-williams/lesson01-understanding"
 date: 2026-05-14T01:00:00
 description: "스타일이란 무엇인가. 명확함과 우아함의 차이. 'Bad style'은 보통 의도된 것이 아닌 부주의의 결과다."
 series: "Style: Lessons in Clarity and Grace"

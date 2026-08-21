@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Consistency and Coherence for Heterogeneous Systems"
+slug: "systems/architecture/cache-coherence/chapter10-heterogeneous"
 date: 2026-05-19T10:00:00
 description: "GPU·NPU·FPGA — 가속기가 끼면 일관성 모델이 달라진다."
 series: "A Primer on Memory Consistency and Cache Coherence"

@@ -1,5 +1,6 @@
 ---
 title: "제3장: 문장의 길이"
+slug: "writing/gojongseok-munjang/ch03-length"
 date: 2026-05-14T03:00:00
 description: "효과적인 문장 길이의 조절과 활용"
 series: "고종석의 문장"

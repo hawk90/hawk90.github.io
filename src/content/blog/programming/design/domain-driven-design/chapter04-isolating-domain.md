@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Isolating the Domain"
+slug: "programming/design/domain-driven-design/chapter04-isolating-domain"
 date: 2026-05-01T04:00:00
 description: "Layered Architecture — 도메인 계층 분리. UI / Application / Domain / Infrastructure."
 tags: [DDD, layered-architecture, domain-layer]

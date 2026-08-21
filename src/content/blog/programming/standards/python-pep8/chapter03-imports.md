@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Imports"
+slug: "programming/standards/python-pep8/chapter03-imports"
 date: 2026-05-18T03:00:00
 description: "Import 순서와 그룹핑. 절대 경로 선호, 와일드카드 피하기. isort로 자동 정렬."
 tags: [Python, PEP8, Imports, Modules, isort]

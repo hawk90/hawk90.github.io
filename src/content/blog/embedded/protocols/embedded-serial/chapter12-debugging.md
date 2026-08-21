@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: 디버깅 종합 — Logic Analyzer, DSO, sigrok, 시나리오별 도구"
+slug: "embedded/protocols/embedded-serial/chapter12-debugging"
 date: 2026-05-16T12:00:00
 description: "Saleae·sigrok·oscilloscope의 결합. SPI·I²C·UART·RS-485를 시각화하는 7가지 시나리오."
 series: "Embedded Protocols 심화"

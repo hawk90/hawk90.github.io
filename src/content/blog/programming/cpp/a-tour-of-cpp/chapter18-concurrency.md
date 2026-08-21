@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Concurrency"
+slug: "programming/cpp/a-tour-of-cpp/chapter18-concurrency"
 date: 2026-05-22T18:00:00
 description: "동시성 — thread, mutex, future, async, atomic"
 series: "A Tour of C++"

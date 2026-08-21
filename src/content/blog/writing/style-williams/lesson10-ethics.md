@@ -1,5 +1,6 @@
 ---
 title: "Lesson 10: The Ethics of Style"
+slug: "writing/style-williams/lesson10-ethics"
 date: 2026-05-14T10:00:00
 description: "글쓰기의 윤리. 흐릿한 글로 책임을 회피하지 마라. 독자에 대한 존중이 모든 좋은 글의 토대."
 series: "Style: Lessons in Clarity and Grace"

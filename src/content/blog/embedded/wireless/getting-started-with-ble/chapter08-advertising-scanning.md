@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Advertising·Scanning — 발견의 비대칭"
+slug: "embedded/wireless/getting-started-with-ble/chapter08-advertising-scanning"
 date: 2026-05-08T08:00:00
 description: "광고 채널 37/38/39, 비콘과 스캐너의 듀티 사이클. iBeacon·Eddystone 포맷."
 series: "Getting Started with BLE"

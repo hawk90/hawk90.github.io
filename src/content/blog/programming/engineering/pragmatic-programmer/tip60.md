@@ -1,5 +1,6 @@
 ---
 title: "Tip 60: Listen to Your Lizard Brain"
+slug: "programming/engineering/pragmatic-programmer/tip60"
 date: 2026-05-11T12:00:00
 description: "도마뱀 뇌의 말을 들어라. 뭔가 잘못됐다는 본능적 불안감을 무시하지 않는다."
 series: "The Pragmatic Programmer"

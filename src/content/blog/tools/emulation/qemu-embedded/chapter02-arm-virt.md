@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: ARM virt 머신"
+slug: "tools/emulation/qemu-embedded/chapter02-arm-virt"
 date: 2026-05-17T02:00:00
 description: "QEMU ARM virt 머신으로 AArch64 리눅스를 부팅한다."
 tags: [QEMU, ARM, virt, AArch64, GIC, PL011]

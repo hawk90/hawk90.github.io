@@ -1,5 +1,6 @@
 ---
 title: "Ch 2.5: Sequence Header 개요"
+slug: "media/av1/chapter02-bitstream/05-sequence-header"
 date: 2026-05-16T03:05:00
 description: "Sequence Header가 담는 시퀀스 전역 설정 — 프로파일, 해상도, 도구 활성화 플래그, Color Config."
 tags: [AV1, Video, Codec, SequenceHeader, ColorConfig]

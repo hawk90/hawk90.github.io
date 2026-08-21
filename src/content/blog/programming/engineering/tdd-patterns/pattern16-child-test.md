@@ -1,5 +1,6 @@
 ---
 title: "Pattern 16: Child Test"
+slug: "programming/engineering/tdd-patterns/pattern16-child-test"
 date: 2026-05-10T16:00:00
 description: "큰 test가 막히면 — 그 일부를 검증하는 더 작은 test로."
 series: "TDD by Example — Patterns Deep Dive"

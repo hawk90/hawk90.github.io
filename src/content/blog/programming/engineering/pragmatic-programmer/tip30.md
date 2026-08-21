@@ -1,5 +1,6 @@
 ---
 title: "Tip 30: Don't Panic"
+slug: "programming/engineering/pragmatic-programmer/tip30"
 date: 2026-05-12T06:00:00
 description: "당황하지 마라 — Hitchhiker's Guide의 가르침. 한 발 뒤로 — 깊게 호흡."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Mocks and Test Fragility"
+slug: "programming/engineering/khorikov-unit-testing/chapter05-mocks-fragility"
 date: 2026-05-10T05:00:00
 description: "Mock의 종류와 사용 규칙. Managed와 Unmanaged 의존, 시스템 경계에서만 Mock한다."
 tags: [TDD, Mock, Stub, Fake]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: BLE 5의 진짜 변화 — 2M·Coded·Extended Adv"
+slug: "embedded/wireless/getting-started-with-ble/chapter10-ble5-features"
 date: 2026-05-08T10:00:00
 description: "2× 속도, 4× 거리, 8× 광고 데이터. 그리고 LE Audio (5.2)와 Direction Finding (5.1)."
 series: "Getting Started with BLE"

@@ -1,5 +1,6 @@
 ---
 title: "Tip 62: Estimate the Order of Your Algorithms"
+slug: "programming/engineering/pragmatic-programmer/tip62"
 date: 2026-05-11T14:00:00
 description: "알고리즘의 차수를 추정하라. Big-O 표기로 성능을 예측하고 병목을 찾는다."
 series: "The Pragmatic Programmer"

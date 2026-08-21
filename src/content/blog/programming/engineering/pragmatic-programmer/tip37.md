@@ -1,5 +1,6 @@
 ---
 title: "Tip 37: Design with Contracts"
+slug: "programming/engineering/pragmatic-programmer/tip37"
 date: 2026-05-11T13:00:00
 description: "계약으로 설계하라. 사전 조건·사후 조건·불변식을 명시해서 책임을 분명히 한다."
 series: "The Pragmatic Programmer"

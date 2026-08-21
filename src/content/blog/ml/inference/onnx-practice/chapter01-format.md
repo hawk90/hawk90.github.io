@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: ONNX 포맷 구조"
+slug: "ml/inference/onnx-practice/chapter01-format"
 date: 2026-05-16T01:00:00
 description: "Protobuf·Graph·Node — ONNX file 안에 무엇이."
 series: "ONNX 실전"

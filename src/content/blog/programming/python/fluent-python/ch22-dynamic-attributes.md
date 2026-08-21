@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Dynamic Attributes and Properties"
+slug: "programming/python/fluent-python/ch22-dynamic-attributes"
 date: 2026-05-15T22:00:00
 description: "동적 속성 — __getattr__, __setattr__, property."
 series: "Fluent Python"

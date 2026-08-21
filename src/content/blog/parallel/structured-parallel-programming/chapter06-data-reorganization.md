@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Data Reorganization"
+slug: "parallel/structured-parallel-programming/chapter06-data-reorganization"
 date: 2026-05-22T01:00:00
 description: "데이터 재조직 패턴 — Gather, Scatter, Pack, Expand, Shift"
 series: "Structured Parallel Programming"

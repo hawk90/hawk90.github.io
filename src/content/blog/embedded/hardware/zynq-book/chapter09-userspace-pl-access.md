@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Userspace ↔ PL Access — UIO·mmap·DMA buf"
+slug: "embedded/hardware/zynq-book/chapter09-userspace-pl-access"
 date: 2026-05-19T09:00:00
 description: "Linux userspace에서 PL IP를 다루는 세 가지 길."
 series: "The Zynq Book"

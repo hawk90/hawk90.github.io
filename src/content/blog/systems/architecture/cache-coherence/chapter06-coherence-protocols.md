@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Coherence Protocols"
+slug: "systems/architecture/cache-coherence/chapter06-coherence-protocols"
 date: 2026-05-19T06:00:00
 description: "MSI·MESI·MOESI·MESIF — cache line state machine의 분류학."
 series: "A Primer on Memory Consistency and Cache Coherence"

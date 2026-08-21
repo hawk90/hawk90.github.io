@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Fixtures 심화"
+slug: "programming/testing/pytest/chapter06-fixtures-advanced"
 date: 2026-05-10T06:00:00
 description: "request·params·indirect·factory fixture — fixture를 자유롭게 다루는 패턴."
 series: "pytest 심화"

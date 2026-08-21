@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Performance — Xcode·Instruments"
+slug: "ml/inference/coreml/chapter06-performance"
 date: 2026-05-16T06:00:00
 description: "Core ML Performance Report·MLPredictor — latency 측정과 튜닝."
 series: "Core ML 심화"

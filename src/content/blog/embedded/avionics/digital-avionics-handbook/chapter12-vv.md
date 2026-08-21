@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Verification & Validation"
+slug: "embedded/avionics/digital-avionics-handbook/chapter12-vv"
 date: 2026-05-18T12:00:00
 description: "HIL·SIL·MIL·certification — avionics V&V의 전체 그림."
 series: "Digital Avionics Handbook"

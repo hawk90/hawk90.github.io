@@ -1,5 +1,6 @@
 ---
 title: "DSA 1: 알고리즘이란 — 좋은 알고리즘의 5가지 기준"
+slug: "programming/algorithms/data-structures-and-algorithms/item01-what-is-algorithm"
 date: 2026-05-15T01:00:00
 description: "알고리즘의 정의와 좋은 알고리즘이 갖춰야 할 속성들."
 tags: [data-structure, Algorithm, Fundamentals]

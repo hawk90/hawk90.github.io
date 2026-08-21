@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Goals, Power, and Sample Size"
+slug: "math/probability/kruschke-dba/chapter10-power-sample-size"
 date: 2026-05-15T10:00:00
 description: "Bayesian power·precision-based sample size."
 series: "Doing Bayesian Data Analysis (2nd ed, core)"

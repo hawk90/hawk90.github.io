@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Comments / Formatting / Closing"
+slug: "programming/standards/google-cpp/chapter10-comments-formatting-closing"
 date: 2026-05-18T10:00:00
 description: "주석 / 형식 (줄 길이, 공백, 중괄호, 조건문, 루프, 포인터, 리턴, 초기화) / Exceptions to Rules / Inclusive Language / Parting Words."
 tags: [Google, cpp, Style-Guide, Comments, Formatting]

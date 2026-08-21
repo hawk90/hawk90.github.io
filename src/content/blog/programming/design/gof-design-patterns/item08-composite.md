@@ -1,5 +1,6 @@
 ---
 title: "GoF 8: Composite"
+slug: "programming/design/gof-design-patterns/item08-composite"
 date: 2026-05-01T08:00:00
 description: "객체를 트리로 구성 — 단일과 복합을 같은 인터페이스로."
 tags: [design-pattern, GoF, cpp, C, Structural]

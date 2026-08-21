@@ -1,5 +1,6 @@
 ---
 title: "Part 7-12: Rolling Update vs Recreate"
+slug: "programming/engineering/agile-lean-engineering/part7-12-rolling-update-vs-recreate"
 date: 2026-05-20T10:00:00
 description: "Kubernetes의 두 배포 전략 — trade-off."
 series: "Agile & Lean Software Engineering"

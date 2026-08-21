@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Google TPU 아키텍처"
+slug: "ml/accelerators/npu-architecture/chapter03-tpu"
 date: 2026-05-16T03:00:00
 description: "TPU v1 → v5p — 시스톨릭 어레이의 진화."
 series: "NPU 아키텍처"

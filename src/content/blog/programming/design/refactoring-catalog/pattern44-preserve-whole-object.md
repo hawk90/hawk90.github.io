@@ -1,5 +1,6 @@
 ---
 title: "Pattern 44: Preserve Whole Object"
+slug: "programming/design/refactoring-catalog/pattern44-preserve-whole-object"
 date: 2026-05-02T20:00:00
 description: "객체의 여러 field만 빼서 전달하지 말고 — 객체를 통째로 넘긴다."
 series: "Refactoring Catalog (Fowler 2nd ed)"

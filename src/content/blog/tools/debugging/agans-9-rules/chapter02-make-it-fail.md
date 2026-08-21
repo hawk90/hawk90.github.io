@@ -1,5 +1,6 @@
 ---
 title: "Rule 2: Make It Fail"
+slug: "tools/debugging/agans-9-rules/chapter02-make-it-fail"
 date: 2026-05-17T02:00:00
 description: "재현 못 하는 버그는 디버그할 수 없다."
 series: "Debugging: The 9 Indispensable Rules"

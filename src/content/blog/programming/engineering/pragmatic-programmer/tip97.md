@@ -1,5 +1,6 @@
 ---
 title: "Tip 97: First, Do No Harm"
+slug: "programming/engineering/pragmatic-programmer/tip97"
 date: 2026-05-13T01:00:00
 description: "먼저 해를 끼치지 마라. 소프트웨어가 사용자, 사회, 환경에 미치는 영향을 고려한다."
 series: "The Pragmatic Programmer"

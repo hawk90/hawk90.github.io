@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Clustering·Mixture Models"
+slug: "math/probability/mackay-itila/chapter08-clustering"
 date: 2026-05-16T08:00:00
 description: "K-means·soft K-means·EM의 information-theoretic 해석."
 series: "Information Theory, Inference, and Learning Algorithms"

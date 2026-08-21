@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: 블록 레이어"
+slug: "tools/emulation/qemu-internals/chapter05-block-layer"
 date: 2026-05-17T05:00:00
 description: "QEMU 블록 레이어의 이미지 포맷과 I/O 경로를 이해한다."
 tags: [QEMU, Block, Storage, qcow2, BDS]

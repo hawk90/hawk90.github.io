@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: The Python Data Model"
+slug: "programming/python/fluent-python/ch01-data-model"
 date: 2026-05-15T01:00:00
 description: "파이썬 데이터 모델 — 던더 메서드와 일관된 인터페이스."
 series: "Fluent Python"

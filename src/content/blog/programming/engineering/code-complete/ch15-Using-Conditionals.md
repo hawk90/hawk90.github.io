@@ -1,5 +1,6 @@
 ---
 title: "Chapter 15: Using Conditionals"
+slug: "programming/engineering/code-complete/ch15-Using-Conditionals"
 date: 2026-05-11T15:00:00
 description: "조건문의 올바른 사용 — 정상 경로 먼저, else 명시, 가드 절, 복잡한 조건 캡슐화."
 series: "Code Complete"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Linux on Zynq — Kernel·Rootfs·Device Tree"
+slug: "embedded/hardware/zynq-book/chapter08-linux-on-zynq"
 date: 2026-05-19T08:00:00
 description: "PetaLinux 빌드·DT·rootfs — Zynq용 Linux 이미지 구성."
 series: "The Zynq Book"

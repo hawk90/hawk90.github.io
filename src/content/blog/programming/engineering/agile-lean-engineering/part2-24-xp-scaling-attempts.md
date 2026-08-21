@@ -1,5 +1,6 @@
 ---
 title: "Part 2-24: XP Scaling 시도와 실패"
+slug: "programming/engineering/agile-lean-engineering/part2-24-xp-scaling-attempts"
 date: 2026-05-21T08:00:00
 description: "Industrial XP·Enterprise XP — XP를 대규모로 키우려는 시도들과 한계."
 series: "Agile & Lean Software Engineering"

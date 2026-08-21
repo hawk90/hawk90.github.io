@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: MSL 기초 — Kernel·Thread·Threadgroup"
+slug: "ml/compilers/apple-metal/chapter02-msl-basics"
 date: 2026-05-16T02:00:00
 description: "Metal Shading Language — C++14 기반 GPU 언어."
 series: "Apple Metal Stack"

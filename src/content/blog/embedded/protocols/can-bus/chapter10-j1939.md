@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: J1939 — 상용차·트럭·건설 표준 (29-bit ID 위)"
+slug: "embedded/protocols/can-bus/chapter10-j1939"
 date: 2026-05-16T10:00:00
 description: "SAE J1939 — Extended ID로 자동 주소 + 표준 PGN. 트럭·버스·건설 장비의 사실상 표준."
 series: "CAN Bus 심화"

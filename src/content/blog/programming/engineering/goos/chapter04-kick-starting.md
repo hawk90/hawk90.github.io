@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Kick-Starting the TDD Cycle"
+slug: "programming/engineering/goos/chapter04-kick-starting"
 date: 2026-05-10T04:00:00
 description: "Walking Skeleton — 가장 단순한 end-to-end. 첫 사이클 시작 방법."
 tags: [TDD, walking-skeleton]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Gaussian Network Models"
+slug: "math/probability/koller-friedman-pgm/chapter07-gaussian-network"
 date: 2026-05-16T07:00:00
 description: "Gaussian Bayes net·Gaussian MRF·precision matrix."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

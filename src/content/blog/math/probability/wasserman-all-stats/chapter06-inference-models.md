@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Models, Statistical Inference, Learning"
+slug: "math/probability/wasserman-all-stats/chapter06-inference-models"
 date: 2026-05-16T06:00:00
 description: "Estimator·bias·variance·MSE — 추론의 어휘."
 series: "All of Statistics"

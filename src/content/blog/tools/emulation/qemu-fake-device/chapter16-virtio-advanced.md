@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: VirtIO 디바이스 심화"
+slug: "tools/emulation/qemu-fake-device/chapter16-virtio-advanced"
 date: 2026-05-17T16:00:00
 description: "Split·packed virtqueue·indirect descriptor — VirtIO 성능 layer."
 tags: [QEMU, virtio, packed-ring, indirect-descriptor, EVENT_IDX]

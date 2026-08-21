@@ -1,5 +1,6 @@
 ---
 title: "Part 2-4: 술어 논리 기초"
+slug: "philosophy/critical-thinking-logic/part2-04-predicate-logic"
 date: 2026-05-14T08:00:00
 description: "개체 / 술어 / 변항. 명제 논리를 넘어선 표현력."
 tags: [Logic, predicate-logic]

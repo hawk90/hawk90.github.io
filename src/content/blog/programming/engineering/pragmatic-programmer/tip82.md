@@ -1,5 +1,6 @@
 ---
 title: "Tip 82: Agile Is Not a Noun; Agile Is How You Do Things"
+slug: "programming/engineering/pragmatic-programmer/tip82"
 date: 2026-05-12T10:00:00
 description: "애자일은 명사가 아니다. 애자일은 하는 방식이다. 프레임워크가 아니라 가치를 따른다."
 series: "The Pragmatic Programmer"

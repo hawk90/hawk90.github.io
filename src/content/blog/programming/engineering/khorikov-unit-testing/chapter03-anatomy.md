@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: The Anatomy of a Unit Test"
+slug: "programming/engineering/khorikov-unit-testing/chapter03-anatomy"
 date: 2026-05-10T03:00:00
 description: "Arrange-Act-Assert 패턴, 테스트 명명, 파라미터화 테스트, 빌더와 Object Mother."
 tags: [TDD, AAA, Naming]

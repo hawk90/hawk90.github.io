@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: OpenAMP·RPMsg on QEMU"
+slug: "tools/emulation/qemu-embedded/chapter15-openamp-rpmsg"
 date: 2026-05-17T15:00:00
 description: "AMP — Cortex-A + Cortex-M 동시 실행 시뮬레이션."
 tags: [QEMU, openamp, rpmsg, amp, remoteproc, zynq]

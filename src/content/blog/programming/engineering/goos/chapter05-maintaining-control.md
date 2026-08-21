@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Maintaining the Test-Driven Cycle"
+slug: "programming/engineering/goos/chapter05-maintaining-control"
 date: 2026-05-10T05:00:00
 description: "외부 → 내부 (outside-in). 인수 → 단위 테스트로 좁혀가기."
 tags: [TDD, Outside-In]

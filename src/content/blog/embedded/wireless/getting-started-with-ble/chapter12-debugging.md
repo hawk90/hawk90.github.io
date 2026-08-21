@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: BLE 디버깅 — Wireshark, BLE Sniffer, nRF Connect"
+slug: "embedded/wireless/getting-started-with-ble/chapter12-debugging"
 date: 2026-05-08T12:00:00
 description: "보이지 않는 무선 트래픽을 보는 법. nRF52840 Dongle + Wireshark가 표준 조합."
 series: "Getting Started with BLE"

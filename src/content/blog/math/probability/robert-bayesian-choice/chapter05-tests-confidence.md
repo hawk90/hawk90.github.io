@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Tests and Confidence Regions"
+slug: "math/probability/robert-bayesian-choice/chapter05-tests-confidence"
 date: 2026-05-15T05:00:00
 description: "Bayes factor·HPD·posterior probability — testing의 Bayesian way."
 series: "The Bayesian Choice"

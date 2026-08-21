@@ -1,5 +1,6 @@
 ---
 title: "Part 8-03: The Phoenix Project 줄거리 + 교훈"
+slug: "programming/engineering/agile-lean-engineering/part8-03-phoenix-project"
 date: 2026-05-20T10:00:00
 description: "Bill Palmer의 위기 — Phoenix project의 narrative와 교훈."
 series: "Agile & Lean Software Engineering"

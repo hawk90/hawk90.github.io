@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: QEMU RISC-V 개요"
+slug: "tools/emulation/qemu-riscv/chapter01-overview"
 date: 2026-05-17T19:00:00
 description: "QEMU RISC-V — 지원 머신, 빌드 옵션, 기본 사용법을 다룬다."
 series: "RISC-V QEMU 심화"

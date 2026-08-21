@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Statistical Decision Theory"
+slug: "math/probability/wasserman-all-stats/chapter12-decision-theory"
 date: 2026-05-16T12:00:00
 description: "Loss·risk·minimax·admissibility — 추정·예측의 통합 framework."
 series: "All of Statistics"

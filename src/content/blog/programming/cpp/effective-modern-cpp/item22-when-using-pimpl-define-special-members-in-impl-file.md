@@ -1,5 +1,6 @@
 ---
 title: "항목 22: Pimpl 관용구 사용 시 특수 멤버 함수는 구현 파일에 정의하라"
+slug: "programming/cpp/effective-modern-cpp/item22-when-using-pimpl-define-special-members-in-impl-file"
 date: 2026-05-04T22:00:00
 description: "Pimpl + unique_ptr 조합에서 incomplete type 에러를 회피하는 정확한 패턴."
 tags: [cpp, Pimpl, unique_ptr, Compilation, modern-cpp]

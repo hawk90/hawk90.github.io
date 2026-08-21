@@ -1,5 +1,6 @@
 ---
 title: "Pattern 5: Change Function Declaration"
+slug: "programming/design/refactoring-catalog/pattern05-change-function-declaration"
 date: 2026-05-02T05:00:00
 description: "함수 이름과 매개변수를 안전하게 바꾼다 — Rename Method + Add/Remove Parameter 통합."
 series: "Refactoring Catalog (Fowler 2nd ed)"

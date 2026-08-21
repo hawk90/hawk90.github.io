@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: 사례 연구 — NVMe 가상 디바이스"
+slug: "tools/emulation/qemu-fake-device/chapter12-case-study-nvme"
 date: 2026-05-17T12:00:00
 description: "QEMU 내장 NVMe 디바이스 분석으로 실전 패턴을 학습한다."
 tags: [QEMU, NVMe, case-study, hw-block, SQ-CQ]

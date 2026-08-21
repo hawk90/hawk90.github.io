@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: SW Procurement Assurance — COTS·OSS·Heritage 인수 절차"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter06-procurement"
 date: 2026-05-18T07:00:00
 description: "ECSS-Q-ST-80C — Supplier qualification, COTS evaluation, OSS adoption, Heritage SW reuse."
 tags: [ecss, procurement, cots, oss, heritage, supplier]

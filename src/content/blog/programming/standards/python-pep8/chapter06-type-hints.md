@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Type Hints"
+slug: "programming/standards/python-pep8/chapter06-type-hints"
 date: 2026-05-18T06:00:00
 description: "PEP 484 타입 힌트. 변수, 함수, 클래스 어노테이션. Generic, Protocol, TypeVar."
 tags: [Python, PEP8, Type-Hints, PEP484, mypy, Typing]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Structure Learning in Bayesian Networks"
+slug: "math/probability/koller-friedman-pgm/chapter18-structure-learning"
 date: 2026-05-16T18:00:00
 description: "Score-based·constraint-based·BIC·BDe·search."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

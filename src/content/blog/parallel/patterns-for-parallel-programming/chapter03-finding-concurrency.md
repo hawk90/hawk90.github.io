@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: The Finding Concurrency Design Space"
+slug: "parallel/patterns-for-parallel-programming/chapter03-finding-concurrency"
 date: 2026-05-21T16:00:00
 description: "병렬성 발견 패턴 — Task/Data Decomposition, Dependency Analysis, Design Evaluation"
 series: "Patterns for Parallel Programming"

@@ -1,5 +1,6 @@
 ---
 title: "제15장: 서사문"
+slug: "writing/gojongseok-munjang/ch15-narrative"
 date: 2026-05-14T15:00:00
 description: "이야기를 풀어가는 서사문의 기법"
 series: "고종석의 문장"

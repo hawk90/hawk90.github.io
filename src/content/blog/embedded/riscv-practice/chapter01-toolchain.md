@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 툴체인 설치"
+slug: "embedded/riscv-practice/chapter01-toolchain"
 date: 2026-05-17T07:00:00
 description: "RISC-V 툴체인 — riscv-gnu-toolchain, LLVM, IDE 설정을 다룬다."
 series: "RISC-V 임베디드 실습"

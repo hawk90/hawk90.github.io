@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: 비즈니스 규칙"
+slug: "programming/design/clean-architecture/chapter20-business-rules"
 date: 2026-05-01T20:00:00
 description: "Entities는 핵심 비즈니스 규칙, Use Cases는 앱별 규칙. 가장 안 변하는 시스템의 코어."
 tags: [Architecture, BusinessRules, Entities, UseCases]

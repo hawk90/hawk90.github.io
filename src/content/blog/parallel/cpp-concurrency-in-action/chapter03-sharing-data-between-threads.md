@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Sharing data between threads"
+slug: "parallel/cpp-concurrency-in-action/chapter03-sharing-data-between-threads"
 date: 2026-05-06T03:00:00
 description: "race condition, std::mutex, lock guard, deadlock 회피, std::shared_mutex."
 tags: [cpp, Concurrency, Mutex, race-condition, Deadlock]

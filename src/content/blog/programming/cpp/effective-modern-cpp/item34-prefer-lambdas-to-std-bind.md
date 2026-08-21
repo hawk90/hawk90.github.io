@@ -1,5 +1,6 @@
 ---
 title: "항목 34: std::bind보다 람다를 선호하라"
+slug: "programming/cpp/effective-modern-cpp/item34-prefer-lambdas-to-std-bind"
 date: 2026-05-04T10:00:00
 description: "C++14+ 람다가 거의 항상 우월 — 가독성·평가 시점·오버로드·인라이닝·디버깅."
 tags: [cpp, Lambda, "std::bind", modern-cpp]

@@ -1,5 +1,6 @@
 ---
 title: "Part 10-05: Spotify Model — 신화와 진실"
+slug: "programming/engineering/agile-lean-engineering/part10-05-spotify-model"
 date: 2026-05-20T13:00:00
 description: "Squad·Tribe·Chapter·Guild가 정착됐는가 — Joakim Sundén의 회고."
 series: "Agile & Lean Software Engineering"

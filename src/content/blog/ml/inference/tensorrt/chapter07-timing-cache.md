@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: TimingCache·Build 시간 단축"
+slug: "ml/inference/tensorrt/chapter07-timing-cache"
 date: 2026-05-16T07:00:00
 description: "Tactic timing 결과를 cache — 동일 GPU에서 재사용."
 series: "TensorRT 심화"

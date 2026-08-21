@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Classical Statistical Inference"
+slug: "math/probability/bertsekas-tsitsiklis/chapter09-classical-inference"
 date: 2026-05-16T09:00:00
 description: "MLE·confidence interval·hypothesis test — frequentist 코너."
 series: "Introduction to Probability"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introducing the Zynq"
+slug: "embedded/hardware/zynq-book/chapter01-zynq-introduction"
 date: 2026-05-19T01:00:00
 description: "PS + PL — ARM Cortex-A9와 FPGA가 한 다이에 있는 의미."
 series: "The Zynq Book"

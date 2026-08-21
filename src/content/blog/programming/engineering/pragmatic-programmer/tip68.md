@@ -1,5 +1,6 @@
 ---
 title: "Tip 68: Design to Test"
+slug: "programming/engineering/pragmatic-programmer/tip68"
 date: 2026-05-11T20:00:00
 description: "테스트를 고려해 설계하라. 테스트 가능한 코드가 좋은 코드다."
 series: "The Pragmatic Programmer"

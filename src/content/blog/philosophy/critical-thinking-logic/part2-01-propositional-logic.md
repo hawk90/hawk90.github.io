@@ -1,5 +1,6 @@
 ---
 title: "Part 2-1: 명제 논리 — 연결사 / 진리표"
+slug: "philosophy/critical-thinking-logic/part2-01-propositional-logic"
 date: 2026-05-14T05:00:00
 description: "∧ ∨ ¬ → ↔. 진리표 작성 / 동치 / 항진."
 tags: [Logic, propositional-logic, truth-table]

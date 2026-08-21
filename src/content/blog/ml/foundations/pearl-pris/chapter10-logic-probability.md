@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Logic and Probability"
+slug: "ml/foundations/pearl-pris/chapter10-logic-probability"
 date: 2026-05-16T10:00:00
 description: "First-order logic + probability — 통합의 시도."
 series: "Probabilistic Reasoning in Intelligent Systems"

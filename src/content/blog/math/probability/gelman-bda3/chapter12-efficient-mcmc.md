@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Computationally Efficient Markov Chain Simulation"
+slug: "math/probability/gelman-bda3/chapter12-efficient-mcmc"
 date: 2026-05-16T12:00:00
 description: "Reparam·tuning·parallel chain — MCMC를 빠르게."
 series: "Bayesian Data Analysis (3rd ed)"

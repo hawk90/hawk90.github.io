@@ -1,5 +1,6 @@
 ---
 title: "Part 5-10: Theory of Constraints — 5 focusing steps"
+slug: "programming/engineering/agile-lean-engineering/part5-10-theory-of-constraints"
 date: 2026-05-23T05:00:00
 description: "Goldratt의 5 단계 — Identify·Exploit·Subordinate·Elevate·Repeat."
 series: "Agile & Lean Software Engineering"

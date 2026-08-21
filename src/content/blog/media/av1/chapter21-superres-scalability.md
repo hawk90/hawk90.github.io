@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Superres와 Scalability"
+slug: "media/av1/chapter21-superres-scalability"
 date: 2026-05-16T22:00:00
 description: "AV1의 Superres와 Scalability — 인루프 업스케일링, Temporal/Spatial Scalability, Decoder Model."
 tags: [AV1, Video, Codec, Superres, Scalability, SVC]

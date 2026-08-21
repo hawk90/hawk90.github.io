@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Probability"
+slug: "math/probability/wasserman-all-stats/chapter01-probability"
 date: 2026-05-16T01:00:00
 description: "확률공간·conditional·independence — 토대."
 series: "All of Statistics"

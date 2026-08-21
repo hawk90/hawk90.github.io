@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 가속기 기초 — CPU → GPU → NPU"
+slug: "ml/accelerators/npu-architecture/chapter01-accelerator-evolution"
 date: 2026-05-16T01:00:00
 description: "왜 ML 워크로드가 또 다른 칩을 요구하는가."
 series: "NPU 아키텍처"

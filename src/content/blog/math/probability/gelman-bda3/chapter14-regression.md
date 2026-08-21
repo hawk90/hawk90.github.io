@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Introduction to Regression Models"
+slug: "math/probability/gelman-bda3/chapter14-regression"
 date: 2026-05-16T14:00:00
 description: "Bayesian linear regression — interpretation·prior choice."
 series: "Bayesian Data Analysis (3rd ed)"

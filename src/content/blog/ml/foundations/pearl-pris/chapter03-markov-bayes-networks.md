@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Markov and Bayesian Networks"
+slug: "ml/foundations/pearl-pris/chapter03-markov-bayes-networks"
 date: 2026-05-16T03:00:00
 description: "DAG·CPT·conditional independence — PGM의 출생."
 series: "Probabilistic Reasoning in Intelligent Systems"

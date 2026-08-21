@@ -1,5 +1,6 @@
 ---
 title: "Unit 1.6: Presentation과 Positioning"
+slug: "writing/academic-writing/unit01-6-positioning"
 date: 2026-05-14T06:00:00
 description: "글의 시각적 표현과, 학술 공동체 안에서 자기 위치를 만드는 방법 — Positioning."
 series: "Academic Writing for Graduate Students"

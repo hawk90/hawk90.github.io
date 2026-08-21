@@ -1,5 +1,6 @@
 ---
 title: "항목 17: 특수 멤버 함수의 자동 생성 규칙을 이해하라"
+slug: "programming/cpp/effective-modern-cpp/item17-understand-special-member-function-generation"
 date: 2026-05-04T17:00:00
 description: "C++11+ move 생성자/대입 추가 — 자동 생성 규칙의 미묘한 함정과 Rule of Zero/Five."
 tags: [cpp, special-member-functions, move-semantics, modern-cpp]

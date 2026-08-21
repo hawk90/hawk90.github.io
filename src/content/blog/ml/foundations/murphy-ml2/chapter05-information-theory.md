@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Information Theory"
+slug: "ml/foundations/murphy-ml2/chapter05-information-theory"
 date: 2026-05-16T05:00:00
 description: "Modern info theory in ML — IB·sufficient statistic·loss decomposition."
 series: "Probabilistic Machine Learning: Advanced Topics"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Notation"
+slug: "programming/design/ooad/chapter05-notation"
 date: 2026-05-19T05:00:00
 description: "표기법 — UML 클래스, 시퀀스, 상태 다이어그램."
 series: "Object-Oriented Analysis and Design with Applications"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Introduction"
+slug: "ml/foundations/murphy-ml1/chapter01-introduction"
 date: 2026-05-16T01:00:00
 description: "Supervised·unsupervised·RL — Murphy의 ML 지도."
 series: "Probabilistic Machine Learning: An Introduction"

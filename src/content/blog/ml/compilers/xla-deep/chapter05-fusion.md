@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Operator Fusion 전략"
+slug: "ml/compilers/xla-deep/chapter05-fusion"
 date: 2026-05-16T05:00:00
 description: "Fusion이 왜 ML compiler의 가장 큰 무기인가."
 series: "XLA·OpenXLA 심화"

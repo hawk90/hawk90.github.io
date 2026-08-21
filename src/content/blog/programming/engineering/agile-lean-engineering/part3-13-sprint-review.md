@@ -1,5 +1,6 @@
 ---
 title: "Part 3-13: Sprint Review — demo + feedback"
+slug: "programming/engineering/agile-lean-engineering/part3-13-sprint-review"
 date: 2026-05-21T21:00:00
 description: "stakeholder가 참여하는 review — demo만 하면 안 되는 이유."
 series: "Agile & Lean Software Engineering"

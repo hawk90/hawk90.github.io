@@ -1,5 +1,6 @@
 ---
 title: "Chapter 12: Writing About People — The Interview"
+slug: "writing/on-writing-well/ch12-people"
 date: 2026-05-14T12:00:00
 description: "인물에 관한 글의 핵심은 인터뷰입니다. 좋은 질문, 진심으로 듣기, 정직한 인용."
 series: "On Writing Well"

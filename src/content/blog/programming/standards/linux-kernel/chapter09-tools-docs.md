@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Tools & Documentation"
+slug: "programming/standards/linux-kernel/chapter09-tools-docs"
 date: 2026-05-18T09:00:00
 description: "checkpatch.pl로 스타일 검사, sparse로 정적 분석, kernel-doc으로 문서화."
 tags: [Linux, Kernel, checkpatch, sparse, kernel-doc, Documentation]

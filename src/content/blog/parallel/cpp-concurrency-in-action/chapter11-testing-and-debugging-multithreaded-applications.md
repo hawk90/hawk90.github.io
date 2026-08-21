@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Testing and debugging multithreaded applications"
+slug: "parallel/cpp-concurrency-in-action/chapter11-testing-and-debugging-multithreaded-applications"
 date: 2026-05-06T11:00:00
 description: "ThreadSanitizer, 재현 가능성, 시뮬레이션 테스트, 동시성 버그 분류."
 tags: [cpp, C, Concurrency, Testing, Debugging, ThreadSanitizer]

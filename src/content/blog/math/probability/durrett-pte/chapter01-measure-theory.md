@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Measure Theory"
+slug: "math/probability/durrett-pte/chapter01-measure-theory"
 date: 2026-05-16T01:00:00
 description: "σ-algebra·Lebesgue measure·integration — 확률의 측도론적 기초."
 series: "Probability: Theory and Examples"

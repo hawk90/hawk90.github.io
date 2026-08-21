@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Search"
+slug: "tools/practical-vim/chapter13-search"
 date: 2026-05-17T13:00:00
 description: "/ ? n N. incsearch / hlsearch. * / # — 단어 검색. count + n."
 tags: [Vim, Search]

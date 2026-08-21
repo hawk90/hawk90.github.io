@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Tools — Vivado·Vitis·PetaLinux"
+slug: "embedded/hardware/zynq-book/chapter04-tools-overview"
 date: 2026-05-19T04:00:00
 description: "Xilinx 툴체인 — 하드웨어 정의에서 Linux 이미지까지."
 series: "The Zynq Book"

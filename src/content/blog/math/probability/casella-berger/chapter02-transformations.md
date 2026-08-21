@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Transformations and Expectations"
+slug: "math/probability/casella-berger/chapter02-transformations"
 date: 2026-05-16T02:00:00
 description: "Change of variable·moments·MGF — RV의 핵심 도구."
 series: "Statistical Inference"

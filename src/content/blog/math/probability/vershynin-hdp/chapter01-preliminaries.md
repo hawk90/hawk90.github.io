@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Preliminaries on Random Variables"
+slug: "math/probability/vershynin-hdp/chapter01-preliminaries"
 date: 2026-05-16T01:00:00
 description: "Tail bound·sub-Gaussian·sub-exponential — HDP의 기본 도구."
 series: "High-Dimensional Probability"

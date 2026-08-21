@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: BoW 아키텍처 — 슬라이스 구조"
+slug: "embedded/hardware/bow/chapter02-architecture"
 date: 2026-05-16T02:00:00
 description: "Slice·lane·data rate — BoW의 기본 빌딩 블록과 forwarded clock·sideband의 동작."
 series: "BoW 개요"

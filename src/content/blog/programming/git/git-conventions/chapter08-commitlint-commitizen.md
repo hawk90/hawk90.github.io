@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: commitlint / commitizen"
+slug: "programming/git/git-conventions/chapter08-commitlint-commitizen"
 date: 2026-05-17T08:00:00
 description: "메시지 검증 (commitlint) / 메시지 도우미 (commitizen). 자동화 / 강제."
 tags: [Git, commitlint, commitizen]

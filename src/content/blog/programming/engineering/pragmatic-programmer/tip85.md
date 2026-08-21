@@ -1,5 +1,6 @@
 ---
 title: "Tip 85: Organize Fully Functional Teams"
+slug: "programming/engineering/pragmatic-programmer/tip85"
 date: 2026-05-12T13:00:00
 description: "완전한 기능을 갖춘 팀을 구성하라. 기능 전체를 전달할 수 있는 팀이 효율적이다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: 디지털 제어보드·신호처리 — PID·LQR·MPC·Kalman"
+slug: "embedded/avionics/launch-vehicle-flight-sw/chapter04-control-and-signal"
 date: 2026-05-18T04:00:00
 description: "발사체 TVC·자세 제어. PID·LQR·MPC. IMU bias·Kalman fusion. DSP·FPGA·ARM 역할 분담."
 series: "Launch Vehicle Flight Software"

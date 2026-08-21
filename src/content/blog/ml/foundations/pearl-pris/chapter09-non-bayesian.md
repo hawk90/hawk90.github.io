@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Non-Bayesian Formalisms"
+slug: "ml/foundations/pearl-pris/chapter09-non-bayesian"
 date: 2026-05-16T09:00:00
 description: "Dempster-Shafer·fuzzy·certainty factor — Bayesian이 아닌 길의 평가."
 series: "Probabilistic Reasoning in Intelligent Systems"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Regression Models"
+slug: "math/probability/casella-berger/chapter12-regression"
 date: 2026-05-16T12:00:00
 description: "Multiple regression·diagnostics·robust·logistic."
 series: "Statistical Inference"

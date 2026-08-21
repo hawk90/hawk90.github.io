@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Indentation & Braces"
+slug: "programming/standards/linux-kernel/chapter01-indentation-braces"
 date: 2026-05-18T01:00:00
 description: "8-space tabs의 철학, K&R brace 스타일, switch 문 정렬. 깊은 중첩은 리팩토링 신호."
 tags: [Linux, Kernel, Indentation, Braces, Tabs]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 2 Rule 22: 강조 단어는 문장의 끝에"
+slug: "writing/elements-of-style/ch02/rule22-emphasis"
 date: 2026-05-14T00:00:00
 description: "문장에서 가장 두드러진 자리는 끝이다. 강조하고 싶은 단어나 구는 보통 끝에 둔다."
 series: "The Elements of Style"

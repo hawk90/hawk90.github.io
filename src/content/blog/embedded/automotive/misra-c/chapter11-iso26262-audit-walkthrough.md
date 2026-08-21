@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: ISO 26262 ASIL D 인증 심사 — 실전 워크스루"
+slug: "embedded/automotive/misra-c/chapter11-iso26262-audit-walkthrough"
 date: 2026-05-18T12:00:00
 description: "가상의 EPB(Electric Parking Brake) ECU 프로젝트를 ASIL D 인증까지. Compliance Matrix, Deviation Records, Tool Qualification, 심사관 질문 시뮬레이션."
 tags: [misra, c, iso-26262, asil-d, audit, certification, deviation, helix-qac]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Formal Methods (DO-333)"
+slug: "embedded/avionics/developing-safety-critical/chapter13-formal-methods"
 date: 2026-05-18T13:00:00
 description: "DO-333 — model checking·deductive proof·abstract interpretation의 인증 자리."
 series: "Developing Safety-Critical Software"

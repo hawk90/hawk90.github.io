@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: From Statistics to Beliefs"
+slug: "math/probability/halpern-uncertainty/chapter11-statistics-to-beliefs"
 date: 2026-05-16T11:00:00
 description: "Statistical → degree of belief — Carnap·objective Bayesianism."
 series: "Reasoning About Uncertainty"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Properties of Random Samples"
+slug: "math/probability/casella-berger/chapter05-random-samples"
 date: 2026-05-16T05:00:00
 description: "Sampling distribution·t·F·χ² — sample 분포의 정수."
 series: "Statistical Inference"

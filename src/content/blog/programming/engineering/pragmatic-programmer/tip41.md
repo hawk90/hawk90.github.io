@@ -1,5 +1,6 @@
 ---
 title: "Tip 41: Act Locally"
+slug: "programming/engineering/pragmatic-programmer/tip41"
 date: 2026-05-11T17:00:00
 description: "지역적으로 행동하라. 변수의 수명을 짧게 유지하고, 부작용을 가까이에서 처리한다."
 series: "The Pragmatic Programmer"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Template-Based Representations"
+slug: "math/probability/koller-friedman-pgm/chapter06-template-models"
 date: 2026-05-16T06:00:00
 description: "Plate model·DBN·PRM — repeating structure 표현."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

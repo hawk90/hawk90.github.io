@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Source Code Standards & MISRA C 적용"
+slug: "embedded/aerospace-standards/do-178c/chapter06-source-code-standards"
 date: 2026-05-18T07:00:00
 description: "SCS 문서 구성, MISRA C 적용, 명명 규칙, defensive programming, LLR ↔ Code traceability."
 tags: [do-178c, source-code, scs, misra, defensive, traceability, code-review]

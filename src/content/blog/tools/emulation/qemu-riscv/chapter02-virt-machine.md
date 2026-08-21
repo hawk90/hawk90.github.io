@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: virt 머신 해부"
+slug: "tools/emulation/qemu-riscv/chapter02-virt-machine"
 date: 2026-05-17T20:00:00
 description: "QEMU virt 머신 — 메모리 맵, 가상 디바이스, DTB 자동 생성을 다룬다."
 series: "RISC-V QEMU 심화"

@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 38: Singleton은 변경과 테스트 가능성을 위해 설계하라"
+slug: "programming/cpp/cpp-software-design/guideline38-design-singletons-for-change-and-testability"
 date: 2026-05-02T14:00:00
 description: "Singleton이 불가피하다면 Strategy로 알고리즘을 격리하고, DI로 인터페이스를 주입하며, Locator로 테스트성을 확보해야 한다."
 tags: [cpp, software-design, Singleton, DI, Testability]

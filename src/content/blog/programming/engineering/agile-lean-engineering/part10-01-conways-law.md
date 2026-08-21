@@ -1,5 +1,6 @@
 ---
 title: "Part 10-01: Conway's Law와 Inverse Conway Maneuver"
+slug: "programming/engineering/agile-lean-engineering/part10-01-conways-law"
 date: 2026-05-20T13:00:00
 description: "1968 Conway 논문 — '조직 구조가 곧 시스템 구조'."
 series: "Agile & Lean Software Engineering"

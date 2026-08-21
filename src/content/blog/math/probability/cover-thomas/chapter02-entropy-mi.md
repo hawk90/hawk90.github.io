@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: Entropy, Relative Entropy, Mutual Information"
+slug: "math/probability/cover-thomas/chapter02-entropy-mi"
 date: 2026-05-16T02:00:00
 description: "H·D·I — 정보이론의 3가지 기본 양."
 series: "Elements of Information Theory"

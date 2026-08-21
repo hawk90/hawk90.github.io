@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Introduction to Inheritance"
+slug: "programming/design/oosc/chapter14-introduction-to-inheritance"
 date: 2026-05-19T14:00:00
 description: "상속 입문 — 확장, 재정의, 다형성, 동적 바인딩."
 series: "Object-Oriented Software Construction"

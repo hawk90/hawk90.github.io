@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Semihosting"
+slug: "tools/emulation/qemu-embedded/chapter14-semihosting"
 date: 2026-05-17T14:00:00
 description: "Host I/O on bare-metal — UART 없이 printf하기."
 tags: [QEMU, semihosting, bare-metal, arm-semihosting, BKPT]

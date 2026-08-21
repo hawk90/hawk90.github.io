@@ -1,5 +1,6 @@
 ---
 title: "Part 2-2: 자연 연역 — 추론 규칙"
+slug: "philosophy/critical-thinking-logic/part2-02-natural-deduction"
 date: 2026-05-14T06:00:00
 description: "MP / MT / DS / Conj / Simp / Add / HS. 가정 / 부분 증명."
 tags: [Logic, natural-deduction, inference-rules]

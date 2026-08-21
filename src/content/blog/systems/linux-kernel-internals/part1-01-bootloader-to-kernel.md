@@ -1,5 +1,6 @@
 ---
 title: "Part 1-1: 부트로더에서 커널 진입까지"
+slug: "systems/linux-kernel-internals/part1-01-bootloader-to-kernel"
 date: 2026-05-12T01:00:00
 description: "BIOS / UEFI → GRUB → vmlinuz. real mode → protected → long mode."
 tags: [Linux, Kernel, Boot, GRUB]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 27: 서비스 — 크고 작은"
+slug: "programming/design/clean-architecture/chapter27-services-great-and-small"
 date: 2026-05-01T03:00:00
 description: "마이크로서비스의 한계. 서비스로 쪼개는 것이 자동으로 디커플링을 만들지 않는다. 결합은 인터페이스가 아닌 데이터에 산다."
 tags: [Architecture, Microservices, Services]

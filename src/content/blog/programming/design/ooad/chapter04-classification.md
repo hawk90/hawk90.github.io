@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Classification"
+slug: "programming/design/ooad/chapter04-classification"
 date: 2026-05-19T04:00:00
 description: "분류 — 클래스 발견, 핵심 추상화 식별, 분류 원칙."
 series: "Object-Oriented Analysis and Design with Applications"

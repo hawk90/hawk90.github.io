@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Abstract Data Types"
+slug: "programming/design/oosc/chapter06-abstract-data-types"
 date: 2026-05-19T06:00:00
 description: "ADT — 객체지향의 수학적 기반, 명세와 구현의 분리."
 series: "Object-Oriented Software Construction"

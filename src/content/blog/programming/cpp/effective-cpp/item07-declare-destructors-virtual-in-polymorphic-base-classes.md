@@ -1,5 +1,6 @@
 ---
 title: "항목 7: 다형성 base 클래스에는 가상 소멸자를 선언하라"
+slug: "programming/cpp/effective-cpp/item07-declare-destructors-virtual-in-polymorphic-base-classes"
 date: 2026-05-04T07:00:00
 description: "non-virtual 소멸자가 부분 파괴(UB)를 일으키는 메커니즘과, 비-다형성 클래스엔 추가하지 말아야 하는 이유."
 tags: [cpp, effective-c++, Inheritance, Virtual]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 19: Multi-Function PCI 디바이스"
+slug: "tools/emulation/qemu-fake-device/chapter19-multi-function"
 date: 2026-05-17T19:00:00
 description: "Function 분리·shared resource — multi-function PCI 패턴."
 tags: [QEMU, multi-function, pci, mfd]

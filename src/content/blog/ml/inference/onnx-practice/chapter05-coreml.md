@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Core ML 변환"
+slug: "ml/inference/onnx-practice/chapter05-coreml"
 date: 2026-05-16T05:00:00
 description: "ONNX → Core ML — Apple Silicon 배포."
 series: "ONNX 실전"

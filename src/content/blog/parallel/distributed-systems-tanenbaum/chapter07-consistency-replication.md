@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Consistency and Replication"
+slug: "parallel/distributed-systems-tanenbaum/chapter07-consistency-replication"
 date: 2025-05-20T07:00:00
 description: "데이터 중심 vs 클라이언트 중심 일관성, 복제 프로토콜, CAP 정리"
 series: "Distributed Systems"

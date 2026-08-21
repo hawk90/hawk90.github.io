@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Quadratic Forms, Symmetrization, Contraction"
+slug: "math/probability/vershynin-hdp/chapter06-quadratic-forms"
 date: 2026-05-16T06:00:00
 description: "Hanson-Wright·Rademacher·symmetrization 기법."
 series: "High-Dimensional Probability"

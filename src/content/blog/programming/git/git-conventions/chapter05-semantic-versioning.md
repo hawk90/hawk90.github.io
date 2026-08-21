@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Semantic Versioning (semver)"
+slug: "programming/git/git-conventions/chapter05-semantic-versioning"
 date: 2026-05-17T05:00:00
 description: "MAJOR.MINOR.PATCH 의미. pre-release / build metadata. CalVer 비교."
 tags: [Git, Semver, Versioning]

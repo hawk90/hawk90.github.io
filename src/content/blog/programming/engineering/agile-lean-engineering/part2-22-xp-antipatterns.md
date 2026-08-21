@@ -1,5 +1,6 @@
 ---
 title: "Part 2-22: XP 안티패턴 — 가장 흔한 실패"
+slug: "programming/engineering/agile-lean-engineering/part2-22-xp-antipatterns"
 date: 2026-05-21T06:00:00
 description: "XP 도입 시 가장 흔한 실패 패턴 — practice만 따라하고 가치를 놓치는 경우."
 series: "Agile & Lean Software Engineering"

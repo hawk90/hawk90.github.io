@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Demystifying C++ I/O"
+slug: "programming/cpp/professional-cpp/chapter13-demystifying-cpp-io"
 date: 2026-05-05T13:00:00
 description: "iostream — cin / cout / cerr. 파일 I/O. format / println (C++20/23)."
 tags: [cpp, io, iostream, format]

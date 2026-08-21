@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: 네트워킹"
+slug: "tools/emulation/qemu-embedded/chapter09-networking"
 date: 2026-05-17T09:00:00
 description: "QEMU에서 TAP/User-mode 네트워킹을 설정한다."
 tags: [QEMU, Networking, TAP, SLIRP, virtio-net, hostfwd]

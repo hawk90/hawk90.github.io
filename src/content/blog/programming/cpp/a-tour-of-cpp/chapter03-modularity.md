@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Modularity"
+slug: "programming/cpp/a-tour-of-cpp/chapter03-modularity"
 date: 2026-05-22T03:00:00
 description: "모듈성 — 헤더, C++20 모듈, 네임스페이스"
 series: "A Tour of C++"

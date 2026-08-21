@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: NASA F´ (F-Prime) — Component·Port·Topology"
+slug: "embedded/avionics/launch-vehicle-flight-sw/chapter09-fprime"
 date: 2026-05-18T09:00:00
 description: "JPL F-Prime framework. C++14 component, FPP model, autocoder, Ingenuity·SmallSat 적용."
 series: "Launch Vehicle Flight Software"

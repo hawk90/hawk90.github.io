@@ -1,5 +1,6 @@
 ---
 title: "Postscript (1969)"
+slug: "philosophy/scientific-revolutions/postscript"
 date: 2026-05-14T15:00:00
 description: "1969년 후기 — 패러다임 개념의 명료화와 반박에 대한 답."
 series: "The Structure of Scientific Revolutions"

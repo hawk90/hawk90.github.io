@@ -1,5 +1,6 @@
 ---
 title: "항목 33: 상속된 이름을 가리지 말라"
+slug: "programming/cpp/effective-cpp/item33-avoid-hiding-inherited-names"
 date: 2026-05-04T09:00:00
 description: "derived의 동명 함수는 base의 모든 동명 함수를 가린다 — 시그니처 무관. using 선언으로 해결."
 tags: [cpp, effective-c++, Inheritance, name-hiding]

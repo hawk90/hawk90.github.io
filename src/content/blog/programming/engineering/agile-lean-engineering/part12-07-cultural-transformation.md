@@ -1,5 +1,6 @@
 ---
 title: "Part 12-07: Cultural Transformation — agile 도입 함정"
+slug: "programming/engineering/agile-lean-engineering/part12-07-cultural-transformation"
 date: 2026-05-20T15:00:00
 description: "Cargo Cult Agile·Dark Scrum — 가장 흔한 도입 실패."
 series: "Agile & Lean Software Engineering"

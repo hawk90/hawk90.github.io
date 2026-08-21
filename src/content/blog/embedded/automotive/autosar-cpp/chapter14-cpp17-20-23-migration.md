@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: C++17/20/23 임베디드 적용 평가 매트릭스"
+slug: "embedded/automotive/autosar-cpp/chapter14-cpp17-20-23-migration"
 date: 2026-05-18T15:00:00
 description: "C++17/20/23의 모든 주요 기능을 *임베디드 안전 critical 관점*에서 평가. 권장·중립·회피로 분류, 마이그레이션 전략."
 tags: [autosar, cpp, cpp17, cpp20, cpp23, migration, modules, concepts, coroutines]

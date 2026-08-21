@@ -1,5 +1,6 @@
 ---
 title: "Ch 32: Representation Learning"
+slug: "ml/foundations/murphy-ml2/chapter32-representation"
 date: 2026-05-16T08:00:00
 description: "Self-supervised·contrastive·masked·foundation embedding."
 series: "Probabilistic Machine Learning: Advanced Topics"

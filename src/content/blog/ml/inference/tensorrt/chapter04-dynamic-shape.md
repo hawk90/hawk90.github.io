@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Dynamic Shape"
+slug: "ml/inference/tensorrt/chapter04-dynamic-shape"
 date: 2026-05-16T04:00:00
 description: "Optimization profile — variable batch·seq에 대응."
 series: "TensorRT 심화"

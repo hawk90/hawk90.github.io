@@ -1,5 +1,6 @@
 ---
 title: "항목 31: 파일 사이 컴파일 의존성을 최소화하라"
+slug: "programming/cpp/effective-cpp/item31-minimize-compilation-dependencies-between-files"
 date: 2026-05-04T07:00:00
 description: "Pimpl 관용구와 인터페이스 클래스로 빌드 시간을 줄이는 패턴 — 전방 선언과 멤버 타입 결정."
 tags: [cpp, effective-c++, Pimpl, Compilation]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: Web Application: Vacation Tracking System"
+slug: "programming/design/ooad/chapter12-vacation-tracking-system"
 date: 2026-05-19T12:00:00
 description: "케이스 스터디 — 휴가 관리 웹 애플리케이션."
 series: "Object-Oriented Analysis and Design with Applications"

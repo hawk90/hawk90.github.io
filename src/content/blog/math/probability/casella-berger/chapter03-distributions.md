@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Common Families of Distributions"
+slug: "math/probability/casella-berger/chapter03-distributions"
 date: 2026-05-16T03:00:00
 description: "Discrete·continuous·exponential family — distribution zoo."
 series: "Statistical Inference"

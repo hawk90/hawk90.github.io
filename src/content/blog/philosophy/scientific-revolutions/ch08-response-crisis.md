@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: The Response to Crisis"
+slug: "philosophy/scientific-revolutions/ch08-response-crisis"
 date: 2026-05-14T09:00:00
 description: "위기에 대한 반응 — 도구 다양화와 철학적 전환."
 series: "The Structure of Scientific Revolutions"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5 Reminder 8: 한정어를 자제하라"
+slug: "writing/elements-of-style/ch05/reminder08-qualifiers"
 date: 2026-05-14T16:00:00
 description: "Rather, very, little, pretty — 이 단어들은 산문의 연못에 사는 거머리들이다."
 series: "The Elements of Style"

@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 12: 디자인 패턴 오해를 경계하라"
+slug: "programming/cpp/cpp-software-design/guideline12-beware-of-design-pattern-misconceptions"
 date: 2026-05-02T12:00:00
 description: "패턴은 클래스 다이어그램이 아니다. 의도와 트레이드오프, 그리고 흔한 여섯 가지 오해."
 tags: [cpp, software-design, design-patterns, Anti-patterns]

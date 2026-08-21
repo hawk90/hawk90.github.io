@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Concurrency"
+slug: "programming/cpp/extreme-c/chapter13-concurrency"
 date: 2026-05-05T13:00:00
 description: "동시성 vs 병렬성. 스케줄링, 컨텍스트 스위치, 동시성의 본질."
 tags: [C, Concurrency]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: Gaussian Processes"
+slug: "ml/foundations/murphy-ml2/chapter18-gaussian-process"
 date: 2026-05-16T18:00:00
 description: "GP regression·classification·sparse·deep GP."
 series: "Probabilistic Machine Learning: Advanced Topics"

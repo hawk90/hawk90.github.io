@@ -1,5 +1,6 @@
 ---
 title: "Ch 20: Causality"
+slug: "math/probability/koller-friedman-pgm/chapter20-causality"
 date: 2026-05-16T20:00:00
 description: "Causal Bayes net·intervention·counterfactual — Pearl과 보완 시각."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

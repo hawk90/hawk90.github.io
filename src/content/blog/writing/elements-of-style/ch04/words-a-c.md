@@ -1,5 +1,6 @@
 ---
 title: "Ch 4 Words: A–C"
+slug: "writing/elements-of-style/ch04/words-a-c"
 date: 2026-05-14T02:00:00
 description: "자주 오용되는 단어와 표현 — Aggravate부터 Currently까지."
 series: "The Elements of Style"

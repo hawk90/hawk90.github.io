@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: 베어메탈 펌웨어"
+slug: "tools/emulation/qemu-embedded/chapter11-baremetal"
 date: 2026-05-17T11:00:00
 description: "QEMU에서 OS 없이 베어메탈 펌웨어를 실행한다."
 tags: [QEMU, bare-metal, Firmware, linker-script, reset-vector]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Qualcomm Hexagon·HTP"
+slug: "ml/accelerators/npu-architecture/chapter05-hexagon"
 date: 2026-05-16T05:00:00
 description: "DSP 출신 — 8 Gen·X 시리즈의 NPU 코어."
 series: "NPU 아키텍처"

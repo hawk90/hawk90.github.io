@@ -1,5 +1,6 @@
 ---
 title: "항목 29: 예외-안전 코드를 작성하라"
+slug: "programming/cpp/effective-cpp/item29-strive-for-exception-safe-code"
 date: 2026-05-04T05:00:00
 description: "기본·강력·noexcept 보증 세 단계, copy-and-swap 패턴, 가장 약한 단계가 함수 전체 보증을 결정."
 tags: [cpp, effective-c++, exception-safety]

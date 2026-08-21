@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Statistics"
+slug: "ml/foundations/murphy-ml2/chapter03-statistics"
 date: 2026-05-16T03:00:00
 description: "Frequentist·Bayesian·empirical Bayes — 추론 통합."
 series: "Probabilistic Machine Learning: Advanced Topics"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: How to Find the Classes"
+slug: "programming/design/oosc/chapter22-how-to-find-the-classes"
 date: 2026-05-19T22:00:00
 description: "클래스를 찾는 방법 — 명사 추출, 책임 주도, 도메인 분석."
 series: "Object-Oriented Software Construction"

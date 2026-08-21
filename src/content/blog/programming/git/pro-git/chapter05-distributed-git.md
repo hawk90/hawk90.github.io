@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Distributed Git"
+slug: "programming/git/pro-git/chapter05-distributed-git"
 date: 2026-05-17T05:00:00
 description: "분산 협업 워크플로우 — integration manager / dictator. 패치 / pull request."
 tags: [Git, Distributed, Workflow]

@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Sorting"
+slug: "parallel/art-of-concurrency/chapter08-sorting"
 date: 2025-05-20T08:00:00
 description: "병렬 정렬 알고리즘 — 퀵소트, 머지소트, 비트닉 소트"
 series: "The Art of Concurrency"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 16: TrustZone Secure World"
+slug: "tools/emulation/qemu-embedded/chapter16-trustzone"
 date: 2026-05-17T16:00:00
 description: "EL3·secure·non-secure 분리 — OP-TEE 부팅."
 tags: [QEMU, trustzone, op-tee, secure-world, EL3, ATF]

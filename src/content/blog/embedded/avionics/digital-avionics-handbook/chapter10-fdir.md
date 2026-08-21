@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: FDIR — Fault Detection·Isolation·Recovery"
+slug: "embedded/avionics/digital-avionics-handbook/chapter10-fdir"
 date: 2026-05-18T10:00:00
 description: "시스템 차원의 fault handling — 감지·격리·복구의 3 단계 패턴."
 series: "Digital Avionics Handbook"

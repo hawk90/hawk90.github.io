@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Dvoretzky-Milman's Theorem"
+slug: "math/probability/vershynin-hdp/chapter11-dvoretzky-milman"
 date: 2026-05-16T11:00:00
 description: "Almost spherical section·high-d convex body geometry."
 series: "High-Dimensional Probability"

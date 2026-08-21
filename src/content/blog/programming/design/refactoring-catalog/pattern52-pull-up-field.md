@@ -1,5 +1,6 @@
 ---
 title: "Pattern 52: Pull Up Field"
+slug: "programming/design/refactoring-catalog/pattern52-pull-up-field"
 date: 2026-05-02T04:00:00
 description: "Subclass 공통 field — superclass로 끌어올려 데이터 중복 제거."
 series: "Refactoring Catalog (Fowler 2nd ed)"

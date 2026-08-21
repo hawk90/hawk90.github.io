@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Statistical Estimation"
+slug: "math/optimization/boyd-convex/chapter07-statistical-estimation"
 date: 2026-05-15T07:00:00
 description: "MLE·MAP·Bayes — convex 형식의 통계 추정."
 series: "Convex Optimization (Boyd)"

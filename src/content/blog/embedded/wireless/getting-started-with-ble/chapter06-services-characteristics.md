@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: 표준 서비스와 직접 만든 서비스"
+slug: "embedded/wireless/getting-started-with-ble/chapter06-services-characteristics"
 date: 2026-05-08T06:00:00
 description: "SIG가 정의한 표준 서비스(Battery, Heart Rate, HID 등) vs Custom Service. 언제 어느 쪽?"
 series: "Getting Started with BLE"

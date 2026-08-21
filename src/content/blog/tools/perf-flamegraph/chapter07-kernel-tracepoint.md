@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: 커널 이벤트 / tracepoint"
+slug: "tools/perf-flamegraph/chapter07-kernel-tracepoint"
 date: 2026-05-17T07:00:00
 description: "tracepoint / kprobe / uprobe / USDT. dynamic vs static."
 tags: [perf, tracepoint, kprobe, uprobe]

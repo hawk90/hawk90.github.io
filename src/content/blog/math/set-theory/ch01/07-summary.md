@@ -1,5 +1,6 @@
 ---
 title: "1.7 지금 우리가 가진 것"
+slug: "math/set-theory/ch01/07-summary"
 date: 2026-05-15T15:54:43
 description: "처음에는 모든 게 좋아 보였다."
 tags: [set-theory, Mathematics, Enderton]

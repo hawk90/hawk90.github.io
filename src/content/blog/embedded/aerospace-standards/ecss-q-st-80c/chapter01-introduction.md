@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: ECSS-Q-ST-80C — 유럽 우주 SW 표준의 전체 그림"
+slug: "embedded/aerospace-standards/ecss-q-st-80c/chapter01-introduction"
 date: 2026-05-18T02:00:00
 description: "ESA + 유럽 우주 산업이 운영하는 ECSS 체계 — Q/E/M 분류와 SW Product Assurance 표준."
 tags: [ecss, esa, european-space, software-quality, satellite]

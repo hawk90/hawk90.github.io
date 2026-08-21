@@ -1,5 +1,6 @@
 ---
 title: "Unit 6.1: Book Reviews와 의견 표명"
+slug: "writing/academic-writing/unit06-1-book-reviews-opinions"
 date: 2026-05-14T22:00:00
 description: "학술 서평의 표준 구조 — 책 소개, 내용 요약, 평가, 결론. 의견을 학술적으로 표명하는 표현들."
 series: "Academic Writing for Graduate Students"

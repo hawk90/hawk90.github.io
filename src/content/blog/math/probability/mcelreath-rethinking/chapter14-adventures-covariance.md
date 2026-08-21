@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Adventures in Covariance"
+slug: "math/probability/mcelreath-rethinking/chapter14-adventures-covariance"
 date: 2026-05-16T14:00:00
 description: "Varying slopes·covariance·Gaussian process·instrumental variable."
 series: "Statistical Rethinking"

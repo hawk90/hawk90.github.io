@@ -1,5 +1,6 @@
 ---
 title: "Ch 11-18: Passing the First Test → Final Features"
+slug: "programming/engineering/goos/chapter11-passing-first-test"
 date: 2026-05-10T11:00:00
 description: "Worked Example 8 챕터 압축 — 점진적 기능 추가, 리팩토링, mock 사용 실전."
 tags: [TDD, case-study, Mock]

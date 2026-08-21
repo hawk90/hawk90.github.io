@@ -1,5 +1,6 @@
 ---
 title: "항목 15: memset과 memcpy 대신 생성자와 할당 연산자를 사용하라"
+slug: "programming/cpp/beautiful-cpp/item15-use-constructors-not-memset-memcpy"
 date: 2026-05-05T15:00:00
 description: "객체에 바이트 단위 연산을 적용하면 즉시 UB — vtable·string·vector 박살. C++ 객체 모델 존중."
 tags: [cpp, Constructor, undefined-behavior]

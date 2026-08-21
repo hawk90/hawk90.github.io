@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Inference as Optimization"
+slug: "math/probability/koller-friedman-pgm/chapter11-inference-optimization"
 date: 2026-05-16T11:00:00
 description: "Free energy·mean field·loopy BP — variational 시각."
 series: "Probabilistic Graphical Models (Koller & Friedman)"

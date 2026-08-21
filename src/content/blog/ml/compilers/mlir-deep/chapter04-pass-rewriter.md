@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Pass와 PatternRewriter"
+slug: "ml/compilers/mlir-deep/chapter04-pass-rewriter"
 date: 2026-05-16T04:00:00
 description: "MLIR이 IR을 변형하는 표준 방식."
 series: "MLIR 심화"

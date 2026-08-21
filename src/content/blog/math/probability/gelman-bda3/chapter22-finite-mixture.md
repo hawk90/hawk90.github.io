@@ -1,5 +1,6 @@
 ---
 title: "Ch 22: Finite Mixture Models"
+slug: "math/probability/gelman-bda3/chapter22-finite-mixture"
 date: 2026-05-16T22:00:00
 description: "Mixture model·label switching·EM·MCMC."
 series: "Bayesian Data Analysis (3rd ed)"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 18: 보드 Bringup Workflow"
+slug: "tools/emulation/qemu-embedded/chapter18-board-bringup"
 date: 2026-05-17T18:00:00
 description: "DTB → kernel → rootfs → driver — 새 보드 살리는 절차."
 tags: [QEMU, board-bringup, dtb, kernel-config, hal]

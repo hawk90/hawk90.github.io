@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Linear Regression"
+slug: "math/probability/hoff-bayesian/chapter09-regression"
 date: 2026-05-15T09:00:00
 description: "Bayesian linear regression — conjugate·Gibbs·model selection."
 series: "A First Course in Bayesian Statistical Methods"

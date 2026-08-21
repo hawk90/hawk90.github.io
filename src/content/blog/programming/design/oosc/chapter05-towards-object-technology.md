@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Towards Object Technology"
+slug: "programming/design/oosc/chapter05-towards-object-technology"
 date: 2026-05-19T05:00:00
 description: "전통적 접근법의 한계 — 함수 분해, 최상위 설계, 데이터 흐름."
 series: "Object-Oriented Software Construction"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: 디자인이란 무엇인가, 아키텍처란 무엇인가"
+slug: "programming/design/clean-architecture/chapter01-what-is-design-and-architecture"
 date: 2026-05-01T01:00:00
 description: "디자인과 아키텍처의 구분은 사실 없다. 좋은 디자인의 유일한 지표는 변경 비용이 일정하게 유지된다는 것이다."
 tags: [Architecture, Design, CleanArchitecture]

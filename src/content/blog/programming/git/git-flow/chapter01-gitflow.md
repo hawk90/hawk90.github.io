@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: GitFlow — Vincent Driessen"
+slug: "programming/git/git-flow/chapter01-gitflow"
 date: 2026-05-17T01:00:00
 description: "전통 GitFlow — develop / feature / release / hotfix / main. 복잡하지만 명확한 구조."
 tags: [Git, GitFlow, Driessen]

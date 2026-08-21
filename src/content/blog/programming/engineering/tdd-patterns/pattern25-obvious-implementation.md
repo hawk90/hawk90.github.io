@@ -1,5 +1,6 @@
 ---
 title: "Pattern 25: Obvious Implementation"
+slug: "programming/engineering/tdd-patterns/pattern25-obvious-implementation"
 date: 2026-05-10T01:00:00
 description: "구현이 명확하면 — 바로 진짜 구현. 가장 큰 스텝."
 series: "TDD by Example — Patterns Deep Dive"

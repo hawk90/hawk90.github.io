@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: QEMU 설치와 빌드"
+slug: "tools/emulation/qemu-fake-device/chapter02-install-build"
 date: 2026-05-17T02:00:00
 description: "QEMU를 소스에서 빌드하고 개발 환경을 구축한다."
 tags: [QEMU, Build, Setup, configure, meson]

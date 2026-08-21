@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Entropy and Other Measures"
+slug: "math/probability/cox-algebra/chapter04-entropy"
 date: 2026-05-15T04:00:00
 description: "Cox의 정보 측도 — Shannon 이전·이후."
 series: "The Algebra of Probable Inference"

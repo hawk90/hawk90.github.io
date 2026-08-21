@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: SBI 호출 규약"
+slug: "systems/riscv/baremetal-boot/chapter07-sbi-calling-convention"
 date: 2026-05-17T01:00:00
 description: "SBI 호출 규약 — ecall, 함수 ID, 반환값, 에러 코드를 다룬다."
 series: "RISC-V 베어메탈 부트"

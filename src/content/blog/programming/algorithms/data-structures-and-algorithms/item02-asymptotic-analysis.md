@@ -1,5 +1,6 @@
 ---
 title: "DSA 2: 시간/공간 복잡도와 점근 표기 (O, Ω, Θ)"
+slug: "programming/algorithms/data-structures-and-algorithms/item02-asymptotic-analysis"
 date: 2026-05-15T02:00:00
 description: "알고리즘 성능을 입력 크기에 대한 함수로 표현 — Big-O / Theta / Omega의 정확한 정의."
 tags: [data-structure, Algorithm, Complexity]

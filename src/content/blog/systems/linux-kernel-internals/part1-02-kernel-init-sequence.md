@@ -1,5 +1,6 @@
 ---
 title: "Part 1-2: 커널 초기화 시퀀스"
+slug: "systems/linux-kernel-internals/part1-02-kernel-init-sequence"
 date: 2026-05-12T02:00:00
 description: "start_kernel() — 서브시스템 초기화 순서. early_init / arch_init / rest_init."
 tags: [Linux, Kernel, Init]

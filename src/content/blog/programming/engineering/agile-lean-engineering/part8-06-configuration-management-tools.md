@@ -1,5 +1,6 @@
 ---
 title: "Part 8-06: Configuration Management — Ansible/Chef/Puppet"
+slug: "programming/engineering/agile-lean-engineering/part8-06-configuration-management-tools"
 date: 2026-05-20T11:00:00
 description: "push vs pull·agent vs agentless — 세 도구 비교."
 series: "Agile & Lean Software Engineering"

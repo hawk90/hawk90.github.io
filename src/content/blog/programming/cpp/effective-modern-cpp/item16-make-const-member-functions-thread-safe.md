@@ -1,5 +1,6 @@
 ---
 title: "항목 16: const 멤버 함수는 스레드 안전하게 만들라"
+slug: "programming/cpp/effective-modern-cpp/item16-make-const-member-functions-thread-safe"
 date: 2026-05-04T16:00:00
 description: "캐싱·mutable 상태가 있는 const 멤버 함수에서 데이터 경쟁 — mutex/atomic으로 보호."
 tags: [cpp, const, thread-safety, modern-cpp]

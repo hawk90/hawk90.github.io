@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: BoW Memory — 직접 메모리 접근"
+slug: "embedded/hardware/bow/chapter04-bow-memory"
 date: 2026-05-16T04:00:00
 description: "Memory-coherent extension — D2D 위에 CXL·OMI를 얹어 메모리 칩렛을 붙이는 BoW의 메모리 풀링 모드."
 series: "BoW 개요"

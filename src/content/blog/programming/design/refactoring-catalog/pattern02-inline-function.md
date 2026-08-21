@@ -1,5 +1,6 @@
 ---
 title: "Pattern 2: Inline Function"
+slug: "programming/design/refactoring-catalog/pattern02-inline-function"
 date: 2026-05-02T02:00:00
 description: "함수 본문이 이름만큼 명확하면 인라인 — Extract Function의 역연산."
 series: "Refactoring Catalog (Fowler 2nd ed)"

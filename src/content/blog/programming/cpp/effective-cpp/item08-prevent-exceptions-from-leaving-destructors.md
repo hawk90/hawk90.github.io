@@ -1,5 +1,6 @@
 ---
 title: "항목 8: 소멸자에서 예외가 나가지 않게 하라"
+slug: "programming/cpp/effective-cpp/item08-prevent-exceptions-from-leaving-destructors"
 date: 2026-05-04T08:00:00
 description: "예외 진행 중 소멸자에서 또 예외 → terminate. 자원 정리 실패 처리 패턴과 C++11 noexcept 기본."
 tags: [cpp, effective-c++, Destructor, Exception]

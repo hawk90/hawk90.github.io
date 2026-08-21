@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Coding with Style"
+slug: "programming/cpp/professional-cpp/chapter03-coding-with-style"
 date: 2026-05-05T03:00:00
 description: "코딩 스타일 — 문서화 / 주석 / 명명 / decomposition / 일관성."
 tags: [cpp, Style, Naming]

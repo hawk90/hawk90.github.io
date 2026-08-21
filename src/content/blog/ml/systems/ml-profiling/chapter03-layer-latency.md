@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: 레이어별 지연 분석"
+slug: "ml/systems/ml-profiling/chapter03-layer-latency"
 date: 2026-05-16T03:00:00
 description: "어느 layer가 느린가 — top-K hotspot 찾기."
 series: "ML 시스템 프로파일링"

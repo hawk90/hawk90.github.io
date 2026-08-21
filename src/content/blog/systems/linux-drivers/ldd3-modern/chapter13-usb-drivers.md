@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: USB Drivers"
+slug: "systems/linux-drivers/ldd3-modern/chapter13-usb-drivers"
 date: 2026-05-13T13:00:00
 description: "usb_driver·URB·endpoint — USB 호스트 사이드 드라이버."
 series: "Linux Device Drivers (LDD3)"

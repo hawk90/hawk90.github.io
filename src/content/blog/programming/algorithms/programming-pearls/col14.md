@@ -1,5 +1,6 @@
 ---
 title: "Column 14: Heaps"
+slug: "programming/algorithms/programming-pearls/col14"
 date: 2026-05-11T14:00:00
 description: "Heaps"
 series: "Programming Pearls"

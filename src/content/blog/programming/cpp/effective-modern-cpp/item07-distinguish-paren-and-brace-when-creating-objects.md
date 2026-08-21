@@ -1,5 +1,6 @@
 ---
 title: "항목 7: 객체 생성 시 ()와 {}를 구분하라"
+slug: "programming/cpp/effective-modern-cpp/item07-distinguish-paren-and-brace-when-creating-objects"
 date: 2026-05-04T07:00:00
 description: "C++의 4가지 초기화 문법 — uniform init {}의 강점, initializer_list 함정, 선택 기준."
 tags: [cpp, Initialization, modern-cpp]

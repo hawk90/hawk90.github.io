@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: Approximate Inference"
+slug: "ml/foundations/bishop-prml/chapter10-approximate-inference"
 date: 2026-05-16T10:00:00
 description: "Variational·EP·local methods — deterministic approximation."
 series: "Pattern Recognition and Machine Learning"

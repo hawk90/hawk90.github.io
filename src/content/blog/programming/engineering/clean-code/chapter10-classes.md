@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 클래스"
+slug: "programming/engineering/clean-code/chapter10-classes"
 date: 2026-05-11T10:00:00
 description: "클래스도 작아야 한다. SRP, 응집도, 책임 분리. 변경 격리를 위한 추상 설계."
 tags: [CleanCode, Classes, SRP, robert-martin]

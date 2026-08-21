@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: One-Parameter Models"
+slug: "math/probability/hoff-bayesian/chapter03-one-parameter"
 date: 2026-05-15T03:00:00
 description: "Binomial·Poisson·exponential — 1-parameter Bayesian의 표준."
 series: "A First Course in Bayesian Statistical Methods"

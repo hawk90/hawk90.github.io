@@ -1,5 +1,6 @@
 ---
 title: "제4권 4장: 단락 짜기"
+slug: "writing/uri-geul-baro-sseugi/vol4-ch04"
 date: 2026-05-14T16:00:00
 description: "단락 구성의 원리. 하나의 생각, 하나의 단락으로 글의 흐름 만들기."
 series: "우리글 바로쓰기"

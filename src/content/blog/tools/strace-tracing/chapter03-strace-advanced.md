@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: strace 고급 — 필터 / 통계 / multi-process"
+slug: "tools/strace-tracing/chapter03-strace-advanced"
 date: 2026-05-17T03:00:00
 description: "-c (통계), -y (fd 이름), -k (콜스택), -e signal, -e network."
 tags: [strace, Advanced]

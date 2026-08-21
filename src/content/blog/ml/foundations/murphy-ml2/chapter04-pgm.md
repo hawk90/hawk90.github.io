@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Graphical Models"
+slug: "ml/foundations/murphy-ml2/chapter04-pgm"
 date: 2026-05-16T04:00:00
 description: "Bayes net·MRF·factor graph — conditional independence의 그림."
 series: "Probabilistic Machine Learning: Advanced Topics"

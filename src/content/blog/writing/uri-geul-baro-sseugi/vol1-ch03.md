@@ -1,5 +1,6 @@
 ---
 title: "제1권 3장: 느낌을 살리는 글"
+slug: "writing/uri-geul-baro-sseugi/vol1-ch03"
 date: 2026-05-14T03:00:00
 description: "감각적 표현의 중요성. 추상적 관념 대신 구체적 느낌을 담는 글쓰기."
 series: "우리글 바로쓰기"

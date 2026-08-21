@@ -1,5 +1,6 @@
 ---
 title: "Part 7-08: Feature Flags · Feature Toggle"
+slug: "programming/engineering/agile-lean-engineering/part7-08-feature-flags-toggle"
 date: 2026-05-24T01:00:00
 description: "release·operational·permission·experiment toggle — Hodgson 분류."
 series: "Agile & Lean Software Engineering"

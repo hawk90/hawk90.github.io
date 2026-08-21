@@ -1,5 +1,6 @@
 ---
 title: "Part 9-07: SPACE Framework — developer productivity"
+slug: "programming/engineering/agile-lean-engineering/part9-07-space-framework"
 date: 2026-05-20T12:00:00
 description: "Satisfaction·Performance·Activity·Communication·Efficiency."
 series: "Agile & Lean Software Engineering"

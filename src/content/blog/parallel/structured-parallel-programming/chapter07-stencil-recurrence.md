@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Stencil and Recurrence"
+slug: "parallel/structured-parallel-programming/chapter07-stencil-recurrence"
 date: 2026-05-22T02:00:00
 description: "Stencil과 Recurrence 패턴 — 이웃 의존 계산, 이미지 필터, PDE"
 series: "Structured Parallel Programming"

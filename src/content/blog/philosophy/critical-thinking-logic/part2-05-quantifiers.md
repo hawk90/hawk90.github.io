@@ -1,5 +1,6 @@
 ---
 title: "Part 2-5: 양화사 / 변항"
+slug: "philosophy/critical-thinking-logic/part2-05-quantifiers"
 date: 2026-05-14T09:00:00
 description: "∀ (전칭) / ∃ (존재). 양화사 부정 / 교환. 술어 논리 추론 규칙."
 tags: [Logic, Quantifier, Universal, Existential]

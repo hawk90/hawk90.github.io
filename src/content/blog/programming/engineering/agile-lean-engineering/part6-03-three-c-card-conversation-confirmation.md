@@ -1,5 +1,6 @@
 ---
 title: "Part 6-03: 3C — Card · Conversation · Confirmation"
+slug: "programming/engineering/agile-lean-engineering/part6-03-three-c-card-conversation-confirmation"
 date: 2026-05-23T10:00:00
 description: "Jeffries의 3C — story는 카드가 아니라 대화의 약속."
 series: "Agile & Lean Software Engineering"

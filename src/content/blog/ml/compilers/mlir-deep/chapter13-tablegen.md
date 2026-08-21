@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: TableGen — ODS·DRR"
+slug: "ml/compilers/mlir-deep/chapter13-tablegen"
 date: 2026-05-16T13:00:00
 description: "Op·pattern을 선언적으로 — TableGen의 두 dialect."
 series: "MLIR 심화"

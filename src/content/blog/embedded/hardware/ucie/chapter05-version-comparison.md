@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: UCIe 1.0 vs 2.0 vs 3.0"
+slug: "embedded/hardware/ucie/chapter05-version-comparison"
 date: 2026-05-19T05:00:00
 description: "버전별 핵심 변화 — bandwidth·management·security."
 series: "UCIe 심화"

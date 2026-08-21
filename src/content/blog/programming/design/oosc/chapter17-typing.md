@@ -1,5 +1,6 @@
 ---
 title: "Ch 17: Typing"
+slug: "programming/design/oosc/chapter17-typing"
 date: 2026-05-19T17:00:00
 description: "타이핑 — 정적 vs 동적, 공변성, 반공변성, 앵커 타입."
 series: "Object-Oriented Software Construction"

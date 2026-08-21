@@ -1,5 +1,6 @@
 ---
 title: "Tip 96: Sign Your Work"
+slug: "programming/engineering/pragmatic-programmer/tip96"
 date: 2026-05-13T00:00:00
 description: "자신의 작업에 서명하라. 장인은 자신의 작품에 자부심을 갖고 이름을 남긴다."
 series: "The Pragmatic Programmer"

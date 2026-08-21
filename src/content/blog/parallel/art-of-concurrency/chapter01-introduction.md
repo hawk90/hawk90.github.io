@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Want to Go Faster?"
+slug: "parallel/art-of-concurrency/chapter01-introduction"
 date: 2025-05-20T01:00:00
 description: "동시성 프로그래밍이 필요한 이유 — 멀티코어 시대의 성능 향상 전략"
 series: "The Art of Concurrency"

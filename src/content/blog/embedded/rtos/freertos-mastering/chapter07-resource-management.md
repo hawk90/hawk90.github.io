@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Resource Management"
+slug: "embedded/rtos/freertos-mastering/chapter07-resource-management"
 date: 2026-05-09T07:00:00
 description: "critical section·mutex + PI·gatekeeper — 공유 자원 보호와 priority inversion."
 series: "Mastering the FreeRTOS Real Time Kernel"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 4: Actions, Plans, and Direct Effects"
+slug: "ml/foundations/pearl-causality/chapter04-actions"
 date: 2026-05-16T04:00:00
 description: "Atomic·conditional intervention·direct·indirect effect."
 series: "Causality: Models, Reasoning, and Inference"

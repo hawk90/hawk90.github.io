@@ -1,5 +1,6 @@
 ---
 title: "Pattern 48: Inline Method (in TDD)"
+slug: "programming/engineering/tdd-patterns/pattern48-inline-method"
 date: 2026-05-10T00:00:00
 description: "잘못된 extract 복구·1줄 helper 제거. Extract Method의 역연산."
 series: "TDD by Example — Patterns Deep Dive"

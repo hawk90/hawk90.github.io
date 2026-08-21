@@ -1,5 +1,6 @@
 ---
 title: "Ch 8: Designing concurrent code"
+slug: "parallel/cpp-concurrency-in-action/chapter08-designing-concurrent-code"
 date: 2026-05-06T08:00:00
 description: "작업 분할 — 데이터 vs 작업 병렬, false sharing, 작업 단위 결정."
 tags: [cpp, C, Concurrency, Design, Parallelism, false-sharing]

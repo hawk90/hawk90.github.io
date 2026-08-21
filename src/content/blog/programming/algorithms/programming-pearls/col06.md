@@ -1,5 +1,6 @@
 ---
 title: "Column 6: Perspective on Performance"
+slug: "programming/algorithms/programming-pearls/col06"
 date: 2026-05-11T06:00:00
 description: "Perspective on Performance"
 series: "Programming Pearls"

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 17: Inline Class"
+slug: "programming/design/refactoring-catalog/pattern17-inline-class"
 date: 2026-05-02T17:00:00
 description: "Class가 더 이상 충분한 책임을 갖지 못하면 다른 class로 합친다."
 series: "Refactoring Catalog (Fowler 2nd ed)"

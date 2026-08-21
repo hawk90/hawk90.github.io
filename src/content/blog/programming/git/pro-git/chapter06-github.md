@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: GitHub"
+slug: "programming/git/pro-git/chapter06-github"
 date: 2026-05-17T06:00:00
 description: "GitHub 워크플로우 — fork / PR / 코드 리뷰 / Issues / Actions."
 tags: [Git, GitHub, pull-request]

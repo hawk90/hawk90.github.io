@@ -1,5 +1,6 @@
 ---
 title: "Ch 2.9: Trailing Bits와 Byte Alignment"
+slug: "media/av1/chapter02-bitstream/09-trailing"
 date: 2026-05-16T03:09:00
 description: "OBU 끝의 trailing_one_bit + trailing_zero_bits, byte_alignment 함수, padding OBU."
 tags: [AV1, Video, Codec, ByteAlignment, Padding]

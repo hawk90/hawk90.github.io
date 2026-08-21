@@ -1,5 +1,6 @@
 ---
 title: "Ch 9: Sorting"
+slug: "parallel/intro-to-parallel-computing/chapter09-sorting"
 date: 2026-05-21T09:00:00
 description: "병렬 정렬 알고리즘 — Bitonic Sort, Sample Sort, Parallel Quicksort"
 series: "Introduction to Parallel Computing"

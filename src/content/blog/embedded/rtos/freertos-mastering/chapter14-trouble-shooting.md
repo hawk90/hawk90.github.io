@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Trouble Shooting"
+slug: "embedded/rtos/freertos-mastering/chapter14-trouble-shooting"
 date: 2026-05-09T14:00:00
 description: "stack overflow·malloc failed·assert — FreeRTOS 흔한 버그 패턴."
 series: "Mastering the FreeRTOS Real Time Kernel"

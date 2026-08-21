@@ -1,5 +1,6 @@
 ---
 title: "Chapter 23: A Writer's Decisions"
+slug: "writing/on-writing-well/ch23-decisions"
 date: 2026-05-14T23:00:00
 description: "글쓰기는 결정의 연속입니다. 모든 문장이 단어 선택, 순서, 자르기의 결정입니다."
 series: "On Writing Well"

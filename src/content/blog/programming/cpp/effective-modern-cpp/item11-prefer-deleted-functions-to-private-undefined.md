@@ -1,5 +1,6 @@
 ---
 title: "항목 11: 정의되지 않은 private 함수보다 = delete를 선호하라"
+slug: "programming/cpp/effective-modern-cpp/item11-prefer-deleted-functions-to-private-undefined"
 date: 2026-05-04T11:00:00
 description: "= delete가 C++98 private 트릭보다 안전·강력 — 컴파일 타임, public 가능, 비-멤버·템플릿 특수화도 차단."
 tags: [cpp, deleted-functions, special-member, modern-cpp]

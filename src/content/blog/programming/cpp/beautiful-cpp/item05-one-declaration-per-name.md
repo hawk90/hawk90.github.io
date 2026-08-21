@@ -1,5 +1,6 @@
 ---
 title: "항목 5: 선언당 단 하나의 이름만 선언하라"
+slug: "programming/cpp/beautiful-cpp/item05-one-declaration-per-name"
 date: 2026-05-05T05:00:00
 description: "한 줄에 여러 변수를 선언할 때의 함정 — 포인터/참조 수식어 위치, 초기화 누락, 가독성 손실."
 tags: [cpp, Declarations, code-style]

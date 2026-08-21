@@ -1,5 +1,6 @@
 ---
 title: "Ch 29: Clean Embedded Architecture"
+slug: "programming/design/clean-architecture/chapter29-clean-embedded-architecture"
 date: 2026-05-01T05:00:00
 description: "임베디드에서 Clean Architecture를 적용한다는 것. firmware와 software를 구분하고, HAL로 하드웨어를 격리한다."
 tags: [Architecture, Embedded, HAL]

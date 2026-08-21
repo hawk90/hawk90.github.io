@@ -1,5 +1,6 @@
 ---
 title: "Part 1-4: init / systemd — PID 1"
+slug: "systems/linux-kernel-internals/part1-04-init-systemd-pid1"
 date: 2026-05-12T04:00:00
 description: "kernel_init → /sbin/init. SysV init / systemd / busybox 비교."
 tags: [Linux, init, systemd]

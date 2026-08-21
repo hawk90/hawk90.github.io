@@ -1,5 +1,6 @@
 ---
 title: "Pattern 32: Replace Derived Variable with Query"
+slug: "programming/design/refactoring-catalog/pattern32-replace-derived-variable-with-query"
 date: 2026-05-02T08:00:00
 description: "계산 가능한 값을 변수로 저장하지 말고 query로 — single source of truth."
 series: "Refactoring Catalog (Fowler 2nd ed)"

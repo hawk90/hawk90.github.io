@@ -1,5 +1,6 @@
 ---
 title: "Ch 1: Essential Features"
+slug: "programming/cpp/extreme-c/chapter01-essential-features"
 date: 2026-05-05T01:00:00
 description: "C 핵심 기능 — preprocessor, 변수 / 함수 / 포인터, 함수 호출 규약."
 tags: [C, Preprocessor, Pointers]

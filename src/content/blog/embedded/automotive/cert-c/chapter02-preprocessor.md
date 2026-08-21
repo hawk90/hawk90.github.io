@@ -1,5 +1,6 @@
 ---
 title: "Ch 2: PRE — Preprocessor와 매크로의 보안 함정"
+slug: "embedded/automotive/cert-c/chapter02-preprocessor"
 date: 2026-05-18T03:00:00
 description: "함수 매크로 대신 inline(PRE00), 괄호화(PRE01), side effect 회피(PRE31), 헤더 guard, ##·# 함정."
 tags: [cert-c, preprocessor, macro, header-guard, side-effect]

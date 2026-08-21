@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Threading Tools"
+slug: "parallel/art-of-concurrency/chapter11-threading-tools"
 date: 2025-05-20T11:00:00
 description: "동시성 디버깅과 프로파일링 도구 — 레이스 탐지, 성능 분석"
 series: "The Art of Concurrency"

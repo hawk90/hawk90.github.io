@@ -1,5 +1,6 @@
 ---
 title: "항목 24: 보편 참조와 rvalue 참조를 구분하라"
+slug: "programming/cpp/effective-modern-cpp/item24-distinguish-universal-references-from-rvalue-references"
 date: 2026-05-04T00:00:00
 description: "T&&는 두 의미 — 정확한 식별 조건과 시각적 구분법."
 tags: [cpp, universal-reference, rvalue-reference, modern-cpp]

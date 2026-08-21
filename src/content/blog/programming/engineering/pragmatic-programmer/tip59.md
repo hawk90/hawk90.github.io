@@ -1,5 +1,6 @@
 ---
 title: "Tip 59: Use Blackboards to Coordinate Workflow"
+slug: "programming/engineering/pragmatic-programmer/tip59"
 date: 2026-05-11T11:00:00
 description: "블랙보드로 워크플로를 조율하라. 독립적인 에이전트들이 공유 공간에 정보를 게시하고 읽는다."
 series: "The Pragmatic Programmer"

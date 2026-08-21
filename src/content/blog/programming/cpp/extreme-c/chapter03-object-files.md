@@ -1,5 +1,6 @@
 ---
 title: "Ch 3: Object Files"
+slug: "programming/cpp/extreme-c/chapter03-object-files"
 date: 2026-05-05T03:00:00
 description: "ELF 포맷, 심볼 테이블, 정적 / 동적 라이브러리, 재배치."
 tags: [C, ELF, Library, Linker]

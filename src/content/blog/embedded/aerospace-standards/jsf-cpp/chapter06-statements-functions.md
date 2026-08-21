@@ -1,5 +1,6 @@
 ---
 title: "Ch 6: Statements + Functions"
+slug: "embedded/aerospace-standards/jsf-cpp/chapter06-statements-functions"
 date: 2026-05-18T07:00:00
 description: "JSF C++ — goto/setjmp 금지, varargs 금지, 재귀 금지, 함수 parameter 한계, return value 검사."
 tags: [jsf-cpp, statements, functions, goto, varargs, recursion, return-value]

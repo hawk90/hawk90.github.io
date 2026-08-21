@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Avionics Buses — MIL-STD-1553·ARINC-429·AFDX"
+slug: "embedded/avionics/digital-avionics-handbook/chapter05-buses"
 date: 2026-05-18T05:00:00
 description: "Avionics 데이터 버스 비교 — 1553(군용), 429(민항), 664/AFDX(switched ethernet)."
 series: "Digital Avionics Handbook"

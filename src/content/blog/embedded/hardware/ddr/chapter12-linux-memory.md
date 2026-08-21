@@ -1,5 +1,6 @@
 ---
 title: "Ch 12: 리눅스 메모리 관리 — mm/, Page Allocator, NUMA"
+slug: "embedded/hardware/ddr/chapter12-linux-memory"
 date: 2026-05-16T13:00:00
 description: "리눅스 커널의 메모리 관리: mm/ 서브시스템, Buddy Allocator, Zone, NUMA"
 series: "DDR Memory Deep Dive"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Sufficiency, Ancillarity, and All That"
+slug: "math/probability/jaynes-logic/chapter07-sufficiency"
 date: 2026-05-16T07:00:00
 description: "Sufficient statistic·exponential family — 데이터의 압축."
 series: "Probability Theory: The Logic of Science"

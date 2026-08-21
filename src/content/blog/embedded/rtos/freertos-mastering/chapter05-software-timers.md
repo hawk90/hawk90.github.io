@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: Software Timer Management"
+slug: "embedded/rtos/freertos-mastering/chapter05-software-timers"
 date: 2026-05-09T05:00:00
 description: "xTimerCreate·one-shot·auto-reload — 타이머 데몬과 콜백."
 series: "Mastering the FreeRTOS Real Time Kernel"

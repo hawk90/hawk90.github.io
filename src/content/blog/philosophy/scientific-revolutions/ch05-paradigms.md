@@ -1,5 +1,6 @@
 ---
 title: "Ch 5: The Priority of Paradigms"
+slug: "philosophy/scientific-revolutions/ch05-paradigms"
 date: 2026-05-14T06:00:00
 description: "패러다임의 우선성 — 규칙 이전의 모형."
 series: "The Structure of Scientific Revolutions"

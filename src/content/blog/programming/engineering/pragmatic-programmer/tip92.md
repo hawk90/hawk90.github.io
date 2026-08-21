@@ -1,5 +1,6 @@
 ---
 title: "Tip 92: Test State Coverage, Not Code Coverage"
+slug: "programming/engineering/pragmatic-programmer/tip92"
 date: 2026-05-12T20:00:00
 description: "코드 커버리지가 아니라 상태 커버리지를 테스트하라. 실행된 줄이 아니라 검증된 상태가 중요하다."
 series: "The Pragmatic Programmer"

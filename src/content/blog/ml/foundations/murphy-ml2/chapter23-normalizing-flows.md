@@ -1,5 +1,6 @@
 ---
 title: "Ch 23: Normalizing Flows"
+slug: "ml/foundations/murphy-ml2/chapter23-normalizing-flows"
 date: 2026-05-16T23:00:00
 description: "Invertible neural network·exact likelihood — flow의 정수."
 series: "Probabilistic Machine Learning: Advanced Topics"

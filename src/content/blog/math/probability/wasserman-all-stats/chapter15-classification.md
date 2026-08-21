@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: Classification"
+slug: "math/probability/wasserman-all-stats/chapter15-classification"
 date: 2026-05-16T15:00:00
 description: "Bayes classifier·LDA·SVM·tree — 분류기의 통계적 토대."
 series: "All of Statistics"

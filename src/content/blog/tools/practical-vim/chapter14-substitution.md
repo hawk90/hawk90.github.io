@@ -1,5 +1,6 @@
 ---
 title: "Ch 14: Substitution"
+slug: "tools/practical-vim/chapter14-substitution"
 date: 2026-05-17T14:00:00
 description: ":s/find/replace/. flag (g, c, i). 캡처 그룹. 표현식 치환 (\\=)."
 tags: [Vim, Substitute, Substitution]

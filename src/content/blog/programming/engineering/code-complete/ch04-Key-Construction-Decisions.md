@@ -1,5 +1,6 @@
 ---
 title: "Chapter 4: Key Construction Decisions"
+slug: "programming/engineering/code-complete/ch04-Key-Construction-Decisions"
 date: 2026-05-11T04:00:00
 description: "construction 시작 전 결정 4가지 — 언어 선택, 컨벤션, 기술 파도 위치, 주요 관행 선택."
 series: "Code Complete"

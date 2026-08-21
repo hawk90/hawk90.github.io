@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: 아키텍처란 무엇인가"
+slug: "programming/design/clean-architecture/chapter15-what-is-architecture"
 date: 2026-05-01T15:00:00
 description: "아키텍처의 진짜 목적은 결정을 가능한 한 오래 연기하는 것. 개발·배포·운용·유지보수 네 가지 비용에 모두 영향을 준다."
 tags: [Architecture]

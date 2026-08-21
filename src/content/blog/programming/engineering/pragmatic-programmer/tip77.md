@@ -1,5 +1,6 @@
 ---
 title: "Tip 77: Work with a User to Think Like a User"
+slug: "programming/engineering/pragmatic-programmer/tip77"
 date: 2026-05-12T05:00:00
 description: "사용자와 함께 일해서 사용자처럼 생각하라. 사용자의 맥락을 이해해야 좋은 소프트웨어를 만든다."
 series: "The Pragmatic Programmer"

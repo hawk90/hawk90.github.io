@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Read Training — DQ/DQS Gate, Bit Delay"
+slug: "embedded/hardware/ddr/chapter07-read-training"
 date: 2026-05-16T08:00:00
 description: "DDR Read Training: DQS Gate Training, Read DQ 타이밍 조정, Bit별 Skew 보정"
 series: "DDR Memory Deep Dive"

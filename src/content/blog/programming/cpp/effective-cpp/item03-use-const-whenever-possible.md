@@ -1,5 +1,6 @@
 ---
 title: "항목 3: 가능한 모든 곳에 const를 사용하라"
+slug: "programming/cpp/effective-cpp/item03-use-const-whenever-possible"
 date: 2026-05-04T03:00:00
 description: "const 위치별 의미, 멤버 함수의 const, bitwise vs logical const, mutable, 중복 제거 패턴."
 tags: [cpp, effective-c++, const]

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 15: Priority Queue"
+slug: "parallel/parallel-principles/ch15-priority-queues"
 date: 2026-05-06T15:00:00
 description: "동시 우선순위 큐 — Heap 기반 / Skiplist 기반 / Linden-Jonsson Relaxed PQ."
 series: "The Art of Multiprocessor Programming"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 13: Neural Networks for Tabular Data"
+slug: "ml/foundations/murphy-ml1/chapter13-nn-tabular"
 date: 2026-05-16T13:00:00
 description: "MLP·backprop·regularization — DL의 시작."
 series: "Probabilistic Machine Learning: An Introduction"

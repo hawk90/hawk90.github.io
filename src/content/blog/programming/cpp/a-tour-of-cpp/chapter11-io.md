@@ -1,5 +1,6 @@
 ---
 title: "Ch 11: Input and Output"
+slug: "programming/cpp/a-tour-of-cpp/chapter11-io"
 date: 2026-05-22T11:00:00
 description: "입출력 — iostream, fstream, std::format"
 series: "A Tour of C++"

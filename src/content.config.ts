@@ -14,6 +14,20 @@ const blogCollection = defineCollection({
     // Required
     title: z.string(),
     date: z.coerce.date(),
+    /**
+     * The post's URL, and the reason a folder is not one.
+     *
+     * Astro's glob loader substitutes this for the entry id, so `slug:` present
+     * means the URL is whatever it says; `slug:` absent means the URL is the
+     * file path. Required, so the second case cannot happen: the whole point of
+     * freezing 3387 of these at their current path was that reorganising the
+     * tree afterwards moves no URL, and deleting one line would quietly hand
+     * that guarantee back — invisibly, because every value equals its path
+     * today and nothing would look different until the file moved.
+     *
+     * Not validated against the path on purpose. Equal today, free to diverge.
+     */
+    slug: z.string(),
 
     // Optional metadata
     description: z.string().optional(),

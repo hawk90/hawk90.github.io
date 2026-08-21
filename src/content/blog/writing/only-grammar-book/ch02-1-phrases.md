@@ -1,5 +1,6 @@
 ---
 title: "Chapter 2.1: Phrases"
+slug: "writing/only-grammar-book/ch02-1-phrases"
 date: 2026-05-14T02:10:00
 description: "구의 종류 — 명사구, 동사구, 전치사구, 동명사구, 부정사구, 분사구."
 series: "The Only Grammar Book You'll Ever Need"

@@ -1,5 +1,6 @@
 ---
 title: "Pattern 49: Extract Interface"
+slug: "programming/engineering/tdd-patterns/pattern49-extract-interface"
 date: 2026-05-10T01:00:00
 description: "Test seam·dependency 분리 — interface 추출로 DIP 실현."
 series: "TDD by Example — Patterns Deep Dive"

@@ -1,5 +1,6 @@
 ---
 title: "Chapter 5: Communicating Sequential Processes (CSP)"
+slug: "parallel/seven-concurrency-models/ch05-csp"
 date: 2026-05-06T05:00:00
 description: "Hoare의 CSP — 채널 중심, identity 없는 메시지. Go goroutine, Clojure core.async."
 series: "Seven Concurrency Models in Seven Weeks"

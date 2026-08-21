@@ -1,5 +1,6 @@
 ---
 title: "Rule 6: Keep an Audit Trail"
+slug: "tools/debugging/agans-9-rules/chapter06-audit-trail"
 date: 2026-05-17T06:00:00
 description: "기록 없는 디버깅은 같은 실수를 반복한다."
 series: "Debugging: The 9 Indispensable Rules"

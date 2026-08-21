@@ -1,5 +1,6 @@
 ---
 title: "Part 4-2: 반론과 재반론"
+slug: "philosophy/critical-thinking-logic/part4-02-rebuttal-and-counter-rebuttal"
 date: 2026-05-14T15:00:00
 description: "반론 다루기 — Toulmin 모델. 논증의 강화."
 tags: [Logic, Rebuttal, toulmin-model]

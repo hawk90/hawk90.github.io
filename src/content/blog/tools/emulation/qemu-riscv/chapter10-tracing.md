@@ -1,5 +1,6 @@
 ---
 title: "Ch 10: 성능 측정과 트레이싱"
+slug: "tools/emulation/qemu-riscv/chapter10-tracing"
 date: 2026-05-17T04:00:00
 description: "QEMU 트레이싱 — TCG 프로파일링, -d 옵션, 성능 분석을 다룬다."
 series: "RISC-V QEMU 심화"

@@ -1,5 +1,6 @@
 ---
 title: "Ch 15: 성능 최적화"
+slug: "embedded/hardware/nvme/chapter15-performance"
 date: 2026-05-16T16:00:00
 description: "NVMe 성능 최적화: Queue Depth, 폴링 모드, NUMA 최적화를 분석한다"
 series: "NVMe Deep Dive"

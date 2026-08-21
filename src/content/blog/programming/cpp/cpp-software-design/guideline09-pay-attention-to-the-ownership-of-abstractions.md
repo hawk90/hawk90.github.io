@@ -1,5 +1,6 @@
 ---
 title: "가이드라인 9: 추상화의 소유권에 주의하라"
+slug: "programming/cpp/cpp-software-design/guideline09-pay-attention-to-the-ownership-of-abstractions"
 date: 2026-05-02T09:00:00
 description: "추상화의 소유는 누가 인터페이스를 정의하느냐의 문제다. high-level이 소유해야 한다는, Dependency Inversion의 핵심."
 tags: [cpp, software-design, SOLID, DIP, Architecture]

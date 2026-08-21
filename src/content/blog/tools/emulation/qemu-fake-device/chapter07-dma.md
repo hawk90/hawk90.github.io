@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: DMA 버퍼 처리"
+slug: "tools/emulation/qemu-fake-device/chapter07-dma"
 date: 2026-05-17T07:00:00
 description: "QEMU 디바이스에서 DMA를 통해 게스트 메모리에 접근한다."
 tags: [QEMU, DMA, Memory, pci_dma_read, IOMMU]

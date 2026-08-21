@@ -1,5 +1,6 @@
 ---
 title: "Ch 7: Pragmatics"
+slug: "programming/design/ooad/chapter07-pragmatics"
 date: 2026-05-19T07:00:00
 description: "실무 — 팀 관리, 릴리스 계획, 재사용, 품질 보증."
 series: "Object-Oriented Analysis and Design with Applications"

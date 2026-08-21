@@ -1,5 +1,6 @@
 ---
 title: "Ch 21: Variational Autoencoders"
+slug: "ml/foundations/murphy-ml2/chapter21-vae"
 date: 2026-05-16T21:00:00
 description: "ELBO·reparameterization·posterior collapse — VAE 일주."
 series: "Probabilistic Machine Learning: Advanced Topics"

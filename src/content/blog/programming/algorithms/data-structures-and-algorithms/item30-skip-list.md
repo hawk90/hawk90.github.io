@@ -1,5 +1,6 @@
 ---
 title: "DSA 30: Skip List"
+slug: "programming/algorithms/data-structures-and-algorithms/item30-skip-list"
 date: 2026-05-15T06:00:00
 description: "확률적 균형 — 정렬 트리만큼 빠르면서 구현 단순. Redis sorted set의 토대."
 tags: [data-structure, Algorithm, skiplist, Probabilistic]
