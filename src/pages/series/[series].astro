@@ -3,27 +3,42 @@
  * Compatibility shim for the old public Series URLs.
  * Series is still metadata and powers previous/next navigation, but it is no
  * longer a standalone browse surface. Keep old inbound links recoverable while
- * sending readers back to the blog index.
+ * sending readers back to the blog.
+ *
+ * Each series goes to the most specific category that holds its posts, not to
+ * the blog index. All 28 pointed at /blog, which drops someone who followed a
+ * link about GNU Make into a list of 726 posts; a search engine reads a
+ * redirect to a generic index as a soft 404 and may keep neither URL.
  */
-import { getPublishedPosts, getAllSeries } from '../../lib/posts';
-import { toSlug } from '../../lib/utils';
+import { getPublishedPosts, getAllSeries, deepestCommonCategory } from '../../lib/posts';
+import { toSlug, getCategoryUrl } from '../../lib/utils';
 
 export async function getStaticPaths() {
-  const series = getAllSeries(await getPublishedPosts());
-  return series.map((name) => ({ params: { series: toSlug(name) } }));
+  const posts = await getPublishedPosts();
+  return getAllSeries(posts).map((name) => {
+    const category = deepestCommonCategory(posts.filter((post) => post.data.series === name));
+    return {
+      params: { series: toSlug(name) },
+      // No shared category means no destination more honest than the index.
+      props: { destination: category ? getCategoryUrl(category) : '/blog' },
+    };
+  });
 }
 
-const destination = '/blog';
+const { destination } = Astro.props;
+// Absolute, matching every other page: a relative canonical resolves against
+// the page it sits on.
+const canonical = new URL(destination, Astro.site).href;
 ---
 <html lang="ko">
   <head>
     <meta charset="utf-8" />
-    <title>블로그로 이동합니다</title>
+    <title>이동합니다</title>
     <meta name="robots" content="noindex" />
-    <link rel="canonical" href={destination} />
+    <link rel="canonical" href={canonical} />
     <meta http-equiv="refresh" content={`0; url=${destination}`} />
   </head>
   <body>
-    <p>시리즈 페이지가 블로그로 통합되었습니다. <a href={destination}>블로그로 이동</a></p>
+    <p>시리즈 페이지가 블로그로 통합되었습니다. <a href={destination}>{destination}</a> 로 이동합니다.</p>
   </body>
 </html>

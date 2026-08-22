@@ -40,6 +40,10 @@ const checks = [
   // Reads dist/, so it must follow the build: a link is only broken once you
   // know which pages were actually generated.
   ['rendered link resolution', ['npm', 'run', 'audit:rendered-links']],
+  // No page links these addresses, so the link audits cannot see them; the
+  // only thing that knows they should resolve is the shape of the post URLs.
+  // Gated because the fix was removed once and nothing noticed.
+  ['URL prefix resolution', ['npm', 'run', 'audit:url-prefixes']],
   ['sitemap vs. robots', ['npm', 'run', 'audit:sitemap']],
   // Reads dist/ against data/published-urls.json. `slug:` being required stops
   // a URL from being lost by deleting the field; this is what stops it being

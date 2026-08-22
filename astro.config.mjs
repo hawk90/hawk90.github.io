@@ -1,4 +1,6 @@
 // @ts-check
+import { readdirSync, readFileSync } from 'node:fs';
+import { join, relative } from 'node:path';
 import { defineConfig } from 'astro/config';
 import { unified } from '@astrojs/markdown-remark';
 import tailwindcss from '@tailwindcss/vite';
@@ -15,6 +17,64 @@ import rehypeTableScroll from './src/lib/rehype-table-scroll.mjs';
 
 // This site is intentionally static and PAT-only. OAuth needs a separately
 // deployed server boundary; do not add OAuth callback routes to this project.
+
+/**
+ * The `/blog/<prefix>/` URLs that are noindex redirects rather than listings.
+ *
+ * These are the segments inside post URLs — `/blog/tools/debugging/postmortem`
+ * is what trimming a chapter URL gives you — and the category route builds a
+ * redirect at each so it resolves instead of 404ing. Being noindex they must
+ * stay out of the sitemap, and the filter below cannot tell them apart by
+ * shape: they look exactly like category URLs.
+ *
+ * Derived by reading frontmatter, because astro:content is not available in the
+ * config. `audit-sitemap-robots.mjs` fails the release if this ever disagrees
+ * with what the pages themselves declare, so the duplicated rule cannot drift
+ * in silence.
+ */
+function redirectPrefixUrls() {
+  const root = 'src/content/blog';
+  /** @type {Array<{slug: string, topics: string[]}>} */
+  const published = [];
+  /** @param {string} dir */
+  const walk = (dir) => {
+    for (const entry of readdirSync(dir, { withFileTypes: true })) {
+      const file = join(dir, entry.name);
+      if (entry.isDirectory()) { walk(file); continue; }
+      if (!entry.name.endsWith('.md')) continue;
+      const fm = readFileSync(file, 'utf8').match(/^---\s*\n([\s\S]*?)\n---/)?.[1];
+      if (!fm || /^draft:\s*true\s*$/m.test(fm)) continue;
+      const slug = fm.match(/^slug:\s*(.+)$/m)?.[1]?.trim().replace(/^['"]|['"]$/g, '')
+        ?? relative(root, file).replace(/\.md$/, '');
+      const block = fm.match(/^topics:\s*(\[.*\])/m)?.[1] ?? '[]';
+      const topics = [...block.matchAll(/["']([^"']+)["']/g)].map((m) => m[1]);
+      published.push({ slug: slug.replace(/\\/g, '/'), topics });
+    }
+  };
+  walk(root);
+
+  // Categories that hold a published post, itself or below — the ones the route
+  // actually builds a listing for. A topic implies its ancestors, and a child id
+  // extends its parent's, so trimming segments walks the trail.
+  const populated = new Set();
+  for (const { topics } of published) {
+    for (const topic of topics) {
+      const segments = topic.split('/');
+      for (let i = segments.length; i > 0; i--) populated.add(segments.slice(0, i).join('/'));
+    }
+  }
+
+  const urls = new Set();
+  for (const { slug } of published) {
+    const segments = slug.split('/');
+    for (let i = 1; i < segments.length; i++) {
+      const prefix = segments.slice(0, i).join('/');
+      if (!populated.has(prefix)) urls.add(`/blog/${prefix}/`);
+    }
+  }
+  return urls;
+}
+const redirectUrls = redirectPrefixUrls();
 
 // https://astro.build/config
 export default defineConfig({
@@ -79,7 +139,8 @@ export default defineConfig({
       !page.includes('/topics/') &&
       !page.includes('/series/') &&
       !page.endsWith('/random/') &&
-      !page.endsWith('/components/'),
+      !page.endsWith('/components/') &&
+      !redirectUrls.has(new URL(page).pathname),
   }),
   ],
 

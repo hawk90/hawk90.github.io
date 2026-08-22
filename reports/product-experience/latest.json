@@ -5,10 +5,10 @@
   },
   "pages": {
     "total": 28,
-    "documents": 25,
-    "redirects": 3,
-    "layoutCoverage": 25,
-    "titleCoverage": 25
+    "documents": 24,
+    "redirects": 4,
+    "layoutCoverage": 24,
+    "titleCoverage": 24
   },
   "checks": [
     {

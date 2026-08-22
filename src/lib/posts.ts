@@ -201,6 +201,61 @@ export function categoryIdsOf(post: BlogPost): Set<string> {
 }
 
 /**
+ * The most specific category that holds all of these posts.
+ *
+ * Used to answer "where should this address go instead?" for the URLs that no
+ * longer have a page of their own — a retired series hub, or one of the
+ * intermediate segments inside a post URL. Sending them all to `/blog` is the
+ * easy answer and the wrong one: 726 posts is not an answer to a reader who
+ * clicked a link about GNU Make, and a redirect to a generic index is what a
+ * search engine treats as a soft 404.
+ *
+ * Returns null for an empty set, or when the posts share no category at all —
+ * in which case there is no honest destination more specific than the index.
+ */
+export function deepestCommonCategory(posts: BlogPost[]): string | null {
+  if (!posts.length) return null;
+  let shared: Set<string> | null = null;
+  for (const post of posts) {
+    const ids = categoryIdsOf(post);
+    if (shared === null) shared = ids;
+    else for (const id of shared) if (!ids.has(id)) shared.delete(id);
+  }
+  // Deepest wins: `embedded/rtos` says more than `embedded`, and an id's depth
+  // is its number of segments because a child id extends its parent's.
+  return [...(shared ?? [])].sort((a, b) => b.split('/').length - a.split('/').length)[0] ?? null;
+}
+
+/**
+ * The URL segments inside post URLs that no page answers.
+ *
+ * `/blog/tools/debugging/postmortem/chapter01-...` is a real post, and a reader
+ * who trims it back — or a crawler walking up from it — asks for
+ * `/blog/tools/debugging/postmortem`, which is a folder name that was never a
+ * page. Every published post URL has one to three of these inside it.
+ *
+ * Skips any prefix that is already an addressable category, since those have a
+ * real page. Returns each remaining prefix with the posts beneath it, so the
+ * caller can decide where it should point.
+ */
+export function getDeadUrlPrefixes(
+  posts: BlogPost[],
+  isAddressable: (prefix: string) => boolean,
+): Array<{ prefix: string; posts: BlogPost[] }> {
+  const under = new Map<string, BlogPost[]>();
+  for (const post of posts) {
+    const segments = post.id.split('/');
+    for (let i = 1; i < segments.length; i++) {
+      const prefix = segments.slice(0, i).join('/');
+      if (isAddressable(prefix)) continue;
+      if (!under.has(prefix)) under.set(prefix, []);
+      under.get(prefix)!.push(post);
+    }
+  }
+  return [...under.entries()].map(([prefix, list]) => ({ prefix, posts: list }));
+}
+
+/**
  * 태그별 포스트 필터링 (대소문자 무시)
  */
 export function filterByTag(posts: BlogPost[], tag: string): BlogPost[] {

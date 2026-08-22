@@ -4,7 +4,8 @@ import PostRow from '../../../components/blog/PostRow.astro';
 import BlogSidebar from '../../../components/blog/BlogSidebar.astro';
 import Breadcrumb from '../../../components/common/Breadcrumb.astro';
 import { CATEGORIES, getCategoryById } from '../../../consts/categories';
-import { getPublishedPosts, filterByCategory } from '../../../lib/posts';
+import { getCategoryUrl } from '../../../lib/utils';
+import { getPublishedPosts, filterByCategory, getDeadUrlPrefixes, deepestCommonCategory } from '../../../lib/posts';
 
 export async function getStaticPaths() {
   const allPosts = await getPublishedPosts();
@@ -21,14 +22,28 @@ export async function getStaticPaths() {
     .filter((cat) => filterByCategory(allPosts, cat.id).length > 0)
     .map((cat) => ({
       params: { category: cat.id },
-      props: { categoryInfo: cat, allPosts },
+      props: { categoryInfo: cat, allPosts, destination: null as string | null },
     }));
 
-  return categoryPages;
+  // The segments inside a post URL. `/blog/tools/debugging/postmortem` is what
+  // a reader gets by trimming a chapter URL back, and it was a 404 on all 28 of
+  // them — together they cover every published post. They are not categories,
+  // so no page claims them; rather than invent one, each resolves to the most
+  // specific category that actually holds the posts underneath it.
+  const addressable = new Set(categoryPages.map((page) => page.params.category));
+  const prefixPages = getDeadUrlPrefixes(allPosts, (prefix) => addressable.has(prefix))
+    .map(({ prefix, posts }) => ({ prefix, category: deepestCommonCategory(posts) }))
+    .filter((entry) => entry.category !== null && addressable.has(entry.category))
+    .map(({ prefix, category }) => ({
+      params: { category: prefix },
+      props: { categoryInfo: null, allPosts, destination: getCategoryUrl(category!) },
+    }));
+
+  return [...categoryPages, ...prefixPages];
 }
 
 const { category } = Astro.params;
-const { categoryInfo, allPosts } = Astro.props;
+const { categoryInfo, allPosts, destination } = Astro.props;
 
 // Two category names repeat under different parents — Systems lives at both
 // `systems` and `ml/systems`, Compilers at `programming/compilers` and
@@ -90,8 +105,26 @@ function formatChapter(key: string): string {
     .join(' ');
   return `Chapter ${num} · ${title}`;
 }
+
+// Absolute, because a relative canonical resolves against the page it sits on
+// and every other page on this site emits the full origin.
+const canonical = destination ? new URL(destination, Astro.site).href : undefined;
 ---
 
+{destination ? (
+  <html lang="ko">
+    <head>
+      <meta charset="utf-8" />
+      <title>이동합니다</title>
+      <meta name="robots" content="noindex" />
+      <link rel="canonical" href={canonical} />
+      <meta http-equiv="refresh" content={`0; url=${destination}`} />
+    </head>
+    <body>
+      <p>이 주소에는 목록이 없습니다. <a href={destination}>{destination}</a> 로 이동합니다.</p>
+    </body>
+  </html>
+) : (
 <BaseLayout title={`${qualifiedName} - Blog`} description={categoryInfo!.description}>
   <section class="py-16 lg:py-24">
     <div class="container">
@@ -142,3 +175,4 @@ function formatChapter(key: string): string {
     </div>
   </section>
 </BaseLayout>
+)}
