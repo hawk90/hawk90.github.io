@@ -19,6 +19,11 @@ const checks = [
   ['route collisions', ['npm', 'run', 'audit:routes']],
   ['post URL single definition', ['npm', 'run', 'audit:content-portability']],
   ['series structure', ['npm', 'run', 'audit:series-structure']],
+  // Chapter integrity, which series-structure above does not cover: duplicate
+  // or gapped seriesOrder, drafts mixed into a published series. Not strict —
+  // it blocks on blocking findings only, because a deliberate gap in a
+  // reading order is a warning and an editorial decision, not a defect.
+  ['series chapter integrity', ['npm', 'run', 'audit:series']],
   ['article connectivity', ['npm', 'run', 'audit:connectivity']],
   // Report-only: where a series belongs in a reading order is editorial, so
   // this prints the coverage gap rather than blocking a deploy on it.
