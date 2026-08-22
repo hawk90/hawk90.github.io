@@ -1,4 +1,3 @@
-import { escapeHtml } from './utils';
 import { expandSearchTerms, normalizeSearchText } from './search-aliases';
 
 export interface SearchItem {
@@ -121,20 +120,38 @@ export function searchPosts(items: SearchItem[], options: SearchOptions | string
   return scored.map((s) => s.item);
 }
 
-export function highlightMatch(text: string, query: string): string {
-  const q = query.trim();
-  if (!q) return escapeHtml(text);
+/**
+ * A result's text split into matched and unmatched runs.
+ *
+ * Highlighting used to be done against the raw query alone, which meant a
+ * result found through a synonym arrived with nothing marked: search 데드락,
+ * get back "Deadlock 회피 전략", and the reason it is in the list is invisible.
+ * The same terms that decide *whether* a document matches should decide what
+ * is shown as matching, so this expands the query the same way scoring does.
+ *
+ * Separators are elastic because `normalizeSearchText` has already flattened
+ * them: the term for a query of "h.264" is "h 264", which as a literal matches
+ * neither "H.264" nor "H-264" in the source text.
+ *
+ * Returns segments rather than HTML. The caller builds text nodes from them,
+ * so a title or description can never be interpreted as markup — the previous
+ * signature returned an HTML string, which only stays safe as long as every
+ * future caller remembers to escape.
+ */
+export function highlightSegments(text: string, query: string): Array<{ text: string; match: boolean }> {
+  const terms = expandSearchTerms(query).filter(Boolean);
+  if (!terms.length) return [{ text, match: false }];
 
-  const escapedQuery = q.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const regex = new RegExp(`(${escapedQuery})`, 'gi');
+  const escape = (value: string) => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+  // Longest first, so "context switch" wins over "context" where both apply.
+  const pattern = [...terms]
+    .sort((a, b) => b.length - a.length)
+    .map((term) => term.split(' ').map(escape).join('[\\s_.\\-/]*'))
+    .join('|');
 
-  const parts = text.split(regex);
-  const lowerQ = q.toLowerCase();
+  // One capturing group, so split() yields matches at the odd indices.
+  const parts = text.split(new RegExp(`(${pattern})`, 'gi'));
   return parts
-    .map((part) =>
-      part.toLowerCase() === lowerQ
-        ? `<mark class="bg-[var(--color-accent-muted)] text-[var(--color-accent)] px-0.5 rounded">${escapeHtml(part)}</mark>`
-        : escapeHtml(part)
-    )
-    .join('');
+    .map((part, index) => ({ text: part, match: index % 2 === 1 }))
+    .filter((segment) => segment.text !== '');
 }

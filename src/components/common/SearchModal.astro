@@ -172,7 +172,7 @@ const filterSeriesLabel = t('search_filter_series');
 </style>
 
 <script>
-  import { searchPosts, type SearchItem } from '../../lib/search';
+  import { searchPosts, highlightSegments, type SearchItem } from '../../lib/search';
   import { isInputElement } from '../../lib/keyboard';
   import { onPageLoad } from '../../lib/lifecycle';
   import { getPostUrl } from '../../lib/utils';
@@ -469,23 +469,17 @@ const filterSeriesLabel = t('search_filter_series');
       return link;
     }
 
+    // What counts as a match is decided in one place, next to the scoring that
+    // put the result in the list. This used to be a second implementation here
+    // that only knew the raw query, so anything found through a synonym showed
+    // up with nothing marked.
     function appendHighlightedText(container: HTMLElement, text: string, query: string) {
-      const normalizedQuery = query.trim();
-      if (!normalizedQuery) {
-        container.textContent = text;
-        return;
-      }
-      const matcher = new RegExp(`(${normalizedQuery.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')})`, 'gi');
-      const lowerQuery = normalizedQuery.toLowerCase();
-      for (const part of text.split(matcher)) {
-        if (part.toLowerCase() === lowerQuery) {
-          const mark = document.createElement('mark');
-          mark.className = 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] px-0.5 rounded';
-          mark.textContent = part;
-          container.append(mark);
-        } else {
-          container.append(part);
-        }
+      for (const segment of highlightSegments(text, query)) {
+        if (!segment.match) { container.append(segment.text); continue; }
+        const mark = document.createElement('mark');
+        mark.className = 'bg-[var(--color-accent-muted)] text-[var(--color-accent)] px-0.5 rounded';
+        mark.textContent = segment.text;
+        container.append(mark);
       }
     }
 
