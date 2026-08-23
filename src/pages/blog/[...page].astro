@@ -57,6 +57,10 @@ const { posts, allPosts, currentPage, totalPages } = Astro.props;
   <section class="py-16 lg:py-24">
     <div class="container">
       <div class="lg:flex lg:gap-12">
+        {/* First in the source, last in the flex row: below lg this stacks
+            above the list, which is where a browse control has to be. */}
+        <BlogSidebar posts={allPosts} />
+
         <!-- Main Content -->
         <div class="flex-1 min-w-0">
           <!-- Header -->
@@ -84,9 +88,6 @@ const { posts, allPosts, currentPage, totalPages } = Astro.props;
             <Pagination currentPage={currentPage} totalPages={totalPages} baseUrl="/blog" />
           </div>
         </div>
-
-        <!-- Sidebar -->
-        <BlogSidebar posts={allPosts} />
       </div>
     </div>
   </section>

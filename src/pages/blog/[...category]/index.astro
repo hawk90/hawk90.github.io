@@ -129,6 +129,10 @@ const canonical = destination ? new URL(destination, Astro.site).href : undefine
   <section class="py-16 lg:py-24">
     <div class="container">
       <div class="lg:flex lg:gap-12">
+        {/* First in the source, last in the flex row: below lg this stacks
+            above the list, which is where a browse control has to be. */}
+        <BlogSidebar posts={allPosts} activeFilter={{ type: 'category', value: category! }} />
+
         <!-- Main Content -->
         <div class="flex-1 min-w-0">
           <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: categoryInfo!.name }]} />
@@ -168,9 +172,6 @@ const canonical = destination ? new URL(destination, Astro.site).href : undefine
             ))}
           </div>
         </div>
-
-        <!-- Sidebar -->
-        <BlogSidebar posts={allPosts} activeFilter={{ type: 'category', value: category! }} />
       </div>
     </div>
   </section>

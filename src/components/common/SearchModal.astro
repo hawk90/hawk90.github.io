@@ -248,6 +248,13 @@ const filterSeriesLabel = t('search_filter_series');
     const closeBtn = document.getElementById('search-close-btn');
 
     const i18n = getI18n();
+    // Fetched on intent only: hovering or focusing the search trigger, or
+    // opening the modal. It used to also fire on a 1200ms idle timer on every
+    // page, which cost every reader 78 KB gzipped — 2.6x the average page's
+    // own HTML — whether or not they ever searched. Hover is a desktop signal;
+    // on a phone, where those bytes cost the most, there was no signal at all,
+    // just the timer. The load now happens when someone asks to search, which
+    // the modal already shows a loading state for.
     const preloadSearch = () => {
       void loadSearchIndex();
     };
@@ -395,6 +402,19 @@ const filterSeriesLabel = t('search_filter_series');
       const q = query.trim();
       selectedIndex = -1;
       input.removeAttribute('aria-activedescendant');
+
+      // Searching an index that has not arrived yet answers "no results" — a
+      // wrong answer, and the one that looks most like a real one. Typing
+      // during the fetch is the normal case now that nothing preloads it.
+      if (!isLoaded && (q || currentFilter)) {
+        showMessage(i18n.loadingMessage, true);
+        loadSearchIndex().then((ok) => {
+          if (!ok) return showMessage(i18n.errorMessage);
+          // The query may have moved on while the fetch was in flight.
+          renderResults(input.value || '');
+        });
+        return;
+      }
 
       if (!q && currentFilter) {
         const options = currentFilter.type === 'tag'
@@ -584,7 +604,6 @@ const filterSeriesLabel = t('search_filter_series');
     document.addEventListener('keydown', handleKeydown);
     input.addEventListener('input', handleInput);
     document.addEventListener('click', handleDocumentClick);
-    const idleLoader = window.setTimeout(preloadSearch, 1200);
 
     return () => {
       filterBadge?.removeEventListener('click', handleFilterBadgeClick);
@@ -598,7 +617,6 @@ const filterSeriesLabel = t('search_filter_series');
       document.removeEventListener('keydown', handleKeydown);
       input.removeEventListener('input', handleInput);
       document.removeEventListener('click', handleDocumentClick);
-      window.clearTimeout(idleLoader);
     };
   });
 </script>

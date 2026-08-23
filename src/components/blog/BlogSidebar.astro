@@ -102,8 +102,19 @@ const categoryTree = topCats
   .map((category) => collapsePassthrough(buildCategoryNode(category.id)));
 ---
 
-<aside class="hidden lg:block w-72 shrink-0">
-  <div class="sticky top-24 max-h-[calc(100vh-7rem)] overflow-y-auto pr-1">
+{/*
+  Below lg this used to be `hidden`, which meant the category tree — the only
+  path from /blog/embedded to /blog/embedded/rtos — existed at one breakpoint.
+  The header's mobile menu carries site links only, so on a phone a category
+  page was a list of posts with no way down into it.
+
+  It is rendered first and pushed last in the flex row, so on a narrow screen
+  it stacks above the list rather than below twelve posts and a pager, which is
+  not a browse control. Affordable at about five rows plus the tag chips,
+  because the tree collapses to its top level.
+*/}
+<aside class="w-full lg:w-72 shrink-0 lg:order-last mb-10 lg:mb-0">
+  <div class="lg:sticky lg:top-24 lg:max-h-[calc(100vh-7rem)] lg:overflow-y-auto lg:pr-1">
     <div class="space-y-5">
       <a
         href="/blog"
@@ -120,9 +131,11 @@ const categoryTree = topCats
 
       <div class="sidebar-divider">
         <div class="flex items-center justify-between mb-3">
-          {/* h2, not h3: the sidebar is a sibling of the main content, not a
-              subsection of it, and on an empty category no h2 precedes it. */}
-          <h2 class="sidebar-section-title">Browse</h2>
+          {/* Not a heading. This block now precedes the page's own <h1> in the
+              document, and "Browse" outranking the category name misreads the
+              page for anyone navigating by heading. The label belongs to the
+              navigation landmark below, which carries it as aria-label. */}
+          <p class="sidebar-section-title" id="sidebar-browse-label">Browse</p>
           <div class="flex gap-1">
             <button
               type="button"
@@ -138,7 +151,7 @@ const categoryTree = topCats
             >Collapse</button>
           </div>
         </div>
-        <nav class="space-y-1">
+        <nav class="space-y-1" aria-labelledby="sidebar-browse-label">
           {categoryTree.map((node) => (
             <CategoryTreeNode node={node} />
           ))}
@@ -146,8 +159,8 @@ const categoryTree = topCats
       </div>
 
       <div class="sidebar-divider">
-        <h2 class="sidebar-section-title mb-3">Tags</h2>
-        <div class="flex flex-wrap gap-2">
+        <p class="sidebar-section-title mb-3" id="sidebar-tags-label">Tags</p>
+        <nav class="flex flex-wrap gap-2" aria-labelledby="sidebar-tags-label">
           {sortedTags.slice(0, maxTagsInSidebar).filter(([tag]) => routableTags.has(tag.toLocaleLowerCase())).map(([tag]) => {
             const isTagActive = isActiveTag(tag);
             return (
@@ -162,7 +175,7 @@ const categoryTree = topCats
               </a>
             );
           })}
-        </div>
+        </nav>
       </div>
     </div>
   </div>

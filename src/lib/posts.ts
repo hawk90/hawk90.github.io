@@ -354,10 +354,33 @@ export function getRelatedPosts(
     .filter((s) => !s.sameSeries && s.sharedTags > 0)
     .sort((a, b) => b.score - a.score || b.post.data.date.valueOf() - a.post.data.date.valueOf());
 
+  /**
+   * The quota above only fills when something outside the series shares a tag,
+   * and on 41 of the 726 published pages nothing did — those readers got three
+   * siblings and no exit, which is the whole complaint. A shared topic is a
+   * weaker claim than a shared tag, so it stands in only when the stronger one
+   * has no candidate at all, and it says so in its own words rather than
+   * borrowing the tag wording.
+   */
+  const currentTopics = categoryIdsOf(currentPost);
+  const sharedTopicDepth = (post: BlogPost) => {
+    let deepest = 0;
+    for (const id of categoryIdsOf(post)) {
+      if (currentTopics.has(id)) deepest = Math.max(deepest, id.split('/').length);
+    }
+    return deepest;
+  };
+  const nearbySeries = scored
+    .filter((s) => !s.sameSeries && s.sharedTags === 0 && sharedTopicDepth(s.post) > 0)
+    .sort((a, b) =>
+      sharedTopicDepth(b.post) - sharedTopicDepth(a.post) ||
+      b.post.data.date.valueOf() - a.post.data.date.valueOf());
+
+  const crossPool = crossSeries.length ? crossSeries : nearbySeries;
   const picks: typeof scored = [];
-  const crossQuota = sameSeries.length && crossSeries.length ? 1 : 0;
+  const crossQuota = sameSeries.length && crossPool.length ? 1 : 0;
   picks.push(...sameSeries.slice(0, Math.max(0, remaining - crossQuota)));
-  picks.push(...crossSeries.slice(0, remaining - picks.length));
+  picks.push(...crossPool.slice(0, remaining - picks.length));
   // Whichever list ran short, the other one finishes the row.
   if (picks.length < remaining) {
     const taken = new Set(picks.map(({ post }) => post.id));
@@ -369,9 +392,13 @@ export function getRelatedPosts(
     );
   }
 
-  const fallback = picks.map(({ post, sameSeries: isSibling }) => ({
+  const fallback = picks.map(({ post, sameSeries: isSibling, sharedTags }) => ({
     post,
-    reason: isSibling ? '같은 시리즈에서 이어 읽기' : '공통 태그 기반 추천',
+    reason: isSibling
+      ? '같은 시리즈에서 이어 읽기'
+      : sharedTags > 0
+        ? '공통 태그 기반 추천'
+        : '같은 분야의 다른 시리즈',
     source: 'inferred' as const,
   }));
 
@@ -381,6 +408,14 @@ export function getRelatedPosts(
 /**
  * 백링크 조회
  * 전체 본문 스캔 인덱스를 1회만 만들고 재사용한다.
+ *
+ * Siblings sink. Across the 726 published pages, 82% of backlinks came from
+ * the same series as the post itself — and that series' full chapter list is
+ * already in the sidebar and again under the article, so a reader met the same
+ * neighbours a third time here. The 18% that arrive from another series are
+ * the ones no other block on the page shows, so they are what this block leads
+ * with. Nothing is dropped; a backlink is evidence someone linked here, and
+ * that stays true whichever series it came from.
  */
 export function getBacklinks(currentId: string, posts: BlogPost[]): BlogPost[] {
   let index = backlinkIndexCache.get(posts);
@@ -388,7 +423,15 @@ export function getBacklinks(currentId: string, posts: BlogPost[]): BlogPost[] {
     index = buildBacklinkIndex(posts);
     backlinkIndexCache.set(posts, index);
   }
-  return index.get(currentId) ?? [];
+  const refs = index.get(currentId) ?? [];
+  const currentSeries = posts.find((post) => post.id === currentId)?.data.series ?? null;
+  if (!currentSeries) return refs;
+  // Chapters of one series share a date by convention, so the date sort below
+  // decides nothing within a series; this is what gives the block an order.
+  return [
+    ...refs.filter((post) => post.data.series !== currentSeries),
+    ...refs.filter((post) => post.data.series === currentSeries),
+  ];
 }
 
 function buildBacklinkIndex(posts: BlogPost[]): Map<string, BlogPost[]> {

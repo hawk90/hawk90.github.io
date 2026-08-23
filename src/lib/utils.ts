@@ -47,11 +47,11 @@ export function getTagUrl(tagName: string): string {
  * The canonical URL of a post.
  *
  * Every link to a post goes through here, including the route that generates
- * it, so there is exactly one definition of where a post lives. It currently
- * derives from the entry id, which is the file path — meaning a published URL
- * and a folder are the same fact, and moving a file breaks its links.
+ * it, so there is exactly one definition of where a post lives. It derives
+ * from the entry id, which is the frontmatter `slug:` — a value each post
+ * declares, not its folder — so a file can move without changing its URL.
  *
- * That coupling is the reason this function exists. Changing the rule here is
+ * One definition is the reason this function exists. Changing the rule here is
  * a one-line edit; changing it in fourteen template literals scattered across
  * components is how a site ends up with two URLs for one post. The
  * `stable-url` control in `audit-content-portability.mjs` fails the build if a

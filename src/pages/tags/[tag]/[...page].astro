@@ -47,6 +47,10 @@ const { tag, allPosts, page } = Astro.props;
   <section class="py-16 lg:py-24">
     <div class="container">
       <div class="lg:flex lg:gap-12">
+        {/* First in the source, last in the flex row: below lg this stacks
+            above the list, which is where a browse control has to be. */}
+        <BlogSidebar posts={allPosts} activeFilter={{ type: 'tag', value: tag }} />
+
         <div class="flex-1 min-w-0">
           <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: `#${tag}` }]} />
 
@@ -101,8 +105,6 @@ const { tag, allPosts, page } = Astro.props;
             </div>
           )}
         </div>
-
-        <BlogSidebar posts={allPosts} activeFilter={{ type: 'tag', value: tag }} />
       </div>
     </div>
   </section>
