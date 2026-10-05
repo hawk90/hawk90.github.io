@@ -1,9 +1,11 @@
 name: CI
 
 on:
+  # Pull requests only. A push to a branch with an open PR used to start a
+  # second, identical run (push + pull_request had different concurrency
+  # groups, so neither cancelled the other). Branches without a PR are covered
+  # by the lefthook pre-push gate and can be run here via workflow_dispatch.
   pull_request:
-  push:
-    branches-ignore: [main]
   schedule:
     # Re-check advisories and the production build even when the repository is idle.
     - cron: '17 3 * * 1'
@@ -32,8 +34,33 @@ jobs:
           node-version: "24"
           cache: npm
 
+      - name: Cache OG images
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: |
+            public/og
+            public/og-default.png
+            .cache/og-manifest.json
+          key: ${{ runner.os }}-og-${{ hashFiles('src/lib/og-themes.data.mjs', 'scripts/build-og.mjs') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-og-${{ hashFiles('src/lib/og-themes.data.mjs', 'scripts/build-og.mjs') }}-
+            ${{ runner.os }}-og-
+
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
+
+      # Astro's content data store (node_modules/.astro/data-store.json, ~300 MB
+      # for ~3,400 posts). Without it every run re-renders all content during
+      # `astro check` (~5 min on the runner, vs seconds when warm). Restored
+      # after `npm ci`, which deletes node_modules. Same key as deploy.yml, so
+      # PR runs can start from main's store.
+      - name: Cache Astro content store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules/.astro
+          key: ${{ runner.os }}-astro-store-${{ hashFiles('package-lock.json', 'astro.config.mjs', 'src/content.config.ts') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-astro-store-${{ hashFiles('package-lock.json', 'astro.config.mjs', 'src/content.config.ts') }}-
 
       - name: Verify release contract
         run: npm run verify:release

@@ -36,15 +36,6 @@ jobs:
           node-version: "24"
           cache: npm
 
-      - name: Cache Astro content layer
-        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
-        with:
-          path: .astro
-          key: ${{ runner.os }}-astro-${{ hashFiles('astro.config.mjs', 'src/content.config.ts') }}-${{ github.sha }}
-          restore-keys: |
-            ${{ runner.os }}-astro-${{ hashFiles('astro.config.mjs', 'src/content.config.ts') }}-
-            ${{ runner.os }}-astro-
-
       - name: Cache OG images
         uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
         with:
@@ -62,6 +53,17 @@ jobs:
 
       - name: Install dependencies
         run: npm ci --prefer-offline --no-audit
+
+      # The content data store lives in node_modules/.astro (not .astro, which
+      # only holds generated types), so it must be restored after `npm ci`,
+      # which deletes node_modules. Same key as ci.yml.
+      - name: Cache Astro content store
+        uses: actions/cache@55cc8345863c7cc4c66a329aec7e433d2d1c52a9 # v6.1.0
+        with:
+          path: node_modules/.astro
+          key: ${{ runner.os }}-astro-store-${{ hashFiles('package-lock.json', 'astro.config.mjs', 'src/content.config.ts') }}-${{ github.sha }}
+          restore-keys: |
+            ${{ runner.os }}-astro-store-${{ hashFiles('package-lock.json', 'astro.config.mjs', 'src/content.config.ts') }}-
 
       - name: Verify publish readiness and build artifact
         run: npm run verify:release
