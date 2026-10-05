@@ -1,6 +1,6 @@
 ---
 name: new-chapter
-description: Scaffold a new blog chapter with correct frontmatter and structure per CLAUDE.md §3/§4. Picks tone from the series, wires series/seriesOrder, defaults to draft.
+description: Scaffold a new blog chapter with correct frontmatter and structure per §3/§4 (.claude/rules/02-structure-and-frontmatter.md). Picks tone from the series, wires series/seriesOrder, defaults to draft.
 argument-hint: "<series dir under src/content/blog> [chapter topic]"
 allowed-tools: Bash, Read, Grep, Glob, Write
 ---
@@ -11,7 +11,7 @@ Create a new chapter for: `$ARGUMENTS` (series directory, then topic).
 
 ## Steps
 
-1. **Inspect the series first** (CLAUDE.md §13 — check pattern before writing):
+1. **Inspect the series first** — match the existing pattern before writing:
    - `ls` the series dir; read the latest chapter's frontmatter and one body.
    - Determine the series **tone** (A `~합니다` vs B `~다`) from existing posts —
      never mix (§1). Note the `series` name and the next free `seriesOrder`

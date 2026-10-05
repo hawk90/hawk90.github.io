@@ -6,19 +6,22 @@
 
 ## 스타일 가이드 (상세 규칙)
 
-세부 스타일 규칙은 아래 파일로 분리돼 있으며, 세션 시작 시 이 지점에 인라인 로드됩니다. 섹션 번호(§1~§11)와 모든 상호참조는 그대로 유지됩니다.
+세부 규칙은 `.claude/rules/`에 있고 Claude Code가 자동 로드합니다(각 파일의 `paths:` 범위 — 블로그 콘텐츠·다이어그램을 다룰 때). 섹션 번호 §1~§11은 커맨드·에이전트·스크립트가 상호참조하므로 그대로 유지합니다.
 
-@.claude/rules/01-tone-and-prose.md
-@.claude/rules/02-structure-and-frontmatter.md
-@.claude/rules/03-code-and-visuals.md
-@.claude/rules/04-linking-and-catalog.md
-@.claude/rules/05-quality.md
+| 섹션 | 파일 |
+|------|------|
+| §1 톤 · §2 한국어 산문 | `.claude/rules/01-tone-and-prose.md` |
+| §3 글 구조 · §4 Frontmatter | `.claude/rules/02-structure-and-frontmatter.md` |
+| §5 코드 예시 · §6 시각 자료 | `.claude/rules/03-code-and-visuals.md` |
+| §7 교차 링크 · §8 카테고리 · §9 시리즈 양산 | `.claude/rules/04-linking-and-catalog.md` |
+| §10 흔한 실수·Hallucination 방지 · §11 접근성 | `.claude/rules/05-quality.md` |
+| 안티패턴 처분 증거 규칙 | `.claude/rules/06-remediation-evidence.md` |
 
 ## 12. 동기화된 콘텐츠
 
 다음은 다른 저장소에서 동기화되는 콘텐츠입니다. **직접 편집하지 마세요.**
 
-- `src/content/blog/math/linear-algebra/**` — `../book-notes/`에서 `npm run sync:book-notes`로 동기화.
+- `src/content/blog/math/linear-algebra/**`, `src/content/blog/math/set-theory/**` (+ `public/images/blog/<series>/`) — `../book-notes/<series>/`에서 동기화. `npm run sync:book-notes`는 dry run이고, 실제 쓰기는 `npm run sync:book-notes -- --apply`.
 
 원본을 수정하고 동기화 스크립트를 다시 돌리는 방식으로 작업합니다.
 
@@ -58,10 +61,10 @@
 
 ### Dispatch — 언제 자동으로 도는가
 
-- **commit 시**: lefthook `pre-commit`이 staged `.md`에 `audit-publish-gate.sh` + frontmatter 검사.
+- **commit 시**: lefthook `pre-commit`이 staged `src/content/blog/**/*.md`에 `audit-publish-gate.sh` + 태그 모양 자동 정규화(`normalize-tag-shape.mjs --apply`, 같은 커밋에 stage) + 필수 frontmatter(`title`·`date`·`description`) 검사.
 - **push 시**: lefthook `pre-push`가 push되는 commit의 변경 파일에 gate.
-- **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (fetch 포함 drift), `npm run audit:staleness` (산문 미래 시제·날짜 앵커), `npm run audit:tags` (태그 어휘 — 리포트형이라 pass/fail 아님).
-- **`npm run verify:release`**: ⑤⑦⑧⑨를 포함한 20단계를 한 번에. ⑧은 `dist/`를 읽으므로 빌드 *뒤*에 돕니다 — 표 잘림·제목 계층은 마크다운 원본에는 없고 렌더된 HTML에만 있습니다. CI가 배포 전 이걸 돌립니다.
+- **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (local clone 기준 drift — 기본 offline, fetch는 `python3 scripts/audit-upstream-freshness.py --fetch`), `npm run audit:staleness` (산문 미래 시제·날짜 앵커), `npm run audit:tags` (태그 어휘 — 리포트형이라 pass/fail 아님).
+- **`npm run verify:release`**: ⑤⑦⑧⑨를 포함한 28단계(`scripts/verify-release.mjs`)를 한 번에. ⑧은 `dist/`를 읽으므로 빌드 *뒤*에 돕니다 — 표 잘림·제목 계층은 마크다운 원본에는 없고 렌더된 HTML에만 있습니다. CI가 배포 전 이걸 돌립니다.
 - **staleness 두 도구 구분**: `audit:roadmap`은 `known-facts.yaml`에 *등재된 SKU*의 `review:` 날짜만, `audit:staleness`는 *본문 산문 자체*의 미래 시제(`예정`·`미발표`)·날짜 앵커(`YYYY년 현재`)를 훑는다. 등재 안 된 주장은 후자만 잡는다.
 - **게이트가 느릴 때**: `git commit/push --no-verify`로 우회하되 *책임 본인* — 우회했으면 `npm run audit:gate`를 별도로 돌린다.
 
@@ -72,6 +75,8 @@
 - `/pre-publish [dir]` — 발행 전 통합 gate (④).
 - `/audit-freshness` — upstream drift + 인용 심볼 존재 + 산문 staleness (③⑥).
 - `/new-chapter` — frontmatter 스캐폴딩 (§4 준수).
+- 거버넌스·리메디에이션: `/content-readiness-run`, `/content-governance-run`, `/methodology-batch-run`, `/phase-run`, `/phase-verify`, `/security-admin-run`, `/security-admin-verify`.
+- 에이전트(`.claude/agents/`): `korean-prose-critic`, `hallucination-triage`, `content-governance`, `phase-guardian`.
 
 ### Upstream tracking 등록
 
@@ -81,4 +86,4 @@
 
 ## 15. Claude Code 실행 패킷
 
-코드 리팩터링 작업은 [claude/WORKFLOW.md](claude/WORKFLOW.md)를 따릅니다. 현재 활성 패킷은 [claude/phase-01/TASK.md](claude/phase-01/TASK.md)입니다.
+코드 리팩터링 작업은 [claude/WORKFLOW.md](claude/WORKFLOW.md)를 따릅니다. 패킷은 `claude/phase-00`~`phase-07`; 어느 패킷·태스크가 활성인지는 각 `STATE.json`의 `status`·`activeTasks`가 정본입니다(phase-01은 `completed`). 다음 패킷 활성화는 사용자 결정 — 스스로 활성화하지 않습니다.

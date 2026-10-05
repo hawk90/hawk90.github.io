@@ -11,7 +11,7 @@ the remediation plan, and the diff. Verify that completed work corresponds to
 active `PH-*` IDs and that its claimed anti-patterns/priority are supported by
 evidence.
 
-Also review pending additions in `llm-antipatterns/supplement-candidates.md`.
+Also review pending additions in `archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/llm-antipatterns/supplement-candidates.md`.
 For each one, return `promote`, `merge`, or `reject` with a concrete reason;
 never add a candidate to the canonical corpus merely because it sounds plausible.
 

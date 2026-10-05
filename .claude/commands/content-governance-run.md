@@ -1,3 +1,8 @@
+---
+description: Review exactly one lifecycle, taxonomy, or relations item from the content-governance queue.
+argument-hint: "[lifecycle|taxonomy|relations]"
+---
+
 Run the content-governance workflow for exactly one queue item.
 
 1. Run `npm run audit:knowledge-model`. It refreshes the lifecycle, classification, and governance reports while also checking the global terminology, topic, and relation contracts.

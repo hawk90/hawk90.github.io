@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/content/**"
+  - "public/images/blog/**"
+---
+
 ## 3. 글 구조
 
 ### 시리즈 글의 표준 흐름

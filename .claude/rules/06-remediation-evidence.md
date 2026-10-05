@@ -1,3 +1,12 @@
+---
+paths:
+  - "archives/**"
+  - "claude/**"
+  - "reports/**"
+  - "scripts/**"
+  - "src/content/**"
+---
+
 # 안티패턴 처분 증거 규칙
 
 모든 AP 처분은 `unassessed`, `remediated`, `accepted`, `superseded` 중 하나여야 한다. 제목·우선순위·유사 기능의 존재만으로는 처분 근거가 아니다.
