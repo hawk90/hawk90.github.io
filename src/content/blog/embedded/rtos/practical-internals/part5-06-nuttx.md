@@ -226,7 +226,7 @@ NASA의 채택 근거 (paper 인용)
 
 > "Apache NuttX is the RTOS chosen for the FCU because of its small footprint, real-time characteristics, and POSIX compliance."
 
-NASA가 든 세 가지 이유 — *작은 footprint, 결정적 실시간성, POSIX 호환* — 가 NuttX의 정체성을 그대로 요약합니다. 화성 표면에서 70회 이상 무사고로 작동한 사실이 *임베디드 POSIX RTOS*의 검증 사례로 남았습니다.
+NASA가 든 세 가지 이유인 *작은 footprint, 결정적 실시간성, POSIX 호환*이 NuttX의 정체성을 그대로 요약합니다. 화성 표면에서 70회 이상 무사고로 작동한 사실이 *임베디드 POSIX RTOS*의 검증 사례로 남았습니다.
 
 ## micro-ROS 통합
 

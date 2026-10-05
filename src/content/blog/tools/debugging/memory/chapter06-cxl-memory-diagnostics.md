@@ -132,7 +132,7 @@ target_id  region(KB)  access(%)  node
 | 승격·강등이 일어나지 않음 | `numa_balancing`이 꺼져 있거나 tiering 정책 미설정 |
 | 대역폭은 정상인데 지연만 나쁨 | 원격 노드 접근 — `numactl --membind`로 배치 확인 |
 
-디바이스 자체의 이상 — health가 warning으로 떨어지거나, poison rate가 뛰거나, `cxl monitor`가 응답하지 않거나, temperature가 비현실적인 값을 내는 경우 — 는 [Embedded Debugging Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot#자주-만나는-함정)에 정리돼 있습니다.
+health가 warning으로 떨어지거나, poison rate가 뛰거나, `cxl monitor`가 응답하지 않거나, temperature가 비현실적인 값을 내는 등 디바이스 자체의 이상은 [Embedded Debugging Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot#자주-만나는-함정)에 정리돼 있습니다.
 
 ## 진단 워크플로
 

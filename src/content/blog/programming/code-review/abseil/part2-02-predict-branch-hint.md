@@ -22,7 +22,7 @@ topics: ["programming", "programming/code-review"]
 1. **명령어 순서** — 어느 분기를 fall-through로 둘 것인가.
 2. **코드 배치** — 어느 분기를 hot path에 가까이 둘 것인가.
 
-런타임의 분기 예측기는 첫 번째 결정에 점점 덜 의존한다. 그러나 두 번째 결정 — code layout — 은 컴파일 시점에 굳어지고, 런타임이 어떻게 해줄 수 없다. `ABSL_PREDICT_*`는 layout을 위한 힌트다.
+런타임의 분기 예측기는 첫 번째 결정에 점점 덜 의존한다. 그러나 두 번째 결정인 code layout은 컴파일 시점에 굳어지고, 런타임이 어떻게 해줄 수 없다. `ABSL_PREDICT_*`는 layout을 위한 힌트다.
 
 ## 정의
 

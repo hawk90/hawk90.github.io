@@ -78,7 +78,7 @@ m.emplace("other", BigStruct{});
 | heterogeneous lookup | C++20 부분 | 처음부터 | 처음부터 |
 | `node_type` extract/insert | C++17 | O | X |
 
-`node_hash_map`이 정확히 `unordered_map`의 안정성 — *value pointer*만 — 을 보장하면서 hash 구조는 Swiss Table을 쓴다.
+`node_hash_map`이 `unordered_map`의 안정성 중 정확히 *value pointer* 안정성만 보장하면서 hash 구조는 Swiss Table을 쓴다.
 
 ## 내부 구현
 

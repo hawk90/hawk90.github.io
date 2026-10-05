@@ -500,7 +500,7 @@ Make는 내장 규칙으로 빌드해 주지만, 변수가 비어 있어 *경고
 
 ## 다음 장 예고
 
-[Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions)에서는 Make의 내장 함수들 — `wildcard`, `patsubst`, `filter`, `foreach`, `shell` 등 — 을 다룹니다. 텍스트 처리만으로 거대한 Makefile을 *수십 줄로* 줄이는 도구들입니다.
+[Ch 5: 함수](/blog/tools/build/gnu-make/chapter05-functions)에서는 `wildcard`, `patsubst`, `filter`, `foreach`, `shell` 같은 Make의 내장 함수들을 다룹니다. 텍스트 처리만으로 거대한 Makefile을 *수십 줄로* 줄이는 도구들입니다.
 
 ## 참고 자료
 

@@ -86,7 +86,7 @@ Sending: "vCont;c"
 Got:     "T05swbreak:;thread:p3039.3039;"
 ```
 
-스텁이 누구든 — gdbserver든 OpenOCD든 J-Link 펌웨어든 — GDB는 *이 패킷*만 봅니다. 본격 디버거를 만들고 싶다면 [RSP 명세](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Remote-Protocol.html)를 정독하면 됩니다.
+스텁이 gdbserver든 OpenOCD든 J-Link 펌웨어든, GDB는 *이 패킷*만 봅니다. 본격 디버거를 만들고 싶다면 [RSP 명세](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Remote-Protocol.html)를 정독하면 됩니다.
 
 ### qSupported — feature negotiation
 
