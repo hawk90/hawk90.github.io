@@ -31,6 +31,9 @@ explicitly activated.
 - Use `/security-admin-verify` as an independent read-only check before
   considering the workstream complete. Record its outcome in
   `claude/security-admin/HANDOFF.md`.
+- Tooling unification (Python·Bash checkers → Node) lives in
+  `claude/tooling-node/`. Every port must pass the parity harness against the
+  old tool on all content before the old tool is removed.
 
 ## Handoff format
 
