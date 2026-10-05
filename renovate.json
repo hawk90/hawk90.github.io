@@ -13,6 +13,9 @@
   "labels": [
     "dependencies"
   ],
+  "rangeStrategy": "bump",
+  "prConcurrentLimit": 3,
+  "prHourlyLimit": 2,
   "minimumReleaseAge": "3 days",
   "osvVulnerabilityAlerts": true,
   "vulnerabilityAlerts": {
@@ -57,11 +60,12 @@
       "automerge": true
     },
     {
-      "description": "Major updates stay separate and manual",
+      "description": "Major updates: listed on the Dependency Dashboard; a PR is opened only after ticking its checkbox",
       "matchUpdateTypes": [
         "major"
       ],
-      "automerge": false
+      "automerge": false,
+      "dependencyDashboardApproval": true
     },
     {
       "description": "Rust toolchain pin (rust-toolchain.toml): manual, one PR per release",
