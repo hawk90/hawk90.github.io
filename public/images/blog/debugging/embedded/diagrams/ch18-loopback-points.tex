@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, blk/.style={cls, minimum width=22mm, text width=20mm, minimum height=10mm}]
+\node[font=\sffamily\bfseries\large] at (6.0,2.6) {Loopback 지점 — 어디서 되돌리느냐가 범위를 정한다};
+\node[blk, con] (t0) at (0,1.0) {컨트롤러};
+\node[blk, con] (r0) at (0,-1.0) {컨트롤러};
+\node[blk, prp] (t30) at (3.0,1.0) {PCS};
+\node[blk, prp] (r30) at (3.0,-1.0) {PCS};
+\node[blk, hi] (t60) at (6.0,1.0) {PMA\\[2pt]\scriptsize (SerDes 아날로그)};
+\node[blk, hi] (r60) at (6.0,-1.0) {PMA\\[2pt]\scriptsize (SerDes 아날로그)};
+\node[blk, neut] (t110) at (11.0,1.0) {상대 장치};
+\node[blk, neut] (r110) at (11.0,-1.0) {상대 장치};
+\node[font=\sffamily\scriptsize, anchor=east] at (-1.3,1.0) {TX};
+\node[font=\sffamily\scriptsize, anchor=east] at (-1.3,-1.0) {RX};
+\draw[arr] (t0.east) -- (t30.west);
+\draw[arr] (t30.east) -- (t60.west);
+\draw[arr] (t60.east) -- node[above, font=\sffamily\scriptsize] {핀·패키지·보드 채널} (t110.west);
+\draw[arr] (r110.west) -- (r60.east);
+\draw[arr] (r60.west) -- (r30.east);
+\draw[arr] (r30.west) -- (r0.east);
+\draw[thr] ($(t30.south)+(0.5,0)$) -- node[right, font=\sffamily\scriptsize, text=inkc] {\textbf{1}} ($(r30.north)+(0.5,0)$);
+\draw[thr] ($(t60.south)+(0.5,0)$) -- node[right, font=\sffamily\scriptsize, text=inkc] {\textbf{2}} ($(r60.north)+(0.5,0)$);
+\draw[thr] ($(t110.south)+(0.5,0)$) -- node[right, font=\sffamily\scriptsize, text=inkc] {\textbf{3}} ($(r110.north)+(0.5,0)$);
+\node[caption, anchor=north west, align=left, text width=13cm] at (-1.2,-2.0) {1. 근단 PCS loopback — 디지털 경로만 확인\\[2pt]2. 근단 PMA loopback — SerDes 아날로그까지 확인, 채널은 제외\\[2pt]3. 원단(far-end) loopback — 채널과 상대 장치의 수신부까지 포함};
+\end{tikzpicture}
+\end{document}

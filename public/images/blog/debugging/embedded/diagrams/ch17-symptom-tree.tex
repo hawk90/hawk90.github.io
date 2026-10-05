@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, sym/.style={cls, text width=4.0cm, minimum height=14mm}]
+\node[font=\sffamily\bfseries\large] at (0,1.5) {DDR 실패 증상 분류와 의심 영역};
+\node[hi, text width=3.6cm] (root) at (0,0) {DDR이 안 뜬다};
+\node[sym, warn] (a) at (-5,-2.2) {\textbf{인식 불가}\\[2pt]\footnotesize training 시작 전·직후 멈춤};
+\node[sym, prp] (b) at (0,-2.2) {\textbf{training 실패}\\[2pt]\footnotesize 특정 단계·특정 lane};
+\node[sym, con] (c) at (5,-2.2) {\textbf{부팅 후 간헐 오류}\\[2pt]\footnotesize ECC 에러·무작위 크래시};
+\node[sym, neut] (a2) at (-5,-4.7) {전원·클럭·리셋\\[2pt]설정값의 기본 오류\\[2pt]\footnotesize (모든 보드 동일)};
+\node[sym, neut] (b2) at (0,-4.7) {lane별 배선·종단\\[2pt]PHY 설정\\[2pt]\footnotesize (lane·보드에 따라 다름)};
+\node[sym, neut] (c2) at (5,-4.7) {마진 부족·온도\\[2pt]데이터 패턴 의존\\[2pt]\footnotesize (조건에 따라 다름)};
+\draw[arr] (root.south) -- (a.north);
+\draw[arr] (a.south) -- (a2.north);
+\draw[arr] (root.south) -- (b.north);
+\draw[arr] (b.south) -- (b2.north);
+\draw[arr] (root.south) -- (c.north);
+\draw[arr] (c.south) -- (c2.north);
+\end{tikzpicture}
+\end{document}

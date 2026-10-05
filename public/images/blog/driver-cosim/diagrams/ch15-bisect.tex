@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  cmt/.style={minimum width=11mm, minimum height=9mm, font=\sffamily\footnotesize}]
+\node[font=\sffamily\bfseries\large, anchor=west] at (-0.6,2.0) {회귀 bisect — 반씩 잘라 범인 커밋 찾기};
+\foreach \i/\sty in {1/ok, 2/ok, 3/ok, 4/ok, 5/ok, 6/warn, 7/warn, 8/warn, 9/warn} {
+  \node[\sty, cmt] (c\i) at ({(\i-1)*1.5},0) {c\i};
+}
+\node[caption, anchor=north] at (c1.south) {통과};
+\node[caption, anchor=north] at (c9.south) {실패};
+\node[badge] at ([yshift=6mm]c5.north) {1: c5 통과};
+\node[badge] at ([yshift=6mm]c7.north) {2: c7 실패};
+\node[badge] at ([yshift=12mm]c6.north) {3: c6 실패 → 범인};
+\node[caption, text width=11cm, anchor=north] at (6,-1.0) {커밋 9개를 세 번의 실행으로 좁힙니다. 커밋이 두 배가 되어도 실행은 한 번만 늘어납니다};
+\end{tikzpicture}
+\end{document}

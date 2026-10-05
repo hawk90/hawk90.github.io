@@ -1,0 +1,21 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  diff/.style={neut, text width=5.4cm, minimum height=10mm}]
+\node[font=\sffamily\bfseries\large] at (4.5,4.2) {같은 RTL, 다른 세계 — sim과 FPGA가 갈리는 다섯 지점};
+\node[con, text width=2.8cm, minimum height=12mm] (sim) at (-1,0) {\textbf{시뮬레이션}\\[2pt]\footnotesize 이상적인 세계};
+\node[imp, text width=2.8cm, minimum height=12mm] (fpga) at (10,0) {\textbf{FPGA 보드}\\[2pt]\footnotesize 물리적인 세계};
+\node[diff] (d1) at (4.5,2.8) {초기값 — X 대 전원 투입 시 값};
+\node[diff] (d2) at (4.5,1.4) {클럭 — 이상적 대 PLL·skew};
+\node[diff] (d3) at (4.5,0) {메모리 — 모델 대 BRAM·DDR IP};
+\node[diff] (d4) at (4.5,-1.4) {지연 — 0 대 실제 경로 지연};
+\node[diff] (d5) at (4.5,-2.8) {비동기 입력 — 깔끔 대 메타스테이빌리티};
+\foreach \d in {d1,d2,d3,d4,d5} { \draw[alt] (sim.east) -- (\d.west); \draw[alt] (\d.east) -- (fpga.west); }
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,29 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large] at (4,1.6) {캐시를 켜면 DMA 데이터가 옛날 값으로 보이는 이유};
+\node[con, minimum width=26mm] (h0) at (0,0.6) {\textbf{CPU + 캐시}};
+\draw[draw=mutec, dashed] (0,0.1) -- (0,-6.4);
+\node[neut, minimum width=26mm] (h4) at (4,0.6) {\textbf{DRAM}};
+\draw[draw=mutec, dashed] (4,0.1) -- (4,-6.4);
+\node[imp, minimum width=26mm] (h8) at (8,0.6) {\textbf{DMA 장치}};
+\draw[draw=mutec, dashed] (8,0.1) -- (8,-6.4);
+\draw[arr] (4,-0.8) -- (0,-0.8);
+\node[font=\sffamily\footnotesize, anchor=south, fill=white, inner sep=1pt] at (2.0,-0.8) {1. 버퍼를 읽음 → 캐시에 복사본(값 A)};
+\draw[arr] (8,-2.0) -- (4,-2.0);
+\node[font=\sffamily\footnotesize, anchor=south, fill=white, inner sep=1pt] at (6.0,-2.0) {2. DMA가 DRAM에 새 데이터(값 B)를 씀};
+\draw[arr, draw=warnbord] (0,-3.2) arc[start angle=90, end angle=-200, radius=0.3];
+\node[font=\sffamily\footnotesize, text=warnbord, anchor=west, fill=white, inner sep=1pt] at (0.5,-3.45) {3. CPU가 다시 읽음 → 캐시 hit, 옛 값 A};
+\draw[arr] (0,-4.6) -- (4,-4.6);
+\node[font=\sffamily\footnotesize, anchor=south, fill=white, inner sep=1pt] at (2.0,-4.6) {해결: DMA 완료 뒤 해당 영역 invalidate};
+\draw[arr] (4,-5.6) -- (0,-5.6);
+\node[font=\sffamily\footnotesize, anchor=south, fill=white, inner sep=1pt] at (2.0,-5.6) {다시 읽으면 DRAM의 값 B};
+\draw[draw=okbord, line width=0.8pt] (-1.6,-4.1) rectangle (9.6,-6.1);
+\end{tikzpicture}
+\end{document}

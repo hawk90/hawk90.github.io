@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  ask/.style={prp, text width=4.6cm, minimum height=11mm},
+  res/.style={cls, text width=4.4cm, minimum height=11mm}]
+
+\node[font=\sffamily\bfseries\large] at (2.5,1.6) {문제는 어디에 있나 — 세 갈래 판정};
+
+\node[neut, text width=4.6cm] (start) at (0,0.4) {증상 발견};
+
+\node[ask] (q1) at (0,-1.4) {여러 보드에서\\[2pt]똑같이 재현되나?};
+\node[ask] (q2) at (0,-3.4) {전압·온도·주파수를 바꾸면\\[2pt]증상이 달라지나?};
+\node[ask] (q3) at (0,-5.4) {최소 코드로 줄여도\\[2pt]재현되나?};
+
+\node[res, warn] (board) at (6.4,-1.4) {\textbf{보드 의심}\\[2pt]\footnotesize 조립·부품·배선};
+\node[res, hi]   (chip)  at (6.4,-3.4) {\textbf{실리콘 마진 의심}\\[2pt]\footnotesize 전기적 특성 (Ch 19)};
+\node[res, con]  (sw)    at (6.4,-5.4) {\textbf{SW 의심}\\[2pt]\footnotesize 드라이버·설정·순서};
+\node[res, imp]  (rtl)   at (0,-7.4)   {\textbf{설계(논리) 버그 의심}\\[2pt]\footnotesize pre-silicon에서 재현 (Co-sim Ch 15)};
+
+\draw[arr] (start) -- (q1);
+\draw[arr] (q1) -- node[right, font=\footnotesize] {예} (q2);
+\draw[arr] (q2) -- node[right, font=\footnotesize] {아니오} (q3);
+\draw[arr] (q3) -- node[right, font=\footnotesize] {예} (rtl);
+\draw[arr] (q1) -- node[above, font=\footnotesize] {아니오} (board);
+\draw[arr] (q2) -- node[above, font=\footnotesize] {예} (chip);
+\draw[arr] (q3) -- node[above, font=\footnotesize] {아니오} (sw);
+
+\end{tikzpicture}
+\end{document}

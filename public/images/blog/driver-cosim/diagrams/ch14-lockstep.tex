@@ -1,0 +1,22 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large] at (4.8,3.3) {lockstep 비교 — 같은 프로그램, 두 구현, 매 명령어 대조};
+\node[neut, text width=2.8cm, minimum height=11mm] (prog) at (0,0) {\textbf{테스트 프로그램}};
+\node[prp, text width=3.0cm, minimum height=12mm] (ref) at (4.6,1.3) {\textbf{참조 모델}\\[2pt]\footnotesize ISS·virtual platform};
+\node[con, text width=3.0cm, minimum height=12mm] (rtl) at (4.6,-1.3) {\textbf{RTL}\\[2pt]\footnotesize 시뮬레이션};
+\node[hi, text width=2.8cm, minimum height=14mm] (cmp) at (9.0,0) {\textbf{비교기}\\[2pt]\footnotesize PC·레지스터·메모리 쓰기};
+\node[warn, text width=2.8cm, minimum height=11mm] (stop) at (9.0,-2.6) {첫 불일치에서 정지};
+\draw[arr] (prog) -- (ref.west);
+\draw[arr] (prog) -- (rtl.west);
+\draw[arr] (ref.east) -- node[above, sloped, font=\footnotesize] {명령어마다} (cmp);
+\draw[arr] (rtl.east) -- (cmp);
+\draw[arr] (cmp) -- node[right, font=\footnotesize] {다르면} (stop);
+\end{tikzpicture}
+\end{document}

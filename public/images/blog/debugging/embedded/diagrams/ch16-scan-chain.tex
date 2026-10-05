@@ -1,0 +1,47 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, muxb/.style={cls, minimum width=8mm, text width=7mm, minimum height=12mm, inner sep=1pt, font=\sffamily\scriptsize}, ffb/.style={con, minimum width=14mm, text width=12mm, minimum height=12mm, inner sep=1pt}]
+\node[font=\sffamily\bfseries\large] at (6.4,3.6) {Scan chain — 플립플롭을 한 줄로 꿰기};
+\node[neut, minimum width=150mm, text width=145mm, minimum height=9mm] (logic) at (6.4,2.2) {조합 논리 (기능 모드에서 각 플립플롭의 입력을 계산)};
+\node[muxb] (m0) at (0.0,0) {MUX};
+\node[ffb] (f0) at (1.5,0) {\textbf{FF0}\\[2pt]\scriptsize D \quad Q};
+\draw[arr] (m0.east) -- (f0.west);
+\draw[arr] (logic.south -| m0.north) -- (m0.north);
+\draw[alt] (f0.north) -- (f0.north |- logic.south);
+\draw (m0.south) -- (0.0,-1.4);
+\node[muxb] (m1) at (3.6,0) {MUX};
+\node[ffb] (f1) at (5.1,0) {\textbf{FF1}\\[2pt]\scriptsize D \quad Q};
+\draw[arr] (m1.east) -- (f1.west);
+\draw[arr] (logic.south -| m1.north) -- (m1.north);
+\draw[alt] (f1.north) -- (f1.north |- logic.south);
+\draw (m1.south) -- (3.6,-1.4);
+\node[muxb] (m2) at (7.2,0) {MUX};
+\node[ffb] (f2) at (8.7,0) {\textbf{FF2}\\[2pt]\scriptsize D \quad Q};
+\draw[arr] (m2.east) -- (f2.west);
+\draw[arr] (logic.south -| m2.north) -- (m2.north);
+\draw[alt] (f2.north) -- (f2.north |- logic.south);
+\draw (m2.south) -- (7.2,-1.4);
+\node[muxb] (m3) at (10.8,0) {MUX};
+\node[ffb] (f3) at (12.3,0) {\textbf{FF3}\\[2pt]\scriptsize D \quad Q};
+\draw[arr] (m3.east) -- (f3.west);
+\draw[arr] (logic.south -| m3.north) -- (m3.north);
+\draw[alt] (f3.north) -- (f3.north |- logic.south);
+\draw (m3.south) -- (10.8,-1.4);
+\draw[flow] (f0.east) -- (m1.west);
+\draw[flow] (f1.east) -- (m2.west);
+\draw[flow] (f2.east) -- (m3.west);
+\node[hi, minimum width=16mm] (si) at (-2.0,0) {scan\_in};
+\draw[flow] (si.east) -- (m0.west);
+\node[hi, minimum width=16mm] (so) at (14.6,0) {scan\_out};
+\draw[flow] (f3.east) -- (so.west);
+\draw (0,-1.4) -- (10.8,-1.4);
+\node[caption, anchor=north] at (5.4,-1.6) {SE (scan enable) — 0이면 기능 경로, 1이면 굵은 화살표의 시프트 경로};
+\node[caption, anchor=north] at (5.4,-2.3) {점선: 기능 모드에서 각 플립플롭의 출력이 다시 조합 논리로 들어감};
+\end{tikzpicture}
+\end{document}

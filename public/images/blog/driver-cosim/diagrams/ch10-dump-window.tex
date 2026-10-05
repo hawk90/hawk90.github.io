@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large, anchor=west] at (-3.4,1.9) {dump 범위 전략 — 시간과 계층을 함께 줄인다};
+\draw[flow] (0,0.8) -- (12.8,0.8);
+\node[font=\sffamily\footnotesize, anchor=south] at (0,0.95) {시뮬레이션 시작};
+\node[font=\sffamily\footnotesize, anchor=south] at (9,0.95) {의심 구간 시작};
+\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=south] at (12,0.95) {실패};
+\draw[thr] (12,0.7) -- (12,-4.5);
+\draw[alt] (9,0.7) -- (9,-4.5);
+\foreach \y/\name/\xs/\xe/\h/\sty/\note in {
+  -0.3/전체 구간·전체 신호/0/12/6/warn/파일이 거대하고 느림,
+  -1.4/시간창만/9/12/6/con/실패 직전 구간만,
+  -2.5/의심 계층만/0/12/2/imp/필요한 모듈만 얇게,
+  -3.6/시간창 + 계층/9/12/2/hi/가장 작고 빠름} {
+  \node[font=\sffamily\small, anchor=east] at (-0.3,\y) {\name};
+  \node[\sty, minimum height=\h mm, minimum width={(\xe-\xs)*1cm}, inner sep=0pt, anchor=west] at (\xs,\y) {};
+  \node[caption, anchor=west] at (12.3,\y) {\note};
+}
+\end{tikzpicture}
+\end{document}

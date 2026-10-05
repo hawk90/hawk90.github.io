@@ -1,0 +1,38 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  bstep/.style={cls, minimum width=21mm, text width=19mm, minimum height=12mm, inner sep=2pt}]
+
+\node[font=\sffamily\bfseries\large, anchor=west] at (0,8.6) {Bring-up 계단 — 아래 칸이 확실해야 위로 올라갑니다};
+
+\foreach \i/\name/\sub/\sty in {
+  0/전원/레일·시퀀스/warn,
+  1/클럭·리셋/PLL·reset 해제/warn,
+  2/디버그 접속/JTAG·SWD/hi,
+  3/BootROM/boot mode·로그/hi,
+  4/첫 코드/SRAM에서 실행/con,
+  5/DDR/training·검증/con,
+  6/부트로더/U-Boot·TF-A/imp,
+  7/커널·드라이버/주변 장치/imp} {
+  \node[bstep, \sty] (s\i) at ({\i*2.5}, {\i*1.0})
+    {\textbf{\name}\\[2pt]\scriptsize \sub};
+}
+
+\foreach \i [evaluate=\i as \j using int(\i+1)] in {0,...,6} {
+  \draw[arr] (s\i.east) -| (s\j.south);
+}
+
+% band labels on the right
+\node[caption, anchor=west] at (2.2,-1.0) {전기 — 측정 장비로 확인};
+\node[caption, anchor=west] at (7.2,1.8) {접속 — 칩과 첫 대화};
+\node[caption, anchor=west] at (12.2,3.8) {메모리 — 코드가 놓일 자리};
+\node[caption] at (17.5,5.6) {SW 스택};
+
+\end{tikzpicture}
+\end{document}

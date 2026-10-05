@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ask/.style={prp, text width=4.6cm, minimum height=11mm},
+  res/.style={cls, text width=4.0cm, minimum height=11mm}]
+\node[font=\sffamily\bfseries\large] at (2.8,1.6) {누구를 고칠까 — 스펙부터 묻는다};
+\node[neut, text width=4.6cm] (start) at (0,0.4) {모델과 RTL의 불일치 발견};
+\node[ask] (q1) at (0,-1.4) {스펙에 이 동작이\\[2pt]분명히 적혀 있나?};
+\node[ask] (q2) at (0,-3.4) {RTL이 스펙대로\\[2pt]동작하나?};
+\node[res, warn] (spec) at (6.2,-1.4) {\textbf{스펙 보완}\\[2pt]\footnotesize 아키텍트가 먼저 결정};
+\node[res, hi] (rtl) at (6.2,-3.4) {\textbf{RTL 수정}\\[2pt]\footnotesize 설계 버그};
+\node[res, con] (model) at (0,-5.4) {\textbf{모델 수정}\\[2pt]\footnotesize 모델이 스펙을 잘못 이해};
+\draw[arr] (start) -- (q1);
+\draw[arr] (q1) -- node[above, font=\footnotesize] {아니오} (spec);
+\draw[arr] (q1) -- node[right, font=\footnotesize] {예} (q2);
+\draw[arr] (q2) -- node[above, font=\footnotesize] {아니오} (rtl);
+\draw[arr] (q2) -- node[right, font=\footnotesize] {예} (model);
+\end{tikzpicture}
+\end{document}

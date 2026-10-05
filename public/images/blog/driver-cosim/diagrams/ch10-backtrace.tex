@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  sig/.style={con, text width=3.4cm, minimum height=11mm}]
+\node[font=\sffamily\bfseries\large] at (4.5,2.9) {역추적 — 값을 만든 신호를 따라 한 칸씩 왼쪽으로};
+\node[warn, text width=3.4cm, minimum height=11mm] (sym) at (9.5,0) {\textbf{증상}\\[2pt]\footnotesize irq 출력이 1이 안 됨};
+\node[sig] (stat) at (4.8,0) {\texttt{irq\_stat[0]}\\[2pt]\footnotesize 세워졌다가 바로 0};
+\node[sig] (set) at (0,1.5) {\textbf{set 경로}\\[2pt]\footnotesize \texttt{dma\_done} = 1};
+\node[sig] (clr) at (0,-1.5) {\textbf{clear 경로}\\[2pt]\footnotesize SW의 write-1-to-clear};
+\node[hi, text width=9.4cm, minimum height=11mm] (root) at (2.8,-3.6) {\textbf{원인}: 같은 cycle에 set과 clear가 겹치면 clear가 이김};
+\draw[arr] (stat) -- node[above, font=\footnotesize] {왜 0?} (sym);
+\draw[arr] (set.east) -- (stat.west);
+\draw[arr] (clr.east) -- (stat.west);
+\draw[arr] (clr.south) -- (clr.south |- root.north);
+\draw[arr] (stat.south) -- (stat.south |- root.north);
+\end{tikzpicture}
+\end{document}

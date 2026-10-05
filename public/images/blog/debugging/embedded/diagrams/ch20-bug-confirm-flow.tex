@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, flowb/.style={cls, text width=4.8cm, minimum height=12mm}, endb/.style={cls, text width=3.4cm, minimum height=12mm}]
+\node[font=\sffamily\bfseries\large] at (0,1.4) {실리콘 버그를 확정하기까지};
+\node[flowb, neut] (s0) at (0,0.0) {\textbf{증상 보고}\\[2pt]\footnotesize SW 팀·현장·검증 팀};
+\node[flowb, prp] (s1) at (0,-1.7) {\textbf{여러 칩·보드에서 재현}\\[2pt]\footnotesize 개별 불량 배제};
+\draw[arr] (s0.south) -- (s1.north);
+\node[flowb, prp] (s2) at (0,-3.4) {\textbf{최소 재현 코드}\\[2pt]\footnotesize 레지스터 몇 개로 줄이기};
+\draw[arr] (s1.south) -- (s2.north);
+\node[flowb, con] (s3) at (0,-5.1) {\textbf{pre-silicon에서 재현}\\[2pt]\footnotesize 같은 시나리오를 시뮬레이션으로};
+\draw[arr] (s2.south) -- (s3.north);
+\node[flowb, warn] (s4) at (0,-6.8) {\textbf{RTL 원인 확정}\\[2pt]\footnotesize waveform으로 설계 결함 확인};
+\draw[arr] (s3.south) -- (s4.north);
+\node[endb, hi] (e0) at (-4.2,-9.4) {\textbf{errata 등록}\\[2pt]\footnotesize 고객·내부 공지};
+\draw[arr] (s4.south) -- (e0.north);
+\node[endb, imp] (e1) at (0,-9.4) {\textbf{SW workaround}\\[2pt]\footnotesize 드라이버·펌웨어 우회};
+\draw[arr] (s4.south) -- (e1.north);
+\node[endb, con] (e2) at (4.2,-9.4) {\textbf{다음 스테핑 수정}\\[2pt]\footnotesize ECO 여부 결정};
+\draw[arr] (s4.south) -- (e2.north);
+\end{tikzpicture}
+\end{document}

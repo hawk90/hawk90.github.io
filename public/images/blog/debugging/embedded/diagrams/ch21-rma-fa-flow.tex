@@ -1,0 +1,31 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, flowb/.style={cls, text width=2.9cm, minimum height=12mm}]
+\node[font=\sffamily\bfseries\large] at (5.4,2.5) {필드 불량에서 근본 원인까지};
+\node[flowb, neut] (a0) at (0.0,0) {\textbf{필드 불량 보고}};
+\node[flowb, con] (a1) at (3.6,0) {\textbf{로그·ramdump 수집}};
+\draw[arr] (a0.east) -- (a1.west);
+\node[flowb, prp] (a2) at (7.2,0) {\textbf{통계로 분류}};
+\draw[arr] (a1.east) -- (a2.west);
+\node[flowb, hi] (a3) at (10.8,0) {\textbf{불량 샘플 회수 (RMA)}};
+\draw[arr] (a2.east) -- (a3.west);
+\node[flowb, prp] (b0) at (10.8,-2.4) {\textbf{재현 시험}\\[2pt]\footnotesize 시스템·테스터에서};
+\node[flowb, imp] (b1) at (7.2,-2.4) {\textbf{비파괴 분석}\\[2pt]\footnotesize X-ray·초음파 현미경};
+\draw[arr] (b0.west) -- (b1.east);
+\node[flowb, warn] (b2) at (3.6,-2.4) {\textbf{파괴 분석}\\[2pt]\footnotesize 디캡·단면 절단};
+\draw[arr] (b1.west) -- (b2.east);
+\node[flowb, ok] (b3) at (0.0,-2.4) {\textbf{근본 원인과 조치}\\[2pt]\footnotesize 설계·공정·SW};
+\draw[arr] (b2.west) -- (b3.east);
+\draw[arr] (a3.south) -- (b0.north);
+\draw[decorate, decoration={brace, amplitude=5pt, mirror}, draw=mutec] (1.9,-3.3) -- (8.9,-3.3);
+\node[caption, anchor=north] at (5.4,-3.55) {FA(실패 분석) 팀의 영역};
+\draw[decorate, decoration={brace, amplitude=5pt}, draw=mutec] (-1.5,0.85) -- (8.7,0.85);
+\node[caption, anchor=south] at (3.6,1.0) {SW·시스템 팀이 데이터를 모으는 영역};
+\end{tikzpicture}
+\end{document}

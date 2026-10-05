@@ -1,0 +1,34 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  bx/.style={text width=3.2cm, minimum height=13mm}]
+
+\node[font=\sffamily\bfseries\large] at (5,6.5) {테이프아웃 전에 심어 두는 디버그 훅};
+\node[con, bx] (cpu) at (0,4.2) {\textbf{CPU 클러스터}\\[2pt]\footnotesize 코어 디버그 레지스터};
+\node[abs, bx] (ic)  at (5,4.2) {\textbf{인터커넥트}\\[2pt]\footnotesize 버스 모니터·timeout};
+\node[imp, bx] (ip)  at (10,4.2) {\textbf{IP 블록}\\[2pt]\footnotesize 상태·에러 레지스터};
+\node[hi, bx] (sc)  at (0,1.6) {\textbf{scratch·postcode}\\[2pt]\footnotesize 항상 켜진 전원 영역};
+\node[hi, bx] (tb)  at (5,1.6) {\textbf{온칩 trace buffer}\\[2pt]\footnotesize 마지막 실행 흐름};
+\node[hi, bx] (dbg) at (10,1.6) {\textbf{디버그 포트}\\[2pt]\footnotesize JTAG·SWD};
+\draw[arr] (cpu.east) -- (ic.west);
+\draw[arr] (ic.east) -- (ip.west);
+\draw[arr] (cpu.south) -- node[left, font=\footnotesize] {postcode 쓰기} (sc.north);
+\draw[arr] (cpu.south east) -- node[above right, font=\footnotesize] {trace} (tb.north west);
+\draw[alt] (dbg.south) -- ++(0,-0.8) -| (sc.south);
+\draw[alt] (dbg.south) -- ++(0,-0.8) -| (tb.south);
+\draw[alt] (dbg.north) -- (ip.south);
+\node[caption] at (5,-0.35) {점선: 디버그 포트로 읽어 오는 경로};
+\begin{scope}[on background layer]
+\node[panel, fit=(cpu)(ip)(sc)(dbg), inner sep=14pt] (soc) {};
+\end{scope}
+\node[panelTitle] at (soc.north west) {SoC};
+\node[caption] at (5,-1.0) {주황색 상자는 테이프아웃 전에 넣어야 하는 디버그 훅입니다};
+
+\end{tikzpicture}
+\end{document}

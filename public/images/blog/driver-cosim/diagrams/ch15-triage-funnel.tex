@@ -1,0 +1,19 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large] at (0,1.5) {triage 깔때기 — 많은 실패를 몇 개의 판정으로};
+\node[warn, minimum width=120mm, minimum height=10mm] (a) at (0,0) {야간 회귀의 실패 수십 건};
+\node[hi, minimum width=96mm, minimum height=10mm] (b) at (0,-1.4) {실패 시그니처로 버킷 나누기};
+\node[con, minimum width=74mm, minimum height=10mm] (c) at (0,-2.8) {버킷마다 대표 1건을 seed로 재현};
+\node[prp, minimum width=56mm, minimum height=10mm] (d) at (0,-4.2) {최소 재현 케이스로 줄이기};
+\node[ok, minimum width=40mm, minimum height=10mm] (e) at (0,-5.6) {책임 영역 판정};
+\foreach \u/\v in {a/b, b/c, c/d, d/e} \draw[arr] (\u) -- (\v);
+\node[caption, anchor=north] at (0,-6.3) {RTL · 테스트벤치 · 모델 · 인프라 중 하나};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,28 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  ff/.style={cls, minimum width=16mm, minimum height=14mm, text width=14mm}]
+\node[font=\sffamily\bfseries\large] at (5.2,3.0) {2단 동기화기 — 클럭 도메인을 건너는 표준 방법};
+\node[ff, con] (a) at (0,0) {FF\\[2pt]\footnotesize clk\_a};
+\node[ff, warn] (b1) at (5,0) {FF1\\[2pt]\footnotesize clk\_b};
+\node[ff, ok] (b2) at (8,0) {FF2\\[2pt]\footnotesize clk\_b};
+\node[font=\sffamily\small, anchor=west] (o) at (10,0) {안정된 신호};
+\draw[arr] (a) -- node[above, font=\footnotesize] {\texttt{req\_a}} (b1);
+\draw[arr] (b1) -- (b2);
+\draw[arr] (b2) -- (o);
+\node[caption, text width=3.6cm, anchor=north] at (5,-1.0) {잠깐 0도 1도 아닌\\[2pt]상태가 될 수 있음};
+\node[caption, text width=3.2cm, anchor=north] at (8,-1.0) {한 cycle 동안\\[2pt]안정될 시간을 줌};
+\begin{scope}[on background layer]
+\node[panel, fit=(a), inner sep=14pt] (pa) {};
+\node[panel, fit=(b1)(b2), inner sep=14pt] (pb) {};
+\end{scope}
+\node[panelTitle] at (pa.north west) {도메인 A};
+\node[panelTitle] at (pb.north west) {도메인 B};
+\end{tikzpicture}
+\end{document}
