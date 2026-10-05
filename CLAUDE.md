@@ -22,6 +22,7 @@
 다음은 다른 저장소에서 동기화되는 콘텐츠입니다. **직접 편집하지 마세요.**
 
 - `src/content/blog/math/linear-algebra/**`, `src/content/blog/math/set-theory/**` (+ `public/images/blog/<series>/`) — `../book-notes/<series>/`에서 동기화. `npm run sync:book-notes`는 dry run이고, 실제 쓰기는 `npm run sync:book-notes -- --apply`.
+- `npm run diagrams`는 위 두 그림 디렉터리(`public/images/blog/linear-algebra`, `set-theory`)를 건너뜁니다. 그림 소스도 원본 저장소에서 고칩니다.
 
 원본을 수정하고 동기화 스크립트를 다시 돌리는 방식으로 작업합니다.
 
@@ -66,6 +67,8 @@
 - **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (local clone 기준 drift — 기본 offline, fetch는 `python3 scripts/audit-upstream-freshness.py --fetch`), `npm run audit:staleness` (산문 미래 시제·날짜 앵커), `npm run audit:tags` (태그 어휘 — 리포트형이라 pass/fail 아님).
 - **`npm run verify:release`**: ⑤⑦⑧⑨를 포함한 28단계(`scripts/verify-release.mjs`)를 한 번에. ⑧은 `dist/`를 읽으므로 빌드 *뒤*에 돕니다 — 표 잘림·제목 계층은 마크다운 원본에는 없고 렌더된 HTML에만 있습니다. CI가 배포 전 이걸 돌립니다.
 - **staleness 두 도구 구분**: `audit:roadmap`은 `known-facts.yaml`에 *등재된 SKU*의 `review:` 날짜만, `audit:staleness`는 *본문 산문 자체*의 미래 시제(`예정`·`미발표`)·날짜 앵커(`YYYY년 현재`)를 훑는다. 등재 안 된 주장은 후자만 잡는다.
+- **다이어그램 캐시**: `npm run diagrams`는 mtime이 아니라 내용 해시로 판단한다. 각 `.svg`에 `<!-- tikz-src sha256=… -->` stamp가 있고, `.tex`나 `_design*.tex`가 바뀌어 해시가 달라질 때만 다시 빌드한다. `npm run check:diagrams`는 빌드 없이 stamp 불일치(= `.tex`만 고치고 `.svg`를 안 만든 상태)를 찾고, pre-commit `diagram-fresh`가 같은 검사를 한다.
+- **새 스크립트는 Node(`.mjs`)로 쓴다.** 기존 Python·Bash 검사기는 `claude/tooling-node/` 패킷에서 parity 검증을 거쳐 옮긴다.
 - **게이트가 느릴 때**: `git commit/push --no-verify`로 우회하되 *책임 본인* — 우회했으면 `npm run audit:gate`를 별도로 돌린다.
 
 ### Slash 커맨드 (`.claude/commands/`)

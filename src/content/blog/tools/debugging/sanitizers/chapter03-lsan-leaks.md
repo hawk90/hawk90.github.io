@@ -386,7 +386,7 @@ const char* get_config_path() {
 
 ## 다음 장 예고
 
-[Ch 4: TSan과 데이터 레이스](/blog/tools/debugging/sanitizers/chapter04-tsan)에서는 멀티스레드 코드의 *가장 어려운 버그* — 데이터 레이스 — 를 다룹니다. TSan의 happens-before 모델, false positive 줄이기, atomic·mutex와의 상호작용.
+[Ch 4: TSan과 데이터 레이스](/blog/tools/debugging/sanitizers/chapter04-tsan)에서는 멀티스레드 코드의 *가장 어려운 버그*인 데이터 레이스를 다룹니다. TSan의 happens-before 모델, false positive 줄이기, atomic·mutex와의 상호작용.
 
 ## 참고 자료
 

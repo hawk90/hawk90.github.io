@@ -260,7 +260,7 @@ CXL 환경 디버깅의 일반 흐름:
 - DAMON *sample_interval 5ms 이하는 위험*, *100ms*가 일반적입니다.
 - `perf mem`은 *분포 분석 전용*, throughput은 *STREAM·mlc*가 정답입니다.
 
-다음 편은 **Ch 56: 실전 사례 — CXL.mem 추가로 LLM inference KV cache 처리량 회복** — Ch 8(HBM)에서 본 LLaMA 70B 메모리 문제의 *해결편 case study*입니다.
+다음 편은 **Ch 56: 실전 사례 — CXL.mem 추가로 LLM inference KV cache 처리량 회복**입니다. Ch 8(HBM)에서 본 LLaMA 70B 메모리 문제의 *해결편 case study*입니다.
 
 ## 관련 항목
 

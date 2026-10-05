@@ -118,7 +118,7 @@ PBR이 있어야 *수십~수백 디바이스의 fabric*이 *실용적*이 됩니
 
 FM에서 이 장에 필요한 성질은 하나입니다. FM은 *out-of-band control plane*이라서, 별도 네트워크나 전용 BMC link로 동작하고 *데이터 평면(CXL link)과 분리*돼 있습니다. 그래서 FM이 죽어도 이미 붙어 있는 LD는 계속 동작하고, 멈추는 것은 *동적 재할당*뿐입니다. pooling의 가용성을 따질 때 이 구분이 결론을 가릅니다.
 
-FM의 전체 책임 범위 — topology discovery, hot-plug, health monitoring, security policy, QoS — 와 redundancy 구성은 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric#fabric-manager--out-of-band-control-plane)에서 다룹니다.
+FM의 전체 책임 범위(topology discovery, hot-plug, health monitoring, security policy, QoS)와 redundancy 구성은 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric#fabric-manager--out-of-band-control-plane)에서 다룹니다.
 
 ## Coherency Domain ID
 

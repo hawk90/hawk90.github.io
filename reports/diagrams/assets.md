@@ -1,7 +1,7 @@
 # Diagram asset audit
 
-- TeX sources: 1008
-- SVG assets: 1039
+- TeX sources: 1048
+- SVG assets: 1079
 - Structural findings: 0
 - Temporary build files: 0
 - SVGs without a sibling TeX source (manual/imported assets): 35

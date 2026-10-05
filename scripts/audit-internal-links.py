@@ -136,6 +136,8 @@ def main():
         p = Path(t)
         if not p.is_absolute():
             p = REPO_ROOT / p
+        if not p.exists():
+            raise SystemExit(f"✗ 경로 없음: {t} (검사 0건을 통과로 보고하지 않도록 중단)")
         if p.is_file() and p.suffix == ".md":
             md_files.append(p)
         elif p.is_dir():

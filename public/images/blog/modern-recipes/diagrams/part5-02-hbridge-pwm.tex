@@ -1,6 +1,7 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{fontspec}
 \setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
 \input{../../_design.tex}
@@ -34,16 +35,16 @@
 
 % Duty annotation
 \draw[<->, draw=mutec, line width=0.3pt] (0, 1.85) -- (\dC, 1.85);
-\node[sublbl, anchor=south] at (\dC/2, 1.85) {25 \textmu s duty};
+\node[sublbl, anchor=south] at (\dC/2, 1.85) {25 μs duty};
 \draw[<->, draw=mutec, line width=0.3pt] (\dC, 1.85) -- (\T, 1.85);
 \pgfmathsetmacro{\xmid}{(\dC + \T)/2}
-\node[sublbl, anchor=south] at (\xmid, 1.85) {25 \textmu s off};
+\node[sublbl, anchor=south] at (\xmid, 1.85) {25 μs off};
 
 % Period brace
 \draw[decorate, decoration={brace, amplitude=3pt, mirror},
       draw=mutec, line width=0.4pt]
   (0, 0.15) -- (\T, 0.15);
-\node[sublbl, anchor=north] at (\T/2, 0.05) {50 \textmu s (20 kHz), 50\% duty};
+\node[sublbl, anchor=north] at (\T/2, 0.05) {50 μs (20 kHz), 50\% duty};
 
 \end{tikzpicture}
 \end{document}

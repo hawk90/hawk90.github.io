@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- tikz-src sha256=1c48d2d51b848cc0ad2dc8e0f9b03a9e80654b8cc312bf8f0355fb629e60112c -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="338.11pt" height="202.83pt" viewBox="0 0 338.11 202.83">
 <defs>
 <g>
@@ -365,6 +366,8 @@
 <use xlink:href="#glyph-1-19" x="190.010438" y="189.167012"/>
 <use xlink:href="#glyph-1-13" x="194.759096" y="189.167012"/>
 </g>
-<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0.00111852 -83.754015 L 0.00111852 0.00102958 L -85.038548 -71.671512 " transform="matrix(0.997375, 0, 0, -0.997375, 168.612166, 21.626027)"/>
-<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0.00111852 -83.754015 L 0.00111852 0.00102958 L 70.866855 -79.132506 " transform="matrix(0.997375, 0, 0, -0.997375, 168.612166, 21.626027)"/>
+<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0.00111852 -83.754015 L 0.00111852 0.00102958 L -82.253894 -69.321593 " transform="matrix(0.997375, 0, 0, -0.997375, 168.612166, 21.626027)"/>
+<path fill-rule="nonzero" fill="rgb(31.373596%, 31.373596%, 31.373596%)" fill-opacity="1" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 5.032465 0.000830905 L 0.724699 1.623485 L 2.138903 0.00135348 L 0.72372 -1.623119 Z M 5.032465 0.000830905 " transform="matrix(-0.762623, 0.642728, 0.642728, 0.762623, 88.118587, 89.464078)"/>
+<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0.00111852 -83.754015 L 0.00111852 0.00102958 L 68.438605 -76.418349 " transform="matrix(0.997375, 0, 0, -0.997375, 168.612166, 21.626027)"/>
+<path fill-rule="nonzero" fill="rgb(31.373596%, 31.373596%, 31.373596%)" fill-opacity="1" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 5.028734 0.000381553 L 0.723311 1.621568 L 2.138399 0.00200395 L 0.7246 -1.623647 Z M 5.028734 0.000381553 " transform="matrix(0.665349, 0.742944, 0.742944, -0.665349, 235.521043, 96.338403)"/>
 </svg>

@@ -1,4 +1,8 @@
 \documentclass[tikz,border=10pt]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing,decorations.pathmorphing}
 \input{../../_design.tex}
 
 \begin{document}
@@ -15,8 +19,8 @@
     node[anchor=west, text=conbord] {팀 A};
 
 % Team B line (constant)
-\draw[impl, very thick] (0.5,2.2) -- (7.5,2.2)
-    node[anchor=west, text=impl] {팀 B};
+\draw[draw=impbord, very thick] (0.5,2.2) -- (7.5,2.2)
+    node[anchor=west, text=impbord] {팀 B};
 
 \end{tikzpicture}
 \end{document}

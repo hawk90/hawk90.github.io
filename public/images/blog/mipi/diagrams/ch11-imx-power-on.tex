@@ -22,14 +22,14 @@
 
 \node[anchor=west, font=\tiny, align=left] at (0, -2.5) {
   1. \textbf{VDDL 1.05V} (digital core) — 첫\\
-  2. \textbf{VANA 2.8V} (analog) — 100 µs 후\\
-  3. \textbf{VDIG 1.8V} (IO) — 100 µs 후\\
-  4. \textbf{XCLK} 24 MHz enable — 200 µs 후\\
+  2. \textbf{VANA 2.8V} (analog) — 100 μs 후\\
+  3. \textbf{VDIG 1.8V} (IO) — 100 μs 후\\
+  4. \textbf{XCLK} 24 MHz enable — 200 μs 후\\
   5. \textbf{XCLR (reset)} High → 6.5 ms wait (Sony 내부 PLL lock)\\
   6. \textbf{I²C} register read OK → chip ID 확인 (0x0219 for IMX219)\\
   7. Init register sequence (~100 register) 적용\\
   8. \textbf{Streaming On} (0x0100 = 0x01) → CSI-2 stream 시작\\[2pt]
-  ⚠ 순서 틀리면 *센서 영구 손상* 가능. 데이터시트 *Power-On Sequence* 표 정확히 따르기.
+  \textbf{주의:} 순서 틀리면 *센서 영구 손상* 가능. 데이터시트 *Power-On Sequence* 표 정확히 따르기.
 };
 
 \end{tikzpicture}

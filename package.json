@@ -113,6 +113,8 @@
     "og:force": "node scripts/build-og.mjs --force",
     "og:prune": "node scripts/build-og.mjs --prune",
     "diagrams": "bash scripts/build-diagrams.sh",
+    "check:diagrams": "bash scripts/build-diagrams.sh --check",
+    "check:script-modes": "node scripts/check-script-modes.mjs",
     "diagrams:force": "bash scripts/build-diagrams.sh --force",
     "diagrams:watch": "bash scripts/watch-diagrams.sh",
     "audit:gate": "bash scripts/audit-publish-gate.sh",

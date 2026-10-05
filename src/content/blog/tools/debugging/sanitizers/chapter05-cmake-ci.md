@@ -539,7 +539,7 @@ Sanitizer는 *컴파일러 한 옵션*으로 *수많은 런타임 버그를 잡�
 3. **PR CI에 ASan + UBSan** — 다음 PR 사이클부터.
 4. **멀티스레드면 TSan** — 동시성 코드 추가 시.
 
-[Valgrind 시리즈](/blog/tools/debugging/valgrind/chapter01-intro)는 *sanitizer가 닿지 못하는 자리* — 재컴파일 불가 바이너리, 시스템 호출 추적 — 를 보완합니다.
+[Valgrind 시리즈](/blog/tools/debugging/valgrind/chapter01-intro)는 재컴파일할 수 없는 바이너리나 시스템 호출 추적처럼 *sanitizer가 닿지 못하는 자리*를 보완합니다.
 
 ## 참고 자료
 

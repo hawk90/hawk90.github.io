@@ -1,4 +1,8 @@
 \documentclass[tikz,border=10pt]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing,decorations.pathmorphing}
 \input{../../_design.tex}
 
 \begin{document}
@@ -15,8 +19,8 @@
 \node[below] at (0,0) {0};
 
 % Main Sequence
-\draw[impl, very thick] (0,5) -- (5,0);
-\node[anchor=south west, text=impl] at (2.5,2.5) {Main Sequence};
+\draw[draw=impbord, very thick] (0,5) -- (5,0);
+\node[anchor=south west, text=impbord] at (2.5,2.5) {Main Sequence};
 
 % Zone of Uselessness
 \node[text=conbord, align=center, text width=3cm] at (1,4.5) {

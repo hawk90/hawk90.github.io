@@ -1,10 +1,10 @@
 # Diagram reference audit
 
-- SVG assets on disk: 1039
-- References from content: 837
+- SVG assets on disk: 1079
+- References from content: 875
 - References with missing or too-short alt: 0
 - References to a missing SVG: 0
-- SVGs never referenced: 223
+- SVGs never referenced: 225
 
 Diagrams are embedded through <img>, so the alt attribute is the accessible
 name. Internal <title>/<desc> elements are not announced and are not checked.
@@ -28,6 +28,7 @@ name. Internal <title>/<desc> elements are not announced and are not checked.
 - public/images/blog/beautiful/diagrams/item01-object-vptr.svg
 - public/images/blog/beautiful/diagrams/item01-vtable.svg
 - public/images/blog/bootloader/diagrams/chapter12-fastboot-seq.svg
+- public/images/blog/debugging/embedded/diagrams/ch12-observation-points.svg
 - public/images/blog/domain-driven-design/diagrams/chapter09-specification-pattern.svg
 - public/images/blog/domain-driven-design/diagrams/chapter10-supple-design.svg
 - public/images/blog/domain-driven-design/diagrams/chapter11-accountability-pattern.svg
@@ -55,6 +56,7 @@ name. Internal <title>/<desc> elements are not announced and are not checked.
 - public/images/blog/domain-driven-design/diagrams/chapter16-system-complexity.svg
 - public/images/blog/domain-driven-design/diagrams/chapter17-context-map-distillation.svg
 - public/images/blog/domain-driven-design/diagrams/chapter17-strategic-design-pillars.svg
+- public/images/blog/driver-cosim/diagrams/ch10-backtrace.svg
 - public/images/blog/dsa/diagrams/item02-bigo-growth.svg
 - public/images/blog/dsa/diagrams/item03-hanoi.svg
 - public/images/blog/dsa/diagrams/item07-queue-fifo.svg
@@ -115,6 +117,4 @@ name. Internal <title>/<desc> elements are not announced and are not checked.
 - public/images/blog/gof/diagrams/item09-decorator.svg
 - public/images/blog/gof/diagrams/item10-facade-seq.svg
 - public/images/blog/gof/diagrams/item10-facade.svg
-- public/images/blog/gof/diagrams/item11-flyweight-seq.svg
-- public/images/blog/gof/diagrams/item11-flyweight.svg
-- … +123 more
+- … +125 more

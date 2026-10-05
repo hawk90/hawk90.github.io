@@ -47,7 +47,7 @@ RSP는 *위쪽 프로토콜*. 아래에서는 실제로 *전선 다섯 가닥*(J
 
 흐름 한 예 — IR에 `EXTEST` 명령(0x00)을 넣기.
 
-![JTAG TAP TMS sequence: Reset + Select-IR + Shift-IR + Update-IR](/images/blog/debugging/embedded/diagrams/ch02-jtag-tap-sequence.svg)
+![JTAG TAP TMS 시퀀스: TMS=1 다섯 번으로 Reset, Run-Test/Idle에서 Select-DR-Scan·Select-IR-Scan·Capture-IR를 거쳐 Shift-IR에서 TDI 4비트를 시프트하고 Exit1-IR·Update-IR 뒤 Run-Test/Idle로 복귀](/images/blog/debugging/embedded/diagrams/ch02-jtag-tap-sequence.svg)
 
 복잡해 보이지만 *디버거 펌웨어*가 알아서 합니다. 사용자는 신경 안 써도 됩니다 — 다만 *왜 5핀이 필요하고 어떤 신호가 어떤 역할인지*를 아는 것이 트러블슈팅에 결정적.
 

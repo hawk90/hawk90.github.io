@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- tikz-src sha256=f2a2fbba344e2915201df680ba50a7a5aedca3ce7ee899794b811f1214f50cea -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="352.29pt" height="163.94pt" viewBox="0 0 352.29 163.94">
 <defs>
 <g>
@@ -355,6 +356,8 @@
 <use xlink:href="#glyph-1-19" x="177.729731" y="148.393132"/>
 <use xlink:href="#glyph-1-20" x="181.049575" y="148.393132"/>
 </g>
-<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M -99.214834 -57.152217 L -102.40093 -68.315294 " transform="matrix(0.997989, 0, 0, -0.997989, 175.788718, 23.954923)"/>
-<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 99.215525 -57.25007 L 102.401621 -68.315294 " transform="matrix(0.997989, 0, 0, -0.997989, 175.788718, 23.954923)"/>
+<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M -99.214834 -57.152217 L -101.402829 -64.816069 " transform="matrix(0.997989, 0, 0, -0.997989, 175.788718, 23.954923)"/>
+<path fill-rule="nonzero" fill="rgb(31.373596%, 31.373596%, 31.373596%)" fill-opacity="1" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 5.031958 0.00226614 L 0.722912 1.621402 L 2.138812 -0.00151055 L 0.725012 -1.622297 Z M 5.031958 0.00226614 " transform="matrix(-0.273988, 0.959616, 0.959616, 0.273988, 75.146052, 86.694069)"/>
+<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 99.215525 -57.25007 L 101.395691 -64.816069 " transform="matrix(0.997989, 0, 0, -0.997989, 175.788718, 23.954923)"/>
+<path fill-rule="nonzero" fill="rgb(31.373596%, 31.373596%, 31.373596%)" fill-opacity="1" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 5.032176 -0.0000849922 L 0.725795 1.623386 L 2.139533 -0.00183609 L 0.723549 -1.622495 Z M 5.032176 -0.0000849922 " transform="matrix(0.276253, 0.958957, 0.958957, -0.276253, 276.41852, 86.697772)"/>
 </svg>

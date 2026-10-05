@@ -21,7 +21,7 @@
 \node[hw] (uart) at (0, 2) {UART HW\\[2pt]IRQ trigger};
 
 % ISR (Top-Half) — explicit row gap
-\node[isr] (isrN) at (4, 2) {Top-Half ISR\\[2pt]$\sim$수 µs};
+\node[isr] (isrN) at (4, 2) {Top-Half ISR\\[2pt]$\sim$수 μs};
 
 % Queue
 \node[queue] (q) at (8.5, 2) {Queue\\[2pt](1 byte)};
@@ -41,7 +41,7 @@
   \quad 1. UART RDR 읽어 1 byte 캡처\\
   \quad 2. xQueueSendFromISR()\\
   \quad 3. portYIELD\_FROM\_ISR()\\
-  \quad 끝. 수 µs 안에.\\[4pt]
+  \quad 끝. 수 μs 안에.\\[4pt]
   \textbf{Bottom-Half (Task)} — 모든 처리:\\
   \quad parse·CRC·검증·로그·전송 (ms 단위 OK)\\
   \quad 모든 RTOS API 사용 가능 (blocking 포함)

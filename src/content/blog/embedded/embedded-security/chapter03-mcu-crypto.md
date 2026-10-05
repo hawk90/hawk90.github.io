@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 데스크톱 크립토 라이브러리(OpenSSL, libsodium)는 *프로세서가 빠르고 메모리가 충분*하다는 가정에서 출발합니다. 그래서 RSA-4096이나 SHA-3-512가 부담스럽지 않습니다. MCU는 정반대 환경입니다. Cortex-M0+ 48 MHz, RAM 16 KB, flash 64 KB가 흔합니다. 이 위에서 같은 보안 강도를 어떻게 확보하느냐가 임베디드 크립토의 핵심 질문입니다.
 
-답은 세 갈래입니다. 첫째, *적절한 알고리즘*을 골라 연산량을 최소화합니다. 둘째, MCU 내부의 *crypto accelerator*를 활용해 처리량을 끌어올립니다. 셋째, *constant-time*과 *masking* 같은 사이드채널 방어를 빼먹지 않습니다. 이 세 가지가 균형을 잃으면 — 알고리즘은 강한데 SW로만 돌려서 너무 느리거나, HW로 빠르지만 timing leak이 있거나 — 시스템이 무너집니다.
+답은 세 갈래입니다. 첫째, *적절한 알고리즘*을 골라 연산량을 최소화합니다. 둘째, MCU 내부의 *crypto accelerator*를 활용해 처리량을 끌어올립니다. 셋째, *constant-time*과 *masking* 같은 사이드채널 방어를 빼먹지 않습니다. 이 세 가지 중 하나라도 균형을 잃으면 시스템이 무너집니다. 알고리즘은 강한데 SW로만 돌려서 너무 느리거나, HW로 빠르지만 timing leak이 있는 경우입니다.
 
 ## AES — 대칭키의 기본
 
@@ -175,7 +175,7 @@ if (crypto_sign_verify_detached(sig, msg, sizeof(msg), pk) == 0) {
 
 키 생성, nonce 생성, IV 생성은 *예측 불가능한* 값이 있어야 합니다. `rand()`는 *수도*무작위라서 시드를 알면 다음 값을 예측할 수 있습니다.
 
-TRNG(True Random Number Generator)는 *물리적 잡음원* — 열잡음, jitter, 양자 효과 — 에서 entropy를 뽑습니다. 거의 모든 최신 MCU에 내장돼 있습니다.
+TRNG(True Random Number Generator)는 열잡음, jitter, 양자 효과 같은 *물리적 잡음원*에서 entropy를 뽑습니다. 거의 모든 최신 MCU에 내장돼 있습니다.
 
 ```c
 // STM32 HAL의 TRNG

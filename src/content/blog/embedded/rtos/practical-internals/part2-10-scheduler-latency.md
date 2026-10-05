@@ -64,7 +64,7 @@ void rx_task(void *arg) {
 
 ![GPIO debug pin — ISR width, scheduler latency, task wake](/images/blog/rtos/diagrams/part2-10-gpio-isr-trace.svg)
 
-세 edge — t2(ISR 시작), t4(ISR 끝), t7(task 시작) — 사이의 폭으로 *ISR 길이*와 *scheduler latency*를 분리해 측정합니다.
+세 edge, 즉 t2(ISR 시작), t4(ISR 끝), t7(task 시작) 사이의 폭으로 *ISR 길이*와 *scheduler latency*를 분리해 측정합니다.
 
 ## DWT Cycle Counter — Cortex-M
 
