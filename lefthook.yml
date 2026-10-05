@@ -27,6 +27,37 @@ pre-commit:
       run: node scripts/normalize-tag-shape.mjs --apply --quiet {staged_files}
       stage_fixed: true
 
+    # .tex를 고치고 .svg를 다시 빌드하지 않은 채 커밋하는 것을 막는다.
+    # .svg 안의 tikz-src 해시(scripts/build-diagrams.sh)가 .tex+의존 파일과
+    # 일치해야 통과. _design*.tex가 바뀌면 그 스타일을 쓰는 전체를 검사한다.
+    diagram-fresh:
+      glob:
+        - "public/images/blog/**/*.tex"
+        - "public/images/blog/**/*.svg"
+      run: |
+        status=0
+        case " {staged_files} " in
+          *"/_design"*) ./scripts/build-diagrams.sh --check || status=1 ;;
+          *)
+            for f in {staged_files}; do
+              tex="${f%.*}.tex"
+              [ -f "$tex" ] || continue
+              ./scripts/build-diagrams.sh --check "$PWD/$tex" | grep '^✗' && status=1
+            done ;;
+        esac
+        exit $status
+      fail_text: |
+        ✗ .svg가 .tex와 맞지 않습니다. `npm run diagrams`로 다시 빌드한 뒤 커밋하세요.
+
+    # 직접 실행되는 스크립트(./scripts/x, $ROOT/scripts/x)가 실행 비트를 잃으면
+    # publish gate가 그 검사를 건너뛴 채 통과한다. scripts/가 바뀔 때마다 확인.
+    script-modes:
+      glob:
+        - "scripts/**"
+        - "lefthook.yml"
+        - "package.json"
+      run: node scripts/check-script-modes.mjs
+
     # 새로 추가된 챕터에 draft·series·title 기본 frontmatter 누락 검사
     frontmatter-required:
       glob:

@@ -71,3 +71,7 @@ node_modules/.package-lock.json
 reports/content-readiness/series.txt
 reports/content-readiness/staleness.txt
 reports/diagrams/tikz-overlap-report.txt
+
+# Python bytecode
+__pycache__/
+*.pyc

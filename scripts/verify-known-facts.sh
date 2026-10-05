@@ -34,6 +34,9 @@ while [ $# -gt 0 ]; do
 done
 
 [ ${#TARGETS[@]} -eq 0 ] && TARGETS=("$ROOT/src/content/blog")
+for t in "${TARGETS[@]}"; do
+  [ -e "$t" ] || { echo "✗ 경로 없음: $t (검사 0건을 통과로 보고하지 않도록 중단)" >&2; exit 2; }
+done
 
 extract_category() {
   awk -v cat="$1" '

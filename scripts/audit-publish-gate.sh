@@ -22,7 +22,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 TMP_DIR="$(mktemp -d "${TMPDIR:-/tmp}/audit-publish-gate.XXXXXX")"
-trap 'rm -rf "$TMP_DIR"' EXIT
+# 종료 코드를 보존한다. 예전에는 trap이 오류 종료(예: bash 3.2의 빈 배열
+# unbound variable)를 0으로 덮어 "검사 0건 + 성공"이 됐다.
+trap 'rc=$?; rm -rf "$TMP_DIR"; exit $rc' EXIT
 STRICT=0
 ARGS=()
 
@@ -62,78 +64,93 @@ run_check() {
   fi
 }
 
+# 검사기가 없거나 실행 권한이 없으면 조용히 건너뛰지 않고 차단한다.
+# (detect-prose-in-code.sh가 실행 비트를 잃은 채 SKIPPED로 통과하던 일이 있었다.)
+require_checker() {
+  local script="$ROOT/scripts/$1"
+  if [ -x "$script" ]; then
+    return 0
+  fi
+  echo ""
+  echo "═══ 검사기 누락: $1 ═══"
+  if [ -f "$script" ]; then
+    echo "✗ 실행 권한 없음 — chmod +x scripts/$1 (git update-index --chmod=+x)"
+  else
+    echo "✗ 파일 없음 — scripts/$1"
+  fi
+  echo "✗ BLOCKING — 검사를 건너뛴 채 통과시킬 수 없음"
+  FAILED=$((FAILED + 1))
+  return 1
+}
+
 # 1. ASCII 박스 다이어그램
-run_check \
-  "1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6)" \
-  "block" \
-  "$ROOT/scripts/detect-ascii-diagrams.sh" "${ARGS[@]}"
+if require_checker "detect-ascii-diagrams.sh"; then
+  run_check \
+    "1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6)" \
+    "block" \
+    "$ROOT/scripts/detect-ascii-diagrams.sh" ${ARGS[@]+"${ARGS[@]}"}
+fi
 
 # 2. TikZ 텍스트 겹침 (시리즈 인자 없이 전체 빠른 검사)
-if [ -x "$ROOT/scripts/detect-tikz-overlap.sh" ]; then
+if require_checker "detect-tikz-overlap.sh"; then
   run_check \
     "2/4 TikZ 텍스트 근접 휴리스틱" \
     "block" \
     "$ROOT/scripts/detect-tikz-overlap.sh"
-else
-  echo ""
-  echo "═══ 2/4 TikZ 텍스트 근접 휴리스틱 ═══"
-  echo "− SKIPPED (detect-tikz-overlap.sh 미존재)"
 fi
 
 # 3. 코드 블록 내 한국어 산문
-if [ -x "$ROOT/scripts/detect-prose-in-code.sh" ]; then
+if require_checker "detect-prose-in-code.sh"; then
   run_check \
     "3/4 코드 블록 내 한국어 산문 후보" \
     "warn" \
-    "$ROOT/scripts/detect-prose-in-code.sh"
-else
-  echo ""
-  echo "═══ 3/4 코드 블록 내 한국어 산문 ═══"
-  echo "− SKIPPED (detect-prose-in-code.sh 미존재)"
+    "$ROOT/scripts/detect-prose-in-code.sh" --published-only
 fi
 
 # 3b. Tone 일관성 (~합니다 vs ~다 혼용·시리즈 이탈) — MIXED 차단
-if [ -x "$ROOT/scripts/audit-tone-consistency.py" ]; then
+if require_checker "audit-tone-consistency.py"; then
   run_check \
     "3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단)" \
     "block" \
-    python3 "$ROOT/scripts/audit-tone-consistency.py" "${ARGS[@]}"
+    python3 "$ROOT/scripts/audit-tone-consistency.py" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 3c. 번역체·AI 상투구 후보 (CLAUDE.md §2) — 휴리스틱이라 warn (후보 = 위반 아님).
 #     확정·리라이트는 korean-prose-critic 에이전트로.
-if [ -x "$ROOT/scripts/audit-translationese.py" ]; then
+if require_checker "audit-translationese.py"; then
   run_check \
     "3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2)" \
     "warn" \
-    python3 "$ROOT/scripts/audit-translationese.py" "${ARGS[@]}"
+    python3 "$ROOT/scripts/audit-translationese.py" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 4. Hallucination 후보 — strict 모드에서만 block
-run_check \
-  "4/5 Hallucination 후보 (CLAUDE.md §10)" \
-  "warn" \
-  "$ROOT/scripts/audit-suspect-claims.sh" "${ARGS[@]}"
+if require_checker "audit-suspect-claims.sh"; then
+  run_check \
+    "4/5 Hallucination 후보 (CLAUDE.md §10)" \
+    "warn" \
+    "$ROOT/scripts/audit-suspect-claims.sh" ${ARGS[@]+"${ARGS[@]}"}
+fi
 
 # 5. Known-fact whitelist 검증 — strict 모드에서만 block
-if [ -x "$ROOT/scripts/verify-known-facts.sh" ]; then
+if require_checker "verify-known-facts.sh"; then
   run_check \
     "5/6 Known-fact whitelist (data/known-facts.yaml)" \
     "warn" \
-    "$ROOT/scripts/verify-known-facts.sh" "${ARGS[@]}"
+    "$ROOT/scripts/verify-known-facts.sh" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 6. Universal fact-density (informational, 항상 warn — review 우선순위 식별)
-if [ -x "$ROOT/scripts/audit-fact-density.sh" ]; then
+if require_checker "audit-fact-density.sh"; then
   run_check \
     "6/10 Fact-density 분석 (universal, 모든 챕터)" \
     "warn" \
-    "$ROOT/scripts/audit-fact-density.sh" --top 20 "${ARGS[@]}"
+    "$ROOT/scripts/audit-fact-density.sh" --top 20 ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 7. Upstream freshness — code-review·spec-analysis 시리즈가 upstream에 얼마나 뒤처졌나
 #    --no-fetch: local clone 기준만 (빠름, fetch는 별도 npm run audit:upstream)
-if [ -x "$ROOT/scripts/audit-upstream-freshness.py" ] && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
+if require_checker "audit-upstream-freshness.py" && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
   echo ""
   echo "═══ 7/10 Upstream freshness (code-review·spec) ═══"
   if python3 "$ROOT/scripts/audit-upstream-freshness.py" --no-fetch --top 5 > "$TMP_DIR/audit-freshness.txt" 2>&1; then
@@ -147,7 +164,7 @@ fi
 
 # 7b. Cited-symbol existence — 글이 인용한 라이브러리 심볼이 upstream에 실제 존재?
 #     rename·삭제·hallucination(존재하지 않는 API 이름) 탐지. 후보=수동 review.
-if [ -x "$ROOT/scripts/audit-cited-symbols.py" ] && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
+if require_checker "audit-cited-symbols.py" && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
   echo ""
   echo "═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══"
   if python3 "$ROOT/scripts/audit-cited-symbols.py" > "$TMP_DIR/audit-symbols.txt" 2>&1; then
@@ -168,15 +185,15 @@ fi
 # 8. Internal link rot — /blog/... 링크가 실제 파일을 가리키는지
 #    Python 버전이 image markdown ![]()과 page link []()를 구별해 정확.
 #    인자 전달 — 단일 파일/디렉터리만 검사 가능.
-if [ -x "$ROOT/scripts/audit-internal-links.py" ]; then
+if require_checker "audit-internal-links.py"; then
   run_check \
     "8/10 Internal link rot (/blog/... page link)" \
     "block" \
-    python3 "$ROOT/scripts/audit-internal-links.py" "${ARGS[@]}"
+    python3 "$ROOT/scripts/audit-internal-links.py" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 9. Series integrity — seriesOrder gap·draft 혼합·date 역행·중복 검출
-if [ -x "$ROOT/scripts/audit-series-integrity.py" ]; then
+if require_checker "audit-series-integrity.py"; then
   echo ""
   echo "═══ 9/10 Series integrity (frontmatter 일관성) ═══"
   if python3 "$ROOT/scripts/audit-series-integrity.py" --quiet > "$TMP_DIR/audit-integrity.txt" 2>&1; then
@@ -190,7 +207,7 @@ if [ -x "$ROOT/scripts/audit-series-integrity.py" ]; then
 fi
 
 # 10. Image coverage — §11 접근성 — 추상 개념 vs 이미지 0개 챕터 ranking
-if [ -x "$ROOT/scripts/audit-image-coverage.py" ]; then
+if require_checker "audit-image-coverage.py"; then
   echo ""
   echo "═══ 10/10 Image coverage (§11 접근성, informational) ═══"
   python3 "$ROOT/scripts/audit-image-coverage.py" --top 5 2>&1 | head -5

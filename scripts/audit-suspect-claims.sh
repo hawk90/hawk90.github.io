@@ -41,6 +41,9 @@ done
 if [ ${#TARGETS[@]} -eq 0 ]; then
   TARGETS=("$ROOT/src/content/blog")
 fi
+for t in "${TARGETS[@]}"; do
+  [ -e "$t" ] || { echo "✗ 경로 없음: $t (검사 0건을 통과로 보고하지 않도록 중단)" >&2; exit 2; }
+done
 
 # The audit is for prose claims, not frontmatter values or code examples.
 prose_only() {
