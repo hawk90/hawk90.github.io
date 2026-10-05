@@ -16,6 +16,7 @@ npm run build      # dist/ 생성. 발행 3387편 중 draft 아닌 것만 페이
 ```
 
 Node는 `.nvmrc`와 `engines`에 명시된 버전을 씁니다.
+처음 받은 뒤에는 `scripts/bootstrap.sh` 한 번이면 됩니다(mise로 Node 설치, `npm ci`, `lefthook install`).
 
 ## 콘텐츠가 사는 곳
 
