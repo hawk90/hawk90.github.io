@@ -143,7 +143,7 @@ bring-up은 몇 주에서 몇 달이 걸리고, 여러 사람이 여러 보드�
   stage: ddr              # 계단의 어느 칸인가
   setup: { vdd_core: 0.80, temp: 25C, fw: bl2-dbg-0.3.1 }
   symptom: "write leveling 단계에서 byte lane 2만 실패"
-  experiment: "VDD_DDR를 +3% 올려 재시도"
+  experiment: "VDD_DDR을 +3% 올려 재시도"
   result: "변화 없음"
   conclusion: "전압 마진 문제 가능성 낮음. 보드 B02에서 같은 실험 예정"
   owner: hw-ddr

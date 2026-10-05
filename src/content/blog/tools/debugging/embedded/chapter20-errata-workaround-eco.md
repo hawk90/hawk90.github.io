@@ -10,9 +10,9 @@ draft: true
 topics: ["tools", "tools/debugging"]
 ---
 
-Ch 19에서 HW냐 SW냐를 가르는 방법을 봤습니다. 판정 결과가 "HW 버그"로 나왔다고 해서 일이 끝나지는 않습니다. 오히려 그때부터 새로운 일이 시작됩니다. 칩은 이미 만들어졌고, 고객은 그 칩으로 제품을 만들어야 합니다. 다음 칩이 나오기까지 몇 달이 걸리는 동안 소프트웨어가 버텨야 합니다.
+Ch 19에서 HW냐 SW냐를 가르는 방법을 봤습니다. 판정 결과가 "HW 버그"로 나와도 일이 끝나지 않고, 오히려 그때부터 시작됩니다. 칩은 이미 만들어졌고, 고객은 그 칩으로 제품을 만들어야 합니다. 다음 칩이 나오기까지 몇 달이 걸리는 동안 소프트웨어가 버텨야 합니다.
 
-이 장은 실리콘 버그를 다루는 전체 흐름을 정리합니다. 문서와 실리콘이 다를 때 무엇을 기준으로 삼는지, 버그를 어떻게 확정하는지, SW workaround는 어떤 원칙으로 설계하고 그 비용은 얼마인지, errata 문서는 어떻게 쓰는지, 그리고 다음 스테핑에서 고칠지 말지를 어떻게 정하는지를 차례로 봅니다. SW 엔지니어는 workaround를 만들고, HW 엔지니어는 수정 방법을 찾습니다. 그래서 양쪽이 같은 흐름을 이해하고 있어야 합니다.
+이 장은 실리콘 버그를 다루는 전체 흐름을 정리합니다. 문서와 실리콘이 다를 때 무엇을 기준으로 삼는지, 버그를 어떻게 확정하는지, SW workaround는 어떤 원칙으로 설계하고 그 비용은 얼마인지, errata(출시된 칩의 결함과 대응을 정리한 문서)는 어떻게 쓰는지, 그리고 다음 스테핑(칩을 고쳐 다시 만든 버전)에서 고칠지 말지를 어떻게 정하는지를 차례로 봅니다. SW 엔지니어는 workaround를 만들고, HW 엔지니어는 수정 방법을 찾습니다. 그래서 양쪽이 같은 흐름을 이해하고 있어야 합니다.
 
 ## 문서와 실리콘이 다를 때
 
@@ -27,7 +27,7 @@ Ch 19에서 HW냐 SW냐를 가르는 방법을 봤습니다. 판정 결과가 "H
 | 문서에 없는 요구 사항 | 블록 활성화 전 대기 시간이 필요 | 문서 보강, 때로는 errata |
 | 이번 스테핑에 기능 없음 | 다음 스테핑에서 구현 예정인 기능 | 스테핑별 기능 표로 관리 |
 
-bring-up에서 이런 불일치를 빨리 찾는 방법 하나는 리셋 직후 레지스터 값을 통째로 읽어 문서와 비교하는 것입니다. 아래 스크립트는 레지스터 덤프와 문서에서 뽑은 기대 리셋값 표를 비교해 다른 항목만 보여 줍니다. 입력 형식은 설명을 위한 예시입니다.
+bring-up에서 이런 불일치를 빨리 찾는 방법 하나는 리셋 직후 레지스터 값을 통째로 읽어 문서와 비교하는 방법입니다. 단, 읽기만 해도 상태가 바뀌는(read-to-clear) 레지스터나 FIFO는 덤프 대상에서 뺍니다. 아래 스크립트는 레지스터 덤프와 문서에서 뽑은 기대 리셋값 표를 비교해 다른 항목만 보여 줍니다. 입력 형식은 설명을 위한 예시입니다.
 
 ```python
 import yaml
@@ -40,8 +40,8 @@ def compare_reset(dump_path, expected_path):
 
     expected = yaml.safe_load(open(expected_path))   # 문서 표에서 뽑은 기대값
     for reg in expected["registers"]:
-        addr, want = int(reg["addr"], 16), int(reg["reset"], 16)
-        mask = int(reg.get("mask", "0xffffffff"), 16)    # 의미 없는 비트 제외
+        addr, want = int(str(reg["addr"]), 0), int(str(reg["reset"]), 0)
+        mask = int(str(reg.get("mask", "0xffffffff")), 0)    # 의미 없는 비트 제외
         got = actual.get(addr)
         if got is None:
             print(f"{reg['name']:24s} missing in dump")
@@ -82,7 +82,7 @@ pre-silicon 재현이 어려운 경우도 있습니다. 전기적 마진 문제�
 
 리눅스 커널에는 이 원칙을 체계화한 실제 사례가 있습니다. arm64 아키텍처 코드는 Arm 코어의 errata마다 `ARM64_ERRATUM_` 접두사가 붙은 Kconfig 옵션을 두고, 부팅할 때 코어의 ID 레지스터(MIDR)를 읽어 영향받는 코어에서만 workaround를 켭니다. 커널 문서에는 어떤 errata에 어떤 옵션이 대응하는지 정리한 목록도 있습니다. 칩 회사의 드라이버도 같은 구조를 따르면 좋습니다.
 
-아래 코드는 이 원칙을 드라이버에 적용한 **예시**입니다. errata 번호, 레지스터 이름, 리비전 값은 모두 가상입니다. 리비전으로 적용 여부를 정하고, 모듈 파라미터로 끌 수 있게 했으며, 적용 사실을 로그로 남깁니다.
+아래 코드는 이 원칙을 드라이버에 적용한 **예시**입니다. errata 번호, 레지스터 이름, 리비전 값은 모두 가상입니다. 리비전으로 적용 여부를 정하되 리비전을 모르면 켜는 쪽으로 정하고, 모듈 파라미터로 끌 수 있게 했으며, 적용 사실을 로그로 남깁니다.
 
 ```c
 /* SOC-ERR-0042 (예시): A0 스테핑의 DMA 엔진은 특정 조건에서
@@ -93,7 +93,7 @@ module_param(disable_err0042_wa, bool, 0444);
 static bool soc_needs_err0042(struct mydma *md)
 {
     u32 rev = readl(md->sysctl + SYSCTL_REVISION) & REV_MASK;
-    return rev == REV_A0 && !disable_err0042_wa;
+    return !disable_err0042_wa && (rev == REV_A0 || !soc_rev_known(rev));
 }
 
 static void mydma_apply_errata(struct mydma *md)
@@ -120,19 +120,19 @@ workaround의 비용이 얼마나 커질 수 있는지 보여 주는 대표적�
 
 ## errata 문서 쓰기
 
-**errata**(출간된 칩에서 발견된 결함과 대응 방법을 정리한 문서)는 약 설명서의 부작용 항목과 비슷합니다. 어떤 상황에서 무슨 일이 생길 수 있는지, 그럴 때 어떻게 해야 하는지, 언제 고쳐지는지를 사용자가 알 수 있게 씁니다. 칩 회사들은 이런 문서를 공개하는데, Intel은 이를 "Specification Update"라는 이름으로 내기도 합니다.
+errata는 약 설명서의 부작용 항목과 비슷합니다. 어떤 상황에서 무슨 일이 생길 수 있는지, 그럴 때 어떻게 해야 하는지, 언제 고쳐지는지를 사용자가 알 수 있게 씁니다. 칩 회사들은 이런 문서를 공개하는데, Intel은 이를 "Specification Update"라는 이름으로 내기도 합니다.
 
 좋은 errata 항목은 읽는 사람이 세 가지 질문에 답할 수 있게 합니다. 내 제품이 영향을 받는가, 영향을 받으면 무엇을 해야 하는가, 언제 해결되는가입니다. 아래는 사내 errata 항목을 관리하는 형식의 예시입니다.
 
 ```yaml
 - id: SOC-ERR-0042
-  title: "DMA descriptor prefetch may return stale data"
+  title: "DMA 디스크립터 prefetch가 옛 값을 읽을 수 있음"
   affected_steppings: [A0]
   fixed_in: A1
   severity: high                     # 데이터 손상 가능
   conditions: >
-    descriptor prefetch enabled AND descriptor ring rewritten by CPU
-    within a short window after the previous fetch
+    descriptor prefetch가 켜져 있고, 직전 fetch 직후 짧은 시간 안에
+    CPU가 디스크립터 ring을 다시 쓸 때
   implication: "DMA가 이전 디스크립터 내용으로 전송할 수 있음"
   workaround: "A0에서 descriptor prefetch 비활성화 (driver: mydma)"
   workaround_cost: "대량 소형 전송에서 처리량 감소, 실측값은 링크한 보고서 참조"
@@ -144,7 +144,7 @@ workaround의 비용이 얼마나 커질 수 있는지 보여 주는 대표적�
 
 ## metal ECO와 스테핑 관리
 
-버그를 칩에서 고치기로 했다면, 다음 **스테핑**(같은 칩을 수정해서 다시 만든 버전, A0·A1·B0 같은 이름을 붙임)에 수정을 넣습니다. 이때 수정 범위가 비용을 결정합니다.
+버그를 칩에서 고치기로 했다면, 다음 스테핑(A0·A1·B0 같은 이름을 붙임)에 수정을 넣습니다. 이때 수정 범위가 비용을 결정합니다.
 
 칩은 여러 층의 마스크로 만듭니다. 아래쪽은 트랜지스터를 만드는 층이고, 위쪽은 트랜지스터를 연결하는 금속 배선층입니다. **metal ECO**(engineering change order, 위쪽 금속 배선층의 마스크만 바꿔 회로 연결을 고치는 수정)는 트랜지스터 층을 그대로 두고 배선만 바꿉니다. 옷으로 치면 단추 위치를 옮기는 수선이고, 트랜지스터 층까지 바꾸는 것은 옷을 새로 짓는 일입니다.
 
