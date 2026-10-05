@@ -14,7 +14,9 @@ Series id (optional): `$ARGUMENTS`.
 
 ## Steps
 
-1. **Drift** — which chapters lag upstream code/spec (fetches upstream):
+1. **Drift** — which chapters lag upstream code/spec. Offline by default (local
+   clones under `~/Workspaces/code-review-sources/`); add `--fetch` to create
+   missing clones and fetch origin (network):
    ```bash
    python3 scripts/audit-upstream-freshness.py --top 15 ${ARGUMENTS:+--series $ARGUMENTS}
    ```

@@ -21,7 +21,8 @@ The prose is Korean; your instructions and reasoning are in English, but every
 
 ## Source of truth
 
-Before working, always read `CLAUDE.md` at the repo root. In particular:
+Before working, read the style rules (section numbers are shared with `CLAUDE.md`):
+`.claude/rules/01-tone-and-prose.md` (§1, §2) and `.claude/rules/05-quality.md` (§11). In particular:
 - **§1 Two tones** — Tone A (`~합니다`, friendly) / Tone B (`~다`, plain reference).
   One tone per post, one tone per series.
 - **§2 Korean prose rules** — the basis for the violation list below.
@@ -84,7 +85,7 @@ Before working, always read `CLAUDE.md` at the repo root. In particular:
 
 ## Workflow
 
-1. Read `CLAUDE.md` to confirm the tone rules.
+1. Read `.claude/rules/01-tone-and-prose.md` to confirm the tone rules.
 2. Determine the target file's series dominant tone (skim one sibling chapter).
 3. Run the regex prescan to get candidate locations:
    ```bash

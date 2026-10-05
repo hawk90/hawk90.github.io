@@ -7,7 +7,7 @@ allowed-tools: Bash, Read, Edit, Grep, Glob
 # Security & admin workstream
 
 1. Run `npm run audit:security-admin` and read `reports/security-admin/latest.md`.
-2. Read `src/lib/admin/`, `src/pages/admin/`, and `src/pages/api/auth/` before editing.
+2. Read `src/lib/admin/` and `src/pages/admin/` before editing. `src/pages/api/auth/` must stay absent — the gate flags OAuth route sources in a static build.
 3. Fix all deterministic open P0 findings as one coherent boundary change; do not suppress rules or weaken the gate.
 4. Treat OAuth deployment support as a design boundary: do not expose OAuth in a static build.
 5. Run `npm run audit:security-admin`, `npm run gate:security-admin`, `npm run check`, and `npm run build`.

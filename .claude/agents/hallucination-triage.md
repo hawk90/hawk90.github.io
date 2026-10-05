@@ -15,7 +15,9 @@ deny from memory; always grep the source.
 ## Sources of truth (in priority order)
 
 1. **Local upstream clones** — `~/Workspaces/code-review-sources/<repo>` (folly,
-   abseil-cpp, linux). For a cited symbol, grep the clone for the real token:
+   abseil-cpp, linux; mapping in `data/upstream-tracking.yaml`). If a clone is
+   missing, report NEEDS-HUMAN or ask the caller to run
+   `python3 scripts/audit-upstream-freshness.py --fetch`. For a cited symbol, grep the clone for the real token:
    `grep -rn "\bSYMBOL\b" <clone>/<subsystem>`. Absent everywhere = invented or
    renamed; find the closest real name and propose it.
 2. **`data/known-facts.yaml`** — whitelisted spec numbers, SKUs, standard names
