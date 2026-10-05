@@ -27,7 +27,7 @@
   6. Send \texttt{Pixel Format Set} (0x3A) → RGB888 등\\
   7. Send vendor-specific gamma/power init (10-50 명령)\\
   8. Send \texttt{Display On} (0x29) → wait 20 ms → video stream 시작\\[2pt]
-  ⚠ 각 명령 후 *데이터시트 wait time* 정확히. 빼먹으면 *첫 프레임 깨짐*.
+  \textbf{주의:} 각 명령 후 *데이터시트 wait time* 정확히. 빼먹으면 *첫 프레임 깨짐*.
 };
 
 \end{tikzpicture}

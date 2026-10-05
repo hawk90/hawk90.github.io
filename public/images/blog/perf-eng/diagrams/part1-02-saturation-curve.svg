@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- tikz-src sha256=b46c7fedac2e428dead9726d1df13735aa2757476efdfb49f8bd17093316dd3c -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="282.04pt" height="209.42pt" viewBox="0 0 282.04 209.42">
 <defs>
 <g>
@@ -266,7 +267,7 @@
 <use xlink:href="#glyph-3-1" x="201.540004" y="59.807837"/>
 <use xlink:href="#glyph-3-2" x="206.718881" y="59.807837"/>
 </g>
-<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(29.412842%, 54.902649%, 35.293579%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0.00133484 130.397396 L 153.071364 130.397396 " transform="matrix(0.996608, 0, 0, -0.996608, 32.221326, 162.19334)"/>
+<path fill="none" stroke-width="0.3985" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(29.412842%, 54.902649%, 35.293579%)" stroke-opacity="1" stroke-miterlimit="10" d="M 0.00133484 132.388525 C 0.597106 133.583987 1.992464 134.379655 3.983594 134.379655 L 72.552131 134.379655 C 74.54326 134.379655 75.938619 135.179242 76.53439 136.374704 C 77.13408 135.179242 78.529439 134.379655 80.520568 134.379655 L 149.089106 134.379655 C 151.080235 134.379655 152.475593 133.583987 153.071364 132.388525 " transform="matrix(0.996608, 0, 0, -0.996608, 32.221326, 162.19334)"/>
 <g fill="rgb(29.399109%, 54.899597%, 35.299683%)" fill-opacity="1">
 <use xlink:href="#glyph-0-11" x="75.914604" y="19.685404"/>
 <use xlink:href="#glyph-0-12" x="82.785354" y="19.685404"/>

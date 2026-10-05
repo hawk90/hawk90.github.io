@@ -1,4 +1,5 @@
 \documentclass[tikz,border=10pt]{standalone}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing,decorations.pathmorphing}
 \input{../../_design.tex}
 
 \begin{document}
@@ -35,7 +36,7 @@
 \draw[arr] (admin.south) -- ++(0, -0.3) -- (kernel.north -| admin.south);
 
 % Labels on arrows
-\node[right, font=\footnotesize, text=contxt] at (0.2, -1) {depends on};
+\node[right, font=\footnotesize, text=inkc] at (0.2, -1) {depends on};
 
 \end{tikzpicture}
 \end{document}

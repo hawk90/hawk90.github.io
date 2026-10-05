@@ -1,4 +1,8 @@
 \documentclass[tikz,border=10pt]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing,decorations.pathmorphing}
 \input{../../_design.tex}
 
 \begin{document}
@@ -13,7 +17,7 @@
 };
 
 % Immutable component (bottom)
-\node[impl, text width=6cm, align=center] (immut) at (0,0) {
+\node[imp, text width=6cm, align=center] (immut) at (0,0) {
     불변 컴포넌트 (대부분)\\[2pt]
     - 비즈니스 로직\\[2pt]
     - 계산\\[2pt]

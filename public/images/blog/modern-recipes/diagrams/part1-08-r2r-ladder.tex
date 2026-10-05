@@ -1,112 +1,64 @@
-\documentclass[tikz,border=2mm]{standalone}
-\input{../../_design.tex}
-
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
-\begin{tikzpicture}[blog]
+\input{../../_design.tex}
+% Standard R-2R ladder: each bit Dn drives a 2R leg into node Nn, nodes are
+% chained by R, the LSB end is terminated by 2R to GND, and the MSB node is
+% the output. Unloaded: V_out = V_REF * code / 256.
+\begin{tikzpicture}[blog,
+  wire/.style={draw=inkc, thick},
+  resV/.style={draw=inkc, thick, fill=white, minimum width=2.2mm, minimum height=7mm, inner sep=0pt},
+  resH/.style={draw=inkc, thick, fill=white, minimum width=7mm, minimum height=2.2mm, inner sep=0pt},
+  dot/.style={circle, fill=inkc, inner sep=1.4pt},
+  lbl/.style={font=\sffamily\scriptsize, text=inkc}]
 
-% Title
-\node[text=inkc, anchor=south] at (4, 4.5) {R-2R Ladder DAC};
+\node[font=\sffamily\bfseries\small, text=inkc] at (5.25, 5.0) {R-2R Ladder DAC (8비트)};
 
-% D7 input (MSB)
-\node[text=inkc] at (0, 4) {D7};
-\draw[thick] (0.3, 4) -- (1, 4);
+% node x positions: D0, D1, D2, (dots), D6, D7
+\foreach \n/\x in {0/1.5, 1/3.0, 2/4.5, 6/7.0, 7/8.5} {
+  \coordinate (N\n) at (\x, 2.0);
+}
 
-% First 2R resistor (vertical)
-\draw[thick] (1, 4.2) -- (1, 4) -- (1, 3.5);
-\draw[thick] (0.9, 3.7) rectangle (1.1, 3.3);
-\node[text=inkc, right=2mm, font=\scriptsize] at (1.1, 3.5) {2R};
-\draw[thick] (1, 3.3) -- (1, 2.8);
+% ladder spine with series R between neighbouring nodes
+\draw[wire] (N0) -- (N2);
+\draw[wire] (N2) -- ($(N2)+(0.6,0)$);
+\node[lbl] at (5.75, 2.0) {$\cdots$};
+\draw[wire] ($(N6)+(-0.6,0)$) -- (N6) -- (N7) -- (9.8, 2.0);
+\foreach \a/\b in {N0/N1, N1/N2, N6/N7} {
+  \node[resH] (r\a) at ($(\a)!0.5!(\b)$) {};
+  \node[lbl, below=1.5mm] at (r\a) {R};
+}
 
-% First R resistor (horizontal)
-\node[circle, fill=inkc, inner sep=1.5pt] at (1, 2.8) {};
-\draw[thick] (1, 2.8) -- (2, 2.8);
-\draw[thick] (1.4, 2.9) rectangle (1.6, 2.7);
-\node[text=inkc, above=1.5mm, font=\scriptsize] at (1.5, 2.9) {R};
+% bit legs: Dn -- 2R -- Nn
+\foreach \n in {0,1,2,6,7} {
+  \draw[wire] (N\n) -- ++(0, 2.0) coordinate (T\n);
+  \node[resV] (l\n) at ($(N\n)+(0,1.0)$) {};
+  \node[lbl, right=1.5mm] at (l\n) {2R};
+  \node[lbl, above=1mm] at (T\n) {D\n};
+  \node[dot] at (N\n) {};
+}
+\node[lbl] at (5.75, 4.15) {$\cdots$};
 
-% Second stage (D6)
-\node[circle, fill=inkc, inner sep=1.5pt] at (2, 2.8) {};
-\draw[thick] (2, 2.8) -- (2, 3.3);
-\draw[thick] (1.9, 3.1) rectangle (2.1, 3.5);
-\node[text=inkc, left=2mm, font=\scriptsize] at (1.9, 3.3) {2R};
-\draw[thick] (2, 3.5) -- (2, 4);
-\node[text=inkc, above] at (2, 4) {D6};
+% LSB termination: N0 -- 2R -- GND
+\draw[wire] (N0) -- ++(0, -1.6) coordinate (G);
+\node[resV] (term) at ($(N0)+(0,-0.8)$) {};
+\node[lbl, right=1.5mm] at (term) {2R (종단)};
+\draw[wire] ($(G)+(-0.3,0)$) -- ($(G)+(0.3,0)$);
+\draw[wire] ($(G)+(-0.2,-0.1)$) -- ($(G)+(0.2,-0.1)$);
+\draw[wire] ($(G)+(-0.1,-0.2)$) -- ($(G)+(0.1,-0.2)$);
+\node[lbl, below=2mm] at (G) {GND};
 
-% Second R
-\draw[thick] (2, 2.8) -- (3, 2.8);
-\draw[thick] (2.4, 2.9) rectangle (2.6, 2.7);
-\node[text=inkc, above=1.5mm, font=\scriptsize] at (2.5, 2.9) {R};
+% output at the MSB end
+\node[dot] at (9.8, 2.0) {};
+\node[lbl, right=1mm] at (9.8, 2.0) {V\textsubscript{out}};
 
-% Third stage (D5)
-\node[circle, fill=inkc, inner sep=1.5pt] at (3, 2.8) {};
-\draw[thick] (3, 2.8) -- (3, 3.3);
-\draw[thick] (2.9, 3.1) rectangle (3.1, 3.5);
-\node[text=inkc, left=2mm, font=\scriptsize] at (2.9, 3.3) {2R};
-\draw[thick] (3, 3.5) -- (3, 4);
-\node[text=inkc, above] at (3, 4) {D5};
-
-% Third R
-\draw[thick] (3, 2.8) -- (4, 2.8);
-\draw[thick] (3.4, 2.9) rectangle (3.6, 2.7);
-\node[text=inkc, above=1.5mm, font=\scriptsize] at (3.5, 2.9) {R};
-
-% Continuation dots
-\node[text=inkc] at (4.5, 2.8) {...};
-\draw[thick] (4.3, 2.8) -- (4.7, 2.8);
-
-% Last stage
-\node[circle, fill=inkc, inner sep=1.5pt] at (5, 2.8) {};
-\draw[thick] (5, 2.8) -- (5, 3.3);
-\draw[thick] (4.9, 3.1) rectangle (5.1, 3.5);
-\node[text=inkc, left=2mm, font=\scriptsize] at (4.9, 3.3) {2R};
-\draw[thick] (5, 3.5) -- (5, 4);
-\node[text=inkc, above] at (5, 4) {D0};
-
-% Final R
-\draw[thick] (5, 2.8) -- (6, 2.8);
-\draw[thick] (5.4, 2.9) rectangle (5.6, 2.7);
-\node[text=inkc, above=1.5mm, font=\scriptsize] at (5.5, 2.9) {R};
-
-% Output
-\node[circle, fill=inkc, inner sep=1.5pt] at (6, 2.8) {};
-\draw[thick] (6, 2.8) -- (7, 2.8);
-\node[text=inkc, right] at (7, 2.8) {V\_out};
-
-% Ground connections (series R to GND)
-\draw[thick] (1, 2.8) -- (1, 2.3);
-\draw[thick] (0.9, 2.5) rectangle (1.1, 2.1);
-\node[text=inkc, right=2mm, font=\scriptsize] at (1.1, 2.3) {R};
-\draw[thick] (1, 2.1) -- (1, 1.8);
-\draw[thick] (0.7, 1.8) -- (1.3, 1.8);
-\draw[thick] (0.8, 1.7) -- (1.2, 1.7);
-\draw[thick] (0.9, 1.6) -- (1.1, 1.6);
-\node[text=inkc, below] at (1, 1.5) {GND};
-
-\draw[thick] (2, 2.8) -- (2, 2.3);
-\draw[thick] (1.9, 2.5) rectangle (2.1, 2.1);
-\node[text=inkc, right=2mm, font=\scriptsize] at (2.1, 2.3) {R};
-\draw[thick] (2, 2.1) -- (2, 1.8);
-\draw[thick] (1.7, 1.8) -- (2.3, 1.8);
-\draw[thick] (1.8, 1.7) -- (2.2, 1.7);
-\draw[thick] (1.9, 1.6) -- (2.1, 1.6);
-\node[text=inkc, below] at (2, 1.5) {GND};
-
-\draw[thick] (3, 2.8) -- (3, 2.3);
-\draw[thick] (2.9, 2.5) rectangle (3.1, 2.1);
-\node[text=inkc, right=2mm, font=\scriptsize] at (3.1, 2.3) {R};
-\draw[thick] (3, 2.1) -- (3, 1.8);
-\draw[thick] (2.7, 1.8) -- (3.3, 1.8);
-\draw[thick] (2.8, 1.7) -- (3.2, 1.7);
-\draw[thick] (2.9, 1.6) -- (3.1, 1.6);
-\node[text=inkc, below] at (3, 1.5) {GND};
-
-\draw[thick] (5, 2.8) -- (5, 2.3);
-\draw[thick] (4.9, 2.5) rectangle (5.1, 2.1);
-\node[text=inkc, right=2mm, font=\scriptsize] at (5.1, 2.3) {R};
-\draw[thick] (5, 2.1) -- (5, 1.8);
-\draw[thick] (4.7, 1.8) -- (5.3, 1.8);
-\draw[thick] (4.8, 1.7) -- (5.2, 1.7);
-\draw[thick] (4.9, 1.6) -- (5.1, 1.6);
-\node[text=inkc, below] at (5, 1.5) {GND};
+\node[font=\sffamily\scriptsize, text=mutec, align=center] at (6.6, 0.0)
+  {D\textsubscript{n} = 1이면 2R이 V\textsubscript{REF}에, 0이면 GND에 연결됩니다\\[2pt]
+   V\textsubscript{out} = V\textsubscript{REF} × code / 256 (MSB인 D7이 출력에 가장 가깝습니다)};
 
 \end{tikzpicture}
 \end{document}

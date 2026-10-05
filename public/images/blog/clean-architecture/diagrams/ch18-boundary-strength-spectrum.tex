@@ -1,4 +1,8 @@
 \documentclass[tikz,border=10pt]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing,decorations.pathmorphing}
 \input{../../_design.tex}
 
 \begin{document}
@@ -8,8 +12,8 @@
 \draw[line width=1.2pt, conbord, -{Stealth[length=3mm]}] (0, 0) -- (13, 0);
 
 % Labels above
-\node[above, text=contxt, font=\small] at (0, 0.3) {약함};
-\node[above, text=contxt, font=\small] at (13, 0.3) {강함};
+\node[above, text=inkc, font=\small] at (0, 0.3) {약함};
+\node[above, text=inkc, font=\small] at (13, 0.3) {강함};
 
 % Four boundary types
 \node[con, minimum width=2.5cm, minimum height=1.8cm, align=center] (func) at (1.5, -2)
@@ -32,10 +36,10 @@
    \small 다른 머신};
 
 % Connect to spectrum line
-\draw[line width=0.8pt, text=contxt!60] (func.north) -- (1.5, 0);
-\draw[line width=0.8pt, text=contxt!60] (comp.north) -- (5, 0);
-\draw[line width=0.8pt, text=contxt!60] (proc.north) -- (8.5, 0);
-\draw[line width=0.8pt, text=contxt!60] (serv.north) -- (11.5, 0);
+\draw[line width=0.8pt, text=inkc!60] (func.north) -- (1.5, 0);
+\draw[line width=0.8pt, text=inkc!60] (comp.north) -- (5, 0);
+\draw[line width=0.8pt, text=inkc!60] (proc.north) -- (8.5, 0);
+\draw[line width=0.8pt, text=inkc!60] (serv.north) -- (11.5, 0);
 
 \end{tikzpicture}
 \end{document}

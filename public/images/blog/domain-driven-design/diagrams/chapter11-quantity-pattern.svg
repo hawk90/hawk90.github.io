@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="UTF-8"?>
+<!-- tikz-src sha256=77c553c5cc91ad1c9d8d704c2fad2195adc24894b350f446153f9bf2b2f6817d -->
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="253.07pt" height="117.76pt" viewBox="0 0 253.07 117.76">
 <defs>
 <g>
@@ -177,5 +178,6 @@
 <use xlink:href="#glyph-1-4" x="200.323796" y="102.481769"/>
 <use xlink:href="#glyph-1-13" x="205.067521" y="102.481769"/>
 </g>
-<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M -10.98501 -56.695264 L 25.159048 -56.695264 " transform="matrix(0.996339, 0, 0, -0.996339, 126.073695, 21.512321)"/>
+<path fill="none" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M -10.98501 -56.695264 L 21.516806 -56.695264 " transform="matrix(0.996339, 0, 0, -0.996339, 126.073695, 21.512321)"/>
+<path fill-rule="nonzero" fill="rgb(31.373596%, 31.373596%, 31.373596%)" fill-opacity="1" stroke-width="0.44832" stroke-linecap="butt" stroke-linejoin="miter" stroke="rgb(31.373596%, 31.373596%, 31.373596%)" stroke-opacity="1" stroke-miterlimit="10" d="M 5.030639 -0.00164356 L 0.725815 1.621487 L 2.137232 -0.00164356 L 0.725815 -1.620853 Z M 5.030639 -0.00164356 " transform="matrix(0.996339, 0, 0, -0.996339, 145.491687, 77.998362)"/>
 </svg>
