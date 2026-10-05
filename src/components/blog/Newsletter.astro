@@ -14,7 +14,7 @@
  */
 import { NEWSLETTER_CONFIG } from '../../consts/config';
 
-if (!NEWSLETTER_CONFIG.enabled) return Astro.redirect ? null : null;
+if (!NEWSLETTER_CONFIG.enabled) return null;
 
 // Type guard: from here on, NEWSLETTER_CONFIG is the enabled variant
 const cfg = NEWSLETTER_CONFIG as Extract<typeof NEWSLETTER_CONFIG, { enabled: true }>;

@@ -12,10 +12,19 @@ updates:
           - "astro"
           - "@astrojs/*"
           - "astro-*"
-
+          - "@expressive-code/*"
+      npm-minor-patch:
+        applies-to: version-updates
+        update-types: ["minor", "patch"]
+        patterns:
+          - "*"
   - package-ecosystem: github-actions
     directory: /
     schedule:
       interval: weekly
       day: monday
     open-pull-requests-limit: 5
+    groups:
+      actions:
+        patterns:
+          - "*"
