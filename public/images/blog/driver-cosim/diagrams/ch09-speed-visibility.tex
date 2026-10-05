@@ -1,0 +1,35 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (5.5,8.2) {검증 플랫폼 — 속도와 가시성의 교환};
+
+% axes
+\draw[arr] (0,0) -- (11.5,0);
+\draw[arr] (0,0) -- (0,7.2);
+\node[caption] at (5.75,-0.6) {실행 속도 (느림 $\longrightarrow$ 빠름)};
+\node[caption, anchor=west] at (0.2,7.2) {내부 가시성 (낮음 $\longrightarrow$ 높음)};
+
+% platforms
+\node[con, text width=3.0cm, align=center] (sim) at (1.9,6.0)
+  {\textbf{RTL 시뮬레이션}\\[2pt]\footnotesize 모든 신호, 모든 cycle};
+\node[hi, text width=3.0cm, align=center] (emu) at (4.9,4.6)
+  {\textbf{에뮬레이터}\\[2pt]\footnotesize 넓게 보되 비쌈};
+\node[prp, text width=3.0cm, align=center] (vp) at (9.2,3.9)
+  {\textbf{Virtual Platform}\\[2pt]\footnotesize SW 상태는 전부, HW는 모델만};
+\node[imp, text width=3.0cm, align=center] (fpga) at (6.4,1.9)
+  {\textbf{FPGA 프로토타입}\\[2pt]\footnotesize 미리 고른 신호만};
+\node[warn, text width=3.0cm, align=center] (si) at (10.0,0.8)
+  {\textbf{실리콘}\\[2pt]\footnotesize 디버그 훅이 전부};
+
+\node[caption, text width=4cm] at (2.4,2.6)
+  {오른쪽 아래로 갈수록 빨라지지만\\[2pt]칩 안은 덜 보입니다};
+
+\end{tikzpicture}
+\end{document}
