@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/content/**"
+  - "public/images/blog/**"
+---
+
 ## 7. 교차 링크
 
 ### 같은 시리즈 안
@@ -7,8 +13,8 @@
 ```markdown
 ## 관련 항목
 
-- [Ch 2: Header Files](/blog/embedded/standards/google-cpp/chapter02-header-files)
-- [Ch 4: Classes](/blog/embedded/standards/google-cpp/chapter04-classes)
+- [Ch 2: Header Files](/blog/programming/standards/google-cpp/chapter02-header-files)
+- [Ch 4: Classes](/blog/programming/standards/google-cpp/chapter04-classes)
 ```
 
 ### 다른 시리즈로
@@ -34,27 +40,13 @@
 
 ## 8. 카테고리
 
-`src/consts/categories.ts`에 정의된 상위/하위 카테고리에 맞게 디렉터리를 정합니다.
+`src/consts/categories.ts`의 `CATEGORIES`가 정본입니다. 디렉터리(`src/content/blog/<id>/...`)는 거기 등록된 id에 맞춥니다. 하위 카테고리는 파일에서 확인합니다.
 
-```
-programming/cpp        — C/C++ 언어
-programming/design     — 디자인 패턴, 아키텍처
-programming/algorithms — 자료구조, 알고리즘
-programming/engineering — 소프트웨어 공학 (TDD, Legacy, Refactoring)
-programming/git        — Git
-
-systems                — OS, 커널, 시스템 프로그래밍
-embedded               — RTOS, MCU, 트러블슈팅
-embedded/standards     — MISRA, CERT, AUTOSAR, Google C++
-
-parallel               — 병렬·동시성
-math                   — 선형대수, 집합론
-writing                — 영문/한국어/학술 글쓰기
-thinking               — 디자인·철학
-code-review            — 코드 리뷰
-tools                  — Vim, tmux, CLI, 디버거
-media                  — 영상·오디오 코덱
-media/av1              — AV1
+```text
+최상위 id: programming systems embedded parallel ml media math writing
+           philosophy science design tools security devops
+예: programming/standards (Google C++·MISRA 등 코딩 표준), programming/code-review,
+    systems/linux-kernel, embedded/rtos, ml/compilers, tools/debugging
 ```
 
 새 시리즈를 만들 때 적합한 자리가 없으면 `categories.ts`에 카테고리를 추가합니다.
@@ -66,7 +58,7 @@ media/av1              — AV1
 긴 시리즈(20+편)는 다음 순서로 진행합니다.
 
 1. **스텁 생성** — 모든 챕터의 frontmatter + 빈 본문(또는 outline). `draft: true`.
-2. **개요 + 1편 파일럿** — 시리즈 개요(00-overview)와 1편을 완성도 있게.
+2. **1편 파일럿** — 1편을 완성도 있게(도입을 겸함). 별도 overview/00- 글은 만들지 않는다(CLAUDE.md §13, 4개 예외 시리즈 제외).
 3. **사용자 확인** — 톤·구조·예시 깊이가 맞는지 검토.
 4. **양산** — 2편부터 끝까지. 5~6편씩 묶어 커밋.
 5. **마무리** — 마지막 글에 시리즈 요약 + 다음 추천 시리즈.

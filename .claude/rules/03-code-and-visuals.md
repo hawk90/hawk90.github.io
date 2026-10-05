@@ -1,3 +1,9 @@
+---
+paths:
+  - "src/content/**"
+  - "public/images/blog/**"
+---
+
 ## 5. 코드 예시
 
 ### 풍부하게
@@ -156,7 +162,7 @@ class OrderProcessor {
 | 코드 블록 내 한국어 산문 | `./scripts/detect-prose-in-code.sh` | 위반 없음 |
 | Hallucination 후보 | `./scripts/audit-suspect-claims.sh` | 출력된 candidate를 사람이 review |
 | Known-fact 화이트리스트 | `./scripts/verify-known-facts.sh` | `data/known-facts.yaml` 등재된 것만 통과 |
-| **통합 gate** | `./scripts/audit-publish-gate.sh` | 위 6가지를 한 번에. `--strict`로 hallucination·whitelist도 차단 |
+| **통합 gate** | `./scripts/audit-publish-gate.sh` | 차단: ASCII 박스·TikZ 근접 휴리스틱·톤 혼용(§1). 경고: 코드 블록 산문·번역체·hallucination·known-fact·fact-density·upstream·인용 심볼·내부 링크·시리즈·이미지. strict `detect-text-overlap.py`는 포함 안 됨 — 따로 실행. `--strict`로 hallucination 후보도 차단 |
 | **Git hook (자동)** | `lefthook install` 한 번 실행 → 매 commit/push 자동 trigger | 위반 시 commit/push 거부 |
 
 *Publish 전 통합 gate 통과 필수*. 빌드가 OK여도 *위반이 있으면 publish 금지*. lefthook이 설치되면 *commit 시 자동*으로 staged .md 파일에 gate가 적용됩니다 (`git commit --no-verify`로 우회 가능, 단 책임 본인).
