@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,decorations.pathreplacing}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large] at (5,3.6) {에뮬레이터 구성 — 호스트와 RTL 사이의 트랜잭터};
+\node[con, text width=3.2cm, minimum height=26mm, align=left] (host) at (0,0)
+  {\textbf{호스트 PC}\\[2pt]\footnotesize $\bullet$ 펌웨어 이미지 로드\\[2pt]\footnotesize $\bullet$ 테스트 스크립트\\[2pt]\footnotesize $\bullet$ 디버거·로그 뷰어};
+\node[prp, text width=2.8cm, minimum height=26mm] (tx) at (4.6,0)
+  {\textbf{트랜잭터}\\[2pt]\footnotesize 메시지 $\leftrightarrow$ 신호};
+\node[hi, text width=3.0cm, minimum height=12mm] (dut) at (9.6,0.7) {\textbf{SoC RTL}};
+\node[neut, text width=3.0cm, minimum height=9mm] (mem) at (9.6,-0.9) {\footnotesize 메모리·UART 모델};
+\draw[arr, <->] (host) -- node[above, font=\footnotesize] {빠른 링크} (tx);
+\draw[arr, <->] (tx.east) -- (dut.west);
+\draw[arr, <->] (tx.east) -- (mem.west);
+\draw[arr] (dut.south) -- (mem.north);
+\begin{scope}[on background layer]
+\node[panel, fit=(dut)(mem), inner sep=12pt] (emu) {};
+\end{scope}
+\node[panelTitle] at (emu.north west) {에뮬레이터};
+\node[caption, anchor=north] at (4.6,-1.9) {호스트는 "UART에 한 글자" 같은 메시지로, RTL은 cycle 단위 신호로 대화합니다};
+\end{tikzpicture}
+\end{document}

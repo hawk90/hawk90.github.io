@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  dp/.style={text width=2.8cm, minimum height=12mm}]
+
+\node[font=\sffamily\bfseries\large] at (6.7,3.3) {디버거에서 코어까지 — 세 개의 문};
+\node[neut, dp] (pr) at (0,0)    {\textbf{디버거}\\[2pt]\footnotesize probe};
+\node[prp, dp]  (dp) at (4.6,0)  {\textbf{DP}\\[2pt]\footnotesize Debug Port};
+\node[abs, dp]  (a1) at (9.0,1.4)  {\textbf{MEM-AP}\\[2pt]\footnotesize 시스템 버스 쪽};
+\node[abs, dp]  (a2) at (9.0,-1.4) {\textbf{MEM-AP}\\[2pt]\footnotesize 디버그 버스 쪽};
+\node[imp, dp]  (t1) at (13.4,1.4)  {메모리·주변 장치};
+\node[con, dp]  (t2) at (13.4,-1.4) {코어 디버그\\[2pt]ETM·CTI};
+\draw[arr] (pr) -- node[above, font=\footnotesize] {JTAG/SWD} (dp);
+\draw[arr] (dp.east) -- (a1.west);
+\draw[arr] (dp.east) -- (a2.west);
+\draw[arr] (a1) -- (t1);
+\draw[arr] (a2) -- (t2);
+\node[circle, draw=warnbord, fill=warnfill, inner sep=1.5pt, font=\sffamily\footnotesize\bfseries] at (6.75,0) {1};
+\node[circle, draw=warnbord, fill=warnfill, inner sep=1.5pt, font=\sffamily\footnotesize\bfseries] at (9.0,0) {2};
+\node[circle, draw=warnbord, fill=warnfill, inner sep=1.5pt, font=\sffamily\footnotesize\bfseries] at (11.2,-1.0) {3};
+\node[caption, text width=12cm, align=left, anchor=north west] at (-0.8,-2.6) {\textbf{1} 디버그 전원 도메인이 켜졌나 (power-up 요청과 응답)\\[2pt]\textbf{2} 디버그 인증이 접근을 허용하나 (보안 설정·잠금)\\[2pt]\textbf{3} 코어가 전원과 클럭을 받고 있나 (전원 꺼짐·클럭 게이팅·WFI)};
+
+\end{tikzpicture}
+\end{document}

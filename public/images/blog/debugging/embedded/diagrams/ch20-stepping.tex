@@ -1,0 +1,39 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large] at (5,5.2) {스테핑과 마스크 — 어디까지 다시 만드나};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (0,0.0) {트랜지스터층};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (0,0.68) {하위 배선};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (0,1.36) {하위 배선};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (0,2.04) {상위 금속 배선};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (0,2.72) {상위 금속 배선};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (0,3.4000000000000004) {최상위 금속};
+\node[font=\sffamily\bfseries] at (0,4.4) {A0};
+\node[caption] at (0,-0.75) {첫 실리콘};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (5,0.0) {트랜지스터층};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (5,0.68) {하위 배선};
+\node[neut, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (5,1.36) {하위 배선};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (5,2.04) {상위 금속 배선};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (5,2.72) {상위 금속 배선};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (5,3.4000000000000004) {최상위 금속};
+\node[font=\sffamily\bfseries] at (5,4.4) {A1};
+\node[caption] at (5,-0.75) {metal ECO};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (10,0.0) {트랜지스터층};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (10,0.68) {하위 배선};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (10,1.36) {하위 배선};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (10,2.04) {상위 금속 배선};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (10,2.72) {상위 금속 배선};
+\node[warn, minimum width=36mm, minimum height=5mm, inner sep=0.5pt, font=\sffamily\scriptsize] at (10,3.4000000000000004) {최상위 금속};
+\node[font=\sffamily\bfseries] at (10,4.4) {B0};
+\node[caption] at (10,-0.75) {base layer 변경};
+\draw[arr] (2.0,1.7) -- (3.0,1.7);
+\draw[arr] (7.0,1.7) -- (8.0,1.7);
+\node[caption, text width=13cm] at (5,-1.6) {빨간 층만 마스크를 새로 만듭니다. 위쪽 금속층만 바꾸는 metal ECO는 비용과 기간이 작고,\\[2pt]트랜지스터층까지 바꾸면 사실상 새로 만드는 일이 됩니다.};
+\end{tikzpicture}
+\end{document}

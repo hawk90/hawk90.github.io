@@ -1,0 +1,32 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large] at (4.0,1.4) {byte lane별 통과 window};
+\node[font=\sffamily\small, anchor=east] at (-0.3,0.0) {lane 0};
+\draw[draw=gridc, line width=0.6pt] (0,0.0) -- (8,0.0);
+\fill[fill=okfill, draw=okbord] (1.2,-0.25) rectangle (6.8,0.25);
+\fill[fill=inkc] (4.0,0.32) -- (3.88,0.52) -- (4.12,0.52) -- cycle;
+\node[font=\sffamily\small, anchor=east] at (-0.3,-1.0) {lane 1};
+\draw[draw=gridc, line width=0.6pt] (0,-1.0) -- (8,-1.0);
+\fill[fill=okfill, draw=okbord] (1.0,-1.25) rectangle (6.6,-0.75);
+\fill[fill=inkc] (3.8,-0.6799999999999999) -- (3.6799999999999997,-0.48) -- (3.92,-0.48) -- cycle;
+\node[font=\sffamily\small, anchor=east] at (-0.3,-2.0) {lane 2};
+\draw[draw=gridc, line width=0.6pt] (0,-2.0) -- (8,-2.0);
+\fill[fill=warnfill, draw=warnbord] (4.0,-2.25) rectangle (5.6,-1.75);
+\fill[fill=inkc] (5.35,-1.68) -- (5.2299999999999995,-1.48) -- (5.47,-1.48) -- cycle;
+\node[font=\sffamily\small, anchor=east] at (-0.3,-3.0) {lane 3};
+\draw[draw=gridc, line width=0.6pt] (0,-3.0) -- (8,-3.0);
+\fill[fill=okfill, draw=okbord] (1.4,-3.25) rectangle (7.0,-2.75);
+\fill[fill=inkc] (4.2,-2.68) -- (4.08,-2.48) -- (4.32,-2.48) -- cycle;
+\draw[arr] (0,-3.8) -- (8.4,-3.8);
+\node[caption, anchor=north] at (4,-3.95) {delay 설정값 (탭) — 색칠한 구간에서만 읽기·쓰기가 통과};
+\node[caption, anchor=north] at (4,-4.6) {삼각형: training이 고른 동작점};
+\node[note, text width=3.6cm, anchor=west] at (8.8,-2.0) {lane 2만 window가\\[2pt]좁고 동작점이\\[2pt]가장자리에 붙음};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,24 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  pf/.style={text width=3.0cm, minimum height=12mm}]
+
+\node[font=\sffamily\bfseries\large] at (5,3.6) {한 벌의 테스트를 실리콘까지};
+\node[con, text width=4.2cm] (t) at (5,2.3) {\textbf{테스트 시나리오 (C)}\\[2pt]\footnotesize 소스는 하나};
+\node[prp, text width=4.2cm] (h) at (5,0.6) {\textbf{플랫폼 계층}\\[2pt]\footnotesize \texttt{plat\_read32} / \texttt{plat\_write32}};
+\node[cls, pf] (a) at (-1,-1.6) {\textbf{RTL 시뮬레이션}\\[2pt]\footnotesize DPI-C};
+\node[hi, pf]  (b) at (3,-1.6)  {\textbf{에뮬레이터}\\[2pt]\footnotesize 트랜잭터};
+\node[imp, pf] (c) at (7,-1.6)  {\textbf{FPGA}\\[2pt]\footnotesize MMIO};
+\node[warn, pf] (d) at (11,-1.6) {\textbf{실리콘}\\[2pt]\footnotesize MMIO·디버그 포트};
+\draw[arr] (t) -- (h);
+\foreach \n in {a,b,c,d} { \draw[arr] (h.south) -- (\n.north); }
+\node[caption, text width=11cm] at (5,-3.1) {같은 테스트가 실리콘에서 돌면, 실리콘 결과를 시뮬레이션 결과와 바로 비교할 수 있습니다};
+
+\end{tikzpicture}
+\end{document}

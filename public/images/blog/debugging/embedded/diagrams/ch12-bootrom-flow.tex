@@ -1,0 +1,36 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  fl/.style={text width=4.0cm, minimum height=10mm}, ob/.style={note, text width=4.6cm}]
+
+\node[font=\sffamily\bfseries\large] at (3,1.5) {BootROM의 흐름과 관찰 지점};
+\node[neut, fl] (r)  at (0,0)    {리셋 해제};
+\node[prp, fl]  (m)  at (0,-1.5) {boot mode 핀 읽기};
+\node[prp, fl]  (f)  at (0,-3.0) {fuse 설정 확인};
+\node[con, fl]  (p1) at (0,-4.5) {1순위 미디어에서 읽기};
+\node[con, fl]  (p2) at (0,-6.0) {2순위 미디어에서 읽기};
+\node[warn, fl] (dl) at (0,-7.5) {다운로드 모드\\[2pt]\footnotesize USB·UART로 이미지 기다림};
+\node[imp, text width=3.0cm] (ok) at (-5.2,-5.25) {이미지 검증\\[2pt]다음 단계로 점프};
+\draw[arr] (r) -- (m); \draw[arr] (m) -- (f); \draw[arr] (f) -- (p1);
+\draw[arr] (p1) -- node[right, font=\footnotesize] {실패} (p2);
+\draw[arr] (p2) -- node[right, font=\footnotesize] {실패} (dl);
+\draw[arr] (p1.west) -- node[above, font=\footnotesize] {성공} (ok.north east);
+\draw[arr] (p2.west) -- node[below, font=\footnotesize] {성공} (ok.south east);
+\node[ob] (o1) at (6.6,-1.5) {strap 핀 전압을 멀티미터로};
+\node[ob] (o2) at (6.6,-3.0) {fuse 값을 디버거로 읽기};
+\node[ob] (o3) at (6.6,-5.25) {미디어 버스 신호를 스코프로\\[2pt](SPI CS·CLK, eMMC CMD)};
+\node[ob] (o4) at (6.6,-7.5) {PC에서 USB 장치로 보이는지};
+\draw[alt] (m.east) -- (o1.west);
+\draw[alt] (f.east) -- (o2.west);
+\draw[alt] (p1.east) -- (o3.west);
+\draw[alt] (p2.east) -- (o3.west);
+\draw[alt] (dl.east) -- (o4.west);
+
+\end{tikzpicture}
+\end{document}

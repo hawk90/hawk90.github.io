@@ -1,0 +1,30 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  ck/.style={text width=2.6cm, minimum height=12mm}]
+
+\node[font=\sffamily\bfseries\large] at (5.8,3.4) {클럭 트리 — 어디서 끊겼나};
+\node[cls, ck] (osc) at (0,0)   {\textbf{기준 클럭}\\[2pt]\footnotesize 수정 발진기};
+\node[hi, ck]  (pll) at (3.8,0) {\textbf{PLL}\\[2pt]\footnotesize 주파수를 배수로};
+\node[prp, ck] (mux) at (7.6,0) {\textbf{MUX·분주기}\\[2pt]\footnotesize 고르고 나누기};
+\node[con, ck] (d1) at (11.6,1.6)  {CPU 클럭};
+\node[abs, ck] (d2) at (11.6,0)    {버스 클럭};
+\node[imp, ck] (d3) at (11.6,-1.6) {주변 장치 클럭};
+\draw[arr] (osc) -- (pll);
+\draw[arr] (pll) -- (mux);
+\draw[arr] (mux.east) -- (d1.west);
+\draw[arr] (mux.east) -- (d2.west);
+\draw[arr] (mux.east) -- (d3.west);
+\draw[alt] (osc.north) -- ++(0,0.9) -| node[pos=0.25, above, font=\footnotesize] {bypass (PLL을 거치지 않는 길)} (mux.north);
+\node[caption, text width=3.0cm, anchor=north] at (0,-1.0)   {\textbf{①} 발진하지 않음\\[2pt]스코프로 확인};
+\node[caption, text width=3.0cm, anchor=north] at (3.8,-1.0) {\textbf{②} lock 안 됨\\[2pt]lock 상태 비트 확인};
+\node[caption, text width=3.0cm, anchor=north] at (7.6,-1.0) {\textbf{③} 잘못된 선택·분주\\[2pt]설정값과 비교};
+
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,23 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  pt/.style={note, text width=3.6cm, align=center}]
+
+\node[font=\sffamily\bfseries\large] at (0,4.4) {ROM이 멈췄을 때 밖에서 볼 수 있는 것};
+\node[hi, minimum width=40mm, minimum height=28mm, text width=3.6cm] (soc) at (0,0) {\textbf{SoC}\\[2pt]\footnotesize BootROM 실행 중};
+\node[pt] (a) at (-5.6,1.3)  {\textbf{boot mode 핀}\\[2pt]핀 전압};
+\node[pt] (b) at (-5.6,-1.3) {\textbf{전원·리셋}\\[2pt]Ch 11에서 확인};
+\node[pt] (c) at (5.6,1.3)   {\textbf{부트 미디어 버스}\\[2pt]CS·CLK·CMD 신호};
+\node[pt] (d) at (5.6,-1.3)  {\textbf{UART TX}\\[2pt]ROM 로그(지원 시)};
+\node[pt] (e) at (0,3.0)     {\textbf{JTAG·SWD}\\[2pt]PC·ROM 상태};
+\node[pt] (g) at (0,-3.0)    {\textbf{USB}\\[2pt]다운로드 모드 인식};
+\foreach \n in {a,b,c,d,e,g} { \draw[edge] (soc) -- (\n); }
+
+\end{tikzpicture}
+\end{document}

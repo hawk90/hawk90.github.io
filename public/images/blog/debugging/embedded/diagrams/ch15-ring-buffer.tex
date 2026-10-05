@@ -1,0 +1,24 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog]
+
+\node[font=\sffamily\bfseries\large] at (2.2,3.6) {링 버퍼 — 가장 오래된 기록부터 덮어씁니다};
+\foreach \i in {0,1,4,5,6,7} {
+  \draw[draw=impbord, fill=impfill] ({\i*45}:1.4) arc ({\i*45}:{\i*45+45}:1.4) -- ({\i*45+45}:2.4) arc ({\i*45+45}:{\i*45}:2.4) -- cycle;
+}
+\draw[draw=hibord, fill=hifill] (90:1.4) arc (90:135:1.4) -- (135:2.4) arc (135:90:2.4) -- cycle;
+\draw[draw=warnbord, fill=warnfill] (135:1.4) arc (135:180:1.4) -- (180:2.4) arc (180:135:2.4) -- cycle;
+\draw[arr, line width=0.9pt] (0,0) -- (112.5:1.3);
+\node[font=\sffamily\footnotesize] at (0,-0.35) {쓰기 위치};
+\node[font=\sffamily\footnotesize, anchor=south] at (112.5:2.6) {가장 새 기록};
+\node[font=\sffamily\footnotesize, anchor=east] at (157.5:2.6) {다음에 덮어쓸 기록};
+\node[note, text width=6.4cm] at (6.9,0) {정지 트리거가 오면 쓰기를 멈춥니다.\\[2pt]버퍼에는 멈추기 직전의 실행 흐름이 남습니다.};
+
+\end{tikzpicture}
+\end{document}

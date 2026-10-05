@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog, flowb/.style={cls, text width=5.6cm, minimum height=12mm}]
+\node[font=\sffamily\bfseries\large] at (2.5,1.4) {Scan dump의 흐름};
+\node[flowb, prp] (s0) at (0,0.0) {\textbf{1. 실패 순간을 잡는 트리거}\\[2pt]\footnotesize watchpoint·카운터·외부 신호};
+\node[flowb, warn] (s1) at (0,-1.75) {\textbf{2. 클럭 정지}\\[2pt]\footnotesize 모든 플립플롭 값이 그대로 얼어붙음};
+\draw[arr] (s0.south) -- (s1.north);
+\node[flowb, hi] (s2) at (0,-3.5) {\textbf{3. scan 모드 진입}\\[2pt]\footnotesize SE=1, 플립플롭이 한 줄로 연결됨};
+\draw[arr] (s1.south) -- (s2.north);
+\node[flowb, hi] (s3) at (0,-5.25) {\textbf{4. shift out}\\[2pt]\footnotesize JTAG이나 테스터로 비트열을 끝까지 읽음};
+\draw[arr] (s2.south) -- (s3.north);
+\node[flowb, con] (s4) at (0,-7.0) {\textbf{5. 매핑 파일로 복원}\\[2pt]\footnotesize 비트 위치 → RTL 신호 이름};
+\draw[arr] (s3.south) -- (s4.north);
+\node[flowb, imp] (s5) at (0,-8.75) {\textbf{6. 시뮬레이션과 비교}\\[2pt]\footnotesize 같은 cycle의 기대 상태와 diff};
+\draw[arr] (s4.south) -- (s5.north);
+\node[note, text width=4.6cm, anchor=west] at (3.6,{-3*1.75}) {이 단계 이후 칩의 기능 상태는\\[2pt]망가집니다. 덤프가 끝나면\\[2pt]반드시 리셋해야 합니다.};
+\draw[alt] (3.6,{-3*1.75}) -- (s3.east);
+\node[note, text width=4.6cm, anchor=west] at (3.6,{-4*1.75-0.2}) {매핑 파일은 DFT 도구가\\[2pt]scan 삽입 때 만듭니다.};
+\draw[alt] (3.6,{-4*1.75-0.2}) -- (s4.east);
+\end{tikzpicture}
+\end{document}

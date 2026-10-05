@@ -1,0 +1,25 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog]
+\node[font=\sffamily\bfseries\large] at (5,5.2) {욕조 곡선 — 시간에 따른 고장률};
+\draw[arr] (0,0) -- (10.6,0);
+\draw[arr] (0,0) -- (0,4.6);
+\node[caption, anchor=north] at (5.3,-0.15) {사용 시간};
+\node[caption, anchor=west] at (0.15,4.6) {고장률};
+\draw[draw=warnbord, line width=1.4pt] (0.2,4.0) .. controls (0.8,1.2) and (1.6,1.0) .. (3,1.0) -- (7,1.0) .. controls (8.4,1.0) and (9.2,1.6) .. (10,4.0);
+\draw[draw=gridc, dashed] (3,0) -- (3,4.3);
+\draw[draw=gridc, dashed] (7,0) -- (7,4.3);
+\node[font=\sffamily\small\bfseries] at (1.5,3.6) {초기 고장};
+\node[font=\sffamily\small\bfseries] at (5,3.6) {우발 고장};
+\node[font=\sffamily\small\bfseries] at (8.2,3.6) {마모 고장};
+\node[caption, text width=2.8cm] at (1.5,2.6) {제조 결함이\\[2pt]일찍 드러남};
+\node[caption, text width=3.2cm] at (5,2.4) {낮고 일정한 비율\\[2pt]무작위로 발생};
+\node[caption, text width=2.8cm] at (7.9,2.4) {노화·열화가\\[2pt]쌓여 늘어남};
+\end{tikzpicture}
+\end{document}

@@ -1,0 +1,26 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../../_design.tex}
+\begin{tikzpicture}[blog,
+  ask/.style={prp, text width=4.4cm, minimum height=11mm}, res/.style={cls, text width=4.2cm, minimum height=11mm}]
+
+\node[font=\sffamily\bfseries\large] at (3,1.4) {SoC에 디버거가 안 붙을 때 — 네 질문};
+\node[ask] (q1) at (0,0)    {IDCODE가 읽히나?};
+\node[ask] (q2) at (0,-2.0) {DP power-up 요청에\\[2pt]응답이 오나?};
+\node[ask] (q3) at (0,-4.0) {AP 목록이 읽히나?};
+\node[ask] (q4) at (0,-6.0) {코어를 halt할 수 있나?};
+\node[res, ok] (done) at (0,-8.0) {\textbf{접속 성공}};
+\node[res, warn] (r1) at (6.2,0)    {\textbf{배선·전압·속도}\\[2pt]\footnotesize MCU와 같은 원인};
+\node[res, hi]   (r2) at (6.2,-2.0) {\textbf{디버그 전원·리셋}\\[2pt]\footnotesize 도메인이 꺼져 있음};
+\node[res, con]  (r3) at (6.2,-4.0) {\textbf{디버그 인증·잠금}\\[2pt]\footnotesize 보안 설정};
+\node[res, abs]  (r4) at (6.2,-6.0) {\textbf{코어 전원·클럭}\\[2pt]\footnotesize 게이팅·WFI};
+\foreach \a/\b in {q1/q2,q2/q3,q3/q4,q4/done} { \draw[arr] (\a) -- node[right, font=\footnotesize] {예} (\b); }
+\foreach \a/\b in {q1/r1,q2/r2,q3/r3,q4/r4} { \draw[arr] (\a) -- node[above, font=\footnotesize] {아니오} (\b); }
+
+\end{tikzpicture}
+\end{document}
