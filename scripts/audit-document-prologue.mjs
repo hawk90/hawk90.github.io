@@ -51,7 +51,9 @@ for (const file of files) {
   // google*.html would still be checked.
   if (/^google-site-verification:\s*\S+\.html\s*$/.test(html)) continue;
 
-  const doctype = html.match(/^﻿?\s*<!DOCTYPE html>/i);
+  // A leading byte-order mark is tolerated; written as an escape so the
+  // source itself carries no invisible character.
+  const doctype = html.match(/^\uFEFF?\s*<!DOCTYPE html>/i);
   if (!doctype) {
     findings.push({ page, problem: 'does not start with <!DOCTYPE html>', sample: html.slice(0, 80) });
     continue;
