@@ -79,3 +79,20 @@ pre-push:
 
 # 옵션: 빌드 후 자동 검증 (수동 npm run build 시에는 별도 trigger 안 됨)
 # 필요 시 prebuild hook 추가 가능
+
+# ================================
+# pull / checkout / rebase 뒤 로컬 의존성을 lockfile과 맞춤
+# package-lock.json이 바뀐 경우에만 npm ci 실행 (scripts/sync-deps.sh)
+# ================================
+post-merge:
+  commands:
+    sync-deps:
+      run: scripts/sync-deps.sh
+post-checkout:
+  commands:
+    sync-deps:
+      run: scripts/sync-deps.sh --since {1}
+post-rewrite:
+  commands:
+    sync-deps:
+      run: scripts/sync-deps.sh
