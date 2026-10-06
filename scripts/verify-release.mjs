@@ -7,6 +7,7 @@ const checks = [
   ['tooling contracts', ['npm', 'run', 'gate:tooling']],
   ['script exec bits', ['npm', 'run', 'check:script-modes']],
   ['diagram source freshness', ['npm', 'run', 'check:diagrams']],
+  ['KaTeX CSS matches renderer', ['npm', 'run', 'check:katex-css']],
   ['CI supply-chain policy', ['npm', 'run', 'gate:ci-security']],
   ['repository object health', ['npm', 'run', 'gate:repository']],
   ['high-severity production dependency audit', ['npm', 'run', 'gate:dependencies']],
