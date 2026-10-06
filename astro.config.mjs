@@ -9,6 +9,7 @@ import expressiveCode from 'astro-expressive-code';
 import remarkMath from 'remark-math';
 import remarkDirective from 'remark-directive';
 import remarkCallouts from './src/lib/remark-callouts.mjs';
+import remarkMathFlag from './src/lib/remark-math-flag.mjs';
 import rehypeKatex from 'rehype-katex';
 import rehypeSlug from 'rehype-slug';
 import rehypeAutolinkHeadings from 'rehype-autolink-headings';
@@ -146,7 +147,7 @@ export default defineConfig({
 
   markdown: {
     processor: unified({
-      remarkPlugins: [remarkMath, remarkDirective, remarkCallouts],
+      remarkPlugins: [remarkMath, remarkMathFlag, remarkDirective, remarkCallouts],
       rehypePlugins: [
         rehypeSlug,
         [rehypeAutolinkHeadings, {

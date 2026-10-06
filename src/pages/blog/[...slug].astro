@@ -30,7 +30,7 @@ export async function getStaticPaths() {
 }
 
 const { post } = Astro.props;
-const { Content, headings } = await render(post);
+const { Content, headings, remarkPluginFrontmatter } = await render(post);
 // Which of this post's tags have a page to link to (see getRoutableTagKeys).
 const routableTags = await getRoutableTagKeys();
 // An article is where search and external links land, and it was the one page
@@ -75,11 +75,9 @@ if (RELATED_POSTS_CONFIG.enabled) {
 const formattedDate = formatDate(post.data.date);
 const postUrl = new URL(getPostUrl(post), SITE_CONFIG.url).toString();
 
-// Detect math content for conditional KaTeX CSS loading.
-// Unambiguous math delimiters: $$...$$ block, \(...\) inline, \[...\] block.
-// Single $ is too ambiguous (matches shell $VAR), so we don't detect those.
-const rawBody = post.body ?? '';
-const hasMath = /\$\$[\s\S]+?\$\$|\\\([\s\S]+?\\\)|\\\[[\s\S]+?\\\]/.test(rawBody);
+// Load KaTeX's stylesheet only on posts with math. remark-math-flag sets this
+// from the parsed tree, so inline `$…$` counts as well as `$$…$$`.
+const hasMath = remarkPluginFrontmatter?.hasMath === true;
 ---
 
 <BaseLayout
