@@ -178,6 +178,9 @@
   "overrides": {
     "satori": {
       "fflate": "0.7.5"
+    },
+    "postcss-nested": {
+      "postcss-selector-parser": "7.1.6"
     }
   }
 }
