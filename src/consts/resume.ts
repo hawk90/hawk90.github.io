@@ -15,18 +15,21 @@ export const RESUME_DATA = {
 
   // Core Competency
   coreCompetency: [
-    'Research Large Scale Resource Virtualization Platform',
-    'Parallelizing and Optimizing AI Applications',
-    'Parallelizing and Optimizing with CUDA or MPI',
-    'Experience in Software Design, Development and Maintenance',
-    'Experience to Collaborate with Front-end',
-    'Team Leader Experience',
-    'Developed embedded firmware for performance-critical system using FPGA',
+    'Embedded Firmware / SDK Development for Custom Silicon (ARM)',
+    'Board Bring-up and Low-Level Device Driver Development',
+    'HW/SW Co-design and Hardware IP Verification (Zebu, HAPS, QEMU)',
+    'Large-Scale Resource Virtualization Platform Research',
+    'Parallelizing and Optimizing with CUDA / MPI',
+    'Software Design, Development, Maintenance and QA',
+    'Technical Leadership & R&D Ownership',
   ],
 
   // Skills
   skills: {
     'Programming Languages': ['C/C++', 'Python'],
+    'CPU / Architecture': ['ARM Cortex-M0+', 'Cortex-A53'],
+    'Interconnect / I/O': ['PCIe', 'NVMe', 'IOMMU', 'DMA', 'I2C', 'UART', 'SPI'],
+    'HW Platform / Verification': ['Zebu', 'HAPS', 'QEMU'],
     'Framework': ['TensorFlow', 'CUDA', 'MPI'],
     'Infra': ['Docker'],
     'OS': ['Linux (Ubuntu, CentOS)'],
@@ -38,7 +41,79 @@ export const RESUME_DATA = {
   // Experience
   experience: [
     {
-      company: 'MetisX',
+      company: 'Bluedot',
+      position: 'Software Engineer / Firmware',
+      period: '2025.11 ~ Present',
+      projects: [
+        {
+          name: 'VQM (Video Quality Measurement) Host Application Development',
+          period: '2025.11 ~ 2025.12',
+          role: 'Host Application Development',
+          skills: ['C++'],
+          highlights: [
+            'Developed and released the VQM host application in C++',
+            'Implemented PSNR, SSIM, and VMAF comparison between bitstreams',
+          ],
+        },
+        {
+          name: 'AV1 Encoder Feature Development (Reference C Encoder)',
+          period: '2026.01 ~ 2026.02',
+          role: 'Encoder Feature Development',
+          skills: ['C', 'AV1'],
+          highlights: [
+            'Implemented keyframe insertion in the reference C encoder',
+            'Implemented long-term reference (LTR) frame support',
+            'Modified core encoder control logic to support the above features',
+          ],
+        },
+        {
+          name: 'AV1 Encoder Host Application Development & Hardware Bring-up',
+          period: '2026.03 ~ 2026.05',
+          role: 'Host Application Development / HW-SW Co-design / HW Bring-up',
+          skills: ['C', 'AV1', 'NVMe', 'FPGA (Xilinx U250, S2C)', 'QEMU'],
+          highlights: [
+            "Designed an NVMe-style command/completion queue architecture that defined the HW interface requirements that led the HW team's RTL changes (HW/SW co-design), and separated a dedicated queue manager module, replacing the legacy blocking (synchronous) flow with an asynchronous design",
+            'Designed and implemented multi-channel operation on top of the asynchronous queue architecture',
+            'Designed and implemented a Hardware Abstraction Layer (HAL) to decouple encoder control logic from hardware',
+            'Introduced QEMU device-model-based verification, enabling driver and e2e tests without FPGA hardware',
+          ],
+        },
+        {
+          name: 'Hardware V2 Architecture Proposal & Documentation',
+          period: '2026.04 ~ 2026.05',
+          role: 'Architecture Design',
+          skills: ['AV1', 'SR-IOV', 'NVMe', 'IOMMU', 'DMA'],
+          highlights: [
+            'Analyzed V1 limitations (single shared queue with head-of-line blocking, excessive per-frame MMIO writes, SW-mutex-based multi-instance ownership) and proposed a V2 architecture to address each',
+            'Proposed a control/data plane split (NVMe-style admin/data queues) to isolate slow session/control commands from the fast encode path',
+            'Proposed a Batch List submit primitive to reduce per-frame MMIO writes',
+            'Proposed SR-IOV HW-enforced queue ownership to replace SW-mutex-based multi-instance management',
+          ],
+        },
+        {
+          name: 'Step Up Engineering (Company-wide Study Crew)',
+          period: '2026.04 ~ Present',
+          role: 'Founder / Lead',
+          skills: [],
+          highlights: [
+            'Founded and currently lead a company-wide engineering study crew as a long-term program',
+            'Strengthened practical engineering skills across the org through study of essential programming references and core concepts',
+          ],
+        },
+        {
+          name: 'Claude Code Seminar',
+          period: '2026.05',
+          role: 'Lecturer',
+          skills: ['Claude Code'],
+          highlights: [
+            "Delivered the company's first seminar on Claude Code",
+            'Led the adoption of AI / productivity tooling beyond personal use, educating and spreading practices across the organization',
+          ],
+        },
+      ],
+    },
+    {
+      company: 'XCENA (formerly MetisX)',
       position: 'Software Engineer / Firmware',
       period: '2023.08 ~ 2024.11',
       projects: [
@@ -50,9 +125,9 @@ export const RESUME_DATA = {
           highlights: [
             'Refactored SDK to enhance code maintainability and modularity',
             'Documented SDK structure and usage for seamless onboarding',
-            'Developed NVMe Driver',
-            'Improve MU print function performance without using MBOX',
-            'Add Test Cases for MU Kernel',
+            'Ported NVMe driver on RTOS',
+            'Implemented MU print via direct memory access (bypassing MBOX)',
+            'Built a GoogleTest-style test framework and MU kernel test cases',
           ],
         },
         {
@@ -62,7 +137,7 @@ export const RESUME_DATA = {
           skills: ['C++', 'Arm M0+', 'Arm A53', 'Zebu', 'HAPS'],
           highlights: [
             'Developed and verified third-party IP drivers for I2C(SMBUS), UART, and SPI',
-            'Developed and verified MetisX IP drivers for GMON, RAU, GDMA, CMDS, MBOX, and MU',
+            'Developed and verified XCENA IP drivers for GMON, RAU, GDMA, CMDS, MBOX, and MU',
             'Established driver verification framework leveraging Zebu and HAPS platform',
             'Collaborated with the SoC team for IP verification',
           ],
@@ -70,12 +145,12 @@ export const RESUME_DATA = {
         {
           name: 'Arm M0+, Arm A53 Bring-up',
           period: '2024.03 ~ 2024.09',
-          role: 'ROM/RAM code develop and porting SDK',
+          role: 'ROM/RAM code develop and SDK porting',
           skills: ['C++', 'Python', 'Arm M0+', 'Arm A53', 'Zebu', 'HAPS'],
           highlights: [
             'Developed an automated deployment script for Zebu and HAPS platform',
             'Developed ROM/RAM code on ARM',
-            'Porting SDK on ARM',
+            'Ported SDK on ARM',
           ],
         },
       ],
@@ -91,25 +166,25 @@ export const RESUME_DATA = {
           role: 'Lecturer',
           skills: ['Python', 'TensorFlow', 'Docker', 'Git'],
           highlights: [
-            'Teach How to Co-Work using Coding Style and Git',
-            'Implemented and Teach State of The Art Architecture',
+            'Taught How to Co-Work using Coding Style and Git',
+            'Implemented and taught state-of-the-art architecture',
           ],
         },
       ],
     },
     {
       company: 'Marine Information Technology',
-      position: 'Software Engineer / Alternative Military Service',
+      position: 'Software Engineer / Alternative Military Service (전문연구요원)',
       period: '2021.01 ~ 2022.05',
       projects: [
         {
-          name: 'Automatically Observe Tsunami using Intelligent CCTV',
+          name: 'Automatic Tsunami Observation using Intelligent CCTV',
           period: '2021.06 ~ 2022.05',
-          role: 'Team Leader and Develop Deep Learning',
+          role: 'AI Part Lead / Deep Learning Development',
           skills: ['Python', 'TensorFlow', 'Flask'],
           highlights: [
             'Wrote an R&D proposal',
-            'Developed to Observe Sea Level using Deep Learning',
+            'Developed a deep-learning model for sea-level observation',
             'Researched Video Enhancement using Deep Learning',
             'Developed Tsunami Detection Algorithm with Anomaly Detection',
           ],
@@ -120,7 +195,7 @@ export const RESUME_DATA = {
           role: 'Feature Improvement and Build Cluster with MPI',
           skills: ['Fortran', 'MPI'],
           highlights: [
-            'Developed Water Gate, Wheel Module for Hydrodynamics Simulator using MPI with Fortran',
+            'Developed Water Gate and Wheel Module for Hydrodynamics Simulator using MPI with Fortran',
             'Built a Cluster with MPI',
           ],
         },
@@ -130,7 +205,7 @@ export const RESUME_DATA = {
           role: 'System Engineer',
           skills: ['Python', 'TensorFlow', 'Docker'],
           highlights: [
-            'Performance Improvement with Refactoring Legacy Code',
+            'Improved performance by refactoring legacy code',
             'Built and Deployed Deep Learning Application with Docker',
           ],
         },
@@ -138,7 +213,7 @@ export const RESUME_DATA = {
     },
     {
       company: 'Future Systems',
-      position: 'Software Engineer / Alternative Military Service',
+      position: 'Software Engineer / Alternative Military Service (전문연구요원)',
       period: '2019.01 ~ 2021.01',
       projects: [
         {
@@ -149,7 +224,7 @@ export const RESUME_DATA = {
           highlights: [
             'Developed Thread-safe Runtime for VPN with C/C++',
             'Developed Microservice Controller for Security Apps (FW, VPN, IDS, Anti-Virus) with Docker',
-            'Researched and Developed Network Anomaly Detect using New Features with TensorFlow',
+            'Researched and Developed Network Anomaly Detection using New Features with TensorFlow',
             'Developed Kernel Module of Firewall',
           ],
         },
@@ -159,24 +234,24 @@ export const RESUME_DATA = {
           role: 'Maintain Web UI',
           skills: ['JavaScript', 'Python'],
           highlights: [
-            'Maintenance Web UI of VPN',
+            'Maintained Web UI of the VPN',
             'Developed New Features',
           ],
         },
         {
-          name: 'Visualization Threat Intelligence',
+          name: 'Threat Intelligence Visualization',
           period: '2020.06 ~ 2020.07',
           role: 'Develop Web UI',
           skills: ['JavaScript'],
           highlights: [
-            'Visualized Cyber Security',
+            'Visualized cyber threat intelligence',
           ],
         },
       ],
     },
     {
       company: 'Korea University',
-      position: 'Integrated Ph.D. Course',
+      position: 'Integrated Ph.D. course',
       period: '2013.03 ~ 2018.12',
       projects: [
         {
@@ -187,7 +262,7 @@ export const RESUME_DATA = {
           highlights: [
             'Developed a Cloud Resource Management System on OpenStack and Eucalyptus',
             'Developed a Web UI with JSP',
-            'Developed Cloud Resource Schedule',
+            'Developed a Cloud Resource Schedule',
           ],
         },
         {
@@ -197,7 +272,7 @@ export const RESUME_DATA = {
           skills: ['Ubuntu', 'Java', 'RESTful', 'OpenStack'],
           highlights: [
             'Developed a Cloud Resource Management System',
-            'Developed to Deploy Distributed Framework MPI, Map-Reduce on Virtual Environment',
+            'Deployed distributed frameworks (MPI, MapReduce) on virtualized environments',
             'Developed Volume Rendering with CUDA',
           ],
         },
@@ -219,8 +294,8 @@ export const RESUME_DATA = {
           highlights: [
             'Wrote an R&D proposal',
             'Optimized Deep Learning Training with GPU Profiling',
-            'Reduced GPU IDLE',
-            'Accelerated GPU with Memory format',
+            'Reduced GPU idle time through profiling',
+            'Tuned GPU memory layout for compute',
           ],
         },
       ],
