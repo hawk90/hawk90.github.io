@@ -173,5 +173,10 @@
   "allowScripts": {
     "esbuild": true,
     "fsevents": true
+  },
+  "overrides": {
+    "satori": {
+      "fflate": "0.7.5"
+    }
   }
 }
