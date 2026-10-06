@@ -115,6 +115,7 @@
     "diagrams": "bash scripts/build-diagrams.sh",
     "check:diagrams": "bash scripts/build-diagrams.sh --check",
     "check:script-modes": "node scripts/check-script-modes.mjs",
+    "check:katex-css": "node scripts/check-katex-css.mjs",
     "diagrams:force": "bash scripts/build-diagrams.sh --force",
     "diagrams:watch": "bash scripts/watch-diagrams.sh",
     "audit:gate": "bash scripts/audit-publish-gate.sh",
