@@ -59,6 +59,10 @@ pre-commit:
       run: node scripts/check-script-modes.mjs
 
     # 새로 추가된 챕터에 draft·series·title 기본 frontmatter 누락 검사
+    inline-math:
+      glob:
+        - "src/content/blog/**/*.md"
+      run: node scripts/check-inline-math.mjs {staged_files}
     frontmatter-required:
       glob:
         - "src/content/blog/**/*.md"

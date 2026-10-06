@@ -41,7 +41,7 @@ BoW를 양산할 때 *substrate 선택*이 *첫 번째 결정*입니다. 옵션�
 특징:
 
 - bump pitch: 45~55 μm (bridge 영역)
-- 단가: 중간 (~$30~$50 for 100 mm²)
+- 단가: 중간 (~\$30~\$50 for 100 mm²)
 - 대표 기술: Intel EMIB, TSMC LSI, Samsung I-Cube
 - BoW Standard와 UCIe Standard 둘 다 지원
 

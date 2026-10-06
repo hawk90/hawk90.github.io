@@ -89,8 +89,8 @@ Beck은 이것을 "working memory의 외부화"라 부른다. 뇌는 테스트 �
 
 **Test List — Money**
 
-- [ ] $5 + 10 CHF = $10 (환율 2:1)
-- [ ] $5 * 2 = $10
+- [ ] \$5 + 10 CHF = \$10 (환율 2:1)
+- [ ] \$5 * 2 = \$10
 - [x] amount를 private으로
 - [ ] Dollar 부작용 제거
 - [ ] Money 반올림

@@ -484,7 +484,7 @@ Vendor 도구 외 *프로젝트 자체 도구*도 qualification 필요.
 
 | 도구 | 사용 가능성 |
 |------|-------------|
-| **GCC (compiler)** | 자체 qualification 어려움 · 가능 — FAA AC 00-69 (open source qualification guidance) · 또는 Adacore GNAT Pro (qualified GCC fork, $$$) · 또는 Green Hills MULTI (qualified C compiler, $$$) |
+| **GCC (compiler)** | 자체 qualification 어려움 · 가능 — FAA AC 00-69 (open source qualification guidance) · 또는 Adacore GNAT Pro (qualified GCC fork, \$\$\$) · 또는 Green Hills MULTI (qualified C compiler, \$\$\$) |
 | **Linux Kernel (RTOS dependency)** | 자체 qualification 매우 어려움 · 또는 별도 qualified RTOS (Wind River VxWorks, Green Hills INTEGRITY) |
 | **gcov / lcov (coverage)** | TQL-5 가능 · 단, MC/DC 미지원 · DAL B 이상에서 부족 |
 | **clang-tidy (static analysis)** | TQL-5 가능 · 단, MISRA 일부만 지원 · 보조 용도 |
