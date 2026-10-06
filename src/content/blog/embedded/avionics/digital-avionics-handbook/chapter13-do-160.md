@@ -370,7 +370,7 @@ LV — DO-160 *기준 부족*. 자체 표준.
 
 **Duration:**
 - LRU full qualification — 6~12개월
-- Cost — $500K~$5M per LRU
+- Cost — \$500K~\$5M per LRU
 
 Qual — *큰 비용 + 시간*. Project schedule 결정.
 

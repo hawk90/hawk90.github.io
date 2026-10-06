@@ -294,7 +294,7 @@ DO-178C Level A 기준:
 - $50-150 per LOC
 - Multiple years
 - Multi-person team
-- $5M-$200M+ per certified SW project
+- \$5M-\$200M+ per certified SW project
 
 이유:
 

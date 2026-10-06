@@ -241,7 +241,7 @@ topics: ["writing"]
 ### 데이터의 시각화
 
 **산문 (어려움)**:
-> "Revenue grew from $1.2M in Q1 to $1.5M in Q2 to $1.8M in Q3, while costs rose from $0.8M to $0.9M to $1.0M."
+> "Revenue grew from \$1.2M in Q1 to \$1.5M in Q2 to \$1.8M in Q3, while costs rose from \$0.8M to \$0.9M to \$1.0M."
 
 **표 (쉬움)**:
 

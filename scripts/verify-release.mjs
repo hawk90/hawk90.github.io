@@ -8,6 +8,7 @@ const checks = [
   ['script exec bits', ['npm', 'run', 'check:script-modes']],
   ['diagram source freshness', ['npm', 'run', 'check:diagrams']],
   ['KaTeX CSS matches renderer', ['npm', 'run', 'check:katex-css']],
+  ['no accidental inline math', ['npm', 'run', 'check:inline-math']],
   ['CI supply-chain policy', ['npm', 'run', 'gate:ci-security']],
   ['repository object health', ['npm', 'run', 'gate:repository']],
   ['high-severity production dependency audit', ['npm', 'run', 'gate:dependencies']],

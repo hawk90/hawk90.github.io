@@ -62,7 +62,7 @@
 
 ### Dispatch — 언제 자동으로 도는가
 
-- **commit 시**: lefthook `pre-commit`이 staged `src/content/blog/**/*.md`에 `audit-publish-gate.sh` + 태그 모양 자동 정규화(`normalize-tag-shape.mjs --apply`, 같은 커밋에 stage) + 필수 frontmatter(`title`·`date`·`description`) 검사.
+- **commit 시**: lefthook `pre-commit`이 staged `src/content/blog/**/*.md`에 `audit-publish-gate.sh` + 태그 모양 자동 정규화(`normalize-tag-shape.mjs --apply`, 같은 커밋에 stage) + 필수 frontmatter(`title`·`date`·`description`) 검사 + 의도하지 않은 인라인 수식(`check-inline-math.mjs` — 가격 `$20K~$40K`·셸 `${D}`처럼 `$` 두 개가 수식으로 렌더되는 것) 검사.
 - **push 시**: lefthook `pre-push`가 push되는 commit의 변경 파일에 gate.
 - **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (local clone 기준 drift — 기본 offline, fetch는 `python3 scripts/audit-upstream-freshness.py --fetch`), `npm run audit:staleness` (산문 미래 시제·날짜 앵커), `npm run audit:tags` (태그 어휘 — 리포트형이라 pass/fail 아님).
 - **`npm run verify:release`**: ⑤⑦⑧⑨를 포함한 28단계(`scripts/verify-release.mjs`)를 한 번에. ⑧은 `dist/`를 읽으므로 빌드 *뒤*에 돕니다 — 표 잘림·제목 계층은 마크다운 원본에는 없고 렌더된 HTML에만 있습니다. CI가 배포 전 이걸 돌립니다.

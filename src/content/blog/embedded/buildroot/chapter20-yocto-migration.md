@@ -333,7 +333,7 @@ Ch 14에서 다룬 Buildroot의 `ccache + per-package directories`로 일부 격
 - 이전 비용은 소형 1주, 중형 1개월, 대형 3개월 정도이며 *recipe 변환*보다 *팀 학습과 재테스트*가 비용 대부분을 차지합니다.
 - 개념 매핑은 대체로 1:1이지만 *per-recipe sysroot 부재*와 *글로벌 Config.in vs 국소 DEPENDS*가 변환의 어려운 지점입니다.
 - 점진적 이전은 *meta-buildroot*로 Buildroot 트리를 Yocto에 임베드해 두 시스템을 *다리 기간* 동안 병행하는 패턴이 안전합니다.
-- recipe 변환의 핵심은 *make 매크로 → task 함수*, *TARGET_CC → CC*, *TARGET_DIR → ${D}*, 그리고 `FILES:${PN}` 명시입니다.
+- recipe 변환의 핵심은 *make 매크로 → task 함수*, *TARGET_CC → CC*, *TARGET_DIR → \${D}*, 그리고 `FILES:${PN}` 명시입니다.
 - defconfig는 MACHINE conf로 *MACHINE 특성*만 옮기고 *패키지 선택*은 image recipe로 분리됩니다.
 - 4번째 빌드부터 Yocto가 빠르며, 5개 보드 빌드에서 sstate 공유로 누적 시간이 역전됩니다.
 - 옮기지 *말아야 할 신호*도 분명합니다. 팀 5명 이하·단일 보드·소형 rootfs라면 Yocto는 과한 결정입니다.

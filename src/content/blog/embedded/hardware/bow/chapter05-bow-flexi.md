@@ -98,7 +98,7 @@ Eliyan은 *Compute Die와 HBM-class 메모리*를 *organic substrate*에 묶는 
 |------|-------------------|----------------------------|
 | substrate | silicon interposer | organic substrate |
 | bandwidth | ~3 TB/s per stack | ~1 TB/s per stack |
-| 단가 | $200~$300 | $5~$10 |
+| 단가 | \$200~\$300 | \$5~\$10 |
 
 bandwidth는 *1/3 수준*이지만, *비용은 1/20~1/30* 수준입니다. AI 추론용이라면 *충분히 매력적인 trade-off*입니다.
 
