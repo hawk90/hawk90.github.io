@@ -1,6 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { ABOUT_DATA } from '../consts/about';
+
+// Section text is plain data, not markdown. Recognise just the two inline
+// forms the data uses, so `*myself*` and `/resume` render as intended
+// instead of as literal characters.
+type Segment = { kind: 'text' | 'em'; text: string } | { kind: 'link'; text: string; href: string };
+function inline(content: string): Segment[] {
+  const out: Segment[] = [];
+  const re = /\[([^\]]+)\]\(([^)\s]+)\)|\*([^*]+)\*/g;
+  let last = 0;
+  for (const m of content.matchAll(re)) {
+    if (m.index > last) out.push({ kind: 'text', text: content.slice(last, m.index) });
+    out.push(m[1] ? { kind: 'link', text: m[1], href: m[2] } : { kind: 'em', text: m[3] });
+    last = m.index + m[0].length;
+  }
+  if (last < content.length) out.push({ kind: 'text', text: content.slice(last) });
+  return out;
+}
 ---
 
 <BaseLayout title={`Who Am I - ${ABOUT_DATA.name}`} description={ABOUT_DATA.title}>
@@ -50,8 +67,16 @@ import { ABOUT_DATA } from '../consts/about';
               <span class="text-2xl">{section.icon}</span>
               <h2 class="text-xl font-bold">{section.title}</h2>
             </div>
-            <p class="text-[var(--color-text-secondary)] leading-relaxed pl-10 max-w-3xl">
-              {section.content}
+            <p class="text-[var(--color-text-secondary)] leading-relaxed sm:pl-10">
+              {inline(section.content).map((seg) =>
+                seg.kind === 'link' ? (
+                  <a href={seg.href} class="text-[var(--color-accent)] underline underline-offset-2 hover:no-underline">{seg.text}</a>
+                ) : seg.kind === 'em' ? (
+                  <em>{seg.text}</em>
+                ) : (
+                  seg.text
+                )
+              )}
             </p>
           </section>
         ))}
@@ -62,7 +87,7 @@ import { ABOUT_DATA } from '../consts/about';
               <span class="text-2xl">🎯</span>
               <h2 class="text-xl font-bold">Hobbies</h2>
             </div>
-            <div class="flex flex-wrap gap-x-6 gap-y-2 pl-10 text-[var(--color-text-secondary)]">
+            <div class="flex flex-wrap gap-x-6 gap-y-2 sm:pl-10 text-[var(--color-text-secondary)]">
               {ABOUT_DATA.hobbies.map((hobby) => (
                 <span class="inline-flex items-center gap-2">
                   <span class="text-xl">{hobby.icon}</span>
