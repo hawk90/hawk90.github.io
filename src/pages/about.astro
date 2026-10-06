@@ -50,7 +50,7 @@ import { ABOUT_DATA } from '../consts/about';
               <span class="text-2xl">{section.icon}</span>
               <h2 class="text-xl font-bold">{section.title}</h2>
             </div>
-            <p class="text-[var(--color-text-secondary)] leading-relaxed pl-10 max-w-3xl">
+            <p class="text-[var(--color-text-secondary)] leading-relaxed sm:pl-10">
               {section.content}
             </p>
           </section>
@@ -62,7 +62,7 @@ import { ABOUT_DATA } from '../consts/about';
               <span class="text-2xl">🎯</span>
               <h2 class="text-xl font-bold">Hobbies</h2>
             </div>
-            <div class="flex flex-wrap gap-x-6 gap-y-2 pl-10 text-[var(--color-text-secondary)]">
+            <div class="flex flex-wrap gap-x-6 gap-y-2 sm:pl-10 text-[var(--color-text-secondary)]">
               {ABOUT_DATA.hobbies.map((hobby) => (
                 <span class="inline-flex items-center gap-2">
                   <span class="text-xl">{hobby.icon}</span>
