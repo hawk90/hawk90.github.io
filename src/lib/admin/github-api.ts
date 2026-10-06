@@ -50,6 +50,17 @@ function encodeBase64Utf8(value: string): string {
   return btoa(binary);
 }
 
+function decodeBase64Utf8(value: string): string {
+  const binary = atob(value.replace(/\s/g, ''));
+  const bytes = Uint8Array.from(binary, (char) => char.charCodeAt(0));
+  return new TextDecoder().decode(bytes);
+}
+
+/** Encode path components while preserving the slash separators GitHub needs. */
+function encodeApiPath(path: string): string {
+  return path.split('/').map((component) => encodeURIComponent(component)).join('/');
+}
+
 // ─── API Client ─────────────────────────────────────────────
 
 const GITHUB_API = 'https://api.github.com';
@@ -88,7 +99,7 @@ export async function fetchRepoContents(
   repo: string,
   path: string = ''
 ): Promise<RepoContent[]> {
-  const endpoint = `/repos/${owner}/${repo}/contents/${path}`;
+  const endpoint = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeApiPath(path)}`;
   const result = await githubFetch<RepoContent | RepoContent[]>(endpoint, token);
 
   // Single file returns object, directory returns array
@@ -104,11 +115,11 @@ export async function fetchFileContent(
   repo: string,
   path: string
 ): Promise<string> {
-  const endpoint = `/repos/${owner}/${repo}/contents/${path}`;
+  const endpoint = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeApiPath(path)}`;
   const result = await githubFetch<FileContent>(endpoint, token);
 
   // Decode base64 content
-  return atob(result.content.replace(/\n/g, ''));
+  return decodeBase64Utf8(result.content);
 }
 
 /**
@@ -120,11 +131,11 @@ export async function fetchFileWithSha(
   repo: string,
   path: string
 ): Promise<{ content: string; sha: string }> {
-  const endpoint = `/repos/${owner}/${repo}/contents/${path}`;
+  const endpoint = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeApiPath(path)}`;
   const result = await githubFetch<FileContent>(endpoint, token);
 
   return {
-    content: atob(result.content.replace(/\n/g, '')),
+    content: decodeBase64Utf8(result.content),
     sha: result.sha,
   };
 }
@@ -143,7 +154,7 @@ export async function createFile(
   message: string,
   branch: string = 'main'
 ): Promise<CommitResponse> {
-  const endpoint = `/repos/${owner}/${repo}/contents/${path}`;
+  const endpoint = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeApiPath(path)}`;
 
   return githubFetch<CommitResponse>(endpoint, token, {
     method: 'PUT',
@@ -169,7 +180,7 @@ export async function updateFile(
   message: string,
   branch: string = 'main'
 ): Promise<CommitResponse> {
-  const endpoint = `/repos/${owner}/${repo}/contents/${path}`;
+  const endpoint = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeApiPath(path)}`;
 
   return githubFetch<CommitResponse>(endpoint, token, {
     method: 'PUT',
@@ -195,7 +206,7 @@ export async function deleteFile(
   message: string,
   branch: string = 'main'
 ): Promise<CommitResponse> {
-  const endpoint = `/repos/${owner}/${repo}/contents/${path}`;
+  const endpoint = `/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeApiPath(path)}`;
 
   return githubFetch<CommitResponse>(endpoint, token, {
     method: 'DELETE',
@@ -237,7 +248,7 @@ export async function uploadImage(
   // Read file as base64
   const content = await fileToBase64(file);
 
-  await githubFetch<CommitResponse>(`/repos/${owner}/${repo}/contents/${path}`, token, {
+  await githubFetch<CommitResponse>(`/repos/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/contents/${encodeApiPath(path)}`, token, {
     method: 'PUT',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify({
@@ -418,7 +429,7 @@ async function fetchHead(
   branch: string,
   path: string
 ): Promise<string | null> {
-  const url = `https://raw.githubusercontent.com/${owner}/${repo}/${branch}/${path}`;
+  const url = `https://raw.githubusercontent.com/${encodeURIComponent(owner)}/${encodeURIComponent(repo)}/${encodeApiPath(branch)}/${encodeApiPath(path)}`;
   try {
     const r = await fetch(url, { headers: { Range: 'bytes=0-2047' } });
     if (!r.ok && r.status !== 206) return null;
@@ -517,11 +528,11 @@ export async function fetchDrafts(
  * Parse owner and repo from a combined string (e.g., "owner/repo").
  */
 export function parseRepo(repoString: string): { owner: string; repo: string } {
-  const [owner, repo] = repoString.split('/');
-  if (!owner || !repo) {
+  const parts = repoString.split('/');
+  if (parts.length !== 2 || !parts[0] || !parts[1]) {
     throw new Error(`Invalid repo string: ${repoString}`);
   }
-  return { owner, repo };
+  return { owner: parts[0], repo: parts[1] };
 }
 
 /**
