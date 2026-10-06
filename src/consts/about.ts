@@ -17,12 +17,13 @@ export const ABOUT_DATA = {
   // Each gets a complementary accent color + small icon.
   skills: [
     { label: 'Embedded Firmware', icon: '🔌', color: 'cyan' },
-    { label: 'ARM / RISC-V',      icon: '🧠', color: 'amber' },
+    { label: 'ARM Bring-up',      icon: '🧠', color: 'amber' },
     { label: 'NVMe / Drivers',    icon: '⚡', color: 'green' },
-    { label: 'CUDA / MPI',        icon: '🐧', color: 'violet' },
+    { label: 'CUDA / MPI',        icon: '🖥️', color: 'violet' },
   ],
 
-  // Content sections
+  // Content sections. `content` supports two inline forms only:
+  // [label](/path/) for links and *text* for emphasis.
   sections: [
     {
       icon: '👋',
@@ -33,7 +34,7 @@ export const ABOUT_DATA = {
         'Since then I\'ve worked on SoC bring-up and IP driver verification at MetisX ' +
         '(ARM M0+ / A53, Zebu/HAPS, NVMe), VPN runtimes and kernel firewall modules at Future Systems, ' +
         'and tsunami-detection / hydrodynamics simulation at Marine Information Technology. ' +
-        'Full project history is on the /resume page.',
+        'Full project history is on the [resume page](/resume/).',
     },
     {
       icon: '🔧',
@@ -68,7 +69,7 @@ export const ABOUT_DATA = {
       content:
         'GitHub and email are linked in the footer. I happily read corrections, ' +
         'disagreements, and "you should also read X" notes. For longer conversations ' +
-        'about firmware, drivers, or parallel systems, the /resume page has fuller context.',
+        'about firmware, drivers, or parallel systems, the [resume page](/resume/) has fuller context.',
     },
   ],
 

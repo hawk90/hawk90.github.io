@@ -1,6 +1,23 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { ABOUT_DATA } from '../consts/about';
+
+// Section text is plain data, not markdown. Recognise just the two inline
+// forms the data uses, so `*myself*` and `/resume` render as intended
+// instead of as literal characters.
+type Segment = { kind: 'text' | 'em'; text: string } | { kind: 'link'; text: string; href: string };
+function inline(content: string): Segment[] {
+  const out: Segment[] = [];
+  const re = /\[([^\]]+)\]\(([^)\s]+)\)|\*([^*]+)\*/g;
+  let last = 0;
+  for (const m of content.matchAll(re)) {
+    if (m.index > last) out.push({ kind: 'text', text: content.slice(last, m.index) });
+    out.push(m[1] ? { kind: 'link', text: m[1], href: m[2] } : { kind: 'em', text: m[3] });
+    last = m.index + m[0].length;
+  }
+  if (last < content.length) out.push({ kind: 'text', text: content.slice(last) });
+  return out;
+}
 ---
 
 <BaseLayout title={`Who Am I - ${ABOUT_DATA.name}`} description={ABOUT_DATA.title}>
@@ -51,7 +68,15 @@ import { ABOUT_DATA } from '../consts/about';
               <h2 class="text-xl font-bold">{section.title}</h2>
             </div>
             <p class="text-[var(--color-text-secondary)] leading-relaxed sm:pl-10">
-              {section.content}
+              {inline(section.content).map((seg) =>
+                seg.kind === 'link' ? (
+                  <a href={seg.href} class="text-[var(--color-accent)] underline underline-offset-2 hover:no-underline">{seg.text}</a>
+                ) : seg.kind === 'em' ? (
+                  <em>{seg.text}</em>
+                ) : (
+                  seg.text
+                )
+              )}
             </p>
           </section>
         ))}

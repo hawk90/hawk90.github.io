@@ -7,7 +7,7 @@ export const RESUME_DATA = {
   // Header
   nameKo: '윤상덕',
   nameEn: 'Sang-Deok Yoon',
-  title: 'Software Engineer',
+  title: 'System & Firmware Engineer',
   github: 'https://github.com/hawk90',
   // Email is split to deter spam bot harvesting. Joined at render time.
   emailUser: 'hawking90a',
