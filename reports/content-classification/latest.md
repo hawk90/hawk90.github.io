@@ -2,9 +2,9 @@
 
 > Informational baseline for migrating from path-derived categories to explicit canonical topic IDs.
 
-- Documents: 3387
+- Documents: 3407
 - Registered category IDs: 65
-- Explicit topic metadata: 3387
+- Explicit topic metadata: 3407
 - Legacy category metadata: 0
 - Path-derived only: 0
 - No current classification: 0
@@ -58,6 +58,7 @@
 - `embedded/bsp` — 21 documents; 1 series; review-as-series (BSP Development: 21/21, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `math/probability/koller-friedman-pgm` — 21 documents; 1 series; review-as-series (Probabilistic Graphical Models (Koller & Friedman): 21/21, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `systems/apue` — 21 documents; 1 series; review-as-series (APUE: 21/21, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
+- `tools/debugging/embedded` — 21 documents; 1 series; review-as-series (Embedded Debugging: 21/21, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `tools/practical-vim` — 21 documents; 1 series; review-as-series (Practical Vim: 21/21, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `embedded/buildroot` — 20 documents; 1 series; review-as-series (Buildroot Practical: 20/20, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `embedded/hardware/pcie` — 20 documents; 1 series; review-as-series (PCIe Deep Dive: 19/20, 95.0%); 1 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
@@ -81,6 +82,7 @@
 - `ml/compilers/mlir-deep` — 16 documents; 1 series; review-as-series (MLIR 심화: 16/16, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `philosophy/critical-thinking-logic` — 16 documents; 1 series; review-as-series (비판적 사고를 위한 논리: 16/16, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/engineering/goos` — 16 documents; 1 series; review-as-series (Growing Object-Oriented Software: 16/16, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
+- `tools/emulation/driver-cosim` — 16 documents; 1 series; review-as-series (Driver-RTL Co-simulation: 16/16, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `writing/gojongseok-munjang` — 16 documents; 1 series; review-as-series (고종석의 문장: 16/16, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `embedded/avionics/developing-safety-critical` — 15 documents; 1 series; review-as-series (Developing Safety-Critical Software: 15/15, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `embedded/hardware/cxl` — 15 documents; 1 series; review-as-series (CXL 4.0 Internals: 15/15, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
@@ -159,7 +161,6 @@
 - `programming/standards/linux-kernel` — 9 documents; 1 series; review-as-series (Linux Kernel Coding Style: 9/9, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `tools/build/cmake` — 9 documents; 1 series; review-as-series (CMake: 9/9, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `tools/debugging/agans-9-rules` — 9 documents; 1 series; review-as-series (Debugging: The 9 Indispensable Rules: 9/9, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
-- `tools/debugging/embedded` — 9 documents; 1 series; review-as-series (Embedded Debugging: 9/9, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `tools/debugging/kernel` — 9 documents; 1 series; review-as-series (Kernel Debugging: 9/9, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `tools/vim` — 9 documents; 1 series; review-as-series (Vim 마스터하기: 9/9, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `math/probability/durrett-pte` — 8 documents; 1 series; review-as-series (Probability: Theory and Examples: 8/8, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
@@ -170,7 +171,6 @@
 - `ml/inference/onnx-runtime` — 8 documents; 1 series; review-as-series (ONNX Runtime 심화: 8/8, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `ml/inference/tensorrt` — 8 documents; 1 series; review-as-series (TensorRT 심화: 8/8, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `ml/systems/ml-profiling` — 8 documents; 1 series; review-as-series (ML 시스템 프로파일링: 8/8, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
-- `tools/emulation/driver-cosim` — 8 documents; 1 series; review-as-series (Driver-RTL Co-simulation: 8/8, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `design/design-everyday-things` — 7 documents; 1 series; review-as-series (The Design of Everyday Things: 7/7, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `parallel/seven-concurrency-models` — 7 documents; 1 series; review-as-series (Seven Concurrency Models in Seven Weeks: 7/7, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/standards/python-pep8` — 7 documents; 1 series; review-as-series (Python Style Guide (PEP 8): 7/7, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.

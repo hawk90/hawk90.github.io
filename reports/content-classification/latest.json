@@ -1,8 +1,8 @@
 {
-  "total": 3387,
+  "total": 3407,
   "categoryCount": 65,
   "sourceCounts": {
-    "explicit": 3387,
+    "explicit": 3407,
     "legacy": 0,
     "pathOnly": 0,
     "unclassified": 0
@@ -451,6 +451,17 @@
       "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
     },
     {
+      "path": "tools/debugging/embedded",
+      "documents": 21,
+      "seriesCount": 1,
+      "dominantSeries": "Embedded Debugging",
+      "dominantSeriesDocuments": 21,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
       "path": "tools/practical-vim",
       "documents": 21,
       "seriesCount": 1,
@@ -697,6 +708,17 @@
       "documents": 16,
       "seriesCount": 1,
       "dominantSeries": "Growing Object-Oriented Software",
+      "dominantSeriesDocuments": 16,
+      "dominantSeriesShare": 1,
+      "ungroupedDocuments": 0,
+      "recommendation": "review-as-series",
+      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
+    },
+    {
+      "path": "tools/emulation/driver-cosim",
+      "documents": 16,
+      "seriesCount": 1,
+      "dominantSeries": "Driver-RTL Co-simulation",
       "dominantSeriesDocuments": 16,
       "dominantSeriesShare": 1,
       "ungroupedDocuments": 0,
@@ -1562,17 +1584,6 @@
       "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
     },
     {
-      "path": "tools/debugging/embedded",
-      "documents": 9,
-      "seriesCount": 1,
-      "dominantSeries": "Embedded Debugging",
-      "dominantSeriesDocuments": 9,
-      "dominantSeriesShare": 1,
-      "ungroupedDocuments": 0,
-      "recommendation": "review-as-series",
-      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
-    },
-    {
       "path": "tools/debugging/kernel",
       "documents": 9,
       "seriesCount": 1,
@@ -1676,17 +1687,6 @@
       "documents": 8,
       "seriesCount": 1,
       "dominantSeries": "ML 시스템 프로파일링",
-      "dominantSeriesDocuments": 8,
-      "dominantSeriesShare": 1,
-      "ungroupedDocuments": 0,
-      "recommendation": "review-as-series",
-      "rationale": "One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved."
-    },
-    {
-      "path": "tools/emulation/driver-cosim",
-      "documents": 8,
-      "seriesCount": 1,
-      "dominantSeries": "Driver-RTL Co-simulation",
       "dominantSeriesDocuments": 8,
       "dominantSeriesShare": 1,
       "ungroupedDocuments": 0,

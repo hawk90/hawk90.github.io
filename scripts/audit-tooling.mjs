@@ -78,6 +78,7 @@ const variants = [...commandGroups.entries()]
 const isExpectedVariant = ({ names }) => {
   const has = (...expected) => expected.every((name) => names.includes(name));
   return has('audit:classification', 'gate:classification')
+    || has('audit:completeness', 'gate:completeness')
     || has('audit:tooling', 'gate:tooling')
     || has('audit:secrets', 'gate:secrets')
     || has('audit:security-admin', 'gate:security-admin')

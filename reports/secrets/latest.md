@@ -2,5 +2,5 @@
 
 Scans content, public assets, and the final `dist` artifact for credential-shaped values.
 
-- Files scanned: 6981
+- Files scanned: 7081
 - Findings: 0
