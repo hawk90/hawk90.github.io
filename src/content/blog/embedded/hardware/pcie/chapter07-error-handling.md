@@ -187,6 +187,7 @@ UE에 진입하지만 *driver·OS가 reset으로 복구* 가능. 다만 *link in
 - [Ch 8: DLLP](/blog/embedded/hardware/pcie/chapter08-dllp) — Replay·NAK
 - [Ch 14: Linux Operations (Hot-plug·AER·DPC)](/blog/embedded/hardware/pcie/chapter14-linux-operations)
 - [Ch 16: Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting) — error 시나리오
+- [BSP Stability Testing](/blog/embedded/bsp/chapter19-stability-testing) — stress·soak 동안 AER 로그를 감시하는 양산 검증 흐름
 
 ## 시리즈 자료 출처 안내
 
