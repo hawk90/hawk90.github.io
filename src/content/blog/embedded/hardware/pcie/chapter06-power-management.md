@@ -154,6 +154,7 @@ UEFI·BIOS 단계 *ASPM 비활성*이 일반. OS 진입 후 *driver·ACPI*로 �
 - [Ch 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space) — PCI-PM Cap·LTR
 - [Ch 5: Interrupts](/blog/embedded/hardware/pcie/chapter05-interrupts) — PME 흐름
 - [Ch 9: Physical Layer](/blog/embedded/hardware/pcie/chapter09-physical-layer) — LTSSM·L states 진입
+- [BSP: SoC 데이터시트 읽기](/blog/embedded/bsp/chapter02-datasheet) — L1 sub-state를 끄는 SoC erratum 예시와 workaround를 넣을 위치
 
 ## 시리즈 자료 출처 안내
 

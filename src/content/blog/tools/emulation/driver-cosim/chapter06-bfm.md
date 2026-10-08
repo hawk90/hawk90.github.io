@@ -267,5 +267,6 @@ C BFM과 Python BFM은 *같은 protocol* 같은 *transaction abstraction*을 다
 
 - [Ch 5: SystemC TLM](/blog/tools/emulation/driver-cosim/chapter05-systemc-tlm)
 - [Ch 7: UVM C Reference Model](/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model)
+- [PCIe Ch 2: TLP](/blog/embedded/hardware/pcie/chapter02-tlp) — 표의 cocotbext-pcie 같은 PCIe BFM이 다루는 TLP 단위의 구조
 - QEMU Fake Device — Register Bank — register 모델링 패턴
 - FPGA Driver — AXI/PCIe Bridge

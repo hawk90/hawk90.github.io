@@ -290,3 +290,4 @@ NPU·chiplet·SoC가 가는 길에서 *pre-silicon driver 검증*은 더 이상 
 - QEMU Fake Device — Test Automation
 - FPGA Driver via QEMU+VFIO — VFIO Basics — post-cosim 단계
 - [Embedded Performance Engineering — Methodology](/blog/embedded/performance-engineering/part1-01-methodology)
+- [PCIe Ch 11: DMA·IOMMU](/blog/embedded/hardware/pcie/chapter11-linux-dma) — cosim에서 shim으로 대신한 dma_map_single이 실제 커널에서 하는 일

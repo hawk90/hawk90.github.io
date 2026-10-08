@@ -361,3 +361,4 @@ soak-72h:
 - [Ch 20: 양산 환경](/blog/embedded/bsp/chapter20-production) — CI 자동화의 다음 단계
 - [Ch 14: 디버깅 도구](/blog/embedded/bsp/chapter14-thermal-watchdog) — kdump와 crash 분석
 - [Modern Embedded Recipes — Stress recipes](/blog/embedded/modern-recipes/00-preface) — recipe 묶음
+- [PCIe Ch 16: Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting) — soak 중 dmesg에 쌓이는 AER CE 폭주를 증상부터 추적하는 시나리오

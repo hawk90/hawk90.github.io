@@ -342,5 +342,6 @@ IOMUXC 레지스터의 5개 필드를 직접 비트 시프트로 계산하는 �
 - [Ch 3: Device Tree 설계](/blog/embedded/bsp/chapter03-device-tree-design)
 - [Ch 4: Pin Mux와 Clock](/blog/embedded/bsp/chapter04-pinmux-clock)
 - [Ch 5: DDR 매개변수 — 보드별 timing](/blog/embedded/bsp/chapter05-ddr-params)
+- [PCIe Ch 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management) — erratum이 끄라는 L1 sub-state가 무엇인지
 - [원문 — NXP i.MX 8M Plus Reference Manual](https://www.nxp.com/products/processors-and-microcontrollers/arm-processors/i-mx-applications-processors/i-mx-8-applications-processors/i-mx-8m-plus-arm-cortex-a53-machine-learning-vision-multimedia-and-industrial-iot:IMX8MPLUS)
 - [원문 — TI AM62x Technical Reference Manual](https://www.ti.com/product/AM625)
