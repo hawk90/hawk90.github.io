@@ -229,4 +229,5 @@ appender 시그니처를 정확히 따른다.
 - [Part 4-03 — StrCat](/blog/programming/code-review/abseil/part4-03-str-cat)
 - [Part 4-04 — StrSplit](/blog/programming/code-review/abseil/part4-04-str-split)
 - [Part 4-06 — StrFormat](/blog/programming/code-review/abseil/part4-06-str-format)
+- [Folly Part 5-04 — folly join·split](/blog/programming/code-review/folly/part5-04-join-split) — Folly 쪽 join
 - [Tip of the Week #36: StrJoin](https://abseil.io/tips/36)

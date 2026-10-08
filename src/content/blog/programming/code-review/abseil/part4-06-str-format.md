@@ -223,4 +223,5 @@ format이 단순 concat 수준이면 `StrCat`, 정렬/정밀도/지수 표기가
 
 - [Part 4-03 — StrCat](/blog/programming/code-review/abseil/part4-03-str-cat)
 - [Part 4-05 — StrJoin](/blog/programming/code-review/abseil/part4-05-str-join)
+- [Folly Part 5-02 — Folly의 fmt 통합](/blog/programming/code-review/folly/part5-02-fmt-format-integration) — fmt 라이브러리를 채택한 Folly 쪽
 - [Tip of the Week #29: StrFormat](https://abseil.io/tips/29)

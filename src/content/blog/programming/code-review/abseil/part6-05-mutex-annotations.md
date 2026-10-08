@@ -254,4 +254,5 @@ Part 6이 끝났다. Part 7에서 시간/Duration/CivilTime을 다룬다.
 - [Part 6-01 — absl::Mutex](/blog/programming/code-review/abseil/part6-01-mutex)
 - [Part 6-02 — Conditional Critical Section](/blog/programming/code-review/abseil/part6-02-conditional-critical-section)
 - [Part 2-08 — Thread annotations](/blog/programming/code-review/abseil/part2-08-thread-annotations)
+- [Folly Part 9-01 — folly::Synchronized](/blog/programming/code-review/folly/part9-01-synchronized) — 잠금 누락을 wrapper 타입으로 막는 Folly 쪽
 - [Clang docs — Thread Safety Analysis](https://clang.llvm.org/docs/ThreadSafetyAnalysis.html)

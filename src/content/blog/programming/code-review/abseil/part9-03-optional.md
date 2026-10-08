@@ -190,5 +190,6 @@ std::optional<int> s = a;   // OK — 같은 타입
 
 - [Part 3-02: StatusOr](/blog/programming/code-review/abseil/part3-02-status-or) — 에러 vs 부재 구분
 - [Part 9-04: absl::variant](/blog/programming/code-review/abseil/part9-04-variant)
+- [Folly Part 13-03 — folly::Optional](/blog/programming/code-review/folly/part13-03-folly-optional) — monadic 연산을 더한 Folly 쪽
 - Effective Modern C++ — 항목 18: unique_ptr
 - [원문 — absl::optional](https://abseil.io/docs/cpp/guides/types#optional)

@@ -285,5 +285,6 @@ LIFO 순서를 명확히 알고 쓰면 문제 없지만, 등록 순서와 실행
 - [Part 14-02 — algorithm container 확장](/blog/programming/code-review/abseil/part14-02-algorithm-container-ext)
 - [Part 13-02 — anti-pattern](/blog/programming/code-review/abseil/part13-02-anti-patterns) — 자원 누수 패턴
 - [Part 3-03 — Status 매크로](/blog/programming/code-review/abseil/part3-03-status-macros) — early return 패턴
+- [Folly Part 13-02 — folly::ScopeGuard](/blog/programming/code-review/folly/part13-02-scope-guard) — SCOPE_EXIT 매크로까지 둔 Folly 쪽
 - Folly Part 6-04 — ScopeGuard — Meta의 대응
 - EMC++ Item 21 — std::make_unique — 자원 RAII의 출발점

@@ -319,4 +319,5 @@ for (int i = 0; i < 1000000; ++i) {
 - [Part 15-03 — Cord vs std::string 선택](/blog/programming/code-review/abseil/part15-03-cord-vs-string)
 - [Part 4-01 — string_view](/blog/programming/code-review/abseil/part4-01-string-view)
 - [Part 4-03 — StrCat](/blog/programming/code-review/abseil/part4-03-str-cat)
+- [Folly Part 4-01 — folly::IOBuf](/blog/programming/code-review/folly/part4-01-iobuf) — tree 대신 ref-counted buffer chain으로 푼 Folly 쪽
 - Folly Part 5-02 — IOBuf — Meta의 zero-copy buffer chain

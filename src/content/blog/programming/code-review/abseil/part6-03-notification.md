@@ -271,3 +271,4 @@ n.Notify(); n.WaitForNotification();
 - [Part 6-01 — absl::Mutex](/blog/programming/code-review/abseil/part6-01-mutex)
 - [Part 6-02 — Conditional Critical Section](/blog/programming/code-review/abseil/part6-02-conditional-critical-section)
 - [Part 6-04 — BlockingCounter / Barrier](/blog/programming/code-review/abseil/part6-04-blocking-counter-barrier)
+- [Folly Part 9-03 — folly::Baton](/blog/programming/code-review/folly/part9-03-baton) — 같은 one-shot signal의 Folly 쪽

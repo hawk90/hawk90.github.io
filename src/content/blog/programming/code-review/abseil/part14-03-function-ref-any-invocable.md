@@ -261,5 +261,6 @@ for (;;) {
 - [Part 14-04 — bind_front / Overload](/blog/programming/code-review/abseil/part14-04-bind-front-overload)
 - [Part 14-01 — Cleanup](/blog/programming/code-review/abseil/part14-01-cleanup)
 - [Part 9-04 — absl::variant](/blog/programming/code-review/abseil/part9-04-variant)
+- [Folly Part 13-04 — folly::Function](/blog/programming/code-review/folly/part13-04-folly-function) — AnyInvocable과 같은 move-only callable
 - Folly Part 4-03 — folly::Function — Meta의 move-only callable
 - EMC++ Item 34 — std::bind 회피
