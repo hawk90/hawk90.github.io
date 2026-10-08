@@ -707,4 +707,4 @@ Ch 5에서는 `find_package`와 외부 의존성을 다룹니다. 시스템 라�
 - [Ch 3: CMake 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 옵션이 붙는 대상인 타겟
 - [Ch 5: find_package와 외부 의존성](/blog/tools/build/cmake/chapter05-find-package) — 옵션으로 의존성 탐색을 제어하는 법
 - [GNU Make 소개](/blog/tools/build/gnu-make/chapter01-intro) — 조건부 변수를 Make에서는 어떻게 다루는가
-- [Sanitizer를 CMake와 CI에 통합](/blog/tools/debugging/sanitizers/chapter05-cmake-ci) — 이 ENABLE_SANITIZERS 옵션을 multi-config 빌드와 CI까지 이어 가는 법
+- [Sanitizer를 CMake와 CI에 통합](/blog/tools/debugging/sanitizers/chapter05-cmake-ci) — ENABLE_SANITIZERS 하나를 ASan·TSan별 옵션과 preset으로 나누고 CI job으로 돌리는 법
