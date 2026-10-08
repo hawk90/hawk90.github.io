@@ -242,5 +242,6 @@ for (int i = 0; i < 1'000'000; ++i) m.emplace(i, i);
 - [Part 7-02: F14NodeMap](/blog/programming/code-review/folly/part7-02-f14-node-map) — pointer 안정 변형
 - [Part 7-04: F14FastMap](/blog/programming/code-review/folly/part7-04-f14-fast-map) — 자동 선택
 - [Part 7-05: F14 internals](/blog/programming/code-review/folly/part7-05-f14-internals) — SIMD probing 상세
+- [Abseil Part 5-01 — absl::flat_hash_map](/blog/programming/code-review/abseil/part5-01-flat-hash-map) — 같은 SIMD open addressing 계열의 Abseil 쪽
 - [원문 — folly/container/F14Map.h](https://github.com/facebook/folly/blob/main/folly/container/F14Map.h)
 - [Meta engineering blog — F14](https://engineering.fb.com/2019/04/25/developer-tools/f14/)

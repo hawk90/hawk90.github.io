@@ -201,4 +201,5 @@ s += "x";                   // OK
 - [Part 7-01: F14ValueMap](/blog/programming/code-review/folly/part7-01-f14-value-map) — inline value 변형
 - [Part 7-03: F14VectorMap](/blog/programming/code-review/folly/part7-03-f14-vector-map) — vector backing
 - [Part 7-04: F14FastMap](/blog/programming/code-review/folly/part7-04-f14-fast-map) — 자동 선택
+- [Abseil Part 5-03 — absl::node_hash_map](/blog/programming/code-review/abseil/part5-03-node-hash-map) — 같은 stable-pointer 변형의 Abseil 쪽
 - [원문 — folly/container/F14Map.h](https://github.com/facebook/folly/blob/main/folly/container/F14Map.h)

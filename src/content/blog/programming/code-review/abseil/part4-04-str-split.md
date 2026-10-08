@@ -261,4 +261,5 @@ predicate는 *판정만* 한다. 안에서 string으로 변환하거나 외부 �
 - [Part 4-01 — string_view](/blog/programming/code-review/abseil/part4-01-string-view)
 - [Part 4-03 — StrCat](/blog/programming/code-review/abseil/part4-03-str-cat)
 - [Part 4-05 — StrJoin](/blog/programming/code-review/abseil/part4-05-str-join)
+- [Folly Part 5-04 — folly join·split](/blog/programming/code-review/folly/part5-04-join-split) — StringPiece 기반 zero-copy split
 - [Tip of the Week #10: StrSplit](https://abseil.io/tips/10)

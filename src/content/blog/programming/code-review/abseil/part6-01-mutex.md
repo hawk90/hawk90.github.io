@@ -317,4 +317,5 @@ raw `Lock`/`Unlock`은 RAII 없이는 위험. 항상 `MutexLock`/`ReaderMutexLoc
 - [Part 6-02 — Conditional Critical Section](/blog/programming/code-review/abseil/part6-02-conditional-critical-section)
 - [Part 6-05 — Mutex annotations](/blog/programming/code-review/abseil/part6-05-mutex-annotations)
 - [Folly Part 9-01 — Synchronized](/blog/programming/code-review/folly/part9-01-synchronized) — Meta의 동기화 wrapper
+- [Folly Part 9-02 — folly::SharedMutex](/blog/programming/code-review/folly/part9-02-shared-mutex) — reader-writer lock을 따로 둔 Folly 쪽
 - [Tip of the Week #88: condition_variable to Mutex::Await](https://abseil.io/tips/188)

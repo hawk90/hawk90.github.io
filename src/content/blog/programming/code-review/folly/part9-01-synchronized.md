@@ -246,4 +246,5 @@ data.withWLock([](auto& v) {
 - [Part 9-02: SharedMutex](/blog/programming/code-review/folly/part9-02-shared-mutex) — default mutex 상세
 - [Part 8-04: ConcurrentHashMap](/blog/programming/code-review/folly/part8-04-concurrent-hash-map) — shard별 lock의 응용
 - [Part 1-02: Folly vs Abseil 철학](/blog/programming/code-review/folly/part1-02-folly-vs-abseil-philosophy) — annotation vs encapsulation
+- [Abseil Part 6-05 — Mutex annotations](/blog/programming/code-review/abseil/part6-05-mutex-annotations) — 잠금 누락을 wrapper 대신 clang 정적 분석으로 잡는 Abseil 쪽
 - [원문 — folly/Synchronized.h](https://github.com/facebook/folly/blob/main/folly/Synchronized.h)

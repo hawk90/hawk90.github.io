@@ -255,4 +255,5 @@ critical section이 100 cycle 이하면 spin lock 또는 atomic 직접 사용이
 - [Part 9-01: Synchronized](/blog/programming/code-review/folly/part9-01-synchronized) — SharedMutex의 wrapper
 - [Part 9-04: RWSpinLock](/blog/programming/code-review/folly/part9-04-rw-spin-lock) — 더 짧은 critical section 용
 - [Part 8-04: ConcurrentHashMap](/blog/programming/code-review/folly/part8-04-concurrent-hash-map) — shard별 SharedMutex 사용
+- [Abseil Part 6-01 — absl::Mutex](/blog/programming/code-review/abseil/part6-01-mutex) — reader-writer 모드를 Mutex 하나에 합친 Abseil 쪽
 - [원문 — folly/SharedMutex.h](https://github.com/facebook/folly/blob/main/folly/SharedMutex.h)

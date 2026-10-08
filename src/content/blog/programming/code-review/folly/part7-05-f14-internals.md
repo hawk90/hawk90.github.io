@@ -264,6 +264,7 @@ Part 8로 넘어가 Folly의 컨테이너 라이브러리(SmallVector, FixedStri
 
 - [Part 7-01: F14ValueMap](/blog/programming/code-review/folly/part7-01-f14-value-map) — 표층 API
 - [Part 7-04: F14FastMap](/blog/programming/code-review/folly/part7-04-f14-fast-map) — variant 선택
+- [Abseil Part 5-07 — Swiss Table internals](/blog/programming/code-review/abseil/part5-07-swiss-table-internals) — H1/H2 분할·SIMD probing의 Abseil 쪽 설계
 - [Meta engineering blog — F14](https://engineering.fb.com/2019/04/25/developer-tools/f14/)
 - [Abseil Swiss Tables blog](https://abseil.io/blog/20180927-swisstables)
 - [원문 — folly/container/F14Map.h](https://github.com/facebook/folly/blob/main/folly/container/F14Map.h)

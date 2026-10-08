@@ -236,4 +236,5 @@ folly::Expected<int, Status> ParseInt(...);
 - [Folly Part 16-02 — Try](/blog/programming/code-review/folly/part16-02-try)
 - [Folly Part 16-03 — Try vs Expected](/blog/programming/code-review/folly/part16-03-try-vs-expected)
 - [Folly Part 13-03 — folly::Optional](/blog/programming/code-review/folly/part13-03-folly-optional)
+- [Abseil Part 3-02 — absl::StatusOr](/blog/programming/code-review/abseil/part3-02-status-or) — 에러 타입을 Status로 고정한 Abseil 쪽 대응
 - [원문 — folly/Expected.h](https://github.com/facebook/folly/blob/main/folly/Expected.h)

@@ -345,5 +345,6 @@ Part 3-03에서 `ASSIGN_OR_RETURN`, `RETURN_IF_ERROR` 매크로를 본다. chain
 - [Part 3-04: Status payload](/blog/programming/code-review/abseil/part3-04-status-payload)
 - [Part 3-05: Status ↔ exception](/blog/programming/code-review/abseil/part3-05-status-exception-conversion)
 - [Part 9-03: absl::optional](/blog/programming/code-review/abseil/part9-03-optional)
+- [Folly Part 16-01 — folly::Expected](/blog/programming/code-review/folly/part16-01-expected) — 에러 타입을 파라미터로 받는 Folly 쪽 대응
 - Effective Modern C++: pass by value
 - [원문 — absl/status/statusor.h](https://github.com/abseil/abseil-cpp/blob/master/absl/status/statusor.h)

@@ -241,4 +241,5 @@ open(std::string(view).c_str(), O_RDONLY);
 - [Part 4-02 — string_view 함정](/blog/programming/code-review/abseil/part4-02-string-view-pitfalls)
 - [Part 4-03 — StrCat](/blog/programming/code-review/abseil/part4-03-str-cat)
 - [Folly Part 5-01 — FBString](/blog/programming/code-review/folly/part5-01-fbstring) — Meta의 문자열 대응
+- [Folly Part 5-03 — folly::StringPiece](/blog/programming/code-review/folly/part5-03-string-piece) — Range<const char*>로 일반화한 Folly 쪽
 - [Tip of the Week #1: string_view](https://abseil.io/tips/1)

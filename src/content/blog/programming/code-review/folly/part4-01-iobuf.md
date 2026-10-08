@@ -222,3 +222,4 @@ parse(buf->data(), buf->length());   // chain의 첫 노드만 본다 — 잘못
 - [Folly Part 4-02 — IOBufQueue](/blog/programming/code-review/folly/part4-02-iobuf-queue)
 - [Folly Part 4-03 — Cursor](/blog/programming/code-review/folly/part4-03-cursor)
 - [Folly Part 4-05 — IOBuf shared semantics](/blog/programming/code-review/folly/part4-05-iobuf-shared-semantics)
+- [Abseil Part 15-01 — absl::Cord](/blog/programming/code-review/abseil/part15-01-cord) — buffer chain 대신 tree로 zero-copy를 푼 Abseil 쪽

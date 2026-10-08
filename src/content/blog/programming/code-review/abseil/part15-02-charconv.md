@@ -271,5 +271,6 @@ absl::SimpleHexAtoi("0xff", &v);  // true → 255
 - [Part 15-03 — Cord vs std::string 선택](/blog/programming/code-review/abseil/part15-03-cord-vs-string)
 - [Part 4-03 — StrCat](/blog/programming/code-review/abseil/part4-03-str-cat) — 숫자 → 문자열
 - [Part 4-06 — StrFormat](/blog/programming/code-review/abseil/part4-06-str-format)
+- [Folly Part 6-01 — folly::to·tryTo](/blog/programming/code-review/folly/part6-01-to-try-to) — throw와 Expected 두 경로를 둔 Folly 쪽
 - Folly Part 5-04 — to/from — Meta의 동급 도구
 - EMC++ Item 11 — 예외 비용

@@ -227,4 +227,5 @@ v.push_back(...); v.push_back(...); ...
 - [Part 8-02: FixedString](/blog/programming/code-review/folly/part8-02-fixed-string) — string 변형
 - [Part 5-01: FBString](/blog/programming/code-review/folly/part5-01-fbstring) — heap 기반 string
 - [Part 7-04: F14FastMap](/blog/programming/code-review/folly/part7-04-f14-fast-map) — Relocatable trait 같이 사용
+- [Abseil Part 5-06 — absl::InlinedVector](/blog/programming/code-review/abseil/part5-06-inlined-vector) — 같은 SBO 컨테이너의 Abseil 쪽
 - [원문 — folly/small_vector.h](https://github.com/facebook/folly/blob/main/folly/small_vector.h)
