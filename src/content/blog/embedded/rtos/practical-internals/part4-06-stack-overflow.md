@@ -305,3 +305,4 @@ PSP만 canary로 보호하면 *ISR overflow는 silent*입니다. MSP에도 *부�
 - [4-05: Memory Pool](/blog/embedded/rtos/practical-internals/part4-05-memory-pool)
 - [2-05: ARM Cortex-M Context Switch](/blog/embedded/rtos/practical-internals/part2-05-cortex-m-context)
 - [1-05: 인터럽트와 RTOS](/blog/embedded/rtos/practical-internals/part1-05-interrupts-rtos)
+- [Embedded Debugging: RTOS-aware 디버깅](/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting) — 디버거에서 task별 stack high water mark를 읽는 법
