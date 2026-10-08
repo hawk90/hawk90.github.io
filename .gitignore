@@ -68,6 +68,7 @@ data/*-spec-cache/
 
 # Generated review-only audit output (regenerated locally from scripts)
 node_modules/.package-lock.json
+reports/content-completeness/latest.json
 reports/content-readiness/series.txt
 reports/content-readiness/staleness.txt
 reports/diagrams/tikz-overlap-report.txt
