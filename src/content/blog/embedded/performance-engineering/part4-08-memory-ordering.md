@@ -276,3 +276,4 @@ ISB                       40 cycle    pipeline flush
 
 - [4-07: Lock-Free](/blog/embedded/performance-engineering/part4-07-lock-free)
 - [4-09: Cache Coherency](/blog/embedded/performance-engineering/part4-09-cache-coherency)
+- [TSan으로 데이터 레이스 디버깅](/blog/tools/debugging/sanitizers/chapter04-tsan) — 잘못 고른 memory_order가 TSan에서 data race로 드러나는 방식
