@@ -227,5 +227,5 @@ for (int i = 0; i < N; ++i) {
 - [Part 6-02: Conv customization](/blog/programming/code-review/folly/part6-02-conv-customization) — `parseTo`/`toAppend` 특화
 - [Part 6-03: Conv performance](/blog/programming/code-review/folly/part6-03-conv-performance) — benchmark 상세
 - [Part 13-01: exception_wrapper](/blog/programming/code-review/folly/part13-01-exception-wrapper) — Expected와 함께 쓰는 에러 처리
-- [Abseil Part 15-02 — absl::SimpleAtoi·from_chars](/blog/programming/code-review/abseil/part15-02-charconv) — exception 없이 bool로 실패를 돌려주는 Abseil 쪽
+- [Abseil Part 15-02 — absl::SimpleAtoi·from_chars](/blog/programming/code-review/abseil/part15-02-charconv) — exception 없이 bool·errc로 실패를 알리는 Abseil 쪽
 - [원문 — folly/Conv.h](https://github.com/facebook/folly/blob/main/folly/Conv.h)
