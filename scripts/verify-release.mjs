@@ -28,6 +28,10 @@ const checks = [
   // it blocks on blocking findings only, because a deliberate gap in a
   // reading order is a warning and an editorial decision, not a defect.
   ['series chapter integrity', ['npm', 'run', 'audit:series']],
+  // draft:true is what keeps a "(작성 예정)" page off the site; nothing else
+  // does. Blocks only when a stub or a series plan is published — unwritten
+  // drafts are the backlog, not a defect.
+  ['no published stubs', ['npm', 'run', 'gate:completeness']],
   ['article connectivity', ['npm', 'run', 'audit:connectivity']],
   // Report-only: where a series belongs in a reading order is editorial, so
   // this prints the coverage gap rather than blocking a deploy on it.

@@ -54,7 +54,7 @@
 | ② 시각화 | ASCII 다이어그램, TikZ 겹침, 코드 블록 산문 | `npm run diagrams` · `detect-ascii-diagrams.sh` · `detect-text-overlap.py` · `detect-prose-in-code.sh` |
 | ③ 사실 검증 | hallucination 후보, known-fact, 인용 심볼 존재, upstream drift | `audit-suspect-claims.sh` · `verify-known-facts.sh` · `audit-cited-symbols.py` · `audit:upstream` |
 | ④ 발행 게이트 | ①③의 blocking 부분을 한 번에 | `npm run audit:gate` (= `audit-publish-gate.sh`) |
-| ⑤ 구조 무결성 | seriesOrder gap·draft 혼합·링크 rot·중복 | `audit:series` · `audit:links` · `check:duplicate` · `audit:series-structure` · `audit:connectivity` |
+| ⑤ 구조 무결성 | seriesOrder gap·draft 혼합·링크 rot·중복·미작성 장(stub) | `audit:series` · `audit:links` · `check:duplicate` · `audit:series-structure` · `audit:connectivity` · `audit:completeness` |
 | ⑥ 유지보수 (발행 후) | upstream 코드·spec 변화, 인용 심볼 rename, 로드맵 만료, 산문 미래 시제·날짜 앵커 stale | `audit:upstream` · `audit-cited-symbols.py` · `audit:roadmap` · `audit:staleness` |
 | ⑦ URL·경로 | 두 글이 같은 URL을 주장, 손으로 조립한 post URL | `audit:routes` · `audit:content-portability` |
 | ⑧ 렌더된 결과 | 표 잘림·제목 계층 건너뜀·alt 누락·링크 이름 없음 (빌드된 HTML 대상) | `audit:reading` |
@@ -65,7 +65,8 @@
 - **commit 시**: lefthook `pre-commit`이 staged `src/content/blog/**/*.md`에 `audit-publish-gate.sh` + 태그 모양 자동 정규화(`normalize-tag-shape.mjs --apply`, 같은 커밋에 stage) + 필수 frontmatter(`title`·`date`·`description`) 검사 + 의도하지 않은 인라인 수식(`check-inline-math.mjs` — 가격 `$20K~$40K`·셸 `${D}`처럼 `$` 두 개가 수식으로 렌더되는 것) 검사.
 - **push 시**: lefthook `pre-push`가 push되는 commit의 변경 파일에 gate.
 - **수동 sweep**: `npm run audit:gate` (전체), `npm run audit:upstream` (local clone 기준 drift — 기본 offline, fetch는 `python3 scripts/audit-upstream-freshness.py --fetch`), `npm run audit:staleness` (산문 미래 시제·날짜 앵커), `npm run audit:tags` (태그 어휘 — 리포트형이라 pass/fail 아님).
-- **`npm run verify:release`**: ⑤⑦⑧⑨를 포함한 28단계(`scripts/verify-release.mjs`)를 한 번에. ⑧은 `dist/`를 읽으므로 빌드 *뒤*에 돕니다 — 표 잘림·제목 계층은 마크다운 원본에는 없고 렌더된 HTML에만 있습니다. CI가 배포 전 이걸 돌립니다.
+- **`npm run verify:release`**: ⑤⑦⑧⑨를 포함한 릴리스 검사 전체(`scripts/verify-release.mjs`)를 한 번에. 발행된 글이 stub(`(작성 예정)`·`Outline —` 같은 placeholder뿐인 글)이거나 시리즈 계획서면 `gate:completeness`가 막는다. ⑧은 `dist/`를 읽으므로 빌드 *뒤*에 돕니다 — 표 잘림·제목 계층은 마크다운 원본에는 없고 렌더된 HTML에만 있습니다. CI가 배포 전 이걸 돌립니다.
+- **완성도 vs draft**: `draft:true`는 *발행 여부*, `audit:completeness`는 *본문이 쓰였는지*를 본다(stub·partial·thin·plan). 미작성 백로그는 `reports/content-completeness/latest.md`가 정본 — 시리즈별 stub 수와 줄 번호가 있다.
 - **staleness 두 도구 구분**: `audit:roadmap`은 `known-facts.yaml`에 *등재된 SKU*의 `review:` 날짜만, `audit:staleness`는 *본문 산문 자체*의 미래 시제(`예정`·`미발표`)·날짜 앵커(`YYYY년 현재`)를 훑는다. 등재 안 된 주장은 후자만 잡는다.
 - **다이어그램 캐시**: `npm run diagrams`는 mtime이 아니라 내용 해시로 판단한다. 각 `.svg`에 `<!-- tikz-src sha256=… -->` stamp가 있고, `.tex`나 `_design*.tex`가 바뀌어 해시가 달라질 때만 다시 빌드한다. `npm run check:diagrams`는 빌드 없이 stamp 불일치(= `.tex`만 고치고 `.svg`를 안 만든 상태)를 찾고, pre-commit `diagram-fresh`가 같은 검사를 한다.
 - **새 스크립트는 Node(`.mjs`)로 쓴다.** 기존 Python·Bash 검사기는 `claude/tooling-node/` 패킷에서 parity 검증을 거쳐 옮긴다.
