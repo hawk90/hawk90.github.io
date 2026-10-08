@@ -231,3 +231,4 @@ libc 업그레이드로 symbol이 사라지거나 inline되면 즉시 깨집니�
 - [5-03: ftrace 활용](/blog/embedded/performance-engineering/part5-03-ftrace)
 - [5-05: Flamegraph 분석](/blog/embedded/performance-engineering/part5-05-flamegraph)
 - [5-10: 연속 프로파일링](/blog/embedded/performance-engineering/part5-10-ebpf-continuous)
+- [Kernel Debugging: eBPF·bpftrace](/blog/tools/debugging/kernel/chapter04-ebpf-kernel) — 같은 bpftrace를 커널 버그 추적에 쓰는 디버깅 쪽

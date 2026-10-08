@@ -429,6 +429,7 @@ Ch 5 — kdb / kgdb. *실시간 인터랙티브* 커널 디버깅 (별 머신 �
 
 - [Ch 3: ftrace + tracepoints](/blog/tools/debugging/kernel/chapter03-ftrace-tracepoints)
 - [Ch 5: kdb / kgdb](/blog/tools/debugging/kernel/chapter05-kdb-kgdb)
+- [Performance Engineering: eBPF 동적 트레이싱](/blog/embedded/performance-engineering/part5-04-ebpf) — probe 종류별 overhead 비교와 latency spike 진단 시나리오가 있는 성능 쪽
 - strace-tracing 시리즈
 - [bpftrace tutorial](https://github.com/bpftrace/bpftrace/blob/master/docs/tutorial_one_liners.md)
 - [Brendan Gregg — BPF Performance Tools](https://www.brendangregg.com/bpf-performance-tools-book.html)

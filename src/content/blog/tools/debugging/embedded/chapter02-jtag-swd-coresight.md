@@ -427,6 +427,7 @@ Ch 3 — OpenOCD 깊이. TCL 인터프리터, flash driver, target 정의 파일
 
 - [Ch 1: RSP 프로토콜](/blog/tools/debugging/embedded/chapter01-rsp-protocol) — 위쪽 계층
 - [Ch 3: OpenOCD 깊이](/blog/tools/debugging/embedded/chapter03-openocd)
+- [Performance Engineering: ARM DS·Lauterbach](/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach) — ETM trace를 Streamline·TRACE32 프로파일링에 쓰는 법
 - [ARMv7-M Architecture Reference Manual](https://developer.arm.com/documentation/ddi0403/latest/) — CoreSight 정의
 - [ARM Debug Interface Architecture v5](https://developer.arm.com/documentation/ihi0031/latest/) — DAP 명세
 - [CMSIS-DAP](https://arm-software.github.io/CMSIS_5/DAP/html/index.html)

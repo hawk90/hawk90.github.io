@@ -182,3 +182,4 @@ Bare-metal과 달리 Linux Streamline은 software 측정이 일부 섞여 있으
 - [5-05: Flamegraph 분석](/blog/embedded/performance-engineering/part5-05-flamegraph)
 - [5-07: Bare-metal 프로파일링](/blog/embedded/performance-engineering/part5-07-baremetal-profiling)
 - [Practical RTOS Internals 2-11: Tracing·Observability](/blog/embedded/rtos/practical-internals/part2-11-tracing-observability)
+- [Embedded Debugging: JTAG·SWD·CoreSight](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight) — ETM이 붙어 있는 CoreSight 디버그 회로 구조

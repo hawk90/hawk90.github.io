@@ -258,3 +258,4 @@ uint32_t elapsed = end - start;          /* 차이 연산이 wrap-safe */
 - [5-06: ARM DS / Lauterbach](/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach)
 - [5-08: Nsight Systems](/blog/embedded/performance-engineering/part5-08-nsight)
 - [Practical RTOS Internals 2-11: Tracing·Observability](/blog/embedded/rtos/practical-internals/part2-11-tracing-observability)
+- [Embedded Debugging: Trace 비교](/blog/tools/debugging/embedded/chapter06-trace) — RTT·ITM·SWO·ETM 중 어느 채널을 쓸지
