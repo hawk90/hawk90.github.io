@@ -207,6 +207,7 @@ ATS는 *translation cache*만 device에. *IOMMU page table은 여전히 host*. *
 - [Ch 5: Interrupts](/blog/embedded/hardware/pcie/chapter05-interrupts) — Interrupt Remapping
 - [Ch 12: Virtualization I](/blog/embedded/hardware/pcie/chapter12-virtualization-1)
 - [Ch 13: Virtualization II](/blog/embedded/hardware/pcie/chapter13-virtualization-2) — vIOMMU·S-IOV·IDE/TDISP
+- [Driver + RTL Co-simulation](/blog/tools/emulation/driver-cosim/chapter08-end-to-end) — DMA descriptor ring을 silicon 전에 RTL과 돌려 보는 흐름
 
 ## 시리즈 자료 출처 안내
 
