@@ -75,7 +75,7 @@ KEEP(*(.rtos_meta*))
 
 ### task별 스택 사용량
 
-각 task의 *최대 stack high water mark*가 RTOS 내부에 저장됩니다.
+FreeRTOS는 high water mark를 따로 저장하지 않습니다. task를 만들 때 스택을 채움 바이트(`tskSTACK_FILL_BYTE`, 0xA5)로 채워 두고, 호출될 때마다 그 패턴이 남아 있는 길이를 세어 *지금까지 가장 적게 남았던 여유*를 계산합니다.
 
 ```c
 UBaseType_t uxTaskGetStackHighWaterMark(TaskHandle_t xTask);
