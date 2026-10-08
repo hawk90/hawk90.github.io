@@ -278,5 +278,6 @@ SCOPE_EXIT { cleanup(); };
 ## 관련 항목
 
 - [Part 13-01 ExceptionWrapper](/blog/programming/code-review/folly/part13-01-exception-wrapper) — SCOPE_FAIL과 함께 쓰기
+- [Abseil Part 14-01 — absl::Cleanup](/blog/programming/code-review/abseil/part14-01-cleanup) — 같은 RAII scope guard의 Abseil 쪽
 - Effective Modern C++ Item 14 — 소멸자 noexcept
 - GoF Decorator — wrap 패턴 일반론

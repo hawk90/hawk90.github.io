@@ -231,5 +231,6 @@ const Function vs non-const Function vs Function<void() const>의 구분을 의�
 ## 관련 항목
 
 - [Part 2-04 thenValue / thenError](/blog/programming/code-review/folly/part2-04-then-value-error) — once-only 콜백 사용
+- [Abseil Part 14-03 — absl::FunctionRef·AnyInvocable](/blog/programming/code-review/abseil/part14-03-function-ref-any-invocable) — move-only owner와 non-owning view로 나눈 Abseil 쪽
 - Effective Modern C++ Item 33 — init capture와 move-only lambda
 - Effective Modern C++ Item 34 — std::function 한계

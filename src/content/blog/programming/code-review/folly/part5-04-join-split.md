@@ -245,5 +245,7 @@ Part 6의 첫 글에서 `folly::to`와 `folly::tryTo`의 변환 API, exception-f
 
 - [Part 5-03: StringPiece](/blog/programming/code-review/folly/part5-03-string-piece) — split의 view 출력 타입
 - [Part 6-01: folly::to / tryTo](/blog/programming/code-review/folly/part6-01-to-try-to) — split 결과를 숫자로 변환
+- [Abseil Part 4-04 — absl::StrSplit](/blog/programming/code-review/abseil/part4-04-str-split) — Delimiter 추상화로 푼 Abseil 쪽 split
+- [Abseil Part 4-05 — absl::StrJoin](/blog/programming/code-review/abseil/part4-05-str-join) — Formatter로 원소 표현을 바꾸는 Abseil 쪽 join
 - [원문 — folly/String.h](https://github.com/facebook/folly/blob/main/folly/String.h)
 - [원문 — abseil StrSplit](https://github.com/abseil/abseil-cpp/blob/master/absl/strings/str_split.h)

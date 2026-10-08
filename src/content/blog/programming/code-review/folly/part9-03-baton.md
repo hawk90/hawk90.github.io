@@ -310,4 +310,5 @@ wait 반환 = post가 이미 일어남. wait return 후 baton destruct 안전.
 - [Part 9-02: SharedMutex](/blog/programming/code-review/folly/part9-02-shared-mutex) — 일반 RW lock
 - [Part 2-02: Promise / makeFuture](/blog/programming/code-review/folly/part2-02-promise-make-future) — Baton의 main client
 - [Part 9-04: RWSpinLock](/blog/programming/code-review/folly/part9-04-rw-spin-lock) — spin-only variant
+- [Abseil Part 6-03 — absl::Notification](/blog/programming/code-review/abseil/part6-03-notification) — 같은 one-shot signal의 Abseil 쪽
 - [원문 — folly/synchronization/Baton.h](https://github.com/facebook/folly/blob/main/folly/synchronization/Baton.h)

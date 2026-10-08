@@ -190,5 +190,6 @@ format string이 외부 입력이면 placeholder count mismatch로 `fmt::format_
 
 - [Part 5-01: FBString](/blog/programming/code-review/folly/part5-01-fbstring) — sformat이 다루는 문자열 타입
 - [Part 11-01: folly::dynamic](/blog/programming/code-review/folly/part11-01-dynamic) — fmt formatter 특화 사례
+- [Abseil Part 4-06 — absl::StrFormat](/blog/programming/code-review/abseil/part4-06-str-format) — fmt 대신 printf 문법을 type-safe하게 만든 Abseil 쪽
 - [원문 — folly/Format.h](https://github.com/facebook/folly/blob/main/folly/Format.h)
 - [원문 — {fmt}](https://github.com/fmtlib/fmt)

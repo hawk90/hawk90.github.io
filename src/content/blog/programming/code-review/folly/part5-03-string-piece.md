@@ -177,4 +177,5 @@ e2.data();   // ""    — c_str OK
 - [Part 5-01: FBString](/blog/programming/code-review/folly/part5-01-fbstring) — StringPiece가 가리키는 owner
 - [Part 5-04: Join / split utilities](/blog/programming/code-review/folly/part5-04-join-split) — split_step의 high-level wrapper
 - [Part 4-03: Cursor](/blog/programming/code-review/folly/part4-03-cursor) — IOBuf 위의 ByteRange parser
+- [Abseil Part 4-01 — absl::string_view](/blog/programming/code-review/abseil/part4-01-string-view) — Abseil 쪽 non-owning 문자열 참조
 - [원문 — folly/Range.h](https://github.com/facebook/folly/blob/main/folly/Range.h)

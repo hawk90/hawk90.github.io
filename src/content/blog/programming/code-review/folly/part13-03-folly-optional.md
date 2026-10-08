@@ -211,5 +211,6 @@ folly::Optional<std::unique_ptr<T>> opt;
 ## 관련 항목
 
 - [Part 6-01 to / tryTo](/blog/programming/code-review/folly/part6-01-to-try-to) — Optional 반환 패턴
+- [Abseil Part 9-03 — absl::optional](/blog/programming/code-review/abseil/part9-03-optional) — 지금은 std::optional alias가 된 Abseil 쪽
 - Effective Modern C++ Item 5 — auto와 Optional 추론
 - Effective Modern C++ Item 41 — value vs reference 반환
