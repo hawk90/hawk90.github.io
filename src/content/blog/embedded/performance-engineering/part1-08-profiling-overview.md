@@ -271,3 +271,4 @@ Profile 결과가 *예상과 다를 때* 진짜 학습이 됩니다. *측정이 
 - [1-07: 성능 모델링](/blog/embedded/performance-engineering/part1-07-modeling)
 - [5-01: perf 기초](/blog/embedded/performance-engineering/part5-01-perf-basics)
 - [5-05: Flamegraph 분석](/blog/embedded/performance-engineering/part5-05-flamegraph)
+- [Valgrind 도구 개요](/blog/tools/debugging/valgrind/chapter01-intro) — callgrind·cachegrind가 속한 Valgrind 도구 묶음

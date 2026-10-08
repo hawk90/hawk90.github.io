@@ -252,3 +252,4 @@ Tracepoint는 거의 zero overhead입니다. 활성화 전에는 NOP 한 줄과 
 - [5-03: ftrace 활용](/blog/embedded/performance-engineering/part5-03-ftrace)
 - [4-09: Cache Coherency](/blog/embedded/performance-engineering/part4-09-cache-coherency)
 - [Practical RTOS Internals 2-11: Tracing·Observability](/blog/embedded/rtos/practical-internals/part2-11-tracing-observability)
+- [DWARF: Call Frame Information](/blog/tools/debugging/dwarf-elf/chapter05-cfi-eh-frame) — `--call-graph dwarf`가 콜스택을 복원할 때 읽는 CFI
