@@ -1,6 +1,5 @@
 {
   "scope": [
-    ".github/dependabot.yml",
     ".github/workflows/ci.yml",
     ".github/workflows/deploy.yml",
     "src/components/admin/AdminGuard.astro",
@@ -84,6 +83,7 @@
     "src/lib/rehype-image-lazy.mjs",
     "src/lib/rehype-table-scroll.mjs",
     "src/lib/remark-callouts.mjs",
+    "src/lib/remark-math-flag.mjs",
     "src/lib/search-aliases.ts",
     "src/lib/search.ts",
     "src/lib/theme.ts",

@@ -1,5 +1,5 @@
 # Route collision audit
 
-- Posts scanned: 3387
-- Frozen slugs in frontmatter: 3387
+- Posts scanned: 3407
+- Frozen slugs in frontmatter: 3407
 - Colliding routes: 0
