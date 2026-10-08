@@ -200,7 +200,6 @@ ECRC는 *RC↔EP* 데이터 무결성. *Header corruption*은 *poisoned TLP* 메
 - [Ch 7: Error Handling (AER)](/blog/embedded/hardware/pcie/chapter07-error-handling) — ECRC·poisoned TLP
 - [Ch 8: DLLP](/blog/embedded/hardware/pcie/chapter08-dllp) — TLP 위 link-level wrapper
 - [Ch 11: DMA·IOMMU](/blog/embedded/hardware/pcie/chapter11-linux-dma) — ATS·PRI·PASID
-- [Co-simulation: Bus Functional Model](/blog/tools/emulation/driver-cosim/chapter06-bfm) — TLP를 RTL 시뮬레이션에서 주고받는 BFM
 
 ## 시리즈 자료 출처 안내
 
