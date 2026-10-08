@@ -419,6 +419,7 @@ Ch 4 — eBPF / bpftrace로 커널 디버깅. ftrace의 모든 것을 *훨씬 �
 
 - [Ch 2: printk / dmesg](/blog/tools/debugging/kernel/chapter02-printk-dmesg)
 - [Ch 4: eBPF for kernel debugging](/blog/tools/debugging/kernel/chapter04-ebpf-kernel)
+- [Performance Engineering: ftrace 활용](/blog/embedded/performance-engineering/part5-03-ftrace) — irqsoff·preemptoff latency tracer로 지연을 재는 성능 쪽
 - strace-tracing Ch 9: ftrace
 - [Brendan Gregg — perf 페이지 (ftrace 자료 많음)](https://www.brendangregg.com/perf.html)
 - [`Documentation/trace/ftrace.rst`](https://www.kernel.org/doc/html/latest/trace/ftrace.html)

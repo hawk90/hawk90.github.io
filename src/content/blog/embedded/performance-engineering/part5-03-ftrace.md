@@ -257,3 +257,4 @@ stable한 snapshot이 필요하면 먼저 `echo 0 > tracing_on`을 실행합니�
 - [5-02: perf 고급](/blog/embedded/performance-engineering/part5-02-perf-advanced)
 - [5-04: eBPF/bpftrace](/blog/embedded/performance-engineering/part5-04-ebpf)
 - [Practical RTOS Internals 2-11: Tracing·Observability](/blog/embedded/rtos/practical-internals/part2-11-tracing-observability)
+- [Kernel Debugging: ftrace와 tracepoints](/blog/tools/debugging/kernel/chapter03-ftrace-tracepoints) — 같은 ftrace로 호출 출처와 hot path 버그를 쫓는 디버깅 쪽
