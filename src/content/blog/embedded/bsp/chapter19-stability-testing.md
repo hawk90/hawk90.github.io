@@ -173,6 +173,7 @@ PATTERNS=(
     "rcu_sched detected stalls"
     "MMC error"
     "AER:"
+    "PCIe Bus Error"
     "EDAC.*error"
     "Out of memory"
 )
