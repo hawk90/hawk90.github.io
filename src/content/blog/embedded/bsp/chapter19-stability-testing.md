@@ -172,7 +172,7 @@ PATTERNS=(
     "soft lockup"
     "rcu_sched detected stalls"
     "MMC error"
-    "PCIe error"
+    "AER:"
     "EDAC.*error"
     "Out of memory"
 )
@@ -332,7 +332,7 @@ soak-72h:
 
 **stress 중 fan/heatsink만 차이.** stress 결과가 좋은데 양산이 다른 fan을 쓰면 의미 없습니다. 양산 setup 그대로 stress.
 
-**dmesg 모니터링 누락.** stress가 통과해도 dmesg에 ECC error나 PCIe AER가 찍혀 있으면 잠재적 결함. grep -E "error|fault|fail"로 매일 확인.
+**dmesg 모니터링 누락.** stress가 통과해도 dmesg에 ECC error나 PCIe AER가 찍혀 있으면 잠재적 결함. `grep -iE "error|fault|fail"`로 매일 확인합니다. 커널은 AER를 `PCIe Bus Error`처럼 대문자로 찍기 때문에 `-i`가 없으면 놓칩니다.
 
 **ECC enabled but counter not checked.** DDR4/LPDDR4 ECC가 켜져 있어도 EDAC counter를 안 보면 실시간으로 단일 bit error가 흐르는 줄 모릅니다. `/sys/devices/system/edac/mc/mc0/ce_count`.
 

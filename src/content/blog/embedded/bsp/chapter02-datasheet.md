@@ -164,19 +164,21 @@ NXP의 도구가 생성하는 i.MX 8M Plus DT fragment 예시입니다.
 
 Errata는 SoC의 *알려진 버그*입니다. 이걸 안 읽으면 *부팅이 잘 안 되는* 이유를 평생 찾습니다.
 
-i.MX 8M Plus 실리콘 erratum 예시입니다.
+같은 NXP 계열인 i.MX 95의 PCIe erratum을 예로 듭니다. 메인라인 커널 `drivers/pci/controller/dwc/pci-imx6.c`가 workaround 코드 옆에 남긴 요약입니다.
 
 ```text
-ERR050273
-The PCIe PHY does not handshake correctly under certain
-timing conditions when L1 sub-state is entered.
+ERR051586: Compliance with 8GT/s Receiver Impedance ECN
 
-Workaround:
-Disable L1 sub-state by clearing bit [12] of register
-PCIE_PORT_PROCESSOR_LANE_CONTROL.
+The default value of GEN3_RELATED_OFF[GEN3_ZRXDC_NONCOMPL]
+is 1 which makes receiver non-compliant with the ZRX-DC
+parameter for 2.5 GT/s when operating at 8 GT/s or higher.
+It causes unnecessary timeout in L1.
+
+Workaround: Program GEN3_RELATED_OFF[GEN3_ZRXDC_NONCOMPL]
+to 0.
 ```
 
-이 workaround가 *U-Boot board 코드*나 *Linux 커널 quirk*에 들어가야 합니다. 메인라인이나 vendor BSP에 이미 들어가 있는 경우가 많지만, *우리가 fork한 시점 이후의 erratum*은 직접 적용해야 합니다.
+workaround는 erratum에 따라 *U-Boot board 코드*나 *Linux 드라이버·quirk*에 들어갑니다. 위 erratum은 커널 PCIe host driver가 초기화 콜백(`imx_pcie_host_post_init`)에서 이 비트를 0으로 씁니다. 메인라인이나 vendor BSP에 이미 들어가 있는 경우가 많지만, *우리가 fork한 시점 이후의 erratum*은 직접 적용해야 합니다.
 
 읽는 순서는 다음과 같습니다.
 
@@ -342,6 +344,6 @@ IOMUXC 레지스터의 5개 필드를 직접 비트 시프트로 계산하는 �
 - [Ch 3: Device Tree 설계](/blog/embedded/bsp/chapter03-device-tree-design)
 - [Ch 4: Pin Mux와 Clock](/blog/embedded/bsp/chapter04-pinmux-clock)
 - [Ch 5: DDR 매개변수 — 보드별 timing](/blog/embedded/bsp/chapter05-ddr-params)
-- [PCIe Ch 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management) — erratum이 끄라는 L1 sub-state가 무엇인지
+- [PCIe Ch 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management) — erratum이 말하는 L1에서의 불필요한 timeout이 어떤 상태에서 일어나는지
 - [원문 — NXP i.MX 8M Plus Reference Manual](https://www.nxp.com/products/processors-and-microcontrollers/arm-processors/i-mx-applications-processors/i-mx-8-applications-processors/i-mx-8m-plus-arm-cortex-a53-machine-learning-vision-multimedia-and-industrial-iot:IMX8MPLUS)
 - [원문 — TI AM62x Technical Reference Manual](https://www.ti.com/product/AM625)
