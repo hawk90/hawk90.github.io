@@ -80,6 +80,7 @@ industrial_ethernet:
 # 통칭(bare) 토큰과 풀 SKU를 함께 등재. audit은 bare 토큰(H100·H200·GH200)을 뽑음.
 nvidia_gpu_verified:
   - H100                 # bare 통칭 — H100 SXM5 / 80GB 등을 본문에서 이렇게 부름
+  - GH100                # Hopper GPU die. 풀 구성 6 stack, HBM3 또는 HBM2e — H100 SXM5는 HBM3, H100 PCIe는 HBM2e. NVIDIA H100 Tensor Core GPU Architecture whitepaper (2022)
   - H200                 # bare 통칭 — H200 SXM5 141GB
   - GH200                # Grace Hopper: GH100 + 141GB HBM3E(6×24GB), 900GB/s C2C. https://www.tomshardware.com/news/nvidia-reveals-gh200-grace-hopper-gpu-with-141gb-of-hbm3e
   - H100 80GB SXM5       # 5x HBM3 16GB = 80 GB, 3.35 TB/s
