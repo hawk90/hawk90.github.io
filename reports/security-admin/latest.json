@@ -72,6 +72,7 @@
     "src/lib/content/relations.ts",
     "src/lib/content/topics.ts",
     "src/lib/content/types.ts",
+    "src/lib/csp-inline-script-hashes.mjs",
     "src/lib/define.ts",
     "src/lib/keyboard.ts",
     "src/lib/lifecycle.ts",
