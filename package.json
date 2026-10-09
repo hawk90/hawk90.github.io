@@ -80,6 +80,7 @@
     "gate:secrets": "node scripts/scan-secrets.mjs --enforce",
     "gate:dependencies": "npm audit --omit=dev --audit-level=high",
     "gate:ci-security": "node scripts/audit-ci-security.mjs",
+    "gate:deploy-paths": "node scripts/audit-deploy-paths-ignore.mjs",
     "gate:repository": "node scripts/audit-repository-health.mjs",
     "audit:repository-resilience": "node scripts/audit-repository-resilience.mjs",
     "record:repository-controls": "node scripts/record-repository-controls.mjs",
