@@ -12,199 +12,139 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL switch는 *2.0의 single-level fan-out*에서 *3.x의 multi-level fabric + PBR + GFAM*까지 진화했고, *Fabric Manager가 out-of-band control plane*으로 모든 운용 결정을 합니다."** — Switch 내부는 *port table·routing·QoS 정책*으로 구성되고, FM은 *MCTP·DCD* 같은 보조 프로토콜로 *runtime 자원 재할당*을 수행합니다. *Composable Datacenter의 핵심 인프라*입니다.
+> **"CXL switch는 *2.0의 단일 계층 switch·MLD pooling*에서 *3.x의 multi-level switching·PBR fabric·G-FAM*으로 넓어졌고, 그 구성을 바꾸는 주체가 *Fabric Manager(FM)*입니다."** — switch 안은 *VCS(Virtual CXL Switch)*와 *vPPB*로 나뉘고, FM은 *FM API*로 vPPB를 물리 포트·LD에 bind/unbind하거나 DCD 용량을 붙입니다. FM API는 mailbox CCI나 MCTP로 전달됩니다.
 
-[Ch 4 Pooling·GFAM](/blog/embedded/hardware/cxl/chapter04-pooling-gfam)에서 *CXL 2.0·3.x fabric의 개념*을 봤습니다. 이 장은 *그 토폴로지의 control plane*인 *switch 내부 동작과 Fabric Manager*를 본격 분해합니다.
+[Ch 4 Pooling·GFAM](/blog/embedded/hardware/cxl/chapter04-pooling-gfam)에서 *CXL 2.0·3.x fabric의 개념*을 봤습니다. 이 장은 *그 토폴로지를 움직이는* switch 구조와 Fabric Manager를 봅니다.
 
-## CXL Switch — 진화 단계
+## 세대별로 더해진 것
 
-| 세대 | Switch 능력 |
+spec 개정 이력과 컨소시엄 발표 기준:
+
+| 세대 | Switching·fabric 관련 추가 |
 |------|-----------|
-| CXL 2.0 | Single-level switch, fan-out, multi-LD pooling |
-| CXL 3.0 | Multi-level switch, PBR, fabric, GFAM, P2P |
-| CXL 3.1 | Direct P2P CXL.mem, TSP 통합 |
-| CXL 3.2 | DCD enhancements, hotness monitoring |
-| **CXL 4.0** | Bundled Port awareness, x2 native, 4 retimer 지원 |
+| CXL 2.0 | 단일 계층 switch, MLD를 이용한 memory pooling |
+| CXL 3.0 | multi-level switching, fabric, G-FAM, memory sharing, Multi-headed MLD, DCD, PBR switch SW 관점(개요) |
+| CXL 3.1 | PBR fabric 디코딩·라우팅과 FM API 정의, fabric deadlock 회피 규칙, Direct P2P CXL.mem, TSP |
+| CXL 3.2 | CHMU(Hot-Page Monitoring Unit), PPR 개선, TSP 확장 |
+| CXL 4.0 | 128 GT/s, native x2, Bundled Port, retimer 최대 4개 |
 
-각 세대의 *추가 능력*이 *switch firmware의 복잡도*를 단계적으로 키웠습니다.
+## Switch 안 — VCS와 vPPB
 
-## Switch Internal — Port Table
-
-Switch의 *기본 자료 구조*:
+CXL switch는 PCIe switch처럼 upstream port 하나에 내부 bus와 downstream port가 붙는 구조를 *가상화*합니다(§7.1).
 
 | 요소 | 의미 |
 |------|------|
-| Port table | upstream·downstream port 목록 |
-| Routing table | SPA → 목적지 port 매핑 |
-| LD allocation | logical device를 어느 host에 할당 |
-| QoS policy | port·flow class별 우선순위 |
-| Health state | port·device 상태 추적 |
+| VCS (Virtual CXL Switch) | host 하나가 보는 가상 switch. upstream vPPB 하나 + downstream vPPB 여러 개 |
+| vPPB | 가상 PCI-to-PCI bridge. FM이 물리 포트(또는 MLD의 LD)에 bind |
+| PPB | 물리 포트의 bridge |
+| Multiple VCS | upstream port가 여럿인 switch. host마다 VCS 하나 |
 
-이 정보들이 *switch firmware의 메모리*에 보관되고 *runtime에 update* 됩니다.
+Multiple VCS의 규칙(§7.1.2) 중 FM과 관련된 것:
+
+- 초기 binding과 VCS 구조는 switch vendor 방식으로 정합니다.
+- FM은 선택 사항입니다. 다만 *bind/unbind가 필요하거나 MLD 포트를 지원*하는 Multiple VCS에는 FM이 필요합니다.
+- downstream port는 FM이 조율하는 managed hot-plug 흐름으로 다른 VCS에 재할당될 수 있습니다.
+
+CXL.mem 요청은 VCS의 주소 디코드 레지스터(HDM Decode)가 어느 downstream PPB로 보낼지 정합니다(§7.3.3.1).
 
 ## Routing — HBR vs PBR
 
-CXL switch의 *라우팅 결정 주체*가 *세대별로 다릅니다*.
-
-| 모델 | 결정 주체 | 적용 |
+| 모델 | 풀이 | 내용 |
 |------|---------|------|
-| **HBR** (Host-Based Routing) | Host | 1-hop switch, 작은 토폴로지 |
-| **PBR** (Port-Based Routing) | Switch | multi-hop fabric, 대규모 |
+| **HBR** | Hierarchy Based Routing | PCIe 계층과 같은 방식. 버스 번호·주소로 라우팅. 3.1 spec은 PBR과 비교할 때 기본 256B flit 메시지를 HBR 메시지라 부름 |
+| **PBR** | Port Based Routing | 메시지에 *12-bit PID*(DPID, 경우에 따라 SPID)를 실어 라우팅. fabric당 PID 4096개 |
 
-HBR은 *host의 메모리 컨트롤러가 모든 routing 정보를 알아야* 합니다. *대규모 fabric에서 비현실적*. PBR은 *switch가 라우팅 결정*하므로 *multi-level fabric이 실용적*.
+host와 디바이스는 기존 메시지를 쓰고, fabric 가장자리의 *Edge Switch*가 PBR 형식으로 바꿉니다(§2.7).
 
-PBR의 *deadlock 회피*는 *fabric topology*에 의존:
+### PBR과 deadlock
 
-| Topology | Deadlock-free | 적용 |
-|----------|---------------|------|
-| Clos | Yes (잘 정의된 layer) | 대표적 fabric |
-| Dragonfly | Yes (with VCs) | HPC fabric |
-| Fat-tree | Yes | 데이터센터 |
-| Arbitrary mesh | No | *위험* |
+PBR switch가 한 Fabric Port에서 다른 Fabric Port로 메시지를 넘기면 의존 관계가 생깁니다(§7.7.5.1).
 
-## Switching·Pooling 흐름
+- PCIe tree나 fat tree처럼 *loop가 없는* 토폴로지는 의존도 순환하지 않습니다.
+- loop가 있는 토폴로지에서는 의존이 닫힌 고리를 이뤄 deadlock이 날 수 있습니다.
+- 그래서 *FM이 PBR switch 라우팅 테이블을 짤 때* 의존이 닫힌 고리를 만들지 않게 해야 합니다.
 
-CXL 2.0 *Multi-Host Pooling* 흐름 (구체적 단계):
+spec은 이 규칙을 *mesh 토폴로지*의 라우팅 예시로 설명합니다(Figure 7-44). mesh가 금지된 것이 아니라, 라우팅 테이블이 순환을 피해야 한다는 뜻입니다.
 
-| 단계 | 동작 |
+## Fabric Manager
+
+spec의 정의(§7.6.1): FM은 *재구성이 필요한 때를 판단하고 명령을 내리는 논리적 프로세스*입니다. 형태는 무엇이든 됩니다.
+
+| FM 형태 (spec 예시) |
+|------|
+| host에서 도는 소프트웨어 |
+| BMC의 embedded 소프트웨어 |
+| 다른 CXL 디바이스나 CXL switch의 firmware |
+| CXL 디바이스 안의 state machine |
+
+FM은 *FM API* 명령 세트로 디바이스를 구성하고, 명령은 *CCI*(Component Command Interface)로 전달됩니다(§7.6.2). CCI는 두 가지로 노출됩니다.
+
+| 경로 | 내용 |
 |------|------|
-| 1 | Boot 시 Fabric Manager가 *switch·device topology 탐색* |
-| 2 | 디바이스 LD 분할 (예: 2 TB → 512 GB × 4 LD) |
-| 3 | Host A·B·C가 enumeration 진행 |
-| 4 | Fabric Manager가 *LD0 → Host A·LD1 → Host B·LD2 → Host C* 할당 결정 |
-| 5 | Switch routing table 업데이트 |
-| 6 | 각 Host가 *자기 LD를 CEDT로 인식*, region 생성 |
-| 7 | Runtime에 워크로드 변화 — Fabric Manager가 *LD3을 Host A에 추가 할당* |
-| 8 | Switch routing 업데이트 후 *hot-plug 이벤트 발생* → Host A의 driver가 인식 |
+| Mailbox 레지스터 | 디바이스·switch의 mailbox CCI |
+| MCTP | SMBus 같은 MCTP 지원 인터페이스, PCIe VDM 등 |
 
-이 *동적 재할당이 CXL 2.0 pooling의 핵심 가치*입니다.
+switch에 붙은 FM은 *Tunnel Management Command*로 switch 아래 MLD에 명령을 터널링할 수 있습니다. FM 기능이 컴포넌트 안에 내장되면 그 내부 인터페이스는 vendor 구현 사항입니다.
 
-## Fabric Manager — Out-of-band Control Plane
+FM API를 MCTP로 실을 때의 binding은 DMTF *DSP0234*(CXL Fabric Manager API over MCTP Binding)가 정합니다(§7.6.3). MCTP 자체는 DMTF DSP0236입니다.
 
-*FM*은 *CXL 데이터 평면 (link traffic)과 분리된 control channel*입니다.
+## Pooling — bind와 unbind
 
-| 책임 | 역할 |
+FM이 MLD의 LD를 host에 붙이고 떼는 흐름(§7.6.6.5~7.6.6.6):
+
+| 동작 | 단계 |
 |------|------|
-| Topology discovery | 모든 switch·device 등록·인식 |
-| LD allocation | host별 메모리 할당·해제·migration |
-| Hot-plug | device 추가·제거 처리 |
-| Health monitoring | RAS 이벤트 수집·정책 적용 |
-| Security policies | host별 권한·access control |
-| QoS configuration | port·flow별 우선순위 |
+| Bind | FM이 *Bind vPPB*(Opcode 5201h)로 물리 포트·VCS ID·vPPB 번호를 지정. MLD면 LD-ID도 지정. host가 이미 부팅했으면 switch가 Managed Hot-Add를 시작할 수 있음. 끝나면 switch가 Virtual CXL Switch Event Record로 FM에 알림 |
+| Unbind | FM이 *Unbind vPPB*(Opcode 5202h)로 VCS ID·vPPB 번호를 지정. 옵션에 따라 Managed Hot-Remove 또는 Surprise Hot-Remove. 끝나면 같은 Event Record |
 
-FM은 *별도 네트워크* 또는 *전용 BMC link*로 동작. 데이터 평면과 분리되어 *FM 다운에도 기존 할당은 동작*하지만 *동적 재할당은 정지*합니다.
-
-## MCTP — Management Component Transport Protocol
-
-*MCTP (DSP0236)*는 DMTF 표준으로 *FM↔switch·FM↔device 통신*에 사용됩니다.
-
-| 항목 | 의미 |
-|------|------|
-| 정의 | DMTF DSP0236 |
-| Transport | I2C·SMBus·PCIe·USB 등 다양 |
-| 용도 | management message exchange |
-| CXL 사용 | FM ↔ switch firmware, FM ↔ device CCI |
-
-MCTP 위에 *SPDM·CMA·FM-specific command set*가 흐릅니다. *Out-of-band 채널*이므로 *데이터 평면 영향 없음*.
+host 입장에서는 LD가 *PCIe hot-plug*로 나타나고 사라지는 것입니다. CEDT가 바뀌는 것이 아닙니다.
 
 ## DCD — Dynamic Capacity Device
 
-*DCD*는 CXL 3.x의 *runtime capacity 재할당* 메커니즘입니다.
+DCD는 CXL 3.0에서 들어온, *디바이스 리셋 없이 용량을 바꾸는* 메모리 디바이스입니다(§9.13.3).
 
-| 항목 | 의미 |
+| 항목 | 내용 |
 |------|------|
-| 능력 | Device의 capacity를 *runtime에 추가·제거* |
-| 적용 | Memory expander, multi-LD pool |
-| Trigger | FM이 *workload demand*에 따라 결정 |
-| 메커니즘 | DCD mailbox command + hot-plug event |
+| 구조 | Dynamic Capacity DPA 범위를 1~8개 *DC Region*으로 나누고, 각 region을 고정 크기 *DC block*으로 나눔 |
+| HDM | host는 최대 용량 전체를 HDM decoder로 미리 덮어 둠. 용량이 바뀌어도 HDM은 그대로 |
+| 상태 전달 | 디바이스가 *Extent List*(시작 DPA·길이)로 host가 쓸 수 있는 block을 알림 |
+| 신호 | 할당이 바뀌면 디바이스가 이벤트로 host에 알림 |
 
-운영 흐름:
+용량을 붙이는 흐름:
 
-| 시점 | 동작 |
-|------|------|
-| t1 | Host A 워크로드 시작, 512 GB 요청 |
-| t2 | FM이 *pool에서 512 GB capacity 확보* |
-| t3 | Switch가 *Host A의 region에 capacity 추가* (DCD add) |
-| t4 | Host A의 region size 증가 인식 |
-| t5 | 워크로드 종료, *capacity 회수* (DCD remove) |
-| t6 | FM이 *capacity를 pool로 반환* |
+| 단계 | 주체 | 동작 |
+|------|------|------|
+| 1 | FM | *Initiate Dynamic Capacity Add*(Opcode 5604h). 선택 정책: Free, Contiguous, Prescriptive, Enable Shared Access |
+| 2 | 디바이스 | Add Capacity 절차 시작, host에 이벤트 |
+| 3 | host | *Add Dynamic Capacity Response*로 수락. 수락 전 extent는 Extent List에 없음 |
 
-DCD가 있어야 *진짜 elastic memory pool*이 가능. *2.0 pooling은 LD 단위 정적*이지만 *3.x DCD는 fine-grained dynamic*.
-
-## Hot-plug 흐름
-
-Switch의 *device hot-add* 처리:
-
-| 단계 | 동작 |
-|------|------|
-| 1 | 새 device가 *switch downstream port에 attach* |
-| 2 | Switch가 *PCIe hot-plug event* 발생 |
-| 3 | Switch firmware가 *FM에 device discovery 보고* (MCTP) |
-| 4 | FM이 *device capability·LD topology 확인* |
-| 5 | Routing table에 *새 device 등록* |
-| 6 | 필요 시 *host 측 hot-plug interrupt* trigger |
-| 7 | Host kernel이 *device enumeration·driver attach* |
-
-Hot-remove는 *역순* + *device offline 단계*.
-
-## Switch Firmware의 복잡도
-
-CXL switch는 *PCIe switch보다 훨씬 복잡한 firmware*를 요구합니다.
-
-| 영역 | 복잡도 |
-|------|--------|
-| Routing | PBR + deadlock 회피 |
-| QoS | per-port·per-flow 우선순위 |
-| LD management | dynamic allocation·DCD |
-| Security | TSP·IDE·SPDM 통합 |
-| RAS | error containment·viral propagation prevention |
-| Telemetry | FM에 status reporting |
-
-이 *firmware*가 *vendor 차별화의 핵심*입니다. Switch chip 자체는 일반화되어도 *firmware의 운용 효율*이 *production 성능 차이*를 만듭니다.
-
-## 실 사례 — CXL Switch 제품
-
-CXL Consortium·각 벤더 공개 자료 기준:
-
-| 회사 | 제품군 | 비고 |
-|------|--------|------|
-| Marvell | CXL Switch | datacenter focus |
-| Astera Labs | Cosmos | smart memory + switch |
-| Microchip | PCIe·CXL switch series | enterprise PCIe→CXL extension |
-| XConn | CXL 3.0 fabric switch | high-port-count fabric |
-
-*2024~2025 양산 시작*. *2026+에 본격 hyperscale 도입* 예상.
+반납은 FM이 *Initiate Dynamic Capacity Release*(Opcode 5605h)로 시작하면 디바이스가 host에 이벤트를 보내고, host가 *Release Dynamic Capacity*(Opcode 4803h)로 돌려줍니다. host가 이벤트 없이 스스로 반납할 수도 있습니다(§8.2.9.9.9.4). 즉 용량 *추가는 FM이 시작*하고, host 드라이버는 이벤트를 받아 수락하거나 반납하는 쪽입니다.
 
 ## 자주 하는 실수
 
-### "Switch가 다 같다"
+### "HBR은 Host-Based Routing"
 
-*Vendor·firmware마다 매우 다름*. *Port 수·routing 정책·DCD 지원 여부·security feature*가 *제품별 차이*. *데이터시트 비교 필수*.
+*Hierarchy Based Routing*입니다. PCIe 계층 방식 라우팅을 가리킵니다.
 
-### "Fabric Manager는 자동"
+### "PBR에서 mesh는 쓰면 안 된다"
 
-*Vendor·플랫폼별 다른 FM*. Open source FM (DMTF Redfish 기반)·vendor-specific FM. *상호 운용성에 한계*. *fabric 전체를 한 vendor로 통일*하는 게 일반적.
+spec은 mesh 라우팅 예시를 직접 듭니다. 조건은 FM이 라우팅 테이블을 짤 때 의존 순환을 만들지 않는 것입니다(§7.7.5.1).
 
-### "PBR이면 어떤 topology든 OK"
+### "Fabric Manager는 별도 서버·네트워크다"
 
-*Deadlock-free topology* 만이 안전. *임의 mesh*는 위험. Clos·Dragonfly·Fat-tree 같은 *검증된 topology* 사용.
+FM은 *논리적 프로세스*이고 형태는 자유입니다. host 소프트웨어, BMC, switch firmware, 디바이스 내부 state machine 모두 됩니다(§7.6.1).
 
-### "DCD를 host가 직접 control"
+### "LD를 붙이면 host의 CEDT가 바뀐다"
 
-*FM이 control plane*이고 *host는 hot-plug event 수신*. host의 *driver*는 *DCD 자체를 trigger 안 함*. *FM API*가 진입점.
-
-### "MCTP가 빠르다"
-
-*Out-of-band control 채널*이라 *slow path*. *bulk data*는 *CXL link*로, *config·status·control*만 MCTP. *수십 ms latency* 일반.
+bind는 vPPB를 물리 포트·LD에 연결하는 것이고, host는 이를 hot-plug로 봅니다. CEDT는 host bridge와 fixed memory window를 기술합니다.
 
 ## 정리
 
-- CXL switch는 *2.0 single-level → 3.x multi-level fabric*으로 진화. *PBR이 multi-hop fabric의 핵심*.
-- *Switch internal*은 *port table·routing·QoS·LD allocation*. firmware 복잡도 매우 높음.
-- *Fabric Manager*는 *out-of-band control plane*. allocation·hot-plug·health·security·QoS 담당.
-- *MCTP*가 FM↔switch·FM↔device의 *management channel*. *SPDM·CMA·FM command* 위에 흐름.
-- *DCD*는 *runtime capacity 재할당*. true elastic memory pool 가능.
-- Vendor 제품: Marvell·Astera·Microchip·XConn 등. 2024~2025 양산, 2026+ hyperscale.
+- CXL 2.0은 단일 계층 switch·MLD pooling, 3.0은 multi-level·fabric·G-FAM·DCD, 3.1은 PBR 라우팅·FM API·deadlock 규칙을 정의했습니다.
+- switch는 *VCS·vPPB*로 host별 가상 switch를 만들고, FM이 vPPB를 포트·LD에 bind/unbind합니다.
+- *HBR*은 Hierarchy Based Routing, *PBR*은 12-bit PID 기반이며 FM이 순환 없는 라우팅 테이블을 짜야 합니다.
+- *FM*은 형태가 자유로운 논리 프로세스. FM API는 mailbox CCI나 MCTP(DSP0234 binding)로 전달합니다.
+- *DCD*는 DC Region·DC block·Extent List로 용량을 바꾸고, 추가는 FM이 시작해 host가 수락합니다.
 
 ## 다음 편
 
