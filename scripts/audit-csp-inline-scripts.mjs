@@ -1,25 +1,25 @@
 #!/usr/bin/env node
-// Release gate: every executable inline <script> in dist/ must be allowed by
-// its own page's CSP through a SHA-256 hash.
+// Release gate: inline <script>s in dist/ must be allowed by CSP hashes, on the
+// page itself and across ClientRouter navigations.
 //
-// src/lib/csp-inline-script-hashes.mjs adds those hashes at astro:build:done.
-// If that integration is dropped from astro.config, or a page loses its CSP
-// meta, the site still builds and still works — inline scripts simply run
-// under 'unsafe-inline' again, and nothing visible changes. This reads the
-// built HTML independently (its own parse, not the integration's code) and
-// fails when:
-//   - a page has executable inline scripts but no CSP meta, or
-//   - an inline script's hash is missing from that page's script-src.
-//
-// HTML is read with parse5 (via cheerio) so tag case, `</script >` and
-// entities are treated the way a browser treats them.
+// src/lib/csp-inline-script-hashes.mjs adds the hashes at astro:build:done. If
+// that integration is dropped, or its output is wrong, the site still builds —
+// so this reads the built HTML independently (parse5 via cheerio, a different
+// parser from the integration's htmlparser2) and fails when:
+//   - a page has executable inline scripts but no CSP meta in <head>, more than
+//     one CSP meta, or a script-src-elem directive (not handled by the tooling);
+//   - an inline script's hash is missing from its page's script-src;
+//   - ClientRouter pages disagree on script-src. A meta CSP stays in force
+//     after the router swaps the <head>, so the first page's policy also
+//     governs every page navigated to; per-page hash lists then block the next
+//     page's inline scripts. Identical script-src everywhere avoids that.
 import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { load } from 'cheerio';
+import { EXECUTABLE_SCRIPT_TYPES } from '../src/lib/csp-inline-script-hashes.mjs';
 
 const DIST = 'dist';
-const EXECUTABLE_TYPES = new Set(['', 'module', 'text/javascript', 'application/javascript']);
 
 /**
  * @param {string} dir
@@ -33,10 +33,15 @@ async function* htmlFiles(dir) {
   }
 }
 
+/** @param {string} body */
+const hashOf = (body) => `'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`;
+
 let pages = 0;
 let scripts = 0;
 /** @type {string[]} */
 const failures = [];
+/** @type {Map<string, string[]>} script-src (normalised) → ClientRouter pages using it */
+const routerPolicies = new Map();
 
 for await (const file of htmlFiles(DIST)) {
   const html = await readFile(file, 'utf8');
@@ -46,33 +51,50 @@ for await (const file of htmlFiles(DIST)) {
   const inline = $('script')
     .toArray()
     .filter((el) => el.attribs.src === undefined)
-    .filter((el) => EXECUTABLE_TYPES.has((el.attribs.type ?? '').trim().toLowerCase()))
+    .filter((el) => EXECUTABLE_SCRIPT_TYPES.has((el.attribs.type ?? '').split(';')[0].trim().toLowerCase()))
     .map((el) => el.children.map((child) => ('data' in child ? child.data : '')).join(''));
   if (inline.length === 0) continue;
   pages++;
 
   const page = relative(DIST, file);
-  const csp = $('meta')
+  const metas = $('meta')
     .toArray()
-    .find((el) => (el.attribs['http-equiv'] ?? '').toLowerCase() === 'content-security-policy')
-    ?.attribs.content;
-  if (!csp) {
-    failures.push(`${page}: ${inline.length} inline script(s) and no CSP meta`);
+    .filter((el) => (el.attribs['http-equiv'] ?? '').toLowerCase() === 'content-security-policy');
+  if (metas.length !== 1 || $(metas[0]).closest('head').length === 0) {
+    failures.push(`${page}: expected exactly one CSP meta in <head>, found ${metas.length}`);
     continue;
   }
-  const scriptSrc = new Set(
-    (csp.split(';').map((d) => d.trim()).find((d) => /^script-src\s/i.test(d)) ?? '').split(/\s+/),
-  );
+  const directives = (metas[0].attribs.content ?? '').split(';').map((d) => d.trim());
+  if (directives.some((d) => /^script-src-elem\s/i.test(d))) {
+    failures.push(`${page}: script-src-elem is set; the hash tooling only maintains script-src`);
+  }
+  const scriptSrc = directives.find((d) => /^script-src\s/i.test(d)) ?? '';
+  const sources = new Set(scriptSrc.split(/\s+/));
+
   for (const body of inline) {
     scripts++;
-    const hash = `'sha256-${createHash('sha256').update(body, 'utf8').digest('base64')}'`;
-    if (!scriptSrc.has(hash)) {
+    if (!sources.has(hashOf(body))) {
       failures.push(`${page}: inline script not in script-src (${body.trim().slice(0, 60)}…)`);
     }
   }
+
+  if ($('meta[name="astro-view-transitions-enabled"]').length > 0) {
+    const key = [...sources].sort().join(' ');
+    routerPolicies.set(key, [...(routerPolicies.get(key) ?? []), page]);
+  }
 }
 
-console.log(`CSP inline scripts: ${scripts} script(s) across ${pages} page(s), ${failures.length} failure(s).`);
+if (routerPolicies.size > 1) {
+  const groups = [...routerPolicies.values()]
+    .map((list) => `${list.length} page(s), e.g. ${list[0]}`)
+    .join('; ');
+  failures.push(`ClientRouter pages use ${routerPolicies.size} different script-src lists (${groups})`);
+}
+
+console.log(
+  `CSP inline scripts: ${scripts} script(s) across ${pages} page(s); ` +
+    `${routerPolicies.size} script-src list(s) on ClientRouter pages; ${failures.length} failure(s).`,
+);
 if (failures.length) {
   for (const f of failures.slice(0, 20)) console.log(`  ✗ ${f}`);
   if (failures.length > 20) console.log(`  … and ${failures.length - 20} more`);
