@@ -161,13 +161,13 @@ QEMU/KVM이 VFIO를 이용해 PCIe device를 통째로 VM에 넘깁니다. BAR�
 
 | SoC | PCIe Spec | Lane |
 |---|---|---|
-| Xilinx Zynq Ultrascale+ | Gen3 x16 | host or endpoint |
+| Xilinx Zynq UltraScale+ | 장치·보드별 Gen2/Gen3 lane 구성 | host or endpoint |
 | NVIDIA Jetson AGX | Gen4 x8 | host |
 | NXP LS1043A | Gen2 x4 | host |
 | TI AM65x | Gen2 x2 | host |
 | Cortex-M에는 PCIe 없음 (USB·Ethernet) | | |
 
-Zynq Ultrascale+의 PCIe Gen3 16 lane은 양방향 16 GB/s를 제공합니다. 주로 카메라, SSD, GPU 연결에 쓰입니다.
+Zynq UltraScale+에서 사용 가능한 PCIe 세대·lane 수와 실제 처리량은 디바이스·보드·링크 협상에 따라 달라집니다. 카메라·SSD·가속기 연결 등에 사용할 수 있습니다.
 
 ## PCIe Endpoint — 우리가 device 만들 때
 

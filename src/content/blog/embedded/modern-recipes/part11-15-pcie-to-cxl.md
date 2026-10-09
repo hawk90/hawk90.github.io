@@ -65,11 +65,11 @@ t=3   CXL.mem S2M DRS   (device → host, data 64 B)
 ...
 ```
 
-*Arbiter가 flit별로 우선순위*를 정합니다. *CXL.mem과 CXL.cache가 latency-critical*이라 우선됩니다.
+링크의 arbitration과 credit 정책은 구현·구성에 따라 여러 트래픽을 조정합니다. CXL.mem과 CXL.cache의 지연 특성은 링크·장치·큐 상태를 함께 측정해야 하며, 한 프로토콜이 항상 우선된다고 일반화할 수 없습니다.
 
 ## 호스트 측에서 CXL 디바이스 인식
 
-Linux에서 PCIe enumeration이 CXL을 보려면 *kernel 6.0+*이 필요합니다.
+Linux에서 CXL을 사용하려면 해당 kernel의 CXL 지원과 `CONFIG_CXL_*`, ACPI/firmware 및 플랫폼 지원을 함께 확인해야 합니다. 단순히 kernel 버전 하나만으로 동작 여부를 판단할 수 없습니다.
 
 ```bash
 # 1. lspci로 보면 PCIe device로 보임
@@ -110,7 +110,7 @@ CXL은 *데이터센터 표준*으로 시작했지만 *임베디드 영역*에�
 | **Network appliance** | SmartNIC가 *Type 1*로 동작, packet metadata를 host와 *cache-coherent 공유* |
 | **In-memory DB appliance** | *Type 3 memory pool*로 *TB급 working set* 확보 |
 
-*Cortex-A 기반 SoC*들이 *PCIe 5.0 root port*를 갖추면서 *CXL 1.1 디바이스를 attach 가능*해지고 있습니다.
+일부 Cortex-A 기반 플랫폼이 PCIe 5.0 root port와 CXL 지원을 제공하지만, PCIe root port가 있다고 CXL 장치를 자동으로 attach할 수 있는 것은 아닙니다. SoC·firmware·kernel·장치의 CXL 지원을 별도로 확인해야 합니다.
 
 ## 자주 하는 실수
 
