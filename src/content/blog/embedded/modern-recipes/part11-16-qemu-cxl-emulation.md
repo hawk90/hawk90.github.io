@@ -79,7 +79,7 @@ guest$ modprobe cxl_pci
 
 # PCIe 레벨에서 보이는가
 guest$ lspci -nn | grep CXL
-0c:00.0 CXL: ... [1af4:0d93]
+0c:00.0 CXL [0502]: Intel Corporation Device [8086:0d93] (rev 01)
 
 # CXL 서브시스템에 등록됐는가
 guest$ ls /sys/bus/cxl/devices/
@@ -108,7 +108,7 @@ node 1 size: 256 MB      # CXL Type 3 expander
 
 | 증상 | 원인 | 고치는 법 |
 |------|------|----------|
-| `cxl option requires q35 machine` | `-machine pc`로 실행 | `q35`로 바꿉니다. CXL은 PCIe 5.0 기반이고 PCIe가 q35 전용입니다 |
+| `pxb-cxl devices cannot reside on a PCI bus` | `-machine pc`(i440fx)로 실행. root bus가 PCIe가 아님 | `-machine q35,cxl=on`으로 바꿉니다. `pxb-cxl`은 PCIe root bus에만 붙습니다 |
 | guest 시작 직후 segfault | backing 파일에 QEMU 프로세스의 쓰기 권한 없음 | `mem-path`를 `/tmp/` 아래로 옮기거나 소유권을 맞춥니다 |
 | `modprobe: cxl_acpi not found` | guest 커널이 6.0 미만 | guest 이미지를 Ubuntu 24.04+ / Fedora 38+로 교체합니다 |
 | region은 만들어지는데 interleave가 안 됨 | FMW 크기가 디바이스 크기와 같음 | FMW를 디바이스의 2배 이상으로 잡습니다 |
