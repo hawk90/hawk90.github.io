@@ -847,19 +847,21 @@
       },
       "disposition": "remediated",
       "nextAction": "manual-review",
-      "reviewQuestion": "Does the ad-script-free layout control still hold after changes to its listed source files?",
-      "scope": "Concrete local repository control only; it makes no claim about external backup, DNS, account, or host recovery.",
+      "reviewQuestion": "Is the AdSense script still the only ad integration, still async and gated by ADS_CONFIG, with no ad slots reserved in the layout — and does blocking it still leave layout and site scripts unchanged?",
+      "scope": "Owner decision 2026-10-09: Auto ads enabled. The control is that an ad-script failure cannot break the layout, not that no ad script exists.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
-            "src/layouts/BaseLayout.astro"
+            "src/layouts/BaseLayout.astro",
+            "src/consts/config.ts",
+            "scripts/record-repository-controls.mjs"
           ],
-          "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
-          "result": "The layout has no AdSense runtime script or ad-slot integration that could make layout rendering depend on an ad provider."
+          "verification": "Chrome (playwright) on the built site, home → post via ClientRouter, once with Google ad hosts allowed and once with them blocked (pagead2.googlesyndication.com, doubleclick, adservice, googleads)",
+          "result": "Both runs: identical document heights (home 2693px, post 10421px), 0 page errors, reading-mode toggle works after navigation, one AdSense script after navigation (no duplicate). With ads allowed the ad code fetched pagead2.googlesyndication.com and googleads.g.doubleclick.net with no CSP violation. The script is a single async <script> gated by ADS_CONFIG.enabled; the layout has no <ins class=\"adsbygoogle\"> slots."
         }
       ],
-      "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
+      "residualRisk": "Auto ads may insert ad units into the page body once ads serve; that is layout change by design, not breakage, and was not observable before approval (no ads served on localhost). Re-run the blocked/allowed comparison after the site starts serving ads. record-repository-controls.mjs is currently not runnable (it reads a runbook path that moved to docs/runbooks/); this record was updated directly."
     },
     {
       "id": "AP-R-30",
