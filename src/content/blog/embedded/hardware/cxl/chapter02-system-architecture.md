@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL은 *디바이스를 5가지 형태*로 정의합니다."** — *Type 1·2·3* 세 기본 유형에 *MLD·MH-MLD* 두 multi-host 변형이 더해집니다. *Type 1은 cache-only NIC*, *Type 2는 메모리 있는 가속기*, *Type 3는 메모리 expander*, *MLD는 한 디바이스를 여러 host가 시분할*, *MH-MLD는 여러 upstream port를 가진 multi-headed device*입니다. CXL 4.0의 *Bundled Port*는 이 구분 위에 *port 집계* 한 층을 더 얹은 것입니다.
+> **"CXL은 *디바이스를 5가지 형태*로 정의합니다."** — *Type 1·2·3* 세 기본 유형에 *MLD·MH-MLD* 두 multi-host 변형이 더해집니다. *Type 1은 캐시를 가진 디바이스*, *Type 2는 메모리 있는 가속기*, *Type 3는 memory expander*, *MLD는 한 링크로 여러 LD를 노출하는 디바이스*, *MH-MLD는 여러 port(head)를 가진 Type 3 디바이스*입니다. CXL 4.0의 *Bundled Port*는 이 구분 위에 *port 집계* 한 층을 더 얹은 것입니다.
 
 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position)에서 *세 프로토콜과 backward-compatible한 세대 진화*를 봤습니다. 이 장은 *디바이스 측 분류*입니다. *어떤 프로토콜 조합*을 지원하느냐, *몇 개의 host에 동시 노출*되느냐가 *디바이스 타입을 결정*합니다.
 
@@ -28,29 +28,13 @@ CXL은 *지원하는 프로토콜 조합*으로 *디바이스를 3가지 type*�
 
 CXL.io는 *모든 유형 필수*. 다른 두 프로토콜은 *디바이스 사용 모델에 따라 선택*입니다. 자세한 동작은 [Ch 6 CXL.io](/blog/embedded/hardware/cxl/chapter06-cxl-io)·[Ch 7 CXL.cache](/blog/embedded/hardware/cxl/chapter07-cxl-cache)·[Ch 8 CXL.mem](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에서 봅니다.
 
-### Type 1 — Cache-only Accelerator
+### Type 1 — 캐시를 가진 디바이스
 
-*자체 메모리 없는 가속기*입니다. *host 메모리를 캐시*해 PCIe 라운드트립을 회피합니다.
-
-| 카테고리 | 예상 활용 |
-|---------|---------|
-| SmartNIC·DPU | packet metadata·flow state 캐싱 |
-| Network appliance | routing table·NAT entry 캐싱 |
-| HBA·storage offload | block translation table 캐싱 |
-
-CXL 1.1부터 정의된 가장 단순한 type이지만 *production CXL.cache 디바이스는 아직 적습니다*. *2025+ 점진 양산* 단계입니다.
+*자체 메모리(HDM)가 없고 캐시를 가진* 디바이스입니다. CXL.cache로 *host 메모리를 coherent하게 캐시*합니다. CXL 1.1 규격이 드는 예는 PCIe 표준 atomic에 없는 *복잡한 atomic 연산*이 필요한 가속기입니다. 디바이스가 둘 수 있는 캐시 크기는 *host의 snoop filter 용량*에 묶입니다.
 
 ### Type 2 — Accelerator with Memory
 
 *자체 HBM/DRAM을 가진 가속기*입니다. *host와 양방향 cache coherent*입니다.
-
-| 제품군 | 자체 메모리 | 비고 |
-|--------|-----------|------|
-| AMD Instinct MI300X | 192 GB HBM3 | 처음부터 *Infinity Fabric + CXL 통합* 설계 |
-| AMD Instinct MI325X | 256 GB HBM3E | MI300X 후속 |
-| Intel Gaudi 3 | HBM2E | CXL 호환 PCIe |
-| Versal AI Premium 계열 | FPGA + DDR/HBM | AMD/Xilinx CXL IP 통합 |
-| NVIDIA Hopper/Blackwell | HBM3·HBM3E | NVLink 중심, CXL 모드는 제품·시점 의존 |
 
 Type 2의 *coherency가 가장 복잡*합니다. *양방향 캐시 + Bias 전환*이 필요한데 [Ch 3 메모리 일관성](/blog/embedded/hardware/cxl/chapter03-coherency-model)에서 본격 분해합니다.
 
@@ -58,15 +42,14 @@ Type 2의 *coherency가 가장 복잡*합니다. *양방향 캐시 + Bias 전환
 
 *순수 메모리 디바이스*입니다. *DRAM 모듈을 PCIe 너머로 노출*합니다.
 
-| 제품 | 회사 | 폼팩터 |
-|------|------|--------|
-| CMM-D (Compute Memory Module-DDR) | Samsung | EDSFF E3.S |
-| Niagara | SK Hynix | EDSFF E3.S |
-| Leo | Astera Labs | AIC |
-| CXL Memory Expander | Micron | EDSFF |
-| Type 3 CXL Memory | Marvell·Rambus | AIC |
+| 제품 | 회사 | 내용 |
+|------|------|------|
+| CMM-D | Samsung | CXL 2.0, 128·256 GB (512 GB 제품도 등록됨) |
+| CMM-DDR5 | SK hynix | CXL 2.0, 96 GB 고객 검증 완료 |
+| CZ120 | Micron | CXL 2.0, 128·256 GB, PCIe 5.0 x8 |
+| Leo (메모리 컨트롤러) | Astera Labs | CXL 2.0, 컨트롤러당 최대 2 TB |
 
-Type 3은 *device 측 캐시가 없습니다*. 모든 cache는 *host CPU의 L1·L2·L3*에 있고 *coherency 관리도 host* 단독. 그래서 *Type 3가 가장 단순*하고 *가장 흔합니다*.
+Type 3는 *CXL.cache로 요청하지 않습니다*. 메모리 영역을 *HDM-H(host-only coherent)*로 노출하면 일관성은 host 쪽 캐시 계층이 맡습니다. CXL 3.0부터는 *HDM-DB* 영역도 둘 수 있는데, 이때는 디바이스가 host의 캐시 상태를 추적하고 *Back-Invalidate Snoop*으로 무효화를 요청합니다([Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)). 단순한 HDM-H Type 3가 *가장 흔한* 형태입니다.
 
 ## MLD — Multi Logical Device
 
@@ -76,9 +59,9 @@ Type 3은 *device 측 캐시가 없습니다*. 모든 cache는 *host CPU의 L1·
 
 | 요소 | 역할 |
 |------|------|
-| Logical Device (LD) | 디바이스 자원의 *논리적 분할 단위* |
-| LD-ID | 각 LD를 식별하는 ID — CXL.mem·CXL.io 양쪽에 노출 |
-| Fabric Manager | LD를 *어느 host에 할당할지* out-of-band로 결정 |
+| Logical Device (LD) | 디바이스 자원의 *논리적 분할 단위*. MLD 하나에 FM용 LD 하나와 *최대 16개*의 LD |
+| LD-ID | 각 LD를 식별하는 ID — CXL.io와 CXL.mem 양쪽에서 씀 |
+| Fabric Manager | LD를 *어느 host에 할당할지* 결정 |
 
 운영 흐름:
 
@@ -92,41 +75,48 @@ Type 3은 *device 측 캐시가 없습니다*. 모든 cache는 *host CPU의 L1·
 
 ## Shared FAM — 같은 영역을 다중 host 공유
 
-CXL 3.0의 *Coherent Fabric*은 *같은 메모리 영역*을 *여러 host가 동시 접근*하게 합니다. *Pooling이 time-share*라면 *Shared FAM은 simultaneous share*. 일관성은 *Back-Invalidation Snoop* 메커니즘으로 유지됩니다.
+규격은 여러 host에 노출되는 HDM을 *FAM(Fabric-Attached Memory)*이라 부르고, 둘로 나눕니다. HDM 영역 하나를 *host 하나에 전용*으로 주면 *pooled memory*, *여러 host가 한 영역에 동시 접근*하면 *Shared FAM*입니다.
 
 | 모드 | 특성 | 적합 워크로드 |
 |------|------|-------------|
-| **Pooling (2.0)** | host별 *exclusive* time-share | 컨테이너 host overcommit, dynamic VM 메모리 |
-| **Shared FAM (3.0+)** | multi-host *동시 read/write*, BISnp로 일관성 | 분산 DB·in-memory cache·shared model state |
+| **Pooled memory** | 영역마다 host 하나가 *전용* | 컨테이너 host overcommit, dynamic VM 메모리 |
+| **Shared FAM** | 여러 host가 *한 영역에 동시 접근* | 분산 DB·in-memory cache·shared model state |
 
-Shared FAM은 *cache invalidation 트래픽*이 크게 늘 수 있어 *application 측 coordination*(transaction·lock)이 거의 필수입니다.
+Shared FAM의 일관성은 영역마다 FM이 두 모델 중 하나로 정합니다(CXL 3.1 §2.4.4).
+
+- *multi-host hardware coherency* — HDM-DB 영역에서 디바이스가 host별 캐시 상태를 snoop filter나 directory로 추적합니다. 이 모드에서 write는 먼저 소유권을 얻고 나서 쓰는 *2단계*입니다.
+- *software-managed coherency* — 하드웨어가 추적하지 않고, host들 사이의 일관성을 소프트웨어가 맞춥니다. HDM-H로 노출한 Shared FAM은 이 모델만 됩니다.
 
 ## MH-MLD — Multi-Headed Device
 
-*디바이스가 multiple upstream port*를 가지는 구조입니다. 즉 *여러 host에 동시 attach*되어 보입니다.
+*포트(head)를 여러 개 가진 Type 3 디바이스*입니다(CXL 3.1 §2.5). 두 종류가 있습니다.
+
+| 종류 | 각 head가 보이는 모습 |
+|------|---------------------|
+| MH-SLD | 모든 head가 SLD. head와 LD가 1:1 |
+| MH-MLD | 어떤 head든 MLD일 수 있음. head마다 LD 1~16개 |
 
 | 차이 | MLD | MH-MLD |
 |------|-----|--------|
-| 물리 port 수 | 1개 | 여러 개 |
-| host attach | switch 통해 multi-host | 직접 multi-host |
-| Use case | switched pooling | direct multi-host (예: blade enclosure) |
+| 링크 | 하나의 공유 링크 | 여러 링크(head) |
+| host attach | switch를 통해 multi-host | head마다 직접 |
 
-MH-MLD의 *LD 관리*는 *MH-MLD 내부의 controller*가 합니다. *각 head별 LD*를 *독립적으로 인식·관리*. Fabric Manager 없이도 *enclosure level*에서 *dynamic 재할당*이 가능합니다.
+LD는 각각 *head 하나에만* 매핑됩니다. 디바이스 안의 모든 LD는 *LD Pool CCI*라는 관리 인터페이스로 관리합니다. LD Pool CCI는 MCTP 기반으로 노출되거나, head의 Mailbox CCI를 통한 tunnel 명령으로 접근합니다.
 
 ## Bundled Port — 4.0의 새 layer
 
-CXL 4.0의 *Bundled Port*는 *MH-MLD의 multiple port*를 *논리적으로 묶어 하나의 port group처럼 host에 노출*합니다.
+CXL 4.0의 *Bundled Port*는 디바이스의 *여러 port를 한 묶음으로 써 대역폭을 늘리는* 기능입니다(CXL 4.0 웨비나, 2025년 12월).
 
-기존 vs 4.0:
+| 항목 | 내용 |
+|------|------|
+| 대상 | 가속기 디바이스 (Type 1·2, 가속기형 Type 3) |
+| 구성 | 묶음마다 *표준 port 하나 이상* + *Streamlined Port* 여러 개. 각 port는 SLD-B를 노출 |
+| Streamlined Port | 데이터 대역폭 확장용, 면적·전력 최적화, 256B flit 모드만 |
+| 기존 소프트웨어 | 각 port를 *따로* enumerate하고 관리할 수 있음 |
+| 묶음 활용 | 포트 간 트래픽 interleave 같은 기능에는 *새 소프트웨어*가 필요 |
+| HDM 용량 | 묶음 전체 용량은 각 port의 용량 합 |
 
-| 항목 | MH-MLD 전통 (3.x) | Bundled Port (4.0) |
-|------|------------------|-------------------|
-| Port 노출 | 각 port 독립 enumeration | *논리적 단일 group*으로 노출 |
-| Host 측 관리 | port별 별도 device로 인식 | *port group을 한 device처럼* 인식 |
-| 트래픽 라우팅 | host가 port 선택 | *device가 dynamic routing* |
-| 효과 | 운영자가 port별 관리 | latency↓, bandwidth↑, QoS↑ |
-
-[Ch 5 CXL 4.0의 핵심 새 기능](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 *Bundled Port·Streamlined Port의 동작*을 본격 분해합니다.
+[Ch 5 CXL 4.0의 핵심 새 기능](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 *Bundled Port의 동작*을 더 봅니다.
 
 ## Linux 측 인식 — 유형별 path
 
@@ -140,12 +130,9 @@ decoder0.0/   # HDM Decoder
 region0/      # 사용자가 생성한 region
 
 # Type 2 — accelerator + memory
-$ ls /sys/bus/cxl/devices/
-mem0/         # CXL.mem 영역
-# 가속기 자체는 vendor-specific driver로 등록 (별도 sysfs)
+# 가속기 드라이버가 CXL_DEVTYPE_DEVMEM으로 memdev를 등록 (include/cxl/cxl.h)
 
-# Type 1 — vendor driver 내부 사용
-# 별도 sysfs 노출 없음. cxl_pci subsystem이 cache 인터페이스를 vendor 드라이버에 전달
+# Type 1 — HDM이 없어 CXL 메모리 장치로 등장하지 않음
 ```
 
 *Type 3의 sysfs path*가 *Linux drivers/cxl/ 코드의 중심*입니다. 자세한 코드 워크스루는 [Ch 11 Linux drivers/cxl/](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서.
@@ -158,27 +145,24 @@ mem0/         # CXL.mem 영역
 
 ### "MLD와 Shared FAM은 같은 거다"
 
-*완전히 다릅니다*. MLD는 *time-share* (한 시점 한 host). Shared FAM은 *coherent simultaneous share* (동시 다중 access). coherency 메커니즘이 *완전히 다릅니다*.
-
-### "Type 1 NIC를 데이터센터에 들이면 packet 처리가 빨라진다"
-
-*Cache hit rate가 충분히 높을 때만*. *불규칙한 packet metadata access*는 *cache miss → host 라운드트립*이라 *오히려 느릴 수 있음*. 워크로드 access pattern *분석이 도입 전 필수*.
+*다릅니다*. MLD는 *디바이스 형태*(한 링크로 여러 LD)이고, pooled memory와 Shared FAM은 *영역을 어떻게 나눠 주느냐*입니다. pooled는 영역마다 host 하나, Shared FAM은 여러 host가 한 영역에 동시 접근합니다.
 
 ### "MH-MLD는 한 host 다운 시 다른 host도 함께 죽는다"
 
-*그렇지 않습니다*. 각 head가 *독립 control path*를 가지므로 *한 host failure가 다른 host에 격리*됩니다. 단 *Fabric Manager redundancy*가 *실 운영의 핵심*.
+규격은 Multi-Headed Device가 *LD 단위로 메모리 자원·상태·context·관리를 격리*하도록 요구합니다. LD는 각각 head 하나에만 매핑됩니다.
 
 ### "Bundled Port가 Multi-LD를 대체한다"
 
-*직교 개념*입니다. Bundled Port는 *port 수준 집계*, MLD는 *capacity 수준 분할*. *둘 다 동시 가능*. 예: *Bundled Port로 묶인 multi-LD device*.
+*다른 개념*입니다. Bundled Port는 *가속기 디바이스의 port를 묶어 대역폭을 늘리는* 것이고, 묶음 안의 port는 각각 *SLD-B(Single Logical Device)*를 노출합니다. MLD는 *한 링크로 여러 LD를 노출해 용량을 나누는* 것입니다.
 
 ## 정리
 
-- CXL 디바이스는 *프로토콜 조합*으로 *Type 1·2·3*. *cache-only NIC·memory 가진 가속기·memory expander*입니다.
-- *MLD*는 *한 디바이스를 LD로 분할*해 *multi-host time-share pooling*.
-- *Shared FAM*은 *같은 메모리 영역을 multi-host simultaneous share*. CXL 3.0+에서 BISnp로 일관성 유지.
-- *MH-MLD*는 *multiple upstream port를 가진 디바이스*. CXL 4.0의 *Bundled Port*는 그 port들을 *논리적으로 묶음*.
-- Linux 측 *Type 3가 가장 흔한 sysfs path*. Type 1·2는 *vendor driver*가 추가 처리.
+- CXL 디바이스는 *프로토콜 조합*으로 *Type 1·2·3*. *캐시를 가진 디바이스·메모리 가진 가속기·memory expander*입니다.
+- *MLD*는 한 링크로 *FM용 LD + 최대 16 LD*를 노출합니다.
+- FAM은 *pooled memory*(영역마다 host 하나)와 *Shared FAM*(여러 host 동시 접근)으로 나뉩니다. Shared FAM의 일관성은 *하드웨어(HDM-DB)* 또는 *소프트웨어* 모델입니다.
+- *Multi-Headed Device*는 *head가 여러 개인 Type 3*이고, LD는 LD Pool CCI로 관리합니다.
+- CXL 4.0의 *Bundled Port*는 표준 port와 Streamlined Port를 묶어 *대역폭을 늘립니다*.
+- Linux에서 *Type 3*는 `mem`·`decoder`·`region`으로 보이고, Type 2는 가속기 드라이버가 `CXL_DEVTYPE_DEVMEM`으로 등록합니다.
 
 ## 다음 편
 

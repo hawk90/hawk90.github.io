@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL.io는 *PCIe와 99% 호환*입니다. 같은 enumeration, 같은 MMIO, 같은 DMA, 같은 AER."** — 다른 점은 *디바이스가 CXL 호환임을 알리는 DVSEC*과 *SPDM·CMA·IDE_KM 같은 보조 프로토콜의 mailbox 채널 DOE*입니다. CXL 1.1부터 정의됐고 *모든 CXL 디바이스에 필수*입니다.
+> **"CXL.io는 PCIe의 enumeration·configuration·MMIO·DMA·오류 보고를 그대로 씁니다."** — CXL에 특유한 부분은 *디바이스가 CXL 기능을 알리는 DVSEC*과, *Compliance·CDAT 같은 메시지를 주고받는 DOE mailbox*입니다. CXL 1.1부터 정의됐고 *모든 CXL 디바이스에 필수*입니다.
 
 [Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 *CXL 4.0의 새 기능*을 봤습니다. 이 장부터 *프로토콜 별 본격 분해*입니다. *CXL.io는 가장 기본·필수*인 프로토콜로, *전체 CXL 디바이스의 출발점*입니다.
 
@@ -27,9 +27,8 @@ CXL.io는 *PCIe 시맨틱*을 그대로 가져와 *디바이스 발견·설정·
 | Error Reporting | AER (Advanced Error Reporting), poison message |
 | MMIO | host가 device register를 *load/store* |
 | DMA | device가 host RAM에 데이터 전송 |
-| HPA Lookup | host physical address 변환·검증 |
 
-*PCIe 위에 100% 호환*되므로 *기존 host의 PCIe enumeration 코드가 그대로 동작*합니다.
+PCIe 시맨틱을 그대로 쓰므로 *기존 host의 PCIe enumeration 코드가 CXL 디바이스를 PCIe 디바이스로 발견*합니다.
 
 ## CXL.io = PCIe + DVSEC + DOE
 
@@ -38,13 +37,13 @@ PCIe와 *다른 부분 둘*만 기억하면 됩니다.
 | 추가 | 역할 |
 |------|------|
 | **DVSEC** | "*이 디바이스가 CXL 호환이다*" 표지 |
-| **DOE** | SPDM·CMA·IDE_KM 같은 *out-of-band protocol의 mailbox* 채널 |
+| **DOE** | config space를 통해 *데이터 객체를 주고받는 mailbox* 채널 |
 
-이 둘만 *CXL 고유 확장*이고, *나머지는 모두 PCIe*입니다.
+이 장은 이 둘을 중심으로 봅니다.
 
 ## DVSEC — CXL 호환 표지
 
-*DVSEC (Designated Vendor-Specific Extended Capability)*은 *PCIe Spec 자체가 정의한 capability*이지만, *CXL Consortium이 자신의 vendor ID*(0x1e98)를 사용해 *CXL 호환 디바이스 식별 표지*로 활용합니다.
+*DVSEC (Designated Vendor-Specific Extended Capability)*은 PCIe가 정의한 capability입니다. CXL 규격은 Vendor ID를 *1E98h*로 둔 DVSEC들로 CXL 기능을 알립니다.
 
 | 항목 | 의미 |
 |------|------|
@@ -60,85 +59,64 @@ PCIe와 *다른 부분 둘*만 기억하면 됩니다.
 3. *Vendor ID = 0x1E98인 DVSEC*을 보면 *CXL 호환 디바이스로 인식*
 4. *CXL subsystem 활성화*, 추가 capability negotiation
 
-Linux의 `lspci -vvv`로 확인:
+Linux의 `lspci -vvv`로 확인합니다. pciutils는 Vendor 1e98 DVSEC을 CXL로 해석해 capability 필드를 풀어 보여 줍니다.
 
 ```bash
-$ lspci -vvv -s 5e:00.0 | grep -A 5 "Designated Vendor"
-Capabilities: [60] Designated Vendor-Specific: Vendor=1e98 ID=0000
-    Compute Express Link
-    DVSEC Rev: 1, Len: 56
-    ...
+$ lspci -vvv -s 5e:00.0
+    Capabilities: [...] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=1 Len=56: CXL
+        CXLCap: Cache- IO+ Mem+ MemHWInit+ HDMCount 1 Viral-
+        ...
 ```
 
 *Vendor=1e98*이 보이면 *CXL 디바이스*입니다.
 
 ## DOE — Boutique Protocol Mailbox
 
-*DOE (Data Object Exchange)*는 *PCIe 5.0부터 도입된 mailbox*로, *config space write/read*를 통해 *임의의 out-of-band protocol*을 *호스트와 디바이스 사이*에 흘리는 채널입니다.
+*DOE (Data Object Exchange)*는 *config space를 통해 데이터 객체를 주고받는* PCIe mailbox입니다.
 
 | 항목 | 의미 |
 |------|------|
 | Location | PCIe Extended Config Space |
-| 동작 | host write → device read·response → host read |
-| 페이로드 | 다양한 protocol을 protocol ID로 분기 |
+| 동작 | host가 요청 객체를 쓰고, 디바이스가 응답 객체를 준비하면 host가 읽음 |
+| 구분 | 객체 header의 *Vendor ID + Data Object Type*으로 프로토콜을 구분 |
 
-CXL이 *DOE를 활용하는 보조 protocol*:
+CXL 규격(3.1 표 8-3)이 정의한 DOE Type은 Vendor ID 1E98h를 씁니다.
 
-| Protocol | 용도 |
-|---------|------|
-| SPDM | 디바이스 인증·키 교환 ([Ch 14 Security](/blog/embedded/hardware/cxl/chapter14-security)) |
-| CMA | Firmware measurement attestation |
-| IDE_KM | IDE 암호화 키 관리 |
-| Compliance Mode | 4.0의 compliance test routing |
+| DOE Type | CXL 기능 |
+|----------|---------|
+| 0 | Compliance ([Ch 15](/blog/embedded/hardware/cxl/chapter15-ras-performance)) |
+| 2 | Table Access — CDAT(Coherent Device Attribute Table) 읽기 |
 
-*하나의 mailbox*에 *여러 protocol*이 *시분할*로 흐릅니다. *Protocol ID*로 분기.
+인증·measurement에 쓰는 SPDM은 DMTF가 정의한 프로토콜이고, CXL.cachemem IDE의 키 관리는 *CXL_IDE_KM* 프로토콜로 합니다([Ch 14 Security](/blog/embedded/hardware/cxl/chapter14-security)).
 
-DOE capability 확인:
+lspci는 DOE capability의 레지스터 상태를 보여 줍니다. 지원 프로토콜 목록은 DOE discovery로 따로 조회해야 합니다.
 
 ```bash
-$ lspci -vvv -s 5e:00.0 | grep -A 8 "Data Object Exchange"
-Capabilities: [70] Data Object Exchange
-    DOE Mailbox: 1 instance
-    Supported Protocols:
-        Vendor=DMTF, ID=0x01 (CMA SPDM)
-        Vendor=DMTF, ID=0x02 (Secured CMA SPDM)
-        Vendor=CXL, ID=0x03 (Compliance Mode)
+$ lspci -vvv -s 5e:00.0
+    Capabilities: [...] Data Object Exchange
+        DOECap: IntSup-
+        DOECtl: IntEn-
+        DOESta: Busy- IntSta- Error- ObjectReady-
 ```
 
-DOE 없이도 *기본 CXL.io 동작*은 가능하지만, *Security·Compliance 검증*에는 *필수*입니다.
+DOE가 없어도 기본 CXL.io 동작은 가능하지만, CDAT 조회나 Compliance·인증 흐름에는 DOE가 필요합니다.
 
 ## UIO — Unordered I/O
 
-CXL.io의 *추가 특성* 중 *UIO (Unordered I/O)*는 *PCIe의 strict ordering보다 완화된 ordering*을 *명시적으로 허용*하는 메커니즘입니다.
+*UIO (Unordered I/O)*는 PCIe의 기본 ordering 규칙에 묶이지 않는 I/O 요청입니다. CXL 3.x는 UIO를 *peer-to-peer*와 *PBR fabric*에서 씁니다. 예를 들어 PBR fabric에서 UIO 요청을 보낸 쪽은 *Source PBR ID(SPID)*로 구분됩니다.
 
-| 모드 | Ordering |
-|------|---------|
-| PCIe 기본 | strict (모든 read·write 순서 유지) |
-| **UIO** | 완화 — write 사이의 *임의 순서*가 OK |
-
-UIO의 가치:
-
-- **P2P 흐름** — accelerator 간 direct 전송이 *strict ordering 부담 없이* 가능
-- **Throughput** — switch가 *큐 분산·재정렬*해 *대역폭 활용 향상*
-
-UIO는 *application이 명시적으로 요청*해야 활성. *순서 보장이 필요한 control path*는 *기본 PCIe ordering* 사용.
+순서 보장이 필요한 control path는 기본 PCIe ordering을 씁니다. CXL 4.0의 Streamlined Port는 UIO에 최적화돼 있습니다([Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)).
 
 ## Direct CXL.mem Access — P2P 메모리 접근
 
-CXL 3.1부터 *accelerator 간 direct P2P CXL.mem access*가 가능해졌습니다. 이전에는 *항상 host를 경유*해야 했습니다.
+CXL 3.1 규격에는 디바이스끼리 host를 거치지 않고 메모리에 접근하는 경로가 두 가지 있습니다.
 
-| 시나리오 | 흐름 |
-|---------|------|
-| 3.0 이전 | Accel A → host → Accel B |
-| **3.1+** | Accel A → Accel B *direct* (CXL.io UIO 위 P2P) |
+| 경로 | 규격 | 내용 |
+|------|------|------|
+| Direct P2P CXL.mem | §3.3.2.1 | *가속기*가 CXL.mem으로 다른 디바이스의 HDM에 직접 접근 |
+| UIO Direct P2P to HDM | §7.7.9 | *UIO*(CXL.io)로 HDM에 직접 접근. PBR fabric에서 지원 |
 
-P2P 흐름:
-1. Accel A가 *Accel B의 HDM memory address*를 안다
-2. UIO 활성화 후 *직접 load/store*
-3. *Host는 경유 안 함* — switch가 routing
-4. *Coherency는 BISnp로 유지* (HDM-DB의 경우)
-
-GPU·NPU 간 *distributed inference*에서 *모델 weight·KV cache의 P2P share*가 가능해집니다.
+HDM-DB 영역이면 일관성은 BISnp로 맞춥니다([Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)). GPU·NPU 간 *모델 weight·KV cache 공유*가 이런 경로의 대표적인 쓰임입니다.
 
 ## Linux 측 — CXL.io 인식 경로
 
@@ -147,7 +125,7 @@ Linux의 *CXL subsystem 활성화*가 *CXL.io 인식*에서 시작합니다.
 ```bash
 # 1. PCIe enumeration 결과
 $ lspci -nn | grep -i cxl
-5e:00.0 Memory controller [0508]: ... [1234:5678]
+5e:00.0 CXL [0502]: ... [1234:5678]     # class 05 subclass 02, prog-if 10 = CXL Memory Device
 
 # 2. CXL DVSEC 확인
 $ lspci -vvv -s 5e:00.0 | grep -E "Designated|Compute Express"
@@ -156,12 +134,12 @@ $ lspci -vvv -s 5e:00.0 | grep -E "Designated|Compute Express"
 $ ls /sys/bus/cxl/devices/
 mem0/ ...
 
-# 4. DOE capability 활성 시
+# 4. 메모리 장치의 보안 상태 (sysfs-bus-cxl ABI)
 $ ls /sys/bus/cxl/devices/mem0/security/
-state  user_keystore  ...
+erase  sanitize  state  ...
 ```
 
-*DVSEC이 없으면 cxl_acpi가 등록 안 함* → *CXL 모드 동작 안 함*. *BIOS·firmware가 DVSEC을 정확히 보고*해야 운영 가능.
+Type 3 메모리 장치는 `cxl_pci` 드라이버가 *CXL memory class code*로 잡고, CXL DVSEC을 찾아 설정을 읽습니다(`drivers/cxl/pci.c`). host bridge와 메모리 window는 `cxl_acpi`가 CEDT로 찾습니다.
 
 ## 자주 하는 실수
 
@@ -171,28 +149,28 @@ state  user_keystore  ...
 
 ### "DOE에 어떤 protocol이든 막 넣어도 된다"
 
-*Protocol ID가 등록된 것만 통신*합니다. CXL Consortium·DMTF가 *protocol ID를 관리*. 임의 ID는 *디바이스가 응답 안 함*. SPDM·CMA·IDE_KM·Compliance가 *현재 표준 set*.
+DOE 객체는 *Vendor ID와 Data Object Type*으로 구분됩니다. CXL 규격이 정의한 Type은 Compliance(0)와 Table Access(2)이고, SPDM은 DMTF가 정의합니다. 디바이스는 자기가 지원하는 Type만 처리합니다.
 
 ### "UIO 항상 켜는 게 좋다"
 
-*Ordering 보장이 필요한 path*에 UIO를 켜면 *데이터 무결성 위험*. *application 의도와 ordering 요구*를 *분석한 후* 선택적 적용.
+UIO는 ordering을 보장하지 않으므로, *순서가 필요한 path*에는 쓰면 안 됩니다.
 
 ### "P2P CXL.mem은 host overhead 0"
 
-*Routing overhead는 있습니다*. Switch가 *P2P 라우팅 결정*에 *수십 ns*. 또한 *coherency 유지 (BISnp 트래픽)*가 *추가됨*. *host 라운드트립보다 빠른 것이지 cost가 0은 아닙니다*.
+host를 거치지 않을 뿐, switch 통과와 (HDM-DB면) BISnp 일관성 트래픽은 그대로 있습니다.
 
 ### "DOE mailbox는 빠르다"
 
-*Config space write/read 기반*이라 *slow path*입니다. *수 µs~수 ms*. *bulk data*는 *DOE로 보내면 안 되고*, *DMA·MMIO* 사용. DOE는 *control plane (인증·키 교환)* 전용.
+DOE는 *config space 접근*으로 객체를 주고받는 control path입니다. bulk data는 DMA·MMIO로 보냅니다.
 
 ## 정리
 
-- CXL.io는 *PCIe와 99% 호환* — 같은 enumeration·config·MMIO·DMA·AER.
-- 다른 점은 *DVSEC* (CXL 호환 표지)와 *DOE* (보조 protocol mailbox) 둘.
-- *DVSEC vendor ID 0x1E98*이 *CXL Consortium의 표지*. 모든 CXL 디바이스 필수.
-- *DOE*는 SPDM·CMA·IDE_KM·Compliance protocol을 *mailbox로 흘림*. Security·Compliance에 필수.
-- *UIO*는 *strict ordering 완화*. P2P·throughput 향상에 활용.
-- *Direct CXL.mem P2P*는 *3.1+*에서 *accel ↔ accel direct access* 가능.
+- CXL.io는 PCIe의 enumeration·config·MMIO·DMA·오류 보고를 그대로 씁니다.
+- CXL 기능은 *Vendor ID 1E98h DVSEC*으로 알립니다. lspci는 이를 `: CXL`로 해석합니다.
+- *DOE*는 config space mailbox입니다. CXL이 정의한 DOE Type은 Compliance(0)와 Table Access/CDAT(2)입니다.
+- *UIO*는 ordering 없는 I/O 요청으로, P2P와 PBR fabric에서 씁니다.
+- 디바이스 간 직접 접근은 *Direct P2P CXL.mem*과 *UIO Direct P2P to HDM* 두 경로가 있습니다.
+- Linux에서 Type 3는 `cxl_pci`가 class code로 잡고 DVSEC을 읽습니다.
 
 ## 다음 편
 

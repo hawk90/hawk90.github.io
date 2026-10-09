@@ -2,7 +2,7 @@
 title: "Ch 14: Security — IDE·SPDM·TSP·CXL TEE"
 slug: "embedded/hardware/cxl/chapter14-security"
 date: 2026-05-16T09:14:00
-description: "CXL 보안 메커니즘 4종의 위치와 관계."
+description: "SPDM·CXL IDE·CXL_IDE_KM·TSP가 각각 무엇을 지키고 어떻게 맞물리는지."
 series: "CXL 4.0 Internals"
 seriesOrder: 14
 tags: [cxl-security, ide, spdm, tsp, tdisp]
@@ -12,193 +12,162 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL 보안은 *4가지 layer*로 구성됩니다."** — *SPDM*은 *디바이스 인증*, *IDE*는 *link 암호화*, *TSP*는 *fabric 통합 보안*, *CXL TEE (TDISP)*는 *TVM에 디바이스 안전 attach*. 각 layer가 *서로 다른 위협*에 대응하며 *조합되면 host CPU·link·device 메모리 전체*에 *Confidential Computing*이 적용됩니다.
+> **"CXL 보안은 *SPDM 인증*, *CXL IDE 링크 보호*, *TSP(TEE Security Protocol)*가 맡고, PCIe 쪽 *TDISP*와 함께 쓸 수 있습니다."** — SPDM(DMTF DSP0274)으로 디바이스를 인증하고 secure session을 열고, 그 session으로 보호된 *CXL_IDE_KM* 메시지로 IDE 키를 넣습니다. TSP(CXL 3.1)는 *직접 연결된 Type 3 메모리*를 TVM 신뢰 경계 안에 넣는 프로토콜입니다. 이 장은 CXL 3.1 spec §11 기준입니다.
 
-[Ch 13](/blog/embedded/hardware/cxl/chapter13-switching-fabric)에서 *Fabric Manager의 control plane*을 봤습니다. 이 장은 *그 fabric의 보안*입니다. CXL은 *PCIe·DMTF·CCC 표준의 조합*으로 *layer별 보안*을 정의합니다.
+[Ch 13](/blog/embedded/hardware/cxl/chapter13-switching-fabric)에서 *Fabric Manager의 control plane*을 봤습니다. 이 장은 *링크와 디바이스의 보안*입니다.
 
-## 위협 모델
+## IDE가 막는 위협
 
-CXL 환경의 *주요 위협*:
+CXL 3.1 §11.1의 IDE 보안 모델이 범위로 잡는 것:
 
-| 위협 | 시나리오 |
+| 구분 | 내용 |
 |------|---------|
-| Link sniffing | 운영자가 *cable·interposer·protocol analyzer*로 link 트래픽 capture |
-| MITM (Man-in-the-Middle) | *재전송·수정* 공격 |
-| Device spoofing | *가짜 디바이스*가 정품처럼 인증 시도 |
-| Firmware downgrade | *알려진 취약점 firmware*가 설치된 디바이스 |
-| Co-tenant 도용 | 같은 host의 *다른 VM*이 *guest 자원* 도용 |
-| Replay attack | 과거 패킷·메시지 재사용 |
+| 보호 대상 | 물리 링크 양 끝 사이를 오가는 트랜잭션(데이터 + 메타데이터) |
+| 위협 | 실험 장비·interposer·악성 Extension Device로 링크 데이터를 들여다보기, 데이터·프로토콜 메타데이터 변조, 기록 후 재전송, flit 재배열·삭제, 트랜잭션 주입 |
+| 위협 | 신뢰하는 디바이스를 다른 디바이스로 바꾸거나, 떼어 내 공격자 시스템에 붙이기 |
+| 범위 밖 | 디바이스 내부 구현의 취약점, 호스트·디바이스 안의 키 보호, DoS |
 
-이들이 *Confidential Computing의 신뢰 모델*에서 *반드시 막아야 할 위협*입니다.
+CXL.cachemem IDE는 *point-to-point* 보호라, 경로 위 switch도 이 spec을 지원해야 하고 TCB에 들어갑니다.
 
-## 4 Layer 방어 — 한눈에
+## 구성 요소 한눈에
 
-| Layer | 표준 | 역할 |
+| 구성 요소 | 정의 주체 | 역할 |
 |-------|------|------|
-| **Authentication** | SPDM (DSP0274) | 디바이스 신원 확인·session 협상 |
-| **Link Encryption** | IDE | link 트래픽 AES-GCM 암호화·무결성 |
-| **Fabric Security** | TSP (CXL 3.1+) | fabric 통합 보안·multi-host coordination |
-| **TEE Integration** | TDISP | TVM에 디바이스 안전 attach |
-
-각 layer는 *서로 다른 attack surface*를 cover하며, *조합되어 end-to-end 보안*을 형성합니다.
+| **SPDM** | DMTF DSP0274 | 디바이스 인증·측정, secure session |
+| **CXL IDE** | CXL (CXL.io는 PCIe IDE 따름) | 링크 트래픽의 기밀성·무결성·재전송 방지 |
+| **CXL_IDE_KM** | CXL §11.4 | SPDM session 위에서 CXL.cachemem IDE 키·IV 설정 |
+| **TSP** | CXL §11.5 (3.1에서 추가) | 직접 연결 Type 3 메모리를 TVM 신뢰 경계에 포함 |
+| **TDISP** | PCI-SIG | PCIe 디바이스를 TVM 신뢰 경계에 포함. TSP는 이를 보완 |
 
 ## SPDM — 디바이스 인증
 
-*SPDM (Security Protocol Data Model)*은 *DMTF DSP0274 표준*입니다.
+*SPDM (Security Protocol and Data Model)*은 DMTF DSP0274입니다. 메시지 시퀀스 자체는 CXL 고유가 아닙니다. 버전 협상, 알고리즘 합의, 인증서 확보, challenge, 측정, session 키 확립까지의 흐름은 [Embedded Security Ch 12: SPDM과 CMA 인증 흐름](/blog/embedded/embedded-security/chapter12-spdm-cma)에 정리돼 있습니다.
 
-| 항목 | 의미 |
-|------|------|
-| 정의 | DMTF DSP0274 |
-| 전송 | PCIe DOE, MCTP, USB, I2C 등 |
-| 용도 | 디바이스 인증·키 교환·session 협상 |
-| CXL 사용 | DOE channel로 SPDM 메시지 흐름 |
+CXL에서 SPDM 메시지는 *PCIe DOE*나 *MCTP*로 오갑니다(§11.4). DOE는 [Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 본 config space mailbox입니다. TSP는 SPDM 1.2 이상을 요구합니다(§11.5.2).
 
-메시지 시퀀스 자체는 CXL 고유가 아닙니다. 버전 협상에서 시작해 알고리즘 합의, 인증서 chain 확보, nonce 기반 challenge, firmware measurement, session 키 확립으로 끝나는 흐름은 PCIe·MCTP·USB 어디에 얹든 같습니다. 그 전체 시퀀스는 [Embedded Security Ch 12: SPDM과 CMA 인증 흐름](/blog/embedded/embedded-security/chapter12-spdm-cma)에 단계별로 정리돼 있습니다.
+## CXL IDE — 링크 보호
 
-CXL에서 달라지는 것은 *어디에 실려 가는가*입니다. SPDM 메시지는 [Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 본 *DOE (Data Object Exchange) mailbox*를 통해 오갑니다. CXL.io의 config space 위에 얹힌 채널이므로, 링크가 완전히 올라오기 전, 즉 아직 신뢰할 수 없는 디바이스와 대화하는 시점에도 쓸 수 있습니다. 인증이 링크 협상보다 앞서야 한다는 요구가 이 선택을 만들었습니다.
+*CXL IDE*는 CXL.io·CXL.cache·CXL.mem 트래픽을 모두 가리키는 말이고, *CXL.cachemem IDE*는 그중 CXL.cache·CXL.mem 쪽입니다(§11.1).
 
-여기서 얻은 session 키가 곧 아래 IDE의 재료가 됩니다. SPDM이 *누구인지*를 확인하고, IDE가 그 결과로 *오가는 데이터*를 암호화하는 분업입니다.
+### CXL.io IDE
 
-## IDE — Link 암호화
+PCIe IDE 정의를 따르고, 차이만 spec에 적혀 있습니다(§11.2).
 
-*IDE (Integrity and Data Encryption)*는 *PCIe·CXL link 트래픽*을 *AES-GCM 256*으로 *암호화·인증*합니다.
-
-| 항목 | 값 |
+| PCIe IDE 항목 | CXL.io에서 |
 |------|-----|
-| 알고리즘 | AES-GCM 256 |
-| Counter | 96-bit nonce |
-| MAC | 96-bit GMAC |
-| 모드 | Selective IDE (특정 stream) 또는 Link IDE (전체) |
+| Link IDE stream | 지원. CXL.cachemem IDE는 Link IDE stream에 묶인 키만 씀 |
+| Selective IDE stream | 지원. CXL.io에만 적용 |
+| Switch | CXL switch는 Link IDE stream을 지원해야 함 |
 
-CXL 환경에서는 *Link IDE 기본* — 모든 트래픽 (CXL.io·CXL.cache·CXL.mem) 암호화.
+### CXL.cachemem IDE
 
-성능 영향:
+| 항목 | 내용 (§11.3) |
+|------|-----|
+| 알고리즘 | AES-GCM (NIST SP 800-38D), 256-bit 키 |
+| 단위 | flit 단위. 프로토콜 계층에서 retry 대상인 flit은 모두 암호화·무결성 보호 |
+| 보호 안 되는 것 | 68B: link layer control flit·CRC. 256B: link layer control 정보·flit header·CRC/FEC |
+| 순서 | Link CRC는 암호화된 flit으로 계산. CRC 통과한 flit만 복호화 후 무결성 검사 |
+| 무결성 실패 시 | 이후 모든 보안 트래픽을 버림 |
+| PCRC | 암호 엔진 내부 오류 대비. CXL.cachemem IDE에서 필수, 기본 활성 |
+| 키 갱신 | 데이터 손실 없이 지원해야 함. 자주 일어나지 않을 것으로 보고 지연·대역폭 손해는 허용 |
 
-| 항목 | 평문 | IDE 활성 | 차이 |
-|------|------|---------|------|
-| Throughput | baseline | -5% | flit 헤더에 MAC 추가 |
-| Latency | baseline | +17 ns | AES-GCM 가속기 처리 |
-| Power | baseline | +1.5~2 W | 가속기 추가 |
+무결성 값을 얼마나 자주 보내느냐로 두 모드가 있습니다(§11.3.5).
+
+| 모드 | 동작 | Aggregation Flit Count |
+|------|------|------|
+| Containment | 무결성 검사를 통과한 뒤에만 데이터를 넘김. 여러 flit을 버퍼링해야 해서 지연·대역폭 모두 손해 | 68B 5, 256B 2 |
+| Skid | 검사 전에 데이터를 넘김. 지연은 거의 0, 대역폭 손해 작음. 변조 데이터가 잠깐 소비될 수 있고 나중에 검사에서 잡힘 | 68B 128, 256B 32 |
+
+Skid 모드를 쓰려면 그 짧은 창 안의 공격을 소프트웨어 스택이 견딜 수 있어야 하고, 그렇지 않으면 결과는 정의되지 않습니다.
 
 자세한 내용은 [Embedded Security Ch 11 PCIe·CXL IDE 분석](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide).
 
-## TSP — Fabric Security (CXL 3.1+)
+## CXL_IDE_KM — 키 넣기
 
-*TSP (Trusted Security Protocol)*는 CXL 3.1부터 추가된 *fabric 통합 보안 표준*입니다.
+CXL.cachemem IDE 키를 설정하는 쪽을 spec은 *CIKMA*(CXL.cachemem IDE Key Management Agent)라 부릅니다. 절차는 세 단계입니다(§11.4).
 
-| 항목 | 의미 |
+| 단계 | 동작 |
 |------|------|
-| 도입 | CXL 3.1 |
-| 적용 | Multi-host fabric, GFAM |
-| 책임 | fabric 내 multi-host secure coordination |
-| 메커니즘 | IDE·SPDM 기반 위에 fabric layer 보안 |
+| 1 | 링크 양 끝의 CXL IDE capability 레지스터를 읽고 제어 레지스터 설정 |
+| 2 | 양 끝 포트와 각각 *SPDM secure session* 수립 (PCIe DOE 또는 MCTP) |
+| 3 | *CXL_IDE_KM* 메시지로 capability 조회, 필요하면 포트가 만든 키·IV 받기, Rx/Tx 키·IV 설정, IDE 활성화. 이 메시지는 2단계 session 키로 보호됨 |
 
-TSP가 푸는 문제:
+CXL_IDE_KM 메시지는 SPDM vendor-defined 요청·응답으로 만들어집니다. Root Port는 host 고유 방식으로 키를 넣을 수 있고, 그 경우 Root Port와의 SPDM session은 없어도 됩니다.
 
-| 문제 | TSP 해결 |
-|------|---------|
-| 같은 fabric의 다른 host가 데이터 도용 시도 | host 별 *coherency domain 격리* |
-| Fabric switch firmware 신뢰성 | switch attestation + secure routing |
-| GFAM의 multi-host access | per-host *region access control* |
-| Fabric Manager 자체 신뢰성 | FM authentication + secure command channel |
+정리하면 SPDM session 키가 곧 IDE 키는 아닙니다. session은 *IDE 키를 안전하게 나르는 통로*입니다.
 
-*Fabric scale에서 IDE·SPDM만으로는 부족*한 *multi-host coordination*을 TSP가 담당합니다.
+## TSP — TEE Security Protocol
 
-## CXL TEE — TDISP 통합
+spec 이름은 *CXL Trusted Execution Environments Security Protocol*입니다(§11.5). 3.2 발표문은 Trusted Security Protocol이라고도 씁니다.
 
-*TEE (Trusted Execution Environment)*가 *CXL 디바이스까지 확장*된 게 *CXL TEE*입니다. *TDISP (TEE Device Interface Security Protocol)*가 표준입니다.
+목적은 *직접 연결된 CXL 메모리 디바이스*를 TVM 신뢰 경계 안에 넣는 것입니다. PCI-SIG TDISP가 PCIe 디바이스에 대해 하는 일을 CXL 메모리 쪽에서 *보완*합니다(§11.5.1). IDE·TDISP와 함께 쓸 수 있지만 둘 중 어느 것에도 의존하지 않습니다(3.1 개정 이력).
 
-| 항목 | 의미 |
+CXL 3.1 TSP의 범위(§11.5.2):
+
+| 포함 | 제외 |
 |------|------|
-| 정의 | PCI-SIG ECN + CXL Consortium ECN |
-| 적용 | Confidential Computing + CXL device |
-| 의존 | SPDM·IDE 필수 |
-| 목표 | TVM에 device를 *hypervisor 격리 상태로 attach* |
+| host Root Port에 *직접* 연결된 Type 3 (LD, SLD, MH-SLD) | CXL switch, switch 뒤 디바이스(MLD 포함) |
+| Dynamic Capacity 디바이스 | Direct P2P (UIO, CXL.mem, CXL.io) |
+| HDM-H 메모리 | HDM-D·HDM-DB, Type 1·2의 Type 3 HDM 접근 |
+| 256B flit | PBR, 68B flit |
+| pooling (같은 물리 메모리를 공유하지 않는 여러 initiator) | sharing (동시 공유) |
 
-각 CPU 벤더의 *TVM 구현*:
+즉 3.1의 TSP는 *fabric 보안*이 아니라 *직접 연결 메모리의 confidential computing*입니다.
 
-| CPU 벤더 | TVM 구현 | CXL 통합 |
-|---------|---------|---------|
-| AMD | SEV-SNP | SEV-TIO (Trusted I/O) |
-| Intel | TDX | TDX Connect |
-| ARM | CCA (Realm) | Realm Memory Manager + CXL |
+### Target 보안 상태
 
-TDISP가 *벤더 무관*하게 동작 — *PCI-SIG·CXL·CCC가 공동 정의한 표준*.
+TSP target의 상태(§11.5.4.8, Figure 11-30):
+
+| 상태 | 의미 | 전이 |
+|------|------|----------|
+| CONFIG_UNLOCKED | Conventional Reset 뒤 기본. 보안 설정을 하는 상태. TEE opcode 트랜잭션 불가 | 잠금 성공 → CONFIG_LOCKED |
+| CONFIG_LOCKED | 레지스터·CCI 접근 제한, TE State 저장·검사. TEE 트랜잭션 허용 | Transport Security 실패(IDE가 안전하지 않게 됨 등)·CXL Reset → ERROR. Conventional Reset → CONFIG_UNLOCKED |
+| ERROR | TVM 데이터는 계속 보호, 새 TEE 트랜잭션 거부 | 세션·데이터 정리 후 자동으로, 또는 Conventional Reset → CONFIG_UNLOCKED |
+
+설정과 잠금은 host가 *PrimarySession*으로 합니다. host가 모든 설정 정책을 갖는 단일 권한 모델입니다.
+
+## TDISP와 Linux
+
+TDISP는 PCI-SIG의 TEE Device Interface Security Protocol입니다(커널 주석은 PCIe r7.0 §11로 인용). Linux mainline(v7.3-rc6)에서는:
+
+| 위치 | 내용 |
+|------|------|
+| `drivers/pci/tsm.c`, `include/linux/pci-tsm.h` | PCI TSM 프레임워크. TDISP 상태 관리용 secure session 전송 |
+| `drivers/crypto/ccp/sev-dev-tsm.c`, `sev-dev-tio.*` | AMD SEV-TIO. mainline에서 `pci_tsm_ops`를 등록하는 유일한 구현 |
+
+Intel TDX Connect나 Arm CCA의 host 쪽 디바이스 할당 구현은 v7.3-rc6 mainline에 `pci_tsm_ops`로 들어와 있지 않습니다.
 
 자세한 내용은 [Embedded Security Ch 13 CXL TEE 확장](/blog/embedded/embedded-security/chapter13-cxl-tee).
 
-## TDISP 상태 머신
-
-디바이스는 *TDISP의 4가지 상태*로 lifecycle:
-
-| 상태 | 의미 | 진입 조건 |
-|------|------|----------|
-| UNLOCKED | 기본 상태. 누구나 접근 가능 | 초기·detach 후 |
-| CONFIG_LOCKED | 설정 잠김. 변경 불가하지만 사용 가능 | TDI lock 명령 |
-| RUN | TVM에 attach되어 동작 중 | START_INTERFACE_REQUEST |
-| ERROR | 에러 발생, 격리 | violation 감지 |
-
-상태 전이는 *out-of-band control*로 trigger되며, *각 전이마다 SPDM 검증* 또는 *firmware attestation* 필요.
-
-## 4 Layer 통합 — Confidential Computing 흐름
-
-전체 보안 흐름:
-
-| 단계 | Layer | 동작 |
-|------|-------|------|
-| 1 | SPDM | host가 디바이스 인증·firmware measurement 검증 |
-| 2 | SPDM | session 키 교환 |
-| 3 | IDE | session 키 기반 link AES-GCM 활성 |
-| 4 | TSP | fabric 내 coordination 보안 (multi-host 환경) |
-| 5 | TDISP | TVM이 device attach 요청 → LOCKED → RUN |
-| 6 | IDE + TDISP | 모든 link 트래픽 암호화 + TVM 격리 |
-| 7 | Periodic | IDE 키 refresh, SPDM re-attestation |
-
-이 흐름이 *cloud operator·hypervisor·co-tenant·network attacker를 모두 적*으로 가정한 *Confidential Computing 모델*을 *CXL device까지 확장*합니다.
-
-## 한국 메모리 산업의 위치
-
-CXL Consortium의 *공개 자료* 기준:
-
-| 회사 | 관여 |
-|------|------|
-| Samsung | CXL Consortium IDE Working Group 참여, CMM-D 양산 디바이스에 IDE 활성 |
-| SK Hynix | Niagara 양산, IDE 지원 |
-| Astera Labs | Leo 카드, IDE + SPDM 통합 |
-
-*IDE의 AES-GCM 가속기*가 *디바이스 controller die 내부에 통합*되어 *firmware update만으로 활성화*. *한국 두 회사가 CXL 보안 WG의 코어 멤버*.
-
 ## 자주 하는 실수
 
-### "IDE만 켜면 데이터센터가 안전"
+### "IDE만 켜면 디바이스 안의 데이터도 안전"
 
-IDE는 *link만* 보호. *디바이스 안의 메모리·캐시·레지스터*는 *별도 보호 메커니즘* 필요. CXL 메모리 디바이스에 저장된 *plain DRAM 내용*은 *physical attack에 그대로 노출*. *TEE 영역*이 필요.
+IDE의 보호 대상은 *링크 위 트랜잭션*입니다. 디바이스 내부 데이터 보호는 구현 몫이고 spec 범위 밖입니다(§11.1). 메모리 내용을 TVM 단위로 지키려면 TSP의 메모리 암호화·접근 제어가 필요합니다.
 
-### "SPDM 한 번 인증 = 영구 신뢰"
+### "SPDM session 키로 IDE를 암호화한다"
 
-*Counter overflow·session 만료*에 따라 *주기적 re-attestation* 필요. CXL 3.0 fabric의 *128 GB/s 링크*는 *분 단위 key refresh* 권장.
+session은 CXL_IDE_KM 메시지를 보호하고, 그 메시지로 IDE 키·IV를 따로 설정합니다(§11.4).
 
-### "TSP는 IDE의 단순 확장"
+### "TSP는 multi-host fabric 보안"
 
-*Layer가 다릅니다*. IDE는 *링크별 암호화*, TSP는 *fabric 내 multi-host coordination*. 둘은 *상호 보완·필수 동시 사용*.
+CXL 3.1 TSP는 switch·PBR·memory sharing을 *범위에서 뺍니다*. 직접 연결된 Type 3 메모리용입니다(§11.5.2).
 
-### "TDISP가 IDE·SPDM 대체"
+### "TDISP는 CXL 표준이다"
 
-*완전 보완 관계*. TDISP는 *디바이스 lock·TVM attach*, IDE는 *링크 트래픽*, SPDM은 *인증*. *셋 다 활성*해야 confidential.
+TDISP는 PCI-SIG 표준입니다. CXL 쪽 대응물이 TSP이고, 둘은 보완 관계입니다.
 
-### "Side-channel 공격은 자동 차단"
+### "Skid 모드면 보호가 없다"
 
-*Power·timing·EM* 채널은 *CXL 보안 영역 밖*. [Embedded Security Ch 7 Side-channel 공격](/blog/embedded/embedded-security/chapter07-side-channel) 영역.
+무결성 검사는 그대로 하고, 데이터를 *검사 전에* 넘길 뿐입니다. 변조는 나중에 검출되지만, 그 사이 소비된 데이터를 소프트웨어가 감당해야 합니다(§11.3.5).
 
 ## 정리
 
-- CXL 보안은 *4 layer 표준 조합* — SPDM·IDE·TSP·TDISP.
-- *SPDM (DSP0274)*: 디바이스 인증·키 교환·session.
-- *IDE*: link 트래픽 AES-GCM 256 암호화. -5% throughput, +17 ns latency cost.
-- *TSP* (CXL 3.1+): fabric 통합 보안·multi-host coordination.
-- *TDISP*: TVM에 device 안전 attach. AMD SEV-TIO·Intel TDX Connect·ARM CCA 통합.
-- *Full Confidential Computing*은 *4 layer 모두 활성* + *주기적 re-attestation* 필요.
-- *Side-channel·physical attack*은 *CXL 보안 영역 밖* — 별도 메커니즘.
+- *SPDM*(DSP0274)이 인증과 secure session을, *CXL_IDE_KM*이 그 session 위에서 IDE 키 설정을 맡습니다.
+- *CXL.io IDE*는 PCIe IDE를 따르고, *CXL.cachemem IDE*는 flit 단위 AES-GCM 256, PCRC 필수, Containment/Skid 모드.
+- *TSP*(CXL 3.1)는 직접 연결 Type 3 메모리를 TVM 신뢰 경계에 넣습니다. switch·PBR·sharing은 3.1 범위 밖.
+- TSP target 상태는 CONFIG_UNLOCKED → CONFIG_LOCKED → (ERROR).
+- *TDISP*는 PCI-SIG 표준. Linux mainline의 TSM 구현은 현재 AMD SEV-TIO.
 
 ## 다음 편
 

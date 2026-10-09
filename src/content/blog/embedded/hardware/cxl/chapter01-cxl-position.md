@@ -24,7 +24,7 @@ CXL은 *세 프로토콜의 묶음*으로 이 문제를 풉니다.
 
 | 프로토콜 | 시맨틱 | 의무 여부 |
 |---------|--------|----------|
-| **CXL.io** | PCIe 호환 I/O — discovery·enumeration·error reporting·HPA lookup | *모든 디바이스 필수* |
+| **CXL.io** | PCIe 호환 I/O — discovery·enumeration·configuration·error reporting | *모든 디바이스 필수* |
 | **CXL.cache** | 디바이스가 *host 메모리를 캐시* — coherent read/write | 선택 (Type 1·2) |
 | **CXL.mem** | host가 *device 메모리를 load/store* — load instruction이 직접 동작 | 선택 (Type 2·3) |
 
@@ -35,10 +35,8 @@ CXL은 *세 프로토콜의 묶음*으로 이 문제를 풉니다.
 CXL 설계의 가장 *영리한 결정*은 *I/O와 메모리·캐시 시맨틱의 분리*입니다.
 
 - *CXL.io만 필수* — discovery·enumeration이 *기존 PCIe 그대로*이므로 *모든 PCIe 호스트가 CXL 디바이스를 일단 인식*할 수 있습니다. 호환성 비용 최소.
-- *CXL.cache·CXL.mem은 선택* — 디바이스 유형에 맞게 *추가 능력만 켭니다*. SmartNIC는 CXL.cache만, 메모리 expander는 CXL.mem만 켭니다.
+- *CXL.cache·CXL.mem은 선택* — 디바이스 유형에 맞게 *추가 능력만 켭니다*. 캐시만 필요한 Type 1은 CXL.cache를, memory expander인 Type 3는 CXL.mem을 켭니다.
 - *세 프로토콜이 같은 케이블* — *별도 인터커넥트 표준이 안 생기고* PCIe 인프라(slot·cable·switch·retimer)가 *그대로 재사용*됩니다.
-
-이 *분리·재사용* 덕분에 *데이터센터 OEM 입장에서 CXL 채택 비용*이 *지난 10년의 어떤 새 인터커넥트보다도 낮습니다*. *Intel·AMD·NVIDIA 모두 같은 표준*을 *동시 양산*에 적용한 이유입니다.
 
 ## 세대 진화 — 매 세대 새로운 사용 모델
 
@@ -50,7 +48,7 @@ CXL은 *2019년 1.1 발표 이후 5세대*에 걸쳐 *backward compatibility를 
 | **2.0** | 2020 | Managed Hot-Plug, persistent memory, single-level switching, multi-LD pooling | PCIe 5.0 |
 | **3.0** | 2022 | Multi-level switching, *Coherent fabric*, GFAM, peer-to-peer, BISnp | PCIe 6.0 (64 GT/s) |
 | **3.1** | 2023 | Direct P2P CXL.mem, Extended Metadata, TSP (Trusted Security Protocol) | PCIe 6.0 |
-| **3.2** | 2024 | Performance monitoring, hotness monitoring, late poison, PPR Enhancement | PCIe 6.0 |
+| **3.2** | 2024 | CHMU(Hot-Page Monitoring Unit), 추가 performance monitoring event, PPR 강화, TSP 확장 | PCIe 6.0 |
 | **4.0** | 2025 | *128 GT/s* (PCIe 7.0), *Bundled Port*, *Streamlined Port*, *x2 native width*, *4 retimer 지원* | **PCIe 7.0 (128 GT/s)** |
 
 각 세대의 *큰 점프*는 *서로 다른 방향*에서 일어났습니다.
@@ -59,22 +57,20 @@ CXL은 *2019년 1.1 발표 이후 5세대*에 걸쳐 *backward compatibility를 
 - **3.0 = Fabric·GFAM** — Multi-host coherent fabric, 글로벌 메모리 풀.
 - **4.0 = Bandwidth·Port aggregation** — 같은 fabric을 *두 배 빠르게*, *port를 묶어* 운용.
 
-CXL 4.0이 *프로토콜을 크게 바꾸지 않은* 이유는 *3.0에서 도입된 Coherent Fabric·GFAM이 아직 막 양산 단계*에 들어섰기 때문입니다. 4.0은 *그 위에서 운용성·대역폭·port 집계*를 다듬는 세대입니다.
+4.0은 *3.x의 프로토콜과 256B flit을 그대로 유지*하면서 대역폭과 port 집계, memory RAS를 더한 세대입니다.
 
 ## CXL 4.0의 핵심 변경
 
-CXL Consortium의 *공개 발표·press release·white paper 자료*가 강조하는 4.0의 주요 변경:
+CXL Consortium의 4.0 발표문(2025년 11월 18일)과 4.0 소개 웨비나(2025년 12월)가 밝힌 주요 변경:
 
 | 영역 | 변경 |
 |------|------|
 | **물리 계층** | *128 GT/s* — PCIe 7.0 PHY 그대로 사용. *x2 native width* 신규. *retimer 4개* 지원으로 *장거리 link* 가능. |
-| **토폴로지** | **Bundled Port** — 여러 upstream port를 *논리적으로 묶어* host에 단일 그룹으로 노출. **Streamlined Port** — 간소화된 enumeration·운용 흐름. |
-| **유지보수** | *Host-initiated PPR* (Post Package Repair) — host가 *부팅 시 device의 bad row repair* 트리거. *Memory sparing* — boot 또는 *다음 boot로 deferral*해 sparing 수행. |
-| **CVME 강화** | *Patrol Scrub cycle end* 이벤트 추가, granularity control 강화. |
-| **Compliance** | *Extended Metadata Capability* test 추가, *Compliance Mode DOE* 활용. |
-| **Errata 흡수** | *3.2 errata 모두 통합*. |
+| **토폴로지** | **Bundled Port** — 디바이스의 여러 port를 *한 묶음*으로 써 대역폭을 늘림. 묶음마다 *표준 port 하나 이상*과 *Streamlined Port* 여러 개. Streamlined Port는 데이터 대역폭 확장용으로 *면적·전력을 줄인* port이고 256B flit 모드만 씀. |
+| **유지보수** | *Host-initiated PPR* (Post Package Repair) — reset을 넘어 유지되는 설정 bit로 *부팅 시 DRAM row repair*. *Memory sparing* — device boot 시 수행하거나 *다음 boot로 미룸*. |
+| **CVME 강화** | *Patrol Scrub* cycle의 event 생성과 granularity control. |
 
-*Flit 구조 자체는 3.0과 동일* — 같은 FEC·CRC·256B flit 배열을 *그대로 128 GT/s에서 사용*. *Backward compatibility 보장*. *4.0 디바이스가 3.x host에 attach되어도 동작*. 자세한 내용은 [Ch 5: CXL 4.0의 핵심 새 기능](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 분해합니다.
+*256B flit 형식은 3.x 그대로*이고, 컨소시엄은 대역폭을 두 배로 하면서 *지연을 더하지 않았다*고 밝혔습니다. CXL 3.x·2.0·1.1·1.0과 *완전한 하위 호환*을 유지합니다. 자세한 내용은 [Ch 5: CXL 4.0의 핵심 새 기능](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 분해합니다.
 
 ## Bundled Port — 4.0의 가시적 변화
 
@@ -137,23 +133,23 @@ ARB/MUX는 *CXL 고유* 레이어로 *세 프로토콜의 flit·packet을 하나
 
 ### "CXL 4.0이 CXL 3.x와 완전히 다른 프로토콜이다"
 
-*Flit 구조·FEC·CRC는 3.0과 동일*. PHY가 *128 GT/s로 빨라지고* *Bundled Port·운용 기능*이 추가됐을 뿐 *프로토콜 레벨에서 BC가 보장*됩니다. *3.x 호스트에 4.0 디바이스가 attach해도 동작*.
+*256B flit 형식과 3.x 프로토콜은 그대로*입니다. PHY가 *128 GT/s로 빨라지고* *Bundled Port·memory RAS*가 추가됐을 뿐, 이전 버전과 *하위 호환*을 유지합니다.
 
 ### "CXL은 NVLink·Infinity Fabric을 대체한다"
 
-*용도가 다릅니다*. NVLink/IF는 *GPU 간 단일 도메인 초고대역폭*에 최적. CXL은 *general purpose 메모리·일반 가속기 공유*. *공존*이 현실입니다. NVIDIA GB200도 *NVLink + CXL 둘 다* 노출합니다.
+*용도가 다릅니다*. NVLink/IF는 *GPU 간 단일 도메인 초고대역폭*용이고, CXL은 *범용 메모리·가속기 연결*용입니다.
 
 ### "CXL 디바이스를 PCIe 슬롯에 그냥 꽂으면 된다"
 
-*PCIe 5.0 이상 슬롯*과 *BIOS의 CEDT (CXL Early Discovery Table) 지원*이 필요. 옛 BIOS는 *CXL DVSEC을 무시*해 *일반 PCIe로만 인식*합니다. *BIOS update가 거의 필수*입니다.
+*CXL을 지원하는 root port*와 *플랫폼 펌웨어의 CEDT(CXL Early Discovery Table)*가 필요합니다. Linux의 `drivers/cxl/acpi.c`는 CEDT를 읽어 CXL host bridge와 메모리 window를 찾습니다.
 
 ## 정리
 
 - CXL은 *PCIe 인프라*를 *그대로 쓰면서* 가속기·메모리 디바이스를 *CPU 가까이* 끌어옵니다.
 - *세 프로토콜* (CXL.io/cache/mem) 중 *CXL.io만 필수*. 나머지는 *디바이스 사용 모델에 따라 선택*.
 - *세대 진화*는 *backward compat 유지*하며 매 세대 *새 사용 모델*을 추가. 2.0 switch, 3.0 fabric, 4.0 bandwidth+port aggregation.
-- CXL 4.0의 *핵심 변경*: *128 GT/s (PCIe 7.0)*, *Bundled Port·Streamlined Port*, *x2 native width*, *Host-initiated PPR*, *4 retimer 지원*.
-- *Flit 구조·FEC·CRC는 3.0과 동일* — 프로토콜 안정성 + 운용성 진화.
+- CXL 4.0의 *핵심 변경*: *128 GT/s (PCIe 7.0)*, *Bundled Port*(Streamlined Port 포함), *native x2 width*, *retimer 최대 4개*, *memory RAS 강화*(PPR, sparing, patrol scrub event).
+- *256B flit과 3.x 프로토콜은 그대로* — 이전 버전과 하위 호환.
 - 본 시리즈는 *15편*으로 *개념·프로토콜·구현·운용*을 흐름으로 정리합니다.
 
 ## 다음 편

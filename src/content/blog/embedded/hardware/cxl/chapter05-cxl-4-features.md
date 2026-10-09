@@ -12,54 +12,38 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL 4.0은 *PCIe 7.0의 128 GT/s*를 base로 *대역폭을 두 배*로 늘리면서, *Bundled Port·Streamlined Port*로 *port 집계*와 *간소화된 enumeration*을 도입했습니다."** — *Flit 구조는 3.0과 동일*(같은 256B·FEC·CRC) 그대로 두고, *PHY·운용 기능·유지보수*에 집중한 세대입니다. *x2 native width·retimer 4개*가 장거리 link를 가능하게 합니다.
+> **"CXL 4.0은 *PCIe 7.0의 128 GT/s*로 *대역폭을 두 배*로 늘리고, *Bundled Port*로 *가속기 디바이스의 port를 묶어* 대역폭을 더 늘린 세대입니다."** — *256B flit 형식과 3.x 프로토콜*은 그대로 두고, *native x2 width*, *retimer 최대 4개*, *memory RAS 강화*를 더했습니다. 컨소시엄은 대역폭을 두 배로 하면서 *지연을 더하지 않았다*고 밝혔습니다.
 
-[Ch 4](/blog/embedded/hardware/cxl/chapter04-pooling-gfam)에서 *CXL 2.0~3.x의 fabric 진화*를 봤습니다. 이 장은 *CXL 4.0이 그 위에 더한 변경*을 분해합니다.
+[Ch 4](/blog/embedded/hardware/cxl/chapter04-pooling-gfam)에서 *CXL 2.0~3.x의 fabric 진화*를 봤습니다. 이 장은 CXL 4.0 발표문(2025년 11월 18일)과 컨소시엄의 4.0 소개 웨비나(2025년 12월)를 기준으로 4.0의 변경을 정리합니다.
 
-## 4.0의 변경 — 5가지 영역
-
-CXL Consortium 공개 발표가 4.0의 변경을 *5가지 영역*으로 정리합니다.
+## 4.0의 변경
 
 | 영역 | 주요 변경 |
 |------|----------|
-| 물리 계층 | *128 GT/s* (PCIe 7.0), *x2 native width*, *retimer 4개* |
-| 토폴로지 | *Bundled Port*, *Streamlined Port* |
-| 유지보수 | *Host-initiated PPR*, *memory sparing at boot/deferred* |
-| 모니터링 | *CVME granularity*, *Patrol Scrub cycle end* event |
-| Compliance | *Extended Metadata Capability* test, *Compliance Mode DOE* 활용 |
-
-각 영역을 순서대로 봅니다.
+| 물리 계층 | *128 GT/s* (PCIe 7.0), *native x2 width*, *retimer 최대 4개* |
+| 토폴로지 | *Bundled Port* (표준 port + Streamlined Port) |
+| Memory RAS | 부팅 시 *Host-initiated PPR*, boot·deferred *memory sparing*, *patrol scrub* event·granularity |
+| 호환성 | 256B flit 유지, CXL 3.x·2.0·1.1·1.0과 하위 호환 |
 
 ## 128 GT/s — PCIe 7.0 PHY
 
-CXL 4.0은 *PCIe 7.0 Base Specification*의 PHY를 그대로 사용합니다.
+| 세대 | 데이터 속도 |
+|------|-----------|
+| CXL 1.1·2.0 | 32 GT/s |
+| CXL 3.x | 64 GT/s |
+| **CXL 4.0** | **128 GT/s** (PCIe 7.0) |
 
-| 세대 | 데이터 속도 | PHY 베이스 |
-|------|-----------|----------|
-| CXL 1.1·2.0 | 32 GT/s | PCIe 5.0 |
-| CXL 3.0·3.1·3.2 | 64 GT/s | PCIe 6.0 |
-| **CXL 4.0** | **128 GT/s** | **PCIe 7.0** |
+속도가 두 배가 되면서 x16 link의 원시 전송률(한 방향)도 *128 GB/s에서 256 GB/s*로 두 배가 됩니다. 컨소시엄 발표는 이 두 배의 대역폭을 *지연 추가 없이(zero added latency)* 얻었다고 설명합니다.
 
-*속도가 두 배*가 되면서 *x16 link의 단방향 대역폭*도 *128 GB/s → 256 GB/s*로 두 배가 됩니다.
+### Flit 형식은 그대로
 
-### Flit 구조는 동일
+4.0은 *3.x에서 도입한 256B flit 형식과 프로토콜 기능*을 그대로 유지합니다. 그래서 *CXL 3.x·2.0·1.1·1.0과 완전한 하위 호환*을 유지합니다. 자세한 flit 구조는 [Ch 9 Flit Format](/blog/embedded/hardware/cxl/chapter09-flit-format)에서 봅니다.
 
-CXL 4.0의 *디자인 결정 중 가장 영리한 부분*은 *Flit 구조를 3.0 그대로 유지*한 점입니다.
+### Native x2 Width
 
-| 항목 | CXL 3.0 | CXL 4.0 |
-|------|---------|---------|
-| Flit 크기 | 256 B | 256 B (동일) |
-| FEC | 적용 | 동일 |
-| CRC | 적용 | 동일 |
-| Latency-Optimized 변형 | 지원 | 지원 |
+CXL 3.1 규격까지 x2와 x1은 *degraded mode*에서만 쓰는 폭이었습니다. 4.0은 *x2를 native width*로 정의했습니다. 컨소시엄은 그 목적을 *플랫폼의 fan-out을 늘리기 위해서*라고 설명합니다.
 
-*Backward compatibility 보장*. *4.0 디바이스가 3.x host에 attach해도 동작*하고, *3.x 디바이스가 4.0 host에 attach해도 동작*합니다. 자세한 flit 구조는 [Ch 9 Flit Format](/blog/embedded/hardware/cxl/chapter09-flit-format)에서.
-
-### x2 Native Width
-
-CXL 4.0부터 *x2가 native width*가 됐습니다. 기존에는 x1·x4·x8·x16이 표준이었고 x2는 *bifurcation으로만* 가능했습니다.
-
-| Lane 구성 | 단방향 대역폭 (128 GT/s) |
+| Lane 구성 | 원시 전송률 (128 GT/s, 한 방향) |
 |----------|----------------------|
 | x1 | 16 GB/s |
 | x2 | 32 GB/s |
@@ -67,144 +51,76 @@ CXL 4.0부터 *x2가 native width*가 됐습니다. 기존에는 x1·x4·x8·x16
 | x8 | 128 GB/s |
 | x16 | 256 GB/s |
 
-*x2의 가치*는 *소형 디바이스 (NIC·SmartNIC·작은 메모리 expander)*에 *낮은 power·작은 die area*로 *적절한 대역폭*을 제공하는 것입니다.
+### Retimer 최대 4개
 
-### Retimer 4개 지원
+*Retimer*는 링크 중간에서 신호를 받아 다시 만들어 보내는 component로, 링크를 길게 늘이는 데 씁니다. 4.0은 *retimer를 최대 4개*까지 지원해 *channel reach를 늘렸습니다*.
 
-*Retimer*는 *링크를 길게 늘이거나 신호 무결성을 유지*하기 위한 *링크 중간 component*입니다. 신호를 *수신·재생·재송신*합니다.
+## Bundled Port — 가속기 port 묶기
 
-| 세대 | Retimer 최대 |
-|------|------------|
-| CXL 3.x | 2 (typical) |
-| **CXL 4.0** | **4** |
+4.0의 가장 눈에 띄는 기능입니다. *가속기 디바이스*(Type 1·2와 가속기형 Type 3)의 *여러 CXL port를 논리적으로 묶어* 대역폭을 늘립니다. 컨소시엄은 *이종 워크로드가 요구하는 대역폭*을 그 동기로 듭니다.
 
-*4개의 retimer*가 가능해지면서 *몇 미터 거리*의 *외부 enclosure*에 CXL 디바이스를 둘 수 있게 됐습니다. *blade enclosure·rack-scale 메모리 풀*의 *물리적 거리 제약*이 완화됩니다.
+| 항목 | 내용 (4.0 웨비나) |
+|------|------------------|
+| 구성 | 디바이스마다 묶음 하나 이상. 묶음마다 *표준(full-capability) port 하나 이상* + *Streamlined Port* 여러 개 |
+| 각 port | *SLD-B(Single Logical Device)*를 노출. 묶음의 HDM 용량은 각 SLD-B의 합 |
+| 기존 소프트웨어 | 각 port를 *따로* enumerate하고 관리할 수 있음 |
+| 묶음 활용 | port 간 트래픽 interleave 같은 기능에는 *새 소프트웨어*가 필요 |
+| Device ID | 묶음을 모르는 드라이버가 잡지 않도록 보통 *다른 Device ID*를 씀 |
+| IOMMU | 묶음을 아는 소프트웨어가 모든 port가 같은 메모리 view를 갖도록 IOMMU를 구성 |
+| 공통 제어 | CXL Reset·cache disable은 SLD-B 하나에 구현되어 묶음 전체에 적용. TSP·IDE 제어도 한 port로 모음 |
+| 개별 동작 | 전원 관리·reset 관점에서는 각 port가 독립. 각 port가 CDAT를 따로 돌려줌 |
 
-## Bundled Port — Port 집계
+### Streamlined Port
 
-CXL 4.0의 *가장 가시적인 새 기능*입니다. *디바이스가 multiple upstream port*를 *논리적으로 하나의 port group*으로 묶어 *host에 노출*합니다.
+*Streamlined Port*는 Bundled Port 안에서 *데이터 대역폭을 늘리려고 면적·전력을 줄인* port입니다. *256B flit 모드만* 쓰고, UIO에 최적화돼 있습니다(UIO가 아닌 VC0 트래픽 성능은 떨어질 수 있음).
 
-| 항목 | 의미 |
-|------|------|
-| Port group | 여러 물리 port의 *논리적 묶음* |
-| Host 인식 | port group을 *한 device처럼* enumeration |
-| 트래픽 분산 | device 내부에서 *port별 dynamic routing* |
-| Bandwidth | port들의 *aggregated bandwidth*로 활용 |
+## Memory RAS 강화
 
-기대 효과:
+### Host-initiated PPR — 부팅 시 Repair
 
-- **Latency 감소** — 트래픽이 *덜 혼잡한 port로 dynamic routing*
-- **Bandwidth 증가** — *aggregated bandwidth* 활용
-- **QoS 개선** — port 별로 *traffic class 분리* 가능
-- **Failover** — 한 port fail해도 *나머지 port로 graceful degradation*
+*PPR(Post Package Repair)*은 DRAM의 불량 row를 spare row로 대체하는 maintenance입니다. CXL 3.1에도 이미 host가 내리는 *Perform Maintenance* 명령(sPPR·hPPR)이 있습니다. 4.0은 여기에 *reset을 넘어 유지되는 설정 bit*로 *부팅 시* device가 PPR을 수행하게 하는 메커니즘을 더했습니다.
 
-활용 사례:
-- 대용량 메모리 디바이스가 *x16 link 하나로 부족*할 때 *여러 link 묶기*
-- 다른 *VH (virtual hierarchy)*에 별도 port를 *동시 노출*해 *fan-out 효율* 향상
-- *blade enclosure*에서 *backplane 다중 link*를 *하나의 device로 추상화*
+### Memory Sparing — Boot 또는 Deferred
 
-## Streamlined Port — 간소화된 운용
+*Memory sparing*은 fault가 난 영역을 spare 영역으로 대체하는 maintenance입니다. 4.0은 *device boot 시 sparing*과 *다음 boot로 미루는(deferred) sparing*을 정의해, device가 시작하는 sparing과 host가 미루는 sparing을 모두 지원합니다.
 
-*Streamlined Port*는 *Bundled Port의 한 변형*으로 *enumeration·관리 흐름을 간소화*한 것입니다.
+### Patrol Scrub과 CVME
 
-| 차이 | Bundled Port | Streamlined Port |
-|------|------------|-----------------|
-| 복잡도 | 전체 기능 | 간소화 |
-| 적합 | 고급 fabric | 단순 multi-host |
-| Configuration | 복잡 | 빠른 setup |
-
-*소형 enclosure나 fixed-topology* 환경에서 *bundled port의 full feature set이 과한* 경우, *streamlined로 같은 효과를 더 빠르게* 달성.
-
-## Host-initiated PPR — 부팅 시 Bad Row Repair
-
-*PPR (Post Package Repair)*은 *DRAM의 bad row를 spare row로 대체*하는 maintenance입니다. CXL 4.0부터 *host가 부팅 시 직접 PPR을 trigger*할 수 있게 됐습니다.
-
-| 시점 | 변화 |
-|------|------|
-| 3.x 이전 | device가 *자체 RAS 이벤트*에 반응해 PPR 실행 |
-| **4.0** | *Host가 boot 시점에 명시적으로 PPR 명령* 가능 |
-
-기대 효과:
-- *Pre-emptive repair* — fault 발생 전 *예방적 PPR*
-- *Maintenance schedule* — host가 *데이터센터 운영 스케줄*과 *연계*해 PPR 시점 결정
-- *Cluster-wide coordination* — 여러 device의 PPR을 *한 번에 진행* 가능
-
-## Memory Sparing — Boot 또는 Deferred
-
-*Memory sparing*은 *물리 영역에 fault*가 발생했을 때 *spare 영역으로 재할당*하는 maintenance입니다. CXL 4.0은 *boot 시점 또는 다음 boot로 deferral*을 지원합니다.
-
-| Trigger | 동작 |
-|---------|------|
-| Boot-time sparing | 부팅 직후 *bad region을 spare로 교체* |
-| Deferred (next boot) | *online 상태에서는 표시만*, 다음 boot에서 교체 |
-
-Deferred sparing이 *운영 친화적*입니다. *production 워크로드 중단 없이* fault를 추적·기록하고, *예정된 maintenance window*에 교체 수행.
-
-## CVME — Enhanced Monitoring
-
-*CVME (CXL Virtual Memory Errors)*는 CXL 디바이스의 *메모리 fault 카운팅* 메커니즘입니다. CXL 4.0은:
-
-| 개선 | 의미 |
-|------|------|
-| Granularity 강화 | per-rank·per-bank 같은 *세밀한 fault 분류* |
-| Patrol Scrub cycle end event | scrub 완료 시 *명시적 이벤트*, host가 *결과 확인* 가능 |
-
-이 모니터링이 *production에서의 disk-style health 추적*과 *예측적 디바이스 교체*를 가능하게 합니다.
-
-## Compliance Testing 강화
-
-CXL 4.0의 Compliance chapter는 *새 test case*를 추가했습니다.
-
-| Test | 추가/변경 |
-|------|----------|
-| Extended Metadata Capability | 새 test 추가 |
-| Compliance Mode DOE | 기존 test가 *Compliance Mode DOE 활용*하도록 update |
-| 일반 test | configuration value 업데이트 |
-
-Compliance testing은 *상호운용성의 핵심*입니다. CXL 4.0 device가 *모든 4.0 host에서 동작*하려면 *Compliance Mode DOE*가 *표준 path*가 됩니다.
+*CVME(Corrected Volatile Memory Error)*는 휘발성 메모리에서 정정된 오류입니다. 4.0은 *patrol scrub cycle*에 대한 *granularity control과 event 생성*을 더해, general media event record에 오류 카운트 조건을 채울 수 있게 했습니다.
 
 ## 4.0이 *안 한* 것
 
-CXL 4.0이 *프로토콜 자체*를 *건드리지 않은* 것이 *중요한 점*입니다.
-
-| 영역 | 4.0에서 안 함 |
+| 영역 | 4.0에서 |
 |------|-------------|
-| Flit 구조 | 3.0과 동일 |
-| Coherency 모델 | 3.x HDM-D/DB·BISnp 그대로 |
-| Fabric routing | 3.0 PBR 그대로 |
-| Security | 3.1 TSP 그대로 |
-
-*안 바꾼 영역*이 *backward compat 보장의 기반*. CXL 4.0이 *너무 많이 바꿨다면* 3.x 디바이스·host와의 *대규모 호환성 문제*가 발생했을 것.
+| Flit 형식 | 3.x의 256B flit 유지 |
+| 프로토콜 기능 | 3.x에서 도입한 기능 유지 |
+| 호환성 | 3.x·2.0·1.1·1.0과 하위 호환 |
 
 ## 자주 하는 실수
 
-### "CXL 4.0이 CXL 3.x보다 모든 면에서 빠르다"
+### "128 GT/s로 바뀌면서 지연도 늘었다"
 
-*PHY 대역폭만* 두 배입니다. *latency*는 *비슷하거나 약간 증가* (128 GT/s 신호 처리 overhead). *cache hit-rate 의존 워크로드*는 *4.0이 빠르지 않을 수 있음*. *workload별 측정* 필수.
+컨소시엄 발표는 *지연 추가 없이* 대역폭을 두 배로 했다고 밝혔습니다. 다만 load 한 번의 지연은 PHY 속도보다 *경로와 컨트롤러*가 좌우합니다.
 
-### "Bundled Port는 multi-LD를 대체"
+### "Bundled Port를 꽂으면 host가 알아서 한 device로 쓴다"
 
-*완전히 다른 차원*입니다. Bundled Port는 *port 수준 집계*, multi-LD는 *capacity 수준 분할*. *둘 다 동시 가능*하고 *상호 보완*적.
+기존 소프트웨어는 port를 *각각* 봅니다. port 간 트래픽 분산 같은 묶음의 이점은 *Bundled Port를 아는 소프트웨어*가 있어야 얻습니다.
 
-### "Host-initiated PPR이면 RAS 자동 처리 끝"
+### "Streamlined Port는 Bundled Port의 간소화 모드다"
 
-*틀렸습니다*. Host가 *PPR을 언제 trigger할지* 결정해야 하고, *그 결정은 RAS 이벤트 모니터링·예측 모델*에 기반해야 합니다. *automation은 software 측 책임*.
+Streamlined Port는 Bundled Port *안에 들어가는 port 종류*입니다. 묶음에는 표준 port가 하나 이상 있어야 하고, Streamlined Port는 데이터 대역폭을 늘리는 역할을 합니다.
 
-### "Retimer 4개 = 무조건 좋다"
+### "Host-initiated PPR은 4.0에서 처음 생겼다"
 
-*Latency가 늘어납니다*. 각 retimer가 *수 ns의 latency*를 추가. *retimer 1개*면 되는 짧은 link에 *4개를 두면 손해*. *링크 길이 매핑* 후 *필요 수만 사용*.
-
-### "Streamlined Port가 Bundled Port의 simplified version"
-
-*Bundled의 한 운용 mode*입니다. *full Bundled feature가 필요 없을 때 선택*하는 것이지 *별도 표준이 아닙니다*.
+host가 PPR을 요청하는 *Perform Maintenance(sPPR·hPPR)*는 3.1에도 있습니다. 4.0이 더한 것은 *부팅 시 PPR*을 위한 지속 설정 bit입니다.
 
 ## 정리
 
-- CXL 4.0은 *PCIe 7.0의 128 GT/s* base로 *대역폭 두 배*. *x2 native·retimer 4개*가 추가.
-- *Bundled Port*는 *port 집계*. *Streamlined Port*는 *간소화 운용*.
-- *Host-initiated PPR·boot/deferred sparing*이 *maintenance를 host 측 제어*로 가져왔습니다.
-- *CVME granularity·Patrol Scrub event*가 *모니터링을 강화*. predictive maintenance 가능.
-- *Flit 구조·coherency·fabric routing은 3.0 그대로* — *backward compatibility 보장*.
+- CXL 4.0은 *PCIe 7.0의 128 GT/s*로 대역폭을 두 배로 늘렸고, 컨소시엄은 *지연 추가 없음*을 밝혔습니다.
+- *native x2 width*로 fan-out을, *retimer 최대 4개*로 channel reach를 늘렸습니다.
+- *Bundled Port*는 가속기 디바이스의 port를 묶어 대역폭을 늘리고, *Streamlined Port*는 그 안의 면적·전력 최적화 port입니다.
+- *부팅 시 PPR*, *boot·deferred sparing*, *patrol scrub event*로 memory RAS를 강화했습니다.
+- *256B flit과 3.x 프로토콜*은 그대로라 이전 버전과 하위 호환입니다.
 
 ## 다음 편
 

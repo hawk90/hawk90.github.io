@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL.cache는 *디바이스가 host 메모리를 native 캐시*하게 만들어 *PCIe 라운드트립을 회피*하는 프로토콜입니다."** — *D2H Req* (device → host: read·write·invalidate)와 *H2D Snoop·Resp·Data*가 *MESI 기반의 양방향 cache coherency*를 유지합니다. *Type 1·2 디바이스가 사용*하며, *Type 1 SmartNIC의 packet metadata 캐싱*이 대표적 사용 사례입니다.
+> **"CXL.cache는 *디바이스가 host 메모리를 native 캐시*하게 만들어 *PCIe 라운드트립을 회피*하는 프로토콜입니다."** — *D2H Req* (device → host: read·write·invalidate)와 *H2D Snoop·Resp·Data*가 *MESI 기반의 양방향 cache coherency*를 유지합니다. *Type 1·2 디바이스가 사용*합니다.
 
 [Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 *CXL.io의 PCIe 호환성*을 봤습니다. 이 장은 *디바이스가 host memory를 native 접근*하는 *CXL.cache 메커니즘*입니다. *PCIe DMA의 한계*를 넘는 *coherent caching*이 핵심입니다.
 
@@ -28,9 +28,8 @@ CXL.cache는 *디바이스에 작은 local cache*를 두고 *host memory의 hot 
 
 | 시나리오 | PCIe DMA | CXL.cache |
 |---------|---------|-----------|
-| 같은 데이터 반복 read | 매번 DMA (느림) | 첫 read 후 cache hit (빠름) |
-| Coherency | 없음 (app가 처리) | 자동 (hardware) |
-| Latency | 수 µs (DMA) | 수십 ns (cache hit) |
+| 같은 데이터 반복 read | 매번 DMA | 첫 read 후 디바이스 cache hit |
+| Coherency | 소프트웨어가 처리 | 하드웨어가 처리 |
 
 ## CXL.cache 메시지 — D2H·H2D
 
@@ -38,9 +37,9 @@ CXL.cache는 *양방향 메시지*로 동작합니다.
 
 | 방향 | 채널 | 메시지 종류 | 의미 |
 |------|------|-----------|------|
-| Device → Host | D2H Req | RdShared·RdOwn·RdAny·CLflushed·Invalidate·... | device가 read·write·invalidate 요청 |
+| Device → Host | D2H Req | RdCurr·RdShared·RdOwn·RdAny·RdOwnNoData·ItoMWr·WrCur·WrInv·CLFlush·CleanEvict·DirtyEvict·CacheFlushed 등 | device가 read·write·eviction 요청 |
 | Device → Host | D2H Resp·Data | response·data return | host snoop 응답·data 반환 |
-| Host → Device | H2D Req·Snoop | snoop·invalidate | host가 device cache 동기화 |
+| Host → Device | H2D Req | SnpData·SnpInv·SnpCur | host가 device cache를 snoop |
 | Host → Device | H2D Resp·Data | response·data return | device read 응답·data 반환 |
 
 *양방향 모두 Req·Resp·Data 3가지 트래픽*. PCIe DMA보다 *훨씬 정교한 메시지 set*입니다.
@@ -89,7 +88,7 @@ Device cache에 *modified line*이 있는데 *host CPU가 같은 line read*하�
 
 ## Cache State — MESI 변형
 
-CXL.cache는 *MESI* (Modified·Exclusive·Shared·Invalid)와 그 *변형*을 지원합니다.
+CXL.cache의 디바이스 캐시는 *MESI* (Modified·Exclusive·Shared·Invalid)를 씁니다. host는 응답(GO)에 *4-bit MESI 인코딩*을 실어 디바이스가 그 line을 어떤 상태로 가져도 되는지 알려 줍니다.
 
 | State | 의미 | Device에서 |
 |-------|------|----------|
@@ -98,30 +97,17 @@ CXL.cache는 *MESI* (Modified·Exclusive·Shared·Invalid)와 그 *변형*을 �
 | **Shared (S)** | shared + clean | device·host(들)이 *공유* read |
 | **Invalid (I)** | line 없음 | cache eviction 또는 invalidate된 상태 |
 
-추가 state:
+## Type 1 시나리오 — 반복해서 읽는 host 데이터
 
-| State | 의미 |
-|-------|------|
-| Forward (F) | shared 중 *forwarding 책임 갖는 sharer* (4-state 변형) |
-| Owned (O) | shared but dirty (MOESI 변형) |
+CXL 1.1 규격이 드는 Type 1의 예는 *복잡한 atomic 연산*이 필요한 가속기입니다. 더 일반적으로는, host 메모리에 있는 *작고 자주 읽는 데이터*를 디바이스가 캐시하는 흐름이 CXL.cache의 기본 모양입니다.
 
-*어떤 state set*을 *지원하는지*는 *디바이스 capability*에 따라 다릅니다. 보통 *MESI*가 최소 baseline.
-
-## Type 1 시나리오 — SmartNIC Packet Metadata
-
-대표적 *production sweet spot*:
-
-| 시나리오 | 동작 |
-|---------|------|
-| 1 | NIC가 packet 받음, packet header 검사 필요 |
-| 2 | Packet metadata는 *host RAM*에 있음 (routing table·flow state) |
-| 3 | NIC가 D2H RdShared로 metadata read |
-| 4 | NIC cache에 저장, state = Shared |
-| 5 | 다음 packet도 같은 metadata 사용 → *cache hit, host 접근 없음* |
-| 6 | Host CPU가 routing table update 시 *H2D Snoop SnpInv*로 NIC cache invalidate |
-| 7 | NIC가 다음 packet에 *RdShared로 fresh data fetch* |
-
-이 패턴이 *NIC packet processing throughput*을 *수십%* 향상시킬 수 있습니다 (workload 의존).
+| 단계 | 동작 |
+|------|------|
+| 1 | 디바이스가 host 메모리의 데이터를 `RdShared`로 읽음 |
+| 2 | 디바이스 cache에 저장, state = Shared |
+| 3 | 같은 데이터를 다시 쓰면 *cache hit*, host 접근 없음 |
+| 4 | host CPU가 그 데이터를 바꾸면 `SnpInv`로 디바이스 cache를 무효화 |
+| 5 | 디바이스가 다음 접근 때 다시 `RdShared`로 가져옴 |
 
 ## Type 2 시나리오 — Accelerator의 Shared Data
 
@@ -144,7 +130,7 @@ Type 2 GPU·NPU도 CXL.cache를 사용해 *host의 shared data*에 접근합니�
 | t1 | byte 0 modify | — | D2H RdOwn, line snatched |
 | t2 | — | byte 32 modify | H2D Snoop, line snatched back |
 | t3 | byte 0 again | — | D2H RdOwn again |
-| ... | (반복) | (반복) | 매번 BISnp 트래픽 |
+| ... | (반복) | (반복) | 매번 D2H 요청과 H2D snoop |
 
 *throughput이 무너집니다*. 해결:
 
@@ -154,23 +140,13 @@ Type 2 GPU·NPU도 CXL.cache를 사용해 *host의 shared data*에 접근합니�
 
 ## Linux 측 — CXL.cache 활용
 
-*Type 1 디바이스*의 CXL.cache는 *vendor driver 내부*에서 사용. *별도 sysfs 노출 없음*.
+Type 1 디바이스는 HDM이 없어 `/sys/bus/cxl/devices/` 아래 CXL 메모리 장치로 등장하지 않습니다. 디바이스가 CXL.cache를 지원하는지는 CXL DVSEC의 capability로 보입니다.
 
 ```bash
-# Type 1 NIC가 attach되면 lspci에 보이지만
-$ lspci -nn | grep -i smartnic
-5e:00.0 Ethernet controller [0200]: ... [...]
-
-# CXL.cache 자체는 sysfs에 노출 안 됨
-$ ls /sys/bus/cxl/devices/
-# (Type 1만 있으면 빈 디렉토리)
-
-# vendor 드라이버 내부에서 cache 기능 사용
-$ dmesg | grep -i "cxl.cache"
-nic0: CXL.cache enabled, cache size 8 MB
+$ lspci -vvv -s 5e:00.0
+    Capabilities: [...] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=1 Len=56: CXL
+        CXLCap: Cache+ IO+ Mem- ...
 ```
-
-*Type 2*의 CXL.cache는 *coro·CUDA 같은 high-level runtime*이 *bias·access pattern hint*를 제공.
 
 ## 자주 하는 실수
 
@@ -184,22 +160,22 @@ CXL.cache 환경에서는 *false sharing이 매우 비쌉니다*. *modern C++의
 
 ### "Device cache state는 software가 관리"
 
-*Hardware가 자동 관리*합니다. software는 *bias hint·prefetch* 같은 hint만 줄 수 있고 *state transition은 hardware*가 결정.
+*Hardware가 관리*합니다. 디바이스가 가질 수 있는 상태는 host가 GO 응답의 MESI 인코딩으로 정합니다.
 
-### "MESI면 모든 CXL 디바이스가 호환"
+### "CXL.cache 디바이스는 MOESI·MESIF 상태도 쓴다"
 
-*State set이 디바이스마다 다를 수 있음*. *MESI·MOESI·MESIF* 변형들. *capability 확인 필요*. CXL.io DVSEC에서 *지원 state 표기*.
+CXL 규격이 정의한 디바이스 캐시 상태는 *MESI*입니다. Owned·Forward 상태는 규격에 없습니다.
 
 ### "Snoop overhead가 항상 무시 가능"
 
-*High-contention shared data*에서는 *snoop 트래픽이 dominant*가 됩니다. *Type 2 GPU의 shared weight scan*에서 *snoop 비용이 compute보다 큰 워크로드*도 존재.
+host와 디바이스가 *같은 line을 자주 번갈아 쓰면* snoop 트래픽이 커집니다. 공유 데이터의 배치와 access pattern을 먼저 봐야 합니다.
 
 ## 정리
 
 - CXL.cache는 *디바이스가 host memory를 native cache*하는 프로토콜입니다.
 - *D2H·H2D 메시지*가 *MESI coherency를 양방향 유지*. PCIe DMA보다 *정교한 메시지 set*.
 - Read는 *RdShared/RdOwn*, Write는 *RdOwn → Modified*, Host의 update는 *Snoop으로 device cache invalidate*.
-- *Type 1 SmartNIC의 packet metadata 캐싱*이 가장 명확한 production fit.
+- 디바이스 캐시 상태는 *MESI*이고, host가 GO 응답으로 허용 상태를 정합니다.
 - *False sharing*이 *최악 시나리오* — cache line padding으로 회피.
 
 ## 다음 편
