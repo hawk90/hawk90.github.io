@@ -2,7 +2,7 @@
 // Validates that the portable export is complete, open, and source-integrity preserving.
 
 import { createHash } from 'node:crypto';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const directory = 'reports/content-export';
@@ -11,7 +11,10 @@ const manifest = await readFile(join(directory, 'manifest.json'), 'utf8').then(J
 const lines = await readFile(join(directory, 'content.jsonl'), 'utf8').then((text) => text.trim().split('\n').filter(Boolean)).catch((error) => { findings.push(`content.jsonl: ${error.code ?? error.message}`); return []; });
 if (manifest) {
   if (manifest.format !== 'UTF-8 JSON Lines') findings.push('manifest: expected open JSONL format');
-  if (manifest.exportedDocumentCount !== 3387) findings.push(`manifest: expected 3387 documents, got ${manifest.exportedDocumentCount}`);
+  // Compare with the corpus as it is now; a constant here went stale the
+  // first time a post was added.
+  const corpus = (await readdir('src/content/blog', { recursive: true })).filter((entry) => entry.endsWith('.md')).length;
+  if (manifest.exportedDocumentCount !== corpus) findings.push(`manifest: export has ${manifest.exportedDocumentCount} documents, corpus has ${corpus} — regenerate with npm run export:portable-content -- --apply`);
   if (lines.length !== manifest.exportedDocumentCount) findings.push(`content.jsonl: expected ${manifest.exportedDocumentCount} records, got ${lines.length}`);
 }
 for (const line of lines) {
