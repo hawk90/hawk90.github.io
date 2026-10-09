@@ -1,7 +1,7 @@
 # Diagram reference audit
 
-- SVG assets on disk: 1079
-- References from content: 875
+- SVG assets on disk: 1072
+- References from content: 868
 - References with missing or too-short alt: 0
 - References to a missing SVG: 0
 - SVGs never referenced: 225
