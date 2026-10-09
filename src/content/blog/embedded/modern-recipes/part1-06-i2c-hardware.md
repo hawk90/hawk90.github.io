@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"I2C는 두 선으로 100 개의 디바이스를 묶는 open-drain 버스입니다."** 풀업 저항 하나가 속도와 전력 모두를 결정합니다.
+> **"I2C는 두 선으로 여러 디바이스를 묶는 open-drain 버스입니다."** 실제 연결 가능한 수는 주소 충돌, 버스 커패시턴스, sink current와 전원 조건으로 결정됩니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -53,8 +53,8 @@ I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 
 | --- | --- | --- |
 | Standard | 100 kHz | 4.7 kΩ 표준 |
 | Fast | 400 kHz | 2.2 kΩ |
-| Fast Plus | 1 MHz | 1 kΩ + push-pull boost |
-| High Speed | 3.4 MHz | 전용 buffer 필요 |
+| Fast Plus | 1 MHz | rise time·sink current 조건 확인 |
+| High Speed | 3.4 MHz | master code·전기적 조건 확인 |
 
 ### 4) 풀업 저항 계산
 
@@ -175,7 +175,7 @@ write-then-read 시 STOP을 거치면 다른 master가 끼어들 수 있습니�
 ## 정리
 
 - I2C는 두 선(SDA, SCL) open-drain wired-AND 버스입니다.
-- 풀업 저항이 핵심입니다. 100 kHz에 4.7k, 400 kHz에 2.2k가 표준입니다.
+- 풀업 저항이 핵심입니다. 4.7 kΩ·2.2 kΩ은 흔한 예시값일 뿐, bus capacitance·전압·sink current·rise-time 요구사항으로 계산해야 합니다.
 - ACK/NACK로 슬레이브 응답을 확인합니다. NACK는 "디바이스 없음"의 신호입니다.
 - Clock stretching으로 슬레이브가 master를 기다리게 할 수 있습니다.
 - Bus stuck은 SCL 9-toggle 시퀀스로 복구합니다.

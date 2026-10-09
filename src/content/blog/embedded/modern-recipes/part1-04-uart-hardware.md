@@ -43,7 +43,7 @@ Baud = 9600일 때, sampling clock = 9600 × 16 = 153.6 kHz입니다.
 
 ### 3) Baud rate 정확도
 
-송수신 양측의 baud rate 차이가 누적되면 한 frame 안에서 sampling 위치가 어긋납니다. 일반적으로 **±2.5%** 이내가 안전 기준입니다.
+송수신 양측의 baud rate 차이가 누적되면 한 frame 안에서 sampling 위치가 어긋납니다. 허용 가능한 총 baud 오차는 oversampling 방식·데이터 길이·수신기 설계에 따라 달라지며, **±2.5%**는 일부 UART 구성에서 쓰는 경험적 기준일 뿐 보편적인 보장값은 아닙니다.
 
 ```c
 // USART BRR 계산 (STM32 — 16x oversampling 기준)
@@ -67,7 +67,7 @@ Framing error는 stop bit 위치에서 0이 들어오는 경우입니다. baud r
 
 ### 5) FIFO
 
-옛 UART는 1 byte buffer만 있어 매 byte마다 IRQ가 발생했습니다. 현대 MCU의 UART는 보통 4 ~ 64 byte FIFO를 갖습니다.
+옛 UART는 1 byte buffer만 있어 매 byte마다 IRQ가 발생했습니다. 현대 MCU UART의 FIFO 깊이는 제품마다 다르며, FIFO가 없거나 1 byte인 구현도 있습니다. 데이터시트에서 깊이와 trigger level을 확인해야 합니다.
 
 ```c
 // STM32H7 — RX FIFO 8 byte
@@ -152,7 +152,7 @@ high baud + slow ISR이면 FIFO가 차서 데이터가 손실됩니다. DMA로 �
 ## 정리
 
 - UART는 클럭선 없이 양측이 baud rate에 합의해 동작하는 가장 단순한 시리얼입니다.
-- 16x oversampling과 majority vote로 ±2.5% baud 오차까지 견딥니다.
+- 16x oversampling과 majority vote는 baud 오차에 대한 여유를 주지만, 허용 오차는 UART 구현과 프레임 형식에 따라 계산해야 합니다.
 - 내부 RC는 ±1 ~ 2%로 위험합니다. 크리스털을 권장합니다.
 - FIFO와 DMA를 활용하면 1 Mbaud 이상에서도 안정적인 통신이 가능합니다.
 - TX/RX cross, 레벨 차이, baud mismatch가 가장 흔한 디버깅 원인입니다.

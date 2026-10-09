@@ -52,11 +52,11 @@ CAN은 한 비트를 여러 time quanta(TQ)로 나누고, 그 중 일부 지점�
 
 ![CAN Bit Timing (TQ segments)](/images/blog/modern-recipes/diagrams/part1-10-can-bit-timing.svg)
 
-Sample point가 너무 빠르면 ringing이 끝나기 전에 sampling, 너무 늦으면 다음 비트 영향. 표준은 75 ~ 87.5%입니다.
+Sample point가 너무 빠르면 ringing이 끝나기 전에 sampling하고, 너무 늦으면 다음 비트의 영향과 oscillator tolerance 여유가 줄어듭니다. 75~87.5%는 흔한 설정 범위지만 모든 CAN/CAN-FD 네트워크의 표준 고정값은 아닙니다.
 
-### 5) CAN-FD — 최대 8 Mbit/s
+### 5) CAN-FD — data phase bitrate 확장
 
-Classic CAN은 1 Mbit/s, 최대 8 byte/payload입니다. CAN-FD는 data phase 속도를 따로(보통 2 ~ 5 Mbit/s) 올리고 payload를 64 byte까지 확장합니다.
+Classic CAN의 최대 bitrate와 CAN-FD data phase bitrate는 controller·transceiver·bus 길이·네트워크 설계에 따라 정합니다. CAN-FD는 arbitration phase와 별도로 data phase bitrate를 높일 수 있고 payload를 64 byte까지 확장합니다.
 
 ```text
 Arbitration phase (1 Mbit/s) | Data phase (2~5 Mbit/s) | EOF
@@ -149,7 +149,7 @@ sample point 계산을 잘못해 ringing 도중 sampling하면 random error가 �
 - CAN은 차동 wired-AND 버스로 multi-master arbitration이 가능합니다.
 - 양 끝 120Ω 종단이 필수입니다. 중간 노드는 종단 금지.
 - Sample point는 75 ~ 87.5% 표준. 잘못 설정하면 sporadic 에러 발생.
-- CAN-FD로 arbitration은 1 Mbit, data는 5 Mbit까지 확장 가능합니다.
+- CAN-FD는 arbitration phase와 data phase의 bitrate를 분리할 수 있으며, 실제 상한은 controller·transceiver·bus 조건을 확인해야 합니다.
 - Transceiver와 공통 GND 없이는 동작하지 않습니다.
 
 다음 편에서는 **RS-485 / RS-422 차동 신호**를 다룹니다. 산업 현장의 다른 차동 표준입니다.
