@@ -34,5 +34,22 @@ export function onPageLoad(init: () => InitResult): void {
     }
   };
   run();
-  document.addEventListener('astro:page-load', run);
+
+  // `run()` above already covered the page this script was loaded on, but
+  // Astro's ClientRouter fires astro:page-load for that same page too (on the
+  // first page's window `load`, or right after the swap when the script first
+  // arrives with a navigation). Running again tore down the first init and
+  // started over — double work, and giscus lost its message listener that way.
+  // So skip the next page-load unless a new navigation has begun since.
+  let skipNextPageLoad = true;
+  document.addEventListener('astro:before-swap', () => {
+    skipNextPageLoad = false;
+  });
+  document.addEventListener('astro:page-load', () => {
+    if (skipNextPageLoad) {
+      skipNextPageLoad = false;
+      return;
+    }
+    run();
+  });
 }
