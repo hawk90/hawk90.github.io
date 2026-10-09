@@ -140,10 +140,18 @@ export const defineAnalytics = (c: AnalyticsConfig): AnalyticsConfig => c;
  * `enabled` loads the Auto ads script and switches the CSP to the policy
  * AdSense can run under (see BaseLayout).
  */
-export type AdsConfig = { enabled: boolean; client: string };
+export type AdsConfig = {
+  enabled: boolean;
+  client: string;
+  /** Path prefixes that never get ads (and keep the strict CSP). */
+  excludePaths: string[];
+};
 export const defineAds = (c: AdsConfig): AdsConfig => {
   if (!/^ca-pub-\d{16}$/.test(c.client)) {
     throw new Error(`ADS_CONFIG.client must look like ca-pub-<16 digits>, got "${c.client}"`);
+  }
+  for (const prefix of c.excludePaths) {
+    if (!prefix.startsWith('/')) throw new Error(`ADS_CONFIG.excludePaths entries must start with "/": "${prefix}"`);
   }
   return c;
 };

@@ -10,10 +10,10 @@
  * astro:build:done and adds their SHA-256 hashes to script-src. Browsers that
  * see a hash ignore 'unsafe-inline'; it stays only as a pre-CSP2 fallback.
  *
- * Opt-in per page: only a CSP <meta> carrying `data-csp-pin-inline-scripts`
- * is pinned. With AdSense on, BaseLayout emits the ads-compatible policy
- * without the marker — ad code injects inline script, and a hash would make
- * browsers ignore the 'unsafe-inline' it needs.
+ * Every CSP <meta> is pinned except one marked `data-csp-ads`: the
+ * AdSense-compatible policy BaseLayout uses on ad pages. Ad code injects
+ * inline script, and a hash would make browsers ignore the 'unsafe-inline' it
+ * needs. Opt-out, so a meta that loses its marker fails closed (gets pinned).
  *
  * One hash set for every ClientRouter page, not one per page. A meta CSP stays
  * in force after the router removes the <meta> during a navigation, so the
@@ -72,8 +72,8 @@ export const EXECUTABLE_SCRIPT_TYPES = new Set([
   'text/x-javascript',
 ]);
 
-/** Attribute on a CSP <meta> that opts the page into hash pinning. */
-export const PIN_MARKER = 'data-csp-pin-inline-scripts';
+/** Attribute on a CSP <meta> that opts it out of hash pinning (ads policy). */
+export const ADS_MARKER = 'data-csp-ads';
 
 // Files are independent; a few at a time overlaps file I/O without holding
 // the whole site in memory.
@@ -240,7 +240,7 @@ export default function cspInlineScriptHashes() {
         let optedOut = 0;
         await forEachLimited(htmlFiles(root), async (file) => {
           const scan = await scanPage(await readFile(file, 'utf8'));
-          if (scan.csp && !(PIN_MARKER in scan.csp.attribs)) {
+          if (scan.csp && ADS_MARKER in scan.csp.attribs) {
             optedOut++;
             return;
           }
@@ -273,8 +273,9 @@ export default function cspInlineScriptHashes() {
         });
 
         logger.info(
-          `pinned ${routerHashes.length} inline script hash(es) site-wide; ${pages} page(s) updated` +
-            (optedOut ? `; ${optedOut} page(s) use an unpinned CSP (no ${PIN_MARKER})` : ''),
+          `pinned inline script hashes in ${pages} page(s)` +
+            (routerHashes.length ? ` (${routerHashes.length} shared across ClientRouter pages)` : '') +
+            (optedOut ? `; ${optedOut} page(s) use the unpinned ads policy (${ADS_MARKER})` : ''),
         );
         if (unprotected.length) {
           logger.warn(
