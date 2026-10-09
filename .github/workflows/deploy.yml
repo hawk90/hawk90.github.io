@@ -3,16 +3,36 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
+    # A push deploys unless every changed file is listed here. Listed = cannot
+    # change dist/: nothing in the build (src/, astro.config.mjs, ec.config.mjs,
+    # tsconfig.json, scripts/build-og.mjs via prebuild) reads these paths.
+    # Do not add scripts/** (prebuild runs scripts/build-og.mjs) or *.txt
+    # globs (public/ads.txt and public/robots.txt ship with the site).
     paths-ignore:
+      # Docs and repo meta
       - 'README.md'
       - 'CHANGELOG.md'
+      - 'CLAUDE.md'
       - 'LICENSE*'
-      - '.gitignore'
       - 'docs/**'
-      - '_jekyll_backup/**'
-      # Audit output only. Not '**.txt': that also matched public/ads.txt and
-      # public/robots.txt, so a commit touching only those never deployed.
+      # Audit output, governance and agent material
       - 'reports/**'
+      - 'archives/**'
+      - 'claude/**'
+      - '.claude/**'
+      # Data read only by audit scripts, never by the build
+      - 'data/**'
+      # Local tooling; deploy pins Node itself (node-version: "24.21.0")
+      - '.gitignore'
+      - '.prettierrc'
+      - '.prettierignore'
+      - 'lefthook.yml'
+      - 'renovate.json'
+      - '.vscode/**'
+      - '.nvmrc'
+      - '.node-version'
+      # Read by giscus.app from the repository, not served by the site
+      - 'giscus.json'
   workflow_dispatch:
 
 permissions:
