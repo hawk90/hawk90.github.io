@@ -74,13 +74,12 @@ Linux에서 CXL을 사용하려면 해당 kernel의 CXL 지원과 `CONFIG_CXL_*`
 ```bash
 # 1. lspci로 보면 PCIe device로 보임
 $ lspci -nn
-5e:00.0 Memory controller [0508]: Samsung CMM-D [1234:5678]
+5e:00.0 CXL [0502]: <vendor> <device> [<vendor id>:<device id>]
 
-# 2. CXL DVSEC 확인
-$ lspci -vvv -s 5e:00.0 | grep -A 5 "Designated Vendor"
-Capabilities: [60] Designated Vendor-Specific: Vendor=1e98 ID=0000
-    Compute Express Link
-    DVSEC Rev: 1, Len: 56
+# 2. CXL DVSEC 확인 (CXLCap 줄은 -vv 이상에서 출력)
+$ sudo lspci -vvv -s 5e:00.0 | grep -A 1 "Designated Vendor"
+	Capabilities: [...] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=1 Len=56: CXL
+		CXLCap:	Cache- IO+ Mem+ MemHWInit+ HDMCount 1 Viral-
 
 # 3. CXL 서브시스템에 등록 확인
 $ ls /sys/bus/cxl/devices/
