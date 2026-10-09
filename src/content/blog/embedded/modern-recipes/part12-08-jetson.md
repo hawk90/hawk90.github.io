@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Jetson은 단순한 GPU 보드가 아니라 TensorRT + DLA + VPI + DeepStream을 묶은 stack입니다."** 자율주행·로봇·산업 vision의 사실상 reference platform이고, 같은 코드가 Nano부터 Orin AGX까지 그대로 돌아갑니다.
+> **"Jetson은 단순한 GPU 보드가 아니라 TensorRT·VPI·DeepStream 등 하드웨어별 SDK를 묶은 stack입니다."** 자율주행·로봇·산업 vision에서 널리 쓰이지만, 지원 가속기와 API·모델 호환성은 제품 세대와 JetPack 버전에 따라 확인해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -47,11 +47,11 @@ JetPack 6.x
   Isaac ROS — GPU-accelerated ROS 2 nodes
 ```
 
-DLA·VIC·PVA가 Jetson의 *숨은 가속기*입니다.
+DLA·VIC·PVA가 Jetson의 *숨은 가속기*입니다. 단, 모든 Jetson SKU가 이 블록을 같은 수로 제공하는 것은 아닙니다.
 
 | 가속기 | 역할 |
 |--------|------|
-| DLA (Deep Learning Accelerator) | fixed-function INT8 conv·activation 가속기입니다. Xavier·Orin에는 2개가 있고 TensorRT에서 따로 떼어 쓸 수 있습니다. GPU보다 낮은 전력으로 INT8 추론을 돌립니다 |
+| DLA (Deep Learning Accelerator) | fixed-function INT8 conv·activation 가속기입니다. Xavier와 일부 Orin SKU에는 DLA가 제공되며, 정확한 개수와 지원 연산은 SKU·TensorRT 버전에 따라 다릅니다. |
 | VIC (Video Image Compositor) | color conversion·resize·blending을 fixed-function으로 처리합니다. GStreamer의 `nvvidconv` plugin이 이 블록을 씁니다 |
 | PVA (Programmable Vision Accelerator) | Vision DSP입니다. VPI의 일부 알고리즘이 이 backend로 떨어집니다 |
 | NVENC/NVDEC | H.264/H.265/AV1 하드웨어 인코더·디코더입니다 |
@@ -143,7 +143,7 @@ gst-launch-1.0 \
   nvegltransform ! nveglglessink
 ```
 
-`(memory:NVMM)` 표시가 *전체 pipeline zero-copy*의 핵심입니다. Camera → ISP → inference → display가 CPU를 한 번도 거치지 않습니다. 8 camera × YOLO inference × tracking이 single Orin AGX에서 30 fps로 돌아갑니다.
+`(memory:NVMM)` 표시는 파이프라인의 버퍼 공유·복사 경로를 점검할 때 유용합니다. 실제로 CPU 복사가 사라지는 범위와 다중 카메라 처리량은 카메라 포맷·모델·해상도·JetPack 구성에 따라 달라지므로, 8 camera × 30 fps 같은 수치는 별도 벤치마크로 확인해야 합니다.
 
 ### Isaac ROS — GPU-accelerated ROS 2
 
@@ -240,7 +240,7 @@ cudaMalloc(&gpu, sz);
 cudaMemcpy(gpu, cpu, sz, cudaMemcpyHostToDevice);   /* 매 frame copy */
 ```
 
-Jetson은 integrated GPU이므로 `cudaHostAllocMapped` zero-copy가 거의 항상 빠릅니다.
+Jetson은 integrated GPU이므로 `cudaHostAllocMapped` zero-copy를 검토할 수 있지만, 접근 패턴·buffer 유형·동기화 비용에 따라 명시적 복사보다 느릴 수도 있습니다.
 
 > DLA fallback 없이 build
 

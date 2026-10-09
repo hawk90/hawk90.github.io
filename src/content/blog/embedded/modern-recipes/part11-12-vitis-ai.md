@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-Zynq UltraScale+ MPSoC, Kria K26 SoM, Versal AI 장착 device에서 neural network inference를 돌릴 때 사실상 표준입니다. ZCU104, KV260 같은 dev kit이 대표 플랫폼입니다.
+Zynq UltraScale+ MPSoC, Kria K26 SoM, Versal AI 계열에서 neural network inference를 구성할 때 사용하는 대표적인 AMD/Xilinx toolchain입니다. 지원 플랫폼과 runtime 조합은 Vitis AI release와 보드에 따라 확인해야 합니다. ZCU104, KV260 같은 dev kit이 대표 예시입니다.
 
 GPU·NPU 없이 *FPGA fabric으로 deep learning*을 하면서 *INT8 throughput*과 *낮은 전력*을 챙기는 게 핵심입니다. ResNet-50을 KV260에서 ~150 fps @ 5W 정도로 돌립니다.
 
@@ -276,7 +276,7 @@ DPU에서 지원 안 하는 op는 CPU로 떨어짐. 모델을 *DPU-friendly*하�
 
 > Input shape 고정
 
-DPU는 *fixed shape*만 지원. Dynamic shape 모델은 max shape으로 fixed + pad.
+DPU 컴파일은 보통 입력 shape을 미리 정해야 합니다. Dynamic shape 모델은 지원 범위를 확인한 뒤 여러 고정 shape으로 컴파일하거나 max shape + padding으로 변환하는 방식이 필요할 수 있습니다.
 
 > Multi-DPU 활용 안 함
 
@@ -305,7 +305,7 @@ Profile으로 측정. Preprocess는 GStreamer 또는 별도 fabric block으로 �
 - Runtime: VART API (C++/Python).
 - Multi-thread로 4× throughput 일반적.
 - DPU는 FPGA fabric에 instantiate되는 softcore (RTL IP).
-- B4096이 KV260·ZCU104 표준 옵션.
+- B4096은 일부 KV260·ZCU104 구성에서 사용하는 예시 옵션이며, 실제 DPU 크기·개수는 FPGA 자원과 보드 설계에 따라 달라집니다.
 - CPU pre/post bottleneck을 항상 profile.
 
 다음 편은 **OpenCL on FPGA**입니다.
