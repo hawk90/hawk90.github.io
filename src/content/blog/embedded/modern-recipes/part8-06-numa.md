@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"NUMA = node별 local memory."** Local access는 빠르고, remote access는 1.5~2배 느립니다. Topology를 모른 채 thread를 띄우면 성능이 묵묵히 절반으로 떨어집니다.
+> **"NUMA = node별 local memory."** Local access가 보통 빠르지만 remote access의 지연·대역폭 차이는 CPU·소켓·메모리 구성에 따라 달라집니다. Topology를 모른 채 thread와 메모리를 배치하면 성능이 크게 흔들릴 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -57,7 +57,7 @@ numactl --hardware
 #   1:  21  10
 ```
 
-`distance` 값이 10이면 local, 20 이상이면 remote입니다. 이 표가 NUMA tuning의 출발점입니다.
+`distance` 값은 Linux가 노드 간 상대적인 비용을 표현하는 지표입니다. 흔히 local 노드가 10으로 표시되지만 remote 임계값을 모든 시스템에서 20으로 해석할 수는 없으므로, 실제 topology와 latency를 함께 확인합니다.
 
 ### 실행 시 binding
 
@@ -120,7 +120,7 @@ CPU affinity와 memory binding을 같은 node로 묶는 패턴입니다. DPDK, 5
 LD_PRELOAD=libjemalloc.so ./prog
 ```
 
-`jemalloc`은 per-thread arena를 가지며 NUMA를 인지합니다. `tcmalloc`도 비슷한 구조입니다. 일반 glibc malloc보다 cross-node fragmentation이 훨씬 적습니다.
+`jemalloc`·`tcmalloc`의 arena와 NUMA 동작은 버전·빌드 옵션·사용 API에 따라 다릅니다. allocator를 바꾸기 전에 실제 allocation locality와 cross-node traffic을 측정해야 하며, 일반 glibc malloc보다 fragmentation이 항상 줄어든다고 단정할 수 없습니다.
 
 ### HBM과 CXL을 NUMA node로
 
@@ -139,7 +139,7 @@ numa_alloc_onnode(hot_data_size, HBM_NODE);
 numa_alloc_onnode(cold_data_size, DRAM_NODE);
 ```
 
-`numactl --hardware`가 보여주는 node는 HBM과 CXL을 *논리적으로 같은 NUMA*로 표시합니다. Tiered memory의 표준 인터페이스입니다.
+일부 Linux 플랫폼에서는 HBM과 CXL 메모리가 NUMA node로 노출될 수 있습니다. 실제 노드 노출과 tiering 방식은 kernel·firmware·장치 구성에 따라 다르므로 `numactl --hardware`와 sysfs를 확인해야 합니다.
 
 ### 자동차 ECU의 mini-NUMA
 
@@ -246,7 +246,7 @@ Kernel auto balancing은 background로 동작하지만 RT spec을 보장하지 �
 
 ## 정리
 
-- NUMA는 node별 local memory를 가지며 remote access는 1.5~2배 느립니다.
+- NUMA는 node별 local memory를 가지며 remote access 비용은 시스템별로 측정해야 합니다.
 - CPU affinity와 memory binding을 *같은 node*로 묶는 것이 기본 패턴입니다.
 - `numactl`은 운영용, `libnuma`는 프로그램용 API입니다.
 - HBM과 CXL도 NUMA node로 노출되어 tiered memory 인터페이스가 됩니다.

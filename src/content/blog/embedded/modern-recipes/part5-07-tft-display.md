@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-산업용 HMI panel, 의료기기 UI, 자동차 cluster, smart home hub — full color graphic UI가 필요할 때 TFT를 씁니다. SPI ILI9341 (2.4-3.5 inch)은 작은 MCU도 구동, parallel RGB LTDC는 STM32F7/H7 이상이 필요합니다.
+산업용 HMI panel, 의료기기 UI, 자동차 cluster, smart home hub — full color graphic UI가 필요할 때 TFT를 씁니다. SPI ILI9341 (2.4~3.5 inch)은 작은 MCU에서도 구동할 수 있고, parallel RGB/LTDC는 해당 주변장치와 충분한 framebuffer 대역폭을 가진 MCU가 필요합니다. 정확한 지원 여부는 STM32 제품군·핀맵·메모리 구성으로 확인해야 합니다.
 
 이 글은 두 가지 변종 — *SPI TFT*와 *parallel LTDC TFT*를 다룹니다.
 
@@ -26,9 +26,9 @@ topics: ["embedded"]
 
 | 인터페이스 | 해상도 | MCU 요구사항 | 전송 속도 |
 |-----------|--------|-------------|-----------|
-| SPI (ILI9341) | 240×320 ~ 320×480 | Cortex-M3 이상 | 40-60 MHz |
-| FSMC/FMC parallel | 480×320 ~ 800×480 | STM32F4 + FSMC | ~50 MHz × 16-bit |
-| LTDC (RGB parallel) | 480×272 ~ 800×480 | STM32F7/H7 | DMA framebuffer |
+| SPI (ILI9341) | 240×320 ~ 320×480 | MCU의 SPI·RAM·DMA 지원에 따라 결정 | 40~60 MHz 예시 |
+| FSMC/FMC parallel | 480×320 ~ 800×480 | 해당 외부 메모리 controller를 가진 MCU | ~50 MHz × 16-bit 예시 |
+| LTDC (RGB parallel) | 480×272 ~ 800×480 | LTDC와 framebuffer 메모리를 제공하는 MCU | DMA framebuffer |
 
 LTDC는 *DMA controller가 framebuffer를 RGB output으로 자동 송출*. CPU는 framebuffer만 그리면 됩니다.
 

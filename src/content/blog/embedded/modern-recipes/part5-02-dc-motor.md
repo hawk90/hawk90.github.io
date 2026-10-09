@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-소형 로봇 wheel, fan, pump, conveyor, RC car — 모두 DC motor에 H-bridge driver IC를 붙입니다. STM32에서 직접 motor를 *돌리지는 않습니다*. 전류가 수백 mA에서 수 A까지 흐르고 *역기전력 spike*가 발생하므로 *driver IC가 격리*합니다.
+소형 로봇 wheel, fan, pump, conveyor, RC car — 모두 DC motor에 H-bridge driver IC를 붙이는 구성이 흔합니다. STM32 GPIO가 모터 전류를 직접 공급하는 대신 driver IC가 전력 스위칭·보호·전류 경로를 담당합니다. 전류가 수백 mA에서 수 A까지 흐르고 *역기전력 spike*가 발생하므로 전원·접지·보호 소자를 함께 설계해야 합니다.
 
 이 글은 흔히 쓰는 H-bridge driver (L293D, L298, DRV8833, TB6612)와 STM32 PWM 연결, 방향·속도 제어, 그리고 current sensing 패턴까지 다룹니다.
 
@@ -214,11 +214,11 @@ driver의 *logic supply*와 *motor supply*를 같은 source에 두면 motor inru
 
 > ⚠️ Flyback diode 누락 (discrete H-bridge)
 
-driver IC 안 쓰고 직접 MOSFET로 만들 때 *Schottky diode 4개 필수*. 없으면 motor 끄는 순간 MOSFET 파괴.
+driver IC 안 쓰고 직접 MOSFET로 만들 때는 MOSFET의 body diode, 외부 다이오드, 스너버 등 회로에 맞는 역기전력 경로를 설계해야 합니다. 외부 Schottky diode 4개가 모든 H-bridge에서 의무인 것은 아니지만, 보호 경로가 없으면 motor를 끄는 순간 소자가 손상될 수 있습니다.
 
-> ⚠️ PWM 주파수 1 kHz 이하
+> ⚠️ PWM 주파수가 너무 낮음
 
-가청 영역에서 *motor가 소리를 냅니다*. 20-30 kHz로 올림.
+가청 영역에서 *motor가 소리를 낼 수 있습니다*. 청각 소음과 driver 손실·전류 리플의 절충을 보면서 주파수를 정합니다. 20~30 kHz는 한 가지 선택지일 뿐입니다.
 
 > ⚠️ Stalled motor가 무한 current 흘림
 
