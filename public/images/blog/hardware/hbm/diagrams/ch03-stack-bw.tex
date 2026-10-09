@@ -16,7 +16,7 @@
 \draw[axisLine] (0,0) -- (12,0) node[ticklabel, below=4pt, midway, yshift=-12pt] {연도};
 \draw[axisLine] (0,0) -- (0,7.5) node[ticklabel, left=4pt, midway, xshift=-22pt, rotate=90] {Stack BW (GB/s)};
 
-\foreach \y/\lab in {0.5/128, 1.2/307, 1.8/461, 3.2/819, 5.0/1250, 6.5/2000} {
+\foreach \y/\lab in {0.5/128, 1.2/307, 1.8/410, 3.2/819, 5.0/1230, 6.5/2000} {
   \draw[tick] (-0.1, \y) -- (0.1, \y);
   \node[ticklabel, anchor=east] at (-0.15, \y) {\lab};
 }
@@ -30,9 +30,9 @@
   \node[font=\sffamily\scriptsize\bfseries, text=absbord, anchor=south] at (\x, \y+0.03) {\lab};
 }
 
-% HBM4 dashed (expected)
+% HBM4 dashed (JESD270-4, Apr 2025)
 \draw[draw=absbord, fill=absfill, line width=0.5pt, dashed] (11.0-0.3, 0) rectangle (11.0+0.3, 6.5);
-\node[font=\sffamily\scriptsize\bfseries, text=absbord, anchor=south] at (11.0, 6.55) {HBM4 (예정)};
+\node[font=\sffamily\scriptsize\bfseries, text=absbord, anchor=south] at (11.0, 6.55) {HBM4 (JESD270-4)};
 
 \node[font=\sffamily\bfseries\small, text=inkc] at (6, 8.2) {세대별 Stack BW};
 
