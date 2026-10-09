@@ -45,7 +45,7 @@ Process마다 별도의 page table을 갖습니다. 같은 가상 주소도 proc
 - L0       L1       L2       L3       offset
 - 9 bit    9 bit    9 bit    9 bit    12 bit
 
-4-level이므로 한 번 변환에 메모리 access 4번이 일어납니다. 그래서 **TLB**(Translation Lookaside Buffer)로 캐싱합니다.
+예시처럼 4-level page table을 사용하면 TLB miss 시 여러 단계의 table access가 필요합니다. 실제 level 수와 access 횟수는 granule·VA 크기·translation regime에 따라 달라지므로 **TLB**(Translation Lookaside Buffer)로 결과를 캐싱합니다.
 
 ### 3) TLB — Translation Lookaside Buffer
 
@@ -53,11 +53,9 @@ Process마다 별도의 page table을 갖습니다. 같은 가상 주소도 proc
 
 **Cortex-A53:**
 
-- ITLB: 10 entry, fully-associative
-- DTLB: 10 entry
-- L2 TLB: 512 entry
+TLB entry 수와 associativity는 구현·revision과 SoC 구성에 따라 확인해야 합니다.
 
-TLB hit이면 1 cycle, miss이면 page table walk(2 ~ 4 cycle, cached) 또는 main memory access(수십 cycle).
+TLB hit/miss latency는 코어·cache·memory system과 현재 부하에 따라 달라집니다. miss에서는 page-table walk와 필요한 memory access가 추가됩니다.
 
 ### 4) Page attribute
 
@@ -123,19 +121,19 @@ cat /proc/self/status | grep -E "VmSize|VmRSS|VmData"
 ps -o min_flt,maj_flt,cmd 1234
 ```
 
-DMA용 물리 주소 메모리 할당:
+DMA용 coherent 메모리 할당:
 
 ```c
 // Linux kernel driver
 void *cpu_addr;
-dma_addr_t phys_addr;
+dma_addr_t dma_addr;
 
-cpu_addr = dma_alloc_coherent(dev, 4096, &phys_addr, GFP_KERNEL);
-// cpu_addr: 가상 주소 (CPU가 사용)
-// phys_addr: 물리 주소 (DMA가 사용)
+cpu_addr = dma_alloc_coherent(dev, 4096, &dma_addr, GFP_KERNEL);
+// cpu_addr: CPU가 사용하는 kernel virtual address
+// dma_addr: device가 사용하는 DMA address (IOMMU가 있으면 물리주소와 다를 수 있음)
 ```
 
-`dma_alloc_coherent`는 cache coherent한 영역을 반환합니다. CPU와 DMA가 같은 데이터를 보장 받습니다.
+`dma_alloc_coherent`는 해당 플랫폼 DMA API가 정의한 coherent mapping을 반환합니다. CPU와 DMA가 같은 데이터를 볼 수 있는 방식은 architecture·IOMMU·DMA API 구현에 따릅니다.
 
 ## 측정 / 비교
 
@@ -179,7 +177,7 @@ context switch마다 TLB 전체 flush하면 너무 느립니다. ARM은 ASID(Add
 ## 정리
 
 - MMU는 모든 메모리 접근을 page table을 통해 가상 → 물리로 번역합니다.
-- ARMv8은 4 KB page, 4-level page table을 표준으로 씁니다.
+- ARMv8-A는 4 KB·16 KB·64 KB granule을 지원하며, page-table level 수는 선택한 granule과 VA 설정에 따라 달라집니다.
 - TLB가 변환 결과를 캐싱해 lookup 비용을 줄입니다.
 - Linux는 process별 page table, COW, demand paging으로 메모리를 관리합니다.
 - DMA는 물리 주소를 쓰므로 `dma_*` API로 변환합니다.

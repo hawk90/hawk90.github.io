@@ -12,15 +12,15 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"DMB는 데이터, DSB는 데이터+명령, ISB는 pipeline flush"**입니다. 잘못된 선택은 race 또는 overhead를 부릅니다.
+> **"DMB는 memory ordering, DSB는 이전 명령·memory access의 완료 대기, ISB는 instruction stream 동기화"**입니다. 정확한 선택은 access 종류와 architecture 상태 변경 여부에 따라 달라집니다.
 
 ## 3 가지 Barrier
 
 | Barrier | 의미 | Cycle 비용 |
 |---|---|---|
-| **DMB** | Data Memory Barrier. 이전 access 완료 후 이후 진행 | 1-10 |
-| **DSB** | Data Sync Barrier. DMB + 모든 명령 완료 대기 | 10-50 |
-| **ISB** | Instruction Sync. pipeline flush + instruction refetch | 5-20 |
+| **DMB** | 이전·이후 memory access의 관찰 순서를 제어 | 구현·memory system에 따라 상이 |
+| **DSB** | 이전 명령과 명시적 memory access가 완료될 때까지 동기화 | 구현·memory system에 따라 상이 |
+| **ISB** | instruction stream을 동기화하고 이후 명령을 다시 fetch | 구현·pipeline에 따라 상이 |
 
 ## DMB — Data Memory Ordering
 
@@ -30,7 +30,7 @@ __DMB();
 flag = 1;   /* shared_data write가 flag write *전*에 가시 */
 ```
 
-`memory_order_release` store와 같은 역할을 수동으로 수행합니다.
+적절한 atomic release/acquire 연산과 결합하면 memory ordering을 구성할 수 있지만, DMB 하나가 C/C++ atomic 연산을 대체하지는 않습니다.
 
 ### 언제 DMB 필요?
 
@@ -65,7 +65,7 @@ __DSB();   /* clock enable 완료 대기 */
 TIM2->CR1 = 1;   /* safe */
 ```
 
-DMB와의 차이는 다음과 같습니다. DSB는 *모든 이전 명령(memory + non-memory) 완료*를 기다립니다.
+DSB는 이전 명령의 효과와 명시된 memory access가 필요한 시점까지 완료되도록 동기화합니다. 단순히 DMB보다 “더 강한 데이터 fence”라고만 이해하지 말고 Arm의 access·completion 정의를 확인해야 합니다.
 
 ### 언제 DSB?
 
@@ -78,7 +78,8 @@ DMB와의 차이는 다음과 같습니다. DSB는 *모든 이전 명령(memory 
 
 ```c
 fill_buffer(tx_buf, len);
-__DSB();   /* memory write 모두 완료 */
+SCB_CleanDCache_by_Addr(tx_buf, len); /* cacheable buffer라면 먼저 clean */
+__DSB();   /* memory access 완료 순서 동기화 */
 DMA->CR = DMA_START;   /* DMA가 fresh data 봄 */
 ```
 
@@ -141,7 +142,7 @@ smp_mb();
 - Atomic 명령 (LDREX/STREX) 후
 - Self-modifying code (DSB + ISB)
 
-Single core의 lock-free는 *barrier 없이도 동작 가능*합니다(volatile + correct usage).
+Single core에서도 ISR·DMA·MMIO ordering이 있으면 barrier가 필요할 수 있습니다. `volatile`만으로 lock-free 동기화의 원자성·ordering이 보장되는 것은 아닙니다.
 
 ## Cortex-A SMP — Barrier 필수
 

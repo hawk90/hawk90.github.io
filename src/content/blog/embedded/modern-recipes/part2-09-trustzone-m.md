@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"TrustZone-M은 하나의 코어에 두 개의 세계를 만듭니다."** Secure에 두면 NS 세계가 절대 접근할 수 없고, NS 코드가 죽어도 Secure는 살아 있습니다.
+> **"TrustZone-M은 하나의 코어에 Secure와 Non-Secure 실행 영역을 분리합니다."** Non-Secure 코드가 Secure 전용 영역에 접근하지 못하도록 경계를 설정할 수 있지만, Secure 코드는 설정에 따라 Non-Secure 영역에 접근할 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -36,7 +36,7 @@ TrustZone-M은 같은 CPU에서 두 모드로 동작합니다.
    PUF / unique ID
 ```
 
-각 world는 별도의 stack, MPU region, vector table, system register를 갖습니다(banked register).
+일부 stack·control·vector 관련 상태는 world별로 분리되거나 banked 형태로 동작합니다. 정확히 banked되는 register와 MPU/SAU 동작은 Armv8-M 프로파일과 구현을 확인해야 합니다.
 
 ### 2) Memory 분류 — Secure / NS / NSC
 
@@ -144,10 +144,10 @@ arm-none-eabi-gcc -mcpu=cortex-m33 \
 
 | 동작 | Cortex-M33 cycle |
 | --- | --- |
-| NS → S 진입 (SG) | 4 ~ 5 cycle |
-| S → NS 리턴 (BXNS) | 4 cycle |
-| Banked register 접근 | 1 cycle (각 world에서) |
-| Cross-world IRQ entry | ~12 ~ 15 cycle |
+| NS → S 진입 (SG) | 구현·메모리 상태에 따라 상이 |
+| S → NS 리턴 (BXNS) | 구현·메모리 상태에 따라 상이 |
+| Banked register 접근 | 구현별 |
+| Cross-world IRQ entry | 구현·설정에 따라 상이 |
 
 | Region 수 | 단위 |
 | --- | --- |

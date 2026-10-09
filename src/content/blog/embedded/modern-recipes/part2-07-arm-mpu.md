@@ -25,7 +25,7 @@ topics: ["embedded"]
 
 ### 1) MPU 기본 — region 단위 보호
 
-Cortex-M MPU는 8 (M3/M4) 또는 16 (M7/M33) region을 정의합니다. 각 region은 시작 주소, 크기, 속성을 갖습니다.
+Cortex-M MPU의 region 수는 코어와 구현에 따라 다릅니다. M3/M4/M7/M33에서 흔히 8 또는 16개 구성을 보지만, 항상 고정된 것은 아닙니다.
 
 ```text
 Region 0: 0x08000000 ~ 0x080FFFFF (Flash)  ─ RX, normal
@@ -145,15 +145,15 @@ mpu_set_region(0, 0x20000000, 0x1000, MPU_AP_RW_RW);
 
 | 코어 | MPU region 수 |
 | --- | --- |
-| Cortex-M0+ | 8 (option) |
-| Cortex-M3 | 8 |
-| Cortex-M4 | 8 |
-| Cortex-M7 | 16 |
-| Cortex-M33 | 16 |
+| Cortex-M0+ | 구현별/옵션 |
+| Cortex-M3 | 구현별 |
+| Cortex-M4 | 구현별 |
+| Cortex-M7 | 구현별 |
+| Cortex-M33 | 구현별 |
 
 | MPU enable 후 overhead | 영향 |
 | --- | --- |
-| Memory access | 1 ~ 2 cycle 추가 (lookup) |
+| Memory access | 코어·region·memory type에 따라 상이 |
 | Region 변경 | DSB + 동기화 필요 |
 | Context switch | RTOS가 region 재설정 |
 

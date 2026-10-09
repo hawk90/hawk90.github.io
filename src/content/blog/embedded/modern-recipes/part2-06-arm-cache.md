@@ -68,13 +68,16 @@ Clean+Inv:  Clean 후 Invalidate
 DMA write(peripheral → memory):
 
 ```c
-// 1. CPU가 buffer 영역의 cache line을 invalidate (stale 제거)
-SCB_InvalidateDCache_by_Addr((uint32_t *)buffer, sizeof(buffer));
+// 1. DMA buffer를 cache line 경계로 배치하고, 기존 dirty data가 있다면
+//    clean 후 invalidate (단순 invalidate는 dirty data를 잃을 수 있음)
+SCB_CleanInvalidateDCache_by_Addr((uint32_t *)buffer, sizeof(buffer));
 // 2. DMA 동작
 dma_start(buffer, len);
 // 3. DMA 완료 대기
 wait_dma_done();
-// 4. CPU read 시 자동으로 memory에서 fetch (cache가 비었으므로)
+// 4. DMA 완료 후 다시 invalidate해 CPU cache의 stale line 제거
+SCB_InvalidateDCache_by_Addr((uint32_t *)buffer, sizeof(buffer));
+// 5. CPU read 시 memory에서 fetch
 process(buffer);
 ```
 
@@ -101,7 +104,7 @@ SCB_EnableDCache();
 // 이후 성능 측정 시 cache effect 포함
 ```
 
-Cortex-A는 BootROM 또는 bootloader가 켜 둡니다. Linux kernel boot 시점에는 이미 활성.
+Cortex-A의 cache enable 시점은 BootROM·firmware·bootloader·OS 구성에 따라 다릅니다. Linux는 보통 초기 부팅 과정에서 cache를 설정하지만 플랫폼별 초기화 코드를 확인해야 합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -147,11 +150,11 @@ MPU->RASR = MPU_RASR_ENABLE_Msk
 
 | 코어 | L1 I/D | L2 | Cache line |
 | --- | --- | --- | --- |
-| Cortex-M7 | 4 ~ 64 KB 각 | option (chip별) | 32 byte |
+| Cortex-M7 | 구현별 | option (chip별) | 보통 32 byte |
 | Cortex-A7 | 32 KB 각 | 256 KB ~ 1 MB | 64 byte |
-| Cortex-A53 | 8 ~ 64 KB 각 | shared 128KB~2MB | 64 byte |
-| Cortex-A72 | 48 KB I, 32 KB D | shared 0.5~4 MB | 64 byte |
-| Cortex-A78 | 64 KB 각 | private + shared L3 | 64 byte |
+| Cortex-A53 | 구현별 | 구현별 | 보통 64 byte |
+| Cortex-A72 | 구현별 | 구현별 | 보통 64 byte |
+| Cortex-A78 | 구현별 | 구현별 | 보통 64 byte |
 
 | 메모리 접근 | Cycle (Cortex-M7 @ 400 MHz) |
 | --- | --- |
@@ -169,7 +172,7 @@ MPU->RASR = MPU_RASR_ENABLE_Msk
 
 > ⚠️ DMA buffer를 cache line aligned 하지 않음
 
-64 byte line인데 buffer가 60 byte offset이면 invalidate가 인접 buffer까지 영향을 줍니다. `__attribute__((aligned(32)))` 필수.
+cache line 크기보다 작은 비정렬 buffer를 부분적으로 clean/invalidate하면 인접 데이터가 영향을 받을 수 있습니다. 실제 line 크기와 API 정렬·길이 요구사항을 확인하고 buffer를 정렬합니다.
 
 > ⚠️ Invalidate 빼고 DMA 동작
 
