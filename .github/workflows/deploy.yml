@@ -10,7 +10,9 @@ on:
       - '.gitignore'
       - 'docs/**'
       - '_jekyll_backup/**'
-      - '**.txt'
+      # Audit output only. Not '**.txt': that also matched public/ads.txt and
+      # public/robots.txt, so a commit touching only those never deployed.
+      - 'reports/**'
   workflow_dispatch:
 
 permissions:
