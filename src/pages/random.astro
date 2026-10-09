@@ -18,9 +18,9 @@ const buildPick = slugs[Math.floor(Math.random() * slugs.length)] ?? '';
     {/*
       This page only runs its own inline redirect script. csp-inline-script-hashes
       adds that script's hash at build time, which also switches off
-      'unsafe-inline' (kept only as a pre-CSP2 fallback).
+      'unsafe-inline' (kept only as a pre-CSP2 fallback). No ads here.
     */}
-    <meta http-equiv="Content-Security-Policy" data-csp-pin-inline-scripts content="default-src 'none'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" />
+    <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'unsafe-inline'; base-uri 'none'; form-action 'none'" />
     {/*
       Self-canonical, not a canonical to buildPick. Pointing it at the picked
       post claimed this page *is* that post, which is false: the destination
