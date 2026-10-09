@@ -48,6 +48,63 @@ const robotsValue = [noIndex && 'noindex', noFollow && 'nofollow']
   .join(', ');
 const ogLocale = SITE_CONFIG.locale.replace('-', '_');
 
+// --- Ads and Content-Security-Policy -------------------------------------
+// Ads run on content pages only. Admin (a GitHub token is typed there),
+// settings, the component gallery and 404 stay ad-free under the strict CSP.
+const pagePath = Astro.url.pathname;
+const adsOnPage =
+  ADS_CONFIG.enabled && !ADS_CONFIG.excludePaths.some((prefix) => pagePath.startsWith(prefix));
+
+const analyticsScriptOrigins =
+  !ANALYTICS_CONFIG.enabled ? []
+  : ANALYTICS_CONFIG.provider === 'google' ? ['https://www.googletagmanager.com', 'https://www.google-analytics.com']
+  : ANALYTICS_CONFIG.provider === 'umami' ? [new URL(ANALYTICS_CONFIG.src || 'https://analytics.umami.is/script.js').origin]
+  : ['https://plausible.io'];
+const analyticsConnectOrigins =
+  !ANALYTICS_CONFIG.enabled ? []
+  : ANALYTICS_CONFIG.provider === 'google' ? ['https://www.google-analytics.com']
+  : analyticsScriptOrigins;
+
+/*
+  Strict policy (no ads on this page). 'unsafe-inline' is only a pre-CSP2
+  fallback: csp-inline-script-hashes.mjs adds the hash of every inline script
+  at build time, and browsers that see a hash ignore 'unsafe-inline'. giscus
+  runs no script here (see Giscus.astro); only its iframe loads. GitHub API
+  origins are for the admin panel.
+*/
+const strictPolicy = [
+  "default-src 'self'",
+  ["script-src 'self' 'unsafe-inline'", ...analyticsScriptOrigins].join(' '),
+  "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+  "font-src 'self' https://cdn.jsdelivr.net",
+  "img-src 'self' data: https:",
+  ["connect-src 'self' https://api.github.com https://github.com", ...analyticsConnectOrigins].join(' '),
+  "frame-src https://giscus.app",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https://github.com",
+].join('; ');
+
+/*
+  Ads policy. AdSense officially supports only a nonce-based strict CSP sent as
+  an HTTP header (its ad domains change over time); GitHub Pages can send
+  neither headers nor per-request nonces, so that is not available here. This
+  is Google's documented directive set ("Integrate the AdSense ad code with a
+  CSP") with the nonce and 'strict-dynamic' removed — not a policy Google
+  endorses as such. data: is allowed because under 'strict-dynamic' Google's
+  policy would let ad code load data: scripts; it adds nothing beyond
+  'unsafe-inline'. No fetch/frame/img restrictions: creatives load from
+  arbitrary hosts and Google warns stricter policies may break without notice.
+  Marked data-csp-ads so the build does not pin hashes (a hash would make
+  browsers ignore 'unsafe-inline' and block ad code).
+*/
+const adsPolicy = [
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:",
+  "object-src 'none'",
+  "base-uri 'self'",
+  "form-action 'self' https://github.com",
+].join('; ');
+
 // JSON-LD structured data
 const jsonLd = type === 'article'
   ? {
@@ -94,60 +151,13 @@ const jsonLd = type === 'article'
 
     <!-- Security -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    {ADS_CONFIG.enabled ? (
-      /*
-        AdSense mode. Google only supports a nonce-based strict CSP sent as an
-        HTTP header, because the ad code's domains change over time; GitHub
-        Pages can send neither headers nor per-request nonces. So this is the
-        fallback policy from Google's own guidance ("Integrate the AdSense ad
-        code with a CSP": script-src … 'unsafe-inline' 'unsafe-eval' https:,
-        object-src 'none', base-uri), with no fetch/frame/img restrictions —
-        ad creatives load from arbitrary hosts and Google warns stricter
-        policies "may break without notice". No data-csp-pin-inline-scripts:
-        hashes would make browsers ignore 'unsafe-inline' and block ad code.
-      */
-      <meta http-equiv="Content-Security-Policy" content={[
-        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
-        "object-src 'none'",
-        "base-uri 'self'",
-        "form-action 'self' https://github.com",
-      ].join('; ')} />
-    ) : (
-      /*
-        Strict mode (no ads). 'unsafe-inline' is only a fallback for pre-CSP2
-        browsers: csp-inline-script-hashes.mjs adds the hash of every inline
-        script to metas marked data-csp-pin-inline-scripts, and browsers that
-        see a hash ignore 'unsafe-inline'. giscus runs no script here (see
-        Giscus.astro); only its iframe loads. GitHub domains are needed for the
-        admin panel's API access.
-      */
-      <meta http-equiv="Content-Security-Policy" data-csp-pin-inline-scripts content={[
-        "default-src 'self'",
-        "script-src 'self' 'unsafe-inline'" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.googletagmanager.com https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
-        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-        "font-src 'self' https://cdn.jsdelivr.net",
-        "img-src 'self' data: https:",
-        "connect-src 'self' https://api.github.com https://github.com" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
-        "frame-src https://giscus.app",
-        "object-src 'none'",
-        "base-uri 'self'",
-        "form-action 'self' https://github.com",
-      ].join('; ')} />
-    )}
+    {adsOnPage
+      ? <meta http-equiv="Content-Security-Policy" data-csp-ads content={adsPolicy} />
+      : <meta http-equiv="Content-Security-Policy" content={strictPolicy} />}
 
-    <!-- Google AdSense: site-ownership verification, and Auto ads when enabled.
-         async, with no ad slots in the layout: if the script is blocked or
-         fails, nothing on the page waits for it or reserves space for it. -->
+    {/* AdSense site-ownership verification, on every page. The Auto ads script
+        itself is near the end of <head>, after the critical CSS and font. */}
     <meta name="google-adsense-account" content={ADS_CONFIG.client} />
-    {ADS_CONFIG.enabled && (
-      <script
-        is:inline
-        async
-        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADS_CONFIG.client}`}
-        crossorigin="anonymous"
-      ></script>
-    )}
-
     <!-- Primary Meta Tags -->
     <title>{title}</title>
     <meta name="title" content={title} />
@@ -270,8 +280,13 @@ const jsonLd = type === 'article'
       })();
     </script>
 
-    <!-- SPA-style navigation with cross-document fallback -->
-    <ClientRouter />
+    {/* SPA-style navigation, off while ads are enabled: a ClientRouter swap
+        discards the <body> (and the Auto ads placed in it) without AdSense
+        scanning the new page, so only the landing page would get ads; and a
+        meta CSP stays in force across swaps, so the ads policy and ad code
+        would carry into /admin. Full loads avoid both. Every astro:page-load
+        listener here also runs its init directly, so nothing depends on it. */}
+    {!ADS_CONFIG.enabled && <ClientRouter />}
 
     <!-- Reactive theme wiring (before-swap, after-swap, pageshow,
          astro:page-load, storage). All handlers live in lib/theme.ts. -->
@@ -280,6 +295,17 @@ const jsonLd = type === 'article'
       installThemeReactivity();
       syncCodeTheme();
     </script>
+    {/* AdSense Auto ads, only where ads run. Last in <head>, so the title, critical
+        CSS and the font preload are requested first; async, and the layout
+        reserves no ad slots, so a blocked or failing script changes nothing. */}
+    {adsOnPage && (
+      <script
+        is:inline
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADS_CONFIG.client}`}
+        crossorigin="anonymous"
+      ></script>
+    )}
   </head>
   <body class="min-h-screen flex flex-col">
     <!-- Skip to content (accessibility) -->

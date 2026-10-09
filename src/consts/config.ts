@@ -105,6 +105,9 @@ export const ANALYTICS_CONFIG = defineAnalytics({
 export const ADS_CONFIG = defineAds({
   enabled: true,
   client: 'ca-pub-6238136533844790',
+  // No ads (strict CSP) on: admin, where a GitHub token is entered; settings
+  // and the component gallery, which are not content; and the 404 page.
+  excludePaths: ['/admin', '/settings', '/components', '/404'],
 });
 
 // --- Newsletter ---

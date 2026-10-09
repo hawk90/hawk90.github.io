@@ -69,6 +69,9 @@ const checks = [
   // Reads dist/: the hashes are added after rendering, so only the built HTML
   // shows whether every inline script is pinned in its page's CSP.
   ['CSP inline script hashes', ['npm', 'run', 'audit:csp']],
+  // Reads dist/: where ad code ships, with which CSP, and whether the layout
+  // reserves ad slots (AP-R-29) or keeps the ClientRouter on with ads.
+  ['AdSense placement and policy', ['npm', 'run', 'audit:ads']],
   ['static admin boundary', ['npm', 'run', 'gate:security-admin', '--', '--artifact', 'dist']],
   ['production secret scan', ['npm', 'run', 'gate:secrets']],
 ];
