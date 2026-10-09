@@ -2,7 +2,7 @@
 title: "Ch 9: Flit Format — 68B vs 256B vs Latency-Optimized"
 slug: "embedded/hardware/cxl/chapter09-flit-format"
 date: 2026-05-16T09:09:00
-description: "Flit 단위 구조의 세대 별 변화."
+description: "68B·Standard 256B·Latency-Optimized 256B flit의 구조와 retry·credit 처리."
 series: "CXL 4.0 Internals"
 seriesOrder: 9
 tags: [cxl, flit, 68b-flit, 256b-flit, fec]
@@ -12,196 +12,161 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"Flit은 *CXL 메시지의 데이터 전송 단위*이며, *세 가지 모드*를 가집니다."** — *68B flit* (CXL 1.1·2.0, PCIe 5.0 baseline), *256B Standard flit* (3.0+, PCIe 6.0/7.0, throughput 위주), *256B Latency-Optimized flit* (3.0+, 작은 메시지 빠르게). CXL 4.0은 *Flit 구조를 3.0과 동일하게 유지*해 *backward compat을 보장*했습니다.
+> **"Flit은 *CXL 링크 위 고정 크기 전송 단위*이며, *세 가지 형식*이 있습니다."** — *68B flit* (CXL 1.1·2.0, 32 GT/s까지), *Standard 256B flit* (3.0+, PCIe Flit mode), *Latency-Optimized 256B flit* (3.0+, 128 B 반쪽마다 CRC). CXL 4.0은 128 GT/s에서도 *3.x의 256B flit 형식과 FEC·CRC를 그대로* 씁니다.
 
-[Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에서 *CXL.mem 메시지의 의미*를 봤습니다. 이 장은 *그 메시지가 실제로 케이블 위를 어떻게 흐르는지* — *flit*입니다.
+[Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에서 *CXL.mem 메시지의 의미*를 봤습니다. 이 장은 *그 메시지가 실제로 링크 위를 어떻게 흐르는지* — *flit*입니다.
 
 ## Flit이란
 
-*Flit (Flow Control Unit)*은 *CXL 링크 위 데이터 전송의 최소 단위*입니다.
+*Flit (Flow Control Unit)*은 *CXL 링크 위 데이터 전송 단위*입니다.
 
 | 항목 | 의미 |
 |------|------|
-| 단위 | 한 transmission 단위 (PHY 위에서) |
-| 내용 | message slot들 + CRC + (FEC) |
-| 크기 | 세대별 다름 |
-| 정렬 | flit boundary로 message 정렬 |
+| 크기 | 고정 (68 B 또는 256 B) |
+| 내용 | 헤더 + message slot + CRC (+ 256B는 FEC) |
+| 한 flit의 프로토콜 | 한 flit은 CXL.io 또는 CXL.cachemem 중 하나만 싣습니다 |
 
-*패킷 (packet)*과 다른 개념. PCIe TLP·DLLP는 *가변 크기*이지만 flit은 *고정 크기*입니다. PCIe 6.0부터 PCIe 자체도 flit-based로 전환됐고, CXL도 같은 흐름을 따릅니다.
+*패킷 (packet)*과 다른 개념. PCIe TLP는 *가변 크기*이지만 flit은 *고정 크기*입니다. PCIe 6.0에서 PCIe 자체도 Flit mode를 도입했고, CXL 256B flit은 그 위에서 동작합니다.
 
-## 세대별 Flit 모드
+## Flit 형식 한눈에
 
-| 세대 | Flit 모드 | 크기 | 특징 |
-|------|----------|------|------|
-| CXL 1.1·2.0 | 68B Flit | 528-bit (66 B) | PCIe 5.0 baseline |
-| CXL 3.0+ | 256B Standard Flit | 256 B | throughput 위주, PCIe 6.0/7.0 |
-| CXL 3.0+ | 256B Latency-Optimized Flit | 256 B | 작은 메시지 빠르게 |
+| 형식 | 크기 | 도입 | 비고 |
+|------|------|------|------|
+| 68B flit | 68 B | CXL 1.1 | 32 GT/s까지 |
+| Standard 256B flit | 256 B | CXL 3.0 | PCIe Flit mode에서 사용. 8 GT/s 이상 |
+| Latency-Optimized 256B flit | 256 B | CXL 3.0 | 선택 기능. 128 B 반쪽마다 CRC |
 
-CXL 4.0은 *flit 모드 변경 없음* — 3.0의 *256B 두 가지 모드*를 그대로 사용. *128 GT/s에서 동일 flit 구조 적용*.
+CXL 4.0 웨비나(2025-12)는 128 GT/s에서도 *PCIe 7.0 FEC·CRC가 CXL 3.0과 같고*, Standard 256B와 Latency-Optimized 256B를 함께 쓴다고 정리합니다. 4.0 발표문은 3.x·2.0·1.1·1.0과의 하위 호환을 유지한다고 밝힙니다.
 
-## 68B Flit (CXL 1.1·2.0)
+## 68B Flit
 
-PCIe 5.0 위 32 GT/s에서 동작하는 *기존 flit*입니다.
+CXL 1.1·2.0의 기본 형식입니다(CXL 3.1 §4.2).
 
-| 항목 | 값 |
+| 부분 | 크기 |
 |------|-----|
-| 크기 | 528-bit (66 B raw + 2 B framing) |
-| CRC | 16-bit |
-| Protocol payload | CXL.io/cache/mem 메시지 |
-| FEC | 없음 |
+| Protocol ID | 2 B — 이 flit이 CXL.io인지 CXL.cachemem인지 |
+| Slot | 16 B × 4 |
+| CRC | 2 B |
+| 합계 | 68 B (Protocol ID 뒤 528 bit가 link layer flit) |
 
-*PCIe 5.0의 NRZ 신호 무결성*이 *FEC 없이도 BER (Bit Error Rate)*가 *낮습니다*. 따라서 *CRC만으로 신뢰성 유지*. *retry 메커니즘*은 *LLR (Link Layer Retry)*가 담당.
+PCIe 5.0까지의 NRZ 링크에는 FEC가 없습니다. 오류는 *CRC*로 잡고, CXL.cachemem은 *LLR (Link Layer Retry)*로 재전송합니다.
 
-68B flit은 *작은 단위*라 *latency 우수*. CXL 1.1·2.0의 *기본 모드*입니다.
+## Standard 256B Flit
 
-## 256B Standard Flit (CXL 3.0+)
+CXL 3.0에서 추가된 형식입니다. *PCIe Flit mode가 켜지면 256B flit mode가 함께 정해지고*, 8 GT/s 이상에서 씁니다(§6.4.1.3.1). 64 GT/s 이상은 256B flit만 됩니다.
 
-PCIe 6.0/7.0 위 64/128 GT/s에서 동작하는 *throughput 최적 flit*입니다.
+CXL.cachemem용 Standard 256B flit(§4.3.2, Figure 4-41):
 
-| 항목 | 값 |
-|------|-----|
-| 크기 | 256 B |
-| FEC | 적용 (3-way interleaved Single Symbol Correction Reed-Solomon) |
-| CRC | 적용 |
-| Symbol time | PCIe 6.0 PAM4 |
+| 부분 | 크기 | 담당 |
+|------|-----|------|
+| HDR | 2 B | Physical Layer |
+| Slot 0 (H-Slot) | 14 B | Link Layer |
+| Slot 1~14 (G-Slot) | 16 B × 14 | Link Layer |
+| CRD | 2 B | Link Layer — credit 반환 |
+| CRC | 8 B | Physical Layer |
+| FEC | 6 B | Physical Layer — 3-way interleaved ECC (PCIe Base Spec 정의) |
 
-*PAM4 신호*는 *NRZ 대비 BER이 더 높음* (eye 높이 1/3). 따라서 *FEC 추가*해 *링크 신뢰성*을 보강. *FEC가 추가 latency*를 가져오지만 *throughput이 두 배가 되는 보상*.
+PCIe 6.0의 PAM4 링크는 BER이 1E-6 수준이라(§6.4.1.3.3) FEC가 필요합니다. 256B flit에서 retry buffer는 *Physical Layer*에 있습니다(§5.1.2.3). 68B의 LLR과 다릅니다.
 
-256B Standard flit은 *큰 payload, 많은 message slot*을 가집니다. *throughput 위주 워크로드*에 적합.
+HDR의 Flit Type 2 bit가 flit 종류를 가릅니다: NOP, CXL.io, CXL.cachemem, ALMP(§6.2.3.1.1.1).
 
-## 256B Latency-Optimized Flit (CXL 3.0+)
+## Latency-Optimized 256B Flit
 
-Standard flit의 *latency 페널티를 회피*하기 위한 모드:
+256B flit을 *128 B 반쪽 둘*로 나누고, 반쪽마다 CRC를 붙인 형식입니다(§6.2.3.1.2).
 
-| 항목 | Standard | Latency-Optimized |
-|------|---------|------------------|
-| Size | 256 B | 256 B |
-| Layout | message 다수 packing | message 적게 packing, 빠른 transmit |
-| FEC | 같음 | 같음 |
-| Use case | bulk transfer | control message·small payload |
-
-*Latency-Optimized*는 *flit 가득 차길 기다리지 않고* *빠르게 전송*. *작은 control message*에 효과적.
-
-| 모드 | Throughput | Latency |
-|------|-----------|---------|
-| Standard | 높음 | 보통 |
-| Latency-Optimized | 보통 | 낮음 |
-
-*동적 전환*은 일반적으로 *워크로드 phase 의존*. 컴파일 시간이나 device firmware가 결정.
-
-## Flit Packing Rules
-
-한 flit에 *여러 message slot*이 들어갑니다.
-
-| 요소 | 의미 |
+| 반쪽 | 구성 |
 |------|------|
-| Slot | 한 메시지가 차지하는 영역 |
-| Protocol ID | slot이 어느 protocol (CXL.io/cache/mem)에 속하는지 |
-| Payload | 실제 message 데이터 |
-| DLLP | Data Link Layer Packet — flow control 등 |
-| LLR | Link Layer Retry header — error recovery |
+| 짝수 반쪽 | Flit Header 2 B + Flit Data 120 B + CRC 6 B |
+| 홀수 반쪽 | Flit Data 116 B + FEC 6 B (256 B 전체 보호) + CRC 6 B |
 
-예 (개념적):
+얻는 것은 *flit accumulation latency* 감소입니다. 짝수 반쪽이 CRC를 통과하면 홀수 반쪽을 기다리지 않고, FEC 디코딩도 건너뛰고 바로 소비합니다. spec은 x4 링크·64 GT/s에서 왕복 accumulation latency가 8 ns라고 예를 듭니다. 링크 폭이 좁을수록 이득이 큽니다.
 
-| Slot | Content |
+| 상황 | 처리 |
+|------|------|
+| 두 반쪽 CRC 통과 | FEC 없이 바로 소비 |
+| 한 반쪽 CRC 실패 | 256 B 전체에 FEC 디코딩·정정 후 다시 CRC |
+| 정정 후에도 실패 | 256 B flit 전체를 retry |
+
+Standard와 Latency-Optimized 중 무엇을 쓸지는 *alternate protocol negotiation에서 한 번* 정합니다. *동적 전환은 지원하지 않습니다*(§6.2.3.1.2).
+
+## Flit에 메시지 싣기
+
+68B flit은 slot 4개, Standard 256B CXL.cachemem flit은 H-Slot 1개 + G-Slot 14개입니다. CXL.cache와 CXL.mem 메시지는 같은 cachemem flit의 slot에 섞여 들어갈 수 있습니다. CXL.io는 별도 flit으로 갑니다.
+
+예 (Standard 256B cachemem flit, 개념적):
+
+| 위치 | 내용 |
 |------|---------|
-| Slot 0 | CXL.mem M2S Req (read) |
+| Slot 0 | CXL.mem M2S Req (MemRd) |
 | Slot 1 | CXL.cache D2H Req (RdShared) |
-| Slot 2 | CXL.mem S2M DRS (data, prev tx) |
-| Slot 3 | DLLP (credit update) |
-| Trailer | CRC + FEC |
+| Slot 2~5 | CXL.mem S2M DRS (data) |
+| CRD | 받은 메시지에 대한 credit 반환 |
+| 끝 | CRC + FEC |
 
-이 packing이 *링크 efficiency*의 핵심. *모든 slot 채워 보내는 게 이상*이지만 *latency 요구*에 따라 *덜 찬 flit도 전송*.
+보낼 메시지가 없을 때도 CXL.cachemem은 *Empty flit*으로 ARB/MUX 경로를 잡아 둘 수 있습니다. 뒤늦게 도착한 메시지를 같은 flit의 뒷 slot에 실어, 다음 256 B 경계까지 기다리지 않게 하는 장치입니다(§6.2.3.1.1.1).
 
-## Protocol ID·Payload·Trailer
+## Receiver 처리
 
-각 flit의 구조 (개념적):
+Standard 256B flit 기준:
 
-| 부분 | 역할 |
-|------|------|
-| Header | Flit 시작 표시·protocol ID |
-| Payload slots | 1~N개의 message |
-| LLR Header | retry sequence number |
-| CRC | 데이터 무결성 |
-| FEC | (3.0+) error correction |
+1. 256 B를 다 받음
+2. *FEC 디코딩·정정*
+3. *CRC 검증* — 실패면 retry 요청
+4. HDR의 *Flit Type*으로 CXL.io / CXL.cachemem / ALMP 분배
+5. cachemem flit이면 slot의 메시지를 CXL.cache·CXL.mem으로 나눔
 
-Receiver는:
-1. Flit 받음
-2. *FEC로 single-bit error correction*
-3. *CRC 검증*
-4. Slot별 *protocol ID 보고 분배*
-5. 각 message를 *CXL.io/cache/mem stack*에 전달
+Latency-Optimized는 2번을 CRC 실패 때만 합니다.
 
-## Backward Compatibility Negotiation
+## 세대가 다른 장치끼리
 
-서로 다른 세대의 host·device가 attach될 때 *flit 모드 협상*:
+서로 다른 세대의 host·device가 붙으면 *둘 다 지원하는 쪽*으로 맞춥니다.
 
-| Host | Device | Negotiated |
+| Host | Device | 결과 |
 |------|--------|-----------|
-| CXL 4.0 (256B) | CXL 4.0 (256B) | 256B (4.0 speed) |
-| CXL 4.0 (256B) | CXL 2.0 (68B) | 68B (2.0 speed) |
-| CXL 4.0 (256B) | CXL 3.0 (256B) | 256B (3.0 speed) |
-| CXL 2.0 (68B) | CXL 4.0 (256B) | 68B (2.0 speed) |
+| CXL 4.0 | CXL 4.0 | 256B, 최대 128 GT/s |
+| CXL 4.0 | CXL 3.x | 256B, 최대 64 GT/s |
+| CXL 4.0 | CXL 2.0 | 68B, 최대 32 GT/s |
+| CXL 2.0 | CXL 4.0 | 68B, 최대 32 GT/s |
 
-*낮은 세대로 fall-back*. *동작은 보장*되지만 *4.0의 새 기능은 활성화 안 됨*.
+낮은 쪽에 맞춰 동작하고, 상위 세대 기능은 쓰지 않습니다.
 
 ## Credit-based Flow Control
 
-Receiver의 *queue 한계*를 transmit가 *credit으로 추적*:
+CXL.cachemem은 채널마다 *메시지 단위 credit*을 씁니다. 받는 쪽이 버퍼를 비우면 credit을 돌려주고, 보내는 쪽은 credit이 있을 때만 그 채널 메시지를 보냅니다.
 
-| 단계 | 동작 |
+| 형식 | Credit 반환 위치 |
 |------|------|
-| Initial | Receiver가 *initial credit*을 transmit에 알림 |
-| Send | Transmit가 *credit 1 소비*하고 flit 보냄 |
-| Process | Receiver가 flit *처리·queue 비움* |
-| Return | Receiver가 *credit 1 반환* (DLLP로) |
-| Retry | Transmit가 새 flit 보낼 수 있음 |
+| 68B flit | flit 헤더의 credit 필드, 또는 LLCRD control flit (§4.2) |
+| 256B flit | flit 끝의 CRD 2 B (§4.3.5) |
 
-이게 *receiver overflow 방지*. *credit 부족*하면 transmit *stall*. *credit pool 크기*가 *throughput에 큰 영향*.
-
-## Latency Optimization (4.0)
-
-CXL 4.0의 *latency optimization*은 *Flit packing rules의 미세한 개선*:
-
-| 항목 | 의미 |
-|------|------|
-| Empty Flit | flit slot이 *비어도 빠르게 보냄* — small message latency↓ |
-| Slot reuse | 미사용 slot이 *다른 protocol에 재할당* |
-| FEC interleaving | 3-way interleaved Reed-Solomon으로 *correction granularity 향상* |
-
-이 개선들이 *4.0의 128 GT/s에서도 latency를 비슷하게 유지*하는 비결입니다.
+CXL.io는 PCIe 방식 그대로 DLLP로 flow control credit을 주고받습니다.
 
 ## 자주 하는 실수
 
 ### "256B flit은 무조건 빠르다"
 
-*throughput은 빠릅니다*. *latency는 비슷하거나 약간 증가*. *FEC가 추가 latency*. small-message workload는 *68B flit이 더 빠를 수 있음*.
+256B flit은 64 GT/s 이상으로 *대역폭*을 올립니다. 하지만 Standard 256B는 flit 전체를 받아 FEC를 거쳐야 소비할 수 있어 *accumulation latency*가 생깁니다. 이걸 줄이려고 Latency-Optimized 형식이 따로 있습니다.
 
-### "Standard·Latency-Optimized 둘 중 하나만 선택"
+### "Standard·Latency-Optimized는 트래픽 따라 오간다"
 
-*동적 전환 가능*합니다. *워크로드 phase·트래픽 mix*에 따라 *flit 모드를 동적 변경*. firmware·driver hint로 제어.
+*아닙니다*. 링크 협상 때 한 번 정하고, 동적 전환은 없습니다(§6.2.3.1.2).
 
-### "FEC가 모든 error 보호"
+### "FEC가 모든 error를 고친다"
 
-*Single-symbol correction*만. *Multi-bit burst error*는 *CRC fail → LLR retry*. *cable 마모·신호 무결성 저하*는 *LLR 트래픽 증가*로 나타납니다.
+FEC가 고칠 수 있는 범위를 넘는 오류는 CRC에 걸리고, flit 단위 retry로 복구합니다. 256B flit에서 retry는 Physical Layer가 맡습니다.
 
-### "Credit이 많을수록 빠름"
+### "68B flit은 CXL 4.0에서 사라졌다"
 
-*Queue depth가 늘면 latency 증가*. *throughput과 latency의 trade-off*. *워크로드별 튜닝*.
-
-### "68B flit은 CXL 4.0에서 deprecated"
-
-*아닙니다*. CXL 1.1·2.0 디바이스와의 *backward compat*을 위해 *4.0 host도 68B 지원*. *legacy 디바이스 운용 가능*.
+*아닙니다*. CXL 4.0 발표문은 1.0·1.1·2.0과의 하위 호환을 유지한다고 밝힙니다. 1.1·2.0 디바이스와는 68B flit으로 붙습니다.
 
 ## 정리
 
-- *Flit*은 *CXL 링크의 데이터 전송 최소 단위*. 세대별 다름.
-- *68B Flit* (CXL 1.1·2.0): 528-bit, FEC 없음, PCIe 5.0 NRZ baseline.
-- *256B Flit* (3.0+): FEC 포함, PCIe 6.0/7.0 PAM4·PAM4-2, throughput 위주.
-- *256B Latency-Optimized*: 작은 message에 빠른 latency.
-- *Flit packing rules*: slot·protocol ID·DLLP·CRC·FEC·LLR이 *각자 역할*.
-- *CXL 4.0은 flit 구조 변경 없음* — 3.0과 *backward compatible*.
-- *Credit-based flow control*이 *throughput vs latency 균형*.
+- *Flit*은 *CXL 링크의 고정 크기 전송 단위*. 한 flit은 CXL.io나 CXL.cachemem 하나만 싣습니다.
+- *68B flit*: Protocol ID 2 B + slot 16 B × 4 + CRC 2 B. FEC 없음, LLR로 retry.
+- *Standard 256B flit* (3.0+): HDR 2 B + slot 15개 + CRD 2 B + CRC 8 B + FEC 6 B. retry는 Physical Layer.
+- *Latency-Optimized 256B flit*: 128 B 반쪽마다 CRC. 통과하면 FEC 없이 바로 소비. 협상 때 한 번 선택.
+- *CXL 4.0*: 128 GT/s에서도 3.x의 256B 형식과 FEC·CRC 유지.
+- *Credit*은 채널·메시지 단위. 68B는 헤더·LLCRD, 256B는 CRD 필드로 반환.
 
 ## 다음 편
 
