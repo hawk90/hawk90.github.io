@@ -29,10 +29,10 @@ topics: ["embedded"]
 
 | 신호 패밀리 | V_OH (min) | V_OL (max) | V_IH (min) | V_IL (max) |
 | --- | --- | --- | --- | --- |
-| TTL (5 V) | 2.4 V | 0.4 V | 2.0 V | 0.8 V |
-| LVTTL (3.3 V) | 2.4 V | 0.4 V | 2.0 V | 0.8 V |
-| CMOS 3.3 V | 3.0 V | 0.5 V | 2.0 V | 0.8 V |
-| CMOS 1.8 V | 1.7 V | 0.1 V | 1.17 V | 0.63 V |
+| TTL (5 V) | 대표값 | 대표값 | 대표값 | 대표값 |
+| LVTTL (3.3 V) | 대표값 | 대표값 | 대표값 | 대표값 |
+| CMOS 3.3 V | 전원·부품별 상이 | 전원·부품별 상이 | 전원·부품별 상이 | 전원·부품별 상이 |
+| CMOS 1.8 V | 전원·부품별 상이 | 전원·부품별 상이 | 전원·부품별 상이 | 전원·부품별 상이 |
 
 V_OH / V_OL은 출력 측이 보장하는 값이고, V_IH / V_IL은 입력 측이 0/1로 해석하는 경계입니다. 둘 사이의 차이가 **noise margin**입니다.
 
@@ -48,12 +48,12 @@ GPIOC->OSPEEDR &= ~(0b11 << (5 * 2));
 GPIOC->OSPEEDR |=  (0b11 << (5 * 2));   // 0b11 = very high speed
 ```
 
-| OSPEEDR | 일반 속도 | rise time (3.3V, 50pF 부하) |
+| OSPEEDR | slew/drive 설정 이름 | rise time (3.3V, 50pF 부하) |
 | --- | --- | --- |
-| 0b00 | low | 약 100 ns |
-| 0b01 | medium | 약 25 ns |
-| 0b10 | high | 약 10 ns |
-| 0b11 | very high | 약 5 ns |
+| 0b00 | low | 데이터시트 확인 |
+| 0b01 | medium | 데이터시트 확인 |
+| 0b10 | high | 데이터시트 확인 |
+| 0b11 | very high | 데이터시트 확인 |
 
 빠를수록 좋아 보이지만, 그만큼 EMI 방사도 커집니다. 필요 없는 라인은 일부러 느린 모드로 둡니다.
 
@@ -81,15 +81,15 @@ void gpio_speed_test(uint32_t speed_bits) {
 }
 ```
 
-이 코드를 4가지 speed로 돌리고 오실로스코프로 보면, rise time이 5 ns에서 100 ns로 변하는 게 눈에 들어옵니다.
+이 코드를 4가지 slew 설정으로 돌리고 오실로스코프로 보면, 부하와 핀에 따라 rise time이 달라지는 것을 확인할 수 있습니다.
 
 ## 측정 / 비교
 
 | 항목 | 측정 방법 | 양호 기준 (3.3V CMOS) |
 | --- | --- | --- |
 | Rise time | 10% → 90% 시간 | 0.5 × bit period 이하 |
-| Overshoot | 정상 값 위로 튄 폭 | V_DD + 0.3 V 이내 |
-| Undershoot | GND 아래로 떨어진 폭 | GND - 0.3 V 이내 |
+| Overshoot | 정상 값 위로 튄 폭 | 해당 핀의 absolute maximum·injection current 기준 |
+| Undershoot | GND 아래로 떨어진 폭 | 해당 핀의 absolute maximum·injection current 기준 |
 | Ringing | 진폭이 50%로 감소까지 시간 | 한 bit period 이내 |
 
 오실로스코프 대역폭은 신호 rise time 기준 **3 ~ 5배**가 필요합니다. 5 ns rise time 신호를 100 MHz 스코프로 보면 측정값 자체가 왜곡됩니다.

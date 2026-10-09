@@ -67,12 +67,12 @@ GPIOA->PUPDR |=  (0b01 << (0 * 2));   // pull-up
 
 ```c
 // STM32F4 OSPEEDR
-// 00 = low (2 MHz), 01 = medium (25 MHz)
-// 10 = high (50 MHz), 11 = very high (100 MHz)
+// 00/01/10/11 = slew/drive 설정 단계
+// 실제 rise time과 최대 토글 속도는 MCU 데이터시트 확인
 GPIOA->OSPEEDR |= (0b11 << (5 * 2));   // very high speed
 ```
 
-빠를수록 좋아 보이지만 EMI 방사가 커집니다. 50 cm 떨어진 거리에서 30 dBμV가 5 dBμV가 될 수 있습니다.
+빠를수록 좋아 보이지만 EMI 방사가 커집니다. 실제 방사량은 핀·부하·배선·측정 조건으로 확인해야 합니다.
 
 ### 4) Schmitt trigger 입력
 
@@ -160,7 +160,7 @@ ESD 다이오드가 0.7V drop으로 견디는 동안은 동작합니다. 며칠 
 - GPIO는 push-pull 또는 open-drain 출력, 풀업/풀다운/플로팅 입력으로 구성됩니다.
 - Open-drain은 공유 버스(I2C 등)나 양방향 IRQ에 필수입니다. 풀업이 반드시 있어야 합니다.
 - 내부 풀업은 30 ~ 50 kΩ이므로 I2C에는 부족합니다. 외부 풀업(2.2k ~ 10k)을 답니다.
-- Drive strength는 필요한 만큼만 설정합니다. 과한 속도는 EMI를 만듭니다.
+- Drive/slew 설정은 필요한 edge rate에 맞춥니다. 과도하게 빠른 edge는 EMI와 ringing을 키울 수 있습니다.
 - 5V 입력은 FT 핀 또는 레벨 시프터로 받습니다. 직결은 칩을 죽입니다.
 
 다음 편에서는 **UART 하드웨어 동작**을 다룹니다. 가장 흔한 시리얼 통신의 내부 구조입니다.

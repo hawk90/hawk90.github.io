@@ -64,7 +64,7 @@ RCC->CFGR |= RCC_CFGR_SW_PLL;
 | Cycle-to-cycle | 인접 두 cycle 차이 | DDR write strobe 불안 |
 | Long-term | 수천 cycle 평균 이동 | PLL lock 품질 |
 
-PLL은 jitter를 완전히 없애 주지 않습니다. 입력의 phase noise를 부분적으로 필터링할 뿐이고, 자체 jitter(보통 5 ~ 50 ps RMS)를 더합니다.
+PLL은 jitter를 완전히 없애 주지 않습니다. 입력의 phase noise를 일부 필터링할 뿐이고, 자체 phase noise와 전원·레이아웃 영향도 더합니다. jitter 수치는 PLL·주파수·측정 대역폭에 따라 달라집니다.
 
 ### 3) Clock skew
 
@@ -106,10 +106,10 @@ brr = 16000000 / 9600;                  // 1666.67 → 1666
 
 | 클럭 소스 | 정확도 | jitter | 비고 |
 | --- | --- | --- | --- |
-| 내부 RC (HSI) | ±1 ~ 2% | 보통 100 ps | factory trim 가능 |
-| Crystal | ±20 ~ 50 ppm | 1 ~ 10 ps | 표준 선택 |
-| TCXO | ±0.5 ~ 2 ppm | 1 ps | GPS 보조 등 |
-| OCXO | ±0.01 ppm | sub-ps | 통신 인프라 |
+| 내부 RC (HSI) | MCU 데이터시트 기준 | 부품별 상이 | factory trim 가능 |
+| Crystal | 부품·온도·load별 상이 | 부품·회로별 상이 | 일반적인 기준 클럭 |
+| TCXO | 부품 데이터시트 기준 | 부품 데이터시트 기준 | 정밀 기준 클럭 |
+| OCXO | 부품 데이터시트 기준 | 부품 데이터시트 기준 | 통신 인프라 등 |
 
 오실로스코프로 jitter를 측정하려면 infinite persistence 모드로 클럭 에지에 trigger를 걸고 수 분간 누적합니다. 에지가 흐려진 폭이 peak-to-peak jitter입니다.
 
@@ -136,7 +136,7 @@ brr = 16000000 / 9600;                  // 1666.67 → 1666
 - 클럭 계층은 HSE → PLL → bus prescaler 순으로 구성됩니다. 각 단계에서 jitter와 정확도가 결정됩니다.
 - Jitter는 PLL이 완전히 제거하지 못합니다. 통신 속도가 빨라질수록 한계로 다가옵니다.
 - Setup/hold time을 어기면 metastability에 빠집니다. 보드 설계의 skew 관리가 중요합니다.
-- 내부 RC는 ±1 ~ 2% 오차이므로 비동기 통신에 부적합합니다. 크리스털을 씁니다.
+- 내부 RC 정확도는 MCU·온도·보정 조건에 따라 달라집니다. 비동기 통신 허용오차를 계산해 부족하면 크리스털 등 외부 기준을 사용합니다.
 - 부하 커패시터·wait state·PLL lock 같은 작은 실수가 모든 동작을 무너뜨립니다.
 
 다음 편에서는 **GPIO 내부 구조**를 다룹니다. 가장 단순해 보이는 디지털 I/O의 실제 회로입니다.

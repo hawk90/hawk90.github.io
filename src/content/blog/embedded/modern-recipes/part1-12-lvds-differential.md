@@ -17,7 +17,7 @@ topics: ["embedded"]
 ## 어떤 상황에서 쓰나
 
 - LCD/LVDS 디스플레이 panel 인터페이스
-- 카메라 센서(MIPI CSI는 LVDS 변종)
+- 카메라 센서(MIPI CSI-2는 별도의 MIPI D-PHY/C-PHY 계층)
 - 보드 간 high-speed backbone(SerDes)
 - PCIe, SATA, USB 3.0의 기반 신호
 
@@ -30,8 +30,8 @@ topics: ["embedded"]
 | Driver | 전류 모드 (3.5 mA) |
 | 종단 | receiver 쪽 100 Ω 차동 저항 |
 | Common-mode | 약 1.2 V |
-| 차동 swing | ±350 mV (high = +350, low = −350) |
-| 계산 | V = I × R = 3.5 mA × 100 Ω = 350 mV |
+| 차동 swing | 약 350 mV 대표값 (부품별 상이) |
+| 계산 | 대표적인 current-mode driver에서 V = I × R로 근사 |
 
 전류 모드 driver(3.5 mA)가 종단 저항 100Ω을 통해 흐릅니다. V = I × R = 3.5 mA × 100Ω = 350 mV.
 
@@ -62,12 +62,12 @@ topics: ["embedded"]
 
 | 패밀리 | Swing | Common-mode | 속도 |
 | --- | --- | --- | --- |
-| LVDS | ±350 mV | 1.2 V | < 3 Gbit/s |
-| LVPECL | ±400 mV | V_CC - 1.3 V | < 5 Gbit/s |
-| CML | ±400 mV | V_CC - 0.4 V | < 28 Gbit/s |
+| LVDS | 대표적으로 수백 mV | 약 1.2 V 계열 | 부품별 상이 |
+| LVPECL | 부품별 상이 | V_CC 의존 | 부품별 상이 |
+| CML | 부품별 상이 | V_CC 의존 | 부품별 상이 |
 | HCSL (PCIe ref clk) | ±350 mV | 0.35 V | 100 / 125 MHz clk |
 
-CML(Current Mode Logic)이 PCIe, SATA, USB 3.0의 실제 PHY입니다. LVDS는 더 낮은 속도 영역.
+CML 계열 signaling이 PCIe·SATA 등 일부 고속 PHY에 사용되지만, USB 3.x와 MIPI·HDMI는 각각 별도의 전기 규격을 사용합니다. LVDS를 단순히 저속 버전으로 볼 수는 없습니다.
 
 ### 4) Pre-emphasis와 De-emphasis
 
@@ -121,7 +121,7 @@ DT 노드 예시
 | PCIe Gen3 | 8 Gbit | 16 | 128 Gbit |
 | PCIe Gen4 | 16 Gbit | 16 | 256 Gbit |
 | PCIe Gen5 | 32 Gbit | 16 | 512 Gbit |
-| HDMI 2.1 | 12 Gbit | 4 (TMDS+) | 48 Gbit |
+| HDMI 2.1 FRL | 12 Gbit/lane 대표값 | 4 lanes | 링크 구성별 상이 |
 
 | FR-4 (1 GHz 신호) 손실 | 길이 |
 | --- | --- |
@@ -145,7 +145,7 @@ LVDS pair 위/아래에 다른 high-speed signal이 있으면 noise가 침범합
 
 > ⚠️ DC blocking cap 누락
 
-서로 다른 common-mode를 가진 receiver와 transmitter를 직결하면 동작이 안 됩니다. 100 nF DC blocking cap이 거의 항상 필요합니다(PCIe, SATA 등 standard).
+서로 다른 common-mode를 가진 receiver와 transmitter는 직결이 안 될 수 있습니다. AC coupling capacitor의 필요 여부와 값은 해당 전기 규격·PHY·reference design을 따릅니다. PCIe·SATA처럼 AC coupling을 요구하는 링크도 있지만 LVDS 전체에 공통인 규칙은 아닙니다.
 
 > ⚠️ Connector impedance discontinuity
 
