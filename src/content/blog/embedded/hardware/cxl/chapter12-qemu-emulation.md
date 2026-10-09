@@ -2,7 +2,7 @@
 title: "Ch 12: QEMU CXL 에뮬레이션 — 노트북에서 CXL 개발"
 slug: "embedded/hardware/cxl/chapter12-qemu-emulation"
 date: 2026-05-16T09:12:00
-description: "QEMU 8.0+의 CXL Type 3 에뮬레이션과 드라이버 검증 워크플로."
+description: "QEMU의 CXL 토폴로지 에뮬레이션과 커널 cxl_test mock으로 드라이버 경로를 돌려 보기."
 series: "CXL 4.0 Internals"
 seriesOrder: 12
 tags: [cxl, qemu, emulation, type-3, dev-workflow]
@@ -12,300 +12,179 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"QEMU 8.0+가 *CXL Type 3 디바이스 에뮬레이션*을 stable 지원해 *노트북에서 CXL 드라이버·BIOS 개발*이 가능해졌습니다."** — `-machine q35,cxl=on` 옵션과 `pxb-cxl·cxl-rp·cxl-type3·memory-backend-file` 조합으로 *실 디바이스 없이* *Linux guest가 CXL을 인식*합니다. *Latency 시뮬레이션은 부정확*하지만 *드라이버 prototype·BIOS 코드 검증*에는 충분.
+> **"QEMU는 *CXL host bridge·root port·switch·Type 3 메모리 디바이스*를 에뮬레이션해, 실 디바이스 없이 *Linux guest의 CXL 드라이버 경로*를 돌려 볼 수 있게 합니다."** — `-M q35,cxl=on`(또는 arm `virt,cxl=on`)에 `pxb-cxl·cxl-rp·cxl-type3`와 `cxl-fmw`를 조합합니다. 링크·PHY는 없으니 성능 측정에는 쓰지 않습니다. 이 장은 QEMU master(11.1 개발판, 2026-10) 문서와 소스 기준입니다.
 
-[Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서 *Linux drivers/cxl/ 코드*를 봤습니다. *드라이버 개발·디버깅에는 실 디바이스 또는 에뮬레이션*이 필요합니다. Astera Leo 카드가 *수십~수백 만원*이라 *책상 위에서 시작*하기엔 부담. QEMU가 그 갭을 채웁니다.
+[Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서 *Linux drivers/cxl/ 코드*를 봤습니다. 이 코드를 돌려 보려면 실 디바이스나 에뮬레이션이 필요합니다. QEMU가 그 자리를 채웁니다.
 
-## QEMU CXL 지원 현황
+## QEMU가 제공하는 것
 
-QEMU 8.0+의 *CXL 기능 매트릭스*:
+QEMU 문서(`docs/system/devices/cxl.rst`)와 소스에서 확인되는 구성 요소:
 
-| 항목 | 지원 | 안정도 |
-|------|-----|--------|
-| Type 3 memory expander | 8.0+ | stable |
-| Type 2 accelerator + memory | 9.0+ | experimental |
-| Type 1 cache-only | — | not supported |
-| Multi-LD pooling | 8.2+ | partial |
-| CXL Switch | 8.2+ | basic |
-| CXL 3.0 fabric | — | not yet |
+| 구성 요소 | QEMU 이름 |
+|------|-----|
+| CXL host bridge | `pxb-cxl` |
+| CXL root port | `cxl-rp` |
+| CXL switch | `cxl-upstream` + `cxl-downstream` (단일 virtual hierarchy) |
+| Type 3 메모리 디바이스 | `cxl-type3` — volatile, persistent, Dynamic Capacity(`num-dc-regions`) |
+| Fixed Memory Window (CEDT CFMWS) | 머신 옵션 `cxl-fmw.N.*` |
+| HDM-DB | `cxl-type3`의 `hdm-db`, 256B flit(`x-256b-flit`), window의 `back-invalidate=on` |
+| 머신 | x86 `q35`, arm `virt` |
 
-*대부분 개발은 Type 3로 충분*. *드라이버 path*가 *Type별로 크게 갈리지 않습니다*.
+Type 1·Type 2 가속기 디바이스 모델은 QEMU 트리에 없습니다. 오류·poison·이벤트 주입은 QMP 명령으로 됩니다: `cxl-inject-poison`, `cxl-inject-uncorrectable-errors`, `cxl-inject-correctable-error`, `cxl-inject-general-media-event`, `cxl-inject-dram-event`, `cxl-inject-memory-module-event`, 그리고 Dynamic Capacity용 `cxl-add-dynamic-capacity`·`cxl-release-dynamic-capacity`.
 
-## 호스트 머신 모델
-
-QEMU에 *CXL host bridge를 자동 생성*하는 옵션:
+## 머신 옵션
 
 ```bash
 qemu-system-x86_64 \
-    -machine q35,cxl=on \
-    -m 8G,slots=8,maxmem=32G \
+    -M q35,cxl=on \
+    -m 4G,maxmem=8G,slots=8 \
     -smp 4 \
-    -enable-kvm \
     ...
 ```
 
-핵심 옵션:
-
 | 옵션 | 의미 |
 |------|------|
-| `cxl=on` | CXL host bridge 자동 생성 |
-| `slots=N,maxmem=M` | hot-add 가능한 memory 슬롯 |
-| `q35` | PCIe support machine (i440fx 안 됨) |
+| `cxl=on` | 머신의 CXL 지원 켜기. CEDT 생성, `pxb-cxl` 레지스터 연결 |
+| `maxmem`·`slots` | QEMU 문서의 모든 CXL 예시가 함께 씀 |
+| `q35` | `pxb-cxl`은 PCIe root bus(`pcie.0`)에 달아야 함 |
 
-*`-machine`이 켜져야* *CEDT가 자동 생성*되어 *Linux guest가 CXL 인식*.
+`cxl=off`인데 `pxb-cxl`이 있으면 QEMU는 `CXL host bridges present, but cxl=off`로 멈춥니다.
 
-## CXL Type 3 디바이스 추가
+## Type 3 디바이스 추가
 
-전체 옵션 조합:
+QEMU 문서의 volatile 메모리 예시:
 
 ```bash
-qemu-system-x86_64 \
-    -machine q35,cxl=on \
-    -m 8G,slots=8,maxmem=32G \
-    \
-    -object memory-backend-file,id=cxl-mem0,share=on,\
-            mem-path=./cxl-mem-backing,size=256M \
-    \
-    -device pxb-cxl,bus_nr=12,bus=pcie.0,id=cxl.1 \
-    -device cxl-rp,port=0,bus=cxl.1,id=root_port0,\
-            chassis=0,slot=0 \
-    -device cxl-type3,bus=root_port0,memdev=cxl-mem0,\
-            id=cxl-mem0-dev \
-    \
-    -M cxl-fmw.0.targets.0=cxl.1,cxl-fmw.0.size=512M
+qemu-system-x86_64 -M q35,cxl=on -m 4G,maxmem=8G,slots=8 -smp 4 \
+  ... \
+  -object memory-backend-ram,id=vmem0,share=on,size=256M \
+  -device pxb-cxl,bus_nr=12,bus=pcie.0,id=cxl.1 \
+  -device cxl-rp,port=0,bus=cxl.1,id=root_port13,chassis=0,slot=2 \
+  -device cxl-type3,bus=root_port13,volatile-memdev=vmem0,id=cxl-vmem0 \
+  -M cxl-fmw.0.targets.0=cxl.1,cxl-fmw.0.size=4G
 ```
-
-각 옵션 의미:
 
 | 옵션 | 역할 |
 |------|------|
-| `memory-backend-file` | 실 파일이 CXL device의 backing store |
-| `pxb-cxl` | CXL host bridge (PCI Expander Bus, CXL flavor) |
-| `cxl-rp` | CXL Root Port |
-| `cxl-type3` | Type 3 디바이스 자체 |
-| `cxl-fmw` | Fixed Memory Window (CFMWS entry) |
+| `memory-backend-ram`·`memory-backend-file` | 디바이스 메모리의 backing store |
+| `pxb-cxl` | CXL host bridge (PCI Expander Bridge의 CXL 판) |
+| `cxl-rp` | CXL root port |
+| `cxl-type3` | Type 3 디바이스. `volatile-memdev=` 또는 `persistent-memdev=`(+ `lsa=`) |
+| `cxl-fmw.N` | CFMWS 하나. `targets`는 host bridge, `size`는 256 MiB 배수 |
 
-*FMW size*는 *디바이스 자체 메모리보다 커야*. multiple device interleave를 위한 *예약 영역*.
+`cxl-type3`의 옛 `memdev=` 속성은 *deprecated*이고, 하위 호환을 위해 *persistent* 메모리로 취급됩니다. volatile region을 만들려면 `volatile-memdev=`를 써야 합니다.
 
-## Linux Guest의 인식 흐름
+## Linux guest에서 확인
 
-QEMU 안에서 부팅한 Linux:
+QEMU 문서는 Linux 5.18 기준 필요한 커널 옵션으로 `CONFIG_CXL_BUS`·`CXL_PCI`·`CXL_ACPI`·`CXL_PMEM`·`CXL_MEM`·`CXL_PORT`·`CXL_REGION`을 듭니다.
 
 ```bash
-# 커널 6.0+이어야 CXL 서브시스템 동작
-guest$ uname -r
-6.8.0-...
+# PCI 디바이스: vendor 8086, device 0d93, class 0502 (CXL memory)
+guest$ lspci -nn -d 8086:0d93
 
-# CXL 모듈 로딩
-guest$ modprobe cxl_acpi
-guest$ modprobe cxl_pci
-
-# PCIe로 보임
-guest$ lspci -nn | grep CXL
-0c:00.0 CXL: ... [1af4:0d93]    # virtio vendor + CXL ID
-
-# CXL sysfs 등록 확인
+# CXL bus 객체: root0, portN, endpointN, decoderX.Y, mem0 등
 guest$ ls /sys/bus/cxl/devices/
-mem0/  decoder0.0/  port0/  root0/
 
-# 토폴로지
-guest$ cxl list -RT
-[
-  {
-    "root":"root0",
-    "decoders":[
-      {
-        "decoder":"decoder0.0",
-        "size":536870912
-      }
-    ],
-    "endpoints":[
-      {
-        "memdev":"mem0",
-        "ram_size":268435456
-      }
-    ]
-  }
-]
+# 토폴로지·decoder·memdev
+guest$ cxl list -M -D -T
 
-# Region 생성
-guest$ cxl create-region -d decoder0.0 -t ram -s 256M
-{
-  "region":"region0",
-  "size":268435456,
-  "decoder":"decoder0.0"
-}
+# volatile region 생성 (크기를 빼면 가능한 최대)
+guest$ cxl create-region -m -d decoder0.0 -t ram mem0
 
-# DAX 모드 또는 system RAM 모드
+# dax 장치를 System RAM으로 (이미 online이면 생략)
 guest$ daxctl reconfigure-device dax0.0 -m system-ram
 
-# numactl로 CXL 노드 확인
+# 새 NUMA 노드 확인
 guest$ numactl --hardware
-node 0 size: 8000 MB     # 기본 RAM
-node 1 size: 256 MB      # CXL Type 3 expander
 ```
 
-guest 안에서 *모든 명령이 실 디바이스와 동일하게* 동작합니다.
+`0d93` 디바이스 ID와 Intel vendor ID는 QEMU `hw/mem/cxl_type3.c`가 그대로 박아 둔 값입니다. 출력 JSON 형식은 ndctl 문서(`cxl-list`, `cxl-create-region`)에 예시가 있습니다.
 
-## CEDT 검증
+## CEDT 확인
 
-QEMU가 *자동 생성한 ACPI CEDT* 확인:
+QEMU의 `hw/acpi/cxl.c`가 CEDT를 만듭니다.
+
+| Subtable | 만드는 단위 | 주요 값 |
+|---------|------|------|
+| CHBS (Type 0) | `pxb-cxl` 하나당 | Record Length 32, *UID = `bus_nr`*, CXL Version 1, Base·Length = host bridge 레지스터 영역 |
+| CFMWS | `cxl-fmw.N` 하나당 | window base·size, target host bridge, interleave |
 
 ```bash
-guest$ acpidump -b
+guest$ acpidump -n CEDT -b
 guest$ iasl -d cedt.dat
-
-# cedt.dsl 파일 내용
-[001h] Signature              "CEDT"
-[004h] Table Length           0x0000005C
-[008h] Revision               0x01
-[009h] Checksum               0x...
-
-[Subtable Type: CHBS (CXL Host Bridge Structure)]
-[001h] Subtable Type          0x00
-[003h] UID                    0x0000
-[007h] CXL Version            0x0001
-[00Bh] Base                   0x...
-[013h] Length                 0x...
-
-[Subtable Type: CFMWS (CXL Fixed Memory Window)]
-[001h] Subtable Type          0x01
-...
 ```
 
-CEDT 내용이 *실 BIOS와 동일한 형식*입니다. *드라이버가 같은 path*로 인식.
+위 예시처럼 `bus_nr=12`면 CHBS UID는 12(0x0C)입니다. 드라이버(`cxl_acpi`)는 실 BIOS가 만든 CEDT와 같은 경로로 이 표를 읽습니다.
 
-## 드라이버 개발 워크플로
+## cxl_test — QEMU 없이 도는 mock 토폴로지
 
-QEMU 환경에서 *kernel module 개발 사이클*:
+커널 트리의 `tools/testing/cxl/`은 QEMU 디바이스와 별개입니다. CXL 모듈을 mock 함수와 함께 다시 빌드하고, `cxl_test` 모듈이 가짜 CXL 토폴로지를 만듭니다. ndctl의 CXL 테스트가 이걸 씁니다.
 
 ```bash
-# host에서 cxl_test mock 프레임워크 빌드 (drivers/cxl/가 아니라 tools/testing/cxl/)
-host$ make -C ~/linux M=tools/testing/cxl
+# ndctl README의 절차
+$ sudo make M=tools/testing/cxl modules_install
+$ sudo make modules_install
 
-# 결과 .ko를 guest로 복사 (cxl_test·cxl_mock·cxl_mock_mem)
-host$ scp tools/testing/cxl/cxl_mock.ko guest:/tmp/
-
-# guest에서 load·테스트
-guest$ insmod /tmp/cxl_mock.ko
-guest$ dmesg | tail
-guest$ ls /sys/bus/cxl/devices/
-
-# 수정·반복 (mock 소스는 test/mock.c)
-host$ vim tools/testing/cxl/test/mock.c
-host$ make -C ~/linux M=tools/testing/cxl
+# 테스트 토폴로지 올리기·내리기 (ndctl test 스크립트와 같음)
+$ sudo modprobe cxl_test
+$ sudo modprobe -r cxl_test
 ```
 
-*컴파일·load·테스트* 사이클이 *수십 초*. *실 하드웨어에 reboot·flash*하는 시간보다 *훨씬 빠름*.
-
-## QEMU CXL의 한계
-
-QEMU CXL은 *정확도가 떨어지는 영역*:
-
-| 한계 | 영향 |
+| 모듈 | 소스 |
 |------|------|
-| latency 시뮬레이션 미정확 | 성능 측정에 못 씀 |
-| 실 PCIe link 없음 | PHY·LTSSM 버그 못 잡음 |
-| CXL.cache 미지원 (Type 2) | accelerator coherency 검증 한계 |
-| Fabric·switch 시뮬레이션 제한 | 대규모 토폴로지 못 봄 |
-| RAS·MCTP·VDM 미구현 | 운영 시나리오 검증 한계 |
+| `cxl_test` | `test/cxl.c`, `test/hmem_test.c` |
+| `cxl_mock` | `test/mock.c` |
+| `cxl_mock_mem` | `test/mem.c` |
+| `cxl_mock_accel` | `test/accel.c` |
 
-*적합한 사용*:
-- 드라이버 prototype·디버깅
-- Kernel module ABI 변경 검증
-- BIOS·UEFI CXL 코드 개발
-- userland tool (cxl-cli 등) 개발
-- 회귀 테스트
+드라이버 로직을 빠르게 반복 테스트하기엔 cxl_test, 실제 PCI 열거·CEDT·레지스터 경로를 보기엔 QEMU가 맞습니다.
 
-*부적합*:
-- 성능 측정·튜닝
-- 실 하드웨어 호환성 검증
-- PHY·signal integrity 디버깅
+## QEMU CXL로 못 하는 것
 
-## 대체 도구
-
-QEMU 외 대안:
-
-| 도구 | 정확도 | 속도 | 용도 |
-|------|--------|------|------|
-| QEMU CXL | medium | fast | 드라이버·BIOS 개발 |
-| Intel/AMD reference | high | slow | 정밀 시뮬레이션 |
-| gem5 CXL 모델 | very high | very slow | 아키텍처 연구 |
-| FPGA 보드 + CXL IP | exact | hardware | 양산 검증 |
-
-대부분 개발자는 *QEMU + FPGA 보드 조합*이 *비용·정확도 균형*입니다.
-
-## QEMU 4.0 spec 지원
-
-CXL 4.0 *Bundled Port·128 GT/s·Streamlined Port* 같은 *새 기능*은 *QEMU 진행 중*:
-
-| 기능 | QEMU 상태 (대략) |
-|------|----------------|
-| 128 GT/s 시뮬레이션 | latency model만 (실 신호 없음) |
-| Bundled Port | 실험 단계 |
-| Streamlined Port | 미지원 |
-| Host-initiated PPR | 미지원 |
-
-대부분 *4.0 기능 개발*은 *QEMU patch 직접 작성 후 test*하는 방식. *Mainline 합류는 시간 걸림*.
+| 한계 | 이유 |
+|------|------|
+| 성능·지연 측정 | 링크와 디바이스 지연을 모델링하지 않음 |
+| PHY·LTSSM·신호 무결성 | 물리 링크가 없음 |
+| Type 1·Type 2 가속기 경로 | 디바이스 모델 없음 |
 
 ## 자주 하는 실수
 
-### `q35` 머신 안 쓰고 i440fx로 시도
+### `memdev=`로 붙이고 ram region을 만들려 함
 
-```bash
-$ qemu-system-x86_64 -machine pc,cxl=on ...
-qemu-system-x86_64: warning: cxl option requires q35 machine
+`memdev=`는 persistent로 취급됩니다. volatile은 `volatile-memdev=`를 써야 합니다.
+
+### `pc`(i440fx) 머신에 `pxb-cxl`
+
+```text
+pxb-cxl devices cannot reside on a PCI bus
 ```
 
-CXL은 *PCIe 5.0 기반*. *PCIe 자체*가 *q35 머신만 지원*. 옛 머신 모델로는 CXL이 동작 안 합니다.
+`pxb-cxl`은 PCIe root bus가 필요합니다. `q35`를 씁니다.
 
-### Backing file 권한 잘못
+### FMW 크기를 256 MiB 배수가 아닌 값으로
 
-```bash
-$ qemu-system-x86_64 \
-    -object memory-backend-file,id=mem0,\
-            mem-path=/root/cxl-mem,...
-# guest 시작 시 segfault — 권한 거부
+```text
+Size of a CXL fixed memory window must be a multiple of 256MiB
 ```
 
-QEMU 프로세스가 *읽기·쓰기 권한*. `/tmp/` 또는 sudo 환경.
+region 전체가 window 안에 들어가야 하므로, interleave할 디바이스 용량의 합보다 작게 잡으면 원하는 region을 만들 수 없습니다.
 
-### Guest kernel 5.x 사용
+### 같은 bus 번호로 `pxb-cxl` 두 개
 
-```bash
-guest$ uname -r
-5.15.0-...
-guest$ modprobe cxl_acpi
-modprobe: FATAL: Module cxl_acpi not found
+```text
+Bus 12 is already in use
 ```
 
-CXL subsystem은 *6.0+ mainline*. *5.15 LTS*는 OEM patch 없이는 동작 안 함. Ubuntu 24.04+ 또는 Fedora 38+ 권장.
-
-### FMW size를 device size와 같게
-
-```bash
--object memory-backend-file,...,size=256M
--M cxl-fmw.0.size=256M   # 같으면 interleave 영역 없음
-```
-
-FMW는 *interleave를 위한 예약 영역*도 포함해야. *device size의 2배 이상* 권장.
-
-### Multi-device emulation 시 chassis·slot 충돌
-
-```bash
--device cxl-rp,port=0,...,chassis=0,slot=0
--device cxl-rp,port=1,...,chassis=0,slot=0  # 충돌!
-```
-
-각 root port는 *고유 (chassis, slot)*. slot을 *1, 2, 3...* 로 증가.
+host bridge마다 `bus_nr`를 다르게 줍니다. QEMU 문서 예시는 12와 222를 씁니다.
 
 ## 정리
 
-- QEMU 8.0+가 *CXL Type 3 디바이스 에뮬레이션*을 stable 지원해 *드라이버·BIOS 개발*을 *노트북에서* 가능하게 합니다.
-- `-machine q35,cxl=on`이 기본. `pxb-cxl·cxl-rp·cxl-type3·memory-backend-file`을 조합해 디바이스 추가.
-- Linux guest는 *kernel 6.0+*에서 *cxl_acpi·cxl_pci·cxl_mem* 자동 인식. `cxl list -RT`로 토폴로지 확인.
-- *latency·신호 무결성·CXL.cache* 시뮬레이션은 한계. 성능 측정·PHY 디버깅은 실 HW 필요.
-- *컴파일·load·테스트 사이클이 수십 초*로 *드라이버 prototype에 이상적*.
+- QEMU는 *pxb-cxl·cxl-rp·cxl-upstream/downstream·cxl-type3*와 *cxl-fmw*로 CXL 토폴로지를 만듭니다. Type 1·2 모델은 없습니다.
+- `-M q35,cxl=on`(x86) 또는 `virt,cxl=on`(arm). volatile은 `volatile-memdev=`.
+- guest에서는 `cxl list`·`cxl create-region`·`daxctl`로 실 디바이스와 같은 경로를 탑니다.
+- 오류·poison·Dynamic Capacity는 QMP `cxl-*` 명령으로 주입합니다.
+- 드라이버 로직만 볼 땐 커널의 *cxl_test* mock이 더 가볍습니다.
+- 링크가 없으니 성능·PHY 검증은 실 하드웨어 몫입니다.
 
 ## 다음 편
 

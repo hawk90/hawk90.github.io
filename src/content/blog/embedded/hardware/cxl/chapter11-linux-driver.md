@@ -280,7 +280,7 @@ v7.3-rc6 소스에 들어 있는 것 중 이 시리즈와 관련된 항목:
 
 ## 다음 편
 
-[Ch 12: QEMU CXL 에뮬레이션 — 노트북에서 CXL 개발](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 *QEMU 8.0+의 CXL Type 3 에뮬레이션*과 *드라이버 검증 워크플로*를 본격적으로 분해합니다.
+[Ch 12: QEMU CXL 에뮬레이션 — 노트북에서 CXL 개발](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 *QEMU의 CXL 에뮬레이션*과 커널의 *cxl_test mock*으로 드라이버 경로를 돌려 봅니다.
 
 ## 관련 항목
 
