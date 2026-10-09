@@ -60,6 +60,7 @@ const en: typeof ko = defineLocale({
 
   giscus_setup_required: 'Giscus configuration is required for comments.',
   giscus_setup_link: 'Configure at giscus.app →',
+  giscus_frame_title: 'Comments',
 });
 
 export default en;

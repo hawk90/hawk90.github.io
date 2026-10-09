@@ -60,6 +60,7 @@ const ja: typeof ko = defineLocale({
 
   giscus_setup_required: 'コメント機能を使用するには Giscus の設定が必要です。',
   giscus_setup_link: 'giscus.app で設定する →',
+  giscus_frame_title: 'コメント',
 });
 
 export default ja;

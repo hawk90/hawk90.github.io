@@ -63,6 +63,9 @@ const checks = [
   // lost by changing the value, unpublishing, or a route that quietly stops
   // generating the page.
   ['published URL continuity', ['npm', 'run', 'audit:published-urls']],
+  // Reads dist/: the hashes are added after rendering, so only the built HTML
+  // shows whether every inline script is pinned in its page's CSP.
+  ['CSP inline script hashes', ['npm', 'run', 'audit:csp']],
   ['static admin boundary', ['npm', 'run', 'gate:security-admin', '--', '--artifact', 'dist']],
   ['production secret scan', ['npm', 'run', 'gate:secrets']],
 ];
