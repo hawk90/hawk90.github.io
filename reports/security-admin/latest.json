@@ -172,7 +172,7 @@
       "remediation": "Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.",
       "evidence": [
         {
-          "file": "dist/404.html",
+          "file": "dist/about/index.html",
           "line": 1,
           "excerpt": "Cross-origin subresource without integrity: https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6238136533844790"
         }
