@@ -58,7 +58,7 @@ _start:
     bl  exit
 ```
 
-bare-metal에서 `_start`가 곧 Reset_Handler의 역할을 합니다. newlib는 `_start`를 link하지만, 보통 startup file에서 같은 역할을 직접 구현해 대체합니다.
+bare-metal에서는 보통 startup file의 `Reset_Handler`가 이 초기화 역할을 담당합니다. `_start`라는 이름과 실제 entry 구성은 linker script, C runtime, startup file 조합에 따라 달라집니다.
 
 ### 3) `.init_array` / `.fini_array`
 
@@ -89,7 +89,7 @@ linker는:
 } > FLASH
 ```
 
-`SORT`로 priority 순 정렬. priority 매개변수가 없으면 link 순서대로.
+`SORT`는 linker script의 정렬 규칙에 따라 input section을 정렬합니다. constructor priority가 있더라도 toolchain/linker 규칙을 확인해야 하며, priority가 없는 서로 다른 translation unit의 순서를 애플리케이션 계약으로 가정해서는 안 됩니다.
 
 ### 4) `__libc_init_array` / `__libc_fini_array`
 
@@ -107,7 +107,7 @@ void __libc_init_array(void) {
 }
 ```
 
-`exit()` 호출 시 `__libc_fini_array`가 reverse 순으로 destructor를 호출.
+runtime이 `exit()` 경로에서 이를 호출하도록 구성된 경우 `__libc_fini_array`가 destructor 처리를 담당합니다. bare-metal에서는 `exit` 경로 자체가 생략되거나 별도로 구현될 수 있습니다.
 
 ### 5) System call stub — `_write`, `_sbrk`, `_close`
 
@@ -202,10 +202,10 @@ int main(void) {
 
 | C 런타임 크기 (hello world) |
 | --- |
-| `--specs=nosys.specs` (full newlib) | 25 KB |
-| `--specs=nano.specs` | 5 KB |
-| picolibc | 2 KB |
-| 사용자 직접 stub | < 1 KB |
+| `--specs=nosys.specs` (full newlib) | toolchain·옵션·사용 API에 따라 달라짐 |
+| `--specs=nano.specs` | toolchain·옵션·사용 API에 따라 달라짐 |
+| picolibc | toolchain·옵션·사용 API에 따라 달라짐 |
+| 사용자 직접 stub | runtime 구현에 따라 달라짐 |
 
 ## 자주 보는 함정
 
@@ -227,15 +227,15 @@ priority 없으면 link 순서. 명확한 순서가 필요하면 `__attribute__(
 
 > ⚠️ Bare-metal에서 `atexit` 사용 후 `main` 반환
 
-`atexit` 함수가 너무 많거나 무거우면 main 반환 시 한참 걸립니다. embedded는 보통 main이 반환되지 않게 설계.
+`atexit` 함수가 등록된 경우 `main` 반환 시 runtime의 종료 경로가 이를 호출할 수 있습니다. bare-metal 애플리케이션은 보통 main이 반환되지 않도록 설계하거나, 반환·종료 정책을 명시합니다.
 
 ## 정리
 
 - crt0은 OS와 application 사이의 가장 얇은 layer입니다.
-- `_start`가 entry point이고, bare-metal에서는 Reset_Handler가 같은 역할을 합니다.
+- `_start` 또는 vendor/startup이 정한 reset entry에서 runtime 초기화를 시작하며, bare-metal의 실제 entry 이름과 구성은 toolchain에 따라 달라집니다.
 - `.init_array` / `.fini_array`에 C++ static 생성자와 destructor가 모입니다.
 - `_write`, `_sbrk` 같은 system call stub을 사용자가 제공해야 `printf`, `malloc`이 동작합니다.
-- `--specs=nano.specs`로 크기를 5분의 1로 줄일 수 있습니다.
+- `--specs=nano.specs`는 기능과 크기를 줄인 newlib 변형을 선택할 수 있지만, 실제 절감 폭은 toolchain·옵션·사용 API로 측정해야 합니다.
 - Stack/heap 영역 설정과 constructor 순서가 흔한 함정입니다.
 
 다음 편에서는 **메모리 레이아웃**을 다룹니다. stack/heap/static이 어디 사는지의 전체 그림입니다.

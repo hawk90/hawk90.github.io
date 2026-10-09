@@ -298,7 +298,7 @@ linker script에 stack을 명시 안 하면 heap과 stack이 같은 영역에서
 
 > ⚠️ Section name이 input과 불일치
 
-`*(.text)`는 정확히 `.text`만 잡고 `.text.foo`는 안 잡습니다. `*(.text*)`로 모든 변형 포함.
+`*(.text)`는 정확히 `.text`만 잡고 `.text.foo`는 안 잡습니다. 컴파일러가 생성하는 변형까지 포함하려면 `*(.text*)`처럼 패턴을 넓혀야 합니다.
 
 ## 정리
 

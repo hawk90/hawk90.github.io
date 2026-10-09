@@ -108,7 +108,7 @@ arm-linux-gnueabihf-gcc \
     main.c -lpthread
 ```
 
-bare-metal에서는 sysroot 대신 newlib가 자동 들어옵니다.
+bare-metal toolchain은 보통 newlib/picolibc 같은 별도 C library와 자체 include/library 경로를 사용합니다. sysroot 사용 여부와 경로는 toolchain 배포 방식에 따라 확인해야 합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -180,16 +180,16 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 | libc | hello-world flash 크기 |
 | --- | --- |
-| newlib (full) | 28 KB |
-| newlib-nano | 4 KB |
-| picolibc | 2 KB |
-| 없음 (bare) | < 1 KB |
+| newlib (full) | toolchain·옵션·linker script에 따라 달라짐 |
+| newlib-nano | toolchain·옵션·사용 API에 따라 달라짐 |
+| picolibc | toolchain·옵션·사용 API에 따라 달라짐 |
+| 없음 (bare) | runtime 구현에 따라 달라짐 |
 
 ## 자주 보는 함정
 
 > ⚠️ 호스트용 gcc로 ARM 빌드 시도
 
-`gcc main.c -mcpu=cortex-m4`는 x86 binary를 만듭니다. host gcc는 ARM 명령을 모릅니다. 반드시 `arm-none-eabi-gcc` 사용.
+host `gcc`는 기본적으로 host용 코드를 생성하며, 설치된 GCC가 ARM 옵션을 지원하지 않으면 `-mcpu=cortex-m4` 같은 옵션에서 바로 실패합니다. ARM target용 compiler와 linker를 사용해야 합니다.
 
 > ⚠️ FPU flag mismatch
 
@@ -197,7 +197,7 @@ application은 hard-float, libc는 soft-float이면 linker error 또는 runtime 
 
 > ⚠️ Library search path 누락
 
-bare-metal에서 `--specs=nosys.specs` 없이 빌드하면 `_sbrk`, `_write` 등 시스템 호출 stub이 없어 link 실패.
+`--specs=nosys.specs`는 newlib system call에 기본 error-return stub을 제공하는 선택지 중 하나입니다. 이를 쓰지 않는다고 항상 link가 실패하는 것은 아니며, 직접 stub을 제공하거나 다른 runtime/specs를 사용할 수도 있습니다.
 
 > ⚠️ ABI 호환성 무시
 
