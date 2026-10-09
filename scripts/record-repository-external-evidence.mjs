@@ -49,7 +49,7 @@ for (const item of targets) {
   item.disposition = 'remediated'; item.nextAction = 'manual-review';
   item.reviewQuestion = `Does the recorded ${control} exercise remain current and cover this item without exposing a secret?`;
   item.scope = 'External recovery exercise attested by a non-secret evidence reference; repository files alone were not used to infer this result.';
-  item.evidence = [{ files: [`${archive}/remediation-plan/repository-recovery-runbook.md`], verification: 'npm run audit:repository-external-evidence', result: `${mapping.result} Date: ${date}; owner: ${owner}; result: passed; evidence reference: ${reference}` }];
+  item.evidence = [{ files: ['docs/runbooks/repository-recovery.md'], verification: 'npm run audit:repository-external-evidence', result: `${mapping.result} Date: ${date}; owner: ${owner}; result: passed; evidence reference: ${reference}` }];
   item.residualRisk = 'External providers, owners, and recovery procedures can change; repeat the exercise on the recorded reassessment schedule.';
 }
 await writeFile(registryPath, `${JSON.stringify(registry, null, 2)}\n`);

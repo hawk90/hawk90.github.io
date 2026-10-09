@@ -15,7 +15,7 @@ const lanes = {
 const laneFor = new Map(Object.entries(lanes).flatMap(([lane, ids]) => ids.map((id) => [id, lane])));
 const items = registry.items.filter((item) => laneFor.has(item.id) && item.disposition === 'unassessed');
 const files = [
-  `${archive}/remediation-plan/repository-recovery-runbook.md`,
+  'docs/runbooks/repository-recovery.md',
   'reports/content-export/README.md',
   'reports/content-export/manifest.json',
   'scripts/audit-content-portability.mjs',
