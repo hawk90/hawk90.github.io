@@ -26,19 +26,19 @@ topics: ["embedded"]
 ### 1) 전원 → main까지 순서
 
 1. 전원 인가
-2. CPU가 `0x00000000` (또는 boot pin에 따른 alias)에서 MSP, `Reset_Handler`를 fetch
+2. 코어와 부트 구성에 정의된 vector table 위치(예: alias된 주소)에서 MSP, `Reset_Handler`를 fetch
 3. MSP를 R13에 적재
 4. `Reset_Handler`로 점프
 5. `SystemInit()` — 클럭, FPU
 6. `.data` 복사 (Flash → RAM)
 7. `.bss` 클리어 (RAM 0으로 채움)
-8. `__libc_init_array()` — C++ static constructor 호출
+8. C runtime 초기화( newlib 계열에서는 `__libc_init_array()` 포함 )
 9. `main()` 호출
-10. `main`이 반환되면 `exit()` → 무한 loop
+10. `main`이 반환되면 runtime의 `exit`/abort 처리 또는 무한 loop로 진입
 
 ### 2) Vector table
 
-linker script에서 0x08000000(또는 chip별 boot address)에 배치된 vector table:
+linker script와 칩의 boot 설정이 정한 주소(예: 일부 STM32의 flash base)에 배치된 vector table:
 
 ```c
 // startup_stm32f4xx.s 일부 (C 표현)
@@ -73,7 +73,7 @@ Reset_Handler:
     ldr     r0, =_estack
     mov     sp, r0
 
-    @ FPU enable (M4 + FPU 옵션)
+    @ FPU enable (FPU가 있는 코어에서, 프로젝트 설정에 맞게)
     ldr     r0, =0xE000ED88           @ CPACR
     ldr     r1, [r0]
     orr     r1, r1, #(0xF << 20)
@@ -103,7 +103,7 @@ zero_bss:
     strlt   r2, [r0], #4
     blt     zero_bss
 
-    @ C++ static constructor
+    @ C/C++ runtime 초기화(newlib 계열 예시)
     bl      __libc_init_array
 
     @ main
@@ -115,7 +115,7 @@ zero_bss:
 
 ### 4) `__libc_init_array` — C++ static 생성자
 
-C++ static 객체나 `__attribute__((constructor))` 함수들을 호출합니다.
+C++ static 객체나 `__attribute__((constructor))` 함수를 초기화합니다. 다만 호출 여부와 순서는 사용하는 C runtime/toolchain 구성에 따라 달라질 수 있습니다.
 
 ```c
 // newlib의 __libc_init_array 단순 구현
@@ -144,7 +144,7 @@ static Sensor s_sensor;          // main 전에 생성됨
 
 ### 5) SystemInit
 
-ARM CMSIS의 표준 함수. chip vendor가 구현합니다. 클럭 설정, vector table 위치(`SCB->VTOR`), FPU 등을 설정.
+ARM CMSIS에서 널리 쓰이는 함수이며 chip vendor가 구현합니다. 클럭 설정, vector table 위치(`SCB->VTOR`), FPU 등을 설정하지만 실제 내용과 순서는 vendor/startup 구성마다 다릅니다.
 
 ```c
 void SystemInit(void) {
@@ -215,14 +215,14 @@ void (* const vector_table[])(void) = {
 
 ## 측정 / 비교
 
-| 단계 | 시간 (Cortex-M4 @ 168 MHz) |
+| 단계 | 시간 (예시 측정; Cortex-M4 @ 168 MHz) |
 | --- | --- |
 | Reset → Reset_Handler | < 1 µs |
 | SystemInit (PLL) | 2 ms (PLL lock) |
 | .data 복사 (1 KB) | 5 µs |
 | .bss 클리어 (16 KB) | 80 µs |
 | __libc_init_array (생성자 10개) | 100 µs ~ 1 ms |
-| main 진입 | 총 2 ~ 5 ms |
+| main 진입 | 보드·클럭·runtime 구성에 따라 달라짐 |
 
 | Section | 보통 크기 |
 | --- | --- |
@@ -238,19 +238,19 @@ void (* const vector_table[])(void) = {
 
 > ⚠️ `.bss` 클리어 누락
 
-0으로 초기화한 전역 변수가 random 값을 가짐. C 표준은 .bss가 0으로 시작한다고 정의하므로 startup 책임.
+0으로 초기화되는 정적 저장 기간 객체가 random 값을 가짐. C 표준의 초기화 요구를 bare-metal startup/runtime이 충족하도록 `.bss` 등 해당 영역을 클리어해야 합니다.
 
-> ⚠️ FPU enable 없이 float 사용
+> ⚠️ FPU enable 없이 하드웨어 부동소수점 명령 실행
 
-M4 FPU 활성 없이 float 연산 시 hardfault. SystemInit 또는 Reset_Handler에서 CPACR 설정 필수.
+FPU가 있는 코어라도 CPACR 및 toolchain의 FPU ABI 설정이 맞지 않으면 지원되지 않는 명령 fault가 발생할 수 있습니다. 코어에 FPU가 없다면 software floating-point 옵션을 사용해야 하며, 정확한 fault 종류와 초기화 방식은 코어와 vendor startup을 확인해야 합니다.
 
 > ⚠️ `__libc_init_array` 호출 누락
 
 C는 문제 없지만 C++ static 객체 생성자가 안 불립니다. 객체가 default(0) 상태로 사용됨.
 
-> ⚠️ `main` 반환 시 무한 loop 안 만들어 둠
+> ⚠️ `main` 반환 처리 가정
 
-main이 반환하면 stack의 LR(garbage)로 점프해 hardfault. 반드시 `while (1);` 또는 `exit` 처리.
+bare-metal에서는 runtime이 `exit`/abort 또는 무한 loop로 처리하는 경우가 많습니다. 프로젝트의 startup/runtime이 반환 경로를 어떻게 처리하는지 확인하고 명시적으로 정책을 정해야 합니다.
 
 > ⚠️ Vendor의 SystemInit이 PLL을 설정하는데 main에서 다시 설정
 
@@ -258,11 +258,11 @@ main이 반환하면 stack의 LR(garbage)로 점프해 hardfault. 반드시 `whi
 
 ## 정리
 
-- 전원 → Reset → main까지 vector table fetch, SystemInit, .data 복사, .bss 클리어, C++ 생성자 순으로 진행됩니다.
+- 전원 → Reset → main의 일반적인 흐름은 vector table fetch, SystemInit, .data 복사, .bss 클리어, runtime 초기화 순서입니다. 정확한 순서는 코어·vendor startup·C runtime에 따라 달라집니다.
 - Vector table의 첫 두 word는 hardware가 자동으로 MSP와 Reset_Handler로 사용합니다.
 - `_sidata`, `_sdata`, `_edata`, `_sbss`, `_ebss`, `__init_array_start/end` symbol을 linker script가 정의합니다.
-- C++ static 생성자는 `__libc_init_array`가 main 전에 호출합니다.
-- 전체 startup 시간은 2 ~ 5 ms 정도입니다. PLL lock이 대부분 차지.
+- newlib 계열에서는 `__libc_init_array`가 main 전에 C++ static 생성자 초기화에 사용됩니다.
+- startup 시간은 보드의 클럭 설정, 복사할 메모리 크기, 생성자와 runtime 구성에 따라 측정해야 합니다.
 
 다음 편에서는 **C 런타임 (crt0)**을 다룹니다. newlib의 `_start`와 system call stub입니다.
 

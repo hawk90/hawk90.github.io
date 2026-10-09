@@ -22,7 +22,7 @@ topics: ["embedded"]
 
 각 stage가 어떤 환경에서 무엇을 하는지 단계별로 정리합니다.
 
-| 단계 | 크기 | 실행 위치 | 주 역할 |
+| 단계 | 크기(예시) | 실행 위치 | 주 역할 |
 | --- | --- | --- | --- |
 | 1. BootROM | 8 ~ 32 KB | internal SRAM (DDR 미초기화) | 부트 매체 select (SD·eMMC·NOR·USB) |
 | 2. SPL | ~64 KB | internal SRAM, ROM 후 | DDR 초기화, U-Boot proper 로드 |
@@ -35,7 +35,7 @@ topics: ["embedded"]
 - Chip mask ROM, 변경 불가
 - TPL (Tertiary), 또는 SBL (Secondary Boot Loader) 라고도
 - Strap pin·fuse로 *부트 소스* 결정 · SD card? · eMMC? · NOR flash? · UART (recovery)?
-- 매체에서 *고정 offset*에서 binary 읽음 · NXP i.MX: 0x400 offset, IVT header · STM32MP1: 0 offset, partition 'fsbl1' · Allwinner: 8 KB offset
+- 매체의 정해진 위치·파티션·헤더 형식에서 binary를 읽음. NXP i.MX의 IVT/offset, STM32MP1의 fsbl 파티션, Allwinner의 offset은 제품·부트 매체 설정별 공식 문서로 확인해야 합니다.
 - Header 검증 → signature check (secure boot 시)
 - SRAM에 로드 후 jump
 
@@ -59,7 +59,7 @@ void board_init_f(ulong dummy) {
 }
 ```
 
-크기가 *극도로 제한*됩니다. chip 내장 SRAM에 들어가야 하므로 보통 64-128 KB 범위입니다.
+크기가 *제한*됩니다. chip 내장 SRAM에 들어가야 하므로 실제 한도와 이미지 크기는 SoC와 구성에 따라 달라집니다.
 
 ## U-Boot Proper
 
@@ -123,7 +123,7 @@ FIT (Flattened Image Tree): 한 파일에 kernel + DTB + initrd + 서명
 mkimage -f boot.its boot.itb
 ```
 
-`boot.itb` 단일 파일로 *서명 + 검증*이 가능합니다.
+FIT 구성에 서명 노드와 키가 포함되고 U-Boot/BootROM이 해당 키를 신뢰하도록 설정된 경우 `boot.itb` 한 파일로 hash/signature 검증을 구성할 수 있습니다. `mkimage` 호출만으로 검증 체인이 자동 완성되는 것은 아닙니다.
 
 ## Secure Boot
 
@@ -156,7 +156,7 @@ BL32 (Secure-EL1 OS): OP-TEE 등
 BL33 (Non-secure): U-Boot or Linux 직접
 ```
 
-Cortex-A ARMv8 표준 부팅 chain입니다. 자동차 ECU·모바일 SoC의 표준입니다.
+여러 Cortex-A 플랫폼에서 쓰이는 일반적인 패턴이지만, BL 단계의 존재·이름·순서는 SoC와 제품 요구사항에 따라 달라집니다.
 
 ## A/B Boot — 안전 업데이트
 
@@ -182,7 +182,7 @@ Cortex-A ARMv8 표준 부팅 chain입니다. 자동차 ECU·모바일 SoC의 표
    fi
 ```
 
-업데이트 후 *N회 부팅 실패*가 발생하면 *자동 rollback*이 일어납니다. Android·Tesla·자동차 OTA에서 씁니다.
+boot count, 성공 표시, metadata 원자성, rollback 정책을 함께 구성한 경우 업데이트 후 *N회 부팅 실패* 시 자동 rollback을 구현할 수 있습니다. A/B 파티션 자체가 rollback을 보장하지는 않습니다.
 
 ## STM32MP1 부팅 예
 
@@ -268,8 +268,8 @@ eFuse에 public key hash가 박히면 revert가 불가합니다. 개발 시에�
 - 부팅은 **BootROM → SPL → U-Boot → Kernel** 순서입니다.
 - SPL은 DDR 초기화와 다음 단계 로드를 담당합니다.
 - **FIT image**로 통합과 서명을 합니다.
-- **A/B boot**로 안전한 업데이트를 보장합니다.
-- TF-A는 ARMv8 표준 chain입니다 (BL1~BL33).
+- **A/B boot**는 rollback을 구현할 수 있는 업데이트 구조이며, 실제 안전성은 boot count·성공 표시·metadata 처리에 달려 있습니다.
+- TF-A는 플랫폼에 따라 BL2·BL31·BL32·BL33 등의 단계를 제공하며, 전체 boot chain은 SoC 구성에 따라 달라집니다.
 - 디버깅에는 UART 로그와 JTAG break를 씁니다.
 
 다음 편은 **JTAG/SWD 디버깅**입니다.

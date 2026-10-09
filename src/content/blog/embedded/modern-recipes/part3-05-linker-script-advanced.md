@@ -71,7 +71,7 @@ void copy_ramfunc(void) {
 }
 ```
 
-이후 함수 호출 시 RAM에서 실행되며, M4 기준 보통 20 ~ 30% 빠릅니다.
+이후 함수 호출 시 RAM에서 실행됩니다. 실제 속도 차이는 코어의 wait state, 메모리 버스와 함수의 메모리 접근 패턴에 따라 측정해야 합니다.
 
 ### 3) Custom section
 
@@ -139,7 +139,7 @@ gcc -ffunction-sections -fdata-sections ...
 gcc -Wl,--gc-sections -Wl,--print-gc-sections ...
 ```
 
-대규모 코드에서 20 ~ 40% flash 절감이 가능합니다.
+사용하지 않는 코드와 데이터가 많은 프로젝트에서는 flash 사용량을 줄일 수 있습니다. 절감 폭은 section 분할과 참조 구조에 따라 달라지므로 실제 map 파일로 확인해야 합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -201,8 +201,8 @@ void relocate_vectors(void) {
 
 | 기법 | 효과 | 비용 |
 | --- | --- | --- |
-| ISR을 .ramfunc로 | 20-30% 빠른 entry | RAM 사용량 증가 |
-| `--gc-sections` | 20-40% flash 감소 | 빌드 시간 약간 증가 |
+| ISR을 .ramfunc로 | wait state 회피 가능 | RAM 사용량 증가 |
+| `--gc-sections` | 미참조 section 제거 | 빌드 시간·linker 설정 관리 |
 | Dual-bank A/B | A/B firmware swap 가능 | flash 절반만 사용 |
 | Custom NOLOAD section | 특수 영역 활용 | 코드 복잡도 |
 
@@ -243,7 +243,7 @@ overlay group A → B 복사 도중 IRQ가 들어와 A의 함수를 호출하면
 - `.ramfunc`로 critical 함수를 RAM에서 실행해 wait state 회피.
 - Custom section과 NOLOAD로 특수 메모리 영역 활용.
 - Dual-bank A/B로 OTA 업데이트 지원.
-- `--gc-sections`로 unused section 제거, 20 ~ 40% flash 절감 가능.
+- `--gc-sections`로 미참조 section을 제거할 수 있으며, 절감 폭은 프로젝트별로 측정해야 합니다.
 - `KEEP`, `LOADADDR`, `PROVIDE` 같은 명령이 고급 배치의 도구입니다.
 
 다음 편에서는 **스타트업 코드 분석**을 다룹니다. Reset_Handler부터 main까지 일어나는 일입니다.

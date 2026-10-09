@@ -92,7 +92,7 @@ set(CMAKE_SIZE arm-none-eabi-size)
 set(CMAKE_C_FLAGS_INIT "-mcpu=cortex-m4 -mthumb")
 set(CMAKE_CXX_FLAGS_INIT "-mcpu=cortex-m4 -mthumb")
 
-# CMake가 host compiler test를 시도하지 않게 함
+# bare-metal try_compile에서 실행 파일 링크를 피하는 일반적인 설정
 set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 
 # Cross-compile 시 search path 제한
@@ -102,7 +102,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_INCLUDE ONLY)
 set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 ```
 
-`CMAKE_SYSTEM_NAME Generic`이 bare-metal의 signal입니다.
+`CMAKE_SYSTEM_NAME Generic`은 bare-metal 환경을 나타내는 흔한 설정입니다. `CMAKE_TRY_COMPILE_TARGET_TYPE`도 프로젝트와 CMake 버전에 맞춰 선택합니다.
 
 ### 3) CMakeLists.txt 작성
 
