@@ -6,7 +6,7 @@ import Footer from '../components/common/Footer.astro';
 import ScrollProgress from '../components/ui/ScrollProgress.astro';
 import BackToTop from '../components/ui/BackToTop.astro';
 import SearchModal from '../components/common/SearchModal.astro';
-import { SITE_CONFIG, ANALYTICS_CONFIG, COMMENTS_CONFIG } from '../consts/config';
+import { SITE_CONFIG, ANALYTICS_CONFIG, COMMENTS_CONFIG, ADS_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
 
 interface Props {
@@ -94,26 +94,59 @@ const jsonLd = type === 'article'
 
     <!-- Security -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
-    <meta http-equiv="Content-Security-Policy" content={[
-      "default-src 'self'",
-      // 'unsafe-inline' is only a fallback for pre-CSP2 browsers: at build time
-      // csp-inline-script-hashes.mjs adds the hash of every inline script on
-      // the page, and browsers that see a hash ignore 'unsafe-inline'.
-      // giscus runs no script here (see Giscus.astro); only its iframe loads.
-      // GitHub domains are needed for the admin panel's API access.
-      "script-src 'self' 'unsafe-inline'" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.googletagmanager.com https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
-      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
-      "font-src 'self' https://cdn.jsdelivr.net",
-      "img-src 'self' data: https:",
-      "connect-src 'self' https://api.github.com https://github.com" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
-      "frame-src https://giscus.app",
-      "object-src 'none'",
-      "base-uri 'self'",
-      "form-action 'self' https://github.com",
-    ].join('; ')} />
+    {ADS_CONFIG.enabled ? (
+      /*
+        AdSense mode. Google only supports a nonce-based strict CSP sent as an
+        HTTP header, because the ad code's domains change over time; GitHub
+        Pages can send neither headers nor per-request nonces. So this is the
+        fallback policy from Google's own guidance ("Integrate the AdSense ad
+        code with a CSP": script-src … 'unsafe-inline' 'unsafe-eval' https:,
+        object-src 'none', base-uri), with no fetch/frame/img restrictions —
+        ad creatives load from arbitrary hosts and Google warns stricter
+        policies "may break without notice". No data-csp-pin-inline-scripts:
+        hashes would make browsers ignore 'unsafe-inline' and block ad code.
+      */
+      <meta http-equiv="Content-Security-Policy" content={[
+        "script-src 'self' 'unsafe-inline' 'unsafe-eval' https:",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self' https://github.com",
+      ].join('; ')} />
+    ) : (
+      /*
+        Strict mode (no ads). 'unsafe-inline' is only a fallback for pre-CSP2
+        browsers: csp-inline-script-hashes.mjs adds the hash of every inline
+        script to metas marked data-csp-pin-inline-scripts, and browsers that
+        see a hash ignore 'unsafe-inline'. giscus runs no script here (see
+        Giscus.astro); only its iframe loads. GitHub domains are needed for the
+        admin panel's API access.
+      */
+      <meta http-equiv="Content-Security-Policy" data-csp-pin-inline-scripts content={[
+        "default-src 'self'",
+        "script-src 'self' 'unsafe-inline'" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.googletagmanager.com https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
+        "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+        "font-src 'self' https://cdn.jsdelivr.net",
+        "img-src 'self' data: https:",
+        "connect-src 'self' https://api.github.com https://github.com" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
+        "frame-src https://giscus.app",
+        "object-src 'none'",
+        "base-uri 'self'",
+        "form-action 'self' https://github.com",
+      ].join('; ')} />
+    )}
 
-    <!-- Google AdSense site-ownership verification -->
-    <meta name="google-adsense-account" content="ca-pub-6238136533844790" />
+    <!-- Google AdSense: site-ownership verification, and Auto ads when enabled.
+         async, with no ad slots in the layout: if the script is blocked or
+         fails, nothing on the page waits for it or reserves space for it. -->
+    <meta name="google-adsense-account" content={ADS_CONFIG.client} />
+    {ADS_CONFIG.enabled && (
+      <script
+        is:inline
+        async
+        src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${ADS_CONFIG.client}`}
+        crossorigin="anonymous"
+      ></script>
+    )}
 
     <!-- Primary Meta Tags -->
     <title>{title}</title>

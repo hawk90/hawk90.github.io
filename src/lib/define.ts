@@ -133,6 +133,21 @@ export type AnalyticsConfig =
   | { enabled: true; provider: 'plausible'; id: string };
 export const defineAnalytics = (c: AnalyticsConfig): AnalyticsConfig => c;
 
+// ─── Ads (Google AdSense) ───────────────────────────────────
+/**
+ * `client` stays set even with ads off: the google-adsense-account meta
+ * (site-ownership verification) and public/ads.txt use the same publisher ID.
+ * `enabled` loads the Auto ads script and switches the CSP to the policy
+ * AdSense can run under (see BaseLayout).
+ */
+export type AdsConfig = { enabled: boolean; client: string };
+export const defineAds = (c: AdsConfig): AdsConfig => {
+  if (!/^ca-pub-\d{16}$/.test(c.client)) {
+    throw new Error(`ADS_CONFIG.client must look like ca-pub-<16 digits>, got "${c.client}"`);
+  }
+  return c;
+};
+
 
 // ─── Newsletter ─────────────────────────────────────────────
 export type NewsletterConfig =

@@ -10,6 +10,11 @@
  * astro:build:done and adds their SHA-256 hashes to script-src. Browsers that
  * see a hash ignore 'unsafe-inline'; it stays only as a pre-CSP2 fallback.
  *
+ * Opt-in per page: only a CSP <meta> carrying `data-csp-pin-inline-scripts`
+ * is pinned. With AdSense on, BaseLayout emits the ads-compatible policy
+ * without the marker — ad code injects inline script, and a hash would make
+ * browsers ignore the 'unsafe-inline' it needs.
+ *
  * One hash set for every ClientRouter page, not one per page. A meta CSP stays
  * in force after the router removes the <meta> during a navigation, so the
  * first page's policy keeps applying to every page visited after it. With
@@ -66,6 +71,9 @@ export const EXECUTABLE_SCRIPT_TYPES = new Set([
   'text/x-ecmascript',
   'text/x-javascript',
 ]);
+
+/** Attribute on a CSP <meta> that opts the page into hash pinning. */
+export const PIN_MARKER = 'data-csp-pin-inline-scripts';
 
 // Files are independent; a few at a time overlaps file I/O without holding
 // the whole site in memory.
@@ -229,8 +237,13 @@ export default function cspInlineScriptHashes() {
         // Pass 1: scan every page. Only offsets and hashes are kept, not HTML.
         /** @type {Map<string, PageScan>} */
         const scans = new Map();
+        let optedOut = 0;
         await forEachLimited(htmlFiles(root), async (file) => {
           const scan = await scanPage(await readFile(file, 'utf8'));
+          if (scan.csp && !(PIN_MARKER in scan.csp.attribs)) {
+            optedOut++;
+            return;
+          }
           // Router pages get the shared set even with no inline script of
           // their own; other pages only need work if they have scripts.
           if (scan.hashes.size > 0 || (scan.router && scan.csp)) scans.set(file, scan);
@@ -260,7 +273,8 @@ export default function cspInlineScriptHashes() {
         });
 
         logger.info(
-          `pinned ${routerHashes.length} inline script hash(es) site-wide; ${pages} page(s) updated`,
+          `pinned ${routerHashes.length} inline script hash(es) site-wide; ${pages} page(s) updated` +
+            (optedOut ? `; ${optedOut} page(s) use an unpinned CSP (no ${PIN_MARKER})` : ''),
         );
         if (unprotected.length) {
           logger.warn(
