@@ -120,20 +120,6 @@ CXL.mem 메모리는 *별도 ACPI 테이블*에도 등록됩니다.
 
 핵심은 *HMAT*. UEFI가 *CXL 디바이스의 latency·bandwidth*를 *HMAT에 미리 적어* 두면 *커널이 자동으로 memory tier를 분류*. *DAMON·NUMA balancing*이 그 분류를 *그대로 사용*.
 
-## Coherency Domain ID
-
-CXL 3.0 fabric에서는 *Coherency Domain ID*가 필요합니다.
-
-같은 *coherency domain*에 속한 디바이스는 *cache coherency를 공유*. 다른 domain은 *별도 관리*. UEFI는 *CFMWS에 domain ID*를 적어 host에 알려 줍니다.
-
-```text
-Domain 0 (host A): CFMWS 0, CFMWS 1
-Domain 1 (host A·B 공유): CFMWS 2
-Domain 2 (host B): CFMWS 3
-```
-
-이 정보가 *fabric 토폴로지 인식*에 핵심.
-
 ## SPDM 인증 통합 (옵션)
 
 Confidential Computing 환경에서는 *UEFI가 부팅 시 디바이스 SPDM 인증*도 진행:
@@ -214,16 +200,6 @@ Error: decoder already committed by firmware
 ```
 
 *Firmware-managed mode*에서는 *user-managed 명령이 안 됩니다*. BIOS에서 *firmware vs user managed* 선택 옵션이 보통 있음.
-
-### Coherency Domain ID 누락 (CXL 3.0)
-
-```text
-[CXL 3.0 fabric 환경]
-[    2.345] cxl_acpi: domain ID missing — assuming single domain
-[    2.346] cxl_acpi: fabric features disabled
-```
-
-*CXL 2.0까지는 단일 domain 가정*이지만 *3.0 fabric은 domain ID 필수*. OEM BIOS에 *3.0 spec 준수* 확인.
 
 ### SPDM 인증 실패가 silent
 
