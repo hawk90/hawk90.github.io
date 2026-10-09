@@ -13,7 +13,9 @@ const config = giscusConfig && {
   category: giscusConfig.category,
   categoryId: giscusConfig.categoryId,
   mapping: 'pathname',
-  strict: '0',
+  // Match threads by a hash of the pathname, not a fuzzy title search, so
+  // posts with similar paths never pick up each other's discussion.
+  strict: '1',
   reactionsEnabled: '1',
   emitMetadata: '0',
   inputPosition: 'top',

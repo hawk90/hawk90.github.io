@@ -6,7 +6,7 @@ import Footer from '../components/common/Footer.astro';
 import ScrollProgress from '../components/ui/ScrollProgress.astro';
 import BackToTop from '../components/ui/BackToTop.astro';
 import SearchModal from '../components/common/SearchModal.astro';
-import { SITE_CONFIG, ANALYTICS_CONFIG } from '../consts/config';
+import { SITE_CONFIG, ANALYTICS_CONFIG, COMMENTS_CONFIG } from '../consts/config';
 import { t } from '../consts/ui-strings';
 
 interface Props {
@@ -86,6 +86,11 @@ const jsonLd = type === 'article'
     <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
     <link rel="manifest" href="/manifest.json" />
     <link rel="canonical" href={canonicalURL} />
+    {COMMENTS_CONFIG.enabled && COMMENTS_CONFIG.provider === 'giscus' && (
+      // giscus links new threads back to this URL instead of location.href,
+      // which can carry ?utm=… or #anchor.
+      <meta name="giscus:backlink" content={canonicalURL.toString()} />
+    )}
 
     <!-- Security -->
     <meta name="referrer" content="strict-origin-when-cross-origin" />
@@ -95,7 +100,7 @@ const jsonLd = type === 'article'
       // define:vars has been eliminated from all components (Giscus, SearchModal).
       // GitHub domains are needed for the admin panel's API access.
       "script-src 'self' 'unsafe-inline' https://giscus.app" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.googletagmanager.com https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
-      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
+      "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net https://giscus.app",
       "font-src 'self' https://cdn.jsdelivr.net",
       "img-src 'self' data: https:",
       "connect-src 'self' https://giscus.app https://api.github.com https://github.com" + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'google' ? ' https://www.google-analytics.com' : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'umami' ? ` ${ANALYTICS_CONFIG.src || 'https://analytics.umami.is'}` : '') + (ANALYTICS_CONFIG.enabled && ANALYTICS_CONFIG.provider === 'plausible' ? ' https://plausible.io' : ''),
