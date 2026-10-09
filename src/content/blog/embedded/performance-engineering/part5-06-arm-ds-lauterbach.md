@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"ARM DS와 Lauterbach는 ETM·PTM hardware trace로 모든 명령 실행을 무손실로 기록하는, 임베디드 전용 측정의 표준입니다."**
+> **"ARM DS와 Lauterbach는 ETM·PTM hardware trace를 분석하는 대표적인 임베디드 측정 도구입니다."** ETM·PTM의 지원 범위와 실제로 수집 가능한 trace 양은 코어·SoC·trace 출력·probe 구성에 따라 달라집니다.
 
 ## 어떤 문제를 푸는가
 
@@ -19,7 +19,7 @@ Linux 위 perf와 ftrace는 software sampling 기반이라 짧은 spike를 놓�
 
 ARM 코어는 ETM(Embedded Trace Macrocell) 또는 PTM(Program Trace Macrocell)이라는 hardware trace unit을 코어 옆에 두고, 매 명령 실행을 압축된 stream으로 외부로 내보냅니다. 외부에는 DSTREAM, ULINKpro, Lauterbach TRACE32 같은 debug probe가 이 stream을 수신해 PC와 메모리에 기록합니다.
 
-소프트웨어 overhead가 0이며, 모든 분기와 함수 호출이 ns 단위로 보존됩니다. 자동차, 항공, 산업 인증이 필요한 분야에서 사실상 표준 도구입니다.
+하드웨어 trace 경로는 계측 코드를 실행하지 않아 소프트웨어 계측 부담을 줄일 수 있습니다. 다만 trace 생성량이 출력·버퍼 용량을 넘으면 필터링이나 유실이 발생할 수 있고, 모든 코어가 ETM/PTM을 제공하는 것도 아닙니다. 자동차·항공·산업 분야에서 널리 쓰이지만, 특정 도메인의 유일한 표준 도구라고 단정할 수는 없습니다.
 
 ## ARM Development Studio와 Streamline
 
@@ -168,7 +168,7 @@ Bare-metal과 달리 Linux Streamline은 software 측정이 일부 섞여 있으
 
 ## 정리
 
-- ETM과 PTM은 ARM 코어 옆에 붙은 hardware trace unit으로 zero overhead 명령 추적을 제공합니다.
+- ETM과 PTM은 지원되는 ARM 코어에서 소프트웨어 계측 부담을 줄이는 hardware trace 경로를 제공합니다.
 - ARM Development Studio의 Streamline은 Linux와 bare-metal을 같은 UI로 분석합니다.
 - Lauterbach TRACE32는 자동차 ECU 개발의 사실상 표준이며 PRACTICE 스크립트로 자동화 가능합니다.
 - RTOS awareness로 task switch와 ISR이 자동 timeline에 표시됩니다.

@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"CXL.mem의 *지연*은 *PCIe 자체*가 아니라 *flit 단계와 큐 깊이*에서 옵니다."** — Direct attach가 *170~220 ns*, switch 한 단이 *250~350 ns*, pooled 환경이 *400~600 ns*입니다. 대역폭은 *PCIe 이론값의 78~92%*, 그리고 *random access 패턴*에서는 *60~70%*까지 떨어집니다. 측정 방법과 토폴로지별 트레이드오프를 정리합니다.
+> **"CXL.mem의 지연은 링크·메모리 장치·토폴로지·큐 깊이에 좌우됩니다."** 아래의 지연·대역폭 수치는 특정 호스트·장치·펌웨어·워크로드를 가정한 예시 측정값이며, CXL 시스템 전체의 보편적인 기준값은 아닙니다.
 
 ## 어떤 문제를 푸는가
 
@@ -19,7 +19,7 @@ topics: ["embedded"]
 
 CXL.mem은 *DDR DIMM이 아닌 새 메모리 tier*입니다. 그렇다면 *지연·대역폭이 워크로드에 미치는 영향*을 *수치로* 알아야 합니다. 측정값 없이 "CXL.mem이 쓸 만하다/없다"는 *서로 다른 토폴로지를 같은 잣대로 평가*하는 흔한 오류입니다.
 
-이 장은 *세 가지 대표 토폴로지*에서 *동일 벤치마크*를 돌렸을 때의 *지연·대역폭 실측*과 *측정 방법*을 정리합니다.
+이 장은 *세 가지 대표 토폴로지*에서 *동일 벤치마크*를 돌렸다고 가정한 예시 지연·대역폭 표와 *측정 방법*을 정리합니다. 실제 수치는 장치와 구성에 따라 다시 측정해야 합니다.
 
 ## 세 가지 토폴로지
 
@@ -73,7 +73,7 @@ CXL.mem 배치 형태는 *세 단계*로 나뉩니다.
 | CXL.mem Switch | 52 GB/s | 33 GB/s | switch 처리 손실 ~7% |
 | CXL.mem Pool (4-host share) | 14 GB/s/host | 9 GB/s/host | 토탈 56 GB/s 분할 |
 
-*sequential은 이론값의 88%*까지 나옵니다. 프로토콜 오버헤드(12%)는 *flit 헤더·credit 관리*에서 나옵니다.
+이 예시 구성에서 sequential 처리량은 이론값의 88%까지 나옵니다. 실제 효율은 링크 폭·장치 구현·접근 크기·큐 깊이에 따라 달라지며, 프로토콜 오버헤드를 고정된 비율로 가정하면 안 됩니다.
 
 *random access*에서는 *60% 수준*으로 떨어집니다. 이유는 *DRAM bank parallelism이 깨지고*, *open row hit rate*가 낮아지기 때문입니다. *Roofline 분석*에서 CXL.mem의 *effective bandwidth*는 *workload 패턴 의존성이 큰* 자리에 놓여야 합니다.
 
@@ -173,8 +173,8 @@ target_id  region(KB)  access(%)
 
 ## 정리
 
-- CXL.mem 지연은 *토폴로지에 강하게 의존*합니다 — Direct 178 ns, Switch 268 ns, Pool 412 ns.
-- 대역폭은 *PCIe 이론값의 88%*가 *sequential*, *60%*가 *random* 수준입니다.
+- CXL.mem 지연은 *토폴로지와 장치 구성에 강하게 의존*합니다 — 이 글의 예시에서는 Direct 178 ns, Switch 268 ns, Pool 412 ns입니다.
+- 대역폭은 접근 패턴과 장치 구성에 따라 달라지므로, 표의 예시값을 실제 시스템의 성능 보장값으로 사용하지 않습니다.
 - *NUMA remote DDR(142 ns)와 CXL Direct(178 ns)의 차이는 크지 않음* — NUMA 잘 다루는 워크로드는 CXL Direct에 *잘 적응*합니다.
 - *mlc·STREAM·DAMON*이 *measurement·sustained throughput·access pattern*을 각각 측정하는 표준 도구입니다.
 - 토폴로지 선택은 *지연 budget*이 결정합니다 — 200 ns 이내면 DDR, 400 ns OK면 Pool.
