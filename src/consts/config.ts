@@ -73,8 +73,6 @@ export const FOOTER_LINKS = [
   // reach. It sits next to Archive because it answers the other chronological
   // question: not "what exists" but "what changed".
   { href: '/recently-updated', label: 'Updated' },
-  { href: '/now', label: 'Now' },
-  { href: '/uses', label: 'Uses' },
   { href: '/stats', label: 'Stats' },
   { href: '/contact', label: 'Contact' },
   { href: '/privacy', label: 'Privacy' },
