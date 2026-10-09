@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL은 *세 단계의 multi-host 메모리 공유*를 정의합니다."** — *2.0 pooling*은 *time-share*, *3.0 fabric*은 *coherent simultaneous share*, *3.x GFAM*은 *fabric 전역 메모리 풀*입니다. 각 단계는 *Fabric Manager·PBR·Coherency Domain*이라는 *새 메커니즘*을 도입합니다. *Composable Datacenter*의 종착점입니다.
+> **"CXL은 *단계적으로 multi-host 메모리 공유*를 넓혀 왔습니다."** — *2.0 pooling*은 영역마다 host 하나가 쓰는 *pooled memory*, *3.0*은 여러 host가 한 영역을 동시에 쓰는 *Shared FAM*과 *fabric*, 그리고 PBR로 더 크게 확장하는 *G-FAM*입니다. *Fabric Manager*와 *PBR(Port Based Routing)*이 그 메커니즘입니다.
 
 [Ch 2](/blog/embedded/hardware/cxl/chapter02-system-architecture)·[Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)에서 *디바이스 분류와 일관성*을 봤습니다. 이 장은 *디바이스 한 대*에서 *데이터센터 전체 토폴로지*로 시야를 확장합니다.
 
@@ -74,116 +74,88 @@ CXL 3.0은 *2.0의 time-share pooling*을 넘어 *multi-host가 동시에 같은
 |---------|------|
 | Multi-level Switch | PBR로 라우팅, multi-hop fabric 가능 |
 | Fabric Manager | out-of-band control + topology 관리 |
-| Coherent Memory Pool | 모든 host가 *같은 SPA로 같은 데이터* 봄 |
-| BISnp | device가 host cache invalidate |
+| Shared FAM | 여러 host가 *한 HDM 영역에 동시 접근* |
+| BISnp | HDM-DB 영역에서 device가 host cache를 snoop·무효화 |
 
 기존 2.0과의 차이:
 
 | 항목 | 2.0 Pooling | 3.0 Fabric |
 |------|------------|-----------|
-| 공유 모델 | time-share | simultaneous coherent share |
-| Coherency | 단일 owner | multi-owner with BISnp |
-| Routing | host-managed (HBR) | switch-managed (PBR) |
+| 공유 모델 | 영역마다 host 하나 (pooled) | 여러 host가 한 영역 (Shared FAM) 추가 |
+| Coherency | 단일 host | Shared FAM은 hardware(HDM-DB) 또는 software 모델 |
+| Routing | HBR (Hierarchy Based Routing) | PBR (Port Based Routing) 추가 |
 | 토폴로지 | single-level | multi-level |
 
 ## GFAM — Global Fabric Attached Memory
 
-*GFAM*은 *fabric 전역에서 보이는 메모리 풀*입니다. 모든 host가 *같은 SPA로 같은 데이터를 봅니다*.
+규격은 여러 host에 노출되는 HDM을 *FAM(Fabric-Attached Memory)*이라 부릅니다. LD로 노출하면 *LD-FAM*, *PBR 링크를 써서 더 확장성 있게* 노출하면 *G-FAM(Global-FAM)*입니다(CXL 3.1 §2.4.3).
 
 | 특성 | 의미 |
 |------|------|
-| 전역 가시성 | 모든 attached host가 *동일 영역 접근 가능* |
-| Coherent | BISnp로 *cache invalidation* 동적 처리 |
-| Scale | TB~PB 규모 |
-| 운영 | Fabric Manager가 *영역 할당·해제·migration* |
+| 접근 | G-FAM 디바이스(GFD)는 여러 host·peer의 요청을 받고, 요청의 *Source PBR ID(SPID)*로 누구의 요청인지 구분 |
+| 주소 변환 | GFD 안의 *GFD decoder*가 HPA를 DPA로 변환 |
+| 일관성 | 여러 host가 일관성을 공유하려면 HDM-DB를 씀 |
+| QoS | host·peer별 QoS 한도를 둘 수 있음 |
 
-GFAM의 *진짜 가치*는 *application이 "내 메모리"가 아닌 "fabric 메모리"를 사용*하게 되는 것. *분산 DB·in-memory cache·shared model state* 같은 *원래는 network로 share*하던 영역이 *load/store로 접근* 가능해집니다.
+G-FAM의 가치는 *원래 network로 주고받던 데이터*를 *load/store로 접근*할 수 있게 되는 데 있습니다.
 
 ## PBR — Port-Based Routing
 
-CXL 2.0의 *HBR (Host-Based Routing)*은 *host가 모든 라우팅 정보를 알아야* 합니다. multi-level switch나 큰 fabric에서는 *비현실적*입니다.
+CXL switch에는 *HBR(Hierarchy Based Routing)* switch와 *PBR(Port Based Routing)* switch가 있습니다. HBR은 PCIe 같은 *계층 구조*를 따라 라우팅합니다. PBR은 메시지에 실린 *PBR ID(SPID·DPID)*와 라우팅 테이블로 라우팅해, 계층 구조에 묶이지 않는 fabric을 만듭니다.
 
-CXL 3.0의 *PBR*은 *switch가 라우팅 결정*을 합니다.
+| 라우팅 | 방식 | 적용 |
+|--------|------|------|
+| HBR | 계층 구조 기반 | 트리형 토폴로지 |
+| PBR | PBR ID + 라우팅 테이블 | 다단계 fabric |
 
-| 라우팅 | 결정 주체 | 적용 |
-|--------|----------|------|
-| HBR | Host | 1-hop switch, 작은 토폴로지 |
-| PBR | Switch | multi-hop fabric, 대규모 |
-
-PBR이 있어야 *수십~수백 디바이스의 fabric*이 *실용적*이 됩니다.
+PBR이 있어야 계층 구조를 벗어난 *큰 fabric*을 만들 수 있습니다.
 
 ## Fabric Manager — Out-of-band Control
 
 지금까지 본 pooling에는 *누가 LD를 어느 host에 붙일지 정하는가*라는 빈칸이 있습니다. 그 자리를 채우는 것이 *Fabric Manager (FM)*입니다.
 
-FM에서 이 장에 필요한 성질은 하나입니다. FM은 *out-of-band control plane*이라서, 별도 네트워크나 전용 BMC link로 동작하고 *데이터 평면(CXL link)과 분리*돼 있습니다. 그래서 FM이 죽어도 이미 붙어 있는 LD는 계속 동작하고, 멈추는 것은 *동적 재할당*뿐입니다. pooling의 가용성을 따질 때 이 구분이 결론을 가릅니다.
+규격(CXL 3.1 §7.6.1)은 FM을 *재구성이 필요한 시점을 정하고 구성 명령을 내리는 논리적 프로세스*로 정의합니다. 형태는 정해져 있지 않습니다. host에서 도는 소프트웨어, BMC의 embedded software, 다른 CXL 디바이스나 switch의 펌웨어, 디바이스 안의 state machine 어느 것이든 될 수 있습니다. FM은 규격의 *FM API* 명령으로 디바이스와 switch를 구성합니다.
 
 FM의 전체 책임 범위(topology discovery, hot-plug, health monitoring, security policy, QoS)와 redundancy 구성은 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric#fabric-manager--out-of-band-control-plane)에서 다룹니다.
 
-## Coherency Domain ID
-
-CXL 3.0 fabric에서는 *Coherency Domain ID*가 필요합니다.
-
-| 의미 | 결과 |
-|------|------|
-| 같은 domain | *cache coherency 공유* — BISnp 등 일관성 메시지 흐름 |
-| 다른 domain | *별도 관리* — domain 간 access는 별도 protocol |
-
-운영 예:
-
-| Domain | 소속 |
-|--------|------|
-| Domain 0 | Host A 단독, Memory Region 0·1 |
-| Domain 1 | Host A·B 공유, Memory Region 2 |
-| Domain 2 | Host B 단독, Memory Region 3 |
-
-이 정보가 *fabric 토폴로지 인식과 BISnp 라우팅의 핵심*.
-
 ## 운영 사례 — hyperscale 도입
 
-CXL Consortium 공식 발표·하이퍼스케일러 백서·기술 블로그가 *2024~2026 도입 사례*를 보고합니다.
+공개된 대표 연구는 두 가지입니다.
 
-| 회사 | 프로젝트 | 적용 (공개 자료 기준) |
-|------|---------|-------------------|
-| Meta | Memory Tiering 연구 | 컨테이너 host overcommit + CXL.mem cold tier 시범 |
-| Microsoft Azure | Project Pond | 다중 VM 메모리 풀링 연구 |
-| AMD | MI300 Cluster | EPYC + Instinct + CXL pool |
-| Samsung·SK Hynix | CMM-D·Niagara 양산 | 자사 R&D·데이터센터 적용 보고 |
+| 연구 | 내용 |
+|------|------|
+| Pond (Microsoft Azure 외, ASPLOS 2023) | 클라우드 trace 분석: 8~16 소켓 범위 풀링으로 이득 대부분. DRAM 비용 7% 절감, 성능은 같은 NUMA 노드 대비 1~5% 이내 |
+| TPP (Meta 외, ASPLOS 2023) | 애플리케이션을 고치지 않는 OS 수준 hot/cold 페이지 배치. 기본 Linux 대비 18% 성능 향상 |
 
-대부분 *CXL 2.0 pooling*이 *2024~2025 양산 적용*, *3.0 fabric*은 *2026+ 본격 도입*입니다.
+Microsoft는 Azure M-series VM 프리뷰에서 CXL 메모리 확장을 발표했습니다(Astera Labs Leo, 2025년 11월).
 
 ## Composability — 데이터센터 비전
 
-CXL 3.x의 종착점은 *Composable Datacenter*입니다.
+CXL 컨소시엄은 3.x의 방향을 *메모리와 가속기를 분리해 조합하는 composable fabric*으로 설명합니다.
 
-**현재 — 정적 서버**:
-- 서버마다 *CPU·메모리·GPU·NVMe가 고정 비율*로 묶여 있음.
-- 워크로드가 GPU 더 필요해도 *옮길 수 없음*. 서버 통째로 사거나 끝.
+**현재 — 정적 서버**: 서버마다 CPU·메모리·가속기가 고정 비율로 묶여 있어, 워크로드가 메모리를 더 원해도 옮길 수 없습니다.
 
-**CXL Composable — 동적 조합**:
-- *풀별로 자원 분리*: CPU pool 1024개, 메모리 pool 1 PB, GPU pool 256개, NVMe pool 100 PB
-- 워크로드 X 시작 시 *필요한 양만 동적 할당*
-- 워크로드 X 종료 시 *전부 회수, 다른 워크로드 재할당*
+**Composable — 동적 조합**: 자원을 종류별 풀로 나눠 두고, 워크로드가 시작할 때 필요한 만큼 빌리고 끝날 때 돌려줍니다.
 
-이 비전은 *CXL fabric + Fabric Manager + composable OS*가 *모두 성숙*해야 가능합니다. *2026~2028 부분적 실현*, *2030+ 본격 도입* 예상.
+이 그림은 *fabric, Fabric Manager, 이를 다루는 OS*가 함께 갖춰져야 성립합니다.
 
 ## 자주 하는 실수
 
 ### "CXL 2.0 pooling = CXL 3.0 fabric"
 
-*완전히 다릅니다*. 2.0 pooling은 *time-share* — *한 시점에 한 host*. 3.0 fabric은 *coherent multi-host* — *동시 다중 접근*. coherency 메커니즘이 *완전히 다릅니다*.
+*다릅니다*. 2.0 pooling은 영역마다 *host 하나*입니다. 3.0은 여러 host가 *한 영역에 동시 접근*하는 Shared FAM과 PBR fabric을 더했습니다.
 
 ### "GFAM은 멀티 host가 자유롭게 read/write"
 
-*가능하지만 비용 큽니다*. *cache invalidation 트래픽*이 *워크로드 throughput을 무너뜨릴 수 있음*. *coordination protocol*(database transaction 등)이 *application 측에서 필요*합니다.
+일관성 모델에 달렸습니다. FM이 영역마다 *hardware coherency*(HDM-DB, write는 소유권을 먼저 얻는 2단계) 또는 *software-managed coherency*를 지정합니다. software 모델이면 일관성은 애플리케이션 몫입니다.
 
 ### "Fabric Manager는 single point of failure"
 
-*맞고 틀립니다*. FM 다운 시 *기존 할당은 유지*되고 *데이터 평면은 동작*. *동적 재할당만 정지*. *FM redundancy*가 production 권장. *완전한 SPOF는 아님*.
+FM의 형태는 규격이 정하지 않습니다. host 소프트웨어, BMC, switch 펌웨어 등 어디서든 돌 수 있으므로, 가용성은 *FM을 어디에 어떻게 두느냐*의 설계 문제입니다.
 
-### "PBR로 모든 토폴로지 OK"
+### "PBR fabric은 정해진 토폴로지만 된다"
 
-*deadlock 위험*. *PBR fabric 토폴로지 설계*는 *Clos·Dragonfly·Fat-tree* 같은 *deadlock-free topology*를 골라야 합니다. *임의 mesh*는 위험.
+규격(§7.7)은 PBR fabric 토폴로지를 *정해 두지 않습니다*. *deadlock-free routing을 찾을 수 있는 토폴로지*면 됩니다. 규격이 드는 예는 PCIe 같은 tree, fat tree(folded Clos), mesh, ring, star, butterfly, HyperX와 그 조합입니다.
 
 ### "CXL fabric이 NVLink을 대체한다"
 
@@ -192,10 +164,11 @@ CXL 3.x의 종착점은 *Composable Datacenter*입니다.
 ## 정리
 
 - CXL은 *Direct → Switching → Fabric*의 *3단계 진화*를 통해 *single device에서 datacenter 전체*로 확장됩니다.
-- *CXL 2.0 switching·pooling*은 *LD 단위 host 시분할*. Fabric Manager가 *out-of-band 할당 관리*.
-- *CXL 3.0 fabric*은 *coherent multi-host*. *PBR + GFAM + BISnp*가 핵심 메커니즘.
-- *GFAM*은 *fabric 전역 메모리 풀* — 분산 DB·in-memory cache의 *load/store 접근* 가능.
-- *Composable Datacenter*는 *CXL fabric의 종착점*. 2026+ 부분 실현, 2030+ 본격.
+- *CXL 2.0 switching·pooling*은 *LD 단위로 영역을 host에 배정*합니다. 배정은 Fabric Manager가 FM API로 합니다.
+- *CXL 3.0*은 *Shared FAM*(여러 host 동시 접근)과 *PBR fabric*을 더했습니다. HBR은 Hierarchy Based Routing, PBR은 Port Based Routing입니다.
+- *G-FAM*은 PBR 링크로 확장성 있게 노출한 FAM이고, GFD decoder가 HPA를 DPA로 변환합니다.
+- PBR fabric 토폴로지는 *deadlock-free routing*만 찾으면 자유롭습니다.
+- 공개 연구로는 Pond(풀링 비용 절감)와 TPP(OS 수준 tiering)가 있습니다.
 
 ## 다음 편
 
