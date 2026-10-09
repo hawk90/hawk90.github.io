@@ -1,4 +1,21 @@
 ---
+/**
+ * giscus comments, without running giscus's client.js on this origin.
+ *
+ * client.js (giscus/giscus client.ts @ e61d28ac, 2025-04-14) only builds an
+ * iframe pointing at giscus.app and relays postMessage. Loading it from
+ * giscus.app would run third-party code with this site's privileges and no
+ * integrity check (it changes too often for SRI). The loader below does the
+ * same job in-repo; the comments themselves still render inside giscus.app's
+ * cross-origin iframe, which cannot touch this page.
+ *
+ * Kept identical to client.ts where it matters for compatibility: the
+ * `giscus-session` localStorage key, the `?giscus=` session handoff, the
+ * pathname-term formula, and the widget query parameters. Deliberate
+ * differences: the term and origin use the canonical path (see canonicalPath),
+ * and query strings/anchors are not sent. If giscus changes its widget
+ * protocol, diff client.ts against that commit and port the change here.
+ */
 import { COMMENTS_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
@@ -7,39 +24,30 @@ const giscusConfig = COMMENTS_CONFIG.enabled && COMMENTS_CONFIG.provider === 'gi
   : null;
 
 const config = giscusConfig && {
-  enabled: 'true',
   repo: giscusConfig.repo,
   repoId: giscusConfig.repoId,
   category: giscusConfig.category,
   categoryId: giscusConfig.categoryId,
-  mapping: 'pathname',
-  // Match threads by a hash of the pathname, not a fuzzy title search, so
-  // posts with similar paths never pick up each other's discussion.
-  strict: '1',
-  reactionsEnabled: '1',
-  emitMetadata: '0',
-  inputPosition: 'top',
   lang: giscusConfig.lang,
 };
 
 const setupMessage = t('giscus_setup_required');
 const setupLink = t('giscus_setup_link');
+const frameTitle = t('giscus_frame_title');
 ---
 
 {config && (
+  <>
+  {/* Open the connection early; the widget itself loads near the comments. */}
+  <link rel="preconnect" href="https://giscus.app" />
   <div
     class="giscus-wrapper"
-    data-giscus-enabled={config.enabled}
     data-giscus-repo={config.repo}
     data-giscus-repo-id={config.repoId}
     data-giscus-category={config.category}
     data-giscus-category-id={config.categoryId}
-    data-giscus-mapping={config.mapping}
-    data-giscus-strict={config.strict}
-    data-giscus-reactions-enabled={config.reactionsEnabled}
-    data-giscus-emit-metadata={config.emitMetadata}
-    data-giscus-input-position={config.inputPosition}
     data-giscus-lang={config.lang}
+    data-giscus-title={frameTitle}
   >
     <div class="giscus"></div>
     <div class="giscus-error hidden p-4 text-center text-sm text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-lg">
@@ -49,113 +57,250 @@ const setupLink = t('giscus_setup_link');
       </a>
     </div>
   </div>
+  </>
 )}
+
+<style is:global>
+  /* giscus.app/default.css, served from here instead of giscus.app */
+  .giscus,
+  .giscus-frame {
+    width: 100%;
+    min-height: 150px;
+  }
+  .giscus-frame {
+    border: none;
+    color-scheme: light dark;
+  }
+  .giscus-frame--loading {
+    opacity: 0;
+  }
+</style>
 
 <script>
   import { onPageLoad } from '../../lib/lifecycle';
 
-  let observer: MutationObserver | null = null;
-  let intersectionObserver: IntersectionObserver | null = null;
+  const GISCUS_ORIGIN = 'https://giscus.app';
+  const SESSION_KEY = 'giscus-session';
+  // giscus sessions are a 96-bit IV in hex followed by base64 AES-GCM
+  // ciphertext (giscus lib/oauth/encryption.ts). Anything else is not a
+  // session and is neither stored nor sent.
+  const SESSION_FORMAT = /^[0-9a-f]{24}[A-Za-z0-9+/]+={0,2}$/;
+  const SESSION_MAX_LENGTH = 4096;
+  // Upper bound for the height the widget may ask for.
+  const MAX_FRAME_HEIGHT = 100_000;
+  // Start loading this far before the comments scroll into view. giscus needs
+  // ~2 s (widget page, then the discussions API, back to back), so begin about
+  // two screens early and the reader rarely sees the spinner.
+  const PRELOAD_MARGIN = '1500px 0px';
 
-  function loadGiscus() {
-    const wrapper = document.querySelector('.giscus-wrapper') as HTMLElement | null;
-    const errorEl = wrapper?.querySelector('.giscus-error');
-    if (!wrapper) return;
+  // Widget options that are the same on every page.
+  const FIXED_PARAMS = {
+    reactionsEnabled: '1',
+    emitMetadata: '0',
+    inputPosition: 'top',
+    // Hash match instead of GitHub's fuzzy title search, so posts with similar
+    // paths never share a thread.
+    strict: '1',
+  };
 
-    const repoId = wrapper.dataset.giscusRepoId;
-    const categoryId = wrapper.dataset.giscusCategoryId;
-
-    if (!repoId || !categoryId) {
-      errorEl?.classList.remove('hidden');
-      console.warn('Giscus: repoId or categoryId is not configured');
-      return;
-    }
-
-    if (wrapper.querySelector('script[src*="giscus"]')) return;
-
-    errorEl?.classList.add('hidden');
-
-    const theme = document.documentElement.classList.contains('light')
-      ? 'light'
-      : 'dark_dimmed';
-
-    const script = document.createElement('script');
-    script.src = 'https://giscus.app/client.js';
-    script.setAttribute('data-repo', wrapper.dataset.giscusRepo || '');
-    script.setAttribute('data-repo-id', repoId);
-    script.setAttribute('data-category', wrapper.dataset.giscusCategory || '');
-    script.setAttribute('data-category-id', categoryId);
-    script.setAttribute('data-mapping', wrapper.dataset.giscusMapping || 'pathname');
-    script.setAttribute('data-strict', wrapper.dataset.giscusStrict || '0');
-    script.setAttribute('data-reactions-enabled', wrapper.dataset.giscusReactionsEnabled || '1');
-    script.setAttribute('data-emit-metadata', wrapper.dataset.giscusEmitMetadata || '0');
-    script.setAttribute('data-input-position', wrapper.dataset.giscusInputPosition || 'top');
-    script.setAttribute('data-theme', theme);
-    script.setAttribute('data-lang', wrapper.dataset.giscusLang || 'ko');
-    script.crossOrigin = 'anonymous';
-    script.async = true;
-
-    wrapper.appendChild(script);
+  function currentTheme(): string {
+    return document.documentElement.classList.contains('light') ? 'light' : 'dark_dimmed';
   }
 
-  function initGiscus() {
-    if (observer) {
-      observer.disconnect();
-      observer = null;
+  function metaContent(selector: string): string {
+    return document.querySelector<HTMLMetaElement>(selector)?.content ?? '';
+  }
+
+  function isSession(value: unknown): value is string {
+    return typeof value === 'string' && value.length <= SESSION_MAX_LENGTH && SESSION_FORMAT.test(value);
+  }
+
+  function forgetSession() {
+    try {
+      localStorage.removeItem(SESSION_KEY);
+    } catch {
+      // Storage blocked (private mode, site data off): nothing was stored.
     }
-    if (intersectionObserver) {
-      intersectionObserver.disconnect();
-      intersectionObserver = null;
+  }
+
+  /**
+   * After GitHub login, giscus.app sends the reader back with ?giscus=<session>.
+   * Keep it (same key client.js uses) and take it out of the address bar.
+   */
+  function takeSession(): string {
+    const url = new URL(location.href);
+    if (url.searchParams.has('giscus')) {
+      const fromUrl = url.searchParams.get('giscus');
+      // Always take the parameter out of the address bar, valid or not.
+      url.searchParams.delete('giscus');
+      // Keep history.state: Astro's router stores its own data there.
+      history.replaceState(history.state, '', url.toString());
+      if (isSession(fromUrl)) {
+        try {
+          localStorage.setItem(SESSION_KEY, JSON.stringify(fromUrl));
+        } catch {
+          // Not persisted; the session still works for this page view.
+        }
+        return fromUrl;
+      }
     }
+    try {
+      const saved = localStorage.getItem(SESSION_KEY);
+      if (!saved) return '';
+      const value: unknown = JSON.parse(saved);
+      if (isSession(value)) return value;
+    } catch {
+      // Fall through: unreadable value.
+    }
+    forgetSession();
+    return '';
+  }
 
-    const wrapper = document.querySelector('.giscus-wrapper') as HTMLElement | null;
-    if (!wrapper || wrapper.dataset.giscusEnabled !== 'true') return;
+  /**
+   * The page's path as the canonical link states it. location.pathname is not
+   * stable: in-site links (ClientRouter) arrive without the trailing slash,
+   * a direct visit gets GitHub Pages' slash redirect — and the thread key would
+   * differ between the two, splitting one post's comments into two threads.
+   */
+  function canonicalPath(): string {
+    const href = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href;
+    if (href) return new URL(href).pathname;
+    const { pathname } = location;
+    return pathname.endsWith('/') ? pathname : `${pathname}/`;
+  }
 
-    const start = () => {
-      loadGiscus();
+  /** Thread key, derived the way client.js does for mapping="pathname". */
+  function pathnameTerm(path: string): string {
+    return path.length < 2 ? 'index' : path.substring(1).replace(/\.\w+$/, '');
+  }
 
-      observer = new MutationObserver((mutations) => {
-        mutations.forEach((mutation) => {
-          if (mutation.attributeName === 'class') {
-            const iframe = document.querySelector('.giscus-frame') as HTMLIFrameElement | null;
-            if (iframe) {
-              const theme = document.documentElement.classList.contains('light')
-                ? 'light'
-                : 'dark_dimmed';
-              iframe.contentWindow?.postMessage(
-                { giscus: { setConfig: { theme } } },
-                'https://giscus.app'
-              );
-            }
-          }
-        });
-      });
+  function widgetSrc(wrapper: HTMLElement, session: string): string {
+    const d = wrapper.dataset;
+    // Send giscus only scheme://host/path: it uses this for the origin check,
+    // the post-login return URL and the default backlink. Query strings and
+    // anchors are nobody's business there.
+    const path = canonicalPath();
+    const pageUrl = `${location.origin}${path}`;
+    const params = new URLSearchParams({
+      origin: pageUrl,
+      session,
+      theme: currentTheme(),
+      ...FIXED_PARAMS,
+      repo: d.giscusRepo ?? '',
+      repoId: d.giscusRepoId ?? '',
+      category: d.giscusCategory ?? '',
+      categoryId: d.giscusCategoryId ?? '',
+      description: metaContent("meta[property='og:description'],meta[name='description']"),
+      backLink: metaContent("meta[name='giscus:backlink']") || pageUrl,
+      term: pathnameTerm(path),
+    });
+    if (!session) params.delete('session');
+    const locale = d.giscusLang ? `/${d.giscusLang}` : '';
+    return `${GISCUS_ORIGIN}${locale}/widget?${params}`;
+  }
 
-      observer.observe(document.documentElement, { attributes: true });
+  function mount(wrapper: HTMLElement): () => void {
+    const container = wrapper.querySelector<HTMLElement>('.giscus');
+    if (!container) return () => {};
+
+    let session = takeSession();
+    const iframe = document.createElement('iframe');
+    iframe.className = 'giscus-frame giscus-frame--loading';
+    iframe.title = wrapper.dataset.giscusTitle || 'Comments';
+    iframe.setAttribute('scrolling', 'no');
+    iframe.allow = 'clipboard-write';
+    iframe.src = widgetSrc(wrapper, session);
+    iframe.addEventListener('load', () => iframe.classList.remove('giscus-frame--loading'), {
+      once: true,
+    });
+    container.replaceChildren(iframe);
+
+    const reloadSignedOut = () => {
+      forgetSession();
+      session = '';
+      iframe.src = widgetSrc(wrapper, '');
     };
 
-    if (!('IntersectionObserver' in window)) {
-      start();
-      return;
-    }
+    const onMessage = (event: MessageEvent) => {
+      if (event.origin !== GISCUS_ORIGIN || event.source !== iframe.contentWindow) return;
+      const msg = (event.data as { giscus?: Record<string, unknown> } | null)?.giscus;
+      if (!msg || typeof msg !== 'object') return;
 
-    intersectionObserver = new IntersectionObserver((entries) => {
-      if (!entries.some((entry) => entry.isIntersecting)) return;
-      intersectionObserver?.disconnect();
-      intersectionObserver = null;
-      start();
-    }, { rootMargin: '300px 0px' });
+      const height = msg.resizeHeight;
+      if (typeof height === 'number' && height > 0 && height <= MAX_FRAME_HEIGHT) {
+        iframe.style.height = `${Math.ceil(height)}px`;
+      }
 
-    intersectionObserver.observe(wrapper);
+      if (msg.signOut) {
+        reloadSignedOut();
+        return;
+      }
+
+      const error = typeof msg.error === 'string' ? msg.error : '';
+      if (!error) return;
+      if (/Bad credentials|Invalid state value|State has expired/.test(error)) {
+        // Expired or revoked session: drop it and show the signed-out widget.
+        if (session) reloadSignedOut();
+      } else if (!error.includes('Discussion not found')) {
+        // "Discussion not found" is normal until the first comment.
+        console.warn(`[giscus] ${error}`);
+      }
+    };
+    window.addEventListener('message', onMessage);
+
+    // Follow the site theme toggle. <html> class changes for other reasons
+    // too, so only message the widget when the theme actually changed.
+    let theme = currentTheme();
+    const themeObserver = new MutationObserver(() => {
+      const next = currentTheme();
+      if (next === theme) return;
+      theme = next;
+      iframe.contentWindow?.postMessage({ giscus: { setConfig: { theme } } }, GISCUS_ORIGIN);
+    });
+    themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
+
+    return () => {
+      window.removeEventListener('message', onMessage);
+      themeObserver.disconnect();
+    };
   }
 
   onPageLoad(() => {
-    initGiscus();
+    const wrapper = document.querySelector<HTMLElement>('.giscus-wrapper');
+    if (!wrapper) return;
+
+    if (!wrapper.dataset.giscusRepoId || !wrapper.dataset.giscusCategoryId) {
+      wrapper.querySelector('.giscus-error')?.classList.remove('hidden');
+      return;
+    }
+
+    let unmount: (() => void) | null = null;
+    const start = () => {
+      if (!unmount) unmount = mount(wrapper);
+    };
+
+    // Load when the comments come near the viewport (PRELOAD_MARGIN) rather
+    // than on every page view. A login return (?giscus=) loads at once so the
+    // session is taken out of the URL immediately.
+    let visibility: IntersectionObserver | null = null;
+    if (new URLSearchParams(location.search).has('giscus') || !('IntersectionObserver' in window)) {
+      start();
+    } else {
+      visibility = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) return;
+          visibility?.disconnect();
+          visibility = null;
+          start();
+        },
+        { rootMargin: PRELOAD_MARGIN },
+      );
+      visibility.observe(wrapper);
+    }
+
     return () => {
-      observer?.disconnect();
-      observer = null;
-      intersectionObserver?.disconnect();
-      intersectionObserver = null;
+      visibility?.disconnect();
+      unmount?.();
     };
   });
 </script>

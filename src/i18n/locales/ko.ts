@@ -69,6 +69,7 @@ const ko = {
   // Giscus
   giscus_setup_required: '댓글 기능을 사용하려면 Giscus 설정이 필요합니다.',
   giscus_setup_link: 'giscus.app에서 설정하기 →',
+  giscus_frame_title: '댓글',
 };
 
 export default ko;

@@ -60,6 +60,7 @@ const zh: typeof ko = defineLocale({
 
   giscus_setup_required: '评论功能需要配置 Giscus。',
   giscus_setup_link: '前往 giscus.app 配置 →',
+  giscus_frame_title: '评论',
 });
 
 export default zh;
