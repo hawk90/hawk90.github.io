@@ -130,7 +130,7 @@ GCC 13+, Clang 15+에서 지원합니다. toolchain 지원이 불확실합니다
 
 `std::expected`만 임베디드 가치가 큽니다. Rust의 `Result<T, E>`에 대응합니다. 자세한 내용은 [Part 3-07](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
 
-대부분 2026년 새 프로젝트에서는 C++20을 권장하고 C++17과 호환되게 만듭니다. C++23은 `std::expected`가 필요한 경우에만 씁니다.
+새 프로젝트에서 C++20을 선택할지는 제품 수명, 인증 도구, 표준 라이브러리와 실제 toolchain 지원을 함께 보고 결정합니다. C++23은 `std::expected` 같은 기능이 필요하고 toolchain이 제공할 때 선택하는 식으로 범위를 좁힐 수 있습니다.
 
 ## 임베디드 toolchain 지원 현황
 

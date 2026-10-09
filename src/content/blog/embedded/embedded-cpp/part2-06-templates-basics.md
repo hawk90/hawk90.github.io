@@ -261,7 +261,7 @@ auto add(T a, U b) {
 auto x = add(1, 2.5);   // double
 ```
 
-C++17에서는 lambda의 `auto` 매개변수가 가능합니다.
+C++14부터 generic lambda의 `auto` 매개변수가 가능합니다.
 
 ```cpp
 auto add = [](auto a, auto b) { return a + b; };
@@ -308,7 +308,7 @@ void print_each(T first, Rest... rest) {
 log("hello", 1, 2.5f, "world");   // 각 인자 타입 안전 처리
 ```
 
-GCC 11+의 `std::format`(C++20)이 type-safe printf 역할을 합니다. 다만 임베디드에서는 크기 부담이 있어, header-only이고 임베디드 친화적인 `fmt::format`을 자주 씁니다.
+`std::format`(C++20)은 표준 라이브러리 구현이 제공할 때 type-safe printf 역할을 합니다. 예를 들어 GCC libstdc++에서는 GCC 13 계열부터 지원이 추가됐지만, 임베디드 toolchain에서는 버전과 라이브러리 조합을 따로 확인해야 합니다. 크기 부담 때문에 header-only인 `fmt::format`을 선택하는 프로젝트도 있습니다.
 
 ## 임베디드 — Type-safe Print
 

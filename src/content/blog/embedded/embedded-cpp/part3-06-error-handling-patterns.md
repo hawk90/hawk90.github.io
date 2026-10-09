@@ -395,7 +395,7 @@ int read();   // -1 반환 = 에러 (?)
 ### 3. 예외와 error code 혼용
 ```cpp
 void foo() {
-    throw std::exception();   // -fno-exceptions에서 abort
+    throw std::exception();   // -fno-exceptions에서는 일반적으로 컴파일 오류
 }
 ErrorCode bar();
 ```
@@ -416,7 +416,7 @@ recoverable한 경우까지 fatal로 처리하면 시스템이 자주 reset됩�
 ```cpp
 try { foo(); } catch (...) {}   // 컴파일 에러
 ```
-예외를 끄면 try를 금지합니다.
+예외를 끈 translation unit에서는 `try`/`catch`를 사용할 수 없으므로, 예외를 사용하지 않는 오류 전달 방식으로 바꿔야 합니다.
 
 ## 측정 — 에러 처리 패턴의 코드 영향
 
