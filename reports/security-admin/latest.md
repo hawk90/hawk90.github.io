@@ -40,8 +40,9 @@ Generated deterministically from the current source tree and `dist`.
 - OAuth endpoint in production artifact
 - Required remediation: Production artifact must not contain /api/auth routes when this project builds as a static site.
 
-## SEC-ADMIN-07 — passed
+## SEC-ADMIN-07 — open
 
 - Priority: P1
 - Cross-origin subresource without integrity
 - Required remediation: Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.
+- Evidence: `dist/404.html:1` — `Cross-origin subresource without integrity: https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6238136533844790`
