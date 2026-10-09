@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getPublishedPosts, getAllSeries, getAllTags, getPostMeta } from '../lib/posts';
+import { getPublishedPosts, getAllSeries, getAllTags, getPostMeta, getProseLength } from '../lib/posts';
 import { SITE_CONFIG } from '../consts/config';
 
 const posts = await getPublishedPosts();
@@ -11,11 +11,10 @@ const tags = getAllTags(posts);
 
 // Reading-time / word estimate
 const totalMinutes = posts.reduce((sum, p) => sum + getPostMeta(p).readingTime, 0);
-// Word count: minutes × words-per-min (en) or chars × 500 (ko)
+// Prose size, measured the same way as reading time (code and markup excluded):
+// characters for ko, words for en.
 const isKo = SITE_CONFIG.lang === 'ko';
-const totalWords = isKo
-  ? posts.reduce((s, p) => s + (p.body || '').replace(/\s+/g, '').length, 0)
-  : posts.reduce((s, p) => s + (p.body || '').split(/\s+/).filter(Boolean).length, 0);
+const totalWords = posts.reduce((sum, p) => sum + getProseLength(p.body || ''), 0);
 
 // Posting cadence
 const sortedByDate = [...posts].sort((a, b) => a.data.date.valueOf() - b.data.date.valueOf());
@@ -66,7 +65,7 @@ const fmt = (n: number) => n.toLocaleString();
         </div>
         <div class="p-5 bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl">
           <div class="text-[10px] uppercase tracking-wider text-[var(--color-text-muted)] mb-2">
-            {isKo ? '글자' : 'Words'}
+            {isKo ? 'Characters' : 'Words'}
           </div>
           <div class="text-3xl font-bold tabular-nums">{fmt(totalWords)}</div>
         </div>

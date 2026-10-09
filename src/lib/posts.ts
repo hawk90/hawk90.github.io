@@ -263,34 +263,33 @@ export function filterByTag(posts: BlogPost[], tag: string): BlogPost[] {
   return posts.filter((p) => p.data.tags.some((t) => t.toLowerCase() === lowerTag));
 }
 
+/** 코드 블록·인라인 코드·링크·제목 기호·마크다운 기호를 뺀 본문 산문 */
+function stripMarkdown(content: string): string {
+  return content
+    .replace(/```[\s\S]*?```/g, '') // remove code blocks
+    .replace(/`[^`]*`/g, '')        // remove inline code
+    .replace(/!?\[.*?\]\(.*?\)/g, '') // remove links/images
+    .replace(/#{1,6}\s/g, '')        // remove headings
+    .replace(/[*_~`>#\-|]/g, '');    // remove markdown symbols
+}
+
+/**
+ * 산문 분량 — 한국어는 공백 뺀 글자 수, 영어는 단어 수.
+ * 읽기 시간과 Stats 페이지가 같은 기준을 쓰도록 한 곳에 둔다.
+ */
+export function getProseLength(content: string): number {
+  const text = stripMarkdown(content);
+  if (SITE_CONFIG.lang === 'ko') return text.replace(/\s+/g, '').length;
+  return text.trim().split(/\s+/).filter(Boolean).length;
+}
+
 /**
  * 읽기 시간 계산
  * 한국어: 분당 500자 / 영어: 분당 200단어
  */
 export function getReadingTime(content: string): number {
-  const lang = SITE_CONFIG.lang;
-
-  if (lang === 'ko') {
-    // Korean: count characters (excluding spaces and markdown syntax)
-    const text = content
-      .replace(/```[\s\S]*?```/g, '') // remove code blocks
-      .replace(/`[^`]*`/g, '')        // remove inline code
-      .replace(/!?\[.*?\]\(.*?\)/g, '') // remove links/images
-      .replace(/#{1,6}\s/g, '')        // remove headings
-      .replace(/[*_~`>#\-|]/g, '')     // remove markdown symbols
-      .replace(/\s+/g, '');            // remove whitespace
-    return Math.max(1, Math.ceil(text.length / 500));
-  }
-
-  // English: count words
-  const text = content
-    .replace(/```[\s\S]*?```/g, '')
-    .replace(/`[^`]*`/g, '')
-    .replace(/!?\[.*?\]\(.*?\)/g, '')
-    .replace(/#{1,6}\s/g, '')
-    .replace(/[*_~`>#\-|]/g, '');
-  const words = text.trim().split(/\s+/).filter(Boolean).length;
-  return Math.max(1, Math.ceil(words / 200));
+  const perMinute = SITE_CONFIG.lang === 'ko' ? 500 : 200;
+  return Math.max(1, Math.ceil(getProseLength(content) / perMinute));
 }
 
 /**
