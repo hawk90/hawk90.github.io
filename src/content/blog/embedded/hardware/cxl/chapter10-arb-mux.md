@@ -136,7 +136,7 @@ spec의 vLSM 결정 표는 두 개(vLSM[0]·vLSM[1])를 놓고 설명하고, L0p
 
 ## 다음 편
 
-[Ch 11: Linux drivers/cxl/ 분석 — Mainline kernel CXL 구현](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서 *Linux 6.x의 CXL subsystem 코드 구조*와 *probe 흐름*을 본격적으로 분해합니다.
+[Ch 11: Linux drivers/cxl/ 분석 — Mainline kernel CXL 구현](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서 *mainline 커널 CXL subsystem의 코드 구조*와 *probe·region·mailbox 경로*를 따라갑니다.
 
 ## 관련 항목
 
