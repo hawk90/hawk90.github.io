@@ -12,7 +12,7 @@
 ]
 
 \node[blk=absbord] (am) at (0, 8) {\textbf{Address mapping (XOR)}\\\footnotesize byte addr → channel / bank / row / col};
-\node[blk=impbord, below=6mm of am, minimum height=24mm] (pq) {\textbf{Per-bank queue (× 512)}\\\footnotesize bank 0: [req] [req] $\ldots$\\\footnotesize bank 1: [req]\\\footnotesize \ldots\\\footnotesize bank 511: [req] [req] [req]};
+\node[blk=impbord, below=6mm of am, minimum height=24mm] (pq) {\textbf{Per-bank queue}\\\footnotesize bank 0: [req] [req] $\ldots$\\\footnotesize bank 1: [req]\\\footnotesize \ldots\\\footnotesize bank 511: [req] [req] [req]};
 \node[blk=clibord, below=6mm of pq, minimum height=20mm] (sch) {\textbf{Scheduler (FR-FCFS)}\\\footnotesize $\cdot$ Row hit 우선\\\footnotesize $\cdot$ Bank conflict 회피\\\footnotesize $\cdot$ WR / RD batch grouping};
 \node[blk=conbord, below=6mm of sch] (bus) {\textbf{Command / Address bus to HBM}};
 

@@ -11,7 +11,7 @@
 \node[font=\sffamily\bfseries\large] at (6,5.4) {REFab vs REFpb — per-bank Refresh};
 
 % ===== REFab — all bank refresh stalls the entire bus =====
-\node[font=\sffamily\bfseries, anchor=west, text=warnbord] at (0,4.4) {REFab (all-bank refresh) — 8.9\% loss};
+\node[font=\sffamily\bfseries, anchor=west, text=warnbord] at (0,4.4) {REFab (all-bank refresh)};
 
 \foreach \b/\y in {0/3.8, 1/3.4, 2/3.0, 3/2.6} {
   \node[caption, anchor=east] at (-0.2, \y) {bank \b};
@@ -36,7 +36,7 @@
 \draw[arr, line width=0.4pt] (0, 2.2) -- (12.2, 2.2);
 
 % ===== REFpb — only one bank refreshes at a time, others continue =====
-\node[font=\sffamily\bfseries, anchor=west, text=okbord] at (0,1.4) {REFpb (per-bank refresh) — 0.6\% loss};
+\node[font=\sffamily\bfseries, anchor=west, text=okbord] at (0,1.4) {REFpb (per-bank refresh)};
 
 \foreach \b/\y in {0/0.8, 1/0.4, 2/0.0, 3/-0.4} {
   \node[caption, anchor=east] at (-0.2, \y) {bank \b};
