@@ -60,7 +60,7 @@ IRQ가 들어오면 hardware가 다음을 자동 수행합니다.
 5. Mode = handler mode
 6. Stack = MSP
 
-이 전체가 12 cycle(M3/M4 기준), no-cache 시 16 ~ 25 cycle 정도 걸립니다.
+이 전체 latency는 Cortex-M 구현·memory wait state·vector 위치·설정에 따라 달라집니다. 12 cycle은 일부 M3/M4 조건에서 인용되는 대표값이며, no-cache나 flash wait state가 있으면 더 늘어날 수 있습니다.
 
 흐름을 정리하면 이렇습니다. IRQ가 pending되면 CPU가 현재 명령을 마친 뒤, 12 cycle 동안 hardware stacking과 vector fetch를 수행하고, 그 다음 IRQ handler의 첫 명령을 실행합니다.
 
@@ -154,7 +154,7 @@ NVIC_EnableIRQ(EXTI0_IRQn);
 
 | 동작 | Cortex-M3/M4 cycle | Cortex-M7 cycle |
 | --- | --- | --- |
-| Exception entry (cold cache) | 12 | 11 |
+| Exception entry (대표적인 zero-wait 조건) | 구현별 | 구현별 |
 | Exception entry (warm) | 12 | 11 |
 | Exception exit | 12 | 11 |
 | Tail-chained entry | 6 | 7 |
@@ -198,7 +198,7 @@ void EXTI0_IRQHandler(void) {
 
 ## 정리
 
-- Cortex-M 예외 처리는 hardware가 12 cycle 안에 stacking·vector fetch·jump를 끝냅니다.
+- Cortex-M 예외 entry는 hardware stacking·vector fetch를 수행하지만, latency는 코어·메모리·설정에 따라 측정해야 합니다.
 - Tail-chaining과 late-arrival로 cycle을 더 절약합니다.
 - Priority는 숫자가 낮을수록 높습니다. group과 sub-priority로 나눕니다.
 - Vector table은 startup file에 정의되고, VTOR로 위치를 옮길 수 있습니다.

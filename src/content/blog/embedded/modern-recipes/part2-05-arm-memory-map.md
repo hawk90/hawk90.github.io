@@ -27,7 +27,7 @@ topics: ["embedded"]
 
 ![Cortex-M standard memory map](/images/blog/modern-recipes/diagrams/part2-05-arm-memory-map.svg)
 
-각 영역은 default access attribute가 다릅니다. MPU로 override 가능.
+각 영역의 실제 memory attribute와 peripheral 배치는 코어·SoC memory map·MPU 설정에 따라 확인해야 합니다. MPU로 일부 attribute를 override할 수 있습니다.
 
 ### 2) Code / SRAM / Peripheral
 
@@ -136,7 +136,7 @@ SECTIONS
 }
 ```
 
-CCM(Closely Coupled Memory)은 STM32F4의 64KB TCM 영역으로, CPU가 0-wait state로 접근합니다. DMA는 못 접근하므로 stack 또는 ISR critical data 용도가 좋습니다.
+일부 STM32F4 제품의 CCM(Closely Coupled Memory)은 CPU 전용에 가까운 SRAM 영역으로, DMA 접근이 제한될 수 있습니다. 크기·wait state·접근성은 제품 데이터시트에서 확인해야 하며 stack 또는 ISR critical data에 사용할 수 있습니다.
 
 ## 측정 / 비교
 

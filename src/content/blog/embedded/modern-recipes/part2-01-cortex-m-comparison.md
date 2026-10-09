@@ -25,13 +25,13 @@ topics: ["embedded"]
 | 코어 | ARM 버전 | 파이프라인 | DSP | FPU | MPU | TrustZone | 대표 chip |
 | --- | --- | --- | --- | --- | --- | --- | --- |
 | M0 | v6-M | 3 단 | X | X | X | X | STM32F0 |
-| M0+ | v6-M | 2 단 | X | X | 옵션 | X | nRF52 |
+| M0+ | v6-M | 2 단 | X | X | 구현별 | X | NXP Kinetis KL25Z |
 | M1 | v6-M | 3 단 | X | X | X | X | (FPGA 전용) |
 | M3 | v7-M | 3 단 | X | X | 옵션 | X | STM32F1, LPC1768 |
 | M4 | v7E-M | 3 단 | O (SIMD) | 옵션 (SP) | 옵션 | X | STM32F4, nRF52833 |
 | M7 | v7E-M | 6 단 (super-scalar) | O | 옵션 (SP/DP) | 옵션 | X | STM32H7, i.MX RT |
 | M23 | v8-M baseline | 2 단 | X | X | 옵션 | 옵션 | LPC55S0x |
-| M33 | v8-M mainline | 3 단 | O | 옵션 | 옵션 | 옵션 | nRF9160, STM32L5 |
+| M33 | v8-M mainline | 구현별 | 구현별 | 옵션 | 옵션 | 옵션 | nRF9160, STM32L5 |
 | M55 | v8.1-M | 4 단 | O + Helium | 옵션 | 옵션 | 옵션 | Alif Ensemble |
 | M85 | v8.1-M | 7 단 | O + Helium | 옵션 | 옵션 | 옵션 | (latest, 2024+) |
 
@@ -72,7 +72,7 @@ double precision은 M7-DP와 M55/M85에만 있습니다. 일반 control은 SP면
 
 ### 5) Security — TrustZone-M
 
-M23, M33, M35P, M55, M85가 TrustZone-M을 지원합니다. Secure/Non-Secure world 분리로 보안 부팅과 PUF 기반 키 관리가 가능합니다.
+M23, M33, M35P, M55, M85 계열은 TrustZone-M을 지원할 수 있지만, 실제 제품의 구현·옵션을 확인해야 합니다. Secure/Non-Secure world 분리는 보안 부팅과 키 관리의 기반이 될 수 있으나 PUF가 모든 칩에 포함되는 것은 아닙니다.
 
 ## 코드 / 실제 사용 예
 
@@ -120,7 +120,7 @@ arm_fir_q15(&S, x, y, 1024);
 
 > ⚠️ M7 선택 후 cache 설정 누락
 
-M7은 L1 cache가 있는데, 기본값으로 disabled 상태입니다. cache를 enable하지 않으면 M4보다 느릴 수 있습니다.
+일부 M7 제품은 L1 cache를 제공하며, 초기화 시 enable·설정 상태를 확인해야 합니다. cache를 활용하지 못하면 특정 workload에서 M4보다 느릴 수 있습니다.
 
 > ⚠️ DSP 명령을 컴파일러 옵션으로 활성화 안 함
 

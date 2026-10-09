@@ -29,11 +29,11 @@ topics: ["embedded"]
 | --- | --- | --- | --- | --- | --- |
 | A7 | v7-A | 8 단 in-order | 2 | 32K / 256K | Allwinner H3 |
 | A9 | v7-A | 8 단 OoO | 2 | 32K / 1M | i.MX6 |
-| A53 | v8-A | 8 단 in-order | 2 | 32K / shared 1M | RPi3, Allwinner |
-| A55 | v8.2-A | 8 단 in-order | 2 | 32K / shared 256K | Snapdragon 855 little |
-| A72 | v8-A | 15 단 OoO | 3 | 48K / shared 2M | RPi4, i.MX8 |
+| A53 | v8-A | 구현별 | 구현별 | 구현별 | RPi3, Allwinner |
+| A55 | v8.2-A | 구현별 | 구현별 | 구현별 | Snapdragon 855 little |
+| A72 | v8-A | 구현별 | 구현별 | 구현별 | RPi4, i.MX8 |
 | A76 | v8.2-A | 13 단 OoO | 4 | 64K / shared | Snapdragon 855 big |
-| A78 | v8.2-A | 13 단 OoO | 4 | 64K / shared | Snapdragon 888 |
+| A78 | v8.2-A | 구현별 | 구현별 | 구현별 | Snapdragon 888 |
 | Neoverse N1 | v8.2-A | 11 단 OoO | 4 | 64K / 1M | AWS Graviton2 |
 | Neoverse V1 | v8.4-A | 15 단 OoO | 8 | 64K / 1M | AWS Graviton3 |
 
@@ -66,7 +66,7 @@ DynamIQ 기술로 같은 cluster에 big과 LITTLE을 섞을 수도 있습니다.
 
 ### 4) ARMv8 64-bit ISA (AArch64)
 
-Cortex-A53 이후는 모두 64-bit를 지원합니다. AArch64는 AArch32와 별개의 ISA입니다.
+Cortex-A53 이후의 많은 Cortex-A 제품은 AArch64를 지원하지만, 코어·제품 구성별 예외와 실행 상태 제약을 확인해야 합니다. AArch64는 AArch32와 별개의 ISA입니다.
 
 | 차이 | AArch32 (32-bit) | AArch64 (64-bit) |
 | --- | --- | --- |
@@ -160,7 +160,7 @@ Neoverse는 server workload 최적화입니다. embedded 워크로드(긴 latenc
 
 ## 정리
 
-- Cortex-A는 MMU와 SMP를 갖는 Linux용 ARM 코어입니다.
+- Cortex-A는 보통 MMU와 멀티코어 구성을 제공해 Linux에 사용되지만, 정확한 기능은 코어와 SoC 구성에 따라 확인해야 합니다.
 - A53/A55는 little, A72/A76/A78은 big, Neoverse는 server용입니다.
 - big.LITTLE은 Linux scheduler가 자동으로 마이그레이션합니다.
 - AArch64는 32-bit 레지스터의 두 배, 단순한 명령 인코딩으로 성능이 향상됐습니다.
