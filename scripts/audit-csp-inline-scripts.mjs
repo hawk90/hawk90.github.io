@@ -9,6 +9,8 @@
 //   - a page has executable inline scripts but no CSP meta in <head>, more than
 //     one CSP meta, or a script-src-elem directive (not handled by the tooling);
 //   - an inline script's hash is missing from its page's script-src;
+//   - the shared list grows past MAX_SHARED_HASHES (an inline script that
+//     embeds per-page data would add a hash per page to every page's <head>);
 //   - ClientRouter pages disagree on script-src. A meta CSP stays in force
 //     after the router swaps the <head>, so the first page's policy also
 //     governs every page navigated to; per-page hash lists then block the next
@@ -20,6 +22,9 @@ import { load } from 'cheerio';
 import { EXECUTABLE_SCRIPT_TYPES } from '../src/lib/csp-inline-script-hashes.mjs';
 
 const DIST = 'dist';
+// Today there are 9. A jump far past this means some inline script varies per
+// page and the shared list is turning into per-page bloat.
+const MAX_SHARED_HASHES = 50;
 
 /**
  * @param {string} dir
@@ -45,15 +50,18 @@ const routerPolicies = new Map();
 
 for await (const file of htmlFiles(DIST)) {
   const html = await readFile(file, 'utf8');
-  if (!/<script/i.test(html)) continue;
+  if (!/<script|content-security-policy/i.test(html)) continue;
   const $ = load(html);
+  const router = $('meta[name="astro-view-transitions-enabled"]').length > 0;
 
   const inline = $('script')
     .toArray()
     .filter((el) => el.attribs.src === undefined)
     .filter((el) => EXECUTABLE_SCRIPT_TYPES.has((el.attribs.type ?? '').split(';')[0].trim().toLowerCase()))
     .map((el) => el.children.map((child) => ('data' in child ? child.data : '')).join(''));
-  if (inline.length === 0) continue;
+  // Router pages are checked even without inline scripts: they must still
+  // carry the shared list, or their <meta> differs from the rest.
+  if (inline.length === 0 && !router) continue;
   pages++;
 
   const page = relative(DIST, file);
@@ -78,10 +86,18 @@ for await (const file of htmlFiles(DIST)) {
     }
   }
 
-  if ($('meta[name="astro-view-transitions-enabled"]').length > 0) {
+  if (router) {
     const key = [...sources].sort().join(' ');
     routerPolicies.set(key, [...(routerPolicies.get(key) ?? []), page]);
   }
+}
+
+const sharedHashes = Math.max(
+  0,
+  ...[...routerPolicies.keys()].map((key) => key.split(' ').filter((s) => s.startsWith("'sha256-")).length),
+);
+if (sharedHashes > MAX_SHARED_HASHES) {
+  failures.push(`ClientRouter script-src carries ${sharedHashes} hashes (limit ${MAX_SHARED_HASHES})`);
 }
 
 if (routerPolicies.size > 1) {

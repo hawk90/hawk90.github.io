@@ -95,8 +95,10 @@ function isExecutableType(type) {
 export function scanPage(html) {
   /** @type {PageScan} */
   const scan = { hashes: new Set(), csp: null, router: false };
-  // Cheap pre-check: a page without "<script" in any case has nothing to pin.
-  if (!/<script/i.test(html)) return scan;
+  // Cheap pre-check: skip the parse for a page that has neither a script nor
+  // a CSP meta (a ClientRouter page with no inline script still needs the
+  // shared hash set, or its <meta> would differ from the others).
+  if (!/<script|content-security-policy/i.test(html)) return scan;
 
   /** @type {string | null} null while outside an executable inline script */
   let body = null;
@@ -192,7 +194,9 @@ export default function cspInlineScriptHashes() {
         const scans = new Map();
         await forEachLimited(htmlFiles(root), async (file) => {
           const scan = scanPage(await readFile(file, 'utf8'));
-          if (scan.hashes.size > 0) scans.set(file, scan);
+          // Router pages get the shared set even with no inline script of
+          // their own; other pages only need work if they have scripts.
+          if (scan.hashes.size > 0 || (scan.router && scan.csp)) scans.set(file, scan);
         });
 
         // One sorted set for every ClientRouter page, so their <meta> is identical.
