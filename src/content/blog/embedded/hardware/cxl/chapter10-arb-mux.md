@@ -12,187 +12,127 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"ARB/MUX는 *Transaction Layer와 Physical Layer 사이*에 위치하며, *세 프로토콜의 메시지를 같은 PHY로 시분할*하는 *CXL 고유 layer*입니다."** — *vLSM* (virtual Link State Machine)이 *protocol별 link state*를 관리하고, *ALMP*가 *protocol 협상·power transition*을 제어합니다. PCIe에는 없는 component로, *CXL이 protocol을 통합한 방식*의 핵심입니다.
+> **"ARB/MUX는 *CXL.io 링크 계층·CXL.cachemem 링크 계층*과 *Flex Bus Physical Layer* 사이에서 *flit 단위로 두 쪽 트래픽을 섞는* CXL 고유 계층입니다."** — 링크 계층마다 *vLSM*(virtual Link State Machine)을 두고, 전원 상태 전환은 *ALMP*(ARB/MUX Link Management Packet)로 상대와 맞춥니다. 중재 정책 자체는 spec이 정하지 않고 구현에 맡깁니다.
 
-[Ch 9](/blog/embedded/hardware/cxl/chapter09-flit-format)에서 *flit 단위 데이터 전송*을 봤습니다. 이 장은 *flit에 어느 protocol을 어떻게 packing할지 결정*하는 *ARB/MUX layer*입니다.
+[Ch 9](/blog/embedded/hardware/cxl/chapter09-flit-format)에서 *flit 단위 데이터 전송*을 봤습니다. 이 장은 *어느 링크 계층의 flit을 언제 보낼지* 정하는 *ARB/MUX*입니다.
 
 ## ARB/MUX의 위치
 
-CXL의 protocol stack에서:
+CXL 3.1 spec의 Flex Bus 계층 구조(§5.0, Figure 5-1):
 
-| Layer | 역할 |
+| 계층 | 역할 |
 |-------|------|
-| Application | host CPU·디바이스 SW |
-| Transaction Layer | CXL.io/cache/mem 메시지 단위 처리 |
-| **ARB/MUX** | **세 프로토콜의 flit packing·multiplex** |
-| Link Layer | Flit 단위 reliability (CRC·FEC·LLR retry) |
-| Physical Layer | Flex Bus PHY (PCIe 5.0/6.0/7.0) |
+| Transaction Layer | CXL.io / CXL.cache·CXL.mem 메시지 |
+| Link Layer | CXL.io 링크 계층, CXL.cachemem 링크 계층 — 각자 flit 구성 |
+| **ARB/MUX** | **두 링크 계층의 flit을 중재·다중화, vLSM·ALMP 처리** |
+| Physical Layer | Flex Bus PHY |
 
-*ARB/MUX는 CXL 고유*입니다. PCIe에는 없는 layer로, *CXL이 multi-protocol을 한 PHY로 통합한 방식*의 핵심입니다.
+송신 쪽에서 ARB/MUX는 링크 계층들의 요청을 중재해 데이터를 다중화합니다. 링크 계층들의 전원 상태 요청을 하나로 모아 Physical Layer에 넘기고, 상대에게는 ALMP로 알립니다. 수신 쪽에서는 flit이 어느 프로토콜인지 보고 해당 링크 계층으로 넘깁니다.
 
-## 왜 ARB/MUX가 필요한가
+*PCIe 모드*로 링크가 올라오면 ARB/MUX는 우회되고 ALMP도 만들지 않습니다(§5.0, §5.2.1).
 
-세 프로토콜이 *같은 PHY*를 공유하려면 *누가 언제 PHY를 쓸지* 결정하는 *arbiter*가 필요합니다.
+## Flit 경계 단위 중재
 
-| 시나리오 | ARB/MUX 결정 |
-|---------|-------------|
-| CXL.mem read와 CXL.io DMA가 동시 | 우선순위 비교 후 *latency-sensitive 먼저* |
-| CXL.cache snoop과 CXL.io config | snoop이 *낮은 latency 필요* → 먼저 |
-| 모든 프로토콜이 idle | *Empty Flit*으로 link 유지 |
-| Power transition | *모든 protocol을 idle로 정렬* 후 진입 |
+ARB/MUX는 slot을 채우지 않습니다. slot 구성은 링크 계층 몫이고, ARB/MUX는 *완성된 flit 단위*로 어느 쪽을 보낼지 고릅니다. 프로토콜 사이 interleave는 68B Flit mode에서 528-bit flit 경계, 256B Flit mode에서 256B flit 경계로 일어납니다(§5.3).
 
-ARB/MUX는 *protocol별 traffic profile*을 알고 *Flit packing 결정*을 합니다.
+## 중재 정책 — 구현 정의 + 가중치 레지스터
+
+spec은 중재 정책을 *구현에 맡깁니다*. 상위 프로토콜의 타이밍 요구만 만족하면 됩니다(§5.3). 대신 *CXL.io* 쪽과 *CXL.cache + CXL.mem* 쪽의 상대 가중치를 프로그래밍할 방법은 있어야 합니다.
+
+그 방법이 Component Register의 ARB/MUX 영역(Offset E000h부터 1 KB)에 있는 두 레지스터입니다(§8.2.5).
+
+| 레지스터 | Offset | 필드 |
+|---------|--------|------|
+| ARB/MUX Arbitration Control Register for CXL.io | 180h | bit 7:4 — CXL.io Weighted Round Robin 가중치 |
+| ARB/MUX Arbitration Control Register for CXL.cache and CXL.mem | 1C0h | bit 7:4 — CXL.cache·CXL.mem Weighted Round Robin 가중치 |
+
+두 필드 모두 기본값은 0h입니다. 그러니 "snoop이 1순위, CXL.io가 꼴찌" 같은 고정 우선순위는 spec에 없습니다. 중재는 *CXL.io 대 CXL.cachemem*의 두 갈래 사이에서 일어나고, 그 비율은 이 가중치와 구현이 정합니다.
 
 ## vLSM — Virtual Link State Machine
 
-각 protocol마다 *독립 link state*를 관리:
+ARB/MUX는 *링크 계층 인터페이스마다* vLSM을 둡니다(§5.1, Table 5-1).
 
-| Link State | 의미 |
+| vLSM 상태 | 의미 |
 |------------|------|
-| L0 | Active, 전송 가능 |
-| L0p | Active, 일부 lane만 사용 (4.0) |
-| L1 | Sleep, fast recovery |
-| L2 | Deep sleep, slow recovery |
-| Disabled | protocol 비활성 |
+| Reset | 전원 인가 직후, 초기화 |
+| Active | 정상 동작 |
+| Active.PMNAK | PM 진입 ALMP 협상이 거절된 Active 하위 상태. Upstream Port·256B Flit mode 전용 |
+| L1.0 | 절전. Retrain을 거쳐 Active 복귀. PCIe L1에 대응 |
+| L1.1~L1.3 | 예약 |
+| DAPM | 허용되는 가장 깊은 PM 상태 요청. L1 하위 상태로 결정됨 |
+| SLEEP_L2 | 절전. Active로 가려면 Reset을 거쳐야 함 |
+| LinkReset | 리셋 전파 |
+| LinkError | 링크 복구로 못 고치는 오류 |
+| LinkDisable | 소프트웨어가 링크를 끈 상태 |
+| Retrain | Active로 가는 과도 상태 |
 
-*세 protocol*이 *각자 vLSM*을 가집니다. 한 protocol이 L1·L2에 들어가도 *다른 protocol은 L0 유지* 가능.
+PM 상태와 Retrain은 인터페이스마다 다를 수 있습니다. LinkReset·LinkDisable·LinkError는 모든 링크 계층에 동기화됩니다.
 
-| State combination | 동작 |
-|------------------|------|
-| io=L0, cache=L0, mem=L0 | 모두 active |
-| io=L0, cache=L1, mem=L0 | cache idle, io·mem만 사용 |
-| io=L1, cache=L0, mem=L0 | io idle (config 끝남), cache·mem 사용 |
-| 모두 L1 | 링크 idle (power save) |
+ARB/MUX는 vLSM들의 상태를 *하나의 요청*으로 합쳐 Physical Layer에 보냅니다(Table 5-2). 예를 들어 한쪽 vLSM이 L1.0이고 다른 쪽이 Active면 결과는 Active입니다. 한 링크 계층만 쉬어도 물리 링크는 깨어 있어야 하기 때문입니다.
 
 ## ALMP — ARB/MUX Link Management Packet
 
-*ALMP*는 *protocol negotiation·power transition*을 위한 *control packet*입니다.
+ALMP는 ARB/MUX끼리 주고받는 제어 패킷입니다(§5.2).
 
-| 용도 | 사용 |
+| 용도 | 내용 |
 |------|------|
-| Initial Training | host·device 간 *protocol 합의* (어떤 protocol 활성화) |
-| Power Transition | *L1·L2 진입·복귀* 협상 |
-| Status Sync | 양 끝의 *state synchronization* |
-| ALMP Bypass | *복잡한 협상 생략* (고급 모드) |
+| State Request / State Status | vLSM의 Active 진입, PM(L1·L2) 진입 요청과 응답 (§5.1.2.4, §5.1.2.6) |
+| Status Synchronization | 링크 복구 뒤 양 끝 vLSM 상태 맞추기. *68B Flit mode 전용* (§5.1.2.3) |
+| L0p 폭 협상 | 256B Flit mode에서 L0p 링크 폭 협상 (§5.1.2.5) |
 
-ALMP는 *flit 안에 packing*되어 흐르되, *우선순위가 매우 높습니다*. transmitter는 *ALMP를 지연 없이 보냅*니다.
+256B Flit mode에서는 replay buffer가 Physical Layer에 있어, ALMP도 FEC·CRC 보호를 받고 replay 대상이 됩니다. 그래서 ALMP가 상대 ARB/MUX에 오류 없이 도착함이 보장되고, 68B의 Status Synchronization이 필요 없습니다.
 
-## Arbitration Policy
+참고로 *어떤 프로토콜을 켤지*(CXL.io·cache·mem) 정하는 건 ALMP가 아닙니다. Physical Layer가 링크 트레이닝 중 modified TS1/TS2 Ordered Set으로 하는 *alternate protocol negotiation* 몫입니다(§6.4.1).
 
-ARB/MUX가 *어느 protocol을 우선*할지의 *기본 정책*:
+## L0p — 일부 lane만 쓰는 Active
 
-| 우선순위 | Protocol | 이유 |
-|---------|---------|------|
-| **1순위** | CXL.cache snoop·response | latency-critical, *cache coherency 유지* |
-| **2순위** | CXL.mem read response·write completion | host CPU stall 회피 |
-| **3순위** | CXL.cache·CXL.mem request | *normal traffic* |
-| **4순위** | CXL.io | bulk transfer·config (latency 덜 critical) |
+CXL 3.1 spec은 *256B Flit mode*에서 PCIe Base Spec의 L0p를 지원합니다(§5.1.2.5). 차이는 협상 수단입니다. PCIe는 Link Management DLLP를 쓰지만 CXL은 *ALMP*를 씁니다.
 
-이 정책은 *기본 가이드*. *디바이스·host implementation*이 *조정* 가능합니다. *워크로드별 fine-tuning*이 *성능 차이*를 만듭니다.
+- CXL.io와 CXL.cachemem 링크 계층이 각자 원하는 폭을 ARB/MUX에 알립니다.
+- ARB/MUX는 이를 모아 물리 링크 폭을 정합니다. 우선 요청(예: thermal throttling)이 아니면 *둘 중 큰 폭 이상*이어야 합니다.
+- 예: 두 계층이 각각 x2를 요청하면, ARB/MUX는 합쳐서 x4를 협상할 수 있습니다. 집계 알고리즘은 구현 정의입니다.
 
-## Flit Packing 흐름
+L0p는 CXL 4.0에서 새로 생긴 것이 아닙니다. CXL 3.1 spec에 이미 있습니다.
 
-ARB/MUX의 *한 flit 만들기* 흐름:
+## 오류 보고 레지스터
 
-| 단계 | 동작 |
-|------|------|
-| 1 | 각 protocol queue에서 *대기 중인 message* 확인 |
-| 2 | *Arbitration policy*로 우선순위 결정 |
-| 3 | Highest-priority message를 *slot 0에 할당* |
-| 4 | 남은 slot에 *다른 message packing* |
-| 5 | DLLP (flow control)·LLR header 추가 |
-| 6 | CRC·FEC 계산 |
-| 7 | Link Layer로 flit 전달 |
+256B Flit mode에서 PM Request ALMP나 L0p Request ALMP가 응답을 못 받으면 ARB/MUX가 타임아웃을 기록합니다(§8.2.5.1~8.2.5.3).
 
-*Flit 가득 차지 않아도* *latency 요구*로 *전송할 수 있음* (Latency-Optimized 모드).
+| 레지스터 | Offset | 내용 |
+|---------|--------|------|
+| ARB/MUX PM Timeout Control | 00h | 타임아웃 enable, 값(00b = 1 ms) |
+| ARB/MUX Uncorrectable Error Status | 04h | PM Timeout Error, L0p Timeout Error |
+| ARB/MUX Uncorrectable Error Mask | 08h | 마스크 해제 시 Root Port의 Internal Uncorrected Error로 보고 |
 
-## Bypass Feature
+## Linux에서 보이는 것
 
-*고급 모드*로 *ARB/MUX의 일부 결정을 생략*합니다:
-
-| 일반 | Bypass |
-|------|--------|
-| 매 flit마다 arbitration | *miniature heuristic*만 사용 |
-| Full ALMP negotiation | *간소화된 protocol 합의* |
-| State machine 전체 | *fast path만* |
-
-Bypass는 *deterministic workload*(예측 가능한 traffic pattern)에서 *latency 절감*에 효과적. *복잡한 mixed traffic*에는 *full ARB/MUX*가 권장.
-
-## L0p (4.0의 새 power state)
-
-CXL 4.0의 *L0p*는 *active 상태에서 일부 lane만 사용*하는 state:
-
-| 상태 | Lane 사용 | Bandwidth |
-|------|----------|----------|
-| L0 | 전체 (예: x16) | 256 GB/s |
-| **L0p** | 일부 (예: x8) | 128 GB/s |
-| L1 | 0 | 0 (sleep) |
-
-*L0p의 가치*:
-- *유휴 워크로드*에서 *bandwidth 줄이고 power save*
-- *L1 진입·복귀의 latency 페널티* 회피
-- *동적 dynamic scaling* 가능
-
-ALMP가 *L0 ↔ L0p ↔ L1 전환*을 협상합니다.
-
-## CXL 4.0 vs 이전 — ARB/MUX 변경
-
-ARB/MUX 자체는 *대부분 그대로*. *4.0의 추가*:
-
-| 변경 | 의미 |
-|------|------|
-| L0p state 지원 | 부분 lane active |
-| Bundled Port awareness | port group 단위 ARB |
-| Improved Latency-Optimized | small message faster transmit |
-
-*근본 architecture 변경 없음* — backward compat 유지.
-
-## Linux 측 — ARB/MUX 인식
-
-ARB/MUX 자체는 *firmware·hardware 결합*으로 동작. *Linux 측 직접 인식·제어 minimal*. 다만 *상태 monitoring* 가능:
-
-```bash
-# CXL device state monitoring (vendor-specific)
-$ cxl monitor -m mem0 | grep -i state
-[2026-06-19 09:00:00] CXL.mem vLSM: L0
-[2026-06-19 09:00:30] CXL.cache vLSM: L0 → L1 (idle)
-
-# bpftrace로 ALMP 트래픽 추적 (vendor·platform 의존)
-$ bpftrace -e 'kprobe:cxl_almp_send { @[arg1] = count(); }'
-```
-
-상세 동작은 *device firmware·BIOS·platform OEM*가 *대부분 hide*. *운영자는 상태 trend monitoring*만 일반적.
+mainline 커널의 `drivers/cxl/`에는 ARB/MUX 레지스터, vLSM, ALMP를 다루는 코드가 없습니다(2026-10 기준 소스 검색). `cxl monitor`(ndctl)는 커널이 내보내는 CXL *trace event*를 JSON으로 보여 주는 도구라 vLSM 상태를 보여 주지 않습니다. ARB/MUX 동작을 보려면 플랫폼·디바이스 벤더 도구나 프로토콜 분석기가 필요합니다.
 
 ## 자주 하는 실수
 
-### "ARB/MUX는 단순한 multiplexer"
+### "ARB/MUX가 메시지를 slot에 채운다"
 
-*정교한 arbiter*입니다. *3개 protocol·여러 vLSM·power state·ALMP*를 *동시 관리*. *firmware 복잡도가 매우 높음*.
+*아닙니다*. slot 구성은 링크 계층이 하고, ARB/MUX는 완성된 flit 단위로 CXL.io와 CXL.cachemem 사이를 고릅니다(§5.3).
 
-### "Latency-critical 트래픽은 항상 1순위"
+### "spec이 프로토콜 우선순위를 정해 둔다"
 
-*기본 policy*는 그렇지만 *워크로드별 조정 가능*. *bulk transfer 위주*에서는 *throughput에 우선순위*를 줄 수도 있음. *vendor firmware tuning*.
+*아닙니다*. 정책은 구현 정의이고, spec이 요구하는 건 CXL.io 대 CXL.cache+mem 가중치를 설정할 수단입니다(§5.3, §8.2.5.4~5).
 
-### "L1·L2 entry는 자동"
+### "ARB/MUX Bypass는 협상을 줄이는 고속 모드다"
 
-*ALMP 협상 필요*합니다. 양 끝의 *idle 인식*과 *state sync*가 필요. *protocol 별로 다른 시점*에 idle.
+*아닙니다*. Bypass는 링크가 *PCIe 모드*로 동작할 때 ARB/MUX가 ALMP 생성을 끄는 것입니다(§5.2.1).
 
-### "ARB/MUX는 host·device 양쪽에 같은 implementation"
+### "vLSM은 CXL.io·cache·mem 세 개"
 
-*기능은 같지만 implementation 다름*. Host의 ARB/MUX는 *CPU 메모리 컨트롤러 내장*, device는 *별도 controller chip*. *Symmetric protocol·asymmetric implementation*.
-
-### "Bypass mode가 항상 빠르다"
-
-*Predictable workload에서만*. *Mixed traffic·dynamic workload*는 *full ARB/MUX가 더 안정적·결국 더 빠름*. Bypass는 *전문 workload tuning* 영역.
+spec의 vLSM 결정 표는 두 개(vLSM[0]·vLSM[1])를 놓고 설명하고, L0p 규칙도 *CXL.io 링크 계층*과 *CXL.cachemem 링크 계층* 둘을 기준으로 씁니다.
 
 ## 정리
 
-- *ARB/MUX*는 *Transaction Layer와 Physical Layer 사이의 multiplexer* — CXL 고유 layer입니다.
-- *vLSM*이 *protocol별 link state* 관리. L0·L0p·L1·L2·Disabled.
-- *ALMP*가 *protocol negotiation·power transition*을 위한 *control packet*.
-- *Arbitration policy*: snoop·response 1순위 → mem/cache request → io 순.
-- *Bypass Feature*는 *predictable workload*에 *latency 절감*.
-- *CXL 4.0의 L0p state*는 *부분 lane active*로 *dynamic bandwidth scaling*.
+- *ARB/MUX*는 *링크 계층과 Physical Layer 사이*에서 CXL.io와 CXL.cachemem의 flit을 다중화합니다. PCIe 모드에서는 우회됩니다.
+- 중재 정책은 *구현 정의*. CXL.io와 CXL.cache+mem의 *WRR 가중치 레지스터*(Offset 180h·1C0h)가 있습니다.
+- *vLSM* 상태: Reset·Active·L1.x·DAPM·SLEEP_L2·LinkReset·LinkError·LinkDisable·Retrain.
+- *ALMP*는 vLSM 상태 요청·응답, 68B의 상태 동기화, 256B의 L0p 폭 협상에 씁니다.
+- *L0p*는 CXL 3.1에 이미 있는 256B Flit mode 기능. 폭 협상을 DLLP 대신 ALMP로 합니다.
 
 ## 다음 편
 
