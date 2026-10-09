@@ -69,7 +69,7 @@ $ devmem 0x10000000 32 0x40   # vendor별 offset
 ```bash
 # 1. 디바이스가 PCIe로 보이는지
 $ lspci -nn | grep -i cxl
-5e:00.0 Memory controller [0508]: ...
+5e:00.0 CXL [0502]: ...
 
 # 안 보이면 — LTSSM Detect 단계에서 멈춘 것
 
