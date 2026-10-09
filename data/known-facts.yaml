@@ -16,7 +16,9 @@ jedec_standards:
   - JESD235B     # HBM2 update
   - JESD235C     # HBM2E (2020)
   - JESD238      # HBM3 (2022)
-  - JESD238A     # HBM3 update (2024)
+  - JESD238A     # HBM3 update (2023) — JEDEC JESD238A:2023 (standards.ie listing)
+  - JESD250      # GDDR6 (2017-07, 최대 16 Gbps)
+  - JESD239      # GDDR7 (2024-03-05, PAM3, 최대 48 Gbps·192 GB/s per device). JEDEC 'Publishes GDDR7 Graphics Memory Standard'
   - JESD209      # LPDDR base
   - JESD209-2    # LPDDR2
   - JESD209-3    # LPDDR3
