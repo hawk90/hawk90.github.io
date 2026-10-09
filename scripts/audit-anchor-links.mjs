@@ -15,6 +15,8 @@ const htmlFor = async (target) => {
 };
 for (const relative of files) {
   const source = await readFile(join(sourceRoot, relative), 'utf8');
+  // A draft is not built, so its links point out of a page nobody can open.
+  if (/^---\r?\n[\s\S]*?^draft:\s*true\s*$[\s\S]*?^---/m.test(source)) continue;
   const links = source.matchAll(/\]\((\/[^\s)#]+)#([^\s)]+)\)/g);
   for (const match of links) {
     checked += 1;
@@ -26,4 +28,5 @@ for (const relative of files) {
 await mkdir('reports/quality', { recursive: true });
 await writeFile('reports/quality/anchors.md', ['# Generated anchor-link audit', '', `- Source documents scanned: ${files.length}`, `- Internal fragment links checked: ${checked}`, `- Findings: ${findings.length}`, ...findings.map((finding) => `- ${finding}`), ''].join('\n'));
 console.log(`Anchor links: ${checked} checked; ${findings.length} finding(s).`);
+for (const finding of findings) console.log(`  ✗ ${finding}`);
 if (findings.length) process.exitCode = 1;

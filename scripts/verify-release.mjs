@@ -35,6 +35,10 @@ const checks = [
   // does. Blocks only when a stub or a series plan is published — unwritten
   // drafts are the backlog, not a defect.
   ['no published stubs', ['npm', 'run', 'gate:completeness']],
+  // Strings a fact-check round proved wrong (data/known-falsehoods.yaml). The
+  // pre-commit gate only sees staged files; this catches the same error left
+  // in another series.
+  ['no known falsehoods', ['npm', 'run', 'audit:falsehoods']],
   ['article connectivity', ['npm', 'run', 'audit:connectivity']],
   // Report-only: where a series belongs in a reading order is editorial, so
   // this prints the coverage gap rather than blocking a deploy on it.
@@ -56,6 +60,9 @@ const checks = [
   // Reads dist/, so it must follow the build: a link is only broken once you
   // know which pages were actually generated.
   ['rendered link resolution', ['npm', 'run', 'audit:rendered-links']],
+  // The link audit resolves pages, not #fragments. A fact-check that rewrote
+  // a heading in CXL Ch 13 left Ch 4 linking to the old anchor.
+  ['rendered anchor resolution', ['npm', 'run', 'audit:anchors']],
   // No page links these addresses, so the link audits cannot see them; the
   // only thing that knows they should resolve is the shape of the post URLs.
   // Gated because the fix was removed once and nothing noticed.
