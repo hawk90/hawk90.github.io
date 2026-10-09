@@ -18,11 +18,11 @@
 \node[stack] (stk) at (0, 6) {stack\\\scriptsize (1024-bit)};
 
 % 4 channels visible + dots + last
-\node[chan] (c0) at (6, 6.5) {Channel 0 (128-bit)};
-\node[chan] (c1) at (6, 4.8) {Channel 1 (128-bit)};
-\node[chan] (c2) at (6, 3.5) {Channel 2 (128-bit)};
+\node[chan] (c0) at (6, 6.5) {Channel 0 (64-bit)};
+\node[chan] (c1) at (6, 4.8) {Channel 1 (64-bit)};
+\node[chan] (c2) at (6, 3.5) {Channel 2 (64-bit)};
 \node[font=\sffamily\scriptsize, text=mutec] at (6, 2.3) {…};
-\node[chan] (c15) at (6, 1.0) {Channel 15 (128-bit)};
+\node[chan] (c15) at (6, 1.0) {Channel 15 (64-bit)};
 
 \draw[link] (stk.east) -- (c0.west);
 \draw[link] (stk.east) -- (c1.west);
@@ -30,8 +30,8 @@
 \draw[link] (stk.east) -- (c15.west);
 
 % PC split for Channel 0
-\node[pc] (pc0) at (12, 7.1) {PC0 (64-bit)};
-\node[pc] (pc1) at (12, 5.9) {PC1 (64-bit)};
+\node[pc] (pc0) at (12, 7.1) {PC0 (32-bit)};
+\node[pc] (pc1) at (12, 5.9) {PC1 (32-bit)};
 \draw[link] (c0.east) -- (pc0.west);
 \draw[link] (c0.east) -- (pc1.west);
 
