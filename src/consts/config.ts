@@ -80,17 +80,17 @@ export const FOOTER_LINKS = [
 ];
 
 // --- Comments ---
-// Off until giscus is actually set up. Turning it on needs the opaque ids that
-// giscus.app issues after Discussions is enabled on the repo and the giscus
-// app is installed — `repo` alone does not identify the thread:
-//
-//   { enabled: true, provider: 'giscus', repo: 'hawk90/hawk90.github.io',
-//     repoId: 'R_…', category: 'Announcements', categoryId: 'DIC_…', lang: 'ko' }
-//
-// Leaving a blank id in place is rejected by defineComments rather than
-// rendered, because that state used to reach readers as a setup notice.
+// giscus (GitHub Discussions). Threads live in this repo's "Comments" category
+// (Announcement format, so only giscus and maintainers open threads). The ids
+// are what GitHub's GraphQL API returns for the repo and that category.
 export const COMMENTS_CONFIG = defineComments({
-  enabled: false,
+  enabled: true,
+  provider: 'giscus',
+  repo: 'hawk90/hawk90.github.io',
+  repoId: 'R_kgDOK_uYHw',
+  category: 'Comments',
+  categoryId: 'DIC_kwDOK_uYH84DHYdY',
+  lang: 'ko',
 });
 
 // --- Analytics ---
