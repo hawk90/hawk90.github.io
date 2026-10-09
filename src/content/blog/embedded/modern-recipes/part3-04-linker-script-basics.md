@@ -294,7 +294,7 @@ linker script에 stack을 명시 안 하면 heap과 stack이 같은 영역에서
 
 > ⚠️ Heap이 부족
 
-`malloc`을 쓰는데 `_Min_Heap_Size`가 0이면 첫 호출에서 실패. newlib는 `_sbrk`가 heap을 확장.
+`malloc`을 쓰려면 linker script의 예약 영역뿐 아니라 runtime의 allocator와 `_sbrk` 구현이 실제 heap 경계를 올바르게 사용해야 합니다. `_Min_Heap_Size`만 설정한다고 모든 newlib 구성에서 할당이 보장되는 것은 아닙니다.
 
 > ⚠️ Section name이 input과 불일치
 

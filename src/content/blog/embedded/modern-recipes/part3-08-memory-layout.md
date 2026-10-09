@@ -23,7 +23,7 @@ topics: ["embedded"]
 
 ## 핵심 개념
 
-### 1) 전형적인 RAM 레이아웃
+### 1) 흔한 RAM 레이아웃 예
 
 | 주소 (낮음 → 높음) | 영역 | 설명 |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ topics: ["embedded"]
 | ↑ | stack | 함수 call frame / local 변수 (아래로 자람) |
 | 0x2001FFFF | `_estack` | initial MSP |
 
-heap은 위로, stack은 아래로 자랍니다. 가운데 빈 공간이 둘의 안전 여유입니다.
+이런 배치는 흔하지만 linker script, ABI, RTOS와 메모리 보호 설정에 따라 달라질 수 있습니다. 일반적인 단일 주소 공간에서는 heap이 높은 주소 방향, stack이 낮은 주소 방향으로 자라며 가운데 공간을 여유로 둡니다.
 
 ### 2) Section별 위치
 
@@ -49,7 +49,7 @@ heap은 위로, stack은 아래로 자랍니다. 가운데 빈 공간이 둘의 
 
 ### 3) `_end`와 heap의 시작
 
-linker가 `.bss` 끝에 `_end` symbol을 정의합니다. heap은 `_end`부터 시작합니다.
+많은 linker script가 `.bss` 끝에 `_end` symbol을 정의하고 heap 시작점으로 사용합니다. 이름과 위치는 linker script의 계약이므로 실제 map 파일에서 확인해야 합니다.
 
 ```c
 extern uint32_t _end;
@@ -58,6 +58,7 @@ static uint8_t *heap_ptr = (uint8_t *)&_end;
 
 void *malloc_simple(size_t size) {
     uint8_t *ret = heap_ptr;
+    // Production code should also enforce allocator alignment and overflow checks.
     heap_ptr += size;
     if (heap_ptr > (uint8_t *)&_estack - 1024) {   // stack 여유 1KB
         return NULL;   // OOM
@@ -88,7 +89,7 @@ RTOS의 경우 task마다 별도 stack이 있습니다. main thread의 stack은 
 ### 5) Stack 사용량 측정
 
 ```c
-// Stack을 0xDEADBEEF로 채우고 사용 후 확인
+// Example: verify the active stack and linker symbol range before painting.
 extern uint32_t _sstack, _estack;
 
 void stack_paint(void) {
@@ -104,7 +105,7 @@ uint32_t stack_high_water(void) {
 }
 ```
 
-ARM compiler의 `-Wstack-usage=N` 옵션도 정적 분석을 도와줍니다.
+GCC/Clang의 `-Wstack-usage=N` 옵션은 함수별 추정 stack 사용량이 임계값을 넘을 때 경고하는 데 도움을 줍니다. 동적 호출 경로와 인터럽트/RTOS stack은 별도로 측정해야 합니다.
 
 ### 6) Heap 정책 선택
 
@@ -172,10 +173,9 @@ mpu_set_region(0, (uint32_t)&_sstack, 32, MPU_AP_NONE);
 | malloc | heap | runtime 측정 |
 | `const` | .rodata | `nm -S \| grep R` |
 
-| 일반 펌웨어의 메모리 비율 |
+| 메모리 비율 |
 | --- |
-| Flash: 70% text, 20% rodata, 10% data init |
-| RAM: 40% data+bss, 30% stack, 30% heap (또는 0% heap) |
+| 프로젝트의 코드·버퍼·stack·heap 정책에 따라 크게 달라짐 |
 
 ## 자주 보는 함정
 
@@ -201,7 +201,7 @@ malloc/free를 반복하면 작은 hole이 많이 생겨 큰 할당이 실패. �
 
 ## 정리
 
-- RAM에는 .data, .bss, heap, stack이 차례로 배치됩니다.
+- RAM에는 보통 .data, .bss, heap, stack이 배치되지만 실제 순서와 영역은 linker script·RTOS·메모리 보호 설정에 따라 달라집니다.
 - heap은 위로, stack은 아래로 자라며, 충돌 시 corruption이 발생합니다.
 - linker script에 `_Min_Heap_Size`, `_Min_Stack_Size`를 명시해 영역을 확보합니다.
 - Stack 사용량은 painting 기법 또는 `-Wstack-usage`로 측정.

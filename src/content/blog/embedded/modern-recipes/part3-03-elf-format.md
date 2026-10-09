@@ -53,8 +53,8 @@ Program header는 "어디에 올려라", section header는 "어디서 만들어�
 | `.rodata` | 상수, string literal | Flash |
 | `.data` | 초기화된 RAM 변수 | RAM (init from Flash) |
 | `.bss` | 0 RAM 변수 | RAM (no init data) |
-| `.heap` | (linker가 생성) | RAM |
-| `.stack` | (linker가 생성) | RAM |
+| `.heap` | linker script가 정의할 수 있는 관례적 section | RAM |
+| `.stack` | linker script가 정의할 수 있는 관례적 section | RAM |
 | `.debug_*` | DWARF 디버그 정보 | (load 안 됨) |
 | `.symtab` | symbol 테이블 | (load 안 됨) |
 | `.strtab` | symbol 이름 문자열 | (load 안 됨) |
@@ -181,9 +181,9 @@ ELF는 metadata, debug 정보, padding을 다 갖고 있어 flash 크기를 초�
 
 `strip app.elf` 후에는 symbol과 debug 정보가 사라져 gdb로 stack trace를 못 봅니다. release용 strip 전에 .elf 사본 보관.
 
-> ⚠️ Debug 정보 크기 무시
+> ⚠️ Debug 정보 크기 고정값으로 가정
 
-`-g` 옵션의 debug 정보는 .text보다 5 ~ 10배 클 수 있습니다. flash 크기에는 영향 없지만 (load 안 됨), elf 파일 크기는 큽니다.
+`-g` 옵션의 debug 정보 크기는 소스와 compiler 옵션에 따라 크게 달라질 수 있습니다. 일반적으로 loadable section과 분리되어 flash 이미지에는 포함되지 않지만, ELF 파일 크기와 배포 방식에는 영향을 줍니다.
 
 > ⚠️ Static vs global symbol 혼동
 

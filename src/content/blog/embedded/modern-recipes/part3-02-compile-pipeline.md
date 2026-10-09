@@ -161,12 +161,12 @@ arm-none-eabi-gcc -O2 -fdump-tree-einline main.c
 
 ## 측정 / 비교
 
-| 단계 | 시간 (간단한 main.c) | 출력 크기 |
+| 단계 | 시간 (예시 측정; 간단한 main.c) | 출력 크기 |
 | --- | --- | --- |
-| Preprocess | 10 ms | 200 KB (.i, 전개된 헤더 포함) |
-| Compile | 30 ms | 500 B (.s) |
-| Assemble | 5 ms | 100 B (.o) |
-| Link | 50 ms (libc 검색) | 2 KB (.elf) |
+| Preprocess | 환경·헤더에 따라 달라짐 | 전개된 헤더 포함 |
+| Compile | 환경·옵션에 따라 달라짐 | assembly 크기는 코드에 따라 달라짐 |
+| Assemble | 환경·옵션에 따라 달라짐 | object 크기는 코드·debug 정보에 따라 달라짐 |
+| Link | 입력 object·library·linker script에 따라 달라짐 | ELF 구성에 따라 달라짐 |
 
 | 옵션 | 효과 |
 | --- | --- |
