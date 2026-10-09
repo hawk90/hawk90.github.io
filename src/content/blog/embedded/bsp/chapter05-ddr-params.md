@@ -82,7 +82,7 @@ JEDEC 표준이 정의하는 주요 timing입니다.
 
 DDR memory에는 *Serial Presence Detect (SPD)*라는 작은 EEPROM이 *옵션으로* 붙습니다. 메모리 module이 *자기 timing 정보*를 그 안에 담고 있습니다.
 
-데스크톱·서버는 DIMM에 SPD가 *반드시* 있습니다. BIOS가 부팅 시 *I2C로 SPD를 읽어* timing을 자동 설정합니다.
+일반적인 데스크톱·서버 DIMM은 SPD EEPROM을 사용합니다. BIOS/UEFI가 부팅 시 SMBus/I2C 계열 인터페이스로 SPD를 읽어 timing을 자동 설정할 수 있지만, 모든 플랫폼이 같은 방식으로 구성되는 것은 아닙니다.
 
 임베디드는 다릅니다. *DRAM 칩이 보드에 직접 납땜*되어 있고 (BGA), *SPD가 없는* 경우가 대부분입니다. BSP가 *DDR 칩의 datasheet를 읽고* timing을 *손으로* 설정합니다.
 
@@ -95,7 +95,7 @@ vendor의 *DDR config tool*이 *datasheet 값을 입력*받아 *SoC의 controlle
 
 ## 벤더 DDR 도구
 
-다음이 SoC 벤더의 *공식 DDR 도구*입니다. 거의 모든 SoC가 자기 도구를 가집니다.
+다음은 대표적인 SoC 벤더의 *공식 DDR 도구* 예시입니다. 도구의 제공 여부와 지원 범위는 SoC·SDK 버전에 따라 다릅니다.
 
 | 벤더 | 도구 |
 |------|------|
@@ -359,11 +359,11 @@ NXP DDR Tool은 *수십 개의 시트 셀*을 채워야 합니다. Bus width, pa
 
 - DDR 매개변수가 살짝 틀리면 *드물게* crash합니다. BSP에서 *가장 시간 소모적*인 단계입니다.
 - 임베디드는 SPD가 없으므로 BSP가 *DDR 칩 datasheet를 읽고* timing을 *손으로* 설정합니다.
-- Vendor의 *DDR config tool*(NXP DDR Tool, TI DDR Config GUI, Rockchip rkbin-tools 등)이 *반드시* 사용됩니다. 손 계산은 금지.
-- DDR4/LPDDR4 이후는 *PHY training*이 부팅 시 필수입니다. Training firmware blob이 vendor 제공.
+- Vendor의 *DDR config tool*(NXP DDR Tool, TI DDR Config GUI, Rockchip 도구 등)을 사용하는 경우가 많습니다. 최종 레지스터 값과 firmware는 해당 SoC vendor 가이드와 보드 설계를 함께 확인해야 합니다.
+- DDR4/LPDDR4 계열은 PHY training을 사용하는 구현이 많지만, 실제 단계와 부팅 시 수행 여부는 SoC·PHY·메모리 조합에 따라 다릅니다. Training firmware blob의 제공 방식도 vendor마다 다릅니다.
 - 핵심 timing은 *tRCD, tRP, tRC, tRAS, CL, WL, tREFI, tRFC*입니다. 대부분 ns 단위로 datasheet에 있고 클록 cycle로 환산됩니다.
 - 잘못된 timing의 증상은 *random crash, 압축 검증 실패, 온도에 따른 hang*입니다. 부팅 성공이 안정성 보장이 아닙니다.
-- `memtester`로 *최소 1시간 이상*의 stress, *24시간 burn-in*이 표준입니다.
+- `memtester` 등으로 충분한 stress와 온도·전압 조건을 검증하되, 시간과 burn-in 기준은 제품의 신뢰성 계획에 맞춰 정합니다.
 - 부트로더가 `ft_board_setup`으로 DT의 메모리 크기를 *런타임 측정값*으로 fixup하면 한 이미지로 여러 변형을 지원합니다.
 
 ## 다음 편

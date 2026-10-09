@@ -27,7 +27,7 @@ topics: ["embedded"]
 | BCT / TOC1 | SoC 특정 | SoC 특정 | NVIDIA, Mediatek |
 | MTD partitions | kernel cmdline | N/A | raw NAND/NOR flash |
 
-eMMC와 SD 카드는 GPT가 표준입니다. raw NAND는 MTD partition을 씁니다. SoC가 자체 boot header 형식을 강요하는 경우(NVIDIA Tegra, Mediatek)도 있습니다. 새 BSP면 *GPT*로 시작하는 것이 안전합니다.
+eMMC와 SD 카드에서는 GPT를 자주 사용하지만, 부트 ROM·펌웨어 요구사항이나 기존 제품 호환성에 따라 MBR 또는 SoC 전용 레이아웃을 사용할 수도 있습니다. raw NAND는 보통 MTD partition을 씁니다. SoC가 자체 boot header 형식을 요구하는 경우(NVIDIA Tegra, MediaTek)도 있으므로, 새 BSP는 먼저 vendor 부트 레이아웃을 확인해야 합니다.
 
 ## GPT 구조
 
@@ -357,7 +357,7 @@ $ sudo uuu flash.uuu
 - A/B 슬롯은 OTA 안전성의 출발점입니다. boot 슬롯과 rootfs 슬롯을 짝지어 두 세트 둡니다.
 - partition UUID로 root를 지정해야 device 이름 변화에 영향을 받지 않습니다.
 - `genimage`는 단일 cfg로 multi-partition disk image를 만드는 표준 도구입니다.
-- `bmaptool`은 빈 영역을 건너뛰어 flash 시간을 한 자릿수로 줄입니다. 양산 line의 필수.
+- `bmaptool`은 빈 영역을 건너뛰어 이미지 기록 시간을 줄일 수 있습니다. 실제 절감 폭은 이미지의 사용 영역과 저장 장치·USB 경로에 따라 달라집니다.
 - Android sparse image는 fastboot 환경에서 큰 image의 전송 시간을 단축합니다.
 - 양산 flashing은 SoC별 전용 도구(uuu, fastboot, RKDevTool, dfu-util)를 PC line에서 multi-board로 운영합니다.
 

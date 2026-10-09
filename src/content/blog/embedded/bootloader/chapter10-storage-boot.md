@@ -347,7 +347,7 @@ XIP(eXecute In Place)는 SPI NOR를 *메모리 매핑된 영역*으로 보고 CP
 
 CMD25(multi-block read)와 CMD17(single-block)의 차이가 *2배*입니다. SPL이 부트 ROM의 보수적인 single-block read로 시작하더라도, main U-Boot에서 multi-block으로 전환하면 커널 load가 빨라집니다.
 
-SPI NOR XIP는 *load time이 0*인 대신 *execution time*이 느립니다. 0x03 모드 SPI는 부트 ROM 단계에서만 쓰고 *반드시* main U-Boot에서 quad I/O로 전환해야 합니다.
+SPI NOR XIP는 별도 복사 시간을 줄이는 대신 *execution time*과 메모리 매핑 제약을 고려해야 합니다. 0x03 모드에서 quad I/O로 전환할지는 부트 ROM·컨트롤러·보드의 지원 여부에 따라 결정하며, 모든 보드에서 전환이 필수인 것은 아닙니다.
 
 ## 부트 미디어 전환 — SD → eMMC → OTA-only
 
