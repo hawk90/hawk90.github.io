@@ -11,6 +11,9 @@
 //   - an inline script's hash is missing from its page's script-src;
 //   - the shared list grows past MAX_SHARED_HASHES (an inline script that
 //     embeds per-page data would add a hash per page to every page's <head>);
+//   - a CSP meta opted out of pinning (no data-csp-pin-inline-scripts; the
+//     AdSense-compatible policy) carries any hash — that would make browsers
+//     ignore its 'unsafe-inline' and block ad code — or lacks 'unsafe-inline';
 //   - ClientRouter pages disagree on script-src. A meta CSP stays in force
 //     after the router swaps the <head>, so the first page's policy also
 //     governs every page navigated to; per-page hash lists then block the next
@@ -19,7 +22,7 @@ import { createHash } from 'node:crypto';
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { load } from 'cheerio';
-import { EXECUTABLE_SCRIPT_TYPES } from '../src/lib/csp-inline-script-hashes.mjs';
+import { EXECUTABLE_SCRIPT_TYPES, PIN_MARKER } from '../src/lib/csp-inline-script-hashes.mjs';
 
 const DIST = 'dist';
 // Today there are 9. A jump far past this means some inline script varies per
@@ -43,6 +46,7 @@ const hashOf = (body) => `'sha256-${createHash('sha256').update(body, 'utf8').di
 
 let pages = 0;
 let scripts = 0;
+let unpinnedPages = 0;
 /** @type {string[]} */
 const failures = [];
 /** @type {Map<string, string[]>} script-src (normalised) → ClientRouter pages using it */
@@ -79,10 +83,20 @@ for await (const file of htmlFiles(DIST)) {
   const scriptSrc = directives.find((d) => /^script-src\s/i.test(d)) ?? '';
   const sources = new Set(scriptSrc.split(/\s+/));
 
-  for (const body of inline) {
-    scripts++;
-    if (!sources.has(hashOf(body))) {
-      failures.push(`${page}: inline script not in script-src (${body.trim().slice(0, 60)}…)`);
+  if (PIN_MARKER in metas[0].attribs) {
+    for (const body of inline) {
+      scripts++;
+      if (!sources.has(hashOf(body))) {
+        failures.push(`${page}: inline script not in script-src (${body.trim().slice(0, 60)}…)`);
+      }
+    }
+  } else {
+    unpinnedPages++;
+    if ([...sources].some((s) => /^'(sha(256|384|512)|nonce)-/.test(s))) {
+      failures.push(`${page}: unpinned CSP carries a hash/nonce, so 'unsafe-inline' would be ignored`);
+    }
+    if (!sources.has("'unsafe-inline'")) {
+      failures.push(`${page}: unpinned CSP without 'unsafe-inline' blocks its inline scripts`);
     }
   }
 
@@ -108,7 +122,7 @@ if (routerPolicies.size > 1) {
 }
 
 console.log(
-  `CSP inline scripts: ${scripts} script(s) across ${pages} page(s); ` +
+  `CSP inline scripts: ${scripts} pinned script(s) across ${pages} page(s) (${unpinnedPages} with an unpinned CSP); ` +
     `${routerPolicies.size} script-src list(s) on ClientRouter pages; ${failures.length} failure(s).`,
 );
 if (failures.length) {
