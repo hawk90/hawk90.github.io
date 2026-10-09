@@ -66,7 +66,7 @@ DAC 출력이 코드를 바꿀 때 순간적으로 큰 spike가 나옵니다. �
 
 ![DAC code transition glitch then settling](/images/blog/modern-recipes/diagrams/part1-08-dac-glitch.svg)
 
-오디오 DAC는 deglitcher(sample-and-hold)로 spike를 잘라냅니다.
+일부 오디오 DAC는 내부 filtering·deglitching 구조로 출력 glitch를 줄입니다. 구현 방식은 DAC 구조와 데이터시트에 따라 다릅니다.
 
 ### 5) Reconstruction filter
 
@@ -140,7 +140,7 @@ DMA1_Stream5->CR   = DMA_SxCR_CIRC | DMA_SxCR_MINC
 
 > ⚠️ Reconstruction filter 누락
 
-DAC 출력을 그대로 op-amp에 넣으면 계단의 high-frequency 성분이 그대로 증폭됩니다. 항상 LPF가 필요합니다.
+DAC 출력을 그대로 사용하면 계단형 업데이트의 high-frequency 성분이 부하로 전달될 수 있습니다. 후단 LPF가 필요한지는 신호 대역과 응용, DAC 내부 필터링에 따라 결정합니다.
 
 > ⚠️ Sample rate mismatch
 
@@ -148,7 +148,7 @@ DAC 출력을 그대로 op-amp에 넣으면 계단의 high-frequency 성분이 �
 
 > ⚠️ V_REF 부족
 
-DAC는 V_REF 핀을 별도 갖습니다. 누설 전류로 V_REF가 흔들리면 출력 전체가 흔들립니다.
+DAC에 별도 V_REF 핀이 있는지와 reference 구조는 제품마다 다릅니다. reference가 외부에 노출되는 경우 그 노이즈와 부하 변동이 출력 정확도에 영향을 줍니다.
 
 > ⚠️ Glitch 무시
 

@@ -46,7 +46,7 @@ H-bridge나 inverter에서 high-side와 low-side switch가 동시에 ON이면 sh
 
 ![Complementary PWM with dead-time — shoot-through 방지](/images/blog/modern-recipes/diagrams/part1-09-pwm-deadtime.svg)
 
-dead-time이 짧으면 short, 길면 전류 distortion이 발생합니다. 보통 100 ns ~ 1 µs로 설정합니다.
+dead-time이 짧으면 short, 길면 전류 distortion이 발생합니다. 값은 MOSFET·gate driver·스위칭 속도에 맞춰 정하며, 100 ns~1 µs는 일부 전력단에서 볼 수 있는 예시 범위입니다.
 
 ### 4) PWM frequency 선택
 
@@ -119,8 +119,8 @@ DMA2_Stream5->CR   = DMA_SxCR_CIRC | DMA_SxCR_MINC
 
 | Timer clock | 100 kHz × 12-bit | 100 kHz × 16-bit |
 | --- | --- | --- |
-| 84 MHz | 가능 (210 MHz 필요) | 불가 (계산 < 7 MHz) |
-| 200 MHz | 가능 | 가능 |
+| 84 MHz | 불가 (409.6 MHz 필요) | 불가 (6.55 GHz 필요) |
+| 200 MHz | 불가 (409.6 MHz 필요) | 불가 (6.55 GHz 필요) |
 
 ## 자주 보는 함정
 
@@ -148,7 +148,7 @@ CCR 업데이트가 cycle 중간에 반영되면 한 cycle만 잘못된 duty가 
 
 - PWM은 디지털로 평균 전압을 만드는 가장 효율적인 방법입니다.
 - Edge-aligned는 일반용, Center-aligned는 모터·BLDC 같은 ripple 민감 응용에 씁니다.
-- Dead-time은 H-bridge의 shoot-through를 막습니다. 100 ns ~ 1 µs가 일반적입니다.
+- Dead-time은 H-bridge의 shoot-through를 막으며, 전력 스위치와 gate driver의 turn-off/on 시간으로 산정합니다.
 - 주파수 선택은 가청, 효율, 인덕터 크기를 고려합니다.
 - Preload(`OCxPE`, `ARPE`)로 cycle 중간 변경 시 race를 방지합니다.
 

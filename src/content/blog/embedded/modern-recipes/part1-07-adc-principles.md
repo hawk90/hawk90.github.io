@@ -25,11 +25,11 @@ topics: ["embedded"]
 
 ### 1) Sampling과 Nyquist
 
-연속 신호를 일정 간격으로 sampling 해 이산 신호로 만듭니다. Nyquist 정리에 따르면 **신호 최대 주파수 × 2** 이상으로 sampling 해야 원래 신호를 복원할 수 있습니다.
+연속 신호를 일정 간격으로 sampling 해 이산 신호로 만듭니다. Nyquist 정리는 대역 제한된 신호를 이상적으로 복원하기 위한 조건으로, **신호 최대 주파수의 2배보다 높은** sampling rate와 적절한 anti-alias filter가 필요합니다. 실제 ADC에서는 filter roll-off와 timing 여유를 더 고려합니다.
 
 이 조건을 어기면 없던 신호가 만들어집니다. 1 kHz sine wave를 1.5 kHz로 sampling하면 1.5 - 1 = 0.5 kHz의 alias 신호로 보입니다. 원본보다 더 낮은 가짜 신호가 관측되는 것입니다.
 
-10 kHz 오디오를 잡으려면 최소 20 kHz sampling이 필요합니다. 보통은 안전 마진으로 2.5 ~ 4 배를 씁니다.
+10 kHz까지의 신호를 잡으려면 이론적으로 20 kS/s보다 높은 sampling이 필요합니다. 실제 설계에서는 anti-alias filter의 전이 대역과 원하는 품질에 맞춰 더 높은 rate를 선택합니다.
 
 ### 2) Quantization과 SNR
 
@@ -75,7 +75,7 @@ SAR ADC는 입력을 sampling 커패시터(보통 5 ~ 20 pF)로 받습니다. �
 - τ_max = 1 µs / 9 ≈ 110 ns
 - R_max = 110 ns / 10 pF = 11 kΩ
 
-10 kΩ 이상의 source 임피던스로 직결하면 측정값이 부정확합니다. op-amp buffer 또는 sample time을 늘립니다.
+계산된 source 임피던스보다 큰 값을 직결하면 측정값이 부정확해질 수 있습니다. op-amp buffer나 더 긴 sample time을 사용하되, 최종 기준은 해당 ADC의 입력 모델과 datasheet입니다.
 
 ### 5) Anti-alias filter
 
@@ -148,7 +148,7 @@ ENOB(Effective Number Of Bits)는 실제 노이즈를 포함한 유효 비트 �
 
 > ⚠️ Anti-alias filter 누락
 
-높은 주파수 노이즈(예: 스위칭 노이즈)가 alias되어 DC offset처럼 보입니다. ADC 앞에 100 Hz ~ 10 kHz LPF가 거의 항상 필요합니다.
+높은 주파수 노이즈(예: 스위칭 노이즈)가 alias되어 DC offset처럼 보일 수 있습니다. 필요한 LPF cutoff와 차수는 신호 대역·sampling rate·노이즈 환경으로 정하며, 모든 ADC 입력에 같은 필터가 필요한 것은 아닙니다.
 
 > ⚠️ V_REF 노이즈
 
@@ -167,7 +167,7 @@ ADC ground와 analog ground를 한 점에서만 연결해야 합니다. 여러 �
 - ADC는 sampling rate(Nyquist)와 bit 해상도(SNR) 둘 다 충분해야 의미 있는 데이터를 줍니다.
 - SAR는 빠른 단발, Σ-Δ는 느린 고해상도입니다. 용도에 맞게 선택합니다.
 - Source 임피던스, sampling cap, sample time이 SAR의 정확도를 좌우합니다.
-- Anti-alias filter는 거의 항상 필요합니다. cutoff와 sampling rate의 거리가 filter 차수를 결정합니다.
+- Anti-alias filter는 입력 대역과 노이즈 조건에 맞춰 설계합니다. cutoff와 sampling rate 사이의 전이 대역이 filter 차수 결정에 영향을 줍니다.
 - ENOB는 nominal bit보다 작습니다. 실측을 확인합니다.
 
 다음 편에서는 **DAC 동작 원리**를 다룹니다. ADC의 반대 방향입니다.
