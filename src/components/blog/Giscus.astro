@@ -214,8 +214,11 @@ const siteOrigin = new URL(SITE_CONFIG.url).origin;
 
     let session = takeSession();
     // The theme the widget was last told about (via src or setConfig), and
-    // whether it has said anything yet — messages before that are lost.
+    // whether the current widget document is up — messages before that are
+    // lost. `loaded` gates it: after a reload, late messages from the old
+    // document (same contentWindow) must not mark the new one ready.
     let widgetTheme = currentTheme();
+    let loaded = false;
     let widgetReady = false;
     const iframe = document.createElement('iframe');
     iframe.className = 'giscus-frame giscus-frame--loading';
@@ -223,14 +226,16 @@ const siteOrigin = new URL(SITE_CONFIG.url).origin;
     iframe.setAttribute('scrolling', 'no');
     iframe.allow = 'clipboard-write';
     iframe.src = widgetSrc(wrapper, session, widgetTheme);
-    iframe.addEventListener('load', () => iframe.classList.remove('giscus-frame--loading'), {
-      once: true,
+    iframe.addEventListener('load', () => {
+      loaded = true;
+      iframe.classList.remove('giscus-frame--loading');
     });
     container.replaceChildren(iframe);
 
     const reloadSignedOut = () => {
       forgetSession();
       session = '';
+      loaded = false;
       widgetReady = false;
       widgetTheme = currentTheme();
       iframe.src = widgetSrc(wrapper, '', widgetTheme);
@@ -251,8 +256,10 @@ const siteOrigin = new URL(SITE_CONFIG.url).origin;
 
       // The widget is up and listening now; catch up on any theme toggle that
       // happened while it was loading.
-      widgetReady = true;
-      syncTheme();
+      if (loaded) {
+        widgetReady = true;
+        syncTheme();
+      }
 
       const height = msg.resizeHeight;
       if (typeof height === 'number' && height > 0 && height <= MAX_FRAME_HEIGHT) {
