@@ -71,8 +71,6 @@ trackings:
       # tools/testing/cxl/의 mock 모듈 — drivers/cxl/ 밖이라 인덱싱 안 됨(실존)
       - 'cxl_mock'
       - 'cxl_mock_mem'
-      # ARB/MUX ALMP는 링크레이어 — Linux 드라이버 심볼 아님, vendor 예시로 hedged
-      - 'cxl_almp_send'
 
   - id: pcie_deep_dive
     title: "PCIe Deep Dive (Linux drivers/pci)"
