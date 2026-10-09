@@ -105,7 +105,7 @@ if require_checker "detect-prose-in-code.sh"; then
   run_check \
     "3/4 코드 블록 내 한국어 산문 후보" \
     "warn" \
-    "$ROOT/scripts/detect-prose-in-code.sh" --published-only
+    "$ROOT/scripts/detect-prose-in-code.sh" --published-only ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 3b. Tone 일관성 (~합니다 vs ~다 혼용·시리즈 이탈) — MIXED 차단
