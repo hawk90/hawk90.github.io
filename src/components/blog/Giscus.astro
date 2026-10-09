@@ -128,6 +128,16 @@ const siteOrigin = new URL(SITE_CONFIG.url).origin;
   /**
    * After GitHub login, giscus.app sends the reader back with ?giscus=<session>.
    * Keep it (same key client.js uses) and take it out of the address bar.
+   *
+   * Accepted risk — session fixation: a crafted link can carry someone
+   * else's valid session, so the reader would comment as that account. The
+   * attacker gains nothing of the reader's (it is their own token), and the
+   * widget shows the signed-in name and avatar. Restricting by
+   * document.referrer (github.com / giscus.app) was considered and rejected:
+   * browsers and extensions that strip referrers would break real logins.
+   * Revisit if giscus adds a login nonce, or if impersonation is reported.
+   * (The serious direction — stealing a reader's 1-year session — is what the
+   * CSP script hashes and the absence of third-party script here guard.)
    */
   function takeSession(): string {
     const url = new URL(location.href);
