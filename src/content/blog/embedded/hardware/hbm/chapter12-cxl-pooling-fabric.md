@@ -162,5 +162,5 @@ CXL을 *프로토콜·구현 쪽에서 다시* 보고 싶다면 [CXL 4.0 Interna
 - [Ch 10: CXL.mem 프로토콜 분해](/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol)
 - [Ch 11: CXL Type 1·2·3 디바이스 분류](/blog/embedded/hardware/hbm/chapter11-cxl-device-types)
 - [Embedded Performance Engineering Ch 29: CXL Interconnect 분석](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)
-- [CXL 4.0 Internals Ch 4: Pooling·GFAM·Fabric](/blog/embedded/hardware/cxl/chapter04-pooling-gfam) — GFAM·PBR·Coherency Domain ID의 메커니즘
+- [CXL 4.0 Internals Ch 4: Pooling·GFAM·Fabric](/blog/embedded/hardware/cxl/chapter04-pooling-gfam) — G-FAM·PBR·Fabric Manager의 메커니즘
 - [CXL 4.0 Internals Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric) — switch 내부 구조와 Fabric Manager의 책임 범위
