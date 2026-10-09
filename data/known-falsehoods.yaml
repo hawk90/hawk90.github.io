@@ -1,0 +1,106 @@
+# known-falsehoods.yaml — 팩트체크에서 *틀렸다고 확인된* 주장
+#
+# known-facts.yaml이 "이 이름은 실존한다"는 화이트리스트라면, 이 파일은
+# "이 문자열은 틀렸다"는 블랙리스트입니다. 한 글에서 고친 오류가 같은 주제를
+# 다룬 다른 시리즈에 그대로 남는 일이 반복돼서 만들었습니다(CXL 라운드에서 고친
+# "Coherency Domain ID"가 Bootloader Ch35에 남아 있던 것처럼).
+#
+# 등재 규칙:
+#   - 1차 자료로 틀렸음을 확인한 것만. `source`에 그 자료를, `fixed_in`에 처음
+#     고친 커밋을 적는다.
+#   - `pattern`은 오탐이 거의 없을 만큼 구체적인 문자열(JS 정규식).
+#     "보통 5 ~ 50 ps" 같은 수치 주장은 문맥 판단이 필요하므로 넣지 않는다.
+#   - 틀린 주장을 *반박하려고* 인용하는 줄(흔한 오해 절의 `### "…"`)은 큰따옴표
+#     안의 매치라서 검사기가 건너뛴다.
+#
+# 사용: node scripts/audit-known-falsehoods.mjs (npm run audit:falsehoods)
+
+- id: cxl-coherency-domain-id
+  pattern: 'Coherency Domain ID'
+  correction: 'CXL에 없는 용어. spec은 Cache ID를 쓴다'
+  source: 'CXL 3.1 spec glossary'
+  fixed_in: c38b4429
+
+- id: cxl-hbr-expansion
+  pattern: 'Host[- ]Based Routing'
+  correction: 'HBR = Hierarchy Based Routing'
+  source: 'CXL 3.1 spec glossary, §7 ("two types of switches: HBR and PBR")'
+  fixed_in: c38b4429
+
+- id: cxl-hdm-db-expansion
+  pattern: 'Device[- ]Backed'
+  correction: 'HDM-DB = Device Coherent using Back-Invalidate'
+  source: 'CXL 3.1 spec §2.2'
+  fixed_in: b8beb9cd
+
+- id: cxl-cvme-expansion
+  pattern: 'CXL Virtual Memory Errors?'
+  correction: 'CVME = Corrected Volatile Memory Error'
+  source: 'CXL 3.1 spec glossary'
+  fixed_in: 0af6ff56
+
+- id: cxl-cache-clflushed
+  pattern: '\bCLflushed\b'
+  correction: 'CXL.cache opcode가 아니다 (CLFlush, CacheFlushed는 있다)'
+  source: 'CXL 3.1 spec §3.2 D2H request opcodes'
+  fixed_in: a3eb6830
+
+- id: cxl-almp-send-kprobe
+  pattern: '\bcxl_almp_send\b'
+  correction: 'drivers/cxl에 ALMP·vLSM 코드가 없다. 지어낸 kprobe'
+  source: 'Linux v7.3-rc6 drivers/cxl'
+  fixed_in: 1c9300eb
+
+- id: cxl-region-create-store
+  pattern: '\bregion_create_store\b'
+  correction: 'core/region.c에 없는 함수. region은 create_{ram,pmem}_region sysfs와 targetN 쓰기로 붙는다'
+  source: 'Linux v7.3-rc6 drivers/cxl/core/region.c'
+  fixed_in: 0900e9fe
+
+- id: cxl-mailbox-send-fn
+  pattern: '\bmbox_send_cmd_fn\b'
+  correction: 'struct cxl_mailbox에 이런 멤버가 없다 (rcuwait을 쓴다)'
+  source: 'Linux v7.3-rc6 include/cxl/mailbox.h'
+  fixed_in: 0900e9fe
+
+- id: cxl-list-hdm-dc-fields
+  pattern: '\bhdm_dc_(back_invalidation|bias_mode)\b'
+  correction: 'cxl list 출력에 없는 필드. decoderX.Y/target_type을 본다'
+  source: 'ndctl Documentation/cxl/cxl-list.txt; Linux drivers/cxl/core/port.c'
+  fixed_in: b8beb9cd
+
+- id: cxl-sysfs-user-keystore
+  pattern: '\buser_keystore\b'
+  correction: 'memdev security ABI는 state, sanitize, erase'
+  source: 'Linux Documentation/ABI/testing/sysfs-bus-cxl'
+  fixed_in: b63eb24b
+
+- id: cxl-class-code-0508
+  pattern: 'Memory controller \[0508\]'
+  correction: 'CXL 장치의 class는 0502 (pci.ids: 05 02 CXL, prog-if 10 = CXL Memory Device)'
+  source: 'pciutils pci.ids'
+  fixed_in: b63eb24b
+
+- id: qemu-cxl-vendor-virtio
+  pattern: '1af4:0d93'
+  correction: 'QEMU CXL Type 3는 Intel 8086:0d93'
+  source: 'QEMU hw/mem/cxl_type3.c'
+  fixed_in: 8b54a73e
+
+- id: qemu-cxl-q35-message
+  pattern: 'cxl option requires q35'
+  correction: 'QEMU에 없는 메시지. 실제 실패는 "pxb-cxl devices cannot reside on a PCI bus"'
+  source: 'QEMU hw/pci-bridge/pci_expander_bridge.c'
+  fixed_in: 8b54a73e
+
+- id: uboot-tftp-env-underscore
+  pattern: '\btftp_(blocksize|windowsize|timeout)\b'
+  correction: 'U-Boot 환경 변수는 tftpblocksize, tftpwindowsize, tftptimeout (밑줄 없음)'
+  source: 'U-Boot doc/usage/environment.rst'
+  fixed_in: bf206362
+
+- id: buildroot-uboot-boot-script-legacy
+  pattern: '\bBR2_TARGET_UBOOT_BOOT_SCRIPT(_SOURCE)?\b'
+  correction: 'Config.in.legacy로 옮겨진 옵션(켜면 BR2_LEGACY로 빌드 중단). 현재 이름은 BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT(_SOURCE)'
+  source: 'Buildroot Config.in.legacy; package/uboot-tools/Config.in.host'
+  fixed_in: 8189c09b

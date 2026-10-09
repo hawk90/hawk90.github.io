@@ -123,6 +123,7 @@
     "diagrams:force": "bash scripts/build-diagrams.sh --force",
     "diagrams:watch": "bash scripts/watch-diagrams.sh",
     "audit:gate": "bash scripts/audit-publish-gate.sh",
+    "audit:falsehoods": "node scripts/audit-known-falsehoods.mjs",
     "audit:upstream": "python3 scripts/audit-upstream-freshness.py --top 20",
     "audit:upstream:json": "python3 scripts/audit-upstream-freshness.py --top 50 --json reports/upstream-freshness.json",
     "audit:links": "python3 scripts/audit-internal-links.py",

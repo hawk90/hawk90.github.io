@@ -7,6 +7,7 @@
 #   3.  코드 블록 내 한국어 산문 후보 (수동 review)
 #   3b. Tone 일관성 §1 — ~합니다/~다 혼용 (자동 차단)
 #   4.  Hallucination 후보 (수동 review 알림)
+#   5b. 이미 틀렸다고 확인된 주장 (data/known-falsehoods.yaml, 자동 차단)
 #
 # Usage:
 #   ./scripts/audit-publish-gate.sh                  # 전체 published
@@ -140,6 +141,14 @@ if require_checker "verify-known-facts.sh"; then
     "$ROOT/scripts/verify-known-facts.sh" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
+# 5b. Known falsehoods — 팩트체크에서 틀렸다고 확인된 문자열(data/known-falsehoods.yaml).
+#     후보가 아니라 확정 오류라서 strict와 무관하게 차단한다.
+if require_checker "audit-known-falsehoods.mjs"; then
+  run_check \
+    "5b/10 Known falsehoods (data/known-falsehoods.yaml)" \
+    "block" \
+    node "$ROOT/scripts/audit-known-falsehoods.mjs" ${ARGS[@]+"${ARGS[@]}"}
+fi
 
 # 6. Universal fact-density (informational, 항상 warn — review 우선순위 식별)
 if require_checker "audit-fact-density.sh"; then
