@@ -17,7 +17,7 @@
 \node[bank] (b4) at (-2.8, 2.5) {Bank 4};
 \node[bank] (b5) at (0, 2.5) {Bank 5};
 \node[bank] (b6) at (2.8, 2.5) {Bank 6};
-\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, 1.4) {\ldots (총 16 bank)};
+\node[font=\sffamily\footnotesize\itshape, text=mutec] at (0, 1.4) {\ldots};
 
 \node[io] (ioring) at (0, 0.2) {I/O ring\\(clock, command, data, vref) — 32-bit};
 
@@ -25,7 +25,6 @@
   fit=(b0)(b2)(b6)(ioring),
   label={[font=\sffamily\bfseries\small, text=inkc]above:GDDR6 chip (16 Gb DRAM)}] (chip) {};
 
-\node[font=\sffamily\footnotesize\itshape, text=mutec, anchor=north] at (chip.south) {BGA package (180-ball), 표준 footprint 14$\times$12 mm};
 
 \end{tikzpicture}
 \end{document}
