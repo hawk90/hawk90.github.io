@@ -181,4 +181,4 @@ FEC가 고칠 수 있는 범위를 넘는 오류는 CRC에 걸리고, flit 단�
 
 ## 시리즈 자료 출처 안내
 
-본 글은 *CXL Consortium·PCI-SIG 공개 자료*를 1차 자료로 합니다. CXL 4.0 Specification은 *§ navigation aid*로만 인용. 자세한 spec 인용 정책은 [Ch 1 footer](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내) 참고.
+이 글은 CXL 3.1·1.1 spec, CXL 4.0 발표문·웨비나를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

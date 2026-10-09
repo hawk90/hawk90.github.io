@@ -135,4 +135,4 @@ host가 PPR을 요청하는 *Perform Maintenance(sPPR·hPPR)*는 3.1에도 있�
 
 ## 시리즈 자료 출처 안내
 
-본 글은 *CXL Consortium 공개 발표·press release·white paper*를 1차 자료로 합니다. CXL 4.0 Specification은 *§ navigation aid*로만 인용. 자세한 spec 인용 정책은 [Ch 1 footer](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내) 참고.
+이 글은 CXL 4.0 발표문(2025-11-18)·웨비나(2025-12-03), CXL 3.1·1.1 spec를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

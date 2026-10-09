@@ -215,7 +215,7 @@ Table 13-2는 *권고 목표*이고, 측정 조건(idle, 핀 기준, IDE 끔)이
 
 ## 시리즈 자료 출처 안내
 
-본 시리즈는 *CXL Consortium·DMTF·PCI-SIG 공개 자료·Linux drivers/cxl/ 소스 (GPL)·QEMU 소스 (GPL)·hyperscale 연구 자료*를 *1차 자료*로 합니다. CXL 4.0 Specification (Revision 4.0, Version 1.0, August 13, 2025)은 *§ navigation aid*로만 인용. *spec 본문의 wording·table·figure 재생산 없음*.
+이 글은 CXL 3.1 spec(§4.3.6.3, §12~14), CXL 3.2 발표문, CXL 4.0 웨비나, ndctl 문서, Linux v7.3-rc6 `drivers/cxl/` 소스, Sun et al. MICRO 2023을 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
 
 > CXL® and Compute Express Link® are trademarks of the Compute Express Link Consortium, Inc.
-> Spec 인용은 © 2019-2025 COMPUTE EXPRESS LINK CONSORTIUM, INC. ALL RIGHTS RESERVED.의 저작권을 따릅니다.
+> spec 인용은 Compute Express Link Consortium, Inc.의 저작권을 따릅니다.

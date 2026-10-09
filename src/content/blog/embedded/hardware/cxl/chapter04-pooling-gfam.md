@@ -182,4 +182,4 @@ FM의 형태는 규격이 정하지 않습니다. host 소프트웨어, BMC, swi
 
 ## 시리즈 자료 출처 안내
 
-본 글은 *CXL Consortium·hyperscaler 공개 자료*를 1차 자료로 합니다. CXL 4.0 Specification은 *§ navigation aid*로만 인용. 자세한 spec 인용 정책은 [Ch 1 footer](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내) 참고.
+이 글은 CXL 3.1 spec, Pond·TPP 논문(ASPLOS 2023)를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
