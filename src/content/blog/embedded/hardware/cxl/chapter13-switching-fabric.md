@@ -148,7 +148,7 @@ bind는 vPPB를 물리 포트·LD에 연결하는 것이고, host는 이를 hot-
 
 ## 다음 편
 
-[Ch 14: Security — IDE·SPDM·TSP·CXL TEE](/blog/embedded/hardware/cxl/chapter14-security)에서 *CXL 보안 메커니즘 4종*과 *fabric 환경의 confidential computing*을 본격적으로 분해합니다.
+[Ch 14: Security — IDE·SPDM·TSP·CXL TEE](/blog/embedded/hardware/cxl/chapter14-security)에서 *SPDM·IDE·TSP*가 각각 무엇을 지키는지, 직접 연결 메모리의 confidential computing까지 봅니다.
 
 ## 관련 항목
 
