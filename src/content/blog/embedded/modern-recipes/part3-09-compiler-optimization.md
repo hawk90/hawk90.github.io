@@ -28,10 +28,10 @@ topics: ["embedded"]
 | 레벨 | 의미 | 일반 사용 |
 | --- | --- | --- |
 | `-O0` | 거의 최적화 없음 | 디버그용 (gdb-friendly) |
-| `-O1` | 기본 최적화 | 거의 안 씀 |
-| `-O2` | 속도 최적화 | release 표준 |
-| `-O3` | 공격적 속도 (vectorize) | 핫스팟에만 |
-| `-Os` | 크기 최적화 | 임베디드 표준 |
+| `-O1` | 기본 최적화 | 빌드·크기 절충 |
+| `-O2` | 더 많은 일반 최적화 | release에서 흔히 사용 |
+| `-O3` | 더 공격적인 최적화(대상에 따라 vectorization 포함) | 측정한 핫스팟 |
+| `-Os` | 크기 중심 최적화 | flash 제약이 있는 빌드 |
 | `-Og` | 디버그 친화 + 일부 최적화 | 개발 중 |
 | `-Ofast` | `-O3` + math 표준 위반 허용 | 측정 후 사용 |
 
@@ -81,26 +81,21 @@ sum:
     bx      lr
 ```
 
-`-O0`은 모든 변수를 stack에 저장, `-O2`는 register 활용.
+`-O0`에서는 최적화가 거의 없어 source 대응이 쉬운 편이고, `-O2`에서는 register allocation과 dead-code 제거 등이 적극적으로 적용됩니다. 실제 stack/register 배치는 코드와 compiler에 따라 달라집니다.
 
 ### 3) `-Os` — 크기 최적화
 
-코드 크기를 최소화하려고 inline expansion을 제한합니다. `-O2`에서 20 ~ 30% 더 작아지지만, 약간 느려질 수 있습니다.
+코드 크기를 줄이는 방향으로 최적화합니다. `-O2`와 비교한 크기·속도 차이는 코드, target, compiler 버전에 따라 달라지므로 실제 빌드로 측정해야 합니다.
 
-**hello.c 빌드 결과:**
-
-- -O0: 28 KB
-- -Os: 8 KB
-- -O2: 12 KB
-- -O3: 14 KB
+**hello.c 빌드 결과:** toolchain, linker script, C library, target 옵션에 따라 달라집니다.
 
 ### 4) `-Og` — 디버그 친화
 
 `-O0`은 너무 느리고, `-O2`는 변수가 사라져 디버깅이 어렵습니다. `-Og`는 그 사이 절충입니다.
 
-- Variable lifetime이 source와 비슷하게 유지
-- Inline expansion 최소화
-- Step-through가 자연스러움
+- 가능한 범위에서 source와 대응하기 쉬운 최적화
+- 디버깅을 고려한 최적화 조합
+- 최적화로 인해 변수·실행 순서가 달라질 수 있음
 
 개발 중에는 `-Og -g3`이 가장 편합니다.
 
@@ -114,11 +109,11 @@ arm-none-eabi-gcc -O2 -flto -c b.c -o b.o
 arm-none-eabi-gcc -O2 -flto a.o b.o -o app.elf
 ```
 
-10 ~ 30% 추가 크기/속도 향상이 흔합니다. 단점은 빌드 시간 증가와 일부 hardware-specific 코드(예: 인라인 어셈블리)에서 가끔 문제 발생.
+크기와 속도에 영향을 줄 수 있지만 방향과 폭은 프로그램·toolchain·linker 옵션에 따라 측정해야 합니다. 단점은 빌드 시간 증가와 일부 hardware-specific 코드(예: 잘못 제약된 인라인 어셈블리)에서 문제가 드러날 수 있다는 점입니다.
 
 ### 6) PGO (Profile-Guided Optimization)
 
-실제 실행 profile을 모아 컴파일러에 알려주는 기법. 임베디드에서는 host에서 측정 후 다시 빌드가 어려워 거의 안 씁니다.
+실제 실행 profile을 모아 컴파일러에 알려주는 기법입니다. target에서 profile을 수집하거나 대표 workload를 host에서 재현할 수 있는지에 따라 적용 가능성이 달라집니다.
 
 ## 코드 / 실제 사용 예
 
@@ -156,21 +151,15 @@ CFLAGS_DEBUG = -Og -g3 -DDEBUG
 CFLAGS_RELEASE = -Os -g3 -flto -ffunction-sections -fdata-sections
 
 # Profile/measure
-CFLAGS_PROFILE = -O2 -g3 -pg
+CFLAGS_PROFILE = -O2 -g3
+# -pg/other profiling options require target runtime support
 ```
 
 ## 측정 / 비교
 
 | 옵션 | hello.c 크기 (Cortex-M4) | speed (relative) |
 | --- | --- | --- |
-| `-O0` | 28 KB | 1.0x |
-| `-Og` | 16 KB | 1.5x |
-| `-O1` | 14 KB | 1.7x |
-| `-O2` | 12 KB | 2.5x |
-| `-O3` | 14 KB | 3.0x |
-| `-Os` | 8 KB | 2.2x |
-| `-Os -flto` | 6 KB | 2.4x |
-| `-O2 -flto` | 10 KB | 3.2x |
+| `-O0` ~ `-O3`, `-Os`, `-flto` | 크기와 속도는 코드·target·toolchain별 측정 필요 |
 
 | 옵션 | 디버깅 친화 |
 | --- | --- |
@@ -184,7 +173,7 @@ CFLAGS_PROFILE = -O2 -g3 -pg
 
 > ⚠️ `-O0`으로만 빌드하고 release
 
-flash 크기와 속도가 release보다 2 ~ 3배 차이. release는 반드시 `-Os` 또는 `-O2`.
+`-O0`은 release 옵션과 크기·속도가 크게 다를 수 있습니다. release 후보는 target 요구사항에 맞춰 `-Os`, `-O2` 등을 측정해 선택합니다.
 
 > ⚠️ `-O2` 후 변수가 optimized out
 
@@ -192,7 +181,7 @@ gdb에서 `<optimized out>`이 보입니다. `volatile`를 붙이거나 `-Og`로
 
 > ⚠️ LTO로 inline assembly가 깨짐
 
-asm constraint이 file 단위로 잡혔는데 LTO가 cross-file inline을 하면서 깨지는 경우. 해당 함수만 `__attribute__((noinline))` 또는 `optimize("no-lto")`.
+asm constraint가 부정확하거나 compiler 가정을 위반하면 LTO에서 문제가 드러날 수 있습니다. asm constraint를 검증하고, 필요하면 해당 함수/파일을 빌드 시스템에서 LTO 제외(`-fno-lto`)하거나 `noinline` 등 실제 지원되는 속성을 사용합니다.
 
 > ⚠️ `-Ofast` 사용 후 NaN 처리 깨짐
 
@@ -200,18 +189,17 @@ asm constraint이 file 단위로 잡혔는데 LTO가 cross-file inline을 하면
 
 > ⚠️ `volatile`이 부족해 HW 접근 reorder
 
-`-O2`는 적극적으로 reorder합니다. peripheral register는 반드시 `volatile` (CMSIS 헤더가 이미 해 줌).
+peripheral register는 반드시 `volatile`로 선언해야 하지만, `volatile`만으로 CPU·DMA·다중 코어 간 memory ordering이나 atomicity가 보장되지는 않습니다. 필요한 경우 target의 barrier/동기화 primitive도 사용해야 합니다.
 
 > ⚠️ Inline 함수가 너무 작아도 inline 안 됨
 
-`-Os`에서는 inline이 보수적. `__attribute__((always_inline))` 또는 `-finline-limit=N`으로 조정.
+`-Os`에서는 inline 결정이 달라질 수 있습니다. 필요하면 `always_inline`을 신중히 사용하고, compiler 버전에 맞는 inline 관련 옵션/parameter를 확인합니다.
 
 ## 정리
 
 - `-O` 레벨은 컴파일러 최적화의 적극성을 정합니다.
-- 임베디드 표준은 release `-Os` 또는 `-O2`, debug `-Og`.
-- `-O3`는 vectorize 포함, 임베디드에서는 hotspot에만.
-- LTO(`-flto`)는 cross-file 최적화로 10 ~ 30% 추가 이득.
+- release는 `-Os`, `-O2` 등 후보를 target workload로 비교하고 debug는 `-Og` 등을 선택합니다.
+- `-O3`의 vectorization과 LTO 효과는 target·compiler·코드에 따라 확인합니다.
 - 함수별 attribute로 개별 최적화 제어 가능.
 - `volatile`, inline 제어, debug 친화를 옵션 선택의 함정에 주의.
 

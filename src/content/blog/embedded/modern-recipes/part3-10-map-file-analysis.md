@@ -99,7 +99,7 @@ libc_nano.a(lib_a-malloc.o)
                               lib_a-vfprintf.o (malloc)
 ```
 
-`printf` 한 번 호출이 vfprintf → malloc → free 등 연쇄로 들어옴을 확인.
+`printf` 호출이 어떤 formatting/buffering 경로와 library object를 끌어왔는지 확인할 수 있습니다. 실제로 `malloc`이나 `free`가 포함되는지는 구현과 사용 옵션에 따라 다릅니다.
 
 ### 6) `--print-gc-sections`
 
@@ -179,14 +179,9 @@ puncover --gcc_tools_base /usr/bin/arm-none-eabi- --elf_file app.elf
 | Library 사용 | map file "Archive member" |
 | 시각화 | bloaty, puncover |
 
-| 일반적인 펌웨어 분포 (32 KB flash) |
+| 펌웨어 분포 |
 | --- |
-| Vector table: 0.4 KB |
-| Application code: 18 KB |
-| Library (printf 등): 8 KB |
-| `.rodata`: 3 KB |
-| `.data` init: 1 KB |
-| Padding: 1.6 KB |
+| vector table·application·library·rodata·data·padding의 비율은 프로젝트와 linker script에 따라 달라짐 |
 
 ## 자주 보는 함정
 
@@ -194,9 +189,9 @@ puncover --gcc_tools_base /usr/bin/arm-none-eabi- --elf_file app.elf
 
 `-Wl,-Map=` 빠지면 map 파일이 안 만들어집니다. CMake `target_link_options(... -Wl,-Map=$<TARGET_NAME>.map)` 처럼 미리 빌드 시스템에 추가.
 
-> ⚠️ `printf` 한 번이 8 KB 차지
+> ⚠️ `printf`가 예상보다 큰 library 경로를 포함하는 경우
 
-stdio 전체 chain이 같이 link됩니다. embedded는 `tinyprintf` 또는 custom 구현으로 1 KB 이하 가능.
+format 기능, buffering, float 지원 등으로 여러 stdio object가 link될 수 있습니다. 경량 formatter나 custom 구현의 크기도 기능과 toolchain에 따라 측정해야 합니다.
 
 > ⚠️ Static library 전체가 link됨
 
