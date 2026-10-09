@@ -10,6 +10,9 @@ const checks = [
   ['KaTeX CSS matches renderer', ['npm', 'run', 'check:katex-css']],
   ['no accidental inline math', ['npm', 'run', 'check:inline-math']],
   ['CI supply-chain policy', ['npm', 'run', 'gate:ci-security']],
+  // A too-broad paths-ignore silently stops site changes from deploying
+  // ('**.txt' once covered public/ads.txt and robots.txt).
+  ['deploy paths-ignore vs build inputs', ['npm', 'run', 'gate:deploy-paths']],
   ['repository object health', ['npm', 'run', 'gate:repository']],
   ['high-severity production dependency audit', ['npm', 'run', 'gate:dependencies']],
   ['search aliases', ['npm', 'run', 'test:search']],
