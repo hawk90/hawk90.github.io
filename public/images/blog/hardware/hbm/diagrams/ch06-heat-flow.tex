@@ -21,25 +21,20 @@
 
 % Top die
 \node[dram, below=1mm of cp] (d12) {DRAM die 12};
-\node[note] at (3.7, 6.15) {refresh, sense amp 활동};
-\node[tim, below=0pt of d12] (t12) {TIM};
+\node[tim, below=0pt of d12] (t12) {bonding layer};
 \node[dram, below=0pt of t12] (d11) {DRAM die 11};
-\node[tim, below=0pt of d11] (t11) {TIM};
+\node[tim, below=0pt of d11] (t11) {bonding layer};
 \node[dram, below=0pt of t11, font=\sffamily\footnotesize\itshape, text=mutec, align=center] (ddots) {\ldots};
-\node[tim, below=0pt of ddots] (tdots) {TIM};
+\node[tim, below=0pt of ddots] (tdots) {bonding layer};
 \node[dram, below=0pt of tdots] (d1) {DRAM die 1};
-\node[tim, below=0pt of d1] (t1) {TIM};
+\node[tim, below=0pt of d1] (t1) {bonding layer};
 
 % Base die
 \node[base, below=0pt of t1] (bd) {Base die};
-\node[note] at (3.7, 2.6) {PHY가 가장 뜨거움};
 
 % Interposer
-\node[intp, below=1mm of bd] (intp) {interposer (열 발산 잘 안 됨)};
+\node[intp, below=1mm of bd] (intp) {interposer};
 
-% Down arrow for heat
-\draw[-{Stealth[length=2.4mm]}, draw=warnbord, line width=0.8pt] (-4.5, 6.0) -- (-4.5, 2.0);
-\node[font=\sffamily\footnotesize, text=warnbord, rotate=90, anchor=south] at (-4.7, 4.0) {위에서 아래로 열 흐름};
 
 \end{tikzpicture}
 \end{document}

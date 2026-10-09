@@ -11,7 +11,7 @@
 \node[font=\sffamily\bfseries\large] at (7,7) {Bank Interleaving — Bad vs Good};
 
 % ===== BAD scenario =====
-\node[font=\sffamily\bfseries, anchor=west, text=warnbord] at (0,6.2) {Bad — 같은 bank만 hit (BW 6\%)};
+\node[font=\sffamily\bfseries, anchor=west, text=warnbord] at (0,6.2) {Bad — 같은 bank만 hit};
 
 % bank rows
 \foreach \b/\y in {0/5.5, 1/4.9, 2/4.3, 3/3.7} {
@@ -32,7 +32,7 @@
 \node[caption, anchor=west] at (8.3, 2.8) {time};
 
 % ===== GOOD scenario =====
-\node[font=\sffamily\bfseries, anchor=west, text=okbord] at (0,1.9) {Good — 라운드 로빈 (BW 90\%+)};
+\node[font=\sffamily\bfseries, anchor=west, text=okbord] at (0,1.9) {Good — 라운드 로빈};
 
 \foreach \b/\y in {0/1.2, 1/0.6, 2/0.0, 3/-0.6} {
   \node[caption, anchor=east] at (-0.2, \y) {bank \b};

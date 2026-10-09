@@ -12,62 +12,49 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"LLM inference의 *HBM 점유*는 *weight·activation·KV cache* 세 부분으로 갈립니다."** — 70B 모델 *weight 140 GB*, batch 128 *activation 40 GB*, *KV cache는 sequence 길이에 비례*해 *50~200 GB*까지 늘어납니다. *KV cache가 진짜 메모리 폭증의 원인*입니다. 시리즈를 마무리하며 *카드급 사례*와 *CXL·UALink와의 결합*까지 봅니다.
+> **"LLM inference의 *HBM 점유*는 *weight·activation·KV cache* 세 부분으로 갈립니다."** — Llama 2 70B는 *weight만 140 GB*이고, *KV cache는 batch와 sequence 길이에 정비례*해 batch 128에서 *seq 2048이면 86 GB, 4096이면 172 GB*가 됩니다. 길게 쓸수록 *KV cache가 weight를 넘어서는 것*이 메모리 폭증의 원인입니다. 뒤에서 *카드급 사례*와 *CXL·UALink와의 결합*도 봅니다.
 
-[Ch 7](/blog/embedded/hardware/hbm/chapter07-memory-controller)에서 *컨트롤러의 내부*를 봤습니다. 이번 마지막 장은 *AI workload가 HBM을 어떻게 채우는지*입니다. 시리즈를 마무리하면서 *현세대 AI 가속기 사례*와 *HBM 너머의 메모리 tiering*까지 정리합니다.
+[Ch 7](/blog/embedded/hardware/hbm/chapter07-memory-controller)에서 *컨트롤러의 내부*를 봤습니다. 이번 장은 *AI workload가 HBM을 어떻게 채우는지*입니다. *AI 가속기 사례*와 *HBM 너머의 메모리 tiering*까지 정리합니다.
 
 ## LLM inference의 메모리 분해
 
-LLaMA 70B 모델을 *batch 128, sequence 2048*로 서빙한다고 합시다.
+Llama 2 70B 모델을 *batch 128, sequence 2048*로 서빙한다고 합시다. 이 모델은 layer 80개, hidden 8192, attention head 64개에 *KV head는 8개*(GQA, grouped-query attention)입니다.
 
 ```text
-LLaMA 70B inference (FP16, batch 128, seq 2048)
+Llama 2 70B inference (FP16, batch 128, seq 2048)
 
 Weight (정적, 모델 자체):
   70 B parameter × 2 byte = 140 GB
 
-Activation (per-token, batch 분담):
-  hidden_size 8192 × layer 80 × batch 128 × seq 1
-  = 8192 × 80 × 128 × 2 / 1024³
-  = 167 MB per token (decode)
+Activation (decode 한 step):
+  layer 1개: hidden 8192 × batch 128 × 2 byte = 2.1 MB
+  80 layer 분량을 모두 잡아도 168 MB
 
 KV cache (sequence에 비례):
-  per token: hidden × 2 (K, V) × layer × dtype
-           = 8192 × 2 × 80 × 2 byte = 2.5 MB per token
-  
-  batch 128 × seq 2048 × 2.5 MB
-  = 128 × 2048 × 2.5 MB / 1024
-  = 640 GB
+  per token: 2 (K, V) × layer 80 × KV head 8 × head_dim 128 × 2 byte
+           = 327,680 byte (약 0.33 MB)
+  batch 128 × seq 2048 × 327,680 byte = 약 86 GB
 
-총 메모리: 140 + 0.17 + 640 = 약 780 GB
+총 메모리: 140 + 0.17 + 86 = 약 226 GB
 ```
 
-*KV cache가 weight보다 4배 큽니다*. 이게 *LLM serving의 메모리 폭증*입니다.
+seq 2048에서는 KV cache(86 GB)가 weight(140 GB)보다 작습니다. 하지만 KV cache는 *sequence에 정비례*합니다. Llama 2의 최대 길이인 *4096*으로 늘리면 *172 GB*가 되어 weight를 넘습니다. GQA가 없었다면, 곧 KV head가 attention head와 같은 64개였다면 seq 2048에서도 *8배인 687 GB*였을 것입니다. GQA가 줄이려는 것이 바로 이 메모리입니다.
 
-| 가속기 | HBM capacity (공개 자료 기준) | 한 장으로 가능한 것 |
-|--------|------------------------------|---------------------|
-| NVIDIA H100 80 GB | 80 GB | LLaMA 70B FP16 weight도 단독 안 됨 |
-| NVIDIA H200 | 141 GB | weight + 짧은 KV |
-| NVIDIA B200 | 192 GB | weight + 중간 KV |
-| AMD MI300X | 192 GB | weight + 중간 KV |
-| AMD MI325X | 256 GB | LLaMA 70B + 큰 KV |
+| 가속기 | HBM capacity | weight 140 GB를 넣고 남는 용량 |
+|--------|--------------|-------------------------------|
+| NVIDIA H100 SXM | 80 GB | 부족 (weight도 단독으로 안 들어감) |
+| NVIDIA H200 | 141 GB | 약 1 GB |
+| NVIDIA B200 | 180 GB | 약 40 GB |
+| AMD MI300X | 192 GB | 약 52 GB |
+| AMD MI325X | 256 GB | 약 116 GB |
 
-H100 *80 GB*로 LLaMA 70B를 *serving하려면* *모델 4분할 + KV cache 별도 호스트*가 필요합니다. H200·B200으로 가야 *한 장에 weight*가 들어갑니다.
+H100 80 GB 한 장에는 weight조차 들어가지 않아 *최소 2장으로 나눠야* 합니다. H200은 weight는 들어가지만 KV cache 자리가 거의 없습니다. batch 128·seq 2048의 KV cache 86 GB까지 *한 장에 다 넣을 수 있는 것*은 위 표에서 MI325X뿐입니다.
 
 ## Weight 저장
 
 weight는 *학습 후 정적*이고 *모든 추론에서 그대로 읽힙니다*.
 
-**Weight layout in HBM** — 전형적 매핑은 *한 layer를 여러 stack에 분산*. Layer 0의 Q/K/V·FFN을 stack 0..7로 쪼개고, Layer 1도 같은 방식.
-
-**Layout 규칙**
-
-| 규칙 | 의미 |
-|------|------|
-| Channel-aware allocation | layer 한 개를 stack 1개에 몰면 다른 stack idle → layer를 stack에 분산해 동시 가동 |
-| Same channel parallel access | 같은 layer의 weight tile을 같은 channel에 묶으면 bank conflict 발생 → tile boundary와 channel boundary를 misalign |
-
-NVIDIA TensorRT-LLM과 vLLM은 *weight를 자동으로 channel-aware*하게 *layout*합니다. *수동 tuning*은 거의 사라졌습니다.
+*같은 weight를 토큰마다 다시 읽는다*는 점이 decode가 메모리 대역폭을 많이 쓰는 이유입니다. layer 하나의 weight는 평균 *140 GB ÷ 80 = 1.75 GB*입니다.
 
 ## Activation — batch와 sequence
 
@@ -80,7 +67,7 @@ activation은 *forward pass 중 layer 입출력*입니다. *batch와 sequence가
 | Prefill (입력 prompt encoding) | `(batch × seq_in × hidden) = (128 × 2048 × 8192)` | `128 × 2048 × 8192 × 2 B = 4 GB` | layer마다 reuse 가능 → peak ≈ `2 × max(layer_input, layer_output) ≈ 8 GB` |
 | Decode (토큰 하나씩) | `(batch × 1 × hidden) = (128 × 1 × 8192)` | `128 × 8192 × 2 B = 2 MB` | 매우 작음 |
 
-prefill은 *throughput bound*, decode는 *latency bound*입니다. *activation memory 자체*는 *KV cache에 비하면 작습니다*.
+*activation memory 자체*는 *KV cache에 비하면 작습니다*.
 
 ## KV cache — 메모리 폭증의 원인
 
@@ -90,14 +77,14 @@ attention 연산은 *과거 모든 토큰의 K, V*를 *현재 query*가 *참조*
 
 | 단위 | Attention | K | V | total |
 |------|-----------|---|---|-------|
-| per layer per token | Vanilla MHA | 16 KB | 16 KB | 32 KB |
-| per layer per token | GQA (group 8) | 2 KB | 2 KB | 4 KB |
-| per token (80 layer) | Vanilla MHA | — | — | 2.5 MB |
-| per token (80 layer) | GQA | — | — | 320 KB |
-| batch 128 × seq 2048 | Vanilla MHA | — | — | **640 GB** |
-| batch 128 × seq 2048 | GQA | — | — | **80 GB** |
+| per layer per token | Vanilla MHA (KV head 64) | 16.4 KB | 16.4 KB | 32.8 KB |
+| per layer per token | GQA (KV head 8) | 2.0 KB | 2.0 KB | 4.1 KB |
+| per token (80 layer) | Vanilla MHA | — | — | 2.6 MB |
+| per token (80 layer) | GQA | — | — | 0.33 MB |
+| batch 128 × seq 2048 | Vanilla MHA | — | — | **687 GB** |
+| batch 128 × seq 2048 | GQA | — | — | **86 GB** |
 
-*GQA*가 *KV cache를 8배 줄였습니다*. LLaMA 2 70B부터 *GQA가 표준*입니다.
+*GQA*가 *KV cache를 8배 줄였습니다*. Llama 2는 70B를 포함한 큰 모델에 GQA를 썼습니다.
 
 **KV cache access pattern** — decode 단계의 매 토큰
 
@@ -118,12 +105,12 @@ for layer in 80:
 
 | 종류 | 크기 |
 |------|------|
-| Weight read | 2 GB (FFN + attention weights) |
-| KV cache read | `past_len × 4 KB` (GQA) |
+| Weight read | 약 1.75 GB (140 GB ÷ 80 layer) |
+| KV cache read | `batch × past_len × 4.1 KB` (GQA) |
 
 Sequence가 길어질수록 KV traffic이 증가 → **long context inference는 KV bound**.
 
-8K context: KV traffic이 weight traffic의 *2배*. 128K context: *32배*. *long context*가 *memory bound의 극단*입니다.
+batch 128 기준으로 계산하면, 8K context에서 layer당 KV read는 `128 × 8192 × 4.1 KB ≈ 4.3 GB`로 weight(1.75 GB)의 *약 2.5배*입니다. 128K context에서는 *약 39배*입니다.
 
 ## Memory layout — tiling 전략
 
@@ -170,110 +157,79 @@ __global__ void matmul_tiled(
 ```text
 tile size 선택
 
-tile 1024 byte (32×32 half):
+tile 2 KB (32×32 half):
   - shared memory 사용: 작음
-  - HBM access 빈번
-  - bandwidth bound
+  - 같은 데이터를 HBM에서 더 자주 다시 읽음
 
 tile 16 KB (128×64 half):
-  - shared memory 한계 근접
-  - HBM access 적음
-  - compute bound로 이동 가능
+  - shared memory 사용: 큼
+  - HBM에서 다시 읽는 횟수가 줄어듦
 
-H100 shared memory: 228 KB per SM
-  → tile 64 KB까지 안전
+H100 shared memory: SM당 최대 228 KB
 ```
 
-*Flash Attention*은 *attention 자체를 tile*해서 *KV cache를 fully on-chip*에 올립니다. *long context의 game changer*입니다.
+*FlashAttention*은 *attention 계산 자체를 tile로 나눠* HBM과 on-chip SRAM 사이의 *읽기·쓰기 횟수를 줄입니다*. 중간 결과인 attention 행렬을 HBM에 통째로 쓰지 않는 것이 핵심입니다.
 
-## MFU·MBU의 현실
+## Decode는 왜 batch를 키우는가
 
-대표적인 inference workload의 *측정치*입니다.
+decode는 *토큰 하나를 만들 때마다 weight 전체를 한 번 읽습니다*. H100 SXM의 HBM 대역폭 3.35 TB/s로 weight 140 GB를 한 번 읽는 데 *약 42 ms*가 걸립니다(대역폭만 따진 하한값입니다. 실제로는 weight가 80 GB에 다 들어가지 않아 여러 장에 나눠 담습니다).
 
-LLaMA 70B inference on H100(FP16)의 측정치는 다음과 같습니다.
-
-| 단계 | latency | MFU | MBU | 특징 |
-|------|---------|-----|-----|------|
-| prefill (seq=2048, batch=1) | 80 ms | 35% | 50% | compute bound (큰 matmul) |
-| decode (batch=1) | 30 ms/token | 5% | 80% | memory bound (small batch matmul) |
-| decode (batch=64) | 50 ms/token | 30% | 75% | weight read를 batch에 amortize |
-
-*batch가 클수록 MFU 상승*합니다. weight read가 *batch 전체에 amortize*되기 때문입니다. *batch 1*에서는 *weight 140 GB*를 *읽기만 하면 42 ms*인데 *batch 64*에서는 *그대로 42 ms*입니다 (capacity 한계까지).
-
-```text
-batch scaling
-
-batch 1:    weight read 1회 × 42 ms = 42 ms / token
-batch 64:   weight read 1회 × 42 ms = 0.65 ms / token (이론)
-            실제 50 ms × token 도달 (limited by FLOPS)
-
-batch sweet spot:
-  H100 80 GB: batch 16~32
-  H200 141 GB: batch 32~64
-  B200 192 GB: batch 64~128
-```
+이 42 ms는 *batch 전체가 나눠 씁니다*. batch 1이면 토큰 하나에 42 ms, batch 64면 같은 weight read 한 번으로 64개 토큰을 만들어 토큰당 *0.65 ms*입니다. batch를 키울수록 weight read가 *amortize*되고, 결국 계산량이나 KV cache 용량이 다음 한계가 됩니다.
 
 ## 카드급 사례
 
-현세대 AI 가속기 카드의 *HBM 구성*입니다.
+AI 가속기 카드의 *HBM 구성*입니다. stack 구성은 벤더가 공개한 경우만 적었습니다.
 
-| 카드 | HBM 구성 | capacity | spec BW | TDP |
-|------|----------|----------|---------|-----|
-| NVIDIA H100 80GB SXM5 | 5 × HBM3 × 16 GB | 80 GB | 3.35 TB/s | 700 W |
-| NVIDIA H200 SXM5 | 6 × HBM3E × 24 GB | 141 GB | 4.8 TB/s | 700 W (liquid) |
-| NVIDIA B100 / B200 SXM6 | 8 × HBM3E × 24 GB | 192 GB | 8 TB/s | 1000 W (liquid 필수) |
-| NVIDIA B300 (Blackwell Ultra, 2026) | 8 × HBM3E × 36 GB (12-Hi) | 288 GB | 8 TB/s | 1400 W |
-| AMD MI300X | 8 × HBM3 × 24 GB (chiplet) | 192 GB | 5.3 TB/s | 750 W |
-| AMD MI325X | 8 × HBM3E × 32 GB | 256 GB | 6.0 TB/s | 750 W |
-| Google TPU v5p | 4 × HBM3 | 95 GB | 2.8 TB/s | — |
+| 카드 | HBM | stack 구성 | capacity | spec BW | TDP |
+|------|-----|-----------|----------|---------|-----|
+| NVIDIA H100 SXM5 | HBM3 | 5 stack | 80 GB | 3.35 TB/s | 최대 700 W |
+| NVIDIA H200 SXM | HBM3e | — | 141 GB | 4.8 TB/s | 최대 700 W |
+| NVIDIA B200 | HBM3e | — | 180 GB | 8 TB/s | TBD |
+| NVIDIA B300 (Blackwell Ultra) | HBM3e | — | TBD | TBD | TBD |
+| AMD Instinct MI300X | HBM3 | — | 192 GB | 5.3 TB/s | 750 W |
+| AMD Instinct MI325X | HBM3E | — | 256 GB | 6 TB/s | 1000 W (peak) |
+| Google TPU v5p | HBM | — | 95 GiB | 2,765 GB/s | — |
+
+B200 capacity는 DGX B200(8 GPU, 1,440 GB) 기준입니다.
 
 한국 NPU의 경우입니다.
 
 | 칩 | 메모리 | capacity | 특징 |
 |-----|--------|----------|------|
-| Rebellions REBEL-Quad (Hot Chips 2025) | HBM3E (4-chiplet, UCIe) | 144 GB | 1 PFLOPS FP16, 300 W. ATOM(전세대)은 16 GB GDDR6 |
-| Sapeon X330 | GDDR (HBM 아님!) | — | inference 전용, FP8 367 TFLOPS @ 120 W. Sapeon은 Rebellions와 합병 |
-| Samsung MACH-1 (연구 중) | HBM die 일부를 PIM | — | on-die 가속으로 memory traffic 자체 감소 |
+| Rebellions REBEL-Quad (Hot Chips 2025) | HBM3E, 4.8 TB/s (4-chiplet, UCIe) | 144 GB | 1,024 TFLOPS FP16, 최대 600 W |
+| Sapeon X330 | TBD | TBD | TBD. Sapeon은 2024년 12월 Rebellions와 합병 |
+| Samsung Mach-1 | LPDDR (HBM 아님) | — | HBM 대신 저전력 메모리로 LLM 추론을 겨냥한 칩 (2024년 3월 발표) |
 
 ## CXL과의 결합 — Memory Tiering
 
-*HBM 192 GB*로도 *대형 LLM weight + 전체 KV cache*를 *담지 못합니다*. *CXL*이 *낮은 tier*의 메모리를 제공합니다.
+카드 한 장의 HBM만으로는 *큰 모델의 weight와 긴 context의 KV cache*를 다 담기 어렵습니다. *CXL*이 HBM 아래 *낮은 tier*의 메모리를 제공합니다.
 
 ![AI 가속기의 메모리 tiering — SRAM / HBM / CXL / NVMe / 네트워크 메모리](/images/blog/hardware/hbm/diagrams/ch08-tiering.svg)
 
-LLM serving 매핑은 다음과 같습니다.
+tier를 나눈다면 데이터를 이렇게 대응시킬 수 있습니다.
 
 - *hot KV cache* → HBM
 - *warm KV cache* → CXL
 - *cold KV cache* → SSD
 - *weight (정적)* → HBM (전부 캐시)
 
-vLLM·SGLang 같은 *현세대 serving framework*는 *KV cache를 tier 1~3에 자동 분산*합니다. *paged attention*이라고 부르는 기법이 *대표적*입니다.
+vLLM의 *PagedAttention*은 tier 분산이 아니라 *GPU 메모리 안의 KV cache 관리* 기법입니다. KV cache를 OS의 page처럼 블록 단위로 나눠 *낭비를 거의 0으로* 줄이고, 요청 사이에 KV cache를 *공유*합니다.
 
 ## UALink — GPU 간 메모리 공유
 
-여러 GPU가 *서로의 HBM을 직접 access*하는 *UALink*는 *2024년 컨소시엄 결성*, *2025년 4월 200G 1.0 spec 비준*으로 이어졌습니다.
+여러 가속기가 *서로의 메모리를 직접 access*하도록 잇는 open 표준이 *UALink*입니다. UALink Consortium은 2024년 10월 법인으로 설립됐고, *2025년 4월 8일 UALink 200G 1.0 spec*을 비준했습니다.
 
-**UALink vs NVLink**
+| 항목 | NVLink (NVIDIA) | UALink 200G 1.0 (open consortium) |
+|------|-----------------|-----------------------------------|
+| 신호 속도 | — | 200G per lane |
+| GPU 당 집계 BW | B200 1.8 TB/s | TBD |
+| Fabric 규모 | NVLink switch 기반 | pod당 가속기 최대 1,024개 |
 
-| 항목 | NVLink (NVIDIA proprietary) | UALink (open consortium) |
-|------|-----------------------------|--------------------------|
-| 세대 / spec | 4세대(GH200)·5세대(B200/GB200) | 200G 1.0 (2025-04 비준) |
-| 신호 속도 | — | 200 Gbps/lane (4-lane station = 800 Gbps) |
-| GPU 당 집계 BW | B200 1.8 TB/s · GH200 900 GB/s | — |
-| Fabric 규모 | NVLink switch 기반 | 1024 accelerator까지 |
-| Cache coherent | O | O |
-| 양산 | 출시 중 | 제품화 2026+ |
+UALink Consortium 이사회: Alibaba, AMD, Apple, Astera Labs, AWS, Cisco, Google, HPE, Intel, Meta, Microsoft, Synopsys.
 
-UALink 컨소시엄: AMD, Broadcom, Cisco, Google, HPE, Intel, Meta, Microsoft.
+## Ch 1~8 정리
 
-**GPU 간 HBM 공유 효과** — weight 한 GPU에 두고 나머지 GPU가 직접 access. weight replication을 줄여 *더 큰 모델 서빙* 가능.
-
-UALink 시리즈에서 자세히 다룹니다.
-
-## 시리즈 마무리
-
-HBM·GDDR 8개 장을 *지났습니다*. 시리즈를 한 줄씩 정리합니다.
+HBM·GDDR 부분인 Ch 1~8을 한 줄씩 정리합니다. Ch 9부터는 HBM 너머의 메모리인 *CXL.mem*으로 넘어갑니다.
 
 | Ch | 주제 | 핵심 |
 |----|------|------|
@@ -282,63 +238,37 @@ HBM·GDDR 8개 장을 *지났습니다*. 시리즈를 한 줄씩 정리합니다
 | 3 | 세대 비교 | HBM2 → HBM3E → HBM4 |
 | 4 | GDDR 진화 | NRZ → PAM4 → PAM3 |
 | 5 | 대역폭 병목 | sustained BW, roofline, memory wall |
-| 6 | 열·전력 | refresh, ASR, liquid cooling |
-| 7 | 메모리 컨트롤러 | bank scheduling, XOR mapping |
+| 6 | 열·전력 | refresh, liquid cooling |
+| 7 | 메모리 컨트롤러 | bank scheduling, address mapping |
 | 8 | NPU·GPU 활용 | weight, KV cache, tiering |
-
-## 추천 후속 시리즈
-
-이 시리즈와 *직접 연결*되는 *세 시리즈*를 추천합니다.
-
-| # | 시리즈 | 연관 |
-|---|--------|------|
-| 1 | UCIe | HBM stack이 interposer에 붙는 것과 같은 방식으로 로직 칩렛이 붙음 — 패키징 차원에서 함께 이해 |
-| 2 | BoW | 또 다른 die-to-die 표준. HBM과 함께 사용 가능 (개방형 인터커넥트) |
-| 3 | CXL | HBM 너머의 메모리 풀링, Tier 2 메모리 확장 |
-| 4 | UALink | GPU 간 HBM 공유, Tier 4 네트워크 메모리 |
-| 5 | DDR | DRAM의 가장 일반적인 형태, CPU 메인 메모리 |
-| 6 | NVMe | Tier 3 메모리 (LLM serving의 cold tier) |
 
 ## 자주 하는 실수
 
 ### "HBM capacity로 모든 LLM이 수용된다"
 
-70B 모델 *weight 140 GB*는 H200(141 GB)에 *겨우 들어갑니다*. *KV cache 80 GB*까지 합치면 *어느 H200도 못 담습니다*. *최소 2장 분할*이 필수입니다. *카드 capacity*만 보고 *수용 가능*을 판단하면 *오답*입니다.
+70B 모델 *weight 140 GB*는 H200(141 GB)에 *겨우 들어갑니다*. batch 128·seq 2048의 *KV cache 86 GB*까지 합치면 *H200 한 장으로는 담을 수 없어* 여러 장으로 나눠야 합니다. *카드 capacity*만 보고 *수용 가능*을 판단하면 *오답*입니다.
 
 ### KV cache를 *작다고 가정*
 
-GQA로 줄여도 *64 GB+*가 나오기 일쑤입니다. *long context*는 *더 늘어납니다*. *paged attention* 같은 *동적 관리*가 *필수*입니다.
+GQA로 8분의 1로 줄여도 batch 128·seq 2048에서 *86 GB*, seq 4096이면 *172 GB*입니다. KV cache는 *batch와 sequence에 정비례*합니다.
 
-### tile size를 *수동 tuning*하려는 시도
+### "batch 1 decode는 GPU 계산력을 다 쓴다"
 
-NVIDIA TensorRT, vLLM, AMD ROCm 모두 *autotuner*가 들어 있습니다. *수동 tile*은 *autotuner를 이기기 어렵습니다*. 새 모델·새 GPU에서 *autotuner를 신뢰*하는 게 안전합니다.
-
-### "batch 1 inference에 H100을 사주면 빠르다"
-
-batch 1은 *MFU 5%*입니다. *H100의 1000 TFLOPS 중 50 TFLOPS만 사용*입니다. *latency*는 *H200*과 *비슷*하기도 합니다. *batch가 작은 사용처*에서는 *L40·L4 같은 GDDR 카드*가 *비용 효율적*입니다.
-
-### *HBM capacity를 늘리면* 무조건 *throughput*이 늘어난다는 가정
-
-capacity가 늘면 *batch를 키울 수 있고* throughput이 늘긴 합니다. 하지만 *batch가 어느 점*을 넘으면 *latency가 SLA를 깨고*, *MBU 상한*에 닿아 *gain이 멈춥니다*. *capacity와 bandwidth의 균형*이 핵심입니다.
+decode는 토큰마다 *weight 전체를 읽어야* 하므로, batch 1에서는 *weight read 시간*이 토큰 생성 시간을 정합니다. 계산 유닛은 그동안 대부분 놉니다. batch를 키워야 같은 weight read로 여러 토큰을 만들 수 있습니다.
 
 ## 정리
 
-- LLM inference 메모리는 *weight·activation·KV cache*로 갈리고, *KV cache가 최대 폭증 원인*입니다.
-- *70B FP16 weight*는 *140 GB*, GQA *KV cache*는 *80~640 GB*입니다.
-- *channel-aware allocation*과 *tile-based access*가 *HBM 효율*을 결정합니다.
-- *MFU와 MBU*를 같이 봐야 *진짜 병목*이 보입니다. decode는 *MBU 80%, MFU 5%*가 흔합니다.
-- *batch가 클수록 MFU 상승*하지만 *latency도 증가*합니다.
-- 현세대 카드는 H100(80GB) → H200(141GB) → B200(192GB) → MI325X(256GB) → B300(288GB) 순으로 *capacity가 빠르게 증가*합니다.
-- *CXL은 Tier 2 메모리*, *UALink는 GPU 간 HBM 공유*, *NVMe는 Tier 3 cold tier*입니다.
-- 한국 NPU(Rebellions Atom, Sapeon X330)는 *HBM 채택*과 *GDDR 채택*이 *섞여 있습니다*.
-- 시리즈는 끝났지만 *UCIe·BoW·CXL·UALink* 시리즈와 *함께 읽으면* *현세대 패키징·메모리 시스템*의 전체 그림이 보입니다.
+- LLM inference 메모리는 *weight·activation·KV cache*로 갈리고, 긴 context에서는 *KV cache가 가장 크게 늘어납니다*.
+- Llama 2 70B FP16 weight는 *140 GB*, KV cache는 batch 128·seq 2048에서 *86 GB*(GQA)입니다. GQA가 없었다면 *687 GB*였습니다.
+- *tile 단위 access*로 HBM 재읽기를 줄이는 것이 kernel 효율의 핵심입니다. FlashAttention은 attention 자체를 tile로 나눕니다.
+- decode는 토큰마다 weight 전체를 읽습니다. *batch를 키우면* 그 read가 여러 토큰에 *amortize*됩니다.
+- 카드 capacity는 H100(80 GB) → H200(141 GB) → B200(180 GB) → MI325X(256 GB) 순으로 늘었습니다.
+- *CXL은 HBM 아래 tier의 메모리*, *UALink는 가속기 간 메모리 접근*을 위한 open 표준입니다.
+- 한국 NPU도 메모리 선택이 갈립니다. REBEL-Quad는 *HBM3E*, Samsung Mach-1은 *LPDDR*입니다.
 
-## 추천 후속 시리즈
+## 다음 편
 
-- UCIe Ch 1: 개요 — 칩렛 표준의 핵심
-- BoW Ch 1: 개요 — open die-to-die 표준
-- CXL Ch 1: 개요 — HBM 너머의 메모리
-- UALink Ch 1: 개요 — GPU 간 메모리 fabric
+[Ch 9: CXL.mem 분석](/blog/embedded/hardware/hbm/chapter09-cxl-mem)에서 HBM·GDDR·DDR 다음의 메모리 계층인 CXL.mem을 봅니다.
 
 ## 관련 항목
 

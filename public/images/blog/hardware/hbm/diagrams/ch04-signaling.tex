@@ -47,10 +47,10 @@
 \foreach \i in {1,...,7} {
   \draw[ax, dashed] (\i*\xstep, 0.95) -- (\i*\xstep, 1.95);
 }
-\node[ticklabel, anchor=west] at (5.2, 1.45) {GDDR6X (24 Gbps)};
+\node[ticklabel, anchor=west] at (5.2, 1.45) {GDDR6X (21 Gbps)};
 
 % Section 3: PAM3
-\node[ttl] (t3) at (0, 0.0) {PAM3 (1.5 bit / UI, 3-level)};
+\node[ttl] (t3) at (0, 0.0) {PAM3 (3-level)};
 \foreach \y/\lab in {-1.4/{$-V$}, -1.0/{$0V$}, -0.6/{$+V$}} {
   \draw[ax] (-0.2, \y) -- (5.0, \y);
   \node[ticklabel, anchor=east] at (-0.3, \y) {\lab};
@@ -63,7 +63,7 @@
 \foreach \i in {1,...,7} {
   \draw[ax, dashed] (\i*\xstep, -1.45) -- (\i*\xstep, -0.55);
 }
-\node[ticklabel, anchor=west] at (5.2, -1.0) {GDDR7 (32 Gbps)};
+\node[ticklabel, anchor=west] at (5.2, -1.0) {GDDR7 (최대 48 Gbps)};
 
 \end{tikzpicture}
 \end{document}

@@ -11,7 +11,7 @@
 ]
 
 \node[L=tealbord] (cp) at (0, 8) {Cold plate (Cu) — liquid 또는 vapor chamber};
-\node[L=mutec, below=0pt of cp] (tim2) {TIM2 (액체 metal)};
+\node[L=mutec, below=0pt of cp] (tim2) {TIM2};
 \node[L=clibord, below=0pt of tim2] (lid) {Lid};
 \node[L=mutec, below=0pt of lid] (tim1) {TIM1 (high-conductive)};
 \node[L=hibord, below=0pt of tim1, minimum height=12mm] (die) {GPU die + HBM stacks (interposer 위)};
@@ -19,7 +19,7 @@
 \node[L=conbord, below=0pt of under] (sub) {Organic substrate};
 \node[L=absbord, below=0pt of sub] (bga) {Ball grid array};
 
-\node[font=\sffamily\bfseries\small, text=inkc] at (0, 8.9) {H100 / H200 / B200 cooling stack};
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 8.9) {lid가 있는 GPU 패키지의 cooling stack (예)};
 
 \end{tikzpicture}
 \end{document}

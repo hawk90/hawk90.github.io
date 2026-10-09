@@ -19,14 +19,12 @@
   \node[num] at (-3.7, \y) {\i};
 }
 
-\node[base] (bd) at (0, -0.05) {Base die (logic, PHY)};
+\node[base] (bd) at (0, -0.05) {Base die (PHY)};
 \node[num] at (-3.7, -0.05) {0};
 
 \node[bump] (bp) at (0, -0.65) {microbump (HBM bump field)};
 
 \node[note] at (3.7, 6.0) {24 Gb DRAM};
-\node[note] at (3.7, -0.05) {로직 공정 ($\sim$12 nm)};
-\node[note] at (3.7, -0.65) {55 $\mu$m pitch};
 
 \draw[-{Stealth[length=2.4mm]}, line width=0.7pt, draw=mutec] (bp.south) -- ++(0, -0.4) node[font=\sffamily\footnotesize, text=mutec, midway, right=2pt] {interposer로 연결};
 
