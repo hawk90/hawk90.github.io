@@ -38,6 +38,7 @@ Buildroot는 *같은 트리·같은 toolchain·같은 commit*으로 U-Boot까지
 | `BR2_TARGET_UBOOT_FORMAT_*` | 산출물 형식 (bin, img, kwb, imx 등) |
 | `BR2_TARGET_UBOOT_SPL=y` | SPL을 함께 빌드 |
 | `BR2_TARGET_UBOOT_SPL_NAME` | SPL 산출물 이름 (`MLO`, `u-boot-spl.bin`) |
+| `BR2_PACKAGE_HOST_UBOOT_TOOLS=y` | host용 U-Boot tools(`mkimage` 등). 아래 두 옵션은 이 메뉴 안에 있음 |
 | `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y` | `boot.scr` 자동 생성 |
 | `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT_SOURCE` | `boot.cmd`의 경로 |
 
@@ -52,8 +53,9 @@ BR2_TARGET_UBOOT_FORMAT_BIN=y
 BR2_TARGET_UBOOT_FORMAT_IMG=y
 BR2_TARGET_UBOOT_SPL=y
 BR2_TARGET_UBOOT_SPL_NAME="MLO u-boot-spl.bin"
-BR2_TARGET_UBOOT_BOOT_SCRIPT=y
-BR2_TARGET_UBOOT_BOOT_SCRIPT_SOURCE="board/myboard/boot.cmd"
+BR2_PACKAGE_HOST_UBOOT_TOOLS=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT_SOURCE="board/myboard/boot.cmd"
 ```
 
 각 항목은 다음 절에서 풀어 설명합니다.
@@ -160,6 +162,7 @@ U-Boot는 보드 부팅 시 *어떤 명령을 실행할지*를 SD 카드의 `boo
 `boot.scr`은 `mkimage`가 평문 `boot.cmd`를 U-Boot script image로 감싼 파일입니다. legacy header의 CRC는 무결성 확인용이지 cryptographic 서명이 아닙니다. 서명 검증이 필요하면 별도의 FIT image 서명 구성을 사용해야 합니다.
 
 ```text
+BR2_PACKAGE_HOST_UBOOT_TOOLS=y
 BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y
 BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT_SOURCE="board/myboard/boot.cmd"
 ```
