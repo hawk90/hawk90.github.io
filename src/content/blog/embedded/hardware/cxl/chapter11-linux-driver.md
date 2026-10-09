@@ -291,4 +291,4 @@ v7.3-rc6 소스에 들어 있는 것 중 이 시리즈와 관련된 항목:
 
 ## 시리즈 자료 출처 안내
 
-본 글은 *Linux Kernel `drivers/cxl/` 소스 (GPL)*를 1차 자료로 합니다. 코드 인용은 *오픈소스 GPL 라이선스*에 따른 자유 분석·인용입니다. CXL 4.0 Specification은 *§ navigation aid*로만 인용. 자세한 spec 인용 정책은 [Ch 1 footer](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내) 참고.
+이 글은 Linux mainline v7.3-rc6의 `drivers/cxl/`·`include/cxl/`·`drivers/dax/` 소스(GPL), ndctl 문서를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

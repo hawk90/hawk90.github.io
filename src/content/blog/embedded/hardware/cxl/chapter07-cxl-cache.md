@@ -191,4 +191,4 @@ host와 디바이스가 *같은 line을 자주 번갈아 쓰면* snoop 트래픽
 
 ## 시리즈 자료 출처 안내
 
-본 글은 *CXL Consortium·Linux drivers/cxl/ 소스·academic 연구*를 1차 자료로 합니다. CXL 4.0 Specification은 *§ navigation aid*로만 인용. 자세한 spec 인용 정책은 [Ch 1 footer](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내) 참고.
+이 글은 CXL 3.1·1.1 spec를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

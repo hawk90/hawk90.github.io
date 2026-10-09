@@ -198,4 +198,4 @@ host bridge마다 `bus_nr`를 다르게 줍니다. QEMU 문서 예시는 12와 2
 
 ## 시리즈 자료 출처 안내
 
-본 글은 *QEMU 공식 문서 (GPL)·QEMU 소스·Linux drivers/cxl/ 소스*를 1차 자료로 합니다. CXL 4.0 Specification은 *§ navigation aid*로만 인용. 자세한 spec 인용 정책은 [Ch 1 footer](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내) 참고.
+이 글은 QEMU master 문서·소스(GPL), Linux `tools/testing/cxl/`, ndctl 문서·테스트를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

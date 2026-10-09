@@ -185,4 +185,4 @@ DOE는 *config space 접근*으로 객체를 주고받는 control path입니다.
 
 ## 시리즈 자료 출처 안내
 
-본 글은 *CXL Consortium·DMTF 공개 자료·Linux drivers/cxl/ 소스*를 1차 자료로 합니다. CXL 4.0 Specification은 *§ navigation aid*로만 인용. 자세한 spec 인용 정책은 [Ch 1 footer](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내) 참고.
+이 글은 CXL 3.1·1.1 spec, Linux `drivers/cxl/` 소스, pciutils 소스를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

@@ -166,14 +166,14 @@ ARB/MUX는 *CXL 고유* 레이어로 *세 프로토콜의 flit·packet을 하나
 
 ## 시리즈 자료 출처 안내
 
-본 시리즈의 *1차 자료*는 다음과 같습니다:
+이 시리즈는 다음 자료를 근거로 합니다.
 
-- **CXL Consortium 공개 자료** — press release, white paper, conference talk, webinar
-- **Linux Kernel `drivers/cxl/` 소스** — GPL, 자유 분석 가능
-- **QEMU CXL emulation 소스** — GPL
-- **Hyperscale 공개 연구 자료** — Meta·Microsoft·Samsung·SK Hynix·Astera Labs의 공개 발표·논문
-
-CXL 4.0 *Specification 문서* (Compute Express Link Specification Revision 4.0, Version 1.0, August 13, 2025)는 *참고 자료*로 § 번호만 인용합니다. spec 본문의 wording·table·figure를 *재생산하지 않으며*, *자체 분석과 구현 관점의 해설*입니다.
+- **CXL spec** — 컨소시엄이 공개한 CXL 3.1 spec(평가판, 2023-08)과 CXL 1.1 spec. 본문의 §·표 번호는 3.1 기준이고, 값은 표를 그대로 옮기지 않고 필요한 것만 인용합니다.
+- **CXL Consortium 발표 자료** — CXL 3.2 발표문(2024-12-03), CXL 4.0 발표문(2025-11-18)과 소개 웨비나(2025-12-03). 4.0 spec 본문은 쓰지 않았으므로, 4.0 내용은 이 발표 자료에 나온 범위만 다룹니다.
+- **Linux 커널 소스** — mainline v7.3-rc6(2026-10-08)의 `drivers/cxl/`·`include/cxl/` 등 (GPL)
+- **QEMU 소스·문서** — QEMU master(2026-10) (GPL)
+- **ndctl·pciutils** — `cxl`·`daxctl` 문서와 테스트, `lspci` 소스
+- **논문** — Sun et al. (MICRO 2023, CXL 디바이스 실측), Pond·TPP (ASPLOS 2023)
 
 > CXL® and Compute Express Link® are trademarks of the Compute Express Link Consortium, Inc.
-> Spec 인용은 © 2019-2025 COMPUTE EXPRESS LINK CONSORTIUM, INC. ALL RIGHTS RESERVED.의 저작권을 따릅니다.
+> spec 인용은 Compute Express Link Consortium, Inc.의 저작권을 따릅니다.
