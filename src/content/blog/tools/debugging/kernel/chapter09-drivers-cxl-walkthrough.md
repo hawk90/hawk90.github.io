@@ -72,18 +72,18 @@ module_init(cxl_mem_driver_init);
 
 ## 핵심 자료 구조
 
-`drivers/cxl/cxl.h`에 정의된 주요 struct:
+주요 struct와 정의 위치(mainline v7.3-rc6):
 
-| Struct | 멤버 (요약) | 의미 |
-|--------|------------|------|
-| cxl_port | `struct device dev`, `nr_dport`, `struct list_head endpoints` | 토폴로지 노드 |
-| cxl_decoder | `range hpa_range`, `interleave_ways`, `interleave_granularity` | HDM Decoder |
-| cxl_region | `struct cxl_decoder*`, `struct cxl_endpoint_decoder *targets[]` | interleave 영역 |
-| cxl_memdev | `struct cxl_dev_state *cxlds`, `struct cdev cdev` | memory device |
-| cxl_mailbox | `struct mutex mutex`, `mbox_send_cmd_fn`, `struct completion done` | mailbox |
-| cxl_dev_state | `struct cxl_mailbox mbox`, `struct cxl_regs regs`, `dev_features` | dev base state |
-| cxl_root_decoder | `struct cxl_decoder cxld`, `qos_class`, `restrictions` | root decoder (CFMWS) |
-| cxl_endpoint_decoder | `struct cxl_decoder cxld`, `struct cxl_region *region` | endpoint decoder |
+| Struct | 위치 | 주요 멤버 |
+|--------|------|------------|
+| `cxl_port` | `drivers/cxl/cxl.h` | `dev`, `dports`·`endpoints`·`regions` (xarray), `nr_dports`, `commit_end` |
+| `cxl_decoder` | `drivers/cxl/cxl.h` | `hpa_range`, `interleave_ways`, `interleave_granularity`, `region`, `commit()`·`reset()` |
+| `cxl_root_decoder` | `drivers/cxl/cxl.h` | `res`, `qos_class`, `regions_lock`, `cxlsd` |
+| `cxl_endpoint_decoder` | `drivers/cxl/cxl.h` | `cxld`, `dpa_res`, `part`, `pos` |
+| `cxl_region` | `drivers/cxl/cxl.h` | `cxlrd`, `mode`, `params`(`targets[]`·`nr_targets`·`state`) |
+| `cxl_memdev` | `drivers/cxl/cxlmem.h` | `dev`, `cdev`, `cxlds`, `endpoint` |
+| `cxl_dev_state` | `include/cxl/cxl.h` | `regs`, `part[]`, `serial`, `cxl_mbox` |
+| `cxl_mailbox` | `include/cxl/mailbox.h` | `payload_size`, `mbox_mutex`, `mbox_wait`, `mbox_send()` |
 
 ## probe 흐름 추적
 
@@ -153,23 +153,18 @@ out:
 
 ## Region 생성 sysfs path
 
-사용자가 `cxl create-region` 했을 때의 *코드 경로*:
+사용자가 `cxl create-region` 했을 때 cxl-cli가 sysfs에 쓰는 순서와 커널 쪽 경로(`drivers/cxl/core/region.c`):
 
-| 단계 | 위치 |
-|------|-----|
-| 1 | `/sys/bus/cxl/devices/decoder0.0/create_ram_region` write |
-| 2 | `region_create_store()` in `core/region.c` |
-| 3 | `devm_cxl_add_region()` |
-| 4 | `cxl_region_alloc()` — `struct cxl_region` 할당 |
-| 5 | `add_region()` — sysfs entry 생성 |
-| 6 | 사용자가 `mappings`·`size`·`interleave_ways` 등 설정 |
-| 7 | 사용자가 `commit` write |
-| 8 | `commit_store()` |
-| 9 | `cxl_region_attach()` — endpoint decoder들과 link |
-| 10 | `cxl_decoder_commit()` (위 코드) |
-| 11 | `cxl_region_decode_commit()` — region 활성화 |
-| 12 | `add_memory_driver_managed()` — kernel memory subsystem에 추가 |
-| 13 | NUMA 노드 등록 |
+| 단계 | 사용자 동작 | 커널 쪽 |
+|------|-----|-----|
+| 1 | root decoder의 `create_ram_region`을 읽어 새 region 이름을 얻고, 그 이름을 다시 씀 | `create_ram_region_store()` → `__create_region()` → `devm_cxl_add_region()` → `cxl_region_alloc()` |
+| 2 | region의 `interleave_ways`·`interleave_granularity`·`size` 설정 | 각 attribute의 store 함수 |
+| 3 | `target0`, `target1`, …에 endpoint decoder 이름 쓰기 | `__attach_target()` → `cxl_region_attach()` |
+| 4 | `commit`에 1 쓰기 | `commit_store()` → `__commit()` → `cxl_region_decode_commit()` |
+| 5 | (커널) endpoint부터 root 쪽으로 각 port의 decoder commit | `commit_decoder()` → `cxld->commit()` = `cxl_decoder_commit()` |
+| 6 | region을 cxl_region 드라이버에 bind | `cxl_region_probe()` → RAM이면 `devm_cxl_add_dax_region()` |
+
+endpoint decoder의 DPA 할당(`dpa_size`·`mode`)은 3단계 전에 해 둬야 하고, cxl-cli가 이를 대신해 줍니다. region을 System RAM으로 올리는 것은 commit이 아니라 6단계 뒤 dax·kmem 드라이버입니다.
 
 ## Mailbox API 구현
 
