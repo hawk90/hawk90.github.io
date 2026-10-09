@@ -143,11 +143,11 @@ TFTP_OPTIONS="--secure --create"
 
 TFTP 원본 사양(RFC 1350)은 *블록 크기 512바이트* 고정입니다. 10MB 커널을 받으려면 약 2만 번의 라운드 트립이 발생합니다. 100Mbps 네트워크에서도 RTT가 누적되어 전송 속도가 1~2 MB/s에 머무는 이유입니다.
 
-RFC 2348의 `blksize` 옵션이 이 문제를 풉니다. 클라이언트가 RRQ 패킷에 원하는 블록 크기를 적으면 서버가 응답에서 합의된 값을 돌려줍니다. U-Boot는 `TFTP_BLOCKSIZE` 환경 변수로 그 값을 정합니다.
+RFC 2348의 `blksize` 옵션이 이 문제를 풉니다. 클라이언트가 RRQ 패킷에 원하는 블록 크기를 적으면 서버가 응답에서 합의된 값을 돌려줍니다. U-Boot는 `tftpblocksize` 환경 변수로 그 값을 정합니다.
 
 ```text
-=> setenv tftp_blocksize 1468
-=> setenv tftp_windowsize 16
+=> setenv tftpblocksize 1468
+=> setenv tftpwindowsize 16
 => saveenv
 => tftp 0x80000000 Image
 ```
@@ -156,11 +156,11 @@ RFC 2348의 `blksize` 옵션이 이 문제를 풉니다. 클라이언트가 RRQ 
 
 | 변수 | 효과 | 권장 값 |
 |------|------|---------|
-| `tftp_blocksize` | RFC 2348 blksize 옵션 | 1468 (1500 MTU - 28 헤더) |
-| `tftp_windowsize` | RFC 7440 윈도우 크기 — ACK 한 번에 N개 블록 | 8 ~ 16 |
-| `tftp_timeout` | 재전송 타임아웃 (ms) | 5000 |
+| `tftpblocksize` | RFC 2348 blksize 옵션 | 1468 (1500 MTU - 28 헤더) |
+| `tftpwindowsize` | RFC 7440 윈도우 크기 — ACK 한 번에 N개 블록 | 8 ~ 16 |
+| `tftptimeout` | 재전송 타임아웃 (ms) | 5000 |
 
-windowsize 16에 blocksize 1468이면 라운드 트립당 23KB를 전송합니다. 같은 네트워크에서 10배 이상 빨라집니다. jumbo frame을 지원하는 NIC라면 `tftp_blocksize`를 8972까지 올릴 수 있지만, 중간 스위치가 jumbo frame을 못 받으면 *MTU black hole*로 멈춥니다. 의심스럽다면 1468로 두는 게 안전합니다.
+windowsize 16에 blocksize 1468이면 라운드 트립당 23KB를 전송합니다. 같은 네트워크에서 10배 이상 빨라집니다. jumbo frame을 지원하는 NIC라면 `tftpblocksize`를 8972까지 올릴 수 있지만, 중간 스위치가 jumbo frame을 못 받으면 *MTU black hole*로 멈춥니다. 의심스럽다면 1468로 두는 게 안전합니다.
 
 ## PXE — 표준 네트워크 부트
 

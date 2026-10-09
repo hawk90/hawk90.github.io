@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**DDR training은 보드의 전기 회로를 SoC가 직접 측정해 보정하는 단계입니다.** Ch 9에서는 큰 흐름을 봤지만, 양산 보드에서 실패하는 7~80%의 사고가 *training 자체*에서 발생합니다. 이 글은 controller와 PHY가 어떻게 분리되어 있는지, 어떤 알고리즘이 돌아가는지, 그리고 실패했을 때 어디를 어떻게 찔러야 하는지를 깊이 있게 다룹니다.
+**DDR training은 보드의 전기적 동작 조건을 측정해 지연·전압 관련 파라미터를 보정하는 단계입니다.** Ch 9에서는 큰 흐름을 봤지만, 양산 보드에서 training 실패가 발생하면 초기화가 중단되므로 원인을 분리해 추적해야 합니다. 이 글은 controller와 PHY가 어떻게 분리되어 있는지, 어떤 알고리즘이 돌아가는지, 그리고 실패했을 때 어디를 어떻게 찔러야 하는지를 깊이 있게 다룹니다.
 
 [9장](/blog/embedded/bootloader/chapter09-dram-init)이 "DDR 초기화의 전체 그림"이라면 이 글은 "그림 안의 까만 상자를 한 번 더 까는" 글입니다. PCB layout 결함, ZQ 저항 미스매치, Vref 오류, IBIS 모델 불일치 같은 *현장에서 가장 자주 만나는* 실패를 다룹니다.
 
@@ -34,11 +34,11 @@ DDR 서브시스템은 두 개의 IP로 구성됩니다. 이름은 벤더마다 
    AXI4              DFI 2.x          pad 신호    JEDEC
 ```
 
-이 분리가 중요한 이유는 *training이 PHY 안에서만 일어나기 때문*입니다. controller는 training 중에 아무 일도 하지 않습니다. SPL은 controller 레지스터를 먼저 프로그래밍한 뒤, PHY에 "training 시작" 명령을 던지고, PHY가 끝났다고 알릴 때까지 *폴링*만 합니다.
+이 분리가 중요한 이유는 많은 SoC에서 training 알고리즘과 측정 엔진이 PHY 쪽에 구현되기 때문입니다. 다만 초기화 순서와 상태 확인은 controller·PHY·펌웨어가 함께 관여하며, SPL은 controller 레지스터를 먼저 프로그래밍한 뒤 PHY에 "training 시작" 명령을 던지고 완료 상태를 확인하는 식으로 동작합니다. 정확한 순서는 SoC와 PHY 구현에 따라 다릅니다.
 
 ## training 5단계
 
-training은 다음 5개 알고리즘이 순서대로 실행됩니다. 어느 한 단계라도 실패하면 그 자리에서 멈춥니다.
+대표적인 DDR4/LPDDR4 초기화에서는 다음과 같은 단계들이 사용됩니다. 단계의 이름·순서·필수 여부는 메모리 규격과 PHY 구현에 따라 달라지며, 어느 한 단계의 실패를 즉시 중단으로 처리할지도 펌웨어에 따라 다릅니다.
 
 | 단계 | 무엇을 정렬하는가 | 실패 시 증상 |
 |------|---------------------|--------------|
@@ -48,7 +48,7 @@ training은 다음 5개 알고리즘이 순서대로 실행됩니다. 어느 한
 | **Read leveling (RdLvl)** | DQS와 DQ 사이의 sampling window 가운데로 이동 | sporadic bit error |
 | **ZQ calibration** | 외부 240Ω 기준으로 ODT·Ron 임피던스 보정 | reflection, signal integrity 저하 |
 
-대부분의 PHY는 위 5단계를 *1D training*과 *2D training* 두 번에 걸쳐 수행합니다. 1D는 시간 축(지연), 2D는 시간 + 전압 축(eye sweep)입니다. DDR4 이상은 2D를 거치지 않으면 corner case에서 비트 에러가 납니다.
+일부 PHY는 위 절차를 *1D training*과 *2D training*으로 나눠 수행합니다. 1D는 주로 시간 축(지연)을, 2D는 시간과 전압 축을 함께 탐색합니다. 2D 사용 여부와 범위는 PHY·메모리 조합과 목표 속도에 따라 결정되므로, 특정 세대의 모든 시스템에 필수라고 일반화하면 안 됩니다.
 
 ```c
 /* drivers/ddr/imx/imx8m/ddr_init.c 의 핵심 흐름 */
@@ -350,7 +350,7 @@ void spl_dram_init(void)
 ## 정리
 
 - DDR 서브시스템은 *protocol을 다루는 controller*와 *전기를 다루는 PHY*로 분리되어 있고, DFI 규격으로 통신합니다.
-- training은 *CA → WrLvl → DGSL → RdLvl → ZQ*의 5단계로 구성되며, 모두 PHY 내부에서 일어납니다.
+- training은 CA·write leveling·read gate/leveling·ZQ calibration 등을 조합하며, 정확한 단계와 순서는 PHY 구현에 따라 달라집니다.
 - DDR4와 LPDDR4는 같은 "DDR"이지만 clock·CA timing·FSP·channel 구조가 달라 SPL 코드가 분기됩니다.
 - timing parameter(tCL, tRCD, tRP, tRC, tRFC, tWR 등)는 datasheet에서 옵니다. 손으로 안 쓰고 벤더 tool로 생성합니다.
 - 보드별 DRAM blob은 *controller config(C 표)*와 *PHY firmware(binary)* 두 가지로 구성됩니다.
