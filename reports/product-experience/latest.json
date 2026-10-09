@@ -4,11 +4,11 @@
     "provider": null
   },
   "pages": {
-    "total": 28,
-    "documents": 24,
+    "total": 26,
+    "documents": 22,
     "redirects": 4,
-    "layoutCoverage": 24,
-    "titleCoverage": 24
+    "layoutCoverage": 22,
+    "titleCoverage": 22
   },
   "checks": [
     {

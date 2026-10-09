@@ -49,11 +49,9 @@
     "src/consts/config.ts",
     "src/consts/homepage-guides.ts",
     "src/consts/learning-paths.ts",
-    "src/consts/now.ts",
     "src/consts/resume.ts",
     "src/consts/series.ts",
     "src/consts/ui-strings.ts",
-    "src/consts/uses.ts",
     "src/content.config.ts",
     "src/i18n/define.ts",
     "src/i18n/index.ts",
@@ -103,7 +101,6 @@
     "src/pages/components.astro",
     "src/pages/contact.astro",
     "src/pages/index.astro",
-    "src/pages/now.astro",
     "src/pages/paths/[path].astro",
     "src/pages/paths/index.astro",
     "src/pages/privacy.astro",
@@ -116,8 +113,7 @@
     "src/pages/settings.astro",
     "src/pages/stats.astro",
     "src/pages/tags/[tag]/[...page].astro",
-    "src/pages/topics/[topic].astro",
-    "src/pages/uses.astro"
+    "src/pages/topics/[topic].astro"
   ],
   "findings": [
     {
