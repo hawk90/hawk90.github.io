@@ -22,7 +22,12 @@ export function onPageLoad(init: () => InitResult): void {
   if (typeof document === 'undefined') return;
   let cleanup: Cleanup | void = undefined;
   let runId = 0;
+  // The <body> the last init ran against. ClientRouter replaces the whole
+  // <body> element on every navigation (swapBodyElement → replaceWith), so a
+  // new element means a new page.
+  let initializedBody: HTMLElement | null = null;
   const run = async () => {
+    initializedBody = document.body;
     const currentRun = ++runId;
     if (typeof cleanup === 'function') cleanup();
     cleanup = undefined;
@@ -35,21 +40,14 @@ export function onPageLoad(init: () => InitResult): void {
   };
   run();
 
-  // `run()` above already covered the page this script was loaded on, but
-  // Astro's ClientRouter fires astro:page-load for that same page too (on the
-  // first page's window `load`, or right after the swap when the script first
-  // arrives with a navigation). Running again tore down the first init and
-  // started over — double work, and giscus lost its message listener that way.
-  // So skip the next page-load unless a new navigation has begun since.
-  let skipNextPageLoad = true;
-  document.addEventListener('astro:before-swap', () => {
-    skipNextPageLoad = false;
-  });
+  // ClientRouter also fires astro:page-load for pages `run()` has already
+  // covered: the first page on window `load`, and the page a script arrives
+  // with, right after its swap — and a slow first `load` can land after a
+  // navigation. Running again tore down the init and started over (double
+  // work; giscus lost its message listener that way). Matching on the <body>
+  // element skips exactly those repeats, whatever order the events come in.
   document.addEventListener('astro:page-load', () => {
-    if (skipNextPageLoad) {
-      skipNextPageLoad = false;
-      return;
-    }
+    if (document.body === initializedBody) return;
     run();
   });
 }
