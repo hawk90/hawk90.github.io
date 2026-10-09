@@ -127,7 +127,7 @@ fi
 # 4. Hallucination 후보 — strict 모드에서만 block
 if require_checker "audit-suspect-claims.sh"; then
   run_check \
-    "4/5 Hallucination 후보 (CLAUDE.md §10)" \
+    "4/10 Hallucination 후보 (CLAUDE.md §10)" \
     "warn" \
     "$ROOT/scripts/audit-suspect-claims.sh" ${ARGS[@]+"${ARGS[@]}"}
 fi
@@ -135,10 +135,11 @@ fi
 # 5. Known-fact whitelist 검증 — strict 모드에서만 block
 if require_checker "verify-known-facts.sh"; then
   run_check \
-    "5/6 Known-fact whitelist (data/known-facts.yaml)" \
+    "5/10 Known-fact whitelist (data/known-facts.yaml)" \
     "warn" \
     "$ROOT/scripts/verify-known-facts.sh" ${ARGS[@]+"${ARGS[@]}"}
 fi
+
 
 # 6. Universal fact-density (informational, 항상 warn — review 우선순위 식별)
 if require_checker "audit-fact-density.sh"; then
@@ -158,7 +159,11 @@ if require_checker "audit-upstream-freshness.py" && [ -f "$ROOT/data/upstream-tr
     grep -E "^## |Since baseline:|Chapters:" "$TMP_DIR/audit-freshness.txt" || true
     echo "ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)"
   else
-    echo "− SKIPPED (upstream tracking 미설정 또는 clone 없음)"
+    # clone이 없는 시리즈는 스크립트 안에서 SKIPPED로 끝나고 exit 0이다.
+    # 여기 오는 건 도구 자체 오류(YAML 파싱 실패 등) — SKIPPED로 삼키지 않는다.
+    cat "$TMP_DIR/audit-freshness.txt"
+    echo "✗ 도구 오류 — audit-upstream-freshness.py가 실패"
+    FAILED=$((FAILED + 1))
   fi
 fi
 
@@ -167,9 +172,19 @@ fi
 if require_checker "audit-cited-symbols.py" && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
   echo ""
   echo "═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══"
-  if python3 "$ROOT/scripts/audit-cited-symbols.py" > "$TMP_DIR/audit-symbols.txt" 2>&1; then
+  SYMBOLS_RC=0
+  python3 "$ROOT/scripts/audit-cited-symbols.py" > "$TMP_DIR/audit-symbols.txt" 2>&1 || SYMBOLS_RC=$?
+  if [ "$SYMBOLS_RC" -eq 0 ]; then
     grep -E "^## |MISSING: 0|✓ 모든" "$TMP_DIR/audit-symbols.txt" || true
-    echo "✓ PASS — 모든 인용 심볼 존재"
+    echo "✓ PASS — 검사한 시리즈의 인용 심볼 모두 존재"
+    grep -E "^  SKIP " "$TMP_DIR/audit-symbols.txt" || true
+  elif [ "$SYMBOLS_RC" -eq 3 ]; then
+    grep -E "^  SKIP " "$TMP_DIR/audit-symbols.txt" || true
+    echo "− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)"
+  elif [ "$SYMBOLS_RC" -ne 2 ]; then
+    cat "$TMP_DIR/audit-symbols.txt"
+    echo "✗ 도구 오류 — audit-cited-symbols.py exit $SYMBOLS_RC"
+    FAILED=$((FAILED + 1))
   else
     # exit 2 = MISSING 후보 있음 (informational, 사람이 확인)
     grep -E "^## |MISSING:|    - \`" "$TMP_DIR/audit-symbols.txt" || true
