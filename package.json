@@ -158,6 +158,7 @@
     "astro": "^7.3.5",
     "astro-expressive-code": "^0.44.2",
     "cheerio": "^1.2.0",
+    "htmlparser2": "^10.1.0",
     "marked": "^18.0.14",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-katex": "^7.0.1",
