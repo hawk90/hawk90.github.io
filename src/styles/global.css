@@ -477,6 +477,16 @@ body {
   font-feature-settings: "liga" 0, "calt" 0;
 }
 
+/* Long unbreakable tokens (CONFIG_* symbols, paths, URLs) must wrap on narrow
+   screens: <html>/<body> clip horizontal overflow, so anything wider than the
+   viewport is cut off and unreadable on a phone (78 posts at 360px). break-word,
+   not anywhere: it only breaks when a line overflows and leaves min-content
+   alone, so table columns are not squeezed into one-character code. Inherited,
+   so it covers inline code, links and long paths in plain/emphasised text. */
+.prose {
+  overflow-wrap: break-word;
+}
+
 /* Universal monospace settings */
 code, pre, kbd, samp, tt {
   font-variant-ligatures: none;
