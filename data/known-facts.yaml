@@ -52,6 +52,7 @@ accelerator_interconnect:
 
 # ─── DMTF / SPDM ───────────────────────────────────────────────
 dmtf_standards:
+  - DSP0234      # CXL Fabric Manager API over MCTP Binding (CXL 3.1 Table 1-2)
   - DSP0236      # MCTP Base Specification
   - DSP0274      # SPDM (Security Protocol Data Model)
   - DSP0276      # SPDM Secured Messages
