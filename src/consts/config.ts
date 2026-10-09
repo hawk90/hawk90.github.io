@@ -11,6 +11,7 @@ import {
   defineSocial,
   defineComments,
   defineAnalytics,
+  defineAds,
   defineNewsletter,
   defineBlog,
   defineUi,
@@ -96,6 +97,14 @@ export const COMMENTS_CONFIG = defineComments({
 // --- Analytics ---
 export const ANALYTICS_CONFIG = defineAnalytics({
   enabled: false,
+});
+
+// --- Ads ---
+// Google AdSense Auto ads. Must match public/ads.txt (pub-6238136533844790).
+// Turning this off also restores the strict, hash-pinned script CSP.
+export const ADS_CONFIG = defineAds({
+  enabled: true,
+  client: 'ca-pub-6238136533844790',
 });
 
 // --- Newsletter ---
