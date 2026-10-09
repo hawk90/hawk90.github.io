@@ -46,9 +46,9 @@ T: 0 ( 1234) P:99 I:1000 C:  60000 Min:      4 Act:    8 Avg:    7 Max:    3421
 
 ## PREEMPT_RT — mainline에 통합
 
-PREEMPT_RT는 *모든 kernel critical section을 preemptible로* 만드는 패치셋입니다. 20년에 걸친 외부 패치 끝에 *2024년 Linux 6.12*에서 *mainline에 완전 병합*되었습니다.
+PREEMPT_RT는 가능한 많은 커널 실행 구간을 선점 가능하게 만들고, spinlock·타이머·IRQ 처리 경로를 실시간 우선순위와 함께 동작시키는 패치셋입니다. 20년에 걸친 외부 패치 끝에 *2024년 Linux 6.12*부터 mainline에 통합되었습니다. 모든 커널 구간이 무조건 선점 가능한 것은 아닙니다.
 
-2026년 현재의 상황:
+Linux 6.12 LTS 기준:
 
 - **Linux 6.12 LTS** — PREEMPT_RT가 *config option* (`CONFIG_PREEMPT_RT=y`).
 - **Xenomai 3** — co-kernel 방식, *legacy*. Linux 5.x까지 active maintenance.

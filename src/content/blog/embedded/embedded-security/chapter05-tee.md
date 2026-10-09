@@ -331,7 +331,7 @@ Text successfully encrypted/decrypted
 
 ## ARM CCA — Confidential Compute Architecture
 
-ARMv9-A의 새로운 보안 아키텍처가 CCA(Confidential Compute Architecture)입니다. TrustZone과 *완전히 다른* 추가 차원의 격리를 도입합니다.
+CCA(Confidential Compute Architecture)는 Armv9-A의 *Realm Management Extension(RME)*과 CCA 펌웨어·소프트웨어 스택을 결합한 구조입니다. 기존 TrustZone의 Secure world에 더해 Realm·Root world와 별도 물리 주소 공간을 추가합니다.
 
 ```text
                     Non-secure           Secure        Realm        Root
@@ -355,7 +355,7 @@ CCA의 핵심 컴포넌트:
 - **GPC (Granule Protection Check)** — 4KB granule 단위로 어느 world가 소유하는지를 하드웨어가 강제.
 - **Attestation** — RMM이 발행하는 cryptographic evidence가 realm의 무결성을 원격으로 증명.
 
-CCA는 2026년 현재 ARMv9.2-A 일부 SoC에 처음 양산되기 시작했고, 향후 5~10년에 걸쳐 모바일·서버 양 쪽에 확산할 것으로 예상됩니다.
+Arm의 공개 자료는 CCA를 Armv9-A RME 기반의 아키텍처와 참조 소프트웨어 스택으로 설명합니다. 실제 제품 적용 시점과 양산 여부는 각 SoC·플랫폼 구현에 따라 다르므로, 특정 아키텍처 버전이나 확산 시점을 일반화하지 않습니다.
 
 ## Intel SGX / AMD SEV / NVIDIA CC 비교
 
@@ -366,7 +366,7 @@ ARM CCA와 같은 *confidential compute* 카테고리의 다른 접근들입니�
 | **Intel SGX** | Enclave (process 일부) | Hardware encrypted memory | Skylake 도입, Ice Lake에서 large-enclave |
 | **Intel TDX** | VM 단위 | Hardware encrypted memory | Sapphire Rapids 도입 |
 | **AMD SEV / SEV-ES / SEV-SNP** | VM 단위 | Hardware encrypted memory | EPYC, register-level encryption까지 |
-| **ARM CCA** | Realm (VM 단위) | GPC + 메모리 암호화 | ARMv9.2-A |
+| **ARM CCA** | Realm (VM 단위) | GPC + 메모리 암호화 | Armv9-A RME |
 | **NVIDIA H100 CC** | GPU compute | encrypted PCIe transfer | LLM 추론 같은 GPU workload |
 
 Intel SGX의 한 시기 큰 인기에 비해, 산업의 흐름은 *VM 단위 confidential compute*로 옮겨가는 추세입니다. 그 이유는 *기존 application을 거의 그대로* 돌릴 수 있기 때문입니다. SGX는 application을 enclave에 맞게 *재작성*해야 했습니다.
