@@ -22,10 +22,18 @@
  * Pages are read with htmlparser2's streaming parser (no DOM): tag case,
  * `</script >`, attribute order and attribute entities are handled as a
  * browser would; script bodies are raw text and CRLF is folded to LF as the
- * browser's input stream does before hashing. Only the CSP <meta> is rewritten,
- * in place, by its source offsets; the rest of each file stays byte-for-byte as
- * Astro wrote it. scripts/audit-csp-inline-scripts.mjs re-checks the result
- * with a different parser (parse5).
+ * browser's input stream does before hashing. htmlparser2 is not a full HTML5
+ * tokenizer, though: it ends a script at the first `</script>` even inside
+ * `<!-- <script>` escaping, and treats <script> inside <svg>/<math> as raw text
+ * (CDATA markers included). Checked in Chromium: in both cases the browser's
+ * hash matches parse5's, not htmlparser2's. A page that shows either pattern
+ * is therefore re-hashed with parse5 (none do today, so the build stays on the
+ * fast path).
+ *
+ * Only the CSP <meta> is rewritten, in place, by its source offsets, keeping
+ * its other attributes; the rest of each file stays byte-for-byte as Astro
+ * wrote it. scripts/audit-csp-inline-scripts.mjs re-checks the result with
+ * parse5.
  */
 import { createHash } from 'node:crypto';
 import { readdir, readFile, writeFile } from 'node:fs/promises';
@@ -82,7 +90,7 @@ function isExecutableType(type) {
 /**
  * @typedef {object} PageScan
  * @property {Set<string>} hashes  CSP sources for the page's executable inline scripts
- * @property {{ content: string, start: number, end: number } | null} csp  first CSP <meta>
+ * @property {{ attribs: Record<string, string>, start: number, end: number } | null} csp  first CSP <meta>
  * @property {boolean} router  page uses Astro's ClientRouter
  */
 
@@ -90,9 +98,9 @@ function isExecutableType(type) {
  * Read one page: its inline-script hashes, its CSP <meta> and whether it uses
  * the ClientRouter.
  * @param {string} html
- * @returns {PageScan}
+ * @returns {Promise<PageScan>}
  */
-export function scanPage(html) {
+export async function scanPage(html) {
   /** @type {PageScan} */
   const scan = { hashes: new Set(), csp: null, router: false };
   // Cheap pre-check: skip the parse for a page that has neither a script nor
@@ -102,18 +110,22 @@ export function scanPage(html) {
 
   /** @type {string | null} null while outside an executable inline script */
   let body = null;
+  let foreignDepth = 0; // inside <svg>/<math>
+  let needsExactParse = false;
   const parser = new Parser(
     {
       onopentag(name, attribs) {
+        if (name === 'svg' || name === 'math') foreignDepth++;
         if (name === 'script') {
           body = attribs.src === undefined && isExecutableType(attribs.type ?? '') ? '' : null;
+          if (body !== null && foreignDepth > 0) needsExactParse = true;
         } else if (name === 'meta') {
           if (attribs.name === 'astro-view-transitions-enabled') scan.router = true;
           if (
             scan.csp === null &&
             (attribs['http-equiv'] ?? '').toLowerCase() === 'content-security-policy'
           ) {
-            scan.csp = { content: attribs.content ?? '', start: parser.startIndex, end: parser.endIndex + 1 };
+            scan.csp = { attribs: { ...attribs }, start: parser.startIndex, end: parser.endIndex + 1 };
           }
         }
       },
@@ -121,7 +133,11 @@ export function scanPage(html) {
         if (body !== null) body += text;
       },
       onclosetag(name) {
+        if ((name === 'svg' || name === 'math') && foreignDepth > 0) foreignDepth--;
         if (name === 'script' && body !== null) {
+          // "<!--" inside a script may start HTML5 script-data escaping, which
+          // htmlparser2 does not model.
+          if (body.includes('<!--')) needsExactParse = true;
           scan.hashes.add(sha256Source(body.replace(/\r\n?/g, '\n')));
           body = null;
         }
@@ -130,26 +146,47 @@ export function scanPage(html) {
     { decodeEntities: true },
   );
   parser.end(html);
+  if (needsExactParse) scan.hashes = await exactScriptHashes(html);
   return scan;
 }
 
 /**
- * Put `hashes` into the CSP <meta> described by `csp`. Hashes already in
- * script-src are not repeated, so running twice does not grow the list.
- * Returns null when the policy has no script-src.
+ * Inline-script hashes from a full HTML5 parse (parse5 via cheerio), for the
+ * pages htmlparser2 cannot read the way a browser does. Loaded on demand.
  * @param {string} html
- * @param {{ content: string, start: number, end: number }} csp
+ * @returns {Promise<Set<string>>}
+ */
+async function exactScriptHashes(html) {
+  const { load } = await import('cheerio');
+  const $ = load(html);
+  return new Set(
+    $('script')
+      .toArray()
+      .filter((el) => el.attribs.src === undefined && isExecutableType(el.attribs.type ?? ''))
+      .map((el) => sha256Source(el.children.map((child) => ('data' in child ? child.data : '')).join(''))),
+  );
+}
+
+/**
+ * Put `hashes` into the CSP <meta> described by `csp`. Hashes already in
+ * script-src are not repeated, so running twice does not grow the list. The
+ * meta's other attributes are kept. Returns null when the policy has no
+ * script-src.
+ * @param {string} html
+ * @param {{ attribs: Record<string, string>, start: number, end: number }} csp
  * @param {Iterable<string>} hashes
  */
 export function withScriptHashes(html, csp, hashes) {
-  const directives = csp.content.split(';').map((d) => d.trim()).filter(Boolean);
+  const directives = (csp.attribs.content ?? '').split(';').map((d) => d.trim()).filter(Boolean);
   const i = directives.findIndex((d) => /^script-src\s/i.test(d));
   if (i === -1) return null;
   const sources = directives[i].split(/\s+/);
   for (const hash of hashes) if (!sources.includes(hash)) sources.push(hash);
   directives[i] = sources.join(' ');
-  const tag = `<meta http-equiv="Content-Security-Policy" content="${escapeAttribute(directives.join('; '))}">`;
-  return html.slice(0, csp.start) + tag + html.slice(csp.end);
+  const attributes = Object.entries({ ...csp.attribs, content: directives.join('; ') })
+    .map(([name, value]) => `${name}="${escapeAttribute(value)}"`)
+    .join(' ');
+  return `${html.slice(0, csp.start)}<meta ${attributes}>${html.slice(csp.end)}`;
 }
 
 /**
@@ -193,7 +230,7 @@ export default function cspInlineScriptHashes() {
         /** @type {Map<string, PageScan>} */
         const scans = new Map();
         await forEachLimited(htmlFiles(root), async (file) => {
-          const scan = scanPage(await readFile(file, 'utf8'));
+          const scan = await scanPage(await readFile(file, 'utf8'));
           // Router pages get the shared set even with no inline script of
           // their own; other pages only need work if they have scripts.
           if (scan.hashes.size > 0 || (scan.router && scan.csp)) scans.set(file, scan);
