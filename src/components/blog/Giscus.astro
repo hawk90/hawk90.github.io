@@ -16,7 +16,7 @@
  * and query strings/anchors are not sent. If giscus changes its widget
  * protocol, diff client.ts against that commit and port the change here.
  */
-import { COMMENTS_CONFIG } from '../../consts/config';
+import { COMMENTS_CONFIG, SITE_CONFIG } from '../../consts/config';
 import { t } from '../../consts/ui-strings';
 
 const giscusConfig = COMMENTS_CONFIG.enabled && COMMENTS_CONFIG.provider === 'giscus'
@@ -34,6 +34,7 @@ const config = giscusConfig && {
 const setupMessage = t('giscus_setup_required');
 const setupLink = t('giscus_setup_link');
 const frameTitle = t('giscus_frame_title');
+const siteOrigin = new URL(SITE_CONFIG.url).origin;
 ---
 
 {config && (
@@ -48,6 +49,7 @@ const frameTitle = t('giscus_frame_title');
     data-giscus-category-id={config.categoryId}
     data-giscus-lang={config.lang}
     data-giscus-title={frameTitle}
+    data-giscus-site={siteOrigin}
   >
     <div class="giscus"></div>
     <div class="giscus-error hidden p-4 text-center text-sm text-[var(--color-text-muted)] border border-[var(--color-border)] rounded-lg">
@@ -162,9 +164,16 @@ const frameTitle = t('giscus_frame_title');
    * a direct visit gets GitHub Pages' slash redirect — and the thread key would
    * differ between the two, splitting one post's comments into two threads.
    */
-  function canonicalPath(): string {
+  function canonicalPath(siteOrigin: string | undefined): string {
     const href = document.querySelector<HTMLLinkElement>('link[rel="canonical"]')?.href;
-    if (href) return new URL(href).pathname;
+    if (href) {
+      const canonical = new URL(href);
+      // Only trust a canonical on this site: one pointing elsewhere (e.g. a
+      // cross-post) must not decide this page's thread or login return URL.
+      if (canonical.origin === siteOrigin || canonical.origin === location.origin) {
+        return canonical.pathname;
+      }
+    }
     const { pathname } = location;
     return pathname.endsWith('/') ? pathname : `${pathname}/`;
   }
@@ -174,17 +183,17 @@ const frameTitle = t('giscus_frame_title');
     return path.length < 2 ? 'index' : path.substring(1).replace(/\.\w+$/, '');
   }
 
-  function widgetSrc(wrapper: HTMLElement, session: string): string {
+  function widgetSrc(wrapper: HTMLElement, session: string, theme: string): string {
     const d = wrapper.dataset;
     // Send giscus only scheme://host/path: it uses this for the origin check,
     // the post-login return URL and the default backlink. Query strings and
     // anchors are nobody's business there.
-    const path = canonicalPath();
+    const path = canonicalPath(d.giscusSite);
     const pageUrl = `${location.origin}${path}`;
     const params = new URLSearchParams({
       origin: pageUrl,
       session,
-      theme: currentTheme(),
+      theme,
       ...FIXED_PARAMS,
       repo: d.giscusRepo ?? '',
       repoId: d.giscusRepoId ?? '',
@@ -204,12 +213,16 @@ const frameTitle = t('giscus_frame_title');
     if (!container) return () => {};
 
     let session = takeSession();
+    // The theme the widget was last told about (via src or setConfig), and
+    // whether it has said anything yet — messages before that are lost.
+    let widgetTheme = currentTheme();
+    let widgetReady = false;
     const iframe = document.createElement('iframe');
     iframe.className = 'giscus-frame giscus-frame--loading';
     iframe.title = wrapper.dataset.giscusTitle || 'Comments';
     iframe.setAttribute('scrolling', 'no');
     iframe.allow = 'clipboard-write';
-    iframe.src = widgetSrc(wrapper, session);
+    iframe.src = widgetSrc(wrapper, session, widgetTheme);
     iframe.addEventListener('load', () => iframe.classList.remove('giscus-frame--loading'), {
       once: true,
     });
@@ -218,13 +231,28 @@ const frameTitle = t('giscus_frame_title');
     const reloadSignedOut = () => {
       forgetSession();
       session = '';
-      iframe.src = widgetSrc(wrapper, '');
+      widgetReady = false;
+      widgetTheme = currentTheme();
+      iframe.src = widgetSrc(wrapper, '', widgetTheme);
+    };
+
+    const syncTheme = () => {
+      if (!widgetReady) return; // src carries the theme; resynced once ready
+      const next = currentTheme();
+      if (next === widgetTheme) return;
+      widgetTheme = next;
+      iframe.contentWindow?.postMessage({ giscus: { setConfig: { theme: next } } }, GISCUS_ORIGIN);
     };
 
     const onMessage = (event: MessageEvent) => {
       if (event.origin !== GISCUS_ORIGIN || event.source !== iframe.contentWindow) return;
       const msg = (event.data as { giscus?: Record<string, unknown> } | null)?.giscus;
       if (!msg || typeof msg !== 'object') return;
+
+      // The widget is up and listening now; catch up on any theme toggle that
+      // happened while it was loading.
+      widgetReady = true;
+      syncTheme();
 
       const height = msg.resizeHeight;
       if (typeof height === 'number' && height > 0 && height <= MAX_FRAME_HEIGHT) {
@@ -249,14 +277,8 @@ const frameTitle = t('giscus_frame_title');
     window.addEventListener('message', onMessage);
 
     // Follow the site theme toggle. <html> class changes for other reasons
-    // too, so only message the widget when the theme actually changed.
-    let theme = currentTheme();
-    const themeObserver = new MutationObserver(() => {
-      const next = currentTheme();
-      if (next === theme) return;
-      theme = next;
-      iframe.contentWindow?.postMessage({ giscus: { setConfig: { theme } } }, GISCUS_ORIGIN);
-    });
+    // too; syncTheme only messages the widget when the theme actually changed.
+    const themeObserver = new MutationObserver(syncTheme);
     themeObserver.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
 
     return () => {
