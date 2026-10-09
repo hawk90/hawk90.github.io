@@ -38,8 +38,8 @@ Buildroot는 *같은 트리·같은 toolchain·같은 commit*으로 U-Boot까지
 | `BR2_TARGET_UBOOT_FORMAT_*` | 산출물 형식 (bin, img, kwb, imx 등) |
 | `BR2_TARGET_UBOOT_SPL=y` | SPL을 함께 빌드 |
 | `BR2_TARGET_UBOOT_SPL_NAME` | SPL 산출물 이름 (`MLO`, `u-boot-spl.bin`) |
-| `BR2_TARGET_UBOOT_BOOT_SCRIPT=y` | `boot.scr` 자동 생성 |
-| `BR2_TARGET_UBOOT_BOOT_SCRIPT_SOURCE` | `boot.cmd`의 경로 |
+| `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y` | `boot.scr` 자동 생성 |
+| `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT_SOURCE` | `boot.cmd`의 경로 |
 
 대표적인 설정은 다음과 같습니다.
 
@@ -157,11 +157,11 @@ rootfs.ext4    rootfs.tar
 
 U-Boot는 보드 부팅 시 *어떤 명령을 실행할지*를 SD 카드의 `boot.scr` 또는 `uEnv.txt`에서 읽습니다. 이걸 직접 작성하는 게 깔끔합니다.
 
-`boot.scr`은 *서명된 binary script*입니다. Buildroot가 자동으로 만들어 줍니다.
+`boot.scr`은 `mkimage`가 평문 `boot.cmd`를 U-Boot script image로 감싼 파일입니다. legacy header의 CRC는 무결성 확인용이지 cryptographic 서명이 아닙니다. 서명 검증이 필요하면 별도의 FIT image 서명 구성을 사용해야 합니다.
 
 ```text
-BR2_TARGET_UBOOT_BOOT_SCRIPT=y
-BR2_TARGET_UBOOT_BOOT_SCRIPT_SOURCE="board/myboard/boot.cmd"
+BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT_SOURCE="board/myboard/boot.cmd"
 ```
 
 `boot.cmd`는 사람이 읽는 평문 스크립트입니다.
@@ -299,7 +299,7 @@ U-Boot 통합에서 가장 자주 만나는 문제 다섯 가지입니다.
 
 **`BR2_TARGET_UBOOT_SPL` 미설정.** AM335x에 `BR2_TARGET_UBOOT_SPL=y`를 안 켜면 `u-boot.bin`만 만들어집니다. SD 카드에 굽고 부팅해도 *ROM이 SPL을 못 찾아* 콘솔에 아무 것도 안 나옵니다. 보드 부팅이 SoC ROM 단계에서 멈춰 보이면 *SPL 관련 옵션*을 먼저 의심합니다.
 
-**`mkimage` 부재로 boot.scr 생성 실패.** `BR2_TARGET_UBOOT_BOOT_SCRIPT=y`가 켜져 있으면 Buildroot가 자동으로 host의 `mkimage`를 빌드합니다. host build가 실패하면 `boot.scr`이 안 만들어지고 *조용히 skip*되는 경우가 있습니다. `output/host/bin/mkimage`가 존재하는지 확인하는 게 빠른 sanity check입니다.
+**`mkimage` 부재로 boot.scr 생성 실패.** `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y`가 켜져 있으면 Buildroot가 host용 U-Boot tools를 사용해 script image를 생성합니다. host build나 source 경로가 잘못되면 `boot.scr`이 만들어지지 않을 수 있으므로 `output/host/bin/mkimage`와 설정된 source 경로를 확인합니다.
 
 **env partition 권한.** Linux에서 `/dev/mmcblk0boot1`은 보통 *read-only*입니다. `fw_setenv`가 쓰기 실패하면 `/sys/block/mmcblk0boot1/force_ro`에 0을 써서 해제하거나 부팅 시 udev rule로 자동 처리합니다.
 
@@ -309,7 +309,7 @@ U-Boot 통합에서 가장 자주 만나는 문제 다섯 가지입니다.
 - Source는 latest / version / tarball / git 네 가지. vendor fork는 보통 git을 씁니다.
 - Defconfig는 *트리 내 defconfig + 외부 fragment* 조합이 유지보수에 유리합니다.
 - 산출물은 `u-boot.bin` / `u-boot.img` / SPL / FIT 등 보드별로 다양합니다. ROM이 요구하는 형식을 정확히 켜야 합니다.
-- `boot.scr`은 서명·CRC가 들어간 boot script. 양산용. `uEnv.txt`는 평문, 디버깅용입니다.
+- `boot.scr`은 U-Boot script image로 CRC 기반 무결성 검사를 포함할 수 있지만, cryptographic 서명은 별도 FIT signing 구성이 필요합니다. `uEnv.txt`는 평문입니다.
 - env 저장 위치는 `CONFIG_ENV_IS_IN_*` 하나로 결정됩니다. eMMC·NOR·NAND·UBI·FAT·휘발성 6가지가 있습니다.
 - 런타임 접근은 `fw_env.config` + `fw_printenv`/`fw_setenv`. *U-Boot 설정과 글자 단위로 일치*해야 합니다.
 - SPL은 DDR/clock 초기화와 main U-Boot 로드를 책임집니다. `BR2_TARGET_UBOOT_SPL=y`와 보드별 SPL 이름이 짝지어야 합니다.
