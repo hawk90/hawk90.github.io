@@ -78,5 +78,7 @@ export const ABOUT_DATA = {
     { icon: '🎾', label: 'Tennis' },
     { icon: '🛹', label: 'Skateboard' },
     { icon: '🎻', label: 'Violin' },
+    { icon: '🏍️', label: 'Motorcycle' },
+    { icon: '🔭', label: 'Astronomy' },
   ],
 };
