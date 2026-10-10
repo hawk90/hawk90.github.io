@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailLink from '../components/common/EmailLink.astro';
 
 const lastUpdated = '2026-05-28';
 ---
@@ -31,7 +32,7 @@ const lastUpdated = '2026-05-28';
           <h2 class="text-2xl font-bold mb-3">2. 운영자 정보</h2>
           <ul class="space-y-1 text-[var(--color-text-secondary)] leading-relaxed">
             <li>운영자: Hawk</li>
-            <li>연락처: <a href="mailto:hawking90a@gmail.com" class="underline hover:text-[var(--color-accent)]">hawking90a@gmail.com</a></li>
+            <li>연락처: <EmailLink class="underline hover:text-[var(--color-accent)]">운영자에게 이메일 보내기</EmailLink></li>
             <li>호스팅: GitHub Pages (GitHub, Inc.)</li>
           </ul>
         </section>
@@ -121,8 +122,7 @@ const lastUpdated = '2026-05-28';
         <section>
           <h2 class="text-2xl font-bold mb-3">9. 문의</h2>
           <p class="text-[var(--color-text-secondary)] leading-relaxed">
-            본 방침에 대한 문의는 <a href="mailto:hawking90a@gmail.com" class="underline hover:text-[var(--color-accent)]">hawking90a@gmail.com</a>
-            으로 보내주세요.
+            본 방침에 대한 문의는 <EmailLink class="underline hover:text-[var(--color-accent)]">운영자에게 이메일 보내기</EmailLink>로 보내주세요.
           </p>
         </section>
       </div>

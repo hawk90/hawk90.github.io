@@ -1,0 +1,26 @@
+---
+import { CONTACT_EMAIL } from '../../consts/contact';
+
+interface Props {
+  user?: string;
+  domain?: string;
+  class?: string;
+  ariaLabel?: string;
+}
+
+const {
+  user = CONTACT_EMAIL.emailUser,
+  domain = CONTACT_EMAIL.emailDomain,
+  class: className,
+  ariaLabel,
+} = Astro.props;
+---
+
+<a
+  href="#"
+  data-email-link
+  data-email-user={user}
+  data-email-domain={domain}
+  class={className}
+  aria-label={ariaLabel}
+><slot /></a>

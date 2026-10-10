@@ -1,5 +1,6 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import EmailLink from '../components/common/EmailLink.astro';
 ---
 
 <BaseLayout
@@ -20,9 +21,9 @@ import BaseLayout from '../layouts/BaseLayout.astro';
         <section class="card card-panel">
           <h2 class="sidebar-section-title mb-3">이메일</h2>
           <p class="text-[var(--color-text-primary)] leading-relaxed mb-2">
-            <a href="mailto:hawking90a@gmail.com" class="underline hover:text-[var(--color-accent)] font-medium">
-              hawking90a@gmail.com
-            </a>
+            <EmailLink class="underline hover:text-[var(--color-accent)] font-medium">
+              이메일 보내기
+            </EmailLink>
           </p>
           <p class="text-sm text-[var(--color-text-secondary)]">
             일반 문의, 협업 제안, 사이트 관련 모든 연락은 이메일이 가장 빠릅니다.

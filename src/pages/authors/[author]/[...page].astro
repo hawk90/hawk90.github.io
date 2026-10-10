@@ -5,6 +5,7 @@ import Breadcrumb from '../../../components/common/Breadcrumb.astro';
 import { AUTHORS } from '../../../consts/authors';
 import { getPublishedPosts, type BlogPost } from '../../../lib/posts';
 import type { PaginateFunction } from 'astro';
+import EmailLink from '../../../components/common/EmailLink.astro';
 
 
 export async function getStaticPaths({ paginate }: { paginate: PaginateFunction }) {
@@ -76,9 +77,9 @@ const isSoleAuthor = AUTHORS.length === 1;
               <a href={author.social.linkedin} target="_blank" rel="noopener noreferrer"
                  class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">LinkedIn</a>
             )}
-            {author.social?.email && (
-              <a href={`mailto:${author.social.email}`}
-                 class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">Email</a>
+            {author.social?.emailUser && author.social?.emailDomain && (
+              <EmailLink user={author.social.emailUser} domain={author.social.emailDomain}
+                class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">Email</EmailLink>
             )}
             {author.url && (
               <a href={author.url} class="text-[var(--color-text-secondary)] hover:text-[var(--color-accent)] transition-colors">Profile →</a>

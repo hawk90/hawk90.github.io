@@ -10,6 +10,7 @@
  */
 
 import { defineAuthors, type AuthorConfig } from '../lib/define';
+import { CONTACT_EMAIL } from './contact';
 
 export const AUTHORS = defineAuthors([
   {
@@ -20,7 +21,7 @@ export const AUTHORS = defineAuthors([
     url: '/about',
     social: {
       github: 'hawk90',
-      email: 'hawking90a@gmail.com',
+      ...CONTACT_EMAIL,
     },
   },
 ]);

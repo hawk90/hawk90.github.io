@@ -349,7 +349,7 @@ mainline에 올릴 생각이면 `board/myvendor/boardx/MAINTAINERS`에 자신을
 
 ```text
 BOARDX BOARD
-M:  Hawk Yoon <hawking90a@gmail.com>
+M:  Hawk Yoon (contact via the site's Contact page)
 S:  Maintained
 F:  arch/arm/dts/boardx.dts
 F:  arch/arm/dts/boardx-u-boot.dtsi

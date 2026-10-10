@@ -10,6 +10,7 @@
 import { ABOUT_DATA } from '../../consts/about';
 import { SOCIAL_CONFIG } from '../../consts/config';
 import { findAuthor } from '../../consts/authors';
+import EmailLink from '../common/EmailLink.astro';
 import type { CollectionEntry } from 'astro:content';
 
 interface Props {
@@ -70,9 +71,9 @@ const social = author?.social;
             <a href={social.linkedin} target="_blank" rel="noopener noreferrer"
                class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">LinkedIn</a>
           )}
-          {social.email && (
-            <a href={`mailto:${social.email}`}
-               class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">Email</a>
+          {social.emailUser && social.emailDomain && (
+            <EmailLink user={social.emailUser} domain={social.emailDomain}
+              class="text-[var(--color-text-muted)] hover:text-[var(--color-text-primary)] transition-colors">Email</EmailLink>
           )}
         </div>
       ) : (

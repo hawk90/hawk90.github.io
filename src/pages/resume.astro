@@ -186,18 +186,6 @@ const { nameKo, nameEn, title, github, emailUser, emailDomain, coreCompetency, s
 
 <script>
   function initResumePage() {
-    // Email link (anti-harvesting)
-    document.querySelectorAll('[data-email-link]').forEach((el) => {
-      el.addEventListener('click', (e) => {
-        e.preventDefault();
-        const user = (el as HTMLElement).dataset.emailUser;
-        const domain = (el as HTMLElement).dataset.emailDomain;
-        if (user && domain) {
-          window.location.href = `mailto:${user}@${domain}`;
-        }
-      });
-    });
-
     // Print button (no inline onclick)
     document.querySelectorAll('[data-print-btn]').forEach((el) => {
       el.addEventListener('click', () => window.print());

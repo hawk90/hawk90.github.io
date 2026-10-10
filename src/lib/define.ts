@@ -50,11 +50,24 @@ export interface NavItem {
 export const defineNav = <T extends ReadonlyArray<NavItem>>(c: T) => c;
 
 // ─── Social ─────────────────────────────────────────────────
+export interface ObfuscatedEmail {
+  emailUser: string;
+  emailDomain: string;
+}
+
+export const defineEmail = (emailUser: string, emailDomain: string): ObfuscatedEmail => ({
+  emailUser,
+  emailDomain,
+});
+
 export interface SocialLink {
   name: string;
   href: string;
   /** Raw SVG markup, rendered via set:html */
   icon: string;
+  /** Optional split address for links that should not expose an email in HTML. */
+  emailUser?: string;
+  emailDomain?: string;
 }
 export const defineSocial = <T extends ReadonlyArray<SocialLink>>(c: T) => c;
 
@@ -182,7 +195,13 @@ export interface AuthorConfig {
   bio?: string;
   avatar?: string;
   url?: string;
-  social?: { twitter?: string; github?: string; linkedin?: string; email?: string };
+  social?: {
+    twitter?: string;
+    github?: string;
+    linkedin?: string;
+    emailUser?: string;
+    emailDomain?: string;
+  };
 }
 export const defineAuthor = <T extends AuthorConfig>(c: T) => c;
 export const defineAuthors = (c: ReadonlyArray<AuthorConfig>): ReadonlyArray<AuthorConfig> => c;

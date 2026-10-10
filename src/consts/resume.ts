@@ -1,4 +1,6 @@
 // ============================================================
+
+import { CONTACT_EMAIL } from './contact';
 // Resume Page Data
 // Edit this file to customize your Resume page.
 // ============================================================
@@ -9,9 +11,8 @@ export const RESUME_DATA = {
   nameEn: 'Sang-Deok Yoon',
   title: 'System & Firmware Engineer',
   github: 'https://github.com/hawk90',
-  // Email is split to deter spam bot harvesting. Joined at render time.
-  emailUser: 'hawking90a',
-  emailDomain: 'gmail.com',
+  // Email is split to deter spam bot harvesting. Joined at click time.
+  ...CONTACT_EMAIL,
 
   // Core Competency
   coreCompetency: [

@@ -1,5 +1,6 @@
 ---
 import { BRAND_CONFIG, SOCIAL_CONFIG, FOOTER_LINKS } from '../../consts/config';
+import EmailLink from './EmailLink.astro';
 
 const currentYear = new Date().getFullYear();
 const socialLinks = SOCIAL_CONFIG.filter(s => s.name !== 'RSS');
@@ -21,18 +22,29 @@ const socialLinks = SOCIAL_CONFIG.filter(s => s.name !== 'RSS');
       ))}
       {socialLinks.length > 0 && (
         <div class="ml-auto flex items-center gap-x-4">
-          {socialLinks.map((link) => (
-            <a
-              href={link.href}
-              target={link.href.startsWith('http') || link.href.startsWith('mailto') ? '_blank' : undefined}
-              rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
-              class="hover:text-[var(--color-text-primary)] transition-colors inline-flex items-center gap-1.5"
-              aria-label={link.name}
-            >
-              <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4 opacity-80"><Fragment set:html={link.icon} /></span>
-              <span>{link.name}</span>
-            </a>
-          ))}
+          {socialLinks.map((link) => {
+            const emailUser = 'emailUser' in link ? link.emailUser : undefined;
+            const emailDomain = 'emailDomain' in link ? link.emailDomain : undefined;
+            return emailUser && emailDomain ? (
+              <EmailLink user={emailUser} domain={emailDomain}
+                class="hover:text-[var(--color-text-primary)] transition-colors inline-flex items-center gap-1.5"
+                ariaLabel={link.name}>
+                <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4 opacity-80"><Fragment set:html={link.icon} /></span>
+                <span>{link.name}</span>
+              </EmailLink>
+            ) : (
+              <a
+                href={link.href}
+                target={link.href.startsWith('http') ? '_blank' : undefined}
+                rel={link.href.startsWith('http') ? 'noopener noreferrer' : undefined}
+                class="hover:text-[var(--color-text-primary)] transition-colors inline-flex items-center gap-1.5"
+                aria-label={link.name}
+              >
+                <span class="w-4 h-4 [&>svg]:w-4 [&>svg]:h-4 opacity-80"><Fragment set:html={link.icon} /></span>
+                <span>{link.name}</span>
+              </a>
+            );
+          })}
         </div>
       )}
       <span class="sr-only">

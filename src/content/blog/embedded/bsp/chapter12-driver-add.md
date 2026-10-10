@@ -388,7 +388,7 @@ $schema: http://devicetree.org/meta-schemas/core.yaml#
 title: MyVendor MyChip controller
 
 maintainers:
-  - Sang-Deok Yoon <hawking90a@gmail.com>
+  - Sang-Deok Yoon (contact via the site's Contact page)
 
 properties:
   compatible:

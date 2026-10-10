@@ -479,5 +479,24 @@ const jsonLd = type === 'article'
       initLightbox();
       document.addEventListener('astro:page-load', initLightbox);
     </script>
+
+    <!-- Assemble contact links only after a deliberate user click. The
+         completed address is never present in the rendered HTML. -->
+    <script>
+      function initEmailLinks() {
+        document.querySelectorAll<HTMLAnchorElement>('[data-email-link]').forEach((link) => {
+          if (link.dataset.emailBound === 'true') return;
+          link.dataset.emailBound = 'true';
+          link.addEventListener('click', (event) => {
+            event.preventDefault();
+            const user = link.dataset.emailUser;
+            const domain = link.dataset.emailDomain;
+            if (user && domain) window.location.href = `mailto:${user}@${domain}`;
+          });
+        });
+      }
+      initEmailLinks();
+      document.addEventListener('astro:page-load', initEmailLinks);
+    </script>
   </body>
 </html>
