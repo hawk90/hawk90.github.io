@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"TensorRT는 NVIDIA GPU·DLA를 위한 ahead-of-time inference compiler입니다."** ONNX를 한 번 engine으로 굽고 나면 같은 hardware에서 cuDNN 대비 2~5배, FP16·INT8까지 적용하면 추가로 2~4배 빨라집니다.
+> **"TensorRT는 NVIDIA GPU·DLA를 위한 ahead-of-time inference compiler입니다."** engine의 성능 변화는 model·hardware·precision·workspace와 baseline에 따라 측정합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -40,7 +40,7 @@ Build 시 결정하는 핵심 옵션 세 가지입니다.
 | 옵션 | 설명 |
 |------|------|
 | Precision | FP32 (기본) → FP16 (2x) → INT8 (추가 2x, calibration 필요) |
-| Workspace | layer 변형 시 사용할 임시 메모리 (보통 1~2 GB) |
+| Workspace | layer tactic에 사용할 임시 메모리 (builder 설정으로 확인) |
 | Device type | GPU (Tensor core) 또는 DLA (저전력 INT8 전용) |
 
 INT8은 *representative dataset*으로 activation 분포를 측정해 scale을 잡아야 합니다. 100~1000장 정도가 보통입니다. 데이터 분포가 deploy 환경과 다르면 accuracy가 크게 떨어집니다.

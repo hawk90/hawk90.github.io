@@ -11,13 +11,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"NPU는 *MAC array가 본체*인 INT8 가속기입니다."** Systolic array·SIMD vector·memory hierarchy의 조합으로 GPU보다 *전력당 throughput*이 10배 이상 좋습니다.
+> **"NPU는 MAC array·vector unit·memory hierarchy를 조합한 workload-specific accelerator입니다."** 전력당 throughput은 architecture·model·precision·memory traffic으로 비교해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
 스마트폰 (Apple Neural Engine, Qualcomm Hexagon, Samsung NPU), 스마트 카메라, 로봇, AR/VR headset, 차량 ADAS, edge AI 박스 등 *저전력 inference*가 필요한 모든 곳에서 NPU가 표준입니다.
 
-CPU로 ResNet-50 한 frame이 100ms 걸리면 NPU는 5ms에 끝납니다. 전력은 1/10. Battery 환경의 *24/7 inference*는 NPU 없이는 불가능합니다.
+CPU와 NPU의 latency·전력 차이는 model·runtime·clock·memory path로 측정합니다. battery 환경의 always-on inference도 NPU 외 여러 구현을 비교할 수 있습니다.
 
 ## 핵심 개념 — MAC Array
 
@@ -178,7 +178,7 @@ converter.inference_output_type = tf.int8
 tflite_model = converter.convert()
 ```
 
-Calibration data 100~500장으로 scale을 결정. Accuracy 손실 1~3% 정도가 일반적.
+Calibration data는 model·data distribution에 맞춰 정하고 accuracy 영향은 representative set에서 측정합니다.
 
 ## Power vs Performance
 

@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Quantization은 float을 정수로 바꿔 메모리·연산을 줄이는 압축입니다."** FP32 → INT8로 메모리 4배·연산 2~4배 절약을 얻고 accuracy는 1~2%만 손해 봅니다. LLM에서는 INT4까지 가야 edge에 들어갑니다.
+> **"Quantization은 float 표현을 낮은 bit-width로 바꿔 메모리·연산량을 줄이는 기법입니다."** FP32→INT8의 저장량과 성능·accuracy 변화는 model·kernel·hardware·calibration으로 측정합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -205,7 +205,7 @@ ResNet-50 ImageNet top-1 accuracy 변화입니다.
 | INT4 PTQ | 73.5 % | 13 MB | 55 ms |
 | INT4 GPTQ | 75.0 % | 13 MB | 55 ms |
 
-PTQ만으로도 accuracy drop이 1% 이하면 그대로 쓸 수 있습니다. 1% 이상이면 per-channel·QAT·calibration data 확장으로 회복합니다.
+PTQ 결과의 허용 accuracy drop은 application requirement로 정합니다. 필요하면 per-channel·QAT·calibration data를 비교합니다.
 
 LLM 비교입니다. Llama 3 8B, perplexity (낮을수록 좋음)입니다.
 
@@ -262,9 +262,9 @@ Preprocess에서 INT8로 변환해 NPU buffer에 직접 넣습니다.
 ## 정리
 
 - Quantization은 float을 정수로 선형 매핑하는 압축으로 메모리 4배·연산 2~4배를 얻습니다.
-- PTQ는 빠르지만 1~5% accuracy 손실, QAT는 재학습 필요하지만 FP32에 근접합니다.
+- PTQ와 QAT의 accuracy·비용 trade-off는 model과 data에서 측정합니다.
 - Weight는 per-channel symmetric, activation은 per-tensor asymmetric이 표준 조합입니다.
-- LLM은 per-group INT4 + GPTQ/AWQ + SmoothQuant 조합이 사실상 표준입니다.
+- LLM은 per-group INT4·GPTQ·AWQ·SmoothQuant 등을 model/runtime 지원에 맞춰 선택합니다.
 - llama.cpp Q4_K_M은 size·quality·speed의 sweet spot입니다.
 - Calibration data는 100~1000장, *deploy 분포*에서 sampling합니다.
 - First/last layer는 FP16에 두는 mixed precision이 accuracy 회복에 효과적입니다.
