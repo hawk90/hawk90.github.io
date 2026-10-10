@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Alignment는 *공짜 성능*입니다."** Natural alignment를 깨면 ARM에서 fault가 나거나 cycle이 두 배로 듭니다. `packed`는 *전송 프로토콜*에만 씁니다.
+> **"Alignment는 correctness와 성능을 함께 좌우합니다."** unaligned 접근의 허용 여부·비용은 architecture, instruction, compiler와 설정에 따라 다릅니다. `packed`는 wire format처럼 필요한 곳에만 씁니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -32,15 +32,14 @@ UART나 BLE로 받은 byte stream을 struct로 캐스팅해서 읽으려고 할 
 | `double` | 8-byte |
 | pointer | architecture word size |
 
-C 표준은 모든 type에 *natural alignment*를 요구합니다. struct field 사이에 *padding*이 자동으로 들어가 이 규칙을 지킵니다.
+C 구현은 각 type의 alignment 요구를 정의하며, struct field 사이에 padding을 넣을 수 있습니다. ABI와 compiler 옵션에 따라 layout을 확인해야 합니다.
 
 | Architecture | Unaligned access |
 |--------------|-------------------|
-| ARM ARMv6/M0 | → BUS FAULT |
-| ARM ARMv7+/M3+ | 허용, 2배 cycle |
-| x86 | 허용, 거의 0 cost |
+| ARM 계열 | instruction·CCR·access width에 따라 허용/예외/비용이 달라짐 |
+| x86 계열 | 일반적으로 허용되지만 cache-line 경계 등에서 비용이 달라질 수 있음 |
 
-ARM Cortex-M0/M3에서는 정렬을 놓치면 hard fault로 reset됩니다. 정렬 비용이 무료가 아닙니다.
+정렬을 놓쳤을 때의 fault 여부와 비용은 Cortex-M variant·instruction·설정으로 확인합니다. 정렬 비용이 무료라고 가정하면 안 됩니다.
 
 ## 코드 / 실제 사용 예
 
@@ -187,23 +186,21 @@ void func(void) {
 ## 측정 / 성능 비교
 
 ```text
-Cortex-M4 72 MHz
-aligned 32-bit read          1 cycle
-unaligned 32-bit read        2 cycle
-aligned + memcpy 32-bit      2~3 cycle (memcpy 펼침)
-packed 접근 → memcpy 우회    2~3 cycle (안전)
+Cortex-M4 72 MHz — 측정 형식 예시
+aligned/unaligned read       target·instruction별 측정
+aligned + memcpy             compiler·optimization별 측정
+packed 접근 → memcpy 우회    target·compiler별 측정
 
 Cortex-A72
 aligned NEON load (vld1q)    1 cycle
 unaligned NEON load          2 cycle (cross-line)
 ```
 
-정렬을 깨면 *최소* 2배 cycle이 듭니다. cross-cache-line이면 더 늘어납니다.
+정렬을 깨면 target에 따라 예외나 추가 cycle이 발생할 수 있습니다. cross-cache-line 접근은 추가 transaction을 만들 수 있습니다.
 
 ```text
 struct 재배열 효과 (RAM 절약)
-field 순서: char int char int char    32 byte
-field 순서: int int char char char    16 byte (50% 절약)
+field 순서에 따른 sizeof/padding은 ABI와 compiler에서 `sizeof`·`offsetof`로 확인합니다.
 ```
 
 같은 정보를 두 배의 RAM으로 표현하는 셈입니다.

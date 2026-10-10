@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"DMA buffer는 physically contiguous, cache-coherent 또는 non-cacheable, line-aligned여야 한다."** 일반 `malloc` 결과는 세 조건 모두 충족하지 못합니다.
+> **"DMA buffer 요구사항은 device·IOMMU·cache 정책에 맞춰 정합니다."** contiguous, mapping, coherency와 alignment 조건을 DMA API와 hardware manual에서 확인합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -23,13 +23,13 @@ Linux 드라이버에서는 IOMMU 없는 SoC에 `malloc`으로 잡은 buffer를 
 
 DMA buffer가 만족해야 할 다섯 가지입니다.
 
-1. **Physically contiguous** — DMA는 MMU를 모름
+1. **DMA가 접근 가능한 mapping** — contiguous가 필요할 수도 있고 SG/IOMMU가 대체할 수도 있음
 2. **Cache 일관성** — coherent or 명시 maintenance
 3. **Alignment** — burst, SIMD, cache line
 4. **DMA addressable** — 32-bit 또는 64-bit 한계
 5. **Allocator overhead 적음** — 자주 alloc/free하는 경우
 
-Coherent와 streaming 두 모드를 구분해서 씁니다. Coherent는 *non-cacheable 또는 cache-coherent* 영역에서 잡아 매 접근마다 cache 관리를 생략합니다. Streaming은 일반 cacheable buffer를 *임시로* DMA에 빌려주고 시작·완료 시점에 cache flush/invalidate를 명시합니다.
+Coherent와 streaming 두 모드를 구분해서 씁니다. Coherent mapping은 platform DMA API가 CPU/device 관찰 일관성을 제공하는 방식이며, 실제 cacheability는 architecture와 mapping에 따라 다릅니다. Streaming은 cacheable buffer를 DMA에 빌려주고 API의 map/unmap 또는 sync 규칙을 따릅니다.
 
 ## 코드 / 실제 사용 예
 
@@ -64,9 +64,9 @@ dma_unmap_single(dev, dma, len, DMA_TO_DEVICE);
 
 | Direction | Cache 동작 |
 |-----------|-------------|
-| `DMA_TO_DEVICE` | flush before, no invalidate after |
-| `DMA_FROM_DEVICE` | no flush, invalidate after |
-| `DMA_BIDIRECTIONAL` | flush before, invalidate after |
+| `DMA_TO_DEVICE` | API가 요구하는 sync 규칙을 따름 |
+| `DMA_FROM_DEVICE` | API가 요구하는 sync 규칙을 따름 |
+| `DMA_BIDIRECTIONAL` | 양방향 sync 규칙과 ownership을 확인 |
 
 일반 cacheable buffer를 그대로 활용할 수 있어 CPU read/write가 잦은 경우 coherent보다 빠릅니다.
 
@@ -93,7 +93,7 @@ reserved-memory {
     cma_buffer: cma_buffer {
         compatible = "shared-dma-pool";
         reusable;
-        size = <0x40000000>;       /* 1 GB */
+        size = <0x04000000>;       /* 예시: 64 MB, board 요구량에 맞춤 */
         alignment = <0x100000>;
         linux,cma-default;
     };
@@ -119,7 +119,7 @@ dma_addr_t iova = dma_map_single(dev, kbuf, len, DMA_TO_DEVICE);
 /* iova != physical addr, SMMU가 translate */
 ```
 
-자동차와 서버 SoC는 SMMU가 표준입니다. DMA address를 그대로 physical로 가정하면 안 됩니다.
+SMMU/IOMMU 지원과 활성화 여부는 SoC·firmware·kernel 설정에 따라 다릅니다. DMA address를 physical로 가정하지 말고 DMA API가 반환한 주소를 사용합니다.
 
 ### FreeRTOS static DMA pool
 
@@ -158,7 +158,7 @@ SECTIONS {
 }
 ```
 
-STM32H7는 AXI SRAM과 별도의 SRAM bank를 가지므로 DMA 전용으로 한 bank를 통째로 비워둘 수 있습니다.
+일부 STM32H7 보드는 여러 SRAM bank를 가지지만, 실제 DMA 접근성과 cache 정책은 part·linker·board 설계를 확인합니다.
 
 ### Cortex-M7 MPU non-cacheable region
 
@@ -197,17 +197,17 @@ STM32H7 ADC를 16 kHz로 받는 코드에서 buffer 위치를 바꿔 측정한 �
 
 | Buffer 위치 | cache 관리 | latency 변동 |
 |---|---|---|
-| AXI SRAM cacheable | Clean+Invalidate | 큼 (수 µs jitter) |
-| DTCM (cacheable) | Clean+Invalidate | 작음 |
-| SRAM2 non-cacheable MPU | 없음 | 가장 작음 |
+| cacheable 영역 | API/설정에 따른 maintenance | workload별 측정 |
+| DMA 접근 가능한 별도 영역 | platform 정책에 따라 다름 | workload별 측정 |
+| non-cacheable MPU 영역 | maintenance 생략 가능할 수 있음 | workload별 측정 |
 
 Cache 관리는 line 단위로 동작하므로 buffer 크기에 비례해 latency가 커집니다. RT 경로에서는 non-cacheable 영역이 가장 예측 가능합니다.
 
 ```text
 Linux NVMe 4 KB read
-일반 buffer + map_single   ~120 µs
-HugePage + pre-mapped       ~80 µs
-io_uring + fixed buffer     ~60 µs
+일반 buffer + map_single   workload별 측정
+HugePage + pre-mapped       workload별 측정
+io_uring + fixed buffer     workload별 측정
 ```
 
 Mapping overhead를 한 번에 끝내는 fixed buffer 방식이 latency를 절반 가까이 줄입니다.

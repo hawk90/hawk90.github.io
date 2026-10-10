@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Cache line align = `alignas(64)` 한 줄로 false sharing을 막는다."** 핵심은 *element 사이*에도 padding을 넣어 hot 변수가 같은 line에 끼지 않게 하는 것입니다.
+> **"Cache line alignment는 false sharing을 줄이는 한 수단입니다."** 실제 line 크기와 allocator/container layout을 확인하고 element 사이 padding을 설계합니다.
 
 ## 어떤 상황에서 쓰나
 
-멀티코어 SMP에서 카운터 두 개를 두 코어가 각각 증가시키는데도 throughput이 코어 하나일 때보다 *느려지는* 경우가 있습니다. 두 변수가 같은 cache line 안에 있으면 코어 간 cache line이 ping-pong을 치면서 매 store마다 coherency traffic이 발생합니다. Cortex-A72에서 10x 가까이 떨어지는 사례가 흔합니다.
+멀티코어 SMP에서 카운터 두 개를 두 코어가 각각 증가시키는데도 throughput이 코어 하나일 때보다 느려질 수 있습니다. 두 변수가 같은 cache line 안에 있으면 coherency traffic이 늘 수 있으며, 저하 폭은 CPU topology와 workload로 측정합니다.
 
 DMA buffer를 cacheable 영역에 두면 line 경계가 어긋난 곳에서 invalidate가 *옆 line까지* 건드리면서 다른 코드의 hot data를 날립니다. 이런 상황을 만나면 alignment가 가장 먼저 의심해야 할 항목입니다.
 
@@ -25,7 +25,7 @@ DMA buffer를 cacheable 영역에 두면 line 경계가 어긋난 곳에서 inva
 
 ![Cache line alignment — false sharing 회피](/images/blog/modern-recipes/diagrams/part3-01-cache-alignment.svg)
 
-Cache line은 CPU가 한 번에 fetch·invalidate하는 단위입니다. Cortex-A53/A72와 Intel/AMD x86은 64B, Apple M1과 IBM POWER는 128B, Cortex-M7은 32B입니다. 같은 line에 있는 두 변수는 멀티코어 관점에서 *하나의 변수*처럼 움직입니다.
+Cache line은 CPU cache coherence와 fetch의 기본 단위입니다. 실제 line 크기는 CPU·cache level·platform에 따라 확인해야 하며, 같은 line의 독립 변수는 coherency traffic을 공유할 수 있습니다.
 
 ```c
 /* C++17 */
@@ -40,11 +40,11 @@ long line_size = sysconf(_SC_LEVEL1_DCACHE_LINESIZE);
 
 | Architecture | Line size |
 |--------------|-----------|
-| ARM Cortex-M7 | 32 B |
-| ARM Cortex-A53/A72 | 64 B |
-| Intel/AMD x86 | 64 B |
-| Apple M1/M2 | 128 B |
-| IBM POWER | 128 B |
+| architecture | line size |
+| ARM Cortex-M7 | SoC/reference manual 확인 |
+| ARM Cortex-A | CPU/cache level 확인 |
+| x86 | CPU/cache level 확인 |
+| 기타 | platform 문서 확인 |
 
 ## 코드 / 실제 사용 예
 
@@ -160,7 +160,7 @@ long sum_all(void) {
 }
 ```
 
-코어별로 *다른 line*을 쓰면 false sharing이 사라지고 코어 수에 거의 선형으로 scaling됩니다.
+코어별로 다른 line을 쓰면 false sharing을 줄일 수 있지만, scaling은 memory ordering·scheduler·접근 패턴으로 측정해야 합니다.
 
 ### Linux 커널 매크로
 
@@ -183,11 +183,11 @@ Cortex-A72 quad core에서 atomic counter 두 개를 두 thread가 1억 번 증�
 
 | 구조 | 시간 | throughput |
 |---|---|---|
-| 같은 line에 a, b | 7.8 s | 26 M ops/s |
-| alignas(64)만 (시작) | 7.4 s | 27 M ops/s |
-| element 사이 padding | 0.9 s | 222 M ops/s |
+| 같은 line에 a, b | workload별 측정 | 측정 필요 |
+| alignas(64)만 (시작) | workload별 측정 | 측정 필요 |
+| element 사이 padding | workload별 측정 | 측정 필요 |
 
-False sharing 제거가 8배 이상 차이를 만듭니다. Intel Xeon에서는 보통 10배 수준까지 벌어집니다.
+false sharing 완화 효과는 workload와 CPU topology에 따라 측정합니다.
 
 ```text
 NEON aligned vs misaligned load (Cortex-A72)
