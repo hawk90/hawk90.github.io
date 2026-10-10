@@ -3,7 +3,7 @@
 #
 # CLAUDE.md §1·§6·§10에 정의된 publish 전 검증을 한 번에 실행:
 #   1.  ASCII 박스 다이어그램 (자동 차단)
-#   2.  TikZ 텍스트 겹침 (자동 차단)
+#   2.  TikZ 텍스트 근접 휴리스틱 (전체 sweep에서만, 참고)
 #   3.  코드 블록 내 한국어 산문 후보 (수동 review)
 #   3b. Tone 일관성 §1 — ~합니다/~다 혼용 (자동 차단)
 #   4.  Hallucination 후보 (수동 review 알림)
@@ -16,7 +16,7 @@
 #
 # Exit code:
 #   0 = all gates pass
-#   1 = blocking violation (rules 1·2) — publish 금지
+#   1 = blocking violation or a checker that did not run — publish 금지
 #   2 = hallucination candidates only — strict 모드에서만 차단
 
 set -euo pipefail
@@ -49,11 +49,20 @@ run_check() {
   echo ""
   echo "═══ $name ═══"
 
-  if "$@" > "$output" 2>&1; then
+  local rc=0
+  "$@" > "$output" 2>&1 || rc=$?
+  if [ "$rc" -eq 0 ]; then
     echo "✓ PASS"
   else
     cat "$output"
-    if [ "$blocking" = "block" ]; then
+    if [ "$blocking" = "warn" ] && [ "$rc" -ge 2 ]; then
+      # A warn checker reports findings with exit 1. Anything else (a crash,
+      # a missing path, 127 for a missing interpreter) means it did not run,
+      # which must not read as "candidates, review later".
+      echo ""
+      echo "✗ 검사기 오류 (exit $rc) — 검사가 돌지 않았다"
+      FAILED=$((FAILED + 1))
+    elif [ "$blocking" = "block" ]; then
       echo ""
       echo "✗ BLOCKING — publish 금지"
       FAILED=$((FAILED + 1))
@@ -92,12 +101,15 @@ if require_checker "detect-ascii-diagrams.sh"; then
     "$ROOT/scripts/detect-ascii-diagrams.sh" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
-# 2. TikZ 텍스트 겹침 (시리즈 인자 없이 전체 빠른 검사)
-if require_checker "detect-tikz-overlap.sh"; then
-  run_check \
-    "2/4 TikZ 텍스트 근접 휴리스틱" \
-    "block" \
-    "$ROOT/scripts/detect-tikz-overlap.sh"
+# 2. TikZ 텍스트 근접 휴리스틱 — 전체 .tex 순위표(점수만, 렌더링 안 함).
+#    --fail-above 없이는 exit 0뿐이라 "차단"이라고 적혀 있어도 막은 적이 없다.
+#    점수 30 초과가 277개라 차단으로 돌릴 수도 없다. 경로를 받는 커밋 단위
+#    실행에서는 건너뛰고, 전체 sweep에서만 상위 5개를 참고로 보여 준다.
+if [ ${#ARGS[@]} -eq 0 ] && require_checker "detect-tikz-overlap.sh"; then
+  echo ""
+  echo "═══ 2/10 TikZ 텍스트 근접 휴리스틱 (informational) ═══"
+  "$ROOT/scripts/detect-tikz-overlap.sh" --report "$TMP_DIR/tikz-overlap.txt" 2>&1 | head -8 || true
+  echo "ℹ  실제 겹침은 python3 scripts/detect-text-overlap.py --series <name>"
 fi
 
 # 3. 코드 블록 내 한국어 산문
@@ -230,11 +242,13 @@ if require_checker "audit-series-integrity.py"; then
   fi
 fi
 
-# 10. Image coverage — §11 접근성 — 추상 개념 vs 이미지 0개 챕터 ranking
-if require_checker "audit-image-coverage.py"; then
+# 10. Image coverage — §11 접근성 — 추상 개념 vs 이미지 0개 챕터 ranking.
+#     전체 코퍼스 순위표(5초)라 커밋 단위(경로 인자) 실행에서는 건너뛴다.
+if [ ${#ARGS[@]} -eq 0 ] && require_checker "audit-image-coverage.py"; then
   echo ""
   echo "═══ 10/10 Image coverage (§11 접근성, informational) ═══"
-  python3 "$ROOT/scripts/audit-image-coverage.py" --top 5 2>&1 | head -5
+  python3 "$ROOT/scripts/audit-image-coverage.py" --top 5 > "$TMP_DIR/images.txt" 2>&1 || true
+  head -5 "$TMP_DIR/images.txt"
   echo "ℹ  상세는 'npm run audit:images' 실행"
 fi
 

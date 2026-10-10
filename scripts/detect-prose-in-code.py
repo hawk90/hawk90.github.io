@@ -80,7 +80,8 @@ def markdown_files(targets):
     for target in targets:
         path = Path(target).resolve()
         if not path.exists():
-            raise SystemExit(f"✗ 경로 없음: {target} (검사 0건을 통과로 보고하지 않도록 중단)")
+            print(f"✗ 경로 없음: {target} (검사 0건을 통과로 보고하지 않도록 중단)")
+            raise SystemExit(2)
         if path.is_file():
             if path.suffix == ".md":
                 yield path
