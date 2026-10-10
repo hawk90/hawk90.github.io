@@ -147,7 +147,7 @@ WRITE of size 4 at 0x602000000058 thread T0
     #1 0x4007fe in main main.c:23
 ```
 
-임베디드에서 못 보던 오류가 ASan에서는 ms 단위로 잡힙니다. *모든 모듈을* 이렇게 빌드할 필요는 없습니다. Parser·codec·state machine 같은 *알고리즘 모듈*만 분리해 desktop test에 둡니다.
+임베디드에서 재현하기 어려운 오류가 ASan에서는 더 빠르게 드러날 수 있습니다. 실행 시간과 지원 범위는 host build와 workload에 따라 달라지며, *모든 모듈을* 이렇게 빌드할 필요는 없습니다. Parser·codec·state machine 같은 *알고리즘 모듈*만 분리해 desktop test에 둡니다.
 
 ## 도구 6 — Fill pattern으로 stack high-water mark
 
@@ -290,11 +290,11 @@ Strict aliasing 위반. `-fno-strict-aliasing`으로 빌드하거나, `memcpy`/`
 
 > Unaligned access
 
-ARMv6-M (Cortex-M0)은 unaligned access를 *지원하지 않음*. 4 byte 정수를 odd address에 쓰면 fault. `__packed` 구조체에서 흔합니다.
+ARMv6-M의 unaligned access 동작과 fault 여부는 명령 종류·설정·compiler codegen에 따라 다릅니다. 4 byte 정수를 odd address에서 직접 다루는 코드는 portable하지 않으므로 `__packed` 구조체와 ABI를 확인합니다.
 
 > Stack 사용량 미측정
 
-Worst-case stack 사용량을 *측정 없이* 추정하면 거의 항상 underestimate합니다. Fill pattern으로 측정.
+Worst-case stack 사용량을 *측정 없이* 추정하면 누락할 수 있습니다. fill pattern과 static 분석을 target 경로에 맞춰 함께 사용합니다.
 
 > Production에서 watchpoint
 

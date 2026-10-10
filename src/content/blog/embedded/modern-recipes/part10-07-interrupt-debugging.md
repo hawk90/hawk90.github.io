@@ -201,7 +201,7 @@ Counter 증가 자체는 atomic이지만, *몇 번 떨어졌는지*를 정확히
 ## 사례 7 — Interrupt latency로 보이는 누락
 
 ```text
-ISR B priority 1, 실행 중 5ms
+ISR B priority 1, 실행 중인 긴 ISR (지속 시간은 측정)
 ISR A priority 5, B 동안에 두 번 trigger
 → A는 한 번만 진입 (pending bit는 *1 bit*)
 ```
@@ -276,11 +276,11 @@ HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
 ```c
 __disable_irq();
-slow_work();   /* 100µs — 그 동안 IRQ 누락 */
+slow_work();   /* 긴 critical section은 낮은 우선순위 IRQ 지연 가능 */
 __enable_irq();
 ```
 
-Critical section은 µs 단위로 짧게. Priority masking(`BASEPRI`)으로 *고우선* IRQ는 살려 둡니다.
+Critical section은 요구 latency 안에서 짧게 유지합니다. Priority masking(`BASEPRI`)의 범위와 고우선 IRQ 허용 여부는 core·RTOS 설정으로 확인합니다.
 
 > RTOS API를 priority 위에서 호출
 

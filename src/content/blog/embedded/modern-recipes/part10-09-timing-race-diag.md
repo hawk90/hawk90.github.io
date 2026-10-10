@@ -49,7 +49,7 @@ uint8_t ring_pop(void) {
 }
 ```
 
-문제가 사라집니다. Printf가 *몇 µs 걸리므로* race window가 닫혔습니다.
+문제가 사라집니다. Printf의 지연과 buffering이 race window를 바꿔 문제가 사라졌을 수 있으며, 정확한 시간은 UART·format·host 설정으로 측정합니다.
 
 ## 가설 정리
 
@@ -200,7 +200,7 @@ if (g_buf_free)
 검사와 사용 사이의 race. Atomic test-and-set 또는 mutex/spinlock 사용.
 
 ```c
-/* Cortex-M0+ 이상은 LDREX/STREX 지원 */
+/* LDREX/STREX 지원 범위와 width는 core·instruction set 확인 */
 do {
     if (__LDREXW(&g_buf_free) == 0) {
         __CLREX();
@@ -298,7 +298,7 @@ Printf를 빼도 race가 안 일어나려면 *진짜 원인*을 고쳐야 합니
 
 > Logic analyzer의 sample rate 부족
 
-100 MHz CPU 사이클을 1 MHz logic analyzer로 잡으면 100 사이클 폭의 race는 안 보입니다. Sample rate가 *측정 대상의 10배 이상*이어야 합니다.
+빠른 CPU의 짧은 race를 느린 logic analyzer로는 놓칠 수 있습니다. sample rate·probe bandwidth·pulse width를 측정 대상에 맞춰 정합니다.
 
 ## 정리
 
