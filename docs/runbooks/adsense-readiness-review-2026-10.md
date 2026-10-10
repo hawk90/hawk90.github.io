@@ -1,7 +1,7 @@
 # AdSense 준비 상태 점검 및 재신청 계획
 
 점검 기준일: 2026-10-10  
-점검 대상: 공개 배포된 `https://hawk90.github.io/`, Google Search Console, AdSense 사이트 상태  
+점검 대상: 공개 배포된 `https://hawk90.github.io/`(2026-10-10부터 `https://hawk90.dev/`로 이전), Google Search Console, AdSense 사이트 상태  
 점검 방법: 세 차례 점검을 합쳤다. 1차는 공개 사이트 구조와 Google 기준 대조, 2차는 sitemap 전수 측정(1,321 URL, 글 726편)과 Search Console·AdSense 화면 확인, 3차는 저장소 원문 기준 글 단위 1차 분류(직접 경험 표현·분량·코드 비중)와 시리즈 간 주제 중복 확인이다. 서로 다른 주장은 공개 사이트나 저장소에서 다시 확인해 아래 "교차 검토" 표에 결과를 남겼다.
 
 ## 결론
@@ -11,6 +11,7 @@
 - Search Console에 `https://hawk90.github.io/blog/`로 **시작하는 모든 URL**의 임시 삭제 요청이 걸려 있었다(2026-05-30 요청). 점검 당일 운영자가 취소했다("요청 취소됨").
 - 점검 시점에 제출된 sitemap이 없었고, 색인된 페이지는 2개였다(홈, `/revue`). 점검 당일 `sitemap-index.xml`을 제출했고 Google이 아직 읽지 않은 상태다.
 - AdSense 사이트 상태는 "주의 필요 / 가치가 별로 없는 콘텐츠"이고 마지막 검토일은 **2026-06-09**다. 삭제 요청 열흘 뒤라, 심사 시점의 사이트는 Google 입장에서 홈 화면뿐이었다.
+- 같은 날 사이트를 커스텀 도메인 `hawk90.dev`로 옮겼다. 옛 주소는 경로를 유지한 채 301로 넘어가고, Search Console 주소 변경과 AdSense 사이트 등록(심사 요청 없음)까지 마쳤다. 자세한 기록은 아래 "도메인·메일 전환" 절에 있다.
 
 색인 차단을 풀고 색인이 쌓인 뒤 재신청하면 **30~45%**, 아래의 공개 범위 정리와 핵심 글 강화까지 마치면 **50~65%** 정도로 본다. 모든 수치는 Google 공식 확률이 아니라 측정값과 반려 이력을 바탕으로 한 판단이다.
 
@@ -78,6 +79,10 @@ Google은 생성형 AI 사용 자체보다, 사람 또는 자동화 도구가 �
 | Google `site:hawk90.github.io` | 홈, `/revue`(다른 저장소의 Rust 프로젝트 페이지) 2건 |
 | AdSense → 사이트 | 주의 필요 / 가치가 별로 없는 콘텐츠 / 2026-06-09 |
 | AdSense → Ads.txt 상태 | "찾을 수 없음". 공개 `/ads.txt`는 200으로 정상 응답하고 publisher ID가 일치하므로, 6월 검토 이후 갱신되지 않은 값으로 본다 |
+| **도메인 이전 후 (같은 날)** | |
+| Search Console `sc-domain:hawk90.dev` | DNS TXT로 소유권 확인, `https://hawk90.dev/sitemap-index.xml` 제출(Google 읽기 대기), 홈 색인 요청 |
+| Search Console 주소 변경 | `hawk90.github.io` → `hawk90.dev` 등록. 양쪽 속성에 "이전 중" 표시. 검사 결과 홈페이지 301·두 사이트 소유 확인은 통과, 샘플 페이지 301은 경고(옛 속성이 아는 URL이 3개뿐이라 표본 부족. 실측으로 옛 URL 15개 모두 같은 경로로 301 확인) |
+| AdSense `hawk90.dev` | 사이트 추가, Ads.txt 방식으로 소유권 확인, Ads.txt **승인됨**, 승인 상태 "검토 필요"(**심사 요청 안 함**) |
 
 5월 말 draft 전환 때 내린 글을 검색에서 빼려던 요청이 `/blog/` 전체를 덮었다. 임시 삭제는 약 6개월 유지되므로 취소하지 않았다면 2026년 11월 말까지 이어졌을 것이다.
 
@@ -277,12 +282,12 @@ GitHub user site(`hawk90.github.io`) 아래에는 같은 계정의 project site�
 
 Search Console의 "사용자가 선택한 표준이 없는 중복 페이지" 1건도 여기서 나왔다. `https://hawk90.github.io/revue/revue/index.html`이 `/revue/` 리디렉션 페이지와 같은 내용으로 잡혔다(처음 감지 2026-07-25). 블로그 글과는 무관하다.
 
-**조치 (2026-10-10, 각 저장소 PR):** 두 저장소의 Pages 배포본 모든 페이지에 `<meta name="robots" content="noindex, follow">`를 넣는다. 사람은 계속 열람할 수 있고 검색 색인에서만 빠진다. revue의 정식 문서인 docs.rs는 영향받지 않는다.
+**조치 (2026-10-10, 병합·배포·실측 완료):** 두 저장소의 Pages 배포본 모든 페이지에 `<meta name="robots" content="noindex, follow">`를 넣었다. 사람은 계속 열람할 수 있고 검색 색인에서만 빠진다. revue의 정식 문서인 docs.rs는 영향받지 않는다.
 
 - revue: rustdoc `--html-in-header`로 전 페이지 주입, 루트 리디렉션 페이지에도 추가 — [hawk90/revue#933](https://github.com/hawk90/revue/pull/933)
 - metl: Pages artifact 업로드 전 생성 HTML에 주입, 누락 시 step 실패 — [hawk90/metl#253](https://github.com/hawk90/metl/pull/253)
 
-병합 후 배포된 페이지에 `noindex`가 들어갔는지 확인하고, Search Console에서 해당 경로가 "noindex 태그에 의해 제외됨"으로 바뀌는지 본다. 이후 새 저장소에 Pages를 켤 때도 같은 처리를 기본으로 한다.
+배포 후 `/revue/`, `/revue/revue/index.html`, `/revue/revue/all.html`, `/metl/`, `/metl/annotated.html`, `/metl/files.html`, `/metl/globals.html`에 `noindex`가 들어간 것을 확인했고, 블로그 홈에는 없는 것도 확인했다. 남은 확인은 Search Console에서 해당 경로가 "noindex 태그에 의해 제외됨"으로 바뀌는 것이다. 이후 새 저장소에 Pages를 켤 때도 같은 처리를 기본으로 한다.
 
 ### 7. 사용자 생성 콘텐츠 관리
 
@@ -315,10 +320,12 @@ Search Console 설정 변경이라 사람이 직접 처리한다.
 - [x] Search Console → 삭제 → `https://hawk90.github.io/blog/` 요청을 **요청 취소**한다. (2026-10-10 완료)
 - [x] Sitemaps에 `sitemap-index.xml`을 제출한다. (2026-10-10 제출, Google 읽기 대기)
 - [ ] 1~2일 뒤 sitemap 상태가 "성공"이고 "마지막으로 읽은 날짜"가 채워졌는지 확인한다.
-- [ ] URL 검사에서 홈과 대표 글 10편 안팎의 색인을 요청한다. 후보는 홈과 Bootloader·BSP·Buildroot·Embedded Security 첫 글이다.
+- [ ] URL 검사에서 홈과 대표 글 10편 안팎의 색인을 요청한다. 후보는 홈과 Bootloader·BSP·Buildroot·Embedded Security 첫 글이다. (도메인 이전 후 `sc-domain:hawk90.dev`에서 홈만 요청함. 나머지는 sitemap 처리 상황을 보고 결정)
 - [ ] **AdSense 재신청은 하지 않는다.** 색인이 쌓이기 전에 재신청하면 같은 사유로 다시 반려된다.
 
 ### 1단계: 목록 페이지·광고 범위 정리 (저장소, 1~2일)
+
+> 진행 상황 (2026-10-10, `ef3fb80e` "seo: reduce duplicate listing pages" 배포 후 실측): sitemap 1,321 → 749 URL(태그·페이지네이션 제외), 태그·`/blog/N`·`/archive/`·`/stats/`에 `noindex`, 홈·`/blog/`·`/about/`·`/privacy/`·`/contact/`·`/paths/`에서 광고 스크립트 제외. 남은 항목은 시리즈 목차·저자 소개 반복 축소, `/paths`의 `준비 중` 카운터(예: "준비 중 41"), Embedded 소개의 "148편"이다.
 
 - 글이 4편 이하인 태그 페이지에 `noindex`를 붙이고 sitemap에서 뺀다(전체 태그 페이지를 빼는 방안도 검토).
 - `/blog/N` 페이지네이션, `/stats/`, `/settings/`, `/recently-updated/`를 sitemap에서 뺀다.
@@ -403,15 +410,70 @@ Search Console 설정 변경이라 사람이 직접 처리한다.
 - Giscus 댓글을 실제로 관리할 수 있다.
 - 광고가 콘텐츠보다 많지 않고, 광고와 본문이 명확히 구분된다.
 
+## 도메인·메일 전환 (2026-10-10)
+
+AdSense 재신청 전에 사이트 주소를 바꾸면 검색 이력과 승인 상태를 잃지만, 점검 시점에는 Google에 색인된 글이 사실상 0이라 잃을 것이 없었다. 그래서 재신청 전에 커스텀 도메인으로 옮겼다.
+
+### 도메인과 DNS
+
+| 항목 | 설정 | 이유 |
+|---|---|---|
+| 도메인 | `hawk90.dev` (Cloudflare Registrar, 1년, 자동 갱신, 2027-10-10 만료) | GitHub 핸들과 같은 이름. 원가 판매라 갱신가가 오르지 않음(첫해 \$8.20, 이후 연 \$12.20) |
+| 등록 정보 | WHOIS 비공개, 이전 잠금, 등록자 이름은 여권 표기와 같게 입력 | 소유권 분쟁 시 신원 대조 |
+| DNSSEC | 켜짐. `.dev` 레지스트리 DS 게시, 검증(AD) 확인 | DNS 위조 방지 |
+| 사이트 레코드 | A 4개(185.199.108~111.153), AAAA 4개(2606:50c0:8000~8003::153), `www` CNAME `hawk90.github.io`. **모두 DNS only** | 아래 "프록시를 켜지 않는 이유" |
+| 확인용 TXT | GitHub Pages verified domain, Google Search Console | 도메인 도용 방지, 도메인 속성 인증 |
+| SSL/TLS 모드 | Full (strict) | DNS only에서는 영향 없음. 나중에 Cloudflare 호스팅으로 옮길 때를 대비한 설정 |
+
+GitHub 쪽은 계정 단위 verified domain 등록, 저장소 Pages 커스텀 도메인 `hawk90.dev`, HTTPS 강제를 켰다. GitHub가 Let's Encrypt 인증서(`CN=hawk90.dev`, 2027-01-08 만료)를 자동 갱신한다. 옛 주소 `hawk90.github.io/...`는 같은 경로로 301된다.
+
+**프록시를 켜지 않는 이유.** GitHub Pages 레코드에 Cloudflare 프록시를 켜면 GitHub가 DNS를 확인하지 못하고 Let's Encrypt 갱신 요청(80번 포트)도 프록시가 바꿔 버려, 몇 달 뒤 인증서 갱신이 실패한다. Full (strict)와 겹치면 만료일에 사이트가 열리지 않는다. GitHub Pages는 이미 자체 CDN(Fastly) 뒤에 있어 프록시로 얻는 이점도 작다. 그래서 Cloudflare 대시보드의 "Proxying is required…" 안내는 무시한다. Cloudflare의 캐시·보안 기능이 필요해지면 프록시를 덧대지 말고 호스팅을 Cloudflare Pages로 옮긴다(아래 "호스팅·저장소 용량 계획").
+
+참고: [Let's Encrypt 커뮤니티](https://community.letsencrypt.org/t/fyi-for-github-pages-or-vercel-netlify-with-cloudflare/231054), [GitHub 커뮤니티](https://github.com/orgs/community/discussions/22052)
+
+### 코드 변경
+
+- [#76](https://github.com/hawk90/hawk90.github.io/pull/76): `site`, config `url`, `robots.txt` sitemap 줄, giscus origin(옛 origin 유지), Privacy 페이지 주소. 배포 후 canonical·sitemap·`robots.txt`가 `hawk90.dev`를 가리키는 것을 확인했다.
+- [#77](https://github.com/hawk90/hawk90.github.io/pull/77): 공개 메일 주소를 `contact@hawk90.dev`(Contact·Privacy·Footer)와 `me@hawk90.dev`(글 하단 저자 소개·이력서)로 교체. 주소는 계속 나눠 두고 클릭할 때만 JS로 조립한다.
+
+### 메일
+
+| 항목 | 설정 |
+|---|---|
+| 받는 주소 | `contact@hawk90.dev`, `me@hawk90.dev` → 운영자 Gmail (Cloudflare Email Routing). catch-all 끔 |
+| 레코드 | MX 3개, SPF `include:_spf.mx.cloudflare.net`, DKIM(`cf2024-1._domainkey`) — Email Routing이 관리 |
+| DMARC | `v=DMARC1; p=reject; sp=reject; adkim=s; aspf=s`. 이 도메인은 메일을 보내지 않으므로 사칭 메일을 거부시킨다 |
+| Gmail | 필터로 `hawk90.dev/contact`, `hawk90.dev/me` 라벨(상위 라벨 `hawk90.dev`). 받은편지함에 그대로 둔다 |
+| 수신 테스트 | 외부 계정에서 두 주소 모두 수신 확인 |
+
+AdSense 정책은 도메인 메일이나 메일 인증 레코드를 요구하지 않는다. 요구하는 것은 게시자 정보를 숨기거나 거짓으로 표시하지 않는 것이라, 공개한 주소가 실제로 받아지는지 확인한 뒤에 페이지를 바꿨다. 이 구성에서는 Gmail "다른 주소로 보내기"로 `@hawk90.dev` 명의 메일을 보내면 DMARC `reject`에 걸린다. 도메인 명의로 보내야 할 일이 생기면 DMARC를 풀지 말고 도메인 DKIM을 지원하는 발신 서비스를 붙인다.
+
+### AdSense 등록 메모
+
+`hawk90.dev`를 사이트로 추가하고 소유권을 확인했다. 목록·정책 페이지에서 광고 스크립트를 뺐기 때문에 "코드 스니펫" 방식(홈에서 코드를 찾음)은 실패하고, **Ads.txt 방식**으로 확인했다. 심사 요청은 하지 않았다. 재신청은 6단계 품질 게이트를 통과한 뒤에 한다. 옛 `hawk90.github.io` 항목은 반려 기록으로 남겨 둬도 되고 지워도 새 사이트에는 영향이 없다.
+
+Search Console의 옛 속성 `https://hawk90.github.io/`는 **지우지 않는다.** 주소 변경 신호가 유지되도록 최소 180일은 옛 속성과 301을 그대로 둔다.
+
+## 호스팅·저장소 용량 계획
+
+DB가 없는 정적 사이트라 유지비는 도메인 값(연 약 \$12)뿐이다. 트래픽보다 먼저 부딪히는 한계는 용량이다.
+
+| 대상 | 현재 (2026-10-10) | 한도 | 넘으면 |
+|---|---|---|---|
+| 빌드 결과물 `dist` | 약 400MB, 파일 4,348개. 글 HTML이 편당 약 260~320KB(대부분 반복되는 시리즈 목차), OG 이미지 91MB | GitHub Pages 1GB | 호스팅을 Cloudflare Pages로 옮긴다(무료, 대역폭 무제한, 파일 20,000개 제한). 도메인이 Cloudflare에 있으므로 DNS만 바꾸면 된다 |
+| 저장소 `.git` | 압축 약 70MB. 이력 기준 `public/images`(생성 SVG) 24.7MB, `src/content` 15.8MB, `reports/content-export` 15.2MB(버전 2개) | 권장 1GB, 파일당 100MB | 저장소는 옮기지 않는다. 생성물을 커밋에서 빼고, 큰 이미지는 Cloudflare R2로 분리한다 |
+
+먼저 할 일은 용량 절감이고, 대부분 AdSense 개선 작업과 겹친다. 시리즈 목차 중복 제거, OG 이미지 압축, 생성 리포트(`reports/content-export/content.jsonl`, 25MB) 커밋 중단 검토가 해당된다. Vercel 무료(Hobby) 플랜은 비상업용이라 광고 사이트에 쓸 수 없다.
+
 ## 실행 우선순위
 
 ### P0 — 재신청 전에 반드시 처리
 
 1. Search Console `/blog/` 임시 삭제 요청 취소, sitemap 제출 (0단계) — 2026-10-10 처리, sitemap 읽기 대기
-2. 얇은 태그·페이지네이션 페이지 `noindex`·sitemap 제외 (1단계)
-3. 목록·정책 페이지 광고 제외 (1단계)
+2. 얇은 태그·페이지네이션 페이지 `noindex`·sitemap 제외 (1단계) — `ef3fb80e`로 완료, 실측 확인
+3. 목록·정책 페이지 광고 제외 (1단계) — `ef3fb80e`로 완료, 실측 확인
 4. 시리즈 목차·저자 소개 등 페이지마다 반복되는 긴 텍스트 축소 (1단계)
-5. revue·metl Pages 문서 `noindex` 병합과 배포 확인 (위험 요소 6)
+5. revue·metl Pages 문서 `noindex` 병합과 배포 확인 (위험 요소 6) — 완료
 6. Modern Embedded Recipes의 편수 불일치 수정
 7. `준비 중`·`예정` 공개 신호 정리
 8. 색인 회복 확인 후에만 재신청
@@ -431,7 +493,7 @@ Search Console 설정 변경이라 사람이 직접 처리한다.
 2. 관련 글 추천 품질 개선
 3. 댓글 moderation 정책 마련
 4. 대표 글의 이미지·도표와 alt 설명 보강(현재 71%가 이미지 없음)
-5. 장기적으로 커스텀 도메인 검토(`ads.txt` 관리). GitHub에서는 user site에 커스텀 도메인을 걸면 project site도 같은 도메인 아래로 따라가므로, 커스텀 도메인만으로 프로젝트 문서가 분리되지는 않는다
+5. 커스텀 도메인 — 2026-10-10 `hawk90.dev`로 완료. GitHub user site에 도메인을 걸면 project site도 같은 도메인 아래로 따라오므로 revue·metl 문서는 `hawk90.dev/revue/`, `/metl/`에 있다(`noindex` 처리됨)
 
 ## 단계별 통과 가능성 (판단치)
 
