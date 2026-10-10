@@ -83,3 +83,46 @@
 - GPIO·UART·SPI·I2C·PWM과 겹치는 설명이 있는지 시리즈 전체 관점에서 기록
 - 1~2루프가 끝난 뒤 공통 보강 템플릿을 만들지, 글별로 차별화할지 결정
 
+## 정성 평가 업데이트
+
+기존 1차 예비 점수를 원문 10편과 대조해 현재 루브릭 형식으로 확정 기록했다. 점수는 Google의 공식 점수나 승인 확률이 아니라 내부 비교용 잠정 지표다. P0 정책 차단 요소는 확인되지 않았으며, 실제 보드·계측기·파형 결과와 공식 문서 대조 전이므로 신뢰도는 중간이다.
+
+### 요약
+
+| 파일 | 점수 | 잠정 판정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `00-preface.md` | **77/100** | 유지 후보(허브) | 시리즈 목적·독자·로드맵·환경을 안내하지만 개별 글과 공통 설명을 분리할 필요가 있다 |
+| `part1-01-digital-signal-basics.md` | **64/100** | 보강 | setup/hold와 신호 무결성 설명은 있으나 측정 조건·외부 근거가 약하다 |
+| `part1-02-clock-timing.md` | **66/100** | 보강 | skew·jitter·PLL/MMCM을 연결하지만 실제 clock tree와 jitter budget 사례가 부족하다 |
+| `part1-03-gpio-internals.md` | **63/100** | 보강 | push-pull·open-drain·Schmitt trigger의 회로 관점은 유용하나 전류·임계값 사례가 없다 |
+| `part1-04-uart-hardware.md` | **59/100** | 보강 검토 | framing·FIFO 설명은 있으나 baud mismatch와 overrun 재현 증거가 약하다 |
+| `part1-05-spi-hardware.md` | **59/100** | 보강 검토 | SPI mode와 신호선 설명은 있으나 CPOL/CPHA 파형·CS timing 차별화가 부족하다 |
+| `part1-06-i2c-hardware.md` | **63/100** | 보강 | arbitration·clock stretching은 다루지만 pull-up·bus capacitance 계산이 부족하다 |
+| `part1-07-adc-principles.md` | **68/100** | 보강 후 유지 | ADC 구조 비교와 적용 맥락은 상대적으로 좋으나 ENOB·aliasing 수치 사례가 필요하다 |
+| `part1-08-dac-principles.md` | **61/100** | 보강 | R-2R·Sigma-Delta·settling time은 설명하지만 INL/DNL 측정 근거가 약하다 |
+| `part1-09-pwm-signal.md` | **59/100** | 보강 검토 | duty·frequency·dead time 설명은 있으나 timer register와 실패 파형이 부족하다 |
+
+### 항목별 점수
+
+| 파일 | 독창성 25 | 완결성 20 | 실전 검증 15 | 중복/병합 15 | 검색 의도 10 | UX/내부링크 10 | 신뢰/출처 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `00-preface.md` | 19 | 15 | 8 | 12 | 9 | 9 | 5 | **77** |
+| `part1-01-digital-signal-basics.md` | 15 | 13 | 8 | 10 | 8 | 7 | 3 | **64** |
+| `part1-02-clock-timing.md` | 16 | 14 | 8 | 11 | 8 | 7 | 2 | **66** |
+| `part1-03-gpio-internals.md` | 15 | 13 | 8 | 10 | 8 | 7 | 2 | **63** |
+| `part1-04-uart-hardware.md` | 14 | 12 | 6 | 9 | 8 | 7 | 3 | **59** |
+| `part1-05-spi-hardware.md` | 14 | 12 | 6 | 9 | 8 | 7 | 3 | **59** |
+| `part1-06-i2c-hardware.md` | 15 | 13 | 8 | 10 | 8 | 7 | 2 | **63** |
+| `part1-07-adc-principles.md` | 17 | 14 | 9 | 11 | 8 | 7 | 2 | **68** |
+| `part1-08-dac-principles.md` | 15 | 13 | 7 | 10 | 8 | 6 | 2 | **61** |
+| `part1-09-pwm-signal.md` | 14 | 12 | 7 | 9 | 8 | 7 | 2 | **59** |
+
+### 공통 근거와 우선순위
+
+- 이번 루프의 핵심 위험은 글자 수가 아니라 9편이 같은 템플릿을 사용하고, 외부 1차 출처·실제 측정값·보드 조건이 공통적으로 약하다는 점이다.
+- UART·SPI·I2C·PWM은 설명만 늘리기보다 baud mismatch, CPOL/CPHA, stuck bus, dead-time 같은 실패 상황의 파형·로그·계산을 각각 넣어야 서로 다른 독립 가치를 만든다.
+- ADC·DAC·clock 글은 ENOB, INL/DNL, jitter budget처럼 수치로 검증 가능한 항목을 최소 한 가지씩 제시하는 것이 우선이다.
+- `00-preface`는 삭제 대상이 아니라 허브로 유지한다. 대신 공통 정의·환경 설명을 허브에 모으고 개별 글에는 주제별 판단 기준을 남기는 방향이 적절하다.
+- 외부 링크를 추가하는 것만으로 점수를 올리지 않는다. 공식 자료를 어떤 설계 판단과 연결했는지 본문에서 설명해야 한다.
+- 이번 평가는 점수 기록만 수행했다. 원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

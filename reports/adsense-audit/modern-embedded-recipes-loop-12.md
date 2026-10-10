@@ -74,3 +74,59 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 후 원문을 직접 읽은 `part10-04-hardfault-analysis.md`의 잠정 평가를 추가한다. P0 정책 차단은 확인되지 않았다.
+
+| 파일 | 상태 | 총점 | 결정 | 핵심 근거 |
+| --- | --- | ---: | --- | --- |
+| `part10-04-hardfault-analysis.md` | 잠정 | **77/100** | 보강 | stacked frame·CFSR·addr2line·NVRAM 진단 흐름은 강하지만 Cortex-M 변형 조건과 사례 재현 근거가 부족함 |
+
+| 항목 | 점수 |
+| --- | ---: |
+| 독창성 | 18/25 |
+| 완결성 | 17/20 |
+| 실전성·검증 가능성 | 11/15 |
+| 중복·병합 위험 | 12/15 |
+| 검색 의도 일치 | 9/10 |
+| 탐색성·가독성·내부 연결 | 8/10 |
+| 작성자·출처·신뢰성 | 2/5 |
+
+근거 위치: `사례 — "그냥 멈춰요"`, `Step 1 — Handler에서 SP 잡기`, `Step 2 — CFSR 비트 해석`, `Step 3 — PC를 source line으로`, `사례 마무리`, `Imprecise BFSR`, `사용 권장 패턴`, `정리`. FPU stacking, Cortex-M 변형, `CCR.STKALIGN`, fault enable 조건과 사례 출력의 실제성 여부를 확인한다. 원문은 수정하지 않았다.
+
+### 추가 정성 평가
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part9-10-mpmc-queue.md` | **70/100** | 보강 | Vyukov/Disruptor와 benchmark 구조는 있으나 “5~10배” 주장과 실제 contention 결과가 없음 |
+| `part10-01-debug-mindset.md` | **80/100** | 유지 후보 | 가설·재현·bisect·노트 작성이 실제 행동으로 이어지지만 사례와 방법론의 공식 근거가 없음 |
+| `part10-02-jtag-swd.md` | **78/100** | 보강 | 전기·핀·속도·잠금·복구 순서가 실용적이나 probe/MCU별 명령 검증이 필요함 |
+| `part10-03-gdb-remote-debug.md` | **80/100** | 유지 후보 | OpenOCD/pyOCD/GDB/RTOS/CI 흐름이 풍부하지만 모든 MCU 조합에 대한 일반화는 제한됨 |
+| `part10-05-uart-not-printing.md` | **80/100** | 유지 후보 | 전기→핀→clock→baud→logic analyzer→polling 순서가 재현 가능하지만 MCU별 표준 출처가 없음 |
+| `part10-06-boot-failure.md` | **80/100** | 유지 후보 | 전원·reset·clock·vector·main을 단계적으로 격리하고 실제 crystal 불량 사례를 제시함 |
+| `part10-07-interrupt-debugging.md` | **79/100** | 보강 | pending/mask/priority/level/shared IRQ와 GPIO/DWT 측정이 연결되지만 peripheral별 차이가 큼 |
+| `part10-08-memory-corruption.md` | **80/100** | 유지 후보 | canary/MPU/watchpoint/ASan/fill pattern을 원인 추적 흐름으로 연결하지만 target별 구현 확인 필요 |
+| `part10-09-timing-race-diag.md` | **78/100** | 보강 | GPIO/DWT/SWO/RTT로 관찰 간섭을 줄이는 방법이 좋지만 사례 원인과 memory-order 조건을 확정해야 함 |
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part9-10-mpmc-queue.md` | 17 | 15 | 9 | 9 | 9 | 8 | 3 | **70** |
+| `part10-01-debug-mindset.md` | 18 | 18 | 12 | 12 | 9 | 8 | 3 | **80** |
+| `part10-02-jtag-swd.md` | 17 | 18 | 11 | 11 | 9 | 9 | 3 | **78** |
+| `part10-03-gdb-remote-debug.md` | 18 | 18 | 12 | 12 | 9 | 8 | 3 | **80** |
+| `part10-05-uart-not-printing.md` | 18 | 18 | 12 | 11 | 9 | 9 | 3 | **80** |
+| `part10-06-boot-failure.md` | 18 | 18 | 12 | 11 | 9 | 9 | 3 | **80** |
+| `part10-07-interrupt-debugging.md` | 18 | 18 | 11 | 11 | 9 | 9 | 3 | **79** |
+| `part10-08-memory-corruption.md` | 18 | 18 | 12 | 11 | 9 | 9 | 3 | **80** |
+| `part10-09-timing-race-diag.md` | 18 | 17 | 11 | 11 | 9 | 9 | 3 | **78** |
+
+### 공통 근거와 보강 우선순위
+
+- 근거 위치: 각 글의 `사례`, `Step`, `진단 도구`, `측정`, `자주 보는 함정`, `정리` 섹션.
+- 공통 강점: 증상에서 바로 수정하지 않고 전기·레지스터·파형·trace·재현 단계로 원인을 좁히는 절차가 있다.
+- 공통 감점: 일부 사례의 출력과 수치가 실제 기록인지 예시인지 구분되지 않고, MCU/probe/tool version이 고정되지 않았다.
+- 중복 위험: GDB·HardFault·메모리 오염·Race·Interrupt 디버깅은 인접 진단 글과 일부 겹치므로 각 글의 관찰 도구와 종료 조건을 명확히 해야 한다.
+- 우선 확인: ARM/CMSIS·OpenOCD·GDB·FreeRTOS 공식 문서, Cortex-M 변형별 fault/trace 조건, 실제 board-in-loop 로그.
+
+원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

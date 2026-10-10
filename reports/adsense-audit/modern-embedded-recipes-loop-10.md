@@ -74,3 +74,43 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 대상 10편을 원문으로 읽고 잠정 점수를 추가했다. P0 정책 차단은 확인되지 않았다. 성능·전력·메모리 결과는 실제 target 측정 전의 `잠정` 값이다.
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part8-02-memory-alignment.md` | **76/100** | 보강 | alignment/padding/packed 함정과 compile-time 검증은 좋지만 architecture별 실제 penalty가 없음 |
+| `part8-03-cache-alignment.md` | **75/100** | 보강 | false sharing·SoA·DMA cache 경계를 설명하지만 benchmark 결과가 측정 필요 상태임 |
+| `part8-04-dma-allocator.md` | **80/100** | 유지 후보 | coherent/streaming/CMA/IOMMU/MPU를 구분하고 cache 오류 경로를 다루지만 platform별 검증이 필요함 |
+| `part8-05-zero-copy.md` | **78/100** | 보강 | DMA-BUF·V4L2·sendfile·io_uring을 pipeline으로 연결하지만 실제 복사 제거 여부와 성능값이 없음 |
+| `part8-06-numa.md` | **77/100** | 보강 | numactl/libnuma/HBM/CXL과 측정 도구를 연결하지만 서버·자동차 사례가 넓고 실측이 없음 |
+| `part8-07-simd.md` | **76/100** | 보강 | auto-vectorization·intrinsics·OpenMP SIMD의 선택 기준은 좋지만 ISA별 benchmark가 없음 |
+| `part8-08-neon.md` | **75/100** | 보강 | matrix/image/FFT/crypto 사례가 풍부하지만 코드 우세와 target별 결과 부재가 남음 |
+| `part8-09-stack-analysis.md` | **80/100** | 유지 후보 | high-water·canary·MPU·static 분석을 실제 검출 흐름으로 연결하지만 RTOS/target 조건이 필요함 |
+| `part8-10-code-size-optimization.md` | **78/100** | 보강 | -Os/LTO/gc-sections/libc 선택 순서가 명확하지만 실제 map diff가 없음 |
+| `part8-11-power-optimization.md` | **80/100** | 유지 후보 | sleep/clock gating/DVFS/측정 장비까지 다루지만 전류·수명 결과는 측정 필요임 |
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part8-02-memory-alignment.md` | 17 | 17 | 10 | 11 | 9 | 9 | 3 | **76** |
+| `part8-03-cache-alignment.md` | 16 | 17 | 10 | 11 | 9 | 9 | 3 | **75** |
+| `part8-04-dma-allocator.md` | 18 | 18 | 12 | 12 | 9 | 8 | 3 | **80** |
+| `part8-05-zero-copy.md` | 17 | 17 | 11 | 11 | 9 | 9 | 4 | **78** |
+| `part8-06-numa.md` | 17 | 17 | 10 | 11 | 9 | 9 | 4 | **77** |
+| `part8-07-simd.md` | 17 | 16 | 10 | 11 | 9 | 9 | 4 | **76** |
+| `part8-08-neon.md` | 17 | 17 | 10 | 10 | 9 | 9 | 3 | **75** |
+| `part8-09-stack-analysis.md` | 18 | 18 | 12 | 12 | 9 | 8 | 3 | **80** |
+| `part8-10-code-size-optimization.md` | 17 | 17 | 11 | 12 | 9 | 9 | 3 | **78** |
+| `part8-11-power-optimization.md` | 18 | 18 | 12 | 11 | 9 | 9 | 3 | **80** |
+
+### 공통 근거와 보강 우선순위
+
+- 근거 위치: 각 글의 `핵심 개념`, `코드 / 실제 사용 예`, `측정 / 성능 비교`, `자주 보는 함정`, `정리` 섹션.
+- 공통 강점: 성능·전력·메모리 주장을 무조건적인 수치로 단정하지 않고 target·workload 측정을 반복해서 요구한다.
+- 공통 감점: 실제 benchmark, map diff, power trace, cache/DMA 환경, CPU/ISA 버전이 보고서에 없다.
+- 중복 위험: alignment/cache/DMA/zero-copy/NUMA가 모두 메모리 이동·locality를 다루므로 각 글의 독립 질문을 유지해야 한다.
+- 다음 확인: ARM/Linux 공식 자료, compiler optimization report, perf/numastat, power profiler, DMA/cache maintenance 결과.
+
+원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

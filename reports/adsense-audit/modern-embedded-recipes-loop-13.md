@@ -74,3 +74,43 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 대상 10편을 원문으로 읽고 잠정 점수를 추가했다. P0 정책 차단은 확인되지 않았다. 장비·FPGA 보드·툴 버전·실측 결과 대조 전의 `잠정` 값이다.
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part10-10-protocol-analyzer.md` | **82/100** | 유지 후보 | UART/SPI/I2C/CAN 캡처·trigger·전기 분석과 실제 오류 사례가 연결됨 |
+| `part10-11-logging-system.md` | **78/100** | 보강 | binary ring/deferred/SWO/RTT 구조는 좋지만 target별 overhead와 loss 결과가 없음 |
+| `part10-12-postmortem-analysis.md` | **82/100** | 유지 후보 | Linux coredump와 MCU mini-dump·field 전송을 하나의 분석 흐름으로 연결함 |
+| `part11-01-fpga-basics.md` | **74/100** | 보강 | LUT/FF/BRAM/DSP와 timing 흐름은 명확하지만 실제 synthesis/resource 결과가 없음 |
+| `part11-02-vivado-usage.md` | **78/100** | 보강 | project/XDC/synth/impl/TCL/ILA 흐름이 풍부하지만 board·Vivado release별 검증이 없음 |
+| `part11-03-pcie-bar.md` | **77/100** | 보강 | BAR sizing·enumeration·ioremap·VFIO까지 연결하지만 실제 config dump와 device 조건이 없음 |
+| `part11-04-axi.md` | **78/100** | 보강 | AXI 변종·handshake·burst·outstanding·deadlock을 폭넓게 설명하지만 burst 실측이 없음 |
+| `part11-05-ps-pl-communication.md` | **76/100** | 보강 | GP/HP/ACP 선택과 cache/DMA 경계가 유용하지만 Zynq 세대별 결과가 없음 |
+| `part11-06-mailbox.md` | **77/100** | 보강 | register/doorbell/sequence/CRC/DMA/OpenAMP 비교가 좋지만 round-trip 측정이 없음 |
+| `part11-07-cq-sq.md` | **78/100** | 보강 | NVMe/XDMA/io_uring 공통 구조와 phase/doorbell/batching이 연결되지만 benchmark 범위가 예시임 |
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part10-10-protocol-analyzer.md` | 19 | 18 | 13 | 12 | 9 | 8 | 3 | **82** |
+| `part10-11-logging-system.md` | 17 | 17 | 11 | 11 | 9 | 9 | 4 | **78** |
+| `part10-12-postmortem-analysis.md` | 19 | 18 | 12 | 12 | 9 | 9 | 3 | **82** |
+| `part11-01-fpga-basics.md` | 16 | 17 | 9 | 10 | 9 | 9 | 4 | **74** |
+| `part11-02-vivado-usage.md` | 17 | 18 | 11 | 11 | 9 | 9 | 3 | **78** |
+| `part11-03-pcie-bar.md` | 17 | 17 | 10 | 11 | 9 | 9 | 4 | **77** |
+| `part11-04-axi.md` | 18 | 17 | 10 | 11 | 9 | 9 | 3 | **78** |
+| `part11-05-ps-pl-communication.md` | 17 | 17 | 10 | 10 | 9 | 9 | 4 | **76** |
+| `part11-06-mailbox.md` | 17 | 17 | 10 | 11 | 9 | 9 | 4 | **77** |
+| `part11-07-cq-sq.md` | 18 | 17 | 10 | 11 | 9 | 9 | 3 | **78** |
+
+### 공통 근거와 보강 우선순위
+
+- 근거 위치: 각 글의 `사례`, `코드 / 실제 사용 예`, `측정 / 성능 비교`, `자주 보는 함정`, `정리` 섹션.
+- 공통 강점: 로그·파형·dump·resource report·queue 상태처럼 확인 가능한 관찰 대상을 제시한다.
+- 공통 감점: 측정 표가 실제 결과가 아니라 `측정 필요` 또는 예시 형식이고, FPGA/PCIe/AXI 글은 board·IP·tool release가 고정되지 않았다.
+- 중복 위험: AXI·PS-PL·Mailbox·CQ/SQ가 host-device 통신과 queue 구조를 공유하므로 각 계층의 독립 질문을 분명히 해야 한다.
+- 다음 확인: Saleae/oscilloscope 사용 조건, AMD/Xilinx 공식 문서·Vivado release, PCIe/AMBA 사양, 실제 board trace/resource/throughput 결과.
+
+원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

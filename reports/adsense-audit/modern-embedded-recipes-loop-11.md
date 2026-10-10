@@ -74,3 +74,43 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 대상 10편을 원문으로 읽고 잠정 점수를 추가했다. P0 정책 차단은 확인되지 않았다. 동시성 보장·WCET·성능 주장은 target과 formal/실측 검증 전의 `잠정` 값이다.
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part8-12-wcet-analysis.md` | **80/100** | 유지 후보 | WCET/ACET·입력·cache·ISR jitter·static/measurement 한계를 잘 구분하지만 실제 분석 결과가 없음 |
+| `part9-01-lock-free-ring.md` | **79/100** | 보강 | SPSC·release/acquire·DMA·SMP 경계를 폭넓게 다루지만 구현별 memory model 검증이 필요함 |
+| `part9-02-wait-free.md` | **67/100** | 보강 | 개념과 주의점은 있으나 요약에서 여러 패턴을 wait-free로 묶어 본문 caveat와 정합성이 흔들림 |
+| `part9-03-rcu-basics.md` | **77/100** | 보강 | kernel/URCU·grace period·reclamation을 연결하지만 flavor별 실제 적용과 측정이 없음 |
+| `part9-04-hazard-pointer.md` | **78/100** | 보강 | reader 보호·retire/scan·RCU 비교가 좋지만 표준화·구현별 메모리 상한 검증이 필요함 |
+| `part9-05-cas-patterns.md` | **77/100** | 보강 | CAS loop·weak/strong·backoff·ABA를 실제 패턴으로 연결하지만 contention 결과가 없음 |
+| `part9-06-atomic-cost.md` | **78/100** | 보강 | ISA와 memory order별 비용 관점이 명확하지만 LSE/LL-SC/lock 비교 실측이 없음 |
+| `part9-07-spinlock-vs-mutex.md` | **76/100** | 보강 | hold time·contention·전력 기준은 유용하지만 kernel/user/RT 환경이 넓게 섞임 |
+| `part9-08-aba-problem.md` | **76/100** | 보강 | tagged/version/hazard/RCU 해결책을 비교하지만 128-bit CAS와 reclamation 전제가 target별임 |
+| `part9-09-false-sharing.md` | **78/100** | 보강 | padding/per-CPU/perf c2c 해결 흐름이 좋지만 CPU topology별 benchmark가 없음 |
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part8-12-wcet-analysis.md` | 18 | 18 | 12 | 12 | 9 | 8 | 3 | **80** |
+| `part9-01-lock-free-ring.md` | 18 | 18 | 11 | 11 | 9 | 9 | 3 | **79** |
+| `part9-02-wait-free.md` | 17 | 14 | 8 | 8 | 9 | 8 | 3 | **67** |
+| `part9-03-rcu-basics.md` | 17 | 17 | 10 | 11 | 9 | 9 | 4 | **77** |
+| `part9-04-hazard-pointer.md` | 18 | 17 | 10 | 11 | 9 | 9 | 4 | **78** |
+| `part9-05-cas-patterns.md` | 17 | 17 | 10 | 11 | 9 | 9 | 4 | **77** |
+| `part9-06-atomic-cost.md` | 18 | 17 | 10 | 11 | 9 | 9 | 4 | **78** |
+| `part9-07-spinlock-vs-mutex.md` | 17 | 16 | 10 | 11 | 9 | 9 | 4 | **76** |
+| `part9-08-aba-problem.md` | 17 | 17 | 9 | 11 | 9 | 9 | 4 | **76** |
+| `part9-09-false-sharing.md` | 17 | 17 | 10 | 11 | 9 | 9 | 4 | **78** |
+
+### 공통 근거와 보강 우선순위
+
+- 근거 위치: 각 글의 `핵심 개념`, `코드 / 실제 사용 예`, `측정 / 성능 비교`, `자주 보는 함정`, `정리` 섹션.
+- 공통 강점: lock-free/wait-free/RCU/hazard/CAS를 서로 다른 progress와 reclamation 문제로 구분하려고 시도한다.
+- 주요 감점: 실제 interleaving 검증, formal proof, compiler/ISA 조건, contention/WCET 측정 결과가 없다.
+- 우선 보강: `part9-02-wait-free.md`의 요약 문구를 본문 caveat와 일치시키고, 모든 wait-free 주장을 bounded step 조건과 함께 확정한다.
+- 다음 확인: C/C++ atomic 표준, ARM architecture manual, Linux RCU/hazard 구현 문서, target별 litmus test·benchmark 결과.
+
+원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

@@ -74,3 +74,74 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 후 원문을 직접 읽은 두 글의 잠정 평가를 추가한다. 두 글 모두 P0 정책 차단은 확인되지 않았다.
+
+| 파일 | 상태 | 총점 | 결정 | 핵심 근거 |
+| --- | --- | ---: | --- | --- |
+| `part11-13-opencl-fpga.md` | 잠정 | **70/100** | 보강 | FPGA 실행 모델·channel·II·emulator 차이는 유용하지만 실제 보드 합성·리포트 검증이 예시 수준임 |
+| `part11-14-intel-quartus.md` | 잠정 | **72/100** | 보강 | Quartus 전체 흐름과 명령은 풍부하지만 release·device·edition별 제약과 실제 timing 결과가 부족함 |
+
+### `part11-13-opencl-fpga.md`
+
+| 항목 | 점수 |
+| --- | ---: |
+| 독창성 | 15/25 |
+| 완결성 | 16/20 |
+| 실전성·검증 가능성 | 10/15 |
+| 중복·병합 위험 | 10/15 |
+| 검색 의도 일치 | 9/10 |
+| 탐색성·가독성·내부 연결 | 8/10 |
+| 작성자·출처·신뢰성 | 2/5 |
+
+근거 위치: `핵심 개념 — Single Work-Item Kernel`, `Channel — Kernel 간 통신`, `Burst memory access`, `Host code (Intel OpenCL)`, `사례 — FIR Filter`, `Profile / Report`, `자주 보는 함정`, `정리`.
+
+### `part11-14-intel-quartus.md`
+
+| 항목 | 점수 |
+| --- | ---: |
+| 독창성 | 14/25 |
+| 완결성 | 17/20 |
+| 실전성·검증 가능성 | 10/15 |
+| 중복·병합 위험 | 11/15 |
+| 검색 의도 일치 | 9/10 |
+| 탐색성·가독성·내부 연결 | 9/10 |
+| 작성자·출처·신뢰성 | 2/5 |
+
+근거 위치: `Project 생성`, `SDC Constraint`, `Compile`, `TimeQuest — Timing Analysis`, `Platform Designer (Qsys)`, `Nios II Soft Processor`, `TCL 자동화`, `자주 보는 함정`, `정리`. 두 글 모두 특정 버전·보드·실행 결과를 공식 문서와 대조한 뒤 점수를 확정한다. 원문은 수정하지 않았다.
+
+### 추가 정성 평가
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part11-08-dma-completion.md` | **79/100** | 보강 | IRQ/polling/completion ring/hybrid와 p99 latency 관점이 좋지만 제시한 UART 결과의 실제성 확인이 필요함 |
+| `part11-09-pcie-streaming.md` | **78/100** | 보강 | BAR/MSI-X/ordering/kernel bypass를 streaming 결정으로 연결하지만 benchmark와 PCIe 조건이 없음 |
+| `part11-10-hls.md` | **80/100** | 유지 후보 | FIR·dataflow·II·AXI·C/RTL 검증 흐름이 명확하지만 합성 report가 예시 수준임 |
+| `part11-11-hls-optimization.md` | **77/100** | 보강 | pipeline/unroll/partition/dataflow를 단계적으로 설명하지만 실제 II/resource 결과가 없음 |
+| `part11-12-vitis-ai.md` | **73/100** | 보강 | quantize→compile→xmodel→VART 흐름은 좋지만 release·board 의존성과 성능 주장 근거가 부족함 |
+| `part12-01-edge-inference.md` | **76/100** | 보강 | cloud/edge 판단과 end-to-end pipeline 기준은 좋지만 latency·privacy·비용 수치의 검증이 없음 |
+| `part12-02-npu-architecture.md` | **74/100** | 보강 | Ethos/Hexagon/ANE/Edge TPU/DLA를 비교하지만 제조사별 비공개 구조를 일반화할 위험이 있음 |
+| `part12-03-quantization.md` | **78/100** | 보강 | PTQ/QAT/per-channel/GPTQ/AWQ 흐름이 풍부하지만 accuracy·memory·latency 결과가 없음 |
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part11-08-dma-completion.md` | 18 | 17 | 11 | 11 | 9 | 9 | 4 | **79** |
+| `part11-09-pcie-streaming.md` | 18 | 17 | 10 | 11 | 9 | 9 | 4 | **78** |
+| `part11-10-hls.md` | 18 | 18 | 11 | 11 | 9 | 9 | 4 | **80** |
+| `part11-11-hls-optimization.md` | 18 | 17 | 10 | 11 | 9 | 9 | 3 | **77** |
+| `part11-12-vitis-ai.md` | 17 | 16 | 10 | 10 | 9 | 8 | 3 | **73** |
+| `part12-01-edge-inference.md` | 17 | 17 | 10 | 11 | 9 | 9 | 3 | **76** |
+| `part12-02-npu-architecture.md` | 17 | 17 | 9 | 10 | 9 | 9 | 3 | **74** |
+| `part12-03-quantization.md` | 18 | 17 | 10 | 11 | 9 | 9 | 4 | **78** |
+
+### 공통 근거와 보강 우선순위
+
+- 근거 위치: 각 글의 `사례`, `코드 / 실제 사용 예`, `측정 / 성능 비교`, `자주 보는 함정`, `정리` 섹션.
+- 공통 강점: FPGA/AI 글이 단순 용어 소개를 넘어 pipeline, resource, quantization, end-to-end 측정 항목을 제시한다.
+- 공통 감점: `측정 필요` 표가 많고 board·IP·runtime·model·release가 고정되지 않았다.
+- 우선 확인: OpenCL/Quartus/Vitis AI의 기존 점수와 함께 AMD/Xilinx·Intel·Arm·runtime 공식 문서 및 실제 synthesis/profile/accuracy 결과를 대조한다.
+- 중복 위험: HLS·HLS optimization·OpenCL·Vitis AI가 pipeline/accelerator 설명을 공유하므로 각 글의 독립적인 질문을 구분한다.
+
+원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+
