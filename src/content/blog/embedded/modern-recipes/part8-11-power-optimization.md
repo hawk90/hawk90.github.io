@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"전력은 *얼마나 빨리 sleep으로 가느냐*가 90%를 결정합니다."** 다음 90%는 어떤 sleep mode를 고르고 어떤 peripheral을 꺼두느냐입니다.
+> **"전력은 sleep 진입 시간과 각 상태의 전류·체류 시간으로 결정됩니다."** 어떤 sleep mode와 peripheral 정책이 유리한지는 측정으로 확인해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
-배터리 IoT device, BLE beacon, sensor logger처럼 *전원 빠진 후 수년*을 돌아야 하는 펌웨어가 전형적입니다. CR2032 한 알(220 mAh)로 1년을 가게 하려면 평균 전류가 25 µA 이하여야 합니다. Active에서 5 mA를 쓰는 MCU가 99% 시간을 sleep으로 보내면 평균이 50 µA가 됩니다.
+배터리 IoT device, BLE beacon, sensor logger처럼 장시간 동작해야 하는 펌웨어가 전형적입니다. 필요한 평균 전류는 배터리의 유효 용량·방전 특성·온도와 목표 수명으로 계산합니다. Active에서 5 mA를 쓰는 MCU의 평균 전류도 sleep 전류와 wake 주기까지 포함해 계산해야 합니다.
 
 또 한 가지 상황은 자동차나 산업 device의 ECO 모드입니다. 전체 시간의 작은 부분만 active를 유지하면 thermal 설계가 단순해집니다.
 
@@ -61,7 +61,7 @@ int main(void) {
 }
 ```
 
-WFI 한 줄만으로도 active 5 mA에서 sleep 1~2 mA로 떨어집니다. Idle hook에서 항상 호출합니다.
+WFI는 CPU를 대기 상태로 전환하지만 실제 전류는 clock·debug·peripheral·전원 모드 설정에 따라 달라집니다. RTOS의 idle hook과 wake 조건을 함께 검증합니다.
 
 ### Stop mode (STM32 예시)
 
@@ -103,7 +103,7 @@ USART2->BRR = 0x683;
 USART2->CR1 = USART_CR1_UE | USART_CR1_TE;
 ```
 
-쓰지 않는 peripheral 한 개당 보통 수십 µA씩 줄어듭니다. 부팅 시 모두 끄고 사용 직전에 켜는 패턴이 표준입니다.
+쓰지 않는 peripheral의 clock gating 효과는 장치별로 다릅니다. 부팅 시 필요한 peripheral만 켜고 사용 후 끄는 정책을 전원·복구 순서와 함께 검증합니다.
 
 ### Tickless idle (FreeRTOS)
 
@@ -143,7 +143,7 @@ void cpu_set_freq(int mhz) {
 }
 ```
 
-전력은 P = C × V² × f이므로 voltage 0.83x + frequency 0.1x이면 전력이 약 7%로 떨어집니다.
+동적 전력은 단순화하면 P ≈ C × V² × f로 설명할 수 있지만 누설·전원 레일·workload가 함께 작용합니다. 전압과 주파수 변경의 효과는 실제 동작점에서 측정해야 합니다.
 
 ### µA-level 측정
 
@@ -154,7 +154,7 @@ void cpu_set_freq(int mhz) {
 | Otii Arc / EEM | µA부터 mA까지, profile + sync trigger |
 | Power Profiler Kit (Nordic) | µA부터 mA, BLE 친화 |
 
-µA 단위 측정은 multimeter로는 불가능합니다. 전용 power profiler가 필요합니다.
+µA 단위 측정은 DMM의 범위·burden voltage·응답 속도와 측정 지점에 따라 정확도가 달라집니다. burst current까지 보려면 shunt+scope나 전용 power profiler가 유리합니다.
 
 ### Pin float 방지
 
@@ -171,18 +171,18 @@ floating input은 noise로 input buffer가 진동해 µA가 새어 나옵니다.
 
 | 시나리오 | 평균 전류 | 배터리(CR2032) 수명 |
 |----------|-----------|-----------------------|
-| WFI 없이 run loop | 5 mA | ~44 시간 |
-| WFI in idle | 1.2 mA | ~180 시간 |
-| + peripheral clock gating | 800 µA | ~11 일 |
-| + stop mode (1초마다 wake) | 80 µA | ~115 일 |
-| + tickless idle + RTC wake-up | 8 µA | ~3 년 |
+| WFI 없이 run loop | 측정 필요 | 배터리 조건으로 계산 |
+| WFI in idle | 측정 필요 | 배터리 조건으로 계산 |
+| + peripheral clock gating | 측정 필요 | 배터리 조건으로 계산 |
+| + stop mode (1초마다 wake) | 측정 필요 | 배터리 조건으로 계산 |
+| + tickless idle + RTC wake-up | 측정 필요 | 배터리 조건으로 계산 |
 
-각 단계가 *한 자릿수씩* 개선됩니다. 누적이 중요합니다.
+각 단계의 효과와 배터리 수명은 wake 패턴·부하·측정 조건에 따라 달라지므로 단계별로 검증합니다.
 
 ```text
 DVFS 효과
-80 MHz, 1.2 V                    5 mA
-8 MHz, 1.0 V                     400 µA
+80 MHz, 1.2 V                    측정 필요
+8 MHz, 1.0 V                     측정 필요
 ```
 
 clock과 voltage를 함께 낮추는 것이 핵심입니다.
@@ -230,9 +230,9 @@ stop mode에서 깨어나면 일부 clock이 default로 돌아가 있습니다. 
 
 - 전력 절감의 핵심은 sleep 시간을 최대화하는 것입니다.
 - WFI 한 줄만으로도 mA 단위가 줄어듭니다.
-- Stop mode와 standby mode는 µA 수준 전력을 달성합니다.
+- Stop mode와 standby mode는 일부 MCU에서 µA 수준을 지원하지만 datasheet 조건을 확인합니다.
 - Peripheral clock gating은 µA 단위 누적 효과가 큽니다.
-- Tickless idle은 RTOS 환경의 표준 절전입니다.
+- Tickless idle은 RTOS 환경에서 검토할 수 있는 절전 방식입니다.
 - DVFS로 active 전력 자체를 줄일 수 있습니다.
 - 측정은 multimeter가 아닌 전용 power profiler로 합니다.
 - 부팅 시 모든 unused peripheral과 floating pin을 명시적으로 처리합니다.

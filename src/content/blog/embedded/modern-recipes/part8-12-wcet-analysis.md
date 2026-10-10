@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-자동차 brake control, 의료기기 dosing pump, 항공 flight controller처럼 *마감을 놓치면 사고*인 시스템에서는 ACET(평균)이 아니라 WCET가 보장되어야 합니다. 평균 50 µs에 worst-case 200 µs인 control loop을 100 µs 주기로 돌리면 가끔 사고가 납니다.
+자동차 brake control, 의료기기 dosing pump, 항공 flight controller처럼 *마감을 놓치면 위험*한 시스템에서는 ACET(평균)만으로는 부족하고 검증 가능한 실행시간 상한이 필요합니다. 평균과 관측된 worst-case가 deadline 안에 있어도 분석 범위 밖의 경로·간섭을 놓치지 않았는지 확인해야 합니다.
 
 상대적으로 가벼운 환경(soft real-time)에서도 WCET 분석은 유용합니다. *얼마나 느려질 수 있는지*를 알면 jitter 한계와 backlog 정책을 합리적으로 정할 수 있습니다.
 
@@ -65,7 +65,7 @@ void measure_loop(void) {
 /* 여러 입력 시나리오로 반복 호출 후 max 추출 */
 ```
 
-DWT cycle counter는 Cortex-M3 이상에서 cycle 정밀도로 측정 가능합니다. 입력을 광범위하게 변화시켜 worst를 찾습니다.
+DWT cycle counter는 지원되는 Cortex-M과 debug/trace 설정에서 cycle 단위 측정에 사용할 수 있습니다. 입력을 광범위하게 변화시켜 관측된 최대값을 찾되, 이것만으로 WCET를 증명할 수는 없습니다.
 
 ### Loop bound 명시
 
@@ -120,7 +120,7 @@ void measure_hot(void) {
 /* WCET = cold time */
 ```
 
-cache가 비었을 때가 worst case입니다. WCET 측정은 *cold cache*로 합니다.
+cache 상태가 cold인 경로가 느릴 수 있지만 항상 전체 worst case인 것은 아닙니다. cache·버스 경쟁·분기 예측·ISR 상태를 요구사항에 맞게 조합해 분석합니다.
 
 ### ISR jitter 가산
 
@@ -139,7 +139,7 @@ cache가 비었을 때가 worst case입니다. WCET 측정은 *cold cache*로 �
 | Heptane | academic, simpler |
 | TimeWeaver | Microsoft Research |
 
-aiT 같은 도구는 binary와 칩 model을 함께 분석해 *수학적으로 증명된 WCET 상한*을 제공합니다. DO-178B/C 인증에 필요합니다.
+aiT 같은 도구는 binary와 칩 model을 함께 분석해 가정과 모델 범위 안에서 WCET 상한을 계산합니다. 인증 표준의 적용 여부와 필요한 증거는 프로젝트·도메인·심사 계획에 따라 다릅니다.
 
 ### Cache-aware coding
 
@@ -160,7 +160,7 @@ WCET를 줄이려면 cache miss 가능성을 줄입니다. 작은 hot path는 ca
 l2_lock_range((uint32_t)critical_loop, 4096);
 ```
 
-Cortex-A의 L2 cache는 way 단위 lock이 가능합니다. critical loop의 cache line을 영구히 잡아두면 deterministic latency가 보장됩니다.
+Cortex-A의 cache lockdown 지원과 범위는 세대·구현별로 다릅니다. 지원되는 경우에도 다른 메모리·버스 간섭까지 제거해야 deterministic latency를 주장할 수 있습니다.
 
 ### Disable cache (극단)
 
@@ -171,7 +171,7 @@ critical_section();
 SCB_EnableDCache();
 ```
 
-Cache를 끄면 모든 access가 RAM access이므로 deterministic하지만 평균 latency가 5~10배로 늘어납니다. 다른 모든 방법이 안 될 때 최후 수단입니다.
+Cache를 끄면 접근 경로가 바뀌지만 모든 access가 동일한 RAM 비용이 되거나 deterministic해지는 것은 아닙니다. 평균 성능과 시스템 영향까지 측정한 뒤 검토합니다.
 
 ## 측정 / 성능 비교
 
@@ -240,11 +240,11 @@ malloc의 WCET는 free list 길이에 의존합니다. real-time path에서는 p
 
 - WCET는 *worst case*입니다. ACET로 deadline을 계산하면 가끔 fail합니다.
 - 측정 기반은 worst input을 의도적으로 만들어 cold cache로 측정합니다.
-- 정적 분석 도구는 수학적으로 증명된 상한을 제공합니다. 인증에 필수입니다.
+- 정적 분석 도구는 명시한 모델과 가정 범위에서 상한을 계산하며, 인증 필요 여부는 시스템 표준과 프로젝트 범위로 정합니다.
 - WCET를 키우는 4대 요인은 branch, loop, cache, ISR입니다.
 - Cache lock과 cache disable은 deterministic latency를 위한 최후 수단입니다.
 - malloc, recursion, unbounded loop은 real-time path에서 금지합니다.
-- WCET와 deadline 사이에 안전 margin을 둡니다(50% 이상이 일반적).
+- WCET와 deadline 사이의 margin은 간섭·측정 오차·요구사항으로 정하고 근거를 남깁니다.
 
 다음 편부터 Part 9 **Concurrency 응용**으로 넘어갑니다.
 

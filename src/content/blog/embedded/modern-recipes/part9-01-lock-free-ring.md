@@ -53,14 +53,14 @@ Producer만 head를 변경하고 consumer만 tail을 변경합니다. 서로 *�
 ## Power-of-2 — 왜 중요한가
 
 ```c
-uint16_t next = (h + 1) & RING_MASK;   /* AND — 1 cycle */
+uint16_t next = (h + 1) & RING_MASK;   /* power-of-2에서 modulo 대신 mask */
 /* vs */
-uint16_t next = (h + 1) % RING_SIZE;   /* MOD — 10+ cycle (div) */
+uint16_t next = (h + 1) % RING_SIZE;   /* non-power-of-2도 가능; 비용은 target 측정 */
 ```
 
-Cortex-M3에서는 *div 명령이 12 cycle*인 반면 AND mask는 1 cycle에 끝납니다.
+Cortex-M에서 modulo와 mask의 비용은 compiler·target·상수 전파에 따라 달라집니다. power-of-2 크기에서는 mask가 단순한 경로를 제공할 수 있습니다.
 
-그래서 `RING_SIZE`는 *반드시 power of 2*(16, 32, 64, 128, ...)여야 합니다.
+`RING_SIZE`는 mask를 사용하려면 power of 2여야 합니다. modulo를 사용하면 다른 크기도 가능하지만 wrap·full/empty 계산을 함께 검증해야 합니다.
 
 ## Memory Order — Release/Acquire
 
@@ -91,7 +91,7 @@ Release/acquire pair를 쓰면 producer의 `buf[h]` write가 consumer의 `head` 
 volatile uint16_t head, tail;   /* volatile은 컴파일러 차단만 */
 ```
 
-Single core에서는 *재정렬이 없습니다*(in-order pipeline에 같은 주소의 store buffer reorder도 없습니다). 그래서 `volatile`만으로 충분합니다.
+단일 코어에서 ISR과 task가 공유하는 단순 SPSC는 target ABI와 인터럽트 모델에 따라 volatile/배리어로 구현할 수 있지만, C의 volatile만으로 일반적인 thread 간 atomicity와 memory ordering을 보장하지는 않습니다. portable한 C thread·SMP 경로는 atomic을 사용합니다.
 
 ## ARM SMP — DMB·LDAR/STLR 필요
 
@@ -116,7 +116,7 @@ typedef struct {
 } ring_t;
 ```
 
-Cortex-A SMP에서는 head와 tail이 *같은 line*에 있으면 false sharing이 발생해 10배 가까이 느려질 수 있습니다.
+Cortex-A SMP에서는 head와 tail이 같은 cache line에 있으면 false sharing이 생길 수 있습니다. 영향은 cache topology와 workload로 측정합니다.
 
 ## Multi-Byte Push
 
@@ -161,7 +161,7 @@ void uart_task(void *p) {
 }
 ```
 
-ISR이 *queue API를 쓰지 않으므로* 매우 빠릅니다. FromISR 호출 overhead도 0입니다.
+ISR이 queue API 대신 고정 크기 ring을 직접 갱신해 경로를 단순화할 수 있습니다. FromISR API보다 항상 빠르거나 overhead가 0이라고 가정하지 말고 측정합니다.
 
 ## Notification 합쳐서
 
@@ -225,7 +225,7 @@ bool mpmc_push(mpmc_t *q, T item) {
 }
 ```
 
-Dmitry Vyukov가 제안한 MPMC 알고리즘으로, Folly와 LMAX, DPDK가 채택했습니다. *진짜 lock-free* 방식입니다.
+Dmitry Vyukov가 제안한 계열의 MPMC 알고리즘입니다. 구현의 memory order·progress 보장과 실제 라이브러리 채택 여부는 각각 확인해야 하며, 예시 코드만으로 lock-free 성질을 보장하지 않습니다.
 
 ## ABA — SPSC엔 없음
 
@@ -255,7 +255,7 @@ rte_ring_sp_enqueue(r, obj);
 rte_ring_sc_dequeue(r, &obj);
 ```
 
-DPDK ring은 *bulk operation*에 최적화되어 있습니다. 10G 이더넷에서 표준처럼 쓰입니다.
+DPDK ring은 bulk operation을 지원하도록 설계됐습니다. 적용 가능한 NIC·polling 모델과 처리율은 workload에서 측정합니다.
 
 ## STM32H7 — DMA UART + Ring
 
@@ -278,7 +278,7 @@ void uart_task(void *p) {
 }
 ```
 
-ISR 자체가 필요 없고 DMA와 polling만으로 동작합니다. 1 Mbps 이상의 high baud UART에서 표준으로 쓰입니다.
+구성에 따라 ISR 없이 DMA와 polling만으로 동작할 수 있습니다. DMA head 갱신의 동시성·cache coherency·wrap 처리를 확인하고 baud rate별로 측정합니다.
 
 ## Stream Buffer — FreeRTOS Built-in
 
