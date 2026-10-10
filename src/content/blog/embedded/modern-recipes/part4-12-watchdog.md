@@ -104,6 +104,7 @@ void task_alive(int id) {
 
 // 최상위 supervisor
 void watchdog_task(void) {
+    // task_alive_mask 갱신과 clear는 동일 context 또는 critical section에서 보호
     if (task_alive_mask == ALL_TASKS_MASK) {
         iwdg_kick();
         task_alive_mask = 0;   // 다음 주기
@@ -195,7 +196,7 @@ GPIOA->BSRR = (1u << 5);   // LED on
 while (1);   // hang here — watchdog should reset after 1 sec
 ```
 
-LED가 켜졌다가 1초 후 보드가 reset 되면서 다시 켜졌다 꺼졌다 합니다. 깜빡임 주기가 정확하지 않으면 LSI 정밀도 ±10% 때문.
+LED가 켜졌다가 watchdog timeout 후 보드가 reset 되면서 다시 켜졌다 꺼졌다 합니다. 깜빡임 주기는 LSI tolerance, temperature, reload/prescaler와 다른 reset 경로의 영향을 함께 받습니다.
 
 ## 자주 보는 함정
 
@@ -213,7 +214,7 @@ JTAG/SWD로 break 걸면 1초 후 reset. debug 빌드는 freeze 비트 set.
 
 > ⚠️ IWDG timeout이 너무 짧음
 
-100 ms timeout은 1초 운영 동안 9번 refresh가 일어나야 합니다. spurious reset이 잦습니다. *normal cycle의 3-5배* 정도로 두는 것이 안전.
+timeout은 정상 cycle, worst-case scheduling latency, LSI tolerance와 startup 시간을 포함해 정합니다. 고정된 3~5배 규칙보다 실제 worst case와 fault detection 요구사항을 측정해야 합니다.
 
 > ⚠️ WWDG window를 너무 좁게
 

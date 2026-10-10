@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"코어를 꺼두는 시간이 곧 전원 수명입니다."** Sleep → Stop → Standby. 단계마다 µA가 한 자릿수씩 줄어듭니다.
+> **"코어를 꺼두는 시간이 곧 전원 수명입니다."** Sleep → Stop → Standby는 일반적으로 전류와 보존되는 상태를 서로 다르게 선택하는 전원 모드입니다.
 
 ## 어떤 상황에서 쓰나
 
-배터리로 동작하는 IoT sensor, wearable, BLE beacon은 *대부분의 시간 동안 자고 있어야* 합니다. 보드를 풀로 돌리면 30 mA 소비, sleep 모드면 5 mA, stop이면 5 µA, standby면 1 µA. 6,000배 차이가 납니다. CR2032 coin cell(220 mAh)로 active 일주일 vs standby 25년 차이입니다.
+배터리로 동작하는 IoT sensor, wearable, BLE beacon은 *대부분의 시간 동안 자고 있어야* 합니다. 실제 전류와 배터리 수명은 MCU variant, regulator, clock, debug 회로, board leakage와 duty cycle에 따라 측정해야 합니다. CR2032의 정격 용량을 단순히 전류로 나눈 값은 self-discharge와 pulse load를 반영하지 않는 이상적인 상한입니다.
 
 이 글은 STM32F4 기준으로 세 저전력 모드와 wake-up source를 정리합니다. 모델마다 low-power run, low-power sleep, shutdown 같은 추가 모드가 있지만 개념은 같습니다.
 
@@ -27,9 +27,9 @@ topics: ["embedded"]
 | 모드 | CPU | Peripheral | SRAM | Wake latency | F411 typ |
 |------|-----|-----------|------|--------------|----------|
 | **Run** | 활성 | 활성 | 활성 | — | 30 mA |
-| **Sleep** | 정지 | 활성 | 활성 | < 1 µs | 5 mA |
-| **Stop** | 정지 | 정지 (일부 wake) | 활성 | 5-15 µs | 100 µA |
-| **Standby** | 정지 | 정지 | 사라짐 (백업 영역만) | 50-200 µs | 1 µA |
+| **Sleep** | 정지 | 활성 | 활성 | device-dependent | device/clock-dependent |
+| **Stop** | 정지 | 정지 (일부 wake) | 보통 유지 | device/config-dependent | device/config-dependent |
+| **Standby** | 정지 | 정지 | 보존 범위는 device-dependent | device-dependent | device/config-dependent |
 
 - **Sleep**: 코어만 멈춤. 모든 peripheral은 자기 clock으로 동작. UART RX 등으로 즉시 깨움.
 - **Stop**: peripheral도 멈추되 SRAM은 유지. RTC, EXTI, IWDG로 wake-up.
@@ -171,11 +171,11 @@ Joulescope 측정 예 (PPK2도 유사):
 
 | Mode | 전류 @ 3.3V | 비고 |
 |------|--------------|------|
-| Run mode (loop) | 30.2 mA | |
-| `__WFI` sleep (SysTick) | 5.1 mA | SysTick 1 kHz가 깨움 |
-| Stop mode (EXTI) | 98 µA | regulator main |
-| Stop mode + LPDS | 32 µA | low-power regulator |
-| Standby + RTC | 1.8 µA | |
+| Run mode (loop) | board·clock·load에 따라 측정 | |
+| `__WFI` sleep (SysTick) | board·peripheral에 따라 측정 | SysTick 1 kHz가 깨움 |
+| Stop mode (EXTI) | regulator·wake 설정에 따라 측정 | |
+| Stop mode + LPDS | regulator·device에 따라 측정 | |
+| Standby + RTC | backup domain·board leakage에 따라 측정 | |
 
 예상보다 안 줄어들면 어떤 peripheral이 살아 있는지 확인합니다. RCC ENR register dump가 빠릅니다.
 
@@ -207,8 +207,8 @@ EXTI line만 enable하고 NVIC 안 켜면 깰 수가 없습니다. 둘 다 set.
 
 ## 정리
 
-- 세 모드: **Sleep (5 mA), Stop (~100 µA), Standby (~1 µA)**. 단계별로 wake source 제한이 다름.
-- **Stop에서 깨면 HSI 16 MHz** — PLL 재구성 필수.
+- 세 모드: **Sleep, Stop, Standby**. 전류와 wake source 제한은 device configuration별로 다릅니다.
+- **Stop wake 후 clock source/PLL 상태 확인** — 필요한 경우 system clock을 재구성합니다.
 - **Standby는 reset과 유사** — SRAM 사라짐, Backup register만 유지.
 - 평균 전류는 **duty-cycling**이 좌우. 1% duty면 active/sleep 차이만큼 잘립니다.
 - **µA meter** + **미사용 peripheral 차단** + **SWD release**가 측정의 3대 조건.

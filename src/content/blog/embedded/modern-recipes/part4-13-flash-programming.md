@@ -51,29 +51,26 @@ sector size가 *불균등*합니다. EEPROM emulation은 보통 sector 1, 2 (16K
 
 ### Programming time
 
-**Erase:**
+**Erase 예시 시간:**
 
-- 16 KB sector:   ~400 ms
-- 64 KB sector:   ~1.1 s
-- 128 KB sector:  ~2.5 s
+- 16 KB sector:   device·전압·온도·option에 따라 달라짐
+- 64 KB sector:   device·전압·온도·option에 따라 달라짐
+- 128 KB sector:  device·전압·온도·option에 따라 달라짐
 
-**Write:**
+**Write 예시 시간:**
 
-- word (4 bytes): ~16 µs (V_dd 2.7~3.6 V)
-- doubleword:     ~30 µs
+- word/doubleword: device·PSIZE·전압·온도에 따라 달라짐
 
-erase는 *수십 ms*, 다른 모든 IRQ가 막힙니다 (CPU stall). 운영 중 erase는 신중히 결정.
+erase는 device에 따라 긴 busy 시간을 만들고, 같은 Flash bank에서 instruction/data fetch가 stall될 수 있습니다. 운영 중 erase는 실행 위치와 interrupt handler의 memory dependency를 확인해야 합니다.
 
 ### Voltage range — PSIZE 결정
 
 | V_dd | PSIZE | Width |
 |------|-------|-------|
-| 1.8 - 2.1 | 00 | byte |
-| 2.1 - 2.7 | 01 | halfword |
-| 2.7 - 3.6 | 10 | word |
-| 2.7 - 3.6 + ext Vpp | 11 | doubleword |
+| device reference manual의 voltage range | PSIZE encoding | 허용 programming width |
+| device-specific | device-specific | byte/halfword/word/doubleword 등 |
 
-대부분의 보드는 3.3 V → PSIZE = 10 (word). 잘못 설정하면 *write 실패 또는 corruption*.
+3.3 V에서의 PSIZE와 programming width도 family별로 다를 수 있으므로 해당 reference manual과 board VDD를 확인합니다. 잘못 설정하면 *write 실패 또는 corruption*이 발생할 수 있습니다.
 
 ## 코드 예제
 
@@ -202,7 +199,7 @@ compact는 *valid entry만 새 sector에 copy* 후 원본 sector erase하는 방
 
 ### 5. Dual bank — OTA bootloader
 
-STM32F4 일부 (F427/429/437/439), F7, H7는 *bank A + bank B*로 나뉜 Flash를 가집니다. 한 bank에서 실행하면서 *다른 bank에 새 firmware를 쓸* 수 있습니다.
+일부 STM32F4/F7/H7 device는 *bank A + bank B*와 read-while-write를 지원합니다. 이런 device에서는 조건을 만족할 때 한 bank에서 실행하면서 *다른 bank에 새 firmware를 쓸* 수 있지만, bank 구성과 지원 여부는 정확한 part number의 reference manual을 확인해야 합니다.
 
 | Bank | 역할 |
 |------|------|
@@ -240,8 +237,8 @@ if (*(volatile uint32_t *)EE_BASE != 0xDEADBEEFu) {
 erase가 *수백 ms* 걸리므로 SysTick으로 측정합니다.
 
 ```text
-Sector 1 (16 KB) erase: 412 ms
-Word write × 4096: 76 ms total (18 µs each)
+Sector 1 erase: measure on the target device
+Word write × 4096: measure with the selected PSIZE and VDD
 ```
 
 ## 자주 보는 함정
@@ -252,11 +249,11 @@ Word write × 4096: 76 ms total (18 µs each)
 
 > ⚠️ Code가 실행 중인 sector를 erase
 
-자기 sector를 지우면 fetch 자체가 깨져 hardfault. *반대편 bank*나 *RAM 실행* 필요. EEPROM emulation은 항상 code와 분리된 sector를 씁니다.
+코드가 실행 중인 Flash bank를 erase/program하면 fetch가 stall되거나 timing 요구를 위반할 수 있습니다. 다른 bank의 read-while-write 지원 또는 RAM 실행 여부를 device manual에서 확인하고, EEPROM sector는 code 영역과 분리해 예약합니다.
 
 > ⚠️ PSIZE 잘못 설정
 
-3.3V 보드에 PSIZE = byte로 두면 write 실패. datasheet의 voltage 표 확인.
+3.3V 보드의 PSIZE와 programming width도 family별로 다를 수 있습니다. board VDD와 datasheet의 voltage/programming 표를 함께 확인합니다.
 
 > ⚠️ IRQ가 erase 중 들어옴
 
@@ -276,14 +273,14 @@ MEMORY {
 
 > ⚠️ Wear-out
 
-Flash는 *10,000 ~ 100,000회 erase* 한도. 매 초마다 EEPROM write하면 *몇 달 만에 마모*. wear leveling이 필요한 사용 시나리오면 append-only + compact 패턴.
+Flash endurance는 device·sector·조건에 따라 다르며 data sheet의 erase-cycle 등급을 사용해야 합니다. 반복 write가 많은 경우 append-only만으로 충분한지 wear leveling과 power-loss recovery를 함께 설계합니다.
 
 ## 정리
 
 - Flash는 **erase 1 → write 0**. 한 번 쓴 비트는 erase 없이 못 되돌림.
-- **Erase 단위 = sector** (16K~128K), **write 단위 = word** (3.3V) 기준.
+- **Erase 단위와 programming width**는 device·전압·설정별 reference manual을 기준으로 합니다.
 - **EEPROM emulation**은 append-only log + compact 패턴이 표준.
-- **Dual bank**는 OTA에 핵심 — 한 bank 실행 + 다른 bank write.
+- **Dual bank**는 지원 device에서 OTA 설계를 도울 수 있지만, read-while-write와 bank swap 조건을 확인해야 합니다.
 - **PSIZE는 voltage**에 맞춰, **자기 sector erase 금지**, **wear-out** 고려.
 
 다음 편부터 Part 5 — **Peripheral 제어**입니다. PWM, motor, display, sensor, CAN, USB, Ethernet, SD card, RTC를 다룹니다.
