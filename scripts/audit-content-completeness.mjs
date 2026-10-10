@@ -163,7 +163,7 @@ const md = [
   '',
   '| Category | Series | Chapters | Published | Stub | Partial | Thin |',
   '|---|---|---:|---:|---:|---:|---:|',
-  ...bySeries.map((s) => `| ${s.category} | ${s.series.replace(/\|/g, '\\|')} | ${s.total} | ${s.published} | ${cell(s.stub)} | ${cell(s.partial)} | ${cell(s.thin)} |`),
+  ...bySeries.map((s) => `| ${s.category} | ${s.series.replace(/\\/g, '\\\\').replace(/\|/g, '\\|')} | ${s.total} | ${s.published} | ${cell(s.stub)} | ${cell(s.partial)} | ${cell(s.thin)} |`),
   '',
 ].join('\n');
 
