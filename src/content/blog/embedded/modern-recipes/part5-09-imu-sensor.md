@@ -1,5 +1,5 @@
 ---
-title: "IMU 센서 활용 — MPU6050·LSM6DSO·Sensor Fusion"
+title: "IMU 센서 활용 — MPU6050·BMI270·Sensor Fusion"
 slug: "embedded/modern-recipes/part5-09-imu-sensor"
 date: 2026-04-14T09:57:00
 description: "MPU6050·BMI270 — sensor fusion 입력 단계."
@@ -12,13 +12,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"6축 또는 9축 raw data를 100-1000 Hz로 sampling."** 그 위에 sensor fusion (Madgwick, Mahony, EKF)이 올라갑니다.
+> **"6축 또는 9축 raw data를 애플리케이션 요구에 맞는 주기로 sampling."** 그 위에 sensor fusion (Madgwick, Mahony, EKF)이 올라갑니다.
 
 ## 어떤 상황에서 쓰나
 
-drone flight controller, self-balancing robot, smartphone orientation, VR headset, athletic activity tracker — 모두 *IMU + fusion algorithm*. IMU가 *raw accel + gyro + mag*를 빠르게 sampling, fusion이 *roll·pitch·yaw*로 변환.
+drone flight controller, self-balancing robot, smartphone orientation, VR headset, athletic activity tracker — 모두 *IMU + fusion algorithm*. IMU가 *raw accel + gyro + mag*를 sampling하고, fusion이 *roll·pitch·yaw*로 변환합니다. 실제 축 수·인터페이스·최대 ODR은 부품 variant datasheet를 확인합니다.
 
-이 글은 MPU6050 (6축, I2C, 가장 흔함)과 BMI270 (6축, SPI, 더 최신)을 다룹니다. magnetometer는 *HMC5883L* 또는 BMI270 + BMM150 조합.
+이 글은 MPU6050 (6축, I2C)과 BMI270 (6축, SPI/I2C 가능)을 예로 듭니다. magnetometer는 별도 부품을 사용하거나 IMU 모듈 조합을 사용하며, 실제 지원 조합과 주소는 각 datasheet를 확인합니다.
 
 ## 핵심 개념
 
@@ -82,9 +82,9 @@ raw_int16 / scale = physical value.
 
 - 매 SysTick으로 read
 
-**Interrupt-driven (≤ 1 kHz):**
+**Interrupt-driven (센서가 지원하는 ODR 범위 내):**
 
-- Data Ready (DRDY) 핀에 IMU가 1 kHz로 pulse → ISR → read
+- Data Ready (DRDY) 핀에 IMU가 설정된 주기로 pulse → ISR → read
 
 **FIFO + DMA (high-rate, batch):**
 
@@ -237,7 +237,7 @@ void compl_update(compl_t *f, const mpu_data_t *d) {
 }
 ```
 
-`alpha = 0.98`이면 *gyro 98% + accel 2%*. gyro의 빠른 응답 + accel의 long-term 정확도 결합.
+`alpha = 0.98`은 이 예제의 한 설정값입니다. 실제 최적값은 sampling 주기, 센서 noise, 동작 특성에 맞춰 조정해야 합니다.
 
 더 정교한 방법은 *Madgwick filter*나 *Kalman filter* — quaternion 기반.
 

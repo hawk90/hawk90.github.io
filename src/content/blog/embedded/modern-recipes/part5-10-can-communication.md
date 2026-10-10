@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"CAN ID = priority, payload = 0~8 byte. ACK는 다른 node가 송신."** 자동차·산업·로봇 표준 bus.
+> **"Classical CAN의 payload는 0~8 byte이고, ACK는 다른 정상 수신 node가 송신."** ID의 arbitration 우선순위와 bus 오류 처리가 핵심이다.
 
 ## 어떤 상황에서 쓰나
 
@@ -55,13 +55,13 @@ sample point at end of tseg1
 
 baud = peripheral_clock / (prescaler × (1 + tseg1 + tseg2))
 
-예) PCLK1 = 42 MHz, target 500 kbit/s
+예시) 특정 bxCAN 설정에서 PCLK1 = 42 MHz, target 500 kbit/s
     prescaler = 6, tseg1 = 11, tseg2 = 2
     1 bit = (1 + 11 + 2) × 6 / 42M = 84 / 42M = 2 µs → 500 kHz
     sample point = (1 + 11) / 14 = 85.7% (CiA recommended 87.5%)
 ```
 
-CiA (CAN in Automation) 권장: sample point 87.5%. 너무 일찍이면 *propagation delay에 못 따라가고*, 늦으면 *phase error에 약함*.
+sample point는 bus 길이·transceiver·시스템 클록 오차에 맞춰 정합니다. 87.5%는 흔히 쓰이는 예시값이지 모든 네트워크의 고정 권장값은 아닙니다.
 
 ### Acceptance filter
 
@@ -75,7 +75,7 @@ CAN bus는 *모든 node가 모든 message를 받습니다*. filter로 *원하는
 
 - ID == any of FILTER[]
 
-STM32 bxCAN은 14개 filter bank, 각 *2개 ID list 또는 2개 mask*.
+bxCAN의 filter bank 수와 16/32-bit list·mask 구성은 STM32 family와 설정에 따라 다르므로 reference manual을 확인합니다.
 
 ### Error frame과 bus-off
 
@@ -88,7 +88,7 @@ TEC(Transmit Error Counter)는 송신 error가 나면 +8, 정상 송신하면 -1
 | TEC ≥ 128 | Error Passive |
 | TEC ≥ 256 | Bus Off (송신 중단) |
 
-Bus-off에 빠지면 128 × 11 recessive bit를 관찰한 뒤 자동 복구합니다 (또는 수동 복구).
+Bus-off 복구 방식과 자동 복구 여부는 CAN controller 설정에 따릅니다. CAN 규격의 bus-off recovery 조건을 만족하거나 controller가 제공하는 수동 복구 절차를 적용해야 합니다.
 
 bus-off는 *심각한 상태*. cable 단선, termination 누락, 다른 node baud 불일치.
 
@@ -114,7 +114,7 @@ void can_init_500k(void) {
     // TXFP = priority by request order
     // NART = no auto retransmit
 
-    // 500 kbit/s @ PCLK1 = 42 MHz
+    // 예시: PCLK1 = 42 MHz에서 500 kbit/s
     // prescaler 6, tseg1=11, tseg2=2 → (1+11+2)*6/42M = 2 µs
     CAN1->BTR = (1u << 24)            // SJW = 2
               | ((2 - 1) << 20)        // tseg2 = 2
@@ -164,6 +164,7 @@ void can_filter_pass_all(void) {
 
 ```c
 int can_send(uint32_t id, const uint8_t *data, uint8_t len) {
+    if (len > 8 || (len != 0 && data == NULL)) return -1;
     // 빈 mailbox 찾기
     int mb = -1;
     if      (CAN1->TSR & CAN_TSR_TME0) mb = 0;
@@ -173,14 +174,14 @@ int can_send(uint32_t id, const uint8_t *data, uint8_t len) {
 
     CAN1->sTxMailBox[mb].TIR  = (id << 21);          // standard
     CAN1->sTxMailBox[mb].TDTR = len & 0xF;
-    CAN1->sTxMailBox[mb].TDLR = (data[0])
-                              | (data[1] << 8)
-                              | (data[2] << 16)
-                              | (data[3] << 24);
-    CAN1->sTxMailBox[mb].TDHR = (data[4])
-                              | (data[5] << 8)
-                              | (data[6] << 16)
-                              | (data[7] << 24);
+    CAN1->sTxMailBox[mb].TDLR = (len > 0 ? data[0] : 0)
+                              | (len > 1 ? ((uint32_t)data[1] << 8) : 0)
+                              | (len > 2 ? ((uint32_t)data[2] << 16) : 0)
+                              | (len > 3 ? ((uint32_t)data[3] << 24) : 0);
+    CAN1->sTxMailBox[mb].TDHR = (len > 4 ? data[4] : 0)
+                              | (len > 5 ? ((uint32_t)data[5] << 8) : 0)
+                              | (len > 6 ? ((uint32_t)data[6] << 16) : 0)
+                              | (len > 7 ? ((uint32_t)data[7] << 24) : 0);
     CAN1->sTxMailBox[mb].TIR |= CAN_TI0R_TXRQ;       // request transmit
     return 0;
 }
@@ -259,9 +260,9 @@ CAN 분석기 (PEAK PCAN-USB, Vector, Kvaser)로 message를 모니터링하면 �
 - → cable, termination, baud 확인
 
 TEC = 255 → Error Passive
-TEC = 256+ → Bus Off (전송 중단)
+TEC가 bus-off 임계값에 도달 → Bus Off (정확한 상태 전이는 TEC/REC와 controller 규칙 확인)
 
-scope로 CAN_H/CAN_L 차이 (recessive ~0V, dominant ~2V)를 확인.
+scope로 CAN_H/CAN_L의 차동 상태와 common-mode 범위를 transceiver datasheet 기준으로 확인합니다.
 
 ## 자주 보는 함정
 
@@ -275,7 +276,7 @@ bus 양 끝 각 120 Ω 없으면 reflection으로 신호 깨짐. 두 끝 사이 
 
 > ⚠️ Baud 불일치
 
-모든 node가 *정확히 같은 baud*. 한 node가 다르면 *모든 message에 NACK*.
+모든 node가 호환되는 nominal/data bit timing을 사용해야 합니다. 한 node의 설정이 다르면 bit·ACK·error 상태가 달라져 통신이 실패할 수 있습니다.
 
 > ⚠️ Single node 송신 → ACK error
 

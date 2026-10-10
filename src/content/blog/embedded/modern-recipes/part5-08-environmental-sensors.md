@@ -1,5 +1,5 @@
 ---
-title: "환경 센서 활용 — BME280 온습압·SHT3x·BMP180 비교"
+title: "환경 센서 활용 — BME280 온습압·SHT3x 비교"
 slug: "embedded/modern-recipes/part5-08-environmental-sensors"
 date: 2026-04-14T09:56:00
 description: "BME280·SHT3x — I2C·SPI 센서 driver 패턴."
@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-날씨 스테이션, 실내 공기 monitor, drone barometric altimeter, refrigeration logger, 산업 공정 monitor — *온도·습도·기압 측정*은 임베디드의 기본 임무. BME280 (Bosch) 한 chip이 셋을 모두 — I2C/SPI 둘 다 지원. SHT3x (Sensirion)는 온습도만, 더 정확한 ±0.1°C / ±1.5%RH.
+날씨 스테이션, 실내 공기 monitor, drone barometric altimeter, refrigeration logger, 산업 공정 monitor — *온도·습도·기압 측정*은 임베디드의 기본 임무. BME280 (Bosch) 한 chip이 셋을 모두 측정하고 I2C/SPI를 지원합니다. SHT3x (Sensirion)는 온습도만 측정하며, 정확도·동작 범위는 정확한 variant와 측정 조건을 datasheet에서 확인해야 합니다.
 
 이 글은 BME280 SPI driver와 SHT3x I2C driver를 모두 작성합니다.
 
@@ -26,12 +26,10 @@ topics: ["embedded"]
 
 ```text
 Bosch BME280:
-  Temperature: -40 ~ +85°C, ±1°C
-  Humidity:    0~100%RH, ±3%
-  Pressure:    300~1100 hPa, ±1 hPa
+  Temperature/humidity/pressure: range와 accuracy는 variant·조건별 datasheet 확인
 
-I2C address: 0x76 (SDO=GND) or 0x77 (SDO=VDD)
-SPI: mode 0 or mode 3, max 10 MHz
+I2C address: 일반적으로 0x76 또는 0x77 (SDO 연결에 따라, module 확인)
+SPI: mode·최대 속도는 BME280 datasheet와 board 배선 조건 확인
 ```
 
 ### Register map (요약)
@@ -151,7 +149,7 @@ void bme_init(void) {
     // Configuration: humidity ×1, temp ×1, pressure ×1, normal mode
     bme_write(0xF2, 0x01);            // ctrl_hum
     bme_write(0xF4, (1<<5)|(1<<2)|3); // ctrl_meas: T×1, P×1, normal
-    bme_write(0xF5, (4<<5)|(0<<2));   // config: 500 ms standby, no filter
+    bme_write(0xF5, (4<<5)|(0<<2));   // config 예: standby/filter 설정은 datasheet 확인
 }
 
 void bme_read_measurements(float *temp_c, float *pres_hpa, float *rh) {
@@ -209,11 +207,11 @@ int sht3x_read(float *temp_c, float *rh) {
 }
 ```
 
-SHT3x는 *공식이 단순* — 곱셈·덧셈만. BME280과 대조적.
+SHT3x의 변환식은 비교적 단순한 곱셈·덧셈이지만, command·repeatability·variant별 timing은 datasheet를 따른다.
 
 ### 3. 평균과 outlier 필터
 
-센서는 *noise spike*가 있습니다. moving average + median filter가 표준.
+센서는 *noise spike*가 있을 수 있습니다. moving average나 median filter를 적용할 수 있지만, 응답 지연과 애플리케이션 요구사항을 함께 정합니다.
 
 ```c
 #define BUF 16
@@ -238,7 +236,7 @@ float temp_smooth(float new) {
 
 ## 측정 / 동작 확인
 
-값이 합리적인 범위(20-25°C, 40-60%RH, 1000-1020 hPa)에서 *정상 변동*해야 합니다.
+설치 환경과 datasheet operating range 안에서 값이 예상한 방향으로 변하는지 확인합니다.
 
 **정상 측정:**
 
