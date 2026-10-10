@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"20 ms 주기에 1~2 ms pulse가 0~180°."** Hobby servo의 표준 신호. 다른 건 다 같습니다.
+> **"20 ms 주기와 1~2 ms pulse는 흔한 hobby servo 신호 예시입니다."** pulse 범위·주기·각도 매핑은 servo datasheet를 확인해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -35,7 +35,7 @@ Pulse width → angle:
   2.5 ms (12.5%) → +90° (또는 180°)
 ```
 
-표준은 *1-2 ms = 90°범위*입니다. 일부 servo는 *0.5-2.5 ms = 180°* (확장 범위). datasheet 확인.
+많은 servo가 약 1~2 ms 또는 확장된 0.5~2.5 ms 범위를 사용하지만, 이를 각도 범위로 직접 일반화할 수 없습니다. 실제 허용 pulse와 endpoint는 datasheet와 calibration으로 확인합니다.
 
 ### Servo 종류
 
@@ -193,7 +193,7 @@ void servo_set_angle_cal(int16_t deg) {
 
 ![Servo PWM — 50 Hz period, 1.5 ms center pulse](/images/blog/modern-recipes/diagrams/part5-04-servo-pulse.svg)
 
-각도 변경 시 pulse width만 바뀝니다 (period는 20 ms 고정).
+각도 변경 시 보통 pulse width를 바꾸지만, 허용 refresh period와 signal timing은 servo 모델에 따라 다릅니다.
 
 physical 회전 각도와 명령 각도가 *어긋나면* calibration 다시.
 
@@ -207,19 +207,19 @@ power supply current로 *stall 여부* 확인. servo가 *물리적으로 막혀*
 
 > ⚠️ MCU에서 직접 servo power 공급
 
-SG90도 stall에 700 mA 흘림. STM32 3.3V regulator (typ 300 mA)에서는 *brown-out reset*. *servo는 별도 5V supply*에서 연결, GND는 공통.
+stall current는 servo 모델과 부하에 따라 크게 달라집니다. MCU regulator에서 직접 공급하지 말고 servo datasheet의 supply/current 요구를 만족하는 별도 전원을 사용하며 GND를 공통으로 연결합니다.
 
 > ⚠️ Pulse 범위 초과
 
-500 µs 이하나 2500 µs 이상을 보내면 servo가 *internal end-stop에 부딪힘* → buzz + 발열. clamp 필수.
+datasheet 범위를 벗어난 pulse는 end-stop 충돌, buzz 또는 과열을 일으킬 수 있습니다. calibration 값으로 clamp하고 endpoint를 점진적으로 검증합니다.
 
 > ⚠️ 50 Hz 이외 frequency
 
-대부분 servo는 50 Hz 전용. *digital servo*만 200-300 Hz 가능.
+허용 refresh 주파수는 servo 모델별로 다릅니다. 50 Hz 부근이 흔하지만, digital servo의 고속 refresh도 datasheet가 허용하는 경우에만 사용합니다.
 
 > ⚠️ 정전기·voltage spike
 
-servo가 외력으로 회전당하면 *back-EMF*가 signal line으로 결합. signal에 *직렬 100 Ω + 1 nF*로 protection.
+신호 보호 부품은 cable, input threshold와 signal edge를 고려해 선정합니다. 고정된 100 Ω + 1 nF를 모든 servo 입력에 적용하지 말고 파형과 datasheet를 확인합니다.
 
 > ⚠️ Multiple servo 동시 startup
 
@@ -227,7 +227,7 @@ servo가 외력으로 회전당하면 *back-EMF*가 signal line으로 결합. si
 
 ## 정리
 
-- Hobby servo = **50 Hz PWM, 1-2 ms pulse**. 1.5 ms가 center.
+- Hobby servo는 흔히 **50 Hz 부근 PWM과 1~2 ms pulse**를 사용하지만, center와 endpoint는 calibration합니다.
 - TIM의 **PSC=83, ARR=19999**로 1 µs resolution, 20 ms period.
 - 한 TIM의 **4 channel로 4 servo**. 12 channel 이상은 PCA9685 I2C driver.
 - **Calibration** (min/center/max) + **smooth interpolation**으로 부드러운 motion.

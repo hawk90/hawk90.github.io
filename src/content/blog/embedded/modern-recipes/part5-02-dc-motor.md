@@ -40,11 +40,11 @@ H-bridge는 4개 스위치 (Q1·Q3 high-side, Q2·Q4 low-side)와 모터로 구�
 
 | IC | 채널 | 전류 (각) | 전압 | 인터페이스 |
 |----|------|---------|------|-----------|
-| L293D | 2 | 600 mA | 4.5-36 V | IN1, IN2, EN |
-| L298 | 2 | 2 A | 5-46 V | IN1, IN2, EN |
-| TB6612FNG | 2 | 1.2 A (peak 3A) | 4.5-13.5 V | IN1, IN2, PWM, STBY |
-| DRV8833 | 2 | 1.5 A | 2.7-10.8 V | IN1, IN2 (no EN — PWM 둘 중 하나로) |
-| DRV8871 | 1 | 3.6 A | 6.5-45 V | IN1, IN2 |
+| L293D | 2 | datasheet/thermal condition dependent | datasheet | IN1, IN2, EN |
+| L298 | 2 | datasheet/thermal condition dependent | datasheet | IN1, IN2, EN |
+| TB6612FNG | 2 | load·board cooling dependent | datasheet | IN1, IN2, PWM, STBY |
+| DRV8833 | 2 | current limit·thermal condition dependent | datasheet | IN1, IN2 |
+| DRV8871 | 1 | current limit·thermal condition dependent | datasheet | IN1, IN2 |
 
 DRV8833·DRV8871은 *PWM을 IN1 또는 IN2 한쪽에 직접* 입력합니다.
 
@@ -102,8 +102,8 @@ void motor_set(int16_t speed) {
         TIM2->CCR1 = (uint32_t)speed * (TIM2->ARR + 1) / 1000;
     } else {
         GPIOA->BSRR = (1u << 1);          // AIN2 = 1
-        // 음수 speed: AIN1 PWM의 *off 시간*이 forward duty
-        TIM2->CCR1 = (TIM2->ARR + 1) - ((uint32_t)(-speed) * (TIM2->ARR + 1) / 1000);
+        // 이 배선에서는 AIN1 PWM + AIN2 high가 active-brake/freewheel
+        TIM2->CCR1 = (uint32_t)(-speed) * (TIM2->ARR + 1) / 1000;
     }
 }
 
@@ -196,21 +196,17 @@ void motor_protect_task(void) {
 
 current sensing이 있으면 ADC로 transient를 봅니다.
 
-**Startup inrush:**
-
-- Steady state running: ~300 mA
-- At startup:           ~2500 mA spike (0.1 sec)
-- → soft-start로 ~800 mA로 제한 권장
+**Startup inrush:** 부하·모터·전원·driver에 따라 크게 달라지므로 current probe로 측정하고, 그 결과에 맞춰 soft-start와 current limit을 정합니다.
 
 ## 자주 보는 함정
 
 > ⚠️ Direction 핀과 PWM 동시 변경 timing
 
-direction 핀 toggle하고 *바로 PWM duty* 올리면 H-bridge 내부에서 shoot-through 위험. driver IC의 *dead-time*이 있다면 안전하지만, *수십 µs는 띄우는 것이 안전*.
+direction 핀을 바꾸는 timing과 dead-time 요구는 driver IC마다 다릅니다. datasheet의 input timing과 safe state를 따르고, 필요하면 PWM을 먼저 비활성화한 뒤 방향을 바꿉니다.
 
 > ⚠️ Driver IC supply 분리 안 함
 
-driver의 *logic supply*와 *motor supply*를 같은 source에 두면 motor inrush로 logic이 reset됩니다. 분리하고 큰 capacitor (1000 µF 이상).
+driver의 logic supply와 motor supply의 분리·decoupling은 driver와 전원 impedance에 맞춰 설계합니다. 고정된 1000 µF 값보다 startup current와 transient를 측정해 결정합니다.
 
 > ⚠️ Flyback diode 누락 (discrete H-bridge)
 

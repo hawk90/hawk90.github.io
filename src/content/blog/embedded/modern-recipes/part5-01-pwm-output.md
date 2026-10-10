@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-LED 밝기 조절, DC motor 속도, servo 위치, switching power, audio class-D — 모두 PWM의 같은 패턴입니다. duty cycle을 0%~100%로 변경하면 평균 전압 (또는 평균 power)이 비례합니다. STM32의 *advanced timer (TIM1/8)*는 complementary output + dead-time까지 hardware로 지원해 3-phase motor도 한 timer로 구동합니다.
+LED 밝기 조절, DC motor 속도, servo 위치, switching power, audio class-D에 PWM이 널리 쓰입니다. duty와 출력의 평균값·밝기·토크 관계는 부하, driver, 필터와 사람의 지각에 따라 달라집니다. STM32의 일부 *advanced timer*는 complementary output과 dead-time을 지원하지만, timer 기능은 family별로 확인해야 합니다.
 
 이 글은 TIM2/3/4 같은 general purpose timer로 단일 PWM, 다중 채널 PWM, complementary PWM 세 변종을 모두 작성합니다.
 
@@ -63,7 +63,7 @@ PWM_freq = TIM_clk / ((PSC+1) × (ARR+1))
 16-bit (ARR=65535): 65536 step
 ```
 
-LED는 8-bit이면 충분 (human eye log perception). motor는 8-12 bit, audio는 12-16 bit가 표준.
+필요한 resolution은 LED의 시각적 요구, motor current ripple, audio sample/clock과 timer 주파수에 따라 정합니다. 8-bit가 충분한 경우도 있지만 보편적인 표준값은 아닙니다.
 
 ## 코드 예제
 
@@ -156,7 +156,7 @@ void pwm_complementary_init(void) {
     TIM1->CCMR1 = (6u << 4) | TIM_CCMR1_OC1PE;
     TIM1->CCER  = TIM_CCER_CC1E | TIM_CCER_CC1NE;
 
-    // Dead-time: 250 ns @ 168 MHz = 42 cycle → DTG = 42
+    // Dead-time encoding and clock-to-time conversion are device-specific.
     TIM1->BDTR = (42u << 0) | TIM_BDTR_MOE;
 
     TIM1->CCR1 = 2100;             // 50% duty
@@ -207,9 +207,9 @@ sine table을 PWM duty로 출력 + RC filter → 사인파 generator. simple cla
 
 ![20 kHz PWM, 25% vs 75% duty](/images/blog/modern-recipes/diagrams/part5-01-pwm-duty-compare.svg)
 
-LED의 경우 RC 적분기 같은 사람 눈이 시간 평균을 봅니다. duty 50%면 정확히 max의 절반 밝기 (실제로는 log 인지라 더 밝게 보임).
+LED의 경우 눈과 광학계가 시간 평균을 어느 정도 통합하지만, duty 50%가 체감 밝기 50%를 의미하지는 않습니다.
 
-DC motor는 *coil이 PWM를 평균화*해 평균 전압이 회전 속도에 비례. *PWM 주파수가 너무 낮으면* (< 1 kHz) 가청 소음. 20 kHz 이상 사용.
+DC motor의 전류·속도 응답은 inductance, load, driver와 PWM 주파수에 따라 달라집니다. 낮은 주파수에서는 가청 소음이 날 수 있지만, 높은 주파수는 switching loss를 늘릴 수 있어 system-level trade-off를 측정합니다.
 
 ## 자주 보는 함정
 
@@ -231,7 +231,7 @@ MOSFET의 turn-off time보다 짧으면 shoot-through → MOSFET 파괴. datashe
 
 > ⚠️ 가청 영역 PWM
 
-PWM freq가 1-15 kHz면 코일이 사람 귀에 들리는 음을 냅니다. 20 kHz 이상으로 올립니다.
+PWM 주파수가 가청 대역에 있으면 코일이나 driver에서 소음이 날 수 있습니다. 20 kHz 이상은 한 선택지지만 timer resolution·switching loss와 함께 결정합니다.
 
 > ⚠️ CCR > ARR
 
@@ -243,7 +243,7 @@ duty 범위를 초과한 값을 쓰면 *항상 active* 또는 *항상 inactive*�
 - General timer는 single-ended, **advanced timer (TIM1/8)**는 complementary + dead-time.
 - Multi-channel 같은 ARR 공유, **CCR만 다르게**.
 - **Preload + UG**로 glitch-free update.
-- 20 kHz 이상으로 두면 motor에서 가청 소음 사라짐.
+- motor PWM 주파수는 소음·resolution·switching loss·driver 한계를 함께 측정해 선택합니다.
 
 다음 편은 **DC motor 제어**입니다. H-bridge + PWM duty + direction 제어를 다룹니다.
 
