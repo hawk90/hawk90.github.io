@@ -35,6 +35,9 @@ texput.log
 # Runbooks are an operational surface, not notes. The recovery runbook lives
 # here and two audits read it, so it has to survive a fresh clone.
 !/docs/runbooks/
+# The AdSense audit rubric and its calibration anchors are what the reports in
+# reports/adsense-audit/ are scored against, so they are tracked too.
+!/docs/adsense-audit/
 
 
 # environment variables
