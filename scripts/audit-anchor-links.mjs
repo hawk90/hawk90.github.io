@@ -16,13 +16,16 @@ const htmlFor = async (target) => {
 for (const relative of files) {
   const source = await readFile(join(sourceRoot, relative), 'utf8');
   // A draft is not built, so its links point out of a page nobody can open.
-  if (/^---\r?\n[\s\S]*?^draft:\s*true\s*$[\s\S]*?^---/m.test(source)) continue;
-  const links = source.matchAll(/\]\((\/[^\s)#]+)#([^\s)]+)\)/g);
+  const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---/.exec(source)?.[1] ?? '';
+  if (/^draft:\s*true\s*$/m.test(frontmatter)) continue;
+  // Same-page links (](#frag)) resolve against this post's own page.
+  const self = `/blog/${/^slug:\s*"?([^"\n]+?)"?\s*$/m.exec(frontmatter)?.[1] ?? relative.replace(/\.md$/, '')}`;
+  const links = source.matchAll(/\]\((\/[^\s)#]*)?#([^\s)]+)\)/g);
   for (const match of links) {
     checked += 1;
-    const target = decodeURIComponent(match[1]); const anchor = decodeURIComponent(match[2]); const html = await htmlFor(target);
+    const target = decodeURIComponent(match[1] ?? self); const anchor = decodeURIComponent(match[2]); const html = await htmlFor(target);
     if (!html) findings.push(`${relative}: missing generated page ${target}#${anchor}`);
-    else if (!new RegExp(`\\bid=["']${anchor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`).test(html)) findings.push(`${relative}: missing generated anchor ${target}#${anchor}`);
+    else if (!new RegExp(`[\\s<]id=["']${anchor.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')}["']`).test(html)) findings.push(`${relative}: missing generated anchor ${target}#${anchor}`);
   }
 }
 await mkdir('reports/quality', { recursive: true });

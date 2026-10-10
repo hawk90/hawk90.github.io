@@ -17,19 +17,21 @@ const checks = [
   ['high-severity production dependency audit', ['npm', 'run', 'gate:dependencies']],
   ['search aliases', ['npm', 'run', 'test:search']],
   ['topic registry', ['npm', 'run', 'test:topics']],
+  ['content classification fixtures', ['npm', 'run', 'test:classification']],
   ['content classification', ['npm', 'run', 'gate:classification']],
   ['editorial relations', ['npm', 'run', 'test:relations']],
   ['shared product experience', ['npm', 'run', 'audit:product-experience']],
-  ['internal links', ['npm', 'run', 'audit:links', '--', '--by-type']],
+  // No --by-type: it exits before printing which file and line are broken.
+  ['internal links', ['npm', 'run', 'audit:links']],
   // Runs before the build, because the build is where a collision stops being
   // visible: the loader drops one of the two posts with a warning and succeeds.
   ['route collisions', ['npm', 'run', 'audit:routes']],
   ['post URL single definition', ['npm', 'run', 'audit:content-portability']],
-  ['series structure', ['npm', 'run', 'audit:series-structure']],
-  // Chapter integrity, which series-structure above does not cover: duplicate
-  // or gapped seriesOrder, drafts mixed into a published series. Not strict —
-  // it blocks on blocking findings only, because a deliberate gap in a
-  // reading order is a warning and an editorial decision, not a defect.
+  // --enforce: without it findings are printed and the step exits 0.
+  ['series structure', ['npm', 'run', 'audit:series-structure', '--', '--enforce']],
+  // Duplicate seriesOrder and missing title/date. Gaps and drafts mixed into a
+  // published series are reported only with --check-policy (not run here);
+  // series-structure's gap-inside-series covers the latter.
   ['series chapter integrity', ['npm', 'run', 'audit:series']],
   // draft:true is what keeps a "(작성 예정)" page off the site; nothing else
   // does. Blocks only when a stub or a series plan is published — unwritten
@@ -39,7 +41,10 @@ const checks = [
   // pre-commit gate only sees staged files; this catches the same error left
   // in another series.
   ['no known falsehoods', ['npm', 'run', 'audit:falsehoods']],
-  ['article connectivity', ['npm', 'run', 'audit:connectivity']],
+  // The pre-commit gate (ASCII boxes, TikZ proximity, tone mixing, …) is
+  // skipped by --no-verify, web edits and direct pushes; run it here too.
+  ['publish gate', ['npm', 'run', 'audit:gate']],
+  ['article connectivity', ['npm', 'run', 'audit:connectivity', '--', '--enforce']],
   // Report-only: where a series belongs in a reading order is editorial, so
   // this prints the coverage gap rather than blocking a deploy on it.
   ['learning path coverage', ['npm', 'run', 'audit:paths']],
@@ -63,6 +68,8 @@ const checks = [
   // The link audit resolves pages, not #fragments. A fact-check that rewrote
   // a heading in CXL Ch 13 left Ch 4 linking to the old anchor.
   ['rendered anchor resolution', ['npm', 'run', 'audit:anchors']],
+  ['search index vs built pages', ['npm', 'run', 'audit:search-page-parity']],
+  ['RSS and sitemap boundaries', ['npm', 'run', 'audit:distribution-feeds']],
   // No page links these addresses, so the link audits cannot see them; the
   // only thing that knows they should resolve is the shape of the post URLs.
   // Gated because the fix was removed once and nothing noticed.

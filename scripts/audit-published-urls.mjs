@@ -63,7 +63,13 @@ const built = new Set(
 let manifest;
 try {
   manifest = JSON.parse(await readFile(MANIFEST, 'utf8'));
-} catch {
+} catch (error) {
+  // Only --record may start a manifest from nothing; a check without the
+  // record would compare against an empty set and pass.
+  if (!record) {
+    console.log(`✗ cannot read ${MANIFEST}: ${error.message}`);
+    process.exit(2);
+  }
   manifest = { note: 'URLs this site has published. See scripts/audit-published-urls.mjs.', urls: [], retired: [] };
 }
 const recorded = new Set(manifest.urls);
