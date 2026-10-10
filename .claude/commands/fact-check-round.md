@@ -2,7 +2,7 @@
 name: fact-check-round
 description: Fact-check one published series chapter by chapter against primary sources (CLAUDE.md §14 stage ③). Wrong → fix, unsupported → delete or TBD, one commit per chapter with its sources, then PR → CI → merge → deploy check. Use for the published fact-check rounds, not for drafts.
 argument-hint: "<series directory under src/content/blog>"
-allowed-tools: Bash, Read, Edit, Grep, Glob, WebFetch
+allowed-tools: Bash, Read, Edit, Grep, Glob, WebFetch, WebSearch
 ---
 
 # Fact-check round
@@ -17,10 +17,13 @@ does see them, so it is done claim by claim, from data, never from recall.
 ## Setup
 
 1. Branch from `origin/main` (a worktree is fine). Never commit to `main`.
-2. List the published chapters in reading order:
+2. List the published chapters in reading order (by `seriesOrder`; series may
+   nest chapters in subdirectories):
    ```bash
-   grep -L '^draft: true' $ARGUMENTS/*.md | sort
+   grep -rL '^draft: true' --include='*.md' "$ARGUMENTS" \
+     | xargs grep -H '^seriesOrder:' | sort -t: -k3 -n | cut -d: -f1
    ```
+   Drafts are out of scope; never flip `draft:` (§13).
 3. Collect the primary sources before reading the first chapter: the spec
    (revision and date), the upstream repository at a pinned commit, the man
    pages or the tool source that prints the output the posts quote. If the

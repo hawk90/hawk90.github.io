@@ -1,7 +1,7 @@
 # Upstream source tracking — code-review·spec-analysis 시리즈
 #
 # 외부 GitHub repo·spec 소스를 인용하는 시리즈의 *baseline commit*을 명시.
-# scripts/audit-upstream-freshness.sh가 이 파일을 읽어 *upstream HEAD와의 diff*를
+# scripts/audit-upstream-freshness.py가 이 파일을 읽어 *upstream HEAD와의 diff*를
 # 분석하고 *영향 챕터를 ranking* 합니다.
 #
 # 신규 시리즈를 추가하면 아래 schema에 맞춰 entry 추가:

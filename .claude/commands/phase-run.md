@@ -7,6 +7,7 @@ allowed-tools: Bash, Read, Edit, Grep, Glob
 
 # Run a remediation phase batch
 
+0. Read `claude/phase-$ARGUMENTS/STATE.json`. Stop unless `status` is `in_progress` — a `queued` phase still lists `activeTasks`, but activating it is the user's decision (CLAUDE.md §15).
 1. Run `npm run audit:remediation-graph`, then read `reports/remediation-graph/latest.md`, `claude/WORKFLOW.md`, `claude/phase-$ARGUMENTS/TASK.md`, `CONTEXT.md`, and `STATE.json`.
 2. Work only on `activeTasks` in `STATE.json`; do not activate the next batch yourself.
 3. Before editing, write concrete code-path findings to `FINDINGS.md`.

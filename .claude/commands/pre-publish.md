@@ -17,7 +17,8 @@ file). If no path is given, audit all published content.
    ./scripts/audit-publish-gate.sh $ARGUMENTS
    ```
 2. Read the output. **Blocking** checks (ASCII box diagrams, TikZ text-proximity
-   heuristic, Tone A/B mixing, known falsehoods) must pass — if any fail, fix the offending file per
+   heuristic, Tone A/B mixing, known falsehoods, internal link rot, series
+   integrity, a missing checker or a checker that errors) must pass — if any fail, fix the offending file per
    §6/§1 and re-run. Do not publish while blocked.
 3. **Informational** checks are candidates, not violations:
    - Hallucination candidates (§10, 7 categories) and cited-symbol MISSING —
@@ -28,7 +29,8 @@ file). If no path is given, audit all published content.
      hand the candidates to the `hallucination-triage` agent.
    - Korean prose in code blocks (§5) and translationese (§2) — warn-only; hand
      prose candidates to the `korean-prose-critic` agent.
-   - Series integrity warnings, image coverage — review but non-blocking.
+   - Image coverage — review but non-blocking.
+   - `--strict` turns every warn stage into a block, not only hallucination.
 4. Report a concise verdict: blocking pass/fail, and the shortlist of candidates
    a human should confirm. Never claim "all clear" if candidates were surfaced —
    say what still needs a human check.

@@ -72,24 +72,20 @@ paths:
 
 다음 카테고리는 *기억에 의존하면 hallucinate*하기 가장 쉽습니다. 챕터 publish 전 *반드시* 자율 점검합니다.
 
-- [ ] **Future-product SKU·spec** — *발표 전·미양산* 제품의 capacity·TOPS·세부 spec을 *단정*하지 않았는가? "*예정·발표·로드맵*" qualifier 사용.
+- [ ] **Future-product SKU·spec** — *발표 전·미양산* 제품의 capacity·TOPS·세부 spec을 *단정*하지 않았는가? 발표만 된 제품이면 *벤더 발표 자료의 수치*를 "발표" 시점과 함께 적는다(상태를 사실대로 적는 것이지 완곡 표현이 아니다). 발표 자료에 없는 수치는 쓰지 않는다.
   - 잘못된 예: "AMD MI325X 288 GB HBM3E" (실은 256 GB)
-  - 잘못된 예: "NVIDIA B300 (288GB)" (미발표·단정)
-- [ ] **JEDEC·DSP·IEEE·RFC 표준 번호와 revision** — *기억으로 적지 말고* 공식 spec 인용·"진행 중"·"update" qualifier 사용.
-  - 잘못된 예: "HBM2E JESD235B" (실은 C), "HBM4 JESD238B" (번호 미부여)
-  - 올바른 예: "JEDEC 표준화 진행", "JESD238 update"
-- [ ] **Kernel API·flag·struct 이름** — *기억으로 만들지 말 것*. 정확한 이름이 안 떠오르면 *generic 설명*으로 우회 또는 *self-walker* qualifier.
+- [ ] **JEDEC·DSP·IEEE·RFC 표준 번호와 revision** — *기억으로 적지 말고* 공식 spec·`data/known-facts.yaml`에서 확인한 번호만 쓴다. 확인 못 하면 번호를 지운다.
+  - 잘못된 예: "HBM2E JESD235B" (실은 C), "HBM4 JESD238B" (실은 JESD270-4)
+- [ ] **Kernel API·flag·struct 이름** — *기억으로 만들지 말 것*. upstream 소스에서 grep으로 확인한 이름만 쓴다. "(개념적)"이라고 붙인 지어낸 코드도 지어낸 코드다 — 실제 소스를 인용하거나 지운다.
   - 잘못된 예: `MHP_NID_IS_MGID` (존재 안 함)
-  - 잘못된 예: `from drgn.helpers.linux.cxl import for_each_cxl_port` (모듈 없음 가능)
-  - 올바른 예: "자체 walker 작성", "(개념적 — 실제는 struct walk)"
-- [ ] **회사 ↔ 내부 구현 매핑** — *비공개 정보가 많음*. "현대중공업은 IgH 기반" 같은 구체 단정 금지.
-  - 올바른 예: "국내 로봇·자동화 업계", "(구체 회사·라인별 채택은 공개 자료 한정)"
+  - 잘못된 예: `from drgn.helpers.linux.cxl import for_each_cxl_port` (모듈 없음)
+- [ ] **회사 ↔ 내부 구현 매핑** — *비공개 정보가 많음*. "현대중공업은 IgH 기반" 같은 구체 단정은 공개 자료가 없으면 지운다.
 - [ ] **Project codename 매핑** — "Google Carbon (Carbon은 프로그래밍 언어)", "Alibaba Pangu (Pangu는 스토리지)" 같은 *이름 충돌* 흔함.
   - 올바른 예: "AMD MI300 Cluster", "Meta Memory Tiering" 같은 *검증된 매핑*만 사용
-- [ ] **YAML·config schema 단정** — *특정 라이브러리의 schema*를 외워 적으면 위험. "*개념적 예시 — 실 schema는 docs 참조*" qualifier.
+- [ ] **YAML·config schema·명령 출력** — 라이브러리 schema, `lspci`·`dmesg`·`cxl list` 같은 출력, 에러 메시지는 그 도구의 문서나 소스가 실제로 내는 형식만 쓴다. 확인 못 한 출력 예시는 지운다.
 - [ ] **인용한 spec·표준의 *publish 연도*** — "JESD235A는 2018년" 같은 *연도 단정*은 *반드시 공식 자료 인용 또는 확인*.
 
-핵심 원칙: *내가 100% 확신 못 하는 fact는 단정하지 않는다*. *qualifier 사용*이 *신뢰성 손실보다 작은 비용*.
+핵심 원칙: *1차 자료로 확인한 것만 쓴다*. 틀리면 출처대로 고치고, 출처가 없으면 산문은 삭제, 표 칸은 `TBD`, 벤더가 공개하지 않는 값은 `—`와 주석. "보통"·"~일 수 있습니다" 같은 완곡 표현으로 바꾸지 않는다 — 완곡하게 바꾼 문장도 출처 없는 새 주장이다. 팩트체크에서 틀렸다고 확인된 문자열은 `data/known-falsehoods.yaml`에 등재한다.
 
 ---
 
@@ -110,7 +106,7 @@ paths:
    - HAMT 구조 공유 → 가계도 (새 가지 생겨도 다른 가계는 그대로)
 3. **실 시스템 사례** — 비유로 *왜 중요*했으면, 사례로 *어디서 쓰는지*. *최소 1-2 사례*.
    - Redis lock-free ops, Kafka producer thread pool
-   - WhatsApp Erlang (9명이 100M 동시 접속), Discord Elixir
+   - WhatsApp Erlang, Discord Elixir
    - Bitcoin GPU 채굴, NVIDIA CUDA 딥러닝
    - Twitter Lambda 시작 사례, Netflix Mantis
 4. **코드 직전 한 문장** — 코드 블록 *바로 위*에 *이 코드가 무엇을 시연하는지* 1-2 문장.

@@ -49,7 +49,7 @@ paths:
     systems/linux-kernel, embedded/rtos, ml/compilers, tools/debugging
 ```
 
-새 시리즈를 만들 때 적합한 자리가 없으면 `categories.ts`에 카테고리를 추가합니다.
+새 시리즈를 만들 때 적합한 자리가 없으면 `categories.ts`에 추가할 카테고리를 사용자에게 제안합니다. 카테고리 변경은 사용자가 결정합니다(§13).
 
 ---
 

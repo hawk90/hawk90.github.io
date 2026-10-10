@@ -98,7 +98,7 @@ curated inventory in `data/resource-tracking.yaml`; the latter collects recent
 items from `data/industry-watch.json` and writes a queue under
 `reports/industry-watch/`, while `state.json` remembers items already seen.
 A reviewer still verifies edition, authority,
-relevance, and overlap before updating `READING_ROADMAP.md`.
+relevance, and overlap before updating `data/resource-tracking.yaml`.
 
 For a recurring weekly pass:
 
@@ -126,7 +126,7 @@ npm run gate:tooling  # fails on a syntax or missing-entrypoint finding
 npm run verify:release # runs every publish-blocking check and creates a verified dist artifact
 ```
 
-- `sync-book-notes.mjs` — scaffolding for the book-notes series.
+- `sync-book-notes.mjs` — syncs `../book-notes/<series>/` into the linear-algebra and set-theory posts; dry run by default, writes only with `--apply` (CLAUDE.md §12).
 - `archive-chatgpt-share.mjs` — stores a share page as original HTML, per-message JSON, readable Markdown, and downloaded images.
 
   ```bash
