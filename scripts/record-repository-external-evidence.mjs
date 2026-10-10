@@ -13,7 +13,7 @@ const reference = option('--evidence-reference');
 const date = option('--date');
 const owner = option('--owner');
 const result = option('--result');
-if (!control || !reference || reference.startsWith('--') || !date || date.startsWith('--') || !owner || owner.startsWith('--') || !result || result.startsWith('--')) throw new Error('Usage: node scripts/record-repository-external-evidence.mjs --control <name> --evidence-reference <non-secret record> --date <YYYY-MM-DD> --owner <name-or-role> --result passed [--apply]');
+if (!control || !reference || reference.startsWith('--') || !date || date.startsWith('--') || !owner || owner.startsWith('--') || !result || result.startsWith('--')) { console.error('Usage: node scripts/record-repository-external-evidence.mjs --control <name> --evidence-reference <non-secret record> --date <YYYY-MM-DD> --owner <name-or-role> --result passed [--apply]'); process.exit(2); }
 if (!/^\d{4}-\d{2}-\d{2}$/.test(date) || Number.isNaN(Date.parse(`${date}T00:00:00Z`))) throw new Error('--date must be a valid YYYY-MM-DD date.');
 if (result !== 'passed') throw new Error('--result must be passed; record failed exercises separately as findings rather than marking completion.');
 if ([reference, owner, result].some((value) => /\r|\n|(?:gh[pousr]_|github_pat_|AIza|-----BEGIN)/i.test(value))) throw new Error('Evidence fields must not contain secrets or multiline values.');

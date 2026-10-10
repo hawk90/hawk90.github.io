@@ -11,7 +11,7 @@ import * as yaml from 'js-yaml';
 const apply = process.argv.includes('--apply');
 const at = process.argv.indexOf('--output');
 const output = at === -1 ? 'reports/content-export' : process.argv[at + 1];
-if (!output || output.startsWith('--')) throw new Error('Usage: node scripts/export-portable-content.mjs [--output <directory>] [--apply]');
+if (!output || output.startsWith('--')) { console.error('Usage: node scripts/export-portable-content.mjs [--output <directory>] [--apply]'); process.exit(2); }
 const root = 'src/content/blog';
 const files = (await readdir(root, { recursive: true })).filter((entry) => entry.endsWith('.md')).sort();
 const records = [];

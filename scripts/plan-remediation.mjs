@@ -6,7 +6,7 @@ import { join } from 'node:path';
 const args = process.argv.slice(2);
 const archiveAt = args.indexOf('--archive');
 const archive = archiveAt === -1 ? 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273' : args[archiveAt + 1];
-if (!archive || archive.startsWith('--')) throw new Error('Usage: node scripts/plan-remediation.mjs [--archive <directory>]');
+if (!archive || archive.startsWith('--')) { console.error('Usage: node scripts/plan-remediation.mjs [--archive <directory>]'); process.exit(2); }
 const output = join(archive, 'remediation-plan');
 const [antipatterns, phases] = await Promise.all([
   readFile(join(archive, 'llm-antipatterns/manifest.json'), 'utf8').then(JSON.parse),

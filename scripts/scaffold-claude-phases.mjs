@@ -11,7 +11,7 @@ const option = (name, fallback) => {
 const archive = option('--archive', 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273');
 const root = option('--output', 'claude');
 if (!archive || archive.startsWith('--') || !root || root.startsWith('--')) {
-  throw new Error('Usage: node scripts/scaffold-claude-phases.mjs [--archive <directory>] [--output <directory>]');
+  { console.error('Usage: node scripts/scaffold-claude-phases.mjs [--archive <directory>] [--output <directory>]'); process.exit(2); }
 }
 const manifest = JSON.parse(await readFile(join(archive, 'llm-phases/manifest.json'), 'utf8'));
 const sourceFiles = ['foundation', 'discovery', 'content', 'quality', 'delivery', 'experience', 'monetization'];
