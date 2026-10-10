@@ -125,12 +125,31 @@ if (!apply) {
   process.exit(0);
 }
 
+// Quote a tag unless YAML reads it back as the same string: "2024" would
+// become a number, "*nix" an alias, "yes" a boolean.
+const flowItem = (tag) => {
+  try {
+    if (/^[A-Za-z0-9][\w+./-]*$/.test(tag) && yaml.load(tag) === tag) return tag;
+  } catch { /* not a plain scalar */ }
+  return JSON.stringify(tag);
+};
+
 let written = 0;
+let failed = 0;
 for (const { file, raw, frontmatter, next } of edits) {
-  const line = `tags: [${next.map((tag) => (/[:#,[\]{}"']/.test(tag) ? JSON.stringify(tag) : tag)).join(', ')}]`;
-  const updated = frontmatter.replace(/^tags:.*(?:\n[ \t]+-.*)*$/m, line);
-  if (updated === frontmatter) { console.error(`  ! could not rewrite tags in ${relative('.', file)}`); continue; }
+  const line = `tags: [${next.map(flowItem).join(', ')}]`;
+  // A block list may be indented or not (`tags:\n- a` is valid YAML too).
+  const updated = frontmatter.replace(/^tags:.*(?:\n[ \t]*-.*)*$/m, line);
+  let roundTrip;
+  try { roundTrip = yaml.load(updated)?.tags; } catch { roundTrip = undefined; }
+  if (updated === frontmatter || JSON.stringify(roundTrip) !== JSON.stringify(next)) {
+    // stage_fixed would commit whatever is on disk, so leave the file alone and fail.
+    console.error(`  ✗ could not rewrite tags in ${relative('.', file)} safely`);
+    failed++;
+    continue;
+  }
   await writeFile(file, raw.replace(frontmatter, updated));
   written++;
 }
 if (written) console.log(`Normalized tags in ${written} file(s).`);
+if (failed) process.exitCode = 1;
