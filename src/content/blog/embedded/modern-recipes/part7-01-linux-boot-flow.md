@@ -17,11 +17,11 @@ topics: ["embedded"]
 
 새 SoC를 받아 자체 BSP를 구성할 때, 부팅 시간 초기화를 줄여야 할 때, secure boot chain을 설계할 때 전체 부팅 흐름을 정확히 알아야 합니다. 단계가 5~7개 있고 각 단계가 다른 binary, 다른 storage, 다른 책임을 가지므로 한 번 그림을 그려두면 디버깅과 최적화가 모두 단순해집니다.
 
-또 한 가지 흔한 작업은 boot time 단축입니다. 자동차 인포테인먼트는 cold boot 2초 이내가 요구사항이고, 어떤 단계에서 몇 ms가 드는지 알아야 줄일 부분을 짚을 수 있습니다.
+또 한 가지 흔한 작업은 boot time 단축입니다. 제품의 cold-boot 요구사항과 측정 기준을 먼저 정하고, 어떤 단계에서 시간이 드는지 계측해야 줄일 부분을 짚을 수 있습니다.
 
 ## 핵심 개념
 
-표준 5~6단계 흐름입니다.
+플랫폼에 따라 달라지는 대표적인 5~6단계 흐름은 다음과 같습니다.
 
 1. **BootROM (SoC 내장)** — on-chip ROM이 boot device 선택
 2. **SPL (Secondary Program Loader)** — DRAM init, U-Boot 로드
@@ -34,11 +34,11 @@ topics: ["embedded"]
 
 | 단계 | 실행 환경 | 주요 작업 | 전형적 시간 |
 |------|-----------|-----------|--------------|
-| BootROM | SRAM (on-chip) | boot mode 결정 | ~10 ms |
-| SPL | SRAM | DRAM init, U-Boot load | 100 ms |
-| U-Boot | DRAM | Kernel+DTB load | 200~500 ms |
-| Kernel | DRAM | driver init | 500 ms ~ 수 s |
-| Init | DRAM | service start | 수 s |
+| BootROM | on-chip 실행 환경 | boot mode 결정 | SoC·storage에 따라 측정 |
+| SPL | SRAM/초기화된 메모리 | DRAM init, U-Boot load | board·DDR training에 따라 측정 |
+| U-Boot | 실행 가능한 메모리 | Kernel+DTB load | storage·console 설정에 따라 측정 |
+| Kernel | DRAM 등 | driver init | config·driver에 따라 측정 |
+| Init | DRAM | service start | userland 구성에 따라 측정 |
 
 ATF/OP-TEE는 ARMv8 secure world에서 EL3/secure EL1을 담당하며, 일반 ARMv7 시스템이라면 보통 생략합니다.
 
@@ -108,7 +108,7 @@ bootargs=console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait
 | runit / s6 | middle ground, supervision tree |
 | custom init | `/sbin/init`으로 직접 만든 binary |
 
-차량 인포테인먼트나 산업 device는 빠른 boot와 minimal RAM을 위해 busybox나 custom init을 선택하는 경우가 많고, Yocto/Debian 기반은 systemd가 표준입니다.
+차량 인포테인먼트나 산업 device는 요구사항에 따라 busybox·custom init·systemd 등을 선택합니다. Yocto/Debian에서도 이미지 정책과 서비스 구성에 따라 달라집니다.
 
 ### Initramfs vs root on storage
 
@@ -117,7 +117,7 @@ bootargs=console=ttyS0,115200 root=/dev/mmcblk0p2 rootwait
 | initramfs | 부팅 시 cpio.gz를 RAM에 풀어 임시 rootfs를 만들고, modules 로드 후 진짜 root로 pivot_root |
 | root direct | U-Boot가 mmcblk0p2를 root로 직접 mount |
 
-초기 driver 로드 순서가 까다로운 환경(NVMe, NFS root)은 initramfs가 필수입니다.
+초기 driver·firmware·root discovery가 필요한 환경(NVMe, NFS root 등)에서는 initramfs가 유용하거나 필요할 수 있습니다.
 
 ### ATF/OP-TEE 흐름 (ARMv8)
 
@@ -132,28 +132,28 @@ Secure boot, TEE, Trusted Apps가 필요한 환경에서는 ATF가 BL1~BL31을 �
 
 ## 측정 / 성능 비교
 
-i.MX8M Mini board에서 cold boot 시간 측정값입니다.
+i.MX8M Mini board에서 측정할 때 기록할 수 있는 예시 형식입니다. 실제 값은 이미지·console·storage·측정 지점에 따라 달라집니다.
 
 | 단계 | 누적 시간 |
 |---|---|
-| BootROM | 12 ms |
-| SPL | 85 ms |
-| U-Boot (default) | 650 ms |
-| Kernel start | 720 ms |
-| Kernel ready (printk) | 2100 ms |
-| systemd default.target | 6500 ms |
+| BootROM | 보드 계측값 |
+| SPL | 보드 계측값 |
+| U-Boot (default) | 보드 계측값 |
+| Kernel start | 보드 계측값 |
+| Kernel ready (printk) | 보드 계측값 |
+| systemd default.target | 이미지·서비스에 따른 계측값 |
 
 가장 큰 비중을 차지하는 것은 보통 kernel init과 userland 서비스 시작입니다.
 
 ```text
 최적화 후 (boot time 단축)
-U-Boot silent mode      -300 ms
-kernel quiet + minimal  -800 ms
-busybox init + 최소 service -3000 ms
-total                   2.5 s
+U-Boot silent mode      계측 필요
+kernel quiet + minimal  계측 필요
+busybox init + 최소 service 계측 필요
+total                   계측 필요
 ```
 
-Silent mode, console 비활성, 비핵심 driver 제거, 최소 init 적용으로 흔히 1/3까지 줄입니다.
+Silent mode, console 조정, 비핵심 driver 제거, init 단순화의 효과는 제품과 측정 기준에 따라 확인합니다.
 
 ## 자주 보는 함정
 
@@ -197,7 +197,7 @@ Kernel 출력이 보이지 않으면 디버깅이 거의 불가능합니다. 양
 
 - BootROM과 SPL은 *DRAM이 살아나기 전*까지의 작업을 담당합니다.
 - U-Boot의 본질은 kernel, DTB, initramfs를 RAM에 올려 boot하는 loader입니다.
-- ATF는 ARMv8 secure world의 표준이고, ARMv7에는 보통 생략됩니다.
+- TF-A/ATF와 OP-TEE 사용 여부·stage 구성은 SoC boot architecture와 secure-boot 요구사항에 따라 달라집니다.
 - Init 선택(systemd, busybox, custom)이 부팅 시간과 RAM 사용량을 크게 좌우합니다.
 - Initramfs는 NVMe, NFS root처럼 초기 driver가 필요한 환경에 필수입니다.
 - Boot time 단축은 silent mode, kernel 최소화, init 단순화 순으로 효과가 큽니다.

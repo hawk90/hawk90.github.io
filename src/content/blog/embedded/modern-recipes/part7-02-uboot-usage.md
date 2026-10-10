@@ -114,7 +114,7 @@ bootcount=0
 altbootcmd=setenv slot A; setenv slot_part 1; run mmcboot
 ```
 
-`bootcount`/`bootlimit`을 사용하면 boot 실패가 N회 연속이면 `altbootcmd`로 fallback합니다. OTA failure의 표준 패턴입니다.
+`bootcount`/`bootlimit`을 활용하면 설정한 실패 조건에서 `altbootcmd`로 fallback하는 정책을 구성할 수 있습니다. 실제 동작은 persistent bootcount backend와 board 설정을 확인합니다.
 
 ### Fastboot mode
 
@@ -160,12 +160,10 @@ vendor의 BSP는 보통 board-specific 명령(`board_id`, `health`, `mfg_test`)�
 
 | 조작 | 소요 시간 |
 |---|---|
-| autoboot delay 기본 | 2 s |
-| autoboot delay 0 | 0 s |
-| TFTP load 8 MB zImage | ~600 ms (100 Mbps) |
-| eMMC load 8 MB zImage | ~80 ms |
-| SD load 8 MB zImage | ~250 ms |
-| silent console (no UART print) | -200 ms |
+| autoboot delay | board 환경변수 설정에 따라 측정 |
+| TFTP load 8 MB zImage | network·server·MTU에 따라 측정 |
+| eMMC/SD load | media·bus mode·filesystem에 따라 측정 |
+| silent console | UART 출력량과 baud에 따라 측정 |
 
 가장 큰 boot time 절감은 autoboot delay 0과 console silent입니다. 양산 펌웨어에서 둘을 함께 적용합니다.
 
@@ -173,8 +171,8 @@ vendor의 BSP는 보통 board-specific 명령(`board_id`, `health`, `mfg_test`)�
 
 | 위치 | 크기 | 특성 |
 |------|------|------|
-| eMMC redundant env | 64 KB × 2 | 안정성 최고 |
-| SPI NOR env | 64 KB | 가장 흔함 |
+| eMMC redundant env | partition/layout 설정에 따라 다름 | redundancy 정책 확인 |
+| SPI NOR env | erase sector·layout 설정에 따라 다름 | wear·recovery 정책 확인 |
 | RAM env | 0 (영구 X) | 개발용만 |
 
 ## 자주 보는 함정
@@ -196,7 +194,7 @@ vendor의 BSP는 보통 board-specific 명령(`board_id`, `health`, `mfg_test`)�
 => setenv bootargs "console=ttyS0,115200 root=/dev/mmcblk0p2 rw quiet"  # 권장
 ```
 
-공백이 있는 값은 따옴표가 필수입니다. 그렇지 않으면 두 번째 단어부터는 다음 명령으로 해석됩니다.
+공백이 있는 값은 U-Boot command parser와 quoting 규칙을 확인해 설정합니다. board/version별 parser 차이를 실제 console에서 검증합니다.
 
 > Network boot 시 server unreachable
 
@@ -228,7 +226,7 @@ fastboot flash boot boot.img → "boot" partition not found
 - U-Boot의 핵심은 environment variable입니다. `bootcmd`와 `bootargs`가 거의 모든 결정을 합니다.
 - TFTP는 개발 cycle을 빠르게, fastboot는 양산 flash를 단순하게 만듭니다.
 - `boot.scr`을 쓰면 kernel update 시 U-Boot env를 건드리지 않습니다.
-- `bootcount/altbootcmd`로 redundant boot를 구성하는 것이 OTA의 표준입니다.
+- `bootcount/altbootcmd`는 OTA fallback에 사용할 수 있는 패턴이며, bootcount 저장·rollback 검증을 함께 설계합니다.
 - Autoboot delay 0과 silent console로 boot time을 쉽게 줄일 수 있습니다.
 - 양산은 env partition을 redundant로 두거나 read-only로 만듭니다.
 

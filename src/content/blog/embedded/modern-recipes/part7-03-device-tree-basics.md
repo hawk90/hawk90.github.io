@@ -144,7 +144,7 @@ uart0: serial@10000000 {
 };
 ```
 
-부팅 시 kernel이 *자동으로 pin mux를 설정*합니다.
+부팅 시 해당 pinctrl 노드를 참조하는 driver와 board 초기화 경로가 있으면 kernel이 pin mux를 설정합니다. 모든 보드에서 자동으로 설정되는 것은 아닙니다.
 
 ## I²C·SPI Device 등록
 
@@ -171,7 +171,7 @@ uart0: serial@10000000 {
     flash@0 {
         compatible = "winbond,w25q128";
         reg = <0>;
-        spi-max-frequency = <50000000>;
+        spi-max-frequency = <50000000>; // controller·flash·board timing을 만족하는 값으로 선택
     };
 };
 ```
