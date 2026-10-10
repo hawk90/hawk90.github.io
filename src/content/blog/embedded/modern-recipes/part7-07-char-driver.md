@@ -212,13 +212,13 @@ static int my_open(struct inode *ino, struct file *f) {
 
 | 연산 | 시간 (x86_64) |
 |------|---------------|
-| syscall (open/close) | ~600 ns |
-| read (1 byte from char driver) | ~700 ns |
-| copy_to_user (1 KB) | ~400 ns |
-| ioctl | ~500 ns |
-| mmap → user 직접 접근 | initial 1 µs, 이후 0 |
+| syscall (open/close) | syscall·환경에 따라 측정 |
+| read (1 byte from char driver) | driver·환경에 따라 측정 |
+| copy_to_user (1 KB) | CPU·kernel·user 환경에 따라 측정 |
+| ioctl | syscall·driver에 따라 측정 |
+| mmap → user 직접 접근 | page fault·cache·접근 패턴에 따라 측정 |
 
-대용량 데이터는 read/write보다 mmap이 거의 항상 더 빠릅니다. Char driver의 read/write는 *작은 메시지나 control용*입니다.
+대용량 데이터에서 mmap이 유리할 수 있지만 page fault·cache·동기화 비용을 측정해야 합니다. Char driver의 read/write와 mmap 선택은 데이터 수명과 API 요구사항으로 결정합니다.
 
 ```text
 RAM 사용량
@@ -265,7 +265,7 @@ static ssize_t my_write(...) {
 }
 ```
 
-Kernel stack은 보통 16 KB입니다. 큰 buffer는 `kmalloc`이나 `vmalloc`을 씁니다.
+Kernel stack 크기는 architecture·kernel configuration에 따라 다릅니다. 큰 buffer는 kernel stack 대신 적절한 동적 할당 또는 `vmalloc`을 검토합니다.
 
 > Major/minor 충돌
 

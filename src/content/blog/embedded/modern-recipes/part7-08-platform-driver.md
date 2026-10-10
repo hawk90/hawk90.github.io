@@ -102,7 +102,7 @@ static int my_remove(struct platform_device *pdev) {
 }
 ```
 
-`devm_*` API는 driver detach 시 자동으로 자원을 해제합니다. error path와 remove의 cleanup 코드를 거의 모두 제거할 수 있습니다.
+`devm_*` API는 연결된 device lifecycle에 맞춰 관리 대상 자원을 해제합니다. enable·disable 상태 전환과 외부 side effect는 여전히 error path와 remove에서 명시적으로 처리해야 합니다.
 
 ### compatible string 여러 개와 data
 
@@ -154,7 +154,7 @@ if (!IS_ERR(d->reg))
 d->pinctrl = devm_pinctrl_get_select_default(dev);
 ```
 
-대부분의 IP는 reset → regulator → pinctrl → clock → IRQ 순서로 초기화합니다. `devm_*` 변종이 거의 모두 존재합니다.
+초기화 순서는 IP의 전원·clock·reset·pinctrl 의존성에 따라 달라집니다. 필요한 자원별로 해당 `devm_*` helper의 존재와 lifecycle을 확인합니다.
 
 ### Power management
 
@@ -218,16 +218,16 @@ DT match가 성공하면 dmesg에 probe 메시지가 찍히고 sysfs에 driver �
 
 | 연산 | 시간 |
 |---|---|
-| platform_driver_register | ~10 µs (DT scan) |
-| probe (단순 IP) | ~1 ms (clock enable 포함) |
-| probe (복잡한 IP, multi-reset) | ~10 ms |
-| remove | ~수백 µs (devm cleanup 포함) |
+| platform_driver_register | kernel·device tree 규모에 따라 측정 |
+| probe (단순 IP) | resource·firmware·driver에 따라 측정 |
+| probe (복잡한 IP, multi-reset) | device init에 따라 측정 |
+| remove | cleanup·hardware 상태에 따라 측정 |
 
 probe가 부팅 latency에 직접 영향을 줍니다. 가능하면 async probe(`PROBE_PREFER_ASYNCHRONOUS`)를 켜 boot 시간을 줄입니다.
 
 ```text
 RAM 사용량
-platform driver                  ~수 KB (code + private data)
+platform driver                  build·private data에 따라 측정
 devm allocations                 device 해제 시 자동 free
 ```
 

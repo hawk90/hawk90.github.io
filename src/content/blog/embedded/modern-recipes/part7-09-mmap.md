@@ -158,7 +158,7 @@ volatile uint32_t *reg = bar;
 reg[CTRL] = 1;          /* MMIO write */
 ```
 
-UIO·VFIO가 매핑하는 영역은 자동으로 non-cacheable 또는 device memory로 설정됩니다. `volatile`을 빼면 compiler가 register 접근을 제거할 수 있으니 주의합니다.
+UIO·VFIO가 매핑하는 영역의 cacheability와 memory attributes는 driver·architecture·mapping flags에 따라 확인해야 합니다. MMIO 접근 순서와 compiler 최적화 요구도 해당 API와 accessors 문서를 따릅니다.
 
 ## 측정 / 성능 비교
 
@@ -166,21 +166,21 @@ UIO·VFIO가 매핑하는 영역은 자동으로 non-cacheable 또는 device mem
 
 | 방식 | 시간 | CPU |
 |---|---|---|
-| read(fd, 4K) 루프 | 0.85 s | 58% |
-| mmap + memcpy | 0.41 s | 30% |
-| mmap + 직접 access | 0.30 s | 18% |
-| mmap + MADV_SEQUENTIAL | 0.24 s | 16% |
+| read(fd, 4K) 루프 | workload·storage에 따라 측정 | 측정 필요 |
+| mmap + memcpy | workload·page cache에 따라 측정 | 측정 필요 |
+| mmap + 직접 access | access pattern·fault에 따라 측정 | 측정 필요 |
+| mmap + MADV_SEQUENTIAL | kernel·storage·pattern에 따라 측정 | 측정 필요 |
 
 TLB miss 영향이 큰 워크로드에 huge page를 적용했을 때입니다.
 
 | 구성 | TLB miss/sec | 실행 시간 |
 |------|---------------|-----------|
-| 4 KB page | 12 M | 1.80 s |
-| THP (2 MB) 자동 | 1.4 M | 1.05 s |
-| `MAP_HUGETLB` 명시 (2 MB) | 0.9 M | 0.92 s |
-| 1 GB huge page | 0.1 M | 0.81 s |
+| 4 KB page | workload별 측정 | 측정 필요 |
+| THP 자동 | workload·kernel 설정별 측정 | 측정 필요 |
+| `MAP_HUGETLB` 명시 | reserved hugepage·mapping에 따라 측정 | 측정 필요 |
+| 1 GB huge page | platform·reservation에 따라 측정 | 측정 필요 |
 
-DPDK 성능 가이드가 huge page를 강하게 권장하는 이유가 여기에 있습니다.
+DPDK 등 일부 workload는 hugepage를 요구하거나 권장할 수 있지만, 실제 효과와 요구사항은 해당 runtime·kernel 설정을 확인합니다.
 
 ## 자주 보는 함정
 
