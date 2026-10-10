@@ -1,9 +1,11 @@
 # Modern Embedded Recipes — 루프 16 (seriesOrder 150~159)
 
-> 분석 단계: 루브릭 기반 검사·분류 1차  
-> 대상: 공개 글 2편  
-> 기준: AdSense 공개 글 평가 루브릭  
+> 분석 단계: 루브릭 기반 검사·분류 1차
+> 대상: 공개 글 2편
+> 기준: AdSense 공개 글 평가 루브릭
 > 상태: 검사·분류만 완료 — 원문 수정·비공개 처리 없음
+>
+> v1.2 재평가(2026-10-11)가 이 문서의 판정이다. 아래 v1.1 점수·분류는 참고 기록이다.
 
 ## 결론
 
@@ -95,3 +97,60 @@
 - 두 글은 서로 중복되지 않는다. 하나는 QEMU 기반 환경 구축, 다른 하나는 Linux 드라이버 장애 진단이므로 병합 대상이 아니다.
 - 이번 평가는 점수 산정만 수행했다. 원문 수정·비공개·삭제·URL 변경은 하지 않았다.
 
+## v1.2 재평가 (2026-10-11)
+
+루브릭 v1.2와 `docs/adsense-audit/anchors.md`의 앵커 네 편을 기준으로 2편을 다시 채점했다. 원문 2편을 처음부터 끝까지 읽었고, 줄 번호는 2026-10-11 기준 원문 파일의 줄이다.
+
+공통 필드: 2편 모두 `score_status: 잠정`이다. P0는 확인하지 못했다(확인 범위는 원문 본문, 다음 편 안내의 seriesOrder 대조, 내부 링크 대상 파일의 존재와 제목이다. 렌더링·광고 배치는 보지 않았다). factcheck는 git 이력으로 정했다(`part11-16` 커밋 `3821af0d`, `part11-17` 커밋 `f3503545`). 평가 중 외부 자료를 가져와 대조하지 않았다.
+
+중복 비교 범위: 루프 15의 `part11-15-pcie-to-cxl.md`, `hardware/cxl/chapter11-linux-driver.md`, `hardware/cxl/chapter12-qemu-emulation.md`, `tools/debugging/kernel/chapter08-cxl-driver-debug.md`. 세 글 모두 공개 상태다.
+
+| 파일 | A | B | C | D | E | F | G | 합계 | factcheck | 판정 | confidence | anchor_ref |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
+| `part11-16-qemu-cxl-emulation.md` | 14 | 17 | 11 | 3 | 8 | 9 | 4 | 66 | 검증됨 | 병합 검토 | 높음 | `part12-10-on-device-llm.md` |
+| `part11-17-linux-cxl-driver.md` | 15 | 15 | 9 | 6 | 7 | 5 | 3 | 60 | 검증됨 | 보강 | 중간 | `part12-10-on-device-llm.md` |
+
+`part11-16`은 총점 구간이 `보강`(60~79)이지만, 같은 사이트의 `hardware/cxl/chapter12-qemu-emulation.md`와 제목·명령·함정·한계가 거의 같아 5-1절 5단계의 강한 중복 신호를 우선 적용해 `병합 검토`로 두었다. 같은 검색 의도("노트북에서 QEMU로 CXL 개발")를 두 글이 나눠 답하므로 "독립 검색 의도가 있는 중복" 예외에 해당하지 않는다고 판단했다.
+
+v1.1의 84·83점에서 크게 내려간 이유는 v1.1이 CXL 4.0 Internals 시리즈와의 중복을 보지 않았기 때문이다. 두 글의 실전성(C)과 출처(G)는 이 루프에서도 상위권이다.
+
+### part11-16-qemu-cxl-emulation.md
+
+| 항목 | 점수 | 이 글의 근거 |
+| --- | ---: | --- |
+| A | 14 | 이 글만의 것은 준비물 표와 확인 명령(29~35행), 파일 backing store를 쓰는 한 번에 붙여넣는 블록(43~61행), FMW를 512M로 잡은 이유(65행)다. 장치 옵션 설명·`memdev=` deprecation·cxl_test·QEMU 한계는 `hardware/cxl/chapter12-qemu-emulation.md`에 이미 있다. |
+| B | 17 | 준비 → 실행 → 검증 순서 → region·NUMA → 함정 → cxl_test 대안 → 멈춰야 할 때(127~134행)까지, 별도 검색 없이 환경을 세울 수 있다. |
+| C | 11 | 실행 명령 전체(43~61행), 통과 순서가 있는 검증 명령(71~96행), 실제 오류 문자열과 해결법(104~109행)이 있다. 성공 출력 예와 QEMU 버전이 없다(31행은 버전 대신 기능 지원 여부를 기준으로 둔다). |
+| D | 3 | Ch 12와 제목 의도("노트북에서 CXL 개발")가 같고, 실행 명령(이 글 48~60행, Ch 12 56~63행), cxl_test 블록(113~123행, Ch 12 123~131행과 주석까지 같음), 함정 세 개(106~108행, Ch 12 152~170행의 같은 오류 문자열), 한계 목록(131~133행, Ch 12 142~148행)이 겹친다. 23·136행도 상세 내용을 Ch 12로 넘긴다. |
+| E | 8 | 제목·description·본문이 같은 레시피를 향한다. 15행 "BIOS 개발이 가능합니다"는 본문에서 다루지 않는다. |
+| F | 9 | 19행 전제 글, 23행 이 글의 범위, 준비물 표, 69행 "위에서부터 하나씩 통과" 안내, 146행 다음 편(Ch 151 = seriesOrder 151), 관련 항목 여섯 개(150~155행)의 라벨·대상이 모두 맞는다. |
+| G | 4 | QEMU 문서 URL(155행), `hw/cxl/cxl-host.c`(65행)·`hw/mem/cxl_type3.c`(98행)·커널 ABI 문서(37행) 같은 1차 출처를 주장마다 붙였다. QEMU 버전·확인 날짜가 없어 5점은 아니다. |
+
+uncertainties:
+- 33행 커널 설정 목록은 37행 설명대로 Linux 5.18 기준 목록이라 6.3 이상 guest에서 이름이 같은지 확인하지 않았다.
+- 52행 `ubuntu-24.04.qcow2`의 기본 커널이 32행 6.3+ 조건과 `cxl`·`daxctl` 도구를 갖추는지 본문에 없다.
+
+병합 대상: `hardware/cxl/chapter12-qemu-emulation.md`. 준비물 표와 한 번에 붙여넣는 블록을 Ch 12에 합치고 이 URL은 Ch 12로 보내는 방안, 또는 이 글을 "레시피", Ch 12를 "구현 분석"으로 나눠 겹치는 함정·cxl_test·한계 절을 한쪽에서 지우는 방안 중 하나를 시리즈 구조 검토에서 정한다. URL 변경이 따르므로 원문 수정 루프에서 결정한다.
+
+### part11-17-linux-cxl-driver.md
+
+| 항목 | 점수 | 이 글의 근거 |
+| --- | ---: | --- |
+| A | 15 | 증상을 다섯 층으로 나눠 "어디서 끊겼는가"를 좁히는 틀(19·27~35행)이 이 글의 관점이다. 층별 사실(모듈 순서, commit 되돌리기, `-EBUSY` 원인, mailbox 2초, DVSEC 경고)은 `hardware/cxl/chapter11-linux-driver.md`에 같은 출처로 이미 있다. |
+| B | 15 | 다섯 층 + mailbox + RAS + hot-remove로 진단 범위를 덮는다. RAS(137~143행)와 hot-remove(145~153행)는 몇 줄뿐이고, 35행 "아래로 내려갈수록 물리"·"위에서부터 확인"은 21행 "아래에서 위로"와 표 순서(29~33행)를 함께 읽으면 방향이 헷갈린다. |
+| C | 9 | ftrace 절차(77~83행), sysfs로 region을 손으로 만드는 순서(99~111행), 확인 명령이 층마다 있다. 출력 예는 70·102행 정도이고 커널 버전이 없어 인용한 함수 동작이 어느 버전 기준인지 알 수 없다. |
+| D | 6 | Ch 11이 모듈 순서(Ch 11 40~52행 ↔ 이 글 56행), region sysfs 단계와 commit 되돌리기(Ch 11 136~150행 ↔ 99~115행), `-EBUSY` 원인(Ch 11 89~134행 ↔ 117행), mailbox 2초(↔ 135행), DVSEC 경고(Ch 11 256행 ↔ 46행), dax·system-ram(↔ 121~129행)을 모두 다룬다. ftrace probe 추적은 `tools/debugging/kernel/chapter08-cxl-driver-debug.md` 27~49행과 겹친다. 진단 순서라는 틀만 이 글의 것이다. |
+| E | 7 | 제목은 "드라이버 분석"이지만 description과 본문은 장애 진단 절차다. 제목의 cxl_pci·cxl_core·region·DAX는 모두 다룬다. |
+| F | 5 | 165행 "다음 편은 Part 12 (Edge AI·IoT) 영역으로 이어집니다"는 틀렸다. 이 글(seriesOrder 151)이 시리즈 마지막이고 Part 12는 137~148로 앞에 있다. 관련 항목 일곱 개(169~175행)는 라벨·대상이 맞는다. |
+| G | 3 | `drivers/cxl/pci.c`(46·135행), `core/region.c`의 `commit_store`(115행), `core/hdm.c`(117행), `core/trace.h`(139행), ABI 문서(97행)를 주장마다 붙였다. 커널 버전·확인 날짜가 없어 소스 위치가 언제 기준인지 알 수 없다. |
+
+uncertainties:
+- 56행 Makefile built-in 순서와 135행 `CXL_MAILBOX_TIMEOUT_MS` 값은 대조 시점 이후 mainline 변경 여부 미확인.
+- 43행 예시 BDF `0c:00.0`과 루프 15 `part11-15` 77행 `5e:00.0`이 다르다. 예시 값이라 문제로 보지 않았다.
+
+### 시리즈 공통 문제
+
+루프 16은 2편이라 이 루프 안에서 3편 기준을 채우는 문제는 없다. 루프 15의 `part11-15-pcie-to-cxl.md`와 함께 CXL 세 편을 보면 다음 문제가 3편 모두에 있다.
+
+- 다른 시리즈와 핵심 내용이 겹친다(D 3~6): `part11-15-pcie-to-cxl.md` ↔ `performance-engineering/part3-11-cxl-interconnect.md`, `part11-16-qemu-cxl-emulation.md` ↔ `hardware/cxl/chapter12-qemu-emulation.md`, `part11-17-linux-cxl-driver.md` ↔ `hardware/cxl/chapter11-linux-driver.md`·`tools/debugging/kernel/chapter08-cxl-driver-debug.md`. 개별 보강 전에 Modern Embedded Recipes의 CXL 세 편을 CXL 4.0 Internals의 입구로 둘지, 병합할지 시리즈 단위로 정해야 한다.
+- 인용한 upstream 위치에 버전·확인 날짜가 없다: `part11-15`(120·124행은 버전을 적었지만 확인 날짜 없음), `part11-16`(QEMU 버전 없음), `part11-17`(커널 버전 없음). 셋 다 검증 커밋은 있지만 독자는 기준 시점을 알 수 없다.
