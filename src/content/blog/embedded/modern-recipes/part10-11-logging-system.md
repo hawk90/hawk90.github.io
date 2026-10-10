@@ -77,7 +77,7 @@ Overflow 시 *가장 오래된 데이터*를 버립니다. 가장 *최근* 직�
 
 ## Layer 3 — Binary record
 
-Printf는 `%d` formatting에 100 cycle 이상 듭니다. Binary record는 10 cycle.
+Printf formatting과 binary record의 비용은 compiler·format·target·memory path별로 측정합니다.
 
 ```c
 struct log_rec {
@@ -189,7 +189,7 @@ Runtime에서 `g_log_tag_mask`를 바꿔 *어느 subsystem*의 로그만 볼지 
 
 | 방식 | cycles (Cortex-M4 @ 168 MHz) |
 |------|------------------------------|
-| `printf("hello %d\n", x)` | ~1500 |
+| `printf("hello %d\n", x)` | 측정 필요 |
 | `log_emit` (text, ring) | ~600 |
 | `log_binary` (4 args) | ~50 |
 | SEGGER RTT (4 byte) | ~30 |
@@ -208,7 +208,7 @@ void TIM2_IRQHandler(void) {
 }
 ```
 
-1ms 주기 IRQ인데 printf가 1ms 걸려 *영원히* ISR 안에 있게 됩니다.
+1ms 주기 IRQ에서 printf가 긴 시간을 차지하면 다음 IRQ 지연·overrun이 생길 수 있습니다. 실제 비용은 target에서 측정합니다.
 
 수정:
 
@@ -216,7 +216,7 @@ void TIM2_IRQHandler(void) {
 void TIM2_IRQHandler(void) {
     TIM2->SR &= ~TIM_SR_UIF;
     HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
-    LOG_B("tick %u", HAL_GetTick());      /* ~50 cycle */
+    LOG_B("tick %u", HAL_GetTick());      /* 비용은 target에서 측정 */
 }
 ```
 
@@ -273,7 +273,7 @@ SWO는 디버거가 connect되어야 의미가 있습니다. Field firmware는 U
 ## 정리
 
 - 로그는 *호출 → 저장 → 전송 → 해석* 4단계로 비용을 분리합니다.
-- Hot path에서는 ring buffer + binary record만. ~50 cycle.
+- Hot path에서는 ring buffer + binary record를 검토하고 실제 비용·손실률을 측정합니다.
 - Format string은 elf section에 두고 host가 lookup.
 - SWO / SEGGER RTT는 UART보다 100배 빠릅니다.
 - Idle task가 출력을 batch로 처리합니다.

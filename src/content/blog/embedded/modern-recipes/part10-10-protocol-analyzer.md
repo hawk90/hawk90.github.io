@@ -21,20 +21,20 @@ UART RX가 가끔 깨진 byte를 받습니다. SPI flash가 가끔 잘못된 데
 
 | 도구 | 가격대 | sample rate | 채널 | decode |
 |---|---|---|---|---|
-| Saleae Logic Pro 8 | 800달러 | 500 MHz | 8 | UART/SPI/I2C/CAN 등 다수 |
-| Saleae Logic 8 | 400달러 | 100 MHz | 8 | 동일 |
-| DSLogic Pro | 300달러 | 1 GHz | 16 | 다수 |
-| Sigrok-supported probe | 30~100달러 | 24 MHz | 8 | 오픈소스 |
-| Oscilloscope (DSO) | 가변 | 100 MHz~ | 2~4 | 일부 모델 (Rigol, Siglent) |
+| Saleae Logic Pro 8 | 판매 시점 확인 | 제품 사양 확인 | 8 | 지원 protocol 확인 |
+| Saleae Logic 8 | 판매 시점 확인 | 제품 사양 확인 | 8 | 지원 protocol 확인 |
+| DSLogic Pro | 판매 시점 확인 | 제품 사양 확인 | 16 | 지원 protocol 확인 |
+| Sigrok-supported probe | 장치별 확인 | 장치별 확인 | 장치별 확인 | decoder 범위 확인 |
+| Oscilloscope (DSO) | 모델별 확인 | 모델별 확인 | 모델별 확인 | protocol decode 옵션 확인 |
 
-100 MHz sample rate면 1 MHz 통신까지 무리 없이 봅니다. SPI 50 MHz를 보려면 500 MHz 이상이 필요합니다.
+필요한 sample rate는 edge rate·protocol·허용 timing 오차로 정합니다. nominal clock의 배수만으로 충분성을 보장하지 말고 대상 신호를 검증합니다.
 
 ## Setup — Saleae Logic 2 예
 
 1. Probe ground를 보드 GND에 연결
 2. 신호선에 probe clip
 3. Capture 설정:
-   - sample rate: 신호의 10배 이상
+   - sample rate: 신호와 edge/timing 요구사항에 맞춰 설정
    - duration: trigger 후 몇 ms 캡쳐
    - trigger: 특정 line의 falling edge
 4. Capture
@@ -186,7 +186,7 @@ GND probe를 보드의 *반대편*에 걸면 ground loop으로 ringing이 측정
 
 > Sample rate 부족
 
-5 MHz SPI를 10 MHz logic analyzer로 캡쳐하면 edge 위치가 정확하지 않습니다. 신호의 *10배 이상* sample rate.
+SPI capture의 timing 정확도는 sample rate뿐 아니라 edge rate·threshold·probe bandwidth로 결정됩니다. analyzer 사양과 대상 timing margin을 함께 확인합니다.
 
 > Logic level mismatch
 

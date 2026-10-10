@@ -189,7 +189,7 @@ static inline void gasp_log(uint16_t code, uint16_t arg) {
 }
 ```
 
-Hot path에서 µs 단위로 부르고, crash dump에 ring 전체를 포함시킵니다. Host에서 ring을 풀어 *마지막 128개 event*를 시간 순으로 봅니다.
+Hot path에서 호출하고 crash dump에 ring 전체를 포함시킵니다. Host에서 ring을 풀어 보존된 event를 시간 순으로 봅니다. 보존 개수는 ring 크기와 event 크기로 결정합니다.
 
 ## RAM watchpoint 패턴 — Stack overflow 잡기
 
@@ -245,7 +245,7 @@ reset_reason_t get_reset_reason(void) {
 | `RESET_BOR` | Brown-out → 전압 dip |
 | `RESET_LOWPWR` | Low-power mode escape failure |
 
-Cloud에서 reset reason 분포를 보면 *어떤 종류 crash가 흔한지* 한눈에 보입니다. IWDG 50%, BOR 30%, hardfault 20%면 *전원* 또는 *hang* 문제가 우선.
+Cloud에서 reset reason 분포를 보면 어떤 종류의 reset이 많은지 파악할 수 있습니다. 원인별 우선순위는 실제 fleet 데이터와 측정 신뢰도를 함께 검토합니다.
 
 ## Field Debug — 원격 진단
 
