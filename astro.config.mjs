@@ -135,14 +135,28 @@ export default defineConfig({
     // /random, retired /topics/ hub URLs, and compatibility-only /series/ URLs
     // are noindex redirects; listing them would contradict their own robots
     // directive.
-    filter: (page) =>
-      !page.includes('/admin') &&
-      !page.includes('/authors/') &&
-      !page.includes('/topics/') &&
-      !page.includes('/series/') &&
-      !page.endsWith('/random/') &&
-      !page.endsWith('/components/') &&
-      !redirectUrls.has(new URL(page).pathname),
+    filter: (page) => {
+      const pathname = new URL(page).pathname;
+      const isBlogPagination = /^\/blog\/\d+\/?$/.test(pathname);
+      const isUtilityListing = new Set([
+        '/archive/',
+        '/stats/',
+        '/recently-updated/',
+      ]).has(pathname);
+
+      return (
+        !pathname.includes('/admin') &&
+        !pathname.includes('/authors/') &&
+        !pathname.includes('/topics/') &&
+        !pathname.includes('/series/') &&
+        !pathname.includes('/tags/') &&
+        !isBlogPagination &&
+        !isUtilityListing &&
+        !pathname.endsWith('/random/') &&
+        !pathname.endsWith('/components/') &&
+        !redirectUrls.has(pathname)
+      );
+    },
   }),
     // Last, so it sees the final HTML: pins each page's inline scripts into
     // its CSP script-src (see the module comment).

@@ -43,6 +43,8 @@ const { tag, allPosts, page } = Astro.props;
   description={page.currentPage > 1
     ? `${tag} 태그가 붙은 글 — ${page.currentPage}/${page.lastPage} 페이지`
     : `${tag} 태그가 붙은 글`}
+  noIndex
+  noAds
 >
   <section class="py-16 lg:py-24">
     <div class="container">

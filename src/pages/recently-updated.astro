@@ -14,7 +14,7 @@ const recentPosts = allPosts
   .slice(0, 24);
 ---
 
-<BaseLayout title="Recently Updated" description="최근 수정·발행된 글">
+<BaseLayout title="Recently Updated" description="최근 수정·발행된 글" noIndex noAds>
   <section class="py-16 lg:py-24">
     <div class="container">
       <Breadcrumb items={[{ label: 'Blog', href: '/blog' }, { label: 'Recently Updated' }]} />

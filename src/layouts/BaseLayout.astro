@@ -20,6 +20,8 @@ interface Props {
   author?: string;
   noIndex?: boolean;
   noFollow?: boolean;
+  /** Keep Auto ads off utility, navigation, and policy pages. */
+  noAds?: boolean;
   canonical?: string;
   hasMath?: boolean;
 }
@@ -35,6 +37,7 @@ const {
   author = SITE_CONFIG.author,
   noIndex = false,
   noFollow = false,
+  noAds = false,
   canonical,
   hasMath = false,
 } = Astro.props;
@@ -56,6 +59,7 @@ const pagePath = Astro.url.pathname;
 // '/administration'. '/404' is rendered as /404.html.
 const adsOnPage =
   ADS_CONFIG.enabled &&
+  !noAds &&
   !ADS_CONFIG.excludePaths.some(
     (prefix) => pagePath === prefix || pagePath === `${prefix}.html` || pagePath.startsWith(`${prefix}/`),
   );

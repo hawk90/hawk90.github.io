@@ -125,7 +125,7 @@ const canonical = destination ? new URL(destination, Astro.site).href : undefine
     </body>
   </html>
 ) : (
-<BaseLayout title={`${qualifiedName} - Blog`} description={categoryInfo!.description}>
+<BaseLayout title={`${qualifiedName} - Blog`} description={categoryInfo!.description} noAds>
   <section class="py-16 lg:py-24">
     <div class="container">
       <div class="lg:flex lg:gap-12">
