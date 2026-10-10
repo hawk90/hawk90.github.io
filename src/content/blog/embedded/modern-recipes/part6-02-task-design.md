@@ -39,7 +39,7 @@ Priority는 마감이 짧을수록 높게 줍니다. Rate Monotonic이 가장 �
 | event-driven UI | 2 |
 | background log | 1 (가장 낮음) |
 
-같은 우선순위에 task가 여러 개 모이면 round-robin이 되지만, 디버깅이 어려워지므로 우선순위는 가능한 한 유일하게 줍니다.
+같은 우선순위 task의 실행 순서는 scheduler 설정과 yield/block 여부에 따라 달라집니다. 우선순위는 마감과 blocking 관계를 기준으로 정하고, 같은 값을 사용해도 되는지 검증합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -57,7 +57,7 @@ void task_control(void *arg) {
 }
 ```
 
-`vTaskDelay`가 아니라 `vTaskDelayUntil`을 쓰는 것이 핵심입니다. 전자는 실행 후 delay라 코드 길이에 따라 주기가 drift하지만, 후자는 절대시각 기준이라 jitter가 누적되지 않습니다.
+`vTaskDelay`가 아니라 `vTaskDelayUntil`을 검토하는 것이 핵심입니다. 전자는 호출 시점 기준 delay이고, 후자는 기준 tick을 갱신해 주기 작업의 drift를 줄입니다. 실행 시간이 주기를 넘으면 deadline miss는 별도로 처리해야 합니다.
 
 ### Event-driven task
 
@@ -80,7 +80,7 @@ void task_ui(void *arg) {
 }
 ```
 
-`portMAX_DELAY`로 무한 대기하다가 ISR이 깨우면 그때만 실행합니다. CPU를 0%에 가깝게 유지하면서도 외부 입력에 빠르게 반응합니다.
+설정에 따라 `portMAX_DELAY`로 무한 대기하다가 ISR이 깨우면 그때만 실행합니다. 실제 CPU 사용량과 wake latency는 tick·port·다른 task 부하로 측정합니다.
 
 ### State machine task
 
@@ -151,30 +151,30 @@ int main(void) {
 }
 ```
 
-같은 우선순위의 worker N개를 두면 굳이 thread pool 라이브러리 없이도 병렬 처리가 됩니다. 다만 MCU에서는 worker 수가 늘수록 stack RAM이 그만큼 늘어납니다.
+같은 우선순위의 worker N개를 두면 별도 thread pool 라이브러리 없이 작업을 분산할 수 있습니다. 다만 단일 코어 MCU에서는 병렬 실행이 아니며, worker 수가 늘수록 stack RAM과 scheduling 비용이 늘어납니다.
 
 ## 측정 / 성능 비교
 
-같은 product를 task 분할만 바꿔서 jitter를 측정해본 사례입니다.
+측정 형식을 보여 주는 예시입니다. 실제 jitter는 workload, tick, interrupt와 compiler 설정으로 다시 측정해야 합니다.
 
 | 구조 | control jitter |
 |------|-----------------|
-| 모든 일을 task 하나에 (priority 3) | 8 ms |
-| control만 분리 (priority 5) | 0.2 ms |
-| control + sensor 분리 | 0.3 ms |
-| sensor를 우선순위 5로 (실수) | 12 ms (control이 굶음) |
+| 모든 일을 task 하나에 (priority 3) | 측정 필요 |
+| control만 분리 (priority 5) | 측정 필요 |
+| control + sensor 분리 | 측정 필요 |
+| sensor를 우선순위 5로 (실수) | workload 의존 |
 
-가장 짧은 마감을 가진 task에 가장 높은 priority를 주는 것만으로도 jitter가 한 자릿수 µs 수준으로 떨어집니다.
+가장 짧은 마감에 높은 priority를 주는 것은 출발점일 뿐이며, blocking·ISR·실행시간을 포함해 jitter를 검증해야 합니다.
 
-Context switch 비용 (Cortex-M4 72 MHz):
+Context switch 비용 예시 형식 (Cortex-M4 72 MHz; 실제 값은 측정):
 
 | 시나리오 | 시간 |
 |----------|------|
-| task 2개 | 3.5 µs / switch |
-| task 8개 | 3.5 µs / switch (task 수 무관) |
-| ISR → task wake | 1.8 µs |
+| task 2개 | 측정 필요 |
+| task 8개 | 측정 필요 |
+| ISR → task wake | 측정 필요 |
 
-Context switch는 task 수와 무관합니다. 다만 task가 너무 많으면 디버깅과 stack RAM이 부담입니다.
+일반적으로 한 번의 context switch 비용은 ready task 수보다 port와 저장·복원 경로의 영향을 크게 받지만, scheduler 검색 방식과 설정도 확인해야 합니다. task가 너무 많으면 디버깅과 stack RAM이 부담입니다.
 
 ## 자주 보는 함정
 
@@ -223,7 +223,7 @@ while (!sensor_ready());     /* CPU 100% 잡아먹음 */
 - 긴 사이드 이펙트는 state machine task로 풀어내면 callback 지옥을 피할 수 있습니다.
 - Priority는 Rate Monotonic으로 시작하고, 가능한 한 유일한 값을 줍니다.
 - 빠르게 받기만 하는 task와 무거운 처리 task를 분리하면 jitter가 안정됩니다.
-- Worker pool은 ScheduleQueue가 깊을 때 가장 단순한 병렬화입니다.
+- Worker pool은 작업 queue가 깊을 때 사용할 수 있는 단순한 분산 패턴입니다.
 
 다음 편은 **Scheduler 동작 이해**입니다. Preemptive와 cooperative, time-slice, context switch 비용을 다룹니다.
 

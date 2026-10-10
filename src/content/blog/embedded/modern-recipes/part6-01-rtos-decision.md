@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"RTOS는 응답시간이 두 개 이상 동시에 마감을 가질 때부터 정답이 됩니다."** Task 한두 개, 주기 하나면 super-loop이 더 단순하고 안전합니다.
+> **"여러 실행 흐름의 마감과 blocking 요구를 함께 검토해야 RTOS 도입 여부를 판단할 수 있습니다."** Task 한두 개, 주기 하나면 super-loop이 더 단순할 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -25,9 +25,9 @@ topics: ["embedded"]
 
 | 조건 | 권장 구조 |
 |------|-----------|
-| 마감 1개 | super-loop + ISR |
-| 마감 2~3개 + 주기 ms 단위 | super-loop + state machine |
-| 마감 4개 이상 + jitter 요구 | RTOS |
+| 실행 흐름이 적고 blocking이 거의 없음 | super-loop + ISR 검토 |
+| 몇 개의 짧은 주기와 명확한 상태 전이 | super-loop + state machine 검토 |
+| 여러 독립 흐름과 blocking/동시성 요구 | RTOS 검토 |
 | HW 차원의 동시성 (BLE, USB stack) | RTOS 또는 bare-metal stack |
 
 RTOS가 주는 것은 time-slicing이 아니라 blocking primitive입니다. `wait_for_event(timeout)`을 한 줄로 쓰는 능력이 본질이고, 그 대가로 stack 메모리와 context-switch 시간을 지불합니다.
@@ -36,9 +36,9 @@ RTOS가 주는 것은 time-slicing이 아니라 blocking primitive입니다. `wa
 
 | 항목 | super-loop | FreeRTOS (4 task) |
 |------|------------|---------------------|
-| Flash 추가 | 0 | 6~10 KB |
-| RAM 추가 | 0 | 4~8 KB (task stack 포함) |
-| context switch | 없음 | 1~3 µs (Cortex-M4) |
+| Flash 추가 | 0 | kernel·port·설정에 따라 달라짐 |
+| RAM 추가 | 0 | task stack·queue·heap 설정에 따라 달라짐 |
+| context switch | 없음 | MCU·port·빌드 옵션에 따라 달라짐 |
 | 디버깅 난이도 | 낮음 | 중간 (race, deadlock) |
 | 소스 재사용 | 낮음 | 높음 (driver 표준화) |
 
@@ -127,13 +127,13 @@ void task_motor(void *arg) {
 
 ## 측정 / 성능 비교
 
-Cortex-M4 72 MHz에서 같은 펌웨어를 두 구조로 구현해 latency를 측정한 결과입니다.
+Cortex-M4 72 MHz에서 측정한 예시입니다. 실제 값은 compiler, optimization, tick 설정, ISR 부하와 port에 따라 달라집니다.
 
 | 시나리오 | super-loop | FreeRTOS |
 |----------|------------|----------|
-| ISR → main loop dispatch | 2 µs | 2 µs |
-| event → task wake | n/a | 8 µs (context switch 포함) |
-| 4개 동시 마감 시 worst jitter | 220 µs | 22 µs |
+| ISR → main loop dispatch | 측정 필요 | 측정 필요 |
+| event → task wake | n/a | 측정 필요 |
+| 4개 동시 마감 시 worst jitter | workload 의존 | workload 의존 |
 
 마감이 하나일 때는 super-loop이 빠르지만, 동시 마감이 많아질수록 RTOS의 우선순위 기반 스케줄링이 jitter를 크게 줄입니다.
 
@@ -186,7 +186,7 @@ xQueueCreate(...);    /* dynamic */
 
 - 동시에 살아있는 마감의 수가 1~2개면 super-loop이 거의 항상 더 안전합니다.
 - RTOS의 본질은 time-slicing이 아니라 blocking primitive입니다.
-- Flash 6~10 KB, RAM 4~8 KB 정도의 비용이 늘어납니다.
+- Flash·RAM 비용은 kernel, port, 설정, task 수와 stack 크기를 실제 map 파일로 확인합니다.
 - Hybrid 구조(ISR + task)는 timing critical 부분에 가장 단순한 답입니다.
 - Static API와 stack 측정은 RTOS를 도입한 다음에 가장 먼저 챙겨야 할 항목입니다.
 - 결정이 애매하면 super-loop으로 시작하고, jitter가 망가질 때 RTOS로 옮깁니다.

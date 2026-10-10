@@ -21,9 +21,9 @@ topics: ["embedded"]
 
 ## 핵심 개념
 
-Scheduler가 호출되는 시점은 정확히 네 가지입니다.
+일반적인 preemptive RTOS에서 scheduler가 다시 실행될 수 있는 대표 시점은 다음과 같습니다.
 
-1. **Tick interrupt** — 매 tick (보통 1 ms) — time-slice 회전
+1. **Tick interrupt** — 설정한 tick — delay 만료와 time-slice 처리
 2. **Task가 block** — delay, queue wait, semaphore take
 3. **Task가 unblock** — ISR이나 다른 task가 깨움
 4. **`yield` / `yield_from_isr`** — 명시적 양보
@@ -36,7 +36,7 @@ Scheduler가 호출되는 시점은 정확히 네 가지입니다.
 | cooperative | yield하지 않으면 영원히 안 바뀜 |
 | time-slice | 같은 priority에서 tick마다 round-robin |
 
-FreeRTOS는 기본이 preemptive와 time-slice이고, Zephyr와 ThreadX도 마찬가지입니다. Cooperative는 디버깅이 단순하지만 단일 task의 무한 루프가 전체를 멈춥니다.
+FreeRTOS·Zephyr·ThreadX 모두 preemptive/cooperative와 time-slice 동작이 설정·port에 따라 달라집니다. Cooperative에서는 yield 없는 task가 다른 task 실행을 지연시킬 수 있습니다.
 
 ## 코드 / 실제 사용 예
 
@@ -66,7 +66,7 @@ void task_a(void *arg) {
 }
 ```
 
-`configUSE_PREEMPTION = 0`이면 yield 없이는 다른 task가 절대 못 돌아옵니다. 그래서 매우 단순한 control loop에서만 안전합니다.
+`configUSE_PREEMPTION = 0`이면 현재 task가 block하거나 yield할 때까지 scheduler 전환이 제한됩니다. 단순한 control loop라도 모든 경로가 양보하는지 검증해야 합니다.
 
 ### Time-slice
 
@@ -74,7 +74,7 @@ void task_a(void *arg) {
 #define configUSE_TIME_SLICING   1
 #define configTICK_RATE_HZ       1000
 
-/* 같은 priority 두 task가 1 ms씩 번갈아 실행 */
+/* 같은 priority task의 tick 기반 교대는 port/config와 ready 상태에 따름 */
 xTaskCreate(task_x, "x", 1024, NULL, 2, NULL);
 xTaskCreate(task_y, "y", 1024, NULL, 2, NULL);
 ```
@@ -90,7 +90,7 @@ void vApplicationIdleHook(void) {
 }
 ```
 
-Idle task는 모든 다른 task가 block일 때만 도는 가장 낮은 priority의 task입니다. WFI(Wait For Interrupt)를 부르면 ISR이 들어올 때까지 CPU clock이 멈춥니다.
+Idle task는 실행 가능한 더 높은 priority task가 없을 때 동작하는 가장 낮은 priority의 task입니다. WFI(Wait For Interrupt)는 port와 interrupt 설정에 맞게 사용해야 합니다.
 
 ### Tickless idle
 
@@ -101,7 +101,7 @@ Idle task는 모든 다른 task가 block일 때만 도는 가장 낮은 priority
 /* FreeRTOS가 자동으로 tick interrupt를 끄고 RTC로 깨움 */
 ```
 
-깨어날 task가 N tick 후에 있다면 tick interrupt를 멈추고 그만큼 sleep합니다. µA 단위 절전이 가능해지지만, RTC 기반 wake-up이 정확히 동작해야 합니다.
+깨어날 task가 충분히 늦다면 port가 tick을 보정하며 저전력 모드로 들어갈 수 있습니다. 절전 효과와 wake-up clock은 MCU port와 tickless 구현을 확인해 측정합니다.
 
 ### Context switch 코드 (Cortex-M)
 
@@ -112,7 +112,7 @@ PendSV에서 호출되는 핵심 4단계.
 3. **다음 task의 SP 복원**
 4. **exception return** — HW가 R0~R12, LR, PSR 자동 pop
 
-Cortex-M은 hardware가 절반의 register를 알아서 push와 pop해줍니다. 그 결과 switch 비용이 1~3 µs로 작아집니다.
+Cortex-M은 exception entry/return에서 일부 register를 hardware가 저장·복원합니다. 전체 비용은 port, FPU 사용, compiler와 clock에 따라 측정해야 합니다.
 
 ### Yield 패턴
 
@@ -128,27 +128,27 @@ Cooperative 환경이나 같은 priority의 worker들 사이에서 fairness를 �
 
 ## 측정 / 성능 비교
 
-Cortex-M4 72 MHz, FreeRTOS 10.5에서 측정한 값입니다.
+Cortex-M4 72 MHz, FreeRTOS 10.5에서 측정하는 예시 항목입니다. 아래 수치는 특정 port·빌드·측정 방법 없이는 일반값으로 사용할 수 없습니다.
 
 ```text
 이벤트                         시간
-tick handler                  0.6 µs
-xTaskIncrementTick             0.8 µs
-context switch (PendSV)        2.8 µs
-ISR → task wake (전체)         5.2 µs
-xQueueSend → receiver 깨움     7.1 µs
+tick handler                  측정 필요
+xTaskIncrementTick             측정 필요
+context switch (PendSV)        측정 필요
+ISR → task wake (전체)         측정 필요
+xQueueSend → receiver 깨움     측정 필요
 ```
 
-Tick handler가 작지 않다는 점이 중요합니다. 1 ms tick이면 0.06%의 overhead가 항상 깔립니다. Latency가 중요하면 tick rate를 낮추거나 tickless를 켜는 것이 효과적입니다.
+Tick handler overhead는 tick rate와 port 설정에 따라 누적됩니다. Latency와 전력 요구에 맞춰 tick rate와 tickless를 측정해 선택합니다.
 
 ```text
 전력 (STM32L4, 80 MHz active)
-tick 1 kHz, idle hook 없음        4.2 mA
-tick 1 kHz + WFI in idle hook     0.9 mA
-tickless idle                     12 µA
+tick 1 kHz, idle hook 없음        측정 필요
+tick 1 kHz + WFI in idle hook     측정 필요
+tickless idle                     측정 필요
 ```
 
-WFI 한 줄과 tickless 한 옵션의 효과가 두 자릿수 배수로 나타납니다.
+WFI와 tickless의 효과는 MCU clock tree, peripheral, wake source와 측정 조건에 따라 크게 달라집니다.
 
 ## 자주 보는 함정
 
