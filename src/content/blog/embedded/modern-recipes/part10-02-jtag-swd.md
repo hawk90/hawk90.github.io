@@ -214,7 +214,7 @@ SWO pin (SWD에선 별도): 디버그 trace, printf
 Manchester 또는 NRZ 인코딩
 ITM stimulus port: printf
 DWT: cycle·event counter
-ETM: instruction trace (수 백 MB/s)
+ETM: instruction trace (대역폭은 target·trace sink별 측정)
 ```
 
 ```c

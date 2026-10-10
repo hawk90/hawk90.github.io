@@ -110,7 +110,7 @@ New value = 1879048197    ← 깨진 값
 0x08001234 in process_input (data=0xdeadbeef) at input.c:78
 ```
 
-Cortex-M의 DWT comparator는 보통 4개입니다. 정확한 주소만 알면 *누가, 어디서* 메모리를 망가뜨렸는지 즉시 잡습니다.
+Cortex-M의 DWT comparator 수는 core 구현별로 다릅니다. 지원되는 comparator와 watchpoint 정렬·크기 제한을 확인해야 하며, 모든 메모리 오염을 즉시 잡는다고 보장할 수 없습니다.
 
 ## .gdbinit으로 반복 작업 자동화
 
@@ -206,7 +206,7 @@ itm port 0 on
 nc localhost 3344 | itm-parse
 ```
 
-SEGGER J-Link 사용자는 RTT가 더 편합니다. UART보다 빠르고 (몇 MB/s) GPIO를 안 씁니다.
+SEGGER J-Link 사용자는 RTT를 선택할 수 있습니다. 처리량과 buffer 동작은 probe·target·host 설정에 따라 달라지고 GPIO를 사용하지 않는 경로를 제공합니다.
 
 ```bash
 JLinkRTTClient
@@ -299,7 +299,7 @@ int compute(int x) {
 
 > Hardware breakpoint 부족
 
-Cortex-M의 FPB는 보통 6개입니다. 7번째 breakpoint를 걸면 "no more breakpoints" 에러가 납니다. 안 쓰는 bp는 정리합니다.
+Cortex-M의 FPB breakpoint 수는 core 구현별로 다릅니다. 사용 가능한 hardware breakpoint 수를 확인하고 부족하면 software breakpoint·watchpoint 제약을 고려합니다.
 
 > Watchpoint를 변수가 아닌 *주소*로 걸어야 할 때
 
