@@ -298,12 +298,7 @@ EP 별로 지원 op가 다름. Verbose log로 *어느 op가 어디로 가는지*
 
 > ONNX opset 호환
 
-```text
-TensorRT EP의 ONNX opset 지원은 설치된 TensorRT·ORT version 문서로 확인
-Model opset 18 → fail or downgrade
-```
-
-ONNX export 시 target EP에 맞는 opset 선택.
+TensorRT EP가 지원하는 ONNX opset은 설치된 TensorRT·ORT version마다 다릅니다. 모델 opset이 그보다 높으면 parse가 실패하거나 일부 node가 다른 EP로 넘어갑니다. 지원 범위는 해당 version 문서로 확인하고, ONNX export 시 target EP에 맞는 opset을 선택합니다.
 
 > Dynamic shape 미지원
 
