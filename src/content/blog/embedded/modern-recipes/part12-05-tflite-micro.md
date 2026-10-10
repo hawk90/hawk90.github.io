@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-Cortex-M4/M7/M33/M55, RISC-V MCU, ESP32 등 *KB ~ 수십 MB RAM의 MCU*에서 keyword spotting, person detection, gesture recognition, anomaly detection 같은 *작은 신경망*을 돌릴 때 표준입니다.
+Cortex-M4/M7/M33/M55, RISC-V MCU, ESP32 등 제한된 RAM의 MCU에서 작은 신경망을 실행할 때 선택되는 runtime입니다. 지원 op·delegate·toolchain은 target별로 확인합니다.
 
 ARM Ethos-U NPU와 결합하면 Cortex-M55 + Ethos-U55 같은 *MCU급* AI inference가 됩니다. Battery로 24/7 always-on inference가 가능합니다.
 
@@ -188,7 +188,7 @@ make -f tensorflow/lite/micro/tools/make/Makefile \
      hello_world
 ```
 
-CMSIS-NN을 활성화하면 INT8 conv가 *5-10배* 빨라집니다 (M7에서). Cortex-M4 SIMD (DSP extensions)와 M55의 Helium (MVE)을 활용.
+CMSIS-NN은 target에 맞는 optimized INT8 kernels를 제공할 수 있습니다. 가속 폭은 core·compiler·tensor shape·memory layout으로 측정합니다.
 
 ## Ethos-U Delegate
 
@@ -239,7 +239,7 @@ int8_t person = out->data.int8[1];
 if (person > THRESHOLD) led_on();
 ```
 
-Cortex-M7 480 MHz에서 ~200 ms/inference. CMSIS-NN으로 ~30 ms. Ethos-U55 추가 시 ~5 ms.
+Cortex-M7/Ethos-U55 사례의 latency와 power는 model·clock·delegate 구성에서 측정합니다.
 
 ## Memory Layout
 
@@ -350,7 +350,7 @@ Quantized model은 *INT8 input*. `q = round(x / scale - zero_point)`로 변환.
 - 모델은 .tflite → C array로 flash에 둠.
 - Tensor arena 한 덩어리에서 intermediate tensor reuse.
 - MutableOpResolver로 사용 op만 link.
-- CMSIS-NN으로 Cortex-M INT8 5-10배 가속.
+- CMSIS-NN kernel의 효과는 target model과 core에서 측정합니다.
 - Vela로 Ethos-U binary 변환 + Ethos-U delegate.
 - INT8 quantization 필수. Float32는 MCU에 너무 무거움.
 - Arena 크기는 `arena_used_bytes()`로 측정 후 조정.

@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"ONNX는 *프레임워크 중립 모델 format*, ONNX Runtime은 *모든 hardware에 한 모델로 배포*하는 inference 엔진입니다."** Execution Provider만 바꿔 같은 .onnx로 CUDA, TensorRT, CoreML, DML, CPU를 골라 씁니다.
+> **"ONNX는 모델 교환 format이고 ONNX Runtime은 Execution Provider 기반 inference engine입니다."** 같은 .onnx를 여러 backend에서 사용할 수 있지만 operator·version·EP 지원 범위와 graph partition을 확인해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -245,7 +245,7 @@ out = sess.run(None, {'input_features': mel})
 tokens = greedy_decode(out[0])
 ```
 
-Whisper-tiny가 Mac M2에서 *real-time보다 10배 빠르게* 동작. CoreML로 ANE 활용.
+Whisper-tiny의 real-time 성능과 ANE 사용 여부는 model·audio length·CoreML EP 설정에서 측정합니다.
 
 ## ONNX Runtime Web — Browser
 
@@ -299,7 +299,7 @@ EP 별로 지원 op가 다름. Verbose log로 *어느 op가 어디로 가는지*
 > ONNX opset 호환
 
 ```text
-TensorRT 8.4 supports opset 17
+TensorRT EP의 ONNX opset 지원은 설치된 TensorRT·ORT version 문서로 확인
 Model opset 18 → fail or downgrade
 ```
 
@@ -315,7 +315,7 @@ dynamic_axes={'input': {0: 'batch'}}
 
 > Calibration data 부족
 
-Static INT8 quantization에서 calibration data가 부족하면 accuracy 5-10% 손실. 500~1000장 권장.
+Static INT8 quantization의 accuracy 영향은 model·calibration data로 측정하며, representative set 크기는 target validation으로 결정합니다.
 
 > Mobile build에서 op 누락
 

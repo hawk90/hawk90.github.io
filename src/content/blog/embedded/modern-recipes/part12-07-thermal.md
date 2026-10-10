@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Edge AI 보드의 진짜 spec은 burst가 아니라 sustained 성능입니다."** 105 × 105 mm 보드에 60 W를 부으면 10초 안에 95°C에 도달해 frequency가 절반으로 떨어집니다. Thermal 설계 없이는 datasheet TOPS가 의미를 잃습니다.
+> **"Edge AI 보드의 진짜 spec은 burst가 아니라 sustained 성능입니다."** 보드 크기·전력·냉각·ambient에 따라 온도와 throttling이 달라지므로 long-run thermal 측정이 필요합니다.
 
 ## 어떤 상황에서 쓰나
 
