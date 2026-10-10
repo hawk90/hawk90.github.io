@@ -26,7 +26,7 @@ export const SITE_CONFIG = defineSite({
   author: 'Hawk',
   locale: 'ko-KR',
   lang: 'ko',
-  url: 'https://hawk90.github.io',
+  url: 'https://hawk90.dev',
 });
 
 // --- Branding ---

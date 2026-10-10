@@ -1,4 +1,4 @@
 {
-  "origins": ["https://hawk90.github.io"],
+  "origins": ["https://hawk90.dev", "https://hawk90.github.io"],
   "originsRegex": ["^http://localhost:[0-9]+$"]
 }
