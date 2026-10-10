@@ -36,3 +36,15 @@ verification; it does not affect the manifest-policy wiring.
 | --- | --- | --- |
 | `npm run check` | passed | 0 errors |
 | `npm run build` | passed | Static Topic Hub routes generated successfully |
+
+## 2026-10-10 status review
+
+`STATE.json` said `completed`, but `phase-dependencies.json` lists 46 tasks for
+Phase 1 and 15 are complete (PH-ARC-01…10, PH-B-01…05). The other 31
+(PH-B-06…28, PH-CPM-01…08) were never started, and `nextRecommendedBatch`
+still names PH-B-06/07. Status is now `paused`: not active, not complete.
+
+Batches 4–5 built Topic Hubs and the PCIe & CXL hub; add43806 (2026-08-18)
+removed Topic Hubs in favour of learning paths, so that work no longer ships.
+Resuming Phase 1 — and whether PH-B-06 onward still applies after that
+change — is the owner's decision (CLAUDE.md §15).

@@ -93,4 +93,4 @@
 
 ## 15. Claude Code 실행 패킷
 
-코드 리팩터링 작업은 [claude/WORKFLOW.md](claude/WORKFLOW.md)를 따릅니다. 패킷은 `claude/phase-00`~`phase-07`; 어느 패킷·태스크가 활성인지는 각 `STATE.json`의 `status`·`activeTasks`가 정본입니다(phase-01은 `completed`). 다음 패킷 활성화는 사용자 결정 — 스스로 활성화하지 않습니다.
+코드 리팩터링 작업은 [claude/WORKFLOW.md](claude/WORKFLOW.md)를 따릅니다. 패킷은 `claude/phase-00`~`phase-07`; 어느 패킷·태스크가 활성인지는 각 `STATE.json`의 `status`·`activeTasks`가 정본입니다(phase-00은 `completed`, phase-01은 15/46 작업 뒤 `paused`, 나머지는 `queued`). `queued`·`paused` 패킷도 `activeTasks`를 갖고 있지만 활성이 아닙니다 — 활성화·재개는 사용자 결정 — 스스로 활성화하지 않습니다.
