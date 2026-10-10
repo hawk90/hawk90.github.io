@@ -113,7 +113,7 @@ else
   echo ""
   echo "각 위치를 수동 review:"
   echo "  - 진짜 fact라면 data/known-facts.yaml에 출처와 함께 등재"
-  echo "  - hallucination이면 수정·qualifier 추가"
+  echo "  - 틀렸으면 1차 자료대로 수정, 출처가 없으면 삭제"
   echo "  - false positive면 패턴·whitelist 정교화"
   exit 1
 fi
