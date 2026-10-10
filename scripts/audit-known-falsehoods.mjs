@@ -18,14 +18,17 @@
 //   node scripts/audit-known-falsehoods.mjs --include-drafts
 // Exit: 0 = clean, 1 = known falsehood found, 2 = bad input.
 import { existsSync, readFileSync, readdirSync, statSync } from 'node:fs';
-import { join, relative } from 'node:path';
+import { dirname, join, relative, resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import * as yaml from 'js-yaml';
 
-const REGISTRY = 'data/known-falsehoods.yaml';
+// Resolved from this file, so the check works from any cwd.
+const ROOT = resolve(dirname(fileURLToPath(import.meta.url)), '..');
+const REGISTRY = join(ROOT, 'data/known-falsehoods.yaml');
 const args = process.argv.slice(2);
 const includeDrafts = args.includes('--include-drafts');
 const targets = args.filter((arg) => !arg.startsWith('--'));
-if (!targets.length) targets.push('src/content/blog');
+if (!targets.length) targets.push(join(ROOT, 'src/content/blog'));
 
 const entries = /** @type {any[]} */ (yaml.load(readFileSync(REGISTRY, 'utf8')) ?? []);
 /** @type {{ id: string, re: RegExp, correction: string }[]} */
@@ -37,7 +40,9 @@ for (const entry of entries) {
       process.exit(2);
     }
   }
-  rules.push({ id: entry.id, re: new RegExp(entry.pattern, 'g'), correction: entry.correction });
+  // Optional `flags` (e.g. "i" for case-insensitive); "g" is always added.
+  const flags = typeof entry.flags === 'string' ? entry.flags.replace(/g/g, '') : '';
+  rules.push({ id: entry.id, re: new RegExp(entry.pattern, `g${flags}`), correction: entry.correction });
 }
 
 /** @param {string} path @returns {string[]} */
@@ -86,6 +91,6 @@ for (const file of files) {
 console.log(`Known falsehoods: ${rules.length} rule(s) over ${scanned} post(s); ${hits.length} hit(s).`);
 if (hits.length) {
   for (const hit of hits) console.log(`  ✗ ${hit}`);
-  console.log(`  출처·처음 고친 커밋은 ${REGISTRY} 참조.`);
+  console.log(`  출처·처음 고친 커밋은 ${relative('.', REGISTRY)} 참조.`);
   process.exit(1);
 }
