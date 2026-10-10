@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Zero-copy camera = 한 frame이 한 physical page를 유지하며 ISP·GPU·NPU·display를 거치는 것입니다."** 1080p × 60 fps에 4~6번 copy하면 4.5 GB/s 메모리 대역폭을 그냥 흘려보냅니다. DMA-BUF로 묶으면 같은 work를 30 fps가 아니라 60 fps로 처리할 수 있습니다.
+> **"Zero-copy camera는 가능한 한 같은 공유 buffer를 ISP·GPU·NPU·display 사이에서 재사용하는 패턴입니다."** 1080p × 60 fps에서 copy 횟수와 pixel format에 따라 메모리 대역폭 부담이 커질 수 있습니다. DMA-BUF를 사용해도 실제 처리량 향상은 driver·format·pipeline 구성에서 측정합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -250,11 +250,11 @@ void main() {
 }
 ```
 
-samplerExternalOES는 *driver가 YUV→RGB를 자동 수행*합니다. CPU에서 conversion하지 않습니다.
+samplerExternalOES의 색 변환과 CPU 개입 여부는 extension·driver·texture format에 따라 확인합니다. CPU conversion을 피할 수 있는 경로도 있지만, 모든 pipeline에서 자동으로 보장되지는 않습니다.
 
 ## 측정 / 성능 비교
 
-1080p 60 fps × YOLOv8s 추론 + display, Jetson Orin Nano입니다.
+다음은 1080p 60 fps × YOLOv8s 추론 + display를 Jetson Orin Nano에서 측정한다고 가정한 비교 형식입니다. 수치는 camera driver·JetPack·모델·display 경로에 따라 달라집니다.
 
 ```text
 Pipeline                                 fps   CPU 사용률   Memory BW
@@ -264,7 +264,7 @@ nvarguscamerasrc ! nvvidconv ! nvinfer    60     20%         0.6 GB/s
                   (NVMM zero-copy)
 ```
 
-CPU 사용률이 1/9, memory bandwidth가 1/6으로 줄어듭니다. 같은 hardware에서 frame rate 2.4배가 나옵니다.
+이 예시에서는 CPU 사용률과 memory bandwidth가 줄고 frame rate가 높아졌습니다. 개선 폭은 같은 hardware라도 format·buffer pool·consumer 수에 따라 달라집니다.
 
 Multi-camera 8 stream input (Orin AGX) 비교입니다.
 
@@ -273,7 +273,7 @@ Multi-camera 8 stream input (Orin AGX) 비교입니다.
 | 8× user-space copy pipeline | 80 | 18 GB/s (saturated) |
 | 8× NVMM zero-copy DeepStream | 480 | 2.4 GB/s |
 
-자율주행 8-camera × 60 fps = 480 fps가 단일 보드에서 가능해지는 이유가 zero-copy입니다.
+8-camera × 60 fps를 단일 보드에서 처리할 수 있는지는 zero-copy 여부만으로 결정되지 않으며, 전체 pipeline benchmark가 필요합니다.
 
 ## 자주 보는 함정
 

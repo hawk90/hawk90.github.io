@@ -33,7 +33,7 @@ Jetson을 고르는 이유는 세 가지입니다. 첫째, NVIDIA CUDA·cuDNN·T
 | AGX Orin | 12× A78AE | 2048 Ampere | 2 DLA | 275 | 15-60 W |
 | Jetson AGX Thor (2025 출시) | 14× Neoverse-V3AE | Blackwell GPU + MIG | - | 2070 (FP4 TFLOPS) | 40-130 W |
 
-자율주행·로봇 production은 *AGX Orin·Thor*가 표준입니다. 개발·prototype·entry edge는 Orin Nano·Orin NX가 가성비가 좋습니다.
+자율주행·로봇 production 후보로 *AGX Orin·Thor*를 검토할 수 있습니다. 개발·prototype·entry edge에서는 Orin Nano·Orin NX도 후보지만, 실제 선택은 workload·전력·JetPack 지원 범위로 비교합니다.
 
 소프트웨어 스택은 *JetPack*이라는 SDK 묶음으로 한 번에 들어옵니다.
 
@@ -160,7 +160,7 @@ int main(int argc, char **argv) {
 }
 ```
 
-Visual SLAM·stereo depth·point cloud·tensor RT 추론까지 ROS 2 node로 wrap되어 있어 robot stack에 바로 끼울 수 있습니다.
+Visual SLAM·stereo depth·point cloud·TensorRT 추론을 ROS 2 node로 연결할 수 있습니다. 센서·ROS 2 배포판·GPU backend 호환성은 target에서 확인합니다.
 
 ### Container deployment
 
@@ -196,7 +196,7 @@ __global__ void wmma_gemm(half *A, half *B, float *C) {
 
 ## 측정 / 성능 비교
 
-Orin AGX, YOLOv8 시리즈, INT8 TensorRT, GPU + 2 DLA 동시 사용입니다.
+다음 표는 Orin AGX에서 YOLOv8 시리즈와 INT8 TensorRT를 사용한 예시 형식입니다. 실제 latency·throughput·전력은 입력 해상도·TensorRT 버전·clock·DLA partition에 따라 다시 측정해야 합니다.
 
 | Model | Latency (GPU only) | Throughput (GPU+2DLA) | 전력 |
 |-------|---------------------|------------------------|------|
@@ -206,7 +206,7 @@ Orin AGX, YOLOv8 시리즈, INT8 TensorRT, GPU + 2 DLA 동시 사용입니다.
 | YOLOv8l | 9 ms | 220 fps | 45 W |
 | YOLOv8x | 18 ms | 110 fps | 50 W |
 
-YOLOv8n으로 자율주행 8-camera × 60 fps = 480 fps가 단일 Orin에서 처리 가능합니다.
+8-camera × 60 fps 입력이 단일 Orin에서 처리되는지는 camera path·전처리·tracking·display를 포함한 end-to-end benchmark로 확인합니다.
 
 Power mode별 sustained 비교(YOLOv8m)입니다.
 
@@ -218,7 +218,7 @@ Power mode별 sustained 비교(YOLOv8m)입니다.
 | 30W | 140 | 83°C | thermal 빠듯 시 |
 | 15W | 85 | 73°C | battery·passive cooling |
 
-MAXN이 oversubscribe되어 sustained가 떨어지는 패턴이 흔합니다. 40W mode가 sweet spot인 경우가 많습니다.
+MAXN에서 sustained 성능이 떨어질 수 있습니다. 적정 power mode는 workload·냉각·ambient에 따라 달라지므로 long-run benchmark로 선택합니다.
 
 ## 자주 보는 함정
 

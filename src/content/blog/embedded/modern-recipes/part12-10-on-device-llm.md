@@ -11,13 +11,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"4-bit 양자화 + KV cache + NPU backend가 LLM을 edge로 내려보냈습니다."** Llama 3 8B Q4가 4.5 GB로 줄어 Raspberry Pi 5·iPhone·Jetson에서 돌고, Phi-3 mini는 2 GB로 더 작은 device에도 들어갑니다.
+> **"4-bit 양자화와 KV cache 관리가 LLM을 edge에서 실행할 수 있게 했습니다."** Llama 3 8B Q4의 weight가 수 GB 수준으로 줄어들 수 있지만, 실제 구동 가능 여부는 quantization variant·KV cache·backend·메모리 여유로 확인합니다.
 
 ## 어떤 상황에서 쓰나
 
 오프라인 voice assistant, 자율주행 cabin dialogue, 산업 진단 챗봇, 의료기기 음성 인터페이스, 카메라 자연어 명령처럼 *연결이 끊긴 채로 자연어 처리가 필요한 모든 사례*가 후보입니다.
 
-Cloud LLM이 더 똑똑하지만 세 가지 한계가 있습니다. Privacy(대화·이미지 raw가 device 밖으로 나감), latency(round-trip 1~3초), cost(token당 과금). 의료·법률·기업 internal·industrial 같은 영역은 cloud가 답이 아닙니다.
+Cloud LLM은 모델·네트워크·서비스 정책에 따라 privacy·latency·cost trade-off가 생깁니다. round-trip latency와 token 비용은 서비스·지역·payload에 따라 측정해야 하며, 의료·법률·기업·산업 환경에서는 보안·규제 요구사항을 먼저 검토합니다.
 
 2024년 이후 4-bit quantization과 GGUF format이 안정되면서 7B~8B model이 *consumer 하드웨어*에서 의미 있는 속도로 동작하기 시작했습니다. Phi-3 mini(3.8B) 같은 small model은 더 빠르게 mobile에 침투하고 있습니다.
 
@@ -60,7 +60,7 @@ Backend selection이 backend·hardware에 따라 throughput을 결정합니다.
 | GGML_BLAS | OpenBLAS CPU |
 | NEON / AVX2 | CPU SIMD (자동) |
 
-Apple은 별도로 *MLX*라는 framework를 가지고 있어 Neural Engine까지 활용합니다. Qualcomm은 QNN backend가 llama.cpp에 통합되는 중입니다.
+Apple은 별도로 *MLX*라는 framework를 제공하며 Apple silicon backend를 활용합니다. Neural Engine 사용 여부는 framework와 model graph 지원 범위를 확인해야 합니다. Qualcomm은 QNN backend 지원 범위를 설치한 llama.cpp 버전에서 확인합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -273,7 +273,7 @@ KV cache 메모리 (Llama 3 8B, GQA 8 heads)입니다.
 | 32k | 4 GB | 2 GB |
 | 128k | 16 GB | 8 GB |
 
-Weight 4.5 GB + KV cache + 약간의 working memory가 합산되므로 8 GB 보드에서는 4~8k context가 현실적 상한입니다.
+Weight·KV cache·working memory를 합산해야 하므로 8 GB 보드의 usable context는 quantization·runtime overhead·동시 프로세스에 따라 달라집니다. 4~8k context는 특정 구성에서의 starting point로 benchmark합니다.
 
 ## 자주 보는 함정
 
