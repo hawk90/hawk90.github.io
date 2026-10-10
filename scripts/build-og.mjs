@@ -169,13 +169,18 @@ async function loadManifest() {
 // ─── main ──────────────────────────────────────────────────────
 async function main() {
   const t0 = Date.now();
-  const [fontData, themesContent, branding] = await Promise.all([
+  const [fontData, themesContent, branding, rendererSource] = await Promise.all([
     fs.readFile(FONT_PATH),
     fs.readFile(THEMES_FILE, 'utf8'),
     loadBranding(),
+    fs.readFile(__filename, 'utf8'),
   ]);
+  // The renderer and the font are inputs too. CI restores public/og from the
+  // nearest cache when this file changes; without them in the version, every
+  // post was a cache hit and the old images shipped.
   const themesVersion = crypto.createHash('sha1')
-    .update(`${themesContent}\0${JSON.stringify(branding)}`)
+    .update(`${themesContent}\0${JSON.stringify(branding)}\0${rendererSource}\0`)
+    .update(fontData)
     .digest('hex')
     .slice(0, 12);
 
