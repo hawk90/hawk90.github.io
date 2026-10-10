@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-양산 firmware가 며칠을 돌면 OOM으로 reboot 되는 사고는 거의 모두 heap fragmentation입니다. 처음에는 16 KB free heap이 충분해 보이지만, 작은 chunk가 산발적으로 free되면 큰 contiguous 영역이 사라져 1 KB malloc이 실패합니다.
+양산 firmware의 OOM 원인은 fragmentation 외에도 leak, peak demand, accounting 오류가 있으므로 원인을 계측해야 합니다. free heap이 남아도 큰 contiguous 영역이 부족하면 allocation이 실패할 수 있습니다.
 
 또 한 가지 상황은 hard real-time입니다. 일반 malloc은 worst-case가 free list 길이에 비례하므로 한 호출에 수십 µs 이상 걸릴 수 있습니다. Control loop 안에서 이런 비결정성은 받아들이기 어렵습니다.
 
@@ -77,7 +77,7 @@ void pool_free(void *p) {
 }
 ```
 
-크기 256 byte짜리 chunk 16개의 pool입니다. fragmentation이 0이고 alloc/free가 상수 시간입니다.
+크기 256 byte짜리 chunk 16개의 pool입니다. 이 예제는 고정 block으로 외부 fragmentation을 피하지만, 선형 scan이므로 alloc 비용은 pool 크기에 영향을 받습니다.
 
 ### Arena (linear allocator)
 
@@ -113,7 +113,7 @@ void init(void) {
 }
 ```
 
-FreeRTOS의 모든 객체는 `*Static` 변종이 있습니다. 양산 firmware에서 heap 사용량을 0으로 만들 수 있습니다.
+주요 FreeRTOS 객체에는 `*Static` 변종이 있지만 API·port별 지원 범위를 확인해야 합니다. 동적 객체를 static으로 바꾸면 해당 객체의 heap 사용을 줄일 수 있습니다.
 
 ### FreeRTOS heap_4 / heap_5
 
@@ -178,7 +178,7 @@ void *my_malloc(size_t n) { return tlsf_malloc(tlsf, n); }
 void  my_free(void *p)    { tlsf_free(tlsf, p); }
 ```
 
-TLSF는 free list를 size class로 나눠 worst-case가 상수입니다. 가변 크기 할당이 꼭 필요할 때의 표준 선택입니다.
+TLSF는 size class와 bitmap을 이용해 예측 가능한 경로를 목표로 합니다. 실제 worst-case와 fragmentation은 사용 중인 구현·설정·workload로 검증해야 합니다.
 
 ### Statistics와 모니터링
 
@@ -201,13 +201,13 @@ void *tracked_malloc(size_t n) {
 
 | allocator | alloc time | free time | fragmentation |
 |-----------|------------|-----------|----------------|
-| static + pool | O(1) ~50 ns | O(1) ~30 ns | 0 |
-| arena | O(1) ~20 ns | n/a | 전체 reset만 |
-| FreeRTOS heap_4 | O(N) 0.5~5 µs | O(N) 1~10 µs | 중간 |
-| TLSF | O(1) ~200 ns | O(1) ~150 ns | 매우 낮음 |
+| static + pool | 구현·pool 크기에 따라 측정 | 구현에 따라 측정 | 고정 block에서는 외부 fragmentation 제한 |
+| arena | bump 경로에 따라 측정 | n/a | 전체 reset만 |
+| FreeRTOS heap_4 | free list·workload에 따라 측정 | free list·workload에 따라 측정 | workload 의존 |
+| TLSF | 구현·size class에 따라 측정 | 구현·size class에 따라 측정 | workload 의존 |
 | newlib malloc | 가변, 길어질 수 있음 | — | 높음 |
 
-실시간 control loop에서는 TLSF 이상이거나 static + pool이 안전합니다.
+실시간 control loop에서는 static·pool·검증된 실시간 allocator를 요구사항과 WCET 측정으로 선택합니다.
 
 ```text
 RAM 사용량

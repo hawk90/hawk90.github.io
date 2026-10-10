@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-100 MB 이내의 small footprint device, BLE gateway, IIoT sensor, kiosk처럼 *수십 개 package*면 충분한 시스템에 Buildroot가 가장 잘 맞습니다. 단일 binary로 모든 것을 정의하고 reproducible build가 가능하며, 6시간 안에 cross toolchain부터 SD image까지 만들어줍니다.
+small footprint device, BLE gateway, IIoT sensor, kiosk처럼 필요한 package와 image 구성이 비교적 단순한 시스템에 Buildroot가 잘 맞습니다. 단일 configuration으로 toolchain·rootfs·image를 관리할 수 있으며, build 시간은 host·package·cache에 따라 달라집니다.
 
 반대로 수백 package + multi-recipe + 다중 image type + 회사 전역 layer 공유가 필요한 환경에서는 Yocto가 더 적합합니다. 둘은 경쟁이 아니라 *크기 기반의 선택*입니다.
 
@@ -46,10 +46,10 @@ buildroot/
 
 | 항목 | Buildroot | Yocto |
 |------|-----------|-------|
-| 크기 | ~수십 MB | ~수 GB |
-| 빌드 시간 (첫 빌드) | 1~3시간 | 6~12시간 |
+| 다운로드·build 산출물 크기 | config·cache에 따라 측정 | layer·cache에 따라 측정 |
+| 빌드 시간 (첫 빌드) | host·package에 따라 측정 | host·layer·cache에 따라 측정 |
 | 학습 곡선 | 완만 | 가파름 |
-| package 수 | ~3000 | ~10000 |
+| package 수 | Buildroot release에 따라 확인 | layer·release에 따라 확인 |
 | multi-image, layer | 제한적 | 강력 |
 | 적합 규모 | small footprint | enterprise BSP |
 
@@ -107,7 +107,7 @@ board별 defconfig을 commit하면 다른 사람이 `make myboard_defconfig`로 
 
 | Toolchain type | 설명 |
 |----------------|------|
-| Buildroot toolchain | source부터 빌드해 재현성이 가장 높습니다 (기본 선택) |
+| Buildroot toolchain | source부터 빌드할 수 있으며 config·toolchain version을 고정해야 합니다 |
 | External toolchain | ARM, Linaro 등 prebuilt를 가져다 씁니다 |
 
 그다음 C library를 고릅니다.
@@ -118,7 +118,7 @@ board별 defconfig을 commit하면 다른 사람이 `make myboard_defconfig`로 
 | musl | 작고 깨끗 |
 | uclibc-ng | 최소 |
 
-External toolchain은 빌드 시간을 크게 줄이지만 reproducibility가 낮아집니다. 양산은 Buildroot toolchain이 표준입니다.
+External toolchain은 빌드 시간을 줄일 수 있지만 version·vendor binary·ABI를 함께 고정해야 합니다. 양산 선택은 제품 요구사항과 toolchain 검증 결과로 결정합니다.
 
 ### Board-specific overlay
 
@@ -195,7 +195,7 @@ $(eval $(generic-package))
 | OpenRC | gentoo 스타일입니다 |
 | None | custom init을 직접 넣습니다 |
 
-작은 device는 BusyBox init이 가장 단순합니다. systemd는 ~30 MB 이상의 RAM을 추가로 씁니다.
+작은 device에서는 BusyBox init이 단순할 수 있습니다. systemd의 RAM·storage 비용은 version·unit·기능 설정에 따라 측정합니다.
 
 ### Reproducible build
 
@@ -211,18 +211,18 @@ BR2_CCACHE=y
 
 | 지표 | Buildroot | Yocto (poky) |
 |------|-----------|---------------|
-| 첫 빌드 (16 코어) | ~90분 | ~6시간 |
-| 재빌드 (1 package 추가) | ~5분 | ~15분 |
-| disk 사용량 | ~5 GB | ~50 GB |
-| rootfs 최소 크기 | ~2 MB (busybox) | ~50 MB (core-image-minimal) |
+| 첫 빌드 (16 코어) | 환경별 측정 | 환경별 측정 |
+| 재빌드 (1 package 추가) | dependency·cache별 측정 | dependency·cache별 측정 |
+| disk 사용량 | source·output·DL cache별 측정 | source·sstate·DL cache별 측정 |
+| rootfs 최소 크기 | config·filesystem별 측정 | image·package별 측정 |
 | package 수 | ~3000 | ~10000 |
 
 부팅 시간 (i.MX8M Mini + `rootfs.ext4`):
 
 | Init | 시간 |
 |------|------|
-| busybox + dropbear | 1.8 s |
-| systemd minimal | 6.2 s |
+| busybox + dropbear | image·board별 측정 |
+| systemd minimal | image·board별 측정 |
 
 부팅 시간을 우선시한다면 BusyBox init이 결정적으로 유리합니다.
 
@@ -271,7 +271,7 @@ ext4 image creation failed: not enough space
 - Custom defconfig을 commit해 board별 BSP를 공유합니다.
 - Overlay와 post-build hook으로 board-specific 파일을 끼웁니다.
 - Custom package는 Config.in과 mk 파일 두 개로 정의합니다.
-- BusyBox init이 작고 빠르고, systemd는 30 MB 이상의 RAM을 더 씁니다.
+- BusyBox init과 systemd의 자원·부팅 비용은 구성과 측정 결과로 비교합니다.
 - Yocto는 enterprise 규모 BSP, Buildroot는 작은 device에 맞습니다.
 
 다음 편부터 Part 8 **동적 메모리**로 넘어갑니다.

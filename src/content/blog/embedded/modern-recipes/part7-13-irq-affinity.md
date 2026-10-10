@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-산업·자동차 ECU에서 한 코어를 RT 제어 루프에 통째로 내어 주는 일이 흔합니다. 그 코어로 일반 IRQ가 한 번 들어오면 cyclictest의 max latency가 수십 µs 단위로 튀어 오릅니다. RT core에 인터럽트가 닿지 않도록 모든 IRQ를 다른 코어로 밀어야 합니다.
+산업·자동차 ECU에서 한 코어를 RT 제어 루프에 할당하는 구성이 있습니다. 일반 IRQ가 그 코어에서 처리되면 cyclictest latency가 증가할 수 있으므로, IRQ routing과 scheduler/RCU work를 함께 측정·조정합니다.
 
 10 GbE 이상의 NIC에서는 반대로 *분산*이 목표입니다. RX queue를 여러 개 만들고 각 queue의 IRQ를 다른 코어에 매핑해야 single core가 병목이 되지 않습니다. 두 시나리오 모두 `/proc/irq/N/smp_affinity` 한 줄에서 시작합니다.
 
@@ -30,7 +30,7 @@ topics: ["embedded"]
 
 `smp_affinity`는 *kernel hint*입니다. irqbalance daemon이 켜져 있으면 자동으로 덮어쓸 수 있습니다. 수동 pinning이 필요하면 irqbalance를 끄거나 ban 목록을 지정합니다.
 
-isolcpus는 한 단계 더 강한 도구입니다. 부팅 시 cmdline으로 코어를 격리하면 일반 scheduler가 그 코어에 task를 배치하지 않고, IRQ도 명시 affinity가 없는 한 들어가지 않습니다. PREEMPT_RT에서는 IRQ가 *threaded*로 변환되어 일반 task처럼 priority와 affinity를 따로 조정할 수 있습니다.
+isolcpus는 scheduler task 배치를 제한하는 부팅 옵션입니다. IRQ는 별도 affinity와 controller 정책의 영향을 받으므로 `irqaffinity`·각 IRQ mask를 함께 설정해야 합니다. PREEMPT_RT에서 IRQ threading과 priority/affinity 동작은 kernel 설정과 IRQ 종류에 따라 확인합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -147,16 +147,16 @@ Cortex-A72 quad-core 보드에서 RT 루프(SCHED_FIFO 80, busy work)와 eth0 �
 
 | 설정 | cyclictest p99 |
 |---|---|
-| 기본 (irqbalance, IRQ가 RT 코어에도 진입) | 180 µs |
-| isolcpus=2,3 + irqaffinity=0-1 | 12 µs |
-| isolcpus=2,3 + irqaffinity=0-1 + RT thread | 8 µs |
+| 기본 (irqbalance, IRQ가 RT 코어에도 진입) | workload별 측정 |
+| isolcpus=2,3 + irqaffinity=0-1 | workload별 측정 |
+| isolcpus=2,3 + irqaffinity=0-1 + RT thread | workload별 측정 |
 
 x86 서버에서 NIC RSS를 활용했을 때입니다.
 
 | 설정 | throughput | CPU |
 |---|---|---|
-| single queue, CPU0 IRQ | 4.1 Gbps | CPU0 100% |
-| RSS 8 queue, 8 코어에 분배 | 9.6 Gbps | CPU 평균 22% |
+| single queue, CPU0 IRQ | NIC·traffic별 측정 | 측정 필요 |
+| RSS queue 분배 | NIC·traffic별 측정 | 측정 필요 |
 
 RT 시나리오에서는 단순히 IRQ를 옮기는 것만으로 p99가 10배 이상 좋아질 수 있고, throughput 시나리오에서는 분산만으로 line rate가 가까워집니다.
 
