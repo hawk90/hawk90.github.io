@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"32.768 kHz crystal + 작은 코인 배터리 = 전원 꺼져도 시간 유지."** STM32 RTC는 calendar + alarm + tamper까지 한 peripheral에.
+> **"32.768 kHz crystal과 backup supply를 설계하면 전원 꺼진 동안에도 RTC를 유지할 수 있습니다."** 지원 기능과 backup 동작은 STM32 family datasheet/reference manual을 확인합니다.
 
 ## 어떤 상황에서 쓰나
 
-데이터 로거의 timestamp, scheduling (특정 시각 wake-up), low-power 시계, security event timestamping. 전원이 꺼져도 *코인 배터리로 RTC와 backup register 영역만 살려둠*. 다음 power-on 시 *현재 시각이 그대로*.
+데이터 로거의 timestamp, scheduling (특정 시각 wake-up), low-power 시계, security event timestamping에 사용합니다. 전원이 꺼져도 backup supply로 RTC와 backup domain을 유지할 수 있으며, 다음 power-on 시에도 oscillator 오차와 backup 전원 상태를 고려해야 합니다.
 
 이 글은 STM32F4 RTC로 LSE 32.768 kHz를 source로 calendar 동작, alarm 설정, tamper detection, sub-second resolution을 다룹니다.
 
@@ -25,8 +25,8 @@ topics: ["embedded"]
 ### Clock source
 
 ```text
-LSE  32.768 kHz external crystal  → 정확 (±20 ppm), 표준 선택
-LSI  32 kHz internal RC            → 부정확 (±10%), no crystal 필요
+LSE  32.768 kHz external crystal  → 외부 부품 정확도·load 조건에 따름
+LSI  internal RC                   → LSE보다 정확도가 낮을 수 있음; variant datasheet 확인
 HSE/128 → less common
 ```
 
@@ -86,7 +86,7 @@ void rtc_init(void) {
         while (!(RCC->BDCR & RCC_BDCR_LSERDY));
     }
 
-    RCC->BDCR |= (1u << 8);                    // RTC src = LSE
+    RCC->BDCR = (RCC->BDCR & ~(3u << 8)) | (1u << 8); // RTC src = LSE (family RM 확인)
     RCC->BDCR |= RCC_BDCR_RTCEN;
 
     RTC->WPR = 0xCA; RTC->WPR = 0x53;          // unlock
@@ -105,7 +105,7 @@ void rtc_init(void) {
             | (0u << 4)  | (0u);               // 00
     RTC->DR = (2u << 20) | (6u << 16)          // year 26
             | (0u << 12) | (5u << 8)           // month 05
-            | (4u << 13)                       // weekday Mon
+            | (1u << 13)                       // weekday Mon (WDU encoding 확인)
             | (1u << 4) | (8u);                // day 18
 
     RTC->ISR &= ~RTC_ISR_INIT;
@@ -204,7 +204,7 @@ void timestamp_now(datetime_t *t, uint16_t *ms) {
 
 ### 5. Backup register
 
-42개의 32-bit register가 VBAT으로 backup. boot flag, calibration value 저장에 적합.
+backup register 수와 폭은 STM32 family마다 다릅니다. 해당 reference manual의 backup register를 확인해 boot flag·calibration value를 저장합니다.
 
 ```c
 RTC->BKP0R = 0xDEADBEEFu;   // boot magic
@@ -240,7 +240,7 @@ void TAMP_STAMP_IRQHandler(void) {
     EXTI->PR = (1u << 21);
     if (RTC->ISR & RTC_ISR_TAMP1F) {
         RTC->ISR &= ~RTC_ISR_TAMP1F;
-        // backup register는 *자동 erase*
+        // tamper 시 backup register erase 여부는 TAMPCR/TAFCR 설정과 family RM 확인
         log_tamper_event();
     }
 }
@@ -267,9 +267,9 @@ while (1) {
 2026-05-18 14:30:01.001
 ```
 
-시간이 *1초씩 정확히* 증가하고 *sub-second가 잘 측정*되면 정상.
+시간이 설정한 oscillator 정확도 범위에서 증가하고 *sub-second가 예상대로 측정*되면 정상.
 
-VBAT test: power 끄고 1시간 후 다시 power on. 시간이 살아 있으면 success. 0:00:00으로 reset되면 VBAT 회로 점검.
+VBAT test: power를 끄고 충분히 기다린 뒤 다시 power on합니다. 시간이 유지되지 않으면 VBAT·backup domain·oscillator 설정을 점검합니다.
 
 ## 자주 보는 함정
 
