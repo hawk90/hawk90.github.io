@@ -209,7 +209,7 @@ if require_checker "audit-cited-symbols.py" && [ -f "$ROOT/data/upstream-trackin
   else
     # exit 2 = MISSING 후보 있음 (informational, 사람이 확인)
     grep -E "^## |MISSING:|    - \`" "$TMP_DIR/audit-symbols.txt" || true
-    echo "ℹ  MISSING 후보 = hallucination 아님. 각 심볼을 upstream에 확인 후 수정·qualify."
+    echo "ℹ  MISSING 후보 = hallucination 아님. 각 심볼을 upstream에 확인 후 수정, 확인 안 되면 삭제."
     echo "ℹ  상세: python3 scripts/audit-cited-symbols.py [--series <id>]"
     if [ "$STRICT" -eq 1 ]; then
       echo "✗ --strict: 인용 심볼 부재 차단"

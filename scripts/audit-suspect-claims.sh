@@ -18,6 +18,7 @@
 #   codename    — Project codename 매핑 가능
 #   yaml-schema — 라이브러리 schema 단정 가능
 #   spec-year   — 표준 publish 연도 단정 가능
+#   hedge-cell  — 출처 대신 '구현별'·'대표값'을 넣은 표 칸
 #
 # Exit code: 0 = no suspects, 1 = suspects found (human review needed)
 
@@ -105,7 +106,7 @@ TOTAL_SUSPECTS=0
 run_category "future-sku" \
   "Future-product SKU 단정 가능" \
   "(B[1-9][0-9]{2}|MI[3-9][0-9]{2}X|MI[3-9][0-9]{2}|Hopper H[3-9][0-9]{2}|Blackwell|Thor|Sierra Forest|Granite Rapids|Sapphire Rapids|Turin|Genoa-X|Emerald Rapids|Diamond Rapids)" \
-  "구체 SKU·코드네임 발견. '예정·발표·로드맵' qualifier 필요한지 검토"
+  "구체 SKU·코드네임 발견. 벤더 발표 자료의 상태(발표·양산)와 수치인지 확인, 아니면 삭제"
 
 # 2. Spec numbers — 표준 번호 단정
 run_category "spec-num" \
@@ -135,9 +136,16 @@ run_category "codename" \
 run_category "yaml-schema" \
   "Library config schema 구체 단정" \
   "(vllm-config|tgi-config|tritonserver|ollama-config)" \
-  "라이브러리 schema는 버전·fork별로 다름. '개념적·docs 참조' qualifier 권장"
+  "라이브러리 schema는 버전·fork별로 다름. 공식 docs·소스로 확인한 형식만, 아니면 삭제"
 
 # 7. Spec publish 연도 단정
+# 8. 출처 대신 들어간 완곡 표 칸 — 규칙: 출처 없는 표 칸은 TBD, 벤더 비공개는 —+주석.
+#    "구현별"·"대표값"은 값을 지운 것도 출처를 단 것도 아니다.
+run_category "hedge-cell" \
+  "출처 없이 값을 대신한 완곡 표 칸" \
+  "\\| *(구현별|대표값|제품별|데이터시트 참조|구현에 따라 다름) *\\|" \
+  "1차 자료 값으로 채우거나, 없으면 TBD / 벤더 비공개면 —+주석 (rules/05 §10)"
+
 run_category "spec-year" \
   "표준 publish 연도 단정 (특히 -2018·-2020·-2024)" \
   "(JESD[0-9]{3}[A-Z]? \([0-9]{4}\)|RFC [0-9]+ \([0-9]{4}\)|802\.[0-9]+[a-z]+-20[0-9]{2})" \

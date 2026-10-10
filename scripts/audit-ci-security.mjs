@@ -14,6 +14,10 @@ for (const entry of await readdir(workflowDir)) {
     if (!/^[a-f0-9]{40}$/i.test(match[2])) findings.push(`${file}: mutable Action reference ${match[1]}@${match[2]}`);
   }
   if (!/permissions:\s*\n\s+contents:\s+read/m.test(source)) findings.push(`${file}: missing read-only contents permission`);
+  // One read-only block somewhere is not enough: a job can still ask for
+  // everything, and pull_request_target runs fork code with secrets.
+  if (/permissions:\s*write-all/.test(source)) findings.push(`${file}: permissions: write-all`);
+  if (/pull_request_target/.test(source)) findings.push(`${file}: pull_request_target trigger`);
 }
 const ci = await readFile(join(workflowDir, 'ci.yml'), 'utf8');
 const deploy = await readFile(join(workflowDir, 'deploy.yml'), 'utf8');
