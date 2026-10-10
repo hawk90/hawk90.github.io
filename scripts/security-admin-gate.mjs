@@ -65,6 +65,8 @@ const artifactAuthFiles = artifactDir ? await artifactEvidence(artifactDir) : []
  * page, and nothing in the build would notice. Reported per unique URL rather
  * than per page — one bad href reaches every page that includes the layout.
  */
+const ADSENSE_LOADER = 'https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js';
+
 async function unpinnedSubresources(directory) {
   const seen = new Map();
   async function visit(current) {
@@ -85,6 +87,9 @@ async function unpinnedSubresources(directory) {
         if (match[1].toLowerCase() === 'link'
           && !/rel\s*=\s*"(?:stylesheet|preload|modulepreload)"/i.test(tag)) continue;
         if (/\bintegrity\s*=/i.test(tag)) continue;
+        // The AdSense loader is the one accepted exception: Google changes its
+        // bytes without changing the URL, so no integrity hash can pin it.
+        if (href[1].startsWith(ADSENSE_LOADER)) continue;
         if (!seen.has(href[1])) {
           seen.set(href[1], { file, line: 1, excerpt: `Cross-origin subresource without integrity: ${href[1]}` });
         }
@@ -146,7 +151,10 @@ const rules = [
   },
   {
     id: 'SEC-ADMIN-07',
-    priority: 'P1',
+    // P0 (blocking): with the AdSense loader exempted above, anything left is
+    // a new third-party script or stylesheet nobody pinned. As P1 it stayed
+    // "open" in the report and never failed, so a new one would pass too.
+    priority: 'P0',
     title: 'Cross-origin subresource without integrity',
     remediation: 'Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.',
     evidence: unpinnedFiles,
