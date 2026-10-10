@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-작은 *graphic display*가 필요할 때 — 산업 sensor의 trend chart, smart watch, 3D printer status, BLE module debug screen. SSD1306 controller가 들어간 128×64 또는 128×32 OLED 모듈은 *1-3 달러*에 SPI/I2C 둘 다 지원합니다. 더 큰 화면이 필요하면 SH1106 (132×64), SSD1309 (128×64 더 큰 module).
+작은 *graphic display*가 필요할 때 — 산업 sensor의 trend chart, smart watch, 3D printer status, BLE module debug screen에 OLED를 사용할 수 있습니다. SSD1306 모듈은 SPI 또는 I2C 변형으로 제공되며, module의 interface·supply 방식과 실제 controller를 확인해야 합니다. SH1106 등 호환 controller는 column offset과 command가 다를 수 있습니다.
 
 이 글은 SPI OLED 128×64를 STM32에 연결하고 framebuffer 기반 graphics를 구현합니다.
 
@@ -51,7 +51,7 @@ Page 7: rows 56-63
 Total: 8 page × 128 col × 1 byte = 1024 bytes
 ```
 
-byte의 *LSB가 top row*입니다 (page 0의 0xFF = column 전체 ON, 0x01 = top pixel만).
+byte의 row bit 방향은 controller scan 설정과 module orientation에 따라 확인해야 합니다. 기본 설정에서 page 0의 0xFF는 해당 column의 8 pixel을 켜지만, top/bottom bit 매핑은 init 설정에 영향을 받을 수 있습니다.
 
 ### Memory addressing mode
 
@@ -65,7 +65,7 @@ Page:       한 page 안에서만, page는 수동 set
 
 ### Init sequence
 
-SSD1306 datasheet의 init sequence는 *charge pump enable*이 핵심. 잘못하면 *깜빡임이나 dim*.
+SSD1306의 init sequence는 panel resolution, COM/segment orientation과 supply 방식에 맞춰야 합니다. 내부 charge pump를 사용하는 구성에서는 관련 command가 중요하지만, 외부 VCC 구성에서는 datasheet 설정이 다를 수 있습니다.
 
 ```c
 const uint8_t ssd1306_init[] = {
@@ -74,7 +74,7 @@ const uint8_t ssd1306_init[] = {
     0xA8, 0x3F,             // multiplex 1/64
     0xD3, 0x00,             // display offset 0
     0x40,                   // start line 0
-    0x8D, 0x14,             // charge pump enable
+    0x8D, 0x14,             // internal charge pump example
     0x20, 0x00,             // horizontal addressing mode
     0xA1,                   // segment remap (mirror)
     0xC8,                   // COM scan dir (mirror)
@@ -208,7 +208,7 @@ void oled_text(int16_t x, int16_t y, const char *s) {
 
 ### 6. Partial update — DMA
 
-전체 1024 byte를 매 frame 보내면 *10 MHz SPI에서 ~820 µs*. 60 Hz update면 5% CPU. *DMA*로 옮기면 0%.
+전체 1024 byte를 매 frame 보내면 10 MHz SPI에서 데이터 시간만 약 820 µs입니다. command·driver overhead도 포함해 측정해야 하며, DMA를 사용해도 setup·cache 관리·completion 처리는 CPU가 수행합니다.
 
 ```c
 void oled_flush_dma(void) {

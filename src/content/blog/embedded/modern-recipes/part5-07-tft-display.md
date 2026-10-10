@@ -26,8 +26,8 @@ topics: ["embedded"]
 
 | 인터페이스 | 해상도 | MCU 요구사항 | 전송 속도 |
 |-----------|--------|-------------|-----------|
-| SPI (ILI9341) | 240×320 ~ 320×480 | MCU의 SPI·RAM·DMA 지원에 따라 결정 | 40~60 MHz 예시 |
-| FSMC/FMC parallel | 480×320 ~ 800×480 | 해당 외부 메모리 controller를 가진 MCU | ~50 MHz × 16-bit 예시 |
+| SPI (ILI9341) | 240×320 ~ 320×480 | MCU의 SPI·RAM·DMA와 panel controller 한계에 따라 결정 | controller datasheet에 따름 |
+| FSMC/FMC parallel | 480×320 ~ 800×480 | 해당 외부 메모리 controller를 가진 MCU | bus timing에 따라 결정 |
 | LTDC (RGB parallel) | 480×272 ~ 800×480 | LTDC와 framebuffer 메모리를 제공하는 MCU | DMA framebuffer |
 
 LTDC는 *DMA controller가 framebuffer를 RGB output으로 자동 송출*. CPU는 framebuffer만 그리면 됩니다.
@@ -179,7 +179,7 @@ void ltdc_fill(uint16_t color) {
 }
 ```
 
-framebuffer 변경이 *즉시* 화면에 반영. CPU 부담 0%.
+framebuffer 변경은 LTDC scan timing에 따라 화면에 반영됩니다. CPU가 framebuffer를 그리는 비용과 DMA/cache coherency 관리는 별도로 필요합니다.
 
 ### 3. Double buffer + vsync
 
@@ -210,7 +210,7 @@ void LTDC_IRQHandler(void) {
 }
 ```
 
-화면이 *완전한 frame*만 표시 — tearing 없음.
+vsync 시점에 올바르게 swap하고 cache를 정리하면 완전한 frame 단위 표시를 구성할 수 있습니다. interrupt·shadow reload·buffer ownership을 함께 보장해야 tearing을 피할 수 있습니다.
 
 ## 측정 / 동작 확인
 
@@ -259,7 +259,7 @@ PWM duty로 backlight 조정. 100% duty면 *power 30 mA*, 50%면 15 mA. battery 
 - TFT는 **framebuffer가 큰 메모리** — 480×272×2 = 261 KB.
 - 작은 MCU는 **SPI TFT (240×320)**, 중대형은 **LTDC parallel + SDRAM**.
 - **RGB565** = 5+6+5 bit. 일반적 색.
-- **Double buffer + vsync swap**으로 tearing 제거.
+- **Double buffer + 올바른 vsync/cache synchronization**으로 tearing을 줄입니다.
 - MADCTL의 **BGR/RGB**, color format **0x3A**가 처음 디버깅 포인트.
 
 다음 편은 **환경 센서 (온도·습도·기압)**입니다. BME280, SHT3x I2C/SPI driver pattern을 다룹니다.

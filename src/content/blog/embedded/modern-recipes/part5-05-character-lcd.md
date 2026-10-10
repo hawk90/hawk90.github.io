@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"30년 된 표준이 아직도 살아있습니다."** 16×2 character LCD = HD44780 chip. 4-bit mode 6 wire로 충분합니다.
+> **"오래된 HD44780 호환 인터페이스가 아직도 널리 쓰입니다."** 16×2 character LCD 모듈은 controller 호환 여부와 wiring을 확인한 뒤 4-bit mode로 연결할 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -36,7 +36,7 @@ topics: ["embedded"]
 | 15 LED+ | backlight + (220Ω 직렬) |
 | 16 LED- | backlight GND |
 
-4-bit mode에서는 DB4-7만 사용. **DB0-3은 floating으로 두거나 GND.**
+4-bit mode에서는 DB4-7만 사용합니다. DB0-3 처리 방식은 controller/module datasheet를 따르며, 사용하지 않는 핀을 임의로 bus에 연결하지 않습니다.
 
 ### 4-bit mode wiring
 
@@ -64,18 +64,14 @@ GND ────────────► DB0-3
 
 ### Timing
 
-**E low → high → low cycle:**
-
-- E high ≥ 230 ns
-- E low ≥ 500 ns
-- data valid 80 ns before E falling
+**E low → high → low cycle:** controller와 VDD에 따른 enable pulse width·data setup·hold 시간을 datasheet로 확인합니다.
 
 **Command execution:**
 
 - Clear / Return Home: 1.52 ms
 - Other commands:      37 µs
 
-대부분의 command 후 *37 µs 대기*가 필요합니다. *clear*만 1.52 ms.
+일반 command와 clear/home의 실행 시간이 다르므로 busy flag를 읽거나 datasheet의 최대 시간을 기다립니다. 예시 모듈의 수치는 controller/VDD에 따라 달라집니다.
 
 ### DDRAM address layout (16×2)
 
@@ -210,7 +206,7 @@ void demo(void) {
 
 요즘은 *I2C backpack PCB*를 LCD에 붙여 *2 wire*만 사용합니다.
 
-**PCF8574 mapping (common):**
+**PCF8574 mapping (많이 쓰이는 예시; backpack별 확인 필요):**
 
 - P0 = RS
 - P1 = RW (GND)
@@ -219,7 +215,7 @@ void demo(void) {
 - P4-7 = D4-D7
 
 ```c
-// I2C address 0x27 (typical)
+// 0x27/0x3F 등 backpack별 주소를 확인
 #define LCD_I2C_ADDR  0x27
 
 static uint8_t bl = 0x08;   // backlight bit (P3)
@@ -258,7 +254,7 @@ E 핀은 명령마다 *두 번* 펄스를 만듭니다 — 상위 nibble 한 번
 
 > ⚠️ 50ms power-on wait 누락
 
-HD44780은 *power-on에 40 ms 이상의 self-init*이 필요. 너무 빨리 command 보내면 무시.
+호환 controller의 power-on wait와 초기화 sequence는 datasheet를 따릅니다. 예시의 40 ms보다 짧게 command를 보내면 초기화가 실패할 수 있습니다.
 
 > ⚠️ 4-bit init sequence 잘못
 
@@ -274,7 +270,7 @@ floating RW가 read mode로 떠 *write가 안 됨*. GND에 연결.
 
 > ⚠️ 5V LCD를 3.3V signal로 구동
 
-데이터 핀 high threshold가 ~3.5V. 3.3V signal이면 high가 인식 안 될 수 있음. *level shifter* 또는 *I2C backpack* (3.3V tolerant) 사용.
+5 V로 구동하는 모듈의 input high threshold와 3.3 V GPIO compatibility를 datasheet로 확인합니다. 보장되지 않으면 level shifter 또는 3.3 V 호환 모듈을 사용합니다.
 
 > ⚠️ 한글·한자 표시 시도
 
