@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"clock tree를 모르면 peripheral은 죽어 있습니다."** HSE → PLL → SYSCLK → AHB → APB → peripheral. 이 한 줄을 머리에 그리면 모든 STM32가 같은 패턴입니다.
+> **"clock tree를 모르면 peripheral은 죽어 있습니다."** HSE → PLL → SYSCLK → AHB → APB → peripheral은 STM32에서 흔한 흐름이지만, 세부 clock tree와 한계는 family별로 다릅니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -82,7 +82,7 @@ prescaler를 잘못 잡으면 APB가 한계를 넘어 *peripheral이 비정상*�
 
 ## 코드 예제
 
-### 1. 168 MHz boot — STM32F411 기준
+### 1. 168 MHz boot — STM32F407 계열 예시
 
 ```c
 #include "stm32f4xx.h"
@@ -115,7 +115,7 @@ void clock_init_168mhz(void) {
 
     // 6. Bus prescalers
     //    AHB = SYSCLK / 1 = 168 MHz
-    //    APB1 = AHB / 4   =  42 MHz (max for F411)
+    //    APB1 = AHB / 4   =  42 MHz (max for this F4 configuration)
     //    APB2 = AHB / 2   =  84 MHz
     RCC->CFGR = (0u << 4)              // HPRE  = /1
               | (5u << 10)             // PPRE1 = /4

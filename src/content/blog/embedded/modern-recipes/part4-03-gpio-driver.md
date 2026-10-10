@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"한 핀이 어떻게 동작할지는 다섯 개 register로 정해집니다."** MODER·OTYPER·OSPEEDR·PUPDR·AFR. 이 다섯이 STM32 GPIO 전부입니다.
+> **"많은 STM32 GPIO는 MODER·OTYPER·OSPEEDR·PUPDR·AFR 조합으로 설정합니다."** 실제 register와 기능은 STM32 family·pin에 따라 reference manual을 확인해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
-STM32 GPIO는 *대단히 유연*합니다. 한 핀이 input·output·analog·alternate function 중 어느 것이든 될 수 있고, output이면 push-pull/open-drain, speed는 4단계, pull-up/down까지 선택할 수 있습니다. 그래서 한 핀을 쓰려면 매번 register 5개를 만져야 합니다.
+많은 STM32 GPIO는 input·output·analog·alternate function을 지원하고, output type·slew setting·pull-up/down을 제공합니다. register 구성과 선택 가능한 speed level은 family와 pin에 따라 다르므로 해당 reference manual을 확인해야 합니다.
 
 HAL을 쓰면 `HAL_GPIO_Init()` 하나로 끝나지만, *왜 그렇게 동작하는지* 모르면 멀티 boards 환경, custom SoC, 또는 timing이 빠듯한 상황에서 막힙니다. 이 글은 그 다섯 register를 한 번에 정리합니다.
 
@@ -264,7 +264,7 @@ ADC 채널로 사용할 핀은 *반드시 analog mode*. digital input 상태로 
 
 ## 정리
 
-- STM32 GPIO는 **MODER·OTYPER·OSPEEDR·PUPDR·AFR** 5개 register로 전부 설정됩니다.
+- 대상 family에서 제공하는 **MODER·OTYPER·OSPEEDR·PUPDR·AFR** 및 관련 register를 reference manual에 맞게 설정합니다.
 - Mode 4가지: **input·output·AF·analog**. 각각 의미와 power 특성이 다릅니다.
 - I2C는 **open-drain**, SPI/UART는 **push-pull**, ADC는 **analog**.
 - **BSRR**은 atomic set/reset. ODR XOR보다 안전합니다.

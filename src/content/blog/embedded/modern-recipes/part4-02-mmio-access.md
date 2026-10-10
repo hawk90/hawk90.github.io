@@ -71,7 +71,7 @@ typedef struct {
 GPIOA->MODER = 0x01 << 10;
 ```
 
-struct member의 offset이 그대로 register offset이 되도록 모든 필드가 `uint32_t`이고 padding이 없어야 합니다. ARM target에서 4-byte 정렬 + 4-byte 멤버는 padding이 들어가지 않으므로 자연스럽게 맞습니다. 만약 8-bit register와 32-bit가 섞이면 `__attribute__((packed))`가 필요합니다.
+struct member의 offset이 register offset과 일치하도록 field 타입과 reserved padding을 vendor header의 정의에 맞춰야 합니다. 연속된 32-bit 멤버는 보통 예상한 offset을 만들지만, 8/16/32-bit register가 섞이면 명시적 padding과 access width를 확인해야 합니다. MMIO struct를 무조건 `packed`로 만들면 unaligned access 문제가 생길 수 있습니다.
 
 ### Access width
 
@@ -79,12 +79,12 @@ peripheral은 허용되는 access width가 정해져 있습니다.
 
 | Peripheral | 허용 width | 비고 |
 |------------|-----------|------|
-| STM32 GPIO ODR | 32-bit | 32-bit만 허용 |
-| STM32 UART RDR | 16-bit | 9-bit data까지 |
-| Bit-band region (Cortex-M3/4) | 32-bit | 1-bit operation |
+| STM32 GPIO ODR | device/reference manual에 따름 | 허용 width 확인 필요 |
+| STM32 UART RDR | device/reference manual에 따름 | data width·상태 비트 확인 |
+| Bit-band region (지원 코어에서) | 32-bit alias access | 코어/SoC의 bit-band 지원 여부 확인 |
 | 일부 EEPROM | 8-bit / 16-bit | 정확히 일치해야 |
 
-잘못된 width로 access 하면 BusFault가 나거나 인접 register까지 영향을 줍니다. CMSIS struct를 쓰면 컴파일러가 자동으로 맞춰 줍니다.
+잘못된 width로 access 하면 BusFault가 나거나 인접 register까지 영향을 줄 수 있습니다. CMSIS struct는 vendor가 정의한 register width를 표현하지만, 실제 허용 access와 reserved 비트 규칙은 reference manual을 따라야 합니다.
 
 ### Memory Barrier
 
@@ -192,7 +192,7 @@ movs r2, #0
 str  r2, [r3]        ; 두 번째 store만 남음
 ```
 
-오실로스코프로 GPIO를 봤을 때 반응이 전혀 없으면 99%는 `volatile`을 빼먹은 것입니다.
+오실로스코프로 GPIO를 봤을 때 반응이 전혀 없으면 `volatile` 누락도 확인하되, clock enable·pin mux·전원·주소·보드 배선·측정 지점도 함께 확인해야 합니다.
 
 ## 자주 보는 함정
 
@@ -238,7 +238,7 @@ datasheet의 reserved 비트는 read-modify-write가 안전합니다. blind writ
 - **CMSIS struct 패턴**이 표준입니다. struct member에 `volatile`이 들어가 안전합니다.
 - **BSRR**처럼 atomic set/reset register가 있으면 그쪽이 read-modify-write보다 안전합니다.
 - **Bit-field는 사용 금지**. layout이 implementation-defined입니다.
-- **clock enable 직후**에는 `__DSB()`로 한 박자 쉬는 것이 안전합니다.
+- **clock enable 직후**의 readback/barrier 필요 여부는 SoC errata와 memory attribute에 따라 확인하고 적용합니다.
 
 다음 편은 **GPIO 드라이버 작성**입니다. MODER·OTYPER·OSPEEDR·PUPDR·AFR — STM32 GPIO의 모든 register를 한 번에 정리합니다.
 

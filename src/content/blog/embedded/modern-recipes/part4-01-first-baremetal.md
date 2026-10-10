@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"디버거 없이 LED 한 개가 깜빡이면 toolchain·linker·boot가 모두 정상이라는 증거입니다."** Bare-metal의 hello-world입니다.
+> **"디버거 없이 LED 한 개를 깜빡이는 것은 bare-metal bring-up의 간단한 첫 검사입니다."** 다만 이 검사가 toolchain·linker·boot 전체의 정상 동작을 보장하는 것은 아닙니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -24,7 +24,7 @@ GPIO 출력 핀 하나만 살아 있으면 됩니다. 1초 주기로 깜빡이�
 
 ### 최소 boot 흐름
 
-ARM Cortex-M의 reset 시퀀스는 다음과 같습니다.
+ARM Cortex-M의 일반적인 reset 시퀀스는 다음과 같습니다. 실제 vector table 시작 주소와 초기화 순서는 코어·SoC·startup 구성에 따라 확인해야 합니다.
 
 ```text
 Power-on / Reset
@@ -44,7 +44,7 @@ main():
   - while(1) { toggle; delay; }
 ```
 
-vector table은 *Flash의 시작 주소*에 위치해야 합니다. Cortex-M3/M4/M7은 `SCB->VTOR`로 재배치 가능하지만, 첫 boot은 `0x00000000`(또는 `0x08000000`이 alias)에서 시작합니다.
+vector table은 SoC의 reset alias와 boot 설정이 정한 주소에서 시작합니다. 많은 Cortex-M 시스템에서 `SCB->VTOR`로 재배치할 수 있지만, 지원 여부·정렬 조건·reset 후 주소는 코어와 SoC 문서를 확인해야 합니다.
 
 ### LED와 GPIO
 
@@ -192,16 +192,16 @@ arm-none-eabi-gdb blink.elf
 
 ## 측정 / 동작 확인
 
-LED가 깜빡이면 다음이 모두 검증된 것입니다.
+LED가 깜빡이면 최소한 해당 코드 경로의 다음 항목을 확인할 수 있습니다.
 
 | 확인 항목 | 의미 |
 |-----------|------|
 | LED ON/OFF | GPIO 출력 동작 |
 | 일정 주기 | main loop 정상 |
 | 깜빡임 속도 | CPU clock (HSI 16MHz 기준 적당) |
-| 깜빡임 안 함 | reset·linker·startup 중 어디서 정지 |
+| 깜빡임 안 함 | reset·linker·startup·clock·GPIO 중 추가 진단 필요 |
 
-오실로스코프로 PA5를 보면 사각파가 명확히 보입니다. delay(500000)에 nop 1-cycle 기준이면 약 0.06초 주기 (16MHz / 500000 × 2 ≈ 16 Hz)가 나옵니다.
+오실로스코프로 PA5를 보면 사각파가 명확히 보입니다. `delay(500000)`의 주기는 loop 명령 수, compiler 옵션, clock 설정에 따라 달라지며, 단순히 NOP 한 개만으로 정확히 계산할 수 없습니다.
 
 ![PA5 Output — Square Wave](/images/blog/modern-recipes/diagrams/part4-01-square-wave.svg)
 
@@ -223,7 +223,7 @@ linker script의 `.isr_vector`와 startup의 `__attribute__((section(".isr_vecto
 
 > ⚠️ `nostartfiles` 없이 빌드
 
-`-nostartfiles`를 빼면 GCC가 libc의 `_start`를 자동으로 링크하려다 실패합니다. Bare-metal은 항상 `-nostartfiles` (또는 `-nostdlib`)를 줍니다.
+사용자 startup을 entry로 쓸 때는 toolchain이 제공하는 startup object와 libc 사용 여부를 명시적으로 결정해야 합니다. `-nostartfiles` 또는 필요에 따라 `-nostdlib`를 사용하되, libc·libgcc를 계속 링크할지는 프로젝트 구성에 맞춰 확인합니다.
 
 > ⚠️ Active-low LED를 active-high로 다룸
 
