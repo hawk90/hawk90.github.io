@@ -67,9 +67,9 @@ def run(cmd, cwd=None, check=True, capture=True):
         capture_output=capture, text=True
     )
     if check and result.returncode != 0:
-        print(f"ERROR running {' '.join(cmd)}", file=sys.stderr)
-        print(result.stderr, file=sys.stderr)
-        sys.exit(1)
+        # Raise, not sys.exit: main() catches per series, reports the others,
+        # and still exits 1 at the end. sys.exit skipped that handler.
+        raise RuntimeError(f"{' '.join(cmd)} failed: {result.stderr.strip()}")
     return result.returncode, result.stdout
 
 

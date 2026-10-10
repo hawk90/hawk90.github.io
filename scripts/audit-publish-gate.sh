@@ -236,7 +236,8 @@ if require_checker "audit-series-integrity.py"; then
     head -3 "$TMP_DIR/audit-integrity.txt"
     echo "ℹ  상세는 'npm run audit:series' 실행"
   else
-    head -3 "$TMP_DIR/audit-integrity.txt"
+    # head -3 showed the summary and hid which series and files were blocking.
+    cat "$TMP_DIR/audit-integrity.txt"
     echo "ℹ  Blocking 위반 발견 — 'npm run audit:series'로 확인"
     FAILED=$((FAILED + 1))
   fi

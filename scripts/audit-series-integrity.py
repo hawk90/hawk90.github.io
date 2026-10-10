@@ -51,6 +51,9 @@ def parse_frontmatter(text):
                 val = val[1:-1]
             elif val.startswith("'") and val.endswith("'"):
                 val = val[1:-1]
+            else:
+                # YAML comment after a plain value: `seriesOrder: 3 # 임시`
+                val = re.sub(r"\s+#.*$", "", val)
             fm[key] = val
     return fm
 
@@ -61,21 +64,26 @@ def collect_series():
     for md in CONTENT_DIR.rglob("*.md"):
         if md.name in ("STORYBOARD.md", "README.md"):
             continue
-        try:
-            text = md.read_text(encoding="utf-8")
-        except Exception:
-            continue
+        # Undecodable bytes are replaced: skipping the file hid its duplicates.
+        text = md.read_text(encoding="utf-8", errors="replace")
         fm = parse_frontmatter(text)
         if "series" not in fm:
             continue
         series = fm["series"]
+        raw_order = fm.get("seriesOrder", "0")
         try:
-            order = int(fm.get("seriesOrder", "0"))
+            # The schema takes any number; AV1 uses 2.07-style sub-orders.
+            order, order_invalid = float(raw_order), False
+            if order.is_integer():
+                order = int(order)
         except ValueError:
-            order = 0
+            # Read as 0 before, which also exempted it from the duplicate check.
+            order, order_invalid = 0, True
         info = {
             "path": str(md.relative_to(REPO_ROOT)),
             "order": order,
+            "order_invalid": order_invalid,
+            "raw_order": raw_order,
             "draft": fm.get("draft", "false").lower() == "true",
             "date": fm.get("date", ""),
             "title": fm.get("title", ""),
@@ -107,7 +115,7 @@ def audit_series(name, chapters, check_policy=False):
     # 편집 정책 점검은 opt-in이다. 챕터 번호가 10 단위이거나 00-preface가
     # 있는 시리즈에서는 gap/발행일 역행이 정상이라 기본 gate 신호가 아니다.
     if check_policy and orders:
-        unique_orders = sorted(set(orders))
+        unique_orders = sorted({o for o in orders if isinstance(o, int)}) or [0]
         expected = set(range(min(unique_orders), max(unique_orders) + 1))
         missing = expected - set(unique_orders)
         if missing:
@@ -117,6 +125,8 @@ def audit_series(name, chapters, check_policy=False):
 
     # 3. 필수 필드 누락
     for c in chapters:
+        if c.get("order_invalid"):
+            issues["blocking"].append(f"seriesOrder가 숫자가 아님 ({c['raw_order']!r}): {c['path']}")
         if not c["has_title"]:
             issues["blocking"].append(f"title 누락: {c['path']}")
         if not c["has_date"]:
