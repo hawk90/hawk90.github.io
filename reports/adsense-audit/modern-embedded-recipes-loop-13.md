@@ -135,7 +135,7 @@
 | `part11-02-vivado-usage.md` | 11 | 14 | 8 | 11 | 8 | 7 | 1 | 60 | 오류 확인 | 우선 조치 | 중간 | part7-05-kernel-build.md |
 | `part11-03-pcie-bar.md` | 9 | 10 | 6 | 6 | 6 | 3 | 1 | 41 | 미검증 | 병합 검토 | 중간 | part6-09-isr-api.md, part1-04-uart-hardware.md |
 | `part11-04-axi.md` | 12 | 12 | 5 | 9 | 7 | 3 | 1 | 49 | 미검증 | 병합 검토 | 중간 | part6-09-isr-api.md, part7-05-kernel-build.md |
-| `part11-05-ps-pl-communication.md` | 12 | 11 | 5 | 10 | 8 | 6 | 1 | 53 | 오류 확인 | 우선 조치 | 중간 | part1-04-uart-hardware.md |
+| `part11-05-ps-pl-communication.md` | 12 | 11 | 5 | 10 | 8 | 6 | 1 | 53 | 미검증 | 병합 검토 | 중간 | part1-04-uart-hardware.md |
 | `part11-06-mailbox.md` | 13 | 13 | 5 | 11 | 6 | 4 | 1 | 53 | 미검증 | 병합 검토 | 중간 | part6-09-isr-api.md, part7-05-kernel-build.md |
 | `part11-07-cq-sq.md` | 14 | 13 | 5 | 10 | 7 | 4 | 1 | 54 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build.md |
 
@@ -272,7 +272,7 @@ uncertainties:
 
 ### part11-05-ps-pl-communication.md
 
-`factcheck: 오류 확인` — 259행 표는 `M_AXI_GP`를 "32-bit × 100 MHz"로, 323행 정리는 "GP는 32-bit 250 MHz"로 적어 같은 인터페이스의 clock이 글 안에서 다르다. 또 298행은 GP로 1024 word를 쓰면 "수십 ms"라고 하지만 같은 글의 GP write 실측 예(259행, ~80 MB/s)로는 4 KiB가 약 51 µs이고, 68행 "전송 비용은 µs 단위"로 잡아도 ms 단위다. 원문 안의 수치 모순이라 `우선 조치`다.
+factcheck `미검증` — 2026-10-11 독립 검증에서 아래 근거가 루브릭 3-1의 제외 유형(완곡한 본문과 단정적 정리의 충돌, 산문 개수 오기, 외부 지식이 필요한 판단)으로 판정되어 `오류 확인`에서 내렸다. 아래 내용은 `uncertainties`로 보고 fact-check 때 1차 자료로 정한다. 원래 기록: 259행 표는 `M_AXI_GP`를 "32-bit × 100 MHz"로, 323행 정리는 "GP는 32-bit 250 MHz"로 적어 같은 인터페이스의 clock이 글 안에서 다르다. 또 298행은 GP로 1024 word를 쓰면 "수십 ms"라고 하지만 같은 글의 GP write 실측 예(259행, ~80 MB/s)로는 4 KiB가 약 51 µs이고, 68행 "전송 비용은 µs 단위"로 잡아도 ms 단위다. 원문 안의 수치 모순이라 `우선 조치`다.
 
 | 항목 | 점수 | 이 글의 근거 |
 | --- | ---: | --- |
@@ -291,6 +291,8 @@ uncertainties:
 - 318행 valid 유지 규칙 문장이 뒤섞여 있어 의도를 확인하지 못했다.
 
 병합 검토 대상(점수 구간 기준 기록): 오류 수정 뒤에도 50점대면 `part11-04-axi.md`의 Zynq port 절과 합치는 안을 검토한다.
+
+병합 대상: 병합 대상 없음. 다음 조치는 `보강`(GP clock과 처리량 수치를 Zynq TRM으로 정리)이다.
 
 ### part11-06-mailbox.md
 
@@ -337,4 +339,4 @@ uncertainties:
 - 빈 측정 표 바로 옆에 출처 없는 단정 수치·결론을 둔다: `part10-11-logging-system.md`(193~196행), `part11-04-axi.md`(224·226행), `part11-05-ps-pl-communication.md`(323~324행), `part11-06-mailbox.md`(199~202행), `part11-07-cq-sq.md`(221~225행).
 - 구체 기준을 "측정합니다"·"확인합니다"·"달라집니다" 같은 완곡 표현으로 대신한다: `part10-10-protocol-analyzer.md`(30·189행), `part10-11-logging-system.md`(80·211행), `part11-01-fpga-basics.md`(98·191·202행), `part11-04-axi.md`(96·163행), `part11-05-ps-pl-communication.md`(78·264행).
 - 관련 항목 라벨이 옛 번호 체계(`1-03`, `4-04`, `5-02` 등)라 링크 대상과 번호가 다르거나 다음 편 안내가 틀렸다: `part11-03-pcie-bar.md`, `part11-04-axi.md`, `part11-06-mailbox.md`, `part11-07-cq-sq.md`.
-- 원문 안의 수치 모순(같은 값에 다른 결과, 표와 정리의 불일치): `part10-10-protocol-analyzer.md`(146·147행), `part11-02-vivado-usage.md`(120·126·51행), `part11-05-ps-pl-communication.md`(259·323·298행). 루브릭 5절에 따라 개별 수정 전 시리즈 차원의 수치 검수 절차를 정한다.
+- 원문 안의 수치 모순(같은 값에 다른 결과, 표와 정리의 불일치): `part10-10-protocol-analyzer.md`(146·147행), `part11-02-vivado-usage.md`(120·126·51행), `part11-05-ps-pl-communication.md`(259·323·298행, 2026-10-11 독립 검증에서 예시 설정과 상한으로 읽을 여지가 있어 `미검증`으로 내림). 루브릭 5절에 따라 개별 수정 전 시리즈 차원의 수치 검수 절차를 정한다.

@@ -126,8 +126,8 @@
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
 | `part8-12-wcet-analysis.md` | 12 | 13 | 7 | 8 | 6 | 6 | 1 | 53 | 오류 확인 | 우선 조치 | 중간 | part7-05-kernel-build, part1-04-uart-hardware |
 | `part9-01-lock-free-ring.md` | 13 | 12 | 6 | 9 | 7 | 4 | 1 | 52 | 미검증 | 병합 검토 | 중간 | part6-09-isr-api, part7-05-kernel-build |
-| `part9-02-wait-free.md` | 11 | 9 | 4 | 9 | 5 | 3 | 1 | 42 | 오류 확인 | 우선 조치 | 높음 | part6-09-isr-api |
-| `part9-03-rcu-basics.md` | 12 | 13 | 6 | 11 | 6 | 6 | 1 | 55 | 오류 확인 | 우선 조치 | 중간 | part7-05-kernel-build |
+| `part9-02-wait-free.md` | 11 | 9 | 4 | 9 | 5 | 3 | 1 | 42 | 미검증 | 병합 검토 | 높음 | part6-09-isr-api |
+| `part9-03-rcu-basics.md` | 12 | 13 | 6 | 11 | 6 | 6 | 1 | 55 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build |
 | `part9-04-hazard-pointer.md` | 14 | 14 | 6 | 12 | 6 | 6 | 1 | 59 | 미검증 | 병합 검토 | 낮음 | part7-05-kernel-build, part12-10-on-device-llm |
 | `part9-05-cas-patterns.md` | 12 | 13 | 6 | 9 | 6 | 6 | 1 | 53 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build, part6-09-isr-api |
 | `part9-06-atomic-cost.md` | 12 | 11 | 5 | 10 | 4 | 6 | 1 | 49 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build |
@@ -178,7 +178,7 @@ uncertainties:
 
 ### part9-02-wait-free.md
 
-`factcheck: 오류 확인` — 75행은 seqlock reader가 "일반적으로 wait-free가 아니라 lock-free/obstruction-free 성질"이라고 하는데, 283행 정리는 "Atomic flag, sequence number, latest-value는 모두 wait-free 패턴"이라고 한다. 같은 방식으로 138행은 triple buffer의 race 여부가 "상태 전이와 동시성 모델에 달려 있다"고 하고 285행은 "Triple buffer에서는 race가 없습니다"라고 단정한다. 판정은 `우선 조치`다.
+factcheck `미검증` — 2026-10-11 독립 검증에서 아래 근거가 루브릭 3-1의 제외 유형(완곡한 본문과 단정적 정리의 충돌, 산문 개수 오기, 외부 지식이 필요한 판단)으로 판정되어 `오류 확인`에서 내렸다. 아래 내용은 `uncertainties`로 보고 fact-check 때 1차 자료로 정한다. 원래 기록: 75행은 seqlock reader가 "일반적으로 wait-free가 아니라 lock-free/obstruction-free 성질"이라고 하는데, 283행 정리는 "Atomic flag, sequence number, latest-value는 모두 wait-free 패턴"이라고 한다. 같은 방식으로 138행은 triple buffer의 race 여부가 "상태 전이와 동시성 모델에 달려 있다"고 하고 285행은 "Triple buffer에서는 race가 없습니다"라고 단정한다. 판정은 `병합 검토`다.
 
 | 항목 | 점수 | 이 글의 근거 |
 | --- | ---: | --- |
@@ -195,9 +195,11 @@ uncertainties:
 - 125~130행 triple buffer reader가 `active`와 `next`를 교환하는 방식이 133~136행 상태 설명과 맞는지 미확인.
 - 241행 "진행 보장이 곧 deadline 보장"은 230행(HW spinlock은 대기 상한을 별도로 분석)과 결이 다르다.
 
+병합 대상: 병합 대상 없음. 다음 조치는 `보강`(75행과 283행의 wait-free 분류를 1차 자료로 정리)이다.
+
 ### part9-03-rcu-basics.md
 
-`factcheck: 오류 확인` — 44행은 reader 경로 비용이 "0이라고 보장하지 않습니다", 78행은 "lock과 atomic이 없더라도 비용이 0은 아니므로"라고 하는데, 262행 정리는 "RCU는 reader 비용 0"이라고 쓴다. 판정은 `우선 조치`다.
+factcheck `미검증` — 2026-10-11 독립 검증에서 아래 근거가 루브릭 3-1의 제외 유형(완곡한 본문과 단정적 정리의 충돌, 산문 개수 오기, 외부 지식이 필요한 판단)으로 판정되어 `오류 확인`에서 내렸다. 아래 내용은 `uncertainties`로 보고 fact-check 때 1차 자료로 정한다. 원래 기록: 44행은 reader 경로 비용이 "0이라고 보장하지 않습니다", 78행은 "lock과 atomic이 없더라도 비용이 0은 아니므로"라고 하는데, 262행 정리는 "RCU는 reader 비용 0"이라고 쓴다. 판정은 `병합 검토`다.
 
 | 항목 | 점수 | 이 글의 근거 |
 | --- | ---: | --- |
@@ -212,6 +214,8 @@ uncertainties:
 uncertainties:
 - 26행 "`rcu_read_lock`은 사실상 `preempt_disable` 또는 그보다 가벼움"은 flavor·CONFIG에 따라 다를 수 있으나 확인하지 않았다.
 - 216행 "unlock 밖 — UB"의 근거 문서 미확인.
+
+병합 대상: 병합 대상 없음. 다음 조치는 `보강`(262행 "reader 비용 0" 정리 문장 수정)이다.
 
 ### part9-04-hazard-pointer.md
 
@@ -329,7 +333,7 @@ uncertainties:
 
 - 측정 표를 `측정 필요`로 채우고, 바로 아래 문장은 결론을 단정한다. 루브릭 3-1절에 따라 C에서 내용 없는 표로 봤다: `part9-03`(193~209행), `part9-05`(184~193행), `part9-06`(175~195행), `part9-07`(186~200행).
 - 출처·환경 없이 측정처럼 보이는 수치 표가 있다. 실제 측정인지 예시인지 밝히지 않는다: `part8-12`(180~195행), `part9-04`(205~210행), `part9-05`(196~200행), `part9-08`(191~199행), `part9-09`(184~200행).
-- 본문은 `Qualify …` 커밋으로 완곡하게 고쳤는데 한 줄 요약·정리 절은 예전 단정을 그대로 둬 같은 글 안에서 모순이 생겼다: `part9-01`(94·337행), `part9-02`(75·283행), `part9-03`(78·262행), `part9-04`(20·279행), `part9-05`(31·211행). 이 가운데 정면 모순인 `part9-02`·`part9-03`은 `오류 확인`으로 처리했다.
+- 본문은 `Qualify …` 커밋으로 완곡하게 고쳤는데 한 줄 요약·정리 절은 예전 단정을 그대로 둬 같은 글 안에서 모순이 생겼다: `part9-01`(94·337행), `part9-02`(75·283행), `part9-03`(78·262행), `part9-04`(20·279행), `part9-05`(31·211행). 처음에는 `part9-02`·`part9-03`을 `오류 확인`으로 처리했으나, 2026-10-11 독립 검증에서 단서와 정리의 충돌로 판정되어 둘 다 `미검증`으로 내렸다.
 - 같은 예제를 여러 글이 반복한다. Vyukov enqueue: `part9-01`(198~228행)·`part9-05`(155~180행)·루프 12의 `part9-10`. per-CPU counter: `part9-03`(172~189행)·`part9-06`(129~149행)·`part9-09`(89~112행). RCU reader/writer: `part9-02`(174~192행)·`part9-03`·`part9-08`(167~181행). tagged pointer stack: `part9-05`(133~151행)·`part9-08`(63~86행).
 - hazard pointer가 ABA를 해결하는지에 대해 글마다 답이 다르다: `part9-04`(269행 "해결되지 않음") 대 `part9-05`(254행)·`part9-08`(165·263행 "근본 해결").
 - 본문 안에 1차 출처·버전 표기가 없다(G=1): 10편 모두.

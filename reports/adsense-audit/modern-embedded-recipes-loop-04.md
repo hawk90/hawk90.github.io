@@ -130,7 +130,7 @@
 | `part3-10-map-file-analysis.md` | 12 | 13 | 8 | 10 | 7 | 6 | 1 | 57 | 오류 확인 | 우선 조치 | 높음 | part1-04-uart-hardware.md |
 | `part3-11-make-cmake-cross.md` | 11 | 13 | 9 | 10 | 6 | 6 | 1 | 56 | 오류 확인 | 우선 조치 | 높음 | part7-05-kernel-build.md |
 | `part3-12-bootloader-chain.md` | 13 | 13 | 8 | 5 | 7 | 3 | 1 | 50 | 미검증 | 병합 검토 | 중간 | part6-09-isr-api.md |
-| `part4-01-first-baremetal.md` | 13 | 14 | 10 | 9 | 8 | 5 | 1 | 60 | 오류 확인 | 우선 조치 | 중간 | part1-04-uart-hardware.md |
+| `part4-01-first-baremetal.md` | 13 | 14 | 10 | 9 | 8 | 5 | 1 | 60 | 미검증 | 보강 | 중간 | part1-04-uart-hardware.md |
 | `part4-02-mmio-access.md` | 11 | 13 | 9 | 9 | 6 | 6 | 1 | 55 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build.md |
 | `part4-03-gpio-driver.md` | 13 | 14 | 9 | 10 | 8 | 6 | 1 | 61 | 오류 확인 | 우선 조치 | 높음 | part12-10-on-device-llm.md |
 | `part4-04-clock-setup.md` | 14 | 15 | 10 | 11 | 8 | 7 | 2 | 67 | 미검증 | 보강 | 중간 | part12-10-on-device-llm.md |
@@ -231,7 +231,7 @@ uncertainties:
 
 ### part4-01-first-baremetal.md
 
-factcheck `오류 확인`: 15행은 LED 검사가 "toolchain·linker·boot 전체의 정상 동작을 보장하는 것은 아닙니다"라고 하고, 236행 정리는 "동작하면 toolchain·linker·startup·clock·GPIO가 모두 정상이라는 뜻입니다"라고 한다. 같은 글의 결론이 서로 반대다. 보조 근거로 21행 "빠르게 깜빡이면 clock이 올라갔다는 신호"는 clock 설정이 없는 예제 코드(127~140행)와 맞지 않는다.
+factcheck `미검증` — 2026-10-11 독립 검증에서 아래 근거가 루브릭 3-1의 제외 유형(완곡한 본문과 단정적 정리의 충돌, 산문 개수 오기, 외부 지식이 필요한 판단)으로 판정되어 `오류 확인`에서 내렸다. 아래 내용은 `uncertainties`로 보고 fact-check 때 1차 자료로 정한다. 원래 기록: 15행은 LED 검사가 "toolchain·linker·boot 전체의 정상 동작을 보장하는 것은 아닙니다"라고 하고, 236행 정리는 "동작하면 toolchain·linker·startup·clock·GPIO가 모두 정상이라는 뜻입니다"라고 한다. 같은 글의 결론이 서로 반대다. 보조 근거로 21행 "빠르게 깜빡이면 clock이 올라갔다는 신호"는 clock 설정이 없는 예제 코드(127~140행)와 맞지 않는다.
 
 | 항목 | 점수 | 이 글의 근거 |
 | --- | ---: | --- |
@@ -320,7 +320,7 @@ uncertainties:
 ### 시리즈 공통 문제
 
 - 관련 글·다음 편 라벨이 실제 대상과 다름: `part3-08-memory-layout.md`(218행), `part3-12-bootloader-chain.md`(275·279·280행), `part4-01-first-baremetal.md`(244행). 루프 03의 다섯 편과 같은 유형이다.
-- 예제 출력·코드가 같은 글의 다른 위치나 자기 계산과 맞지 않음(`오류 확인` 근거): `part3-10-map-file-analysis.md`(61·63·66·128행), `part3-11-make-cmake-cross.md`(204·219행), `part4-03-gpio-driver.md`(229·231·239행). 결론끼리 반대인 `part4-01-first-baremetal.md`(15·236행)까지 네 편이다. 출력 예를 실제 빌드·디버거에서 가져오지 않은 것으로 보인다(INF).
+- 예제 출력·코드가 같은 글의 다른 위치나 자기 계산과 맞지 않음(`오류 확인` 근거): `part3-10-map-file-analysis.md`(61·63·66·128행), `part3-11-make-cmake-cross.md`(204·219행), `part4-03-gpio-driver.md`(229·231·239행). 결론끼리 반대인 `part4-01-first-baremetal.md`(15·236행)도 같은 유형이지만, 2026-10-11 독립 검증에서 단서와 정리의 충돌로 판정되어 `미검증`으로 내렸다. `오류 확인`은 세 편이다. 출력 예를 실제 빌드·디버거에서 가져오지 않은 것으로 보인다(INF).
 - 같은 GPIO·startup 코드가 여러 글에 반복됨: PA5 레지스터 매크로와 BSRR set/reset이 `part4-01-first-baremetal.md`(114~119행), `part4-02-mmio-access.md`(109~116·139~140행), `part4-03-gpio-driver.md`(166~168행), `part4-05-interrupt-handling.md`(202·207행)에 있다.
 - 측정·비교 표를 서술 한 칸으로 채움: `part3-08-memory-layout.md`(176~178행), `part3-09-compiler-optimization.md`(160~162행), `part3-10-map-file-analysis.md`(182~184행).
 - 제목 키워드 일부를 본문이 다루지 않음: `part3-09-compiler-optimization.md`(비교 결과), `part3-11-make-cmake-cross.md`(Sysroot), `part4-02-mmio-access.md`(Aliasing).
