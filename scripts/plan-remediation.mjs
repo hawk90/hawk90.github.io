@@ -28,9 +28,11 @@ const triage = antipatterns.canonicalItems.map((item) => {
   const [priority, baseEffort] = defaults[item.category] || ['P2', 'M'];
   const previous = existingItems.get(item.id);
   const generated = { id: item.id, title: item.title, category: item.category, priority, effort: hardWords.test(item.title) ? 'L' : baseEffort, rationale: 'Initial heuristic; confirm against concrete finding and affected scope.' };
-  // Regeneration refreshes source metadata but never discards audit/manual triage.
-  for (const key of ['priority', 'effort', 'rationale', 'dependsOn', 'dependsOnPhase', 'auditEvidence']) {
-    if (previous?.[key] !== undefined) generated[key] = previous[key];
+  // Regeneration refreshes source metadata but never discards audit/manual
+  // triage: any field this script does not compute is carried over (a fixed
+  // allowlist dropped `auditedAt`, which nothing else writes).
+  for (const [key, value] of Object.entries(previous ?? {})) {
+    if (!['id', 'title', 'category'].includes(key) && value !== undefined) generated[key] = value;
   }
   return generated;
 });
