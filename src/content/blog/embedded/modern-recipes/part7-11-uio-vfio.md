@@ -11,13 +11,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"UIO는 user space에서 MMIO·IRQ를 보고, VFIO는 거기에 IOMMU 격리를 더한다."** Kernel module은 얇은 wrapper로 두고, 정책과 fast path를 user space에 두는 것이 두 framework의 공통 목표입니다.
+> **"UIO는 user space에 MMIO·IRQ를 노출하고, VFIO는 device assignment와 IOMMU 보호를 제공할 수 있다."** Kernel module은 얇은 wrapper로 두고 정책과 fast path를 user space에 두는 패턴입니다.
 
 ## 어떤 상황에서 쓰나
 
 FPGA 보드의 신규 register block을 일주일 안에 테스트해야 하면, 정식 kernel driver를 정성스럽게 만들기보다 UIO로 노출한 뒤 user space 코드로 동작을 확인하는 편이 훨씬 빠릅니다. Crash가 나도 process만 죽고 kernel은 안전합니다.
 
-NIC·NVMe 같은 고성능 device를 다룰 때도 user space driver가 표준이 되었습니다. DPDK는 10G NIC에서 line rate를 받기 위해 kernel network stack을 우회하고, SPDK는 NVMe IOPS 100만을 user space에서 처리합니다. 두 경우 모두 IOMMU 보호가 필수라서 VFIO를 사용합니다.
+NIC·NVMe 같은 고성능 device를 user space에서 다룰 때 UIO/VFIO 기반 구성을 검토할 수 있습니다. DPDK·SPDK의 backend와 성능은 버전·device·설정에 따라 달라지며, IOMMU 사용 여부와 isolation 수준을 확인해야 합니다.
 
 ## 핵심 개념
 
@@ -28,7 +28,7 @@ UIO와 VFIO는 layer가 다릅니다.
 | UIO | MMIO 영역과 IRQ를 `/dev/uioN`으로 노출 | user가 알아서 (보통은 안 한다) | 작은 PCI/Platform device, FPGA bring-up |
 | VFIO | IOMMU group 단위로 device를 user에 위임 | DMA address를 IOMMU가 변환·보호 | DPDK·SPDK·KVM passthrough 표준 |
 
-UIO는 kernel side가 매우 얇습니다. `uio_register_device` 한 번이면 충분합니다. VFIO는 IOMMU·container·group이라는 세 가지 객체를 ioctl로 조립해야 합니다. Setup 복잡도가 늘어나는 대신, user process가 임의 physical memory에 DMA를 거는 사고를 원천 차단합니다.
+UIO kernel side는 비교적 얇지만 interrupt·resource 정책은 driver가 정의해야 합니다. VFIO는 container·group·device와 IOMMU 설정을 ioctl로 조립합니다. IOMMU가 실제로 활성화된 구성에서 DMA 격리를 제공하며, no-IOMMU 모드는 같은 보호를 제공하지 않습니다.
 
 ## 코드 / 실제 사용 예
 
@@ -160,7 +160,7 @@ dpdk-devbind.py --bind=vfio-pci 0000:81:00.0
 sudo ./l3fwd -l 0-3 -n 4 -- -p 0x1 --config="(0,0,1)"
 ```
 
-DPDK는 NIC를 VFIO로 grab한 뒤 PMD(Poll Mode Driver)가 RX queue를 polling합니다. IRQ가 아니라 user thread가 직접 ring을 읽으니 1 µs 단위 latency가 가능합니다.
+DPDK는 설정된 device backend로 NIC을 연결한 뒤 PMD가 RX queue를 polling할 수 있습니다. latency는 CPU pinning·queue·driver·traffic 조건으로 측정해야 합니다.
 
 ### SPDK가 NVMe를 직접 잡는 방식
 
@@ -169,7 +169,7 @@ spdk_nvme_probe(NULL, NULL, probe_cb, attach_cb, NULL);
 /* attach_cb 안에서 namespace를 잡아 read/write 직접 발행 */
 ```
 
-SPDK도 내부적으로 VFIO를 사용합니다. NVMe queue를 user space에서 만들고, doorbell write로 명령을 제출합니다. Linux block layer를 거치지 않으니 1 M IOPS, p99 latency 10 µs 같은 수치가 가능합니다.
+SPDK는 user space에서 NVMe queue와 doorbell을 다루는 구성을 제공합니다. backend와 성능은 device·CPU·queue depth·storage 설정에 따라 측정합니다.
 
 ### vfio-platform — SoC 내장 IP
 
@@ -207,7 +207,7 @@ UIO는 보통 throughput보다 *간편함*이 이유입니다. FPGA bring-up에�
 HW_REG_DMA_ADDR = (uint32_t)buf;   /* virtual = physical 아님 */
 ```
 
-UIO는 IOMMU 없이 physical address를 그대로 씁니다. user space의 가상 주소를 그대로 적으면 무관한 메모리를 침범하거나 SMMU fault가 납니다. DMA가 필요하면 VFIO나 정식 kernel driver를 씁니다.
+UIO는 DMA mapping을 자동으로 안전하게 제공하지 않습니다. user space 가상 주소와 device DMA 주소를 혼동하면 memory corruption이나 SMMU fault가 발생할 수 있으므로, DMA가 필요하면 VFIO의 mapping 또는 정식 kernel driver를 검토합니다.
 
 > VFIO group을 통째로 받지 않은 경우
 

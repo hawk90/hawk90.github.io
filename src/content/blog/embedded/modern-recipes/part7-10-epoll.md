@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-게이트웨이 하나가 1만 개 이상의 TCP/MQTT connection을 동시에 처리하는 상황이 점점 흔해집니다. `select`는 1024 fd 한계가 있고, `poll`은 매 호출마다 user/kernel 사이로 `pollfd` 배열을 통째로 복사합니다. fd가 늘어날수록 idle connection 때문에 cost가 늘어나니, idle이 많을수록 epoll이 절대적으로 유리합니다.
+게이트웨이 하나가 많은 TCP/MQTT connection을 동시에 처리하는 상황이 있습니다. `select`는 구현과 `FD_SETSIZE` 설정에 따른 제한이 있고, `poll`은 매 호출마다 감시 배열을 전달합니다. fd 수·ready 비율·workload에 따라 epoll의 이점을 측정해야 합니다.
 
 embedded daemon에서도 효용이 있습니다. timerfd·signalfd·eventfd·socket을 한 epoll fd에 묶으면 *event loop 하나*만 돌리면 됩니다. systemd·journald·NetworkManager가 모두 같은 패턴입니다.
 
@@ -124,7 +124,7 @@ for (int i = 0; i < N_WORKERS; i++) {
 }
 ```
 
-새 connection이 들어올 때 kernel이 worker 한 명만 깨웁니다. `SO_REUSEPORT`와 함께 쓰면 분배는 kernel hash가 맡고, EXCLUSIVE는 각 listen socket의 wakeup 효율을 보장합니다.
+새 connection에서 불필요한 wakeup을 줄이는 데 사용할 수 있지만, 실제 wakeup과 accept 분배는 kernel 버전·소켓 구성에 따라 확인합니다. `SO_REUSEPORT`와 `EPOLLEXCLUSIVE`는 서로 다른 동작을 가지므로 함께 사용할 때 별도 검증이 필요합니다.
 
 ### timerfd·eventfd·signalfd 통합
 
@@ -161,9 +161,9 @@ x86 서버에서 idle connection 비율이 매우 높은 가상 워크로드를 
 
 | fd 수 | select | poll | epoll(LT) | epoll(ET) |
 |-------|--------|------|-----------|-----------|
-| 1 K | 1.2 ms | 1.0 ms | 12 µs | 9 µs |
-| 10 K | -- 한계 | 11 ms | 18 µs | 11 µs |
-| 100 K | -- | 120 ms | 25 µs | 14 µs |
+| 1 K | workload별 측정 | workload별 측정 | workload별 측정 | workload별 측정 |
+| 10 K | FD_SETSIZE·환경 의존 | workload별 측정 | workload별 측정 | workload별 측정 |
+| 100 K | 구현·자원 한계 확인 | workload별 측정 | workload별 측정 | workload별 측정 |
 
 ARM Cortex-A72 게이트웨이에서 동시 5000 connection을 받은 web socket 서버는 LT에서 평균 CPU 22%, ET에서 13%를 썼습니다. ET는 syscall 횟수가 더 적기 때문입니다. 다만 ET 전환은 코드 복잡도가 같이 늘어나니 throughput이 실제로 부족할 때만 도입하는 편이 좋습니다.
 
@@ -214,7 +214,7 @@ ONESHOT 없이 같은 fd를 여러 worker가 wait하면 한 event를 둘이 동�
 
 ## 정리
 
-- epoll은 *준비된 fd 수*에만 비례해 비용을 내므로 idle 비율이 높을수록 select·poll 대비 우위가 커집니다.
+- epoll은 관심 집합을 kernel이 유지하고 ready event를 회수하는 모델입니다. 실제 비용은 ready 수·등록 수·workload에 따라 비교합니다.
 - Level-Triggered는 안전한 기본값이고, Edge-Triggered는 syscall 수를 줄이는 대신 drain을 책임져야 합니다.
 - ET를 쓰려면 fd를 non-blocking으로 두고 EAGAIN까지 반드시 비웁니다.
 - ONESHOT은 worker 풀에서 race를 막고, EXCLUSIVE는 listen fd의 thundering herd를 해결합니다.

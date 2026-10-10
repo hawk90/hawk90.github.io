@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-LED 모듈에 brightness 값을 외부에서 바꾸고 싶거나, 산업용 ECU에서 fan PWM duty를 실시간으로 조절해야 할 때 ioctl보다 sysfs가 훨씬 단순합니다. `echo 80 > /sys/class/leds/status/brightness` 한 줄로 끝나니, 쉘 스크립트·systemd unit·monitoring agent에서 그대로 쓸 수 있습니다.
+LED 모듈의 brightness나 산업용 ECU의 fan PWM duty처럼 저빈도 제어 값을 노출할 때 sysfs가 ioctl보다 단순할 수 있습니다. 실제 ABI와 권한은 subsystem 문서를 확인합니다.
 
 자동차나 산업 장비의 운영 모니터링도 거의 sysfs로 끝납니다. 온도, 회전수, fault count를 모두 sysfs로 노출하면 별도의 daemon 없이 텍스트 파일 폴링만으로 telemetry가 만들어집니다. configfs는 *user space가 새 객체를 만드는* 정반대의 흐름인데, USB gadget이나 target framework가 표준으로 씁니다.
 
@@ -144,7 +144,7 @@ static struct bin_attribute fw_attr = {
 sysfs_create_bin_file(&pdev->dev.kobj, &fw_attr);
 ```
 
-ASCII 텍스트가 어색한 firmware blob·calibration data는 binary attribute로 노출합니다. 일반 attribute는 page size(보통 4 KB) 제한이 있어 큰 데이터에는 부적합합니다.
+ASCII 텍스트가 어색한 firmware blob·calibration data는 binary attribute로 노출할 수 있습니다. 일반 attribute는 텍스트 출력과 ABI 규칙에 제약이 있어 큰 데이터에는 부적합합니다.
 
 ### configfs — user가 객체를 만든다
 
@@ -179,12 +179,12 @@ sysfs read/write 자체는 가벼운 syscall + kernel function call입니다. fa
 
 | 인터페이스 | one round-trip cost |
 |---|---|
-| sysfs read (단일 정수) | 3~5 µs |
-| ioctl (단순 명령) | 2~3 µs |
-| netlink unicast | 8~12 µs |
-| shared memory pointer | <50 ns |
+| sysfs read (단일 정수) | kernel·storage·scheduler에 따라 측정 |
+| ioctl (단순 명령) | syscall·driver에 따라 측정 |
+| netlink unicast | socket·scheduler·payload에 따라 측정 |
+| shared memory pointer | access pattern·cache에 따라 측정 |
 
-LED brightness나 fan duty 같은 *초당 수십 회 미만*의 제어에는 sysfs로 충분합니다. 1 kHz 이상의 sensor sampling이나 audio stream을 sysfs로 빼면 syscall 비용이 누적되어 빠르게 한계에 부딪힙니다.
+LED brightness나 fan duty처럼 저빈도 제어에는 sysfs가 적합할 수 있습니다. 고주기 sensor sampling이나 audio stream은 전용 data interface를 사용하고 syscall·buffer 비용을 측정합니다.
 
 ## 자주 보는 함정
 
