@@ -12,12 +12,28 @@
 //   - ad code ships while the ClientRouter is on: a swap discards the body's
 //     ads without a rescan, and a meta CSP persists across swaps (ads policy
 //     and ad code would follow the reader into /admin);
-//   - the google-adsense-account meta disagrees with ads.txt.
+//   - the google-adsense-account meta disagrees with ads.txt;
+//   - a page under one of ADS_CONFIG.excludePaths (src/consts/config.ts) loads
+//     ad code — not only /admin;
+//   - a page with giscus comments and ad code lacks the inline script that
+//     takes ?giscus=<session> out of the URL before adsbygoogle.js can run.
 import { readdir, readFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
 import { load } from 'cheerio';
 
 const DIST = 'dist';
+
+// The layout's exclusion list, read from source so the gate follows the config.
+const configSource = await readFile('src/consts/config.ts', 'utf8');
+const excludeBlock = /excludePaths:\s*\[([^\]]*)\]/.exec(configSource)?.[1];
+if (excludeBlock === undefined) {
+  console.log('✗ could not read ADS_CONFIG.excludePaths from src/consts/config.ts');
+  process.exit(1);
+}
+const excludePaths = [...excludeBlock.matchAll(/'([^']+)'/g)].map((m) => m[1].replace(/^\//, ''));
+/** @param {string} page dist-relative path, e.g. admin/index.html or 404.html */
+const excluded = (page) =>
+  excludePaths.some((p) => page === `${p}.html` || page === `${p}/index.html` || page.startsWith(`${p}/`));
 
 /**
  * @param {string} dir
@@ -64,7 +80,15 @@ for await (const file of htmlFiles(DIST)) {
         failures.push(`${page}: adsbygoogle.js client=${src.searchParams.get('client')} but ads.txt says ${client}`);
       }
     }
-    if (page.startsWith('admin/')) failures.push(`${page}: ad code on an admin page`);
+    if (excluded(page)) failures.push(`${page}: ad code on a page under ADS_CONFIG.excludePaths`);
+    if ($('.giscus-wrapper').length) {
+      const scrubber = $('head script:not([src])').filter((_, el) => /giscus-session/.test($(el).text())).first();
+      const adScript = $(adScripts[0]);
+      if (!scrubber.length) failures.push(`${page}: giscus and ad code without the ?giscus= scrubber`);
+      else if (scrubber.nextAll().filter((_, el) => el === adScripts[0]).length === 0 && adScript.length) {
+        failures.push(`${page}: ?giscus= scrubber comes after adsbygoogle.js`);
+      }
+    }
     if (!adsPolicy) failures.push(`${page}: ad code without the ads CSP (data-csp-ads)`);
   } else if (adsPolicy) {
     failures.push(`${page}: ads CSP on a page without ad code`);

@@ -136,8 +136,13 @@ const siteOrigin = new URL(SITE_CONFIG.url).origin;
    * document.referrer (github.com / giscus.app) was considered and rejected:
    * browsers and extensions that strip referrers would break real logins.
    * Revisit if giscus adds a login nonce, or if impersonation is reported.
-   * (The serious direction — stealing a reader's 1-year session — is what the
-   * CSP script hashes and the absence of third-party script here guard.)
+   * The serious direction is stealing a reader's 1-year session. On pages
+   * with the strict CSP, script hashes and the absence of third-party script
+   * guard it. Pages with ads run adsbygoogle.js in this origin under the ads
+   * CSP, and that code can read localStorage; the pre-ads scrubber in
+   * BaseLayout only keeps the token out of the URL the ad request reports.
+   * Whether that is acceptable is the owner's call; serving comments only on
+   * ad-free pages would remove the exposure.
    */
   function takeSession(): string {
     const url = new URL(location.href);
@@ -156,6 +161,9 @@ const siteOrigin = new URL(SITE_CONFIG.url).origin;
         return fromUrl;
       }
     }
+    // Handed over by the pre-ads scrubber in BaseLayout when storage is blocked.
+    const handedOver: unknown = (window as { __giscusSession?: unknown }).__giscusSession;
+    if (isSession(handedOver)) return handedOver;
     try {
       const saved = localStorage.getItem(SESSION_KEY);
       if (!saved) return '';
