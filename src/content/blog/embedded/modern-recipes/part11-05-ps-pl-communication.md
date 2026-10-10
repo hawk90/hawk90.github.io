@@ -23,7 +23,7 @@ Zynq 7000 기준입니다 (UltraScale+는 더 다양함).
 
 ```text
 PS → PL (PS가 master, PL이 slave):
-  M_AXI_GP0, GP1                — General Purpose, 32-bit, 250 MHz
+  M_AXI_GP0, GP1                — General Purpose, width/clock은 device 설정 확인
                                   → PL의 control register access
 
 PL → PS (PL이 master, PS가 slave):
@@ -75,7 +75,7 @@ PL에서 DDR에 직접 read/write. PS의 L1/L2 cache를 *우회*합니다.
 S_AXI_HP path:
   PL AXI master → HP port → DDR controller → DDR
 
-throughput: 64-bit × 150 MHz × 4 port = ~4.8 GB/s 이론값
+throughput: data width × configured clock × port 수로 이론 상한 계산; 실제 값은 측정
 ```
 
 ```c
@@ -252,7 +252,7 @@ cache invalidate를 kernel이 자동 처리.
 
 ## 측정 — 인터페이스별 throughput
 
-Zynq Z-7020, 100 MHz fabric, 533 MHz DDR3 기준입니다.
+예시 측정 형식입니다. Zynq device·fabric/DDR clock·cache·DMA 설정을 고정해 대상 보드에서 재측정해야 합니다.
 
 | 인터페이스 | bandwidth (이론) | 실측 (sustained) |
 |------------|------------------|-------------------|
@@ -261,7 +261,7 @@ Zynq Z-7020, 100 MHz fabric, 533 MHz DDR3 기준입니다.
 | `S_AXI_ACP` | 64-bit × 150 MHz | ~400 MB/s (cache hit), ~150 MB/s (miss) |
 | 4× `S_AXI_HP` | parallel | ~2 GB/s aggregate |
 
-Camera 1080p60 (~370 MB/s)는 *HP 하나*면 충분. 4K60 raw 12-bit (~3 GB/s)는 *4× HP* 또는 압축 필요.
+camera workload의 필요 bandwidth는 pixel format·stride·packing으로 계산하고 HP 수와 압축 여부를 대상 보드에서 검증합니다.
 
 ## 자주 보는 함정
 

@@ -93,7 +93,7 @@ void accel_start(struct accel_regs *r, dma_addr_t in, dma_addr_t out, int n) {
     max_read_burst_length=256 max_write_burst_length=256
 ```
 
-AXI4 burst는 최대 256 beat입니다. 64-bit data bus라면 한 transaction에서 2 KB를 옮길 수 있습니다. Burst를 크게 잡을수록 DDR address phase overhead가 amortize되어 effective bandwidth가 올라갑니다.
+AXI4 burst의 최대 beat 수와 허용 burst type은 protocol version·slave 설정으로 확인합니다. 64-bit bus에서 256 beat이면 payload가 2 KiB인 계산 예가 되지만, 실제 burst 길이와 bandwidth는 interconnect·DDR·alignment로 결정됩니다.
 
 ### 4 KB boundary 회피
 
@@ -160,7 +160,7 @@ Time:   AR0  AR1  AR2  AR3
                                        max_write_outstanding=16
 ```
 
-DDR controller는 latency가 보통 100-200 ns입니다. Outstanding 1이면 매 beat마다 idle 100 ns가 끼어 throughput이 1/5로 떨어집니다. 8-16 outstanding이 표준입니다.
+DDR latency와 outstanding transaction의 적정 수는 memory controller·traffic·clock·QoS에 따라 측정합니다. 여러 outstanding을 사용해 latency를 숨길 수 있지만 8–16이 모든 설계의 표준은 아닙니다.
 
 ### AXI ID 분리로 deadlock 회피
 
@@ -208,18 +208,18 @@ Zynq UltraScale+에서 AXI4 m_axi를 burst length만 바꿔 측정한 효과입�
 
 | burst length | effective bandwidth |
 |---|---|
-| 1 beat | 0.3 GB/s |
-| 16 beat | 4.1 GB/s |
-| 64 beat | 9.6 GB/s |
-| 256 beat | 18.4 GB/s |
+| 1 beat | 측정 필요 |
+| 16 beat | 측정 필요 |
+| 64 beat | 측정 필요 |
+| 256 beat | 측정 필요 |
 
 Outstanding 수의 효과는 다음과 같습니다.
 
 | outstanding | bandwidth | 평균 latency |
 |---|---|---|
-| 1 | 5.1 GB/s | 210 ns |
-| 4 | 14.7 GB/s | 220 ns |
-| 16 | 18.4 GB/s | 240 ns |
+| 1 | 측정 필요 | 측정 필요 |
+| 4 | 측정 필요 | 측정 필요 |
+| 16 | 측정 필요 | 측정 필요 |
 
 Outstanding을 늘리면 latency가 거의 변하지 않으면서 throughput이 크게 올라갑니다. DDR access pattern이 random일수록 outstanding의 이득이 큽니다.
 
@@ -278,7 +278,7 @@ CPU와 공유하는 영역인데 HP 포트로 접근하면 접근할 때마다 c
 - AXI는 AXI4 full(memory), AXI4-Lite(control), AXI-Stream(data) 세 변종으로 구성됩니다.
 - 5 channel(AR·R·AW·W·B)이 모두 VALID·READY handshake로 움직입니다.
 - AXI4 burst는 1-256 beat이며 4 KB boundary를 넘으면 안 됩니다.
-- Outstanding transactions를 8-16으로 잡아 DDR latency를 감춥니다.
+- Outstanding transaction 수는 DDR latency·buffer·QoS를 측정해 정합니다.
 - AXI ID는 slave별로 분리해 deadlock을 피합니다.
 - QoS는 RT critical master(카메라·display)를 굶기지 않기 위해 명시합니다.
 - AXI-Stream의 TLAST·TKEEP·TUSER는 DMA·video·packet 처리의 핵심 sideband입니다.

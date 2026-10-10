@@ -27,7 +27,7 @@ Mailbox는 세 가지 요소로 정의됩니다.
 2. **Doorbell** — 상대편에게 "확인하라"고 알리는 IRQ
 3. **Sequence·CRC·timeout** — 손실·중복·hang 방어
 
-Polling만 쓰면 latency는 짧지만 CPU 한 코어가 항상 묶입니다. Doorbell IRQ를 더하면 CPU는 자유로워지지만 IRQ entry/exit 비용 5-50 µs가 붙습니다. 작은 message는 mailbox로, 큰 buffer는 mailbox로 "준비됐다"만 알리고 실제 데이터는 DMA로 나르는 분리가 자연스럽습니다.
+Polling은 CPU를 점유하는 대신 latency를 줄일 수 있고, doorbell IRQ는 CPU 점유를 줄이는 대신 interrupt·scheduler 비용이 생깁니다. 비용은 core·RTOS·power state별로 측정합니다. 작은 message는 mailbox로, 큰 buffer는 mailbox로 준비 상태만 알리고 실제 데이터는 DMA로 나르는 구성을 검토합니다.
 
 Register-only mailbox는 8-16 word 정도면 충분합니다. 그보다 큰 payload는 shared memory(주로 OCM이나 reserved DDR)에 두고 mailbox로는 주소·길이·sequence만 넘기는 hybrid 구조가 일반적입니다.
 
@@ -188,12 +188,12 @@ Zynq UltraScale+ APU(Cortex-A53)와 PL의 HLS accelerator 사이 mailbox round-t
 
 | 방식 | RTT | CPU 사용 |
 |---|---|---|
-| APU polling (busy-wait) | ~0.6 µs | 100% one core |
-| APU doorbell IRQ + sleep | ~7 µs | <1% |
-| APU mailbox + DMA 8KB | ~9 µs | <1% (CPU) |
-| OpenAMP RPMsg (mailbox + virtio) | ~25 µs | <1% |
+| APU polling (busy-wait) | 측정 필요 | workload별 측정 |
+| APU doorbell IRQ + sleep | 측정 필요 | workload별 측정 |
+| APU mailbox + DMA 8KB | 측정 필요 | workload별 측정 |
+| OpenAMP RPMsg (mailbox + virtio) | 측정 필요 | workload별 측정 |
 
-RPMsg는 ring buffer, endpoint multiplex, name service까지 포함하므로 overhead가 mailbox 단독 대비 한 자릿수 µs 더 늘어납니다. 1 ms 주기 control loop처럼 latency가 직접 deadline에 박히는 경로에서는 raw mailbox가 유리합니다.
+RPMsg는 ring buffer·endpoint·name service 등의 계층을 포함하므로 mailbox 단독과 비용 구조가 다릅니다. 1 ms 주기 control loop에서는 deadline·전력·신뢰성 요구사항을 비교해 raw mailbox와 상위 stack을 선택합니다.
 
 ```text
 STM32MP1 IPCC (Cortex-A7 ↔ Cortex-M4)
