@@ -17,7 +17,9 @@ Create a new chapter for: `$ARGUMENTS` (series directory, then topic).
      never mix (§1). Note the `series` name and the next free `seriesOrder`
      (gaps may be intentional; confirm before filling).
 2. **Write the stub** with required frontmatter (§4): `title` (with `Ch N:`/`Item N:`
-   prefix if the series uses one), `date`, `description` (one search-meaningful
+   prefix if the series uses one), `slug` (the public URL — category path +
+   file stem, as in sibling chapters), `topics` (≥1 ID from
+   `src/lib/content/topics.ts`; copy a sibling's), `date`, `description` (one search-meaningful
    sentence), `series`, `seriesOrder`, `tags` (≤5), `draft: true`. Add
    `type: book-review` + `bookTitle`/`bookAuthor` if it's a book series.
 3. **Body skeleton** (§3): start at H2 (H1 is the title). Include a motivation

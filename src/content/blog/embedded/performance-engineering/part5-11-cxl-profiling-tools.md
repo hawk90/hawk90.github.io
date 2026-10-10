@@ -32,97 +32,54 @@ CXL 성능 분석은 *기존 메모리 분석과 다른 층*이 추가됩니다.
 
 ## cxl-cli — 토폴로지와 region 관리
 
-cxl-cli는 *Linux 6.0+에서 CXL 서브시스템 표준 CLI*입니다.
+cxl-cli는 ndctl 패키지에 들어 있는 *CXL 서브시스템 CLI*입니다.
 
 ```bash
-# 전체 토폴로지
+# region과 그 mapping(어느 endpoint decoder가 몇 번째 자리인지)
 $ cxl list -RT
-[
-  {
-    "host":"acpi0017:00",
-    "ports": [
-      {
-        "port":"port1",
-        "host":"0000:00:01.0",
-        "decoders": [...],
-        "endpoints": [
-          {
-            "memdev":"mem0",
-            "ram_size":274877906944,
-            "host":"0000:5e:00.0"
-          }
-        ]
-      }
-    ]
-  }
-]
 
-# Decoder 매핑 확인
+# decoder와 target 목록 (interleave_ways·interleave_granularity 포함)
 $ cxl list -DT
-[
-  {
-    "decoder":"decoder3.0",
-    "resource":0x80000000,
-    "size":0x80000000,
-    "interleave_ways":2,
-    "interleave_granularity":64
-  }
-]
 
-# Region 생성
-$ cxl create-region -d decoder0.0 -t ram -s 128G
-{
-  "region":"region0",
-  "resource":0x80000000,
-  "size":137438953472,
-  "interleave_ways":2,
-  "interleave_granularity":64,
-  "decoder":"decoder0.0",
-  "mappings": [
-    {"position":0, "memdev":"mem0"},
-    {"position":1, "memdev":"mem1"}
-  ]
-}
+# 2-way interleave ram region 생성 — memdev는 -m과 함께 위치 인자로
+$ cxl create-region -m -d decoder0.0 -t ram -w 2 -g 256 mem0 mem1
 
 # DAX 또는 System RAM 모드 전환
 $ daxctl reconfigure-device dax0.0 -m system-ram
 ```
 
-핵심 명령은 *list·create-region·set-partition·set-event-irq* 5가지입니다.
+출력 JSON 형식은 ndctl 문서(`cxl-list`, `cxl-create-region`)에 예시가 있습니다. interleave granularity는 커널 HDM 디코더 코드가 256 B~16 KB의 2의 거듭제곱만 받으므로(`drivers/cxl/cxl.h`의 `granularity_to_eig()`), `-g`도 그 범위 안에서 고릅니다.
+
+이 장에서 쓰는 명령은 *list·create-region·monitor*이고, 그 밖에 *set-partition·enable/disable-region·update-firmware* 등이 있습니다(ndctl `cxl/cxl.c`의 명령 표).
 
 ## DAMON — Page 단위 access 추적
 
-DAMON은 *kernel 5.15+*에서 *page 활동을 적은 오버헤드로 측정*합니다.
+DAMON은 *메모리 region의 access 빈도를 적은 오버헤드로 측정*합니다.
 
 ```bash
-# 1. DAMON 활성화
+# 1. DAMON 설정 후 시작 (대상·operations 설정은 커널 admin-guide/mm/damon/usage 참조)
 $ echo on > /sys/kernel/mm/damon/admin/kdamonds/0/state
 
 # 2. 결과 확인
 $ damo report access
-target_id  region(KB)  access(%)  node
-0          0-32M       82.3       0
-0          32M-128M    45.1       0
-0          128M-1G     8.2        2  # CXL — cool
-0          1G-256G     1.1        2  # CXL — cold
 
-# 3. DAMOS scheme — 자동 promotion/demotion
-$ cat /sys/kernel/mm/damon/admin/kdamonds/0/contexts/0/schemes/0/access_pattern/min_nr_accesses
-1
+# 3. DAMOS scheme — access 패턴과 action
+$ cat /sys/kernel/mm/damon/admin/kdamonds/0/contexts/0/schemes/0/access_pattern/nr_accesses/min
 $ cat /sys/kernel/mm/damon/admin/kdamonds/0/contexts/0/schemes/0/action
-migrate_hot   # hot page를 빠른 tier로 이동
 ```
+
+action이 `migrate_hot`이면 warm한 region부터, `migrate_cold`이면 cold한 region부터 `target_nid` 노드로 옮깁니다.
 
 DAMON의 핵심 파라미터:
 
-| 파라미터 | 의미 | 권장 |
+| 파라미터 | 의미 | 기본값 (`mm/damon/core.c`) |
 |---------|------|------|
-| sample_interval | 한 region을 얼마나 자주 sample | 5ms (default) |
-| aggr_interval | aggregation 주기 | 100ms |
+| sample_interval | access 여부를 sample하는 주기 | 5 ms |
+| aggr_interval | sample을 모아 집계하는 주기 | 100 ms |
 | min_nr_regions | 최소 region 분할 | 10 |
 | max_nr_regions | 최대 region 분할 | 1000 |
 
-*aggr_interval이 크면* DAMON 오버헤드가 작아지지만 *반응이 느림*. *작으면* 정확도 높아지지만 *오버헤드 증가*. tradeoff입니다.
+커널 설계 문서의 튜닝 가이드는 *aggr_interval*을 워크로드가 의미 있는 양의 access를 하는 시간으로 잡으라고 합니다. 기본값 100 ms는 많은 경우, 특히 큰 시스템에서 너무 짧습니다. *sample_interval*은 aggr_interval에 비례해 잡고 기본 권장 비율은 1/20입니다. sample_interval을 줄이면 해상도는 그대로인데 *모니터링 오버헤드만 늘어납니다*.
 
 ## perf-mem — CPU의 메모리 접근 분포
 
@@ -133,65 +90,42 @@ DAMON의 핵심 파라미터:
 $ perf mem record -- ./workload
 $ perf mem report
 
-# Sample 출력
-        Local Weight   Memory Access     Symbol             DSO
-        ── 12.45%      cxl-mem (node 2) workload::process   workload
-        ── 35.20%      L3 hit            workload::cache    workload
-        ── 8.10%       L1 hit            workload::hot      workload
-
-# CXL 노드 access만 필터
-$ perf mem report --sort=mem,symbol | grep "node 2"
+# memory level별로 보기
+$ perf mem report --sort=mem,symbol
 
 # Snoop 트래픽
 $ perf c2c record -- ./workload
 $ perf c2c report
 ```
 
-`Local Weight`는 *각 access의 latency 비중*입니다. *cxl-mem (node 2)가 큰 비중*이면 *CXL.mem이 hot path*에 있는 신호.
+`Local Weight`는 sample의 weight(load latency)입니다. perf는 data source의 memory level로 `CXL`을 따로 표시할 수 있으므로(`PERF_MEM_LVLNUM_CXL`), PMU가 그 level을 보고하는 플랫폼에서는 `Memory access` 열에서 CXL 비중을 볼 수 있습니다.
 
 ## numastat — NUMA 노드별 통계
 
 CXL은 *별도 NUMA 노드*로 등록되어 numastat이 자연스럽게 통합 분석을 제공합니다.
 
 ```bash
-# 전체 노드 통계
+# 노드별 메모리 사용 (meminfo 형식)
 $ numastat -m
-                  Node 0     Node 1     Node 2 (CXL)
-MemTotal      262144000  262144000  274877906944
-MemFree         5120000     6291000    8589934592
-Active(anon)  198976000  201342000  198945792000
-Inactive       2048000     1532000     1073741824
 
 # 프로세스별 노드 사용
 $ numastat -p <pid>
-Per-node process memory usage (in MBs)
-                Node 0  Node 1  Node 2  Total
-Huge               0      0       0      0
-Heap            1234   2345    98765  102344
-Stack              0      0       0      0
-Private         1098   1872    87654   90624
 
-# Memory miss·hit 통계
+# 노드별 hit/miss 카운터 (/sys/devices/system/node/node*/numastat)
 $ numastat
-                       node0     node1     node2
-numa_hit          103294827   85928301  29384720
-numa_miss            382910     482910   1834820  # CXL — miss 많음
-numa_foreign         482910     382910      0
-local_node        102911917   85445391  29384720
-other_node           382910     482910   1834820
 ```
 
-*numa_miss가 CXL 노드에 집중*이면 *application이 자기 노드 외 메모리를 자주 접근*하는 신호.
+커널 문서(`admin-guide/numastat.rst`)의 정의로 읽습니다. *numa_miss*는 다른 노드를 원했지만 *이 노드*에서 메모리를 받은 횟수입니다. CXL 노드의 numa_miss가 크면 local 노드가 모자라 CXL 노드로 넘친 할당이 많다는 뜻입니다.
 
 ## bpftrace — CXL 드라이버 동적 트레이싱
 
 CXL 드라이버 내부 호출을 동적으로 캡처:
 
 ```bash
-# CXL mailbox 명령 추적
+# CXL mailbox 명령 추적 — opcode별 횟수 (cxl_core의 cxl_internal_send_cmd)
 $ bpftrace -e '
-  kprobe:cxl_mbox_send_cmd {
-    @cmds[arg1] = count();
+  fentry:cxl_core:cxl_internal_send_cmd {
+    @cmds[args->mbox_cmd->opcode] = count();
   }
   interval:s:5 {
     print(@cmds);
@@ -199,25 +133,22 @@ $ bpftrace -e '
   }
 '
 
-# 출력 예
-@cmds[0x4400]: 1234   # Get Health Info
-@cmds[0x4300]: 567    # Get LSA
-@cmds[0x4302]: 89     # Set LSA
-
-# Page migration 추적 (DAMON 동작 검증)
+# Page migration 추적 (DAMON 동작 검증) — reason별 성공 페이지 수
 $ bpftrace -e '
-  tracepoint:migrate:mm_migrate_pages_start {
-    @migrations[args->from_node, args->to_node] = sum(args->nr_pages);
+  tracepoint:migrate:mm_migrate_pages {
+    @migrated[args->reason] = sum(args->succeeded);
   }
 '
 
-# CXL 인터럽트 빈도
+# CXL event 인터럽트 빈도 (cxl_pci의 event IRQ thread)
 $ bpftrace -e '
-  kprobe:cxl_event_irq_handler {
+  kprobe:cxl_event_thread {
     @[probe] = count();
   }
 '
 ```
+
+opcode는 `drivers/cxl/cxlmem.h`의 값으로 읽습니다. 예를 들어 Get Event Records 0100h, Identify 4000h, Get LSA 4102h, Set LSA 4103h, Get Health Info 4200h, Get Poison List 4300h입니다. `cxl_internal_send_cmd`는 커널 내부 경로만 거치고, `cxl_pci`의 `cxl_pci_mbox_send`가 실제 doorbell을 울립니다.
 
 bpftrace는 *문제가 의심되는 좁은 영역*을 *수정 없이 깊이 추적*할 때 강력합니다.
 
@@ -238,11 +169,11 @@ CXL 환경 디버깅의 일반 흐름:
 
 > ⚠️ `cxl list`만 보고 토폴로지 단정
 
-`cxl list` 출력은 *현재 활성 디바이스만*. *hot-plug 가능 슬롯*은 *별도 옵션* (`-i`)으로 봐야 합니다. *구성 가능한 슬롯과 활성 디바이스를 혼동*하면 *용량 계획이 틀려집니다*.
+`cxl list`는 기본으로 *활성 객체만* 보여 줍니다. enable되지 않았거나 크기가 0인 객체는 `-i`(`--idle`)를 붙여야 나옵니다(ndctl `cxl-list`). 이걸 빠뜨리면 disable된 memdev·region을 없는 것으로 착각합니다.
 
-> ⚠️ DAMON `sample_interval` 너무 작게 설정
+> ⚠️ DAMON `sample_interval`만 줄이기
 
-*5ms 이하*면 *DAMON 자체 오버헤드*가 *워크로드의 5% 이상*. *측정 결과가 측정 행위로 왜곡*됩니다. *100ms 단위*가 일반 권장.
+sample_interval을 줄여도 해상도는 그대로이고 *오버헤드만 늘어납니다*. 해상도가 모자라면 aggr_interval을 워크로드에 맞게 늘리고 sample_interval을 그 1/20로 맞춥니다(커널 DAMON 설계 문서).
 
 > ⚠️ `perf mem`로 throughput 측정
 
@@ -250,14 +181,14 @@ CXL 환경 디버깅의 일반 흐름:
 
 > ⚠️ numastat의 `numa_foreign` 항목 무시
 
-`numa_foreign`은 *자기 노드 메모리가 다른 노드 프로세스에 할당된 경우*. *큰 값*은 *자원 공유 충돌*. CXL pool 환경에서는 *항상 모니터링*해야 할 지표.
+`numa_foreign`은 *이 노드에서 할당받기를 원했지만 다른 노드에서 받은* 횟수로, 선호 노드 쪽에 쌓입니다. local 노드의 numa_foreign과 CXL 노드의 numa_miss를 함께 보면 어느 노드에서 어디로 넘쳤는지 알 수 있습니다.
 
 ## 정리
 
 - CXL 성능 분석은 *cxl-cli·DAMON·perf-mem·numastat·bpftrace 5개 도구*가 *서로 다른 층*을 봅니다.
 - *cxl-cli*는 *토폴로지와 region 관리*, *DAMON*은 *page 활동*, *perf-mem*은 *CPU access 분포*, *numastat*은 *NUMA 통계*, *bpftrace*는 *드라이버 동적 추적*입니다.
 - 워크플로 권장: *토폴로지 → NUMA → 워크로드 시작 → access 분포 → tier 동작 → RAS*의 6단계 순.
-- DAMON *sample_interval 5ms 이하는 위험*, *100ms*가 일반적입니다.
+- DAMON은 *aggr_interval*을 워크로드에 맞춰 잡고 *sample_interval*을 그 1/20로 둡니다. 기본값은 5 ms / 100 ms입니다.
 - `perf mem`은 *분포 분석 전용*, throughput은 *STREAM·mlc*가 정답입니다.
 
 다음 편은 **Ch 56: 실전 사례 — CXL.mem 추가로 LLM inference KV cache 처리량 회복**입니다. Ch 8(HBM)에서 본 LLaMA 70B 메모리 문제의 *해결편 case study*입니다.

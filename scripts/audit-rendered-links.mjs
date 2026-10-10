@@ -25,7 +25,7 @@
  *
  * Usage: node scripts/audit-rendered-links.mjs [--json] [--limit N]
  */
-import { readFile, readdir, mkdir, writeFile, access } from 'node:fs/promises';
+import { readFile, readdir, mkdir, writeFile, access, stat } from 'node:fs/promises';
 import { join } from 'node:path';
 
 const asJson = process.argv.includes('--json');
@@ -55,7 +55,8 @@ async function resolves(pathname) {
     const base = join(DIST, candidate);
     if (await exists(join(base, 'index.html'))) return true;
     if (await exists(`${base}.html`)) return true;
-    if (await exists(base)) return true;
+    // A file only: a directory with no index.html is a 404 on GitHub Pages.
+    if (await stat(base).then((s) => s.isFile(), () => false)) return true;
   }
   return false;
 }

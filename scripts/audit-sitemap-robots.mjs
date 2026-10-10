@@ -52,6 +52,12 @@ for (const name of sitemapFiles) {
   }
 }
 
+// No sitemap at all would otherwise mean "0 orphans" and a pass.
+if (sitemapFiles.length === 0 || sitemapPaths.size === 0) {
+  console.log(`✗ no sitemap entries in ${DIST} (looked for sitemap-N.xml)`);
+  process.exit(1);
+}
+
 const files = await walk(DIST);
 const noindexInSitemap = [];
 const indexablePages = new Set();

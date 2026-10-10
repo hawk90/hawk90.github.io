@@ -1,0 +1,244 @@
+# known-falsehoods.yaml — 팩트체크에서 *틀렸다고 확인된* 주장
+#
+# known-facts.yaml이 "이 이름은 실존한다"는 화이트리스트라면, 이 파일은
+# "이 문자열은 틀렸다"는 블랙리스트입니다. 한 글에서 고친 오류가 같은 주제를
+# 다룬 다른 시리즈에 그대로 남는 일이 반복돼서 만들었습니다(CXL 라운드에서 고친
+# "Coherency Domain ID"가 Bootloader Ch35에 남아 있던 것처럼).
+#
+# 등재 규칙:
+#   - 1차 자료로 틀렸음을 확인한 것만. `source`에 그 자료를, `fixed_in`에 처음
+#     고친 커밋을 적는다.
+#   - `pattern`은 오탐이 거의 없을 만큼 구체적인 문자열(JS 정규식). 대소문자를
+#     가리지 않으려면 `flags: i`.
+#     "보통 5 ~ 50 ps" 같은 수치 주장은 문맥 판단이 필요하므로 넣지 않는다.
+#   - 틀린 주장을 *반박하려고* 인용하는 줄(흔한 오해 절의 `### "…"`)은 큰따옴표
+#     안의 매치라서 검사기가 건너뛴다.
+#
+# 사용: node scripts/audit-known-falsehoods.mjs (npm run audit:falsehoods)
+
+- id: cxl-coherency-domain-id
+  pattern: 'Coherency Domain ID'
+  flags: i
+  correction: 'CXL에 없는 용어. spec은 Cache ID를 쓴다'
+  source: 'CXL 3.1 spec glossary'
+  fixed_in: c38b4429
+
+- id: cxl-hbr-expansion
+  pattern: 'Host[- ]Based Routing'
+  flags: i
+  correction: 'HBR = Hierarchy Based Routing'
+  source: 'CXL 3.1 spec glossary, §7 ("two types of switches: HBR and PBR")'
+  fixed_in: c38b4429
+
+- id: cxl-hdm-db-expansion
+  pattern: 'Device[- ]Backed'
+  correction: 'HDM-DB = Device Coherent using Back-Invalidate'
+  source: 'CXL 3.1 spec §2.2'
+  fixed_in: b8beb9cd
+
+- id: cxl-cvme-expansion
+  pattern: 'CXL Virtual Memory Errors?'
+  correction: 'CVME = Corrected Volatile Memory Error'
+  source: 'CXL 3.1 spec glossary'
+  fixed_in: 0af6ff56
+
+- id: cxl-cache-clflushed
+  pattern: '\bCLflushed\b'
+  correction: 'CXL.cache opcode가 아니다 (CLFlush, CacheFlushed는 있다)'
+  source: 'CXL 3.1 spec §3.2 D2H request opcodes'
+  fixed_in: a3eb6830
+
+- id: cxl-almp-send-kprobe
+  pattern: '\bcxl_almp_send\b'
+  correction: 'drivers/cxl에 ALMP·vLSM 코드가 없다. 지어낸 kprobe'
+  source: 'Linux v7.3-rc6 drivers/cxl'
+  fixed_in: 1c9300eb
+
+- id: cxl-region-create-store
+  pattern: '\bregion_create_store\b'
+  correction: 'core/region.c에 없는 함수. region은 create_{ram,pmem}_region sysfs와 targetN 쓰기로 붙는다'
+  source: 'Linux v7.3-rc6 drivers/cxl/core/region.c'
+  fixed_in: 0900e9fe
+
+- id: cxl-mailbox-send-fn
+  pattern: '\bmbox_send_cmd_fn\b'
+  correction: 'struct cxl_mailbox에 이런 멤버가 없다 (rcuwait을 쓴다)'
+  source: 'Linux v7.3-rc6 include/cxl/mailbox.h'
+  fixed_in: 0900e9fe
+
+- id: cxl-list-hdm-dc-fields
+  pattern: '\bhdm_dc_(back_invalidation|bias_mode)\b'
+  correction: 'cxl list 출력에 없는 필드. decoderX.Y/target_type을 본다'
+  source: 'ndctl Documentation/cxl/cxl-list.txt; Linux drivers/cxl/core/port.c'
+  fixed_in: b8beb9cd
+
+- id: cxl-sysfs-user-keystore
+  pattern: '\buser_keystore\b'
+  correction: 'memdev security ABI는 state, sanitize, erase'
+  source: 'Linux Documentation/ABI/testing/sysfs-bus-cxl'
+  fixed_in: b63eb24b
+
+- id: cxl-class-code-0508
+  pattern: 'Memory controller \[0508\]'
+  correction: 'CXL 장치의 class는 0502 (pci.ids: 05 02 CXL, prog-if 10 = CXL Memory Device)'
+  source: 'pciutils pci.ids'
+  fixed_in: b63eb24b
+
+- id: qemu-cxl-vendor-virtio
+  pattern: '1af4:0d93'
+  correction: 'QEMU CXL Type 3는 Intel 8086:0d93'
+  source: 'QEMU hw/mem/cxl_type3.c'
+  fixed_in: 8b54a73e
+
+- id: qemu-cxl-q35-message
+  pattern: 'cxl option requires q35'
+  correction: 'QEMU에 없는 메시지. 실제 실패는 "pxb-cxl devices cannot reside on a PCI bus"'
+  source: 'QEMU hw/pci-bridge/pci_expander_bridge.c'
+  fixed_in: 8b54a73e
+
+- id: uboot-tftp-env-underscore
+  pattern: '\btftp_(blocksize|windowsize|timeout)\b'
+  correction: 'U-Boot 환경 변수는 tftpblocksize, tftpwindowsize, tftptimeout (밑줄 없음)'
+  source: 'U-Boot doc/usage/environment.rst'
+  fixed_in: bf206362
+
+- id: buildroot-uboot-boot-script-legacy
+  pattern: '\bBR2_TARGET_UBOOT_BOOT_SCRIPT(_SOURCE)?\b'
+  correction: 'Config.in.legacy로 옮겨진 옵션(켜면 BR2_LEGACY로 빌드 중단). 현재 이름은 BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT(_SOURCE)'
+  source: 'Buildroot Config.in.legacy; package/uboot-tools/Config.in.host'
+  fixed_in: 8189c09b
+
+# ── 2026-10-10: CXL 형제 시리즈 라운드 (디버깅·성능·Modern Recipes·Embedded Security) ──
+
+- id: cxl-mailbox-completion
+  pattern: '\bmbox_done\b'
+  correction: 'struct cxl_mailbox에 completion 없음 — rcuwait mbox_wait, PCI mailbox는 doorbell을 2*HZ polling'
+  source: 'Linux include/cxl/mailbox.h, drivers/cxl/pci.c'
+  fixed_in: 8e18e425
+
+- id: cxl-mbox-send-cmd
+  pattern: '\bcxl_mbox_send_cmd\b'
+  correction: 'mainline에 없는 함수. 공통 진입점은 cxl_internal_send_cmd(), 전송은 cxl_mbox->mbox_send()'
+  source: 'Linux drivers/cxl/core/mbox.c, include/cxl/mailbox.h'
+  fixed_in: 18f8b421
+
+- id: cxl-event-irq-handler
+  pattern: '\bcxl_event_irq_handler\b'
+  correction: 'mainline에 없는 함수. 이벤트 인터럽트 스레드는 cxl_event_thread()'
+  source: 'Linux drivers/cxl/pci.c'
+  fixed_in: e4415b20
+
+- id: cxl-decoder-rwsem
+  pattern: '\bcxl_decoder_rwsem\b'
+  correction: 'mainline은 cxl_rwsem.region / cxl_rwsem.dpa'
+  source: 'Linux drivers/cxl/core/core.h, core/hdm.c'
+  fixed_in: 8e18e425
+
+- id: cxl-mbox-opcode-health
+  pattern: '\b0x4400\b[^\n]{0,40}[Hh]ealth|[Hh]ealth[^\n]{0,40}\b0x4400\b'
+  correction: 'Get Health Info = 4200h (4400h = Sanitize)'
+  source: 'Linux drivers/cxl/cxlmem.h CXL_MBOX_OP_*'
+  fixed_in: 0900e9fe
+
+- id: cxl-mbox-opcode-events
+  pattern: '\b0x4500\b[^\n]{0,40}Event|Event[^\n]{0,40}\b0x4500\b'
+  correction: 'Get Event Records = 0100h (4500h = Get Security State)'
+  source: 'Linux drivers/cxl/cxlmem.h'
+  fixed_in: 2cd20c22
+
+- id: cxl-mbox-opcode-poison
+  pattern: '\b0x4800\b[^\n]{0,40}[Pp]oison|[Pp]oison[^\n]{0,40}\b0x4800\b'
+  correction: 'Get Poison List = 4300h (48xxh = Dynamic Capacity)'
+  source: 'Linux drivers/cxl/cxlmem.h; CXL 3.1 §8.2.9.9'
+  fixed_in: 2cd20c22
+
+- id: cxl-mbox-opcode-lsa
+  pattern: '\b0x430[02]\b[^\n]{0,40}(Get|Set) LSA|(Get|Set) LSA[^\n]{0,40}\b0x430[02]\b'
+  correction: 'Get LSA 4102h / Set LSA 4103h (4300h Get Poison, 4302h Clear Poison)'
+  source: 'Linux drivers/cxl/cxlmem.h'
+  fixed_in: 0900e9fe
+
+- id: cxl-cli-health
+  pattern: '\bcxl health\b(?!` 명령은 없)'
+  correction: 'ndctl에 cxl health 명령은 없다 — cxl list -H'
+  source: 'ndctl cxl/cxl.c command table, Documentation/cxl/cxl-list.txt'
+  fixed_in: 2cd20c22
+
+- id: cxl-cli-list-P-poison
+  pattern: 'cxl list -m \S+ -P\b'
+  correction: '-P는 --ports; poison 목록은 -L (--media-errors)'
+  source: 'ndctl Documentation/cxl/cxl-list.txt'
+  fixed_in: 2cd20c22
+
+- id: cxl-cli-nonexistent-subcommands
+  pattern: '\bcxl (clear-poison|set-event-irq)\b'
+  correction: '없는 subcommand — clear-media-poison / inject-media-poison; set-event-irq 없음'
+  source: 'ndctl cxl/cxl.c command table'
+  fixed_in: 2cd20c22
+
+- id: cxl-health-json-fields
+  pattern: '"(health_status|media_status)"|\bdirty_shutdown_count\b'
+  correction: 'cxl list -H 필드는 media_normal, life_used_percent, dirty_shutdowns 등'
+  source: 'ndctl Documentation/cxl/cxl-list.txt (-H example)'
+  fixed_in: 2cd20c22
+
+- id: cxl-granularity-64
+  pattern: '"?interleave_granularity"?\s*[:=]\s*64\b'
+  correction: 'interleave granularity는 256 B ~ 16 KB'
+  source: 'Linux drivers/cxl/cxl.h (granularity encoding), CXL Ch 8 fix'
+  fixed_in: 52f548ef
+
+- id: cxl-port-nr-dport
+  pattern: '\bnr_dport\b'
+  correction: 'struct cxl_port 멤버는 nr_dports'
+  source: 'Linux drivers/cxl/cxl.h'
+  fixed_in: 0900e9fe
+
+- id: cxl-tsp-expansion
+  pattern: 'TSP\s*\(\s*Trusted Security Protocol'
+  correction: 'TSP = TEE Security Protocol'
+  source: 'CXL 3.1 spec §11.5'
+  fixed_in: 4c7912d3
+
+- id: cxl-doe-lspci-protocol-list
+  pattern: 'Vendor=(DMTF|CXL), ID=0x0[0-3] \('
+  correction: 'lspci는 DOE를 DOECap/DOECtl/DOESta로만 출력 — 프로토콜 목록 줄은 지어낸 것'
+  source: 'pciutils ls-ecaps.c; CXL 3.1 Table 8-3'
+  fixed_in: b63eb24b
+
+- id: cxl-cache-invalidate-opcode
+  pattern: 'CXL\.cache Invalidate\b'
+  correction: 'CXL.cache에 Invalidate opcode 없음 (H2D SnpInv, D2H CLFlush 등)'
+  source: 'CXL 3.1 spec §3.2.4'
+  fixed_in: a3eb6830
+
+- id: spdm-expansion
+  pattern: 'Security Protocol Data Model'
+  flags: i
+  correction: 'SPDM = Security Protocol and Data Model'
+  source: 'DMTF DSP0274 title'
+  fixed_in: 42423bce
+
+- id: pcie5-64gt
+  pattern: 'PCIe 5\.0[^\n|]{0,10}64 GT/s'
+  correction: 'PCIe 5.0은 32 GT/s, 64 GT/s는 PCIe 6.0'
+  source: 'PCI-SIG specification announcements'
+  fixed_in: 3da59d41
+
+- id: nvml-mem-thermal-slowdown
+  pattern: '\bMEM_THERMAL_SLOWDOWN\b'
+  correction: 'nvml.h에 없는 throttle reason'
+  source: 'NVIDIA nvml.h (clocksThrottleReasons)'
+  fixed_in: 9ad745f7
+
+- id: dram-tccd-order
+  pattern: 'tCCD_L\s*<\s*tCCD_S'
+  correction: 'tCCD_L(같은 bank group)이 tCCD_S보다 길다'
+  source: 'JEDEC DDR/HBM timing definitions (HBM Ch 7 fix)'
+  fixed_in: 9ad745f7
+
+- id: nvidia-h100-pcie-nvl
+  pattern: 'H100 PCIe NVL'
+  correction: 'H100 PCIe(HBM2e)와 H100 NVL(HBM3)은 별개 제품'
+  source: 'NVIDIA H100 product page / Hopper whitepaper'
+  fixed_in: 9ad745f7

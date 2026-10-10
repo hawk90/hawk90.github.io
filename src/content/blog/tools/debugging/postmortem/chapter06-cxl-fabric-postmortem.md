@@ -19,7 +19,6 @@ topics: ["tools", "tools/debugging"]
 - *Fabric Manager (FM)*가 *out-of-band*로 관리하므로 vmcore에 안 잡힘
 - 호스트 vmcore들의 *시간 동기화 안 됨*
 - *Switch의 상태*가 호스트 vmcore에 없음
-- *Coherency domain ID·routing*이 fabric 토폴로지에 의존
 
 ## Fabric의 추가 자료
 
@@ -30,7 +29,7 @@ topics: ["tools", "tools/debugging"]
 | FM log | Fabric Manager 자체 | 모든 control plane 이벤트 |
 | LD 할당 이력 | FM database | host A → B로 transfer 시점 |
 | Switch routing 테이블 | switch CLI export | fabric 토폴로지 snapshot |
-| Coherency domain ID | CFMWS·CEDT | 어느 host가 어느 영역 owning |
+| CFMWS (CEDT) | 각 호스트의 ACPI 테이블 | 호스트별 HPA window 크기·interleave target |
 | Each host vmcore | 각 호스트 kdump | 호스트별 시각 |
 
 이 *5가지를 시간 동기화*해야 *전체 그림*이 나옵니다.

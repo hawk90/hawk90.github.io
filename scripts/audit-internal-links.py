@@ -21,6 +21,8 @@ Exit code:
 import argparse
 import json
 import re
+
+from markdown_fences import Fences  # noqa: E402  (scripts/ is on sys.path)
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -30,9 +32,10 @@ CONTENT_DIR = REPO_ROOT / "src" / "content" / "blog"
 IMAGES_DIR = REPO_ROOT / "public" / "images" / "blog"
 
 # Pattern: image markdown `![alt](/blog/...)` — image
-IMAGE_LINK = re.compile(r"!\[[^\]]*\]\((/blog/[^)\s]+)\)")
+# An optional "title" may follow the URL: [x](/blog/a "title").
+IMAGE_LINK = re.compile(r"!\[[^\]]*\]\((/blog/[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 # Pattern: text link `[text](/blog/...)` — page link
-TEXT_LINK = re.compile(r"(?<!\!)\[[^\]]*\]\((/blog/[^)\s]+)\)")
+TEXT_LINK = re.compile(r"(?<!\!)\[[^\]]*\]\((/blog/[^)\s]+)(?:\s+\"[^\"]*\")?\)")
 # Reference-style Markdown links are valid in long-form content and need the
 # same filesystem checks as inline links.
 REFERENCE_DEF = re.compile(r"^\s{0,3}\[([^\]]+)\]:\s*(/blog/[^\s]+)", re.MULTILINE)
@@ -75,14 +78,13 @@ def check_image(rel_path):
 
 def audit_file(md_path):
     """파일 안 모든 broken link 추출 — (line, type, url, suggestion)."""
-    try:
-        text = md_path.read_text(encoding="utf-8")
-    except Exception:
-        return []
+    # Undecodable bytes become U+FFFD; returning [] here passed the file with
+    # its links unchecked.
+    text = md_path.read_text(encoding="utf-8", errors="replace")
     broken = []
     lines = text.split("\n")
     definitions = {key.strip().lower(): url for key, url in REFERENCE_DEF.findall(text)}
-    in_fence = False
+    fences = Fences()
     in_frontmatter = text.startswith("---")
     for lineno, line in enumerate(lines, 1):
         if lineno == 1 and in_frontmatter:
@@ -91,10 +93,7 @@ def audit_file(md_path):
             if line == "---":
                 in_frontmatter = False
             continue
-        if re.match(r"^\s*```", line):
-            in_fence = not in_fence
-            continue
-        if in_fence:
+        if fences.step(line) is not None or fences.inside:
             continue
         # Image links — image 파일 존재 확인
         for m in IMAGE_LINK.finditer(line):

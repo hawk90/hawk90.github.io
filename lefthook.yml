@@ -2,6 +2,13 @@
 #
 # 설치: `lefthook install` (한 번만)
 # 우회: `git commit --no-verify` (긴급 시)
+# lefthook 2.2.1 이상. 2.1.16은 git worktree에서 일부만 stage된 파일이 있으면
+# "failed to save all unstaged changes"로 커밋을 막는다(brew upgrade lefthook).
+min_version: 2.2.1
+
+# `dir/**/*.ext`가 dir 바로 아래 파일도 잡도록. 기본 matcher에서는
+# public/images/blog/_design*.tex가 diagram-fresh에 한 번도 걸리지 않았다.
+glob_matcher: doublestar
 
 pre-commit:
   parallel: false
@@ -42,7 +49,9 @@ pre-commit:
             for f in {staged_files}; do
               tex="${f%.*}.tex"
               [ -f "$tex" ] || continue
-              ./scripts/build-diagrams.sh --check "$PWD/$tex" | grep '^✗' && status=1
+              # Keep the exit code: piping into grep let a crashed check pass.
+              out=$(./scripts/build-diagrams.sh --check "$PWD/$tex" 2>&1) || status=1
+              printf '%s\n' "$out" | grep '^✗' && status=1
             done ;;
         esac
         exit $status
@@ -58,7 +67,7 @@ pre-commit:
         - "package.json"
       run: node scripts/check-script-modes.mjs
 
-    # 새로 추가된 챕터에 draft·series·title 기본 frontmatter 누락 검사
+    # 가격 `$20K~$40K`처럼 의도하지 않은 인라인 수식
     inline-math:
       glob:
         - "src/content/blog/**/*.md"
@@ -66,15 +75,21 @@ pre-commit:
     frontmatter-required:
       glob:
         - "src/content/blog/**/*.md"
+      # frontmatter 블록 안만 본다 — 본문 코드 예시의 `description:` 줄이
+      # 누락을 가리지 않게. 값이 비어 있으면 누락. slug·topics는 스키마 필수.
       run: |
         for f in {staged_files}; do
           if [ ! -f "$f" ]; then continue; fi
+          fm=$(awk 'NR==1 && $0 != "---" {exit} NR>1 && /^---[[:space:]]*$/ {exit} NR>1 {print}' "$f")
           missing=""
-          for key in title date description; do
-            if ! grep -q "^$key:" "$f"; then
+          for key in title slug date description; do
+            if ! printf '%s\n' "$fm" | grep -qE "^$key:[[:space:]]*[^[:space:]]"; then
               missing="$missing $key"
             fi
           done
+          if ! printf '%s\n' "$fm" | grep -qE "^topics:"; then
+            missing="$missing topics"
+          fi
           if [ -n "$missing" ]; then
             echo "✗ $f: 필수 frontmatter 누락:$missing"
             exit 1
@@ -85,27 +100,39 @@ pre-push:
   parallel: false
   commands:
     # push 직전에는 *push할 commit에서 변경된 파일만* 검사.
-    # 이미 main에 있던 기존 violation은 별 작업으로 fix.
     # (전체 sweep을 원하면 수동으로 `npm run audit:gate` 실행)
     push-changed-files:
+      # git이 stdin으로 넘기는 "<local ref> <local sha> <remote ref> <remote sha>"
+      # 줄마다, 실제로 push되는 commit 범위에서 바뀐 글만 검사한다. 예전에는
+      # upstream이 없으면 range=HEAD(작업 트리 vs HEAD)라 새 브랜치의 첫 push가
+      # 아무것도 검사하지 않았고, 바뀐 글이 아니라 그 디렉터리 전체를 돌렸다.
+      use_stdin: true
       run: |
         echo "▶ Running publish gate on commits being pushed..."
-        # 1) push할 commit 범위: origin/main..HEAD 또는 첫 push면 모든 commit
-        if git rev-parse --verify --quiet @{u} > /dev/null; then
-          range="@{u}..HEAD"
-        else
-          range="HEAD"
-        fi
-        files=$(git diff --name-only --diff-filter=ACMR $range -- "src/content/blog/**/*.md" 2>/dev/null || true)
-        if [ -z "$files" ]; then
+        zero=0000000000000000000000000000000000000000
+        empty_tree=$(git hash-object -t tree /dev/null)
+        files=""
+        while read -r lref lsha rref rsha; do
+          [ "$lsha" = "$zero" ] && continue  # branch deletion
+          if [ "$rsha" = "$zero" ]; then
+            # New remote branch: everything not yet on origin/main.
+            base=$(git merge-base origin/main "$lsha" 2>/dev/null || echo "$empty_tree")
+          else
+            base=$rsha
+          fi
+          files="$files
+        $(git diff --name-only --diff-filter=ACMR "$base" "$lsha" -- 'src/content/blog/*.md')"
+        done
+        set --
+        for f in $(printf '%s\n' "$files" | sed 's/^[[:space:]]*//; /^$/d' | sort -u); do
+          [ -f "$f" ] && set -- "$@" "$f"
+        done
+        if [ $# -eq 0 ]; then
           echo "  No blog .md changes — skip"
           exit 0
         fi
-        # 변경된 .md 파일들의 디렉터리 unique → audit 대상
-        dirs=$(echo "$files" | xargs -n1 dirname 2>/dev/null | sort -u)
-        echo "  Auditing dirs:"
-        echo "$dirs" | sed 's|^|    |'
-        ./scripts/audit-publish-gate.sh $dirs
+        echo "  Auditing $# changed post(s)"
+        ./scripts/audit-publish-gate.sh "$@"
       fail_text: |
         ✗ Publish gate failed on commits being pushed.
         Push할 commit의 *변경 파일에* 규칙 위반이 있습니다. 수정 후 push 재시도.

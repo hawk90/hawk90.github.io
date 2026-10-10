@@ -3,10 +3,11 @@
 #
 # CLAUDE.md §1·§6·§10에 정의된 publish 전 검증을 한 번에 실행:
 #   1.  ASCII 박스 다이어그램 (자동 차단)
-#   2.  TikZ 텍스트 겹침 (자동 차단)
+#   2.  TikZ 텍스트 근접 휴리스틱 (전체 sweep에서만, 참고)
 #   3.  코드 블록 내 한국어 산문 후보 (수동 review)
 #   3b. Tone 일관성 §1 — ~합니다/~다 혼용 (자동 차단)
 #   4.  Hallucination 후보 (수동 review 알림)
+#   5b. 이미 틀렸다고 확인된 주장 (data/known-falsehoods.yaml, 자동 차단)
 #
 # Usage:
 #   ./scripts/audit-publish-gate.sh                  # 전체 published
@@ -15,7 +16,7 @@
 #
 # Exit code:
 #   0 = all gates pass
-#   1 = blocking violation (rules 1·2) — publish 금지
+#   1 = blocking violation or a checker that did not run — publish 금지
 #   2 = hallucination candidates only — strict 모드에서만 차단
 
 set -euo pipefail
@@ -48,11 +49,20 @@ run_check() {
   echo ""
   echo "═══ $name ═══"
 
-  if "$@" > "$output" 2>&1; then
+  local rc=0
+  "$@" > "$output" 2>&1 || rc=$?
+  if [ "$rc" -eq 0 ]; then
     echo "✓ PASS"
   else
     cat "$output"
-    if [ "$blocking" = "block" ]; then
+    if [ "$blocking" = "warn" ] && [ "$rc" -ge 2 ]; then
+      # A warn checker reports findings with exit 1. Anything else (a crash,
+      # a missing path, 127 for a missing interpreter) means it did not run,
+      # which must not read as "candidates, review later".
+      echo ""
+      echo "✗ 검사기 오류 (exit $rc) — 검사가 돌지 않았다"
+      FAILED=$((FAILED + 1))
+    elif [ "$blocking" = "block" ]; then
       echo ""
       echo "✗ BLOCKING — publish 금지"
       FAILED=$((FAILED + 1))
@@ -91,12 +101,15 @@ if require_checker "detect-ascii-diagrams.sh"; then
     "$ROOT/scripts/detect-ascii-diagrams.sh" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
-# 2. TikZ 텍스트 겹침 (시리즈 인자 없이 전체 빠른 검사)
-if require_checker "detect-tikz-overlap.sh"; then
-  run_check \
-    "2/4 TikZ 텍스트 근접 휴리스틱" \
-    "block" \
-    "$ROOT/scripts/detect-tikz-overlap.sh"
+# 2. TikZ 텍스트 근접 휴리스틱 — 전체 .tex 순위표(점수만, 렌더링 안 함).
+#    --fail-above 없이는 exit 0뿐이라 "차단"이라고 적혀 있어도 막은 적이 없다.
+#    점수 30 초과가 277개라 차단으로 돌릴 수도 없다. 경로를 받는 커밋 단위
+#    실행에서는 건너뛰고, 전체 sweep에서만 상위 5개를 참고로 보여 준다.
+if [ ${#ARGS[@]} -eq 0 ] && require_checker "detect-tikz-overlap.sh"; then
+  echo ""
+  echo "═══ 2/10 TikZ 텍스트 근접 휴리스틱 (informational) ═══"
+  "$ROOT/scripts/detect-tikz-overlap.sh" --report "$TMP_DIR/tikz-overlap.txt" 2>&1 | head -8 || true
+  echo "ℹ  실제 겹침은 python3 scripts/detect-text-overlap.py --series <name>"
 fi
 
 # 3. 코드 블록 내 한국어 산문
@@ -104,7 +117,7 @@ if require_checker "detect-prose-in-code.sh"; then
   run_check \
     "3/4 코드 블록 내 한국어 산문 후보" \
     "warn" \
-    "$ROOT/scripts/detect-prose-in-code.sh" --published-only
+    "$ROOT/scripts/detect-prose-in-code.sh" --published-only ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 3b. Tone 일관성 (~합니다 vs ~다 혼용·시리즈 이탈) — MIXED 차단
@@ -127,7 +140,7 @@ fi
 # 4. Hallucination 후보 — strict 모드에서만 block
 if require_checker "audit-suspect-claims.sh"; then
   run_check \
-    "4/5 Hallucination 후보 (CLAUDE.md §10)" \
+    "4/10 Hallucination 후보 (CLAUDE.md §10)" \
     "warn" \
     "$ROOT/scripts/audit-suspect-claims.sh" ${ARGS[@]+"${ARGS[@]}"}
 fi
@@ -135,9 +148,18 @@ fi
 # 5. Known-fact whitelist 검증 — strict 모드에서만 block
 if require_checker "verify-known-facts.sh"; then
   run_check \
-    "5/6 Known-fact whitelist (data/known-facts.yaml)" \
+    "5/10 Known-fact whitelist (data/known-facts.yaml)" \
     "warn" \
     "$ROOT/scripts/verify-known-facts.sh" ${ARGS[@]+"${ARGS[@]}"}
+fi
+
+# 5b. Known falsehoods — 팩트체크에서 틀렸다고 확인된 문자열(data/known-falsehoods.yaml).
+#     후보가 아니라 확정 오류라서 strict와 무관하게 차단한다.
+if require_checker "audit-known-falsehoods.mjs"; then
+  run_check \
+    "5b/10 Known falsehoods (data/known-falsehoods.yaml)" \
+    "block" \
+    node "$ROOT/scripts/audit-known-falsehoods.mjs" ${ARGS[@]+"${ARGS[@]}"}
 fi
 
 # 6. Universal fact-density (informational, 항상 warn — review 우선순위 식별)
@@ -158,7 +180,11 @@ if require_checker "audit-upstream-freshness.py" && [ -f "$ROOT/data/upstream-tr
     grep -E "^## |Since baseline:|Chapters:" "$TMP_DIR/audit-freshness.txt" || true
     echo "ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)"
   else
-    echo "− SKIPPED (upstream tracking 미설정 또는 clone 없음)"
+    # clone이 없는 시리즈는 스크립트 안에서 SKIPPED로 끝나고 exit 0이다.
+    # 여기 오는 건 도구 자체 오류(YAML 파싱 실패 등) — SKIPPED로 삼키지 않는다.
+    cat "$TMP_DIR/audit-freshness.txt"
+    echo "✗ 도구 오류 — audit-upstream-freshness.py가 실패"
+    FAILED=$((FAILED + 1))
   fi
 fi
 
@@ -167,13 +193,23 @@ fi
 if require_checker "audit-cited-symbols.py" && [ -f "$ROOT/data/upstream-tracking.yaml" ]; then
   echo ""
   echo "═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══"
-  if python3 "$ROOT/scripts/audit-cited-symbols.py" > "$TMP_DIR/audit-symbols.txt" 2>&1; then
+  SYMBOLS_RC=0
+  python3 "$ROOT/scripts/audit-cited-symbols.py" > "$TMP_DIR/audit-symbols.txt" 2>&1 || SYMBOLS_RC=$?
+  if [ "$SYMBOLS_RC" -eq 0 ]; then
     grep -E "^## |MISSING: 0|✓ 모든" "$TMP_DIR/audit-symbols.txt" || true
-    echo "✓ PASS — 모든 인용 심볼 존재"
+    echo "✓ PASS — 검사한 시리즈의 인용 심볼 모두 존재"
+    grep -E "^  SKIP " "$TMP_DIR/audit-symbols.txt" || true
+  elif [ "$SYMBOLS_RC" -eq 3 ]; then
+    grep -E "^  SKIP " "$TMP_DIR/audit-symbols.txt" || true
+    echo "− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)"
+  elif [ "$SYMBOLS_RC" -ne 2 ]; then
+    cat "$TMP_DIR/audit-symbols.txt"
+    echo "✗ 도구 오류 — audit-cited-symbols.py exit $SYMBOLS_RC"
+    FAILED=$((FAILED + 1))
   else
     # exit 2 = MISSING 후보 있음 (informational, 사람이 확인)
     grep -E "^## |MISSING:|    - \`" "$TMP_DIR/audit-symbols.txt" || true
-    echo "ℹ  MISSING 후보 = hallucination 아님. 각 심볼을 upstream에 확인 후 수정·qualify."
+    echo "ℹ  MISSING 후보 = hallucination 아님. 각 심볼을 upstream에 확인 후 수정, 확인 안 되면 삭제."
     echo "ℹ  상세: python3 scripts/audit-cited-symbols.py [--series <id>]"
     if [ "$STRICT" -eq 1 ]; then
       echo "✗ --strict: 인용 심볼 부재 차단"
@@ -200,17 +236,20 @@ if require_checker "audit-series-integrity.py"; then
     head -3 "$TMP_DIR/audit-integrity.txt"
     echo "ℹ  상세는 'npm run audit:series' 실행"
   else
-    head -3 "$TMP_DIR/audit-integrity.txt"
+    # head -3 showed the summary and hid which series and files were blocking.
+    cat "$TMP_DIR/audit-integrity.txt"
     echo "ℹ  Blocking 위반 발견 — 'npm run audit:series'로 확인"
     FAILED=$((FAILED + 1))
   fi
 fi
 
-# 10. Image coverage — §11 접근성 — 추상 개념 vs 이미지 0개 챕터 ranking
-if require_checker "audit-image-coverage.py"; then
+# 10. Image coverage — §11 접근성 — 추상 개념 vs 이미지 0개 챕터 ranking.
+#     전체 코퍼스 순위표(5초)라 커밋 단위(경로 인자) 실행에서는 건너뛴다.
+if [ ${#ARGS[@]} -eq 0 ] && require_checker "audit-image-coverage.py"; then
   echo ""
   echo "═══ 10/10 Image coverage (§11 접근성, informational) ═══"
-  python3 "$ROOT/scripts/audit-image-coverage.py" --top 5 2>&1 | head -5
+  python3 "$ROOT/scripts/audit-image-coverage.py" --top 5 > "$TMP_DIR/images.txt" 2>&1 || true
+  head -5 "$TMP_DIR/images.txt"
   echo "ℹ  상세는 'npm run audit:images' 실행"
 fi
 

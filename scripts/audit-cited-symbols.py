@@ -26,8 +26,10 @@ Cited-symbol existence audit — 글이 인용한 라이브러리 심볼이 *ups
 - 시리즈별 cited/missing 카운트 + MISSING 심볼의 챕터:line 위치
 
 Exit code:
-    0 = 모든 인용 심볼 존재 (또는 whitelist)
+    0 = 검사한 시리즈의 모든 인용 심볼 존재 (또는 whitelist)
+    1 = 도구 오류 (YAML 파싱·시리즈 audit 예외)
     2 = MISSING 후보 있음 (수동 review 필요; --strict면 1로 승격)
+    3 = 검사한 시리즈 없음 (clone이 모두 없음 — PASS로 읽으면 안 됨)
 
 사용:
     python3 scripts/audit-cited-symbols.py
@@ -61,7 +63,7 @@ def load_yaml(path):
     try:
         out = subprocess.check_output([
             "node", "--input-type=module", "--eval",
-            "import fs from 'node:fs'; import yaml from 'js-yaml'; "
+            "import fs from 'node:fs'; import * as yaml from 'js-yaml'; "
             "console.log(JSON.stringify(yaml.load(fs.readFileSync(process.argv[1], 'utf8'))));",
             str(path),
         ], text=True, cwd=REPO_ROOT)
@@ -248,12 +250,14 @@ def main():
 
     config = load_yaml(TRACKING_FILE)
     results = []
+    errors = 0
     for entry in config.get("trackings", []):
         if args.series and entry["id"] != args.series:
             continue
         try:
             results.append(audit_series(entry))
         except Exception as e:
+            errors += 1
             print(f"ERROR auditing {entry['id']}: {e}", file=sys.stderr)
             import traceback; traceback.print_exc(file=sys.stderr)
 
@@ -266,8 +270,14 @@ def main():
             json.dump(payload, f, indent=2, ensure_ascii=False)
         print(f"\nJSON written: {args.json}", file=sys.stderr)
 
+    if errors:
+        sys.exit(1)
     if total_missing > 0:
         sys.exit(1 if args.strict else 2)
+    if not any(r is not None for r in results):
+        print("검사한 시리즈 없음: upstream clone이 하나도 없다 "
+              "(python3 scripts/audit-upstream-freshness.py --fetch로 생성)", file=sys.stderr)
+        sys.exit(3)
 
 
 if __name__ == "__main__":

@@ -23,6 +23,10 @@
 
 set -euo pipefail
 
+# draft:true in the frontmatter only — a `draft: true` line in a code sample
+# in the body must not hide a published post from the checks.
+is_draft() { awk 'NR==1 && $0 != "---" {exit} NR>1 && /^---[[:space:]]*$/ {exit} NR>1 && /^draft:[[:space:]]*true[[:space:]]*$/ {d=1; exit} END {exit !d}' "$1"; }
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 THRESHOLD=30
 TOP=0
@@ -69,7 +73,7 @@ TMP=$(mktemp)
 trap 'rm -f "$TMP"' EXIT
 
 while IFS= read -r f; do
-  if grep -q "^draft: true" "$f"; then continue; fi
+  if is_draft "$f"; then continue; fi
 
   count_pattern() {
     local n

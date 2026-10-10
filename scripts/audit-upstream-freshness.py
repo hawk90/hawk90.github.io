@@ -43,7 +43,7 @@ def load_yaml(path):
     try:
         out = subprocess.check_output([
             "node", "--input-type=module", "--eval",
-            "import fs from 'node:fs'; import yaml from 'js-yaml'; "
+            "import fs from 'node:fs'; import * as yaml from 'js-yaml'; "
             "console.log(JSON.stringify(yaml.load(fs.readFileSync(process.argv[1], 'utf8'))));",
             str(path),
         ], text=True, cwd=REPO_ROOT)
@@ -67,9 +67,9 @@ def run(cmd, cwd=None, check=True, capture=True):
         capture_output=capture, text=True
     )
     if check and result.returncode != 0:
-        print(f"ERROR running {' '.join(cmd)}", file=sys.stderr)
-        print(result.stderr, file=sys.stderr)
-        sys.exit(1)
+        # Raise, not sys.exit: main() catches per series, reports the others,
+        # and still exits 1 at the end. sys.exit skipped that handler.
+        raise RuntimeError(f"{' '.join(cmd)} failed: {result.stderr.strip()}")
     return result.returncode, result.stdout
 
 
@@ -381,6 +381,7 @@ def main():
     config = load_yaml(TRACKING_FILE)
 
     results = []
+    errors = 0
     for entry in config.get("trackings", []):
         if args.series and entry["id"] != args.series:
             continue
@@ -389,6 +390,7 @@ def main():
                              fetch_releases=args.releases)
             results.append(r)
         except Exception as e:
+            errors += 1
             print(f"ERROR auditing {entry['id']}: {e}", file=sys.stderr)
             import traceback; traceback.print_exc(file=sys.stderr)
 
@@ -399,6 +401,9 @@ def main():
         with open(args.json, "w") as f:
             json.dump(results, f, indent=2, ensure_ascii=False)
         print(f"\nJSON written: {args.json}", file=sys.stderr)
+
+    if errors:
+        sys.exit(1)
 
 
 if __name__ == "__main__":

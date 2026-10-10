@@ -5,7 +5,7 @@ import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const categoryAt = process.argv.indexOf('--category');
 const category = categoryAt === -1 ? null : process.argv[categoryAt + 1];
-if (!category || category.startsWith('--')) throw new Error('Usage: node scripts/audit-category-registry.mjs --category <triage category>');
+if (!category || category.startsWith('--')) { console.error('Usage: node scripts/audit-category-registry.mjs --category <triage category>'); process.exit(2); }
 const evidenceMode = process.argv.includes('--evidence');
 const archive = 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273';
 const [registry, triage, packageJson] = await Promise.all([

@@ -5,7 +5,7 @@ import { mkdir, readFile, writeFile } from 'node:fs/promises';
 
 const at = process.argv.indexOf('--category');
 const category = at === -1 ? null : process.argv[at + 1];
-if (!category || category.startsWith('--')) throw new Error('Usage: node scripts/plan-category-batches.mjs --category <category>');
+if (!category || category.startsWith('--')) { console.error('Usage: node scripts/plan-category-batches.mjs --category <category>'); process.exit(2); }
 const sizeAt = process.argv.indexOf('--batch-size');
 const batchSize = sizeAt === -1 ? 15 : Number(process.argv[sizeAt + 1]);
 if (!Number.isInteger(batchSize) || batchSize < 1) throw new Error('--batch-size must be a positive integer');

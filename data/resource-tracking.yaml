@@ -1,7 +1,7 @@
 # Curated external-resource review queue.
 # This is intentionally a review inventory, not an automatic recommendation list.
 # A human/web search validates title, edition, maintenance, and topical fit before
-# changing READING_ROADMAP.md.
+# changing this file.
 resources:
   - id: zephyr-blog
     kind: blog

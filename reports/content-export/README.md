@@ -1,6 +1,6 @@
 # Portable content export
 
-- Documents: 3387
+- Documents: 3407
 - Format: UTF-8 JSON Lines (`content.jsonl`)
 - Integrity: each record and manifest entry contains SHA-256 for its original Markdown source.
 - Relationships: frontmatter retains topics, tags, series, and other source metadata.

@@ -116,7 +116,7 @@ PBR이 있어야 계층 구조를 벗어난 *큰 fabric*을 만들 수 있습니
 
 규격(CXL 3.1 §7.6.1)은 FM을 *재구성이 필요한 시점을 정하고 구성 명령을 내리는 논리적 프로세스*로 정의합니다. 형태는 정해져 있지 않습니다. host에서 도는 소프트웨어, BMC의 embedded software, 다른 CXL 디바이스나 switch의 펌웨어, 디바이스 안의 state machine 어느 것이든 될 수 있습니다. FM은 규격의 *FM API* 명령으로 디바이스와 switch를 구성합니다.
 
-FM의 전체 책임 범위(topology discovery, hot-plug, health monitoring, security policy, QoS)와 redundancy 구성은 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric#fabric-manager--out-of-band-control-plane)에서 다룹니다.
+FM의 spec 정의(§7.6.1), FM API가 CCI로 전달되는 경로, bind·unbind 흐름은 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric#fabric-manager)에서 다룹니다.
 
 ## 운영 사례 — hyperscale 도입
 

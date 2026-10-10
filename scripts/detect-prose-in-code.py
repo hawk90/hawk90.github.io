@@ -8,11 +8,12 @@ with Korean explanations are intentionally ignored.
 
 import argparse
 import re
+
+from markdown_fences import Fences  # noqa: E402  (scripts/ is on sys.path)
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT_ROOT = ROOT / "src" / "content" / "blog"
-FENCE = re.compile(r"^\s*```")
 CHECKBOX = re.compile(r"^\s*\[[ xX]\]\s")
 BOLD_LABEL = re.compile(r"^\*\*[^*]+\*\*\s*$")
 KOREAN_BULLET = re.compile(r"^\s*[-*]\s+[가-힣]")
@@ -46,31 +47,58 @@ def prose_reason(lines):
 
 
 def scan_file(path):
-    hits, in_fence, start, lang, body = [], False, 0, "", []
+    hits, fences, start, lang, body = [], Fences(), 0, "", []
     for line_no, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
-        if not FENCE.match(line):
-            if in_fence:
+        event = fences.step(line)
+        if event is None:
+            if fences.inside:
                 body.append(line)
             continue
-        if not in_fence:
-            in_fence, start, lang, body = True, line_no, line.strip()[3:].strip().lower(), []
+        if event is not True:  # opened; event is the info string
+            start, lang, body = line_no, event.lower(), []
             continue
         if lang in {"", "text", "asciidoc", "markdown", "md"}:
             reasons, snippet = prose_reason(body)
             if reasons:
                 hits.append((start, reasons, snippet))
-        in_fence = False
     return hits
+
+
+FRONTMATTER = re.compile(r"\A---\r?\n(.*?)\r?\n---", re.S)
+
+
+def is_draft(raw):
+    """`draft` defaults to false in the content schema, so a post with no
+    `draft:` line is published. Matching `draft: false` skipped all 174 of them."""
+    match = FRONTMATTER.match(raw)
+    return bool(match and re.search(r"^draft:\s*true\s*$", match.group(1), re.M))
+
+
+def markdown_files(targets):
+    if not targets:
+        yield from sorted(CONTENT_ROOT.rglob("*.md"))
+        return
+    for target in targets:
+        path = Path(target).resolve()
+        if not path.exists():
+            print(f"✗ 경로 없음: {target} (검사 0건을 통과로 보고하지 않도록 중단)")
+            raise SystemExit(2)
+        if path.is_file():
+            if path.suffix == ".md":
+                yield path
+        else:
+            yield from sorted(path.rglob("*.md"))
 
 
 def main():
     parser = argparse.ArgumentParser()
     parser.add_argument("--published-only", action="store_true")
+    parser.add_argument("paths", nargs="*", help="files or directories (default: src/content/blog)")
     args = parser.parse_args()
     total = 0
-    for path in sorted(CONTENT_ROOT.rglob("*.md")):
+    for path in markdown_files(args.paths):
         raw = path.read_text(encoding="utf-8", errors="ignore")
-        if args.published_only and not re.search(r"^draft:\s*false\s*$", raw, re.MULTILINE):
+        if args.published_only and is_draft(raw):
             continue
         for line_no, reasons, snippet in scan_file(path):
             print(f"{path.relative_to(ROOT)}:{line_no}  [{' '.join(reasons)}]  {snippet}")

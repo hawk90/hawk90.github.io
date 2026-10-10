@@ -6,7 +6,7 @@ import { join } from 'node:path';
 const args = process.argv.slice(2);
 const archiveAt = args.indexOf('--archive');
 const archive = archiveAt === -1 ? 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273' : args[archiveAt + 1];
-if (!archive || archive.startsWith('--')) throw new Error('Usage: node scripts/plan-remediation.mjs [--archive <directory>]');
+if (!archive || archive.startsWith('--')) { console.error('Usage: node scripts/plan-remediation.mjs [--archive <directory>]'); process.exit(2); }
 const output = join(archive, 'remediation-plan');
 const [antipatterns, phases] = await Promise.all([
   readFile(join(archive, 'llm-antipatterns/manifest.json'), 'utf8').then(JSON.parse),
@@ -28,9 +28,11 @@ const triage = antipatterns.canonicalItems.map((item) => {
   const [priority, baseEffort] = defaults[item.category] || ['P2', 'M'];
   const previous = existingItems.get(item.id);
   const generated = { id: item.id, title: item.title, category: item.category, priority, effort: hardWords.test(item.title) ? 'L' : baseEffort, rationale: 'Initial heuristic; confirm against concrete finding and affected scope.' };
-  // Regeneration refreshes source metadata but never discards audit/manual triage.
-  for (const key of ['priority', 'effort', 'rationale', 'dependsOn', 'dependsOnPhase', 'auditEvidence']) {
-    if (previous?.[key] !== undefined) generated[key] = previous[key];
+  // Regeneration refreshes source metadata but never discards audit/manual
+  // triage: any field this script does not compute is carried over (a fixed
+  // allowlist dropped `auditedAt`, which nothing else writes).
+  for (const [key, value] of Object.entries(previous ?? {})) {
+    if (!['id', 'title', 'category'].includes(key) && value !== undefined) generated[key] = value;
   }
   return generated;
 });

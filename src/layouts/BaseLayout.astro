@@ -52,8 +52,13 @@ const ogLocale = SITE_CONFIG.locale.replace('-', '_');
 // Ads run on content pages only. Admin (a GitHub token is typed there),
 // settings, the component gallery and 404 stay ad-free under the strict CSP.
 const pagePath = Astro.url.pathname;
+// Whole path segments only: '/admin' covers '/admin' and '/admin/x', not
+// '/administration'. '/404' is rendered as /404.html.
 const adsOnPage =
-  ADS_CONFIG.enabled && !ADS_CONFIG.excludePaths.some((prefix) => pagePath.startsWith(prefix));
+  ADS_CONFIG.enabled &&
+  !ADS_CONFIG.excludePaths.some(
+    (prefix) => pagePath === prefix || pagePath === `${prefix}.html` || pagePath.startsWith(`${prefix}/`),
+  );
 
 const analyticsScriptOrigins =
   !ANALYTICS_CONFIG.enabled ? []
@@ -70,7 +75,8 @@ const analyticsConnectOrigins =
   fallback: csp-inline-script-hashes.mjs adds the hash of every inline script
   at build time, and browsers that see a hash ignore 'unsafe-inline'. giscus
   runs no script here (see Giscus.astro); only its iframe loads. GitHub API
-  origins are for the admin panel.
+  origins are for the admin panel (raw.githubusercontent.com: the drafts list
+  reads each file's frontmatter from there).
 */
 const strictPolicy = [
   "default-src 'self'",
@@ -78,7 +84,7 @@ const strictPolicy = [
   "style-src 'self' 'unsafe-inline' https://cdn.jsdelivr.net",
   "font-src 'self' https://cdn.jsdelivr.net",
   "img-src 'self' data: https:",
-  ["connect-src 'self' https://api.github.com https://github.com", ...analyticsConnectOrigins].join(' '),
+  ["connect-src 'self' https://api.github.com https://github.com https://raw.githubusercontent.com", ...analyticsConnectOrigins].join(' '),
   "frame-src https://giscus.app",
   "object-src 'none'",
   "base-uri 'self'",
@@ -295,6 +301,16 @@ const jsonLd = type === 'article'
       installThemeReactivity();
       syncCodeTheme();
     </script>
+    {/* After a GitHub login giscus returns here with ?giscus=<session>, a
+        1-year token. The comments loader moves it into storage, but it is a
+        deferred module and adsbygoogle.js below is async, so the ad script can
+        run first and report location.href with the token in it. This runs while
+        the parser is still here, before any async script, and does the same
+        move (format check = isSession() in Giscus.astro). If storage is
+        blocked the token is handed over in a window property instead. */}
+    {adsOnPage && COMMENTS_CONFIG.enabled && COMMENTS_CONFIG.provider === 'giscus' && (
+      <script is:inline>{`(function(){try{var u=new URL(location.href);if(!u.searchParams.has('giscus'))return;var s=u.searchParams.get('giscus');u.searchParams.delete('giscus');history.replaceState(history.state,'',u.toString());if(!s||s.length>4096||!/^[0-9a-f]{24}[A-Za-z0-9+/]+={0,2}$/.test(s))return;try{localStorage.setItem('giscus-session',JSON.stringify(s));}catch(e){window.__giscusSession=s;}}catch(e){}})();`}</script>
+    )}
     {/* AdSense Auto ads, only where ads run. Last in <head>, so the title, critical
         CSS and the font preload are requested first; async, and the layout
         reserves no ad slots, so a blocked or failing script changes nothing. */}

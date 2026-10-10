@@ -18,12 +18,15 @@ Series id (optional): `$ARGUMENTS`.
    clones under `~/Workspaces/code-review-sources/`); add `--fetch` to create
    missing clones and fetch origin (network):
    ```bash
-   python3 scripts/audit-upstream-freshness.py --top 15 ${ARGUMENTS:+--series $ARGUMENTS}
+   python3 scripts/audit-upstream-freshness.py --top 15
    ```
+   If a series id was given (`$ARGUMENTS`), append `--series $ARGUMENTS`.
 2. **Cited-symbol existence** — renamed/removed/invented API names:
    ```bash
-   python3 scripts/audit-cited-symbols.py ${ARGUMENTS:+--series $ARGUMENTS}
+   python3 scripts/audit-cited-symbols.py
    ```
+   Same `--series` rule. Exit 3 means no clone was present and nothing was
+   checked — not a pass.
 3. **Prose staleness** — future-tense claims / dated anchors that may have
    resolved (roadmap SKU shipped, spec ratified, "N년 현재" year passed).
    Covers *all* published series, not only upstream-tracked ones:

@@ -70,7 +70,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -151,7 +151,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -233,7 +233,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -315,7 +315,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -396,7 +396,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -477,7 +477,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -558,7 +558,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -640,7 +640,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -722,7 +722,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -803,7 +803,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -925,7 +925,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1007,7 +1007,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1089,7 +1089,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1171,7 +1171,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1253,7 +1253,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1335,7 +1335,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1417,7 +1417,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1499,7 +1499,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1581,7 +1581,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1663,7 +1663,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1745,7 +1745,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1827,7 +1827,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1909,7 +1909,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -1991,7 +1991,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."
@@ -2073,7 +2073,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/search-remediation-backlog.json",
-            "scripts/route-methodology-search-proposals.mjs"
+            "scripts/archive/remediation-batches/route-methodology-search-proposals.mjs"
           ],
           "verification": "npm run audit:methodology",
           "result": "Atomic source item is preserved in the blocked AP-S backlog rather than misreported as complete."

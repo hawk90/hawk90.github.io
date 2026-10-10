@@ -55,12 +55,14 @@ H1 (frontmatter title)
 ```yaml
 ---
 title: "Ch 1: Header Files"             # 시리즈면 "Ch N:" 또는 "Item N:" 접두사
+slug: "programming/cpp/chapter01-header-files"  # 필수. 공개 URL. 보통 카테고리 경로 + 파일 이름(확장자 제외)
 date: 2025-05-13T10:00:00               # 시리즈는 같은 날짜 + 시간으로 정렬
 description: "한 문장으로 글의 요점 — 검색·SEO용"
 series: "Series Name"                    # 시리즈에 속하면 필수
 seriesOrder: 1                           # 시리즈 안 순서
 tags: [tag1, tag2, tag3]                 # 5개 이하 권장
-draft: false                             # true면 빌드에서 제외
+topics: ["embedded"]                     # 필수, 1개 이상. src/lib/content/topics.ts의 ID — 같은 시리즈 글에서 복사
+draft: true                              # 새 글은 항상 true. 사용자가 발행을 지시할 때만 false (§13)
 ---
 ```
 

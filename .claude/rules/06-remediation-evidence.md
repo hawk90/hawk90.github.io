@@ -35,4 +35,4 @@ paths:
 
 이 규칙은 콘텐츠 삭제·통합·대량 재작성의 근거가 될 수 없다.
 
-Frontmatter 변경은 예외 없이 preview-first 스크립트로 수행한다. 스크립트는 `--apply`를 명시적으로 요구하고, 대상 목록·diff/변경 요약·idempotency·사후 검증을 제공해야 한다.
+기존 글 여러 개에 걸친 frontmatter 일괄 변경은 예외 없이 preview-first 스크립트로 수행한다(새 글 생성, 팩트체크 라운드의 장 단위 `title`·`description` 정정은 손으로 한다). 스크립트는 `--apply`를 명시적으로 요구하고, 대상 목록·diff/변경 요약·idempotency·사후 검증을 제공해야 한다.

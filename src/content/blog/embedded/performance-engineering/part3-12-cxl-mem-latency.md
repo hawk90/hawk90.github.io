@@ -2,7 +2,7 @@
 title: "CXL.mem 지연·대역폭 실측 — Direct·Switch·Pooled 토폴로지 비교"
 slug: "embedded/performance-engineering/part3-12-cxl-mem-latency"
 date: 2026-06-16T09:01:00
-description: "CXL.mem 토폴로지별 실측 — Direct attach·Single switch·Multi-host pool의 지연·대역폭 비용 측정."
+description: "CXL.mem 토폴로지 세 가지의 구조, 실제 CXL 디바이스 실측(MICRO 2023), mlc·STREAM·DAMON으로 직접 재는 방법."
 series: "Embedded Performance Engineering"
 seriesOrder: 54
 tags: [cxl, cxl-mem, latency, bandwidth, numa, mlc, stream]
@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"CXL.mem의 지연은 링크·메모리 장치·토폴로지·큐 깊이에 좌우됩니다."** 아래의 지연·대역폭 수치는 특정 호스트·장치·펌웨어·워크로드를 가정한 예시 측정값이며, CXL 시스템 전체의 보편적인 기준값은 아닙니다.
+> **"CXL.mem의 지연은 디바이스 설계에 크게 좌우됩니다."** 실제 CXL 메모리 디바이스 3종을 잰 연구(Sun et al., MICRO 2023)에서 load 지연이 원격 소켓 DDR5의 1.35배부터 약 3배까지 갈렸습니다. 내 시스템의 값은 mlc·STREAM으로 직접 재야 합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -19,7 +19,7 @@ topics: ["embedded"]
 
 CXL.mem은 *DDR DIMM이 아닌 새 메모리 tier*입니다. 그렇다면 *지연·대역폭이 워크로드에 미치는 영향*을 *수치로* 알아야 합니다. 측정값 없이 "CXL.mem이 쓸 만하다/없다"는 *서로 다른 토폴로지를 같은 잣대로 평가*하는 흔한 오류입니다.
 
-이 장은 *세 가지 대표 토폴로지*에서 *동일 벤치마크*를 돌렸다고 가정한 예시 지연·대역폭 표와 *측정 방법*을 정리합니다. 실제 수치는 장치와 구성에 따라 다시 측정해야 합니다.
+이 장은 *세 가지 대표 토폴로지*의 구조, 공개된 실측 결과, 그리고 *측정 방법*을 정리합니다.
 
 ## 세 가지 토폴로지
 
@@ -27,158 +27,86 @@ CXL.mem 배치 형태는 *세 단계*로 나뉩니다.
 
 | 토폴로지 | 구성 | 대표 사례 |
 |----------|------|----------|
-| 1. Direct Attach (CXL 1.1/2.0) | Host CPU → CXL link → CXL Type 3 Memory Device | Samsung CMM-D, SK Hynix Niagara |
-| 2. Single Switch (CXL 2.0 pooling) | Host CPU → CXL link → CXL Switch → Memory Device A·B·C | Astera Leo with switch |
-| 3. Multi-Host Pool (CXL 2.0 multi-LD / 3.0 fabric) | Host A·B·C → CXL Switch → Memory Device (Multi-Logical Device, 각 Host에 logical slice) | hyperscale 데이터센터 |
+| 1. Direct Attach (CXL 1.1/2.0) | Host CPU → CXL link → CXL Type 3 Memory Device | Samsung CMM-D |
+| 2. Single Switch (CXL 2.0 pooling) | Host CPU → CXL link → CXL Switch → Memory Device A·B·C | TBD |
+| 3. Multi-Host Pool (CXL 2.0 multi-LD / 3.0 fabric) | Host A·B·C → CXL Switch → Memory Device (Multi-Logical Device, 각 Host에 logical slice) | TBD |
 
 각 토폴로지마다 *flit이 지나가는 단계 수*가 다르고, 그게 *지연*에 직접 반영됩니다.
 
-## 측정 환경
+## 공개된 실측 — 실제 CXL 디바이스 3종
 
-본 측정은 *공개 자료 + 자체 추정*입니다. 실 production 배포에서는 *Intel Sapphire Rapids·Emerald Rapids* CPU와 *Astera Labs Leo*·*Samsung CMM-D* 디바이스 조합이 일반적입니다.
+Sun et al.(MICRO 2023)은 Intel Sapphire Rapids 서버에 *실제 CXL 메모리 디바이스 3종*(CXL-A·B·C, ASIC 기반 hard IP와 FPGA 기반 soft IP)을 붙이고 Intel MLC와 자체 마이크로벤치마크로 쟀습니다. 비교 기준은 원격 NUMA 노드의 DDR5(DDR5-R)입니다.
 
-| 항목 | 값 |
-|------|----|
-| Host CPU | Intel Xeon 6th gen (Granite Rapids), 8-channel DDR5-6400 |
-| CXL link | PCIe 5.0 x16 (32 GT/s, 64 GB/s 이론) |
-| CXL spec | 2.0 |
-| OS | Linux kernel 6.8, CXL driver mainline |
-| 벤치마크 | Intel mlc (Memory Latency Checker), STREAM, 자체 random walk |
+| 디바이스 | load(ld) 지연, DDR5-R 대비 |
+|---------|----------|
+| CXL-A | 약 1.35배 (35% 더 김) |
+| CXL-B | 약 2배 |
+| CXL-C | 약 3배 |
 
-## 지연 실측
-
-*idle 상태에서 cache line 하나 읽기*에 걸리는 시간(round-trip)입니다.
-
-| 토폴로지 | 평균 지연 | 99p 지연 | 비고 |
-|---------|----------|---------|------|
-| Local DDR5 | 88 ns | 105 ns | 같은 소켓 |
-| Remote DDR5 (NUMA) | 142 ns | 178 ns | 다른 소켓, UPI 1 hop |
-| CXL.mem Direct | 178 ns | 215 ns | DRAM 자체 + flit overhead |
-| CXL.mem Switch 1단 | 268 ns | 325 ns | switch routing 추가 |
-| CXL.mem Pool (2-hop) | 412 ns | 510 ns | multi-LD + switch 2단 |
-
-*Direct attach*가 *NUMA remote(142 ns)보다도 살짝 느린* 정도입니다. 즉 *NUMA로 잘 동작하던 워크로드*는 *CXL Direct에 옮겨도 비슷한 성능*을 냅니다.
-
-*Switch 한 단*이 들어가면 *90 ns*가 추가됩니다. 이게 *CXL.mem 도입의 분기점*입니다 — *지연 250 ns에 견디는 워크로드*면 *switch pooling*도 OK, *못 견디는 워크로드*면 *direct attach* 필수입니다.
-
-## 대역폭 실측
-
-*sequential read*와 *random read*의 차이가 큽니다.
-
-| 토폴로지 | Sequential Read | Random Read (cache line) | 비고 |
-|---------|----------------|--------------------------|------|
-| Local DDR5 | 320 GB/s | 250 GB/s | 8-channel |
-| CXL.mem Direct (PCIe 5.0 x16) | 56 GB/s | 38 GB/s | 이론 64 GB/s 대비 88% / 60% |
-| CXL.mem Direct (PCIe 5.0 x8) | 28 GB/s | 19 GB/s | 절반 링크 |
-| CXL.mem Switch | 52 GB/s | 33 GB/s | switch 처리 손실 ~7% |
-| CXL.mem Pool (4-host share) | 14 GB/s/host | 9 GB/s/host | 토탈 56 GB/s 분할 |
-
-이 예시 구성에서 sequential 처리량은 이론값의 88%까지 나옵니다. 실제 효율은 링크 폭·장치 구현·접근 크기·큐 깊이에 따라 달라지며, 프로토콜 오버헤드를 고정된 비율로 가정하면 안 됩니다.
-
-*random access*에서는 *60% 수준*으로 떨어집니다. 이유는 *DRAM bank parallelism이 깨지고*, *open row hit rate*가 낮아지기 때문입니다. *Roofline 분석*에서 CXL.mem의 *effective bandwidth*는 *workload 패턴 의존성이 큰* 자리에 놓여야 합니다.
+논문의 결론은 *CXL 메모리 지연이 CXL 컨트롤러 설계에 크게 좌우된다*는 것입니다. 같은 DDR4를 써도 CXL-C(DDR4-3200)가 CXL-B(DDR4-2400)보다 ld 지연이 67% 길었습니다. 이 측정은 direct attach 디바이스 기준이고, switch·pool 토폴로지의 실측은 이 글의 자료에 없습니다(TBD).
 
 ## 측정 방법 — mlc
 
-Intel mlc는 *NUMA-aware 메모리 벤치마크*로 *CXL.mem을 NUMA 노드로 등록*된 환경에서 *직접 측정 가능*합니다.
+Intel mlc는 *NUMA-aware 메모리 벤치마크*로, 3.0부터 *CPU 없는 메모리 전용 NUMA 노드*를 지원합니다. CXL.mem이 NUMA 노드로 등록된 환경에서 그대로 쓸 수 있습니다.
 
 ```bash
-# 1. CXL 노드 확인
+# 1. CXL 노드 확인 (CPU 없는 노드)
 $ numactl --hardware
-node distances:
-node   0   1   2
-  0:  10  21  50    # CXL = node 2, distance 50
-  1:  21  10  50
-  2:  50  50  10
 
-# 2. mlc loaded latency 측정
+# 2. 노드 간 idle 지연 행렬
+$ ./mlc --latency_matrix
+
+# 3. 부하를 올려 가며 지연·대역폭
 $ ./mlc --loaded_latency
-        Inject  Latency Bandwidth
-        Delay   (ns)    (MB/sec)
-==========================
- 00000  178     54820   # CXL Direct, idle latency
- 00100  185     54100
- 00500  202     53400
- 02000  256     46300   # 부하 증가하면 latency 늘어남
 
-# 3. random access bandwidth
+# 4. 노드 간 대역폭 행렬
 $ ./mlc --bandwidth_matrix
-Node 0 -> Node 0: 320350  # local DDR
-Node 0 -> Node 2:  38200  # CXL random
 ```
 
-*loaded latency*가 *idle보다 30~50% 큰* 것은 *queue depth가 늘어나면서* *flit 대기*가 생기기 때문입니다. *CXL.mem은 큐 깊이 영향이 DDR보다 큰* 영역입니다.
+출력 형식과 옵션은 Intel MLC 문서에 있습니다. 숫자는 플랫폼·디바이스마다 다르므로 직접 잰 값으로 판단합니다.
 
 ## STREAM으로 본 sustained bandwidth
 
 ```bash
 $ OMP_NUM_THREADS=16 numactl --cpunodebind=0 --membind=2 ./stream
-
-Function    Best Rate MB/s
-Copy:        55428.2    # CXL.mem 노드
-Scale:       55102.8
-Add:         54201.5
-Triad:       54089.3
 ```
 
-*Triad 54 GB/s*는 *PCIe 5.0 x16 이론값 64 GB/s의 84%*입니다. *DDR5의 320 GB/s 대비 17%*이지만, *용량은 8배(2 TB vs 256 GB)*입니다.
+`--membind`로 CXL 노드(여기서는 node 2)에만 할당해 Copy·Scale·Add·Triad 처리량을 잽니다. 같은 명령을 local 노드에 돌린 결과와 비교하면 CXL tier의 대역폭 비율이 나옵니다.
 
 ## DAMON으로 본 access 패턴
 
-DAMON(Data Access Monitor)은 Linux 5.15+에서 *page granularity로 access 빈도*를 측정합니다. CXL.mem tiered 환경에서 *cold page*를 식별해 *promotion/demotion* 결정을 돕습니다.
+DAMON(Data Access Monitor)은 *메모리 region 단위로 access 빈도*를 측정합니다. CXL.mem tiered 환경에서 *cold region*을 식별해 *promotion/demotion* 결정을 돕습니다.
 
 ```bash
-# 1. DAMON 활성화
+# 1. DAMON 설정 후 시작 (sysfs, 대상 지정은 커널 문서 참조)
 $ echo on > /sys/kernel/mm/damon/admin/kdamonds/0/state
 
-# 2. 결과 — page activity 분포
+# 2. 결과 — region별 access 분포
 $ damo report access
-target_id  region(KB)  access(%)
-0          0-256000    78.2    # hot — DDR에 머무름
-0          256000-512  12.4
-0          512000-1G   3.1     # cold — CXL.mem 후보
-0          1G-2G       0.8     # cold cold
 ```
 
-*hot 30%·cold 70% 분포*가 *일반적인 LLM inference KV cache 패턴*입니다. 이 비율이 *CXL.mem tier에 cold 데이터를 둘지*의 *수치 근거*가 됩니다.
+hot/cold 비율은 워크로드마다 다르므로, 이 분포를 직접 보고 *CXL.mem tier에 cold 데이터를 둘지* 판단합니다.
 
-## 토폴로지 선택의 트레이드오프
+## 토폴로지 선택
 
-| 워크로드 | 추천 토폴로지 | 이유 |
-|---------|-------------|------|
-| LLM inference KV cache | Direct or Switch | 지연 ~300 ns 견딤, 용량 우선 |
-| In-memory DB cold tier | Switch + DAMON | 자동 promotion으로 hot은 DDR로 |
-| 컨테이너 호스트 overcommit | Pool (multi-host) | 호스트별 동적 분할 |
-| HPC tight loop | 안 씀 | 지연에 민감, HBM/DDR 필수 |
-| Real-time control | 안 씀 | 지연 jitter 예측 불가 |
-
-핵심 결정 변수는 *지연 budget*입니다. *200 ns 이내*면 *DDR에 머무름*, *200~400 ns 견디면 CXL Direct/Switch*, *400+ ns OK면 Pool*입니다.
+결정 변수는 *지연 budget*과 *용량*입니다. 위 실측처럼 같은 direct attach라도 디바이스에 따라 지연이 원격 소켓 DDR5의 1.35배~3배로 갈리므로, 토폴로지보다 먼저 *실제 디바이스의 지연*을 mlc로 재고 워크로드의 지연 budget과 비교합니다.
 
 ## 자주 보는 함정과 안티패턴
 
 > ⚠️ PCIe 5.0 x16의 64 GB/s를 그대로 가정
 
-이론값 그대로 모델에 쓰면 *실측 56 GB/s*에서 *throughput 모델이 무너집니다*. *CXL.mem flit 헤더*(약 4%), *credit-based flow control*(약 3%), *DRAM access 자체 한계*(약 5%)로 *총 12% 손실*입니다. 처음부터 *sustained 88% 기준*으로 설계합니다.
+링크 원시 전송률(32 GT/s × 16 ÷ 8)은 이론 상한입니다. 프로토콜 오버헤드와 디바이스 구현이 실효 대역폭을 정하므로 STREAM·mlc로 잰 값으로 모델을 세웁니다.
 
-> ⚠️ Switch 한 단을 *지연 2배*로 가정
+> ⚠️ "CXL 메모리 지연은 하나의 값"
 
-*과대 추정*입니다. Direct 178 ns → Switch 268 ns로 *50% 증가*이지 *2배*가 아닙니다. *Switch가 무조건 비싸다*는 가정으로 토폴로지 선택을 좁히면 *불필요한 direct attach 제약*이 생깁니다.
-
-> ⚠️ Random access bandwidth를 무조건 60%로 가정
-
-*과소 추정*입니다. *DRAM bank parallelism*과 *prefetcher 동작*은 CXL.mem에도 적용됩니다. *access pattern을 sequential 친화로 재설계*하면 *sustained 70% 이상* 회복합니다. 워크로드 코드 측 *cache line 정렬*과 *prefetch hint*가 차이를 만듭니다.
-
-> ⚠️ "지연 250 ns면 못 쓴다"
-
-*워크로드 의존*입니다. Memory-bound LLM inference는 *전체 처리 시간의 30%*가 KV cache load이고, *150 ns 추가*되어도 *전체 처리 시간 5%* 증가에 불과합니다. *throughput은 떨어지지만 용량 8배*가 *총 처리량*을 끌어올립니다. 워크로드별로 *지연 budget 계산*을 먼저 합니다.
+Sun et al.의 세 디바이스는 같은 시스템에서 1.35배~약 3배로 갈렸습니다. 다른 디바이스의 수치를 가져다 쓰지 않고, 쓸 디바이스를 직접 잽니다.
 
 ## 정리
 
-- CXL.mem 지연은 *토폴로지와 장치 구성에 강하게 의존*합니다 — 이 글의 예시에서는 Direct 178 ns, Switch 268 ns, Pool 412 ns입니다.
-- 대역폭은 접근 패턴과 장치 구성에 따라 달라지므로, 표의 예시값을 실제 시스템의 성능 보장값으로 사용하지 않습니다.
-- *NUMA remote DDR(142 ns)와 CXL Direct(178 ns)의 차이는 크지 않음* — NUMA 잘 다루는 워크로드는 CXL Direct에 *잘 적응*합니다.
-- *mlc·STREAM·DAMON*이 *measurement·sustained throughput·access pattern*을 각각 측정하는 표준 도구입니다.
-- 토폴로지 선택은 *지연 budget*이 결정합니다 — 200 ns 이내면 DDR, 400 ns OK면 Pool.
-- *Random access bandwidth가 60% 수준으로 떨어짐*은 *DRAM bank parallelism 깨짐* 때문이며 *access pattern 설계*로 *70% 이상* 복구 가능합니다.
+- CXL.mem 지연은 *디바이스 설계에 강하게 의존*합니다 — 실제 디바이스 3종이 원격 소켓 DDR5의 1.35배~약 3배(Sun et al., MICRO 2023).
+- switch·pool 토폴로지의 실측은 이 글의 자료에 없습니다.
+- *mlc·STREAM·DAMON*이 *지연·sustained throughput·access pattern*을 각각 재는 도구입니다.
+- 토폴로지 선택은 *직접 잰 지연*과 워크로드의 *지연 budget*으로 합니다.
 
 다음 편은 **Ch 55: CXL 성능 프로파일링 도구** — cxl-cli·DAMON·perf-mem로 *측정 환경 자체*를 구축하는 법을 정리합니다.
 
