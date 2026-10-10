@@ -40,7 +40,7 @@ if (atomic_load_explicit(&ready, memory_order_acquire)) {
 }
 ```
 
-가장 단순한 wait-free signaling입니다. *재진입성이 있고 retry가 없습니다*.
+단일 producer·consumer와 데이터 수명·재설정 규칙이 맞는 경우의 단순한 signaling입니다. `data` 자체의 동시 접근과 flag 재사용을 설계하지 않으면 wait-free나 race-free를 보장하지 않습니다.
 
 ## Sequence Number — Multi-Reader
 
@@ -72,7 +72,7 @@ bool read(sensor_data_t *out) {
 }
 ```
 
-Seqlock은 *reader 다중 wait-free*입니다(writer는 한 명).
+이 seqlock reader는 writer가 계속 갱신하면 재시도할 수 있으므로 일반적으로 wait-free가 아니라 lock-free/obstruction-free 성질로 분석합니다. reader의 bounded 완료가 필요하면 재시도 상한과 실패 처리까지 정의해야 합니다.
 
 ## Latest-Value — Double Buffer
 
@@ -97,11 +97,11 @@ void read(sensor_data_t *out) {
 }
 ```
 
-양쪽 모두 wait-free입니다. *가장 최근 값만* 필요할 때 적합합니다(sensor, GPS).
+단순 double buffer는 reader와 writer의 동시 접근을 자동으로 안전하게 만들지 않습니다. atomic pointer publish와 slot 재사용 규칙을 함께 설계해야 하며, *가장 최근 값만* 필요한 sensor·GPS 경로에서 선택할 수 있습니다.
 
 > ⚠️ Reader가 *읽는 동안 writer가 두 번 write*하면 reader buf가 변경될 수 있습니다(race in same buf).
 
-→ *Triple buffer*(3 slot)로 해결합니다.
+→ triple buffer가 한 설계 선택이 될 수 있지만, slot 상태 전이와 reader·writer 수를 명시적으로 검증해야 합니다.
 
 ## Triple Buffer
 
@@ -135,7 +135,7 @@ void read(sensor_data_t *out) {
 - 가장 최근(next)
 - reader가 읽는 중(active)
 
-Reader와 writer는 절대 *같은 buffer*를 보지 않습니다.
+Reader와 writer가 같은 buffer를 보지 않는지는 위 상태 전이와 동시성 모델에 달려 있습니다. 예시를 production 구현으로 사용하기 전에 atomic order와 모든 interleaving을 검증해야 합니다.
 
 ## Wait-Free Queue — Kogan-Petrank
 
@@ -157,7 +157,7 @@ ISR: status = STATUS_OK;
 task: if (status == STATUS_OK) ...
 ```
 
-Aligned word write/read은 *single load/store*로 atomic합니다. 기본적으로 *wait-free*입니다.
+정렬된 word 접근의 atomicity와 단일 명령 생성 여부는 target bus·ABI·compiler를 확인해야 합니다. atomic한 단일 접근이어도 전체 연산의 wait-free 진행 보장과는 별개입니다.
 
 ## SwiftLM — Hardware Wait-Free Counter
 
@@ -167,7 +167,7 @@ atomic_fetch_add(&counter, 1, memory_order_relaxed);
                 /* → LDADD — 단일 명령, contention 무관 wait-free */
 ```
 
-ARMv8.1+에서는 LDADD·LDSET·LDCLR이 모두 *single instruction*입니다. *진정한 wait-free*입니다.
+ARMv8.1 LSE를 지원하는 target에서는 LDADD·LDSET·LDCLR로 원자 연산을 구현할 수 있습니다. 단일 명령이라는 사실만으로 전체 알고리즘의 wait-free 성질이나 시스템 수준 deadline을 보장하지는 않습니다.
 
 ARMv8.0의 LDREX/STREX는 retry가 가능하므로 *lock-free이지만 wait-free는 아닙니다*.
 
@@ -227,7 +227,7 @@ critical();
 spin_unlock(spin_lock_instance(0), saved);
 ```
 
-HW spinlock은 *bounded* wait입니다(waiter 수만큼). 거의 wait-free에 가깝습니다.
+HW spinlock은 lock acquisition을 기다릴 수 있는 blocking primitive입니다. waiter 수만큼 bounded하다고 일반화하거나 wait-free에 가깝다고 부르면 안 되며, deadline 경로에는 대기 상한을 별도로 분석해야 합니다.
 
 ## 자동차 — Wait-Free 우선
 

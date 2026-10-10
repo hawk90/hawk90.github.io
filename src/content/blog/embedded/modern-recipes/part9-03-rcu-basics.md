@@ -11,13 +11,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"RCU = reader가 비용 0, writer가 모든 비용을 부담하는 read-mostly 동기화."** 핵심은 *grace period*입니다. 모든 reader가 한 번씩 *quiescent state*를 지나야 옛 객체를 free할 수 있습니다.
+> **"RCU = reader 경로를 가볍게 하고 writer가 reclamation 비용을 부담하는 read-mostly 동기화."** 핵심은 *grace period*입니다. 모든 reader가 한 번씩 *quiescent state*를 지나야 옛 객체를 free할 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
 routing table, config object, kernel module 목록처럼 *읽기는 자주, 쓰기는 가끔*인 데이터에 RCU가 빛납니다. Reader 쪽은 lock도, atomic도 안 쓰니 contention이 0에 가깝습니다. SMP 환경에서 reader 수가 늘어도 성능이 일정합니다.
 
-리눅스 커널이 RCU를 30년 가까이 운영 중이고, 사용자 공간에서도 liburcu(URCU)로 같은 패턴을 쓸 수 있습니다. 임베디드 Linux에서 routing daemon, telemetry aggregator 같은 read-mostly 자료구조에 적용합니다.
+리눅스 커널은 오랫동안 여러 RCU flavor를 운영해 왔고, 사용자 공간에서도 liburcu(URCU) 계열을 사용할 수 있습니다. flavor별 API·등록·메모리 모델이 다르므로 임베디드 Linux의 read-mostly 자료구조에 적용할 때 구현 문서를 확인합니다.
 
 ## 핵심 개념
 
@@ -41,7 +41,7 @@ routing table, config object, kernel module 목록처럼 *읽기는 자주, 쓰�
 
 RCU의 trade-off는 네 가지로 정리됩니다.
 
-- reader는 O(1)이고 contention이 0입니다.
+- reader 경로의 작업량과 contention을 줄일 수 있지만 비용이 0이라고 보장하지 않습니다.
 - writer는 grace period 만큼 기다립니다.
 - 한순간 old와 new가 동시에 존재하므로 메모리를 더 씁니다.
 - writer가 빈번하면 RWLock이 더 낫습니다.
@@ -75,7 +75,7 @@ void reader(void) {
 }
 ```
 
-reader는 lock도 atomic도 안 씁니다. preemption이 disable되는 정도이므로 cost가 거의 0입니다.
+reader는 flavor와 구현에 따라 preemption/상태 표시나 메모리 barrier를 수행할 수 있습니다. lock과 atomic이 없더라도 비용이 0은 아니므로 target에서 측정합니다.
 
 ### URCU (User-space RCU)
 
@@ -194,16 +194,16 @@ per-CPU counter는 RCU와 같은 정신입니다. 각 CPU가 자기 자리만 �
 |---|---|---|
 | spinlock | 100 ns | 악화 (contention) |
 | rwlock | 150 ns | 일부 scaling |
-| RCU | 10 ns | 거의 선형 |
+| RCU | 측정 필요 | workload별 측정 |
 
-reader가 늘수록 RCU가 압도적입니다. SMP 8코어에서는 보통 50배 이상 차이가 납니다.
+reader가 늘 때 RCU가 유리할 수 있지만 결과는 reader critical section·cache·flavor·workload에 따라 달라집니다.
 
 ```text
 writer 비용 비교
-spinlock writer         150 ns
-rwlock writer           수 µs (모든 reader가 끝나야)
-RCU writer + grace     수 ms (grace period 대기)
-RCU writer + call_rcu  150 ns (callback 예약)
+spinlock writer         측정 필요
+rwlock writer           측정 필요
+RCU writer + grace     측정 필요
+RCU writer + call_rcu  측정 필요
 ```
 
 writer는 RCU가 더 비싸므로 *read-mostly*일 때 의미가 있습니다.

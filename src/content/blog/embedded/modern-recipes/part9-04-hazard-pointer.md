@@ -17,9 +17,9 @@ topics: ["embedded"]
 
 Lock-free queue, stack, hash table을 만들 때 가장 큰 문제는 *언제 free할 수 있는가*입니다. 한 thread가 node를 막 dereference하기 직전, 다른 thread가 그 node를 dequeue하고 free하면 use-after-free가 발생합니다.
 
-RCU가 grace period로 같은 문제를 풉니다. 차이는 *bounded vs unbounded memory*입니다. RCU는 grace period가 길어지면 메모리가 계속 쌓일 수 있지만, hazard pointer는 retired list 길이를 thread 수에 비례한 상한으로 잡습니다.
+RCU가 grace period로 같은 문제를 풉니다. 두 방식 모두 reclamation 지연과 retired list 정책을 분석해야 합니다. hazard pointer의 메모리 사용량도 thread 수, 보호 슬롯, retire/scan 임계값과 stalled thread에 따라 달라지며 자동으로 고정 상한이 되지는 않습니다.
 
-C++26에서 표준 라이브러리(`std::hazard_pointer`)에 들어올 예정입니다.
+C++ 표준화 제안과 구현 지원 상태는 toolchain·표준 버전에 따라 확인해야 합니다. 특정 표준 버전에 이미 들어왔다고 전제하지 말고 사용 중인 library 문서를 확인합니다.
 
 ## 핵심 개념
 
@@ -50,11 +50,11 @@ RCU와 비교하면 다음과 같습니다.
 
 | 항목 | RCU | Hazard Pointer |
 |------|-----|----------------|
-| reader cost | ~0 (preempt disable) | atomic store + reload |
+| reader cost | flavor·구현별 측정 | atomic store + reload 비용 측정 |
 | writer cost | grace period 대기 | retired list scan |
-| memory bound | grace period에 의존 | O(thread 수) |
+| memory bound | grace period·retire 정책에 의존 | thread·slot·scan 정책에 의존 |
 | sleep in reader | 금지 (전통적) | 가능 |
-| C++ 표준 | 없음 | C++26 `std::hazard_pointer` |
+| C++ 표준 | 구현별 지원 | 표준/library 지원 여부 확인 |
 
 ## 코드 / 실제 사용 예
 
@@ -148,7 +148,7 @@ T *acquire_at(std::atomic<T *> *src, int slot) {
 }
 ```
 
-linked list traversal처럼 *현재 + 다음*을 동시에 보호해야 하는 경우 thread당 hazard pointer를 여러 개 둡니다. 보통 thread당 4~8개로 충분합니다.
+linked list traversal처럼 *현재 + 다음*을 동시에 보호해야 하는 경우 thread당 hazard pointer를 여러 개 둡니다. 필요한 슬롯 수는 자료구조 traversal과 구현에 따라 정합니다.
 
 ### Lock-free stack (hazard pointer로 메모리 안전화)
 
@@ -187,7 +187,7 @@ pop이 `old->next`에 접근하기 직전, 다른 thread가 old를 free하면 �
 ### C++26 표준
 
 ```cpp
-#include <hazard_pointer>     /* C++26 (proposal) */
+#include <hazard_pointer>     /* 지원되는 표준/library에서 확인 */
 
 std::hazard_pointer hp;
 node *p = hp.protect(head);
@@ -198,7 +198,7 @@ hp.reset_protection();
 old->retire();    /* 자동 retired list 관리 */
 ```
 
-C++26부터 표준 라이브러리에 들어와 보일러플레이트가 사라집니다.
+C++ 표준/library에서 지원되는 경우에만 해당 API를 사용하며, 그렇지 않으면 구현 또는 외부 library를 검토합니다.
 
 ## 측정 / 성능 비교
 
@@ -209,12 +209,12 @@ RCU                     10 ns               5 M ops/s
 hazard pointer          25 ns               4 M ops/s
 ```
 
-RCU가 가장 빠르지만 hazard pointer도 매우 좋은 성능을 보입니다.
+어느 방식이 빠른지는 reader 경로, scan 빈도, cache와 allocator 조건에서 측정해야 합니다.
 
 ```text
 메모리 bound
 RCU                     grace period 비례 (수 ms 동안 retired 쌓임)
-hazard pointer          ~thread 수 × retired threshold (bounded)
+hazard pointer          thread·slot·retire/scan 정책으로 결정
 ```
 
 real-time 환경처럼 메모리 상한이 필요한 경우 hazard pointer가 더 안전합니다.
@@ -271,9 +271,9 @@ hazard pointer는 *use-after-free*를 막을 뿐 ABA는 별도 처리가 필요�
 ## 정리
 
 - Hazard pointer는 reader가 보호 중인 pointer를 광고해 writer가 free 시점을 결정합니다.
-- RCU와 비교해 memory가 bounded라는 점이 가장 큰 강점입니다.
-- thread당 hazard pointer 수는 보통 4~8개로 충분합니다.
-- C++26 표준 라이브러리에 들어옵니다(`std::hazard_pointer`).
+- RCU와 비교해 reader가 보호 대상을 명시하고 reclamation을 세밀하게 제어할 수 있다는 점이 강점입니다. 메모리 상한은 구현 정책으로 검증합니다.
+- thread당 hazard pointer 수는 traversal 요구사항으로 정합니다.
+- C++ 표준/library 지원 여부는 사용 중인 toolchain에서 확인합니다.
 - publish 후 *재확인*과 *thread-local 등록*이 정확성의 핵심입니다.
 - ABA는 별도 처리가 필요합니다(tagged pointer 등).
 - writer 메모리 회수가 *bounded*해야 하면 RCU보다 hazard pointer를 우선 고려합니다.
