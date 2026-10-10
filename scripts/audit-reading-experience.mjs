@@ -50,14 +50,12 @@ function walk(dir, out = []) {
  * End tags may carry whitespace or junk before `>` (`</script >`), and HTML
  * also closes a comment with `--!>`. Removal repeats until nothing changes, so
  * it cannot leave a new tag assembled from the pieces around a removed one. */
+const INERT = /<script\b[\s\S]*?<\/script[^>]*>|<style\b[\s\S]*?<\/style[^>]*>|<!--[\s\S]*?--!?>/gi;
 const stripInert = (html) => {
   let previous;
   do {
     previous = html;
-    html = html
-      .replace(/<script\b[\s\S]*?<\/script[^>]*>/gi, '')
-      .replace(/<style\b[\s\S]*?<\/style[^>]*>/gi, '')
-      .replace(/<!--[\s\S]*?--!?>/g, '');
+    html = html.replace(INERT, '');
   } while (html !== previous);
   return html;
 };
