@@ -55,6 +55,12 @@ SOFT = [
 ]
 
 
+def is_draft(raw):
+    """draft: true in the frontmatter only (a body code sample must not hide a post)."""
+    m = re.match(r"---\r?\n(.*?)\r?\n---", raw, re.S)
+    return bool(m and re.search(r"^draft:\s*true\s*$", m.group(1), re.M))
+
+
 def prose_lines(raw):
     """(원본 line 번호, 텍스트) 리스트 — frontmatter·코드펜스·표·헤딩·인용 제외."""
     m = re.match(r"^---\s*\n.*?\n---\s*\n", raw, re.DOTALL)
@@ -130,7 +136,7 @@ def main():
     total_hard = 0
     for md in files:
         raw = md.read_text(encoding="utf-8", errors="ignore")
-        if not args.include_drafts and re.search(r"^draft:\s*true\s*$", raw, re.MULTILINE):
+        if not args.include_drafts and is_draft(raw):
             continue
         n_sent, hard, soft, _ = analyze(raw, args.min)
         if n_sent < args.min:

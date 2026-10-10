@@ -40,6 +40,12 @@ ANIDA = re.compile(r"아니다[.!?…]")          # 예외: '아니다'는 Tone 
 SIDA = re.compile(r"시다[.!?…]")             # 청유형 '…ㅂ시다.' (봅시다·합시다) = Tone A, B로 세지 않음
 
 
+def is_draft(raw):
+    """draft: true in the frontmatter only (a body code sample must not hide a post)."""
+    m = re.match(r"---\r?\n(.*?)\r?\n---", raw, re.S)
+    return bool(m and re.search(r"^draft:\s*true\s*$", m.group(1), re.M))
+
+
 def field(fm, key):
     m = re.search(rf"^{key}:\s*(.+)$", fm, re.MULTILINE)
     return m.group(1).strip().strip('"') if m else ""
@@ -103,7 +109,7 @@ def main():
     by_series = defaultdict(list)
     for md in files:
         raw = md.read_text(encoding="utf-8", errors="ignore")
-        if not args.include_drafts and re.search(r"^draft:\s*true\s*$", raw, re.MULTILINE):
+        if not args.include_drafts and is_draft(raw):
             continue
         a, b = count_tones(prose_of(raw))
         total = a + b

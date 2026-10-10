@@ -16,6 +16,10 @@
 
 set -euo pipefail
 
+# draft:true in the frontmatter only — a `draft: true` line in a code sample
+# in the body must not hide a published post from the checks.
+is_draft() { awk 'NR==1 && $0 != "---" {exit} NR>1 && /^---[[:space:]]*$/ {exit} NR>1 && /^draft:[[:space:]]*true[[:space:]]*$/ {d=1; exit} END {exit !d}' "$1"; }
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 INCLUDE_DRAFTS=0
 TARGETS=()
@@ -55,7 +59,7 @@ count_suspects() {
 while IFS= read -r -d '' f; do
   # Skip drafts unless --include-drafts
   if [ "$INCLUDE_DRAFTS" -eq 0 ]; then
-    if grep -q "^draft: true" "$f"; then
+    if is_draft "$f"; then
       continue
     fi
   fi

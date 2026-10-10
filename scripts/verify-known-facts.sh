@@ -15,6 +15,10 @@
 
 set -eo pipefail
 
+# draft:true in the frontmatter only — a `draft: true` line in a code sample
+# in the body must not hide a published post from the checks.
+is_draft() { awk 'NR==1 && $0 != "---" {exit} NR>1 && /^---[[:space:]]*$/ {exit} NR>1 && /^draft:[[:space:]]*true[[:space:]]*$/ {d=1; exit} END {exit !d}' "$1"; }
+
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 KNOWN_FACTS="$ROOT/data/known-facts.yaml"
 TARGETS=()
@@ -69,7 +73,7 @@ echo 0 > "$COUNTFILE"
 echo "═══ Known-fact verification ═══"
 
 while IFS= read -r f; do
-  if grep -q "^draft: true" "$f"; then continue; fi
+  if is_draft "$f"; then continue; fi
 
   for cat in jedec cxl dmtf ieee_tsn nvidia_gpu amd_gpu jetson; do
     [ -n "$CATEGORY" ] && [ "$CATEGORY" != "$cat" ] && continue
