@@ -74,3 +74,46 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+원문 10편을 직접 대조해 루브릭 7개 항목으로 잠정 점수화했다. 점수는 Google의 공식 점수나 승인 확률이 아니라 콘텐츠 품질·독립 가치·검증 가능성을 비교하기 위한 내부 지표다. P0 정책 차단 요소는 확인되지 않았다. 실제 보드·칩·계측기·툴체인 버전별 실행 결과와 제조사 문서 대조 전이므로 신뢰도는 중간이다.
+
+### 요약
+
+| 파일 | 점수 | 잠정 판정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part4-06-systick-timer.md` | **74/100** | 보강 후 유지 | register·tick 계산·overflow-safe timeout과 periodic task를 연결한다 |
+| `part4-07-uart-driver.md` | **77/100** | 유지 후보 | polling·interrupt·DMA를 코드·throughput·CPU 점유율 비교로 구분한다 |
+| `part4-08-spi-driver.md` | **76/100** | 유지 후보 | SPI mode·divider·DMA·multi-slave CS까지 구현 선택을 다룬다 |
+| `part4-09-i2c-driver.md` | **76/100** | 유지 후보 | state machine·7/10-bit·repeated START·bus recovery가 독립적인 문제를 푼다 |
+| `part4-10-dma-basics.md` | **78/100** | 유지 후보 | circular/half-transfer·cache coherency·ADC/UART 예제가 실전적이다 |
+| `part4-11-low-power-modes.md` | **74/100** | 보강 후 유지 | Sleep/Stop/Standby와 wake source를 코드로 연결하지만 전류 측정값이 없다 |
+| `part4-12-watchdog.md` | **74/100** | 보강 후 유지 | IWDG/WWDG·window·멀티태스크 check-in·reset 원인 확인을 다룬다 |
+| `part4-13-flash-programming.md` | **77/100** | 유지 후보 | erase/program·전압 범위·EEPROM emulation·dual-bank OTA를 연결한다 |
+| `part4-14-ddr-init-failure.md` | **80/100** | 유지 후보 | timing·training·walking bit·March·eye 측정까지 장애 진단 흐름이 강하다 |
+| `part5-01-pwm-output.md` | **77/100** | 유지 후보 | LED·RGB·complementary/dead-time·DMA waveform으로 적용 범위가 넓다 |
+
+### 항목별 점수
+
+| 파일 | 독창성 25 | 완결성 20 | 실전 검증 15 | 중복/병합 15 | 검색 의도 10 | UX/내부링크 10 | 신뢰/출처 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part4-06-systick-timer.md` | 18 | 16 | 10 | 11 | 9 | 8 | 2 | **74** |
+| `part4-07-uart-driver.md` | 19 | 17 | 11 | 11 | 9 | 8 | 2 | **77** |
+| `part4-08-spi-driver.md` | 18 | 16 | 11 | 11 | 9 | 8 | 3 | **76** |
+| `part4-09-i2c-driver.md` | 18 | 16 | 11 | 11 | 9 | 8 | 3 | **76** |
+| `part4-10-dma-basics.md` | 19 | 17 | 12 | 12 | 9 | 7 | 2 | **78** |
+| `part4-11-low-power-modes.md` | 18 | 16 | 9 | 11 | 9 | 8 | 3 | **74** |
+| `part4-12-watchdog.md` | 17 | 16 | 10 | 11 | 9 | 8 | 3 | **74** |
+| `part4-13-flash-programming.md` | 18 | 17 | 11 | 12 | 9 | 8 | 2 | **77** |
+| `part4-14-ddr-init-failure.md` | 20 | 18 | 12 | 12 | 9 | 7 | 2 | **80** |
+| `part5-01-pwm-output.md` | 19 | 17 | 11 | 11 | 9 | 8 | 2 | **77** |
+
+### 공통 근거와 우선순위
+
+- 이 루프는 코드뿐 아니라 선택 기준, 실패 조건, 측정/동작 확인 절이 있어 실전성이 높다. 특히 DDR 초기화 진단은 다른 드라이버 구현 글과 겹치지 않는 독립 가치가 크다.
+- UART·SPI·I2C는 모두 드라이버 코드 형식이므로, 프로토콜별 실패 증거를 차별화해야 한다. UART는 framing/overrun, SPI는 CPOL/CPHA·CS timing, I2C는 stuck SDA·clock stretching의 실제 파형 또는 로그가 우선이다.
+- DMA·PWM·Flash는 cache, bus, erase/program timing, voltage range, timer clock처럼 칩 구현에 민감하다. STM32F4 기준임을 제목·본문·코드에 일관되게 고정해야 한다.
+- 저전력 글은 mode 이름보다 측정 조건이 중요하다. 보드 누설, regulator, clock, wake source, 측정기와 안정화 시간을 기록하지 않은 전류 비교는 일반 수치로 사용하면 안 된다.
+- Watchdog은 LSI 오차와 window refresh 조건, DDR은 메모리 파트·PHY·PCB length matching·training firmware 조건을 공식 reference manual과 함께 검증해야 한다.
+- 이번 평가는 점수 기록만 수행했다. 원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

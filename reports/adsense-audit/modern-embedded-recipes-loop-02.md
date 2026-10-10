@@ -61,3 +61,46 @@
 - git diff --check 통과
 - 다음 루프에서 비교할 공통 패턴과 미해결 질문 기록
 
+## 정성 평가 업데이트
+
+원문 10편을 직접 대조해 루브릭 7개 항목으로 잠정 점수화했다. 점수는 Google의 공식 점수나 승인 확률이 아니라 콘텐츠 품질·독립 가치·검증 가능성을 비교하기 위한 내부 지표다. P0 정책 차단 요소는 확인되지 않았다. 실제 보드·계측기·벤치마크 결과와 ARM/CAN/RS-485/LVDS 공식 문서 대조 전이므로 신뢰도는 중간이다.
+
+### 요약
+
+| 파일 | 점수 | 잠정 판정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part1-10-can-electrical.md` | **70/100** | 보강 | 전압·종단·bit timing·CAN-FD를 연결하지만 실제 파형과 트랜시버 조건이 없다 |
+| `part1-11-rs485-rs422.md` | **70/100** | 보강 | termination·biasing·turn-around을 다루지만 케이블·unit load·실패 측정이 부족하다 |
+| `part1-12-lvds-differential.md` | **71/100** | 보강 | swing·common-mode·임피던스·eye를 설명하지만 부품/stackup 조건과 측정 근거가 약하다 |
+| `part2-01-cortex-m-comparison.md` | **71/100** | 보강 | M 계열 기능 비교와 선택 맥락은 좋지만 코어별 수치의 출처·칩 조건이 없다 |
+| `part2-02-cortex-a-comparison.md` | **70/100** | 보강 | A 계열·big.LITTLE 비교는 유용하지만 성능·전력 표의 실험 조건이 불명확하다 |
+| `part2-03-arm-registers.md` | **75/100** | 유지 후보 | AAPCS·예외 진입·특수 레지스터를 코드와 연결해 독립적인 디버깅 가치가 있다 |
+| `part2-04-cortex-m-exceptions.md` | **76/100** | 유지 후보 | vector table·stacking·tail-chaining·late arrival을 추적 절차와 연결한다 |
+| `part2-05-arm-memory-map.md` | **67/100** | 보강 | 메모리 영역·attribute·MPU 흐름은 있으나 코어/제품별 조건과 수치 근거가 약하다 |
+| `part2-06-arm-cache.md` | **72/100** | 보강 후 유지 | cache 정책·maintenance·DMA 함정을 설명하지만 코어별 결과와 측정 조건이 부족하다 |
+| `part2-07-arm-mpu.md` | **71/100** | 보강 | region·permission·attribute·sub-region을 다루지만 실제 fault 재현과 RTOS 조건이 없다 |
+
+### 항목별 점수
+
+| 파일 | 독창성 25 | 완결성 20 | 실전 검증 15 | 중복/병합 15 | 검색 의도 10 | UX/내부링크 10 | 신뢰/출처 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part1-10-can-electrical.md` | 16 | 15 | 9 | 11 | 9 | 8 | 2 | **70** |
+| `part1-11-rs485-rs422.md` | 16 | 15 | 9 | 11 | 9 | 8 | 2 | **70** |
+| `part1-12-lvds-differential.md` | 17 | 15 | 9 | 11 | 9 | 8 | 2 | **71** |
+| `part2-01-cortex-m-comparison.md` | 17 | 15 | 9 | 11 | 9 | 8 | 2 | **71** |
+| `part2-02-cortex-a-comparison.md` | 16 | 15 | 9 | 11 | 9 | 8 | 2 | **70** |
+| `part2-03-arm-registers.md` | 18 | 16 | 10 | 12 | 9 | 8 | 2 | **75** |
+| `part2-04-cortex-m-exceptions.md` | 18 | 16 | 11 | 12 | 9 | 8 | 2 | **76** |
+| `part2-05-arm-memory-map.md` | 16 | 14 | 8 | 10 | 9 | 8 | 2 | **67** |
+| `part2-06-arm-cache.md` | 17 | 15 | 10 | 11 | 9 | 8 | 2 | **72** |
+| `part2-07-arm-mpu.md` | 17 | 15 | 9 | 11 | 9 | 8 | 2 | **71** |
+
+### 공통 근거와 우선순위
+
+- CAN·RS-485·RS-422·LVDS는 표의 대표 전압·거리·속도만으로는 독립적인 경험이 되기 어렵다. 트랜시버 부품, 케이블, 종단·bias 값, probe 위치와 실제 파형을 함께 기록해야 한다.
+- Cortex-M/A 비교 글의 CoreMark·DMIPS·SPEC·전력 수치는 칩 구현, 컴파일러, 클럭, 메모리·온도 조건에 따라 달라진다. 출처와 측정 조건 없는 숫자는 범위 또는 예시로 명시할 필요가 있다.
+- 레지스터·예외 글은 코드와 진단 순서가 있어 이번 루프에서 상대적으로 독립 가치가 높다. 다만 M0/M3/M4/M7의 예외 cycle과 FPU 동작을 한 표로 일반화하지 않도록 코어별 범위를 분리해야 한다.
+- 메모리 맵·cache·MPU 글은 ARM 아키텍처와 특정 MCU 구현을 구분해야 한다. 특히 attribute, bit-band, cache line, barrier의 적용 범위를 공식 ARM 문서와 칩 reference manual로 대조해야 한다.
+- 공통 템플릿 자체는 문제라기보다, 각 글에 서로 다른 실패 재현·선택 기준·측정 결과가 있는지가 핵심이다.
+- 이번 평가는 점수 기록만 수행했다. 원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

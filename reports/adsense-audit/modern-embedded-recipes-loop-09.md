@@ -74,3 +74,43 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 대상 10편을 원문으로 읽고 잠정 점수를 추가했다. P0 정책 차단은 확인되지 않았다. 공식 Linux 문서·커널 버전·실행 결과 대조 전의 `잠정` 값이다.
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part7-06-kernel-module.md` | **75/100** | 보강 | module/KBuild/DKMS 흐름은 완결되지만 kernel release와 실제 build 결과가 없음 |
+| `part7-07-char-driver.md` | **77/100** | 보강 | char driver API와 blocking/poll이 풍부하지만 표준 subsystem과의 선택 근거가 약함 |
+| `part7-08-platform-driver.md` | **78/100** | 보강 | probe/resource/DT/PM 오류 경로가 좋지만 실제 kernel version 검증이 없음 |
+| `part7-09-mmap.md` | **78/100** | 보강 | mmap 모드와 huge page/UIO 사례가 넓지만 성능값은 모두 측정 필요 상태임 |
+| `part7-10-epoll.md` | **78/100** | 보강 | LT/ET/ONESHOT/EXCLUSIVE 비교가 실용적이나 workload별 결과와 kernel 조건이 없음 |
+| `part7-11-uio-vfio.md` | **76/100** | 보강 | UIO/VFIO/IOMMU/DMA 경계가 유용하지만 보안·권한·device binding 검증이 필요함 |
+| `part7-12-sysfs.md` | **75/100** | 보강 | sysfs/configfs 구현과 ABI 주의가 있으나 subsystem별 표준 경계와 실제 출력이 부족함 |
+| `part7-13-irq-affinity.md` | **77/100** | 보강 | affinity/isolcpus/RSS/RT 측정 경로는 좋지만 kernel·NIC·워크로드 종속성이 큼 |
+| `part7-14-rootfs-buildroot.md` | **79/100** | 보강 | Buildroot 설정·package·reproducible build 흐름이 강하지만 실제 image 결과와 버전 고정이 없음 |
+| `part8-01-dynamic-memory.md` | **78/100** | 보강 | pool/arena/TLSF와 OOM 진단을 연결하지만 allocator 구현별 WCET 근거가 없음 |
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part7-06-kernel-module.md` | 16 | 17 | 10 | 11 | 9 | 9 | 3 | **75** |
+| `part7-07-char-driver.md` | 17 | 17 | 11 | 11 | 9 | 9 | 3 | **77** |
+| `part7-08-platform-driver.md` | 17 | 18 | 11 | 11 | 9 | 9 | 3 | **78** |
+| `part7-09-mmap.md` | 17 | 17 | 11 | 11 | 9 | 9 | 4 | **78** |
+| `part7-10-epoll.md` | 17 | 17 | 11 | 11 | 9 | 9 | 4 | **78** |
+| `part7-11-uio-vfio.md` | 17 | 16 | 10 | 11 | 9 | 9 | 4 | **76** |
+| `part7-12-sysfs.md` | 16 | 17 | 10 | 11 | 9 | 9 | 3 | **75** |
+| `part7-13-irq-affinity.md` | 17 | 17 | 10 | 11 | 9 | 9 | 4 | **77** |
+| `part7-14-rootfs-buildroot.md` | 17 | 18 | 11 | 12 | 9 | 9 | 3 | **79** |
+| `part8-01-dynamic-memory.md` | 17 | 17 | 11 | 11 | 9 | 9 | 4 | **78** |
+
+### 공통 근거와 보강 우선순위
+
+- 근거 위치: 각 글의 `핵심 개념`, `코드 / 실제 사용 예`, `측정 / 성능 비교`, `자주 보는 함정`, `정리` 섹션.
+- 공통 강점: Linux API와 실제 명령·코드·실패 조건을 연결하며, 단순 용어 나열을 넘어 선택 기준을 제시한다.
+- 공통 감점: 성능 비교가 대부분 `측정 필요` 상태이고 kernel release, device, distribution, compiler 조건이 고정되어 있지 않다.
+- 중복 위험: Kernel module/char/platform driver/sysfs 글은 Linux driver 학습 경로가 겹치므로 각 글의 subsystem 경계를 선명하게 해야 한다.
+- 다음 확인: Linux kernel 공식 문서와 해당 release 소스, Buildroot/U-Boot/DPDK/SPDK 공식 문서, 실제 build·trace·benchmark 결과.
+
+원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

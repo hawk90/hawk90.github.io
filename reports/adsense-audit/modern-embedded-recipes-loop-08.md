@@ -75,3 +75,66 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 후 원문을 직접 읽은 `part6-09-isr-api.md`와 `part7-03-device-tree-basics.md`의 잠정 평가를 추가한다. 두 글 모두 P0 정책 차단은 확인되지 않았다.
+
+| 파일 | 상태 | 총점 | 결정 | 핵심 근거 |
+| --- | --- | ---: | --- | --- |
+| `part6-09-isr-api.md` | 잠정 | **64/100** | 보강 | ISR 조건·FromISR·deferred work 예제는 충실하지만 원자성·동시성의 공식 근거와 실제 측정 결과가 부족함 |
+| `part7-03-device-tree-basics.md` | 잠정 | **65/100** | 보강 | DTS·DTB·phandle·overlay 흐름은 넓게 설명하지만 보드·커널별 검증 결과와 범위가 불명확함 |
+
+### `part6-09-isr-api.md`
+
+| 항목 | 점수 |
+| --- | ---: |
+| 독창성 | 15/25 |
+| 완결성 | 14/20 |
+| 실전성·검증 가능성 | 8/15 |
+| 중복·병합 위험 | 9/15 |
+| 검색 의도 일치 | 8/10 |
+| 탐색성·가독성·내부 연결 | 8/10 |
+| 작성자·출처·신뢰성 | 2/5 |
+
+근거 위치: `ISR-Safe 함수의 조건`, `Atomic 변수만 공유`, `ISR ↔ Task — Lock-Free Ring`, `자주 하는 실수`, `정리`. `volatile`과 Cortex-M 원자성 설명의 적용 범위, 공식 ARM/FreeRTOS 출처, 실제 ISR latency 측정 조건을 보강 검토한다.
+
+### `part7-03-device-tree-basics.md`
+
+| 항목 | 점수 |
+| --- | ---: |
+| 독창성 | 13/25 |
+| 완결성 | 16/20 |
+| 실전성·검증 가능성 | 8/15 |
+| 중복·병합 위험 | 8/15 |
+| 검색 의도 일치 | 9/10 |
+| 탐색성·가독성·내부 연결 | 9/10 |
+| 작성자·출처·신뢰성 | 2/5 |
+
+근거 위치: `DTS·DTB·DTBO`, `#address-cells·#size-cells`, `Compatible — Driver Matching`, `Device Tree Overlay`, `/proc/device-tree·dtdiff`, `자주 하는 실수`, `정리`. 기초 문법·overlay·부팅 흐름의 역할 중복과 특정 보드에서의 `dtc` 실행 결과를 정성 확인한다.
+
+### 추가 정성 평가
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part6-08-software-timer.md` | **74/100** | 보강 | one-shot/auto-reload와 callback race를 설명하지만 실제 jitter·tick·priority 측정이 없음 |
+| `part6-10-priority-inversion.md` | **76/100** | 보강 | timeline·PI/PCP·trace 진단이 유용하지만 사례 출처와 RTOS별 검증이 부족함 |
+| `part6-11-timer-services.md` | **70/100** | 보강 | timer wheel 구조와 여러 구현을 넓게 다루지만 O(1) 표현과 버전별 구현 근거가 약함 |
+| `part6-12-rtos-debugging.md` | **78/100** | 보강 | stack/heap/trace 진단 경로가 실용적이나 도구 overhead·양산 조건의 실측이 없음 |
+| `part7-01-linux-boot-flow.md` | **76/100** | 보강 | BootROM부터 init까지 흐름은 완결되지만 SoC별 boot chain과 측정 결과가 없음 |
+| `part7-02-uboot-usage.md` | **75/100** | 보강 | environment/TFTP/A-B fallback 명령이 좋지만 board·U-Boot 버전별 차이가 큼 |
+| `part7-04-device-tree-overlay.md` | **75/100** | 보강 | fragment·symbol·configfs와 probe 확인이 있으나 지원 플랫폼별 검증이 없음 |
+| `part7-05-kernel-build.md` | **80/100** | 유지 후보 | 공식 Linux 링크와 실제 build 명령 흐름이 명확하지만 build 결과·보드 전제가 필요함 |
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part6-08-software-timer.md` | 16 | 16 | 9 | 11 | 9 | 9 | 4 | **74** |
+| `part6-10-priority-inversion.md` | 17 | 17 | 10 | 11 | 9 | 9 | 3 | **76** |
+| `part6-11-timer-services.md` | 16 | 15 | 9 | 10 | 9 | 8 | 3 | **70** |
+| `part6-12-rtos-debugging.md` | 17 | 18 | 11 | 12 | 9 | 8 | 3 | **78** |
+| `part7-01-linux-boot-flow.md` | 17 | 17 | 10 | 11 | 9 | 9 | 3 | **76** |
+| `part7-02-uboot-usage.md` | 16 | 17 | 10 | 11 | 9 | 9 | 3 | **75** |
+| `part7-04-device-tree-overlay.md` | 16 | 16 | 10 | 11 | 9 | 9 | 4 | **75** |
+| `part7-05-kernel-build.md` | 17 | 18 | 12 | 12 | 9 | 9 | 3 | **80** |
+
+근거 위치: 각 글의 `핵심 개념`, `코드 / 실제 사용 예`, `측정 / 성능 비교`, `자주 보는 함정`, `정리`. 공통적으로 예제와 다음 행동은 있으나 실제 실행 로그·보드·버전·성능 수치가 부족하다. `part7-05-kernel-build.md`의 외부 Linux 링크 2개는 강점이지만 특정 BSP 결과를 확인한 뒤 확정 점수로 전환한다.
+

@@ -74,3 +74,46 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+원문 10편을 직접 대조해 루브릭 7개 항목으로 잠정 점수화했다. 점수는 Google의 공식 점수나 승인 확률이 아니라 콘텐츠 품질·독립 가치·검증 가능성을 비교하기 위한 내부 지표다. P0 정책 차단 요소는 확인되지 않았다. 실제 보드·칩·툴체인 버전별 실행 결과와 제조사 문서 대조 전이므로 신뢰도는 중간이다.
+
+### 요약
+
+| 파일 | 점수 | 잠정 판정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part3-08-memory-layout.md` | **74/100** | 보강 후 유지 | section·heap·stack·사용량 추적을 연결하지만 MCU별 linker 조건과 실제 map 결과가 부족하다 |
+| `part3-09-compiler-optimization.md` | **72/100** | 보강 | O 레벨·LTO·PGO 선택은 유용하나 최적화별 실제 크기·속도 결과가 없다 |
+| `part3-10-map-file-analysis.md` | **75/100** | 유지 후보 | map·symbol·section·GC 분석을 구체적 도구 명령과 연결한다 |
+| `part3-11-make-cmake-cross.md` | **76/100** | 유지 후보 | Make/CMake toolchain·sysroot·preset을 전체 빌드 흐름으로 보여준다 |
+| `part3-12-bootloader-chain.md` | **78/100** | 유지 후보 | BootROM→SPL→U-Boot→Kernel·Secure Boot·A/B·디버깅까지 범위가 넓다 |
+| `part4-01-first-baremetal.md` | **78/100** | 유지 후보 | linker·startup·GPIO·flash까지 첫 실행 경로가 재현 가능하게 연결된다 |
+| `part4-02-mmio-access.md` | **75/100** | 유지 후보 | volatile·access width·RMW·barrier의 위험을 코드와 함께 설명한다 |
+| `part4-03-gpio-driver.md` | **77/100** | 유지 후보 | STM32 레지스터·BSRR·alternate function·출력 모드를 직접 구현한다 |
+| `part4-04-clock-setup.md` | **76/100** | 유지 후보 | STM32F4 clock tree·PLL·Flash latency·APB timer 규칙이 연결된다 |
+| `part4-05-interrupt-handling.md` | **78/100** | 유지 후보 | NVIC 상태·priority·EXTI/TIM 예제·tail chaining을 실전 흐름으로 묶었다 |
+
+### 항목별 점수
+
+| 파일 | 독창성 25 | 완결성 20 | 실전 검증 15 | 중복/병합 15 | 검색 의도 10 | UX/내부링크 10 | 신뢰/출처 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part3-08-memory-layout.md` | 18 | 16 | 10 | 11 | 9 | 8 | 2 | **74** |
+| `part3-09-compiler-optimization.md` | 17 | 15 | 9 | 11 | 9 | 8 | 3 | **72** |
+| `part3-10-map-file-analysis.md` | 18 | 16 | 10 | 12 | 9 | 8 | 2 | **75** |
+| `part3-11-make-cmake-cross.md` | 18 | 16 | 11 | 12 | 9 | 8 | 2 | **76** |
+| `part3-12-bootloader-chain.md` | 19 | 17 | 11 | 12 | 9 | 8 | 2 | **78** |
+| `part4-01-first-baremetal.md` | 19 | 17 | 11 | 12 | 9 | 8 | 2 | **78** |
+| `part4-02-mmio-access.md` | 18 | 16 | 10 | 11 | 9 | 8 | 3 | **75** |
+| `part4-03-gpio-driver.md` | 19 | 17 | 11 | 11 | 9 | 8 | 2 | **77** |
+| `part4-04-clock-setup.md` | 18 | 16 | 11 | 12 | 9 | 8 | 2 | **76** |
+| `part4-05-interrupt-handling.md` | 19 | 17 | 11 | 12 | 9 | 8 | 2 | **78** |
+
+### 공통 근거와 우선순위
+
+- 이 루프는 이전 루프보다 실행 절차와 코드가 구체적이어서 유지 후보가 많다. 다만 코드가 있다는 사실만으로 실전 검증을 충족하지 않으므로 실제 빌드·플래시·로그·파형 결과가 필요하다.
+- 메모리 레이아웃·최적화·map 파일은 하나의 빌드 진단 흐름으로 연결되지만, 각각 메모리 배치·성능/크기 선택·원인 추적이라는 독립 질문을 유지할 수 있다.
+- Make/CMake 글은 다운로드 URL, 도구 버전, 실제 `cmake --build` 출력과 cross compiler 선택 결과를 고정하면 재현성이 올라간다. 현재 측정된 빌드 시간은 환경 의존 수치로 취급해야 한다.
+- Bootloader·bare-metal·GPIO·clock·interrupt는 특정 STM32F4 보드·레퍼런스 매뉴얼 조건을 명시해야 한다. 다른 STM32 제품군에 일반화되는 것처럼 보이지 않게 범위를 제한할 필요가 있다.
+- MMIO 글은 `volatile`이 순서·원자성·cache coherency를 해결하지 않는다는 경계를 계속 분명히 해야 한다. access width와 RMW 실패 사례를 실제 레지스터 기준으로 검증하는 것이 우선이다.
+- 이번 평가는 점수 기록만 수행했다. 원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

@@ -74,3 +74,47 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+원문 10편을 직접 대조해 루브릭 7개 항목으로 잠정 점수화했다. 점수는 Google의 공식 점수나 승인 확률이 아니라 콘텐츠 품질·독립 가치·검증 가능성을 비교하기 위한 내부 지표다. P0 정책 차단 요소는 확인되지 않았다. 실제 장치·보드·센서·프로토콜 분석기 결과와 제조사 데이터시트·USB/CAN 표준 대조 전이므로 신뢰도는 중간이다.
+
+### 요약
+
+| 파일 | 점수 | 잠정 판정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part5-02-dc-motor.md` | **78/100** | 유지 후보 | H-bridge·shoot-through·driver 선택·ramp·current sensing을 연결한다 |
+| `part5-03-stepper-motor.md` | **77/100** | 유지 후보 | step mode·current limit·timer pulse·acceleration ramp을 실제 제어 흐름으로 묶었다 |
+| `part5-04-servo-motor.md` | **72/100** | 보강 | PWM·다채널·보정 코드는 있으나 제품별 pulse 범위·토크·closed-loop 주장이 불안정하다 |
+| `part5-05-character-lcd.md` | **74/100** | 보강 후 유지 | HD44780 4-bit·초기화·CGRAM·I2C backpack까지 재현 범위가 넓다 |
+| `part5-06-spi-oled.md` | **77/100** | 유지 후보 | SSD1306 초기화·framebuffer·그리기·partial DMA 갱신이 연결된다 |
+| `part5-07-tft-display.md` | **75/100** | 보강 후 유지 | SPI/FSMC/LTDC·RGB565·double buffer를 장치 선택 문제로 설명한다 |
+| `part5-08-environmental-sensors.md` | **75/100** | 유지 후보 | BME280 보정·SHT3x CRC·outlier 처리로 단순 센서 비교를 넘어선다 |
+| `part5-09-imu-sensor.md` | **79/100** | 유지 후보 | register·calibration·sampling·complementary filter·INT 동기화가 실전적이다 |
+| `part5-10-can-communication.md` | **78/100** | 유지 후보 | frame·bit timing·filter·error/bus-off·loopback을 하나의 진단 흐름으로 묶었다 |
+| `part5-11-usb-device.md` | **77/100** | 유지 후보 | descriptor·endpoint·TinyUSB CDC/HID 예제와 enumeration 확인을 연결한다 |
+
+### 항목별 점수
+
+| 파일 | 독창성 25 | 완결성 20 | 실전 검증 15 | 중복/병합 15 | 검색 의도 10 | UX/내부링크 10 | 신뢰/출처 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part5-02-dc-motor.md` | 19 | 17 | 11 | 12 | 9 | 8 | 2 | **78** |
+| `part5-03-stepper-motor.md` | 18 | 17 | 11 | 12 | 9 | 8 | 2 | **77** |
+| `part5-04-servo-motor.md` | 16 | 15 | 9 | 11 | 9 | 8 | 4 | **72** |
+| `part5-05-character-lcd.md` | 18 | 16 | 10 | 11 | 9 | 8 | 2 | **74** |
+| `part5-06-spi-oled.md` | 18 | 17 | 11 | 12 | 9 | 8 | 2 | **77** |
+| `part5-07-tft-display.md` | 18 | 16 | 10 | 11 | 9 | 8 | 3 | **75** |
+| `part5-08-environmental-sensors.md` | 18 | 16 | 10 | 11 | 9 | 8 | 3 | **75** |
+| `part5-09-imu-sensor.md` | 19 | 17 | 12 | 12 | 9 | 8 | 2 | **79** |
+| `part5-10-can-communication.md` | 19 | 17 | 11 | 12 | 9 | 8 | 2 | **78** |
+| `part5-11-usb-device.md` | 18 | 17 | 11 | 12 | 9 | 8 | 2 | **77** |
+
+### 공통 근거와 우선순위
+
+- 이번 루프는 장치별 코드뿐 아니라 실패 조건과 확인 절이 있어 실전성이 높다. DC 모터·스테퍼·IMU·CAN·USB는 서로 다른 문제를 풀므로 병합보다는 개별 유지가 적절하다.
+- 모터 글은 전류 제한, 전원, 부하, dead-time, 가속 프로파일이 핵심이다. 드라이버 데이터시트와 실제 전류/온도/실속 조건을 기록해야 일반적인 제어 예제를 넘어선다.
+- 디스플레이 글은 해상도·framebuffer·버스 대역폭·DMA·TE/vsync와 보드 RAM 조건을 함께 제시해야 한다. 단순 색상 코드와 드라이버 구현만으로는 충분하지 않다.
+- 센서 글은 BME280 보정식, SHT3x CRC, IMU scale/filter처럼 독립 가치가 높다. 센서 정확도·샘플링·온도 drift·calibration 결과를 측정 조건과 함께 제시하는 것이 우선이다.
+- CAN·USB는 표준 및 class/descriptor 동작이 버전·스택에 의존한다. loopback/virtual host만으로 끝내지 말고 실제 bus analyzer·호스트 enumeration 로그와 사용한 스택 버전을 고정해야 한다.
+- 서보 글은 SG90/MG996R의 pulse·토크·전압이 제조사와 제품 변형에 따라 달라질 수 있어 현재 루프에서 가장 먼저 수치 출처를 보강할 대상이다.
+- 이번 평가는 점수 기록만 수행했다. 원문 수정·비공개·삭제·URL 변경은 하지 않았다.
+

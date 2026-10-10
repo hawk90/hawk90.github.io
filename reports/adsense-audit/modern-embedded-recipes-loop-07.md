@@ -73,3 +73,44 @@
 - [x] 원문 수정·비공개·삭제·URL 변경 없음
 - [x] 보고서 자체의 diff 공백 오류 없음
 
+## 정성 평가 업데이트
+
+기계 triage 대상 10편을 원문으로 읽고 잠정 점수를 추가했다. P0 정책 차단은 확인되지 않았다. 모든 점수는 공식 출처·실행 환경·실측 결과 대조 전의 `잠정` 값이다.
+
+| 파일 | 총점 | 결정 | 핵심 근거 |
+| --- | ---: | --- | --- |
+| `part5-12-ethernet-mac-phy.md` | **71/100** | 보강 | MAC/PHY·lwIP·DMA·측정 흐름은 있으나 보드·PHY·실측 결과가 부족함 |
+| `part5-13-sd-card-fatfs.md` | **72/100** | 보강 | SPI/SDIO·FatFs·전원 장애 주제를 다루지만 카드·호스트별 재현 결과가 없음 |
+| `part5-14-rtc-utilization.md` | **70/100** | 보강 | RTC 초기화·alarm·tamper 예제는 충분하나 STM32 family 차이와 정확도 측정 근거가 약함 |
+| `part6-01-rtos-decision.md` | **76/100** | 보강 | super-loop와 RTOS 선택 기준이 명확하지만 비용 표의 실제 측정값이 없음 |
+| `part6-02-task-design.md` | **74/100** | 보강 | periodic/event/state-machine 패턴이 실용적이나 priority·jitter 판단은 환경 의존적임 |
+| `part6-03-scheduler-internals.md` | **77/100** | 보강 | scheduler 시점·tickless·context switch 흐름은 좋지만 FreeRTOS 버전/port 근거가 없음 |
+| `part6-04-semaphore-usage.md` | **74/100** | 보강 | binary/counting/ISR 패턴이 명확하나 latency 비교가 측정 필요 상태임 |
+| `part6-05-mutex-usage.md` | **75/100** | 보강 | ownership·priority inheritance·lock ordering이 유용하나 RTOS별 차이와 실측이 부족함 |
+| `part6-06-queue-usage.md` | **74/100** | 보강 | by-value/by-pointer/backpressure 선택이 좋지만 ownership·cache·성능을 환경별로 검증해야 함 |
+| `part6-07-event-group.md` | **72/100** | 보강 | AND/OR/broadcast/sync 사용 사례가 있으나 FreeRTOS bit 폭·ISR deferred 동작의 출처 확인이 필요함 |
+
+### 세부 점수
+
+| 파일 | 독창성 25 | 완결성 20 | 실전성 15 | 중복 15 | 검색 의도 10 | UX 10 | 신뢰 5 | 합계 |
+| --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: |
+| `part5-12-ethernet-mac-phy.md` | 15 | 16 | 10 | 11 | 9 | 8 | 2 | **71** |
+| `part5-13-sd-card-fatfs.md` | 15 | 17 | 10 | 11 | 9 | 8 | 2 | **72** |
+| `part5-14-rtc-utilization.md` | 14 | 16 | 9 | 11 | 9 | 8 | 3 | **70** |
+| `part6-01-rtos-decision.md` | 17 | 17 | 10 | 12 | 10 | 8 | 2 | **76** |
+| `part6-02-task-design.md` | 16 | 16 | 10 | 11 | 9 | 9 | 3 | **74** |
+| `part6-03-scheduler-internals.md` | 17 | 17 | 10 | 12 | 9 | 9 | 3 | **77** |
+| `part6-04-semaphore-usage.md` | 16 | 16 | 9 | 11 | 9 | 9 | 4 | **74** |
+| `part6-05-mutex-usage.md` | 16 | 17 | 10 | 12 | 9 | 8 | 3 | **75** |
+| `part6-06-queue-usage.md` | 16 | 17 | 10 | 11 | 9 | 8 | 3 | **74** |
+| `part6-07-event-group.md` | 15 | 16 | 9 | 11 | 9 | 9 | 3 | **72** |
+
+### 공통 근거와 보강 우선순위
+
+- 근거 위치: 각 글의 `핵심 개념`, `코드 / 실제 사용 예`, `측정 / 성능 비교`, `자주 보는 함정`, `정리` 섹션.
+- 공통 강점: 모든 글이 문제 상황, API/구조 예제, 함정, 다음 글 링크를 갖고 있어 단순 코드 덤프는 아니다.
+- 공통 감점: `측정 필요` 표기가 많고 실제 보드·컴파일러·RTOS 버전·측정 출력이 없다.
+- 시리즈 중복: Ethernet/SD/RTC는 주변장치 구현군, RTOS 63~69는 선택·task·scheduler·동기화 API가 연속되어 역할 경계를 더 명확히 해야 한다.
+- 다음 확인: FreeRTOS 공식 API 문서, STM32 reference manual/datasheet, lwIP/FatFs 공식 문서, 실제 build·timing·throughput 결과.
+
+원문 수정·비공개·삭제·URL 변경은 하지 않았다.
