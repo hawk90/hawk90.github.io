@@ -36,7 +36,7 @@ topics: ["embedded"]
 
 ### RMII (Reduced MII)
 
-7개 wire:
+일반적인 RMII 신호는 다음과 같습니다. 실제 pin·clock direction은 MCU와 PHY board 설계를 확인합니다.
 
 ```text
 REF_CLK  ←── 50 MHz reference (oscillator 또는 MCO)
@@ -46,7 +46,7 @@ TXEN     ──→ TX enable
 TXD[1:0] ──→ 2-bit TX data
 ```
 
-50 MHz × 2-bit = 100 Mbps. 100Base-TX (Fast Ethernet) standard.
+50 MHz reference와 2-bit 데이터 폭을 사용하는 100Base-TX 구성입니다. 실제 link speed와 clock source는 MAC/PHY 설정과 협상 결과를 확인합니다.
 
 ### MDIO (Management Data Interface)
 
@@ -126,7 +126,7 @@ void eth_init(uint8_t mac[6]) {
     RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
     SYSCFG->PMC |= SYSCFG_PMC_MII_RMII_SEL;     // RMII mode
 
-    // GPIO setup (PA1, PA2, PA7, PB11, PB13, PC1, PC4, PC5 — AF11)
+    // GPIO setup — pin과 alternate function은 STM32 family/board 회로도 확인
     // ...
 
     // MAC reset
@@ -134,7 +134,7 @@ void eth_init(uint8_t mac[6]) {
     while (ETH->DMABMR & ETH_DMABMR_SR);
 
     // MAC config
-    ETH->MACCR = ETH_MACCR_FES | ETH_MACCR_DM    // 100 Mbps full
+    ETH->MACCR = ETH_MACCR_FES | ETH_MACCR_DM    // 예시: 협상 결과에 맞춰 설정
                | ETH_MACCR_IPCO;
     ETH->MACA0HR = (mac[5] << 8) | mac[4];
     ETH->MACA0LR = (mac[3] << 24) | (mac[2] << 16) | (mac[1] << 8) | mac[0];
@@ -225,7 +225,7 @@ void net_poll_link(void) {
 }
 ```
 
-100 ms 주기로 호출. cable plug/unplug detect.
+주기적으로 호출해 cable plug/unplug와 link 변화를 확인합니다.
 
 ## 측정 / 동작 확인
 
@@ -254,9 +254,9 @@ DHCP가 안 되면 *static IP*로 시도. ping이 안 가면:
 
 ## 자주 보는 함정
 
-> ⚠️ 50 MHz RMII clock 정확도
+> ⚠️ 50 MHz RMII clock
 
-PHY에서 OSC로 공급하거나 MCO로 공급. ±50 ppm 이내. 정확하지 않으면 frame 못 받음.
+PHY에서 OSC로 공급하거나 MCO로 공급합니다. 허용 오차와 duty cycle은 PHY/MAC datasheet 및 board 설계를 따릅니다.
 
 > ⚠️ MAC address 모두 같음
 
@@ -264,11 +264,11 @@ PHY에서 OSC로 공급하거나 MCO로 공급. ±50 ppm 이내. 정확하지 �
 
 > ⚠️ TX/RX descriptor 부족
 
-DMA ring buffer가 작으면 burst load에서 drop. RX는 5-10개, TX는 3-5개 권장.
+DMA ring buffer가 작으면 burst load에서 drop할 수 있습니다. descriptor 수는 throughput·RAM·cache 전략에 맞춰 정합니다.
 
 > ⚠️ lwIP buffer 부족
 
-`MEM_SIZE`, `PBUF_POOL_SIZE`가 작으면 packet drop. 작은 MCU도 16 KB 이상 권장.
+`MEM_SIZE`, `PBUF_POOL_SIZE`가 작으면 packet drop할 수 있습니다. 필요한 크기는 MTU·동시 연결·버퍼링 정책으로 산정합니다.
 
 > ⚠️ Cortex-M7 cache coherency
 

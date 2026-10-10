@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-USB로 PC와 통신해야 할 때 — debug serial output (CDC), 자체 USB-HID device (keyboard, mouse, custom), audio (UAC), MIDI, mass storage. 단일 module이 *USB cable로 PC와 직결*되면 driver 설치 없이 동작 (CDC, HID는 OS 기본 driver).
+USB로 PC와 통신해야 할 때 — debug serial output (CDC), 자체 USB-HID device (keyboard, mouse, custom), audio (UAC), MIDI, mass storage. USB class와 OS 버전에 따라 기본 driver가 제공될 수 있지만, custom/vendor class나 특정 OS에서는 별도 driver·권한 설정이 필요할 수 있습니다.
 
 이 글은 STM32 USB peripheral의 hardware 구조를 짧게 살펴본 뒤 *TinyUSB*로 CDC와 HID device를 만드는 패턴을 다룹니다.
 
@@ -67,9 +67,9 @@ USB device는 *Descriptor*로 자신을 PC에 설명. PC OS가 이를 보고 dri
 
 | Type | 용도 | 보장 |
 |------|------|------|
-| Control | 설정·status | 시간 보장 (low priority) |
+| Control | 설정·status | enumeration과 제어 전송에 사용 |
 | Bulk | 큰 데이터 (CDC, MSC) | 시간 보장 없음, error 검출 강함 |
-| Interrupt | 작고 빠른 데이터 (HID) | 정해진 주기 보장 |
+| Interrupt | 작고 주기적인 데이터 (HID) | host가 예약한 polling 기회 |
 | Isochronous | 실시간 (audio) | 주기 보장, error 검출 약함 |
 
 ### 자주 쓰는 class
@@ -110,8 +110,8 @@ tusb_desc_device_t const desc_device = {
     .bDeviceSubClass    = MISC_SUBCLASS_COMMON,
     .bDeviceProtocol    = MISC_PROTOCOL_IAD,
     .bMaxPacketSize0    = CFG_TUD_ENDPOINT0_SIZE,
-    .idVendor           = 0xCafe,
-    .idProduct          = 0x4001,
+    .idVendor           = 0xCafe,  // 예시값; 제품은 등록한 VID와 할당한 PID 사용
+    .idProduct          = 0x4001,  // 예시값
     .bcdDevice          = 0x0100,
     .iManufacturer      = 0x01,
     .iProduct           = 0x02,
@@ -120,7 +120,7 @@ tusb_desc_device_t const desc_device = {
 };
 
 uint8_t const desc_configuration[] = {
-    TUD_CONFIG_DESCRIPTOR(1, 2, 0, 75, 0x00, 100),
+    TUD_CONFIG_DESCRIPTOR(1, 2, 0, 75, 0x00, 100), // total length는 실제 class descriptor와 일치시킴
 
     TUD_CDC_DESCRIPTOR(0, 4, 0x81, 8, 0x02, 0x82, 64),
 };
@@ -138,7 +138,7 @@ main loop:
 
 ```c
 void usb_init(void) {
-    // GPIO PA11/12 (D-/D+), AF10
+    // GPIO와 AF는 사용 중인 STM32 family/board의 alternate-function 표를 확인
     gpio_init(GPIOA, 11, &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=10});
     gpio_init(GPIOA, 12, &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=10});
 
@@ -149,7 +149,7 @@ void usb_init(void) {
 }
 
 int main(void) {
-    clock_init_168mhz();
+    clock_init();  // USB가 요구하는 clock 정확도와 peripheral 설정은 MCU datasheet 확인
     usb_init();
 
     while (1) {
@@ -165,7 +165,7 @@ int main(void) {
 }
 ```
 
-PC에서 `/dev/ttyACM0` (Linux) 또는 `COM` 포트 (Windows)로 보임. terminal로 송수신 echo.
+PC에서는 OS와 descriptor에 따라 `/dev/ttyACM0` (Linux) 또는 `COM` 포트 (Windows) 등으로 보입니다. terminal로 송수신 echo를 확인합니다.
 
 ### 2. CDC retarget printf
 

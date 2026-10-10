@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SD card는 SPI 모드면 어디든 동작합니다. SDIO는 빠르지만 핀이 많고 까다롭습니다."** 위에 FatFs를 얹으면 PC의 FAT32와 호환.
+> **"SD card는 SPI mode를 지원하는 카드라면 SPI host에서 사용할 수 있습니다. SDIO는 더 넓은 데이터 폭을 제공하지만 핀과 peripheral 설정이 필요합니다."** 위에 FatFs를 얹으면 지원하는 FAT 볼륨을 PC와 교환할 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -27,11 +27,11 @@ topics: ["embedded"]
 | 측면 | SPI | SDIO 1-bit | SDIO 4-bit |
 |------|-----|------------|------------|
 | Wire | 4 | 3 | 6 |
-| Speed | ~25 MHz | ~25 MHz | ~50 MHz × 4 = 200 Mbps |
+| Speed | card·host 한계 내 | card·host 한계 내 | card·host 한계 내 |
 | MCU 요구사항 | 모든 STM32 | SDIO 전용 peripheral | 동상 |
 | Code 복잡도 | 단순 | 보통 | 복잡 |
 
-대부분의 application은 SPI로 충분. *오디오·video* 같은 throughput-critical은 SDIO 4-bit.
+대부분의 application은 SPI로 시작할 수 있습니다. *오디오·video*처럼 throughput이 중요한 경우에는 card, host, filesystem overhead를 측정한 뒤 4-bit mode를 검토합니다.
 
 ### SD card init sequence
 
@@ -61,7 +61,7 @@ CMD25 WRITE_MULTIPLE_BLOCK
 
 ### FatFs
 
-ChaN의 *FatFs* (free, open-source)가 STM32·AVR·ARM 임베디드의 사실상 표준. *diskio.c*에 4개 함수만 구현하면 됨:
+ChaN의 *FatFs* (free, open-source)는 여러 MCU에서 널리 사용됩니다. *diskio.c*의 5개 disk I/O 함수를 구현해 block driver를 연결합니다:
 
 ```c
 DSTATUS disk_initialize(BYTE pdrv);
@@ -71,7 +71,7 @@ DRESULT disk_write(BYTE pdrv, const BYTE *buff, LBA_t sector, UINT count);
 DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff);
 ```
 
-이 4개를 SD card driver에 연결하면 *그 위에 모든 FatFs API*가 동작.
+이 함수들을 SD card driver에 연결하면 설정한 FatFs 기능 범위에서 파일 API를 사용할 수 있습니다.
 
 ## 코드 예제
 
@@ -82,6 +82,7 @@ DRESULT disk_ioctl(BYTE pdrv, BYTE cmd, void *buff);
 #define CS_HIGH() GPIOA->BSRR = (1u << 4)
 
 uint8_t spi_xfer8(uint8_t tx);   // 4-08 참고
+static int sd_block_addressing;
 
 static uint8_t sd_cmd(uint8_t cmd, uint32_t arg, uint8_t crc) {
     spi_xfer8(0xFF);
@@ -115,12 +116,14 @@ int sd_init(void) {
         for (int i = 0; i < 4; i++) spi_xfer8(0xFF);   // discard 32-bit echo
     }
 
-    // ACMD41
+    // ACMD41 — timeout 시 초기화 실패로 처리하는 것이 안전
+    int ready = 0;
     for (int t = 0; t < 1000; t++) {
         sd_cmd(55, 0, 0xFF);
-        if (sd_cmd(41, v2 ? 0x40000000 : 0, 0xFF) == 0x00) break;
+        if (sd_cmd(41, v2 ? 0x40000000 : 0, 0xFF) == 0x00) { ready = 1; break; }
         delay_ms(10);
     }
+    if (!ready) { CS_HIGH(); return -1; }
 
     // CMD58 → CCS bit
     int sdhc = 0;
@@ -132,6 +135,7 @@ int sd_init(void) {
 
     if (!sdhc) sd_cmd(16, 512, 0xFF);   // block size
 
+    sd_block_addressing = sdhc;
     CS_HIGH();
     spi_set_speed_high();   // 10-25 MHz
     return sdhc ? 1 : 0;
@@ -143,7 +147,8 @@ int sd_init(void) {
 ```c
 int sd_read_block(uint32_t lba, uint8_t *buf) {
     CS_LOW();
-    if (sd_cmd(17, lba, 0xFF) != 0x00) { CS_HIGH(); return -1; }
+    uint32_t arg = sd_block_addressing ? lba : lba * 512u; // card type에 따라 block/byte address
+    if (sd_cmd(17, arg, 0xFF) != 0x00) { CS_HIGH(); return -1; }
 
     // wait data token 0xFE
     uint8_t r;
@@ -161,7 +166,8 @@ int sd_read_block(uint32_t lba, uint8_t *buf) {
 
 int sd_write_block(uint32_t lba, const uint8_t *buf) {
     CS_LOW();
-    if (sd_cmd(24, lba, 0xFF) != 0x00) { CS_HIGH(); return -1; }
+    uint32_t arg = sd_block_addressing ? lba : lba * 512u;
+    if (sd_cmd(24, arg, 0xFF) != 0x00) { CS_HIGH(); return -1; }
 
     spi_xfer8(0xFF);
     spi_xfer8(0xFE);             // data token
