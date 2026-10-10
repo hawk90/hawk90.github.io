@@ -62,7 +62,15 @@ for (const file of files) {
   // Everything between the doctype and the root element must be whitespace or
   // an HTML comment. Anything else is content the parser will relocate.
   const after = html.slice(doctype[0].length);
-  const stray = after.replace(/<!--[\s\S]*?-->/g, '').match(/^([\s\S]*?)<html[\s>]/i);
+  // HTML also closes a comment with `--!>`; repeat so no new comment is
+  // assembled from the pieces around a removed one.
+  let uncommented = after;
+  let previous;
+  do {
+    previous = uncommented;
+    uncommented = uncommented.replace(/<!--[\s\S]*?--!?>/g, '');
+  } while (uncommented !== previous);
+  const stray = uncommented.match(/^([\s\S]*?)<html[\s>]/i);
   if (!stray) {
     findings.push({ page, problem: 'no <html> element follows the doctype', sample: after.slice(0, 80) });
     continue;

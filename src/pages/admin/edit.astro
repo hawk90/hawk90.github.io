@@ -231,6 +231,7 @@ import { SITE_CONFIG } from '../../consts/config';
     deleteFile,
     parseRepo,
     splitFrontmatter,
+    isFlatFrontmatter,
   } from '../../lib/admin/github-api';
   import {
     buildPostDocument,
@@ -290,6 +291,10 @@ import { SITE_CONFIG } from '../../consts/config';
     let currentPath = '';
     let isDraft = true;
     let publishedDate = '';
+    // Full frontmatter as loaded; saving overlays the edited fields on it.
+    let loadedFrontmatter: Record<string, unknown> = {};
+    // False when the frontmatter uses YAML the editor cannot round-trip.
+    let loadedFlat = true;
 
     // Check if a post identifier is provided
     if (!pathParam && !slug) {
@@ -350,6 +355,8 @@ import { SITE_CONFIG } from '../../consts/config';
         currentSha = sha;
 
         const { frontmatter, body } = splitFrontmatter(content);
+        loadedFrontmatter = frontmatter;
+        loadedFlat = isFlatFrontmatter(content);
 
         // Populate fields
         if (titleInput) titleInput.value = (frontmatter.title as string) || '';
@@ -412,6 +419,11 @@ import { SITE_CONFIG } from '../../consts/config';
       const authState = getAuthState();
       if (!authState.accessToken || !ADMIN_CONFIG.enabled) return;
 
+      if (!loadedFlat) {
+        showToast('This post uses multi-line frontmatter the editor cannot save safely. Edit it in the repository.', 'error');
+        return;
+      }
+
       if (saveStatus) saveStatus.textContent = 'Saving...';
 
       try {
@@ -452,7 +464,7 @@ import { SITE_CONFIG } from '../../consts/config';
     }
 
     function buildMarkdown(input: Parameters<typeof buildPostDocument>[0]): string {
-      return buildPostDocument(input);
+      return buildPostDocument({ ...input, base: loadedFrontmatter });
     }
 
     // Pull a human-readable name out of a repo path. Used in commit
@@ -464,6 +476,11 @@ import { SITE_CONFIG } from '../../consts/config';
 
     // Toggle draft status
     async function toggleDraft() {
+      // saveChanges refuses non-flat frontmatter; don't flip the UI first.
+      if (!loadedFlat) {
+        showToast('This post uses multi-line frontmatter the editor cannot save safely. Edit it in the repository.', 'error');
+        return;
+      }
       if (draftCheckbox) {
         draftCheckbox.checked = !draftCheckbox.checked;
         isDraft = draftCheckbox.checked;

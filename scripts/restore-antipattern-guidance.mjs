@@ -23,6 +23,17 @@ const output = value('--output', join(archive, 'original-guidance.md'));
 const markdown = await readFile(input, 'utf8');
 const html = await readFile(htmlInput, 'utf8');
 const hash = (content) => createHash('sha256').update(content, 'utf8').digest('hex');
+/** Text placed inside an HTML comment must not close it: drop `-->`, `--!>`
+ * and any `--` run, repeating until none is left. */
+const commentSafe = (text) => {
+  let out = String(text);
+  let previous;
+  do {
+    previous = out;
+    out = out.replace(/--!?>?/g, '-');
+  } while (out !== previous);
+  return out;
+};
 
 const lines = markdown.split('\n');
 const heading = /^(#{1,6})\s+(.+?)\s*$/;
@@ -117,7 +128,7 @@ for (const [category, items] of grouped) {
     const sourceLine = section.index + 1;
     const path = [...section.parents.map(({ title }) => title), section.title].join(' > ');
     const message = section.message ? `; message: ${section.message.index} (${section.message.role})` : '';
-    provenance.push(`#### ${ordinal}. ${section.title}`, '', `<!-- source: ${input}:${sourceLine}${message}; path: ${path.replace(/-->/g, '')} -->`, '', section.body || '<!-- empty source section -->', '');
+    provenance.push(`#### ${ordinal}. ${section.title}`, '', `<!-- source: ${input}:${sourceLine}${message}; path: ${commentSafe(path)} -->`, '', section.body || '<!-- empty source section -->', '');
   }
 }
 

@@ -298,6 +298,40 @@ export interface DraftPost {
  * write — multi-line YAML block scalars (`|`/`>`) are intentionally not
  * supported.
  */
+function decodeJson(text: string): unknown {
+  try {
+    return JSON.parse(text);
+  } catch {
+    return undefined;
+  }
+}
+
+const YAML_NUMBER = /^[-+]?(?:0|[1-9]\d*)(?:\.\d+)?(?:[eE][-+]?\d+)?$/;
+
+/**
+ * Read a one-line YAML scalar the way the content schema will see it, so a
+ * parse → serialize round trip keeps each value's type: quoted values stay
+ * strings (`"true"`, `"3"`), bare `true`/`false`, `null`/`~` and numbers are
+ * typed (`seriesOrder: 3` must stay a number for `z.number()`). Anything else,
+ * such as a bare date, stays a string.
+ */
+function parseScalar(raw: string): unknown {
+  if (raw.length >= 2 && raw.startsWith('"') && raw.endsWith('"')) {
+    // serializeFrontmatter writes JSON strings, which are valid YAML
+    // double-quoted scalars; hand-written YAML-only escapes fall back.
+    const decoded = decodeJson(raw);
+    return typeof decoded === 'string' ? decoded : raw.slice(1, -1);
+  }
+  if (raw.length >= 2 && raw.startsWith("'") && raw.endsWith("'")) {
+    return raw.slice(1, -1).replace(/''/g, "'");
+  }
+  if (raw === 'true') return true;
+  if (raw === 'false') return false;
+  if (raw === 'null' || raw === '~') return null;
+  if (YAML_NUMBER.test(raw)) return Number(raw);
+  return raw;
+}
+
 export function parseFrontmatter(content: string): Record<string, unknown> {
   const match = content.match(/^---\n([\s\S]*?)\n---/);
   if (!match) return {};
@@ -312,33 +346,45 @@ export function parseFrontmatter(content: string): Record<string, unknown> {
     const key = line.slice(0, colonIndex).trim();
     let value: unknown = line.slice(colonIndex + 1).trim();
 
-    // Array form: [a, b, c] — strip wrapping quotes on each item.
+    // Array form: [a, b, c]. serializeFrontmatter writes a JSON array, so
+    // decode that exactly; hand-written arrays fall back to a comma split.
     if (typeof value === 'string' && value.startsWith('[') && value.endsWith(']')) {
-      const inner = value.slice(1, -1).trim();
-      value = inner
-        ? inner
-            .split(',')
-            .map((item) => item.trim())
-            .filter(Boolean)
-            .map((item) => item.replace(/^['"]|['"]$/g, ''))
-        : [];
-    } else if (typeof value === 'string') {
-      // Scalars only: strip wrapping quotes, then convert literal "true"/"false".
-      // Guarded so we don't call `.startsWith` on the array branch above.
-      if (
-        (value.startsWith('"') && value.endsWith('"')) ||
-        (value.startsWith("'") && value.endsWith("'"))
-      ) {
-        value = value.slice(1, -1);
+      const decoded = decodeJson(value);
+      if (Array.isArray(decoded)) {
+        value = decoded.map((item) => String(item));
+      } else {
+        const inner = value.slice(1, -1).trim();
+        value = inner
+          ? inner
+              .split(',')
+              .map((item) => item.trim())
+              .filter(Boolean)
+              .map((item) => item.replace(/^['"]|['"]$/g, ''))
+          : [];
       }
-      if (value === 'true') value = true;
-      else if (value === 'false') value = false;
+    } else if (typeof value === 'string') {
+      value = parseScalar(value);
     }
 
     frontmatter[key] = value;
   }
 
   return frontmatter;
+}
+
+/**
+ * True when every frontmatter line is a one-line `key: value` pair, the only
+ * shape parseFrontmatter reads. Block lists (`- item`), block scalars (`|`,
+ * `>`) and other indented lines would be lost on a parse → serialize round
+ * trip, so the editor refuses to save such a document.
+ */
+export function isFlatFrontmatter(content: string): boolean {
+  const match = content.match(/^---\n([\s\S]*?)\n---/);
+  if (!match) return true;
+  return match[1]
+    .split('\n')
+    .filter((line) => line.trim() !== '' && !line.trimStart().startsWith('#'))
+    .every((line) => /^[^\s:#][^:]*:(?:\s.*)?$/.test(line) && !/:\s*[|>][-+]?\s*$/.test(line));
 }
 
 export function splitFrontmatter(content: string): {
@@ -358,13 +404,15 @@ export function splitFrontmatter(content: string): {
 
 export function serializeFrontmatter(frontmatter: Record<string, unknown>): string {
   const lines = Object.entries(frontmatter).map(([key, value]) => {
+    // JSON strings are valid YAML double-quoted scalars, so JSON.stringify
+    // escapes quotes, backslashes, newlines and control characters in one go.
     if (Array.isArray(value)) {
-      const serialized = value.map((item) => `"${String(item).replace(/"/g, '\\"')}"`).join(', ');
+      const serialized = value.map((item) => JSON.stringify(String(item))).join(', ');
       return `${key}: [${serialized}]`;
     }
 
     if (typeof value === 'string') {
-      return `${key}: "${value.replace(/"/g, '\\"')}"`;
+      return `${key}: ${JSON.stringify(value)}`;
     }
 
     return `${key}: ${JSON.stringify(value)}`;
@@ -543,7 +591,7 @@ export function generatePostTemplate(title: string, draft: boolean = true): stri
   const date = now.toISOString().split('T')[0];
 
   return `---
-title: "${title}"
+title: ${JSON.stringify(title)}
 date: ${date}
 draft: ${draft}
 description: ""

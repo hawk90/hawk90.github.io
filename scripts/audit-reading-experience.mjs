@@ -46,14 +46,28 @@ function walk(dir, out = []) {
   return out;
 }
 
-/** Scripts and comments carry markup that never reaches the accessibility tree. */
-const stripInert = (html) =>
-  html
-    .replace(/<script\b[\s\S]*?<\/script>/gi, '')
-    .replace(/<style\b[\s\S]*?<\/style>/gi, '')
-    .replace(/<!--[\s\S]*?-->/g, '');
+/** Scripts and comments carry markup that never reaches the accessibility tree.
+ * End tags may carry whitespace or junk before `>` (`</script >`), and HTML
+ * also closes a comment with `--!>`. Removal repeats until nothing changes, so
+ * it cannot leave a new tag assembled from the pieces around a removed one. */
+const INERT = /<script\b[\s\S]*?<\/script[^>]*>|<style\b[\s\S]*?<\/style[^>]*>|<!--[\s\S]*?--!?>/gi;
+const stripInert = (html) => {
+  let previous;
+  do {
+    previous = html;
+    html = html.replace(INERT, '');
+  } while (html !== previous);
+  return html;
+};
 
-const textOf = (html) => html.replace(/<[^>]+>/g, '').replace(/&[a-z]+;/gi, ' ').trim();
+const textOf = (html) => {
+  let previous;
+  do {
+    previous = html;
+    html = html.replace(/<[^>]*>/g, '');
+  } while (html !== previous);
+  return html.replace(/&[a-z]+;/gi, ' ').trim();
+};
 
 const pages = walk(distDir).sort();
 const cssText = readdirSync(join(distDir, '_astro'))
