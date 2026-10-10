@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-Smart light, door lock, thermostat, sensor, plug, blind, appliance처럼 *집·건물에서 다른 brand와 섞여 동작해야 하는 모든 IoT device*가 후보입니다. 산업 IoT·gateway도 점점 Matter를 transport로 쓰는 방향입니다.
+Smart light, door lock, thermostat, sensor, plug, blind, appliance처럼 *집·건물에서 다른 brand와 섞여 동작해야 하는 모든 IoT device*가 후보입니다. 산업 IoT·gateway에서 Matter를 쓸지는 필요한 device type이 표준에 정의되어 있는지부터 확인합니다.
 
 이전에는 HomeKit·Google Weave·Amazon Smart Home·Samsung SmartThings·Zigbee·Z-Wave가 따로따로 였어서 vendor는 각 ecosystem별 firmware variant를 유지해야 했습니다. Matter는 *commissioning·discovery·security·OTA*를 단일 표준으로 묶었고, 각 ecosystem의 hub(Apple TV·Nest Hub·Echo·SmartThings Station)가 Matter controller 역할을 합니다.
 
@@ -23,40 +23,29 @@ Smart light, door lock, thermostat, sensor, plug, blind, appliance처럼 *집·�
 
 Matter는 *application layer + security + transport*로 구성되는 layered protocol입니다.
 
-```text
-Application Layer
-  Cluster (Lighting, Door Lock, Thermostat, Sensor, ...)
-  Endpoint·Attribute·Command (Data Model)
-
-Security
-  PASE (passcode-based session for commissioning)
-  CASE (certificate-based session for operation)
-  Group key
-
-Transport
-  IPv6 over UDP/TCP
-  Thread (802.15.4 mesh)  |  Wi-Fi  |  Ethernet
-```
+| Layer | 구성 |
+|-------|------|
+| Application | Data Model — Endpoint·Cluster(Lighting, Door Lock, Thermostat, Sensor 등)·Attribute·Command |
+| Security | PASE (commissioning용 passcode 기반 session), CASE (운영용 certificate 기반 session), Group key |
+| Transport | IPv6 over UDP/TCP — Thread(802.15.4 mesh)·Wi-Fi·Ethernet |
 
 핵심 통찰은 *Matter가 여러 IP transport를 지원*한다는 점입니다. 공통 application model을 재사용할 수 있지만, platform port·commissioning·전원 관리 코드는 Thread node와 Wi-Fi node에서 달라질 수 있습니다.
 
-Thread는 *802.15.4 + 6LoWPAN + RPL routing*을 합친 mesh입니다.
+Thread는 *802.15.4 + 6LoWPAN* 위에 자체 mesh routing을 얹은 IPv6 network입니다.
 
 | Layer | 내용 |
 |-------|------|
-| PHY/MAC | IEEE 802.15.4 2.4 GHz, 250 kbps, ~30 m |
+| PHY/MAC | IEEE 802.15.4 2.4 GHz, 250 kbps |
 | Network | 6LoWPAN (IPv6 over low-power) |
-| Routing | RPL mesh, multi-hop |
-| Roles | Router, REED, FED, Sleepy End Device |
-| Border Router | Thread ↔ Wi-Fi/Ethernet bridge |
+| Routing | MLE 기반 distance-vector routing, Router 사이 multi-hop |
+| Roles | Leader, Router, REED, FED, MED, SED (1.2부터 SSED) |
+| Border Router | Thread ↔ Wi-Fi/Ethernet IPv6 routing |
 
-Thread 1.3에는 TCPlp(low-power TCP)와 Thread Domain(multi-network)이 들어왔습니다.
+Thread 1.2에서 Sleepy End Device의 지연을 줄이는 CSL(Coordinated Sampled Listening)·Enhanced Frame Pending과 Thread Domain unicast addressing이 들어왔고, Thread 1.3에서 Border Router의 양방향 IPv6 연결, SRP·DNS-SD 기반 service discovery, TCP 지원이 정의됐습니다.
 
-Multi-fabric은 Matter의 *killer feature*입니다.
+Multi-fabric은 Matter의 핵심 기능입니다. 같은 device 하나가 여러 fabric에 등록될 수 있습니다. 각 fabric은 별도의 NOC(Node Operational Certificate)를 가지며, 지원 가능한 fabric 수와 ecosystem별 동작은 Matter version·device resource·controller 구현으로 확인합니다.
 
-같은 device 하나가 여러 fabric에 등록될 수 있습니다. 각 fabric은 별도의 NOC(Node Operational Certificate)를 가지며, 지원 가능한 fabric 수와 ecosystem별 동작은 Matter version·device resource·controller 구현으로 확인합니다.
-
-Vendor lock-in이 종료됩니다. 사용자가 어느 ecosystem을 골라도 같은 device를 쓸 수 있습니다.
+그래서 사용자는 한 device를 여러 ecosystem의 controller에서 함께 쓸 수 있습니다. 다만 각 ecosystem이 지원하는 device type과 기능 범위는 따로 확인해야 합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -94,7 +83,7 @@ void main_loop(otInstance *ot) {
 }
 ```
 
-OpenThread는 Google maintained open-source impl입니다. nRF Connect SDK, Zephyr, ESP-IDF, Silicon Labs SDK에 모두 통합되어 있습니다.
+OpenThread는 Google이 공개한 open-source Thread 구현입니다. nRF Connect SDK, Zephyr, ESP-IDF, Silicon Labs SDK에 통합되어 있습니다.
 
 ### Sleepy End Device
 
@@ -128,33 +117,24 @@ ESP32·nRF52840·Nordic NCS·NXP·Infineon용 example이 모두 포함되어 있
 
 ### Matter cluster handler
 
-```cpp
-#include <app/clusters/on-off-server/on-off-server.h>
-#include <app-common/zap-generated/attributes/Accessors.h>
+On/Off command 처리 자체는 SDK의 On/Off cluster server가 맡고, application은 attribute가 바뀐 뒤 불리는 `MatterPostAttributeChangeCallback`에서 hardware를 움직입니다. `examples/lighting-app/linux/main.cpp`와 같은 구조입니다.
 
-using namespace chip;
+```cpp
+#include <app/ConcreteAttributePath.h>
+#include <app-common/zap-generated/ids/Attributes.h>
+#include <app-common/zap-generated/ids/Clusters.h>
+
 using namespace chip::app::Clusters;
 
-void OnOff::Attributes::OnOff::Changed(
-    EndpointId endpoint, bool value)
+void MatterPostAttributeChangeCallback(
+    const chip::app::ConcreteAttributePath &path,
+    uint8_t type, uint16_t size, uint8_t *value)
 {
-    if (endpoint == LIGHT_ENDPOINT_ID) {
-        if (value) {
-            gpio_set(LED_PIN, 1);
-        } else {
-            gpio_set(LED_PIN, 0);
-        }
+    if (path.mClusterId == OnOff::Id &&
+        path.mAttributeId == OnOff::Attributes::OnOff::Id &&
+        path.mEndpointId == LIGHT_ENDPOINT_ID) {
+        gpio_set(LED_PIN, *value ? 1 : 0);
     }
-}
-
-/* Matter generated handler — On command */
-bool emberAfOnOffClusterOnCallback(
-    CommandHandler *cmd, const ConcreteCommandPath &path,
-    const Commands::On::DecodableType &data)
-{
-    OnOffServer::Instance().setOnOffValue(path.mEndpointId,
-                                            OnOff::Commands::On::Id, false);
-    return true;
 }
 ```
 
@@ -196,41 +176,40 @@ Commissioning 과정은 PASE·인증서·CASE를 사용해 보호되지만, 전�
 
 Apple Home에 등록된 device를 *Google Home에도 등록*하려면:
 
-1. Apple Home에서 "share with Google" 선택. 또는 device를 commissioning mode로 다시 두고 Google Home app에서 add device.
-2. Google이 다른 NOC를 발급. Device는 두 NOC를 모두 보관.
-3. 양쪽 controller에서 control 가능.
+1. 이미 등록된 controller(Apple Home)에서 pairing mode를 켭니다. Controller가 device의 commissioning window를 열고 새 setup code를 보여 줍니다.
+2. 두 번째 controller(Google Home app)에서 그 code로 device를 추가합니다.
+3. Google fabric이 별도 NOC를 발급하고, device는 두 fabric의 NOC를 모두 보관합니다.
+4. 양쪽 controller에서 같은 device를 제어할 수 있습니다.
 
-지원 가능한 fabric 수는 Matter specification revision과 device resource·SDK 구현을 기준으로 확인합니다.
+Device가 지원하는 fabric 수는 Operational Credentials cluster의 `SupportedFabrics` attribute로 드러나며, spec은 최소 5개를 요구합니다.
 
 ### Border Router
 
-**Thread Border Router 후보:**
+**Thread Border Router 예:**
 
-- Apple TV 4K (2nd gen+), HomePod mini, Nest Hub Gen 2+, Echo Hub
-- 또는 Raspberry Pi 4/5 + nRF52840 dongle (OpenThread BR)
+- Thread radio가 들어간 smart home hub — Apple TV 4K·HomePod mini, Nest Hub (2nd gen) 등. 같은 제품군이라도 model별로 Thread 탑재 여부가 다르므로 사양표로 확인합니다.
+- 또는 Raspberry Pi + nRF52840 dongle 같은 RCP (OpenThread Border Router)
 
 **기능:**
 
 - 802.15.4 Thread ↔ Wi-Fi/Ethernet IPv6 routing
 - mDNS/DNS-SD service discovery
-- BR election (multiple BRs)
-- Thread Domain (multi-mesh)
+- SRP server — Thread device의 service 등록 (Thread 1.3)
+- 여러 BR이 있을 때의 redundancy
 
-Border Router 없으면 Thread mesh가 local subnet 안에서만 동작합니다. 한 home에 보통 BR이 2~3개 있습니다.
+Border Router가 없으면 Thread mesh 안의 device끼리만 통신하고, Wi-Fi·Ethernet 쪽 controller에는 닿지 못합니다.
 
 ### OTA — Matter Software Update
 
-**Matter OTA Provider cluster (`0x002A`):**
+**OTA Software Update Provider cluster(`0x0029`)·Requestor cluster(`0x002A`):**
 
-1. Vendor가 image를 cloud provider에 upload
-2. Device가 query (vendor·product·current version)
-3. Provider가 download URL 반환
-4. Device가 image download (HTTPS over IPv6)
-5. Signature verify (vendor key)
-6. Apply on next boot
-7. Confirm or revert
+1. Device(Requestor)가 Provider node에 `QueryImage`를 보냅니다(vendor ID·product ID·현재 version).
+2. 새 image가 있으면 Provider가 image URI를 돌려줍니다.
+3. Device가 image를 받습니다. 기본 경로는 Matter의 BDX(Bulk Data Transfer)입니다.
+4. Device가 image를 검증하고 `ApplyUpdateRequest`로 적용 시점을 확인받습니다.
+5. 재부팅 후 새 firmware로 올라오면 `NotifyUpdateApplied`로 알립니다.
 
-PSA Firmware Update API와 호환되어 TF-M project와 자연스럽게 합쳐집니다.
+Device 안에서 image를 검증·설치·되돌리는 부분은 platform의 bootloader 몫입니다. TF-M 기반 device라면 앞 편의 MCUboot chain이 그 역할을 합니다.
 
 ### Diagnostic — neighbor info
 
@@ -248,37 +227,19 @@ Production device는 link quality·RSSI를 telemetry로 보내 mesh 건강도를
 
 ## 측정 / 성능 비교
 
-Thread mesh 1080 m² 가정, nRF52840 router 5개, sleepy device 10개 기준입니다.
+Mesh 성능은 router 수·배치·hop 수·간섭에 따라 달라지므로 설치 환경에서 측정합니다. 기록할 항목입니다.
 
-| 지표 | 값 |
+| 지표 | 측정 방법 |
 |------|------|
-| Commissioning (BLE → CASE) | 15~30 sec |
-| PASE handshake | 1~2 sec |
-| Light on/off command latency | 50~150 ms (1-2 hop), 200~500 ms (3+ hop) |
-| Sleepy device wake → response | 0.5~2 sec |
-| Mesh self-heal (router 추가/제거) | 10~30 sec |
-| OTA 1 MB image | 2~5 min (Thread), 30~60 sec (Wi-Fi) |
+| Commissioning 시간 (BLE → CASE) | controller log timestamp |
+| Command latency (hop 수별) | controller 송신 → device attribute report |
+| Sleepy device 응답 시간 | poll period·CSL 설정별 |
+| Mesh 회복 시간 | router 제거 후 route 재수렴까지 |
+| OTA 시간 | 같은 image를 Thread·Wi-Fi로 비교 |
 
-Battery life (sleepy end device, CR2032 235 mAh)입니다.
+Sleepy End Device의 배터리 수명은 *평균 전류*로 추정합니다. 수명(h) ≈ 배터리 유효 용량(mAh) / 평균 전류(mA)이고, 평균 전류는 sleep 전류와 poll·TX·센서 측정 때의 burst 전류를 duty cycle로 가중 평균한 값입니다. 전류 프로파일러로 실제 파형을 잡아 계산하고, 저온·노화에 따른 유효 용량 감소를 여유로 둡니다.
 
-| Poll period | Average current | Battery life |
-|---|---|---|
-| 1 sec | 80 µA | 4 개월 |
-| 5 sec | 25 µA | 13 개월 |
-| 30 sec | 8 µA | 3.4 년 |
-| 300 sec | 3 µA | 9 년 |
-
-Door sensor·temperature sensor는 5분 poll로 *수년* 운영이 가능합니다.
-
-Power 비교 (light bulb 동등 idle)입니다.
-
-| Transport | Idle power | 평균 current |
-|---|---|---|
-| Thread router | 30 mW | 7 mA @ 3.3V |
-| Thread SED | 0.3 mW | 100 µA |
-| Wi-Fi | 200~500 mW | 60-150 mA (DTIM 3) |
-
-Battery 운영 device는 사실상 *Thread*가 강제됩니다.
+Router 역할은 radio를 항상 켜 두어야 하므로 상시 전원 device(전구·플러그)가 맡고, 배터리 device는 SED·SSED로 둡니다. Wi-Fi device는 association 유지 비용 때문에 배터리 운영 설계가 더 까다롭습니다.
 
 ## 자주 보는 함정
 
@@ -288,58 +249,41 @@ Border Router 없이 mesh만 구성하면 device끼리는 통신이 되지만 cl
 
 > 동일 SoC에서 Wi-Fi + 802.15.4 동시 전송
 
-ESP32-C6처럼 Wi-Fi 2.4 GHz와 802.15.4 2.4 GHz를 한 칩에서 돌리면 같은 antenna를 시간으로 나눠 쓰게 되고, 그 과정에서 packet loss가 생깁니다. Coexistence config(`CONFIG_ESP_COEX_*`)로 time-sharing을 설정합니다.
+ESP32-C6처럼 Wi-Fi 2.4 GHz와 802.15.4 2.4 GHz를 한 칩에서 돌리면 같은 RF를 시간으로 나눠 쓰게 되고, 그 과정에서 packet loss가 생길 수 있습니다. Coexistence config(`CONFIG_ESP_COEX_*`)로 time-sharing을 설정합니다.
 
 > Sleepy device poll period 너무 짧음
 
 ```c
-otLinkSetPollPeriod(ot, 100);   /* 100 ms — battery 며칠 */
+otLinkSetPollPeriod(ot, 100);   /* 100 ms마다 radio를 켜 parent에 poll */
 ```
 
-1초 이상이 표준입니다. Latency가 critical하면 push-based(parent → child) 방식을 활용합니다.
+Poll period는 응답 지연과 배터리 수명을 맞바꾸는 값이므로 위 평균 전류 계산으로 정합니다. 짧은 지연과 배터리를 함께 원하면 Thread 1.2의 CSL(SSED)로 parent가 정해진 시점에 child에게 보내게 하는 방식을 검토합니다.
 
 > Certificate provisioning 누락
 
-```text
-DAC(Device Attestation Certificate) 없이 출하
-→ commissioning fail
-```
-
-각 device가 *factory-provisioned* DAC chain을 가져야 합니다. PSA ITS 또는 secure element에 저장합니다.
+DAC(Device Attestation Certificate) 없이 출하하면 commissioner의 device attestation 단계에서 commissioning이 실패합니다. 각 device가 *factory-provisioned* DAC chain(DAC·PAI)과 Certification Declaration을 가져야 하고, DAC private key는 PSA ITS나 secure element처럼 보호된 저장소에 둡니다.
 
 > Fabric overflow
 
-```text
-Matter 1.0~1.2 — 5 fabric max
-1.3+ — 16
-1.4+ — 더 큰 fabric
-```
-
-지원 Matter 버전을 확인하고 한도를 알려 줍니다.
+Spec은 device가 fabric을 최소 5개 지원하도록 요구하고, 실제 한도는 구현이 정합니다. connectedhomeip SDK의 기본값은 `CHIP_CONFIG_MAX_FABRICS` 16입니다. 한도가 차면 새 ecosystem 추가가 실패하므로, `SupportedFabrics`·`CommissionedFabrics` attribute로 현재 상태를 확인하고 사용하지 않는 fabric을 제거하도록 안내합니다.
 
 > OTA image rollback 미구현
 
-```text
-새 firmware boot 실패 → 영구 brick
-```
-
-MCUboot A/B + confirmation timeout 패턴으로 *자동 revert*를 구현합니다.
+새 firmware가 boot에 실패했을 때 되돌릴 image가 없으면 device를 현장에서 복구할 수 없습니다. MCUboot swap mode처럼 이전 image를 보존하고, 새 image가 스스로 정상 동작을 확인(confirm)하지 않으면 다음 reset에서 이전 image로 돌아가는 *자동 revert*를 구현합니다.
 
 ## 정리
 
 - Matter는 여러 ecosystem의 상호운용을 목표로 하는 IoT application-layer 표준입니다.
-- Thread 1.3 802.15.4 mesh + 6LoWPAN이 저전력 transport, Wi-Fi/Ethernet은 상시 전원용입니다.
+- Thread(802.15.4 mesh + 6LoWPAN)가 저전력 transport이고, Wi-Fi/Ethernet은 주로 상시 전원 device가 씁니다.
 - Multi-fabric으로 한 device가 동시에 여러 ecosystem에 등록됩니다.
-- Commissioning은 PASE → DAC verify → NOC issue → CASE 순으로 end-to-end secure입니다.
-- OpenThread + Matter SDK는 nRF52840·ESP32-H2/C6·Silicon Labs·NXP에서 모두 동작합니다.
+- Commissioning은 PASE → DAC verify → NOC issue → CASE 순으로 진행됩니다.
+- OpenThread와 Matter SDK는 Nordic·Espressif·Silicon Labs·NXP 등의 SDK에 통합되어 있습니다.
 - Sleepy End Device의 배터리 수명은 poll·재전송·센서 duty cycle을 포함해 측정합니다.
 - Border Router(Apple TV·Nest Hub·OpenThread BR)가 mesh와 internet을 잇습니다.
 - Matter 지원만으로 EU CRA·UK PSTI 등 규제 요구사항이 자동 충족되지는 않으며, secure boot·OTA·attestation과 제품 평가를 별도로 확인합니다.
 
-**Modern Embedded Recipes 시리즈 완성**입니다(Part 1~6, 39편).
-
 ## 관련 항목
 
-- [6-08: TF-M TrustZone](/blog/embedded/modern-recipes/part12-11-tfm-trustzone)
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [12-11: TF-M TrustZone](/blog/embedded/modern-recipes/part12-11-tfm-trustzone)
+- [12-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
 - [RTOS 4-11: TrustZone·TF-M](/blog/embedded/rtos/practical-internals/part4-11-trustzone-tfm)
