@@ -25,99 +25,59 @@ DDR DIMM과 달리 CXL 메모리 디바이스는:
 `numastat`에서 CXL 노드 사용량 확인:
 
 ```bash
-# 전체 노드 통계
+# 전체 노드 통계 (노드별 meminfo)
 $ numastat -m
-                  Node 0     Node 1     Node 2 (CXL)
-MemTotal      262144000  262144000  274877906944
-MemFree         5120000     6291000    8589934592
-MemUsed       257024000  255853000  266287972352
-Anon          198976000  201342000  198945792000
-Active(file)    2048000     1532000     1073741824
 
 # 프로세스별 노드 할당
 $ numastat -p <pid>
-Per-node process memory usage (in MBs)
-                Node 0  Node 1  Node 2  Total
-Huge               0      0       0      0
-Heap            1234   2345    98765  102344
-Stack              0      0       0      0
-Private         1098   1872    87654   90624
-----------------------------------
-Total           2332   4217   186419  192968
 ```
 
-*Node 2 (CXL)에 메모리 의외로 많이* 가 있으면 *원하지 않은 placement*입니다. *`mbind()` 또는 `numactl`로 제어*해야 합니다.
+*CXL 노드에 메모리가 의외로 많이* 잡혀 있으면 *원하지 않은 placement*입니다. *`mbind()` 또는 `numactl`로 제어*해야 합니다.
 
 ## cxl-cli로 디바이스 상태
 
 ```bash
-# 1. 전체 토폴로지
+# 1. region과 target 토폴로지
 $ cxl list -RT
-[
-  {
-    "memdev":"mem0",
-    "ram_size":274877906944,
-    "host":"0000:5e:00.0"
-  }
-]
 
-# 2. 디바이스 health
-$ cxl health -m mem0
-{
-  "memdev":"mem0",
-  "health_status":"normal",
-  "media_status":"normal",
-  "ext_status":"normal",
-  "life_used_percent":12,
-  "temperature":42,
-  "dirty_shutdown_count":3
-}
+# 2. 디바이스 health (Get Health Info, mailbox opcode 0x4200)
+$ cxl list -m mem0 -H
 
-# 3. Poison list — bad media 추적
-$ cxl list -m mem0 -P
-{
-  "poison":[
-    {"address":"0x80012340", "length":64, "source":"injected"},
-    {"address":"0x80015800", "length":64, "source":"internal"}
-  ]
-}
+# 3. Poison list — media error 추적 (Get Poison List, opcode 0x4300)
+$ cxl list -m mem0 -L
 
-# 4. Event log
-$ cxl monitor -m mem0
-[2026-06-18 09:10:23] Info: Mailbox cmd 0x4400 completed in 1.2ms
-[2026-06-18 09:11:45] Warning: Correctable ECC error at 0x80045000
-[2026-06-18 09:12:01] Failure: Media error at 0x80067800 — added to poison list
+# 4. CXL trace event 모니터링
+$ cxl monitor
 ```
 
-## RAS 이벤트 분류
+`-H` 출력의 `health` 객체에는 `life_used_percent`, `temperature`, `dirty_shutdowns`, `volatile_errors`, `pmem_errors`와 `media_*`·`ext_*` 상태 필드가 들어 있습니다. `-L` 출력은 `media_errors` 배열로 `offset`·`length`·`source`를 줍니다(ndctl `Documentation/cxl/cxl-list.txt`). 전체 예시는 [Embedded Debugging Ch 9](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot)에 있습니다.
 
-| 등급 | 의미 | 대응 |
-|------|------|------|
-| Information | 정보성 (mailbox completion 등) | 무시 가능 |
-| Warning | Correctable error | 카운트 모니터링 |
-| Failure | Uncorrectable, 단일 영역 | poison list 격리, 페이지 unmap |
-| Fatal | 디바이스 오류 | 디바이스 reset 또는 교체 |
+## Event Log 분류
 
-Linux 6.2+에서는 *Failure 이벤트 발생 시* *자동 page offline*과 *MCE 이벤트 발생*이 통합됩니다.
+CXL 디바이스의 Event Log는 네 종류입니다(`drivers/cxl/core/trace.h`).
+
+| 로그 | 커널 enum |
+|------|-----------|
+| Informational | `CXL_EVENT_TYPE_INFO` |
+| Warning | `CXL_EVENT_TYPE_WARN` |
+| Failure | `CXL_EVENT_TYPE_FAIL` |
+| Fatal | `CXL_EVENT_TYPE_FATAL` |
+
+드라이버는 이 로그들을 Get Event Records(0x0100)로 읽어 trace event로 내보냅니다.
 
 ## DAMON으로 access 패턴
 
 CXL 메모리가 *cold tier*로 잘 활용되는지 확인:
 
 ```bash
-# DAMON 활성화
+# DAMON 활성화 (kdamond 설정 뒤)
 $ echo on > /sys/kernel/mm/damon/admin/kdamonds/0/state
 
 # 결과 분포
 $ damo report access
-target_id  region(KB)  access(%)  node
-0          0-32M       82.3       0  # DDR — hot
-0          32M-128M    45.1       0  # DDR — warm
-0          128M-1G     8.2        2  # CXL — cool
-0          1G-256G     1.1        2  # CXL — cold
 ```
 
-*CXL 노드의 access %*가 *DDR 대비 작아야 정상*입니다. 비슷하면 *promotion이 잘 안 되고 있는 신호*.
+*CXL 노드의 access 빈도*가 *DDR보다 낮으면* tier 배치가 의도대로 동작하고 있습니다. 비슷하면 *promotion이 잘 안 되고 있는 신호*입니다.
 
 ## 자주 만나는 함정
 
@@ -127,29 +87,27 @@ target_id  region(KB)  access(%)  node
 |------|------|
 | CXL 노드 메모리 안 보임 | `cxl create-region` 안 함 — region 생성해야 사용 가능 |
 | `numastat`에 node 2 없음 | `daxctl reconfigure-device -m system-ram` 누락 |
-| region은 있는데 노드 용량이 예상보다 작음 | interleave 설정에서 일부 디바이스가 빠짐 — `cxl list -RT`로 endpoint 수 확인 |
-| DAMON CXL 노드 무시 | DAMON 6.2+ tiered memory awareness 활성 확인 |
-| 승격·강등이 일어나지 않음 | `numa_balancing`이 꺼져 있거나 tiering 정책 미설정 |
-| 대역폭은 정상인데 지연만 나쁨 | 원격 노드 접근 — `numactl --membind`로 배치 확인 |
+| 승격(promotion)이 일어나지 않음 | `/proc/sys/kernel/numa_balancing`에 `NUMA_BALANCING_MEMORY_TIERING`(2)이 설정되지 않음 |
+| 강등(demotion)이 일어나지 않음 | `/sys/kernel/mm/numa/demotion_enabled`가 꺼져 있음 |
 
-health가 warning으로 떨어지거나, poison rate가 뛰거나, `cxl monitor`가 응답하지 않거나, temperature가 비현실적인 값을 내는 등 디바이스 자체의 이상은 [Embedded Debugging Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot#자주-만나는-함정)에 정리돼 있습니다.
+health 이상, media error 증가, `cxl monitor`에 이벤트가 나오지 않는 경우 등 디바이스 자체의 이상은 [Embedded Debugging Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot#자주-만나는-함정)에 정리돼 있습니다.
 
 ## 진단 워크플로
 
 1. `numastat -m` — 노드별 전체 통계
-2. `cxl health -m memX` — 디바이스 자체 상태
-3. `cxl list -m memX -P` — poison list 변화 추적
-4. `cxl monitor -m memX` — 실시간 event log
+2. `cxl list -m memX -H` — 디바이스 자체 상태
+3. `cxl list -m memX -L` — poison list 변화 추적
+4. `cxl monitor` — CXL trace event
 5. `damo report access` — access pattern 분포
 6. `dmesg | grep -E "cxl|mce|memory_failure"` — kernel 측 이벤트
 
 ## 정리
 
 - CXL 메모리는 *별도 NUMA 노드*로 등록되어 `numastat`에서 *디바이스 관점* 진단이 가능합니다.
-- *cxl-cli*가 *디바이스 health·poison·event*를 노출하는 표준 도구입니다.
-- *RAS 이벤트는 Information·Warning·Failure·Fatal* 네 단계로 분류되며 *Failure 이상에서 page offline*이 trigger됩니다.
+- *cxl-cli*의 `cxl list -H`·`-L`과 `cxl monitor`가 *디바이스 health·poison·event*를 보여 줍니다.
+- *Event Log는 Informational·Warning·Failure·Fatal* 네 종류입니다.
 - *DAMON*으로 *CXL 노드의 access pattern*을 확인해 *tier 정렬이 잘 동작하는지* 검증합니다.
-- 운영에서는 *poison rate·life_used·dirty_shutdown* 세 지표를 *장기 추적*합니다.
+- 운영에서는 *media error 수·`life_used_percent`·`dirty_shutdowns`* 세 지표를 *장기 추적*합니다.
 
 ## 다음 장 예고
 
