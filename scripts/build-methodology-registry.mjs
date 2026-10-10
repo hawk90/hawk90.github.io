@@ -35,6 +35,9 @@ const items = triage.items.filter(({ category }) => category === 'methodology').
     dependsOn: prior?.dependsOn ?? [],
     evidence: prior?.evidence ?? [],
     residualRisk: prior?.residualRisk ?? null,
+    // Added later to routed items. Rebuilding used to drop it, and
+    // audit:methodology then reported 25 missing-execution-lane findings.
+    ...(prior?.executionLane !== undefined && { executionLane: prior.executionLane }),
   };
 });
 const registry = {

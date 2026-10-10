@@ -1,9 +1,12 @@
 #!/usr/bin/env node
 // Records concrete AP-T controls already enforced by the release contract. Preview by default.
 
-import { readFile, writeFile } from 'node:fs/promises';
+import { readdir, readFile, writeFile } from 'node:fs/promises';
 
 const apply = process.argv.includes('--apply');
+// --refresh re-checks controls already recorded as remediated; without it a
+// condition that stopped holding is never looked at again.
+const refresh = process.argv.includes('--refresh');
 const archive = 'archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273';
 const path = `${archive}/remediation-plan/category-registries/quality.json`;
 const registry = JSON.parse(await readFile(path, 'utf8'));
@@ -16,6 +19,8 @@ const [release, deploy, config, frontmatter, links, search, frontmatterReport, t
 const searchParity = await readFile('reports/quality/search-page-parity.md', 'utf8').catch(() => '');
 const qualityContracts = await readFile('reports/quality/contracts.md', 'utf8').catch(() => '');
 const distributionFeeds = await readFile('reports/quality/distribution-feeds.md', 'utf8').catch(() => '');
+// The corpus as it is now; a fixed 3387 went stale when posts were added.
+const corpusSize = (await readdir('src/content/blog', { recursive: true })).filter((entry) => entry.endsWith('.md')).length;
 const controls = [
   ['AP-T-01', /gate:tooling/.test(release) && /audit:product-experience/.test(release), 'multi-layer release contract'],
   ['AP-T-02', /topics: z\.array\(z\.string\(\)\)\.min\(1\)/.test(config) && /date: z\.coerce\.date\(\)/.test(config), 'validated content schema'],
@@ -28,7 +33,7 @@ const controls = [
   ['AP-T-18', /gate:tooling/.test(release) && /gate:secrets/.test(release) && /build/.test(release), 'layered checks before build'],
   ['AP-T-19', /gate:security-admin/.test(release) && /--artifact/.test(release), 'generated artifact inspection'],
   ['AP-T-20', /Files scanned/.test(links) && /audit:links/.test(release), 'corpus-wide internal-link audit'],
-  ['AP-T-21', /Markdown documents scanned: 3387/.test(frontmatterReport), 'large-corpus parser coverage'],
+  ['AP-T-21', new RegExp(`Markdown documents scanned: ${corpusSize}\\b`).test(frontmatterReport), 'large-corpus parser coverage'],
   ['AP-T-25', /--artifact/.test(release), 'dist artifact validation'],
   ['AP-T-36', /PASS dictionary integrity/.test(search), 'search quality regression contract'],
   ['AP-T-37', /const cases/.test(search) && /PCI Express/.test(search) && /RISC-V ISA/.test(search), 'golden query set'],
@@ -44,7 +49,7 @@ const controls = [
   ['AP-T-42', /PASS search-publication-filter/.test(qualityContracts), 'publication-aware search contract'],
   ['AP-T-43', /PASS search-canonical-id/.test(qualityContracts), 'canonical search URL contract'],
   ['AP-T-74', /PASS verification-separate-from-updated/.test(qualityContracts), 'separate verification metadata contract'],
-  ['AP-T-83', /PASS published-hub-draft-guard/.test(qualityContracts), 'published hub draft guard'],
+  ['AP-T-83', /PASS curated-guides-must-resolve/.test(qualityContracts), 'curated guides resolve to published posts'],
   ['AP-T-92', /PASS rss-publication-filter/.test(distributionFeeds), 'RSS publication boundary'],
   ['AP-T-93', /PASS sitemap-admin-exclusion/.test(distributionFeeds) && /PASS built-sitemap-unique/.test(distributionFeeds), 'sitemap uniqueness boundary'],
   ['AP-T-61', /PASS search-escape-close/.test(qualityContracts), 'search Escape close contract'],
@@ -65,9 +70,9 @@ const controls = [
   ['AP-T-45', /PASS search-ranking-regression/.test(qualityContracts), 'automated search quality regression'],
   ['AP-T-85', /Unique slugs: [1-9][0-9]*\n- Findings: 0/.test(searchParity), 'generated canonical slug uniqueness'],
 ];
-const candidates = controls.map(([id, ok, name]) => ({ id, ok, name, item: registry.items.find((item) => item.id === id) })).filter(({ item }) => item?.disposition === 'unassessed');
+const candidates = controls.map(([id, ok, name]) => ({ id, ok, name, item: registry.items.find((item) => item.id === id) })).filter(({ item }) => item?.disposition === 'unassessed' || (refresh && item?.disposition === 'remediated'));
 const failed = candidates.filter(({ ok }) => !ok);
-console.log(`Quality controls: ${candidates.length - failed.length}/${candidates.length} eligible controls pass.${apply ? ' Applying.' : ' Preview only; pass --apply to record.'}`);
+console.log(`Quality controls: ${candidates.length - failed.length}/${candidates.length} eligible controls pass.${apply ? ' Applying.' : ' Preview only; pass --apply to record.'}${refresh ? ' Refreshing existing local evidence.' : ''}`);
 for (const control of candidates) console.log(`- ${control.ok ? 'PASS' : 'FAIL'} ${control.id} -> ${control.name}`);
 if (!apply) process.exit(failed.length ? 1 : 0);
 if (failed.length) throw new Error(`Refusing failed controls: ${failed.map(({ id }) => id).join(', ')}`);

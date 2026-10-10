@@ -31,7 +31,9 @@ try {
   run('git', ['clone', bundle, clone]);
   run('git', ['fsck', '--no-reflogs', '--connectivity-only'], clone);
   const restoredDocuments = output('git', ['ls-files', 'src/content/blog'], clone).split('\n').filter((file) => file.endsWith('.md'));
-  if (restoredDocuments.length !== 3387) throw new Error(`restored source inventory is incomplete: ${restoredDocuments.length} Markdown documents`);
+  // Against what HEAD holds here, not a fixed number (3387 went stale).
+  const expected = output('git', ['ls-tree', '-r', '--name-only', 'HEAD', 'src/content/blog']).split('\n').filter((file) => file.endsWith('.md')).length;
+  if (restoredDocuments.length !== expected) throw new Error(`restored source inventory is incomplete: ${restoredDocuments.length} of ${expected} Markdown documents`);
   if (full) {
     run('npm', ['ci', '--prefer-offline', '--ignore-scripts', '--no-audit'], clone);
     run('npm', ['run', 'check'], clone);
