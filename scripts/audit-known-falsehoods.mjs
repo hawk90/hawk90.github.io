@@ -7,8 +7,10 @@
 // it — so each fix is recorded once and enforced everywhere.
 //
 // Code blocks are scanned too: invented lspci lines and Kconfig symbols live
-// there. A match inside double quotes is skipped; that is how a "흔한 오해"
-// heading quotes the wrong claim in order to refute it.
+// there. So are the frontmatter `title` and `description`, which become the
+// page title and search snippet. The one exemption is a heading that quotes
+// the wrong claim in order to refute it (### "HBR은 Host-Based Routing");
+// quotes anywhere else — JSON in a code block, an f-string — do not exempt.
 //
 // Usage:
 //   node scripts/audit-known-falsehoods.mjs                  # published posts
@@ -50,12 +52,12 @@ function markdownFiles(path) {
     .map((name) => join(path, name));
 }
 
-/** True when `index` sits between a pair of straight or curly double quotes. */
-function insideQuotes(line, index) {
-  const before = line.slice(0, index);
-  const straight = (before.match(/"/g) ?? []).length;
-  const opened = (before.match(/“/g) ?? []).length - (before.match(/”/g) ?? []).length;
-  return straight % 2 === 1 || opened > 0;
+/** True for a Markdown heading whose text is a quoted claim, and the match is inside the quotes. */
+function quotedMythHeading(line, index) {
+  const heading = /^#{2,6}\s+["“]/.exec(line);
+  if (!heading) return false;
+  const close = line.slice(heading[0].length).search(/["”]/);
+  return close !== -1 && index < heading[0].length + close;
 }
 
 const files = [...new Set(targets.flatMap(markdownFiles))].sort();
@@ -67,12 +69,14 @@ for (const file of files) {
   const frontmatter = /^---\r?\n([\s\S]*?)\r?\n---/.exec(text);
   if (!includeDrafts && frontmatter && /^draft:\s*true\s*$/m.test(frontmatter[1])) continue;
   scanned++;
-  const bodyStart = frontmatter ? frontmatter[0].split('\n').length : 0;
   const lines = text.split('\n');
-  for (let i = bodyStart; i < lines.length; i++) {
+  const frontmatterEnd = frontmatter ? frontmatter[0].split('\n').length : 0;
+  for (let i = 0; i < lines.length; i++) {
+    // In the frontmatter only title and description are prose.
+    if (i < frontmatterEnd && !/^(title|description):/.test(lines[i])) continue;
     for (const rule of rules) {
       for (const match of lines[i].matchAll(rule.re)) {
-        if (insideQuotes(lines[i], match.index)) continue;
+        if (quotedMythHeading(lines[i], match.index)) continue;
         hits.push(`${relative('.', file)}:${i + 1}  [${rule.id}] "${match[0]}" — ${rule.correction}`);
       }
     }
