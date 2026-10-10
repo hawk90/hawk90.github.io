@@ -25,7 +25,7 @@ topics: ["embedded"]
 | LPDDR4 | 최대 4266 MT/s | 1.1V (LPDDR4X 0.6V) |
 | LPDDR5 | 최대 6400 MT/s | 0.5V (코어 VDD2H 1.05V) |
 
-LV는 low voltage를 의미하고, LP는 low power를 의미합니다. 둘은 다른 표준입니다.
+DDR3L의 L은 low voltage, LPDDR의 LP는 low power를 뜻합니다. 둘은 다른 표준입니다.
 
 ## JEDEC Init Sequence (DDR3)
 
