@@ -49,7 +49,9 @@ pre-commit:
             for f in {staged_files}; do
               tex="${f%.*}.tex"
               [ -f "$tex" ] || continue
-              ./scripts/build-diagrams.sh --check "$PWD/$tex" | grep '^✗' && status=1
+              # Keep the exit code: piping into grep let a crashed check pass.
+              out=$(./scripts/build-diagrams.sh --check "$PWD/$tex" 2>&1) || status=1
+              printf '%s\n' "$out" | grep '^✗' && status=1
             done ;;
         esac
         exit $status
