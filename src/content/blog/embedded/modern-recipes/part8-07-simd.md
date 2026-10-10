@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SIMD = 한 명령으로 여러 데이터."** 4~16배 가속이 가능하지만 코드보다 *데이터 layout*이 효과를 결정합니다.
+> **"SIMD = 한 명령으로 여러 데이터."** 여러 배 가속이 가능할 수 있지만 실제 효과는 ISA·메모리 대역폭·데이터 layout·컴파일러와 workload로 결정됩니다.
 
 ## 어떤 상황에서 쓰나
 
-오디오 mixer, 카메라 frame conversion, IMU sensor fusion 같은 *동일 연산 반복*은 SIMD의 대표 무대입니다. 1 M element float add를 scalar로 돌리면 1.0 s, NEON으로는 0.25 s, AVX-512로는 0.06 s 수준입니다.
+오디오 mixer, 카메라 frame conversion, IMU sensor fusion 같은 *동일 연산 반복*은 SIMD의 대표 무대입니다. 1 M element float add의 시간과 가속 배수는 ISA, compiler, 메모리 계층과 측정 조건에 따라 달라집니다.
 
 문제는 SIMD가 친화적인 코드를 *처음부터* 짜야 효과가 난다는 점입니다. AoS 구조를 그대로 둔 채 intrinsics만 끼워 넣으면 load/store가 모두 cross-line이 되어 기대만큼 빨라지지 않습니다.
 
@@ -141,7 +141,7 @@ void add_sve(float *a, float *b, float *c, int N) {
 }
 ```
 
-128~2048 bit가 runtime에 결정되는 length-agnostic 코드입니다. Neoverse V1/V2와 Cortex-X 계열의 미래 표준입니다.
+SVE의 vector length는 구현에서 결정되고 length-agnostic 코드는 이를 런타임에 질의해 처리합니다. 지원 ISA와 vector length는 CPU별로 확인해야 하며 특정 제품군의 공통 미래 표준으로 단정할 수 없습니다.
 
 ### x86 AVX2
 
@@ -178,7 +178,7 @@ for (int i = 0; i < N; i++) {
 }
 ```
 
-GCC, Clang, Intel ICC 모두 지원합니다. Vendor 독립이라는 점이 큰 장점입니다.
+GCC·Clang 등 여러 컴파일러가 지원하지만 pragma의 진단·정렬 가정·vectorization 결과는 컴파일러와 옵션에 따라 다릅니다.
 
 ### Multiple accumulator로 ILP 확보
 
@@ -196,7 +196,7 @@ for (int i = 0; i + 16 <= N; i += 16) {
 }
 ```
 
-FMA latency가 3~4 cycle인 Cortex-A에서 누산기 하나만 쓰면 매 iteration이 직렬화됩니다. 4개로 늘려 latency를 *숨기면* throughput이 거의 4배가 됩니다.
+FMA latency와 실행 포트 수는 Cortex-A 세대와 구현에 따라 다릅니다. 독립 누산기를 늘리면 의존성을 줄일 수 있지만, throughput 증가는 레지스터 압박·메모리 대역폭과 함께 측정해야 합니다.
 
 ### Saturating arithmetic
 
@@ -211,25 +211,25 @@ vst1q_u8(out, r);
 
 ## 측정 / 성능 비교
 
-1 M element float add (Cortex-A72)입니다.
+예시 benchmark 표입니다. 동일한 데이터 크기라도 cache 상태·compiler·주파수·메모리 배치에 따라 결과가 달라지므로 대상 시스템에서 재측정해야 합니다.
 
 | 구현 | 시간 | speedup |
 |---|---|---|
-| scalar -O2 | 3.20 ms | 1.0x |
-| scalar -O3 auto-vec | 0.85 ms | 3.8x |
-| NEON intrinsic | 0.78 ms | 4.1x |
-| NEON + 4 acc | 0.42 ms | 7.6x |
+| scalar -O2 | 측정 필요 | 기준 |
+| scalar -O3 auto-vec | 측정 필요 | 측정 필요 |
+| NEON intrinsic | 측정 필요 | 측정 필요 |
+| NEON + 4 acc | 측정 필요 | 측정 필요 |
 
 Auto-vectorize만 잘 풀려도 4배에 도달합니다. ILP까지 챙기면 한 단계 더 갑니다.
 
 ```text
 x86 AVX2 1 M float add
-scalar                 1.40 ms
-AVX2 (8-wide)          0.22 ms    6.4x
-AVX-512 (16-wide)      0.11 ms    12.7x
+scalar                 측정 필요
+AVX2 (8-wide)          측정 필요  측정 필요
+AVX-512 (16-wide)      측정 필요  측정 필요
 ```
 
-Vector width가 그대로 speedup으로 이어지는 이상적 경우입니다.
+Vector width가 그대로 speedup으로 이어지는 것은 메모리 대역폭과 loop overhead가 충분하지 않을 때의 이상적인 경우에 가깝습니다.
 
 ## 자주 보는 함정
 
@@ -254,8 +254,8 @@ Scalar tail을 붙이거나 SVE/MVE의 predication을 활용합니다.
 > Misalignment 무시
 
 ```c
-float *p = malloc(N * sizeof(float));   /* 8B alignment */
-float32x4_t v = vld1q_f32(p);           /* 16B aligned가 빠름 */
+float *p = malloc(N * sizeof(float));   /* 필요한 정렬은 구현·allocator 확인 */
+float32x4_t v = vld1q_f32(p);           /* 정렬 요구와 성능은 ISA 확인 */
 ```
 
 `aligned_alloc(16, ...)` 또는 `alignas(16)`을 씁니다.
@@ -280,7 +280,7 @@ SIMD를 진지하게 쓸 때는 SoA 변환이 거의 필수입니다.
 
 ## 정리
 
-- SIMD는 4~16배 가속이 가능하지만 데이터 layout이 성능을 결정합니다.
+- SIMD는 여러 배 가속이 가능할 수 있지만 데이터 layout과 메모리 계층이 성능을 좌우합니다.
 - Auto-vectorize + `restrict` + SoA가 첫 단계입니다.
 - Intrinsics는 정확한 통제를 주는 대신 vendor lock-in을 만듭니다.
 - OpenMP SIMD pragma는 portable한 hint입니다.

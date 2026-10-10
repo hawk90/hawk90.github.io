@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Zero-copy = buffer를 핸들로만 넘기고, 데이터 자체는 옮기지 않는다."** Sensor에서 wire까지 *fd 하나*만 전달하는 그림이 목표입니다.
+> **"Zero-copy = 가능한 경로에서 불필요한 CPU 복사를 줄이는 것."** Sensor에서 wire까지 fd/핸들로 연결할 수 있어도 드라이버·IOMMU·포맷 변환·동기화 때문에 실제 복사나 메모리 접근이 남을 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
-4K 60fps 카메라 한 대만 받아도 raw 영상은 약 1.5 GB/s입니다. Camera driver → user buffer → encoder input → encoder output → socket까지 네 번 복사하면 6 GB/s memcpy가 발생합니다. LPDDR4 한 channel의 대역폭 절반이 memcpy로 증발합니다.
+4K 60fps 카메라의 raw 대역폭은 픽셀 포맷과 stride에 따라 달라집니다. Camera driver → user buffer → encoder input → encoder output → socket처럼 여러 경계를 거치면 각 경로에서 복사가 추가될 수 있고, 실제 메모리 트래픽은 버퍼 수명과 캐시 정책을 포함해 측정해야 합니다. LPDDR 대역폭의 어느 정도를 소모하는지는 SoC와 동시 workload에 따라 달라집니다.
 
 5G UPF나 자율주행 sensor fusion에서는 µs 단위 latency가 중요합니다. 데이터를 복사하는 시간은 *전송보다 길어질 수 있고* CPU cache까지 오염시킵니다. Pipeline이 길어질수록 zero-copy의 이득이 커집니다.
 
@@ -44,7 +44,7 @@ struct dma_buf_attachment *attach = dma_buf_attach(imported, dev);
 struct sg_table *sgt = dma_buf_map_attachment(attach, DMA_FROM_DEVICE);
 ```
 
-같은 physical buffer가 두 driver의 sg_table에 매핑됩니다. User space는 fd만 들고 다니고 buffer 자체는 절대 user 공간으로 올라오지 않습니다.
+하나의 dma-buf 객체가 각 장치의 주소 공간에 서로 다른 scatter-gather 매핑으로 연결될 수 있습니다. User space는 fd를 전달하지만, CPU 접근이 필요한 경우에는 별도 매핑과 cache 동기화가 필요합니다.
 
 ### V4L2 카메라에서 DMA-BUF fd 얻기
 
@@ -68,7 +68,7 @@ int dma_fd = exp.fd;
 encoder_input(dma_fd);   /* 같은 buffer */
 ```
 
-User code는 fd 정수만 encoder로 넘깁니다. memcpy가 한 번도 일어나지 않습니다.
+User code는 fd 정수만 encoder로 넘길 수 있습니다. 다만 드라이버가 포맷 변환·stride 보정·fallback buffer를 사용하면 복사가 남을 수 있으므로 trace와 DMA 경로로 확인해야 합니다.
 
 ### DRM/KMS로 카메라 buffer를 그대로 화면에
 
@@ -82,7 +82,7 @@ drmModeAddFB2(drm_fd, w, h, format, &prime.handle, ...);
 drmModeSetCrtc(drm_fd, ...);
 ```
 
-자동차 클러스터, 임베디드 HMI, Wayland 컴포지터가 표준으로 쓰는 흐름입니다.
+자동차 클러스터, 임베디드 HMI, Wayland 컴포지터에서 선택되는 흐름 중 하나입니다. 지원 포맷과 modifier, fencing은 각 DRM·카메라·컴포지터 조합을 확인해야 합니다.
 
 ### `sendfile` — file → socket 직접
 
@@ -107,7 +107,7 @@ splice(file_fd, NULL, pipe_fd[1], NULL, count, SPLICE_F_MOVE);
 splice(pipe_fd[0], NULL, sock_fd, NULL, count, SPLICE_F_MOVE);
 ```
 
-`sendfile`이 file → socket만 지원하는 데 비해 `splice`는 임의 source/sink를 연결합니다. `tee`로 한 입력을 여러 소비자에게 fanout할 수도 있습니다.
+`sendfile`의 지원 범위는 커널·파일시스템·대상 fd에 따라 달라지며, `splice`도 pipe를 포함한 지원 가능한 fd 조합에 제한이 있습니다. `tee`로 한 pipe 입력을 복제할 수 있어도 소비자별 처리와 backpressure가 사라지는 것은 아닙니다.
 
 ### `io_uring` — async batch submission
 
@@ -126,7 +126,7 @@ io_uring_wait_cqe(&ring, &cqe);
 io_uring_cqe_seen(&ring, cqe);
 ```
 
-Linux 5.1+에서 도입된 새 비동기 I/O API입니다. Syscall 자체를 ring queue로 묶어 한 번에 처리합니다.
+io_uring은 Linux 5.1 계열에서 도입됐지만, opcode·등록 버퍼·polling 등의 기능은 커널과 liburing 버전에 따라 다릅니다. submission/completion을 링으로 묶어 syscall 오버헤드를 줄일 수 있어도 모든 I/O가 비동기 또는 zero-copy가 되는 것은 아닙니다.
 
 ### Fixed buffer로 mapping overhead 제거
 
@@ -137,7 +137,7 @@ io_uring_register_buffers(&ring, &iov, 1);
 io_uring_prep_read_fixed(sqe, fd, buf, len, offset, 0);
 ```
 
-Kernel이 buffer를 한 번만 mapping해 두고 매 I/O는 fast path를 탑니다. NVMe IOPS가 50% 이상 늘어납니다.
+등록 버퍼는 반복적인 pinning·검증 비용을 줄일 수 있지만, 실제 이득은 커널 버전·파일시스템·I/O 크기와 workload로 측정해야 합니다. NVMe IOPS가 항상 증가하거나 특정 비율로 늘어난다고 보장할 수 없습니다.
 
 ### `mmap`으로 파일과 메모리 공유
 
@@ -148,7 +148,7 @@ process(p, file_size);
 munmap(p, file_size);
 ```
 
-Read 시스템 콜이 일어나지 않고 첫 접근에서만 page fault로 가져옵니다. LMDB·SQLite 같은 embedded DB가 표준으로 씁니다.
+명시적인 read 호출 대신 페이지 폴트와 파일 매핑 경로를 사용하며, 첫 접근 이후에도 major/minor fault와 writeback이 발생할 수 있습니다. LMDB·SQLite 등에서 선택되는 방식이지만 데이터베이스의 전체 I/O 경로가 자동으로 zero-copy가 되는 것은 아닙니다.
 
 ### POSIX shared memory
 
@@ -185,28 +185,28 @@ while (rte_eth_rx_burst(port, 0, &pkt, 1) > 0) {
 }
 ```
 
-NIC DMA가 user space ring buffer에 직접 packet을 쓰고 user thread가 polling합니다. Kernel skb 자체가 없습니다.
+일부 DPDK 구성이 NIC DMA와 user-space mempool/ring을 사용해 polling하며, 일반적인 커널 skb 경로를 우회할 수 있습니다. NIC 드라이버·IOMMU·메모리 등록 조건에 따라 실제 경로는 달라집니다.
 
 ## 측정 / 성능 비교
 
-1 GB 파일을 socket으로 전송했을 때입니다.
+예시 측정 형식입니다. 수치는 파일시스템, NIC, 커널, CPU, 암호화·TLS 여부에 따라 달라지므로 동일 조건에서 재측정해야 합니다.
 
 ```text
 방식                       시간      CPU
-read/write                 1.20 s    50%
-sendfile                   0.45 s    18%
-splice (file→pipe→sock)    0.42 s    16%
-io_uring + fixed buf       0.38 s    12%
+read/write                 측정 필요  측정 필요
+sendfile                   측정 필요  측정 필요
+splice (file→pipe→sock)    측정 필요  측정 필요
+io_uring + fixed buf       측정 필요  측정 필요
 ```
 
 4K 60fps 카메라 → encoder pipeline입니다.
 
 ```text
-copy 4번 (V4L2 read → memcpy)        CPU 35%, jitter 8 ms
-DMA-BUF (V4L2 → encoder fd 전달)     CPU 8%,  jitter 1 ms
+copy 경로 (V4L2 read → memcpy)        CPU·jitter 측정 필요
+DMA-BUF (V4L2 → encoder fd 전달)     CPU·jitter 측정 필요
 ```
 
-Drone, 자율주행, 5G UPF는 jitter 자체가 spec이므로 DMA-BUF가 기본입니다.
+Drone, 자율주행, 5G UPF처럼 지연·jitter가 중요한 시스템에서도 DMA-BUF는 요구사항과 드라이버 지원을 확인해 선택합니다. 사용 자체가 성능이나 jitter 사양을 보장하지는 않습니다.
 
 ## 자주 보는 함정
 
@@ -226,7 +226,7 @@ dma_buf_map_attachment(...);
 /* CPU가 read만 하고 dma_buf_end_cpu_access 안 부름 */
 ```
 
-Producer/consumer 양쪽 모두 `dma_buf_begin_cpu_access` / `end_cpu_access`로 cache 경계를 표시해야 합니다.
+CPU가 dma-buf에 접근하는 구간에서는 exporter/importer의 DMA-BUF 동기화 계약과 플랫폼 DMA API를 따라야 합니다. 필요한 호출과 방향은 exporter·장치·coherency 정책에 따라 다르므로 양쪽이 무조건 같은 호출을 한다고 일반화하면 안 됩니다.
 
 > `mmap` 후 `fork`
 

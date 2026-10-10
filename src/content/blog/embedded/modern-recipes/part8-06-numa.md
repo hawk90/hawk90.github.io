@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-2-socket 서버에서 thread를 무작정 띄우면 OS scheduler가 socket 사이를 옮겨 다닙니다. 그동안 thread의 hot data는 한 node에만 있어서 다른 socket으로 옮겨갈 때마다 cross-node access가 발생합니다. 같은 코드가 socket 하나에 pin했을 때보다 30~50% 느려지는 경우가 흔합니다.
+2-socket 서버에서 thread와 메모리 배치를 무작정 두면 scheduler migration이나 first-touch 정책으로 remote access가 늘 수 있습니다. 같은 코드의 차이는 CPU·메모리·workload와 배치 정책에 따라 달라지므로 단일 성능 비율로 예측하지 말고 측정해야 합니다.
 
 자동차 central computing의 Cortex-A78AE 8 core SoC도 cluster 두 개로 나뉘고 각 cluster가 다른 L2와 DRAM channel을 갖습니다. 클래식한 NUMA는 아니지만 cluster 간 latency 차이는 같은 형태로 나타납니다. ASIL workload는 cluster 0, infotainment는 cluster 1 같은 분리가 시작점입니다.
 
@@ -23,7 +23,7 @@ topics: ["embedded"]
 
 2-socket 서버의 토폴로지를 그림으로 보면 local과 remote의 차이가 분명합니다.
 
-![2-socket NUMA topology — local 80 ns, remote 130 ns](/images/blog/modern-recipes/diagrams/part3-04-numa-topology.svg)
+![2-socket NUMA topology — local·remote 비용은 시스템별 측정 필요](/images/blog/modern-recipes/diagrams/part3-04-numa-topology.svg)
 
 ```text
 Server 2-socket
@@ -33,8 +33,8 @@ Server 2-socket
        │
   Socket 1 (CPU 16~31) ── DDR 64 GB (node 1)
 
-Latency           local 80 ns,  remote 130 ns (1.6x)
-Bandwidth         local 100 GB/s, remote 60 GB/s
+Latency           local·remote 값은 CPU·링크·메모리 구성별 측정
+Bandwidth         local·remote 값은 workload와 topology별 측정
 ```
 
 Topology의 핵심 두 가지는 CPU affinity와 memory binding입니다. 둘 중 하나만 묶고 다른 하나가 움직이면 cross-node access가 발생합니다. *둘 다 같은 node에* 묶는 것이 NUMA tuning의 기본입니다.
@@ -67,7 +67,7 @@ numactl --interleave=all ./prog                   # 큰 workload 분산
 numactl --localalloc ./prog                       # 자기 node에 자동 alloc
 ```
 
-`--interleave`는 throughput 위주, `--membind`는 latency 위주의 선택입니다.
+`--interleave`는 여러 node에 페이지를 분산하는 정책이고, `--membind`는 허용 node를 제한합니다. 어느 쪽이 throughput·latency에 유리한지는 접근 패턴과 topology로 검증해야 합니다.
 
 ### `libnuma`로 명시 alloc
 
@@ -112,7 +112,7 @@ void *thread_func(void *p) {
 }
 ```
 
-CPU affinity와 memory binding을 같은 node로 묶는 패턴입니다. DPDK, 5G UPF, Cassandra가 표준으로 씁니다.
+CPU affinity와 memory binding을 같은 node로 묶는 패턴입니다. DPDK, 5G UPF, Cassandra 등에서 workload에 맞춰 사용할 수 있습니다.
 
 ### NUMA-aware allocator
 
@@ -126,7 +126,7 @@ LD_PRELOAD=libjemalloc.so ./prog
 
 ```text
 HBM3 stacked memory (GPU·AI accelerator 옆)
-  819 GB/s per stack, 5~10 ns latency
+  대역폭·지연은 장치와 연결 경로별 측정
 
 CXL 2.0/3.0
   PCIe 기반 coherent memory pool
@@ -152,7 +152,7 @@ ASIL workload   cluster 0에 pin
 Infotainment    cluster 1에 pin
 ```
 
-NVIDIA Drive Thor와 Mobileye EyeQ7 같은 자율주행 SoC도 같은 구조입니다. Cluster 간 cache coherence는 보장되지만 latency는 분명히 다릅니다.
+자율주행 SoC에서도 cluster별 cache·메모리 경로가 분리된 구성이 있을 수 있습니다. coherence와 latency 특성은 제품의 interconnect·firmware·메모리 구성 문서로 확인해야 합니다.
 
 ### Kernel automatic balancing
 
@@ -160,7 +160,7 @@ NVIDIA Drive Thor와 Mobileye EyeQ7 같은 자율주행 SoC도 같은 구조입�
 echo 1 > /proc/sys/kernel/numa_balancing
 ```
 
-Kernel이 page와 thread를 자동 migration합니다. 단점은 *예측 불가능*하다는 것입니다. RT나 latency-critical workload에서는 자동 balancing을 끄고 명시 pinning을 선호합니다.
+Kernel이 page와 thread를 자동 migration합니다. migration 비용과 시점은 workload에 따라 달라집니다. RT나 latency-critical workload에서는 자동 balancing을 끄고 명시 pinning을 검토할 수 있습니다.
 
 ### 측정 — `numastat`
 
@@ -182,7 +182,7 @@ perf stat -e mem_load_l3_miss_retired.local_dram,\
 mem_load_l3_miss_retired.remote_dram ./prog
 ```
 
-`remote_dram` 비율이 높으면 cross-node access가 일어나고 있다는 신호입니다. 보통 5% 이하를 목표로 합니다.
+`remote_dram` 비율은 cross-node access를 판단하는 신호 중 하나지만 이벤트 이름과 지원 여부는 CPU perf PMU에 따라 다릅니다. 목표 비율은 latency·throughput 요구사항과 workload로 정해야 합니다.
 
 ### Multi-socket RT tuning
 
@@ -191,7 +191,7 @@ isolcpus=8-15 nohz_full=8-15 rcu_nocbs=8-15
 taskset -c 8-15 numactl --membind=1 ./rt_app
 ```
 
-CPU isolation으로 8~15번 코어를 OS scheduler에서 제외하고 그 위에서 RT app을 실행합니다. 산업·자동차·금융 latency-critical 시스템의 표준 패턴입니다.
+CPU isolation으로 8~15번 코어를 OS scheduler에서 제외하고 그 위에서 RT app을 실행합니다. 산업·자동차·금융의 latency-critical 시스템에서 검토되는 패턴입니다.
 
 ## 측정 / 성능 비교
 
@@ -199,17 +199,17 @@ CPU isolation으로 8~15번 코어를 OS scheduler에서 제외하고 그 위에
 
 | 실행 | 시간 | remote DRAM 비율 |
 |---|---|---|
-| default (anywhere) | 2.30 s | 38% |
-| numactl --cpunodebind=0 --membind=0 | 1.45 s | 2% |
-| numactl --interleave=all | 1.70 s | 50% |
+| default (anywhere) | 측정 필요 | 측정 필요 |
+| numactl --cpunodebind=0 --membind=0 | 측정 필요 | 측정 필요 |
+| numactl --interleave=all | 측정 필요 | 측정 필요 |
 
 Latency 위주면 single-node pin이 가장 빠르고, throughput 위주면 interleave가 안정적입니다.
 
-Cortex-A78AE 8 core SoC에서 image processing pipeline입니다.
+Cortex-A78AE 계열 SoC에서 image processing pipeline을 비교한 예시 형식입니다.
 
 ```text
-cluster scheduler 자유                jitter 6.2 ms
-cluster 0에 pin                       jitter 1.8 ms
+cluster scheduler 자유                jitter 측정 필요
+cluster 0에 pin                       jitter 측정 필요
 ```
 
 Mini-NUMA에서도 pin이 jitter를 크게 줄입니다.
