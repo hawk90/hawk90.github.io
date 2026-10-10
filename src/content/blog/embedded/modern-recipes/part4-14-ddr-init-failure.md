@@ -16,33 +16,31 @@ topics: ["embedded"]
 
 ## DDR 종류와 속도
 
-| 종류 | Data Rate | I/O Voltage | 사용 |
-|---|---|---|---|
-| DDR3 | 800-1600 MT/s | 1.5V (LV 1.35V) | 자동차·산업 |
-| DDR3L | 1066-1600 | 1.35V | 임베디드 Linux |
-| DDR4 | 1600-3200 | 1.2V | 모바일·서버 |
-| LPDDR3 | 800-1866 | 1.2V | 모바일 |
-| LPDDR4 | 1600-4266 | 1.1V | 스마트폰 |
-| LPDDR5 | 4266-6400 | 1.05V | 최신 |
-| DDR5 | 3200-8400 | 1.1V | 데스크탑·서버 |
+| 종류 | JEDEC 표준 data rate | I/O 전압 (VDDQ) |
+|---|---|---|
+| DDR3 | 800-2133 MT/s (JESD79-3F) | 1.5V |
+| DDR3L | TBD | 1.35V |
+| DDR4 | 최대 3200 MT/s | 1.2V |
+| DDR5 | 최대 8800 MT/s (JESD79-5C, 2024. 처음 표준은 6400) | 1.1V |
+| LPDDR4 | 최대 4266 MT/s | 1.1V (LPDDR4X 0.6V) |
+| LPDDR5 | 최대 6400 MT/s | 0.5V (코어 VDD2H 1.05V) |
 
-LV는 low voltage를 의미하고, LP는 low power를 의미합니다. 둘은 다른 표준입니다.
+DDR3L의 L은 low voltage, LPDDR의 LP는 low power를 뜻합니다. 둘은 다른 표준입니다.
 
 ## JEDEC Init Sequence (DDR3)
 
-1. Power-on — VDD·VDDQ·VTT ramp (수 ms)
-2. CKE pin = LOW 유지 200µs
-3. CKE = HIGH, reset issue
-4. PRECHARGE ALL
-5. MR2 program (CWL, etc.)
+1. 전원 인가 — RESET#을 LOW로 둔 채 VDD·VDDQ를 올림
+2. 전원이 안정된 뒤 RESET# LOW를 최소 200µs 유지. CKE는 RESET#을 풀기 전에 LOW로 둠
+3. RESET# 해제 후 500µs 기다린 다음 CKE = HIGH
+4. tXPR 대기
+5. MR2 program (CWL 등)
 6. MR3 program (MPR)
-7. MR1 program (DLL enable, output drive)
+7. MR1 program (DLL enable, output drive, Rtt_Nom)
 8. MR0 program (CL, BL, DLL reset)
-9. ZQCL — calibration
-10. Self-refresh 잠시
-11. Normal operation
+9. ZQCL — 초기 calibration (tZQinit 동안 대기)
+10. Normal operation
 
-순서와 timing이 모두 맞아야 합니다. 수 ms 이내에 약 100개의 step을 순서대로 실행해야 합니다.
+순서와 대기 시간이 모두 맞아야 합니다. 실제로는 SoC의 DDR controller와 PHY가 이 순서를 대신 실행하고, 펌웨어는 그 전에 timing 레지스터를 채웁니다.
 
 ## 핵심 Timing Parameter (DDR3-1600)
 
@@ -53,8 +51,8 @@ LV는 low voltage를 의미하고, LP는 low power를 의미합니다. 둘은 �
 | tRP | 13.75 | precharge |
 | tRAS | 35 | active → precharge minimum |
 | tRC | 48.75 | tRAS + tRP |
-| tRFC | 260 | refresh cycle (1Gb chip) |
-| tREFI | 7800 | refresh interval (max 7.8 µs) |
+| tRFC | 260 | refresh cycle (4Gb chip. 1Gb 110, 2Gb 160, 8Gb 350) |
+| tREFI | 7800 | refresh interval (TC ≤ 85°C에서 max 7.8 µs) |
 | CL | 11 cycle | CAS latency |
 
 데이터시트의 AC characteristics 표를 보고 CLK 사이클 단위로 변환합니다.
@@ -67,26 +65,23 @@ ddr->tRC  = ceil(48.75 / 1.25);   // = 39
 
 ## ZQ Calibration
 
-**ZQ** = Z (impedance) Q (quality). 온도·전압 변화로 *드라이버 임피던스가 변화*해 주기적 재교정이 필요하다.
+ZQ calibration은 DRAM의 ZQ 핀에 연결된 정밀 저항(240Ω)을 기준으로 출력 드라이버와 ODT 임피던스를 맞추는 절차입니다. 온도와 전압이 바뀌면 임피던스가 흘러가므로 운영 중에도 주기적으로 다시 맞춥니다.
 
 | 명령 | 시점 |
 |------|------|
-| `ZQCL` | long calibration (init time) |
-| `ZQCS` | short calibration (운영 중) |
+| `ZQCL` | long calibration (초기화) |
+| `ZQCS` | short calibration (운영 중 주기적으로) |
 
-```c
-/* 256 ms마다 ZQCS 자동 (DDR controller 설정) */
-ddr->ZQCTL = ZQCL_INTERVAL_256ms;
-```
+ZQCS 주기는 DDR controller 레지스터로 설정합니다. 값은 DRAM 데이터시트의 온도·전압 drift 사양과 보드의 온도 변화 폭을 보고 정합니다.
 
 ## Write Leveling
 
 DDR3 fly-by topology에서는 각 chip별로 신호 도착 시점이 다릅니다. 이를 보정하는 절차는 다음과 같습니다.
 
-1. MRS — write leveling mode
-2. DQS toggle, read CLK sample
-3. CK ↑ 시점에 DQS ↑ 시점 일치할 때까지 *delay 조정*
-4. 각 byte lane 별로 fine adjust
+1. MR1로 write leveling mode 진입
+2. controller가 DQS를 toggle하면 DRAM이 DQS 상승 에지에서 CK를 sample해 그 값을 DQ로 돌려줌
+3. DQ 값이 0에서 1로 바뀌는 지점(DQS ↑가 CK ↑와 맞는 지점)까지 DQS *delay 조정*
+4. byte lane마다 반복
 
 DDR controller가 자동으로 수행하지만, 결과는 반드시 register에서 읽어 확인해야 합니다.
 
@@ -126,7 +121,7 @@ void walking_bit_test(uint32_t *base, size_t words) {
 
 `0x55555555`, `0xAAAAAAAA`, `0xCAFEBABE` 같은 패턴도 함께 시험합니다.
 
-## 주소 라인 검증 — March Test
+## 주소 라인 검증 — Address Bus Test
 
 ```c
 /* Address line short/open 검증 */
@@ -145,7 +140,7 @@ void address_test(uint32_t *base, size_t words) {
 }
 ```
 
-A0부터 An까지의 line이 짧거나 단선된 경우, 서로 다른 address에 같은 data가 기록되어 검출됩니다.
+A0부터 An까지의 line이 단락(short)되거나 단선(open)되면 서로 다른 address가 같은 셀을 가리켜, 나중에 쓴 값이 앞의 값을 덮어쓰면서 검출됩니다. 셀 자체의 결함을 찾는 March C- 같은 March 테스트는 모든 주소를 정해진 순서로 읽고 쓰는 별개의 알고리즘입니다.
 
 ## 실측 — 데이터 무결성
 
@@ -170,20 +165,18 @@ void full_dram_test(uint32_t *base, size_t mb) {
 }
 ```
 
-운영 시에는 Linux MemTest86이나 u-boot memtest 명령을 사용합니다.
+이미 있는 도구로는 Linux 사용자 공간의 memtester, 독립 부팅 이미지인 MemTest86, U-Boot의 `mtest` 명령이 있습니다.
 
 ## 보드 디자인 — Length Matching
 
-**DDR signal lines:**
+DDR 배선은 신호 group마다 길이를 맞춥니다.
 
-- CLK 차분 pair — 길이 정확
-- ADDR/CMD — CLK ± 50 mil (수밀)
-- DQ byte lane — group 안 ± 20 mil
-- DQS - DQ — 25 mil 이내
+- CLK 차동 pair — pair 안 길이를 맞춤
+- ADDR/CMD — CLK를 기준으로 맞춤 (fly-by)
+- DQ — 같은 byte lane 안에서 맞춤
+- DQS - DQ — 같은 byte lane의 DQS와 맞춤
 
-Length mismatch는 skew를 만들어 high-speed 동작을 실패하게 합니다.
-
-> ⚠️ DDR4 1600 MT/s 이상에서는 수 mil 차이도 marginal입니다.
+Length mismatch는 skew를 만들어 high-speed 동작을 실패하게 합니다. 허용 오차는 SoC 벤더의 DDR layout guide에 data rate별로 나와 있으니, 그 문서의 값을 그대로 씁니다.
 
 ## 종단 — VTT·ODT
 
@@ -207,13 +200,11 @@ VTT (terminator 전압)는 VDDQ / 2입니다. 약간만 잘못되어도 eye diag
 | DDR PHY | controller ↔ DRAM | analog (PLL, IO buffer, training) |
 | DRAM chip | ↔ PHY | 실제 storage |
 
-Cortex-A SoC (i.MX, STM32MP1, Zynq)에서는 Synopsys uMCTL2와 DDR PHY 조합이 표준입니다.
+Cortex-A SoC 중 i.MX 8M과 STM32MP1은 Synopsys uMCTL2 controller에 DDR PHY를 붙인 구성이고(U-Boot `drivers/ddr/imx/imx8m`, `drivers/ram/stm32mp1`), Zynq·Zynq UltraScale+의 DDR controller도 Linux의 Synopsys EDAC 드라이버가 함께 지원합니다. 반면 i.MX6은 NXP 자체 MMDC를 씁니다.
 
 ## Eye Diagram 측정
 
 Oscilloscope (수 GHz BW) + DDR probe + signal trigger로 측정. **data eye**는 *signal이 stable한 영역*. 폭이 좁으면 *jitter*가 심함 → speed를 낮추거나 layout 수정.
-
-전문 도구로는 Tektronix BERTScope와 Keysight UXR가 있습니다.
 
 ## 자주 하는 실수
 
@@ -224,7 +215,7 @@ init_ddr();
 *((volatile uint32_t*)0x80000000) = 0xDEADBEEF;   // ← bus fault
 ```
 
-DDR init 후 짧은 settle time이 필요합니다. PHY가 안정될 때까지 수 µs 정도 기다려야 합니다.
+초기화 함수가 반환됐다고 바로 접근하면 안 됩니다. controller와 PHY가 초기화·training 완료를 알리는 status bit(예: STM32MP1 PHY의 `PGSR.IDONE`)를 확인한 뒤 첫 접근을 합니다.
 
 > ⚠️ Refresh interval 짧음
 
@@ -237,11 +228,7 @@ tREFI = 7800 ns;   // ← 표준
 
 > ⚠️ Temperature 무시
 
-```text
-DRAM 85°C 이상 — refresh rate 2x 필요 (tREFI 절반)
-```
-
-Industrial과 자동차 grade는 105°C까지 지원합니다. 그 외 환경에서는 temperature compensation이 필수입니다.
+DDR3는 case 온도 85°C까지 tREFI 7.8µs, 85°C 초과 95°C까지는 3.9µs(refresh 2배)를 요구합니다. 보드가 85°C를 넘을 수 있으면 refresh 주기를 절반으로 설정하고, 더 높은 온도는 그 범위를 보증하는 산업용·자동차용 등급 부품의 데이터시트를 따릅니다.
 
 > ⚠️ 8-bit×4 칩과 16-bit×2 칩 혼용
 
@@ -251,13 +238,15 @@ Industrial과 자동차 grade는 105°C까지 지원합니다. 그 외 환경에
 
 - DDR init은 **JEDEC sequence와 timing parameter**를 정확히 맞추는 작업입니다.
 - **ZQ calibration, write leveling, DQS training**은 controller가 자동 처리하지만 결과를 확인해야 합니다.
-- **Walking bit 테스트와 March 테스트**로 bring-up을 검증합니다.
+- **Walking bit(data bus)와 address bus 테스트**로 bring-up을 검증합니다.
 - 보드 length matching이 high-speed 동작의 핵심입니다.
-- 자동차와 산업 환경에서는 temperature compensation이 필수입니다.
+- 85°C를 넘는 환경에서는 refresh 주기를 절반(3.9µs)으로 줄입니다.
 
-다음 편은 **PCIe BAR 매핑**입니다.
+다음 편은 **PWM 출력**입니다.
 
 ## 관련 항목
 
-- 1-01: UART 디버깅
-- [1-03: PCIe BAR](/blog/embedded/modern-recipes/part11-03-pcie-bar)
+- [5-01: PWM 출력](/blog/embedded/modern-recipes/part5-01-pwm-output)
+- 더 깊이 — [Bootloader Internals: DDR Controller 프로그래밍과 PHY Training](/blog/embedded/bootloader/chapter09-dram-init)
+- 더 깊이 — [Bootloader Internals: DDR Training과 PHY Calibration](/blog/embedded/bootloader/chapter26-ddr-training)
+- [BSP Development: DDR 매개변수 결정](/blog/embedded/bsp/chapter05-ddr-params)
