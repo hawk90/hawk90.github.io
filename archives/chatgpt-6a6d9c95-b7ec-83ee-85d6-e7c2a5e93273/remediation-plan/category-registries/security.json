@@ -187,24 +187,24 @@
       "disposition": "accepted",
       "nextAction": "manual-review",
       "reviewQuestion": "Reassess sec-06. trust every third-party script after security, deployment, or integration changes.",
-      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
+      "scope": "Static-site CSP and third-party script boundary; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
             "src/layouts/BaseLayout.astro",
             "src/consts/config.ts",
+            "src/lib/csp-inline-script-hashes.mjs",
+            "scripts/audit-csp-inline-scripts.mjs",
+            "scripts/audit-ads.mjs",
             "scripts/security-admin-gate.mjs",
-            "scripts/audit-ci-security.mjs",
-            "scripts/verify-release.mjs",
-            ".github/workflows/ci.yml",
-            ".github/workflows/deploy.yml"
+            "scripts/verify-release.mjs"
           ],
-          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
-          "result": "Third-party integrations are explicitly enumerated in CSP and optional integrations are kept outside the core recovery path."
+          "verification": "npm run audit:csp && npm run audit:ads && npm run gate:security-admin -- --artifact dist (all three run inside npm run verify:release)",
+          "result": "Third parties are enumerated only in the strict policy (analytics, giscus frame, jsDelivr fonts/styles, GitHub API). Owner decision 2026-10-09 (#70, #72): AdSense Auto ads on content pages. AdSense supports only a nonce-based CSP sent as an HTTP header, which GitHub Pages cannot send, so pages that load ads carry `script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; object-src 'none'; base-uri 'self'; form-action 'self' https://github.com`. Pages under ADS_CONFIG.excludePaths (/admin, /settings, /components, /404) and /random keep the strict default-src 'self' policy with build-time SHA-256 hashes for every inline script. On ad pages script-src allows any https: origin, as AdSense's rotating domains require. gate:security-admin fails on any cross-origin script or stylesheet without SRI except the AdSense loader, whose bytes change under a fixed URL."
         }
       ],
-      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
+      "residualRisk": "Ad network code runs with page privileges on ad pages. Re-disposition if ads are turned off."
     },
     {
       "id": "AP-SEC-07",
@@ -283,27 +283,27 @@
           "f8db6fce-9ed2-49f0-bb1c-0b5d2935a99b"
         ]
       },
-      "disposition": "remediated",
-      "nextAction": "verify",
+      "disposition": "accepted",
+      "nextAction": "manual-review",
       "reviewQuestion": "Reassess sec-09. no content security policy after security, deployment, or integration changes.",
-      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
+      "scope": "Static-site CSP and third-party script boundary; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
             "src/layouts/BaseLayout.astro",
             "src/consts/config.ts",
+            "src/lib/csp-inline-script-hashes.mjs",
+            "scripts/audit-csp-inline-scripts.mjs",
+            "scripts/audit-ads.mjs",
             "scripts/security-admin-gate.mjs",
-            "scripts/audit-ci-security.mjs",
-            "scripts/verify-release.mjs",
-            ".github/workflows/ci.yml",
-            ".github/workflows/deploy.yml"
+            "scripts/verify-release.mjs"
           ],
-          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
-          "result": "BaseLayout emits a restrictive default-src self CSP with explicit script, style, frame, object, base, and form boundaries."
+          "verification": "npm run audit:csp && npm run audit:ads && npm run gate:security-admin -- --artifact dist (all three run inside npm run verify:release)",
+          "result": "The site always emits a CSP, but on ad pages it is the relaxed ads policy above, not a restrictive one. Owner decision 2026-10-09 (#70, #72): AdSense Auto ads on content pages. AdSense supports only a nonce-based CSP sent as an HTTP header, which GitHub Pages cannot send, so pages that load ads carry `script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; object-src 'none'; base-uri 'self'; form-action 'self' https://github.com`. Pages under ADS_CONFIG.excludePaths (/admin, /settings, /components, /404) and /random keep the strict default-src 'self' policy with build-time SHA-256 hashes for every inline script. audit:csp checks the hashes and that every page has a policy; audit:ads checks that ad code and the ads policy appear together and never under an excluded path."
         }
       ],
-      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
+      "residualRisk": "On ad pages any injected https: script would run; the site renders no user-supplied HTML, and the giscus session token in localStorage is readable by ad code (scrubbed from the URL before the ad script loads; owner decision on that exposure is open, see src/components/blog/Giscus.astro). Re-disposition if ads are turned off or GitHub Pages gains custom headers."
     },
     {
       "id": "AP-SEC-10",
@@ -388,24 +388,24 @@
       "disposition": "accepted",
       "nextAction": "manual-review",
       "reviewQuestion": "Reassess sec-11. csp with `unsafe-inline` everywhere after security, deployment, or integration changes.",
-      "scope": "Static-site security boundary only; no published content, URLs, or frontmatter are changed.",
+      "scope": "Static-site CSP and third-party script boundary; no published content, URLs, or frontmatter are changed.",
       "dependsOn": [],
       "evidence": [
         {
           "files": [
             "src/layouts/BaseLayout.astro",
             "src/consts/config.ts",
+            "src/lib/csp-inline-script-hashes.mjs",
+            "scripts/audit-csp-inline-scripts.mjs",
+            "scripts/audit-ads.mjs",
             "scripts/security-admin-gate.mjs",
-            "scripts/audit-ci-security.mjs",
-            "scripts/verify-release.mjs",
-            ".github/workflows/ci.yml",
-            ".github/workflows/deploy.yml"
+            "scripts/verify-release.mjs"
           ],
-          "verification": "npm run gate:ci-security && npm run audit:security-admin -- --artifact dist && npm run verify:release",
-          "result": "The CSP documents the narrow inline-script exception required by the current Astro theme path; removing it requires a separate nonce/hash design."
+          "verification": "npm run audit:csp && npm run audit:ads && npm run gate:security-admin -- --artifact dist (all three run inside npm run verify:release)",
+          "result": "'unsafe-inline' is effective on ad pages, where the ads policy carries no hashes. On strict pages it is only a pre-CSP2 fallback: csp-inline-script-hashes.mjs pins every inline script, and browsers that see a hash ignore 'unsafe-inline'. Owner decision 2026-10-09 (#70, #72): AdSense Auto ads on content pages. AdSense supports only a nonce-based CSP sent as an HTTP header, which GitHub Pages cannot send, so pages that load ads carry `script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; object-src 'none'; base-uri 'self'; form-action 'self' https://github.com`. Pages under ADS_CONFIG.excludePaths (/admin, /settings, /components, /404) and /random keep the strict default-src 'self' policy with build-time SHA-256 hashes for every inline script."
         }
       ],
-      "residualRisk": "The evidence covers the checked-in static boundary only; provider behavior, browser enforcement, and untested historical/runtime conditions still require targeted review."
+      "residualRisk": "Inline-script injection is not blocked on ad pages. Re-disposition if ads are turned off or a header-based nonce becomes possible."
     },
     {
       "id": "AP-SEC-12",

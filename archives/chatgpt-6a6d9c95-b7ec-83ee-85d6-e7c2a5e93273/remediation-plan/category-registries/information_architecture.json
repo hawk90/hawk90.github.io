@@ -569,7 +569,7 @@
             "src/pages/index.astro"
           ],
           "verification": "npm run build && npm run audit:reading",
-          "result": "Chronological navigation exists exactly once, in the footer of every page, while topic and path navigation own the header and the homepage. There are no year or month index routes, and the homepage leads with learning paths rather than a date-ordered list.",
+          "result": "Chronological navigation lives only in the footer of every page (Archive for what exists, Updated for what changed), while topic and path navigation own the header and the homepage. There are no year or month index routes, and the homepage leads with learning paths rather than a date-ordered list.",
           "verifiedOn": "2026-08-20",
           "commits": [
             "21d6eafc — category membership read from `topics` instead of the post URL; empty categories no longer built; /recently-updated linked",

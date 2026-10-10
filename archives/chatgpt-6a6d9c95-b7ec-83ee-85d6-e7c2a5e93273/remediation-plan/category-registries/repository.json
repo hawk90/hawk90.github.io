@@ -714,10 +714,11 @@
         {
           "files": [
             "src/components/blog/Giscus.astro",
+            "src/lib/define.ts",
             "src/pages/blog/[...slug].astro"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
-          "result": "A missing Giscus configuration shows a setup fallback and returns before loading an external script; article rendering remains available."
+          "result": "A disabled Giscus configuration renders nothing and loads no external script (an incomplete one fails the build in defineComments); a widget that fails to load shows a fallback; article rendering remains available."
         }
       ],
       "residualRisk": "External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control."
@@ -861,7 +862,7 @@
           "result": "audit:ads passes on the built site (1382 of 1449 pages load AdSense, 0 failures) and was negative-tested: ad code on /admin, a non-async script and a static <ins class=\"adsbygoogle\"> are each reported. Chrome on the build: with ad hosts allowed or blocked, page heights, scripts and navigation are unchanged and error-free; /admin/login loads no ad code after navigating from an ad page."
         }
       ],
-      "residualRisk": "Auto ads places units in the body once ads serve on the production domain; that is layout change by design. Ads mode relaxes the CSP on content pages (see BaseLayout); /admin, /settings, /components and 404 keep the strict policy. record-repository-controls.mjs is not runnable today (it reads a runbook path that moved to docs/runbooks/), so this record was updated directly."
+      "residualRisk": "Auto ads places units in the body once ads serve on the production domain; that is layout change by design. Ads mode relaxes the CSP on content pages (see BaseLayout); /admin, /settings, /components and 404 keep the strict policy."
     },
     {
       "id": "AP-R-30",
@@ -1071,6 +1072,7 @@
         {
           "files": [
             "src/lib/content/normalize.ts",
+            "src/lib/utils.ts",
             "scripts/audit-content-portability.mjs"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
@@ -1540,6 +1542,7 @@
         {
           "files": [
             "src/lib/content/normalize.ts",
+            "src/lib/utils.ts",
             "scripts/audit-content-portability.mjs"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
@@ -1568,6 +1571,7 @@
         {
           "files": [
             "src/lib/content/normalize.ts",
+            "src/lib/utils.ts",
             "scripts/audit-content-portability.mjs"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
@@ -1596,6 +1600,7 @@
         {
           "files": [
             "src/lib/content/normalize.ts",
+            "src/lib/utils.ts",
             "scripts/audit-content-portability.mjs"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
@@ -2259,6 +2264,7 @@
         {
           "files": [
             "src/lib/content/normalize.ts",
+            "src/lib/utils.ts",
             "scripts/audit-content-portability.mjs"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
