@@ -1,5 +1,5 @@
 ---
-title: "ARM 레지스터 구조 분석 — R0~R15·CPSR·SPSR·Banked Registers"
+title: "Cortex-M 레지스터 구조 분석 — R0~R15·xPSR·CONTROL·Mask Registers"
 slug: "embedded/modern-recipes/part2-03-arm-registers"
 date: 2026-04-11T09:15:00
 description: "R0-R15·xPSR·CONTROL·PRIMASK·BASEPRI — register set 전체 지도."
@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Cortex-M 레지스터는 R0 ~ R15 + 6개의 special입니다."** 단순해 보이지만, IRQ 처리·context switch의 모든 코드가 이 레지스터들을 직접 다룹니다.
+> **"Cortex-M 레지스터는 R0 ~ R15와 xPSR·PRIMASK·FAULTMASK·BASEPRI·CONTROL입니다."** 단순해 보이지만, IRQ 처리·context switch의 모든 코드가 이 레지스터들을 직접 다룹니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -30,7 +30,7 @@ Cortex-M은 16개의 32-bit 레지스터를 갖습니다.
 | 레지스터 | 별명 | 용도 (AAPCS) |
 | --- | --- | --- |
 | R0 ~ R3 | arg / scratch | 함수 인자, return 값 |
-| R4 ~ R11 | callee-saved | 함수 안 임시 변수 |
+| R4 ~ R11 | variable (callee-saved) | 함수 호출 뒤에도 보존되는 지역 변수. R9는 플랫폼 ABI가 역할을 정함 |
 | R12 | IP | intra-procedure call scratch |
 | R13 | SP | Stack Pointer (MSP / PSP) |
 | R14 | LR | Link Register (return 주소) |
@@ -47,12 +47,14 @@ MSP (Main Stack Pointer)   — reset 시, IRQ handler에서 사용
 PSP (Process Stack Pointer) — RTOS task가 사용
 ```
 
-RTOS는 각 task에 PSP를 따로 줘서, IRQ가 발생해도 MSP로 전환되어 task stack을 침범하지 않게 합니다.
+RTOS는 각 task에 PSP를 따로 줍니다. 예외가 발생하면 하드웨어가 레지스터 8개를 그 task의 PSP stack에 쌓고, handler 자체는 항상 MSP를 쓰므로 handler의 stack 사용이 task stack을 침범하지 않습니다.
+
+PSP를 먼저 채운 뒤 CONTROL.SPSEL(bit 1)을 바꿔야 합니다. 순서를 거꾸로 하면 아직 설정하지 않은 PSP로 stack을 쓰게 됩니다.
 
 ```c
-// CONTROL register bit[1] = 0 → MSP, 1 → PSP
-__set_CONTROL(0x02);   // PSP 사용
+// CONTROL bit[1] (SPSEL) = 0 → MSP, 1 → PSP (thread mode)
 __set_PSP(task_stack_top);
+__set_CONTROL(__get_CONTROL() | CONTROL_SPSEL_Msk);   // CMSIS 구현이 MSR 뒤 ISB까지 실행
 ```
 
 ### 3) LR — Link Register와 EXC_RETURN
@@ -66,6 +68,8 @@ EXC_RETURN (Cortex-M3/M4)
    0xFFFFFFFD — thread mode, PSP
 ```
 
+FPU가 있는 Cortex-M4F에서 FP context까지 stack에 쌓였으면 bit 4가 0인 값(0xFFFFFFE1·0xFFFFFFE9·0xFFFFFFED)이 들어갑니다. 아래 context switch 코드의 `tst r14, #0x10`이 이 bit를 봅니다.
+
 `BX LR`로 IRQ를 나갈 때 CPU가 이 값을 보고 올바른 stack을 복원합니다. 정상 함수 return은 PC에 LR을 복사하는 것과 같습니다.
 
 ### 4) xPSR — Program Status Register
@@ -74,16 +78,19 @@ xPSR은 3개의 view로 나뉩니다.
 
 | 부분 | bit | 의미 |
 | --- | --- | --- |
-| APSR | 31 ~ 27 | N, Z, C, V, Q flag |
-| IPSR | 8 ~ 0 | 현재 처리 중인 IRQ 번호 |
-| EPSR | 26, 24, 15 ~ 10 | Thumb mode bit (T), ICI/IT |
+| APSR | 31 ~ 27 (M4는 GE 19 ~ 16 추가) | N, Z, C, V, Q flag |
+| IPSR | 8 ~ 0 | 현재 처리 중인 exception 번호 (외부 IRQ는 IRQn + 16) |
+| EPSR | 26 ~ 25, 24, 15 ~ 10 | Thumb mode bit (T), ICI/IT |
+
+IPSR 값은 NVIC의 IRQ 번호가 아니라 exception 번호입니다. 0~15는 Reset·HardFault·SysTick 같은 시스템 예외가 쓰고, 외부 IRQ는 16부터 시작합니다(CMSIS `NVIC_USER_IRQ_OFFSET` = 16).
 
 ```c
 uint32_t psr = __get_xPSR();
-int irq_num = psr & 0x1FF;   // IPSR 부분
+uint32_t exc_num = psr & 0x1FF;      // IPSR: exception 번호 (0이면 thread mode)
+int32_t irqn = (int32_t)exc_num - 16; // 외부 IRQ일 때만 0 이상
 ```
 
-T bit이 0이면 illegal state(Cortex-M은 항상 Thumb)이므로 hardfault가 발생합니다.
+Cortex-M은 Thumb 상태로만 실행되므로 T bit이 0인 채로 실행하면 UsageFault(INVSTATE)가 발생합니다. UsageFault를 켜 두지 않았다면(`SCB->SHCSR`의 USGFAULTENA) HardFault로 올라갑니다.
 
 ### 5) Special registers — CONTROL, PRIMASK, BASEPRI, FAULTMASK
 
@@ -91,8 +98,8 @@ T bit이 0이면 illegal state(Cortex-M은 항상 Thumb)이므로 hardfault가 �
 |----------|------|
 | `CONTROL` | privilege level, SP 선택, FPU active |
 | `PRIMASK` | bit 0 = 1이면 모든 configurable IRQ 차단 (NMI/HardFault 제외) |
-| `FAULTMASK` | bit 0 = 1이면 NMI 제외 모든 fault/IRQ 차단 |
-| `BASEPRI` | 8-bit, 이 값 이상의 priority는 차단 (M3+, 0이면 disable) |
+| `FAULTMASK` | bit 0 = 1이면 NMI 제외 모든 fault/IRQ 차단 (M3+) |
+| `BASEPRI` | 8-bit, 우선순위 값이 이 값 이상인(덜 급한) 예외 차단 (M3+, 0이면 disable) |
 
 ```c
 // Critical section — IRQ 차단
@@ -100,11 +107,11 @@ __disable_irq();         // PRIMASK = 1
 /* ... */
 __enable_irq();          // PRIMASK = 0
 
-// 부분 차단 — priority 5 이상만 (낮은 priority만 차단)
+// 부분 차단 — 우선순위 값 5 이상(덜 급한 IRQ)만 차단, 0~4는 계속 처리
 __set_BASEPRI(5 << (8 - __NVIC_PRIO_BITS));
 ```
 
-BASEPRI는 FreeRTOS critical section에서 자주 쓰입니다. SysTick보다 높은 priority의 IRQ는 critical section 중에도 처리됩니다.
+FreeRTOS의 ARM_CM3·ARM_CM4F 포트는 critical section에 들어갈 때 BASEPRI를 `configMAX_SYSCALL_INTERRUPT_PRIORITY`로 올립니다. 그래서 이보다 급한(값이 작은) IRQ는 critical section 중에도 처리됩니다. 대신 그런 IRQ에서는 FreeRTOS API를 부를 수 없습니다.
 
 ## 코드 / 실제 사용 예
 
@@ -149,7 +156,7 @@ PendSV_Handler:
     bx lr                            @ EXC_RETURN으로 복귀
 ```
 
-HW가 자동 stacking 하는 8개 register(R0 ~ R3, R12, LR, PC, xPSR)와 SW가 직접 처리하는 8개(R4 ~ R11)를 나눠 다룹니다.
+HW가 자동 stacking 하는 8개 register(R0 ~ R3, R12, LR, PC, xPSR)와 SW가 직접 처리하는 8개(R4 ~ R11)를 나눠 다룹니다. SW 쪽은 EXC_RETURN이 든 LR도 함께 저장해, 복귀할 task가 FP context를 썼는지 bit 4로 다시 판단합니다. FreeRTOS ARM_CM4F 포트의 `xPortPendSVHandler`도 같은 순서로 저장·복원하며, `cpsid i` 대신 BASEPRI로 IRQ를 막는다는 점만 다릅니다.
 
 ## 측정 / 비교
 
@@ -161,18 +168,19 @@ HW가 자동 stacking 하는 8개 register(R0 ~ R3, R12, LR, PC, xPSR)와 SW가 
 | PRIMASK | 1 | O (1 bit 의미) | IRQ mask |
 | BASEPRI | 1 | O (8 bit 의미) | 부분 IRQ mask |
 | FAULTMASK | 1 | O (1 bit) | fault mask |
-| CONTROL | 1 | O (3 bit) | privilege/SP |
+| CONTROL | 1 | O (M4F 기준 nPRIV·SPSEL·FPCA 3 bit) | privilege/SP/FP |
 | FPU s0 ~ s31 | 32 | O | FPU 옵션 |
 
 | IRQ entry 시 HW push | 자동 |
 | --- | --- |
 | R0, R1, R2, R3, R12, LR, PC, xPSR | 8 word = 32 byte |
+| FP context 사용 중(M4F) | 위 8개 + S0 ~ S15·FPSCR |
 
 ## 자주 보는 함정
 
 > ⚠️ Privileged mode 가정 코드를 unprivileged에서 실행
 
-CONTROL[0]을 1로 설정한 task가 privileged register(SCB, NVIC 등)에 접근하면 BusFault. RTOS에서 unprivileged task를 만들 때 confirm.
+CONTROL[0](nPRIV)을 1로 설정한 task가 System Control Space(SCB, NVIC 등)에 접근하면 BusFault가 납니다(STIR처럼 따로 허용한 레지스터만 예외). RTOS에서 unprivileged task를 만들 때는 이런 접근을 SVC 같은 privileged 경로로 옮겨야 합니다.
 
 > ⚠️ Inline assembly에서 R0 ~ R3 clobber 누락
 
@@ -180,7 +188,7 @@ GCC inline asm에서 `clobbers`에 누락하면 컴파일러가 그 레지스터
 
 > ⚠️ FPU context 저장 누락
 
-M4 FPU 사용 task의 context switch에서 FPU register(s0 ~ s31)를 저장 안 하면 다른 task가 FPU 결과를 덮어씁니다. lazy stacking + FPCAR 활용.
+M4F에서 하드웨어는 S0 ~ S15와 FPSCR만 자동으로 쌓습니다. S16 ~ S31은 context switch 코드가 직접 저장해야 하고(위 코드의 `vstmdbeq`), 빠뜨리면 다른 task가 FPU 결과를 덮어씁니다. 자동 저장분은 lazy stacking으로 실제 FP 명령이 나올 때까지 미뤄지며, 예약된 위치는 FPCAR에 기록됩니다.
 
 > ⚠️ BASEPRI를 priority bit 정렬 안 하고 설정
 
@@ -188,13 +196,14 @@ BASEPRI는 priority bit이 MSB 쪽에 정렬돼 있습니다. NVIC priority 5를
 
 > ⚠️ xPSR Thumb bit 클리어
 
-context switch 또는 fault inject 시 xPSR의 T bit(bit 24)를 0으로 만들면 BX 후 illegal state로 hardfault.
+새 task의 초기 stack frame을 만들 때 xPSR의 T bit(bit 24)를 빠뜨리면, exception return으로 그 task에 들어가는 순간 UsageFault(INVSTATE)가 납니다. FreeRTOS ARM_CM4F 포트는 초기 xPSR을 `0x01000000`(T bit만 1)으로 넣습니다.
 
 ## 정리
 
-- Cortex-M은 R0 ~ R15와 special register(CONTROL, PRIMASK, BASEPRI, FAULTMASK, xPSR)로 구성됩니다.
+- Cortex-M은 R0 ~ R15와 special register(CONTROL, PRIMASK, BASEPRI, FAULTMASK, xPSR)로 구성됩니다. A-profile의 CPSR·SPSR·모드별 banked register는 없고, ARMv7-M 기준으로 banked인 것은 SP(MSP·PSP)뿐입니다.
+- IPSR은 IRQ 번호가 아니라 exception 번호입니다(외부 IRQ = IRQn + 16).
 - SP는 MSP / PSP로 나뉩니다. RTOS는 task에 PSP를 줘 stack 격리를 합니다.
-- IRQ entry 시 HW가 8 register를 자동 push합니다. SW가 나머지 8 register를 추가로 push.
+- IRQ entry 시 HW가 8 register를 자동 push하고, context switch 코드가 R4 ~ R11(FP 사용 시 S16 ~ S31까지)을 추가로 저장합니다.
 - BASEPRI는 부분 IRQ 차단에 씁니다. FreeRTOS critical section의 기반입니다.
 - Privilege level, FPU context, T bit 같은 작은 실수가 fault를 부릅니다.
 
