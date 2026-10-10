@@ -76,12 +76,15 @@ console.log(`Quality controls: ${candidates.length - failed.length}/${candidates
 for (const control of candidates) console.log(`- ${control.ok ? 'PASS' : 'FAIL'} ${control.id} -> ${control.name}`);
 if (!apply) process.exit(failed.length ? 1 : 0);
 if (failed.length) throw new Error(`Refusing failed controls: ${failed.map(({ id }) => id).join(', ')}`);
-for (const { item, name } of candidates) {
+// --refresh verifies; it never rewrites a control that is already recorded
+// (that replaced per-item evidence with generic text and reformatted the file).
+const toRecord = candidates.filter(({ item }) => item.disposition === 'unassessed');
+for (const { item, name } of toRecord) {
   item.disposition = 'remediated'; item.nextAction = 'manual-review';
   item.reviewQuestion = `Does the ${name} control remain in the release contract after future tooling changes?`;
   item.scope = 'Repository-wide quality control; no published content, URLs, or frontmatter are changed.';
   item.evidence = [{ files: ['scripts/verify-release.mjs', 'scripts/verify-search.mjs', 'scripts/audit-frontmatter-portability.mjs'], verification: 'npm run verify:release', result: `The ${name} control is included in the current quality contract.` }];
   item.residualRisk = 'This automated control does not replace evidence-led editorial, visual, accessibility, or external-system review.';
 }
-await writeFile(path, `${JSON.stringify(registry, null, 2)}\n`);
-console.log(`Recorded ${candidates.length} AP-T control dispositions.`);
+if (toRecord.length) await writeFile(path, `${JSON.stringify(registry, null, 2)}\n`);
+console.log(`Recorded ${toRecord.length} AP-T control dispositions.`);

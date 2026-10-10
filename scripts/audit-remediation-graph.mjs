@@ -37,6 +37,26 @@ if (categories.get('methodology')?.status === 'completed') {
   if (!methodologyRegistry) findings.push({ type: 'missing-methodology-registry', category: 'methodology' });
   else if (methodologyRegistry.items.some(({ disposition }) => disposition === 'unassessed')) findings.push({ type: 'unassessed-methodology-ap', category: 'methodology', detail: 'AP-D completion requires every atomic item to be dispositioned.' });
 }
+// Status vs. the registry it summarizes. The graph was hand-edited and drifted:
+// categories at 100/100 still said baseline_established, and remediation had
+// started in categories whose dependencies were not complete.
+const registryCounts = async (id) => {
+  const path = id === 'methodology' ? `${planRoot}/methodology-registry.json` : `${planRoot}/category-registries/${id}.json`;
+  const registry = await readFile(path, 'utf8').then(JSON.parse).catch(() => null);
+  if (!registry) return null;
+  return { total: registry.items.length, done: registry.items.filter(({ disposition }) => disposition !== 'unassessed').length };
+};
+for (const category of graph.categories) {
+  const counts = await registryCounts(category.id);
+  if (!counts) continue;
+  const { total, done } = counts;
+  if (category.status === 'completed' && done < total) findings.push({ type: 'completed-with-unassessed', category: category.id, detail: `${done}/${total} dispositioned` });
+  if (category.status !== 'completed' && total > 0 && done === total) findings.push({ type: 'closure-not-recorded', category: category.id, detail: `${done}/${total} dispositioned but status is ${category.status}; verify closure criteria and mark completed` });
+  if (category.status === 'baseline_established' && done > 0) findings.push({ type: 'remediation-not-reported', category: category.id, detail: `${done}/${total} dispositioned but status is baseline_established` });
+  if (done > 0 && !category.dependsOn.every((dependency) => dependencySatisfiedForActivation(category, dependency))) {
+    findings.push({ type: 'activated-before-dependencies', category: category.id, detail: `${done} item(s) dispositioned while ${category.dependsOn.filter((dependency) => !dependencySatisfiedForActivation(category, dependency)).join(', ')} not complete` });
+  }
+}
 const ready = graph.categories.filter((category) => category.status !== 'completed' && category.dependsOn.every((dependency) => dependencySatisfiedForActivation(category, dependency)));
 const report = { generatedAt: new Date().toISOString(), categories: graph.categories, ready: ready.map(({ id, label }) => ({ id, label })), findings };
 await mkdir('reports/remediation-graph', { recursive: true });

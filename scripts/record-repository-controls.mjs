@@ -89,7 +89,11 @@ console.log(`Repository control mapping: ${eligible.length - invalid.length}/${e
 for (const control of eligible) console.log(`- ${control.ok ? 'PASS' : 'FAIL'} ${control.id} -> ${control.name}`);
 if (!apply) process.exit(invalid.length ? 1 : 0);
 if (invalid.length) throw new Error(`Refusing to record controls with failed evidence: ${invalid.map(({ id }) => id).join(', ')}`);
-for (const control of eligible) {
+// --refresh verifies; it never rewrites a control that is already recorded.
+// Rewriting replaced hand-written evidence (AP-R-29's negative tests) with
+// this script's generic text. Update a recorded item by hand.
+const toRecord = eligible.filter(({ item }) => item.disposition === 'unassessed');
+for (const control of toRecord) {
   const { item } = control;
   item.disposition = 'remediated'; item.nextAction = 'manual-review';
   item.reviewQuestion = `Does the ${control.name} control still hold after changes to its listed source files?`;
@@ -97,5 +101,5 @@ for (const control of eligible) {
   item.evidence = [{ files: control.files, verification: 'npm run audit:repository-controls && npm run audit:category-registry -- --category repository', result: control.result }];
   item.residualRisk = 'External recovery and all unmapped AP-R items remain unassessed; rerun the listed verification after changing the control.';
 }
-await writeFile(registryPath, `${JSON.stringify(registry, null, 2)}\n`);
-console.log(`Recorded ${eligible.length} AP-R control dispositions.`);
+if (toRecord.length) await writeFile(registryPath, `${JSON.stringify(registry, null, 2)}\n`);
+console.log(`Recorded ${toRecord.length} AP-R control dispositions.`);
