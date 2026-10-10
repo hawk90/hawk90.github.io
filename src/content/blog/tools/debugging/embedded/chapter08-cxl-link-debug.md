@@ -40,13 +40,7 @@ LTSSM은 `Detect → Polling → Configuration → L0` 순으로 진행하며, L
 | Configuration | Lane reverse·width mismatch·polarity 문제 |
 | Recovery 반복 | 신호 marginal — eye margin 부족, retimer 필요 |
 
-SoC의 *PCIe controller register*가 *LTSSM_STATE 필드*를 노출합니다. Linux에서:
-
-```bash
-$ devmem 0x10000000 32 0x40   # vendor별 offset
-0x0000000B   # 11 = L0 도달
-0x00000006   # 6  = Configuration 멈춤
-```
+SoC의 *PCIe controller register*가 *LTSSM 상태 필드*를 노출하는 경우가 있습니다. 레지스터 offset과 상태 값 인코딩은 컨트롤러마다 다르므로, 해당 SoC reference manual에서 확인한 값으로 읽습니다.
 
 ## Protocol Analyzer 캡처
 
@@ -54,15 +48,14 @@ $ devmem 0x10000000 32 0x40   # vendor별 offset
 
 | 도구 | 회사 | 가격대 | 용도 |
 |------|------|--------|------|
-| LeCroy Summit T516 | Teledyne | $$$$ | CXL 2.0 / PCIe 5.0 wire-level |
-| ASMedia Probe | ASMedia | $$$ | PCIe 4.0/5.0, retimer 디버깅 |
-| Keysight U4154A | Keysight | $$$$$ | 고급 multi-link 동시 캡처 |
-| 가짜 device on FPGA | self-built | $$ | CXL.io level만 — production 디버깅에는 한계 |
+| Summit T516 | Teledyne LeCroy | — | PCIe 5.0 / CXL, x16 32GT/s 캡처 |
+
+가격은 벤더가 공개하지 않아 `—`로 둡니다.
 
 캡처할 항목:
 - *TS1·TS2 ordered set* — Polling 단계 분석
 - *Flit 흐름* — CXL.mem M2S·S2M sequence
-- *DVSEC negotiation* — 호스트가 CXL 지원 확인하는 메시지
+- *Flex Bus 모드 협상* — link training 중 modified TS1/TS2 ordered set으로 CXL 지원 여부를 주고받는 구간
 
 ## 호스트 측 진단 명령
 
@@ -71,19 +64,20 @@ $ devmem 0x10000000 32 0x40   # vendor별 offset
 $ lspci -nn | grep -i cxl
 5e:00.0 CXL [0502]: ...
 
-# 안 보이면 — LTSSM Detect 단계에서 멈춘 것
+# 안 보이면 — LTSSM이 L0에 도달하지 못한 것
 
 # 2. Link 속도/폭 확인
 $ lspci -vvv -s 5e:00.0 | grep -E "LnkSta|LnkCap"
-LnkCap: Speed 32GT/s, Width x16
-LnkSta: Speed 32GT/s, Width x16, TrErr- Train- SlotClk+
+LnkCap:	Port #0, Speed 32GT/s, Width x16, ASPM ...
+LnkSta:	Speed 32GT/s, Width x16
 
-# Width 차이가 나면 — Configuration 멈춤
+# LnkSta 폭이 LnkCap보다 좁으면 — Configuration에서 일부 lane만으로 협상된 것
 
 # 3. CXL DVSEC 발견 여부
-$ lspci -vvv -s 5e:00.0 | grep -A 5 DVSEC
-Capabilities: [60] Designated Vendor-Specific: Vendor=1e98 ID=0000
-    Compute Express Link
+$ lspci -vvv -s 5e:00.0 | grep -A 2 "Designated Vendor-Specific"
+	Capabilities: [...] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=1 Len=56: CXL
+		PCIe DVSEC for CXL Devices
+		CXLCap:	Cache- IO+ Mem+ ...
 
 # 없으면 — CXL 호환 디바이스 아니거나 firmware 문제
 
@@ -99,16 +93,10 @@ $ lsmod | grep cxl
 
 | 증상 | 원인 |
 |------|------|
-| `lspci`에 안 보임 | LTSSM Detect 실패. 슬롯·전원·reset 점검 |
-| `lspci`엔 있는데 cxl 디렉터리 비어 있음 | CEDT 누락 — BIOS 업데이트 |
-| Link width x16인데 실측 x4 | Polarity inversion 또는 PHY equalization 실패 |
+| `lspci`에 안 보임 | LTSSM이 L0 미도달. 슬롯·전원·reset 점검 |
+| `lspci`엔 있는데 cxl 디렉터리 비어 있음 | CEDT 누락 또는 cxl_acpi 미로딩 |
 | LinkSta "Train+" 깜빡임 | Recovery 반복 — eye margin 부족·retimer 필요 |
-| `cxl list`엔 보이는데 region 생성 실패 | HDM Decoder 프로그래밍 실패 — UEFI 또는 cxl-cli 권한 |
-| Cold boot에 보이는데 warm reboot 안 보임 | PERST# timing 문제 — vendor BSP 패치 |
-| CXL.cache 트래픽 없음 | Type 1/2 모드 미협상 — DVSEC config 확인 |
-| `dmesg` "AER Bad TLP" | 신호 무결성 또는 BIOS CXL config 오류 |
-| `cxl-cli` "no devices" | kernel < 6.0 또는 cxl 모듈 미로딩 |
-| Hot-plug 안 됨 | Slot Power Limit 또는 hot-plug 지원 비활성 |
+| `dmesg`에 "Device DVSEC not present, skip CXL.mem init" | `cxl_pci`가 CXL Device DVSEC을 찾지 못해 CXL.mem 초기화를 건너뜀 (`drivers/cxl/pci.c`) |
 
 ## 디버깅 체크리스트
 
