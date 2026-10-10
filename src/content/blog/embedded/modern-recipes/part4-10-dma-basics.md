@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"DMA = CPU 없이 메모리 ↔ 메모리/peripheral 이동."** Source, destination, length, trigger 네 가지만 정하면 됩니다.
+> **"DMA는 CPU가 각 word를 직접 복사하지 않고 메모리와 peripheral 사이 이동을 수행합니다."** Source, destination, length, trigger 외에도 width, alignment, cache/coherency와 ownership을 설정해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -163,7 +163,7 @@ uint8_t uart_dma_rx_get(void) {
 }
 ```
 
-이 패턴은 *IRQ 없이* RX를 무한히 받습니다. CPU는 한가할 때만 buffer를 비웁니다.
+이 패턴은 IRQ 없이도 RX write position을 폴링할 수 있습니다. CPU가 처리하지 못해 write position이 read position을 추월하면 데이터가 덮어쓰이므로 overrun 정책이 필요합니다.
 
 ### 3. Memory-to-memory (software trigger)
 
@@ -186,7 +186,7 @@ void dma_memcpy(void *dst, const void *src, size_t n) {
 }
 ```
 
-memory-to-memory는 *CPU memcpy보다 약간 빠르고* (peripheral bus 별도 사용), CPU 부담이 없습니다. 단 *small copy*는 setup overhead 때문에 손해.
+memory-to-memory DMA가 CPU memcpy보다 빠른지는 bus contention·width·cache·전송 크기에 따라 달라집니다. CPU 부담은 줄일 수 있지만 small copy는 setup overhead 때문에 손해일 수 있습니다.
 
 ## 측정 / 동작 확인
 
@@ -218,7 +218,7 @@ stream은 *한 시점에 하나의 source*만 처리합니다. 두 peripheral이
 
 > ⚠️ Width 불일치
 
-8-bit PSIZE인데 16-bit MSIZE면 align 오류. 같은 width로 통일이 안전.
+PSIZE와 MSIZE는 peripheral과 memory의 데이터 표현에 맞춰 설정해야 합니다. 서로 다른 width를 지원하는 DMA도 있으므로 무조건 같은 값으로 가정하지 말고 packing/alignment 규칙을 확인합니다.
 
 > ⚠️ Buffer가 stack에 있음
 
@@ -226,11 +226,11 @@ local array에 DMA target을 잡으면 *함수 return 후 stale*. 항상 `static
 
 > ⚠️ Buffer alignment
 
-`uint32_t` transfer는 4-byte align이 필요합니다. `__attribute__((aligned(4)))`.
+width와 controller에 따라 source/destination alignment 제약이 있습니다. `uint32_t` transfer를 사용할 때는 4-byte alignment를 보장하고, cache line alignment 요구도 별도로 확인합니다.
 
 > ⚠️ Cortex-M7 cache coherency
 
-H7·F7에서 DMA가 SRAM에 쓴 데이터를 CPU가 *cache hit로 stale read*. `SCB_InvalidateDCache_by_Addr` 필수. 또는 *MPU로 buffer 영역만 non-cacheable*로 설정.
+cacheable memory를 사용하는 H7/F7 등에서는 DMA가 쓴 데이터를 CPU가 stale cache에서 읽을 수 있습니다. DMA 방향에 맞춰 clean/invalidate를 하고, 해당 CMSIS 함수의 cache-line alignment 요구를 따르거나 buffer를 non-cacheable 영역에 배치합니다.
 
 > ⚠️ Half-word access가 boundary를 넘김
 

@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SPI는 4선 풀듀플렉스. CPOL/CPHA와 CS만 맞으면 동작합니다."** Multi-slave는 *CS 핀을 GPIO로 직접 제어*하는 것이 표준입니다.
+> **"SPI는 흔히 4선 풀듀플렉스로 사용하지만, half-duplex·3-wire 변형도 있습니다."** CPOL/CPHA·data width·CS timing을 맞추고, multi-slave에서는 보통 CS를 GPIO로 직접 제어합니다.
 
 ## 어떤 상황에서 쓰나
 
-SPI는 sensor·flash·display·SD card·radio module이 가장 자주 쓰는 버스입니다. I2C보다 *빠르고* (10-50 MHz), UART보다 *동기적*이며, 신호선이 4개로 적당합니다. STM32 SPI peripheral은 master/slave 양쪽 지원, 16-bit data, DMA까지 모두 갖춥니다.
+SPI는 sensor·flash·display·SD card·radio module에 널리 쓰입니다. I2C보다 빠르게 구성할 수 있지만 실제 clock 한계는 controller·slave·배선에 따라 다릅니다. STM32 SPI의 master/slave·data width·DMA 기능도 family별 reference manual을 확인해야 합니다.
 
 이 글은 SPI master 드라이버를 polling·interrupt·DMA로 작성하고, 멀티 슬레이브 환경에서의 CS 제어 패턴을 다룹니다.
 
@@ -42,7 +42,7 @@ NSS (또는 CS, SS)는 *active-low*입니다. 둘 이상의 slave가 있으면 *
 | 2 | 1 | 0 | HIGH | Falling |
 | 3 | 1 | 1 | HIGH | Rising |
 
-대부분의 sensor·flash·SD card는 **Mode 0**. 일부 ADC, audio codec은 다른 모드를 씁니다. datasheet의 "SPI timing diagram"을 항상 확인합니다.
+많은 sensor·flash가 **Mode 0**을 지원하지만, 일부 ADC·audio codec·display는 다른 모드를 요구합니다. datasheet의 "SPI timing diagram"을 항상 확인합니다.
 
 ### Baud divider
 
@@ -61,7 +61,7 @@ PCLK2 = 84 MHz, BR = 2 → 84 / 8 = 10.5 MHz
 | 4 | /32 | 2.6 MHz |
 | 5 | /64 | 1.3 MHz |
 
-flash·SD는 보통 25-50 MHz, sensor는 1-10 MHz, display는 모델별로 다양.
+flash·SD·sensor·display의 허용 clock은 부품과 board signal integrity에 따라 다르므로 datasheet와 실제 파형으로 정합니다.
 
 ### Full-duplex 동작
 
@@ -140,8 +140,7 @@ void spi_read(uint8_t *buf, size_t n) {
 
 ```c
 void spi_init_dma(void) {
-    // SPI1 RX = DMA2 Stream 0/2, Channel 3
-    // SPI1 TX = DMA2 Stream 3/5, Channel 3
+    // 아래 Stream/Channel은 특정 STM32F4 DMA mapping 예시
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
 
     // RX
@@ -186,7 +185,7 @@ void DMA2_Stream0_IRQHandler(void) {
 }
 ```
 
-DMA는 *> 32 byte* 전송에서 빛을 봅니다. 짧은 register read·write는 polling이 더 빠릅니다.
+DMA의 이점은 전송 길이, interrupt/setup overhead와 peripheral에 따라 달라집니다. 짧은 register read·write는 polling이 더 빠를 수 있으므로 target에서 측정합니다.
 
 ### 4. Multi-slave CS pattern
 
@@ -239,13 +238,13 @@ void spi_deselect(const spi_slave_t *s) {
 
 scope에 SCK는 보이는데 *수신 데이터가 이상*하면 CPOL/CPHA 의심. datasheet timing diagram과 직접 비교합니다.
 
-> ⚠️ MISO에 pull-up 없음
+> ⚠️ MISO line bias를 무조건 pull-up으로 해결하려는 경우
 
-slave가 high-Z일 때 MISO가 floating → 의미 없는 read. internal pull-up enable.
+slave deselect 시 high-Z가 되는지와 bus idle 요구사항을 datasheet로 확인합니다. pull-up은 bus contention·signal level 요구사항을 검토한 뒤 사용합니다.
 
 > ⚠️ 8-bit transfer인데 16-bit access
 
-`SPI->DR`을 `uint32_t` write하면 STM32는 *16-bit transfer*로 해석합니다. 8-bit access는 *byte pointer cast*가 필요합니다.
+data width는 SPI peripheral 설정과 허용 access width에 의해 결정됩니다. `DR`에 어떤 C width로 접근해야 하는지는 해당 STM32 reference manual과 설정을 따르며, 8-bit transfer라고 무조건 같은 access 표현을 다른 family에 재사용해서는 안 됩니다.
 
 > ⚠️ DMA 사용 시 CR2 enable 누락
 
@@ -260,7 +259,7 @@ flying wires로 50 MHz는 동작 안 함. 짧은 PCB trace + ground plane이 있
 - SPI는 4선 (SCK/MOSI/MISO/CS). 멀티 slave는 **CS를 GPIO로 직접** 제어.
 - Mode 0이 기본, **CPOL/CPHA**는 datasheet timing 확인 필수.
 - **`BSY` 폴링 후 CS up**이 가장 흔한 디테일 함정.
-- DMA는 **> 32 byte**에서 효과, 짧은 transaction은 polling.
+- DMA 효과는 전송 길이·setup overhead·peripheral에 따라 측정하고, 짧은 transaction은 polling을 고려합니다.
 - baud는 PCB 품질에 의존 — prototype은 5 MHz에서 시작해 올려 봅니다.
 
 다음 편은 **I2C 드라이버**입니다. state machine, repeated start, NACK 회복, timeout을 다룹니다.

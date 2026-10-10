@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-I2C는 *센서·EEPROM·RTC·OLED*가 가장 자주 쓰는 버스입니다. SPI보다 신호선이 적고 (2선), 같은 버스에 여러 device를 붙일 수 있습니다. 단점은 *느리고* (100k/400k/1M Hz), *clock stretching이나 NACK에 hang하기 쉽다*는 점입니다.
+I2C는 *센서·EEPROM·RTC·OLED*에 널리 쓰입니다. SPI보다 신호선이 적고 (2선), 같은 버스에 여러 device를 붙일 수 있습니다. 지원 speed mode와 clock stretching 동작은 controller·device·전기적 조건에 따라 확인해야 하며, timeout 없이 구현하면 NACK나 stuck bus에서 hang하기 쉽습니다.
 
 이 글은 STM32F4 I2C peripheral을 master mode로 다루며, NACK 회복과 timeout으로 hang을 방지하는 패턴을 정리합니다. (참고: STM32F7/H7/G0/G4의 I2C는 *완전히 다른 design*이라 register가 다르나, 개념은 동일합니다.)
 
@@ -60,8 +60,8 @@ Fast mode (400 kHz):
 CCR = PCLK / (3 × 400000)   (DUTY=0)
 CCR = PCLK / (25 × 400000)  (DUTY=1)
 
-TRISE = (PCLK / 1MHz) + 1    (standard)
-TRISE = (PCLK × 0.3) + 1     (fast)
+TRISE = (PCLK / 1MHz) + 1    (standard, STM32F4 구형 I2C peripheral 기준)
+TRISE = (PCLK × 0.3) + 1     (fast, 해당 peripheral 규칙 확인)
 ```
 
 예: PCLK1 = 42 MHz, 400 kHz fast mode → CCR = 35, TRISE = 13.
@@ -236,11 +236,11 @@ void i2c_bus_recover(void) {
 
 > ⚠️ Pull-up 누락
 
-I2C는 *반드시 외부 pull-up* (보통 4.7 kΩ). MCU internal pull-up은 약해 (40 kΩ) 400 kHz에서 동작 안 합니다.
+I2C는 open-drain bus이므로 pull-up이 필요합니다. 저항값은 bus capacitance, voltage, speed와 device sink current로 계산하며, 4.7 kΩ은 흔한 예시일 뿐 고정값이 아닙니다.
 
 > ⚠️ Internal pull-up만으로 시도
 
-400 kHz fast mode는 rise time이 빠듯해 *external pull-up 필수*. 100 kHz에서는 internal로도 가까스로 동작.
+400 kHz에서는 rise-time 요구를 만족하도록 대개 외부 pull-up을 사용합니다. internal pull-up만으로 가능한지는 보드 capacitance와 MCU 사양으로 검증해야 합니다.
 
 > ⚠️ ADDR clear 순서 (SR1 → SR2)
 
@@ -263,8 +263,8 @@ multi-master 환경에서 다른 master가 동시에 START하면 ARLO flag. 이 
 - I2C는 **state machine + timeout**. 각 단계의 flag 폴링.
 - master TX는 START → ADDR+W → ADDR clear → DATA → STOP.
 - master RX는 register address write → **repeated START** → ADDR+R → read → NACK + STOP.
-- **bus recovery** 9-clock pulse는 stuck SDA에서 필수 패턴.
-- **외부 pull-up** 4.7 kΩ + timeout이 안정성의 80%.
+- **bus recovery**의 clock pulse 수와 STOP 생성은 device 상태와 controller에 맞춰 설계합니다. 9-clock pulse는 흔한 복구 패턴입니다.
+- **pull-up 값**은 bus 전기 사양으로 계산하고 timeout을 함께 둡니다.
 
 다음 편은 **DMA 기초**입니다. channel/trigger·circular·half/full complete를 다룹니다.
 
