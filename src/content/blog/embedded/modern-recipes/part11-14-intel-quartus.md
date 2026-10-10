@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-Cyclone 10, Cyclone V, Arria 10, Stratix 10, Agilex 등 Intel FPGA를 다룰 때 Quartus가 표준입니다. DE10-Nano, DE0-Nano 같은 학습 보드부터 Stratix 10 GX 양산 시스템까지 같은 toolchain. Quartus Prime은 Lite (무료) / Standard / Pro 세 edition.
+Cyclone·Arria·Stratix·Agilex 계열 Intel FPGA에서 Quartus Prime을 사용합니다. 지원 device·edition·feature는 release와 device family별로 확인하며, Lite/Standard/Pro 구성도 버전 정책을 확인합니다.
 
 ```text
 Lite        : Cyclone 10 LP, MAX 10 — 무료
@@ -212,7 +212,7 @@ void vec_add(int *a, int *b, int *c, int n) {
 
 ## Partial Reconfiguration
 
-큰 design의 *일부 영역*만 runtime에 교체. Cyclone V/Arria V 이상에서 지원.
+큰 design의 일부 영역을 runtime에 교체하는 기능입니다. 지원 여부와 region·flow 제약은 device family와 Quartus release 문서를 확인합니다.
 
 1. PR region 정의 (Project → Assignments → PR Region)
 2. Static region (기본 동작) + PR region (교체 대상) 분리
@@ -278,7 +278,7 @@ endmodule
 | TCL | Vivado TCL | Quartus TCL |
 | OpenCL | Vitis | Intel FPGA OpenCL |
 
-흐름은 거의 동일. 명령어와 file extension만 다릅니다.
+두 flow 모두 constraint·compile·timing 검증 단계가 있지만 command·constraint semantics·IP와 file format은 다릅니다.
 
 ## TCL 자동화
 

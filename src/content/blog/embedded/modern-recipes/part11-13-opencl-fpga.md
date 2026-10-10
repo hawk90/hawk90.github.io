@@ -100,7 +100,7 @@ __kernel void vec_add(__global const float * restrict a,
 }
 ```
 
-`restrict` qualifier로 *pointer aliasing 없음*을 알려줌. Compiler가 burst load/store로 합성. 없으면 cycle마다 1 word, 있으면 burst로 16~256 word.
+`restrict`는 aliasing 가정을 제공하지만 burst 생성과 길이는 compiler·memory interface·access pattern으로 결정됩니다. 합성 report에서 실제 access를 확인합니다.
 
 `ivdep` (Intel)은 *loop carried dependency 없음*을 알려줌.
 
@@ -265,7 +265,7 @@ __kernel void fir(__global const float *in, __global float *out, int n) {
 }
 ```
 
-Inner loop unroll로 한 cycle 8 MAC. II=1 outer pipeline으로 100 MSPS.
+Inner loop unroll과 pipeline의 실제 MAC 수·II·sample rate는 compiler와 target resource로 합성해 확인합니다.
 
 ## Profile / Report
 
@@ -332,7 +332,7 @@ __kernel void f(__global float *in, __global float *out, int n) {
 channel float c __attribute__((depth(4)));
 ```
 
-Depth 4면 backpressure 잦음. Producer/consumer 속도 차이 흡수에 1024 정도가 보통.
+channel depth는 producer/consumer rate 차이·burst·latency와 BRAM budget으로 정합니다.
 
 > Floating point 가정
 

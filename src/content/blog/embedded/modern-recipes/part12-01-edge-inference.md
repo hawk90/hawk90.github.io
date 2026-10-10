@@ -178,12 +178,12 @@ void pipeline_worker(frame_t *frames, int n) {
 
 | Hardware | Precision | Latency | Power | 원격 가능? |
 |----------|-----------|---------|-------|-----------|
-| Cortex-M55 + Ethos-U55 | INT8 | 50 ms (224) | 0.1 W | × |
-| Pi 5 CPU | FP16 | 180 ms | 3 W | × |
-| Pi 5 + Hailo-8 NPU | INT8 | 10 ms | 4 W | × |
-| Jetson Orin Nano GPU | FP16 | 15 ms | 7 W | × |
-| Jetson AGX Orin GPU+DLA | INT8 | 3 ms | 40 W | × |
-| Cloud T4 GPU | FP16 | 8 ms + 80 ms RTT | — | ◯ |
+| Cortex-M55 + Ethos-U55 | INT8 | 측정 필요 | 측정 필요 | 측정 필요 |
+| Pi 5 CPU | FP16 | 측정 필요 | 측정 필요 | 측정 필요 |
+| Pi 5 + Hailo-8 NPU | INT8 | 측정 필요 | 측정 필요 | 측정 필요 |
+| Jetson Orin Nano GPU | FP16 | 측정 필요 | 측정 필요 | 측정 필요 |
+| Jetson AGX Orin GPU+DLA | INT8 | 측정 필요 | 측정 필요 | 측정 필요 |
+| Cloud GPU | FP16 | 측정 필요 | 측정 필요 | 측정 필요 |
 
 Cloud는 inference 자체는 빠르지만 RTT가 더해져 *체감 latency*가 가장 큽니다. Edge가 답인 이유의 핵심입니다.
 
