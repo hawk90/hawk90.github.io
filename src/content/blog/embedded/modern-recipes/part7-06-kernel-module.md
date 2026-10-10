@@ -162,16 +162,16 @@ blacklist nouveau
 
 ## 측정 / 성능 비교
 
-`.ko` 한 개 로드에 드는 시간은 대부분 1 ms 이하지만, 의존성이 깊거나 firmware blob을 같이 가져오면 수십 ms까지 늘어납니다.
+`.ko` 로드 시간은 module 크기·relocation·의존성·firmware·storage와 kernel 설정에 따라 측정해야 합니다.
 
 | 모듈 | size | load time |
 |---|---|---|
-| sample (hello) | 8 KB | 0.4 ms |
-| sample + sysfs group | 12 KB | 0.5 ms |
-| ath10k_pci + firmware | 540 KB | 48 ms |
-| nvidia (proprietary) | 28 MB | 320 ms |
+| sample (hello) | build·debug 설정에 따라 측정 | 측정 필요 |
+| sample + sysfs group | build·debug 설정에 따라 측정 | 측정 필요 |
+| driver + firmware | driver·firmware·storage에 따라 측정 | 측정 필요 |
+| vendor module | vendor build와 symbol에 따라 측정 | 측정 필요 |
 
-부팅 시간을 줄여야 한다면 자주 쓰는 driver를 built-in으로 옮기고, drone·infotainment처럼 USB 디바이스 종류가 다양한 환경에서는 module로 유지해 hot-plug에 맞춥니다.
+부팅 시간을 줄여야 한다면 자주 쓰는 driver를 built-in으로 옮길지 측정하고, USB 디바이스 종류가 다양한 환경에서는 module과 hot-plug 비용을 비교해 선택합니다.
 
 ## 자주 보는 함정
 

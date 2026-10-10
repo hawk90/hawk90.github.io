@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 같은 board에 옵션으로 LCD나 sensor를 다는 경우, 사용자가 GPIO에 외부 module을 꽂는 경우, 한 device family가 여러 변형(variant)을 가지는 경우 overlay가 답입니다. Base DTB는 board의 *고정* 구성만 담고, 옵션은 .dtbo 파일로 분리해 boot time에 선택합니다.
 
-Raspberry Pi와 BeagleBone이 overlay를 표준 운영 방식으로 사용하기에 가장 친숙합니다. 그러나 i.MX, Allwinner, Rockchip 같은 SoC에서도 동일한 메커니즘이 적용됩니다.
+Raspberry Pi와 BeagleBone은 overlay 사용 사례가 잘 알려져 있습니다. 다른 SoC에서도 DT overlay를 지원할 수 있지만, bootloader·kernel·vendor tooling의 지원 범위를 확인해야 합니다.
 
 ## 핵심 개념
 
@@ -178,16 +178,16 @@ pin reassign과 새로운 노드 추가를 fragment 두 개로 표현합니다.
 
 | 방식 | 빌드 시간 | boot 영향 |
 |---|---|---|
-| base DT 전체 재컴파일 | 수십 초 | SD 재flash 필요 |
-| overlay (.dtbo) 추가 | <1초 | 파일만 복사 |
-| configfs runtime overlay | <100 ms | reboot 불필요 |
+| base DT 전체 재컴파일 | toolchain·파일 크기에 따라 측정 | 배포 방식에 따라 다름 |
+| overlay (.dtbo) 추가 | build 환경에 따라 측정 | boot flow에 파일 반영 필요 |
+| configfs runtime overlay | kernel·driver에 따라 측정 | reboot 없이 적용 가능할 수 있음 |
 
 Overlay 작업이 모두 *증분* 작업이기 때문에 개발 속도가 크게 향상됩니다.
 
 ```text
 RAM 영향
-overlay 적용              수 KB 증가 (devicetree blob 일부)
-device probe              driver별 ~수 ms
+overlay 적용              DT 크기·kernel allocator에 따라 측정
+device probe              driver·resource init에 따라 측정
 ```
 
 ## 자주 보는 함정

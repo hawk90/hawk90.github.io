@@ -164,15 +164,15 @@ make -j8 drivers/iio/
 make -j8 prepare modules_prepare
 ```
 
-`ccache`는 같은 소스의 재컴파일을 캐시해 두 번째 빌드를 70~90% 단축시킵니다.
+`ccache`는 같은 소스의 재컴파일을 캐시해 재빌드 시간을 줄일 수 있습니다. hit rate와 build graph에 따라 효과를 측정합니다.
 
 ## 측정 / 성능 비교
 
 | 빌드 환경 | 완전 빌드(no cache) |
 |-----------|----------------------|
-| 4 코어 노트북 | 45 분 |
-| 16 코어 desktop | 8 분 |
-| 16 코어 + ccache (재빌드) | 90 초 |
+| 4 코어 노트북 | 환경별 측정 |
+| 16 코어 desktop | 환경별 측정 |
+| 16 코어 + ccache (재빌드) | cache hit rate별 측정 |
 
 CI 환경에서는 ccache와 KBUILD output dir 분리가 시간을 크게 줄입니다.
 
@@ -180,10 +180,10 @@ CI 환경에서는 ccache와 KBUILD output dir 분리가 시간을 크게 줄입
 
 | 산출물 | 크기 |
 |--------|------|
-| `Image` | ~20 MB |
-| `Image.gz` | ~7 MB |
-| `zImage` 압축률 | 약 65% |
-| modules 전체 | 100~300 MB (option 따라) |
+| `Image` | config·compiler에 따라 측정 |
+| `Image.gz` | compression·config에 따라 측정 |
+| `zImage` 압축률 | image·config에 따라 측정 |
+| modules 전체 | option·debug symbol에 따라 측정 |
 
 ## 자주 보는 함정
 
