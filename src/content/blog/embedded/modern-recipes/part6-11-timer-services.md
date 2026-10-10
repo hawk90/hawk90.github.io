@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Timer Wheel은 O(1) tick, O(1) add·cancel"**입니다. 수천 timer에도 *상수 시간*을 유지합니다.
+> **"Timer wheel은 bucket 기반으로 timer 관리 비용을 줄이는 구조입니다."** 정확한 add·cancel·tick 복잡도는 wheel 구현과 한 bucket의 timer 수에 따라 달라집니다.
 
 ## Naive — Sorted List
 
@@ -99,7 +99,7 @@ void tick(void) {
 }
 ```
 
-**Add는 O(1), Tick은 O(K)**입니다(K는 current slot의 timer 수).
+**Add는 평균적으로 bucket 삽입 비용으로 처리할 수 있고, Tick은 current slot의 timer 수 K에 영향을 받습니다.** 충돌·긴 기간 timer 처리는 별도 설계가 필요합니다.
 
 > ⚠️ Wheel 한 바퀴(256 tick)를 초과하는 timer는 *slot 충돌*이 발생하므로 re-add로 처리합니다.
 
@@ -125,7 +125,7 @@ void tick(void) {
 - 256 tick마다 → level 1의 slot 1개 *spread* to level 0
 - 즉 level 1→0 *cascade*
 
-O(1) add + O(1) tick에 가끔 cascade가 들어갑니다. Linux kernel 5.0까지 jiffies로 사용했고, 5.0+에서는 *hash-only*로 바뀌었습니다(no cascade).
+hierarchical wheel은 일반 tick에서 낮은 비용을 유지하면서 필요할 때 cascade를 수행합니다. Linux 구현의 자료구조와 버전별 동작은 해당 kernel source를 기준으로 확인합니다.
 
 ## Linux New Hashed Wheel (HRtimer 아닌 timer_list)
 
@@ -156,15 +156,15 @@ DPDK는 *skiplist 기반*입니다. add와 tick 모두 O(log N)입니다.
 
 **Timer wheel 정확도 = tick frequency**
 
-- 1 ms tick → 1 ms 해상도
-- 10 µs tick → 10 µs 해상도, but tick 비용 ↑
+- tick 주기가 짧아지면 이론상 만료 granularity가 줄지만, callback·scheduler latency는 별도로 존재합니다.
+- tick 비용은 tick rate와 구현에 따라 증가할 수 있습니다.
 
 **Tickless idle** — sleep 중 *expiry까지 hardware timer set*
 
 - tick freq 의미 적음
 - 다음 expiry == hardware timer
 
-Modern Linux와 FreeRTOS는 *tickless*입니다.
+Linux와 FreeRTOS의 tickless 동작은 kernel/configuration/port에 따라 달라집니다.
 
 ## STM32 — Hardware Timer Compare
 
@@ -194,7 +194,7 @@ esp_timer_start_once(timer, 1000000);   /* 1 sec */
 esp_timer_start_periodic(timer, 500000);   /* 500 ms */
 ```
 
-내부는 *high-resolution timer + sorted list*로 구성되어 있습니다. 1 µs 정확도를 보장합니다.
+내부 자료구조와 callback 실행 context는 ESP-IDF 버전과 설정을 확인해야 합니다. 1 µs는 단위·해상도 예시이지 callback 지연 보장이 아닙니다.
 
 ## FreeRTOS Software Timer Wheel?
 

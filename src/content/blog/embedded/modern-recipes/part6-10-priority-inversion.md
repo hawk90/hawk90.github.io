@@ -94,7 +94,7 @@ L1 mtx_B 대기 → L2 boost
 H mtx_A 대기 → L1·L2 둘 다 boost
 ```
 
-체인 길이가 N이면 boost가 N번 propagation됩니다. 그러면 *수십 µs*까지 시간이 누적될 수 있습니다.
+체인 길이가 N이면 boost propagation과 ready-list 처리가 추가됩니다. 비용은 RTOS·port·체인 구조에 따라 측정해야 합니다.
 
 자동차 ASIL-D에서는 *chain depth를 제한*합니다(보통 3 이하).
 
@@ -117,11 +117,11 @@ VxWorks와 INTEGRITY, 일부 µC/OS는 PCP를 지원합니다. 덕분에 WCET �
 
 - Ceiling만큼 boost되어 *다른 lower priority task만* preempt 가능
 
-Immediate 방식이 *구현이 쉬우면서도* 효과는 같습니다. 그래서 Modern RTOS의 표준이 되었습니다.
+Immediate와 Original 방식의 선택과 지원 여부는 RTOS 구현마다 다릅니다. 둘의 차이와 실제 지원 범위를 문서와 소스로 확인합니다.
 
 ## 해결 3: Priority Ceiling Emulation (PCE)
 
-Linux PREEMPT_RT는 *robust mutex와 priority ceiling*을 함께 제공합니다.
+Linux PREEMPT_RT의 mutex/priority protocol 지원은 kernel API와 설정에 따라 확인해야 하며, robust mutex와 priority ceiling을 같은 기능으로 간주하면 안 됩니다.
 
 ```c
 pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_PROTECT);
@@ -160,7 +160,7 @@ ISR과 task 사이에는 *semaphore*(signaling)를 씁니다. Mutex는 *task 간
 1. **Short critical section**을 μs 단위로 유지합니다.
 2. Sleep이나 IO 중에는 **mutex를 잡지 않습니다**.
 3. **Lock ordering**으로 deadlock과 chain inheritance를 제한합니다.
-4. **PI mutex**를 사용합니다(기본 활성화).
+4. **PI mutex**를 사용합니다(해당 RTOS의 mutex 구현과 설정 확인).
 
 ```c
 /* 회피 */
@@ -197,12 +197,12 @@ xSemaphoreGive(&mtx);
 ## WCET 분석
 
 ```text
-Task H budget: 100 µs
-Mutex hold worst case (Low): 50 µs
-Inheritance chain depth: 2 → +100 µs
-Total worst case wait: 150 µs
+Task H budget: 예시값 — 시스템 요구사항으로 산정
+Mutex hold worst case (Low): 측정·분석 필요
+Inheritance chain depth: 실제 lock graph로 산정
+Total worst case wait: WCET·스케줄링 분석 필요
 
-H가 매 1 ms tick에 — budget 안 OK? → 100 µs < 1 ms ✓
+H의 deadline 충족 여부는 측정된 WCET와 모든 blocking 항을 합산해 판단
 ```
 
 aiT와 Bound-T 같은 *정적 WCET 도구*를 활용합니다. 자동차와 항공 분야의 표준입니다.

@@ -176,13 +176,13 @@ Hardware watchdog을 software로 한 단계 감쌉니다. 어떤 task가 굶고 
 
 | 인프라 | overhead |
 |---|---|
-| configCHECK_FOR_STACK_OVERFLOW=1 (top of stack 검사) | 0.1 µs / switch |
-| configCHECK_FOR_STACK_OVERFLOW=2 (canary) | 0.3 µs / switch |
-| configGENERATE_RUN_TIME_STATS | 1 µs / switch (HW timer 1개 사용) |
-| SystemView (RTT 모드) | 2 µs / event |
-| Tracealyzer (J-Link 직접) | 0 µs (DAP로 RAM 직접 읽음) |
+| configCHECK_FOR_STACK_OVERFLOW=1 (검사 방식은 port 의존) | 측정 필요 |
+| configCHECK_FOR_STACK_OVERFLOW=2 (canary) | 측정 필요 |
+| configGENERATE_RUN_TIME_STATS | clock source·측정 경로에 따라 측정 |
+| SystemView (RTT 모드) | transport·event 수에 따라 측정 |
+| Tracealyzer | recorder 설정·전송 방식에 따라 측정 |
 
-Canary 방식 stack 검사가 0.3 µs 정도 듭니다. 양산에서도 켜두는 편이 안전합니다.
+Canary 방식 stack 검사는 port와 검사 시점에 따라 비용이 달라집니다. 양산 적용 여부는 overhead와 검출 범위를 측정해 결정합니다.
 
 ```text
 RAM 사용량
@@ -230,12 +230,12 @@ Trace recorder가 켜진 상태의 측정값은 production 값과 다릅니다. 
 /* IWDG 안 켜고 양산 */
 ```
 
-Software 모든 사고는 watchdog이 마지막 안전망입니다. Hardware watchdog은 항상 활성화하고 적절한 timeout을 둡니다.
+Software fault에 대비해 watchdog을 안전망으로 사용할 수 있습니다. Hardware watchdog의 활성화와 timeout은 시스템 hazard analysis, boot/recovery 경로와 함께 정합니다.
 
 ## 정리
 
 - 네 가지 인프라(stack high-water, overflow hook, heap stats, trace)는 처음부터 켭니다.
-- 양산 reset은 거의 항상 stack overflow나 heap 고갈입니다. 사전 모니터링이 답입니다.
+- 양산 reset 원인은 stack overflow·heap 고갈 외에도 전원·clock·bus·assert 등 다양하므로 reset reason과 fault context를 함께 기록합니다.
 - Mutex take에는 timeout을 두어 deadlock이 detectable하도록 만듭니다.
 - Runtime stats는 CPU 사용량의 가장 단순한 측정 도구입니다.
 - SystemView/Tracealyzer는 jitter와 priority inversion을 시각적으로 보여줍니다.
