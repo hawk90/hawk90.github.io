@@ -80,7 +80,7 @@ const redirectUrls = redirectPrefixUrls();
 
 // https://astro.build/config
 export default defineConfig({
-  site: 'https://hawk90.github.io',
+  site: 'https://hawk90.dev',
 
   vite: {
     plugins: [tailwindcss()],
