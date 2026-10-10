@@ -30,7 +30,7 @@
       "dependsOn": [
         "methodology"
       ],
-      "status": "remediation_in_progress",
+      "status": "completed",
       "closure": [
         "Every AP-R item is dispositioned.",
         "CI, dependency, artifact, and rollback evidence are recorded."
@@ -49,7 +49,7 @@
         "methodology",
         "repository"
       ],
-      "status": "remediation_in_progress",
+      "status": "completed",
       "closure": [
         "Every AP-T item is dispositioned.",
         "Required regression and release checks pass."
@@ -69,7 +69,7 @@
         "repository",
         "quality"
       ],
-      "status": "baseline_established",
+      "status": "completed",
       "closure": [
         "Every AP-SEC item is dispositioned.",
         "Static-admin, secrets, supply-chain, and production-artifact checks pass."
@@ -88,7 +88,7 @@
         "methodology",
         "quality"
       ],
-      "status": "baseline_established",
+      "status": "completed",
       "closure": [
         "Every AP-M item is dispositioned.",
         "Metadata lifecycle decisions are evidence-backed; no bulk verification claims."
@@ -106,7 +106,7 @@
         "metadata",
         "quality"
       ],
-      "status": "baseline_established",
+      "status": "remediation_in_progress",
       "closure": [
         "Every AP-I item is dispositioned.",
         "Taxonomy and relation decisions are reviewed rather than inferred from paths."
