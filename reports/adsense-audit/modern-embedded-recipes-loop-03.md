@@ -110,14 +110,14 @@
 | --- | ---: | ---: | ---: | ---: | ---: | ---: | ---: | ---: | --- | --- | --- | --- |
 | `part2-08-arm-mmu.md` | 10 | 11 | 6 | 10 | 5 | 6 | 1 | 49 | 오류 확인 | 우선 조치 | 중간 | part1-04-uart-hardware.md |
 | `part2-09-trustzone-m.md` | 9 | 8 | 4 | 7 | 6 | 5 | 1 | 40 | 미검증 | 병합 검토 | 중간 | part6-09-isr-api.md |
-| `part2-10-memory-barrier.md` | 12 | 12 | 6 | 9 | 6 | 3 | 1 | 49 | 오류 확인 | 우선 조치 | 중간 | part6-09-isr-api.md |
+| `part2-10-memory-barrier.md` | 12 | 12 | 6 | 9 | 6 | 3 | 1 | 49 | 미검증 | 병합 검토 | 중간 | part6-09-isr-api.md |
 | `part3-01-cross-compiler.md` | 11 | 12 | 7 | 10 | 6 | 6 | 2 | 54 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build.md |
 | `part3-02-compile-pipeline.md` | 10 | 12 | 7 | 10 | 7 | 6 | 1 | 53 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build.md |
 | `part3-03-elf-format.md` | 10 | 11 | 8 | 11 | 6 | 5 | 1 | 52 | 미검증 | 병합 검토 | 중간 | part1-04-uart-hardware.md |
 | `part3-04-linker-script-basics.md` | 11 | 13 | 8 | 9 | 7 | 6 | 1 | 55 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build.md |
 | `part3-05-linker-script-advanced.md` | 12 | 12 | 8 | 10 | 6 | 6 | 1 | 55 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build.md |
 | `part3-06-startup-code.md` | 11 | 13 | 8 | 8 | 7 | 5 | 1 | 53 | 미검증 | 병합 검토 | 중간 | part7-05-kernel-build.md |
-| `part3-07-c-runtime.md` | 12 | 12 | 8 | 8 | 5 | 5 | 1 | 51 | 오류 확인 | 우선 조치 | 중간 | part1-04-uart-hardware.md |
+| `part3-07-c-runtime.md` | 12 | 12 | 8 | 8 | 5 | 5 | 1 | 51 | 미검증 | 병합 검토 | 중간 | part1-04-uart-hardware.md |
 
 점수 구간만 보면 10편 모두 40~59(`병합 검토`)다. `우선 조치` 세 편은 점수와 무관하게 factcheck 게이트로 정해졌다.
 
@@ -160,7 +160,7 @@ uncertainties:
 
 ### part2-10-memory-barrier.md
 
-factcheck `오류 확인`: 232행은 "전체 흐름은 5 단계입니다"라고 한 뒤 같은 줄에서 write·D-cache flush·I-cache invalidate·DSB·ISB·jump 여섯 항목을 나열한다. 바로 위 코드(211~228행)의 주석은 1~4단계다. 보조 근거로 304행 "Cortex-M single core에서는 MMIO·DMA·atomic에만 씁니다"는 같은 글의 ISR↔Task DMB 예(42~57행)와 CONTROL·MPU·FPU 뒤 ISB 목록(99~104행)과 어긋난다.
+factcheck `미검증` — 2026-10-11 독립 검증에서 아래 근거가 루브릭 3-1의 제외 유형(완곡한 본문과 단정적 정리의 충돌, 산문 개수 오기, 외부 지식이 필요한 판단)으로 판정되어 `오류 확인`에서 내렸다. 아래 내용은 `uncertainties`로 보고 fact-check 때 1차 자료로 정한다. 원래 기록: 232행은 "전체 흐름은 5 단계입니다"라고 한 뒤 같은 줄에서 write·D-cache flush·I-cache invalidate·DSB·ISB·jump 여섯 항목을 나열한다. 바로 위 코드(211~228행)의 주석은 1~4단계다. 보조 근거로 304행 "Cortex-M single core에서는 MMIO·DMA·atomic에만 씁니다"는 같은 글의 ISR↔Task DMB 예(42~57행)와 CONTROL·MPU·FPU 뒤 ISB 목록(99~104행)과 어긋난다.
 
 | 항목 | 점수 | 이 글의 근거 |
 | --- | ---: | --- |
@@ -175,6 +175,8 @@ factcheck `오류 확인`: 232행은 "전체 흐름은 5 단계입니다"라고 
 uncertainties:
 - 296행 "Cortex-M에는 share domain 개념 없음"과 136행 "No store buffer reorder for same address"는 미확인이다.
 - 162~183행 ring은 `head`/`tail`을 일반 변수로 두고 DMB만 쓴다. 33행 "DMB 하나가 C/C++ atomic을 대체하지 않는다"와 어떻게 맞는지 본문에 설명이 없다.
+
+병합 대상: 병합 대상 없음. 다음 조치는 `보강`(304행 사용 범위와 본문 예제를 1차 자료로 맞춤)이다.
 
 ### part3-01-cross-compiler.md
 
@@ -287,7 +289,7 @@ uncertainties:
 
 ### part3-07-c-runtime.md
 
-factcheck `오류 확인`: 15행은 "Linux 환경의 startup도 본질은 `.data` 복사와 `.bss` 클리어"라고 하는데, 47~49행 `_start` 주석은 Linux에서는 stack·argc/argv를 준비하고 ".data 복사, .bss 클리어"는 "(bare)"의 경우라고 구분한다. 같은 글 안에서 Linux startup의 역할이 서로 다르다.
+factcheck `미검증` — 2026-10-11 독립 검증에서 아래 근거가 루브릭 3-1의 제외 유형(완곡한 본문과 단정적 정리의 충돌, 산문 개수 오기, 외부 지식이 필요한 판단)으로 판정되어 `오류 확인`에서 내렸다. 아래 내용은 `uncertainties`로 보고 fact-check 때 1차 자료로 정한다. 원래 기록: 15행은 "Linux 환경의 startup도 본질은 `.data` 복사와 `.bss` 클리어"라고 하는데, 47~49행 `_start` 주석은 Linux에서는 stack·argc/argv를 준비하고 ".data 복사, .bss 클리어"는 "(bare)"의 경우라고 구분한다. 같은 글 안에서 Linux startup의 역할이 서로 다르다.
 
 | 항목 | 점수 | 이 글의 근거 |
 | --- | ---: | --- |
@@ -302,6 +304,8 @@ factcheck `오류 확인`: 15행은 "Linux 환경의 startup도 본질은 `.data
 uncertainties:
 - 92행 "priority 없는 TU 간 순서를 가정하지 말라"와 226행 "priority 없으면 link 순서"가 다른 강도로 말한다.
 - 226행 priority 범위 101~65535, 150행 nosys.specs 설명은 미확인이다.
+
+병합 대상: `part3-06-startup-code.md`를 이 글로 합치는 쪽의 기준 글이다. 다음 조치는 `보강`(15행과 47~49행의 Linux startup 설명 정리)이다.
 
 ### 시리즈 공통 문제
 
