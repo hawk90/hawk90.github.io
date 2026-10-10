@@ -7,7 +7,9 @@ const blogCollection = defineCollection({
   // Modern content layer (Astro 5+, required in Astro 6).
   // Replaces the deprecated `type: 'content'` option.
   loader: glob({
-    pattern: '**/*.{md,mdx}',
+    // Markdown only. The mdx() integration is gone (astro.config.mjs) and every
+    // hook and checker globs *.md, so an MDX post would bypass all of them.
+    pattern: '**/*.md',
     base: './src/content/blog',
   }),
   schema: z.object({

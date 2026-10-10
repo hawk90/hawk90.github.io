@@ -2,9 +2,9 @@
 #
 # 설치: `lefthook install` (한 번만)
 # 우회: `git commit --no-verify` (긴급 시)
-# git worktree에서는 lefthook 2.2.1 이상이 필요하다. 2.1.16은 일부만 stage된
-# 파일이 있으면 "failed to save all unstaged changes"로 커밋을 막는다
-# (brew upgrade lefthook).
+# lefthook 2.2.1 이상. 2.1.16은 git worktree에서 일부만 stage된 파일이 있으면
+# "failed to save all unstaged changes"로 커밋을 막는다(brew upgrade lefthook).
+min_version: 2.2.1
 
 # `dir/**/*.ext`가 dir 바로 아래 파일도 잡도록. 기본 matcher에서는
 # public/images/blog/_design*.tex가 diagram-fresh에 한 번도 걸리지 않았다.
