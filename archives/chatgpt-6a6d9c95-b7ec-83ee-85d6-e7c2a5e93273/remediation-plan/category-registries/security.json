@@ -303,7 +303,7 @@
           "result": "The site always emits a CSP, but on ad pages it is the relaxed ads policy above, not a restrictive one. Owner decision 2026-10-09 (#70, #72): AdSense Auto ads on content pages. AdSense supports only a nonce-based CSP sent as an HTTP header, which GitHub Pages cannot send, so pages that load ads carry `script-src 'self' 'unsafe-inline' 'unsafe-eval' https: data:; object-src 'none'; base-uri 'self'; form-action 'self' https://github.com`. Pages under ADS_CONFIG.excludePaths (/admin, /settings, /components, /404) and /random keep the strict default-src 'self' policy with build-time SHA-256 hashes for every inline script. audit:csp checks the hashes and that every page has a policy; audit:ads checks that ad code and the ads policy appear together and never under an excluded path."
         }
       ],
-      "residualRisk": "On ad pages any injected https: script would run; the site renders no user-supplied HTML, and the giscus session token in localStorage is readable by ad code (scrubbed from the URL before the ad script loads; owner decision on that exposure is open, see src/components/blog/Giscus.astro). Re-disposition if ads are turned off or GitHub Pages gains custom headers."
+      "residualRisk": "On ad pages any injected https: script would run; the site renders no user-supplied HTML, and the giscus session token in localStorage is readable by ad code (scrubbed from the URL before the ad script loads; accepted by the owner 2026-10-10: the value is giscus's encrypted session, usable only via giscus.app to comment as that reader; see src/components/blog/Giscus.astro). Re-disposition if ads are turned off or GitHub Pages gains custom headers."
     },
     {
       "id": "AP-SEC-10",

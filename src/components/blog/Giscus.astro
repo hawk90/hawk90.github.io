@@ -141,8 +141,12 @@ const siteOrigin = new URL(SITE_CONFIG.url).origin;
    * guard it. Pages with ads run adsbygoogle.js in this origin under the ads
    * CSP, and that code can read localStorage; the pre-ads scrubber in
    * BaseLayout only keeps the token out of the URL the ad request reports.
-   * Whether that is acceptable is the owner's call; serving comments only on
-   * ad-free pages would remove the exposure.
+   * Accepted by the owner (2026-10-10). Comments live on post pages and post
+   * pages carry ads, so the only alternatives were dropping ads or comments.
+   * The stored value is giscus's server-encrypted session, usable only
+   * through giscus.app to comment or react as that reader in this repo's
+   * Discussions; abusing it requires compromised AdSense code. Revisit if
+   * giscus changes what the session grants or ads leave post pages.
    */
   function takeSession(): string {
     const url = new URL(location.href);
