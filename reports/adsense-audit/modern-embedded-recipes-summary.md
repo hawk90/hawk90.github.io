@@ -11,6 +11,38 @@
 
 이 문서는 전체 처리 순서를 결정하기 위한 요약본이다. 글별 상세 근거는 각 루프 보고서에 남겨 두고, 이 문서에서는 작업 순서와 상태를 관리한다.
 
+## 루브릭 적용 상태
+
+| 확인 항목 | 상태 | 결과 |
+| --- | --- | --- |
+| 공개 평가 대상 | 완료 | 152편, `seriesOrder 0~151` |
+| 루프 보고서 | 완료 | 16개 보고서, 대상 수 합계 152편 |
+| A~G 항목 점수 | 완료 | 152편 모두 항목별 합계 기록 |
+| A~G 합계 일치 | 완료 | 항목별 합계와 총점 일치 |
+| 점수 상태 | 잠정 | 원문 수정·실측 재검증 전 |
+| P0 정책 차단 | 현재 확인 없음 | 사이트 전체 렌더링·광고 게이트는 별도 검사 필요 |
+| 사이트 전체 제출 게이트 | 조건부 통과 | 자동화 가능한 배포·광고·탐색 검사는 통과했지만 About/Contact/Privacy와 시각·법적 검토는 별도 확인 필요 |
+
+이 표에서 `완료`는 감사 문서 기록이 완료됐다는 뜻이며 AdSense 승인이나 Google의 품질 판정을 의미하지 않는다. 사이트 전체 제출 게이트가 통과되기 전에는 콘텐츠 점수만으로 제출 결론을 내리지 않는다.
+
+### 실행된 사이트 게이트 결과
+
+| 검사 | 결과 | 관찰값 |
+| --- | --- | --- |
+| rendered anchor links | 통과 | 51 checked, 0 finding |
+| search/page parity | 통과 | 726 records, 0 finding |
+| RSS·sitemap distribution | 통과 | 3/3 pass, 0 finding |
+| AdSense placement | 통과 | 726/1,449 pages load AdSense, 0 failure, 0 ClientRouter page |
+| sitemap·robots boundary | 통과 | 749 entries/1,449 built pages, 0 noindex 제출, 0 orphan |
+| reading experience | 통과 | 1,449 pages, 1,997 tables, 5,127 images, 180,107 links, violation 없음 |
+
+### 아직 별도 확인할 사이트 항목
+
+- About·Contact·Privacy·Cookie 및 광고 관련 안내가 실제 공개 페이지와 일치하는지
+- 대표 모바일·데스크톱 페이지에서 광고가 본문·메뉴·다운로드 링크로 오인되지 않는지
+- 작성자 정보·업데이트 정책·법적 안내의 실제 렌더링과 링크 상태
+- 실제 AdSense 심사 계정·지역·페이지 샘플에서의 최종 광고 정책 판정
+
 ## 우선순위 기준
 
 | 우선순위 | 점수 | 처리 의미 | 다음 행동 |
