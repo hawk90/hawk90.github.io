@@ -9,7 +9,7 @@ const [rssSource, publication, astro] = await Promise.all([
 ]);
 const checks = [
   ['rss-publication-filter', /\.filter\(\(document\) => getPublicationDecision\(document\)\.rss\)/.test(rssSource) && /const render = document\.status === 'published'/.test(publication)],
-  ['sitemap-admin-exclusion', /sitemap\(\{/.test(astro) && /!page\.includes\('\/admin'\)/.test(astro)],
+  ['sitemap-admin-exclusion', /sitemap\(\{/.test(astro) && /!(?:page|pathname)\.includes\('\/admin'\)/.test(astro)],
 ];
 let sitemapDuplicateFindings = [];
 try {
