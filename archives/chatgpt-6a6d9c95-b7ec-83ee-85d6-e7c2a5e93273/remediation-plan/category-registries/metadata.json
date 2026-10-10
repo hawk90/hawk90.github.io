@@ -36,7 +36,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "The Astro content schema and knowledge-model audit provide one checked-in schema contract with regression checks."
@@ -72,7 +72,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Optional metadata is retained where content types differ; the schema does not claim every field applies to every document."
@@ -108,7 +108,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Required fields are limited to title, date, and explicit topics; the required set is enforced by schema and classification tests."
@@ -144,7 +144,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "A shared collection schema models common fields with bounded optional type-specific fields; introducing separate collections remains a future design decision."
@@ -180,7 +180,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Content type and review status use explicit enums and topic values resolve through the canonical registry."
@@ -216,7 +216,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "The topic registry validates duplicate IDs, missing parents, cycles, and unknown explicit topic values."
@@ -252,7 +252,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Series identity remains source frontmatter while the series lens registry provides presentation metadata; duplication is audited rather than silently merged."
@@ -288,7 +288,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Normalized categories and public URLs are derived at runtime from stable IDs and explicit metadata rather than manually duplicated fields."
@@ -324,7 +324,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Generated search/feed/artifact data is treated as derived output with source manifests; no generated field is promoted to editorial source automatically."
@@ -360,7 +360,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Schema defaults for author, tags, type, draft, featured, and review status are explicit and covered by the content contract."
@@ -396,7 +396,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Legacy categories remain a compatibility field while explicit topics are canonical; removal requires a separately reviewed migration."
@@ -432,7 +432,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Topic migration defaults to dry-run and preserves source bodies; no big-bang write is authorized implicitly."
@@ -468,7 +468,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "The migration script emits conflict/unclassified reports before any --apply write."
@@ -504,7 +504,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Migration compares existing explicit topics and only writes missing metadata under explicit --apply, making reruns no-ops for already classified documents."
@@ -540,7 +540,7 @@
             "scripts/verify-content-classification.mjs",
             "scripts/migrate-explicit-topics.mjs",
             "scripts/export-portable-content.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:knowledge-model && npm run test:topics && npm run test:classification && npm run audit:content-portability",
           "result": "Migration and export policies are additive, but external backup/recovery evidence remains separately deferred and is not inferred from a metadata script."
@@ -2591,7 +2591,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:gate && npm run verify:release",
           "result": "Edits cannot land unvalidated: lefthook runs the publish gate and frontmatter checks on staged markdown at commit and on changed files at push, audit:gate sweeps the whole corpus, and verify:release rebuilds and re-gates in CI before deployment."
@@ -2626,7 +2626,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run gate:tooling && npm run audit:methodology-policy",
           "result": "Bulk rewriting is blocked by rule and by machine: claude/WORKFLOW.md and .claude/rules/06 forbid bulk rewrite or mass drafting to clear an anti-pattern queue, frontmatter changes are script-only with preview-by-default and explicit --apply, and audit-tooling.mjs enforces that contract across 138 script files rather than trusting the convention."
@@ -2727,7 +2727,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run gate:repository",
           "result": "Content and platform changes are separated in practice: over the last 300 commits exactly one touches both src/content and the platform directories, and that commit is a documented content sweep. Commit subjects carry scoped prefixes such as chore(content), fix(blog), and docs."
@@ -2762,7 +2762,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run gate:repository",
           "result": "Commits are small by default and large only mechanically: the last 200 commits have a median of 3 files changed and a 90th percentile of 24, and the outliers are single-purpose script-driven sweeps such as recording topic metadata or unpublishing a series. One 685-file commit combined a chapter rename with a date normalization, which is the accepted exception."
@@ -2797,7 +2797,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run gate:repository",
           "result": "Mechanical rewrites are isolated into their own commits rather than mixed into semantic edits: the ASCII-to-TikZ conversion, code-block cleanup, and broken-link repair each landed as separate batches, and no formatter runs automatically over markdown, so reformatting noise is not injected into unrelated changes. No written rule enforces the separation."
@@ -2832,7 +2832,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run verify:release",
           "result": "A rollback plan exists and states its own limits: the repository recovery runbook defines the recovery priority as source first, then a readable static site with canonical URLs unchanged, then redirects and discovery, then optional integrations, and names required evidence and pass conditions per control. It declares that it is a checklist rather than proof recovery was tested, and the deployed site is a rebuildable artifact from committed source."
@@ -2867,7 +2867,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run verify:release",
           "result": "Preview is representative because it serves the production artifact: npm run preview serves the output of astro build, the same build that verify:release runs and that CI and deploy execute, and prebuild generates OG images on both paths. Preview still runs against a local build rather than the deployed host."
@@ -3001,7 +3001,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:remediation-graph",
           "result": "A baseline is required before changes: claude/WORKFLOW.md orders the loop as read the packet, inspect the current implementation and record concrete findings, then implement only the named task IDs. Each phase packet carries CONTEXT, FINDINGS, CHANGES, and VERIFICATION, and the remediation graph tracks a per-category baseline state."
@@ -3036,7 +3036,7 @@
             "scripts/audit-publish-gate.sh",
             ".github/workflows/ci.yml",
             ".github/workflows/deploy.yml",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:remediation-graph && npm run audit:methodology-policy",
           "result": "Completion is defined by evidence, not by a merge: the remediation graph report states that baseline_established means enabling work exists and is never category completion, WORKFLOW.md requires running the listed verification commands and forbids claiming success for a failed command, and audit-category-registry.mjs rejects any recorded decision whose evidence files or npm commands do not exist."

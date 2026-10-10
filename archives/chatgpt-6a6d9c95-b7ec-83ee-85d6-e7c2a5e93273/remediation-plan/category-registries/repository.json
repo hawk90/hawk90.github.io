@@ -171,7 +171,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for account-recovery; actual exercise remains pending."
@@ -314,7 +314,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
           "result": "The runbook prioritizes a readable site and explicitly prevents resilience work from becoming an unbounded publishing blocker."
@@ -513,7 +513,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
@@ -541,7 +541,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
@@ -569,7 +569,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
@@ -597,7 +597,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
@@ -624,7 +624,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -910,7 +910,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -971,7 +971,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1004,7 +1004,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1037,7 +1037,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1209,7 +1209,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1242,7 +1242,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1275,7 +1275,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1308,7 +1308,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1341,7 +1341,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1374,7 +1374,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1407,7 +1407,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1440,7 +1440,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1473,7 +1473,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1506,7 +1506,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1623,7 +1623,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1656,7 +1656,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1689,7 +1689,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1750,7 +1750,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1783,7 +1783,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1816,7 +1816,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1877,7 +1877,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1910,7 +1910,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1943,7 +1943,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -1976,7 +1976,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2009,7 +2009,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2042,7 +2042,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2075,7 +2075,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2108,7 +2108,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2141,7 +2141,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2313,7 +2313,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2346,7 +2346,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2379,7 +2379,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2412,7 +2412,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2445,7 +2445,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
@@ -2473,7 +2473,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/content/blog",
             "reports/content-export/content.jsonl"
           ],
@@ -2502,7 +2502,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2535,7 +2535,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2652,7 +2652,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2685,7 +2685,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "reports/content-export/README.md",
             "reports/content-export/manifest.json",
             "scripts/audit-content-portability.mjs",
@@ -2746,7 +2746,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
           "result": "The runbook bounds preservation work around restoring a readable site before optional integrations, preventing the preservation system from becoming the product."
@@ -2773,7 +2773,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
           "result": "The recovery runbook requires an incident trigger and failure classification."
@@ -2800,7 +2800,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
           "result": "The runbook defines recovery order before optional integration recovery."
@@ -2827,7 +2827,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
           "result": "Comments are explicitly restored only after the readable static site is healthy."
@@ -2884,7 +2884,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
@@ -2912,7 +2912,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for domain-dns-recovery; actual exercise remains pending."
@@ -2939,7 +2939,7 @@
       "evidence": [
         {
           "files": [
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-controls && npm run audit:category-registry -- --category repository",
           "result": "The runbook requires an incident record including residual risk and reassessment, not only an immediate fix."
@@ -2967,7 +2967,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for account-recovery; actual exercise remains pending."
@@ -2995,7 +2995,7 @@
         {
           "files": [
             "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-external-risk-acceptance.json",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md"
+            "docs/runbooks/repository-recovery.md"
           ],
           "verification": "npm run audit:repository-external-evidence",
           "result": "Accepted risk deferral for account-recovery; actual exercise remains pending."

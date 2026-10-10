@@ -364,7 +364,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3111,7 +3111,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3147,7 +3147,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3183,7 +3183,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3219,7 +3219,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3255,7 +3255,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3291,7 +3291,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3327,7 +3327,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3363,7 +3363,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3399,7 +3399,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
@@ -3435,7 +3435,7 @@
             "scripts/scan-secrets.mjs",
             "scripts/audit-quality-contracts.mjs",
             "scripts/verify-release.mjs",
-            "archives/chatgpt-6a6d9c95-b7ec-83ee-85d6-e7c2a5e93273/remediation-plan/repository-recovery-runbook.md",
+            "docs/runbooks/repository-recovery.md",
             "src/consts/config.ts",
             "src/layouts/BaseLayout.astro"
           ],
