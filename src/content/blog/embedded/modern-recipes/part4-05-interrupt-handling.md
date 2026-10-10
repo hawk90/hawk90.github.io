@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"NVIC enable + ISR 이름 일치 + priority 설정."** Cortex-M의 인터럽트는 이 세 가지만 맞으면 동작합니다. 그 외는 모두 디테일입니다.
+> **"peripheral 설정 + ISR 이름 일치 + NVIC 설정."** Cortex-M 인터럽트의 기본 흐름은 이 세 축으로 확인하지만, flag clear·priority grouping·vector 배치는 코어와 peripheral에 따라 함께 검증해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -24,7 +24,7 @@ polling으로 처리하는 모든 일은 인터럽트로 옮길 수 있습니다
 
 ### Vector table과 ISR 명명
 
-Cortex-M의 vector table은 reset 시 Flash 시작 (보통 `0x08000000`)에 배치되고, `SCB->VTOR`로 재배치합니다.
+Cortex-M의 vector table은 SoC의 reset alias와 boot 설정이 정한 주소에 배치되며, 많은 구현에서 `SCB->VTOR`로 재배치할 수 있습니다. 주소·정렬 조건·VTOR 지원 여부는 대상 문서를 확인해야 합니다.
 
 ```text
 Offset  Vector
@@ -78,10 +78,10 @@ NVIC_SetPriority(USART1_IRQn, 6);       // priority 설정
 
 ### Priority
 
-Cortex-M의 priority는 *값이 작을수록 높습니다*. 8-bit field지만, 보통 상위 4-bit (16 levels)만 implement됩니다.
+Cortex-M의 priority는 *값이 작을수록 높습니다*. field는 8-bit이지만 실제 구현 bit 수와 CMSIS API의 표현 범위는 core/vendor 설정에 따라 다릅니다.
 
 ```c
-// 0 (highest) ~ 15 (lowest) for 4-bit priority
+// 아래 범위는 priority bit가 4개인 예시
 NVIC_SetPriority(EXTI0_IRQn, 0);     // 가장 높음
 NVIC_SetPriority(USART1_IRQn, 8);    // 중간
 NVIC_SetPriority(TIM2_IRQn, 15);     // 가장 낮음
@@ -101,7 +101,7 @@ NVIC_SetPriorityGrouping(0);   // all 4 bits = pre-empt
 
 ### Tail-Chaining과 Late Arrival
 
-ISR 끝나면 *context restore 없이* 다음 pending IRQ로 바로 진입 (6-12 cycle 절약). late arrival은 *낮은 priority ISR이 stacking 중일 때 높은 priority가 오면* 그쪽을 먼저 처리하고 돌아옵니다. 둘 다 hardware가 자동입니다.
+ISR 끝나면 구현된 exception entry/return 규칙에 따라 다음 pending IRQ로 바로 이어지는 tail-chaining이 발생할 수 있습니다. late arrival도 core가 지원하는 경우 stacking 중 더 높은 priority exception을 선택할 수 있으며, cycle 수는 core·memory wait state에 따라 달라집니다.
 
 ## 코드 예제
 
@@ -208,7 +208,7 @@ void EXTI15_10_IRQHandler(void) {
 }
 ```
 
-스코프로 PA5를 보면 ISR entry-exit 시간이 *pulse width*로 보입니다. 보통 100-300 ns 정도 (168 MHz 기준 ISR overhead + 본문).
+스코프로 PA5를 보면 ISR entry-exit 시간이 *pulse width*로 보입니다. 실제 폭은 core clock, flash wait state, compiler와 ISR 본문에 따라 측정해야 합니다.
 
 ISR이 들어오지 않으면 *NVIC pending register*를 확인합니다.
 
@@ -235,7 +235,7 @@ priority가 같으면 nested가 안 됩니다. critical work는 priority를 높�
 
 > ⚠️ ISR 안에서 긴 작업
 
-50 µs 이상 걸리면 다른 ISR이 막힙니다. flag만 set하고 main loop이나 task로 work를 넘기는 *bottom-half 패턴*을 씁니다.
+긴 ISR은 lower-priority interrupt latency를 늘리고 jitter를 만들 수 있습니다. 허용 latency budget을 정한 뒤 flag만 set하고 main loop이나 task로 work를 넘기는 *bottom-half 패턴*을 고려합니다.
 
 > ⚠️ Shared 변수에 `volatile` 누락
 
@@ -243,13 +243,13 @@ main과 ISR이 공유하는 변수는 `volatile`. 안 그러면 compiler가 regi
 
 > ⚠️ Floating-point in ISR (Cortex-M4F/M7)
 
-FPU lazy stacking 설정에 따라 stack 사용량이 늘어납니다. ISR 안에서는 float을 피하거나 `FPU_LAZYSTATE`를 명시적으로 관리합니다.
+FPU lazy stacking과 FP context 정책에 따라 stack 사용량과 latency가 달라질 수 있습니다. ISR에서 float을 사용할 때는 대상 core와 RTOS/ABI의 FP context 저장 정책을 확인합니다.
 
 ## 정리
 
 - ISR은 **weak symbol을 덮는 방식**. 이름 정확히 일치.
 - 세 단계: **peripheral configure → NVIC enable → priority set**.
-- **Flag clear**는 ISR 첫 줄에. 안 하면 즉시 재진입.
+- **Flag clear**는 해당 peripheral의 reference manual에 정한 순서로. 안 하면 즉시 재진입할 수 있습니다.
 - Cortex-M priority는 **값 작을수록 높음**.
 - ISR은 짧게, 긴 일은 **main loop으로 넘김**.
 

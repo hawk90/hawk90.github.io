@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SysTick은 모든 Cortex-M에 있는 1ms tick generator입니다."** Reload + IRQ 두 줄로 jiffies, delay, timeout이 끝납니다.
+> **"SysTick은 많은 Cortex-M 구현에서 제공되는 간단한 tick source입니다."** 지원 여부와 clock source를 확인한 뒤 reload + IRQ로 jiffies, delay, timeout을 구성합니다.
 
 ## 어떤 상황에서 쓰나
 
-RTOS 없는 펌웨어에서 "100ms 후에 LED 끄기" 같은 단순 시간 처리가 필요할 때마다 polling delay를 쓰지 않습니다. delay loop은 *CPU clock 변화에 취약*하고 *다른 일을 막습니다*. SysTick은 *Cortex-M에 표준으로 들어있는* 24-bit down-counter로 reload 시 IRQ를 발생시킵니다.
+RTOS 없는 펌웨어에서 "100ms 후에 LED 끄기" 같은 단순 시간 처리가 필요할 때 polling delay만 사용하지 않을 수 있습니다. delay loop은 *CPU clock 변화에 취약*하고 *다른 일을 막습니다*. SysTick을 제공하는 Cortex-M 시스템에서는 24-bit down-counter와 reload IRQ를 활용할 수 있습니다.
 
 이 글은 SysTick으로 1ms jiffies counter를 만들고, 안전한 `delay_ms()`, overflow-safe timeout 비교를 작성합니다.
 
@@ -43,7 +43,7 @@ reload + 1 = SYSCLK / desired_tick_hz
     → SysTick->LOAD = 168000 - 1 = 167999
 ```
 
-24-bit 한계는 16,777,215. 168 MHz에서 *최대 100ms 주기*까지 가능합니다. 더 긴 주기는 *TIM*을 씁니다.
+24-bit reload의 최대값은 16,777,215입니다. 가능한 최대 주기는 clock source에 따라 달라지며, 168 MHz에서는 약 100 ms 수준입니다. 더 긴 주기는 prescaler가 있는 TIM 등 다른 timer를 고려합니다.
 
 ### Overflow-safe timing
 
@@ -122,7 +122,7 @@ while (!sensor_ready()) {
 }
 ```
 
-`int32_t` cast가 핵심입니다. 49.7일 wrap 직후에도 정확히 동작합니다.
+`int32_t` cast가 핵심입니다. 단, 한 번에 비교하는 시간 간격은 unsigned counter 범위의 절반보다 짧아야 하며, 1 ms tick의 49.7일은 전체 32-bit wrap 주기일 뿐 이 제한과는 구분해야 합니다.
 
 ### 4. Microsecond delay — busy loop
 
@@ -143,7 +143,7 @@ void dwt_init(void) {
 }
 ```
 
-DWT cycle counter는 32-bit, SYSCLK 168 MHz에서 ~25.5초 wrap. 짧은 timing 측정의 표준 도구입니다.
+DWT cycle counter는 32-bit이지만 core에 따라 지원 여부가 다릅니다. 168 MHz에서 약 25.5초마다 wrap하므로 짧은 timing 측정에 사용할 때도 지원·wrap을 확인합니다.
 
 ### 5. Periodic task (deadline 누적)
 
@@ -174,7 +174,7 @@ while (1) {
 }
 ```
 
-LED가 정확히 1Hz로 깜빡이면 tick이 1 ms로 들어오고 있다는 뜻입니다. 두 배 빠르거나 느리면 *SYSCLK 계산 오류* — clock setup을 다시 봅니다.
+LED toggle 간격이 의도한 1초인지 확인하면 tick 설정을 점검할 수 있습니다. 완전한 on/off 한 주기는 toggle 간격의 두 배이며, 두 배 빠르거나 느리면 *SYSCLK 또는 reload 계산*을 다시 봅니다.
 
 오실로스코프로 SysTick 진입 시점을 보려면 ISR 첫 줄에 GPIO toggle을 넣습니다.
 
@@ -203,7 +203,7 @@ wrap 시점에 잘못된 비교. signed 차이로 비교합니다.
 
 > ⚠️ `delay_ms(0)`이 한 cycle 도는 게 아니라 99% 1 ms 대기
 
-`g_jiffies - start = 0`이라 첫 iter는 들어옵니다. 그러나 SysTick 발생 직전에 진입하면 *0 ms로 끝나기도 합니다*. 정확한 0 dwell이 필요하면 별도 처리.
+조건식이 처음부터 false이므로 `delay_ms(0)`은 일반적으로 즉시 반환합니다. 최소 한 tick을 기다리는 API가 필요하면 별도 계약으로 정의해야 합니다.
 
 > ⚠️ SysTick priority를 너무 높게
 
@@ -211,11 +211,11 @@ priority 0~4에 두면 다른 ISR이 SysTick에 의해 막힙니다. 일반적�
 
 > ⚠️ Debugger break 후 timing 어긋남
 
-break 동안 SysTick은 멈추지 않으므로 jiffies가 *훨씬 늦은 값*이 됩니다. 디버깅 후 reset 한 번 해서 baseline 맞춥니다.
+break 동안 SysTick이 계속 실행되는지는 debug freeze 설정과 SoC에 따라 다릅니다. resume 후 tick 기준과 peripheral timer 상태를 다시 확인합니다.
 
 ## 정리
 
-- SysTick는 모든 Cortex-M의 **표준 24-bit down-counter + IRQ**.
+- SysTick은 지원되는 Cortex-M 시스템에서 사용하는 **24-bit down-counter + IRQ**입니다.
 - reload = SYSCLK / tick_hz - 1. 1 ms tick이 표준.
 - `g_jiffies`는 **volatile**, timing 비교는 **signed 차이**로.
 - µs 단위는 **DWT cycle counter**가 더 정확합니다.

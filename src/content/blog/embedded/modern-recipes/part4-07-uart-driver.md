@@ -50,7 +50,7 @@ OVER8 = 0 (16x oversample, default) → USARTDIV = f_pclk / (16 × baud)
     BRR = (0x16 << 4) | 0xD = 0x16D
 ```
 
-대부분의 STM32 HAL은 자동 계산해 줍니다. 직접 작성 시 *반올림 오차*가 ±2% 안에 들어와야 합니다.
+대부분의 STM32 HAL은 family 규칙에 맞춰 자동 계산해 줍니다. 직접 작성할 때는 oversampling, clock tolerance, frame format과 상대편 수신기 허용 오차를 함께 계산해야 하며, ±2%는 모든 조건에 적용되는 보편적인 보장값이 아닙니다.
 
 ### 세 방식의 trade-off
 
@@ -173,7 +173,7 @@ void uart_init_dma(uint32_t baud, uint32_t pclk) {
 
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
 
-    // RX DMA — Stream 2, Channel 4, USART1_RX, circular
+    // RX DMA — 아래 Stream/Channel은 특정 STM32F4 예시
     DMA2_Stream2->CR = 0;
     while (DMA2_Stream2->CR & DMA_SxCR_EN);
     DMA2_Stream2->PAR  = (uint32_t)&USART1->DR;
@@ -184,7 +184,7 @@ void uart_init_dma(uint32_t baud, uint32_t pclk) {
                        | DMA_SxCR_MINC          // memory inc
                        | DMA_SxCR_EN;
 
-    // TX DMA — Stream 7, Channel 4, USART1_TX, normal
+    // TX DMA — 아래 Stream/Channel은 특정 STM32F4 예시
     DMA2_Stream7->CR = 0;
     while (DMA2_Stream7->CR & DMA_SxCR_EN);
     DMA2_Stream7->PAR  = (uint32_t)&USART1->DR;
@@ -233,17 +233,17 @@ baud rate가 한계를 정하므로 시간은 비슷하지만, *CPU가 자유롭
 
 ## 자주 보는 함정
 
-> ⚠️ Baud rate 오차 > 2%
+> ⚠️ Baud rate 오차를 고정 한계로 가정
 
-수신 측이 동일 clock으로 sample 하려면 ±2% 안에 들어와야 합니다. HSI 16 MHz로 ±1% 보장이 어렵습니다. 정확한 baud가 필요하면 HSE crystal을 씁니다.
+허용 가능한 baud 오차는 oversampling과 frame, 양쪽 clock tolerance에 따라 달라집니다. HSI의 실제 오차와 온도 범위를 확인하고, 정확도가 필요한 경우 외부 clock 또는 보정된 source를 고려합니다.
 
 > ⚠️ ORE (overrun) flag 무시
 
-수신이 너무 빠르면 ORE가 set되고 *그 이후 RXNE가 안 들어옵니다*. ISR에서 ORE를 명시적으로 clear해야 합니다 (F4는 SR read → DR read 순서).
+수신이 처리보다 빠르면 ORE가 set될 수 있습니다. flag clear 순서와 이후 RXNE 동작은 USART family마다 다르므로 reference manual을 따르고, STM32F4의 해당 구성에서는 SR read → DR read 순서를 확인합니다.
 
 > ⚠️ Ring buffer head/tail이 atomic하지 않음
 
-ARM은 32-bit access가 atomic이라 *16-bit head/tail은 안전*합니다. 그러나 *64-bit 또는 struct*는 critical section이 필요합니다.
+정렬된 native-width load/store는 일부 Cortex-M에서 atomic이지만, ring buffer의 producer/consumer 설계와 memory ordering까지 자동으로 해결하지는 않습니다. head/tail의 ownership을 분리하고 필요하면 critical section 또는 atomic primitive를 사용합니다.
 
 > ⚠️ TXE와 TC 혼동
 
@@ -255,15 +255,15 @@ ARM은 32-bit access가 atomic이라 *16-bit head/tail은 안전*합니다. 그�
 
 > ⚠️ Flow control이 없는 상태에서 high-speed
 
-921600+ baud에 hardware CTS/RTS 없으면 *RX overflow가 빈번*. CR3의 CTSE/RTSE를 enable합니다.
+높은 baud에서 flow control 없이 운용할 수 있는지는 receiver service latency, buffer와 protocol에 따라 달라집니다. 손실을 허용하지 못하면 CTS/RTS나 software flow control, 충분한 buffering을 설계합니다.
 
 ## 정리
 
 - **Polling**은 단순하고 latency가 낮지만 CPU를 묶습니다. 부트로더·디버그에 적합.
 - **Interrupt + ring buffer**는 일반 용도 표준. RX overflow 처리 필수.
 - **DMA**는 throughput 최고, CPU 부담 최소. circular RX + linear TX가 표준 패턴.
-- **Flag clear 순서**(SR read → DR read)는 STM32 F1/F4 패밀리의 함정입니다.
-- baud rate 정확도가 ±2% 안에 들어오는지 항상 검증합니다.
+- **Flag clear 순서**는 USART family/reference manual의 규칙을 따릅니다.
+- baud rate 정확도는 clock tolerance·oversampling·frame 조건을 포함해 검증합니다.
 
 다음 편은 **SPI 드라이버**입니다. CPOL/CPHA, multi-slave CS, full-duplex DMA를 다룹니다.
 
