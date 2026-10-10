@@ -7,6 +7,12 @@ export interface PostDocumentInput {
   date: string;
   draft: boolean;
   body: string;
+  /**
+   * Frontmatter of the document being edited. The editor only shows a few
+   * fields, so every other key (slug, series, seriesOrder, topics, …) is kept
+   * from here instead of being dropped on save.
+   */
+  base?: Record<string, unknown>;
 }
 
 export function todayIsoDate(): string {
@@ -22,6 +28,7 @@ export function parseTagInput(value: string): string[] {
 
 export function buildPostDocument(input: PostDocumentInput): string {
   const frontmatter: Record<string, unknown> = {
+    ...input.base,
     title: input.title || 'Untitled',
     date: input.date,
     draft: input.draft,
@@ -29,10 +36,14 @@ export function buildPostDocument(input: PostDocumentInput): string {
 
   if (input.description) {
     frontmatter.description = input.description;
+  } else {
+    delete frontmatter.description;
   }
 
   if (input.tags.length > 0) {
     frontmatter.tags = input.tags;
+  } else {
+    delete frontmatter.tags;
   }
 
   return `${serializeFrontmatter(frontmatter)}\n\n${input.body}`;
