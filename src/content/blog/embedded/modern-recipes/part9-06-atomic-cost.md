@@ -48,7 +48,7 @@ fetch_add
   seq_cst       LDAXR/STLXR loop or LDADDAL
 ```
 
-ARMv8.1의 LSE(Large System Extensions)가 LL/SC retry를 single instruction으로 대체해 contention에서 큰 이점을 줍니다.
+ARMv8.1 LSE를 지원하는 target은 일부 원자 연산을 LSE 명령으로 구현할 수 있습니다. contention에서의 이득은 CPU·메모리 계층·실패율로 측정해야 합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -174,22 +174,22 @@ std::atomic<__int128> c;  // 대부분 false (DCAS)
 
 ```text
 연산 (Cortex-A72, no contention)
-LDR / STR                  1 cycle
-LDAR (acquire load)        2 cycle
-STLR (release store)       2 cycle
-LDAXR/STLXR loop           4~6 cycle
-LDADD (LSE)                3 cycle
-DMB ISH                    10~20 cycle
+LDR / STR                  측정 필요
+LDAR (acquire load)        측정 필요
+STLR (release store)       측정 필요
+LDAXR/STLXR loop           측정 필요
+LDADD (LSE)                측정 필요
+DMB ISH                    측정 필요
 ```
 
 acquire/release는 거의 무료, seq_cst의 DMB가 큰 비용입니다.
 
 ```text
 contention 시 (8 thread, 같은 변수)
-LL/SC fetch_add            >200 cycle/op
-LSE   fetch_add            ~50 cycle/op
-mutex lock/unlock          ~150 ns
-per-CPU counter            10 cycle/op
+LL/SC fetch_add            측정 필요
+LSE   fetch_add            측정 필요
+mutex lock/unlock          측정 필요
+per-CPU counter            측정 필요
 ```
 
 contention이 있는 순간 비용이 폭증합니다. sharding이 가장 큰 효과를 냅니다.
@@ -249,7 +249,7 @@ flag.store(true);    /* default seq_cst */
 
 ## 정리
 
-- atomic 비용은 memory order에 따라 1 cycle에서 20 cycle 이상까지 변합니다.
+- atomic 비용은 memory order·ISA·cache 상태·contention에 따라 변하므로 target에서 측정합니다.
 - ARMv8.1의 LSE는 LL/SC retry를 single instruction으로 대체해 contention에 강합니다.
 - spin loop은 yield/pause로 backoff를 둬야 다른 코어 work를 망치지 않습니다.
 - sharding(per-CPU counter)이 contention을 가장 효과적으로 줄입니다.

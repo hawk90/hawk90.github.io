@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-Lock-free counter, stack, queue, hash table을 만들 때 거의 항상 CAS가 hot path에 들어갑니다. Mutex로 보호하면 contention 시 모든 thread가 한 줄로 줄을 서지만, CAS는 *경합에 진 thread만* 다시 시도합니다.
+Lock-free counter, stack, queue, hash table에서 CAS가 hot path가 될 수 있습니다. Mutex와 CAS의 유불리는 contention·critical section·platform에 따라 달라지며, CAS는 실패한 thread가 다시 시도하는 비용을 부담합니다.
 
 또 한 가지 흔한 상황은 단순한 *원자적 갱신*입니다. counter를 증가시키되 일정 max를 넘기지 않는 saturating counter는 fetch_add로는 정확히 표현할 수 없습니다. CAS loop이 깔끔합니다.
 
@@ -28,7 +28,7 @@ bool compare_exchange_weak  (T &expected, T desired);
 
 `expected`는 현재 `*p` 값을 in/out으로 받습니다. `*p == expected`이면 `*p = desired`로 바꾸고 true를 반환하고, 아니면 `expected`에 현재 `*p`를 담아 false를 반환합니다. 실패했을 때 갱신된 `expected`가 그대로 재시도용 값이 됩니다.
 
-`weak`는 spurious failure(거짓 실패)가 가능하지만 LL/SC architecture(ARM)에서 더 빠릅니다. loop 안에서는 항상 `weak`를 씁니다.
+`weak`는 spurious failure가 가능해 loop에서 사용할 수 있습니다. strong/weak의 비용과 적합성은 compiler·ISA·API 사용 맥락에 따라 확인하며 loop에서 항상 weak가 더 빠르다고 단정하지 않습니다.
 
 ```text
 typical CAS loop
@@ -58,7 +58,7 @@ void inc_saturating(int max) {
 }
 ```
 
-fetch_add로는 max 체크를 atomic하게 못 합니다. CAS loop이 표준 답입니다.
+fetch_add만으로 max 조건을 함께 처리하기 어렵다면 CAS loop이 한 선택입니다. overflow 정책과 실패 재시도 상한도 함께 설계합니다.
 
 ### Lock-free stack push
 
@@ -183,11 +183,11 @@ Vyukov MPMC queue의 핵심 패턴입니다. CAS로 enqueue 위치를 예약하�
 
 ```text
 연산                        시간 (Cortex-A72, no contention)
-atomic load (relaxed)       2 cycle
-atomic store (release)      4 cycle
-CAS (uncontended)          ~6 cycle
-CAS (contended, 2 thread)  ~80 cycle (cache line ping)
-CAS (contended, 8 thread)  >300 cycle (강한 contention)
+atomic load (relaxed)       측정 필요
+atomic store (release)      측정 필요
+CAS (uncontended)          측정 필요
+CAS (contended, 2 thread)  측정 필요
+CAS (contended, 8 thread)  측정 필요
 ```
 
 contention이 커질수록 CAS는 급격히 비싸집니다. backoff와 sharding이 필수입니다.
@@ -211,7 +211,7 @@ do {
 } while (!p.compare_exchange_strong(cur, cur + 1));   /* weak가 더 빠름 */
 ```
 
-loop 안에서는 항상 weak가 더 빠릅니다. ARM에서 결정적으로 차이 납니다.
+loop에서는 weak를 검토할 수 있지만 항상 더 빠르거나 ARM에서 차이가 일정하다고 보장할 수 없습니다.
 
 > CAS 결과 무시
 

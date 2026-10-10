@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Hold time이 µs 단위면 spinlock, ms 단위면 mutex."** SMP가 아니면 spinlock은 거의 의미가 없습니다.
+> **"짧은 hold time과 실행 환경에서는 spinlock을, 대기·선점이 허용되는 경로에서는 mutex를 검토한다."** 임계값은 CPU·scheduler·contention·전력 요구사항으로 측정합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -32,9 +32,9 @@ Linux에서는 `spin_lock_irqsave`가 IRQ까지 disable합니다.
 
 | hold time | 권장 |
 |-----------|------|
-| < 1 µs (수십 cycle) | spinlock 또는 atomic |
-| 1~10 µs | spinlock (SMP) / mutex (UP) |
-| > 10 µs | mutex |
+| 짧은 측정된 hold time | spinlock 또는 atomic 검토 |
+| 대기·선점이 허용되는 경로 | mutex 검토 |
+| 긴 I/O·sleep 가능 경로 | mutex 등 blocking primitive |
 | ISR context | 반드시 `spinlock(_irqsave)` |
 | single-CPU | spinlock의 의미 없음 (`preempt_disable`로 대체) |
 
@@ -165,7 +165,7 @@ void mcs_unlock(mcs_node **tail, mcs_node *me) {
 | 긴 contention | MCS chain — fair |
 | 0 contention | CAS 한 줄 |
 
-Linux는 4.2부터 qspinlock이 표준입니다. 일반 코드는 그냥 spin_lock을 부르면 됩니다.
+Linux의 spinlock 구현과 선택은 kernel configuration·architecture·version에 따라 달라집니다. 일반 코드는 해당 API 계약에 따라 `spin_lock`을 사용합니다.
 
 ### Decision tree
 
@@ -175,9 +175,9 @@ Linux는 4.2부터 qspinlock이 표준입니다. 일반 코드는 그냥 spin_lo
 
 | hold time | 선택 |
 |-----------|------|
-| < 1 µs | spinlock 또는 atomic 직접 |
-| 1~10 µs | spinlock (SMP에서만) |
-| > 10 µs | mutex |
+| 짧은 측정된 hold time | spinlock 또는 atomic 직접 검토 |
+| contention·선점 가능 경로 | mutex 검토 |
+| I/O·sleep 가능 경로 | mutex |
 
 세 번째 질문은 contention 규모입니다. 코어가 8개 이상이고 동시 thread가 4개를 넘으면 MCS나 qspinlock을 쓰고, 그렇지 않으면 기본 spinlock으로 충분합니다.
 
@@ -185,16 +185,16 @@ Linux는 4.2부터 qspinlock이 표준입니다. 일반 코드는 그냥 spin_lo
 
 ```text
 Cortex-A72 8-core, no contention
-spinlock acquire/release         15 cycle
-mutex lock/unlock (futex)        ~50 ns (uncontended fast path)
-ticket lock                      18 cycle
-MCS lock                         20 cycle
+spinlock acquire/release         측정 필요
+mutex lock/unlock (futex)        측정 필요
+ticket lock                      측정 필요
+MCS lock                         측정 필요
 
 contention 8 thread, 100 ns critical section
-basic spinlock                   ~2 µs/op (cache ping-pong)
-ticket lock                      ~1.8 µs/op
-MCS lock                         ~300 ns/op (각자 자기 line)
-mutex                            ~600 ns/op (context switch)
+basic spinlock                   측정 필요
+ticket lock                      측정 필요
+MCS lock                         측정 필요
+mutex                            측정 필요
 ```
 
 contention이 크면 MCS가 압도적입니다. mutex도 의외로 잘 동작합니다.
@@ -260,13 +260,13 @@ yield 또는 pause로 backoff를 둡니다.
 
 ## 정리
 
-- Hold time < 1 µs면 spinlock 또는 atomic, > 10 µs면 mutex가 일반 규칙입니다.
+- hold time만으로 결정하지 말고 contention·선점·전력·실행 환경을 함께 측정합니다.
 - ISR과 race 가능한 자원은 반드시 spinlock_irqsave입니다.
 - Single-CPU에서 spinlock은 preempt_disable과 같습니다.
 - contention이 크면 MCS / qspinlock으로 확장성을 회복합니다.
 - spinlock 안에서는 sleep 가능한 모든 작업이 금지입니다.
 - hold time이 가변이면 lock을 쪼개거나 mutex로 옮깁니다.
-- Linux는 4.2부터 qspinlock이 기본이므로 일반 코드는 spin_lock만 부르면 됩니다.
+- Linux spinlock의 내부 구현은 kernel configuration·architecture·version을 확인하고 API 계약에 맞춰 사용합니다.
 
 다음 편은 **ABA 문제 회피**입니다.
 
