@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Matter는 Apple·Google·Amazon·Samsung의 공통 IoT 표준입니다."** Thread mesh와 Wi-Fi를 transport로 묶어 vendor lock-in 없이 *한 device가 동시에 네 ecosystem*에 등록됩니다. 2024 EU CRA가 요구하는 보안 요소도 대부분 자동으로 충족됩니다.
+> **"Matter는 여러 생태계가 상호운용을 목표로 사용하는 IoT application-layer 표준입니다."** Thread·Wi-Fi·Ethernet을 transport로 사용할 수 있고 multi-fabric commissioning을 지원하지만, 실제 ecosystem·device type·controller 지원 범위는 제품과 인증 버전에서 확인합니다. Matter 사용만으로 규제 보안 요구사항이 자동 충족되지는 않습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -38,7 +38,7 @@ Transport
   Thread (802.15.4 mesh)  |  Wi-Fi  |  Ethernet
 ```
 
-핵심 통찰은 *Matter가 transport-agnostic*이라는 점입니다. 같은 application code가 Thread node·Wi-Fi node 어느 쪽에서도 돌아갑니다.
+핵심 통찰은 *Matter가 여러 IP transport를 지원*한다는 점입니다. 공통 application model을 재사용할 수 있지만, platform port·commissioning·전원 관리 코드는 Thread node와 Wi-Fi node에서 달라질 수 있습니다.
 
 Thread는 *802.15.4 + 6LoWPAN + RPL routing*을 합친 mesh입니다.
 
@@ -54,7 +54,7 @@ Thread 1.3에는 TCPlp(low-power TCP)와 Thread Domain(multi-network)이 들어�
 
 Multi-fabric은 Matter의 *killer feature*입니다.
 
-같은 device 하나가 Apple Home, Google Home, Amazon Alexa, Samsung SmartThings fabric에 *동시에* 등록될 수 있습니다. 각 fabric은 별도의 NOC(Node Operational Certificate)를 가지며, 자기 fabric의 controller에서만 그 device를 제어할 수 있습니다.
+같은 device 하나가 여러 fabric에 등록될 수 있습니다. 각 fabric은 별도의 NOC(Node Operational Certificate)를 가지며, 지원 가능한 fabric 수와 ecosystem별 동작은 Matter version·device resource·controller 구현으로 확인합니다.
 
 Vendor lock-in이 종료됩니다. 사용자가 어느 ecosystem을 골라도 같은 device를 쓸 수 있습니다.
 
@@ -109,7 +109,7 @@ otThreadSetLinkMode(ot, mode);
 otLinkSetPollPeriod(ot, 5000);   /* 5 sec poll parent */
 ```
 
-99% 시간 sleep, 5초마다 parent router에 poll합니다. CR2032 한 개로 *수년* 동작이 가능합니다.
+이 예시는 약 5초 poll 주기를 설정한 구성입니다. 실제 sleep 비율과 CR2032 수명은 poll interval·TX 재시도·센서 duty cycle·배터리 조건으로 측정합니다.
 
 ### Matter SDK build (Linux example)
 
@@ -158,7 +158,7 @@ bool emberAfOnOffClusterOnCallback(
 }
 ```
 
-ZAP(ZCL Advanced Platform) tool로 cluster·attribute·command가 자동 생성됩니다. Vendor SDK는 *handler만* 구현합니다.
+ZAP(ZCL Advanced Platform) tool은 지원되는 cluster·attribute·command의 code generation을 돕습니다. Vendor는 generated code와 SDK version에 맞춰 handler·platform integration을 구현합니다.
 
 ### ESP-IDF + Matter (ESP32-H2 Thread)
 
@@ -178,7 +178,7 @@ void app_main(void) {
 }
 ```
 
-ESP32-H2가 Thread native, ESP32-C6은 Wi-Fi 6 + 802.15.4, ESP32-S3는 Wi-Fi only입니다. Matter는 세 chip 모두에서 동작합니다.
+ESP32-H2는 Thread native, ESP32-C6은 Wi-Fi 6 + 802.15.4, ESP32-S3는 Wi-Fi 계열 구성을 제공합니다. Matter 지원 여부와 transport 조합은 해당 SDK·예제·인증 범위에서 확인합니다.
 
 ### Commissioning flow
 
@@ -190,7 +190,7 @@ ESP32-H2가 Thread native, ESP32-C6은 Wi-Fi 6 + 802.15.4, ESP32-S3는 Wi-Fi onl
 6. **Network credentials transferred** — Thread network key OR Wi-Fi PSK
 7. **CASE — Certificate Authenticated Session** — Permanent secure channel using NOC
 
-전 과정이 end-to-end secure로 진행됩니다. Setup code 한 번이 평생 identity로 굳어집니다.
+Commissioning 과정은 PASE·인증서·CASE를 사용해 보호되지만, 전체 보안 수준은 DAC/PAA 관리와 device·controller 구현에 좌우됩니다. Setup code와 operational identity의 수명·교체 정책도 제품에서 설계해야 합니다.
 
 ### Multi-fabric 추가
 
@@ -200,7 +200,7 @@ Apple Home에 등록된 device를 *Google Home에도 등록*하려면:
 2. Google이 다른 NOC를 발급. Device는 두 NOC를 모두 보관.
 3. 양쪽 controller에서 control 가능.
 
-Matter 1.3은 5 fabric, 1.4는 16+ fabric을 지원합니다.
+지원 가능한 fabric 수는 Matter specification revision과 device resource·SDK 구현을 기준으로 확인합니다.
 
 ### Border Router
 
@@ -327,14 +327,14 @@ MCUboot A/B + confirmation timeout 패턴으로 *자동 revert*를 구현합니�
 
 ## 정리
 
-- Matter는 Apple·Google·Amazon·Samsung이 함께 만든 IoT 통합 표준입니다.
+- Matter는 여러 ecosystem의 상호운용을 목표로 하는 IoT application-layer 표준입니다.
 - Thread 1.3 802.15.4 mesh + 6LoWPAN이 저전력 transport, Wi-Fi/Ethernet은 상시 전원용입니다.
 - Multi-fabric으로 한 device가 동시에 여러 ecosystem에 등록됩니다.
 - Commissioning은 PASE → DAC verify → NOC issue → CASE 순으로 end-to-end secure입니다.
 - OpenThread + Matter SDK는 nRF52840·ESP32-H2/C6·Silicon Labs·NXP에서 모두 동작합니다.
-- Sleepy End Device로 CR2032 한 개에 수년 동작이 가능합니다.
+- Sleepy End Device의 배터리 수명은 poll·재전송·센서 duty cycle을 포함해 측정합니다.
 - Border Router(Apple TV·Nest Hub·OpenThread BR)가 mesh와 internet을 잇습니다.
-- 2024 EU CRA·UK PSTI 요구사항(secure boot·OTA·attestation)이 Matter로 대부분 자동 충족됩니다.
+- Matter 지원만으로 EU CRA·UK PSTI 등 규제 요구사항이 자동 충족되지는 않으며, secure boot·OTA·attestation과 제품 평가를 별도로 확인합니다.
 
 **Modern Embedded Recipes 시리즈 완성**입니다(Part 1~6, 39편).
 

@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"TF-M은 Cortex-M33+ 보드의 표준 secure firmware입니다."** PSA Certified 인증이 2024 EU CRA·UK PSTI에 사실상 강제되면서 IoT MCU project의 default가 됐습니다. Crypto·storage·attestation을 secure side에 두고 RTOS·앱은 non-secure side에서 돌립니다.
+> **"TF-M은 TrustZone-M 기반 Cortex-M에서 secure service를 구성하는 대표적인 open-source framework입니다."** PSA Certified와 각 지역 규제의 요구사항을 검토할 때 참고할 수 있지만, 인증·준수 여부는 제품 threat model과 구현·평가 범위로 판단합니다. Crypto·storage·attestation을 secure side에 두고 RTOS·앱은 non-secure side에서 돌리는 구성을 지원합니다.
 
 ## 어떤 상황에서 쓰나
 
-IoT sensor, smart lock, gateway, wearable, BLE node, industrial controller처럼 *공격면이 있는 connected MCU device* 모두가 대상입니다. 2024년 이후 다음 규제가 본격화되면서 PSA Certified가 거의 의무가 됐습니다.
+IoT sensor, smart lock, gateway, wearable, BLE node, industrial controller처럼 *공격면이 있는 connected MCU device*에서 후보가 됩니다. 다음 규제·인증 요구사항을 검토할 때 PSA Certified와 TF-M 구성을 참고할 수 있지만, 적용 의무와 시점은 제품·시장·관할에 따라 확인해야 합니다.
 
 ```text
 EU Cyber Resilience Act (CRA) 2024 발효, 2027 본격 시행
@@ -23,7 +23,7 @@ UK PSTI Act 2024 발효
 US Cyber Trust Mark 2024-25 점진 적용
 ```
 
-요구사항은 secure boot, encrypted storage, device attestation, secure update입니다. TF-M이 이 모두를 reference로 제공하기 때문에 vendor SDK(STM32Cube·nRF Connect·NXP MCUXpresso)가 모두 TF-M을 끼워 줍니다.
+요구사항에는 secure boot, protected storage, device attestation, secure update 등이 포함될 수 있습니다. TF-M은 관련 secure service의 reference 구현을 제공하며, vendor SDK의 통합 범위와 설정은 MCU·SDK 버전별로 확인합니다.
 
 ## 핵심 개념
 
@@ -113,7 +113,7 @@ psa_sign_message(key_id, PSA_ALG_ECDSA(PSA_ALG_SHA_256),
                   msg, msg_len, sig, sizeof(sig), &sig_len);
 ```
 
-Private key는 *NSPE에 export되지 않습니다*. `key_id`만 capability로 받아 sign/encrypt 위임만 가능합니다. NSPE가 침투당해도 key 자체는 보호됩니다.
+일반적인 PSA Crypto 구성에서는 private key를 NSPE로 export하지 않고 `key_id`를 통해 sign/encrypt를 위임합니다. 실제 key 보호 수준은 hardware isolation·storage backend·policy 설정과 secure world 구현을 함께 검토해야 합니다.
 
 ### PSA Internal Trusted Storage
 
@@ -142,7 +142,7 @@ psa_ps_set(0x200, sizeof(secret), secret, PSA_STORAGE_FLAG_NONE);
 psa_ps_get(0x200, 0, sizeof(buf), buf, &out_len);
 ```
 
-PS는 *external flash까지 안전*하게 encrypted로 저장합니다. Wire-level dump를 떠도 key 없이는 읽을 수 없습니다.
+PS는 설정된 storage backend에서 encrypted-at-rest를 지원할 수 있습니다. external flash의 보호 범위와 dump에 대한 저항성은 key 관리·암호화 구현·debug lock·physical attack model을 별도로 검증합니다.
 
 ### Initial Attestation
 
@@ -283,7 +283,7 @@ Cortex-M33 @ 80 MHz, TF-M profile_medium, software crypto 기준입니다.
 | Initial attestation token | 100 ms |
 | PSA service call overhead | ~50 µs (NSC + IPC) |
 
-Hardware crypto accelerator(STM32U5 PKA, nRF5340 CryptoCell)가 있으면 ECDSA가 5~10 ms로 줄어 10배 빨라집니다. Production은 hardware crypto가 거의 필수입니다.
+Hardware crypto accelerator(STM32U5 PKA, nRF5340 CryptoCell 등)를 사용하면 ECDSA latency를 줄일 수 있지만, 개선 폭은 curve·key size·driver·clock에서 측정합니다. Production에서는 hardware crypto 필요성을 threat model과 성능 예산으로 판단합니다.
 
 PSA Certified Level별 비교입니다.
 
@@ -353,13 +353,13 @@ SAU(CPU view) + MPC(memory controller view) + PPC(peripheral)를 모두 설정�
 
 ## 정리
 
-- TF-M은 Cortex-M33+ TrustZone-M 위 표준 secure firmware입니다.
-- SPE/NSPE 분리, NSC veneer로 cross-world call, PSA API로 vendor 독립을 보장합니다.
+- TF-M은 Cortex-M33+ TrustZone-M에서 secure service를 구성하는 대표적인 framework입니다.
+- SPE/NSPE 분리와 NSC veneer를 제공하며, PSA API로 vendor 간 이식성을 목표로 하지만 platform port와 backend 차이는 확인해야 합니다.
 - PSA Crypto·ITS·PS·Attestation이 네 가지 핵심 service입니다.
 - MCUboot이 2nd-stage bootloader로 secure boot·anti-rollback·A/B update를 담당합니다.
-- 2024 EU CRA·UK PSTI·US Cyber Trust Mark가 PSA Certified를 사실상 강제합니다.
+- EU CRA·UK PSTI·US Cyber Trust Mark의 적용 여부와 PSA Certified 필요성은 제품·시장·관할별 요구사항으로 확인합니다.
 - STM32L5/U5·nRF5340·NXP LPC55가 TF-M reference platform입니다.
-- Software crypto는 ECDSA 50 ms, hardware crypto가 있으면 5~10 ms로 줄어듭니다.
+- Crypto latency는 algorithm·hardware·implementation에 따라 benchmark합니다.
 - Key는 NSPE에 export하지 않고 `key_id` capability만 위임하는 패턴을 지킵니다.
 
 다음 편은 **Matter·Thread IoT 표준**입니다.
