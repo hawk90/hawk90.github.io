@@ -240,7 +240,7 @@ CI/CD에 그대로 들어갑니다.
 +----------------------------+------+-------+-----------+-------+
 ```
 
-LUT 80% 넘어가면 P&R이 어려워집니다. 90% 넘으면 *routing congestion*으로 timing 못 맞춤. Resource 여유를 두고 설계.
+LUT 사용률이 높아질수록 placement·routing 여유가 줄 수 있지만 임계값은 device·floorplan·netlist에 따라 다릅니다. utilization과 timing report를 함께 보고 여유를 둡니다.
 
 ## 시간 단축 팁
 
@@ -316,7 +316,7 @@ ILA가 들어간 채 release하면 LUT 수천 개 낭비. Production build에서
 - Block Design / IP Integrator는 SoC·AXI에 빠름.
 - TCL script로 CI 자동화. `vivado -mode batch -source build.tcl`.
 - ILA로 실제 hardware에서 wave 잡기.
-- LUT 사용률 80% 이내가 안전. 90% 넘으면 routing 망함.
+- LUT 사용률만으로 안전 여부를 정하지 말고 device별 utilization·congestion·timing report로 판단합니다.
 
 다음 편은 **PCIe BAR**입니다.
 

@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"FPGA는 *programable 논리 회로*입니다."** SW 개발자에게는 "thread를 무한히 띄울 수 있는 board"로 보입니다. 단, 각 thread는 *clock cycle 단위로 결정적*입니다.
+> **"FPGA는 *programmable 논리 회로*입니다."** SW 개발자에게는 병렬 datapath를 구성하는 fabric으로 볼 수 있습니다. 각 경로의 latency와 timing determinism은 clock·constraint·CDC·implementation 결과로 검증해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -95,7 +95,7 @@ Xilinx DSP48E1:
   pre-adder, ALU, pattern detector 내장
 ```
 
-MAC 한 cycle에 한 번. FIR filter, matrix multiply, FFT, neural network이 DSP slice를 가득 채워 사용합니다.
+DSP slice의 처리율과 latency는 device family·연산 mode·pipeline 설정에 따라 달라집니다. FIR filter, matrix multiply, FFT, neural network에서 활용할 수 있습니다.
 
 ```verilog
 // → DSP slice 1개
@@ -188,7 +188,7 @@ module blink(
 endmodule
 ```
 
-이 한 모듈을 합성하면 26 FF + 1 carry chain + 1 LUT 정도 사용. FPGA 자원의 0.001%도 안 씁니다.
+이 한 모듈의 자원 사용량은 device·tool·constraint·coding style에 따라 합성 report로 확인합니다.
 
 ## CPU와의 차이
 
@@ -199,7 +199,7 @@ endmodule
 | 수정 | SW로 알고리즘 수정 가능 | 알고리즘 = 회로 → 재합성 필요 |
 | Overhead | 매 명령 fetch/decode overhead | fetch/decode 없음 — 회로가 그 자체 |
 
-100 MHz FPGA의 *한 cycle*에 1000개 MAC을 동시에 실행할 수 있다면 *throughput*은 100 GMAC/s. 같은 일을 1 GHz CPU로 하려면 100배 더 빠른 cycle이 필요합니다.
+100 MHz FPGA에서 1000개 MAC을 병렬화할 수 있다면 이상적인 연산 throughput은 100 GMAC/s로 계산할 수 있지만, DSP 수·routing·memory bandwidth·pipeline initiation interval을 확인해야 합니다. CPU와 단순 clock 배수 비교는 적절하지 않습니다.
 
 ## SoC FPGA — Hard core + Fabric
 
@@ -222,7 +222,7 @@ always @(posedge clk_b)
     out <= signal_from_clk_a;   /* metastability 위험 */
 ```
 
-CDC는 항상 *2-FF synchronizer* 또는 *async FIFO*.
+CDC는 신호 종류·frequency ratio·loss 허용도에 따라 2-FF synchronizer, handshake, async FIFO 등을 선택합니다.
 
 > 합성 결과 != HDL 의도
 
@@ -259,7 +259,7 @@ Pinout이 XDC/SDC 파일에 없으면 P&R이 *임의로* 배치합니다. 보드
 
 - FPGA = LUT + FF + BRAM + DSP + IOB + routing.
 - 모든 회로가 *동시에 동작*. CPU의 sequential과 본질이 다릅니다.
-- 100 MHz × 1000 MAC = 100 GMAC/s 같은 *완전 병렬* 처리.
+- clock·병렬도·pipeline과 memory 조건을 반영해 throughput을 계산합니다.
 - Clock region이 시간의 단위. CDC는 항상 synchronizer.
 - BRAM이 on-chip buffer, DSP가 MAC, LUT/FF가 조합/순차 회로.
 - SoC FPGA는 ARM/RISC-V hard core + fabric을 묶은 형태.

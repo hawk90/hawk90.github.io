@@ -14,7 +14,9 @@ topics: ["embedded"]
 
 > **"BAR는 device의 메모리/IO 영역 선언입니다."** CPU에게 어디로 접근해야 할지 알려주는 역할을 합니다.
 
-## PCIe Config Space 256 byte
+## PCIe Config Space와 extended space
+
+legacy configuration space는 256 byte이고, capability와 extended configuration space는 PCIe 세대·access mechanism에 따라 더 넓은 범위를 사용합니다.
 
 ```text
 Offset
