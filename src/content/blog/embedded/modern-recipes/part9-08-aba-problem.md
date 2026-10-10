@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 lock-free stack의 pop, free list 관리, lock-free hash table에서 가장 자주 마주칩니다. 어떤 thread가 head pointer A를 읽고 잠깐 멈췄을 때, 다른 thread가 A를 dequeue, free, 같은 주소를 다시 allocate해 A로 만들면, 멈췄던 thread가 다시 깨어나 CAS를 시도해 *성공*합니다. 그러나 의미는 깨졌습니다.
 
-GC가 있는 언어(Java, C#)는 free 자체가 즉시 일어나지 않으므로 ABA가 거의 없습니다. C/C++의 lock-free 자료구조에서는 항상 고려해야 합니다.
+GC가 있는 언어는 reclamation 시점이 다르지만 ABA가 자동으로 사라진다고 단정할 수는 없습니다. C/C++의 lock-free 자료구조에서는 reclamation 방식과 함께 분석합니다.
 
 ## 핵심 개념
 
@@ -118,7 +118,7 @@ int pop_packed(void) {
 }
 ```
 
-64-bit atomic 하나로 처리되므로 가장 가볍습니다. 16-bit tag는 2^16 = 65536 update마다 wraparound하므로 매우 빠른 cycle에서는 부족할 수 있습니다.
+64-bit atomic 하나로 처리할 수 있는 구성도 있지만 pointer 폭·정렬·ABI를 확인해야 합니다. 16-bit tag는 2^16 update마다 wraparound하므로 update 속도와 reclamation 지연을 함께 분석합니다.
 
 ### Version counter (DCAS 없이)
 
@@ -182,7 +182,7 @@ RCU도 free를 grace period까지 지연하므로 ABA가 발생할 수 없습니
 
 ### 실제 사례 — IBM의 lock-free queue
 
-Michael & Scott의 원본 paper(1996)는 enqueue와 dequeue를 CAS 두 번으로 처리합니다. ABA를 피하려면 tagged pointer가 필수이고, C++ 구현은 보통 `atomic<__int128>`을 사용합니다.
+Michael & Scott queue 구현의 ABA 처리와 memory reclamation은 구현별로 다릅니다. tagged pointer가 한 방법이지만 필수라고 단정할 수 없고, C++의 128-bit atomic 지원·lock-freedom은 target에서 확인해야 합니다.
 
 기록된 거의 모든 lock-free queue가 tagged pointer 또는 RCU를 가집니다.
 
@@ -202,7 +202,7 @@ Michael & Scott의 원본 paper(1996)는 enqueue와 dequeue를 CAS 두 번으로
 연산 비용
 naive CAS                   1 CAS
 tagged CAS (16-bit packed)  1 CAS (같은 비용)
-tagged CAS (128-bit DCAS)   1 CMPXCHG16B (1.5x cycle)
+tagged CAS (128-bit CAS)    target에서 측정
 hazard pointer              1 atomic store + 1 load + 1 CAS (3x)
 RCU                         거의 0 (reader)
 ```
@@ -217,7 +217,7 @@ RCU                         거의 0 (reader)
 /* 매우 빠른 cycle에서 65536 update면 wraparound */
 ```
 
-ms 단위 op이면 안전하지만 ns 단위 cycle이면 32-bit 이상 tag가 필요합니다.
+ms 단위인지 ns 단위인지보다 update rate·tag 폭·reclamation 지연으로 wraparound 가능성을 계산합니다.
 
 > Tag만 증가하고 pointer는 검사 안 함
 

@@ -182,30 +182,30 @@ int items[16];
 size_t n = q.try_dequeue_bulk(items, 16);
 ```
 
-매우 빠른 unbounded MPMC 구현입니다. linux/windows/macos 모두 동작하고 header-only입니다.
+구현 예시와 library API의 지원 범위·bounded 여부·성능은 버전과 platform을 확인해야 합니다.
 
 ## 측정 / 성능 비교
 
-8 코어 Intel Xeon, 메시지 1억 개 처리 throughput입니다.
+예시 benchmark 형식입니다. CPU·compiler·메시지 크기·queue 설정·측정 방법을 고정해 대상 시스템에서 재측정해야 합니다.
 
 ```text
 구조                        4P/4C throughput
-mutex + std::queue          8 M ops/s
-boost::lockfree::queue      45 M ops/s
-Vyukov MPMC                 95 M ops/s
-moodycamel ConcurrentQueue  120 M ops/s
-LMAX Disruptor (batched)    180 M ops/s
+mutex + std::queue          측정 필요
+boost::lockfree::queue      측정 필요
+Vyukov MPMC                 측정 필요
+moodycamel ConcurrentQueue  측정 필요
+LMAX Disruptor (batched)    측정 필요
 
-SPSC만 (비교용)              350 M ops/s
+SPSC만 (비교용)              측정 필요
 ```
 
 SPSC가 가장 빠르고, MPMC는 잘 짜도 SPSC의 1/3 이하입니다. 단일 thread queue가 가능한 경우 굳이 MPMC를 안 쓰는 것이 best입니다.
 
 ```text
 contention 영향 (Vyukov, 16 thread)
-4 producer, 4 consumer      95 M ops/s
-8 producer, 8 consumer      75 M ops/s
-16 producer, 16 consumer    50 M ops/s
+4 producer, 4 consumer      측정 필요
+8 producer, 8 consumer      측정 필요
+16 producer, 16 consumer    측정 필요
 ```
 
 contention이 늘수록 cache line ping-pong이 늘어 throughput이 떨어집니다.

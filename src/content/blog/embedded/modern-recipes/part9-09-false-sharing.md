@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"False sharing = 다른 변수인데 *같은 cache line*에 있어 코어들이 서로 cache line을 끌고 다니는 현상."** SMP throughput이 갑자기 10배 떨어지는 1순위 원인입니다.
+> **"False sharing = 다른 변수인데 *같은 cache line*에 있어 코어들이 서로 cache line을 끌고 다니는 현상."** 영향은 coherency protocol·쓰기 패턴·topology와 workload로 측정합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -84,7 +84,7 @@ struct counters {
 };
 ```
 
-C++17부터 표준 상수가 있습니다. 칩별 line 크기를 컴파일러가 제공합니다.
+C++17의 표준 상수는 구현이 권장하는 destructive-interference 크기이며, 실제 cache line 크기를 모든 칩에서 직접 보장하는 값으로 사용하면 안 됩니다.
 
 ### Per-CPU counter
 
@@ -148,7 +148,7 @@ struct spsc_ring {
 };
 ```
 
-producer는 head만, consumer는 tail만 씁니다. 두 변수가 다른 line에 있으면 coherency traffic이 0에 수렴합니다.
+producer는 head만, consumer는 tail만 씁니다. 두 변수가 다른 line에 있어도 다른 데이터와의 traffic이 0이 되지는 않으며, 효과는 측정해야 합니다.
 
 ### Linux kernel ____cacheline_aligned
 
@@ -164,7 +164,7 @@ static struct bar g_bar ____cacheline_aligned;
 DEFINE_PER_CPU(unsigned long, counters);   /* per-CPU는 자동 분리 */
 ```
 
-Linux 커널은 `____cacheline_aligned` 매크로가 표준입니다. per-CPU 변수는 자동으로 다른 line에 위치합니다.
+Linux 커널은 `____cacheline_aligned` 같은 정렬 매크로를 제공합니다. per-CPU 배치와 실제 line 분리는 선언·architecture·allocator를 확인해야 합니다.
 
 ### perf c2c로 감지
 
