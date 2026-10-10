@@ -50,8 +50,13 @@ count_suspects() {
     BEGIN { in_fence = 0; in_frontmatter = 0 }
     NR == 1 && $0 == "---" { in_frontmatter = 1; next }
     in_frontmatter { if ($0 == "---") in_frontmatter = 0; next }
-    /^[[:space:]]*```/ { in_fence = !in_fence; next }
-    !in_fence && /┌|┐|┘|┬|┤|┴|┼|━━/ { count++ }
+    # CommonMark fences: close only on the same char, at least as long.
+    match($0, /^[ \t]*(````*|~~~~*)/) {
+      mark = substr($0, RSTART, RLENGTH); gsub(/[ \t]/, "", mark); rest = substr($0, RSTART + RLENGTH)
+      if (fc == "") { if (!(substr(mark, 1, 1) == "`" && index(rest, "`"))) { fc = substr(mark, 1, 1); fn = length(mark); next } }
+      else if (substr(mark, 1, 1) == fc && length(mark) >= fn && rest ~ /^[ \t]*$/) { fc = ""; next }
+    }
+    fc == "" && /┌|┐|┘|┬|┤|┴|┼|━━/ { count++ }
     END { print count + 0 }
   ' "$1"
 }

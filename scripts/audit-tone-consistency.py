@@ -26,6 +26,8 @@ Exit: 0 = MIXED 없음, 1 = MIXED 있음.
 
 import argparse
 import re
+
+from markdown_fences import Fences  # noqa: E402  (scripts/ is on sys.path)
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -33,7 +35,6 @@ from pathlib import Path
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONTENT = REPO_ROOT / "src" / "content" / "blog"
 
-FENCE = re.compile(r"^\s*```")
 DA = re.compile(r"([가-힣])다[.!?…]")        # 종결 '…X다.'  (X = 직전 음절)
 NIDA = re.compile(r"니다[.!?…]")             # '…니다.'  (Tone A: 합니다·입니다)
 ANIDA = re.compile(r"아니다[.!?…]")          # 예외: '아니다'는 Tone B
@@ -55,12 +56,9 @@ def prose_of(raw):
     """frontmatter·코드펜스·표·헤딩 제거한 산문 텍스트."""
     m = re.match(r"^---\s*\n.*?\n---\s*\n(.*)$", raw, re.DOTALL)
     body = m.group(1) if m else raw
-    out, in_fence = [], False
+    out, fences = [], Fences()
     for line in body.split("\n"):
-        if FENCE.match(line):
-            in_fence = not in_fence
-            continue
-        if in_fence:
+        if fences.step(line) is not None or fences.inside:
             continue
         s = line.lstrip()
         # 표·헤딩·블록인용 제외. 블록인용(>)은 예문·인용·콜아웃 용도라 본문 톤이

@@ -8,11 +8,12 @@ with Korean explanations are intentionally ignored.
 
 import argparse
 import re
+
+from markdown_fences import Fences  # noqa: E402  (scripts/ is on sys.path)
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parent.parent
 CONTENT_ROOT = ROOT / "src" / "content" / "blog"
-FENCE = re.compile(r"^\s*```")
 CHECKBOX = re.compile(r"^\s*\[[ xX]\]\s")
 BOLD_LABEL = re.compile(r"^\*\*[^*]+\*\*\s*$")
 KOREAN_BULLET = re.compile(r"^\s*[-*]\s+[가-힣]")
@@ -46,20 +47,20 @@ def prose_reason(lines):
 
 
 def scan_file(path):
-    hits, in_fence, start, lang, body = [], False, 0, "", []
+    hits, fences, start, lang, body = [], Fences(), 0, "", []
     for line_no, line in enumerate(path.read_text(encoding="utf-8", errors="ignore").splitlines(), 1):
-        if not FENCE.match(line):
-            if in_fence:
+        event = fences.step(line)
+        if event is None:
+            if fences.inside:
                 body.append(line)
             continue
-        if not in_fence:
-            in_fence, start, lang, body = True, line_no, line.strip()[3:].strip().lower(), []
+        if event is not True:  # opened; event is the info string
+            start, lang, body = line_no, event.lower(), []
             continue
         if lang in {"", "text", "asciidoc", "markdown", "md"}:
             reasons, snippet = prose_reason(body)
             if reasons:
                 hits.append((start, reasons, snippet))
-        in_fence = False
     return hits
 
 

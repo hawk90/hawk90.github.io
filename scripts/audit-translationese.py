@@ -32,13 +32,14 @@ Exit: 0 = 후보 없음, 1 = 후보 발견 (gate에서 warn 레벨로 표시).
 
 import argparse
 import re
+
+from markdown_fences import Fences  # noqa: E402  (scripts/ is on sys.path)
 import sys
 from pathlib import Path
 
 REPO_ROOT = Path(__file__).resolve().parent.parent
 CONTENT = REPO_ROOT / "src" / "content" / "blog"
 
-FENCE = re.compile(r"^\s*```")
 EMDASH = "—"  # —
 SENT_SPLIT = re.compile(r"(?<=[.!?…])\s+")
 LIST_ITEM = re.compile(r"^\s*([-*+]|\d+\.)\s")   # 불릿·번호 항목 (— 라벨 구분자로 정상 사용)
@@ -66,12 +67,9 @@ def prose_lines(raw):
     m = re.match(r"^---\s*\n.*?\n---\s*\n", raw, re.DOTALL)
     start_off = raw[: m.end()].count("\n") if m else 0
     body = raw[m.end():] if m else raw
-    out, in_fence = [], False
+    out, fences = [], Fences()
     for i, line in enumerate(body.split("\n"), start=start_off + 1):
-        if FENCE.match(line):
-            in_fence = not in_fence
-            continue
-        if in_fence:
+        if fences.step(line) is not None or fences.inside:
             continue
         s = line.lstrip()
         if s.startswith(("|", "#", ">")):

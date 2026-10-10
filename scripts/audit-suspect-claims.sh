@@ -54,8 +54,13 @@ prose_only() {
   awk '
     NR == 1 && $0 == "---" { frontmatter = 1; next }
     frontmatter { if ($0 == "---") frontmatter = 0; next }
-    /^[[:space:]]*```/ { fenced = !fenced; next }
-    !fenced { print }
+    # CommonMark fences: close only on the same char, at least as long.
+    match($0, /^[ \t]*(````*|~~~~*)/) {
+      mark = substr($0, RSTART, RLENGTH); gsub(/[ \t]/, "", mark); rest = substr($0, RSTART + RLENGTH)
+      if (fc == "") { if (!(substr(mark, 1, 1) == "`" && index(rest, "`"))) { fc = substr(mark, 1, 1); fn = length(mark); next } }
+      else if (substr(mark, 1, 1) == fc && length(mark) >= fn && rest ~ /^[ \t]*$/) { fc = ""; next }
+    }
+    fc == "" { print }
   ' "$1"
 }
 

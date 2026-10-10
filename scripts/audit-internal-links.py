@@ -21,6 +21,8 @@ Exit code:
 import argparse
 import json
 import re
+
+from markdown_fences import Fences  # noqa: E402  (scripts/ is on sys.path)
 import sys
 from collections import defaultdict
 from pathlib import Path
@@ -82,7 +84,7 @@ def audit_file(md_path):
     broken = []
     lines = text.split("\n")
     definitions = {key.strip().lower(): url for key, url in REFERENCE_DEF.findall(text)}
-    in_fence = False
+    fences = Fences()
     in_frontmatter = text.startswith("---")
     for lineno, line in enumerate(lines, 1):
         if lineno == 1 and in_frontmatter:
@@ -91,10 +93,7 @@ def audit_file(md_path):
             if line == "---":
                 in_frontmatter = False
             continue
-        if re.match(r"^\s*```", line):
-            in_fence = not in_fence
-            continue
-        if in_fence:
+        if fences.step(line) is not None or fences.inside:
             continue
         # Image links — image 파일 존재 확인
         for m in IMAGE_LINK.finditer(line):
