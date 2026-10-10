@@ -167,14 +167,7 @@ export const DEFAULT_CODE_THEMES = {
 
 // --- Admin Panel ---
 export const ADMIN_CONFIG = defineAdmin({
-  enabled: true,
-  allowedUsers: ['hawk90'],
-  contentRepo: 'hawk90/hawk90.github.io',
-  branch: 'main',
-  contentPath: 'src/content/blog',
-  imagePath: 'public/images/blog',
-  notifications: {
-    enabled: true,
-    pollInterval: 5,
-  },
+  // GitHub Pages has no server-side secret storage. Re-enable admin after
+  // moving it to a server-authenticated Vercel route.
+  enabled: false,
 });

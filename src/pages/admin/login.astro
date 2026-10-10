@@ -1,6 +1,6 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
-import { SITE_CONFIG } from '../../consts/config';
+import { SITE_CONFIG, ADMIN_CONFIG } from '../../consts/config';
 
 ---
 
@@ -13,10 +13,12 @@ import { SITE_CONFIG } from '../../consts/config';
     <div class="container max-w-md">
       <div class="text-center mb-8">
         <h1 class="text-3xl font-bold mb-2">Admin Login</h1>
-        <p class="text-[var(--color-text-muted)]">Sign in with a Personal Access Token</p>
+        <p class="text-[var(--color-text-muted)]">
+          {ADMIN_CONFIG.enabled ? 'Sign in with a Personal Access Token' : 'Administrative access is unavailable'}
+        </p>
       </div>
 
-      <!-- Login Form -->
+      {ADMIN_CONFIG.enabled ? (
       <div id="login-form" class="space-y-4">
         <!-- PAT Form -->
         <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-6">
@@ -58,6 +60,15 @@ import { SITE_CONFIG } from '../../consts/config';
             </div>
         </div>
       </div>
+      ) : (
+      <div class="bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-8 text-center">
+        <div class="text-4xl mb-4">🔒</div>
+        <h2 class="font-bold mb-2">Admin is currently disabled</h2>
+        <p class="text-sm text-[var(--color-text-muted)]">
+          The admin panel will return after the site moves to a server-authenticated platform.
+        </p>
+      </div>
+      )}
 
       <!-- Loading State -->
       <div id="login-loading" class="hidden bg-[var(--color-bg-secondary)] border border-[var(--color-border)] rounded-xl p-8 text-center">
@@ -107,6 +118,8 @@ import { SITE_CONFIG } from '../../consts/config';
   import { ADMIN_CONFIG } from '../../consts/config';
 
   onPageLoad(async () => {
+    if (!ADMIN_CONFIG.enabled) return;
+
     // Check if already authenticated (with token verification)
     const authState = await checkAuth();
     if (

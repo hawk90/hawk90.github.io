@@ -55,7 +55,7 @@
       }
 
       // Check if user is allowed
-      if (!isAllowedUser(authState.user, ADMIN_CONFIG.allowedUsers)) {
+      if (ADMIN_CONFIG.enabled && !isAllowedUser(authState.user, ADMIN_CONFIG.allowedUsers)) {
         loading.classList.add('hidden');
         denied.classList.remove('hidden');
         return;

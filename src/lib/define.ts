@@ -245,4 +245,4 @@ export type AdminConfig =
         pollInterval?: number;
       };
     };
-export const defineAdmin = <T extends AdminConfig>(c: T) => c;
+export const defineAdmin = (c: AdminConfig): AdminConfig => c;
