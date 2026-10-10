@@ -214,16 +214,11 @@ Production은 `nvpmodel`로 *thermal-aware mode*를 선택합니다.
 /* 먼지 누적·bearing 마모로 fan 성능 저하 → throttle */
 ```
 
-먼지·진동·진동 환경(자동차)이라면 fanless·passive를 우선 검토합니다. Fan을 쓰더라도 monitoring + alert를 갖춥니다.
+먼지·진동이 많은 환경(자동차)이라면 fanless·passive를 우선 검토합니다. Fan을 쓰더라도 monitoring + alert를 갖춥니다.
 
 > Margin 부족
 
-```text
-정상 운영 온도가 trip 직전
-→ ambient가 조금만 올라도 trip
-```
-
-최악 ambient 조건에서 측정한 margin을 기준으로 enclosure·workload를 설계합니다.
+정상 운영 온도가 trip 직전에 머물면 ambient가 조금만 올라도 trip에 걸립니다. 최악 ambient 조건에서 측정한 margin을 기준으로 enclosure·workload를 설계합니다.
 
 > Enclosure ventilation 부족
 
