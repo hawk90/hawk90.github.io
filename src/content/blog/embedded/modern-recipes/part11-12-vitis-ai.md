@@ -31,7 +31,7 @@ DPU = Deep Learning Processing Unit
 - DPUCVDX8G: Versal
 ```
 
-DPU는 *고정된 instruction set*을 가진 *softcore accelerator*입니다. xmodel은 *DPU instruction stream*. CPU instruction과 비슷한 관계입니다.
+DPU는 target IP와 compiler가 정의하는 연산 실행 구조를 가진 accelerator입니다. xmodel의 내부 표현과 지원 op·version은 Vitis AI release와 DPU target에 따라 확인합니다.
 
 DPU 옵션:
 
@@ -40,7 +40,7 @@ DPU 옵션:
 | B512 | ~256 GOPS | 작은 model |
 | B1024 | — | — |
 | B2304 | ~1100 GOPS | — |
-| B4096 | ~2000 GOPS | ZCU104·KV260 표준 |
+| B4096 | target·clock별 측정 | 보드·release 지원 여부 확인 |
 | B8192 | ~4000 GOPS | 대형 부서 |
 
 LUT, DSP, BRAM 사용량이 옵션에 따라 다릅니다. KV260은 보통 B4096.
@@ -240,9 +240,9 @@ xdputil benchmark resnet50.xmodel 4   # 4 thread
 
 ```text
 ResNet-50 KV260:
-1 thread: 150 fps, 6.6ms/frame
-4 thread: 600 fps, 6.7ms/frame (latency 동일, throughput 4×)
-8 thread: 750 fps, ~13ms (queue 적체)
+1 thread: 측정 필요
+4 thread: 측정 필요
+8 thread: 측정 필요
 ```
 
 Thread 수는 *core 수*가 아니라 *queue depth*로 보면 됩니다.
@@ -263,7 +263,7 @@ Pre-built KV260 / ZCU104 image가 있으니 처음에는 그걸 그대로 사용
 
 > Calibration data 부족
 
-100장 이하로 calibration하면 accuracy가 5~10% 떨어질 수 있음. 500~1000장 권장.
+calibration dataset의 크기와 대표성은 모델·quantizer·데이터 분포에 따라 정합니다. accuracy 영향과 권장 샘플 수는 대상 모델에서 측정합니다.
 
 > Unsupported op
 
@@ -306,7 +306,7 @@ Profile으로 측정. Preprocess는 GStreamer 또는 별도 fabric block으로 �
 - Multi-thread로 4× throughput 일반적.
 - DPU는 FPGA fabric에 instantiate되는 softcore (RTL IP).
 - B4096은 일부 KV260·ZCU104 구성에서 사용하는 예시 옵션이며, 실제 DPU 크기·개수는 FPGA 자원과 보드 설계에 따라 달라집니다.
-- CPU pre/post bottleneck을 항상 profile.
+- CPU pre/post bottleneck을 포함해 end-to-end profile합니다.
 
 다음 편은 **OpenCL on FPGA**입니다.
 

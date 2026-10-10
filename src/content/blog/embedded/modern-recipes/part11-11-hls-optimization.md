@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"HLS의 성능은 *코드*가 아니라 *pragma*가 결정합니다."** 같은 C++ 함수가 pragma 한 줄로 throughput이 100배 변할 수 있습니다.
+> **"HLS의 성능은 C++ 코드·pragma·메모리 구조·합성 결과가 함께 결정합니다."** 같은 함수도 scheduling과 resource constraint에 따라 throughput이 달라질 수 있습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -24,7 +24,7 @@ II=1: 매 cycle 새 input 1개 받음 → throughput = clock
 II=4: 4 cycle마다 input 1개   → throughput = clock / 4
 ```
 
-II가 1이면 100 MHz fabric에서 100 Msamples/s. II가 4면 25 Msamples/s. 4배 차이.
+II가 1이면 이상적으로 100 MHz에서 100 Msamples/s의 initiation rate가 되며, II가 4면 이상적인 rate는 25 Msamples/s입니다. 실제 처리율은 clock·stall·memory와 interface로 검증합니다.
 
 Loop pipeline pragma:
 
@@ -74,7 +74,7 @@ for (int j = 0; j < 8; j++) {
 
 ## Pragma 3 — ARRAY_PARTITION
 
-BRAM은 *port 2개*. 한 cycle에 2 word 이상 access하려면 partition 필요.
+BRAM port 수와 mode는 device primitive와 inference 설정에 따라 다릅니다. 한 cycle 다중 access가 필요하면 partition·reshape·banking을 합성 report로 검증합니다.
 
 ```cpp
 float coef[8];
@@ -130,7 +130,7 @@ void accel(int *in, int *out, int n) {
 
 ## 사례 — Naive vs Optimized FIR Filter
 
-### Naive (II=4, 1 MSPS @ 100 MHz)
+### Naive (예시: II와 throughput은 합성 report 확인)
 
 ```cpp
 void fir_naive(float in[N], float out[N]) {
@@ -148,7 +148,7 @@ void fir_naive(float in[N], float out[N]) {
 
 Shift loop와 MAC loop가 *순차* 실행. II=8~16.
 
-### Optimized (II=1, 100 MSPS @ 100 MHz)
+### Optimized (예시: II와 throughput은 합성 report 확인)
 
 ```cpp
 void fir_fast(float in[N], float out[N]) {
@@ -320,7 +320,7 @@ Stream으로만 통신. Array share는 dependency violation.
 stream<int, 2> s;   /* depth 2 — backpressure 자주 */
 ```
 
-Producer가 빨리 보내고 consumer가 느리면 stream이 가득 차 producer 정지. Depth 256~4096이 보통.
+Producer와 consumer의 rate가 다르면 stream이 가득 차 producer가 정지할 수 있습니다. depth는 burst·latency·resource budget으로 정합니다.
 
 > Resource 폭증
 

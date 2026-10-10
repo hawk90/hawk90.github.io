@@ -101,7 +101,7 @@ void fir_mm(int16_t *in, int16_t *out, int n,
 }
 ```
 
-`m_axi`는 host memory에 직접 DMA합니다. `bundle`을 다르게 주면 read·write가 별도 AXI port로 분리되어 동시 진행이 가능합니다. `max_read_burst_length=256`은 DDR controller가 한 transaction에서 256 beat까지 burst하도록 허용합니다.
+`m_axi`는 tool-generated memory interface를 통해 external memory와 연결됩니다. `bundle`과 burst option의 실제 port 분리·동시성·최대 길이는 Vitis HLS와 platform interconnect 설정으로 확인합니다.
 
 ### 3-stage dataflow image pipeline
 
@@ -183,7 +183,7 @@ II=1이면 MAC loop는 매 cycle 시작합니다. DSP48E 32개는 32-tap MAC의 
 
 ## 측정 / 성능 비교
 
-같은 32-tap FIR을 세 가지 합성 옵션으로 비교한 예입니다(Zynq UltraScale+ ZU3, 200 MHz 가정).
+같은 32-tap FIR을 세 가지 합성 옵션으로 비교하는 예시 형식입니다. device·clock·constraint·Vitis version에 따라 report를 재생성해야 합니다.
 
 | 구현 | II | throughput | DSP | LUT | BRAM | 비고 |
 |------|----|------------|-----|-----|------|------|
@@ -198,9 +198,9 @@ DDR burst 크기에 따른 streaming throughput도 큰 차이를 만듭니다.
 
 | max_burst_length | effective bandwidth |
 |---|---|
-| 8 | 0.4 GB/s |
-| 64 | 2.1 GB/s |
-| 256 | 6.8 GB/s (PCIe Gen3 x8 한계 근접) |
+| 8 | 측정 필요 |
+| 64 | 측정 필요 |
+| 256 | 측정 필요 |
 
 ## 자주 보는 함정
 
