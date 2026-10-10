@@ -127,7 +127,7 @@ PCIe는 *그 자체로도 표준*이지만, *2026 datacenter*에서는 *다른 p
 | **NVMe** | *PCIe 위 storage protocol* | 가장 큰 PCIe 응용 |
 | **AMD Infinity Fabric / Intel UPI** | CPU 간 *별도 PHY* | PCIe와 *공존* |
 
-[CXL 4.0 Internals Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position)에서 *CXL이 PCIe 위에 어떻게 얹히는지* 다뤘습니다. *PCIe 5.0 64 GT/s 위에 CXL 3.x, PCIe 7.0 128 GT/s 위에 CXL 4.0*이 결합되는 구조입니다.
+[CXL 4.0 Internals Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position)에서 *CXL이 PCIe 위에 어떻게 얹히는지* 다뤘습니다. *PCIe 6.0 64 GT/s 위에 CXL 3.x, PCIe 7.0 128 GT/s 위에 CXL 4.0*이 결합되는 구조입니다.
 
 ## 자주 하는 실수
 
