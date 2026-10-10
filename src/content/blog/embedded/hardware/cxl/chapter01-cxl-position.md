@@ -47,7 +47,7 @@ CXL은 *2019년 1.1 발표 이후 5세대*에 걸쳐 *backward compatibility를 
 | **1.1** | 2019 | 세 프로토콜 정의, Type 1·2·3 디바이스 분류 | PCIe 5.0 (32 GT/s) |
 | **2.0** | 2020 | Managed Hot-Plug, persistent memory, single-level switching, multi-LD pooling | PCIe 5.0 |
 | **3.0** | 2022 | Multi-level switching, *Coherent fabric*, GFAM, peer-to-peer, BISnp | PCIe 6.0 (64 GT/s) |
-| **3.1** | 2023 | Direct P2P CXL.mem, Extended Metadata, TSP (Trusted Security Protocol) | PCIe 6.0 |
+| **3.1** | 2023 | Direct P2P CXL.mem, Extended Metadata, TSP (TEE Security Protocol) | PCIe 6.0 |
 | **3.2** | 2024 | CHMU(Hot-Page Monitoring Unit), 추가 performance monitoring event, PPR 강화, TSP 확장 | PCIe 6.0 |
 | **4.0** | 2025 | *128 GT/s* (PCIe 7.0), *Bundled Port*, *Streamlined Port*, *x2 native width*, *4 retimer 지원* | **PCIe 7.0 (128 GT/s)** |
 
