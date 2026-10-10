@@ -179,10 +179,10 @@ PCIe Gen3 x16 카드(이론 15.75 GB/s effective) 위에서 BAR 접근과 stream
 
 | 동작 | 지연/대역 |
 |------|-----------|
-| BAR0 register read (host MMIO) | ~1.5 µs |
-| BAR0 register write (posted) | submit은 ~80 ns, 실제로 보이기까지는 ~1 µs |
-| PCIe DMA 64 KB read (host→card) | ~13 GB/s |
-| PCIe DMA 64 KB write (card→host) | ~12 GB/s |
+| BAR0 register read (host MMIO) | 측정 필요 |
+| BAR0 register write (posted) | 측정 필요 |
+| PCIe DMA 64 KB read (host→card) | 측정 필요 |
+| PCIe DMA 64 KB write (card→host) | 측정 필요 |
 
 NVMe 4 KB read를 host stack에 따라 비교한 결과입니다.
 
@@ -248,7 +248,7 @@ DPDK·SPDK가 device를 grab하지 못하면 보통 IOMMU group의 다른 device
 - MSI-X를 queue 수만큼 받고 vector마다 CPU affinity를 박아 정렬합니다.
 - Memory Write는 posted, Read는 non-posted입니다. Hot loop에서 read를 반복하지 않습니다.
 - BAR을 VFIO + mmap으로 user에 올리면 doorbell·polling을 system call 없이 수행할 수 있습니다.
-- DPDK·SPDK는 kernel bypass의 표준 구현이고, latency가 절반 가까이 줄어듭니다.
+- DPDK·SPDK는 kernel bypass를 제공하는 대표 구현이며, latency 변화는 workload와 platform에서 측정합니다.
 - 64-bit BAR sizing, IOMMU group 묶기, Relaxed Ordering 같은 곳에서 silent failure가 자주 발생합니다.
 - 측정은 throughput, IOPS, p99 latency를 한 묶음으로 봅니다.
 

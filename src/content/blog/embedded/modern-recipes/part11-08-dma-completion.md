@@ -25,13 +25,13 @@ UART RX 한 글자에 IRQ를 쏘면 CPU가 1 Mbps만으로도 30% 가까이 묶�
 
 **Interrupt**
 
-- latency 5-30 µs (entry/exit + ISR)
+- latency는 core·OS·ISR 경로별 측정
 - CPU 사용 적음 (idle 가능)
 - 큰 transfer / 낮은 빈도에 유리
 
 **Polling**
 
-- latency sub-µs
+- latency는 polling 경로별 측정
 - CPU 한 코어 100%
 - 짧은 transfer / 매우 높은 빈도 (NVMe SPDK, DPDK)
 
@@ -212,7 +212,7 @@ NVMe 4 KB 랜덤 read에서는 양상이 다릅니다.
 | Hybrid NAPI 방식 | 48 µs | 900 k | 중간 |
 | SPDK polling | 12 µs | 2.4 M | 가장 낮음 (per IOP) |
 
-IRQ 한 번의 비용은 보통 1.5-3 µs입니다. Transfer가 그보다 짧으면 polling이 이깁니다. 길어지면 IRQ 비용이 무뎌지고 CPU를 양보하는 IRQ 모델이 유리해집니다.
+IRQ 한 번의 비용은 core·OS·경로별로 측정합니다. transfer가 짧을수록 polling과 IRQ의 trade-off를 측정해 선택하고, 긴 transfer에서는 CPU 점유와 latency를 함께 비교합니다.
 
 ## 자주 보는 함정
 

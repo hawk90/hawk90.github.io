@@ -204,7 +204,7 @@ for (int i = 0; i < BATCH; i++)
 q_flush_doorbell(q);                     /* MMIO write 1번 */
 ```
 
-매 SQE마다 도어벨을 치면 NVMe Gen3 NVMe SSD에서 IOPS가 절반 이하로 떨어집니다. 가능한 모든 명령을 push한 뒤 마지막에 한 번 쓰는 것이 표준 패턴입니다.
+매 SQE마다 doorbell을 쓰는 비용은 device·MMIO path·batch size로 측정합니다. 가능한 명령을 묶은 뒤 doorbell을 줄이는 패턴을 검토합니다.
 
 ## 측정 / 성능 비교
 
@@ -212,9 +212,9 @@ q_flush_doorbell(q);                     /* MMIO write 1번 */
 
 | 모델 | QD=1 IOPS | QD=32 IOPS | p99 latency |
 |------|-----------|------------|-------------|
-| Single queue + IRQ | 180 k | 420 k | 95 µs |
-| 16 queue + IRQ | 180 k | 1.6 M | 55 µs |
-| SPDK polling (VFIO) | 280 k | 2.4 M | 12 µs |
+| Single queue + IRQ | 측정 필요 | 측정 필요 | 측정 필요 |
+| 16 queue + IRQ | 측정 필요 | 측정 필요 | 측정 필요 |
+| SPDK polling (VFIO) | 측정 필요 | 측정 필요 | 측정 필요 |
 
 Xilinx XDMA에서 H2C 8 KB transfer 측정 예입니다.
 
