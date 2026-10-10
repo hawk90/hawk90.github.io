@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Linux CXL 드라이버는 *cxl_acpi → cxl_pci → cxl_core → cxl_mem*의 의존성 체인으로 동작합니다."** 어느 한 모듈만 로딩 안 돼도 *침묵하며 동작 안* 합니다.
+> **"Linux CXL 드라이버는 *cxl_core* 위에 *cxl_port·cxl_acpi·cxl_pmem·cxl_mem·cxl_pci*가 얹힌 모듈 묶음입니다."** 어느 한 모듈이 빠지면 그 층에서 객체가 생기지 않고, 에러 대신 *빈 sysfs*로 나타나기 쉽습니다.
 
 ## 이 레시피가 푸는 것
 
@@ -43,7 +43,7 @@ $ lspci -nn | grep -i cxl
 $ lspci -vv -s 0c:00.0 | grep -A4 "Designated Vendor-Specific"
 ```
 
-CXL 디바이스는 *DVSEC*(Designated Vendor-Specific Extended Capability)로 자신이 CXL임을 알립니다. `lspci`에는 뜨는데 DVSEC가 없으면 커널은 그냥 PCI 디바이스로 취급하고 CXL 경로를 아예 타지 않습니다. 이 경우 CXL 모듈을 아무리 로딩해도 소용없습니다.
+CXL 디바이스는 *DVSEC*(Designated Vendor-Specific Extended Capability)로 자신이 CXL임을 알립니다. `cxl_pci`는 CXL memory class code(0502)로 디바이스에 붙고, probe 중 CXL Device DVSEC을 찾습니다. DVSEC이 없으면 `Device DVSEC not present, skip CXL.mem init` 경고만 남기고 probe는 계속합니다(`drivers/cxl/pci.c`). 이 경고가 dmesg에 있으면 CXL.mem 초기화가 빠졌습니다.
 
 ## 2층 — 모듈 체인이 다 올라왔는가
 
@@ -51,13 +51,9 @@ CXL 모듈은 기능별 의존성이 있으며, 필요한 모듈과 펌웨어·A
 
 ```bash
 $ lsmod | grep cxl
-cxl_mem      cxl_core
-cxl_pci      cxl_core
-cxl_acpi     cxl_core
-cxl_core
 ```
 
-`cxl_core`는 공통 기능을 제공하고 나머지 드라이버가 이를 사용합니다. 정상적인 시스템에서는 CEDT와 필요한 장치가 있으면 `modprobe cxl_acpi` 또는 udev/module autoload로 의존성이 처리됩니다. `cxl_mem not found`가 나오면 모듈 순서뿐 아니라 kernel config, 장치 타입, firmware table도 함께 확인해야 합니다.
+`drivers/cxl/Makefile`이 built-in 순서를 이렇게 적습니다. `core`가 먼저, 다음 `port`(CXL root port를 바로 enable하려고 `acpi`보다 앞), `acpi`, `pmem`·`mem`(endpoint 드라이버보다 앞), 마지막이 `pci`(하드웨어 열거 계층과 같은 순서)입니다. `cxl_core`는 공통 기능을 제공하고 나머지 드라이버가 이를 사용합니다. 정상적인 시스템에서는 CEDT와 필요한 장치가 있으면 `modprobe cxl_acpi` 또는 udev/module autoload로 의존성이 처리됩니다. `cxl_mem not found`가 나오면 모듈 순서뿐 아니라 kernel config, 장치 타입, firmware table도 함께 확인해야 합니다.
 
 `cxl_acpi`가 안 올라온다면 펌웨어 쪽을 봅니다. CEDT 테이블이 없으면 root port를 등록할 근거가 없습니다.
 
@@ -76,7 +72,7 @@ mem0/  decoder0.0/  port0/  root0/
 $ dmesg | grep -i cxl | tail -20
 ```
 
-`mem0`은 있는데 `decoder0.0`이 없는 식으로 *일부만* 등록되는 경우가 실제로 자주 나옵니다. probe가 어느 단계에서 멈췄는지는 ftrace로 잡는 것이 가장 빠릅니다.
+`mem0`은 있는데 decoder가 없는 식으로 *일부만* 등록될 수 있습니다. probe가 어느 단계에서 멈췄는지는 ftrace로 잡습니다.
 
 ```bash
 $ echo 'cxl_*' > /sys/kernel/debug/tracing/set_ftrace_filter
@@ -93,23 +89,32 @@ $ cat /sys/kernel/debug/tracing/trace | grep cxl
 여기가 가장 많이 막히는 층입니다. region 생성은 sysfs write의 연속이고, 각 write가 실패하면 그 자리에서 errno를 돌려줍니다.
 
 ```bash
-$ cxl create-region -d decoder0.0 -t ram -s 128G
+$ cxl create-region -m -d decoder0.0 -t ram mem0
 # 실패하면 어느 write에서 났는지 확인
 $ dmesg | tail -5
 ```
 
-`cxl-cli`가 하는 일은 결국 sysfs에 값을 쓰는 것이라, 막히면 손으로 한 단계씩 밟아 어디서 거부되는지 볼 수 있습니다.
+`cxl-cli`가 하는 일은 결국 sysfs에 값을 쓰는 것이라, 막히면 손으로 한 단계씩 밟아 어디서 거부되는지 볼 수 있습니다. 순서와 의미는 커널 ABI 문서(`Documentation/ABI/testing/sysfs-bus-cxl`)를 따릅니다.
 
 ```bash
+# root decoder가 다음 region 이름을 알려 주고, 그 이름을 그대로 써야 함
+$ cat /sys/bus/cxl/devices/decoder0.0/create_ram_region
+region0
 $ echo region0 > /sys/bus/cxl/devices/decoder0.0/create_ram_region
-$ echo mem0   > /sys/bus/cxl/devices/region0/target0
-$ echo 137438953472 > /sys/bus/cxl/devices/region0/size
-$ echo 1      > /sys/bus/cxl/devices/region0/commit
+
+# interleave 설정 → size → target(endpoint decoder 이름) → commit
+$ echo 1    > /sys/bus/cxl/devices/region0/interleave_ways
+$ echo 256  > /sys/bus/cxl/devices/region0/interleave_granularity
+$ echo 256M > /sys/bus/cxl/devices/region0/size
+$ echo decoder2.0 > /sys/bus/cxl/devices/region0/target0
+$ echo 1    > /sys/bus/cxl/devices/region0/commit
 ```
 
-**commit은 되돌릴 수 없습니다.** decoder를 잘못 프로그래밍한 채 commit하면 그 decoder는 reboot 전까지 그 상태입니다. size와 target을 확인하고 마지막 줄을 실행합니다.
+`targetN`에는 memdev 이름이 아니라 *endpoint decoder* 이름을 씁니다. 그 endpoint decoder에는 미리 DPA 공간이 잡혀 있어야 하고, `cxl create-region`은 이 과정까지 대신 합니다. size는 interleave 설정 뒤에 써야 합니다.
 
-commit이 `-EBUSY`로 거부되면 decoder가 이미 enable 상태입니다. 앞선 시도가 절반쯤 성공한 채 남아 있는 경우가 대부분입니다.
+**commit은 되돌릴 수 있습니다.** `commit`에 0을 쓰면 decoder reset이 예약되고 region이 내려갑니다. 플랫폼이 잠근(locked) region만 `-EPERM`으로 거부합니다(`drivers/cxl/core/region.c`의 `commit_store`).
+
+commit이 `-EBUSY`로 거부되면 decoder를 spec이 정한 순서(마지막으로 commit된 decoder id + 1)대로 commit하지 않았거나, 그 memdev에서 sanitize가 진행 중입니다(`drivers/cxl/core/hdm.c`의 `cxl_decoder_commit`). 이미 enable된 decoder는 `-EBUSY`가 아니라 그대로 성공 처리됩니다.
 
 ## 5층 — NUMA 노드로 올라오는가
 
@@ -125,23 +130,21 @@ $ numactl --hardware
 
 ## mailbox가 응답하지 않을 때
 
-디바이스 상태를 물어보는 명령(`cxl health`, poison list 조회 등)이 멈춘다면 mailbox 층입니다.
+디바이스 상태를 물어보는 명령(`cxl list -H`의 health 정보, poison list 조회 등)이 멈춘다면 mailbox 층입니다.
 
-명령마다 걸리는 시간이 크게 다르다는 점이 함정입니다. Identify는 즉시 돌아오지만 firmware update나 flash 계열은 수십 초가 걸립니다. 드라이버의 mailbox timeout이 짧게 잡혀 있으면 정상 동작 중인 명령을 timeout으로 죽입니다. 기본값은 2000 ms 이상을 씁니다.
+`cxl_pci`의 mailbox 전송은 doorbell을 `CXL_MAILBOX_TIMEOUT_MS`(2 × HZ, 약 2초)까지 polling합니다(`drivers/cxl/pci.c`). 오래 걸리는 background 명령은 별도 경로로 완료를 기다립니다. dmesg에 mailbox timeout이 찍히면 이 층에서 막혔습니다.
 
 ## RAS 이벤트가 안 보일 때
 
-CXL의 에러는 PCIe AER 경로를 타고 올라옵니다. 그래서 AER이 꺼져 있으면 *에러가 조용히 사라집니다*.
+CXL 프로토콜 에러는 PCIe AER 경로를 타고 올라오고, 커널은 `cxl_aer_correctable_error`·`cxl_aer_uncorrectable_error` 같은 trace event로 남깁니다(`drivers/cxl/core/trace.h`). 디바이스의 media 이벤트는 `cxl_general_media`·`cxl_dram` 등 event record trace로 나옵니다. `cxl monitor`가 이 trace event를 보여 줍니다.
 
 ```bash
-$ cat /proc/cmdline | grep -o 'pci=noaer'
+$ cxl monitor
 ```
-
-`pci=noaer`는 다른 문제를 디버깅하다 넣어 두고 잊는 대표적인 옵션입니다. 이게 남아 있으면 CXL 디바이스가 media error를 내고 있어도 호스트는 모릅니다.
 
 ## Hot-remove 전에
 
-디바이스를 뽑기 전에 region을 쓰는 워크로드를 먼저 정리합니다. hot-remove 중 region cleanup에는 시간이 걸리고, 그 사이 접근하는 프로세스는 SIGBUS를 받거나 최악의 경우 OOPS로 이어집니다.
+디바이스를 뽑기 전에 region을 쓰는 워크로드를 먼저 정리하고 region을 내립니다.
 
 ```bash
 $ umount /mnt/cxl-backed   # 있다면 먼저
@@ -152,12 +155,12 @@ $ cxl destroy-region region0
 ## 정리
 
 - 층을 나눠 좁힙니다. PCI 열거 → 모듈 체인 → CXL 등록 → region → NUMA 순서로, 실패 지점의 *한 층 아래*를 의심합니다.
-- `lspci`에 보여도 DVSEC가 없으면 커널은 CXL 경로를 타지 않습니다.
-- `cxl_core`가 베이스입니다. 손으로 modprobe하면 순서를 맞춰야 합니다.
-- region commit은 되돌릴 수 없습니다. `-EBUSY`는 앞선 시도가 절반 남아 있다는 뜻입니다.
+- `lspci`에 보여도 CXL Device DVSEC이 없으면 `cxl_pci`가 경고를 남기고 CXL.mem 초기화를 건너뜁니다.
+- `cxl_core`가 베이스이고, built-in 순서는 core → port → acpi → pmem/mem → pci입니다.
+- region commit은 되돌릴 수 있습니다(`commit`에 0). `-EBUSY`는 순서가 어긋난 commit이나 진행 중인 sanitize입니다.
 - region이 있는데 NUMA 노드가 없으면 `daxctl reconfigure-device -m system-ram`이 빠진 것입니다.
-- mailbox timeout은 2000 ms 이상. firmware 계열 명령은 수십 초가 정상입니다.
-- `pci=noaer`가 남아 있으면 RAS 이벤트가 통째로 사라집니다.
+- mailbox doorbell은 약 2초까지 polling합니다. health 정보는 `cxl list -H`로 봅니다.
+- RAS 이벤트는 trace event로 남고 `cxl monitor`로 봅니다.
 
 다음 편은 Modern Embedded Recipes 시리즈의 *Part 12 (Edge AI·IoT)* 영역으로 이어집니다.
 
