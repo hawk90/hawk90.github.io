@@ -11,17 +11,17 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"NEON이 진짜 빛나는 영역은 matrix, FFT, image processing이다."** Pixel 단위 연산에서 10~20배 speedup이 흔합니다.
+> **"NEON은 matrix, FFT, image processing처럼 반복적인 데이터 병렬 연산에서 유용하다."** 가속 폭은 ISA·메모리·컴파일러·알고리즘과 측정 조건에 따라 달라집니다.
 
 ## 어떤 상황에서 쓰나
 
-자율주행 perception은 매 frame에 카메라 input을 preprocessing합니다. 1080p RGB를 YUV로 변환하고 box filter로 노이즈를 줄이고 Sobel로 edge를 찾는 일이 수십 ms 안에 끝나야 합니다. Scalar 구현으로는 frame rate를 못 맞추는 경우가 대부분이고, NEON으로 다시 짜면 한 자릿수 ms로 떨어집니다.
+자율주행 perception은 매 frame에 카메라 input을 preprocessing합니다. 1080p RGB를 YUV로 변환하고 box filter로 노이즈를 줄이고 Sobel로 edge를 찾는 시간 예산은 제품과 frame rate에 따라 달라집니다. Scalar와 NEON의 차이는 포맷·메모리 배치·라이브러리 구현을 포함해 대상 장치에서 측정해야 합니다.
 
-자동차·드론의 attitude 제어는 quaternion 회전이 매 ms 단위로 돌아갑니다. 4-element vector 자체가 NEON과 자연스럽게 맞아 별도 최적화 없이도 scalar 대비 두 배 가깝게 빨라집니다.
+자동차·드론의 attitude 제어에서는 quaternion 회전처럼 작은 벡터 연산이 반복됩니다. 4-element vector가 NEON 레지스터에 맞더라도 정렬·로드·스케줄링·전체 파이프라인을 확인해야 하며, 별도 최적화 없이 특정 배수의 가속을 보장하지 않습니다.
 
 ## 핵심 개념
 
-NEON은 128-bit SIMD register 32개를 가집니다. Float32 4개, int16 8개, int8 16개를 한 명령에 처리합니다. Cortex-M55/M85의 MVE는 동일한 아이디어를 4 beat 분할로 저전력 MCU에 옮긴 변종입니다.
+ARMv8-A AArch64 NEON은 128-bit SIMD 레지스터 32개를 사용하며, AArch32의 레지스터 표현과 사용 가능한 명령은 다를 수 있습니다. 128-bit 벡터에는 float32 4개, int16 8개, int8 16개가 들어갑니다. Cortex-M55/M85의 MVE는 별도 ISA로 유사한 데이터 병렬 연산과 predication을 제공합니다.
 
 ```text
 ARMv8 AArch64 NEON
@@ -32,7 +32,7 @@ ARMv8 crypto extension
   AES, SHA-1/256, PMULL (hardware)
 
 ARMv9 SVE2 (Neoverse V1/V2, Cortex-X)
-  vector length runtime (128~2048 bit)
+  vector length는 구현별로 runtime 확인
 ```
 
 핵심 patterns는 *load → compute → store* 단순 흐름, multiple accumulator로 latency 숨기기, interleaved load (`vld2`, `vld3`)로 색상 채널 분리입니다.
@@ -61,7 +61,7 @@ void mat_mul_4x4(const float A[16], const float B[16], float C[16]) {
 }
 ```
 
-`vmulq_lane_f32(b, a, idx)`는 vector × scalar입니다. 4×4 matrix가 16 FMA, 8 load, 4 store로 끝납니다. 자동차 sensor fusion과 자세 제어가 표준으로 쓰는 패턴입니다.
+`vmulq_lane_f32(b, a, idx)`는 vector × scalar입니다. 이 예시는 행렬 배치와 compiler가 허용하는 경우의 한 구현이며, load·FMA·store 수는 데이터 배치와 최적화에 따라 달라집니다. 자동차 sensor fusion과 자세 제어에서 검토할 수 있는 패턴입니다.
 
 ### YUV422 → RGB Conversion
 
@@ -81,7 +81,7 @@ void yuv422_to_rgb(const uint8_t *yuv, uint8_t *rgb, int N) {
 }
 ```
 
-`vld2q_u8`은 interleaved load로 Y와 UV를 자동 분리하고, `vst3q_u8`은 RGB 3 채널을 interleave해서 저장합니다. Scalar로는 채널 분리에 추가 cycle이 들지만 NEON에서는 한 명령으로 끝납니다.
+`vld2q_u8`과 `vst3q_u8`은 interleaved 데이터를 벡터 레지스터로 분리·저장하는 연산을 표현합니다. 실제 명령 수와 비용은 target ISA와 compiler에 따라 다르며, 포맷의 stride·packing이 예시와 일치해야 합니다.
 
 ### 3×3 Box Filter
 
@@ -108,7 +108,7 @@ void box_filter_3x3(const uint8_t *in, uint8_t *out, int W, int H) {
 }
 ```
 
-세 row를 add하고 좌우 neighbor를 더해 9-element sum을 만듭니다. Computer vision preprocessing의 가장 흔한 패턴입니다.
+세 row를 add하고 좌우 neighbor를 더해 9-element sum을 만듭니다. Computer vision preprocessing에서 자주 쓰이는 패턴 중 하나입니다.
 
 ### Sobel Edge Detection
 
@@ -155,7 +155,7 @@ arm_rfft_fast_f32(&fft, input, output, 0);
 arm_cmplx_mag_f32(output, magnitude, FFT_SIZE / 2);
 ```
 
-CMSIS-DSP는 ARM이 공식 배포하는 NEON·MVE optimized DSP 라이브러리입니다. 오디오, radar, 진동 분석의 표준 도구입니다.
+CMSIS-DSP는 Arm이 배포하는 DSP 라이브러리로 target에 따라 NEON·MVE 최적화 경로를 제공합니다. 오디오·radar·진동 분석에서 사용할 수 있지만 지원 ISA와 build 옵션을 확인해야 합니다.
 
 ### Quaternion Rotation
 
@@ -181,7 +181,7 @@ state = vaesmcq_u8(vaeseq_u8(state, key));   /* AES round */
 uint32x4_t s = vsha256hq_u32(s, t, msg);     /* SHA-256 */
 ```
 
-ARMv8 crypto extension은 AES와 SHA를 hardware 한 명령으로 처리합니다. TLS와 secure boot에서 자릿수 단위 speedup을 줍니다.
+ARMv8 crypto extension은 AES·SHA 관련 primitive를 하드웨어 명령으로 가속할 수 있습니다. TLS와 secure boot의 실제 이득은 라이브러리 경로·키 길이·버퍼 크기와 target 지원 여부를 측정해야 합니다.
 
 ### Cortex-M Helium (MVE)
 
@@ -220,24 +220,24 @@ float32x4_t acc = vaddq_f32(vaddq_f32(acc0, acc1), vaddq_f32(acc2, acc3));
 float result = vaddvq_f32(acc);
 ```
 
-VFMA latency가 3~4 cycle인 Cortex-A에서 누산기 4개로 latency를 숨기면 throughput이 거의 풀로 나옵니다.
+VFMA latency와 실행 포트 수는 Cortex-A 세대와 구현에 따라 다릅니다. 누산기를 여러 개 사용하면 의존성을 줄일 수 있지만 register pressure와 memory bandwidth를 함께 측정해야 합니다.
 
 ## 측정 / 성능 비교
 
-Cortex-A72에서 자주 보는 workload별 speedup입니다.
+Cortex-A72에서 측정할 수 있는 workload별 benchmark 형식입니다. 실제 값은 compiler·cache·주파수·메모리 배치와 구현에 따라 달라집니다.
 
 ```text
 Workload                       Scalar      NEON     Speedup
-4x4 matrix multiply            16 mul      16 fmla  2~4x  (load/store 지배)
-1024 dot product                512 op      128 op   4x
-3x3 box filter (1080p)         210 ms      12 ms   17x
-Sobel edge (1080p)             280 ms      22 ms   12x
-512-point FFT                   32 µs       8 µs    4x
-AES-128 1 KB encrypt           2.5 µs      0.3 µs   8x
-YUV → RGB 1080p                 45 ms       6 ms    7x
+4x4 matrix multiply            측정 필요   측정 필요  측정 필요 (load/store 지배 가능)
+1024 dot product                측정 필요   측정 필요  측정 필요
+3x3 box filter (1080p)         측정 필요   측정 필요  측정 필요
+Sobel edge (1080p)             측정 필요   측정 필요  측정 필요
+512-point FFT                  측정 필요   측정 필요  측정 필요
+AES-128 1 KB encrypt           측정 필요   측정 필요  측정 필요
+YUV → RGB 1080p                측정 필요   측정 필요  측정 필요
 ```
 
-이미지·crypto·DSP는 NEON의 압도적 우세 영역입니다. Matrix multiply는 load/store가 병목이라 speedup이 상대적으로 작습니다.
+이미지·crypto·DSP는 NEON 적용을 검토하기 좋은 영역입니다. Matrix multiply의 이득은 load/store와 cache가 병목인지에 따라 달라집니다.
 
 ## 자주 보는 함정
 
@@ -253,8 +253,8 @@ v = vqaddq_u8(a, b);   /* 255 + 1 = 255 */
 > Misaligned load
 
 ```c
-float *p = malloc(N * 4);   /* 8-byte align */
-float32x4_t v = vld1q_f32(p);   /* 16-byte align 권장 */
+float *p = malloc(N * 4);   /* 필요한 정렬은 allocator·ABI 확인 */
+float32x4_t v = vld1q_f32(p);   /* 정렬 요구와 성능은 target ISA 확인 */
 ```
 
 `aligned_alloc(16, ...)`이나 `posix_memalign`을 사용합니다.
@@ -296,8 +296,8 @@ NEON·FPU 명령은 reset 직후 disabled입니다. Startup 코드에서 enable�
 ## 정리
 
 - NEON이 빛나는 영역은 matrix, FFT, image, crypto입니다.
-- Image filter는 10~20배 speedup이 흔합니다.
-- CMSIS-DSP가 ARM 공식 표준 라이브러리이고 Cortex-M/A 모두 지원합니다.
+- Image filter는 데이터 배치·메모리·구현에 따라 큰 가속이 가능하지만 대상 장치에서 측정합니다.
+- CMSIS-DSP는 Arm이 배포하는 라이브러리이며 target과 build 옵션별 지원 범위를 확인합니다.
 - `vld2`/`vld3`로 색상 채널 분리를 한 명령에 끝냅니다.
 - ARMv8 crypto extension은 AES와 SHA를 hardware로 가속합니다.
 - Cortex-M55/M85의 MVE로 MCU에서도 SIMD가 가능합니다.

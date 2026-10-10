@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-64 KB MCU에 기능을 자꾸 추가하다 보면 link error로 "region FLASH overflowed by 1.2K"가 나옵니다. 새 MCU로 옮기기 전에 컴파일 옵션과 link option, libc 선택만으로 30~50%를 줄일 수 있습니다.
+64 KB MCU에 기능을 자꾸 추가하다 보면 link error로 flash 영역이 넘을 수 있습니다. 새 MCU로 옮기기 전에 컴파일·link 옵션과 libc 선택을 검토할 수 있지만 절감 폭은 코드와 toolchain에 따라 측정해야 합니다.
 
 또 한 가지 흔한 상황은 secure boot의 image 크기 제한입니다. signed image의 *max size*가 정해진 환경에서는 코드 줄이기가 필수입니다.
 
@@ -36,11 +36,11 @@ topics: ["embedded"]
 
 | Step | 효과 |
 |------|------|
-| `-Os` vs `-O2` | -15~25% |
-| + LTO | -5~15% 추가 |
-| + section gc | -5~10% 추가 |
-| + newlib-nano | -20~50% (libc heavy 코드) |
-| + printf-tiny | -10~30% (printf 많이 쓰면) |
+| `-Os` vs `-O2` | 대상 빌드에서 측정 |
+| + LTO | 대상 빌드에서 측정 |
+| + section gc | 대상 빌드에서 측정 |
+| + newlib-nano | libc 사용 경로별 측정 |
+| + printf-tiny | printf 사용량·기능별 측정 |
 
 ## 코드 / 실제 사용 예
 
@@ -64,7 +64,7 @@ arm-none-eabi-gcc -Os -ffunction-sections -fdata-sections \
     -Wl,--gc-sections main.c -o main.elf
 ```
 
-`-ffunction-sections`는 각 함수를 별도 section에 두고, `--gc-sections`는 참조 없는 section을 link 시 제거합니다. 사용 안 한 함수의 코드가 0 byte가 됩니다.
+`-ffunction-sections`는 각 함수를 별도 section에 두고, `--gc-sections`는 도달할 수 없는 section을 link 시 제거합니다. linker script의 KEEP, 생성자, weak·reflection 경로 등에 따라 제거되지 않는 코드가 있을 수 있습니다.
 
 ### LTO (Link-Time Optimization)
 
@@ -73,7 +73,7 @@ arm-none-eabi-gcc -Os -flto -c file1.c
 arm-none-eabi-gcc -Os -flto -o main.elf file1.o file2.o
 ```
 
-LTO는 link 시 모든 object file을 함께 보고 inline, dead code elimination, constant propagation을 합니다. 빌드 시간이 늘지만 크기가 5~15% 더 줄어듭니다.
+LTO는 link 시 여러 object file을 함께 보고 inline, dead code elimination, constant propagation을 수행할 수 있습니다. 빌드 시간과 binary 크기·성능 변화는 project와 toolchain에서 측정해야 합니다.
 
 ### strip
 
@@ -90,20 +90,20 @@ ELF에서 debug symbol과 사용 안 된 symbol을 제거합니다. flash에 올
 arm-none-eabi-gcc --specs=nano.specs main.c
 ```
 
-`nano.specs`는 standard newlib 대신 newlib-nano를 link합니다. floating-point printf, wide char 같은 무거운 기능이 제거되어 libc 크기가 절반 이하가 됩니다.
+`nano.specs`는 toolchain에 제공되는 newlib-nano 구성을 선택합니다. floating-point printf, wide char 등 지원 범위와 크기는 toolchain build와 link 옵션에 따라 달라지므로 기능·크기를 함께 확인해야 합니다.
 
 ```text
 대표 절약 (ARM Cortex-M4)
-newlib              ~80 KB
-newlib-nano         ~20 KB
+newlib              측정 필요
+newlib-nano         측정 필요
 ```
 
 ### printf 대안
 
 ```bash
-# integer 전용 (float 제외)
-arm-none-eabi-gcc -Os -u _printf_float main.c
-# (float을 *제외*하면 약 5 KB 절약)
+# integer 전용 (float 지원은 link하지 않음)
+arm-none-eabi-gcc -Os main.c
+# float 지원이 필요할 때만 -u _printf_float을 추가하고 절감 폭을 측정
 
 # tinyprintf 같은 minimal 구현
 #include "tinyprintf.h"
@@ -111,7 +111,7 @@ init_printf(NULL, my_putchar);
 tfp_printf("hello %d\n", 42);
 ```
 
-`printf` family는 embedded에서 가장 큰 단일 함수군입니다. `%f`를 안 쓴다면 float 지원을 빼는 것만으로 4~5 KB가 줄어듭니다.
+`printf` family는 embedded에서 큰 의존성을 만들 수 있습니다. `%f` 지원 제거의 절감 폭은 libc 구현·linker·사용 포맷에 따라 측정해야 합니다.
 
 ### Compiler 옵션 추가 정리
 
@@ -131,7 +131,7 @@ arm-none-eabi-gcc \
     -o firmware.elf
 ```
 
-`-fno-unwind-tables`는 exception unwinding 정보(.eh_frame)를 제거합니다. C 코드라면 안전합니다.
+`-fno-unwind-tables`는 일부 unwind 정보를 제거할 수 있습니다. 예외·backtrace·런타임 요구사항이 있는 빌드에서는 기능 손실 여부를 확인해야 합니다.
 
 ### Size 분석 도구
 
@@ -183,18 +183,18 @@ __attribute__((noinline)) void big_func(void) { ... }
 ## 측정 / 성능 비교
 
 ```text
-단계별 적용 (Cortex-M4 사례, 시작 binary 48 KB)
-원본 -O2                                    48.0 KB
--Os                                         42.1 KB
--Os -ffunction-sections -Wl,--gc-sections   36.4 KB
-+ -flto                                     33.2 KB
-+ newlib-nano                               24.8 KB
-+ printf-tiny                               19.5 KB
+단계별 적용 (Cortex-M 사례 형식; 실제 값은 대상 빌드에서 측정)
+원본 -O2                                    측정 필요
+-Os                                         측정 필요
+-Os -ffunction-sections -Wl,--gc-sections   측정 필요
++ -flto                                     측정 필요
++ newlib-nano                               측정 필요
++ printf-tiny                               측정 필요
 ```
 
-다섯 옵션의 합성 효과로 60%까지 줄어들 수 있습니다.
+다섯 옵션의 합성 효과는 코드·toolchain·linker script별로 측정해야 합니다.
 
-빌드 시간은 반대로 늘어납니다. `-Os` 단독을 baseline으로 보면 `-flto`를 더할 때 link 단계가 길어져 30~80%가 추가됩니다.
+빌드 시간은 반대로 늘어날 수 있습니다. `-flto`의 link 비용은 project 규모와 toolchain에서 측정합니다.
 
 LTO의 비용은 link 시간뿐, runtime에는 오히려 더 빠른 경우도 많습니다.
 
@@ -203,7 +203,7 @@ LTO의 비용은 link 시간뿐, runtime에는 오히려 더 빠른 경우도 �
 > `-O0` 디버깅 빌드로 양산
 
 ```bash
-gcc -O0 main.c       # 2~3배 큰 binary, 2~5배 느림
+gcc -O0 main.c       # 크기·성능 변화는 빌드별 측정
 ```
 
 디버깅 빌드를 양산에 올리는 사고는 가끔 발생합니다. 빌드 system에서 `-O0`을 차단합니다.
@@ -242,11 +242,11 @@ inline void log_line(const char *s) { /* 50 줄 */ }
 
 ## 정리
 
-- `-Os`, `-ffunction-sections + --gc-sections`, `-flto` 세 옵션이 1차 답입니다.
-- newlib-nano는 libc 크기를 절반 이하로 줄입니다.
-- printf의 float 지원 제거만으로 4~5 KB가 줄어듭니다.
+- `-Os`, `-ffunction-sections + --gc-sections`, `-flto`는 1차로 검토할 수 있는 옵션입니다.
+- newlib-nano의 크기·기능 차이는 toolchain과 사용 API로 확인합니다.
+- printf의 float 지원 제거 효과는 대상 빌드에서 측정합니다.
 - `bloaty`로 어느 symbol이 큰지 즉시 확인합니다.
-- inline 정책은 small hot은 inline, big cold는 noinline이 표준입니다.
+- inline 정책은 hot/cold 경로와 code size를 측정해 정합니다.
 - LTO는 빌드 시간이 늘지만 runtime이 더 빠른 경우도 많습니다.
 - 디버깅 빌드(-O0)는 양산 차단합니다.
 
