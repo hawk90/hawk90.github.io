@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"HardFault는 *우연*이 아니라 *기록을 남기고* 떨어집니다."** Stacked PC와 CFSR 두 값만 정확히 읽어내면 90%의 hardfault는 5분 안에 원인이 잡힙니다.
+> **"HardFault는 *기록을 남기고* 분석해야 합니다."** Stacked frame과 CFSR는 중요한 단서지만, fault 종류·stacking 상태·최적화와 target 구현을 함께 확인해야 합니다.
 
 ## 사례 — "그냥 멈춰요"
 
@@ -35,7 +35,7 @@ PSR 0x01000003
 
 ## 핵심 개념 — Stacked Frame
 
-Cortex-M은 예외 진입 시 다음 8 word를 *자동으로* stack에 push합니다.
+Cortex-M exception model은 기본 frame으로 8 word를 stack에 저장하지만, FPU와 stacking 상태에 따라 추가 frame과 정렬 word가 붙을 수 있습니다.
 
 SP가 가리키는 낮은 주소부터 차례로 다음과 같이 쌓입니다.
 
@@ -283,7 +283,7 @@ Reset 없이 fault 재현 디버깅을 할 때 누적된 bit 때문에 헷갈립
 
 - HardFault는 stacked frame과 CFSR에 모든 단서를 남깁니다.
 - LR (EXC_RETURN) 비트 2로 MSP/PSP를 골라 stacked frame을 잡습니다.
-- Stacked PC가 *fault 발생 명령*. `addr2line`으로 source line.
+- Stacked PC는 fault 경로의 중요한 주소지만 precise/imprecise fault와 instruction semantics에 따라 정확한 faulting instruction과 다를 수 있습니다. `addr2line`과 disassembly를 함께 확인합니다.
 - CFSR을 BFSR/UFSR/MMFSR로 나눠 읽고 BFAR/MMAR을 함께 봅니다.
 - Imprecise BFSR은 write buffer disable로 precise하게 만듭니다.
 - Field에서는 fault record를 NVRAM에 남기고 reset합니다.

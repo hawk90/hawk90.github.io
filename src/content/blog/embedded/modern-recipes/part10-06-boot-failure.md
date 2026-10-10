@@ -21,7 +21,7 @@ topics: ["embedded"]
 
 - [ ] VDD 핀에 3.3V (또는 보드 spec) 측정?
 - [ ] GND 핀 0V?
-- [ ] 전류 소비 정상? (몇 mA ~ 수십 mA)
+- [ ] 전류 소비가 보드·MCU·부팅 단계의 예상 범위인지 측정?
 - [ ] 디커플링 cap 손상 없음?
 
 멀티미터로 VDD와 GND를 먼저 잡습니다. 새 보드의 흔한 사고.
@@ -54,13 +54,13 @@ NRST가 *low로 계속 머물러* 있으면 MCU는 영원히 reset 상태입니�
 
 크리스털이 발진을 못 시키는 사례는 의외로 많습니다.
 
-- 부하 커패시터 값 부적합 (보통 12-22 pF)
+- 부하 커패시터 값 부적합 (datasheet·crystal 사양 확인)
 - 크리스털 자체 불량
 - PCB layout 길이 너무 김
 - 솔더링 cold joint
 
 ```text
-정상: OSC_IN에 1.6V~1.7V 중심의 sinusoidal (수 MHz)
+정상 파형의 진폭·주파수는 oscillator 회로와 probe 조건별 확인
 비정상: DC 일정 / 진동 없음
 ```
 
@@ -174,7 +174,7 @@ int main(void) {
 
 문제의 보드를 oscilloscope로 OSC_IN 측정 → 신호 없음. Crystal 솔더링 불량.
 
-크리스털 솔더링을 재작업하니 정상 부팅. 100장 중 7장이 같은 문제. 위탁 PCBA의 stencil thickness 문제로 0402 cap 옆 8 MHz crystal의 솔더 양이 부족했습니다.
+크리스털 솔더링을 재작업하니 정상 부팅했다는 사례입니다. 양산 판단은 보드 샘플과 PCBA 공정 데이터를 함께 확인합니다.
 
 **교훈:**
 

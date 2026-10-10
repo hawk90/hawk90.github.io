@@ -101,11 +101,10 @@ Cortex-M의 peripheral clock gating은 기본값이 disable입니다. 칩 reset 
 
 actual_baud = PCLK / (16 × BRR);
 error_pct = abs(actual_baud - 115200) / 115200 × 100;
-// 3% 초과 시 통신 실패
+// 허용 오차는 UART·clock 정확도·sampling 조건으로 검증
 ```
 
-> ⚠️ HSI (internal oscillator)는 정확도가 ±1-3% 수준이라 115200 이상에서 marginal해집니다.
-> 외부 crystal이나 HSE 사용을 권장합니다.
+> ⚠️ 내부 oscillator 정확도는 MCU·전압·온도·calibration에 따라 달라집니다. baud error budget을 datasheet와 측정으로 확인합니다.
 
 ## Step 7: Logic Analyzer로 캡쳐
 
@@ -180,7 +179,7 @@ Newlib-nano (`-specs=nano.specs`)를 사용하면 float printf가 동작하지 �
 
 ## SWO Trace — UART 대신 빠른 출력
 
-Cortex-M3 이상은 Single Wire Output을 지원합니다. UART보다 수십 배 빠르고 GPIO 1핀만 사용합니다.
+Cortex-M의 SWO/ITM 지원과 pin·trace 설정은 core와 debug probe에 따라 다릅니다. UART와 처리량을 비교할 때는 target 조건에서 측정합니다.
 
 ```c
 ITM_SendChar('H');
@@ -242,7 +241,7 @@ printf("%f", 3.14);   // → ""  (newlib-nano 기본)
 3. Baud·8N1 일치
 4. GPIO Alternate Function
 5. RCC clock enable
-6. Baud 계산 error < 3%
+6. Baud error 허용 범위를 datasheet·receiver 조건으로 확인
 7. Logic analyzer 캡쳐
 8. LED 토글로 코드 동작 확인
 9. Polling으로 우선 검증
