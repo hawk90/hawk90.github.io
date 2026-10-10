@@ -25,8 +25,8 @@ Hardware timer와 software timer는 개수와 정밀도에서 정반대입니다
 
 | 종류 | 특성 |
 |------|------|
-| HW timer | peripheral 한 개 = timer 한 개, µs 정밀 |
-| SW timer | timer task 한 개 = N개 가상 timer, tick 정밀(보통 1 ms) |
+| HW timer | peripheral 한 개 = timer 한 개, peripheral 설정에 따른 정밀도 |
+| SW timer | timer task 한 개 = N개 가상 timer, RTOS tick 정밀도 |
 
 FreeRTOS software timer 구조입니다.
 
@@ -126,7 +126,7 @@ void init(void) {
 }
 ```
 
-양산은 static 변종이 표준입니다. heap fragmentation이 사라집니다.
+양산에서는 static 변종을 검토할 수 있습니다. 동적 할당을 줄이지만 전체 heap 사용은 다른 객체와 함께 확인해야 합니다.
 
 ### ISR에서 reset
 
@@ -149,7 +149,7 @@ void TIM2_IRQHandler(void) {
 }
 ```
 
-µs 단위 정밀, ISR latency 보장이 필요하면 HW timer를 직접 다룹니다. SW timer는 tick 정밀이라 1 ms tick에서는 ±1 ms jitter가 항상 깔립니다.
+µs 단위 정밀이나 결정적인 ISR latency가 필요하면 HW timer를 검토합니다. SW timer의 latency와 jitter는 tick, timer task priority, callback 실행시간과 부하로 측정합니다.
 
 ### Timer 종료 시 race 처리
 
@@ -170,10 +170,10 @@ void shutdown_module(void) {
 
 | 연산 | 시간 (Cortex-M4 72 MHz) |
 |------|--------------------------|
-| `xTimerStart` | 2.1 µs (queue로 명령 전달) |
-| SW timer callback latency | tick + 2 µs (보통 1 ms tick에 1 ms 지연) |
-| HW timer ISR | 0.4 µs (직접 ISR 진입) |
-| timer task per-tick overhead | 0.6 µs (active timer 4개) |
+| `xTimerStart` | 측정 필요 (queue 명령 전달) |
+| SW timer callback latency | tick·priority·부하에 따라 측정 |
+| HW timer ISR | MCU·ISR에 따라 측정 |
+| timer task per-tick overhead | active timer·port에 따라 측정 |
 
 SW timer는 tick 정밀입니다. 1 ms tick에서는 callback이 0~1 ms 늦게 호출될 수 있습니다.
 
@@ -181,11 +181,11 @@ RAM 사용량:
 
 | 종류 | 크기 |
 |------|------|
-| SW timer 1개 | 66 B |
-| HW timer | 0 B (peripheral 사용) |
-| timer task stack | 256 B (default) |
+| SW timer 1개 | config·port에 따라 측정 |
+| HW timer | peripheral 사용 및 driver 비용 확인 |
+| timer task stack | config·callback에 따라 측정 |
 
-Timer task 자체가 항상 살아있으니 RTOS 도입 시 256 B 정도가 기본으로 소비됩니다.
+Timer task와 timer object의 RAM 비용은 RTOS 설정과 callback에 따라 산정합니다.
 
 ## 자주 보는 함정
 
@@ -215,7 +215,7 @@ void cb(TimerHandle_t t) {
 xTimerStart(t, 0);   /* timer queue 가득 차면 fail */
 ```
 
-기본 queue 길이는 10입니다. 짧은 시간에 많은 timer 명령이 발생하면 길이를 늘립니다(`configTIMER_QUEUE_LENGTH`).
+timer command queue 길이는 설정값에 따릅니다. 짧은 시간에 많은 timer 명령이 발생하면 `configTIMER_QUEUE_LENGTH`와 실패 처리를 함께 검토합니다.
 
 > Period를 0으로
 

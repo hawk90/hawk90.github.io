@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 "Wi-Fi 연결됨", "NTP 동기화 완료", "config 로드됨" 세 조건이 모두 갖춰져야 application task가 시작해야 하는 부팅 시나리오가 흔합니다. Semaphore 세 개로 take를 차례로 하면 순서가 강제되고 코드가 지저분해집니다. Event group은 세 비트의 AND wait 한 줄로 끝납니다.
 
-반대로 한 task가 setting을 바꿨을 때 여러 subscriber task를 모두 깨우고 싶을 때도 event group이 답입니다. Queue는 1:1 또는 1:N broadcast가 안 됩니다.
+반대로 한 task가 setting을 바꿨을 때 여러 subscriber task를 모두 깨우고 싶을 때도 event group이 유용합니다. Queue는 한 항목을 보통 한 receiver가 소비하므로 broadcast에는 별도 fan-out 설계가 필요합니다.
 
 ## 핵심 개념
 
@@ -158,19 +158,19 @@ void EXTI_IRQHandler(void) {
 
 ```text
 연산                              시간 (Cortex-M4 72 MHz)
-xEventGroupSetBits (waiter 0)     1.3 µs
-xEventGroupSetBits (waiter 3)     5.6 µs  ← 3개 깨우기
-xEventGroupWaitBits (already set) 0.9 µs
-xEventGroupSync (3 task barrier)  8.1 µs
-xEventGroupSetBitsFromISR         2.1 µs (deferred)
+xEventGroupSetBits (waiter 0)     측정 필요
+xEventGroupSetBits (waiter 3)     측정 필요
+xEventGroupWaitBits (already set) 측정 필요
+xEventGroupSync (3 task barrier)  측정 필요
+xEventGroupSetBitsFromISR         측정 필요 (deferred)
 ```
 
 여러 task를 깨울수록 set 비용이 비례해 늘어납니다. ISR에서는 deferred 호출이므로 일정 latency가 더 듭니다.
 
 ```text
 대체 비교
-3 semaphore로 AND               9.0 µs (3 give + 3 take)
-1 event group AND               2.0 µs
+3 semaphore로 AND               측정 필요
+1 event group AND               측정 필요
 ```
 
 다중 조건 wait는 event group이 훨씬 효율적입니다.
@@ -192,7 +192,7 @@ xEventGroupWaitBits(eg, BIT, pdFALSE, ...);   /* clear 안 함 */
 #define BIT_X   (1 << 24)   /* 사용 안 됨 — 상위 8비트는 system reserved */
 ```
 
-FreeRTOS는 24비트만 사용자에게 줍니다. ZEPHYR k_event는 32비트, FreeRTOS는 24비트라는 점을 기억합니다.
+FreeRTOS event group의 사용자 bit 수는 tick type·설정에 따라 달라집니다. Zephyr `k_event`와도 API·bit 폭이 다르므로 각 RTOS 문서를 확인합니다.
 
 > Race in set + clear
 

@@ -20,7 +20,7 @@ topics: ["embedded"]
 |---|---|
 | **Reentrant** | 중간에 끊겨도 재실행 안전 |
 | **Non-blocking** | sleep·spin·malloc 없음 |
-| **Short** | 수 µs 이내 |
+| **Short** | 시스템 latency budget 안에서 짧게 유지 |
 | **No side effect outside protected** | shared state는 atomic 또는 lock-free |
 
 ## Reentrant 함수 체크
@@ -154,7 +154,7 @@ void CAN_RX_IRQHandler(void) {
 }
 ```
 
-CAN 1 Mbps에서는 14k frame/sec, 즉 frame당 70 µs의 budget이 주어집니다. 그래서 ISR은 *수 µs 이내*로만 동작해야 합니다.
+CAN frame rate와 ISR budget은 ID·DLC·bit timing·bus load에 따라 달라집니다. ISR은 전체 latency budget 안에서 수집만 하고, 실제 허용 시간은 시스템 측정으로 정합니다.
 
 ## Critical Section Helper
 
@@ -192,7 +192,7 @@ critical();
 __set_BASEPRI(0);
 ```
 
-자동차·항공의 high RT ISR은 *kernel API를 쓰지 않으면서도 동작*합니다.
+높은 실시간성이 필요한 ISR은 kernel API 제약과 interrupt priority 규칙을 확인하고, 필요하면 deferred work로 분리합니다.
 
 ## printf in ISR — 회피
 
