@@ -148,7 +148,7 @@ void task_high(void *arg) {      /* priority 5 */
 }
 ```
 
-PI가 켜진 FreeRTOS mutex라면 Low가 High의 priority로 잠시 boost되어 빨리 release합니다. PI가 없으면 Med이 끝없이 끼어들어 High가 영원히 못 들어옵니다.
+PI가 켜진 FreeRTOS mutex라면 Low가 대기 중인 높은 priority를 반영해 잠시 boost될 수 있어 release를 앞당깁니다. PI가 없으면 중간 priority task가 끼어들어 High의 대기가 길어질 수 있습니다.
 
 ### Timeout으로 deadlock 감지
 
@@ -183,14 +183,14 @@ void transfer(account_t *a, account_t *b, int amount) {
 
 ```text
 연산                             시간 (Cortex-M4 72 MHz)
-mutex take (uncontended)         0.9 µs
-mutex give (no waiter)           0.7 µs
-mutex take (PI boost 발생)       3.1 µs
-recursive take                   1.1 µs
-mutex contended → 다음 깨움      6.4 µs
+mutex take (uncontended)         측정 필요
+mutex give (no waiter)           측정 필요
+mutex take (PI boost 발생)       측정 필요
+recursive take                   측정 필요
+mutex contended → 다음 깨움      측정 필요
 ```
 
-PI boost는 ready list rebalancing 비용이 들지만 µs 단위입니다. Hold time이 ms라면 PI cost는 무시할 만합니다.
+PI boost 비용은 port와 scheduler 설정에 따라 측정합니다. Hold time이 길수록 lock 설계 자체가 latency에 미치는 영향도 함께 봅니다.
 
 ```text
 PI on vs off (Mars Pathfinder 재현, Med busy_work 100 ms)

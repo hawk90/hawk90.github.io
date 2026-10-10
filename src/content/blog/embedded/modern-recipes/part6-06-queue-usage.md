@@ -110,7 +110,7 @@ void task_parse(void *arg) {
 }
 ```
 
-1 KB의 packet을 매번 복사하면 32-bit ARM에서도 수 µs가 듭니다. Pool에서 미리 할당해두고 pointer만 send하면 send 비용이 4 byte로 떨어집니다. 대신 lifetime을 명확히 관리해야 합니다.
+큰 packet을 매번 복사하면 CPU와 latency 비용이 늘어납니다. Pool에서 미리 할당해 pointer만 send하면 복사량을 줄일 수 있지만, lifetime과 ownership을 명확히 관리해야 합니다.
 
 ### ISR에서 send
 
@@ -182,11 +182,11 @@ UART나 USB CDC처럼 byte 단위로 들어오는 stream에는 queue보다 strea
 
 ```text
 연산                              시간 (Cortex-M4 72 MHz)
-xQueueSend (sizeof 12 B)          1.4 µs
-xQueueSend (sizeof 256 B)         3.2 µs  ← memcpy 비용
-xQueueSend (pointer only, 4 B)    1.1 µs
-xQueueReceive (block → wake)      6.8 µs
-xStreamBufferSend (32 B)          1.3 µs
+xQueueSend (sizeof 12 B)          측정 필요
+xQueueSend (sizeof 256 B)         측정 필요
+xQueueSend (pointer only)         측정 필요
+xQueueReceive (block → wake)      측정 필요
+xStreamBufferSend (32 B)          측정 필요
 ```
 
 대형 메시지를 by-value로 보내면 send 비용이 빠르게 증가합니다. 64 byte를 넘으면 pointer 방식을 검토할 가치가 있습니다.
@@ -243,7 +243,7 @@ Backpressure 정책 없이 무한 대기하면 cascading failure가 발생합니
 ## 정리
 
 - Queue는 by-value memcpy가 기본입니다. sizeof가 클수록 send 비용이 늘어납니다.
-- 64 byte 이상은 by-pointer + pool 패턴이 거의 항상 더 빠릅니다.
+- 큰 record는 by-pointer + pool을 검토하되, ownership·fragmentation·cache 비용을 함께 측정합니다.
 - ISR은 `xQueueSendFromISR`과 `portYIELD_FROM_ISR`을 함께 씁니다.
 - Backpressure 정책(block, drop, replace)을 코드 단위로 명시합니다.
 - Queue set은 여러 입력을 한 task에서 대기할 때 씁니다.

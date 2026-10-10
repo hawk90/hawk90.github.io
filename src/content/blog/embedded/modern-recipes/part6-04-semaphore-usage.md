@@ -66,7 +66,7 @@ int main(void) {
 }
 ```
 
-ISR에서 한 줄, task에서 한 줄이면 polling이 사라집니다. CPU usage가 0%에 가깝게 떨어지고 latency도 한 자릿수 µs입니다.
+ISR에서 신호를 주고 task에서 대기하면 polling을 줄일 수 있습니다. CPU 사용량과 wake latency는 port·tick·부하에 따라 측정합니다.
 
 ### Counting semaphore — resource pool
 
@@ -182,13 +182,13 @@ Cortex-M4 72 MHz에서 측정한 latency입니다.
 
 ```text
 패턴                              latency
-ISR → semaphore give → task wake   5.8 µs
-ISR → task notification → wake     3.2 µs
-mutex take/give (uncontended)      0.9 µs
-counting semaphore take (count>0)  1.1 µs
+ISR → semaphore give → task wake   측정 필요
+ISR → task notification → wake     측정 필요
+mutex take/give (uncontended)      측정 필요
+counting semaphore take (count>0)  측정 필요
 ```
 
-Notification이 semaphore보다 약 두 배 빠릅니다. 1:1 신호라면 거의 항상 notification이 더 낫습니다.
+Task notification은 전용 1:1 신호에서 메모리와 경로가 단순할 수 있습니다. 실제 성능과 다중 producer 요구를 함께 비교합니다.
 
 RAM 사용량:
 
