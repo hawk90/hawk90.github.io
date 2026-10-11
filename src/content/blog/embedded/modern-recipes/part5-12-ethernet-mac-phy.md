@@ -286,11 +286,11 @@ Ethernet cable에는 큰 ESD. *RJ45 magnetics integrated jack* 사용, PHY datas
 - **DHCP**로 IP 자동 획득, **link polling**으로 plug/unplug detect.
 - **Unique MAC**, **50 MHz precise**, **충분한 buffer**가 안정성의 핵심.
 
-다음 편은 **SD card + FatFs**입니다. SPI/SDIO interface와 file system 통합을 다룹니다.
+다음 편은 **SD 카드 SPI 모드 + FatFs**입니다. SPI 모드 초기화와 FatFs disk I/O 연결을 다룹니다.
 
 ## 관련 항목
 
 - [4-10: DMA 기초](/blog/embedded/modern-recipes/part4-10-dma-basics)
 - [5-11: USB Device 기초](/blog/embedded/modern-recipes/part5-11-usb-device)
-- [5-13: SD card + FatFs](/blog/embedded/modern-recipes/part5-13-sd-card-fatfs)
+- [5-13: SD 카드 SPI 모드 + FatFs](/blog/embedded/modern-recipes/part5-13-sd-card-fatfs)
 - [12-13: Matter·Thread](/blog/embedded/modern-recipes/part12-13-matter-thread)
