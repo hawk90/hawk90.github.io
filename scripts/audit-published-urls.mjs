@@ -13,7 +13,10 @@
 // with it. Adding URLs is free — publishing is meant to happen. Removing one is
 // the operation that needs a decision, so it cannot happen by accident:
 // retiring a URL means listing it under `retired` with where it now goes, and a
-// page has to exist there to send the reader on.
+// page has to exist there to send the reader on. Content that was withdrawn with
+// no equivalent page anywhere is listed under `gone` with a reason and a date
+// instead: the old URL answers 404, which is what search engines expect for
+// removed content (a redirect to an unrelated page is treated as a soft 404).
 //
 // Checked in both directions, because they fail differently: a URL in the
 // manifest but not in the build is a URL that disappeared, and a published post
@@ -74,13 +77,26 @@ try {
 }
 const recorded = new Set(manifest.urls);
 const retired = new Map((manifest.retired ?? []).map((entry) => [entry.url, entry]));
+const gone = new Map((manifest.gone ?? []).map((entry) => [entry.url, entry]));
 
 const findings = [];
+
+// 0. A `gone` entry is a recorded decision, so it has to say why and when, and it
+//    has to be about a URL this site actually published.
+for (const [url, entry] of gone) {
+  if (!entry.reason || !entry.date) findings.push({ kind: 'gone-without-reason', url });
+  if (!recorded.has(url)) findings.push({ kind: 'gone-not-recorded', url });
+}
 
 // 1. A recorded URL that the build no longer produces. Retiring it is allowed,
 //    but only deliberately and only if something still answers at that address.
 for (const url of recorded) {
-  if (built.has(url)) continue;
+  if (built.has(url)) {
+    // Withdrawn on purpose, yet a page is back at the old URL: decide which one is true.
+    if (gone.has(url)) findings.push({ kind: 'gone-but-built', url });
+    continue;
+  }
+  if (gone.has(url)) continue;
   const entry = retired.get(url);
   if (!entry) { findings.push({ kind: 'vanished', url }); continue; }
   if (!built.has(url)) findings.push({ kind: 'retired-without-page', url, to: entry.redirectsTo });
@@ -92,20 +108,23 @@ for (const url of published) {
 }
 
 // 3. Newly published, not yet recorded. Not a failure; this is what --record is for.
-const fresh = [...published].filter((url) => !recorded.has(url) && !retired.has(url)).sort();
+const fresh = [...published].filter((url) => !recorded.has(url) && !retired.has(url) && !gone.has(url)).sort();
 
 console.log(
   `Published URLs: ${recorded.size} recorded, ${published.size} published in content, ` +
-  `${built.size} built page(s), ${retired.size} retired.`,
+  `${built.size} built page(s), ${retired.size} retired, ${gone.size} gone.`,
 );
 
 if (findings.length) {
-  const byKind = { vanished: [], 'retired-without-page': [], 'not-built': [] };
+  const byKind = { vanished: [], 'retired-without-page': [], 'not-built': [], 'gone-but-built': [], 'gone-without-reason': [], 'gone-not-recorded': [] };
   for (const finding of findings) byKind[finding.kind].push(finding);
   const explain = {
     vanished: 'recorded as published, but the build produces no page at this URL. A slug edit, a moved file, a flip to draft, or a deleted post. Restore it, or retire it explicitly in the manifest with a redirect.',
     'retired-without-page': 'listed as retired, but nothing is served at the old URL, so it is a 404 rather than a redirect.',
     'not-built': 'the content says this post is published, but the route generated no page for it.',
+    'gone-but-built': 'listed as gone (withdrawn, answers 404), but the build produces a page there again. Remove it from `gone` or withdraw the page.',
+    'gone-without-reason': 'a `gone` entry needs both `reason` and `date`.',
+    'gone-not-recorded': 'a `gone` entry must be a URL listed under `urls`.',
   };
   for (const [kind, list] of Object.entries(byKind)) {
     if (!list.length) continue;
@@ -130,6 +149,7 @@ if (!record) {
 
 manifest.urls = [...new Set([...recorded, ...published])].sort();
 manifest.retired ??= [];
+manifest.gone ??= [];
 await writeFile(MANIFEST, `${JSON.stringify(manifest, null, 2)}\n`);
 console.log(`\nRecorded ${fresh.length} new URL(s); manifest holds ${manifest.urls.length}.`);
 
