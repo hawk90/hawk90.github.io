@@ -2,7 +2,7 @@
 title: "PWM 신호 생성 분석 — Duty·Frequency·Dead Time·Center-Aligned"
 slug: "embedded/modern-recipes/part1-09-pwm-signal"
 date: 2026-04-10T09:09:00
-description: "Duty·frequency·dead-time·center-aligned·complementary 출력."
+description: "STM32F407 TIM1(168 MHz)을 기준으로 PWM 주파수와 duty 단계, edge·center-aligned의 주기 차이, dead-time이 양 끝 duty를 깎는 양을 RM0090으로 계산합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 9
 tags: [recipes, pwm, hw-basics]
@@ -10,147 +10,106 @@ draft: false
 topics: ["embedded"]
 ---
 
-## 한 줄 요약
+타이머 하나로 PWM을 만들 때 정해야 하는 값은 주파수, duty 단계 수, 정렬 방식, dead-time입니다. 넷 모두 같은 counter clock을 나눠 쓰므로 하나를 정하면 나머지의 범위가 줄어듭니다. 이 글은 STM32F407의 advanced-control timer TIM1을 기준으로, [RM0090 Rev 22](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf)(이하 RM0090)의 정의로 그 범위를 계산합니다. 레지스터 설정 코드는 [5-01: PWM 출력 실전](/blog/embedded/modern-recipes/part5-01-pwm-output)에 있고, 이 글은 그 코드에 넣을 숫자를 정하는 쪽을 다룹니다.
 
-> **"PWM은 디지털 펄스 폭으로 아날로그 평균 전압을 흉내냅니다."** DAC 없이도 LED 디밍, 모터 속도, DC-DC 변환을 모두 할 수 있습니다.
+## 기준 타이머 — TIM1 counter clock 168 MHz
 
-## 어떤 상황에서 쓰나
+RM0090 §7.2(216쪽)에 따르면 STM32F405/407의 AHB 최대 주파수는 168 MHz, APB2 최대 주파수는 84 MHz이고, APB prescaler가 1이 아니면 그 버스에 붙은 타이머의 clock은 APB 주파수의 두 배입니다. TIM1은 APB2에 붙어 있으므로(§7.3.14 `RCC_APB2ENR`의 `TIM1EN`, 249쪽) HCLK 168 MHz, APB2 prescaler 2로 두면 TIM1 clock은 84 MHz × 2 = 168 MHz입니다. TIM1의 counter와 prescaler는 16-bit입니다(§17.2, 515쪽). 아래 계산은 모두 prescaler를 1로 둔(PSC = 0) 168 MHz를 쓰고, 한 tick은 1/168 MHz ≈ 5.95 ns입니다.
 
-- LED 밝기 조정, RGB 컬러 제어
-- DC 모터 속도, 서보 motor 위치 제어
-- BLDC, SR motor의 inverter 구동
-- DC-DC converter, class-D amplifier
-- Heater, peltier 같은 thermal 제어
+## Duty와 평균 전압
 
-## 핵심 개념
-
-### 1) Duty와 평균 전압
-
-PWM은 고정 주파수의 사각파인데, on/off 비율(duty)로 평균을 만듭니다.
+PWM은 고정 주기의 사각파이고, 한 주기 중 high 구간의 비율이 duty입니다. 출력이 0과 V<sub>H</sub> 사이를 오가면 한 주기 평균은 duty × V<sub>H</sub>입니다. 타이머가 정하는 것은 이 duty를 몇 단계로 나눌 수 있는가이고, 아래 절들이 그 단계 수를 계산합니다.
 
 ![PWM duty 50% vs 75% — duty 비율이 평균 전압](/images/blog/modern-recipes/diagrams/part1-09-pwm-duty.svg)
 
-부하가 inductive(모터 코일 등)이면 자체 적분 효과로 평균 전압이 흐릅니다. resistive 부하는 RC 필터를 후단에 답니다.
+## Edge-aligned와 center-aligned — 주기와 duty 단계
 
-### 2) Edge-aligned vs Center-aligned
+두 정렬 방식은 counter가 세는 모양이 달라서, 같은 ARR이라도 주기와 duty 단계가 다릅니다. RM0090 §17.3.2(519·525쪽)의 정의는 다음과 같습니다.
 
-타이머가 counter를 0 ~ ARR로 올리는 동안 비교 값 CCR보다 작으면 0, 크면 1을 출력합니다.
+- **Edge-aligned(upcounting)**: counter가 0부터 ARR까지 센 뒤 0으로 돌아갑니다. 한 주기는 ARR + 1 tick입니다.
+- **Center-aligned**: counter가 0부터 ARR − 1까지 올라가 overflow를 내고, ARR부터 1까지 내려가 underflow를 낸 뒤 0부터 다시 셉니다. 한 주기는 2 × ARR tick입니다.
 
-![Edge-aligned vs Center-aligned PWM — counter ramp 차이](/images/blog/modern-recipes/diagrams/part1-09-pwm-alignment.svg)
+PWM mode 1에서 기준 신호 OCxREF는 upcounting 중에는 CNT < CCR인 동안 high이고, downcounting 중에는 CNT > CCR인 동안 low입니다. PWM mode 2는 그 반대입니다(§17.4.7 `OC1M`, 570쪽). 이 정의로 PWM mode 1의 high 구간을 세면 다음과 같습니다.
 
-Edge-aligned는 LED나 일반 부하에 쓰입니다. Center-aligned는 모터의 ripple 전류와 harmonic을 줄여 줍니다.
+| 정렬 | 한 주기 | duty | CCR 범위 (단계 수, 단계당 폭) |
+| --- | ---: | ---: | --- |
+| Edge-aligned | ARR + 1 tick | CCR / (ARR + 1) | 0 ~ ARR + 1 (ARR + 2단계, 1 tick) |
+| Center-aligned | 2 × ARR tick | CCR / ARR | 0 ~ ARR (ARR + 1단계, 2 tick) |
 
-### 3) Dead-time — Complementary 출력
+CCR이 ARR보다 크면 OCxREF는 1에 고정되고 CCR = 0이면 0에 고정되므로(§17.3.10, 540–542쪽) 0%와 100%가 모두 단계에 들어갑니다.
 
-H-bridge나 inverter에서 high-side와 low-side switch가 동시에 ON이면 short(shoot-through)가 발생합니다. dead-time은 한 쪽이 OFF된 후 다른 쪽이 ON까지 일부러 두는 간격입니다.
+![Edge-aligned PWM mode 1과 center-aligned PWM mode 2 — counter 모양과 출력 극성 차이](/images/blog/modern-recipes/diagrams/part1-09-pwm-alignment.svg)
+
+그림의 두 파형은 PWM mode가 다릅니다. 왼쪽 edge-aligned는 PWM mode 1이라 counter가 CCR 아래에 있는 동안 high이고, 오른쪽 center-aligned는 PWM mode 2라 counter가 CCR 위에 있는 동안 high입니다. 그래서 CCR 선의 높이가 같아도 duty가 다르게 그려져 있습니다. center-aligned에서 같은 CCR이면 mode 1의 duty는 CCR / ARR, mode 2의 duty는 1 − CCR / ARR이고, 어느 mode든 펄스는 counter가 꺾이는 점(0 또는 ARR)을 중심으로 대칭입니다.
+
+정렬만 바꾸고 ARR을 그대로 두면 주기가 ARR + 1 tick에서 2 × ARR tick으로 바뀌어 주파수가 (ARR + 1) / (2 × ARR)배가 됩니다. 절반에 가깝지만 정확히 절반은 아닙니다. 168 MHz에서 ARR = 4199로 edge-aligned 40 kHz를 만든 뒤 center-aligned로 바꾸면 168 MHz / 8398 ≈ 20.005 kHz입니다. center-aligned로 정확히 20 kHz를 만들려면 2 × ARR = 8400, 즉 ARR = 4200을 씁니다.
+
+## 주파수와 duty 해상도
+
+counter-compare PWM에서는 duty 한 단계가 counter tick 하나(center-aligned는 둘)입니다. 그래서 edge-aligned에서 한 주기를 N tick으로 나누려면 counter clock이 PWM 주파수 × N이어야 하고, counter clock이 168 MHz로 정해져 있으면 N tick으로 낼 수 있는 최고 주파수는 168 MHz / N입니다.
+
+| 해상도 | 한 주기 tick 수 N | 100 kHz에 필요한 counter clock (TIM1 168 MHz) | TIM1의 최고 주파수 |
+| --- | ---: | --- | ---: |
+| 8-bit | 256 | 25.6 MHz (가능) | 656.25 kHz |
+| 10-bit | 1024 | 102.4 MHz (가능) | 164.0625 kHz |
+| 12-bit | 4096 | 409.6 MHz (불가, > 168 MHz) | 41.015625 kHz |
+| 16-bit | 65536 | 6553.6 MHz (불가, > 168 MHz) | 약 2.563 kHz |
+
+TIM1 168 MHz에서 두 주파수의 ARR은 다음과 같습니다.
+
+| PWM 주파수 | Edge-aligned ARR (한 주기 tick) | Center-aligned ARR (duty 단계 수) |
+| ---: | ---: | ---: |
+| 20 kHz | 8399 (8400, 약 13.0-bit) | 4200 (4201) |
+| 100 kHz | 1679 (1680, 약 10.7-bit) | 840 (841) |
+
+100 kHz에서 12-bit duty가 필요하면 TIM1의 counter-compare PWM으로는 만족하지 못합니다. PWM 주파수를 41.015625 kHz 이하로 낮추거나, 100 kHz를 지키고 해상도를 1680 tick(edge-aligned)으로 줄이는 것 중에서 고릅니다.
+
+## Dead-time — complementary 출력
+
+H-bridge나 inverter의 한 다리에서 high-side와 low-side switch가 동시에 켜지면 전원이 두 switch를 거쳐 GND로 바로 이어집니다(shoot-through). dead-time은 한쪽을 끈 뒤 다른 쪽을 켜기까지 두 출력을 모두 끄는 간격입니다. RM0090 §17.3.11(543쪽)은 이 값을 출력에 연결된 소자의 특성, 즉 level shifter의 지연과 power switch의 지연에 맞춰 정한다고 씁니다.
 
 ![Complementary PWM with dead-time — shoot-through 방지](/images/blog/modern-recipes/diagrams/part1-09-pwm-deadtime.svg)
 
-dead-time이 짧으면 short, 길면 전류 distortion이 발생합니다. 값은 MOSFET·gate driver·스위칭 속도에 맞춰 정하며, 100 ns~1 µs는 일부 전력단에서 볼 수 있는 예시 범위입니다.
+TIM1의 dead-time generator는 OCxREF 하나에서 OCx와 OCxN을 만듭니다(§17.3.11). 두 출력이 active high일 때 OCx는 OCxREF에서 rising edge만 dead-time만큼 늦춘 신호이고, OCxN은 OCxREF를 뒤집은 신호에서 rising edge를 늦춘 신호입니다. 지연이 active 펄스 폭보다 길면 그 펄스는 나오지 않습니다.
 
-### 4) PWM frequency 선택
+### DTG 값과 dead-time
 
-| 응용 | 권장 주파수 | 이유 |
-| --- | --- | --- |
-| LED 디밍 | 200 Hz ~ 2 kHz | 깜빡임 방지(>100 Hz), 효율 |
-| DC motor | 20 kHz | 가청 노이즈 회피 |
-| BLDC | 16 ~ 40 kHz | 가청 회피 + iron loss |
-| Switching converter | 100 kHz ~ 1 MHz | 인덕터 크기 |
-| Class-D audio | 384 kHz 이상 | THD 감소 |
+dead-time의 기준 clock t<sub>DTS</sub>는 `TIMx_CR1.CKD`로 정하고, `CKD = 00`이면 t<sub>DTS</sub> = t<sub>CK_INT</sub>입니다(§17.4.1, 560쪽). `TIMx_BDTR.DTG[7:0]`의 인코딩(§17.4.18, 582쪽)을 168 MHz, `CKD = 00`에 적용하면 범위가 다음과 같습니다.
 
-## 코드 / 실제 사용 예
+| DTG[7:5] | 식 | tick 수 | 168 MHz에서의 범위 |
+| --- | --- | ---: | ---: |
+| 0xx | DTG[7:0] × t<sub>DTS</sub> | 0 ~ 127 | 0 ~ 756.0 ns |
+| 10x | (64 + DTG[5:0]) × 2 t<sub>DTS</sub> | 128 ~ 254 | 761.9 ns ~ 1.512 µs |
+| 110 | (32 + DTG[4:0]) × 8 t<sub>DTS</sub> | 256 ~ 504 | 1.524 ~ 3.000 µs |
+| 111 | (32 + DTG[4:0]) × 16 t<sub>DTS</sub> | 512 ~ 1008 | 3.048 ~ 6.000 µs |
 
-STM32F4 TIM1로 1 kHz PWM 출력입니다.
+5-01의 complementary 예제가 쓰는 `DTG = 42`는 첫 행에 해당하고, 42 tick × 5.95 ns = 250 ns입니다.
 
-```c
-// TIM1 channel 1 — PA8, 1 kHz, duty 50%
-RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+### dead-time이 깎는 duty
 
-// 84 MHz / 84 = 1 MHz tick
-TIM1->PSC = 83;
-// 1 MHz / 1000 = 1 kHz
-TIM1->ARR = 999;
-// 50% duty
-TIM1->CCR1 = 500;
+center-aligned PWM mode 1에서 OCxREF의 high 폭은 2 × CCR tick입니다. dead-time이 42 tick이면 OCx의 high 폭은 2 × CCR − 42 tick이 되고, 2 × CCR ≤ 42, 즉 CCR ≤ 21이면 OCx 펄스가 나오지 않습니다. OCxN의 high 폭은 2 × (ARR − CCR) − 42 tick이므로 CCR ≥ ARR − 21이면 OCxN 펄스가 나오지 않습니다.
 
-// PWM mode 1 (high until match)
-TIM1->CCMR1 = (0b110 << TIM_CCMR1_OC1M_Pos)
-            | TIM_CCMR1_OC1PE;
-TIM1->CCER  = TIM_CCER_CC1E;
-TIM1->BDTR |= TIM_BDTR_MOE;
-TIM1->CR1   = TIM_CR1_ARPE | TIM_CR1_CEN;
-```
+| PWM 주파수 (center ARR) | OCx 펄스가 없는 CCR | OCxN 펄스가 없는 CCR | 양 끝에서 잃는 duty |
+| ---: | ---: | ---: | ---: |
+| 20 kHz (4200) | 0 ~ 21 | 4179 ~ 4200 | 각각 21/4200 = 0.5% |
+| 100 kHz (840) | 0 ~ 21 | 819 ~ 840 | 각각 21/840 = 2.5% |
 
-Complementary 출력 + dead-time:
+dead-time은 tick 수로 고정되어 있으므로, PWM 주파수를 다섯 배 올리면 양 끝에서 잃는 duty도 다섯 배가 됩니다. 이 구간의 CCR에서는 한쪽 출력이 꺼진 채로 남으므로, 0%나 100% 근처까지 duty를 연속으로 움직이는 제어에서는 이 구간이 duty 한계입니다.
 
-```c
-// PA8 (CH1), PA7 (CH1N) — complementary
-TIM1->CCER |= TIM_CCER_CC1NE;             // CH1N enable
+## 스코프로 확인할 값
 
-// Dead-time = 12 × 1/84MHz = 143 ns (대략)
-TIM1->BDTR = TIM_BDTR_MOE
-           | (12 << TIM_BDTR_DTG_Pos);
-```
+위 설정(168 MHz, center-aligned PWM mode 1, ARR = 4200, `DTG = 42`)으로 5-01의 TIM1 코드를 돌렸다면, CH1과 CH1N을 두 채널로 함께 보면서 아래 값과 비교합니다. 모두 RM0090의 정의에서 계산한 예상값입니다.
 
-DMA로 dynamic waveform 생성도 가능합니다.
-
-```c
-static uint16_t pwm_table[256];   // 256 단계 sine 또는 envelope
-
-TIM1->DIER |= TIM_DIER_UDE;
-DMA2_Stream5->PAR  = (uint32_t)&TIM1->CCR1;
-DMA2_Stream5->M0AR = (uint32_t)pwm_table;
-DMA2_Stream5->NDTR = 256;
-DMA2_Stream5->CR   = DMA_SxCR_CIRC | DMA_SxCR_MINC
-                   | DMA_SxCR_MSIZE_0 | DMA_SxCR_PSIZE_0
-                   | DMA_SxCR_DIR_0 | DMA_SxCR_EN;
-```
-
-## 측정 / 비교
-
-| Duty 해상도 (12-bit) | CCR 단위 | 1 kHz 기준 분해능 |
-| --- | --- | --- |
-| 8-bit | 1 / 256 | 3.9 µs |
-| 10-bit | 1 / 1024 | 977 ns |
-| 12-bit | 1 / 4096 | 244 ns |
-| 16-bit | 1 / 65536 | 15 ns |
-
-높은 PWM 주파수 + 높은 해상도는 timer clock이 충분해야 합니다.
-
-| Timer clock | 100 kHz × 12-bit | 100 kHz × 16-bit |
-| --- | --- | --- |
-| 84 MHz | 불가 (409.6 MHz 필요) | 불가 (6.55 GHz 필요) |
-| 200 MHz | 불가 (409.6 MHz 필요) | 불가 (6.55 GHz 필요) |
-
-## 자주 보는 함정
-
-> ⚠️ Dead-time 없이 complementary
-
-H-bridge에서 dead-time 없으면 한 switch가 끄기 전에 다른 쪽이 켜집니다. 큰 전류가 흐르고 MOSFET이 죽습니다.
-
-> ⚠️ ARR=0 또는 CCR > ARR
-
-duty가 0% 또는 100%로 fixed 됩니다. 0%/100% 처리는 timer 설정 자체로 강제하지 말고 코드 분기로 처리합니다.
-
-> ⚠️ Update preload 미사용
-
-CCR 업데이트가 cycle 중간에 반영되면 한 cycle만 잘못된 duty가 나옵니다. `OCxPE`(preload enable)와 `ARPE`로 update event에서만 적용되게 합니다.
-
-> ⚠️ LED를 너무 낮은 주파수로
-
-100 Hz 미만은 사람 눈에 깜빡임이 보입니다. 카메라로 찍으면 더 잘 보입니다. 200 Hz 이상으로 올리거나 BCM(binary code modulation) 사용.
-
-> ⚠️ Audio range 모터 PWM
-
-8 kHz 같은 가청 주파수는 모터가 휘파람 소리를 냅니다. 20 kHz 이상으로 설정합니다.
+- 주기: 8400 tick = 50 µs (20 kHz).
+- CH1이 내려간 뒤 CH1N이 올라가기까지, CH1N이 내려간 뒤 CH1이 올라가기까지의 간격: 각각 250 ns.
+- CCR = 2100일 때 CH1 high 폭: 2 × 2100 − 42 = 4158 tick = 24.75 µs.
+- CCR을 21 이하로 내리면 CH1 펄스가, 4179 이상으로 올리면 CH1N 펄스가 사라짐.
 
 ## 정리
 
-- PWM은 디지털로 평균 전압을 만드는 가장 효율적인 방법입니다.
-- Edge-aligned는 일반용, Center-aligned는 모터·BLDC 같은 ripple 민감 응용에 씁니다.
-- Dead-time은 H-bridge의 shoot-through를 막으며, 전력 스위치와 gate driver의 turn-off/on 시간으로 산정합니다.
-- 주파수 선택은 가청, 효율, 인덕터 크기를 고려합니다.
-- Preload(`OCxPE`, `ARPE`)로 cycle 중간 변경 시 race를 방지합니다.
+- 주파수와 duty 단계는 counter clock 하나를 나눠 씁니다. TIM1 168 MHz의 counter-compare PWM으로는 100 kHz·12-bit(409.6 MHz 필요)를 만들지 못합니다.
+- 정렬을 center-aligned로 바꾸면 주기가 ARR + 1 tick에서 2 × ARR tick이 되므로 ARR을 다시 계산합니다.
+- dead-time은 tick 수로 고정되어 PWM 주파수가 높을수록 양 끝에서 잃는 duty가 커집니다. 250 ns면 center-aligned 100 kHz에서 각각 2.5%입니다.
 
 다음 편에서는 **CAN 버스 전기적 특성**을 다룹니다. 차동 신호 통신의 대표 예입니다.
 
@@ -158,4 +117,4 @@ CCR 업데이트가 cycle 중간에 반영되면 한 cycle만 잘못된 duty가 
 
 - [1-08: DAC 동작 원리](/blog/embedded/modern-recipes/part1-08-dac-principles)
 - [1-10: CAN 버스 전기적 특성](/blog/embedded/modern-recipes/part1-10-can-electrical)
-- 더 깊이 — [Practical RTOS Internals: Timer subsystem](/blog/embedded/rtos/practical-internals/00-preface)
+- [5-01: PWM 출력 실전 — LED 밝기·모터 속도 제어](/blog/embedded/modern-recipes/part5-01-pwm-output)
