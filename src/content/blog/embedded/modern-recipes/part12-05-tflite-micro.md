@@ -4,7 +4,7 @@ slug: "embedded/modern-recipes/part12-05-tflite-micro"
 date: 2026-04-21T09:04:00
 description: "MCU용 TensorFlow Lite Micro의 구조, op resolver·tensor arena·CMSIS-NN integration·Ethos-U delegate."
 series: "Modern Embedded Recipes"
-seriesOrder: 141
+seriesOrder: 142
 tags: [recipes, edge-ai, tflite-micro, mcu, cortex-m]
 topics: ["embedded"]
 ---

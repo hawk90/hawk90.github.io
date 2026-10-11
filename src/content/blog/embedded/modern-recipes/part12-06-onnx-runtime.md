@@ -4,7 +4,7 @@ slug: "embedded/modern-recipes/part12-06-onnx-runtime"
 date: 2026-04-21T09:05:00
 description: "ONNX format·ONNX Runtime의 Execution Provider (CUDA·TensorRT·DML·CoreML)·embedded build·cross-platform inference."
 series: "Modern Embedded Recipes"
-seriesOrder: 142
+seriesOrder: 143
 tags: [recipes, edge-ai, onnx, onnxruntime]
 topics: ["embedded"]
 ---
