@@ -153,7 +153,7 @@ add_to_epoll(ep, sock_fd, EPOLLIN | EPOLLET, on_data);
 
 ### io_uring과의 관계
 
-io_uring은 *작업 자체*를 비동기로 제출하는 인터페이스라 `read`·`write`까지 묶어서 처리합니다. epoll은 *준비 알림*만 받는 readiness 모델입니다. 이미 검증된 코드베이스에서 fd 다중화만 필요하면 epoll, 새 서비스를 zero-copy까지 끌어올리려면 io_uring을 고려합니다. 자세한 비교는 [3-03 Zero-Copy](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)에서 다뤘습니다.
+io_uring은 *작업 자체*를 비동기로 제출하는 인터페이스라 `read`·`write`까지 묶어서 처리합니다. epoll은 *준비 알림*만 받는 readiness 모델입니다. 이미 검증된 코드베이스에서 fd 다중화만 필요하면 epoll, 새 서비스를 zero-copy까지 끌어올리려면 io_uring을 고려합니다. 자세한 비교는 [12-10 Zero-Copy](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)에서 다뤘습니다.
 
 ## 측정 / 성능 비교
 
@@ -226,6 +226,6 @@ ONESHOT 없이 같은 fd를 여러 worker가 wait하면 한 event를 둘이 동�
 
 ## 관련 항목
 
-- [3-03: Zero-Copy](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [12-10: Zero-Copy](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
 - [4-02: mmap](/blog/embedded/modern-recipes/part7-09-mmap)
 - [PE 5-04: eBPF](/blog/embedded/performance-engineering/part5-04-ebpf)

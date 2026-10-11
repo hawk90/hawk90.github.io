@@ -312,4 +312,4 @@ VBAT 없거나 첫 power-on은 시간이 *임의 값*. backup register magic으�
 - [4-11: 저전력 모드](/blog/embedded/modern-recipes/part4-11-low-power-modes)
 - [4-12: 워치독 (IWDG/WWDG)](/blog/embedded/modern-recipes/part4-12-watchdog)
 - [5-13: SD card + FatFs](/blog/embedded/modern-recipes/part5-13-sd-card-fatfs)
-- [12-11: TF-M·TrustZone](/blog/embedded/modern-recipes/part12-11-tfm-trustzone)
+- [12-12: TF-M·TrustZone](/blog/embedded/modern-recipes/part12-12-tfm-trustzone)

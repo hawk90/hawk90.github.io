@@ -1,6 +1,6 @@
 ---
 title: "ONNX Runtime 분석 — Execution Provider와 Cross-Platform 배포"
-slug: "embedded/modern-recipes/part12-06-onnx-runtime"
+slug: "embedded/modern-recipes/part12-07-onnx-runtime"
 date: 2026-04-21T09:05:00
 description: "ONNX format·ONNX Runtime의 Execution Provider (CUDA·TensorRT·DML·CoreML)·embedded build·cross-platform inference."
 series: "Modern Embedded Recipes"
@@ -336,8 +336,8 @@ Custom build에서 op를 빠뜨림. `required_ops.config` 재생성.
 
 ## 관련 항목
 
-- [12-02: NPU 아키텍처](/blog/embedded/modern-recipes/part12-02-npu-architecture)
-- [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
-- [12-05: TFLite Micro](/blog/embedded/modern-recipes/part12-05-tflite-micro)
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
+- [12-03: NPU 아키텍처](/blog/embedded/modern-recipes/part12-03-npu-architecture)
+- [12-05: TensorRT](/blog/embedded/modern-recipes/part12-05-tensorrt)
+- [12-06: TFLite Micro](/blog/embedded/modern-recipes/part12-06-tflite-micro)
+- [12-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [12-04: Quantization](/blog/embedded/modern-recipes/part12-04-quantization)

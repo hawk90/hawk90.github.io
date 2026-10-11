@@ -1,6 +1,6 @@
 ---
 title: "딥러닝 Quantization 분석 — PTQ·QAT·INT8·INT4·Calibration"
-slug: "embedded/modern-recipes/part12-03-quantization"
+slug: "embedded/modern-recipes/part12-04-quantization"
 date: 2026-04-21T09:02:00
 description: "FP32→INT8/INT4 양자화의 수식, PTQ와 QAT 차이, per-channel·per-tensor 선택, LLM용 GPTQ·AWQ까지 실전 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
@@ -274,6 +274,6 @@ Preprocess에서 INT8로 변환해 NPU buffer에 직접 넣습니다.
 
 ## 관련 항목
 
-- [6-02: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
-- [6-04: Thermal](/blog/embedded/modern-recipes/part12-07-thermal)
+- [12-05: TensorRT](/blog/embedded/modern-recipes/part12-05-tensorrt)
+- [12-08: Thermal](/blog/embedded/modern-recipes/part12-08-thermal)
 - 6-07: 온디바이스 LLM

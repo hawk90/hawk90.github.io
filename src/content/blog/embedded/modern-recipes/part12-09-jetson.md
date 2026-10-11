@@ -1,6 +1,6 @@
 ---
 title: "NVIDIA Jetson 분석 — Nano·Xavier·Orin·Thor·JetPack·DLA·VPI"
-slug: "embedded/modern-recipes/part12-08-jetson"
+slug: "embedded/modern-recipes/part12-09-jetson"
 date: 2026-04-21T09:07:00
 description: "Jetson 라인업의 power·성능 trade-off, JetPack 구성, DLA·VPI·DeepStream을 묶어 자율주행·로봇 stack에서 쓰는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
@@ -200,7 +200,7 @@ Model별 latency·throughput·전력은 입력 해상도·TensorRT 버전·clock
 | 전력 | `tegrastats` VDD_* rail | power mode별 |
 | Sustained fps·온도 | 1시간 이상 long-run + `tegrastats` | power mode·cooling별 |
 
-여러 camera 입력이 단일 Orin에서 처리되는지는 camera path·전처리·tracking·display를 포함한 end-to-end benchmark로 확인합니다. MAXN에서 sustained 성능이 떨어질 수 있으므로 적정 power mode도 long-run benchmark로 선택합니다([12-07: Thermal](/blog/embedded/modern-recipes/part12-07-thermal)).
+여러 camera 입력이 단일 Orin에서 처리되는지는 camera path·전처리·tracking·display를 포함한 end-to-end benchmark로 확인합니다. MAXN에서 sustained 성능이 떨어질 수 있으므로 적정 power mode도 long-run benchmark로 선택합니다([12-08: Thermal](/blog/embedded/modern-recipes/part12-08-thermal)).
 
 ## 자주 보는 함정
 
@@ -269,6 +269,6 @@ Devkit 보드에서 thermal·power를 측정해 놓고 production module도 같�
 
 ## 관련 항목
 
-- [12-07: Thermal](/blog/embedded/modern-recipes/part12-07-thermal)
-- [12-09: Zero-Copy Camera](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
-- [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
+- [12-08: Thermal](/blog/embedded/modern-recipes/part12-08-thermal)
+- [12-10: Zero-Copy Camera](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
+- [12-05: TensorRT](/blog/embedded/modern-recipes/part12-05-tensorrt)

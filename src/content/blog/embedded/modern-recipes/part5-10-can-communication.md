@@ -305,4 +305,4 @@ mask = 0xFFFF로 두면 ID 정확히 일치만 수신. 처음에는 *pass-all* (
 - [1-10: CAN 버스 전기적 특성](/blog/embedded/modern-recipes/part1-10-can-electrical)
 - [4-05: 인터럽트 핸들링](/blog/embedded/modern-recipes/part4-05-interrupt-handling)
 - [5-11: USB Device 기초](/blog/embedded/modern-recipes/part5-11-usb-device)
-- [12-12: Matter·Thread](/blog/embedded/modern-recipes/part12-12-matter-thread)
+- [12-13: Matter·Thread](/blog/embedded/modern-recipes/part12-13-matter-thread)

@@ -271,6 +271,6 @@ Cache 관리 단위는 *line 크기* 그대로입니다. 정렬은 line 크기�
 ## 관련 항목
 
 - [3-01: Cache Alignment](/blog/embedded/modern-recipes/part8-03-cache-alignment)
-- [3-03: Zero-Copy Pipeline](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [12-10: Zero-Copy Pipeline](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
 - [PE 3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)
 - [RTOS 4-02: FreeRTOS Heap](/blog/embedded/rtos/practical-internals/part4-02-freertos-heap)
