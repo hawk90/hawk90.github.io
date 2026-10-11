@@ -245,7 +245,7 @@ cross build에서 `INSTALL_MOD_PATH`를 잊으면 host의 module이 덮어써집
 
 ## 관련 항목
 
-- [7-01: 임베디드 Linux 부팅 흐름](/blog/embedded/modern-recipes/part7-01-linux-boot-flow)
+- [7-01: i.MX8M Mini EVK Linux 부팅 흐름](/blog/embedded/modern-recipes/part7-01-linux-boot-flow)
 - [7-04: Device Tree Overlay](/blog/embedded/modern-recipes/part7-04-device-tree-overlay)
 - [7-06: Kernel Module 기초](/blog/embedded/modern-recipes/part7-06-kernel-module)
 - [7-07: 캐릭터 드라이버](/blog/embedded/modern-recipes/part7-07-char-driver)

@@ -234,7 +234,7 @@ fastboot flash boot boot.img → "boot" partition not found
 
 ## 관련 항목
 
-- [7-01: 임베디드 Linux 부팅 흐름](/blog/embedded/modern-recipes/part7-01-linux-boot-flow)
+- [7-01: i.MX8M Mini EVK Linux 부팅 흐름](/blog/embedded/modern-recipes/part7-01-linux-boot-flow)
 - [7-04: Device Tree Overlay](/blog/embedded/modern-recipes/part7-04-device-tree-overlay)
 - [7-05: 커널 빌드](/blog/embedded/modern-recipes/part7-05-kernel-build)
 - [7-14: 루트 파일시스템 (Buildroot 기초)](/blog/embedded/modern-recipes/part7-14-rootfs-buildroot)

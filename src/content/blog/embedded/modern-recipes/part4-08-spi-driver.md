@@ -269,4 +269,4 @@ flying wires로 50 MHz는 동작 안 함. 짧은 PCB trace + ground plane이 있
 - [1-05: SPI 하드웨어](/blog/embedded/modern-recipes/part1-05-spi-hardware)
 - [4-09: I2C 드라이버](/blog/embedded/modern-recipes/part4-09-i2c-driver)
 - [4-10: DMA 기초](/blog/embedded/modern-recipes/part4-10-dma-basics)
-- [5-13: SD card + FatFs](/blog/embedded/modern-recipes/part5-13-sd-card-fatfs)
+- [5-13: SD 카드 SPI 모드 + FatFs](/blog/embedded/modern-recipes/part5-13-sd-card-fatfs)

@@ -153,7 +153,7 @@ DC/스테퍼/서보 모터·LCD/OLED/TFT·환경 센서·IMU·CAN·USB·Ethernet
 | 5-10 | CAN 통신 | frame·filter·bit timing·CAN-FD |
 | 5-11 | USB Device | CDC·HID·TinyUSB |
 | 5-12 | Ethernet MAC + PHY | RMII·MDIO·lwIP·DHCP |
-| 5-13 | SD card + FatFs | SPI/SDIO·long filename |
+| 5-13 | SD 카드 SPI 모드 + FatFs | SPI 모드 초기화·diskio 포팅·f_sync |
 | 5-14 | RTC 활용 | VBAT backup·alarm·tamper |
 
 ### Part 6 — RTOS 실전 활용 (12편)

@@ -278,7 +278,7 @@ ext4 image creation failed: not enough space
 
 ## 관련 항목
 
-- [7-01: 임베디드 Linux 부팅 흐름](/blog/embedded/modern-recipes/part7-01-linux-boot-flow)
+- [7-01: i.MX8M Mini EVK Linux 부팅 흐름](/blog/embedded/modern-recipes/part7-01-linux-boot-flow)
 - [7-02: U-Boot 활용](/blog/embedded/modern-recipes/part7-02-uboot-usage)
 - [7-05: 커널 빌드](/blog/embedded/modern-recipes/part7-05-kernel-build)
 - [7-06: Kernel Module 기초](/blog/embedded/modern-recipes/part7-06-kernel-module)
