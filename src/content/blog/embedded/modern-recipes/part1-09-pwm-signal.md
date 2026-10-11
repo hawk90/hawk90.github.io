@@ -18,7 +18,7 @@ RM0090 §7.2(216쪽)에 따르면 STM32F405/407의 AHB 최대 주파수는 168 M
 
 ## Duty와 평균 전압
 
-PWM은 고정 주기의 사각파이고, 한 주기 중 high 구간의 비율이 duty입니다. 출력이 0과 V<sub>H</sub> 사이를 오가면 한 주기 평균은 duty × V<sub>H</sub>입니다. 타이머가 정하는 것은 이 duty를 몇 단계로 나눌 수 있는가이고, 아래 절들이 그 단계 수를 계산합니다.
+PWM은 고정 주기의 사각파이고, 한 주기 중 high 구간의 비율이 duty입니다. 출력이 0과 `V_H` 사이를 오가면 한 주기 평균은 duty × `V_H`입니다. 타이머가 정하는 것은 이 duty를 몇 단계로 나눌 수 있는가이고, 아래 절들이 그 단계 수를 계산합니다.
 
 ![PWM duty 50% vs 75% — duty 비율이 평균 전압](/images/blog/modern-recipes/diagrams/part1-09-pwm-duty.svg)
 
@@ -72,14 +72,14 @@ TIM1의 dead-time generator는 OCxREF 하나에서 OCx와 OCxN을 만듭니다(�
 
 ### DTG 값과 dead-time
 
-dead-time의 기준 clock t<sub>DTS</sub>는 `TIMx_CR1.CKD`로 정하고, `CKD = 00`이면 t<sub>DTS</sub> = t<sub>CK_INT</sub>입니다(§17.4.1, 560쪽). `TIMx_BDTR.DTG[7:0]`의 인코딩(§17.4.18, 582쪽)을 168 MHz, `CKD = 00`에 적용하면 범위가 다음과 같습니다.
+dead-time의 기준 clock `t_DTS`는 `TIMx_CR1.CKD`로 정하고, `CKD = 00`이면 `t_DTS` = `t_CK_INT`입니다(§17.4.1, 560쪽). `TIMx_BDTR.DTG[7:0]`의 인코딩(§17.4.18, 582쪽)을 168 MHz, `CKD = 00`에 적용하면 범위가 다음과 같습니다.
 
 | DTG[7:5] | 식 | tick 수 | 168 MHz에서의 범위 |
 | --- | --- | ---: | ---: |
-| 0xx | DTG[7:0] × t<sub>DTS</sub> | 0 ~ 127 | 0 ~ 756.0 ns |
-| 10x | (64 + DTG[5:0]) × 2 t<sub>DTS</sub> | 128 ~ 254 | 761.9 ns ~ 1.512 µs |
-| 110 | (32 + DTG[4:0]) × 8 t<sub>DTS</sub> | 256 ~ 504 | 1.524 ~ 3.000 µs |
-| 111 | (32 + DTG[4:0]) × 16 t<sub>DTS</sub> | 512 ~ 1008 | 3.048 ~ 6.000 µs |
+| 0xx | DTG[7:0] × `t_DTS` | 0 ~ 127 | 0 ~ 756.0 ns |
+| 10x | (64 + DTG[5:0]) × 2 `t_DTS` | 128 ~ 254 | 761.9 ns ~ 1.512 µs |
+| 110 | (32 + DTG[4:0]) × 8 `t_DTS` | 256 ~ 504 | 1.524 ~ 3.000 µs |
+| 111 | (32 + DTG[4:0]) × 16 `t_DTS` | 512 ~ 1008 | 3.048 ~ 6.000 µs |
 
 5-01의 complementary 예제가 쓰는 `DTG = 42`는 첫 행에 해당하고, 42 tick × 5.95 ns = 250 ns입니다.
 
