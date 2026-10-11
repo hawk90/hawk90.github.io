@@ -86,10 +86,10 @@ while (gpio_read(SCL) == 0) { }        // wait slave to release too
 가속도계(MPU6050) WHO_AM_I 레지스터 read입니다.
 
 ```c
-// I2C 초기화 — 400 kHz @ 84 MHz APB
-I2C1->CR2  = 84;                       // PCLK = 84 MHz
-I2C1->CCR  = (1 << 15) | 1;            // FM mode, t_high = 1 cycle
-I2C1->TRISE = 26;                      // max rise time
+// I2C 초기화 — Fm 400 kHz 목표 @ PCLK1 42 MHz
+I2C1->CR2  = 42;                       // FREQ = PCLK1 in MHz
+I2C1->CCR  = (1 << 15) | 35;           // F/S = Fm, DUTY = 0: 42 MHz / (3 x 400 kHz)
+I2C1->TRISE = 13;                      // floor(300 ns / 23.8 ns) + 1
 I2C1->CR1 |= I2C_CR1_PE;
 
 uint8_t mpu_who_am_i(void) {
@@ -121,6 +121,8 @@ uint8_t mpu_who_am_i(void) {
 }
 ```
 
+PCLK1은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`가 만드는 42 MHz이고, STM32F405/407의 fPCLK1 최대값입니다(DS8626 Rev 12 Table 14). CCR·TRISE는 RM0090 Rev 22 27.6.8·27.6.9의 식에 UM10204 Table 11의 Fm 최대 rise time 300 ns를 넣은 값입니다. RM0090 CCR note는 400 kHz 최대 Fm 클럭에 도달하려면 fPCLK1이 10 MHz의 배수여야 한다고 적으므로, 42 MHz에서 400 kHz는 식의 목표값이고 실제 SCL이 400 kHz라는 보장은 아닙니다. 계산 과정은 [4-09: I2C 드라이버 구현](/blog/embedded/modern-recipes/part4-09-i2c-driver)에 있습니다.
+
 ## 측정 / 비교
 
 | 풀업 저항 | 100 pF 부하 rise time | 100 kHz 동작 | 400 kHz 동작 |
@@ -148,17 +150,22 @@ uint8_t mpu_who_am_i(void) {
 
 ```c
 // Bus recovery — SCL을 9번 토글해 slave를 idle로 강제
+#define CPU_HZ 168000000u   // SYSCLK after clock_init_168mhz() (4-04)
+
 void i2c_recover(void) {
     for (int i = 0; i < 9; i++) {
-        gpio_set_low(SCL); delay_us(5);
-        gpio_set_high(SCL); delay_us(5);
+        gpio_set_low(SCL);  delay_us_dwt(5, CPU_HZ);
+        gpio_set_high(SCL); delay_us_dwt(5, CPU_HZ);
     }
     // Manual STOP
-    gpio_set_low(SDA); delay_us(5);
-    gpio_set_high(SCL); delay_us(5);
-    gpio_set_high(SDA); delay_us(5);
+    gpio_set_low(SCL);  delay_us_dwt(5, CPU_HZ);
+    gpio_set_low(SDA);  delay_us_dwt(5, CPU_HZ);   // SCL low: no START
+    gpio_set_high(SCL); delay_us_dwt(5, CPU_HZ);
+    gpio_set_high(SDA); delay_us_dwt(5, CPU_HZ);   // SCL high: STOP
 }
 ```
+
+SCL이 high인 동안 SDA가 high에서 low로 바뀌면 START, low에서 high로 바뀌면 STOP입니다(UM10204 Rev 7.0 3.1.4). 루프가 SCL을 high로 두고 끝나므로 SCL을 먼저 내린 뒤 SDA를 내려야 STOP 앞에 START가 끼지 않습니다. `delay_us_dwt()`는 [4-06: SysTick 타이머 활용](/blog/embedded/modern-recipes/part4-06-systick-timer)의 DWT cycle counter delay입니다.
 
 > ⚠️ Address 충돌
 
