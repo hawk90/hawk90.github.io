@@ -21,26 +21,34 @@
 \node[s] (b1) at (6, 4) {Slave B};
 \node[s] (c1) at (6, 3) {Slave C};
 
-\draw[bus] (m1.east) -- node[font=\tiny, above] {SCK/MOSI/MISO} ($(m1.east) + (1.5, 0)$) coordinate (j1);
-\draw[bus] (j1) -- (a1.west);
-\draw[bus] (j1) -- (b1.west);
-\draw[bus] (j1) -- (c1.west);
-\draw[cs] ([yshift=-3pt]m1.east) -- ++(2.5, 0) |- node[font=\tiny, pos=0.25, above] {CS\_A} (a1.south);
-\draw[cs] ([yshift=-5pt]m1.east) -- ++(2.8, 0) -- node[font=\tiny, above] {CS\_B} (b1.south west);
-\draw[cs] ([yshift=-7pt]m1.east) -- ++(3.0, 0) |- node[font=\tiny, pos=0.25, above] {CS\_C} (c1.north);
+% Shared SCK/MOSI/MISO: trunk at x = 2, one branch per slave (upper half of west edge)
+\draw[bus] ([yshift=4pt]m1.east) -- (2, 4.14) coordinate (j1);
+\draw[bus] (2, 5.14) -- (2, 3.14);
+\node[font=\tiny, above] at (3.5, 5.14) {SCK/MOSI/MISO (공유)};
+\foreach \n/\y in {a1/5.14, b1/4.14, c1/3.14} {
+  \draw[bus] (2, \y) -- (\n.west |- 0, \y);
+}
+% One CS per slave: leaves the master bottom, enters the lower half of the slave's west edge
+\draw[cs] (-0.5, 3.5) -- (-0.5, 2.2) -- (3.0, 2.2) -- (3.0, 4.78) -- node[font=\tiny, below, pos=0.6] {CS\_A} (a1.west |- 0, 4.78);
+\draw[cs] ( 0.0, 3.5) -- ( 0.0, 2.0) -- (3.6, 2.0) -- (3.6, 3.78) -- node[font=\tiny, below, pos=0.5] {CS\_B} (b1.west |- 0, 3.78);
+\draw[cs] ( 0.5, 3.5) -- ( 0.5, 1.8) -- (4.2, 1.8) -- (4.2, 2.78) -- node[font=\tiny, below, pos=0.4] {CS\_C} (c1.west |- 0, 2.78);
 
 % --- Section 2: Daisy-chain (bottom) ---
-\node[font=\sffamily\bfseries\small, anchor=west] at (-0.5, 1.2) {방식 2 — Daisy-chain (드물게 사용)};
+\node[font=\sffamily\bfseries\small, anchor=west] at (-0.5, 0.9) {방식 2 — Daisy-chain};
 
 \node[m] (m2) at (0, -0.5) {Master};
 \node[s] (a2) at (4, -0.5) {Slave A};
 \node[s] (b2) at (8, -0.5) {Slave B};
 \node[font=\scriptsize, anchor=west] at (10.2, -0.5) {…};
 
-\draw[bus, -{Stealth[length=2mm]}] (m2.east) -- node[font=\tiny, above] {MOSI/MISO} (a2.west);
-\draw[bus, -{Stealth[length=2mm]}] (a2.east) -- node[font=\tiny, above] {chain} (b2.west);
+% Data path: MOSI -> A input, A output -> B input
+\draw[bus, -{Stealth[length=2mm]}] (m2.east) -- node[font=\tiny, above] {MOSI} (a2.west);
+\draw[bus, -{Stealth[length=2mm]}] (a2.east) -- node[font=\tiny, above] {A 출력 $\to$ B 입력} (b2.west);
 
-\node[font=\tiny, text=mutec, anchor=west] at (-0.5, -1.6) {단일 CS, 단일 SCK};
+% Shared SCK and CS
+\draw[cs] (m2.south) -- ++(0, -0.6) coordinate (k0) -- (k0 -| b2.south) -- (b2.south);
+\draw[cs] (k0 -| a2.south) -- (a2.south);
+\node[font=\tiny, anchor=north west] at ([yshift=-2pt]k0) {SCK·CS (모든 slave 공유)};
 
 \end{tikzpicture}
 \end{document}

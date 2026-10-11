@@ -1,6 +1,7 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{fontspec}
 \setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,decorations.pathreplacing}
 \input{../../_design.tex}
@@ -13,46 +14,60 @@
   sublbl/.style={font=\sffamily\scriptsize, text=mutec}
 ]
 
-% Bit width represents one bit time (104 us at 9600 baud); 16 samples per bit
+% One start bit = 16 samples (OVER8 = 0), RM0433 48.5.6
 \def\bw{9.6}
-% Start bit: falling edge at x=0, bit ends at x=\bw
-% Show one start bit followed by D0 high
+\def\sw{0.6}  % \bw / 16
 
-% Falling edge at 0
+% Falling edge at 0, start bit, then D0 high
 \draw[sig] (-1.5, 1) -- (0, 1) -- (0, 0) -- (\bw, 0) -- (\bw, 1) -- (\bw + 1.5, 1);
 
-% 16 oversample ticks across start bit
+% 16 sample ticks across the start bit, numbered
 \foreach \i in {1,...,16} {
-  \draw[tick] (\i * \bw / 16 - \bw/16/2, -0.15) -- (\i * \bw / 16 - \bw/16/2, 0);
+  \draw[tick] (\i*\sw - \sw/2, -0.15) -- (\i*\sw - \sw/2, 0);
+}
+\foreach \i in {1, 3, 5, 7, 8, 9, 10, 16} {
+  \node[sublbl, anchor=south] at (\i*\sw - \sw/2, 0.05) {\i};
 }
 
-% Highlight samples 8, 9, 10
+% Group 1: samples 3, 5, 7
+\foreach \s in {3, 5, 7} {
+  \fill[tealfill, draw=tealbord, line width=0.3pt]
+    (\s*\sw - \sw/2 - 0.08, -0.2) rectangle (\s*\sw - \sw/2 + 0.08, 0.0);
+}
+% Group 2: samples 8, 9, 10
 \foreach \s in {8, 9, 10} {
   \fill[hifill, draw=hibord, line width=0.3pt]
-    (\s * \bw / 16 - \bw/16/2 - 0.08, -0.2) rectangle
-    (\s * \bw / 16 - \bw/16/2 + 0.08, 0.05);
+    (\s*\sw - \sw/2 - 0.08, -0.2) rectangle (\s*\sw - \sw/2 + 0.08, 0.0);
 }
 
-% Sample annotation
-\node[sublbl, text=hibord, anchor=north] at (\bw/2, -0.45)
-  {sample 8, 9, 10 $\to$ majority vote};
+% Group braces
+\draw[decorate, decoration={brace, amplitude=3pt, mirror}, draw=tealbord, line width=0.4pt]
+  (3*\sw - \sw/2 - 0.1, -0.3) -- (7*\sw - \sw/2 + 0.1, -0.3);
+\node[sublbl, text=tealbord, anchor=north] at (5*\sw - \sw/2, -0.45) {확인 1: 3·5·7};
+
+\draw[decorate, decoration={brace, amplitude=3pt, mirror}, draw=hibord, line width=0.4pt]
+  (8*\sw - \sw/2 - 0.1, -0.3) -- (10*\sw - \sw/2 + 0.1, -0.3);
+\node[sublbl, text=hibord, anchor=north] at (9*\sw - \sw/2, -0.45) {확인 2: 8·9·10};
+
+% Rule
+\node[sublbl, text=inkc, anchor=north west, align=left] at (-1.5, -1.05)
+  {두 묶음 모두 셋 중 둘 이상이 0 $\to$ start bit로 받음\\[2pt]
+   어느 묶음이든 셋 중 둘만 0 $\to$ 받고 NE를 세움\\[2pt]
+   조건을 못 채우면 $\to$ 플래그 없이 idle로 돌아감};
 
 % Edge arrow
-\draw[->, draw=focusc, line width=0.5pt]
-  (-0.6, 1.4) -- (0, 1.05);
-\node[lbl, text=focusc, anchor=south east] at (-0.4, 1.4) {start edge};
+\draw[->, draw=focusc, line width=0.5pt] (-0.6, 1.4) -- (0, 1.05);
+\node[lbl, text=focusc, anchor=south east] at (-0.4, 1.4) {falling edge};
 
-% Bit boundary labels
+% Bit labels
 \node[lbl, anchor=east] at (-1.6, 1) {idle};
 \node[lbl] at (\bw/2, 1.4) {Start bit};
 \node[lbl] at (\bw + 0.75, 1.4) {D0};
-
-% Time annotation
-\draw[<->, draw=mutec, line width=0.3pt] (0, -0.95) -- (\bw, -0.95);
-\node[sublbl] at (\bw/2, -1.15) {1 bit = 104 \textmu s @ 9600 baud};
-
-% Level annotations
 \node[lbl, anchor=east] at (-1.65, 0) {0};
+
+% Bit time
+\draw[<->, draw=mutec, line width=0.3pt] (0, 1.85) -- (\bw, 1.85);
+\node[sublbl, anchor=south] at (\bw/2, 1.9) {1 bit = 16 샘플 (OVER8 = 0)};
 
 \end{tikzpicture}
 \end{document}

@@ -1,0 +1,38 @@
+# 작성자 측정 요청 — `part1-09-pwm-signal.md`
+
+> - 대상: `src/content/blog/embedded/modern-recipes/part1-09-pwm-signal.md`
+> - 작성: 2026-10-11, AdSense 개선 루프 묶음 2 (최종 점수 71, 상태 `max_rounds`)
+> - 목적: 루브릭 C(실전성)·A(독창성)는 작성자가 실제 하드웨어에서 잰 값과 기록이 있어야 오른다. 아래 항목을 측정해 주면 글에 넣는다. 측정하지 않은 항목은 비워 둔다.
+> - 원칙: 측정값은 작성자가 직접 잰 값만 쓴다. 에이전트가 개발 머신에서 돌린 결과는 넣지 않는다(운영자 결정 2026-10-11).
+
+## 1. Scope capture of TIM1 CH1/CH1N in center-aligned PWM mode 1 at the post's '스코프로 확인할 값' settings: period, CH1 high width at CCR=2100, and the two dead-time gaps (CH1 fall to CH1N rise, CH1N fall to CH1 rise)
+
+- **준비:** An STM32F407 board the author owns (record the exact board, e.g. STM32F4DISCOVERY/STM32F407VG or other, plus silicon rev from DBGMCU_IDCODE). HSE/PLL set so SYSCLK = HCLK = 168 MHz, APB2 prescaler 2 (TIM1 clock 168 MHz). Confirm by reading RCC_CFGR, or by outputting SYSCLK/x on MCO2 (PC9) and measuring it. Use 5-01's TIM1 code with ARR = 4200 (not 4200 - 1), CMS = 01, OC1M = 110 (mode 1), CCR1 = 2100, DTG = 42, MOE = 1. Pins PA8 = CH1, PB13 = CH1N, GPIO speed very high. Scope: record model, bandwidth, sample rate, probe type and attenuation, and ground-lead length (short ground spring preferred, since 250 ns edges are being measured). Toolchain/HAL/CMSIS versions and the commit or snippet of the exact init code. Pins unloaded (record whether anything is attached).
+- **절차:** 1) Flash and run. Before measuring, dump TIM1->CR1, CCMR1, CCER, BDTR, ARR, CCR1, PSC over the debugger (e.g. OpenOCD/STM32CubeProgrammer 'mdw 0x40010000 0x14') to prove the configuration. 2) Put CH1 on scope ch1 and CH1N on scope ch2, trigger on the CH1 rising edge. 3) Use scope automatic measurements (period/frequency, +width) on CH1, averaged over at least 1000 cycles if the scope supports statistics. 4) Use cursors or a skew/delay measurement for CH1 falling to CH1N rising, and for CH1N falling to CH1 rising, at a timebase of at most 100 ns/div. 5) Save screenshots: one full period and one zoomed on each dead-time gap.
+- **기록할 것:** Measured period/frequency (mean, min, max), CH1 +width (mean), both dead-time gaps (mean, plus 10-90% rise/fall times so the reader knows the threshold used), the scope's frequency-counter reading, and the register dump. Compare against the post's computed values: 50 us / 20 kHz, 4158 ticks = 24.75 us, 250 ns. Note the deviation and its likely cause (crystal ppm, probe loading, threshold choice). Do not change the expected values to match. Report both side by side.
+- **글에 넣을 위치:** Rewrite L99-106 '스코프로 확인할 값' into '측정 결과': board/scope/probe setup paragraph, a table with 예상값 vs 측정값 columns, and 2-3 captures (alt text giving the measured numbers). Also replace L101's claim about 5-01's code with the exact register dump/settings actually run.
+- **오르는 항목:** C: moves the section from 'procedure + expected values' (capped at 9 or below per rubric 3-1/AP-C-24) to 8-11 'reproducible procedure + observed result', and toward 12-15 if deviations and environment are recorded. A: first-hand measurement that generic PWM explainers lack.
+
+## 2. The dead-time duty-loss boundary: sweep CCR1 around 21 and around ARR-21 (=4179) and record where CH1 and CH1N pulses actually disappear, at both 20 kHz (ARR=4200) and 100 kHz (ARR=840)
+
+- **준비:** Same board/scope/probe setup as item 1. Center-aligned mode 1, DTG = 42, CKD = 00. Two builds or a runtime switch: ARR = 4200 and ARR = 840. A way to set CCR1 at runtime (debugger write to TIM1->CCR1 at 0x40010034, or UART command).
+- **절차:** 1) For ARR = 4200, set CCR1 to 19, 20, 21, 22, 23, 25 in turn. Record the CH1 width with the scope on single-shot/persistence and note whether the pulse is present. 2) Repeat for CCR1 = 4177 ... 4181 and watch CH1N. 3) Repeat steps 1-2 with ARR = 840 (CCR1 around 21 and around 819). 4) Do the same at one mid value (e.g. CCR1 = 420 at ARR = 840) to check that width = 2*CCR - 42 ticks holds. 5) Save a persistence capture at CCR = 22 (smallest width) and at CCR = 21.
+- **기록할 것:** Table: ARR, CCR1, expected CH1 width (2*CCR-42 ticks, ns), measured CH1 width, pulse present (Y/N); and the same for CH1N. Record whether CCR = 21 gives no pulse or a glitch/runt pulse on the scope (resolves the rubric's 'CCR <= 21 vs CCR < 21' boundary question empirically). Any runt pulse widths at the boundary.
+- **글에 넣을 위치:** Under L88-97 '### dead-time이 깎는 duty', after the table at L92-95: a short '측정' paragraph and a measured-boundary table, plus one capture. Use the observed boundary to word L90/L106 precisely.
+- **오르는 항목:** C: real measurement of a trade-off (frequency vs lost duty range) with environment recorded, the 12-15 band criterion. A: an original verification of the RM0090 §17.3.11 'pulse not generated' rule at its edge, which no datasheet example shows.
+
+## 3. Edge-aligned vs center-aligned with unchanged ARR: measured frequency change (ARR=4199 edge to center giving the post's claimed ≈20.005 kHz) and edge-aligned dead-time width (CCR - DT ticks)
+
+- **준비:** Same board/scope. Edge-aligned (CMS = 00) with ARR = 4199, CCR1 = 2100, DTG = 42; then switch only CMS to 01, keeping ARR = 4199. Scope frequency counter, or a timer/counter instrument if available (record its resolution).
+- **절차:** 1) Edge-aligned ARR = 4199: measure frequency and CH1/CH1N widths. 2) Change only CR1.CMS to center-aligned (stop counter, write CMS, restart) and measure the frequency again. 3) Then ARR = 4200 center-aligned and measure. Use scope statistics or a counter with gate time of at least 1 s so that 20.000 kHz vs 20.005 kHz (250 ppm difference) is resolvable. Also measure the crystal/MCO-derived SYSCLK error so it can be separated from the ARR effect.
+- **기록할 것:** Measured frequency for: edge ARR=4199, center ARR=4199, center ARR=4200, each with instrument resolution. Measured clock error in ppm. Edge-aligned CH1 and CH1N widths with DTG=42.
+- **글에 넣을 위치:** After L45 (the ARR+1 vs 2*ARR paragraph): one sentence plus a small table of measured frequencies. The edge-aligned dead-time widths go into the B gap noted at L67-97 as one measured sentence.
+- **오르는 항목:** C: observed result backing the post's main numerical claim (the 2*ARR factor that also exposes the 5-01 L152 error). A: a concrete measured example of a common off-by-one mistake. Only worth doing if the instrument can resolve about 250 ppm. Otherwise record that limitation instead.
+
+## 4. (Optional, only if the author has a real half-bridge/gate driver) Gate-node capture showing whether 250 ns dead-time is sufficient for a specific MOSFET/driver pair
+
+- **준비:** A real half-bridge the author owns: record gate driver part number, MOSFETs, gate resistors, supply voltage, load. Scope with a current probe or a shunt on the bus, if available. Without this hardware, skip the item. Do not cite a generic criterion.
+- **절차:** Drive the bridge from TIM1 CH1/CH1N at 20 kHz with DTG = 42, then reduce DTG step by step (e.g. 42, 21, 10) at low bus voltage with current limit enabled. Capture the high- and low-side gate-source voltages and the bus current at each switching edge.
+- **기록할 것:** Per DTG: measured gap between gate-voltage threshold crossings, bus current spike peak (A) or its absence, bus voltage, temperature if observed. The driver datasheet propagation-delay figures used for comparison (with document revision).
+- **글에 넣을 위치:** New short subsection after L86 ('DTG = 42 ... 250 ns') or the L69 shoot-through paragraph, replacing the unsourced mechanism sentence with a measured observation on named parts.
+- **오르는 항목:** C: real failure/trade-off measurement with environment (12-15 band). A: first-hand selection criterion for dead-time on a named driver, which also gives a sourced basis for the sizing sentence that was removed here and in 5-01 L230.
