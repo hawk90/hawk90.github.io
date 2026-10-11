@@ -38,9 +38,7 @@ PWM mode 1에서 기준 신호 OCxREF는 upcounting 중에는 CNT < CCR인 동�
 
 CCR이 ARR보다 크면 OCxREF는 1에 고정되고 CCR = 0이면 0에 고정되므로(§17.3.10, 540–542쪽) 0%와 100%가 모두 단계에 들어갑니다.
 
-![Edge-aligned PWM mode 1과 center-aligned PWM mode 2 — counter 모양과 출력 극성 차이](/images/blog/modern-recipes/diagrams/part1-09-pwm-alignment.svg)
-
-그림의 두 파형은 PWM mode가 다릅니다. 왼쪽 edge-aligned는 PWM mode 1이라 counter가 CCR 아래에 있는 동안 high이고, 오른쪽 center-aligned는 PWM mode 2라 counter가 CCR 위에 있는 동안 high입니다. 그래서 CCR 선의 높이가 같아도 duty가 다르게 그려져 있습니다. center-aligned에서 같은 CCR이면 mode 1의 duty는 CCR / ARR, mode 2의 duty는 1 − CCR / ARR이고, 어느 mode든 펄스는 counter가 꺾이는 점(0 또는 ARR)을 중심으로 대칭입니다.
+![Edge-aligned와 center-aligned의 PWM mode 1 — counter 모양, CCR 비교, OCxREF](/images/blog/modern-recipes/diagrams/part1-09-pwm-alignment.svg)
 
 정렬만 바꾸고 ARR을 그대로 두면 주기가 ARR + 1 tick에서 2 × ARR tick으로 바뀌어 주파수가 (ARR + 1) / (2 × ARR)배가 됩니다. 절반에 가깝지만 정확히 절반은 아닙니다. 168 MHz에서 ARR = 4199로 edge-aligned 40 kHz를 만든 뒤 center-aligned로 바꾸면 168 MHz / 8398 ≈ 20.005 kHz입니다. center-aligned로 정확히 20 kHz를 만들려면 2 × ARR = 8400, 즉 ARR = 4200을 씁니다.
 

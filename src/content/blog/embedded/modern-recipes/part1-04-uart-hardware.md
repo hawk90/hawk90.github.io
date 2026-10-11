@@ -41,9 +41,9 @@ M = 01에 `PCE` = 0이면 9비트 데이터, M = 10이면 7비트 데이터입�
 
 ## 수신기는 어디서 샘플링하나
 
-![UART 16x oversampling — start bit의 두 번째 확인, 8·9·10번째 샘플](/images/blog/modern-recipes/diagrams/part1-04-uart-oversampling.svg)
+![UART 16x oversampling — start bit 확인, 3·5·7번째와 8·9·10번째 샘플 묶음](/images/blog/modern-recipes/diagrams/part1-04-uart-oversampling.svg)
 
-oversampling 16(`OVER8` = 0)이면 비트 하나를 16개 샘플로 나눕니다. falling edge 뒤 수신기는 3·5·7번째와 8·9·10번째 샘플을 묶음별로 확인하고, 두 묶음 모두 셋 중 둘 이상이 0이어야 start bit로 받아들입니다. 어느 묶음이든 셋 중 둘만 0이었으면 받아들이되 noise 플래그(`NE`)를 세우고, 조건을 못 채우면 플래그 없이 idle로 돌아갑니다(48.5.6, p.2027~2028). 그림은 두 번째 확인을 보여 줍니다.
+oversampling 16(`OVER8` = 0)이면 비트 하나를 16개 샘플로 나눕니다. falling edge 뒤 수신기는 3·5·7번째와 8·9·10번째 샘플을 묶음별로 확인하고, 두 묶음 모두 셋 중 둘 이상이 0이어야 start bit로 받아들입니다. 어느 묶음이든 셋 중 둘만 0이었으면 받아들이되 noise 플래그(`NE`)를 세우고, 조건을 못 채우면 플래그 없이 idle로 돌아갑니다(48.5.6, p.2027~2028).
 
 데이터 비트는 `CR3`의 `ONEBIT`로 방법을 고릅니다(p.2032). `ONEBIT` = 0이면 비트 가운데 세 샘플의 다수결이고, 세 값이 다르면 `NE`를 세웁니다. `ONEBIT` = 1이면 가운데 샘플 하나만 봅니다. 수신기는 송신 측 클럭을 받지 않으므로, 이 샘플 시점이 송신 측 비트 가운데에서 얼마나 벗어나도 되는지가 다음 절의 허용 오차입니다.
 

@@ -66,7 +66,7 @@ floating-point 연산을 쓰는 중이면 S0~S15·FPSCR 자리를 더한 frame�
 
 ### 3) Tail-chaining과 late-arrival
 
-handler가 끝날 때 진입 조건을 만족하는 pending 예외가 있으면 stack pop을 건너뛰고 바로 다음 handler로 갑니다(tail-chaining, UG 2.3.7). Cortex-M4 TRM 3.9.1은 wait state가 없는 메모리 조건에서 진입(IRQ assert → ISR 첫 명령) 최대 12 cycle, 복귀 12 cycle, tail-chaining 6 cycle을 적습니다. 복귀 뒤 다시 진입하면 24 cycle이 걸릴 경로를 tail-chaining은 6 cycle에 끝내므로 18 cycle이 줄어듭니다.
+handler가 끝날 때 진입 조건을 만족하는 pending 예외가 있으면 stack pop을 건너뛰고 바로 다음 handler로 갑니다(tail-chaining, UG 2.3.7). Cortex-M4 TRM 3.9.1은 메모리에 wait state가 없을 때 진입(IRQ assert → ISR 첫 명령)이 최대 12 cycle이고, 복귀도 마찬가지로 12 cycle, tail-chaining은 zero wait state 메모리에서 6 cycle이라고 적습니다. 복귀한 뒤 다시 진입하는 경로는 이 값으로 최대 24 cycle이고 tail-chaining은 6 cycle이므로, 줄어드는 양은 최대 18 cycle입니다. TRM이 진입을 최댓값으로만 주기 때문에 이 계산에서 고정된 절감량은 나오지 않습니다.
 
 STM32F407의 flash는 HCLK와 전원 전압에 맞춰 wait state(`FLASH_ACR` LATENCY)를 설정하고 읽습니다([stm32f4xx_hal_rcc.c v1.8.5 L605-L607](https://github.com/STMicroelectronics/stm32f4xx_hal_driver/blob/v1.8.5/Src/stm32f4xx_hal_rcc.c#L605-L607)). LATENCY를 0이 아닌 값으로 둔 구성에서 flash의 vector와 handler를 읽으면 위 조건 밖이고, 그때의 cycle 수는 TRM에 없습니다. 그래서 아래 예제 표에는 cycle 수를 적지 않았습니다.
 
@@ -171,7 +171,7 @@ HAL의 `NVIC_PRIORITYGROUP_0`은 PRIGROUP = 7이라 group priority bit가 없습
 - `NVIC_SetPriority` 값의 의미는 `__NVIC_PRIO_BITS`에 달려 있습니다. 칩을 바꾸면 구현 bit 수부터 읽어 봅니다.
 - application으로 넘길 때는 IRQ를 끄고 pending을 지운 뒤 VTOR를 512 byte 경계의 새 table로 바꾸고, application의 `SystemInit()`이 그 값을 덮어쓰지 않는지 봅니다.
 
-수정 이력: 2026-10-11 — tail-chaining 절감량 "5~6 cycle" → 18 cycle(TRM 3.9.1, zero wait state 조건). 우선순위 표 "0~3 = Reset·NMI·HardFault·MemManage" → Reset −3·NMI −2·HardFault −1 고정, MemManage 설정 가능(UG Table 2-16). 출처를 확인하지 못한 Cortex-M7 cycle 수와 late-arrival 6 cycle은 뺐습니다.
+수정 이력: 2026-10-11 — tail-chaining 절감량 "5~6 cycle" → TRM 3.9.1의 진입 최대 12·복귀 12·tail-chaining 6 cycle(zero wait state 조건)에서 계산한 최대 18 cycle. 우선순위 표 "0~3 = Reset·NMI·HardFault·MemManage" → Reset −3·NMI −2·HardFault −1 고정, MemManage 설정 가능(UG Table 2-16). 출처를 확인하지 못한 Cortex-M7 cycle 수와 late-arrival 6 cycle은 뺐습니다.
 
 다음 편에서는 **ARM 메모리 맵**을 다룹니다. Normal·Device·Strongly-Ordered region을 구분합니다.
 
