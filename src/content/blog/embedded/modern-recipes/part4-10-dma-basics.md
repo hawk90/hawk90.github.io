@@ -251,4 +251,4 @@ odd address에 16-bit DMA write → bus fault. address도 width에 맞춰 align.
 - [2-06: ARM 캐시](/blog/embedded/modern-recipes/part2-06-arm-cache)
 - [4-07: UART 드라이버](/blog/embedded/modern-recipes/part4-07-uart-driver)
 - [4-08: SPI 드라이버](/blog/embedded/modern-recipes/part4-08-spi-driver)
-- [12-09: zero-copy 카메라](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [12-10: zero-copy 카메라](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)

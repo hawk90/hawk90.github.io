@@ -222,17 +222,29 @@
     "/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation",
     "/blog/embedded/modern-recipes/part11-17-linux-cxl-driver",
     "/blog/embedded/modern-recipes/part12-01-edge-inference",
+    "/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement",
     "/blog/embedded/modern-recipes/part12-02-npu-architecture",
+    "/blog/embedded/modern-recipes/part12-03-npu-architecture",
     "/blog/embedded/modern-recipes/part12-03-quantization",
+    "/blog/embedded/modern-recipes/part12-04-quantization",
     "/blog/embedded/modern-recipes/part12-04-tensorrt",
+    "/blog/embedded/modern-recipes/part12-05-tensorrt",
     "/blog/embedded/modern-recipes/part12-05-tflite-micro",
     "/blog/embedded/modern-recipes/part12-06-onnx-runtime",
+    "/blog/embedded/modern-recipes/part12-06-tflite-micro",
+    "/blog/embedded/modern-recipes/part12-07-onnx-runtime",
     "/blog/embedded/modern-recipes/part12-07-thermal",
     "/blog/embedded/modern-recipes/part12-08-jetson",
+    "/blog/embedded/modern-recipes/part12-08-thermal",
+    "/blog/embedded/modern-recipes/part12-09-jetson",
     "/blog/embedded/modern-recipes/part12-09-zero-copy-camera",
     "/blog/embedded/modern-recipes/part12-10-on-device-llm",
+    "/blog/embedded/modern-recipes/part12-10-zero-copy-camera",
+    "/blog/embedded/modern-recipes/part12-11-on-device-llm",
     "/blog/embedded/modern-recipes/part12-11-tfm-trustzone",
     "/blog/embedded/modern-recipes/part12-12-matter-thread",
+    "/blog/embedded/modern-recipes/part12-12-tfm-trustzone",
+    "/blog/embedded/modern-recipes/part12-13-matter-thread",
     "/blog/embedded/modern-recipes/part2-01-cortex-m-comparison",
     "/blog/embedded/modern-recipes/part2-02-cortex-a-comparison",
     "/blog/embedded/modern-recipes/part2-03-arm-registers",
@@ -1568,6 +1580,61 @@
     {
       "url": "/blog/programming/code-review/folly/part9-05-pico-spin-lock",
       "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-02-npu-architecture",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-03-quantization",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-04-tensorrt",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-05-tflite-micro",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-06-onnx-runtime",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-07-thermal",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-08-jetson",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-09-zero-copy-camera",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-10-on-device-llm",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-11-tfm-trustzone",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/embedded/modern-recipes/part12-12-matter-thread",
+      "reason": "12-01 분할로 Part 12 번호를 하나씩 밀어 URL이 바뀌었다(운영자 결정). 색인 전이라 리디렉션 없이 404로 둔다. 새 URL은 번호가 하나 큰 같은 이름이다.",
       "date": "2026-10-11"
     }
   ]

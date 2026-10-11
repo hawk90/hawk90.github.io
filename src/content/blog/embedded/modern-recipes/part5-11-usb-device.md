@@ -305,4 +305,4 @@ Vendor class는 libusb·WinUSB driver가 별도 필요. 가능하면 *CDC, HID*�
 - [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)
 - [4-07: UART 드라이버](/blog/embedded/modern-recipes/part4-07-uart-driver)
 - [5-12: Ethernet MAC + PHY](/blog/embedded/modern-recipes/part5-12-ethernet-mac-phy)
-- [12-12: Matter·Thread](/blog/embedded/modern-recipes/part12-12-matter-thread)
+- [12-13: Matter·Thread](/blog/embedded/modern-recipes/part12-13-matter-thread)

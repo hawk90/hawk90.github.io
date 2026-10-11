@@ -1,6 +1,6 @@
 ---
 title: "Edge 추론 Pipeline 측정 — Stage Latency·Mailbox 정책·Buffer 수"
-slug: "embedded/modern-recipes/part12-01b-edge-pipeline-measurement"
+slug: "embedded/modern-recipes/part12-02-edge-pipeline-measurement"
 date: 2026-04-21T09:00:30
 description: "Edge 추론을 preprocess·inference·postprocess 세 stage로 나눠 stage별·end-to-end latency를 재고, thread·크기 1 mailbox·buffer pool로 만든 pipeline의 처리량과 지연을 backpressure·latest-wins 정책별로 셈하고 필요한 buffer 수를 정합니다."
 series: "Modern Embedded Recipes"
@@ -21,7 +21,7 @@ draft: false
 글의 순서는 이렇습니다. 추론 한 번을 세 stage로 나누고, stage별·end-to-end latency를 재는 코드로 직렬 구성의 시간을 봅니다. 그다음 세 stage를 thread로 나눈 pipeline을 만들고, mailbox 정책별 처리량과 지연, 필요한 buffer 수를 코드 구조에서 셈합니다. 코드 절은 독자가 두 가지를 안다고 보고 씁니다.
 
 - C에서 `pthread_mutex_t`와 [`pthread_cond_wait`](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_cond_wait.html)로 기다리고 깨우는 법
-- V4L2 capture buffer를 dequeue하는 흐름 — [12-09 Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)과 커널의 [V4L2 buffer 문서](https://docs.kernel.org/userspace-api/media/v4l/buffer.html)
+- V4L2 capture buffer를 dequeue하는 흐름 — [12-10 Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)과 커널의 [V4L2 buffer 문서](https://docs.kernel.org/userspace-api/media/v4l/buffer.html)
 
 ## 3-stage pipeline
 
@@ -125,7 +125,7 @@ static int v4l2_ts_ns(const struct v4l2_buffer *b, uint64_t *ns, int *soe) {
 
 `VIDIOC_DQBUF`로 받은 buffer를 이 함수에 넘기고, 반환값이 0이면 `*ns`를 `t_start`로 씁니다.
 
-`*soe`는 측정 기록에 함께 남깁니다. 커널 문서의 `timestamp` 필드 설명은 capture stream에서 첫 data byte를 받은 시각이라고 일반적으로 적고, 같은 문서의 `V4L2_BUF_FLAG_TSTAMP_SRC_*` flag가 driver가 실제로 시각을 찍은 지점을 알려 줍니다. `V4L2_BUF_FLAG_TSTAMP_SRC_SOE`(값 `0x00010000`)는 노출이 시작된 시각, `V4L2_BUF_FLAG_TSTAMP_SRC_EOF`(값 `0x00000000`)는 frame의 마지막 픽셀을 받은 시각입니다. 그래서 시작점은 필드 설명이 아니라 이 flag로 판단합니다. EOF timestamp에서 시작한 e2e에는 노출과 sensor readout 시간이 들어 있지 않습니다. Camera 경로 전체의 측정 항목은 12-09가 다루므로, 여기서는 이 시작점 하나만 맞춥니다.
+`*soe`는 측정 기록에 함께 남깁니다. 커널 문서의 `timestamp` 필드 설명은 capture stream에서 첫 data byte를 받은 시각이라고 일반적으로 적고, 같은 문서의 `V4L2_BUF_FLAG_TSTAMP_SRC_*` flag가 driver가 실제로 시각을 찍은 지점을 알려 줍니다. `V4L2_BUF_FLAG_TSTAMP_SRC_SOE`(값 `0x00010000`)는 노출이 시작된 시각, `V4L2_BUF_FLAG_TSTAMP_SRC_EOF`(값 `0x00000000`)는 frame의 마지막 픽셀을 받은 시각입니다. 그래서 시작점은 필드 설명이 아니라 이 flag로 판단합니다. EOF timestamp에서 시작한 e2e에는 노출과 sensor readout 시간이 들어 있지 않습니다. Camera 경로 전체의 측정 항목은 12-10가 다루므로, 여기서는 이 시작점 하나만 맞춥니다.
 
 ### 3-stage pipeline — thread, 크기 1 mailbox, buffer pool
 
@@ -367,7 +367,7 @@ resize_scalar();   /* accelerator idles while the CPU works */
 inference_npu();   /* CPU idles while the accelerator works */
 ```
 
-두 장치가 번갈아 쉬게 됩니다. 설계값으로 셈하면 같은 stage를 직렬로 돌릴 때 결과 간격은 45 ms, thread로 나누면 30 ms입니다. Stage를 thread로 나누거나 resize를 ISP·2D 엔진으로 옮겨 CPU를 비웁니다. 버퍼 복사 없이 카메라 frame을 가속기로 넘기는 방법은 [12-09 Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)에 있습니다.
+두 장치가 번갈아 쉬게 됩니다. 설계값으로 셈하면 같은 stage를 직렬로 돌릴 때 결과 간격은 45 ms, thread로 나누면 30 ms입니다. Stage를 thread로 나누거나 resize를 ISP·2D 엔진으로 옮겨 CPU를 비웁니다. 버퍼 복사 없이 카메라 frame을 가속기로 넘기는 방법은 [12-10 Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)에 있습니다.
 
 > 크기 1 mailbox면 늘 최신 frame을 처리한다고 생각함
 
@@ -381,13 +381,13 @@ inference_npu();   /* CPU idles while the accelerator works */
 - 크기 1 mailbox는 대기열 길이를 묶을 뿐 최신 frame을 보장하지 않습니다. 매 frame이 필요한 추론은 backpressure, 최신 frame만 의미 있는 추론은 latest-wins를 고릅니다.
 - 세 stage pipeline의 buffer는 자리 다섯 개를 나열해 셉니다. Pool이 5개면 `pool_get`이 기다리지 않고, `pool waits`가 0이 아니면 셈에 없는 자리가 있다는 뜻입니다.
 
-다음 편은 **[NPU 아키텍처 분석 — Ethos·Hexagon·Systolic Array 비교](/blog/embedded/modern-recipes/part12-02-npu-architecture)**입니다.
+다음 편은 **[NPU 아키텍처 분석 — Ethos·Hexagon·Systolic Array 비교](/blog/embedded/modern-recipes/part12-03-npu-architecture)**입니다.
 
 ## 관련 항목
 
 - [12-01: Edge Inference 분석](/blog/embedded/modern-recipes/part12-01-edge-inference) — 추론을 cloud와 edge 중 어디서 할지 정하는 네 질문
-- [12-02: NPU 아키텍처](/blog/embedded/modern-recipes/part12-02-npu-architecture)
-- [12-06: ONNX Runtime](/blog/embedded/modern-recipes/part12-06-onnx-runtime) — EP 목록을 바꿀 때 stage 시간을 다시 재는 이유
-- [12-09: Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [12-03: NPU 아키텍처](/blog/embedded/modern-recipes/part12-03-npu-architecture)
+- [12-07: ONNX Runtime](/blog/embedded/modern-recipes/part12-07-onnx-runtime) — EP 목록을 바꿀 때 stage 시간을 다시 재는 이유
+- [12-10: Zero-Copy Camera Pipeline](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)
 - [8-07: SIMD](/blog/embedded/modern-recipes/part8-07-simd) — preprocess 정규화·resize를 SIMD로 옮길 때
 - [9-02: Wait-Free Signaling](/blog/embedded/modern-recipes/part9-02-wait-free) — 이 글의 latest-wins mailbox를 mutex 없이 만드는 latest-value(double buffer) 패턴

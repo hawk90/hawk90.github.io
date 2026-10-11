@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 카메라·마이크·진동 센서처럼 데이터가 연속으로 들어오고, 추론 결과로 device가 바로 무언가를 해야 하는 시스템입니다. 컨베이어 불량 검출, 로봇 장애물 회피, wake-word, 출입 카운터가 여기에 속합니다.
 
-이 글은 Part 12의 첫 편이라 *어디서 추론할지*를 정하는 데 집중합니다. NPU 내부 구조는 [12-02](/blog/embedded/modern-recipes/part12-02-npu-architecture), 양자화는 [12-03](/blog/embedded/modern-recipes/part12-03-quantization), 런타임별 사용법은 12-04~12-06에서 따로 다룹니다. 고른 edge 경로가 frame 예산을 실제로 맞추는지 재는 법(stage별 latency, pipeline의 mailbox 정책, buffer 수)은 다음 편 [12-01b Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-01b-edge-pipeline-measurement)에서 다룹니다.
+이 글은 Part 12의 첫 편이라 *어디서 추론할지*를 정하는 데 집중합니다. NPU 내부 구조는 [12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture), 양자화는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization), 런타임별 사용법은 12-05~12-07에서 따로 다룹니다. 고른 edge 경로가 frame 예산을 실제로 맞추는지 재는 법(stage별 latency, pipeline의 mailbox 정책, buffer 수)은 다음 편 [12-02 Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement)에서 다룹니다.
 
 글의 순서는 이렇습니다. "결정 기준 — 네 가지 질문"에서 자리를 정하고, "하드웨어 등급"과 "프레임워크 선택"에서 edge 안의 선택지를 좁히고, "코드 / 실제 사용 예"에서 그 결정을 코드와 빌드로 지키는 원본 반출 차단·오프라인 대응 코드를 봅니다.
 
@@ -121,7 +121,7 @@ result = cloud_api(image) if online else local_model(image)
 
 ## 하드웨어 등급 — 공개 사양으로 본 범위
 
-아래는 각 제조사가 공개한 값만 옮긴 표이고, 값은 2026-10-11에 아래 출처에서 확인했습니다. 출처에 값이 없는 칸은 `TBD`입니다. Jetson 계열 전체 라인업과 세대 비교는 [12-08 NVIDIA Jetson](/blog/embedded/modern-recipes/part12-08-jetson)에 있고, 여기서는 등급 사이의 거리만 봅니다.
+아래는 각 제조사가 공개한 값만 옮긴 표이고, 값은 2026-10-11에 아래 출처에서 확인했습니다. 출처에 값이 없는 칸은 `TBD`입니다. Jetson 계열 전체 라인업과 세대 비교는 [12-09 NVIDIA Jetson](/blog/embedded/modern-recipes/part12-09-jetson)에 있고, 여기서는 등급 사이의 거리만 봅니다.
 
 | 예시 (등급) | 메모리 | 전력 (공식 표기) |
 |---|---|---|
@@ -192,9 +192,9 @@ ONNX Runtime 문서는 EP 구조가 하드웨어별 라이브러리를 감싸, �
 이 구조에서 생기는 장단점은 다음과 같습니다.
 
 - **장점.** 같은 모델을 여러 등급에 배포해야 하면 ONNX Runtime으로 시작해 등급마다 EP 목록을 바꿔 끼웁니다. 지원되지 않는 operator가 있어도 세션은 돕니다.
-- **실패 모양.** 세션이 돈다고 해서 가속기가 모델 전체를 받았다는 뜻은 아닙니다. 위 fallback 동작 때문에, 일부 node가 CPU EP로 넘어가도 세션은 그대로 만들어지고 돕니다. 그래서 EP 목록을 바꿀 때마다 [12-01b](/blog/embedded/modern-recipes/part12-01b-edge-pipeline-measurement)의 방법으로 stage 시간을 다시 잽니다. TensorRT EP의 `trt_dump_subgraphs` 옵션을 켜면 TensorRT engine으로 바뀐 subgraph가 ONNX 형식으로 파일 시스템에 저장되므로, 무엇이 넘어갔는지 볼 수 있습니다.
+- **실패 모양.** 세션이 돈다고 해서 가속기가 모델 전체를 받았다는 뜻은 아닙니다. 위 fallback 동작 때문에, 일부 node가 CPU EP로 넘어가도 세션은 그대로 만들어지고 돕니다. 그래서 EP 목록을 바꿀 때마다 [12-02](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement)의 방법으로 stage 시간을 다시 잽니다. TensorRT EP의 `trt_dump_subgraphs` 옵션을 켜면 TensorRT engine으로 바뀐 subgraph가 ONNX 형식으로 파일 시스템에 저장되므로, 무엇이 넘어갔는지 볼 수 있습니다.
 
-그래서 이 글은 다음 순서를 권합니다. 먼저 ONNX Runtime과 EP로 여러 등급을 맞추고, 한 플랫폼에서 TensorRT EP가 받은 부분만으로 예산을 맞추지 못할 때 vendor 런타임을 직접 쓰는 쪽으로 옮깁니다. EP별 이름과 설정, 각 런타임의 코드는 [12-04 TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt), [12-05 TFLite Micro](/blog/embedded/modern-recipes/part12-05-tflite-micro), [12-06 ONNX Runtime](/blog/embedded/modern-recipes/part12-06-onnx-runtime)에 있습니다.
+그래서 이 글은 다음 순서를 권합니다. 먼저 ONNX Runtime과 EP로 여러 등급을 맞추고, 한 플랫폼에서 TensorRT EP가 받은 부분만으로 예산을 맞추지 못할 때 vendor 런타임을 직접 쓰는 쪽으로 옮깁니다. EP별 이름과 설정, 각 런타임의 코드는 [12-05 TensorRT](/blog/embedded/modern-recipes/part12-05-tensorrt), [12-06 TFLite Micro](/blog/embedded/modern-recipes/part12-06-tflite-micro), [12-07 ONNX Runtime](/blog/embedded/modern-recipes/part12-07-onnx-runtime)에 있습니다.
 
 ## 코드 / 실제 사용 예
 
@@ -361,17 +361,17 @@ AGX Orin의 275 TOPS는 sparse이고 GPU·DLA 합이며, dense GPU 칸은 85 TOP
 
 - 2026-10-11: 하드웨어 표·EP 목록·TensorRT sparsity 조건을 각 1차 자료와 다시 대조하고 확인 날짜를 붙였습니다. ONNX Runtime IoT/Edge/Mobile 열에 Qualcomm QNN이 있다고 적었던 것을 바로잡았습니다(QNN은 GPU 열에 있습니다). Pipeline buffer 수를 상태 나열로 다시 셌습니다(이전 판의 "6개 이상"을 5개로 정정). 128 MAC NPU를 약 180 MHz로 돈다고 적었던 역산을, 페이지의 core clock과 나란히 놓고 46 GOPS가 식과 맞지 않는다는 서술로 바꿨습니다. Alif 값을 dense로 본 것이 추정임을 밝히고, 배율을 162배로 고쳤습니다. 결과 구조체·`FRAME_DUMP`·출하 빌드 검사와 store-and-forward 예제를 더했습니다.
 - 2026-10-11 (2차): 개발용 노트북에서 실행한 출력과 그 환경 표를 모두 지우고, 처리량·지연은 코드의 설계값과 구조로 셈한 값으로 바꿨습니다. 같은 이유로 NEON 정규화 비교 절을 지웠습니다(SIMD는 [8-07 SIMD](/blog/embedded/modern-recipes/part8-07-simd)가 다룹니다). 다시 열어 보지 못한 Ethos-U55 TRM 기반 서술(AXI manager 구성, clock 입력)을 지웠습니다. 결과 구조체 크기를 AAPCS64 규칙으로 셈했습니다. Raspberry Pi·Hailo 출처를 product brief로 바꾸고(Raspberry Pi 두 문서는 발행 월을 표기합니다), Vela·TFLM 링크를 태그·커밋에 고정했습니다.
-- 2026-10-11 (3차): stage latency 측정, 3-stage pipeline 코드, 처리량·지연 셈, buffer 수 절을 다음 편 [12-01b Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-01b-edge-pipeline-measurement)으로 옮겼습니다. 이 글은 추론을 어디서 할지를 정하는 내용만 남깁니다.
+- 2026-10-11 (3차): stage latency 측정, 3-stage pipeline 코드, 처리량·지연 셈, buffer 수 절을 다음 편 [12-02 Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement)으로 옮겼습니다. 이 글은 추론을 어디서 할지를 정하는 내용만 남깁니다.
 
-다음 편은 **[Edge 추론 Pipeline 측정 — Stage Latency·Mailbox 정책·Buffer 수](/blog/embedded/modern-recipes/part12-01b-edge-pipeline-measurement)**입니다.
+다음 편은 **[Edge 추론 Pipeline 측정 — Stage Latency·Mailbox 정책·Buffer 수](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement)**입니다.
 
 ## 관련 항목
 
-- [12-01b: Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-01b-edge-pipeline-measurement) — 고른 edge 경로가 frame 예산을 맞추는지 재는 법
-- [12-02: NPU 아키텍처](/blog/embedded/modern-recipes/part12-02-npu-architecture)
-- [12-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
-- [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
-- [12-05: TFLite Micro](/blog/embedded/modern-recipes/part12-05-tflite-micro)
-- [12-06: ONNX Runtime](/blog/embedded/modern-recipes/part12-06-onnx-runtime)
-- [12-08: NVIDIA Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
-- [12-10: 온디바이스 LLM](/blog/embedded/modern-recipes/part12-10-on-device-llm)
+- [12-02: Edge 추론 Pipeline 측정](/blog/embedded/modern-recipes/part12-02-edge-pipeline-measurement) — 고른 edge 경로가 frame 예산을 맞추는지 재는 법
+- [12-03: NPU 아키텍처](/blog/embedded/modern-recipes/part12-03-npu-architecture)
+- [12-04: Quantization](/blog/embedded/modern-recipes/part12-04-quantization)
+- [12-05: TensorRT](/blog/embedded/modern-recipes/part12-05-tensorrt)
+- [12-06: TFLite Micro](/blog/embedded/modern-recipes/part12-06-tflite-micro)
+- [12-07: ONNX Runtime](/blog/embedded/modern-recipes/part12-07-onnx-runtime)
+- [12-09: NVIDIA Jetson](/blog/embedded/modern-recipes/part12-09-jetson)
+- [12-11: 온디바이스 LLM](/blog/embedded/modern-recipes/part12-11-on-device-llm)

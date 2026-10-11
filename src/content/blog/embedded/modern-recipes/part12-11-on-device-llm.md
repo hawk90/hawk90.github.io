@@ -1,6 +1,6 @@
 ---
 title: "온디바이스 LLM 추론 — llama.cpp·GGUF·MLX·KV Cache·NPU Backend"
-slug: "embedded/modern-recipes/part12-10-on-device-llm"
+slug: "embedded/modern-recipes/part12-11-on-device-llm"
 date: 2026-04-21T09:09:00
 description: "4-bit 양자화된 LLM이 모바일·edge에서 동작하는 시대. llama.cpp/GGUF, Apple MLX, KV cache 메모리, 백엔드 선택을 정리합니다."
 series: "Modern Embedded Recipes"
@@ -334,6 +334,6 @@ prompt = "Hello";   /* special token 없음 → 모델이 chat mode로 안 들�
 
 ## 관련 항목
 
-- [12-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
-- [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
-- [12-11: TF-M TrustZone](/blog/embedded/modern-recipes/part12-11-tfm-trustzone)
+- [12-04: Quantization](/blog/embedded/modern-recipes/part12-04-quantization)
+- [12-05: TensorRT](/blog/embedded/modern-recipes/part12-05-tensorrt)
+- [12-12: TF-M TrustZone](/blog/embedded/modern-recipes/part12-12-tfm-trustzone)

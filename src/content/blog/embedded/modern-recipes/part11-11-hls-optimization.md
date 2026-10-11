@@ -356,4 +356,4 @@ Trigonometric은 cordic IP 또는 LUT-based로 직접. Floating point는 fixed p
 - [11-10: HLS](/blog/embedded/modern-recipes/part11-10-hls)
 - [11-12: Vitis AI](/blog/embedded/modern-recipes/part11-12-vitis-ai)
 - [11-13: OpenCL on FPGA](/blog/embedded/modern-recipes/part11-13-opencl-fpga)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
+- [12-04: Quantization](/blog/embedded/modern-recipes/part12-04-quantization)

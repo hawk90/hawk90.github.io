@@ -269,4 +269,4 @@ PWM duty로 backlight 조정. 100% duty면 *power 30 mA*, 50%면 15 mA. battery 
 - [4-08: SPI 드라이버](/blog/embedded/modern-recipes/part4-08-spi-driver)
 - [4-10: DMA 기초](/blog/embedded/modern-recipes/part4-10-dma-basics)
 - [5-06: SPI OLED](/blog/embedded/modern-recipes/part5-06-spi-oled)
-- [12-09: zero-copy 카메라](/blog/embedded/modern-recipes/part12-09-zero-copy-camera)
+- [12-10: zero-copy 카메라](/blog/embedded/modern-recipes/part12-10-zero-copy-camera)

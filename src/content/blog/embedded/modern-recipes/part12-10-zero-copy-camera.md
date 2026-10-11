@@ -1,6 +1,6 @@
 ---
 title: "Zero-Copy Camera Pipeline — V4L2·DMA-BUF·GPU Import·NPU 직결"
-slug: "embedded/modern-recipes/part12-09-zero-copy-camera"
+slug: "embedded/modern-recipes/part12-10-zero-copy-camera"
 date: 2026-04-21T09:08:00
 description: "카메라부터 NPU·display까지 한 frame이 한 physical page를 유지하도록 V4L2·DMA-BUF·EGL·CUDA를 연결하는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
@@ -329,6 +329,6 @@ VIC·GPU shader로 옮기면 CPU 부하가 그만큼 빠집니다.
 
 ## 관련 항목
 
-- [12-08: Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
-- [12-10: 온디바이스 LLM](/blog/embedded/modern-recipes/part12-10-on-device-llm)
+- [12-09: Jetson](/blog/embedded/modern-recipes/part12-09-jetson)
+- [12-11: 온디바이스 LLM](/blog/embedded/modern-recipes/part12-11-on-device-llm)
 - [1-04: Device Tree](/blog/embedded/modern-recipes/part7-03-device-tree-basics)

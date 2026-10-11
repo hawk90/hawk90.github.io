@@ -374,4 +374,4 @@ CFM (configuration flash memory)에 따라 format 다름. EPCS/EPCQ serial flash
 - [11-01: FPGA 기초](/blog/embedded/modern-recipes/part11-01-fpga-basics)
 - [11-02: Vivado 사용법](/blog/embedded/modern-recipes/part11-02-vivado-usage)
 - [11-13: OpenCL on FPGA](/blog/embedded/modern-recipes/part11-13-opencl-fpga)
-- [12-02: NPU 아키텍처](/blog/embedded/modern-recipes/part12-02-npu-architecture)
+- [12-03: NPU 아키텍처](/blog/embedded/modern-recipes/part12-03-npu-architecture)

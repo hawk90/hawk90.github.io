@@ -1,6 +1,6 @@
 ---
 title: "TensorRT 분석 — ONNX→Engine·FP16·INT8·DLA·Multi-Stream"
-slug: "embedded/modern-recipes/part12-04-tensorrt"
+slug: "embedded/modern-recipes/part12-05-tensorrt"
 date: 2026-04-21T09:03:00
 description: "NVIDIA TensorRT로 ONNX 모델을 engine으로 빌드하고 FP16·INT8·DLA·multi-stream으로 throughput을 끌어올리는 패턴을 정리합니다."
 series: "Modern Embedded Recipes"
@@ -314,8 +314,8 @@ config->setDefaultDeviceType(DeviceType::kDLA);
 
 ## 관련 항목
 
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
-- [6-05: Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
+- [12-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [12-04: Quantization](/blog/embedded/modern-recipes/part12-04-quantization)
+- [12-09: Jetson](/blog/embedded/modern-recipes/part12-09-jetson)
 - [5-04: PCIe Streaming](/blog/embedded/modern-recipes/part11-09-pcie-streaming)
 - [PE 5-08: Nsight Systems](/blog/embedded/performance-engineering/part5-08-nsight)

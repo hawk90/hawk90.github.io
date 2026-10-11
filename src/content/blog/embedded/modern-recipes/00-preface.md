@@ -279,18 +279,18 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 | # | 레시피 | 핵심 |
 |---|--------|------|
 | 12-01 | Edge Inference 개요 | cloud vs edge·latency·privacy |
-| 12-01b | Edge 추론 Pipeline 측정 | stage latency·mailbox·buffer 수 |
-| 12-02 | NPU 아키텍처 | Ethos·Hexagon·systolic·MAC array |
-| 12-03 | Quantization | PTQ·QAT·INT8·INT4·calibration |
-| 12-04 | TensorRT | ONNX→engine·FP16·INT8·DLA |
-| 12-05 | TFLite Micro | op resolver·tensor arena·MCU |
-| 12-06 | ONNX Runtime | EP·CUDA/TensorRT/DML·minimal |
-| 12-07 | Thermal Management | throttling·DVFS·fan curve |
-| 12-08 | Jetson | Orin/Thor·JetPack·DLA·VPI |
-| 12-09 | Zero-Copy Camera | V4L2·DMA-BUF·GPU·NPU |
-| 12-10 | 온디바이스 LLM | llama.cpp·GGUF·MLX·NPU backend |
-| 12-11 | TF-M·TrustZone | Cortex-M33 secure·PSA·MCUboot |
-| 12-12 | Matter·Thread | IoT 통합·commissioning·multi-fabric |
+| 12-02 | Edge 추론 Pipeline 측정 | stage latency·mailbox·buffer 수 |
+| 12-03 | NPU 아키텍처 | Ethos·Hexagon·systolic·MAC array |
+| 12-04 | Quantization | PTQ·QAT·INT8·INT4·calibration |
+| 12-05 | TensorRT | ONNX→engine·FP16·INT8·DLA |
+| 12-06 | TFLite Micro | op resolver·tensor arena·MCU |
+| 12-07 | ONNX Runtime | EP·CUDA/TensorRT/DML·minimal |
+| 12-08 | Thermal Management | throttling·DVFS·fan curve |
+| 12-09 | Jetson | Orin/Thor·JetPack·DLA·VPI |
+| 12-10 | Zero-Copy Camera | V4L2·DMA-BUF·GPU·NPU |
+| 12-11 | 온디바이스 LLM | llama.cpp·GGUF·MLX·NPU backend |
+| 12-12 | TF-M·TrustZone | Cortex-M33 secure·PSA·MCUboot |
+| 12-13 | Matter·Thread | IoT 통합·commissioning·multi-fabric |
 
 ---
 
@@ -334,7 +334,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 | RTOS scheduler·sync internals | Part 6 (8편 응용) | [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) |
 | 성능 측정·프로파일링 방법론 | Part 8 (12편 적용) | [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface) |
 | C++ on MCU (template·RAII·constexpr) | 일부 코드 예시 | [Embedded C++ for Real Systems](/blog/embedded/embedded-cpp/00-preface) |
-| 보안 인증·표준 | Part 12 (TF-M·Matter) | (Practical RTOS Part 4-11 + Modern Recipes 12-11) |
+| 보안 인증·표준 | Part 12 (TF-M·Matter) | (Practical RTOS Part 4-11 + Modern Recipes 12-12) |
 
 **조합 예**:
 

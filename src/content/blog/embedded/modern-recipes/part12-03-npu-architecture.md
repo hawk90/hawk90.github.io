@@ -1,6 +1,6 @@
 ---
 title: "NPU 아키텍처 분석 — Ethos·Hexagon·Systolic Array 비교"
-slug: "embedded/modern-recipes/part12-02-npu-architecture"
+slug: "embedded/modern-recipes/part12-03-npu-architecture"
 date: 2026-04-21T09:01:00
 description: "Arm Ethos·Qualcomm Hexagon·Apple Neural Engine 등 NPU 내부 구조와 systolic MAC array·INT8·memory hierarchy."
 series: "Modern Embedded Recipes"
@@ -306,8 +306,8 @@ Edge는 보통 batch=1. NPU 효율이 batch=1에서 떨어집니다. Multi-frame
 
 ## 관련 항목
 
-- [12-04: TensorRT](/blog/embedded/modern-recipes/part12-04-tensorrt)
-- [12-05: TFLite Micro](/blog/embedded/modern-recipes/part12-05-tflite-micro)
-- [12-06: ONNX Runtime](/blog/embedded/modern-recipes/part12-06-onnx-runtime)
-- [6-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
-- [6-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
+- [12-05: TensorRT](/blog/embedded/modern-recipes/part12-05-tensorrt)
+- [12-06: TFLite Micro](/blog/embedded/modern-recipes/part12-06-tflite-micro)
+- [12-07: ONNX Runtime](/blog/embedded/modern-recipes/part12-07-onnx-runtime)
+- [12-01: Edge Inference](/blog/embedded/modern-recipes/part12-01-edge-inference)
+- [12-04: Quantization](/blog/embedded/modern-recipes/part12-04-quantization)

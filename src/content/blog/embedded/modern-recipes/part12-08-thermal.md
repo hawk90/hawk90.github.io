@@ -1,6 +1,6 @@
 ---
 title: "Edge Thermal Management — Throttling·DVFS·Fan Curve·Sustained"
-slug: "embedded/modern-recipes/part12-07-thermal"
+slug: "embedded/modern-recipes/part12-08-thermal"
 date: 2026-04-21T09:06:00
 description: "Edge AI 보드의 sustained 성능을 결정하는 thermal 한계. throttle trip, DVFS, fan curve, nvpmodel, passive cooling 설계를 정리합니다."
 series: "Modern Embedded Recipes"
@@ -243,6 +243,6 @@ Production은 `nvpmodel`로 *thermal-aware mode*를 선택합니다.
 
 ## 관련 항목
 
-- [12-03: Quantization](/blog/embedded/modern-recipes/part12-03-quantization)
-- [12-08: Jetson](/blog/embedded/modern-recipes/part12-08-jetson)
+- [12-04: Quantization](/blog/embedded/modern-recipes/part12-04-quantization)
+- [12-09: Jetson](/blog/embedded/modern-recipes/part12-09-jetson)
 - [PE 3-10: Thermal Throttling](/blog/embedded/performance-engineering/part3-10-thermal)

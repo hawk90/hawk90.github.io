@@ -293,4 +293,4 @@ Ethernet cable에는 큰 ESD. *RJ45 magnetics integrated jack* 사용, PHY datas
 - [4-10: DMA 기초](/blog/embedded/modern-recipes/part4-10-dma-basics)
 - [5-11: USB Device 기초](/blog/embedded/modern-recipes/part5-11-usb-device)
 - [5-13: SD card + FatFs](/blog/embedded/modern-recipes/part5-13-sd-card-fatfs)
-- [12-12: Matter·Thread](/blog/embedded/modern-recipes/part12-12-matter-thread)
+- [12-13: Matter·Thread](/blog/embedded/modern-recipes/part12-13-matter-thread)
