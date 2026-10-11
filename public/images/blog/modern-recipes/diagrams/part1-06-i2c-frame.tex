@@ -41,25 +41,19 @@
 % ACK = 0 (slave pulls)
 \draw[sda] (7.7, 2.7) -- (7.7, 2) -- (8.6, 2);
 
-% SCL: 9 pulses for 8 bits + ACK
+% SCL: 9 clocks for 8 bits + ACK (UM10204 3.1.3: SDA changes only while SCL
+% is low; 3.1.4: START = SDA falls while SCL is high).
+% SCL is high before START, falls at x = 0.25 (after SDA falls at x = 0), then
+% for bit i (start s = 0.5 + i*0.9) it is low at the bit boundary, where SDA
+% changes, and high from s+0.25 to s+0.65, the middle of the bit.
 \node[lbl, anchor=east] at (-0.2, 0) {SCL};
-% pre-start high
-\draw[scl] (-0.5, 0.7) -- (0.5, 0.7);
-% Drop to low between bits, pulses at center of each bit
-% Bit i: low from 0.5+i*0.9 to 0.5+i*0.9+0.05; high from there to 0.5+i*0.9+0.85; low to next
+\draw[scl] (-0.5, 0.7) -- (0.25, 0.7) -- (0.25, 0) -- (0.75, 0);
 \foreach \i in {0,1,2,3,4,5,6,7,8} {
-  \pgfmathsetmacro{\xa}{0.5 + \i * 0.9 + 0.05}
-  \pgfmathsetmacro{\xb}{0.5 + \i * 0.9 + 0.85}
-  \draw[scl] (\xa, 0.7) -- (\xa, 0) -- (\xb, 0) -- (\xb, 0.7);
+  \pgfmathsetmacro{\xa}{0.5 + \i * 0.9 + 0.25}
+  \pgfmathsetmacro{\xb}{0.5 + \i * 0.9 + 0.65}
+  \pgfmathsetmacro{\xc}{0.5 + (\i+1) * 0.9 + 0.25}
+  \draw[scl] (\xa, 0) -- (\xa, 0.7) -- (\xb, 0.7) -- (\xb, 0) -- (\xc, 0);
 }
-% Connect tops between pulses
-\draw[scl] (0.5, 0.7) -- (0.55, 0.7);
-\foreach \i in {0,1,2,3,4,5,6,7} {
-  \pgfmathsetmacro{\xa}{0.5 + \i * 0.9 + 0.85}
-  \pgfmathsetmacro{\xb}{0.5 + (\i+1) * 0.9 + 0.05}
-  \draw[scl] (\xa, 0.7) -- (\xb, 0.7);
-}
-\draw[scl] (8.35, 0.7) -- (8.7, 0.7);
 
 % Bit labels above SDA
 \node[bitlbl] at (0.95, 3.1) {A6};
