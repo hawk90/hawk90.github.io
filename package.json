@@ -157,13 +157,13 @@
     "astro-expressive-code": "^0.44.2",
     "cheerio": "^1.2.0",
     "htmlparser2": "^10.1.0",
-    "marked": "^18.0.14",
+    "marked": "^18.1.0",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-katex": "^7.0.1",
     "rehype-slug": "^6.0.0",
     "remark-directive": "^4.0.0",
     "remark-math": "^6.0.0",
-    "satori": "^0.35.0",
+    "satori": "^0.44.0",
     "satori-html": "^0.3.2",
     "tailwindcss": "^4.3.3",
     "turndown": "^7.2.4",
@@ -171,7 +171,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "js-yaml": "^5.4.2",
+    "js-yaml": "^5.4.3",
     "typescript": "^5.9.3"
   },
   "allowScripts": {
@@ -180,7 +180,7 @@
   },
   "overrides": {
     "satori": {
-      "fflate": "0.7.5"
+      "fflate": "0.8.3"
     },
     "postcss-nested": {
       "postcss-selector-parser": "7.1.6"
