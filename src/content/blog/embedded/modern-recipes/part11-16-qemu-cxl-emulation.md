@@ -4,7 +4,7 @@ slug: "embedded/modern-recipes/part11-16-qemu-cxl-emulation"
 date: 2026-06-18T09:02:00
 description: "QEMU로 CXL Type 3 개발 환경을 세우는 레시피 — 한 번에 붙여넣는 실행 명령, 부팅 후 검증 순서, 처음 세울 때 걸리는 함정."
 series: "Modern Embedded Recipes"
-seriesOrder: 150
+seriesOrder: 151
 tags: [recipes, cxl, qemu, emulation, virtualization, type-3]
 draft: false
 topics: ["embedded"]

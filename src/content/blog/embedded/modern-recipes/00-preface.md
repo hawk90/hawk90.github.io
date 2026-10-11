@@ -2,7 +2,7 @@
 title: "Modern Embedded Recipes — 모던 임베디드 실전 레시피 시리즈 소개"
 slug: "embedded/modern-recipes/00-preface"
 date: 2026-04-10T09:00:00
-description: "HW interface 기초부터 ARM·빌드·드라이버·peripheral·RTOS·Linux·메모리·동시성·디버깅·FPGA·Edge AI까지 임베디드 12 Part 종합 cookbook 148편."
+description: "HW interface 기초부터 ARM·빌드·드라이버·peripheral·RTOS·Linux·메모리·동시성·디버깅·FPGA·Edge AI까지 임베디드 12 Part 종합 cookbook 152편."
 series: "Modern Embedded Recipes"
 seriesOrder: 0
 tags: [embedded, recipes, cookbook, arm, linux, rtos, fpga, edge-ai]
@@ -272,13 +272,14 @@ FPGA 기초·Vivado/Quartus·AXI·PCIe·Zynq PS-PL·mailbox·CQ/SQ·DMA·HLS·Vi
 | 11-13 | OpenCL on FPGA | kernel·channel·burst memory |
 | 11-14 | Intel Quartus 사용법 | Platform Designer·Nios II·partial reconfig |
 
-### Part 12 — Edge AI & 보안 (12편)
+### Part 12 — Edge AI & 보안 (13편)
 
 Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson·zero-copy camera·LLM·TF-M·Matter.
 
 | # | 레시피 | 핵심 |
 |---|--------|------|
 | 12-01 | Edge Inference 개요 | cloud vs edge·latency·privacy |
+| 12-01b | Edge 추론 Pipeline 측정 | stage latency·mailbox·buffer 수 |
 | 12-02 | NPU 아키텍처 | Ethos·Hexagon·systolic·MAC array |
 | 12-03 | Quantization | PTQ·QAT·INT8·INT4·calibration |
 | 12-04 | TensorRT | ONNX→engine·FP16·INT8·DLA |
@@ -295,7 +296,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 ## 학습 로드맵
 
-148편이 부담스러우면 단계별로 접근하세요.
+152편이 부담스러우면 단계별로 접근하세요.
 
 ### 입문 (Part 1~5, 62편)
 
