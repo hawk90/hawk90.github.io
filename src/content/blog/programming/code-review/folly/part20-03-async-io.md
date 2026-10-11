@@ -9,7 +9,7 @@ tags: [cpp, folly, async-io, io_uring, linux]
 type: book-review
 bookTitle: "Folly C++ Common Libraries"
 bookAuthor: "Meta (Facebook)"
-draft: false
+draft: true
 topics: ["programming", "programming/code-review"]
 ---
 

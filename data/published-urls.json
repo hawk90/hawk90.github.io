@@ -728,5 +728,847 @@
     "/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model",
     "/blog/tools/emulation/driver-cosim/chapter08-end-to-end"
   ],
-  "retired": []
+  "retired": [],
+  "gone": [
+    {
+      "url": "/blog/programming/code-review/abseil/00-preface",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part1-01-overview",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part1-02-design-philosophy",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part1-03-build-dependency-bazel",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part1-04-lts-vs-head-release",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part1-05-versioning-abi",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part10-01-abseil-hash-value",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part10-02-hash-state-chaining",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part10-03-custom-hashable",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part11-01-log-vlog-check",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part11-02-log-sink",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part11-03-log-entry-structured",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part11-04-stack-trace-handler",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part12-01-absl-flag-define",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part12-02-parse-command-line",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part12-03-flag-introspection",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part13-01-google-style-patterns",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part13-02-anti-patterns",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part13-03-std-to-absl-migration",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part14-01-cleanup",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part14-02-algorithm-container-ext",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part14-03-function-ref-any-invocable",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part14-04-bind-front-overload",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part15-01-cord",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part15-02-charconv",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part15-03-cord-vs-string",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part16-01-stacktrace-symbolize",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part16-02-crc32c",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part16-03-periodic-sampler",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-01-abseil-macros",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-02-predict-branch-hint",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-03-log-severity",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-04-type-traits",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-05-conformance-policy",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-06-memory-utilities",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-07-raw-logging",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part2-08-thread-annotations",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part3-01-status",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part3-02-status-or",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part3-03-status-macros",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part3-04-status-payload",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part3-05-status-exception-conversion",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-01-string-view",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-02-string-view-pitfalls",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-03-str-cat",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-04-str-split",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-05-str-join",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-06-str-format",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-07-ascii-functions",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part4-08-escaping-base64",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part5-01-flat-hash-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part5-02-flat-hash-set",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part5-03-node-hash-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part5-04-btree-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part5-05-fixed-array",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part5-06-inlined-vector",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part5-07-swiss-table-internals",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part6-01-mutex",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part6-02-conditional-critical-section",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part6-03-notification",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part6-04-blocking-counter-barrier",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part6-05-mutex-annotations",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part7-01-time-duration-overview",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part7-02-format-parse",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part7-03-civil-time",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part7-04-time-zone",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part7-05-time-mocking",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part8-01-bit-gen",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part8-02-distributions",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part8-03-mocking-random",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part8-04-seeding-entropy",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-01-int128",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-02-bits",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-03-optional",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-04-variant",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-05-span",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-06-any",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-07-compare",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/abseil/part9-08-utility",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/00-preface",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part1-01-overview",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part1-02-folly-vs-abseil-philosophy",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part1-03-build-fbcode",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part1-04-api-stability",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part1-05-production-validation",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part10-01-producer-consumer-queue",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part10-02-mpmc-queue",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part10-03-unbounded-queue",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part10-04-fibers-channel",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part11-01-dynamic",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part11-02-json-conversion",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part11-03-dynamic-struct",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part11-04-dynamic-visitor",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part12-01-singleton-vs-meyers",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part12-02-singleton-vault",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part12-03-try-get-fast",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part13-01-exception-wrapper",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part13-02-scope-guard",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part13-03-folly-optional",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part13-04-folly-function",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part13-05-lazy",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part14-01-meta-style-review",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part14-02-folly-anti-patterns",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part14-03-std-vs-folly-choice",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part15-01-coro-overview",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part15-02-coro-task",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part15-03-coro-async-generator",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part15-04-coro-blocking-wait",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part15-05-coro-baton-mutex",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part16-01-expected",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part16-02-try",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part16-03-try-vs-expected",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part17-01-range",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part17-02-uri",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part17-03-hash-fingerprint",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part17-04-spooky-hash",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part18-01-init",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part18-02-indestructible",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part18-03-micro-lock",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part18-04-micro-spin-lock",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part19-01-format-legacy",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part19-02-demangle",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part19-03-dynamic-converter",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part2-01-future-overview",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part2-02-promise-make-future",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part2-03-semi-future-vs-future",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part2-04-then-value-error",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part2-05-collect",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part2-06-retry-window-via",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part2-07-fibers",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part20-01-record-io",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part20-02-compression",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part20-03-async-io",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part20-04-cancellation-token",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part21-01-observer",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part21-02-fbcode-patterns",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part3-01-inline-executor",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part3-02-cpu-thread-pool-executor",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part3-03-io-thread-pool-executor",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part3-04-manual-executor",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part3-05-event-base",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part4-01-iobuf",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part4-02-iobuf-queue",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part4-03-cursor",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part4-04-zero-copy-patterns",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part4-05-iobuf-shared-semantics",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part5-01-fbstring",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part5-02-fmt-format-integration",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part5-03-string-piece",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part5-04-join-split",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part6-01-to-try-to",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part6-02-conv-customization",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part6-03-conv-performance",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part7-01-f14-value-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part7-02-f14-node-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part7-03-f14-vector-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part7-04-f14-fast-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part7-05-f14-internals",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part8-01-small-vector",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part8-02-fixed-string",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part8-03-atomic-hash-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part8-04-concurrent-hash-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part8-05-evicting-cache-map",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part9-01-synchronized",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part9-02-shared-mutex",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part9-03-baton",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part9-04-rw-spin-lock",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    },
+    {
+      "url": "/blog/programming/code-review/folly/part9-05-pico-spin-lock",
+      "reason": "Abseil·Folly Code Review 시리즈를 draft로 전환(운영자 결정). 공식 문서 요약형이라 AdSense 품질 기준에 못 미치고, 같은 내용을 대신할 페이지가 없어 404로 둔다.",
+      "date": "2026-10-11"
+    }
+  ]
 }

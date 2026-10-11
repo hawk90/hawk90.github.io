@@ -9,7 +9,7 @@ tags: [cpp, abseil, bind-front, overload, variant]
 type: book-review
 bookTitle: "Abseil C++ Common Libraries"
 bookAuthor: "Google"
-draft: false
+draft: true
 topics: ["programming", "programming/code-review"]
 ---
 
