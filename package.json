@@ -22,7 +22,7 @@
   },
   "packageManager": "npm@12.2.0",
   "engines": {
-    "node": ">=24.21.0"
+    "node": ">=24.22.0"
   },
   "scripts": {
     "dev": "astro dev",
@@ -150,20 +150,20 @@
     "@astrojs/rss": "^4.0.19",
     "@astrojs/sitemap": "^3.7.4",
     "@expressive-code/plugin-line-numbers": "^0.44.2",
-    "@milkdown/kit": "^7.22.2",
+    "@milkdown/kit": "^7.22.3",
     "@resvg/resvg-js": "^2.6.2",
     "@tailwindcss/vite": "^4.3.3",
     "astro": "^7.4.0",
     "astro-expressive-code": "^0.44.2",
     "cheerio": "^1.2.0",
     "htmlparser2": "^10.1.0",
-    "marked": "^18.1.0",
+    "marked": "^18.1.1",
     "rehype-autolink-headings": "^7.1.0",
     "rehype-katex": "^7.0.1",
     "rehype-slug": "^6.0.0",
     "remark-directive": "^4.0.0",
     "remark-math": "^6.0.0",
-    "satori": "^0.44.0",
+    "satori": "^0.60.0",
     "satori-html": "^0.3.2",
     "tailwindcss": "^4.3.3",
     "turndown": "^7.2.4",
@@ -171,7 +171,7 @@
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.10",
-    "js-yaml": "^5.4.3",
+    "js-yaml": "^5.5.0",
     "typescript": "^5.9.3"
   },
   "allowScripts": {
