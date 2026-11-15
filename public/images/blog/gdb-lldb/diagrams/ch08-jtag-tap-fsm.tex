@@ -1,42 +1,101 @@
 \documentclass[border=10pt,tikz]{standalone}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \usepackage{kotex}
+
+% JTAG TAP 상태 머신 (16 상태).
+% 상태 이름: OpenOCD src/jtag/interface.c tap_name_mapping[]
+% 전이: OpenOCD src/jtag/interface.c tap_state_transition()
+% 안정 상태 6개: OpenOCD doc/openocd.texi "TAP state names"
 
 \begin{document}
 \input{../../_design.tex}
+\input{../../_design-state.tex}
 
-\begin{tikzpicture}[blog,
-    state/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
-                  minimum width=30mm, minimum height=10mm, align=center,
-                  font=\sffamily\small},
-    accent/.style={state, draw=hibord, fill=hifill, font=\sffamily\small\bfseries},
-    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
-    edgelbl/.style={font=\sffamily\scriptsize, inner sep=2pt, fill=white}
+\begin{tikzpicture}[blog, state,
+    st/.style={stateBox, minimum width=24mm, minimum height=8mm, font=\sffamily\small},
+    stable/.style={st, draw=absbord, fill=absfill, font=\sffamily\small\bfseries},
+    tms/.style={font=\sffamily\footnotesize, text=inkc, inner sep=1.5pt},
+    ln/.style={draw=edgec, line width=0.5pt}
 ]
 
-% States
-\node[accent] (reset) at (0, 2.2)  {Test-Logic-Reset};
-\node[state]  (idle)  at (0, 0)    {Run-Test/Idle};
-\node[state]  (sdr)   at (4.4, 0)  {Select-DR-Scan};
-\node[state]  (sir)   at (8.8, 0)  {Select-IR-Scan};
-\node[state]  (cap)   at (4.4, -2.4) {Capture-DR};
-\node[state]  (cap2)  at (8.8, -2.4) {(more states\\toward IR/DR)};
+% ---- columns: control (x=0), DR (x=5), IR (x=11.2)
+\node[stable] (reset) at (0, 0)    {RESET};
+\node[stable] (idle)  at (0, -2)   {RUN/IDLE};
 
-% Self-loop on reset
-\draw[arr] (reset.north) .. controls +(2,1.4) and +(2.2,-0.8) ..
-  node[edgelbl, right]{TMS=1} (reset.east);
+\node[st]     (drs)  at (5, -2)    {DRSELECT};
+\node[st]     (drc)  at (5, -3.5)  {DRCAPTURE};
+\node[stable] (drsh) at (5, -5)    {DRSHIFT};
+\node[st]     (dre1) at (5, -6.5)  {DREXIT1};
+\node[stable] (drp)  at (5, -8)    {DRPAUSE};
+\node[st]     (dre2) at (5, -9.5)  {DREXIT2};
+\node[st]     (dru)  at (5, -11)   {DRUPDATE};
 
-% reset → idle
-\draw[arr] (reset) -- node[edgelbl, right]{TMS=0} (idle);
+\node[st]     (irs)  at (11.2, -2)    {IRSELECT};
+\node[st]     (irc)  at (11.2, -3.5)  {IRCAPTURE};
+\node[stable] (irsh) at (11.2, -5)    {IRSHIFT};
+\node[st]     (ire1) at (11.2, -6.5)  {IREXIT1};
+\node[stable] (irp)  at (11.2, -8)    {IRPAUSE};
+\node[st]     (ire2) at (11.2, -9.5)  {IREXIT2};
+\node[st]     (iru)  at (11.2, -11)   {IRUPDATE};
 
-% idle → select-DR
-\draw[arr] (idle) -- node[edgelbl, above]{TMS=1} (sdr);
+% ---- control column
+% RESET self-loop (TMS=1)
+\draw[trans] ([yshift=1.5mm]reset.west) -- ++(-0.6,0) |- ([yshift=-1.5mm]reset.west);
+\node[tms, anchor=east] at ([xshift=-6.5mm]reset.west) {1};
+\draw[trans] (reset) -- node[tms, right]{0} (idle);
+% RUN/IDLE self-loop (TMS=0)
+\draw[trans] ([yshift=1.5mm]idle.west) -- ++(-0.6,0) |- ([yshift=-1.5mm]idle.west);
+\node[tms, anchor=east] at ([xshift=-6.5mm]idle.west) {0};
+\draw[trans] (idle) -- node[tms, above]{1} (drs);
 
-% select-DR → select-IR or capture-DR
-\draw[arr] (sdr) -- node[edgelbl, above]{TMS=1} (sir);
-\draw[arr] (sdr) -- node[edgelbl, right]{TMS=0} (cap);
-\draw[arr] (sir) -- node[edgelbl, right]{...} (cap2);
+% ---- select row
+\draw[trans] (drs) -- node[tms, above]{1} (irs);
+\draw[trans] (irs.north) |- node[tms, pos=0.25, right]{1} (reset.east);
+
+% ---- one column of the scan path (DR or IR); #1 = prefix, #2 = x
+\newcommand{\scancol}[2]{%
+  \draw[trans] (#1s) -- node[tms, right]{0} (#1c);
+  \draw[trans] (#1c) -- node[tms, right]{0} (#1sh);
+  \draw[trans] (#1sh) -- node[tms, right]{1} (#1e1);
+  \draw[trans] (#1e1) -- node[tms, right]{0} (#1p);
+  \draw[trans] (#1p) -- node[tms, right]{1} (#1e2);
+  \draw[trans] (#1e2) -- node[tms, right]{1} (#1u);
+  % CAPTURE -> EXIT1 (TMS=1), left lane 1
+  \draw[trans] (#1c.west) -- (#2-1.8, -3.5) -- node[tms, left, pos=0.5]{1} (#2-1.8, -6.35) -- ([yshift=1.5mm]#1e1.west);
+  % EXIT1 -> UPDATE (TMS=1), left lane 2
+  \draw[trans] ([yshift=-1.5mm]#1e1.west) -- (#2-2.4, -6.65) -- node[tms, left, pos=0.5]{1} (#2-2.4, -11) -- (#1u.west);
+  % EXIT2 -> SHIFT (TMS=0), right lane
+  \draw[trans] (#1e2.east) -- (#2+2.3, -9.5) -- node[tms, right, pos=0.5]{0} (#2+2.3, -5.25) -- ([yshift=-2.5mm]#1sh.east);
+  % SHIFT / PAUSE self-loops (TMS=0)
+  \draw[trans] ([yshift=3mm]#1sh.east) -- ++(0.5,0) |- ([yshift=0.5mm]#1sh.east);
+  \node[tms, anchor=west] at ([xshift=5.5mm, yshift=1.75mm]#1sh.east) {0};
+  \draw[trans] ([yshift=3mm]#1p.east) -- ++(0.5,0) |- ([yshift=0.5mm]#1p.east);
+  \node[tms, anchor=west] at ([xshift=5.5mm, yshift=1.75mm]#1p.east) {0};
+}
+\scancol{dr}{5}
+\scancol{ir}{11.2}
+
+% ---- UPDATE -> DRSELECT (TMS=1): both UPDATE states share one return lane
+\draw[ln] ([xshift=-4mm]iru.south) -- ++(0,-0.4) -| (7.9, -11);
+\draw[trans] (dru.east) -- (7.9, -11) -- node[tms, right, pos=0.5]{1} (7.9, -2.75) -- (5.8, -2.75) -- (5.8, -2.4);
+\node[tms, anchor=west] at ([xshift=-3.6mm, yshift=-2mm]iru.south) {1};
+
+% ---- UPDATE -> RUN/IDLE (TMS=0): shared bottom lane
+\draw[ln] (dru.south) -- (5, -12.3);
+\node[tms, anchor=west] at ([xshift=0.5mm, yshift=-2mm]dru.south) {0};
+\draw[trans] ([xshift=4mm]iru.south) -- (11.6, -12.3) -- (0, -12.3) -- (idle.south);
+\node[tms, anchor=west] at ([xshift=4.5mm, yshift=-2mm]iru.south) {0};
+
+% ---- legend
+\node[stable, minimum width=8mm, minimum height=5mm] (lg1) at (0.4, -13.4) {};
+\node[anchor=west, font=\sffamily\footnotesize, text=inkc] at ([xshift=2mm]lg1.east)
+  {TMS를 고정해도 머무는 안정 상태 6개};
+\node[st, minimum width=8mm, minimum height=5mm] (lg2) at (7.2, -13.4) {};
+\node[anchor=west, font=\sffamily\footnotesize, text=inkc] at ([xshift=2mm]lg2.east)
+  {다음 TCK에서 넘어가는 상태};
+\node[anchor=west, font=\sffamily\footnotesize, text=mutec] at (-0.4, -14.2)
+  {화살표 숫자는 TMS 값입니다. 상태 이름은 OpenOCD 표기(RUN/IDLE = Run-Test/Idle)입니다.};
 
 \end{tikzpicture}
 \end{document}

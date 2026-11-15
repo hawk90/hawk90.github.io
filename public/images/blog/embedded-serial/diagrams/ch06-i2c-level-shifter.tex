@@ -6,7 +6,7 @@
 \setsansfont{Apple SD Gothic Neo}
 \ctikzset{bipoles/length=8mm}
 \begin{document}
-\begin{circuitikz}[scale=1.0, transform shape]
+\begin{tikzpicture}[scale=1.0, transform shape]
   % 3.3V side
   \draw (0,4) node[anchor=south] {\footnotesize 3.3V};
   \draw (0,4) -- (0,3);
@@ -47,5 +47,5 @@
     \textbullet\ SDA·SCL 각각 별도 BSS138
   };
 
-\end{circuitikz}
+\end{tikzpicture}
 \end{document}

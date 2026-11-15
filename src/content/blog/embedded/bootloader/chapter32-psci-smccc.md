@@ -29,6 +29,14 @@ PSCI(Power State Coordination Interface)는 운영체제 같은 클라이언트�
 
 `CPU_ON` 요청을 개념적으로 보면 호출자는 대상 CPU의 플랫폼 식별자, 해당 CPU가 시작할 entry point, 추가 context 값을 전달합니다. 반환 결과는 요청의 접수·실패 상태를 나타냅니다. 호출이 성공적으로 반환했다는 사실만으로 대상 CPU가 Linux에서 이미 online 상태가 됐다고 판단할 수는 없습니다. secondary 진입과 운영체제 초기화는 별도 단계입니다.
 
+![PSCI CPU_ON 요청 흐름: Linux 호출 CPU가 SMC/HVC로 CPU_ON을 보내고, firmware가 검증 후 플랫폼 hook으로 대상 CPU 전원을 켜고 반환하며, 대상 CPU는 warm boot 경로를 거쳐 요청한 entry로 진입한 뒤 Linux online은 별도 단계로 확인](/images/blog/bootloader/diagrams/chapter32-psci-cpu-on-seq.svg)
+
+위 그림은 TF-A 구현을 예로 든 흐름으로, `PSCI_E_SUCCESS` 반환과 대상 CPU의 entry 진입, Linux online이 서로 다른 시점의 사건임을 보여 줍니다.
+
+![TF-A가 관리하는 대상 CPU 상태: OFF에서 CPU_ON 접수로 ON_PENDING, warm boot 경로 마무리로 ON이 되며, 플랫폼 hook 실패 시 OFF로 복원되고 Linux online은 ON 이후의 별도 단계](/images/blog/bootloader/diagrams/ch32-power-state.svg)
+
+firmware 쪽에서 보면 대상 CPU는 `OFF`, `ON_PENDING`, `ON` 상태를 거치며, 이미 진행 중이거나 켜진 CPU에 다시 `CPU_ON`을 보내면 오류가 반환됩니다.
+
 PSCI function identifier와 인자 형태는 지원하는 PSCI 버전에 맞춰야 합니다. 클라이언트는 버전 조회와 기능 조회를 이용해 실제 펌웨어가 제공하는 계약을 확인해야 하며, 특정 SoC의 reset register나 전원 상태 인코딩을 일반적인 PSCI 예제로 제시하면 안 됩니다.
 
 ## Linux와 device tree

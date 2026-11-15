@@ -6,27 +6,33 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  chk/.style={font=\sffamily\footnotesize, text=inkc, anchor=west, align=left}
+]
 
-\node[font=\sffamily\bfseries\large] at (0,2.6) {Vendor-Locked Architecture (Today)};
+\node[font=\sffamily\bfseries\large, text=inkc] at (5.0,3.0) {Gateway로 두 망을 연결할 때};
 
-% Three vendor segments at top
-\node[con, minimum width=30mm, minimum height=14mm, align=center] (cat)  at (-5,1) {EtherCAT\\segment};
-\node[con, minimum width=30mm, minimum height=14mm, align=center] (pn)   at ( 0,1) {PROFINET\\segment};
-\node[con, minimum width=30mm, minimum height=14mm, align=center] (eip)  at ( 5,1) {EtherNet/IP\\segment};
+\node[cls, draw=impbord, fill=impfill, minimum width=32mm, minimum height=16mm, align=center] (na) at (0,1.2)
+  {\textbf{망 A}\\[2pt]\footnotesize 자체 주기·시간 기준};
+\node[cls, draw=hibord, fill=hifill, minimum width=30mm, minimum height=16mm, align=center] (gw) at (5.0,1.2)
+  {\textbf{Gateway}\\[2pt]\footnotesize 데이터 매핑·변환};
+\node[cls, draw=prpbord, fill=prpfill, minimum width=32mm, minimum height=16mm, align=center] (nb) at (10.0,1.2)
+  {\textbf{망 B}\\[2pt]\footnotesize 자체 주기·시간 기준};
 
-% Gateway middle row (small text on edges)
-\node[caption] at (-5,-0.5) {gateway};
-\node[caption] at ( 0,-0.5) {gateway};
-\node[caption] at ( 5,-0.5) {gateway};
+\draw[arr, {Latex}-{Latex}] (na.east) -- (gw.west);
+\draw[arr, {Latex}-{Latex}] (gw.east) -- (nb.west);
 
-% SCADA/MES top-of-stack
-\node[hi, minimum width=70mm, minimum height=12mm] (scada) at (0,-2.4) {상위 SCADA · MES};
+% two columns below
+\node[cls, draw=warnbord, fill=warnfill, minimum width=60mm, minimum height=26mm] (no) at (1.6,-2.0) {};
+\node[font=\sffamily\bfseries\small, text=warnbord, anchor=north west] at (no.north west) {자동으로 이어지지 않는 것};
+\node[chk] at (-1.2,-2.2) {· 기능 안전\\[2pt]· 보안\\[2pt]· 시간 기준};
 
-% Arrows down to SCADA via gateways
-\draw[arr] (cat.south) -- (scada.north -| cat.south);
-\draw[arr] (pn.south)  -- (scada.north -| pn.south);
-\draw[arr] (eip.south) -- (scada.north -| eip.south);
+\node[cls, draw=absbord, fill=absfill, minimum width=60mm, minimum height=26mm] (chk) at (8.4,-2.0) {};
+\node[font=\sffamily\bfseries\small, text=absbord, anchor=north west] at (chk.north west) {따로 설계하고 시험할 것};
+\node[chk] at (5.6,-2.2) {· 재전송·queue·변환으로 늘어난 지연\\[2pt]· 오래된 값의 표시\\[2pt]· 한쪽이 끊겼을 때 다른 쪽에 남는 값};
+
+\draw[alt] (gw.south) -- ++(0,-0.8) -| (no.north);
+\draw[alt] (gw.south) -- ++(0,-0.8) -| (chk.north);
 
 \end{tikzpicture}
 \end{document}

@@ -16,6 +16,10 @@ U-Boot에서 USB는 서로 다른 역할로 사용될 수 있습니다. USB host
 
 [10장](/blog/embedded/bootloader/chapter10-storage-boot)에서 본 저장 장치와 마찬가지로 USB도 연결 형태만으로 부팅 가능 여부가 정해지지 않습니다. ROM-level USB download는 U-Boot에 진입하기 전 SoC별 동작이고, U-Boot의 gadget/host 명령은 U-Boot가 실행된 다음의 기능입니다.
 
+![U-Boot 진입 전의 Boot ROM USB recovery와, U-Boot 실행 후 board가 USB host로 저장 장치를 읽는 경우, USB gadget으로 Fastboot·DFU·UMS를 제공하는 경우를 나눈 구성도](/images/blog/bootloader/diagrams/ch12-usb-boot-modes.svg)
+
+그림처럼 같은 USB 포트라도 boot stage와 board의 USB 역할에 따라 쓰는 명령과 확인할 설정이 달라집니다.
+
 ## USB host로 파일 읽기
 
 USB host mode에서는 U-Boot가 mass-storage 장치를 인식하고 지원되는 filesystem에서 파일을 읽을 수 있습니다. 명령과 device numbering은 driver 및 build 설정을 확인해야 합니다.

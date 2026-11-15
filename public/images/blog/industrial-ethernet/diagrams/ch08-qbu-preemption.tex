@@ -6,37 +6,61 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  tc/.style={cls, minimum width=26mm, minimum height=8mm, font=\sffamily\footnotesize},
+  mac/.style={cls, minimum width=30mm, minimum height=11mm, align=center},
+  seg/.style={rectangle, draw, line width=0.4pt, minimum height=10mm, anchor=west, inner sep=2pt, font=\sffamily\footnotesize, align=center}
+]
 
-\node[font=\sffamily\bfseries\large] at (6.5,2.6) {802.1Qbu — Frame Preemption};
+\node[font=\sffamily\bfseries\large, text=inkc] at (6.0,4.6) {802.1Qbu · 802.3br --- express와 preemptible};
 
-% --- Row 1: 정상 (no preemption) ---
-\node[caption, anchor=east, align=right] at (-0.2,1.4) {정상};
-\node[abs, minimum width=110mm, minimum height=10mm, anchor=west] (pmacFull) at (0,1.4)
-  {pMAC frame (1500 B)};
+% ---------- upper: structure ----------
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-1.6,3.6) {(a) 송신 경로};
 
-% --- Row 2: 선점 (preemption) ---
-\node[caption, anchor=east, align=right] at (-0.2,-0.2) {선점};
-\node[abs, minimum width=12mm, minimum height=10mm, anchor=west] (frag1) at (0,-0.2)
-  {\small frag1\\[1pt]\small 64 B};
-\node[hi,  minimum width=20mm, minimum height=10mm, anchor=west] (eMAC)  at (1.2,-0.2)
-  {\small eMAC\\[1pt]\small 100 B};
-\node[abs, minimum width=78mm, minimum height=10mm, anchor=west] (frag2) at (3.2,-0.2)
-  {pMAC frag2 (1436 B)};
+\node[tc, draw=hibord, fill=hifill] (tce) at (0,2.4) {express TC};
+\node[tc, draw=absbord, fill=absfill] (tcp) at (0,0.8) {preemptible TC};
 
-% Vertical drop indicating critical inserts
-\draw[arr, line width=0.7pt, dashed] (eMAC.north) -- ++(0,0.7)
-  node[caption, anchor=south] {critical 프레임 끼어듦};
+\node[mac, draw=hibord, fill=hifill] (emac) at (4.4,2.4) {eMAC\\[2pt]\footnotesize express MAC};
+\node[mac, draw=absbord, fill=absfill] (pmac) at (4.4,0.8) {pMAC\\[2pt]\footnotesize preemptible MAC};
 
-% Time axis
-\draw[arr, line width=0.6pt] (0,-1.4) -- (11.2,-1.4);
-\node[caption, anchor=west] at (11.2,-1.4) {time};
+\node[cls, draw=prpbord, fill=prpfill, minimum width=30mm, minimum height=27mm, align=center] (mm) at (8.6,1.6)
+  {MAC Merge\\[2pt]\footnotesize (802.3br)};
 
-% Legend
-\node[abs, minimum width=4mm, minimum height=4mm] (leg1) at (1.4,-2.2) {};
-\node[caption, anchor=west] at (1.7,-2.2) {pMAC (preemptable)};
-\node[hi,  minimum width=4mm, minimum height=4mm] (leg2) at (6.0,-2.2) {};
-\node[caption, anchor=west] at (6.3,-2.2) {eMAC (express, critical)};
+\node[neut, minimum width=18mm, minimum height=11mm] (phy) at (12.0,1.6) {PHY\\[2pt]\footnotesize 링크};
+
+\draw[arr] (tce.east) -- (emac.west);
+\draw[arr] (tcp.east) -- (pmac.west);
+\draw[arr] (emac.east) -- (emac.east -| mm.west);
+\draw[arr] (pmac.east) -- (pmac.east -| mm.west);
+\draw[arr] (mm.east) -- (phy.west);
+
+\node[caption, anchor=north] at (2.2,0.0) {TC마다 E/P 지정 (802.1Q-2018 6.7.2)};
+
+% ---------- lower: timeline ----------
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=west] at (-1.6,-0.8) {(b) 링크 위의 개념 timeline};
+
+\node[seg, draw=absbord, fill=absfill, minimum width=36mm] (f1) at (0,-2.6)
+  {preemptible 프레임\\[2pt]non-final fragment};
+\node[seg, draw=hibord, fill=hifill, minimum width=30mm] (ex) at (3.9,-2.6)
+  {express 프레임};
+\node[seg, draw=absbord, fill=absfill, minimum width=40mm] (f2) at (7.2,-2.6)
+  {preemptible 프레임\\[2pt]남은 fragment};
+
+% express arrival marker
+\draw[arr, draw=hibord, line width=0.7pt] (2.2,-1.6) -- (2.2,-2.05);
+\node[font=\sffamily\footnotesize, text=hibord, anchor=south] at (2.2,-1.65) {express 프레임 도착};
+
+% residual blocking brace-like marker
+\draw[draw=focusc, line width=0.6pt, |-|] (2.2,-3.45) -- (3.9,-3.45);
+\node[font=\sffamily\footnotesize, text=focusc, anchor=north, align=center] at (3.05,-3.6)
+  {잔여 blocking\\[2pt]속도·fragment 조건·구현에 따름};
+
+% time axis
+\draw[arr, line width=0.5pt] (0,-4.9) -- (12.0,-4.9);
+\node[caption, anchor=west] at (12.1,-4.9) {시간};
+
+\node[caption, anchor=north, align=center] at (6.0,-5.2)
+  {fragment 크기와 지연 값은 링크 양 끝의 지원·설정과 링크 속도로 정해지므로 그림에 수치를 두지 않습니다};
 
 \end{tikzpicture}
 \end{document}

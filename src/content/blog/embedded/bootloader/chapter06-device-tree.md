@@ -35,6 +35,10 @@ Device Tree는 U-Boot과 Linux 양쪽에서 사용하는 firmware·OS 데이터 
 
 같은 .dtb일 수도 있고 서로 다를 수도 있습니다. 특정 SoC에서 어느 방식을 쓰는지는 board build와 boot flow로 확인해야 합니다.
 
+![control DTB는 OF_EMBED·OF_SEPARATE·OF_BOARD 중 한 경로로 얻어 gd->fdt_blob을 거쳐 driver model이 쓰고, OS DTB는 부트 미디어의 파일을 fdt 명령과 runtime fixup으로 다듬은 뒤 booti로 커널에 넘기는 두 흐름](/images/blog/bootloader/diagrams/chapter06-two-dtb-flow.svg)
+
+그림의 왼쪽은 U-Boot 자신이 쓰는 control DTB, 오른쪽은 커널에 넘기는 OS DTB의 흐름이며, 아래 절에서 두 흐름을 차례로 살펴봅니다.
+
 ## control DTB를 제공하는 구성
 
 U-Boot은 Kconfig에 따라 여러 상호 배타적인 경로로 control DTB를 얻을 수 있습니다. 여기서는 공식 v2024.04 문서에 있는 세 경로를 개략적으로 소개합니다.

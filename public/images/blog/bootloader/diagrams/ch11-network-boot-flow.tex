@@ -7,41 +7,49 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  box/.style={cls, minimum width=20mm, minimum height=10mm, font=\sffamily\small},
-  pkt/.style={-{Stealth[length=2mm]}, line width=0.8pt, draw=#1}
+  actor/.style={cls, minimum width=30mm, minimum height=11mm, font=\sffamily\small},
+  msg/.style={-{Stealth[length=2mm]}, line width=0.8pt, draw=#1},
+  lab/.style={font=\sffamily\scriptsize, fill=white, inner sep=1.5pt, text=inkc},
+  stepl/.style={font=\sffamily\scriptsize, text=mutec, anchor=west, align=left}
 ]
 
 % Title
-\node[font=\sffamily\bfseries] at (3.5, 5) {네트워크 부트 흐름};
+\node[font=\sffamily\bfseries] at (6.75, 1.4) {네트워크 부트 흐름 (U-Boot 기준)};
 
-% Board side
-\node[box, draw=absbord, fill=absfill] (board) at (0, 3) {Board\\(U-Boot)};
+% Actors
+\node[actor, draw=absbord, fill=absfill] (tgt)  at (0, 0)    {Target\\[2pt]U-Boot};
+\node[actor, draw=impbord, fill=impfill] (dhcp) at (4.5, 0)  {DHCP/BOOTP\\[2pt]server};
+\node[actor, draw=clibord, fill=clifill] (tftp) at (9, 0)    {TFTP\\[2pt]server};
+\node[actor, draw=hibord,  fill=hifill]  (nfs)  at (13.5, 0) {NFS\\[2pt]server};
 
-% Server side
-\node[box, draw=impbord, fill=impfill] (dhcp) at (7, 4) {DHCP\\Server};
-\node[box, draw=clibord, fill=clifill] (tftp) at (7, 2) {TFTP\\Server};
-\node[box, draw=hibord, fill=hifill] (nfs) at (7, 0) {NFS\\Server};
+% Lifelines
+\foreach \x/\c in {0/absbord, 4.5/impbord, 9/clibord, 13.5/hibord}
+  \draw[draw=\c, densely dashed, line width=0.5pt] (\x, -0.6) -- (\x, -8.6);
 
-% DHCP flow
-\draw[pkt=absbord] (board.east) ++(0, 0.3) -- ++(1.5, 0) |- node[above, pos=0.25, font=\sffamily\tiny] {DISCOVER} (dhcp.west);
-\draw[pkt=impbord] (dhcp.west) ++(0, -0.3) -- ++(-1.5, 0) |- node[below, pos=0.25, font=\sffamily\tiny] {OFFER + next-server} ([yshift=0.1cm]board.east);
+% (1) DHCP
+\draw[msg=absbord] (0, -1.3) -- node[lab, above=1pt] {\texttt{dhcp}: DISCOVER · REQUEST} (4.5, -1.3);
+\draw[msg=impbord] (4.5, -2.2) -- node[lab, above=1pt] {OFFER · ACK} node[lab, below=1pt] {주소, server, bootfile} (0, -2.2);
 
-% TFTP flow
-\draw[pkt=absbord] ([yshift=-0.2cm]board.east) -- node[above, font=\sffamily\tiny] {tftp Image} ([yshift=0.2cm]tftp.west);
-\draw[pkt=clibord] ([yshift=-0.2cm]tftp.west) -- node[below, font=\sffamily\tiny] {kernel + dtb} ([yshift=-0.4cm]board.east);
+% (2) PXE config (optional)
+\draw[msg=absbord] (0, -3.6) -- node[lab, above=1pt, pos=0.7] {\texttt{pxe get}: config 요청} (9, -3.6);
+\draw[msg=clibord] (9, -4.4) -- node[lab, above=1pt, pos=0.3] {extlinux 형식 config} (0, -4.4);
 
-% NFS flow (after boot)
-\draw[pkt=absbord, densely dashed] ([yshift=-0.6cm]board.east) -- node[above, font=\sffamily\tiny, text=mutec] {mount rootfs} (nfs.west);
+% (3) File transfer
+\draw[msg=absbord] (0, -5.6) -- node[lab, above=1pt, pos=0.7] {\texttt{tftpboot \$\{kernel\_addr\_r\} Image}} (9, -5.6);
+\draw[msg=clibord] (9, -6.4) -- node[lab, above=1pt, pos=0.3] {kernel · DTB를 RAM 주소로} (0, -6.4);
 
-% Timeline labels
-\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-1.5, 4) {1. IP 획득};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-1.5, 2.5) {2. 커널 다운로드};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-1.5, 0) {3. rootfs 마운트};
+% Handoff separator
+\draw[draw=neutbord, line width=0.4pt] (-1.6, -7.05) -- (15.1, -7.05);
+\node[font=\sffamily\scriptsize, text=mutec, fill=white, inner sep=2pt] at (2.25, -7.05) {kernel로 handoff};
 
-% Note
-\node[font=\sffamily\footnotesize, text=mutec, align=left, anchor=north west] at (-1.5, -1) {%
-TFTP: UDP/69, 인증 없음\\
-NFS: ip=dhcp in bootargs 필수};
+% (4) NFS root — kernel stage, separate configuration
+\draw[msg=hibord, densely dashed] (0, -7.9) -- node[lab, above=1pt, pos=0.75] {kernel이 NFS root mount (별도 설정)} (13.5, -7.9);
+
+% Step labels
+\node[stepl] at (15.3, -1.75) {\textbf{1} 주소와\\[2pt]boot metadata};
+\node[stepl] at (15.3, -4.0)  {\textbf{2} PXE 사용 시\\[2pt]config 읽기};
+\node[stepl] at (15.3, -6.0)  {\textbf{3} 파일 전송};
+\node[stepl] at (15.3, -7.9)  {\textbf{4} kernel 단계};
 
 \end{tikzpicture}
 \end{document}

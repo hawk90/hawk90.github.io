@@ -71,6 +71,10 @@ GSDML은 IO-Device의 식별자, 모듈·서브모듈 구성, 통신 기능 등�
 
 IO-Controller는 제어 애플리케이션을 실행하고 IO-Device와 통신 관계를 설정합니다. 주기 통신에서는 Controller와 Device가 각각 provider가 되어 독립적으로 데이터를 보냅니다. Device가 매번 Controller의 요청을 받은 뒤 응답하는 polling 그림으로 해석하면 수신 누락 분석이 어긋납니다.
 
+![IO-Controller와 IO-Device 사이의 AR 안에 출력·입력 IO data CR, record data CR, alarm CR이 있고 IO-Supervisor는 시운전·진단을 위해 연결되는 구조](/images/blog/industrial-ethernet/diagrams/ch06-profinet-hierarchy.svg)
+
+그림처럼 IO data CR의 출력과 입력은 provider가 서로 다르며, record와 alarm은 같은 AR 안의 별도 CR로 오갑니다.
+
 IO-Supervisor는 엔지니어링과 진단에 참여합니다. 사용하는 서비스에 따라 통신 경로가 달라지므로 “모든 Supervisor 트래픽은 TCP/IP”라고 일반화하지 않습니다. 특히 DCP는 IP 없이 동작하는 L2 서비스입니다. 주기 데이터는 PROFINET IO 데이터라고 부르며 EtherCAT의 PDO라는 이름을 그대로 붙이지 않습니다.
 
 | 작업 | 통신 관점 |

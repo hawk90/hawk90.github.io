@@ -7,50 +7,51 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  reg/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=44mm, inner sep=4pt, align=center, font=\sffamily\footnotesize},
-  sram/.style={reg, fill=clifill, draw=clibord},
-  ubox/.style={reg, fill=hifill, draw=hibord},
-  dead/.style={reg, fill=neutfill, draw=neutbord, text=mutec},
-  tit/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
-  sub/.style={font=\sffamily\footnotesize\itshape, text=mutec, align=center},
-  addr/.style={font=\sffamily\scriptsize\ttfamily, text=mutec, anchor=west}
+  stp/.style={cls, minimum width=72mm, text width=68mm, minimum height=10mm, align=center, font=\sffamily\footnotesize, inner sep=3pt, draw=absbord, fill=absfill},
+  hk/.style={stp, draw=hibord, fill=hifill},
+  fin/.style={stp, draw=impbord, fill=impfill, font=\sffamily\bfseries\footnotesize},
+  reg/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=56mm, text width=52mm, minimum height=8mm, inner sep=2pt, align=center, font=\sffamily\footnotesize},
+  top/.style={reg, fill=neutfill, draw=neutbord},
+  ub/.style={reg, fill=hifill, draw=hibord, minimum height=11mm},
+  low/.style={reg, fill=clifill, draw=clibord},
+  ptr/.style={font=\sffamily\scriptsize\ttfamily, text=focusc, anchor=west},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  sub/.style={font=\sffamily\footnotesize, text=mutec, align=center}
 ]
 
-% Left column — board_init_f
-\node[tit] at (0, 9.6) {board\_init\_f (pre-reloc)};
-\node[sub] at (0, 9.0) {SoC SRAM에서 실행};
+% ── Left: board_init_f flow ──
+\node[hdr] at (0, 10.9) {\texttt{board\_init\_f()} — \texttt{init\_sequence\_f}};
+\node[sub] at (0, 10.35) {항목은 \texttt{CONFIG}·architecture 조건부};
 
-\node[sram, minimum height=8mm]  (s_text) at (0, 7.8) {text (U-Boot 코드)};
-\node[sram, minimum height=6mm, below=0pt of s_text]  (s_data) {data};
-\node[sram, minimum height=6mm, below=0pt of s_data]  (s_bss)  {bss};
-\node[sram, minimum height=6mm, below=0pt of s_bss]   (s_stk)  {stack (작음)};
-\node[sram, minimum height=6mm, below=0pt of s_stk]   (s_mal)  {malloc (작음)};
+\node[stp] (s1) at (0, 9.2) {\texttt{setup\_mon\_len} · \texttt{fdtdec\_setup} (OF\_CONTROL)};
+\node[stp] (s2) at (0, 7.9) {\texttt{initf\_malloc} · \texttt{log\_init} · \texttt{initf\_dm}};
+\node[hk]  (s3) at (0, 6.6) {\texttt{arch\_cpu\_init} · \texttt{board\_early\_init\_f} 등 hook};
+\node[hk]  (s4) at (0, 5.3) {\texttt{dram\_init} — DRAM 설정};
+\node[stp] (s5) at (0, 4.0) {\texttt{setup\_dest\_addr} → \texttt{reserve\_*} (오른쪽 그림)};
+\node[stp] (s6) at (0, 2.7) {\texttt{reloc\_fdt} · \texttt{setup\_reloc} (\texttt{gd->reloc\_off})};
+\node[stp, draw=neutbord, fill=neutfill] (s7) at (0, 1.4) {architecture relocation path\\[2pt]\scriptsize (예: Arm \texttt{crt0}의 \texttt{relocate\_code})};
+\node[fin] (s8) at (0, 0.0) {\texttt{board\_init\_r()} — \texttt{init\_sequence\_r}};
 
-\node[addr] at (2.6, 7.8) {0x920000};
-\node[addr] at (2.6, 5.3) {SoC SRAM 128KB};
+\foreach \a/\b in {s1/s2, s2/s3, s3/s4, s4/s5, s5/s6, s6/s7, s7/s8}
+  \draw[flow] (\a) -- (\b);
 
-\node[dead, minimum height=14mm] (s_dram) at (0, 2.8) {DRAM\\[3pt] (사용 불가)};
-\node[addr] at (2.6, 2.8) {0x40000000};
+% ── Right: top-down reservation order ──
+\node[hdr] at (9.0, 10.9) {DRAM 위쪽 예약 순서 (위 → 아래)};
+\node[sub] at (9.0, 10.35) {크기 비례 아님 · 영역 일부 생략};
 
-% Right column — board_init_r
-\node[tit] at (10, 9.6) {board\_init\_r (post-reloc)};
-\node[sub] at (10, 9.0) {DRAM의 맨 위로 옮겨감};
+\node[top] (r0) at (9.0, 9.2) {\texttt{reserve\_video} · \texttt{reserve\_trace} 등\\[2pt]\scriptsize (구성에 따라)};
+\node[ub, below=0pt of r0] (r1) {U-Boot code · data · bss\\[2pt]\scriptsize \texttt{reserve\_uboot}: \texttt{mon\_len}만큼, 4 KiB 정렬};
+\node[low, below=0pt of r1] (r2) {malloc — \texttt{reserve\_malloc}};
+\node[low, below=0pt of r2] (r3) {bd · gd\\[2pt]\scriptsize \texttt{reserve\_board} · \texttt{reserve\_global\_data}};
+\node[low, below=0pt of r3] (r4) {FDT — \texttt{reserve\_fdt}};
+\node[low, below=0pt of r4] (r5) {stack — \texttt{reserve\_stacks}};
+\node[reg, draw=neutbord, fill=white, text=mutec, minimum height=14mm, below=0pt of r5] (r6) {나머지 DRAM};
 
-\node[dead, minimum height=10mm] (r_sram) at (10, 7.8) {SoC SRAM\\[3pt] (해제됨)};
-
-\node[ubox, minimum height=8mm]  (r_free) at (10, 5.8) {빈 영역 (커널 적재)};
-\node[ubox, minimum height=6mm, below=0pt of r_free]  (r_mal)  {malloc (큼)};
-\node[ubox, minimum height=6mm, below=0pt of r_mal]   (r_stk)  {stack (큼)};
-\node[ubox, minimum height=6mm, below=0pt of r_stk]   (r_bss)  {bss};
-\node[ubox, minimum height=6mm, below=0pt of r_bss]   (r_data) {data};
-\node[ubox, minimum height=8mm, below=0pt of r_data]  (r_text) {text (relocated)};
-
-\node[addr] at (12.6, 5.8) {0x40000000};
-\node[addr] at (12.6, 1.0) {0xBFE00000};
-\node[addr] at (12.6, 0.4) {(relocaddr)};
-
-% Relocation arrow — far above so it doesn't cross labels
-\draw[focus] (s_text.north) to[bend left=25] node[font=\sffamily\footnotesize\bfseries, text=focusc, midway, above] {relocate\_code} (r_text.west);
+% pointers on the right edge
+\draw[draw=focusc, line width=0.5pt] (r0.north east) -- ++(0.4, 0) node[ptr] {\texttt{gd->ram\_top}};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at ($(r0.north east)+(0.5,-0.4)$) {(\texttt{setup\_dest\_addr}: usable RAM top)};
+\draw[draw=focusc, line width=0.5pt] (r1.south east) -- ++(0.4, 0) node[ptr] {\texttt{gd->relocaddr}};
+\draw[draw=focusc, line width=0.5pt] (r5.south east) -- ++(0.4, 0) node[ptr] {\texttt{gd->start\_addr\_sp}};
 
 \end{tikzpicture}
 \end{document}

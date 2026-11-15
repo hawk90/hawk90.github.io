@@ -4,25 +4,46 @@
 \setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+
+% FreeRTOS V11.2.0 GCC/ARM_CM4F 기준.
+% 출처: portable/GCC/ARM_CM4F/port.c
+%   - vPortValidateInterruptPriority: configASSERT( ucCurrentPriority >= ucMaxSysCallPriority ),
+%     "default priority of zero ... guaranteed to be invalid"
+%   - portNVIC_PENDSV_PRI / portNVIC_SYSTICK_PRI = portMIN_INTERRUPT_PRIORITY (255)
+% portmacro.h: ulPortRaiseBASEPRI / vPortRaiseBASEPRI가 BASEPRI에 configMAX_SYSCALL_INTERRUPT_PRIORITY를 씀
+% 0x50 예시: 글 본문 (priority bit 4개, 논리 threshold 5)
+
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog, x=1cm, y=1cm,
-  band/.style={cls, align=center, font=\sffamily\footnotesize, minimum width=88mm, minimum height=12mm, draw=edgec, line width=0.4pt},
-  hard/.style={band, fill=warnfill!50},
-  divider/.style={band, fill=hifill, minimum height=10mm},
-  kernel/.style={band, fill=okfill!60}
+\begin{tikzpicture}[blog,
+  band/.style={rectangle, rounded corners=2pt, align=center, font=\sffamily\small,
+               minimum width=104mm, minimum height=16mm, line width=0.4pt},
+  hard/.style={band, draw=warnbord, fill=warnfill},
+  line/.style={band, draw=hibord, fill=hifill, minimum height=13mm},
+  ok/.style={band, draw=okbord, fill=okfill},
+  kern/.style={band, draw=neutbord, fill=neutfill, minimum height=11mm},
+  side/.style={font=\sffamily\footnotesize, text=mutec, align=left, anchor=west}
 ]
 
-% Top: highest priority (lowest value)
-\node[hard] (h) at (0, 4) {0 (highest) — Hard real-time IRQ\\[1pt]\scriptsize FreeRTOS API 금지};
+\node[hard] (h) at (0, 4.2)
+  {\textbf{register 값 < threshold}\\[2pt]\footnotesize FreeRTOS API 호출 금지 · BASEPRI critical section이 막지 않음\\[2pt]\footnotesize 설정하지 않은 기본 priority 0도 여기에 속함 (예: \texttt{NVIC\_SetPriority(UART1\_IRQn, 0)})};
 
-\node[divider] (mid) at (0, 2.5) {0xBF (191) — configMAX\_SYSCALL\_INTERRUPT\_PRIORITY\\[1pt]\scriptsize 위쪽: API 금지 — 아래쪽: FromISR 호출 OK};
+\node[line] (t) at (0, 2.3)
+  {\textbf{threshold = configMAX\_SYSCALL\_INTERRUPT\_PRIORITY}\\[2pt]\footnotesize BASEPRI에 쓰는 encoded 값 (예: priority bit 4개 · 논리 5 → 0x50)};
 
-\node[kernel] (k) at (0, 1.0) {0xFF (255) — Kernel · Tick · SysCall (lowest)};
+\node[ok] (k) at (0, 0.4)
+  {\textbf{register 값 ≥ threshold}\\[2pt]\footnotesize \texttt{*FromISR} API 호출 가능 · critical section 동안 mask됨};
 
-% Direction labels
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (5.0, 4) {Priority value 작음 (높은 우선순위)};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (5.0, 1.0) {Priority value 큼 (낮은 우선순위)};
+\node[kern] (p) at (0, -1.3)
+  {PendSV · SysTick — port.c가 가장 낮은 priority로 설정};
+
+% urgency axis on the left
+\draw[-{Stealth[length=2.6mm]}, draw=edgec, line width=0.6pt] (-6.0, -1.7) -- (-6.0, 5.0);
+\node[side, anchor=south] at (-6.0, 5.1) {긴급도 높음};
+\node[side, anchor=north] at (-6.0, -1.8) {긴급도 낮음};
+
+\node[side, anchor=west] at (-5.2, -2.6)
+  {priority register 값이 작을수록 긴급합니다. threshold와 같은 값도 critical section 동안 mask됩니다.};
 
 \end{tikzpicture}
 \end{document}

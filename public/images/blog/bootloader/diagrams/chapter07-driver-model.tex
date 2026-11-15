@@ -7,33 +7,55 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  box/.style={cls, minimum width=78mm, minimum height=18mm, align=center, font=\footnotesize, inner sep=4pt},
+  box/.style={cls, minimum width=66mm, text width=62mm, minimum height=15mm, align=center, font=\sffamily\footnotesize, inner sep=4pt},
   uclassB/.style={box, fill=absfill, draw=absbord},
   driverB/.style={box, fill=impfill, draw=impbord},
-  devB/.style={box, fill=hifill, draw=hibord},
-  side/.style={font=\scriptsize\itshape, text=mutec, anchor=west},
-  rel/.style={font=\scriptsize, anchor=west, text=mutec}
+  devB/.style={box, fill=hifill, draw=hibord, minimum width=50mm, text width=46mm},
+  stg/.style={cls, minimum width=46mm, text width=42mm, minimum height=14mm, align=center, font=\sffamily\footnotesize, inner sep=4pt},
+  rel/.style={font=\sffamily\scriptsize, text=mutec, fill=white, inner sep=1.5pt},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, anchor=west}
 ]
 
-\node[uclassB] (uc) at (0, 6) {%
-  \textbf{uclass (인터페이스)}\\[2pt]
-  class별 operation 시그니처 정의};
-\node[side] at (uc.east) {\,UCLASS\_MMC, UCLASS\_GPIO, \ldots};
+% ── Part 1: three elements ──
+\node[hdr] at (-3.0, 9.4) {세 요소의 관계 (같은 MMC driver를 쓰는 controller 두 개)};
 
-\node[driverB] (drv) at (0, 3) {%
-  \textbf{driver (구현)}\\[2pt]
-  특정 hardware의 코드\\[2pt]
-  compatible string으로 device와 매칭};
-\node[side] at (drv.east) {\,fsl\_esdhc, mvneta, \ldots};
+\node[uclassB] (uc) at (4.5, 7.6) {%
+  \textbf{uclass} — 같은 종류 device의 공통 interface\\[2pt]
+  \scriptsize 예: \texttt{UCLASS\_MMC}, \texttt{UCLASS\_GPIO}};
 
-\node[devB] (dev) at (0, 0) {%
-  \textbf{udevice (인스턴스)}\\[2pt]
-  DT 노드 1개당 udevice 1개\\[2pt]
-  driver\_data + 보드 상태 보관};
-\node[side] at (dev.east) {\,mmc@30b40000, eth@30be0000, \ldots};
+\node[devB] (d0) at (0.5, 4.6) {%
+  \textbf{device} (\texttt{udevice})\\[2pt]
+  MMC controller 0의 instance};
+\node[devB] (d1) at (8.5, 4.6) {%
+  \textbf{device} (\texttt{udevice})\\[2pt]
+  MMC controller 1의 instance};
 
-\draw[flow] (uc.south) -- node[rel, right] {\,구현} (drv.north);
-\draw[flow] (drv.south) -- node[rel, right] {\,인스턴스화} (dev.north);
+\node[driverB] (drv) at (4.5, 1.6) {%
+  \textbf{driver} — hardware-specific 동작 구현\\[2pt]
+  \scriptsize 하나의 구현을 여러 instance가 사용};
+
+\draw[uses] (d0) -- node[rel] {소속} (uc);
+\draw[uses] (d1) -- node[rel] {소속} (uc);
+\draw[uses] (d0) -- node[rel] {사용} (drv);
+\draw[uses] (d1) -- node[rel] {사용} (drv);
+
+% ── Part 2: bind and probe ──
+\node[hdr] at (-3.0, -0.6) {DT 구성에서 device가 쓸 수 있게 되기까지};
+
+\node[stg, draw=prpbord, fill=prpfill] (dt) at (-0.5, -2.4) {%
+  \textbf{DT node}\\[2pt]
+  \texttt{compatible} $\leftrightarrow$\\[2pt] driver의 matching data};
+\node[stg, draw=clibord, fill=clifill] (bind) at (4.5, -2.4) {%
+  \textbf{bind}\\[2pt]
+  instance와 부모-자식 관계를\\[2pt] driver model에 등록};
+\node[stg, draw=impbord, fill=impfill] (probe) at (9.5, -2.4) {%
+  \textbf{probe}\\[2pt]
+  driver와 관련 자원을 초기화해\\[2pt] 사용 가능 상태로};
+
+\draw[flow] (dt) -- (bind);
+\draw[flow] (bind) -- (probe);
+
+\node[caption, text width=150mm] at (4.5, -4.0) {probe 시점은 uclass lookup, \texttt{DM\_FLAG\_PROBE\_AFTER\_BIND}, 단계별 초기화 정책에 따라 달라집니다.\\[2pt] bind가 됐다고 해서 clock·reset·pinctrl·parent bus까지 정상이라는 뜻은 아닙니다.};
 
 \end{tikzpicture}
 \end{document}

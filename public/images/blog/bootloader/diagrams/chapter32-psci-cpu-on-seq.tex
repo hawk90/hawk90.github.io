@@ -7,46 +7,55 @@
 \begin{document}
 \input{../../_design.tex}
 \input{../../_design-sequence.tex}
+% Sources (verified):
+%   TF-A lib/psci/psci_main.c  psci_cpu_on() -> is_valid_mpidr, psci_validate_entry_point
+%   TF-A lib/psci/psci_on.c    cpu_on_validate_state(), pwr_domain_on hook, psci_cpu_on_finish()
+%   TF-A lib/psci/psci_common.c psci_get_ns_ep_info(): ep->args.arg0 = context_id
+%   TF-A include/lib/psci/psci.h PSCI_E_* return codes
+%   Linux arch/arm64/kernel/smp.c __cpu_up(): boot_secondary() then wait, cpu_online()
 \begin{tikzpicture}[blog, seq]
 
-% Actors (top)
-\node[actor]    (p)  at (0,   0) {Primary CPU\\(EL1)};
-\node[actorAlt] (b)  at (6,   0) {BL31\\(EL3)};
-\node[actorWarn] (sc) at (12,  0) {SoC reset\\controller};
-\node[actor]    (s)  at (17,  0) {Secondary\\CPU};
+% Actors
+\node[actor]     (p) at (0,    0) {Linux\\[2pt]호출 CPU};
+\node[actorAlt]  (f) at (6.8,  0) {PSCI firmware\\[2pt](EL3, 예: TF-A BL31)};
+\node[actorWarn] (c) at (12.6, 0) {플랫폼 전원 제어\\[2pt](SoC별 코드)};
+\node[actor]     (s) at (17.6, 0) {대상 CPU};
 
-% Lifelines
-\draw[lifeline] (p)  -- ++(0,-9.2);
-\draw[lifeline] (b)  -- ++(0,-9.2);
-\draw[lifeline] (sc) -- ++(0,-9.2);
-\draw[lifeline] (s)  -- ++(0,-9.2);
+\foreach \n in {p,f,c,s} { \draw[lifeline] (\n) -- ++(0,-9.6); }
 
-% Messages — keep y separated by >=0.9 so labels do not collide
+% 1. request
+\draw[msgsync] (p |- 0,-1.4) -- node[msglabel]{SMC/HVC: \texttt{CPU\_ON}(target, entry, context)} (f |- 0,-1.4);
 
-% 1. SMC trap
-\draw[msgsync] (p |- 0,-1.2) -- node[msglabel]{\texttt{smc \#0} : CPU\_ON(target, entry, ctx)} (b |- 0,-1.2);
+% 2. validation (self message on firmware)
+\draw[msgself] (f |- 0,-2.2) -- ++(0.9,0) |- (f |- 0,-2.9);
+\node[font=\sffamily\footnotesize, text=inkc, anchor=west, align=left] at ($(f |- 0,-2.55)+(1.05,0)$)
+  {target·entry 검증\\[2pt]대상 상태가 OFF인지 확인};
 
-% 2. validate inputs (self-message on BL31)
-\draw[msgsync] (b |- 0,-2.3) -- ++(1.2,0) |- node[msglabel, pos=0.25]{validate MPIDR / entry} (b |- 0,-3.0);
+% 3. platform hook
+\draw[msgsync] (f |- 0,-3.9) -- node[msglabel]{\texttt{pwr\_domain\_on}(target)} (c |- 0,-3.9);
 
-% 3. pwr_domain_on → SoC SRC
-\draw[msgsync] (b |- 0,-4.0) -- node[msglabel]{pwr\_domain\_on()\\write SRC reset register} (sc |- 0,-4.0);
+% 4. power / reset release
+\draw[msgasync] (c |- 0,-4.9) -- node[msglabel]{전원·reset 해제} (s |- 0,-4.9);
 
-% 4. reset deassert → secondary CPU starts
-\draw[msgasync] (sc |- 0,-5.0) -- node[msglabel]{reset deassert} (s |- 0,-5.0);
+% 5. return to caller
+\draw[msgret] (f |- 0,-5.9) -- node[msglabel, align=center]{\texttt{PSCI\_E\_SUCCESS} 또는 오류\\[2pt]\texttt{ALREADY\_ON}, \texttt{ON\_PENDING}, \texttt{INVALID\_PARAMS} 등} (p |- 0,-5.9);
 
-% 5. SMC return (PSCI_SUCCESS)
-\draw[msgret] (b |- 0,-6.0) -- node[msglabel]{PSCI\_SUCCESS} (p |- 0,-6.0);
+% 6. warm boot path on target
+\draw[msgself] (s |- 0,-6.9) -- ++(-0.9,0) |- (s |- 0,-7.5);
+\node[font=\sffamily\footnotesize, text=inkc, anchor=east, align=right] at ($(s |- 0,-7.2)+(-1.05,0)$)
+  {firmware warm boot 경로\\[2pt]플랫폼 마무리 후 상태 ON};
 
-% 6. Secondary enters BL31 warm boot
-\draw[msgsync] (s |- 0,-7.0) -- ++(-1.5,0) |- node[msglabel, pos=0.25]{warm boot entry} (s |- 0,-7.7);
+% 7. enter caller entry
+\draw[msgself] (s |- 0,-8.0) -- ++(-0.9,0) |- (s |- 0,-8.6);
+\node[font=\sffamily\footnotesize, text=inkc, anchor=east, align=right] at ($(s |- 0,-8.3)+(-1.05,0)$)
+  {요청한 entry로 진입 (x0 = context)};
 
-% 7. Secondary jumps to caller-provided entry
-\draw[msgsync] (s |- 0,-8.7) -- ++(-1.5,0) |- node[msglabel, pos=0.25]{br x4 = entry\\x0 = ctx} (s |- 0,-9.0);
+% 8. OS-level online is a separate step
+\draw[msgasync] (s |- 0,-9.3) -- node[msglabel]{secondary 초기화 완료 후 Linux online (별도 단계)} (p |- 0,-9.3);
 
-% Note explaining async nature (place to the left, away from message labels)
-\node[seqnote, anchor=north west] at (-2.5, -7.0)
-  {SMC는 \texttt{PSCI\_SUCCESS}로\\[2pt]즉시 return하지만\\[2pt]secondary는 비동기로\\[2pt]entry에 도착한다.};
+% Note
+\node[seqnote, anchor=north west] at (0.3,-6.75)
+  {SUCCESS 반환은 요청이\\[2pt]접수됐다는 뜻입니다.\\[2pt]Linux online 여부는\\[2pt]따로 확인합니다.};
 
 \end{tikzpicture}
 \end{document}

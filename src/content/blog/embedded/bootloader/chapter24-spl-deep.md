@@ -22,6 +22,10 @@ U-Boot 문서는 TPL(초기 단계), VPL(선택적 검증 단계), SPL(2차 로�
 
 SPL은 SDRAM 초기화와 다음 단계 적재를 맡을 수 있지만, 항상 U-Boot proper만 적재하는 것은 아닙니다. 공식 문서는 SPL이 ARM Trusted Firmware BL31, EDK II, Linux 또는 RISC-V OpenSBI 등으로 이어지는 경우도 설명합니다. 실제 선택은 보드의 boot flow와 이미지 패키징에서 확인하세요.
 
+![Boot ROM에서 선택적 TPL·VPL을 거쳐 SPL로 이어지고 SPL이 U-Boot proper, TF-A BL31, EDK II, Linux kernel, RISC-V OpenSBI 중 하나를 적재하는 흐름과, Kconfig·phase별 device tree·linker script가 SPL 빌드 산출물을 만들고 이를 보드 자료와 대조하는 구조도](/images/blog/bootloader/diagrams/ch24-spl-sram-layout.svg)
+
+그림의 위쪽은 U-Boot 문서가 설명하는 phase 흐름이고, 아래쪽은 이 글에서 다루는 실행 위치와 크기를 고정 주소 대신 빌드 입력과 산출물로 확인하는 순서입니다.
+
 ## 메모리와 코드 크기
 
 초기 프로그램이 SRAM에서 실행되는지, 어느 시점에 SDRAM이 준비되는지, 각 이미지와 stack/BSS가 차지하는 공간은 보드별 메모리 맵과 linker map에 달려 있습니다. 모든 SPL이 “DDR 없는 SRAM”에서만 실행한다거나, 특정 SRAM 용량 범위에 들어간다고 단정하지 않습니다. 정확한 시작 주소·최대 크기·예약 영역이 필요하면 보드 defconfig, linker script, ROM 요구 사항과 해당 빌드의 map 파일을 함께 확인합니다.

@@ -7,58 +7,47 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  stage/.style={cls, minimum width=30mm, minimum height=9mm, font=\sffamily\small},
-  check/.style={diamond, draw=nodebord, fill=warnfill, aspect=2, inner sep=1pt, font=\sffamily\scriptsize}
+  src/.style={cls, minimum width=62mm, text width=58mm, minimum height=9mm, align=center, font=\sffamily\footnotesize, inner sep=3pt, draw=absbord, fill=absfill},
+  cfg/.style={cls, minimum width=62mm, text width=58mm, minimum height=14mm, align=center, font=\sffamily\footnotesize, inner sep=3pt, draw=prpbord, fill=prpfill},
+  stg/.style={cls, minimum width=70mm, text width=66mm, minimum height=11mm, align=center, font=\sffamily\footnotesize, inner sep=3pt, draw=clibord, fill=clifill, dashed},
+  chk/.style={cls, minimum width=70mm, text width=66mm, minimum height=11mm, align=center, font=\sffamily\footnotesize, inner sep=3pt, draw=impbord, fill=impfill},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  sub/.style={font=\sffamily\footnotesize, text=mutec, align=center}
 ]
 
-% Title
-\node[font=\sffamily\bfseries] at (0, 6.5) {DDR 초기화 시퀀스};
+% ── Left: where board-specific settings come from ──
+\node[hdr] at (0, 9.6) {보드별 설정의 출처};
+\node[sub] at (0, 9.05) {한 세트로 고정해 대조};
 
-% Stages - left column (Controller)
-\node[stage, draw=absbord, fill=absfill] (pll) at (-2.5, 5) {PLL Lock};
-\node[stage, draw=absbord, fill=absfill] (ctrl) at (-2.5, 3.5) {Controller Reset};
-\node[stage, draw=absbord, fill=absfill] (phy) at (-2.5, 2) {PHY 초기화};
-\node[stage, draw=impbord, fill=impfill] (mrs) at (-2.5, 0.5) {MRS 설정};
+\node[src] (a1) at (0, 8.0) {DRAM 부품 데이터시트 · 해당 세대 표준};
+\node[src] (a2) at (0, 6.9) {SoC 기술 문서 (controller · PHY 구성)};
+\node[src] (a3) at (0, 5.8) {보드 회로 · 배선 자료};
+\node[src] (a4) at (0, 4.7) {공급업체 설정 도구 ·\\[2pt] 검증된 reference configuration};
 
-% Stages - right column (Training)
-\node[stage, draw=clibord, fill=clifill] (zq) at (2.5, 5) {ZQ Calibration};
-\node[stage, draw=clibord, fill=clifill] (wl) at (2.5, 3.5) {Write Leveling};
-\node[stage, draw=clibord, fill=clifill] (rl) at (2.5, 2) {Read Leveling};
-\node[stage, draw=hibord, fill=hifill] (done) at (0, -1) {정상 동작};
+\node[cfg] (cfg) at (0, 2.4) {%
+  \textbf{보드별 DRAM 설정}\\[2pt]
+  \scriptsize 형식은 platform별: C 자료 구조 · register/value 목록 ·\\[1pt]
+  \scriptsize firmware image · Device Tree 등};
 
-% Check node
-\node[check] (chk) at (2.5, 0.5) {Pass?};
+\node[fit=(a1)(a4), draw=groupbord, rounded corners=3pt, inner sep=5pt] (srcs) {};
+\draw[flow] (srcs.south) -- (cfg.north);
 
-% Arrows - left column
-\draw[arr] (pll) -- (ctrl);
-\draw[arr] (ctrl) -- (phy);
-\draw[arr] (phy) -- (mrs);
+% ── Right: steps an init may include ──
+\node[hdr] at (9.0, 9.6) {초기화에 포함될 수 있는 단계};
+\node[sub] at (9.0, 9.05) {단계 · 순서 · 대기 시간은 대상 구현을 따름};
 
-% Arrow from left to right
-\draw[arr] (mrs.east) -- ++(1, 0) |- (zq.west);
+\node[stg] (b1) at (9.0, 8.0) {전원 · clock 안정화};
+\node[stg] (b2) at (9.0, 6.6) {controller · PHY 설정};
+\node[stg] (b3) at (9.0, 5.2) {DRAM mode 설정};
+\node[stg] (b4) at (9.0, 3.8) {보정 또는 training\\[2pt]\scriptsize PHY · controller가 지원하는 절차만};
+\node[stg] (b5) at (9.0, 2.4) {메모리 사용 준비\\[2pt]\scriptsize ECC 초기화 · scrub은 구현 · 정책 확인 후};
+\node[chk] (b6) at (9.0, 0.8) {초기화 성공 뒤, 허용된 범위에서 검증\\[2pt]\scriptsize 예: U-Boot \texttt{mtest}, Linux \texttt{memtester}};
 
-% Arrows - right column
-\draw[arr] (zq) -- (wl);
-\draw[arr] (wl) -- (rl);
-\draw[arr] (rl) -- (chk);
+\foreach \a/\b in {b1/b2, b2/b3, b3/b4, b4/b5, b5/b6}
+  \draw[flow] (\a) -- (\b);
 
-% Check outcomes
-\draw[arr] (chk.south) -- node[right, font=\sffamily\tiny, text=impbord] {Yes} (chk |- done.north) -- (done.north);
-\node[font=\sffamily\tiny, text=conbord, anchor=west] at (3.3, 0.5) {No: Hang};
-
-% Labels
-\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.3, 5) {clock 안정화};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.3, 3.5) {DDRC 레지스터};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.3, 2) {DWC/Cadence};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=east] at (-4.3, 0.5) {CL, BL 등};
-
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (4.3, 5) {임피던스 보정};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (4.3, 3.5) {DQS 정렬};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (4.3, 2) {sampling window};
-
-% Section labels
-\node[font=\sffamily\footnotesize\bfseries, text=absbord] at (-2.5, 5.8) {Controller Setup};
-\node[font=\sffamily\footnotesize\bfseries, text=clibord] at (2.5, 5.8) {PHY Training};
+\node[fit=(b1)(b5), draw=groupbord, rounded corners=3pt, inner sep=5pt] (stgs) {};
+\draw[uses] (cfg.east) -- node[font=\sffamily\scriptsize, text=mutec, above] {적용} (cfg.east -| stgs.west);
 
 \end{tikzpicture}
 \end{document}

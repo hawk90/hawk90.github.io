@@ -8,27 +8,28 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-\node[font=\sffamily\bfseries\large] at (0,4.6) {EtherCAT Ecosystem};
+\node[font=\sffamily\bfseries\large] at (0,4.6) {EtherCAT 생태계 — 이 글에서 다루는 범위};
 
 % ETG umbrella
-\node[abs, minimum width=110mm, minimum height=24mm, align=left, inner sep=8pt] (etg) at (0,2.7)
-  {\textbf{ETG (EtherCAT Technology Group) — 표준 관리}\\[2pt]
-   $\bullet$ IEC 61158 / 61784 표준\\
-   $\bullet$ 6000+ 회원사\\
-   $\bullet$ vendor ID 발급, conformance test};
+\node[abs, minimum width=110mm, minimum height=22mm, align=center, inner sep=8pt] (etg) at (0,2.7)
+  {\textbf{ETG (EtherCAT Technology Group)}\\[4pt]
+   기술 보급 · 상호운용 생태계 운영\\[2pt]
+   IEC 61158 국제 표준에 포함};
 
 % Two implementation sides
-\node[hi, minimum width=52mm, minimum height=28mm, align=left, inner sep=6pt] (beck) at (-3.5,-0.5)
-  {\textbf{Beckhoff 솔루션}\\[2pt]
-   $\bullet$ ET1100 ASIC\\
-   $\bullet$ TwinCAT (master)\\
-   $\bullet$ 슬레이브 IO 모듈};
+\node[hi, minimum width=52mm, minimum height=26mm, align=center, inner sep=6pt] (beck) at (-3.5,-0.5)
+  {\textbf{Beckhoff}\\[4pt]
+   \mdseries 프로토콜 발표 (2003)\\[2pt]
+   \mdseries ESC ASIC: ET1100\\[2pt]
+   \mdseries 상용 master 제품};
 
-\node[imp, minimum width=52mm, minimum height=28mm, align=left, inner sep=6pt] (other) at (3.5,-0.5)
-  {\textbf{타사 솔루션}\\[2pt]
-   $\bullet$ LAN9252 (Microchip), AX58100 (ASIX)\\
-   $\bullet$ SOEM, IgH (open source)\\
-   $\bullet$ acontis (commercial)};
+\node[imp, minimum width=52mm, minimum height=26mm, align=center, inner sep=6pt] (other) at (3.5,-0.5)
+  {\textbf{다른 구현}\\[4pt]
+   ESC: LAN9252 (Microchip)\\[2pt]
+   오픈소스 master: SOEM, IgH};
+
+\node[font=\sffamily\footnotesize, text=mutec, align=center] at (0,-2.7)
+  {같은 프로토콜이어도 ESC마다 register 자원 · PDI · driver가 다릅니다};
 
 % Down arrows
 \draw[arr, line width=0.6pt] (etg.south) -- (beck.north);

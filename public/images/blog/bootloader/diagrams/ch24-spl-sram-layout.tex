@@ -6,23 +6,58 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  ph/.style={cls, minimum width=26mm, minimum height=10mm, font=\sffamily\small},
+  opt/.style={ph, densely dashed},
+  nxt/.style={cls, minimum width=46mm, minimum height=6.5mm, font=\sffamily\scriptsize, draw=impbord, fill=impfill},
+  note/.style={font=\sffamily\scriptsize, text=mutec, text width=30mm, align=center},
+  inp/.style={cls, minimum width=44mm, minimum height=17mm, text width=41mm, font=\sffamily\small, draw=clibord, fill=clifill},
+  sec/.style={font=\sffamily\bfseries\small, text=inkc, anchor=west}
+]
 
-\node[font=\sffamily\bfseries\large] at (3,5.8) {SPL SRAM Layout (i.MX 8M, 192 KB)};
+% ── Panel 1: boot phases ──
+\node[sec] at (-1.3, 2.7) {U-Boot boot phase (TPL·VPL·SPL은 선택)};
 
-% Top address
-\node[caption, anchor=west] at (4.6,5.0) {\texttt{0x00910000}};
+\node[ph, draw=neutbord, fill=neutfill] (rom) at (0, 0)    {Boot ROM};
+\node[opt, draw=absbord, fill=absfill]  (tpl) at (3.4, 0)  {TPL};
+\node[opt, draw=absbord, fill=absfill]  (vpl) at (6.8, 0)  {VPL};
+\node[ph, draw=hibord, fill=hifill, font=\sffamily\bfseries\small] (spl) at (10.2, 0) {SPL};
 
-% Sections stacked top to bottom
-\node[hi,    minimum width=60mm, minimum height=12mm] (text) at (1, 4.2) {.text (코드)};
-\node[hi,    minimum width=60mm, minimum height=10mm] (rod)  at (1, 3.1) {.rodata (상수 + DTB)};
-\node[abs,   minimum width=60mm, minimum height=10mm] (data) at (1, 2.0) {.data (초기화된 전역)};
-\node[abs,   minimum width=60mm, minimum height=10mm] (bss)  at (1, 0.9) {.bss (0으로 초기화 전역)};
-\node[imp,   minimum width=60mm, minimum height=10mm] (heap) at (1,-0.2) {heap (있다면)};
-\node[con,   minimum width=60mm, minimum height=14mm] (stk)  at (1,-1.7) {stack ($\downarrow$ grows down)};
+\draw[arr] (rom) -- (tpl);
+\draw[arr] (tpl) -- (vpl);
+\draw[arr] (vpl) -- (spl);
+\draw[arr, densely dashed, draw=edgesc] (tpl.north) -- ++(0,0.6) -| node[pos=0.25, above, font=\sffamily\scriptsize, text=mutec] {VPL 없이} ([xshift=-3mm]spl.north);
+\draw[arr, densely dashed, draw=edgesc] (rom.north) -- ++(0,1.3) -| node[pos=0.25, above, font=\sffamily\scriptsize, text=mutec] {TPL·VPL 없이} ([xshift=3mm]spl.north);
 
-% Bottom address
-\node[caption, anchor=west] at (4.6,-2.7) {\texttt{0x00940000}};
+\node[note] at (3.4, -1.15)  {very early init,\\[2pt]가능한 한 작게};
+\node[note] at (6.8, -1.15)  {A/B verified boot 시\\[2pt]SPL 선택 (v2024.04\\[2pt]문서: 구현 진행 중)};
+\node[note] at (10.2, -1.15) {SDRAM 설정,\\[2pt]다음 단계 적재};
+
+% Next stages listed by U-Boot doc/develop/spl.rst
+\node[nxt] (n1) at (15.2, 1.7)  {U-Boot proper};
+\node[nxt] (n2) at (15.2, 0.85) {TF-A BL31 $\rightarrow$ U-Boot (BL33)};
+\node[nxt] (n3) at (15.2, 0)    {EDK II};
+\node[nxt] (n4) at (15.2, -0.85){Linux kernel};
+\node[nxt] (n5) at (15.2, -1.7) {RISC-V OpenSBI $\rightarrow$ U-Boot};
+\foreach \n in {n1,n2,n3,n4,n5}
+  \draw[arr] (spl.east) -- (\n.west);
+\node[font=\sffamily\scriptsize, text=mutec] at (15.2, 2.35) {보드에 따라 하나를 적재};
+
+% ── Panel 2: what fixes SPL size / placement ──
+\node[sec] at (-1.3, -3.0) {SPL의 기능·크기·메모리 배치를 정하는 입력 (같은 U-Boot tag 기준)};
+
+\node[inp] (k)  at (1.5, -4.6)  {\textbf{Kconfig}\\[2pt]최종 \texttt{.config}\\[2pt]{\ttfamily\scriptsize CONFIG\_SPL\_OF\_PLATDATA}};
+\node[inp] (dt) at (6.7, -4.6)  {\textbf{phase별 device tree}\\[2pt]\texttt{bootph-*} + fdtgrep\\[2pt]{\ttfamily\scriptsize spl/u-boot-spl.dtb}};
+\node[inp] (ld) at (11.9, -4.6) {\textbf{linker script}\\[2pt]+ startup code\\[2pt]{\scriptsize .text .data .bss stack 배치}};
+
+\node[cls, draw=absbord, fill=absfill, minimum width=148mm, minimum height=9mm] (out) at (6.7, -6.6)
+  {SPL 빌드 산출물: ELF · map · image metadata};
+\foreach \n in {k,dt,ld}
+  \draw[arr] (\n.south) -- (\n.south |- out.north);
+
+\node[cls, draw=hibord, fill=hifill, minimum width=148mm, minimum height=12mm, text width=142mm] (chk) at (6.7, -8.2)
+  {보드 defconfig · ROM 요구 사항 · 보드 memory map과 대조\\[2pt]{\scriptsize 실행 위치, 최대 크기, 예약 영역은 보드마다 다르므로 그림에 고정 주소·용량을 두지 않습니다}};
+\draw[arr] (out) -- (chk);
 
 \end{tikzpicture}
 \end{document}

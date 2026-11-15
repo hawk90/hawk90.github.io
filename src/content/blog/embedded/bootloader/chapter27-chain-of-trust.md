@@ -32,6 +32,10 @@ Chain of Trust는 각 단계가 신뢰된 기준으로 다음 구성요소를 �
 
 앞 단계에서 설정이 빠지면 그 뒤의 검증은 초기 firmware를 보호하지 못합니다. 반대로 module signing이나 dm-verity가 구성되어도 그들의 기준 key/hash가 신뢰되는 전달 경로로 공급되지 않으면 전체 chain을 설명할 수 없습니다.
 
+![SoC ROM trust anchor에서 TF-A Trusted Board Boot, U-Boot FIT 검증, Linux kernel을 거쳐 module signing과 dm-verity로 갈라지는 검증 단계와 각 단계가 성립하는 조건을 나타낸 그림](/images/blog/bootloader/diagrams/ch27-chain-of-trust.svg)
+
+그림의 각 화살표는 위 표의 한 줄에 해당하며, 해당 단계가 빌드·설정되고 실패 시 실행을 막을 때만 chain이 이어집니다.
+
 ## TF-A Trusted Board Boot의 범위
 
 TF-A Trusted Board Boot(TBB)는 TF-A의 선택적 인증 기능입니다. TF-A 문서는 Root of Trust Public Key(ROTPK)와 firmware/certificate 관계를 특정 TBB 구현의 구성요소로 설명합니다. TBB build option이 포함되지 않은 TF-A image에 같은 동작을 가정하지 마세요. BL1/BL2 역할과 인증하는 image는 platform port에 따라 달라질 수 있습니다.

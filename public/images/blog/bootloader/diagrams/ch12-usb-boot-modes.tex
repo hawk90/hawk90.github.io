@@ -7,35 +7,46 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  mode/.style={cls, minimum width=26mm, minimum height=12mm, font=\sffamily\small, align=center}
+  mode/.style={cls, minimum width=36mm, minimum height=19mm, font=\sffamily\small, align=center, text width=33mm},
+  cmd/.style={font=\ttfamily\scriptsize, text=inkc},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc},
+  sub/.style={font=\sffamily\scriptsize, text=mutec, anchor=west}
 ]
 
 % Title
-\node[font=\sffamily\bfseries] at (3, 4.5) {USB 부트 모드};
+\node[font=\sffamily\bfseries] at (7, 2.6) {USB가 부팅에 쓰이는 세 가지 역할};
 
-% Three modes
-\node[mode, draw=absbord, fill=absfill] (serial) at (0, 2.5) {Serial Download\\[1pt](SDP)};
-\node[mode, draw=impbord, fill=impfill] (fastboot) at (3, 2.5) {fastboot\\[1pt]Protocol};
-\node[mode, draw=clibord, fill=clifill] (ums) at (6, 2.5) {USB Mass\\[1pt]Storage};
+% Stage headers
+\node[hdr] at (0, 1.7) {U-Boot 진입 전};
+\node[hdr] at (10, 1.7) {U-Boot 실행 후};
+\draw[draw=neutbord, densely dashed, line width=0.5pt] (2.6, 2.0) -- (2.6, -5.6);
 
-% Descriptions — explicit row gap so 3-line text doesn't crowd itself
-\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (0, 0.8) {BootROM 단계\\[2pt]이미지 주입\\[2pt]NXP uuu, sdp};
-\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (3, 0.8) {U-Boot 단계\\[2pt]파티션 flash\\[2pt]Android 호환};
-\node[font=\sffamily\scriptsize, text=mutec, text width=24mm, align=center] at (6, 0.8) {eMMC를 PC에\\[2pt]USB 디스크로\\[2pt]dd, gparted};
+% ROM-level recovery
+\node[mode, draw=neutbord, fill=neutfill] (rom) at (0, -1.6)
+  {\textbf{Boot ROM USB}\\[2pt]download / recovery\\[2pt]{\scriptsize SoC·revision별 protocol,\\[2pt]진입 조건, host tool}};
 
-% Flow arrows
-\draw[arr] (serial) -- node[above, font=\sffamily\tiny] {SPL 적재} (fastboot);
-\draw[arr] (fastboot) -- node[above, font=\sffamily\tiny] {ums 0 mmc 0} (ums);
+% USB host row
+\node[sub] at (4.0, 0.95) {board = USB host};
+\node[cls, draw=absbord, fill=absfill, minimum width=116mm, minimum height=12mm, text width=110mm] (host) at (10, 0)
+  {\textbf{USB host}: USB 저장 장치의 filesystem에서 파일 읽기\\[2pt]{\ttfamily\scriptsize usb start\quad load usb <device>:<partition> \$\{kernel\_addr\_r\} ...}};
 
-% Stage labels
-\node[font=\sffamily\tiny, text=absbord] at (0, 3.4) {ROM 단계};
-\node[font=\sffamily\tiny, text=impbord] at (3, 3.4) {U-Boot 단계};
-\node[font=\sffamily\tiny, text=clibord] at (6, 3.4) {U-Boot 단계};
+% USB gadget row
+\node[sub] at (4.0, -1.35) {board = USB device (gadget), host computer와 연결};
+\node[mode, draw=impbord, fill=impfill] (fb)  at (6, -2.9)
+  {\textbf{Fastboot}\\[2pt]host tool과 image\\[2pt]download · flash};
+\node[mode, draw=clibord, fill=clifill] (dfu) at (10, -2.9)
+  {\textbf{DFU}\\[2pt]USB-IF DFU 1.1\\[2pt]backend별 alternate};
+\node[mode, draw=prpbord, fill=prpfill] (ums) at (14, -2.9)
+  {\textbf{UMS}\\[2pt]block device를\\[2pt]host에 저장 장치로 노출};
 
-% Commands
-\node[font=\ttfamily\tiny, text=inkc, anchor=north] at (0, -0.2) {uuu board.uuu};
-\node[font=\ttfamily\tiny, text=inkc, anchor=north] at (3, -0.2) {fastboot flash boot};
-\node[font=\ttfamily\tiny, text=inkc, anchor=north] at (6, -0.2) {dd if=img of=/dev/sdX};
+% Commands / key settings under each gadget box
+\node[cmd] at (6, -4.4)  {fastboot usb <controller>};
+\node[cmd] at (6, -4.85) {CONFIG\_FASTBOOT\_BUF\_ADDR};
+\node[cmd] at (6, -5.3) {CONFIG\_FASTBOOT\_BUF\_SIZE};
+\node[cmd] at (10, -4.4) {dfu <USB\_controller> ...};
+\node[cmd] at (10, -4.85) {dfu\_alt\_info};
+\node[cmd] at (14, -4.4) {ums <USB\_controller> ...};
+\node[font=\sffamily\scriptsize, text=mutec] at (14, -4.85) {종료 전 host에서 unmount};
 
 \end{tikzpicture}
 \end{document}

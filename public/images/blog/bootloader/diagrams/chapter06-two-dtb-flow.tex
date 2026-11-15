@@ -7,41 +7,60 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  stg/.style={cls, minimum width=44mm, minimum height=12mm, align=center, font=\sffamily\small, inner sep=4pt},
-  spl/.style={stg, draw=impbord, fill=impfill},
-  ub/.style={stg, draw=clibord, fill=clifill},
-  kn/.style={stg, draw=hibord, fill=hifill, font=\sffamily\bfseries\small},
-  dt/.style={cls, minimum width=42mm, minimum height=10mm, align=center, font=\sffamily\footnotesize, draw=prpbord, fill=prpfill, inner sep=3pt},
-  rowlab/.style={font=\sffamily\bfseries\footnotesize, text=mutec, anchor=east}
+  box/.style={cls, minimum width=80mm, text width=76mm, minimum height=11mm, align=center, font=\sffamily\footnotesize, inner sep=4pt},
+  ctl/.style={box, draw=prpbord, fill=prpfill},
+  osd/.style={box, draw=clibord, fill=clifill},
+  use/.style={box, draw=impbord, fill=impfill},
+  kn/.style={box, draw=hibord, fill=hifill, font=\sffamily\bfseries\footnotesize},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, align=center},
+  sub/.style={font=\sffamily\footnotesize, text=mutec, align=center}
 ]
 
-% Row 1 — stages
-\node[spl] (spl) at (0, 7) {SPL};
-\node[ub]  (ub)  at (7, 7) {U-Boot Proper};
-\node[kn]  (lk)  at (14, 7) {Linux Kernel};
+% ── Left column: control DTB ──
+\node[hdr] at (0, 9.2) {control DTB};
+\node[sub] at (0, 8.65) {U-Boot 자신의 driver model용};
 
-% Row labels (left of the rows)
-\node[rowlab] at (-3.0, 7)   {부트 단계};
-\node[rowlab] at (-3.0, 4)   {control DTB};
-\node[rowlab] at (-3.0, 1)   {OS DTB};
+\node[ctl] (src) at (0, 7.0) {%
+  \textbf{얻는 경로 (Kconfig, 상호 배타)}\\[3pt]
+  \texttt{CONFIG\_OF\_EMBED} — U-Boot image에 포함\\[2pt]
+  \texttt{CONFIG\_OF\_SEPARATE} — \texttt{u-boot-nodtb.bin}\\[2pt] + \texttt{u-boot.dtb} $\to$ \texttt{u-boot.bin}\\[2pt]
+  \texttt{CONFIG\_OF\_BOARD} — 보드별 routine이 runtime에 제공};
 
-% Row 2 — control DTBs
-\node[dt] (cd1) at (0, 4) {control DTB (SPL용)\\[2pt]\scriptsize embed};
-\node[dt] (cd2) at (7, 4) {control DTB (자신용)\\[2pt]\scriptsize embed / separate};
+\node[ctl] (blob) at (0, 4.6) {%
+  \texttt{gd->fdt\_blob}\\[2pt]
+  현재 control DTB를 가리키는 전역 상태};
 
-% Row 3 — OS DTB and kernel x0
-\node[dt] (osd) at (7, 1) {OS DTB\\[2pt]\scriptsize mmc에서 load};
-\node[font=\sffamily\footnotesize, text=mutec, align=center, text width=42mm] at (14, 1) {DTB physical address $\to$ x0};
+\node[use] (dm) at (0, 2.6) {%
+  driver model · board 설정에서 사용\\[2pt]
+  \scriptsize (MMC, UART, GPIO 등 U-Boot 쪽 장치 정의)};
 
-% Vertical dashed: control DTB feeds stage
-\draw[uses, dashed, draw=prpbord] (cd1) -- (spl);
-\draw[uses, dashed, draw=prpbord] (cd2) -- (ub);
-% OS DTB flows up into U-Boot and right to kernel
-\draw[uses, dashed, draw=prpbord] (osd.east) -- (14, 1);
+\draw[flow] (src) -- (blob);
+\draw[flow] (blob) -- (dm);
 
-% Stage flow arrows (above the boxes to avoid label collisions)
-\draw[flow] (spl) -- node[font=\sffamily\footnotesize, text=inkc, midway, above, align=center] {Proper + DTB 적재} (ub);
-\draw[flow] (ub)  -- node[font=\sffamily\footnotesize, text=inkc, midway, above, align=center] {fixup + booti} (lk);
+% ── Right column: OS DTB ──
+\node[hdr] at (9.5, 9.2) {OS DTB};
+\node[sub] at (9.5, 8.65) {커널에 넘기는 DT};
+
+\node[osd] (file) at (9.5, 7.0) {%
+  부트 미디어의 \texttt{.dtb} 파일\\[2pt]
+  \scriptsize (예: \texttt{imx8mp-evk.dtb})};
+
+\node[osd] (fix) at (9.5, 5.2) {%
+  \texttt{fdt} 명령 · runtime fixup\\[2pt]
+  \scriptsize bootargs · memory · \texttt{/chosen} 등 — 적용 항목은 board · boot path별};
+
+\node[osd] (booti) at (9.5, 3.4) {%
+  \texttt{booti <kernel> - <fdt>}\\[2pt]
+  \scriptsize initrd 자리에 \texttt{-}};
+
+\node[kn] (lk) at (9.5, 1.6) {Linux kernel};
+
+\draw[flow] (file) -- (fix);
+\draw[flow] (fix) -- (booti);
+\draw[flow] (booti) -- (lk);
+
+% ── Bottom caption ──
+\node[caption, text width=170mm] at (4.75, 0.3) {두 역할은 같은 DTB 파일을 공유할 수도, 서로 다른 DTB를 쓸 수도 있습니다. 실제 구성은 board Kconfig와 boot flow로 확인합니다.};
 
 \end{tikzpicture}
 \end{document}

@@ -9,14 +9,8 @@
 \begin{tikzpicture}[blog]
 
 % Axes
-\draw[arr, line width=0.6pt] (0, 0) -- (7.5, 0) node[anchor=north, font=\sffamily\footnotesize] {Utilization (\%)};
-\draw[arr, line width=0.6pt] (0, 0) -- (0, 5) node[anchor=east, font=\sffamily\footnotesize, rotate=90, yshift=5mm] {R/T (ms)};
-
-% Y-axis labels
-\foreach \y/\val in {0.5/1, 1/10, 2/50, 4/100} {
-  \draw[line width=0.3pt] (-0.1, \y) -- (0.1, \y);
-  \node[font=\sffamily\scriptsize, anchor=east] at (-0.15, \y) {\val};
-}
+\draw[arr, line width=0.6pt] (0, 0) -- (7.5, 0) node[anchor=west, font=\sffamily\footnotesize] {Utilization (\%)};
+\draw[arr, line width=0.6pt] (0, 0) -- (0, 5) node[anchor=south, font=\sffamily\footnotesize] {응답 시간 (R/T)};
 
 % X-axis labels
 \foreach \x/\val in {1.4/20, 2.8/40, 4.2/60, 5.6/80, 7/100} {
@@ -46,10 +40,10 @@
 
 % Example marker only; this is an illustrative curve, not a universal threshold
 \draw[dashed, line width=0.5pt, draw=warnbord] (5.6, 0) -- (5.6, 4.8);
-\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=south west] at (5.7, 3.5) {예시 80\%};
+\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=south] at (5.6, 4.8) {예시 80\%};
 
 % Illustrative latency-growth annotation
-\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=west] at (6.0, 4.0) {지연 증가};
+\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=east] at (5.45, 3.4) {지연 증가};
 
 % Caption
 \node[font=\sffamily\footnotesize, text=mutec, align=center, anchor=north] at (3.5, -0.8) {%

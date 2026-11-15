@@ -3,50 +3,52 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \usepackage{kotex}
 
+% 디버거가 Cortex-M의 halt·step·breakpoint·watchpoint 자원에 닿는 경로.
+% 출처: OpenOCD src/target/adi_v5_swd.c / adi_v5_jtag.c (DP 접근),
+%       src/target/armv7m.h (debug_ap = MEM-AP), src/target/cortex_m.c
+%       (DHCSR 읽기·쓰기는 mem_ap_*_u32(debug_ap, DCB_DHCSR ...);
+%        FP_CTRL에서 fp_num_code, DWT_CTRL에서 dwt_num_comp를 읽음),
+%       src/target/cortex_m.h (C_STEP = BIT(2), C_MASKINTS = BIT(3)).
+
 \begin{document}
 \input{../../_design.tex}
 
 \begin{tikzpicture}[blog,
     layer/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
-                  minimum width=58mm, minimum height=11mm, align=center,
+                  minimum width=70mm, minimum height=12mm, align=center,
                   font=\sffamily\small},
+    probe/.style={layer, draw=hibord, fill=hifill},
     block/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
-                  minimum width=18mm, minimum height=12mm, align=center,
-                  font=\sffamily\small\bfseries},
-    note/.style={rectangle, rounded corners=2pt, draw=nodebord, fill=nodefill,
-                 align=center, font=\sffamily\scriptsize, inner sep=4pt,
-                 text width=28mm, minimum height=12mm},
-    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt}
+                  text width=40mm, minimum height=22mm, align=center,
+                  font=\sffamily\small},
+    arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
+    lbl/.style={font=\sffamily\footnotesize, text=inkc, fill=white, inner sep=2pt}
 ]
 
-% Layer 1: SWD/JTAG pins
-\node[layer] (pins) at (0, 4.4) {SWD / JTAG 핀};
+\node[probe] (probe) at (0, 6.6) {\textbf{probe + 서버} (OpenOCD · J-Link GDB Server)};
 
-% Layer 2: DAP
-\node[layer] (dap) at (0, 2.4)
-  {DAP (Debug Access Port)\\\scriptsize AMBA AHB-AP};
+\node[layer] (dp) at (0, 4.4)
+  {\textbf{DP} (Debug Port)\\[2pt]\footnotesize SWD 또는 JTAG로 접근};
+\node[layer] (ap) at (0, 2.4)
+  {\textbf{MEM-AP} (Access Port)\\[2pt]\footnotesize 디버그 레지스터를 메모리 주소로 읽고 씀};
 
-\draw[arr] (pins) -- (dap);
+\draw[arr] (probe) -- node[lbl, right=1mm]{SWD 또는 JTAG} (dp);
+\draw[arr] (dp) -- (ap);
 
-% Layer 3: 5 blocks side by side (CPU, FPB, DWT, ITM, ETM)
-\node[block] (cpu) at (-7.2, 0) {CPU};
-\node[block] (fpb) at (-3.6, 0) {FPB};
-\node[block] (dwt) at ( 0,   0) {DWT};
-\node[block] (itm) at ( 3.6, 0) {ITM};
-\node[block] (etm) at ( 7.2, 0) {ETM};
+\node[block] (dcb) at (-4.8, -0.6)
+  {\textbf{core debug (DHCSR)}\\[2pt]\footnotesize C\_HALT = bit 1\\[2pt]\footnotesize C\_STEP = bit 2\\[2pt]\footnotesize C\_MASKINTS = bit 3};
+\node[block] (fpb) at ( 0,   -0.6)
+  {\textbf{FPB}\\[2pt]\footnotesize hardware breakpoint 비교기\\[2pt]\footnotesize 개수는 FP\_CTRL에서 읽음};
+\node[block] (dwt) at ( 4.8, -0.6)
+  {\textbf{DWT}\\[2pt]\footnotesize watchpoint 비교기\\[2pt]\footnotesize 개수는 DWT\_CTRL에서 읽음};
 
-\draw[arr] (dap.south) -- ([yshift=8mm]cpu.north) -- (cpu.north);
-\draw[arr] (dap.south) -- ([yshift=8mm]fpb.north) -- (fpb.north);
-\draw[arr] (dap.south) -- (dwt.north);
-\draw[arr] (dap.south) -- ([yshift=8mm]itm.north) -- (itm.north);
-\draw[arr] (dap.south) -- ([yshift=8mm]etm.north) -- (etm.north);
+\coordinate (bus) at (0, 1.0);
+\draw[arr] (ap.south) -- (bus) -| (dcb.north);
+\draw[arr] (bus) -- (fpb.north);
+\draw[arr] (bus) -| (dwt.north);
 
-% Annotation notes directly below each block (no crossing lines)
-\node[note, below=4mm of cpu] (n1) {core debug 레지스터\\(DHCSR/DCRSR/DEMCR)};
-\node[note, below=4mm of fpb] (n2) {flash-patch\\+ breakpoint};
-\node[note, below=4mm of dwt] (n3) {데이터 워치포인트\\+ cycle counter};
-\node[note, below=4mm of itm] (n4) {software trace\\(printf 대용)};
-\node[note, below=4mm of etm] (n5) {명령 트레이스\\(CPU 매 명령)};
+\node[font=\sffamily\footnotesize, text=mutec, align=center] at (0, -2.6)
+  {비교기 수는 core·구현마다 다르므로 서버가 위 레지스터를 읽어 확인합니다.};
 
 \end{tikzpicture}
 \end{document}

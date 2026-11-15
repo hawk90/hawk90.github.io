@@ -75,6 +75,10 @@ cpu@1 {
 
 이 비교만으로 전력 소비, hotplug 지원 또는 부팅 속도를 단정할 수 없습니다. 그 결과는 구현과 플랫폼의 전원 상태 지원에 달려 있습니다.
 
+![spin-table과 PSCI 비교: spin-table은 primary가 cpu-release-addr에 entry를 기록하고 SEV를 보내면 대기 중인 CPU가 non-zero 값을 읽고 이동하며, PSCI는 primary가 SMC 또는 HVC로 CPU_ON을 호출하고 firmware와 플랫폼 코드가 대상 CPU를 시작](/images/blog/bootloader/diagrams/chapter33-spin-vs-psci.svg)
+
+두 방식을 나란히 놓으면 spin-table은 공유 메모리 위치를, PSCI는 firmware 호출을 계약의 중심에 둔다는 점이 드러납니다.
+
 ## 커널 경로를 확인할 때
 
 1. 실제 부팅에 전달된 DT 또는 ACPI를 저장하고 CPU enable 방식을 확인합니다.
@@ -82,6 +86,10 @@ cpu@1 {
 3. CPU 시작 요청과 반환 상태를 커널 로그 및 firmware 로그에서 확인합니다.
 4. CPU가 커널의 online 상태가 됐는지 sysfs와 커널 로그로 별도 확인합니다.
 5. assembly 단계까지 추적하려면 정확한 kernel tag, `.config`, 빌드 산출물과 소스 심볼을 함께 고정합니다.
+
+![secondary CPU 시작 확인 흐름: DT 또는 ACPI에서 enable 방식을 확인한 뒤 psci면 CPU_ON 요청, spin-table이면 cpu-release-addr 기록과 SEV를 거쳐 secondary가 커널 entry에 진입하고, 마지막으로 Linux online 여부를 확인](/images/blog/bootloader/diagrams/chapter33-smp-bringup-flow.svg)
+
+그림의 세 확인 지점은 위 목록의 요청 반환, secondary 진입, online 확인에 대응합니다.
 
 이 문서 수정에서는 QEMU, 보드 또는 실제 Linux kernel image를 실행하지 않았습니다. secondary CPU 경로와 시간 측정 결과를 실행 증거처럼 제시하지 않습니다.
 

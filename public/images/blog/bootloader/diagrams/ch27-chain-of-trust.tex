@@ -6,44 +6,54 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  stg/.style={cls, minimum width=124mm, text width=118mm, align=center, font=\sffamily\small},
+  leaf/.style={cls, minimum width=58mm, text width=54mm, align=center, font=\sffamily\small},
+  elab/.style={font=\sffamily\scriptsize, text=mutec, anchor=west}
+]
 
-\node[font=\sffamily\bfseries\large] at (0,8.6) {Chain of Trust};
+\node[font=\sffamily\bfseries\large] at (0, 2.0) {Chain of Trust: 단계별 검증 경계};
 
-\node[imp, minimum width=100mm, minimum height=11mm, align=center] (root) at (0,7.4)
-  {\textbf{eFuse PK hash} — Root of Trust (변경 불가)};
+% Trust anchor
+\node[stg, draw=impbord, fill=impfill, minimum height=13mm] (root) at (0, 0.6)
+  {\textbf{Trust anchor}: SoC ROM의 고정 검증 로직\\[2pt]{\scriptsize 제품 정책에 따라 OTP/fuse 등 protected storage의 key 또는 key hash 추가 (chip family·lifecycle별)}};
 
-\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s1) at (0,5.6)
-  {BootROM → BL1 / SPL 검증};
+% TF-A TBB
+\node[stg, draw=absbord, fill=absfill, minimum height=21mm] (tfa) at (0, -2.0)
+  {\textbf{TF-A Trusted Board Boot} {\scriptsize (\texttt{TRUSTED\_BOARD\_BOOT=1} 빌드)}\\[2pt]
+   {\scriptsize BL1: BL2 content certificate의 issuer key hash를 ROTPK hash와 비교한 뒤 BL2 검증}\\[2pt]
+   {\scriptsize BL2: trusted key certificate로 BL31·BL32, non-trusted key로 BL33 검증}\\[2pt]
+   {\scriptsize\color{mutec} TF-A 문서의 기본 순서이며, 역할과 대상 image는 platform port에 따라 다름}};
 
-\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s2) at (0,3.8)
-  {BL1 → BL2 검증};
+% U-Boot FIT
+\node[stg, draw=clibord, fill=clifill, minimum height=15mm] (uboot) at (0, -5.0)
+  {\textbf{U-Boot (BL33) $\rightarrow$ FIT}: image hash · signature 검증\\[2pt]
+   {\scriptsize control FDT의 \texttt{/signature} node에 public key, \texttt{required} 속성으로 검증 요구}\\[2pt]
+   {\scriptsize\color{mutec} configuration signature와 image signature는 서로 다른 선택지}};
 
-\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s3) at (0,2.0)
-  {BL2 → BL31 / BL32 / BL33 검증};
+% Linux kernel
+\node[stg, draw=neutbord, fill=neutfill, minimum height=9mm] (kern) at (0, -7.3)
+  {\textbf{Linux kernel}};
 
-\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s4) at (0,0.2)
-  {U-Boot (BL33) → kernel / DT / initramfs (FIT) 검증};
+% Leaves
+\node[leaf, draw=prpbord, fill=prpfill, minimum height=15mm] (mod) at (-3.2, -9.4)
+  {\textbf{module signing}\\[2pt]{\scriptsize enforcement가 켜진 설정에서만}\\[2pt]{\scriptsize unsigned·unknown-key module 거부}};
+\node[leaf, draw=hibord, fill=hifill, font=\sffamily\small, minimum height=15mm] (vrt) at (3.2, -9.4)
+  {\textbf{dm-verity (root filesystem)}\\[2pt]{\scriptsize hash tree로 읽기 내용 검증}\\[2pt]{\scriptsize root hash 전달 경로는 제품 정책}};
 
-\node[abs, minimum width=100mm, minimum height=11mm, align=center] (s5) at (0,-1.6)
-  {kernel → kernel module (\texttt{.ko}) 서명 검증};
+% Edges with conditions
+\draw[arr, line width=0.8pt] (root.south) -- (tfa.north)
+  node[midway, elab, xshift=2pt] {ROM이 첫 firmware의 format·인증 정책을 지원할 때};
+\draw[arr, line width=0.8pt] (tfa.south) -- (uboot.north)
+  node[midway, elab, xshift=2pt] {BL33으로 U-Boot 실행};
+\draw[arr, line width=0.8pt] (uboot.south) -- (kern.north)
+  node[midway, elab, xshift=2pt] {검증된 kernel · DTB};
+\draw[arr, line width=0.8pt] (kern.south -| mod.north) -- (mod.north);
+\draw[arr, line width=0.8pt] (kern.south -| vrt.north) -- (vrt.north);
 
-\node[hi, minimum width=100mm, minimum height=11mm, align=center] (s6) at (0,-3.4)
-  {user space (dm-verity로 rootfs 무결성)};
-
-% Arrows with verification keys on edges
-\draw[arr, line width=0.8pt] (root.south) -- (s1.north)
-  node[midway, right, caption] {\scriptsize SHA-256 비교};
-\draw[arr, line width=0.8pt] (s1.south) -- (s2.north)
-  node[midway, right, caption] {\scriptsize RSA};
-\draw[arr, line width=0.8pt] (s2.south) -- (s3.north)
-  node[midway, right, caption] {\scriptsize trusted key};
-\draw[arr, line width=0.8pt] (s3.south) -- (s4.north)
-  node[midway, right, caption] {\scriptsize control DT key};
-\draw[arr, line width=0.8pt] (s4.south) -- (s5.north)
-  node[midway, right, caption] {\scriptsize builtin\_trusted\_keys};
-\draw[arr, line width=0.8pt] (s5.south) -- (s6.north)
-  node[midway, right, caption] {\scriptsize dm-verity root hash};
+% Footer note
+\node[font=\sffamily\scriptsize, text=conbord, text width=124mm, align=center] at (0, -11.0)
+  {각 화살표는 해당 단계가 빌드·설정되고 실패 시 실행을 막을 때만 성립합니다.\\[2pt]앞 단계가 빠지면 뒤 단계의 검증은 초기 firmware를 보호하지 못합니다.};
 
 \end{tikzpicture}
 \end{document}
