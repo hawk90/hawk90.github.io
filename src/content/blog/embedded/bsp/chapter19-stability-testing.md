@@ -20,14 +20,14 @@ stress test는 1시간만 돌려도 잡히는 결함을 노출합니다. soak te
 
 ## stress-ng — 범용 스트레스 도구
 
-`stress-ng`는 Linux의 표준 stress 도구입니다. 70여 stressor가 있고 CPU, memory, IO, syscall 거의 모든 영역을 부하시킬 수 있습니다.
+`stress-ng`는 Linux에서 사용할 수 있는 범용 stress 도구입니다. 여러 stressor로 CPU, memory, I/O 및 syscall을 부하할 수 있으나 모든 fault 유형을 검증하지는 않습니다.
 
 ```bash
 # 4 CPU 모두 100% load, 30분
 $ stress-ng --cpu 4 --cpu-method matrixprod --timeout 30m --metrics-brief
 
 # memory bandwidth - 512MB × 8 worker
-$ stress-ng --vm 8 --vm-bytes 512M --timeout 1h --metrics-brief
+$ stress-ng --vm 8 --vm-bytes 512M --timeout 1h --metrics-brief  # 총 메모리 사용량·OOM 여유 확인
 
 # 종합 - CPU + memory + IO + scheduler 동시
 $ stress-ng --cpu 4 --io 2 --vm 2 --vm-bytes 256M \
@@ -63,7 +63,7 @@ Loop 1/5:
   16-bit Writes       : ok
 ```
 
-DRAM 결함은 *온도*와 강하게 상관됩니다. memtester는 thermal chamber에서 ambient를 변화시키며 돌리는 것이 의미 있습니다. 같은 BSP가 +25°C에서 ok, +70°C에서 bit-flip이 나면 DRAM controller setting을 다시 봐야 합니다(read leveling, write leveling, on-die termination).
+DRAM 결함은 *온도*와 강하게 상관됩니다. memtester는 thermal chamber에서 ambient를 변화시키며 돌리는 것이 의미 있습니다. 온도 조건별 오류는 DRAM, controller timing/training, 전원·board signal integrity를 함께 조사할 신호입니다. 단일 실패만으로 controller 설정이 원인이라고 단정하지 않습니다.
 
 `stressapptest`는 Google이 만든 더 무거운 도구입니다. cache 비활성화, large page 같은 옵션을 제공해 DRAM 자체에 더 가깝게 부하를 줍니다.
 
@@ -84,13 +84,15 @@ runtime=600
 group_reporting
 
 [randread]
-filename=/dev/mmcblk0
+filename=/data/fio-test.dat
+size=100M
 rw=randread
 bs=4k
 iodepth=16
 
 [randwrite]
-filename=/dev/mmcblk0p4
+filename=/data/fio-test.dat
+size=100M
 rw=randwrite
 bs=4k
 iodepth=16
@@ -149,7 +151,7 @@ done
 
 ## Soak test 설계
 
-soak는 *오래 돌리면 보이는 결함*을 잡습니다. 자동차 AEC-Q104는 1000시간 soak를 요구합니다. 산업용 보드는 보통 168시간(1주일) 또는 720시간(30일)으로 잡습니다.
+soak는 *오래 돌리면 보이는 결함*을 잡습니다. 필요한 soak duration은 제품 위험 분석, qualification 규격, workload와 신뢰성 계획으로 정합니다. 자동차 부품의 qualification 표준을 일률적인 system BSP 1000시간 soak로 바꾸어 말할 수 없습니다.
 
 soak 구성 요소:
 
@@ -223,7 +225,7 @@ cycle 중 보드는 powered-on이고 일정 부하가 걸려 있어야 합니다
 - Crystal oscillator drift
 - PCB 휨에 의한 connector 접촉 불량
 
-자동차/항공/방산 BSP라면 thermal cycling은 *필수*입니다. 가전이라면 short cycle (0~50°C × 100 cycle)로 축약하는 것이 보통입니다.
+thermal cycle 범위와 cycle 수는 적용되는 제품 규격·사용 환경·시험 계획으로 정합니다. 이 예시의 −40°C/+85°C 조건은 보편적인 의무 기준이 아닙니다.
 
 ## 랜덤 리부트 테스트
 

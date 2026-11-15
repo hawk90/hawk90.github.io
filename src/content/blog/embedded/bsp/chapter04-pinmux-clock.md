@@ -12,32 +12,19 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Pin mux와 clock은 *보드별로 거의 100% 달라지는* 두 가지입니다."** — 다른 모든 dts 노드가 SoC dtsi에서 상속되더라도, 이 두 개는 BSP 엔지니어가 *처음부터* 적습니다.
+> **"Pin mux와 clock은 보드 배선과 SoC 기능을 함께 확인해야 하는 초기화 항목입니다."** — SoC 공통 정의는 dtsi나 vendor code에서 재사용할 수 있고, 보드별 선택은 회로도와 부품 구성에 맞춥니다.
 
-새 보드에서 *시리얼이 안 뜨는* 이유 90%가 pin mux 또는 clock입니다. peripheral 자체는 정상이고, 드라이버도 probe 성공인데, 출력이 안 나옵니다. *핀이 다른 기능에 묶여 있거나*, *클록이 안 들어오는* 것입니다.
+새 보드에서 시리얼이 안 보이면 pin mux와 clock은 확인할 항목이지만, 그 원인 비율을 고정된 수치로 말할 근거는 없습니다. console 선택·baud·전원·배선·부트 단계도 함께 확인하고, probe 성공만으로 UART signal 경로가 정상이라고 단정하지 않습니다.
 
 ## SoC 핀은 *공장*이다 — alternate function
 
 요즘 SoC의 핀 하나가 *3~8개의 기능*을 가집니다. 이걸 *pin mux*라고 합니다.
 
-i.MX 8M Plus의 SAI5_RXFS ball(K1)의 alternate function입니다.
-
-| ALT | 기능 |
-|-----|------|
-| ALT0 | SAI5_RXFS (오디오 SAI5 frame sync) |
-| ALT1 | SAI1_TX_DATA0 |
-| ALT2 | PWM4_OUT |
-| ALT3 | I2C6_SCL |
-| ALT4 | UART3_DCE_RX |
-| ALT5 | GPIO3_IO21 |
-| ALT6 | SRC_BOOT_MODE3 |
-| ALT7 | EPDC_PWR_CTRL3 |
-
-같은 핀이 SAI, UART, I2C, GPIO 어디로든 갈 수 있습니다. 보드 설계자가 *회로도에서* 하나를 택하고, BSP 엔지니어가 *DT의 pinctrl 노드*에 그 선택을 적습니다.
+Linux v6.12 `imx8mp-pinfunc.h`에는 UART1_RXD pad를 UART1 DCE 수신 기능으로 설정하는 항목이 있습니다. 이 header의 pad 이름은 SoC의 mux 설정을 나타내며 package ball 이름을 대신하지 않습니다. 보드에서 쓸 수 있는지 판단하려면 package pinout과 회로도도 함께 확인해야 합니다.
 
 ## IOMUXC 레지스터 — pin mux의 *물리적 정체*
 
-NXP는 *IOMUXC*(IO Multiplexing Controller), TI는 *PINCTRL*, Rockchip은 *GRF + PMUGRF*, ST는 *GPIO*에 mux 기능이 통합되어 있습니다. 이름은 다르지만 *역할은 같습니다*. 각 핀에 대해 *5~6개 비트필드*를 설정합니다.
+NXP i.MX는 *IOMUXC*, TI·Rockchip·ST 계열은 각 SoC의 pin controller·GRF·GPIO register block을 사용합니다. 역할은 유사하지만 register layout과 설정 항목은 SoC별로 다릅니다. 이 장의 bit field 예시는 i.MX 8M Plus에 한정합니다.
 
 i.MX 8M Plus IOMUXC의 한 핀에 대한 레지스터 셋입니다.
 
@@ -45,10 +32,10 @@ i.MX 8M Plus IOMUXC의 한 핀에 대한 레지스터 셋입니다.
 |---------|---------|------|
 | `IOMUXC_SW_MUX_CTL_PAD_xxx` | MUX_MODE [2:0] | ALT0~ALT7 선택 |
 | `IOMUXC_SW_MUX_CTL_PAD_xxx` | SION [4] | input override |
-| `IOMUXC_SW_PAD_CTL_PAD_xxx` | DSE [3:1] | drive strength |
-| `IOMUXC_SW_PAD_CTL_PAD_xxx` | SRE [0] | slew rate |
-| `IOMUXC_SW_PAD_CTL_PAD_xxx` | PUE / PUS [12:13] | pull up/down/keeper |
-| `IOMUXC_DAISY_xxx` | DAISY [N:0] | 어느 핀이 input인지 선택 (input mux) |
+| `IOMUXC_SW_PAD_CTL_PAD_xxx` | SoC별 pad-control field | drive strength, pull, hysteresis, slew 등. 비트 위치와 인코딩은 RM에서 pad별로 확인 |
+| `IOMUXC_SELECT_INPUT_xxx` | input daisy 선택 값 | 해당 입력 신호에 연결할 pad를 선택. 신호별 field와 값은 RM 및 pinfunc 정의에서 확인 |
+
+이 표는 레지스터 역할을 구분합니다. pad-control field의 비트 위치와 값은 SoC별로 달라질 수 있으므로 다른 i.MX 세대의 예를 복사하지 않습니다.
 
 이걸 *손으로* 계산하면 거의 항상 실수합니다. 다행히 *DT의 매크로*가 이 셋을 한꺼번에 캡슐화합니다.
 
@@ -58,14 +45,14 @@ MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX    0x140
 
 매크로 이름은 `MX8MP_IOMUXC_<pad name>__<function name>` 패턴입니다. `__`(double underscore)가 *pad와 function의 구분자*입니다. 끝의 `0x140`이 *PAD_CTL* 값(drive strength, pull 등)입니다.
 
-매크로 정의는 커널의 `arch/arm64/boot/dts/freescale/imx8mp-pinfunc.h`에 있습니다.
+매크로 정의는 Linux v6.12 [`imx8mp-pinfunc.h`](https://github.com/torvalds/linux/blob/v6.12/arch/arm64/boot/dts/freescale/imx8mp-pinfunc.h)에 있습니다.
 
 ```c
 #define MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX \
-    0x1F4 0x454 0x5C4 0x0 0x0
+    0x220 0x480 0x5E8 0x0 0x4
 ```
 
-다섯 숫자는 *MUX_CTL 레지스터 오프셋*, *PAD_CTL 오프셋*, *DAISY 오프셋*, *MUX_MODE 값*, *DAISY 값*입니다. SoC vendor가 이 매크로 파일을 *RM의 pinmux 표에서 생성*합니다.
+다섯 값은 `<mux_reg conf_reg input_reg mux_mode input_val>` 순서입니다. Linux v6.12 `imx8mp-pinfunc.h`에서 가져온 값이며, 뒤에 `fsl,pins` property의 pad control 값(예: `0x140`)이 별도 항목으로 올 수 있습니다.
 
 ## DT의 pinctrl 패턴
 
@@ -100,8 +87,8 @@ peripheral 노드가 pinctrl 노드를 *참조*합니다.
 
 - `pinctrl-names`가 *상태 이름의 배열*입니다. "default"가 probe 시 적용.
 - `pinctrl-0`은 *첫 번째 이름의 phandle 배열*. 여러 phandle을 한 상태에 묶을 수 있습니다.
-- `pinctrl-1`은 *두 번째 이름*. "sleep" 상태에서 핀을 GPIO로 돌립니다.
-- pinctrl driver가 *런타임에* 이 상태들을 토글합니다.
+- `pinctrl-1`은 *두 번째 이름*에 대응하는 상태입니다. 예제에서는 sleep 상태에서 핀을 GPIO 기능으로 mux하지만, 안전한 상태는 보드 회로와 전원 설계에 따라 달라집니다.
+- pinctrl core 자체가 모든 상태를 자동 전환하지는 않습니다. 해당 장치 드라이버나 PM 경로가 적절한 상태를 선택해야 합니다.
 
 같은 패턴이 TI, ST, Rockchip에 동일하게 적용됩니다. 매크로 이름만 다릅니다.
 
@@ -173,7 +160,7 @@ Pinmux가 *공간*의 문제라면, clock은 *시간*의 문제입니다. periph
 
 ## Common Clock Framework (CCF)
 
-Linux 커널이 모든 SoC의 clock tree를 *통일된 방식*으로 다루기 위해 도입한 framework입니다. `drivers/clk/`에 SoC별 driver가 있고, *동일한 API*로 접근합니다.
+Linux Common Clock Framework(CCF)는 clock provider/consumer를 위한 공통 API를 제공합니다. SoC별 provider와 binding은 다르므로 사용 가능한 parent·rate·clock ID는 해당 커널과 SoC 자료에서 확인합니다.
 
 DT에서 peripheral이 clock을 *참조*하는 방식입니다.
 
@@ -230,7 +217,7 @@ UART이 동작 안 할 때 `uart1_root`의 enable count가 0이면 *peripheral d
 
 ## U-Boot 단계의 clock 초기화
 
-부트로더는 *CCF가 없습니다*. SPL 시점에 *손으로* PLL을 설정합니다.
+U-Boot에도 clock framework가 있지만, 특정 SoC의 초기 PLL·clock root 설정은 SPL과 SoC별 코드가 맡을 수 있습니다. 아래는 실행 가능한 U-Boot 함수가 아니라 설정 단계의 관계를 설명하기 위한 개략 의사 코드입니다.
 
 ```c
 /* arch/arm/mach-imx/imx8m/clock_imx8mp.c (요약) */
@@ -258,9 +245,9 @@ void clock_init(void)
 }
 ```
 
-이 코드가 SPL의 *가장 초기 단계*에서 호출됩니다. UART을 켜기 전에 *UART의 parent clock이 흘러야* 합니다.
+실제 호출 시점과 함수 이름은 U-Boot 버전·SoC 포팅에 따라 다릅니다. 특정 보드에서는 이 코드 경로와 UART parent clock 설정 순서를 해당 U-Boot 소스로 확인해야 합니다.
 
-벤더가 reference BSP에서 이 함수를 *완성된 형태로* 제공합니다. 우리는 *주파수 값*만 보드에 맞게 조정합니다. PLL 자체의 *주파수 선택*은 거의 안 건드립니다.
+이 장의 코드는 의사 코드이며 U-Boot API나 빌드 가능한 예제가 아닙니다. 실제 PLL·clock-root 설정은 U-Boot 버전과 SoC 포팅의 초기화 코드, 보드 전원·주파수 요구사항을 함께 확인해야 합니다. 참조 보드 구현을 재사용할 때도 변경점을 검토합니다.
 
 ## 보드별로 변경되는 부분 — 어디인가
 
@@ -328,16 +315,9 @@ ARM Trusted Firmware-A를 쓰는 보드라면 *BL2가 console UART을 설정*합
 
 부팅 중에 *어디서 멈췄는지* 모를 때 JTAG으로 IOMUXC와 CCM 레지스터를 *직접* 읽습니다.
 
-```text
-# OpenOCD 또는 J-Link Commander에서
-> mdw 0x30890084   # IMX8MP CCM_TARGET_ROOT_UART1
-0x10000000         # bit 28 = enable, source/divider 비트 확인
+Linux v6.12 `imx8mp.dtsi`는 IOMUXC의 register base를 `0x30330000`으로 정의하고, pin-function header는 UART1_RXD의 mux offset을 `0x220`으로 둡니다. 따라서 해당 mux register의 physical address는 base+offset인 `0x30330220`입니다. 실제 JTAG memory-read 명령과 읽기 권한은 debugger, SoC security state, silicon 설정에 따라 달라지므로 특정 도구의 출력값을 범용 예로 제시하지 않습니다.
 
-> mdw 0x303404B0   # IMX8MP IOMUXC_SW_MUX_CTL_PAD_UART1_RXD
-0x00000000         # MUX_MODE 비트 확인 (UART1 RX는 ALT0이어야)
-```
-
-clock과 pinmux 레지스터를 *바로 읽을 수 있다*는 점이 JTAG의 가장 큰 가치입니다. 시리얼이 안 뜨는 상황에서는 *유일한 진단 수단*입니다.
+JTAG/SWD는 firmware에서 설정한 register 상태를 조사하는 방법 중 하나입니다. Serial console, bootloader log, kernel tracing 및 보드 계측도 함께 사용할 수 있으며, JTAG이 항상 필요하거나 사용 가능한 것은 아닙니다.
 
 ## 자주 하는 실수
 

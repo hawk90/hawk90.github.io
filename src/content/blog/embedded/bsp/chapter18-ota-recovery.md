@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**OTA의 핵심은 *원자성*과 *롤백*입니다. 한 줄 요약하면 "절대 벽돌이 되지 않는다"입니다.** 이를 보장하는 것이 A/B 슬롯, bootcount, 그리고 서명된 update agent입니다.
+**OTA는 업데이트 원자성, 실패 탐지, 복구 경로를 함께 설계해야 합니다.** A/B 슬롯과 서명 검증은 위험을 줄이는 구성요소지만 전원·저장장치·bootloader 고장까지 포함해 벽돌 상태를 완전히 방지한다고 보장하지 않습니다.
 
 OTA가 없는 BSP는 *현장에서 죽은* BSP입니다. 가전, 차량, 산업 IoT 모두 펌웨어를 회수해 다시 굽는 비용을 감당할 수 없습니다. 동시에 OTA가 *잘못* 설계되면 한 번의 실패가 전체 fleet을 벽돌로 만듭니다.
 
@@ -32,7 +32,7 @@ OTA가 없는 BSP는 *현장에서 죽은* BSP입니다. 가전, 차량, 산업 
 
 ## A/B 슬롯과 bootcount
 
-U-Boot의 `bootcount`는 A/B 패턴의 핵심입니다. 매 부팅마다 +1, application이 정상 부팅을 확인하면 0으로 reset, 임계치 초과 시 `altbootcmd`로 fallback.
+U-Boot의 `bootcount`와 `bootlimit`은 설정된 backend와 boot flow가 갖춰졌을 때 실패 횟수에 따른 대체 명령을 구성하는 데 사용할 수 있습니다. 증가·초기화 시점, 저장 backend, `altbootcmd` 진입은 설정에 따라 달라지므로 target U-Boot configuration으로 검증해야 합니다.
 
 ```text
 # U-Boot env
@@ -47,7 +47,7 @@ boot_b=setenv bootargs root=PARTUUID=$uuid_rootfs_b ...; load mmc 0:3 ...; bootm
 switch_slot=if test "$slot" = "B"; then setenv slot A; else setenv slot B; fi; saveenv; reset
 ```
 
-application이 부팅 직후 reset 하지 않으면 watchdog과 같습니다.
+아래 C 코드는 제어 흐름을 보여주는 비빌드 pseudocode이며 `check_critical_services_running()` 구현과 안전한 env write 정책을 포함하지 않습니다. 단순히 PID 1이 시작됐다는 이유만으로 update를 성공 처리하지 말고 제품의 health criteria를 정의합니다.
 
 ```c
 // /usr/sbin/bootcount-reset
@@ -83,7 +83,7 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 ```
 
-`fw_setenv`는 U-Boot의 `tools/env/`에서 빌드한 utility로 Linux에서 U-Boot env partition을 안전하게 수정합니다. `/etc/fw_env.config`에 partition 위치를 명시합니다.
+`fw_setenv`는 설정된 environment backend에 접근합니다. 올바른 redundancy, device offset, locking 및 power-loss 처리 없이 실행하면 부팅 환경을 손상시킬 수 있으므로 target 설정과 U-Boot env configuration을 대조합니다. `/etc/fw_env.config`에 partition 위치를 명시합니다.
 
 ```text
 # /etc/fw_env.config
@@ -91,7 +91,7 @@ WantedBy=multi-user.target
 /dev/mmcblk0p1   0x20000 0x20000   0x20000
 ```
 
-두 줄은 redundant env입니다. 둘 다 두면 write 중 전원이 끊겨도 한쪽은 살아남습니다.
+두 개의 설정 행은 사용하는 U-Boot redundancy 설정과 맞춰야 합니다. 이 구조가 전원 차단 시 무조건 안전하다고 보장하지 않으므로 실제 backend의 write protocol을 확인합니다.
 
 ## RAUC — Robust Auto-Update Controller
 
@@ -187,7 +187,7 @@ x [rootfs.1] (inactive, pending)
         boot status: pending
 ```
 
-재부팅하면 B가 부팅됩니다. 정상 부팅 후 RAUC가 자동으로 `boot status: good`을 표시합니다.
+다음 부팅에서 B를 선택하려면 bootloader integration이 활성 slot을 올바르게 반영해야 합니다. 건강 상태 판정 뒤 system service 또는 product logic이 RAUC의 boot status를 `mark-good`으로 갱신하도록 구성합니다. RAUC가 application의 정상 동작을 자동으로 판단하지는 않습니다.
 
 ## SWUpdate
 

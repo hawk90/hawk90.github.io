@@ -14,7 +14,7 @@ topics: ["embedded"]
 
 **Thermal과 watchdog은 *최후의 안전망*입니다.** 부팅 후 software가 정상 동작하지 않거나 칩이 너무 뜨거워졌을 때, 사용자 개입 없이 시스템을 보호하는 마지막 메커니즘입니다. BSP가 이 둘을 빠뜨리면 양산 후 필드에서 "왜 갑자기 보드가 죽었는가"를 영원히 추적하게 됩니다.
 
-여름철 차량 내부 70°C, 산업 현장 먼지 속의 fanless 보드, 무인 키오스크의 24시간 운용 — 임베디드는 *사람이 옆에 없는 환경*에서 동작하는 경우가 많습니다. 그래서 BSP의 마지막 챕터는 시스템의 *자기 보호 능력*입니다. thermal framework가 발열을 다스리고, watchdog이 hang을 끊습니다.
+여름철 차량 내부 70°C, 산업 현장 먼지 속의 fanless 보드, 무인 키오스크의 24시간 운용 — 임베디드는 *사람이 옆에 없는 환경*에서 동작하는 경우가 많습니다. 이 장에서는 thermal 정책과 watchdog 통합 시 확인할 항목을 다룹니다. thermal framework가 발열을 다스리고, watchdog이 hang을 끊습니다.
 
 ## Thermal framework 구조
 
@@ -71,7 +71,7 @@ thermal-zones {
 | `hot` | 경고 알림, userspace 통보 |
 | `critical` | 강제 shutdown |
 
-`critical` trip은 *반드시* 한 개 이상 있어야 합니다. 이 값을 넘으면 커널이 `emergency_restart()`를 호출합니다.
+critical trip의 필요 여부와 임계값은 SoC 안전 요구사항과 platform thermal design에 따라 정합니다. Linux thermal core의 동작은 kernel 버전과 zone ops에 달려 있으며, 일부 경로는 orderly poweroff/shutdown을 요청하고 실패 시 설정된 emergency action을 수행합니다. `emergency_restart()`가 항상 첫 동작인 것은 아닙니다.
 
 ## Cortex-A 등급별 최대 온도
 
@@ -113,7 +113,7 @@ $ cat /sys/class/thermal/cooling_device0/max_state
 3
 ```
 
-cooling device의 `cur_state`가 증가하면 그만큼 cpufreq가 낮아집니다.
+cooling device의 `cur_state`는 해당 device가 보고하는 cooling state입니다. CPU frequency가 실제로 낮아지는지는 cooling-map binding과 cpufreq device 동작을 함께 확인해야 합니다.
 
 ## Thermal governor
 
@@ -125,7 +125,7 @@ cooling device의 `cur_state`가 증가하면 그만큼 cpufreq가 낮아집니�
 | `user_space` | userspace daemon이 정책 결정 |
 | `power_allocator` | power budget 기반 (PID 제어) |
 
-기본은 `step_wise`이며, 정밀 제어가 필요하면 `power_allocator`로 바꿉니다.
+기본 thermal governor는 kernel configuration에 따라 다릅니다. 사용할 수 있는 policy와 제어 특성을 target kernel에서 확인하고, board thermal model에 맞춰 검증합니다.
 
 ```text
 thermal-zones {
@@ -161,7 +161,7 @@ $ echo power_allocator > /sys/class/thermal/thermal_zone0/policy
     };
 };
 
-/* fan via PWM */
+/* PWM output for fan control */
 fan0: pwm-fan {
     compatible = "pwm-fan";
     pwms = <&pwm1 0 40000 0>;
@@ -377,7 +377,7 @@ $ dmesg | grep -i wdog
 
 - Thermal framework는 sensor, zone, trip point, cooling device의 4개 레이어로 구성됩니다.
 - DT의 `thermal-zones`가 zone과 trip을 선언하고, `cooling-maps`가 trip과 cooling device를 연결합니다.
-- trip type은 active, passive, hot, critical이며 critical은 *반드시* 한 개 있어야 합니다.
+- trip type과 critical 동작은 해당 SoC thermal binding, kernel version 및 제품 안전 요구사항에서 확인합니다.
 - Cortex-A 등급별 Tj_max를 기준으로 critical을 5~10°C 마진 두고 설정합니다.
 - thermal governor는 step_wise가 기본이며 정밀 제어는 power_allocator를 씁니다.
 - Watchdog은 `/dev/watchdog`을 통해 `WDIOC_KEEPALIVE`로 키워 주는 timer입니다.
@@ -386,7 +386,7 @@ $ dmesg | grep -i wdog
 
 ## 다음 편 예고
 
-이 글은 BSP Development 시리즈의 마지막 챕터입니다. 다음 시리즈로 [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/chapter01-problem) 또는 [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)를 추천합니다. BSP가 완성되면 이미지 빌드와 양산 펌웨어 관리가 다음 관심사입니다.
+다음은 BSP Development Ch 15의 [부트 시간 최적화](/blog/embedded/bsp/chapter15-boot-time-optimization)입니다. 이어서 [Buildroot로 첫 이미지 만들기](/blog/embedded/buildroot/chapter01-problem) 또는 [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)를 추천합니다. BSP가 완성되면 이미지 빌드와 양산 펌웨어 관리가 다음 관심사입니다.
 
 ## 관련 항목
 

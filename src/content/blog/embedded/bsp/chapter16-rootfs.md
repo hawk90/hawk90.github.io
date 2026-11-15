@@ -372,7 +372,7 @@ bmaptool create -o "${BINARIES_DIR}/sdcard.bmap" "${BINARIES_DIR}/sdcard.img"
 
 **커널 config를 defconfig 전체로.** Buildroot는 `BR2_LINUX_KERNEL_DEFCONFIG`로 distro의 defconfig을 base로 쓰고, fragment에는 *차이*만 둡니다. defconfig을 전체로 가져가면 다음 커널 버전업 때 옵션 충돌이 폭발합니다.
 
-**Buildroot에서 ld.so.cache 재생성 잊기.** `post-build.sh`에서 `/etc/ld.so.cache`를 갱신하지 않으면 dynamic linker가 동작하지 않습니다. 표준 Buildroot는 자동이지만 커스텀 패키지는 의존성을 명시해야 합니다.
+**동적 링크 의존성 누락.** `/etc/ld.so.cache`가 모든 Buildroot target에서 필수인 것은 아닙니다. glibc/musl 선택, dynamic linker 설정, package metadata와 target filesystem 구성에 따라 필요한 라이브러리 경로를 관리합니다. 사용하는 C library의 동작과 생성된 rootfs를 확인하세요.
 
 **Yocto에서 `INHERIT` 순서 무시.** `core-image`를 inherit 한 후 `IMAGE_INSTALL`을 override 하지 않고 그냥 할당하면 기본 패키지가 사라집니다. 항상 `+=`로 추가.
 
@@ -381,7 +381,7 @@ bmaptool create -o "${BINARIES_DIR}/sdcard.bmap" "${BINARIES_DIR}/sdcard.img"
 - BSP의 rootfs는 Buildroot 또는 Yocto에 *통합*하는 것이 표준입니다. 손으로 모으지 않습니다.
 - Buildroot는 외부 트리(BR2_EXTERNAL)로 BSP를 분리합니다. Buildroot 본체 코드에 손대지 않습니다.
 - Yocto는 meta-vendor 레이어로 BSP를 분리합니다. machine.conf, 커널 recipe, U-Boot recipe, 이미지 recipe로 구성됩니다.
-- Buildroot는 빠른 iteration과 작은 팀에, Yocto는 장기 LTS와 복잡한 product line에 적합합니다.
+- Buildroot와 Yocto의 선택은 팀 규모만이 아니라 package/version maintenance, SDK, license compliance 및 reproducibility 요구를 비교해 결정합니다.
 - 커널 config는 defconfig + fragment 패턴으로 *차이*만 관리합니다. 전체 defconfig을 BSP가 들고 있으면 upgrade가 막힙니다.
 - rootfs overlay와 post-build 스크립트로 시스템 설정과 application을 주입합니다.
 - 최종 이미지는 Buildroot에서 `genimage`, Yocto에서 `wic`로 조립합니다.

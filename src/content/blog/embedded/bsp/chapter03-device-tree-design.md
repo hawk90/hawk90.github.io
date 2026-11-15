@@ -22,12 +22,10 @@ ARM Linux는 한 zImage/Image가 *수십 가지 보드*를 지원할 수 있어�
 
 | 단계 | 산출물 | 설명 |
 |------|--------|------|
-| 1 | `*.dts` (소스) | 사람이 작성. `#include`로 재사용 fragment를 `dtsi`로 분리 |
-| 2 | `*.dtsi` | include 대상 |
-| 3 | `dtc` (Device Tree Compiler) | dts → dtb 컴파일 |
-| 4 | `*.dtb` (Device Tree Blob) | 바이너리 |
-| 5 | bootloader → kernel | 부트로더가 커널에 전달 |
-| 6 | kernel `of_*()` API | 커널이 parsing |
+| 1 | `*.dts`, `*.dtsi` (소스) | `.dts`가 board description이며 재사용할 SoC/common fragment를 `.dtsi`로 include할 수 있음 |
+| 2 | C preprocessor + `dtc` | include와 macro를 처리한 뒤 DTS를 DTB로 컴파일 |
+| 3 | `*.dtb` (Device Tree Blob) | 부트로더가 커널에 전달하는 binary tree |
+| 4 | kernel OF APIs | 커널이 전달받은 tree와 bindings에 따라 장치 표현을 구성 |
 
 DT의 *논리적 정의*는 두 종류로 나뉩니다.
 
@@ -56,10 +54,6 @@ DT의 *논리적 정의*는 두 종류로 나뉩니다.
         device_type = "memory";
         reg = <0x80000000 0x20000000>;  // 512MB
     };
-};
-
-&cpu0_opp_table {
-    /* 추가 OPP point */
 };
 
 &am33xx_pinmux {
@@ -94,7 +88,6 @@ DT의 *논리적 정의*는 두 종류로 나뉩니다.
 - `#include` — dtsi를 끌어와 *상속*합니다. C의 include와 동일한 텍스트 치환.
 - `model`, `compatible` — 보드 식별 문자열. 부트로더와 커널이 *어느 보드인지* 판단하는 근거.
 - `memory@...` — DDR 영역. base address와 size.
-- `&cpu0_opp_table { ... }` — dtsi의 노드를 *override*. ampersand는 *레이블 참조*입니다.
 - `&am33xx_pinmux { ... }` — pinmux fragment 정의.
 - `&i2c0 { status = "okay"; ... }` — dtsi에서 disable 상태로 정의된 peripheral을 *enable*하고 외부 칩(TPS65217 PMIC)을 부착.
 - `&mmc1 { ... }` — eMMC/SD controller에 *bus width*, *pinctrl*, *card detect GPIO*, *전원 supply*를 연결.
@@ -120,13 +113,13 @@ DT 노드는 *주소가 있는 것*과 *없는 것*으로 나뉩니다.
 - ...
 - };
 
-주소 있는 노드는 `<name>@<unit-address>` 형식입니다. unit-address가 *부모 노드의 reg 첫 셀*과 일치해야 합니다. dtc가 이 일치를 *경고*합니다.
+주소 있는 노드는 `<name>@<unit-address>` 형식을 씁니다. unit-address는 *그 노드 자신의* `reg`에 적힌 첫 주소와 일치해야 합니다. `reg`가 없는 노드에는 `@unit-address`를 붙이지 않습니다. Device Tree Specification의 node-name 규칙과 dtc의 `unit_address_vs_reg` 진단으로 확인합니다.
 
 `uart0:` 같은 *레이블*은 다른 곳에서 `&uart0`로 참조하기 위함입니다. dtsi가 레이블을 정의하고, dts가 `&uart0`로 *덮어쓰기*합니다.
 
 ## `compatible` 문자열 — 드라이버 매칭의 핵심
 
-`compatible`은 *문자열 배열*이고, 커널이 *왼쪽부터* 드라이버를 매칭합니다.
+`compatible`은 문자열 배열이며 구체적인 식별자부터 더 일반적인 호환 식별자 순으로 기술합니다. 드라이버는 자신이 선언한 OF match table과 이 목록을 대조합니다.
 
 ```text
 compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
@@ -134,11 +127,11 @@ compatible = "ti,am335x-bone-black", "ti,am335x-bone", "ti,am33xx";
 
 이 줄을 해석하면:
 
-1. `ti,am335x-bone-black` 드라이버가 있으면 그것을 쓴다.
-2. 없으면 `ti,am335x-bone`을 시도.
-3. 그것도 없으면 가장 일반적인 `ti,am33xx`.
+1. `ti,am335x-bone-black`은 이 보드 변형을 식별합니다.
+2. `ti,am335x-bone`과 `ti,am33xx`는 호환성을 더 넓게 표현합니다.
+3. 실제 driver binding은 각 드라이버의 match table 및 등록 상태에 달려 있습니다.
 
-이 fallback 구조 덕에 *새 보드 변형*이 추가될 때 *드라이버 추가 없이* 동작할 수 있습니다.
+이 호환성 목록은 기존 드라이버가 명시적으로 지원하는 범위에서 보드 변형을 재사용하도록 돕습니다. 새 하드웨어가 기존 binding과 다르면 binding·드라이버 지원도 추가해야 할 수 있습니다.
 
 벤더 prefix는 *DT bindings 문서*에 등록되어 있어야 합니다. 임의 prefix를 만들면 메인라인에 받아들여지지 않습니다.
 
@@ -171,7 +164,7 @@ ARMv8 GIC 환경에서는 `interrupts`가 *3개 셀*입니다.
 interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>;
 ```
 
-`GIC_SPI`는 *Shared Peripheral Interrupt* 종류, `26`은 *번호 - 32*, 그 다음이 *trigger type*입니다. 이 규약을 모르면 인터럽트가 안 들어와도 *왜 안 들어오는지* 알 수 없습니다.
+`GIC_SPI`는 첫 셀의 SPI 유형이고 `26`은 그 GIC interrupt domain의 SPI 번호이며 마지막 셀은 trigger type입니다. 이 값은 Linux가 런타임에 부여하는 virtual IRQ 번호가 아니므로 `32`를 더하거나 빼지 않습니다. 상세 형식은 Linux의 [GIC binding](https://github.com/torvalds/linux/blob/v6.12/Documentation/devicetree/bindings/interrupt-controller/arm%2Cgic.yaml)에 정의되어 있습니다.
 
 ## DT bindings 문서 — 노드 형식의 *명세*
 
@@ -342,8 +335,8 @@ overlay 파일(`.dtso` 또는 `.dts` with `/plugin/` 태그) 예시입니다.
 빌드는 base와 동일하지만 `-@` 옵션이 *상징적 정보를 dtb에 보존*합니다.
 
 ```bash
-dtc -@ -I dts -O dtb -o acme-cam.dtb acme-cam.dts
-dtc -@ -I dts -O dtbo -o acme-cam-with-ov5640.dtbo acme-cam-with-ov5640.dts
+dtc -@ -I dts -O dtb -o acme-cam.dtb acme-cam.dts  # source must be preprocessed; use the kernel DTS build for #include/macros
+dtc -@ -I dts -O dtb -o acme-cam-with-ov5640.dtbo acme-cam-with-ov5640.dts
 ```
 
 런타임 적용은 부트로더 단계(U-Boot `fdt apply`) 또는 커널 후 ConfigFS overlay 인터페이스로 가능합니다.
@@ -354,7 +347,7 @@ mkdir /sys/kernel/config/device-tree/overlays/cam
 cat acme-cam-with-ov5640.dtbo > /sys/kernel/config/device-tree/overlays/cam/dtbo
 ```
 
-Raspberry Pi가 이 방식을 *매우 적극적으로* 씁니다. `/boot/config.txt`에 `dtoverlay=...`로 부트 시 overlay를 적용합니다.
+Raspberry Pi firmware는 지원되는 설정에서 `/boot/config.txt`의 `dtoverlay=...`를 통해 boot 시 overlay를 적용합니다. 이는 다른 firmware·bootloader의 적용 경로와 구분됩니다.
 
 ## 자주 하는 실수
 
@@ -372,7 +365,7 @@ Raspberry Pi가 이 방식을 *매우 적극적으로* 씁니다. `/boot/config.
 
 ### `reg`의 셀 개수 헷갈림
 
-`#address-cells = <2>`, `#size-cells = <2>` 환경(ARMv8 64-bit)에서는 `reg = <0x0 0x40000000 0x0 0x80000000>`처럼 *4개 셀*입니다. ARMv7은 보통 *2개 셀*입니다. 부모 노드의 `#address-cells` / `#size-cells`가 자식의 reg 형식을 정합니다.
+`reg`의 셀 수와 의미는 노드의 부모 bus가 선언한 `#address-cells`와 `#size-cells`에 따릅니다. CPU 아키텍처만으로 셀 수를 정할 수 없습니다. 예를 들어 부모가 각각 2로 선언했다면 `reg = <0x0 0x40000000 0x0 0x80000000>`은 64-bit address와 size를 나타내는 네 셀입니다.
 
 ### Interrupts에 *raw 번호*만 적음
 
@@ -392,11 +385,11 @@ UART 노드는 enable했는데 `pinctrl-0`을 안 적으면, *해당 핀이 다�
 make ARCH=arm64 dtbs_check
 ```
 
-이 한 번이 *명세 위반*을 잡아냅니다. 메인라인 기여하려면 *반드시* 통과해야 합니다.
+이 명령은 커널 소스 트리의 binding schema와 DT를 검사합니다. 대상 아키텍처·스키마 선택, 도구 의존성과 빌드 설정에 따라 검사 범위가 달라지므로 전체 BSP 적합성 증명으로 보지 않습니다. upstream 기여 시에는 해당 문서의 검증 지침과 CI 결과도 확인합니다.
 
 ## 작은 예시 — 우리 보드의 *완성도 있는* dts skeleton
 
-i.MX 8M Plus 기반 ACME 카메라 보드의 *최소 동작* dts입니다.
+i.MX 8M Plus 기반 가상 ACME 카메라 보드를 설명하는 *불완전한 DTS 골격*입니다. UART·I2C·regulator·Ethernet·memory의 phandle, 핀 그룹, 인터럽트, regulator binding 등은 실제 보드의 회로도와 SoC DTS에 맞춰 채워야 하므로 이 예제만으로 컴파일되거나 동작한다고 볼 수 없습니다.
 
 ```text
 /dts-v1/;
@@ -485,14 +478,14 @@ i.MX 8M Plus 기반 ACME 카메라 보드의 *최소 동작* dts입니다.
 };
 ```
 
-`chosen`의 `stdout-path = &uart2`는 *부트로더가 어느 UART을 console로 쓸지* 알려줍니다. earlycon이 이 정보를 사용합니다.
+이 골격은 binding 검증이나 하드웨어 동작 검증을 거친 완성 예제가 아닙니다. 특히 fixed-regulator의 GPIO property 이름과 각 peripheral의 phandle은 커널 버전의 binding 및 보드 회로와 대조해 채워야 합니다. `chosen`의 `stdout-path = &uart2`는 부트로더가 전달한 DT에서 Linux console 경로를 지정합니다. U-Boot의 console은 별도 설정이며, Linux earlycon 사용은 커널 옵션과 드라이버 지원에도 달려 있습니다.
 
 ## 정리
 
 - Device Tree는 *커널에 하드웨어 토폴로지를 데이터로 전달*합니다. 보드를 추가할 때 *드라이버를 안 고치는* 것이 목표입니다.
 - `<soc>.dtsi`(벤더 제공) + `<board>.dts`(BSP 작성)의 두 층 구조입니다. dts가 dtsi를 *include*하고 *override*합니다.
 - 세 가지 표준 속성 `reg`, `interrupts`, `clocks`가 거의 모든 peripheral 노드에 등장합니다.
-- `compatible` 문자열은 *왼쪽부터* 매칭되며, fallback 구조 덕에 새 보드 변형이 *드라이버 수정 없이* 동작할 수 있습니다.
+- `compatible` 문자열은 구체적인 identifier부터 일반적인 호환 identifier 순으로 쓰며, 실제 매칭은 driver OF table에 따릅니다.
 - DT bindings 문서(`Documentation/devicetree/bindings/`)가 각 compatible의 *명세*입니다. `make dtbs_check`로 검증합니다.
 - peripheral은 `status = "okay"`로 *enable*해야 하고, *pinmux*와 *clock*이 함께 연결되어야 동작합니다.
 - DT overlay는 *변형 보드와 add-on*을 처리합니다. `dtc -@`로 빌드하고 ConfigFS 또는 부트로더에서 적용합니다.

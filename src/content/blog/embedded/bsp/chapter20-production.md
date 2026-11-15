@@ -35,7 +35,7 @@ reproducibility를 깨는 주범은 다음입니다.
 | Build path 차이 | `--remap-path-prefix` (gcc, clang) |
 | Locale | `LC_ALL=C` |
 | 병렬 빌드 순서 | 결정적 sort, deterministic archive |
-| Random ID (build-id) | `--build-id=sha1` |
+| ELF build-id 설정 | 해당 linker가 지원하는 결정적 style을 선택하고 실제 산출물 비교 |
 | 호스트 username/hostname | strip 또는 명시적 값 |
 | 컴파일러 버전 | 컨테이너로 pin |
 | 의존 패키지 버전 | lock file |
@@ -49,30 +49,30 @@ $ export SOURCE_DATE_EPOCH=$(git log -1 --pretty=%ct)
 $ make
 ```
 
-이렇게 두면 `__DATE__`/`__TIME__`, gzip header, tar mtime, ar header가 모두 이 epoch로 고정됩니다.
+이 변수는 이를 지원하는 빌드 도구의 timestamp 입력을 고정하는 규약입니다. `__DATE__`/`__TIME__`, archive, gzip, tar 등 모든 도구가 자동으로 이를 처리하지는 않으므로 각 빌드 단계의 지원 여부를 확인합니다.
 
 ```c
 // __DATE__가 빌드 시각 대신 commit 시각으로 고정
 printf("Built on %s\n", __DATE__);
 ```
 
-Buildroot, Yocto, Debian 모두 표준으로 채택했습니다.
+Buildroot·Yocto·Debian은 재현 가능한 package build에서 이 변수를 사용할 수 있지만, 전체 build graph의 모든 도구를 자동으로 결정적으로 만들지는 않습니다.
 
 ## build-id 결정성
 
-ELF binary의 `.note.gnu.build-id` 섹션은 binary fingerprint입니다. linker가 *content hash*로 생성하면 결정적, 기본값(uuid)이면 매 빌드 다릅니다.
+ELF `.note.gnu.build-id`는 linker가 만드는 build identifier입니다. 기본적으로 항상 UUID가 매번 생성되는 것은 아니며, linker와 build 설정에 따라 생성 여부와 style이 달라집니다. `sha1` style을 요청해도 전체 빌드가 재현 가능해지는 것은 아니므로 두 산출물을 직접 비교합니다.
 
 ```text
 LDFLAGS += -Wl,--build-id=sha1
 ```
 
-또는 명시적 0 값:
+build-id를 생략하는 선택은 `none`이지만, 이는 결정적 identifier를 만드는 설정이 아니라 identifier를 생성하지 않는 설정입니다.
 
 ```text
 LDFLAGS += -Wl,--build-id=none
 ```
 
-build-id를 켜둔 채 결정적으로 만드는 것이 디버깅에 유리합니다. crash dump의 build-id와 release archive의 build-id를 매칭할 수 있습니다.
+결정적 build-id는 matching에 유용할 수 있습니다. target linker 문서와 ELF 산출물에서 실제 동작을 확인하고, release archive에 대응하는 debug symbols를 보관합니다.
 
 ## 컨테이너로 toolchain pin
 
@@ -98,7 +98,7 @@ $ docker build -t mybsp-builder:1.0 .
 $ docker run --rm -v $(pwd):/work mybsp-builder:1.0 all
 ```
 
-image digest(`@sha256:...`)로 base image를 *pin* 합니다. 다음에 누가 같은 Dockerfile을 다시 build 해도 base가 동일합니다.
+image digest는 base image를 고정합니다. `apt-get update`로 최신 저장소 패키지를 설치하는 이 예시는 나머지 build dependency를 고정하지 않으므로, 재현성에는 package snapshot/version도 별도로 고정해야 합니다.
 
 ## CI/CD 파이프라인 (GitLab 예)
 
@@ -194,7 +194,7 @@ LAVA(Linaro Automation and Validation Architecture)는 보드를 farm으로 운�
 |------|------|------|
 | Dev | 개발자 PC, daily build | 평문 파일 (git ignore) |
 | QA | CI staging, internal release | CI secret store (Vault, GitLab CI variables) |
-| Production | 출시 binary 서명 | HSM (Yubikey, AWS CloudHSM, on-prem PKCS#11) |
+| Production | 출시 binary 서명 | YubiHSM, AWS CloudHSM 또는 PKCS#11을 제공하는 관리형 HSM 등 |
 
 같은 키로 모두 서명하면 dev 환경 침해 시 production이 함께 무너집니다. 분리 + 서로 다른 CA chain.
 
@@ -365,7 +365,7 @@ regulator(CE, FCC, KC)와 customer에게 제출하는 release package는 다음�
 
 ## 정리
 
-- 재현 가능 빌드는 `SOURCE_DATE_EPOCH`, build-id sha1, 컨테이너로 pin 한 toolchain의 조합으로 달성합니다.
+- `SOURCE_DATE_EPOCH`, build-id, container는 재현성을 돕지만, 전체 dependency와 build step을 고정하고 두 output을 비교해야 재현성을 확인할 수 있습니다.
 - CI/CD 파이프라인은 lint → build → smoke → stress → package → sign → deploy 단계로 분리합니다.
 - 키는 dev / QA / production 3등급으로 나누고 production은 HSM에 보관합니다. PKCS#11 API로 접근.
 - 부트로더(HABv4, TF-A FIP), kernel(FIT image 서명), rootfs(dm-verity), OTA bundle 모두 별도 서명 layer입니다.

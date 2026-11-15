@@ -1,8 +1,8 @@
 ---
-title: "TF-A·TrustZone 통합 — BL31·secure world·SMC 흐름 적용"
+title: "TF-A·TrustZone 통합 — 선택적 BL 단계와 secure world"
 slug: "embedded/bsp/chapter07-tfa-trustzone"
 date: 2026-05-18T09:07:00
-description: "ARM Trusted Firmware-A를 BSP에 통합 — BL31 빌드, U-Boot와 BL33 결합, secure/non-secure 분리."
+description: "TF-A를 사용하는 boot chain의 BL 단계, BL31, PSCI와 secure-world 통합을 플랫폼 범위에 맞춰 설명합니다."
 series: "BSP Development"
 seriesOrder: 7
 tags: [embedded, bsp, tf-a, trustzone, security]
@@ -12,32 +12,32 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"ARMv8 BSP는 TF-A의 BL31이 secure monitor로 상주하고, U-Boot은 그 위의 BL33으로 동작합니다."** ARM Trusted Firmware-A는 거의 모든 Cortex-A 보드에서 *반드시* 통합해야 하는 secure world의 기반층입니다.
+> **TF-A는 Arm 시스템에서 선택할 수 있는 EL3 runtime firmware 구현입니다.** TF-A를 사용하는 boot chain에서는 보통 BL31이 EL3 runtime 역할을 맡고 U-Boot 등이 BL33으로 실행될 수 있습니다. 모든 Armv8 보드가 TF-A를 사용하거나 같은 BL 구성을 쓰지는 않습니다.
 
 ## TF-A가 필요한 이유
 
-ARMv8 아키텍처에서 부팅 직후 *모든 코드*가 가장 높은 권한 레벨인 EL3에서 시작합니다. EL3는 secure monitor를 위한 자리이며, 이 자리에 머무를 코드가 있어야 OS가 SMC 호출로 PSCI·secure storage·trusted apps에 접근할 수 있습니다. ARM은 이 역할을 표준화한 reference 구현으로 *Trusted Firmware-A (TF-A)*를 제공합니다.
+Arm 시스템의 초기 실행 예외 레벨은 SoC와 firmware boot design에 따릅니다. EL3 runtime이 있는 구성에서는 해당 firmware가 SMC 서비스 등 일부 기능을 제공할 수 있지만, PSCI는 반드시 TF-A가 구현해야 하는 것은 아닙니다. TF-A는 Arm이 제공하는 오픈소스 reference implementation 중 하나입니다.
 
-i.MX 8M, RK3588, AM62, STM32MP1, Qualcomm SDM 같은 ARMv8 SoC는 모두 *TF-A를 BL31로 채택*합니다. vendor가 직접 작성한 SMC monitor를 쓰는 경우는 거의 없으며, vendor는 TF-A에 자기 SoC port만 추가합니다.
+일부 SoC vendor SDK는 TF-A 포트를 제공합니다. SoC 이름만으로 TF-A 채택 여부나 BL31의 배치를 단정할 수 없으며, vendor boot chain 문서와 해당 SDK의 정확한 버전을 확인해야 합니다.
 
-TF-A 없이는 PSCI를 통한 CPU on/off가 불가능하므로 SMP 부팅도 안 됩니다. TrustZone-aware DRAM 컨트롤러 설정도 BL31의 일이며, OP-TEE 같은 TEE OS도 BL31의 boot 후에 깨어납니다.
+PSCI는 firmware interface이므로 이를 제공하는 구성요소와 구현은 플랫폼별로 다릅니다. DRAM security controller의 설정 주체도 SoC boot design에 따릅니다. OP-TEE는 TF-A 기반 boot flow에서 BL32로 배치될 수 있으나, 이 구성은 선택 사항입니다.
 
 ## BL 단계 모델
 
-TF-A는 부팅을 *BL0부터 BL33*까지 단계로 나눕니다. 각 단계의 역할과 다음 단계로의 전이는 다음과 같습니다.
+TF-A 문서에서 쓰는 BL 단계 이름은 모든 SoC의 실제 boot chain을 뜻하지 않습니다. 아래는 일부 TF-A 구성에서 볼 수 있는 이름이며, BootROM·초기 firmware와 SoC별 단계가 추가되거나 통합될 수 있습니다.
 
 <!-- TODO: TikZ — BL0→BL1→BL2→BL31(→BL32)→BL33→Linux 세로 flow 다이어그램 -->
 
 | 단계 | 역할 | 다음 단계로 넘기는 일 |
 |------|------|----------------------|
-| BL0 | BootROM (SoC 내부, fix) | boot mode pin 읽기, BL1 적재 |
-| BL1 | Trusted Boot ROM (선택적, ROM 안에 fuse-burn 가능) | BL2 인증·적재 |
+| BootROM | SoC 내부의 초기 firmware | boot source와 이후 실행 단계를 SoC 정책에 따라 결정 |
+| BL1 | TF-A의 선택적 첫 단계 | 구성에 따라 BL2를 적재 |
 | BL2 | Trusted Boot Firmware (DDR 초기화·서명 검증) | SoC vendor마다 SPL 대체 또는 보완 |
 | BL31 | EL3 Runtime Firmware (Secure Monitor) | PSCI·SMC handler로 상주, BL32(Secure World OS, OP-TEE 등, 선택) 기동 |
 | BL33 | Non-secure firmware (U-Boot) | Linux 부팅 준비 |
 | Linux Kernel | EL2 또는 EL1에서 실행 | — |
 
-BL0에서 시작해 BL33(U-Boot)까지 순차로 내려가며, BL31이 BL32를 곁가지로 기동한 뒤 BL33으로 이어집니다.
+단계 간 관계와 BL32 시작 시점은 platform port와 이미지 구성에 따라 다릅니다. 특정 보드의 순서는 해당 boot image 구성과 TF-A platform 문서에서 확인해야 합니다.
 
 BL31은 *상주 코드*입니다. Linux로 진입한 뒤에도 SMC instruction이 호출되면 BL31이 깨어나 처리하고 EL1으로 돌아갑니다. SMC instruction은 사실상 secure world로의 *trap*입니다.
 
@@ -48,12 +48,10 @@ BootROM
   → flash.bin 적재 (offset 32KB)
     flash.bin = SPL + DDR firmware + tee.bin + bl31.bin + u-boot.itb
   → SPL이 SRAM에서 동작 (DDR 초기화)
-  → SPL이 DDR로 bl31.bin·tee.bin·u-boot.itb 적재
-  → BL31 점프
-  → BL31이 OP-TEE(BL32)·U-Boot(BL33) 시작
+  → SPL, BL31, BL32, BL33의 적재 주소와 handoff 순서는 U-Boot·TF-A·OP-TEE 및 `imx-mkimage` 버전에 따라 확인합니다. 위 목록은 고정된 i.MX 8M Plus boot order가 아닙니다.
 ```
 
-SPL이 BL2 역할을 겸하는 경우입니다. RK3588은 BootROM이 직접 BL2를 적재하고 BL2가 BL31을 호출하는 *더 표준적인* 흐름입니다.
+SPL이 BL2 역할을 겸하는 경우입니다. 다른 SoC의 예시는 해당 board SDK가 문서화한 단계와 대조해야 하며, 이를 보편적인 표준 순서로 부르지 않습니다.
 
 ## TF-A 소스 트리
 
@@ -99,7 +97,7 @@ trusted-firmware-a/
 | `lib/` | libc, fdt, optee_utils |
 | `services/std_svc/` | PSCI 등 표준 서비스 |
 
-새 BSP에 TF-A를 통합할 때 직접 만드는 디렉터리는 `plat/<vendor>/<soc>/<board>/` 하나입니다. SoC는 이미 vendor가 port를 maintain하고 있으므로 우리는 *보드별 plat_io_storage.c·platform_def.h·plat_psci.c* 정도만 만듭니다.
+TF-A port에 필요한 파일과 변경 범위는 target platform이 upstream에 있는지, vendor fork인지, boot device·power design이 무엇인지에 따라 달라집니다. 플랫폼 코드 일부만 만드는 것으로 일반화하지 말고 기존 port와 platform integration guide를 기준으로 작업 범위를 산정합니다.
 
 ## BL31 빌드 — i.MX 8M Plus 사례
 
@@ -119,7 +117,7 @@ ls build/imx8mp/debug/bl31.bin
 
 `BL32_BASE`·`BL32_SIZE`는 OP-TEE가 들어갈 자리입니다. OP-TEE 없이 부팅한다면 안 줘도 됩니다.
 
-`LOG_LEVEL`은 BL31의 console 출력량입니다. 운용에서는 0(none) 또는 10(notice)이고, 개발에서는 40(verbose)으로 둡니다.
+`LOG_LEVEL` 값의 이름과 유효 범위는 TF-A 버전에 따릅니다. 개발·제품 설정은 보안 요구사항과 console 정책을 함께 고려해 해당 버전 문서로 정합니다.
 
 빌드 결과 `bl31.bin`은 *위치 독립적 raw binary*입니다. SPL이 미리 정해진 주소에 적재한 뒤 점프합니다. i.MX 8M Plus는 `0x970000`이 BL31의 entry입니다.
 
@@ -148,7 +146,7 @@ ls build/imx8mp/debug/bl31.bin
 #define PLAT_NS_IMAGE_OFFSET    BL33_BASE
 ```
 
-`BL31_BASE`는 SRAM 안의 작은 영역입니다(보통 64~128KB). DDR이 깨어나기 전부터 동작해야 하므로 SRAM에 머뭅니다.
+`BL31_BASE`의 주소와 메모리 영역은 platform port와 boot sequence가 정합니다. 모든 플랫폼에서 SRAM을 사용하거나 같은 크기 범위를 쓰는 것은 아닙니다.
 
 `BL32_BASE`는 OP-TEE가 들어갈 DDR 안 영역입니다. 이 영역은 *TZASC*(TrustZone Address Space Controller)로 *secure-only*로 보호됩니다. Linux에서 이 주소를 read하면 fault가 납니다.
 
@@ -164,11 +162,11 @@ TF-A의 *가장 큰 가치*는 PSCI(Power State Coordination Interface)입니다
 static int imx_pwr_domain_on(u_register_t mpidr)
 {
     unsigned int cpu_id = MPIDR_AFFLVL0_VAL(mpidr);
-    uint64_t entry = BL31_BASE;
+    uint64_t entry = platform_secondary_entry(mpidr); /* platform-specific */
 
     /* CPU 전원 켜기 (SoC 특정 GPC register) */
-    imx_set_cpu_secure_entry(cpu_id, entry);
-    imx_set_cpu_pwr_on(cpu_id);
+    platform_set_secondary_entry(cpu_id, entry);
+    platform_power_on_cpu(cpu_id);
 
     return PSCI_E_SUCCESS;
 }
@@ -195,13 +193,13 @@ const plat_psci_ops_t imx_plat_psci_ops = {
 int plat_setup_psci_ops(uintptr_t sec_entrypoint,
                         const plat_psci_ops_t **psci_ops)
 {
-    imx_mailbox_init(sec_entrypoint);
+    platform_mailbox_init(sec_entrypoint);
     *psci_ops = &imx_plat_psci_ops;
     return 0;
 }
 ```
 
-이 ops 테이블을 등록해 두면 Linux의 `arm,psci-1.0` 드라이버가 SMC로 `PSCI_CPU_ON`을 호출할 때마다 `imx_pwr_domain_on()`이 실행됩니다.
+TF-A 기반 플랫폼이라면 platform PSCI callback이 CPU power sequencing을 구현합니다. Linux DT binding과 firmware가 협상한 PSCI version·conduit에 따라 호출 경로가 달라지므로 함수 이름은 해당 TF-A source revision에서 확인해야 합니다.
 
 ## device tree에서의 PSCI
 
@@ -236,39 +234,33 @@ cpus {
 };
 ```
 
-`enable-method = "psci"`가 *PSCI 사용*을 의미합니다. 이 한 줄이 없으면 Linux는 SMP 부팅을 안 합니다. Ch 9에서 SMP bring-up 디버깅을 자세히 다룹니다.
+`enable-method = "psci"`는 해당 CPU에 PSCI enable method를 사용한다고 선언합니다. 실제 bring-up에는 PSCI firmware, compatible/method, CPU topology와 kernel 지원이 모두 맞아야 합니다. Ch 9에서 SMP bring-up 디버깅을 자세히 다룹니다.
 
 ## TrustZone 메모리 분할
 
-TF-A는 SoC의 TZASC(TrustZone Address Space Controller)를 설정해 *DDR 일부를 secure-only*로 만듭니다.
+일부 플랫폼에서는 secure monitor나 다른 firmware가 TrustZone Address Space Controller(TZASC)를 설정해 메모리 영역 접근을 제한합니다. 설정 주체·register layout·주소 범위는 SoC와 security design에 따라 다릅니다. 아래 값은 장치 설정으로 사용하면 안 되는 개념 예시입니다.
 
 ```c
-/* plat_arch_setup() 또는 bl31_plat_arch_setup()에서 호출 */
+/* Non-buildable pseudocode: the real platform code and register values are required. */
 
-#define TZASC_BASE      0x32F80000
+#define TZASC_BASE      PLATFORM_DEFINED_TZASC_BASE /* placeholder, not a literal address */
 
 void imx_init_tzasc(void)
 {
     /* Region 0: 0x40000000 ~ 0x55FFFFFF — Non-secure (Linux DDR) */
-    writel(0x40000000, TZASC_BASE + 0x100);
-    writel(0x55FFFFFF, TZASC_BASE + 0x104);
-    writel(0xC0000000, TZASC_BASE + 0x110);  /* NS access */
+    platform_configure_nonsecure_region(/* platform-specific range */);
 
     /* Region 1: 0x56000000 ~ 0x57FFFFFF — Secure-only (OP-TEE) */
-    writel(0x56000000, TZASC_BASE + 0x120);
-    writel(0x57FFFFFF, TZASC_BASE + 0x124);
-    writel(0x80000000, TZASC_BASE + 0x130);  /* S-only access */
+    platform_configure_secure_region(/* reserved for secure firmware */);
 
     /* Region 2: 0x58000000 ~ 0xFFFFFFFF — Non-secure */
-    writel(0x58000000, TZASC_BASE + 0x140);
-    writel(0xFFFFFFFF, TZASC_BASE + 0x144);
-    writel(0xC0000000, TZASC_BASE + 0x150);
+    platform_configure_remaining_region(/* platform-specific policy */);
 }
 ```
 
-설정 후 OP-TEE 영역은 *Linux에서 접근 불가*입니다. dmesg에서 OP-TEE 영역에 read를 시도하면 *SError exception*이 발생합니다.
+실제 secure carveout의 접근 결과는 SoC interconnect·TZASC 및 exception 처리에 따라 다릅니다. Linux가 이를 정상 메모리로 쓰지 않도록 device tree/reservation과 firmware 설정을 일치시켜야 합니다. 이 가상 주소를 읽어 동작을 시험하지 마세요.
 
-비슷한 컨트롤러로 GIC의 secure interrupt 그룹, IOMUX의 secure-only mux, SDMA의 secure channel 등이 있습니다. 모두 BL31이 설정합니다.
+다른 peripheral의 secure attribution도 플랫폼 별 보안 설계와 firmware 구성요소가 정합니다. 모든 설정을 BL31이 담당한다고 단정할 수 없습니다.
 
 ## OP-TEE를 BL32로 통합
 
@@ -439,7 +431,7 @@ Breakpoint 1, bl31_main () at bl31/bl31_main.c:73
 
 ### BL31 entry address가 SRAM 밖
 
-`BL31_BASE`를 DDR 안에 두면 SRAM에서 동작해야 하는 부팅 초기에 *DDR이 깨기 전*이라 fault가 납니다. SoC vendor가 권장한 *SRAM 안 주소*를 사용합니다.
+BL31의 실행 주소가 어느 메모리에 놓이는지는 platform boot design의 계약입니다. 특정 주소·SRAM 배치와 handoff 시점은 선택한 TF-A/U-Boot/SoC 문서와 링크 map으로 확인해야 합니다.
 
 ### `PLATFORM_CORE_COUNT`가 실제 코어 수와 다름
 
