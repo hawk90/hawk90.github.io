@@ -183,6 +183,7 @@ libfdt fdt_getprop(): FDT_ERR_NOTFOUND
 
 - **옛 버전으로 되돌리기(rollback).** 예전에 정상 서명된 FIT은 지금도 정상 서명입니다. 취약점이 있던 이전 kernel을 다시 넣어도 위 ④처럼 통과합니다. 막으려면 서명된 버전 정보와, 되돌릴 수 없는 저장소(OTP·RPMB 등)의 counter를 비교하는 제품별 장치가 따로 필요합니다.
 - **FIT 밖에서 오는 값.** 환경의 `bootargs`는 서명 범위 밖입니다. [15장](/blog/embedded/bootloader/chapter15-fit-image)에서 본 것처럼 환경에 `bootargs`가 있으면 서명된 DTB의 `chosen/bootargs`를 덮어쓰므로, 제품에서는 환경을 고정하거나 kernel command line을 서명된 DTB에서만 받게 구성합니다.
+- **환경 변수 `verify`.** v2024.04에서 `verify=n`이면 `bootm`이 `required` 키가 있어도 configuration 서명 검사를 건너뜁니다(`boot/bootm.c:262`, `fit_image_load()`). 이 장의 공격자 키 FIT가 그 상태에서 부팅되는 것을 [29장](/blog/embedded/bootloader/chapter29-distro-boot)에서 재현했습니다. 환경은 서명되지 않으므로 제품에서는 이 변수를 바꿀 수 없게 막아야 합니다.
 - **공개키를 담은 DTB 자체.** 이 장의 QEMU 구성에서 공개키는 `-dtb qemu-key.dtb`로 들어가는 런타임 DTB에 있습니다. 그 DTB를 공격자 키가 든 것으로 바꾸면 U-Boot는 공격자가 서명한 FIT를 `+ OK`로 받아들입니다. 앞 단계(TF-A Trusted Board Boot)가 `u-boot.bin`을 검증해도 이 DTB는 그 범위 밖입니다. [27장](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 이 장면을 실제로 재현하고, 키를 검증 범위 안으로 옮기는 방법을 정리했습니다.
 - **부팅 이후의 rootfs.** FIT은 kernel·DTB·initramfs까지만 보호합니다. 그 뒤 rootfs의 무결성은 kernel의 dm-verity 같은 기능이 이어받고, dm-verity의 root hash가 서명된 이미지(예: 서명된 initramfs나 DTB)에서 와야 사슬이 이어집니다.
 

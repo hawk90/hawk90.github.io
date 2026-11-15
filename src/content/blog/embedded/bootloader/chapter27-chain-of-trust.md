@@ -151,6 +151,8 @@ Please enable CONFIG_OF_BOARD to ensure that it works correctly.
 
 TF-A 쪽에서 잇는 방법도 있습니다. `tbbr_cot_bl2.c`는 `NT_FW_CONFIG_ID` 이미지(564행)를 같은 non-trusted FW content cert의 `nt_fw_config_hash`로 검증하도록 정의합니다. 즉 Normal world용 설정 DTB를 BL33처럼 인증서 해시로 묶어 넘기는 길이 CoT에 이미 있습니다. 이번 빌드의 FIP에는 이 항목이 없었고, 이 경로도 실행해 보지는 않았습니다.
 
+같은 구조의 틈이 환경 변수에도 있습니다. v2024.04에서는 `verify=n` 한 줄로 `bootm`의 FIT 서명 강제가 꺼지고, 환경은 서명되지 않은 저장소에 있습니다. [Ch 29](/blog/embedded/bootloader/chapter29-distro-boot)에서 공격자 키 FIT가 이 상태로 부팅되는 것을 재현했습니다.
+
 ## 그다음 고리 — 커널 모듈과 rootfs
 
 U-Boot 뒤에도 고리가 두 개 더 있습니다. 둘 다 같은 원칙으로 점검합니다.
