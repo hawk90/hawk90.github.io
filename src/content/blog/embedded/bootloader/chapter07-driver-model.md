@@ -29,6 +29,10 @@ U-Boot v2024.04 문서는 uclass를 같은 방식으로 동작하는 device의 �
 
 같은 SoC 안에 여러 MMC controller가 있으면 하나의 driver 구현을 여러 instance가 사용할 수 있습니다. 각 instance의 주소·속성·호환성 정보는 Device Tree 또는 board configuration에서 제공됩니다.
 
+![uclass 하나에 MMC controller instance 두 개가 소속되고 두 instance가 같은 driver를 쓰는 관계, 그리고 DT node의 compatible이 bind와 probe를 거쳐 사용 가능한 device가 되는 순서](/images/blog/bootloader/diagrams/chapter07-driver-model.svg)
+
+그림 위쪽은 세 요소의 관계를, 아래쪽은 다음 절에서 다룰 binding과 bind·probe 순서를 보여 줍니다.
+
 ## Binding과 Device Tree
 
 U-Boot의 driver model은 보드 설정과 Kconfig에서 사용할 수 있는 driver를 등록합니다. Device Tree를 쓰는 구성에서는 node의 `compatible` 정보와 driver의 matching data를 사용해 device를 bind할 수 있습니다. Binding된 node마다 hardware가 정상 동작한다고 보장되지는 않습니다. clock, reset, pinctrl, parent bus, status, driver 지원과 probe 결과를 확인해야 합니다.

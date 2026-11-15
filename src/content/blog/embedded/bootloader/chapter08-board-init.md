@@ -31,9 +31,13 @@ U-Boot v2024.04의 `common/board_f.c`에는 `init_sequence_f`가 정의되어 �
 
 ## DRAM 이후와 relocation
 
-DRAM이 준비되는 시점과 relocation 여부는 platform에 따라 다릅니다. U-Boot v2024.04의 `setup_dest_addr()`는 usable RAM의 top을 계산해 `gd->relocaddr`의 초기 값을 정합니다. 이후 `reserve_uboot()`는 `mon_len`을 빼고 page boundary에 맞추며, 이어지는 reservation 단계가 FDT, malloc, stack, video, trace 등 추가 영역을 배치할 수 있습니다. 따라서 최종 주소는 단순히 `ram_base + ram_size - mon_len`으로만 결정되지 않습니다.
+DRAM이 준비되는 시점과 relocation 여부는 platform에 따라 다릅니다. U-Boot v2024.04의 `setup_dest_addr()`는 usable RAM의 top을 계산해 `gd->relocaddr`의 초기 값을 정합니다. 그 다음 `init_sequence_f`는 구성에 따라 `reserve_video()`, `reserve_trace()` 같은 영역을 먼저 잡아 `gd->relocaddr`를 낮추고, `reserve_uboot()`가 `mon_len`을 빼고 page boundary에 맞춥니다. 이어지는 `reserve_malloc()`, `reserve_board()`, `reserve_fdt()`, `reserve_stacks()` 같은 단계는 U-Boot image 아래에 malloc, board/global data, FDT, stack 영역을 배치합니다. 따라서 최종 주소는 단순히 `ram_base + ram_size - mon_len`으로만 결정되지 않습니다.
 
 `reloc_off` 계산도 architecture에 따라 image start 또는 `CONFIG_TEXT_BASE`를 기준으로 합니다. `bdinfo` output 하나만 보고 relocation 관계를 일반화하지 말고, 같은 build의 linker/configuration과 `common/board_f.c` 및 architecture relocation code를 같이 확인해야 합니다.
+
+![board_init_f의 init_sequence_f가 dram_init 뒤 setup_dest_addr와 reserve 단계를 거쳐 relocation 후 board_init_r로 넘어가는 흐름, 그리고 usable RAM top에서 아래로 U-Boot 이미지·malloc·FDT·stack 영역이 예약되는 순서](/images/blog/bootloader/diagrams/chapter08-relocation-memory.svg)
+
+그림은 v2024.04 `init_sequence_f`의 항목 순서를 따른 개념도이며, 실제 영역 크기와 주소는 보드의 configuration에 따라 달라집니다.
 
 ## Global data와 runtime 확인
 

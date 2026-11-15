@@ -23,6 +23,10 @@ topics: ["embedded"]
 
 특정 `BOOTSEL[2:0]` 비트 표는 칩 전반의 공통 규칙이 아닙니다. 실제 설정은 해당 SoC의 문서와 보드 회로에서 확인해야 합니다. 이 글은 Fuse programming 명령이나 공용 주소표를 제시하지 않습니다.
 
+![ROM이 boot source를 골라 첫 firmware stage 이미지를 읽는 단계와, U-Boot가 저장 장치 driver로 raw offset·파티션·filesystem에서 kernel·DTB·initramfs를 RAM에 적재하는 단계를 나눈 그림](/images/blog/bootloader/diagrams/ch10-storage-layout.svg)
+
+두 단계는 근거 자료도 다르므로, 그림처럼 ROM 쪽은 SoC 문서로, U-Boot 쪽은 build configuration과 command 문서로 따로 확인합니다.
+
 ## eMMC와 SD
 
 U-Boot의 MMC subsystem은 eMMC와 SD 장치를 다룹니다. eMMC는 보드에 실장되고 boot hardware partition 등을 제공할 수 있으며, SD 카드는 removable media입니다. 파티션 구성과 ROM이 어느 영역을 읽는지는 SoC의 boot flow에 따릅니다. U-Boot가 지원되도록 빌드됐다면 다음은 장치 상태를 살펴보는 **읽기 명령 형태**입니다.

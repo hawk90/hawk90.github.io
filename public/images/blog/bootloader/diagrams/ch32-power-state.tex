@@ -3,36 +3,43 @@
 \setmainfont{Apple SD Gothic Neo}
 \setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\input{../../_design-state.tex}
+% Sources (verified):
+%   TF-A include/lib/psci/psci.h  aff_info_state_t: AFF_STATE_ON/OFF/ON_PENDING
+%                                 (states reported by PSCI_AFFINITY_INFO), PSCI_E_*
+%   TF-A lib/psci/psci_setup.c     initial aff_info_state = AFF_STATE_OFF
+%   TF-A lib/psci/psci_on.c        cpu_on_validate_state(): ON -> ALREADY_ON, ON_PENDING -> ON_PENDING
+%                                 psci_cpu_on_start(): OFF -> ON_PENDING, restore OFF if pwr_domain_on fails
+%   TF-A lib/psci/psci_common.c    psci_set_pwr_domains_to_run(): -> AFF_STATE_ON (warm boot path)
+%   TF-A lib/psci/psci_off.c       psci_do_cpu_off(): -> AFF_STATE_OFF
+%   Linux arch/arm64/kernel/smp.c  __cpu_up(): waits, then checks cpu_online() separately
+\begin{tikzpicture}[blog, state]
 
-\node[font=\sffamily\bfseries\large] at (0,5.6) {PSCI \texttt{power\_state} Encoding};
+\node[font=\sffamily\bfseries, text=inkc] at (5.5,2.9) {대상 CPU의 PSCI 상태 (TF-A \texttt{aff\_info\_state})};
 
-% --- Original (v0.2) ---
-\node[font=\sffamily\bfseries] at (-5.5,4.4) {Original — PSCI v0.2};
+\node[initial] (i) at (-2.4,0) {};
+\node[stateNeut, stateLg] (off) at (0,0)    {\texttt{OFF}};
+\node[stateCon,  stateLg] (pen) at (5.5,0)  {\texttt{ON\_PENDING}};
+\node[stateOk,   stateLg] (on)  at (11,0)   {\texttt{ON}};
+\node[stateAbs,  stateLg, dashed, text width=30mm, align=center] (lx) at (16.6,0) {Linux CPU online};
 
-\node[hi,    minimum width=10mm, minimum height=10mm, anchor=west] (sf)  at (-7.0,3.4) {SF};
-\node[neut,  minimum width=10mm, minimum height=10mm, anchor=west] (z)   at (-6.0,3.4) {0};
-\node[abs,   minimum width=24mm, minimum height=10mm, anchor=west] (st)  at (-5.0,3.4) {StateType};
-\node[con,   minimum width=30mm, minimum height=10mm, anchor=west] (sid) at (-2.6,3.4) {StateID};
-\node[imp,   minimum width=26mm, minimum height=10mm, anchor=west] (al)  at (0.4,3.4) {AffinityLevel};
-\node[neut,  minimum width=16mm, minimum height=10mm, anchor=west] (mbz) at (3.0,3.4) {MBZ};
+\draw[trans] (i) -- (off);
+\draw[trans] (off) -- node[transLabel, above=2pt]{\texttt{CPU\_ON} 접수} (pen);
+\draw[trans] (pen) -- node[transLabel, above=2pt, align=center]{warm boot 경로\\[2pt]마무리} (on);
+\draw[transAlt] (on) -- node[transLabelMute, above=2pt, align=center]{OS 초기화 후\\[2pt](별도 단계)} (lx);
 
-\node[caption, anchor=north, align=left] at (-6.4,2.7) {Shallow(0) /\\Deep(1)};
-\node[caption, anchor=north, align=left] at (-3.8,2.7) {0=standby\\1=power-down};
-\node[caption, anchor=north, align=left] at (1.6,2.7) {0=CPU\\1=cluster\\2=system};
+% self loops: repeated CPU_ON requests are rejected
+\draw[trans] (pen.north west) ++(0.5,0) to[out=100,in=80,looseness=2.2] node[transLabel, above]{\texttt{CPU\_ON} $\to$ \texttt{ON\_PENDING} 오류} ($(pen.north east)+(-0.5,0)$);
+\draw[trans] (on.north west) ++(0.5,0) to[out=100,in=80,looseness=2.2] node[transLabel, above]{\texttt{CPU\_ON} $\to$ \texttt{ALREADY\_ON} 오류} ($(on.north east)+(-0.5,0)$);
 
-% --- Extended (v1.0+) ---
-\node[font=\sffamily\bfseries] at (-5.5,0.8) {Extended — PSCI v1.0+ (선호)};
+% return paths to OFF
+\draw[transError] (pen.south) -- ++(0,-0.9) -| node[transLabel, pos=0.25, below]{플랫폼 hook 실패 시 복원} ($(off.south)+(0.8,0)$);
+\draw[transAlt] (on.south) -- ++(0,-1.9) -| node[transLabel, pos=0.25, below]{\texttt{CPU\_OFF}} ($(off.south)+(-0.6,0)$);
 
-\node[hi,   minimum width=10mm, minimum height=10mm, anchor=west] (pd)   at (-7.0,-0.4) {PD};
-\node[neut, minimum width=26mm, minimum height=10mm, anchor=west] (mbz2) at (-6.0,-0.4) {MBZ};
-\node[abs,  minimum width=22mm, minimum height=10mm, anchor=west] (lv)   at (-3.4,-0.4) {Level};
-\node[con,  minimum width=36mm, minimum height=10mm, anchor=west] (sid2) at (-1.2,-0.4) {StateID};
-
-\node[caption, anchor=north, align=left] at (-6.4,-1.1) {Power-down(1) /\\Standby(0)};
+\node[caption] at (5.5,-3.3) {\texttt{OFF}, \texttt{ON\_PENDING}, \texttt{ON}은 \texttt{AFFINITY\_INFO}가 보고하는 값입니다. Linux online은 OS 쪽 상태입니다.};
 
 \end{tikzpicture}
 \end{document}

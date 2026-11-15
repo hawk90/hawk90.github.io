@@ -44,6 +44,10 @@ DRAM controller는 CPU 요청을 메모리 프로토콜 명령으로 바꾸고 r
 
 이 정보가 없으면 특정 register 값, memory map, training 결과를 문서만으로 판정하기 어렵습니다. 값을 추측해 채우기보다 해당 보드의 원본 설정과 공급업체 자료를 대조해야 합니다. [BSP 5장](/blog/embedded/bsp/chapter05-ddr-params)도 설정 자료를 확인할 때 참고할 수 있습니다.
 
+![부품 데이터시트·SoC 문서·보드 회로·공급업체 설정에서 보드별 DRAM 설정을 만들고, 이를 전원·clock 안정화부터 메모리 사용 준비까지 초기화에 포함될 수 있는 단계에 적용한 뒤 검증하는 흐름](/images/blog/bootloader/diagrams/ch09-ddr-init-flow.svg)
+
+그림의 오른쪽 단계는 점선으로 그렸는데, 대상 플랫폼에 따라 단계가 빠지거나 순서가 달라질 수 있기 때문입니다.
+
 ## 주소 변환과 메모리 구성
 
 CPU physical address가 DRAM의 row, bank, column에 대응하는 방식은 controller와 메모리 구성에 따라 정해집니다. 주소의 어느 비트를 어떤 필드에 연결하는지에 대한 보편적인 비트 배열은 없습니다. 따라서 특정 용량이나 DRAM 조직을 전제로 만든 주소 분해 예제는 대상 controller 문서와 실제 설정 없이는 일반 예제로 사용하기 어렵습니다.

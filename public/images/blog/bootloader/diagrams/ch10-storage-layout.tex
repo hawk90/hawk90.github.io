@@ -6,46 +6,55 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  bx/.style={cls, minimum width=52mm, text width=48mm, minimum height=22mm, align=center, font=\sffamily\footnotesize, inner sep=4pt},
+  rom/.style={bx, draw=absbord, fill=absfill},
+  ub/.style={bx, draw=impbord, fill=impfill},
+  mem/.style={bx, draw=hibord, fill=hifill},
+  lay/.style={bx, draw=clibord, fill=clifill},
+  hdr/.style={font=\sffamily\bfseries\small, text=inkc, anchor=west},
+  sub/.style={font=\sffamily\footnotesize, text=mutec, anchor=west}
+]
 
-% Title
-\node[font=\sffamily\bfseries] at (4, 5.5) {eMMC 부트 파티션 레이아웃};
+% ── Stage 1: ROM → first firmware ──
+\node[hdr] at (-2.8, 7.6) {① ROM에서 다음 firmware로};
+\node[sub] at (-2.8, 7.05) {근거: SoC reference manual · 보드 문서};
 
-% eMMC structure
-\node[font=\sffamily\small\bfseries, text=inkc, anchor=west] at (0, 4.5) {Boot Partition 0};
-\draw[draw=nodebord, fill=absfill] (0, 3.6) rectangle (8, 4.2);
-\node[font=\sffamily\scriptsize, anchor=west] at (0.2, 3.9) {SPL (33KB offset)};
-\node[font=\sffamily\scriptsize, anchor=east] at (7.8, 3.9) {U-Boot + FIT};
+\node[rom] (sel) at (0, 5.4) {%
+  \textbf{boot source 선택}\\[2pt]
+  reset 설정 · straps ·\\[1pt] 비휘발성 설정};
+\node[lay] (img1) at (6.6, 5.4) {%
+  \textbf{첫 firmware stage 이미지}\\[2pt]
+  ROM 전용 header · 고정 위치 ·\\[1pt] packaging format (SoC별)};
+\node[mem] (fw) at (13.2, 5.4) {%
+  \textbf{다음 firmware 실행}\\[2pt]
+  \scriptsize (이후 DRAM 초기화 등, 9장)};
 
-% Boot Partition 1
-\node[font=\sffamily\small\bfseries, text=inkc, anchor=west] at (0, 3) {Boot Partition 1};
-\draw[draw=nodebord, fill=neutfill] (0, 2.1) rectangle (8, 2.7);
-\node[font=\sffamily\scriptsize, text=mutec, anchor=center] at (4, 2.4) {(backup 또는 미사용)};
+\draw[flow] (sel) -- node[font=\sffamily\scriptsize, text=mutec, above] {읽음} (img1);
+\draw[flow] (img1) -- (fw);
 
-% User Area with GPT
-\node[font=\sffamily\small\bfseries, text=inkc, anchor=west] at (0, 1.5) {User Area (GPT)};
+% ── Stage 2: U-Boot → OS files ──
+\node[hdr] at (-2.8, 2.6) {② U-Boot에서 OS 파일로};
+\node[sub] at (-2.8, 2.05) {근거: board defconfig · DTS · U-Boot 버전별 command 문서};
 
-% GPT partitions
-\draw[draw=nodebord, fill=impfill] (0, 0.3) rectangle (1.5, 0.9);
-\node[font=\sffamily\tiny] at (0.75, 0.6) {boot};
+\node[ub] (drv) at (0, 0.2) {%
+  \textbf{저장 장치 driver · command}\\[2pt]
+  \scriptsize eMMC · SD → \texttt{mmc}\\[1pt]
+  \scriptsize SATA (SCSI 경로일 때) → \texttt{scsi}\\[1pt]
+  \scriptsize raw NAND → \texttt{nand} · SPI NOR → \texttt{sf}};
+\node[lay] (img2) at (6.6, 0.2) {%
+  \textbf{저장 레이아웃}\\[2pt]
+  raw offset · GPT/MBR 파티션 ·\\[1pt] filesystem · platform container};
+\node[mem] (ram) at (13.2, 0.2) {%
+  \textbf{RAM에 적재}\\[2pt]
+  kernel · DTB · initramfs\\[2pt]
+  \scriptsize 예: \texttt{load mmc <dev>:<part> ...}};
 
-\draw[draw=nodebord, fill=clifill] (1.6, 0.3) rectangle (5.5, 0.9);
-\node[font=\sffamily\tiny] at (3.55, 0.6) {rootfs};
+\draw[flow] (drv) -- node[font=\sffamily\scriptsize, text=mutec, above] {읽기} (img2);
+\draw[flow] (img2) -- (ram);
 
-\draw[draw=nodebord, fill=prpfill] (5.6, 0.3) rectangle (8, 0.9);
-\node[font=\sffamily\tiny] at (6.8, 0.6) {data};
 
-% Offset annotations
-\draw[draw=mutec, densely dashed] (0, 3.6) -- (0, -0.3);
-\node[font=\sffamily\tiny, text=mutec, anchor=north] at (0, -0.4) {0x0};
-
-% 33KB offset tick — placed in the wide gap between the eMMC structure and
-% the GPT partitions (around y=1.7, x=1)
-\draw[draw=mutec, densely dashed] (1, 3.6) -- (1, 1.8);
-\node[font=\sffamily\tiny, text=mutec, anchor=south] at (1, 1.75) {33KB};
-
-% Legend
-\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (0, -1) {BootROM이 Boot Partition 0의 33KB 오프셋에서 SPL을 읽음};
+\node[caption, text width=160mm] at (6.6, -1.9) {ROM이 읽는 위치와 U-Boot가 OS 파일을 읽는 위치는 따로 문서화합니다. 주소 · offset · Fuse 값은 SoC와 보드별 자료로 확인합니다.};
 
 \end{tikzpicture}
 \end{document}

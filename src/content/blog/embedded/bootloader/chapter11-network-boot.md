@@ -16,6 +16,10 @@ topics: ["embedded"]
 
 [10장](/blog/embedded/bootloader/chapter10-storage-boot)에서 다룬 로컬 저장 장치 대신, 개발 환경에서는 네트워크 서버에서 파일을 받을 수 있습니다. 이를 통해 보드에 이미지를 계속 기록하지 않고도 새 kernel/DTB를 시험할 수 있지만, IP 설정·서버 구성·보안 경계를 맞춰야 합니다.
 
+![U-Boot target이 DHCP/BOOTP server에서 주소와 bootfile 정보를 받고, PXE를 쓸 때 TFTP server에서 config를 읽은 뒤 tftpboot로 kernel과 DTB를 받으며, kernel 단계에서 별도로 NFS root를 mount하는 순서도](/images/blog/bootloader/diagrams/ch11-network-boot-flow.svg)
+
+그림은 이 글에서 다루는 네 단계를 순서대로 보여 주며, 마지막 NFS root mount는 U-Boot가 아니라 kernel 설정에 속하는 별도 단계입니다.
+
 ## DHCP와 BOOTP
 
 DHCP는 client가 주소와 네트워크 설정을 얻는 프로토콜입니다. 흔히 DISCOVER, OFFER, REQUEST, ACK 네 메시지로 설명하지만, 실제 패킷 흐름과 선택한 옵션은 client/server 구성에 달려 있습니다. BOOTP는 오래된 bootstrapping protocol이며 DHCP는 BOOTP packet format 및 동작을 확장해 사용합니다.
