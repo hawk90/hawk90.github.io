@@ -1,8 +1,8 @@
 ---
-title: "HBM 메모리 컨트롤러 분석 — Bank·Row·Column·Address Mapping·Scheduling"
+title: "HBM 컨트롤러 입문 — DRAM 스케줄링과 AXI HBM IP"
 slug: "embedded/hardware/hbm/chapter07-memory-controller"
 date: 2026-05-16T09:07:00
-description: "Bank·row·column·command — 컨트롤러가 보는 HBM과 scheduling·address mapping."
+description: "DRAM 공통 page policy·주소 매핑을 학습용 예제로 살펴보고 AMD AXI HBM IP의 공개 인터페이스와 구분합니다."
 series: "HBM·GDDR 심화"
 seriesOrder: 7
 tags: [hbm, memory-controller, bank, scheduling]
@@ -31,22 +31,19 @@ stack (1024-bit)
                 └── Column
 ```
 
-channel 16개와 channel당 pseudo channel 2개는 JEDEC HBM3 발표에 나온 값입니다. pseudo channel 아래의 *bank group·bank·row·column 개수와 주소 비트 배치*는 JEDEC 규격 원문에 있고, 이 장에서는 TBD로 둡니다.
+channel 16개와 channel당 pseudo channel 2개는 [JEDEC의 2022년 HBM3 발표](https://www.businesswire.com/news/home/20220127005320/en/) 기준입니다. pseudo channel 아래의 *bank group·bank·row·column 개수와 주소 비트 배치*는 JEDEC 규격 원문에 있고, 이 장에서는 TBD로 둡니다.
 
 ## DRAM 명령 인터페이스
 
 컨트롤러가 DRAM에 보내는 *기본 명령*은 DRAM 계열 공통입니다.
 
-```text
-DRAM 기본 명령
-
-  ACT  (Activate)   : row를 sense amp에 올림
-  PRE  (Precharge)  : row를 닫고 bit line 충전
-  RD   (Read)       : 열린 row의 column 읽기
-  WR   (Write)      : 열린 row의 column 쓰기
-  REF  (Refresh)    : row 데이터 다시 채우기
-  MRS  (Mode Register Set) : 설정 변경
-```
+| 명령 | 역할 |
+|---|---|
+| ACT | row 활성화 |
+| PRE | precharge |
+| RD / WR | 열린 row의 column 읽기 / 쓰기 |
+| REF | refresh |
+| MRS | mode register 설정 |
 
 명령 사이에는 *최소 간격(timing constraint)*이 있습니다. 대표적인 것이 같은 bank에서 ACT 뒤 RD까지 기다려야 하는 tRCD, PRE 뒤 다음 ACT까지 기다려야 하는 tRP입니다. HBM3의 실제 값은 TBD입니다.
 
@@ -80,7 +77,7 @@ ACT row=R + RD col=1 + auto PRE
 - **장점**: row buffer locality가 없을 때 단순함
 - **단점**: row hit 기회를 버림
 
-많은 컨트롤러가 *adaptive* 방식을 씁니다. queue에 같은 row로 가는 요청이 더 있으면 열어 두고, 없으면 auto-precharge로 닫습니다.
+두 정책을 요청에 따라 선택하는 adaptive 정책도 설계할 수 있습니다. queue에 같은 row로 가는 요청이 더 있으면 열어 두고, 없으면 auto-precharge로 닫습니다.
 
 ## Bank parallelism — 인터리브의 핵심
 
@@ -95,30 +92,28 @@ ACT row=R + RD col=1 + auto PRE
 
 주소의 *상위 비트를 그대로 bank 번호*로 쓰면, 큰 stride로 도는 access가 *한 bank*에 몰릴 수 있습니다.
 
-```text
-Linear mapping (bank = 상위 비트)
+학습용 linear 예를 `bank=(address >> 20) & 15`로 정의하면 1 MiB 미만 범위에서는 bank 0에 몰립니다. 반면 1 MiB stride는 bank를 순환합니다. 따라서 큰 stride라는 사실만으로 conflict를 예측할 수는 없습니다.
 
-address = 0x0000_0000 → bank 0
-address = 0x0010_0000 → bank 1
-...
-작은 범위를 반복 sweep하면 같은 bank만 hit
+해결책 중 하나가 *XOR hash mapping*입니다. 여러 비트 구간의 XOR가 특정 access pattern의 분포를 바꾸는지 비교할 수 있습니다. 모든 stride의 충돌을 없애는 보장은 없습니다.
+
+다음 순수 함수는 **가상의 주소 매핑**을 비교하는 학습용 모델입니다. HBM 규격·상용 컨트롤러의 register나 실제 주소 decoder를 구현한 것이 아닙니다.
+
+```c title="hbm-toy-mapping.c"
+#include <stdint.h>
+struct mapping { unsigned channel, bank; };
+struct mapping toy_mapping(uint64_t addr) {
+    uint64_t burst = addr >> 5;
+    struct mapping result = {
+        (unsigned)(((burst >> 4) ^ (burst >> 12) ^ (burst >> 20)) & 15),
+        (unsigned)(((burst >> 8) ^ (burst >> 16)) & 15)
+    };
+    return result;
+}
 ```
 
-해결책 중 하나가 *XOR hash mapping*입니다. 여러 비트 구간을 XOR해 bank 번호를 만들면, stride access도 여러 bank로 흩어집니다.
+예를 들어 2 MiB stride의 주소 16개는 이 모델에서 bank 16개로 분산되지만 channel은 모두 0입니다. XOR를 넣었다고 모든 stride·모든 계층의 분포가 좋아지는 것은 아닙니다. 또한 `0`과 `(1<<13)|(1<<21)` 주소는 같은 channel·bank로 충돌합니다. 실제 비교에서는 row까지 포함한 요청 trace와 ordering·timing 제약을 봐야 합니다.
 
-```c
-// 개념 예시 (실제 비트 위치는 컨트롤러마다 다름)
-uint64_t base = addr >> 5;          // burst 단위
-
-int ch = (base >> 4) & 0xF;         // channel: 세 구간 XOR
-ch ^= (base >> 12) & 0xF;
-ch ^= (base >> 20) & 0xF;
-
-int bank = (base >> 8) & 0xF;       // bank: 두 구간 XOR
-bank ^= (base >> 16) & 0xF;
-```
-
-상용 GPU·NPU 컨트롤러의 실제 mapping은 공개되지 않습니다.
+이 모델로 상용 GPU·NPU의 실제 mapping을 추정하거나 단정하지 않습니다.
 
 ## Per-bank refresh — bandwidth 보호
 
@@ -146,23 +141,13 @@ HBM3는 DRAM die 안에 *on-die ECC(symbol 기반)*를 표준으로 둡니다. �
 
 ![HBM 컨트롤러 내부 큐 — address mapping, per-bank queue, scheduler, bus](/images/blog/hardware/hbm/diagrams/ch07-controller-queue.svg)
 
-대표적인 scheduling 정책이 *FR-FCFS(First-Ready, First-Come-First-Served)*입니다. 지금 바로 실행할 수 있는 요청(열린 row로 가는 row hit)을 먼저 처리하고, 그중에서는 먼저 온 요청을 먼저 처리합니다.
+[Rixner 등의 Memory Access Scheduling(ISCA 2000)](https://www.ece.ualberta.ca/~elliott/ece510/seminars/2002f/2002-10-29/p128-rixner.pdf)은 DRAM locality를 이용한 요청 재배치를 연구합니다. FR-FCFS에서는 timing 제약상 ready인 명령을 우선하고 그 안에서 도착 순서를 고려합니다. row hit도 tCCD·turnaround·종속성 때문에 항상 즉시 ready인 것은 아닙니다. 재배치는 동일 주소의 의존성과 가시성 순서를 보존해야 하며, row miss 요청의 starvation 방지 정책도 필요합니다.
 
 ## FPGA 예 — Xilinx HBM
 
-FPGA에서는 HBM 컨트롤러가 IP로 제공됩니다. AMD(Xilinx) Alveo U55C는 *16 GB HBM2*에 *460 GB/s*입니다. AXI HBM Controller IP(PG276)는 programmable logic 쪽에 *256-bit AXI 포트 32개*를 열어 줍니다. 포트 하나가 *pseudo channel 하나*에 대응하고, 포트당 이론 대역폭 *14.375 GB/s* × 32 = *460 GB/s*입니다. 포트는 segmented crossbar를 거쳐 어느 stack의 어느 pseudo channel이든 접근할 수 있습니다.
+FPGA에서는 HBM 컨트롤러가 IP로 제공됩니다. [U55C DS978 v1.3(2023-06-23)](https://docs.amd.com/r/en-US/ds978-u55c/Product-Details)의 공개값은 16 GB HBM2·460 GB/s입니다. [PG276 1.0(2025-12-17) Features](https://docs.amd.com/r/en-US/pg276-axi-hbm/Features)는 stack당 16개의 256-bit AXI3 slave port와 dual-stack의 32 port 확장을 설명합니다. 총 460을 32로 나눈 14.375 GB/s는 산술 평균이며 개별 경로의 보장 대역폭이 아닙니다. 교차 경로·동시 요청·목적지 경쟁은 별도 제약을 받습니다. [AXI Considerations](https://docs.amd.com/r/en-US/pg276-axi-hbm/AXI-Considerations)는 32-byte 정렬·고정 AxSIZE=5와 작은 write의 효율 저하를 설명합니다.
 
-```text
-Alveo U55C (16 GB HBM2)
-
-User logic ──► AXI 포트 × 32 (256-bit)
-                       │  segmented crossbar
-                       ▼
-              HBM Controller IP
-                       │
-                       ▼
-              pseudo channel × 32 (HBM2 stack 2개)
-```
+사용자 로직은 memory-mapped AXI 포트로 접근하고 crossbar를 거쳐 HBM 주소 공간을 사용합니다. 이는 AXI-Stream 인터페이스가 아니며, 포트 개수와 독립적인 물리 대역폭 경로 개수를 같은 것으로 취급하면 안 됩니다.
 
 ## 자주 하는 실수
 
@@ -172,7 +157,7 @@ User logic ──► AXI 포트 × 32 (256-bit)
 
 ### "open page가 *항상* 좋다"
 
-random access가 많은 workload에서는 row hit이 드물어 *closed page*가 낫습니다. 그래서 adaptive 방식이 흔합니다.
+random access가 많은 workload에서는 row hit이 드물어 *closed page*가 낫습니다. 어느 정책이 유리한지는 요청 trace와 timing model로 비교해야 합니다.
 
 ### tCCD_L과 tCCD_S를 거꾸로 이해
 
@@ -199,5 +184,3 @@ AXI HBM Controller IP는 *memory-mapped AXI* 포트 32개를 엽니다. AXI-Stre
 - [Ch 5: 대역폭 계산과 병목 분석](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)
 - [Ch 6: 열 설계와 전력 관리](/blog/embedded/hardware/hbm/chapter06-thermal-power)
 - [Ch 8: NPU·GPU 활용](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)
-- CXL Ch 4: CXL.mem — 외부 메모리 컨트롤러
-- BoW Ch 4: BoW Memory — 메모리 트랜잭션의 일반론

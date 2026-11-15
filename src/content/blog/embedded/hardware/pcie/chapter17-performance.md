@@ -10,212 +10,91 @@ draft: false
 topics: ["embedded", "embedded/hardware"]
 ---
 
-## 한 줄 요약
 
-> **"PCIe 성능은 *theoretical BW × encoding overhead × MaxPayload 효율 × NUMA locality × Posted/Non-Posted 비율*에 의해 결정됩니다."** — *Effective BW*는 *theoretical의 70~90%*. *MaxPayload·MaxReadReq tuning*이 *throughput을 1.5~3배*. *Latency*는 *RC·switch·EP의 hop 누적*. *NUMA mismatch*가 *5~30% 손실*. *ASPM*은 *low-load 절전이지만 burst latency*.
+## 대역폭 계산과 측정을 구분하기
 
-[Ch 16 Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting)에서 *성능 미달 시나리오*를 봤습니다. 이 장은 *성능 측정·tuning의 전체 그림*을 본격적으로 분해합니다.
+PCIe 속도는 link rate 하나로 결정되지 않습니다. TLP 크기·outstanding 요청·응답 지연·경로의 경합·메모리 배치·장치 내부 처리 능력을 나눠 봐야 합니다. 이 요인을 하나의 고정된 효율 비율로 곱하거나, 특정 설정만으로 1.5~3배 빨라진다고 단정할 수는 없습니다.
 
-## Theoretical vs Effective Bandwidth
+이 장은 [PCI-SIG의 Flit 공개 설명](https://pcisig.com/blog/evolution-pci-express-specification-its-sixth-generation-third-decade-and-still-going-strong)과 [Linux v6.12 PCI register 정의](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h), DMA·P2PDMA 문서를 기준으로 계산과 실험 설계를 설명합니다. 실제 NVMe·NIC·GPU benchmark는 실행하지 않았습니다. 아래 계산값을 장치 실측 결과로 사용하면 안 됩니다.
 
-| Generation | per-lane raw | per-lane effective | x16 raw | x16 effective |
-|-----------|-------------|--------------------|---------|--------------|
-| Gen 3 | 8 GT/s | ~7.88 Gb/s | 128 GT/s | ~126 Gb/s (16 GB/s) |
-| Gen 4 | 16 GT/s | ~15.75 Gb/s | 256 GT/s | ~252 Gb/s (32 GB/s) |
-| Gen 5 | 32 GT/s | ~31.5 Gb/s | 512 GT/s | ~504 Gb/s (63 GB/s) |
-| Gen 6 | 64 GT/s | ~63 Gb/s | 1024 GT/s | ~126 GB/s |
-| Gen 7 | 128 GT/s | ~126 Gb/s | 2048 GT/s | ~252 GB/s |
+## 한 방향 link 상한
 
-*encoding overhead* (8b/10b 20%·128b/130b 1.5%·PAM4+FEC ~3%) 적용 후가 *effective*.
+Gen 3~5의 128b/130b 반영 값과 Gen 6~7의 Flit 전송률을 같은 “effective” 열에 섞지 않습니다. 방향과 overhead를 먼저 고정합니다.
 
-*실측 BW*는 *effective의 70~90%* — *TLP header overhead·ACK/NAK·Update FC·idle gap*.
+| x16 링크 | 한 방향 계산 | 포함하지 않은 것 |
+|------|------|------|
+| Gen 3 | 8 × 16 / 8 × 128/130 ≈ 15.75 GB/s | TLP·DLL·idle 등 |
+| Gen 4 | 16 × 16 / 8 × 128/130 ≈ 31.51 GB/s | TLP·DLL·idle 등 |
+| Gen 5 | 32 × 16 / 8 × 128/130 ≈ 63.02 GB/s | TLP·DLL·idle 등 |
+| Gen 6 | 64 × 16 / 8 = 128 GB/s 명목 | Flit·CRC·FEC·idle 등 |
+| Gen 7 | 128 × 16 / 8 = 256 GB/s 명목 | Flit·CRC·FEC·idle 등 |
 
-## MaxPayloadSize (MPS) — TLP Payload 최대 크기
+PCIe 6.0의 Flit은 256 B 중 236 B가 TLP 영역입니다. 따라서 Gen 6 x16에서 128 × 236/256 = 118 GB/s는 이 영역만 고려한 산술 상한입니다. TLP header도 이 영역에 들어가고 padding·실제 packing·SKP·경합 등이 남으므로 애플리케이션 payload 118 GB/s 보장은 아닙니다. 양방향 합계가 필요하면 별도로 표시하고 실제로 양방향을 동시에 포화시킨 부하인지 확인합니다.
 
-| MPS | Header overhead 비율 |
-|-----|---------------------|
-| 128 byte | ~12.5% (header 16 byte / 128 byte) |
-| 256 byte | ~6% |
-| 512 byte | ~3% |
-| 1024 byte | ~1.5% |
-| 4096 byte | ~0.4% |
+## MPS와 MRRS
 
-*전 link의 device들이 최소값으로 협상*. *낮은 MPS device 하나*가 *전체를 끌어내림*.
+MPS는 TLP가 실을 수 있는 data payload의 상한이며, 실제 장치가 매번 그만큼 묶어 보낸다는 뜻은 아닙니다. MRRS는 requester가 한 Memory Read로 요청하는 data 크기의 상한입니다. Read Request 자체에 그 크기의 payload가 실리는 것은 아닙니다.
 
-```bash
-# 현재 MPS 확인
-lspci -vv | grep "MaxPayload"
+4 DW header 16 B와 data만 계산하는 단순 TLP 예에서 payload 비율은 다음과 같습니다. Prefix·ECRC·DLL·encoding 비용은 제외했으므로 wire 효율과 다릅니다.
 
-# 변경 (driver·BIOS 지원해야)
-setpci -s 01:00.0 CAP_EXP+8.W=0x2810  # MaxPayload 256
-```
-
-NVMe·Mellanox NIC은 *256·512 byte* 일반. *legacy device*가 *128 byte*면 *bottleneck*.
-
-## MaxReadRequestSize (MRRS)
-
-*outbound Memory Read TLP의 max payload*. 즉 *한 번에 얼마나 큰 read 요청*할지:
-
-| MRRS | 효과 |
+| Payload | Payload / (16 + Payload) |
 |------|------|
-| 작음 (128 byte) | 여러 read TLP → header overhead |
-| 큼 (4096 byte) | 적은 read TLP → 효율적 |
+| 128 B | 88.9% |
+| 256 B | 94.1% |
+| 512 B | 97.0% |
 
-```bash
-# 현재 MRRS
-lspci -vv | grep "MaxReadReq"
+작은 전송은 MPS를 높여도 자동으로 큰 TLP가 되지 않습니다. Read의 completion 크기는 MPS·boundary·completer의 동작에 영향을 받으므로 MRRS를 키우는 것과 별개입니다. 지원 capability·현재 설정·전체 경로의 제약을 같이 확인해야 합니다.
 
-# 변경
-setpci -s 01:00.0 CAP_EXP+8.W=0x5810  # MRRS 4096
-```
+[Ch 15의 실제 decoder 검사](/blog/embedded/hardware/pcie/chapter15-tools#실제-도구로-합성-필드-해석하기)에서 Device Control `0x2810`은 MPS 128 B·MRRS 512 B로 해석됐습니다. 전체 word를 이 값으로 쓰는 것을 MPS 256 B tuning이라고 제시할 수 없습니다. 이 작업에서는 setpci write를 실행하지 않았습니다.
 
-NVMe·NIC는 *4096 byte*가 일반. *MPS와 다름* — MPS는 *받을 수 있는 payload*, MRRS는 *요청할 size*.
+## Outstanding 요청과 bandwidth-delay product
 
-## Latency Breakdown
+Read pipeline을 채우려면 응답이 돌아오는 동안 충분한 요청이 진행 중이어야 합니다. 목표 처리량을 B byte/s, 왕복 지연을 T s, 실제 요청당 처리 data를 S byte로 놓으면, 단순 모델에서 필요한 outstanding 수는 적어도 B × T / S 정도입니다. Tag·credit·buffer·device queue 한계와 completion 분할은 별도로 남습니다.
 
-End-to-end latency:
+예를 들어 32 GB/s × 1 µs / 256 B = 125개입니다. 이 값은 임의 조건의 산술 예이며 실제 장치 지연이 1 µs라는 뜻은 아닙니다. 10-bit Tag 공간이 넓어져도 driver와 hardware의 실제 요청 한도나 memory bandwidth가 병목이면 성능은 늘지 않습니다.
 
-| 영역 | 일반 latency |
-|------|-------------|
-| CPU → Root Complex | < 100 ns |
-| Root Complex → Switch | ~50~100 ns |
-| Switch → Endpoint | ~50 ns/hop |
-| Endpoint internal | device 의존 (NVMe ~10 µs·NIC ~µs) |
-| Completion 돌아옴 | 같은 path 역순 |
+End-to-end 지연에는 요청 전송·queue 대기·장치 처리·completion 전송·CPU/driver 관찰이 들어갑니다. Hop마다 같은 고정 ns를 가정하기보다 무엇의 시작과 끝을 재는지 정의합니다. 평균뿐 아니라 p50·p99와 queue depth·offered load를 기록해야 합니다.
 
-*Latency = 2 × (hop count × hop latency) + endpoint processing*. *Direct attach (RC → EP)*가 *switch traversal*보다 빠름.
+## 애플리케이션 방향과 PCIe 방향
 
-## Completion Combining·Coalescing
+NVMe 명령의 Read/Write는 PCIe TLP의 MRd/MWr와 같지 않습니다. 이름이 같다는 이유로 방향을 대응시키면 병목을 반대로 해석할 수 있습니다.
 
-*큰 Read*는 *여러 Completion으로 split* (Ch 2). *Coalescing*이 *Completion 묶어 처리*:
-
-| 기능 | 효과 |
+| 작업 | 대표적인 PCIe data 경로 |
 |------|------|
-| TLP coalescing | RC가 *여러 작은 Completion을 batch* — software overhead 감소 |
-| NIC interrupt coalescing | 다수 packet → 한 interrupt |
-| NVMe Q-depth | submission queue 깊이 |
+| NIC RX | NIC가 받은 packet을 host memory로 DMA write |
+| NIC TX | NIC가 host의 packet을 DMA read하고 completion data를 받음 |
+| NVMe Read | Controller가 storage data를 host memory에 DMA write |
+| NVMe Write | Controller가 host data를 DMA read |
 
-`ethtool -C eth0 rx-usecs 100`처럼 *NIC-level tuning*.
+Descriptor fetch·doorbell·completion queue·interrupt 등 다른 traffic도 있으므로 위 표는 data 경로의 출발점입니다. GPU workload 전체를 항상 Posted Write 중심이라고 분류하지 않습니다.
 
-## NUMA Locality
+## NUMA·전력·P2P를 비교하는 방법
 
-*Multi-socket system*에서 *device가 어느 socket에 매달려 있는지*:
+장치 locality와 실행 CPU·buffer 배치를 함께 기록합니다. Sysfs `numa_node`의 -1은 유효한 node 번호가 아니라 locality를 알 수 없는 경우입니다. Remote 배치의 손실을 고정 5~30%로 가정하지 말고, 실제 memory controller·interconnect와 부하를 비교합니다.
 
-| 시나리오 | latency·BW |
-|---------|-----------|
-| Same NUMA (local) | 최적 |
-| Cross-NUMA (UPI/Infinity Fabric traverse) | *5~30% 손실* |
+ASPM은 idle 전력과 burst 지연 사이의 선택에 영향을 줍니다. 고정된 복귀 시간표나 “서버이면 off” 규칙 대신 [Ch 6](/blog/embedded/hardware/pcie/chapter06-power-management)의 상태·정책·실제 측정을 구분합니다. RO·No Snoop의 순서·coherency 계약도 CPU barrier 하나로 복원할 수는 없습니다.
 
-```bash
-# Device NUMA
-cat /sys/bus/pci/devices/0000:01:00.0/numa_node
+[P2PDMA 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/driver-api/pci/p2pdma.rst)는 provider·client·topology 제약을 설명합니다. P2P라고 항상 Root Complex를 지나지 않는 것은 아니며, 같은 switch 아래에 있다는 사실만으로 임의 peer DMA를 지원하지는 않습니다. DDIO 역시 platform의 cache I/O 기능이지 모든 PCIe·CXL traffic의 고정 지연 절감 보장이 아닙니다.
 
-# Process 측 NUMA pinning
-numactl --cpunodebind=0 --membind=0 ./app
-```
+## 실험 기록에 필요한 항목
 
-NVMe·NIC을 *해당 NUMA의 CPU·memory*에서 사용. 8-socket server에서 *NUMA mismatch는 큰 성능 차*.
-
-## Posted vs Non-Posted 비율
-
-| Workload | Posted·Non-Posted |
-|----------|-------------------|
-| NIC RX (DMA write to host) | 거의 Posted |
-| NVMe Read | Non-Posted (Read 요청) + Completion |
-| NIC TX (host → NIC DMA) | NIC이 Read 발행 → 응답 |
-| GPU compute | Posted Write 중심 |
-
-Non-Posted가 많으면 *latency 노출*. *큰 MRRS로 Non-Posted 줄임*.
-
-## Relaxed Ordering·No Snoop
-
-*Attribute 비트*가 *throughput에 큰 영향*:
-
-| Attr | 효과 |
+| 항목 | 기록과 해석 |
 |------|------|
-| RO (Relaxed Ordering) | strict order 완화 → parallelism ↑ |
-| NS (No Snoop) | RC cache snoop skip → host CPU 부담 ↓ |
+| 장치와 경로 | ID·firmware·driver·kernel, 양단 LnkCap/LnkSta, switch 공유 upstream |
+| 부하 | 방향·전송 크기·queue depth·동시 요청·offered load·지속 시간 |
+| 배치 | CPU·IRQ·buffer NUMA, IOMMU·bounce·cache 조건 |
+| 관찰 | 유효 payload 처리량, latency 분포, CPU 사용률·전력·오류·재전송 |
+| 비교 | 한 설정씩 변경하고 같은 조건 반복. cold/warm·열 제한을 구분 |
 
-GPU·HPC accelerator가 *RO·NS 활성*해 *최대 throughput*. *데이터 손상 위험*은 driver가 *barrier로 control*.
-
-## ASPM·LTR 영향
-
-| 활성 | Idle 전력 | Burst latency |
-|------|----------|-------------|
-| ASPM Off | 높음 | 낮음·일정 |
-| ASPM L0s | 중간 | µs 잡음 |
-| ASPM L1 | 낮음 | µs~수십 µs 잡음 |
-| L1.2 substates | 매우 낮음 | 수백 µs |
-
-*Latency-critical (NVMe·NIC)*는 *ASPM off*가 일반. *모바일·노트북*은 *L1.2까지 활성*.
-
-## P2P DMA
-
-*EP A → EP B 직접 DMA* (RC 경유 안 함):
-
-| 시나리오 | 효과 |
-|---------|------|
-| NVMe → GPU 직접 copy | host memory bypass |
-| GPU ↔ GPU (NCCL) | inter-GPU NVLink + PCIe |
-| 같은 switch | switch peer-to-peer |
-
-`/sys/bus/pci/.../p2pdma`로 *지원 확인*. *driver·BIOS·switch ACS 모두* P2P 허용해야.
-
-## DDIO — Direct Data I/O
-
-Intel Xeon의 *NIC traffic을 LLC에 직접 DMA*:
-
-| 시나리오 | 효과 |
-|---------|------|
-| DDIO 활성 | NIC RX가 *LLC*로, CPU L3 hit |
-| DDIO 비활성 | DRAM 경유 — latency 큼 |
-
-*Latency 200~300 ns 절감*. 100 GbE·NVMe·CXL에 *유효*.
-
-## 측정 도구
-
-| 도구 | 용도 |
-|------|------|
-| `lspci -vv | grep "Lnk"` | Link 상태·MPS·MRRS |
-| `fio` | NVMe IOPS·throughput·latency |
-| `iperf3·netperf` | NIC throughput |
-| `perf c2c` | cache contention |
-| `intel-pmu-tools` | PCIe BW counter |
-| `pcm-pcie` (Intel PCM) | PCIe BW per device |
-| `nvidia-smi dmon` | GPU PCIe BW |
-
-## 자주 하는 실수
-
-### "Gen 5면 NVMe Gen 4의 2배"
-
-*Effective BW*는 그렇지만 *NVMe 내부 throughput 한계*도 있음. *NVMe controller·flash bandwidth*가 *bottleneck*이면 *PCIe upgrade* 효과 적음.
-
-### "MPS 키우면 항상 빠름"
-
-*latency-sensitive small transfer*는 *작은 MPS*가 유리. *MPS·MRRS는 workload 따라 다른 optimum*.
-
-### "ASPM Off가 항상 최선"
-
-*low-load device*는 *electricity·thermal cost*. *server*에서도 *deeper power state 활용*이 *total cost optimum*.
-
-### "NUMA가 software 결정"
-
-*PCIe slot의 NUMA*는 *hardware 고정*. *board layout으로 결정*. *bind 못 함*. *workload를 그 NUMA에 맞춤*.
-
-### "Coalescing이 latency 손해만"
-
-*low load*에서 *false*. *high load*에서 *throughput per ISR*가 크게 향상. *workload-aware tuning*.
+`fio`·`iperf3`는 storage·network 경로 전체를 측정합니다. 그 숫자만으로 PCIe link가 포화됐다고 판정하지 않습니다. 장치·uncore counter의 의미와 방향을 확인해 애플리케이션 처리량과 대조해야 합니다. 더 큰 MPS·MRRS나 coalescing이 이득인지도 workload와 정확성 조건을 유지한 비교로 판단합니다.
 
 ## 정리
 
-- *Effective BW*는 *theoretical의 70~90%*. encoding·header·ACK/NAK 모두 overhead.
-- *MaxPayload·MaxReadReq*가 *throughput tuning의 1순위*.
-- *Latency*는 *hop count × hop latency + endpoint*. Direct attach 빠름.
-- *NUMA locality*가 *5~30% 차이*. Hardware 고정.
-- *Posted·Non-Posted 비율·RO·NS attribute*가 *parallelism*.
-- *ASPM·LTR*은 *power vs latency trade-off*.
-- *P2P DMA·DDIO*가 *host memory bypass·LLC 직접*.
-- 측정: `lspci`·`fio`·`perf`·`pcm-pcie`·`nvidia-smi`.
+- 방향·단위·encoding·Flit 비용을 구분해 상한을 계산합니다.
+- MPS·MRRS와 실제 전송 크기는 다르며, 작은 요청을 설정만으로 합칠 수는 없습니다.
+- B × T / S는 outstanding 수를 가늠하는 단순 모델이며 실제 자원 한도를 확인합니다.
+- NVMe Read/Write와 PCIe MRd/MWr의 방향을 구분합니다.
+- NUMA·전력·ordering·P2P는 지원 조건과 실제 latency 분포·처리량을 함께 비교합니다.
 
 ## 다음 편
 
@@ -226,7 +105,7 @@ Intel Xeon의 *NIC traffic을 LLC에 직접 DMA*:
 - [Ch 1: PCIe Fundamentals](/blog/embedded/hardware/pcie/chapter01-fundamentals) — Gen·encoding
 - [Ch 2: TLP](/blog/embedded/hardware/pcie/chapter02-tlp) — Posted·Non-Posted·attribute
 - [Ch 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management) — ASPM
-- [Ch 11: DMA·IOMMU](/blog/embedded/hardware/pcie/chapter11-linux-dma) — P2P DMA
+- [Ch 11: DMA·IOMMU](/blog/embedded/hardware/pcie/chapter11-linux-dma) — DMA 소유권·주소 변환
 
 ## 시리즈 자료 출처 안내
 

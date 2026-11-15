@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"Linux PCI subsystem은 *firmware·UEFI가 끝낸 enumeration*을 받아 *struct pci_dev*로 표현하고, *pci_driver의 id_table*과 매칭해 *probe → resource → IRQ → I/O*의 생명주기를 관리합니다."** — `/sys/bus/pci/`가 *모든 device·driver 통합 view*. `lspci`도 결국 *sysfs read*. *ACPI PRT·MCFG*가 *firmware↔kernel 인터페이스*.
+> **"Linux PCI subsystem은 *firmware·UEFI가 끝낸 enumeration*을 받아 *struct pci_dev*로 표현하고, *pci_driver의 id_table*과 매칭해 *probe → resource → IRQ → I/O*의 생명주기를 관리합니다."** — `/sys/bus/pci/`가 *모든 device·driver 통합 view*. `lspci`는 플랫폼과 선택한 backend에 따라 sysfs·다른 접근 방법·dump 파일을 사용합니다. *ACPI PRT·MCFG*가 *firmware↔kernel 인터페이스*.
 
 [Ch 3 Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space)·[Ch 4 BAR](/blog/embedded/hardware/pcie/chapter04-bar-mmio)에서 *device가 자기를 광고하는 layout*을 봤습니다. 이 장은 *Linux가 그 layout을 읽어 driver model로 통합*하는 흐름을 본격적으로 분해합니다.
 
@@ -22,12 +22,12 @@ topics: ["embedded", "embedded/hardware"]
 |------|------|
 | 1 | UEFI/BIOS가 *Configuration Space probe·BAR 할당·bridge bus numbering* |
 | 2 | UEFI가 *ACPI MCFG (ECAM 영역) 등록* |
-| 3 | Linux *pci-acpi.c*가 *MCFG 읽고 root bus 등록* |
+| 3 | 플랫폼의 host bridge 초기화 경로가 MCFG·DT 등으로 config 접근과 root bus 구성 |
 | 4 | Linux *pci_scan_root_bus()*가 *각 bus walk → struct pci_dev 생성* |
 | 5 | sysfs에 entry 노출 (`/sys/bus/pci/devices/`) |
 | 6 | *deferred*: pci_bus_add_devices가 *driver matching·probe* 호출 |
 
-*Re-enumeration*은 *hot-plug·VFIO*에서 일어남. `echo 1 > /sys/bus/pci/rescan`으로 *manual trigger*.
+Hotplug·rescan으로 추가 장치를 찾을 수 있지만, driver 재binding과 hardware 재열거는 다릅니다. 이 글에서는 rescan·bind/unbind·module load를 실행하지 않았습니다.
 
 ## struct pci_dev — 핵심 멤버
 
@@ -38,10 +38,10 @@ topics: ["embedded", "embedded/hardware"]
 | `u16 subsystem_vendor·subsystem_device` | 서브시스템 식별 |
 | `u32 class` | Class Code |
 | `u8 hdr_type` | Type 0 또는 Type 1 |
-| `u8 bus·devfn` | BDF |
-| `struct resource resource[6]` | BAR 0~5의 *resource* |
+| `unsigned int devfn` | Device·function 인코딩. bus 번호는 `bus->number` |
+| `struct resource resource[DEVICE_COUNT_RESOURCE]` | BAR·ROM·bridge window 등 전체 resource. BAR 슬롯 6개보다 큼 |
 | `struct pci_driver *driver` | 매칭된 driver |
-| `void *driver_data` | driver 전용 데이터 |
+| `dev`에 연결한 driver data | `pci_set_drvdata()`·`pci_get_drvdata()`로 접근 |
 | `struct pci_bus *bus` | 속한 bus |
 | `struct list_head bus_list` | bus의 device list |
 
@@ -54,26 +54,12 @@ topics: ["embedded", "embedded/hardware"]
 | `const struct pci_device_id *id_table` | *Vendor·Device·Class 매칭 패턴* |
 | `int (*probe)(struct pci_dev *, const struct pci_device_id *)` | device 발견 시 |
 | `void (*remove)(struct pci_dev *)` | device 해제 시 |
-| `int (*suspend·resume)(struct pci_dev *)` | PM callback |
+| driver의 `dev_pm_ops` | runtime·system PM callback. 기존 PCI legacy PM callback과 구분 |
 | `const struct pci_error_handlers *err_handler` | AER callback (Ch 7) |
 | `struct device_driver driver` | Linux driver model |
 
-```c
-static const struct pci_device_id my_pci_table[] = {
-    { PCI_DEVICE(0x8086, 0x1234) },
-    { PCI_DEVICE_CLASS(PCI_CLASS_NETWORK_ETHERNET << 8, ~0) },
-    { 0 }
-};
-MODULE_DEVICE_TABLE(pci, my_pci_table);
+장치 ID 표는 driver가 실제로 지원하는 장치로 제한해야 합니다. Ethernet class 전체를 임의 driver에 매칭하면 register·DMA protocol이 다른 장치까지 probe할 수 있습니다. `MODULE_DEVICE_TABLE`은 module alias를 만들어 자동 load에 쓰이며, 그 자체가 장치 초기화를 수행하거나 matching 성공을 보장하지는 않습니다.
 
-static struct pci_driver my_driver = {
-    .name     = "mydrv",
-    .id_table = my_pci_table,
-    .probe    = my_probe,
-    .remove   = my_remove,
-};
-module_pci_driver(my_driver);
-```
 
 ## Driver Matching
 
@@ -84,24 +70,27 @@ module_pci_driver(my_driver);
 | `PCI_DEVICE(v, d)` | 특정 V/D |
 | `PCI_DEVICE_SUB(v,d,sv,sd)` | Sub-system도 매칭 |
 | `PCI_DEVICE_CLASS(class, mask)` | Class 기반 (모든 NIC 등) |
-| ACPI `_HID`·`_CID` | ACPI 기반 (root port 등) |
+| `driver_override` | 지정된 driver 이름으로 binding을 제한하는 별도 정책 |
 
-여러 driver가 *같은 device 매칭*하면 *bind priority*에 따라 결정. `/sys/bus/pci/drivers/<drv>/bind`로 *수동 binding*.
+PCI core의 ID matching, 이미 binding된 상태와 driver_override 등을 확인해야 합니다. vendor-specific driver가 class driver보다 항상 우선한다는 보편적 우선순위는 없습니다.
 
 ## probe·remove 생명 주기
 
 | 단계 | 함수 | 의미 |
 |------|------|------|
-| 1 | `pci_enable_device(pdev)` | Memory·I/O space 활성, IRQ 할당 |
+| 1 | `pci_enable_device(pdev)` | 사용할 자원을 활성화. MSI/MSI-X vector 할당은 뒤 단계 |
 | 2 | `pci_request_regions(pdev, "mydrv")` | BAR 영역 *exclusive ownership* 요청 |
-| 3 | `pci_set_master(pdev)` | DMA bus master 활성 |
-| 4 | `pci_iomap(pdev, bar, max_size)` | BAR을 *kernel virtual address*로 매핑 |
-| 5 | `pci_alloc_irq_vectors()` | MSI/MSI-X 할당 (Ch 5) |
-| 6 | `request_irq(irq, isr, ...)` | ISR 등록 |
-| 7 | Driver 자체 init (queue·workqueue 등) |
-| 8 | `remove` 시 *역순* cleanup |
+| 3 | `dma_set_mask_and_coherent()` 등 | 실제 장치의 DMA 주소 폭 지원을 검사 |
+| 4 | `pci_set_master(pdev)` | 준비된 DMA 경로의 bus master 활성 |
+| 5 | `pci_iomap(pdev, bar, max_size)` | BAR을 *kernel virtual address*로 매핑 |
+| 6 | `pci_alloc_irq_vectors()` | MSI/MSI-X 할당 (Ch 5) |
+| 7 | `request_irq(irq, isr, ...)` | ISR 등록 |
+| 8 | Driver 자체 init (queue·workqueue 등) |
+| 9 | `remove` 시 *역순* cleanup |
 
-각 단계 실패면 *별도 errno*. `dmesg | grep <drv>`로 *각 단계 결과* 추적.
+실패하면 이미 획득한 자원만 되돌립니다. DMA·interrupt가 발생 가능한 상태라면 발생원을 먼저 중단하고 handler·work를 동기화한 뒤 mapping과 resource를 해제해야 합니다. 단순히 함수 이름을 역순으로 나열하는 것만으로는 안전한 remove가 되지 않습니다. 실제 module build·probe/remove 시험은 수행하지 않았습니다.
+
+각 단계 실패면 별도 errno를 확인합니다. `dmesg | grep <drv>`로 *각 단계 결과* 추적.
 
 ## sysfs 구조
 
@@ -122,7 +111,7 @@ module_pci_driver(my_driver);
 | `drivers/<drv>/bind·unbind` | 수동 driver binding |
 | `slots/` | hot-plug slot 정보 |
 
-`lspci`는 *사실상 sysfs 읽기*. `lspci -t`로 *topology tree*, `lspci -vv`로 *상세 capability dump*.
+Linux에서 sysfs backend를 사용할 수 있지만 `lspci -F`는 저장된 dump를 읽는 별도 backend입니다. `lspci -t`로 *topology tree*, `lspci -vv`로 *상세 capability dump*.
 
 ## ACPI 통합
 
@@ -131,7 +120,7 @@ module_pci_driver(my_driver);
 | **MCFG** | ECAM 영역 (Ch 3) |
 | **DSDT** | device 동작·resource·PRT |
 | **PRT (PCI Routing Table)** | INTx → APIC vector 매핑 |
-| **HOTPLUG (HPET·_OST)** | hot-plug event 통보 |
+| **ACPI hotplug** | Notify·`_EJ0` 등의 플랫폼 절차. HPET는 hotplug가 아니라 timer 기능 |
 
 x86은 *ACPI 의존도 큼*. ARM·POWER는 *DT (Device Tree)* 또는 *ACPI + DT 혼용*.
 
@@ -161,11 +150,11 @@ x86은 *ACPI 의존도 큼*. ARM·POWER는 *DT (Device Tree)* 또는 *ACPI + DT 
 
 ### "ID 매칭만 되면 probe 호출"
 
-*Class·subsystem ID*도 매칭. *generic driver (예: nouveau)*가 *priority 낮은 매칭*. *vendor-specific driver*가 *우선 binding*.
+*Class·subsystem ID*도 매칭. 이미 bind된 장치, driver_override, ID table·동적 ID와 probe 결과를 함께 확인합니다. 드라이버 이름이나 vendor 전용 여부만으로 우선순위를 정하지 않습니다.
 
 ### "sysfs config write로 BAR 변경"
 
-*BAR write는 driver가 owner일 때만 안전*. *manual setpci*는 *driver 영향* — *device hang 또는 OS crash 위험*.
+Driver가 owner여도 임의 BAR config write가 안전한 것은 아닙니다. decode·resource·사용 중인 매핑을 관리하는 PCI core 절차를 따라야 합니다. *manual setpci*는 *driver 영향* — *device hang 또는 OS crash 위험*.
 
 ### "remove가 동기로 즉시 완료"
 
@@ -176,7 +165,7 @@ x86은 *ACPI 의존도 큼*. ARM·POWER는 *DT (Device Tree)* 또는 *ACPI + DT 
 - Linux PCI subsystem은 *firmware enumeration*을 *struct pci_dev*로 흡수.
 - *pci_driver의 id_table*과 *device ID 매칭*해 *probe/remove*.
 - *Probe 패턴*: enable → request_regions → set_master → iomap → alloc_irq_vectors → request_irq.
-- `/sys/bus/pci/`가 *모든 통합 view* — `lspci`도 sysfs 읽기.
+- `/sys/bus/pci/`가 *모든 통합 view* — backend에 따라 config 접근 방식이 달라집니다.
 - *ACPI MCFG·PRT*가 *firmware↔kernel 인터페이스*.
 - *pcie-portdriver*가 *AER·hot-plug·PM·DPC* service 통합.
 - *MODULE_DEVICE_TABLE*로 *udev autoload*.
@@ -194,4 +183,4 @@ x86은 *ACPI 의존도 큼*. ARM·POWER는 *DT (Device Tree)* 또는 *ACPI + DT 
 
 ## 시리즈 자료 출처 안내
 
-본 글의 1차 자료·정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.
+구현은 [Linux v6.12 pci.h](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/linux/pci.h), [pci-driver.c](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/pci/pci-driver.c), [PCI driver 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/pci.rst)를 대조했습니다. 본 글의 1차 자료·정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.

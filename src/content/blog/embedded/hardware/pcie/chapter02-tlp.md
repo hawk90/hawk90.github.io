@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## TLP 기본 구조
 
-TLP는 *고정 frame*을 가집니다.
+이 절은 Non-Flit Mode의 기본 TLP 형식입니다. Flit Mode의 새 header·packing 규칙과 혼합하지 않습니다.
 
 | 영역 | 크기 | 의미 |
 |------|------|------|
@@ -26,7 +26,7 @@ TLP는 *고정 frame*을 가집니다.
 | **Data Payload** | 0 ~ MaxPayloadSize | Write payload, Completion data |
 | **Digest (ECRC)** | 4 byte (선택) | End-to-End CRC |
 
-*Header 3 DW*는 *32-bit address*, *4 DW*는 *64-bit address*. 현대 시스템은 거의 *4 DW*입니다.
+Memory Request에서 3 DW·4 DW는 각각 32-bit·64-bit 주소 형식입니다. 모든 TLP의 header 크기를 주소 폭으로 해석할 수는 없습니다. Completion과 Configuration 등은 자기 형식을 따릅니다.
 
 ## TLP 종류 — 5 가족
 
@@ -38,7 +38,7 @@ TLP는 *고정 frame*을 가집니다.
 | **Message** | Msg·MsgD | Interrupt·error·power 관리 |
 | **Completion** | Cpl·CplD·CplLk·CplDLk | Non-posted 요청의 응답 |
 
-*MRd/MWr*가 *전체 traffic의 99%*. 나머지는 *드물거나 management*용.
+트래픽 비중은 장치와 부하에 따라 달라집니다. 비율을 단정하려면 해당 환경의 packet capture나 counter가 필요합니다.
 
 ## Header DW 분해 — Memory TLP 예
 
@@ -75,9 +75,9 @@ PCIe는 *3가지 transaction 부류*를 가집니다.
 | 4 | Completer가 *CplD (Tag=5, 8 DW data)* 응답 |
 | 5 | Requester가 *Tag=5 retire* |
 
-*Tag*가 *요청-응답 매칭*의 키. 한 requester는 *여러 outstanding read 동시 보유*. *response 순서가 다를 수 있음*. PCIe 기본 *32 tag (5-bit)*, *Extended Tag*로 *256·1024 tag*.
+*Tag*가 *요청-응답 매칭*의 키. 한 requester는 *여러 outstanding read 동시 보유*. *response 순서가 다를 수 있음*. PCIe 기본 *32 tag (5-bit)*, 8-bit Extended Tag와 별도의 10-bit Tag 기능을 구분합니다. 10-bit 요청 tag는 상위 두 비트가 모두 0인 값을 제외하므로 최대 768개입니다. [Altera R-Tile의 Tag Allocation 설명](https://docs.altera.com/r/docs/683501/26.1/r-tile-avalon-streaming-ip-for-pci-express-user-guide/tag-allocation)도 유효 범위를 256~1023으로 설명합니다.
 
-*큰 read는 여러 Completion으로 split 가능*. *MaxPayloadSize = 256 byte*면 *4 KB read*가 *16개 Completion*으로 옵니다.
+*큰 read는 여러 Completion으로 split 가능*. MPS가 256 B이면 4 KiB 데이터에는 적어도 16개의 data completion이 필요합니다. alignment·Read Completion Boundary·실제 분할에 따라 더 많을 수 있고, 한 요청의 모든 데이터를 받은 뒤 tag를 해제합니다.
 
 ## Routing — 3 가지 방식
 
@@ -101,7 +101,7 @@ DW 1의 *Requester ID는 16-bit*:
 
 *ARI (Alternative Routing-ID Interpretation)* 활성화 시 *Function 영역 확장* — single device가 *256 function* 표현 가능.
 
-*Tag*는 *5/8/10-bit* (Extended Tag 설정에 따라). *outstanding 한계*를 정함.
+Tag 용량은 기본 5-bit, 8-bit Extended Tag, 별도 10-bit Tag 지원·설정을 구분합니다. 디바이스의 실제 outstanding 자원과도 같지 않습니다.
 
 *First DW BE·Last DW BE (각 4-bit)*: payload의 *첫·마지막 DW에서 어느 byte가 valid*인지. *partial DW write*에 사용.
 
@@ -113,7 +113,7 @@ DW 0의 *Attribute (Attr) 비트*:
 |------|------|
 | **NS (No Snoop)** | RC가 *cache snoop을 skip* — graphics traffic 등 |
 | **RO (Relaxed Ordering)** | Strict write ordering *완화*, parallelism 증가 |
-| **TH (TLP Hints)** | TPH 비트와 함께, *cache hint* |
+| **TH (TLP Hints)** | TPH 관련 별도 header bit. Attr의 NS·RO·IDO와 구분 |
 | **IDO (ID-Based Ordering)** | 다른 ID의 traffic 사이 *ordering 완화* |
 
 *Performance tuning의 핵심*. *잘못 쓰면 데이터 손상*. NIC·NVMe 드라이버가 *intentionally* 사용.
@@ -128,9 +128,9 @@ PCIe는 *PCI 시절의 strict ordering 모델*을 *부분적으로 유지*:
 | Posted Write가 *이전 Read Completion*을 추월 *가능* | latency 개선 |
 | Posted Write가 *Non-Posted Read*를 *추월 가능* | 일반적인 경우 |
 
-*Producer-Consumer 모델*: producer가 *data write → flag write* 순서로 보내고 consumer가 *flag read → data read*. PCIe가 *flag write 전에 data write를 완료시킴*을 *ordering rule*로 보장.
+*Producer-Consumer 모델*: producer가 *data write → flag write* 순서로 보내고 consumer가 *flag read → data read*. PCIe가 같은 경로·traffic class와 관련 attribute 등 ordering 조건을 확인해야 합니다. 전송 순서와 CPU cache 가시성·장치 작업 완료는 별도 문제입니다.
 
-*RO 활성화 시 이 보장 약화* — driver가 *barrier (memory fence·doorbell write)*로 직접 sync.
+RO를 켠 요청의 순서 완화를 CPU barrier 하나로 취소할 수는 없습니다. [Linux device I/O 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/driver-api/device-io.rst)는 posted MMIO write의 수신 확인이 필요할 때 같은 장치에서 안전한 register를 read-back하는 방식을 설명합니다. DMA 메모리 동기화와 장치의 완료 protocol도 각각 지켜야 합니다.
 
 ## ECRC — End-to-End CRC
 
@@ -140,7 +140,7 @@ PCIe는 *PCI 시절의 strict ordering 모델*을 *부분적으로 유지*:
 |------|------|------|
 | 적용 범위 | Link 1 hop | End-to-end (multi-hop) |
 | 위치 | DLL이 추가 | TL이 추가, *Digest 영역* |
-| 활성화 | 항상 | *AER capability*로 enable |
+| 활성화 | Non-Flit Mode의 link 보호 | *AER capability*로 enable |
 | 비용 | 자동 | CPU·EP 모두 ECRC 처리 능력 필요 |
 
 *Switch가 중간 transformation 안 한다*는 가정으로 *ECRC가 RC→EP 보호*. *RAS-critical 시스템*에서 활성화.
@@ -160,11 +160,11 @@ ATS·PRI·PASID 묶음은 *Shared Virtual Memory (SVM)*의 토대. [Ch 11 DMA·I
 
 ### "MWr Completion 기다린다"
 
-*Posted*라 *Completion 없음*. *flush 보장은 read-back* (해당 BAR 또는 다른 register read). *Non-Posted Completion이 와야* 이전 Posted Write가 *visible* 보장.
+*Posted*라 *Completion 없음*. *flush 보장은 read-back* (해당 BAR 또는 다른 register read). read-back은 같은 장치의 안전한 register와 해당 ordering 조건을 사용해야 합니다. 무관한 장치의 임의 read로 flush를 보장할 수는 없습니다.
 
 ### "Tag는 무한"
 
-기본 *5-bit (32 outstanding)*. *Extended Tag*로 *8-bit (256)*·*10-bit (1024)*. EP의 *Tag 자원*이 부족하면 *throughput 한계*. NVMe·NIC는 *Extended Tag 활성화 필수*.
+기본 *5-bit (32 outstanding)*. 8-bit Extended Tag는 256개, 별도의 10-bit 기능은 요청 tag 최대 768개입니다. EP의 *Tag 자원*이 부족하면 *throughput 한계*. 지원과 효과는 장치·경로·부하별로 확인합니다.
 
 ### "Address routing이면 IOMMU 불필요"
 
@@ -172,7 +172,7 @@ ATS·PRI·PASID 묶음은 *Shared Virtual Memory (SVM)*의 토대. [Ch 11 DMA·I
 
 ### "ECRC만 켜면 RAS 완벽"
 
-ECRC는 *RC↔EP* 데이터 무결성. *Header corruption*은 *poisoned TLP* 메커니즘이 다룸. *AER capability*까지 같이 enable 해야 *fault report*. *Switch DPC*까지 묶어야 *containment*.
+ECRC는 *RC↔EP* 데이터 무결성. ECRC는 규정된 TLP 필드를 검사하고, poison은 이미 알게 된 데이터 오류를 표시합니다. Poison이 header 변조를 검출하는 CRC를 대신하지는 않습니다. *AER capability*까지 같이 enable 해야 *fault report*. *Switch DPC*까지 묶어야 *containment*.
 
 ### "Length는 byte"
 

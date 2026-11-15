@@ -16,9 +16,11 @@ topics: ["embedded", "embedded/hardware"]
 
 [Ch 14](/blog/embedded/hardware/cxl/chapter14-security)에서 *보안*을 봤습니다. 마지막 장은 *RAS·Performance·Compliance*입니다.
 
+규범과 목표 수치는 [CXL 3.1 §12~14](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf), 구현 예는 Linux v6.12와 ndctl v80을 기준으로 설명합니다. 오류 주입·실장비 지연·복구 시험을 실행한 글은 아닙니다. 오류 기록을 볼 수 있다는 사실, 장애에서 복구했다는 사실, 성능 목표를 만족했다는 사실은 각각 별도의 증거가 필요합니다.
+
 ## RAS 기능 목록
 
-spec §12는 "CXL RAS는 PCIe 위에 쌓고, coherency와 메모리를 위한 기능을 더한다"고 시작합니다. Table 12-1의 주요 항목:
+CXL 3.1 §12는 PCIe RAS에 coherency·메모리 기능을 더해 설명합니다. 아래는 이 판의 Table 12-1을 발췌한 것이며, 모든 CXL 세대·모드에 그대로 적용하는 표는 아닙니다.
 
 | 기능 | CXL.io | CXL.cache·CXL.mem |
 |------|------|-----------|
@@ -42,7 +44,7 @@ Linux 쪽 PCI error handler 흐름은 [Ch 11](/blog/embedded/hardware/cxl/chapte
 | Failure | `CXL_EVENT_TYPE_FAIL` |
 | Fatal | `CXL_EVENT_TYPE_FATAL` |
 
-커널은 레코드를 trace event로 내보냅니다. `drivers/cxl/core/trace.h`에 `cxl_general_media`, `cxl_dram`, `cxl_memory_module`, `cxl_memory_sparing`, `cxl_poison`, `cxl_aer_correctable_error`, `cxl_aer_uncorrectable_error` 등이 있습니다. `cxl monitor`가 이 trace event를 JSON으로 보여 줍니다.
+Linux v6.12는 레코드를 trace event로 내보냅니다. 이 판의 [`drivers/cxl/core/trace.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/trace.h)에 `cxl_general_media`, `cxl_dram`, `cxl_memory_module`, `cxl_poison`, `cxl_aer_correctable_error`, `cxl_aer_uncorrectable_error` 등이 있습니다. `cxl monitor`가 CXL trace event를 JSON으로 보여 줍니다. 위 심각도 상수의 정의 위치는 `trace.h`가 아니라 `drivers/cxl/cxlmem.h`입니다.
 
 ## Poison
 
@@ -54,9 +56,9 @@ Linux 쪽 PCI error handler 흐름은 [Ch 11](/blog/embedded/hardware/cxl/chapte
 |------|------|
 | 길이 단위 | 64 B |
 | Source | Unknown, External, Internal, Injected, Vendor Specific |
-| 커널 상한 | 한 번에 1024개 (`CXL_POISON_LIST_MAX`) |
+| 커널 요청 단위 상한 | v6.12의 한 번 조회에서 최대 1024개 (`CXL_POISON_LIST_MAX`). 디바이스 전체 poison 주소 수의 상한은 아님 |
 
-시험용으로 poison을 넣고 지우는 명령도 있고, ndctl의 `cxl inject-media-poison`·`cxl clear-media-poison`이 이를 씁니다.
+시험용 poison 주입·삭제 인터페이스도 있지만 이 글에서는 실행하지 않았습니다. 삭제는 진단 기록을 읽는 동작과 다르므로, 사용 중인 메모리의 복구 절차로 그대로 적용하면 안 됩니다.
 
 ### Late Poison
 
@@ -69,8 +71,8 @@ Late Poison은 *링크 계층*의 기능입니다(§4.3.6.3). 데이터 메시�
 | 카운터 단위 (3.1) | 내용 |
 |------|------|
 | Full HDM Range | 디바이스 HDM 전체에 카운터 하나. 모든 메모리 디바이스가 지원(Set Alert Configuration) |
-| Per Memory Media FRU | 예: DIMM마다 카운터 |
-| Per Rank | rank마다 카운터 |
+| Per Memory Media FRU | 지원 flag가 있는 경우 DIMM 등 memory media FRU마다 카운터 |
+| Per Rank | 지원 flag가 있는 경우 rank마다 카운터 |
 
 CXL 4.0 웨비나는 메모리 RAS 개선으로 *CVME granularity 제어*와 *Patrol Scrub cycle 이벤트 생성*을 꼽습니다. PPR 쪽 변화는 [Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 다뤘습니다.
 
@@ -78,17 +80,19 @@ ndctl의 `cxl list -H` 출력에는 `ext_corrected_volatile`(정상·경고 상�
 
 ## Performance Considerations (spec §13)
 
-spec 13장은 성능 속성과 권고 지연 목표를 둡니다. 3.1 기준 x16 링크:
+spec 13장은 성능 속성과 권고 지연 목표를 둡니다. 3.1 Table 13-1의 x16 수치는 한 방향의 명목 전송률에 해당합니다. 예를 들어 64 GT/s × 16 / 8 = 128 GB/s이며, 양방향 합계나 애플리케이션 payload 처리량이 아닙니다.
 
-| 링크 | 총 대역폭 |
+| 링크 | 한 방향 명목 대역폭 |
 |------|------|
 | 16 GT/s | 32 GB/s |
 | 32 GT/s | 64 GB/s |
 | 64 GT/s | 128 GB/s |
 
-실제 대역폭은 프로토콜과 payload 크기에 달려 있고, spec은 CXL.cache·CXL.mem에서 60~90% 효율을 예상합니다.
+실제 대역폭은 프로토콜과 payload 크기에 달려 있고, spec의 표 각주는 CXL.cache·CXL.mem에서 60~90% 효율을 예상합니다. 이 범위는 프로토콜 효율에 관한 예상이며 측정 결과나 제품의 최소 보장치가 아닙니다.
 
 권고 지연 목표(Table 13-2). 아무 일도 없는 시스템에서 컴포넌트 핀 기준으로 잰 평균이고, x16·64 GT/s·IDE 끔이 전제입니다.
+
+주소는 무작위로 분산하며, 한 요청의 응답을 받은 다음 요청을 보냅니다. 따라서 CPU의 load-to-use 지연, 부하가 있을 때의 p99, switch를 포함한 전체 왕복 지연을 이 수치와 직접 비교하면 안 됩니다.
 
 | 컴포넌트 | 받는 메시지 → 보내는 메시지 | 목표 |
 |------|------|------|
@@ -98,7 +102,7 @@ spec 13장은 성능 속성과 권고 지연 목표를 둡니다. 3.1 기준 x16
 | Type 3 DDR (CXL.mem) | M2S MemWr → S2M NDR Cmp | 40 ns |
 | Host | S2M BISnp → M2S BIRsp | 90 ns |
 
-Type 3 목표는 DDR DIMM에 견줄 만한 단순·소형·저전력 디바이스를 상정한 값입니다. 느린 미디어나 pooled·multi-port 디바이스는 더 깁니다. 실제 디바이스 측정은 [Embedded Performance Engineering Ch 54](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)와 [Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)의 MICRO 2023 결과를 보세요.
+Type 3 목표는 DDR DIMM에 견줄 만한 단순·소형·저전력 DRAM 디바이스를 상정한 값입니다. WritePull은 보낼 데이터가 이미 출력 버퍼에 준비된 조건이며, Host BISnp 목표는 host가 해당 cache line을 캐시에 갖고 있지 않은 단순한 경우입니다. 느린 미디어나 pooled·multi-port 디바이스에 같은 목표를 강제할 수는 없습니다. 실제 디바이스 측정은 [Embedded Performance Engineering Ch 54](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)와 [Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)의 MICRO 2023 결과를 보세요.
 
 spec은 이와 함께 디바이스가 CDAT로 지연·대역폭을 보고하고, *QoS Telemetry*(§3.3.4)로 host가 요청 속도를 조절할 수 있다고 설명합니다.
 
@@ -106,9 +110,7 @@ spec은 이와 함께 디바이스가 CDAT로 지연·대역폭을 보고하고,
 
 CXL 3.2 발표문은 *메모리 tiering을 위한 CXL Hot-Page Monitoring Unit(CHMU)*을 새 기능으로 꼽습니다. 어떤 페이지가 자주 쓰이는지를 디바이스가 세어 OS의 tiering 결정에 쓰게 하는 장치입니다.
 
-v7.3-rc6 mainline 커널(`drivers/cxl`, `drivers/perf`)과 QEMU master에는 아직 CHMU 코드가 없습니다.
-
-이 측정은 [HBM Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)에서 본 hot/warm/cold 티어링을 *추정이 아니라 측정*으로 돌리는 토대가 됩니다.
+CHMU capability가 존재하는 것과 OS가 그 정보를 읽어 페이지를 이동하는 것은 별도 단계입니다. 실제 적용에는 디바이스·드라이버의 지원, 집계 단위·기간, OS의 배치 정책을 확인해야 합니다. 이 글은 최신 Linux·QEMU의 구현 유무를 판정하거나 CHMU 기반 tiering을 실행하지 않았습니다. 티어별 배치의 배경은 [HBM Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)을 참고하세요.
 
 ## Compliance Testing (spec §14)
 
@@ -123,25 +125,21 @@ spec 14장의 시험 영역(3.1):
 | §14.7 | Switch |
 | §14.8 | Configuration Register |
 
-시험용 DOE 객체 타입으로 *Compliance*(type 0)가 있습니다([Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)). 컨소시엄 웨비나(2025-12)에 따르면 2023년 4월 이후 compliance 이벤트가 9회 열렸고, Integrators List에는 CXL 1.1 디바이스 30개, CXL 2.0 디바이스 30개가 올라 있습니다.
+시험용 DOE 객체 타입으로 *Compliance*(type 0)가 있습니다([Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)). 시험 결과를 읽을 때는 대상 spec 판·디바이스 모델·firmware·시험 범위를 맞춰 봅니다. 목록 등재만으로 임의의 host·switch 구성에서 상호운용성·장애 복구·성능을 입증할 수는 없습니다.
 
 ## 실 운용 — ndctl 명령
 
+아래 명령 형식은 [ndctl v80의 `cxl-list`](https://github.com/pmem/ndctl/blob/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3/Documentation/cxl/cxl-list.txt)와 [`cxl-monitor`](https://github.com/pmem/ndctl/blob/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3/Documentation/cxl/cxl-monitor.txt)를 대조했습니다. 이 작업에서 실제 memdev에 실행하지 않았습니다. `mem0`는 해당 환경의 디바이스 이름으로 바꿔야 하며, trace 수집은 커널 설정과 권한이 필요합니다.
+
 ```bash
 # health 정보
-$ cxl list -m mem0 -H
+cxl list -m mem0 -H
 
 # poison 목록 (media error)
-$ cxl list -m mem0 -L
+cxl list -m mem0 -L
 
 # 커널 CXL trace event를 JSON으로
-$ cxl monitor
-
-# correctable AER 빈도를 1분마다
-$ bpftrace -e '
-  tracepoint:cxl:cxl_aer_correctable_error { @[probe] = count(); }
-  interval:s:60 { print(@); clear(@); }
-'
+cxl monitor
 ```
 
 `cxl list -H`의 필드 예시는 ndctl `cxl-list` 문서에 있습니다: `life_used_percent`, `temperature`, `dirty_shutdowns`, `volatile_errors`, `pmem_errors`, `ext_life_used`, `ext_temperature`, `ext_corrected_volatile` 등. `-L`(`--media-errors`)은 libtracefs를 켜고 빌드한 ndctl에서만 됩니다.
@@ -155,6 +153,8 @@ $ bpftrace -e '
 | `dirty_shutdowns` | `cxl list -H` |
 | `temperature` | `cxl list -H` |
 | CVME 경고 상태·`volatile_errors` | `cxl list -H`, DRAM·General Media event |
+
+필드가 없거나 읽기에 실패한 경우를 오류 0개로 채우면 안 됩니다. 누적 counter는 재부팅·reset 여부와 관찰 기간을 같이 기록하고, 여러 log에서 같은 이벤트를 수집하면 중복을 구분해야 합니다. event log·trace buffer overflow가 있으면 관찰하지 못한 오류도 있으므로, “로그가 비었다”를 정상 판정으로 사용하지 않습니다. 추세를 비교할 때는 같은 디바이스 식별자·firmware·부하와 시간 구간을 유지합니다.
 
 ## 자주 하는 실수
 
@@ -176,17 +176,17 @@ Table 13-2는 *권고 목표*이고, 측정 조건(idle, 핀 기준, IDE 끔)이
 
 ## 정리
 
-- CXL RAS는 PCIe 위에 *Viral(필수)·Isolation(선택)·Data Poisoning* 등을 더합니다.
+- CXL 3.1 Table 12-1은 cache·mem의 Viral 필수, Isolation 선택 등 RAS 요구를 정합니다.
 - 이벤트는 Informational·Warning·Failure·Fatal log에 쌓이고, Linux는 trace event로 내보냅니다.
 - *Poison List*는 64 B 단위, source 다섯 종. *Late Poison*은 링크 계층 기능.
 - *CVME*(Corrected Volatile Memory Error) 임계값은 3.1에서 HDM 전체·FRU·rank 단위.
 - spec §13: x16 64 GT/s 128 GB/s, 효율 60~90%, Type 3 MemRd 80 ns 등 권고 목표.
-- *CHMU*(3.2)는 hot page 측정용. mainline 커널·QEMU 구현은 아직 없음.
+- *CHMU*(3.2)는 hot page 측정용이며, 실제 tiering에는 디바이스·OS·정책의 연동을 확인해야 합니다.
 - 운용 명령은 `cxl list -H`·`cxl list -L`·`cxl monitor`.
 
 ## 시리즈 마무리 — 15편 회고
 
-본 시리즈는 *CXL 4.0의 핵심 동작과 구현*을 *15편*으로 풀었습니다.
+본 시리즈는 CXL 3.1의 프로토콜, 4.0의 공개된 변경 사항, Linux v6.12·QEMU 9.2.4의 구현을 15편에서 구분해 살폈습니다. 이 소프트웨어 검토가 CXL 4.0 전체 기능의 실행 검증을 뜻하지는 않습니다.
 
 | Part | Ch | 주제 |
 |------|-----|------|
@@ -201,7 +201,7 @@ Table 13-2는 *권고 목표*이고, 측정 조건(idle, 핀 기준, IDE 끔)이
 - [HBM·GDDR 심화 Ch 9~12](/blog/embedded/hardware/hbm/chapter09-cxl-mem) — 메모리 산업 관점
 - [Embedded Performance Engineering Ch 54~56](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency) — 성능 측정·튜닝
 - [Embedded Security Ch 11~13](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide) — 보안 깊이
-- [Modern Embedded Recipes Ch 149~151](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl) — 임베디드·implementation
+- [Modern Embedded Recipes: PCIe에서 CXL로](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl) — 임베디드·implementation
 - [Bootloader Internals Ch 34~36](/blog/embedded/bootloader/chapter34-pcie-enumeration) — 부팅·UEFI
 - 4개 디버깅 시리즈의 CXL 추가 챕터들
 
@@ -215,7 +215,7 @@ Table 13-2는 *권고 목표*이고, 측정 조건(idle, 핀 기준, IDE 끔)이
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1 spec(§4.3.6.3, §12~14), CXL 3.2 발표문, CXL 4.0 웨비나, ndctl 문서, Linux v7.3-rc6 `drivers/cxl/` 소스, Sun et al. MICRO 2023을 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 위 CXL 3.1 spec(§4.3.6.3, §8.2.9.9.11.3, §12~14), [CXL 4.0 웨비나](https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf), ndctl v80 문서, Linux v6.12 [`cxlmem.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/cxlmem.h)·위 `trace.h`를 대조했습니다. CHMU의 발표 출처는 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내), 실제 디바이스 논문의 조건은 Ch 8을 참고하세요. 성능 숫자의 단순 산술과 문서·소스 검토를 실제 하드웨어 시험으로 해석하면 안 됩니다.
 
 > CXL® and Compute Express Link® are trademarks of the Compute Express Link Consortium, Inc.
 > spec 인용은 Compute Express Link Consortium, Inc.의 저작권을 따릅니다.

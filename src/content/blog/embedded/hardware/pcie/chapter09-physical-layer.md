@@ -2,7 +2,7 @@
 title: "Ch 9: Physical Layer — LTSSM·Equalization·SerDes"
 slug: "embedded/hardware/pcie/chapter09-physical-layer"
 date: 2026-05-19T09:09:00
-description: "PCIe Physical Layer — LTSSM 11 state·link training timeline·4-phase equalization·TS1/TS2·SKP·encoding 진화."
+description: "PCIe link training의 상태·ordered set·equalization과 Linux에서 관찰할 수 있는 범위를 구분합니다."
 series: "PCIe Deep Dive"
 seriesOrder: 9
 tags: [pcie, ltssm, physical-layer, equalization, serdes, pam4]
@@ -16,14 +16,17 @@ topics: ["embedded", "embedded/hardware"]
 
 [Ch 1 Fundamentals](/blog/embedded/hardware/pcie/chapter01-fundamentals)에서 *Gen 6 PAM4·encoding 진화*를 봤습니다. 이 장은 *그 신호가 lane에서 어떻게 trained·equalized·encoded*되는지 본격적으로 분해합니다.
 
-## LTSSM — 11 State 머신
+이 글은 기본 NRZ training 흐름의 길잡이이며, 모든 세대의 LTSSM substate를 열거한 규범표가 아닙니다. [PCI-SIG FAQ](https://pcisig.com/faq?keys=LTSSM)의 Polling·Recovery 설명, [AMD PG239 Equalization Sequences](https://docs.amd.com/r/en-US/pg239-pcie-phy/Equalization-Sequences), [pciutils v3.13.0의 Link Status 출력](https://github.com/pciutils/pciutils/blob/v3.13.0/ls-caps.c)을 대조했습니다. 실제 PHY 측정이나 analyzer capture는 하지 않았습니다.
+
+## LTSSM의 주요 상태
 
 | State | 의미 |
 |-------|------|
 | **Detect** | Lane에 *receiver 존재 감지*. Reset 후 첫 state |
 | **Polling.Active** | TS1 ordered set 교환, link rate 협상 |
-| **Polling.Compliance** | 신호 무결성 test (제조 검사용) |
-| **Configuration** | Lane reversal·polarity·link width 결정, FC Init |
+| **Polling.Compliance** | 규정된 compliance pattern 전송 |
+| **Loopback** | 시험용 loopback 동작 |
+| **Configuration** | Link·lane 번호와 width 구성. DLL의 FC initialization과 상태 기계를 구분 |
 | **Recovery** | 일시적 에러·rate 변경 시 진입, equalization 가능 |
 | **L0** | Active — normal data transfer |
 | **L0s** | Lower power, *송신측 idle* |
@@ -32,7 +35,7 @@ topics: ["embedded", "embedded/hardware"]
 | **Hot Reset** | Software-trigger reset |
 | **Disabled** | 명시적 disable |
 
-LTSSM이 *PCIe device의 link 생명 주기*를 모두 표현. *Recovery는 normal 동작 중 자주 진입* — 일시적 noise 등에서 *retraining*.
+LTSSM이 *PCIe device의 link 생명 주기*를 모두 표현. Recovery는 속도 변경·재훈련 등에서 진입할 수 있음 — 일시적 noise 등에서 *retraining*.
 
 ## Link Training Timeline
 
@@ -47,11 +50,11 @@ Reset 후 *L0 도달*까지:
 | 4 | Recovery (option) | *Equalization* (Gen 3+) |
 | 5 | L0 | Active — DLL이 FC Init |
 
-전체 *수십 ms* 일반. Gen 5 이상은 *equalization 추가 시간*.
+완료 시간은 장치·속도·재시도에 따라 측정해야 합니다. L0 도달과 DLL 준비·OS enumeration 완료도 같은 사건이 아닙니다.
 
 ## TS1·TS2 Ordered Set
 
-*16-symbol 길이*의 *training sequence*:
+아래는 8b/10b TS의 기본 field 예입니다. 다른 encoding과 PAM4 training에 그대로 적용하지 않습니다.
 
 | 영역 | 의미 |
 |------|------|
@@ -59,7 +62,7 @@ Reset 후 *L0 도달*까지:
 | Symbol 1 | Link Number — lane이 속한 link |
 | Symbol 2 | Lane Number |
 | Symbol 3 | N_FTS — FTS(Fast Training Sequence) 수 |
-| Symbol 4 | Data Rate Identifier — 지원 rate (Gen 1~7) |
+| Symbol 4 | Data Rate Identifier — 해당 판에서 정의한 지원 속도 정보 |
 | Symbol 5 | Training Control — equalization request 등 |
 | Symbol 6~15 | TS identifier (TS1 또는 TS2 패턴) |
 
@@ -71,16 +74,16 @@ Gen 3 이상의 *고속 신호*는 *PCB·card·connector의 reflection·loss*를
 
 | Phase | 동작 |
 |-------|------|
-| Phase 0 | RX detect 후 *기본 preset 적용* |
-| Phase 1 | *Initial coefficients exchange* — 양단이 preset 정보 교환 |
-| Phase 2 | *TX coefficient sweep* — DSP가 *best EQ 검색* |
-| Phase 3 | *RX feedback*으로 *final coefficient 결정* |
+| Phase 0 | 초기 transmitter preset 등의 설정 |
+| Phase 1 | 초기 설정과 고속 동작의 기본 조건 확인 |
+| Phase 2 | Upstream Port가 Downstream Port transmitter 설정을 요청·평가하는 방향 |
+| Phase 3 | 반대 방향의 transmitter 설정을 요청·평가 |
 
 Equalization 실패는 *Gen 5·6 보드에서 흔한 문제* — *signal integrity 측정·preset 조정* 필요.
 
 ## Lane Reversal·Polarity Inversion
 
-물리적 lane 배선 실수를 *softwarefree 보정*:
+허용된 배선 변형을 다루는 기능입니다. 임의의 lane 뒤섞기나 단선까지 자동으로 복구하지는 않습니다.
 
 | 항목 | 의미 |
 |------|------|
@@ -97,9 +100,9 @@ Equalization 실패는 *Gen 5·6 보드에서 흔한 문제* — *signal integri
 |------|------|
 | 주기적 SKP 삽입 | *수천 symbol마다 SKP ordered set* |
 | Receiver가 SKP 흡수·추가 | *clock domain 보정* |
-| Gen 6 FLIT | *SKP가 FLIT 일부* — 별도 처리 |
+| Flit Mode | 해당 속도·clock 구조의 SKP 절차를 별도로 확인 |
 
-*Gen 1·2의 8b/10b*는 *DC balance를 위해 SKP 빈도 높음*. *Gen 6 PAM4*는 *다른 mechanism*.
+SKP의 목적은 clock 차이 보상입니다. 8b/10b의 DC balance와 혼동하면 안 됩니다. 삽입·제거 빈도는 mode·clock 조건과 해당 규격으로 확인합니다.
 
 ## Encoding 진화 (재확인)
 
@@ -107,7 +110,7 @@ Equalization 실패는 *Gen 5·6 보드에서 흔한 문제* — *signal integri
 |-----------|----------|----------|------|
 | Gen 1·2 | 8b/10b | 20% | DC balance 쉬움 |
 | Gen 3·4·5 | 128b/130b | 1.5% | Scrambler 필수 |
-| Gen 6·7 | PAM4 + FEC | 1.5% + FEC overhead | *4-level signaling*, FEC로 noise 회복 |
+| Gen 6·7 | PAM4 + FEC | Flit·CRC·FEC 비용을 별도 계산 | *4-level signaling*, FEC로 noise 회복 |
 
 PAM4는 *symbol rate 절반에 bit rate 2배* — *signal integrity 한계 회피*. 다만 *noise margin 1/3* → *FEC 필수*.
 
@@ -121,7 +124,7 @@ L0에서 *transient error*나 *rate change* 발생 시 *Recovery 진입*:
 | User가 rate change request | Recovery에서 *new rate로 training* |
 | ASPM L1 exit | L1 → Recovery → L0 (간단한 path) |
 
-*Recovery 진입은 정상 동작 일부*. `lspci -vv | grep "LnkSta:"` 의 *RT (Recovery Time)*가 *얼마나 자주 진입*했는지 확인.
+*Recovery 진입은 정상 동작 일부*. `lspci`의 LnkSta에는 Recovery Time 또는 진입 횟수라는 RT counter가 없습니다. 현재 속도·폭·Train 등의 bit만으로 전체 LTSSM 이력이나 반복 횟수를 복원할 수 없습니다.
 
 ## FTS — Fast Training Sequence
 
@@ -132,13 +135,13 @@ L0에서 *transient error*나 *rate change* 발생 시 *Recovery 진입*:
 | L0s 진입 시 | sender가 *N_FTS 개수만큼 FTS 보낼 약속* 알림 |
 | L0s exit 시 | sender가 *FTS 보내고 normal traffic* 시작 |
 
-FTS 개수는 *Gen·implementation 따라 다름* — *50~500 FTS* 일반.
+FTS 개수는 *Gen·implementation 따라 다름* — 장치와 협상된 값을 확인해야 합니다.
 
 ## LTSSM 디버깅
 
 `lspci -vv`의 LnkCap·LnkSta·LnkCtl로 *현재 LTSSM 상태 추적 어려움* — *vendor-specific debug register* 필요. 일부 *protocol analyzer (Teledyne LeCroy 등)*가 *LTSSM 상태 실시간 capture*.
 
-Linux에는 *pcie_aer.c* 외에 *별도 LTSSM trace 없음*. *드라이버 측 debug log* + *protocol analyzer*가 일반적 접근.
+이 장에서 확인한 표준 Link Status 출력은 전체 LTSSM trace가 아닙니다. 특정 driver·vendor의 추가 기능은 별도로 확인해야 합니다. *드라이버 측 debug log* + *protocol analyzer*가 일반적 접근.
 
 ## 자주 하는 실수
 
@@ -156,16 +159,16 @@ L0 진입 후도 *Recovery 자주 진입*. *frequent Recovery*는 *signal integr
 
 ### "SKP이 latency 영향"
 
-*수 ns 수준*. *측정 가능*하지만 *applications에 영향 적음*. *high-precision timing*만 의식.
+SKP의 영향은 실제 속도·폭·clock 구조와 workload에서 판단합니다. 측정 없이 고정된 ns 값이나 애플리케이션 영향의 크기를 단정하지 않습니다.
 
 ### "PAM4면 무조건 빠르다"
 
-*Gen 6 PAM4 = symbol rate 32 GBaud, bit rate 64 Gbps/lane*. *NRZ Gen 5의 32 GT/s*보다 *bit rate 2배*지만 *symbol rate 같음*. 즉 *PCB는 같은 EQ*가 *bit는 2배*.
+*Gen 6 PAM4 = symbol rate 32 GBaud, bit rate 64 Gbps/lane*. *NRZ Gen 5의 32 GT/s*보다 *bit rate 2배*지만 *symbol rate 같음*. 같은 symbol rate라도 PAM4의 여러 전압 수준과 오류율 요구 때문에 동일한 EQ·채널 조건으로 충분하다고 할 수는 없습니다.
 
 ## 정리
 
 - *Physical Layer*가 *lane·SerDes·LTSSM*으로 *signal 전달*.
-- *LTSSM 11 state*: Detect → Polling → Configuration → L0, 그 위에 L0s·L1·L2·Recovery·Disabled·Hot Reset.
+- 주요 LTSSM 상태: Detect → Polling → Configuration → L0, 그 위에 L0s·L1·L2·Recovery·Disabled·Hot Reset.
 - *Link Training* — TS1·TS2 ordered set + Equalization 4 phase로 *link 활성*.
 - *Lane Reversal·Polarity Inversion*이 *PCB layout 자유도*.
 - *SKP*가 *clock PPM drift 보정*.

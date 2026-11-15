@@ -1,8 +1,8 @@
 ---
-title: "HBM과 GDDR 분기점 분석 — Bandwidth·Capacity·Cost 트레이드오프"
+title: "HBM과 GDDR의 분기점 — 버스 폭과 패키징 비교"
 slug: "embedded/hardware/hbm/chapter01-overview"
 date: 2026-05-16T09:01:00
-description: "HBM과 GDDR의 분기점 — bandwidth·capacity·cost의 트레이드오프와 시장 분할."
+description: "H100과 RTX 4090의 공개 사양으로 버스 폭·전송률·패키징의 차이를 비교합니다."
 series: "HBM·GDDR 심화"
 seriesOrder: 1
 tags: [hbm, gddr, memory, bandwidth]
@@ -14,7 +14,7 @@ topics: ["embedded", "embedded/hardware"]
 
 > **"같은 DRAM 셀에서 시작했지만, *bus width와 packaging*이 갈렸습니다."** — GDDR은 *PCB 위 chip*으로 *pin rate를 끝까지 밀어 올린* 방식, HBM은 *interposer 위 stack*으로 *bus를 1024-bit까지 넓힌* 방식입니다.
 
-NVIDIA H100과 RTX 4090을 같이 놓고 보면 둘 다 *최신 메모리*를 씁니다. 그런데 H100 SXM은 *80 GB HBM3*에 *3.35 TB/s*, RTX 4090은 *24 GB GDDR6X*에 *1,008 GB/s*입니다. 같은 회사의 같은 시기 칩인데 *메모리 선택*이 완전히 다릅니다. 이 분기점이 어디서 생기는지가 이 시리즈의 시작입니다.
+NVIDIA H100과 RTX 4090을 같이 놓고 보면 서로 다른 메모리 구성을 씁니다. 이 글은 두 제품이 발표된 세대의 비교이며 현재 제품의 최고 사양 순위가 아닙니다. 그런데 H100 SXM은 *80 GB HBM3*에 *3.35 TB/s*, RTX 4090은 *24 GB GDDR6X*에 *1,008 GB/s*입니다. 같은 회사의 같은 시기 칩인데 *메모리 선택*이 완전히 다릅니다. 이 분기점이 어디서 생기는지가 이 시리즈의 시작입니다.
 
 ## DRAM 가족의 분기
 
@@ -33,20 +33,19 @@ JEDEC 표준 안에서 DRAM은 *네 갈래*로 갈렸습니다.
 
 | 축 | DDR | GDDR | HBM |
 |----|-----|------|-----|
-| Bus width | 64-bit/DIMM | 32-bit/chip | 1024-bit/stack (HBM4는 2048-bit) |
-| Per-pin rate 예 | TBD | 21 Gbps (GDDR6X, RTX 4090) | 9.6 Gbps (HBM3E, SK hynix) |
+| Bus width | 64-bit/DIMM | x32 구성 기준 32-bit/chip | 1024-bit/stack (HBM4는 2048-bit) |
 | Signaling | NRZ | NRZ (GDDR6) · PAM4 (GDDR6X) · PAM3 (GDDR7) | NRZ |
 | Packaging | DIMM (PCB) | BGA on PCB | TSV stack on interposer |
 
 GDDR은 *pin rate를 끝까지 밀어 올린* 방식입니다. 32-bit *좁은 bus*에 *PAM4·PAM3* 같은 *멀티 레벨 signaling*까지 끌어와 pin rate를 올립니다.
 
-HBM은 *반대 방향*입니다. *pin rate는 낮게 두고*, 대신 *bus width*를 *1024-bit*까지 넓힙니다. 한 stack에 *1024개 신호*가 한꺼번에 움직입니다.
+HBM은 *반대 방향*입니다. *pin rate는 낮게 두고*, 대신 *bus width*를 *1024-bit*까지 넓힙니다. HBM3의 1024는 데이터 DQ 폭입니다. 명령·주소·전원까지 포함한 전체 접점 수가 아닙니다.
 
 두 방식을 실제 제품으로 비교하면 이렇습니다.
 
 **GDDR6X 방식 (RTX 4090).** `21 Gbps × 384-bit ÷ 8 = 1,008 GB/s`. 32-bit chip 12개를 PCB 위에 놓습니다. chip 1개당 `21 × 32 ÷ 8 = 84 GB/s`입니다.
 
-**HBM3 방식 (H100 SXM5).** HBM3 stack 5개를 interposer 위에 놓아 *3.35 TB/s*를 냅니다. HBM3 정격(6.4 Gbps, stack당 819 GB/s)으로 돌리면 5 stack이 4.1 TB/s지만, H100은 정격보다 낮게 돌려 stack당 약 670 GB/s입니다.
+**HBM3 방식 (H100 SXM5).** HBM3 stack 5개를 interposer 위에 놓아 *3.35 TB/s*를 냅니다. HBM3 정격(6.4 Gbps, stack당 819 GB/s)으로 돌리면 5 stack이 4.1 TB/s지만, H100의 공개 peak를 5로 나누면 stack당 약 670 GB/s입니다. 이는 산술 평균이며 측정한 sustained 대역폭이 아닙니다. 두 제품의 입력값은 [NVIDIA H100 사양](https://www.nvidia.com/en-us/data-center/h100/)과 [Ada 백서의 RTX 4090 부록](https://images.nvidia.cn/aem-dam/Solutions/geforce/ada/nvidia-ada-gpu-architecture.pdf)을 기준으로 합니다.
 
 같은 *총 대역폭*을 만들어도 *pin 수, 배선, 패키징*이 완전히 다릅니다.
 
@@ -68,7 +67,7 @@ GDDR은 NRZ에서 PAM4, 다시 PAM3으로 *signaling 자체를 바꿔* 가며 pi
 
 ## 패키징의 분기
 
-GDDR chip은 *일반 PCB 위 BGA*로 붙습니다. HBM stack은 GPU die와 함께 *silicon interposer 위*에 올라가야 합니다. 1024개 신호를 PCB로 끌어낼 수는 없기 때문입니다. 그래서 HBM을 쓰려면 *2.5D 패키징*이 필요합니다. 세부 비용과 전력 분해는 벤더가 공개하지 않습니다.
+GDDR chip은 *일반 PCB 위 BGA*로 붙습니다. 이 글에서 비교하는 CoWoS 방식은 GPU와 HBM을 interposer로 연결합니다. [SK hynix·TSMC의 2024년 설명](https://news.skhynix.com/en/sk-hynix-partners-with-tsmc-to-strengthen-hbm-technological-leadership/)도 이 구조를 2.5D 패키징으로 정의합니다. 넓은 DQ를 짧게 연결한다는 설계 차이에 주목해야 하며, 모든 HBM 패키지에 실리콘 interposer만 가능하다는 뜻은 아닙니다. 구매 가격·조립 수율·열 설계를 같은 조건으로 비교한 비용 자료가 없어 여기서는 가격 우열을 계산하지 않습니다.
 
 ## 시장 분할
 
@@ -76,7 +75,7 @@ GDDR chip은 *일반 PCB 위 BGA*로 붙습니다. HBM stack은 GPU die와 함�
 
 | 진영 | 대표 제품 |
 |------|-----------|
-| **HBM** | NVIDIA H100·H200·B200 (HBM3·HBM3e)<br>AMD Instinct MI300X (HBM3)·MI325X (HBM3E)<br>Google TPU v5p<br>Intel Gaudi 3 (HBM2e)<br>Rebellions REBEL-Quad (HBM3E) |
+| **HBM** | NVIDIA H100·H200·B200 (HBM3·HBM3e)<br>AMD Instinct MI300X (HBM3)·MI325X (HBM3E)<br>Intel Gaudi 3 (HBM2e) |
 | **GDDR** | NVIDIA GeForce RTX 4090 (GDDR6X)<br>NVIDIA L4·L40 (GDDR6) |
 
 같은 NVIDIA 안에서도 H100은 HBM, RTX 4090은 GDDR입니다.
@@ -92,8 +91,8 @@ HBM 양산은 한국 두 회사와 Micron이 이끌어 왔습니다.
 | 2020년 2월 | Samsung | 16 GB HBM2E (Flashbolt, 3.2 Gbps) 발표 |
 | 2020년 7월 | SK hynix | 16 GB HBM2E 양산 (3.6 Gbps) |
 | 2022년 6월 | SK hynix | HBM3 양산, NVIDIA H100에 공급 |
-| 2024년 2월 | Micron | 24 GB HBM3E 양산 (9.2 Gbps, NVIDIA H200용) |
-| 2024년 9월 | SK hynix | 12-Hi 36 GB HBM3E 양산 (9.6 Gbps) |
+| 2024년 2월 | Micron | 24 GB 8-Hi HBM3E 양산 발표 ([9.2 Gbps 초과·1.2 TB/s 초과](https://micron.gcs-web.com/news-releases/news-release-details/micron-commences-volume-production-industry-leading-hbm3e), H200용) |
+| 2024년 9월 | SK hynix | [12-Hi 36 GB HBM3E 양산 발표](https://news.skhynix.com/en/sk-hynix-begins-volume-production-of-the-world-first-12-layer-hbm3e/) (9.6 Gbps) |
 
 ## 시리즈 로드맵
 
@@ -133,7 +132,7 @@ HBM은 *DDR5의 진화형*이 아니라 *패키징부터 다른 카테고리*입
 - DRAM 가족은 *DDR·LPDDR·GDDR·HBM* 네 갈래로 갈렸고, *셀은 같지만 패키징과 signaling*이 다릅니다.
 - GDDR은 *32-bit 좁은 bus*에 *PAM4·PAM3*로 pin rate를 올린 방식입니다. GDDR7 규격은 최대 48 Gbps입니다.
 - HBM은 *1024-bit 넓은 bus*에 *낮은 pin rate*로 stack당 *819 GB/s(HBM3)~1.23 TB/s(HBM3E)*를 만든 방식입니다.
-- HBM은 1024개 신호 때문에 *interposer 기반 2.5D 패키징*이 필요합니다.
+- 비교한 CoWoS 구조는 HBM과 GPU를 interposer로 연결하며, DQ 폭과 전체 접점 수를 구별해야 합니다.
 - H100·H200·B200·MI300X는 HBM, RTX 4090·L4·L40은 GDDR입니다.
 - 다음 장부터 *HBM stack 구조*와 *TSV*부터 차근차근 들어갑니다.
 
@@ -146,6 +145,3 @@ HBM은 *DDR5의 진화형*이 아니라 *패키징부터 다른 카테고리*입
 - [Ch 2: HBM 스택 구조와 TSV](/blog/embedded/hardware/hbm/chapter02-hbm-stack)
 - [Ch 3: HBM2/HBM2E/HBM3/HBM3E 스펙 비교](/blog/embedded/hardware/hbm/chapter03-hbm-generations)
 - [Ch 4: GDDR6·GDDR6X·GDDR7](/blog/embedded/hardware/hbm/chapter04-gddr)
-- BoW Ch 1: 개요 — die-to-die 표준의 한쪽
-- UCIe Ch 1: 개요 — die-to-die 표준의 다른 쪽
-- CXL Ch 1: 개요 — HBM 너머의 메모리 풀링

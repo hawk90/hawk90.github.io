@@ -2,7 +2,7 @@
 title: "Ch 14: Linux Operations — Hot-plug·AER Recovery·DPC·ARI"
 slug: "embedded/hardware/pcie/chapter14-linux-operations"
 date: 2026-05-19T09:14:00
-description: "PCIe 운영 — pciehp surprise·orderly hot-plug·AER recovery callback chain·DPC integration·ARI 256+ function·EEH."
+description: "PCIe 운영 — pciehp surprise·orderly hot-plug·AER recovery callback chain·DPC integration·ARI 8-bit function 식별·EEH."
 series: "PCIe Deep Dive"
 seriesOrder: 14
 tags: [pcie, hotplug, aer-recovery, dpc, ari, linux-operations]
@@ -21,7 +21,7 @@ topics: ["embedded", "embedded/hardware"]
 | 종류 | 의미 |
 |------|------|
 | **Surprise** | 사용자가 *통보 없이 제거* — NVMe U.2·OCP NIC |
-| **Orderly** | 사용자가 *button·software 명시 후 제거* | enterprise blade·CXL device |
+| **Orderly** | button·software로 사전 요청하고 OS가 I/O 중단·제거를 처리 |
 
 | 메커니즘 | Linux 드라이버 |
 |---------|---------------|
@@ -53,16 +53,16 @@ pciehp가 *이 register들로 hot-plug 처리*. `lspci -vv | grep -A 5 "SltCap"`
 | 6 | Bus allocation·BAR 할당 |
 | 7 | Driver matching·probe |
 
-각 단계 *delay·timeout*. 보통 *수백 ms ~ 수 s*.
+단계별 시간은 controller·장치·driver·재시도에 따라 확인해야 합니다. Presence와 전원 제어 기능도 모든 slot이 같지 않으며, link 활성·자원 할당·probe 성공은 별도 조건입니다.
 
 ## Hot-plug 시퀀스 — 제거
 
 | 종류 | 단계 |
 |------|------|
 | Orderly | 사용자 button → Slot Status event → driver detach → power off |
-| Surprise | Link Down detect → AER + DPC → driver remove |
+| Surprise | 예고 없는 link·장치 상실을 감지해 제거 처리. AER·DPC가 항상 모두 관여하는 고정 순서는 아님 |
 
-Surprise removal은 *진행 중 I/O가 fail* — *driver의 unbind callback*에서 *graceful cleanup*.
+Surprise removal에서는 진행 중 I/O가 실패할 수 있습니다. PCI driver의 remove와 오류 처리 경로가 새 요청을 막고 종료를 처리해야 하며, 이미 사라진 장치의 register 완료를 무한히 기다리면 안 됩니다.
 
 ## AER Recovery Callback Chain
 
@@ -72,7 +72,7 @@ Surprise removal은 *진행 중 I/O가 fail* — *driver의 unbind callback*에�
 |------|----------|------|
 | 1 | `error_detected` | AER가 *에러 인식* — driver 상태 record, return `PCI_ERS_RESULT_NEED_RESET` |
 | 2 | (option) `mmio_enabled` | MMIO 가능한지 확인 |
-| 3 | `slot_reset` 또는 `link_reset` | Reset 후 *device reinit* |
+| 3 | `slot_reset` | Reset 후 *device reinit* |
 | 4 | `resume` | 정상 복귀, *workload 재개* |
 
 Return 값:
@@ -80,27 +80,12 @@ Return 값:
 | 값 | 의미 |
 |----|------|
 | `PCI_ERS_RESULT_NEED_RESET` | reset 필요 |
-| `PCI_ERS_RESULT_CAN_RECOVER` | reset 없이 복구 |
+| `PCI_ERS_RESULT_CAN_RECOVER` | reset 없이 복구를 시도할 수 있음 |
 | `PCI_ERS_RESULT_DISCONNECT` | 복구 불가, *driver detach* |
 | `PCI_ERS_RESULT_RECOVERED` | 정상 복귀 |
 
-```c
-static pci_ers_result_t my_error_detected(
-    struct pci_dev *pdev,
-    pci_channel_state_t state)
-{
-    struct my_dev *dev = pci_get_drvdata(pdev);
-    drain_outstanding_io(dev);
-    return PCI_ERS_RESULT_NEED_RESET;
-}
+Callback이 반환한 결과와 관련 driver들의 집계 결과에 따라 다음 단계가 결정됩니다. 모든 오류에서 네 callback이 반드시 한 번씩 순서대로 호출되는 것은 아닙니다. `error_detected`에서는 새 I/O를 중단하고 접근이 금지된 장치 register를 기다리지 않아야 합니다. `slot_reset`은 필요한 설정 복원이 성공한 뒤에만 복구 성공을 반환하고, 실패 시에는 사용을 재개하지 않습니다.
 
-static pci_ers_result_t my_slot_reset(struct pci_dev *pdev)
-{
-    pci_restore_state(pdev);
-    reinit_hardware(dev);
-    return PCI_ERS_RESULT_RECOVERED;
-}
-```
 
 ## DPC Integration
 
@@ -113,19 +98,19 @@ DPC가 *AER recovery와 어떻게 결합*:
 | DPC trigger 후 | `pci_error_handlers`의 *error_detected → slot_reset → resume* |
 | Recovery 시 | DPC가 *link 재활성* |
 
-`drivers/pci/pcie/dpc.c`가 *handler*. `dpcgo`·debug script로 *manual trigger* 가능.
+[Linux v6.12 dpc.c](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/pci/pcie/dpc.c)와 `err.c`의 실제 recovery 흐름을 기준으로 봅니다. 이 글에서는 DPC trigger나 reset을 실행하지 않았습니다.
 
 ## ARI — Alternative Routing-ID Interpretation
 
-기존: *8-bit function (8 function/device)*. ARI: *전체 8-bit를 function*으로 — *256 function/device*:
+기존 devfn은 Device 5-bit와 Function 3-bit로 나뉩니다. ARI는 이 8-bit를 Function으로 해석해 256개 인코딩을 제공합니다. Routing ID 해석 변화이며 실제 생성 가능한 VF 수와 같지는 않습니다.
 
 | 시나리오 | 효과 |
 |---------|------|
-| SR-IOV with N>8 VF | ARI 필수 |
-| NVMe multi-controller | ARI로 *128 controller* |
+| SR-IOV | 실제 First VF Offset·VF Stride·Routing ID 배치와 upstream ARI forwarding 조건 확인 |
+| 여러 function을 가진 장치 | 지원하는 function과 자원 한도를 별도 확인 |
 | 복잡 ASIC | function 분할 자유도 |
 
-활성화: *Switch downstream port + EP 모두 ARI Capability*. `lspci -vv | grep "ARI Cap"`.
+장치의 ARI capability와 upstream port의 ARI forwarding 지원·활성 상태를 구분합니다. [v6.12 iov.c](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/pci/iov.c)는 ARI 상태에 따라 SR-IOV control을 설정하고 offset·stride를 읽습니다.
 
 ## EEH — POWER Architecture
 
@@ -143,18 +128,18 @@ x86은 *AER + DPC*, POWER는 *EEH + AER*. 동일 목적 다른 메커니즘.
 
 | 시나리오 | 결과 |
 |---------|------|
-| SR-IOV 32 VF | ARI 필요 (>8) |
-| SR-IOV 128 VF (NIC) | ARI + 적절한 Bus 할당 |
+| VF 수를 늘리는 경우 | 개수만으로 ARI 필수 경계를 단정하지 않고 RID 배치를 확인 |
+| 여러 bus로 확장되는 VF | 필요한 bus 번호와 platform 자원을 확인 |
 | Switch가 ARI 미지원 | NumVFs 한계 |
 
-NIC vendor가 *ARI 활성 펌웨어 권장*.
+구체적인 장치·firmware의 지원 조건은 해당 자료와 실제 enumeration으로 확인합니다.
 
 ## Pciehp + SR-IOV 상호작용
 
 | 시나리오 | 결과 |
 |---------|------|
 | VF live 시 PF hot-remove | 모든 VF 자동 제거 |
-| Hot-plug 진행 중 SR-IOV 활성 | *atomicity* 보장 — pciehp lock |
+| Hot-plug와 VF 변경이 겹침 | kernel lock·driver 수명 관리와 실패 처리를 확인. 외부 I/O까지 원자적으로 성공한다는 보장은 아님 |
 | Hot-plug → driver probe → SR-IOV enable | 일반 흐름 |
 
 ## Surprise Removal
@@ -185,11 +170,11 @@ NIC vendor가 *ARI 활성 펌웨어 권장*.
 
 ### "ARI = SR-IOV"
 
-*ARI는 routing 확장*, *SR-IOV는 virtualization*. *SR-IOV with NumVFs > 7*에 *ARI 필요*. 다른 용도는 *순수 ARI*만.
+*ARI는 routing 확장*, *SR-IOV는 virtualization*. VF 수 하나만으로 ARI 필요 여부를 결정하지 않습니다. 다른 용도는 *순수 ARI*만.
 
 ### "Surprise removal은 OS panic"
 
-*잘 짠 driver는 graceful handle*. NVMe는 *transfer 진행 중 surprise removal도 안전*. *driver bug*가 *panic의 진짜 원인*.
+Driver는 장치 상실을 처리해야 하지만, 진행 중인 데이터·파일시스템·상위 서비스의 복구까지 자동 보장하지는 않습니다. Panic의 원인도 driver bug 하나로 확정할 수 없습니다.
 
 ## 정리
 
@@ -197,7 +182,7 @@ NIC vendor가 *ARI 활성 펌웨어 권장*.
 - *Surprise vs Orderly* — 사용자 통보 여부.
 - *AER recovery callback chain*: `error_detected → mmio_enabled → slot_reset → resume`.
 - *DPC integration* — fault containment 후 AER chain 진행.
-- *ARI*가 *256 function/device* — SR-IOV with NumVFs > 7 필수.
+- ARI는 8-bit function 식별을 제공하며, 실제 VF RID 배치와 forwarding을 확인합니다.
 - *EEH (POWER)*가 *PE frozen·unfreeze 모델*.
 - *Surprise removal*은 *driver의 graceful handle*에 의존.
 
@@ -209,8 +194,8 @@ NIC vendor가 *ARI 활성 펌웨어 권장*.
 
 - [Ch 7: Error Handling](/blog/embedded/hardware/pcie/chapter07-error-handling) — AER·DPC 개념
 - [Ch 10: Linux PCI Basics](/blog/embedded/hardware/pcie/chapter10-linux-basics) — pcie-portdrv
-- [Ch 12: Virtualization I](/blog/embedded/hardware/pcie/chapter12-virtualization-1) — SR-IOV·ARI
+- [Ch 12: Virtualization I](/blog/embedded/hardware/pcie/chapter12-virtualization-1) — PF·VF와 소유권
 
 ## 시리즈 자료 출처 안내
 
-본 글의 1차 자료·정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.
+구현 기준은 [Linux v6.12 PCI Error Recovery](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/pci-error-recovery.rst), [pci.h의 실제 callback](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/linux/pci.h), `pciehp`·`dpc.c`·`err.c`·`iov.c`입니다. Hot-remove·AER 주입·실제 recovery는 실행하지 않았습니다. 본 글의 1차 자료·정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.

@@ -2,7 +2,7 @@
 title: "Ch 15: Tools — lspci·setpci·pcimem·protocol analyzer"
 slug: "embedded/hardware/pcie/chapter15-tools"
 date: 2026-05-19T09:15:00
-description: "PCIe 디버깅 도구 — lspci 전체 옵션·setpci raw access·pcimem BAR R/W·protocol analyzer·debugfs."
+description: "pciutils 3.13.0의 조회·dump 해석, Linux v6.12 AER 통계와 실제 장비 시험의 경계를 정리합니다."
 series: "PCIe Deep Dive"
 seriesOrder: 15
 tags: [pcie, lspci, setpci, pcimem, debug-tools]
@@ -10,231 +10,95 @@ draft: false
 topics: ["embedded", "embedded/hardware"]
 ---
 
-## 한 줄 요약
 
-> **"PCIe 트러블슈팅은 *lspci로 topology·capability dump → setpci로 register read·write → pcimem으로 BAR 직접 access → dmesg·debugfs로 kernel state → 마지막에 protocol analyzer*의 흐름입니다."** — *대부분 문제는 lspci -vv + dmesg*로 해결, *드물게 setpci의 raw write*가 필요, *진짜 link 문제*는 *protocol analyzer hardware*.
+## 조회와 제어를 먼저 나누기
 
-[Ch 1~14](/blog/embedded/hardware/pcie/chapter01-fundamentals)에서 *PCIe의 동작 원리*를 봤습니다. 이 장은 *그것을 진단·검증할 도구*를 본격적으로 분해합니다.
+PCIe 진단은 topology·장치 ID·현재 설정·kernel log를 같은 시점에 모으는 데서 시작합니다. Register를 읽는 도구와 쓰는 도구, 저장된 dump를 읽는 동작과 실제 장치를 접근하는 동작을 구분해야 합니다. BAR는 데이터 배열과 달리 read 자체에도 부작용이 있는 register를 포함할 수 있습니다.
 
-## lspci — 1차 진단 도구
+기준은 [pciutils v3.13.0 lspci 매뉴얼](https://github.com/pciutils/pciutils/blob/v3.13.0/lspci.man)·[setpci 매뉴얼](https://github.com/pciutils/pciutils/blob/v3.13.0/setpci.man), [Linux v6.12 AER HOWTO](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/pcieaer-howto.rst)입니다. 이 작업에서는 pciutils를 빌드하고 **합성 dump의 `lspci -F` 해석만 실행**했습니다. 실제 PCI config·BAR 접근이나 setpci write·오류 주입은 하지 않았습니다.
 
-`pciutils` 패키지에 포함. PCIe device 정보 dump:
+## lspci의 범위
 
-| 옵션 | 효과 |
+옵션의 verbosity와 raw dump 길이는 별개입니다. 권한 부족이나 장치 상태에 따라 전부 읽지 못할 수 있고, raw config 전체 읽기는 장치에 따라 문제를 일으킬 수도 있습니다.
+
+| 옵션 | pciutils 3.13.0의 의미 |
 |------|------|
-| `-t` | tree topology — switch·port 구조 |
-| `-tv` | tree + vendor/device 이름 |
-| `-D` | full domain (0000:bb:dd.f) |
-| `-x` | 256 byte config space hex dump |
-| `-xxx` | 4 KB extended config space hex dump |
-| `-xxxx` | 4 KB + capability 분해 |
-| `-vv` | 모든 capability 디코딩 (실용 1순위) |
-| `-k` | kernel driver·module 정보 |
-| `-nn` | numeric ID + name |
-| `-s 01:00.0` | 특정 device |
+| `-t` | bridge·bus topology 표시 |
+| `-D`·`-nn` | domain과 numeric ID를 명시 |
+| `-v`·`-vv`·`-vvv` | 해석 정보의 상세 수준 증가 |
+| `-x` | 표준 header 64 B, CardBus는 128 B raw dump |
+| `-xxx` | 256 B config raw dump |
+| `-xxxx` | 4096 B extended config raw dump |
+| `-k` | 지원되는 OS에서 kernel driver·module 정보 |
+| `-s BDF` | 대상 장치 선택 |
+| `-F FILE` | 저장된 dump 파일을 읽는 backend. 실제 장치 조회와 구분 |
 
-## lspci -vv 출력 해석
+가져온 dump를 해석할 때는 원본 수집 시점·장치·도구 버전·읽지 못한 범위를 남깁니다. 파일 안의 capability·enable bit는 그 시점의 관찰이며 현재 장치의 활성 상태를 입증하지 않습니다.
+
+### 실제 도구로 합성 필드 해석하기
+
+4096 B 합성 config에 Express capability를 배치하고 Device Control을 `0x2810`으로 설정했습니다. 아래는 빌드한 3.13.0 `lspci -F` 출력의 해당 부분입니다. 실제 Intel NIC나 완전한 하드웨어 profile의 dump가 아닙니다.
 
 ```text
-01:00.0 Network controller [0280]: Intel Corp. 82599EB ...
-        Subsystem: Intel Corp. ...
-        Flags: bus master, fast devsel, latency 0, IRQ 50
-        Memory at f7800000 (64-bit, prefetchable) [size=4M]
-        Capabilities: [40] Power Management ...
-        Capabilities: [50] MSI: Enable+ Count=1/1 ...
-        Capabilities: [60] MSI-X: Enable+ Count=64 ...
-        Capabilities: [a0] Express Endpoint, ...
-                LnkCap: Port #0, Speed 8GT/s, Width x8 ...
-                LnkSta: Speed 8GT/s (ok), Width x8 (ok)
-                DevCtl: ... MaxPayload 256 ...
-                DevCtl2: ... LTR+ ...
-        Capabilities: [100] AER ...
-        Capabilities: [140] SR-IOV ... NumVF 0
-        Kernel driver in use: ixgbe
+DevCtl: CorrErr- NonFatalErr- FatalErr- UnsupReq-
+        RlxdOrd+ ExtTag- PhantFunc- AuxPwr- NoSnoop+
+        MaxPayload 128 bytes, MaxReadReq 512 bytes
+LnkSta: Speed 32GT/s, Width x16
+        TrErr- Train- SlotClk- DLActive- BWMgmt- ABWMgmt-
 ```
 
-핵심:
-- *LnkCap vs LnkSta* — 광고와 현재 일치 여부
-- *MaxPayload*·*MaxReadRequest* — performance tuning
-- *AER 상태*·*카운터*
+공백을 정리한 발췌이며, MPS·MRRS의 유효 encoding 0~5 조합 36개도 같은 decoder로 확인했습니다. `0x2810`의 MPS mask `0x00e0` 결과는 0이므로 MPS는 128 B입니다. 이를 “MPS 256 설정값”이라고 쓰면 틀립니다. `lspci`의 LnkSta에는 Recovery Time을 뜻하는 RT counter도 없습니다.
 
-## setpci — Raw Register Access
+## setpci와 BAR 직접 접근
 
-*직접 Configuration Space write*. 위험!
+setpci는 config register를 읽거나 쓸 수 있습니다. Device Control 전체 word를 상수로 덮으면 MPS 외 RO·No Snoop·error reporting 등의 bit도 바뀝니다. Masked write라도 경로의 MPS 제약·driver 동기화를 대신하지 못하므로 이 글은 임의 tuning write를 제공하지 않습니다.
 
-| 명령 | 효과 |
-|------|------|
-| `setpci -s 01:00.0 0x04.W` | offset 0x04 W (16-bit) read |
-| `setpci -s 01:00.0 0x04.W=0x0006` | bus master·memory enable |
-| `setpci -s 01:00.0 CAP_EXP+30.W` | Capability symbolic name |
+특히 AER capability의 `+0x18`은 AER Capabilities/Control입니다. 여기에 7을 쓰는 것을 포괄적인 “AER enable”로 설명하면 안 됩니다. Error reporting·mask·severity·Root Error Command는 서로 다른 register입니다.
+
+pcimem류 도구는 resource mapping을 통해 BAR를 직접 접근합니다. [Linux sysfs PCI 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/sysfs-pci.rst)처럼 platform별 mmap 지원과 resource 정보를 확인해야 합니다. Driver unbind만으로 임의 offset·폭의 read/write가 안전해지는 것은 아닙니다. 장치 register 명세와 소유권·DMA·interrupt 상태를 아는 초기화·검증 절차 안에서 사용합니다.
+
+## AER 통계의 실제 경로
+
+AER 통계는 일반적인 debugfs `pci/<BDF>/` 경로가 아니라 [v6.12 sysfs ABI](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-pci-devices-aer_stats)에 정의돼 있습니다. 아래는 Linux 대상에서 사용할 조회 형식이며 실제 장치에서는 실행하지 않았습니다.
 
 ```bash
-# bus master + memory space enable
-setpci -s 01:00.0 COMMAND=0x06
-
-# MaxPayload 256 byte set (Device Control)
-setpci -s 01:00.0 CAP_EXP+8.W=0x2810
-
-# AER capability enable
-setpci -s 01:00.0 ECAP_AER+18.L=0x00000007
+bdf=0000:01:00.0
+lspci -Dnn -s "$bdf" -vv
+cat "/sys/bus/pci/devices/$bdf/aer_dev_correctable"
+cat "/sys/bus/pci/devices/$bdf/aer_dev_nonfatal"
+cat "/sys/bus/pci/devices/$bdf/aer_dev_fatal"
+dmesg | grep -iE 'pci|pcie|aer'
 ```
 
-*driver가 인지 못 하는 변경* — race 가능. *디버깅·연구용*.
+속성 부재·권한 거부는 0개라는 뜻이 아닙니다. Device의 AER status bit와 kernel이 관찰한 누적 통계도 구분합니다. 빈도를 비교하려면 시작·끝 시각과 counter 차이, reset·재열거 여부, mask·log ratelimit·overflow, 부하를 함께 기록합니다.
 
-## pcimem — BAR Direct R/W
+`resource`는 주소와 flags를 보여 주지만 `resourceN` mapping은 장치 접근입니다. `reset`·`remove`·`rescan`·`power/control` 쓰기는 제어 동작입니다. Debugfs는 driver별 interface가 다르며 read라는 이유만으로 부작용이 없다고 가정하지 않습니다.
 
-`pcimem` 도구 (github.com/billfarrow/pcimem):
+## 오류 주입과 protocol analyzer
 
-```bash
-# BAR0의 offset 0x100 32-bit read
-pcimem /sys/bus/pci/devices/0000:01:00.0/resource0 0x100 w
+v6.12의 AER software injection은 `CONFIG_PCIEAER_INJECT`와 `/dev/aer_inject`, 별도 [intel/aer-inject](https://github.com/intel/aer-inject) 도구를 사용합니다. 존재하지 않는 debugfs echo 경로로 대신할 수 없습니다. Software injection은 kernel의 보고·복구 경로를 시험하는 수단이며 실제 PHY 오류·link 차단과 같은 시험은 아닙니다. CE 주입은 일반적으로 nonfatal/fatal recovery callback을 시험하는 것과도 다릅니다.
 
-# write
-pcimem /sys/bus/pci/devices/0000:01:00.0/resource0 0x100 w 0xdeadbeef
-```
+DPC 시험은 지원되는 controller·장치와 구체적인 trigger 절차가 필요합니다. v6.12의 파일을 대조하지 않은 `dpc-test.c`나 임의 utility를 보편적인 kernel 도구로 소개하지 않습니다. 이 글에서는 두 주입 모두 실행하지 않았습니다.
 
-*driver 없이도 BAR access*. *register layout 검증·하드웨어 brings up*.
+Protocol analyzer는 지원 속도·폭·encoding의 traffic과 상태를 관찰할 때 사용합니다. Interposer·probe가 시험 경로에 미치는 영향, trigger 조건, capture 누락과 재현 조건을 기록해야 합니다. Capture 하나가 장치 내부 상태나 드문 장애의 모든 원인을 설명해 주지는 않습니다. 제품 이름·가격보다 필요한 관찰 범위에 맞춰 선택합니다.
 
-## /sys/bus/pci/devices/<BDF>/
+## 도구 결과에서 다음 단계로
 
-| Entry | 의미 |
-|-------|------|
-| `config` | 4 KB config dump (binary) |
-| `resource` | BAR base·limit·flags |
-| `resource0`~`resource5` | 각 BAR (mmap 가능) |
-| `vendor·device` | ID |
-| `class` | Class Code |
-| `numa_node` | NUMA locality |
-| `driver` | 매칭 driver symlink |
-| `sriov_numvfs` | SR-IOV 활성 (PF만) |
-| `reset` | FLR·secondary bus reset trigger |
-| `power/control` | runtime PM ("auto"·"on") |
-| `power/wakeup` | wake-up 활성 |
-
-```bash
-# config space dump
-xxd /sys/bus/pci/devices/0000:01:00.0/config | head
-
-# FLR
-echo 1 > /sys/bus/pci/devices/0000:01:00.0/reset
-
-# runtime PM
-echo auto > /sys/bus/pci/devices/0000:01:00.0/power/control
-```
-
-## debugfs
-
-`/sys/kernel/debug/pci/`에 *디버깅 인터페이스*:
-
-| Entry | 의미 |
-|-------|------|
-| `pci/devices` | 모든 device 목록 |
-| `pci/<BDF>/config` | config space |
-| `pci/<BDF>/aer_dev_correctable` | CE counter |
-| `pci/<BDF>/aer_dev_fatal·nonfatal` | UE counter |
-| `pci/<BDF>/dpc` | DPC trigger·log |
-
-`mount -t debugfs none /sys/kernel/debug` 필요.
-
-## dmesg — Kernel Log
-
-| 패턴 | 의미 |
+| 현재 증거 | 다음 질문 |
 |------|------|
-| `pcieport` | hot-plug·AER·DPC |
-| `aer` | AER report |
-| `ixgbe·nvme·...` | driver-specific |
-| `BAR.*can't` | resource conflict |
-| `Link is up` | LTSSM L0 진입 |
-| `Link is down` | LTSSM 떨어짐 |
-
-```bash
-dmesg | grep -iE "pci|pcie|aer" | tail -50
-```
-
-*첫 line부터 timing·sequence 추적*. *boot 직후 init·error 동시 추적*.
-
-## aer-inject
-
-`drivers/pci/pcie/aer_inject.c`로 *AER 에러 인위 발생*. *driver recovery callback 검증*용:
-
-```bash
-# 모듈 로드
-modprobe aer_inject
-
-# 가짜 CE 발생
-echo "0000:01:00.0 cor=000001" > /sys/kernel/debug/pci/aer_inject
-
-# driver의 error_detected callback 확인
-dmesg | grep "error_detected"
-```
-
-## dpc-test
-
-`drivers/pci/pcie/dpc-test.c`로 *DPC 동작 검증*. *Switch port의 DPC trigger* test.
-
-## Protocol Analyzer — Hardware
-
-| 분야 | 도구 |
-|------|------|
-| Commercial | Teledyne LeCroy *Summit*·Keysight *Pulsar* |
-| TLP/DLLP capture | 모든 link traffic |
-| LTSSM 추적 | state transition timeline |
-| FPGA-based open-source | `pcie-tlp-injector` 등 |
-
-*Cost 수천만 원*. *제조사·card vendor*에서 *진짜 link 문제 분석*에 사용.
-
-## NVMe·NIC 특화 도구
-
-| 도구 | 용도 |
-|------|------|
-| `nvme list·smart-log·get-log` | NVMe AER·SMART |
-| `ethtool -S` | NIC statistics |
-| `mlnx_perf·intel_iommu_dump` | vendor-specific |
-
-## 트러블슈팅 결정 트리 (간략)
-
-| 증상 | 1단계 |
-|------|------|
-| Device 안 보임 | `lspci -D` |
-| Link 속도 안 남 | `lspci -vv | grep "LnkSta"` |
-| Driver bind 안 됨 | `lspci -k` |
-| Hot-plug 안 됨 | `dmesg | grep pciehp` |
-| 성능 미달 | `lspci -vv | grep "MaxPayload\|MaxReadReq"` |
-| AER 폭주 | `dmesg | grep aer` + `aer_dev_*` counter |
-
-자세한 시나리오북은 [Ch 16 Troubleshooting](/blog/embedded/hardware/pcie/chapter16-troubleshooting).
-
-## 자주 하는 실수
-
-### "setpci로 BAR 변경"
-
-*driver가 동작 중*이면 *driver 입장의 BAR이 invalid*. *device hang*. *unbind 후 setpci, 또는 manual driver*만.
-
-### "lspci -vv가 항상 동작"
-
-*kernel access 필요*. *VFIO-bound device*는 *userspace 소유*라 *상세 정보 제한*. *unbind 후* 다시.
-
-### "AER counter 0이면 정상"
-
-*Mask로 가려진 경우*도. `lspci -vv | grep "AER.*MaskSta"` 확인 필요.
-
-### "Protocol Analyzer가 모든 문제 해결"
-
-*Hardware 자체의 비결정적 fault*는 *analyzer로도 reproduction* 어려움. *통계적 RAS 누적 → analyzer trigger*가 일반 워크플로.
-
-### "debugfs는 production에 안전"
-
-*Read는 OK*, *write·trigger는 production 위험*. *staging·QA*에서만 trigger.
+| BDF가 없음 | upstream topology·power·link·bus 범위가 맞는가? |
+| LnkCap보다 낮은 LnkSta | 양단 capability·정책·배선과 재훈련 이력은 무엇인가? |
+| AER counter 증가 | 오류 종류·부하·시간 상관관계와 다른 경로의 기록이 일치하는가? |
+| Driver가 bound | probe 뒤 queue·DMA·IRQ 준비와 실제 I/O 완료도 확인했는가? |
+| Reset 성공 | 애플리케이션 데이터와 서비스가 실제 복구됐는가? |
 
 ## 정리
 
-- *lspci -vv*가 *PCIe 진단의 1순위*. topology·capability·LnkCap/LnkSta 모두 dump.
-- *setpci*는 *raw register access* — driver 무관하게 변경 가능, *위험*.
-- *pcimem*이 *BAR 직접 R/W*. driver brings up·register 검증.
-- *sysfs (`/sys/bus/pci/`)·debugfs*가 *kernel state·counter·reset trigger*.
-- *dmesg*에서 *boot·link·error timing* 추적.
-- *aer-inject·dpc-test*가 *driver recovery 검증*.
-- *Protocol analyzer*는 *진짜 link 문제*에. cost 큼.
+- `lspci` 해석 수준과 raw dump 길이를 나눠 사용합니다.
+- 합성 dump decoder 실행과 실제 장치 검증은 다릅니다.
+- setpci·BAR 직접 접근은 driver·장치 명세와 동기화 조건을 확인합니다.
+- AER 통계는 sysfs ABI를 따르고 관찰 구간·누락·reset을 같이 기록합니다.
+- Software injection·DPC·protocol capture는 각각 다른 증거를 제공합니다.
 
 ## 다음 편
 

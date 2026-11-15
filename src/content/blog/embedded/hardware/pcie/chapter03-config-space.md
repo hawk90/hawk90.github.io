@@ -79,7 +79,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## Capabilities Pointer·Capability List
 
-*Capabilities Pointer (offset 0x34)*가 *capability chain의 첫 entry offset*. 각 capability는 *3 byte 헤더*:
+*Capabilities Pointer (offset 0x34)*가 *capability chain의 첫 entry offset*. 각 capability는 *2 byte 공통 헤더*:
 
 | 필드 | bit | 의미 |
 |------|-----|------|
@@ -118,25 +118,26 @@ topics: ["embedded", "embedded/hardware"]
 
 ## Extended Capability (offset 0x100~)
 
-*4 KB 영역*에는 *Extended Capability*가 줄지어 있습니다. *PCIe 3.0 이상 기능*은 대부분 여기에:
+*4 KB 영역*에는 *Extended Capability*가 줄지어 있습니다. Extended Capability ID는 세대 번호가 아닙니다. 다음 표는 [Linux v6.12 pci_regs.h](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h)의 정의와 대조했습니다. IDE 0x0030은 이 판의 Linux 헤더에 없으므로 [pciutils v3.13.0의 정의](https://github.com/pciutils/pciutils/blob/v3.13.0/lib/header.h)를 별도로 참고합니다.
 
 | ID | 명칭 |
 |----|------|
 | 0x0001 | Advanced Error Reporting (AER) |
 | 0x0002 | Virtual Channel |
 | 0x0003 | Device Serial Number |
-| 0x0009 | Vendor-Specific (VSEC) |
-| 0x000B | Vendor-Specific Extended (DVSEC) |
-| 0x000F | Access Control Services (ACS) |
+| 0x0009 | Virtual Channel (별도 VC ID) |
+| 0x000B | Vendor-Specific (VSEC) |
+| 0x0023 | Designated Vendor-Specific (DVSEC) |
+| 0x000D | Access Control Services (ACS) |
 | 0x0010 | SR-IOV |
 | 0x0011 | MR-IOV |
 | 0x0018 | Latency Tolerance Reporting (LTR) |
 | 0x001D | Downstream Port Containment (DPC) |
 | 0x001E | L1 PM Substates |
-| 0x0023 | Resizable BAR (ReBAR) |
-| 0x0026 | Address Translation Services (ATS) |
-| 0x0027 | TPH Requester |
-| 0x002A | Process Address Space ID (PASID) |
+| 0x0015 | Resizable BAR (ReBAR) |
+| 0x000F | Address Translation Services (ATS) |
+| 0x0017 | TPH Requester |
+| 0x001B | Process Address Space ID (PASID) |
 | 0x002E | Data Object Exchange (DOE) |
 | 0x0030 | Integrity & Data Encryption (IDE) |
 
@@ -144,15 +145,15 @@ topics: ["embedded", "embedded/hardware"]
 
 ## DVSEC — Vendor 확장
 
-*DVSEC (Designated Vendor-Specific Extended Capability, ID 0x000B)*은 *vendor가 자기 capability를 표준 형식으로 광고*하는 영역. *CXL이 DVSEC로 자기를 식별*합니다:
+*DVSEC (Designated Vendor-Specific Extended Capability, ID 0x0023)*은 *vendor가 자기 capability를 표준 형식으로 광고*하는 영역. *CXL이 DVSEC로 자기를 식별*합니다:
 
 | 필드 | 의미 |
 |------|------|
-| DVSEC Header 1 | Length·Vendor ID |
-| DVSEC Header 2 | Revision·DVSEC ID |
+| DVSEC Header 1 | Vendor ID [15:0]·Revision [19:16]·Length [31:20] |
+| DVSEC Header 2 | DVSEC ID [15:0] |
 | DVSEC Body | vendor-specific 내용 |
 
-CXL 1.1+ device는 *DVSEC ID = 0x0~0x10* 사이 여러 entry로 자기를 광고. [CXL Internals Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 자세히.
+CXL은 vendor ID 0x1e98과 개별 DVSEC ID·revision·length를 함께 해석합니다. 모든 장치에 같은 entry 집합이 존재한다고 가정하지 않습니다. [CXL Internals Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 자세히.
 
 ## ECAM — Enhanced Configuration Access Mechanism
 
@@ -160,7 +161,7 @@ CXL 1.1+ device는 *DVSEC ID = 0x0~0x10* 사이 여러 entry로 자기를 광고
 
 | 영역 | 의미 |
 |------|------|
-| ECAM base address | UEFI·ACPI가 지정 (보통 `0xE0000000` 근처) |
+| ECAM base address | 플랫폼 firmware가 제공. 고정 주소로 가정하지 않음 |
 | 1 device·function | 4 KB |
 | 1 bus | 4 KB × 256 (32 device × 8 function) = 1 MB |
 | 1 PCIe segment (256 bus) | 256 MB |
@@ -196,7 +197,7 @@ RC는 이 정보로 *deeper power state로 진입 결정*. *모바일·저전력
 
 ### "Configuration Space는 256 byte"
 
-*PCI는 256 byte, PCIe는 4 KB*. *Extended Cap (AER·SR-IOV·ATS 등)*은 *256 byte 너머*에 있음. *0x100 이상 access*가 *Configuration TLP*로 안 되면 *ECAM이 활성 안 됨* — *legacy CF8/CFC*만 동작.
+*PCI는 256 byte, PCIe는 4 KB*. *Extended Cap (AER·SR-IOV·ATS 등)*은 *256 byte 너머*에 있음. 확장 영역을 읽지 못했다면 접근 방식·권한·플랫폼 지원·장치 상태를 각각 확인해야 합니다. 그것만으로 ECAM 비활성 하나로 원인을 확정하지 않습니다.
 
 ### "Vendor ID 0xFFFF면 device 없음"
 
@@ -204,7 +205,7 @@ RC는 이 정보로 *deeper power state로 진입 결정*. *모바일·저전력
 
 ### "PCIe Cap이 곧 PCIe device 인증"
 
-PCIe Capability ID 0x10은 *해당 device가 PCIe임을 명시*. 다만 *없어도 PCIe device가 있음* — 일부 *legacy compatible* device. *BIOS·UEFI가 ECAM 매핑*하면 *물리적 PCIe slot*임은 거의 확실.
+PCIe Capability ID 0x10은 *해당 device가 PCIe임을 명시*. 다만 *없어도 PCIe device가 있음* — 일부 *legacy compatible* device. ECAM은 config 접근 방법이며 물리 slot이나 장치 인증을 입증하지 않습니다. 가상 플랫폼도 ECAM을 제공할 수 있습니다.
 
 ### "Capability chain은 짧다"
 
@@ -212,14 +213,14 @@ PCIe Capability ID 0x10은 *해당 device가 PCIe임을 명시*. 다만 *없어�
 
 ### "ECAM이 동작하면 모든 device 보임"
 
-ECAM은 *UEFI·ACPI MCFG에 등록된 영역*만 매핑. *secondary domain·virtio*는 *별도 controller*. `lspci -D`로 *domain·bus 분리* 확인.
+ECAM은 *UEFI·ACPI MCFG에 등록된 영역*만 매핑. 별도 domain·host bridge도 확인해야 합니다. virtio-pci 장치는 PCI config 모델 안에서 열거되므로 virtio라는 이유로 ECAM과 무관한 별도 controller로 분류하지 않습니다. `lspci -D`로 *domain·bus 분리* 확인.
 
 ## 정리
 
 - Configuration Space는 *4 KB* — 256 byte PCI + 3840 byte PCIe Extended.
 - *Type 0 (EP)·Type 1 (Bridge)* 두 헤더 형식. *Type 1*에 *bus routing 정보*.
 - *Capabilities Pointer (0x34)*가 *capability linked list* 시작. *PM·MSI·PCIe Cap·MSI-X* 등 chain.
-- *Extended Capability* (0x100~)에 *AER·SR-IOV·DPC·ATS·PASID·DOE·IDE* 등 PCIe 3.0+ 기능.
+- *Extended Capability* (0x100~)에 *AER·SR-IOV·DPC·ATS·PASID·DOE·IDE* 등을 식별합니다. ID 자체는 도입 세대가 아닙니다.
 - *DVSEC*은 *vendor 확장 영역* — CXL이 *자기 식별에 사용*.
 - *ECAM*이 *4 KB Configuration*을 *MMIO로 매핑*. UEFI MCFG에 등록.
 - *Type 1 → Type 0 변환*이 *enumeration의 핵심* — bridge가 *secondary/subordinate*로 라우팅.

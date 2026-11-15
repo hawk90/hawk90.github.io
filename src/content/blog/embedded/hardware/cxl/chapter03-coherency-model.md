@@ -2,7 +2,7 @@
 title: "Ch 3: 메모리 일관성 모델 — HDM-DB·HDM-D·Bias·BISnp"
 slug: "embedded/hardware/cxl/chapter03-coherency-model"
 date: 2026-05-16T09:03:00
-description: "Host-managed Device Memory 두 종류와 일관성 메커니즘."
+description: "HDM-H·HDM-D·HDM-DB의 일관성 채널과 선택적 bias 관리, Linux decoder 관측의 한계를 구분합니다."
 series: "CXL 4.0 Internals"
 seriesOrder: 3
 tags: [cxl, coherency, hdm-db, hdm-d, bias, bisnp]
@@ -14,7 +14,7 @@ topics: ["embedded", "embedded/hardware"]
 
 > **"device memory를 host와 device가 함께 캐시할 수 있으면 일관성을 맞출 장치가 필요합니다."** — CXL은 HDM 영역을 *세 종류*로 나눕니다. *HDM-H*는 host만 일관성을 책임지는 Type 3 영역, *HDM-D*는 CXL.cache로 host와 일관성을 맞추는 Type 2 영역, *HDM-DB*는 CXL.mem의 *Back-Invalidate Snoop(BISnp)* 채널로 일관성을 맞추는 영역입니다. 256B flit을 쓰는 디바이스는 HDM-DB를 지원해야 합니다.
 
-[Ch 2](/blog/embedded/hardware/cxl/chapter02-system-architecture)에서 디바이스 유형을 봤습니다. 이 장은 *device memory의 일관성이 어떻게 유지되는지*를 CXL 3.1 규격 §2.2 기준으로 정리합니다.
+[Ch 2](/blog/embedded/hardware/cxl/chapter02-system-architecture)에서 디바이스 유형을 봤습니다. 이 장은 *device memory의 일관성이 어떻게 유지되는지*를 [CXL 3.1 규격 §2.2](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf) 기준으로 정리합니다.
 
 ## HDM이란
 
@@ -47,7 +47,7 @@ HDM-D는 CXL 1.1부터 있던 Type 2의 *bias 기반 일관성 모델*을 씁니
 | **Host Bias** | host 접근이 빠름. 디바이스가 접근하려면 host를 거쳐야 함 | 작업을 넣을 때, 결과를 읽을 때 |
 | **Device Bias** | 디바이스가 host 일관성 엔진을 거치지 않고 접근. host도 접근할 수 있지만 성능이 떨어짐 | 디바이스가 작업을 실행하는 동안 |
 
-Type 2 디바이스는 bias를 *page 단위*(예: 4 KB당 1 bit)로 Bias Table에 기록하고, *Transition Agent*가 host 캐시를 정리하며 bias를 바꿉니다. LLM inference처럼 *weight 적재 → 연산 → 결과 회수*로 phase가 뚜렷하면 이 모델에 맞습니다. 전환 비용의 구체적인 크기는 TBD입니다.
+Bias를 구현하는 경우에는 page 단위로 추적하고 전환 시 host cache 정리가 필요합니다. §2.2.2의 4 KiB page는 예이며, 모든 구현이 4 KiB당 물리 1 bit를 써야 한다는 규칙은 아닙니다. §2.2.2.3은 bias 관리를 구현하지 않고 모든 device memory를 Host Bias처럼 처리하는 경우도 허용합니다. 전환의 크기·지연은 구현과 추적 상태에 달려 있으며 이 글은 실측 비용을 제시하지 않습니다.
 
 ## HDM-DB — Back-Invalidate Snoop
 
@@ -75,16 +75,18 @@ BISnp를 *모든 cache line마다* 보내면 부담이 큽니다. 디바이스�
 
 snoop filter의 크기는 디바이스 설계의 트레이드오프입니다. 작으면 추적할 수 있는 line이 줄어 snoop이 늘고, 크면 면적이 늘어납니다.
 
-## Linux 측 — decoder의 target type
+## Linux 측: target type과 coherency mode는 다릅니다
 
-Linux에서 switch 수준 decoder가 어떤 메모리를 디코딩하는지는 sysfs의 `target_type`으로 보입니다.
+Linux v6.12의 [CXL sysfs ABI](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-cxl)는 switch decoder의 `target_type`을 설명합니다. `accelerator`는 Type 2 메모리, `expander`는 Type 3 메모리라는 target 구분이며, HDM-H/D/DB 활성 상태를 직접 출력하는 속성이 아닙니다.
 
 ```bash
-$ cat /sys/bus/cxl/devices/decoder1.0/target_type
-expander       # Type 3 memory. accelerator memory(Type 2)면 accelerator
+cat /sys/bus/cxl/devices/decoder1.0/target_type
+cxl list -M
 ```
 
-커널 ABI 문서(`sysfs-bus-cxl`, v5.14)에 따르면 이 값은 *그 decode 계층에서 어떤 메모리 영역이 활성화되느냐*에 따라 바뀔 수 있습니다. 메모리 장치 자체는 `cxl list -M`으로 보이고, 출력에는 `memdev`, `ram_size`, `pmem_size`, `serial`, `host` 같은 필드가 나옵니다.
+명령의 이름은 실제 대상에서 확인해야 합니다. 이 글에는 장치에서 얻지 않은 출력에 주석을 붙여 캡처처럼 제시하지 않습니다. 해당 decoder 계층에서 활성화한 메모리에 따라 target 값이 달라질 수 있으며, `cxl list -M`에 memdev가 있다는 것만으로 host mapping·일관성·System RAM 노출이 모두 완료된 것은 아닙니다.
+
+Cache coherency는 애플리케이션의 동기화도 대신하지 않습니다. 여러 host가 공유한다면 영역의 hardware/software coherency 모델과 별도로 ownership·동기화·데이터 수명 규칙이 필요합니다. CPU 하나에서의 C/C++ atomic 사용법을 검증 없이 다른 host까지 확장하지 않습니다.
 
 ## 자주 하는 실수
 
@@ -98,7 +100,7 @@ expander       # Type 3 memory. accelerator memory(Type 2)면 accelerator
 
 ### "Bias 전환은 단순한 flag"
 
-Type 2 디바이스는 bias를 page 단위로 추적하고, 전환할 때 *Transition Agent가 host 캐시를 정리*합니다. 단순히 bit 하나를 바꾸는 일이 아닙니다.
+Bias를 구현한 장치에서 전환은 host의 cache 상태를 정리하는 절차를 포함합니다. 다만 모든 Type 2가 동적인 bias table·전환을 구현해야 하는 것은 아닙니다.
 
 ### "Snoop filter가 크면 무조건 좋다"
 
@@ -108,7 +110,7 @@ Type 2 디바이스는 bias를 page 단위로 추적하고, 전환할 때 *Trans
 
 - *HDM*은 디바이스 메모리를 *system coherent 주소 공간*에 매핑해 host가 write-back 방식으로 접근하게 한 영역입니다.
 - 영역은 *HDM-H*(host-only, Type 3), *HDM-D*(CXL.cache로 일관성, Type 2), *HDM-DB*(BISnp/BIRsp로 일관성, Type 2·3)로 나뉩니다.
-- *HDM-D*는 page 단위 *Host Bias / Device Bias*로 일관성 비용을 phase별로 나눕니다.
+- HDM-D의 bias 관리는 선택적인 구현 전략입니다. 모든 영역을 Host Bias처럼 처리하는 구현도 허용됩니다.
 - *HDM-DB*는 CXL 3.0의 *BISnp 채널*을 쓰고, 256B flit 디바이스는 반드시 지원해야 합니다.
 - 디바이스는 *inclusive snoop filter*로 필요한 경우에만 BISnp를 보냅니다.
 - Linux는 switch decoder의 `target_type`으로 accelerator(Type 2)와 expander(Type 3) 메모리를 구분합니다.
@@ -121,8 +123,8 @@ Type 2 디바이스는 bias를 page 단위로 추적하고, 전환할 때 *Trans
 
 - [Ch 2: System Architecture — Type 1·2·3·MLD·MH-MLD](/blog/embedded/hardware/cxl/chapter02-system-architecture)
 - [Ch 8: CXL.mem — M2S·S2M·HDM Decoder](/blog/embedded/hardware/cxl/chapter08-cxl-mem) — HDM Decoder의 mapping 구조
-- [HBM·GDDR 심화 Ch 10: CXL.mem 프로토콜 분해](/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol) — Bias·BISnp의 message 흐름
+- [HBM·GDDR 심화 Ch 10: CXL.mem 프로토콜 분해](/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol) — host 명령·응답과 성능 예산 관점
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1·1.1 spec, Linux `drivers/cxl/` 소스, ndctl 문서를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 §2.2·§2.4.4, Linux v6.12 CXL ABI·소스와 ndctl v80 문서를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

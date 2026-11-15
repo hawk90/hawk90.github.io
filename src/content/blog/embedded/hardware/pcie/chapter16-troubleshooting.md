@@ -12,15 +12,19 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"실무 PCIe 문제는 *10가지 패턴*에 거의 다 들어갑니다."** — *device not visible·link training fail·rate downgrade·CE storm·hang/freeze·IOMMU group 분리 안 됨·hot-plug 실패·성능 미달·lane reversal·power budget*. 각 시나리오의 *증상·1단계 진단·일반 원인*을 정리합니다.
+> **"이 장은 PCIe 문제를 조사할 열 가지 출발점을 정리합니다."** — *device not visible·link training fail·rate downgrade·CE storm·hang/freeze·IOMMU group 분리 안 됨·hot-plug 실패·성능 미달·lane reversal·power budget*. 각 시나리오의 *증상·1단계 진단·일반 원인*을 정리합니다.
 
 [Ch 15 Tools](/blog/embedded/hardware/pcie/chapter15-tools)에서 *도구*를 봤습니다. 이 장은 *그 도구로 실 시나리오 진단·해결*하는 케이스북입니다.
 
+다음은 실제 장애 재현 결과가 아니라 조사 순서입니다. 기준은 [Linux v6.12 AER HOWTO](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/pcieaer-howto.rst), [AER sysfs ABI](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-pci-devices-aer_stats)와 PCI source입니다. 단일 증상에서 원인을 확정하거나 자동 reset·설정 변경으로 넘어가지 않습니다.
+
 ## 시나리오 1 — Device가 안 보임
 
-| 증상 | `lspci -D` 에 *없음* |
+| 확인 단계 | 내용 |
+|------|------|
+| 증상 | `lspci -D`에 *없음* |
 | 1단계 | `lspci -tv` topology 확인 |
-| 2단계 | `dmesg | grep -i "pci|link"` 진단 |
+| 2단계 | `dmesg \| grep -iE "pci\|link"` 진단 |
 
 | 가능 원인 | 검증 |
 |----------|------|
@@ -28,13 +32,15 @@ topics: ["embedded", "embedded/hardware"]
 | Bifurcation 잘못 (x16 → x8+x8) | BIOS bifurcation 설정 |
 | Card 미인식 (presence detect 실패) | 물리적 재삽입 |
 | Link Training fail | Recovery·LTSSM 추적 |
-| Bus 번호 충돌 | re-enumeration (`echo 1 > /sys/bus/pci/rescan`) |
+| Bus 번호 충돌 | firmware·bridge의 bus 번호 범위를 먼저 수집. rescan은 설정 변경이며 자동 해결책이 아님 |
 | Card 자체 결함 | 다른 slot 시험 |
 
 ## 시나리오 2 — Link Training Fail
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | `dmesg`에 *"Link training failed"* 또는 *LTSSM Recovery 반복* |
-| 1단계 | `lspci -vv | grep "LnkSta"` 확인 |
+| 1단계 | `lspci -vv \| grep "LnkSta"` 확인 |
 | 2단계 | 신호 무결성 검토 |
 
 | 원인 | 해결 |
@@ -47,8 +53,10 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 시나리오 3 — Link Downgrade (Gen X → Gen Y)
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | LnkCap=8 GT/s·LnkSta=2.5 GT/s |
-| 1단계 | `lspci -vv | grep "LnkSta"` |
+| 1단계 | `lspci -vv \| grep "LnkSta"` |
 
 | 원인 | 검증 |
 |------|------|
@@ -59,20 +67,24 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 시나리오 4 — Correctable Error Storm
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | dmesg에 *AER CE 폭주*, `aer_dev_correctable` counter 급증 |
-| 1단계 | `cat /sys/kernel/debug/pci/<BDF>/aer_dev_correctable` |
+| 1단계 | `cat /sys/bus/pci/devices/<BDF>/aer_dev_correctable` |
 
 | 원인 | 해결 |
 |------|------|
 | Cable 노이즈·접점 산화 | 재삽입·교체 |
 | Power supply noise | filter capacitor 점검 |
 | Cross-talk (인접 card) | slot 분리 |
-| Replay 빈도 ↑ | Replay Timer 조정 |
+| Replay 빈도 ↑ | 오류 종류·발생 속도·부하와 link 조건을 비교 |
 
-CE 자체는 자동 복구, *frequent CE는 임박 fault 신호*.
+CE는 protocol상 복구되는 분류입니다. 빈도가 높으면 조사하되 단일 counter로 임박 고장을 확정하지 않습니다.
 
 ## 시나리오 5 — Hang / Freeze
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | System unresponsive·`dmesg`에 *completion timeout·UE fatal* |
 | 1단계 | sysrq trigger·crashdump |
 
@@ -83,53 +95,61 @@ CE 자체는 자동 복구, *frequent CE는 임박 fault 신호*.
 | IOMMU page fault loop | PRI handler 결함 |
 | Driver bug | softlockup detect |
 
-복구: *FLR → secondary bus reset → power cycle*. *RAS log 분석*이 *root cause*.
+복구는 영향 범위·장치 지원·서비스 I/O 중단 조건을 확인해 선택합니다. Reset 순서를 고정해서 실행하거나 성공한 reset을 원인 확인으로 간주하지 않습니다.
 
 ## 시나리오 6 — IOMMU Group 분리 안 됨 (VFIO)
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | `/sys/kernel/iommu_groups/N/`에 *여러 device* |
-| 1단계 | `lspci -vv | grep ACS` 확인 |
+| 1단계 | `lspci -vv \| grep ACS` 확인 |
 
 | 원인 | 해결 |
 |------|------|
 | Switch downstream port ACS 미지원 | switch 교체 |
-| ACS bits 비활성화 | `pci=force_floppy_to_high_dma=Off`·BIOS |
+| ACS bits 비활성화 | 실제 ACS control·firmware 정책과 해당 kernel의 지원 옵션 확인 |
 | Vendor 펌웨어 한계 | firmware update |
 | Multi-function device | function 분리 불가 (펌웨어) |
 
-대안: *ACS override patch* (security 위험), *별도 slot 사용*.
+대체 slot·topology의 실제 격리와 group 구성을 비교합니다. 소프트웨어로 group만 나누는 override는 하드웨어 격리를 추가하지 않습니다.
 
 ## 시나리오 7 — Hot-plug 실패
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | Card 삽입해도 *probe 안 됨* |
-| 1단계 | `dmesg | grep pciehp` |
+| 1단계 | `dmesg \| grep pciehp` |
 
 | 원인 | 해결 |
 |------|------|
 | Slot이 *Hot-Plug Capable* 아님 | hardware 한계 |
 | BIOS·UEFI에서 hot-plug disable | BIOS option |
-| `pciehp` 모듈 미로드 | `modprobe pciehp` |
+| `pciehp` 모듈 미로드 | kernel의 built-in·module 설정과 firmware의 제어권 확인 |
 | Power budget 한계 | `Slot Capabilities Power Limit` 검증 |
 | ACPI HOTPLUG 결함 | DSDT analysis |
 
 ## 시나리오 8 — 성능 미달 (Throughput 부족)
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | NVMe random IOPS 또는 NIC pps가 *예상 이하* |
-| 1단계 | `lspci -vv | grep "MaxPayload\|MaxReadReq"` |
+| 1단계 | `lspci -vv \| grep "MaxPayload\|MaxReadReq"` |
 
 | 원인 | 해결 |
 |------|------|
 | MaxPayload 작음 (default 128) | driver·BIOS 설정 |
 | MaxReadReq 작음 | driver tuning |
-| ASPM L1 진입 빈번 | `pcie_aspm=off` |
+| ASPM L1 진입 빈번 | 실제 절전 전환과 지연의 상관관계를 먼저 측정 |
 | IRQ affinity 잘못 | `irqbalance`·driver affinity API |
 | NUMA mismatch | `numactl` |
-| TLP coalescing 미설정 | NIC: tx/rx coalesce |
+| TLP coalescing 미설정 | NIC interrupt coalescing과 PCIe TLP packing을 구분 |
 
 ## 시나리오 9 — Lane Reversal·Width 한계
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | LnkCap x16 인데 LnkSta x8 |
-| 1단계 | `lspci -vv | grep "LnkSta"` |
+| 1단계 | `lspci -vv \| grep "LnkSta"` |
 
 | 원인 | 해결 |
 |------|------|
@@ -140,8 +160,10 @@ CE 자체는 자동 복구, *frequent CE는 임박 fault 신호*.
 
 ## 시나리오 10 — Power Budget
 
+| 확인 단계 | 내용 |
+|------|------|
 | 증상 | Card 인식되지만 *power on 실패* |
-| 1단계 | `dmesg | grep "Power Limit"` |
+| 1단계 | `dmesg \| grep "Power Limit"` |
 
 | 원인 | 해결 |
 |------|------|
@@ -151,6 +173,10 @@ CE 자체는 자동 복구, *frequent CE는 임박 fault 신호*.
 | BIOS Power Limit 설정 | BIOS option |
 
 GPU·HPC accelerator에서 흔함. 카드 specs *TDP* 확인.
+
+## 증거를 보존하고 다음 단계로 넘어가기
+
+동일 BDF가 reset·재열거 뒤 다른 장치를 가리키지 않는지 ID·topology·firmware를 같이 기록합니다. AER 속성 부재나 권한 오류를 0으로 처리하지 않고, mask·ratelimit·overflow와 관찰 시작 시점을 남깁니다. 설정을 하나 바꿔 비교할 때는 부하·온도·전원·연결 조건을 유지하고, 증상이 사라져도 반복 검증 전에는 원인을 확정하지 않습니다. 이 글에서는 장치 설정이나 reset을 실행하지 않았습니다.
 
 ## 추가 진단 도구 모음
 
@@ -166,9 +192,9 @@ GPU·HPC accelerator에서 흔함. 카드 specs *TDP* 확인.
 | 1단계 | 2단계 |
 |-------|------|
 | `lspci -D`로 *visible 확인* | visible면 다음 |
-| `lspci -vv | grep "LnkSta"`로 *link 상태* | 정상이면 다음 |
-| `dmesg | grep -E "pci|aer"`로 *kernel log* | error 있으면 분석 |
-| `cat /sys/kernel/debug/pci/<BDF>/aer_*`로 *counter* | CE/UE 분류 |
+| `lspci -vv \| grep "LnkSta"`로 *link 상태* | 정상이면 다음 |
+| `dmesg \| grep -E "pci\|aer"`로 *kernel log* | error 있으면 분석 |
+| `cat /sys/bus/pci/devices/<BDF>/aer_*`로 *counter* | CE/UE 분류 |
 | Driver-specific tool로 *application-level* | NVMe smart·ethtool 등 |
 | 마지막 *Protocol analyzer* | hardware 추적 |
 
@@ -197,9 +223,9 @@ GPU·HPC accelerator에서 흔함. 카드 specs *TDP* 확인.
 ## 정리
 
 - 10가지 패턴 — *device not visible·link training fail·downgrade·CE storm·hang·IOMMU group·hot-plug·성능·lane·power*.
-- 1단계 도구: *lspci -vv·dmesg·`/sys/kernel/debug/pci/`*.
+- 1단계 도구: *lspci -vv·dmesg·AER sysfs 통계*.
 - *2단계*: hardware level (signal integrity·analyzer).
-- *AER counter 보존*이 *근본 원인 추적*의 핵심.
+- AER counter는 시간 구간·부하·reset 여부·로그 손실 여부와 함께 보존합니다.
 - *Driver·BIOS·hardware*의 *세 단계 검증*이 일반.
 
 ## 다음 편

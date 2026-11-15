@@ -2,7 +2,7 @@
 title: "Ch 10: ARB/MUX — 세 프로토콜의 PHY 다중화"
 slug: "embedded/hardware/cxl/chapter10-arb-mux"
 date: 2026-05-16T09:10:00
-description: "같은 PHY에 CXL.io·CXL.cache·CXL.mem을 시분할로 흘리는 layer."
+description: "CXL.io와 cachemem 링크 계층의 중재·vLSM·ALMP를 CXL 3.1 규칙과 Linux 관측 범위로 구분합니다."
 series: "CXL 4.0 Internals"
 seriesOrder: 10
 tags: [cxl, arb-mux, vlsm, almp, multiplexing]
@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## ARB/MUX의 위치
 
-CXL 3.1 spec의 Flex Bus 계층 구조(§5.0, Figure 5-1):
+[CXL 3.1 §5.0, Figure 5-1](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)의 계층 구조입니다. 시리즈 제목은 4.0이지만 이 절의 규범적 설명은 3.1 기준이며 4.0 전체 구현·시험 결과가 아닙니다.
 
 | 계층 | 역할 |
 |-------|------|
@@ -33,7 +33,7 @@ CXL 3.1 spec의 Flex Bus 계층 구조(§5.0, Figure 5-1):
 
 ## Flit 경계 단위 중재
 
-ARB/MUX는 slot을 채우지 않습니다. slot 구성은 링크 계층 몫이고, ARB/MUX는 *완성된 flit 단위*로 어느 쪽을 보낼지 고릅니다. 프로토콜 사이 interleave는 68B Flit mode에서 528-bit flit 경계, 256B Flit mode에서 256B flit 경계로 일어납니다(§5.3).
+ARB/MUX는 slot을 채우지 않습니다. slot 구성은 링크 계층 몫이고, ARB/MUX는 flit 경계에서 어느 link protocol을 보낼지 선택합니다. 전부 수신·조립이 끝난 256 B를 반드시 store-and-forward한다는 의미는 아닙니다. 프로토콜 사이 interleave는 68B Flit mode에서 528-bit flit 경계, 256B Flit mode에서 256B flit 경계로 일어납니다(§5.3). 528 bit는 Protocol ID 2 B를 제외한 66 B link-layer flit이므로 68 B 전체와 세는 경계가 다릅니다.
 
 ## 중재 정책 — 구현 정의 + 가중치 레지스터
 
@@ -46,7 +46,7 @@ spec은 중재 정책을 *구현에 맡깁니다*. 상위 프로토콜의 타이
 | ARB/MUX Arbitration Control Register for CXL.io | 180h | bit 7:4 — CXL.io Weighted Round Robin 가중치 |
 | ARB/MUX Arbitration Control Register for CXL.cache and CXL.mem | 1C0h | bit 7:4 — CXL.cache·CXL.mem Weighted Round Robin 가중치 |
 
-두 필드 모두 기본값은 0h입니다. 그러니 "snoop이 1순위, CXL.io가 꼴찌" 같은 고정 우선순위는 spec에 없습니다. 중재는 *CXL.io 대 CXL.cachemem*의 두 갈래 사이에서 일어나고, 그 비율은 이 가중치와 구현이 정합니다.
+표의 offset은 Component Register Range 전체가 아니라 ARB/MUX register space의 base E000h를 기준으로 합니다. 두 필드 모두 기본값은 0h입니다. 0을 무조건 대역폭 0 또는 특정 공정성 보장으로 해석하지 않습니다. 그러니 "snoop이 1순위, CXL.io가 꼴찌" 같은 고정 우선순위는 spec에 없습니다. 중재는 *CXL.io 대 CXL.cachemem*의 두 갈래 사이에서 일어나고, 그 비율은 이 가중치와 구현이 정합니다.
 
 ## vLSM — Virtual Link State Machine
 
@@ -80,7 +80,7 @@ ALMP는 ARB/MUX끼리 주고받는 제어 패킷입니다(§5.2).
 | Status Synchronization | 링크 복구 뒤 양 끝 vLSM 상태 맞추기. *68B Flit mode 전용* (§5.1.2.3) |
 | L0p 폭 협상 | 256B Flit mode에서 L0p 링크 폭 협상 (§5.1.2.5) |
 
-256B Flit mode에서는 replay buffer가 Physical Layer에 있어, ALMP도 FEC·CRC 보호를 받고 replay 대상이 됩니다. 그래서 ALMP가 상대 ARB/MUX에 오류 없이 도착함이 보장되고, 68B의 Status Synchronization이 필요 없습니다.
+256B Flit mode에서는 replay buffer가 Physical Layer에 있어, ALMP도 FEC·CRC 보호를 받고 replay 대상이 됩니다. 이 보호·replay 모델에서 68B와 같은 Status Synchronization을 사용하지 않는다는 설명입니다. fatal link failure나 복구 실패까지 없어졌다는 무조건적 전달 보장은 아닙니다.
 
 참고로 *어떤 프로토콜을 켤지*(CXL.io·cache·mem) 정하는 건 ALMP가 아닙니다. Physical Layer가 링크 트레이닝 중 modified TS1/TS2 Ordered Set으로 하는 *alternate protocol negotiation* 몫입니다(§6.4.1).
 
@@ -106,13 +106,13 @@ L0p는 CXL 4.0에서 새로 생긴 것이 아닙니다. CXL 3.1 spec에 이미 �
 
 ## Linux에서 보이는 것
 
-mainline 커널의 `drivers/cxl/`에는 ARB/MUX 레지스터, vLSM, ALMP를 다루는 코드가 없습니다(2026-10 기준 소스 검색). `cxl monitor`(ndctl)는 커널이 내보내는 CXL *trace event*를 JSON으로 보여 주는 도구라 vLSM 상태를 보여 주지 않습니다. ARB/MUX 동작을 보려면 플랫폼·디바이스 벤더 도구나 프로토콜 분석기가 필요합니다.
+이 글의 고정 기준인 Linux v6.12 `drivers/cxl/` 검색에서는 ARB/MUX·ALMP·vLSM의 전용 제어·상태 구현을 확인하지 못했습니다. 이를 모든 커널·driver·firmware에 대한 부재 증명으로 확대하지 않습니다. [ndctl v80 `cxl-monitor` 문서](https://github.com/pmem/ndctl/blob/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3/Documentation/cxl/cxl-monitor.txt)는 커널 trace event를 JSON으로 내보내는 기능을 설명하며, 이것이 vLSM 상태를 직접 읽는 API는 아닙니다. ARB/MUX 동작을 보려면 플랫폼·디바이스 벤더 도구나 프로토콜 분석기가 필요합니다.
 
 ## 자주 하는 실수
 
 ### "ARB/MUX가 메시지를 slot에 채운다"
 
-*아닙니다*. slot 구성은 링크 계층이 하고, ARB/MUX는 완성된 flit 단위로 CXL.io와 CXL.cachemem 사이를 고릅니다(§5.3).
+*아닙니다*. slot 구성은 링크 계층이 하고, ARB/MUX는 정해진 flit 경계에서 CXL.io와 CXL.cachemem 사이를 고릅니다(§5.3).
 
 ### "spec이 프로토콜 우선순위를 정해 둔다"
 
@@ -146,4 +146,4 @@ spec의 vLSM 결정 표는 두 개(vLSM[0]·vLSM[1])를 놓고 설명하고, L0p
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1 spec(§5, §8.2.5), Linux `drivers/cxl/` 소스, ndctl 문서를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 spec(§5, §8.2.5), Linux v6.12 `drivers/cxl/` 소스와 ndctl v80 문서를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
