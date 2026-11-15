@@ -27,6 +27,7 @@ SMC는 회사 대표 전화번호와 비슷합니다. 번호 하나로 걸지만
 | 호출 규약 | 30 | `FUNCID_CC_SHIFT 30`, `SMC_64 1`, `SMC_32 0` | 1 = SMC64, 0 = SMC32 |
 | OEN(Owning Entity Number) | 29:24 | `FUNCID_OEN_SHIFT 24`, `FUNCID_OEN_MASK 0x3f` | 어느 "부서"인가 |
 | 예약 | 23:17 | `FUNCID_FC_RESERVED_SHIFT 17`, 폭 7 | fast call에서는 0이어야 함 |
+| SVE hint | 16 | `FUNCID_SVE_HINT_SHIFT 16` | SMCCC v1.3 힌트. `sync_handler()`가 디스패치 전에 지움 |
 | 함수 번호 | 15:0 | — | 부서 안의 기능 |
 
 OEN 값도 같은 헤더에 있습니다. `OEN_ARM_START 0`(Arm 아키텍처 호출), `OEN_SIP_START 2`(SoC 제조사), `OEN_STD_START 4`(PSCI 같은 표준 서비스) 등이고, 전체 범위는 `OEN_LIMIT 64`입니다. 예를 들어 `PSCI_VERSION`은 `0x84000000`이라 bit 31 = 1(fast), bit 30 = 0(SMC32), OEN = 4입니다.
@@ -45,7 +46,7 @@ TF-A 소스에는 `DECLARE_RT_SVC()`가 여러 곳에 있습니다. v2.15.0 트�
 000000000e0bcf58 b rt_svc_descs_indices
 ```
 
-두 개, 각각 0x20바이트입니다. 이 빌드에는 `SPD`도 SDEI도 넣지 않았으므로 나머지 선언은 링크되지 않았습니다(`bl31.elf`에 `sdei`가 들어간 심볼이 하나도 없음). 두 descriptor의 원본 선언은 다음과 같습니다.
+두 개, 각각 0x20바이트입니다. 이 빌드에는 `SPD`를 넣지 않았고, `services/el3/ven_el3_svc.c`는 `bl31/bl31.mk`에서 `ENABLE_PMF`나 `USE_DEBUGFS`가 켜질 때만 들어가며, SiP 서비스는 플랫폼마다 따로 넣는 파일이라 나머지 선언은 링크되지 않았습니다. SDEI는 자기 descriptor가 없고 `std_svc` 안에서 `#if SDEI_SUPPORT`로 나뉘는데, 이 빌드에서는 그것도 꺼져 있습니다(`bl31.elf`에 `sdei`가 들어간 심볼이 하나도 없음). 두 descriptor의 원본 선언은 다음과 같습니다.
 
 ```c
 /* services/std_svc/std_svc_setup.c:269 */

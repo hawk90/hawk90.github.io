@@ -67,6 +67,7 @@ Main header: OK
 Backup header: OK
 Main partition table: ERROR
 Backup partition table: OK
+...
 ```
 
 1 KiB는 LBA 2입니다. LBA 1의 GPT 헤더는 살아남았고, LBA 2부터 시작하는 파티션 항목이 `flash.bin`에 덮여 CRC가 깨졌습니다. GPT는 디스크 끝에 백업을 두므로 `sgdisk`는 백업을 읽어 버텼습니다. 하지만 이 상태로 OS가 GPT를 "복구"하면 이번에는 백업 기준으로 주 GPT를 다시 써서 `flash.bin`의 앞부분을 덮게 됩니다. 부트 이미지와 파티션 테이블이 서로를 번갈아 망가뜨리는 구조입니다.

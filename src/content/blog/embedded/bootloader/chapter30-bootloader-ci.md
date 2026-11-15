@@ -32,7 +32,7 @@ v2024.04 `.gitlab-ci.yml`의 실행 이미지는 `trini/u-boot-gitlab-ci-runner:
 
 `tools/buildman/cmdline.py`에서 각 옵션의 뜻을 찾으면 `-P`는 "Use an O= (output) directory per board", `-E`는 "Treat all compiler warnings as errors", `-W`는 "Return success even if there are warnings", `-M`은 "Tell binman to allow missing blobs and generate fake ones as needed"입니다. 마지막 `-M`이 중요합니다. [Ch 26](/blog/embedded/bootloader/chapter26-ddr-training)에서 DDR training firmware 없이 만든 i.MX8MM 이미지는 SPL 안의 firmware 크기가 0이었습니다. CI의 전체 빌드도 같은 조건이므로, 여기서 통과했다는 것은 "그 보드의 이미지가 만들어진다"는 뜻이지 "부팅된다"는 뜻이 아닙니다.
 
-**보드별 test.py.** `.buildman_and_testpy_template`을 쓰는 job이 `TEST_PY_BD` 값만 바꿔 38개 있습니다. 각 job은 그 보드 하나를 빌드한 뒤 `test/py`를 돌립니다.
+**보드별 test.py.** `.buildman_and_testpy_template`을 쓰는 job이 `TEST_PY_BD`(38개 모두)와 `TEST_PY_ID`·`OVERRIDE`·`TEST_PY_TEST_SPEC` 같은 변수만 바꿔 38개 있습니다. 각 job은 그 보드 하나를 빌드한 뒤 `test/py`를 돌립니다.
 
 ```bash
 tools/buildman/buildman -o ${UBOOT_TRAVIS_BUILD_DIR} -w -E -W -e \
@@ -97,7 +97,7 @@ t evil.itb  b 'source 0x50000000' | grep -q 'ATTACKER' && ng ... || ok ...
 t evil.itb  c 'setenv verify n; source 0x50000000' | grep -q 'ATTACKER' && ng ... || ok ...
 ```
 
-첫 묶음의 두 로그는 같은 `imx8mm_evk_defconfig`를 `CROSS_COMPILE=aarch64-elf-`를 주고, 그리고 주지 않고 처리한 결과입니다. 둘째 묶음은 [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)의 i.MX8MM 빌드에서 SPL 크기를 읽습니다. 4096 B 기준은 이 실험에서 정한 값입니다. 셋째 묶음은 [Ch 29](/blog/embedded/bootloader/chapter29-distro-boot)의 FIT script 세 개를 QEMU에서 실행합니다(`t`는 QEMU를 띄워 명령을 보내고 콘솔 출력을 돌려주는 함수).
+첫 묶음의 두 로그는 같은 `imx8mm_evk_defconfig`를 `make O=<dir> CROSS_COMPILE=aarch64-elf- imx8mm_evk_defconfig`와 `make O=<dir> imx8mm_evk_defconfig`로 처리한 결과입니다. 둘째 묶음은 [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)의 i.MX8MM 빌드에서 SPL 크기를 읽습니다. 4096 B 기준은 이 실험에서 정한 값입니다. 셋째 묶음은 [Ch 29](/blog/embedded/bootloader/chapter29-distro-boot)의 FIT script 세 개를 QEMU에서 실행합니다(`t`는 QEMU를 띄워 명령을 보내고 콘솔 출력을 돌려주는 함수).
 
 실행 결과입니다.
 

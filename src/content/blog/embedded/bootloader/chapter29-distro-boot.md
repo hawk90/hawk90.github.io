@@ -115,8 +115,10 @@ configuration 서명을 확인하는 `fit_config_verify()`는 **이미지 이름
 
 ```text
 => bootm 0x50000000
+## Loading kernel from FIT Image at 50000000 ...
    Using 'conf-1' configuration
    Verifying Hash Integrity ... sha256,rsa2048:dev-  error!
+Verification failed for '<NULL>' hash node in 'conf-1' config node
 Failed to verify required signature 'key-dev'
 Bad Data Hash
 ERROR -2: can't get kernel image!
@@ -124,9 +126,15 @@ ERROR -2: can't get kernel image!
 
 ```text
 => setenv verify n;bootm 0x50000000
+## Loading kernel from FIT Image at 50000000 ...
    Using 'conf-1' configuration
+   ...
+## Loading ramdisk from FIT Image at 50000000 ...
    Using 'conf-1' configuration
+   ...
+## Loading fdt from FIT Image at 50000000 ...
    Using 'conf-1' configuration
+   ...
 Starting kernel ...
 [    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
 ```
@@ -151,7 +159,7 @@ Starting kernel ...
 ## 정리
 
 - v2024.04 i.MX8MM EVK는 `run distro_bootcmd`(스크립트, 기본 변수 43개), qemu_arm64는 `bootflow scan -lb`(bootstd, 21개)입니다. `DISTRO_DEFAULTS`는 "(deprecated)"입니다.
-- 두 구현 모두 `/`·`/boot/`에서 `extlinux/extlinux.conf`, 그다음 `boot.scr.uimg`·`boot.scr`, 마지막으로 EFI를 찾습니다.
+- 옛 스크립트는 `/`·`/boot/`마다 `extlinux/extlinux.conf`, 그다음 `boot.scr.uimg`·`boot.scr`을 찾고 마지막으로 EFI를 시도합니다. bootstd는 같은 파일을 찾지만 순서가 다릅니다. 전역 bootmeth `efi_mgr`을 먼저 훑고([Ch 14](/blog/embedded/bootloader/chapter14-bootflow-bootmeth)의 `glob` 항목), 이후 bootmeth마다 모든 prefix를 차례로 봅니다.
 - legacy `boot.scr`의 CRC는 1바이트 손상(`Bad data crc`)은 잡지만, 공격자가 새로 만든 스크립트는 막지 못합니다.
 - 서명한 FIT script는 `source <addr>`에서는 공격자 스크립트를 막지만, `source <addr>:script-1`은 이미지 해시만 봐서 통과시킵니다.
 - 환경 변수 `verify=n`은 `source`와 `bootm` 모두에서 서명 검사를 끕니다. 공격자 키 FIT가 `required = "conf"` 키가 있는 상태로 부팅됐습니다.
