@@ -1,8 +1,8 @@
 ---
-title: "ESP32-C3 분석 — Espressif가 Xtensa에서 RISC-V로 갈아탄 이유"
+title: "ESP32-C3 개요 — RISC-V 코어·주변장치·ESP-IDF 시작"
 slug: "embedded/riscv/esp32-c3-mastering/chapter01-overview"
 date: 2026-05-20T09:01:00
-description: "Espressif가 Tensilica Xtensa에서 RISC-V로 전환한 첫 SoC. WiFi 4 + BLE 5.0, 32-bit RV32IMC."
+description: "ESP32-C3의 RISC-V·무선·주변장치 지원을 확인하고 ESP-IDF v5.4.2 기준으로 개발 환경을 시작합니다."
 series: "ESP32-C3 Mastering"
 seriesOrder: 1
 tags: [esp32-c3, risc-v, mcu, wifi, ble]
@@ -12,51 +12,36 @@ topics: ["embedded", "embedded/riscv"]
 
 ## 한 줄 요약
 
-> **"ESP32-C3은 Espressif의 *첫 RISC-V SoC*이자, ESP8266의 *진짜 후계자*입니다."** Xtensa LX7을 버리고 RV32IMC + PMP를 채택한 결정은 단순한 ISA 교체가 아니라, *로열티 제로의 자체 코어 IP* 전략의 시작이었습니다.
+> **ESP32-C3은 단일 RISC-V 코어와 2.4 GHz Wi-Fi·Bluetooth LE를 결합한 SoC입니다.** 모델 이름이 비슷해도 기존 ESP32의 주변장치·코어 수·핀 배치를 그대로 가정하면 안 됩니다.
 
-ESP32(원조)가 2016년에 나왔을 때 사람들이 가장 먼저 묻는 질문은 늘 같았습니다. "왜 ARM이 아니라 Xtensa인가?" 답은 *비용*입니다. Espressif는 Tensilica로부터 LX6/LX7 코어 IP를 라이선싱해 썼고, 이는 ARM Cortex-M 라이선스보다 *훨씬 저렴*했습니다. 그러나 Tensilica가 Cadence에 인수되면서 *라이선스 비용이 흔들리기 시작*했습니다. 2020년 말 발표된 ESP32-C3는 *그 흔들림에 대한 답*입니다.
+이 시리즈의 소프트웨어 기준은 **ESP-IDF v5.4.2, commit `f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0`**입니다. 특정 릴리스를 현재 제품의 최적 선택으로 권고하는 의미는 아닙니다. 아래 hello_world는 API 사용 예이며 실제 보드의 전력·무선 처리량을 측정한 결과가 아닙니다.
 
-이 장에서는 ESP32-C3의 전반적인 포지셔닝을 다룹니다. *왜 RISC-V*였는지, *무엇이 같고 무엇이 다른지*, 그리고 이 시리즈가 어떤 12개 챕터로 진행될지를 정리합니다. 본격적인 코어·메모리·페리퍼럴은 다음 장부터 들어갑니다.
+기업의 비공개 IP 계약 비용과 ISA 전환 동기는 공개 근거 없이 단정하지 않습니다. 기존의 Cadence 인수에 따른 비용 변동·칩당 수십 센트 절감·대부분 코드95% 호환 주장은 근거를 확인하지 못해 제외했습니다.
 
 ## ESP32 vs ESP32-C3 — 핵심 차이
 
-이름이 비슷해 헷갈리지만, 두 칩은 *완전히 다른 코어 아키텍처*입니다. 같은 SDK(ESP-IDF)를 쓰는 덕에 *애플리케이션 코드는 거의 호환*되지만, 어셈블리·linker script·startup·인터럽트 핸들러는 *다시 짜야* 합니다.
+이름이 비슷해 헷갈리지만, 두 칩은 *완전히 다른 코어 아키텍처*입니다. ESP-IDF의 공통 API를 사용할 수 있지만 지원 주변장치·컴포넌트 설정·메모리·핀·ISA 의존 코드를 점검해야 합니다. SDK가 제공하는 startup·linker script를 사용자마다 다시 구현해야 하는 것은 아닙니다.
 
 | 항목 | ESP32 (원조) | ESP32-C3 |
 |------|-------------|---------|
 | 코어 | Xtensa LX6 dual-core | RV32IMC single-core |
 | 클럭 | 240 MHz | 160 MHz |
 | SRAM | 520 KB | 400 KB |
-| Flash | 외장 SPI (최대 16 MB) | 4 MB on-package (대부분 모델) |
+| Flash | 외장 SPI (최대 16 MB) | part number별 flash 유무·용량 확인 |
 | WiFi | 802.11b/g/n (WiFi 4) | 802.11b/g/n (WiFi 4) |
 | BLE | BLE 4.2 | BLE 5.0 (LE 1M/2M/Coded) |
 | Classic BT | 있음 (EDR) | 없음 |
 | GPIO | 34 | 22 (GPIO0~GPIO21) |
-| ADC | 18 ch (12-bit) | 6 ch (12-bit, ADC1만) |
+| ADC | 18 ch (12-bit) | ADC1 5채널 + ADC2 1채널; API 제약 별도 |
 | Touch | 10 ch | 없음 (C3는 미지원) |
 | Hall sensor | 있음 | 없음 |
-| Hardware crypto | AES/SHA/RSA | AES/SHA/RSA + ECC (HMAC) |
-| 가격대 (모듈) | \$2.5~\$4 | \$1.5~\$2.5 |
+| Hardware crypto | AES/SHA/RSA | AES/SHA/RSA·HMAC·Digital Signature |
 
-C3는 *기능을 덜고 가격을 낮춘* 칩입니다. ESP32의 *센서 허브* 기능(Hall, Touch, DAC)이 빠진 대신, *RISC-V 코어로 라이선스 비용 절감 + BLE 5.0*을 얻었습니다.
+이 표는 핀 호환이나 기능의 상위 호환을 뜻하지 않습니다. Flash는 칩 내 package와 모듈 PCB의 별도 flash를 구분하고, 데이터시트의 part number·module schematic을 확인합니다. ADC는 두 unit에 걸쳐 있지만 대상 revision과 ESP-IDF driver의 지원 조건을 따릅니다. HMAC은 ECC 가속기의 다른 이름이 아닙니다.
 
-> **메모**: ESP32-C3는 ESP8266의 시장(WiFi 단독, 단일 코어, 저가)을 대체합니다. ESP32의 시장(dual-core + 풍부한 페리퍼럴)은 ESP32-S3가 잇습니다.
+## RISC-V를 읽는 기준
 
-## 왜 RISC-V인가
-
-Espressif가 RISC-V로 전환한 이유는 *세 가지*로 요약할 수 있습니다.
-
-### 1. 로열티 제로
-
-RISC-V는 *오픈 ISA*입니다. Tensilica처럼 코어 IP에 라이선스를 지불할 필요가 *아예 없습니다*. ARM Cortex-M처럼 *코어당 라이선스 + 출하당 로열티* 모델도 없습니다. 칩 한 개당 *수십 센트*의 비용이 그대로 절감됩니다.
-
-### 2. 코어 IP 자유도
-
-Espressif는 자체 코어를 *설계*했습니다. 표준 RV32IMC를 베이스로 *PMP·CLIC 인터럽트 컨트롤러·perf counter*를 자체 구현했습니다. ARM Cortex-M은 *NVIC를 마음대로 못 바꾸지만*, RISC-V는 *인터럽트 컨트롤러까지 자유*입니다.
-
-### 3. 생태계의 폭
-
-GCC, Clang, LLVM이 모두 RISC-V를 *1급 시민*으로 지원합니다. OpenOCD, GDB, Rust, Zig, MicroPython 등도 마찬가지입니다. ARM 생태계만큼 *성숙하지는 않지만*, 빠르게 따라잡고 있고 *오픈소스 비중이 더 높습니다*.
+RISC-V는 ISA 규격이며 구현 IP의 계약과 비용은 별개의 문제입니다. C3용 바이너리는 RV32IMC 계열 toolchain으로 빌드하고 Xtensa 어셈블리를 그대로 재사용하지 않습니다. ISA와 주변장치 차이를 구분하면 core port 문제와 pin/driver 문제를 나누어 찾을 수 있습니다. 실제 toolchain 옵션은 고정한 ESP-IDF build의 compiler command에서 확인합니다.
 
 ## RV32IMC + PMP — 한눈에
 
@@ -66,10 +51,10 @@ C3의 ISA는 *RV32IMC*입니다. 이를 풀면 다음과 같습니다.
 RV32IMC = RV32I + M + C
   RV32I — 32-bit base integer instruction set
   M     — Integer multiplication and division
-  C     — Compressed 16-bit instructions (코드 밀도 향상)
+  C     — Compressed 16-bit instructions
 ```
 
-여기에 *PMP*(Physical Memory Protection)가 더해집니다. PMP는 ARM의 MPU와 비슷한 개념인데, RISC-V 표준 사양으로 정의되어 있어 *cross-vendor 이식성*이 좋습니다.
+여기에 *PMP*(Physical Memory Protection)가 더해집니다. PMP는 물리 주소 영역의 접근 권한을 제어합니다. C3에는 표준과 다른 overlapping-region 제약도 있어 다른 RISC-V 구현의 설정을 그대로 이식하지 않습니다.
 
 ```text
 PMP entry (8 bits per cfg + 4 bytes per addr)
@@ -84,7 +69,7 @@ PMP entry (8 bits per cfg + 4 bytes per addr)
   pmpaddrN: 32-bit base address (shifted >> 2)
 ```
 
-C3는 *16 entries*의 PMP를 갖습니다. 부트로더가 *Flash·SRAM·RTC*에 대해 *기본 권한*을 설정하고, 사용자 코드가 *secure boot* 시나리오에서 활용합니다. 자세한 PMP 설정은 Ch 2에서 다룹니다.
+기준 ESP-IDF의 `components/esp_hw_support/port/esp32c3/cpu_region_protect.c`는 16개 entry로 비중첩 TOR 영역 등을 설정하고 lock을 사용합니다. 이는 secure boot의 서명 검증과 다른 보호 경로입니다. Ch 2에서 설정과 접근 모드의 차이를 다룹니다.
 
 ## WiFi 4 + BLE 5.0 — 무선의 두 축
 
@@ -96,12 +81,12 @@ WiFi 사양:
 
 - **Standard**: IEEE 802.11 b/g/n
 - **Band**: 2.4 GHz (5 GHz 미지원)
-- **Throughput**: 최대 150 Mbps (HT40)
+- **전송률**: PHY link rate와 application 처리량을 구분
 - **Security**: WPA/WPA2/WPA3-Personal, WPA2/3-Enterprise
 - **Antenna**: 1T1R (single antenna)
-- **Tx power**: +20 dBm (조정 가능)
+- **Tx power**: 변조·규제·설정별 데이터시트 조건 확인
 
-WiFi 5/6은 지원하지 않습니다. *IoT 디바이스*에 5 GHz와 MIMO는 *과잉*이라는 판단입니다. 대부분의 가정용 라우터는 2.4 GHz를 *동시 송출*하므로 호환성에 문제가 없습니다.
+5 GHz 전용 AP에는 연결할 수 없습니다. 보안 방식·채널·국가 설정과 provisioning을 실제 AP에서 확인합니다.
 
 ### BLE 5.0
 
@@ -109,42 +94,27 @@ BLE 사양:
 
 - **Standard**: Bluetooth 5.0 (LE only, Classic BT 없음)
 - **PHY**: LE 1M, LE 2M, LE Coded (S=2, S=8)
-- **Range**: Coded PHY로 long-range 가능 (~1 km LoS)
+- **Range**: 안테나·출력·PHY·간섭·배치에 따라 측정
 - **Roles**: Central / Peripheral / Broadcaster / Observer
-- **Mesh**: Bluetooth Mesh (NimBLE 스택)
+- **Mesh**: ESP-IDF의 별도 ESP-BLE-MESH 구성과 host 선택 확인
 
-LE 2M PHY로 *throughput 2배*, Coded PHY로 *거리 4배*를 얻습니다. 둘 다 BLE 5.0의 핵심 추가 기능입니다.
+PHY 속도의 차이를 application 처리량이나 거리의 고정 배수로 읽지 않습니다. 패킷 크기·connection interval·재전송·공존 설정까지 포함해 측정합니다.
 
 ## 메모리·전력·패키지
 
-메모리:
+실제 사용 가능한 heap은 cache·정적 데이터·task stack·무선 stack·linker 배치에 따라 달라집니다. SRAM 총량을 그대로 application 예산으로 쓰거나 고정320 KB를 보장하지 않습니다. Flash 유무와 용량, 노출 GPIO도 칩 part number와 모듈 회로에서 확인합니다.
 
-- **SRAM**: 400 KB (실제 사용 가능 약 320 KB, 나머지는 ROM cache 등)
-- **ROM**: 384 KB (boot ROM)
-- **Flash**: 4 MB on-package (대부분 모듈, 8 MB 옵션 있음)
-- **External**: SPI flash 추가 가능
+전력 비교는 supply voltage·클럭·RF 모드·wake source와 측정 지점을 함께 기록합니다. 칩의 Deep-sleep 값만으로 개발 보드 전체 소비전류나 배터리 수명을 계산할 수 없습니다. LED·USB-UART·regulator·외부 센서와 주기적 송신 비용을 포함해 Ch12에서 예산을 다룹니다.
 
-전력:
-
-- **Active**: ~80 mA @ WiFi TX
-- **Modem-sleep**: ~15 mA (WiFi off)
-- **Light-sleep**: ~140 µA
-- **Deep-sleep**: ~5 µA (RTC 메모리 유지 시 ~10 µA)
-
-패키지:
-
-- **Package**: QFN32, 5x5 mm
-- **Module**: ESP32-C3-WROOM-02, ESP32-C3-MINI-1
-
-*Deep-sleep 5 µA*는 *코인셀 배터리 수년* 운용을 가능하게 합니다. 센서 → BLE 전송 → 다시 슬립 패턴이 IoT의 핵심 use case입니다.
+[ESP32-C3 Datasheet v2.4](https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf)의 series comparison·CPU/memory·전류 측정 조건을 부품 선택의 기준으로 사용합니다. 해당 수치를 이 글의 실측 결과로 제시하지 않습니다.
 
 ## ESP-IDF — 개발 환경
 
-C3는 *ESP-IDF v4.3 이상*에서 지원합니다. v5.x를 권장합니다. 설치는 다음과 같습니다.
+아래는 기준 릴리스의 설치 흐름입니다. 운영체제별 prerequisite와 Python/toolchain 요구 조건은 [v5.4.2 시작 안내](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/get-started/index.html)를 먼저 확인합니다.
 
-```bash
+```text
 # Linux/macOS
-$ git clone -b release/v5.1 --recursive https://github.com/espressif/esp-idf.git
+$ git clone -b v5.4.2 --recursive https://github.com/espressif/esp-idf.git
 $ cd esp-idf
 $ ./install.sh esp32c3
 $ . ./export.sh
@@ -161,8 +131,9 @@ $ idf.py build flash monitor
 
 ### 첫 hello_world
 
-```c
+```c title="c3-hello.c"
 #include <stdio.h>
+#include "esp_system.h"
 #include "freertos/FreeRTOS.h"
 #include "freertos/task.h"
 #include "esp_chip_info.h"
@@ -178,7 +149,7 @@ void app_main(void) {
 
     for (int i = 10; i > 0; i--) {
         printf("Restarting in %d seconds...\n", i);
-        vTaskDelay(1000 / portTICK_PERIOD_MS);
+        vTaskDelay(pdMS_TO_TICKS(1000));
     }
     esp_restart();
 }
@@ -186,50 +157,42 @@ void app_main(void) {
 
 빌드·플래시·모니터를 한 명령으로 실행합니다.
 
-```bash
+```text
 $ idf.py -p /dev/ttyUSB0 build flash monitor
 ```
 
-출력 예시는 다음과 같습니다.
-
-```text
-I (xxx) cpu_start: Starting scheduler.
-Chip: esp32c3, 1 cores, rev v0.4
-Restarting in 10 seconds...
-Restarting in 9 seconds...
-...
-```
+실행하면 target 문자열·core 수·revision과 재시작 countdown을 출력합니다. revision은 연결한 chip에 따라 다르며 startup log의 문구도 ESP-IDF 설정에 따라 달라집니다. 이 장에서는 실제 USB port에 flash하거나 로그를 수집하지 않았습니다.
 
 ## 이 시리즈의 12 챕터 로드맵
 
 | Ch | 주제 | 핵심 키워드 |
 |----|------|------------|
-| 1 | 개요 (이 글) | Xtensa → RISC-V 전환, 사양 비교 |
+| 1 | 개요 (이 글) | target 차이, 사양 확인 |
 | 2 | RISC-V 코어 | RV32IMC, M-mode, PMP, CSR |
 | 3 | 메모리·플래시 | IRAM/DRAM/RTC, 파티션, NVS, LittleFS, OTA |
-| 4 | GPIO·PWM | GPIO Matrix, LEDC, MCPWM |
+| 4 | GPIO·PWM | GPIO Matrix, LEDC, C3 지원 범위 |
 | 5 | 시리얼 통신 | UART, SPI, I2C, I2S, DMA |
 | 6 | ADC·터치 | 12-bit SAR, 캘리브레이션, 노이즈 |
 | 7 | WiFi 4 | STA/AP, scan, WPA2/3, ESP-NETIF |
 | 8 | BLE 5.0 | NimBLE, GATT, advertising, mesh |
-| 9 | RTC·저전력 | sleep mode, wake-up source, ULP |
-| 10 | FreeRTOS·ESP-IDF | 태스크, 큐, 이벤트 그룹 |
+| 9 | ESP-IDF 빌드 | CMake, sdkconfig, component |
+| 10 | FreeRTOS | 태스크, 큐, 이벤트 그룹 |
 | 11 | 보안·secure boot | eFuse, flash encryption, secure boot v2 |
-| 12 | 양산 워크플로 | 캘리브레이션, OTA, 양산 fixture |
+| 12 | 저전력 | sleep, wake-up, 전력 예산 |
 
 ## 자주 묻는 질문
 
 ### "ESP32와 ESP32-C3 중 뭘 골라야 하나"
 
-*센서 허브* 기능(터치, Hall, DAC, 듀얼 코어)이 필요하면 ESP32 또는 ESP32-S3. *WiFi/BLE 노드*만 필요하고 *가격·전력*이 중요하면 ESP32-C3. 새 프로젝트라면 보통 C3가 *현명한 출발점*입니다.
+필요한 주변장치·핀·무선 기능·메모리·전력 조건과 구매 가능한 part를 비교합니다. ESP32-S3를 포함한 다른 칩도 모든 센서 기능을 공유하지 않습니다. 가격과 전력 우위를 고정한 값으로 일반화하지 않습니다.
 
 ### "기존 ESP32 코드가 그대로 도나"
 
-ESP-IDF 레벨 코드는 *95% 이상 호환*됩니다. 인터럽트 핸들러에서 *어셈블리*를 직접 짠 부분, *듀얼 코어 동기화*에 의존하는 부분, *Hall/Touch*를 쓴 부분은 *다시 짜야* 합니다. menuconfig에서 target만 바꾸면 *대부분 빌드*는 됩니다.
+공통 API 위의 코드라도 target 선택 후 실제 build·link·실행 검증이 필요합니다. 듀얼 코어 동기화·Xtensa inline assembly·지원하지 않는 주변장치·직접 레지스터 접근을 먼저 찾습니다. 성공 비율을 측정하지 않은95% 같은 수치는 사용하지 않습니다.
 
 ### "Arduino IDE에서도 되나"
 
-Arduino-ESP32 core가 *2.0.x부터 C3를 지원*합니다. 단, ESP-IDF 직접 사용 대비 *기능 노출이 늦고 제한적*입니다. 시리즈는 ESP-IDF 기준으로 진행합니다.
+Arduino-ESP32를 사용한다면 선택한 core 릴리스와 board definition의 ESP32-C3 지원을 확인합니다. 이 시리즈의 C API·빌드 설명은 ESP-IDF v5.4.2를 기준으로 합니다.
 
 ### "RISC-V를 새로 배워야 하나"
 
@@ -237,17 +200,11 @@ ESP-IDF 사용자라면 *몰라도 됩니다*. C 레벨에서 코어 ISA는 *완
 
 ## 정리
 
-- ESP32-C3는 Espressif의 *첫 RISC-V SoC*로, Xtensa 라이선스 비용 절감과 *코어 IP 자유도*를 동시에 노린 전략적 전환입니다.
-- ISA는 *RV32IMC + PMP*이며, ESP-IDF 사용자는 코어 ISA를 *몰라도 무방*하지만 secure boot·인라인 어셈블리 시 필요합니다.
-- *WiFi 4(2.4 GHz)*과 *BLE 5.0 (Coded PHY 포함)*을 동시 지원하며, 두 라디오는 *time-multiplexing*으로 공유 사용합니다.
-- 메모리는 *400 KB SRAM + 4 MB on-package flash*가 표준이고, deep-sleep 시 *5 µA* 수준의 초저전력이 가능합니다.
-- ESP32(원조) 대비 *Touch·Hall·DAC·듀얼 코어가 빠진* 대신 *가격·전력·BLE 5.0*에서 우위입니다.
-- ESP-IDF v5.x가 권장 SDK이며 `idf.py set-target esp32c3`로 *RV32IMC 툴체인*이 자동 선택됩니다.
-- 시리즈 전체 12 챕터는 *코어 → 메모리 → 페리퍼럴 → 무선 → 저전력 → 보안 → 양산* 순으로 진행합니다.
+C3는 기존 ESP32와 ISA·코어 수·주변장치가 다릅니다. ESP-IDF의 공통 API와 target별 제약을 구분하고, 부품 사양·SDK contract·실제 보드 측정을 각각 기록합니다. 시리즈는 코어, 메모리, 주변장치, 무선, 빌드, FreeRTOS, 보안, 저전력 순서로 이어집니다.
 
 ## 다음 장 예고
 
-다음 편은 **Ch 2: RISC-V 코어 — RV32IMC + PMP + 인터럽트 컨트롤러**입니다. C3의 코어를 ISA 레벨에서 들여다보고, *CSR 접근·PMP 설정·CLIC 인터럽트* 같은 *ESP-IDF가 가려 둔 부분*을 직접 만져봅니다.
+다음 편은 **Ch 2: RISC-V 코어 — RV32IMC + PMP + 인터럽트 컨트롤러**입니다. C3의 코어를 ISA 레벨에서 들여다보고, *CSR 접근·PMP 설정·인터럽트 매트릭스* 같은 *ESP-IDF가 가려 둔 부분*을 직접 만져봅니다.
 
 
 ## 관련 항목
@@ -255,7 +212,5 @@ ESP-IDF 사용자라면 *몰라도 됩니다*. C 레벨에서 코어 ISA는 *완
 - [Ch 2: RISC-V 코어 — RV32IMC + PMP + 인터럽트 컨트롤러](/blog/embedded/riscv/esp32-c3-mastering/chapter02-riscv-core)
 - [Ch 3: 메모리 맵·플래시·SPIFFS/LittleFS](/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash)
 - [Ch 11: 보안·Secure Boot](/blog/embedded/riscv/esp32-c3-mastering/chapter11-security) — eFuse·flash encryption
-- Modern Embedded Recipes Part 5.2: WiFi provisioning
-- Practical RTOS Internals Part 1.1: 듀얼 코어 vs 싱글 코어
 - [원문 — ESP32-C3 Datasheet (Espressif)](https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf)
 - [원문 — ESP-IDF Programming Guide](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/)

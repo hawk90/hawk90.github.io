@@ -1,8 +1,8 @@
 ---
-title: "ESP32-C3 ADC와 터치 센서 — 아날로그 입력 처리"
+title: "ESP32-C3 ADC — 캘리브레이션·샘플링과 터치 부재"
 slug: "embedded/riscv/esp32-c3-mastering/chapter06-adc-touch"
 date: 2026-05-20T09:06:00
-description: "12-bit SAR ADC × 2 unit, 정전식 터치 9 채널. 캘리브레이션과 노이즈."
+description: "ESP-IDF v5.4.2의 ADC1 5채널·ADC2 제약과 calibration 오류·continuous record를 확인합니다. C3에는 터치 주변장치가 없습니다."
 series: "ESP32-C3 Mastering"
 seriesOrder: 6
 tags: [adc, touch, analog, calibration, esp32-c3]
@@ -12,324 +12,169 @@ topics: ["embedded", "embedded/riscv"]
 
 ## 한 줄 요약
 
-> **"C3의 ADC는 *12-bit SAR × ADC1*에 *GPIO0~GPIO4*로 6 채널이고, *터치 센서는 없습니다*."** 캘리브레이션은 *eFuse에 굽힌 보정값*을 읽어 *수십 mV 오차를 보정*하며, 노이즈 대책은 *RC filter + multisampling*이 기본입니다.
+> **C3의 ADC1은 GPIO0~4에 연결된5채널이며 ADC2는 GPIO5의1채널입니다. 터치 주변장치는 없습니다.** Hardware 채널 수와 SDK가 지원하는 사용 모드를 구분합니다.
 
-ESP32 원조와 가장 큰 차이는 *DAC와 터치 센서의 부재*입니다. C3는 *경량 IoT 노드*에 초점을 맞춰 *센서 허브 기능*을 잘라냈습니다. 그래서 이 장은 *ADC가 거의 전부*입니다. ESP32의 touch wake-up 기능을 *어떻게 대체*할지도 마지막에 정리합니다.
+기준은 ESP-IDF v5.4.2 commit `f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0`입니다. 이 장의 helper 검사는 실제 ADC 입력·오차·전원 차단 시험과 구분합니다. Pin 보호·부품 허용 전압·기준 계측기·board 전원 조건을 함께 기록해야 전압 측정 결과를 평가할 수 있습니다.
 
-이 장에서는 *attenuation 선택*, *eFuse 캘리브레이션*, *continuous DMA 모드*, *노이즈 대책*을 다룹니다. 실습은 *배터리 전압 모니터*입니다.
+## C3 ADC의 대상 제약
 
-## C3 ADC — 사양 한눈에
+기준 `soc_caps.h`는 ADC unit2개와 channel5/1개를 선언합니다. GPIO4를 board에 따라 내부 reference로 바꾸는 설명은 근거가 없습니다. `adc_oneshot.c`는 C3의 ADC2 사용을 기본 제한하며 override는 별도의 호환성 설정입니다. Continuous ADC2도 hardware errata와 driver 제한을 따릅니다. 이를 다른 ESP32의 Wi-Fi 충돌 설명만으로 대체하지 않습니다.
 
-**ADC1:**
-
-| 속성 | 값 |
-|------|-----|
-| Type | 12-bit SAR (Successive Approximation Register) |
-| Channels | 6 (ADC1_CH0~CH4, ADC1_CH4 = GPIO4) |
-| Pins | GPIO0, GPIO1, GPIO2, GPIO3, GPIO4 |
-| Sample rate | 최대 ~2 MSPS (continuous mode) |
-| Vref | ~1.1 V (internal) |
-
-**ADC2** — 존재하지만 WiFi와 충돌해 *일반 사용 비권장*.
-
-> **메모**: 일부 데이터시트는 "ADC1 6 channels"라고 적지만, 실제로 *GPIO에 연결된 채널*은 *5개(GPIO0~4)*입니다. CH4는 *별도 IO*가 아닌 *내부 reference channel*인 경우가 보드별로 다릅니다.
-
-### Attenuation — 입력 전압 범위 확장
-
-ADC의 *최대 입력 전압*은 *기본 ~1.1 V*입니다. 더 큰 전압을 측정하려면 *attenuation 단계*를 올려 *입력을 분압*합니다.
-
-| Attenuation | 측정 범위 (대략) | 권장 사용 |
-|-------------|-----------------|----------|
-| 0 dB | 0 ~ 0.95 V | 정확도 중시, 1V 미만 신호 |
-| 2.5 dB | 0 ~ 1.32 V | 1.2 V 셀 측정 |
-| 6 dB | 0 ~ 1.75 V | 1.5 V battery |
-| 12 dB | 0 ~ 3.10 V (실용) | 3.3 V 신호, 가장 흔함 |
-
-`ADC_ATTEN_DB_12`는 *제조 시 "11 dB"로 표기*되기도 합니다. ESP-IDF 5.x에서 이름이 *_12로 통일*되었습니다.
-
-> **주의**: attenuation을 높이면 *분해능이 떨어지고 비선형성이 커집니다*. 정확도가 필요하면 *적절한 attenuation*을 고르고, 분압 저항을 외부에 둬도 됩니다.
+Attenuation은 입력 범위와 calibration 조건을 함께 바꿉니다. `ADC_ATTEN_DB_0`, `_2_5`, `_6`, `_12`를 선택할 수 있지만 raw12-bit를 곧바로0~3.3V로 비례 환산하지 않습니다. 실제 측정 범위·오차와 절대 허용 pin 전압은 다른 값이므로 선택한 [datasheet](https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf)와 [calibration driver](https://github.com/espressif/esp-idf/blob/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0/components/esp_adc/adc_cali_curve_fitting.c)를 확인합니다.
 
 ## ADC oneshot 모드
 
-가장 단순한 사용은 *oneshot* (한 번 변환 후 값 반환)입니다.
+Handle 생성·channel 설정·calibration 생성·변환의 오류를 각각 확인합니다. 다음 context는 zero-initialize하고 한 task가 소유하며, 읽는 동안 다른 task가 close하지 않는 조건입니다. Init 실패의 정리도 실패했다면 남은 handle을 context에 유지하므로 caller가 close를 다시 시도할 수 있습니다.
 
-```c
+```c title="c3-adc.c"
+#include <stddef.h>
+#include <stdint.h>
 #include "esp_adc/adc_oneshot.h"
 #include "esp_adc/adc_cali.h"
 #include "esp_adc/adc_cali_scheme.h"
 
-adc_oneshot_unit_handle_t adc1;
-adc_cali_handle_t cali;
+typedef struct {
+    adc_oneshot_unit_handle_t unit;
+    adc_cali_handle_t calibration;
+} c3_adc_t;
 
-void setup_adc(void) {
-    adc_oneshot_unit_init_cfg_t init_cfg = {
-        .unit_id = ADC_UNIT_1,
-        .ulp_mode = ADC_ULP_MODE_DISABLE,
-    };
-    adc_oneshot_new_unit(&init_cfg, &adc1);
-
-    adc_oneshot_chan_cfg_t chan_cfg = {
-        .bitwidth = ADC_BITWIDTH_12,
-        .atten = ADC_ATTEN_DB_12,
-    };
-    adc_oneshot_config_channel(adc1, ADC_CHANNEL_0, &chan_cfg);   // GPIO0
-
-    // 캘리브레이션 (Curve Fitting scheme, C3에서 기본)
-    adc_cali_curve_fitting_config_t cali_cfg = {
-        .unit_id = ADC_UNIT_1,
-        .atten = ADC_ATTEN_DB_12,
-        .bitwidth = ADC_BITWIDTH_12,
-    };
-    adc_cali_create_scheme_curve_fitting(&cali_cfg, &cali);
+esp_err_t c3_adc_close(c3_adc_t *ctx) {
+    if (!ctx) return ESP_ERR_INVALID_ARG;
+    if (ctx->calibration) {
+        esp_err_t error = adc_cali_delete_scheme_curve_fitting(ctx->calibration);
+        if (error != ESP_OK) return error;
+        ctx->calibration = NULL;
+    }
+    if (ctx->unit) {
+        esp_err_t error = adc_oneshot_del_unit(ctx->unit);
+        if (error != ESP_OK) return error;
+        ctx->unit = NULL;
+    }
+    return ESP_OK;
 }
 
-int read_voltage_mv(void) {
-    int raw;
-    adc_oneshot_read(adc1, ADC_CHANNEL_0, &raw);
+esp_err_t c3_adc_open(c3_adc_t *ctx) {
+    if (!ctx) return ESP_ERR_INVALID_ARG;
+    if (ctx->unit || ctx->calibration) return ESP_ERR_INVALID_STATE;
+    adc_oneshot_unit_init_cfg_t unit = {
+        .unit_id = ADC_UNIT_1, .ulp_mode = ADC_ULP_MODE_DISABLE,
+    };
+    esp_err_t error = adc_oneshot_new_unit(&unit, &ctx->unit);
+    if (error != ESP_OK) return error;
+    adc_oneshot_chan_cfg_t channel = {
+        .bitwidth = ADC_BITWIDTH_12, .atten = ADC_ATTEN_DB_12,
+    };
+    error = adc_oneshot_config_channel(ctx->unit, ADC_CHANNEL_0, &channel);
+    if (error == ESP_OK) {
+        adc_cali_curve_fitting_config_t calibration = {
+            .unit_id = ADC_UNIT_1, .chan = ADC_CHANNEL_0,
+            .atten = ADC_ATTEN_DB_12, .bitwidth = ADC_BITWIDTH_12,
+        };
+        error = adc_cali_create_scheme_curve_fitting(&calibration, &ctx->calibration);
+    }
+    if (error != ESP_OK) (void)c3_adc_close(ctx);
+    return error;
+}
 
-    int voltage_mv;
-    adc_cali_raw_to_voltage(cali, raw, &voltage_mv);
-    return voltage_mv;
+esp_err_t c3_adc_read_mean_mv(c3_adc_t *ctx, size_t count, int *out) {
+    if (!ctx || !out || count == 0 || count > 64) return ESP_ERR_INVALID_ARG;
+    if (!ctx->unit || !ctx->calibration) return ESP_ERR_INVALID_STATE;
+    int64_t sum = 0;
+    for (size_t i = 0; i < count; ++i) {
+        int raw, millivolts;
+        esp_err_t error = adc_oneshot_read(ctx->unit, ADC_CHANNEL_0, &raw);
+        if (error != ESP_OK) return error;
+        if (raw < 0 || raw > 4095) return ESP_ERR_INVALID_RESPONSE;
+        error = adc_cali_raw_to_voltage(ctx->calibration, raw, &millivolts);
+        if (error != ESP_OK) return error;
+        sum += millivolts;
+    }
+    *out = (int)(sum / (int64_t)count);
+    return ESP_OK;
 }
 ```
 
-`adc_cali_raw_to_voltage`가 *eFuse에 구워진 보정값*을 적용해 *mV 단위*로 변환합니다. 캘리브레이션 *없이* raw 값을 직접 변환하면 *수십 mV 오차*가 흔합니다.
+Calibration 후 mV를 평균하므로 "raw 평균을 nonlinear calibration에 넣는 방식"과 일반적으로 같은 값이 아닙니다. Sample count를 늘렸다고 고정±2mV 정확도나 독립 noise 감소를 보장하지 않습니다. 읽기/변환 실패 시 `out`을 새 측정값으로 갱신하지 않습니다.
 
-## eFuse 캘리브레이션 — 어떻게 동작하나
+## eFuse calibration 오류는 단위 변환 실패로 처리
 
-Espressif는 출하 전 *모든 칩에 대해 ADC 캘리브레이션*을 수행해 *eFuse*에 결과를 굽습니다. eFuse는 *한 번 굽고 되돌릴 수 없는* OTP 메모리입니다.
+`adc_cali_create_scheme_curve_fitting()`의 `ESP_ERR_NOT_SUPPORTED`는 이 scheme이 요구하는 eFuse 정보를 사용할 수 없다는 계약입니다. 기준 구현은 encoding version 범위를 검사합니다. 이 오류만으로 특정 생산 batch 불량이라고 판단하거나 임의1100mV full-scale을 대신 넣지 않습니다.
 
-| 영역 | 내용 |
-|------|------|
-| BLK1 | MAC address |
-| BLK2 | ADC calibration (factory) — Vref 보정, 채널별 offset |
-| BLK3 | 사용자 영역 (secure boot key 등) |
-
-`adc_cali_create_scheme_curve_fitting`은 *Curve Fitting scheme*을 씁니다. 이는 *다항식 보정*으로, *Two Point 보정*보다 *정확하지만 더 많은 eFuse 비트*를 씁니다. C3는 *Curve Fitting을 기본*으로 가집니다.
-
-캘리브레이션 *비활성* 칩(드물지만 양산 초기 일부 ESP32-C3)에서는 다음 호출이 *ESP_ERR_NOT_SUPPORTED*를 돌려줍니다. 이 경우 *수동 보정*이 필요합니다.
-
-```c
-esp_err_t err = adc_cali_create_scheme_curve_fitting(&cfg, &cali);
-if (err == ESP_ERR_NOT_SUPPORTED) {
-    printf("Calibration not burned, falling back\n");
-    // Vref 1100 mV 가정한 manual conversion
-    voltage_mv = raw * 1100 / 4095;
-}
-```
+C3의 key/MAC/calibration 배치를 과거 ESP32의 BLK1~3 표로 복사하지 않습니다. 고정 source의 eFuse table과 read-only SDK 조회를 사용하며, 이 장에는 fuse를 굽는 명령을 넣지 않습니다. Calibration을 준비하지 못했다면 raw 값과 미보정 상태를 구분해 보고하고 별도 계측·보정 절차를 정합니다.
 
 ## 배터리 전압 모니터 실습
 
-리튬 배터리(3.0~4.2 V)는 *ADC 한계인 3.3 V를 넘으므로* *외부 분압*이 필요합니다.
+배터리 전압을 pin에 직접 연결하지 않습니다. 입력 최대값·분압 오차·ADC 측정 범위·pin 절대 허용값과 전원 꺼진 상태의 역급전을 함께 검토합니다. 아래100kΩ 두 개는 계산을 설명하는 예이며 검증된 제품 회로가 아닙니다.
 
 ![Voltage divider for battery measurement](/images/blog/riscv/esp32-c3-mastering/diagrams/ch06-voltage-divider.svg)
 
-분압 비 1:1이라서 *측정값 × 2 = 실제 전압*입니다. 저항을 *100 kΩ 이상*으로 크게 잡는 이유는 *상시 누설 전류 최소화*입니다 (100 kΩ × 2 = 200 kΩ → 4.2V 시 21 µA).
+두 저항이 정확히 같으면 nominal gain은2입니다. 4.2V를200kΩ으로 나눈 상시 전류는21µA이며 ADC 입력은2.1V가 됩니다. 실제 배터리 전압은 위 helper가 성공한 경우의 mV에 nominal ratio를 적용해 계산하되 저항 허용차·입력 누설·settling 오차를 포함합니다.
 
-```c
-#define BATTERY_DIVIDER_RATIO 2.0f
-
-float read_battery_voltage(void) {
-    int sum = 0;
-    const int N = 32;
-
-    for (int i = 0; i < N; i++) {
-        int raw;
-        adc_oneshot_read(adc1, ADC_CHANNEL_0, &raw);
-        sum += raw;
-    }
-    int avg_raw = sum / N;
-
-    int voltage_mv;
-    adc_cali_raw_to_voltage(cali, avg_raw, &voltage_mv);
-
-    return (voltage_mv * BATTERY_DIVIDER_RATIO) / 1000.0f;
-}
-```
-
-*32회 평균*으로 ±2 mV 수준의 안정성이 나옵니다. 100 µF 캐패시터를 *ADC 입력에 병렬*로 두면 더 안정합니다.
+큰 저항은 상시 전류를 줄이지만 sample-and-hold 충전과 RC settling에 영향을 줍니다. 임의100µF를 병렬로 추가하면 항상 좋아진다는 설명은 제거했습니다. R1/R2·입력 capacitor·switch·샘플링 간격을 함께 정하고 기준 계측기로 지연과 정확도를 확인합니다.
 
 ## Continuous mode — 고속 샘플링
 
-오디오나 진동 측정처럼 *MHz급 sample rate*가 필요하면 *continuous mode*를 씁니다. DMA가 *링 버퍼*에 연속으로 채우면 사용자 task가 *덩어리*로 가져갑니다.
+기준 C3 `soc_caps.h`의 digital sampling 범위는611~83333Hz이며 MHz급 ADC라고 설명하지 않습니다. 요청 rate·pattern 길이·실제 rate와 task의 소비 속도를 구분합니다. Oneshot과 continuous가 같은 unit을 동시에 소유하지 않도록 수명을 관리합니다.
 
-```c
-#include "esp_adc/adc_continuous.h"
+Handle 생성, `adc_continuous_config()`, start, read의 오류를 확인하고 종료 시 stop/deinit합니다. Read timeout이나 pool overflow는 정상 sample로 해석하지 않습니다. TYPE2 record는 기준 target에서4byte이며32record는128byte입니다.20krecord/s라면32개분량은1.6ms이지만 channel pattern이 여러 개면 채널별 rate는 달라집니다.
 
-adc_continuous_handle_t handle;
+다음 decoder는 **ADC1 channel0 pattern의 C3 TYPE2 buffer**만 허용합니다. Unaligned byte buffer를 struct pointer로 cast하지 않고 memcpy로 읽습니다.
 
-void setup_continuous(void) {
-    adc_continuous_handle_cfg_t handle_cfg = {
-        .max_store_buf_size = 4096,
-        .conv_frame_size = 256,
-    };
-    adc_continuous_new_handle(&handle_cfg, &handle);
+```c title="c3-adc-decode.c"
+#include <stddef.h>
+#include <stdint.h>
+#include <stdbool.h>
+#include <string.h>
+#include "hal/adc_types.h"
 
-    adc_digi_pattern_config_t pat[1] = {
-        {
-            .atten = ADC_ATTEN_DB_12,
-            .channel = ADC_CHANNEL_0,
-            .unit = ADC_UNIT_1,
-            .bit_width = ADC_BITWIDTH_12,
-        }
-    };
-    adc_continuous_config_t cont_cfg = {
-        .pattern_num = 1,
-        .adc_pattern = pat,
-        .sample_freq_hz = 20000,         // 20 kHz
-        .conv_mode = ADC_CONV_SINGLE_UNIT_1,
-        .format = ADC_DIGI_OUTPUT_FORMAT_TYPE2,
-    };
-    adc_continuous_config(handle, &cont_cfg);
-
-    adc_continuous_start(handle);
-}
-
-void read_continuous(void) {
-    uint8_t buf[256];
-    uint32_t bytes_read;
-
-    while (1) {
-        if (adc_continuous_read(handle, buf, sizeof(buf),
-                                 &bytes_read, 100) == ESP_OK) {
-            // buf 안에 adc_digi_output_data_t 구조체 배열
-            for (int i = 0; i < bytes_read; i += sizeof(adc_digi_output_data_t)) {
-                adc_digi_output_data_t *p = (void*)(buf + i);
-                // p->type2.data, p->type2.channel
-            }
-        }
+bool c3_adc_decode(const uint8_t *bytes, size_t size, uint16_t *out,
+                   size_t capacity, size_t *count) {
+    _Static_assert(sizeof(adc_digi_output_data_t) == 4, "C3 TYPE2 record size");
+    if (!bytes || !out || !count || size == 0 || size % 4 || size / 4 > capacity)
+        return false;
+    for (size_t i = 0; i < size; i += 4) {
+        adc_digi_output_data_t value;
+        memcpy(&value, bytes + i, sizeof(value));
+        if (value.type2.unit != 0 || value.type2.channel != 0) return false;
     }
+    for (size_t i = 0; i < size; i += 4) {
+        adc_digi_output_data_t value;
+        memcpy(&value, bytes + i, sizeof(value));
+        out[i / 4] = value.type2.data;
+    }
+    *count = size / 4;
+    return true;
 }
 ```
 
-20 kHz × 32 samples = 256 bytes per 1.6 ms입니다. CPU는 *읽고 처리*만 하면 됩니다.
+단위·channel이 다른 record를 버리려는 제품이라면 별도의 정책으로 구현합니다. 위 함수는 잘못된 record를 포함한 batch를 거부하고 output/count를 갱신하지 않습니다. 실제 DMA read 경로·overflow·재시작은 target 시험이 필요합니다.
 
 ## 노이즈 대책
 
-ADC가 *깨끗하게 12 bits*를 다 쓰려면 *PCB 디자인부터 신경*을 써야 합니다. 실전 경험은 *유효 bit가 10~11*에 머무르는 경우가 흔합니다.
+Noise·분압 settling·전원 변동·reference 오차·calibration 잔차를 분리합니다. Calibration만으로0V offset이 고정0~50mV가 되거나 유효 bit가 항상10~11이라고 보장하지 않습니다.
 
-### 하드웨어
+RC cutoff는 `1 / (2πRC)`로 계산합니다. 예를 들어1kΩ·100nF는약1.59kHz입니다. PCB의 return path와 부품 배치·decoupling은 실제 회로를 보고 판단하며 analog/digital ground를 무조건 나누는 규칙으로 제시하지 않습니다.
 
-| 대책 | 효과 |
-|------|------|
-| ADC 입력에 100 nF 캐패시터 | 고주파 노이즈 제거 |
-| RC low-pass filter (1 kΩ + 100 nF) | 100 Hz 이상 cutoff |
-| GND plane 분리 (analog vs digital) | 디지털 노이즈 차단 |
-| Vref 안정 (LDO regulator) | 기준 변동 제거 |
-| 단일점 접지 (single-point GND) | ground loop 제거 |
-
-### 소프트웨어
-
-```c
-// 1. Multisampling (가장 흔함)
-int read_avg(int channel, int n) {
-    int sum = 0;
-    for (int i = 0; i < n; i++) {
-        int raw;
-        adc_oneshot_read(adc1, channel, &raw);
-        sum += raw;
-    }
-    return sum / n;
-}
-
-// 2. Median filter (스파이크 제거)
-int read_median(int channel, int n) {
-    int samples[n];
-    for (int i = 0; i < n; i++) {
-        adc_oneshot_read(adc1, channel, &samples[i]);
-    }
-    // qsort + 중앙값 반환
-    qsort(samples, n, sizeof(int), int_compare);
-    return samples[n / 2];
-}
-
-// 3. Exponential moving average (저주파 추적)
-float ema = 0;
-const float alpha = 0.1f;
-void update(int channel) {
-    int raw;
-    adc_oneshot_read(adc1, channel, &raw);
-    ema = alpha * raw + (1.0f - alpha) * ema;
-}
-```
-
-세 가지 조합이 보통입니다. *64 sample 평균 + median filter + EMA*가 *센서급 안정성*을 줍니다.
+평균·median·EMA는 서로 다른 필터입니다. Average는 bounded count·읽기 오류·overflow를 확인하고, median은 고정 최대 크기와 comparator를 갖추어야 하며 EMA는 초기 상태·sampling interval을 기록합니다. 세 개를 겹쳤다고 "센서급 안정성"이 증명되지는 않습니다. 응답 지연과 noise 분포를 같은 입력에서 비교합니다.
 
 ## 터치 센서 — C3에는 없습니다
 
 ESP32(원조)는 *10채널 정전식 터치*가 있고 *deep-sleep wake-up source*로도 쓸 수 있었습니다. **C3에는 터치 페리퍼럴이 없습니다.**
 
-대체 방안입니다.
+외부 touch controller의 GPIO interrupt 또는 별도 버튼을 사용할 수 있지만 interface·동작 전압·소비전류·sleep 중 출력 level을 해당 부품 자료에서 확인합니다. 근거가 없는 "공식 RC oscillator 예제"와 추가 부품 없이 같은 동작을 보장한다는 설명은 제외했습니다.
 
-### 1. 외부 터치 IC
-
-CAP1188(8 channel), TTP223(1 channel) 같은 *I2C 터치 컨트롤러*를 외부에 답니다.
-
-| IC | 인터페이스 |
-|----|-----------|
-| TTP223 | GPIO 인터럽트 |
-| CAP1188 | I2C로 폴링 또는 인터럽트 |
-
-### 2. RC oscillator 흉내
-
-GPIO를 *output → input*으로 토글하며 *charge time*을 측정하면 *정전용량 변화*를 잡을 수 있습니다. *정확도와 안정성*은 낮지만 *추가 부품 없이* 됩니다. ESP-IDF의 official 예제에 *이 패턴*이 들어가 있습니다.
-
-### 3. ADC capacitive sensing
-
-저항 + GPIO + ADC로 *RC 회로의 시정수*를 측정하는 방식입니다. 정확도는 낮지만 *전원 켜진 상태에서 단순 터치 감지*에는 충분합니다.
-
-### Wake-up source 대안
-
-deep-sleep에서 깨우는 *원래의 touch wake-up* 기능은 C3에서 다음으로 대체합니다.
-
-| 원래 (ESP32) | C3 대체 |
-|--------------|---------|
-| touch wake | GPIO wake (low-power) |
-| touch + GPIO | GPIO + 외부 푸시버튼 |
-| capacitive slider | 외부 IC + GPIO INT |
-
-```c
-// 9장에서 다룰 deep-sleep + GPIO wake
-esp_sleep_enable_gpio_wakeup();
-gpio_wakeup_enable(GPIO_NUM_9, GPIO_INTR_LOW_LEVEL);
-esp_deep_sleep_start();
-```
+Light-sleep GPIO wake API와 Deep-sleep API를 섞지 않습니다. C3의 Deep-sleep GPIO wake는 `esp_deep_sleep_enable_gpio_wakeup(mask, mode)`의 지원 pin을 확인하며 GPIO9을 RTC GPIO로 가정하지 않습니다. 실제 pin·pull·level과 재기동 과정은 [Ch12](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management)에서 다룹니다.
 
 ## 자주 하는 실수
 
-### "ADC 값이 0V 근처에서 0이 아닌 100~200으로 깔린다"
-
-ADC의 *zero-offset*은 정상 동작입니다. 캘리브레이션을 적용하면 *0~50 mV*로 보정됩니다. raw 값으로 0V를 기대하지 않습니다.
-
-### "WiFi를 켜자 ADC 값이 흔들린다"
-
-ADC2를 쓰는 경우 *WiFi와 하드웨어가 충돌*합니다. *반드시 ADC1*만 사용합니다. ESP-IDF가 ADC2를 비활성하기도 합니다.
-
-### "high attenuation에서 값이 비선형"
-
-12 dB attenuation은 *0~3.1 V 사실상 측정 범위*지만 *2.5 V 이상*에서 *명확한 비선형*이 생깁니다. 더 정확한 측정이 필요하면 *외부 분압 + 0 dB*로 설계합니다.
-
-### "캘리브레이션이 ESP_ERR_NOT_SUPPORTED"
-
-eFuse에 캘리브레이션이 *안 구워진* 칩입니다. 양산 초기 일부 batch에서 발견됩니다. 수동 보정으로 fallback하거나 *batch 교체*가 필요합니다.
-
-### "다른 채널 읽으면 직전 채널 값이 일부 묻어 나온다"
-
-ADC sample-and-hold 시간이 *부족*해서 *charge sharing*이 일어난 결과입니다. `bitwidth` 설정 시 *sample time*도 확인하고, 임피던스가 큰 신호는 *외부 OP-AMP buffer*를 답니다.
-
-### "터치 센서 라이브러리가 빌드 에러"
-
-`driver/touch_pad.h`를 include하면 C3에서 *컴파일 자체가 안 됩니다*. ESP32용 코드를 C3로 포팅 시 *터치 부분을 외부 IC 호출로 대체*해야 합니다.
+- **ADC unit/channel을 혼동합니다.** ADC1의5개 pin과 ADC2 제약을 target driver·revision별로 확인합니다.
+- **Calibration 실패를 숨깁니다.** 보정되지 않은 raw를 mV로 표시하지 않고 실패 원인·재시도 정책을 기록합니다.
+- **DMA buffer를 바로 cast합니다.** 반환 byte 수·record 크기·unit/channel·alignment를 검사합니다.
+- **평균 count만 늘립니다.** 입력 임피던스·settling·샘플 주기·지연과 calibration을 함께 측정합니다.
 
 ## 정리
 
-- C3의 ADC는 *12-bit SAR × ADC1*이며 *GPIO0~GPIO4*가 채널로 매핑됩니다. ADC2는 WiFi 충돌로 *실질 사용 불가*입니다.
-- *Attenuation 0/2.5/6/12 dB*로 입력 범위를 *0.95 V ~ 3.1 V*까지 확장하며, 정확도와 분해능은 *낮은 attenuation*이 유리합니다.
-- *eFuse Curve Fitting scheme*이 출하 시 굽혀 있어 `adc_cali_raw_to_voltage`로 *mV 단위 자동 보정*이 됩니다.
-- 노이즈 대책은 *하드웨어(RC filter, GND plane) + 소프트웨어(multisampling, median, EMA)*의 조합이 표준입니다.
-- Continuous mode는 *DMA로 MHz급 sample rate*를 가능하게 하며 *오디오·진동·고속 센서*에 적합합니다.
-- **C3에는 터치 센서가 없습니다.** 대안은 *외부 I2C 터치 IC*(CAP1188, TTP223) 또는 *RC oscillator 흉내*입니다.
-- Deep-sleep wake-up은 *GPIO wake*로 대체하며 *touch wake 시나리오*는 외부 버튼/IC로 풀어야 합니다.
+C3에는 touch peripheral이 없고 ADC 사용에는 target별 제약이 있습니다. Oneshot·calibration·continuous handle 수명을 관리하고, raw/mV·채널별 rate·batch 오류를 구분합니다. 필터 계산·native decoder 검사와 실제 아날로그 정확도·sleep wake 시험은 별도로 남깁니다.
 
 ## 다음 장 예고
 
@@ -338,10 +183,8 @@ ADC sample-and-hold 시간이 *부족*해서 *charge sharing*이 일어난 결�
 
 ## 관련 항목
 
-- [Ch 4: GPIO·LEDC·MCPWM](/blog/embedded/riscv/esp32-c3-mastering/chapter04-gpio-ledc-pwm)
+- [Ch 4: GPIO Matrix·LEDC](/blog/embedded/riscv/esp32-c3-mastering/chapter04-gpio-ledc-pwm)
 - [Ch 5: 시리얼 통신 4종 — UART·SPI·I2C·I2S](/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s)
-- [Ch 9: RTC·저전력](/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build) — GPIO wake-up
-- Modern Embedded Recipes Part 4.9: ADC 노이즈 대책
-- Practical RTOS Internals Part 3.4: DMA 링 버퍼
-- [원문 — ESP-IDF ADC API](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/peripherals/adc_oneshot.html)
-- [원문 — ESP32-C3 ADC Calibration](https://docs.espressif.com/projects/esp-idf/en/latest/esp32c3/api-reference/peripherals/adc_calibration.html)
+- [Ch 12: RTC·저전력](/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management) — GPIO wake-up
+- [원문 — ESP-IDF ADC API](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/adc_oneshot.html)
+- [원문 — ESP32-C3 ADC Calibration](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/adc_calibration.html)
