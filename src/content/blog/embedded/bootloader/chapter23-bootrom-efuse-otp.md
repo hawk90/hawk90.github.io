@@ -16,7 +16,7 @@ BootROM의 동작은 SoC마다 다르기 때문에 이 장에서는 하나를 �
 
 ## 한 줄 요약
 
-BootROM은 boot 장치의 **정해진 오프셋에서 IVT 헤더**를 찾아 이미지를 OCRAM에 올리고, HAB가 켜져 있으면 **fuse에 구운 SRK 해시**로 서명을 검증한 뒤 entry로 점프합니다. fuse는 한 번 쓰면 되돌릴 수 없으므로 `fuse prog` 전에 `hab_status`로 서명 이미지가 이벤트 없이 부팅되는지부터 확인합니다.
+BootROM은 boot 장치의 **정해진 오프셋에서 IVT 헤더**를 찾아 이미지를 칩 내부 SRAM에 올리고, HAB가 켜져 있으면 **fuse에 구운 SRK 해시**로 서명을 검증한 뒤 entry로 점프합니다. fuse는 한 번 쓰면 되돌릴 수 없으므로 `fuse prog` 전에 `hab_status`로 서명 이미지가 이벤트 없이 부팅되는지부터 확인합니다.
 
 ## BootROM이 찾는 것 — 오프셋과 IVT
 
@@ -63,7 +63,7 @@ BOOT_FROM	sd
 LOADER		u-boot-spl-ddr.bin	0x7E1000
 ```
 
-defconfig에도 `CONFIG_SPL_TEXT_BASE=0x7E1000`이 있습니다. 이 주소는 칩 내부 SRAM(OCRAM)입니다. 이 시점에는 DDR이 아직 초기화되지 않았으므로, ROM은 SPL을 칩 안 메모리에 올립니다. DDR training은 SPL이 맡고, 그래서 빠진 blob 목록에 `lpddr4_pmu_train_*` 펌웨어가 있습니다.
+defconfig에도 `CONFIG_SPL_TEXT_BASE=0x7E1000`이 있습니다. 이 주소는 칩 내부 TCM 영역입니다. U-Boot의 i.MX8M MMU 맵(`arch/arm/mach-imx/imx8m/soc.c:135`)은 `TCM`을 0x7C0000부터 0x80000바이트로 잡고, OCRAM은 0x900000부터 따로 둡니다. 이 시점에는 DDR이 아직 초기화되지 않았으므로, ROM은 SPL을 칩 안 메모리에 올립니다. DDR training은 SPL이 맡고, 그래서 빠진 blob 목록에 `lpddr4_pmu_train_*` 펌웨어가 있습니다.
 
 `boot_data.start`가 self보다 정확히 0x400 앞인 것도 소스와 맞습니다. `tools/imx8mimage.c:84`의 `imx8mimage_ivt_offset` 표는 `sd`의 IVT 오프셋을 `0x400`으로 정합니다. 메모리에서 이미지 시작 뒤 1 KiB 지점에 IVT가 오도록 만든 배치입니다.
 
@@ -234,7 +234,7 @@ i.MX8MM에서 확인한 숫자는 다른 칩으로 그대로 옮기면 안 됩�
 
 ## 정리
 
-- i.MX8MM ROM은 SD 카드 33 KiB 지점의 `flash.bin`에서 IVT(`0xD1`, v`0x41`)를 읽고, entry `0x7E1000`(OCRAM)에서 SPL을 실행합니다.
+- i.MX8MM ROM은 SD 카드 33 KiB 지점의 `flash.bin`에서 IVT(`0xD1`, v`0x41`)를 읽고, entry `0x7E1000`(칩 내부 TCM)에서 SPL을 실행합니다.
 - SPL은 다시 섹터 0x300(카드 0x60000바이트)에서 `u-boot.itb`를 찾습니다. ROM 오프셋과 SPL 오프셋은 따로 맞춰야 합니다.
 - ROM은 주소 `0x9E0`이 가리키는 event log를 남기고, U-Boot는 event `0x51`로 secondary 이미지 부팅을 알아냅니다.
 - `fuse read`는 shadow, `fuse sense`는 fuse 배열을 읽습니다. `override`는 리셋까지만, `prog`는 영구입니다.
@@ -244,7 +244,7 @@ i.MX8MM에서 확인한 숫자는 다른 칩으로 그대로 옮기면 안 됩�
 
 ## 다음 장 예고
 
-다음 편은 **Ch 24: SPL·TPL 내부 해부**입니다. 이 장에서 ROM이 OCRAM `0x7E1000`에 올린 SPL이 그다음에 무엇을 하는지, 즉 DDR을 초기화하고 섹터 0x300의 FIT를 읽어 TF-A와 U-Boot proper로 넘기는 과정을 따라갑니다.
+다음 편은 **Ch 24: SPL·TPL 내부 해부**입니다. 이 장에서 ROM이 TCM `0x7E1000`에 올린 SPL이 그다음에 무엇을 하는지, 즉 DDR을 초기화하고 섹터 0x300의 FIT를 읽어 TF-A와 U-Boot proper로 넘기는 과정을 따라갑니다.
 
 ## 관련 항목
 
