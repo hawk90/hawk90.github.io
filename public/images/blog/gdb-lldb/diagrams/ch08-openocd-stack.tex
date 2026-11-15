@@ -3,28 +3,62 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \usepackage{kotex}
 
+% 출처: OpenOCD src/server/gdb_server.c (기본 포트 3333, qRcmd, vFlashErase/Write/Done),
+%       src/target/ (cortex_m.c), src/flash/nor/ (stm32f4x.cfg -> stm32f2x 드라이버),
+%       src/jtag/drivers/ (stlink_usb.c), tcl/interface/stlink.cfg, tcl/target/stm32f4x.cfg
+
 \begin{document}
 \input{../../_design.tex}
 
 \begin{tikzpicture}[blog,
     box/.style={rectangle, rounded corners=3pt, draw=absbord, fill=absfill,
-                minimum width=60mm, minimum height=11mm, align=center,
+                minimum width=64mm, minimum height=13mm, align=center,
                 font=\sffamily\small},
-    accent/.style={box, draw=hibord, fill=hifill},
+    host/.style={box, draw=nodebord, fill=nodefill},
+    hw/.style={box, draw=hibord, fill=hifill},
+    cfg/.style={rectangle, rounded corners=2pt, draw=impbord, fill=impfill,
+                minimum width=44mm, minimum height=9mm, align=center,
+                font=\sffamily\footnotesize},
     arr/.style={-{Stealth[length=2.4mm]}, draw=edgec, line width=0.55pt},
-    lbl/.style={font=\sffamily\scriptsize, fill=white, inner sep=2pt}
+    cfgarr/.style={-{Stealth[length=2mm]}, draw=impbord, line width=0.5pt, dashed},
+    lbl/.style={font=\sffamily\footnotesize, text=inkc, fill=white, inner sep=2pt, align=left}
 ]
 
-\node[box]    (gdb)  at (0, 5.4)  {GDB};
-\node[box]    (rsp)  at (0, 3.6)  {OpenOCD RSP server};
-\node[box]    (tgt)  at (0, 1.8)  {target.cpp — 칩 모델};
-\node[box]    (adp)  at (0, 0)    {adapter.cpp — 프로브 모델};
-\node[accent] (hw)   at (0, -1.8) {USB $\to$ 프로브 $\to$ SWD/JTAG $\to$ 칩};
+\node[host] (gdb) at (0, 7.6)
+  {\textbf{GDB} (arm-none-eabi-gdb)\\[2pt]\footnotesize target extended-remote localhost:3333};
 
-\draw[arr] (gdb) -- node[lbl]{RSP} (rsp);
-\draw[arr] (rsp) -- (tgt);
+\node[box] (srv) at (0, 4.6)
+  {\textbf{GDB server}\\[2pt]\footnotesize src/server/gdb\_server.c};
+\node[box] (tgt) at (0, 2.6)
+  {\textbf{target · flash 드라이버}\\[2pt]\footnotesize src/target/ · src/flash/nor/};
+\node[box] (adp) at (0, 0.6)
+  {\textbf{adapter 드라이버}\\[2pt]\footnotesize src/jtag/drivers/};
+
+\begin{scope}[on background layer]
+  \node[draw=groupbord, fill=white, rounded corners=4pt, inner sep=4mm,
+        fit=(srv)(tgt)(adp)] (ocd) {};
+\end{scope}
+\node[font=\sffamily\small\bfseries, text=absbord, anchor=south west]
+  at ([xshift=1mm]ocd.north west) {OpenOCD};
+
+\node[hw] (probe) at (0, -2.0) {\textbf{probe} (예: ST-Link)};
+\node[hw] (mcu)   at (0, -4.2) {\textbf{MCU} (예: STM32F4)};
+
+\draw[arr] (gdb) -- node[lbl, right=1mm, pos=0.45]
+  {RSP over TCP\\[2pt]monitor → qRcmd\\[2pt]flash 쓰기 → vFlashErase/Write/Done}
+  (ocd.north);
+\draw[arr] (srv) -- (tgt);
 \draw[arr] (tgt) -- (adp);
-\draw[arr] (adp) -- (hw);
+\draw[arr] (adp) -- node[lbl, right=1mm]{USB} (probe);
+\draw[arr] (probe) -- node[lbl, right=1mm]{SWD 또는 JTAG} (mcu);
+
+% config files on the right
+\node[cfg] (tcfg) at (7.4, 2.6) {-f target/stm32f4x.cfg};
+\node[cfg] (icfg) at (7.4, 0.6) {-f interface/stlink.cfg};
+\draw[cfgarr] (tcfg) -- (tgt.east);
+\draw[cfgarr] (icfg) -- (adp.east);
+\node[font=\sffamily\footnotesize, text=impbord, align=center] at (7.4, 4.0)
+  {칩 쪽 설정과 프로브 쪽 설정을\\[2pt]따로 골라 조합합니다};
 
 \end{tikzpicture}
 \end{document}

@@ -170,11 +170,15 @@ GDB Server의 monitor 명령과 Commander의 명령 집합은 같지 않습니�
 
 ## Unlimited Flash Breakpoints
 
-J-Link만의 상용 기능. FPB의 HW BP 개수(6개) 제한을 *flash patching*으로 무한 흉내.
+Unlimited Flash Breakpoints는 SEGGER가 J-Link용으로 제공하는 유료 기능입니다. FPB의 hardware breakpoint 비교기 수는 core마다 정해져 있는데, 이 기능은 비교기를 모두 쓴 뒤에도 flash를 다시 프로그래밍하는 방식으로 breakpoint를 더 설정합니다.
 
 ### 동작 원리
 
 SEGGER는 hardware breakpoint를 우선 사용하고 자원이 부족하면 지원하는 flash 영역에 software breakpoint를 적용한다고 설명합니다. 이를 FP_REMAP으로 flash page를 SRAM에 alias하는 방식이라고 일반화하지 않습니다. flash 패치와 복원은 flash 재프로그래밍을 포함할 수 있으며 지원 장치·영역과 라이선스를 확인합니다.
+
+![J-Link Unlimited Flash Breakpoints 판단 흐름 — hardware breakpoint가 남아 있으면 그것을 쓰고, 모두 사용 중이면 flash sector를 다시 프로그래밍하는 flash breakpoint로 넘어간다](/images/blog/tools/diagrams/jlink-unlimited-fbp.svg)
+
+그림은 SEGGER 설명에 나온 순서만 옮긴 것으로, flash 쓰기는 필요할 때만 일어나고 보통 프로그램 실행을 시작하는 시점에 몰립니다.
 
 [Unlimited Flash Breakpoints 공식 문서](https://www.segger.com/products/debug-probes/j-link/technology/flash-breakpoints/)를 기준으로 했습니다. 실제 장치의 BP 전환·erase 횟수·성능은 이 환경에서 실행하지 않았습니다.
 

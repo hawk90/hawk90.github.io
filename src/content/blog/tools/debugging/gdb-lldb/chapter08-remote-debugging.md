@@ -251,6 +251,10 @@ $ codesign -dvvv $(which debugserver)
 
 MCU에서는 Linux gdbserver 대신 OpenOCD·J-Link GDB Server가 probe를 통해 칩을 제어합니다. 이 장은 GDB 연결 순서를 다루고, 배선·CoreSight·trace의 세부 구현은 전용 장으로 연결합니다. 이 검토에서는 probe나 보드를 연결하지 않았습니다.
 
+probe가 JTAG로 붙을 때 TMS 값에 따라 오가는 TAP 상태는 16개이며, 아래 그림의 상태 이름과 전이는 OpenOCD의 `tap_state_transition()`을 그대로 옮겼습니다.
+
+![JTAG TAP 상태 머신 — RESET·RUN/IDLE과 DR·IR 두 스캔 경로의 16개 상태, 화살표마다 TMS 값 0 또는 1](/images/blog/gdb-lldb/diagrams/ch08-jtag-tap-fsm.svg)
+
 ### OpenOCD 예시
 
 아래 파일 이름은 ST-Link와 STM32F4 조합의 예입니다. 실제 board/target cfg·flash bank·reset 구성을 확인한 뒤 사용합니다.
@@ -270,6 +274,10 @@ arm-none-eabi-gdb firmware.elf
 ```
 
 monitor는 RSP qRcmd를 통해 서버 명령을 전달합니다. flash 쓰기는 stub의 vFlashErase/vFlashWrite/vFlashDone 지원 경로도 사용하며, 모든 load가 M 패킷만 사용한다고 가정하면 안 됩니다. linker의 section·LMA·target memory map과 서버 flash driver를 함께 확인합니다.
+
+![OpenOCD 계층 — GDB가 TCP 3333으로 RSP를 보내면 GDB server, target·flash 드라이버, adapter 드라이버를 거쳐 probe와 MCU에 닿고, target과 interface 설정 파일이 각 계층을 고른다](/images/blog/gdb-lldb/diagrams/ch08-openocd-stack.svg)
+
+두 `-f` 인자가 각각 target 계층과 adapter 계층을 고르므로 같은 칩 설정을 다른 probe와 조합할 수 있습니다.
 
 기존 가공 load 로그는 section 크기 합 0x1c0+0x9d20+0x4c0+0x140=0xa4e0(42208)와 total 41960이 충돌해 실행 기록으로 제거했습니다. 실제 load 로그와 map 파일이 있어야 전송량·검증 성공을 주장할 수 있습니다.
 
@@ -292,6 +300,10 @@ arm-none-eabi-gdb firmware.elf
 ### core와 보호 설정을 해석할 때
 
 Cortex-M4 DHCSR의 C_STEP은 bit 2, C_MASKINTS는 bit 3이므로 같은 [5:2] 전체를 reserved로 적을 수 없습니다. 정확한 비트는 [Arm CMSIS core_cm4.h](https://github.com/ARM-software/CMSIS_6/blob/main/CMSIS/Core/Include/core_cm4.h)의 마스크로 확인합니다. breakpoint·watchpoint 수는 구현별 레지스터와 서버 출력으로 확인합니다.
+
+![Cortex-M 디버그 접근 경로 — probe가 SWD 또는 JTAG로 DP에, DP가 MEM-AP를 거쳐 DHCSR·FPB·DWT 레지스터에 닿는다](/images/blog/gdb-lldb/diagrams/ch08-coresight-arch.svg)
+
+OpenOCD의 Cortex-M target도 이 경로로 DHCSR을 읽고 쓰며, FPB와 DWT의 비교기 수는 FP_CTRL·DWT_CTRL을 읽어 알아냅니다.
 
 RDP·APPROTECT·secure boot는 서로 다른 벤더 기능입니다. 예를 들어 STM32의 RDP 단계 전환을 모든 MCU에 일반화하거나 debugger attach만으로 항상 erase된다고 해석하면 안 됩니다. 부품 reference manual과 복구·영구 잠금 조건을 확인해야 합니다.
 
