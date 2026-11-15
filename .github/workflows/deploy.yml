@@ -22,7 +22,7 @@ on:
       - '.claude/**'
       # Data read only by audit scripts, never by the build
       - 'data/**'
-      # Local tooling; deploy pins Node itself (node-version: "24.21.0")
+      # Local tooling; deploy pins Node itself (node-version in the Setup Node step)
       - '.gitignore'
       - '.prettierrc'
       - '.prettierignore'

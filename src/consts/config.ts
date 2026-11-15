@@ -31,7 +31,7 @@ export const SITE_CONFIG = defineSite({
 
 // --- Branding ---
 export const BRAND_CONFIG = defineBranding({
-  logoText: 'Hawk',
+  logoText: 'Hawk90',
   logoSuffix: '.dev',
   copyright: 'Hawk',
   tagline: 'Developer Blog',
