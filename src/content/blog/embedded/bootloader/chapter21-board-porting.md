@@ -109,7 +109,7 @@ make O=build-demo demo_virt_defconfig
 make O=build-demo -j8 CROSS_COMPILE=aarch64-elf-
 ```
 
-빌드 로그에 `CC board/demo/demo-virt/demo-virt.o`가 찍혔고 `u-boot.bin`은 1,046,248 byte였습니다(경고 두 개는 macOS host 도구의 것이었습니다). QEMU에서 부팅한 결과입니다.
+빌드 로그에 `CC board/demo/demo-virt/demo-virt.o`가 찍혔고 `u-boot.bin`은 1,046,248 byte였습니다(경고 8개는 모두 macOS에서 빌드한 host 도구 `tools/imagetool.c`·`proftool.c`·`relocate-rela.c`의 것이었습니다). QEMU에서 부팅한 결과입니다.
 
 ```text
 U-Boot 2024.04-gbc7c5457-dirty (Nov 15 2026 - 23:00:02 +0900)

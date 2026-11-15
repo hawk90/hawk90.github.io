@@ -47,7 +47,7 @@ Partition Map for USB device 0  --   Partition Type: EFI
 35 bytes read in 3 ms (10.7 KiB/s)
 ```
 
-`usb start`가 아무것도 출력하지 않은 데는 이유가 있습니다. 이 빌드의 `CONFIG_PREBOOT="usb start"`가 shell이 뜨기 전에 이미 USB를 시작했고(부팅 로그의 `starting USB...`가 그것입니다), `cmd/usb.c`는 이미 시작된 상태면 아무 말 없이 돌아갑니다. QEMU 환경의 `stdin=serial,usbkbd`처럼 USB 키보드를 콘솔로 쓰려면 shell 전에 USB가 올라와 있어야 하기 때문입니다. 실제 보드에서도 preboot에 `usb start`가 있으면 USB 장치 열거 시간만큼 부팅이 늦어집니다.
+`usb start`가 아무것도 출력하지 않은 데는 이유가 있습니다. USB는 shell이 뜨기 훨씬 전, `board_late_init()`에서 이미 시작됐습니다. `board/emulation/qemu-arm/qemu-arm.c:118-120`이 "start usb so that usb keyboard can be used as input device"라는 주석과 함께 `CONFIG_USB_KEYBOARD`일 때 `usb_init()`을 부르고, 부팅 로그의 `Net:` 줄 앞 `scanning bus xhci_pci for devices... 2 USB Device(s) found`가 그 결과입니다. `usb_init()`이 `usb_started`를 세우므로, 그 뒤의 `CONFIG_PREBOOT="usb start"`도 제가 친 `usb start`도 `cmd/usb.c`에서 아무 말 없이 돌아갑니다. QEMU 환경의 `stdin=serial,usbkbd`처럼 USB 키보드를 콘솔로 쓰려면 shell 전에 USB가 올라와 있어야 하기 때문입니다. 실제 보드에서도 preboot에 `usb start`가 있으면 USB 장치 열거 시간만큼 부팅이 늦어집니다.
 
 `usb tree`에서 저장 장치는 root hub 아래 2번 장치로 붙었고, `usb storage`가 그것을 `Device 0`으로 보여 줍니다. 그다음부터는 `part list usb 0`, `load usb 0:1`처럼 인터페이스 이름만 `usb`로 바꾸면 10장과 똑같습니다.
 
@@ -145,7 +145,7 @@ UMS가 도는 동안 PC는 보드의 파티션을 자기 디스크처럼 씁니�
 
 ## 정리
 
-- USB host 모드에서 USB 메모리는 블록 장치가 되어 `part list usb 0`, `load usb 0:1`로 읽습니다. QEMU는 `CONFIG_PREBOOT="usb start"`로 shell 전에 USB를 시작해서 `usb start`가 조용했습니다.
+- USB host 모드에서 USB 메모리는 블록 장치가 되어 `part list usb 0`, `load usb 0:1`로 읽습니다. QEMU 보드는 `board_late_init()`의 `usb_init()`으로 shell 전에 USB를 시작해서 `usb start`가 조용했습니다.
 - Fastboot는 USB든 UDP든 같은 명령 처리 코드를 쓰고, `getvar` 응답은 `FASTBOOT_VERSION`, `CONFIG_FASTBOOT_BUF_SIZE`, 환경 변수 `board`·`serial#`에서 옵니다.
 - `fastboot stage`로 보낸 데이터는 `CONFIG_FASTBOOT_BUF_ADDR`에 그대로 놓였고 CRC32가 host와 일치했습니다. 이 주소는 U-Boot 예약 영역과 겹치지 않게 직접 정합니다.
 - 생산 라인처럼 여러 보드를 다룰 때는 `serial#`을 채워 둡니다. 비어 있으면 `serialno`가 FAIL입니다.

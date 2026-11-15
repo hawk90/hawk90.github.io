@@ -74,7 +74,7 @@ QEMU를 껐다 켜고 ESP를 보면 파일이 하나 늘어 있습니다.
 3 file(s), 0 dir(s)
 ```
 
-`CONFIG_EFI_VARIABLE_FILE_STORE`가 켜진 빌드는 비휘발(NV) 속성 변수를 ESP의 `ubootefi.var`에 저장합니다(`efi_var_file.c`의 주석 "File ubootefi.var is created on the EFI system partition"). 이 파일을 쓰려면 U-Boot가 ESP를 찾아야 하므로 파티션 type이 EFI system partition이어야 합니다. [14장](/blog/embedded/bootloader/chapter14-bootflow-bootmeth)에서 Linux type 파티션에 EFI 프로그램을 두었을 때 `No EFI system partition` / `Failed to persist EFI variables`가 나온 것이 그 반대 경우입니다.
+`CONFIG_EFI_VARIABLE_FILE_STORE`가 켜진 빌드는 비휘발(NV) 속성 변수를 ESP의 `ubootefi.var`에 저장합니다(`efi_var_file.c:122`의 주석이 이 파일을 EFI system partition에 만든다고 적습니다). 이 파일을 쓰려면 U-Boot가 ESP를 찾아야 하므로 파티션 type이 EFI system partition이어야 합니다. [14장](/blog/embedded/bootloader/chapter14-bootflow-bootmeth)에서 Linux type 파티션에 EFI 프로그램을 두었을 때 `No EFI system partition` / `Failed to persist EFI variables`가 나온 것이 그 반대 경우입니다.
 
 ```text
 => efidebug boot dump
@@ -83,18 +83,21 @@ attributes: A-- (0x00000001)
   label: virtio 0
   file_path: /VenHw(e61d73b9-...)/VenHw(e61d73b9-...)/VenHw(e61d73b9-...)
   data:
+    ...
 Boot0001:
 attributes: A-- (0x00000001)
   label: debian
   file_path: /HD(1,GPT,2b2f14fc-1b09-455f-9cbc-d93760b30732,0x800,0x20000)/vmlinuz.efi
   initrd_path: /HD(1,GPT,2b2f14fc-1b09-455f-9cbc-d93760b30732,0x800,0x20000)/initrd.gz
   data:
+    ...
 => efidebug boot order
  1: Boot0001: debian
 => printenv -e BootOrder
 BootOrder:
     8be4df61-93ca-11d2-aa0d-00e098032b8c (EFI_GLOBAL_VARIABLE_GUID)
     NV|BS|RT, DataSize = 0x2
+    00000000: 01 00                                            ..
 ```
 
 읽을 거리가 몇 가지 있습니다.

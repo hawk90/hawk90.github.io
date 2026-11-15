@@ -22,7 +22,7 @@ kernel, DTB, initramfs를 따로 두면 세 파일의 버전이 어긋나는 일
 
 ## ITS 작성
 
-FIT의 원본은 ITS(Image Tree Source)라는 device tree source 파일입니다. 실제로 쓴 파일입니다.
+FIT의 원본은 ITS(Image Tree Source)라는 device tree source 파일입니다. 아래는 실험에 쓴 `board.its`를 바탕으로 한 권장형입니다. 실제 파일과는 두 군데가 다릅니다. 실험 파일은 ramdisk에 `compression = "gzip"`을 적어 아래의 경고를 직접 확인했고, `fdt-2`에는 `fdt-1`과 같은 속성을 모두 적었습니다.
 
 ```dts
 /dts-v1/;
@@ -69,11 +69,13 @@ FIT의 원본은 ITS(Image Tree Source)라는 device tree source 파일입니다
 	configurations {
 		default = "conf-revA";
 		conf-revA {
+			description = "rev A";
 			kernel = "kernel-1";
 			fdt = "fdt-1";
 			ramdisk = "ramdisk-1";
 		};
 		conf-revB {
+			description = "rev B";
 			kernel = "kernel-1";
 			fdt = "fdt-2";
 			ramdisk = "ramdisk-1";
@@ -164,7 +166,7 @@ Starting kernel ...
 - FIT을 `0x50000000`에 올린 것은 의도한 배치입니다. kernel은 `0x40400000`부터 약 36 MiB를 차지하므로, FIT을 그 범위 안(예: QEMU의 `loadaddr` `0x40200000`)에 올리면 kernel을 복사하는 순간 FIT 자신을 덮어씁니다.
 - kernel command line이 rev B DTB에 적어 둔 `fit_conf=revB`였습니다. `boot/fdt_support.c`의 `fdt_chosen()`은 `board_fdt_chosen_bootargs()`(기본 구현은 `env_get("bootargs")`)가 값을 돌려줄 때만 DTB의 `bootargs`를 덮어씁니다. 이 환경에는 `bootargs` 변수가 없었으므로 DTB의 값이 그대로 kernel에 갔습니다. 반대로 환경에 `bootargs`가 있으면 DTB 쪽은 무시됩니다.
 
-kernel은 이 initramfs에 init이 없어 `Kernel panic - not syncing: Attempted to kill init!`으로 끝났습니다. 확인하려던 것은 FIT 적재까지이므로 rootfs는 넣지 않았습니다.
+kernel은 `Kernel panic - not syncing: Attempted to kill init! exitcode=0x0000000b`으로 끝났습니다. 원인은 initramfs가 아니었습니다. 그보다 앞서 driver probe 중 `amba_read_periphid`에서 `Internal error: synchronous external abort`가 났고(`of_platform_default_populate_init` → `kernel_init_freeable` 경로), PID 1이 initramfs의 init에 닿기 전에 죽었습니다. 확인하려던 것은 FIT 적재까지이므로 이 abort의 원인은 추적하지 않았습니다.
 
 ## 한 byte를 바꾸면
 

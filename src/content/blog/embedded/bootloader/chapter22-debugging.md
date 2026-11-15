@@ -38,7 +38,7 @@ initcall: 000000000008d658
 U-Boot 2024.04-...
 ```
 
-실제 보드에서 이 한 줄이 나오면 "CPU가 U-Boot 코드를 실행하고, UART 핀과 clock이 살아 있다"까지 확인된 것입니다. [21장](/blog/embedded/bootloader/chapter21-board-porting) 그림의 1단계가 이것입니다. 안 나오면 원인은 그 앞, 곧 ROM이 이미지를 읽었는지, 주소와 clock 값이 맞는지로 좁혀집니다. 이 QEMU 실험에서 `CONFIG_DEBUG_UART_CLOCK` 값은 의미가 없지만(QEMU의 PL011은 분주를 흉내 내지 않습니다), 실제 보드에서는 이 값이 틀리면 글자가 깨집니다.
+실제 보드에서 이 한 줄이 나오면 "CPU가 U-Boot 코드를 실행하고, UART 핀과 clock이 살아 있다"까지 확인된 것입니다. [21장](/blog/embedded/bootloader/chapter21-board-porting) 그림의 1단계가 이것입니다. 안 나오면 원인은 그 앞, 곧 ROM이 이미지를 읽었는지, 주소와 clock 값이 맞는지로 좁혀집니다. 실제 보드에서는 `CONFIG_DEBUG_UART_CLOCK` 값이 틀리면 baud rate 분주가 어긋나 글자가 깨집니다.
 
 ## 2. 초기화 순서 보기 — 파일별 `#define DEBUG`
 

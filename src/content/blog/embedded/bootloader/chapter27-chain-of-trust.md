@@ -115,6 +115,7 @@ ERROR:   BL2: Failed to load image id 5 (-80)
 ```text
 => bootm 0x50000000
    Verifying Hash Integrity ... sha256,rsa2048:dev-  error!
+Verification failed for '<NULL>' hash node in 'conf-1' config node
 Failed to verify required signature 'key-dev'
 Bad Data Hash
 ERROR -2: can't get kernel image!
@@ -133,7 +134,7 @@ Starting kernel ...
 
 두 번 모두 TF-A 로그는 `Image id=5 loaded: 0x60000000 - 0x600ffb30` 다음 BL31로 정상 진행했습니다. BL33은 변하지 않았으니 TBB 입장에서는 아무 문제가 없습니다. 그런데 U-Boot가 믿는 키는 공격자의 키로 바뀌었고, 공격자가 서명한 커널이 실행됐습니다. 각 단계의 검증은 모두 "성공"했는데 체인 전체는 끊긴 것입니다. 금고 문(TBB)은 튼튼한데, 금고 열쇠의 복제 견본(FIT 공개키)을 현관 우편함(런타임 DTB)에 둔 셈입니다.
 
-> ⚠️ 첫 시도에서는 BL2가 `ERROR:   Invalid Device Tree at 0x40000000: error -3`을 찍었습니다. `dumpdtb`가 만든 DTB는 헤더의 `totalsize`가 `0x100000`(1 MiB)으로 패딩돼 있었고, BL2가 PSCI 노드를 넣으려고 `PLAT_QEMU_DT_MAX_SIZE`(`0x100000`) 공간에 `fdt_open_into()`하다 `FDT_ERR_NOSPACE`(3)로 실패한 것입니다. 그 상태로도 U-Boot는 부팅했지만 `/psci` 노드가 빠진 채였습니다. in-tree `dtc -I dtb -O dtb`로 다시 써서 8,983바이트로 줄이자 오류가 사라지고 `method = "smc"`가 들어갔습니다. 위 결과는 이 정리된 DTB로 다시 돌린 것입니다.
+> ⚠️ 첫 시도에서는 BL2가 `ERROR:   Invalid Device Tree at 0x40000000: error -3`을 찍었습니다. `dumpdtb`가 만든 DTB는 헤더의 `totalsize`가 `0x100000`(1 MiB)으로 패딩돼 있었습니다. 이 파일을 `-dtb`로 넘긴 뒤 U-Boot에서 `md.l 0x40000000 2`로 RAM의 블롭 헤더를 읽어 보니 `totalsize`가 `0x204e20`(2,117,152 B)으로 더 커져 있었습니다. BL2는 PSCI 노드를 넣으려고 이 블롭을 `PLAT_QEMU_DT_MAX_SIZE`(`0x100000`) 공간에 `fdt_open_into()`하는데(`plat/qemu/common/qemu_bl2_setup.c:93-95`), 블롭이 공간보다 크니 `FDT_ERR_NOSPACE`(3)로 실패한 것입니다. in-tree `dtc -I dtb -O dtb`로 다시 써서 파일을 8,983바이트로 줄이자 RAM의 `totalsize`는 `0x23fa`가 되었고, 오류가 사라지고 `method = "smc"`가 들어갔습니다. 위 결과는 이 정리된 DTB로 다시 돌린 것입니다.
 
 ## 고리를 다시 잇는 방법
 

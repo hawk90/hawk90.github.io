@@ -38,7 +38,7 @@ Protected 2 sectors
 OK
 ```
 
-저장 직후 QEMU를 끄고 flash 파일의 앞부분을 열어 보면 형식이 그대로 보입니다.
+아래 덤프는 두 번째 부팅에서 `env default -a; saveenv`로 기본값을 다시 저장한 직후의 flash 파일입니다(그래서 `greeting`이 없습니다). QEMU를 끄고 앞부분을 열어 보면 형식이 그대로 보입니다.
 
 ```text
 $ xxd -l 48 flash1.img
@@ -47,7 +47,7 @@ $ xxd -l 48 flash1.img
 00000020: 7264 3d71 656d 752d 6172 6d00 626f 6172  rd=qemu-arm.boar
 ```
 
-앞 4 byte(`0xefb6ac4f`, little-endian)가 CRC32이고, 그 뒤가 `arch=arm\0baudrate=115200\0…`입니다. v2024.04 `include/env_internal.h`의 `env_t`가 바로 이 구조입니다(`crc` 다음 `data[ENV_SIZE]`). host에서 `zlib.crc32()`로 4 byte 이후 나머지 256 KiB 전체를 계산하면 `0xefb6ac4f`가 나와 일치합니다. 부팅할 때 이 계산이 맞지 않으면 위의 "bad CRC" 경고와 함께 기본값으로 돌아가는 것입니다.
+앞 4 byte(`0xefb6ac4f`, little-endian)가 CRC32이고, 그 뒤가 `arch=arm\0baudrate=115200\0…`입니다. v2024.04 `include/env_internal.h`의 `env_t`가 바로 이 구조입니다(`crc` 다음 `data[ENV_SIZE]`). host에서 `zlib.crc32()`로 4 byte 이후 `ENV_SIZE`(0x40000 − 4 byte) 전체를 계산하면 `0xefb6ac4f`가 나와 일치합니다. 부팅할 때 이 계산이 맞지 않으면 위의 "bad CRC" 경고와 함께 기본값으로 돌아가는 것입니다.
 
 숫자 하나가 눈에 띕니다. 변수는 21개, 실제로 쓴 공간은 439 byte인데, `saveenv`는 매번 128 KiB sector 두 개를 지우고 다시 씁니다. flash는 지운 횟수만큼 닳기 때문에, 부팅할 때마다 `saveenv`를 부르는 스크립트(부팅 횟수 카운터 등)는 환경 sector의 수명을 깎아 먹습니다. [17장](/blog/embedded/bootloader/chapter17-ab-update)의 bootcount도 v2024.04 `drivers/bootcount/Kconfig`에 환경에 쓰는 `BOOTCOUNT_ENV` 외에 `BOOTCOUNT_RAM`, `BOOTCOUNT_MEM`, RTC를 쓰는 `DM_BOOTCOUNT_RTC` 같은 backend가 있으므로, 매 부팅 바뀌는 값은 flash 환경이 아닌 쪽에 둡니다.
 

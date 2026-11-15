@@ -51,7 +51,7 @@ topics: ["embedded"]
 
 v2024.04 `init_sequence_f`에서 실제 순서는 이렇습니다.
 
-1. `reserve_round_4k`, `arch_reserve_mmu`, `reserve_video`, `reserve_trace` — 4 KiB 정렬, MMU table, framebuffer, trace buffer(각각 구성에 있을 때)
+1. `reserve_round_4k`, `setup_relocaddr_from_bloblist`, `arch_reserve_mmu`, `reserve_video`, `reserve_trace` — 4 KiB 정렬, bloblist가 지정한 relocation 주소(있을 때), MMU table, framebuffer, trace buffer(각각 구성에 있을 때)
 2. `reserve_uboot` — U-Boot 이미지(`gd->mon_len`)만큼 빼고 4 KiB로 정렬합니다. 이 값이 최종 `gd->relocaddr`, 곧 **U-Boot가 복사될 주소**입니다.
 3. `reserve_malloc`, `reserve_board`, `reserve_global_data`, `reserve_fdt`, `reserve_bootstage`, `reserve_bloblist`, `reserve_arch`, `reserve_stacks` — U-Boot 이미지 **아래**에 heap, `bd_info`, 새 GD, FDT 복사본, stack을 차례로 둡니다. 마지막 stack 위치가 `gd->start_addr_sp`가 됩니다.
 

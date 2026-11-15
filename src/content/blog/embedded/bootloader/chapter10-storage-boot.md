@@ -137,9 +137,10 @@ load <interface> [<dev[:part]> [<addr> [<filename> [bytes [pos]]]]]
 => fdt header
 No FDT memory address configured. Please configure
 the FDT address via "fdt addr <address>" command.
+Aborting!
 ```
 
-원인은 QEMU의 기본 환경에 `fdt_addr_r`이 없다는 것이었습니다. `board/emulation/qemu-arm/qemu-arm.env`에는 `kernel_addr_r=0x40400000`, `ramdisk_addr_r=0x44000000`, 그리고 QEMU가 DTB를 넣어 주는 위치인 `fdt_addr=0x40000000`만 있습니다. 정의되지 않은 변수는 빈 문자열로 바뀌기 때문에 `load`는 인자가 하나 모자라 사용법만 찍었고, `fdt addr`은 주소 없이 실행되어 **아무 메시지도 내지 않았습니다**. 다음 명령에서야 실패가 드러납니다.
+원인은 QEMU의 기본 환경에 `fdt_addr_r`이 없다는 것이었습니다. `board/emulation/qemu-arm/qemu-arm.env`의 주소 변수는 `scriptaddr=0x40200000`, `pxefile_addr_r=0x40300000`, `kernel_addr_r=0x40400000`, `ramdisk_addr_r=0x44000000`, 그리고 QEMU가 DTB를 넣어 주는 위치인 `fdt_addr=0x40000000`이고, `fdt_addr_r`은 없습니다. 정의되지 않은 변수는 빈 문자열로 바뀌기 때문에 `load`는 인자가 하나 모자라 사용법만 찍었고, `fdt addr`은 주소 없이 실행되어 **아무 메시지도 내지 않았습니다**. 다음 명령에서야 실패가 드러납니다.
 
 `kernel_addr_r`·`fdt_addr_r`·`ramdisk_addr_r`이라는 이름은 `doc/usage/environment.rst`가 정한 관례일 뿐이고, 값을 정의하는 것은 보드의 몫입니다. 다른 보드의 `bootcmd`를 가져올 때는 먼저 변수가 있는지 확인합니다.
 
@@ -201,7 +202,7 @@ Bank # 2: CFI conformant flash (16 x 16)  Size: 32 MB in 256 Sectors
 
 sector 시작 주소가 `0x20000`씩 늘어나므로 erase 단위는 128 KiB입니다. `RO` 표시는 U-Boot가 스스로 걸어 둔 쓰기 보호이고, 두 구간 모두 이유가 있습니다.
 
-- bank 1의 `0x00000000`~`0x000FFFFF`(8 sector)는 U-Boot 자신입니다. 이 빌드는 `CONFIG_SYS_MONITOR_BASE=0x00000000`이고, `drivers/mtd/cfi_flash.c`의 `flash_protect_default()`가 그 주소부터 `monitor_flash_len`(`common/board_r.c`에서 `_end - __image_copy_start`)만큼을 보호합니다. 그 길이 `0xffb30`이 8장 `bdinfo`의 `flashoffset` 값이고, sector 경계로 올리면 8개가 됩니다.
+- bank 1의 `0x00000000`~`0x000FFFFF`(8 sector)는 U-Boot 자신입니다. 이 빌드는 `CONFIG_SYS_MONITOR_BASE=0x00000000`이고, `drivers/mtd/cfi_flash.c`의 `flash_protect_default()`가 그 주소부터 `monitor_flash_len`(`common/board_r.c`에서 `_end - __image_copy_start`)만큼을 보호합니다. 이 장의 빌드(`CMD_MEMTEST`를 더한 빌드)에서는 `_end`가 `0xfff28`이라 그 길이가 `0xfff28`이고, sector 경계로 올리면 8개가 됩니다. 8장 `bdinfo`의 `flashoffset` `0xffb30`은 기본 빌드의 값입니다.
 - bank 2의 `0x04000000`~`0x0403FFFF`(2 sector)는 환경 변수 영역입니다. 이 빌드는 `CONFIG_ENV_IS_IN_FLASH=y`, `CONFIG_ENV_ADDR=0x4000000`, `CONFIG_ENV_SECT_SIZE=0x40000`입니다. 부팅 로그의 `Loading Environment from Flash... *** Warning - bad CRC, using default environment`는 이 영역이 아직 비어 있다는 뜻입니다.
 
 raw NAND와 SPI NOR는 이 QEMU 빌드에 없지만 명령은 v2024.04 소스에 있습니다. NAND는 `nand bad`로 공장 출하 때부터 표시된 bad block 목록을 먼저 봅니다(`cmd/nand.c`). bad block을 건너뛰지 않고 이미지를 연속 주소로 쓰면 중간 block이 사라지기 때문에, NAND 위에는 보통 bad block을 처리하는 UBI 같은 계층을 둡니다. SPI NOR는 `sf probe [[bus:]cs] [hz] [mode]`로 장치를 고른 뒤 `sf read <addr> <offset> <len>`으로 읽습니다(`cmd/sf.c`). `sf probe` 없이 다른 `sf` 명령을 치면 "No SPI flash selected. Please run \`sf probe'"가 나옵니다.

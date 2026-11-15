@@ -152,7 +152,12 @@ Found valid slot B, 3 attempts remaining
 Loading kernel
  Starting kernel
 ## Loading kernel from FIT Image at 50000000 ...
+   Using 'conf-1' configuration
+   Verifying Hash Integrity ... OK
+   Trying 'kernel-1' kernel subimage
+   ...
    Verifying Hash Integrity ... sha256 error!
+Bad hash value for 'hash-1' hash node in 'kernel-1' image node
 Bad Data Hash
 ERROR -2: can't get kernel image!
 bootm returned, resetting (stands in for a watchdog)
@@ -178,7 +183,7 @@ B를 세 번 시도해 횟수를 다 쓴 뒤 네 번째 부팅에서 A로 넘어
 
 ## 성공 확인은 OS의 몫
 
-마지막 점이 A/B의 핵심입니다. 정상 부팅한 슬롯의 횟수를 다시 채워 주지 않으면, 정상 부팅을 세 번 할 때마다 횟수가 바닥나 "No valid slot found"로 넘어갑니다. RAUC에서는 `rauc status mark-good`이 이 일을 합니다. RAUC master(1.16-dev) `src/bootloaders/uboot.c`의 `r_uboot_set_state()`는 good일 때 그 슬롯의 `BOOT_<이름>_LEFT`를 `system.conf`의 `boot_default_attempts`(없으면 `UBOOT_DEFAULT_ATTEMPTS` = 3)로 되돌리고, bad일 때는 그 슬롯을 `BOOT_ORDER`에서 빼고 횟수를 0으로 씁니다. 값은 `"%x"`, 곧 16진수로 기록되는데, 스크립트가 `test 0x${BOOT_A_LEFT} -gt 0`처럼 앞에 `0x`를 붙여 비교하는 것이 이 때문입니다. 이 값들은 Linux에서 `fw_setenv`로 U-Boot 환경에 직접 씁니다(`docs/integration.rst`).
+마지막 점이 A/B의 핵심입니다. 정상 부팅한 슬롯의 횟수를 다시 채워 주지 않으면, 정상 부팅을 세 번 할 때마다 횟수가 바닥나 "No valid slot found"로 넘어갑니다. RAUC에서는 `rauc status mark-good`이 이 일을 합니다. RAUC `src/bootloaders/uboot.c`의 `r_uboot_set_state()`는 good일 때 그 슬롯의 `BOOT_<이름>_LEFT`를 `system.conf`의 `boot_default_attempts`(없으면 `UBOOT_DEFAULT_ATTEMPTS` = 3)로 되돌리고, bad일 때는 그 슬롯을 `BOOT_ORDER`에서 빼고 횟수를 0으로 씁니다. 값은 `"%x"`, 곧 16진수로 기록되는데, 스크립트가 `test 0x${BOOT_A_LEFT} -gt 0`처럼 앞에 `0x`를 붙여 비교하는 것이 이 때문입니다. 이 값들은 Linux에서 `fw_setenv`로 U-Boot 환경에 직접 씁니다(`docs/integration.rst`).
 
 언제 `mark-good`을 부를지는 제품이 정합니다. kernel이 떴다는 것만으로 부르면 앱이 계속 죽는 이미지도 "성공"이 되므로, 보통 핵심 서비스가 일정 시간 정상 동작한 뒤에 부릅니다. 반대로 끝내 부르지 않으면, 위 실험처럼 몇 번의 재부팅 뒤 다른 슬롯으로 넘어갑니다. 이 시간 안에 리셋을 일으키는 것이 watchdog의 역할입니다. kernel panic이나 멈춤이 리셋으로 이어지지 않으면 횟수는 줄지 않고 보드는 그 자리에 멈춰 있습니다.
 

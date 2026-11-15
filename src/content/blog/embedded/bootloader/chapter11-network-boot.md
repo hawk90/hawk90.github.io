@@ -75,7 +75,7 @@ Loading: *#################################################################
 Bytes transferred = 2097152 (200000 hex)
 ```
 
-`net/net.c`의 `net_auto_load()`가 원인입니다. DHCP가 끝나면 이 함수가 `env_get_yesno("autoload")`를 보고, 값이 `no`(0)일 때만 멈춥니다. 변수가 없으면 -1이 돌아오므로(`env/common.c`) 멈추지 않고 `tftp_start(TFTPGET)`으로 bootfile을 `loadaddr`(QEMU에서는 `0x40200000`)에 받습니다. 즉 **`autoload`가 없으면 "예"로 취급됩니다**.
+`net/net.c`의 `net_auto_load()`가 원인입니다. DHCP가 끝나면 이 함수가 `env_get_yesno("autoload")`를 보고, 값이 `1`·`y`·`t`(대소문자 무관)로 시작하지 않으면 0이 되어 멈춥니다(`no`가 대표적인 예). 변수가 없으면 -1이 돌아오므로(`env/common.c`) 멈추지 않고 `tftp_start(TFTPGET)`으로 bootfile을 `loadaddr`(QEMU에서는 `0x40200000`)에 받습니다. 즉 **`autoload`가 없으면 "예"로 취급됩니다**.
 
 이 동작은 두 가지 문제를 만들 수 있습니다. 하나는 시간입니다. bootfile이 큰 rootfs 이미지라면 주소만 필요한 `dhcp`가 수십 MB를 받습니다. 다른 하나는 메모리입니다. `loadaddr`가 다른 이미지를 이미 올려 둔 자리와 겹치면 덮어씁니다. 주소만 필요한 스크립트라면 앞에 `setenv autoload no`를 둡니다.
 
@@ -152,7 +152,7 @@ label test
 
 ## 자동 부팅에서도 같은 일이 일어난다
 
-autoboot을 제때 멈추지 못한 첫 실행에서는 제가 명령을 치기 전에 이미 DHCP 두 번과 TFTP 전송이 일어났습니다. QEMU 환경의 `boot_targets=qfw usb scsi virtio nvme dhcp`에 따라 표준 부팅(bootstd)이 마지막 `dhcp` bootdev까지 훑었고, 그 과정에서 `payload.bin`을 받았지만 부팅할 수 있는 형식이 아니어서 `(0 bootflows, 0 valid)`로 끝났습니다. 네트워크 부팅을 쓰지 않는 제품이라면 `boot_targets`에서 `dhcp`를 빼 두어야 부팅 시간마다 DHCP 대기가 끼지 않습니다.
+autoboot을 멈추지 않으면 표준 부팅(bootstd)이 QEMU 환경의 `boot_targets=qfw usb scsi virtio nvme dhcp`를 따라 네트워크까지 훑습니다. [10장](/blog/embedded/bootloader/chapter10-storage-boot)의 저장 장치 실행 로그에 그 장면이 남아 있습니다. `BOOTP broadcast 1`과 `DHCP client bound to address 10.0.2.15`가 두 번 나오고, bootfile이 없어서 `*** Warning: no boot file name; using '0A00020F.img'` 뒤에 `TFTP error: 'Access violation' (2)`로 끝납니다. 네트워크 부팅을 쓰지 않는 제품이라면 `boot_targets`에서 `dhcp`를 빼 두어야 부팅 시간마다 DHCP 대기가 끼지 않습니다.
 
 ## NFS root는 별도 구성
 

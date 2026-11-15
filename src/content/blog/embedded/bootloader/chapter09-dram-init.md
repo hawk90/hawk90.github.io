@@ -53,7 +53,7 @@ i.MX8MM EVK의 보드별 값은 전부 `board/freescale/imx8mm_evk/lpddr4_timing
 | `ddrphy_cfg` | PHY 초기 register 주소·값 쌍 | `ddr_cfg_phy()` 첫 루프 |
 | `fsp_msg` | 주파수 setpoint별 training 입력(message block) | `ddr_cfg_phy()` training 루프 |
 | `ddrphy_pie` | training 뒤 PHY Init Engine에 올릴 값 | `ddr_cfg_phy()` 마지막 루프 |
-| `ddrphy_trained_csr` | 저전력 복귀용으로 저장할 PHY register 목록 | `ddrphy_trained_csr_save()` |
+| `ddrphy_trained_csr` | 저전력 복귀용 PHY register 목록(보드 표) | imx8m 경로에서는 읽지 않음. 실제로 저장되는 목록은 드라이버의 `drivers/ddr/imx/phy/ddrphy_csr.c` 전역 배열(`ddrphy_trained_csr_save()`, `dram_config_save()`) |
 | `fsp_table` | 사용할 data rate(MT/s) 목록 | 주파수 전환 |
 
 EVK 표의 `fsp_table`은 `{ 3000, 400, 100 }`이고, `fsp_msg`에는 3000·400·100 MT/s 각각의 1D training과 3000 MT/s의 2D training, 모두 네 항목이 있습니다. 즉 이 보드는 부팅할 때 training을 네 번 돌립니다.
@@ -86,9 +86,9 @@ EVK 표의 `fsp_table`은 `{ 3000, 400, 100 }`이고, `fsp_msg`에는 3000·400�
 3. message block(`fsp_cfg`)을 씁니다. 이 setpoint의 DRAM 설정과 training 옵션이 들어 있습니다.
 4. `0xd0099`에 값을 써서 PMU를 reset에서 풀고 실행시킵니다.
 5. `wait_ddrphy_training_complete()`로 mailbox를 읽으며 기다립니다.
-6. 끝나면 PMU를 멈추고 message block 결과를 읽습니다. 1D 결과에서는 `get_trained_CDD()`가 message block에서 rank·방향(read/write) 조합별 CDD 값의 최대값을 뽑아 두고, `ddr_init()`이 뒤에서 부르는 `update_umctl2_rank_space_setting()`이 이 값을 controller의 `DRAMTMG2` read↔write 전환 간격에 더합니다. training 결과가 PHY 안에만 머물지 않고 controller timing까지 바꾸는 지점입니다.
+6. 끝나면 PMU를 멈추고 message block 결과를 읽습니다. 1D 결과에서는 `get_trained_CDD()`가 message block에서 rank·방향(read/write) 조합별 CDD 값의 최대값을 뽑아 두고, `ddr_init()`이 뒤에서 부르는 `update_umctl2_rank_space_setting()`이 이 값을 바탕으로 controller의 `DRAMTMG2` read↔write 전환 간격과 `RANKCTL`의 rank 간 간격을 늘립니다(계산은 [Ch 26](/blog/embedded/bootloader/chapter26-ddr-training)). training 결과가 PHY 안에만 머물지 않고 controller timing까지 바꾸는 지점입니다.
 
-firmware 파일은 U-Boot 소스에 없습니다. `doc/board/nxp/imx8mm_evk.rst`는 NXP의 `firmware-imx-8.9.bin`을 받아 `lpddr4*.bin`을 빌드 디렉터리에 복사하라고 안내하고, `arch/arm/dts/imx8mm-u-boot.dtsi`의 binman 설정이 `lpddr4_pmu_train_1d_imem.bin`, `_1d_dmem.bin`, `_2d_imem.bin`, `_2d_dmem.bin` 네 파일을 SPL 뒤에 붙입니다. `ddr_load_train_firmware()`는 SPL의 `_end` 바로 뒤에서 이 이미지를 찾습니다. 그래서 이 파일을 빼먹고 빌드하면 SPL은 만들어지지만 training 단계에서 쓰레기 데이터를 firmware로 올리게 됩니다.
+firmware 파일은 U-Boot 소스에 없습니다. `doc/board/nxp/imx8mm_evk.rst`는 NXP의 `firmware-imx-8.9.bin`을 받아 `lpddr4*.bin`을 빌드 디렉터리에 복사하라고 안내하고, `arch/arm/dts/imx8mm-u-boot.dtsi`의 binman 설정이 `lpddr4_pmu_train_1d_imem.bin`, `_1d_dmem.bin`, `_2d_imem.bin`, `_2d_dmem.bin` 네 파일을 SPL 뒤에 붙입니다. `ddr_load_train_firmware()`는 binman이 SPL 안에 써 넣은 심볼로 이 이미지의 위치와 크기를 찾고, 그 심볼이 없을 때만 `_end`(와 DTB) 뒤를 가정합니다. 이 파일을 빼먹으면 binman이 `Image 'u-boot-spl-ddr' is missing external blobs and is non-functional`로 빌드를 실패시키고, `BINMAN_ALLOW_MISSING=1`로 강제하면 firmware 크기가 0인 이미지가 나와 아무것도 올리지 않습니다. 자세한 측정은 [Ch 26](/blog/embedded/bootloader/chapter26-ddr-training)에 있습니다.
 
 mailbox 판정은 짧습니다.
 
@@ -107,7 +107,7 @@ if (mail == 0x08) {
 }
 ```
 
-여기서 실무에 바로 쓰이는 차이가 하나 있습니다. 실패 메시지는 `printf`라서 항상 나오지만, 진행 상황(`DDRINFO: ...`, `DRAM PHY training for 3000MTS`, `Training PASS`)은 전부 `debug()`입니다. U-Boot의 `debug()`는 그 파일에 `DEBUG`가 정의되어야 출력되므로(`include/log.h`), 기본 빌드에서는 성공해도 아무 말이 없습니다. bring-up 중에는 `ddr_init.c`와 `ddrphy_train.c` 맨 위에 `#define DEBUG`를 넣고 빌드해 어느 setpoint까지 통과하는지 보는 것이 가장 빠른 첫 단계입니다.
+여기서 실무에 바로 쓰이는 차이가 하나 있습니다. 실패 메시지는 `printf`라서 항상 나오지만, 진행 상황(`DDRINFO: ...`, `DRAM PHY training for 3000MTS`, `Training PASS`)은 전부 `debug()`입니다. U-Boot의 `debug()`는 그 파일에 `DEBUG`가 정의되어야 출력되므로(`include/log.h`), 기본 빌드에서는 성공해도 아무 말이 없습니다. bring-up 중에는 `ddr_init.c`, `ddrphy_train.c`, 그리고 `Training PASS`를 찍는 `ddrphy_utils.c` 맨 위에 `#define DEBUG`를 넣고 빌드해 어느 setpoint까지 통과하는지 보는 것이 가장 빠른 첫 단계입니다.
 
 ## ECC와 저전력 복귀
 
@@ -147,7 +147,7 @@ Tested 2 iteration(s) with 0 errors.
 
 `reg`의 두 64-bit 값이 시작 `0x40000000`과 크기 `0x40000000`(1 GiB)이고, 이것이 [8장](/blog/embedded/bootloader/chapter08-board-init)의 `bdinfo`에 나온 DRAM bank 값과 같습니다.
 
-`mtest`는 `CONFIG_SYS_ALT_MEMTEST`가 꺼져 있으면 `cmd/mem.c`의 `mem_test_quick()`을 씁니다. 각 word에 시작 pattern에서 1씩 증가하는 값을 쓰고 다시 읽어 비교하며, 홀수 번째 반복마다 pattern을 뒤집고 감소 방향으로 씁니다. 출력의 `0000…` 다음 `FFFF…`가 그 뒤집기입니다. word마다 값이 다르므로, 주소선 하나가 붙어서 두 주소가 같은 칸을 가리키면 나중에 쓴 값이 앞의 값을 덮어써 불일치로 드러납니다. 반대로 한 번 통과했다고 training margin이 충분하다는 뜻은 아닙니다. QEMU에서는 RAM이 host 메모리라 이 결과는 명령이 동작한다는 확인일 뿐입니다.
+`mtest`는 `CONFIG_SYS_ALT_MEMTEST`가 꺼져 있으면 `cmd/mem.c`의 `mem_test_quick()`을 씁니다. 각 word에 시작 pattern에서 1씩 증가하는 값을 쓰고 다시 읽어 비교하며, 짝수 번째(2·4…번째) 반복마다 pattern을 뒤집고 감소 방향으로 씁니다. 출력의 `0000…` 다음 `FFFF…`가 그 뒤집기입니다. word마다 값이 다르므로, 주소선 하나가 붙어서 두 주소가 같은 칸을 가리키면 나중에 쓴 값이 앞의 값을 덮어써 불일치로 드러납니다. 반대로 한 번 통과했다고 training margin이 충분하다는 뜻은 아닙니다. QEMU에서는 RAM이 host 메모리라 이 결과는 명령이 동작한다는 확인일 뿐입니다.
 
 `mtest`에서 자주 하는 실수도 하나 있습니다. 네 번째 인자(iterations)는 `strict_strtoul(argv[4], 16, ...)`로 읽으므로 **16진수**입니다. `mtest ... 0 10`은 10번이 아니라 16번을 돕니다. 그리고 범위를 U-Boot 자신이 relocation된 영역(8장의 `relocaddr` 근처)까지 넓히면 실행 중인 코드를 덮어쓰므로, 실제 보드에서는 `bdinfo`로 예약 영역을 먼저 확인한 뒤 그 아래만 시험합니다.
 

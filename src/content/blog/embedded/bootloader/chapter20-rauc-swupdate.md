@@ -67,6 +67,7 @@ BOOT_IMAGE=/boot/vmlinuz-6.12.116+deb13-arm64 root=PARTUUID=... ro rauc.slot=A
 === System Info ===
 Compatible:  qemu-demo
 Booted from: rootfs.0 (A)
+...
 === Bootloader ===
 Activated: rootfs.0 (A)
 ```
@@ -101,6 +102,7 @@ Failed to create bundle: squashfs size (4096) must be larger than 4096 bytes
 # rauc info --keyring=/etc/rauc/keyring.pem demo.raucb
 Compatible:     'qemu-demo'
 Version:        '1.0.0'
+...
 Bundle Format:  verity
   Verity Salt:  '500fd86a...'
   Verity Hash:  'fb5ddce2...'
@@ -113,6 +115,7 @@ Manifest Hash:  'b73364e1...'
     Size:      16.8 MB (16777216 bytes)
 Certificate Chain:
  0 Subject: CN = demo-signer
+   ...
 ```
 
 ### 무엇이 서명되고, 언제 검사되나
@@ -122,7 +125,7 @@ Certificate Chain:
 | 시험 | `rauc info` | `rauc install` |
 | --- | --- | --- |
 | 다른 키(keyring에 없는 인증서)로 서명 | `signature verification failed: Verify error: self-signed certificate` | — |
-| 정상 번들의 4096번째 byte를 바꿈 | **통과** (서명자·해시 정상 표시) | `Failed mounting bundle: Unexpected dm-verity status 'C' (instead of '\0')` |
+| 정상 번들의 오프셋 4096 byte를 바꿈(`dd ... bs=1 seek=4096`) | **통과**(오류 없음) | `Failed mounting bundle: Unexpected dm-verity status 'C' (instead of '\0')` |
 
 변조한 번들이 `rauc info`를 통과한 이유는 verity 형식의 구조에 있습니다. RAUC v1.13 `docs/reference.rst`에 따르면 verity 번들의 CMS 서명은 **manifest를 품고 있고**, 그 manifest에 squashfs 전체에 대한 dm-verity root hash·salt·크기가 들어 있습니다. 서명 확인은 manifest까지만 하고, squashfs의 각 블록은 설치 중 kernel의 dm-verity가 실제로 읽을 때 검사합니다. 그래서 큰 번들도 전체를 한 번 해시하지 않고 바로 설치를 시작할 수 있고, 손상된 블록은 설치 단계에서 걸립니다. 서명 하나로 전체를 검사하는 `plain` 형식과 다른 점이고, [16장](/blog/embedded/bootloader/chapter16-verified-boot)에서 본 FIT 서명이 hash 값을 덮고 데이터는 따로 검사하는 구조와 같은 생각입니다.
 
