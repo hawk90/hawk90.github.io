@@ -1,8 +1,8 @@
 ---
-title: "ARM64 Secondary Core Bring-up — PSCI CPU_ON 호출부터 EL1 진입까지"
+title: "ARM64 Secondary Core Bring-up — PSCI와 spin-table 시작 계약"
 slug: "embedded/bootloader/chapter33-smp-secondary-cpu-bringup"
 date: 2026-05-22T09:33:00
-description: "ARM64 secondary CPU 깨우기 — spin-table 옛 방식과 PSCI CPU_ON 표준 방식, secondary_startup 어셈블리, percpu 초기화, hotplug 흐름."
+description: "Linux AArch64의 secondary CPU 시작 계약을 PSCI와 spin-table 방식으로 비교하고 DT 및 검증 경계를 정리합니다."
 series: "Bootloader Internals"
 seriesOrder: 33
 tags: [embedded, bootloader, smp, psci, arm64, kernel, hotplug]
@@ -11,480 +11,98 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SMP 부트는 *primary CPU가 secondary CPU 각각에 진입점을 알려 주고 한 줄씩 일으켜 세우는* 순서입니다."** — BL1·BL2는 single CPU로 진행되고, BL31이 primary 한 명만 BL33으로 보냅니다. 나머지 CPU들은 *Linux가 primary 위에서 동작한 뒤에야* PSCI SMC로 깨워집니다. 옛 spin-table 방식과 현재 표준 PSCI 방식이 *어떻게 다른지*가 핵심입니다.
+> AArch64 Linux가 보조 CPU를 시작하는 방법은 플랫폼의 firmware 계약에 달려 있습니다. 흔한 경로인 PSCI와 spin-table은 서로 다른 약속을 가지며, DT와 실제 firmware 구현을 같이 확인해야 합니다.
 
-[Ch 32](/blog/embedded/bootloader/chapter32-psci-smccc)에서 PSCI CPU_ON의 ABI를 봤습니다. 이 장은 그 *반대편*을 봅니다. CPU_ON이 trigger된 뒤 secondary CPU가 *어떤 어셈블리를 통과해* Linux의 `secondary_start_kernel`에 도착하는지, 그 사이에 *어떤 자료구조가 초기화*되는지를 따라갑니다. 비교 대상으로 옛 spin-table 방식도 함께 봅니다.
+[Ch 32](/blog/embedded/bootloader/chapter32-psci-smccc)에서 PSCI 요청과 SMCCC 전달 규약을 구분했습니다. 여기서는 Linux 부팅 시 보조 CPU를 시작하는 두 가지 계약을 비교하고, 문서화된 경계와 커널 내부 구현의 차이를 살펴봅니다.
 
-## 부트 시퀀스 안에서 SMP가 일어나는 자리
+## 먼저 구분할 것: 부팅 계약과 커널 내부 경로
 
-ARMv8-A 부트 체인은 *primary CPU 한 명만*으로 진행됩니다. BL1·BL2는 *single CPU 가정*으로 짜여 있습니다. 나머지 CPU 코어들은 reset 직후 *holding pen* 또는 *WFI*로 묶여 있습니다.
+모든 Arm 시스템이 같은 Boot ROM, TF-A, EL3 서비스, CPU 시작 순서를 사용하는 것은 아닙니다. CPU가 초기화된 뒤 Linux가 진입하는 상태도 플랫폼 부트 체인에 따라 다릅니다. 따라서 “BL1·BL2·BL31은 한 CPU만 쓰고 나머지는 항상 WFI에 있다” 같은 문장을 보편 규칙으로 적용할 수 없습니다.
 
-![SMP bring-up: primary boots alone, then PSCI CPU_ON wakes secondaries](/images/blog/bootloader/diagrams/ch33-smp-bringup-flow.svg)
+Linux에 중요한 것은 각 CPU의 enable 방식과 펌웨어가 지키는 진입 계약입니다. Linux 소스의 `secondary_entry`, `secondary_start_kernel` 같은 내부 심볼은 커널 버전과 설정의 구현 세부이므로, 특정 버전을 지정하지 않고 고정된 명령 흐름으로 복사하지 않습니다.
 
-primary가 *부트의 거의 끝까지* 혼자 가고, 마지막에 secondary들을 한 명씩 깨웁니다. 이 모델의 장점은 *부트 초반의 race를 원천 차단*하는 것입니다. DDR initialization, secure carveout setup, MMU page table build 같이 *원자적 단일 흐름이 필요한 작업*을 race 걱정 없이 진행할 수 있습니다.
+## PSCI 방식
 
-전체 SMP bring-up 흐름을 한눈에 보면 다음과 같습니다.
-
-![SMP bring-up flow — power on → primary → secondary online](/images/blog/bootloader/diagrams/chapter33-smp-bringup-flow.svg)
-
-## 두 가지 방식 — spin-table vs PSCI
-
-secondary CPU를 깨우는 방식은 mainline 커널 기준 두 가지입니다.
-
-### spin-table (legacy)
-
-ARMv8 spec 초기에 정의된 방식입니다. secondary CPU가 *지정된 메모리 주소*를 polling하며 WFE로 대기합니다. primary가 *그 주소에 entry point를 write하고 SEV*하면, secondary가 깨어나 그 주소로 점프합니다.
-
-```text
-[Boot]
-Primary 진행                       Secondary
-────────                            ──────────
-                                    ldr x0, [release_addr]
-                                    cbz x0, wait
-                                    br  x0           ← 진입
-                                wait:
-                                    wfe
-                                    b   loop
-
-Linux primary:
-  str <entry>, [release_addr]
-  sev                              ← secondary wakes up
-```
-
-`release_addr`는 *각 CPU마다 다른 주소*고 DT에 `cpu-release-addr = <0x0 0x70000000>` 형태로 적힙니다. BL31이 부팅 후 secondary CPU들을 그 주소에서 WFI/WFE 상태로 둬야 합니다.
-
-### PSCI CPU_ON (현재 표준)
-
-primary가 SMC를 통해 BL31에 *직접 깨우기를 요청*합니다. BL31이 SoC reset controller를 두드려 secondary CPU의 reset을 풀고, *warm boot path*에서 caller가 지정한 entry로 점프시킵니다. spin-table과 달리 *busy-loop polling이 필요 없고* 진정한 power-down에서 깨울 수 있습니다.
-
-| 항목 | spin-table | PSCI |
-|---|---|---|
-| 깨우는 메커니즘 | 메모리 polling + SEV | SMC + SoC reset controller |
-| CPU의 전력 상태 | WFI/WFE (clock 그대로) | 진정한 power-down 가능 |
-| HOTPLUG_CPU 지원 | 미흡 (재진입 어려움) | CPU_OFF로 완전 지원 |
-| suspend-to-RAM | 미지원 | 지원 (CPU_SUSPEND) |
-| 표준 | ARMv8 옛 spec | PSCI v1.0+ |
-| Linux DT 표기 | `enable-method = "spin-table"` | `enable-method = "psci"` |
-
-mainline 커널 기준 *PSCI가 사실상 강제*다. spin-table은 PSCI가 없는 환경(예: hypervisor 없이 EL2에서 직접 부팅하는 일부 minimal boot)이나 *legacy 보드*에만 남아 있습니다. 새로 만드는 모든 ARMv8 보드는 PSCI를 씁니다.
-
-## DT 표기 — enable-method가 분기점
-
-커널의 secondary CPU 깨우기 분기는 DT의 `enable-method` 속성으로 결정됩니다.
+PSCI를 사용하는 시스템에서 Linux는 firmware에 CPU 시작을 요청합니다. Device tree에는 PSCI firmware를 기술하는 노드와 CPU 노드의 `enable-method = "psci"`가 사용될 수 있습니다. Linux는 `CPU_ON` 인터페이스를 호출하고 firmware가 플랫폼의 CPU 전원·reset 절차를 수행합니다.
 
 ```dts
-/* PSCI 방식 */
-cpus {
-    cpu@0 {
-        device_type = "cpu";
-        compatible = "arm,cortex-a53";
-        reg = <0x0>;
-        enable-method = "psci";
+/ {
+    psci {
+        compatible = "arm,psci-1.0";
+        method = "smc";
     };
-    cpu@1 {
-        device_type = "cpu";
-        compatible = "arm,cortex-a53";
-        reg = <0x1>;
-        enable-method = "psci";
-    };
-};
 
-psci {
-    compatible = "arm,psci-1.0";
-    method = "smc";
+    cpus {
+        cpu@0 {
+            device_type = "cpu";
+            reg = <0>;
+            enable-method = "psci";
+        };
+        cpu@1 {
+            device_type = "cpu";
+            reg = <1>;
+            enable-method = "psci";
+        };
+    };
 };
 ```
+
+예시는 구조만 보여 줍니다. `reg`의 값과 형식은 CPU address cells 및 플랫폼 토폴로지에 맞아야 하며, 호출 method와 entry point는 실제 시스템의 firmware 계약을 따라야 합니다. CPU_ON 성공 응답은 Linux의 CPU-online 완료를 대신하지 않습니다.
+
+## spin-table 방식
+
+Linux의 arm64 부팅 문서는 spin-table CPU가 커널 밖에서 대기하다가 `cpu-release-addr`에 기록된 시작 주소를 읽는 방식을 정의합니다. release 주소는 자연 정렬된 64비트 위치이며, 초기값은 0이고, 해당 위치는 DT가 설명하는 예약 메모리에 포함돼야 합니다. primary는 주소를 기록한 뒤 secondary에 알리며, secondary는 non-zero entry를 읽으면 그 주소로 이동합니다.
 
 ```dts
-/* spin-table 방식 (legacy) */
-cpus {
-    cpu@0 {
-        device_type = "cpu";
-        compatible = "arm,cortex-a53";
-        reg = <0x0>;
-        enable-method = "spin-table";
-        cpu-release-addr = <0x0 0x70000fff8>;
-    };
-    cpu@1 {
-        device_type = "cpu";
-        compatible = "arm,cortex-a53";
-        reg = <0x1>;
-        enable-method = "spin-table";
-        cpu-release-addr = <0x0 0x70000fff0>;
-    };
+cpu@1 {
+    device_type = "cpu";
+    reg = <1>;
+    enable-method = "spin-table";
+    cpu-release-addr = <0x0 0x70000000>; /* 예시 주소 아님: 보드 예약 영역으로 대체 */
 };
 ```
 
-같은 `cpus` 노드에 enable-method가 *섞여 있어도* 됩니다. 일부 CPU는 PSCI, 일부는 spin-table로 깨우는 hybrid 보드가 드물게 존재합니다.
+위 주소는 문법 모양만 나타내는 자리표시자입니다. 실제 주소를 그대로 복사하면 안 됩니다. 보드 메모리 지도, DT의 reserved-memory 또는 memreserve 정보, CPU의 대기 코드가 같은 위치를 가리키는지 검증해야 합니다. 일부 시스템은 spin-table을 제공하지 않습니다.
 
-두 방식의 차이를 그림으로 비교하면 다음과 같습니다.
+## 둘의 차이
 
-![spin-table vs PSCI CPU_ON 비교](/images/blog/bootloader/diagrams/chapter33-spin-vs-psci.svg)
+| 확인 항목 | PSCI | spin-table |
+| --- | --- | --- |
+| 요청 경로 | firmware service 호출 | 공유 메모리의 release 위치 사용 |
+| 필요한 설명 | PSCI 노드, CPU enable 방식, conduit | CPU별 release 주소와 예약 메모리 |
+| CPU 전원 제어 | firmware와 플랫폼 코드에 위임 | 대기·해제 동작을 플랫폼 firmware가 제공 |
+| 대표적인 확인 자료 | PSCI 규격, Linux DT binding, SoC firmware | Linux arm64 boot 문서, DT, SoC 대기 코드 |
 
-## Linux primary의 SMP 진입 흐름
+이 비교만으로 전력 소비, hotplug 지원 또는 부팅 속도를 단정할 수 없습니다. 그 결과는 구현과 플랫폼의 전원 상태 지원에 달려 있습니다.
 
-커널이 secondary CPU를 깨우는 코드 경로를 따라갑니다. `start_kernel`이 마지막에 `rest_init` → `kernel_init` → `kernel_init_freeable` → `smp_init`을 호출합니다.
+## 커널 경로를 확인할 때
 
-```c
-/* kernel/smp.c */
-void __init smp_init(void)
-{
-    unsigned int cpu;
+1. 실제 부팅에 전달된 DT 또는 ACPI를 저장하고 CPU enable 방식을 확인합니다.
+2. 사용 중인 커널 릴리스의 arm64 boot 문서 및 PSCI binding을 확인합니다.
+3. CPU 시작 요청과 반환 상태를 커널 로그 및 firmware 로그에서 확인합니다.
+4. CPU가 커널의 online 상태가 됐는지 sysfs와 커널 로그로 별도 확인합니다.
+5. assembly 단계까지 추적하려면 정확한 kernel tag, `.config`, 빌드 산출물과 소스 심볼을 함께 고정합니다.
 
-    /* 모든 possible CPU에 대해 cpu_up 호출 */
-    for_each_present_cpu(cpu) {
-        if (num_online_cpus() >= setup_max_cpus)
-            break;
-        if (!cpu_online(cpu))
-            cpu_up(cpu);
-    }
-}
-```
-
-`cpu_up`이 `_cpu_up` → `bringup_cpu` → `__cpu_up`(arch-specific)으로 내려갑니다.
-
-```c
-/* arch/arm64/kernel/smp.c */
-int __cpu_up(unsigned int cpu, struct task_struct *idle)
-{
-    int ret;
-    long status;
-
-    /* 1. idle task 등록 — secondary가 첫 진입할 stack */
-    secondary_data.task = idle;
-    secondary_data.stack = task_stack_page(idle) + THREAD_SIZE;
-    update_cpu_boot_status(CPU_MMU_OFF);
-    __flush_dcache_area(&secondary_data, sizeof(secondary_data));
-
-    /* 2. enable-method별 ops 호출 */
-    ret = cpu_ops[cpu]->cpu_boot(cpu);
-    if (ret)
-        return ret;
-
-    /* 3. secondary가 online 될 때까지 wait */
-    wait_for_completion_timeout(&cpu_running,
-                                msecs_to_jiffies(5000));
-
-    if (!cpu_online(cpu))
-        return -EIO;
-    return 0;
-}
-```
-
-`cpu_ops[cpu]`는 enable-method에 따라 다른 ops 구조체입니다.
-
-```c
-/* arch/arm64/kernel/cpu_ops.c */
-static const struct cpu_operations *const supported_cpu_ops[] = {
-    &smp_spin_table_ops,
-    &cpu_psci_ops,
-    NULL,
-};
-```
-
-PSCI 방식이면 `cpu_psci_ops.cpu_boot = cpu_psci_cpu_boot`가 호출되어 SMC를 발사합니다.
-
-```c
-/* drivers/firmware/psci/psci.c */
-static int cpu_psci_cpu_boot(unsigned int cpu)
-{
-    phys_addr_t pa_secondary_entry = __pa_symbol(secondary_entry);
-    int err = psci_ops.cpu_on(cpu_logical_map(cpu), pa_secondary_entry);
-
-    if (err)
-        pr_err("failed to boot CPU%d (%d)\n", cpu, err);
-    return err;
-}
-```
-
-`secondary_entry`가 *secondary CPU가 첫 진입할 어셈블리 라벨*입니다. PSCI CPU_ON에 *physical address*로 넘긴다는 점이 중요합니다.
-
-## secondary_entry 어셈블리 — MMU off에서 시작
-
-`secondary_entry`부터 `__secondary_switched`까지의 어셈블리가 SMP bring-up의 *진짜 핵심*입니다. 이 코드는 *MMU off, cache off* 상태에서 시작해 *MMU on, cache on*까지 가져갑니다.
-
-```asm
-/* arch/arm64/kernel/head.S */
-SYM_CODE_START(secondary_entry)
-    bl    init_kernel_el           /* EL1 또는 EL2 결정 */
-    bl    set_cpu_boot_mode_flag
-    b     secondary_startup
-SYM_CODE_END(secondary_entry)
-
-SYM_CODE_START_LOCAL(secondary_startup)
-    /*
-     * 공통 entry — secondary 모두가 통과.
-     * stack은 still primary의 secondary_data에서 가져옴.
-     */
-    mov   x20, x0                  /* preserve boot mode */
-    bl    __cpu_secondary_check52bitva
-    bl    __cpu_setup              /* TCR_EL1, MAIR_EL1 등 set up */
-    adrp  x1, swapper_pg_dir       /* primary가 만든 page table */
-    adrp  x2, idmap_pg_dir
-    bl    __enable_mmu             /* MMU on */
-    ldr   x8, =__secondary_switched
-    br    x8
-SYM_CODE_END(secondary_startup)
-```
-
-각 단계가 다음을 합니다.
-
-| 단계 | 내용 |
-|---|---|
-| `init_kernel_el` | EL2면 EL1으로 강하 (EL2 register init 포함) |
-| `set_cpu_boot_mode_flag` | EL1으로 시작했는지 EL2로 시작했는지 기록 |
-| `__cpu_secondary_check52bitva` | 52-bit VA 지원 일치 검증 |
-| `__cpu_setup` | TCR_EL1·MAIR_EL1·SCTLR_EL1 set up |
-| `__enable_mmu` | TTBR0·TTBR1 set, SCTLR_EL1.M·C·I bit set |
-| `__secondary_switched` | MMU on 상태로 C 코드 진입 |
-
-MMU를 켜는 순간 *primary가 만들어 둔 swapper_pg_dir*가 secondary에도 보이게 됩니다. 이 page table은 *모든 CPU가 공유*하므로 별도 build가 필요 없습니다. `__cpu_setup`이 TCR_EL1의 TG0/TG1(page size), IPS(physical addr size)를 primary와 *일치*시켜 page table을 그대로 쓸 수 있게 만듭니다.
-
-## __secondary_switched — C 코드로 점프
-
-MMU가 켜진 직후의 첫 C 함수가 `secondary_start_kernel`입니다.
-
-```asm
-/* arch/arm64/kernel/head.S */
-SYM_FUNC_START_LOCAL(__secondary_switched)
-    mov   x0, x20                  /* boot mode */
-    bl    set_cpu_boot_mode_flag
-
-    /* secondary_data로부터 idle task, stack 가져옴 */
-    adr_l x0, secondary_data
-    ldr   x1, [x0, #CPU_BOOT_STACK] /* stack */
-    cbz   x1, __secondary_too_slow
-    mov   sp, x1
-    ldr   x2, [x0, #CPU_BOOT_TASK]  /* task_struct */
-    cbz   x2, __secondary_too_slow
-    msr   sp_el0, x2                /* current_thread_info */
-
-    scs_load_current                /* shadow call stack */
-    mov   x29, #0
-    mov   x30, #0
-    b     secondary_start_kernel
-SYM_FUNC_END(__secondary_switched)
-```
-
-`sp_el0`에 task_struct를 넣어 두는 것이 ARM64 커널의 `current` 매크로를 동작하게 만드는 핵심입니다. 그래서 `current = (struct task_struct *) read_sysreg(sp_el0)`이 *어떤 CPU에서든 자기 자신의 task*를 가리킵니다.
-
-```c
-/* arch/arm64/kernel/smp.c */
-asmlinkage notrace void secondary_start_kernel(void)
-{
-    u64 mpidr = read_cpuid_mpidr() & MPIDR_HWID_BITMASK;
-    struct mm_struct *mm = &init_mm;
-    unsigned int cpu = smp_processor_id();
-
-    /* 1. percpu offset 설정 */
-    set_my_cpu_offset(per_cpu_offset(cpu));
-
-    /* 2. cpu info 채우기 (cpuinfo_arm64) */
-    cpuinfo_store_cpu();
-
-    /* 3. mm context 활성화 */
-    mmgrab(mm);
-    current->active_mm = mm;
-
-    /* 4. GIC CPU interface 초기화 */
-    if (cpu_ops[cpu]->cpu_postboot)
-        cpu_ops[cpu]->cpu_postboot();
-
-    /* 5. local timer, IRQ enable */
-    notify_cpu_starting(cpu);
-    store_cpu_topology(cpu);
-    numa_add_cpu(cpu);
-
-    /* 6. online 표시 → primary가 wait에서 깨어남 */
-    set_cpu_online(cpu, true);
-    complete(&cpu_running);
-
-    /* 7. local IRQ enable, idle loop 진입 */
-    local_daif_restore(DAIF_PROCCTX);
-    cpu_startup_entry(CPUHP_AP_ONLINE_IDLE);
-}
-```
-
-`set_cpu_online(cpu, true)`이 *그 CPU가 동작 가능*함을 scheduler에 알리는 신호입니다. 이 줄이 실행되는 순간 scheduler가 그 CPU에 task를 배정하기 시작합니다. `complete(&cpu_running)`이 primary의 `wait_for_completion_timeout`을 깨웁니다. 그 다음 `cpu_startup_entry`가 idle loop로 들어가고 첫 *timer interrupt*가 도착하면 scheduler가 work를 배정합니다.
-
-## percpu 자료구조 초기화
-
-`set_my_cpu_offset(per_cpu_offset(cpu))`이 secondary의 *percpu base register*를 set up합니다. ARM64는 TPIDR_EL1를 percpu offset register로 씁니다.
-
-```c
-/* arch/arm64/include/asm/percpu.h */
-static inline void set_my_cpu_offset(unsigned long off)
-{
-    asm volatile("msr tpidr_el1, %0" :: "r" (off) : "memory");
-}
-
-static inline unsigned long __my_cpu_offset(void)
-{
-    unsigned long off;
-    asm("mrs %0, tpidr_el1" : "=r" (off));
-    return off;
-}
-```
-
-이 offset이 설정되기 *전에* percpu variable 접근을 시도하면 *primary CPU의 변수에 접근*하게 되어 race가 납니다. `set_my_cpu_offset` 호출 *직후부터* 비로소 percpu access가 안전합니다.
-
-GIC CPU interface 초기화는 `cpu_postboot` ops에서 합니다. PSCI ops의 경우 다음이 호출됩니다.
-
-```c
-/* drivers/irqchip/irq-gic-v3.c */
-static void gic_cpu_init(void)
-{
-    void __iomem *rbase;
-    int i;
-
-    /* GICR (Re-distributor) base 계산 */
-    rbase = gic_data_rdist_sgi_base();
-
-    /* SGI/PPI enable */
-    for (i = 0; i < 32; i += 32)
-        writel_relaxed(GICD_INT_DEF_PRI_X4,
-                       rbase + GIC_DIST_PRI + i);
-
-    /* CPU interface enable */
-    gic_cpu_sys_reg_init();
-}
-```
-
-GIC CPU interface(GICC/GICR)는 *CPU별로 자기 자신만 접근 가능*합니다. 그래서 *secondary CPU 위에서 직접* 초기화해야 합니다. primary가 대신 못 합니다. 이게 secondary CPU bring-up이 단순히 reset release만으로 끝나지 않는 이유 중 하나입니다.
-
-## HOTPLUG_CPU — CPU_OFF 흐름
-
-`echo 0 > /sys/devices/system/cpu/cpu1/online`으로 CPU를 끄면 reverse 흐름이 진행됩니다.
-
-```text
-echo 0 > .../cpu1/online
-   │
-   ▼
-cpu_down(1) → __cpu_down → cpuhp_kick_ap
-   │
-   ▼
-take_cpu_down (CPU1에서 실행)
-   │
-   ▼
-__cpu_disable
-   ├─ migrate IRQs to 다른 CPU
-   ├─ disable local timer
-   └─ cpu_psci_cpu_disable
-   │
-   ▼
-cpu_die (CPU1)
-   ├─ idle_task_exit
-   ├─ complete(&cpu_died)
-   └─ arch_cpu_idle_dead
-         │
-         ▼
-      cpu_psci_cpu_die
-         │
-         ▼
-      smc PSCI_CPU_OFF        ← BL31로 trap
-         │
-         ▼
-      [BL31] platform pwr_domain_off
-         │
-         ▼
-      SoC reset assert → CPU1 전원 차단
-```
-
-CPU_OFF SMC는 *return하지 않는다*. 호출한 CPU 자신이 power down되기 때문입니다. CPU1이 사라진 뒤 primary는 `wait_for_completion(&cpu_died)`에서 깨어나 hotplug list에서 CPU1을 제거합니다.
-
-다시 켤 때는 *처음 SMP bring-up과 같은 경로*가 반복됩니다. PSCI CPU_ON → BL31 warm boot → secondary_entry → secondary_start_kernel. CPU별 percpu storage는 *영구 할당*돼 있어 재초기화만 하면 됩니다.
-
-## 측정 — 4-core boot up time
-
-i.MX 8M Plus(4-core Cortex-A53 1.5 GHz, kernel 6.6) 측정값입니다.
-
-```text
-[BL31 reset release → primary BL33 진입]    : ~5 ms
-[BL33 → kernel start_kernel]                : ~500 ms
-[start_kernel → smp_init]                   : ~80 ms
-[smp_init → 모든 CPU online]                 : ~1 ms
-  [CPU1 PSCI CPU_ON SMC]                    : ~5 µs
-  [CPU1 reset → secondary_start_kernel]     : ~150 µs
-  [CPU1 percpu·GIC·timer init]              : ~100 µs
-  [CPU1 ONLINE 표시]                        : ~300 µs (CPU1 총합)
-  [CPU2, CPU3 동일]                         : ~600 µs
-[총 SMP bring-up time]                      : ~1 ms (4-core)
-```
-
-전체 부트의 *1 ms*만이 SMP bring-up에 쓰입니다. 나머지는 BL31 부팅과 kernel single-CPU init이 잡아먹습니다. SMP bring-up이 빠른 이유는 *PSCI fast call*과 *모든 CPU가 같은 page table을 공유*하기 때문입니다.
-
-```text
-[ 부트 로그에서 본 SMP 단계 ]
-[    0.087401] smp: Bringing up secondary CPUs ...
-[    0.087512] Detected VIPT I-cache on CPU1
-[    0.087602] GICv3: CPU1: found redistributor 1 region 0
-[    0.087701] CPU1: Booted secondary processor 0x0000000001
-[    0.087788] Detected VIPT I-cache on CPU2
-[    0.087877] GICv3: CPU2: found redistributor 2 region 0
-[    0.087966] CPU2: Booted secondary processor 0x0000000002
-[    0.088054] Detected VIPT I-cache on CPU3
-[    0.088143] GICv3: CPU3: found redistributor 3 region 0
-[    0.088232] CPU3: Booted secondary processor 0x0000000003
-[    0.088354] smp: Brought up 1 node, 4 CPUs
-[    0.088462] SMP: Total of 4 processors activated.
-```
-
-`Booted secondary processor` 사이의 timestamp 차이가 *한 CPU bring-up 시간*입니다. 약 100 µs 단위로 올라옵니다.
-
-## 자주 보는 함정
-
-### Secondary CPU stack 미할당
-
-`secondary_data.stack`이 NULL이면 `__secondary_switched`의 `cbz x1, __secondary_too_slow` 검사에 걸려 secondary가 *조용히 hang*합니다. mainline 커널은 idle thread를 미리 fork해 stack을 할당해 두지만, 새 enable-method ops를 custom으로 추가하다 `secondary_data` 설정을 빠뜨리면 발생합니다. 부팅 중 `CPU%d: failed to come online`이 뜨면 stack 또는 task struct를 의심합니다.
-
-### GIC CPU interface 초기화 누락
-
-`cpu_postboot`에서 `gic_cpu_init`을 부르지 않으면 SGI/PPI가 안 들어와 *secondary가 timer interrupt를 못 받는다*. local IRQ는 enable되지만 *아무 interrupt도 도착하지 않으므로* scheduler가 task를 배정해도 idle에 머뭅니다. mainline에서는 `cpu_psci_ops`가 자동 처리하지만, hypervisor 환경의 paravirt SMP에서 빠뜨리는 경우가 있습니다.
-
-### CPU_ON race — 같은 CPU 두 번 호출
-
-primary가 `cpu_up(1)`을 호출한 직후 *다른 thread가 다시 `cpu_up(1)`을 호출*하면 PSCI가 `ALREADY_ON` 또는 `ON_PENDING`을 return합니다. 커널의 `cpu_up`은 `cpu_hotplug_lock`으로 보호되지만, custom ops를 짤 때 race를 신경 쓰지 않으면 *secondary가 두 번 진입*해 stack corruption이 납니다.
-
-### MMU enable 전에 percpu access
-
-`set_my_cpu_offset` 이전에 percpu variable에 쓰는 코드가 들어가면 *primary CPU의 percpu 영역*을 두드리게 됩니다. 이는 *race로 primary를 망가뜨릴 수* 있습니다. 특히 `pr_info` 같은 매크로가 내부에서 percpu printk buffer를 쓰므로 *MMU enable 전에 print 호출 자체가 위험*합니다. mainline은 `early_printk`에 special path를 두지만 custom build에서 잊기 쉽습니다.
-
-### spin-table release_addr 정렬 누락
-
-spin-table 방식에서 `cpu-release-addr`가 8-byte aligned가 아니면 `ldr x0, [release_addr]`이 alignment fault를 냅니다. DT 작성 시 *항상 8-byte aligned* 주소를 쓰고, BL31이 그 주소에 8-byte zero를 미리 깔아 둬야 합니다.
-
-### enable-method 누락 또는 잘못
-
-`enable-method` 속성이 없으면 커널이 *PSCI도 spin-table도 아니라고 판단해* 그 CPU를 *online으로 만들지 않는다*. `dmesg`에 `CPU%d: failed in unknown state` 형태의 메시지가 뜨면 DT의 enable-method를 확인합니다. 거꾸로 `enable-method = "psci"`인데 PSCI 노드 자체가 DT에 없으면 PSCI ops가 등록 안 돼 같은 결과가 납니다.
+이 문서 수정에서는 QEMU, 보드 또는 실제 Linux kernel image를 실행하지 않았습니다. secondary CPU 경로와 시간 측정 결과를 실행 증거처럼 제시하지 않습니다.
 
 ## 정리
 
-- SMP 부트는 *primary CPU가 secondary 각각에 진입점을 알려 일으켜 세우는* 순서입니다. BL1·BL2·BL31·BL33·Linux primary가 모두 single CPU로 진행됩니다.
-- secondary 깨우는 방식은 두 가지입니다. *spin-table*은 메모리 polling + SEV, *PSCI*는 SMC + SoC reset controller다. 현재 표준은 PSCI다.
-- DT의 `cpus/cpu@N/enable-method` 속성이 분기점이고, PSCI 방식이면 `psci` 노드와 `method = "smc"`가 함께 있어야 합니다.
-- 커널의 `__cpu_up`이 `secondary_data`에 idle task와 stack을 채우고, enable-method에 맞는 `cpu_boot` ops를 호출해 PSCI CPU_ON SMC를 발사합니다.
-- secondary는 `secondary_entry → secondary_startup → __secondary_switched → secondary_start_kernel`을 통과합니다. MMU off에서 시작해 primary가 만든 swapper_pg_dir로 MMU를 켭니다.
-- `set_my_cpu_offset`이 TPIDR_EL1을 채워야 percpu access가 안전해집니다. GIC CPU interface 초기화는 secondary 위에서 직접 해야 합니다.
-- HOTPLUG_CPU는 `cpu_die`가 `PSCI CPU_OFF` SMC로 자신을 끄는 흐름이고, 다시 켤 때는 처음 bring-up과 같은 경로가 반복됩니다.
-- 4-core Cortex-A53 기준 전체 SMP bring-up이 약 1 ms 안에 끝납니다. 한 CPU당 reset release 후 online까지 ~300 µs다.
-- 흔한 함정은 secondary stack 미할당, GIC 초기화 누락, CPU_ON race, MMU 전 percpu access, spin-table 정렬 문제, enable-method 누락 여섯 가지입니다.
+- PSCI와 spin-table은 Linux가 보조 CPU를 시작하는 서로 다른 firmware 계약입니다.
+- `cpu-release-addr`는 임의의 예제 주소가 아니라 보드의 예약 메모리 및 대기 코드와 일치해야 합니다.
+- 커널의 secondary assembly와 초기화 함수는 버전별 구현이므로 대상 소스에서 검증해야 합니다.
+- CPU_ON 응답, secondary 진입, Linux CPU-online 상태를 각각 확인해야 합니다.
 
-## 시리즈 마무리
+## 다음 편
 
-이 장이 Bootloader Internals 시리즈의 *마지막 깊이*다. 시리즈는 [Ch 1: 부트로더가 푸는 문제](/blog/embedded/bootloader/chapter01-boot-problem)에서 시작해 BootROM부터 init까지의 전 과정을 따라왔습니다. 30장이 양산 CI까지의 보편적 흐름을 다뤘다면, 마지막 세 장(31·32·33)은 *ARM bare-metal boot이 깊어질 때 반드시 마주치는* EL3 runtime과 SMP bring-up을 채웠습니다.
-
-다음 단계로 추천할 주제는 두 가지입니다. 첫째는 [Embedded Security](/blog/embedded/embedded-security/chapter01-threat-model) 시리즈로 secure boot·TrustZone·TEE의 보안 모델을 더 깊이 파는 길입니다. 둘째는 [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) 시리즈로 ARM Cortex-A SMP·AMP·context switch 같은 *부트 이후의 runtime* 동작을 따라가는 길입니다.
+다음 편 [Ch 34: U-Boot PCIe enumeration](/blog/embedded/bootloader/chapter34-pcie-enumeration)에서는 부트로더가 PCIe 장치와 자원을 열거하는 경계를 살펴봅니다.
 
 ## 관련 항목
 
-- [Ch 1: 부트로더가 푸는 문제](/blog/embedded/bootloader/chapter01-boot-problem)
-- [Ch 4: 부트 단계 — BL1 → SPL → TPL → U-Boot Proper](/blog/embedded/bootloader/chapter04-boot-stages)
-- [Ch 25: ARM TF-A 통합 — BL1·BL2·BL31·BL32·BL33](/blog/embedded/bootloader/chapter25-tfa-optee)
-- [Ch 31: TF-A BL31 EL3 Runtime](/blog/embedded/bootloader/chapter31-tfa-bl31-runtime)
 - [Ch 32: PSCI / SMCCC ABI](/blog/embedded/bootloader/chapter32-psci-smccc)
+- [Ch 34: PCIe enumeration](/blog/embedded/bootloader/chapter34-pcie-enumeration)
 - [Practical RTOS Internals Ch 2-6: Cortex-A context switch](/blog/embedded/rtos/practical-internals/part2-06-cortex-a-context)
 - [Practical RTOS Internals Ch 4-7: SMP RTOS](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)
 - [Practical RTOS Internals Ch 4-12: AMP와 OpenAMP](/blog/embedded/rtos/practical-internals/part4-12-amp-openamp)
-- [Embedded Security Ch 4: TrustZone](/blog/embedded/embedded-security/chapter04-trustzone)
-- [원문 — Arm PSCI v1.1 specification (DEN0022)](https://developer.arm.com/documentation/den0022)
-- [원문 — Linux kernel Documentation/arm64/booting.rst](https://www.kernel.org/doc/html/latest/arch/arm64/booting.html)
+- [Arm PSCI specification (DEN0022)](https://developer.arm.com/documentation/den0022)
+- [Linux arm64 boot protocol](https://www.kernel.org/doc/html/latest/arch/arm64/booting.html)
+- [Linux PSCI device tree binding](https://www.kernel.org/doc/Documentation/devicetree/bindings/arm/psci.yaml)

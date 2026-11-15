@@ -10,15 +10,15 @@ draft: false
 topics: ["embedded"]
 ---
 
-UEFI는 데스크탑·서버의 영역이라 생각하기 쉽지만, U-Boot은 *EFI loader*라는 부분 UEFI 구현을 들고 있습니다. 덕분에 임베디드 보드도 GRUB·systemd-boot·Linux EFI stub처럼 *EFI 애플리케이션*을 그대로 부팅할 수 있습니다. 배포판이 굳이 보드별 부트로더를 만들지 않아도 되는 셈입니다.
+U-Boot은 EFI/UEFI application을 실행하는 loader를 제공합니다. 임베디드 보드에서 GRUB이나 EFI stub을 실행할 수 있지만, 필요한 protocol, device driver, configuration과 image compatibility가 해당 board build에 갖춰져야 합니다.
 
 ## 한 줄 요약
 
-**`bootefi`로 U-Boot이 EFI Boot Services를 띄우면, EFI 애플리케이션은 자기가 UEFI 위에서 도는지 임베디드 보드 위에서 도는지 구별할 필요가 없어집니다.**
+**`bootefi`는 구성된 U-Boot EFI subsystem에서 UEFI binary를 실행합니다.** 실제 application 호환성은 필요한 EFI protocol과 board resource 지원에 달려 있습니다.
 
 ## 왜 임베디드에서 EFI인가
 
-이유는 *배포판 호환*과 *표준화* 두 가지입니다. Debian·Fedora·Ubuntu가 ARM64 이미지를 만들 때 보드마다 별도 부트로더를 묶지 않아도, *EFI stub이 박힌 vmlinuz* 하나로 임베디드 보드까지 부팅할 수 있게 됩니다. ARM·Linaro가 만든 EBBR(Embedded Base Boot Requirements) 표준이 이 흐름을 명문화했습니다. 다음 그림은 Traditional 부트와 EFI 부트의 차이를 보여줍니다.
+EFI application interface는 배포판별 loader를 실행하는 공통 경로를 제공할 수 있습니다. EBBR은 embedded firmware의 requirements를 정의하지만, 모든 ARM64 image나 installer와의 호환성을 보장하지 않습니다.
 
 ![U-Boot EFI 부트 흐름 — Traditional vs EFI Boot 비교](/images/blog/bootloader/diagrams/ch18-efi-boot-flow.svg)
 
@@ -32,7 +32,7 @@ UEFI는 데스크탑·서버의 영역이라 생각하기 쉽지만, U-Boot은 *
                             Same Linux kernel runs
 ```
 
-EBBR을 따르면 *PC용 ARM64 iso*가 임베디드 보드에서도 그대로 부팅됩니다. 보드 BSP의 부담이 줄어들고, 펌웨어 업데이트도 표준화된 EFI Variable로 처리할 수 있습니다.
+EBBR-compatible platform은 해당 requirements를 만족하는 firmware/software combinations를 대상으로 합니다. 설치 media, storage/USB driver, network, graphics 및 distro image support는 별도로 확인해야 합니다.
 
 ## EFI loader가 구현하는 것
 
@@ -48,7 +48,7 @@ U-Boot의 EFI loader는 UEFI 전체가 아니라 *부팅에 꼭 필요한 부분
 | Graphics Output Protocol | 디스플레이 있으면 | 보통 임베디드는 비활성 |
 | Secure Boot | 부분 구현 | PK·KEK·db·dbx 변수 검증 |
 
-이 정도면 EFI stub 박힌 커널·GRUB·systemd-boot·shim 같은 표준 EFI 부팅 도구를 띄우기에 충분합니다.
+지원 범위는 U-Boot tag, Kconfig, board drivers와 firmware variables에 따라 다릅니다. 아래 목록은 완전한 conformance matrix가 아닙니다.
 
 ## defconfig 설정
 
@@ -56,19 +56,10 @@ EFI 부팅을 켜려면 다음을 활성화합니다.
 
 ```text
 CONFIG_CMD_BOOTEFI=y
-CONFIG_CMD_BOOTEFI_BOOTMGR=y
-CONFIG_CMD_BOOTEFI_HELLO=y
 CONFIG_EFI_LOADER=y
-CONFIG_EFI_VARIABLE_FILE_STORE=y
-CONFIG_EFI_VARIABLES_PRESEED=y
-CONFIG_EFI_BOOTMGR=y
-CONFIG_EFI_DEVICE_PATH_UTIL=y
-CONFIG_EFI_LOAD_FILE2_INITRD=y
-# 보안
-CONFIG_EFI_SECURE_BOOT=y
 ```
 
-`CONFIG_EFI_LOAD_FILE2_INITRD=y`가 의외로 중요한 옵션입니다. Linux 5.8 이후 EFI stub은 initramfs를 *LoadFile2 프로토콜*로 로드합니다. 이 옵션이 없으면 initramfs를 따로 cmdline으로 전달해야 합니다.
+UEFI Boot Manager, Secure Boot, variable storage, device-path 및 initrd 관련 옵션은 tag와 board configuration에 따라 추가로 선택합니다. 옵션 이름만으로 동작을 단정하지 말고 해당 tag의 Kconfig/help와 build configuration을 확인합니다. Initrd 전달 방식도 U-Boot 및 kernel 설정에서 검증합니다.
 
 ## bootefi 명령
 
@@ -84,24 +75,20 @@ CONFIG_EFI_SECURE_BOOT=y
 ```text
 => load mmc 0:1 ${kernel_addr_r} vmlinuz.efi
 => load mmc 0:1 ${ramdisk_addr_r} initrd.img
-=> bootefi setup ${fdt_addr_r}
 => setenv bootargs 'root=/dev/mmcblk0p2 ro'
 => bootefi ${kernel_addr_r} ${fdt_addr_r}
 ```
 
-`bootefi setup`은 *EFI System Table*과 *기본 변수*를 초기화하는 단계입니다. 이 단계가 한 번 끝나면 그다음부터는 그냥 `bootefi <addr>`로 실행할 수 있습니다.
+U-Boot v2025.01 `bootefi` synopsis에는 `setup` subcommand가 없습니다. Application은 `bootefi <image_addr> [fdt_addr]`로 실행하며, `bootargs`는 loaded image protocol의 load options로 전달됩니다.
 
 ### 완전한 EFI 부팅 스크립트 예시
 
-다음은 ESP(EFI System Partition)에서 Linux EFI stub을 직접 부팅하는 전체 흐름입니다.
+다음은 command shape 예시이며 실제 board log나 완성된 boot recipe가 아닙니다. Address, file path, FDT/initrd handling은 target 설정에서 확인해야 합니다.
 
 ```bash
 # ESP를 FAT으로 마운트하고 파일 확인
 => ls mmc 0:1
-    12345678   EFI/BOOT/BOOTAA64.EFI
-     8765432   vmlinuz.efi
-     1234567   initrd.img
-      456789   board.dtb
+    <target media에 있는 file과 크기를 확인>
 
 # kernel과 initrd 로드
 => load mmc 0:1 ${kernel_addr_r} vmlinuz.efi
@@ -109,7 +96,6 @@ CONFIG_EFI_SECURE_BOOT=y
 => load mmc 0:1 ${fdt_addr_r} board.dtb
 
 # EFI 환경 초기화 (한 번만)
-=> bootefi setup ${fdt_addr_r}
 
 # bootargs는 EFI stub이 UEFI 변수에서 읽음
 # 또는 직접 전달
@@ -123,7 +109,7 @@ initrd를 LoadFile2로 전달하려면 `CONFIG_EFI_LOAD_FILE2_INITRD=y`가 필�
 
 ## EFI bootmgr
 
-`bootefi bootmgr`은 *EFI Boot Manager*를 흉내 냅니다. EFI Variable에 `BootOrder`와 `Boot0000`, `Boot0001` 등이 적혀 있으면 그 순서대로 시도합니다.
+`bootefi bootmgr`은 UEFI Boot Manager를 실행하며 BootNext/BootOrder 변수를 사용합니다. EFI Variable에 `BootOrder`와 `Boot0000`, `Boot0001` 등이 적혀 있으면 그 순서대로 시도합니다.
 
 ```text
 => efidebug boot add 0 distro mmc 0:1 efi/boot/bootaa64.efi
@@ -136,7 +122,7 @@ initrd를 LoadFile2로 전달하려면 `CONFIG_EFI_LOAD_FILE2_INITRD=y`가 필�
 => bootefi bootmgr
 ```
 
-이 흐름이 시작되면, 보드는 *UEFI 펌웨어를 가진 PC*와 거의 같은 방식으로 부팅됩니다. `efibootmgr`을 userspace에서 돌려 부팅 순서를 바꿀 수도 있습니다.
+Boot option 저장과 userspace 변경은 EFI variable services와 persistent backend가 제공될 때 사용할 수 있습니다. 지원 여부와 command syntax는 target에서 확인합니다.
 
 ```bash
 # userspace (Linux)
@@ -149,52 +135,28 @@ Boot0001* recovery  HD(2,GPT,...)/File(\EFI\RECOVERY\BOOT.EFI)
 
 ## EFI Variable 저장
 
-U-Boot은 EFI Variable을 *env*에 매핑하거나, 별도 파일에 저장합니다. `CONFIG_EFI_VARIABLE_FILE_STORE=y`면 ESP의 `ubootefi.var` 파일에 저장합니다.
+EFI variable의 persistent backend는 U-Boot version, Kconfig 및 board/TEE 구성에 따라 다릅니다. U-Boot v2025.01 문서는 OP-TEE variable services와 RPMB 구성을 설명합니다. 특정 ESP 파일명이나 environment mapping을 모든 build의 동작으로 일반화하지 않습니다.
 
-```text
-mmc 0:1
-  /EFI/
-    BOOT/
-      BOOTAA64.EFI
-  ubootefi.var      <- EFI variable storage
-```
-
-변수 저장이 *별도 파일*이라는 점이 익숙해지면 편합니다. env와 분리되어 한쪽이 망가져도 다른 쪽이 살아 있고, ESP만 backup·restore해도 EFI 환경이 옮겨갑니다.
+Media layout만으로 variable backend가 설정되거나 EFI variables가 저장되는 것은 아닙니다. EFI application path와 variable storage를 별도로 확인합니다. 저장 안정성, tamper resistance, backup/restore 및 recovery는 선택한 variable backend로 검증해야 합니다.
 
 ## UEFI Secure Boot 연결
 
-EFI 부팅을 켜면 UEFI Secure Boot를 그대로 쓸 수 있습니다. 키 계층은 PC와 동일합니다.
+U-Boot EFI loader와 Secure Boot 지원은 build 및 board configuration에 따라 다릅니다. UEFI Secure Boot 키 데이터 모델에는 다음 변수들이 포함됩니다.
 
 - **PK** (Platform Key) — OEM/벤더.
 - **KEK** (Key Exchange Key) — distro·OS.
 - **db** (Allowed signatures) — 허용 이미지 해시·서명.
 - **dbx** (Forbidden) — 폐기된 해시.
 
-shim·grub·linux 모두 db에 들어 있는 키로 서명되어 있어야 부팅됩니다. U-Boot은 이 검증을 *Boot Services의 LoadImage 안*에서 수행합니다.
+이미지 검증 지원, variable provisioning 및 enforcement 경로는 선택한 U-Boot tag에서 확인해야 합니다. 아래 임의 `efidebug` key enrollment 예제는 명령/인증서 형식과 지원을 검증하지 않아 제거했습니다.
 
-```text
-=> efidebug pk set MyPK.auth
-=> efidebug kek set MyKEK.auth
-=> efidebug db set MyDB.auth
-=> efidebug secure-boot
-secure boot enabled
-```
-
-이 흐름과 *Ch 16의 FIT 서명*은 둘 다 가능합니다. 시스템의 *제1 부트 경로*는 FIT signature로 두고, "distro install ISO도 받아 부팅하고 싶다" 같은 부가 경로에 EFI Secure Boot을 두는 식의 분업이 흔합니다.
+FIT signature verification과 UEFI Secure Boot은 서로 다른 verification paths입니다. 두 경로를 같이 활성화할 경우 trusted keys, fallback policy와 allowed image set을 통합 검토해야 합니다.
 
 ## EBBR 호환
 
-EBBR(Embedded Base Boot Requirements)은 임베디드용 UEFI 최소 요건을 정해 둔 표준입니다.
+EBBR(Embedded Base Boot Requirements)은 임베디드용 UEFI 요구사항을 정의합니다. Revision별 normative requirements는 해당 revision의 specification에서 확인해야 합니다. 이 장의 요약은 보드 conformity 판정이나 complete requirements list가 아닙니다.
 
-| 요건 | 의미 |
-|------|------|
-| FAT ESP | EFI System Partition을 FAT으로 둘 것 |
-| BOOTAA64.EFI / BOOTARM.EFI | fallback 부팅 경로 |
-| Variable Storage | 영구 EFI 변수 저장 |
-| Devicetree 전달 | EFI configuration table로 DTB 전달 |
-| LoadFile2 initrd | 표준 방식의 initramfs 전달 |
-
-U-Boot이 EBBR을 다 만족하면, *Debian arm64 install ISO* 같은 디스크를 그대로 끼워 부팅해도 됩니다. `bootefi`가 자동으로 ESP를 찾아 부트로더를 띄웁니다.
+EBBR-related requirements alone do not guarantee a particular distro installer boots. EFI Boot Manager uses configured BootNext/BootOrder options; media discovery, image compatibility and required drivers must also be present.
 
 ## UEFI 명세에서 무엇이 필수인가
 
@@ -204,15 +166,15 @@ UEFI 명세는 두꺼운 책 한 권 분량입니다. 모든 항목을 다 만�
 |------|------|--------|
 | Boot Services | 메모리 할당, 프로토콜 핸들, 이미지 로딩·실행 | OS 로더가 가장 많이 호출 |
 | Runtime Services | EFI Variable, 시간, reset | Linux 부팅 후에도 일부 호출 |
-| NVRAM Variables | `BootOrder`, `BootXXXX`, `SecureBoot` 등 영구 변수 | bootmgr이 의존 |
-| GPT + FAT ESP | 디스크 파티션 표준과 FAT32 ESP | 부트로더가 들어 있는 곳 |
+| EFI variables | `BootOrder`, `BootXXXX`, `SecureBoot` 등 variables; non-volatile 보존은 attribute/backend에 따름 | bootmgr configuration에서 사용 |
+| System partition | GPT 또는 MBR과 FAT filesystem 조합을 UEFI media access rules 및 platform firmware에 따라 확인 | EFI image discovery 경로 |
 
-GPT 헤더 안에 `EFI System Partition`이라는 type GUID(`C12A7328-F81F-11D2-BA4B-00A0C93EC93B`)가 박힌 파티션이 한 개는 있어야 합니다. 그 위는 FAT12/16/32 중 하나이고, 관례상 FAT32를 씁니다. 그 안 표준 경로(`/EFI/BOOT/BOOTAA64.EFI`)에 fallback 이미지가 놓여 있으면 펌웨어가 무엇이든 부팅이 됩니다.
+UEFI system partition은 GPT 또는 MBR partitioning에서 정의될 수 있습니다. UEFI 2.10은 EFI FAT32/FAT16/FAT12 support를 정의하며 system partition과 removable media의 FAT 요구를 구분합니다. GPT ESP GUID는 GPT-based system partition discovery에 중요하지만, fallback path나 bootability는 architecture, firmware implementation 및 device-path configuration에 좌우됩니다.
 
 ```text
 GPT disk
 ├── Partition 1: ESP (type GUID = C12A7328-...)
-│   FAT32
+│   EFI FAT filesystem (format/media class에 맞춤)
 │   └── /EFI
 │       ├── BOOT/
 │       │   └── BOOTAA64.EFI       <- fallback loader
@@ -225,30 +187,24 @@ GPT disk
 └── Partition 3: rootfs
 ```
 
-NVRAM Variables는 매번 부팅마다 보존되어야 합니다. 영구 저장소가 없으면 펌웨어가 사용자가 등록한 부팅 항목을 잊어버려 fallback 경로만 시도하게 됩니다.
+Non-volatile boot variables의 지속성은 구현된 backend가 제공합니다. Persistent storage가 없는 환경에서 reboot 후 variable retention을 가정하면 안 됩니다.
 
 ## U-Boot EFI 구현 범위
 
-U-Boot의 EFI loader는 *부팅에 필요한 만큼*만 구현하는 실용주의 노선입니다. UEFI 명세 100% 호환을 목표로 두지 않으며, 통과 의무가 있는 시험 모음(SCT, Self-Certification Test)에도 일부 항목만 통과합니다.
+U-Boot 문서는 implementation target으로 EBBR requirements를 명시하며, full UEFI implementation을 목표로 하지 않는다고 설명합니다. 구체적인 protocol support는 선택한 tag의 source/documentation과 board configuration에서 확인합니다.
 
-| 분류 | 항목 | U-Boot 구현 |
-|------|------|-------------|
-| Boot Services | LoadImage, StartImage, AllocatePages, HandleProtocol | 전부 구현 |
-| Boot Services | OpenProtocolInformation, ConnectController | 부분 구현 |
-| Runtime Services | GetVariable, SetVariable | 구현 (env 또는 file backend) |
-| Runtime Services | GetTime, SetTime | RTC 있을 때만 |
-| Runtime Services | UpdateCapsule | 부분 구현 (펌웨어 업데이트용) |
-| Runtime Services | ResetSystem | 구현 |
-| Protocols | Block IO, Disk IO, Simple File System | 구현 |
-| Protocols | Graphics Output Protocol | 디스플레이 드라이버 있을 때 |
-| Protocols | Network (PXE, TCP, UDP) | 부분 구현 |
-| 보안 | Secure Boot 검증 (PK/KEK/db/dbx) | 구현 |
+| 확인 항목 | 무엇을 대조할지 |
+|------|------|
+| Boot Services / protocols | 선택 tag의 source 및 UEFI test 결과 |
+| EFI variables | board가 선택한 variable backend와 persistent storage |
+| Storage / display / network | 해당 device driver와 board configuration |
+| Secure Boot | tag의 Kconfig, enrollment path, enforcement 및 negative test |
 
-`OpenProtocolInformation`처럼 진단·디버그용 API 일부가 stub이고, multiprocessor 관련 프로토콜은 빠져 있습니다. 그래도 GRUB·systemd-boot·shim·Linux EFI stub 같은 *실전 소프트웨어*가 동작하기에는 충분합니다.
+일반적인 compatibility를 protocol list만으로 보장할 수 없습니다. GRUB, systemd-boot, shim 및 Linux EFI stub은 대상 board와 build에서 각각 시험해야 합니다.
 
 ## GRUB · systemd-boot 부팅 흐름
 
-U-Boot EFI를 켠 임베디드 보드에서 distro를 부팅하는 흐름은 PC와 거의 같습니다. 세 단계로 나뉩니다.
+U-Boot EFI를 사용하는 임베디드 보드의 distro boot flow는 loader, boot manager configuration 및 OS image에 따라 달라집니다. 아래는 개념도입니다.
 
 ```text
 [U-Boot EFI loader]
@@ -266,7 +222,7 @@ U-Boot EFI를 켠 임베디드 보드에서 distro를 부팅하는 흐름은 PC�
 [kernel main]
 ```
 
-U-Boot은 ESP를 mount해 fallback 경로 또는 `BootXXXX`에 적힌 경로의 EFI 이미지를 LoadImage로 메모리에 올리고 StartImage로 점프합니다. 그 EFI 이미지가 GRUB이면 `grub.cfg`를 파싱해 메뉴를 띄우고, systemd-boot이면 `/loader/entries/*.conf`를 읽어 항목을 보여 줍니다.
+U-Boot의 EFI loader가 boot option을 실행할 때 Boot Manager가 변수에서 선택한 device path를 사용하고 EFI image를 load/execute합니다. 장치와 filesystem 가용성은 platform 설정에 달려 있습니다. 그 EFI 이미지가 GRUB이면 `grub.cfg`를 파싱해 메뉴를 띄우고, systemd-boot이면 `/loader/entries/*.conf`를 읽어 항목을 보여 줍니다.
 
 ```text
 # /EFI/debian/grub.cfg 예시
@@ -287,11 +243,13 @@ initrd   /initrd.img-6.6.0-arm64
 options  root=UUID=... ro quiet
 ```
 
-GRUB·systemd-boot 모두 *Linux kernel을 EFI 이미지로 보고* StartImage로 호출합니다. EFI stub이 박힌 kernel이라면 그 자체가 EFI application이라 별도 변환이 필요하지 않습니다.
+EFI stub이 포함된 Linux kernel은 supported UEFI image로 실행될 수 있습니다. GRUB과 systemd-boot의 지원 기능 및 각 command는 해당 loader/kernel version 문서에서 확인해야 합니다.
 
 ## EFI variables (efivars)
 
-EFI Variable은 키-값 쌍의 영구 저장소입니다. 이름(`BootOrder`, `Boot0000`, `SecureBoot` 등)과 GUID, 그리고 attribute 비트(non-volatile, boot-services-only, runtime-access 등)로 식별됩니다.
+UEFI variable은 이름과 GUID, attribute로 식별되며 비휘발성인지는 attribute와 variable service 구현에 따릅니다. 이름(`BootOrder`, `Boot0000`, `SecureBoot` 등)과 GUID, 그리고 attribute 비트(non-volatile, boot-services-only, runtime-access 등)로 식별됩니다.
+
+아래 형식은 설명용 예시이며 target command output이 아닙니다.
 
 ```text
 => efidebug boot dump
@@ -306,7 +264,7 @@ Boot0001:
   file_path: VenHw(...)/HD(2,GPT,...)/File(\EFI\RECOVERY\BOOT.EFI)
 ```
 
-U-Boot이 NVRAM에 저장하는 방식은 두 가지입니다. `CONFIG_EFI_VARIABLE_FILE_STORE=y`면 ESP 루트에 `ubootefi.var` 파일을 만들어 그 안에 변수를 직렬화합니다. 그 옵션이 없으면 U-Boot env에 `efi_<name>` 형태로 섞여 저장됩니다. 파일 백엔드가 더 안전합니다. env를 erase해도 EFI 변수는 남고, ESP만 복사해도 환경이 옮겨집니다.
+EFI variable 저장 방식은 version, Kconfig 및 board/TEE backend에 따라 달라집니다. 특정 파일명이나 U-Boot environment mapping을 보편 동작으로 가정하지 말고 실제 configuration과 recovery behavior를 확인합니다.
 
 Linux userspace에서는 `/sys/firmware/efi/efivars/`에 read/write할 수 있습니다. `efibootmgr`이 그 인터페이스를 사용합니다.
 
@@ -355,29 +313,18 @@ ARM SystemReady는 ARM이 정의한 *EFI/ACPI/devicetree 호환 인증 프로그
 | SystemReady IR | IoT·임베디드 | UEFI + DT + EBBR |
 | SystemReady LS | 리눅스 한정 | LBBR |
 
-임베디드 보드는 보통 *IR*을 노립니다. U-Boot 기반으로 EBBR(Embedded Base Boot Requirements)을 만족하면 IR 인증을 받을 수 있습니다. 인증을 받으면 *어떤 generic distro ISO든* 부팅된다는 보증이 따라옵니다.
+SystemReady profile과 EBBR compliance는 별도 specification/test scope를 따릅니다. EBBR compliance만으로 arbitrary generic distro ISO의 boot guarantee가 생기지는 않습니다.
 
-```text
-SystemReady IR 요구 요약
-- UEFI Boot Services 핵심
-- UEFI Runtime Services: SetVariable·GetVariable·ResetSystem
-- GPT + FAT ESP
-- Device Tree를 EFI Configuration Table로 전달
-- BSA(Base System Architecture) ACS test suite 통과
-```
-
-U-Boot은 IR을 충족하기 위해 만들어진 옵션을 다 갖추고 있습니다. 다만 *벤더가 빌드 시점에 그 옵션을 켰는지*는 보드마다 다릅니다. defconfig를 확인하는 습관이 필요합니다.
+이 장에서는 profile requirements를 완전하게 열거하거나 U-Boot build의 compliance를 주장하지 않습니다. U-Boot build이 특정 profile을 충족하는지는 해당 revision의 normative specification, board configuration과 conformance tests로 확인해야 합니다.
 
 ## debian-installer · Fedora 부팅 사례
 
-EBBR/SystemReady IR을 충족하는 보드는 distro install 이미지를 그대로 부팅할 수 있습니다. 가장 흔한 시나리오는 다음 둘입니다.
+EBBR/SystemReady profile은 정해진 firmware interface requirements를 다룹니다. 특정 distribution installer의 성공적인 부팅은 image, architecture, drivers 및 board configuration에 따라 별도로 검증해야 합니다. 아래 output은 예시이며 실제 보드 캡처가 아닙니다.
 
 debian-installer (netinst) AArch64.
 
 ```bash
-# host에서 SD/USB에 이미지 dd
-$ xz -d debian-12-netinst-arm64.iso.xz
-$ sudo dd if=debian-12-netinst-arm64.iso of=/dev/sdX bs=4M conv=fsync
+# Host imaging commands are intentionally omitted: verify the target device, image and recovery plan before writing removable media.
 
 # 보드 부팅
 => usb start
@@ -399,32 +346,32 @@ Booting /EFI/BOOT/BOOTAA64.EFI
 Welcome to Fedora 39 (Server Edition)
 ```
 
-보드별 BSP 부팅 스크립트를 만들 필요가 없어집니다. *PC를 부팅시키듯이* SD 카드를 꽂고 전원을 넣으면 됩니다. 이게 EBBR이 약속하는 핵심 가치입니다.
+이 예시만으로 보드별 BSP script가 불필요하거나 installer가 자동으로 동작한다고 결론내릴 수 없습니다. 실제 media와 board에서 확인해야 합니다.
 
 ## 자주 하는 실수
 
 EFI 부팅 도입 시 자주 만나는 함정입니다.
 
-- **`bootefi setup`을 건너뛴다.** EFI System Table이 초기화 안 되어 EFI 변수·시간 함수가 NULL을 반환합니다.
-- **DTB를 EFI Configuration Table로 전달하지 않는다.** Linux EFI stub이 *EFI에서 DTB를 받아야* 정상 동작합니다. `bootefi ${kernel_addr_r} ${fdt_addr_r}` 형태의 두 번째 인자를 빠뜨리지 않아야 합니다.
-- **`CONFIG_EFI_LOAD_FILE2_INITRD=y`를 빼고** 5.8+ 커널을 부팅한다. initramfs가 메모리에 있어도 커널이 찾지 못합니다.
-- **EFI Variable을 env에만 두고** 펌웨어 업데이트 시 env가 같이 날아간다. 파일 저장 백엔드를 권합니다.
-- **Secure Boot의 db에 직접 키만 넣고** PK·KEK 계층을 건너뛴다. 검증이 도중에 풀려 거짓 양성이 납니다.
+- **`bootefi setup` 명령을 가정한다.** v2025.01 documented synopsis에 이 subcommand는 없으며, board-specific initialization은 해당 build documentation을 확인합니다.
+- **FDT/ACPI 전달을 가정한다.** `bootefi`는 옵션 FDT 주소를 받으며 UEFI application이 hardware description을 요구하는 방식은 image와 platform에 따라 확인합니다.
+- **Initrd 전달 방식과 kernel support를 확인하지 않는다.** 선택한 U-Boot EFI configuration과 Linux kernel documentation으로 검증합니다.
+- **EFI variables persistence를 가정한다.** board가 제공하는 storage backend, secure storage, backup/restore policy를 확인합니다.
+- **Secure Boot provisioning을 가정한다.** PK/KEK/db/dbx handling, enrollment 및 enforcement를 선택한 U-Boot build에서 확인합니다.
 - **GUI 콘솔이 없는데 GOP를 켠다.** 부팅이 *디스플레이 초기화에서* 한참 멈추거나 hang합니다.
-- **ESP 파티션을 FAT 외 파일시스템으로 만든다.** ext4·btrfs로 포맷한 ESP는 펌웨어가 인식하지 못합니다. FAT32(또는 FAT16)만 허용됩니다.
-- **MBR 디스크에 EFI 부팅을 시도한다.** UEFI 명세는 GPT를 전제로 하는 항목이 많습니다. MBR로도 부팅이 되긴 하지만 BootXXXX의 디바이스 경로가 GPT GUID에 의존하므로 항목 등록이 깨집니다.
-- **EFI variable 영역을 빼고 빌드한다.** `CONFIG_EFI_VARIABLE_FILE_STORE`도 `CONFIG_ENV_IS_*`도 없으면 SetVariable이 in-memory에만 머무릅니다. 재부팅하면 사라집니다.
-- **ESP의 GPT type GUID를 일반 데이터 파티션으로 둔다.** type GUID가 `C12A7328-F81F-11D2-BA4B-00A0C93EC93B`여야 펌웨어가 ESP로 인식합니다. `parted set 1 esp on`이나 `sgdisk -t 1:EF00`로 설정합니다.
+- **ESP filesystem support를 가정한다.** UEFI FAT variant와 platform implementation을 확인합니다; UEFI 2.10은 FAT32 system partition과 FAT12/16 removable-media support를 구분합니다.
+- **GPT만 지원된다고 가정한다.** UEFI system partition은 GPT 또는 MBR-based device에 있을 수 있으나 firmware discovery와 device path는 구현별로 검증해야 합니다.
+- **EFI variable persistence를 빌드 option 이름만으로 추론한다.** 실제 backend와 power-loss behavior를 해당 tag의 board/TEE configuration으로 확인합니다.
+- **GPT-based system partition에서 ESP type GUID를 누락한다.** GPT partition entry를 사용하는 경우 GUID `C12A7328-F81F-11D2-BA4B-00A0C93EC93B`를 지정합니다; MBR layouts use a different partition-type mechanism.
 
 ## 정리
 
 - U-Boot의 EFI loader는 UEFI Boot Services·일부 Runtime Services를 구현해 EFI 부팅을 가능케 합니다.
-- `bootefi setup` 다음 `bootefi <addr> <dtb>` 형태가 표준 부팅 흐름입니다.
+- `bootefi <image_addr> [fdt_addr]` 또는 `bootefi bootmgr`를 사용하며 availability는 board config로 확인합니다.
 - `bootefi bootmgr`이 EFI Variable의 BootOrder를 읽어 자동 부팅을 수행합니다.
-- EFI Variable 저장은 env 매핑보다 별도 파일 저장이 더 안전합니다.
-- UEFI Secure Boot의 PK/KEK/db/dbx 계층을 그대로 가져와 distro 키로 검증할 수 있습니다.
-- EBBR을 충족하면 distro 설치 ISO를 임베디드 보드에서 바로 부팅할 수 있습니다.
-- Linux 5.8+의 LoadFile2 initrd 프로토콜은 `CONFIG_EFI_LOAD_FILE2_INITRD=y`로 활성화해야 합니다.
+- EFI variable persistence와 trust properties는 실제 backend에 따라 달라집니다.
+- Secure Boot enforcement와 PK/KEK/db/dbx enrollment은 선택한 U-Boot tag/board에서 end-to-end 검증합니다.
+- EBBR requirements만으로 특정 distro installer의 compatibility가 보장되지는 않습니다.
+- Initrd 전달 경로는 target U-Boot/Kconfig와 Linux kernel configuration으로 검증해야 합니다.
 
 ## 다음 장 예고
 
@@ -437,6 +384,8 @@ EFI든 FIT든 `bootm`이든, 결국 *커널에 점프하는 순간*의 ABI는 �
 - [Ch 25: TF-A와 보안 부트](/blog/embedded/bootloader/chapter25-tfa-optee) — TF-A BL31 위에서 U-Boot EFI가 도는 구성
 - [Ch 29: Distro Boot vs EFI Boot](/blog/embedded/bootloader/chapter29-distro-boot) — 두 부팅 흐름의 비교와 선택 기준
 - [Embedded Security Ch 2: Secure Boot](/blog/embedded/embedded-security/chapter02-secure-boot)
-- [원문 — U-Boot doc/uefi/uefi.rst](https://u-boot.readthedocs.io/en/latest/develop/uefi/uefi.html)
-- [원문 — EBBR specification](https://arm-software.github.io/ebbr/)
+- [UEFI 2.10: Media Access](https://uefi.org/specs/UEFI/2.10/13_Protocols_Media_Access.html) — GPT/MBR 및 FAT media requirements
+- [원문 — U-Boot doc/uefi/uefi.rst](https://docs.u-boot.org/en/v2025.01/develop/uefi/uefi.html)
+- [U-Boot v2025.01 `bootefi` command](https://docs.u-boot.org/en/v2025.01/usage/cmd/bootefi.html)
+- [원문 — EBBR specification](https://github.com/ARM-software/ebbr)
 - [원문 — ARM SystemReady program](https://www.arm.com/architecture/system-architectures/systemready-compliance-program)

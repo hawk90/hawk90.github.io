@@ -1,8 +1,8 @@
 ---
-title: "EFI·UEFI에서 CXL 초기화 — CEDT 생성과 HDM Decoder 사전 설정"
+title: "EFI·UEFI에서 CXL 초기화 — CEDT 인계와 HDM Decoder 설정의 경계"
 slug: "embedded/bootloader/chapter35-uefi-cxl-init"
 date: 2026-06-19T09:02:00
-description: "EDK II 기반 UEFI에서 CXL 디바이스 초기화 — CEDT(CXL Early Discovery Table) 생성, HDM Decoder 사전 설정, ACPI handoff."
+description: "CXL firmware가 인계하는 CEDT의 CHBS·CFMWS 정보와 HDM decoder·region의 runtime 설정을 구분하고, QEMU와 Linux guest에서 확인할 범위를 정리합니다."
 series: "Bootloader Internals"
 seriesOrder: 35
 tags: [embedded, bootloader, uefi, edk2, cxl, cedt, acpi, hdm-decoder]
@@ -12,222 +12,146 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"UEFI는 *enumeration 결과*를 *ACPI 테이블*로 *커널에 인계*합니다."** — *CEDT (CXL Early Discovery Table)*가 *host bridge·memory window·interleave 규칙*을 담고, *HDM Decoder가 부팅 시점에 이미 프로그래밍*되어 있어 *커널이 깨어났을 때 즉시 메모리를 사용*할 수 있습니다.
+CXL 플랫폼 firmware는 OS가 사용할 host bridge·주소 window·메모리 속성을 일관되게 기술해야 합니다. **CEDT가 존재한다고 endpoint decoder 설정과 Linux System RAM online까지 끝난 것은 아닙니다.** HDM decoder는 firmware가 미리 설정할 수도, Linux 드라이버가 나중에 구성할 수도 있습니다.
 
-[Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)에서 *U-Boot의 PCIe enumeration*과 *CXL DVSEC scan*을 봤습니다. *서버 환경*에서는 *EDK II 기반 UEFI*가 *비슷한 흐름*에 *ACPI 통합*을 더해 *훨씬 정교한 인계 절차*를 거칩니다. 이 장은 *UEFI에서 CXL 초기화가 어떻게 이루어지는지*, *어떤 ACPI 테이블이 만들어지는지*를 분해합니다.
+[Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)에서 PCI BAR와 CXL 메모리 주소 공간을 구분했습니다. 이 장은 ACPI 기반 Linux CXL 문서를 기준으로 firmware 인계의 책임을 설명합니다. 특정 OEM의 EDK II fork나 상용 BIOS 실행 경로를 재현한 분석은 아닙니다.
 
 ## UEFI와 U-Boot의 차이
 
-같은 *enumeration 작업*이지만 *환경이 다릅니다*.
+UEFI는 firmware 인터페이스 규격이고 U-Boot은 그 인터페이스 일부를 구현할 수 있는 부트로더입니다. 따라서 두 이름을 상호 배타적인 제품 유형이나 CXL 지원 등급으로 비교하면 안 됩니다. DT와 ACPI의 사용 여부, 실제 CXL 지원은 해당 플랫폼의 구현과 OS 계약에 달려 있습니다.
 
-| 항목 | U-Boot | UEFI |
-|------|--------|------|
-| 사용처 | 임베디드 | 서버·데스크탑 |
-| 인계 방식 | DTB (Device Tree) | ACPI tables |
-| CXL 표준 통합 | 비교적 늦음 | spec 발표 직후 |
-| HDM Decoder 처리 | 단순 | CFMWS 기반 정교 |
-| Secure Boot 통합 | 옵션 | 표준 |
-| Hot-add 지원 | 제한적 | spec |
+| 확인 항목 | 필요한 자료 |
+| --- | --- |
+| 부팅 인터페이스 | EFI loader 지원과 OS 진입 경로 |
+| 하드웨어 기술 | 실제 전달한 DT 또는 ACPI tables |
+| CXL 지원 | host·port·device의 protocol 지원과 driver |
+| 부팅 시 메모리 사용 | memory map·decoder·OS 정책 |
 
-서버 CXL 환경에서는 *UEFI가 표준*입니다.
+PCIe 5.0이나 UEFI라는 이름만으로 CXL 기능이 보장되지는 않습니다. boot device를 찾는 PCI 탐색과 CXL 메모리를 page allocator에 연결하는 과정도 각각 확인합니다.
 
-## EDK II의 CXL 모듈
+## EDK II에서 확인할 구현 범위
 
-EDK II는 *CXL 지원을 별도 DXE 드라이버 모듈*로 제공합니다. *실제 모듈 이름*은 *EDK II 버전과 vendor fork*마다 다르지만 *역할 분류*가 비슷합니다:
+EDK II 기반이라는 설명만으로 공통 CXL bus DXE·memory DXE·CEDT generator가 모두 포함됐다고 볼 수 없습니다. 구현을 분석하려면 repository·tag/commit·platform DSC/FDF와 실제 포함된 INF, table 설치 코드를 먼저 확보해야 합니다.
 
-| 역할 | 모듈 카테고리 |
-|------|--------------|
-| CXL bus enumeration·DVSEC 검출 | bus driver (PCI/CXL bus DXE) |
-| CXL.mem device 초기화·HDM 프로그래밍 | memory device driver DXE |
-| CXL port·switch 처리 | port driver DXE |
-| CEDT ACPI table 생성 | ACPI table generator |
-| CXL host bridge 추상화 | host bridge driver |
+| 역할 | 코드·실행에서 확인할 것 |
+| --- | --- |
+| PCI 장치 발견 | 실제 bus driver와 DVSEC 접근 경로 |
+| 정적 host 정보 | host bridge UID·component register·주소 window |
+| decoder 설정 | 누가 설정하고 commit·lock하는지 |
+| ACPI 인계 | 어떤 코드가 CEDT와 관련 tables를 설치하는지 |
+| OS 사용 | driver probe·region 구성·DAX 또는 RAM online 상태 |
 
-부팅 흐름에서 *bus driver가 가장 먼저 동작*해 *디바이스 발견*, 그 다음 *memory driver가 HDM Decoder 프로그래밍*, 마지막에 *ACPI generator가 CEDT 생성*. *실 모듈 이름은 `MdeModulePkg`·OEM platform fork*를 참고합니다.
+이 자료가 없는 상태에서 모든 platform이 같은 순서로 DXE 모듈을 실행한다고 단정하지 않습니다. 아래에서는 모듈명을 추정하는 대신 커널이 소비하는 정보의 의미를 확인합니다.
 
 ## CEDT 구조
 
-*CEDT (CXL Early Discovery Table)*는 CXL의 *ACPI table*입니다. UEFI Spec과 CXL Spec 양쪽에 정의:
+CEDT는 **CXL Early Discovery Table**입니다. UEFI라는 이름 자체가 세부 CXL table format을 정하는 것은 아니며, 사용 중인 CXL·ACPI 관련 규격 revision과 OS parser를 함께 확인해야 합니다. 여기서는 Linux 문서가 설명하는 CHBS와 CFMWS에 범위를 한정합니다.
 
-| Subtable | Type | 의미 |
-|----------|------|------|
-| Header | — | "CEDT" signature + revision |
-| CHBS | 0x00 | CXL Host Bridge Structure |
-| CFMWS | 0x01 | CXL Fixed Memory Window Structure |
-| CXIMS | 0x02 | CXL XOR Interleave Math Structure |
-| RDPAS | 0x03 | RCEC (Root Complex Event Collector) Downstream Port Association |
-| CSDS | 0x04 | CXL System Description Structure |
+| 구조 | 역할 |
+| --- | --- |
+| CHBS, type 0 | host bridge의 UID와 component register 정보 등 |
+| CFMWS, type 1 | host physical address window·host bridge target·interleave·허용 용도 등 |
 
-핵심은 *CHBS·CFMWS 두 가지*. *CHBS가 어디에 host bridge가 있나*, *CFMWS가 어느 SPA range가 CXL에 매핑되어 있나*를 알려 줍니다.
+CHBS의 UID는 ACPI host bridge 식별과 맞아야 합니다. register base·length를 모든 장치에서 같은 값으로 가정하지 않으며 version 필드도 규격의 encoding으로 해석합니다. endpoint별 용량 목록이나 SPDM 인증 성공 목록으로 읽으면 안 됩니다.
 
-## CHBS — Host Bridge Structure
+## CFMWS — Fixed Memory Window
 
-각 CXL host bridge마다 CHBS 항목:
+CFMWS는 하나 이상의 host bridge에 연결되는 host physical address 범위를 기술합니다. window 전체가 현재 설치된 메모리이거나 이미 online된 RAM이라는 뜻은 아닙니다. host bridge 사이 interleave와 bridge 아래 decoder의 interleave 설정도 서로 구분합니다.
 
-| Field | 의미 |
-|-------|------|
-| Subtable Type | 0x00 (CHBS) |
-| UID | 고유 식별자 |
-| CXL Version | 0x0001 (1.1), 0x0002 (2.0) |
-| Base | host bridge component register block 시작 주소 |
-| Length | register block 크기 (0x10000 = 64 KB 기본) |
+Linux CEDT 문서의 Restrictions 비트는 다음과 같습니다. 비트가 하나 이상 켜질 수 있으므로 이름에 무조건 “only”를 붙이지 않습니다.
 
-호스트 커널이 *CHBS를 보고* *각 host bridge 위치*를 압니다.
+| 비트 | 허용·제약 정보 |
+| --- | --- |
+| 0 | CXL Type 2 memory |
+| 1 | CXL Type 3 memory |
+| 2 | volatile memory |
+| 3 | persistent memory |
+| 4 | fixed configuration |
 
-## CFMWS — Fixed Memory Window Structure
+예를 들어 0x06은 이 필드에서 Type 3와 volatile 비트가 설정된 값입니다. 실제 region 구성에는 window·target·decoder·메모리 종류 등 전체 조건이 맞아야 하며, 이 값 하나만 바꿔 장치 호환성을 만들 수는 없습니다.
 
-가장 중요한 항목. *어느 SPA range가 CXL용으로 예약*되어 있나:
+## HDM Decoder 사전 설정과 Runtime 설정
 
-| Field | 의미 |
-|-------|------|
-| Subtable Type | 0x01 (CFMWS) |
-| Window Size | window 크기 (예: 512 GB) |
-| ENIW (Encoded Number of Interleave Ways) | interleave 방향 수 |
-| HBIG (Host Bridge Interleave Granularity) | 256 B·512 B·...·16 KB |
-| Restrictions | type 3 only / volatile only / persistent only 등 |
-| QTG ID | QoS Throttling Group |
-| Window Base Address | 시작 SPA |
-| First Interleave Target List Index | 매핑된 host bridge IDs |
+Linux BIOS/EFI 문서는 **decoder와 switch port의 사전 programming을 필수로 요구하지 않습니다.** firmware가 static topology와 window 정보를 준비하고 CXL 드라이버가 runtime에 decoder를 구성하는 경로가 있습니다. 특정 플랫폼은 미리 설정하거나 잠글 수 있으므로 그 조건과 Linux 지원을 별도로 검증해야 합니다.
 
-CFMWS가 *여러 개*면 *각각 다른 메모리 영역·다른 interleave 정책*입니다. 예를 들어:
-- *CFMWS 0*: 직접 attach 256 GB, single host bridge
-- *CFMWS 1*: pooling용 1 TB, 2-way interleave
+| 구성 | 확인할 경계 |
+| --- | --- |
+| firmware가 미리 설정 | 경로 전체 decoder 일관성·commit·lock·OS의 자동 region 인식 |
+| OS가 runtime 구성 | 가용 window·device capacity·interleave·region 생성 권한과 정책 |
+| RAM으로 노출 | memory map 또는 driver 경로와 실제 online 상태 |
 
-## HDM Decoder 사전 프로그래밍
+commit과 lock은 다른 상태입니다. firmware가 commit했다는 사실만으로 모든 runtime 조작이 금지된다고 할 수 없습니다. 사용 중인 region과 메모리 수명을 확인하지 않은 채 재설정하는 명령을 실행해서도 안 됩니다.
 
-UEFI는 *enumeration이 끝나면 HDM Decoder를 미리 프로그래밍*해 둡니다.
+## SRAT·HMAT·SLIT과의 관계
 
-이유:
-1. 커널이 깨어났을 때 *즉시 메모리를 system RAM으로 인식*하게 함
-2. *SRAT·HMAT 통합*이 *부팅 시점에 완료*
-3. *NUMA 노드 자동 등록*
+CEDT가 말하는 window, SRAT가 말하는 proximity domain과 memory affinity, HMAT의 접근 성능 정보, SLIT의 상대 거리는 서로 다른 정보입니다. [Ch 36](/blog/embedded/bootloader/chapter36-boot-memory-topology)에서 이 정보가 NUMA·tier·RAM online 상태로 연결되는 과정을 다룹니다.
 
-이를 *Auto-Commit*이라 부르며, *firmware-managed 모드*입니다. *커널 측이 commit 불필요*.
+여기에 고정된 CXL latency나 distance 범위를 넣어 모든 플랫폼에 적용하지 않습니다. HMAT가 있다고 DAMON이 애플리케이션의 hot/cold 데이터를 자동 식별하고 이동시키는 것도 아닙니다. 커널 버전과 실제 메모리 관리 정책이 더 필요합니다.
 
-대조적으로 *user-managed 모드*는 *커널 부팅 후 cxl-cli로 commit*. *Hot-add·테스트*에는 user-managed가 유리.
+## SPDM 인증과 인계 정보
 
-## SRAT와 HMAT 통합
+장치 인증과 IDE 적용은 해당 platform의 보안 설계·지원 장치·firmware/OS 정책에 달려 있습니다. CEDT의 CHBS·CFMWS는 장치 인증 성공 여부를 나열하는 범용 active/disabled 목록이 아닙니다. 인증 실패가 항상 CEDT 삭제로 표현된다고 가정하지 않습니다.
 
-CXL.mem 메모리는 *별도 ACPI 테이블*에도 등록됩니다.
+보안 경로를 분석하려면 실제 SPDM requester/responder·인증 정책·실패 로그·IDE 설정 주체를 추적해야 합니다. Secure Boot의 firmware 이미지 서명 검증과 장치 attestation도 다른 확인 대상입니다.
 
-| 테이블 | 역할 | CXL 영향 |
-|-------|------|---------|
-| MADT | CPU·local APIC | 변경 없음 |
-| SRAT | NUMA 노드 → CPU·memory affinity | CXL.mem 영역이 *별도 노드*로 등록 |
-| HMAT | memory tier (latency·bandwidth) | CXL.mem이 *higher latency tier*로 분류 |
-| SLIT | NUMA 노드 간 거리 | CXL 노드 *distance 50~80*으로 등록 |
-| MCFG | PCIe config space | 변경 없음 |
+## QEMU와 Guest에서 확인할 것
 
-핵심은 *HMAT*. UEFI가 *CXL 디바이스의 latency·bandwidth*를 *HMAT에 미리 적어* 두면 *커널이 자동으로 memory tier를 분류*. *DAMON·NUMA balancing*이 그 분류를 *그대로 사용*.
+QEMU의 CXL 모델은 topology와 driver의 **기능 검증**에 유용합니다. firmware·machine version·device 옵션·guest kernel을 함께 고정해야 하며, 물리 link timing·신호 무결성·실장치 보안을 대신 검증하지는 않습니다. 사용 중인 빌드에서 제공하는 옵션은 다음처럼 확인할 수 있습니다.
 
-## SPDM 인증 통합 (옵션)
-
-Confidential Computing 환경에서는 *UEFI가 부팅 시 디바이스 SPDM 인증*도 진행:
-
-| 단계 | 동작 |
-|------|------|
-| 1 | UEFI가 CXL 디바이스 enumerate |
-| 2 | UEFI가 SPDM 인증 시도 ([Ch 12 Security](/blog/embedded/embedded-security/chapter12-spdm-cma)) |
-| 3 | 인증 성공 → CEDT에 *active* 표시 + IDE 활성화 |
-| 4 | 인증 실패 → CEDT에 *disabled* 표시 또는 항목 제거 |
-
-*보안 부팅*과 *attestation*이 *부팅 시점*에 완료됩니다.
-
-## QEMU + OVMF 검증
-
-EDK II 기반 *OVMF (Open Virtual Machine Firmware)*에 CXL 코드가 들어 있어 *QEMU에서 검증* 가능:
-
-```bash
-# OVMF 빌드 시 CXL 옵션
-$ cd edk2
-$ build -p OvmfPkg/OvmfPkgX64.dsc -t GCC -a X64 -b RELEASE \
-    -D CXL_ENABLED=TRUE
-
-# QEMU에서 OVMF 사용
-$ qemu-system-x86_64 \
-    -bios OVMF.fd \
-    -machine q35,cxl=on \
-    [CXL device options...]
-
-# Linux guest에서 CEDT 확인
-guest$ acpidump -b
-guest$ iasl -d cedt.dat
-guest$ cat cedt.dsl   # CHBS·CFMWS 내용 확인
+```bash title="cxl-qemu-help.sh"
+qemu-system-x86_64 --version
+qemu-system-x86_64 -machine q35,help
+qemu-system-x86_64 -device cxl-type3,help
 ```
 
-OVMF의 CXL 코드가 *실 BIOS와 동일한 path*. *드라이버 통합 검증*에 충분합니다.
+QEMU 공식 문서의 실행 예와 그 버전이 요구하는 firmware를 사용합니다. 확인하지 않은 CXL_ENABLED=TRUE를 OVMF의 공통 build switch로 제시하지 않으며, 상용 BIOS와 동일한 실행 경로라고 주장하지 않습니다.
 
-## 상용 BIOS의 CXL 구현
+다음은 **별도로 부팅한 Linux guest**에서 ACPICA 도구와 읽기 권한이 있을 때 사용하는 수집 예제입니다. 새 작업 디렉터리에서 실행하며 실제 결과를 파일로 보존합니다.
 
-| Vendor | BIOS | CXL 지원 시점 |
-|--------|------|---------------|
-| Intel | RBU·MEBx | Sapphire Rapids (CXL 1.1), Granite Rapids (CXL 2.0) |
-| AMI | Aptio V | Genoa (CXL 2.0), Turin (CXL 3.0) |
-| Insyde | H2O | various OEM 적용 |
-| Phoenix | SecureCore | 일부 서버 |
-
-상용 BIOS는 *EDK II base*에 *vendor-specific extension*. 핵심 *CEDT 생성·HDM 프로그래밍 코드*는 공통.
-
-## 자주 하는 실수
-
-### CEDT 누락 시 증상
-
-```text
-[Linux kernel boot]
-[    0.524] cxl_acpi: device 0000:5e:00.0 — CHBS not found in CEDT
-[    0.525] cxl_acpi: skipping enumeration
+```bash title="cedt-dump.sh"
+set -eu
+acpidump -b -n CEDT
+iasl -d cedt.dat
+cat cedt.dsl
 ```
 
-BIOS의 *CXL 활성화 옵션이 disabled*거나 *EDK II에 CXL 모듈이 안 들어간 경우*. BIOS update가 답.
+table이 나오지 않으면 명령 권한·도구 버전·guest firmware·QEMU ACPI 생성·topology 옵션부터 확인합니다. CEDT가 없다는 증상 하나만으로 BIOS 업데이트를 정답으로 결정할 수 없습니다. 이 글에서는 QEMU나 guest 수집을 실행하지 않았습니다.
 
-### CFMWS Restrictions 잘못 설정
+## 실패 구간별 다음 확인
 
-```text
-CFMWS 0:
-  Restrictions = 0x06 (Type 3 only + Volatile only)
+| 관찰 | 다음 확인 |
+| --- | --- |
+| PCI 장치만 발견됨 | CXL protocol·ACPI·driver probe 상태 |
+| CEDT는 있으나 region 없음 | target UID·window·decoder·가용 capacity와 커널 로그 |
+| region은 있으나 RAM 증가 없음 | DAX mode·memory block·online 정책 |
+| region 수정 거부 | 실제 commit·lock·사용 상태와 지원 명령 |
+| 인증 문제 의심 | platform 보안 로그와 해당 인증 구현 |
 
-[Persistent memory device를 이 window에 매핑 시도]
-[    1.234] cxl_mem mem0: window restrictions mismatch — skip
-```
-
-*Restrictions field*가 *디바이스 타입과 맞아야* mapping됩니다. *Type 3 persistent*를 *volatile only window*에 못 넣음.
-
-### HDM Decoder Auto-Commit과 cxl-cli 충돌
-
-```bash
-$ cxl create-region -d decoder0.0 -t ram -s 128G
-Error: decoder already committed by firmware
-```
-
-*Firmware-managed mode*에서는 *user-managed 명령이 안 됩니다*. BIOS에서 *firmware vs user managed* 선택 옵션이 보통 있음.
-
-### SPDM 인증 실패가 silent
-
-BIOS SPDM 인증이 실패하면 다음과 같이 처리됩니다.
-
-- CEDT에서 해당 디바이스 항목이 제거됩니다.
-- 실패는 BIOS log에만 기록되고, 호스트 OS에는 전달되지 않습니다.
-
-*인증 실패한 디바이스가 그냥 안 보임*. *Confidential Computing 환경*에서는 *BIOS log 확인* 필수.
+kernel log 문구와 cxl-cli 오류를 만들어 실제 출력처럼 제시하지 않습니다. 기대한 경계와 실제 원시 로그를 대조해야 firmware table 문제와 OS 구성 문제를 구분할 수 있습니다.
 
 ## 정리
 
-- UEFI는 *EDK II 기반 CXL 모듈*들로 *enumeration → HDM 프로그래밍 → ACPI 테이블 생성*을 수행합니다.
-- *CEDT*는 *CHBS (host bridge)·CFMWS (memory window)·CXIMS (interleave)*를 호스트에 전달.
-- *SRAT·HMAT·SLIT*에도 CXL 정보가 통합되어 *커널이 자동으로 NUMA 노드·tier 분류*.
-- *Firmware-managed*는 BIOS가 HDM commit, *user-managed*는 cxl-cli로 commit. *각 모드의 장단*이 있음.
-- *Confidential Computing*은 *부팅 시 SPDM 인증*도 UEFI가 진행. 인증 실패 디바이스는 *CEDT에서 빠짐*.
-- *QEMU + OVMF*로 *드라이버 통합 검증*이 가능. 상용 BIOS는 *EDK II + vendor extension*.
+- CEDT의 정적 window 정보와 endpoint decoder·region·RAM online은 구분해야 합니다.
+- EDK II라는 이름만으로 공통 CXL DXE 모듈과 실행 순서가 정해지지는 않습니다.
+- Linux는 runtime decoder 구성을 지원하며 firmware 사전 설정은 플랫폼별로 검토합니다.
+- CEDT를 장치 인증 상태 목록으로 해석하지 않습니다.
+- QEMU는 기능 검증 범위를 제공하며 실제 firmware·hardware 검증과 실행 기록은 따로 필요합니다.
 
 ## 다음 편
 
-[Ch 36: 부트 시 메모리 토폴로지 결정](/blog/embedded/bootloader/chapter36-boot-memory-topology)에서는 *DDR DIMM·HBM·CXL.mem·Persistent memory*가 *하나의 메모리 토폴로지로 통합 인식*되는 흐름을 봅니다. *Bootloader Internals 시리즈의 마무리*입니다.
+[Ch 36: 부트 시 메모리 토폴로지 결정](/blog/embedded/bootloader/chapter36-boot-memory-topology)에서 SRAT·HMAT·SLIT과 Linux의 NUMA·tier·zone 결정 주체를 나눠 살펴봅니다.
+
+## 근거 자료
+
+- [Linux CXL CEDT](https://docs.kernel.org/driver-api/cxl/platform/acpi/cedt.html): CHBS·CFMWS와 Restrictions.
+- [Linux CXL BIOS/EFI Configuration](https://docs.kernel.org/driver-api/cxl/platform/bios-and-efi.html): firmware와 runtime programming의 책임.
+- [Linux CXL Driver Operation](https://docs.kernel.org/driver-api/cxl/linux/cxl-driver.html): decoder·region과 자동 발견.
+- [QEMU CXL 문서](https://www.qemu.org/docs/master/system/devices/cxl.html): 모델의 범위와 실행 구성 예시.
 
 ## 관련 항목
 
-- [Ch 18: U-Boot의 EFI 호환 분석](/blog/embedded/bootloader/chapter18-efi-in-uboot) — U-Boot의 EFI 인터페이스
-- [Ch 19: Linux Boot ABI — ARM/ARM64 커널 진입 규약 추적](/blog/embedded/bootloader/chapter19-kernel-handoff) — DTB·ACPI 인계
+- [Ch 18: U-Boot의 EFI 호환](/blog/embedded/bootloader/chapter18-efi-in-uboot)
 - [Ch 34: U-Boot PCIe Enumeration](/blog/embedded/bootloader/chapter34-pcie-enumeration)
-- [Ch 36: 부트 시 메모리 토폴로지 결정](/blog/embedded/bootloader/chapter36-boot-memory-topology) (다음 편)
-- [Embedded Security Ch 12: SPDM과 CMA 인증 흐름](/blog/embedded/embedded-security/chapter12-spdm-cma)
-- [Modern Embedded Recipes Ch 150: QEMU CXL Type 3 디바이스 에뮬레이션](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)
+- [Ch 36: 부트 시 메모리 토폴로지](/blog/embedded/bootloader/chapter36-boot-memory-topology)
+- [Embedded Security: SPDM과 CMA](/blog/embedded/embedded-security/chapter12-spdm-cma)
+- [Modern Embedded Recipes: QEMU CXL Type 3 에뮬레이션](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)
