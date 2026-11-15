@@ -1,82 +1,197 @@
 ---
-title: "DDR Training과 PHY Calibration — 보드별 파라미터 튜닝"
+title: "DDR training 깊이 — PHY·컨트롤러·보드 파라미터 검증"
 slug: "embedded/bootloader/chapter26-ddr-training"
 date: 2026-05-19T09:26:00
-description: "DDR controller와 PHY 초기화, DRAM별 training 설정, 보드 bring-up에서 실패를 구분하는 방법."
+description: "i.MX8MM과 U-Boot v2024.04로 DDR training firmware가 binman 심볼을 통해 PHY에 올라가는 경로, message block 주소, 타임아웃 없는 mailbox, training 결과가 컨트롤러 타이밍으로 돌아가는 과정을 실제 빌드와 소스로 추적합니다."
 series: "Bootloader Internals"
 seriesOrder: 26
-tags: [embedded, bootloader, ddr, lpddr, dram-init, training]
+tags: [embedded, bootloader, ddr, training, phy, lpddr4]
 draft: false
 topics: ["embedded"]
 ---
 
-DDR 초기화는 메모리 부품, SoC의 controller/PHY, PCB, 초기화 firmware가 함께 맞아야 합니다. Training은 설정된 메모리 인터페이스가 동작하는 지점을 찾는 과정이지만, 알고리즘과 관찰 방법은 DRAM 세대, PHY 및 vendor 도구에 따라 다릅니다. 보편적인 register 값이나 training 성공 기준을 추측하는 대신, 보드의 BOM·회로도·정확한 DRAM 자료와 SoC 문서를 연결해 확인하세요.
+[Ch 9](/blog/embedded/bootloader/chapter09-dram-init)에서 i.MX8M Mini(이하 i.MX8MM) SPL의 `ddr_init()` 순서와 `lpddr4_timing.c` 표, training 루프의 큰 흐름을 봤습니다. 이 장은 그 루프 안으로 한 단계 더 들어갑니다. training firmware가 어떻게 PHY 안의 마이크로컨트롤러(PMU)까지 가는지, PMU와 SPL이 무엇을 주고받는지, training이 끝나면 그 결과가 어디로 가는지를 봅니다.
+
+근거는 두 가지입니다. 하나는 U-Boot v2024.04 `drivers/ddr/imx/` 소스이고, 다른 하나는 [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 만든 `imx8mm_evk_defconfig` 빌드 산출물입니다. 이 빌드에는 NXP의 training firmware가 들어 있지 않습니다(`BINMAN_ALLOW_MISSING=1`). 그 덕분에 firmware가 *없을 때* 이미지가 어떤 모양이 되는지도 직접 볼 수 있습니다. 실제 보드에서 training을 돌린 결과는 이 장에 없습니다.
 
 ## 한 줄 요약
 
-Training 결과는 특정 SoC·PHY·DRAM·보드 조합의 증거입니다. 한 조합에서 얻은 timing, register 값, mailbox 값이나 온도 기준을 다른 제품에 이식하지 마세요.
+binman은 SPL 바이너리 안의 `_binman_ddr_*` 심볼에 firmware 위치와 크기를 써 넣고, SPL은 그 값으로 IMEM 32 KiB·DMEM 16 KiB를 PHY에 복사합니다. 주파수별 입력은 DMEM `0x54000` 영역(message block)에 쓰고, PMU의 응답은 mailbox로 받는데 이 대기에는 타임아웃이 없습니다. training이 끝나면 message block의 결과로 컨트롤러 타이밍(`DRAMTMG2`·`DRAMTMG9`·`RANKCTL`)을 고치고, PHY CSR 719개를 저장해 TF-A에 넘깁니다.
 
-## Controller와 PHY
+## firmware가 PHY까지 가는 길
 
-Controller는 메모리 프로토콜에 맞춰 요청과 timing을 관리하고, PHY는 SoC와 DRAM 사이의 전기적 인터페이스를 구현합니다. 이 역할 분리는 분석에 유용하지만 초기화 순서, training 실행 위치와 완료 상태는 IP 공급자 및 SoC 통합 방식에 달려 있습니다. 일부 PHY는 별도의 firmware를 쓸 수 있고, 다른 구현은 register sequence나 전용 control unit을 사용할 수 있습니다.
+DDR PHY 안의 PMU는 작은 전용 CPU입니다. 그런데 이 CPU는 자기 프로그램을 스스로 가져오지 못합니다. 이삿짐센터 직원이 짐 목록을 받아야 일을 시작하듯, SPL이 firmware를 PMU의 명령 메모리(IMEM)와 데이터 메모리(DMEM)에 직접 넣어 줘야 합니다. 그 일을 `drivers/ddr/imx/phy/helper.c:43`의 `ddr_load_train_firmware()`가 맡습니다.
 
-따라서 소스에서 함수 이름만 보고 실제 hardware 절차를 일반화하지 말고, reference manual, PHY/DRAM 문서, 해당 보드의 초기화 코드 및 vendor tool output을 같은 버전으로 맞춰 보세요. U-Boot의 board 문서도 구체적인 DDR 설정 흐름을 플랫폼별로 설명합니다.
+```c
+#define IMEM_LEN 32768 /* byte */
+#define DMEM_LEN 16384 /* byte */
+#define IMEM_2D_OFFSET	49152
 
-## Training 단계는 조합에 따라 다릅니다
+#define IMEM_OFFSET_ADDR 0x00050000
+#define DMEM_OFFSET_ADDR 0x00054000
+```
 
-초기화에는 DRAM 규격과 구현에 따라 command/address 또는 data path 관련 calibration, read/write timing 조정, impedance calibration 등 서로 다른 과정이 포함될 수 있습니다. 단계의 이름·순서·필수 여부와 실패 처리 방식은 모든 DDR4·LPDDR4 PHY에서 같지 않습니다. 숫자만 나열된 표를 근거 없이 표준 절차로 읽지 마세요.
+IMEM은 32 KiB, DMEM은 16 KiB이고, PHY 주소 공간에서 각각 `0x50000`과 `0x54000`에 있습니다. 복사 루프는 SPL 메모리에서 32비트를 읽어 16비트씩 두 번 `writew()`로 PHY에 씁니다. PHY 레지스터 한 칸이 16비트라서 주소(`pr_to32`)도 1씩 늘어납니다.
 
-DDR 세대별 signal 구성이나 전압, timing, ZQ 조건은 JEDEC 규격과 정확한 DRAM 부품의 datasheet를 확인해야 합니다. 보드에 납땜된 DRAM의 상세값을 eMMC `EXT_CSD`에서 얻는다는 식의 설명은 맞지 않습니다. DIMM의 SPD 사용 여부도 시스템 설계에 따라 다릅니다. DRAM 부품 번호와 speed grade, rank/width, SoC revision, PHY firmware 및 초기화 도구 버전을 기록하세요.
+### SPL은 firmware 위치를 어떻게 아나
 
-## 보드별 설정 산출과 빌드
+firmware 파일은 SPL을 링크한 *뒤에* binman이 이미지 끝에 붙입니다. 그래서 SPL 코드는 컴파일할 때 firmware 주소를 알 수 없습니다. 해결책은 빈칸이 있는 양식입니다. SPL에 8바이트짜리 빈칸을 미리 만들어 두고, binman이 이미지를 다 조립한 뒤 빈칸에 실제 주소를 채웁니다. `helper.c`는 이렇게 선언합니다.
 
-Vendor DDR tool은 제품군에 맞는 controller 설정이나 training 입력을 생성·점검할 수 있습니다. 예를 들어 NXP의 i.MX8/MSCALE DDR Tool User Guide는 특정 i.MX 계열과 해당 도구/firmware 사용 관계 및 U-Boot 빌드 통합 방법을 설명합니다. 그 절차를 다른 i.MX 제품이나 다른 vendor에 그대로 적용할 수는 없습니다.
+```c
+binman_sym_declare(ulong, ddr_1d_imem_fw, image_pos);
+binman_sym_declare(ulong, ddr_1d_imem_fw, size);
+```
 
-빌드 전 다음 자료를 상호 확인합니다.
+빌드한 SPL ELF에는 이 빈칸이 심볼로 남아 있습니다. `nm`으로 주소를 찾은 뒤, 같은 위치의 8바이트를 binman이 손대기 전(`spl/u-boot-spl.bin`)과 후(`u-boot-spl-ddr.bin`)로 나눠 읽었습니다.
 
-- 정확한 SoC와 silicon revision 및 PHY/controller IP 버전
-- DRAM 부품 번호, datasheet revision, density, organization, speed grade와 board routing
-- 생성된 설정 파일·binary firmware 이름과 version/hash
-- U-Boot tag, board defconfig, image packaging 방식과 linker/map 산출물
-- vendor tool이 요구하는 BSP, firmware 및 생성 코드 조합
+| 심볼 | 패치 전 | 패치 후 |
+|------|--------|--------|
+| `_binman_ddr_1d_imem_fw_prop_image_pos` | `0x0` | `0x806418` |
+| `_binman_ddr_1d_imem_fw_prop_size` | `0x0` | `0x0` |
+| `_binman_ddr_2d_dmem_fw_prop_image_pos` | `0x0` | `0x806418` |
+| `_binman_sym_magic` | `0x0` | `0x4d595342` |
 
-초기화 값의 출처와 변경 이력을 보드 revision에 연결해 두세요. 다른 DRAM 부품을 같은 보드 옵션으로 처리할 수 있는지, 또는 보드 식별을 통해 설정을 선택하는지는 해당 platform code로 확인합니다.
+magic 값 `0x4d595342`는 ASCII로 `BSYM`이고, `include/binman_sym.h:15`의 `BINMAN_SYM_MAGIC_VALUE`입니다. SPL은 `BINMAN_SYMS_OK`(같은 파일 95행)로 이 magic이 맞는지 확인한 뒤에만 심볼 값을 믿습니다. `image_pos` `0x806418`은 binman map의 firmware 자리와 일치합니다.
+
+```text
+ImagePos    Offset      Size  Name
+00000000  00000000  00025418  u-boot-spl-ddr
+00000000   00000000  00025417  u-boot-spl
+00000000    00000000  00023410  u-boot-spl-nodtb
+00023410    00023410  00002007  u-boot-spl-dtb
+00025418   00025418  00000000  ddr-1d-imem-fw
+00025418   00025418  00000000  ddr-1d-dmem-fw
+00025418   00025418  00000000  ddr-2d-imem-fw
+00025418   00025418  00000000  ddr-2d-dmem-fw
+```
+
+SPL 로드 주소 `0x7E1000` + 오프셋 `0x25418` = `0x806418`입니다. 네 firmware 슬롯이 모두 같은 위치에 크기 0으로 놓인 것은 파일이 없어서입니다. 정상 빌드라면 `lpddr4_pmu_train_1d_imem.bin` 같은 파일 크기만큼 슬롯이 차례로 늘어서고, `size` 심볼에 그 크기가 들어갑니다(`arch/arm/dts/imx8mm-u-boot.dtsi`의 각 노드는 `align-end = <4>`).
+
+여기서 중요한 결론이 하나 나옵니다. **firmware를 빼먹고 빌드한 SPL은 크기 0을 그대로 믿습니다.** `ddr_load_train_firmware()`는 `BINMAN_SYMS_OK`가 참이면 `imem_len = binman_sym(..., size)`로 길이를 덮어쓰므로 복사 루프가 한 번도 돌지 않습니다. PMU는 빈 IMEM으로 실행됩니다. 빌드 로그에 `Image 'u-boot-spl-ddr' is missing external blobs and is non-functional`이 찍혔다면 그 이미지를 보드에 올려서는 안 됩니다. binman 심볼이 없는 예전 방식(`BINMAN_SYMS_OK`가 거짓)에서는 `_end` 뒤 DTB 다음 위치를 firmware로 가정하는 fallback 코드가 대신 돕니다(같은 함수의 `CONFIG_SPL_OF_CONTROL` 블록).
+
+### 1D firmware는 한 번만 올린다
+
+`ddr_load_train_firmware()`에는 `static enum fw_type last_type`이 있어서, 직전과 같은 종류면 복사를 건너뜁니다("If FW doesn't change, we can save the loading."). i.MX8MM EVK의 `ddr_dram_fsp_msg[]`는 3000·400·100 MT/s 1D, 그다음 3000 MT/s 2D 순서입니다. 그래서 training은 네 번 돌지만 firmware 복사는 1D 한 번, 2D 한 번, 모두 두 번입니다. `IMEM_2D_OFFSET`(49,152 = 48 KiB)은 fallback 경로에서 2D firmware가 1D의 IMEM+DMEM 48 KiB 뒤에 있다고 가정하는 값입니다.
+
+## message block — 주파수마다 바뀌는 입력
+
+firmware가 프로그램이라면, message block은 그 프로그램에 주는 입력 양식입니다. 시험지는 같아도 수험번호와 과목 코드는 매번 다르게 적는 것과 같습니다. `ddr_cfg_phy()`(`drivers/ddr/imx/phy/ddrphy_train.c:12`)는 firmware를 올린 뒤 `fsp_msg->fsp_cfg` 표를 PHY에 씁니다. EVK의 3000 MT/s 1D 표 앞부분입니다.
+
+```c
+struct dram_cfg_param ddr_fsp0_cfg[] = {
+	{ 0xd0000, 0x0 },
+	{ 0x54003, 0xbb8 },
+	{ 0x54004, 0x2 },
+	{ 0x54005, 0x2228 },
+	{ 0x54006, 0x11 },
+	{ 0x54008, 0x131f },
+```
+
+주소가 `0x540xx`입니다. 앞에서 본 `DMEM_OFFSET_ADDR` `0x54000` 바로 위이므로, 이 표는 PMU의 데이터 메모리에 입력값을 채우는 것입니다. 34줄 중 32줄이 `0x540xx`이고 나머지 2줄은 `0xd0000` 같은 제어 레지스터입니다. 표 네 개를 비교하면 각 칸의 역할이 일부 보입니다.
+
+| 표 | `0x54003` | `0x54008` |
+|----|----------|----------|
+| `ddr_fsp0_cfg` (1D) | `0xbb8` = 3000 | `0x131f` |
+| `ddr_fsp1_cfg` (1D) | `0x190` = 400 | `0x121f` |
+| `ddr_fsp2_cfg` (1D) | `0x64` = 100 | `0x121f` |
+| `ddr_fsp0_2d_cfg` (2D) | `0xbb8` = 3000 | `0x61` |
+
+`0x54003`은 `fsp_table = { 3000, 400, 100 }`과 정확히 같은 data rate입니다. 3000 MT/s의 1D와 2D 표를 `diff`하면 `0x54008` 값이 다르고 2D에 `0x5400f`·`0x54010` 두 줄이 더 있을 뿐, 나머지는 같습니다. 각 칸의 공식 이름과 비트 의미는 Synopsys PHY 문서에 있고 U-Boot 소스에는 없습니다. 그래서 이 글에서는 이름을 붙이지 않습니다. 이 표를 손으로 고치지 않고 NXP DDR tool로 다시 만드는 이유이기도 합니다(파일 머리 주석: "Generated code from MX8M_DDR_tool").
+
+## mailbox — 기다림에 끝이 없다
+
+PMU를 깨운 뒤 SPL은 결과를 기다립니다. 둘 사이의 대화는 교환 일기처럼 한 번에 한 메시지씩 오갑니다. `drivers/ddr/imx/phy/ddrphy_utils.c`의 함수들이 그 규칙을 구현합니다.
+
+| 함수 | PHY 레지스터 | 하는 일 |
+|------|------------|--------|
+| `poll_pmu_message_ready()` | `0xd0004` bit 0 | 0이 될 때까지 반복해서 읽음 |
+| `get_mail()` | `0xd0032` | 16비트 메시지 읽기 |
+| `get_stream_message()` | `0xd0032`, `0xd0034` | 32비트(상위·하위 16비트) 읽기 |
+| `ack_pmu_message_receive()` | `0xd0031`에 0 → `0xd0004` bit 0이 1이 될 때까지 대기 → `0xd0031`에 1 | 읽었다고 알림 |
+
+메시지 판정은 `wait_ddrphy_training_complete()`(88행)에 있습니다.
+
+```c
+	while (1) {
+		mail = get_mail();
+		decode_major_message(mail);
+		if (mail == 0x08) {
+			decode_streaming_message();
+		} else if (mail == 0x07) {
+			debug("Training PASS\n");
+			return 0;
+		} else if (mail == 0xff) {
+			printf("Training FAILED\n");
+			return -1;
+		}
+	}
+```
+
+이 코드에서 디버깅에 중요한 사실 세 가지를 읽을 수 있습니다.
+
+첫째, **성공은 조용합니다.** `Training PASS`는 `debug()`라서 `DEBUG`를 정의하지 않은 빌드에서는 찍히지 않습니다. 실패만 `printf`로 `Training FAILED`가 나옵니다.
+
+둘째, **타임아웃이 없습니다.** `while (1)`도, 그 안의 `poll_pmu_message_ready()`의 `do ... while (reg & 0x1)`도 횟수나 시간 제한이 없습니다. PMU가 `0x07`도 `0xff`도 보내지 않으면 SPL은 그 자리에서 영원히 기다립니다. 앞 절처럼 firmware 없이 빌드한 이미지에서는 빈 IMEM으로 실행된 PMU가 무엇을 보낼지 코드로 알 수 없습니다. 확실한 것은 PMU가 `0x07`이나 `0xff`를 보내기 전까지 SPL이 **아무것도 출력하지 않고** 이 루프에 머문다는 점입니다. 실제 보드에서 확인한 것은 아니고, 위 두 루프를 읽은 결론입니다. "SPL 배너 다음에 아무것도 안 나온다"는 증상에서 DDR training 대기를 의심해야 하는 이유입니다.
+
+셋째, **`0x08` 스트리밍 메시지는 숫자로만 나옵니다.** `decode_streaming_message()`는 문자열 인덱스와 인자를 `debug("PMU String index = 0x%08x\n", ...)`로 찍을 뿐 사람이 읽는 문장으로 바꾸지 않습니다. 인덱스를 문장으로 바꾸는 표는 U-Boot 소스에 없으므로, 이 값을 해석하려면 PHY firmware와 함께 배포되는 자료가 필요합니다.
+
+`ddrphy_init_read_msg_block()`(176행)은 v2024.04에서 빈 함수입니다. 이름과 달리 message block 결과를 읽어 출력하지 않습니다.
+
+## training 결과가 컨트롤러로 돌아간다
+
+training의 목적은 PHY 안 지연값만 맞추는 데 그치지 않습니다. 결과 일부는 메모리 컨트롤러의 타이밍 설정으로 되돌아갑니다. 1D training이 끝날 때마다 `ddr_cfg_phy()`는 `get_trained_CDD(i)`를 부릅니다(`drivers/ddr/imx/imx8m/ddr_init.c:162`).
+
+```c
+	ddr_type = reg32_read(DDRC_MSTR(0)) & 0x3f;
+	if (ddr_type == 0x20) {
+		for (i = 0; i < 6; i++) {
+			tmp = reg32_read(IP2APB_DDRPHY_IPS_BASE_ADDR(0) + (0x54013 + i) * 4);
+			cdd_cha[i * 2] = tmp & 0xff;
+			cdd_cha[i * 2 + 1] = (tmp >> 8) & 0xff;
+		}
+```
+
+입력을 썼던 그 DMEM 영역(`0x54013`부터, 채널 B는 `0x5402c`부터)에서 이번에는 결과를 읽습니다. `ddr_type == 0x20`은 LPDDR4 분기이고, DDR4는 다른 위치에서 64개 값을 읽습니다. 읽은 값은 read→read, read→write, write→read, write→write 네 묶음으로 나눠 묶음별 최댓값을 `g_cdd_rr_max[]`, `g_cdd_rw_max[]`, `g_cdd_wr_max[]`, `g_cdd_ww_max[]`에 주파수별로 저장합니다.
+
+이 값을 쓰는 곳이 `update_umctl2_rank_space_setting()`(221행)이고, `ddr_init()`이 PHY 설정 뒤에 `update_umctl2_rank_space_setting(dram_timing->fsp_msg_num - 1)`로 부릅니다(414행). 이 함수는 `DDRC_DRAMTMG2`의 write→read(`& 0x3f`)·read→write(`>> 8`) 간격과 `DDRC_DRAMTMG9`의 write→read 간격에 CDD 최댓값의 절반(`>> 1`)을 더하고, 6비트 필드 한계인 `0x3f`에서 자릅니다. `DDRC_RANKCTL`의 `wr_gap`(비트 11:8)과 `rd_gap`(비트 7:4)에도 write→write, read→read 최댓값의 절반을 더하고 4비트 한계 `0xf`에서 자릅니다. 공장에서 정한 신호등 주기(`lpddr4_timing.c`의 컨트롤러 표)를 실제로 측정한 교통량(training 결과)에 맞춰 늘리는 셈입니다. 그래서 이 레지스터들의 최종값은 `lpddr4_timing.c`에 적힌 값이 아니라, 그 부팅에서 나온 training 결과에 따라 정해집니다.
+
+## 저장해서 TF-A에 넘긴다
+
+PHY 설정의 마지막 단계는 `ddrphy_trained_csr_save()`(`helper.c:160`)입니다. `drivers/ddr/imx/phy/ddrphy_csr.c`의 `ddrphy_trained_csr[]` 목록에 있는 PHY 레지스터 **719개**를 하나씩 `dwc_ddrphy_apb_rd()`로 읽어 값 칸을 채웁니다. 보드 파일의 `ddr_ddrphy_trained_csr[]`도 719개이고 값은 모두 `0x0`으로 시작합니다. 빈 표를 training 뒤 실측값으로 채우는 구조입니다.
+
+그다음 `ddr_init()` 끝의 `dram_config_save()`가 표 전체를 `CONFIG_SAVED_DRAM_TIMING_BASE`로 복사합니다. 빌드한 `.config`에서 이 값은 `0x180000`이고, U-Boot i.MX8M MMU 맵(`arch/arm/mach-imx/imx8m/soc.c`)에서 `OCRAM_S`(32 KiB)가 시작하는 주소입니다. TF-A v2.15.0의 i.MX8MM 포트는 같은 주소를 `SAVED_DRAM_TIMING_BASE = OCRAM_S_BASE`로 정하고(`plat/imx/imx8m/imx8mm/include/platform_def.h:173`), `imx8mm_bl31_setup.c:247`에서 `dram_info_init(SAVED_DRAM_TIMING_BASE)`로 읽어 갑니다. `plat/imx/imx8m/ddr/dram.c`는 그 내용을 자기 영역 `dram_timing_saved[13 * 1024]`로 복사하고 표 포인터를 새 위치에 맞게 고칩니다. 그래서 TF-A는 Linux가 DDR 주파수를 바꾸거나 저전력에서 돌아올 때 training을 다시 돌리지 않고 이 값을 씁니다. [Ch 9](/blog/embedded/bootloader/chapter09-dram-init)에서 본 것처럼, SPL 쪽 표를 바꾸면 런타임 동작도 같이 바뀝니다.
 
 ## 실패를 조사하는 순서
 
-1. 보드 BOM과 부품 marking이 build가 대상으로 삼는 DRAM과 일치하는지 확인합니다.
-2. U-Boot 로그 또는 PHY firmware의 진단 output에서 마지막으로 완료된 단계를 기록합니다. 출력이 없는 경우 그 사실만으로 training 단계나 원인을 확정할 수 없습니다.
-3. 정확한 부품 datasheet와 SoC/PHY 매뉴얼에서 설정 값, reset, clocking 및 전원 조건을 대조합니다.
-4. vendor가 제공하는 상태 해석 도구·테스트를 해당 release 기준으로 사용하고, raw register 주소나 결과 코드를 인터넷의 다른 보드에서 복사하지 않습니다.
-5. 재현 가능한 조건에서 부품·보드 revision, 온도, 전원, firmware 버전과 결과를 함께 기록합니다.
+위 코드에서 증상별로 확인할 곳을 거꾸로 정리할 수 있습니다.
 
-온도 변화, 보드 간 편차, reset 후 간헐 오류는 조사 단서일 뿐 특정 원인을 확정하지 않습니다. PCB impedance, 길이 정합, Vref, 저항값을 수치로 판정하려면 회로도·layout·DRAM/SoC specification과 실제 측정이 필요합니다. 이 글은 특정 board를 측정하거나 training result를 얻은 기록이 아닙니다.
+| 증상 | 먼저 볼 곳 |
+|------|----------|
+| SPL 배너 뒤 아무 출력 없이 멈춤 | firmware 누락 여부(빌드 로그의 `missing external blobs`, binman map의 firmware 크기), mailbox 무한 대기 |
+| `Training FAILED` 출력 | 그 주파수의 message block 표, DRAM 부품과 `lpddr4_timing.c` 생성 조건 일치 여부 |
+| `check ddr_pmu_train_imem code fail=` 출력 | IMEM 복사 후 읽기 검증 실패(`helper.c`), firmware 파일 손상이나 PHY 접근 문제 |
+| 부팅은 되지만 간헐 오류 | training 결과 의존 레지스터(`DRAMTMG2`·`DRAMTMG9`·`RANKCTL`), 온도·전압 조건 |
 
-## Training 이후 메모리 시험
-
-초기화 완료 메시지는 모든 메모리 주소, 온도, 전압과 부하 조건에서 무오류를 보장하지 않습니다. 제품 검증은 SoC vendor가 안내하는 DDR tool, OS memory test, ECC telemetry와 stress 조건을 제품 요구 사항에 맞춰 조합합니다. 시험 결과는 memory range, cache 설정, 접근 pattern, runtime, 온도·전원 조건과 build ID를 함께 적어야 합니다.
-
-U-Boot `mtest`는 선택한 RAM 범위에 pattern을 기록한 뒤 읽는 명령입니다. 따라서 기존 내용을 덮어쓸 수 있고, 시작·끝 주소가 안전하다고 확인되어야 합니다. Linux `memtester`나 stress 도구 역시 시스템 사용 중 전체 RAM을 시험할 수 있는 것은 아닙니다. 이 도구를 실행한 사실만으로 제조 sign-off나 ECC coverage를 주장하지 마세요.
+가장 먼저 할 일은 출력이 없는 상태를 없애는 것입니다. `ddrphy_utils.c`와 `ddr_init.c` 맨 위에 `#define DEBUG`를 넣고 SPL을 다시 빌드하면 `DDRINFO: start DRAM init`부터 `[PMU Major message = 0x%08x]`, `Training PASS`까지 단계별 `debug()` 출력이 살아납니다. 소스를 고치지 않고 `make ... CFLAGS_ddrphy_utils.o=-DDEBUG CFLAGS_ddr_init.o=-DDEBUG spl/u-boot-spl`처럼 두 파일에만 DEBUG를 줄 수도 있습니다. 이렇게 빌드해 보니 SPL `.text`가 115,537 B에서 116,032 B로 495 B 늘었고, 바이너리에 `DDRINFO: start DRAM init`, `[PMU Major message = 0x%08x]`, `Training PASS` 문자열이 들어갔습니다. [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 잰 코드·데이터 여유 15,344 B 안에 넉넉히 들어갑니다. 파일 전체에 DEBUG를 켜면 이야기가 달라지므로, 범위는 이렇게 좁혀 둡니다.
 
 ## 정리
 
-- Training 순서와 지원 기능은 DRAM 규격뿐 아니라 PHY·SoC 구현에 종속됩니다.
-- timing과 electrical limits는 정확한 DRAM/SoC 자료 및 보드 설계 자료에서 얻습니다.
-- vendor 생성 코드와 firmware는 맞는 silicon, board, BSP 및 tool 버전으로 고정합니다.
-- raw training register 값이나 합성 로그를 일반적인 정상 기준으로 제시하지 않습니다.
-- 메모리 시험은 범위와 파괴성, 시험 조건을 기록하고 하드웨어 sign-off와 구분합니다.
+- binman은 SPL 안의 `_binman_ddr_*_prop_image_pos/size` 심볼에 firmware 위치를 써 넣고, magic `BSYM`(`0x4d595342`)으로 유효함을 표시합니다. 이 빌드에서는 위치 `0x806418`, 크기 0이었습니다.
+- firmware가 빠진 빌드는 크기 0을 믿고 아무것도 복사하지 않습니다. `missing external blobs` 경고가 있는 이미지는 보드에 올리지 않습니다.
+- PMU 입력(message block)은 DMEM `0x54000` 영역에 쓰며, `0x54003`이 data rate(3000/400/100)와 일치합니다. 1D firmware는 세 주파수에 한 번만 올립니다.
+- mailbox는 `0x07` PASS, `0xff` FAIL이고, PASS는 `debug()`라 기본 빌드에서 보이지 않습니다. 대기 루프에 타임아웃이 없어서, PMU가 응답하지 않으면 SPL은 아무 출력 없이 멈춥니다.
+- 1D training 결과(CDD)는 `DDRC_DRAMTMG2`·`DRAMTMG9`·`RANKCTL`의 rank 간 간격에 더해집니다.
+- training 뒤 PHY CSR 719개를 읽어 OCRAM_S `0x180000`에 저장하고, TF-A가 DVFS·저전력 복귀에 다시 씁니다.
 
 ## 다음 장 예고
 
-다음 편은 **Ch 27: 신뢰 체인(Chain of Trust)**입니다. 초기 firmware, U-Boot FIT, 커널 모듈과 rootfs 무결성 검증이 어떤 조건에서 서로 연결되는지 분리해 살펴봅니다.
+다음 편은 **Ch 27: 신뢰 체인(Chain of Trust)**입니다. [Ch 23](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp)의 HAB, [Ch 25](/blog/embedded/bootloader/chapter25-tfa-optee)의 TF-A, U-Boot FIT 서명이 하나의 체인으로 이어지는 조건을 봅니다.
 
 ## 관련 항목
 
-- [Ch 9: DRAM 초기화](/blog/embedded/bootloader/chapter09-dram-init)
-- [Ch 24: SPL·TPL 내부 해부](/blog/embedded/bootloader/chapter24-spl-deep)
+- [Ch 9: DRAM 초기화](/blog/embedded/bootloader/chapter09-dram-init) — `ddr_init()` 전체 순서와 QEMU `mtest`
+- [Ch 24: SPL·TPL 내부 해부](/blog/embedded/bootloader/chapter24-spl-deep) — SPL 크기 제한과 메모리 배치
+- [Ch 25: ARM TF-A 통합](/blog/embedded/bootloader/chapter25-tfa-optee) — 저장된 DRAM 표를 읽는 BL31
 - [Ch 27: Chain of Trust](/blog/embedded/bootloader/chapter27-chain-of-trust)
-- [NXP i.MX8/MSCALE DDR Tool User Guide](https://community.nxp.com/pwmxy87654/attachments/pwmxy87654/other/22755/1/MSCALE_DDR_Tool_User_Guide.pdf)
-- [NXP i.MX8/MSCALE DDR Tool Release](https://community.nxp.com/t5/i-MX-Processors-Knowledge-Base/i-MX-8-8X-Family-DDR-Tools-Release/ta-p/1121519)
-- [U-Boot: TI K3 DDR configuration](https://docs.u-boot.org/en/latest/board/ti/k3.html)
-- [U-Boot: mtest command](https://docs.u-boot.org/en/v2024.01/usage/cmd/mtest.html)
-- [JEDEC LPDDR4 Standard](https://www.jedec.org/standards-documents/docs/jesd209-4b)
+- [U-Boot v2024.04 — drivers/ddr/imx/phy](https://github.com/u-boot/u-boot/tree/v2024.04/drivers/ddr/imx/phy) — training firmware 적재·mailbox 소스
+- [NXP i.MX8/MSCALE DDR Tool Release](https://community.nxp.com/t5/i-MX-Processors-Knowledge-Base/i-MX-8-8X-Family-DDR-Tools-Release/ta-p/1121519) — `lpddr4_timing.c` 생성 도구
