@@ -1,0 +1,48 @@
+{
+  "date": "2026-10-22",
+  "sourceHead": "d55f8d66ece6acb8ebb274df7c843ce6b4054853",
+  "articles": [
+    {
+      "path": "src/content/blog/tools/debugging/dwarf-elf/chapter01-elf-overview.md",
+      "beforeSha256": "87d5eeebcb327d12108b46c25d58801745d4ea9427993e2fd89f5b32dface7e9",
+      "afterSha256": "1ac79e620888262506e103d4c5c9a45da0c0e04408f39b26d3c5cd82701fa482",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/dwarf-elf/chapter02-dwarf-overview.md",
+      "beforeSha256": "3db6a09c75afa62949e360d63f3239d15b1133a0e7c718387350ef800b4b7332",
+      "afterSha256": "f9429e0da8706d9dd51aa96911d02572a049173404d957289727257e769c3bf3",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/dwarf-elf/chapter03-debug-line.md",
+      "beforeSha256": "b45efee2a82dfa26e44517dc28042e0668739958dd2c569f125eb6f15227a285",
+      "afterSha256": "c2d21f3f77457d630e1bbb6a5ae6c2c61a46da7a5539f07fbeb2080b33bdfac3",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/dwarf-elf/chapter04-debug-loc.md",
+      "beforeSha256": "35ba58b7597a711b3e263011de4ebf0e0b078da0b11cd6077d3f5dc2238aefc6",
+      "afterSha256": "6d9da5f23f92a5f0544d8261e5b9be20d3603f1cd28f1d6759d3097a6086f56e",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/dwarf-elf/chapter05-cfi-eh-frame.md",
+      "beforeSha256": "51d5b9aebc9d00d61f8795ba00eddfceac4d2d362f8cd1f1bf5b82abc18a41ac",
+      "afterSha256": "3e39a5322d75e5e9311848a6a4c75aa70ccfb4701ba33d6eb2a4e5fd96bcd59a",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/dwarf-elf/chapter06-split-dwarf-tools.md",
+      "beforeSha256": "ae9be2f82ca328654dca18660fe358fa1d8273f0e4a528cd04bbefdce08ea6f8",
+      "afterSha256": "80c8b11b4803052e525d757d3603169797ff226c46b295457769898cb97ae651",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    }
+  ]
+}

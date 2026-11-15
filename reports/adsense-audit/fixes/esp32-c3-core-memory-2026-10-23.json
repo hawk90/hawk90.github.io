@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-23",
+  "series": "ESP32-C3 Mastering",
+  "batch": "chapter01–03",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-24.md"
+  ],
+  "primarySources": [
+    "https://github.com/espressif/esp-idf/tree/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-c3_technical_reference_manual_en.pdf",
+    "https://www.espressif.com/sites/default/files/documentation/esp32-c3_datasheet_en.pdf",
+    "https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/system/intr_alloc.html"
+  ],
+  "validationCommands": [
+    "node scripts/verify-esp32-c3-core-memory-examples.mjs",
+    "bash scripts/audit-publish-gate.sh <three sources>",
+    "node scripts/check-inline-math.mjs <three sources>",
+    "bash scripts/build-diagrams.sh public/images/blog/riscv/esp32-c3-mastering/diagrams/ch02-interrupt-matrix.tex",
+    "python3 scripts/detect-text-overlap.py --series riscv --strict --jobs 1",
+    "git diff --check -- <scoped files>"
+  ],
+  "scope": "Three full article sources and loop24 evaluations read; pinned ESP-IDFv5.4.2 source/TRM/datasheet contracts compared, extracted arithmetic/instruction/API/partition examples executed within declared scope.",
+  "limits": "No full IDF project, target toolchain install, board/flash/CSR/fault/interrupt/NVS/OTA/wireless/power executed. Native tests use actual API headers and explicitly fake NVS/heap backend. Arithmetic/crosscompile are not hardware tests. Correctedch02diagram0overlap0touch; strict broader riscv sweepfails on unchangedch06diagram2overlaps and remains an implementation follow-up withch06. Unrelated clone-only gate skipped.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview.md",
+      "status": "remediated",
+      "beforeSha256": "a1fe2df663313f0031a945d01b40b8d684ae3d9be12977cd528213219315cc0c",
+      "afterSha256": "19361c2f206a61adaafa13ce605ef9faccbe6e731ca3400eada10f2680341fc8",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Chapter/source/evaluation comparison and actual headers/encoding checks in companion verifier. Hello board flash/log, radio/power and vendor-cost claims not executed or asserted.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview.md",
+        "problemSignalAndCounterevidence": "Unsupported IP-cost/strategy/pricing/95% compatibility, ECC-HMAC conflation, ADC unit assumption, fixed available heap/range/battery claims and wrong roadmap links.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Pinned ESP-IDFv5.4.2 soc_caps/cpu-region source and official datasheetv2.4.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Narrowed manual title/description to actual introduction; removed unsupported cause/rank/guarantees; corrected target/ADC/crypto/flash bounds, version pin, hello includes/tick conversion and roadmap.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Chapter/source/evaluation comparison and actual headers/encoding checks in companion verifier. Hello board flash/log, radio/power and vendor-cost claims not executed or asserted. No full IDF project, target toolchain install, board/flash/CSR/fault/interrupt/NVS/OTA/wireless/power executed. Native tests use actual API headers and explicitly fake NVS/heap backend. Arithmetic/crosscompile are not hardware tests. Correctedch02diagram0overlap0touch; strict broader riscv sweepfails on unchangedch06diagram2overlaps and remains an implementation follow-up withch06. Unrelated clone-only gate skipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which actual part/module, SDK configuration and board measurements establish available pins, heap, wireless/power budget and port compatibility?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter02-riscv-core.md",
+      "status": "remediated",
+      "beforeSha256": "9abb1abc845748072fb3593c7136ed4a57fd2b2a226b0524f7902ff8b6a0d24e",
+      "afterSha256": "785a2eafca0d579cc3c6b1ff216b8e4b4a607b19150d882d32d46ea91a4c0691",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "ExactRV32 byte comparison, CSRcrosscompile/disassembly, ASan/UBSan NAPOT sizes/alignment/bounds/null tests pass. Corrected diagram rebuilt:0 overlap/0touch; wider riscv sweep still reports2 overlaps in unchanged chapter06 diagram, next implementation tracked. No CSR/PMP/fault/interrupt board execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter02-riscv-core.md",
+        "problemSignalAndCounterevidence": "U-mode falsely absent, C.SWSP encoded as C.SW, L=0 M-mode protection falsely promised, unsupported CLIC/priority1..7/CPU0..30, IRAM flag/linker and scheduler order wrong.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "ESP32-C3 TRMv1.4 CPU/PMP/interrupt sections; pinned IDFcpu_region_protect.c/intr_alloc/vector/app_startup source.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Corrected M/U vs SDK execution, actual PMP/lock/nonoverlap initialization and interrupt number/priority contracts; removed unsafe runtime PMP rewrite; added pure checked NAPOT encoder, CSR mask save/restore and correct explicit instruction encodings; corrected source diagram.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "ExactRV32 byte comparison, CSRcrosscompile/disassembly, ASan/UBSan NAPOT sizes/alignment/bounds/null tests pass. Corrected diagram rebuilt:0 overlap/0touch; wider riscv sweep still reports2 overlaps in unchanged chapter06 diagram, next implementation tracked. No CSR/PMP/fault/interrupt board execution. No full IDF project, target toolchain install, board/flash/CSR/fault/interrupt/NVS/OTA/wireless/power executed. Native tests use actual API headers and explicitly fake NVS/heap backend. Arithmetic/crosscompile are not hardware tests. Correctedch02diagram0overlap0touch; strict broader riscv sweepfails on unchangedch06diagram2overlaps and remains an implementation follow-up withch06. Unrelated clone-only gate skipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which boot/runtime config and complete privilege/PMP/alias/reset and interrupt-threshold observations establish isolation and latency on the actual C3?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash.md",
+      "status": "remediated",
+      "beforeSha256": "06abb9a251fc2cf1be3cdede3947aeebb75e6acb2b1d1f39ec45c5beaba4187b",
+      "afterSha256": "6b3c38a45526199e5556817f4fecfa696b1f8d03f3738b0baeacf7014fe50a63",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Actualgen_esp32part.py CSV->binary->CSV passes; overflow/overlap/misalignment rejected. Actual pinned NVS/heap headers plus explicit fake backends verify open/set/commit/get/shortbuffer/allocation failures and resource lifetime underASan/UBSan. No actualflash/OTA/powercut.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter03-memory-flash.md",
+        "problemSignalAndCounterevidence": "6MiB CSV falsely fits4MiB, alias/physical memory conflation, Xtensa GPIO address, unchecked NVS errors, RTC heap persistence, external LittleFS presented builtin and unconditional timed OTA rollback.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Pinned actualsoc.h/memory_layout.c/nvs.h/partitiongenerator/OTA source and manual; actual target API headers.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Corrected fixed source memory windows and RTC config/lifetime; replaced overflow partition with exact4MiB custom6-row example, checked heap/NVS helpers and explicit trust-anchor/rollback contracts. Removed unpinned filesystem mount procedure and unsupported rankings; manual description correction.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Actualgen_esp32part.py CSV->binary->CSV passes; overflow/overlap/misalignment rejected. Actual pinned NVS/heap headers plus explicit fake backends verify open/set/commit/get/shortbuffer/allocation failures and resource lifetime underASan/UBSan. No actualflash/OTA/powercut. No full IDF project, target toolchain install, board/flash/CSR/fault/interrupt/NVS/OTA/wireless/power executed. Native tests use actual API headers and explicitly fake NVS/heap backend. Arithmetic/crosscompile are not hardware tests. Correctedch02diagram0overlap0touch; strict broader riscv sweepfails on unchangedch06diagram2overlaps and remains an implementation follow-up withch06. Unrelated clone-only gate skipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which complete application/config, actual flash part/image sizes, filesystem revision and NVS/OTA power-cut/reset test establish data durability and rollback behavior?"
+        }
+      ]
+    }
+  ]
+}

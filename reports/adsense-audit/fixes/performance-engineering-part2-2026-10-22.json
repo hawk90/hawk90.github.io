@@ -1,0 +1,232 @@
+{
+  "series": "Embedded Performance Engineering Part 2",
+  "date": "2026-10-22",
+  "readyForIntegration": true,
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-01-pipeline.md",
+      "beforeSha256": "b4a9b2f04d4d3079d7b339b9d8544d4bf02a9e80e9b65fc5bb1b55e9fd1bb8df",
+      "afterSha256": "0ec34c0d226df76bde8cd9b3f87ff7983ebbb7a51ff3e6178a147ea8dc2ab050",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS host arithmetic, negative 200x assertion, gate/math/diff; no target timing run.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "200x throughput arithmetic; M0/M0+ pipeline stage conflation; fixed Cortex-M4 load timing.",
+        "signalAndRefutation": "5N/(N+4) evaluates to 4.98008 at N=1000; official Arm M0/M0+/M4/M7/A53/A72 documentation distinguishes implementations.",
+        "causeAndAlternatives": "Confused latency/throughput and assumed one pipeline structure across cores.",
+        "evidence": "Source equation recomputation; Arm Cortex-M0/M0+ overview, M4/M7 documentation, A53 overview, A72 TRM.",
+        "sampleScope": "Article schedule and equations plus source prose; host arithmetic only.",
+        "decision": "Correct equation and stage distinctions; qualify target timing and barrier claims.",
+        "smallestSafeChangeAndRollback": "Affected prose only; URL/frontmatter preserved; rollback per article diff.",
+        "validationAndResidualRisk": "PASS host arithmetic, negative 200x assertion, gate/math/diff; no target timing run."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-02-pipeline-stall.md",
+      "beforeSha256": "38d103345ce5287edd4dd5fda32e99ddc3b45b4539b742def23ea3d40892e8f4",
+      "afterSha256": "a5fe2c87f9fa3ea778f96d0960a6ca24c928eba17f102f9096548fb121c51c1b",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS source fence/text assertions, gate/math/diff; no board timing.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "Cortex-M3/M4 mislabeled single-port with integrated I/D bus; compiler/volatile behavior overstated.",
+        "signalAndRefutation": "Arm identifies ICode, DCode and System AHB-Lite interfaces; system-path arbitration may still occur.",
+        "causeAndAlternatives": "Core interface paths conflated with SoC bus topology; generic compiler behavior treated as guarantee.",
+        "evidence": "Arm Cortex-M4 datasheet/TRM, Cortex-M memory documentation, extracted structural-hazard fence.",
+        "sampleScope": "Bus and load-use article fences; no MCU simulation.",
+        "decision": "Correct interface model and qualify load-use and volatile semantics.",
+        "smallestSafeChangeAndRollback": "Affected explanations only; preserve code samples and route.",
+        "validationAndResidualRisk": "PASS source fence/text assertions, gate/math/diff; no board timing."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-03-branch-prediction.md",
+      "beforeSha256": "fd16adc73350905f18524536dc51295318045f20e080190f86339d5285c4619e",
+      "afterSha256": "b8bf2a6061c56d6c2ad89627f83a2fe5b485419b4cc96729622bdb6b6c786aff",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS source checks, gate/math/diff; no perf/hardware predictor run.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "Contradictory A53 predictor sizes, PMU event labels and CVE/Mitigation grouping.",
+        "signalAndRefutation": "PMUv3 IDs distinguish 0x10 BR_MIS_PRED, 0x11 CPU_CYCLES and 0x12 BR_PRED; Spectre CVEs differ from Meltdown CVE.",
+        "causeAndAlternatives": "Implementation values and event aliases conflated with architectural guarantees; CVE families confused.",
+        "evidence": "Arm PMU documentation, NIST CVE records, original Spectre paper.",
+        "sampleScope": "Predictor state table and article source claims; host/static checks only.",
+        "decision": "Remove unsupported fixed table; correct IDs/CVEs; remove universal miss thresholds.",
+        "smallestSafeChangeAndRollback": "Edit only affected claims and tables; retain metadata.",
+        "validationAndResidualRisk": "PASS source checks, gate/math/diff; no perf/hardware predictor run."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-04-speculative-execution.md",
+      "beforeSha256": "1c821ef70680d5aa5cb5904430c80b56b3b7f46107e002cef77cb156fd1837f3",
+      "afterSha256": "cb0c5d80ae5a22b614c5355492a9c57664ba9e61fea0534eb92b55ba57c3dbbc",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS extracted-order check, gate/math/diff; security/runtime behavior not tested.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "ROB entries shown out of program order while claiming in-order retirement; unsupported queue counts.",
+        "signalAndRefutation": "Older pending load must precede younger completed operations in the ROB example.",
+        "causeAndAlternatives": "Execution completion order confused with architectural retirement order; counts lacked a pinned source.",
+        "evidence": "Article ROB fence; Arm Cortex-A72 TRM confirms OoO/superscalar implementation but not article-specific counts.",
+        "sampleScope": "Extracted ROB-order check; no OoO core/Spectre runtime.",
+        "decision": "Correct ordering and remove unsourced resource sizes.",
+        "smallestSafeChangeAndRollback": "Only the example and claims changed; route/frontmatter retained.",
+        "validationAndResidualRisk": "PASS extracted-order check, gate/math/diff; security/runtime behavior not tested."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-05-cache-basics.md",
+      "beforeSha256": "7b500522d447c03b5c9787f48cce515583fc858ecc23889d55e52ca8c2793c85",
+      "afterSha256": "755aba8fe1d21f905698caa0754d140cc72f287fd2f9f596cad15e12ae8cb5e9",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS positive/negative arithmetic, gate/math/diff; no cache hardware measurement.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "64 KiB/64 B direct-map index given as 8 bits; Cortex-M4 assigned cache line despite no core-internal cache.",
+        "signalAndRefutation": "64 KiB / 64 B = 1024 lines = 10 index bits; Arm states M4 has no internal cache.",
+        "causeAndAlternatives": "Arithmetic error and core cache conflated with possible SoC system cache.",
+        "evidence": "Host geometry calculation; Arm memory-barrier guide and Cortex-A72 TRM.",
+        "sampleScope": "Address-split fence and hierarchy prose; no physical cache measurement.",
+        "decision": "Fix index and remove false M4 cache line; qualify latency and policy values.",
+        "smallestSafeChangeAndRollback": "Affected tables/text only; preserve article structure.",
+        "validationAndResidualRisk": "PASS positive/negative arithmetic, gate/math/diff; no cache hardware measurement."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-06-cache-miss.md",
+      "beforeSha256": "f21a51829f5ead59348a74a531667b0ef94a715e88494fb5fa391c2590278ca8",
+      "afterSha256": "56a5d10e696a3c9e4cb31e0ba24ac845ffbda94dfc73166edb7a17e8f610c780",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS positive/negative associativity model, gate/math/diff; no cache simulator/perf/board.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "Three same-set arrays asserted to conflict in a four-way cache; malloc/page alignment and random access overstated.",
+        "signalAndRefutation": "Three lines can coexist in four ways; random addresses may still hit depending on cache state.",
+        "causeAndAlternatives": "Conditional mapping assumed guaranteed; allocator and state assumptions omitted.",
+        "evidence": "Associativity count model; Arm PMU source for event/core-specific nature.",
+        "sampleScope": "Conflict fence and PMU claims; simple model only, not simulator.",
+        "decision": "Correct counterexample and qualify allocator/prefetch/cache state.",
+        "smallestSafeChangeAndRollback": "Preserve 3C structure; change false guarantees only.",
+        "validationAndResidualRisk": "PASS positive/negative associativity model, gate/math/diff; no cache simulator/perf/board."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-07-cache-line.md",
+      "beforeSha256": "48ab27f52830019b4f3cdc25f022e58d5dc95be764038cb266c588d49f56bb36",
+      "afterSha256": "b2ab33b5e4fb1105f4d85739d159eb9c9a9f9fa2c98d2ec35cb60e5315b65676",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS source checks, gate/math/diff; no multicore/DMA target.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "Fixed line sizes, misalignment penalties, 10x false-sharing effect, prefetch register and unconditional STNP bypass claim.",
+        "signalAndRefutation": "CCR.BP is branch prediction control; STNP is a non-temporal hint, not a portable cache-bypass guarantee.",
+        "causeAndAlternatives": "Implementation geometry, branch control and memory hint conflated.",
+        "evidence": "Arm M-profile register docs, AArch64 instruction semantics, Arm cache/DMA guidance.",
+        "sampleScope": "False-sharing fence and static source checks; no SMP or DMA execution.",
+        "decision": "Replace fixed/unverified values with target-specific requirements.",
+        "smallestSafeChangeAndRollback": "Affected explanatory claims only; retain route and examples.",
+        "validationAndResidualRisk": "PASS source checks, gate/math/diff; no multicore/DMA target."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-08-memory-bandwidth.md",
+      "beforeSha256": "f8ed73816e4121f8d8c0ee50ff31af83a90f6c5694269d15438a45d4b65d2598",
+      "afterSha256": "e95d55428ada0cf1bc87f0fadcd3cd0294092b450f1ebbf67b8728f666906fe2",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS host positive/negative math, gate/math/diff; no STREAM, perf or board.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "DDR peak equation unit mismatch; float32 vector-add intensity wrong; unsupported benchmark and device figures.",
+        "signalAndRefutation": "3200 MT/s × 4 B = 12.8 GB/s under stated assumptions; float32 vector add = 1/12 FLOP/B.",
+        "causeAndAlternatives": "Clock and transfer rate mixed; benchmarks lacked reproducible board/build/thread conditions.",
+        "evidence": "Unit recomputation and extracted Roofline fence; unsupported values removed.",
+        "sampleScope": "Host arithmetic only; no STREAM run.",
+        "decision": "Fix equations, remove unsupported values and require PMU event-byte semantics.",
+        "smallestSafeChangeAndRollback": "Keep section flow; edit formula/unsupported claims.",
+        "validationAndResidualRisk": "PASS host positive/negative math, gate/math/diff; no STREAM, perf or board."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-09-simd-neon.md",
+      "beforeSha256": "061f408b20f4903d0b70b90fb0ab6796d3e4a25e6da821428fc305ce8e22c7d6",
+      "afterSha256": "c793d33291ebacd88aa736cb158ceb3411cfd8a098df3487817fce0829829042",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS AArch64/MVE object compile, host tail positive/negative, gate/math/diff; no ARM runtime.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "MVE tail overrun; auto-vectorization/predication and SVE core support overstated; speedup unsupported.",
+        "signalAndRefutation": "N=10 needs one 8-lane vector block plus two scalar elements; compiler output and SVE availability are target-specific.",
+        "causeAndAlternatives": "ISA capability conflated with automatic compiler/loop behavior and model-specific optional feature.",
+        "evidence": "Arm ACLE and SVE guidance; source examples compiled for AArch64 and MVE object targets.",
+        "sampleScope": "Article NEON/MVE fences plus host tail model; ARM objects not executed.",
+        "decision": "Add scalar tail and qualify target/compiler/performance claims.",
+        "smallestSafeChangeAndRollback": "MVE loop and related prose only; retain metadata.",
+        "validationAndResidualRisk": "PASS AArch64/MVE object compile, host tail positive/negative, gate/math/diff; no ARM runtime."
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part2-10-pmu.md",
+      "beforeSha256": "15cd6aeb54788e5d3de89f42e7e6d322862b48c519f2c5c72455791c7a431ee8",
+      "afterSha256": "6a692f1dfa6ff3241a13bd33cf1cd341a34d43a82a26bdb4d8c64901c028f4e1",
+      "status": "remediated",
+      "validation": [
+        "node scripts/verify-performance-engineering-part2-examples.mjs: PASS; PASS host formula positive/zero-denominator negative and gate/math/diff; no Linux perf/WCET/hardware.",
+        "node scripts/check-inline-math.mjs <10 Part 2 paths>: PASS",
+        "bash scripts/audit-publish-gate.sh <article path>: blocking checks PASS; cited-symbol/upstream clone check SKIPPED (not PASS)",
+        "git diff --check on scoped articles and verifier: PASS"
+      ],
+      "evidence": {
+        "contextAndScope": "PMU count/width and aliases generalized; DWT formula did not include retired instruction count; RISC-V HPM count wrong.",
+        "signalAndRefutation": "CPI = cycles/instructions; RISC-V defines 29 HPM slots and platform-defined events; PMU implementation and event support vary.",
+        "causeAndAlternatives": "Architectural interfaces, implementation counters, and perf aliases conflated.",
+        "evidence": "Arm PMU docs and RISC-V Privileged ISA; host CPI formula test.",
+        "sampleScope": "Source PMU table and article formulas; no PMU register/perf runtime.",
+        "decision": "Correct formula/count and qualify event availability, width, and sampling overhead.",
+        "smallestSafeChangeAndRollback": "Limited to event tables, formulas and claims; metadata preserved.",
+        "validationAndResidualRisk": "PASS host formula positive/zero-denominator negative and gate/math/diff; no Linux perf/WCET/hardware."
+      }
+    }
+  ],
+  "metadataExceptions": [],
+  "report": "reports/adsense-audit/fixes/performance-engineering-part2-2026-10-22.md",
+  "verifier": "scripts/verify-performance-engineering-part2-examples.mjs",
+  "runLog": "reports/adsense-audit/fixes/performance-engineering-part2-2026-10-22.log",
+  "scopeNote": "No score, fact-check verdict, or aggregate score copied from evaluation ledgers. No physical target, Linux perf, STREAM, or site build claimed."
+}

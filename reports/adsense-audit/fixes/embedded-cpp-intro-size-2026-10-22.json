@@ -1,0 +1,26 @@
+{
+  "date": "2026-10-22",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/00-preface.md",
+      "beforeSha256": "4a899ef8d8e0e76f55d4e4bb09259ced5a083b32e4cf98b588334c7c77a2e99f",
+      "afterSha256": "45871d51324c88fc3e186d5ff0a4fec84b4c9dcdedb4a84f64567d9dd8cbe224",
+      "rescored": false,
+      "validation": "Primary-source review; intro coverage and compiler flag scope; C/C++ Cortex-M4 object equality and rejected pin; ELF section/debug-strip assertions; chapter gates/math. No final firmware link, hardware timing or Bloaty run."
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part1-01-cpp-vs-c.md",
+      "beforeSha256": "fa11edaa174f0e28ff7fa54e90bc40317a6155eadc01260e608ddcf6b6b610ab",
+      "afterSha256": "56cb174610bd3e0f11a03696500a575239e41f05544aa3847ed15cdfeed4951f",
+      "rescored": false,
+      "validation": "Primary-source review; intro coverage and compiler flag scope; C/C++ Cortex-M4 object equality and rejected pin; ELF section/debug-strip assertions; chapter gates/math. No final firmware link, hardware timing or Bloaty run."
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part1-04-code-size-analysis.md",
+      "beforeSha256": "559387a0e68d8f814c2650a8c3837910d625da4a37a4607e97a539207e383228",
+      "afterSha256": "72373f493c55f2459e8043e298b46275688e2c28fb8d302ef5f018657803770b",
+      "rescored": false,
+      "validation": "Primary-source review; intro coverage and compiler flag scope; C/C++ Cortex-M4 object equality and rejected pin; ELF section/debug-strip assertions; chapter gates/math. No final firmware link, hardware timing or Bloaty run."
+    }
+  ]
+}

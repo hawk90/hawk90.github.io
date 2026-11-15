@@ -1,0 +1,23 @@
+{
+  "createdAt": "2026-10-24",
+  "rescore": false,
+  "readyForIntegration": true,
+  "articles": [
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter01-rsp-protocol.md",
+      "status": "remediated",
+      "beforeSha256": "4b944213d7e02f3aa2e80291e4c51fa64394caa2f544b0242911cce9fa805bb0",
+      "afterSha256": "f0e91eef6f40ff74c97fb0b6b7a514ac5e02c172a8b068f89c080da93fdccf93",
+      "validation": {
+        "contextAndScope": "Final release follow-up: one contextual next-chapter link in the RSP article; previous technical repair remains documented in embedded-debugging-2026-10-22.",
+        "signalAndRefutation": "Enforced connectivity audit found no outbound blog link. Series navigation existed, but did not satisfy the prose-link contract.",
+        "causeAndAlternatives": "The earlier malformed-ending repair removed the next-reading link; this is a missing editorial connection, not a missing destination page.",
+        "evidence": "Read complete RSP source and previous manifest. Confirmed chapter 2 published slug and added a contextual RSP-to-debug-interface link. Removing the added paragraph reproduces the exact previously recorded SHA.",
+        "sampleScope": "One paragraph only; no executable example or frontmatter changed. Previous runtime limitations still apply.",
+        "decision": "Remediated: add next-chapter prose link with verified destination slug.",
+        "smallestSafeChangeAndRollback": "Remove only the appended paragraph to restore the preceding recorded article SHA; preserve original repair records and evaluation ledgers.",
+        "verificationAndResidualRisk": "Scoped blocking publish gate and full enforced connectivity audit pass. Rendered resolution is checked by subsequent site build/link audit. No live probe or target execution."
+      }
+    }
+  ]
+}

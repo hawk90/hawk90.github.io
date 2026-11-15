@@ -1,0 +1,87 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-23",
+  "series": "ESP32-C3 Mastering",
+  "batch": "chapter07–08",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-25.md"
+  ],
+  "primarySources": [
+    "https://github.com/espressif/esp-idf/tree/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0",
+    "https://github.com/espressif/esp-nimble/tree/0225775e49669cd4f070400908f73718bddce83b",
+    "https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-guides/wifi-security.html",
+    "https://www.bluetooth.com/wp-content/uploads/Files/Specification/HTML/Core-54/out/en/host/attribute-protocol--att-.html"
+  ],
+  "validationCommands": [
+    "node scripts/verify-esp32-c3-wireless-examples.mjs",
+    "bash scripts/audit-publish-gate.sh <two sources>",
+    "node scripts/check-inline-math.mjs <two sources>",
+    "git diff --check -- <scopedfiles>"
+  ],
+  "scope": "Bothfullarticles andloop25evaluations read; pinnedIDFv5.4.2 + its exactNimBLEsubmodule source and primary WiFi/ATT contracts compared; namednativehelperfences executed underdeclaredfakebackend scope.",
+  "limits": "NoWiFi/BLEinit, actualNimBLEhost/controller/transport, AP/phone/RF/MTUexchange/pairing/security/provisioning/mesh/throughput/power executed. Hosttests use actualpinnedAPIheaders plus upstreamdummyNPL, CSFC1default, explicitfakeadv/GATT/mbufbackend and fail-if-calledtransportstubs. Headerssystem-marked solelyforupstreammacOSqueuemacro warnings. Unrelatedclone-onlygateskipped.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter07-wifi-stack.md",
+      "status": "remediated",
+      "beforeSha256": "b5d675421eed2248a876082066886fd527e29bc85893acc136f4ae027d320832",
+      "afterSha256": "56ec3ee6b4257af54280665a3ca60cb661ccd01b6732f25328fcee70ef6a6b26",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Pure retry policy6delays/cap/null/UINT_MAX tests ASan/UBSan pass; fullsource/evaluation/APIcomparison. No actualWiFiinit/AP/retrytimer/provisioning/security/throughput/current test.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter07-wifi-stack.md",
+        "problemSignalAndCounterevidence": "AllWiFiresults miscalledasync, immediateunboundedreconnect, incomplete/doubleownerinitialization, APSTAbridgeconflation, deprecatedPMF/Enterprise and security/provisioning/layer/radio/power/throughput guarantees.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "PinnedESP-IDFv5.4.2 event/WiFi/EAP/mesh/protocomm headers and docs, officialWiFisecurity/PMFdeprecation.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Separated APIreturn/link/IPevent and owner lifetime; explicitboundedretrydelay helper and nonretrydisconnect handler, modeNULL/APSTA/security contracts and pinnedprovisioningscope; removedfabricatedperformance/current/mesh/vendor claims. Manualdescriptioncorrection.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Pure retry policy6delays/cap/null/UINT_MAX tests ASan/UBSan pass; fullsource/evaluation/APIcomparison. No actualWiFiinit/AP/retrytimer/provisioning/security/throughput/current test. NoWiFi/BLEinit, actualNimBLEhost/controller/transport, AP/phone/RF/MTUexchange/pairing/security/provisioning/mesh/throughput/power executed. Hosttests use actualpinnedAPIheaders plus upstreamdummyNPL, CSFC1default, explicitfakeadv/GATT/mbufbackend and fail-if-calledtransportstubs. Headerssystem-marked solelyforupstreammacOSqueuemacro warnings. Unrelatedclone-onlygateskipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which completeowner/event/timer/cancel/reinit path, peer auth/configuration and AP/hardware measurements establish reconnection, provisioning and power/performance behavior?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt.md",
+      "status": "remediated",
+      "beforeSha256": "28e63e3a0e24b279ac2e27af62101b9de705ba9e04b512821e88da0621fd63ba",
+      "afterSha256": "1c0c442b2e6a146e817d1d4fcfa0484145cae96b98698b4b6683993b5cffd8e8",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "ActualAPIheaders with upstreamdummyNPL, CSFC1matchesSDKdefault, actualesp_errheader, explicitfakeadv/GATT/mbuf backends andfail-if-calledtransport. Register/adverror/null/invalidhandle/unsubscribed/value/alloc/readappend/notifyerror+consumption tests ASan/UBSan pass. Nohost/controller/peer/radio/pairingtest.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter08-ble-gap-gatt.md",
+        "problemSignalAndCounterevidence": "FixedPHYrange/throughput/radiohalf/stacksize/current claims, undefinedPHYstruct and lifecycle/notifyhandles, uncheckedmbufappend/ownership, CCCDassumption, NO_IO/MITM, MTU247payload224, publishedASCII/TODO.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Pinnedesp-nimbleSHA0225775e49669cd4f070400908f73718bddce83b actualheaders/notifyimplementation, IDFbleprph sample, officialBluetoothATTnotificationcontract.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Corrected actualPHYAPI, checkedadvertisingfields/start, GATTregister/val_handle/READ/notifyguards and consumedmbuf semantics; separatedhostlifecycle/security/peersubscription; corrected244bytes and removedunsupportedrankings/guarantees/ASCII. Manualdescriptioncorrection.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "ActualAPIheaders with upstreamdummyNPL, CSFC1matchesSDKdefault, actualesp_errheader, explicitfakeadv/GATT/mbuf backends andfail-if-calledtransport. Register/adverror/null/invalidhandle/unsubscribed/value/alloc/readappend/notifyerror+consumption tests ASan/UBSan pass. Nohost/controller/peer/radio/pairingtest. NoWiFi/BLEinit, actualNimBLEhost/controller/transport, AP/phone/RF/MTUexchange/pairing/security/provisioning/mesh/throughput/power executed. Hosttests use actualpinnedAPIheaders plus upstreamdummyNPL, CSFC1default, explicitfakeadv/GATT/mbufbackend and fail-if-calledtransportstubs. Headerssystem-marked solelyforupstreammacOSqueuemacro warnings. Unrelatedclone-onlygateskipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which fullhostsync/start/reset/stop lifecycle, generation-safepeerstate, actualphoneGATT/MTU/security/bond and RF/power tests establish this BLE service?"
+        }
+      ]
+    }
+  ]
+}

@@ -32,6 +32,7 @@
     "src/components/blog/TagBadge.astro",
     "src/components/blog/Utterances.astro",
     "src/components/common/Breadcrumb.astro",
+    "src/components/common/EmailLink.astro",
     "src/components/common/Footer.astro",
     "src/components/common/Header.astro",
     "src/components/common/LanguageSwitcher.astro",
@@ -47,6 +48,7 @@
     "src/consts/authors.ts",
     "src/consts/categories.ts",
     "src/consts/config.ts",
+    "src/consts/contact.ts",
     "src/consts/homepage-guides.ts",
     "src/consts/learning-paths.ts",
     "src/consts/resume.ts",
@@ -167,17 +169,11 @@
     },
     {
       "id": "SEC-ADMIN-07",
-      "priority": "P1",
+      "priority": "P0",
       "title": "Cross-origin subresource without integrity",
       "remediation": "Pin every third-party stylesheet or script with a sha384 integrity hash, or self-host it.",
-      "evidence": [
-        {
-          "file": "dist/about/index.html",
-          "line": 1,
-          "excerpt": "Cross-origin subresource without integrity: https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-6238136533844790"
-        }
-      ],
-      "status": "open"
+      "evidence": [],
+      "status": "passed"
     }
   ]
 }

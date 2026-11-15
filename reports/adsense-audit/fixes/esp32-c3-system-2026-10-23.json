@@ -1,0 +1,148 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-23",
+  "series": "ESP32-C3 Mastering",
+  "batch": "chapter09–12",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-25.md"
+  ],
+  "primarySources": [
+    "https://github.com/espressif/esp-idf/tree/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0",
+    "https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/security/secure-boot-v2.html",
+    "https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/security/flash-encryption.html",
+    "https://docs.espressif.com/projects/idf-component-manager/en/latest/reference/manifest_file.html",
+    "https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/0adc196d4bd52a2d91102b525b0aafc1e14a2386"
+  ],
+  "validationCommands": [
+    "node scripts/verify-esp32-c3-system-examples.mjs",
+    "bash scripts/audit-publish-gate.sh <four sources>",
+    "node scripts/check-inline-math.mjs <four sources>",
+    "git diff --check -- <scopedfiles>"
+  ],
+  "scope": "Fourfullarticles andloop25evaluations read; pinnedIDFv5.4.2 source/templates/headers/efuse/security contracts compared; actualextractedtemplatecreator/read-onlycounterfunction, nativehelpers andvanillaFreeRTOSPOSIXqueue exercised.",
+  "limits": "No fullESP-IDFproject configure/targetcompile/link/flash or externalcomponent resolution. ActualsourceeFusearithmetic usesfakefieldreads only; actualHMAC/sleepheaders useexplicitfakebackends. No physicalfuse/key/provisioning/imageboot/crypto/schedulerISR/watchdog/sleepwake/RTC/current/batterymeasurements. QueueusesactualvanillaFreeRTOS11.2POSIXport/include-layoutshims, notESP-IDForC3runtime/stackunits. Unrelatedclone-onlygateskipped.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build.md",
+      "status": "remediated",
+      "beforeSha256": "7454abdd72e3abfc18f03f7369f3634543070c9160e62a307ee2d788830e00c5",
+      "afterSha256": "d538465ed7dc7e8dfc2a5d0d29fe94600951fda4a260174c9441065e5e5c14c3",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Extractedactualcreate_project ran withupstreamtemplate, exact3files andarticleCMakecompare pass; actualcompiler manifest esp14.2 checked. No fullIDFconfigure/Kconfigresolution/externaldependency/targetbuild claimed.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter09-esp-idf-build.md",
+        "problemSignalAndCounterevidence": "Generatedtree fabricatedoptionalfiles, wrongcreate-projectpath andset-targetclean steps, absenttopCMake, config/defaultsoverride andbuildflavor sharing, blanketGCC13/LTO/partition/errorrules.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "ActualIDFv5.4.2 create_ext.py/template/CMake/kconfig/project/toolmanifest andComponentManager primarydocs.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Added actualpinnedtemplate/topCMake andseparateSDKCONFIGpaths; correctedcreation/defaults/componentinterface/toolchain/partitioncontracts; removedunverifiedexternalversions/LTOguarantees/singlecauseerror mappings. Manualdescriptioncorrection.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Extractedactualcreate_project ran withupstreamtemplate, exact3files andarticleCMakecompare pass; actualcompiler manifest esp14.2 checked. No fullIDFconfigure/Kconfigresolution/externaldependency/targetbuild claimed. No fullESP-IDFproject configure/targetcompile/link/flash or externalcomponent resolution. ActualsourceeFusearithmetic usesfakefieldreads only; actualHMAC/sleepheaders useexplicitfakebackends. No physicalfuse/key/provisioning/imageboot/crypto/schedulerISR/watchdog/sleepwake/RTC/current/batterymeasurements. QueueusesactualvanillaFreeRTOS11.2POSIXport/include-layoutshims, notESP-IDForC3runtime/stackunits. Unrelatedclone-onlygateskipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which effectiveSDKCONFIG/defaults/lock/target/toolchain and actualconfigure/compile/link outputs establish reproducible debug/release builds for this product?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos.md",
+      "status": "remediated",
+      "beforeSha256": "500ba3081d603d56d92654a097b464759cbe54c2b243b277364e61ef5885f6c2",
+      "afterSha256": "f5d32a2c403b8d0bd4dd549d5a077d112deacb45b648a5523bd1b4ee3e0f59a4",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Unchangednamedqueueexample executesproducer/consumer withsamples0/1/2 onactualpinnedvanilla11.2POSIX kernel via include-layoutshims. SDKC3byteunits/ISR/tickless/WDT remain source-reviewed, nottargetruntime. No failureinjection inqueuehostrun.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter10-freertos.md",
+        "problemSignalAndCounterevidence": "Singlecore concurrency/coreid/priority0/systempriority assumptions, wrongstackwordmodel, invalidglobalinitializers andundefinedtasks/buffers, uncheckedcreates, ticklessDeepSleep/WDT andIRAM/canary guarantees.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "PinnedC3RISC-V port StackType_tuint8, FreeRTOSConfig25priorities, SDKstartup/WDT/PM/sourcecontracts; actualvanilla11.2POSIX kernel.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "CorrectedC3specificunits/affinity/priority contracts andconfig scope; completecheckedcounterqueue andISRstream helper; removedundefinedexamplecallbacks/globalruntimecalls andunprovedtiming/current/stackrules; clarifiedTWDTstartup/registration andtimerenqueue/snapshotlifetime. Manualdescriptioncorrection.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Unchangednamedqueueexample executesproducer/consumer withsamples0/1/2 onactualpinnedvanilla11.2POSIX kernel via include-layoutshims. SDKC3byteunits/ISR/tickless/WDT remain source-reviewed, nottargetruntime. No failureinjection inqueuehostrun. No fullESP-IDFproject configure/targetcompile/link/flash or externalcomponent resolution. ActualsourceeFusearithmetic usesfakefieldreads only; actualHMAC/sleepheaders useexplicitfakebackends. No physicalfuse/key/provisioning/imageboot/crypto/schedulerISR/watchdog/sleepwake/RTC/current/batterymeasurements. QueueusesactualvanillaFreeRTOS11.2POSIXport/include-layoutshims, notESP-IDForC3runtime/stackunits. Unrelatedclone-onlygateskipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which completeSDKconfig and targettask/queue/error/ISR/WDT/stackload tests establish lifetimes, starvation handling, deadline and actual memory margins?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter11-security.md",
+      "status": "remediated",
+      "beforeSha256": "04978f7fef3bae15cd98801cb1bbe8d3e52a441098506332d6271330d4021294",
+      "afterSha256": "e4e30a6dad9683ef098f1d4fdadb254afad75ea682215839c327f37dbd02dd4b",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Actualextractedread_secure_version withfakefieldreads compared againstdecoder forall65536bitpatterns x16widths; all8cryptstates andinvalids pass ASan/UBSan. ActualHMACheader plusfakebackend bounds/errorpropagation pass. No physicalcrypto/key/fuse/image/securityexecution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter11-security.md",
+        "problemSignalAndCounterevidence": "WrongECDSA/64bytepartition-signaturechain, AES256vsXTS128, dangeroussinglebitburn/reflash recipes, cryptcountnumericparity3, wrong32bitantirollback, HMACdownstream andblanketUART/JTAG/OTA/recovery guarantees.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "PinnedbootloaderKconfig/efuseC3csv/actualesp_efuse_read_secure_version/flashencrypt/soccaps/HMACheaders; officialversionedC3securitydocs.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "CorrectedRSA-PSS3072/ECO3imagechain, XTS-AES128keymaterial, actualcounterpopcount16bitfield andmode/provisioning/recovery constraints; removedinvalidburn/transcripts; addedread-onlycounterparser andboundedHMACwrapper. Manualdescriptioncorrection.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Actualextractedread_secure_version withfakefieldreads compared againstdecoder forall65536bitpatterns x16widths; all8cryptstates andinvalids pass ASan/UBSan. ActualHMACheader plusfakebackend bounds/errorpropagation pass. No physicalcrypto/key/fuse/image/securityexecution. No fullESP-IDFproject configure/targetcompile/link/flash or externalcomponent resolution. ActualsourceeFusearithmetic usesfakefieldreads only; actualHMAC/sleepheaders useexplicitfakebackends. No physicalfuse/key/provisioning/imageboot/crypto/schedulerISR/watchdog/sleepwake/RTC/current/batterymeasurements. QueueusesactualvanillaFreeRTOS11.2POSIXport/include-layoutshims, notESP-IDForC3runtime/stackunits. Unrelatedclone-onlygateskipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which exactchip/revision/eFuse/key-purpose/protection/image/signature/padding and authorizedprovisioning/update/recovery tests establish this device security configuration?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management.md",
+      "status": "remediated",
+      "beforeSha256": "38be628f23000f60c1104ac0db835b01f8df9e8ed444c8e75f01c25fac8b7d73",
+      "afterSha256": "f0ba097bb90f342b2d22f4909ce8bfcc1fe260264399e0bbe7f669b69122ee3a",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Actualsleepheaders+fakebackendtestvalidrequest/timerfailure/GPIOpartialfailure/invalidpin/zero/24hlimit passes. ExtractedpowerBudget positive602.4459/103.5261days/zeroactive/fullactive andnegative/nonfinite/overflow tests pass. Noactualsleep/wake/retention/current/batterymeasurement.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/riscv/esp32-c3-mastering/chapter12-power-management.md",
+        "problemSignalAndCounterevidence": "Fixedcurrent/latency/lifetime andCPUradioassertions, light/deepGPIOAPI conflation, wakeedge/RTC/ULPH2 assumptions, unsafebrownoutfix, battery602days incorrectly301 andratio1/3.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Pinnedesp_sleep.h/sleep_modes.c/soccapsvalidGPIOmask/RTCmap/PMcontracts; explicitdimensionalarithmeticinputs.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correctedconditionalmode/wake/retention/config contracts; boundeddeepwakepreparationhelper withpartialstate explanation; transparentterminalcurrentbudget calculator and602.4/103.5dayhypothetical math; removedfalsemeasurement/current/product/ranking guarantees. Manualdescriptioncorrection.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Actualsleepheaders+fakebackendtestvalidrequest/timerfailure/GPIOpartialfailure/invalidpin/zero/24hlimit passes. ExtractedpowerBudget positive602.4459/103.5261days/zeroactive/fullactive andnegative/nonfinite/overflow tests pass. Noactualsleep/wake/retention/current/batterymeasurement. No fullESP-IDFproject configure/targetcompile/link/flash or externalcomponent resolution. ActualsourceeFusearithmetic usesfakefieldreads only; actualHMAC/sleepheaders useexplicitfakebackends. No physicalfuse/key/provisioning/imageboot/crypto/schedulerISR/watchdog/sleepwake/RTC/current/batterymeasurements. QueueusesactualvanillaFreeRTOS11.2POSIXport/include-layoutshims, notESP-IDForC3runtime/stackunits. Unrelatedclone-onlygateskipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which samevoltagebatteryterminalcapacity/current/wakecost and actualsleepcause/retention/peripheral/powertrace establish the product power budget and wake behavior?"
+        }
+      ]
+    }
+  ]
+}

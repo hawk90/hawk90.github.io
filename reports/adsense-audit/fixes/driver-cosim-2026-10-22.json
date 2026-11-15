@@ -1,0 +1,72 @@
+{
+  "date": "2026-10-22",
+  "sourceHead": "d55f8d66ece6acb8ebb274df7c843ce6b4054853",
+  "beforeHashNote": "beforeSha256 hashes the repository HEAD source; chapters 01-04 also contained pre-existing workspace edits when this continuation began.",
+  "rescored": false,
+  "articles": [
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter01-why-cosim.md",
+      "beforeSha256": "3eadf291e4f4521652870bcadabdab0cbc3172229fbc3d761433d52fa5307f67",
+      "afterSha256": "90eb998926853418762c097835fd9fa8f7dfb93e4649657475f7b385c9eed8e7",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (3 assertions)",
+      "simulatorValidation": "NOT RUN: RTL simulation, Linux integration, and board execution"
+    },
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter02-dpi-c-basics.md",
+      "beforeSha256": "f614284978a883d85f5f9b24631f3d8b6f4adc8943d00216486698ca3faaa619",
+      "afterSha256": "2ba91883969364c86949bad72a50745b1cb50a09919cb49c83884b0be9493b41",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (4 assertions); packed word byte-order and bounds checks passed",
+      "simulatorValidation": "NOT RUN: simulator-generated DPI header and DPI callback execution"
+    },
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter03-verilator.md",
+      "beforeSha256": "ffd772d9333c1f70b65be74c4bf3294bdbe224e1d8057588c89a0aafab3d3d99",
+      "afterSha256": "c3c5d95d08a486ca3b30ecf07cc2b9b2da58020542d2de8226db2469b58a4838",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (4 assertions)",
+      "simulatorValidation": "NOT RUN: Verilator compile/run and FST generation"
+    },
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter04-cocotb.md",
+      "beforeSha256": "f0f0fbb2dca15df449a5025498b78b4b2c94b3a5ff29ed43c2488f123ec77db1",
+      "afterSha256": "d1072086ecb7de8de7d09e73a774d5c93eac8e4b20c4a1fe41c3e4323ac3f6ef",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (4 assertions); host callback uint32/bounds/lifetime checks passed",
+      "simulatorValidation": "NOT RUN: cocotb simulator, AXI BFM, coverage, and runner execution"
+    },
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter05-systemc-tlm.md",
+      "beforeSha256": "902c9cd0bddd7fb4db39f2c5d9df93d588bafc604e82bf152c3bc3e6890e242b",
+      "afterSha256": "dd1f790be84774ec64f99137ef45bdcc026e3b5fc3f4f8d59bf3a93e3590ff0c",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (2 assertions)",
+      "simulatorValidation": "NOT RUN: SystemC kernel and TLM scheduler execution"
+    },
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter06-bfm.md",
+      "beforeSha256": "29b702f6d3755135af9cd88e303524c1c8d71e73ac4e7422395b6695e15df29f",
+      "afterSha256": "869ac874f32c869d87e82909055e024f5367e05c46a4d4a10565a7cd36d206fd",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (4 assertions)",
+      "simulatorValidation": "NOT RUN: SystemVerilog compile and AXI skew-channel simulation"
+    },
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model.md",
+      "beforeSha256": "ab8e1a72b5f5fa0d744515b7601d9c850b6f04c752777a1e37bb85acfaadd950",
+      "afterSha256": "0abf23ec7d5228d984757d38a8d2f40bfec309cf0912f5b451630514281a18bd",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (5 assertions); C matmul reference golden vector, accumulator overflow, and invalid-dimension checks passed",
+      "simulatorValidation": "NOT RUN: simulator DPI open-array ABI and UVM scoreboard execution"
+    },
+    {
+      "path": "src/content/blog/tools/emulation/driver-cosim/chapter08-end-to-end.md",
+      "beforeSha256": "ac09da62e817dc42fefa7e49cc3b487cc0cc8cced1910da9918ba30d3dc0cfe8",
+      "afterSha256": "c1148a2157b231d06ca553584a0c0030a2cdf1a9e7b59688f7a2e678bfb96d14",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contract checks passed (3 assertions); IRQ mask compile and simultaneous/new/unchanged bit checks passed",
+      "simulatorValidation": "NOT RUN: Verilator RTL/driver integration and stress run"
+    }
+  ]
+}

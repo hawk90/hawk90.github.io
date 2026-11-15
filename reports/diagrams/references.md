@@ -1,10 +1,10 @@
 # Diagram reference audit
 
 - SVG assets on disk: 1072
-- References from content: 868
+- References from content: 839
 - References with missing or too-short alt: 0
 - References to a missing SVG: 0
-- SVGs never referenced: 225
+- SVGs never referenced: 254
 
 Diagrams are embedded through <img>, so the alt attribute is the accessible
 name. Internal <title>/<desc> elements are not announced and are not checked.
@@ -27,7 +27,21 @@ name. Internal <title>/<desc> elements are not announced and are not checked.
 - public/images/blog/av1/diagrams/ch02-obu-header.svg
 - public/images/blog/beautiful/diagrams/item01-object-vptr.svg
 - public/images/blog/beautiful/diagrams/item01-vtable.svg
+- public/images/blog/bootloader/diagrams/ch09-ddr-init-flow.svg
+- public/images/blog/bootloader/diagrams/ch10-storage-layout.svg
+- public/images/blog/bootloader/diagrams/ch11-network-boot-flow.svg
+- public/images/blog/bootloader/diagrams/ch12-usb-boot-modes.svg
+- public/images/blog/bootloader/diagrams/ch24-spl-sram-layout.svg
+- public/images/blog/bootloader/diagrams/ch27-chain-of-trust.svg
+- public/images/blog/bootloader/diagrams/ch32-power-state.svg
+- public/images/blog/bootloader/diagrams/ch33-smp-bringup-flow.svg
+- public/images/blog/bootloader/diagrams/chapter06-two-dtb-flow.svg
+- public/images/blog/bootloader/diagrams/chapter07-driver-model.svg
+- public/images/blog/bootloader/diagrams/chapter08-relocation-memory.svg
 - public/images/blog/bootloader/diagrams/chapter12-fastboot-seq.svg
+- public/images/blog/bootloader/diagrams/chapter32-psci-cpu-on-seq.svg
+- public/images/blog/bootloader/diagrams/chapter33-smp-bringup-flow.svg
+- public/images/blog/bootloader/diagrams/chapter33-spin-vs-psci.svg
 - public/images/blog/debugging/embedded/diagrams/ch12-observation-points.svg
 - public/images/blog/domain-driven-design/diagrams/chapter09-specification-pattern.svg
 - public/images/blog/domain-driven-design/diagrams/chapter10-supple-design.svg
@@ -95,26 +109,12 @@ name. Internal <title>/<desc> elements are not announced and are not checked.
 - public/images/blog/dsa/diagrams/item36-container-flowchart.svg
 - public/images/blog/dsa/diagrams/item39-selection-guide.svg
 - public/images/blog/dsa/diagrams/item40-overview.svg
+- public/images/blog/embedded-cpp/diagrams/part5-01-mmio-bitfield.svg
 - public/images/blog/emc/diagrams/item03-decltype-flow.svg
 - public/images/blog/emc/diagrams/item19-shared-ptr-layout.svg
 - public/images/blog/emc/diagrams/item27-decision-tree.svg
+- public/images/blog/gdb-lldb/diagrams/ch08-coresight-arch.svg
+- public/images/blog/gdb-lldb/diagrams/ch08-jtag-tap-fsm.svg
+- public/images/blog/gdb-lldb/diagrams/ch08-openocd-stack.svg
 - public/images/blog/gof/diagrams/item01-abstract-factory-seq.svg
-- public/images/blog/gof/diagrams/item02-builder-seq.svg
-- public/images/blog/gof/diagrams/item02-builder.svg
-- public/images/blog/gof/diagrams/item03-factory-method-seq.svg
-- public/images/blog/gof/diagrams/item03-factory-method.svg
-- public/images/blog/gof/diagrams/item04-prototype-seq.svg
-- public/images/blog/gof/diagrams/item04-prototype.svg
-- public/images/blog/gof/diagrams/item05-singleton-seq.svg
-- public/images/blog/gof/diagrams/item05-singleton.svg
-- public/images/blog/gof/diagrams/item06-adapter-seq.svg
-- public/images/blog/gof/diagrams/item06-adapter.svg
-- public/images/blog/gof/diagrams/item07-bridge-seq.svg
-- public/images/blog/gof/diagrams/item07-bridge.svg
-- public/images/blog/gof/diagrams/item08-composite-seq.svg
-- public/images/blog/gof/diagrams/item08-composite.svg
-- public/images/blog/gof/diagrams/item09-decorator-seq.svg
-- public/images/blog/gof/diagrams/item09-decorator.svg
-- public/images/blog/gof/diagrams/item10-facade-seq.svg
-- public/images/blog/gof/diagrams/item10-facade.svg
-- … +125 more
+- … +154 more

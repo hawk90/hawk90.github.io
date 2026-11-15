@@ -1,0 +1,187 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Bootloader Internals",
+  "batch": "chapter01–chapter06",
+  "readOnlyEvaluationReference": "reports/adsense-audit/published-loop-01.md",
+  "rescore": false,
+  "readyForIntegration": true,
+  "scope": "Completed batch: only Bootloader Internals chapter01–06 source articles and this remediation evidence. No score/rubric/factcheck status changes; do not rescore. Chapter07–09 is tracked in bootloader-chapter07-09-2026-10-22.json.",
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/bootloader/chapter01-boot-problem.md src/content/blog/embedded/bootloader/chapter02-u-boot-position.md src/content/blog/embedded/bootloader/chapter03-build-system.md src/content/blog/embedded/bootloader/chapter04-boot-stages.md src/content/blog/embedded/bootloader/chapter05-falcon-mode.md src/content/blog/embedded/bootloader/chapter06-device-tree.md (blocking checks pass; upstream clone-only checks SKIPPED, not PASS)",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/bootloader/chapter01-boot-problem.md src/content/blog/embedded/bootloader/chapter02-u-boot-position.md src/content/blog/embedded/bootloader/chapter03-build-system.md src/content/blog/embedded/bootloader/chapter04-boot-stages.md src/content/blog/embedded/bootloader/chapter05-falcon-mode.md src/content/blog/embedded/bootloader/chapter06-device-tree.md",
+    "git diff --check",
+    "frontmatter invariant comparison against pre-edit source"
+  ],
+  "runtimeAvailability": {
+    "qemuSystemAarch64": "not installed",
+    "qemuSystemRiscv64": "not installed",
+    "aarch64LinuxGnuGcc": "not installed",
+    "riscv64LinuxGnuGcc": "not installed",
+    "uBootCheckout": "/tmp/u-boot missing",
+    "deviceTreeCompiler": "not installed",
+    "fdtoverlay": "not installed",
+    "uBootTarget": "not available"
+  },
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter01-boot-problem.md",
+      "beforeSha256": "0ed529df86edd641ca182947a36d0c59b9159d6c0010292f29925987d3ce7093",
+      "afterSha256": "5781cefa12c1abf7e82a22028082fb8137af6c9b6981fd1b4128472b2f0845fa",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 첫 글. Armv8-A 초기 실행 단계, 부트 체인의 적용 범위, AArch64 Linux 진입 ABI, 측정 예시를 검토했다.",
+        "problemSignalAndCounterevidence": "특정 SRAM 용량·주변 장치 상태·EL3 시작·시간 수치가 모든 SoC에 적용되는 듯 서술되어 있었다. 실제 부트 sequence는 플랫폼마다 달라지며 AArch64 Linux 진입 레지스터 요구사항은 공식 boot protocol로 판정 가능하다.",
+        "causeHypothesisAndAlternatives": "일반적인 평가 보드 예시를 보편 규칙처럼 확장하고, 고정된 시뮬레이터 결과와 근거 없는 시간 분포를 전재한 것이 원인으로 보인다. 플랫폼별 숫자를 덧붙이는 대신 차이를 설명하고 측정 방법을 안내하도록 정정했다.",
+        "evidence": "Linux kernel 6.18 AArch64 boot protocol은 x0=DTB, x1-x3=0, MMU off, non-secure EL2 권장 또는 EL1, instruction cache on/off 허용을 명시한다. Arm Exception Model은 EL2/EL3가 optional임을 명시한다. https://docs.kernel.org/6.18/arch/arm64/booting.html ; https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Learn%20the%20Architecture/Exception%20model.pdf U-Boot QEMU ARM guide confirms the qemu_arm64_defconfig and -bios u-boot.bin command shape: https://docs.u-boot.org/en/v2024.01/board/emulation/qemu-arm.html",
+        "sampleCoverage": "문서의 QEMU 명령과 기존 console excerpt를 확인했다. QEMU, U-Boot checkout, AArch64 compiler가 없어 정상 부팅·부정 실행 사례는 실행하지 않았다. 미검증 console 수치는 제거했다.",
+        "decision": "확인된 범위 오류와 미실행 출력·수치를 수정하고, 제목·description을 실제 설명 범위에 맞췄다. 기존 URL, 날짜, draft, seriesOrder는 보존했다.",
+        "smallestSafeChange": "chapter01-boot-problem.md의 기술 문장·요약·제목/description·검증되지 않은 출력만 수정했다. slug, date, draft, seriesOrder와 다른 콘텐츠는 수정하지 않았다.",
+        "validationAndResidualRisk": "publish gate, inline-math, git diff --check, shell fence bash -n 및 frontmatter invariant 검사를 통과했다. gate의 upstream clone 전용 검사는 SKIPPED였다. U-Boot/QEMU 실행과 보드별 ABI·실측은 하지 않았다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "question": "U-Boot v2024.01 and a matching qemu-system-aarch64 are installed in the target build environment; does the documented QEMU command reach the U-Boot prompt?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; documentation and static gates pass; hardware/tool execution not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter02-u-boot-position.md",
+      "beforeSha256": "3226eee6a4a66c463debf2b21214da631fc5e0295e0be9964de295569dd0e0f3",
+      "afterSha256": "3108ce0b8f80f8163b4d7a3f95b646c79b8900888ad753943d1fb40815e4d3df",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 두 번째 글. U-Boot, TF-A, EDK II, LinuxBoot의 역할과 ARMv8-A firmware 결합 사례를 검토했다.",
+        "problemSignalAndCounterevidence": "TF-A가 없으면 SMP 불가, Arm 서버에 EDK II와 TF-A가 필수, EDK II가 모든 UEFI interface를 제공한다는 절대 문장이 있었다. PSCI는 firmware가 제공하는 서비스이며 TF-A 외 조합과 플랫폼별 구성이 가능하다.",
+        "causeHypothesisAndAlternatives": "전형적인 한 구현의 이미지 단계와 기능을 전체 플랫폼의 필수 구조처럼 일반화했다. 제품 사례를 보편 규칙으로 두지 않고, 일반 역할과 선택 가능한 플랫폼 구성을 분리했다.",
+        "evidence": "TF-A v2.10 design 문서는 PSCI runtime service 및 BL1/BL2/BL31/optional BL32/BL33 구조를 TF-A implementation context에서 설명한다. U-Boot v2024.04 문서는 UEFI 기능과 EBBR 목표를 명시하고 full-blown UEFI 구현은 목표가 아니라고 밝힌다. https://trustedfirmware-a.readthedocs.io/en/v2.10/design/firmware-design.html ; https://docs.u-boot.org/en/v2024.04/develop/uefi/uefi.html ; https://www.tianocore.org/tianocore-wiki.github.io/reference/external-resources/edk_ii.html",
+        "sampleCoverage": "TF-A의 부트 전환 C 형태 예시는 태그·플랫폼 소스에서 검증되지 않아 제거하고 흐름 설명으로 바꿨다. QEMU RISC-V, OpenSBI, RISC-V toolchain, U-Boot checkout이 없어 명령·부팅 출력은 미실행이며 예시 transcript를 제거했다.",
+        "decision": "확인되지 않은 필수성·완전 지원·기능 절대화를 플랫폼 조건이 드러나도록 수정했다. 미실행 보드별 U-Boot 명령은 transcript가 아닌 패턴으로 표시했다.",
+        "smallestSafeChange": "chapter02-u-boot-position.md의 역할 표, 절대 주장, 보드별 미실행 transcript만 정정했다. URL/date/draft/seriesOrder는 유지했다.",
+        "validationAndResidualRisk": "publish gate, inline-math, git diff --check, shell fence bash -n 및 frontmatter invariant 검사를 통과했다. upstream clone 전용 검사는 SKIPPED였다. 보드별 펌웨어 결합, PSCI 구현, QEMU 실행 결과는 검증하지 않았다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "question": "Which exact board/firmware image provides EL3 runtime services and which PSCI or other CPU-start interface does its OS configuration expose?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; documentation and static gates pass; hardware/tool execution not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter03-build-system.md",
+      "beforeSha256": "5c0139a9d065dbe76bfeeaa8ab21fe63dc42ce0dfd3d982c67a1e19298a7b3f2",
+      "afterSha256": "603fd23b05018c6b318fdcfadae646dea7fc48536420e3e8211fae49344d48c0",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 세 번째 글. U-Boot Kconfig/Makefile, defconfig, output artifacts, cross-compilation 지침을 검토했다.",
+        "problemSignalAndCounterevidence": "Linux Kbuild를 그대로 사용한다고 설명했지만 U-Boot Kconfig 문서는 Linux와 다른 처리 및 호환 설정을 명시하고, U-Boot의 빌드에는 SPL/TPL 별도 흐름도 있다. 예시 빌드 파일 크기·map 주소는 대상 보드나 환경과 연결되지 않은 구체 수치였다.",
+        "causeHypothesisAndAlternatives": "공통 Kbuild 계보를 동일한 빌드 시스템으로 과도 축약하고, 실제 실행으로 확인하지 않은 예시 숫자를 로그처럼 제시했다. 차이는 계보와 개별 동작을 분리해 설명하고 빌드별 결과는 해당 환경에서 관찰하도록 바꿨다.",
+        "evidence": "U-Boot Kconfig 문서는 U-Boot 고유 compatibility outputs와 legacy configuration 공존을 설명한다. U-Boot v2024.01 GCC 문서는 defconfig 생성, cross-compiler prefix, O= output directory를 설명한다. https://docs.u-boot.org/en/stable/develop/kconfig.html ; https://docs.u-boot.org/en/v2024.01/build/gcc.html",
+        "sampleCoverage": "문서의 shell fence 12개를 bash -n으로 문법 검사했다. U-Boot checkout과 cross-toolchain이 없어 defconfig/build/size/map 예제는 실행하지 않았으며, 검증되지 않은 크기·주소 예시는 제거했다.",
+        "decision": "Kbuild 동일성 표현을 수정하고 보드·옵션별 결과물과 아키텍처 확인을 분명히 했다. URL/date/draft/seriesOrder는 보존했다.",
+        "smallestSafeChange": "chapter03-build-system.md의 빌드 설명·검증되지 않은 output 숫자 예시만 수정했다. 타깃 설정·API를 추가하거나 점수를 산출하지 않았다.",
+        "validationAndResidualRisk": "publish gate, inline-math, git diff --check, shell fence bash -n 및 frontmatter invariant 검사를 통과했다. upstream clone 전용 검사는 SKIPPED였다. 실제 U-Boot 태그의 빌드 결과, 보드 산출물, map 크기 확인은 미실행이다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "question": "Against a checked out, pinned U-Boot tag, do the documented SPL/TPL options and target artifacts match the board configuration when built?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; documentation and static gates pass; hardware/tool execution not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter04-boot-stages.md",
+      "beforeSha256": "8ee0eae4e28452021eaaef7ac3747d2a6052697f692f95de4349f2077ce7f303",
+      "afterSha256": "a18ad094db64a5685a16db1e2b351d717b94d772cdb75d91483e55675a9dcdd8",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 4편. TF-A AArch64 stage, U-Boot SPL/TPL, Arm EL, Linux AArch64 handoff, FIT 및 RISC-V 개요를 검토했다.",
+        "problemSignalAndCounterevidence": "제목은 4단계라 했지만 본문은 5단계와 서로 다른 이름을 혼합했다. 앞선 단계 handoff의 x0와 Linux AArch64 진입 x0를 모순되게 기술했고, 보드 주소·메모리 크기·빌드 출력과 실행상태를 공통 사실처럼 제시했다.",
+        "causeHypothesisAndAlternatives": "TF-A 예시, U-Boot 단계, Linux handoff protocol을 하나의 공통 chain으로 일반화하고 미실행 board transcript를 증거처럼 사용했다. 공통 protocol과 platform-specific implementation을 분리했다.",
+        "evidence": "TF-A v2.10 Firmware Design은 AArch64 단계에서 BL2가 image list를 BL31에 arg0로 전달하며, BL2는 기본적으로 Secure-EL1에서 실행되고 플랫폼별 주소·image loading을 사용한다고 설명한다. Linux 6.18 AArch64 boot protocol은 Linux 진입 x0=DTB, x1–x3=0, non-secure EL2 권장 또는 EL1, MMU off 및 cache maintenance 요구를 설명한다. https://trustedfirmware-a.readthedocs.io/en/v2.10/design/firmware-design.html ; https://docs.kernel.org/6.18/arch/arm64/booting.html",
+        "sampleCoverage": "x0 모순과 가공된 i.MX 메모리맵/FIT/UART 출력은 제거했다. SPL/TPL/TF-A 세부 함수/API와 diagrams는 pinned source 및 board 자료가 없어 실행·완전 검증하지 않았다. 런타임 실행은 하지 않았다.",
+        "decision": "제목을 본문 범위에 맞추고, Linux handoff ABI와 앞선 firmware 인계를 분리했다. 공통 주소·실행상태 및 실행하지 않은 로그를 제거하거나 플랫폼별 확인 대상으로 한정했다.",
+        "smallestSafeChange": "chapter04의 title/description, stage·EL·handoff 설명 및 미검증 메모리/FIT/로그 예시만 수정했다. slug/date/draft/seriesOrder 및 평가 원장은 건드리지 않았다.",
+        "validationAndResidualRisk": "publish gate와 inline-math 통과, git diff --check 통과, frontmatter 핵심 필드 보존을 확인했다. upstream clone 전용 gate는 SKIPPED였다. TF-A/U-Boot build와 board runtime 실행은 도구/target 부재로 미실행이다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which pinned TF-A and U-Boot versions and target board define the chain, memory map, SPL/BL2 responsibilities, FIT configuration, and diagram details in this article?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "corrected; documentation and static gates pass; target runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter05-falcon-mode.md",
+      "beforeSha256": "1e91cab63c4b3569eeadecbddb8b7cb81759e0bf05dd7e7f955fa3a75c5f9364",
+      "afterSha256": "1fdc4f9a6db7f4e0e5df0d5cb51d60eeefcec26b0d88edd0c65b3556d86d381c",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 5편. Falcon Mode의 SPL 진입, `spl_start_uboot()`, configuration, 인자 생성·저장과 실패 경로를 다뤘다.",
+        "problemSignalAndCounterevidence": "`spl export` 인자 순서/의미가 틀렸고 서로 다른 args 위치와 storage offsets가 충돌했다. `dd seek=0x900` 및 실기기 `/dev` 기록 예시와 출처 없는 부팅시간·console 로그도 있었다.",
+        "causeHypothesisAndAlternatives": "매체·보드별 예시를 공통 Falcon 동작으로 합쳤고, 임시 RAM 결과 생성과 persistent storage write를 혼동했다. 버전 고정된 공식 문법과 설정 역할로 줄였다.",
+        "evidence": "U-Boot v2024.04 Falcon Mode 문서는 `CONFIG_SPL_OS_BOOT`, `CONFIG_CMD_SPL`, `CONFIG_SPL_PAYLOAD_ARGS_ADDR`, `spl_start_uboot()` 반환 의미, `spl export <img=atags|fdt> [kernel_addr] [initrd_addr] [fdt_addr]` 문법 및 명령이 storage에 쓰지 않는다는 점을 설명한다. https://docs.u-boot.org/en/v2024.04/develop/falcon.html",
+        "sampleCoverage": "매체 write commands, fake timings/logs와 unverified board hooks를 제거했다. U-Boot shell, SPL, kernel, NAND/MMC target이 없어 정상·부정 boot sample은 실행하지 않았다. `spl export`는 CLI command이며 shell에서 실행 불가한 형식만 문서 문법으로 기록했다.",
+        "decision": "공식 v2024.04 문법과 매체 write 분리를 설명하고, storage layout·fallback·security 동작은 target configuration으로 확인하도록 한정했다. description은 검증된 문서 범위에 맞췄다.",
+        "smallestSafeChange": "chapter05의 부트시간 주장, 잘못된 args syntax/offset, 실행 transcript, 장치 기록 명령 및 보드별 복구 code를 수정·삭제했다. URL/date/draft/seriesOrder는 보존했다.",
+        "validationAndResidualRisk": "publish gate와 inline-math 통과, git diff --check 통과, frontmatter 핵심 필드 보존 확인. upstream clone 전용 검사는 SKIPPED. U-Boot build, Falcon boot 및 staging fixture 검사는 도구/target 부재로 미실행이다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For which pinned U-Boot build and board/media should `spl export`, parameter image storage offset/size, fallback path, and any boot-time comparison be verified?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "corrected; documentation and static gates pass; target runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter06-device-tree.md",
+      "beforeSha256": "c23fca36cc784ea4d9f54fc5aecc83a552dfac70e7f99ddae41a05dfa4e24709",
+      "afterSha256": "5ae01cdb23d4c1be0228601664f93fdd5f9062ae4643a407cf0910f767410f72",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 6편. U-Boot control DTB/OS DTB, OF configuration, FDT operations, runtime fixup, Device Tree cells, overlay 흐름을 검토했다.",
+        "problemSignalAndCounterevidence": "`OF_SEPARATE`의 산출물 이름이 잘못됐고, `#size-cells = 2`에서 4 GiB를 단일 32-bit cell `0x100000000`으로 썼다. 보드 API, 호출 순서와 가공된 console output도 버전 불명 상태로 단정했다.",
+        "causeHypothesisAndAlternatives": "일반 개념을 하나의 board implementation 및 산출물 체계로 단순화했다. 공식 versioned docs와 DTSpec으로 확인 가능한 내용만 단정하고 나머지는 버전/보드 검토 대상으로 했다.",
+        "evidence": "U-Boot v2024.04 Device Tree Control은 `OF_SEPARATE`에서 `u-boot.dtb`와 `u-boot-nodtb.bin`을 `u-boot.bin`에 결합하며 `SPL_FRAMEWORK`에서는 `u-boot.img`가 포함될 수 있다고 설명한다. `OF_BOARD`는 board routine이 runtime DT를 제공한다. DTSpec은 address/size를 32-bit cell 배열로 표현한다; 두 size cells의 4 GiB는 `0x1, 0x0`이다. https://docs.u-boot.org/en/v2024.04/develop/devicetree/control.html ; https://devicetree-specification.readthedocs.io/en/stable/devicetree-basics.html",
+        "sampleCoverage": "4 GiB reg cell tuple을 바로잡고 내부 함수/API 및 가공된 transcript를 삭제했다. `dtc`, `fdtoverlay`, U-Boot shell과 board target이 없어 DTS compile, overlay, fixup 및 부정 실행 사례는 하지 않았다.",
+        "decision": "build artifact 명칭과 memory cells를 고치고, runtime hooks·API signature·특정 board behavior는 pinned source/target 검증이 필요하다고 명시했다.",
+        "smallestSafeChange": "chapter06 내 control DTB artifact, 4 GiB cell 표현, unverified internal implementation/output 및 overlay/fixup 설명만 수정했다. slug/date/draft/seriesOrder를 보존했다.",
+        "validationAndResidualRisk": "publish gate와 inline-math 통과, git diff --check 통과, frontmatter 핵심 필드 보존 확인. upstream clone 전용 검사는 SKIPPED. `dtc`/`fdtoverlay`/U-Boot가 없어 컴파일·overlay·runtime 검증 미실행이다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Against which pinned U-Boot version and target board should the remaining control-DTB initialization, OS-DTB fixup hooks, fdt command syntax, and shared DTS assumptions be checked?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "corrected; documentation and static gates pass; target runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    }
+  ]
+}

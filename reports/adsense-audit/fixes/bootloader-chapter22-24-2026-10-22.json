@@ -1,0 +1,146 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Bootloader Internals",
+  "batch": "chapter22–chapter24",
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-03.md"
+  ],
+  "rescore": false,
+  "readyForIntegration": true,
+  "scope": "Only Bootloader Internals chapter22–24 source articles and this fixed batch evidence. No new score, grade, rubric result or evaluation status generated or modified.",
+  "metadataExceptions": [
+    {
+      "path": "src/content/blog/embedded/bootloader/chapter23-bootrom-efuse-otp.md",
+      "field": "description",
+      "reason": "Narrowed description to the generic scope after removing unverified SoC-specific eFuse/OTP claims."
+    },
+    {
+      "path": "src/content/blog/embedded/bootloader/chapter24-spl-deep.md",
+      "field": "description",
+      "reason": "Removed the universal DDR-less SRAM model and described the versioned, optional U-Boot phases covered by the revised article."
+    }
+  ],
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh <chapter22-24> — all blocking checks pass; upstream clone-only checks SKIPPED (not PASS)",
+    "node scripts/check-inline-math.mjs <chapter22-24> — pass",
+    "git diff --check -- <chapter22-24> — pass",
+    "Frontmatter slug/date/series/seriesOrder/draft compared with pre-edit tracked source — unchanged; chapter23–24 description exceptions recorded above",
+    "Markdown code fence delimiters checked for balanced open/close fences"
+  ],
+  "primarySources": [
+    "https://docs.u-boot.org/en/latest/develop/gdb.html",
+    "https://docs.u-boot.org/en/latest/develop/driver-model/debugging.html",
+    "https://docs.u-boot.org/en/v2024.01/usage/cmd/mtest.html",
+    "https://docs.u-boot.org/en/v2025.01/board/qualcomm/debugging.html",
+    "https://docs.kernel.org/6.2/admin-guide/ramoops.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/spl.html",
+    "https://www.nxp.com/docs/en/user-guide/UG10158-AUTO.pdf",
+    "https://community.nxp.com/pwmxy87654/attachments/pwmxy87654/imx-processors/194321/1/AN4581_2018.pdf"
+  ],
+  "runtimeAvailability": {
+    "U-BootSourceAndBuild": "not available",
+    "U-BootToolchain": "not available",
+    "QEMU": "not run",
+    "debugProbeAndOpenOCDTarget": "not available",
+    "SoCBoardAndROM": "not available",
+    "SoCSpecificSecurityManualRevision": "not specified",
+    "OTPProvisioningFixture": "not available",
+    "persistentRAM/pstoreTarget": "not available"
+  },
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter22-debugging.md",
+      "beforeSha256": "e82450905c76d302fd311215ec0f54ad4a604495f3386baace95164f4c75a280",
+      "afterSha256": "fc123a89fd8cdb5ba4c28351b8f09581aaa1cf34e2805cac08108bb765a9c8bd",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "Bootloader Internals chapter22 covers early UART output, U-Boot console inspection, memory test commands, JTAG/GDB and post-reboot crash evidence.",
+        "problemSignalAndCounterevidence": "The original passed invented bdinfo/JTAG/UART output as observed, gave an address range inconsistent with its displayed DRAM bank, recommended destructive mw/mtest/env-save commands without adequate target bounds, assumed generic ramoops retention, and called chapter22 the series finale although later chapters exist. No claim is made that all command examples are false on all targets; the issue is unsupported universal presentation.",
+        "causeHypothesisAndAlternatives": "Board-specific settings and illustrative transcripts were presented as a reproducible generic workflow. Replaced them with command shapes, target-specific caveats and a distinction between read-only observation and state-changing actions.",
+        "evidence": "U-Boot GDB documentation says target configuration is board-specific and post-relocation symbols need the relocaddr. U-Boot mtest documentation says the command writes patterns into the selected range and may run indefinitely when iterations are omitted. Driver Model debugging documentation identifies debug UART, logging, sandbox and JTAG. Linux ramoops documentation requires persistent RAM and a predefined region. These sources support only the scoped statements; no board transcript was produced.",
+        "sampleCoverage": "Read the full original chapter and published-loop-03 remediation notes, including debug UART config/code, bdinfo values, md/mw/mtest, environment writes, JTAG transcript, ramoops example, failure matrix, statistics, summary and links. Removed fabricated output and unsourced numbers. No target, probe, OpenOCD server, U-Boot ELF or kernel fixture was available.",
+        "decision": "Remediated by removing fabricated outputs, inconsistent addresses, unbounded/destructive recipes and unsupported retention assumptions; kept safe placeholder command shapes and qualified target-dependent behaviors. Corrected the inaccurate next-chapter/series-final wording. Frontmatter slug/date/series/order/draft unchanged.",
+        "smallestSafeChange": "Edited chapter22 only. No target memory, environment, flash, fuse, firmware, kernel or hardware state was changed. Rollback boundary is this article.",
+        "validationAndResidualRisk": "Blocking publish gate, inline-math check, diff check, markdown fence and required metadata invariants passed. Upstream clone-only checks were SKIPPED (not PASS). U-Boot command availability, debug UART, JTAG, relocated symbols, pstore persistence and all target behavior remain untested."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 U-Boot tag, 보드/메모리 맵, debug probe와 pstore 설정을 대상으로 early UART, relocation 전후 GDB, mtest 안전 범위 및 재부팅 로그 보존을 실제 재현할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter23-bootrom-efuse-otp.md",
+      "beforeSha256": "901583f051b174343f68ebcd73a5f0dcd51849ccacf0f4a20316ef2e528611ff",
+      "afterSha256": "86a8483d83aa9d9d47f59291ee01dbf1b27ed07fb2840471ceb6543f319c41bc",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass_with_recorded_description_exception",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "Bootloader Internals chapter23 discusses SoC BootROM, boot selection, eFuse/OTP, secure boot, anti-rollback and debug lifecycle policy.",
+        "problemSignalAndCounterevidence": "The original generalized i.MX BootROM sequencing, fuse banking/bit polarity, i.MX 8M and RK3568 layouts, TI K3/AM62x behavior, key provisioning and JTAG lock commands without a reliable part/revision-scoped source. It also presented irreversible programming examples and a universal monotonic-counter model. Those product-specific claims are not verified here.",
+        "causeHypothesisAndAlternatives": "Examples from multiple SoC families were combined into a single model despite different ROM, security lifecycle and provisioning implementations. Removed addresses, field values, command recipes and universal mechanisms; retained a source-checking framework and explicitly marks exact chip behavior unassessed.",
+        "evidence": "NXP official security collateral illustrates that HAB/AHAB and secure boot documents have explicit processor-family scope; the NXP security user guide distinguishes families and directs chip-specific container details to the relevant reference manual. This supports the need for part-specific documentation, not any particular fuse layout. No exact SoC was specified, and no SoC-specific fuse map was accepted as verified.",
+        "sampleCoverage": "Read the full original chapter and published-loop-03 notes, including boot sequence, fuse tables, NXP signing/fuse commands, anti-rollback pseudocode, JTAG lock commands and links. Removed unverified specific values and all write commands. No chip, fuse tool, key material, provisioning fixture or security manual revision was available for product-level validation.",
+        "decision": "Remediated by deleting unsupported cross-vendor maps, irreversible programming steps and universal anti-rollback assertions. Replaced them with a review checklist and a clear boundary that provisioning must follow exact vendor documentation. Updated description to reflect the narrower generic article; slug/date/series/order/draft unchanged.",
+        "smallestSafeChange": "Edited chapter23 only. No fuse was read or written; no key, security lifecycle, debug policy, board, flash or firmware was changed. Rollback boundary is this article.",
+        "validationAndResidualRisk": "Blocking publish gate, inline-math, diff, fence and metadata invariants passed; description exception is recorded. Upstream clone-only checks were SKIPPED (not PASS). All SoC-specific boot order, fuse fields, lifecycle transitions, secure boot verification and rollback policy remain unassessed pending exact part/revision primary sources."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 정확한 SoC 부품·silicon revision·ROM/security manual revision과 승인된 provisioning 절차를 기준으로 BootROM 경로, fuse field, 인증 체인, rollback 및 debug lifecycle을 검증할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter24-spl-deep.md",
+      "beforeSha256": "e38ad4ddfa9a58f66942663cf37b4bfef9f658a6ec0523349545134c39c0dd04",
+      "afterSha256": "4cb5fe4b0b3db8edefa755a5a89501b33321ea66184dceb5448c4aaa01d2de69",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass_with_recorded_description_exception",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "Bootloader Internals chapter24 covers U-Boot SPL/TPL/VPL phases, memory placement, Kconfig/device tree, next-stage loading, linker layout, Falcon mode and debug/test guidance.",
+        "problemSignalAndCounterevidence": "The original presented a universal DDR-less SRAM execution model and SRAM-size table; claimed certain SoCs required TPL; included unverified Kconfig, addresses, loader APIs, linker/BSS behavior and synthetic UART/bootstage logs; asserted four standard loading patterns and universal FIT authentication and Falcon timing. These details depend on board, U-Boot tag and ROM implementation.",
+        "causeHypothesisAndAlternatives": "Generic U-Boot concepts were blended with board-specific examples and unverified assumptions. Reframed around the versioned U-Boot xPL docs, removed code/address tables and treated actual memory layout, phase properties and image authentication as target-specific evidence requirements.",
+        "evidence": "U-Boot v2025.01 Generic xPL documentation states TPL/VPL/SPL are optional and describes phase roles, SPL use cases and versioned bootph properties. It does not establish any specific board SRAM layout, size or ROM behavior. U-Boot driver-model debugging docs cover sandbox and debug mechanisms but do not validate hardware startup. No board-specific primary source was available.",
+        "sampleCoverage": "Read all of chapter24 and published-loop-03 notes, including SRAM table, stage roles, Kconfig list, device-tree claims, linker code, media loading samples, Falcon mode, UART/bootstage examples, failure checklist and related links. Replaced unsupported numeric, code and transcript examples. No U-Boot build, QEMU, ROM or hardware boot was run.",
+        "decision": "Remediated by aligning generic phase description with U-Boot v2025.01 documentation and removing board-specific figures/API behavior that lacked a pinned source. Updated description to avoid promising a universal SRAM/DDR model; slug/date/series/order/draft unchanged.",
+        "smallestSafeChange": "Edited chapter24 only; the existing unrelated diagram asset was not used or altered. No firmware, image, build configuration, memory, ROM or board state changed. Rollback boundary is this article.",
+        "validationAndResidualRisk": "Blocking publish gate, inline-math, diff, fence and metadata invariants passed; description exception is recorded. Upstream clone-only checks were SKIPPED (not PASS). Board-specific phase chain, SRAM/SDRAM timing, image loading/authentication, linker/BSS placement, Falcon behavior and runtime remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 SoC/board revision, ROM media specification, U-Boot tag/configuration, linker map 및 signed-image fixture를 대상으로 각 phase·memory layout·load/authentication·handoff를 재현할 것인가?"
+        }
+      ]
+    }
+  ]
+}

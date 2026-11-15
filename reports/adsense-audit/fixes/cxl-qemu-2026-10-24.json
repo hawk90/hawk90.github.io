@@ -1,0 +1,50 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24",
+  "series": "CXL 4.0 Internals",
+  "batch": "Ch12",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-10.md"
+  ],
+  "primarySources": [
+    "https://gitlab.com/qemu-project/qemu/-/tree/v9.2.4/docs/system/devices/cxl.rst",
+    "https://gitlab.com/qemu-project/qemu/-/blob/v9.2.4/hw/mem/cxl_type3.c"
+  ],
+  "validationCommands": [],
+  "scope": "Full original and frozen loop10 entry read; QEMU v9.2.4 b2995afed254e4804611df52210067a4d5dbdf0b built for x86_64-softmmu on macOS arm64 with two jobs. Exact article argv compared to actual paused TCG machine initialization and QMP queries.",
+  "limits": "No guest boot, firmware execution, guest PCI enumeration, CEDT dump, Linux CXL probe, decoder/region/NUMA, capacity exchange, poison injection, physical protocol or performance validation. CPU stayed stopped; no disk/network/passthrough. Generic clone gate skipped, not passed. Frozen scores unchanged.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter12-qemu-emulation.md",
+      "status": "remediated",
+      "beforeSha256": "d9e396c4521a7e77fc89595b18182490d442426aa7c1b60584b822b843668b1a",
+      "afterSha256": "e07b557a55fc4cbb70041de0cc8ecd2dfae913a44cd694a6bcaeaadf677a50d1",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Verifier, blocking gate, inline math and scoped diff pass. Paused model runtime only; guest/hardware claims not validated.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/cxl/chapter12-qemu-emulation.md",
+        "problemSignalAndCounterevidence": "Original mixed future master properties and unsupported HDM-DB/flit switches, described model configuration as guest CXL validation, and offered mutating guest recipes without executing them.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Actual 1565-step two-job build completed. Article argv equals runtime args after source-path resolution; bash syntax passed. QMP reports CPU stopped, Type3 realized, volatile backend bound, num-dc-regions property present and unsupported properties absent. Before firmware query-pci does not enumerate Type3. Actual negative QEMU runs reject cxl=off, 257MiB FMW and duplicate bus 12.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Pin actual QEMU 9.2.4. Provide exact modest paused topology and actual QMP observations, remove nonexistent properties and distinguish QOM realization from firmware/guest enumeration. Keep guest inspection as unexecuted next-stage commands.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Verifier, blocking gate, inline math and scoped diff pass. Paused model runtime only; guest/hardware claims not validated. No guest boot, firmware execution, guest PCI enumeration, CEDT dump, Linux CXL probe, decoder/region/NUMA, capacity exchange, poison injection, physical protocol or performance validation. CPU stayed stopped; no disk/network/passthrough. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "With a pinned guest kernel and firmware, do CEDT/PCI enumeration, CXL probe and usable region mappings agree with this realized topology?"
+        }
+      ]
+    }
+  ]
+}

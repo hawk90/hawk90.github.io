@@ -1,0 +1,237 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24",
+  "series": "PCIe Deep Dive",
+  "batch": "Ch1–7",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-32.md"
+  ],
+  "primarySources": [
+    "https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a/drivers/pci",
+    "https://www.kernel.org/doc/html/v6.12/power/pci.html",
+    "https://pcisig.com/specifications",
+    "https://pcisig.com/what-flit-mode-and-why-did-pci-sig-move-unit-data-exchange",
+    "https://docs.altera.com/r/docs/683501/26.1/r-tile-avalon-streaming-ip-for-pci-express-user-guide/tag-allocation"
+  ],
+  "validationCommands": [
+    "node scripts/verify-pcie-core-boundaries.mjs",
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/hardware/pcie/chapter0[1-7]*.md",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/hardware/pcie/chapter0[1-7]*.md"
+  ],
+  "scope": "Full originals and frozen loop32 entries read. Pinned Linux6.12 and pciutils3.13 source plus PCI-SIG, Linux and vendor primary references. Actual upstream IRQ/VF RID functions extracted unchanged for host ASan/UBSan with explicit mocks.",
+  "limits": "No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter01-fundamentals.md",
+      "status": "remediated",
+      "beforeSha256": "dc07a40826323e847bb142b4bc0f1c06ac2339089e8528131db9eada31def73a",
+      "afterSha256": "703770da44465e734c405c94a2423bb5e9204777fdeb89d9f8f77993ab46d3ad",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/pcie/chapter01-fundamentals.md",
+        "problemSignalAndCounterevidence": "Lane count, one-way versus aggregate bandwidth and unsupported measured/production claims. UCIe PHY and Flit deterministic guarantees were conflated.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "PCI-SIG official generation/Flit public references and raw arithmetic; source full chapter/frozen loop32 entry read.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correct x16 to16 lanes64 wires,19 chapters and Recipes label; calculate GT-to-GB with /8 and distinguish encoding/protocol costs. Qualify topology/multi-domain and switch contention, separate UCIe PHY, remove ungrounded timelines and latency guarantees.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution. No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For the declared device, kernel and topology, what real observations prove the documented configuration, ownership, IRQ/recovery or power state rather than capability alone?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter02-tlp.md",
+      "status": "remediated",
+      "beforeSha256": "734fccd400030c3309db3bfc9fe71b8a5fac3f50f83858c2aba8b4e4746e77e6",
+      "afterSha256": "52c00b39f788067e057d82465d6f7cdf2e7c75ef30f531a2179ab8c514164b69",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/pcie/chapter02-tlp.md",
+        "problemSignalAndCounterevidence": "Universal 3/4DW address inference,99% traffic,1024 tags,exact completion count and unconditional ordering/poison claims lacked support.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Altera R-Tile Tag Allocation valid256..1023 and AMD PG343768confirmed; Linux6.12 device-io.rst posted writes and ordering reviewed; full chapter/frozen entry read.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Limit layout to Non-Flit Memory Request context, separate8-bit and10-bit tags(max768), minimum rather than exact completion count; qualify same-device flush, barrier/DMA contracts, distinguish poison from header CRC.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution. No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For the declared device, kernel and topology, what real observations prove the documented configuration, ownership, IRQ/recovery or power state rather than capability alone?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter03-config-space.md",
+      "status": "remediated",
+      "beforeSha256": "c4264ebd540bb2dc13025be46aa6dd39b116a77b65d19637fdebb30e426c2b0b",
+      "afterSha256": "11650044e250e2c4386d5059c39539523183502814413f9a9ca3a80845530bdc",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/pcie/chapter03-config-space.md",
+        "problemSignalAndCounterevidence": "Frozen loop32 confirms wrong extended IDs. Common cap header3B and DVSEC revision location also wrong. ECAM failures overdiagnosed.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Actual pci_regs.h ID and DVSEC extraction macros and pci-ecam.h compared. Permanent verifier checks article IDs against pinned source; no live config. Full chapter/frozen entry read.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correct IDs against actualLinux6.12/pciutils3.13,2B common header, DVSEC Header1 revision. Distinguish cap from enable/physicalslot/authentication, qualify ECAM access failures and virtio.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution. No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For the declared device, kernel and topology, what real observations prove the documented configuration, ownership, IRQ/recovery or power state rather than capability alone?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter04-bar-mmio.md",
+      "status": "remediated",
+      "beforeSha256": "ecca14166c2b50c7aa7b27176488b44e75e7743d7d4c69ffa6b9429d1d0a8f6e",
+      "afterSha256": "3c06295c0a9fef83dba76dad4af1b580f0312780e38046effec84892bb5d2f78",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/pcie/chapter04-bar-mmio.md",
+        "problemSignalAndCounterevidence": "Wrong ReBAR ID, prefetchable-only64bit assertion, VF Stride conflated with MMIO spacing and unsafe unqualified probing/write snippet.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Actual setup-res.c pci_resize_resource and iov.c RID functions/resource barsz compared. Unmodified RID functions host-compiled ASan/UBSan1048576validcases and nonPF rejection. Full chapter/frozen entry read.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correct ReBAR15, independent attributes, RID versus BAR placement; remove fake enable register write, automatic wholeVRAM/zero-copy claims; state safe enumeration/resize constraints.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution. No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For the declared device, kernel and topology, what real observations prove the documented configuration, ownership, IRQ/recovery or power state rather than capability alone?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter05-interrupts.md",
+      "status": "remediated",
+      "beforeSha256": "705b09e00653422769f9ef581459c7ff6a57f16a86138fc877a70f69015d2fed",
+      "afterSha256": "9241893e964b9e09a5ce48500a4c28dc621df00ec741500a70e965a794cdea6a",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/pcie/chapter05-interrupts.md",
+        "problemSignalAndCounterevidence": "Wrong MMC masking definition and unconditionalINTx fallback; unchecked request_irq snippet leaks on failure; queue/core equality and platformIRdefaults overgeneralized.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Actualmsi/api.cfallbackextractedunchangedwithhostsimulatedallocatorandstructures:864flag/min/IRQ/successfailurecasescheckedASan/UBSan. MSI guide and constants reviewed. Full chapter/frozen entry read.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correctbit8MASKBIT,actualPCI_IRQ_INTXconditions, replace incomplete snippet with allocation/failure cleanup workflow; qualifytable/PBAranges,architectureIRQpath andaffinity.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution. No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For the declared device, kernel and topology, what real observations prove the documented configuration, ownership, IRQ/recovery or power state rather than capability alone?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter06-power-management.md",
+      "status": "remediated",
+      "beforeSha256": "c0590da933ca46a10d8b96dcac9b3dff4300d99e1e1be16a4310d0fe9d2fb47b",
+      "afterSha256": "3561cba31c98b894b52559ee94e3ad1cf62058bb8051727ac8cd9f454b6b3186",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/pcie/chapter06-power-management.md",
+        "problemSignalAndCounterevidence": "Wake signaling before link/power restoration unclear; ungrounded mW/latency/defaults and blanketserverrecommendations.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "OfficialLinux6.12PCIPMdocumentandactualaspm.cselectedpathscompared. BashqueriesnotrunonPCIhardware. Full chapter/frozen entry read; prioruncertainty notrelabeledasprovenoldcontradiction.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Rewrite around D/Lindependentaxes, D3coldplatformpower/reset, supportedwakepathandresume, policyversusactualstatusandenergy/tail-latencycriteria. Retainread-onlyunexecutedqueryexamples.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution. No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For the declared device, kernel and topology, what real observations prove the documented configuration, ownership, IRQ/recovery or power state rather than capability alone?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/pcie/chapter07-error-handling.md",
+      "status": "remediated",
+      "beforeSha256": "c15aa589dd721e917654df877402e9e109171d67651f573aabe1803b05955b99",
+      "afterSha256": "06ca86a6d57eaa0286ce47716d675cdc3b57054c853e7848720b9a4897e41824",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/pcie/chapter07-error-handling.md",
+        "problemSignalAndCounterevidence": "ReplayRollover/Timer wronglyUE, nonexistlink_resetcallback, poisonconfusedwithheadercorruption, fatal/reset/DPCautomaticguarantees.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Actualpci_regs.hPCI_ERR_COR_REP_ROLL/TIMER,pci.hcallbacks, PCIErrorRecoveryandpcieaer-howtoselectedsectionscompared. Full chapter/frozen entry read; noactualerrorinjection.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correctcorrectablestatusbitsandactualcallbacks, qualifyfatalandcontainment/recovery, remove reset execution snippet, no imminentfault inferencefromCEcount. Fixnextchapterprerequisitewording.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Scoped blocking gate, inline math and diff pass. Actual host source harness covers IRQ selection and VF RID arithmetic only; other chapters source/document comparison. No kernel module/hardware execution. No physical PCI access, setpci, MMIO, IRQ/interrupt-remapping, kernel build/load, live VF allocation, reset/DPC/AER injection, power or performance validation. Host structures/allocators do not validate kernel ABI, locks or hardware. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For the declared device, kernel and topology, what real observations prove the documented configuration, ownership, IRQ/recovery or power state rather than capability alone?"
+        }
+      ]
+    }
+  ]
+}

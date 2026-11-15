@@ -1,0 +1,113 @@
+# PCIe operations, tools, performance and register repair
+
+No re-score. Evaluation ledger preserved. Scope: Full originals and frozen loop33/34 entries read. Actual Linux6.12 PCI/ABI and pciutils3.13 source/documents compared; actual compiled lspci -F decodes36syntheticMPS/MRRSconfigurations. No livePCIaccess.
+
+## Checks and limits
+
+Syntheticdumpdecoder and document/source review only. No realPCIconfigread/write,setpci/MMIO,hotplug/AER/DPC/reset,margining/TPH/L0p,performance or power measurement. Staticgates do not certify all normative generations. Genericclonegate skipped, notpassed. Frozen scores unchanged.
+
+Gate: [pcie-operations-tools-2026-10-24.gate.log](pcie-operations-tools-2026-10-24.gate.log).
+Execution: [pcie-operations-tools-2026-10-24.verify.log](pcie-operations-tools-2026-10-24.verify.log).
+Execution: [pcie-operations-tools-2026-10-24.math.log](pcie-operations-tools-2026-10-24.math.log).
+
+## Per-article evidence
+
+### `chapter14-linux-operations.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/hardware/pcie/chapter14-linux-operations.md
+2. **problemSignalAndCounterevidence:** Malformedtable,8-bit=8functionerror,NumVFs-onlyARIthreshold,nonexistentlink_resetcallback and brokenresetcode;universalhotplugatomicity/recovery/safeNVMeclaims.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** Actualpci.hcallbacks,pcie/err.c/dpc.c,pciehpandacpiphpselectedsource/iov.cARIoffset-stride reviewed. No hotplug/recovery run.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Correct3-bitfunction+5-bitdevice versusARI8-bit,qualifyRID/forwardingratherthanVFcount,removefakecallback/uninitializedsnippetandunverifiedDPCtool. Clarifyoptionalcallbackchain,memory/IOboundariesandpartialfailure.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** Blocking gates, inline math, scoped diff and declared synthetic lspci decoder pass. Primary review does not validate physical link/recovery/performance. Syntheticdumpdecoder and document/source review only. No realPCIconfigread/write,setpci/MMIO,hotplug/AER/DPC/reset,margining/TPH/L0p,performance or power measurement. Staticgates do not certify all normative generations. Genericclonegate skipped, notpassed. Frozen scores unchanged.
+
+Before SHA-256: `1c1a9992a309a33d1f17bcee5aa1addf88ad2419c8f6e710188c2629cec66fa8`. After SHA-256: `815c92207062d7db42fdf79354c7f4ebaf991cc622fbc5ccdd49a0c04d9293a2`.
+
+Next action: manual-review. On a pinned device/kernel/firmware, which captured states, failure paths and measured distributions satisfy the documented conditions without confusing capability with activation?
+
+### `chapter15-tools.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/hardware/pcie/chapter15-tools.md
+2. **problemSignalAndCounterevidence:** Wronglspcidumplengths, fabricatedsimultaneouslyenabledMSI/MSIXNICoutput,wrongMPSword,AERenableanddebugfscounter/injectionpaths;unsupportedDPCtool/costs.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** Actualbuiltpciutils3.13lspci-F36validMPS/MRRSencodingsdecoded;2810isMPS128MRRS512. lspci.man/setpci.man,AERHOWTOandactualsysfsABIcompared. No hardware access.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Replacewithversionedquery/toolcontract,actualsyntheticdecoderexcerpt,correctAERsysfsABIand/dev/aer_injectscope. Removeunguardedwrite/reset/injectionrecipesandvendorclaims;separateconfig/status/counter/PHYanddriverownership. Manuallynarrowdescription.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** Blocking gates, inline math, scoped diff and declared synthetic lspci decoder pass. Primary review does not validate physical link/recovery/performance. Syntheticdumpdecoder and document/source review only. No realPCIconfigread/write,setpci/MMIO,hotplug/AER/DPC/reset,margining/TPH/L0p,performance or power measurement. Staticgates do not certify all normative generations. Genericclonegate skipped, notpassed. Frozen scores unchanged.
+
+Before SHA-256: `dee7a4a613ae42d45d0ea6482a4c54b2b63a196574ba079112aca26cfae9ea94`. After SHA-256: `52e6f318c0530655756a235233f129eb5ee2553eafe23c3614ec96827f6d5065`.
+
+Next action: manual-review. On a pinned device/kernel/firmware, which captured states, failure paths and measured distributions satisfy the documented conditions without confusing capability with activation?
+
+### `chapter16-troubleshooting.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/hardware/pcie/chapter16-troubleshooting.md
+2. **problemSignalAndCounterevidence:** AERwrongdebugfspaths,invalidACSparameter,brokenpseudo-tablesandpipeescaping;overconfidentfaultcause/reset/ASPMsolutions.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** Fulloriginal/frozenentry plusLinux6.12AERABI,HOWTOandkernel-parametersselectedPCIACSoptionscompared. Scenariosareinvestigationplans,notobservedincidents.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Repairallscenarioheaders/tablesandpaths,queryversuscontrolboundaries,removebogusparameterandunconditionaltimer/reset/offfixes. Addidentity/timewindow/missingdata/overflow/one-changecomparisoncriteria.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** Blocking gates, inline math, scoped diff and declared synthetic lspci decoder pass. Primary review does not validate physical link/recovery/performance. Syntheticdumpdecoder and document/source review only. No realPCIconfigread/write,setpci/MMIO,hotplug/AER/DPC/reset,margining/TPH/L0p,performance or power measurement. Staticgates do not certify all normative generations. Genericclonegate skipped, notpassed. Frozen scores unchanged.
+
+Before SHA-256: `2f283d9566fbfc6a53e92b15315bb375630c7ce5b64e40561e72bbc377c7d897`. After SHA-256: `ff477b26ff6a9425b5984444b7d5cd297263d12b5e346d5d5de30e32561f2f63`.
+
+Next action: manual-review. On a pinned device/kernel/firmware, which captured states, failure paths and measured distributions satisfy the documented conditions without confusing capability with activation?
+
+### `chapter17-performance.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/hardware/pcie/chapter17-performance.md
+2. **problemSignalAndCounterevidence:** WrongMPSvalueandgenericthroughput/ns/lossclaims;Gen6/7overheadmixedwith128b130b;NVMeReadTLPdirectionwrong;BDPpromisedbyCh19butmissing.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** Actual36lspcidecoderfixtures;Linux6.12register/DMA/P2Pdocs;PCI-SIGFlit236+6+8+6. Independentsimplearithmetic63.02GB/s,118GB/sTLParea,32GB/s*1us/256=125. Notbenchmarks.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Rewritecalculationconditionsversusmeasurement,one-wayrateand236/256TLParea,MPS/MRRSversusactualsize,BDP125hypotheticalexample,NVMeDMAdataorientation,NUMA/PM/P2Pconstraintsandexperimentalrecordmatrix. Removerawwritesandunsupportedbenchmarks.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** Blocking gates, inline math, scoped diff and declared synthetic lspci decoder pass. Primary review does not validate physical link/recovery/performance. Syntheticdumpdecoder and document/source review only. No realPCIconfigread/write,setpci/MMIO,hotplug/AER/DPC/reset,margining/TPH/L0p,performance or power measurement. Staticgates do not certify all normative generations. Genericclonegate skipped, notpassed. Frozen scores unchanged.
+
+Before SHA-256: `91c2fbc3bfe74aafe12eb89cba7967954c2c6e5e29750b9a5b369365f6ff2d98`. After SHA-256: `29eeee1aea5a9bfb50a8ec890c9cb6ae49aee27f459cf3abdb30bb0e9b58fbac`.
+
+Next action: manual-review. On a pinned device/kernel/firmware, which captured states, failure paths and measured distributions satisfy the documented conditions without confusing capability with activation?
+
+### `chapter18-register-maps.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/hardware/pcie/chapter18-register-maps.md
+2. **problemSignalAndCounterevidence:** ACSincorrectID,nonexistentAER/MSIXsymbolnames,MSI32/64maskoffsetconflation,LTRmessageRequirementbitmixedwithconfig;18chapterfinalein19series.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** Linux6.12pci_regs.h/pci-ecam.hdefinitionscompared. IntelDSA341204-006MAXSNPLAT15:13reservedconfirmsLTRconfigscope. ActualpciutilsMPS/MRRSdecoderfixturevalidatesexample,notallhardwarebits.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Preservewidequickreference;correctactualsymbols/offsetsandversionconditions,clarifyPCIeCapversionat+2,FLRtypeconditions,ECAMbaseorigin;addactual2810decodereferenceandCh19continuation.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** Blocking gates, inline math, scoped diff and declared synthetic lspci decoder pass. Primary review does not validate physical link/recovery/performance. Syntheticdumpdecoder and document/source review only. No realPCIconfigread/write,setpci/MMIO,hotplug/AER/DPC/reset,margining/TPH/L0p,performance or power measurement. Staticgates do not certify all normative generations. Genericclonegate skipped, notpassed. Frozen scores unchanged.
+
+Before SHA-256: `6f4cf1b6e0f020102c22553cba829c623ad63c1b597f500181c2bba1f50def20`. After SHA-256: `6971842408b93878a0d72490ebae5c2c3ec0195ef64b81689f9032fb9083f781`.
+
+Next action: manual-review. On a pinned device/kernel/firmware, which captured states, failure paths and measured distributions satisfy the documented conditions without confusing capability with activation?
+
+### `chapter19-advanced-features.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/hardware/pcie/chapter19-advanced-features.md
+2. **problemSignalAndCounterevidence:** Marginvoltagealwaysclaim,toolmodecommentwrong,ACSoverrideassumedmainline,TPHcacheguaranteeandlinearL0ppower;unsupportedcurrentkernelimplication.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** Actualpcilmr.manread:timingrequired,voltageoptional16required32+,ASPM/autonomousbitmutation. PCI-SIG6.0part2,L0pQAandAltera256..1023tagreferencecompared. Noactualmarginingorlinkpower.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Pinpcilmr3.13conditions16/32GTtiming/voltageandtemporarilychangedsettings,qualifyTPHhintsandkernelversion,realACSgroupversusphysicalisolation,FlitretimerL0pscopeandpower. Removeunexecutedcommands;BDPtargetnowexistsinCh17.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** Blocking gates, inline math, scoped diff and declared synthetic lspci decoder pass. Primary review does not validate physical link/recovery/performance. Syntheticdumpdecoder and document/source review only. No realPCIconfigread/write,setpci/MMIO,hotplug/AER/DPC/reset,margining/TPH/L0p,performance or power measurement. Staticgates do not certify all normative generations. Genericclonegate skipped, notpassed. Frozen scores unchanged.
+
+Before SHA-256: `6c6437a723cef0bf01024665cf3fd318a38cfcb9c563c8651e447ab04ce961bf`. After SHA-256: `b77980105d79ee6ecbe4869a21742d91b7afb7e73b04c8053af88c37b9660845`.
+
+Next action: manual-review. On a pinned device/kernel/firmware, which captured states, failure paths and measured distributions satisfy the documented conditions without confusing capability with activation?
+
+## Primary sources
+
+- [https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a/drivers/pci](https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a/drivers/pci)
+- [https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-pci-devices-aer_stats](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-pci-devices-aer_stats)
+- [https://github.com/pciutils/pciutils/tree/v3.13.0](https://github.com/pciutils/pciutils/tree/v3.13.0)
+- [https://pcisig.com/blog/pci-express%C2%AE-60-specification-functionality-updates-%E2%80%93-part-2](https://pcisig.com/blog/pci-express%C2%AE-60-specification-functionality-updates-%E2%80%93-part-2)
+- [https://cdrdv2-public.intel.com/857060/341204-006-intel-data-streaming-accelerator-spec.pdf](https://cdrdv2-public.intel.com/857060/341204-006-intel-data-streaming-accelerator-spec.pdf)
+
+readyForIntegration records only the declared repair/verification scope; target follow-ups remain open.

@@ -1,0 +1,66 @@
+{
+  "series": "Embedded Performance Engineering Part 6",
+  "date": "2026-10-22",
+  "readyForIntegration": true,
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part6-01-case-isr-latency.md",
+      "beforeSha256": "2f5f83bb37b77dcf557838178d9889564e605ecbda5e17e57014e02708fa54e5",
+      "afterSha256": "0f92bde5dbb0e63d7a943fe4ec1710369c9235dcb720abfd74575162dd9c87c7",
+      "status": "remediated",
+      "validation": [
+        "Named fences extracted; ftrace trace format/scope and deadline table source assertions passed.",
+        "Per-file publish gate, inline-math, and scoped diff check passed; final host/NEON example checks are logged.",
+        "Linux IRQ/ftrace/SDHCI/board runtime was not run; unverified outcomes remain labeled as scenarios."
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part6-02-case-cache-thrashing.md",
+      "beforeSha256": "23951df0d507fb88499846b2f30d8e4beb9cbb28231e65e9a6b3371aae31e1bb",
+      "afterSha256": "8f382d21795d73679b53ce23c094ddb5ae5b50cb29e20b411c5a657ad92cf776",
+      "status": "remediated",
+      "validation": [
+        "Named matrix fences extracted; FLOP/time arithmetic and tile initialization/bounds assertions passed.",
+        "Extracted scalar/tiled C matched for N=3, 32, 33; deliberately incorrect transpose layout was rejected.",
+        "AArch32 NEON excerpt passed Clang syntax-only cross-target compilation; no ARM execution/performance test."
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part6-03-case-lock-contention.md",
+      "beforeSha256": "0e87461fe2012f9c061afd6defbb4905607098020dae44e23aada44aa339e0a3",
+      "afterSha256": "369ab446856864a4cdf114524c158d6520888dc6e0a592cc968563722e56aca6",
+      "status": "unassessed",
+      "validation": [
+        "Named worker/aggregate fences and C11 atomic/data-race source assertions passed.",
+        "Extracted counter example compiled and passed 10,000 valid updates plus invalid-worker negative case on host.",
+        "Per-file publish gate, inline-math, and scoped diff check passed; target lock/cache evidence remains unassessed."
+      ],
+      "nextAction": "manual-review: reproduce userspace lock and cache-line observations on the stated kernel/CPU; review the worker aggregation consistency contract.",
+      "reviewQuestion": "What supported userspace tracing and PMU setup produced the reported mutex wait, cache-to-cache traffic, and scaling values?"
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part6-04-case-dma-tuning.md",
+      "beforeSha256": "123e55a8edaba0671205af1951ba6e97c2a59206b6b7f844967af8cf1c88b5f2",
+      "afterSha256": "000f2b5490c6310a18ba5eab8184228a1285e561e3bb0901dfa2f2a278ebb0b5",
+      "status": "remediated",
+      "validation": [
+        "Frame payload and explicit burst-delay model arithmetic passed targeted source checks.",
+        "DMAengine client API flow was compared to Linux documentation; no kernel/SoC API compile was available.",
+        "Per-file publish gate, inline-math, and scoped diff check passed; no DMA/camera/AXI runtime."
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache.md",
+      "beforeSha256": "e36ee98c658aec149e29f72bcb037bb041ab42268c91bcd015e6032ea281c257",
+      "afterSha256": "ba7422883b4acc17d6ca5953a09e8adca2f3a9bdd1135335a8e7a1e1a92de2cf",
+      "status": "unassessed",
+      "validation": [
+        "Official H100, PCIe, Astera, vLLM and Linux CXL source assertions passed; fabricated performance tables/thresholds were removed.",
+        "Per-file publish gate, inline-math, and scoped diff check passed.",
+        "No GPU/CXL/vLLM/Nsight/DAMON deployment or runtime was available; platform claims remain unassessed."
+      ],
+      "nextAction": "manual-review: validate the exact GPU/CXL platform, Linux memory policy, vLLM connector and measured workload on hardware.",
+      "reviewQuestion": "Which H100 SKU, model/context/batch/parallelism, CXL card and firmware topology, vLLM release, and trace support the claimed capacity and performance results?"
+    }
+  ]
+}

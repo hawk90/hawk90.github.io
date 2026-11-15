@@ -1,0 +1,79 @@
+{
+  "verifier": "scripts/verify-embedded-debugging-examples.mjs",
+  "articles": [
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter01-rsp-protocol.md",
+      "namedExamples": [
+        {
+          "title": "rsp-check.mjs",
+          "line": 449,
+          "mode": "node-execute",
+          "output": "PASS checksum, escaping, RLE, corrupt and truncated inputs",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight.md",
+      "namedExamples": [
+        {
+          "title": "dhcsr-check.mjs",
+          "line": 415,
+          "mode": "node-execute",
+          "output": "PASS DHCSR, AP bank/address, SWJ LSB-first vector",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter03-openocd.md",
+      "namedExamples": [
+        {
+          "title": "flash-plan.tcl",
+          "line": 446,
+          "mode": "tcl-mock-success-and-failure",
+          "output": "program success reaches reset run; program failure does not",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter04-jlink.md",
+      "namedExamples": [
+        {
+          "title": "jlink-plan-check.mjs",
+          "line": 287,
+          "mode": "node-execute",
+          "output": "ExitOnError 1\ndevice STM32F407VG\nsi SWD\nspeed 4000\nconnect\nr\nh\nloadfile firmware.bin 0x08000000\nverifybin firmware.bin 0x08000000\nr\ng\nexit",
+          "status": "PASS"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter05-elf-map.md",
+      "namedExamples": [],
+      "namedExamplesStatus": "NO_NAMED_EXECUTABLE_BLOCK"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter06-trace.md",
+      "namedExamples": [],
+      "namedExamplesStatus": "NO_NAMED_EXECUTABLE_BLOCK"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting.md",
+      "namedExamples": [],
+      "namedExamplesStatus": "NO_NAMED_EXECUTABLE_BLOCK"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter08-cxl-link-debug.md",
+      "namedExamples": [],
+      "namedExamplesStatus": "NO_NAMED_EXECUTABLE_BLOCK"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot.md",
+      "namedExamples": [],
+      "namedExamplesStatus": "NO_NAMED_EXECUTABLE_BLOCK"
+    }
+  ],
+  "failures": 0
+}

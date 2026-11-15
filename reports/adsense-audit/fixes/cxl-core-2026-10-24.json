@@ -1,0 +1,119 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24",
+  "series": "CXL 4.0 Internals",
+  "batch": "Ch1–3",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-09.md"
+  ],
+  "primarySources": [
+    "https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf",
+    "https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-1.1-Specification.pdf",
+    "https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-Specification-Release_FINAL_Website-Copy.pdf",
+    "https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf",
+    "https://computeexpresslink.org/blog/introducing-the-cxl-4-0-specification-webinar-qa-recap-4386/",
+    "https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a/drivers/cxl",
+    "https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-cxl",
+    "https://github.com/pmem/ndctl/tree/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3"
+  ],
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md src/content/blog/embedded/hardware/cxl/chapter03-coherency-model.md",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md src/content/blog/embedded/hardware/cxl/chapter03-coherency-model.md"
+  ],
+  "scope": "Full original chapters/frozen evaluation entries read. Primary CXL3.1 selected architecture/coherency definitions, CXL4.0 official presentation/QA and actual Linux v6.12/ndctl v80 source/ABI comparison; article static gates.",
+  "limits": "Documentation/source review only. No CXL device, memory mapping, decoder commit, host coherency/bias transition, multi-host sharing, protocol analyzer, QEMU runtime or performance result. Public evaluation PDF selected sections2.1–2.5 and related definitions read, not full specification certification. No new executable article model, so no mirrored tests. Generic upstream clone checks skipped, not passed. Frozen scores preserved.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
+      "status": "remediated",
+      "beforeSha256": "0926717e7871e50664b21987d86a51b5ee39a276fa22e94b4f5f60f59a0299a1",
+      "afterSha256": "6ead6740074dcbb3e58e0de1b4c77bde97b3a709f870382a0b0695d78503f588",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Publish gate and math pass; no software/physical protocol runtime. Statements about standardized functions remain bounded to the cited version/presentation.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/cxl/chapter01-cxl-position.md",
+        "problemSignalAndCounterevidence": "Loop09 flags contradictory spec/source policy, unverified future Linux v7.3-rc, misleading recipes number and simplistic lanes/ARB-MUX/activation assumptions.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Original179 lines/evaluation read; actual Linux cxl_pci_probe/acpi/decoder paths and ndctl region docs compared. Public CXL4.0 presentation distinguishes native x2, bundling/software awareness and design latency statements from measured workload latency. CXL3.1 chapter1 layer descriptions reviewed.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Keep series hub; correct every-access DMA/copy assumption, protocol/PHY negotiation order and CXL capability prerequisites, firmware preconfigured regions, mode-qualified compatibility and source pins. Replace nonexecuted future source version with actual v6.12/v80 evidence; correct crosslink label and date scope.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Publish gate and math pass; no software/physical protocol runtime. Statements about standardized functions remain bounded to the cited version/presentation. Documentation/source review only. No CXL device, memory mapping, decoder commit, host coherency/bias transition, multi-host sharing, protocol analyzer, QEMU runtime or performance result. Public evaluation PDF selected sections2.1–2.5 and related definitions read, not full specification certification. No new executable article model, so no mirrored tests. Generic upstream clone checks skipped, not passed. Frozen scores preserved."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For a named CXL4.0 platform, which negotiated features and firmware/OS layers actually expose a usable mapping?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md",
+      "status": "remediated",
+      "beforeSha256": "e14829bbef7feaa6caaf3fab298737854ce8c4056d3f6b4fa4a039878c92845a",
+      "afterSha256": "39475f887695ce4241d1b05d853372e062f02bb3ddd7d49e1f79590a7cebcd5d",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Publish gate/math pass; no synthetic sysfs output claimed. No live Type2/Type3/MLD probe, isolation or data reassignment validated.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/cxl/chapter02-system-architecture.md",
+        "problemSignalAndCounterevidence": "Loop09 flags five-type classification vs MH-SLD and unpinned product/driver claims. Original nonexistent CXL_DEVTYPE_DEVMEM registration API and Type1 no-physical-memory definition are contradicted by actual source/spec.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Original180lines/evaluation read. CXL3.1§2.1 optionalprivate device-attached memory,§2.4LD-ID,§2.4.3/.4FAM and§2.5heads read. Actual v6.12 cxl.h defines decoder enumDEVMEM=2/HOSTONLYMEM=3, not CXL_DEVTYPE_DEVMEM. Source PCI binding reviewed.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Separate protocol type,LD/head structure and sharing mode. Allow Type1 optional private memory and Type3 non-DRAM/accelerator use; remove unsupported product matrix. Replace fake sysfs capture/Type2 registration with source-qualified read-only observations, qualify realloc/isolation/fault assumptions.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Publish gate/math pass; no synthetic sysfs output claimed. No live Type2/Type3/MLD probe, isolation or data reassignment validated. Documentation/source review only. No CXL device, memory mapping, decoder commit, host coherency/bias transition, multi-host sharing, protocol analyzer, QEMU runtime or performance result. Public evaluation PDF selected sections2.1–2.5 and related definitions read, not full specification certification. No new executable article model, so no mirrored tests. Generic upstream clone checks skipped, not passed. Frozen scores preserved."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For an actual device/firmware, how do its LD/head capabilities and kernel support expose the intended host mappings?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter03-coherency-model.md",
+      "status": "remediated",
+      "beforeSha256": "f11f9b1b570fb969ba5db47a0a3d9d69d3ae2ade0a86eabf13a030d084917bc4",
+      "afterSha256": "d92b7b37d17c811ed145500518930a985f7c75dd5b2a1903b2b1a5c3293be017",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Publish gate/math pass; no bias/BISnp runtime. Inclusive snoop-filter explanation remains a model/example and does not certify a particular implementation.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/cxl/chapter03-coherency-model.md",
+        "problemSignalAndCounterevidence": "Loop09 flags outdated two-kind description,4KiB/1bit assumption,TBD transition cost and circular HBM link. Originalmandatory bias wording ignores spec optional all-host-bias case; sysfs target_type conflated with complete mode status.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Original128lines/evaluation read. Actual CXL3.1§2.2.1 requires HDM-DB support for256Bmode and usesBISnp notD2Hcache;§2.2.2.3 explicitly permits no bias implementation/allHostBias. Actual sysfs ABI target_type refers to switchdecoder target region, not full HDM mode. No contradiction with preserved accurate normative support requirement found.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Keep coherency comparison, correct description and optional bias/granularity explanation, remove TBD measured-cost implication. Link exact versioned ABI and explain target_type vs coherency state; separate coherence from software synchronization.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Publish gate/math pass; no bias/BISnp runtime. Inclusive snoop-filter explanation remains a model/example and does not certify a particular implementation. Documentation/source review only. No CXL device, memory mapping, decoder commit, host coherency/bias transition, multi-host sharing, protocol analyzer, QEMU runtime or performance result. Public evaluation PDF selected sections2.1–2.5 and related definitions read, not full specification certification. No new executable article model, so no mirrored tests. Generic upstream clone checks skipped, not passed. Frozen scores preserved."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which hardware/software coherency mode and synchronization rules apply to a real mapped region, and what trace would validate its transitions?"
+        }
+      ]
+    }
+  ]
+}

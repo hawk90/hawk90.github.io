@@ -1,0 +1,187 @@
+{
+  "date": "2026-10-22",
+  "scope": "src/content/blog/tools/debugging/embedded/chapter01-09",
+  "scoresRecalculated": false,
+  "invariants": {
+    "slug": "preserved",
+    "date": "preserved",
+    "draft": "preserved",
+    "seriesOrder": "preserved",
+    "scoreLedger": "not edited"
+  },
+  "handoffBaseline": {
+    "chapters01To04": "Prior unverified worktree edits existed; exact handoff-start SHA-256 was not captured. beforeSha256 records tracked HEAD, not the handoff draft.",
+    "chapters05To09": "No worktree diff existed at handoff; handoff-start SHA-256 equals tracked HEAD."
+  },
+  "checks": {
+    "namedExamples": "4 named examples pass: Node RSP, Node DHCSR/AP/SWJ, Tcl OpenOCD success and injected failure, Node J-Link BIN plan negative cases.",
+    "articlePublishGates": "All nine per-file gates pass blocking checks; cited-symbol/upstream checks are SKIPPED because source clones are absent, not PASS.",
+    "inlineMath": "PASS for nine files",
+    "gitDiffCheck": "PASS for owned articles and verifier",
+    "hardware": "Not run: no CXL host/device. Clear Poison is state-changing and was not executed."
+  },
+  "articles": [
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter01-rsp-protocol.md",
+      "beforeSha256": "ff7c9c2dfc434266a7af21abbfd03fd1bdb6614a1e66fbefe972d97f4ecbf401",
+      "handoffStartSha256": null,
+      "handoffStartNote": "Not captured; pre-existing unverified worktree draft.",
+      "afterSha256": "4b944213d7e02f3aa2e80291e4c51fa64394caa2f544b0242911cce9fa805bb0",
+      "validation": {
+        "contextAndScope": "Published RSP article: packet framing, RLE/escaping, description, and its named JavaScript example.",
+        "signalAndRefutation": "Handoff draft had an unterminated JS string/fence swallowing summary and links, duplicate tail, and an ASCII-only description despite binary X payload. A balanced fence and accurate description refute these signals.",
+        "causeAndAlternatives": "Malformed insertion boundary and duplicated ending; not a general renderer defect.",
+        "evidence": "Extracted the exact body block and ran Node 24.21.0 vectors for checksum, escaping round trip, RLE, bad checksum, and truncated escape; article cites GDB Remote Protocol documentation.",
+        "sampleScope": "Full chapter and sole named executable example; no real GDB stub, probe, serial transport, or target.",
+        "decision": "Remediated: repaired code fence, removed duplicated ending, and corrected description.",
+        "smallestSafeChangeAndRollback": "Article body and description only; slug/date/draft/order preserved. Roll back this article file only.",
+        "verificationAndResidualRisk": "Named checker and publish/inline-math gates pass. Production RSP parser behavior and live GDB interoperability remain untested."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight.md",
+      "beforeSha256": "782b196817487d8d1634eb90d6727bef8193e54a59121dd018961545cd65c439",
+      "handoffStartSha256": null,
+      "handoffStartNote": "Not captured; pre-existing unverified worktree draft.",
+      "afterSha256": "166692f9f1e039d0148f1f1f7e3b0b706eac561e115542db859e53b4c24afa55",
+      "validation": {
+        "contextAndScope": "Published JTAG/SWD/CoreSight article: SWJ switch sequence, SWD fields, ADIv5 AP addressing, and DHCSR named decoder.",
+        "signalAndRefutation": "The reviewed draft reversed APnDP, conflated APBANKSEL and request address, and treated posted AP reads as immediately complete. Bit-field-consistent vectors refute the mismatch.",
+        "causeAndAlternatives": "Mixed bit-numbering conventions and posted-read semantics; device-specific wire timing is a separate issue.",
+        "evidence": "Ran exact dhcsr-check.mjs body block; DHCSR bit masks, AP bank/address vectors, and SWJ LSB-first vector pass.",
+        "sampleScope": "Named host-side vectors and affected prose; no SWD capture, board-specific comparator, or trace run.",
+        "decision": "Remediated in handoff draft; named vectors pass.",
+        "smallestSafeChangeAndRollback": "Correct descriptions and named checker only; frontmatter identity preserved. Roll back this article file only.",
+        "verificationAndResidualRisk": "Node checker and gates pass. ADIv6 differences, real probe timing, and device-specific trace support remain unverified."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter03-openocd.md",
+      "beforeSha256": "09a6ee6a58d7734405c3ea9b630be7ba9151c4c55857179012e70dc09fcbd7b5",
+      "handoffStartSha256": null,
+      "handoffStartNote": "Not captured; pre-existing unverified worktree draft.",
+      "afterSha256": "12163db05fc8488b354cf5459887d2b2e619dfd2675b8a80b01e4210a8be69c7",
+      "validation": {
+        "contextAndScope": "Published OpenOCD guide: named flash-plan.tcl automation and failure-before-run safety behavior.",
+        "signalAndRefutation": "Question: does reset run occur after a failed program/verify? A trace showing reset run after injected program failure would refute the safety claim.",
+        "causeAndAlternatives": "Tcl error propagation exits the procedure at the failed command; actual OpenOCD program implementation and target setup are separate variables.",
+        "evidence": "Extracted exact article Tcl block. Mock Tcl records happy-path order and injects program error; success reaches reset run and failure does not.",
+        "sampleScope": "One named Tcl block with success and forced-error paths; no OpenOCD executable, cfg, adapter, target, or flash.",
+        "decision": "Keep the guarded example; host-side control flow verified. Prior draft's debug-level wording was normalized before gate run.",
+        "smallestSafeChangeAndRollback": "Keep article workflow; mock behavior lives in verifier. Article and verifier can roll back independently.",
+        "verificationAndResidualRisk": "Tcl mock and article gates pass. Version-specific commands, target initialization, flash, and reset were not executed."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter04-jlink.md",
+      "beforeSha256": "ef64c00350150b9e030011b8615d52088d7b29d8594358ca1eef35aa541cee89",
+      "handoffStartSha256": null,
+      "handoffStartNote": "Not captured; pre-existing unverified worktree draft.",
+      "afterSha256": "3b4ce40477f3390d13c44bde6fdca10c9c157ad08b4464f135eae94a7e17fc1f",
+      "validation": {
+        "contextAndScope": "Published SEGGER tool workflow: GDB load arithmetic, RTT lifetime, licensing wording, and named BIN-plan example.",
+        "signalAndRefutation": "Displayed section sizes sum to 42,208 bytes; a different load size is contradictory. ELF accepted as raw BIN input would contradict verifybin use.",
+        "causeAndAlternatives": "Transcript total was arithmetic drift. RTT polling also needs a live J-Link connection process; exact device support is separate.",
+        "evidence": "Corrected total to 42,208. Extracted jlink-plan-check.mjs: valid BIN passes; ELF filename, ELF magic, and empty input fail.",
+        "sampleScope": "Arithmetic and named host-only planner; no SEGGER tools, probe, or target board.",
+        "decision": "Remediated transcript total; retained RTT lifetime and model-specific licensing qualifications.",
+        "smallestSafeChangeAndRollback": "Correct sample output and qualifications only; preserve article route and metadata. Roll back this article file only.",
+        "verificationAndResidualRisk": "Named Node checker and gates pass. Device flash algorithms, live RTT, BP effects, and current license terms were not tested."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter05-elf-map.md",
+      "beforeSha256": "5ba6358f9b6dc08948d76a460d88b8c96c6046759f497429bac5dca59c154842",
+      "handoffStartSha256": "5ba6358f9b6dc08948d76a460d88b8c96c6046759f497429bac5dca59c154842",
+      "handoffStartNote": "No handoff worktree diff; equals HEAD.",
+      "afterSha256": "0e215cfb5ebe9e4ae29649740b2a0d40d5bcd09e29fe87869ed8663a25726539",
+      "validation": {
+        "contextAndScope": "Published ELF memory guide: first PT_LOAD and startup source symbol cross-reference.",
+        "signalAndRefutation": "Segment ended at 0x08009f80 while mapped sections extended to 0x0800a3b0; startup used __etext absent from the accompanying linker script, which defines _sidata.",
+        "causeAndAlternatives": "Example outputs and startup/linker snippets drifted independently. Omitted zero-sized sections explain some gaps, but not a LOAD range ending before listed contents.",
+        "evidence": "Recomputed the mapped end and changed LOAD sizes to 0x0a3b0; startup now copies from _sidata defined by the same article's linker script.",
+        "sampleScope": "Internal range arithmetic and symbol references; no generated ELF, ARM linker, or final target link.",
+        "decision": "Remediated provable range and symbol mismatch; retain real linker output as a reproducibility follow-up.",
+        "smallestSafeChangeAndRollback": "Correct the segment size and startup symbol only; frontmatter unchanged. Roll back this article file only.",
+        "verificationAndResidualRisk": "Manual arithmetic and gates pass. Complete section map and actual GNU ld output remain ungenerated."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter06-trace.md",
+      "beforeSha256": "5375e7574ac2ba2559bb59af8c812a3e5eb81027be37d3ef7be026aa174f405c",
+      "handoffStartSha256": "5375e7574ac2ba2559bb59af8c812a3e5eb81027be37d3ef7be026aa174f405c",
+      "handoffStartNote": "No handoff worktree diff; equals HEAD.",
+      "afterSha256": "7ab9526603024ce40693504128e485d39fea7b753cdb55f91d07d55c15c6f18e",
+      "validation": {
+        "contextAndScope": "Published trace comparison: Semihosting IDs, blanket nonblocking claim, and Ch7 preview.",
+        "signalAndRefutation": "SYS_EXIT/HEAPINFO/ELAPSED were 0x0c/0x12/0x13, contrary to pinned Arm ABI table; Semihosting stops the target during host service.",
+        "causeAndAlternatives": "Wrong operation numbers and a blanket timing statement collapsed host-mediated, buffered, and hardware trace mechanisms.",
+        "evidence": "Updated IDs to 0x18/0x16/0x30, pinned citation to Arm ABI 2025Q4, and described blocking/timing by method; removed nonexistent MMU promise from next chapter preview.",
+        "sampleScope": "Operation rows and article opening/navigation; no target trace path or throughput measurement.",
+        "decision": "Remediated against cited Semihosting revision; no score changes.",
+        "smallestSafeChangeAndRollback": "Correct three IDs and scope statements only; preserve URL/date/draft/order. Roll back this article file only.",
+        "verificationAndResidualRisk": "Gates and inline-math pass. Real ITM/SWO/RTT/ETM throughput and probe combinations remain untested."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting.md",
+      "beforeSha256": "d020f8c92b20b127ada13344816e24645055870b33685d5f19212ce8043cc389",
+      "handoffStartSha256": "d020f8c92b20b127ada13344816e24645055870b33685d5f19212ce8043cc389",
+      "handoffStartNote": "No handoff worktree diff; equals HEAD.",
+      "afterSha256": "1141daa56caff6be8d4f28c953fa6f5282916aa755a7472fa01990d4d28896ea",
+      "validation": {
+        "contextAndScope": "Published RTOS troubleshooting article: BFSR range, FreeRTOS stack sample, title/description scope, and series navigation.",
+        "signalAndRefutation": "BFARVALID bit 15 was outside BFSR [12:8]; Queue was promised without an analysis section; chapter called itself series-final despite later chapters; GDB Python listing contained ellipses and undefined values.",
+        "causeAndAlternatives": "Register range omitted bit 15; metadata exceeded body scope; sample inferred unavailable stack bounds. FreeRTOS already provides a configurable high-water-mark API.",
+        "evidence": "Changed BFSR to [15:8]. Inspected supplied FreeRTOS Kernel 11.2.0 tasks.c, stack_macros.h, and config defaults for fill byte, overflow checks, and INCLUDE_uxTaskGetStackHighWaterMark; replaced incomplete Python with configured API and units; corrected CMSIS 5/6 link label.",
+        "sampleScope": "Internal register consistency and supplied FreeRTOS source; no RTOS target build or fault-board execution.",
+        "decision": "Remediated; manual chapter-level title/description correction is recorded. Queue internals are no longer advertised.",
+        "smallestSafeChangeAndRollback": "Update range, stack example, title/description, and navigation; preserve slug/date/draft/order. Roll back this article file only.",
+        "verificationAndResidualRisk": "Source inspection and all gates pass. C fault snippets, MPU configuration, port-specific checks, and physical recovery remain uncompiled/unexecuted."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter08-cxl-link-debug.md",
+      "beforeSha256": "4df8f2b00f8c84029bfda4b1ef0bff8fc41e7c87f04c43e898a94def52427f26",
+      "handoffStartSha256": "4df8f2b00f8c84029bfda4b1ef0bff8fc41e7c87f04c43e898a94def52427f26",
+      "handoffStartNote": "No handoff worktree diff; equals HEAD.",
+      "afterSha256": "dbd864c96d6e84cbf1e4b776db980994caf2ec7f673ba991a40bf70b57810ff1",
+      "validation": {
+        "contextAndScope": "Published CXL link guide: lspci absence inference and Recipes cross-link label.",
+        "signalAndRefutation": "The article inferred LTSSM not reaching L0 from lspci absence alone; LTSSM state needs controller or analyzer evidence. Link said Ch149 while destination seriesOrder is 150.",
+        "causeAndAlternatives": "Enumeration symptom was treated as a sufficient cause; power/reset, firmware setup, enumeration, and LTSSM are distinct observations.",
+        "evidence": "Reworded symptom/checklist to separate enumeration failure from LTSSM state and compared destination slug/order to correct label to Ch150.",
+        "sampleScope": "Article logic and local series metadata; no CXL host, analyzer, or controller register.",
+        "decision": "Remediated inference and chapter label; no score change.",
+        "smallestSafeChangeAndRollback": "Edit symptom inference and link text only; preserve target URL and frontmatter. Roll back this article file only.",
+        "verificationAndResidualRisk": "Internal link/series gates pass. LTSSM, DVSEC, CEDT, and kernel behavior need pinned host/kernel/device evidence."
+      },
+      "status": "remediated"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot.md",
+      "beforeSha256": "7b15914cb61767736cca29c103012c90bd2cffb12eb90956d9b5f7ff85018612",
+      "handoffStartSha256": "7b15914cb61767736cca29c103012c90bd2cffb12eb90956d9b5f7ff85018612",
+      "handoffStartNote": "No handoff worktree diff; equals HEAD.",
+      "afterSha256": "a00e16e81f12cd0ed97fd80576159e2f3ccd8a2bc1bc94b629e6e254e3efdb69",
+      "validation": {
+        "contextAndScope": "Full CXL RAS/poison troubleshooting article; focus was state-changing Clear Poison semantics, ndctl poison-list source/offset interpretation, and a universal device-replacement threshold.",
+        "signalAndRefutation": "The article showed clear-media-poison as a routine remove command and did not warn that clear does not restore data. Linux implementation sends a 64-byte zero write-data payload. Restricting the command to confirmed test-injected poison and warning about data recovery/device policy refutes routine operational use.",
+        "causeAndAlternatives": "The command name invites interpreting it as metadata-only cleanup; actual device behavior is protocol/vendor dependent. Poison list disappearance can mean state cleared without restoring affected contents; collect backup/recovery and vendor platform guidance before any production action.",
+        "evidence": "Compared ndctl cxl list documentation (DPA/source fields and supported options) with Linux drivers/cxl/core/memdev.c Clear Poison payload, core/trace.h event fields, and pci.c event handling. Removed universal replacement threshold and linked the official sources in the article.",
+        "sampleScope": "Full article prose and all named command/trace examples were reviewed against official docs/source. No cxl command, device, host, poison injection, or event path was executed.",
+        "decision": "Remediated: require first listing the target DPA/source, limit clear to test-injected poison, state that Linux sends zero write-data and that clear is not data recovery, and use trends with vendor service criteria rather than a universal replacement threshold.",
+        "smallestSafeChangeAndRollback": "Changed the affected command framing, added a data-loss/recovery warning and four source links, and qualified the replacement decision. Preserve slug/date/draft/seriesOrder; rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Per-file publish gate, inline-math and diff checks pass. Upstream cited-symbol check is SKIPPED because the Linux source clone is absent (not PASS). Hardware and version-specific ndctl/kernel/device behavior remain untested."
+      },
+      "status": "remediated"
+    }
+  ]
+}

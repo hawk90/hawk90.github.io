@@ -1,0 +1,55 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24",
+  "series": "Embedded Security",
+  "batch": "Ch6",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-23.md"
+  ],
+  "primarySources": [
+    "https://github.com/mcu-tools/mcuboot/tree/9c99326b9756dbcc35b524636d99ed5f3e6cb29b",
+    "https://sbabic.github.io/swupdate/2024.12/swupdate.html",
+    "https://sbabic.github.io/swupdate/2024.12/signed_images.html"
+  ],
+  "validationCommands": [
+    "node scripts/verify-mcuboot-image-boundaries.mjs",
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/embedded-security/chapter06-ota-update.md",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/embedded-security/chapter06-ota-update.md"
+  ],
+  "scope": "Full original and frozen loop23 entry read; selected primary documents and actual pinned host examples checked.",
+  "limits": "No MCUboot target build, boot, physical flash, secure-counter backend, OTA server, recovery/watchdog or power-cut testing. Payload is a synthetic host fixture, not executable firmware. Generic upstream clone gate skipped, not passed. Frozen evaluation ledgers unchanged.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/embedded-security/chapter06-ota-update.md",
+      "status": "remediated",
+      "beforeSha256": "8ce715097ec920d4e2ed06e721969ecf4726bc6c076bd1fcf9efb09112e29636",
+      "afterSha256": "3a598596721ce76542ecedce224b5d36bb9efa59c741da0ff4f0d36522b1814e",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Actual host imgtool CLI and format/negative tests passed, gate/math/diff passed.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/embedded-security/chapter06-ota-update.md",
+        "problemSignalAndCounterevidence": "Original combined signature, hashes, antirollback and recovery, used unverified image format/tool snippets and universal timers.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Pinned MCUboot v2.1.0 imgtool signed a non-executable synthetic payload with disposable keys. Five changed payload/counter/signature/magic/wrong-key cases rejected; correctly signed lower counter passed host verification. Exact article command executed and TLV layout parsed. SWUpdate2024.12 documentation establishes cpio plus signed sw-description and per-image hashes.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correct protected/normal TLV and algorithms, distinguish key-based authenticity from hash-only verification, device rollback policy and power-loss recovery; remove non-executable product commands.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Actual host imgtool CLI and format/negative tests passed, gate/math/diff passed. No MCUboot target build, boot, physical flash, secure-counter backend, OTA server, recovery/watchdog or power-cut testing. Payload is a synthetic host fixture, not executable firmware. Generic upstream clone gate skipped, not passed. Frozen evaluation ledgers unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Does device-side counter commitment preserve the required signed fallback under reset at each swap/confirmation step?"
+        }
+      ]
+    }
+  ]
+}

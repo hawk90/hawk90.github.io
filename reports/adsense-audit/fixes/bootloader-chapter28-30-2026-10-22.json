@@ -1,0 +1,142 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Bootloader Internals",
+  "batch": "chapter28–chapter30",
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-03.md"
+  ],
+  "rescore": false,
+  "readyForIntegration": true,
+  "scope": "Only Bootloader Internals chapter28–30 articles and this fixed batch evidence. No new score, grade, rubric result or evaluation status generated or modified.",
+  "metadataExceptions": [
+    {
+      "path": "src/content/blog/embedded/bootloader/chapter30-bootloader-ci.md",
+      "field": "description",
+      "reason": "Narrowed CI description to distinguish software/emulation tests from real-board validation."
+    }
+  ],
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh <chapter28-30> — all blocking checks pass; upstream clone-only checks SKIPPED (not PASS)",
+    "node scripts/check-inline-math.mjs <chapter28-30> — pass",
+    "git diff --check -- <chapter28-30> — pass",
+    "Frontmatter slug/date/series/seriesOrder/draft compared with pre-edit tracked source — unchanged; chapter30 description exception recorded above",
+    "Markdown code fence delimiters checked for balanced open/close fences"
+  ],
+  "primarySources": [
+    "https://docs.kernel.org/filesystems/ubifs.html",
+    "https://docs.kernel.org/driver-api/mtdnand.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/mmc.html",
+    "https://docs.u-boot.org/en/latest/usage/environment.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/distro.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/bootstd/index.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/bootflow.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/source.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/fit/signature.html",
+    "https://docs.u-boot.org/en/v2025.01/board/emulation/qemu-arm.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/py_testing.html"
+  ],
+  "runtimeAvailability": {
+    "U-Boot source/build": "not available",
+    "QEMU binary": "not available/not run",
+    "target storage parts/board": "not specified",
+    "CI provider configuration": "not available",
+    "CI secret/HSM test fixture": "not available",
+    "real-board farm": "not available"
+  },
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter28-flash-layout.md",
+      "beforeSha256": "07b6cbd43aba0d6a353dd93697a1bc5ae10ff2ac4d741f20582fadfa41ba743a",
+      "afterSha256": "ad8bb47b350f7d7bf14cdbfd4ba790cf0b4fb0d366865a55fc37de0aefa94b61",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "chapter28 explains storage geometry, MTD partitions, UBI/UBIFS, U-Boot environment, A/B layout, eMMC boot partitions/RPMB and product storage sizing.",
+        "problemSignalAndCounterevidence": "The prior text contained bad-block offsets whose implied erase geometry contradicted one another; unsupported standard sizes, fixed sizing multiples and UBI overhead; unverified fixed-partition/eMMC commands and claims that generic UBI or RPMB automatically supplies atomic OTA/anti-rollback. The existing evaluation explicitly withdrew a device-capacity inference based only on BBT page number.",
+        "causeHypothesisAndAlternatives": "Examples from raw NAND, block devices and eMMC hardware partitions were mixed without a pinned device geometry, board ROM format or exact U-Boot configuration. Generic sizing heuristics were stated as standards.",
+        "evidence": "Linux MTD docs describe NAND eraseblock handling; Linux UBIFS docs state UBI handles wear-leveling/bad-block abstraction and UBIFS works above UBI volumes. U-Boot v2025.01 mmc docs define `partconf` and its boot/access fields. Those docs do not validate an unspecified device layout or a generic OTA design.",
+        "sampleCoverage": "Read full article and published-loop-03 notes, including media table, 1GB fixed-partition map, sizing tables, env offsets, A/B guidance, synthetic BBT transcript, UBI config/overhead, eMMC area size/partconf/genimage examples, workflow and summary. Removed invented geometry/output/commands and fixed-ratio rules. No target device, image, NAND geometry or eMMC EXT_CSD was available.",
+        "decision": "Remediated as a device-specific design/verification workflow; distinguished MTD/UBI from block devices; removed synthetic logs, unsupported values and persistent-write recipes. No metadata exception.",
+        "smallestSafeChange": "Edited chapter28 only. No media, partition table, U-Boot environment, firmware, image, key, NAND or eMMC state changed. Rollback boundary is this article.",
+        "validationAndResidualRisk": "Publish gate, inline-math, diff, fences and metadata invariants passed. Upstream clone-only checks SKIPPED (not PASS). Device geometry, boot-ROM read path, partition map, UBI/UBIFS settings, RPMB use, update interruption and recovery remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 storage part/revision, SoC ROM boot flow, filesystem/update stack, U-Boot tag, 실제 최대 artifact 및 power-cut fixture를 기준으로 partition geometry·A/B·recovery를 검증할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter29-distro-boot.md",
+      "beforeSha256": "4ffdeeba333a0ad59f1ea8893c4bec78c402a2e6d9f1e83b31718ecd154b7245",
+      "afterSha256": "69969eb2495f109c77b0b2f0fc74c111d5a187824863a2fa85f53fb46d3379ba",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "chapter29 compares U-Boot Distro Boot, extlinux.conf, legacy U-Boot scripts, FIT scripts, Standard Boot/bootflow and distribution installation expectations.",
+        "problemSignalAndCounterevidence": "The prior text treated extlinux as universal across Linux distributions, called a legacy script signed despite its CRC-based container, labeled bootflow a universal second-generation replacement and promised automatic fallback; it also used synthetic bootflow/extlinux/EFI/Raspberry Pi output and board-specific assumptions. The read-only evaluation leaves those technical claims unverified.",
+        "causeHypothesisAndAlternatives": "Documentation contracts for one U-Boot release were mixed with general distro/Raspberry Pi/EFI claims and invented console examples.",
+        "evidence": "U-Boot v2025.01 Generic Distro Configuration says it specifies features for board-agnostic distro support and names extlinux.conf as the configuration format for U-Boot syslinux/PXE paths. U-Boot source docs define legacy script versus FIT script and say legacy images cannot be signed/verified. Standard Boot/bootflow docs define configuration-dependent scan behavior.",
+        "sampleCoverage": "Read full chapter and published-loop-03 notes, including Distro Boot requirements, extlinux syntax/routes, boot.scr build/output, bootflow listing/fallback, Raspberry Pi config.txt, EFI examples, choice tables, multiple-boot section and known issues. Removed fabricated logs and unverified board/distribution universals. No U-Boot build, removable medium, QEMU or board was available.",
+        "decision": "Remediated with versioned U-Boot documentation; separated Distro Boot, script format and Standard Boot policy; corrected legacy CRC versus cryptographic verification and narrowed fallback/distribution claims. Metadata unchanged.",
+        "smallestSafeChange": "Edited chapter29 only. No boot configuration, disk/SD card, environment, image or firmware was written or executed. Rollback boundary is this article.",
+        "validationAndResidualRisk": "Publish gate, inline-math, diff, fences and metadata invariants passed. Upstream clone-only checks SKIPPED (not PASS). Actual release/config feature availability, distro installer behavior, board boot order, script side effects, FIT policy, EFI variables and fallback remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 pinned U-Boot tag/defconfig, distro installer image, partition map과 board recovery fixture로 extlinux, script/FIT, Standard Boot 순서 및 failure fallback을 실행 검증할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter30-bootloader-ci.md",
+      "beforeSha256": "1650bcd37c225feeee0188d303f8ff5925df8ce3208034ad839cea3f7f3fa139",
+      "afterSha256": "84c4f3199e0ee1f3f5366941656e75c68d32c4b7ecd950ce0075145e3f373e79",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass_with_recorded_description_exception",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "chapter30 describes a U-Boot CI matrix, QEMU smoke testing, real-board automation, artifact provenance, metric regressions, bisect and signing-key separation.",
+        "problemSignalAndCounterevidence": "The prior text claimed QEMU prompt proves DDR training, implied TF-A is required for ARMv8 builds, had inconsistent sample size hex values, synthetic CI outputs/logs, unverified GitLab/LAVA/Vault APIs and made unsupported universal CI thresholds/retention claims. The published-loop evaluation specifically confirms QEMU cannot stand in for physical DDR training and points to the U-Boot QEMU-arm reference build.",
+        "causeHypothesisAndAlternatives": "CI architecture patterns were presented as executed, vendor-neutral code and pass criteria without pinned U-Boot/QEMU versions or board pipeline configuration.",
+        "evidence": "U-Boot v2025.01 QEMU ARM docs define qemu_arm64_defconfig and a supported `virt` machine invocation with emulated RAM/devices. U-Boot pytest docs describe sandbox and physical-board console hooks. These document software/emulation tests, not target DDR PHY/electrical validation.",
+        "sampleCoverage": "Read the entire chapter and published-loop-03 notes, including matrix YAML, QEMU script/output, LAVA schema, self-hosted runner, regression hex metrics/thresholds, bisect output, archive sizes, Vault signing commands, pitfalls and summary. Removed unverifiable outputs, vendor-specific CI API examples and universal thresholds. No U-Boot checkout, QEMU or board runner was available.",
+        "decision": "Remediated by separating build/sandbox/QEMU/hardware test scopes, using official documented QEMU and pytest invocation shapes, preserving artifact provenance and conditioning thresholds and signing policy on product requirements. Description narrowed to that scope.",
+        "smallestSafeChange": "Edited chapter30 only. No CI config, secret, key, image, source build, QEMU process, board or release artifact was changed or run. Rollback boundary is this article.",
+        "validationAndResidualRisk": "Publish gate, inline-math, diff, fences and metadata invariants passed with description exception recorded. Upstream clone-only checks SKIPPED (not PASS). U-Boot sandbox, QEMU, device boot, DDR, CI-provider workflow, hardware farm, production signing and failure bisect remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 U-Boot commit/config, QEMU version/machine, board revision, CI provider, reproducible artifacts, board hook and test-key fixture를 기준으로 각 test tier와 negative/recovery case를 검증할 것인가?"
+        }
+      ]
+    }
+  ]
+}

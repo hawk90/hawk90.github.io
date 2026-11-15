@@ -1,0 +1,212 @@
+{
+  "date": "2026-10-22",
+  "scoreChanged": false,
+  "environment": "macOS arm64 Homebrew Clang/LLVM23.1.3; C++17; ASan+UBSan host; M0/M4 Thumb object only",
+  "verifier": "scripts/verify-embedded-cpp-part4-examples.mjs",
+  "etlVersion": "20.49.0",
+  "etlHeaders": [
+    {
+      "name": "version.h",
+      "sha256": "54434261fa675d997c305742b3da5855b0a473d8512aaec4f7d13ceb257f7588"
+    },
+    {
+      "name": "platform.h",
+      "sha256": "29dd9e3f94bca9d59b37557b86f2d41a61612bbb1a233f984e64f2af812c8e96"
+    },
+    {
+      "name": "error_handler.h",
+      "sha256": "fa2c644583d0af270370792fb3fe42caef28bb3e14a991d5b4c8118bdba269ad"
+    },
+    {
+      "name": "vector.h",
+      "sha256": "f141e905e55fe473be350ca4c97f27a83c3adee4cf162978d31b665bcb61f3ac"
+    },
+    {
+      "name": "basic_string.h",
+      "sha256": "8203cf350cab04790f238ce8206c2c58560991a28e8982b01237ff24a38c2e3f"
+    },
+    {
+      "name": "delegate.h",
+      "sha256": "6d19231ccdb7b873ba34764337e2bed7c1cb4b07ef09c5bacb4835779fbbca6a"
+    },
+    {
+      "name": "fsm.h",
+      "sha256": "9a779f3b9b909bcdc9b3e53e4b0a2bae6d19920fdc11ea73aed243459ba506bb"
+    }
+  ],
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-01-intrusive-containers.md",
+      "beforeSha256": "874f797d76ad3d1d092fcf8524eb711346853174f44be2640708f303b3b691e7",
+      "chapter": "01",
+      "status": "remediated",
+      "afterSha256": "2a65cc0650a8b3653ce56412116b22c3c5a3797f3f273a57c4dc4b1d57c2def4",
+      "frontmatterPreserved": true,
+      "decision": [
+        "고정 주소 객체를 list가 빌려 쓰는 intrusive 경계",
+        "std::list iterator erase O(n), 미초기화 sentinel, 안전하지 않은 이중 삽입/erase와 근거 없는 cycle/ms 비교가 문제입니다. 객체가 연결되기 전에 초기화되고 더 오래 살며 실제 다른 API를 쓴 경우는 구분합니다.",
+        "allocator·객체 수명·hook 저장 공간과 복잡도를 혼합한 것이 원인입니다. owner guard와 복사 금지를 둔 교육용 list, lifetime 계약, 올바른 std::list 복잡도를 반영했습니다.",
+        "Boost.Intrusive·C++ list.modifiers·Linux list.h를 대조했습니다. 정상2node 순회/erase/clear, 이중 삽입·wrong-container erase 거부, 독립 hook 동시 가입과 BAD_COPY compile failure를 실행했습니다.",
+        "자작 list와 정상/거부 경계를 포함합니다. Boost/ETL intrusive library와 실제 RTOS scheduler는 빌드·실행하지 않았습니다.",
+        "remediated: 잘못된 복잡도·수명 가정을 고치고 재현 예제로 대체했습니다. 도식의 O(n)도 O(1)로 수정하고 allocator와 node 저장 공간을 구분했습니다.",
+        "URL·frontmatter 보존. 소유권 이전/삭제/시리즈 병합은 하지 않았습니다. 추가 owner 포인터 비용과 node 선행 수명을 명시했습니다.",
+        "host ASan·UBSan+copy failure, gate 통과. diagram은 single target 재빌드·stamp 확인·시각 확인 및 bbox overlap=0/touching=0 검사를 수행했습니다. node 재배치·연결 중 파괴·ISR 동시 사용은 지원 계약 밖이며 target 변경 시 재검증합니다."
+      ],
+      "examples": "embedded-cpp-part4-01-examples.log",
+      "gate": "embedded-cpp-part4-01-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed"
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-02-etl-library.md",
+      "beforeSha256": "f5636c585039d05ef66991a50d2fe5c96caacc2ba7aff5c8a780384a7dbc5a4e",
+      "chapter": "02",
+      "status": "remediated",
+      "afterSha256": "dbb4cb26188cd6dfb9d1b9a48481adec5a93faf8df32b71c235d6ab557d96207",
+      "frontmatterPreserved": true,
+      "decision": [
+        "고정 capacity ETL 저장 정책과 오류 처리",
+        "size>capacity로 string truncation을 검사하고 예외/abort/무시를 기본 동작처럼 서술한 것이 문제입니다. ETL 판과 설정이 다른 실제 동작은 별도 비교합니다.",
+        "compiler 예외 사용과 ETL_THROW_EXCEPTIONS·ETL_CHECK_PUSH_POP·error_handler 정책을 혼동했습니다. 판 고정 source와 정상·고갈·unknown event probe로 대체했습니다.",
+        "로컬 ETL20.49.0 version/platform/error_handler/vector/basic_string/fsm/delegate 헤더를 직접 확인했습니다. vector4개/5번째 vector_full, string4byte truncation, delegate42와2state FSM start/unknown/stop을 실제 실행했습니다.",
+        "고갈 정상 처리와 미정의 event를 포함합니다. no-exception handler 분기·router·observer·모든 ETL 컨테이너를 실행한 것은 아닙니다.",
+        "remediated: 잘못된 설정·누락 FSM 상태 처리·router message 생성자를 수정하고 재현 불가능한 15배 크기 주장 대신 검증 조건을 기록했습니다.",
+        "URL·frontmatter와 대표 API 개관 보존. capacity 저장 위치를 항상 bss라고 하지 않고 T/callback 자체의 allocation 계약을 분리했습니다.",
+        "host ASan·UBSan, pinned capacity/FSM 실행과 gate 통과. no-exception 제품 오류 handler, target library 및 board 메모리 예산은 제품 통합 시 확인합니다."
+      ],
+      "examples": "embedded-cpp-part4-02-examples.log",
+      "gate": "embedded-cpp-part4-02-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed"
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-03-lock-free-basics.md",
+      "beforeSha256": "f65ecd8a0071193e78e8f29aa43151f46154ff723e0488ab5faa0e69a2223e14",
+      "chapter": "03",
+      "status": "remediated",
+      "afterSha256": "9b114654170010aca39e38d5465c15790c6f9a0cfd8684219e557e2172616d9b",
+      "frontmatterPreserved": true,
+      "decision": [
+        "atomic 기본 API와 Cortex-M/ISR 적용 조건",
+        "atomic=단일 명령=deterministic ISR-safe, M0 atomic API 전면 미지원 같은 일반화가 문제입니다. 특정 target의 lock-free/ISR 보장 증거가 있으면 그 범위에서만 적용합니다.",
+        "언어 atomicity·알고리즘 진행성·코어 명령·runtime helper를 한 의미로 취급했습니다. 실제 코드 생성과 release/acquire 게시, CAS expected 갱신을 구분했습니다.",
+        "C++ atomic lock-free/order·Clang builtin·CMSIS PRIMASK 문서를 대조했습니다. host2thread payload42 게시와 CAS mismatch7/success9, M4 LDREX/STREX와 M0 __atomic_fetch_add_4 참조를 확인했습니다.",
+        "host 기능과 M0/M4 ELF 코드를 포함합니다. M0 helper 링크·board ISR·contention WCET는 실행하지 않았습니다.",
+        "remediated: cycle 수·항상 가장 빠름을 제거하고 weak CAS의 spurious failure, seq_cst 범위, IRQ 상태 복원과 SPSC capacity>=2 조건을 반영했습니다.",
+        "URL·frontmatter·입문 API 구조 보존. 성능 수치만 지우고 성공 단정으로 바꾸지 않았으며 실제 관찰과 미검증 한계를 본문에 기록했습니다.",
+        "ASan·UBSan host 및 ARM object 검사, gate 통과. host interleaving 표본은 증명이 아니며 ISR/helper/retry 상한은 target과 runtime 변경 때 재검증합니다."
+      ],
+      "examples": "embedded-cpp-part4-03-examples.log",
+      "gate": "embedded-cpp-part4-03-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed"
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-04-lock-free-container.md",
+      "beforeSha256": "7fa99a74fa05b0c8bfa93e838f602ed584fb227ad1921ddb57b4a5b1aa9d8a5c",
+      "chapter": "04",
+      "status": "remediated",
+      "afterSha256": "83615531d02755d3ae104151be553fef25e09bf81e05dc39839bd7fc4eb230de",
+      "frontmatterPreserved": true,
+      "decision": [
+        "SPSC 구현과 MPMC/reclamation 경계",
+        "동일 EventBus를 여러 consumer와 SPSC로 동시에 설명하고 안전하지 않은 union freelist를 완성 pool처럼 제시했습니다. 정확히 한 producer/consumer와 별도 수명 프로토콜이 있으면 다르게 판단합니다.",
+        "인덱스 소유권·node 재사용·wake token과 item 개수를 혼합했습니다. SPSC는 N-1/overflow/slot 회수 계약으로 검증하고 MPMC 골격은 명시적으로 제품 구현 범위에서 제외했습니다.",
+        "C++ atomic order·Boost.Lockfree·ConcurrentQueue README를 대조했습니다. N4 capacity3, empty/full/wrap,2thread100000 FIFO와 N0 static_assert failure를 실행했습니다.",
+        "기본 경계와 장시간 순환 FIFO 표본을 포함합니다. 완성 Treiber reclamation·RTOS semaphore deadline·Boost/moodycamel 실행은 포함하지 않습니다.",
+        "remediated: EventBus를 단일 consumer로 고치고 semaphore 주입·stale wake hint·실제 timeout 한계를 명시했습니다. union을 lifetime 분리 설계 조각으로 바꾸고 실제 MPMC 완성이라고 주장하지 않습니다.",
+        "URL·frontmatter·SPSC 구현 보존. custom MPMC를 임의로 새 library로 대체하지 않고 node 수명/ABA 검증이 추가로 필요함을 명시했습니다.",
+        "ASan·UBSan+FIFO/compile failure와 gate 통과. 전체 interleaving/board ISR/DMA coherence/WCET 및 MPMC reclamation은 미검증입니다. target 도입 전 해당 계약을 검증합니다."
+      ],
+      "examples": "embedded-cpp-part4-04-examples.log",
+      "gate": "embedded-cpp-part4-04-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed"
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-05-type-safe-flags.md",
+      "beforeSha256": "14b6bc1b6ef4f3a0e5aa1d626377dc301ef25fa55c265a6c0e8c268220cbcb6d",
+      "chapter": "05",
+      "status": "remediated",
+      "afterSha256": "258bf943e183688ba982eafd5113a3f44c23af8bf502e97a1e94ebdb42a2a606",
+      "frontmatterPreserved": true,
+      "decision": [
+        "enum flags와 register field/tag 경계",
+        "존재하지 않는 Flags operator|=, all검사로 AnyError 판정, GPIO MODER 3bit mask·2bit stride 충돌과 bounded 출력 오류가 문제입니다. abstract flag와 실제 MCU field를 구분해야 합니다.",
+        "독립 bit flags·mutually-exclusive field·strong typedef를 같은 OR 연산으로 취급했습니다. compound operators, any/all,2bit pure encoding과 role tag를 분리했습니다.",
+        "C++ enum/operator 계약·ST RM0090 field를 대조했습니다. Flags 추가/제거·빈mask·any/all·pin5 이웃 bit 보존·pin16/무효mode 거부, enum혼합/tag혼합 각각 compile failure를 실행했습니다.",
+        "정상 조합과 잘못된 입력/type 경계를 포함합니다. 실제 USART/GPIO MMIO·interrupt·clock 설정은 실행하지 않았습니다.",
+        "remediated: wrapper API를 완성하고 raw 정수 암묵 변환을 막았습니다. SR bit 배치·AnyError 검사·snprintf capacity 처리를 고치고 제목의 Tag/Strong typedef를 실제 예제로 이행했습니다.",
+        "URL·frontmatter 보존. hardware 접근 대신 일반 정수 pure function을 써 board 미검증을 성공으로 오인하지 않게 했습니다.",
+        "ASan·UBSan·두 compile failure·gate 통과. 실제 RMW 경합·MMIO side effects·성능 동일성은 target에서 후속 검증합니다."
+      ],
+      "examples": "embedded-cpp-part4-05-examples.log",
+      "gate": "embedded-cpp-part4-05-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed"
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-06-state-machine.md",
+      "beforeSha256": "be2450a8ad0939851407699d160cd162c914fcceb79574d20c74ced8f839c40b",
+      "chapter": "06",
+      "status": "remediated",
+      "afterSha256": "76e7091b66af2ba9fd5093b65708eb032fdb8164313f978eb74795bbacd47fdc",
+      "frontmatterPreserved": true,
+      "decision": [
+        "미디어 FSM의 enum/variant/table/ETL 선택",
+        "diagram의 Resume와 코드 Play재개 불일치, PausedState 누락, C++23 필요성 및 상태 수별 임의 크기 순위가 문제입니다. state/event 정책을 달리 설계했다면 그 계약을 먼저 명시합니다.",
+        "표현 방식을 고정된 발전 단계와 크기 순위로 취급했고 상태/event 정의가 분산됐습니다.3state4event ETL/table 완성 probe와 명시적 무시 정책으로 대체했습니다.",
+        "C++ variant.visit/constexpr·ETL20.49 fsm.h를 대조했습니다. Play/Pause/Resume/Stop과 Stopped+Pause/Paused+Play 무시, C++17 table sequence·미정의 전이 유지를 실행했습니다.",
+        "정상 sequence와 미정의 event를 포함합니다. 실제 playback action·TCP·HSM·원래 variant 조각 전체는 실행하지 않았습니다.",
+        "remediated: 누락 상태/이벤트와 비교표를 고치고 variant fallback이 자동 exhaustive가 아니며 RAM 절감도 조건부임을 명시했습니다.",
+        "URL·frontmatter와 비교 주제 보존. runtime 구현 상세와 compile-time 검증의 역할을 분리하고 미발행 GoF 링크 안내 대신 공개 근거를 제공했습니다.",
+        "ASan·UBSan ETL/table과 gate 통과. library 갱신·event policy 변경 시 회귀하며 board 코드 크기/전이 action과 재진입은 별도입니다."
+      ],
+      "examples": "embedded-cpp-part4-06-examples.log",
+      "gate": "embedded-cpp-part4-06-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed"
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-07-compile-time-fsm.md",
+      "beforeSha256": "adaf3b560feadfd7178a8df3da8397ec49b9c8d4c262feb7a1c53f74a0c9a214",
+      "chapter": "07",
+      "status": "remediated",
+      "afterSha256": "299bc4e8c00589dfcebd01244bc45461be6a9d2eaee4ebd33fd8492884741a93",
+      "frontmatterPreserved": false,
+      "decision": [
+        "compile-time 전이 검증과 runtime dispatch의 구분",
+        "runtime 코드0 약속, std::visit catch-all static_assert가 정상 event까지 막는 문제, cycle에서 종료하지 않는 recursive reachability가 문제입니다. 완전히 상수 평가된 단일 계산은 runtime 코드가 없어질 수 있습니다.",
+        "고정된 전이 정의와 실제 동적 state/event를 혼동했습니다. template 호출의 invalid와 runtime fallback을 분리하고 visited 집합을 유한 횟수 갱신했습니다.",
+        "C++ constexpr·variant.visit 계약과 SML 저장소를 대조했습니다. 정상 runtime sequence, cycle/terminal/orphan 도달성, BAD_TRANSITION/BAD_REACHABILITY 실패, 정상 variant fallback과 BAD_VISIT_FALLBACK 실패를 실행했습니다.",
+        "정상과 고립 상태·cycle·잘못된 조합·visit의 다른 alternative까지 포함합니다. SML/HSM 실제 library는 빌드하지 않았습니다.",
+        "remediated:0비용/바이트·cycle 숫자 대신 코드/데이터가 남는 조건과 실제 정상·실패 예제를 반영했습니다. HSM 부모 type 조각은 미완성 개념임을 명시했습니다.",
+        "URL·날짜·seriesOrder 보존. self-transition 없는 graph 가정과 외부 table index/중복 검증 한계를 기록했습니다.",
+        "ASan·UBSan 및3가지 의도한 compile failure, gate 통과. arbitrary graph/duplicate edges/SML runtime/board cost는 별도 검증입니다."
+      ],
+      "examples": "embedded-cpp-part4-07-examples.log",
+      "gate": "embedded-cpp-part4-07-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed",
+      "metadataException": {
+        "field": "description",
+        "reason": "확인된 runtime 코드0 오류의 장단위 수동 정정; parent 승인, rule06 예외",
+        "preserved": "slug/date/series/seriesOrder/tags/type/topics/publication status"
+      }
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-cpp/part4-08-singleton-alternatives.md",
+      "beforeSha256": "d33a4bcd535c575dfe40e174cd553e86686d5c3028e2138a57df022ecca3b2a7",
+      "chapter": "08",
+      "status": "remediated",
+      "afterSha256": "476505408285ec38f429f2bb6ef6fc75448139ef01e07800683e38fd2432869a",
+      "frontmatterPreserved": true,
+      "decision": [
+        "Singleton의 전역 접근·초기화·주입·수명 계약",
+        "모든 Singleton 폐기·GoF권고 단정, 초기화 thread-safe와 member thread-safe 혼동, 다른 concrete type fake 테스트와 runtime0 비용 주장이 문제입니다. 단일 자원 접근이 실제 요구라면 전역 접근과 별개로 검토합니다.",
+        "유일성·전역 접근·저장 기간·DI를 같은 축으로 비교했습니다. 명시적 local wiring, 공통 ILogger fake, 등록/해제와 phantom role tag로 대체했습니다.",
+        "C++ block initialization·termination·GCC guard 옵션을 대조했습니다. fake주입/read message, locator미등록/등록/해제,정상LoggingTag와 DiagnosticTag 혼합 compile failure를 실행했습니다.",
+        "정상 교체와 null 등록 경계·type mismatch를 포함합니다. 실제 Uart singleton 초기화·RTOS/ISR guard·board size는 실행하지 않았습니다.",
+        "remediated: 초기화/파괴 규칙·create_once specialization 저장 계약을 고치고 제목의 Phantom을 type-safe role ref 예제로 이행했습니다. 근거 없는 KB 비교와 미발행 책 링크를 제거했습니다.",
+        "URL·frontmatter 보존. hardware 소유권을 임의 변경하지 않았고 fake std::string이 host 검사 전용임을 명시했습니다.",
+        "ASan·UBSan+phantom compile failure와 gate 통과. global registry의 동시 교체·재귀 초기화·abnormal shutdown은 별도 프로토콜로 확인합니다."
+      ],
+      "examples": "embedded-cpp-part4-08-examples.log",
+      "gate": "embedded-cpp-part4-08-gate.log",
+      "scope": "host functional/expected failure checks; board/ISR/WCET not executed"
+    }
+  ]
+}

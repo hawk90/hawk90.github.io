@@ -1,0 +1,125 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Bootloader Internals",
+  "batch": "chapter13–chapter15",
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-02.md"
+  ],
+  "rescore": false,
+  "readyForIntegration": true,
+  "scope": "Only Bootloader Internals chapter13–15 articles and this fixed batch evidence. No scoring, grade, rubric, or evaluation status was generated or modified.",
+  "metadataException": {
+    "path": "src/content/blog/embedded/bootloader/chapter14-bootflow-bootmeth.md",
+    "field": "description",
+    "reason": "The previous description promised to replace distro_bootcmd in general; U-Boot v2025.01 describes Standard Boot as a generalization with migration choices and retained boot ordering controls. Corrected manually to describe Standard Boot and board-specific migration."
+  },
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/bootloader/chapter13-env-bootcmd.md src/content/blog/embedded/bootloader/chapter14-bootflow-bootmeth.md src/content/blog/embedded/bootloader/chapter15-fit-image.md — blocking checks pass; upstream clone-only checks SKIPPED (not PASS)",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/bootloader/chapter13-env-bootcmd.md src/content/blog/embedded/bootloader/chapter14-bootflow-bootmeth.md src/content/blog/embedded/bootloader/chapter15-fit-image.md — pass",
+    "git diff --check -- src/content/blog/embedded/bootloader/chapter13-env-bootcmd.md src/content/blog/embedded/bootloader/chapter14-bootflow-bootmeth.md src/content/blog/embedded/bootloader/chapter15-fit-image.md — pass",
+    "Frontmatter title/slug/date/series/seriesOrder/draft compared with HEAD — unchanged; chapter14 description exception recorded above",
+    "Local tool availability check: mkimage, dumpimage, fdtdump, dtc, u-boot not found on PATH"
+  ],
+  "primarySources": [
+    "https://docs.u-boot.org/en/v2025.01/usage/environment.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/distro.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/bootstd/overview.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/bootflow.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/fit/index.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/fit/signature.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/bootm.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/fit/overlay-fdt-boot.html"
+  ],
+  "runtimeAvailability": {
+    "uBootBuild": "not available",
+    "uBootBoard": "not available",
+    "mkimage": "not found on PATH",
+    "dtc": "not found on PATH",
+    "fdtdump": "not found on PATH",
+    "firmwareVariables": "not available"
+  },
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter13-env-bootcmd.md",
+      "beforeSha256": "bf6b8a197d9a2cc5acb6935fd8f76e389a3554adf174179cca66edc78b4863d1",
+      "afterSha256": "244e16d7e23b3e9f3f9dcc4ed5376c9624b0cf0928535b5c088b4bdc3fe09785",
+      "evidence": {
+        "contextAndScope": "U-Boot environment defaults and persistence, backend examples, bootcmd/distro boot flow, redundant storage, and command examples in Bootloader chapter 13.",
+        "problemSignalAndCounterevidence": "The original treated all U-Boot state as environment data, implied all persistent writes share one backend/layout/atomicity, used an unverified board offset and transcript, generalized distro fallback, and made blanket MAC/redundancy claims. Official v2025.01 docs describe environment variables and text-based .env as supported mechanisms while actual backend configuration remains board-specific.",
+        "causeHypothesisAndAlternatives": "The article merged legacy C environment, newer text-based environment, generic distro scripts, and board-specific storage into one universal model. Narrowed behavior to documented concepts and left offsets, defaults, persistence and recovery to target configuration.",
+        "evidence": "U-Boot v2025.01 Environment Variables docs state env set/print/save behavior, provide text-based .env support and describe bootcmd; v2025.01 Distro docs describe the generic model and its storage assumptions: https://docs.u-boot.org/en/v2025.01/usage/environment.html ; https://docs.u-boot.org/en/v2025.01/develop/distro.html",
+        "sampleCoverage": "Reviewed the complete article, existing evaluation section for chapter13, environment command/backend examples, distro script sample, redundancy assertions and metadata. Replaced invented target output/board offsets with explicit syntax or target-specific caveats. No U-Boot target or board config was available; no persistent environment operation was run.",
+        "decision": "Corrected universal claims and unsafe generic storage specifics. No title or metadata change was required; slug/date/seriesOrder/draft retained.",
+        "smallestSafeChange": "Edited chapter13 only. Removed fabricated offsets and ungrounded transcript lines, qualified backend and redundancy behavior, and documented `saveenv` persistence risk. Rollback boundary is this source file.",
+        "validationAndResidualRisk": "Three-file publish-gate blocking checks, inline-math check, diff check and metadata comparison passed. Upstream clone-only checks were SKIPPED (not PASS). No board config, U-Boot console or backend was available, so actual save/delete, fallback, power-loss and redundancy behavior remains unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 보드 revision, U-Boot tag, environment backend와 flash layout을 기준으로 default 값, persistence, redundancy 및 power-loss 복구를 확인할 것인가?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; static blocking gates pass; board/toolchain runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter14-bootflow-bootmeth.md",
+      "beforeSha256": "38d90101ebf1c45ea32a0916a5e859fdffd96979d4c01cdc69cbfef4d84533fb",
+      "afterSha256": "2b2411c478da00b5b103605f3c2371769024a33af79382d27d90aa06a50edbc3",
+      "evidence": {
+        "contextAndScope": "Standard Boot concepts, bootflow command availability, scan ordering, bootmeth list, extlinux/EFI paths, migration guidance and illustrative driver/API material in Bootloader chapter 14.",
+        "problemSignalAndCounterevidence": "The original gave an unsourced 2023.07 introduction date, modeled every flow as a simple bootdev×bootmeth product, called the abstraction a complete distro_bootcmd replacement, showed exact-looking synthetic console output/API, and directed unconditional environment cleanup. U-Boot v2025.01 docs describe bootflow files, global bootmeths, hunters, order controls, command feature conditions and migration steps that qualify those claims.",
+        "causeHypothesisAndAlternatives": "A simplified conceptual description was presented as version-independent behavior and tested output. Replaced absolute statements with tag/configuration boundaries and marked console/API material as illustrative or pseudocode.",
+        "evidence": "U-Boot v2025.01 Standard Boot overview documents bootdev/bootmeth/bootflow, scan behavior and ordering, CONFIG_BOOTSTD_FULL, available drivers, and distro_boot migration. The bootflow command docs specify scan/list/select/read/boot behavior and options: https://docs.u-boot.org/en/v2025.01/develop/bootstd/overview.html ; https://docs.u-boot.org/en/v2025.01/usage/cmd/bootflow.html",
+        "sampleCoverage": "Read the complete article and chapter14 existing evaluation. Reviewed the synthetic scan/list/EFI transcripts, command and Kconfig examples, migration instructions, custom driver pseudocode, related links, and the official overview/command docs. No U-Boot build or target bootdev was available; no command/runtime execution was performed.",
+        "decision": "Corrected the abstraction model and applicability claims; marked output/API as non-captured illustrative material; removed unconditional disabling/deletion instructions. Confirmed the existing EFI and BSP related links point to relevant sections. Manually corrected the description because it incorrectly promised full distro_bootcmd replacement; all other frontmatter fields remain unchanged.",
+        "smallestSafeChange": "Edited chapter14 only. Updated the confirmed inaccurate description and narrowed technical guidance; retained slug/date/seriesOrder/draft and article scope. Rollback boundary is this source file.",
+        "validationAndResidualRisk": "Three-file publish-gate blocking checks, inline-math check, diff check and metadata comparison (with the documented description exception) passed. Upstream clone-only checks were SKIPPED (not PASS). No target defconfig, DTS, firmware variables or command transcript was available to verify exact board behavior."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 board defconfig/DTS와 U-Boot tag에서 bootdev hunter, bootmeth 순서, enabled commands, EFI path 및 fallback을 runtime 확인할 것인가?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; static blocking gates pass; board/toolchain runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter15-fit-image.md",
+      "beforeSha256": "280ab0168d8c57da18e297afbecf45d454c13177fcaef21a1fefb33ec1462f6d",
+      "afterSha256": "266042075d54df2398eae0d013e95e8f706b22d96a7f261df4ee824f02865cf7",
+      "evidence": {
+        "contextAndScope": "FIT/ITS structure, hashing/signing, bootm configuration selection, load/entry metadata, command line and overlays in Bootloader chapter 15.",
+        "problemSignalAndCounterevidence": "The article claimed CONFIG_FIT_SIGNATURE alone rejects every unsigned FIT, referenced CONFIG_FIT_SIGNATURE_STRICT, asserted unconditional compatible-based selection and bootargs override, and showed fabricated output. U-Boot v2025.01 signature docs say required public-key properties define enforcement; bootm docs define selection syntax; FIT overlay docs document ordered FDT lists. FIT_BEST_MATCH is a build-dependent condition for compatible matching.",
+        "causeHypothesisAndAlternatives": "Configuration, signature enablement, required-key policy and runtime selection were conflated; synthetic output was written as if observed. Corrected the required-key distinction, qualified compatible/overlay behavior, removed the unverified bootargs example and exact-looking logs, and marked remaining DTS fragments illustrative.",
+        "evidence": "U-Boot v2025.01 FIT docs identify FIT packaging; signature docs describe trusted control-FDT keys and required=\"image\"/\"conf\"; bootm docs define FIT configuration arguments; overlay docs show ordered FDT overlay configuration: https://docs.u-boot.org/en/v2025.01/usage/fit/index.html ; https://docs.u-boot.org/en/v2025.01/usage/fit/signature.html ; https://docs.u-boot.org/en/v2025.01/usage/cmd/bootm.html ; https://docs.u-boot.org/en/v2025.01/usage/fit/overlay-fdt-boot.html",
+        "sampleCoverage": "Read complete chapter15 and its existing evaluation. Cross-checked signature policy, `-r`, configuration selection, best-match qualification, overlay syntax, command forms and all synthetic output against primary U-Boot docs. `mkimage`, `dtc`, `fdtdump`, and U-Boot executables were not installed/on PATH; no FIT artifact was generated and no target positive/negative boot test was run.",
+        "decision": "Removed the unconditional unsigned rejection, unknown strict option and unverified bootargs example; qualified key policy, compatible matching and overlay behavior. Updated the summary so FIT support for hashing/signature metadata is conditional. Title/description were retained; slug/date/seriesOrder/draft preserved.",
+        "smallestSafeChange": "Edited chapter15 only. Kept educational ITS structure while labeling it non-built and version-dependent; removed synthetic logs. No key, firmware, flash, boot media or target was touched. Rollback boundary is this source file.",
+        "validationAndResidualRisk": "Three-file publish-gate blocking checks, inline-math check, diff check and metadata comparison passed. Upstream clone-only checks were SKIPPED (not PASS). Actual FIT generation, crypto verification, malformed/unsigned negative cases, config selection and overlay application remain unassessed without a pinned build/toolchain/board."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 고정 U-Boot tag, mkimage/dtc 버전, board configuration, trusted key policy와 FIT samples를 대상으로 unsigned/invalid signature, compatible selection, bootargs와 overlay 사례를 실행 검증할 것인가?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; static blocking gates pass; board/toolchain runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    }
+  ]
+}

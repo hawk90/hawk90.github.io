@@ -1,0 +1,89 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24",
+  "series": "Embedded Security",
+  "batch": "Ch4–5",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-23.md"
+  ],
+  "primarySources": [
+    "https://arm-software.github.io/acle/cmse/cmse.html",
+    "https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/linux/arm-smccc.h",
+    "https://github.com/OP-TEE/optee_os/tree/0919de0f7c79ad35ad3c8ace5f823ad1344b4716",
+    "https://optee.readthedocs.io/en/4.5.0/architecture/secure_storage.html",
+    "https://trustedfirmware-a.readthedocs.io/en/v2.12.0/components/realm-management-extension.html"
+  ],
+  "validationCommands": [
+    "node scripts/verify-cmse-call-directions.mjs",
+    "node scripts/verify-optee-storage-helper.mjs",
+    "bash scripts/build-diagrams.sh public/images/blog/embedded-security/diagrams/ch04-stm32l552-memory-map.tex",
+    "python3 scripts/detect-text-overlap.py --series embedded-security --jobs 2 --keep-pdf",
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/embedded-security/chapter0[45]*.md"
+  ],
+  "scope": "Full originals/frozen loop23 entries read. Arm CMSE requirements, Linux6.12 SMCCC header, OP-TEE4.5.0 source/secure-storage docs and TFA2.12RME selected sections compared. Actual Cortex-M33 compile and GP-header host mock executed. Native partition diagram rebuilt, visually inspected and five series figures overlap-checked.",
+  "limits": "Compile and host mock only. No linked NSC/import library, SAU/IDAU/GTZC/stack configuration, firmware/TA/devkit ABI run, OP-TEE boot/xtest, real storage/RPMB/HUK provisioning, TOCTOU/authorization/side-channel or CCA attestation test. Macro namespace adaptations only for macOS public-header compile. No physical isolation certification. Generic clone gate skipped, not passed. Frozen scores unchanged.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/embedded-security/chapter04-trustzone.md",
+      "status": "remediated",
+      "beforeSha256": "d7faf5687cca86a645907e41171a6ec22007ea127b9739a143f401224556486d",
+      "afterSha256": "cf86e7424e0bf737d4a128e78c6ce9563c4a868dfe7dbbc1736a0383f090c3b5",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Compiler check, gate, math, diff, native diagram build and overlap pass. No hardware/linker isolation validation.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/embedded-security/chapter04-trustzone.md",
+        "problemSignalAndCounterevidence": "Original inverted BLXNS direction, used fake MMU register names and unverified NSC/HAL snippets; native L552 diagram showed invented address ranges. Other OS/stack/controller guarantees overgeneralized.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Actual Arm CMSE describes BLXNS Secure-to-NS, SG NS-to-S, BXNS return/FNC_RETURN. Article C compiled unchanged with Clang CortexM33-mcmse; assembly verifies BXNS/BLXNS and independent NS caller ordinary BL. Linux6.12SMCCC bits reviewed. Native SVG rebuilt, raster visually checked; all five embedded-security figures0overlap/0touch, near counts reported separately.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Separate A/M example configurations and RME scope; qualify GIC/EL/SMCCC and context management. Replace unsafe crypto entry with actual compile-only CMSE call-direction example; clarify shared memory TOCTOU/DMA/lock/stack limits. Preserve diagram path but replace fictitious addresses with explicit conceptual partition roles.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Compiler check, gate, math, diff, native diagram build and overlap pass. No hardware/linker isolation validation. Compile and host mock only. No linked NSC/import library, SAU/IDAU/GTZC/stack configuration, firmware/TA/devkit ABI run, OP-TEE boot/xtest, real storage/RPMB/HUK provisioning, TOCTOU/authorization/side-channel or CCA attestation test. Macro namespace adaptations only for macOS public-header compile. No physical isolation certification. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "In the actual firmware map and linked veneers, do forbidden entry, pointer mutation, DMA and reset tests preserve the intended security boundary?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/embedded-security/chapter05-tee.md",
+      "status": "remediated",
+      "beforeSha256": "c2e08a4775422e92d709dceb67d2556985bb5e9690d80a6f07fef9c541313db1",
+      "afterSha256": "6565dbc3545b2e11fab61e23b834eb48a42c0f544626a8de1b2efd3b6f055e0e",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Actual header host compile/mock, gate, math and scoped diff pass. No actual TA/storage/RPMB or fullOPTEEbuild/run.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/embedded-security/chapter05-tee.md",
+        "problemSignalAndCounterevidence": "Unverified fake AES TA and logs, API size types, session/load/RPC confusion, storage rollback/strongest-backend assertions and ungrounded CCA comparisons. Title promised broadcomparison beyond body evidence.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "OPTEE4.5.0 0919de0f source actual tee_internal_api.h has size_t ReadObjectData and distinctGP11compat; actual headers used unmodified with three macOS macro undef adaptations. Extracted article helper mocked four object APIs underASan/UBSan:validread,open/info/readfailures,nullcontract,short/zerocapacityandclosecounts. Docs explicitlyPRIVATEprefersREEandnoCFG_RPMB_FSmeansnorollbackprotection. TF-A2.12RMEfourstates/GPC compared.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Manually narrow title/description to OP-TEE call/storage trust. Remove incomplete CA/AES/manifest/QEMU examples; pin4.5.0 source and provide complete internal config-read helper with checked failures/close ownership. Clarify TA/pTA, supplicant, session versus invoke, shared buffer TOCTOU, REE/RPMB/PRIVATEselection and CCA access-control scope.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Actual header host compile/mock, gate, math and scoped diff pass. No actual TA/storage/RPMB or fullOPTEEbuild/run. Compile and host mock only. No linked NSC/import library, SAU/IDAU/GTZC/stack configuration, firmware/TA/devkit ABI run, OP-TEE boot/xtest, real storage/RPMB/HUK provisioning, TOCTOU/authorization/side-channel or CCA attestation test. Macro namespace adaptations only for macOS public-header compile. No physical isolation certification. Generic clone gate skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "For a pinned platform, which trusted-storage selection, key derivation, rollback and CA/TA negative tests prove the intended authorization and recovery contracts?"
+        }
+      ]
+    }
+  ]
+}

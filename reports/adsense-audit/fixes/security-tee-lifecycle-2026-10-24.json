@@ -1,0 +1,54 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24",
+  "series": "Embedded Security",
+  "batch": "Ch13",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-24.md"
+  ],
+  "primarySources": [
+    "https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf",
+    "https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci"
+  ],
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md",
+    "git diff --check -- src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md"
+  ],
+  "scope": "Full original and frozen loop24 entry read. Selected CXL3.1scope/threat/session/state clauses and Linux7.0PCI ABI compared; no target runtime.",
+  "limits": "Document review only. No actual TSM platform/TVM/TDISP/TSP device, sysfs connect/bind, firmware, SPDM/IDE traffic, reset/cleanup or tenant reuse validation. Linux7.0ABI scope only; later-driver unique implementation or absence claims not certified. Attempted Linux7.3 sparse clone is not treated as passed source/runtime evidence. Generic gate clone checks skipped, not passed. Frozen scores unchanged.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md",
+      "status": "remediated",
+      "beforeSha256": "6cc8edf7a85a95c5596651d2001fbe64008d98ba22d5a32ae4775c5a6c4f3349",
+      "afterSha256": "cb356d0d4cbca7acfe5d325932875e3614ce6f96fa73c7fc890668de4955d96d",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Gate/math/scoped diff pass; per-scenario expected evidence labelled unexecuted, no hardware claim.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/embedded-security/chapter13-cxl-tee.md",
+        "problemSignalAndCounterevidence": "Original unpinned current/unique Linuxdriver claims and fullstackguarantee, bound state couldbeERROR butreadasattachsuccess, TSP SPDMrequirementsectionmismatch, pooling/sharing scope notclear, fakeclassoutput/mutatingcommandsunrun andwrongCh151/HBMTEElinks.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Linux7.0ABIexplicitlyconditions tsmdir anddriverreadiness;connectreadsemptyorTSMname;boundincludesLOCKED/RUN/ERROR and VFIO/IOMMUFDinitiatedbind. CXL3.1 11.5.2includesdirectType3HDMH256Bpooling,butexcludesswitch/PBR68B/sharing;11.5.4.8ERRORcontinuestoprotectTVMdata/stopsfutureTEEtransactions/autounlocksaftercleanup.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "PinLinux7.0ABIreviewandCXL3.1selectedclauses; separate TDISP connect/bind/state fromTSPmemoryprotection. Addconditionsandnegativeevidenceplan, correctSPDMscopepointer/poolingvsconcurrentsharing and cleanup-before-reuse. Removeunverifiedlatest/uniqueimplementationguarantees and fakeoutput, correctlinks/order.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Gate/math/scoped diff pass; per-scenario expected evidence labelled unexecuted, no hardware claim. Document review only. No actual TSM platform/TVM/TDISP/TSP device, sysfs connect/bind, firmware, SPDM/IDE traffic, reset/cleanup or tenant reuse validation. Linux7.0ABI scope only; later-driver unique implementation or absence claims not certified. Attempted Linux7.3 sparse clone is not treated as passed source/runtime evidence. Generic gate clone checks skipped, not passed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "On the pinned Type3/platform stack, do failed authentication, partial lock, transport failure and reset preserve ownership/data until session/key/TVM cleanup completes before reassignment?"
+        }
+      ]
+    }
+  ]
+}
