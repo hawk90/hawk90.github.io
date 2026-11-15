@@ -2,6 +2,7 @@
 
 import { mkdir, readFile, readdir, writeFile } from 'node:fs/promises';
 import { join, relative } from 'node:path';
+import { isReviewedPublicReference } from './secret-scan-public-references.mjs';
 
 const enforce = process.argv.includes('--enforce');
 const roots = ['src/content', 'public', 'dist'];
@@ -37,6 +38,7 @@ for (const file of files) {
   const content = await readFile(file, 'utf8');
   for (const rule of rules) {
     for (const match of content.matchAll(rule.pattern)) {
+      if (rule.id === 'openai-api-key' && isReviewedPublicReference(content, match)) continue;
       findings.push({
         rule: rule.id,
         description: rule.description,

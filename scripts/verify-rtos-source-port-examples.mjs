@@ -1,0 +1,30 @@
+import assert from 'node:assert/strict';import{spawnSync}from'node:child_process';import{mkdtempSync,mkdirSync,readFileSync,writeFileSync}from'node:fs';import{createHash}from'node:crypto';import{join}from'node:path';import{tmpdir}from'node:os';import{pathToFileURL}from'node:url';
+const kernel=process.env.FREERTOS_KERNEL_DIR??'/private/tmp/FreeRTOS-Kernel-11.2.0',zephyr=process.env.ZEPHYR_SOURCE_DIR??'/private/tmp/zephyr-article-validation-2026-10-23',rt=process.env.RTTHREAD_SOURCE_DIR??'/private/tmp/rtthread-article-validation-2026-10-23';const llvm=process.env.RTOS_LLVM_BIN??'/opt/homebrew/opt/llvm/bin',cc=join(llvm,'clang');const work=mkdtempSync(join(tmpdir(),'rtos-source-port-'));
+for(const name of ['01-freertos-source','02-zephyr-source','03-rt-thread','04-porting']){const s=readFileSync('src/content/blog/embedded/rtos/practical-internals/part5-'+name+'.md','utf8');for(const[,f,b]of s.matchAll(/^```[\w+]+ title="([^"]+)"\n([\s\S]*?)^```/gm))writeFileSync(join(work,f),b);}
+function run(cmd,args,timeout=30000){const r=spawnSync(cmd,args,{cwd:work,encoding:'utf8',timeout});console.log(`$ ${cmd} ${args.join(' ')}\n${r.stdout??''}${r.stderr??''}status=${r.status} signal=${r.signal}`);if(r.error)throw r.error;assert.equal(r.status,0);return r.stdout??'';}
+console.log('Workspace '+work);run(cc,['--version']);for(const [dir,sha]of [[kernel,'0adc196d4bd52a2d91102b525b0aafc1e14a2386'],[zephyr,'36940db938a8f4a1e919496793ed439850a221c2'],[rt,'4f7940167d172858e37373bc330c7093e8765d5b']])assert.equal(run('git',['-C',dir,'rev-parse','HEAD']).trim(),sha);
+for(const [dir,files]of [[kernel,['tasks.c','queue.c','portable/GCC/ARM_CM4F/port.c','CMakeLists.txt']],[zephyr,['kernel/sem.c','include/zephyr/kernel/thread.h','include/zephyr/device.h']],[rt,['include/rtdef.h','src/scheduler_up.c','src/thread.c','src/ipc.c']]])for(const file of files){const content=readFileSync(join(dir,file));console.log('Source provenance '+file+' SHA256 '+createHash('sha256').update(content).digest('hex'));}
+const sem=readFileSync(join(zephyr,'kernel/sem.c'),'utf8');assert.match(sem,/static struct k_spinlock lock;/);assert.match(sem,/z_pend_curr\(&lock, key, &sem->wait_q, timeout\)/);assert.match(readFileSync(join(zephyr,'include/zephyr/device.h'),'utf8'),/#define DEVICE_DT_INST_DEFINE\(inst, \.\.\.\)/);
+const scheduler=readFileSync(join(rt,'src/scheduler_up.c'),'utf8');assert.match(scheduler,/\(number << 3\) \+ __rt_ffs\(rt_thread_ready_table\[number\]\) - 1/);assert.match(readFileSync(join(rt,'src/ipc.c'),'utf8'),/rt_spin_lock_irqsave\(&\(sem->spinlock\)\)/);console.log('PASS source provenance/contracts reviewed: Zephyr common semaphore lock and single-instance macro; RT-Thread two-stage 1-based FFS and semaphore spinlock. Not runtime kernel verification.');
+const {readyPriority}=await import(pathToFileURL(join(work,'rt-priority-model.mjs')));for(let i=0;i<256;i++){const table=Array(32).fill(0);table[i>>3]=1<<(i&7);assert.equal(readyPriority(2**(i>>3),table),i);}const table=Array(32).fill(255);assert.equal(readyPriority(0xffffffff,table),0);for(const group of [0,-1,1.5,NaN,2**32])assert.throws(()=>readyPriority(group,table),RangeError);assert.throws(()=>readyPriority(1,Array(32).fill(0)),RangeError);assert.throws(()=>readyPriority(1,[]),RangeError);console.log('PASS extracted RT priority arithmetic model: all256 priorities, lowest-group/bit and invalid input. Not RT-Thread scheduler execution.');
+const port=readFileSync(join(kernel,'portable/GCC/ARM_CM4F/port.c'),'utf8');const start=port.indexOf('StackType_t * pxPortInitialiseStack(');assert.ok(start>=0);const end=port.indexOf('\n}',start)+2;const initializer=port.slice(start,end);writeFileSync(join(work,'frame-test.c'),`#include <assert.h>
+#include <stdint.h>
+#include <stdio.h>
+#include "m4-frame-fixture.c"
+typedef uint32_t StackType_t;typedef void(*TaskFunction_t)(void*);
+#define portINITIAL_XPSR 0x01000000u
+#define portSTART_ADDRESS_MASK 0xfffffffeu
+#define portTASK_RETURN_ADDRESS 0xabcd1235u
+#define portINITIAL_EXC_RETURN 0xfffffffdu
+${initializer}
+static void task(void *p){(void)p;}
+int main(void){uint32_t actual[18],model[18];for(unsigned i=0;i<18;i++)actual[i]=0xcccccccc;uint32_t arg=0x12345678;void *parameter=(void*)(uintptr_t)arg;
+assert(pxPortInitialiseStack(&actual[17],task,parameter)==actual);make_m4_basic_fixture(model,(uint32_t)(uintptr_t)task,arg,portTASK_RETURN_ADDRESS);
+for(unsigned i=0;i<18;i++)if(i==8||i==9||i==14||i==15||i==16)assert(actual[i]==model[i]);else assert(actual[i]==0xcccccccc);
+assert(actual[8]==0xfffffffd&&actual[9]==arg);puts("PASS extracted M4 fixture matches actual pinned CM4F initializer initialized offsets, EXC_RETURN/R0/LR/PC/xPSR; untouched slots not presumed zero. Host layout check only; pointer low32 cast intentional.");}
+`);
+run(cc,['-std=c11','-Wno-pointer-to-int-cast','-fsanitize=address,undefined','frame-test.c','-o','frame-test']);run(join(work,'frame-test'),[],60000);
+const project=join(work,'project');mkdirSync(project);mkdirSync(join(project,'config'));writeFileSync(join(project,'CMakeLists.txt'),readFileSync(join(work,'freertos-tour-CMakeLists.txt')));const config=readFileSync('scripts/verify-rtos-part3-continuation-examples.mjs','utf8').match(/writeFileSync\(join\(work,'FreeRTOSConfig.h'\),`([\s\S]*?)`\);/)[1];writeFileSync(join(project,'config/FreeRTOSConfig.h'),config);
+writeFileSync(join(project,'main.c'),`#include <assert.h>\n#include <stdio.h>\n#include "FreeRTOS.h"\n#include "task.h"\nstatic int ran;static void controller(void *p){(void)p;vTaskDelay(2);ran=1;vTaskEndScheduler();}\nint main(void){assert(xTaskCreate(controller,"tour",2048,NULL,2,NULL)==pdPASS);vTaskStartScheduler();assert(ran);puts("PASS extracted CMake integration links and runs actual pinned POSIX scheduler; no MCU port execution");}\n`);
+run('cmake',['-S',project,'-B',join(work,'build'),'-DFREERTOS_SOURCE_DIR='+kernel,'-DCMAKE_C_COMPILER='+cc]);run('cmake',['--build',join(work,'build'),'--parallel','2']);run(join(work,'build/tour'),[],15000);
+console.log('NOT RUN: new-board/ISA firmware, Zephyr or RT-Thread runtime, real FP/IRQ nesting/SMP/MPU, tickless power/clock or target WCET.');

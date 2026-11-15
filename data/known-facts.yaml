@@ -55,8 +55,11 @@ dmtf_standards:
   - DSP0234      # CXL Fabric Manager API over MCTP Binding (CXL 3.1 Table 1-2)
   - DSP0236      # MCTP Base Specification
   - DSP0274      # SPDM (Security Protocol Data Model)
-  - DSP0276      # SPDM Secured Messages
-  - DSP0277      # SPDM over MCTP Binding
+  # DMTF SPDM Technical Note (January 2024), p. 4, specification roles:
+  # https://www.dmtf.org/sites/default/files/standards/documents/DMTF_SPDM%20_Tech_Note_January_2024.pdf
+  - DSP0275      # Security Protocol and Data Model (SPDM) over MCTP Binding
+  - DSP0276      # Secured Messages using SPDM over MCTP Binding
+  - DSP0277      # Secured Messages using SPDM
 
 # ─── IEEE 802.1 TSN ────────────────────────────────────────────
 ieee_802_1_tsn:

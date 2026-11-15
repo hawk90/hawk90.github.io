@@ -1,0 +1,30 @@
+#!/usr/bin/env node
+import assert from 'node:assert/strict';
+import {readFileSync} from 'node:fs';
+import {spawnSync} from 'node:child_process';
+const source=process.env.MBEDTLS_ARTICLE_SOURCE||'/private/tmp/mbedtls-article-validation-2026-10-24';
+const revision=spawnSync('git',['-C',source,'rev-parse','HEAD'],{encoding:'utf8'});
+assert.equal(revision.status,0);assert.equal(revision.stdout.trim(),'c765c831e5c2a0971410692f92f7a81d6ec65ec2');
+const article=readFileSync('src/content/blog/embedded/embedded-security/chapter07-side-channel.md','utf8');
+const block=article.match(/^```js title="leakage-correlation.mjs"\n([\s\S]*?)^```/m);assert.ok(block);
+const {pearson}=await import('data:text/javascript;base64,'+Buffer.from(block[1]).toString('base64'));
+assert.equal(pearson([1,2,3],[2,4,6]),1);
+assert.equal(pearson([1,2,3],[6,4,2]),-1);
+assert.equal(pearson([1,0,-1],[1,-2,1]),0);
+assert.equal(pearson([1,1,1],[2,3,4]),null);
+assert.equal(pearson([1,2,3],[4,4,4]),null);
+for(const [x,y] of [[[],[]],[[1],[2]],[[1,2],[1]],[[NaN,2],[1,2]],[[1,2],[Infinity,2]],[[,2],[1,2]],[null,[1,2]],[new Float64Array([1,2]),[1,2]]])assert.throws(()=>pearson(x,y),TypeError);
+const raw=readFileSync(source+'/library/aes.c','utf8').match(/static const unsigned char FSb\[256\]\s*=\s*\{([\s\S]*?)\};/);assert.ok(raw);
+const sbox=[...raw[1].matchAll(/0x([0-9a-f]{2})/gi)].map(m=>parseInt(m[1],16));assert.equal(sbox.length,256);
+const hw=v=>{let n=0;for(;v;v>>>=1)n+=v&1;return n;};
+const inputs=Array.from({length:512},(_,i)=>(i*73+19)&255);
+const model=k=>inputs.map(p=>hw(sbox[p^k]));
+const trace=model(0x2b).map((v,i)=>v+(((i*37+11)%31)-15)/100);
+function rank(samples){return Array.from({length:256},(_,k)=>({k,r:pearson(model(k),samples)})).sort((a,b)=>Math.abs(b.r)-Math.abs(a.r));}
+const positive=rank(trace),negative=rank(trace.map(v=>-v));
+assert.equal(positive[0].k,0x2b);assert.equal(negative[0].k,0x2b);
+assert.ok(positive[0].r>0.99);assert.ok(negative[0].r< -0.99);
+const misaligned=trace.slice(1).concat(trace[0]);const r=pearson(model(0x2b),misaligned);assert.ok(Math.abs(r)<0.5);
+console.log('PASS: extracted article Pearson function; three algebraic oracles, two constant vectors, eight invalid input cases including sparse array.');
+console.log(`PASS: pinned Mbed TLS3.6.4 AES S-box, 512 synthetic samples, 256 candidates; planted byte 0x2b ranks first for both polarities (r=${positive[0].r.toFixed(6)}); one-sample misalignment r=${r.toFixed(6)}.`);
+console.log('Synthetic statistical check only. No captured traces, ChipWhisperer/EM hardware, key recovery from a device, leakage absence, masking or fault-resistance validation.');
