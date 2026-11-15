@@ -2,7 +2,7 @@
 title: "TSN 표준 분석 — IEEE 802.1 Time-Sensitive Networking 개요"
 slug: "embedded/protocols/industrial-ethernet/chapter08-tsn"
 date: 2026-05-13T09:08:00
-description: "IEEE 802.1 toolkit — 표준 Ethernet에 결정성을 더하는 9개 표준을 한 자리에."
+description: "TSN의 시간 동기화·예약 전송·선점·스트림 감시·중복 제거·설정 기능과 각각의 보장 조건을 구분합니다."
 series: "Industrial Ethernet 심화"
 seriesOrder: 8
 tags: [tsn, ieee-802-1, deterministic-ethernet, gptp, qbv, qbu, qci, cb, frer, qcc]
@@ -12,254 +12,90 @@ topics: ["embedded", "embedded/protocols"]
 
 ## 한 줄 요약
 
-> **"TSN은 *하나의 프로토콜*이 아니라 *IEEE 802.1이 모은 toolkit*입니다."** — 시간 동기는 802.1AS, 게이트는 Qbv, 선점은 Qbu, 필터링은 Qci, redundancy는 CB, 설정은 Qcc가 맡습니다. 이 6개를 알면 TSN 시스템이 *보입니다*.
+> **TSN은 여러 이더넷 기능의 집합입니다. 필요한 기능과 프로파일을 선택하고, 전체 경로를 구성·검증해야 지연과 손실에 관한 요구를 만족시킬 수 있습니다.**
 
-EtherCAT·PROFINET·POWERLINK는 모두 *각자의 방식*으로 표준 Ethernet에 결정성을 만들었습니다. TSN의 출발은 "이걸 *벤더 중립으로* 표준화하자"입니다. IEEE 802.1 working group이 2016년부터 약 9개의 부속 표준으로 쪼개서 발표해 왔습니다.
+스위치가 “TSN 지원”이라고 표시되어 있어도 시간 동기화, 게이트 제어, 선점과 중복 제거가 모두 구현된 것은 아닙니다. 하드웨어 기능에 더해 드라이버와 관리 인터페이스의 지원도 확인해야 합니다. 이 장에서는 각 기능이 어떤 문제를 맡는지 구분하고, 다음 장에서는 한 출력 포트의 스케줄을 계산합니다.
 
-이 장은 그 표준들을 *기능 단위*로 묶어 한 번에 정리합니다. 다음 장(Ch 9)이 *어떻게 스케줄을 짜는지*의 깊이 있는 이야기로 들어가므로, 여기서는 *각 표준이 무엇을 책임지는지*에 집중합니다.
+[IEEE TSN Task Group](https://1.ieee802.org/tsn/)은 AVB에서 이어진 작업과 여러 기본 표준·프로파일을 함께 소개합니다. TSN을 2016년에 시작한 고정된 “9개 표준”으로 한정하지 않습니다. 아래 Q 접미사는 해당 기능을 도입한 amendment 이름이며, 후속 802.1Q 판에 통합된 기능도 있습니다.
 
-## 왜 TSN인가 — 표준화의 가치
+## 기능별로 구분하기
 
-EtherCAT은 *daisy-chain + on-the-fly*, PROFINET IRT는 *IRT slot*, POWERLINK는 *polling*. 각 프로토콜이 *수십 µs jitter*를 만드는 방법은 다 다릅니다.
+| 기능 | 관련 표준·amendment | 확인할 질문 |
+|---|---|---|
+| 공통 시간 | 802.1AS | 어느 시간 도메인을 사용하며 실제 오차는 얼마인가? |
+| 예약된 출력 기회 | 802.1Qbv | 포트별 GCL과 traffic class 매핑이 맞는가? |
+| 프레임 선점 | 802.1Qbu, 802.3br | 양 끝 MAC Merge가 지원·설정되고 동작하는가? |
+| 스트림 감시 | 802.1Qci | 어떤 stream에 어떤 filter·gate·meter 정책을 적용하는가? |
+| 복제와 중복 제거 | 802.1CB | 경로 분리와 sequence recovery 조건이 맞는가? |
+| 예약·설정 | 802.1Qcc | 분산·중앙 설정 중 무엇을 사용하며 어떤 요구를 전달하는가? |
+| 주기적 큐 전달 | 802.1Qch | 큐 전환 주기와 hop별 시간 조건이 맞는가? |
 
-이게 *공장에서는 견딜만* 합니다. 한 라인 안에서는 한 프로토콜만 쓰니까요. 문제는 *공장과 IT*가 만날 때입니다.
+모든 TSN 구성이 위 기능 전부를 사용하는 것은 아닙니다. 프로파일이 정한 기능 조합과 실제 장치의 지원 범위를 구분해야 합니다. 또한 8개의 PCP 값이 모든 장치에서 각각 하나의 전용 하드웨어 큐에 대응한다는 보장은 없습니다.
 
-- *데이터 수집* — 모든 PLC가 다른 프로토콜이라 게이트웨이가 9개 필요.
-- *카메라·AI 추론* — 비결정적 트래픽과 결정적 트래픽이 같은 망에 섞이지 않음.
-- *Industry 4.0*  — OPC UA Pub/Sub이 *결정적 채널*을 요구함.
+## 802.1AS: 시계와 링크 지연
 
-TSN은 이 *분리된 두 세계*를 *같은 케이블에 결정적·비결정적이 공존*하는 한 네트워크로 묶습니다. 자동차의 AVB(Audio Video Bridging)에서 시작된 시리즈가 산업·5G fronthaul로 확장된 결과입니다.
+gPTP는 시간 동기화에 사용하는 프로토콜입니다. Sync와 Follow_Up은 송신 시각 정보를 전달하고, peer delay 교환은 인접한 시간 인식 시스템 사이의 링크 지연을 구하는 데 관여합니다. 하나의 grandmaster가 모든 종단과 직접 peer delay를 교환하는 구조로 그리면 hop별 처리를 놓칩니다.
 
-## TSN 표준 한눈 매핑
+| 관찰 대상 | 의미 | 그 값만으로 증명하지 못하는 것 |
+|---|---|---|
+| 선택된 grandmaster와 domain | 현재 사용하는 시간 기준 | 장애 시 무중단 전환 |
+| peer delay와 포트 상태 | 인접 링크의 시간 전달 조건 | 전체 애플리케이션 지연 |
+| timestamp 지점과 PHC | 시각이 찍히는 하드웨어 경계와 시계 | 모든 NIC에서 PHY에 timestamp가 있다는 주장 |
+| 측정 offset·최대 편차 | 해당 조건에서의 시간 차이 | 측정하지 않은 부하에서의 오차 상한 |
 
-| 표준 | 별명 | 기능 |
-|------|------|------|
-| **802.1AS** | gPTP | 시간 동기 (sub-µs) |
-| **802.1AS-2020** | gPTP-Rev | redundant grandmaster·hot standby |
-| **802.1Qbv** | TAS | Time-Aware Shaper — gate control list |
-| **802.1Qbu** | Preemption | 프레임 선점 (큰 BE 프레임 중단) |
-| **802.3br** | (Qbu 짝꿍) | MAC 레벨 preemption signaling |
-| **802.1Qci** | PSFP | Per-Stream Filtering & Policing |
-| **802.1CB** | FRER | Frame Replication and Elimination for Reliability |
-| **802.1Qcc** | (관리) | Stream Reservation + YANG model |
-| **802.1Qch** | CQF | Cyclic Queuing & Forwarding |
-| **802.1Qbz** | (브리지 확장) | (less relevant for industrial) |
+802.1AS-2020을 사용한다는 것만으로 hot standby가 즉시 동작한다고 말할 수 없습니다. IEEE는 [802.1ASdm-2024](https://1.ieee802.org/tsn/802-1asdm/)에서 hot standby와 clock drift error reduction을 별도 amendment로 다룹니다. 도메인 수, 선택 알고리즘과 장애 시 전환 조건은 적용 판·프로파일·구현으로 확인합니다.
 
-산업용 TSN에서 *반드시 보는* 다섯은 AS·Qbv·Qbu·Qci·CB입니다. Qcc는 *어떻게 설정하느냐*입니다.
+소프트웨어 timestamp와 하드웨어 timestamp의 차이도 단순한 고정 수치로 환산하지 않습니다. timestamp가 MAC인지 PHY인지, PHC와 시스템 시계가 어떻게 연결되는지 먼저 확인합니다. `ptp4l`의 offset 로그 하나가 모든 출력 포트 게이트의 동기 상태를 증명하지는 않습니다.
 
-## 802.1AS — 시간 동기의 토대
+## Qbv와 선점: 전송 기회와 잔여 blocking
 
-TSN의 모든 결정성은 *시간이 맞아 있다*는 가정 위에 섭니다. 802.1AS는 IEEE 1588 PTP의 *Ethernet-only profile*입니다. *gPTP(generalized PTP)*라고 부릅니다.
+Qbv의 GCL은 출력 traffic class의 게이트 상태를 시간에 따라 바꿉니다. 열린 게이트는 송신 자격을 주지만, 각 stream의 패킷 한 개를 지정 시각에 반드시 내보내라는 명령은 아닙니다. 데이터가 제때 큐에 들어오고 다른 eligible 트래픽과의 선택 조건도 맞아야 합니다.
 
-핵심 메시지 4개입니다.
+게이트가 닫히기 전에 시작한 프레임의 전송 시간도 고려해야 합니다. 예약 구간 앞에 guard band를 배치하거나, 지원되는 프레임 선점 기능으로 간섭의 크기를 줄일 수 있습니다. guard band를 예약 구간 뒤에 놓으면 다음 주기 경계의 blocking을 막지 못합니다.
 
-```text
-Grandmaster                      Slave
-    |                              |
-    |---  Sync (T1) -------------> |  T2에 도착
-    |---  Follow_Up (T1 exact) --> |
-    |                              |
-    | <-- Pdelay_Req (T3) -------- |
-    |---  Pdelay_Resp (T4) ------> |  T5에 도착
-    |---  Pdelay_Resp_Follow_Up -->|
-```
+Qbu는 선점 가능한 traffic class와 express traffic class의 사용을 다루고, 802.3br의 MAC Merge가 하위 전송 메커니즘을 제공합니다. 이를 단순한 PHY multiplexer라고 부르지는 않습니다. 잔여 blocking은 링크 속도, fragment 조건과 구현 지연에 따르므로 “항상 1 μs 이하”라는 보장은 둘 수 없습니다.
 
-`Sync`/`Follow_Up`이 마스터 시간을 알리고, `Pdelay_*`가 *직접 연결된 두 노드 사이의 link delay*를 측정합니다. PTP의 일반 `Delay_Req` 대신 *peer-to-peer delay*를 쓰는 게 gPTP의 특징입니다. 매 hop마다 *그 link만의 delay*를 알면 *경로 전체*를 누적할 수 있습니다.
+예를 들어 MAC 프레임 길이를 FCS 포함 1522 B, preamble/SFD를 8 B, IPG를 12 B로 가정하면 1 Gbit/s에서 차지하는 선로 시간은 1542 × 8 ns = **12,336 ns**입니다. 이 값은 VLAN 태그 한 개를 포함하는 예제의 계산입니다. 추가 캡슐화, jumbo frame, 속도와 구현 여유가 달라지면 guard band도 다시 산정합니다.
 
-802.1AS-2020은 *복수 도메인*과 *hot-standby grandmaster*를 추가했습니다. grandmaster가 고장 나면 *backup이 즉시* 인계받습니다. 산업·자동차에 필수입니다.
+## Qci와 CB: 잘못된 송신과 경로 장애
 
-```text
-Domain 0: 절대 시간 (산업 PLC)
-Domain 1: 미디어 시간 (차량 카메라/디스플레이)
-Domain 2: 5G fronthaul
-```
+[Qci](https://1.ieee802.org/tsn/802-1qci/)는 stream별 계수·필터링·policing 기능을 다룹니다. 과도한 트래픽이나 정해진 조건을 벗어나는 송신이 다른 stream에 미치는 영향을 제한하는 수단입니다. 분류와 정책이 틀리면 정상 트래픽도 버릴 수 있으므로 drop counter를 실제 stream·gate·meter 설정과 연결해서 봅니다.
 
-한 네트워크에 *복수 도메인*이 공존합니다.
+Qci를 보안 인증이나 기능 안전의 완성으로 취급하지 않습니다. 정상 메시지의 의미를 이해하거나 모든 공격을 차단하는 기능은 아닙니다. ingress 정책을 구성했다는 사실과 전체 경로의 deadline 만족은 별도 검증 대상입니다.
 
-## 802.1Qbv — TAS, 게이트의 시간 분할
+[802.1CB](https://1.ieee802.org/tsn/802-1cb/)는 프레임 복제와 중복 식별·제거를 정의합니다. 아래 그림은 두 경로를 쓰는 개념 예입니다. 복제 위치는 종단이나 중계 지점일 수 있으며 두 경로라는 수가 모든 구성을 제한하지는 않습니다.
 
-TSN의 *간판* 표준입니다. Time-Aware Shaper(TAS)는 *큐별 게이트*를 시간에 따라 *열고 닫습니다*.
+![두 경로로 복제된 프레임의 sequence를 사용해 중복을 제거하는 FRER 개념 예](/images/blog/industrial-ethernet/diagrams/ch08-frer-replication.svg)
 
-이더넷 스위치의 출력 포트에는 *8개의 priority queue*(QoS 큐)가 있습니다. Qbv는 그 8개 각각에 *게이트* G0~G7을 답니다. 게이트가 *열린 큐*만 그 시각에 송신할 수 있습니다.
+미리 복제본을 보내면 경로 재구성이 끝나기를 기다리지 않고 surviving path의 데이터를 받을 수 있습니다. 그러나 이를 모든 장애에서 “복구 시간 0, 손실 0”이라고 확대하면 안 됩니다. 공통 장애 지점, 경로 지연 차이, history window와 reset 조건, 두 경로의 동시 손실도 고려해야 합니다. 두 복제본이 공유하는 링크에서 소비하는 대역폭과 경로별 대역폭도 따로 계산합니다.
 
-```text
-Time:  0µs    100µs   200µs   300µs   400µs   500µs
-Q7:    [OPEN ][CLOSED][CLOSED][OPEN ][CLOSED]   ← critical (시간 슬롯)
-Q6:    [CLOSED][CLOSED][OPEN ][CLOSED][CLOSED]  ← motion
-Q0~5:  [CLOSED][OPEN ][CLOSED][CLOSED][OPEN ]   ← best-effort
-```
+## Qcc: 요구사항과 설정 모델
 
-*Gate Control List(GCL)*가 이 패턴을 정의합니다. *cycle time*마다 같은 패턴이 반복됩니다.
+[Qcc](https://1.ieee802.org/tsn/802-1qcc/)는 stream reservation과 사용자·네트워크 사이의 요구사항 전달을 확장합니다. 분산 설정과 중앙 설정 모델을 구분해야 하며, 모든 망에 CNC와 CUC가 반드시 있는 것은 아닙니다. CNC가 있다는 이유만으로 특정 NETCONF server 배치나 상용 관리 제품을 단정하지 않습니다.
 
-```text
-cycle_time = 500 µs
-gcl = [
-  { offset=0,   duration=100µs, gates=0b10000000 },  # Q7 only
-  { offset=100, duration=100µs, gates=0b00111111 },  # BE
-  { offset=200, duration=100µs, gates=0b01000000 },  # Q6
-  { offset=300, duration=100µs, gates=0b10000000 },  # Q7 only
-  { offset=400, duration=100µs, gates=0b00111111 },  # BE
-]
-```
+YANG은 데이터 모델 언어입니다. YAML 모양의 임의 문서를 “표준 YANG 설정”이라고 제시하면 실제 장치에 적용할 수 없습니다. 대상 장치의 모듈 이름·revision·feature·deviation, 관리 프로토콜과 권한을 맞추고 schema 검증을 거쳐야 합니다. Qcc와 YANG 관련 amendment를 같은 표준 하나로 뭉뚱그리지 않습니다.
 
-100µs의 *critical 슬롯* 동안 다른 트래픽은 *기다립니다*. critical 프레임은 *정확한 시간*에 *경합 없이* 빠져나갑니다. 이게 sub-100µs jitter의 핵심입니다.
+이 글은 schema를 검증하지 않은 stream YAML이나 출처 없는 벤더 CLI를 제공하지 않습니다. 다음 장의 JSON은 순수 계산 프로그램의 **교육용 입력 형식**이며 CNC나 스위치의 표준 설정 파일이 아닙니다.
 
-문제는 *슬롯 경계에서 송신 중인 큰 프레임*입니다. 1538바이트 프레임이 1Gbps에서 약 12µs입니다. critical 슬롯이 시작될 때 그 프레임이 *방해*합니다. 이걸 해결하는 게 다음 표준입니다.
+## 애플리케이션과 TSN 사이
 
-## 802.1Qbu / 802.3br — 프레임 선점
+TSN은 애플리케이션 데이터 모델을 통일하지 않습니다. OPC UA PubSub 메시지를 사용해도 선택한 transport mapping과 네트워크 자원 구성이 필요합니다. [OPC UA Part 14 §7.3](https://reference.opcfoundation.org/specs/OPC-10000-14/7.3)은 여러 transport mapping을 다루므로 PubSub를 항상 UDP multicast 한 가지로 한정하지 않습니다.
 
-Qbu는 *송신 중인 best-effort 프레임을 일시 중단*하고, critical 프레임을 먼저 보낸 다음 *나중에 이어 보내는* 메커니즘입니다.
-
-MAC 계층이 *두 개*로 분리됩니다.
-
-| 계층 | 역할 |
-|------|------|
-| eMAC (express MAC) | critical 트래픽 전용 |
-| pMAC (preemptable MAC) | BE 트래픽, 중단 가능 |
-| PHY layer multiplexer | 두 MAC의 출력을 합쳐 PHY로 |
-
-송신 중인 pMAC 프레임을 어디서 자를 수 있는지가 *fragment 단위*로 정의됩니다. 최소 64바이트(+ 4 mCRC) 단위로 자릅니다. 자른 조각에는 *mCRC*가 붙고, 마지막 조각에는 일반 CRC가 붙습니다.
-
-![802.1Qbu preemption — pMAC 프레임이 frag1·frag2로 쪼개지고 그 사이에 eMAC critical 프레임이 끼어든다](/images/blog/industrial-ethernet/diagrams/ch08-qbu-preemption.svg)
-
-Qbu가 있으면 critical 프레임이 *최대 1µs 이내*(64B fragment 시간)에 송신을 시작할 수 있습니다. Qbv 단독으로는 *최악 12µs* 대기인 것을 *1µs 이하*로 줄입니다.
-
-802.3br은 *MAC merge sublayer*를 정의합니다. PHY 위에서 두 MAC 출력을 fragment 단위로 섞는 *물리적 메커니즘*입니다. Qbu(상위 사용)와 802.3br(하위 메커니즘)이 짝을 이룹니다.
-
-## 802.1Qci — Per-Stream 필터링·정책
-
-Qbv가 *송신 측*의 시간을 잡는다면, Qci는 *수신 측*에서 *스트림 단위*로 *받을지 말지*를 결정합니다.
-
-세 단계입니다.
-
-1. **Stream Identification (802.1CB-2018)** — 들어오는 프레임을 *stream*으로 분류. MAC+VLAN, 또는 IP 5-tuple 기반.
-2. **Stream Filter** — 해당 stream이 *허용된 priority*인지 검증.
-3. **Stream Gate / Meter** — *해당 stream의 도착 시각이 예상 윈도우*인지, *대역폭이 예약치 이내*인지 확인.
-
-![802.1Qci stream filtering pipeline — Stream ID → Filter → Gate → Meter → output queue](/images/blog/industrial-ethernet/diagrams/ch08-qci-pipeline.svg)
-
-위 단계 중 하나라도 실패하면 *프레임을 drop*하고 *카운터*를 올립니다. 공격적인 트래픽(예: 잘못 동작하는 IoT 디바이스가 critical 슬롯에 끼어들기)이 *critical 망을 오염시키는 것*을 막습니다.
-
-Qci는 *수신 측의 면역계*입니다. 보낸 쪽이 약속을 지키지 않으면 받는 쪽이 *적극적으로* 차단합니다.
-
-## 802.1CB — FRER, 프레임 복제
-
-*FRER(Frame Replication and Elimination for Reliability)*은 *같은 프레임을 두 경로로 동시에* 보내서, 도착하는 쪽이 *중복을 제거*하는 redundancy 메커니즘입니다.
-
-![802.1CB FRER — Talker가 같은 seq=42 프레임을 path A·B로 동시에 보내고 Listener의 SRF가 중복을 제거](/images/blog/industrial-ethernet/diagrams/ch08-frer-replication.svg)
-
-Talker가 같은 `seq=42` 프레임을 두 경로로 동시에 보내고, Listener는 *먼저 도착한 것만 받고 나중 것은 버린다*.
-
-핵심은 *sequence number*입니다. R-TAG(Redundancy Tag, EtherType 0xF1C1) 안에 16bit sequence가 들어갑니다. 수신 측의 *Sequence Recovery Function(SRF)*이 history window를 보고 *중복은 drop, 새 것만 통과*시킵니다.
-
-전통적 redundancy(MRP·RSTP)는 *링이 끊긴 뒤* 복구합니다. FRER은 *끊김이 일어나기 전부터 두 경로로 동시에* 보내므로 *복구 시간이 0*입니다. 산업 안전·항공 전자에 적합합니다.
-
-비용은 *대역폭 2배*와 *경로가 분리된 토폴로지*가 필요합니다. *링 + cross link*나 *이중 mesh*를 씁니다.
-
-## 802.1Qcc — 설정의 표준화
-
-Qcc는 *어떻게 위 모든 것을 설정하느냐*입니다. *CNC(Centralized Network Configuration)*라는 중앙 관리자가 *YANG model*로 모든 스위치·엔드 스테이션을 설정합니다.
-
-```yaml
-# YANG model example (simplified)
-tsn-stream:
-  stream-id: "00-1B-1B-AA-BB-CC:5"   # MAC + VLAN
-  talker:
-    end-station-interfaces: ["sw1/port1"]
-    data-frame-spec:
-      ieee802-mac-addresses:
-        destination-mac-address: "01-80-C2-00-00-0E"
-      ieee802-vlan-tag:
-        priority-code-point: 7
-        vlan-id: 100
-    traffic-specification:
-      interval: { numerator: 1, denominator: 1000 }   # 1ms
-      max-frames-per-interval: 1
-      max-frame-size: 256
-  listeners:
-    - end-station-interfaces: ["sw3/port2"]
-  group-status-stream:
-    status-info:
-      talker-status: ready
-      listener-status: ready
-      failure-code: 0
-```
-
-세 가지 설정 모델이 있습니다.
-
-| 모델 | 누가 결정 | 사용처 |
-|------|----------|--------|
-| **Fully distributed** | 모든 노드가 분산 협상 | (사실상 미사용) |
-| **Centralized network, distributed user** | CNC가 네트워크, 엔드는 분산 | 산업용 표준 |
-| **Fully centralized** | CNC + CUC(Centralized User Configuration) | 자동차·5G |
-
-CNC는 *NETCONF·RESTCONF*로 스위치 fleet에 YANG payload를 push합니다. *벤더 중립*이 핵심입니다.
-
-## 실제 TSN 스위치·NIC
-
-표준이 있어도 *지원하는 하드웨어*가 없으면 의미가 없습니다. 2024~2026년 기준 주요 제품군입니다.
-
-| 제품 | 종류 | TSN 지원 | 가격대 |
-|------|------|---------|-------|
-| **Intel I225/I226** | NIC | 802.1AS, Qbv, Qbu (LaunchTime) | $20 |
-| **Intel I210** | NIC | 802.1AS만 | $15 |
-| **NXP LS1028A** | SoC + 4-port switch | AS, Qbv, Qbu, Qci, CB | 평가보드 $300 |
-| **TI AM6442** | SoC, PRU-ICSS | AS, Qbv, Qbu | 평가보드 $500 |
-| **Cisco IE 4000** | 산업 스위치 | AS, Qbv, Qbu, Qci | $$$ (PLC급) |
-| **Marvell Prestera** | switch ASIC | Full TSN | 산업 OEM |
-| **Hirschmann BOBCAT** | 산업 스위치 | AS, Qbv | mid |
-
-I225는 *PC에 꽂는* 가장 저렴한 TSN NIC입니다. *Linux 6+에서 tc-taprio*로 Qbv를 설정할 수 있어 실험·교육에 자주 쓰입니다.
-
-NXP LS1028A는 *Arm Cortex-A72 + 내장 TSN 스위치*입니다. *완성된 TSN 엔드포인트*를 한 칩으로 만들 수 있어 산업 게이트웨이의 표준에 가깝습니다.
-
-## OPC UA over TSN
-
-산업 4.0 메시지 표준인 *OPC UA*가 *Pub/Sub over UDP over TSN*으로 진화 중입니다. *OPC UA Companion Spec for Field Level Communications(FLC)*가 이걸 정의합니다.
-
-```text
-Application: OPC UA Pub/Sub (binary encoding)
-Transport:   UDP multicast
-Network:     IP + VLAN priority
-Link:        Ethernet + TSN (Qbv slot, AS sync)
-```
-
-motion 사이클 1ms에 OPC UA 메시지를 *결정적 슬롯*에 실어 PLC↔드라이브·PLC↔PLC를 모두 OPC UA 하나로 통일하는 그림입니다. EtherCAT·PROFINET을 *완전히 대체*하지는 않고, *공장 전체의 통합 계층*으로 자리잡고 있습니다.
-
-## 자주 하는 실수
-
-### "Intel I210에 Qbv를 설정하려 한다"
-
-I210은 *802.1AS만* 지원합니다. Qbv는 I225/I226부터입니다. 사양서를 보지 않고 *TSN-capable*이라고 적힌 것만 보고 사면 실험이 멈춥니다.
-
-### "한 도메인에 grandmaster가 두 개 보인다"
-
-BMCA(Best Master Clock Algorithm)가 *결정 안 됨*입니다. 두 후보의 *priority1·clockClass*가 같으면 *MAC tiebreaker*로 갑니다. 의도적인 redundant 구성이 아니면 한쪽의 `priority1`을 *명시적으로 낮춰* 한 grandmaster만 유효하게 만듭니다.
-
-### "Qbv 슬롯을 정확히 잡았는데 jitter가 나온다"
-
-대부분 *Qbu를 안 켠* 경우입니다. BE 프레임이 슬롯 경계에서 *blocking*합니다. Qbu(802.3br MAC merge)를 양쪽 모두 활성화합니다. 또는 BE를 *Qbv guard band* 안에 가둡니다(guard band = 최대 BE 프레임 시간).
-
-### "FRER이 켜져 있는데 한 경로가 끊어져도 listener가 잠시 못 받는다"
-
-*history window* 설정이 너무 작거나, *sequence reset 조건*이 잘못된 경우입니다. window는 *경로 간 max delta + 여유*로 잡습니다.
+장치를 선정할 때는 광고의 기능 이름보다 실제 사용 경로를 확인합니다. NIC의 launch-time 지원, Qbv full offload, MAC Merge와 hardware timestamp는 서로 다른 기능입니다. 제조사·모델·리비전·드라이버에 대한 증거 없이 가격이나 “Full TSN” 지원표를 만들지 않습니다.
 
 ## 정리
 
-- TSN은 *하나의 프로토콜이 아니라 IEEE 802.1 toolkit*입니다.
-- *802.1AS*(gPTP)가 시간 동기의 토대를 만듭니다. sub-µs 정확도가 모든 결정성의 출발입니다.
-- *Qbv*(TAS)는 큐별 게이트로 *시간 슬롯*을 만들고, *Qbu*가 선점으로 *슬롯 진입 지연*을 1µs 이하로 줄입니다.
-- *Qci*(PSFP)는 수신 측에서 *예상 윈도우 밖의 stream을 차단*해 결정성을 지킵니다.
-- *CB*(FRER)는 *동시 이중 경로 + 중복 제거*로 *복구 시간 0*의 redundancy를 만듭니다.
-- *Qcc*는 *YANG model 기반 CNC*로 fleet 설정을 표준화합니다.
-- 실용 NIC: Intel I225/I226, SoC: NXP LS1028A·TI AM64x, 스위치: Cisco IE 4000·Hirschmann BOBCAT.
-- *OPC UA over TSN*이 공장 통합 계층의 차세대 표준입니다.
+- TSN은 기능과 프로파일의 집합이며 표준 개수가 고정되어 있지 않습니다.
+- 공통 시간과 예약 전송은 구성·측정 조건을 함께 확인해야 합니다.
+- 게이트가 열려 있다는 사실만으로 stream의 deadline을 보장하지는 않습니다.
+- 선점의 잔여 blocking과 guard band는 속도·프레임·장치 조건에 따라 계산합니다.
+- Qci 정책과 FRER은 각각 별도의 실패 조건과 검증 범위를 가집니다.
+- 예약 모델, YANG schema와 실제 설정 인터페이스를 구분합니다.
 
-다음 편은 **Ch 9: TSN 스케줄링 — Qbv·Qbu·gPTP 깊이 있는 설정**입니다.
+다음 [Ch 9: TSN 스케줄링](/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling)에서 주기 경계의 guard band와 Linux taprio의 시계 모드를 구체적으로 확인합니다.
 
 ## 관련 항목
 
-- [Ch 7: PROFINET IO — Controller·Device·Supervisor](/blog/embedded/protocols/industrial-ethernet/chapter07-profinet-io)
-- [Ch 9: TSN 스케줄링 — Qbv·Qbu·동기화](/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling)
-- [Ch 2: 실시간 요구사항 — cycle, jitter, determinism](/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements)
-- [원문 — IEEE 802.1 TSN Task Group](https://1.ieee802.org/tsn/)
+- [Ch 7: PROFINET IO 모델](/blog/embedded/protocols/industrial-ethernet/chapter07-profinet-io)
+- [Ch 2: 실시간 요구사항](/blog/embedded/protocols/industrial-ethernet/chapter02-realtime-requirements)
+- [IEEE TSN Task Group: 표준·프로파일 목록](https://1.ieee802.org/tsn/)

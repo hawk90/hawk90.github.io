@@ -2,7 +2,7 @@
 title: "TSN 스케줄링 메커니즘 — Qbv·Qbu·gPTP 동기화 분석"
 slug: "embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling"
 date: 2026-05-13T09:09:00
-description: "Gate Control List 설계부터 ILP 기반 스케줄 합성·실제 도구·CNC YANG까지."
+description: "주기 경계의 guard band와 프레임 선로 시간을 검산하고, Linux taprio의 offload·시계 모드를 구분합니다."
 series: "Industrial Ethernet 심화"
 seriesOrder: 9
 tags: [tsn, qbv, qbu, ptp, scheduling, gcl, ilp, cnc]
@@ -12,369 +12,146 @@ topics: ["embedded", "embedded/protocols"]
 
 ## 한 줄 요약
 
-> **"TSN 스케줄링은 *공장 전체의 시계 위에 그린 시간표*입니다."** — 모든 스위치 포트에서 *언제 무엇이 송신되는지*를 1µs 단위로 미리 정하고, gPTP가 그 시계를 맞춰 줍니다. 손으로 짤 만한 규모를 넘어가면 ILP나 휴리스틱이 필요합니다.
+> **GCL의 기간 합계만 맞추면 충분하지 않습니다. 주기 경계의 간섭, 큐 매핑, 송신 준비 시각과 기준 시계를 함께 맞춰야 합니다.**
 
-이전 장에서 TSN의 *표준 toolkit*을 훑었다면, 이 장은 *실제로 스케줄을 짜는* 작업입니다. *GCL을 어떻게 채울 것인가*, *gPTP는 어떻게 동기화 정확도를 보장하는가*, *수십 노드 규모에서는 누가 자동으로 풀어 주는가*가 핵심 질문입니다.
+이 장은 1 Gbit/s 출력 포트 한 개의 교육용 스케줄을 계산합니다. 실제 스위치의 스케줄을 측정한 결과나 모든 hop의 deadline 증명은 아닙니다. Linux 설정 의미는 [iproute2 v6.12.0의 `tc-taprio.8`](https://git.kernel.org/pub/scm/network/iproute2/iproute2.git/tree/man/man8/tc-taprio.8?h=v6.12.0)과 Linux v6.12 구현을 기준으로 구분합니다.
 
-GCL을 손으로 짤 수 있는 규모는 대략 *4~8 노드*까지입니다. 그 이상이면 *CNC + 합성 도구*에 맡깁니다. 이 장은 양쪽을 모두 다룹니다.
+PCP와 traffic class의 매핑은 설계의 입력입니다. PCP 7을 언제나 safety, PCP 6을 언제나 AVB A로 부르는 보편 규칙은 없습니다. 여기서는 두 traffic class를 사용하며 TC1은 예약 트래픽, TC0은 나머지 트래픽으로 **가정**합니다.
 
-## Traffic class — 무엇을 결정적으로 다룰까
+## 한 포트의 시간 예산
 
-TSN을 도입하면 가장 먼저 *트래픽 분류*를 고민합니다. 802.1Q는 *8개의 priority(PCP 0~7)*를 제공합니다. 산업 환경의 표준 분류는 다음과 같습니다.
+한 주기는 1 ms이고, 예약 트래픽은 주기당 MAC 프레임 4개입니다. 각 프레임 길이는 FCS 포함 256 B이며 주기 시작 전에 큐에 준비된다고 가정합니다. 애플리케이션 payload가 256 B라는 뜻은 아닙니다.
 
-| PCP | Traffic class | 대역폭 | 사이클 | 예시 |
-|-----|--------------|-------|--------|------|
-| 7 | **CDT** (Critical Data Transfer) | 작음 | ≤ 1ms | 모션 제어, safety |
-| 6 | **Class A** (AVB-strict) | 75% | ≤ 2ms | high-priority I/O |
-| 5 | **Class B** (AVB-strict) | 25% | ≤ 50ms | medium I/O |
-| 4 | **Network control** | 작음 | aperiodic | gPTP, MRP, LLDP |
-| 3 | **Video/audio** | 변동 | streaming | 카메라 |
-| 0~2 | **Best effort** | 잔여 | aperiodic | OPC UA non-RT, SSH, HTTPS |
+| 구간 | 기간 | gate mask | 예제의 목적 |
+|---|---:|---:|---|
+| 0~12 μs | 12,000 ns | `0x02` | TC1 송신 기회 |
+| 12~984 μs | 972,000 ns | `0x01` | TC0 송신 기회 |
+| 984~1000 μs | 16,000 ns | `0x00` | 다음 주기 TC1 앞의 guard band |
 
-이 표가 *스케줄 설계의 출발점*입니다. CDT는 *반드시 Qbv 슬롯*을 받고, Class A·B는 *credit-based shaper(CBS)*로, BE는 *strict priority + Qbu*로 처리합니다.
+1 Gbit/s에서 256 B 프레임 하나의 선로 점유는 `(256 + 8 + 12) × 8 = 2208 ns`입니다. 네 개는 8832 ns이므로 12,000 ns 안에 들어갑니다. 남은 3168 ns가 모든 하드웨어 처리 지연을 보장하는 여유라는 주장은 하지 않습니다.
 
-## GCL 설계 — 4 클래스 예제
+TC0 최대 MAC 프레임을 FCS 포함 1522 B로 제한하면 같은 가정의 선로 점유는 12,336 ns입니다. 16,000 ns guard는 이 값보다 큽니다. 중요한 위치는 **TC0 구간 뒤, 다음 TC1 구간 앞**입니다. TC1 바로 뒤에만 빈 구간을 넣고 주기 마지막까지 TC0을 열면 다음 주기 경계가 보호되지 않습니다.
 
-5포트 스위치의 한 출력 포트를 가정합니다. 목표는 다음 트래픽을 1ms 사이클에 욱여넣는 것입니다.
+## 실행 가능한 계산 입력
 
-- 4개의 CDT stream — 각 256B, 100µs 주기 안에 모두 송신
-- AVB Class A — 평균 75Mbps
-- AVB Class B — 평균 25Mbps
-- BE — 잔여 시간
+다음 JSON은 이 글의 계산기에만 사용하는 형식입니다. 스위치나 CNC에 import하는 표준 schema는 아닙니다. preamble/SFD 8 B와 IPG 12 B를 선로 시간에 포함하고 별도의 장치 지연은 포함하지 않습니다.
 
-링크는 1Gbps입니다. 256B 프레임 송신 시간은 약 2µs입니다(256 × 8 / 1Gbps + IPG).
-
-```text
-cycle_time = 1 ms (1,000,000 ns)
-hyperperiod = 1 ms
-
-GCL:
-| offset(ns) | duration(ns) | gates(Q7..Q0)         | meaning           |
-|------------|--------------|------------------------|-------------------|
-| 0          | 2,200        | 10000000               | CDT stream 1      |
-| 2,200      | 2,200        | 10000000               | CDT stream 2      |
-| 4,400      | 2,200        | 10000000               | CDT stream 3      |
-| 6,600      | 2,200        | 10000000               | CDT stream 4      |
-| 8,800      | 1,200        | 00000000               | guard band        |
-| 10,000     | 740,000      | 01100000               | AVB Class A + B   |
-| 750,000    | 250,000      | 00001111               | Best effort       |
+```json title="tsn-teaching-schedule.json"
+{
+  "linkBps": 1000000000,
+  "criticalMacBytes": 256,
+  "criticalCount": 4,
+  "maxOtherMacBytes": 1522,
+  "cycleNs": 1000000,
+  "entries": [
+    {"mask": 2, "ns": 12000},
+    {"mask": 1, "ns": 972000},
+    {"mask": 0, "ns": 16000}
+  ]
+}
 ```
 
-가장 앞 8.8µs를 CDT 4개에 *경합 없이* 할당합니다. 그 뒤 1.2µs *guard band*는 *큰 BE 프레임이 다음 사이클의 CDT 슬롯을 침범*하지 못하도록 비워 둡니다. 1Gbps에서 1538B는 약 12.3µs이므로 guard band는 *그 시간보다 작게는 둘 수 없습니다*. Qbu(preemption)가 켜져 있으면 64B(약 0.5µs)면 충분합니다.
+계산기는 이 **세 구간 모델만** 검사합니다. 일반 GCL 합성기, stream별 분리 검사기나 지연 보장 도구가 아닙니다. BigInt로 계산하여 정수 overflow와 단위 반올림을 명시적으로 처리합니다.
 
-GCL은 *모든 스위치 출력 포트마다 따로* 가지고 있습니다. 같은 stream이 여러 hop을 지나면 *각 hop의 GCL이 일관*돼야 합니다. 이게 손으로 짜기 어려워지는 이유입니다.
+```js title="tsn-teaching-check.mjs"
+export function checkSchedule(s) {
+  const positive = x => Number.isSafeInteger(x) && x > 0;
+  const fields = ['linkBps', 'criticalMacBytes', 'criticalCount',
+    'maxOtherMacBytes', 'cycleNs'];
+  if (!s || !fields.every(k => positive(s[k])) ||
+      !Array.isArray(s.entries) || s.entries.length !== 3) {
+    throw new TypeError('positive integers and exactly three entries required');
+  }
+  const masks = [2, 1, 0];
+  if (!Array.from(s.entries).every((e, i) => e && e.mask === masks[i] && positive(e.ns))) {
+    throw new RangeError('required order: TC1, TC0, closed guard');
+  }
+  const wire = bytes => {
+    const bitsNs = (BigInt(bytes) + 20n) * 8n * 1000000000n;
+    return (bitsNs + BigInt(s.linkBps) - 1n) / BigInt(s.linkBps);
+  };
+  const total = s.entries.reduce((n, e) => n + BigInt(e.ns), 0n);
+  const critical = wire(s.criticalMacBytes) * BigInt(s.criticalCount);
+  const guard = wire(s.maxOtherMacBytes);
+  return {
+    totalMatches: total === BigInt(s.cycleNs),
+    criticalFits: critical <= BigInt(s.entries[0].ns),
+    boundaryGuardFits: guard <= BigInt(s.entries[2].ns),
+    criticalWireNs: critical.toString(),
+    requiredGuardNs: guard.toString(),
+  };
+}
+```
 
-## Linux tc-taprio — Qbv를 실제로 설정하기
+JSON을 읽어 `checkSchedule()`에 전달하면 세 검사 결과가 참이고, `criticalWireNs`는 `"8832"`, `requiredGuardNs`는 `"12336"`입니다. 링크를 100 Mbit/s로만 바꾸면 예약 구간과 guard 모두 부족해집니다. 더 큰 TC0 프레임을 허용하거나 네 개보다 많은 TC1 프레임이 쌓이면 예제의 전제도 바뀝니다.
 
-Intel I225 NIC + Linux 6+ 조합이 가장 흔한 실험 환경입니다. `tc`의 `taprio` qdisc가 *802.1Qbv를 그대로* 노출합니다.
+## taprio: software, txtime-assist, full offload
+
+| 모드 | 핵심 조건 | 기준 시계와 주의점 |
+|---|---|---|
+| software scheduling | 하드웨어 GCL 실행을 요청하지 않습니다. | qdisc의 `clockid`를 사용합니다. OS 지연을 별도 측정합니다. |
+| `flags 0x1` | txtime-assist, ETF와의 조합을 확인합니다. | `txtime-delay`와 ETF delta의 관계를 확인합니다. |
+| `flags 0x2` | full offload를 드라이버·NIC가 지원해야 합니다. | 장치 PHC를 사용하므로 `clockid`를 생략합니다. |
+
+`0x1`과 `0x2`는 동시에 사용할 수 없습니다. full offload 예제에 `clockid CLOCK_TAI`와 txtime-assist용 옵션을 섞지 않습니다. PHC는 PTP Hardware Clock이며 timestamp 위치가 반드시 PHY라는 뜻은 아닙니다.
+
+다음은 **실험망용 설정 형식 예**입니다. 이 글의 검증에서는 실행하지 않았습니다. 두 송신 큐와 full offload, 해당 GCL·간격을 지원하는 장치가 필요하며, 실제 적용 전에는 기존 qdisc와 트래픽의 영향을 확인해야 합니다. `ethLAB`는 실제 인터페이스 이름으로 바꿉니다.
+
+```bash title="taprio-full-offload-example.sh"
+tc qdisc replace dev ethLAB parent root handle 100 taprio \
+  num_tc 2 \
+  map 0 0 0 0 0 0 0 1 0 0 0 0 0 0 0 0 \
+  queues 1@0 1@1 \
+  base-time 200 \
+  sched-entry S 02 12000 \
+  sched-entry S 01 972000 \
+  sched-entry S 00 16000 \
+  flags 0x2
+```
+
+여기서 map은 skb priority 0~15를 TC에 매핑합니다. priority 7만 TC1로 보냅니다. skb priority, VLAN PCP와 실제 하드웨어 큐 사이의 경로는 별도로 확인해야 합니다. GCL의 bit는 stream 번호가 아니라 traffic class 번호입니다.
+
+`base-time 200`은 PHC 기준의 주기 위상을 보여 주는 예입니다. 과거 시각이면 지원 구현은 cycle을 더해 현재 이후의 시작을 구합니다. “과거 base-time은 무조건 오류” 또는 “항상 현재+1초로 설정”은 올바른 규칙이 아닙니다. 여러 hop의 base-time이 같아야만 하는 것도 아닙니다. 경로별 전달 시간에 맞춘 위상 차이가 필요할 수 있습니다.
+
+qdisc 적용 성공은 NIC의 물리 송신 시각이나 end-to-end deadline을 측정한 결과가 아닙니다. 전제인 최대 프레임과 송신량을 실제로 제한하고, driver offload 상태와 wire상의 송신·수신을 확인해야 합니다. 이 예제는 장치별 `max-sdu`와 overhead accounting을 완성한 생산 설정이 아닙니다.
+
+## 시간 동기화 설정에서 분리할 것
+
+[LinuxPTP의 gPTP 예제](https://www.linuxptp.org/documentation/configs/gptp/)는 `network_transport L2`, `delay_mechanism P2P`, `transportSpecific 0x1` 등의 설정을 제시합니다. 임의의 `gPTP 1` 옵션으로 전체 프로파일을 선택하는 방식이 아닙니다. 현재 설치한 LinuxPTP 버전의 설정 parser와 프로파일을 함께 확인합니다.
+
+PHC와 시스템 시계는 다를 수 있습니다. full offload는 장치 PHC의 스케줄이고 software 모드의 `CLOCK_TAI`와 자동으로 같아지지 않습니다. `ptp4l`·`phc2sys`의 동기화 방향, UTC/TAI offset과 grandmaster 역할을 정한 뒤 구성해야 합니다. 의미를 확인하지 않고 `phc2sys -O 0`으로 시계를 맞추는 예제는 제공하지 않습니다.
+
+다음 명령은 Linux 실험 장치에서 상태를 읽는 데 사용합니다. 출력은 이 글에서 측정한 결과로 싣지 않습니다. timestamp capability가 있어도 그 기능의 활성화나 오차 상한까지 증명하지는 않습니다.
 
 ```bash
-# Enable taprio on eth0 with 1ms cycle, base time aligned to next second
-NOW=$(date +%s)
-BASE=$(( (NOW + 5) * 1000000000 ))
-
-tc qdisc replace dev eth0 parent root handle 100 taprio \
-    num_tc 4 \
-    map 0 0 0 0 1 1 2 3 \
-    queues 1@0 1@1 1@2 1@3 \
-    base-time $BASE \
-    sched-entry S 01 200000 \
-    sched-entry S 02 200000 \
-    sched-entry S 04 200000 \
-    sched-entry S 08 400000 \
-    flags 0x2 \
-    txtime-delay 200000 \
-    clockid CLOCK_TAI
+ethtool -T ethLAB
+tc -s -d qdisc show dev ethLAB
 ```
 
-읽는 법입니다.
+## 다중 hop과 스케줄 합성
 
-- `num_tc 4` — 4개의 traffic class.
-- `map 0 0 0 0 1 1 2 3` — skb priority 0~7을 tc 0~3에 매핑.
-- `queues 1@0 ...` — 각 tc가 hw queue 0~3을 한 개씩 사용.
-- `sched-entry S 01 200000` — 200µs 동안 *bit0 = tc0*만 게이트 open.
-- `flags 0x2` — *hardware offload*. NIC가 직접 처리.
-- `clockid CLOCK_TAI` — PTP가 동기화하는 *TAI* 시계 기준.
+한 출력 포트의 gate 시간이 맞아도 다음 hop의 큐에 제때 도착해야 합니다. 송신 시간, propagation과 bridge delay, clock error, 애플리케이션 준비 지연을 합쳐 경로별 제약을 만듭니다. 서로 다른 큐라도 같은 출력 링크를 동시에 사용할 수 없다는 점이 중요합니다.
 
-`base-time`을 *미래의 정확한 1초 경계*로 잡는 게 중요합니다. 두 노드가 base-time이 *같지 않으면* 같은 슬롯에 송신하지 못합니다. PTP로 시계만 맞춘다고 끝이 아니라, *base-time 자체*가 같은 wall-clock이어야 합니다.
+ILP/MILP에서는 송신 시작 시각, 경로·큐 배정과 순서 선택을 변수로 두고, deadline과 링크의 비중첩 제약을 표현할 수 있습니다. OR 형태의 순서 선택은 정수 변수를 사용해 선형화할 수 있습니다. 단지 OR가 있다는 이유로 모든 정식화가 비선형인 것은 아닙니다.
 
-## gPTP — sub-µs 동기의 비밀
+주기마다 여러 release가 있으면 hyperperiod 안의 반복과 경계 간섭도 포함해야 합니다. FIFO와 실제 큐 공유, gate 해상도와 entry 수 제한도 필요합니다. 최적화 목표나 변수 집합이 다른데 모든 solver가 같은 답이나 실행 시간을 낸다고 가정하지 않습니다.
 
-GCL이 1µs 정확도로 동작하려면 *시계 자체*가 1µs 안에 맞아 있어야 합니다. gPTP가 그걸 보장합니다.
-
-3단계 메커니즘입니다.
-
-1. **Sync interval** — grandmaster가 매 125ms마다 `Sync`+`Follow_Up` 송신.
-2. **Pdelay measurement** — 직접 연결된 두 노드가 매 1초마다 *link delay*를 측정.
-3. **Offset correction** — slave가 *수신 timestamp - master timestamp - link delay*로 offset 계산, slow drift는 PI 제어로 추정.
-
-```python
-# Pseudo-code of slave time correction
-def on_sync_followup(master_time_T1, link_delay_d):
-    local_time_T2 = phy_rx_timestamp()
-    offset = local_time_T2 - master_time_T1 - link_delay_d
-
-    # PI filter: smooth out jitter, track drift
-    integ += offset * ki
-    correction = offset * kp + integ
-    adjust_local_clock(correction)
-```
-
-핵심은 *PHY-level timestamping*입니다. Sync 프레임이 *PHY에서 송수신되는 순간*에 timestamp를 찍어야 합니다. 소프트웨어 stack 안에서 찍으면 *수십 µs 변동*이 그대로 noise로 들어옵니다.
-
-Intel I225, NXP LS1028A 같은 TSN NIC은 *PHY timestamp*를 hardware로 제공합니다. PTP daemon(`ptp4l`)이 그 hw 값을 읽어 보정합니다.
-
-```bash
-# Linux: ptp4l with gPTP profile
-sudo ptp4l -i eth0 -f /etc/ptp4l-gptp.conf -m
-```
-
-`ptp4l-gptp.conf`:
-
-```ini
-[global]
-gPTP                    1
-twoStepFlag             1
-delay_mechanism         P2P
-network_transport       L2
-priority1               128
-priority2               128
-clockClass              248
-[eth0]
-logSyncInterval         -3   ; = 125 ms
-logMinPdelayReqInterval 0    ; = 1 s
-```
-
-`ptp4l`이 PHY 시계를 *grandmaster에 맞춥니다*. 그러나 *시스템 시계*는 아직 PHY와 별개입니다. `phc2sys`로 *PHY → system clock*을 한 번 더 옮깁니다.
-
-```bash
-sudo phc2sys -s eth0 -O 0 -m
-```
-
-`ptp4l`이 PHY 시계, `phc2sys`가 system 시계, `tc taprio`가 그 system 시계 기반 base-time. *세 단계가 모두* 맞아야 GCL이 의도대로 동작합니다.
-
-동기화 정확도는 일반적으로 다음 수준입니다.
-
-| 측정 | 정확도 |
-|------|-------|
-| PHY ↔ PHY (gPTP, 1 hop) | ±100ns |
-| PHY ↔ PHY (gPTP, 5 hop) | ±500ns |
-| PHY → system clock | ±1µs |
-| system → GCL trigger | ±1µs (소프트웨어), ±10ns (hw offload) |
-
-hardware offload (`flags 0x2`)가 *결정적*인 이유입니다.
-
-## CNC YANG — fleet 단위 설정
-
-10대 미만이면 수동 설정도 가능합니다. 그 이상이면 *CNC*에 맡깁니다.
-
-CNC는 *NETCONF 서버*로 동작하는 중앙 컨트롤러입니다. *Talker*와 *Listener*가 자기 요구사항을 YANG model로 등록하면, CNC가 *위상 + 트래픽*을 보고 *모든 스위치의 GCL을 합성*해서 push합니다.
-
-Talker가 등록하는 stream 요구사항입니다.
-
-```yaml
-ieee802-dot1q-tsn-config-uni:
-  talkers:
-    - stream-id: "00:1b:1b:11:22:33:5"
-      stream-rank:
-        rank: 0     # 0 = highest
-      end-station-interfaces:
-        - interface-name: "eth0"
-      data-frame-specification:
-        - ieee802-mac-addresses:
-            destination-mac-address: "01:80:c2:00:00:0e"
-        - ieee802-vlan-tag:
-            priority-code-point: 7
-            vlan-id: 100
-      traffic-specification:
-        interval:
-          numerator: 1
-          denominator: 1000     # 1 ms
-        max-frames-per-interval: 1
-        max-frame-size: 256
-        transmission-selection: 0
-      user-to-network-requirements:
-        num-seamless-trees: 2   # FRER
-        max-latency: 500000     # ns
-```
-
-Listener는 더 간단합니다.
-
-```yaml
-listeners:
-  - end-station-interfaces:
-      - interface-name: "eth3"
-    user-to-network-requirements:
-      max-latency: 500000
-```
-
-CNC가 *모든 talker + listener + 네트워크 위상*을 받아서 *스케줄을 합성*합니다. 결과가 *configured-by-cnc* 항목에 채워져 talker/listener에 통보됩니다.
-
-```yaml
-status-talker-listener:
-  status-info:
-    talker-status: ready
-    listener-status: ready
-    failure-code: 0
-  accumulated-latency: 350000
-  configured-by-cnc:
-    schedule:
-      gate-control-list: [...]
-      base-time: 1700000000000000000
-      cycle-time: 1ms
-```
-
-## 스케줄 합성 — ILP
-
-CNC 내부에서 어떻게 스케줄을 *계산하는가*가 다음 질문입니다. 학계의 주된 정식화는 *MILP(Mixed Integer Linear Programming)*입니다.
-
-변수와 제약을 간단히 풀면 다음과 같습니다.
-
-**Variables:**
-
-- t_{s,h}  ∈ ℝ⁺   : stream s가 hop h를 떠나는 시각 (in cycle)
-- q_{s,h}  ∈ {0..7} : 그 hop의 queue 배정
-
-**Constraints:**
-
-- (1) Topology: t_{s, h+1} ≥ t_{s, h} + tx_time + prop_delay
-- (2) Deadline: t_{s, last} + tx_time ≤ deadline_s
-
-**(3) Non-overlap (same port, same queue):**
-
-
-**∀ s1, s2 sharing port p, queue q:**
-
-- t_{s1,p} + tx_time + IPG ≤ t_{s2,p}    OR
-- t_{s2,p} + tx_time + IPG ≤ t_{s1,p}
-- (4) Frame ordering: FIFO within queue
-- (5) Cyclic wrap: t_{s,h} mod hyperperiod
-
-**Objective:**
-
-- minimize  Σ end-to-end latency
-- OR
-- minimize  GCL entries (스위치 hw 제약)
-
-(3)이 *비선형*(OR)이라 *integer variable*로 분리합니다. 수십 stream + 수 hop이면 CPLEX·Gurobi가 *수십 초*에 푸는 규모이고, 수백 stream이면 *수 시간*입니다. 실시간 재계산은 어렵습니다.
-
-산업 환경의 정적 스케줄은 *오프라인*에 한 번 풀어 둡니다. 토폴로지가 바뀌거나 새 stream이 추가되면 다시 풉니다.
-
-## 휴리스틱 — list scheduling
-
-ILP가 너무 비싼 규모에서는 *list scheduling*이 보통 정답입니다.
-
-```python
-def list_schedule(streams, topology):
-    # 1. Sort streams by priority (deadline, criticality)
-    streams.sort(key=lambda s: (-s.priority, s.deadline))
-
-    # 2. For each stream, route greedy & assign earliest slot
-    schedule = {}
-    for s in streams:
-        path = shortest_path(topology, s.src, s.dst)
-        t = 0
-        for hop in path:
-            port = hop.out_port
-            slot = find_earliest_free_slot(
-                port,
-                start=t,
-                length=s.tx_time + GUARD_BAND,
-                cycle=s.cycle_time,
-            )
-            if slot is None:
-                raise InfeasibleException(s)
-            schedule[s, hop] = slot
-            t = slot + s.tx_time + hop.prop_delay
-        if t > s.deadline:
-            raise InfeasibleException(s)
-    return schedule
-```
-
-핵심은 *find_earliest_free_slot*입니다. 한 포트의 *cycle 내 사용 중인 시간 구간*을 정렬해 두고, *충분히 긴 빈 구간*을 찾습니다. O(streams × hops × log slots)에 풀립니다.
-
-list scheduling은 *optimal*이 아니지만, 보통 *수 초 안에* feasible solution을 줍니다. 안 풀리면 ILP로 보내는 *2-tier* 구성을 자주 씁니다.
-
-## 실제 도구
-
-| 도구 | 종류 | 비고 |
-|------|------|------|
-| **Cisco Catalyst Center / CCC** | 상용 CNC | IE 스위치 fleet, NETCONF |
-| **Marvell TSN switch CLI** | 벤더 CLI | Prestera ASIC, YAML 설정 |
-| **TTTech Insight / Slate** | 합성·시뮬레이션 | 자동차·산업 |
-| **Hirschmann HiVision** | NMS | BOBCAT/Greyhound 관리 |
-| **NXP TSN-Configurator** | 오픈소스 GUI | LS1028A 평가보드용 |
-| **iCNet** | Python lib | 학술용 ILP/heuristic 프로토타이핑 |
-
-Marvell Prestera 스위치 CLI 예입니다.
-
-```text
-switch> configure terminal
-switch(config)> interface gigabit 0/1
-switch(config-if)> tsn taprio
-switch(config-taprio)> base-time 1700000000000000000
-switch(config-taprio)> cycle-time 1000000
-switch(config-taprio)> entry add 1 gate 0x80 duration 200000
-switch(config-taprio)> entry add 2 gate 0x40 duration 200000
-switch(config-taprio)> entry add 3 gate 0x0F duration 600000
-switch(config-taprio)> commit
-```
-
-요점은 모든 벤더가 *결국 GCL을 어떻게 표현하느냐* 차이만 있을 뿐, *모델은 같다*는 것입니다. YANG model이 그 모델의 *표준화된 표현*입니다.
-
-## 자주 하는 실수
-
-### "GCL을 짰는데 jitter가 50µs"
-
-guard band를 *생략*했거나 Qbu를 안 켠 경우입니다. BE 프레임이 슬롯 경계를 침범합니다. 1Gbps에서 *guard band ≥ 12.3µs*(Qbu 없을 때) 또는 *guard band ≥ 0.5µs + Qbu 활성*로 잡습니다.
-
-### "한 hop에서는 잘 되는데 3 hop에서 deadline miss"
-
-각 hop의 *propagation delay*와 *bridge processing delay*를 누적하지 않은 경우입니다. cut-through 스위치는 hop당 약 1µs, store-and-forward는 *프레임 시간 + 1µs*입니다. 3 hop이면 *3 × 1µs + 3 × frame_time*을 deadline에서 빼고 합성합니다.
-
-### "ptp4l offset이 ±10µs를 진동한다"
-
-PHY timestamp가 안 켜져 있거나 *sw timestamp* fallback인 경우입니다. `ethtool -T eth0`로 확인합니다.
-
-```text
-$ ethtool -T eth0
-Time stamping parameters for eth0:
-Capabilities:
-        hardware-transmit
-        hardware-receive
-        hardware-raw-clock
-PTP Hardware Clock: 0
-Hardware Transmit Timestamp Modes: off, on
-Hardware Receive Filter Modes: none, all
-```
-
-`hardware-*`가 모두 보이면 OK. 안 보이면 *NIC 또는 드라이버*가 PHY ts를 지원하지 않습니다. I210은 부분 지원, I225부터 full.
-
-### "base-time이 과거인데 taprio가 동작 안 함"
-
-`taprio`는 *base-time이 미래*여야 시작합니다. 과거면 *cycle 만큼 뒤로 미뤄* 시작하지만, 차이가 크면 *immediate error*입니다. `base-time`을 *항상 현재 + 1초* 이상으로 잡습니다.
-
-### "CNC 합성이 infeasible로 나온다"
-
-bandwidth 합이 100%를 넘었거나, *deadline이 hop chain의 minimum latency*보다 짧은 경우입니다. CNC가 보통 *어떤 stream이 문제인지*를 `failure-code`로 알려 줍니다. 그 stream의 deadline을 늘리거나, *경로를 짧게* 재설계합니다.
+Greedy/list scheduling이 답을 못 찾았다는 사실은 전역적으로 불가능하다는 증명이 아닙니다. 반대로 답을 찾았어도 모델에서 누락한 지연이나 구현 제약이 있으면 장치에서 실패할 수 있습니다. 수동 설계의 한계를 “8노드”, solver 시간을 “수십 초”처럼 보편 수치로 고정하지 않습니다.
 
 ## 정리
 
-- TSN traffic class는 *CDT·AVB-A·AVB-B·NC·video·BE*로 나뉘고, CDT가 *Qbv 슬롯*을 받습니다.
-- *GCL*은 cycle 내 *언제 어느 큐가 송신하는지*를 정의합니다. guard band가 슬롯 침범을 막습니다.
-- Linux는 `tc taprio`로 Qbv를 노출합니다. hw offload(`flags 0x2`)가 결정성의 핵심입니다.
-- *gPTP*는 PHY-level timestamping + PI 제어로 1µs 이내 동기를 만듭니다. `ptp4l` + `phc2sys`가 표준 조합입니다.
-- *CNC*가 talker·listener의 YANG 요구사항을 받아 *전체 fleet의 GCL을 합성*합니다.
-- 합성은 *MILP*가 정확하지만 비쌉니다. *list scheduling 휴리스틱*이 실무 표준입니다.
-- 도구: Cisco CCC, Marvell CLI, TTTech, NXP TSN-Configurator, 학술용 iCNet.
-- 디버깅의 80%는 *guard band·base-time·PHY timestamp 셋 중 하나*입니다.
+- guard band는 방해 트래픽 뒤, 보호할 구간 앞에 있어야 합니다. 주기 경계도 포함합니다.
+- 프레임 길이에 어떤 헤더·FCS·선로 overhead를 포함했는지 명시합니다.
+- GCL은 class의 송신 자격을 제어하며 stream별 패킷 시각을 직접 지정하지 않습니다.
+- taprio 모드별 옵션과 시계를 구분하고 full offload에는 `clockid`를 넣지 않습니다.
+- 과거 base-time과 hop별 위상은 지원 구현과 경로 조건으로 해석합니다.
+- 계산 검증, 설정 수락과 실제 장치의 deadline 측정은 서로 다른 단계입니다.
 
-다음 편은 **Ch 10: POWERLINK + OpenSAFETY — 오픈소스 산업 이더넷의 정수**입니다.
+다음 [Ch 10: POWERLINK·OpenSAFETY](/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink)에서 다른 주기 통신 방식과 safety 계층의 경계를 살펴봅니다.
 
 ## 관련 항목
 
-- [Ch 8: TSN — Time-Sensitive Networking](/blog/embedded/protocols/industrial-ethernet/chapter08-tsn)
-- [Ch 10: POWERLINK·OpenSAFETY](/blog/embedded/protocols/industrial-ethernet/chapter10-powerlink)
-- [Ch 11: 리눅스 실시간 — PREEMPT_RT·EtherCAT](/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime)
-- [원문 — IEEE 802.1Qbv-2015 Time-Aware Shaper](https://standards.ieee.org/ieee/802.1Qbv/6068/)
-- [원문 — IEEE 802.1AS-2020 Timing and Synchronization](https://standards.ieee.org/ieee/802.1AS/7121/)
+- [Ch 8: TSN 표준 개요](/blog/embedded/protocols/industrial-ethernet/chapter08-tsn)
+- [Ch 11: Linux 실시간](/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime)
+- [Linux v6.12 taprio 구현](https://github.com/torvalds/linux/blob/v6.12/net/sched/sch_taprio.c)
+- [iproute2 v6.12.0 taprio 사용자 문서](https://git.kernel.org/pub/scm/network/iproute2/iproute2.git/tree/man/man8/tc-taprio.8?h=v6.12.0)

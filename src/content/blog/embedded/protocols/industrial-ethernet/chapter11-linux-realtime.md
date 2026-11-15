@@ -2,7 +2,7 @@
 title: "리눅스 실시간 산업 통신 — PREEMPT_RT·EtherCAT Master 운영"
 slug: "embedded/protocols/industrial-ethernet/chapter11-linux-realtime"
 date: 2026-05-13T09:11:00
-description: "PREEMPT_RT mainline·CPU isolation·NIC tuning·IgH EtherCAT 마스터까지 — Linux 위에서 산업 이더넷을 굴리는 모든 단계."
+description: "Linux 산업 통신의 wakeup 지연·CPU/IRQ 배치·NIC 경로와 EtherCAT deadline을 구분하고, 측정 조건과 overrun 처리를 정리합니다."
 series: "Industrial Ethernet 심화"
 seriesOrder: 11
 tags: [linux, preempt-rt, xenomai, ethercat-driver, cyclictest, isolcpus]
@@ -12,415 +12,164 @@ topics: ["embedded", "embedded/protocols"]
 
 ## 한 줄 요약
 
-> **"Linux로 산업 이더넷 마스터를 돌리려면 *커널·CPU·IRQ·NIC* 네 곳 모두에서 결정성을 짜야 합니다."** — PREEMPT_RT 한 줄로 끝나는 일이 아닙니다. isolation·affinity·hw timestamp·드라이버 튜닝까지 *전부 같이* 갖춰야 100µs jitter가 나옵니다.
+> **Linux의 타이머 wakeup 지연, 애플리케이션 실행 시간과 통신 완료 시간은 서로 다른 값입니다. PREEMPT_RT와 cyclictest만으로 전체 제어 deadline을 증명하지는 못합니다.**
 
-EtherCAT IgH 마스터, openPOWERLINK MN, OPC UA Pub/Sub publisher 같은 *RT 애플리케이션*을 Linux에서 돌리는 일은 이제 표준이 되었습니다. PLC 벤더가 *softPLC*라는 이름으로 Linux 기반 PLC를 판매하는 시대입니다(B&R APROL, CODESYS Runtime, Bosch ctrlX, Phoenix Contact PLCnext).
+이 장에서는 Linux 기반 산업 통신을 검증할 때 측정해야 할 경계를 나눕니다. 설명 기준은 Linux v6.12와 rt-tests v2.6이며, EtherCAT API는 IgH 1.6 문서와 대조합니다. 아래에는 이 글에서 얻지 않은 cyclictest 측정 로그나 “50 μs 이하면 생산 가능” 같은 보편 합격 기준을 싣지 않습니다.
 
-이 장은 *어떻게 Linux를 그 수준까지 가져가는가*를 4단계로 풉니다. PREEMPT_RT 활성화, CPU isolation, NIC 튜닝, EtherCAT IgH 설정. 각 단계가 *어디서 결정성을 얼마나 가져오는지* 측정하면서 갑니다.
+설정 순서는 지연의 원인을 찾아 필요한 변경을 하나씩 검증하는 방향입니다. 모든 설비에 같은 부트 옵션과 NIC 값을 복사하거나 보안 완화·전력 관리를 일괄 해제하는 방식은 근거가 부족합니다. 마스터 구현의 API 흐름은 [Ch 5](/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master)를 함께 참고합니다.
 
-## 왜 vanilla Linux로는 안 되는가
+## 먼저 측정 경계를 정하기
 
-표준 Linux 커널은 *throughput 최적화*가 목표입니다. *최악 응답 시간*은 다음과 같은 곳에서 망가집니다.
+| 측정 경계 | 무엇을 포함하는가 | 추가로 필요한 증거 |
+|---|---|---|
+| 목표 wakeup→실제 wakeup | 타이머와 스케줄링 지연 | 부하·실행 정책·CPU 배치 |
+| wakeup→송신 요청 | 애플리케이션과 마스터 처리 | 최악 실행 시간과 blocking |
+| 송신 요청→실제 선로 송신 | driver·큐·NIC 경로 | 실제 경로의 timestamp나 외부 관측 |
+| 선로 송신→유효 입력 수신 | 네트워크와 장치 응답 | 토폴로지·슬레이브·WKC/status |
+| 전체 제어 반응 | 계산·통신·IO 갱신 | 제어 요구와 장애 시 반응 조건 |
 
-| 원인 | 추가 latency |
-|------|-------------|
-| 커널 코드 안의 *spinlock* | 수십 µs |
-| irq 처리 *non-preemptible* | 수십 µs |
-| *RCU* grace period | 수십~수백 ms |
-| Workqueue 지연 | 수~수십 ms |
-| Page fault (swap, demand-paging) | 수ms~수초 |
-| *NMI* (perf 등) | µs~ms |
-| *Power management* (cpuidle, cpufreq) | µs~ms |
+예를 들어 250 μs 주기에서 wakeup 지연이 18 μs였다고 해도 나머지 구간이 얼마인지 알 수 없습니다. 평균이 낮아도 드문 spike나 데이터 유효성 문제를 놓칠 수 있습니다. 반대로 주기와 deadline이 항상 같은 것도 아니므로 요구를 먼저 명시해야 합니다.
 
-`cyclictest`로 vanilla Linux를 측정하면 *최대 latency가 수 ms 단위*로 튑니다. EtherCAT 1ms 사이클에서 이건 *연속 사이클 miss*를 만듭니다.
+## PREEMPT_RT와 실행 정책
 
-```text
-# vanilla 6.6 kernel, idle system
-$ cyclictest -p99 -t 4 -i 1000 -n -D 60
-T: 0 ( 1234) P:99 I:1000 C:  60000 Min:      4 Act:    8 Avg:    7 Max:    3421
-                                                                          ^^^^
-                                                                          ms 단위로 튐
+Linux v6.12는 mainline에서 PREEMPT_RT 구성을 사용할 수 있는 기준입니다. 실제 활성화 가능 여부는 architecture와 배포 커널 구성으로 확인합니다. 커널 버전 문자열에 6.12가 있다는 사실만으로 `CONFIG_PREEMPT_RT=y`를 증명하지 않습니다.
+
+[Linux v6.12 lock 문서](https://kernel.org/doc/html/v6.12/locking/locktypes.html)는 PREEMPT_RT에서 `spinlock_t` 등의 동작이 달라지는 점을 설명합니다. `raw_spinlock_t`를 포함한 모든 구간이 선점 가능해지는 것은 아닙니다. 또한 RCU grace period가 길다는 사실을 곧바로 같은 길이의 비선점 구간으로 해석하지 않습니다.
+
+`SCHED_FIFO`는 일반 스케줄링과 다른 실행 정책이며 우선순위·권한·RT throttling과 다른 스레드의 관계를 고려해야 합니다. 우선순위를 무조건 99로 올리면 NIC IRQ thread나 필요한 보조 작업의 진행을 방해할 수도 있습니다. 정책 변경과 affinity·memory lock의 반환값을 확인하고, 실패한 상태로 RT 실행을 시작하지 않도록 합니다.
+
+`mlockall()`은 메모리 상주에 도움을 주지만 모든 종류의 page fault나 지연을 제거하지는 않습니다. stack과 미리 사용할 메모리를 준비하고, 동적 할당·동기 IO·lock 경합을 실제 실행 경로에서 줄여야 합니다. `MCL_FUTURE`와 자원 제한 때문에 이후 할당이 실패할 수도 있으므로 그 경로도 처리합니다.
+
+## CPU·IRQ 배치는 하나의 고정 처방이 아닙니다
+
+[커널 파라미터 문서](https://docs.kernel.org/6.12/admin-guide/kernel-parameters.html)는 각 옵션의 조건을 구분합니다. 아래는 효과를 읽는 요약이며, 완전한 격리를 보장하는 부트 문자열이 아닙니다.
+
+| 항목 | 목적 | 남는 확인 사항 |
+|---|---|---|
+| cpuset·thread affinity | 작업이 실행할 CPU를 제한합니다. | housekeeping과 보조 스레드 배치 |
+| `isolcpus` | 지정한 scheduling domain 등의 간섭을 줄입니다. | 문서가 deprecated로 안내하는 domain 격리 대신 cpuset 검토 |
+| `nohz_full` | 조건을 만족하는 CPU의 주기 tick을 줄입니다. | 모든 timer·IRQ가 사라지는 것은 아닙니다. |
+| `rcu_nocbs` | RCU callback 실행을 offload합니다. | callback 처리 스레드의 위치와 부하 |
+| `irqaffinity` | 기본 IRQ affinity를 지정합니다. | managed IRQ·driver·irqbalance의 실제 배치 |
+
+NIC IRQ를 애플리케이션 CPU에 둘지 다른 CPU에 둘지는 경로와 우선순위, cache·NUMA 조건으로 결정합니다. 한쪽이 항상 정답은 아닙니다. “모든 IRQ가 housekeeping으로 강제 이동한다”는 전제 대신 실제 `/proc/interrupts`와 affinity를 읽습니다.
+
+전력·주파수 설정도 부하, 열과 전력 예산을 포함해 비교합니다. idle polling이나 깊은 sleep 제한이 모든 wakeup 지연을 0으로 만들지는 않습니다. 펌웨어·SMI 등을 의심할 때도 측정 시각과 원인 증거를 연결해야 하며, 원인을 확인하기 전에 BIOS 기능을 일괄 해제하지 않습니다.
+
+## cyclictest: 횟수와 시간 조건 맞추기
+
+[rt-tests v2.6의 실제 parser](https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git/tree/src/cyclictest/cyclictest.c?h=v2.6)는 `--loops`, `--duration`, `--interval` 등을 처리합니다. 이 판에는 예전 예제의 `-n` 옵션을 사용하지 않습니다. `--interval`의 단위는 μs이며 여러 thread를 쓸 때는 interval 간격 옵션도 확인해야 합니다.
+
+아래는 **Linux 실험 장치에서 사용할 명령 예**입니다. CPU 2가 online이고 사용할 수 있어야 하며, 필요한 권한과 RT 우선순위 정책을 먼저 확인합니다. 이 글의 host 검증에서 명령을 실행하거나 시스템의 scheduling·전력 정책을 바꾸지는 않았습니다.
+
+```bash title="cyclictest-count-example.sh"
+cyclictest --affinity=2 --threads=1 --priority=80 \
+  --interval=250 --loops=200000 --mlockall --quiet
 ```
 
-3.4ms의 *최악 latency*면 1ms 사이클은 불가능합니다.
+200,000회 × 250 μs는 명목상 **50초**입니다. 실제 시작·종료 처리와 지연이 있으므로 wall time을 정확히 50초라고 보장하지는 않습니다. 1시간을 기준으로 종료하려면 횟수 조건과 혼동하지 말고 별도로 지정합니다.
 
-## PREEMPT_RT — mainline에 통합
-
-PREEMPT_RT는 가능한 많은 커널 실행 구간을 선점 가능하게 만들고, spinlock·타이머·IRQ 처리 경로를 실시간 우선순위와 함께 동작시키는 패치셋입니다. 20년에 걸친 외부 패치 끝에 *2024년 Linux 6.12*부터 mainline에 통합되었습니다. 모든 커널 구간이 무조건 선점 가능한 것은 아닙니다.
-
-Linux 6.12 LTS 기준:
-
-- **Linux 6.12 LTS** — PREEMPT_RT가 *config option* (`CONFIG_PREEMPT_RT=y`).
-- **Xenomai 3** — co-kernel 방식, *legacy*. Linux 5.x까지 active maintenance.
-- **Xenomai 4 / EVL** — *EVL Project*로 이름 바뀜. *user-level RT*를 위한 새 API. 적극 개발 중.
-- **RTAI** — 사실상 *unmaintained*.
-
-선택 가이드는 단순합니다.
-
-| 시나리오 | 추천 |
-|----------|------|
-| 새 프로젝트, 사이클 ≥ 250µs | **PREEMPT_RT** (mainline) |
-| 사이클 ≤ 100µs, 극단적 결정성 | **EVL / Xenomai 4** |
-| 기존 Xenomai 3 시스템 유지 | **Xenomai 3** (단, EOL 계획 수립) |
-
-PREEMPT_RT 활성화:
-
-```bash
-# Debian/Ubuntu (kernel 6.12+)
-sudo apt install linux-image-rt-amd64
-
-# 또는 source build
-make menuconfig
-  General setup
-    Preemption Model -> Fully Preemptible Kernel (Real-Time)
-make -j && sudo make modules_install install
+```bash title="cyclictest-duration-example.sh"
+cyclictest --affinity=2 --threads=1 --priority=80 \
+  --interval=250 --duration=1h --mlockall --quiet
 ```
 
-PREEMPT_RT만 활성화한 결과:
+명목상 1시간에는 14,400,000개의 250 μs 간격이 들어갑니다. 실제 관측 loop 수와 종료 조건은 로그로 기록해야 합니다. 200,000회 실험의 출력처럼 14,400,000회를 붙이면 다른 실험을 섞은 것입니다.
 
-```text
-$ uname -a
-Linux rt 6.12.0-rt amd64
-$ cyclictest -p99 -t 4 -i 1000 -n -D 60
-T: 0 ( 1234) P:99 I:1000 C:  60000 Min:      4 Act:    9 Avg:    8 Max:      87
-                                                                          ^^
-                                                                          µs로 떨어짐
-```
+cyclictest의 실행 자체도 RT 정책과 memory lock, 전력 지연 요청 등에 영향을 줄 수 있습니다. 단순한 읽기 전용 상태 조회와는 다릅니다. 측정 보고에는 kernel/config, CPU·SMT·NUMA, BIOS·firmware, 부하, clock, 정책·affinity·우선순위, 측정 시간과 실패·누락을 남깁니다.
 
-87µs로 떨어졌습니다. 좋아졌지만 *EtherCAT 250µs 사이클*에는 아직 빠듯합니다. 다음 단계가 *CPU isolation*입니다.
+유휴 상태와 대표 부하를 나누어 비교하고, 통신과 저장장치·IRQ 부하가 겹치는 조건도 포함합니다. 한 시간 관측 최대값은 그 실험의 최대값입니다. 실험 시간을 늘렸다는 이유로 미관측 최악값의 수학적 상한이나 제품 합격을 선언하지 않습니다.
 
-## CPU isolation — RT 코어를 격리
+## Overrun 이후의 deadline 계산
 
-multicore 시스템에서 *몇 개 코어만 RT 작업에 전용*으로 두면 latency가 한 자릿수 µs까지 떨어집니다. 세 가지 옵션을 *함께* 씁니다.
+절대 시각 sleep은 상대 sleep의 누적 drift를 줄이는 수단입니다. Linux의 `clock_nanosleep()`을 `TIMER_ABSTIME`으로 사용할 때 `EINTR`이면 같은 목표 시각으로 재시도하고 다른 오류도 처리해야 합니다. 이미 deadline을 넘었다면 다음 목표를 어떻게 잡을지도 정해야 합니다.
 
-| 부트 파라미터 | 효과 |
-|--------------|------|
-| `isolcpus=2,3` | 스케줄러가 이 코어에 *일반 태스크를 배치하지 않음* |
-| `nohz_full=2,3` | 이 코어의 *timer tick을 끔* (CPU 휴식 시 인터럽트 0) |
-| `rcu_nocbs=2,3` | RCU callback을 이 코어에서 *호출하지 않음* |
+다음 코드는 **늦은 release를 건너뛰고 엄격히 미래인 다음 release를 선택하는 산술 예제**입니다. 실제 시계·sleep·EtherCAT 통신을 호출하지 않습니다. 제어기에서 누락 시 멈춰야 하는지, 데이터를 유지해야 하는지는 별도 정책이며 이 함수가 정하지 않습니다.
 
-`/etc/default/grub`:
+```c title="periodic-next-deadline.c"
+#include <stdbool.h>
+#include <stdint.h>
 
-```text
-GRUB_CMDLINE_LINUX_DEFAULT="quiet isolcpus=2,3 nohz_full=2,3 rcu_nocbs=2,3 \
-  irqaffinity=0,1 mitigations=off intel_pstate=disable processor.max_cstate=1 \
-  idle=poll"
-```
-
-옵션 해설:
-
-- `irqaffinity=0,1` — *모든 IRQ를 housekeeping 코어(0,1)에 보냄*. RT 코어로 IRQ가 못 들어오게.
-- `mitigations=off` — Spectre/Meltdown 완화 끄기 (보안 vs 결정성 trade-off, *isolated 시스템*에서만).
-- `intel_pstate=disable` — Intel P-state governor 비활성. 주파수 변동 방지.
-- `processor.max_cstate=1` — C1 이상의 deep sleep 금지. wakeup latency 0.
-- `idle=poll` — idle 시 *busy loop*. wakeup latency를 거의 0으로. 전력 비용 큼.
-
-`grub-mkconfig -o /boot/grub/grub.cfg` 후 재부팅합니다.
-
-RT 애플리케이션을 *cpu 2*에 pin:
-
-```bash
-sudo taskset -c 2 chrt -f 80 ./ec_master_app
-```
-
-또는 코드 안에서:
-
-```c
-#include <sched.h>
-#include <pthread.h>
-
-void pin_to_cpu(int cpu) {
-    cpu_set_t set;
-    CPU_ZERO(&set);
-    CPU_SET(cpu, &set);
-    sched_setaffinity(0, sizeof(set), &set);
-
-    struct sched_param param = { .sched_priority = 80 };
-    sched_setscheduler(0, SCHED_FIFO, &param);
-
-    // Lock memory
-    mlockall(MCL_CURRENT | MCL_FUTURE);
-}
-```
-
-`mlockall`이 *page fault*를 막습니다. 산업 RT에서는 *반드시* 호출합니다.
-
-## cyclictest로 측정
-
-isolation 후 측정:
-
-```bash
-# RT 코어 (cpu 2)에 200,000 사이클, 250µs 간격으로
-sudo taskset -c 2 cyclictest -p99 -t 1 -i 250 -n -D 1h
-```
-
-전형적 결과:
-
-```text
-T: 0 ( 5678) P:99 I:250 C:14400000 Min:      2 Act:    5 Avg:    4 Max:      18
-                                                                          ^^
-                                                                          μs
-```
-
-18µs max latency까지 떨어집니다. 250µs 사이클에 *충분*하고 100µs 사이클도 *마진 있게* 들어갑니다.
-
-장시간 측정이 중요합니다. *1시간 이상* 돌려야 *real-world worst case*가 보입니다. 짧게 돌리면 page fault·hardware error 같은 *드문 사건*을 놓칩니다.
-
-`hackbench`를 *백그라운드로 돌리며* 측정하면 *부하 중 worst case*를 봅니다.
-
-```bash
-# Stress in background
-hackbench -g 10 -l 10000 &
-
-# Measure on RT core
-sudo taskset -c 2 cyclictest -p99 -t 1 -i 250 -n -D 30m
-```
-
-이 조건에서 *Max가 50µs 이하*면 production-ready로 간주합니다.
-
-## NIC 튜닝 — Intel I210 / I225 + NXP
-
-NIC 자체의 jitter도 줄여야 합니다. 표준 NIC의 *default 설정*은 throughput 최적화이므로 *latency를 깨트립니다*.
-
-### IRQ affinity
-
-NIC IRQ를 *RT 코어가 아닌 housekeeping 코어*로 보냅니다.
-
-```bash
-# Find NIC IRQ
-$ cat /proc/interrupts | grep eth0
-  29:    1234567   IO-APIC   29-edge      eth0
-  30:        890   IO-APIC   30-edge      eth0-rx-0
-  31:        912   IO-APIC   31-edge      eth0-tx-0
-
-# Pin to cpu 0
-$ echo 1 | sudo tee /proc/irq/29/smp_affinity
-$ echo 1 | sudo tee /proc/irq/30/smp_affinity
-$ echo 1 | sudo tee /proc/irq/31/smp_affinity
-```
-
-또는 `irqbalance`를 *끄고* `tuna`로 영구 설정합니다.
-
-```bash
-sudo systemctl disable --now irqbalance
-sudo tuna -q eth0 -c 0 -m
-```
-
-### Offload 끄기
-
-generic-segmentation-offload, TCP-segmentation-offload 등은 *NIC가 큰 프레임을 쪼개는* 기능입니다. 결정성을 깨므로 끕니다.
-
-```bash
-sudo ethtool -K eth0 gso off tso off gro off lro off ufo off
-sudo ethtool -K eth0 rx-checksumming off tx-checksumming off
-sudo ip link set eth0 txqueuelen 0
-```
-
-### Ring size 줄이기
-
-NIC ring buffer가 크면 *프레임이 큐에서 대기*합니다. RT 트래픽은 *큐에 쌓이면 안 됩니다*.
-
-```bash
-sudo ethtool -G eth0 rx 64 tx 64
-```
-
-기본은 보통 256~512이고 *고처리량* 최적화입니다. RT에서는 *프레임이 즉시 송신*되어야 하므로 64까지 줄입니다.
-
-### Interrupt coalescing 끄기
-
-NIC가 *여러 패킷을 모아* IRQ를 한 번에 거는 *coalescing*은 latency를 만듭니다.
-
-```bash
-sudo ethtool -C eth0 rx-usecs 0 tx-usecs 0 rx-frames 1 tx-frames 1 \
-                    adaptive-rx off adaptive-tx off
-```
-
-`rx-usecs 0 / rx-frames 1`이 *프레임마다 즉시 IRQ*입니다.
-
-### Busy poll (선택)
-
-`SO_BUSY_POLL`이나 `napi_busy_read`로 NIC를 *busy-loop polling*하면 IRQ 자체를 없앨 수 있습니다. CPU 비용이 크지만 *jitter 최소*입니다.
-
-```c
-int busy_poll = 50; // µs
-setsockopt(fd, SOL_SOCKET, SO_BUSY_POLL, &busy_poll, sizeof(busy_poll));
-```
-
-EtherCAT 마스터 같은 *전용 thread*에 적합합니다.
-
-### Intel I210 / I225
-
-I210은 PTP timestamping + Qav AVB까지. *TSN(Qbv/Qbu)는 I225부터*입니다.
-
-I225는 *LaunchTime*이라는 *NIC 내장 송신 스케줄러*를 가집니다. 송신 시각을 *NIC에 미리 알리면* 그 시각에 정확히 송신합니다. tc-taprio의 hw offload가 이걸 활용합니다.
-
-NXP LS1021A·LS1028A는 *Cortex-A + 내장 TSN switch*입니다. *enetc·felix* 드라이버가 PTP·Qbv·Qbu를 노출합니다.
-
-```bash
-# LS1028A: 내장 스위치 포트 SWP0~SWP3
-$ ls /sys/class/net/
-eno0  eno1  enp0s0  swp0  swp1  swp2  swp3
-
-# Bridge로 노출
-$ ip link add name br0 type bridge
-$ ip link set swp0 master br0
-```
-
-`swp0~3`이 *완전한 TSN 포트*로 동작합니다.
-
-## EtherCAT IgH — Linux 마스터의 표준
-
-EtherCAT 마스터를 Linux로 구현하는 *de facto 표준*은 *IgH EtherLab Master*입니다. GPL이고 active maintenance입니다.
-
-```bash
-git clone https://gitlab.com/etherlab.org/ethercat.git
-cd ethercat
-./bootstrap
-./configure \
-    --prefix=/opt/etherlab \
-    --enable-generic \
-    --enable-igb \
-    --with-linux-dir=/lib/modules/$(uname -r)/build
-make -j && sudo make modules_install install
-sudo depmod
-```
-
-`/etc/ethercat.conf`:
-
-```text
-MASTER0_DEVICE="00:1B:21:AA:BB:CC"     # 마스터로 쓸 NIC의 MAC
-MASTER0_BACKUP=""                       # redundancy NIC (없으면 빈 문자열)
-DEVICE_MODULES="generic"                # 또는 "igb" (Intel I210/I225 전용)
-UTIL_DIR="/opt/etherlab"
-```
-
-`generic` 모듈은 *어떤 NIC에서도* 동작합니다. *추가 패치된 igb*는 더 빠른 send-receive turnaround를 제공하지만, 커널 버전마다 패치 적용 작업이 필요합니다.
-
-서비스 기동:
-
-```bash
-sudo systemctl enable --now ethercat
-sudo ethercat slaves
-```
-
-연결된 슬레이브 목록이 나옵니다.
-
-```text
-$ sudo ethercat slaves
-0  0:0  PREOP  +  EK1100 EtherCAT Coupler (2A E-Bus)
-1  0:1  PREOP  +  EL2008 8K. Dig. Ausgang 24V, 0.5A
-2  0:2  PREOP  +  EL1018 8K. Dig. Eingang 24V, 3ms
-```
-
-마스터 application은 *userspace에서* `ec_master_open` API로 cyclic process data를 주고받습니다.
-
-```c
-#include <ecrt.h>
-
-ec_master_t *master;
-ec_domain_t *domain;
-ec_slave_config_t *sc;
-
-int main(void) {
-    pin_to_cpu(2);
-
-    master = ecrt_request_master(0);
-    domain = ecrt_master_create_domain(master);
-
-    sc = ecrt_master_slave_config(master, 0, 1, 0x00000002, 0x07d83052);
-    // ... PDO mapping ...
-
-    ecrt_master_activate(master);
-
-    // Cyclic loop
-    struct timespec next;
-    clock_gettime(CLOCK_MONOTONIC, &next);
-    while (running) {
-        ecrt_master_receive(master);
-        ecrt_domain_process(domain);
-
-        // application logic, update PDOs
-
-        ecrt_domain_queue(domain);
-        ecrt_master_send(master);
-
-        next.tv_nsec += 1000000;  // 1 ms cycle
-        if (next.tv_nsec >= 1000000000) { next.tv_sec++; next.tv_nsec -= 1000000000; }
-        clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &next, NULL);
+bool next_deadline(uint64_t previous, uint64_t now, uint64_t period,
+                   uint64_t *next, uint64_t *skipped) {
+    if (!next || !skipped || next == skipped || period == 0 ||
+        now < previous || previous > UINT64_MAX - period) {
+        return false;
     }
+    uint64_t candidate = previous + period;
+    uint64_t count = 0;
+    if (now >= candidate) {
+        uint64_t quotient = (now - candidate) / period;
+        if (quotient == UINT64_MAX) return false;
+        count = quotient + 1;
+        if (count > (UINT64_MAX - candidate) / period) return false;
+        candidate += count * period;
+    }
+    *next = candidate;
+    *skipped = count;
+    return true;
 }
 ```
 
-`clock_nanosleep`을 *TIMER_ABSTIME*으로 호출하는 게 핵심입니다. 매 사이클이 *절대 시각*에 깨므로 *drift가 누적되지 않습니다*.
+시간 단위를 모두 ns로 두면 `previous=1000`, `period=250`, `now=1100`에서 다음 release는 1250이고 skipped는 0입니다. `now=1750`이면 1250·1500·1750을 건너뛰어 2000을 선택하고 skipped는 3입니다. 목표와 정확히 같을 때도 건너뛰는 예제 정책임을 명시합니다.
 
-## softPLC 생태계
+오류 시 출력 인자는 바뀌지 않습니다. 너무 늦어서 미래 값을 표현할 수 없으면 wrap하지 않고 실패합니다. 실제 구현에서는 monotonic clock의 단위 변환, 종료·재시작과 누락 처리까지 별도로 설계해야 합니다.
 
-같은 Linux + PREEMPT_RT 위에 *softPLC*가 올라가는 흐름이 커지고 있습니다.
+## NIC와 마스터 경로 확인
 
-| 제품 | 마스터 | 비고 |
-|------|-------|------|
-| **CODESYS Runtime** | EtherCAT, PROFINET, Modbus | IEC 61131-3 라이선스 |
-| **Bosch ctrlX AUTOMATION** | EtherCAT, OPC UA | Ubuntu 기반, snap 모듈 |
-| **B&R APROL** | POWERLINK | 공정 제어 SCADA + softPLC |
-| **Phoenix Contact PLCnext** | PROFINET | Linux ARM, C++/IEC 61131 |
-| **Beckhoff TwinCAT/BSD** | EtherCAT | FreeBSD 기반, RT는 자체 커널 |
+NIC 튜닝은 사용하는 경로에 맞춰야 합니다. 일반 socket/NAPI, raw Ethernet과 전용 driver는 같은 경로가 아닙니다. GSO/TSO는 주로 segmentation 경로와 관련되므로 모든 EtherCAT 프레임 지연의 공통 원인으로 단정하지 않습니다.
 
-ctrlX·PLCnext가 *오픈 ecosystem* 측면에서 가장 활발합니다. Docker 컨테이너로 제어 application을 배포하는 *IT-style 운영*이 가능해집니다.
+| 변경 후보 | 검증할 조건 |
+|---|---|
+| ring 크기 축소 | 지연 감소와 burst에서의 drop 증가를 함께 확인합니다. |
+| coalescing 조정 | driver 지원, 적응형 동작, IRQ 부하와 수신 지연을 확인합니다. |
+| IRQ affinity | 애플리케이션과 IRQ thread의 위치·우선순위·NUMA를 비교합니다. |
+| busy polling | 적용 socket·driver 경로와 CPU 비용을 확인합니다. IRQ 자체를 없앤다는 뜻은 아닙니다. |
+| launch-time·Qbv | NIC 기능, driver와 qdisc 모드를 구분합니다. 두 기능을 같은 이름으로 부르지 않습니다. |
 
-## 자주 하는 실수
+아래는 상태를 읽는 명령 예입니다. 실제 interface와 IRQ 번호를 확인한 뒤 해당 자료를 수집합니다. 특정 ring 크기 64, coalescing 0, txqueuelen 0을 보편적인 생산 설정으로 지정하지 않습니다.
 
-### "PREEMPT_RT를 켰는데 latency가 그대로"
-
-`CONFIG_PREEMPT_RT=y`만 켜고 *user-space에서 RT 우선순위를 안 준* 경우입니다. `chrt -f 80` 또는 `sched_setscheduler(SCHED_FIFO)`를 *반드시* 호출합니다. 기본 우선순위는 `SCHED_OTHER`(0)라 다른 일반 태스크와 같이 경쟁합니다.
-
-### "isolcpus를 했는데 RT 코어에 다른 프로세스가 보인다"
-
-`isolcpus`는 *스케줄러 default placement*만 막습니다. *명시적으로 affinity를 그 코어로 지정한* 프로세스는 들어옵니다. `systemd-cgroup`이나 `cgroupv2 cpuset`으로 *system slice 전체*를 housekeeping 코어로 묶는 게 더 확실합니다.
-
-### "EtherCAT 마스터가 cyclic 안에서 sleep 누락"
-
-`clock_nanosleep`이 `EINTR`로 깨면 signal로 인터럽트된 것입니다. `while (ret == EINTR)` 루프로 재시도하거나, RT 스레드에서 *signal mask*를 전부 막아 둡니다.
-
-```c
-sigset_t set;
-sigfillset(&set);
-pthread_sigmask(SIG_BLOCK, &set, NULL);
+```bash
+uname -r
+cat /proc/cmdline
+cat /proc/interrupts
+ethtool -i ethLAB
+ethtool -g ethLAB
+ethtool -c ethLAB
+ethtool -k ethLAB
 ```
 
-### "I225에 LaunchTime을 쓰는데 가끔 미스"
+## IgH EtherCAT: 설정 수락과 유효 IO
 
-`SO_TXTIME` socket option의 시계를 *CLOCK_TAI*로 잡았는지 확인합니다. CLOCK_REALTIME / CLOCK_MONOTONIC과 섞이면 *수십 µs 어긋남*이 누적됩니다. `ptp4l` + `phc2sys`가 *TAI*로 system 시계를 맞춰야 합니다.
+[IgH 1.6 API 문서](https://docs.etherlab.org/ethercat/1.6/doxygen/ecrt_8h.html)는 master 요청에 `ecrt_request_master()`를 제공합니다. 이를 존재하지 않는 `ec_master_open` API로 안내하지 않습니다. userspace 라이브러리·kernel module·driver와 커널의 호환 조건도 함께 확인합니다.
 
-### "cyclictest는 좋은데 실제 app은 jitter가 크다"
+| 단계 | 확인할 API·상태 |
+|---|---|
+| 구성 | master·domain·slave config 생성 결과와 PDO 등록 |
+| 활성화 | `ecrt_master_activate()` 결과와 process data 포인터 |
+| 수신 처리 | `ecrt_master_receive()`, `ecrt_domain_process()` |
+| 유효성 판단 | domain WKC와 slave/application 상태 |
+| 송신 | 출력 갱신, `ecrt_domain_queue()`, `ecrt_master_send()` |
+| 종료·오류 | 출력 정책과 master 자원 해제 |
 
-cyclictest가 안 측정하는 *application-specific* 원인이 있습니다.
+이 순서는 완성된 제어 프로그램이 아닙니다. 실제 identity·PDO map·상태 감시·반환값·DC 설정이 없는 루프를 복사해서 출력 장치를 구동하지 않습니다. `generic` driver나 특정 Intel driver 이름만으로 모든 NIC·kernel에서 지원된다고 가정하지 않습니다.
 
-- *Memory allocation* 중에 page fault — `mlockall` 후 *부팅 시 메모리를 미리 touch*합니다.
-- *I/O syscall* (`printf`, `fprintf`) 안에 sleep — RT thread에서 *printf 금지*. 별도 thread로 logging.
-- *Mutex contention* with non-RT thread — priority inheritance mutex만 사용.
-
-### "softPLC가 잘 돌다가 한 시간에 한 번 spike"
-
-거의 항상 *firmware/microcode update*나 *power management 이벤트*입니다. `dmesg`에서 그 시점을 확인합니다. *SMI(System Management Interrupt)*가 의심되면 BIOS에서 *SMI 출처들*(USB legacy emulation, power button polling 등)을 끕니다.
+실제 통신 시험에서는 wakeup 로그와 송수신 시각, WKC/status, slave 상태와 애플리케이션의 deadline miss를 같은 실행 조건으로 연결합니다. cyclictest 결과가 좋아도 실제 통신이 실패하면 남은 경로의 증거를 모읍니다. IRQ·메모리·네트워크·장치 지연을 한 숫자에 섞지 않는 것이 목적입니다.
 
 ## 정리
 
-- vanilla Linux의 worst-case latency는 *수 ms*입니다. *모든 단계*에서 결정성을 짜야 µs 단위로 들어옵니다.
-- *PREEMPT_RT*는 *Linux 6.12부터 mainline 통합*입니다. *Xenomai 4 / EVL*은 더 극단적 결정성용입니다.
-- *isolcpus + nohz_full + rcu_nocbs*가 함께 적용되어야 RT 코어가 *완전 격리*됩니다.
-- *IRQ affinity*를 housekeeping 코어로 보내고, *cpuidle·cpufreq*를 끄고, *mlockall*로 page fault를 막습니다.
-- *cyclictest*는 *1시간 이상 hackbench 부하 중*에 측정해야 의미가 있습니다. 50µs 이하면 production-ready입니다.
-- NIC 튜닝 — *gso/tso off, ring 64, coalescing 0, txqueuelen 0*. Intel I225는 *LaunchTime*으로 TSN 지원.
-- *IgH EtherCAT*이 Linux 마스터의 표준입니다. userspace에서 `clock_nanosleep(TIMER_ABSTIME)`이 cyclic의 핵심.
-- *softPLC* 생태계 — CODESYS·ctrlX·B&R APROL·Phoenix PLCnext가 모두 PREEMPT_RT 기반.
+- PREEMPT_RT 활성화와 전체 통신 deadline 검증은 별개입니다.
+- CPU·IRQ·메모리·전력·NIC 설정은 실제 실행 경로와 부하로 비교합니다.
+- cyclictest의 판과 옵션, 횟수·기간·단위를 일치시킵니다.
+- 측정 최대값과 보장 상한을 구분하고, 임의의 생산 합격 기준을 두지 않습니다.
+- 절대 시각 sleep과 별도로 overrun·종료·데이터 누락 정책을 설계합니다.
+- EtherCAT은 API 호출 성공뿐 아니라 유효 IO와 장치 상태도 확인합니다.
 
-다음 편이자 시리즈 마지막은 **Ch 12: 비교 분석 — 프로토콜 선택 가이드**입니다.
+다음 [Ch 12: 프로토콜 비교와 선택](/blog/embedded/protocols/industrial-ethernet/chapter12-comparison)에서 실제 선정에 필요한 요구와 증거를 묶습니다.
 
 ## 관련 항목
 
 - [Ch 5: EtherCAT Master 구현](/blog/embedded/protocols/industrial-ethernet/chapter05-ethercat-master)
-- [Ch 12: 비교 분석 — 프로토콜 선택 가이드](/blog/embedded/protocols/industrial-ethernet/chapter12-comparison)
-- [Practical RTOS Internals Part 5-07: PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)
-- [Modern Embedded Recipes Part 4-06: IRQ affinity tuning](/blog/embedded/modern-recipes/part7-13-irq-affinity)
-- [원문 — IgH EtherLab Master](https://gitlab.com/etherlab.org/ethercat)
-- [원문 — Linux PREEMPT_RT wiki](https://wiki.linuxfoundation.org/realtime/)
+- [Practical RTOS Internals: PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)
+- [Modern Embedded Recipes: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity)
+- [rt-tests v2.6 소스](https://git.kernel.org/pub/scm/utils/rt-tests/rt-tests.git/tree/?h=v2.6)

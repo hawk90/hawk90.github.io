@@ -22,24 +22,9 @@ topics: ["embedded", "embedded/protocols"]
 
 cycle time은 *제어 알고리즘이 한 번 도는 데 걸리는 시간*입니다. 보통 *제어 대상의 물리 시정수*가 정합니다.
 
-| 대상 | 물리 시정수 | 권장 cycle time |
-|------|------------|----------------|
-| 화학 공정 (탱크 온도) | 분 단위 | 100 ms ~ 1 s |
-| 컨베이어 모터 | 100 ms | 10~50 ms |
-| 일반 PLC I/O | 10 ms | 1~10 ms |
-| 서보 모터 위치 제어 | 1 ms | 250 μs ~ 1 ms |
-| 토크 전류 루프 | 100 μs | 31.25~125 μs |
-| 안전 (E-stop) | 즉시 | 1~10 ms (별도 채널) |
+cycle은 샘플링 주기·통신 주기·연산 완료 시간 중 무엇을 뜻하는지 먼저 정해야 합니다. 물리 시정수 하나를 Nyquist 주파수로 간주하거나, 그 1/10이라는 규칙에서 1/4 주기를 유도할 수는 없습니다. 제어 대역폭·안정성 여유·센서/구동기·연산 및 통신 지연을 함께 설계해야 합니다.
 
-cycle time을 *물리 시정수의 1/10 이하*로 잡는 것이 일반 원칙입니다. 시정수 1 ms인 서보를 250 μs cycle로 도는 이유가 여기 있습니다. 더 빠르게 돌면 *제어 성능은 그대로*인데 *망 부하만 늘어납니다*. 너무 느리게 돌면 *위상 지연*으로 발진이 일어납니다.
-
-시정수 1 ms인 서보 위치 제어 루프를 예로 들면 다음과 같습니다.
-
-| 기준 | 근거 | cycle time |
-|------|------|-----------|
-| Nyquist | 시정수 1 ms → 최소 샘플 | 500 μs |
-| 실용 안전 마진 | 시정수의 1/4 | 250 μs |
-| 표준 EtherCAT | DC 활용 | 125 μs로도 가능 |
+가상 통신 주기를 250 μs로 정했다면, 예를 들어 sample→계산→전송→출력의 각 worst-case budget과 margin의 합이 해당 deadline 안에 들어가는지 확인합니다. 이 숫자는 제어 성능이나 안전 응답 시간의 권고값이 아닙니다.
 
 ## Jitter — 평균이 아니라 분산
 
@@ -47,35 +32,26 @@ jitter는 *cycle 간 도착 시각의 편차*입니다. 평균 250 μs cycle인�
 
 제어 이론에서 jitter는 *시간 변동성*으로 작용합니다. 위치 제어 PID 입장에서 cycle 간격이 매번 다른 것은 *제어 주기가 흔들리는 것*과 같습니다. 결과는 *진동* 또는 *위치 오차 누적*입니다.
 
-```text
-jitter가 미치는 영향 (모션 컨트롤)
-  ±1 μs:    무시 가능 (EtherCAT DC, PROFINET IRT)
-  ±10 μs:   미세한 진동, 대부분 무해
-  ±100 μs:  표면 거칠기, 정밀 가공 불가
-  ±1 ms:    가시적 진동, 조작자가 체감
-  ±10 ms:   제어 발진, 안전 회로 작동
-```
+어느 jitter가 무해한지 또는 설비를 정지시켜야 하는지는 제어·안전 요구사항에서 정합니다. ns·μs 숫자 하나로 가공 품질이나 비상 정지를 일반화하지 않습니다.
 
-각 산업 표준의 *광고 문구*에 나오는 "1 μs jitter"는 *worst-case*를 의미합니다. p99.9 또는 그 이상의 백분위로 측정한 값입니다. 평균이 1 μs라는 뜻이 아닙니다.
+**관측 p99.9와 worst-case 보장은 다릅니다.** 백분위는 유한 표본의 통계이고, 상한 보장은 명세된 조건 안의 모든 경우를 다룹니다. Jitter도 예정 시각 대비 오차·연속 간격 편차·peak-to-peak 중 어떤 정의인지 명시해야 합니다.
 
 ## Jitter 예산 분해
 
 망의 전체 jitter는 여러 *원천*의 합입니다. 결정적 망의 설계는 각 원천에 *예산*을 배정하는 일입니다.
 
-| 원천 | 표준 Ethernet | EtherCAT (DC) | PROFINET IRT |
-|------|--------------|--------------|--------------|
-| 마스터 송신 jitter | OS scheduler 의존 | <1 μs (DC ref) | <1 μs (hw) |
-| 매체 전파 (100 m) | 500 ns | 500 ns | 500 ns |
-| Switch store-and-forward | 5~50 μs/hop | (cut-through) | (cut-through) |
-| Slave 처리 jitter | NIC 의존 (수 ms) | <100 ns (ASIC) | <1 μs (ASIC) |
-| 슬레이브 응답 합성 | 큐 의존 | n/a (in-flight) | TDMA 슬롯 |
-| **합계 (worst-case)** | **수 ms** | **<1 μs** | **<1 μs** |
+| 구분 | 확인할 값 |
+|---|---|
+| host release / scheduling | task가 예정 시각에서 얼마나 늦게 실행됐는지 |
+| 송수신 경로 | timestamp 기준점과 IRQ/queue·serialization 비용 |
+| 전파·device 처리 | 고정 지연과 그 변동을 구분 |
+| clock 동기 | clock offset·drift와 경로 비대칭 |
 
-핵심은 *마지막 행*입니다. 표준 Ethernet에서는 jitter 원천들이 *누적*되어 ms 단위가 됩니다. 결정적 망은 *각 원천을 0에 가깝게* 만듭니다. EtherCAT은 슬레이브를 *ASIC*으로 만들어 처리 jitter를 ns 단위로 줄이고, PROFINET IRT는 *시간 인식 스위치*로 큐 jitter를 없앱니다.
+100 m 전파 시간 같은 고정 지연을 jitter에 그대로 더하면 안 됩니다. EtherCAT DC가 맞추는 slave clock/event와 host의 frame 송신 지연도 별도로 관측해야 합니다.
 
 ## IEEE 1588 PTP — 어떻게 ns 정밀로 동기하나
 
-분산 시스템에서 시계 동기의 표준은 PTP(Precision Time Protocol)입니다. NTP가 ms 정밀이라면, PTP는 *ns 정밀*입니다. 같은 원리에 *하드웨어 타임스탬프*를 더한 결과입니다.
+분산 시스템에서 시계 동기의 표준은 PTP(Precision Time Protocol)입니다. [linuxptp 문서](https://www.linuxptp.org/documentation/ptp4l/)는 hardware·software timestamp 모드를 모두 지원합니다. PTP라는 이름이 ns 정확도를 보장하지 않으며 timestamp 기준점·경로 비대칭·oscillator·servo·profile에 따라 실제 오차가 달라집니다.
 
 PTP에는 네 가지 메시지가 있습니다.
 
@@ -88,64 +64,43 @@ PTP에는 네 가지 메시지가 있습니다.
 
 이 네 메시지로 *클럭 오프셋*과 *전파 지연*을 분리해 계산합니다.
 
-```text
-Master                          Slave
-  |                               |
-  | Sync (t1 in msg)              |
-  |------------------------------>| t2 (slave 측 수신 시각)
-  | Follow_Up (precise t1)        |
-  |------------------------------>|
-  |                               |
-  |                       Delay_Req
-  | t4 (master 측 수신)       <--| t3 (slave 측 송신)
-  | Delay_Resp (t4)              |
-  |------------------------------>|
+E2E two-step 교환에서 t1은 master 송신, t2는 slave 수신, t3는 slave 송신, t4는 master 수신 시각입니다. 같은 교환·단위로 정렬하고 correctionField와 clock 변화가 없다고 단순화하면 다음 식을 얻습니다.
 
-오프셋 = ((t2 - t1) - (t4 - t3)) / 2
-지연   = ((t2 - t1) + (t4 - t3)) / 2
+- offset(slave−master) = `((t2−t1)−(t4−t3))/2`
+- 평균 경로 지연 = `((t2−t1)+(t4−t3))/2`
+
+다음 Node.js 함수는 정수 ns timestamp의 반 ns까지 보존하도록 결과의 두 배를 BigInt로 반환합니다. 실제 PTP servo를 구현하지는 않습니다.
+
+```js title="ptp-four-timestamps.mjs"
+export function ptpExchange(t1, t2, t3, t4) {
+  if (![t1,t2,t3,t4].every(x => typeof x === "bigint" && x >= 0n) ||
+      t3 < t2 || t4 < t1) throw new RangeError("invalid exchange timestamps");
+  const forward = t2 - t1, reverse = t4 - t3;
+  if (forward + reverse < 0n) throw new RangeError("negative path delay");
+  return {offsetTimesTwoNs: forward-reverse, pathDelayTimesTwoNs: forward+reverse};
+}
 ```
 
-수식의 트릭은 *대칭 가정*입니다. master→slave 경로와 slave→master 경로의 지연이 *같다*고 가정하면, 두 식에서 오프셋과 지연을 *분리*할 수 있습니다. 비대칭이 큰 망(예: 다른 path를 거치는 경우)에서는 오차가 생깁니다.
+수식의 트릭은 *대칭 가정*입니다. master→slave 경로와 slave→master 경로의 지연이 *같다*고 가정하면, 두 식에서 오프셋과 지연을 *분리*할 수 있습니다. forward와 reverse 지연이 다르면 추정 offset에는 그 차이의 절반이 섞입니다. 예를 들어 경로 차이 1000 ns는 이 모델에서 offset 오차 500 ns입니다. 실제 PTP는 correctionField·timestamp 보정과 profile별 delay mechanism을 함께 적용합니다.
 
 ### 하드웨어 타임스탬프
 
-PTP의 ns 정밀은 *하드웨어 타임스탬프* 없이는 불가능합니다. OS 스택을 거치는 동안 jitter가 μs ~ ms로 쌓이기 때문입니다.
+Hardware timestamp는 OS 처리 지연이 timestamp에 섞이는 영향을 줄입니다. 목표 정확도를 만족하는지는 clock·경로·timestamp 기준점과 실측으로 확인해야 합니다.
 
 지원하는 NIC는 *MAC 레벨*에서 송수신 시각을 캡처합니다. Linux에서 확인합니다.
 
 ```bash
-# NIC의 PTP hardware timestamp 지원 여부
-$ ethtool -T eth0
-Time stamping parameters for eth0:
-Capabilities:
-        hardware-transmit     (SOF_TIMESTAMPING_TX_HARDWARE)
-        software-transmit
-        hardware-receive      (SOF_TIMESTAMPING_RX_HARDWARE)
-        software-receive
-        software-system-clock
-        hardware-raw-clock    (SOF_TIMESTAMPING_RAW_HARDWARE)
-PTP Hardware Clock: 0
-Hardware Transmit Timestamp Modes:
-        off                   (HWTSTAMP_TX_OFF)
-        on                    (HWTSTAMP_TX_ON)
+ethtool -T eth0
+ptp4l -v
 ```
 
-`PTP Hardware Clock: 0`이 보이면 `/dev/ptp0`이 있다는 뜻입니다. `linuxptp`의 `ptp4l`이 이 장치를 *MAC clock*으로 사용해 ns 동기를 수행합니다.
+이는 조회 예이며 이 환경에서는 NIC 출력이나 동기 수렴 로그를 수집하지 않았습니다. `ethtool -T`에서 TX/RX hardware 지원과 PHC index를 확인하고 실제 `/dev/ptpN`·권한·driver 지원을 함께 확인합니다.
 
-```bash
-# PTP slave로 동작 시작
-$ sudo ptp4l -i eth0 -s -m
+PHC index와 device node·권한은 실제 환경에서 함께 확인합니다. PHC는 NIC 등의 hardware clock이며 timestamp 위치가 항상 MAC 한 지점으로 고정되는 것은 아닙니다.
 
-ptp4l[12.345]: selected /dev/ptp0 as PTP clock
-ptp4l[12.456]: port 1: INITIALIZING to LISTENING on INIT_COMPLETE
-ptp4l[13.123]: port 1: new foreign master 001122.fffe.334455-1
-ptp4l[16.789]: selected best master clock 001122.fffe.334455
-ptp4l[17.890]: master offset    -823 s2 freq    -12345 path delay     1234
-ptp4l[18.890]: master offset      45 s2 freq    -12300 path delay     1234
-ptp4l[19.890]: master offset     -12 s2 freq    -12290 path delay     1234
-```
+[ptp4l 문서](https://www.linuxptp.org/documentation/ptp4l/)의 `-H`는 hardware timestamp, `-S`는 software timestamp, `-s`는 clientOnly, `-m`은 표준출력 로그입니다. 실행하면 PHC 또는 시스템 clock을 조정하므로, 사용 중인 clock 관리 daemon·profile·domain·transport를 정한 시험 환경에서 구성해야 합니다. 이 글은 해당 조정을 실행하지 않습니다.
 
-`master offset`이 *수렴된 동기 오차*입니다. 단위는 ns. 100 ns 안쪽으로 들어가면 정상입니다.
+offset 로그는 servo가 추정한 값이며 외부 기준으로 잰 절대 오차와 구별해야 합니다. 특정 100 ns 값만으로 정상 여부를 정하지 않고 요구사항·분포·holdover·수집 조건을 확인합니다.
 
 ### Boundary Clock vs Transparent Clock
 
@@ -153,26 +108,18 @@ ptp4l[19.890]: master offset     -12 s2 freq    -12290 path delay     1234
 
 | 모델 | 동작 | 정확도 |
 |------|------|--------|
-| **Boundary Clock** | 스위치 자체가 PTP slave + master로 동작 | <100 ns/hop |
-| **Transparent Clock** | 패킷 통과 시간을 *correctionField*에 누적 | <30 ns/hop |
+| **Boundary Clock** | 스위치 자체가 PTP slave + master로 동작 | 제품·profile·구성별 검증 |
+| **Transparent Clock** | 패킷 통과 시간을 *correctionField*에 누적 | 제품·profile·구성별 검증 |
 
-산업용 스위치는 Transparent Clock을 표준 지원합니다. 일반 IT 스위치는 PTP를 *모르는* 경우가 많아 정확도가 떨어집니다. 산업용 망에서는 *PTP-aware 스위치*가 필수입니다.
+Industrial switch라는 이름만으로 BC/TC 지원을 가정하지 않습니다. 제품의 profile·timestamp·보정 기능을 확인해야 합니다. PTP-aware 기능의 필요 여부는 topology·부하·허용 오차와 profile로 결정합니다.
 
 ## EtherCAT Distributed Clock — PTP의 변형
 
 EtherCAT은 PTP를 그대로 쓰지 않습니다. *Distributed Clock(DC)*이라는 자체 방식을 씁니다. 원리는 비슷하지만 *마스터가 아니라 첫 슬레이브가 reference clock*이라는 점이 다릅니다.
 
-EtherCAT DC 동기 절차는 다음과 같습니다.
+DC는 IEEE 1588 PTP를 그대로 운반하는 방식이 아닙니다. [SOEM v1.4.0 `ecx_configdc()`](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/soem/ethercatdc.c)는 BWR로 port 수신 시간을 latch한 뒤, 각 DC slave를 FPRD로 읽고 topology를 따라 delay를 계산하며 offset·delay register를 FPWR로 설정합니다. 첫 DC-capable slave가 reference로 연결됩니다. BRD 한 번으로 각 slave의 개별 시간을 수집하는 절차가 아닙니다.
 
-1. 마스터가 BRD(0x900) 명령으로 모든 슬레이브에 *현재 시각*을 broadcast 읽기 합니다.
-2. 첫 번째 DC-capable 슬레이브의 시각을 reference로 채택합니다.
-3. 각 슬레이브의 offset을 `reference - local`로 구합니다.
-4. 마스터가 ARMW(Auto-increment + Read-Multiple-Write)로 offset을 분배합니다.
-5. 슬레이브 ASIC이 그 offset만큼 자신의 clock을 자동 조정합니다.
-
-결과는 sub-μs 수준입니다. 64축 모터가 모두 *동일한 절대 시각*에 다음 위치로 움직입니다. 1번 모터가 12.5 μs 먼저 움직이고 64번이 늦게 움직이는 일이 없습니다.
-
-DC가 PTP와 비교해 갖는 강점은 *마스터의 OS jitter에 둔감*하다는 점입니다. 마스터가 보낸 *프레임 자체의 도착 시각*은 흔들려도, 슬레이브들 *사이*의 동기는 ASIC이 유지합니다. PTP는 마스터 jitter가 전체 slave에 *전파*되지만, DC는 *슬레이브 간 동기*만 보장하는 대신 그것을 *완벽하게* 보장합니다.
+주기 통신의 [ethercatmain.c](https://github.com/OpenEtherCATsociety/SOEM/blob/abbf0d42e38d6cfbaa4c1e9e8e07ace651c386fd/soem/ethercatmain.c)는 reference의 system time을 읽고 전파하는 FRMW datagram을 붙입니다. `ec_DCtime`은 reference system time의 관측값이며 slave 간 동기 오차 그 자체가 아닙니다. SYNC0 이벤트·각 장치 offset·외부 계측을 함께 보아야 실제 동기 오차를 검증할 수 있습니다. DC도 deadline을 넘긴 process data를 제때 도착시켜 주지는 않습니다.
 
 ## TDMA — 시간 슬롯 분할
 
@@ -186,44 +133,42 @@ TDMA의 장점은 *결정성이 명시적*이라는 점입니다. 어느 시각�
 
 ## 동기 방식 비교
 
-| 표준 | 동기 방식 | 정확도 | reference |
-|------|----------|--------|-----------|
-| 표준 NTP | software polling | 1~10 ms | 외부 NTP server |
-| 표준 PTP | hw timestamp | <100 ns | grandmaster |
-| EtherCAT DC | ASIC + ARMW | <100 ns | 첫 DC slave |
-| PROFINET IRT | hw schedule | <1 μs | IRT controller |
-| TSN gPTP | hw + 802.1AS | <100 ns | grandmaster |
+| 메커니즘 | 구별할 점 |
+|---|---|
+| IEEE 1588 PTP | profile·E2E/P2P·timestamp 모드·servo |
+| EtherCAT DC | ESC register와 reference clock·SYNC 이벤트 |
+| IEEE 802.1AS | 해당 timing profile과 bridge 지원 |
 
-PTP가 가장 *일반 표준*이고, EtherCAT DC와 TSN gPTP가 그 *변형/계승*입니다. PROFINET IRT는 다른 노선을 따라가는데, 최근 TSN과 통합되는 흐름입니다.
+동기 표준의 이름만으로 같은 정확도나 clock domain을 가정하지 않습니다.
 
 ## 자주 하는 실수
 
-### "PREEMPT_RT만 켜면 1 μs jitter다"
+### "PREEMPT_RT와 하드웨어 timestamp가 있으면 정확도가 보장된다"
 
-호스트 OS jitter는 줄지만, *NIC 인터럽트 → 커널 스택 → 사용자 코드* 경로의 jitter는 여전히 수십 μs입니다. ns급 동기는 *NIC 하드웨어 타임스탬프*가 있어야 가능합니다. PREEMPT_RT + 하드웨어 PTP + IRQ affinity 셋이 모두 필요합니다.
+두 기능은 host scheduling과 timestamp 변동을 줄이는 서로 다른 수단입니다. Clock domain·profile·경로 비대칭·servo와 실제 event 시점을 별도로 검증해야 합니다. 사용 중인 망을 측정했다는 기록 없이 ns 정확도를 제시하면 안 됩니다.
 
-### "PTP는 NTP의 빠른 버전이다"
+### "PTP는 하드웨어이고 NTP는 소프트웨어다"
 
-원리는 닮았지만, NTP는 *소프트웨어*이고 PTP는 *하드웨어*입니다. NTP의 정밀도 한계는 OS 스택의 jitter입니다. PTP는 MAC 레벨에서 타임스탬프를 캡처하므로 이 한계를 우회합니다. 같은 1 ms 망에서 NTP는 ms 정밀, PTP는 ns 정밀입니다.
+linuxptp는 software timestamp도 지원합니다. PTP 메시지를 사용한다는 것과 NIC hardware timestamp를 사용한다는 것은 다른 조건입니다. NTP/PTP라는 이름만으로 지연·정확도를 고정하지 않습니다.
 
-### "스위치가 끼면 PTP 정확도가 절반이다"
+### "스위치가 끼면 오차는 항상 일정 배수로 커진다"
 
-PTP-aware 스위치(Boundary 또는 Transparent Clock)면 거의 손실 없습니다. *일반 IT 스위치*에 PTP를 흘리면 스위치 큐 jitter가 그대로 오차로 들어옵니다. 산업용 망에서 *general purpose 스위치*는 금기입니다.
+스위치의 BC/TC 기능·queue 부하·경로 대칭과 해당 profile의 요구조건을 확인해야 합니다. 일반 switch도 허용 오차 안에서 작동하는지 측정할 수 있으며, BC/TC라는 이유만으로 손실이 0이라고 가정하지 않습니다.
 
-### "Jitter 사양이 ±1 μs면 항상 1 μs 이내다"
+### "관측 p99.9가 1 μs면 항상 1 μs 이내다"
 
-벤더 사양은 *전형적인 worst-case*입니다. 망 부하, 토폴로지, 슬레이브 수에 따라 더 나빠질 수 있습니다. *실제 측정*이 필수입니다. EtherCAT은 `ec_dcsync0` 호출 후 `ec_DCtime`을 로깅하면 측정할 수 있습니다.
+표본 백분위는 보장 상한이 아닙니다. `ec_DCtime`도 reference clock 값이므로 slave 간 오차를 직접 나타내지 않습니다. 요구조건과 외부 계측을 포함한 검증 범위를 명시해야 합니다.
 
 ## 정리
 
-- cycle time은 *물리 시정수의 1/10 이하*가 일반 원칙입니다.
-- jitter는 *평균이 아니라 worst-case*로 명세됩니다. p99.9 이상의 백분위입니다.
+- cycle·deadline·연산 시간의 정의를 구분하고 제어·통신 budget을 함께 설계합니다.
+- 관측 백분위·관측 최대·보장 상한을 구별하고 jitter 정의를 명시합니다.
 - 망 jitter는 *마스터 송신, 매체 전파, switch 큐, slave 처리* 네 원천의 합입니다.
 - IEEE 1588 PTP는 *하드웨어 타임스탬프*로 sub-μs 동기를 달성합니다. Sync·Follow_Up·Delay_Req·Delay_Resp 네 메시지를 씁니다.
-- EtherCAT DC는 *첫 슬레이브가 reference*인 변형으로, 마스터 OS jitter에 둔감합니다.
+- SOEM v1.4.0의 DC 설정은 첫 DC-capable slave를 reference로 사용하며, PTP와 다른 register·datagram 흐름입니다.
 - TDMA(POWERLINK·SERCOS III)는 *시간 슬롯*으로 hard 트래픽과 best-effort를 분리합니다.
-- 산업용 망에는 *PTP-aware 스위치*가 필수입니다.
-- ns 정밀 동기는 *PREEMPT_RT + 하드웨어 PTP + IRQ affinity* 셋이 모두 갖춰져야 합니다.
+- BC/TC 기능의 필요성과 정확도는 profile·topology·허용 오차를 기준으로 확인합니다.
+- PTP 지원·하드웨어 timestamp·PREEMPT_RT 중 어느 하나도 동기 정확도나 deadline을 단독으로 보장하지 않습니다.
 
 다음 편은 **Ch 3: EtherCAT 아키텍처 — Processing on the Fly**입니다. 슬레이브가 어떻게 프레임을 *통과시키면서* 데이터를 읽고 쓰는지, FMMU와 Sync Manager가 무엇인지 풀어봅니다.
 
@@ -232,6 +177,6 @@ PTP-aware 스위치(Boundary 또는 Transparent Clock)면 거의 손실 없습�
 - [Ch 1: 산업용 이더넷 개요](/blog/embedded/protocols/industrial-ethernet/chapter01-overview)
 - [Ch 3: EtherCAT 아키텍처 — Processing on the Fly](/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture)
 - [Practical RTOS Internals Part 1.4: Preemption](/blog/embedded/rtos/practical-internals/part1-04-preemption)
-- [Modern Embedded Recipes Part 4.6: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity) — PTP 패킷 처리를 RT core로 고정
+- [Modern Embedded Recipes: IRQ affinity](/blog/embedded/modern-recipes/part7-13-irq-affinity) — PTP 패킷 처리를 RT core로 고정
 - [원문 — IEEE 1588-2019 PTP](https://standards.ieee.org/standard/1588-2019.html)
 - [원문 — linuxptp project](https://linuxptp.sourceforge.net/)
