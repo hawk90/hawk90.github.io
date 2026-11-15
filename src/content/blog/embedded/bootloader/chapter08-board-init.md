@@ -103,19 +103,53 @@ ARM64에서 `board_init_f()`가 돌아오면 `_main`(`arch/arm/lib/crt0_64.S`)�
 
 그래서 U-Boot 안에서 실행되는 코드(독자적인 assembly, 외부 라이브러리 포함)가 이 register를 덮어쓰면 `gd->` 접근이 엉뚱한 메모리를 읽습니다. relocation 전후로 이상하게 멈추는 보드에서 먼저 의심할 곳입니다.
 
-## 확인하는 방법
+## 확인하는 방법 — QEMU에서 실제로 본 `bdinfo`
 
-relocation 결과는 U-Boot shell에서 `bdinfo`로 볼 수 있습니다. v2024.04 `cmd/bdinfo.c`는 `relocaddr`와 `reloc off` 줄에 `gd->relocaddr`와 `gd->reloc_off`를 그대로 출력합니다. 아래는 출력 형식만 보인 것으로, 값은 보드와 구성마다 다르므로 비워 두었습니다.
+relocation 결과는 U-Boot shell의 `bdinfo`로 확인합니다. v2024.04 `cmd/bdinfo.c`는 `relocaddr`와 `reloc off` 줄에 `gd->relocaddr`와 `gd->reloc_off`를 그대로 찍고, ARM은 `arch/arm/lib/bdinfo.c`가 `TLB addr`와 `Early malloc usage`를 더 보여 줍니다.
+
+아래는 U-Boot v2024.04를 `qemu_arm64_defconfig`로 빌드해(`aarch64-elf-gcc` 16.2.0) QEMU 11.1.3의 `virt` 머신(`-cpu cortex-a57 -m 1G`)에서 실행한 출력입니다. 주소는 이 환경의 값이고, 실제 보드에서는 RAM 위치와 예약 영역이 다릅니다.
+
+```bash
+qemu-system-aarch64 -machine virt -cpu cortex-a57 -m 1G -nographic -bios u-boot.bin
+```
 
 ```text
 => bdinfo
+boot_params = 0x0000000000000000
+DRAM bank   = 0x0000000000000000
+-> start    = 0x0000000040000000
+-> size     = 0x0000000040000000
 ...
-relocaddr   = 0x<gd->relocaddr>
-reloc off   = 0x<gd->reloc_off>
+relocaddr   = 0x000000007f6d7000
+reloc off   = 0x000000007f6d7000
+Build       = 64-bit
 ...
+fdt_blob    = 0x000000007e596d90
+new_fdt     = 0x000000007e596d90
+...
+TLB addr    = 0x000000007ffe0000
+irq_sp      = 0x000000007e596d80
+sp start    = 0x000000007e596d80
+Early malloc usage: 540 / 2000
 ```
 
-`relocaddr`가 RAM 끝에서 이미지 크기만큼 떨어진 값보다 훨씬 아래에 있다면, 앞서 본 `reserve_video`·`reserve_trace` 같은 영역이 위쪽을 먼저 차지한 것입니다. relocation 뒤 코드에 breakpoint를 걸 때는 `System.map`의 링크 주소에 `reloc off`를 더한 주소를 씁니다.
+RAM은 `0x40000000`에서 1 GiB이므로 꼭대기는 `0x80000000`입니다. 앞에서 본 예약 순서대로 위에서부터 빼 보면 `relocaddr`가 정확히 맞아떨어집니다.
+
+| 단계 | 크기 | 결과 주소 | 근거 |
+| --- | --- | --- | --- |
+| RAM 꼭대기 | — | `0x80000000` | `start + size` |
+| `arch_reserve_mmu` (MMU table) | `0x20000` (128 KiB) | `0x7ffe0000` | `TLB addr` 줄 |
+| `reserve_video` (framebuffer) | `0x800000` (8 MiB) | `0x7f7e0000` | `.config`의 `CONFIG_VIDEO_PCI_DEFAULT_FB_SIZE=0x800000` |
+| `reserve_uboot` (이미지) | `0x109000` | `0x7f6d7000` | `__bss_end`가 `0x108c30`, 4 KiB 올림 |
+| `reserve_malloc` 이하 | `0x1000000` + 약 1.25 MiB | `0x7e596d80` | `CONFIG_SYS_MALLOC_LEN=0x1000000`, `sp start` 줄 |
+
+이 출력에서 읽을 수 있는 것이 세 가지 있습니다.
+
+- `relocaddr`가 RAM 끝에서 이미지 크기(약 1 MiB)만큼이 아니라 9 MiB 넘게 아래에 있습니다. 위쪽을 framebuffer와 MMU table이 먼저 차지했기 때문입니다. 화면 출력이 없는 보드에서 `CONFIG_VIDEO`를 끄면 이 8 MiB가 그대로 올라갑니다.
+- `reloc off`가 `relocaddr`와 같습니다. 이 구성은 `CONFIG_TEXT_BASE=0x00000000`이라 `__image_copy_start`가 0이고, ARM의 `reloc_off = relocaddr - __image_copy_start`가 `relocaddr` 자체가 됩니다. 그래서 이 환경에서는 `u-boot.map`의 링크 주소에 `0x7f6d7000`을 더하면 relocation 뒤 실행 주소가 됩니다.
+- `Early malloc usage: 540 / 2000`은 16진수입니다(`printf("%lx / %x")`). pre-relocation heap `CONFIG_SYS_MALLOC_F_LEN=0x2000`(8 KiB) 중 `0x540`(1,344 byte)을 썼다는 뜻이고, driver를 더 붙여서 이 값이 한도에 가까워지면 앞서 말한 "alloc space exhausted"가 납니다.
+
+같은 빌드에서 `bootstage report`는 `Unknown command`로 끝났습니다. 이 빌드의 `.config`에는 `CONFIG_BOOTSTAGE`가 꺼져 있고, `bootstage` 명령(`CONFIG_CMD_BOOTSTAGE`)은 이 옵션에 의존하기 때문입니다. 단계별 시간을 보려면 두 옵션을 켜고 다시 빌드해야 합니다.
 
 ## 정리
 
@@ -123,6 +157,7 @@ reloc off   = 0x<gd->reloc_off>
 - `init_sequence_f`는 console·DRAM 준비 뒤 RAM 꼭대기부터 영역을 예약하고, `reserve_uboot`가 정한 주소가 relocation 목적지입니다.
 - 예약 순서는 video·trace → U-Boot 이미지 → malloc·bd·GD·FDT·stack입니다(v2024.04).
 - ARM은 `-pie` fixup 표로 복사된 이미지의 주소를 고치고, `gd->reloc_off`가 그 이동 거리입니다.
+- QEMU `virt`(1 GiB)에서는 MMU table 128 KiB와 framebuffer 8 MiB가 먼저 예약되어 `relocaddr`가 `0x7f6d7000`이 됩니다.
 - `board_init_r()`는 `GD_FLG_RELOC`를 세우고 정식 heap·driver model을 다시 초기화한 뒤 `main_loop`로 갑니다.
 - pre-relocation device는 `bootph-all` 또는 `DM_FLAG_PRE_RELOC`가 있어야 bind되고, heap은 `CONFIG_SYS_MALLOC_F_LEN`으로 제한됩니다.
 - GD 포인터는 ARM64 `x18`, ARM32 `r9`에 있습니다(`CONFIG_ARM64`로 구분).
