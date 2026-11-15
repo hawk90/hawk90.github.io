@@ -2,7 +2,7 @@
 title: "CXL.mem 프로토콜 분해 — 왕복 횟수가 만드는 지연, 링크가 만드는 대역폭"
 slug: "embedded/hardware/hbm/chapter10-cxl-mem-protocol"
 date: 2026-06-15T09:02:00
-description: "Ch 9의 지연·대역폭 수치가 왜 그렇게 나오는지 — 왕복 횟수로 본 지연 예산, 링크에 묶인 대역폭, credit 고갈이 만드는 throughput 절벽, interleave granularity의 유불리."
+description: "CXL 1.1의 접근 흐름과 연구의 측정 범위를 구분하고, 동시 요청량과 interleave 배치를 계산합니다."
 series: "HBM·GDDR 심화"
 seriesOrder: 10
 tags: [cxl, cxl-mem, hdm-decoder, cache-coherency]
@@ -20,7 +20,7 @@ M2S/S2M 채널 구성, HDM Decoder 레지스터, BISnp 상태 전이, flit 포�
 
 ## 지연 예산 — load 한 번에 무엇이 붙는가
 
-CPU가 CXL 영역에 `mov rax, [addr]` 한 줄을 던지면, local DDR 접근에는 없던 단계가 앞뒤로 붙습니다.
+CPU의 load가 cache miss로 CXL 장치까지 진행하면, local DDR 접근에는 없던 단계가 앞뒤로 붙습니다.
 
 | 단계 | DDR 접근과의 차이 |
 |------|------------------|
@@ -30,7 +30,7 @@ CPU가 CXL 영역에 `mov rax, [addr]` 한 줄을 던지면, local DDR 접근에
 | 디바이스 측 컨트롤러 → DRAM read | 디바이스 안의 DRAM 접근 |
 | 응답이 링크를 지나 host로 | 신규 |
 
-CXL이 local DDR보다 느린 이유는 *링크를 한 번 왕복*하고 *양쪽 끝에서 프로토콜 계층과 컨트롤러를 통과*하기 때문입니다. 그 비용은 *컨트롤러 설계*에 크게 좌우됩니다. Intel Xeon 6430 서버에서 실제 CXL 메모리 디바이스 3종을 잰 연구(Sun et al., MICRO 2023)에서는 load 지연이 *원격 소켓 DDR5보다 35% 긴 것부터 약 3배까지* 디바이스마다 크게 달랐습니다.
+CXL이 local DDR보다 느린 이유는 *링크를 한 번 왕복*하고 *양쪽 끝에서 프로토콜 계층과 컨트롤러를 통과*하기 때문입니다. 그 비용은 *컨트롤러 설계*에 크게 좌우됩니다. [Sun 등의 MICRO 2023 논문](https://tianyin.github.io/pub/cxl-mem.pdf)의 Xeon 6430·Linux v6.2 기준 3종 장치 실험에서는 load 지연이 *원격 소켓 DDR5보다 35% 긴 것부터 약 3배까지* 디바이스마다 크게 달랐습니다.
 
 경로에 switch가 끼면 *통과 지점*이 늘어납니다.
 
@@ -44,7 +44,7 @@ CXL이 local DDR보다 느린 이유는 *링크를 한 번 왕복*하고 *양쪽
 
 ## 왕복 한 번으로 끝나는 것
 
-CXL 1.1 규격의 CXL.mem 흐름을 보면 기본 접근은 모두 *요청 하나, 응답 하나*입니다.
+[CXL 1.1 규격](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-1.1-Specification.pdf) §3.3의 기본 transaction 예입니다. CPU store 명령 하나와 wire transaction 하나가 일대일로 대응하거나 모든 접근이 항상 같은 latency라는 뜻은 아닙니다. 캐시·write combining·ordering·snoop·backpressure가 추가로 관여합니다.
 
 | 접근 | host → 디바이스 | 디바이스 → host |
 |------|----------------|----------------|
@@ -52,7 +52,7 @@ CXL 1.1 규격의 CXL.mem 흐름을 보면 기본 접근은 모두 *요청 하�
 | Write (store) | `MemWr` + 데이터 | `Cmp` (완료, 데이터 없음) |
 | Partial write (64 B 미만) | `MemWrPtl` + 데이터 + Byte Enable(64 bit) | `Cmp` |
 
-여기서 자주 뒤집히는 직관이 하나 있습니다. **write가 read보다 비쌀 것 같지만, 왕복 횟수는 같습니다.** 데이터가 명령과 함께 나가고 host는 완료 응답 `Cmp`만 기다리면 됩니다. 부분 쓰기도 Byte Enable을 실어 보내 디바이스가 병합하므로, host가 먼저 읽어 오는 *read-modify-write 왕복*이 링크에 붙지 않습니다.
+여기서 자주 뒤집히는 직관이 하나 있습니다. 기본 transaction 도식에서 요청·완료 경로의 수를 비교할 수 있습니다. **이 사실만으로 read/write latency나 비용이 같다고 결론낼 수는 없습니다.** 데이터가 명령과 함께 나가고 장치 측 완료는 `Cmp`로 통지됩니다. CPU가 store 명령을 retire하는 시점·다른 agent에 보이는 시점·persistent media의 내구성 완료와 같은 의미는 아닙니다. 부분 쓰기도 Byte Enable을 실어 보내 디바이스가 병합하므로, host가 먼저 읽어 오는 *read-modify-write 왕복*이 링크에 붙지 않습니다.
 
 ## bias — 디바이스도 자기 메모리를 쓸 때
 
@@ -63,7 +63,7 @@ Type 2 가속기처럼 *디바이스도 자기 메모리를 캐시*하는 경우
 | Host Bias | 작업을 넣을 때, 결과를 읽을 때 | host 접근이 빠릅니다. 디바이스가 접근하려면 host를 거쳐야 합니다 |
 | Device Bias | 디바이스가 작업을 실행하는 동안 | 디바이스가 host 일관성 엔진을 거치지 않고 접근합니다. host도 접근할 수 있지만 성능이 떨어집니다 |
 
-Type 2 디바이스는 bias를 *page 단위*(예: 4 KB당 1 bit)로 Bias Table에 기록하고, *Transition Agent*가 host 캐시를 정리하며 bias를 바꿉니다. LLM inference처럼 *weight 적재 → 연산 → 결과 회수*로 phase가 뚜렷한 작업이 이 모델에 맞습니다. phase가 잘게 쪼개지면 전환 비용이 이득을 먹습니다. 전환 비용의 구체적인 크기는 TBD입니다.
+이 절은 CXL 1.1의 선택적 bias 모델입니다. §2.2.1.3은 별도 bias 관리를 구현하지 않고 전체가 Host Bias로 동작하는 경우도 명시합니다. bias를 구현하는 디바이스는 *page 단위*(예: 4 KB당 1 bit)로 Bias Table에 기록하고, *Transition Agent*가 host 캐시를 정리하며 bias를 바꿉니다. LLM inference처럼 *weight 적재 → 연산 → 결과 회수*로 phase가 뚜렷한 작업이 이 모델에 맞습니다. phase가 잘게 쪼개지면 전환 비용이 이득을 먹습니다. 전환 비용의 구체적인 크기는 TBD입니다.
 
 > **메모** — bias 전환의 상태 기계와 BISnp 메시지 자체의 동작은 [CXL Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)과 [CXL Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)에서 다룹니다.
 
@@ -79,34 +79,40 @@ Type 2 디바이스는 bias를 *page 단위*(예: 4 KB당 1 bit)로 Bias Table�
 
 레인을 두 배로 늘리거나 세대를 올리면 원시 전송률이 두 배가 됩니다. 하지만 *load 한 번의 지연*은 그만큼 줄지 않습니다. 64 B 한 줄은 작아서 *직렬화 시간*이 지연 예산의 큰 몫이 아니고, 예산을 지배하는 *양쪽 끝의 프로토콜 계층과 컨트롤러 통과*는 레인 수와 무관하기 때문입니다.
 
-| 확장하면 좋아지는 것 | 확장해도 그대로인 것 |
+| 확장 목표 | 자동으로 비례 개선되지 않는 것 |
 |---------------------|---------------------|
 | 총 처리량 (레인·세대·디바이스 수) | load 한 번의 지연 |
 | 용량 (카드 추가·pooling) | dependent load 체인의 진행 속도 |
 
 Ch 9에서 *처리량이 목적인 워크로드*는 잘 맞고 *지연에 민감한 tight loop*는 안 맞는다고 정리했던 근거가 이것입니다.
 
-실측할 때도 두 성질은 *다른 벤치마크*로 재야 합니다. 지연은 다음 주소가 이전 read 결과에 의존하는 pointer chase로, 대역폭은 의존이 없는 순차 스트리밍으로 잽니다. 위 연구도 지연은 pointer chase(Intel MLC)로 쟀습니다.
+실측할 때도 두 성질은 *다른 벤치마크*로 재야 합니다. 지연은 다음 주소가 이전 read 결과에 의존하는 pointer chase로, 대역폭은 의존이 없는 순차 스트리밍으로 잽니다. 위 연구의 도구·cache 상태·SNC·prefetch 조건은 논문의 방법 절을 함께 확인해야 합니다. 아래 함수는 메모리 접근 형태를 보여 주는 **host 계산 예제**이며 시간 측정기나 CXL 벤치마크가 아닙니다.
 
-```c
-// 지연 측정 — 다음 접근이 앞 결과에 의존하므로 왕복이 직렬화된다
-uint64_t ChaseLatency(const size_t* ring, size_t steps) {
+```c title="cxl-access-shapes.c"
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+bool chase_index(const size_t *ring, size_t n, size_t steps, size_t *out) {
+    if (!ring || !out || n == 0) return false;
     size_t idx = 0;
     for (size_t i = 0; i < steps; ++i) {
-        idx = ring[idx];          // 이전 load가 끝나야 다음 주소가 정해진다
+        size_t next = ring[idx];
+        if (next >= n) return false;
+        idx = next;
     }
-    return idx;
+    *out = idx;
+    return true;
 }
-
-// 대역폭 측정 — 의존이 없어 여러 요청이 동시에 링크 위에 떠 있다
-uint64_t StreamSum(const uint64_t* buf, size_t n) {
-    uint64_t acc = 0;
-    for (size_t i = 0; i < n; ++i) {
-        acc += buf[i];            // 주소가 미리 정해져 있어 병렬 issue 가능
-    }
-    return acc;
+bool stream_sum(const uint64_t *buf, size_t n, uint64_t *out) {
+    if (!out || (!buf && n != 0)) return false;
+    uint64_t sum = 0;
+    for (size_t i = 0; i < n; ++i) sum += buf[i];
+    *out = sum; // uint64_t addition is modulo 2^64
+    return true;
 }
 ```
+
+배열은 호출자가 n개 이상의 유효 원소로 제공해야 합니다. 실제 벤치마크에서는 반환값을 소비해 최적화 제거를 막고, 주소 배치·warmup·cache 크기·CPU affinity·NUMA·timer 비용을 통제해야 합니다.
 
 둘 중 하나만 재고 "CXL은 느리다 / 쓸 만하다"를 결론내는 것이 흔한 실수입니다.
 
@@ -114,9 +120,9 @@ uint64_t StreamSum(const uint64_t* buf, size_t n) {
 
 지연과 대역폭을 잇는 것이 *동시에 링크 위에 떠 있는 요청 수*입니다.
 
-CXL.cache와 CXL.mem은 *credit 기반 흐름 제어*를 씁니다(CXL 1.1 규격). 보내는 쪽은 받는 쪽이 허용한 만큼만 요청을 내보내고, credit이 반환되어야 다음 요청을 넣습니다. 그러면 *뽑을 수 있는 대역폭 = 동시 요청 수 × 64 B ÷ 왕복 지연*이 됩니다. 뒤집으면, **어떤 대역폭을 뽑으려면 그 대역폭 × 왕복 지연만큼의 데이터가 항상 비행 중이어야 합니다.**
+CXL.cache와 CXL.mem은 *credit 기반 흐름 제어*를 씁니다(CXL 1.1 규격). 보내는 쪽은 받는 쪽이 허용한 만큼만 요청을 내보내고, credit이 반환되어야 다음 요청을 넣습니다. 단순 정상상태 모델에서는 outstanding line 수 × 64 B ÷ 평균 응답시간이 가능한 처리량의 한 제약이 됩니다. 이는 Little의 법칙에 따른 **필요 조건**이며, 프로토콜 credit 하나가 CPU 요청 하나와 같다는 뜻은 아닙니다. 뒤집으면, **어떤 대역폭을 뽑으려면 그 대역폭 × 왕복 지연만큼의 데이터가 항상 비행 중이어야 합니다.**
 
-예를 들어 왕복 지연을 200 ns로 가정하고 50 GB/s를 뽑으려면 `50 GB/s × 200 ns = 10 KB`, 곧 64 B 라인 *약 156개*가 늘 비행 중이어야 합니다. 링크가 빨라질수록, 그리고 지연이 길어질수록 필요한 동시 요청 수가 늘어납니다. switch를 끼워 지연이 늘면 같은 링크에서도 필요한 in-flight 양이 그만큼 늘어납니다.
+예를 들어 왕복 지연을 200 ns로 가정하고 50 GB/s를 뽑으려면 `50 GB/s × 200 ns = 10 KB`, 곧 평균 156.25개의 64 B line입니다. 정수 request 슬롯 수로 올림하면 *최소 157개*가 필요하다는 모델입니다. 링크가 빨라질수록, 그리고 지연이 길어질수록 필요한 동시 요청 수가 늘어납니다. switch를 끼워 지연이 늘면 같은 링크에서도 필요한 in-flight 양이 그만큼 늘어납니다.
 
 | 동시 요청 수 | 관찰되는 현상 |
 |-------------|--------------|
@@ -128,14 +134,20 @@ CXL.cache와 CXL.mem은 *credit 기반 흐름 제어*를 씁니다(CXL 1.1 규�
 
 ## Interleave granularity — 접근 패턴이 유불리를 가른다
 
-디바이스를 여러 장 묶으면 대역폭이 합쳐지지만, *어느 단위로 번갈아 쓸지*에 따라 실제로 합쳐지는 정도가 달라집니다. 이 단위가 *interleave granularity*입니다. Linux 커널의 HDM decoder 코드는 *256 B부터 16 KB까지*(2의 거듭제곱)를 받습니다.
+디바이스를 여러 장 묶으면 대역폭이 합쳐지지만, *어느 단위로 번갈아 쓸지*에 따라 실제로 합쳐지는 정도가 달라집니다. 이 단위가 *interleave granularity*입니다. [Linux v6.12의 `granularity_to_eig()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/cxl.h)는 256 B~16 KiB의 2의 거듭제곱만 인코딩합니다. 하지만 [region.c](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/region.c)는 host bridge가 interleave된 경우 root granularity와의 일치도 검사합니다. 범위 안에 든다고 모든 장치·topology에서 선택 가능한 것은 아닙니다.
 
-| granularity | 한 번의 순차 접근이 하는 일 | 유리한 패턴 |
-|------------|---------------------------|-----------|
-| 작음 (256 B 쪽) | 짧은 구간마다 디바이스가 바뀌어 *부하가 흩어짐* | random — locality가 없으니 분산이 그대로 이득 |
-| 큼 (4 KB~16 KB) | 한 디바이스 안에서 *연속 영역이 이어짐* | sequential — row·bank locality와 prefetch가 살아남 |
+다음 학습용 배치 모델은 단일 interleave 단계에서 `target=floor(offset/granularity) mod ways`를 사용합니다. Linux의 전체 HPA→DPA decoder나 XOR 주소 매핑을 재현한 것은 아닙니다.
 
-Sequential bulk read는 큰 granularity에서 *한 디바이스가 연속 영역을 연달아 읽으므로* DRAM 쪽 row hit이 유지됩니다. Random access는 어차피 locality가 없으니 작은 granularity가 *요청을 골고루 흩어* 디바이스 병렬성을 최대로 씁니다. 워크로드와 반대로 고르면 대역폭이 덜 나옵니다.
+```js title="cxl-simple-stripe.mjs"
+export function stripeTarget(offset, granularity, ways) {
+  if (typeof offset !== 'bigint' || offset < 0n ||
+      ![256,512,1024,2048,4096,8192,16384].includes(granularity) ||
+      ![1,2,4,8,16].includes(ways)) throw new RangeError('invalid teaching model input');
+  return Number((offset / BigInt(granularity)) % BigInt(ways));
+}
+```
+
+예를 들어 2-way에서 offset 0·4096은 granularity 256이면 같은 target0, 4096이면 target0·1로 갈립니다. 반대로 0·256은 256에서 분산되고 4096에서 같은 target에 모입니다. sequential/random이라는 이름만으로 최적 granularity를 고를 수 없으며, 실제 주소 stride·page 배치·root 경로·device mapping과 측정이 필요합니다.
 
 granularity는 `cxl create-region -g`로 *region을 만들 때* 정합니다. 값별 상세 비교와 region 생성 절차는 [CXL Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에 있습니다.
 
@@ -155,7 +167,7 @@ granularity는 `cxl create-region -g`로 *region을 만들 때* 정합니다. �
 
 ### "링크 세대를 올리면 지연도 줄어든다"
 
-*대역폭이 늘어날 뿐*입니다. load 한 번의 지연은 *경로의 통과 지점과 컨트롤러*가 정합니다. 지연이 문제라면 링크를 넓히지 말고 *switch·fabric 단수를 줄여야* 합니다.
+*대역폭이 늘어날 뿐*입니다. load 한 번의 지연은 *경로의 통과 지점과 컨트롤러*가 정합니다. 지연을 개선하려면 직렬화·protocol·queue·controller·경로별 기여를 측정해야 합니다. 링크 폭·속도 변경도 직렬화 부분을 바꾸므로 지연이 절대 불변이라고 단정할 수는 없습니다.
 
 ### "큐를 깊게 하면 대역폭이 계속 늘어난다"
 
@@ -171,7 +183,7 @@ granularity는 `cxl create-region -g`로 *region을 만들 때* 정합니다. �
 
 ### "interleave granularity는 무조건 작을수록 좋다"
 
-*접근 패턴 의존*입니다. Random에는 작은 granularity가, sequential bulk에는 큰 granularity가 맞습니다. region을 만들 때 정하는 값이라 워크로드에 맞춰 골라야 합니다.
+접근 주소·stride·topology에 의존합니다. Random에는 작게, sequential에는 크게라는 규칙은 충분하지 않습니다. region을 만들 때 정하는 값이라 워크로드에 맞춰 골라야 합니다.
 
 ### "CXL 메모리 지연은 제품마다 비슷하다"
 
@@ -194,10 +206,10 @@ granularity는 `cxl create-region -g`로 *region을 만들 때* 정합니다. �
 
 ## 관련 항목
 
-- [Ch 9: CXL.mem 분석 — HBM·GDDR·DDR 다음의 메모리 계층](/blog/embedded/hardware/hbm/chapter09-cxl-mem) — 이 장이 설명한 지연·대역폭 수치의 출처
+- [Ch 9: CXL.mem 분석 — HBM·GDDR·DDR 다음의 메모리 계층](/blog/embedded/hardware/hbm/chapter09-cxl-mem) — CPU 메모리 확장과 Linux 노출 모드의 개요
 - [Ch 7: HBM 메모리 컨트롤러 분석](/blog/embedded/hardware/hbm/chapter07-memory-controller) — 큐 깊이와 대역폭의 같은 구조, HBM 쪽에서
 - [Ch 11: CXL Type 1·2·3 디바이스 분류](/blog/embedded/hardware/hbm/chapter11-cxl-device-types) (다음 편)
 - [Ch 12: 메모리 풀링과 데이터센터 토폴로지](/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric) — 통과 지점을 늘려 유연성을 사는 쪽의 이야기
 - [CXL 4.0 Internals Ch 8: CXL.mem — M2S·S2M·HDM Decoder](/blog/embedded/hardware/cxl/chapter08-cxl-mem) — 같은 프로토콜을 메커니즘 쪽에서. 메시지 채널, HDM Decoder 프로그래밍, Linux region 생성
 - [Embedded Performance Engineering Ch 54: CXL.mem 지연·대역폭 실측](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency) — 측정 방법과 도구
-- [Modern Embedded Recipes Ch 149: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
+- [Modern Embedded Recipes: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)

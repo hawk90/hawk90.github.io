@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"ETL은 STL의 임베디드 친화 대체입니다."** 모든 컨테이너가 고정 크기이고 heap을 쓰지 않으며, FSM과 message router와 factory도 함께 제공합니다.
+> **"ETL은 STL의 임베디드 친화 대체입니다."** 고정 capacity 컨테이너를 제공하며 container 자체의 node/buffer를 heap에서 확보하지 않습니다. 저장하는 T의 생성자·callback은 별도이며, FSM과 message router와 factory도 함께 제공합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -57,7 +57,7 @@ v.erase(v.begin());
 v.clear();
 ```
 
-내부적으로는 `T storage[N]`과 size만 갖고 있어 heap을 쓰지 않습니다.
+내부에 capacity N에 맞는 정렬 저장 공간을 확보하고 원소 수명을 관리합니다. T 생성자가 별도로 메모리를 할당할 수 있으므로 container 저장 공간과 T의 동작을 구분합니다.
 
 ### `etl::string<N>`
 
@@ -67,12 +67,12 @@ v.clear();
 etl::string<64> s = "hello";
 s += " world";
 
-if (s.size() > 64) { /* truncated */ }
+if (s.is_truncated()) { /* 잘린 문자열 처리 */ }
 
 const char* cstr = s.c_str();
 ```
 
-고정 크기 char array이며 길이가 초과되면 잘립니다.
+문자 capacity는 N이며 종료 null을 위한 공간도 확보합니다. capacity를 넘는 입력은 truncation 상태로 확인하며, 해당 판의 string truncation 검사 설정에 따라 오류 처리도 달라집니다. size가 capacity보다 커지는 것을 기다리면 truncation을 잡지 못합니다.
 
 ### `etl::list<T, N>`
 
@@ -102,7 +102,7 @@ auto it = m.find(1);
 if (it != m.end()) { /* */ }
 ```
 
-RB-tree 기반이며 노드 pool도 고정 크기입니다.
+정렬 associative container이며 노드 pool은 고정 capacity입니다. 실제 tree 구현·삽입 비용은 고정한 ETL 판의 map.h를 확인합니다.
 
 ### `etl::queue<T, N>`
 
@@ -137,7 +137,7 @@ d = etl::delegate<void(int)>::create<Handler, &Handler::on_event>(h);
 d(42);   // h.on_event(42) 호출
 ```
 
-크기는 object와 method 두 pointer만큼이며 heap을 쓰지 않습니다.
+delegate 자체는 호출 대상과 stub을 저장하며 동적으로 호출 wrapper를 할당하지 않습니다. 정확한 sizeof와 대상 객체의 수명은 ABI·판에 따라 확인합니다.
 
 함수와 lambda도 받을 수 있습니다.
 
@@ -180,68 +180,37 @@ heap 없는 pub/sub이며 최대 observer 수가 고정되어 있습니다.
 
 ETL의 대표 기능으로 fixed-size FSM을 제공합니다.
 
-```cpp
+```cpp title="etl-fsm-check.cpp"
 #include <etl/fsm.h>
-
-// Event 정의
-struct events {
-    enum {
-        start,
-        stop,
-        error,
-    };
+#include <cassert>
+#include <iostream>
+struct Start : etl::message<1> {};
+struct Stop : etl::message<2> {};
+struct Unknown : etl::message<3> {};
+struct Machine : etl::fsm { Machine() : etl::fsm(0) {} };
+struct Idle : etl::fsm_state<Machine, Idle, 0, Start> {
+    etl::fsm_state_id_t on_event(const Start&) { return 1; }
+    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) { return STATE_ID; }
 };
-
-class StartEvent : public etl::message<events::start> {};
-class StopEvent : public etl::message<events::stop> {};
-
-// State 정의
-enum class StateId : etl::fsm_state_id_t {
-    idle,
-    running,
-    error,
+struct Running : etl::fsm_state<Machine, Running, 1, Stop> {
+    etl::fsm_state_id_t on_event(const Stop&) { return 0; }
+    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) { return STATE_ID; }
 };
-
-class MyFsm : public etl::fsm {
-public:
-    MyFsm() : fsm(0) {}
-};
-
-class IdleState : public etl::fsm_state<MyFsm, IdleState, (etl::fsm_state_id_t)StateId::idle,
-                                          StartEvent> {
-public:
-    etl::fsm_state_id_t on_event(const StartEvent&) {
-        log("starting");
-        return (etl::fsm_state_id_t)StateId::running;
-    }
-
-    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) {
-        return STATE_ID;   // 무시
-    }
-};
-
-class RunningState : public etl::fsm_state<MyFsm, RunningState, (etl::fsm_state_id_t)StateId::running,
-                                            StopEvent> {
-public:
-    etl::fsm_state_id_t on_event(const StopEvent&) {
-        log("stopping");
-        return (etl::fsm_state_id_t)StateId::idle;
-    }
-    // ...
-};
-
-// 사용
-IdleState idle;
-RunningState running;
-etl::ifsm_state* states[] = {&idle, &running};
-
-MyFsm fsm;
-fsm.set_states(states, etl::size(states));
-fsm.start();
-
-fsm.receive(StartEvent{});   // idle → running
-fsm.receive(StopEvent{});    // running → idle
+int main() {
+    Idle idle; Running running;
+    etl::ifsm_state* states[] = {&idle, &running};
+    Machine machine;
+    machine.set_states(states, 2); machine.start();
+    assert(machine.get_state_id() == 0);
+    machine.receive(Start{}); assert(machine.get_state_id() == 1);
+    machine.receive(Unknown{}); assert(machine.get_state_id() == 1);
+    machine.receive(Stop{}); assert(machine.get_state_id() == 0);
+    std::cout << "etl fsm start/unknown/stop passed\n";
+}
 ```
+
+이 완성 예시는 ETL 20.49.0에서 상태 ID와 states 배열 인덱스를 맞춥니다. 모든 상태의 unknown-event 처리까지 정의하며 states와 state 객체는 machine의 사용 기간 동안 살아 있어야 합니다.
+
 
 heap을 쓰지 않고, type-safe event dispatch가 가능하며, 상태 전이가 명확합니다.
 
@@ -252,8 +221,14 @@ heap을 쓰지 않고, type-safe event dispatch가 가능하며, 상태 전이�
 ```cpp
 #include <etl/message_router.h>
 
-struct TempMessage : public etl::message<1> { float celsius; };
-struct PressureMessage : public etl::message<2> { float kpa; };
+struct TempMessage : public etl::message<1> {
+    float celsius;
+    explicit TempMessage(float value) : celsius(value) {}
+};
+struct PressureMessage : public etl::message<2> {
+    float kpa;
+    explicit PressureMessage(float value) : kpa(value) {}
+};
 
 class SensorRouter : public etl::message_router<SensorRouter,
                                                   TempMessage,
@@ -304,64 +279,50 @@ x = 42;
 
 C++17 이전 환경에서 std::optional의 대체로 쓰며, C++17 이상에서는 표준을 사용합니다.
 
-## 설정 매크로
+## 판과 오류 정책을 고정하고 재현하기
 
-ETL은 컴파일러와 플랫폼 설정이 필요합니다.
+아래 예시는 **ETL 20.49.0**의 vector.h·basic_string.h·error_handler.h를 확인한 결과입니다. ETL_THROW_EXCEPTIONS로 예외 경로를 선택하고 ETL_CHECK_PUSH_POP으로 vector의 경계 검사를 켭니다. compiler에 예외가 켜졌다는 이유만으로 ETL이 기본적으로 throw한다고 가정하지 않습니다.
 
-```cpp
-// etl_profile.h
-#define ETL_NO_STL                        // STL 의존 끔
-#define ETL_NO_LARGE_CHAR_SUPPORT
-#define ETL_LOG_ERRORS                    // 로깅
-#define ETL_VERBOSE_ERRORS                // 상세 에러
-#define ETL_DEBUG_COUNT                   // 디버깅 통계
+```cpp title="etl-capacity-check.cpp"
+#include <etl/vector.h>
+#include <etl/string.h>
+#include <etl/delegate.h>
+#include <etl/version.h>
+#include <cassert>
+#include <iostream>
+struct Handler { int last = 0; void event(int value) { last = value; } };
+int main() {
+    static_assert(ETL_VERSION_MAJOR == 20 && ETL_VERSION_MINOR == 49 && ETL_VERSION_PATCH == 0);
+    etl::vector<int, 4> values;
+    for (int i = 0; i < 4; ++i) values.push_back(i);
+    assert(values.full());
+    bool full_error = false;
+    try { values.push_back(4); } catch (const etl::vector_full&) { full_error = true; }
+    assert(full_error && values.size() == 4);
+    etl::string<4> text = "abcdef";
+    assert(text.size() == 4 && text.is_truncated());
+    Handler handler;
+    auto callback = etl::delegate<void(int)>::create<Handler, &Handler::event>(handler);
+    callback(42); assert(handler.last == 42);
+    std::cout << "etl=" << ETL_VERSION << " full=detected string=truncated delegate=42\n";
+}
 ```
 
-```cpp
-// 또는 컴파일러 플래그
-CXXFLAGS += -DETL_NO_STL -DETL_LOG_ERRORS
+```bash
+clang++ -std=c++17 -I /path/to/etl-20.49.0/include -DETL_THROW_EXCEPTIONS -DETL_CHECK_PUSH_POP etl-capacity-check.cpp -o etl-capacity-check
+./etl-capacity-check
+clang++ -std=c++17 -I /path/to/etl-20.49.0/include etl-fsm-check.cpp -o etl-fsm-check
+./etl-fsm-check
 ```
 
-## 에러 처리
+Clang 23.1.3 host에서 정상 capacity 경계·다섯 번째 삽입 오류·문자열 truncation·delegate 호출·FSM unknown event를 실행했습니다. no-exception 제품에서는 ETL_LOG_ERRORS, ETL_USE_ASSERT_FUNCTION, ETL_NO_CHECKS 및 NDEBUG 등 error_handler.h의 분기를 검토하고 반환 여부를 포함한 실패 정책을 정해야 합니다. logging callback이 돌아온 뒤에도 모든 API가 안전하게 작업을 중단한다고 가정하지 않습니다. 정상 경로에서는 full()/empty()를 먼저 검사합니다.
 
-ETL은 예외 또는 abort를 선택할 수 있습니다.
+ETL_ASSERT를 애플리케이션에서 임의로 재정의하는 대신 이 판의 공식 설정과 handler API를 사용합니다. capacity N의 RAM은 저장 기간에 따라 stack·static 영역 등에 놓이며 항상 .bss인 것은 아닙니다. .text·RAM·worst-case 동작은 실제 target 산출물과 workload로 비교해야 하며 이 host 검증은 STM32 코드 크기 개선 측정이 아닙니다.
 
-```cpp
-// 예외 모드 (기본)
-etl::vector<int, 4> v;
-v.push_back(1); v.push_back(2); v.push_back(3); v.push_back(4);
-v.push_back(5);   // throws etl::vector_full
+## 1차 자료
 
-// no-exception 모드
-#define ETL_NO_EXCEPTIONS
-
-// → push_back에 5번째는 그냥 *무시* 또는 ETL_ASSERT trigger
-```
-
-`ETL_ASSERT` 매크로를 정의해 fail 동작을 직접 통제할 수 있습니다.
-
-```cpp
-#define ETL_ASSERT(condition, error) \
-    if (!(condition)) { fatal_error(error.what()); }
-```
-
-## 측정 — ETL vs STL
-
-같은 코드를 STL과 ETL로 비교한 결과입니다 (STM32F4).
-
-```text
-std::vector<int> + 16 elements:
-  .text:  6.2 KB (vector + heap)
-  .heap usage: ~64 B
-  alloc cost: 변동 (realloc 가능)
-
-etl::vector<int, 16>:
-  .text:  0.4 KB (간단한 wrapper)
-  .heap usage: 0
-  alloc cost: 0 (compile-time fixed)
-```
-
-코드 크기가 15배 작고 heap도 쓰지 않습니다.
+- [ETL 20.49.0 release](https://github.com/ETLCPP/etl/releases/tag/20.49.0)
+- [vector.h](https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/vector.h), [basic_string.h](https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/basic_string.h), [error_handler.h](https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/error_handler.h), [fsm.h](https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/fsm.h) — 이 글에서 확인한 판의 구현
 
 ## 자주 보는 함정과 안티패턴
 
@@ -381,14 +342,14 @@ std::vector<etl::string<32>> v;   // STL vector는 heap
 완전히 ETL을 쓰거나, STL이 허용되는 환경에서만 섞습니다.
 
 ### 3. exception 가정
-ETL은 기본적으로 exception을 던집니다. `-fno-exceptions` 환경에서는 abort합니다. 이때는 `ETL_NO_EXCEPTIONS`를 정의합니다.
+ETL 20.49.0에서는 ETL_THROW_EXCEPTIONS와 error-handler 설정을 확인합니다. no-exception compiler 옵션과 library 오류 정책은 별개이며, abort·callback·검사 생략 중 무엇인지 실제 설정으로 확인합니다.
 
 ### 4. 큰 N으로 .bss 폭증
 ```cpp
 etl::vector<HugeStruct, 1000> v;
 ```
 
-`sizeof(HugeStruct) * 1000`이 그대로 `.bss`에 잡힙니다. 측정 후 적정 N을 선택합니다.
+지역 automatic 객체라면 stack 등 automatic 저장 공간을 사용합니다. static 저장 기간 객체도 초기화 내용과 linker 배치에 따라 .bss/.data 등이 달라집니다. 측정 후 적정 N을 선택합니다.
 
 ### 5. Boost.Intrusive와 비교하지 않음
 ETL은 가볍고 Boost는 더 강력합니다. 프로젝트의 요구에 맞게 선택합니다.
@@ -401,7 +362,7 @@ ETL은 header-only라서 컴파일 시간이 늘어납니다. PCH를 활용합�
 | 장점 | 단점 |
 | --- | --- |
 | Heap 0 | API가 STL과 일부 다름 |
-| 인증 친화 (MISRA 가까움) | C++11/14 위주 (C++20 일부) |
+| 동적 할당 없는 저장 정책을 선택하기 쉬움 | 지침 준수·인증은 프로젝트 근거가 별도 필요 |
 | Header-only | 컴파일 시간 |
 | Fixed-size 명시 | 동적 크기 불가 |
 | FSM, router 포함 | 학습 곡선 |
@@ -409,10 +370,10 @@ ETL은 header-only라서 컴파일 시간이 늘어납니다. PCH를 활용합�
 
 ## 정리
 
-- ETL은 임베디드용 STL 대체 라이브러리로, 모두 fixed-size이며 heap을 쓰지 않습니다.
+- ETL은 고정 capacity 컨테이너와 임베디드 유틸리티를 제공합니다. 원소와 callback의 할당·수명은 별도 계약입니다.
 - 기본 컨테이너로 `etl::vector`, `etl::string`, `etl::list`, `etl::map`, `etl::queue`를 제공합니다.
 - 특수 도구로 `etl::delegate`(std::function 대체), `etl::observer`, `etl::fsm`, `etl::message_router`가 있습니다.
-- `-fno-exceptions` 환경에서는 `ETL_NO_EXCEPTIONS` 매크로를 정의합니다.
+- 예외·경계 검사·error handler 설정을 고정한 판에서 함께 검증합니다.
 - 측정 가능한 fixed-size이므로 `.bss` 영향을 추적할 수 있습니다.
 - MIT 라이선스이며 header-only로 배포됩니다.
 

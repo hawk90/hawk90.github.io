@@ -24,7 +24,7 @@ topics: ["embedded"]
 
 **일부는 맞고, 일부는 틀립니다.**
 
-Modern C++의 많은 기능은 **zero-cost abstraction**입니다. 컴파일 타임에 모든 것이 결정되고, 런타임 오버헤드는 없습니다. 이 시리즈는 임베디드에서 C++를 **안전하고 효율적으로** 사용하는 방법을 다룹니다.
+Modern C++의 많은 기능은 **zero-cost abstraction**입니다. 동등한 수동 구현보다 추가 비용이 없도록 설계할 수 있다는 뜻이며, 모든 실행·저장 공간 비용이 0이라는 보장은 아닙니다. 이 시리즈는 임베디드에서 C++를 **안전하고 효율적으로** 사용하는 방법을 다룹니다.
 
 ## 대상 독자
 
@@ -42,7 +42,7 @@ Modern C++의 많은 기능은 **zero-cost abstraction**입니다. 컴파일 타
 
 ## 시리즈 구성
 
-**총 5개 Part, 40개 글**로 구성됩니다.
+**총 5개 Part의 본문 40편과 이 소개 글 1편**로 구성됩니다.
 
 C++ 기초부터 zero-cost abstraction, 메모리 관리, 고급 패턴, 하드웨어 추상화까지 체계적으로 다룹니다.
 
@@ -67,11 +67,11 @@ C++ 기초부터 zero-cost abstraction, 메모리 관리, 고급 패턴, 하드�
 
 ### Part 2: Zero-Cost Abstractions (10개)
 
-런타임 비용 없이 추상화하는 방법을 다룹니다.
+동등한 수동 구현과 비용을 비교하고, 상수 평가·인라인 등으로 추가 비용을 줄이는 방법을 다룹니다.
 
 | # | 글 제목 | 핵심 내용 |
 |---|--------|----------|
-| 2-01 | RAII 기초 | 리소스 관리, 소멸자 보장 |
+| 2-01 | RAII 기초 | 정상 scope 종료의 자원 정리, 비정상 종료의 한계 |
 | 2-02 | RAII 실전 패턴 | Lock, Handle, ScopedXxx |
 | 2-03 | constexpr 기초 | 컴파일 타임 계산 |
 | 2-04 | constexpr 고급 | LUT 생성, CRC 테이블 |
@@ -143,8 +143,8 @@ C++로 하드웨어를 추상화하는 방법을 다룹니다.
 
 ### 1. 측정 가능한 주장만 한다
 
-- "빠르다" → "어셈블리 N줄, 사이클 M개"
-- "안전하다" → "컴파일 타임에 검증됨"
+- "빠르다" → 타깃·도구 버전·옵션·재현 소스와 관찰 범위를 제시합니다. 명령 수만으로 사이클 수를 단정하지 않습니다
+- "안전하다" → 컴파일 시 검증하는 조건과 런타임·수명·동시성에서 별도로 확인할 조건을 구분합니다
 - Godbolt(Compiler Explorer)로 확인
 
 ### 2. 대안을 제시한다
@@ -173,7 +173,7 @@ C++로 하드웨어를 추상화하는 방법을 다룹니다.
 | 아키텍처 | ARM Cortex-M/A, RISC-V |
 | OS | bare-metal, FreeRTOS, Zephyr |
 | 컴파일러 | GCC, Clang, ARM Compiler |
-| 플래그 | -fno-exceptions, -fno-rtti |
+| 플래그 | 예외·RTTI 정책에 따라 선택, 라이브러리와 ABI 일치 확인 |
 | 할당 | 정적 우선, 제한된 동적 |
 | 중요 지표 | 코드 크기, latency, determinism |
 
@@ -184,7 +184,7 @@ C++로 하드웨어를 추상화하는 방법을 다룹니다.
 CXXFLAGS += -std=c++17
 CXXFLAGS += -fno-exceptions
 CXXFLAGS += -fno-rtti
-CXXFLAGS += -fno-threadsafe-statics
+# thread-safe static guard는 기본 유지합니다. ISR·동시 초기화 정책을 별도 설계합니다.
 
 # 최적화
 CXXFLAGS += -Os          # 또는 -O2
@@ -197,8 +197,11 @@ CXXFLAGS += -Werror
 # ARM 특화
 CXXFLAGS += -mcpu=cortex-m4
 CXXFLAGS += -mthumb
+CXXFLAGS += -mfpu=fpv4-sp-d16
 CXXFLAGS += -mfloat-abi=hard
 ```
+
+이 플래그는 FPU가 있는 Cortex-M4F와 hard-float ABI 라이브러리를 사용하는 예입니다. FPU 없는 M4·다른 코어에 그대로 적용하지 않습니다. `-flto`는 최종 링크에도 맞춰 전달하고, `-fno-exceptions`·`-fno-rtti`는 프로젝트 정책으로 선택합니다. 모든 대상 환경에서 이 조합을 실행 검증했다는 뜻은 아닙니다. 구체적인 재현 범위는 각 장과 [컴파일러 플래그 가이드](/blog/embedded/embedded-cpp/part1-02-compiler-flags)에 기록합니다.
 
 ## 사전 지식
 
@@ -232,7 +235,7 @@ CXXFLAGS += -mfloat-abi=hard
 
 - **C++ 도입 여부를 판단**할 수 있다
 - **zero-cost abstraction을 활용**할 수 있다
-- **메모리 안전한 코드를 작성**할 수 있다
+- **메모리 수명·할당 실패·동시 접근을 검토**할 수 있다
 - **예외/RTTI 없이 설계**할 수 있다
 - **하드웨어를 타입 안전하게 추상화**할 수 있다
 - **코드 bloat를 통제**할 수 있다

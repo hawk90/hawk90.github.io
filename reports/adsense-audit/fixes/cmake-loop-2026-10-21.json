@@ -1,0 +1,71 @@
+{
+  "date": "2026-10-21",
+  "baseHead": "d55f8d66ece6acb8ebb274df7c843ce6b4054853",
+  "scoreSnapshotSha256": "aa4e8105a77d0e828899abecf52b22f70a544840b8af9a35c23694f5493f2995",
+  "rescored": false,
+  "articles": [
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter01-intro.md",
+      "beforeSha256": "0c21d7eefd3def2eb94db8933f4764c1a443a1427390ace47bb6b89040edb3cd",
+      "afterSha256": "c60d15337db36cc08c0468fedec8e5f946d159ee279e048278ed7fa7f06e6e5e",
+      "exampleLog": "cmake-ch01-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter02-language.md",
+      "beforeSha256": "14bf8614e979072ae6ce48ca94b0fae2f6357e1c6c340eb74df6117adbc0a6d1",
+      "afterSha256": "3675be067e934f4c92c89e67f4b5df2aebe5518d1e710169a00fa9a36b75a94e",
+      "exampleLog": "cmake-ch02-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter03-targets.md",
+      "beforeSha256": "f57800f917191fc98276491183fb331da3a9f2187c4d64bd8d1ba4364de62315",
+      "afterSha256": "b23b6cace262c2d11ad0fd615fe6426f0a7febb4617557dd90af415146775587",
+      "exampleLog": "cmake-ch03-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter04-options.md",
+      "beforeSha256": "e5b6d9498c96a81034684ff65da8968440488d68e598c7d304bd522e49f22864",
+      "afterSha256": "1f26d4b0cf59cb32f172511e11f2c7c9ecdb48bef6c2cde471cbd2cafa2191e7",
+      "exampleLog": "cmake-ch04-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter05-find-package.md",
+      "beforeSha256": "5af7e12bde9344f863f21f69f5042bfcb3f4c56e92c73e1338286eae8f1a0b9a",
+      "afterSha256": "51e03a3848f386931353d6f55b2f0fcb426165f77b24b6dbd5b6c7cf304171d7",
+      "exampleLog": "cmake-ch05-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter06-testing.md",
+      "beforeSha256": "9c29bc4d34774cd3d40b3c30e834052167af9fb2ae8a1eec2608b161ccb828e7",
+      "afterSha256": "a3df81f593f38a865ae03ea650c2140c5dd4c95f875840eb53d7ec99012ad4dd",
+      "exampleLog": "cmake-ch06-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter07-install.md",
+      "beforeSha256": "2f22889f45ffa4b11b1360cc4b90e20d3ef4ca18461af7d8abc79d3dd7813d87",
+      "afterSha256": "00e6eed8594a2bf88c2055bb26a718a6ea929b8bcbca760cd380ee0dd3e62e54",
+      "exampleLog": "cmake-ch07-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter08-best-practices.md",
+      "beforeSha256": "e806e4e33d41a7c12bc63de5ecbf2b4ed0ecc14028800f867e92147f3a8c68a2",
+      "afterSha256": "8d68d85732147ac95455002bbf3e263085c5bd411192597f638ca01f1ec16c34",
+      "exampleLog": "cmake-ch08-examples.log",
+      "scoreUpdated": false
+    },
+    {
+      "path": "src/content/blog/tools/build/cmake/chapter09-modern-advanced.md",
+      "beforeSha256": "bf5c5903e29a48c2eeee6d92d27de1cf9fe82d92c24893f9339e65a171e1f3bb",
+      "afterSha256": "fa8cfe99f8c9a659f25edb21a121af9a659a28a2dbc3b62a7b8f6b09e2233232",
+      "exampleLog": "cmake-ch09-examples.log",
+      "scoreUpdated": false
+    }
+  ]
+}

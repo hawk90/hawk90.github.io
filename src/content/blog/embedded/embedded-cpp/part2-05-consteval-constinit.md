@@ -30,11 +30,11 @@ int b = square(read_input());        // 런타임 — 의도 아님
 C++20의 **`consteval`**과 **`constinit`**이 이 빈틈을 메웁니다.
 
 - `consteval`은 함수가 컴파일 타임에만 호출되도록 강제합니다. 런타임 호출은 컴파일 에러입니다.
-- `constinit`은 변수 초기화가 컴파일 타임에 완료되도록 강제합니다. 런타임 초기화는 컴파일 에러입니다.
+- `constinit`은 지정한 static/thread 저장 기간 변수의 동적 초기화를 금지합니다. 초기값을 RAM에 복사하는 시작 코드나 이후 읽기·수정 비용까지 제거하지는 않습니다.
 
 ## `consteval` — Immediate Function
 
-`consteval`로 선언된 함수는 immediate function입니다. 모든 호출이 컴파일 타임에 일어나며, 런타임 인자는 컴파일 에러로 잡힙니다.
+`consteval`로 선언된 함수는 immediate function입니다. 일반 호출 위치의 immediate invocation은 상수식이어야 합니다. 다른 immediate function 내부나 `if consteval` 분기 같은 immediate context는 규칙이 다르므로 단순히 모든 함수 선언의 인자가 리터럴이어야 한다는 뜻은 아닙니다.
 
 ```cpp
 consteval int square(int x) {
@@ -67,7 +67,7 @@ constexpr PinId kLed = make_pin(0, 5);   // OK
 constexpr PinId kBad = make_pin(9, 5);   // ERROR at compile time
 ```
 
-여기서 `throw`는 런타임 예외를 던지는 게 아니라 컴파일 에러로 변환됩니다. invalid configuration을 컴파일 시점에 차단합니다.
+C++20 상수 평가에서 `throw` 경로를 실행하면 상수식 조건을 만족하지 않아 컴파일 오류가 됩니다. 다만 `-fno-exceptions`는 실행하지 않는 `throw` 문장 자체도 거부할 수 있습니다. 이 설정에서는 아래처럼 비constexpr 오류 함수를 호출하는 방식으로 유효 경로와 잘못된 경로를 나눌 수 있습니다. invalid configuration을 컴파일 시점에 차단합니다.
 
 ### 매크로 vs consteval
 
@@ -99,7 +99,7 @@ constexpr uint32_t bad      = pin_mask(35);  // 컴파일 에러
 
 ### 함수 포인터
 
-`consteval` 함수는 함수 포인터로 변환할 수 없으므로 런타임 dispatch가 불가능합니다.
+immediate context 안에서 주소를 일시적으로 사용할 수는 있지만, immediate function의 포인터를 상수식 결과로 밖에 보존해 런타임 dispatch에 쓸 수는 없습니다.
 
 ```cpp
 consteval int f(int);
@@ -120,10 +120,10 @@ constinit int counter = 0;                    // OK
 constinit int pi_thousand = 3141;             // OK
 constinit int from_register = read_io();      // ERROR — runtime
 
-constinit auto* g_logger = make_logger();     // OK if make_logger is constexpr
+constinit auto* g_logger = make_logger();     // 결과 포인터도 상수 초기화 요건을 만족해야 함
 ```
 
-[Part 1-06: Static Initialization Order Fiasco](/blog/embedded/embedded-cpp/part1-06-startup-code)를 언어 차원에서 방지합니다. 모든 static 변수가 `main` 진입 전에 초기화되도록 보장합니다.
+[Part 1-06: Static Initialization Order Fiasco](/blog/embedded/embedded-cpp/part1-06-startup-code)를 언어 차원에서 방지합니다. 이 키워드를 붙인 변수의 동적 초기화만 차단합니다. 다른 전역 객체의 초기화와 종료 순서, 하드웨어 준비 시점의 접근까지 해결하지는 않습니다.
 
 ### `const` vs `constinit` vs `constexpr`
 
@@ -202,7 +202,7 @@ constexpr int a = compute(10);   // slow_but_precise
 int b = compute(read_input());    // fast_approximate
 ```
 
-C++20에서는 `std::is_constant_evaluated()`로 같은 효과를 냈으며, C++23의 `if consteval`이 더 깔끔합니다.
+C++20의 `std::is_constant_evaluated()`도 평가 문맥을 구분하지만 `if consteval`의 true 분기는 immediate context이므로 immediate function 호출 규칙까지 완전히 같지는 않습니다.
 
 ## 임베디드 — Compile-Time Configuration Validation
 
@@ -259,15 +259,9 @@ int b = times_two(read_input());    // ERROR
 
 ## 자주 보는 함정과 안티패턴
 
-### 1. consteval 함수를 다른 constexpr 안에서 호출
-```cpp
-consteval int f(int x) { return x * 2; }
-constexpr int g(int x) { return f(x); }   // OK in C++23, ERROR in C++20
+### 1. constexpr 매개변수로 immediate function 호출
 
-constexpr int a = g(5);      // OK — 컴파일 타임 chain
-int b = g(read_input());     // ERROR — g가 f를 런타임으로 호출 못 함
-```
-C++20과 C++23의 동작이 다릅니다. C++23이 더 관대합니다.
+`constexpr int g(int x) { return f(x); }`처럼 일반 비템플릿 함수의 매개변수를 immediate invocation에 바로 넘기는 예를 C++23이면 항상 된다고 가정하지 않습니다. C++23의 `if consteval` 안에서 호출하면 상수 평가 경로와 런타임 경로를 명시적으로 나눌 수 있습니다. immediate function 전파에 대한 결함 수정의 적용 여부도 컴파일러에 따라 확인합니다.
 
 ### 2. constinit은 mutable
 ```cpp
@@ -277,37 +271,58 @@ counter++;   // OK — constinit은 mutable
 const 효과는 없고 초기화 시점만 보장합니다. const까지 원하면 `constinit const`로 씁니다.
 
 ### 3. consteval 안에서 dynamic alloc
-C++20에서는 불가능하며, C++26 정도까지 기다려야 합니다.
+C++20부터 같은 상수 평가 안에서 해제하는 transient allocation은 가능합니다. `new`로 얻은 저장 공간을 영구 보존하는 포인터 상수와 구분합니다. 아래 예제가 할당·해제 경로를 실제 컴파일합니다.
 
 ### 4. macro와 consteval 혼동
-`consteval`은 함수입니다. 블록 형태, multi-statement, 변수 정의가 모두 가능하며 매크로처럼 텍스트 치환되지 않습니다. 디버거로 step into도 됩니다.
+`consteval`은 함수입니다. 블록 형태, multi-statement, 변수 정의가 모두 가능하며 매크로처럼 텍스트 치환되지 않습니다. 런타임 호출이 없으므로 일반적인 런타임 디버거의 step into 대상으로 가정할 수 없습니다.
 
 ### 5. toolchain 미지원
-ARM Compiler 6, IAR 일부는 C++20 `consteval`을 지원하지 않습니다. toolchain 확인이 필수입니다.
+벤더 이름만으로 지원 여부를 단정하지 않습니다. 설치한 버전의 C++ 모드와 `__cpp_consteval`, `__cpp_constinit`을 확인하고 최소 예제를 컴파일합니다.
 
 ### 6. constinit 변수의 destructor
 `constinit` 변수도 프로그램 종료 시 destructor가 호출됩니다. 임베디드는 `main`이 끝나지 않으므로 거의 무관하지만, exit 패턴이 있다면 주의해야 합니다.
 
-## 측정 — consteval과 constinit의 코드 효과
+## 작은 예제 — 정상 설정, 잘못된 핀, 런타임 초기화
 
-같은 코드에 `constexpr`, `consteval`, `constinit`을 각각 적용해 봅니다.
+C++23으로 평가 문맥을 분리합니다. 핀 오류 경로는 비constexpr 함수에 도달해 상수식이 되지 않으므로 `-fno-exceptions`에서도 잘못된 설정을 거부합니다.
 
-```cpp
-// 모두 같은 결과 (Flash에 상수 박힘)
-// 차이는 — 잘못된 사용을 *컴파일러가 차단*하는지
-
-constexpr int a = 42;          // 0 운영비
-consteval int f() { return 42; }
-constexpr int b = f();         // 0 운영비 + 강제 컴파일 타임
-
-constinit int c = 42;          // 0 운영비 + 강제 정적 초기화
+```cpp title="immediate-check.cpp"
+#include <cstdint>
+void invalid_pin();
+consteval std::uint32_t pin_mask(int pin) {
+    if (pin < 0 || pin >= 32) invalid_pin();
+    return std::uint32_t{1} << pin;
+}
+consteval int allocate() {
+    int* p = new int(42); int value = *p; delete p; return value;
+}
+constexpr int twice(int x) {
+    if consteval { return allocate() + x; }
+    else { return x * 2; }
+}
+constinit int counter = 0;
+#ifdef BAD_PIN
+constexpr auto mask = pin_mask(32);
+#else
+constexpr auto mask = pin_mask(5);
+#endif
+#ifdef BAD_INIT
+int read_io();
+constinit int bad = read_io();
+#endif
+static_assert(allocate() == 42);
+static_assert(twice(2) == 44);
+static_assert(mask == 32);
+int main(int argc, char**) { ++counter; return twice(argc) == 2 && counter == 1 ? 0 : 1; }
 ```
 
-런타임 비용은 동일하게 0이며, 컴파일 시점 검증의 강도만 달라집니다.
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++23 -Wall -Wextra -pedantic-errors -fno-exceptions immediate-check.cpp -o immediate-check && ./immediate-check`를 실행했습니다. `-DBAD_PIN`과 `-DBAD_INIT`은 각각 비상수 호출·정적 초기화 진단으로 거부됩니다. 이 검사는 MCU 시작 코드의 데이터 복사 비용을 측정하지 않습니다.
+
+[C++20 N4861 상수 평가 규칙](https://timsong-cpp.github.io/cppwp/n4861/expr.const), [constinit 규칙](https://eel.is/c++draft/dcl.constinit), [WG21 P1938R3 if consteval](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1938r3.html)을 참고합니다.
 
 ## `consteval`의 실용적 가치
 
-1. **매크로 대체** — 타입 안전성과 디버깅 가능성을 함께 얻습니다.
+1. **매크로 대체** — 타입 검사와 상수식 진단을 얻습니다.
 2. **컴파일 타임 검증** — invalid input을 컴파일 시점에 차단합니다.
 3. **API 설계** — 컴파일 타임 보장을 함수 시그니처에 명시합니다.
 
@@ -321,9 +336,9 @@ consteval PinId make_pin(int port, int pin);
 ## 정리
 
 - `consteval`은 함수의 컴파일 타임 호출을 강제하며, 런타임 호출은 컴파일 에러로 막힙니다.
-- `constinit`은 변수의 컴파일 타임 초기화를 강제하므로 Static Initialization Order Fiasco를 방지합니다.
+- `constinit`은 지정한 변수의 동적 초기화를 거부하며, 전역 자원 간 전체 초기화·종료 순서를 대신 설계하지는 않습니다.
 - 매크로를 대체하면서 타입 안전성과 검증 가능성을 함께 얻습니다.
-- C++20 기능이며 GCC 10+, Clang 12+가 필요하므로 toolchain 지원을 반드시 확인합니다.
+- C++20 기능이며 설치한 언어 모드·기능 매크로·최소 예제로 지원 여부를 확인합니다.
 - `if consteval`(C++23)로 컴파일과 런타임을 분기할 수 있습니다.
 
 ## 관련 항목

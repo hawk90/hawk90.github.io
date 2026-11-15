@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**부팅 실패는 4가지 모드로 수렴합니다 — 시리얼 garbage, hang, panic, late hang.** 각 모드의 *원인 집합*은 좁고 명확합니다. 어떤 모드인지 5초 안에 분류하고, 해당 모드의 첫 의심부터 확인하는 것이 BSP 디버깅의 기본기입니다.
+**부팅 문제는 시리얼 깨짐, hang, panic, userspace 지연 같은 증상으로 분류해 조사할 수 있습니다.** 하나의 증상만으로 원인을 확정하지 말고 마지막 로그, boot stage, board 측정값을 함께 확인합니다.
 
 [Ch 10](/blog/embedded/bsp/chapter10-first-boot)에서 정상 부팅의 단계를 따라갔다면, 이번 글은 *비정상*의 카탈로그입니다. 각 패턴을 진단 명령과 함께 정리합니다. 보드 50개를 부팅하는 BSP 엔지니어는 결국 이 카탈로그를 머릿속에 갖게 됩니다.
 
@@ -24,7 +24,7 @@ topics: ["embedded"]
 U�4☐2*▒~������
 ```
 
-원인은 거의 항상 **UART baud rate 불일치**입니다.
+baud rate 불일치는 한 가지 가능성입니다. UART clock·전압·배선·line configuration·노이즈도 함께 확인합니다. 아래 host baud 조합은 진단을 위한 후보이며 garbage 패턴만으로 실제 baud를 역산할 수 없습니다.
 
 ```bash
 # host side에서 다른 속도로 다시 시도
@@ -43,11 +43,11 @@ picocom -b 38400 /dev/ttyUSB0
 
 baud rate가 맞는데도 garbage라면 **UART pinmux** 잘못입니다.
 
-```bash
-# 부트로더에서 pinmux dump
-=> md.l 0x30330014 1   # IOMUXC_SW_PAD_CTL_PAD_<UART_RX>
-=> md.l 0x30330018 1   # IOMUXC_SW_PAD_CTL_PAD_<UART_TX>
+```text
+=> md.l <board-verified-mux-or-pad-address> 1
 ```
+
+이 주소는 회로도, SoC reference manual, board DTS에서 해당 UART pad를 확인해 정합니다. 임의의 base+offset을 그대로 읽지 않습니다.
 
 DT의 `pinctrl-0`이 가리키는 핀이 실제 UART 핀이 맞는지, voltage(1.8V vs 3.3V)가 맞는지 확인합니다.
 
@@ -106,7 +106,7 @@ earlycon=ec_imx6q0,0x30890000,115200n8
 
 UART base address는 SoC TRM에 적힌 값을 정확히 써야 합니다. `console=ttymxc0,115200`만 있어서는 `console`이 활성화되는 시점까지 침묵합니다.
 
-두 번째 의심은 **잘못된 DTB**입니다. U-Boot가 다른 보드의 DTB를 로드했거나, 메모리 노드의 base가 잘못되어 커널이 자기 자신을 RAM 밖으로 복사하면 hang합니다.
+두 번째 의심은 **잘못된 DTB 또는 load address overlap**입니다. U-Boot가 다른 보드의 DTB를 전달했거나, memory description이 실제 RAM과 맞지 않는지 bootloader 전달 DT 및 memory map으로 확인합니다.
 
 ### 패턴 2d — driver probe에서 hang
 
@@ -117,7 +117,7 @@ UART base address는 SoC TRM에 적힌 값을 정확히 써야 합니다. `conso
 
 특정 디바이스 probe에서 멈춥니다. MMC, I2C, SPI 드라이버가 응답하지 않는 디바이스를 폴링하면 timeout 처리 안 한 코드에서 hang합니다.
 
-```bash
+```text
 # bootargs에 추가해 어디서 멈췄는지 정확히 본다
 initcall_debug printk.time=1 ignore_loglevel
 ```
@@ -144,7 +144,7 @@ initcall_debug printk.time=1 ignore_loglevel
 [    1.901234]  mount_block_root+0x180/0x270
 ```
 
-panic은 *원인이 메시지에 적혀 있다*는 점이 그나마 다행입니다. 패턴별로 대응:
+panic message와 call trace는 단서지만, 증상이 근본 원인과 일치한다고 보장하지 않습니다. 같은 로그가 여러 원인에서 나올 수 있어 관련 설정과 초기 로그를 같이 봅니다.
 
 ### "Unable to mount root fs"
 
@@ -165,7 +165,7 @@ zcat /proc/config.gz | grep -E "MMC|MMC_SDHCI"
 root=/dev/mmcblk0p2   # mmcblk0의 p2 — 위 로그와 일치
 ```
 
-`rootwait`도 잊지 말아야 합니다. MMC가 비동기로 인식되는 보드는 `rootwait` 없으면 panic합니다.
+`rootwait`도 잊지 말아야 합니다. 저장장치 probe가 비동기인 환경에서는 `rootwait`이 필요할 수 있습니다. 실제 `root=` device와 initramfs 여부를 함께 확인합니다.
 
 ### "No init found"
 
@@ -190,6 +190,9 @@ ls -l /mnt/sbin/init /mnt/lib/systemd/systemd
 aarch64-linux-gnu-addr2line -e vmlinux -f 0xffffffc008abcdef
 # 또는
 gdb-multiarch vmlinux
+```
+
+```text
 (gdb) l *0xffffffc008abcdef
 ```
 
@@ -245,7 +248,7 @@ cat /sys/kernel/debug/pinctrl/<dev>/pinmux-functions
 cat /sys/kernel/debug/regulator/regulator_summary
 ```
 
-`CONFIG_DEBUG_FS=y`가 빌트인이어야 동작합니다.
+debugfs를 쓰려면 kernel의 debugfs 지원과 mount가 필요합니다. 실제 파일은 driver·config·해당 kernel 버전에 따라 달라집니다.
 
 ### earlyprintk vs earlycon
 
@@ -254,9 +257,9 @@ cat /sys/kernel/debug/regulator/regulator_summary
 | 옵션 | 의미 | 활성 시기 |
 |------|------|-----------|
 | `earlyprintk` | 보드별 *fixed* early console. legacy. | 일부 보드만 지원 |
-| `earlycon` | DT-based 또는 explicit address. 표준 | arm64 표준 |
+| `earlycon` | 초기 kernel console; DT 또는 명시 설정 | target architecture·driver 지원 확인 |
 
-arm64는 `earlycon`을 쓰고, 32-bit ARM에서는 `earlyprintk`가 남아 있는 보드가 있습니다. 새 보드라면 `earlycon`이 정답입니다.
+`earlycon`과 legacy `earlyprintk` 지원은 architecture·driver·kernel 버전에 따릅니다. 새로운 통합에서는 target kernel documentation과 UART driver를 확인합니다.
 
 ```text
 # 명시적 주소
@@ -286,9 +289,13 @@ probe 단계의 hang을 좁히는 데 효과적입니다. 부팅 단계에서 ft
 ```bash
 # OpenOCD
 openocd -f interface/jlink.cfg -f target/imx8mm.cfg
+```
 
-# 다른 터미널에서 gdb
+```bash
 gdb-multiarch vmlinux
+```
+
+```text
 (gdb) target remote :3333
 (gdb) info registers
 (gdb) bt
@@ -311,7 +318,7 @@ kgdboc=ttymxc0,115200 kgdbwait
 console=ttymxc0,115200 console=tty0
 ```
 
-마지막에 적은 console이 *primary*(`/dev/console`)가 됩니다. 시리얼과 HDMI 모두에 보내고 싶으면 둘 다 적습니다.
+여러 `console=` 인자는 여러 console로 출력할 수 있지만 `/dev/console` 지정은 등록 순서와 console driver에 영향을 받습니다. 대상 kernel의 serial-console 문서에서 순서 규칙을 확인합니다.
 
 ## 부팅 실패 진단 체크리스트
 
@@ -338,9 +345,9 @@ console=ttymxc0,115200 console=tty0
 - 부팅 실패는 garbage, hang, panic, late hang의 4가지 모드로 분류됩니다.
 - 시리얼 garbage는 baud rate, pinmux, 클럭 중 하나입니다.
 - Hang은 *마지막 라인*이 핵심 단서이며, SPL·U-Boot proper·kernel decompress·driver probe 단계에 따라 의심 영역이 다릅니다.
-- Kernel panic은 메시지에 원인이 적혀 있으므로 `Unable to mount root fs`, `No init found`, NULL deref 패턴을 익혀 둡니다.
+- Kernel panic은 메시지와 call trace가 조사 단서를 제공하므로 `Unable to mount root fs`, `No init found`, NULL deref 패턴을 익혀 둡니다.
 - Late hang은 systemd unit 실패, OOM, getty miss-attach가 흔합니다.
-- `earlycon`은 BSP 초기에 절대 빠뜨리지 말아야 할 인자입니다.
+- `earlycon`은 초기 로그를 확인할 때 유용하지만 주소·driver·console 설정을 target kernel과 맞춰야 합니다.
 - ftrace, kgdb, JTAG로 깊은 진단이 가능하지만 먼저 `dmesg`와 `/proc/cmdline`을 확인합니다.
 - `CONFIG_DEBUG_FS`, `CONFIG_PRINTK_TIME`, `CONFIG_MAGIC_SYSRQ`는 디버깅 친화 옵션입니다.
 

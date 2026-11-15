@@ -13,7 +13,7 @@ topics: ["tools", "tools/debugging"]
 생성된 core 파일은 그저 *ELF*입니다. `e_type = ET_CORE`. 일반 실행 파일·shared library와 *같은 포맷*. 이 장은 core 안에 *어떤 정보*가 어떻게 들어 있는지를 깊이 봅니다 — PT_NOTE 세그먼트의 모든 NT_* 노트, PT_LOAD의 메모리 매핑, 그리고 *부분 core*가 어떻게 표현되는지.
 
 :::tldr
-ELF core = PT_NOTE (스레드·프로세스 메타) + PT_LOAD (메모리 내용). 디버거가 이 둘로 *프로세스 상태 전체*를 재구성.
+ELF core는 보통 `PT_NOTE` 메타데이터와 `PT_LOAD` 메모리 영역을 담습니다. core filter와 플랫폼에 따라 빠진 정보가 있어 프로세스 상태 전체가 항상 복원되는 것은 아닙니다.
 :::
 
 ## 전체 구조
@@ -40,7 +40,7 @@ Program Headers:
   ...
 ```
 
-`PT_NOTE` 한 개 + `PT_LOAD` 다수.
+`PT_NOTE`와 `PT_LOAD`의 개수와 내용은 실제 core·커널·아키텍처에 따라 달라집니다. 아래 출력은 형식을 설명하는 예시입니다.
 
 ## PT_NOTE — 메타데이터
 
@@ -48,17 +48,33 @@ NOTE 세그먼트 안에 *Note 레코드*들이 연속.
 
 ### Note 레코드 구조
 
-```c
+```c title="elf-note-layout.c"
+#include <stddef.h>
+#include <stdint.h>
+
 struct Elf64_Nhdr {
-    Elf64_Word n_namesz;     // name 길이 (NUL 포함)
-    Elf64_Word n_descsz;     // descriptor 길이
-    Elf64_Word n_type;       // NT_*
+    uint32_t n_namesz;
+    uint32_t n_descsz;
+    uint32_t n_type;
 };
-// 이후 name (n_namesz, 4-byte aligned)
-// 이후 descriptor (n_descsz, 4-byte aligned)
+
+static int align4(size_t n, size_t *aligned) {
+    if (n > SIZE_MAX - 3u) return -1;
+    *aligned = (n + 3u) & ~(size_t)3u;
+    return 0;
+}
+
+_Static_assert(sizeof(struct Elf64_Nhdr) == 12, "ELF note header layout");
+
+int main(void) {
+    size_t a, b;
+    return align4(5, &a) == 0 && a == 8 &&
+           align4(9, &b) == 0 && b == 12 &&
+           align4(SIZE_MAX, &a) == -1 ? 0 : 1;
+}
 ```
 
-`name`이 vendor 식별 (보통 `"CORE"` 또는 `"LINUX"`). `n_type` + `name`이 *노트 종류*를 결정.
+노트 이름과 descriptor는 각각 4바이트 경계로 정렬됩니다. 이 독립 C 예제는 헤더와 정렬 산술만 확인하며, kernel의 실제 `NT_PRSTATUS` ABI를 재현하지 않습니다. `name`은 owner 식별자(예: `CORE`, `LINUX`)이고 `n_type`과 함께 노트 종류를 구분합니다.
 
 ### 주요 NT_*
 
@@ -182,8 +198,8 @@ $1 = {si_signo = 11, si_code = 1, si_errno = 0,
 |-------------------|------|
 | 1 (SEGV_MAPERR) | 주소가 매핑되지 않음 — NULL deref 또는 잘못된 포인터 |
 | 2 (SEGV_ACCERR) | 권한 없음 — read-only에 쓰기 |
-| 6 (SEGV_BNDERR) | bounds 위반 (MPX) |
-| 7 (SEGV_PKUERR) | 메모리 보호 키 위반 |
+| 3 (SEGV_BNDERR) | bounds 위반 (Linux 3.19 이상) |
+| 4 (SEGV_PKUERR) | 메모리 보호 키 위반 (Linux 4.6 이상) |
 
 | si_code (SIGBUS) | 의미 |
 |------------------|------|
@@ -197,10 +213,12 @@ $1 = {si_signo = 11, si_code = 1, si_errno = 0,
 | 1 (ILL_ILLOPC) | illegal opcode |
 | 2 (ILL_ILLOPN) | illegal operand |
 | 3 (ILL_ILLADR) | illegal address |
-| 7 (ILL_PRVOPC) | privileged opcode |
-| 8 (ILL_PRVREG) | privileged register |
+| 5 (ILL_PRVOPC) | privileged opcode |
+| 6 (ILL_PRVREG) | privileged register |
 
-`si_addr`가 *실제 접근한 주소*. NULL deref라면 `0x0` 또는 그 근처.
+이 값은 Linux `si_code` 상수입니다. 지원되는 시그널 종류와 일부 세부 코드는 kernel·아키텍처에 따라 다릅니다. [Linux `sigaction(2)`의 `si_code` 목록](https://man7.org/linux/man-pages/man2/sigaction.2.html#The_si_code_field)을 기준으로 확인합니다.
+
+fault 관련 시그널에서 `si_addr`는 fault 주소를 나타내지만, NULL 역참조로 원인을 단정할 수는 없습니다. 명령어·레지스터·매핑 권한과 함께 해석합니다.
 
 ## NT_FILE — 매핑된 파일
 
@@ -217,7 +235,7 @@ struct {
 };
 ```
 
-각 entry가 *한 매핑 영역*. 실행 파일 + 모든 .so + mmap된 파일.
+각 entry는 core 생성 시 기록된 파일 매핑을 설명합니다. 필터·커널·파일 상태에 따라 목록이 불완전할 수 있습니다.
 
 ```bash
 $ readelf -n core | grep -A 40 NT_FILE | head -50
@@ -236,9 +254,9 @@ $ readelf -n core | grep -A 40 NT_FILE | head -50
     ...
 ```
 
-GDB가 이 정보로 *어떤 라이브러리*가 로드됐는지 + *어디에* 알아냅니다. core dump 분석의 핵심.
+GDB는 이 정보를 사용해 파일 매핑과 주소 범위를 복원합니다. 저장된 core에 모든 매핑이 있다고 가정하지 않습니다.
 
-다른 머신에서 core 분석 시 — *같은 라이브러리 버전*을 그 머신에 두거나 (sysroot로 가리키거나), debuginfod로 자동 다운로드.
+다른 머신에서 분석할 때는 일치하는 실행 파일·라이브러리와 심볼을 제공해야 합니다. debuginfod 자동 다운로드는 GDB 지원·활성화·서버 구성에 달려 있습니다.
 
 ## NT_AUXV — auxv 벡터
 
@@ -358,15 +376,15 @@ $ gdb /usr/local/bin/server /var/crash/core.server.1234
 
 ### Build-ID 매칭
 
-core 안에 *실행 파일의 build-id*도 저장. 다른 머신에서 core를 받으면.
+실행 파일의 GNU build ID는 실행 파일의 ELF note에 있습니다. kernel·GDB가 core에서 매핑된 파일의 build ID를 추출할 수 있는 경우도 있지만, `readelf -n core`에 실행 파일 ID가 항상 들어 있다고 가정하지 않습니다.
 
 ```bash
-$ readelf -n core | grep -B 1 "Build ID"
-  CORE
+$ readelf -n /usr/local/bin/server | grep -B 1 "Build ID"
+  GNU
   Build ID: 8d3a91f0e5...
 ```
 
-이 build-id로 *맞는 실행 파일*을 찾기. `/usr/lib/debug/.build-id/8d/3a91f0e5...`에 debuginfo 검색.
+이 ID와 일치하는 실행 파일·분리 debuginfo를 찾습니다. GDB의 검색 경로와 debuginfod 동작은 다음 장에서 다룹니다.
 
 자세히는 다음 장.
 
@@ -408,7 +426,7 @@ $ file /cores/core.12345
 /cores/core.12345: Mach-O 64-bit core x86_64
 ```
 
-GDB와 LLDB 모두 두 포맷 읽음. 그래서 *Linux core를 macOS의 lldb로* 분석도 가능 (드물지만).
+GDB와 LLDB의 core reader는 운영체제와 빌드 설정에 따라 지원 포맷이 다릅니다. ELF와 Mach-O가 모두 읽힌다고 가정하거나, Linux core를 macOS LLDB에서 읽을 수 있다고 전제하지 않습니다. 사용 중인 도구의 core support로 확인합니다.
 
 ## .ips / .crash — Apple
 
@@ -423,9 +441,9 @@ MyApp_2026-05-10-032114_MyMac.ips
 
 ## minidump — Google Breakpad
 
-크로스 플랫폼 *축약된 core* 포맷.
+크로스 플랫폼 crash-report 형식입니다. Linux ELF core와 호환되는 축약본이라고 단정하지 않습니다.
 
-*콜스택 + 일부 핫 메모리 + 모듈 목록*만 담은 포맷. 크기는 보통 *수 MB* (full core의 1/1000).
+stream 구성은 플랫폼·수집기·설정에 따라 달라지며 스레드·모듈·exception·선택 메모리 영역 등을 포함할 수 있습니다. 파일 크기도 서비스 설정과 workload에 따라 달라집니다.
 
 Chrome·Firefox·게임이 사용. *대규모 클라이언트*에서 자동 수집에 적합.
 

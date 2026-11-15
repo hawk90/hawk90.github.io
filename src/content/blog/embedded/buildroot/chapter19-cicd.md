@@ -66,8 +66,8 @@ GitLab Runner를 docker executor로 띄운 상황을 가정합니다.
 stages: [build, package, deploy]
 
 variables:
-  BR2_DL_DIR: /cache/dl
-  CCACHE_DIR: /cache/ccache
+  BR2_DL_DIR: "$CI_PROJECT_DIR/cache/dl"
+  CCACHE_DIR: "$CI_PROJECT_DIR/cache/ccache"
   IMAGE: registry.example.com/embedded/buildroot-builder:2026.02
 
 default:
@@ -86,8 +86,13 @@ default:
       - cache/ccache/
     policy: pull-push
   script:
+    - mkdir -p cache/dl cache/ccache
+    - export BR2_DL_DIR="$CI_PROJECT_DIR/cache/dl"
     - make ${BOARD}_defconfig
-    - make BR2_CCACHE=y -j$(nproc) 2>&1 | tee build.log
+    - echo "BR2_CCACHE=y" >> .config
+    - echo "BR2_CCACHE_DIR=$CI_PROJECT_DIR/cache/ccache" >> .config
+    - make olddefconfig
+    - make 2>&1 | tee build.log
     - ccache -s
   artifacts:
     name: "image-${BOARD}-${CI_COMMIT_SHORT_SHA}"
@@ -176,8 +181,12 @@ jobs:
           BR2_DL_DIR: ${{ github.workspace }}/dl
           CCACHE_DIR: ${{ github.workspace }}/ccache
         run: |
+          mkdir -p dl ccache
           ccache --max-size=10G
-          make BR2_CCACHE=y -j$(nproc)
+          echo "BR2_CCACHE=y" >> .config
+          echo "BR2_CCACHE_DIR=$CCACHE_DIR" >> .config
+          make olddefconfig
+          make
           ccache -s
 
       - name: Upload image
@@ -271,7 +280,7 @@ tar -I 'zstd -T0' -cf ccache.tar.zst -C "$CCACHE_DIR" .
 aws s3 cp ccache.tar.zst "s3://buildroot-cache/ccache/${BOARD}.tar.zst"
 ```
 
-zstd 압축이 LZ4보다 약 30% 작고 LZMA보다 5배 빠릅니다. ccache처럼 *중복이 많은* 디렉터리에 잘 맞습니다.
+zstd·LZ4·LZMA의 크기와 속도는 입력 데이터, 옵션, CPU에 따라 달라집니다. 캐시를 압축한다면 실제 runner와 cache corpus에서 크기·압축·해제 시간을 함께 측정하세요.
 
 ## matrix build — 다중 defconfig 동시
 
@@ -314,7 +323,7 @@ CI 마지막 단계는 산출물을 *artifact repo*로 보내는 것입니다. �
 | 산출물 | 위치 | 소비자 |
 |---|---|---|
 | `rootfs.tar.zst` / `*.img` | `output/images/` | 양산 라인 |
-| `sdk.tar.zst` | `output/host/` → `make sdk` | application 개발자 |
+| `<target-tuple>_sdk-buildroot.tar.gz` | `output/images/` → `make sdk` | application 개발자 |
 | `legal-info/` | `output/legal-info/` (Ch 18) | 법무 |
 | SBOM JSON | `output/sbom.json` | 보안 |
 | CVE report | `cve-check.txt` | 보안 / QA |
@@ -327,8 +336,8 @@ TAG=$(git describe --tags --always)
 aws s3 cp output/images/sdcard.img \
   "s3://artifacts.example.com/${BOARD}/${TAG}/sdcard.img"
 
-aws s3 cp output/sdk.tar.zst \
-  "s3://artifacts.example.com/sdk/${TAG}.tar.zst"
+aws s3 cp output/images/aarch64-buildroot-linux-gnu_sdk-buildroot.tar.gz \
+  "s3://artifacts.example.com/sdk/${TAG}-sdk.tar.gz"
 
 aws s3 cp output/sbom.json \
   "s3://artifacts.example.com/sbom/${BOARD}/${TAG}.json"

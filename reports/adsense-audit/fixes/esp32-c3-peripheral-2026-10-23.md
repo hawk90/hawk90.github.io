@@ -1,0 +1,68 @@
+# ESP32-C3 peripheral repairs — 2026-10-23
+
+No re-score. Evaluation ledger preserved. Scope: Fullthreechapter sources and loop24/25 evaluations read; actual pinnedESP-IDFv5.4.2 driver/header contracts compared and extracted native helper tests run with explicitlyfakebackends.
+
+## Checks and limits
+
+Actualpinnedheaders+explicitfakeLEDC/I2C/ADCbackend and pureformat/arithmetic helpers only. No fullIDFproject, board/flash/driverISR/scheduler/clockDMA/ADCaccuracy/sleepwake/radio/electrical/motor hardware execution. APIsignature and hosterror/lifetime validation do not establish targettiming/safety. Unrelatedclone-onlygate skipped.
+
+Gate: [esp32-c3-peripheral-2026-10-23-gate.log](esp32-c3-peripheral-2026-10-23-gate.log).
+Execution: [esp32-c3-peripheral-2026-10-23.log](esp32-c3-peripheral-2026-10-23.log).
+Execution: [esp32-c3-peripheral-2026-10-23-diagrams.log](esp32-c3-peripheral-2026-10-23-diagrams.log).
+Execution: [esp32-c3-peripheral-2026-10-23-gpio-diagram.log](esp32-c3-peripheral-2026-10-23-gpio-diagram.log).
+
+## Per-article evidence
+
+### `chapter04-gpio-ledc-pwm.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/riscv/esp32-c3-mastering/chapter04-gpio-ledc-pwm.md
+2. **problemSignalAndCounterevidence:** Nonexistent C3 MCPWM motor API, invalid16bitLEDC, unlimited mapping/current/routing/timing guarantees, unchecked calls and uninitialized ISR queue.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** PinnedC3soc_caps14bit/6channel/4timer/noMCPWM, GPIO/LEDC headers and driver docs.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Corrected manual title/description to actualGPIO/LEDC support; removed C3 MCPWM execution example, fixed14bit range/error paths and pulse-to-duty helper; bounded pin/routing/fade claims and corrected diagram.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** Actual headers and explicit fake LEDC backend: timer/channel/set/update errors, duty0/8191/invalid, pure pulseboundaries ASan/UBSan pass. ModifiedGPIOdiagram0overlap0touch. No physicalPWM/motor/ISR current tests. Actualpinnedheaders+explicitfakeLEDC/I2C/ADCbackend and pureformat/arithmetic helpers only. No fullIDFproject, board/flash/driverISR/scheduler/clockDMA/ADCaccuracy/sleepwake/radio/electrical/motor hardware execution. APIsignature and hosterror/lifetime validation do not establish targettiming/safety. Unrelatedclone-onlygate skipped.
+
+Before SHA-256: `a45d7d73a82997cd9bc8dd28b970a3a3c67ea0e94b6b5f100aed7474f3766cf9`. After SHA-256: `fc193cdf241bbcd45b42b710b40037529d480236050f44229cebd825ce7d91e5`.
+
+Next action: manual-review. Which actual part/module pin map, SDK configuration, driver lifetime and measured output waveform/electrical protection establish the intended PWM application?
+
+### `chapter05-uart-spi-i2c-i2s.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/riscv/esp32-c3-mastering/chapter05-uart-spi-i2c-i2s.md
+2. **problemSignalAndCounterevidence:** WrongC3GP-SPI2/3count, always-nonblockingUART and DMA-freeCPU, queue/buffer lifetime, unsafeOLEDallocation, stereo half-frame writes, wrongI2SDMAdefaults and unsupported speed/size rules.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** PinnedUART/SPI/I2C/I2S header+driver contracts, soc capabilities, I2Schannel default macro and actualI2C master headers.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Corrected host count/APItimeout/lifetime/error contracts; bounded I2C helpers require blocking callback-free devices, OLED guards allocation/free; added stereo-frame helper; actual6x240defaults; removed ungrounded performance thresholds. Manualdescription correction.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** ActualI2C headers with explicitfakeblockingbackend verify size/controlbytes/timeouts, propagatedfailures/null/oversize/OOM/noIO/free. StereoL/R/sample bounds/capacity/rate/frequency/phase tests ASan/UBSan pass. Setup/target driver integration not executed. Actualpinnedheaders+explicitfakeLEDC/I2C/ADCbackend and pureformat/arithmetic helpers only. No fullIDFproject, board/flash/driverISR/scheduler/clockDMA/ADCaccuracy/sleepwake/radio/electrical/motor hardware execution. APIsignature and hosterror/lifetime validation do not establish targettiming/safety. Unrelatedclone-onlygate skipped.
+
+Before SHA-256: `a63b27e9c8ab75cfdd5c670e30b15ee1a546071eee29da3975e1c1b679cf05b4`. After SHA-256: `c676e8d91951fb3dfc59fe7df3238fd0f9f9cccce206ac1082e6e88b1beca5f8`.
+
+Next action: manual-review. Which board devices, exclusive pins/bus ownership, blocking-vs-async contracts and actual wire/frame/partialcompletion/overflow measurements establish the complete transfer path?
+
+### `chapter06-adc-touch.md` — remediated
+
+1. **contextAndScope:** src/content/blog/embedded/riscv/esp32-c3-mastering/chapter06-adc-touch.md
+2. **problemSignalAndCounterevidence:** Falsely advertised9touchchannels, wrongADC1count/reference/WiFiADC2/MHz, guessedfuseblocks and unsafe1100mVfallback, uncheckedhandle/error/sampleparser, incorrectdeepGPIOwake and diagramoverlaps.
+3. **causeHypothesisAndAlternatives:** The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.
+4. **evidence:** PinnedADCcalibration/oneshot/haltypes/soccaps/esp_sleep sources and publictargetdocs.
+5. **sampleCoverage:** Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.
+6. **decision:** Correctedtitle/description and actualADC/errata/config/calibration boundaries; completecheckedcontext lifecycle and converted-mV averaging, goldenTYPE2decoder; removed fabricatedmeasurement/board guarantees, correctedwakecontract and dividerdiagram.
+7. **smallestSafeChange:** Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.
+8. **validationAndResidualRisk:** ActualADCheaders+explicitfakebackend testedopen/config/calibration/read/convert/deletefailures, retain/retryhandles, unchangedoutputonerror, boundedcount/raw; golden0/4095, wrongunit/channel/short/unaligned/capacity/null decoder ASan/UBSan pass. Divider/riscvdiagrams now0overlap0touch, closing priorch06diagramfollowup. NoADCaccuracy/OTA/sleephardwaretest. Actualpinnedheaders+explicitfakeLEDC/I2C/ADCbackend and pureformat/arithmetic helpers only. No fullIDFproject, board/flash/driverISR/scheduler/clockDMA/ADCaccuracy/sleepwake/radio/electrical/motor hardware execution. APIsignature and hosterror/lifetime validation do not establish targettiming/safety. Unrelatedclone-onlygate skipped.
+
+Before SHA-256: `3fbe7feee2e37edc282eb96a598da1e838d8bee694360a541c2337bb31c27a39`. After SHA-256: `1457b04abe33aee6fda7937a95ffc0236f67f583e270de5b320211a3deaf2ad9`.
+
+Next action: manual-review. Which actualboard/analoginput/referenceinstrument, impedance/settling/calibrationrevision, DMAoverflow/restart and sleepwake tests establish measurement error and lifecycle behavior?
+
+## Primary sources
+
+- [https://github.com/espressif/esp-idf/tree/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0](https://github.com/espressif/esp-idf/tree/f5c3654a1c2d2a01f7f67def7a0dc48e691f63c0)
+- [https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/ledc.html](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/ledc.html)
+- [https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/i2c.html](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/i2c.html)
+- [https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/adc_calibration.html](https://docs.espressif.com/projects/esp-idf/en/v5.4.2/esp32c3/api-reference/peripherals/adc_calibration.html)
+
+readyForIntegration records only the declared repair/verification scope; target follow-ups remain open.

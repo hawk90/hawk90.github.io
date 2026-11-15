@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 `perf report`의 tree view는 정확하지만 한 화면에 한 path만 보여 줍니다. 100개 함수가 균등하게 hot하면 모든 path를 펼쳐 보며 비교해야 합니다.
 
-Flamegraph는 동일한 stack sample을 가로폭으로 합쳐 보여 줍니다. 가로폭이 넓으면 hot, 세로가 높으면 깊은 호출입니다. 색상은 의미가 없고 시각적 구분 용도이며, 정렬은 알파벳 순입니다.
+Flamegraph는 동일한 형식의 stack sample을 가로폭으로 합쳐 보여 줍니다. 가로폭은 입력 sample의 비율을 나타내며, CPU sampling이라면 해당 설정에서 관측된 on-CPU sample의 비율입니다. 세로는 호출 깊이입니다. 기본 색은 시각적 구분에 쓰지만, `--color` 팔레트는 입력 유형별 색 구분을 제공할 수 있습니다. 기본 정렬은 시간 순서가 아닙니다.
 
 이 글에서는 perf로 stack을 수집해 flamegraph로 변환하는 표준 workflow, off-CPU flamegraph, 차분 flamegraph를 살펴봅니다.
 
@@ -33,7 +33,8 @@ cd FlameGraph
 수집과 변환은 세 단계입니다.
 
 ```bash
-# 1. perf record로 99 Hz로 stack sample 수집
+# 1. 예시 sample rate로 stack을 수집 (target에 맞게 조정)
+# perf record -F가 지원하는 최대값·비용을 확인합니다.
 perf record -F 99 -g --call-graph dwarf -- ./app
 # 또는 PID 지정
 perf record -F 99 -g -p <pid> -- sleep 30
@@ -51,6 +52,8 @@ perf script > out.perf
 생성된 SVG는 브라우저에서 열면 클릭과 검색이 가능합니다.
 
 ## Collapsed Format 이해
+
+`--reverse`, `--inverted`, `--flamechart`, 색상 옵션의 동작은 [FlameGraph 저장소 문서](https://github.com/brendangregg/FlameGraph)를 참고하세요.
 
 `stackcollapse-perf.pl`의 출력은 매우 단순합니다.
 
@@ -75,10 +78,10 @@ stackcollapse-jstack.pl jstack.txt > out.folded
 
 | 요소 | 의미 |
 |------|------|
-| 폭 | 해당 stack의 sample 비율 (전체 시간에서 차지하는 비중) |
+| 폭 | 해당 stack의 입력 sample 비율 (wall-clock 시간 비율과 동일하지 않음) |
 | 높이 | 호출 깊이 |
-| 색상 | 무의미 (시각 구분용) |
-| 정렬 | 알파벳 순 (시간 순서 아님) |
+| 색상 | 기본 팔레트는 시각 구분용; 선택 팔레트는 범주를 색으로 구분 가능 |
+| 정렬 | 기본 출력은 시간 순서가 아님 (`--flamechart`는 시간 순서 보존) |
 
 가장 흔한 패턴은 다음과 같습니다.
 
@@ -105,13 +108,11 @@ Off-CPU flamegraph는 `sched_switch` tracepoint로 task가 CPU를 떠나는 순�
 offcputime-bpfcc -df 30 > out.stacks
 flamegraph.pl --color=io --title="Off-CPU Time" < out.stacks > offcpu.svg
 
-# 또는 perf로
-perf record -e sched:sched_switch -g --call-graph dwarf -- sleep 30
-perf script | ./stackcollapse-perf.pl > out.folded
-flamegraph.pl --color=io < out.folded > offcpu.svg
+# sched_switch sample을 일반 perf stackcollapse로 바꾸는 것만으로
+# off-CPU 대기시간을 계산할 수는 없습니다. BCC offcputime은 별도 수집기입니다.
 ```
 
-I/O 대기와 mutex contention이 우측에 큰 면적으로 나타납니다.
+off-CPU 결과의 폭은 수집기가 기록한 대기 구간을 반영합니다. 스택의 가로 위치 자체는 시간축이 아니며, 원인이 I/O인지 lock인지 별도 이벤트와 workload로 판별합니다.
 
 ## On-CPU와 Off-CPU 함께 보기
 
@@ -152,11 +153,11 @@ perf script | ./stackcollapse-perf.pl > after.folded
 기본 flamegraph는 bottom-up으로 leaf가 위쪽입니다. Icicle graph는 top-down으로 root가 위쪽입니다.
 
 ```bash
-flamegraph.pl --reverse < out.folded > icicle.svg
-flamegraph.pl --inverted < out.folded > inverted.svg
+flamegraph.pl --inverted < out.folded > icicle.svg
+flamegraph.pl --reverse < out.folded > reversed-stack.svg
 ```
 
-`--reverse`는 함수 순서를 뒤집어 leaf부터 보여 줍니다. 어떤 leaf 함수가 여러 path에서 호출되는지 확인할 때 유용합니다.
+`--inverted`는 root가 위에 오는 icicle 모양을 만듭니다. `--reverse`는 각 stack의 frame 순서를 뒤집는 옵션으로, 호출 방향을 바꿔 살펴볼 때 사용합니다.
 
 ## 색상 옵션
 
@@ -204,13 +205,13 @@ perf record -g --call-graph fp ./app   # → stack 깨짐, flame이 짧고 평�
 perf record -F 9 ./app                 # 9 Hz → 30초에 270 sample
 ```
 
-Sample이 적으면 통계가 부정확합니다. 99 Hz 또는 999 Hz가 표준입니다. 99 Hz는 다른 주기적 작업과 alias가 발생하지 않도록 prime number를 쓰는 관행입니다.
+Sample 수가 적으면 분포의 불확실성이 커집니다. sample rate와 수집 시간을 정할 보편적 정답은 없으므로 관측 대상과 비용에 맞춰 선택하고, 반복 측정이나 신뢰구간을 고려합니다.
 
 > ⚠️ On-CPU만 보고 I/O 무시
 
 on-CPU flame이 비어 있는 것을 보고 "최적화할 곳이 없다"고 결론 내리는 경우입니다.
 
-응답 시간이 길지만 on-CPU가 비어 있으면 거의 항상 off-CPU에 답이 있습니다.
+응답 시간은 긴데 on-CPU profile에 일이 거의 보이지 않으면 off-CPU 대기, scheduler delay, 수집 범위를 함께 조사합니다.
 
 > ⚠️ 너무 짧은 측정 시간
 
@@ -218,7 +219,7 @@ on-CPU flame이 비어 있는 것을 보고 "최적화할 곳이 없다"고 결�
 perf record -F 99 ./app                # 0.1초만 실행
 ```
 
-수집 시간이 짧으면 잡음에 묻힙니다. 최소 5초, 가능하면 30초 이상을 기록합니다.
+수집 시간이 짧으면 관측 sample이 적습니다. 기간은 workload의 반복 특성에 맞춰 정하고, sample count와 반복 간 변동을 함께 봅니다.
 
 ## 정리
 
@@ -227,7 +228,7 @@ perf record -F 99 ./app                # 0.1초만 실행
 - On-CPU flamegraph는 CPU 시간을, off-CPU flamegraph는 blocked 시간을 보여 줍니다.
 - 차분 flamegraph로 before/after 회귀를 시각적으로 확인합니다.
 - Frame pointer가 없으면 stack이 깨지므로 컴파일 옵션 또는 DWARF를 사용합니다.
-- 99 Hz, 30초 이상이 표준 sampling 설정입니다.
+- Sampling rate와 지속 시간은 질문·이벤트·시스템 비용에 맞춰 정합니다.
 
 다음 편은 **ARM DS / Lauterbach** — 임베디드 전용 hardware trace 도구.
 

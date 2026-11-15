@@ -58,7 +58,7 @@ add r2, r0, r3   F D E       ; E 단계에 r0 필요 — but M 단계 안 끝남
                      ─── 1 cycle bubble ───
 ```
 
-ARM Cortex-M3/M4의 *load-use penalty는 1 cycle*입니다. Cortex-M7은 2 cycle입니다.
+load-use penalty는 target core, instruction pair, memory system과 compiler output에 따라 달라집니다. Cortex-M4·M7의 정확한 cycle 수는 해당 revision TRM과 측정으로 확인합니다.
 
 ### 해결책은 명령 재정렬
 
@@ -73,7 +73,7 @@ add r4, r5, r6   ; 독립 명령 삽입
 add r2, r0, r3   ; ← load 결과 사용 시점에 준비됨
 ```
 
-`-O2` 이상에서 컴파일러가 자동으로 재정렬합니다. `volatile` 변수는 *순서가 고정*되어 재정렬되지 않습니다.
+최적화 컴파일러는 alias·예외·언어 메모리 모델과 대상에 따라 명령을 재배치할 수 있습니다. `volatile`은 C 추상기계의 volatile 접근을 보존하지만 일반적인 memory fence나 task 간 동기화 primitive가 아닙니다. 생성된 assembly를 확인합니다.
 
 ## Structural Hazard
 
@@ -85,7 +85,7 @@ ldr r2, [r3]    ; F D E    ← M 단계에 또 memory 시도 → stall
 
 **Harvard architecture**를 쓰면 instruction memory와 data memory가 분리되어 동시에 액세스할 수 있습니다.
 
-ARM Cortex-M3/M4는 *single port* Harvard입니다 (I/D 통합 bus). M7은 *dual port* TCM을 가집니다.
+Cortex-M3/M4에는 ICode, DCode, System AHB-Lite 인터페이스가 있습니다. ICode/DCode 경로는 분리되어 있지만 System 경로는 다른 접근과 공유·중재될 수 있으므로, 코어 전체를 단일 I/D 통합 bus라고 부르지 않습니다. Cortex-M7 인터페이스 구성은 제품 TRM과 MCU 통합을 따릅니다.
 
 ## Control Hazard
 
@@ -140,7 +140,7 @@ Cortex-A53 Performance Monitoring Unit의 이벤트는 다음과 같습니다.
 |---|---|
 | `0x23` STALL_FRONTEND | F·D 단계 stall입니다 (cache miss·branch mispredict) |
 | `0x24` STALL_BACKEND | E·M 단계 stall입니다 (data dependency·memory) |
-| `0x73` STALL_BACKEND_MEM | memory bound stall입니다 |
+| implementation-specific raw event | target TRM/OS PMU driver에서 지원 여부와 의미 확인 |
 
 ```c
 /* perf_event_open으로 측정 */

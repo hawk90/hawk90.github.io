@@ -123,7 +123,7 @@ $ cd ~/work/buildroot
 $ make BR2_EXTERNAL=~/work/br2-acme qemu_aarch64_virt_defconfig
 ```
 
-이 명령은 *영구적으로* 외부 트리 경로를 `output/.br-external.mk`에 기록합니다. 다음부터는 `make`만 쳐도 외부 트리를 인식합니다. 즉 *한 번만* `BR2_EXTERNAL=...`을 명시하면 됩니다.
+이 명령은 외부 트리 경로를 `output/.br2-external.mk`에 기록합니다. 같은 output 디렉터리를 사용하는 후속 `make`는 이 파일에서 경로를 읽습니다.
 
 ```bash
 make menuconfig
@@ -215,14 +215,14 @@ source "$BR2_EXTERNAL_ACME_PATH/package/acme-firmware/Config.in"
 
 ## 여러 외부 트리 stacking
 
-`BR2_EXTERNAL`은 *콜론으로 구분된 여러 경로*를 받습니다. 회사 트리 위에 프로젝트 트리를 얹는 흐름이 흔합니다.
+`BR2_EXTERNAL`은 여러 외부 트리 경로를 공백으로 구분해 받습니다. 회사 공통 트리와 제품 트리를 함께 지정할 수 있습니다.
 
 ```text
-$ make BR2_EXTERNAL=~/work/br2-acme:~/work/br2-project-x \
+$ make BR2_EXTERNAL="~/work/br2-acme ~/work/br2-project-x" \
     qemu_aarch64_virt_defconfig
 ```
 
-각 트리의 `external.desc`에 적힌 `name`이 prefix가 됩니다. 위 예시면 `BR2_EXTERNAL_ACME_PATH`와 `BR2_EXTERNAL_PROJECT_X_PATH`가 동시에 정의됩니다. 후자가 전자의 패키지를 *override*할 수도 있는데, 우선순위는 `BR2_EXTERNAL` 인자의 순서를 따릅니다. 뒤에 오는 트리가 이깁니다.
+각 트리의 `external.desc`에 적힌 `name`이 prefix가 됩니다. 위 예시면 `BR2_EXTERNAL_ACME_PATH`와 `BR2_EXTERNAL_PROJECT_X_PATH`가 동시에 정의됩니다. 같은 이름의 패키지를 뒤 트리가 일반적으로 덮어쓰는 방식은 지원되지 않습니다. 패키지 이름과 Kconfig 심볼을 구분하고, 우선순위가 적용되는 구체 기능은 해당 릴리스 매뉴얼에서 확인하세요.
 
 회사 공통은 `br2-acme/`에, 제품별 차이는 `br2-product-x/`에 두는 식의 *2단 레이어*가 실무에서 가장 흔한 구성입니다.
 
@@ -254,7 +254,7 @@ defconfig 안에서도 Buildroot의 변수 expansion이 동작합니다. 따라�
 
 ```text
 $ cd ~/work/buildroot
-$ cat output/.br-external.mk
+$ cat output/.br2-external.mk
 # 첫 줄에 BR2_EXTERNAL = /home/user/work/br2-acme
 
 $ make show-info | grep -i external
@@ -304,8 +304,8 @@ Kconfig 옵션 이름(`BR2_PACKAGE_ACME_FIRMWARE`)이 같으면 두 번째 정�
 - `BR2_EXTERNAL`은 Buildroot 본체를 fork하지 않고 *내 패키지·보드·defconfig*만 분리하는 공식 메커니즘입니다.
 - 최소 구성은 `external.desc`, `external.mk`, `Config.in` 셋입니다.
 - 외부 트리의 디렉터리 구조는 본체와 동일합니다. `package/`, `board/`, `configs/`를 같은 규약으로 사용합니다.
-- `make BR2_EXTERNAL=...`은 한 번만 명시하면 `output/.br-external.mk`에 기록됩니다.
-- 콜론으로 여러 트리를 stacking할 수 있습니다. 뒤에 오는 트리가 우선순위에서 이깁니다.
+- `make BR2_EXTERNAL=...`은 외부 트리 경로를 `output/.br2-external.mk`에 기록합니다.
+- 공백으로 여러 트리를 지정할 수 있습니다. 같은 패키지의 뒤 트리 override를 가정하지 말고 릴리스별 지원 계약을 확인합니다.
 - defconfig·overlay 경로는 항상 `$(BR2_EXTERNAL_<NAME>_PATH)`로 표기합니다. 절대 경로 하드코딩은 금지입니다.
 
 ## 다음 장 예고

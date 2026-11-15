@@ -59,27 +59,27 @@ struct Node {
     struct Node* next;
 };
 
-Node* head = malloc(sizeof(Node));
-head->next = malloc(sizeof(Node));    // ← 자식
+struct Node* head = malloc(sizeof(*head));
+head->next = malloc(sizeof(*head));    // ← 자식
 head->next->next = NULL;
 // head를 잃어버림 → head->next도 잃어버림
 ```
 
 이 경우:
-- `head` → *definitely lost* (40 bytes)
-- `head->next` → *indirectly lost* (40 bytes)
+- head 할당은 definitely lost, head->next 할당은 indirectly lost가 될 수 있습니다.
+- 각 할당 크기는 sizeof(struct Node)이며 ABI에 따라 달라집니다.
 
 `head`가 잃어버려진 순간 `head->next`도 *도달 불가능*해집니다. 두 누수는 *같은 사고의 부산물*입니다.
 
 ### 우선순위: definite와 함께
 
-`indirectly lost`는 *직접 고칠 필요 없습니다*. 대응하는 `definitely lost`를 고치면 *자동으로* 사라집니다.
+루트를 잃어버린 원인을 고치고 연결된 자식까지 순회 해제해야 합니다. head만 free하면 자식은 여전히 누수이며 오히려 definite로 바뀔 수 있습니다.
 
 보고서를 볼 때:
 
 1. *definite* 항목들을 모두 검토.
 2. 각 definite의 *자식 그래프*가 indirect로 묶임.
-3. definite를 고치면 indirect도 같이 해소.
+3. 자료 구조 전체의 소유권·해제 경로를 고친 뒤 두 분류가 모두 해소됐는지 확인합니다.
 
 ```text
 40 bytes in 1 blocks are definitely lost in loss record X
@@ -114,15 +114,15 @@ p += 10;       // 포인터 내부를 가리킴
 1. **C++ 다중 상속**
 
 ```cpp
-class Base1 {};
-class Base2 {};
-class Derived : public Base1, public Base2 {};
+struct Base1 { virtual ~Base1() = default; int a = 1; };
+struct Base2 { virtual ~Base2() = default; int b = 2; };
+struct Derived : Base1, Base2 {};
 
 Base2* b = new Derived();   // b는 Derived의 *Base2 부분*을 가리킴 (블록 중간)
-// b를 잃어버리면 → possibly lost
+// b만 루트로 남으면 ABI·휴리스틱에 따라 내부 포인터로 분류될 수 있음
 ```
 
-다중 상속 객체의 *비-첫 베이스 포인터*는 객체 시작이 아니라 *내부*를 가리킵니다.
+비어 있는 기반 클래스는 empty base 최적화로 같은 주소일 수 있습니다. 위처럼 멤버가 있는 경우에도 정확한 배치와 Memcheck의 multipleinheritance 휴리스틱을 확인합니다. 내부 포인터도 잃어버리면 possibly가 아니라 definite 쪽 분류가 될 수 있습니다.
 
 2. **STL 컨테이너 내부 구현**
 
@@ -145,7 +145,7 @@ char* slot2 = pool + 200;
 
 *possibly lost*는 *케이스별 판단*이 필요합니다.
 
-- 다중 상속·STL은 *false positive*. 무시.
+- 다중 상속·STL도 소유권·해제 경로·내부 포인터와 휴리스틱 적용을 확인합니다. 이름만으로 오탐으로 분류하지 않습니다.
 - 메모리 풀에서 정리 잊은 거면 *진짜 누수*.
 
 `--show-leak-kinds=definite,possible`로 함께 검사하고, possibly가 우리 코드 자리면 *definite처럼 다룸*.
@@ -179,7 +179,7 @@ int main() {
 
 ### 우선순위: 보통 무시
 
-대부분의 *still reachable*은 *의도된 동작*입니다. CI에서 빌드 실패로 만들 이유 없음.
+still reachable은 현재 루트에서 도달 가능하다는 분류입니다. 의도한 종료 시 보존인지, 요청마다 늘어나는 무제한 캐시인지에 따라 영향과 CI 정책이 달라집니다.
 
 ```bash
 # CI에서는 reachable 제외
@@ -218,7 +218,7 @@ public:
 };
 ```
 
-이렇게 하면 *still reachable이 0 bytes*로 떨어집니다. 다만 *비용 대비 효과*가 낮아 대부분의 프로젝트는 그대로 둡니다.
+이 객체의 해제 경로는 만들 수 있지만, 다른 런타임·라이브러리 할당까지 포함한 전체 reachable=0을 보장하지는 않습니다. 종료 순서와 서비스 반복 사용 목적도 함께 확인합니다.
 
 ---
 
@@ -235,12 +235,12 @@ LEAK SUMMARY가 다음과 같다고 합시다.
 
 이걸 고치는 순서:
 
-1. **definite 6개 항목 검토** — 각각 진짜 누수. 스택 트레이스로 위치 식별.
-2. **indirect는 함께 해소** — definite를 고치면 indirect도 사라짐.
-3. **possible 2개 항목 검토** — 다중 상속·STL이면 무시, 우리 코드면 fix.
+1. **definite 6개 블록 검토** — 블록 수는 loss record 수와 다릅니다. 할당 스택과 소유권을 확인합니다.
+2. **indirect의 자식 정리 확인** — 루트만 free하지 않고 자료 구조 전체를 정리합니다.
+3. **possible 2개 블록 검토** — 라이브러리 종류와 무관하게 내부 포인터·해제 경로를 확인합니다.
 4. **reachable은 검토만** — 의도된 정적 데이터인지 확인. 보통 무시.
 
-이 순서를 따르면 *6개의 definite 자리*만 고쳐도 보고서가 *거의 깨끗*해집니다.
+분류만으로 우선순위를 확정하지 않고 재현 빈도·증가량·사용자 영향·해제 책임을 함께 기록합니다. 하나의 소유권 오류가 여러 loss record로 보일 수도 있습니다.
 
 ---
 
@@ -260,8 +260,8 @@ LEAK SUMMARY가 다음과 같다고 합시다.
 
 | `blocks` 카운트 | 의미 |
 |----------------|------|
-| `in 1 blocks` | 일회성 누수. 짧게 도는 프로그램은 무시 가능 |
-| `in N blocks` | N번 호출된 자리에서 누수. 서버라면 시간당 누수율 측정 가능 |
+| `in 1 blocks` | 이번 검색에서 미해제인 블록 하나입니다. 일회성인지 반복되는지는 추가 관찰이 필요합니다. |
+| `in N blocks` | 해당 loss record에 묶인 미해제 블록 수입니다. 호출 빈도나 시간당 증가율을 직접 뜻하지 않습니다. |
 
 서버에서 `process_request`가 분당 1000번 호출되고 *매번 누수*면, 1시간 후 60,000개 블록이 쌓입니다. *반드시 고침*.
 
@@ -292,10 +292,10 @@ valgrind --leak-check=full --leak-resolution=high ./myapp
 ```
 
 - `low` — 상위 2 프레임만 매칭. 같은 함수에서 호출이면 같은 record.
-- `med` (기본) — 상위 4 프레임 매칭. 보통 적절.
-- `high` — 모든 프레임 매칭. 가장 세밀.
+- med는 할당 지점부터 4개 프레임을 비교합니다.
+- high가 기본값이며 기록된 모든 프레임을 비교합니다.
 
-세밀할수록 *record 개수가 많아지고* 보고서가 길어집니다. 처음에는 `med`로 보고, 깊은 분석 필요할 때 `high`로 올림.
+이 옵션은 보고서를 묶는 기준이며 누수 탐지 능력을 바꾸지 않습니다. num-callers로 저장한 깊이도 함께 확인하고, 필요할 때 기본 high에서 묶음 기준을 낮춥니다.
 
 ---
 
@@ -332,7 +332,7 @@ Valgrind는 *재귀의 각 깊이*를 *다른 호출자 컨텍스트*로 봅니�
 
 ## *Reachable from*
 
-`--show-reachable=yes`(또는 `--show-leak-kinds=reachable`)로 reachable 보고를 켜면, *어디서 가리키고 있는지*도 함께 보입니다.
+show-reachable=yes는 show-leak-kinds=all과 동치입니다. reachable만 보려면 show-leak-kinds=reachable을 사용합니다. 일반 보고 스택은 할당 위치이며 현재 루트 포인터의 위치를 직접 보여 주는 것은 아닙니다.
 
 ```text
 256 bytes in 1 blocks are still reachable in loss record 1
@@ -343,7 +343,7 @@ Valgrind는 *재귀의 각 깊이*를 *다른 호출자 컨텍스트*로 봅니�
 
 이 자리는 *config.c:10*에서 할당된 것이고 종료 시점에도 *살아 있는 포인터로 가리켜진다*는 뜻. 보통 전역 변수 또는 정적 캐시.
 
-위치를 확인하면 *의도된 거인지 사고인지* 즉시 판단됩니다.
+할당 위치를 출발점으로 소유권과 증가 추세를 조사합니다. 스택 하나만으로 의도와 무해성을 확정하지 않습니다.
 
 ---
 
@@ -400,13 +400,46 @@ void process_request(const char* input) {
 
 ---
 
+## 실행 입력 — 연결된 할당 전체 정리
+
+아래 그래프는 head와 payload 두 할당을 만들고, keep은 루트 보존, lost는 루트 제거, free는 자식부터 해제합니다. 분류 비교용 Linux 입력이며 현재 macOS에서는 컴파일과 free 분기만 실행했습니다. 실제 분류·휴리스틱·블록 수는 Memcheck 검증 대기입니다.
+
+```c title="graph.c"
+#include <stdlib.h>
+#include <string.h>
+struct Node { char* payload; };
+struct Node* root;
+int main(int argc, char** argv) {
+    root = malloc(sizeof(*root));
+    if (!root) return 1;
+    root->payload = malloc(80);
+    if (!root->payload) { free(root); root = NULL; return 1; }
+    memset(root->payload, 0, 80);
+    if (argc > 1 && strcmp(argv[1], "free") == 0) {
+        free(root->payload);
+        free(root);
+        root = NULL;
+    } else if (argc > 1 && strcmp(argv[1], "lost") == 0) {
+        root = NULL;
+    }
+    return 0;
+}
+```
+
+```bash
+cc -g -O0 graph.c -o graph
+valgrind --leak-check=full --show-leak-kinds=all ./graph keep
+valgrind --leak-check=full --show-leak-kinds=all ./graph lost
+valgrind --leak-check=full --show-leak-kinds=all ./graph free
+```
+
 ## 정리
 
 - **definitely lost** — 진짜 누수. *가장 먼저 고침*.
-- **indirectly lost** — definite의 자식. *definite를 고치면 자동 해소*.
-- **possibly lost** — 케이스 판단. 다중 상속·STL은 무시, 우리 코드면 처리.
+- **indirectly lost** — 잃어버린 자료 구조의 자식도 함께 해제해야 해결됩니다.
+- **possibly lost** — 내부 포인터·휴리스틱·소유권을 확인하며 다중 상속·STL도 자동 제외하지 않습니다.
 - **still reachable** — 살아 있는 캐시. *보통 무시*. 정리하고 싶으면 `atexit` 또는 Singleton.
-- *loss record*의 `in N blocks`로 *호출 빈도* 파악. 핫 패스의 누수는 우선순위 높음.
+- in N blocks는 현재 누수 블록 수이며 호출 빈도·누수율은 반복 관찰로 확인합니다.
 - `--leak-resolution`으로 트레이스 매칭 정밀도 조절. 재귀 코드는 `low` 권장.
 - 디버깅 흐름: *짧은 재현 → Valgrind → 보고서 분석 → 코드 수정 → 재검증*.
 

@@ -1,0 +1,53 @@
+{
+  "date": "2026-10-22",
+  "scoreChanged": false,
+  "scope": "part1-05..08",
+  "environment": "macOS arm64; Homebrew Clang/LLVM 23.1.3; ARM object target arm-none-eabi cortex-m4 thumb",
+  "verifier": "scripts/verify-embedded-cpp-part1-followup-examples.mjs",
+  "chapters": [
+    {
+      "chapter": "05",
+      "path": "src/content/blog/embedded/embedded-cpp/part1-05-abi-compatibility.md",
+      "status": "remediated",
+      "beforeSha256": "d908524ab57a6664a3b9310bd2fc819d3720b2444a876a223a5254bb7d611801",
+      "afterSha256": "d1f8c08c1ed795bd4d949f8fe1a01f24c17c4397259fc3ef443f4b66eaee7747",
+      "frontmatterPreserved": true,
+      "examples": "embedded-cpp-part1-05-examples.log",
+      "gate": "embedded-cpp-part1-05-gate.log",
+      "externalValidationPending": "other target/compiler ABI combinations"
+    },
+    {
+      "chapter": "06",
+      "path": "src/content/blog/embedded/embedded-cpp/part1-06-startup-code.md",
+      "status": "remediated",
+      "beforeSha256": "681b7ffd6e63e7e14a1d7daf43c21500b5819ad257a0c5a0471f28b0b4fee5f8",
+      "afterSha256": "10bdef4c62c332d5a6c07bd4574003f492d086b8dfcefd8efc004fe802d6e10b",
+      "frontmatterPreserved": true,
+      "examples": "embedded-cpp-part1-06-examples.log",
+      "gate": "embedded-cpp-part1-06-gate.log",
+      "externalValidationPending": "newlib final link, reset and board initialization"
+    },
+    {
+      "chapter": "07",
+      "path": "src/content/blog/embedded/embedded-cpp/part1-07-linker-scripts.md",
+      "status": "remediated",
+      "beforeSha256": "3358799c97c78f25c6d8a17511756bc68d9d3e8648a20f0da5677df60caa578d",
+      "afterSha256": "2943ed67e4f76ac6137e0a7274679aae3287c678c205d286c7479df7974aabbe",
+      "frontmatterPreserved": true,
+      "examples": "embedded-cpp-part1-07-examples.log",
+      "gate": "embedded-cpp-part1-07-gate.log",
+      "externalValidationPending": "GNU ld final placement/NOLOAD/overflow and board DMA"
+    },
+    {
+      "chapter": "08",
+      "path": "src/content/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice.md",
+      "status": "remediated",
+      "beforeSha256": "9b1a409e3ad58211ebe81c47a391b0456bfcfcd3b73bb9e1758f48d4308a6aeb",
+      "afterSha256": "a8d98e2ea6a254dc351732dda85f0b9049e4c80cc23e522f89de05d47beb6afb",
+      "frontmatterPreserved": true,
+      "examples": "embedded-cpp-part1-08-examples.log",
+      "gate": "embedded-cpp-part1-08-gate.log",
+      "externalValidationPending": "vendor target library and qualification"
+    }
+  ]
+}

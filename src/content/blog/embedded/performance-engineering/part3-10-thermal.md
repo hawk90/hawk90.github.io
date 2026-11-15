@@ -135,15 +135,12 @@ if (temp > THRESH) {
 ## TDP·SDP·CTDP
 
 ```text
-TDP (Thermal Design Power) — sustained 최대 발열 (cooling 설계 기준)
-SDP (Scenario Design Power) — 일반 workload 평균
-cTDP (Configurable TDP) — OEM이 BIOS에서 조정 가능
+TDP (Thermal Design Power) — 제품·세대가 정의한 열 설계 지표이며, 실제 지속 전력과 동일하다고 단정할 수 없음
+SDP (Scenario Design Power) — 일부 제품에서 특정 사용 시나리오를 나타내는 제조사별 지표; 일반 workload 평균을 뜻하지 않음
+cTDP (Configurable TDP) — 일부 제품에서 지원하는 구성 가능한 TDP 범위
 ```
 
-Intel i7-12700:
-- TDP 65 W (base)
-- Max Turbo Power 180 W (peak, short)
-- SDP ~30 W (idle + light)
+Intel Core i7-12700 제품 사양은 Processor Base Power 65 W와 Maximum Turbo Power 180 W를 명시합니다. 두 값은 각각의 제품 사양 명칭으로 읽고, SDP나 idle/light 평균 전력으로 바꿔 부르지 않습니다. [Intel 제품 사양](https://www.intel.com/content/www/us/en/products/sku/134591/intel-core-i712700-processor-25m-cache-up-to-4-90-ghz/specifications.html)
 
 ## Cortex-A 모바일 — Heat Map
 
@@ -229,7 +226,7 @@ Hard RT는 fixed frequency를 보장하고, 발열도 예산 안에서 관리해
 - Junction T로 chip 자체를 보호하며, **trip point** 단계별로 throttle이 동작합니다.
 - 자동차와 우주 영역은 온도 등급 specification이 매우 엄격합니다.
 - Cooling 방식에는 passive, active, throttle, migration이 있습니다.
-- **TDP**와 **SDP**는 각각 평균과 peak 발열을 가리킵니다.
+- TDP·SDP·base power·maximum turbo power의 정의는 제조사와 제품 세대의 공식 사양을 확인합니다.
 - IR camera로 PCB의 hot spot을 식별할 수 있습니다.
 - 우주에서는 진공에서 방열이 어렵기 때문에 근본적으로 저전력 설계를 채택합니다.
 

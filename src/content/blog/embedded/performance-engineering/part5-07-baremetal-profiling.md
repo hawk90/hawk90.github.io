@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Cortex-M에서는 GPIO toggle과 DWT cycle counter 두 가지면 거의 모든 측정이 가능하며, 둘 다 측정 overhead가 cycle 단위입니다."**
+> **"MCU에서 외부 GPIO 관측과 구현된 cycle counter는 서로 다른 측정 관점을 제공합니다."**
 
 ## 어떤 문제를 푸는가
 
@@ -19,9 +19,11 @@ Cortex-M0/M3/M4 같은 작은 MCU에는 OS도 없고 perf 같은 도구도 없�
 
 이런 환경에서 가장 신뢰할 수 있는 방법은 두 가지입니다. GPIO 핀을 toggle하고 오실로스코프나 로직 분석기로 시간을 측정하거나, 코어 내부의 DWT cycle counter를 읽어 두 시점 간 cycle 차이를 계산하는 방법입니다.
 
-둘 다 measurement intrusion이 1-2 cycle이며, 실제 실행 환경을 거의 그대로 측정할 수 있습니다. 이 글에서는 두 방법과 SysTick, ITM도 함께 정리합니다.
+두 방법의 resolution과 instrumentation 영향은 GPIO 경로·counter 접근·계측기 구성에 따라 달라집니다. 이 글에서는 SysTick과 ITM을 포함해 대상 MCU에서 확인할 지점을 정리합니다.
 
-## GPIO Toggle + 오실로스코프 — 가장 원시적이며 가장 정확
+이 장은 [CMSIS-Core SysTick 문서](https://arm-software.github.io/CMSIS_6/latest/Core/group__SysTick__gr.html)와 register API의 전제를 확인한 예입니다. Board·GPIO·DWT·ITM·SystemView 실행은 하지 않았습니다. Register code는 대상 BSP에서 clock·pin·권한·feature를 초기화한 뒤 적용할 설명용 조각입니다.
+
+## GPIO Toggle + 오실로스코프 — 외부 관찰
 
 ```c
 /* STM32F4 예시 */
@@ -29,10 +31,10 @@ Cortex-M0/M3/M4 같은 작은 MCU에는 OS도 없고 perf 같은 도구도 없�
 #define MEASURE_PORT GPIOA
 
 static inline void measure_high(void) {
-    MEASURE_PORT->BSRR = MEASURE_PIN;       /* 1 cycle */
+    MEASURE_PORT->BSRR = MEASURE_PIN;       /* measured GPIO write */
 }
 static inline void measure_low(void) {
-    MEASURE_PORT->BSRR = MEASURE_PIN << 16; /* 1 cycle */
+    MEASURE_PORT->BSRR = MEASURE_PIN << 16; /* measured GPIO write */
 }
 
 void critical_section(void) {
@@ -42,20 +44,22 @@ void critical_section(void) {
 }
 ```
 
-오실로스코프로 핀의 high 구간을 측정하면 `do_work()`의 실행 시간이 ns 단위로 보입니다. ARM Cortex-M의 BSRR 레지스터 쓰기는 1 cycle이며, set과 clear가 한 레지스터에서 분리되어 read-modify-write가 없습니다.
+오실로스코프로 핀의 high 구간을 측정하면 GPIO의 실제 edge 사이 구간이 보입니다. 함수 앞뒤 store·bus·pin 경로까지 포함할 수 있으며 계측기 표본 간격과 정확도는 다릅니다. STM32의 BSRR는 set/clear 동작을 제공해 ODR을 읽고 수정하는 패턴을 피할 수 있습니다. 실제 write latency는 peripheral bus와 clock에 따라 측정합니다.
 
 이 방법의 강점은 다음과 같습니다.
 
-- 측정 overhead가 1-2 cycle입니다 (168 MHz에서 12 ns).
+- GPIO write의 시간 비용은 코어·버스·주변장치 경로와 compiler 설정에 따라 달라지므로, 기준 신호와 비교해 보정합니다.
 - 코어와 완전히 독립적으로 측정합니다 (오실로스코프가 별도 장비).
 - 인터럽트와 메인 코드의 간섭을 외부에서 관찰할 수 있습니다.
-- 100 MHz 로직 분석기면 10 ns resolution을 얻습니다.
+- 100 MHz sampling logic analyzer의 표본 간격은 10 ns입니다. 실제 timing accuracy는 장비 사양과 edge 설정을 확인합니다.
 
 여러 GPIO를 동시에 사용하면 인터럽트 진입과 main task 실행을 같은 timeline에 겹쳐 볼 수 있습니다.
 
-## DWT Cycle Counter — Cortex-M3 이상
+## DWT Cycle Counter — 구현 확인
 
-DWT(Data Watchpoint and Trace) unit은 Cortex-M3 이상에 표준 포함된 디버그 ip이며, 32-bit free-running cycle counter를 제공합니다.
+CMSIS core register map은 [Cortex-M core별 DWT register 가용성](https://arm-software.github.io/CMSIS_6/latest/Core/group__Core__Register.html)을 확인하는 출발점입니다. 최종 확인은 target datasheet/TRM에서 합니다.
+
+DWT(Data Watchpoint and Trace)와 `CYCCNT`의 제공 여부는 core와 SoC 구현에 따라 다릅니다. Cortex-M0/M0+에서는 사용할 수 없는 경우가 일반적이며, Cortex-M3 이상도 실제 target의 debug feature, lock/권한, `NOCYCCNT` 상태를 확인해야 합니다.
 
 ```c
 #include "core_cm4.h"
@@ -81,7 +85,7 @@ uint32_t elapsed = dwt_now() - start;
 float us = (float)elapsed / (SystemCoreClock / 1000000.0f);
 ```
 
-168 MHz에서 1 cycle은 약 6 ns이며, 32-bit counter는 약 25초 후 wrap-around합니다. 짧은 구간에는 영향이 없고, 긴 구간은 wrap 처리를 추가해야 합니다.
+168MHz가 일정하고 counter가 계속 돈다는 가정이면 한 cycle은 약5.95ns, 32bit 주기는 약25.57초입니다. Unsigned 차이는 **실제 경과가 한 주기 미만**일 때 wrap을 포함해 유효합니다. 여러 번 wrap했거나 sleep/debug 중 counter가 멈췄다면 두 값만으로 복원할 수 없습니다.
 
 ```c
 /* DWT 측정 매크로 */
@@ -95,126 +99,70 @@ float us = (float)elapsed / (SystemCoreClock / 1000000.0f);
 uint32_t cycles = DWT_MEASURE(parse_packet(buf, len));
 ```
 
-함수 호출 비용까지 포함하려면 inline 매크로가 안전합니다.
+위 매크로는 GNU statement-expression을 쓴 설명용 조각입니다. Inline이 정확도·compiler 재배치 방지를 보증하지 않습니다. 최종 assembly·barrier 요구·계측 자체 비용을 target에서 확인합니다.
 
 ## SysTick — 24-bit Counter Alternative
 
-DWT가 없는 Cortex-M0에서는 SysTick을 측정용으로 활용합니다. SysTick은 24-bit down counter라 측정 범위는 짧습니다.
+DWT가 없거나 비활성화된 코어에서는 SysTick을 측정용으로 고려할 수 있습니다. SysTick은 24-bit down counter라 측정 범위는 짧습니다.
 
-```c
-void systick_measure_init(void) {
-    SysTick->LOAD = 0x00FFFFFF;                  /* max reload */
-    SysTick->VAL = 0;
-    SysTick->CTRL = SysTick_CTRL_CLKSOURCE_Msk
-                  | SysTick_CTRL_ENABLE_Msk;     /* IRQ 비활성 */
-}
+SysTick이 OS tick에 쓰이는지와 reload·clock·enable 상태를 먼저 확인합니다. 다음은 register를 만지지 않는 **down-counter 차이 계산 함수**입니다. 실제 elapsed가 한 주기 미만이고 두 읽기 사이 reload·clock이 바뀌지 않았다는 전제가 필요합니다.
 
-uint32_t systick_now(void) {
-    return SysTick->VAL;                         /* down counter */
-}
+```c title="down-counter.c"
+#include <stdint.h>
+#include <stdbool.h>
+#include <stddef.h>
 
-uint32_t cycles_between(uint32_t start, uint32_t end) {
-    return (start - end) & 0x00FFFFFF;
+bool elapsed_down(uint32_t start, uint32_t end, uint32_t reload,
+                  uint32_t *elapsed)
+{
+    if (elapsed == NULL || reload > 0x00ffffffu ||
+        start > reload || end > reload)
+        return false;
+    uint32_t period = reload + 1u;
+    *elapsed = start >= end ? start - end : start + period - end;
+    return true;
 }
 ```
 
-72 MHz에서 24-bit는 약 233 ms를 cover하므로 그 안의 짧은 구간 측정에만 적합합니다. OS의 tick 인터럽트로 SysTick을 이미 쓰고 있으면 별도 timer를 활용합니다.
+Max24bit뿐 아니라 임의 reload의 wrap·동일 값·잘못된 범위를 host에서 검사했습니다. 동일 값은 이 전제에서0tick이며 여러 주기 경과 여부를 판별하지 못합니다. 72MHz·max reload라면 주기는 약233ms라는 계산 예이고 board에서 측정한 값은 아닙니다.
 
 ## ITM — Instrumentation Trace Macrocell
 
-ITM은 Cortex-M3 이상의 SWD pin을 통해 trace 데이터를 송신하는 unit입니다. printf 대체로 자주 쓰며 송신 비용이 매우 낮습니다.
+ITM은 구현된 stimulus port에 software event를 기록하는 경로입니다. SWD debug control과 SWO/TPIU trace 출력은 같은 개념이 아닙니다. Trace block·출력 routing·권한과 수신 장비 설정을 확인합니다.
 
-```c
-void itm_send_char(uint8_t ch) {
-    if ((ITM->TCR & ITM_TCR_ITMENA_Msk) && (ITM->TER & 1)) {
-        while (ITM->PORT[0].u32 == 0);
-        ITM->PORT[0].u8 = ch;
-    }
-}
-```
-
-ST-Link와 J-Link 모두 SWO(Serial Wire Output) 핀으로 ITM stream을 받습니다. UART printf는 보통 1 character당 87 us(115200 baud)지만 ITM은 한 자에 100 ns 수준입니다.
-
-ITM 32-channel을 정의해 channel별로 다른 종류의 trace를 분리할 수 있습니다.
-
-```c
-#define ITM_CH_FUNC_ENTRY  0
-#define ITM_CH_FUNC_EXIT   1
-#define ITM_CH_IRQ_ENTRY   2
-
-ITM->PORT[ITM_CH_FUNC_ENTRY].u32 = (uint32_t)func_ptr;
-```
+준비되지 않은 port에 무한 대기하는 함수는 계측하려던 경로를 멈출 수 있습니다. Ready·enable·privilege·buffer 정책을 확인하고 drop·bounded wait를 설계합니다. Port 개수·지원 write width·timestamp는 target TRM에 따르며 무조건 모든32port가 같은 기능이라고 가정하지 않습니다.
 
 ## SEGGER SystemView — RTT 기반 RTOS Trace
 
-SEGGER SystemView는 RTT(Real-Time Transfer)를 사용한 RTOS visualization 도구입니다. RTT는 target 메모리의 ring buffer를 J-Link가 직접 읽는 방식이라 송신 비용이 거의 0입니다.
+SEGGER SystemView는 RTT(Real-Time Transfer)를 사용하는 RTOS visualization 도구입니다. RTT는 target memory buffer와 debug probe를 이용하며, 처리 비용과 영향은 target·buffer mode·probe 설정에 따릅니다.
 
-```c
-#include "SEGGER_SYSVIEW.h"
+[SEGGER SystemView](https://www.segger.com/products/development-tools/systemview/)의 recorder·RTOS integration과 RTT buffer mode는 선택한 release에서 확인합니다. 확인하지 않은 event ID·RecordEndCall 조합을 완성된 측정 예로 쓰지 않습니다. 이 환경에서는 SystemView나 RTT를 실행하지 않았습니다.
 
-void SystemView_Init(void) {
-    SEGGER_SYSVIEW_Conf();
-    SEGGER_SYSVIEW_Start();
-}
+## ISR 경계의 측정
 
-void critical_func(void) {
-    SEGGER_SYSVIEW_RecordVoid(33);   /* 사용자 정의 이벤트 */
-    do_work();
-    SEGGER_SYSVIEW_RecordEndCall(33);
-}
-```
-
-FreeRTOS, embOS, Zephyr 등 주요 RTOS 통합이 제공되며, task switch와 ISR이 자동 timeline에 표시됩니다. ETM이 없는 작은 MCU에서 가장 가벼운 RTOS trace 옵션입니다.
-
-```text
-RTT 송신 overhead   ~0.5 us per event
-SystemView buffer   기본 4-8 KB
-J-Link 수신 속도   ~1 MB/s
-```
-
-## 시나리오 — ISR 지연 측정
-
-```c
-/* 인터럽트 진입에서 GPIO high */
-void EXTI0_IRQHandler(void) {
-    GPIOA->BSRR = GPIO_PIN_5;        /* IRQ entry marker */
-
-    uint32_t start = DWT->CYCCNT;
-    handle_event();
-    uint32_t cycles = DWT->CYCCNT - start;
-
-    if (cycles > worst_case)
-        worst_case = cycles;
-
-    GPIOA->BSRR = GPIO_PIN_5 << 16;  /* IRQ exit marker */
-    EXTI->PR = EXTI_PR_PR0;
-}
-```
-
-오실로스코프로 GPIO의 high 구간 폭을 측정하면 ISR 총 시간을, `worst_case` 변수로 cycle 단위 최악값을 동시에 얻습니다. 외부 이벤트가 ISR을 trigger한 순간부터 ISR 진입까지의 hardware latency도 외부 trigger pin과 비교하면 볼 수 있습니다.
+ISR 안에서 읽은 DWT 구간과 GPIO edge 구간은 exception entry/exit 전체를 포함하지 않을 수 있습니다. 외부 입력 event부터 ISR 진입까지의 latency, ISR body·nested interrupt·return을 별도로 정의하고 외부 trigger와 동기화해야 합니다. 관찰한 최대값을 자동으로 WCET라고 부르지 않습니다.
 
 ## 측정 — 정확도 비교
 
-| 방법 | Overhead | Resolution | 범위 |
-|------|----------|------------|------|
-| GPIO + scope | 1-2 cycle | 10 ns | 무제한 |
-| DWT CYCCNT | 1-2 cycle | 1 cycle | 25초 (168 MHz) |
-| SysTick | 1-2 cycle | 1 cycle | 233 ms (72 MHz) |
-| ITM printf | ~100 ns | 단방향 | 유사 무제한 |
-| SystemView RTT | ~0.5 us | 1 us | buffer 의존 |
-| SWO trace | ~10 ns | cycle | 수신 대역폭 의존 |
-| ETM (외부 probe) | 0 | cycle | buffer 의존 |
+| 방법 | instrumentation 영향 | 시간 분해능 | 범위 |
+|------|----------------------|------------|------|
+| GPIO + scope | GPIO·버스·probe 경로에 따름 | scope/edge 설정에 따름 | 측정 설정에 따름 |
+| DWT CYCCNT | register 접근·compiler 영향 | 구현된 counter tick | 32-bit counter라면 wrap 시점은 clock에 따름 |
+| SysTick | register 접근·interrupt 설정에 따름 | timer tick | 24-bit down counter의 범위는 clock에 따름 |
+| ITM/SWO | instrumentation·port throughput에 따름 | trace timestamp/config에 따름 | buffer와 수신 bandwidth에 따름 |
+| SystemView RTT | recording mode와 buffer 상태에 따름 | target timer resolution에 따름 | buffer/host 처리에 따름 |
+| ETM | trace 설정·target 영향에 따름 | trace timestamp/core에 따름 | probe buffer·bandwidth에 따름 |
 
-가장 가벼우면서 정확한 조합은 GPIO toggle과 DWT cycle counter입니다. 두 가지를 같이 사용하면 인터럽트 latency와 함수 실행 시간을 동시에 측정할 수 있습니다.
+GPIO·DWT는 서로 다른 관점의 교차 확인에 쓸 수 있습니다. 두 가지를 같이 사용하면 인터럽트 latency와 함수 실행 시간을 동시에 측정할 수 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
 > ⚠️ printf로 시간 측정
 
 ```c
-printf("start\n");                       /* ~870 us */
+printf("start\n");                       /* output and formatting cost depend on setup */
 do_work();
-printf("end\n");                         /* ~870 us */
+printf("end\n");                         /* output and formatting cost depend on setup */
 ```
 
 UART printf 자체가 측정하려는 함수보다 오래 걸리는 경우가 흔합니다. 측정용은 GPIO나 DWT로, 로깅은 별도로 분리합니다.
@@ -230,7 +178,7 @@ for (int i = 0; i < 100; i++)
 
 > ⚠️ ITM과 SWO의 baud rate mismatch
 
-ST-Link Configuration에서 SWO 속도는 코어 클럭과 정수배로 나뉘어야 합니다.
+SWO의 clock source·prescaler·trace encoding·probe 수신 설정을 해당 target 문서로 확인합니다.
 
 mismatch 시 character가 깨져 출력됩니다. 디버거의 SWO speed 설정과 시스템 클럭을 맞춰야 합니다.
 
@@ -240,15 +188,15 @@ mismatch 시 character가 깨져 출력됩니다. 디버거의 SWO speed 설정�
 uint32_t elapsed = end - start;          /* 차이 연산이 wrap-safe */
 ```
 
-부호 없는 32-bit 뺄셈은 wrap이 자연스럽게 처리됩니다. signed로 캐스팅하면 음수가 나와 잘못 해석됩니다.
+부호 없는32bit 뺄셈은 실제 경과가 한 주기 미만이고 counter가 연속 동작한다는 전제에서 wrap을 처리합니다. signed로 캐스팅하면 음수가 나와 잘못 해석됩니다.
 
 ## 정리
 
-- GPIO toggle과 오실로스코프는 가장 원시적이지만 정확하며 측정 overhead가 1-2 cycle입니다.
-- DWT cycle counter는 Cortex-M3 이상에서 코드 한 줄로 cycle 단위 측정을 제공합니다.
+- GPIO toggle과 오실로스코프는 외부에서 핀 변화를 관찰하며, GPIO·버스·계측기 경로를 고려해 보정합니다.
+- DWT cycle counter는 target이 해당 기능을 구현하고 활성화한 경우에만 사용할 수 있습니다.
 - SysTick은 24-bit이라 짧은 구간 전용이며 Cortex-M0의 대체 수단입니다.
-- ITM은 SWO pin으로 printf 대비 100배 빠른 trace 송신을 제공합니다.
-- SEGGER SystemView는 RTT 기반으로 작은 MCU에서 가장 가벼운 RTOS visualization입니다.
+- ITM/SWO를 사용할 수 있는지는 MCU 구현과 board routing에 따르며, 전송 비용은 target setup에서 확인합니다.
+- SystemView·RTT의 비용과 손실·buffer mode는 해당 target에서 평가합니다.
 - GPIO와 DWT를 조합하면 hardware latency와 software 시간을 같은 timeline에서 봅니다.
 
 다음 편은 **Nsight Systems** — GPU와 NPU가 포함된 시스템 분석.

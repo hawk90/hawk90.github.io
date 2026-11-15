@@ -95,13 +95,19 @@ constexpr Flag& operator&=(Flag& a, Flag b) noexcept { a = a & b; return a; }
 constexpr Flag& operator^=(Flag& a, Flag b) noexcept { a = a ^ b; return a; }
 
 // bool 변환
-constexpr bool has_flag(Flag a, Flag b) noexcept {
-    return (static_cast<uint32_t>(a) & static_cast<uint32_t>(b))
-        == static_cast<uint32_t>(b);
+template<typename E>
+constexpr bool has_flag(E a, E b) noexcept {
+    using U = std::underlying_type_t<E>;
+    return (static_cast<U>(a) & static_cast<U>(b)) == static_cast<U>(b);
+}
+template<typename E>
+constexpr bool has_any(E a, E mask) noexcept {
+    using U = std::underlying_type_t<E>;
+    return (static_cast<U>(a) & static_cast<U>(mask)) != 0;
 }
 ```
 
-연산자는 namespace 안이나 enum과 같은 scope에 두어 ADL로 찾도록 합니다.
+연산자는 enum과 같은 namespace에 두어 ADL로 찾도록 합니다. has_flag는 mask의 모든 bit가 있는지 검사하며 빈 mask에는 true입니다. 하나라도 있는지 보려면 has_any를 쓰고 빈 mask에는 false입니다. 예시는 <cstdint>와 <type_traits>가 필요합니다.
 
 ## 사용 예
 
@@ -192,50 +198,34 @@ DEFINE_BIT_FLAGS(Permission)
 
 ARM Cortex의 register flag를 type-safe하게 다룰 수 있습니다.
 
-```cpp
-enum class GpioConfig : uint32_t {
-    None        = 0,
-    InputPullUp = 0b001,
-    InputPullDown = 0b010,
-    Output      = 0b011,
-    AlternateFn = 0b100,
-    AnalogMode  = 0b111,
-    HighSpeed   = 1 << 4,
-    OpenDrain   = 1 << 5,
-};
+STM32F407 MODER의 pin별 2-bit mode는 서로 독립인 bit flag가 아닙니다. pull-up/down·speed·output type도 서로 다른 register field이므로 하나의 enum OR로 섞지 않습니다. 다음은 실제 MMIO 대신 일반 정수에서 field encoding을 검사하는 순수 함수입니다.
 
-template<>
-struct enable_bit_flags<GpioConfig> : std::true_type {};
-
-void configure_gpio(int pin, GpioConfig cfg) {
-    uint32_t reg = GPIOA->MODER;
-    reg &= ~(0b111 << (pin * 2));
-    reg |= static_cast<uint32_t>(cfg & GpioConfig::AnalogMode) << (pin * 2);
-    GPIOA->MODER = reg;
-
-    if (has_flag(cfg, GpioConfig::HighSpeed)) {
-        GPIOA->OSPEEDR |= 1 << (pin * 2);
-    }
-    if (has_flag(cfg, GpioConfig::OpenDrain)) {
-        GPIOA->OTYPER |= 1 << pin;
-    }
+```cpp title="gpio-mode.h"
+#pragma once
+#include <cstdint>
+enum class GpioMode : std::uint32_t { Input = 0, Output = 1, Alternate = 2, Analog = 3 };
+constexpr bool update_mode(std::uint32_t before, unsigned pin, GpioMode mode,
+                           std::uint32_t& after) {
+    if (pin >= 16 || static_cast<std::uint32_t>(mode) > 3) return false;
+    const unsigned shift = pin * 2;
+    const std::uint32_t mask = 3U << shift;
+    after = (before & ~mask) | (static_cast<std::uint32_t>(mode) << shift);
+    return true;
 }
-
-configure_gpio(5, GpioConfig::Output | GpioConfig::HighSpeed);
 ```
 
-`#define MODE_OUTPUT` 매크로보다 type-safe하며 디버거에서 enum 이름을 그대로 확인할 수 있습니다.
+field 폭은 2bit이며 pin 범위를 shift 전에 검사합니다. 실제 GPIO register를 갱신할 때는 clock·경합·volatile 접근과 RMW 안전성까지 MCU 계약에 맞춰야 합니다. 위 함수의 host 성공을 MMIO 실행 성공으로 해석하지 않습니다.
 
 ## 임베디드 — Status Register Flags
 
 ```cpp
 enum class UartStatus : uint32_t {
     None           = 0,
-    DataReady      = 1 << 0,
-    Overrun        = 1 << 1,
-    NoiseDetected  = 1 << 2,
-    FramingError   = 1 << 3,
-    ParityError    = 1 << 4,
+    DataReady      = 1U << 5,   // STM32F407 USART_SR RXNE
+    Overrun        = 1U << 3,   // ORE
+    NoiseDetected  = 1U << 2,   // NE
+    FramingError   = 1U << 1,   // FE
+    ParityError    = 1U << 0,   // PE
     AnyError       = Overrun | NoiseDetected | FramingError | ParityError,
 };
 
@@ -252,7 +242,7 @@ void uart_isr() {
     if (has_flag(status, UartStatus::DataReady)) {
         read_data();
     }
-    if (has_flag(status, UartStatus::AnyError)) {
+    if (has_any(status, UartStatus::AnyError)) {
         log_error("UART error");
         clear_errors();
     }
@@ -261,70 +251,55 @@ void uart_isr() {
 
 ISR에서 상태 검사가 명확해집니다.
 
-## To-string for logging
+## To-string과 bounded 출력
 
-flag 값을 문자열로 출력할 때도 활용합니다.
+조합 flag는 단일 enum 이름과 다릅니다. 각 bit를 검사해 출력하되 destination capacity 전체를 strncat의 잔여 길이처럼 넘기면 overflow가 날 수 있습니다. 아래 snprintf는 출력할 값과 buffer 길이를 함께 받으며 n=0도 처리합니다.
 
 ```cpp
-constexpr const char* to_string(GpioConfig cfg) {
-    // 단일 값은 단순
-    switch (cfg) {
-        case GpioConfig::None: return "None";
-        case GpioConfig::Output: return "Output";
-        // ...
+#include <cstdio>
+void format_status(UartStatus status, char* buffer, std::size_t n) {
+    if (n == 0) return;
+    const int needed = std::snprintf(buffer, n, "rx=%d error=%d",
+        has_any(status, UartStatus::DataReady), has_any(status, UartStatus::AnyError));
+    if (needed < 0 || static_cast<std::size_t>(needed) >= n) {
+        // encoding 실패 또는 truncation: application 정책으로 처리
     }
-    return "Combined";   // 여러 비트
-}
-
-// 또는 combined 처리
-void format_flags(GpioConfig cfg, char* buf, size_t n) {
-    buf[0] = 0;
-    if (has_flag(cfg, GpioConfig::HighSpeed)) strncat(buf, "HighSpeed|", n);
-    if (has_flag(cfg, GpioConfig::OpenDrain)) strncat(buf, "OpenDrain|", n);
-    // ...
-    // 마지막 | 제거
-    size_t len = strlen(buf);
-    if (len > 0 && buf[len - 1] == '|') buf[len - 1] = 0;
 }
 ```
 
-C++20 이후 reflection이 추가되면 자동 to_string이 가능해집니다. 현재는 수동으로 작성합니다.
+이 조각은 n>0이면 buffer가 n바이트의 유효한 저장 공간을 가리킨다는 전제입니다. 자동 reflection 지원을 가정하지 않고 실제 toolchain에서 제공되는 변환 기능 또는 명시적 변환표를 사용합니다.
 
 ## Strongly-typed Flags<E>
 
 C++의 `std::bitset`처럼 wrapper class로 감싸는 방식입니다.
 
-```cpp
+```cpp title="flags.h"
+#pragma once
+#include <type_traits>
 template<typename E>
 class Flags {
+    static_assert(std::is_enum_v<E>);
     using U = std::underlying_type_t<E>;
-    U value_;
-
+    U value_ = 0;
+    explicit constexpr Flags(U bits) : value_(bits) {}
 public:
-    constexpr Flags() : value_(0) {}
+    constexpr Flags() = default;
     constexpr Flags(E e) : value_(static_cast<U>(e)) {}
-    constexpr Flags(U v) : value_(v) {}
-
-    constexpr Flags operator|(Flags other) const { return value_ | other.value_; }
-    constexpr Flags operator&(Flags other) const { return value_ & other.value_; }
-    constexpr Flags operator~() const { return ~value_; }
-
-    constexpr bool has(E flag) const {
-        return (value_ & static_cast<U>(flag)) == static_cast<U>(flag);
-    }
-
+    constexpr Flags operator|(Flags other) const { return Flags(static_cast<U>(value_ | other.value_)); }
+    constexpr Flags operator&(Flags other) const { return Flags(static_cast<U>(value_ & other.value_)); }
+    constexpr Flags operator~() const { return Flags(static_cast<U>(~value_)); }
+    constexpr Flags& operator|=(Flags other) { return *this = *this | other; }
+    constexpr Flags& operator&=(Flags other) { return *this = *this & other; }
+    constexpr bool has_all(E mask) const { const U m = static_cast<U>(mask); return (value_ & m) == m; }
+    constexpr bool has_any(E mask) const { return (value_ & static_cast<U>(mask)) != 0; }
     constexpr U value() const { return value_; }
 };
-
-// 사용
-Flags<Permission> p;
-p = Permission::Read;
-p |= Permission::Write;
-
-if (p.has(Permission::Read)) { /* */ }
 ```
 
-한 번의 operator 정의로 모두 처리할 수 있지만 enum을 직접 쓰는 것보다 약간 무겁습니다.
+~는 underlying type의 유효하지 않은 enum bit도 켤 수 있습니다. 정해진 domain mask로 제한하거나 기존 flags에서 제거할 bit에만 AND하는 정책을 정합니다. wrapper가 raw enum보다 항상 느리거나 항상 같다고 단정하지 않고 생성 코드를 확인합니다.
+
+
+Flags는 하나의 underlying 정수 값을 저장합니다. raw 정수 constructor를 private로 두어 무관한 정수의 암묵 변환을 막고 compound operator를 실제로 제공합니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -368,29 +343,53 @@ A::X | B::X;   // type 다름 — 컴파일 에러 (의도된 안전)
 같은 enum의 flag끼리만 조합합니다.
 
 ### 6. Strongly typed flags의 overhead 가정
-`enum class` + operator는 zero-cost이며 컴파일러가 모두 인라인합니다.
+간단한 조합은 최적화할 수 있지만 인라인과 동일한 instruction 수가 언어 보장은 아닙니다. 실제 target·옵션에서 비교합니다.
 
-## 측정 — type-safe vs raw
+## Strong typedef와 tag를 구분하기
 
-```cpp
-// V1 — raw int
-int flags = (1 << 0) | (1 << 1);
+flag의 enum domain을 나누는 것과 같은 underlying 값에 서로 다른 용도를 부여하는 것은 다른 문제입니다. tag parameter로 만든 strong typedef는 pin 번호와 channel 번호 같은 수치를 섞지 못하게 합니다.
 
-// V2 — enum class with operators
-auto flags = MyFlag::A | MyFlag::B;
+```cpp title="flags-check.cpp"
+#include "flags.h"
+#include "gpio-mode.h"
+#include <cassert>
+#include <cstdint>
+#include <iostream>
+enum class Permission : std::uint32_t { None = 0, Read = 1, Write = 2, Both = 3 };
+enum class Other : std::uint32_t { Read = 1 };
+template<typename Tag> struct ResourceId { explicit ResourceId(unsigned v) : value(v) {} unsigned value; };
+struct PinTag; struct ChannelTag;
+using Pin = ResourceId<PinTag>; using Channel = ResourceId<ChannelTag>;
+int main() {
+    Flags<Permission> p;
+    p |= Permission::Read;
+    assert(p.has_any(Permission::Both) && !p.has_all(Permission::Both));
+    p |= Permission::Write; assert(p.has_all(Permission::Both));
+    p &= ~Flags<Permission>(Permission::Read);
+    assert(!p.has_any(Permission::Read) && p.has_all(Permission::Write));
+    assert(p.has_all(Permission::None) && !p.has_any(Permission::None));
+    std::uint32_t result = 0;
+    assert(update_mode(0xFFFFFFFFU, 5, GpioMode::Output, result));
+    assert(result == ((0xFFFFFFFFU & ~(3U << 10)) | (1U << 10)));
+    assert(!update_mode(result, 16, GpioMode::Output, result));
+    assert(!update_mode(result, 0, static_cast<GpioMode>(4), result));
+    Pin pin(5); Channel channel(2); (void)pin; (void)channel;
+#ifdef BAD_ENUM_MIX
+    p |= Other::Read;
+#endif
+#ifdef BAD_TAG_MIX
+    pin = channel;
+#endif
+    std::cout << "flags compound/any/all/field/tag checks passed\n";
+}
 ```
 
-어셈블리:
+Clang 23.1.3 C++17 host에서 ASan·UBSan으로 실행했습니다. compound operator·any/all·빈 mask·유효/무효 pin·이웃 field 보존을 확인하고, 다른 enum과 tag를 섞는 경우 각각 컴파일 실패를 확인했습니다. board MMIO와 raw 코드 대비 성능은 실행하지 않았습니다.
 
-```text
-V1:
-    mov  r0, #3       ; 1 | 2 = 3
+## 1차 자료
 
-V2:
-    mov  r0, #3       ; 동일
-```
-
-생성된 코드가 완전히 동일하며 zero-cost입니다.
+- [C++ draft: enum declarations](https://eel.is/c++draft/dcl.enum), [overloaded operators](https://eel.is/c++draft/over.oper) — domain과 연산자 계약
+- [ST RM0090](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) — GPIO MODER 2bit field와 USART_SR bit 배치
 
 ## 정리
 
@@ -398,7 +397,7 @@ V2:
 - 무관한 정수와 섞이지 않으므로 type safety가 보장됩니다.
 - Template이나 매크로로 operator를 자동 정의합니다.
 - 임베디드의 register flag와 status flag에 적합합니다.
-- 컴파일 결과가 동일하므로 zero-cost입니다.
+- 단순 조합의 최적화 결과는 실제 target과 옵션으로 확인합니다.
 
 ## 관련 항목
 

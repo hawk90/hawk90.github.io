@@ -2,7 +2,7 @@
 title: "GDB FrameDecorator·Unwinder — 콜스택 가공과 JIT 지원"
 slug: "tools/debugging/gdb-extension/chapter04-frame-unwinder"
 date: 2026-05-27T09:04:00
-description: "Frame filter, FrameDecorator로 콜스택 변형, custom unwinder로 JIT 코드 추적."
+description: "Frame filter·FrameDecorator의 표시와 실제 unwind를 구분합니다. 고정한 x86-64 fixture의 caller 복원, GDB JIT 등록과 runtime helper의 경계를 살펴봅니다."
 tags: [gdb, python, frame, unwinder, jit]
 series: "GDB Extension and IDE"
 seriesOrder: 4
@@ -14,6 +14,8 @@ topics: ["tools", "tools/debugging"]
 
 - **Frame Filter** — 기존 프레임을 *숨기거나 묶거나 데코레이트*.
 - **Unwinder** — DWARF가 없는 영역의 콜스택을 *Python으로 직접 풀기*.
+
+GDB 17.2의 동봉 Python API/source를 기준으로 합니다. filter의 입력은 gdb.Frame 자체가 아니라 frame-decorator protocol 객체이며 실제 frame 상태는 바꾸지 않습니다.
 
 ## Frame Filter
 
@@ -30,7 +32,8 @@ class SkipBoostFilter:
         gdb.frame_filters[self.name] = self
     def filter(self, frame_iter):
         for frame in frame_iter:
-            name = frame.function() or ""
+            name = frame.function()
+            name = name if isinstance(name, str) else ""
             if "boost::" not in name:
                 yield frame
 
@@ -46,7 +49,7 @@ SkipBoostFilter()
 
 ### priority
 
-여러 필터가 등록되면 *priority 순*으로 chain.
+여러 filter는 priority가 큰 순서로 적용됩니다. 같은 priority의 상대 순서에 의존하지 않으며 scope·enabled 상태도 확인합니다.
 
 ```text
 frame_iter → filter1 → filter2 → filter3 → 사용자
@@ -74,7 +77,7 @@ class HighlightDecorator(FrameDecorator):
         super().__init__(frame)
     def function(self):
         name = super().function()
-        if name and 'critical' in name:
+        if isinstance(name, str) and 'critical' in name:
             return f"⭐ {name}"
         return name
 ```
@@ -83,7 +86,7 @@ class HighlightDecorator(FrameDecorator):
 
 ### 코루틴 콜스택 압축
 
-C++20 coroutine·boost::asio 같은 비동기 코드는 콜스택이 *내부 implementation*으로 가득. 의미 있는 *논리적 호출 체인*을 한 단계로 묶기.
+C++20 coroutine·boost::asio 같은 비동기 코드는 콜스택이 *내부 implementation*으로 가득. 연속된 implementation frame 표시를 접을 수 있지만, 이 작업으로 아직 존재하지 않는 비동기 logical stack을 복원하는 것은 아닙니다.
 
 ```python
 class FoldCoroutineFilter:
@@ -95,7 +98,8 @@ class FoldCoroutineFilter:
     def filter(self, frame_iter):
         buffer = []
         for frame in frame_iter:
-            name = frame.function() or ""
+            name = frame.function()
+            name = name if isinstance(name, str) else ""
             if "std::__n4861::coroutine_handle" in name or "asio::detail::" in name:
                 buffer.append(frame)
             else:
@@ -121,138 +125,87 @@ class CoroFoldedFrame(FrameDecorator):
 #2  main at main.cpp:10
 ```
 
-12개 implementation frame이 *한 줄*로. 의미 있는 콜스택만 남음.
+이 출력은 접는 표시의 모형입니다. namespace 문자열은 compiler/runtime별로 다르며 물리적 frame을 숨기는 것과 coroutine의 logical parent를 복원하는 일은 다릅니다.
 
 ## frame_args() — 인자 표시 커스터마이즈
 
-```python
+```python title="argument-decorator.py"
+from gdb.FrameDecorator import FrameDecorator
+
 class SmartArgsDecorator(FrameDecorator):
     def frame_args(self):
-        orig = super().frame_args()
-        if orig is None:
+        original = super().frame_args()
+        if original is None:
             return None
-        # 중요한 인자만 강조, 나머지는 짧게
         result = []
-        for arg in orig:
-            name = arg.sym().name
-            val = arg.value()
-            if 'this' in name:
-                # this는 표시 생략
-                continue
-            result.append(SymValueWrapper(name, val))
+        for argument in original:
+            symbol = argument.symbol()
+            name = symbol if isinstance(symbol, str) else getattr(symbol, "name", None)
+            if name != "this":
+                result.append(argument)
         return result
-
-from gdb.FrameDecorator import SymValueWrapper
 ```
 
-`bt full`이 표시하는 인자를 가공.
+Symbol/Value interface의 symbol()·value()를 사용합니다. sym()이나 SymValueWrapper(name, value)는 GDB17.2의 실제 interface/constructor가 아닙니다. 기존 wrapper를 그대로 반환하면 원래 value 조회 계약을 보존합니다.
 
 ## Unwinder — DWARF 없이 콜스택 풀기
 
-JIT 코드 (V8, JVM, .NET, Lua), 인터프리터, 또는 *완전히 별 ABI*의 코드에서 GDB가 콜스택을 풀려면 *Python으로 직접* unwind 정보를 제공.
+unwinder는 표시가 아니라 **caller register와 stable frame ID**를 제공해야 합니다. 어디에 saved state가 있는지 ABI/PC별로 알아야 합니다. 미정의 V8 g_heap·frame_size_·caller_sp_offset_를 추측한 기존 코드는 사용하지 않습니다.
 
-```python
+다음은 **x86-64 little-endian의 알려진 fixture 한 PC**에서만 동작하는 예입니다. 그 위치에서는 RBP가 saved caller RBP를, RBP+8이 return PC를 가리키는 계약을 갖습니다. 실제 V8/JVM·전체 함수 prologue/epilogue unwinder가 아닙니다.
+
+```python title="toy-unwinder.py"
 import gdb
 import gdb.unwinder
 
-class JitUnwinder(gdb.unwinder.Unwinder):
-    def __init__(self):
-        super().__init__("jit-unwinder")
-
-    def __call__(self, pending_frame):
-        pc = pending_frame.read_register("pc")
-        if not in_jit_region(int(pc)):
-            return None    # 다른 unwinder가 처리하도록
-
-        # JIT 사이드 테이블 lookup
-        info = lookup_jit_frame(int(pc))
-        if not info: return None
-
-        # 새 frame 정보 빌드
-        unwind_info = pending_frame.create_unwind_info(
-            FrameId(int(pending_frame.read_register("sp")), int(pc)))
-        unwind_info.add_saved_register("pc", info.return_pc)
-        unwind_info.add_saved_register("sp", info.caller_sp)
-        return unwind_info
-
 class FrameId:
     def __init__(self, sp, pc):
-        self.sp = sp
-        self.pc = pc
+        self.sp, self.pc = sp, pc
 
-gdb.unwinder.register_unwinder(None, JitUnwinder(), replace=False)
+class ToyUnwinder(gdb.unwinder.Unwinder):
+    def __init__(self):
+        super().__init__("article-toy-rbp")
+
+    def __call__(self, pending_frame):
+        try:
+            if pending_frame.architecture().name() != "i386:x86-64":
+                return None
+            site = int(gdb.parse_and_eval("(void *)&toy_unwind_site"))
+            pc = int(pending_frame.read_register("rip"))
+            if pc != site:
+                return None
+            rbp = int(pending_frame.read_register("rbp"))
+            if rbp == 0 or rbp % 8 != 0:
+                return None
+            raw = bytes(gdb.selected_inferior().read_memory(rbp, 16))
+            saved_rbp = int.from_bytes(raw[:8], "little")
+            return_pc = int.from_bytes(raw[8:], "little")
+            caller_sp = rbp + 16
+            if caller_sp >= 1 << 64 or return_pc == 0 or saved_rbp == rbp:
+                return None
+            info = pending_frame.create_unwind_info(FrameId(caller_sp, pc))
+            for register, value in (("rip", return_pc), ("rsp", caller_sp), ("rbp", saved_rbp)):
+                register_type = pending_frame.read_register(register).type
+                info.add_saved_register(register, gdb.Value(value).cast(register_type))
+            return info
+        except gdb.error:
+            return None
+
+gdb.unwinder.register_unwinder(None, ToyUnwinder(), replace=True)
 ```
 
-핵심:
-
-1. `__call__(pending_frame)` — 현재 프레임이 *나에게 속하는가* 결정.
-2. 속하면 *create_unwind_info*로 unwind 정보 빌드.
-3. *호출자 측 레지스터*를 `add_saved_register`로 등록.
-4. 속하지 않으면 `None` 반환 — 다른 unwinder가 처리.
-
-### in_jit_region — JIT 영역 판단
-
-```python
-def in_jit_region(pc):
-    inferior = gdb.selected_inferior()
-    # JIT은 보통 mmap한 RWX 영역에 코드를 둠
-    # 또는 메타데이터에 영역 정보 보관
-    
-    # 예: V8은 v8::internal::Heap에 코드 영역 보관
-    heap = gdb.parse_and_eval("v8::internal::g_heap")
-    code_start = int(heap['code_space_']['allocation_top_'])
-    code_end = int(heap['code_space_']['allocation_limit_'])
-    return code_start <= pc < code_end
-```
-
-각 JIT 엔진마다 *영역 검출* 방식이 다름.
-
-### lookup_jit_frame
-
-JIT은 보통 *사이드 테이블*에 컴파일된 함수의 *프롤로그/에필로그* 정보를 보관. Python에서 그 테이블을 읽어 unwind 정보 재구성.
-
-```python
-def lookup_jit_frame(pc):
-    # V8의 경우: optimized code의 *deoptimization data*에 unwind 정보
-    code = find_code_object_containing(pc)
-    if not code: return None
-    
-    # 프레임 크기 + saved register offset
-    frame_size = int(code['frame_size_'])
-    sp_offset = int(code['caller_sp_offset_'])
-    
-    # 현재 SP에서 호출자 SP·PC 계산
-    sp = pending_frame.read_register("sp")
-    caller_sp = int(sp) + frame_size
-    return_pc_addr = caller_sp - 8
-    return_pc = read_memory_u64(return_pc_addr)
-    
-    return JitFrameInfo(caller_sp, return_pc)
-```
-
-복잡하지만 *JIT 디버깅의 유일한 길*. 큰 JIT 엔진은 보통 *자체 GDB 헬퍼*를 제공.
+범위 밖은 None을 반환합니다. PendingFrame은 callback이 끝난 뒤 보관해 다시 쓰지 않습니다. 여기서 inferior function call·다른 frame 조회처럼 unwind 재진입을 일으킬 수 있는 작업을 피합니다. fixture 검사와 실제 runtime JIT의 stack 복원은 서로 다른 검증 범위입니다.
 
 ## 실전 — V8 디버깅
 
-V8은 [공식 GDB 매크로](https://github.com/v8/v8/blob/main/tools/gdbinit)를 제공.
-
-```text
-(gdb) source /path/to/v8/tools/gdbinit
-(gdb) jss        # JavaScript stack 출력 (간단)
-(gdb) jlh        # JS local handles
-(gdb) job        # JS object 출력
-```
-
-JS 객체를 *그 시점의 V8 표현*으로 디코딩. 일반 `print`로는 못 보는 정보.
-
-Node.js·Chrome 디버깅에서 V8 helpers 없이는 native crash 분석이 매우 어렵습니다.
+V8은 tools/gdbinit와 version별 helper를 제공합니다. 사용 중인 V8/Node build·debug symbol과 같은 revision을 고정하고 실제 지원 command를 help/source에서 확인합니다. jss/jlh/job가 모든 release에 같은 이름·인자로 존재한다고 가정하지 않습니다. [공식 source](https://github.com/v8/v8/blob/main/tools/gdbinit)는 탐색 출발점입니다.
 
 ## 인터프리터 — Python의 GDB 헬퍼
 
 CPython 자체는 *C로* 구현. CPython 인터프리터 안에서 PyObject가 어떻게 흐르는지 디버깅하려면.
 
 ```text
-(gdb) source /usr/share/gdb/python/python-gdb.py
+(gdb) source /path/to/matching/python-gdb.py
 (gdb) py-bt
 Traceback (most recent call first):
   File "myapp.py", line 42, in process_data
@@ -261,30 +214,21 @@ Traceback (most recent call first):
     process_data(req)
 ```
 
-`py-bt`가 *C 콜스택 안의 Python 프레임*만 추출. 일반 `bt`는 `PyEval_EvalFrameDefault`로 가득.
+py-bt가 Python-level traceback을 구성하며 CPython version·debug build/추가 symbol·matching helper가 필요합니다. 설치 경로는 distro별입니다. 출력 예는 형식 설명이며 이 검증에서 실제 CPython crash를 수집한 결과는 아닙니다.
+
+`py-bt`가 *C 콜스택 안의 Python 프레임*을 해석. 일반 `bt`는 `PyEval_EvalFrameDefault`로 가득.
 
 이게 가능한 이유는 *CPython이 자체 GDB 헬퍼를 제공* — Python frame object를 디코딩하는 코드.
 
-## JVM — hsdis
+## JVM과 JIT 등록의 경계
 
-HotSpot JVM도 비슷. `libjvm.so`와 함께 *GDB SA*(Service Agent)가 제공돼 Java frame을 풀어내지만 GDB와 통합이 거칠어 보통 *jhsdb*나 *async-profiler* 같은 별 도구를 씁니다.
+hsdis는 disassembler이고 HotSpot Serviceability Agent/jhsdb와 역할이 다릅니다. 일반적인 GDB SA 하나가 모든 Java frame을 자동 복원한다는 설명은 사용하지 않습니다. 정확한 JDK·symbol·helper와 live/core 조건을 맞춥니다.
 
-## DWARF JIT 등록 — __register_frame
+## GDB JIT Interface와 Runtime Unwind
 
-`Python Unwinder` 대안 — *런타임에 DWARF FDE를 직접 등록*.
+GDB의 JIT interface는 __jit_debug_descriptor와 __jit_debug_register_code 등 정해진 rendezvous를 이용해 in-memory symbol object를 등록합니다. runtime/libgcc의 __register_frame FDE 등록을 GDB가 무조건 watch해 같은 정보를 얻는다는 설명은 틀립니다.
 
-```c
-// JIT가 컴파일한 코드에 대한 FDE 생성
-void *fde_data = generate_fde_for_jit_function(addr, size);
-__register_frame(fde_data);
-
-// 정리
-__deregister_frame(fde_data);
-```
-
-libgcc가 제공하는 함수. GDB가 `__register_frame`을 *watch* — 호출되면 그 FDE를 자기 unwind 정보에 추가.
-
-`perf_jitdump` 형식으로 *perf와 통합*도 가능 — Linux perf가 JIT 콜스택을 정확히 그릴 수 있게.
+Python unwinder, GDB JIT symbol registration, runtime exception unwinding과 perf jitdump는 목적과 소비 도구가 다른 경로입니다. JIT의 하나뿐인 해결책으로 묶지 않습니다. [JIT interface](https://sourceware.org/gdb/current/onlinedocs/gdb.html/JIT-Interface.html)를 선택한 GDB/runtime source와 대조합니다.
 
 ## frame() / read_register() / function()
 
@@ -321,34 +265,35 @@ frame.type()           # NORMAL_FRAME / DUMMY_FRAME / INLINE_FRAME / ...
 ```python
 top = gdb.newest_frame()
 f = top
-while f.older():
+while f is not None and f.older():
     f = f.older()
 
-reason = f.unwind_stop_reason()
-print(gdb.frame_stop_reason_string(reason))
+if f is not None:
+    reason = f.unwind_stop_reason()
+    print(gdb.frame_stop_reason_string(reason))
 ```
 
 ```text
-UNWIND_NO_REASON           정상
-UNWIND_NULL_ID             null frame ID
-UNWIND_OUTERMOST           바깥 끝
-UNWIND_UNAVAILABLE         정보 없음
-UNWIND_INNER_ID            안쪽 ID
-UNWIND_SAME_ID             ID 같음 (loop)
-UNWIND_NO_SAVED_PC         PC 보존 안 됨
-UNWIND_MEMORY_ERROR        메모리 read 실패
-UNWIND_FIRST_ERROR
+FRAME_UNWIND_NO_REASON           정상
+FRAME_UNWIND_NULL_ID             null frame ID
+FRAME_UNWIND_OUTERMOST           바깥 끝
+FRAME_UNWIND_UNAVAILABLE         정보 없음
+FRAME_UNWIND_INNER_ID            안쪽 ID
+FRAME_UNWIND_SAME_ID             ID 같음 (loop)
+FRAME_UNWIND_NO_SAVED_PC         PC 보존 안 됨
+FRAME_UNWIND_MEMORY_ERROR        메모리 read 실패
+FRAME_UNWIND_FIRST_ERROR
 ```
 
-콜스택이 *끊기는 이유*를 진단. 보통 `UNWIND_UNAVAILABLE` (DWARF 없음) 또는 `UNWIND_MEMORY_ERROR` (스택 손상).
+콜스택이 *끊기는 이유*를 진단. unavailable는 여러 종류의 register/memory 미수집·target 한계를 포함합니다. memory error도 손상만의 증거는 아닙니다. 실제 constant는 gdb.FRAME_UNWIND_*이며 DWARF 유무 하나로 원인을 확정하지 않습니다.
 
 ## 정리
 
 - Frame Filter — 콜스택 *외관* 변경. 숨기기·묶기·데코레이트.
 - FrameDecorator — 개별 frame의 *function/address/args* 변환.
 - Custom unwinder로 DWARF 없는 영역 풀기 — JIT, 인터프리터, exotic ABI.
-- `__register_frame`으로 *런타임 DWARF FDE 등록*도 가능.
-- V8·CPython·JVM은 *자체 GDB 헬퍼* 제공 — 활용 권장.
+- GDB JIT symbol 등록과 runtime/libgcc FDE 등록은 다른 interface.
+- runtime별 matching version·symbol·helper와 지원 범위를 확인.
 - `frame.type()`, `unwind_stop_reason()`이 콜스택 깨짐의 1차 진단.
 
 ## 다음 장 예고

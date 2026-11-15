@@ -20,16 +20,17 @@ BSP는 빌드되어 양산되면 끝나는 것이 아닙니다. 5년, 10년 동�
 
 ## Linux LTS 일정
 
-Linus가 release 하는 mainline은 *대략 9~10주마다* 새 버전이 나옵니다. 그중 일부가 LTS(Long Term Support)로 지정되어 Greg KH가 5~6년간 보안 백포트를 합니다.
+Mainline release cadence와 LTS 유지 기간은 달라질 수 있습니다. Linux kernel의 공식 release 페이지는 현재 longterm branch와 projected EOL을 공개하므로 제품 계획 시 갱신 시점의 upstream 정보와 vendor support policy를 함께 확인합니다.
 
 | 버전 | EOL (예상) | 비고 |
 |------|-----------|------|
-| 5.4 | 2025-12 | 곧 EOL |
-| 5.10 | 2026-12 | Android 11/12 베이스 |
-| 5.15 | 2026-10 | Ubuntu 22.04 base |
-| 6.1 | 2027-12 | 현재 다수 BSP 선택 |
-| 6.6 | 2026-12 (연장될 가능성) | 현재 추천 |
-| 6.12 | 2026-12 (연장될 가능성) | 최신 LTS |
+| 5.4 | 2025-12 | EOL 지남 |
+| 5.10 | 2026-12 | kernel.org longterm 계획 |
+| 5.15 | 2026-12 | kernel.org longterm 계획 |
+| 6.1 | 2027-12 | kernel.org longterm 계획 |
+| 6.6 | 2027-12 | kernel.org longterm 계획 |
+| 6.12 | 2028-12 | kernel.org longterm 계획 |
+| 6.18 | 2028-12 | kernel.org longterm 계획 |
 
 선택 기준은 다음입니다.
 
@@ -37,7 +38,7 @@ Linus가 release 하는 mainline은 *대략 9~10주마다* 새 버전이 나옵�
 - **SoC vendor의 BSP가 해당 LTS를 지원** — vendor가 패치를 backport 해주면 부담 감소
 - **AOSP/AGL/Yocto LTS 일정과 일치** — 다른 layer와 align
 
-2026년 5월 기준 새 product는 6.6 또는 6.12를 선택하는 것이 권장됩니다.
+2026년 10월 22일 확인 기준 kernel.org는 6.12의 projected EOL을 2028년 12월, 6.6을 2027년 12월로 표기합니다. 버전 선택은 이 일정만으로 정하지 말고 제품 지원 기간, SoC 기능, vendor BSP와 유지보수 계획을 함께 평가합니다.
 
 ## Out-of-tree 패치 cost
 
@@ -58,7 +59,7 @@ patches/
 
 여기서 *out-of-tree 50K 줄*은 다음 LTS upgrade마다 *전부 rebase* 해야 합니다. 5.10 → 5.15 rebase에서 *수십 개의 conflict*가 생기고, 5.15 → 6.1 rebase에서 또 수십 개. 패치마다 fix가 두 줄이라도 rebase에 한 시간씩 들면 누적이 큽니다.
 
-업스트림에 들어간 패치는 *rebase 비용이 0*입니다. 다음 LTS에 자동으로 따라옵니다. SoC vendor x가 자기 patch를 mainline에 보내 *vendor tree가 거의 비어*가는 케이스가 가장 성공한 패턴입니다(예: i.MX, Allwinner의 일부 SoC).
+해당 변경이 upstream에 통합되면 그 upstream branch 기반 작업에서 자체 carry patch를 유지하는 부담이 줄 수 있습니다. downstream 제품의 이전 kernel branch에 자동 backport되거나 업데이트 비용이 0이 된다는 뜻은 아닙니다. SoC vendor x가 자기 patch를 mainline에 보내 *vendor tree가 거의 비어*가는 케이스가 가장 성공한 패턴입니다(예: i.MX, Allwinner의 일부 SoC).
 
 ## 업스트림 기여 워크플로
 
@@ -163,7 +164,7 @@ $ git format-patch -1 HEAD --subject-prefix="PATCH v2" \
 - Move PHY mode to ethernet0 subnode (Rob)
 - Fix DT binding compatible (David Heidelberg)
 
-응답이 빠르면 patch가 다음 merge window에 들어갈 가능성이 높습니다. 느리면 maintainer가 잊거나 다른 patch가 같은 영역을 건드려 conflict가 생깁니다.
+응답 일정과 merge 결과는 maintainer 판단, patch quality, test evidence, release timing 및 subsystem process에 따릅니다. 재촉 횟수만으로 merge 시점을 예측하지 않습니다.
 
 ## LTS upgrade 전략
 
@@ -250,42 +251,31 @@ CVE가 *exploitable*한지는 별도 판단입니다. 모든 CVE를 매번 backp
 | Medium | DoS, info leak | 다음 minor release (분기) |
 | Low | 이론적 위협 | 다음 LTS upgrade |
 
-## 시리즈 finale — 21장 회고
+## 시리즈 회고 — 실제 목차
 
-BSP Development 시리즈가 21장에 걸쳐 다룬 내용을 한눈에 정리합니다.
+이 시리즈의 21편은 보드 bring-up부터 유지보수까지 다음 순서로 구성했습니다.
 
-### Part I — 기초 (Ch 1~5)
-
-- BSP의 정의와 범위 (Ch 1)
-- 보드와 SoC 이해 (Ch 2)
-- toolchain 구축 (Ch 3)
-- 첫 번째 부팅 (Ch 4)
-- Device Tree 기본 (Ch 5)
-
-### Part II — 부트로더와 커널 (Ch 6~10)
-
-- U-Boot 포팅 (Ch 6)
-- 커널 포팅 (Ch 7)
-- 디바이스 드라이버 (Ch 8)
-- power management (Ch 9)
-- secure boot 기초 (Ch 10)
-
-### Part III — 시스템 통합 (Ch 11~15)
-
-- multimedia subsystem (Ch 11)
-- 네트워크 stack (Ch 12)
-- 그래픽 (DRM/KMS) (Ch 13)
-- 디버깅 도구 (Ch 14)
-- 부트 시간 최적화 (Ch 15)
-
-### Part IV — 양산과 운영 (Ch 16~21)
-
-- Buildroot/Yocto 통합 (Ch 16)
-- 이미지 패키징 (Ch 17)
-- OTA와 recovery (Ch 18)
-- stability testing (Ch 19)
-- 양산 환경 (Ch 20)
-- 유지보수 (Ch 21)
+1. BSP 정의와 범위
+2. SoC 데이터시트 읽기
+3. Device Tree 설계
+4. Pin mux와 clock
+5. DDR 매개변수
+6. U-Boot 포팅
+7. TF-A와 TrustZone 통합
+8. Linux kernel config
+9. SMP bring-up
+10. 첫 부팅 추적
+11. 부트로그 디버깅
+12. Peripheral driver 통합
+13. Power management
+14. Thermal과 watchdog
+15. 부트 시간 최적화
+16. Buildroot·Yocto와 rootfs 통합
+17. 이미지 패키징
+18. OTA와 field recovery
+19. Stability testing
+20. 양산 환경과 재현 가능한 build
+21. 유지보수와 LTS 전략
 
 ## BSP 엔지니어의 다음 단계
 
@@ -308,11 +298,11 @@ BSP를 한 번 완성하고 나면 깊이를 만들 방향이 갈립니다. 가�
 ## 정리
 
 - 유지보수 비용은 out-of-tree 패치의 양에 비례합니다. 업스트림 기여가 가장 효과적인 비용 절감 수단입니다.
-- LTS 선택은 양산 시점에 EOL까지 2~3년 이상 남도록 합니다. 2026년 신규 product는 6.6 또는 6.12.
+- LTS 선택은 kernel.org의 projected EOL, vendor support와 제품 계획을 함께 고려합니다. 2026년 10월 확인한 일정은 [kernel.org release page](https://www.kernel.org/releases.html)에서 다시 검증합니다.
 - 업스트림 기여는 mainline base, checkpatch, get_maintainer, format-patch, send-email의 표준 워크플로를 따릅니다.
 - LTS upgrade는 단계적으로 진행합니다. 5.10 → 6.1 → 6.6 식으로 한 단계씩 testing.
 - git bisect는 회귀 commit을 식별하는 표준입니다. CI에 자동 bisect를 두는 것이 한 단계 더.
-- CVE 추적은 LTS 커널은 자동, out-of-tree 패키지(WPA, OpenSSL 등)는 별도 도구로 수동. 우선순위에 따라 hotfix/patch/minor release.
+- kernel.org longterm은 upstream stable fix를 제공하지만 제품 이미지가 자동으로 업데이트되지는 않습니다. 배포판·vendor tree·out-of-tree package를 포함해 CVE triage와 release 계획을 운영합니다.
 - BSP 엔지니어의 다음 단계는 보안, RTOS, 그리고 recipe 묶음입니다.
 
 ## 시리즈 마무리

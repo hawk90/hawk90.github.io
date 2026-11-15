@@ -1,8 +1,8 @@
 ---
-title: "DMA vs CPU Copy 성능 비교 — Break-even·Setup Overhead 실측"
+title: "DMA vs CPU Copy 성능 비교 — Break-even·Setup Overhead 측정법"
 slug: "embedded/performance-engineering/part3-04-dma-vs-cpu"
 date: 2026-04-25T09:03:00
-description: "DMA setup overhead. CPU memcpy 최적화. Break-even size. 실측 데이터."
+description: "DMA setup overhead와 CPU memcpy 비용을 비교하는 방법, 대상별 break-even 측정 절차."
 series: "Embedded Performance Engineering"
 seriesOrder: 22
 tags: [dma, memcpy, cpu, break-even]
@@ -46,7 +46,7 @@ HAL_DMA_Start(&hdma, src, dst, len);
 | Wake task (RTOS) | ~100 |
 | Total overhead | **~200 cycle** |
 
-200 cycle은 약 60 byte의 CPU memcpy에 해당합니다.
+본문의 단순 모델(CPU cost = N/3 cycle)만 적용하면 200 cycle은 약 600 byte의 CPU 작업에 해당합니다. 이 환산은 그 가정 안에서만 성립하며, 실제 DMA 설정 시간이나 memcpy 처리량을 측정한 값은 아닙니다.
 
 ## Break-even Point
 
@@ -199,16 +199,9 @@ printf("DMA: %u cycle\n", t1 - t0);
 
 각 size별로 측정해 break-even chart를 만듭니다.
 
-## STM32H743 실측 (170 MHz Cortex-M7 + 1.4 GB/s DDR3)
+## 대상에서 비교 측정하기
 
-| Size | CPU memcpy | DMA | DMA + CPU 다른 일 |
-|---|---|---|---|
-| 32 B | 28 cycle | 220 cycle | 220 - other |
-| 256 B | 200 cycle | 350 cycle | 350 - other |
-| 4 KB | 2,800 cycle | 3,200 cycle | 3,200 - other |
-| 64 KB | 45,000 | 50,000 | 50,000 - other |
-
-CPU offload 효과를 빼면 둘 다 *비슷*합니다. 다만 CPU가 다른 일을 할 수 있는 상황에서는 *DMA가 압승*입니다.
+이 글에는 STM32H743 보드에서 얻은 재현 가능한 측정 로그가 없으므로 MCU·클럭·메모리 종류와 함께 cycle 표를 제시하지 않습니다. 앞 절의 DWT 예제를 보드와 linker 설정에 맞춰 실행하고, 같은 메모리 구간·cache 상태·DMA 완료 조건으로 각 크기를 반복 측정해야 합니다. DMA 중 CPU가 다른 일을 수행하는 경우에는 copy elapsed time과 CPU 점유 시간을 별도로 기록합니다.
 
 ## Cortex-A - memcpy 라이브러리
 
@@ -280,7 +273,7 @@ DMA가 너무 빠르면 bus saturation이 일어나 다른 master가 starvation�
 
 ## 정리
 
-- DMA setup overhead는 *60-200 byte 등가의 CPU 작업*에 해당합니다.
+- DMA setup overhead의 CPU-work 등가는 대상의 측정값과 memcpy throughput으로 계산합니다.
 - 작은 copy(<64 B)는 CPU, 큰 copy와 peripheral은 DMA가 유리합니다.
 - 진짜 이득은 *CPU offload*이며 CPU가 다른 일을 할 때만 의미가 있습니다.
 - Cortex-M4 memcpy는 ldmia/stmia 최적화 기준 약 3 byte/cycle입니다.

@@ -43,10 +43,9 @@ perf --version
 
 ```bash
 # /proc/sys/kernel/perf_event_paranoid
-#  2 — kernel·CPU event 접근 차단 (기본)
-#  1 — user-space event 가능
-#  0 — kernel event도 가능
-# -1 — 모두 허용 (보안 위험)
+# 값의 의미는 커널 버전과 capability에 따라 달라질 수 있습니다.
+# 최신 커널의 기본값 2는 일반 사용자 접근을 user-space 중심으로 제한합니다.
+# CAP_PERFMON은 성능 모니터링에 필요한 권한을 분리해 부여합니다.
 
 echo 1 | sudo tee /proc/sys/kernel/perf_event_paranoid
 ```
@@ -60,10 +59,13 @@ echo 'kernel.perf_event_paranoid = 1' | sudo tee /etc/sysctl.d/99-perf.conf
 Capability 방식이 더 안전합니다. perf 실행 파일에만 권한을 부여합니다.
 
 ```bash
-sudo setcap cap_perfmon,cap_sys_ptrace=ep $(which perf)
+sudo setcap cap_perfmon=ep /usr/bin/perf  # 경로는 설치 환경에 맞게 확인
+# Linux 5.9 이전 커널은 별도 권한 요구가 다를 수 있습니다.
 ```
 
 ## perf stat — 첫 측정
+
+최신 커널의 `perf_event_paranoid` 설명과 capability 범위는 [Linux perf 보안 문서](https://docs.kernel.org/admin-guide/perf-security.html)를 확인하세요. sysctl 값의 정확한 효과는 커널 버전과 권한에 따라 달라집니다.
 
 `perf stat`은 프로그램 한 번 실행 동안의 누적 카운터를 보여 줍니다. 가장 빠르고 가벼운 첫 측정 도구입니다.
 
@@ -87,9 +89,9 @@ perf stat ./prog
 
 | Metric | 의미 | 기준 |
 |---|---|---|
-| **IPC** (insns per cycle) | 한 사이클에 실행한 명령어 수 | 1.0 이상 양호, 0.5 이하 의심 |
-| **Branch miss rate** | 분기 예측 실패 비율 | 1% 이하 정상 |
-| **Page faults** | 페이지 폴트 횟수 | 메모리 압박 신호 |
+| **IPC** (insns per cycle) | 한 사이클에 완료한 명령어 수 | CPU·코드·부하에 따라 해석 |
+| **Branch miss rate** | 분기 예측 실패 비율 | 동일한 CPU·부하에서 비교 |
+| **Page faults** | 페이지 폴트 횟수 | major faults와 함께 원인 확인 |
 
 IPC가 낮다면 stall 원인을 찾아야 합니다. Cache miss, branch miss, dependency chain 중 하나가 보통 범인입니다.
 
@@ -104,7 +106,7 @@ perf stat -e cycles,instructions,cache-references,cache-misses ./prog
 #     12,345,678   cache-misses          #    5.26% of all cache refs
 ```
 
-Cache miss rate가 10%를 넘으면 데이터 레이아웃을 점검할 차례입니다.
+Cache miss 비율만으로 원인을 단정하지 말고, 이벤트 정의와 동일한 워크로드에서 기준선과 비교합니다.
 
 여러 번 실행해 평균과 분산을 보고 싶다면 `-r`을 씁니다.
 
@@ -114,7 +116,7 @@ perf stat -r 10 ./prog
 #   1234.56 msec task-clock                #    0.987 CPUs utilized ( +-  0.45% )
 ```
 
-분산이 5%를 넘으면 측정 자체에 noise가 있다는 뜻이므로, CPU governor를 performance로 고정하거나 다른 백그라운드 작업을 줄여야 합니다.
+반복 결과의 분산은 부하·온도·주파수 정책 등 측정 조건과 함께 해석합니다. 필요하면 조건을 기록하고 백그라운드 부하를 통제해 다시 측정합니다.
 
 ## perf record / report — 핫스팟 찾기
 
@@ -143,7 +145,7 @@ perf report
 #    5.67%  prog     [kernel.kallsyms]   [k] copy_user_enhanced_fast_string
 ```
 
-`Overhead` 열이 전체 사이클 중 비율입니다. 위 예에서는 `hot_function`이 23.45%를 차지하므로 이 함수부터 들여다봅니다.
+`Overhead` 열은 선택한 이벤트의 sample 가운데 해당 항목에 귀속된 비율입니다. 예에서 선택한 이벤트가 cycles라면 cycle sample의 비율입니다. 위 예에서는 `hot_function`이 23.45%를 차지하므로 이 함수부터 들여다봅니다.
 
 Enter 키로 함수를 펼치면 호출 경로 트리가 나옵니다.
 
@@ -168,13 +170,13 @@ perf annotate hot_function
        │     for (i = 0; i < N; i++) {
   0.5  │ 10:   mov    %eax, %edx
        │         sum += data[i];
- 23.4  │ 12:   add    (%rcx), %edx       ← 가장 hot
+ 23.4  │ 12:   add    (%rcx), %edx
   0.3  │ 14:   inc    %rax
   0.2  │ 16:   cmp    $0x1000, %rax
- 76.0  │ 19:   jne    10                 ← 분기 hot
+ 75.6  │ 19:   jne    10                 ← sample 비중 최대
 ```
 
-명령어 단위까지 내려가면 "이 add가 메모리 fetch를 기다리고 있구나" 같은 결론이 가능합니다.
+명령어별 sample은 후보 위치를 좁히는 데 씁니다. 예시 output의 백분율은 합계가 100%가 되도록 표시했습니다. 메모리 대기 원인은 이 출력만으로 확정하지 말고, 선택 이벤트와 어셈블리 또는 추가 측정으로 확인합니다.
 
 ## Call Graph 수집 방식
 
@@ -203,7 +205,7 @@ perf top -p $(pidof app)  # 특정 프로세스
 perf top -e cache-misses  # 다른 이벤트로
 ```
 
-배포된 시스템에서 갑자기 CPU 사용률이 올라간 경우, ssh로 접속해 `perf top`을 띄우면 즉시 hot 함수를 알 수 있습니다. 30분 이상 켜 두면 perf 자체가 noise가 되므로 짧게 사용하는 것이 좋습니다.
+배포 시스템의 긴급 진단에도 쓸 수 있지만, 권한·성능 영향과 샘플 기간을 확인하고 필요한 시간만 실행합니다.
 
 ## perf diff — 최적화 효과 비교
 
@@ -228,9 +230,7 @@ perf diff before.data after.data
 $$\text{IPC} = \frac{\text{instructions}}{\text{cycles}}$$
 
 ```text
-IPC > 2.0  — superscalar 잘 활용
-IPC 1.0~2.0 — 일반적
-IPC < 0.5  — 심각한 stall, 원인 찾기 필요
+IPC 값은 명령어 구성, CPU 폭, 메모리 지연, 동시성에 따라 달라집니다. 절대 임계값 대신 같은 플랫폼에서 바뀐 조건을 비교합니다.
 ```
 
 IPC가 낮을 때 다음 순서로 좁혀 갑니다.
@@ -265,7 +265,7 @@ perf report                   # [.] 0x12345 만 표시
 perf record -F 99999 ./prog   # 100 kHz, overhead 5% 이상
 ```
 
-너무 높이면 측정 대상보다 perf 자체가 noise가 됩니다. 999~4000 Hz가 표준이며 ARM Cortex-A에서는 4000 Hz에서 2~5% overhead를 봅니다.
+샘플 주파수는 플랫폼과 이벤트에 맞춰 정하고, 주파수를 높일수록 측정 비용과 데이터 양이 늘 수 있으므로 같은 조건에서 비용을 확인합니다.
 
 > ⚠️ Frame pointer 없이 call graph
 
@@ -295,7 +295,7 @@ echo -1 > /proc/sys/kernel/perf_event_paranoid
 - `perf record -g`로 sampling profile을 수집하고 `perf report`로 핫스팟을 찾습니다.
 - `perf annotate`는 명령어 단위까지 cycle 분포를 보여 줍니다.
 - `perf top`은 실시간 응급 진단에 유용하며, `perf diff`로 최적화 효과를 정량 비교합니다.
-- Sampling rate는 999~4000 Hz가 표준이며, `-fno-omit-frame-pointer`가 call graph 정확도를 좌우합니다.
+- Sampling rate는 비교 목적과 측정 비용에 맞춰 정하고, `-fno-omit-frame-pointer` 등 call graph 수집 전제를 기록합니다.
 
 다음 편은 **perf 고급** — raw event, tracepoint, perf script Python으로 들어갑니다.
 

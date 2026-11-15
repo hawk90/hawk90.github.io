@@ -64,7 +64,7 @@ SoC의 *PCIe controller register*가 *LTSSM 상태 필드*를 노출하는 경�
 $ lspci -nn | grep -i cxl
 5e:00.0 CXL [0502]: ...
 
-# 안 보이면 — LTSSM이 L0에 도달하지 못한 것
+# 안 보이면 — PCIe enumeration이 되지 않은 상태다. 이 결과만으로 LTSSM 정지 상태를 단정하지 말고, 전원·reset·firmware 설정과 SoC가 제공하는 LTSSM 진단을 함께 확인한다.
 
 # 2. Link 속도/폭 확인
 $ lspci -vvv -s 5e:00.0 | grep -E "LnkSta|LnkCap"
@@ -93,14 +93,14 @@ $ lsmod | grep cxl
 
 | 증상 | 원인 |
 |------|------|
-| `lspci`에 안 보임 | LTSSM이 L0 미도달. 슬롯·전원·reset 점검 |
+| `lspci`에 안 보임 | PCIe enumeration 실패. 슬롯·전원·reset·firmware 설정을 확인하고 LTSSM은 컨트롤러 상태로 따로 판독 |
 | `lspci`엔 있는데 cxl 디렉터리 비어 있음 | CEDT 누락 또는 cxl_acpi 미로딩 |
 | LinkSta "Train+" 깜빡임 | Recovery 반복 — eye margin 부족·retimer 필요 |
 | `dmesg`에 "Device DVSEC not present, skip CXL.mem init" | `cxl_pci`가 CXL Device DVSEC을 찾지 못해 CXL.mem 초기화를 건너뜀 (`drivers/cxl/pci.c`) |
 
 ## 디버깅 체크리스트
 
-1. `lspci -nn`에 디바이스 보이는가 → 없으면 LTSSM 멈춤
+1. `lspci -nn`에 디바이스 보이는가 → 없으면 PCIe enumeration 경로를 조사하고 LTSSM 상태는 별도 관측
 2. `lspci -vvv`의 LnkSta가 정상인가 → Recovery 반복이면 신호 문제
 3. DVSEC이 있는가 → 없으면 CXL 미지원 디바이스
 4. `/sys/bus/cxl/devices/`에 등록되었는가 → 비면 CEDT 또는 드라이버 문제
@@ -123,4 +123,4 @@ Ch 9 — CXL 디바이스 트러블슈팅. RAS 이벤트·poison list·media err
 - [Ch 2: JTAG·SWD·CoreSight 분석](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight)
 - [Bootloader Internals Ch 34: U-Boot PCIe Enumeration](/blog/embedded/bootloader/chapter34-pcie-enumeration)
 - [HBM·GDDR 심화 Ch 9: CXL.mem 분석](/blog/embedded/hardware/hbm/chapter09-cxl-mem)
-- [Modern Embedded Recipes Ch 149: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
+- [Modern Embedded Recipes Ch 150: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)

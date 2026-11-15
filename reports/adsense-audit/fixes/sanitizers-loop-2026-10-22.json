@@ -1,0 +1,41 @@
+{
+  "date": "2026-10-22",
+  "sourceHead": "d55f8d66ece6acb8ebb274df7c843ce6b4054853",
+  "articles": [
+    {
+      "path": "src/content/blog/tools/debugging/sanitizers/chapter01-intro.md",
+      "beforeSha256": "553782213ecb23d8a5dad41a12cad67537b95e89682d12613ca28224274aeab5",
+      "afterSha256": "870b3100c4ba7fc213eb520dc5f912f5ecc8afc91461f31b2d013e992d46e893",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/sanitizers/chapter02-asan-ubsan.md",
+      "beforeSha256": "ceeec16a9a69eab1063d07e0be92df8fe5c2c7ca5562c821abc96dcfe3da6329",
+      "afterSha256": "afd7b73b0a32ce645822a3267d994b480f064286b27debbb0712942ad51b9df8",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/sanitizers/chapter03-lsan-leaks.md",
+      "beforeSha256": "056e1b5470bf7689475d80ed3f998fc08017a802387bb48a40a2e1cad74cc78c",
+      "afterSha256": "c6f5081a1505959863a8952cf866b3c12c714330bc3e591ea5c04c3ecbebb888",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/sanitizers/chapter04-tsan.md",
+      "beforeSha256": "b21382a9a4f30c03a955ef610711b039840b5ee224d98cef690a88b7df9a15c7",
+      "afterSha256": "15c5198a3fc945c58fe0b6e5149852b292928370c050125498640be1836db6e7",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/sanitizers/chapter05-cmake-ci.md",
+      "beforeSha256": "685fae518a7b6fcd7af6fce4bd05179d9e3557875c4004006ef9f60f3e6a31d5",
+      "afterSha256": "36cc373ec5ca335ab3ce8c234c7552dad24894f85a2f22884e6318bfae3fd846",
+      "rescored": false,
+      "validation": "scoped examples; see companion report"
+    }
+  ]
+}

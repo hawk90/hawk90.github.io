@@ -2,7 +2,7 @@
 title: "메모리 풀링과 데이터센터 토폴로지 — 용량을 서버 밖에서 빌리는 일"
 slug: "embedded/hardware/hbm/chapter12-cxl-pooling-fabric"
 date: 2026-06-15T09:04:00
-description: "on-package HBM의 용량 상한 밖을 CXL 풀이 맡는 방식 — 빌린 용량의 지연 값, hot/cold 구분이라는 전제, 서버당 고정 구성에서 풀 조달로의 전환."
+description: "CXL 풀의 용량·대역폭·배치 조건을 구별하고, 동시 수요 예산과 TPP·Pond 연구의 적용 범위를 살펴봅니다."
 series: "HBM·GDDR 심화"
 seriesOrder: 12
 tags: [cxl, memory-pooling, fabric, datacenter, gfam]
@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"풀링은 토폴로지 문제처럼 보이지만, 메모리를 사고 배치하는 사람에게는 *용량을 서버 안에서 살 것인가 서버 밖에서 빌릴 것인가*의 문제입니다."** — on-package HBM의 용량은 *스택 수에 묶여* 있고, 그 한계 밖을 맡는 것이 *풀*입니다. 다만 빌린 용량은 *지연이 한두 단 먼 자리*에 있고, *hot/cold 구분이 서지 않는 워크로드*에서는 이득이 나지 않습니다.
+> **"풀링은 토폴로지 문제처럼 보이지만, 메모리를 사고 배치하는 사람에게는 *용량을 서버 안에서 살 것인가 서버 밖에서 빌릴 것인가*의 문제입니다."** — on-package HBM의 용량은 *스택 수에 묶여* 있고, host에 연결한 CXL pool은 별도 메모리 확장 경로입니다. GPU HBM과 직접 연결되는지는 별도 offload·copy·주소 매핑 지원을 확인해야 합니다. 다만 빌린 용량은 *지연이 한두 단 먼 자리*에 있고, *hot/cold 구분이 서지 않는 워크로드*에서는 이득이 나지 않습니다.
 
 [Ch 11](/blog/embedded/hardware/hbm/chapter11-cxl-device-types)에서 *디바이스 한 대*의 유형 분류를 봤습니다. 이 마지막 장은 시야를 데이터센터 전체로 넓힙니다. 시리즈 내내 따라온 질문은 *"이 워크로드의 데이터를 어느 메모리에 둘 것인가"*였습니다. 풀링은 그 질문에 *서버 밖*이라는 선택지를 하나 더 붙이는 일입니다.
 
@@ -20,20 +20,20 @@ fabric 자체의 동작은 [CXL 4.0 Internals Ch 4](/blog/embedded/hardware/cxl/
 
 ## 용량은 스택 수에 묶여 있다
 
-HBM의 용량 상한은 *물리 구조가 정합니다*. 스택 하나의 die 수와 패키지에 올릴 수 있는 스택 수가 곧 상한이고, 그 위에 인터포저 면적과 [Ch 6](/blog/embedded/hardware/hbm/chapter06-thermal-power)에서 본 열 문제가 얹힙니다. 용량을 더 원하면 패키지를 다시 설계해야 하고, 그 말은 *다음 세대를 기다린다*는 뜻입니다.
+HBM의 용량 상한은 *물리 구조가 정합니다*. 스택 하나의 die 수와 패키지에 올릴 수 있는 스택 수가 곧 상한이고, 그 위에 인터포저 면적과 [Ch 6](/blog/embedded/hardware/hbm/chapter06-thermal-power)에서 본 열 문제가 얹힙니다. 기존 패키지의 HBM을 DIMM처럼 추가할 수는 없습니다. 그러나 더 큰 용량의 기존 SKU 선택·모델 분할·정밀도 변경·offload는 별개의 대안이므로 반드시 다음 세대까지 기다려야 한다는 뜻은 아닙니다.
 
-그 상한이 실제로 어디서 걸리는지는 [Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)에서 봤습니다. Llama 2 70B를 batch 128·seq 2048로 서빙하면 *약 226 GB*가 필요한데, H100 SXM의 HBM은 *80 GB*입니다.
+그 상한이 실제로 어디서 걸리는지는 [Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)에서 봤습니다. Llama 2 70B를 batch 128·seq 2048로 가정의 weight+KV 소계만 *약 226 GB*인데, H100 SXM의 HBM은 *80 GB*입니다.
 
 CXL 카드를 서버 하나에 꽂아 두면 그 카드의 용량은 *그 서버의 새 상한*이 될 뿐입니다. 풀링은 상한을 서버 경계 밖으로 옮깁니다.
 
 | 배치 | 용량 상한을 정하는 것 | 늘리려면 |
 |------|---------------------|---------|
-| on-package HBM | 스택 수 × 스택 용량, 인터포저 면적, 열 | 패키지 재설계 — 세대 교체를 기다림 |
+| on-package HBM | 스택 수 × 스택 용량, 인터포저 면적, 열 | 다른 패키지/SKU 또는 모델 분할·offload 검토 |
 | 로컬 DDR DIMM | 소켓당 채널·슬롯 수 | DIMM 증설, 한계에 닿으면 서버 교체 |
 | Direct-attach CXL 카드 | 서버의 슬롯 수 × 카드 용량 | 그 서버에 카드 추가 |
-| Switch 뒤 풀 | 풀 전체 용량 | 풀에 카드 추가 — 어느 서버와도 무관 |
+| Switch 뒤 풀 | 풀 전체 용량 | pool·host decoder·주소 공간·switch·관리 계층 한도 안에서 확장 |
 
-마지막 줄이 풀링이 파는 유일한 물건입니다. *용량의 상한이 서버가 아니라 풀에 걸린다*는 것.
+이 비교에서 풀링의 핵심은 용량 할당의 경계입니다. *용량의 상한이 서버가 아니라 풀에 걸린다*는 것.
 
 ## 대역폭과 용량은 다른 축이다
 
@@ -42,13 +42,13 @@ CXL 카드를 서버 하나에 꽂아 두면 그 카드의 용량은 *그 서버
 | 병목 | 증상 | 풀링이 답인가 |
 |------|------|--------------|
 | 대역폭 | 모델은 올라가는데 처리량이 안 나옴. [Ch 5](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)의 roofline에서 memory bound 쪽에 붙어 있음 | 아니다. HBM 세대·스택 수·컨트롤러 효율의 문제 |
-| 용량 | 모델이나 working set이 아예 안 올라감. 배치를 줄이거나 노드를 쪼개서 우회 중 | 그렇다. 풀이 미는 축이 정확히 이쪽 |
+| 용량 | 모델이나 working set이 아예 안 올라감. 배치를 줄이거나 노드를 쪼개서 우회 중 | 그렇다. 용량 확장의 후보. 접근 경로와 latency budget 충족 여부는 별도 확인 |
 
 대역폭이 모자란데 용량을 사고, 용량이 모자란데 대역폭 좋은 메모리를 사는 것이 가장 비싼 실수입니다. 두 축은 서로를 대신하지 못합니다.
 
 ## 토폴로지 세 단계가 메모리에 하는 일
 
-CXL은 버전마다 *용량을 나눠 쓸 수 있는 범위*를 넓혀 왔습니다.
+[CXL 2.0 발표](https://computeexpresslink.org/wp-content/uploads/2024/02/0c1418_caa15c61bc7b499087ad4ec3713df1ec.pdf)와 [CXL 3.0 소개](https://computeexpresslink.org/event/cxl-3-0-enabling-composable-systems-with-expanded-fabric-capabilities/)는 switching·pooling과 이후 fabric·sharing의 범위를 설명합니다. 표는 사양의 기능 구분이며 OS가 전부 지원하거나 모든 장치가 상호운용된다는 뜻은 아닙니다.
 
 | 단계 | CXL 버전 | 용량이 묶이는 경계 | 나눠 쓰는 단위 |
 |------|---------|------------------|---------------|
@@ -66,7 +66,7 @@ CXL은 버전마다 *용량을 나눠 쓸 수 있는 범위*를 넓혀 왔습니
 
 ## 빌린 용량은 먼 자리다
 
-풀은 여러 host가 같은 디바이스를 두드리는 구조이므로, 혼잡한 시간대의 지연은 조용할 때보다 나빠질 수 있습니다. 평균만 보고 배치를 정하면 *꼬리에서 사고가 납니다*.
+CXL 2.0 pooling은 host별로 분리된 논리 장치/용량을 할당하는 것과 같은 byte를 동시에 공유하는 것을 구별해야 합니다. 여러 host가 장치 내부 자원·switch uplink를 공유한다면, 혼잡한 시간대의 지연은 조용할 때보다 나빠질 수 있습니다. 평균만 보고 배치를 정하면 *꼬리에서 사고가 납니다*.
 
 그래서 배치 원칙은 단순합니다. *hot working set은 로컬에, 빌린 용량은 cold tier에.*
 
@@ -82,13 +82,44 @@ CXL은 버전마다 *용량을 나눠 쓸 수 있는 범위*를 넓혀 왔습니
 
 풀이 이득을 내려면 *풀에 둬도 되는 데이터가 실제로 존재*해야 합니다. 워크로드의 접근이 전체 용량에 고르게 퍼져 있으면, 어느 페이지를 풀에 올리든 같은 비율로 두드려지고 결과는 *전체가 조금씩 느려지는 것*뿐입니다.
 
-도입 전에 답해 둘 질문은 세 개입니다.
+GPU KV를 host CXL에 두는 경우에도 실제 offload runtime과 transfer 경로가 필요합니다. 단지 cold라는 분류만으로 장치가 직접 접근할 수는 없습니다. 도입 전에 답해 둘 질문은 세 개입니다.
 
 - 실제 working set이 전체 용량의 몇 %인가. 이 비율이 작을수록 풀의 값어치가 큽니다.
 - 그 비율이 시간에 따라 얼마나 흔들리는가. hot 영역이 자주 이동하면 이동 비용이 이득을 먹습니다.
 - 데이터를 누가 배치하는가. 애플리케이션이 직접 정할 수도 있고(DAX), OS가 접근 패턴을 보고 옮길 수도 있습니다(System RAM 노드).
 
-OS가 옮기는 쪽의 근거로는 Meta의 TPP 연구가 있습니다. Meta 서버 fleet의 메모리 사용 패턴을 분석해 *차가운 페이지를 느린 tier로 내릴 기회*가 있음을 보였고, *애플리케이션을 고치지 않는* OS 수준 배치로 기본 Linux 대비 성능을 18% 올렸습니다. 기본 NUMA balancing보다도 5~17% 나았습니다.
+OS가 옮기는 쪽의 근거로는 [TPP 논문(ASPLOS 2023)](https://arxiv.org/abs/2206.02878)이 있습니다. Meta 서버 fleet의 메모리 사용 패턴을 분석해 *차가운 페이지를 느린 tier로 내릴 기회*가 있음을 보였고, *애플리케이션을 고치지 않는* OS 수준 배치로 기본 Linux 대비 성능을 18% 올렸습니다. 해당 연구의 NUMA Balancing·AutoTiering을 포함한 비교 대상보다 5~17% 나았습니다. 이는 논문의 workload·장치·kernel 구성에서 나온 결과이며 현재 모든 시스템의 개선율이 아닙니다.
+
+## 동시 수요 예산을 계산하기
+
+동시 수요는 같은 시각·같은 단위로 정렬된 trace로 계산해야 합니다. 아래 Node.js 예는 행을 시각, 열을 host로 보고 관측 구간의 최대 합과 host별 최대값의 합을 구합니다. missing sample을 0으로 채우지 않으며, 실제 구매 비용이나 필요한 reserve를 추정하지 않습니다.
+
+```js title="cxl-pool-demand.mjs"
+export function demandPeaks(rows) {
+  if (!Array.isArray(rows) || rows.length === 0 || rows.length > 4096 ||
+      !Array.isArray(rows[0]) || rows[0].length === 0 || rows[0].length > 1024) {
+    throw new RangeError('nonempty bounded demand matrix required');
+  }
+  const hosts = rows[0].length, peaks = Array(hosts).fill(0);
+  let concurrentPeak = 0;
+  for (const row of rows) {
+    if (!Array.isArray(row) || row.length !== hosts ||
+        !Array.from(row).every(x => Number.isSafeInteger(x) && x >= 0)) {
+      throw new RangeError('aligned nonnegative integer samples required');
+    }
+    let sum = 0;
+    row.forEach((value, i) => { sum += value; peaks[i] = Math.max(peaks[i], value); });
+    if (!Number.isSafeInteger(sum)) throw new RangeError('sum overflow');
+    concurrentPeak = Math.max(concurrentPeak, sum);
+  }
+  const separatePeakSum = peaks.reduce((sum, x) => sum + x, 0);
+  if (!Number.isSafeInteger(separatePeakSum)) throw new RangeError('sum overflow');
+  return {separatePeakSum, concurrentPeak};
+}
+console.log(demandPeaks([[100,0],[0,100]])); // 200 vs 100 (같은 단위)
+```
+
+두 host의 peak가 겹치면 `[[100,100]]`은 200 대 200으로 절감 여지가 없습니다. 관측되지 않은 future peak, 장애 복구·할당 단위·reserve·local memory 비율·pool 자체 비용을 포함하면 구매량은 다시 정해야 합니다.
 
 ## 조달 방식이 바뀐다
 
@@ -105,7 +136,7 @@ OS가 옮기는 쪽의 근거로는 Meta의 TPP 연구가 있습니다. Meta 서
 
 마지막 줄을 빼고 읽으면 풀링이 공짜처럼 보입니다. 실제로는 *지연 한 단*과 *운영할 관리 계층*이 새로 생기고, 그 둘이 이득보다 큰 환경도 있습니다.
 
-이 이득을 정량화한 연구가 Microsoft Azure의 *Pond*입니다. 클라우드 운영 trace를 분석해 *8~16 소켓 범위로만 풀링해도 이득 대부분*을 얻는다고 봤고, VM에 로컬·풀 메모리를 얼마씩 줄지 예측하는 방식으로 *DRAM 비용을 7% 줄이면서 성능을 같은 NUMA 노드 할당 대비 1~5% 이내*로 지켰습니다.
+이 이득을 정량화한 연구가 [Pond(ASPLOS 2023)](https://arxiv.org/abs/2203.00241)입니다. 클라우드 운영 trace를 분석해 *8~16 소켓 범위로만 풀링해도 이득 대부분*을 얻는다고 봤고, VM에 로컬·풀 메모리를 얼마씩 줄지 예측하는 방식으로 *DRAM 비용을 7% 줄이면서 성능을 같은 NUMA 노드 할당 대비 1~5% 이내*로 지켰습니다. 논문의 158 workload 평가 결과이며 상용 Azure 전반의 운영 성과로 일반화하지 않습니다.
 
 ## 메모리 계층에서 자주 어긋나는 판단
 
@@ -134,8 +165,8 @@ OS가 옮기는 쪽의 근거로는 Meta의 TPP 연구가 있습니다. Meta 서
 ## 정리
 
 - 풀링이 파는 것은 토폴로지가 아니라 *용량 상한의 위치*입니다.
-- HBM의 용량은 *스택 수·인터포저·열*에 묶여 다음 세대까지 못 늘립니다. CXL 풀이 그 한계 밖을 맡습니다.
-- *대역폭 병목과 용량 병목은 다른 문제*입니다. 풀은 용량 축만 밉니다.
+- HBM 패키지의 물리 용량과 host CXL pool 용량은 별도이며, GPU offload 경로가 있어야 함께 사용할 수 있습니다.
+- *대역폭 병목과 용량 병목은 다른 문제*입니다. 풀 용량 증가만으로 host 링크의 대역폭이 늘지는 않습니다. CXL 장치·채널을 추가해 시스템 총 BW를 확장하는 별도 설계와 구별합니다.
 - CXL 1.1(direct) → 2.0(switching·MLD pooling) → 3.x(fabric·공유)로 갈수록 *나눠 쓰는 범위가 넓어지고 경로가 길어집니다*.
 - 풀링의 전제 조건은 *hot/cold가 실제로 갈리는 워크로드*입니다.
 - 조달 기준이 *서버별 peak의 합*에서 *동시 peak*로 바뀝니다. Pond는 DRAM 비용 7% 절감을 성능 손실 1~5% 이내로 보였습니다.
@@ -158,7 +189,7 @@ CXL을 *프로토콜·구현 쪽에서 다시* 보고 싶다면 [CXL 4.0 Interna
 
 - [Ch 1: HBM과 GDDR 분기점 분석](/blog/embedded/hardware/hbm/chapter01-overview) — 시리즈 시작
 - [Ch 8: NPU·GPU에서의 HBM 활용](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage) — 용량이 벽이 되는 지점
-- [Ch 9: CXL.mem 분석](/blog/embedded/hardware/hbm/chapter09-cxl-mem) — 이 장이 인용한 지연·대역폭 실측
+- [Ch 9: CXL.mem 분석](/blog/embedded/hardware/hbm/chapter09-cxl-mem) — CPU 메모리 확장과 Linux 노출의 개요
 - [Ch 10: CXL.mem 프로토콜 분해](/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol)
 - [Ch 11: CXL Type 1·2·3 디바이스 분류](/blog/embedded/hardware/hbm/chapter11-cxl-device-types)
 - [Embedded Performance Engineering Ch 29: CXL Interconnect 분석](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)

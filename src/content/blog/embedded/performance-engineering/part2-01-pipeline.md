@@ -38,13 +38,14 @@ Inst4:                 [F] [D] [E] [M] [W]
 
 ![5-stage pipeline에 RAW hazard 하나가 들어왔을 때의 stall 전파](/images/blog/perf-eng/diagrams/part2-01-pipeline-stages.svg)
 
-## Cortex-M0/M0+ — 2-Stage
+## Cortex-M0 / M0+ — 3-Stage / 2-Stage
 
 ```text
-[Fetch] → [Execute (Decode+Execute+WB 통합)]
+Cortex-M0: [Fetch] → [Decode] → [Execute]
+Cortex-M0+: [Fetch+Decode] → [Execute]
 ```
 
-매우 단순한 구조라서 작은 die와 낮은 전력이 특징입니다. 분기 시 *1 cycle을 손실*합니다.
+매우 단순한 구조라서 작은 die와 낮은 전력이 특징입니다. M0+는 M0보다 짧은 pipeline으로 non-sequential fetch를 한 stage 덜 거칠 수 있습니다. 구체적인 branch timing은 processor revision과 memory system을 확인합니다.
 
 ## Cortex-M3/M4 — 3-Stage
 
@@ -57,7 +58,7 @@ ldr r0, [r1]   ; F D E
 add r2, r0, r3 ; F D E   ← r0 사용
 ```
 
-`r0` 의존성이 있지만 load 결과가 *같은 cycle*에 ALU로 전달됩니다 (forwarding). Stall 없이 진행됩니다.
+`r0` 의존성이 있습니다. 실제 load-use stall 여부와 cycle 수는 명령 조합, 구현 및 memory latency에 따라 달라집니다. Cortex-M4 전체에 같은-cycle forwarding을 일반화하지 않습니다.
 
 ## Cortex-M7 — 6-Stage Dual-Issue
 
@@ -79,7 +80,7 @@ F1 F2 F3 D1 D2 I E1 E2
 
 In-order 발행에 dual-issue를 더한 구조입니다. 적당한 성능과 낮은 전력이 특징이며, Raspberry Pi 3B의 BCM2837에 들어 있습니다.
 
-## Cortex-A72 — 15-Stage Out-of-Order
+## Cortex-A72 — Out-of-Order
 
 ```text
 F1 F2 F3 F4 F5 D1 D2 D3 Dispatch [Issue Queue]
@@ -93,7 +94,7 @@ F1 F2 F3 F4 F5 D1 D2 D3 Dispatch [Issue Queue]
 
 - *5-stage fetch*로 깊은 branch prediction을 지원합니다.
 - *Out-of-order issue*로 의존성이 없는 명령을 먼저 실행합니다.
-- *4-wide superscalar*로 동시에 4 명령을 처리합니다.
+- Superscalar execution으로 독립 명령을 병렬 처리할 수 있습니다. Issue width와 sustained IPC는 stage, instruction mix와 resource constraints에 따라 달라집니다.
 
 성능이 높지만 전력 소모도 그만큼 큽니다.
 
@@ -103,7 +104,7 @@ F1 F2 F3 F4 F5 D1 D2 D3 Dispatch [Issue Queue]
 |---|---|---|
 | 짧음 (3) | Branch miss penalty가 작습니다 | 클럭 속도 한계가 있습니다 |
 | 중간 (8) | 균형이 잡힙니다 | — |
-| 김 (15+) | 고클럭이 가능합니다 (1.5 GHz↑) | Mispredict penalty가 큽니다 |
+| 김 (target별) | 높은 clock 목표에 활용할 수 있음 | Mispredict 비용은 구현별 |
 
 Pentium 4는 31 stage였습니다. mispredict 시 *31 cycle을 손실*했고, 결국 실패한 디자인이 되었습니다.
 
@@ -111,7 +112,7 @@ Pentium 4는 31 stage였습니다. mispredict 시 *31 cycle을 손실*했고, �
 
 $$T_{\text{no pipeline}} = 5N \text{ cycle}, \quad T_{\text{5-stage pipe}} = 5 + (N-1) = N + 4 \text{ cycle} \ (N \gg 1)$$
 
-*N=1000*이면 pipeline은 200x throughput을 냅니다. 다만 *latency* (한 명령의 완료 시간)는 *동일하거나 길어집니다*.
+*N=1000*이면 이상적인 수식은 no-pipeline 5,000 cycle, 5-stage pipeline 1,004 cycle이며 비율은 약 4.98배입니다. 이는 stage latency가 같고 stall이 없다는 단순 모델의 throughput 비교입니다. 한 명령의 latency는 5 cycle로 동일합니다.
 
 ## Pipeline Hazard 3종
 
@@ -146,7 +147,7 @@ ldr r0, [r1]   ; F D E   M  W (load 완료 = W)
 mul r2, r0, r3 ; F D D' E   M  W   ← stall 1 cycle (load-use)
 ```
 
-Load 결과는 *forwarding이 불가능*하여 1 cycle bubble이 생깁니다. 컴파일러가 *재정렬*을 시도합니다.
+이 예는 load-use 간격을 보여 주지만, 고정된 stall 수를 모든 메모리와 명령 조합에 일반화할 수 없습니다. 대상 Cortex-M4 TRM과 생성된 기계어를 확인하고 측정합니다.
 
 ```c
 ldr r0, [r1]   ; F D E   M  W
@@ -167,11 +168,7 @@ float ipc = (float)insts / cycles;
 ```
 
 목표 IPC는 다음과 같습니다.
-- Cortex-M0: ~0.7
-- Cortex-M3: ~0.9
-- Cortex-M4: ~0.95
-- Cortex-M7 (dual-issue): ~1.5
-- Cortex-A72 (OoO): ~3.0
+- target별 instruction mix와 memory system에서 측정하며, architecture 고정 IPC 목표값은 제시하지 않습니다.
 
 ## SuperH vs ARM Pipeline 차이
 
@@ -206,7 +203,7 @@ add r2, r0, r3
 
 > ⚠️ Cycle 측정 오류
 
-DWT CYCCNT는 *DMB와 DSB 없이는* 정확하게 측정되지 않습니다. *barrier를 추가*합니다.
+CYCCNT 측정 경계는 코어·컴파일러·대상 메모리와 측정하려는 작업에 맞춰 설계해야 합니다. DSB/ISB는 항상 필요한 고정 recipe가 아니므로, 해당 플랫폼의 TRM과 측정 코드 생성 결과를 확인합니다.
 
 ```c
 __DSB();
@@ -219,8 +216,8 @@ uint32_t end = DWT->CYCCNT;
 ## 정리
 
 - Pipeline은 **명령어 단계별 병렬화**입니다 (F·D·E·M·W).
-- Cortex-M0는 2-stage, M3/M4는 **3-stage**, M7은 6-stage dual-issue입니다.
-- Cortex-A는 8~15-stage의 *out-of-order superscalar*입니다.
+- Cortex-M0는 3-stage, Cortex-M0+는 2-stage입니다. M3/M4는 **3-stage**, M7은 6-stage dual-issue pipeline입니다.
+- Cortex-A는 8~15+ stage의 *out-of-order superscalar*입니다.
 - 3 hazard (structural·data·control)는 forwarding과 branch prediction으로 회피합니다.
 - Pipeline 깊이는 trade-off가 있습니다. *길수록 클럭이 높아지지만 mispredict 비용도 커집니다*.
 

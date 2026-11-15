@@ -2,7 +2,7 @@
 title: "포스트모템 자동화 — debuginfod·Minidump 파이프라인"
 slug: "tools/debugging/postmortem/chapter04-debuginfod-minidump-automation"
 date: 2026-06-01T09:04:00
-description: "build-id로 자동 debuginfo 매칭, Breakpad/crashpad minidump, CI 자동 사후 분석."
+description: "build-id 기반 debuginfo 조회 설정, Breakpad/crashpad minidump, CI 사후 분석 자동화."
 tags: [debuginfod, minidump, breakpad, sentry, automation, postmortem]
 series: "Postmortem Debugging"
 seriesOrder: 4
@@ -10,15 +10,15 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-대규모 운영 환경에선 core dump 분석을 *수동*으로 할 수 없습니다. 사고가 *하루에 수십*. 이 시리즈의 마지막 장은 *자동화* — build-id로 debuginfo 자동 다운로드, Breakpad/crashpad minidump 워크플로, Sentry 같은 SaaS, 그리고 CI에서 자동 사후 분석.
+대규모 운영 환경에서는 반복되는 core dump 분석을 자동화할 수 있습니다. 이 장에서는 build-id 기반 debuginfo 조회, Breakpad/crashpad minidump 워크플로, Sentry 같은 서비스, CI 사후 분석을 다룹니다. GDB의 debuginfod 조회는 사용 가능한 서버와 설정에 따라 달라집니다.
 
 :::tldr
-build-id가 *바이너리 정체성*. debuginfod가 *네트워크 자동 매칭*. minidump가 *클라이언트 분포 표준*. Sentry/Crashlytics가 SaaS dashboard.
+build-id는 ELF 산출물 식별에 쓰이며, debuginfod는 build-id를 사용해 네트워크에서 파일을 조회합니다. minidump는 클라이언트 측 crash 수집에 쓰이는 여러 형식 중 하나입니다.
 :::
 
 ## Build-ID — 정체성
 
-ELF 빌드 시 링커가 *해시*로 만든 32바이트 (SHA-1 기본). 같은 *바이트별로 같은 빌드*면 같은 ID.
+ELF 링커는 build-id를 만들 수 있습니다. GNU ld의 기본 SHA-1 형식은 20바이트이며, 옵션에 따라 UUID나 명시한 값을 사용할 수도 있습니다. build-id는 체크섬 검증값이 아니며, 같은 입력에 대한 재현성은 빌드 도구와 옵션에 달렸습니다. [GNU ld 문서](https://sourceware.org/binutils/docs/ld/Options.html).
 
 ```bash
 $ readelf -n /usr/bin/myapp | grep "Build ID"
@@ -33,9 +33,9 @@ $ ld --build-id=uuid ...       # 무작위 UUID
 $ ld --build-id=0xdeadbeef     # 명시 값
 ```
 
-대부분의 빌드 시스템(CMake, Meson, autotools)이 자동으로 `--build-id` 켭니다.
+빌드 시스템의 linker 기본값과 프로젝트 설정에 따라 build-id가 포함되지 않을 수 있습니다. 산출물에서 `readelf -n` 또는 `llvm-readelf -n`으로 확인합니다.
 
-core 안에도 *프로세스 실행 파일의 build-id*가 저장 — 디버거가 *맞는 debuginfo*를 찾는 핵심.
+core에 실행 파일의 build-id가 항상 저장되는 것은 아닙니다. 디버거는 core의 매핑 정보와 실행 파일, 별도 debug 파일의 build-id 등 이용 가능한 정보로 대상을 찾습니다. [GDB separate debug files](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Separate-Debug-Files.html).
 
 ## 별도 debuginfo
 
@@ -76,7 +76,7 @@ The directory where separate debug symbols are searched for is "/usr/lib/debug".
 
 첫 2글자가 디렉터리, 나머지가 파일명. 효율적인 lookup.
 
-```bash
+```bash title="inspect-build-id.sh"
 $ build_id=$(readelf -n /usr/bin/myapp | awk '/Build ID/ {print $3}')
 $ ls /usr/lib/debug/.build-id/${build_id:0:2}/${build_id:2}.debug
 ```
@@ -99,16 +99,17 @@ build-id로 *HTTP*로 debuginfo 가져오는 표준 서비스.
 
 ![Build-ID 매칭 + debuginfod 자동 다운로드 흐름](/images/blog/tools/diagrams/build-id-matching.svg)
 
-```bash
+```bash title="debuginfod-gdb.sh"
 $ export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/"
 
-# 자동 동작
-$ gdb /usr/bin/foo /var/crash/core.foo.123
+# 비대화형 GDB에서는 debuginfod를 명시적으로 활성화
+$ gdb -q -batch -ex 'set debuginfod enabled on' \
+    -ex 'bt' /usr/bin/foo /var/crash/core.foo.123
 Downloading separate debug info for /usr/bin/foo... done
 [...심볼 자동 로드 + 정상 디버깅...]
 ```
 
-내부 동작 — HTTP GET `https://server/buildid/<id>/debuginfo`. *부분 다운로드* (Range)로 매우 큰 debuginfo도 효율적.
+GDB 설정의 `set debuginfod enabled`는 대화형 여부에 따라 기본 동작이 다릅니다. 비대화형 실행에서는 필요한 경우 명시적으로 활성화하고, 신뢰할 수 있는 `DEBUGINFOD_URLS`만 사용합니다. [GDB debuginfod 설정](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debuginfod-Settings.html). 서버는 build-id를 사용해 ELF, debuginfo, source 파일을 제공합니다. 자세한 프로토콜과 지원 범위는 [elfutils 문서](https://sourceware.org/elfutils/Debuginfod.html)를 확인하세요.
 
 ### 캐시
 
@@ -144,13 +145,14 @@ $ export DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/ https://debuginf
 
 자체 CI 빌드를 사내 서버에 인덱싱.
 
-```bash
+```bash title="start-debuginfod.sh"
 $ debuginfod -F /opt/builds -d /var/cache/debuginfod -p 8002 /opt/builds
 ```
 
-- `-F` — 인덱싱할 디렉터리.
-- `-d` — 캐시 DB.
+- `-F` — ELF/DWARF 파일도 스캔하도록 활성화.
+- `-d` — 데이터베이스 경로.
 - `-p` — 리슨 포트.
+- `/opt/builds` — 스캔할 경로.
 
 운영 머신에서.
 
@@ -174,24 +176,25 @@ GDB 외 다른 도구(systemtap, perf, pprof)도 같은 라이브러리(`libdebu
 
 ## 자동 사후 분석 — 한 스크립트
 
-```bash
+```bash title="postmortem.sh"
 #!/usr/bin/env bash
 # postmortem.sh — core dump 자동 분석
 
-set -e
+set -euo pipefail
 
-CORE=$1
-EXE=$(file "$CORE" | awk -F"'" '{print $2}')
-
-# build-id 추출
-BUILD_ID=$(readelf -n "$CORE" 2>/dev/null | awk '/Build ID/ {print $3}' | head -1)
-echo "Executable: $EXE"
-echo "Build ID:   $BUILD_ID"
+if [[ $# -ne 2 ]]; then
+    echo "usage: $0 EXECUTABLE CORE" >&2
+    exit 2
+fi
+EXE=$1
+CORE=$2
+[[ -r "$EXE" && -r "$CORE" ]] || { echo "executable/core not readable" >&2; exit 2; }
 
 # debuginfo 자동 다운로드 + GDB 분석
 export DEBUGINFOD_URLS="http://debuginfod.internal:8002/ https://debuginfod.elfutils.org/"
 
 gdb -batch \
+    -ex 'set debuginfod enabled on' \
     -ex 'set pagination off' \
     -ex 'set print pretty on' \
     -ex 'set print elements 100' \
@@ -208,21 +211,22 @@ gdb -batch \
     "$EXE" "$CORE" 2>&1
 ```
 
-```bash
-$ ./postmortem.sh /var/crash/core.myapp.1234 > /tmp/report.txt
+```bash title="run-postmortem.sh"
+$ ./postmortem.sh /usr/local/bin/myapp /var/crash/core.myapp.1234 > /tmp/report.txt
 ```
 
-CI에서 *PR에 segfault* 자동 검출 시 이 스크립트 실행 → 코멘트로 콜스택 첨부.
+이 스크립트는 명시한 실행 파일과 core를 GDB에 전달합니다. `-batch`는 GDB 명령을 실행하고 종료하며 inferior를 실행하지 않습니다. 실행 파일이 core와 일치하는지, debuginfod URL과 별도 심볼을 신뢰하는지는 운영자가 확인해야 합니다.
 
 ## minidump — 클라이언트 분포
 
-Chrome·Firefox·Steam 게임·VLC가 *수억 사용자*에게 배포. 사용자 머신에서 *전체 core dump* (수 GB)는 비현실적. **minidump**는 *축약된* 형태.
+클라이언트 프로그램은 여러 운영체제와 환경에서 crash 정보를 수집해야 할 수 있습니다. **minidump**는 전체 프로세스 core와 다른 선택적 자료 형식이며, 수집되는 정보와 크기는 플랫폼·설정·제품에 따라 달라집니다.
 
 ### Breakpad / crashpad
 
 [Google Breakpad](https://chromium.googlesource.com/breakpad/breakpad/)와 후속 [crashpad](https://chromium.googlesource.com/crashpad/crashpad). 크로스 플랫폼 (Win/Mac/Linux).
 
-```c
+```c title="breakpad-handler-illustrative.cc"
+// 개념 예시: 실제 생성자는 Breakpad/crashpad 버전과 앱의 업로드 흐름에 맞춰 구성해야 합니다.
 // 앱 진입에 한 줄
 #include "client/linux/handler/exception_handler.h"
 google_breakpad::ExceptionHandler eh(...);
@@ -233,10 +237,10 @@ minidump 파일 (`.dmp`) 구조:
 
 - *Header* + 다수 *Streams*.
 - Streams: ThreadList, ModuleList, MemoryList, SystemInfo, ExceptionInfo, ...
-- 콜스택의 *주변 메모리만* (스택 + 일부 힙).
+- 설정에 따라 선택된 스레드·모듈·메모리 범위.
 - *모듈 목록* (어떤 .so/.dll이 로드됐는지).
 
-크기: 보통 *수 MB*. core의 1/1000.
+minidump의 크기와 포함 정보는 수집 설정과 프로세스 상태에 따라 달라집니다. 실제 배포 전에 산출물 크기와 민감 정보 포함 여부를 측정해야 합니다.
 
 ### symbol server
 
@@ -307,16 +311,16 @@ $ cd self-hosted && ./install.sh
 $ ASAN_OPTIONS="abort_on_error=1:disable_coredump=0" ./prog
 ```
 
-- `abort_on_error=1` — `_exit` 대신 `abort()`.
-- `disable_coredump=0` — ASan이 `RLIMIT_CORE=0` 안 함.
+- `abort_on_error=1` — sanitizer runtime의 오류 종료 동작을 조정합니다.
+- `disable_coredump=0` — 해당 runtime의 core dump 억제를 끕니다. 커널 설정, 권한, `RLIMIT_CORE` 등도 충족해야 core가 생성됩니다.
 
-core 안에 *ASan shadow 메모리*도 포함하려면.
+ASan shadow 영역의 core 수록 여부는 runtime과 커널 설정에 달립니다. 일부 sanitizer runtime은 `use_madv_dontdump`로 shadow를 제외하도록 요청할 수 있습니다. 아래 옵션은 모든 버전에서 지원된다고 가정하지 마세요.
 
 ```bash
-$ ASAN_OPTIONS="abort_on_error=1:disable_coredump=0:coredump_dump_full_shadow=1" ./prog
+$ ASAN_OPTIONS="abort_on_error=1:disable_coredump=0:use_madv_dontdump=0" ./prog
 ```
 
-shadow가 *원본 1/8*이라 큰 프로세스면 core가 *매우 큼*.
+shadow 수록은 core 크기를 크게 늘릴 수 있으므로 배포된 sanitizer runtime의 옵션을 확인하고 제한된 테스트 환경에서 확인합니다. [Sanitizer common flags](https://github.com/google/sanitizers/wiki/SanitizerCommonFlags).
 
 ASan 진단은 보통 *abort 직전 stderr*에 출력. core에선 추가 메모리 정보만.
 
@@ -345,16 +349,17 @@ $ eu-stack -p <pid>
 
 ### CI
 
-```yaml
+```yaml title="test.yml"
 # .github/workflows/test.yml
 - name: Run tests
   run: |
     ulimit -c unlimited
-    ./test_runner || true     # 항상 통과 (다음 step에서 분석)
+    ./test_runner
 
 - name: Analyze cores
-  if: failure()
+  if: always()
   run: |
+    shopt -s nullglob
     for core in core.*; do
       echo "=== $core ==="
       gdb -batch -ex 'bt' -ex 'thread apply all bt' \
@@ -362,11 +367,11 @@ $ eu-stack -p <pid>
     done
 ```
 
-테스트가 죽으면 자동으로 콜스택 분석 → PR 코멘트.
+`failure()`는 이전 step이 실패했을 때만 실행됩니다. 분석 step을 `always()`로 두면 테스트 실패 뒤에도 분석이 실행되고, 앞 step의 실패 상태는 workflow에 남습니다. 이 예시는 runner가 `core.*` 파일을 생성하도록 구성된 경우에만 동작합니다. [GitHub Actions status functions](https://docs.github.com/en/actions/reference/workflows-and-actions/expressions).
 
 ### Production
 
-```bash
+```ini title="postmortem-systemd-units.ini"
 # /etc/systemd/system/postmortem.service
 [Unit]
 Description=Postmortem analyzer
@@ -384,13 +389,14 @@ Unit=postmortem.service
 WantedBy=multi-user.target
 ```
 
-새 core 떨어질 때마다 자동 분석 + 결과 *Slack/이메일* 전송.
+새 파일 변경을 감지해 analyzer를 호출하는 구성 예입니다. Slack·이메일 전송은 `analyze-cores.sh`나 별도 notifier에서 구현해야 합니다.
 
-### 자체 알람
+### 자체 분석 함수 — GDB Python
 
-```python
+```python title="analyze-and-alert.py"
 # analyze-and-alert.py
-import gdb, subprocess, json, requests
+import gdb
+import json
 
 def analyze_core(core_path, exe_path):
     gdb.execute(f"file {exe_path}", to_string=True)
@@ -403,53 +409,44 @@ def analyze_core(core_path, exe_path):
     siginfo = gdb.execute("print $_siginfo", to_string=True)
     
     # 콜스택 해시로 그룹화
-    sig = "|".join(frame.split()[1:3] for frame in bt.split("\n") if frame.strip())
+    frames = [frame.split()[1:3] for frame in bt.split("\n") if frame.strip()]
+    sig = "|".join(" ".join(parts) for parts in frames)
     
-    # Slack 전송
-    requests.post("https://hooks.slack.com/...", json={
-        "text": f"Core dump:\n```\n{bt}\n```\nSignal:\n{siginfo}",
-        "thread_ts": signature_to_ts.get(sig)  # 같은 콜스택은 같은 thread
-    })
+    # 실제 전송은 인증·재시도·개인정보 정책을 갖춘 별도 notifier에 맡깁니다.
+    print(json.dumps({"signature": sig, "signal": siginfo, "backtrace": bt}))
 
-analyze_core(...)
+# GDB Python 콘솔에서 analyze_core(core_path, exe_path)를 호출합니다.
 ```
 
 ## 자체 분석 — pyelftools
 
 GDB 없이도 Python으로 core 분석.
 
-```python
+```python title="core-notes.py"
+import sys
 from elftools.elf.elffile import ELFFile
 
-with open('core', 'rb') as f:
+with open(sys.argv[1], 'rb') as f:
     elf = ELFFile(f)
     for seg in elf.iter_segments():
         if seg.header.p_type == 'PT_NOTE':
             for note in seg.iter_notes():
-                if note.n_type == 'NT_PRSTATUS':
-                    # 레지스터 추출
-                    pr = note.n_desc
-                    pid = struct.unpack_from('i', pr, ...)[0]
-                    ...
-                elif note.n_type == 'NT_FILE':
-                    # 매핑된 파일 목록
-                    ...
-        elif seg.header.p_type == 'PT_LOAD':
-            # 메모리 영역
-            data = seg.data()
-            ...
+                if note['n_type'] in ('NT_PRSTATUS', 'NT_FILE', 'NT_AUXV'):
+                    print(note['n_type'], 'name=', note['n_name'],
+                          'description-bytes=', note['n_descsz'])
 ```
 
-대규모 분석 (수천 core)에서 GDB 띄우기보다 빠름.
+이 예시는 note 이름과 description 길이만 열거합니다. 레지스터와 NT_FILE의 의미를 디코딩하려면 ELF class, endianness, 아키텍처별 ABI 처리가 추가로 필요합니다. 많은 core를 처리할 때 성능 이점이 있는지는 입력과 작업을 측정해 판단합니다.
 
 ## 시리즈 정리
 
-4장으로 *core dump의 전체 생명주기*를 다뤘습니다.
+앞의 네 장에서 core dump 분석 흐름을 다뤘습니다. 이 시리즈에는 뒤이어 CXL 디바이스와 fabric postmortem 장도 있습니다.
 
 - **Ch 1** Core 생성 메커니즘 — ulimit, core_pattern, systemd-coredump.
 - **Ch 2** ELF core 포맷 — PT_NOTE, NT_PRSTATUS, NT_FILE.
 - **Ch 3** GDB로 core 분석 — 8가지 패턴, siginfo, 변수 검사.
-- **Ch 4** (이 장) 자동화 — debuginfod, minidump, Sentry.
+- **Ch 4** (이 장) 자동화 — debuginfod, minidump, CI.
+- **Ch 5–6** CXL 디바이스와 fabric 사례.
 
 *사고 분석의 표준 운영*:
 

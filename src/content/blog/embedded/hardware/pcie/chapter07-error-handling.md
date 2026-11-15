@@ -14,15 +14,15 @@ topics: ["embedded", "embedded/hardware"]
 
 > **"PCIe 에러는 *Correctable (CE)·Uncorrectable Non-Fatal (UE-NF)·Uncorrectable Fatal (UE-F)*의 *3-tier 분류*입니다."** — Physical·DLL·TL 각 계층이 *자기 단계에서 정정·검출*. *AER capability*가 *상세 로깅·report*, *DPC (Downstream Port Containment)*가 *switch 단에서 fault 격리*. Linux는 *pci_error_handlers callback*으로 *driver-level 복구* 지원.
 
-[Ch 2 TLP](/blog/embedded/hardware/pcie/chapter02-tlp)·[Ch 8 DLL](/blog/embedded/hardware/pcie/chapter08-dllp)에서 *ECRC·LCRC·ACK/NAK*가 *각 계층 무결성 보장*임을 봤습니다. 이 장은 *그 보호망을 넘은 에러*를 *어떻게 분류·report·복구*하는지 본격적으로 분해합니다.
+[Ch 2 TLP](/blog/embedded/hardware/pcie/chapter02-tlp)에서 ECRC를 소개했습니다. Link 보호의 상세한 ACK/NAK·재전송은 다음 [Ch 8 DLL](/blog/embedded/hardware/pcie/chapter08-dllp)에서 다룹니다. 이 장은 *그 보호망을 넘은 에러*를 *어떻게 분류·report·복구*하는지 본격적으로 분해합니다.
 
 ## Error 3-Tier 분류
 
 | Tier | 의미 | 영향 |
 |------|------|------|
-| **Correctable (CE)** | Hardware가 *복구*. 로깅만 | application 영향 없음 |
+| **Correctable (CE)** | 하드웨어가 protocol상 복구 | 데이터 손실 없이 처리되지만 재전송 지연·빈도는 관찰해야 함 |
 | **Uncorrectable Non-Fatal (UE-NF)** | 복구 못 함, *transaction은 abort* | application *그 transaction 실패* |
-| **Uncorrectable Fatal (UE-F)** | *link 자체 손상* | OS panic·device offline·containment 필요 |
+| **Uncorrectable Fatal (UE-F)** | 관련 계층의 정상 동작을 신뢰할 수 없는 오류 | containment·복구 또는 사용 중단. 반드시 물리 link 손상이나 panic인 것은 아님 |
 
 Critical workload (RAS-sensitive)은 *모든 tier 로깅*, server 환경은 *CE 누적도 health monitoring*.
 
@@ -34,7 +34,7 @@ Critical workload (RAS-sensitive)은 *모든 tier 로깅*, server 환경은 *CE 
 | **Data Link** | LCRC 실패 → NAK·Replay, Replay Number Rollover |
 | **Transaction** | Poisoned TLP, ECRC 실패, Unsupported Request, Completer Abort, Completion Timeout |
 
-각 계층이 *자기 단계에서 detect·report*. *상위 계층은 모름*.
+각 계층이 *자기 단계에서 detect·report*. 상태·메시지·interrupt를 통해 상위 소프트웨어에도 오류가 보고될 수 있습니다.
 
 ## AER — Advanced Error Reporting
 
@@ -74,7 +74,7 @@ Switch는 *내려온 ERR Message를 RC로 forward*. RC가 *AER root status에 re
 | 차단 후 *bus traffic 흐르지 않음* | 추가 corruption 방지 |
 | Recovery 동작 | OS가 *port reset·device reinit* |
 
-DPC 없으면 *fault가 propagate*해 *다른 device·system 영향*. *enterprise server·NVMe·CXL*에 *필수*.
+DPC 없으면 *fault가 propagate*해 *다른 device·system 영향*. 실제 DPC capability·firmware ownership·커널 복구 지원을 확인해야 합니다.
 
 ## Linux pci_error_handlers
 
@@ -85,7 +85,7 @@ driver가 *복구 callback* 등록:
 | `error_detected` | AER가 에러 인식, *상태 확인* |
 | `mmio_enabled` | MMIO 접근 가능 확인 |
 | `slot_reset` | Slot reset 후 *device reinit* |
-| `link_reset` | Link reset 후 |
+| `reset_prepare`·`reset_done` | function reset 전후 알림. 아래 AER 복구 단계와 구분 |
 | `resume` | 정상 복귀, *workload 재개* |
 
 ```c
@@ -106,7 +106,7 @@ static struct pci_driver my_driver = {
 
 ## Poisoned TLP
 
-*Header 손상 또는 명시적 poison*된 TLP는 *EP가 special bit set*:
+Poison 표시는 알고 있는 데이터 오류를 전달하는 수단입니다. Header corruption을 검출·정정하는 수단이 아닙니다. Non-Flit Mode에서는 TLP header의 EP bit를 사용합니다.
 
 | 시나리오 | 영향 |
 |---------|------|
@@ -126,7 +126,7 @@ UE Fatal 후 복구는 *다양한 reset* 옵션:
 | **Secondary Bus Reset** | bridge가 *자기 secondary bus의 모든 device reset* |
 | **PERST# (Platform Reset)** | 보드 차원 reset |
 
-`echo 1 > /sys/bus/pci/devices/.../reset`이 *FLR 또는 secondary bus reset*. *VFIO pass-through* 시 필수.
+sysfs reset은 장치에서 지원하는 kernel reset 방법과 범위를 확인한 뒤 사용하는 제어 인터페이스입니다. 이 글에서는 reset을 실행하지 않았습니다. FLR 미지원이라고 무조건 secondary bus reset만 가능한 것은 아니며, reset이 outstanding I/O·DMA·애플리케이션 상태를 자동 복구하지는 않습니다.
 
 ## Replay·Replay Timer
 
@@ -134,11 +134,11 @@ UE Fatal 후 복구는 *다양한 reset* 옵션:
 
 | 시나리오 | 효과 |
 |---------|------|
-| Replay 1~3회 성공 | 정상 — CE 로그만 |
-| Replay 반복 실패 | *Replay Number Rollover* → UE 진입 |
-| Replay timer 없음 | timeout으로 ERR_NONFATAL |
+| 재전송 성공 | 해당 오류와 mask·보고 설정에 따라 관찰 |
+| Replay Number Rollover | v6.12 `PCI_ERR_COR_REP_ROLL`: Correctable Error Status의 비트 |
+| Replay Timer Timeout | v6.12 `PCI_ERR_COR_REP_TIMER`: Correctable Error Status의 비트 |
 
-*Frequent CE (Replay)*는 *physical layer 문제 신호* — cable·connector·signal integrity 검토 필요.
+빈번한 replay 오류는 link 경로·속도·장치 조합을 조사할 신호입니다. 단일 counter로 cable 결함이나 곧 발생할 고장을 확정하지 않습니다. 이 절은 Non-Flit Mode의 replay 설명이며 Flit Mode의 별도 규칙과 혼합하지 않습니다.
 
 ## EEH — Enhanced Error Handling (POWER)
 
@@ -148,7 +148,7 @@ IBM POWER 아키텍처의 *추가 mechanism*. Linux 일반은 *AER + DPC*만, PO
 
 ### "CE는 무시해도 된다"
 
-*개별 CE는 무시 OK*. *Frequent CE 누적*은 *physical layer 임박 fault 신호*. *server monitoring*에서 *CE rate threshold alarm* 필수.
+CE가 복구됐어도 빈도·부하·재전송 지연의 변화를 확인합니다. 경보 임계값은 장치와 workload의 관찰 근거로 정하며, 일정 횟수를 보편적인 임박 고장 기준으로 쓰지 않습니다.
 
 ### "AER 활성하면 자동 복구"
 
@@ -164,7 +164,7 @@ DPC는 *downstream port의 link 차단*만. *NIC 자체 reset은 driver의 slot_
 
 ### "Replay Number Rollover면 끝"
 
-UE에 진입하지만 *driver·OS가 reset으로 복구* 가능. 다만 *link instability*가 *근본 원인*이라 *물리적 해결 (cable·card 교체)* 권장.
+Replay Number Rollover는 Correctable status 항목입니다. 그 비트 하나로 UE 진입·reset 필요·물리 교체를 결정하지 말고, 같은 시각의 다른 오류와 복구 상태를 확인합니다.
 
 ## 정리
 
@@ -175,7 +175,7 @@ UE에 진입하지만 *driver·OS가 reset으로 복구* 가능. 다만 *link in
 - Linux *pci_error_handlers*가 *driver-level 복구* callback.
 - *Poisoned TLP*가 *bad data 전파 차단*.
 - Reset: *FLR (function)·Hot Reset·Secondary Bus·PERST#*.
-- *Frequent CE*가 *physical 임박 fault 신호*.
+- 빈번한 CE는 원인 조사 신호이며, 곧 고장 난다는 확정 증거는 아닙니다.
 
 ## 다음 편
 
@@ -191,4 +191,4 @@ UE에 진입하지만 *driver·OS가 reset으로 복구* 가능. 다만 *link in
 
 ## 시리즈 자료 출처 안내
 
-본 글의 1차 자료·정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.
+Linux 동작은 [v6.12 pci.h](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/linux/pci.h)의 실제 callback과 [PCI Error Recovery](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/pci-error-recovery.rst), [pci_regs.h](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h)의 status 비트를 대조했습니다. 실제 AER 주입·DPC 격리·reset·데이터 무손실 복구를 실행하지 않았습니다. 본 글의 1차 자료·정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.

@@ -15,15 +15,17 @@ topics: ["tools", "tools/debugging"]
 이 시리즈는 *core dump의 전체 생명주기*를 다룹니다. 첫 장은 *어떻게* 만들어지는지부터.
 
 :::tldr
-특정 시그널 + ulimit 허용 + 저장 위치 결정 + dumpable 플래그 — 네 조건이 모두 맞아야 core가 떨어짐.
+core 생성은 기본 동작이 Core인 시그널, 프로세스의 dumpable 상태, 자원 제한, 저장 경로 또는 pipe handler 설정의 영향을 받습니다. pipe 방식은 파일 방식과 `RLIMIT_CORE` 처리도 다릅니다.
 :::
 
 ## 생성 조건
 
-1. **Core-generating 시그널**.
-2. **ulimit -c** > 0.
-3. **`/proc/sys/kernel/core_pattern`** 결정한 위치에 쓰기 가능.
-4. **PR_SET_DUMPABLE** 플래그 = 1.
+1. 기본 동작이 core 생성인 시그널이 전달됩니다.
+2. 프로세스가 dumpable 상태이고 setuid·file capability 등 보호 조건을 통과합니다.
+3. 파일 방식이면 `RLIMIT_CORE`와 경로·파일 시스템 조건을 통과합니다. pipe 방식은 core 크기 한도 적용이 다릅니다.
+4. `core_pattern`과 pipe handler가 설정된 방식으로 수집을 완료합니다.
+
+이 목록은 대표 조건입니다. kernel 설정·권한·namespace·handler 동작도 결과에 영향을 줍니다. [Linux `core(5)`](https://man7.org/linux/man-pages/man5/core.5.html)와 [kernel `core_pattern` 문서](https://docs.kernel.org/admin-guide/sysctl/kernel.html#core-pattern)를 함께 확인합니다.
 
 하나라도 빠지면 *조용히 사라짐*. 디버깅의 첫 작업이 *왜 core가 안 떨어졌나* 확인일 때가 많음.
 
@@ -31,7 +33,7 @@ topics: ["tools", "tools/debugging"]
 
 `man 7 signal`의 "Default action" 열에 "Core" 표시된 시그널들.
 
-| 시그널 | 번호 | 의미 | 흔한 원인 |
+| 시그널 | 번호 (Linux x86 기준 예) | 의미 | 흔한 원인 |
 |--------|------|------|-----------|
 | SIGSEGV | 11 | Segmentation fault | NULL deref, 권한 |
 | SIGABRT | 6 | `abort()` 호출 | assert(), Sanitizer |
@@ -44,13 +46,16 @@ topics: ["tools", "tools/debugging"]
 | SIGXCPU | 24 | CPU time 초과 | rlimit |
 | SIGXFSZ | 25 | File size 초과 | rlimit |
 
-기본 "Term"인 SIGTERM, SIGINT는 core 생성 안 함.
+시그널 번호는 아키텍처별 차이가 있습니다. 기본 동작이 `Term`인 SIGTERM·SIGINT는 기본 설정만으로 core를 생성하지 않습니다.
 
 직접 `abort()` 호출 시.
 
-```c
+```c title="abort-core-signal.c"
 #include <stdlib.h>
-abort();        // SIGABRT → core
+
+int main(void) {
+    abort();
+}
 ```
 
 C++ uncaught exception, `assert(false)`도 결국 `abort()`.
@@ -165,13 +170,13 @@ $ cat /proc/sys/kernel/core_pipe_limit
 0
 ```
 
-기본 0 = 무제한. 너무 많은 *동시* core면 핸들러를 *drop*. 사용 시 1 이상으로.
+기본 0은 동시 처리 수 제한이 없고 kernel이 handler 종료까지 기다리지 않는다는 뜻입니다. 1 이상이면 처리 수를 제한하고, 한도를 넘는 추가 dump는 건너뛸 수 있습니다. handler가 `/proc/<pid>`를 읽어야 한다면 설정별 대기 계약도 확인합니다.
 
-핸들러 자체는 *root 권한*으로 실행. 잘못 짜면 *시스템 전체 보안 위협*.
+pipe handler의 credentials와 접근 가능한 데이터는 kernel 설정과 dump 모드에 따릅니다. handler는 민감한 core 입력을 받는 보안 경계로 취급하고 권한·저장소·삭제 정책을 검토합니다.
 
 ## systemd-coredump
 
-Fedora·Arch·Ubuntu 22.04+·최신 SUSE의 표준.
+systemd가 설치·설정된 시스템에서는 systemd-coredump가 `core_pattern` pipe handler로 사용될 수 있습니다. 배포판과 설치 설정에 따라 기본값은 다릅니다.
 
 ```bash
 $ cat /proc/sys/kernel/core_pattern
@@ -236,7 +241,7 @@ $ coredumpctl debug 1234
 $ coredumpctl dump 1234 > /tmp/core
 ```
 
-`coredumpctl debug`가 *실행 파일·debuginfo 자동 매칭*. 가장 편한 분석 시작점.
+`coredumpctl debug`는 저장된 core와 실행 파일을 찾아 디버거를 시작하는 편리한 진입점입니다. 별도 debuginfo 다운로드는 GDB의 debuginfod 지원·서버 설정·활성화 여부에 달려 있습니다.
 
 ### Filter
 
@@ -253,15 +258,18 @@ systemd-journal 쿼리 문법 — strict filter.
 
 ## PR_SET_DUMPABLE
 
-```c
-prctl(PR_SET_DUMPABLE, 0);   // core 생성 안 됨
-prctl(PR_SET_DUMPABLE, 1);   // 정상
-prctl(PR_SET_DUMPABLE, 2);   // suidsafe — root만 dump 읽기
+```c title="dumpable-values.c"
+#include <sys/prctl.h>
+
+int main(void) {
+    if (prctl(PR_SET_DUMPABLE, 0) == -1) return 1;
+    return prctl(PR_SET_DUMPABLE, 1) == -1;
+}
 ```
 
-setuid/setgid 바이너리는 *보안상 자동으로 0*. `passwd`, `sudo`가 죽으면 core 안 떨어짐 (악의적 사용자가 *root 비밀번호 해시*를 core에서 읽을 수 있어).
+`PR_SET_DUMPABLE`은 0 또는 1만 받습니다. 값 2는 Linux 2.6.13~2.6.17에서만 허용되었고 보안 이유로 제거됐습니다. setuid 실행 등에서 dumpability가 재설정되는 조건은 `execve(2)`와 커널 문서를 확인합니다. [`PR_SET_DUMPABLE(2const)`](https://man7.org/linux/man-pages/man2/PR_SET_DUMPABLE.2const.html).
 
-`/proc/sys/fs/suid_dumpable=2`로 *root만 읽을 수 있는* core 생성 허용.
+별도 설정인 `/proc/sys/fs/suid_dumpable`은 보호된 프로세스의 dump mode입니다. 값 2(`suidsafe`)는 `core_pattern`이 pipe handler 또는 절대 경로를 지정하는 조건에서 dump를 허용할 수 있으며, 단순히 “root만 읽는 파일”을 뜻하지 않습니다. [`suid_dumpable` 커널 문서](https://docs.kernel.org/admin-guide/sysctl/fs.html#suid-dumpable).
 
 ```bash
 $ sysctl fs.suid_dumpable
@@ -307,13 +315,9 @@ $ ./my_prog
 
 자식 프로세스가 *상속*. exec 후에도 유지.
 
-### 환경 변수
+### systemd에서의 filter 설정
 
-```bash
-$ COREDUMP_FILTER=0x33 ./my_prog
-```
-
-GNU libc 일부 버전이 자동 적용.
+일반 Linux 프로세스는 `/proc/<pid>/coredump_filter` 값을 상속합니다. systemd 서비스는 `CoredumpFilter=`로 mapping 유형을 지정할 수 있습니다. `COREDUMP_FILTER` 환경 변수가 모든 GNU libc에서 자동 적용된다고 가정하지 않습니다. [systemd.exec(5)](https://www.freedesktop.org/software/systemd/man/latest/systemd.exec.html#CoredumpFilter=).
 
 ## 가장 흔한 함정 — 왜 core가 안 떨어지나
 
@@ -341,7 +345,7 @@ $ /tmp/test
 Segmentation fault                       ← BAD (core not dumped)
 ```
 
-`(core dumped)` 메시지가 *있어야* 떨어짐.
+셸의 `(core dumped)` 표시는 dump 처리 결과를 알려주는 단서일 뿐, 기대한 경로에 파일이 저장됐다는 증거는 아닙니다. pipe handler나 systemd 저장소를 별도로 확인합니다.
 
 ```bash
 # 어디 떨어졌나
@@ -358,16 +362,16 @@ $ sudo find / -name 'core*' -newer /tmp/test 2>/dev/null
 $ ASAN_OPTIONS="abort_on_error=1:disable_coredump=0" ./prog
 ```
 
-- `abort_on_error=1` — `_exit` 대신 `abort()` (기본은 `_exit`).
-- `disable_coredump=0` — ASan이 `setrlimit(RLIMIT_CORE, 0)` 호출 안 함.
+- `abort_on_error=1` — ASan runtime의 오류 종료 방식을 조정합니다. signal·core 생성은 OS 설정에도 좌우됩니다.
+- `disable_coredump=0` — ASan runtime이 core dump를 비활성화하지 않도록 설정합니다. 64-bit 환경의 기본값은 sanitizer runtime 버전에 따라 확인해야 합니다.
 
-TSan은 `TSAN_OPTIONS`, UBSan은 `UBSAN_OPTIONS`.
+ASan·TSan·UBSan은 각 runtime과 옵션별 종료 동작이 다릅니다. 진단 출력이나 `abort_on_error`만으로 core가 생성된다고 단정하지 않습니다. [Clang AddressSanitizer 문서](https://clang.llvm.org/docs/AddressSanitizer.html)와 [Sanitizer common flags](https://github.com/google/sanitizers/wiki/SanitizerCommonFlags)를 확인합니다.
 
 ### ASan shadow 메모리
 
 ASan은 *원본 메모리의 1/8 크기*의 shadow를 유지. 큰 프로세스면 *수 GB*. core_filter로 shadow도 포함하면 core가 *매우 커짐*.
 
-ASAN의 `coredump_dump_full_shadow=1` 옵션으로 *shadow도 포함* — 사후 분석에 유용하지만 디스크 부담.
+일부 sanitizer runtime은 `coredump_dump_full_shadow` 등 shadow dump 관련 옵션을 제공합니다. 지원 여부와 기본 동작은 사용하는 compiler-rt 버전에서 확인하고, 메모리 크기와 민감 정보 노출도 평가합니다.
 
 ## 코어 생성에 시간
 
@@ -400,9 +404,9 @@ if (pid == 0) {
 - 4 조건: 시그널 + ulimit + 위치 + dumpable.
 - `core_pattern`이 *파일* 또는 *파이프 핸들러*.
 - 컨테이너 환경은 `%P` (호스트 PID) 사용 권장.
-- systemd-coredump가 현대 표준 — `coredumpctl`로 관리.
+- systemd-coredump를 사용하는 호스트에서는 `coredumpctl`로 저장된 dump를 조회·추출.
 - coredump_filter로 *영역 선택* → 큰 mmap 제외.
-- PR_SET_DUMPABLE = 0이면 (setuid 등) core 안 생성.
+- `PR_SET_DUMPABLE=0`이면 해당 프로세스는 일반적인 조건에서 core dump 대상이 아닙니다. 보호된 실행 파일의 동작은 `suid_dumpable` 설정도 확인합니다.
 - ASan/TSan은 `abort_on_error=1`로 core 생성.
 - 큰 프로세스는 `gcore`로 *살아 있는* core 추출.
 

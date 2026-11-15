@@ -134,6 +134,7 @@ $ echo $CC
 SDK_PATH="/opt/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot"
 TARGET_PREFIX="aarch64-buildroot-linux-gnu"
 SYSROOT="${SDK_PATH}/${TARGET_PREFIX}/sysroot"
+export SYSROOT
 
 export PATH="${SDK_PATH}/bin:${PATH}"
 export CC="${TARGET_PREFIX}-gcc --sysroot=${SYSROOT}"
@@ -360,7 +361,7 @@ $ wget https://artifacts.example.com/sdk/sdk-myproduct-v1.4.2.tar.gz.sha256
 $ sha256sum -c sdk-myproduct-v1.4.2.tar.gz.sha256
 sdk-myproduct-v1.4.2.tar.gz: OK
 $ tar xzf sdk-myproduct-v1.4.2.tar.gz -C /opt/sdk/
-$ /opt/sdk/sdk-myproduct-v1.4.2/relocate-sdk.sh
+$ /opt/sdk/aarch64-buildroot-linux-gnu_sdk-buildroot/relocate-sdk.sh
 ```
 
 SDK 안의 `version` 파일에 Buildroot revision (`git describe`)을 적어 두면 *문제 발생 시 정확히 어느 트리·commit*에서 만든 SDK인지 추적 가능합니다. CI에서 SDK 빌드 job을 분리해 매 tagged release마다 자동 발급하는 게 표준 패턴입니다 (자세한 흐름은 [Ch 19: CI/CD](/blog/embedded/buildroot/chapter19-cicd)).

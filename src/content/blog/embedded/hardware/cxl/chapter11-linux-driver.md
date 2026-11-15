@@ -2,7 +2,7 @@
 title: "Ch 11: Linux drivers/cxl/ 분석 — Mainline kernel CXL 구현"
 slug: "embedded/hardware/cxl/chapter11-linux-driver"
 date: 2026-05-16T09:11:00
-description: "Linux mainline CXL subsystem의 코드 구조, probe·region·mailbox 경로."
+description: "고정한 Linux v6.12에서 CXL PCI probe·decoder commit·mailbox 오류 경로와 DAX 노출 단계를 추적합니다."
 series: "CXL 4.0 Internals"
 seriesOrder: 11
 tags: [cxl, linux, drivers, sysfs, hdm-decoder]
@@ -12,283 +12,160 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"Linux CXL 드라이버는 *cxl_core*를 공통 기반으로 *cxl_port·cxl_acpi·cxl_pmem·cxl_mem·cxl_pci*가 올라가는 구조입니다."** — 디바이스 인식은 `cxl_pci_probe()`, HDM decoder 프로그래밍은 `core/hdm.c`, region은 `core/region.c`가 맡습니다. 이 장의 코드 인용은 *mainline v7.3-rc6*(2026-10-08) 기준입니다.
+> **CXL PCI 장치의 발견, memdev 등록, decoder commit과 System RAM 추가는 서로 다른 단계입니다. 어느 단계가 성공했는지와 그 단계에서 반환한 오류를 구분해야 합니다.**
 
-[Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에서 *CXL.mem 프로토콜·HDM Decoder 메커니즘*을 봤습니다. 이 장은 *그게 Linux에서 실제로 어떻게 구현*되는지를 *mainline 코드*로 따라갑니다.
+이 장의 소스 기준은 [Linux v6.12, commit `adc218676eef`](https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a/drivers/cxl)입니다. 확인하지 않은 v7.3-rc 코드나 현재 master를 실행 근거로 삼지 않습니다. Linux CXL software 경로를 읽는 것이며 이 판이 CXL 4.0 전체를 구현한다는 뜻은 아닙니다.
 
-## drivers/cxl/ 디렉토리
+[Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에서 주소와 프로토콜을 봤다면, 여기서는 구성·명령의 성공과 실제 메모리 사용 가능 상태를 나눠 봅니다. 전체 코드 지도를 반복하기보다 probe, commit과 mailbox의 실패 지점을 따라갑니다. 물리 장치나 해당 커널을 실행한 결과는 아닙니다.
 
-v7.3-rc6 기준 주요 파일:
+## 소스 지도와 자료 구조
 
-| 경로 | 내용 |
-|------|------|
-| `acpi.c` | cxl_acpi — ACPI CEDT 파싱, CXL root·root decoder 등록 |
-| `pci.c` | cxl_pci — PCI 드라이버, 레지스터 매핑·mailbox·memdev 생성 |
-| `mem.c` | cxl_mem — memdev 드라이버, endpoint port 연결 |
-| `port.c` | cxl_port — port 드라이버 |
-| `pmem.c`·`security.c` | cxl_pmem — persistent memory·보안 명령 |
-| `core/port.c` | port·dport·decoder 객체, CXL bus |
-| `core/hdm.c` | HDM decoder 레지스터 읽기·프로그래밍 |
-| `core/region.c` | region 생성·target attach·commit |
-| `core/memdev.c` | memdev 객체·char device |
-| `core/mbox.c` | mailbox 명령 공통부 |
-| `core/regs.c` | component·device 레지스터 탐색·매핑 |
-| `core/ras.c` | RAS capability, PCI error handler 본체 |
+| 소스 | 확인할 책임 |
+|---|---|
+| `drivers/cxl/acpi.c` | ACPI 기반 root와 fixed window 발견 |
+| `drivers/cxl/pci.c` | PCI probe, 장치 register·mailbox와 memdev 등록 |
+| `drivers/cxl/mem.c`, `port.c` | memdev와 port의 CXL topology 연결 |
+| `drivers/cxl/core/hdm.c` | decoder 설정·commit·reset |
+| `drivers/cxl/core/region.c` | region 상태와 target·commit·driver binding |
+| `drivers/cxl/core/mbox.c` | 공통 mailbox 명령과 출력 검증 |
+| `drivers/cxl/core/pci.c` | 이 판의 PCI 오류·RAS 처리 공통부 |
+| `drivers/dax/cxl.c`, `kmem.c` | Device DAX와 메모리 hot-add 경로 |
 
-`drivers/cxl/` 아래 `.c`·`.h`는 33개입니다. 공용 헤더 일부는 `include/cxl/`에 있습니다(`cxl.h`, `mailbox.h` 등).
+`drivers/cxl/Makefile`은 built-in 구성에서 core, port, platform root, mem/pmem, PCI 순서의 이유를 주석으로 설명합니다. 모듈의 실제 로딩·binding은 의존성과 device 발견에 따릅니다. 소스 파일 개수를 기능 지원 수치나 실행 순서의 증거로 사용하지 않습니다.
 
-## 모듈 구성과 순서
+이 판의 `cxl_port`·decoder·region 정의는 `drivers/cxl/cxl.h`, `cxl_memdev`·`cxl_dev_state`는 `drivers/cxl/cxlmem.h`에 있습니다. mailbox 공용 정의는 `include/cxl/mailbox.h`입니다. 다른 판의 `regions_lock`·`cxl_rwsem.region` 같은 멤버·이름을 이 판의 struct에 섞지 않습니다.
 
-`drivers/cxl/Makefile`은 built-in일 때의 순서를 주석으로 못박아 둡니다.
+## PCI probe: 발견과 초기화의 차이
 
-| 순서 | 대상 | Makefile 주석이 밝힌 이유 |
-|------|------|------|
-| 1 | `core/` (cxl_core) | 기본 초기화 |
-| 2 | cxl_port | CXL root port를 바로 enable하려고 platform root 드라이버(acpi)보다 먼저 |
-| 3 | cxl_acpi | platform root |
-| 4 | cxl_pmem, cxl_mem | endpoint 드라이버보다 먼저, memdev를 바로 enable |
-| 5 | cxl_pci | 마지막. 하드웨어 열거 계층과 같은 순서 |
+[`cxl_pci_probe()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/pci.c)의 주요 호출을 실제 소스 순서로 읽습니다. 아래 표는 중간 세부를 생략한 지도이며 모든 함수 호출 목록은 아닙니다.
 
-모듈로 빌드했다면 `modprobe`가 심볼 의존성(`cxl_core` 등)을 알아서 먼저 올립니다.
+| 순서 | 주요 호출 | 읽을 점 |
+|---|---|---|
+| 1 | `pcim_enable_device()`, `pci_set_master()` | PCI 장치 사용을 준비합니다. |
+| 2 | `cxl_memdev_state_create()` | 상태를 만든 뒤 DVSEC를 찾습니다. |
+| 3 | `pci_find_dvsec_capability()` | Device DVSEC가 없어도 이 위치에서는 경고 후 진행합니다. |
+| 4 | register 탐색·매핑, `cxl_pci_type3_init_mailbox()` | memdev register와 선택적 component/RAS 경로를 구분합니다. |
+| 5 | `cxl_await_media_ready()` | media 준비 실패를 기록하는 경로와 즉시 fatal return을 구분합니다. |
+| 6 | IRQ·`cxl_pci_setup_mailbox()` | IRQ 가능 여부와 mailbox 설정을 처리합니다. |
+| 7 | 명령 열거·timestamp·poison·identify | 실제 장치 명령의 실패가 probe에 전파될 수 있습니다. |
+| 8 | `cxl_mem_create_range_info()`, `devm_cxl_add_memdev()` | 용량 정보를 만들고 memdev를 등록합니다. |
+| 9 | FW upload·sanitize notifier·PMU·event·RAS | 후속 관리 기능을 설정합니다. |
 
-## 핵심 자료 구조
+Device DVSEC가 없다는 경고 뒤에도 management에 유용한 초기화가 진행될 수 있습니다. 반대로 memdev 디렉터리가 있다는 사실만으로 decoder·region과 application mapping이 준비된 것은 아닙니다. capability 발견, driver binding, 메모리 노출을 각각 관측해야 합니다.
 
-| Struct | 위치 | 주요 멤버 |
-|--------|------|------------|
-| `cxl_port` | `drivers/cxl/cxl.h` | `dev`, `dports`·`endpoints`·`regions` (xarray), `nr_dports`, `commit_end` |
-| `cxl_decoder` | `drivers/cxl/cxl.h` | `hpa_range`, `interleave_ways`, `interleave_granularity`, `region`, `commit()`·`reset()` |
-| `cxl_root_decoder` | `drivers/cxl/cxl.h` | `res`, `qos_class`, `regions_lock`, `cxlsd` |
-| `cxl_endpoint_decoder` | `drivers/cxl/cxl.h` | `cxld`, `dpa_res`, `part`, `pos` |
-| `cxl_region` | `drivers/cxl/cxl.h` | `cxlrd`, `mode`, `params`(`targets[]`·`nr_targets`·`state`) |
-| `cxl_memdev` | `drivers/cxl/cxlmem.h` | `dev`, `cdev`, `cxlds`, `endpoint` |
-| `cxl_dev_state` | `include/cxl/cxl.h` | `regs`, `part[]`, `serial`, `cxl_mbox` |
-| `cxl_mailbox` | `include/cxl/mailbox.h` | `payload_size`, `mbox_mutex`, `mbox_wait`, `mbox_send()` |
+## Decoder commit: 순서와 실패 복구
 
-## probe 흐름 추적
+[`cxl_decoder_commit()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/hdm.c)는 이미 enabled이면 바로 반환하고, port의 다음 commit 순서와 decoder ID가 맞지 않으면 `-EBUSY`를 반환합니다. endpoint에서 sanitize가 진행 중인 경우도 거부합니다. source의 조건을 단순히 “모든 commit 실패는 순서 문제”로 축소하지 않습니다.
 
-`cxl_pci_probe()`(`drivers/cxl/pci.c`)가 부르는 주요 함수, 소스 순서대로:
+이 판은 `cxl_dpa_rwsem`을 사용해 interleave·type·base·size와 target 또는 DPA skip을 설정합니다. 이후 commit 상태를 기다리며 오류 시 decoder reset 경로를 호출합니다. 다른 판의 `setup_hw_decoder()`·scoped guard 발췌를 이 판의 실제 함수인 것처럼 싣지 않습니다.
 
-| 단계 | 함수 | 동작 |
-|------|------|------|
-| 1 | `pcim_enable_device()` | PCI 디바이스 enable |
-| 2 | `pci_find_dvsec_capability()` | CXL Device DVSEC 찾기. 없으면 경고만 하고 CXL.mem 초기화를 건너뜀 |
-| 3 | `cxl_memdev_state_create()` | 상태 구조체 할당 |
-| 4 | `cxl_pci_setup_regs()` | 레지스터 블록 찾아 매핑 |
-| 5 | `cxl_await_media_ready()` | 미디어 준비 대기 |
-| 6 | `cxl_alloc_irq_vectors()` | MSI/MSI-X 할당 |
-| 7 | `cxl_pci_setup_mailbox()` | mailbox 초기화 |
-| 8 | `cxl_enumerate_cmds()` | 지원 명령 목록 조회 |
-| 9 | `cxl_set_timestamp()`·`cxl_poison_state_init()` | 시각 설정, poison 상태 초기화 |
-| 10 | `cxl_dev_state_identify()` | Identify Memory Device 명령 |
-| 11 | `cxl_mem_dpa_fetch()`·`cxl_dpa_setup()` | DPA 파티션 정보 |
-| 12 | `devm_cxl_add_classdev()` | memdev 생성, sysfs 등록 |
-| 13 | `cxl_event_config()` | 이벤트 로그·인터럽트 설정 |
+| 관측 지점 | v6.12 소스의 의미 |
+|---|---|
+| commit 순서 불일치 | `-EBUSY` |
+| Commit Error bit | commit bit를 정리하고 `-EIO` |
+| Committed bit | 대기 성공 |
+| 제한 안에 미완료 | `-ETIMEDOUT` |
 
-PCI 오류 처리는 probe에서 등록하지 않고, 드라이버 구조체의 정적 `cxl_error_handlers`가 맡습니다. ftrace function_graph로 이 흐름을 볼 수 있습니다([Kernel Debugging Ch 8 CXL 디버깅](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)).
+`cxld_await_commit()`은 최대 20번 register를 검사하고 중간에 `fsleep(1000)`을 사용합니다. 이는 소스의 대기 정책이며 실제 wall time이 정확히 20 ms라는 측정·보장이 아닙니다. hardware commit 성공도 OS에서 유효한 data를 읽었다는 증거가 아닙니다.
 
-## HDM Decoder commit
+## Region 상태와 메모리 노출
 
-`drivers/cxl/core/hdm.c`의 `cxl_decoder_commit()` (발췌):
+region은 root window, interleave, endpoint DPA·target 구성과 commit 상태를 함께 가집니다. [`commit_store()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/region.c)는 `cxl_region_rwsem`으로 상태를 보호하고, 준비되지 않은 commit을 거부합니다. cache 무효화와 driver release가 개입하는 경로도 있습니다.
 
-```c
-static int cxl_decoder_commit(struct cxl_decoder *cxld)
-{
-	struct cxl_port *port = to_cxl_port(cxld->dev.parent);
-	struct cxl_hdm *cxlhdm = dev_get_drvdata(&port->dev);
-	void __iomem *hdm = cxlhdm->regs.hdm_decoder;
-	int id = cxld->id, rc;
+이 판에는 commit 해제·decode reset 코드가 있지만, 사용 중인 메모리를 임의로 되돌려도 안전하다는 뜻은 아닙니다. 반환을 막는 조건, firmware 구성과 잠금, Device DAX mapping·System RAM 사용과 실제 offline 가능 여부를 함께 확인해야 합니다. 이 장은 sysfs에 값을 쓰거나 사용 중인 region을 해제하지 않습니다.
 
-	if (cxld->flags & CXL_DECODER_F_ENABLE)
-		return 0;
+| 상태 | 구분할 증거 |
+|---|---|
+| memdev 발견 | PCI·CXL device와 용량·capability |
+| region 구성·commit | decoder와 target·주소 범위·상태 |
+| Device DAX | dax region·device와 사용할 mapping |
+| System RAM | kmem binding·hot-add·online·NUMA 상태 |
 
-	if (cxl_num_decoders_committed(port) != id) {
-		dev_dbg(&port->dev,
-			"%s: out of order commit, expected decoder%d.%d\n",
-			dev_name(&cxld->dev), port->id,
-			cxl_num_decoders_committed(port));
-		return -EBUSY;
-	}
+volatile `ram` region과 Device DAX/System RAM은 같은 분류 축이 아닙니다. firmware가 이미 구성한 region을 OS가 발견하는 경우도 있습니다. `numactl --hardware`의 특정 node 번호를 모든 CXL region의 고정 결과로 기대하지 않습니다.
 
-	/* (sanitize 진행 중인 endpoint decoder 거부 — 생략) */
+## Mailbox: transport 성공과 명령 성공
 
-	scoped_guard(rwsem_read, &cxl_rwsem.dpa)
-		setup_hw_decoder(cxld, hdm);
+다음은 [v6.12 `cxl_internal_send_cmd()`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/mbox.c)의 실제 함수에서 주석·빈 줄만 줄인 발췌입니다. kernel의 struct·상수·하위 함수 문맥이 필요하며 standalone host 프로그램은 아닙니다. 장치에 명령을 보내는 실습으로 실행하지 않습니다.
 
-	rc = cxld_await_commit(hdm, cxld->id);
-	if (rc) {
-		dev_dbg(&port->dev, "%s: error %d committing decoder\n",
-			dev_name(&cxld->dev), rc);
-		return rc;
-	}
-	port->commit_end++;
-	cxld->flags |= CXL_DECODER_F_ENABLE;
-
-	return 0;
-}
-```
-
-읽을 점:
-
-- 한 port의 decoder는 *번호 순서대로* commit해야 합니다. 순서가 어긋나면 `-EBUSY`.
-- 레지스터 쓰기는 `setup_hw_decoder()`가 하고, `cxld_await_commit()`이 Committed 비트를 기다립니다. 1 ms 간격으로 최대 `COMMIT_TIMEOUT_MS`(20)회 확인하고, Commit Error 비트가 서면 `-EIO`, 시간이 다 되면 `-ETIMEDOUT`.
-- `cxl_rwsem.region`은 이 함수가 아니라 호출 쪽(region commit 경로)이 쓰기 잠금으로 잡습니다.
-
-## Region 생성 — sysfs 경로
-
-`cxl create-region`이 하는 일을 sysfs와 커널 함수로 풀면:
-
-| 단계 | 사용자 동작 | 커널 쪽 |
-|------|-----|-----|
-| 1 | root decoder의 `create_ram_region`을 읽어 새 region 이름을 얻고, 그 이름을 다시 씀 | `create_ram_region_store()` → `__create_region()` → `devm_cxl_add_region()` → `cxl_region_alloc()` |
-| 2 | region의 `interleave_ways`·`interleave_granularity`·`size` 설정 | 각 attribute의 store 함수 |
-| 3 | `target0`, `target1`, …에 endpoint decoder 이름 쓰기 | `__attach_target()` → `cxl_region_attach()` |
-| 4 | `commit`에 1 쓰기 | `commit_store()` → `__commit()` → `cxl_region_decode_commit()` |
-| 5 | (커널) endpoint부터 root 쪽으로 각 port의 decoder commit | `commit_decoder()` → `cxld->commit()` = `cxl_decoder_commit()` |
-| 6 | region을 cxl_region 드라이버에 bind | `cxl_region_probe()` → RAM이면 `devm_cxl_add_dax_region()` |
-
-endpoint decoder의 DPA 할당(`dpa_size`·`mode`)은 3단계 전에 해 둬야 하고, cxl-cli가 이를 대신해 줍니다.
-
-`commit`에 0을 쓰면 reset을 예약해 decoder를 되돌릴 수 있습니다. 단, 플랫폼이 잠근 region(`CXL_REGION_F_LOCK`)은 `-EPERM`으로 거부됩니다.
-
-## Mailbox API
-
-공통 진입점은 `drivers/cxl/core/mbox.c`의 `cxl_internal_send_cmd()`입니다.
-
-```c
+```c title="cxl-internal-send-kernel.c"
 int cxl_internal_send_cmd(struct cxl_mailbox *cxl_mbox,
 			  struct cxl_mbox_cmd *mbox_cmd)
 {
 	size_t out_size, min_out;
 	int rc;
-
 	if (mbox_cmd->size_in > cxl_mbox->payload_size ||
 	    mbox_cmd->size_out > cxl_mbox->payload_size)
 		return -E2BIG;
-
 	out_size = mbox_cmd->size_out;
 	min_out = mbox_cmd->min_out;
 	rc = cxl_mbox->mbox_send(cxl_mbox, mbox_cmd);
-	/* ... return code → errno 변환, 출력 크기 검사 ... */
+	if (WARN_ONCE(rc == -EIO, "Bad return code: -EIO"))
+		return -ENXIO;
+	if (rc)
+		return rc;
+	if (mbox_cmd->return_code != CXL_MBOX_CMD_RC_SUCCESS &&
+	    mbox_cmd->return_code != CXL_MBOX_CMD_RC_BACKGROUND)
+		return cxl_mbox_cmd_rc2errno(mbox_cmd);
+	if (!out_size)
+		return 0;
+	if (min_out == 0)
+		min_out = out_size;
+	if (mbox_cmd->size_out < min_out)
+		return -EIO;
+	return 0;
 }
 ```
 
-실제 하드웨어 접근은 `mbox_send`에 꽂힌 `cxl_pci_mbox_send()`(`drivers/cxl/pci.c`)가 합니다.
+입출력 요청 크기가 payload보다 크면 transport를 호출하기 전에 `-E2BIG`입니다. transport가 성공해도 장치 return code가 성공·background가 아니면 오류로 변환합니다. 출력이 필요한 명령에서 실제 size가 요구한 최소보다 작으면 `-EIO`입니다. 따라서 host 전송 결과와 장치 명령 결과, 반환 데이터 크기는 다른 조건입니다.
 
-- `mbox_mutex`를 잡고 `__cxl_pci_mbox_send_cmd()`를 부릅니다. 모든 명령이 이 mutex로 직렬화됩니다.
-- payload를 쓰고 doorbell을 울린 뒤, doorbell이 내려가길 *polling*합니다. 한도는 `CXL_MAILBOX_TIMEOUT_MS`로, 정의는 `(2 * HZ)`라 jiffies 단위 2초입니다.
-- 디바이스가 *background* 명령으로 응답하면 명령별 `poll_interval_ms`·`poll_count`만큼 기다립니다. Sanitize는 예외로, 비동기로 돌리고 사용자 공간이 poll(2)로 완료를 기다립니다.
+실제 `cxl_pci_mbox_send()`는 mailbox mutex를 잡고 register·doorbell 경로를 처리합니다. 이 판의 `CXL_MAILBOX_TIMEOUT_MS` 이름은 `(2 * HZ)`로 정의되어 jiffies 비교에 사용됩니다. 이름만 보고 숫자 2를 millisecond로 해석하면 안 됩니다. background 명령의 후속 대기·sanitize 처리도 따로 확인해야 합니다.
 
-자주 쓰는 opcode (`drivers/cxl/cxlmem.h`):
+이 함수의 경계 검사는 host에서 추출한 원문과 명시적 mock transport로 확인할 수 있습니다. 이때 오류 변환 helper·struct의 host shim을 사용한 검사는 실제 kernel ABI·mutex·하드웨어 mailbox 실행과 다릅니다. device return code를 조작하는 fault injection은 실습 장치의 상태 변화와 분리해야 합니다.
 
-| Opcode | 명령 |
-|--------|------|
-| 0x0100 | Get Event Records |
-| 0x0200 | Get FW Info |
-| 0x0201 | Transfer FW |
-| 0x4000 | Identify (Memory Device) |
-| 0x4102 | Get LSA (Label Storage Area) |
-| 0x4103 | Set LSA |
-| 0x4200 | Get Health Info |
-| 0x4300 | Get Poison List |
+## RAS와 재시도: 복구 가능이라는 반환의 한계
 
-## NUMA 통합 — dax와 kmem
+v6.12의 `pci.c`는 PCI error handler를 등록하고, 실제 공통 오류 처리 본체는 `core/pci.c`에 있습니다. `cxl_error_detected()`는 memdev driver가 없으면 disconnect로 처리하고, 채널 상태와 RAS 결과에 따라 다른 값을 반환합니다.
 
-region이 바로 System RAM이 되지는 않습니다. RAM region은 `devm_cxl_add_dax_region()`으로 *dax region*이 되고, 메모리로 붙이는 건 `drivers/dax/kmem.c`가 합니다.
+| 채널 상태·조건 | 처리 결과의 예 |
+|---|---|
+| normal, uncorrectable 없음 | `CAN_RECOVER` |
+| normal, uncorrectable 있음 | memdev driver release 후 `NEED_RESET` |
+| frozen | 경고·driver release 후 `NEED_RESET` |
+| permanent failure | `DISCONNECT` |
 
-| 단계 | 위치 | 동작 |
-|------|------|------|
-| 1 | `drivers/dax/cxl.c` | `phys_to_target_node()`로 region 시작 주소의 NUMA 노드 결정 |
-| 2 | `drivers/dax/kmem.c` | `mt_calc_adistance()`로 abstract distance 계산, memory tier 타입 지정 |
-| 3 | `drivers/dax/kmem.c` | `__add_memory_driver_managed()`로 메모리 hot-add |
+이 반환값은 애플리케이션 데이터의 보존이나 서비스 복귀 성공을 보장하지 않습니다. 소스 자체도 frozen/reset이 CXL.mem 사용에 치명적일 수 있음을 설명합니다. 사용 중인 System RAM에 영향을 주는 실패는 단순히 driver를 다시 bind하면 원상 복구된다고 가정하지 않습니다.
 
-dax 장치가 `system-ram` 모드면 kmem이 붙어 `numactl --hardware`에 노드가 보입니다. `daxctl reconfigure-device -m system-ram`이 이 전환입니다. `cxl_region_probe()`는 이미 System RAM으로 올라간 범위면 dax region을 만들지 않습니다.
+## 안전하게 관측 범위 정하기
 
-## 에러 처리·RAS
+Linux 대상에서 다음 명령은 상태를 읽는 예입니다. 이 글은 해당 kernel·device에서 출력한 로그를 제공하지 않으며, 이름은 실제 topology에 맞춰 확인해야 합니다.
 
-`drivers/cxl/pci.c`의 PCI error handler:
-
-```c
-static const struct pci_error_handlers cxl_error_handlers = {
-	.error_detected	= cxl_error_detected,
-	.slot_reset	= cxl_slot_reset,
-	.resume		= cxl_error_resume,
-	.cor_error_detected	= cxl_cor_error_detected,
-	.reset_done	= cxl_reset_done,
-};
+```bash
+lspci -n
+ls /sys/bus/cxl/devices/
+cxl list -M -D -T
+cxl list -R
+daxctl list
 ```
 
-`cxl_error_detected()`(`drivers/cxl/core/ras.c`)는 RAS capability 레지스터를 읽어 기록한 뒤 채널 상태로 나눕니다.
-
-| 채널 상태 | 반환 |
-|-----------|------|
-| `pci_channel_io_normal` | uncorrectable이면 memdev 드라이버 해제 후 `NEED_RESET`, 아니면 `CAN_RECOVER` |
-| `pci_channel_io_frozen` | "disable CXL.mem" 경고, memdev 드라이버 해제 후 `NEED_RESET` |
-| `pci_channel_io_perm_failure` | `DISCONNECT` |
-
-memdev에 드라이버가 붙어 있지 않으면 처리를 포기하고 `DISCONNECT`를 돌려줍니다.
-
-## Lock 사용
-
-| Lock | 위치 | 보호 대상 |
-|------|------|----------|
-| `cxl_rwsem.region` | `core/core.h` | region 구성·decoder commit (쓰기), 조회 (읽기) |
-| `cxl_rwsem.dpa` | `core/core.h` | DPA 할당 |
-| `cxlrd->regions_lock` | `cxl_root_decoder` | region 발견·생성·삭제 동기화 |
-| `cxl_mbox->mbox_mutex` | `cxl_mailbox` | mailbox 직렬화 |
-| `mds->event.log_lock` | `cxlmem.h` | event 버퍼·로그 사용 |
-
-`lockdep_assert_held_write(&cxl_rwsem.region)`이 region.c 곳곳에 있어, lockdep을 켜면 잠금 없이 들어온 경로가 경고로 드러납니다.
-
-## 자주 하는 실수
-
-### "commit하면 region을 되돌릴 수 없다"
-
-*아닙니다*. `commit`에 0을 쓰면 reset을 예약하고 decoder를 되돌립니다. 플랫폼이 잠근 region만 `-EPERM`입니다.
-
-### "region commit이 곧 System RAM 추가"
-
-commit은 decoder 프로그래밍까지입니다. 메모리 hot-add는 region probe → dax region → kmem 단계에서 일어납니다.
-
-### "mailbox timeout은 명령마다 지정한다"
-
-doorbell 대기는 공통 2초 한도입니다. 명령별로 다른 건 background 명령의 poll 간격과 횟수입니다.
-
-### "DVSEC가 없으면 probe가 실패한다"
-
-`cxl_pci_probe()`는 경고만 남기고 계속 진행합니다. 다만 CXL.mem 초기화는 건너뜁니다.
-
-## 최근 mainline에서 볼 것
-
-v7.3-rc6 소스에 들어 있는 것 중 이 시리즈와 관련된 항목:
-
-| 영역 | 내용 |
-|------|----------|
-| **Type 2 region attach** | `devm_cxl_probe_mem()`·`cxl_memdev_attach_region()` (`drivers/cxl/mem.c`) — Type 2(accelerator + memory) 디바이스가 memdev 생성과 함께 region에 attach하는 경로 |
-| **memdev 타입** | `cxl_class_memdev_type` (`core/memdev.c`) |
-| **RAS header log** | `CXL_HEADERLOG_SIZE`는 `SZ_64`(RAS capability 크기), trace 이벤트용 `CXL_HEADERLOG_TRACE_SIZE`는 `SZ_512` — rasdaemon이 쓰는 기존 레이아웃을 유지하려고 따로 둠 (`drivers/cxl/cxl.h` 주석) |
-
-> 이 시리즈는 *upstream tracking*(`data/upstream-tracking.yaml` + `audit-upstream-freshness.py`)으로 `drivers/cxl/` 변경을 추적합니다.
+ftrace·trace event를 추가하면 호출 경로와 반환을 더 볼 수 있지만 trace 자체의 부하와 접근 권한도 고려합니다. 관련 방법은 [CXL 커널 디버깅](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)과 [driver 코드 워크스루](/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough)로 이어집니다. 특정 버전의 소스 검색이 현재 mainline의 모든 기능을 검증하는 것은 아닙니다.
 
 ## 정리
 
-- `drivers/cxl/`는 *cxl_core*를 기반으로 cxl_port·cxl_acpi·cxl_pmem·cxl_mem·cxl_pci가 올라갑니다.
-- `cxl_pci_probe()`: enable → DVSEC → 레지스터 매핑 → media ready → IRQ → mailbox → identify → memdev 생성 → 이벤트 설정.
-- HDM decoder는 port마다 *번호 순서로* commit. `commit`에 0을 쓰면 되돌릴 수 있습니다(잠긴 region 제외).
-- region: `create_ram_region` → 파라미터 → `targetN` attach → `commit` → probe → dax → kmem.
-- mailbox는 `mbox_mutex`로 직렬화, doorbell 대기 2초, background 명령은 명령별 polling.
-- PCI error handler는 채널 상태에 따라 `CAN_RECOVER`·`NEED_RESET`·`DISCONNECT`.
+- PCI probe·memdev 등록·decoder commit·DAX/System RAM 노출을 나눠 봅니다.
+- 실제 고정 버전의 함수·struct·lock 이름을 대조합니다.
+- commit은 순서·sanitize·hardware error·timeout 등 서로 다른 실패가 있습니다.
+- mailbox는 transport 결과, 장치 return code와 출력 크기를 따로 검사합니다.
+- commit 해제나 driver recovery 반환은 사용 중인 메모리의 안전한 반환·복구를 보장하지 않습니다.
+- source·host mock·kernel guest·물리 장치 실행은 검증 범위가 다릅니다.
 
-## 다음 편
-
-[Ch 12: QEMU CXL 에뮬레이션 — 노트북에서 CXL 개발](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 *QEMU의 CXL 에뮬레이션*과 커널의 *cxl_test mock*으로 드라이버 경로를 돌려 봅니다.
+다음 [Ch 12: QEMU CXL 에뮬레이션](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 에뮬레이터의 topology와 guest driver 관측을 구분합니다.
 
 ## 관련 항목
 
 - [Ch 8: CXL.mem](/blog/embedded/hardware/cxl/chapter08-cxl-mem)
-- [Modern Embedded Recipes Ch 151: Linux CXL 드라이버 분석](/blog/embedded/modern-recipes/part11-17-linux-cxl-driver)
-- [Kernel Debugging Ch 8: CXL 커널 드라이버 디버깅](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)
-- [Kernel Debugging Ch 9: drivers/cxl 코드 분석](/blog/tools/debugging/kernel/chapter09-drivers-cxl-walkthrough)
+- [Modern Embedded Recipes: Linux CXL 드라이버](/blog/embedded/modern-recipes/part11-17-linux-cxl-driver)
+- [Linux v6.12 CXL sysfs ABI](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-cxl)
 
 ## 시리즈 자료 출처 안내
 
-이 글은 Linux mainline v7.3-rc6의 `drivers/cxl/`·`include/cxl/`·`drivers/dax/` 소스(GPL), ndctl 문서를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 위 commit의 `drivers/cxl/`·`include/cxl/`·`drivers/dax/`와 ndctl v80 문서를 기준으로 합니다. 소스 경로의 열람·host 함수 검사는 실제 kernel·CXL 장치의 실행이나 최신 기능 지원을 의미하지 않습니다. 전체 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

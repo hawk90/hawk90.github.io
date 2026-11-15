@@ -10,10 +10,10 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-커널 디버깅의 *가장 빠른 도구*는 printk입니다. 너무 단순해 무시하기 쉽지만, *대부분의 커널 버그가 printk 한 줄로 잡힙니다*. 다만 잘 쓰려면 *log level*, *ring buffer*, *ratelimit*, *dynamic_debug*를 알아야 합니다.
+`printk()`는 커널의 기본 로그 인터페이스입니다. 관찰 지점과 메시지 빈도를 신중히 정해야 합니다. 특히 legacy console의 핫패스에서 과도하게 호출하면 지연이나 lockup을 일으킬 수 있습니다. log level, ring buffer, ratelimit, dynamic_debug의 동작을 함께 살펴봅니다.
 
 :::tldr
-`printk(KERN_INFO "...")` → 커널 ring buffer → `dmesg`. dynamic_debug로 런타임에 디버그 메시지 켜고 끄기.
+`printk(KERN_INFO "...")` → 커널 ring buffer → `/dev/kmsg` 등 사용자 공간 인터페이스 → `dmesg`. dynamic_debug는 컴파일된 디버그 호출 지점을 조건에 따라 활성화합니다.
 :::
 
 ## printk 기본
@@ -40,10 +40,10 @@ printk(KERN_DEBUG "verbose state: %s\n", name);
 | `KERN_NOTICE`  | 5 | normal but significant | ✗ |
 | `KERN_INFO`    | 6 | informational | ✗ |
 | `KERN_DEBUG`   | 7 | debug | ✗ |
-| `KERN_DEFAULT` | (현재 default) | (보통 4 = warning) | |
+| `KERN_DEFAULT` | 명시되지 않은 메시지의 기본 수준 | 커널 설정·부팅 인자에 따라 다름 | |
 | `KERN_CONT`    | 특수 | 이전 메시지에 이어 출력 (no newline) | |
 
-`KERN_CONT`로 한 줄을 여러 printk로 조합.
+`KERN_CONT`는 이어지는 로그 조각에 사용되지만, 동시 실행 환경에서 임의의 여러 `printk()`를 하나의 원자적 줄로 묶어 주지는 않습니다. 가능하면 한 번의 호출로 메시지를 기록합니다.
 
 ```c
 printk(KERN_INFO "starting init... ");
@@ -55,7 +55,7 @@ printk(KERN_CONT "done\n");
 
 ![printk fans out from __log_buf to console, syslogd, /proc/kmsg, /dev/kmsg](/images/blog/debugging/kernel/diagrams/ch02-printk-fanout.svg)
 
-여러 destination이 동시에. *console*은 console_loglevel 이하만 표시 (기본 7 또는 4).
+메시지는 커널 ring buffer에 기록되고, console은 우선순위 숫자가 현재 `console_loglevel`보다 작은 메시지를 표시합니다. 실제 destination과 보존 여부는 설정에 따릅니다.
 
 ## dmesg
 
@@ -65,7 +65,7 @@ $ dmesg -T              # 타임스탬프 사람 읽기
 $ dmesg -w              # follow (tail -f 비슷)
 $ dmesg --level=err,warn  # 특정 level만
 $ dmesg --facility=kern   # 커널만 (default)
-$ dmesg --clear         # ring buffer 비우기
+$ dmesg --clear         # ring buffer를 비움 (기존 증거가 삭제되므로 진단 중 주의)
 $ dmesg --notime        # 타임스탬프 숨김
 $ dmesg --color=always  # 컬러
 ```
@@ -94,7 +94,7 @@ $ sudo dmesg -n 7
 
 위 4숫자.
 1. *현재 console_loglevel* — 이 미만 level만 console로.
-2. *default_message_loglevel* — KERN_DEFAULT의 의미.
+2. *default_message_loglevel* — 명시적 수준이 없는 메시지의 기본값.
 3. *minimum_console_loglevel* — 사용자가 설정 가능한 최소.
 4. *default_console_loglevel* — 부팅 시 초기값.
 
@@ -148,7 +148,7 @@ Call Trace:
 
 ## dynamic_debug
 
-`pr_debug` / `dev_dbg`로 작성된 메시지는 *컴파일 시* 코드는 포함되지만 *런타임에 토글* 가능. 운영 환경에서 *서비스 재시작 없이* 특정 모듈만 verbose.
+`pr_debug` / `dev_dbg` 호출이 dynamic debug로 등록되어 있고 관련 커널 설정이 켜져 있으면 런타임에 선택적으로 활성화할 수 있습니다. 실행 중인 커널에 해당 호출 지점이 컴파일되어 있어야 하며, 로그량·민감 정보 노출·성능 영향을 검토해야 합니다.
 
 ### 활성화
 
@@ -160,7 +160,7 @@ fs/btrfs/super.c:567 [btrfs]btrfs_check_super =_ "...format..."
 ```
 
 각 줄: `file:line [module]function = <flag> "format"`.
-- `=_` 비활성, `=p` 활성 (print), `=_p` 활성+stack.
+- `=` 뒤의 플래그에서 `p`는 해당 호출 지점을 출력하도록 활성화한다. 실제 표시 필드는 `f`, `l`, `m`, `t` 등 별도 플래그로 선택한다.
 
 ### 토글
 
@@ -191,7 +191,7 @@ $ echo 'module btrfs +pfml' | sudo tee /sys/kernel/debug/dynamic_debug/control
 | `+l` | line number 추가 |
 | `+m` | module name 추가 |
 | `+t` | thread id 추가 |
-| `+_` | 모두 끔 |
+| `+_` | 플래그 전체 초기화 |
 
 ### 부팅 시
 
@@ -220,7 +220,7 @@ if (some_error) {
 }
 ```
 
-기본 rate: *10초에 10회*. 초과 메시지는 *조용히 drop*. 변경:
+커널 기본 ratelimit은 *5초 간격, burst 10회*입니다. `DEFINE_RATELIMIT_STATE`로 만든 개별 제한은 전달한 interval·burst 값이 적용됩니다. 제한을 넘긴 로그는 생략될 수 있습니다. 변경:
 
 ```c
 static DEFINE_RATELIMIT_STATE(my_rs, 5 * HZ, 100);  // 5초에 100회
@@ -233,7 +233,7 @@ if (__ratelimit(&my_rs))
 
 ## Trace prints — printk가 너무 느릴 때
 
-printk는 *console 출력 락*과 *string formatting*으로 *us~ms* 단위 비용. 핫 path (인터럽트, 스케줄러 내부)엔 부적합.
+printk의 비용은 호출 빈도, 콘솔 드라이버, 설정과 커널 선점 모델에 따라 달라집니다. legacy console의 고빈도 핫패스 출력은 긴 동기식 flush로 lockup까지 유발할 수 있으므로, 무조건적인 시간 수치 대신 rate-limited 로그나 tracing을 검토합니다.
 
 대안:
 - **ftrace**의 `trace_printk()` — ring buffer만 (no console).
@@ -288,7 +288,7 @@ journald는 ring buffer + 디스크 *영구 저장*. 부팅 간 보존.
 | 부팅 초기 메시지 없음 | earlyprintk 옵션 없음 |
 | dynamic_debug 비활성 | CONFIG_DYNAMIC_DEBUG 또는 debugfs 미마운트 |
 | `pr_debug` 출력 안 됨 | CONFIG_DYNAMIC_DEBUG_CORE 필요 + 활성화 |
-| 메시지 깨짐 | 멀티 CPU 동시 printk — 인터리브. printk 안에선 atomic이지만 *console UART는* 직렬 |
+| 핫패스 로그로 지연·lockup | legacy console은 printk 출력 중 동기화·console flush 비용이 생길 수 있음. 호출률 제한 또는 trace 도구를 검토 |
 | WARN 후 시스템 정상 | 의도된 동작 (panic 아님) |
 
 ## 한 예 — Driver 디버깅 흐름
@@ -319,9 +319,8 @@ my_device device locked, value=0xdeadbeef
 
 # 사고 후 디버깅 — debug 메시지 켜기
 $ echo 'module my_driver +pfl' | sudo tee /sys/kernel/debug/dynamic_debug/control
-$ dmesg -c    # clear
-$ # 문제 재현
-$ dmesg
+# 기존 로그를 보존한 채 문제를 재현하고 새 메시지를 관찰
+$ dmesg --follow --human
 my_device probing
 my_driver:my_probe:42 init value: 0x12345678
 my_device device locked, value=0xdeadbeef
@@ -329,7 +328,7 @@ my_device device locked, value=0xdeadbeef
 
 ## 정리
 
-- printk는 *가장 단순하고 빠른* 커널 디버그 도구.
+- printk는 커널 기본 로그 도구이며, 호출 빈도와 console 경로에 따라 성능·지연 영향이 달라집니다.
 - KERN_* 레벨이 *console 출력 여부* 결정.
 - dmesg / journalctl -k로 ring buffer 읽기.
 - dynamic_debug로 *재컴파일 없이* pr_debug 토글.

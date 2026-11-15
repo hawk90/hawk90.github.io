@@ -3,104 +3,38 @@
 \setmainfont{Apple SD Gothic Neo}
 \setsansfont{Apple SD Gothic Neo}
 \usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc,decorations.pathreplacing}
+\usetikzlibrary{positioning,arrows.meta,calc,decorations.pathreplacing}
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  hdr/.style={font=\sffamily\bfseries\small, text=inkc},
-  subhdr/.style={font=\sffamily\bfseries\footnotesize, text=mutec},
-  stackcell/.style={rectangle, draw=nodebord, line width=0.4pt, minimum width=22mm, minimum height=5.5mm, inner sep=2pt, font=\sffamily\footnotesize\ttfamily, align=center, fill=white},
-  hwcell/.style={stackcell, fill=hifill, draw=hibord},
-  swcell/.style={stackcell, fill=impfill, draw=impbord},
-  spreg/.style={rectangle, rounded corners=2pt, draw=conbord, line width=0.5pt, minimum width=22mm, minimum height=10mm, inner sep=2pt, fill=confill, font=\sffamily\bfseries\footnotesize, align=center}
-]
-
-% ===== Title =====
-\node[hdr] at (0, 7.2) {Cortex-M Context Switch — Stack Frame};
-
-% ===== Left: Stack pointers =====
-\node[hdr, anchor=center] at (-7.0, 6.0) {Stack Pointers};
-\node[spreg] (msp) at (-7.0, 4.9) {MSP \\[2pt] \footnotesize ISR / OS};
-\node[spreg, below=4mm of msp] (psp) {PSP \\[2pt] \footnotesize task};
-
-\node[note, anchor=north, text width=46mm, align=left] at (-7.0, 1.8) {
-  \textbf{CONTROL.SPSEL} \\[2pt]
-  $\bullet$ 0 = MSP (handler) \\[2pt]
-  $\bullet$ 1 = PSP (thread) \\[2pt]
-  ISR 진입 시 자동으로 MSP로 전환
-};
-
-% ===== Center: Task stack (PSP) =====
-\node[hdr, anchor=center] at (0, 6.0) {Task Stack (PSP)};
-\node[font=\sffamily\scriptsize, text=mutec] at (0, 5.5) {(높은 주소)};
-
-\node[swcell] (r11) at (0, 5.0) {R11};
-\node[swcell, below=0pt of r11.south, anchor=north] (r10) {R10};
-\node[swcell, below=0pt of r10.south, anchor=north] (r9)  {R9};
-\node[swcell, below=0pt of r9.south, anchor=north]  (r8)  {R8};
-\node[swcell, below=0pt of r8.south, anchor=north]  (r7)  {R7};
-\node[swcell, below=0pt of r7.south, anchor=north]  (r6)  {R6};
-\node[swcell, below=0pt of r6.south, anchor=north]  (r5)  {R5};
-\node[swcell, below=0pt of r5.south, anchor=north]  (r4)  {R4};
-
-\node[hwcell, below=2mm of r4.south, anchor=north] (xpsr) {xPSR};
-\node[hwcell, below=0pt of xpsr.south, anchor=north] (pc)  {PC};
-\node[hwcell, below=0pt of pc.south, anchor=north]   (lr)  {LR};
-\node[hwcell, below=0pt of lr.south, anchor=north]   (r12) {R12};
-\node[hwcell, below=0pt of r12.south, anchor=north]  (r3)  {R3};
-\node[hwcell, below=0pt of r3.south, anchor=north]   (r2)  {R2};
-\node[hwcell, below=0pt of r2.south, anchor=north]   (r1)  {R1};
-\node[hwcell, below=0pt of r1.south, anchor=north]   (r0)  {R0};
-
-\node[font=\sffamily\scriptsize, text=mutec, anchor=north] at (r0.south) [below=3mm] {(낮은 주소 — PSP 현재)};
-
-% ===== Brackets — placed well to the right =====
-\draw[decorate, decoration={brace, amplitude=4pt}, draw=impbord, line width=0.5pt]
-  ($(r11.north east) + (0.4, 0)$) -- ($(r4.south east) + (0.4, 0)$);
-
-\node[font=\sffamily\footnotesize, text=impbord, anchor=west, align=left]
-  at ($(r11.north east) + (0.7, -1.1)$) {
-  \textbf{SW push} \\[3pt]
-  PendSV가 \\[2pt]
-  \texttt{stmdb r0!,} \\[2pt]
-  \texttt{\{r4-r11\}}
-};
-
-\draw[decorate, decoration={brace, amplitude=4pt}, draw=hibord, line width=0.5pt]
-  ($(xpsr.north east) + (0.4, 0)$) -- ($(r0.south east) + (0.4, 0)$);
-
-\node[font=\sffamily\footnotesize, text=hibord, anchor=west, align=left]
-  at ($(xpsr.north east) + (0.7, -1.1)$) {
-  \textbf{HW push} \\[3pt]
-  예외 진입 시 \\[2pt]
-  자동 push
-};
-
-% ===== Right: EXC_RETURN =====
-\node[hdr, anchor=center] at (7.6, 6.0) {EXC\_RETURN (\texttt{r14})};
-
-\node[note, anchor=north, text width=54mm, align=left] at (7.6, 5.5) {
-  \texttt{0xFFFF\_FFFD} \\[2pt]
-  \quad$\to$ Thread + PSP \\[4pt]
-  \texttt{0xFFFF\_FFE9} \\[2pt]
-  \quad$\to$ Thread + MSP + FP \\[4pt]
-  \texttt{0xFFFF\_FFE1} \\[2pt]
-  \quad$\to$ Handler + FP \\[6pt]
-  \textbf{bx r14}: HW가 자동으로 \\[2pt]
-  \footnotesize xPSR/PC/LR/R12/R0-R3 pop
-};
-
-% ===== Bottom-right: Flow =====
-\node[hdr, anchor=center] at (7.6, 0.6) {PendSV Flow};
-\node[font=\sffamily\footnotesize, anchor=north, text width=52mm, align=left]
-  at (7.6, 0.2) {
-  $\bullet$ \texttt{mrs r0, psp} \\[2pt]
-  $\bullet$ \texttt{stmdb r0!, \{r4-r11\}} \\[2pt]
-  $\bullet$ \texttt{str r0, [pxCurTCB]} \\[2pt]
-  $\bullet$ \texttt{bl vTaskSwitchContext} \\[2pt]
-  $\bullet$ load new PSP, \texttt{ldmia} \\[2pt]
-  $\bullet$ \texttt{bx r14} $\to$ HW pop
-};
-
+ cell/.style={draw=nodebord,minimum width=28mm,minimum height=5.5mm,inner sep=1pt,font=\sffamily\footnotesize\ttfamily},
+ hw/.style={cell,fill=hifill,draw=hibord},
+ sw/.style={cell,fill=impfill,draw=impbord}]
+\node[font=\sffamily\bfseries] at (0,6.2) {FreeRTOS V11.2.0 ARM\_CM4F: basic PSP frame};
+\node[font=\sffamily\scriptsize,text=mutec] at (0,5.6) {높은 주소};
+\node[hw] (c0) at (0,5.00) {xPSR};
+\node[hw] (c1) at (0,4.42) {PC};
+\node[hw] (c2) at (0,3.84) {thread LR};
+\node[hw] (c3) at (0,3.26) {R12};
+\node[hw] (c4) at (0,2.68) {R3};
+\node[hw] (c5) at (0,2.10) {R2};
+\node[hw] (c6) at (0,1.52) {R1};
+\node[hw] (c7) at (0,0.94) {R0};
+\node[sw] (c8) at (0,0.36) {EXC\_RETURN};
+\node[sw] (c9) at (0,-0.22) {R11};
+\node[sw] (c10) at (0,-0.80) {R10};
+\node[sw] (c11) at (0,-1.38) {R9};
+\node[sw] (c12) at (0,-1.96) {R8};
+\node[sw] (c13) at (0,-2.54) {R7};
+\node[sw] (c14) at (0,-3.12) {R6};
+\node[sw] (c15) at (0,-3.70) {R5};
+\node[sw] (c16) at (0,-4.28) {R4};
+\node[font=\sffamily\scriptsize,text=mutec] at (0,-5.05) {낮은 주소: saved PSP};
+\draw[decorate,decoration={brace,amplitude=4pt},draw=hibord] (1.65,5.27) -- (1.65,0.67);
+\node[anchor=west,align=left,font=\sffamily\footnotesize,text=hibord] at (2.1,3) {HW: 8 word\\[3pt]예외 진입 시 PSP에 저장};
+\draw[decorate,decoration={brace,amplitude=4pt},draw=impbord] (1.65,0.63) -- (1.65,-4.57);
+\node[anchor=west,align=left,font=\sffamily\footnotesize,text=impbord] at (2.1,-1.8) {SW: 9 word\\[3pt]R4--R11 + EXC\_RETURN\\[3pt]기본 합계: 68 byte};
+\node[anchor=north west,text width=48mm,align=left,font=\sffamily\footnotesize] at (-7.4,4.9) {\textbf{스택 선택}\\[3pt]Thread: PSP\\[3pt]Handler: MSP\\[6pt]Thread의 첫 예외 프레임은\\[3pt]PSP에 쌓입니다.\\[3pt]중첩 handler 프레임은 MSP를 사용합니다.};
+\node[anchor=north west,text width=48mm,align=left,font=\sffamily\footnotesize] at (-7.4,0.8) {\textbf{복귀 형식}\\[3pt]\texttt{0xFFFFFFFD}: Thread + PSP, basic\\[3pt]\texttt{0xFFFFFFED}: Thread + PSP, FP\\[6pt]FP 확장과 정렬 word는\\[3pt]이 그림에서 제외합니다.};
 \end{tikzpicture}
 \end{document}

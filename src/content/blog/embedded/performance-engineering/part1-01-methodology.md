@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 왜 방법론이 필요한가
 
-"느려요"라는 보고가 들어오면 80% 개발자가 *코드를 읽으면서 추측*합니다. "여기일 것 같다"고 결론짓고 수정한 뒤 측정해 보면 변화가 없습니다. 그래서 다른 곳을 또 만지고, 이렇게 추측과 수정을 반복합니다.
+"느려요"라는 보고가 들어오면 먼저 관측 가능한 지표와 재현 조건을 정합니다. 코드만 읽어 병목을 추측하면 수정 후에도 개선이 없을 수 있습니다. 가설을 측정으로 검증하고, 결과가 맞지 않으면 다음 원인을 살펴봅니다.
 
 이렇게 작업하면 시간만 낭비됩니다. 더 큰 문제는 *원래 안 느렸던 코드*까지 망가뜨릴 수 있다는 점입니다.
 
@@ -24,7 +24,7 @@ topics: ["embedded"]
 
 ## Brendan Gregg의 USE 메서드
 
-각 자원(CPU, memory, disk, network)에 대해 세 가지 지표를 확인합니다.
+CPU, 메모리, 디스크, 네트워크처럼 USE가 잘 맞는 자원은 사용률(Utilization), 포화(Saturation), 오류(Errors)를 확인합니다. 모든 자원에 세 지표가 똑같이 정의되는 것은 아니므로, 장치별로 의미를 정해야 합니다.
 
 | 지표 | 의미 |
 | --- | --- |
@@ -60,7 +60,7 @@ topics: ["embedded"]
 | RAM | heap used / total | OOM 카운트 | malloc 실패 |
 | Flash | bandwidth 사용률 | wait state | ECC 오류 |
 | Bus (AXI·AHB) | 트랜잭션/sec | outstanding TX | bus fault |
-| Cache | hit rate | line refill stall | (없음) |
+| Cache | target-specific counter | refill/miss counter (지원 시) | 구현별 오류 지표 |
 | DMA | 채널 사용률 | 대기 descriptor | DMA error |
 | ISR | duty cycle | nested depth | spurious IRQ |
 | Mutex | hold time | wait list 길이 | timeout |
@@ -93,7 +93,7 @@ PMU counter를 활성화합니다.
 read_pmu(L1D_CACHE_REFILL);
 ```
 
-수치가 예측과 일치하면 가설이 맞은 것이므로 해결책을 적용합니다. 일치하지 않으면 다른 가설을 세웁니다.
+이 이벤트의 존재와 의미는 프로세서별 PMU 문서에서 확인합니다. 값이 예측과 일치하면 가설을 지지하는 증거가 됩니다. 한 이벤트만으로 원인을 확정하지 말고 작업량과 다른 카운터도 함께 비교합니다.
 
 ## 흔한 함정
 
@@ -105,7 +105,7 @@ read_pmu(L1D_CACHE_REFILL);
 | p99 | 50 ms | 나쁨 |
 | max | 500 ms | 끔찍 |
 
-Real-time에서는 *worst case가 진실*입니다. 그래서 항상 percentile과 max를 함께 봅니다.
+실시간 요구사항에서는 최악 실행 시간의 근거가 중요합니다. 관측한 최대값은 시험한 입력과 환경에서의 표본 최대이며, 그 자체로 WCET 상한을 보장하지 않습니다. 목적에 따라 percentile과 표본 최대를 함께 보고합니다.
 
 ### 2. 측정 환경 = 실 환경 가정
 
@@ -119,24 +119,23 @@ Real-time에서는 *worst case가 진실*입니다. 그래서 항상 percentile�
 
 ### 4. Single Run
 
-한 번 측정하고 "이 정도구나"라고 결론을 내리면 다음 실행에서는 완전히 다른 결과가 나옵니다. 최소 N=100회 측정으로 분포를 확인해야 합니다.
+한 번 측정하고 결론을 내리면 변동성과 드문 지연을 알 수 없습니다. 반복 횟수는 관찰할 꼬리 확률과 신뢰도에 맞춰 정하고 입력·환경·표본 수를 기록합니다.
 
 ## 임베디드 특화 — Bottleneck 우선순위
 
-대부분의 임베디드 시스템에서 문제 발생 빈도는 다음과 같습니다.
+병목의 우선순위는 시스템과 작업량에 따라 달라집니다. 아래는 보편적인 비율이 아니라 먼저 살펴볼 진단 항목입니다.
 
-1. ISR 길거나 nested (40%)
-2. Critical section / lock contention (25%)
-3. Memory bandwidth (15%)
-4. Cache miss (10%)
-5. DMA bottleneck (5%)
-6. 기타 (5%)
+1. ISR 실행 시간과 도착 빈도
+2. critical section과 lock 대기
+3. 메모리·버스 대역폭과 대기
+4. 지원되는 PMU의 cache event
+5. DMA 동시 접근과 대기열
 
 처음에는 ISR과 lock부터 확인합니다. Cache와 DMA는 그 다음 순서입니다.
 
 ## Roofline Model 미리보기
 
-성능은 *min(peak compute, memory bandwidth)*로 결정됩니다. 자세한 내용은 1-07에서 다룹니다.
+Roofline은 지정된 메모리 계층과 작업량 가정에서 성능 상한을 `min(peak compute, bandwidth × operational intensity)`로 나타냅니다. 자세한 내용은 1-07에서 다룹니다.
 
 ![Roofline Model Preview — memory bound vs compute bound](/images/blog/perf-eng/diagrams/part1-01-roofline-preview.svg)
 
@@ -156,7 +155,7 @@ Real-time에서는 *worst case가 진실*입니다. 그래서 항상 percentile�
 
 > ⚠️ "여기일 것 같다"
 
-코드 읽기만으로 결정하면 80%는 틀립니다. 항상 측정합니다.
+코드만으로 결론을 내리지 말고, 측정으로 가설을 확인합니다.
 
 > ⚠️ Premature optimization
 
@@ -174,9 +173,9 @@ production 데이터가 *최고의 input*입니다. 출시 후 실 사용 환경
 
 - **방법론 = 측정 → 가설 → 검증**입니다. 추측은 금지입니다.
 - **USE**(Utilization·Saturation·Errors)와 **RED**(Rate·Errors·Duration)를 함께 씁니다.
-- 임베디드에서는 *모든 자원에 USE를 적용*합니다(CPU·RAM·Bus·Cache·DMA·ISR·Mutex).
+- 임베디드에서도 USE/RED를 참고하되, 지표가 실제로 정의되는 자원에 적용합니다.
 - 평균이나 single run의 함정을 피하려면 *분포와 다중 측정*이 필요합니다.
-- ISR과 Lock이 *임베디드 bottleneck 상위 65%*를 차지합니다.
+- ISR, lock, 메모리, DMA를 진단 후보로 두되 순서는 관측 결과로 정합니다.
 
 다음 편은 **성능 지표 정의**입니다. Latency·Throughput·Utilization을 다룹니다.
 
@@ -185,3 +184,8 @@ production 데이터가 *최고의 input*입니다. 출시 후 실 사용 환경
 - [1-02: 성능 지표 정의](/blog/embedded/performance-engineering/part1-02-metrics)
 - [1-07: 성능 모델링 (Amdahl, Roofline)](/blog/embedded/performance-engineering/part1-07-modeling)
 - [Brendan Gregg's Systems Performance](https://www.brendangregg.com/sysperfbook.html)
+
+## 참고 자료
+
+- [Brendan Gregg, USE Method](https://www.brendangregg.com/usemethod.html)
+- [Arm, PMU event support and profiling](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/profile-firmware-with-performance-monitor-unit-in-armv8-a-cpu)

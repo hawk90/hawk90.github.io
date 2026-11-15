@@ -1,0 +1,297 @@
+{
+  "generatedAt": "2026-10-19T08:32:26.700Z",
+  "head": "d55f8d66ece6acb8ebb274df7c843ce6b4054853",
+  "scope": "Modern Embedded Recipes 이외 공개 406편",
+  "total": 406,
+  "reviewed": 406,
+  "pending": 0,
+  "loopsReviewed": 41,
+  "loopsPending": 0,
+  "previousAverageReviewed": 51.45566502463054,
+  "newAverageReviewed": 52.083743842364534,
+  "scoreChanged": 192,
+  "decisionChanged": 54,
+  "factcheckChanged": 53,
+  "errorsWithdrawn": 14,
+  "errorsAdded": 36,
+  "decisions": {
+    "보강": 29,
+    "병합 검토": 130,
+    "우선 조치": 245,
+    "제외 검토": 2
+  },
+  "factchecks": {
+    "미검증": 128,
+    "오류 확인": 245,
+    "검증됨": 33
+  },
+  "increased": 166,
+  "decreased": 26,
+  "unchanged": 214,
+  "min": 37,
+  "max": 67,
+  "criterion": [
+    {
+      "criterion": "A",
+      "old": 4653,
+      "now": 4673
+    },
+    {
+      "criterion": "B",
+      "old": 4490,
+      "now": 4478
+    },
+    {
+      "criterion": "C",
+      "old": 2460,
+      "now": 2447
+    },
+    {
+      "criterion": "D",
+      "old": 3723,
+      "now": 3829
+    },
+    {
+      "criterion": "E",
+      "old": 2573,
+      "now": 2637
+    },
+    {
+      "criterion": "F",
+      "old": 2292,
+      "now": 2382
+    },
+    {
+      "criterion": "G",
+      "old": 700,
+      "now": 700
+    }
+  ],
+  "series": [
+    {
+      "series": "Bootloader Internals",
+      "count": 37,
+      "previousAverage": "54.54",
+      "newAverage": "56.19",
+      "scoreChanged": 29,
+      "decisionChanged": 2,
+      "errorConfirmed": 28
+    },
+    {
+      "series": "BSP Development",
+      "count": 21,
+      "previousAverage": "52.43",
+      "newAverage": "53.00",
+      "scoreChanged": 10,
+      "decisionChanged": 3,
+      "errorConfirmed": 15
+    },
+    {
+      "series": "Buildroot Practical",
+      "count": 20,
+      "previousAverage": "56.60",
+      "newAverage": "56.40",
+      "scoreChanged": 5,
+      "decisionChanged": 4,
+      "errorConfirmed": 18
+    },
+    {
+      "series": "CMake",
+      "count": 9,
+      "previousAverage": "56.33",
+      "newAverage": "56.44",
+      "scoreChanged": 1,
+      "decisionChanged": 1,
+      "errorConfirmed": 8
+    },
+    {
+      "series": "CXL 4.0 Internals",
+      "count": 15,
+      "previousAverage": "58.33",
+      "newAverage": "58.47",
+      "scoreChanged": 3,
+      "decisionChanged": 0,
+      "errorConfirmed": 0
+    },
+    {
+      "series": "Driver-RTL Co-simulation",
+      "count": 8,
+      "previousAverage": "49.38",
+      "newAverage": "49.38",
+      "scoreChanged": 0,
+      "decisionChanged": 3,
+      "errorConfirmed": 7
+    },
+    {
+      "series": "DWARF and ELF Internals",
+      "count": 6,
+      "previousAverage": "55.33",
+      "newAverage": "55.33",
+      "scoreChanged": 0,
+      "decisionChanged": 1,
+      "errorConfirmed": 6
+    },
+    {
+      "series": "Embedded C++ for Real Systems",
+      "count": 41,
+      "previousAverage": "49.59",
+      "newAverage": "49.41",
+      "scoreChanged": 9,
+      "decisionChanged": 6,
+      "errorConfirmed": 28
+    },
+    {
+      "series": "Embedded Debugging",
+      "count": 9,
+      "previousAverage": "53.78",
+      "newAverage": "53.78",
+      "scoreChanged": 4,
+      "decisionChanged": 1,
+      "errorConfirmed": 7
+    },
+    {
+      "series": "Embedded Performance Engineering",
+      "count": 57,
+      "previousAverage": "46.70",
+      "newAverage": "46.98",
+      "scoreChanged": 17,
+      "decisionChanged": 7,
+      "errorConfirmed": 29
+    },
+    {
+      "series": "Embedded Security",
+      "count": 13,
+      "previousAverage": "54.54",
+      "newAverage": "55.46",
+      "scoreChanged": 10,
+      "decisionChanged": 1,
+      "errorConfirmed": 4
+    },
+    {
+      "series": "ESP32-C3 Mastering",
+      "count": 12,
+      "previousAverage": "51.83",
+      "newAverage": "52.42",
+      "scoreChanged": 4,
+      "decisionChanged": 1,
+      "errorConfirmed": 6
+    },
+    {
+      "series": "GDB and LLDB",
+      "count": 12,
+      "previousAverage": "49.08",
+      "newAverage": "49.67",
+      "scoreChanged": 5,
+      "decisionChanged": 0,
+      "errorConfirmed": 5
+    },
+    {
+      "series": "GDB Extension and IDE",
+      "count": 6,
+      "previousAverage": "49.83",
+      "newAverage": "49.83",
+      "scoreChanged": 0,
+      "decisionChanged": 0,
+      "errorConfirmed": 1
+    },
+    {
+      "series": "GNU Make",
+      "count": 7,
+      "previousAverage": "59.71",
+      "newAverage": "59.71",
+      "scoreChanged": 2,
+      "decisionChanged": 3,
+      "errorConfirmed": 6
+    },
+    {
+      "series": "HBM·GDDR 심화",
+      "count": 12,
+      "previousAverage": "54.33",
+      "newAverage": "55.17",
+      "scoreChanged": 8,
+      "decisionChanged": 0,
+      "errorConfirmed": 2
+    },
+    {
+      "series": "Industrial Ethernet 심화",
+      "count": 12,
+      "previousAverage": "53.33",
+      "newAverage": "54.25",
+      "scoreChanged": 9,
+      "decisionChanged": 0,
+      "errorConfirmed": 8
+    },
+    {
+      "series": "Kernel Debugging",
+      "count": 9,
+      "previousAverage": "49.78",
+      "newAverage": "50.89",
+      "scoreChanged": 9,
+      "decisionChanged": 2,
+      "errorConfirmed": 4
+    },
+    {
+      "series": "Memory Diagnostics",
+      "count": 7,
+      "previousAverage": "51.14",
+      "newAverage": "52.00",
+      "scoreChanged": 3,
+      "decisionChanged": 0,
+      "errorConfirmed": 2
+    },
+    {
+      "series": "PCIe Deep Dive",
+      "count": 19,
+      "previousAverage": "45.84",
+      "newAverage": "47.11",
+      "scoreChanged": 14,
+      "decisionChanged": 6,
+      "errorConfirmed": 12
+    },
+    {
+      "series": "Postmortem Debugging",
+      "count": 6,
+      "previousAverage": "50.83",
+      "newAverage": "52.33",
+      "scoreChanged": 5,
+      "decisionChanged": 2,
+      "errorConfirmed": 4
+    },
+    {
+      "series": "Practical RTOS Internals",
+      "count": 53,
+      "previousAverage": "48.91",
+      "newAverage": "50.36",
+      "scoreChanged": 42,
+      "decisionChanged": 9,
+      "errorConfirmed": 33
+    },
+    {
+      "series": "Python Debugging",
+      "count": 5,
+      "previousAverage": "55.40",
+      "newAverage": "55.60",
+      "scoreChanged": 1,
+      "decisionChanged": 1,
+      "errorConfirmed": 3
+    },
+    {
+      "series": "Sanitizers",
+      "count": 5,
+      "previousAverage": "57.40",
+      "newAverage": "57.40",
+      "scoreChanged": 0,
+      "decisionChanged": 1,
+      "errorConfirmed": 4
+    },
+    {
+      "series": "Valgrind",
+      "count": 5,
+      "previousAverage": "57.00",
+      "newAverage": "57.00",
+      "scoreChanged": 2,
+      "decisionChanged": 0,
+      "errorConfirmed": 5
+    }
+  ]
+}

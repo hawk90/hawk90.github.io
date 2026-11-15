@@ -12,7 +12,7 @@ topics: ["tools", "tools/debugging"]
 
 ## 왜 Sanitizer인가
 
-C/C++ 코드의 버그는 *대개 정적 분석으로 보이지 않습니다*. 메모리 오류, 미정의 동작, 데이터 레이스 같은 자리는 *실제로 코드가 돌아야* 드러납니다. 그렇다고 디버거로 한 줄 한 줄 추적하는 건 비효율적입니다 — 문제가 *어디서 시작됐는지* 모르기 때문입니다.
+정적 분석과 런타임 검사는 서로 다른 증거를 제공합니다. 정적 분석으로 찾을 수 있는 메모리 오류도 있지만, 실제 입력과 스레드 실행 경로에서만 관찰되는 문제도 있습니다. 그렇다고 디버거로 한 줄 한 줄 추적하는 건 비효율적입니다 — 문제가 *어디서 시작됐는지* 모르기 때문입니다.
 
 **Sanitizer**는 이 틈을 메웁니다. 컴파일러가 *런타임 검사 코드*를 자동 삽입해, 문제가 *발생하는 순간*에 즉시 보고합니다.
 
@@ -24,7 +24,7 @@ strcpy(buf, "hello world");  // buffer overflow
 // 디버거: "프로그램이 어디선가 죽었네..."
 // AddressSanitizer:
 // ==12345==ERROR: AddressSanitizer: stack-buffer-overflow on address...
-//   READ of size 12 at 0x7fff... thread T0
+//   WRITE of size 12 at 0x7fff... thread T0
 //     #0 strcpy in main.c:5
 //   This frame has 1 object(s):
 //     [32, 42) 'buf' <== Memory access at offset 42 overflows this variable
@@ -32,27 +32,27 @@ strcpy(buf, "hello world");  // buffer overflow
 
 정적 분석이 *코드 패턴*을 보고, Valgrind가 *바이너리 실행*을 보는 동안, Sanitizer는 *컴파일러 계측*으로 그 둘 사이에 자리 잡습니다. 세 도구의 위치는 다음과 같습니다.
 
-| 도구 | 동작 시점 | 오버헤드 | 정확도 |
-|------|-----------|---------|--------|
-| 정적 분석 (clang-tidy 등) | 컴파일 전 | 0 | 거짓 양성 많음 |
-| **Sanitizer** | 컴파일 + 런타임 | 2~3× 느림 | 매우 높음 |
-| Valgrind (Memcheck) | 런타임만 (재컴파일 불필요) | 10~50× 느림 | 매우 높음 |
+| 도구 | 검사 방식 | 확인 범위 |
+| --- | --- | --- |
+| 정적 분석 | 실행 없이 소스·경로 분석 | 실제 실행하지 않은 경로도 분석하지만 모델의 한계가 있습니다. |
+| Sanitizer | 컴파일 계측과 런타임 검사 | 선택한 검사와 실제 실행 경로에 의존합니다. |
+| Valgrind Memcheck | 실행 파일의 동적 분석 | 지원 플랫폼에서 메모리 접근과 초기화 상태를 추적합니다. |
 
-Sanitizer가 *셋 중 가장 균형 잡힌* 선택입니다. 컴파일러 한 옵션으로 켜지고, Valgrind보다 *훨씬 빠르며*, 정적 분석보다 *정확합니다*.
+속도와 정확도를 하나의 배율로 비교하지 않습니다. 검사 종류, 입력, 라이브러리 계측 여부에 따라 비용과 탐지 범위가 달라집니다.
 
 ---
 
 ## Sanitizer 다섯 종류
 
-GCC와 Clang이 공통으로 지원하는 다섯 Sanitizer입니다.
+대표적인 다섯 검사 계열입니다. MSan은 Clang 계열 기능이며, 나머지도 컴파일러·OS·아키텍처·배포 런타임의 지원을 확인해야 합니다.
 
-| Sanitizer | 옵션 | 잡는 것 | 오버헤드 |
-|-----------|------|---------|---------|
-| **ASan** (AddressSanitizer) | `-fsanitize=address` | buffer overflow, use-after-free, double-free | 2~3× |
-| **UBSan** (UndefinedBehavior) | `-fsanitize=undefined` | signed overflow, null deref, type confusion | 1.2~1.5× |
-| **LSan** (LeakSanitizer) | `-fsanitize=leak` | 메모리 누수 (보통 ASan 포함) | ASan과 같음 |
-| **TSan** (ThreadSanitizer) | `-fsanitize=thread` | 데이터 레이스, 동기화 누락 | 5~15× |
-| **MSan** (MemorySanitizer) | `-fsanitize=memory` | 초기화 안 된 메모리 사용 | 3× (Clang only) |
+| Sanitizer | 옵션 | 주요 검사·조건 |
+| --- | --- | --- |
+| ASan | `-fsanitize=address` | 지원되는 메모리 경계·수명 오류를 검사합니다. |
+| UBSan | `-fsanitize=undefined` | 선택된 미정의 동작 검사를 수행합니다. 모든 UB를 검출하지는 않습니다. |
+| LSan | `-fsanitize=leak` | 지원 런타임에서 도달 불가능한 할당을 찾습니다. |
+| TSan | `-fsanitize=thread` | 관찰된 접근 사이의 동기화와 레이스를 분석합니다. |
+| MSan | `-fsanitize=memory` | 초기화되지 않은 값 사용을 추적하며 종속 코드의 계측도 필요합니다. |
 
 ### 호환성 — 한 빌드에 같이 쓸 수 있는가
 
@@ -65,9 +65,9 @@ GCC와 Clang이 공통으로 지원하는 다섯 Sanitizer입니다.
 
 핵심 규칙 셋만 기억하면 됩니다.
 
-1. **UBSan은 모두와 호환**. 거의 항상 켜 둡니다.
+1. **UBSan은 다른 검사 계열과 조합할 수 있습니다.** 개별 검사와 타깃 런타임 지원을 확인합니다.
 2. **ASan + TSan + MSan은 서로 배타적**. 같은 메모리 영역을 다른 방식으로 추적하므로 동시 사용 불가.
-3. **LSan은 ASan에 자동 포함**. 따로 켤 필요 거의 없음.
+3. **LSan은 지원되는 ASan 런타임에 통합됩니다.** 기본 활성화와 별도 leak 런타임 지원은 플랫폼마다 확인합니다.
 
 결과적으로 *실무에서 만나는 빌드는 세 가지*입니다.
 
@@ -83,20 +83,20 @@ GCC와 Clang이 공통으로 지원하는 다섯 Sanitizer입니다.
 
 ### 1단계 — `-fsanitize=address,undefined`
 
-가장 큰 효과를 내는 *황금 조합*. 거의 모든 C/C++ 프로젝트에 즉시 적용해도 좋습니다.
+ASan과 UBSan을 함께 시험하는 시작 설정입니다. 지원되는 개발·테스트 환경에서 먼저 적용하고 실행 시간과 메모리 비용을 확인합니다.
 
 ```bash
 CFLAGS="-fsanitize=address,undefined -fno-omit-frame-pointer -g -O1"
 ```
 
-세 옵션의 역할:
+각 옵션의 역할:
 
 - `-fsanitize=address,undefined` — ASan + UBSan 켜기
-- `-fno-omit-frame-pointer` — 스택 트레이스 정확도 보장 (없으면 인라인이 트레이스 망침)
+- `-fno-omit-frame-pointer` — frame pointer를 유지해 스택 해석을 돕습니다. 인라인·tail call까지 되돌리지는 않습니다.
 - `-g` — 디버그 심볼 (Sanitizer가 *소스 파일·줄 번호*를 보고하려면 필수)
-- `-O1` — 약한 최적화 (O0은 false positive 많음, O2는 정보 손실)
+- `-O1` — 초기 진단에 사용할 최적화 수준입니다. O0 자체가 오탐의 원인은 아닙니다.
 
-이 한 빌드로 가장 많이 만나는 *메모리 오류 + UB*가 다 잡힙니다.
+이 빌드가 실행한 경로에서 지원 검사를 수행합니다. 경고가 없다는 사실만으로 모든 메모리 오류와 UB가 없다고 결론 내리지 않습니다.
 
 ### 2단계 — 멀티스레드면 `-fsanitize=thread`
 
@@ -110,7 +110,7 @@ CFLAGS_TSAN="-fsanitize=thread -fno-omit-frame-pointer -g -O1"
 ### 3단계 — 깊은 분석이 필요하면 MSan/LSan/UBSan trap 모드
 
 - **MSan**: *초기화 안 된 변수*를 추적. Clang 전용, 표준 라이브러리도 *MSan-instrumented build*가 필요해 진입 장벽 높음.
-- **LSan 단독**: 거의 안 씀. ASan에 포함되어 자동 동작.
+- **LSan 단독**: 메모리 경계 검사 없이 누수 검사를 분리할 때 사용합니다.
 - **UBSan trap 모드**: `-fsanitize=undefined -fsanitize-trap=undefined` — UB가 *프로세스를 죽이게* 만듦. 프로덕션 hardening 옵션.
 
 ---
@@ -136,11 +136,11 @@ int* p = &x;
 free(p);                         // ❌ invalid-free (not from malloc)
 ```
 
-추가로 *static buffer overflow*, *global buffer overflow*, *container overflow*(STL)도 잡습니다.
+전역 배열 경계도 검사합니다. STL의 논리적 크기와 capacity 사이 접근은 라이브러리의 container annotation 지원에 따라 달라집니다.
 
 ### UBSan이 잡는 것
 
-```c
+```cpp
 int x = INT_MAX;
 x++;                             // ❌ signed integer overflow
 
@@ -166,18 +166,18 @@ std::atomic<bool> ready{false};
 int data = 0;
 
 std::thread t1([&] {
-    data = 42;        // ❌ 데이터 레이스
+    data = 42;        // ready의 store 이전 쓰기
     ready = true;
 });
 
 std::thread t2([&] {
     if (ready) {
-        std::cout << data;   // ❌ 동기화 없이 읽음
+        std::cout << data;   // ready의 true를 읽었다면 안전
     }
 });
 ```
 
-TSan은 *happens-before* 관계를 추적해, 두 스레드가 *동기화 없이 같은 메모리에 접근*하는 모든 경우를 보고합니다. 락이 필요한 자리, atomic을 빠뜨린 자리가 모두 잡힙니다.
+위 코드는 레이스 예제가 아닙니다. ready의 기본 store/load는 seq_cst이며, true를 읽은 쪽에는 이전 data 쓰기가 전달됩니다. 반대로 두 연산을 relaxed로 바꾸면 data에 대한 동기화는 성립하지 않습니다. TSan은 실행 중 관찰한 접근을 검사하며 모든 경로의 문제를 보장하지 않습니다. [C++ atomic 순서 규칙](https://eel.is/c++draft/atomics.order)을 기준으로 구분합니다.
 
 ### LSan이 잡는 것
 
@@ -186,7 +186,7 @@ void* p = malloc(40);
 return;                          // ❌ 누수 — p 해제 안 됨
 ```
 
-ASan과 함께 자동 동작합니다. 프로세스 종료 시 *살아 있는 할당*을 모두 보고합니다.
+지원되는 ASan 런타임에서는 LSan을 함께 사용할 수 있습니다. 루트에서 도달 가능한 할당은 보통 누수로 보고하지 않으므로, 해제하지 않은 모든 할당을 나열하는 도구는 아닙니다.
 
 ### MSan이 잡는 것
 
@@ -205,17 +205,13 @@ if (x > 0) {                    // ❌ uninitialized value
 
 Valgrind Memcheck는 ASan과 *비슷한 버그*를 잡지만, 동작 방식이 다릅니다.
 
-| | Sanitizer | Valgrind |
-|---|---|---|
-| 동작 | 컴파일러가 코드 계측 | 바이너리 위에서 가상 실행 |
-| 재컴파일 | *필요* | *불필요* |
-| 오버헤드 | 2~3× | 10~50× |
-| stack 검사 | *지원* | *제한적* |
-| 시스템 콜 추적 | 부분적 | *완전* |
-| 외부 라이브러리 | 동작 (재컴파일 불필요) | *완전 동작* |
-| 멀티 도구 통합 | 옵션으로 조합 | Memcheck/Helgrind/DRD 별도 |
+| | Sanitizer | Valgrind Memcheck |
+| --- | --- | --- |
+| 준비 | 검사할 코드의 계측 빌드가 필요합니다. | 지원되는 실행 파일을 동적 분석합니다. |
+| 외부 라이브러리 | 비계측 코드는 탐지 공백을 만들 수 있습니다. | 계측 재빌드 없이 분석하지만 플랫폼·명령 지원의 제한이 있습니다. |
+| 초기화 상태 | MSan 계열을 별도로 선택합니다. | 초기화되지 않은 값의 사용을 추적합니다. |
 
-요약: *코드를 컴파일할 수 있으면 Sanitizer*, *바이너리만 있으면 Valgrind*. 둘은 *경쟁이 아니라 보완 관계*입니다. CI에서는 PR마다 Sanitizer를 돌리고, 야간에 Valgrind를 한 번 더 도는 식이 흔합니다.
+재빌드 가능 여부와 검사 목적을 기준으로 선택합니다. 둘 다 시스템 콜 추적의 완전성을 보장하는 도구로 설명하지 않습니다.
 
 자세한 비교는 별도 시리즈 [Valgrind](/blog/tools/debugging/valgrind/chapter01-intro)에서 다룹니다.
 
@@ -235,11 +231,43 @@ Valgrind Memcheck는 ASan과 *비슷한 버그*를 잡지만, 동작 방식이 �
 
 ---
 
+## 직접 확인 — atomic으로 데이터 전달
+
+아래는 앞선 seq_cst 설명을 완전한 프로그램으로 만든 예제입니다. 소비자가 true를 읽을 때까지 기다리므로 출력은 data=42입니다. relaxed 레이스 사례와 수정 비교는 4장에서 다룹니다.
+
+```cpp title="publication.cpp"
+#include <atomic>
+#include <iostream>
+#include <thread>
+
+int main() {
+    std::atomic<bool> ready{false};
+    int data = 0;
+    std::thread producer([&] {
+        data = 42;
+        ready = true;
+    });
+    std::thread consumer([&] {
+        while (!ready) std::this_thread::yield();
+        std::cout << "data=" << data << '\n';
+    });
+    producer.join();
+    consumer.join();
+}
+```
+
+```bash
+clang++ -std=c++17 -O1 -g -fsanitize=thread publication.cpp -o publication
+./publication
+```
+
+이 예제의 정상 출력과 TSan의 무경고 여부를 별도로 확인합니다. 무경고는 이 실행의 증거이며 다른 모든 코드의 안전성 증명은 아닙니다.
+
 ## 정리
 
 - *Sanitizer*는 컴파일러 계측 기반 런타임 검사 — 정적 분석과 Valgrind 사이의 균형점.
 - 다섯 가지: **ASan / UBSan / LSan / TSan / MSan**. UBSan은 거의 다른 모든 것과 호환, ASan·TSan·MSan은 서로 배타적.
-- *황금 조합*은 `-fsanitize=address,undefined -fno-omit-frame-pointer -g -O1`. 거의 모든 C/C++ 프로젝트에 즉시 적용 가능.
+- 시작 설정은 `-fsanitize=address,undefined -fno-omit-frame-pointer -g -O1`이며 지원 환경·비용을 먼저 확인합니다.
 - 멀티스레드면 *별도 빌드*로 `-fsanitize=thread`.
 - Valgrind는 *재컴파일 불가능한 바이너리*에 보완으로.
 

@@ -78,7 +78,7 @@ utils.o: utils.c utils.h
 	$(PROTOC) --cpp_out=. $<
 ```
 
-마지막 예가 흥미롭습니다. *한 입력에서 두 출력이 동시에 생기는* 경우입니다. 보통 Make는 이걸 "두 별개 규칙"으로 펴는데, 그러면 `protoc`이 두 번 호출됩니다. 4.3부터는 *grouped target* 문법 `%.pb.cc %.pb.h &: %.proto`를 쓰면 "한 호출이 정말 둘을 함께 만든다"는 의미를 정확히 알려 줄 수 있습니다. 4.3 이전 Make에서는 한 출력만 의존성으로 적고, 다른 출력은 "사이드 이펙트"로 간주하는 회피책을 씁니다.
+여러 타겟을 가진 패턴 규칙은 일반적인 명시적 다중 타겟 규칙과 다릅니다. GNU Make는 콜론 종류와 무관하게 이 패턴 출력들을 한 그룹으로 취급하므로 위 예제만으로 protoc이 두 번 호출된다고 설명하면 틀립니다. 레시피는 요청된 한 파일만이 아니라 함께 선언한 출력을 모두 갱신해야 합니다. [다중 출력 패턴 규칙](https://www.gnu.org/software/make/manual/html_node/Pattern-Intro.html)을 참고합니다.
 
 ### 디렉터리를 포함한 패턴
 
@@ -163,21 +163,11 @@ CFLAGS := -Wall -g
 hello: main.o hello.o utils.o
 ```
 
-이게 전부입니다. `make` 한 번 치면:
-
-```text
-$ make
-cc -Wall -g  -c -o main.o main.c
-cc -Wall -g  -c -o hello.o hello.c
-cc -Wall -g  -c -o utils.o utils.c
-cc  main.o hello.o utils.o  -o hello
-```
-
-세 오브젝트 모두 *내장 `%.o: %.c` 규칙*으로 빌드되고, 마지막 링크는 *`% : %.o` 규칙*이 처리합니다.
+이 조각은 main.c·hello.c·utils.c 등의 소스가 준비된 상태를 가정합니다. CC를 gcc로 지정했으므로 내장 규칙도 gcc를 사용합니다. 실제 실행 전 `make -n`으로 컴파일과 링크 입력을 확인합니다. 의존성만 적은 명시적 규칙에 레시피가 없으면 암시적 규칙을 검색할 수 있습니다.
 
 ### 암시적 규칙이 보고 있는 변수
 
-암시적 규칙은 일반 패턴 규칙처럼 자동 변수를 사용합니다. 위 표의 명령에는 `$(CC)`, `$(CFLAGS)` 같은 표준 변수가 그대로 등장하는데, 이 변수를 정의하지 않으면 빈 값이 들어갑니다.
+암시적 규칙은 일반 패턴 규칙처럼 자동 변수를 사용합니다. 위 표의 명령에는 `$(CC)`, `$(CFLAGS)` 같은 표준 변수가 그대로 등장하는데, 사용자가 정의하지 않아도 CC=cc 같은 내장 기본값이 있습니다. 반면 CFLAGS처럼 빈 기본값을 가진 변수도 있으므로 $(origin CC)와 실제 값을 구분해 확인합니다.
 
 빈 `$(CFLAGS)`로 빌드된 결과는 *경고도 디버그 정보도 최적화도 없는* 상태가 됩니다. 그래서 암시적 규칙에 의존하려면 *변수만큼은 반드시* 명시적으로 설정해야 합니다.
 
@@ -215,7 +205,7 @@ make -p -f /dev/null 2>/dev/null | less
 MAKEFLAGS += --no-builtin-rules --no-builtin-variables
 ```
 
-`--no-builtin-rules`는 *규칙*만, `--no-builtin-variables`는 *기본 변수(`CC=cc` 등)*까지 끕니다. 둘을 같이 끄면 빈 상태에서 시작할 수 있어, 의도가 명확한 Makefile이 됩니다. Linux 커널 Makefile이 이 방식을 채택해 *모든 규칙·변수를 명시적*으로 적어 둡니다.
+`--no-builtin-rules`는 *규칙*만, `--no-builtin-variables`는 *기본 변수(`CC=cc` 등)*까지 끕니다. 둘을 같이 끄면 빈 상태에서 시작할 수 있어, 의도가 명확한 Makefile이 됩니다. 이 옵션을 사용하면 필요한 도구와 규칙을 직접 제공해야 합니다. 다른 프로젝트가 같은 옵션을 쓴다는 이유만으로 적용하지 않습니다.
 
 특정 패턴만 끄려면 *빈 레시피*의 패턴 규칙을 정의합니다.
 
@@ -269,11 +259,10 @@ $(TEST_OBJS): %.o: %.c
 
 Make가 한 타겟의 빌드 방법을 찾을 때 *어떤 규칙을 먼저 시도*하는지 — 이 순서를 알면 "왜 내 규칙이 안 먹히지?" 답이 보입니다.
 
-1. **명시적 규칙** — 타겟이 정확히 이 파일
-2. **정적 패턴 규칙** — `$(OBJS): %.o: %.c`
-3. **일반 패턴 규칙** — `%.o: %.c` (사용자 정의)
-4. **암시적 규칙** — Make 내장
-5. 매칭이 없으면 에러: `No rule to make target...`
+1. 명시적 규칙이나 정적 패턴 규칙에 레시피가 있으면 그것을 사용합니다.
+2. 명시적 규칙에 의존성만 있다면 암시적 규칙 검색을 할 수 있습니다.
+3. 사용자 패턴과 내장 규칙의 후보 중 의존성을 충족할 수 있는 규칙을 검색합니다. 사용자 규칙·stem 길이·동률일 때 정의 순서 등이 선택에 영향을 줍니다.
+4. 만들 방법도 기존 파일도 없으면 No rule to make target 오류가 납니다.
 
 여러 패턴이 동시에 매칭될 때는 *더 구체적인 패턴이 이깁니다*. 예컨대 `%.o`와 `lib%.o`가 둘 다 `libfoo.o`에 매칭되면, *더 긴 stem*을 가지지 않은 쪽(여기서는 `lib%.o`)이 우선합니다.
 
@@ -289,7 +278,7 @@ config.o: config.c config.h defaults.h
 	$(CC) $(CFLAGS) -DVERSION="1.0" -c $< -o $@
 ```
 
-`config.o`는 명시적 규칙(2번째)이 있어 그쪽으로, 나머지 `.o`는 일반 패턴(3번째)으로 빌드됩니다.
+config.o에는 명시적 레시피가 있으므로 그 레시피를 쓰고, 나머지는 적용 가능한 패턴을 검색합니다. 더 짧은 stem을 선호하는 규칙은 GNU Make 3.82 이후 기준입니다.
 
 ---
 
@@ -364,7 +353,7 @@ build/%.o: src/%.c
 GNU Make 4.3(2020)에 추가된 `&:` 문법입니다.
 
 ```makefile
-# 기존 (각 출력이 별개 규칙으로 해석되어 protoc이 두 번 호출됨)
+# 다중 출력 패턴 규칙: 이 형태도 그룹으로 취급
 %.pb.cc %.pb.h: %.proto
 	$(PROTOC) --cpp_out=. $<
 
@@ -375,9 +364,53 @@ GNU Make 4.3(2020)에 추가된 `&:` 문법입니다.
 
 `&:`로 묶인 출력은 *한 레시피 호출로 함께 만들어진다*는 약속입니다. Make는 둘 중 하나가 필요해도 한 번만 명령을 실행합니다. *코드 생성기*(`protoc`, `yacc`, `bison`, `swig`)를 다룰 때 매우 유용합니다.
 
-4.3 이전 환경을 지원해야 한다면 회피책으로 *intermediate 파일*을 만들어 두 출력을 그 파일에 의존하게 잡습니다. 약간 복잡해지므로, 가능하면 4.3+ 사용을 권장합니다.
+4.3 이전에는 &: 구문 자체를 사용할 수 없습니다. 다중 출력 패턴 규칙의 기존 동작과, 파일명이 고정된 명시적 grouped target의 도입을 구분합니다. 이 장은 GNU Make 4.4.1에서 실행했습니다.
 
 ---
+
+## 직접 확인 — 독립 출력과 그룹 출력
+
+아래 Makefile은 이름이 고정된 명시적 grouped target입니다. GNU Make 4.4.1에서 한 호출이 두 출력을 함께 만드는 것을 확인했습니다. 파일명과 일치하는 기존 출력이 없는 빈 디렉터리에서 시작합니다.
+
+```makefile title="Makefile"
+.DEFAULT_GOAL := all
+.PHONY: all
+all: left.txt right.txt
+left.txt right.txt &: input.txt
+	@printf 'RUN\n' >> calls.log
+	cp input.txt left.txt
+	cp input.txt right.txt
+```
+
+패턴 출력도 두 파일을 함께 갱신합니다. 이 파일은 pattern.mk로 저장합니다.
+
+```makefile title="pattern.mk"
+%.a %.b: %.in
+	@printf 'PATTERN\n' >> pattern.log
+	cp $< $*.a
+	cp $< $*.b
+```
+
+입력은 같은 디렉터리에 저장합니다.
+
+```text title="input.txt"
+grouped input
+```
+
+다음 명령으로 생성과 재생성을 확인합니다.
+
+```bash
+make -j2
+cat calls.log
+rm right.txt
+make -j2
+cat calls.log
+cp input.txt x.in
+make -f pattern.mk x.a x.b
+cat pattern.log
+```
+
+최초 빌드의 calls.log에는 RUN이 한 줄, right.txt를 지운 뒤 재빌드하면 두 줄입니다. pattern.mk의 일반 콜론 다중 출력 패턴 규칙도 x.a와 x.b를 한 레시피 호출로 만들며 PATTERN은 한 줄입니다. 두 경우 모두 레시피가 선언한 출력을 모두 만들어야 합니다.
 
 ## 실전 예시
 
@@ -444,7 +477,7 @@ build/%.o: src/%.c
 
 **해결**: 파일 이름이 필요하면 `$(notdir $*)`, 디렉터리는 `$(dir $*)`.
 
-### 3. 명시적 규칙이 패턴 규칙을 막음
+### 3. 레시피 없는 규칙과 명시적 빈 레시피 혼동
 
 ```makefile
 %.o: %.c
@@ -453,7 +486,7 @@ build/%.o: src/%.c
 main.o: main.c header.h   # 레시피 없음
 ```
 
-`main.o`에 *레시피 없는 명시적 규칙*을 적으면 Make는 이걸 "특수한 의존성 추가"로 받아들이지 *않습니다*. 대신 "이 타겟에는 별도 규칙이 있다(레시피가 빈 채로)"로 해석해 패턴 규칙 적용을 막을 수 있습니다.
+위 main.o 규칙은 레시피가 없으므로 의존성을 추가하고 적용 가능한 패턴 규칙의 레시피를 사용합니다. 명시적으로 빈 레시피를 주는 `main.o: main.c header.h ;`와는 다릅니다.
 
 의도가 "패턴 규칙은 그대로 쓰되, 의존성만 추가"라면 *레시피 없이 의존성만* 적습니다.
 
@@ -474,7 +507,7 @@ hello: main.o
 # CC, CFLAGS 등 미설정
 ```
 
-Make는 내장 규칙으로 빌드해 주지만, 변수가 비어 있어 *경고도 디버그 정보도 없는* 상태가 됩니다.
+Make는 내장 규칙으로 빌드해 주지만, CC 같은 내장 기본값은 사용되지만 프로젝트에서 요구하는 경고·디버그 플래그가 자동으로 붙는 것은 아닙니다.
 
 **해결**: 최소한 `CC`, `CFLAGS`, `CPPFLAGS`, `LDLIBS`는 설정.
 

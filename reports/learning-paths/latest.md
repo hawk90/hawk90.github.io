@@ -1,18 +1,16 @@
 # Learning path coverage
 
 - Learning paths: 4
-- Published series: 28 (726 posts)
+- Published series: 26 (559 posts)
 - Series reachable from a path: 8 (222 posts)
-- Published series in no path: 20
+- Published series in no path: 18
 - Path nodes naming a series that does not exist: 0
 
 ## Published, but in no learning path
 
 | series | published posts |
 |---|---|
-| Modern Embedded Recipes | 152 |
-| Folly Code Review | 89 |
-| Abseil Code Review | 79 |
+| Modern Embedded Recipes | 153 |
 | Embedded C++ for Real Systems | 41 |
 | Buildroot Practical | 20 |
 | Embedded Security | 13 |

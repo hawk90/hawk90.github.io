@@ -24,235 +24,171 @@ RTOS 위에서 버그를 잡아 본 사람은 *한 번쯤 겪는 무력감*이 �
 - Queue/semaphore/mutex 동작 — 누가 보내고 누가 받았는가
 - Tick, timer expiry, software event
 
-`printf`를 그 안에 박으면 *그 자체*가 실행 시간을 바꿔서 버그가 사라지거나 새로 생깁니다. 필요한 건 *오버헤드가 무시할 만한 trace 인프라*와, *그 trace를 사람이 읽을 수 있게 시각화*해 주는 도구입니다.
+`printf`를 그 안에 박으면 *그 자체*가 실행 시간을 바꿔서 버그가 사라지거나 새로 생깁니다. 필요한 것은 관측 비용과 유실을 관리하는 trace 수집 구조와, 기록을 시간축에서 해석할 수 있는 도구입니다. trace도 실행 시간과 메모리·전송 부하를 바꾸므로 비용을 측정해야 합니다.
 
 이 글에서는 Tracealyzer, SystemView, 그리고 그 아래에서 동작하는 ITM·ETM 하드웨어 트레이스를 살펴봅니다.
 
 ## 두 가지 접근 — SW Trace vs HW Trace
 
-| | SW Trace | HW Trace |
-|---|---|---|
-| 예 | Tracealyzer, SystemView, FreeRTOS+Trace | ITM, ETM, PTM |
-| 데이터 출처 | RTOS hook에서 event record | CPU/bus가 자동으로 생성 |
-| 오버헤드 | event당 ~100 ns | ≈0 (별도 trace port) |
-| 정보량 | 이벤트 단위 | 명령 단위까지 가능 |
-| 호스트 전송 | RTT, UART, USB | TPIU, ETB, off-chip |
-| 디바이스 요구 | 없음 (메모리만) | trace 지원 칩 + 프로브 |
+| 항목 | SW event trace | HW trace 구성 |
+| --- | --- | --- |
+| 데이터 출처 | RTOS hook·사용자 계측 코드 | ITM stimulus·DWT packet·ETM instruction trace 등 |
+| CPU 영향 | 이벤트 기록·clock 읽기·buffer/전송 비용 | ITM의 SW write는 CPU 비용이 있고 ETM 등도 수집 설정·경쟁·stall 조건 확인 |
+| 정보 범위 | 설치된 hook·filter·이벤트 | 구현·필터·decoder·실행 이미지에 따른 범위 |
+| 전송 | RTT·UART·USB·네트워크·snapshot 등 | on-chip sink 또는 지원 trace 출력 |
+| 요구 | recorder 통합·메모리·timestamp·지원 transport | 코어/SoC trace 기능·접근 권한·sink/probe·decoder |
 
-SW trace는 *대부분의 칩에서 작동*하고 RTOS 이벤트 수준에서 충분히 풍부합니다. HW trace는 *프로파일링·드물게 발생하는 버그* 같은 어려운 문제에서 빛납니다. 둘은 *서로를 대체하지 않습니다*.
+ITM을 이용한 사용자 print는 하드웨어 trace 경로를 쓰더라도 SW instrumentation입니다. DWT 기반 PC sampling·exception·data trace와 ETM instruction trace도 같은 종류의 이벤트로 뭉뚱그리면 안 됩니다. “SW는 100 ns, HW는 0” 같은 고정 비용 비교는 실제 구성을 설명하지 못합니다.
 
 ## Tracealyzer — 시각화의 결정판
 
-Percepio Tracealyzer는 *RTOS 이벤트의 시간축 시각화* 도구입니다. FreeRTOS, Zephyr, ThreadX, SafeRTOS, embOS 등 주요 RTOS를 지원합니다.
+Percepio Tracealyzer는 recorder가 수집한 RTOS 이벤트를 timeline·CPU load·IPC 관점 등으로 분석합니다. 지원 RTOS·버전·transport는 사용하는 recorder와 호스트 도구의 문서를 확인합니다.
 
-수집 방법은 두 가지입니다.
+snapshot은 타깃 buffer를 나중에 회수하고 streaming은 실행 중 데이터를 전송합니다. snapshot buffer가 가득 찼을 때는 stop/overwrite 정책이 있을 수 있으며, streaming도 bandwidth·buffer·수집 장애에 따라 drop이 생길 수 있습니다.
 
-- **Snapshot mode**: 타겟의 ring buffer에 trace를 쌓아 두고, 필요할 때 디버거로 한꺼번에 *덤프* 합니다. 호스트 연결 불필요.
-- **Streaming mode**: J-Link RTT, USB, TCP 등으로 *실시간 전송*합니다. 장시간 캡처 가능.
-
-호스트 GUI에서는 *task별 timeline*, *CPU load 히트맵*, *IPC graph*, *responsiveness chart* 같은 view가 제공됩니다. 같은 데이터를 여러 관점에서 펼쳐 볼 수 있는 게 핵심 가치입니다.
+공식 FreeRTOS getting-started guide는 trace facility와 trcRecorder.h·recorder 설정·hardware port·stream port 통합을 요구합니다. 다음은 **그 통합을 완료한 뒤** 사용하는 API 발췌이며 독립 main 함수 전체가 아닙니다.
 
 ```c
-// FreeRTOSConfig.h
-#define configUSE_TRACE_FACILITY        1
-#define configUSE_STATS_FORMATTING_FUNCTIONS 1
-#define configGENERATE_RUN_TIME_STATS   1
-
-// TraceRecorder 통합
-#include "trcRecorder.h"
-
-void main(void) {
-    /* RTOS 시작 전 trace 초기화 */
-    xTraceInitialize();
-    xTraceEnable(TRC_START);
-
-    /* 태스크 생성 */
-    xTaskCreate(task_a, "A", 256, NULL, 3, NULL);
-    xTaskCreate(task_b, "B", 256, NULL, 2, NULL);
-    vTaskStartScheduler();
+/* Recorder headers/configuration and hardware setup are required. */
+if (xTraceEnable(TRC_START) != TRC_SUCCESS) {
+    /* Report recorder startup failure through a safe application path. */
 }
 ```
 
-`xTraceEnable()` 호출 이후 *모든 RTOS 이벤트*가 자동으로 기록됩니다. 추가 코드는 보통 필요 없습니다.
+일반 경로에서는 RTOS object 생성 전 초기화·시작을 수행합니다. 다만 FreeRTOS tick과 같은 timestamp source를 쓰는 일부 hardware port는 object 생성 전에 xTraceInitialize를 하고 scheduler 시작 뒤 xTraceEnable을 해야 합니다. 문서에 적힌 포트별 순서를 우선합니다. configGENERATE_RUN_TIME_STATS나 formatting 설정을 켜는 것만으로 trace 통합을 대신할 수는 없습니다.
+
+기록되는 범위는 설치한 hook·지원 이벤트·filter에 따릅니다. “모든 이벤트가 추가 코드 없이 자동 기록된다”는 보편적 보장은 하지 않습니다.
 
 ## SystemView — RTT의 친구
 
-SEGGER SystemView는 SystemView 자체 호스트 GUI와 *Real Time Transfer (RTT)* 인프라를 묶은 솔루션입니다.
+SEGGER SystemView는 RTOS integration과 사용자 event를 수집하고 호스트에서 분석합니다. RTT는 타깃 메모리의 ring buffer를 이용하는 전송 방식이며 debug probe가 비정지 접근을 지원하는 환경에서 CPU를 멈추지 않고 읽을 수 있습니다. 실제 처리량과 간섭은 probe·debug clock·타깃 memory·event 양에 달려 있습니다.
 
-RTT는 SEGGER가 만든 *호스트-타겟 통신 채널*입니다. 타겟 메모리에 *ring buffer*를 두고, J-Link가 SWD/JTAG로 *CPU를 멈추지 않고* 그 메모리를 읽어 갑니다. 평균 오버헤드가 *μs 단위*입니다.
+SEGGER_SYSVIEW_Conf와 SEGGER_SYSVIEW_Start 같은 함수는 timestamp·RTOS hook·buffer·transport 설정이 준비된 통합 예제 안에서 사용합니다. MarkStart/MarkStop 등의 사용자 이벤트도 사용하는 SDK 버전의 선언과 설정을 확인합니다.
 
-```c
-// SEGGER RTT + SystemView 통합
-#include "SEGGER_SYSVIEW.h"
+| 항목 | 확인할 조건 |
+| --- | --- |
+| 분석 | 필요한 task/ISR/IPC 이벤트와 view가 지원되는가? |
+| 전송 | live RTT인지, 저장된 trace를 나중에 분석하는지? |
+| 손실 | buffer 포화·drop·blocking 정책을 관찰했는가? |
+| 라이선스 | 목적·호스트 도구·타깃 코드·probe별 조건이 맞는가? |
 
-void main(void) {
-    SEGGER_SYSVIEW_Conf();
-    SEGGER_SYSVIEW_Start();
-
-    /* RTOS 시작 */
-    vTaskStartScheduler();
-}
-
-// 사용자 이벤트
-SEGGER_SYSVIEW_PrintfHost("DMA complete: %d bytes", count);
-SEGGER_SYSVIEW_MarkStart(0x42);
-process_frame();
-SEGGER_SYSVIEW_MarkStop(0x42);
-```
-
-`MarkStart`/`MarkStop`은 사용자 정의 구간을 *timeline 위의 색 bar*로 보여 줍니다. 함수 실행 시간을 시각적으로 비교하기에 편합니다.
-
-Tracealyzer와의 차이를 정리하면 이렇습니다.
-
-| | Tracealyzer | SystemView |
-|---|---|---|
-| 가격 | 상용 (eval 가능) | 무료 (J-Link 필요) |
-| RTOS 지원 폭 | 매우 넓음 | FreeRTOS·embOS 중심 |
-| 분석 view | 다양함 (graph·heatmap·responsiveness) | 기본 timeline + table |
-| 전송 채널 | RTT/UART/USB/TCP | RTT 위주 |
-| 라이센스 부담 | 있음 | J-Link 묶음 |
-
-소규모 프로젝트나 초기 디버깅엔 SystemView가 가볍게 시작하기 좋고, *제품 단위 분석*에는 Tracealyzer가 더 깊이 들어갑니다.
+**2026-10-22 확인한 공식 user guide**는 SystemView 비상업 용도의 무료 조건과 상업 용도 라이선스를 구분합니다. “J-Link가 있으면 모든 용도로 무료”라고 할 수 없습니다. 저장 trace의 offline 분석도 가능하므로 모든 분석 단계에 probe 연결이 필수인 것은 아닙니다.
 
 ## ITM — Cortex-M의 Trace Macrocell
 
-Instrumentation Trace Macrocell은 Cortex-M3/M4/M7에 들어 있는 *하드웨어 trace port*입니다. CPU가 직접 *32개 stimulus port*에 데이터를 쓰면, 그 데이터가 *TPIU(Trace Port Interface Unit)*를 거쳐 외부 trace probe로 나갑니다.
+ITM을 구현한 Cortex-M에서는 stimulus port로 software event를 보낼 수 있습니다. core·SoC의 trace 경로와 pin·clock·접근 권한·TER 설정 및 host decode를 준비해야 합니다. ITM write 한 번만으로 수신이 보장되거나 거의 0 비용이 되는 것은 아닙니다.
 
-```c
-// ITM port 0에 한 byte 전송 — 거의 0 오버헤드
-static inline void itm_putc(char c) {
-    if (ITM->TCR & ITM_TCR_ITMENA_Msk) {       // ITM enabled?
-        while (ITM->PORT[0].u32 == 0);          // port ready?
-        ITM->PORT[0].u8 = c;
-    }
+다음은 **Cortex-M4 CMSIS register 정의를 사용하는 조건부 전송 예제**입니다. stimulus가 준비되지 않으면 기다리지 않고 false를 반환합니다. 단일 writer 또는 외부 동기화 계약을 전제로 하며 probe 연결과 실제 전송 완료까지 보장하지 않습니다.
+
+```c title="itm-try-putc.c"
+#include <stdbool.h>
+#include <stdint.h>
+/* Include the actual device CMSIS header before compiling this source. */
+bool itm_try_putc(uint8_t byte) {
+    if ((ITM->TCR & ITM_TCR_ITMENA_Msk) == 0U ||
+        (ITM->TER & 1U) == 0U || ITM->PORT[0].u32 == 0U)
+        return false;
+    ITM->PORT[0].u8 = byte;
+    return true;
 }
 ```
 
-CPU 입장에선 *memory-mapped register에 write 한 번*이 전부입니다. 데이터 export는 TPIU가 알아서 합니다.
+CMSIS의 ITM_SendChar도 buffer가 busy이면 기다리는 구현을 포함합니다.
 
-ITM이 자동으로 만들어 주는 이벤트도 있습니다.
+기존의 무제한 while 대기는 trace가 막힐 때 관측 대상의 진행을 멈추는 원인이 됩니다.
 
-- *PC sampling* — 일정 주기로 program counter 캡처
-- *Exception trace* — IRQ 진입/종료
-- *Watchpoint trace* — 특정 주소 access
-
-이걸 OpenOCD/J-Link가 받아서 *flame graph* 생성에 쓰면 별도 코드 없이 profiling이 됩니다.
+PC sampling·exception trace·data trace는 DWT가 생성하고 ITM 경로에 실리는 기능과 구분해서 봅니다. 임의의 ITM print만으로 호출 stack과 flame graph가 자동 생성되지는 않으며 sampling·symbol·decoder가 추가로 필요합니다.
 
 ## ETM — 명령어 단위 트레이스
 
-Embedded Trace Macrocell은 *실행된 모든 명령*을 압축해서 export하는 더 강력한 trace입니다. ITM은 *명시적 print*만 보내지만 ETM은 *모든 branch*를 자동으로 기록합니다.
+ETM instruction trace는 분기·주소·상태 등 압축 packet과 실행 이미지를 이용해 선택된 실행 흐름을 재구성합니다. 모든 instruction을 항상 그대로 전송하는 메모리 dump가 아니며 필터·on/off 구간·overflow·decode 조건의 영향을 받습니다.
 
-```text
-ETM 출력 예 (압축 해제 후):
-0x0800_1234  ldr  r0, [r1]
-0x0800_1238  cmp  r0, #0
-0x0800_123C  beq  0x0800_1300        ← taken
-0x0800_1300  mov  r2, #1
-...
-```
+on-chip buffer 또는 SoC가 지원하는 trace output과 수집·decode 도구가 필요합니다. TPIU와 ETB는 서로 같은 종류의 장치가 아니며 모든 MCU가 같은 trace fabric이나 충분한 buffer를 제공하지 않습니다. 필요한 bandwidth는 코어·trace 설정·실행 패턴에 따라 계산합니다.
 
-수 GB/s를 export하므로 *off-chip TPIU*나 *ETB(Embedded Trace Buffer)*가 필요합니다. Lauterbach TRACE32, ARM DS-5/DS, SEGGER J-Trace 같은 *고가 프로브*가 받아 줍니다.
-
-ETM이 진짜 빛나는 경우는 *재현 안 되는 crash*입니다. ETB에 마지막 수천 명령이 남아 있으면 *crash까지의 control flow*를 정확히 재구성할 수 있습니다.
+crash 직전의 trace를 보존하면 경로 분석에 도움이 되지만 buffer가 얼마나 남는지, reset 뒤 유지되는지, 실행 이미지와 동기 packet을 확보했는지 확인해야 합니다. 출처 없는 GB/s 수치나 마지막 몇 천 명령 보존을 범용 보장으로 사용하지 않습니다.
 
 ## Run-Time Stats — 가장 가벼운 시작
 
-`configGENERATE_RUN_TIME_STATS = 1`을 켜면 FreeRTOS가 *task별 누적 실행 시간*을 추적합니다. 추가 도구 없이도 *CPU 점유율*을 볼 수 있는 가장 가벼운 옵션입니다.
+FreeRTOS **V11.2.0**의 run-time stats는 태스크별 누적 실행 counter를 제공합니다. configGENERATE_RUN_TIME_STATS와 유효한 timer accessor가 필요하며, raw snapshot API에는 configUSE_TRACE_FACILITY 설정도 확인합니다. timer 폭·overflow·주파수와 snapshot 비용을 분석해야 합니다.
 
-```c
-// FreeRTOSConfig.h
-#define configGENERATE_RUN_TIME_STATS  1
-#define portCONFIGURE_TIMER_FOR_RUN_TIME_STATS()  timer_init()
-#define portGET_RUN_TIME_COUNTER_VALUE()          timer_get_cycles()
+고정 512 byte 문자열에 vTaskGetRunTimeStats를 쓰면 태스크 수·이름 길이·API 버전에 따른 출력 크기를 보장하기 어렵습니다. 다음은 raw data를 **최대 8개 태스크**까지 읽고, 작으면 실패로 처리하는 예제입니다. snapshot 메모리·이름 수명·출력 동기화는 호출자 계약에 포함합니다.
+
+```c title="runtime-snapshot.c"
+#include <stdbool.h>
+#include "FreeRTOS.h"
+#include "task.h"
+extern void report_task_stat(const TaskStatus_t *task,
+                             configRUN_TIME_COUNTER_TYPE total);
+bool report_runtime_snapshot(void) {
+    TaskStatus_t snapshot[8];
+    configRUN_TIME_COUNTER_TYPE total = 0;
+    UBaseType_t count = uxTaskGetSystemState(snapshot, 8, &total);
+    if (count == 0 || total == 0) return false;
+    for (UBaseType_t i = 0; i < count; ++i)
+        report_task_stat(&snapshot[i], total);
+    return true;
+}
 ```
 
-조회 코드는 다음과 같습니다.
+단일 코어에서 태스크 누적 시간을 전체 counter와 나누면 점유율을 계산할 수 있습니다. ISR 시간의 귀속과 SMP의 분모는 별도로 해석해야 하며 태스크 비율의 합이 언제나 100%라고 가정하지 않습니다. 이 함수 호출의 스택 사용량과 scheduler 정지 구간도 관찰 대상에 영향을 줄 수 있습니다.
 
-```c
-char buf[512];
-vTaskGetRunTimeStats(buf);
-printf("%s\n", buf);
-
-// 출력 예
-// Task          Abs Time      % Time
-// IDLE          1234567       65%
-// AUDIO_TASK    234567        12%
-// NET_TASK      345678        18%
-// LOG_TASK      45678         2%
-```
-
-오버헤드는 *task switch당 timer read 두 번*입니다. 보통 *2~3% 미만*입니다. 본격적인 trace 도구를 붙이기 전, 첫 진단 도구로 쓰기 좋습니다.
+원본 포트·kernel 경로에 따라 counter 읽기 횟수와 hook 비용이 달라집니다. “전환당 두 번, 항상 1% 미만” 같은 고정 비용을 보장하지 않습니다.
 
 ## 측정 — 오버헤드 비교
 
-대표적인 실측 오버헤드입니다(Cortex-M4F @ 168 MHz 기준).
+아래 조건을 맞춰 trace off/on을 비교해야 관측 비용을 말할 수 있습니다. 실제 수집 로그가 없는 168 MHz 측정표나 ITM 5–10 ns, ETM 0%, 도구 간 배수 비교는 실측 결과로 제시하지 않습니다.
 
-| 도구 | 이벤트당 비용 | 전체 CPU 오버헤드 |
-|---|---|---|
-| `printf` over UART | 100~500 μs | 측정 불가 (system 망가짐) |
-| Run-time stats only | 50 ns | <1% |
-| SystemView RTT | 100~200 ns | 2~5% |
-| Tracealyzer streaming | 100~300 ns | 3~7% |
-| ITM stimulus | 5~10 ns | <0.1% |
-| ETM (full instr) | 0 (별도 port) | 0% (CPU 부담 없음) |
+| 관측 항목 | 비교할 조건 |
+| --- | --- |
+| task latency | 같은 workload·IRQ·clock에서 off/on 분포 |
+| CPU·memory | event rate·recorder code·buffer·stack 사용량 |
+| 전송 | 생성 bytes/s·실제 drain rate·drop·block 시간 |
+| trace 유효성 | filter·timestamp·overflow·snapshot 범위 |
+| 계측 비용 | marker/clock read 자체의 비용과 최악 영향 |
 
-ITM이 SW trace보다 *10~30배 가볍습니다*. 단, ETM 수준의 정보 밀도는 *대용량 export bandwidth*를 요구해서 별도 HW를 깔아야 합니다.
+non-blocking drop 정책은 target 진행을 우선하는 대신 trace가 불완전해질 수 있습니다. blocking 정책은 보존에 유리할 수 있지만 지연을 늘립니다. 정책과 손실 수를 함께 보고해야 관측 결과를 해석할 수 있습니다.
 
 ## 실전 — IPC 인과 추적
 
-다음과 같은 시나리오를 생각해 봅니다.
+Task A가 큐로 보낸 메시지를 Task B가 5 ms 뒤에 처리했다는 **가상 시나리오**를 봅니다. 다음은 실제 수집 로그가 아니라 가설을 확인하기 위한 이벤트 순서입니다.
 
-> "Task A가 큐에 메시지를 보냈는데, Task B가 가끔 5 ms 지나서 깨어납니다. 평소엔 100 μs면 깨는데요."
+| 상대 시각 | 확인할 event |
+| --- | --- |
+| 0 | A의 queue send, B의 blocked→ready |
+| 0 부근 | B보다 높은 우선순위 X가 실행 중인지 |
+| 0–5 ms | X의 실행·IRQ·scheduler suspend·trace 누락 여부 |
+| 5 ms | X block 이후 B 선택과 queue receive 복귀 |
 
-Tracealyzer로 이 trace를 캡처하면 *timeline 위에 무엇이 일어났는지* 한눈에 보입니다.
-
-```text
-t=0     Task A: xQueueSend → Task B를 ready로 표시
-t=0     Scheduler: Task B preempt? — 더 높은 priority Task X가 RUNNING
-t=0     ... Task X 계속 실행
-t=5ms   Task X: vTaskDelay → block
-t=5ms   Scheduler: Task B run → xQueueReceive return
-```
-
-원인은 *Task X의 priority가 B보다 높았고, 그동안 X가 자기 일을 했기 때문*이라는 게 분명해집니다. Print 디버깅으로는 *시간 정렬*이 안 되어 보이지 않을 일입니다.
+완전한 trace에서 이 순서가 확인되면 우선순위 정책에 의한 지연이라는 가설을 지지합니다. send 자체의 block·메시지 대기·IRQ 간섭·buffer drop 같은 다른 원인도 배제해야 합니다. timeline만 보고 인과를 확정하지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
-> ⚠️ Trace buffer overflow
-
-Snapshot mode에서 buffer가 작으면 *오래된 이벤트가 지워집니다*. 버그 발생 시점이 buffer보다 더 옛날이면 trace에 안 잡힙니다. Streaming mode로 바꾸거나, buffer를 *수 MB* 수준으로 늘립니다.
-
-> ⚠️ Hook 안에서 RTOS API 호출
-
-Trace hook은 *RTOS 내부에서* 호출되므로 그 안에서 `xQueueSend` 같은 API를 다시 부르면 *재진입 무한 루프*가 발생할 수 있습니다. Hook은 *기록만* 합니다.
-
-> ⚠️ USB/UART trace의 bandwidth 한계
-
-Full-speed USB는 *12 Mbps*입니다. Trace 데이터가 그보다 빠르게 만들어지면 buffer가 차서 drop이 발생합니다. RTT가 *수십 Mbps*로 훨씬 여유 있습니다.
-
-> ⚠️ 디버거 의존성
-
-RTT나 ITM은 *J-Link/ST-Link 연결*이 필요합니다. 필드 디바이스에서는 못 씁니다. 그럴 땐 *flash에 ring buffer로 dump*하고 나중에 회수하는 방식이 필요합니다.
-
-> ⚠️ Trace 켜면 동작이 달라지는 버그
-
-5% 오버헤드라도 *race condition*에는 영향을 줍니다. Trace 켜면 사라지는 버그는 *trace를 다시 끄고* 가벼운 ITM stimulus 몇 줄로 재현해 봅니다.
-
-> ⚠️ 시계 기준이 다른 두 trace 비교
-
-호스트 시각과 타겟 cycle count가 *동기화되지 않은 채* 비교하면 인과가 뒤집힙니다. 두 trace를 합치려면 *공통 trigger* 이벤트를 정해 시각을 정렬합니다.
+- **buffer full 정책을 모릅니다.** snapshot은 stop/overwrite, streaming은 drop/block 등의 설정을 확인합니다. RAM을 무조건 수 MB 늘리는 처방 대신 사건 window와 event rate로 계산합니다.
+- **hook에서 RTOS API를 재호출합니다.** lock·IRQ·재진입 계약을 깨뜨릴 수 있으므로 지원 recorder 방식으로 최소 기록만 수행합니다.
+- **link nominal rate를 trace payload로 간주합니다.** USB·UART·RTT 모두 framing·probe·clock·buffer·host drain 조건을 포함해 실제 처리량을 측정합니다.
+- **필드 수집은 불가능하다고 단정합니다.** 현장 transport 또는 저장 후 회수도 가능하지만 flash 수명·crash 보존·재부팅·개인 데이터 등의 제품 계약을 설계해야 합니다.
+- **trace가 버그를 바꾸지 않는다고 생각합니다.** 최소 계측·다른 수집 방식·off/on 실험으로 간섭을 확인합니다.
+- **다른 clock의 기록을 바로 병합합니다.** 공통 trigger로 정렬하고 offset·drift·불확실성을 기록합니다.
 
 ## 정리
 
-- RTOS는 `printf`로는 안 보이고, *시간축 시각화*가 본질적으로 필요합니다.
-- Tracealyzer는 다양한 RTOS와 풍부한 view를 제공하며, snapshot/streaming 두 모드를 지원합니다.
-- SystemView는 J-Link RTT 기반으로 가벼운 시작에 좋습니다.
-- ITM은 Cortex-M의 하드웨어 trace port로 5~10 ns 수준의 stimulus를 보냅니다.
-- ETM은 명령 단위 트레이스로 재현 안 되는 crash 분석에 빛납니다.
-- Run-time stats는 FreeRTOS 자체 기능으로 1% 미만 오버헤드에 CPU 점유율을 보여 줍니다.
-- Trace는 동작을 *살짝 바꿉니다*. race condition은 lightweight ITM으로 재확인합니다.
+- RTOS trace는 task·ISR·IPC 순서를 보는 데 유용하지만 관측 비용과 유실을 관리해야 합니다.
+- recorder 통합과 지원 이벤트·timestamp·transport 설정이 수집 범위를 정합니다.
+- SystemView의 용도별 라이선스와 offline 분석 가능 여부는 공식 문서로 확인합니다.
+- ITM software write·DWT event·ETM instruction trace는 서로 다른 정보원입니다.
+- run-time stats는 bounded raw snapshot과 counter·ISR·SMP 해석 범위를 확인합니다.
+- 비용·정확도·전송률은 실제 구성으로 비교하며 고정 ns·%를 일반화하지 않습니다.
 
-다음 편은 **2-12: 임베디드 시스템의 시간 동기화** — Tick, PTP, IEEE 1588을 다룹니다.
+이 장으로 Part 2를 마칩니다. 다음은 Part 3의 Critical Section 구현 비교입니다. ISR·trace hook에서 어떤 동기화가 허용되는지 이어서 살펴봅니다.
+
+## 근거 자료
+
+- [Percepio 공식 FreeRTOS 시작 가이드](https://percepio.com/getstarted/latest/html/freertos.html): 초기화 순서·hardware port 예외·snapshot buffer 정책.
+- [SEGGER SystemView User Guide](https://doc.segger.com/UM08027_SystemView.html): 통합·기록·라이선스·offline 분석.
+- [Arm CMSIS 6.1.0 core_cm4.h](https://github.com/ARM-software/CMSIS_6/blob/v6.1.0/CMSIS/Core/Include/core_cm4.h): ITM register·ITM_SendChar 조건과 대기.
+- [FreeRTOS V11.2.0 task.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/task.h), [tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): raw stats API·snapshot 범위.
+
+- [3-01: Critical Section 구현 비교](/blog/embedded/rtos/practical-internals/part3-01-critical-section)
 
 ## 관련 항목
 

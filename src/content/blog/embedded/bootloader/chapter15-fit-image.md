@@ -12,9 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**FIT(Flattened Image Tree)는 kernel·DTB·ramdisk·overlay를 한 파일에 묶고, 각각에 hash와 서명을 붙이는 표준 컨테이너입니다.** 한 이미지로 여러 보드를 지원하고, verified boot의 기초가 됩니다.
+**FIT(Flattened Image Tree)는 kernel·DTB·ramdisk·overlay를 한 파일에 묶고, 설정에 따라 hash와 signature metadata를 포함할 수 있는 U-Boot 이미지 형식입니다.** 한 이미지로 여러 구성을 나타낼 수 있고, verified boot의 구성 요소로 사용할 수 있습니다.
 
-[10~14장](/blog/embedded/bootloader/chapter10-storage-boot)에서 본 부트 흐름은 *kernel*, *DTB*, *ramdisk*를 따로 적재했습니다. 파일이 셋이면 배포·검증이 모두 복잡합니다. 어느 하나가 옛 버전이면 무엇이 잘못됐는지 추적이 어렵습니다. FIT는 이 셋을 *한 컨테이너*에 묶고, 각 component에 hash·서명을 달아, 전체를 *원자적*으로 다루는 포맷입니다.
+[10~14장](/blog/embedded/bootloader/chapter10-storage-boot)에서 본 부트 흐름은 *kernel*, *DTB*, *ramdisk*를 따로 적재했습니다. 파일이 셋이면 배포·검증이 모두 복잡합니다. 어느 하나가 옛 버전이면 무엇이 잘못됐는지 추적이 어렵습니다. FIT는 관련 이미지와 구성을 한 컨테이너에 패키징할 수 있습니다. 패키징만으로 배포의 원자성이나 보안이 보장되지는 않으며, 무결성과 서명 검증은 별도 설정이 필요합니다.
+
+이 글의 DTS/ITS 조각은 구조 설명용 예시이며 target artifact로 빌드하거나 실행하지 않았습니다. FIT configuration 속성, signature metadata, address, algorithm 지원은 선택한 U-Boot tag와 host `mkimage` 버전에 맞춰 검증해야 합니다.
 
 이 글에서는 FIT의 구조, ITS(Image Tree Source) 작성, mkimage로 빌드, U-Boot의 적재 흐름, configuration node, 그리고 hash·서명을 다룹니다.
 
@@ -35,7 +37,7 @@ FIT는 이 문제를 *device tree blob 형식의 컨테이너*로 풉니다.
 
 ## ITS 파일 — Image Tree Source
 
-ITS는 *device tree source 문법*으로 작성합니다. 컴파일러는 `mkimage`(또는 `dtc`)입니다.
+ITS는 device tree source 형식이며, 일반적으로 U-Boot의 `mkimage`가 처리합니다. `dtc`만으로 서명·해시 작성까지 대체하는 것은 아닙니다.
 
 ```dts
 /dts-v1/;
@@ -135,30 +137,13 @@ mkimage -f myboard.its myboard.itb
 
 내부적으로는 device tree compiler가 ITS를 binary blob으로 만들고, mkimage가 hash·서명을 채워 넣습니다. 결과 `.itb` 파일은 *device tree 형식의 binary*입니다. `fdtdump`나 `dtc -I dtb -O dts`로 들여다볼 수 있습니다.
 
+FIT의 실제 구조는 사용하는 `mkimage` 버전과 입력 ITS에 따라 달라집니다. 아래 명령으로 파일을 덤프할 수 있지만, 이 문서에는 특정 보드에서 생성한 덤프 결과를 싣지 않습니다.
+
 ```bash
-$ fdtdump myboard.itb | head -30
-/dts-v1/;
-// magic:            0xd00dfeed
-// totalsize:        0x12ab450
-// off_dt_struct:    0x38
-...
-/ {
-    description = "Kernel and DTB for myboard";
-    images {
-        kernel-1 {
-            description = "Linux kernel";
-            type = "kernel";
-            ...
-            hash-1 {
-                algo = "sha256";
-                value = <0xabcd1234 ...>;
-            };
-        };
-    };
-};
+fdtdump myboard.itb
 ```
 
-`hash-1`의 `value`가 mkimage 시점에 계산되어 채워진 것이 보입니다.
+`hash` 노드는 생성 절차와 옵션에 따라 값이 채워지며, 이 노드가 있다고 해서 서명 검증이나 trusted boot가 자동 활성화되는 것은 아닙니다.
 
 ## U-Boot 측 적재 — `bootm`
 
@@ -167,28 +152,9 @@ $ fdtdump myboard.itb | head -30
 ```text
 => load mmc 0:1 ${loadaddr} /boot/myboard.itb
 => bootm ${loadaddr}#conf-revA
-## Loading kernel from FIT Image at 40200000 ...
-   Using 'conf-revA' configuration
-   Trying 'kernel-1' kernel subimage
-     Description:  Linux kernel
-     Type:         Kernel Image
-     Compression:  uncompressed
-     Data Start:   0x402000ec
-     Data Size:    10995712 Bytes = 10.5 MiB
-     Load Address: 0x40400000
-     Entry Point:  0x40400000
-     Hash algo:    sha256
-     Hash value:   abcd1234...
-     Verifying Hash Integrity ... sha256+ OK
-## Loading fdt from FIT Image at 40200000 ...
-   Using 'conf-revA' configuration
-   Trying 'fdt-1' fdt subimage
-     ...
-     Verifying Hash Integrity ... sha256+ OK
-## Loading ramdisk from FIT Image at 40200000 ...
-   ...
-Starting kernel ...
 ```
+
+이 명령은 해당 FIT, U-Boot 빌드, 주소 배치가 실제 구성과 맞을 때의 syntax 예시입니다. 보드별 주소, 선택된 configuration 및 성공 출력은 실행 확인하지 않았습니다.
 
 `bootm ${loadaddr}#conf-revA`의 `#conf-revA`가 *configuration 이름*입니다. 생략하면 `default`가 쓰입니다.
 
@@ -196,21 +162,9 @@ Starting kernel ...
 
 ## bootargs 변수 통합
 
-configuration 노드에 `bootargs`를 직접 둘 수도 있습니다.
+일부 FIT 기반 부트 설계는 OS command line을 함께 제공하려 하지만, 이 속성과 U-Boot `bootargs` 사이의 지원·우선순위를 이 문서의 확인 자료로 검증하지 못했습니다. 제품에 적용하기 전 선택한 tag의 source와 runtime behavior를 대조해야 합니다.
 
-```dts
-configurations {
-    conf-revA {
-        kernel = "kernel-1";
-        fdt = "fdt-1";
-        ramdisk = "ramdisk-1";
-        bootargs = "console=ttyS0,115200 root=/dev/mmcblk0p2 rw";
-        hash-1 { algo = "sha256"; };
-    };
-};
-```
-
-U-Boot 환경의 `bootargs`를 덮어쓰고 *이미지 자체가 지정한 인자*로 부팅합니다. OTA로 새 이미지를 배포할 때 *환경 변수에 의존하지 않고* 새 bootargs를 같이 보낼 수 있습니다.
+여기서는 검증되지 않은 `bootargs` property 예시를 제시하지 않습니다. FIT image/configuration 처리와 Linux command-line 전달은 각각 target의 U-Boot tag 문서 및 source로 확인합니다.
 
 ## 서명 추가 — verified boot의 기초
 
@@ -232,7 +186,7 @@ configurations {
 };
 ```
 
-mkimage가 RSA 키로 서명을 만들어 `value`에 채워 넣습니다.
+서명 생성 시에는 FIT 문서에 맞는 ITS와 mkimage 옵션, 키, 대상 configuration을 준비해야 합니다. 서명 node의 속성과 선택되는 이미지 범위는 빌드 도구와 옵션에 따라 정해집니다.
 
 ```bash
 mkimage -f myboard.its -k keys/ -K u-boot.dtb -r myboard.itb
@@ -240,9 +194,9 @@ mkimage -f myboard.its -k keys/ -K u-boot.dtb -r myboard.itb
 
 - `-k keys/` — 서명 키가 든 디렉터리
 - `-K u-boot.dtb` — *공개 키*를 U-Boot의 control DTB에 박는다
-- `-r` — 서명을 *required*로 표시 (verified boot에서 강제)
+- `-r` — 서명 verification에서 required key 정책을 설정하는 옵션; 결과 FIT와 control FDT의 required 조건을 검사해야 합니다.
 
-U-Boot 측에서 `CONFIG_FIT_SIGNATURE=y`를 켜면 `bootm`이 *서명 없는 FIT를 거부*합니다. 공개 키는 U-Boot 빌드 시점에 control DTB에 들어 있으므로, 키 자체가 변조되어도 부트가 막힙니다.
+`CONFIG_FIT_SIGNATURE`는 FIT 서명 기능을 활성화하지만, 이것만으로 모든 unsigned FIT가 거부된다고 할 수는 없습니다. FIT 문서는 control FDT의 public key에 `required = "conf"` 또는 `required = "image"` 조건을 두어 필수 검증을 설정하는 방법을 설명합니다. 키는 신뢰 가능한 방식으로 control FDT에 provision되어야 하며, 키 저장과 fallback 설정은 제품의 root-of-trust 설계로 검증해야 합니다.
 
 [16장](/blog/embedded/bootloader/chapter16-verified-boot)에서 verified boot 전체 사슬을 다룹니다. FIT 서명은 그 마지막 단계의 빌딩 블록입니다.
 
@@ -275,7 +229,7 @@ configurations {
 };
 ```
 
-U-Boot가 *현재 보드의 root compatible*과 일치하는 configuration을 자동 선택합니다. `bootm`에 `#`을 명시하지 않아도 됩니다.
+configuration 선택은 명시된 configuration 또는 default 속성에 따릅니다. compatible에 따른 best-match 선택은 `CONFIG_FIT_BEST_MATCH` 등 build/runtime 조건에 의존하므로, compatible 속성만으로 자동 선택을 가정하면 안 됩니다.
 
 ## DT overlay 적용
 
@@ -296,15 +250,15 @@ configurations {
 };
 ```
 
-U-Boot가 base DTB에 overlay를 적용한 결과를 커널에 넘깁니다. 같은 보드의 *옵션 부품*을 configuration 단위로 처리할 수 있습니다.
+U-Boot FIT overlay 문서는 configuration의 `fdt` 목록에 base와 overlay를 순서대로 지정하는 방식을 설명합니다. 보드별 overlay 적용은 실제 FIT, DT symbols, load addresses와 U-Boot 설정으로 검증해야 합니다.
 
 ## 자주 하는 실수
 
 - **load 주소 충돌.** kernel과 ramdisk의 load 주소가 겹치면 *조용히 깨집니다*. 적재 직후 ramdisk가 kernel을 덮어쓰거나 그 반대.
-- **압축 type 불일치.** ramdisk를 `.cpio.gz`로 만들고 ITS에 `compression = "none"`이라 쓰면 U-Boot는 압축 해제를 안 합니다. 부트 후 init이 실패.
-- **default configuration이 *서명되지 않음*.** `signature-1` 노드 없는 configuration이 default라면 `CONFIG_FIT_SIGNATURE_STRICT=y`에서 부트가 거부됩니다.
+- **압축 속성을 가정합니다.** 실제 payload 압축 형식, ITS 속성 및 U-Boot의 지원 조합을 확인하고 부팅 시험을 합니다.
+- **required key 정책과 FIT 서명 범위를 확인하지 않습니다.** required key 속성, 서명된 configuration 및 구성에 포함된 이미지가 맞는지 positive/negative 시험을 합니다.
 - **mkimage가 *옛 버전*.** mkimage가 새 사양(예: configuration signing)을 모르면 ITS는 컴파일되지만 *서명 노드는 비어 있습니다*. U-Boot 트리에서 빌드한 mkimage를 쓰세요.
-- **공개 키를 control DTB에 *안 박았습니다*.** `-K u-boot.dtb`를 빼면 U-Boot가 검증할 키가 없어 모든 FIT를 거부합니다.
+- **검증 키 provision을 확인하지 않습니다.** 키 위치와 required 조건이 대상 빌드에서 일치하는지 확인합니다. 동작은 `CONFIG_FIT_SIGNATURE`만으로 단정할 수 없습니다.
 
 ## 정리
 
@@ -312,8 +266,8 @@ U-Boot가 base DTB에 overlay를 적용한 결과를 커널에 넘깁니다. 같
 - ITS는 device tree source 문법이고, mkimage로 `.itb`를 빌드합니다.
 - `images/`는 raw component, `configurations/`는 component 조합입니다.
 - `bootm <addr>#<conf>`로 configuration을 선택해 부팅합니다.
-- 각 노드에 `hash-1`을 두면 전송 오류 탐지, `signature-1`을 두면 verified boot가 됩니다.
-- `compatible` 속성으로 *보드별 configuration 자동 매칭*이 가능합니다.
+- hash는 FIT component 무결성 검사에 사용되고 서명 검증은 trusted key 및 required 정책 등 추가 구성이 필요합니다.
+- compatible best-match 선택은 해당 U-Boot의 `FIT_BEST_MATCH` 설정과 실행 조건을 확인해야 합니다.
 - DT overlay를 configuration 안에서 base + overlay로 조합할 수 있습니다.
 
 ## 다음 장 예고
@@ -327,4 +281,7 @@ U-Boot가 base DTB에 overlay를 적용한 결과를 커널에 넘깁니다. 같
 - [Ch 17: A/B 업데이트](/blog/embedded/bootloader/chapter17-ab-update) — FIT 단위의 atomic update
 - [Security Ch 2: Secure Boot](/blog/embedded/embedded-security/chapter02-secure-boot) — root of trust 개념
 - [Security Ch 6: OTA Update](/blog/embedded/embedded-security/chapter06-ota-update) — FIT와 OTA 결합
-- [U-Boot FIT 문서](https://docs.u-boot.org/en/latest/usage/fit/index.html)
+- [U-Boot v2025.01 FIT 문서](https://docs.u-boot.org/en/v2025.01/usage/fit/index.html)
+- [U-Boot v2025.01 FIT Signature Verification](https://docs.u-boot.org/en/v2025.01/usage/fit/signature.html)
+- [U-Boot v2025.01 FIT Overlay Usage](https://docs.u-boot.org/en/v2025.01/usage/fit/overlay-fdt-boot.html)
+- [U-Boot v2025.01 bootm command](https://docs.u-boot.org/en/v2025.01/usage/cmd/bootm.html)

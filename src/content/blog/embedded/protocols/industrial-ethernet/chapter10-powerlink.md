@@ -2,7 +2,7 @@
 title: "POWERLINK과 OpenSAFETY 분석 — 산업 안전 통신 프로토콜"
 slug: "embedded/protocols/industrial-ethernet/chapter10-powerlink"
 date: 2026-05-13T09:10:00
-description: "B&R발 오픈소스 표준 산업 이더넷·통합 safety layer — slot polling으로 1ms 결정성을 만드는 법."
+description: "POWERLINK의 MN·CN 전송 순서와 선로 시간 예산을 검산하고, openPOWERLINK의 실제 API와 openSAFETY의 책임 경계를 구분합니다."
 series: "Industrial Ethernet 심화"
 seriesOrder: 10
 tags: [powerlink, opensafety, br-automation, sil3, black-channel]
@@ -12,342 +12,136 @@ topics: ["embedded", "embedded/protocols"]
 
 ## 한 줄 요약
 
-> **"POWERLINK는 *MN이 모든 송신 권한을 줄로 세워* 결정성을 만들고, *OpenSAFETY*는 그 위에 *black channel*로 SIL 3까지 한 번에 올라갑니다."** — 표준 Ethernet 하드웨어 + 오픈소스 stack으로 EtherCAT급 사이클을 내는 *유일한* 옵션입니다.
+> **POWERLINK의 주기 통신과 openSAFETY의 안전 통신은 서로 다른 책임을 가집니다. 주기가 빠르거나 스택이 공개되어 있다는 사실이 안전 기능의 인증을 대신하지는 않습니다.**
 
-POWERLINK는 *B&R Automation*이 2001년에 만들고 *EPSG(Ethernet POWERLINK Standardization Group)*가 표준화한 산업 이더넷입니다. EtherCAT(2003)보다 2년 먼저 나왔고, *오픈소스 stack(openPOWERLINK)*과 *오픈 표준*이라는 점에서 다른 모든 경쟁자와 다릅니다.
+POWERLINK는 MN(Managing Node)이 주기와 전송 기회를 관리하는 산업용 이더넷입니다. 이 장에서는 기본 PReq/PRes 모드의 순서와 시간 예산을 살펴봅니다. 구현 대조에는 [openPOWERLINK V2.7.2, commit `048650a8`](https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2/tree/048650a80db37fa372330c3a900d2c8edb327e47)를 사용합니다.
 
-이 장은 POWERLINK의 *slot polling 메커니즘*과 그 위에 올라가는 *OpenSAFETY*(EN 50325-5 / IEC 61784-3)를 다룹니다. 둘이 합쳐지면 *별도의 safety bus 없이* 동일 이더넷 케이블로 SIL 3 safety가 가능합니다.
+일반 NIC로 구현할 수 있다는 것과 어떤 스위치·OS에서도 같은 시간 상한을 얻는다는 것은 다른 주장입니다. 드라이버, 토폴로지와 프레임 길이가 실제 가능한 주기에 영향을 줍니다. “유일한 오픈소스 방식”이나 출처 없는 제조사별 최소 주기 비교로 선택하지 않습니다.
 
-## 왜 POWERLINK인가
+## MN과 CN: 기본 전송 순서
 
-다른 산업 이더넷과 비교했을 때 POWERLINK의 *유일한 특징*은 *표준 100Mbps Ethernet 하드웨어로 1ms 사이클을 낸다*는 점입니다.
+| 메시지 | 기본 역할 | 시간 예산에서 확인할 점 |
+|---|---|---|
+| SoC | 주기 시작을 알립니다. | 송신 시각과 동기화 조건 |
+| PReq | MN이 대상 CN에 출력 데이터를 전달합니다. | 프레임 길이와 요청 순서 |
+| PRes | CN이 입력 데이터를 제공합니다. | 응답 시간과 프레임 길이 |
+| SoA | 비동기 통신 기회를 관리합니다. | 비동기 구간에 남긴 예산 |
+| ASnd | 비동기 서비스 데이터를 전달합니다. | 선택된 서비스와 노드의 전송량 |
 
-| 프로토콜 | 특수 hw 필요? | 사이클 | 오픈소스? |
-|----------|--------------|--------|----------|
-| EtherCAT | 예 (ESC ASIC) | 50µs~ | 마스터만 |
-| PROFINET IRT | 예 (스위치 IRT) | 250µs~ | 부분 |
-| EtherNet/IP | 아니오 | 10ms~ (RT) | 부분 |
-| **POWERLINK** | **아니오** | **200µs~ (1ms 표준)** | **마스터·슬레이브 둘 다** |
-| TSN | 예 (TSN switch) | 250µs~ | 부분 |
+기본 polling에서는 SoC 다음에 각 CN의 PReq/PRes를 처리하고 비동기 구간으로 이어집니다. Multiplexing이나 Poll Response Chaining을 쓰면 전송·동기화 조건이 달라집니다. 따라서 “모든 CN은 모든 주기에서 PReq를 받은 직후에만 송신한다”를 모든 모드의 규칙으로 확대하지 않습니다.
 
-표준 Realtek RTL8169·Intel I210 같은 평범한 NIC으로도 POWERLINK MN/CN을 돌릴 수 있습니다. *Slot polling*이 핵심 트릭입니다.
+활성 MN이 전송을 관리하지만 redundancy를 포함한 전체 구성을 “물리적으로 MN 한 대만 존재한다”라고 한정하지 않습니다. 또한 protocol의 전송 규칙은 고장·오설정·외부 트래픽이 물리적으로 불가능하다는 보장이 아닙니다. 스위치의 큐와 전달 지연도 실제 토폴로지 조건으로 확인해야 합니다.
 
-## 두 역할 — MN과 CN
+## 최소 프레임으로 보는 선로 시간 하한
 
-POWERLINK 네트워크에는 두 종류의 노드가 있습니다.
+100 Mbit/s에서 FCS 포함 최소 MAC 프레임은 64 B입니다. preamble/SFD 8 B와 IPG 12 B를 더하면 프레임마다 84 B, 즉 **6.72 μs**를 차지합니다. 아래는 모든 SoC·PReq·PRes·SoA를 최소 길이로 놓은 직렬화 모델입니다.
 
-| 역할 | 약어 | 책임 |
-|------|-----|------|
-| Managing Node | MN | 마스터. *모든 송신을 polling으로 줄 세움*. 정확히 1대. |
-| Controlled Node | CN | 슬레이브. MN의 *poll 요청을 받았을 때만* 송신. 최대 240대. |
+| CN 수 | 프레임 수 `2N + 2` | 선로 점유 시간 |
+|---|---:|---:|
+| 8 | 18 | 120.96 μs |
+| 16 | 34 | 228.48 μs |
+| 32 | 66 | 443.52 μs |
 
-MN이 *유일한 권한자*입니다. CN은 *동시 송신*을 절대 하지 않습니다. 충돌이 발생할 수 없으므로 *표준 hub·스위치 어느 것에서도* 결정성이 보장됩니다.
+이 합계에는 ASnd, CN 응답 대기, 케이블·허브·스위치 지연, 처리 지연과 구현 여유가 없습니다. 따라서 표는 완성된 cycle time이 아닌 **가정한 프레임들의 선로 점유 하한**입니다. 32 CN의 이 모델이 200 μs에 들어가지 않는다는 것은 알 수 있지만, 8 CN이 실제 200 μs를 만족한다고 증명하지는 못합니다.
 
-CN은 *실시간 시작 시점*에는 *발언권을 받아야* 합니다. MN이 매 사이클 모든 CN을 polling합니다. polling 순서가 *고정*이라 각 CN의 송신 시각이 *결정적*입니다.
+다음 계산기는 이 제한된 모델을 사용합니다. NodeID 숫자와 실제 연결 가능한 CN 수는 별개의 제한일 수 있으므로 수용량이나 인증 결과로 해석하지 않습니다.
 
-## 사이클 — Cyclic vs Asynchronous
-
-한 사이클은 두 구간으로 나뉩니다.
-
-```text
-|<------------------- cycle (1ms) ------------------>|
-| Isochronous phase (cyclic) | Async phase | Idle    |
-
-Isochronous:
-  SoC -> PReq -> PRes -> PReq -> PRes -> ... -> SoA
-                CN1            CN2
-
-Async:
-  ASnd (one chosen station per cycle, requested via SoA)
-```
-
-각 frame의 역할입니다.
-
-| Frame | 약어 | 보내는 쪽 | 용도 |
-|-------|-----|----------|------|
-| **SoC** (Start of Cyclic) | SoC | MN → multicast | 사이클 시작 신호, 모든 CN 동기화 |
-| **PReq** (Poll Request) | PReq | MN → CN(unicast) | "CN_x야, 너 데이터 보내라" + MN→CN output |
-| **PRes** (Poll Response) | PRes | CN → multicast | CN의 input data, 모든 노드가 들음 |
-| **SoA** (Start of Async) | SoA | MN → multicast | 비동기 phase 시작, 1 노드에게 *발언권* 부여 |
-| **ASnd** (Asynchronous Send) | ASnd | 선택된 노드 → unicast/multicast | SDO, NMT, 진단, IP 트래픽 |
-
-흐름의 *핵심 발상*은 다음입니다.
-
-1. MN이 SoC로 *모든 CN에게 사이클 시작*을 알린다.
-2. CN1에게 PReq를 보낸다 (output data 동봉).
-3. CN1이 PRes로 답한다 (input data 동봉). 다른 모든 CN도 *이 PRes를 듣는다* (cross traffic, publisher-subscriber).
-4. CN2 동일.
-5. 모든 CN의 polling이 끝나면 MN이 SoA로 *async phase 시작*.
-6. SoA가 *발언권을 1 노드에게* 줌. 그 노드만 ASnd 송신.
-7. async phase가 *남은 시간을 채우고 끝* → 다음 cycle의 SoC.
-
-이 흐름이 *충돌을 원천 차단*합니다. 동시에 송신하는 두 노드가 *물리적으로 존재할 수 없습니다*.
-
-## 200µs 사이클 — 어떻게?
-
-100Mbps Ethernet의 *최소 프레임*은 64B = 약 6.7µs 송신 시간입니다(IFG + preamble 포함). 32-노드 시스템에서 모두 *최소 프레임 PReq/PRes*만 주고받아도:
-
-```text
-SoC:          ~6.7 µs
-32 × PReq:    32 × 6.7 = ~214 µs
-32 × PRes:    32 × 6.7 = ~214 µs
-SoA:          ~6.7 µs
-Total iso:    ~442 µs
-```
-
-200µs 사이클은 8 노드 정도가 한계입니다. 16 노드면 400~500µs, 32 노드면 1ms가 타깃이 됩니다. *노드 수와 사이클*은 직접적인 trade-off입니다.
-
-성능 limit를 끌어올리는 방법:
-
-- *Gigabit Ethernet* (1Gbps) — 10배 단축. 단, 산업 인프라가 100Mbps에 맞춰 있어 보급은 천천히.
-- *Multiplexed slots* — 빠른 CN은 매 사이클 polling, 느린 CN은 *N사이클마다 한 번* polling.
-- *Poll Response Chaining (PRC)* — CN1의 PRes를 들은 CN2가 *MN 응답을 기다리지 않고* 바로 PRes 송신. 트리 토폴로지에서 효과적.
-
-B&R의 *최신 POWERLINK*는 200µs 사이클 + 32 CN을 *gigabit + PRC*로 보장합니다.
-
-## BS-Frame 구조
-
-POWERLINK 프레임은 *표준 Ethernet frame*입니다. EtherType `0x88AB`를 씁니다.
-
-```text
-+----------+----------+----------+--------+---------+--------+-----+
-| dst MAC  | src MAC  | EtherType| message| dest ID | src ID | ... payload ... | CRC
-| 6B       | 6B       | 0x88AB   | 1B     | 1B      | 1B     |
-+----------+----------+----------+--------+---------+--------+-----+
-
-message types:
-  0x01  SoC
-  0x03  PReq
-  0x04  PRes
-  0x05  SoA
-  0x06  ASnd
-```
-
-destination/source ID는 *POWERLINK 노드 ID(1~240)*입니다. MAC 주소와 별개로 *각 CN에 1~240 사이의 NodeID*를 할당합니다. NodeID 240(`F0`)이 MN입니다.
-
-payload는 *PDO(Process Data Object)*를 담습니다. CANopen의 PDO 모델을 그대로 가져왔습니다. POWERLINK의 application layer는 사실상 *CANopen over Ethernet*입니다. EDS 파일·SDO 통신·NMT 상태기계가 모두 CANopen 기반입니다.
-
-## openPOWERLINK — 오픈소스 stack
-
-`openPOWERLINK`는 LGPL/BSD로 풀려 있는 *완성된* MN·CN stack입니다. EPSG가 직접 유지합니다.
-
-```bash
-git clone https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2
-cd openPOWERLINK_V2
-
-# Build MN on Linux
-cd stack/build/linux
-cmake -DCFG_KERNEL_STACK=Userspace -DCFG_DEMO=mn_console ../..
-make
-```
-
-지원 OS와 인터페이스가 광범위합니다.
-
-| 호스트 | NIC 인터페이스 |
-|--------|---------------|
-| Linux (userspace) | pcap, raw socket |
-| Linux (kernel) | edrv 모듈 (Intel 8255x, 82573, RTL8139) |
-| Windows | WinPcap/Npcap |
-| VxWorks | edrv |
-| Bare-metal Xilinx Zynq | FPGA based MAC |
-| FreeRTOS / no-OS | edrv with PRU/ENET |
-
-가장 빠른 사이클이 필요한 경우 *Xilinx Zynq + openPOWERLINK FPGA design*을 씁니다. PRU/PHY ts로 jitter를 sub-µs로 끌어내립니다.
-
-CN 코드는 더 단순합니다. *EDS 파일*을 만들고, 그에 맞춰 *PDO callback*만 채우면 됩니다.
-
-```c
-// CN: process incoming PDO from MN, fill outgoing PDO
-tOplkError processSync(void)
-{
-    // Read input PDO from MN (output channel)
-    UINT16 cmd;
-    oplk_readPdo(0x6000, 0x00, &cmd, sizeof(cmd));
-
-    // Update local state
-    motor_set_target(cmd);
-
-    // Fill output PDO (input channel back to MN)
-    UINT16 status = motor_get_status();
-    oplk_writePdo(0x6001, 0x00, &status, sizeof(status));
-
-    return kErrorOk;
+```js title="powerlink-wire-floor.mjs"
+export function wireFloorNs(cnCount, linkBps = 100000000) {
+  if (!Number.isSafeInteger(cnCount) || cnCount < 1 || cnCount > 239 ||
+      !Number.isSafeInteger(linkBps) || linkBps <= 0) {
+    throw new RangeError('CN count 1..239 and positive integer link rate required');
+  }
+  const bitsNs = BigInt(2 * cnCount + 2) * 84n * 8n * 1000000000n;
+  const rate = BigInt(linkBps);
+  return (bitsNs + rate - 1n) / rate;
 }
 ```
 
-`processSync`는 매 사이클 *PRes 송신 직전*에 호출됩니다. 사이클 안에 *반드시* 끝나야 합니다.
+`wireFloorNs(32)`은 `443520n`입니다. 더 빠른 링크 속도를 넣으면 산술상 시간은 줄지만 해당 장치가 그 속도와 프로파일을 지원한다는 뜻은 아닙니다. PRC를 켜면 항상 이 결과가 특정 비율로 줄어든다는 가정도 하지 않습니다.
 
-## openCONFIGURATOR — XML 기반 설정 도구
+## NodeID와 기본 프레임
 
-openPOWERLINK의 짝꿍 도구입니다. 모든 노드의 EDS·CDC·CN 설정을 *XML*로 만들고, *Java GUI* + *CLI*로 export합니다.
+[pinned `oplkdefs.h`](https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2/blob/048650a80db37fa372330c3a900d2c8edb327e47/stack/include/oplk/oplkdefs.h)는 MN 기본 주소를 `0xF0`으로 정의합니다. 일반 CN의 1~239와 MN 기본 주소 240을 같은 CN 할당 범위에 넣으면 안 됩니다. `0xFF` broadcast, `0xFD` 진단 기본 주소 등도 있으므로 모든 바이트를 일반 CN 번호로 분류하지 않습니다.
 
-```text
-$ openconfigurator-cli --project my_project.xml --output stack/
+태그 없는 기본 Ethernet wrapper의 EtherType은 `0x88AB`입니다. [실제 `frame.h`](https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2/blob/048650a80db37fa372330c3a900d2c8edb327e47/stack/include/oplk/frame.h)는 message type, destination NodeID, source NodeID의 offset을 각각 14, 15, 16으로 정의합니다. 아래 예제는 이 **17 B prefix만** 읽습니다. 전체 프레임의 길이·payload·FCS를 검증하지 않습니다.
 
-generates:
-  stack/mnobd.cdc      ← MN의 binary configuration
-  stack/mnobd.txt      ← human-readable form
-  stack/cn001.xdc      ← CN1 configuration
-  ...
-```
-
-`mnobd.cdc`는 MN이 부팅 시 읽어 *모든 CN을 어떻게 다룰지* 알아내는 binary blob입니다. 노드 추가는 *XML 수정 + 재export*만으로 끝납니다.
-
-GUI에서 *각 CN의 PDO mapping*을 드래그&드롭으로 짭니다. CANopen에서 그대로 가져온 *Index/SubIndex* 표현입니다.
-
-**MN node F0:**
-
-- cycle: 1000 µs
-- async slot: 200 µs
-
-**CN node 01 (motor drive):**
-
-- TPDO 0x1800 -> mapping object 0x6041:00 (statusword)
-- 0x6064:00 (position actual)
-- RPDO 0x1400 -> mapping object 0x6040:00 (controlword)
-- 0x607A:00 (target position)
-
-이 매핑이 *PReq/PRes payload의 byte layout*을 정합니다.
-
-## OpenSAFETY — black channel으로 SIL 3
-
-POWERLINK는 *통신을 빠르게* 만들 뿐, *safety*는 별개 문제입니다. *OpenSAFETY*가 그 위에 *safety message*를 얹는 layer입니다.
-
-핵심 발상은 *black channel*입니다.
-
-```text
-Application Layer (safety)
-  - safety message with SADR, SDN, CRC, sequence
-                |
-                | "treat the network as a black box"
-                v
-Transport (POWERLINK, EtherCAT, PROFINET, Modbus...)
-  - any underlying network; no guarantees needed
-                |
-                v
-Physical (Ethernet)
-```
-
-*하부 네트워크가 무엇이든 신뢰하지 않습니다*. 메시지 자체가 *모든 검증 코드*를 안에 들고 다닙니다. 받는 쪽은 *내용물의 무결성·신선도·출처*를 독립적으로 검증합니다.
-
-safety message의 구성요소입니다.
-
-| 필드 | 길이 | 의미 |
-|------|-----|------|
-| **SADR** (Safety Address) | 10bit | 송신 safety 노드 ID |
-| **SDN** (Safety Domain Number) | 16bit | 도메인 식별자 |
-| **SCT** (Safety Cycle Time) | watchdog | 다음 message가 와야 할 시간 |
-| **TXN** (Sequence number) | 8bit | 순서 보장 |
-| **Payload** | 1~254B | 실제 safety data |
-| **CRC8 / CRC16** | duplicate | *두 가지 다른 CRC*로 잡음 검출 |
-
-특이한 것은 *두 가지 CRC*입니다. CRC8과 CRC16(또는 CRC32) *서로 다른 다항식*을 사용해 *시스템적 비트 오류*까지 잡습니다. 표준 Ethernet의 CRC32가 흐른 *뒤*에도 OpenSAFETY 자체 CRC가 한 번 더 검증합니다.
-
-```c
-// Pseudo-code: receiver checks
-bool process_safety_frame(safety_frame_t *f) {
-    // 1. CRC1 must match
-    if (crc8(f->payload, len) != f->crc1) return drop_and_fault();
-
-    // 2. CRC2 must match (different polynomial)
-    if (crc16(f->payload, len) != f->crc2) return drop_and_fault();
-
-    // 3. Source must be expected SADR
-    if (f->sadr != expected_sadr) return drop_and_fault();
-
-    // 4. SCT not expired (watchdog)
-    if (now() > last_rx_time + sct) return enter_safe_state();
-
-    // 5. Sequence number consistent
-    if (!sequence_check(f->txn)) return drop_and_fault();
-
-    return accept(f);
+```js title="powerlink-basic-prefix.mjs"
+export function decodeBasicPrefix(bytes) {
+  if (!(bytes instanceof Uint8Array) || bytes.length < 17) {
+    throw new TypeError('at least 17 bytes required');
+  }
+  if (bytes[12] !== 0x88 || bytes[13] !== 0xab) {
+    throw new RangeError('untagged POWERLINK EtherType required');
+  }
+  return {
+    messageType: bytes[14],
+    destinationNodeId: bytes[15],
+    sourceNodeId: bytes[16],
+  };
 }
 ```
 
-이 검증 시퀀스가 *IEC 61508 SIL 3* 인증의 핵심입니다. *통신 채널의 무결성을 가정하지 않는다*는 점이 black channel의 정의입니다.
+메시지 값은 SoC `0x01`, PReq `0x03`, PRes `0x04`, SoA `0x05`, ASnd `0x06` 등이 있습니다. 예를 들어 synthetic prefix의 마지막 다섯 바이트가 `88 ab 03 01 f0`이면 MN 기본 주소에서 CN 1로 향하는 PReq의 header 값을 나타냅니다. 실제 캡처나 완성된 유효 PReq라는 주장은 하지 않습니다.
 
-## 실용 예 — 같은 케이블에 motion + safety
+## openPOWERLINK의 실제 API로 읽기
 
-OpenSAFETY가 POWERLINK 위에서 어떻게 흐르는지 보면 다음과 같습니다.
+기존에 소개하던 `oplk_readPdo()`와 `oplk_writePdo()`는 V2.7.2 공개 API에 없습니다. 실제 [CN console demo의 `app.c`](https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2/blob/048650a80db37fa372330c3a900d2c8edb327e47/apps/demo_cn_console/src/app.c)는 process image를 할당하고 object dictionary와 연결한 뒤 교환합니다.
 
-```text
-| SoC | PReq(CN1) | PRes(CN1) | PReq(CN2) | PRes(CN2) | ... | SoA | ASnd |
-                              ^
-                              |
-              PRes payload    | OpenSAFETY frame (in PDO)
-              -----------------------------------------
-              | normal motion data (40B)               |
-              | OpenSAFETY message (16B)               |
-              |   SADR=12, SDN=1, payload=safety_state |
-              |   CRC1, CRC2                           |
-              -----------------------------------------
-```
+| 단계 | 실제 API | demo에서 확인할 내용 |
+|---|---|---|
+| 할당 | `oplk_allocProcessImage()` | input/output 크기와 실패 반환값 |
+| 포인터 획득 | `oplk_getProcessImageIn/Out()` | 이미지의 수명과 방향 |
+| object 연결 | `oplk_linkProcessImageObject()` | index, subindex, offset, entry 크기와 개수 |
+| 수신 이미지 반영 | `oplk_exchangeProcessImageOut()` | 애플리케이션이 읽을 출력 데이터 |
+| 송신 이미지 반영 | `oplk_exchangeProcessImageIn()` | 애플리케이션이 제공할 입력 데이터 |
+| 종료 | `oplk_freeProcessImage()` | 연결 종료 순서와 자원 수명 |
 
-safety data가 *cyclic PDO의 일부*로 들어갑니다. *통신은 POWERLINK*가, *safety 보장은 OpenSAFETY*가 합니다. *별도 safety 케이블 / 별도 safety PLC가 필요 없습니다*.
+demo는 CN 입력의 `0x6000:01`과 출력을 위한 `0x6200:01`을 연결합니다. 이 주소를 모든 모터의 controlword/statusword 주소로 바꾸어 사용하면 안 됩니다. CiA 402 object와 실제 PDO 매핑, 장치의 XDD/XDC·설정 자료를 확인해야 합니다.
 
-물리적으로는 *safety I/O 모듈*과 *safety PLC*가 *normal PLC와 같은 망에 공존*합니다. 시리즈 인증을 받은 B&R *X20 SLC*가 가장 흔한 safety PLC, *X20 SI8100* 같은 모듈이 safety I/O입니다.
+동기 처리의 실행 문맥과 시점도 빌드 구성에 따릅니다. `processSync`라는 함수 이름만으로 “항상 PRes 송신 직전”이라고 단정하지 않습니다. 초기화, NMT 상태, 프로세스 이미지와 오류 처리까지 포함하지 않은 fragment를 실제 모터를 구동하는 완성 예제로 제시하지 않습니다.
 
-## EN 50325-5 / IEC 61784-3 — safety 표준 매핑
+## 빌드와 라이선스의 범위
 
-OpenSAFETY가 다른 산업 이더넷 위에도 올라갑니다. *transport-independent*가 핵심입니다.
+V2.7.2는 대상별 stack·driver·demo 구성이 나뉩니다. `CFG_KERNEL_STACK=Userspace`, `CFG_DEMO=mn_console`라는 임의 옵션 두 개로 빌드가 완성된다고 가정하지 않습니다. 저장소의 target별 CMake와 demo 문서를 따라 필요한 라이브러리·object dictionary·설정 파일을 맞춥니다. 이 글의 검사에서는 전체 stack 빌드나 NIC 실행을 하지 않았습니다.
 
-| Lower layer | OpenSAFETY profile name |
-|------------|------------------------|
-| POWERLINK | OpenSAFETY on POWERLINK |
-| EtherCAT | Safety over EtherCAT (FSoE) — 별도지만 black channel 모델 동일 |
-| PROFINET | PROFIsafe — 별도 표준이지만 컨셉 동일 |
-| Modbus TCP | OpenSAFETY on Modbus |
-| Sercos III | OpenSAFETY on Sercos |
+저장소의 [`license.md`](https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2/blob/048650a80db37fa372330c3a900d2c8edb327e47/license.md)는 주 코드의 BSD 조건과 일부 target별 GPLv2 등 별도 조건을 구분합니다. 따라서 전체를 LGPL/BSD 하나로 요약하지 않습니다. 실제 사용하는 파일의 header와 포함된 구성 요소의 조건을 확인합니다.
 
-PROFIsafe는 *PROFIBUS·PROFINET 공식 safety layer*이고, FSoE는 *EtherCAT 공식 safety layer*입니다. OpenSAFETY는 *EPSG 표준이지만 underlying을 가리지 않습니다*. *transport agnostic*이 OpenSAFETY의 차별점입니다.
+## openSAFETY와 안전 기능의 경계
 
-## 자주 하는 실수
+[IEC 61784-3-13:2021의 공개 설명](https://webstore.iec.ch/en/publication/68897)은 CPF 13에 기반한 safety communication layer를 다루며 안전 장치에 구현하는 범위를 명시합니다. 공개 초록만으로 전체 wire layout이나 CRC 다항식·길이의 구현을 확정하지 않습니다. 이 장은 해당 표준 전체를 검증한 구현 설명이 아닙니다.
 
-### "표준 NIC인데 jitter가 100µs"
+Black channel 접근은 하부 통신을 안전 기능 자체로 신뢰하지 않고 안전 계층에서 통신 오류를 다루는 방식입니다. 지연·손실을 허용하는 무제한 채널이라는 뜻은 아닙니다. 안전 반응 시간 안에 통신과 장치의 반응이 이루어지는지, timeout과 오류 검출·대체 동작을 어떻게 구성하는지 확인해야 합니다.
 
-`tx_queue_len`이 큰 채로 두면 OS가 *전송 큐에서 시간을 못 박습니다*. POWERLINK MN을 돌릴 NIC는 다음을 적용합니다.
+일반 통신 케이블을 공유할 수 있어도 안전 논리·IO·출력 장치의 적합성 요구가 사라지는 것은 아닙니다. 공개 스택을 추가하거나 CRC를 두 번 검사하는 짧은 코드만으로 시스템이 SIL 3가 되지는 않습니다. 잘못된 CRC8/CRC16 필드 표나 안전 수신기 의사코드를 구현 예제로 제공하지 않습니다.
 
-```bash
-ip link set eth1 txqueuelen 0
-ethtool -K eth1 gso off tso off ufo off lro off
-```
+| 이름 | 구분 |
+|---|---|
+| openSAFETY | 이 장에서 POWERLINK와 함께 구분하는 안전 통신 계층입니다. |
+| PROFIsafe | 별도 안전 통신 프로파일입니다. openSAFETY의 다른 이름이 아닙니다. |
+| FSoE | 별도 안전 통신 프로토콜입니다. openSAFETY의 EtherCAT 매핑 이름이 아닙니다. |
 
-`gso`/`tso`(generic/TCP segmentation offload)는 *큰 프레임을 NIC가 쪼개는* 기능이라 *시간 결정성을 깹니다*. 산업 NIC에서는 항상 끕니다.
+실제 안전 기능에는 적용 표준, 지원되는 장치 조합과 safety manual을 바탕으로 설계·검증한 근거가 필요합니다. 이 장의 선로 시간 계산과 prefix decode는 안전 검증을 수행하지 않습니다. 시스템 인증 결과나 특정 safety PLC의 채택을 권장하는 근거로 사용하지 않습니다.
 
-### "openPOWERLINK MN이 CN을 못 찾는다"
+## 문제를 좁히는 관찰점
 
-대부분 *MAC 주소·NodeID 매핑*이 어긋났습니다. openCONFIGURATOR로 *CN의 NodeID와 MAC*을 확인하고, CN 측이 정말 그 NodeID로 부팅하는지 점검합니다.
+CN이 연결되지 않으면 NodeID, NMT 상태, 설정한 identity와 object mapping을 확인합니다. PRes가 늦으면 실제 프레임 길이, 노드별 응답과 경로 지연을 측정합니다. ASnd가 부족하면 비동기 예산과 서비스 요청량을 확인하되, 주기를 임의로 늘려도 제어 요구가 유지되는지 먼저 봅니다.
 
-### "안전을 위해 OpenSAFETY를 도입했는데 인증이 안 떨어진다"
-
-stack 자체는 인증 가능하지만, *어떻게 통합했는가*가 IEC 61508 평가의 본체입니다. *safety PLC가 인증되어 있어야* OpenSAFETY까지 묶어서 SIL 3 인증이 나옵니다. B&R X20 SLC, Pilz PSS 4000 같은 *기성 safety PLC*를 함께 쓰는 것이 가장 빠른 길입니다.
-
-### "Async phase가 모자라 SDO가 끝없이 누적된다"
-
-async slot 시간이 너무 짧거나 *큰 SDO upload*를 사이클 중에 시도한 경우입니다. async를 *200µs → 400µs*로 늘리거나, *MN이 사이클을 잠시 늘려* SDO를 비웁니다. 진단 트래픽이 cyclic을 방해하지 않게 합니다.
-
-### "사이클을 200µs로 잡았는데 PRes drop이 계속"
-
-*노드 수 × frame 시간*이 이미 한계입니다. *PRC(Poll Response Chaining)*를 켜거나, 사이클을 500µs로 늘려야 합니다.
+일반 TCP offload, raw Ethernet 경로와 전용 driver 경로도 구분합니다. 모든 NIC에서 `txqueuelen 0`, 모든 offload 해제가 필수라는 조언은 적용하지 않습니다. 변경할 때는 지원 여부와 변경 전후의 누락·지연·CPU 부하를 비교해야 합니다.
 
 ## 정리
 
-- POWERLINK는 *표준 Ethernet hw + slot polling*으로 1ms 사이클을 만듭니다. *MN이 모든 송신 권한*을 줄 세웁니다.
-- 사이클은 *Isochronous(SoC·PReq·PRes·SoA)* + *Async(ASnd)* 두 구간입니다.
-- *openPOWERLINK*가 MN·CN 모두 오픈소스로 제공됩니다. *openCONFIGURATOR*가 XML 기반 설정.
-- application layer는 *CANopen over Ethernet*입니다. EDS·PDO·SDO·NMT 그대로.
-- *OpenSAFETY*가 위에 올라가면 IEC 61508 *SIL 3*가 가능합니다. *별도 safety bus 없음*.
-- *Black channel* 모델 — 하부 네트워크를 신뢰하지 않고 *메시지 자체*가 모든 무결성 코드를 들고 다닙니다.
-- 두 종류 *CRC*와 *SCT watchdog*, *sequence number*가 결합돼 systematic error까지 잡습니다.
-- POWERLINK + OpenSAFETY는 *오픈 표준 + 오픈소스 stack*으로 *EtherCAT급 사이클 + SIL 3 safety*를 동시에 달성하는 유일한 조합입니다.
+- 기본 POWERLINK 모드와 PRC·multiplexing의 조건을 구분합니다.
+- 최소 선로 시간은 실제 cycle time의 하한 모델이며 응답·경로·비동기 예산이 추가됩니다.
+- 일반 CN 번호와 MN 기본 주소 `0xF0`을 겹치게 배정하지 않습니다.
+- 공개 API는 process image와 object dictionary의 연결·교환으로 확인합니다.
+- 전체 스택 빌드, 통신 실측과 순수 host 예제 검증은 서로 다른 범위입니다.
+- 안전 통신 계층의 도입이 장치와 시스템의 안전 기능 검증을 대신하지 않습니다.
 
-다음 편은 **Ch 11: 리눅스 실시간 — PREEMPT_RT·EtherCAT으로 마스터 만들기**입니다.
+다음 [Ch 11: Linux 실시간 산업 통신](/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime)에서 OS 지연과 실제 통신 deadline을 나누어 측정하는 방법을 살펴봅니다.
 
 ## 관련 항목
 
-- [Ch 9: TSN 스케줄링 — Qbv·Qbu·동기화](/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling)
-- [Ch 11: 리눅스 실시간 — PREEMPT_RT·EtherCAT](/blog/embedded/protocols/industrial-ethernet/chapter11-linux-realtime)
+- [Ch 9: TSN 스케줄링](/blog/embedded/protocols/industrial-ethernet/chapter09-tsn-scheduling)
 - [Ch 3: EtherCAT 아키텍처](/blog/embedded/protocols/industrial-ethernet/chapter03-ethercat-architecture)
-- [원문 — EPSG POWERLINK Specification](https://www.ethernet-powerlink.org/)
-- [원문 — IEC 61784-3 functional safety profiles](https://webstore.iec.ch/publication/26458)
+- [openPOWERLINK V2.7.2](https://github.com/OpenAutomationTechnologies/openPOWERLINK_V2/tree/048650a80db37fa372330c3a900d2c8edb327e47)

@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"템플릿은 zero runtime cost지만 compile-time과 binary size cost가 있습니다."** — 같은 함수가 5개 타입에 쓰이면 코드도 5배가 됩니다.
+> **"템플릿 비용은 컴파일 시간과 최종 링크 결과에서 확인합니다."** — 타입별 인스턴스가 생겨도 인라인·제거·병합 때문에 최종 크기가 정확히 배수가 되지는 않습니다.
 
 ## 어떤 문제를 푸는가
 
@@ -43,12 +43,12 @@ process<double>(4.0);
 process<MyClass>(obj);
 ```
 
-5개의 전용 함수가 생성됩니다. 200줄 × 5 = 1000줄로, 동일한 로직이 각 타입별로 늘어납니다.
+5개의 전용 함수가 생성됩니다. 소스 줄 수를 기계어 크기로 환산할 수는 없으며 사용되지 않는 인스턴스는 출력되지 않을 수 있습니다.
 
 확인은 다음과 같이 합니다.
 
-```bash
-arm-none-eabi-nm --size-sort --print-size --demangle firmware.elf | grep "process<"
+```text
+$ arm-none-eabi-nm --size-sort --print-size --demangle firmware.elf | grep "process<"
 
 00000200 T void process<int>(int)
 00000200 T void process<long>(long)
@@ -57,7 +57,7 @@ arm-none-eabi-nm --size-sort --print-size --demangle firmware.elf | grep "proces
 000003c0 T void process<MyClass>(MyClass)
 ```
 
-총 3344 B로 무시할 수 없는 크기입니다.
+위 값은 도구 형식을 설명하는 예시이며 실제 측정 자료가 아닙니다. 크기 열을 16진수로 읽으면 합계는 3328바이트입니다. 심볼 크기 합은 정렬·공유·링커 동작 때문에 전체 Flash 증가량과 다를 수 있습니다.
 
 ## 패턴 1 — 비-템플릿 helper로 공통 부분 분리
 
@@ -93,17 +93,9 @@ void process(T value) {
 
 각 인스턴스에는 작은 코드만 들어가고, 공통 부분은 한 번만 컴파일됩니다.
 
-이전 예제로 측정한 결과는 다음과 같습니다.
+공통 함수가 다시 인라인될 수 있으므로 함수 분리만으로 특정 감소율을 보장하지 않습니다. 동일한 toolchain·플래그·호출 지점으로 최종 ELF와 map을 비교합니다.
 
-```text
-Before: 3344 B
-After:
-  process_common              : 280 B (한 번만)
-  process<int> 등 5개         : 80 B × 5 = 400 B
-  total                       : 680 B (-80%)
-```
-
-## 패턴 2 — 타입 erasure (`std::any`, `std::variant`)
+## 패턴 2 — 닫힌 타입 집합의 `std::variant`
 
 여러 타입을 하나의 컨테이너 타입으로 감쌉니다.
 
@@ -119,7 +111,7 @@ std::variant<int, float, Order> v;
 std::vector<decltype(v)> mixed;
 ```
 
-`std::variant`의 sizeof는 최대 멤버 크기에 tag가 더해진 크기이며, 코드는 한 번만 생성됩니다. 타입별 분기는 `visit`으로 처리합니다.
+`std::variant`는 닫힌 합 타입이며 `std::any`와 같은 열린 type erasure와 구분합니다. 크기는 가장 큰 대안과 태그·정렬·padding에 따라 정해집니다. visitor는 대안 타입마다 인스턴스화될 수 있어 코드가 한 번만 생성된다는 보장은 없습니다.
 
 ```cpp
 std::visit([](auto&& val) {
@@ -133,7 +125,7 @@ std::visit([](auto&& val) {
 }, v);
 ```
 
-`if constexpr`이 컴파일 타임 분기이므로 사용하지 않는 case는 코드에 남지 않습니다.
+visitor의 각 타입별 인스턴스 안에서 종속 분기를 선택하지만, variant의 모든 대안에 유효한 방문 코드를 제공해야 합니다. 최종 dispatch와 코드 크기는 실제 빌드로 확인합니다.
 
 ## 패턴 3 — non-template wrapper
 
@@ -176,10 +168,14 @@ class Buffer : public BufferBase<T> {
     T storage_[N];
 public:
     Buffer() : BufferBase<T>(storage_, N) {}
+    Buffer(const Buffer&) = delete;
+    Buffer& operator=(const Buffer&) = delete;
+    Buffer(Buffer&&) = delete;
+    Buffer& operator=(Buffer&&) = delete;
 };
 ```
 
-`push_impl`은 `Buffer<T>` 단위로 한 번만 컴파일되고, N별로 인스턴스화되지 않습니다. storage만 다른 크기가 됩니다.
+`push_impl`은 `Buffer<T>` 단위로 한 번만 컴파일되고, N별로 인스턴스화되지 않습니다. storage만 다른 크기가 됩니다. 이 구조는 기본 복사·이동 시 내부 포인터가 원본의 storage를 가리키게 되므로 여기서는 복사·이동을 금지했습니다. 지원하려면 목적 객체 storage로 포인터를 다시 묶고 원소를 옮기는 구현이 필요합니다.
 
 ## 패턴 4 — extern template
 
@@ -209,7 +205,7 @@ template class Container<float>;
 
 `Container<int>`, `Container<float>` 코드가 `container.o`에만 들어가고, 다른 `.o` 파일은 extern 선언만 보고 link합니다.
 
-효과는 컴파일 시간 감소와 코드 중복 제거 두 가지입니다.
+주된 목적은 여러 TU에서의 불필요한 인스턴스화 작업을 줄이는 것입니다. 일반 템플릿 중복은 링커가 이미 병합할 수 있으므로 최종 바이너리가 반드시 작아지지는 않습니다. inline 멤버에는 별도 예외도 있습니다.
 
 ## 패턴 5 — virtual 대신 if constexpr
 
@@ -260,7 +256,7 @@ bloaty -d symbols --demangle=full new.elf -- base.elf
 
 ```bash
 arm-none-eabi-nm --demangle firmware.elf | grep "Container<" | wc -l
-# 23 — 23개 다른 Container 인스턴스
+# 출력된 심볼 행 수 — 서로 다른 클래스 인스턴스 수와 같지는 않음
 ```
 
 너무 많으면 디자인을 재검토합니다.
@@ -270,12 +266,12 @@ arm-none-eabi-nm --demangle firmware.elf | grep "Container<" | wc -l
 ```cpp
 template<typename T>
 void func(T x) {
-    static_assert(sizeof(T) == 0, __PRETTY_FUNCTION__);
+    static_assert(sizeof(T) == 0, "inspect the template instantiation diagnostic");
     // 컴파일 에러 메시지에 인스턴스화 정보
 }
 ```
 
-어디서 인스턴스화되는지를 컴파일 에러 메시지로 추적합니다(디버깅 후 제거합니다).
+C++17/20의 static_assert 메시지는 문자열 리터럴이어야 하므로 `__PRETTY_FUNCTION__`을 그대로 메시지로 넘기지 않습니다. 위 의도적인 실패의 진단에 표시되는 타입과 호출 경로를 확인합니다.
 
 ## 컴파일 시간 — 큰 문제
 
@@ -307,7 +303,7 @@ arm-none-eabi-g++ -x c++-header common.h -o common.h.gch
 arm-none-eabi-g++ -include common.h source.cpp ...
 ```
 
-컴파일 시간을 30~50% 줄일 수 있습니다. 단 PCH가 invalidate되면 전체가 재컴파일됩니다.
+효과는 헤더 구성과 캐시에 달립니다. PCH가 무효화되면 이를 사용하는 TU의 재빌드 비용도 비교해야 합니다.
 
 CMake에서는 다음과 같이 설정합니다.
 
@@ -324,7 +320,7 @@ target_precompile_headers(my_target PRIVATE common.h)
 set_target_properties(my_target PROPERTIES UNITY_BUILD ON)
 ```
 
-컴파일 시간을 40~70% 줄일 수 있습니다. 단 static 함수 충돌이나 header include 충돌이 발생할 수 있습니다.
+속도 개선은 프로젝트별로 측정합니다. 익명 namespace·static 이름 충돌, include 순서 의존, 병렬 작업 수 감소가 생길 수 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -333,7 +329,7 @@ set_target_properties(my_target PROPERTIES UNITY_BUILD ON)
 template<typename T>
 T abs(T x) { return x < 0 ? -x : x; }
 ```
-5개 타입에 쓰면 5개 함수가 생기지만 각각 4~8바이트라 무시할 만합니다. 큰 함수만 분리합니다.
+여러 타입에 쓰더라도 인라인·병합으로 별도 함수가 남지 않을 수 있습니다. 이 signed abs는 최솟값의 부호 반전 overflow도 별도로 처리해야 합니다. 작은 함수의 비용까지 추정 수치로 단정하지 않습니다.
 
 ### 2. namespace 안 함수도 인스턴스화됨
 ```cpp
@@ -364,28 +360,34 @@ include할 때마다 파싱됩니다. PCH나 extern template으로 대응합니�
 ### 6. 디버깅이 어려움
 템플릿 함수의 디버그 정보가 각 인스턴스마다 별도로 생성되어 디버그 정보 크기가 늘어납니다. 단 Flash와는 무관합니다(디버그 정보는 ELF에만 포함).
 
-## 측정 — 실제 프로젝트의 bloat 패턴
+## 작은 예제 — extern template의 링크 계약
 
-한 STM32 프로젝트(FreeRTOS + C++)의 template 인스턴스 분포입니다.
+함수 본문을 따로 두고 명시적 인스턴스화 정의를 한 TU에서 제공합니다. 정상 링크와 그 TU를 빠뜨린 링크 실패를 비교합니다. 이 예제는 컴파일 시간 절감률을 측정하지 않습니다.
 
-```text
-Top template instances by total size:
-
-1. std::function<...>          : 4 instances, 1.8 KB
-2. RingBuffer<...>             : 6 instances, 1.2 KB
-3. EventDispatcher<...>        : 3 instances, 0.9 KB
-4. Logger<...>                 : 4 instances, 0.6 KB
-5. std::optional<...>          : 12 instances, 0.4 KB (small)
-...
-
-Total template overhead: ~5.5 KB (8% of code section)
+```cpp title="container.hpp"
+#pragma once
+template<class T> struct Container { T twice(T) const; };
+extern template struct Container<int>;
 ```
 
-8%는 수용할 만한 수준입니다. 다만 `std::function`이 1.8 KB를 차지하는 것은 과한지 검토해 봐야 합니다. capture lambdas 대신 함수 포인터나 delegate 패턴으로 대체할 수 있습니다.
+```cpp title="container.cpp"
+#include "container.hpp"
+template<class T> T Container<T>::twice(T x) const { return x+x; }
+template struct Container<int>;
+```
+
+```cpp title="extern-main.cpp"
+#include "container.hpp"
+int main() { Container<int> c; return c.twice(21)==42 ? 0 : 1; }
+```
+
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors container.cpp extern-main.cpp -o extern-check && ./extern-check`를 확인했습니다. `container.cpp`를 빼면 정의되지 않은 `Container<int>::twice(int) const` 심볼로 링크가 실패합니다. `-g` 디버그 정보를 포함한 산출물과 제거한 산출물의 파일 크기는 Flash 적재 크기와 별개입니다.
+
+[명시적 인스턴스화의 표준 규칙](https://eel.is/c++draft/temp.explicit)을 참고합니다. 실제 프로젝트의 Flash·컴파일 시간·debug 정보 분포는 해당 프로젝트의 ELF와 빌드 기록이 있어야 판단할 수 있습니다.
 
 ## C++20 — modules로 컴파일 시간 단축
 
-C++20 modules는 include의 대안입니다. 템플릿을 한 번 컴파일한 뒤 재사용할 수 있습니다.
+C++20 modules는 include의 대안입니다. 모듈 인터페이스의 파싱 결과를 재사용할 수 있지만, 타입별 인스턴스화 작업까지 모두 한 번으로 줄어드는 것은 아닙니다.
 
 ```cpp
 // container.cppm — module
@@ -404,13 +406,13 @@ import container;
 Container<int> c;
 ```
 
-GCC 11+가 부분 지원합니다. 2026년 기준 임베디드 toolchain 대부분은 아직 미지원이며, 몇 년 안에 일반화될 것으로 보입니다.
+설치한 컴파일러·빌드 시스템의 모듈 지원과 의존성 스캔을 최소 프로젝트로 확인합니다. 벤더 전체의 지원율이나 향후 보급 시점을 추정하지 않습니다.
 
 ## 정리
 
-- 템플릿은 runtime cost는 0이지만 컴파일/binary size cost를 발생시킵니다.
-- 큰 함수는 비-템플릿 helper로 분리하면 bloat가 70% 이상 줄어듭니다.
-- Type erasure(`std::variant`)는 닫힌 type set에 유리합니다.
+- 템플릿 자체의 런타임 dispatch 없이 구현할 수 있지만 연산·컴파일·최종 코드 크기 비용은 확인해야 합니다.
+- 큰 함수의 공통 부분을 helper로 분리하고 같은 조건의 최종 링크 결과를 비교합니다.
+- `std::variant`는 닫힌 type set을 표현하며 visitor별 인스턴스화 비용도 확인합니다.
 - `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드가 한 곳에 모입니다.
 - 측정 도구는 `nm`(인스턴스 수), `bloaty`(PR diff), `__PRETTY_FUNCTION__`(debug)입니다.
 - 컴파일 시간을 줄이려면 PCH, unity build, modules(C++20)를 활용합니다.

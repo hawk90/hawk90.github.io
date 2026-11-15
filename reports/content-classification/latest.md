@@ -2,9 +2,9 @@
 
 > Informational baseline for migrating from path-derived categories to explicit canonical topic IDs.
 
-- Documents: 3407
+- Documents: 3408
 - Registered category IDs: 65
-- Explicit topic metadata: 3407
+- Explicit topic metadata: 3408
 - Legacy category metadata: 0
 - Path-derived only: 0
 - No current classification: 0
@@ -19,7 +19,7 @@
 > These are folder buckets below the deepest registered topic. They are candidates, not automatic categories: create one only when it represents a stable reader-facing domain.
 
 - `programming/engineering/agile-lean-engineering` — 156 documents; 1 series; review-as-series (Agile & Lean Software Engineering: 156/156, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
-- `embedded/modern-recipes` — 152 documents; 1 series; review-as-series (Modern Embedded Recipes: 152/152, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
+- `embedded/modern-recipes` — 153 documents; 1 series; review-as-series (Modern Embedded Recipes: 153/153, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/engineering/pragmatic-programmer` — 100 documents; 1 series; review-as-series (The Pragmatic Programmer: 100/100, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/code-review/folly` — 89 documents; 1 series; review-as-series (Folly Code Review: 89/89, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.
 - `programming/code-review/abseil` — 79 documents; 1 series; review-as-series (Abseil Code Review: 79/79, 100.0%); 0 without a series. One named series accounts for at least 80% of documents; keep its navigation in the series layer unless a separate reader-facing domain is approved.

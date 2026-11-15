@@ -2,7 +2,7 @@
 title: "GDB Remote Serial Protocol 분석 — 디버거-타겟 통신 메커니즘"
 slug: "tools/debugging/embedded/chapter01-rsp-protocol"
 date: 2026-05-26T09:01:00
-description: "GDB가 원격 스텁과 주고받는 ASCII 패킷의 모든 것. 패킷 형식, qSupported 협상, vCont, 멀티 패킷, RLE."
+description: "GDB와 원격 스텁의 packet framing·ACK·qSupported 협상, 메모리·실행·스레드 명령과 RLE를 설명합니다."
 tags: [gdb, rsp, embedded, protocol]
 series: "Embedded Debugging"
 seriesOrder: 1
@@ -27,7 +27,7 @@ GDB와 원격 스텁이 *`$payload#checksum`* 형태의 ASCII 패킷을 주고�
 
 ## 역사
 
-1989년 GDB 4.x에 처음 도입. 당시 워크스테이션 ↔ 임베디드 보드 시리얼 케이블이 9600bps였던 점이 설계에 그대로 반영됐습니다 — *짧고 ASCII로*. 35년이 지나도 같은 프로토콜이 USB 3.0 위에서 동작합니다. 단순함의 위력.
+RSP는 serial transport뿐 아니라 TCP 등에서도 쓰입니다. 오래된 framing과 ACK 방식에 feature 협상·binary 전송·멀티프로세스 확장이 더해졌으므로 ASCII 명령만 처리하는 스텁으로 모든 연결을 지원할 수는 없습니다.
 
 ## 패킷 형식
 
@@ -80,7 +80,7 @@ TCP/USB 환경의 거의 모든 현대 스텁이 이걸 켭니다. 성능 차이
 [remote] Sending packet: $qSupported:multiprocess+;swbreak+;hwbreak+;...
 [remote] Received Ack
 [remote] Packet received: PacketSize=2000;qXfer:features:read+;...
-[remote] Sending packet: $!#04           ← extended-remote
+[remote] Sending packet: $!#21           ← extended-remote
 [remote] Packet received: OK
 [remote] Sending packet: $?#3f           ← 현재 정지 사유
 [remote] Packet received: T05thread:p1.1;
@@ -88,7 +88,7 @@ TCP/USB 환경의 거의 모든 현대 스텁이 이걸 켭니다. 성능 차이
 
 각 줄이 *한 패킷*. `Sending`/`Received` 짝으로 흐름이 보입니다.
 
-`set remote-debug 1`이 LLDB의 같은 옵션. `gdb-remote.txt`로 로그를 떨어뜨릴 수도 있습니다.
+LLDB는 `log enable -f /tmp/lldb-rsp.log gdb-remote packets`로 패킷 로그를 켭니다. 아래의 `set logging`은 GDB 명령이며 LLDB 명령이 아닙니다.
 
 ```text
 (gdb) set logging redirect on
@@ -104,11 +104,11 @@ TCP/USB 환경의 거의 모든 현대 스텁이 이걸 켭니다. 성능 차이
 $? → $T05thread:p1.1;
 ```
 
-`T<sig>` 시그널 정지. `S<sig>`는 단순 시그널(deprecated). `W<exitcode>` 정상 종료. `X<sig>` 비정상 종료.
+`T<sig>` 시그널 정지. `S<sig>`는 추가 필드가 없는 단순 시그널 응답입니다. `W<exitcode>` 정상 종료. `X<sig>` 비정상 종료.
 
 | 응답 | 의미 |
 |------|------|
-| `S05` | SIGTRAP (잘 안 씀, 호환용) |
+| `S05` | 추가 필드가 없는 SIGTRAP |
 | `T05thread:1;watch:7fff8000;reason:hwbreak` | watchpoint hardware BP 정지 |
 | `W00` | exit 0 |
 | `X0b` | SIGSEGV로 죽음 |
@@ -156,7 +156,7 @@ $G<hex> → $OK                                   ← 전체 쓰기
 
 `g`와 달리 한 레지스터만 *효율적으로*. ARM처럼 레지스터가 많은 아키텍처에서 `p`가 자주 쓰입니다.
 
-레지스터 번호는 XML의 *나열 순서*. x86-64는 RAX=0, RBX=1, ..., RIP=16. ARM은 R0=0, ..., PC=15.
+레지스터 번호는 target description의 `regnum`과 생략 시 연속 번호 규칙을 따릅니다. x86-64는 RAX=0, RBX=1, ..., RIP=16. ARM은 R0=0, ..., PC=15.
 
 ### 4. 메모리 — `m` / `M`
 
@@ -165,7 +165,7 @@ $G<hex> → $OK                                   ← 전체 쓰기
 | `$m400000,10 → $4889e5...` | `0x400000`부터 16바이트 hex 인코딩 |
 | `$M400000,4:48c7c001 → $OK` | 4바이트 쓰기 |
 
-길이 제한은 `PacketSize`(qSupported 응답). 보통 16KB. 큰 메모리 영역을 받으려면 *여러 패킷*으로 나뉘어 자동 분할됩니다.
+길이 제한은 `PacketSize`(qSupported 응답). 스텁별 값과 hex 인코딩으로 늘어난 길이를 확인합니다. 큰 메모리 영역을 받으려면 *여러 패킷*으로 나뉘어 자동 분할됩니다.
 
 #### binary 형식 — `X`
 
@@ -175,7 +175,7 @@ $G<hex> → $OK                                   ← 전체 쓰기
 $X400000,4:<raw 4 bytes>           ← OpenOCD/J-Link가 일반적으로 선호
 ```
 
-다만 `$`/`#`/`}` 같은 바이트는 `0x7d ^ byte`로 *escape*해야 합니다 (`}`이 escape 문자). 양쪽 모두 escape 디코딩 구현 필수.
+다만 `$`/`#`/`}` 같은 바이트는 `}` 뒤에 원래 바이트 XOR `0x20`로 *escape*해야 합니다 (`}`이 escape 문자). 양쪽 모두 escape 디코딩 구현 필수.
 
 ### 5. 실행 제어 — `c` / `s` / `vCont`
 
@@ -186,7 +186,7 @@ $s → ...                                       ← single step
 $s401200 → ...                                ← 그 주소부터 step
 ```
 
-`c`/`s`는 *현재 스레드*만 다룸. 멀티스레드를 정교하게 제어하려면 `vCont`.
+`c`/`s`는 H 패킷과 all-stop/non-stop 상태에 따른 실행 문맥을 사용합니다. 단순히 현재 스레드 하나만 실행한다고 가정하지 않습니다. 멀티스레드를 정교하게 제어하려면 `vCont`.
 
 ```text
 $vCont;c                          ← 모든 스레드 continue
@@ -218,7 +218,7 @@ $z0,401200,1 → $OK            ← BP 제거
 
 Z0의 *kind* 인자(`1`)는 *명령어 길이*. ARM Thumb는 `2`, ARM은 `4`. x86은 항상 `1` (가변 길이지만 INT3=1바이트 패치이므로). 잘못된 kind면 스텁이 잘못된 위치를 패치할 수 있음.
 
-스텁이 hardware BP를 못 만들면 `Z1`에 빈 응답(`$$#00`)을 줍니다 — GDB는 *software BP로 대체*합니다.
+스텁이 hardware BP를 못 만들면 `Z1`에 빈 응답(`$#00`)을 줍니다 — 스텁이 그 요청을 지원하지 않는다는 뜻입니다. 하드웨어 BP를 반드시 software BP로 대체한다고 보장하지 않으며 요청 종류·메모리 속성·다른 지원 경로에 따라 오류가 될 수 있습니다.
 
 ### 7. 스레드 — `H` / `T` / `qfThreadInfo`
 
@@ -229,7 +229,7 @@ Z0의 *kind* 인자(`1`)는 *명령어 길이*. ARM Thumb는 `2`, ARM은 `4`. x8
 | `$T1 → $OK` | thread 1이 살아 있나? (alive check) |
 | `$qfThreadInfo → $mp1.1,p1.2,p1.3` | 첫 번째 스레드 목록 페이지 |
 | `$qsThreadInfo → $l` | 다음 페이지 없음 (lowercase L) |
-| `$qThreadExtraInfo,p1.1 → $Worker_thread_1` | 이름 |
+| `$qThreadExtraInfo,p1.1 → $576f726b65725f7468726561645f31` | 이름 |
 
 GDB의 `info threads`가 이 셋(`qfThreadInfo` + `qsThreadInfo` + `qThreadExtraInfo`)으로 구성됩니다. 페이지네이션이 있는 이유는 PacketSize 한계 때문 — 천 개 스레드는 한 패킷에 안 들어갑니다.
 
@@ -251,13 +251,13 @@ Stub: PacketSize=2000;QPassSignals+;QProgramSignals+;QStartupWithShell+;
       BreakpointCommands+;FastTracepoints+;TracepointSource+;...
 ```
 
-`xxx+` = 지원, `xxx-` = 미지원, `xxx?` = 조건부. 이 한 줄로 GDB가 *이 스텁에서는 무엇을 할 수 있는지* 결정합니다.
+`xxx+` = 지원, `xxx-` = 미지원, `xxx?` = 해당 feature에 대한 추가 질의를 요청하는 형식입니다. 각 feature의 개별 정의를 따릅니다. 이 한 줄로 GDB가 *이 스텁에서는 무엇을 할 수 있는지* 결정합니다.
 
 #### 자주 보이는 feature
 
 | feature | 의미 |
 |---------|------|
-| `PacketSize=<hex>` | 한 패킷 최대 크기 (양쪽 합의) |
+| `PacketSize=<hex>` | 스텁이 받을 수 있는 packet-data 최대 크기 (16진수) |
 | `multiprocess+` | 여러 inferior 지원 |
 | `swbreak+` / `hwbreak+` | 정지 사유에 software/hardware BP 표시 |
 | `vContSupported+` | `vCont;...` 사용 |
@@ -307,7 +307,7 @@ $qXfer:features:read:target.xml:0,ffb → $l<target><architecture>i386:x86-64</a
 
 GDB가 `load` 시 *주소가 flash인지 RAM인지*를 이걸 보고 결정. flash면 OpenOCD/J-Link의 *flash driver*를 거치고, RAM이면 단순 메모리 쓰기.
 
-이게 없으면 GDB는 flash 영역에 사용자가 *직접 못 쓰는* 메모리로 보고 `M` 패킷을 거부합니다. 임베디드 디버깅에서 `monitor flash` 명령이 필요한 이유.
+memory-map을 제공하지 않는다고 GDB가 모든 flash 쓰기를 반드시 거부하는 것은 아닙니다. 자동 flash 처리에는 메모리 속성 정보와 vFlash 계열 지원, 대상 flash driver 등이 함께 필요하므로 서버의 설정·지원 패킷을 확인합니다.
 
 ### 10. monitor — 패스스루
 
@@ -341,20 +341,11 @@ $k → (없음)                         ← kill
 
 OpenOCD에서 `monitor reset` + `load` + `monitor reset` 시퀀스가 일반적인 이유 — `R`로 재시작이 안 되거나 어색해서 `monitor`로 우회.
 
-## 멀티 패킷 — RLE 압축
+## RLE 압축 — 한 응답 안의 반복 인코딩
 
-레지스터 같은 *반복 바이트가 많은* 응답에는 RLE(Run-Length Encoding)이 적용됩니다.
+RLE는 여러 패킷을 합치는 기능이 아니라 packet-data 안의 반복 문자 인코딩입니다. `*` 뒤 한 바이트의 ASCII 값에서 29를 뺀 수만큼 직전 문자를 추가 반복합니다. 예를 들어 `0* `의 마지막 문자는 공백(32)이므로 추가3회, 총 `0000`으로 복원합니다. 숫자 두 자리 hex로 횟수를 읽는 방식이 아닙니다.
 
-```text
-$0000000000000000000000000000000000000000  ← 일반
-$0000000000000000*0d                        ← RLE
-                  ↑
-                  '*' 다음에 +29 (40 - 4 + 0x20)
-```
-
-`*<count_plus_29>`: 바로 앞 문자를 *N+29회* 반복. 14자 → 4자로 줄어듭니다. 시리얼 환경에서는 의미 있는 절감.
-
-ASCII 32~127 사이를 쓰기 위해 +29 오프셋. 디코딩이 복잡하지만 옛 시리얼 환경의 잔재.
+허용되는 반복 횟수·금지된 count 문자와 binary escaping 순서도 명세를 따라야 합니다. 아래 오프라인 예제로 checksum·escaping·RLE의 경계를 나눠 확인합니다.
 
 ## escape — `}` 메타바이트
 
@@ -372,20 +363,9 @@ GDB와 스텁 모두 디코더가 필요. 자체 스텁 구현 시 자주 빼먹
 
 ## PacketSize 협상
 
-`qSupported`의 `PacketSize=<hex>`가 양쪽이 *받을 수 있는 최대*. 보내는 쪽이 한 패킷을 그 크기로 잘라야 합니다.
+`qSupported` 응답의 `PacketSize=<hex>`는 스텁의 수신 packet-data 용량입니다. 호스트의 응답 수신 용량을 같은 값으로 협상한 것으로 해석하지 않습니다. hex 메모리 쓰기는 데이터 바이트 하나가 두 문자이므로 주소·길이·구분자까지 포함해 패킷을 구성해야 합니다.
 
-```text
-PacketSize=400        ← 1024 바이트 (32-bit MCU 흔함)
-PacketSize=2000       ← 8192 (PC gdbserver)
-PacketSize=10000      ← 65536 (USB 고속)
-```
-
-작은 PacketSize면 큰 `load`(코드 굽기)는 *수백 패킷*으로 잘려 느립니다. ESP32 같은 일부 환경에서 OpenOCD가 작은 PacketSize를 통보해 굽는 시간이 길어집니다 — 가능하면 USB 고속 + PacketSize=4000 이상이 좋습니다.
-
-```text
-(openocd config)
-set _PacketSize 0x4000
-```
+예를 들어 0x400은 1024, 0x2000은8192입니다. OpenOCD Tcl 변수 `_PacketSize`를 임의로 정하는 것만으로 서버 구현의 용량이 바뀌지 않으며 해당 버전이 제공하는 설정·패킷 동작을 확인합니다.
 
 ## file I/O — `F` 패킷
 
@@ -406,7 +386,7 @@ $ENN → ...              ← errno 인코딩
 $E.<error_text>         ← textual error (GDB 12+)
 ```
 
-스텁이 명령을 이해 못 하면 *빈 응답* `$$#00`. GDB는 이를 *불지원*으로 해석하고 다른 방법을 시도.
+스텁이 명령을 이해 못 하면 *빈 응답* `$#00`. GDB는 이를 *불지원*으로 해석하고 다른 방법을 시도.
 
 ## 자체 스텁을 만들기 — 최소 구현
 
@@ -419,13 +399,13 @@ $E.<error_text>         ← textual error (GDB 12+)
 | `m` / `M` | ✅ | 메모리 |
 | `c` / `s` | ✅ | 실행 |
 | `Z0` / `z0` | ✅ | software BP |
-| `qSupported` | ✅ | feature 협상 |
-| `qXfer:features:read:target.xml` | ✅ | 아키텍처 정의 |
-| `vCont`/`vCont?` | 권장 | 멀티스레드면 필수 |
-| `qXfer:memory-map:read` | 권장 | flash 있으면 필수 |
+| `qSupported` | 권장 | 지원하지 않으면 빈 응답; 기능별 요구 확인 |
+| `qXfer:features:read:target.xml` | 대상별 | 기본 아키텍처 레지스터 정의로 충분한지에 따라 다름 |
+| `vCont`/`vCont?` | 기능별 | 세밀한 스레드별 실행 제어 |
+| `qXfer:memory-map:read` | 권장 | 자동 flash 처리에 필요한 속성 정보 |
 | `qRcmd` (monitor) | 선택 | 디버그 보조 |
 
-[gdbstub.c 미니멀 구현](https://github.com/bigchungus/embedded-gdb-stub) 같은 오픈 예제를 참고.
+[GDB RSP 명세](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Remote-Protocol.html)와 대상 아키텍처 레지스터 규칙을 기준으로 필요한 패킷을 정합니다. 위 표는 모든 타깃에 동일하게 강제되는 최소 명세가 아닙니다.
 
 ## 보안
 
@@ -462,26 +442,62 @@ Remote replied: Packet too long
 
 `memory-map`이 없거나 잘못 — flash 드라이버가 안 깸. OpenOCD에서 `flash banks` 확인.
 
-## 정리
+## 작은 예제 — 와이어 바이트 검사
 
-- RSP = `$payload#cs` ASCII 패킷 + 양방향 ACK.
-- `qSupported`로 능력 협상 → 이후 모든 동작이 그 능력 범위 안.
-- 메모리는 `m`(hex) 또는 `X`(binary), 큰 영역은 자동 분할.
-- 실행은 `c`/`s`/`vCont` — 멀티스레드는 `vCont` 필수.
-- BP는 `Z0`(sw) / `Z1`(hw) / `Z2~4`(watch).
-- 임베디드의 *flash vs RAM* 결정은 `qXfer:memory-map:read`.
-- `monitor` 명령은 `qRcmd`로 스텁의 자체 인터프리터 호출.
-- `set debug remote 1`이 디버깅의 디버깅 도구.
-- 자체 스텁 구현은 10여 개 패킷이면 시작 가능.
+다음은 실제 GDB 세션이 아닌 로컬 인코딩 검사입니다. 바이너리 escaping은 wire payload에 적용하고 checksum도 wire payload로 계산합니다.
 
-## 다음 장 예고
+```js title="rsp-check.mjs"
+import assert from 'node:assert/strict';
+const sum = data => [...data].reduce((n,b)=>(n+b)&255,0);
+function frame(data) {
+    const body=Buffer.from(data);
+    return Buffer.concat([Buffer.from('$'),body,Buffer.from('#'+sum(body).toString(16).padStart(2,'0'))]);
+}
+function verify(packet) {
+    const end=packet.length-3;
+    assert(packet[0]===36 && packet[end]===35);
+    const body=packet.subarray(1,end);
+    assert.equal(sum(body),parseInt(packet.subarray(end+1).toString(),16));
+    return body;
+}
+function escape(data) {
+    const out=[];
+    for(const b of data) { if([35,36,42,125].includes(b)) out.push(125,b^32); else out.push(b); }
+    return Buffer.from(out);
+}
+function unescape(data) {
+    const out=[];
+    for(let i=0;i<data.length;i++) {
+        if(data[i]===125) { assert(i+1<data.length); out.push(data[++i]^32); }
+        else out.push(data[i]);
+    }
+    return Buffer.from(out);
+}
+function rle(text) {
+    let out='';
+    for(let i=0;i<text.length;i++) {
+        if(text[i]!=='*') out+=text[i];
+        else {
+            assert(out.length && i+1<text.length);
+            const count=text.charCodeAt(++i)-29;
+            assert(count>=3 && count<=97);
+            out+=out.at(-1).repeat(count);
+        }
+    }
+    return out;
+}
+assert.equal(frame('g').toString(),'$g#67');
+assert.equal(frame('!').toString(),'$!#21');
+assert.equal(frame('').toString(),'$#00');
+const raw=Buffer.from([35,36,42,125,0,255]);
+assert.deepEqual(unescape(verify(frame(escape(raw)))),raw);
+assert.equal(rle('0* '),'0000');
+assert.throws(()=>verify(Buffer.from('$g#00')));
+assert.throws(()=>unescape(Buffer.from([125])));
+assert.throws(()=>rle('* '));
+console.log('PASS checksum, escaping, RLE, corrupt and truncated inputs');
+```
 
-Ch 2 — JTAG / SWD / CoreSight. RSP의 *아래*에서 실제로 칩 안 디버그 회로를 두드리는 물리·논리 계층.
+Node 24.21.0에서 named 검사 코드를 실행했습니다. 이 코드는 설명한 경계 검사이며 production RSP parser가 아닙니다. [GDB framing/escaping/RLE](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Overview.html)와 [feature 협상](https://sourceware.org/gdb/current/onlinedocs/gdb.html/General-Query-Packets.html)을 기준으로 했습니다. 프로브·GDB 서버 연결과 실제 전송량은 검증하지 않았습니다.
 
-## 관련 항목
-
-- [Ch 2: JTAG / SWD / CoreSight](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight)
-- [GDB and LLDB Ch 1: 소개](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install)
-- [GDB RSP 공식 명세](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Remote-Protocol.html)
-- [LLDB GDB-Remote Protocol 확장](https://github.com/llvm/llvm-project/blob/main/lldb/docs/lldb-gdb-remote.txt)
-- `set debug remote 1` — GDB 트래픽 노출
+RSP가 프로브를 통해 타깃의 디버그 회로로 연결되는 과정은 다음 장 [JTAG·SWD·CoreSight](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight)에서 이어집니다.

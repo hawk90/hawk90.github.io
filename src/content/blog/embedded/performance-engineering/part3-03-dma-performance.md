@@ -28,13 +28,21 @@ topics: ["embedded"]
 
 ```c
 /* 매 transfer 1 byte */
-HAL_DMA_Init(&hdma, .PeriphDataAlignment = DMA_PDATAALIGN_BYTE);
+/* Instance, request, direction, widths, increments, and burst settings are
+ * device-specific fields in hdma.Init; fill them from the target reference manual. */
+hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_BYTE;
+if (HAL_DMA_Init(&hdma) != HAL_OK) {
+    Error_Handler();
+}
 /* → AXI overhead per byte → 매우 느림 */
 
 /* 4-beat burst, 4-byte beat */
-HAL_DMA_Init(&hdma, 
-    .PeriphDataAlignment = DMA_PDATAALIGN_WORD,
-    .BurstSize = DMA_BURST_INC4);
+hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;
+hdma.Init.MemBurst = DMA_MBURST_INC4;
+/* Configure the remaining required fields for this MCU and request. */
+if (HAL_DMA_Init(&hdma) != HAL_OK) {
+    Error_Handler();
+}
 /* → 16-byte per transaction → 10x throughput */
 ```
 
@@ -55,10 +63,10 @@ hmdma.Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
 hmdma.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
 hmdma.Init.BufferTransferLength = 128;   // burst length
 
-HAL_MDMA_Start(&hmdma, src, dst, len, 1);
+HAL_MDMA_Start(&hmdma, (uint32_t)src, (uint32_t)dst, len, 1);
 ```
 
-`MDMA`는 AXI master여서 *DRAM ↔ DRAM* copy까지 가능합니다. 일반 DMA1/2는 *peripheral ↔ memory*만 지원합니다.
+`MDMA`는 AXI master이며 memory-to-memory 전송을 지원합니다. STM32H743의 DMA1/2도 memory bus로 memory-to-memory 전송이 가능하지만, 접근 가능한 메모리와 주변장치는 RM0433의 bus connectivity 표에 따라 제한됩니다([ST RM0433](https://www.st.com/resource/en/reference_manual/rm0433-stm32h743-753-and-stm32h750-value-line-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)).
 
 ## Scatter-Gather
 
@@ -122,7 +130,7 @@ void HAL_DMA_M1CpltCallback(DMA_HandleTypeDef *hdma) {
 }
 ```
 
-DMA와 CPU가 동시에 동작하면서 *throughput이 약 2배*로 늘어납니다.
+두 버퍼에서 CPU 처리와 DMA 수집이 겹치면 이상적인 경우 처리량이 최대 두 배에 가까워질 수 있습니다. 실제 이득은 두 단계의 처리시간, 버스 경합과 버퍼 전환 비용으로 제한되며 측정이 필요합니다.
 
 ## Cache 일관성 - Cortex-M7
 
@@ -182,11 +190,9 @@ DMA 전용 buffer는 *non-cacheable*로 두면 *cache maintenance overhead가 �
 
 **Setup overhead - 매 transfer 시작 비용:**
 
-- STM32 DMA: ~5 cycle
-- i.MX SDMA: ~50 cycle (FW 실행)
-- Linux dmaengine: ~100 cycle + IRQ
+- DMA 시작 지연은 controller, firmware, OS, interrupt 경로와 측정 기준에 따라 달라집니다. 아래의 cycle 수를 공통 상수로 쓰지 말고 대상에서 측정합니다.
 
-작은 transfer (< 256 byte)에서는 *DMA setup 비용이 더 큽니다*. 이 구간은 CPU memcpy가 빠릅니다.
+작은 transfer에서는 DMA 설정·완료 처리 비용이 copy 자체보다 클 수 있습니다. 보편적인 byte 임계값은 두지 않고 대상에서 비교합니다.
 
 ## CPU vs DMA - 손익 분기점
 
@@ -265,7 +271,7 @@ Peripheral FIFO depth가 *4*인데 burst length가 16이면 slave가 4-cycle마�
 - **Scatter-gather와 chain**으로 CPU 개입을 최소화합니다.
 - **Double buffer**로 throughput을 2배로 끌어올립니다.
 - Cortex-M7에서는 **clean/invalidate**가 필수이고 *non-cacheable region*도 선택지입니다.
-- 작은 copy는 CPU memcpy, 큰 copy와 peripheral은 DMA가 유리합니다.
+- copy 크기별 CPU/DMA break-even은 controller, memory path, cache, 동시 작업에 따라 달라집니다.
 
 다음 편은 **DMA vs CPU 손익 분석**을 다룹니다.
 

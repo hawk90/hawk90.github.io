@@ -27,7 +27,7 @@ topics: ["tools", "tools/emulation"]
   - 30분 stress test
   - GitHub Actions에서 매 push마다 smoke
 
-이 요건을 *5분짜리 smoke + 1시간짜리 nightly*로 분리해 cosim 환경에 태우는 게 목표입니다.
+실행 시간 목표는 RTL·host·trace 조건을 고정해 측정한 뒤 smoke와 긴 regression으로 나눕니다. 아래 수치는 설계 요구의 예이며 여기서 측정한 결과가 아닙니다.
 
 ## 아키텍처 한 장
 
@@ -66,13 +66,14 @@ Linux driver를 *그대로* 가져와 cosim에서 컴파일하려면 *Linux kern
   #include <string.h>
 
   static inline uint32_t readl(volatile void *addr) {
-    extern void bfm_read(int addr, int *data);
-    int v; bfm_read((int)(intptr_t)addr, &v);
+    extern int bfm_read(uintptr_t addr, uint32_t *data);
+    uint32_t v = 0;
+    if (bfm_read((uintptr_t)addr, &v) != 0) abort();
     return (uint32_t)v;
   }
   static inline void writel(uint32_t val, volatile void *addr) {
-    extern void bfm_write(int addr, int data);
-    bfm_write((int)(intptr_t)addr, (int)val);
+    extern int bfm_write(uintptr_t addr, uint32_t data);
+    if (bfm_write((uintptr_t)addr, val) != 0) abort();
   }
 
   #define dev_info(d, fmt, ...)  printf("[driver] " fmt, ##__VA_ARGS__)
@@ -84,53 +85,43 @@ Linux driver를 *그대로* 가져와 cosim에서 컴파일하려면 *Linux kern
 #endif
 ```
 
-driver 본체는 `cosim_shim.h`를 통해 빌드되면 cosim용, kernel에서 빌드되면 *원래의 .ko*로 컴파일됩니다. 같은 source.
+이 shim은 주소 폭과 오류 전달을 보여 주는 host 예시입니다. 실제 Linux `readl`은 kernel address-space와 ordering 계약을 가지므로, 이를 그대로 대체해 kernel module과 동등하다고 볼 수 없습니다. 재사용할 driver logic과 OS 종속부를 분리하고 각각 다른 검증으로 다룹니다.
 
 ## Step 3 — IRQ injection
 
 RTL의 `irq` pin을 driver의 ISR에 *직접* 연결하는 thread.
 
 ```cpp
-// sim/main.cpp
+// sim/main.cpp — IRQ sampling은 DUT를 소유한 simulator thread에서 수행
 #include "Varistos1_tb.h"
-#include <thread>
-#include <atomic>
-
-extern "C" void aristos1_isr(int vector);  // driver의 ISR
-std::atomic<bool> sim_running{true};
-Varistos1_tb *dut;
-
-void irq_thread() {
-  uint8_t prev = 0;
-  while (sim_running.load()) {
-    uint8_t cur = dut->irq;
-    if (cur && !prev) {
-      // rising edge → 가장 낮은 set bit를 vector로
-      for (int i = 0; i < 4; i++) {
-        if (cur & (1 << i)) aristos1_isr(i);
-      }
-    }
-    prev = cur;
-    std::this_thread::sleep_for(std::chrono::microseconds(10));
-  }
+extern "C" void aristos1_isr(unsigned vector);
+static uint8_t newly_pending(uint8_t current, uint8_t previous) {
+  return current & (uint8_t)~previous;
 }
 
 int main(int argc, char **argv) {
   Verilated::commandArgs(argc, argv);
-  dut = new Varistos1_tb();
-
-  std::thread t(irq_thread);
-
-  // pytest로부터 시나리오 신호 받기
-  // ... (구현 생략)
-
-  sim_running.store(false);
-  t.join();
-  delete dut;
+  Varistos1_tb dut;
+  uint8_t prev = 0;
+  while (!Verilated::gotFinish()) {
+    eval_one_cycle(dut);
+    const uint8_t cur = dut.irq;
+    const uint8_t pending = newly_pending(cur, prev);
+    for (unsigned bit = 0; bit < 4; ++bit)
+      if (pending & (1u << bit)) aristos1_isr(bit);
+    prev = cur;
+  }
 }
 ```
 
-driver의 ISR이 *우리가 띄운 thread*에서 호출됩니다. driver 코드는 자신이 진짜 IRQ를 받고 있다고 가정해도 동작합니다.
+```cpp title="irq-mask.cpp"
+#include <cstdint>
+uint8_t newly_pending(uint8_t current, uint8_t previous) {
+  return current & static_cast<uint8_t>(~previous);
+}
+```
+
+bit mask는 IRQ 0이 이미 high일 때 IRQ 1이 새로 올라오는 경우도 보존합니다. 이 sketch의 callback은 simulator 소유 thread에서만 호출합니다. Linux interrupt controller·ISR context·동시성·ack/clear 동작을 재현하는 것은 아니며, 실제 모델에서는 pending/level/edge 정책과 재진입을 따로 정의합니다.
 
 ## Step 4 — Pytest 시나리오
 
@@ -139,7 +130,7 @@ driver의 ISR이 *우리가 띄운 thread*에서 호출됩니다. driver 코드�
 import pytest
 import ctypes
 
-driver = ctypes.CDLL("./obj_dir/Varistos1_tb")
+driver = ctypes.CDLL("./libcosim.so")  # C ABI wrapper를 shared library로 빌드한 경우
 driver.cosim_probe.restype = ctypes.c_int
 
 @pytest.fixture(scope="module")
@@ -161,7 +152,7 @@ class TestSmoke:
 class TestStress:
     @pytest.mark.slow
     def test_dma_throughput_30min(self, dut):
-        rc = driver.cosim_dma_loop(seconds=1800)
+        rc = driver.cosim_dma_loop(1800)
         assert rc == 0
 ```
 
@@ -170,7 +161,7 @@ pytest -v test_aristos1.py -m "not slow"        # smoke
 pytest -v test_aristos1.py -m slow              # nightly
 ```
 
-mark로 빠른 test와 느린 test가 *같은 코드 베이스*에서 분리됩니다.
+`ctypes.CDLL`은 실행 파일을 임의로 shared library처럼 불러오지 않습니다. `libcosim.so`에는 위 Python이 호출하는 `cosim_probe`, `cosim_remove`, `cosim_read_id`, `cosim_run_matmul_2x2`, `cosim_dma_loop`의 C ABI export와 DUT 생성·평가·종료 경계가 구현되어 있어야 합니다. 실행 파일을 유지하려면 별도 IPC client/server를 두거나 cocotb runner에서 시나리오를 실행합니다. 이 다이어그램은 아직 그 wrapper를 제공하지 않습니다.
 
 ## Step 5 — CI 파이프라인
 
@@ -229,10 +220,10 @@ cosim의 *근본 제약*은 RTL이 cycle-accurate라는 점입니다. 대략 다
 
 | 구성 | cycle/sec | 의미 |
 |------|-----------|------|
-| Verilator + 작은 RTL(<10k gate) | 50,000~200,000 | sub-millisecond test가 빠름 |
-| Verilator + 큰 RTL(>100k gate) | 1,000~10,000 | 1 ms 시뮬레이션에 100ms~1s |
-| Verilator + multi-thread | 위의 1.5~3× | host CPU 활용 |
-| Commercial(VCS optimized) | 10,000~50,000 | 일반적으로 Verilator보다 느림(!) |
+| 구성 | 측정해야 할 조건 |
+|------|----------------|
+| Verilator + RTL | RTL 규모, host CPU, compile flags, threading, trace, testcase |
+| commercial simulator | 같은 RTL·입력·assertion·trace·host 조건과 라이선스 설정 |
 
 이로부터 *어떤 시나리오를 cosim에 두고 어떤 시나리오를 다른 도구로 보내야* 하는지가 결정됩니다.
 
@@ -271,7 +262,7 @@ NPU·chiplet·SoC가 가는 길에서 *pre-silicon driver 검증*은 더 이상 
 - driver는 `cosim_shim.h`로 *동일 source가 .ko와 cosim binary 양쪽으로* 빌드되게 함.
 - IRQ injection은 별도 thread에서 `dut->irq` rising edge를 polling. driver ISR을 *직접* 호출.
 - pytest mark로 *smoke*(PR마다)·*nightly*(stress) 분리. waveform은 실패 시 artifact.
-- Cycle-accurate 한계: 작은 RTL에서 200k cycle/s, 큰 RTL에서 10k 미만. stress·boot은 다른 도구로.
+- 상대 성능은 같은 RTL·host·옵션·trace 조건으로 측정해 smoke, nightly, 다른 추상화 모델의 경계를 정합니다.
 - 시리즈가 가르치는 것은 *조립 사고*: 8개 어휘를 상황에 맞게 결합.
 - pre-silicon driver 검증은 NPU/chiplet/SoC의 표준 작업.
 

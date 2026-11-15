@@ -10,205 +10,91 @@ draft: false
 topics: ["embedded", "embedded/hardware"]
 ---
 
-## 한 줄 요약
 
-> **"Ch 12의 SR-IOV·VFIO 한계를 풀어주는 *차세대 가상화 기술 묶음*입니다."** — *vIOMMU*가 *guest 안에서도 nested IOMMU*, *Scalable IOV*가 *static partition → dynamic ADI*, *VirtIO*가 *paravirtualization·vDPA 데이터 패스 가속*, *IDE·TDISP·CMA-SPDM*이 *Confidential VM의 pass-through 신뢰* 토대.
+## 가상화 기능을 하나의 보장으로 묶지 않기
 
-[Ch 12 Virtualization I](/blog/embedded/hardware/pcie/chapter12-virtualization-1)에서 *SR-IOV*가 *펌웨어 정의 partition*임을 봤습니다. 이 장은 *그 한계를 해결*하는 *2025~2026의 차세대 기술*을 본격적으로 분해합니다.
+vIOMMU·S-IOV·VirtIO·Confidential I/O는 서로 다른 문제를 풉니다. Guest가 보는 DMA 주소, 장치를 나누는 단위, guest와 device의 queue protocol, 신뢰 경계를 각각 구분해야 합니다. 어느 기능 하나가 있다고 나머지까지 지원되거나 빠르고 안전한 migration이 완성되는 것은 아닙니다.
 
-## vIOMMU — Guest IOMMU
+이 장은 [Linux v6.12 VFIO](https://www.kernel.org/doc/html/v6.12/driver-api/vfio.html)·[IOMMUFD](https://www.kernel.org/doc/html/v6.12/userspace-api/iommufd.html), [Intel Scalable IOV Rev 1.1(2020-09) 기술 규격](https://cdrdv2-public.intel.com/671403/intel-scalable-io-virtualization-technical-specification.pdf), [VirtIO 1.2](https://docs.oasis-open.org/virtio/virtio/v1.2/virtio-v1.2.html)을 기준으로 역할과 확인 조건을 설명합니다. 실제 guest·ADI·vDPA 설정, migration 또는 TEE device assignment는 실행하지 않았습니다.
 
-guest 안에서도 *IOMMU 추상*이 필요한 이유:
+## vIOMMU와 두 주소 변환
 
-| 시나리오 | vIOMMU 필요 |
-|---------|------------|
-| Guest 안 *userspace driver* (DPDK·SPDK) | guest IOMMU 필요 |
-| Guest 안 *nested guest* (L2) | nested translation |
-| Guest *kernel security* | DMA-safe 보장 |
+Guest driver가 장치에 DMA 주소를 줄 때 guest 안의 IOMMU 추상을 제공할 수 있습니다. 하지만 guest에 vIOMMU가 노출됐다는 사실이 hardware nested translation 활성과 같지는 않습니다. Hypervisor가 guest mapping을 추적해 host mapping에 반영하는 방식과 hardware가 두 단계를 수행하는 방식을 구분합니다.
 
-| 구현 | 의미 |
+| 관점 | 주소 변환 |
 |------|------|
-| **QEMU intel-iommu (emulated)** | software emulation — 느림 |
-| **virtio-iommu (paravirt)** | guest driver가 *host와 협력* — 빠름 |
-| **VT-d nested translation** | hardware 2-stage — 가장 빠름 |
-| **SMMUv3 nested stages** | ARM 동일 모델 |
+| Guest가 관리하는 변환 | Guest IOVA → Guest physical address |
+| Host의 보호 경계 | Guest physical address → Host physical address |
+| Hardware nesting | 장치·IOMMU·kernel·hypervisor가 지원한 경우 두 단계를 hardware에서 연계 |
 
-## 2-Stage Translation
+`intel-iommu`·virtio-iommu·SMMU 등의 이름만으로 빠르기 순서를 정할 수는 없습니다. DMA mapping 빈도, IOTLB miss, invalidation과 실제 지원 경로가 영향을 줍니다. Guest DPDK 사용도 모든 구성에서 vIOMMU를 반드시 요구하는 하나의 조건으로 묶을 수 없습니다.
 
-| Stage | 역할 |
-|-------|------|
-| **Stage 1** | Guest IOVA → Guest PA (guest IOMMU table) |
-| **Stage 2** | Guest PA → Host PA (hypervisor table) |
+## S-IOV와 ADI
 
-Hardware가 *2-stage walk*. *Guest와 host 모두 separate page table*. SR-IOV + vIOMMU + nested = *완전 가상화*.
+Intel Scalable IOV의 ADI(Assignable Device Interface)는 공유 가능한 device backend 자원을 격리 단위로 구성한 것입니다. 별도 PCI function인 VF와 구분합니다. ADI를 같은 PCI function 아래 여러 출입구로 생각하면, 각 출입구를 식별하는 PASID와 자원을 관리하는 host 소프트웨어의 역할을 나눌 수 있습니다.
 
-## Scalable IOV (S-IOV) — Intel
+| 비교 | SR-IOV | Scalable IOV |
+|------|------|------|
+| 식별 단위 | 별도 PCI function인 VF | 별도 PCI function이 아닌 ADI |
+| 자원 생성 | 지원 TotalVFs와 PF driver·resource 조건 안에서 설정 | 장치의 ADI 자원과 관리 소프트웨어 조건에 따라 생성 |
+| 주소 공간 | function 단위 격리, PASID는 별도 기능 | PASID 기반 식별을 활용하는 구조 |
+| 실제 한도 | 장치·firmware·시스템 자원에 의존 | 장치·소프트웨어 자원에 의존 |
 
-*SR-IOV의 펌웨어 정적 partition* 한계 해결:
+SR-IOV도 NumVFs를 지원 범위 안에서 설정하므로 “firmware가 고정한 개수”라고 할 수는 없습니다. ADI 역시 소프트웨어가 만든다는 이유로 개수·resize·migration이 무제한인 것은 아닙니다. IDXD work queue를 설정하는 명령 하나가 ADI의 guest 할당과 격리를 모두 입증하지 않으므로, 미검증한 accel-config 예와 최초 상용 제품 단정은 사용하지 않습니다.
 
-| 항목 | SR-IOV | S-IOV |
-|------|--------|-------|
-| Partition 정의 | 펌웨어가 *NumVFs 고정* | *software ADI* — runtime resize |
-| Light HW | VF 자체 PCIe entity | *ADI*는 PCIe entity 아님 |
-| Scale | 64~256 VF | *수천 ADI* 가능 |
-| Memory overhead | VF 메타 큼 | 작음 |
-| PASID 의존 | optional | *필수* |
+## VirtIO와 vDPA
 
-| 요소 | 역할 |
+VirtIO는 guest driver와 device가 feature와 queue 형식을 합의하는 protocol입니다. VirtIO 1.2 §2.7·§2.8은 Split·Packed Virtqueue를 구분하고, Packed 사용은 `VIRTIO_F_RING_PACKED` 협상으로 결정합니다. Packed를 지원한다는 사실만으로 어떤 workload에서도 더 빠르다고 판정할 수 없습니다.
+
+| 구성 | 확인할 경계 |
 |------|------|
-| **ADI (Assignable Device Interface)** | Software 분할 단위 |
-| **Mediated VFIO** | ADI ↔ VFIO 통합 |
-| **Composable** | runtime add/remove |
+| virtio-net·blk 등 | guest driver가 협상한 feature와 queue 구성 |
+| vhost backend | queue를 처리하는 host 측 구현과 메모리 접근 범위 |
+| vDPA | VirtIO data path를 제공하는 backend. hardware뿐 아니라 software 구현도 가능 |
+| 실제 장치 가속 | 지원 feature·queue·DMA mapping·interrupt와 장치별 제약 |
 
-*Intel IDXD (Data Streaming Accelerator)*가 *S-IOV 첫 상용 사례*. `drivers/dma/idxd/`의 *work queue 기반 ADI*.
+QEMU의 device 옵션, netdev backend 옵션과 host의 management device 설정은 별개입니다. 불완전한 `-device` 문자열이나 존재를 확인하지 않은 관리 옵션을 실행 예로 제시하지 않습니다. 구현에 맞는 고정판 문서와 실제 feature negotiation 결과로 연결해야 합니다.
 
-```bash
-# IDXD work queue 구성 (S-IOV)
-accel-config config-wq dsa0/wq0.0 \
-  --wq-size=64 --mode=dedicated \
-  --type=user --priority=10
-accel-config config-wq dsa0/wq0.0 --pasid-enable=1
-accel-config enable-wq dsa0/wq0.0
-```
+## Pass-through migration의 세 가지 상태
 
-## VirtIO — Paravirtualization
+[QEMU 9.2.4 VFIO migration 문서](https://gitlab.com/qemu-project/qemu/-/blob/v9.2.4/docs/devel/migration/vfio.rst)는 장치 상태와 DMA dirty-page 수집을 따로 설명합니다. Guest RAM만 복사하면 장치도 함께 이사하는 것은 아닙니다. 진행 중인 DMA는 이동 중인 짐에 계속 손을 대는 작업에 가깝습니다. 장치 상태, DMA로 바뀐 메모리, 목적지의 호환 조건을 함께 다뤄야 합니다.
 
-*Guest가 자기 가상화됨을 알고 협력*:
+| 항목 | 필요한 확인 | 부족한 증거 |
+|------|------|------|
+| Device state | driver가 제공하는 migration state와 save/restore, stop·resume 순서 | VFIO에 bind됐다는 사실 |
+| DMA dirty pages | 실제 장치·IOMMU의 dirty logging과 메모리 재수집 | PRI 지원. PRI는 page request이고 dirty tracking이 아님 |
+| Destination | 장치·firmware·feature·queue 상태의 호환성 | 양쪽에 같은 이름의 VF가 존재한다는 사실 |
+| 최종 전환 | 새 DMA 차단·잔여 작업 정리·복원 후 재개 | guest RAM 복사 완료만 확인 |
 
-| 항목 | 의미 |
-|------|------|
-| VirtIO 1.x | 현대 표준 (OASIS) |
-| Capability 기반 | Common·Notify·ISR·Device·PCI |
-| virtqueue | descriptor·available·used ring |
-| Packed virtqueue (1.1+) | single ring, cache-friendly |
+VirtIO·vDPA도 backend와 협상 feature가 migration을 지원해야 합니다. 정지 시간·반복 복사량·실패 rollback은 실제 장치 조합에서 측정하고, “vDPA이면 자동 live migration”으로 묶지 않습니다.
 
-대표 device:
+## Confidential I/O의 신뢰 경계
 
-| Device | 사용 |
-|--------|------|
-| virtio-net | virtual NIC |
-| virtio-blk | virtual block |
-| virtio-scsi | virtual SCSI |
-| virtio-gpu | virtual GPU |
-| virtio-iommu | paravirt IOMMU |
-| virtio-fs | shared filesystem |
+암호화된 VM 메모리만으로 외부 장치까지 신뢰할 수는 없습니다. Link 보호, 장치 신원·firmware 상태, VM에 할당된 interface의 상태를 별도로 확인합니다. 아래는 역할 구분이며 특정 제품의 인증이나 구현 지원표가 아닙니다.
 
-## vDPA — Virtio Data Path Acceleration
+| 기능 | 담당하는 것 | 그것만으로 보장하지 못하는 것 |
+|------|------|------|
+| PCIe IDE | 지정된 link·stream의 암호화·무결성·replay 보호 | 장치 내부 firmware의 신뢰성과 VM별 권한 전체 |
+| SPDM·CMA | 장치 신원과 측정 정보를 검증하는 기반 | 측정값의 허용 정책이나 실제 IDE stream 활성 |
+| TDISP | TEE에 할당할 device interface의 configuration·state 관리 | 임의 장치의 자동 지원이나 별도 조건 없는 완전한 confidential I/O |
 
-*VirtIO control plane + Hardware data path*:
+IDE의 Link·Selective stream은 보호 범위와 경로를 기준으로 구분합니다. Selective를 단순히 성능을 위해 임의 packet만 암호화하는 기능으로 설명하지 않습니다. AES-GCM을 일반적인 stream cipher라는 이름으로 바꾸지도 않습니다.
 
-| 영역 | 누가 |
-|------|------|
-| Control plane | VirtIO (paravirt) |
-| Data plane | Hardware (real NIC·NVMe SR-IOV/S-IOV) |
+[TDISP는 PCI-SIG 표준](https://pcisig.com/PCI%20Express/ECN/Base/TEEDeviceInterfaceSecurityProtocol)이고, SPDM secure session을 사용하는 protocol과 platform의 trusted 관리 주체가 관여합니다. “VM이 TDISP session을 열고 IDE 키를 직접 협상한다”는 고정된 다섯 단계로 모든 구현을 설명할 수 없습니다. CXL 메모리의 TSP와도 구분해야 하며, 그 범위는 [CXL 보안 장](/blog/embedded/hardware/cxl/chapter14-security)에서 다룹니다.
 
-장점: *VirtIO의 portability + Hardware의 speed*. *vhost-vdpa device*가 *Linux kernel interface*.
-
-```bash
-# vhost-vdpa NIC binding
-modprobe vhost_vdpa
-vdpa dev add name vdpa0 mgmtdev <hw-id>
-# QEMU에 -device virtio-net,netdev=type=vhost-vdpa,...
-```
-
-DPDK·SR-IOV·VirtIO 장점 결합.
-
-## Live Migration of Pass-through
-
-*Pass-through device의 큰 문제*. *SR-IOV VF는 source HW에 묶여* 있어 *target host의 다른 VF로 옮기기 어려움*.
-
-해결 시도:
-
-| 기술 | 동작 |
-|------|------|
-| **Dirty page tracking (PRI)** | Guest의 *device-touched page* 추적 |
-| **State migration** | device internal state save·restore |
-| **vDPA·virtio-net** | *control plane 그대로*, data path만 reset |
-
-vDPA·VirtIO가 *live migration 친화적*인 이유 — *abstraction layer*가 *device-specific 변동을 흡수*.
-
-## Confidential I/O — 2026의 새 영역
-
-*Confidential VM (Intel TDX·AMD SEV-SNP·ARM CCA)*이 *pass-through device를 신뢰*하려면?
-
-| 위협 | 해결 |
-|------|------|
-| Hypervisor·host OS가 *I/O 가로채기* | *암호화·무결성 보호* |
-| Device가 *위조* | *attestation* |
-| DMA 외부 노출 | *암호화 link* |
-
-3개 표준:
-
-| 표준 | 책임 |
-|------|------|
-| **PCIe IDE (Integrity & Data Encryption)** | *link 레벨 AES-GCM 암호화* |
-| **TDISP (TEE Device Interface Security Protocol)** | *Guest TEE ↔ device 신뢰 세션* |
-| **CMA-SPDM (Component Measurement & Authentication)** | *device measurement·attestation* |
-
-## PCIe IDE — Link 암호화
-
-*TLP에 AES-GCM 적용*:
-
-| 항목 | 의미 |
-|------|------|
-| Selective IDE | *특정 TLP만 암호화* (성능 trade-off) |
-| Link IDE | *전체 link 암호화* |
-| IDE_KM | *key management* |
-| Stream cipher | *고속 stream cipher* |
-
-NVIDIA H100 *Confidential Computing (CC mode)*가 *IDE 첫 상용 사례*. AMD MI300A도 *IDE 지원*.
-
-## TDISP — TEE Device Session
-
-| 단계 | 동작 |
-|------|------|
-| 1 | Confidential VM이 *device attestation 요청* |
-| 2 | Device가 *SPDM measurement 제공* |
-| 3 | VM이 *TDISP 세션 수립* |
-| 4 | IDE key 협상 |
-| 5 | *Encrypted DMA stream* 시작 |
-
-Intel TDX-IO·AMD SEV-TIO·ARM CCA-IO의 *공통 spec*.
-
-## CMA-SPDM
-
-*Security Protocol and Data Model (DMTF DSP0274)*가 *device 신원·firmware measurement* 표준화. *MCTP·DOE (Data Object Exchange)*가 *transport*.
-
-## 자주 하는 실수
-
-### "S-IOV가 SR-IOV 즉시 대체"
-
-*특정 device (Intel IDXD 등)*만 *현재 지원*. SR-IOV가 *NIC·NVMe 대부분*. *겸용*이 일반.
-
-### "VirtIO는 항상 느리다"
-
-*Modern VirtIO 1.1+·vDPA·packed virtqueue*는 *bare-metal에 근접*. *legacy VirtIO 0.9*는 느림.
-
-### "Live Migration이 자동"
-
-Pass-through는 *대부분 manual*. *vDPA·virtio*가 유리하지만 *완전 자동 아님*. 운영팀 *migration window 설계* 필요.
-
-### "IDE면 모든 security 해결"
-
-IDE는 *link 무결성*만. *Device-level firmware·hardware trust*는 *별도 (CMA-SPDM·TDISP)*. *3개 모두* 활성화해야 *완전 Confidential I/O*.
-
-### "TDISP가 곧 양산"
-
-*spec stable·NVIDIA H100 CC 첫 상용*. *완전 보편화*는 *2027~2028*. *Intel TDX·AMD SEV-SNP·ARM CCA platform*도 *순차 도입*.
+신뢰 anchor·측정값 정책, interface 잠금·활성 상태, key 갱신과 실패 시 접근 차단을 실제 platform에서 확인해야 합니다. 특정 GPU의 CC 기능을 PCIe IDE·TDISP의 최초 상용 구현으로 단정하거나, 보편화 연도를 추측하지 않습니다.
 
 ## 정리
 
-- *vIOMMU*가 *guest 안 IOMMU* — *2-stage translation (guest IOVA→guest PA→host PA)*.
-- *Scalable IOV*가 *SR-IOV의 static partition → dynamic ADI*. PASID 필수.
-- *VirtIO 1.x*가 *paravirt 표준*. *packed virtqueue·vDPA*가 throughput.
-- *vDPA*가 *VirtIO control + HW data plane* — 양쪽 장점.
-- *Live migration of pass-through*는 *PRI dirty tracking·vDPA*가 친화적.
-- *Confidential I/O*: *PCIe IDE (암호화)·TDISP (세션)·CMA-SPDM (attestation)*.
-- NVIDIA H100 CC가 *첫 상용 Confidential I/O*.
+- vIOMMU 노출과 실제 hardware 2-stage translation은 구분합니다.
+- VF와 ADI는 식별 단위가 다르며 자원·관리 소프트웨어 제약이 있습니다.
+- VirtIO queue는 feature 협상으로 정하고, vDPA도 backend 지원을 확인합니다.
+- Migration에는 장치 상태·DMA dirty tracking·목적지 호환성이 필요합니다.
+- PRI는 dirty tracking이 아니며, IDE·SPDM·TDISP도 각각 다른 신뢰 경계를 다룹니다.
 
 ## 다음 편
 
-[Ch 14: Linux Operations — Hot-plug·AER·DPC·ARI](/blog/embedded/hardware/pcie/chapter14-linux-operations)에서 *운영 환경의 hot-plug·AER recovery·DPC integration·ARI 256+ function*을 본격적으로 분해합니다.
+[Ch 14: Linux Operations — Hot-plug·AER·DPC·ARI](/blog/embedded/hardware/pcie/chapter14-linux-operations)에서 *운영 환경의 hot-plug·AER recovery·DPC integration·ARI의 function 식별*을 본격적으로 분해합니다.
 
 ## 관련 항목
 

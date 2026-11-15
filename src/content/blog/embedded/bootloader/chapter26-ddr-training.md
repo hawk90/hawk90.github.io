@@ -2,7 +2,7 @@
 title: "DDR Training과 PHY Calibration — 보드별 파라미터 튜닝"
 slug: "embedded/bootloader/chapter26-ddr-training"
 date: 2026-05-19T09:26:00
-description: "DDR4/LPDDR4 controller·PHY가 어떻게 캘리브레이션되는지, 보드별 timing parameter, training 실패 디버깅."
+description: "DDR controller와 PHY 초기화, DRAM별 training 설정, 보드 bring-up에서 실패를 구분하는 방법."
 series: "Bootloader Internals"
 seriesOrder: 26
 tags: [embedded, bootloader, ddr, lpddr, dram-init, training]
@@ -10,363 +10,73 @@ draft: false
 topics: ["embedded"]
 ---
 
+DDR 초기화는 메모리 부품, SoC의 controller/PHY, PCB, 초기화 firmware가 함께 맞아야 합니다. Training은 설정된 메모리 인터페이스가 동작하는 지점을 찾는 과정이지만, 알고리즘과 관찰 방법은 DRAM 세대, PHY 및 vendor 도구에 따라 다릅니다. 보편적인 register 값이나 training 성공 기준을 추측하는 대신, 보드의 BOM·회로도·정확한 DRAM 자료와 SoC 문서를 연결해 확인하세요.
+
 ## 한 줄 요약
 
-**DDR training은 보드의 전기적 동작 조건을 측정해 지연·전압 관련 파라미터를 보정하는 단계입니다.** Ch 9에서는 큰 흐름을 봤지만, 양산 보드에서 training 실패가 발생하면 초기화가 중단되므로 원인을 분리해 추적해야 합니다. 이 글은 controller와 PHY가 어떻게 분리되어 있는지, 어떤 알고리즘이 돌아가는지, 그리고 실패했을 때 어디를 어떻게 찔러야 하는지를 깊이 있게 다룹니다.
-
-[9장](/blog/embedded/bootloader/chapter09-dram-init)이 "DDR 초기화의 전체 그림"이라면 이 글은 "그림 안의 까만 상자를 한 번 더 까는" 글입니다. PCB layout 결함, ZQ 저항 미스매치, Vref 오류, IBIS 모델 불일치 같은 *현장에서 가장 자주 만나는* 실패를 다룹니다.
-
-## controller와 PHY의 분리
-
-DDR 서브시스템은 두 개의 IP로 구성됩니다. 이름은 벤더마다 다르지만 역할은 동일합니다.
-
-| 블록 | 역할 | 인터페이스 |
-|------|------|------------|
-| **DDR controller** (uMCTL2, DENALI) | 프로토콜 — bank/row/column scheduling, refresh, ECC, AXI bridging | AXI ↔ DFI |
-| **DDR PHY** (Synopsys DWC PUB, Cadence DDR PHY) | 전기 — DQ/DQS drive·sample, ZQ calibration, training engine | DFI ↔ pad |
-
-이 둘은 **DFI(DDR PHY Interface)** 규격으로 통신합니다. controller는 "이 row를 activate해라"라는 *명령*을 발행하고, PHY는 그 명령을 *DDR chip이 알아듣는 전기 신호*로 변환합니다. 반대 방향도 같습니다. controller는 *논리적인* DRAM access만 알고, PHY는 *전기적인* 타이밍과 신호 무결성을 책임집니다.
-
-```text
-+----------+    +-----------------+    +-----+    +-----+
-|   CPU    |←→  |  DDR controller |←→  | PHY |←→  | DRAM|
-+----------+    +-----------------+    +-----+    +-----+
-   AXI4              DFI 2.x          pad 신호    JEDEC
-```
-
-이 분리가 중요한 이유는 많은 SoC에서 training 알고리즘과 측정 엔진이 PHY 쪽에 구현되기 때문입니다. 다만 초기화 순서와 상태 확인은 controller·PHY·펌웨어가 함께 관여하며, SPL은 controller 레지스터를 먼저 프로그래밍한 뒤 PHY에 "training 시작" 명령을 던지고 완료 상태를 확인하는 식으로 동작합니다. 정확한 순서는 SoC와 PHY 구현에 따라 다릅니다.
-
-## training 5단계
-
-대표적인 DDR4/LPDDR4 초기화에서는 다음과 같은 단계들이 사용됩니다. 단계의 이름·순서·필수 여부는 메모리 규격과 PHY 구현에 따라 달라지며, 어느 한 단계의 실패를 즉시 중단으로 처리할지도 펌웨어에 따라 다릅니다.
-
-| 단계 | 무엇을 정렬하는가 | 실패 시 증상 |
-|------|---------------------|--------------|
-| **CA training** (LPDDR4만) | Command/Address 신호와 CK clock의 정렬 | DRAM이 MRS 명령을 못 알아들음 |
-| **Write leveling (WrLvl)** | SoC 측 DQS edge가 chip 내부 CLK와 일치하도록 지연 조정 | write가 wrong bank로 들어감 |
-| **Read DQS gate training (DGSL)** | DRAM이 보낸 DQS의 도달 시점 학습 | read가 noise만 잡음 |
-| **Read leveling (RdLvl)** | DQS와 DQ 사이의 sampling window 가운데로 이동 | sporadic bit error |
-| **ZQ calibration** | 외부 240Ω 기준으로 ODT·Ron 임피던스 보정 | reflection, signal integrity 저하 |
-
-일부 PHY는 위 절차를 *1D training*과 *2D training*으로 나눠 수행합니다. 1D는 주로 시간 축(지연)을, 2D는 시간과 전압 축을 함께 탐색합니다. 2D 사용 여부와 범위는 PHY·메모리 조합과 목표 속도에 따라 결정되므로, 특정 세대의 모든 시스템에 필수라고 일반화하면 안 됩니다.
-
-```c
-/* drivers/ddr/imx/imx8m/ddr_init.c 의 핵심 흐름 */
-int ddr_cfg_phy(struct dram_timing_info *t)
-{
-    /* 1) 1D firmware 로드 — IMEM, DMEM */
-    ddr_load_train_firmware(FW_1D_IMAGE);
-
-    /* 2) PHY APB 레지스터에 firmware parameter 주입 */
-    for (int i = 0; t->fsp_msg[i].drate; i++) {
-        ddrphy_init_set_dfi_clk(t->fsp_msg[i].drate);
-        for (int j = 0; j < t->fsp_msg[i].fsp_cfg_num; j++) {
-            dwc_ddrphy_apb_wr(t->fsp_msg[i].fsp_cfg[j].reg,
-                              t->fsp_msg[i].fsp_cfg[j].val);
-        }
-    }
-
-    /* 3) training 시작 */
-    dwc_ddrphy_apb_wr(0xd0000, 0x0);          /* MicroContMuxSel */
-    dwc_ddrphy_apb_wr(0xd0099, 0x9);          /* TrainEnable */
-    dwc_ddrphy_apb_wr(0xd0099, 0x1);
-    dwc_ddrphy_apb_wr(0xd0099, 0x0);
-
-    /* 4) 완료 폴링 — mailbox 통해 결과 수신 */
-    if (wait_ddrphy_training_complete())
-        return -ETIMEDOUT;
-
-    /* 5) 2D firmware 로드, 다시 위 사이클 */
-    ddr_load_train_firmware(FW_2D_IMAGE);
-    /* ... */
-    return 0;
-}
-```
-
-`wait_ddrphy_training_complete()`가 반환하는 값에 *어느 단계가 실패했는지*가 담깁니다. 0xFF는 mailbox에 도달 못 함, 0x00은 성공, 그 외는 단계별 에러 코드입니다. 벤더 reference manual의 *PMU training major message* 표를 보면 코드별 해석이 나옵니다.
+Training 결과는 특정 SoC·PHY·DRAM·보드 조합의 증거입니다. 한 조합에서 얻은 timing, register 값, mailbox 값이나 온도 기준을 다른 제품에 이식하지 마세요.
 
-## DDR4 vs LPDDR4
+## Controller와 PHY
 
-같은 "DDR"이지만 전기·프로토콜이 다릅니다. SPL 코드도 분기됩니다.
+Controller는 메모리 프로토콜에 맞춰 요청과 timing을 관리하고, PHY는 SoC와 DRAM 사이의 전기적 인터페이스를 구현합니다. 이 역할 분리는 분석에 유용하지만 초기화 순서, training 실행 위치와 완료 상태는 IP 공급자 및 SoC 통합 방식에 달려 있습니다. 일부 PHY는 별도의 firmware를 쓸 수 있고, 다른 구현은 register sequence나 전용 control unit을 사용할 수 있습니다.
 
-| 항목 | DDR4 | LPDDR4 |
-|------|------|--------|
-| **clock** | single-ended CK_t, CK_c (differential) | differential CK only |
-| **command/address** | 1N timing 일반적 | 2N timing + **CA training 필수** |
-| **VDDQ** | 1.2 V | 1.1 V |
-| **bus width** | 64-bit + 8-bit ECC 일반 | 16-bit/32-bit channel 다수 |
-| **channel** | 1 channel = 1 controller | 2 sub-channel per chip |
-| **read DQS** | differential | single-ended (LPDDR4), differential (LPDDR4X) |
-| **mode register** | MR0~MR6 | MR1~MR22, **FSP(frequency set point)** |
-| **deep power-down** | 별도 없음 | DPD 모드 |
+따라서 소스에서 함수 이름만 보고 실제 hardware 절차를 일반화하지 말고, reference manual, PHY/DRAM 문서, 해당 보드의 초기화 코드 및 vendor tool output을 같은 버전으로 맞춰 보세요. U-Boot의 board 문서도 구체적인 DDR 설정 흐름을 플랫폼별로 설명합니다.
 
-LPDDR4의 *FSP*가 SPL 코드를 복잡하게 만듭니다. 같은 chip이 여러 주파수(예: 25 MHz boot → 1.6 GHz 정상)에서 동작하고, 주파수마다 *별도의 MR set*과 *별도의 training 결과*가 필요합니다. i.MX8M의 `t->fsp_msg[]` 배열이 바로 이 FSP별 설정입니다. boot 동안 *boot frequency*로 한 번 training, 정상 frequency로 또 한 번 training이 돌아갑니다.
+## Training 단계는 조합에 따라 다릅니다
 
-DDR4는 단일 frequency만 다루지만, *2D training의 eye sweep*에서 더 많은 sample 시간을 씁니다. 두 표준 모두 training 자체는 수십 ms ~ 수백 ms가 걸립니다.
+초기화에는 DRAM 규격과 구현에 따라 command/address 또는 data path 관련 calibration, read/write timing 조정, impedance calibration 등 서로 다른 과정이 포함될 수 있습니다. 단계의 이름·순서·필수 여부와 실패 처리 방식은 모든 DDR4·LPDDR4 PHY에서 같지 않습니다. 숫자만 나열된 표를 근거 없이 표준 절차로 읽지 마세요.
 
-## timing parameter
+DDR 세대별 signal 구성이나 전압, timing, ZQ 조건은 JEDEC 규격과 정확한 DRAM 부품의 datasheet를 확인해야 합니다. 보드에 납땜된 DRAM의 상세값을 eMMC `EXT_CSD`에서 얻는다는 식의 설명은 맞지 않습니다. DIMM의 SPD 사용 여부도 시스템 설계에 따라 다릅니다. DRAM 부품 번호와 speed grade, rank/width, SoC revision, PHY firmware 및 초기화 도구 버전을 기록하세요.
 
-DRAM chip의 datasheet에는 *수십 개의 timing parameter*가 정의되어 있습니다. 그 중 SPL이 controller 레지스터로 직접 프로그래밍해야 하는 핵심 값은 다음과 같습니다.
+## 보드별 설정 산출과 빌드
 
-| 파라미터 | 의미 | DDR4-3200 일반값 | LPDDR4-3200 일반값 |
-|----------|------|------------------|----------------------|
-| **tCL** | CAS latency (RD 명령 → 첫 data) | 22 cycles | 28 cycles |
-| **tRCD** | RAS → CAS delay (ACT → RD) | 22 cycles | 18 cycles |
-| **tRP** | row precharge time | 22 cycles | 18 cycles |
-| **tRC** | row cycle time (ACT → ACT same bank) | 76 ns | 63 ns |
-| **tRFC** | refresh cycle time | 350 ns (8Gb) | 280 ns (16Gb) |
-| **tWR** | write recovery time | 24 cycles | 24 cycles |
-| **tWTR** | write to read delay | 12 cycles | 12 cycles |
-| **tFAW** | four activate window | 30 ns | 40 ns |
-| **tREFI** | refresh interval (avg) | 7.8 μs (≤85°C) | 3.9 μs (≤85°C) |
+Vendor DDR tool은 제품군에 맞는 controller 설정이나 training 입력을 생성·점검할 수 있습니다. 예를 들어 NXP의 i.MX8/MSCALE DDR Tool User Guide는 특정 i.MX 계열과 해당 도구/firmware 사용 관계 및 U-Boot 빌드 통합 방법을 설명합니다. 그 절차를 다른 i.MX 제품이나 다른 vendor에 그대로 적용할 수는 없습니다.
 
-이 값들은 다음 세 곳 중 하나에서 옵니다.
+빌드 전 다음 자료를 상호 확인합니다.
 
-1. **DRAM chip datasheet** — 가장 정확. JEDEC speed grade로 제공.
-2. **SPD EEPROM** (server-grade DDR4 DIMM) — controller가 I2C로 직접 읽음.
-3. **eMMC EXT_CSD** 같은 *embedded* 정보 — 보드 설계서에 정리.
+- 정확한 SoC와 silicon revision 및 PHY/controller IP 버전
+- DRAM 부품 번호, datasheet revision, density, organization, speed grade와 board routing
+- 생성된 설정 파일·binary firmware 이름과 version/hash
+- U-Boot tag, board defconfig, image packaging 방식과 linker/map 산출물
+- vendor tool이 요구하는 BSP, firmware 및 생성 코드 조합
 
-embedded 보드에는 SPD가 보통 *없습니다*. soldered DRAM이 한 가지뿐이라 보드 설계 시점에 timing이 고정됩니다. 그래서 SPL 빌드에 *하드코딩된 table*이 들어갑니다.
+초기화 값의 출처와 변경 이력을 보드 revision에 연결해 두세요. 다른 DRAM 부품을 같은 보드 옵션으로 처리할 수 있는지, 또는 보드 식별을 통해 설정을 선택하는지는 해당 platform code로 확인합니다.
 
-```c
-/* board/freescale/imx8mm_evk/lpddr4_timing.c — 일부 */
-struct dram_cfg_param ddrc_cfg[] = {
-    { DDRC_MSTR(0),       0xa1080020 },  /* mstr: LPDDR4, 32-bit, 1 rank */
-    { DDRC_RFSHTMG(0),    0x004900a1 },  /* tRFC=161, tRFCI=73 */
-    { DDRC_DRAMTMG0(0),   0x1a201d1d },  /* tRAS, tFAW, tWR2PRE */
-    { DDRC_DRAMTMG1(0),   0x00060633 },  /* tXP, tRTP, tRC */
-    { DDRC_DRAMTMG2(0),   0x070e1214 },  /* tCWL, tCL, tRD2WR, tWR2RD */
-    { DDRC_DRAMTMG3(0),   0x00b0b006 },  /* tMRW, tMRD */
-    { DDRC_DRAMTMG4(0),   0x0a040509 },  /* tRP, tRRD, tCCD, tRCD */
-    /* ... 수백 줄 ... */
-};
-```
+## 실패를 조사하는 순서
 
-이 파일 한 줄이라도 잘못되면 *전부* 실패합니다. 그래서 *손으로 작성하지 않습니다*. 다음 절의 벤더 tool이 datasheet PDF를 입력으로 받아 자동 생성합니다.
+1. 보드 BOM과 부품 marking이 build가 대상으로 삼는 DRAM과 일치하는지 확인합니다.
+2. U-Boot 로그 또는 PHY firmware의 진단 output에서 마지막으로 완료된 단계를 기록합니다. 출력이 없는 경우 그 사실만으로 training 단계나 원인을 확정할 수 없습니다.
+3. 정확한 부품 datasheet와 SoC/PHY 매뉴얼에서 설정 값, reset, clocking 및 전원 조건을 대조합니다.
+4. vendor가 제공하는 상태 해석 도구·테스트를 해당 release 기준으로 사용하고, raw register 주소나 결과 코드를 인터넷의 다른 보드에서 복사하지 않습니다.
+5. 재현 가능한 조건에서 부품·보드 revision, 온도, 전원, firmware 버전과 결과를 함께 기록합니다.
 
-## 보드별 DRAM blob
+온도 변화, 보드 간 편차, reset 후 간헐 오류는 조사 단서일 뿐 특정 원인을 확정하지 않습니다. PCB impedance, 길이 정합, Vref, 저항값을 수치로 판정하려면 회로도·layout·DRAM/SoC specification과 실제 측정이 필요합니다. 이 글은 특정 board를 측정하거나 training result를 얻은 기록이 아닙니다.
 
-SPL 안에 들어가는 DDR 데이터는 두 종류입니다.
+## Training 이후 메모리 시험
 
-| 종류 | 내용 | 생성 도구 |
-|------|------|-----------|
-| **controller config** — C source | `ddrc_cfg[]` 같은 레지스터 표 | 벤더 GUI tool |
-| **PHY firmware** — binary blob | training PMU가 실행하는 microcode | 벤더 binary release |
+초기화 완료 메시지는 모든 메모리 주소, 온도, 전압과 부하 조건에서 무오류를 보장하지 않습니다. 제품 검증은 SoC vendor가 안내하는 DDR tool, OS memory test, ECC telemetry와 stress 조건을 제품 요구 사항에 맞춰 조합합니다. 시험 결과는 memory range, cache 설정, 접근 pattern, runtime, 온도·전원 조건과 build ID를 함께 적어야 합니다.
 
-벤더별 위치와 이름이 다릅니다.
-
-| SoC vendor | controller config | PHY firmware |
-|------------|--------------------|--------------|
-| **NXP i.MX8M** | `lpddr4_timing.c` (DDR_TOOL 출력) | `lpddr4_pmu_train_1d_imem.bin`, `lpddr4_pmu_train_1d_dmem.bin`, `2d_imem.bin`, `2d_dmem.bin` |
-| **Rockchip RK3399/3568** | `sdram-lpddr4-*.dtsi` | `ddr.bin` (single blob, controller + PHY 통합) |
-| **Allwinner H6/H616** | C source in U-Boot | `dram-h6.bin` (별도 blob 없음, 코드에 통합) |
-| **TI AM6x** | `ddrss.c` + DTS overlay | DENALI는 firmware 별도 없음 |
-| **STM32MP1** | DTS의 `&dramc { ... }` 블록 | 없음 (controller가 PHY와 결합) |
-
-NXP의 경우 firmware 4개를 `MAINTAINERS`가 binary release로 배포합니다. U-Boot 빌드 시 `nxp-firmware/firmware/ddr/synopsys/`에 복사하지 않으면 SPL이 *link*는 되지만 *런타임에 segfault*가 납니다.
-
-```bash
-# i.MX8MM SPL 빌드 전 firmware 위치 확인
-$ ls $(pwd)/lpddr4_pmu_train_*.bin
-lpddr4_pmu_train_1d_dmem.bin  lpddr4_pmu_train_2d_dmem.bin
-lpddr4_pmu_train_1d_imem.bin  lpddr4_pmu_train_2d_imem.bin
-
-# SPL 빌드
-$ make -j$(nproc) imx8mm_evk_defconfig
-$ make -j$(nproc) flash.bin
-```
-
-빌드 산출물 `flash.bin`은 *bootloader code + DDR firmware blob + DTB*가 하나로 합쳐진 이미지입니다. SPL이 SRAM에서 동작하다가 DDR firmware를 PHY의 IMEM/DMEM에 *직접 복사*하고, training을 트리거합니다.
-
-## training 실패 — 5가지 원인
-
-production bring-up에서 만나는 training 실패의 90%는 다음 5가지에서 옵니다.
-
-### 1. signal integrity — PCB layout
-
-가장 흔합니다. DRAM은 *수 GHz에 가까운* 신호를 다루고, PCB 트레이스 길이가 1 mm만 어긋나도 timing eye가 닫힙니다.
-
-증상:
-- 25°C에서는 동작, 0°C 또는 70°C에서 실패.
-- 보드 A는 OK, 동일 설계의 보드 B는 실패.
-- write leveling은 통과, 2D RdLvl에서 실패.
-
-확인 절차:
-- *via를 줄였는가*, *fly-by topology를 따랐는가*, *DQ skew matching ≤ 25 mil인가*.
-- DDR4는 *Z_t = 40~50Ω*, LPDDR4는 *Z_t = 50~60Ω* 으로 임피던스 컨트롤.
-- DQS·CK는 *differential 100Ω*.
-
-해결은 board respin이 정공법입니다. 임시로는 *training 결과 register를 dump*하고, 가장 큰 marginal byte lane을 식별해 *PCB 어느 트레이스가 부족한지* 역추적합니다.
-
-### 2. timing parameter mismatch
-
-보드의 DRAM 부품이 *dual-source*인 경우. Micron 부품 가정으로 빌드한 SPL을 Samsung 부품 보드에 올리면 tRFC가 안 맞아 training이 멈춥니다. 부품 마킹을 *현미경으로* 확인하고, 해당 chip의 정확한 datasheet로 timing table을 다시 생성해야 합니다.
-
-### 3. Vref off
-
-DDR4 이후 *Vref training*이 chip 내부에서 일어납니다. 보드의 외부 Vref bias network가 잘못 설계되어 *시작 Vref*가 JEDEC 범위를 벗어나면, training 자체가 시작도 못 합니다.
-
-확인 — schematic에서 `VREFCA` / `VREFDQ` 핀의 bias resistor 값을 검토하고, *오실로스코프로* power-on 직후 Vref 핀의 전압을 측정합니다. 0.5 × VDDQ ± 5% 안에 들어야 합니다.
-
-### 4. ZQ resistor 잘못
-
-DRAM의 ZQ 핀에는 *정밀 240Ω 1% 저항*이 GND로 연결됩니다. 이 저항을 240Ω 5%, 또는 220Ω, 250Ω으로 잘못 BOM에 넣으면 ZQ calibration이 *out-of-range*를 보고합니다.
-
-```c
-/* 단순화된 ZQ calibration 트리거 — controller가 직접 발행 */
-void zq_calibration(struct ddrc *ddrc)
-{
-    /* 1) ZQ short 시작 */
-    writel(DDRC_ZQ_SHORT_REQ, &ddrc->zqctl0);
-
-    /* 2) 완료 폴링 — 보통 100 cycle 이내 */
-    int timeout = 1000;
-    while (readl(&ddrc->zqstat) & DDRC_ZQ_BUSY) {
-        if (--timeout == 0) {
-            panic("ZQ calibration timeout — check 240Ω external resistor");
-        }
-        udelay(1);
-    }
-
-    /* 3) 결과 확인 — out of range면 외부 저항 의심 */
-    uint32_t r = readl(&ddrc->zqstat);
-    if (r & DDRC_ZQ_OUT_OF_RANGE) {
-        printf("ZQ out of range (raw=0x%x) — external R = wrong\n", r);
-    }
-}
-```
-
-`DDRC_ZQ_OUT_OF_RANGE`가 set되면 *전기적으로* 외부 저항이 잘못 붙어 있다는 의미입니다. BOM 검수.
-
-### 5. IBIS model mismatch
-
-PCB 설계 시 IBIS(I/O Buffer Information Specification) model로 *pre-layout 시뮬레이션*을 합니다. SoC vendor가 제공한 IBIS가 *실제 silicon revision*과 다르면 시뮬레이션은 OK인데 실측은 fail이 됩니다. 특히 신생 SoC의 *engineering sample* 단계에서 발생하며, vendor의 *latest IBIS*로 *post-layout* 시뮬레이션을 다시 돌리는 것이 해법입니다.
-
-## training 결과 dump와 분석
-
-training이 통과해도 *얼마나 여유 있게 통과했는지*를 확인해야 양산까지 갑니다. PMU mailbox는 단계별 *결과 register*를 남깁니다.
-
-```text
-=> mw 0x3d000d0  ; PHY MicroContMuxSel = CSR mode
-=> md 0x3d0080000 0x40
-3d0080000: 0000007f 00000000 00000003 00000000   /* RdLvl byte 0 delay */
-3d0080010: 0000007e 00000000 00000003 00000000   /* RdLvl byte 1 */
-3d0080020: 00000081 00000000 00000003 00000000
-3d0080030: 0000007d 00000000 00000003 00000000
-...
-```
-
-값이 *byte lane 사이에 5 이상 차이*가 나면 PCB skew가 큽니다. 이상적으로는 ±2 이내가 healthy. NXP의 *PMU result decoder script*는 이 raw 값을 *picosecond*로 환산해 줍니다.
-
-U-Boot 콘솔에서 즉시 돌릴 수 있는 검증:
-
-```text
-=> mtest 0x40000000 0x60000000 0xAA55
-Testing 40000000 ... 60000000:
-Pattern AA55AA55AA55AA55  Writing...  Reading...
-Tested 536870912 bytes OK.
-
-=> mtest 0x40000000 0x60000000 0x55AA 100
-Pattern 55AA55AA55AA55AA  Iteration 1   OK
-Pattern 55AA55AA55AA55AA  Iteration 2   OK
-...
-```
-
-이 단계에서 *interrupt*나 *cache aliasing*은 짚지 못합니다. Linux userspace의 `memtester`가 더 철저합니다.
-
-```bash
-# 256 MB 영역 1회 — 보통 10분 정도
-$ memtester 256M 1
-memtester version 4.5.1 (64-bit)
-got 256MB (268435456 bytes), trying mlock ...locked.
-Loop 1/1:
-  Stuck Address        : ok
-  Random Value         : ok
-  Compare XOR / SUB    : ok
-  Sequential Increment : ok
-  Solid Bits           : ok
-  Checkerboard         : ok
-  Walking Ones / Zeroes: ok
-  8-bit / 16-bit Writes: ok
-```
-
-이 패턴들이 *모두* OK여야 합니다. *Walking Ones / Zeroes*가 자주 marginal로 잡힙니다. 한 번이라도 failure가 나오면 *training이 marginal하게 통과한 것*입니다. 즉, training은 PMU 기준 통과지만 *실제 marginal*. board respin 또는 training parameter tweak 필요.
-
-## post-training 검증
-
-training과 mtest를 통과해도 *production*까지 가려면 한 단계가 더 필요합니다.
-
-1. **kernel boot 전 memory walk** — SPL이 DDR 전체 영역을 0으로 쓰고 읽으며 *DDR controller error counter*가 0인지 확인. ECC 모드면 *uncorrectable error count*도 0.
-2. **ECC enable** — 가능하면 켭니다. DDR4 server-grade는 SECDED, LPDDR4는 *inline ECC* 또는 *side-band ECC*. 양산에서 latent bit error를 잡아냅니다.
-3. **stress test** — `stress-ng --vm 4 --vm-bytes 80% --vm-method all --verify -t 3600s` 같은 1시간 stress를 *온도 chamber*에서 -10°C, 25°C, 70°C로 3회.
-4. **resume retraining 검증** — suspend/resume 100회 반복 후 데이터 무결성 확인. ATF가 retraining을 *제대로* 돌리는지 확인.
-5. **장기 burn-in** — 48시간 idle + 48시간 stress. 양산 보드 100대 표본으로.
-
-이 5단계가 통과하면 양산 진입 가능. 한 단계라도 통과 못 하면 그 원인이 *DDR fixed*인지 *software fixable*인지 결정합니다.
-
-## 여러 PCB revision 대응
-
-같은 제품군에 *revision A·B·C*가 공존하는 경우, DDR 부품이 dual-source가 되거나 PCB가 변경됩니다. SPL이 *런타임에 보드를 식별*하고 *해당 DDR config를 골라야* 합니다.
-
-```c
-/* board/myvendor/myboard/spl.c */
-void spl_dram_init(void)
-{
-    enum board_rev rev = detect_board_revision();  /* GPIO·ID EEPROM 으로 */
-
-    struct dram_timing_info *t;
-    switch (rev) {
-    case BOARD_REV_A:
-        t = &dram_timing_micron_8gb;
-        break;
-    case BOARD_REV_B:
-        t = &dram_timing_samsung_8gb;
-        break;
-    case BOARD_REV_C:
-        t = &dram_timing_micron_16gb;
-        break;
-    default:
-        panic("Unknown board rev — cannot pick DDR timing");
-    }
-
-    ddr_init(t);
-
-    if (ddr_self_test() != 0)
-        panic("DRAM self-test failed on rev=%d", rev);
-}
-```
-
-각 `dram_timing_*` 구조체는 *별도 파일*로 분리합니다. 보드 revision이 늘어나도 코드가 한 곳에 모이지 않게. 식별 신호는 보통 *board ID GPIO 3 ~ 4개* 또는 *EEPROM의 board metadata*입니다. SPL이 그 단계까지 동작해야 하므로 *식별 자체는 DDR에 의존하지 않는* 코드 경로로 짜야 합니다.
-
-## 흔한 실수
-
-- **firmware blob 버전을 잊습니다.** NXP firmware는 *SoC silicon revision별*로 다릅니다. silicon rev B0인데 A0용 firmware로 SPL을 만들면 mailbox response가 다르고 *training이 거짓 성공*을 보고합니다. silicon rev은 `cat /proc/cpuinfo`나 SPL 부팅 메시지로 확인.
-- **온도 단일 조건에서 sign-off.** 25°C training은 *우연히* 통과하기 쉽습니다. 양산 전 *3-point 온도 sweep*은 필수. chamber 없으면 *cold spray + heat gun*으로라도 marginal lane을 찾습니다.
-- **`mtest` 한 번만 돌립니다.** 단일 패턴은 cache·prefetcher·DMA 트래픽을 시뮬레이션하지 못합니다. *memtester + stress-ng*까지 거쳐야 합니다.
-- **suspend/resume를 검증 안 합니다.** cold boot training은 성공인데 resume retraining이 marginal하면 *suspend에서 영원히 못 깨어나는* 사고가 양산에서 나옵니다. PSCI `CPU_SUSPEND` ↔ `CPU_RESUME` cycle을 *수백 회* 반복 검증.
-- **ECC enable을 *마지막에* 합니다.** ECC를 일찍 켰다면 *uncorrectable error 카운터*가 실패 lane 추적의 1차 단서입니다. 양산까지 끄고 가다가 마지막에 켜면, 어디가 marginal한지 *이미 잊어버린 뒤*가 됩니다.
-- **board revision 식별을 DDR에 의존합니다.** EEPROM이 *I2C로* 읽히면 DDR 전이라 OK지만, 코드가 DDR을 거치게 짜이면 자기 모순. 항상 *DDR 이전*에 식별이 끝나야 합니다.
+U-Boot `mtest`는 선택한 RAM 범위에 pattern을 기록한 뒤 읽는 명령입니다. 따라서 기존 내용을 덮어쓸 수 있고, 시작·끝 주소가 안전하다고 확인되어야 합니다. Linux `memtester`나 stress 도구 역시 시스템 사용 중 전체 RAM을 시험할 수 있는 것은 아닙니다. 이 도구를 실행한 사실만으로 제조 sign-off나 ECC coverage를 주장하지 마세요.
 
 ## 정리
 
-- DDR 서브시스템은 *protocol을 다루는 controller*와 *전기를 다루는 PHY*로 분리되어 있고, DFI 규격으로 통신합니다.
-- training은 CA·write leveling·read gate/leveling·ZQ calibration 등을 조합하며, 정확한 단계와 순서는 PHY 구현에 따라 달라집니다.
-- DDR4와 LPDDR4는 같은 "DDR"이지만 clock·CA timing·FSP·channel 구조가 달라 SPL 코드가 분기됩니다.
-- timing parameter(tCL, tRCD, tRP, tRC, tRFC, tWR 등)는 datasheet에서 옵니다. 손으로 안 쓰고 벤더 tool로 생성합니다.
-- 보드별 DRAM blob은 *controller config(C 표)*와 *PHY firmware(binary)* 두 가지로 구성됩니다.
-- training 실패의 5대 원인은 PCB SI, timing mismatch, Vref off, ZQ 저항, IBIS mismatch입니다.
-- training 통과 후 *memtester + stress-ng + 온도 sweep + resume cycle*까지 통과해야 양산 진입.
-- 여러 PCB revision은 *런타임 board ID 식별 + DDR config 선택*으로 처리합니다.
+- Training 순서와 지원 기능은 DRAM 규격뿐 아니라 PHY·SoC 구현에 종속됩니다.
+- timing과 electrical limits는 정확한 DRAM/SoC 자료 및 보드 설계 자료에서 얻습니다.
+- vendor 생성 코드와 firmware는 맞는 silicon, board, BSP 및 tool 버전으로 고정합니다.
+- raw training register 값이나 합성 로그를 일반적인 정상 기준으로 제시하지 않습니다.
+- 메모리 시험은 범위와 파괴성, 시험 조건을 기록하고 하드웨어 sign-off와 구분합니다.
 
 ## 다음 장 예고
 
-다음 편은 **Ch 27: 신뢰 체인(Chain of Trust)**. ROM → SPL → ATF → U-Boot → kernel 각 단계에서 *어떤 서명·검증*이 일어나는지, fused key가 어떻게 흐르는지 봅니다.
-
+다음 편은 **Ch 27: 신뢰 체인(Chain of Trust)**입니다. 초기 firmware, U-Boot FIT, 커널 모듈과 rootfs 무결성 검증이 어떤 조건에서 서로 연결되는지 분리해 살펴봅니다.
 
 ## 관련 항목
 
-- [Ch 9: DRAM 초기화](/blog/embedded/bootloader/chapter09-dram-init) — 이 글의 기초가 되는 큰 그림
-- [Ch 8: 보드 초기화](/blog/embedded/bootloader/chapter08-board-init) — `board_init_f`에서 DDR을 부르는 위치
-- [Ch 24: SPL 분리 빌드](/blog/embedded/bootloader/chapter24-spl-deep) — DDR firmware blob이 들어가는 SPL 빌드 흐름
-- [Ch 22: 부트 디버깅](/blog/embedded/bootloader/chapter22-debugging) — training 실패 시 JTAG·UART 활용법
-- [JEDEC LPDDR4 Standard (JESD209-4)](https://www.jedec.org/standards-documents/docs/jesd209-4b)
+- [Ch 9: DRAM 초기화](/blog/embedded/bootloader/chapter09-dram-init)
+- [Ch 24: SPL·TPL 내부 해부](/blog/embedded/bootloader/chapter24-spl-deep)
+- [Ch 27: Chain of Trust](/blog/embedded/bootloader/chapter27-chain-of-trust)
+- [NXP i.MX8/MSCALE DDR Tool User Guide](https://community.nxp.com/pwmxy87654/attachments/pwmxy87654/other/22755/1/MSCALE_DDR_Tool_User_Guide.pdf)
+- [NXP i.MX8/MSCALE DDR Tool Release](https://community.nxp.com/t5/i-MX-Processors-Knowledge-Base/i-MX-8-8X-Family-DDR-Tools-Release/ta-p/1121519)
+- [U-Boot: TI K3 DDR configuration](https://docs.u-boot.org/en/latest/board/ti/k3.html)
+- [U-Boot: mtest command](https://docs.u-boot.org/en/v2024.01/usage/cmd/mtest.html)
+- [JEDEC LPDDR4 Standard](https://www.jedec.org/standards-documents/docs/jesd209-4b)

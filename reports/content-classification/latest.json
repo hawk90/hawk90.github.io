@@ -1,8 +1,8 @@
 {
-  "total": 3407,
+  "total": 3408,
   "categoryCount": 65,
   "sourceCounts": {
-    "explicit": 3407,
+    "explicit": 3408,
     "legacy": 0,
     "pathOnly": 0,
     "unclassified": 0
@@ -23,10 +23,10 @@
     },
     {
       "path": "embedded/modern-recipes",
-      "documents": 152,
+      "documents": 153,
       "seriesCount": 1,
       "dominantSeries": "Modern Embedded Recipes",
-      "dominantSeriesDocuments": 152,
+      "dominantSeriesDocuments": 153,
       "dominantSeriesShare": 1,
       "ungroupedDocuments": 0,
       "recommendation": "review-as-series",

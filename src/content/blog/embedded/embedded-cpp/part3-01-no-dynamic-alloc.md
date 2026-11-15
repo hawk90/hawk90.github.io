@@ -33,19 +33,19 @@ for (auto& order : input) {
 }
 ```
 
-대부분의 인증 환경(MISRA, AUTOSAR, DO-178C)이 동적 할당을 금지하거나 심하게 제한합니다. 허용한다 해도 시스템 초기화 시점에만 허용합니다.
+동적 할당 허용 범위는 프로젝트의 코딩 규칙과 안전 요구사항에 따라 정합니다. MISRA·AUTOSAR의 특정 규칙과 DO-178C의 인증 프로세스를 한데 묶어 일괄 금지로 해석하면 안 됩니다. 이 글은 운용 중 heap 할당을 금지하기로 정한 프로젝트를 대상으로 합니다.
 
 이 글은 heap 없이 C++를 쓰는 패턴을 정리합니다.
 
 ## 정적 컨테이너 표준 라이브러리
 
-C++ 표준에서 `<array>`가 유일한 stack-only 컨테이너입니다. 나머지는 대부분 heap을 사용합니다.
+`std::array`는 원소를 객체 내부에 저장하는 고정 길이 컨테이너입니다. 자동·정적·동적 저장 기간은 array 객체를 어디에 생성하는지에 따라 달라집니다. `std::optional`, `std::variant`도 자신의 값을 내부에 저장하며, C++26에는 `std::inplace_vector`도 추가됩니다.
 
 ```cpp
 #include <array>
 
-std::array<int, 16> buffer;             // stack, 64 byte
-std::array<float, 256> sin_table;       // 1024 byte
+std::array<int, 16> buffer{};             // stack, 64 byte
+std::array<float, 256> sin_table{};       // 1024 byte
 std::array<Order, 8> recent_orders;     // sizeof(Order)*8
 
 buffer[0] = 1;
@@ -64,7 +64,7 @@ std::sort(sin_table.begin(), sin_table.end());
 
 ## ETL — heap 없는 STL 대체
 
-[Embedded Template Library](https://www.etlcpp.com/) (ETL)는 임베디드 친화 STL입니다. 모든 컨테이너가 고정 크기로 동작합니다.
+[Embedded Template Library](https://www.etlcpp.com/) (ETL)는 임베디드 친화 STL입니다. 이 장에서 사용하는 vector·string·map은 고정 용량을 타입에 지정합니다.
 
 ```cpp
 #include <etl/vector.h>
@@ -101,12 +101,13 @@ ETL은 MIT license에 header-only이며, 임베디드 표준 라이브러리에 
 
 // stack buffer 위에 monotonic allocator
 std::array<std::byte, 4096> buffer;
-std::pmr::monotonic_buffer_resource pool(buffer.data(), buffer.size());
+std::pmr::monotonic_buffer_resource pool(
+    buffer.data(), buffer.size(), std::pmr::null_memory_resource());
 
 std::pmr::vector<int> v(&pool);
 v.reserve(100);
 for (int i = 0; i < 100; ++i) v.push_back(i);
-// 모든 메모리는 stack buffer에서
+// 초기 버퍼가 부족하면 bad_alloc. 원소 자체의 내부 할당은 별도입니다.
 ```
 
 자세한 내용은 [Part 3-04: std::pmr 활용](/blog/embedded/embedded-cpp/part3-04-pmr).
@@ -160,6 +161,7 @@ public:
     template<typename... Args>
     T* construct(Args&&... args) {
         T* p = allocate();
+        static_assert(std::is_nothrow_constructible_v<T, Args...>);
         if (p) new (p) T(std::forward<Args>(args)...);
         return p;
     }
@@ -179,7 +181,7 @@ auto* o = order_pool.construct(/* args */);
 order_pool.destroy(o);
 ```
 
-고정 크기 N개를 heap 없이 결정적 시간에 처리합니다.
+이 검색형 pool의 할당은 최대 N개 슬롯을 살피므로 O(N)입니다. 생성자가 예외를 던지면 슬롯을 반환하는 복구도 필요합니다. 아래 미리보기는 nothrow 생성·소멸 타입과 같은 pool에서 얻은 유효 포인터만 받는다고 가정합니다. O(1) free-list 구현과 완전한 예제는 Part 3-03에서 다룹니다.
 
 ## 패턴 2 — placement new
 
@@ -201,7 +203,7 @@ heap을 전혀 쓰지 않고 기존 메모리 위에 객체를 construct합니�
 객체의 유무를 heap 없이 표현합니다.
 
 ```cpp
-std::optional<Order> current_order;   // sizeof(Order) + bool, on stack
+std::optional<Order> current_order;   // Order + 상태·정렬 패딩, 저장 위치는 선언에 따름
 
 void start() {
     current_order = Order{/* args */};   // emplace
@@ -218,7 +220,7 @@ void end() {
 }
 ```
 
-pointer나 heap 없이 "있을 수도, 없을 수도"를 표현합니다. 모든 메모리가 stack 또는 static에 자리잡습니다.
+optional 자체가 값을 내부에 저장하지만 Order의 내부 할당과 저장 기간은 따로 확인합니다.
 
 ## 패턴 4 — Static factory
 
@@ -253,8 +255,8 @@ orders.push_back(o);
 etl::vector<Order, 32> orders;
 if (!orders.full()) orders.push_back(o);
 
-// GOOD — pmr (메모리 풀에서)
-std::pmr::vector<Order> orders(&order_pool);
+// GOOD — pmr (memory_resource 구현에서; ObjectPool은 직접 호환되지 않음)
+std::pmr::vector<Order> orders(&pool_resource);
 
 // GOOD — std::array + 직접 size
 std::array<Order, 32> orders;
@@ -295,10 +297,10 @@ cb = etl::delegate<void(int)>::create<&MyClass::method>(my_obj);
 void (*cb)(int) = my_function;
 
 // GOOD — std::function with capture-less lambda
-std::function<void(int)> cb = [](int x) { /* */ };   // capture 없으면 inline storage
+std::function<void(int)> cb = [](int x) { /* */ };   // 구현의 SBO 조건을 확인해야 함
 ```
 
-`etl::delegate`은 고정 크기 internal storage를 사용하므로 heap을 쓰지 않습니다.
+캡처 없는 람다는 함수 포인터로 변환할 수 있습니다. `std::function`에 람다 객체를 직접 넣는 경우에는 구현의 작은 객체 최적화 조건을 확인합니다. 확실히 표준의 비할당 보장을 쓰려면 `std::function<void(int)> cb = +[](int) {};`처럼 함수 포인터를 저장합니다. ETL의 용량 초과·delegate 계약과 버전 검증은 [Part 4-02](/blog/embedded/embedded-cpp/part4-02-etl-library)에서 다룹니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -364,44 +366,60 @@ extern "C" {
 }
 ```
 
-링커 옵션 `-Wl,--wrap=malloc,--wrap=free`로 모든 malloc 호출을 가로채면 예상치 못한 호출을 발견할 수 있습니다.
+위 GNU ld 예제에는 `__real_malloc`·`__real_free` 선언이 추가로 필요합니다. `-Wl,--wrap=malloc,--wrap=free`는 링크 시 미해결 참조를 치환합니다. 이미 라이브러리 내부에서 결합된 호출·다른 allocation API까지 모두 잡는 것은 아니며 Apple ld에서는 같은 옵션을 사용할 수 없습니다.
 
-## Code size 비교
+## 실행 확인 — 고정 저장소와 객체 수명
 
-같은 기능을 동적과 정적 방식으로 비교합니다.
+다음 파일은 C++17에서 고정 저장소 위 생성·소멸과 optional의 재생성을 확인합니다. 원소 타입 자체가 heap을 사용하면 컨테이너의 내부 저장만으로 시스템 전체의 무할당을 보장할 수 없습니다.
 
-```cpp
-// V1 — std::vector (heap)
-std::vector<int> v;
-for (int i = 0; i < 100; ++i) v.push_back(i);
-
-// V2 — etl::vector (static)
-etl::vector<int, 128> v;
-for (int i = 0; i < 100; ++i) v.push_back(i);
-
-// V3 — std::array
-std::array<int, 128> v;
-for (int i = 0; i < 100; ++i) v[i] = i;
+```cpp title="fixed-storage.cpp"
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <new>
+#include <optional>
+struct Reading {
+    static inline int live = 0;
+    int value;
+    explicit Reading(int v) noexcept : value(v) { ++live; }
+    ~Reading() noexcept { --live; }
+};
+int main() {
+    alignas(Reading) std::array<std::byte, sizeof(Reading)> bytes{};
+    auto* r = new (bytes.data()) Reading(42);
+    assert(r->value == 42 && Reading::live == 1);
+    r->~Reading();
+    assert(Reading::live == 0);
+    std::optional<Reading> current;
+    current.emplace(7);
+    assert(current->value == 7 && Reading::live == 1);
+    current.reset();
+    assert(!current && Reading::live == 0);
+}
 ```
 
-STM32F4 (newlib-nano, -Os):
-
-```text
-V1 (std::vector): +6.2 KB (heap, vector, growth logic)
-V2 (etl::vector): +0.4 KB
-V3 (std::array): +0.2 KB
+```bash
+clang++ -std=c++17 -Wall -Wextra -Werror fixed-storage.cpp -o fixed-storage
+./fixed-storage
 ```
 
-동적과 정적의 차이가 수 KB에 이릅니다. 임베디드에서는 결정적인 차이입니다.
+보드별 코드 크기·실행 시간은 이 예제로 측정하지 않았습니다. 같은 입력과 관찰 가능한 출력으로 각 구현을 빌드한 다음 linker map과 allocation 추적 범위를 함께 남겨야 합니다.
 
 ## 정리
 
 - 임베디드는 정적 할당이 원칙이며 heap은 회피하거나 제한적으로 사용합니다.
-- `std::array`가 유일한 표준 stack 컨테이너입니다.
-- ETL이 heap 없는 STL 대체이며 모든 컨테이너가 고정 크기입니다.
+- `std::array`는 내부 고정 저장소를 제공하며 저장 기간은 객체의 선언 위치로 정합니다.
+- ETL의 고정 용량 컨테이너는 용량 초과 정책을 확인하고 사용합니다.
 - `std::pmr`(C++17)로 표준 컨테이너에 custom allocator를 붙여 pool을 활용합니다.
 - placement new로 명시적 위치에 객체를 생성합니다.
-- `std::function` 대신 `etl::delegate`나 capture-less lambda를 씁니다.
+- 콜백의 heap 제한은 함수 포인터·delegate의 계약 또는 실제 표준 라이브러리 구현으로 확인합니다.
+
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [고정 저장소와 배열 계약](https://eel.is/c++draft/array)
+- [std::function의 함수 포인터 생성 계약](https://eel.is/c++draft/func.wrap.func.con)
 
 ## 관련 항목
 

@@ -56,9 +56,9 @@ MSI 제한 (32 vector·연속만)을 해결한 게 *MSI-X (ID 0x11)*:
 | Max vector | *2048* |
 | Vector 분포 | *불연속 가능*, *각 vector 다른 CPU APIC 가리킬 수 있음* |
 
-*Table·PBA는 별도 BAR 영역에 위치*. *table size = vector 수 × 16 byte*.
+Table과 PBA는 BAR 번호(BIR)와 offset으로 위치를 지정합니다. 같은 BAR의 서로 다른 범위에 있을 수도 있습니다. *table size = vector 수 × 16 byte*.
 
-NIC·NVMe는 *queue별 vector*로 *core당 1 vector*. 100 GbE에 *32 core면 32 vector*. *parallel ISR*로 *throughput 극대*.
+Queue와 vector의 대응은 driver와 할당 결과에 달려 있습니다. queue가 vector를 공유하거나 polling queue가 있을 수 있으므로 CPU 수와 1:1이라고 가정하지 않습니다.
 
 ## MSI-X Table Entry — 16 byte
 
@@ -77,11 +77,11 @@ NIC·NVMe는 *queue별 vector*로 *core당 1 vector*. 100 GbE에 *32 core면 32 
 | 단계 | 동작 |
 |------|------|
 | 1 | Device가 *Message Address에 Message Data write* (Posted MWr) |
-| 2 | RC가 *CPU APIC에 deliver* |
-| 3 | (IOMMU 활성화 시) *Interrupt Remapping*이 *redirection table 참조* |
+| 2 | 플랫폼의 interrupt 수신 경로로 전달 |
+| 3 | 지원·활성화된 경우 Interrupt Remapping이 출처와 목적지를 검사·변환 |
 | 4 | APIC가 *vector → CPU* lookup |
 | 5 | CPU가 *interrupt 진입* — context switch, IRQ stack |
-| 6 | Linux *do_IRQ()* → *IRQ handler* 호출 |
+| 6 | 해당 architecture의 Linux IRQ 진입 경로가 등록 handler 호출 |
 | 7 | Driver의 *ISR* (`request_irq`로 등록된 함수) 실행 |
 | 8 | ISR이 *device register 읽고 cleanup*, *softirq/tasklet/threaded IRQ* schedule |
 
@@ -95,7 +95,7 @@ NIC·NVMe는 *queue별 vector*로 *core당 1 vector*. 100 GbE에 *32 core면 32 
 | AMD-Vi | AMD IOMMU의 IRTE 형태 |
 | Bypass mode | remapping 없이 *직접 APIC delivery* (security 위험) |
 
-가상화 안 쓸 때도 *MSI-X 같은 source는 IOMMU IR이 default*. *security*·*vCPU 분리* 양쪽 목적.
+Interrupt Remapping은 비가상화 환경에서도 출처 검증에 사용됩니다. 실제 활성 여부는 architecture·firmware·커널 설정으로 확인해야 하며, DMA remapping 활성과 같은 뜻은 아닙니다.
 
 ## Linux PCI IRQ API
 
@@ -108,17 +108,18 @@ NIC·NVMe는 *queue별 vector*로 *core당 1 vector*. 100 GbE에 *32 core면 32 
 | `request_irq(irq, handler, ...)` | ISR 등록 |
 | `pci_free_irq_vectors()` | 해제 |
 
-```c
-// Driver 예
-int nvecs = pci_alloc_irq_vectors(pdev, 1, 32,
-                                  PCI_IRQ_MSIX | PCI_IRQ_MSI);
-for (int i = 0; i < nvecs; i++) {
-    int irq = pci_irq_vector(pdev, i);
-    request_irq(irq, my_isr, 0, "mydev", queue[i]);
-}
-```
+실제 driver의 실패 처리는 다음 순서로 설계합니다. [Linux v6.12 MSI 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/PCI/msi-howto.rst)와 [`drivers/pci/msi/api.c`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/pci/msi/api.c)를 기준으로 하며, 실제 IRQ 할당·발생 시험은 하지 않았습니다.
 
-*PCI_IRQ_MSIX*가 *우선*, 실패하면 *MSI fallback*, 그것도 실패하면 *INTx*.
+| 결과 | 처리 |
+|------|------|
+| 할당 함수가 음수 반환 | IRQ 번호 조회와 handler 등록을 시작하지 않음 |
+| 요청 최대보다 적은 양수 반환 | 실제 vector 수에 맞춰 queue 구성 |
+| 중간 `request_irq()` 실패 | 이미 등록한 handler를 같은 dev_id로 역순 해제한 뒤 vector 해제 |
+| 정상 remove | 장치 IRQ·DMA 발생 중단, handler 동기화·해제 후 vector 해제 |
+
+`PCI_IRQ_MSIX | PCI_IRQ_MSI`이면 MSI-X 후 MSI를 시도합니다. INTx fallback은 v6.12의 `PCI_IRQ_INTX` flag와 `min_vecs == 1` 등 조건을 만족해야 합니다. 위 두 flag만으로 INTx까지 자동 선택하지 않습니다.
+
+위 v6.12 할당 함수는 본문과 별도로 원본 그대로 추출해 host의 모의 allocator와 연결했습니다. Flag·최소 개수·INTx 존재·MSI-X/MSI 성공과 실패 조합 864개에서 반환과 fallback 호출 순서를 ASan·UBSan으로 확인했습니다. 실제 커널의 IRQ domain·handler·affinity 동작을 실행한 것은 아닙니다.
 
 ## CPU 분산 — IRQ Affinity
 
@@ -130,7 +131,7 @@ for (int i = 0; i < nvecs; i++) {
 | `irqbalance` daemon | *자동 분산* |
 | `pci_alloc_irq_vectors_affinity()` | driver가 *affinity 지정* — NVMe·NIC 표준 |
 
-NVMe driver는 *queue 수 = vector 수 = core 수*로 *1:1 binding*. core 0의 submit queue → vector 0 → core 0 ISR. *cache locality 극대*.
+Affinity는 queue 구성·CPU online 상태·managed IRQ 정책과 함께 봅니다. 요청한 affinity와 실제 IRQ 분포를 비교해야 locality 효과를 판단할 수 있습니다.
 
 ## 자주 하는 실수
 
@@ -148,21 +149,21 @@ PCIe는 *물리 wire 없음*. INTx는 *Message로 simulate*. *4 wire를 logical�
 
 ### "Per-vector mask는 항상 있다"
 
-*MSI capability*에 *per-vector mask는 optional*. *Multiple Message Capable*가 *지원 여부 표시*. MSI-X는 *항상 per-vector mask*.
+*MSI capability*에 *per-vector mask는 optional*. MSI Message Control의 bit 8(`PCI_MSI_FLAGS_MASKBIT`)가 지원 여부를 표시합니다. Multiple Message Capable은 vector 개수 인코딩입니다. MSI-X는 *항상 per-vector mask*.
 
 ### "interrupt remapping은 가상화 전용"
 
-비가상화 환경도 *기본 활성* — *security (rogue device가 임의 vector send 방지)*. `intremap=off`는 *security 약화*.
+비가상화 환경에서도 지원·활성 여부를 확인해야 함 — *security (rogue device가 임의 vector send 방지)*. `intremap=off`는 *security 약화*.
 
 ## 정리
 
 - *INTx*는 *legacy 4-wire를 Message로 simulate*. *shared·level-triggered*, overhead 큼.
 - *MSI*는 *memory write로 interrupt*. *32 vector·연속만*. Per-vector mask는 optional.
 - *MSI-X*는 *2048 vector·불연속 가능·per-vector independent*. NIC·NVMe 표준.
-- *MSI-X Table·PBA*는 *별도 BAR 영역*. *table entry 16 byte*.
+- Table·PBA는 BAR와 offset으로 지정된 범위. *table entry 16 byte*.
 - *IOMMU Interrupt Remapping*이 *redirection·security*.
 - Linux API: *pci_alloc_irq_vectors → pci_irq_vector → request_irq*.
-- *IRQ affinity*가 *throughput의 핵심* — queue·vector·core *1:1 binding*.
+- *IRQ affinity*가 *throughput의 핵심* — queue·vector·CPU 대응은 실제 할당과 workload에 맞춰 검토합니다.
 
 ## 다음 편
 
@@ -171,8 +172,8 @@ PCIe는 *물리 wire 없음*. INTx는 *Message로 simulate*. *4 wire를 logical�
 ## 관련 항목
 
 - [Ch 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space) — MSI·MSI-X Capability 위치
-- [Ch 4: BAR & MMIO](/blog/embedded/hardware/pcie/chapter04-bar-mmio) — MSI-X Table BAR
-- [Ch 11: DMA·IOMMU](/blog/embedded/hardware/pcie/chapter11-linux-dma) — Interrupt Remapping
+- [Ch 4: BAR & MMIO](/blog/embedded/hardware/pcie/chapter04-bar-mmio) — BAR resource의 주소 매핑
+- [Ch 11: DMA·IOMMU](/blog/embedded/hardware/pcie/chapter11-linux-dma) — DMA 주소 변환과 메모리 격리
 - [Ch 10: Linux PCI Basics](/blog/embedded/hardware/pcie/chapter10-linux-basics) — pci_alloc_irq_vectors
 
 ## 시리즈 자료 출처 안내

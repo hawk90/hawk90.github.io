@@ -19,10 +19,10 @@ std::thread t1([] { counter++; });
 std::thread t2([] { counter++; });
 
 t1.join(); t2.join();
-std::cout << counter;   // 2 또는 1
+std::cout << counter;   // 데이터 레이스로 UB: 결과를 1/2로 제한할 수 없음
 ```
 
-`counter++`은 *세 단계의 명령*입니다: load → add → store. 두 스레드가 *동시에* load를 하면, 둘 다 같은 옛 값을 보고 같은 새 값을 저장합니다. 결과는 2가 아니라 1.
+`counter++`은 *세 단계의 명령*입니다: load → add → store. 두 스레드가 *동시에* load를 하면, 둘 다 같은 옛 값을 보고 같은 새 값을 저장합니다. 단순한 교차 실행으로 1이 되는 상황을 설명할 수 있지만, C++ 데이터 레이스는 UB라서 가능한 결과를 1과 2로 한정할 수 없습니다.
 
 이 버그가 어려운 이유는 *대부분의 실행에서는 안 보입니다*. 운 좋게 한 스레드가 다른 스레드보다 먼저 끝나면 정상으로 보입니다. 빌드를 100번 돌려도 한 번 터지지 않을 수 있습니다. 그러다 *프로덕션 부하 상황에서* 처음 드러납니다.
 
@@ -46,15 +46,15 @@ WARNING: ThreadSanitizer: data race (pid=12345)
 
 ## TSan의 동작 — *happens-before 추적*
 
-TSan은 *각 메모리 접근*에 대해 *시간적 순서*를 추적합니다. 두 스레드의 접근이 *순서가 보장되지 않으면* 레이스로 보고합니다.
+TSan은 관찰한 메모리 접근과 동기화의 happens-before 관계를 추적합니다. 충돌하는 접근은 서로 다른 스레드가 같은 위치를 다루고 적어도 하나가 쓰기인 경우입니다. 실행되지 않은 경로와 비계측 접근까지 전수 검사하지는 않습니다.
 
 순서가 보장되는 자리(*happens-before*)는 다음과 같습니다.
 
-1. **mutex 락**: `lock()` → `unlock()` 사이의 코드는 다른 스레드의 동일 mutex `lock()` *이전에* happens.
-2. **atomic 연산**: `release store` → `acquire load`가 happens-before를 형성.
+1. **mutex 락**: unlock은 이후 같은 mutex를 획득하는 lock과 동기화됩니다. 그 결과 앞선 임계구역의 쓰기를 전달합니다.
+2. **atomic 연산**: acquire가 해당 release 또는 그 release sequence에서 기록한 값을 읽어야 동기화가 성립합니다.
 3. **스레드 생성**: 부모 스레드가 자식 *생성 호출 이전의 모든 일*은 자식이 시작하기 *이전에* happens.
 4. **스레드 join**: 자식의 *모든 일*은 부모가 `join()` *이후에* happens.
-5. **condition variable**: signal/wait 쌍이 happens-before를 형성.
+5. **condition variable**: 공유 조건은 mutex로 보호하고 wait 복귀 뒤 조건을 다시 검사합니다. notify만으로 임의의 비원자 데이터 접근이 보호되지는 않습니다.
 
 이 *명시적 동기화 없이* 두 스레드가 같은 메모리에 접근하고 그중 *하나라도 쓰기*라면 레이스입니다.
 
@@ -102,13 +102,7 @@ ctest --test-dir build-tsan
 
 ### 오버헤드
 
-TSan은 *Sanitizer 중 가장 무겁습니다*.
-
-- 실행 속도: **5~15× 느림**
-- 메모리: **5~10× 사용**
-- 컴파일 시간: **약 1.5× 느림**
-
-이 때문에 TSan은 *PR 빌드에는 너무 무겁고*, 보통 *야간 빌드*나 *전용 작업*에서 돌립니다.
+실행 시간과 메모리 비용은 대상 코드·입력·런타임마다 측정합니다. [Clang 문서](https://clang.llvm.org/docs/ThreadSanitizer.html)는 일반적인 실행·메모리 비용을 설명하지만, 이 글에서는 컴파일 시간이나 해당 프로젝트의 배율을 측정하지 않았습니다. PR의 짧은 동시성 테스트와 야간 전체 테스트를 분리할지는 실제 소요 시간으로 결정합니다.
 
 ---
 
@@ -169,9 +163,9 @@ void worker(int key) {
 
 ---
 
-## 자주 만나는 false positive와 해결
+## 실제 레이스와 도구의 탐지 한계 구분
 
-TSan은 *대체로 정확*하지만, 몇 가지 패턴에서 *false positive*를 냅니다.
+atomic·읽기 전용 객체·외부 라이브러리라는 이름만으로 오탐 여부를 결정하지 않습니다. 실제 동기화의 존재와 도구가 이를 관찰했는지 나눠 봅니다.
 
 ### 1. 라이브러리가 TSan-instrumented가 아닐 때
 
@@ -187,7 +181,7 @@ race:libcurl.so
 race:OpenSSL_*
 ```
 
-### 2. atomic을 사용했는데 TSan이 false alarm
+### 2. relaxed로 전달한 비원자 데이터는 실제 레이스
 
 ```cpp
 std::atomic<int> flag{0};
@@ -227,9 +221,11 @@ void worker() {
 
 시그널 핸들러는 *동기화 없이 메인 스레드를 인터럽트*합니다. TSan이 이 자리를 경고할 수 있습니다.
 
-해결: `std::atomic`을 쓰고 핸들러 안에서는 *async-signal-safe* 한 연산만.
+시그널 핸들러에서는 signal-safe 규칙을 따릅니다. 아래 C++17 예제처럼 lock-free임을 확인한 atomic 연산만 허용 범위에서 사용합니다. 모든 std::atomic 타입의 연산이 시그널 안전한 것은 아닙니다. [C++ signal 규칙](https://eel.is/c++draft/support.signal)을 확인합니다.
 
-```c
+```cpp
+#include <atomic>
+static_assert(std::atomic<int>::is_always_lock_free);
 std::atomic<int> counter{0};
 
 void handler(int sig) {
@@ -251,7 +247,7 @@ const Config g_config = load_config();
 std::cout << g_config.name;  // 동기화 없는 읽기
 ```
 
-전역 `const` 객체를 *초기화 후 읽기만* 한다면 *데이터 레이스가 아닙니다*. 하지만 TSan은 *초기화*가 다른 스레드에서 일어났는지 확신할 수 없을 수 있어 경고할 수 있습니다.
+초기화가 스레드 시작 전에 완료되고 이후 변경되지 않는 객체를 여러 스레드가 읽는 것은 데이터 레이스가 아닙니다. const라는 사실만으로 게시 시점까지 보장되지는 않습니다. 경고가 있다면 다른 쓰기·수명 종료·비계측 동기화가 있는지 확인하고, 단지 TSan이 확신하지 못한다는 이유로 무시하지 않습니다.
 
 해결: 초기화가 *모든 스레드 시작 전*에 끝남을 명확히 (`main` 함수 시작 부분, `std::call_once`).
 
@@ -341,7 +337,7 @@ int v = x;    // memory_order_seq_cst
 
 ## 데드락 검출
 
-TSan은 *데이터 레이스뿐 아니라 데드락도* 감지합니다.
+일부 TSan 런타임은 detect_deadlocks 옵션으로 잠금 순서 역전을 검사합니다. 지원 여부와 기본값을 해당 런타임의 TSAN_OPTIONS=help=1에서 확인합니다. 모든 실제 데드락을 검출한다는 뜻은 아닙니다.
 
 ```cpp
 std::mutex m1, m2;
@@ -357,17 +353,20 @@ void thread_b() {
 }
 ```
 
-TSan은 *락 순서의 일관성*을 추적해 *역순*이 가능한 자리를 경고합니다.
+잠금 순서 검사가 지원되고 활성화되면 관찰한 획득 순서에서 순환을 찾습니다. 아래 경고는 형식 예시이며 이번 실행에서 잠금 순서 검출을 재현한 기록은 아닙니다.
 
 ```text
 WARNING: ThreadSanitizer: lock-order-inversion (potential deadlock)
 ```
 
-실제 데드락이 *발생하지 않아도* 보고합니다 — *가능성*만으로도 위험.
+관찰한 역순은 잠재적 데드락의 단서이며, 실제로 멈췄다는 판정과 구분합니다.
 
 해결: *모든 스레드에서 같은 순서로 락*. C++17의 `std::scoped_lock`을 쓰면 자동 처리.
 
 ```cpp
+void thread_a() {
+    std::scoped_lock g(m1, m2);
+}
 void thread_b() {
     std::scoped_lock g(m1, m2);   // 안전: 내부 알고리즘이 deadlock-free
 }
@@ -401,21 +400,65 @@ TSan은 *실행 중에 발생할 가능성이 있는* 레이스만 감지합니�
 
 일부 코드는 TSan과 안 친합니다.
 
-- **메모리 풀**: 동기화 없이 reuse하면 false positive 자주.
+- **메모리 풀**: 실제 동기화 없는 재사용은 버그일 수 있습니다. 사용자 정의 동기화를 도구가 관찰하는지 별도로 확인합니다.
 - **lock-free 큐**: 정교한 atomic 사용을 TSan이 못 따라갈 수 있음.
-- **fiber/coroutine**: 사용자 모드 스케줄러는 TSan이 모름.
+- **fiber/coroutine**: 사용자 스케줄러의 fiber API 연동과 문맥 전환 경계를 확인합니다.
 
-이런 자리는 *suppress하거나*, *알고리즘을 단순화*하거나, *TSan annotation* (`__tsan_acquire`, `__tsan_release`)으로 직접 happens-before를 알려 줍니다.
+먼저 알고리즘의 실제 동기화를 검증합니다. annotation은 이미 존재하는 동기화를 모델링할 때만 사용하며, 잘못된 코드에 가짜 happens-before를 추가해 경고를 가리지 않습니다. suppression도 원인과 재검토 조건을 기록한 뒤 최소 범위로 적용합니다.
 
 ---
+
+## 직접 확인 — relaxed 실패와 release/acquire 수정
+
+같은 파일을 두 번 빌드합니다. 기본 분기는 relaxed로 data를 게시하는 잘못된 코드이며, SAFE를 정의하면 release/acquire로 동기화합니다. 잘못된 값이 출력돼야만 레이스인 것은 아닙니다.
+
+```cpp title="publication-race.cpp"
+#include <atomic>
+#include <cstdio>
+#include <thread>
+
+int main() {
+    std::atomic<bool> ready{false};
+    std::atomic<bool> consumer_started{false};
+    int data = 0;
+#ifdef SAFE
+    constexpr auto store_order = std::memory_order_release;
+    constexpr auto load_order = std::memory_order_acquire;
+#else
+    constexpr auto store_order = std::memory_order_relaxed;
+    constexpr auto load_order = std::memory_order_relaxed;
+#endif
+    std::thread producer([&] {
+        while (!consumer_started.load()) std::this_thread::yield();
+        data = 42;
+        ready.store(true, store_order);
+    });
+    std::thread consumer([&] {
+        consumer_started.store(true);
+        while (!ready.load(load_order)) std::this_thread::yield();
+        std::printf("data=%d\n", data);
+    });
+    producer.join();
+    consumer.join();
+}
+```
+
+```bash
+clang++ -std=c++17 -O1 -g -fsanitize=thread publication-race.cpp -o race
+TSAN_OPTIONS=halt_on_error=1 ./race
+clang++ -std=c++17 -O1 -g -fsanitize=thread -DSAFE publication-race.cpp -o safe
+TSAN_OPTIONS=halt_on_error=1 ./safe
+```
+
+기본 분기는 TSan의 data race 보고와 비정상 종료를, SAFE는 data=42와 정상 종료를 확인합니다. TSan 런타임이 지원되지 않는 환경의 기동 실패를 레이스 검출 성공으로 세지 않습니다.
 
 ## 정리
 
 - TSan은 *happens-before 모델*로 데이터 레이스를 감지. 동기화 *없이* 같은 메모리 동시 접근이 레이스.
 - 황금 옵션: `-fsanitize=thread -fno-omit-frame-pointer -g -O1`. ASan과 *별도 빌드*.
-- 오버헤드 5~15×. *야간 빌드* 또는 *동시성 단위 테스트*에 적합.
+- 실행 시간·메모리 비용을 측정해 짧은 동시성 테스트와 전체 테스트의 주기를 정합니다.
 - `relaxed`는 *주변 메모리 보호 못 함*. `release/acquire` 필요.
-- 데드락도 감지 — `lock-order-inversion` 경고.
+- 잠금 순서 검사는 런타임의 지원·옵션을 확인하며 실제 데드락 전수 검출과 구분합니다.
 - Suppression은 `race:` / `mutex:` / `deadlock:` 등 키워드별.
 - 반복 실행 + 다양한 시나리오로 *커버리지* 확보.
 

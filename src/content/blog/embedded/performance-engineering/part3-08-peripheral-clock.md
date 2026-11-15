@@ -31,11 +31,11 @@ __HAL_RCC_GPIOA_CLK_ENABLE();
 __HAL_RCC_USART2_CLK_DISABLE();
 ```
 
-Cortex-M은 reset 직후 모든 peripheral clock이 OFF 상태이므로, 사용하기 전에 반드시 활성화해야 합니다.
+Peripheral clock의 reset 상태는 MCU별로 다릅니다. 해당 reference manual의 reset value를 확인하고, 사용 전에 필요한 clock만 활성화합니다.
 
 ```c
 RCC->APB2ENR |= RCC_APB2ENR_USART1EN;
-__DSB();   // ← clock stable 대기
+__DSB();   // ← 앞선 register write의 완료를 보장; clock 안정화 대기는 아님
 USART1->BRR = 1000;   // safe
 ```
 

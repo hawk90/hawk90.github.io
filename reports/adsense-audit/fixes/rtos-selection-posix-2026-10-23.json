@@ -1,0 +1,128 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-23",
+  "series": "Practical RTOS Internals",
+  "batch": "part5-05–part5-07",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-39.md",
+    "reports/adsense-audit/published-loop-40.md"
+  ],
+  "primarySources": [
+    "https://github.com/eclipse-threadx/threadx/blob/master/LICENSE.txt",
+    "https://nuttx.apache.org/docs/latest/introduction/about.html",
+    "https://nuttx.apache.org/docs/latest/implementation/memory_configurations.html",
+    "https://nuttx.apache.org/docs/latest/reference/user/01_task_control.html",
+    "https://nuttx.apache.org/docs/latest/os/filesystem/procfs.html",
+    "https://docs.px4.io/v1.15/en/concept/architecture",
+    "https://www.jpl.nasa.gov/news/meet-the-open-source-software-powering-nasas-ingenuity-mars-helicopter/",
+    "https://developer.sony.com/spresense/development-guides/sdk_tutorials_en",
+    "https://docs.kernel.org/6.12/locking/locktypes.html",
+    "https://docs.kernel.org/6.12/timers/no_hz.html",
+    "https://wiki.linuxfoundation.org/realtime/documentation/howto/tools/cyclictest/start",
+    "https://evlproject.org/core/user-api/thread/",
+    "https://evlproject.org/core/user-api/api-revs/",
+    "https://forums.mbed.com/latest"
+  ],
+  "validationCommands": [
+    "node scripts/verify-rtos-selection-posix-examples.mjs",
+    "bash scripts/audit-publish-gate.sh <three sources>",
+    "node scripts/check-inline-math.mjs <three sources>",
+    "git diff --check -- <scoped files>"
+  ],
+  "scope": "Three full chapters/evaluations and primary sources reviewed; unsupported recommendation/benchmark/adoption claims removed and actual contracts distinguished.",
+  "limits": "macOS POSIX prefix helper and synthetic parser only. No NuttX/simulator/board/PX4 flight, real Linux/EVL/cyclictest/IRQ/driver/power/benchmark, supplier price, legal/certification determination or WCET proof. Clone-only gate skipped.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md",
+      "status": "remediated",
+      "beforeSha256": "e2cd83d0789b18f68113ea4fdf09ae5e5e6b0fe105ef7b6e826354b152e2ec05",
+      "afterSha256": "b2f4e69b62432e0c0ebc682b387767dfac8e71d7f0f93ce9659d79aa30b08e7f",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Full source/evaluation and primary-document comparison. No benchmark, vendor quote or legal/certification determination claimed. Linked NuttX NASA correction and precise source licenses checked.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/rtos/practical-internals/part5-05-selection-guide.md",
+        "problemSignalAndCounterevidence": "Unsourced fixed footprints/cycles/certification/prices/market and platform recommendations, binary-patch blanket, NASA adoption and future EOL wording.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Pinned FreeRTOS/Zephyr/RT-Thread license/source; official ThreadX license, NuttX/PX4 docs and Arm Mbed EOL notice index verified2026-10-23.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Replaced unsupported ranking/data with same-board/config/failure-path selection contracts, separated license/support/assurance scopes; corrected EOL timing and withdrew NASA claim; manual description correction.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Full source/evaluation and primary-document comparison. No benchmark, vendor quote or legal/certification determination claimed. Linked NuttX NASA correction and precise source licenses checked. macOS POSIX prefix helper and synthetic parser only. No NuttX/simulator/board/PX4 flight, real Linux/EVL/cyclictest/IRQ/driver/power/benchmark, supplier price, legal/certification determination or WCET proof. Clone-only gate skipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which concrete hardware/workload/API/assurance scope, comparable measured image/latency and supplier terms establish this product selection?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-06-nuttx.md",
+      "status": "remediated",
+      "beforeSha256": "c11a7a4bb821140057763a1ce1d7538f7e836658d3fe94780803f27a0fd1a0aa",
+      "afterSha256": "05de8d8f64334020118b9fe0309189139b0d573f1e26040322e71870bcc17580",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Extracted POSIX helper ASan/UBSan on macOS: full/empty/truncation/missing/null/zero capacity tests. Document scope comparison only for NuttX/PX4/SDK, no kernel/board/flight executed.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/rtos/practical-internals/part5-06-nuttx.md",
+        "problemSignalAndCounterevidence": "Untraceable NASA quote/adoption/space-grade claim and wrong hardware table; POSIX/procfs/build/process/Spresense generalized beyond source.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "NuttX official memory/task/procfs/config docs; PX4v1.15 architecture; NASA/JPL2021-07-08 FPrime report; Sony official SDK SMP/ASMP docs.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Withdrew unsupported quote/validation and corrected title/description manually; bounded API/three-mode/PX4/SDK and ASMP-vs-SMP; added checked prefix reader.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Extracted POSIX helper ASan/UBSan on macOS: full/empty/truncation/missing/null/zero capacity tests. Document scope comparison only for NuttX/PX4/SDK, no kernel/board/flight executed. macOS POSIX prefix helper and synthetic parser only. No NuttX/simulator/board/PX4 flight, real Linux/EVL/cyclictest/IRQ/driver/power/benchmark, supplier price, legal/certification determination or WCET proof. Clone-only gate skipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which pinned NuttX/apps/board config and target API/resource/fault/timing tests establish the intended protected/process/driver behavior?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md",
+      "status": "remediated",
+      "beforeSha256": "16f6980405cdf2a0e038b9817be1cf187a04704ef2e2bc4009c6f74a5b5d6c0d",
+      "afterSha256": "a074a90bff3c032d8178835c2d2939bdc8c3c8531b756ed8db55525b60f31775",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Extracted parser synthetic two-row/CRLF and no/unsupported/zero/unsafe/range negatives pass. Actual Linux kernel, cyclictest, EVL or hardware timing not executed.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux.md",
+        "problemSignalAndCounterevidence": "nonRT spin_lock incorrectly masksIRQ; allIRQ threading, arbitrary sleep, fixed RTOS/RT/EVL latency guarantee, EVL API, Yocto and60+count.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Linux6.12 locking/NO_HZ,6.18 real-time differences (revision distinguished); LF cyclictest FAQ; official EVL thread/API revisions.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Corrected lock/IRQ/config and observedMax/WCET scope; removed fake vendor/timing/safety guarantees; added checked output parser and corrected actual53chapter count; manual description correction.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Extracted parser synthetic two-row/CRLF and no/unsupported/zero/unsafe/range negatives pass. Actual Linux kernel, cyclictest, EVL or hardware timing not executed. macOS POSIX prefix helper and synthetic parser only. No NuttX/simulator/board/PX4 flight, real Linux/EVL/cyclictest/IRQ/driver/power/benchmark, supplier price, legal/certification determination or WCET proof. Clone-only gate skipped."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which Linux/kernel/driver or EVL core/lib configuration and representative overload/IRQ/power experiment plus deadline analysis establish the target response bound?"
+        }
+      ]
+    }
+  ]
+}

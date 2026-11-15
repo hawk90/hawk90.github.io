@@ -1,0 +1,22 @@
+import assert from 'node:assert/strict';
+import {spawnSync} from 'node:child_process';
+import {mkdtempSync, readFileSync, writeFileSync, statSync} from 'node:fs';
+import {tmpdir} from 'node:os';
+import {join} from 'node:path';
+const work=mkdtempSync(join(tmpdir(),'embedded-size-'));
+const source=readFileSync('src/content/blog/embedded/embedded-cpp/part1-04-code-size-analysis.md','utf8');
+const block=source.match(/^```cpp title="sections.cpp"\n([\s\S]*?)^```/m);assert.ok(block);
+writeFileSync(join(work,'sections.cpp'),block[1]);
+function run(cmd,args){const r=spawnSync(cmd,args,{cwd:work,encoding:'utf8',timeout:30000});console.log(`$ ${cmd} ${args.join(' ')}\n${r.stdout??''}${r.stderr??''}status=${r.status}`);if(r.error)throw r.error;assert.equal(r.status,0);return r.stdout;}
+console.log('Workspace: '+work);run('clang++',['--version']);
+for(const [name,count] of [['small',32],['large',1024]])run('clang++',['--target=x86_64-unknown-linux-gnu','-O2','-g',`-DBSS_COUNT=${count}`,'-c','sections.cpp','-o',name+'.o']);
+run('llvm-objcopy',['--strip-debug','small.o','small-stripped.o']);
+const rows=run('llvm-size',['--format=berkeley','small.o','large.o','small-stripped.o']).trim().split('\n').slice(1).map(line=>line.trim().split(/\s+/).slice(0,3).map(Number));
+assert.equal(rows.length,3);const [small,large,stripped]=rows;
+assert.deepEqual(small,stripped);assert.equal(small[1],16);assert.equal(large[1],16);assert.equal(small[2],128);assert.equal(large[2],4096);assert.equal(small[0]+small[1],large[0]+large[1]);
+const staticRam=([,data,bss])=>data+bss;
+assert.equal(staticRam(small),144);assert.equal(staticRam(large),4112);assert.ok(staticRam(small)<=256);assert.ok(staticRam(large)>256);
+assert.ok(statSync(join(work,'small-stripped.o')).size<statSync(join(work,'small.o')).size);
+const symbols=run('llvm-nm',['-S','--size-sort','--reverse-sort','--demangle','small.o']);assert.match(symbols,/zeroed/);assert.match(symbols,/initialized/);assert.match(symbols,/read_value/);
+run('llvm-objdump',['-h','-d','small.o']);
+console.log('PASS: BSS-only growth, separate static RAM budget rejection, debug stripping preserves allocation totals. Final firmware link and Bloaty NOT RUN.');

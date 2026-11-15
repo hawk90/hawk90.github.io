@@ -2,7 +2,7 @@
 title: "RTOS Tick과 타이머 — SysTick·Generic Timer·configTICK_RATE_HZ"
 slug: "embedded/rtos/practical-internals/part2-08-tick-timer"
 date: 2026-05-05T09:18:00
-description: "RTOS의 심장 박동. SysTick 1 kHz가 표준 — Hz 선택의 trade-off."
+description: "FreeRTOS의 tick 주기와 SysTick 24비트 한계, delay 양자화와 timer 단위를 확인합니다. 1 kHz를 보편적 표준으로 가정하지 않고 설정·비용·정확도를 구분합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 18
 tags: [tick, systick, hw-timer, time-slice]
@@ -12,219 +12,149 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> Tick은 RTOS의 심장 박동에 해당합니다. 주기적인 IRQ가 scheduler, timeout, preemption의 토대가 됩니다.
+Tick은 커널 timeout과 스케줄링 판단에 쓰는 시간 단위입니다. 주기와 소스는 포트·제품 요구에 맞춰 정하며 1 kHz가 모든 RTOS의 표준값인 것은 아닙니다. 이 글의 구체적인 SysTick 경로는 FreeRTOS **V11.2.0 GCC/ARM_CM4F**를 기준으로 합니다.
 
 ## Cortex-M SysTick
 
-Cortex-M에는 24-bit down-counter가 내장되어 있습니다. 대부분의 RTOS가 이를 기본 tick source로 사용합니다.
+SysTick을 제공하는 Cortex-M 구성에서는 24-bit down-counter를 tick source로 사용할 수 있습니다. 실제 사용 여부·입력 클록·저전력 중 동작은 MCU와 포트 설정에 달려 있습니다. ARM_CM4F 원본은 configSYSTICK_CLOCK_HZ를 사용하며 별도 정의가 없으면 configCPU_CLOCK_HZ로 둡니다.
 
-```c
-// FreeRTOSConfig.h
-#define configTICK_RATE_HZ              ((TickType_t) 1000)   // 1 kHz
-#define configCPU_CLOCK_HZ              ((unsigned long) 168000000)   // 168 MHz
-```
+주기 counts는 입력 Hz를 tick Hz로 나눈 값이고 LOAD는 counts − 1입니다. 나누어떨어지지 않으면 실제 주파수가 요청값과 달라지므로, 아래 계산 예제는 **정확한 정수 분주만 허용하는 정책**을 택합니다. 원본 포트의 레지스터 초기화 전체가 아닙니다.
 
-내부 구현은 다음과 같습니다.
-
-```c
-void vPortSetupTimerInterrupt(void) {
-    /* SysTick 설정 */
-    portNVIC_SYSTICK_LOAD_REG = (configCPU_CLOCK_HZ / configTICK_RATE_HZ) - 1UL;
-    portNVIC_SYSTICK_CTRL_REG = (portNVIC_SYSTICK_CLK_BIT |
-                                  portNVIC_SYSTICK_INT_BIT |
-                                  portNVIC_SYSTICK_ENABLE_BIT);
+```c title="systick-period.c"
+#include <stdbool.h>
+#include <stdint.h>
+bool systick_reload(uint32_t input_hz, uint32_t tick_hz,
+                    uint32_t *reload) {
+    if (reload == 0 || tick_hz == 0 || input_hz < tick_hz ||
+        input_hz % tick_hz != 0) return false;
+    uint32_t counts = input_hz / tick_hz;
+    if (counts > UINT32_C(0x1000000)) return false;
+    *reload = counts - 1;
+    return true;
 }
 ```
 
-168 MHz를 1 kHz로 나누면 168,000 cycle입니다. 이 카운트마다 SysTick 인터럽트가 한 번씩 발생합니다.
+168 MHz 입력을 1 kHz로 나누면 168,000 counts이고 LOAD는 167,999입니다. 입력값과 24-bit 범위를 확인한 뒤 실제 포트는 counter 정지·현재값 clear·LOAD·CTRL 설정을 수행합니다.
 
 ## SysTick Handler
 
-```c
-void xPortSysTickHandler(void) {
-    vPortRaiseBASEPRI();              // IRQ mask
-    if (xTaskIncrementTick() != pdFALSE) {
-        portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;   // preempt 필요
-    }
-    vPortClearBASEPRIFromISR();
-}
-```
+원본 xPortSysTickHandler는 RTOS API 가능 IRQ를 마스크하고 xTaskIncrementTick을 호출합니다. 전환이 필요하다는 반환값을 받으면 PendSV를 pending으로 만들고 마스크를 해제합니다. 실제 context 저장·복원은 PendSV가 처리합니다.
 
-`xTaskIncrementTick()`이 하는 일은 다음과 같습니다.
-
-- `xTickCount`를 1 증가시킵니다.
-- delayed list에서 만료된 task를 wake해 ready로 옮깁니다.
-- 같은 priority 안에서 round-robin rotation을 진행합니다.
-- preemption이 필요하면 `pdTRUE`를 반환합니다.
+xTaskIncrementTick은 tick을 갱신하고 만료된 delayed task를 ready로 옮깁니다. 선점·time slicing 설정에 따라 전환 필요를 표시하지만, 동일 우선순위 ready list의 다음 항목 선택은 실제 스케줄러 경로에서 일어납니다. 스케줄러가 suspend된 동안의 pended tick 처리도 별도입니다.
 
 ## Tick Rate Trade-off
 
-| Rate | Period | 장단점 |
+| 예시 rate | 주기 | 검토할 조건 |
 | --- | --- | --- |
-| 100 Hz | 10 ms | 저전력, 낮은 정밀도 |
-| 500 Hz | 2 ms | 균형 |
-| **1 kHz** | 1 ms | **표준 — 대부분 RTOS 기본** |
-| 10 kHz | 100 µs | 정밀, ISR overhead 큼 |
+| 100 Hz | 10 ms | timeout 양자화가 요구에 충분한가? |
+| 500 Hz | 2 ms | timer counts와 부하가 적절한가? |
+| 1 kHz | 1 ms | 예시 설정이며 범용 표준값은 아님 |
+| 10 kHz | 100 µs | tick ISR 비용과 counter 범위를 감당하는가? |
 
-`vTaskDelay(1)`은 1 tick 뒤에 wake합니다. tick rate에 따라 실제 시간이 달라지므로, 100 Hz면 10 ms, 1 kHz면 1 ms로 의미가 달라집니다.
+vTaskDelay(1)은 다음 tick 경계까지 block하므로 호출 위상에 따라 block 시간은 거의 0부터 한 tick 사이입니다. 만료는 ready가 되는 시점이며 실제 실행은 스케줄러와 다른 부하로 더 늦어질 수 있습니다. “1 tick은 항상 정확히 1 ms 대기”라는 뜻이 아닙니다.
+
+pdMS_TO_TICKS는 단위 변환이며 기본 정수 연산에서 작은 양의 ms가 0 tick으로 내려갈 수 있습니다. 필요한 최소 지연·반올림·중간 곱셈 overflow를 설정별로 검토해야 합니다.
 
 ## Tick Overhead
 
-```text
-SysTick ISR @ 1 kHz:
-- HW enter: 12 cycle
-- BASEPRI set: 2 cycle
-- xTaskIncrementTick: 100-500 cycle (delayed list 처리에 따라)
-- BASEPRI clear: 2 cycle
-- HW exit: 6 cycle (tail-chain)
-Total ≈ 120-520 cycle/tick
+tick의 CPU 점유율은 **한 번의 실제 tick 처리 시간 × 초당 tick 수**로 추정할 수 있습니다. 예를 들어 처리 시간이 3 µs로 측정됐다는 가정에서 1 kHz는 0.3%, 10 kHz는 3%입니다. 이는 계산 예시이며 이 글에서 얻은 실측 결과가 아닙니다.
 
-@ 168 MHz: 0.7-3 µs/tick = 0.07-0.3% CPU
-```
-
-부담이 작은 편입니다. 10 kHz로 올려도 0.7~3% CPU 정도라 여전히 견딜 만합니다.
+만료 task 수·trace hook·메모리·중첩 IRQ에 따라 비용이 달라집니다. 예외 entry나 tail-chain의 이상적인 명령 cycle을 합쳐 커널 전체의 비용으로 사용하지 않습니다. 평균 점유율과 최악 응답 시간은 각각 확인해야 합니다.
 
 ## Cortex-A Generic Timer
 
-Cortex-A에는 SysTick이 없습니다. 대신 Generic Timer(ARM Architecture Timer)를 제공합니다.
+AArch64에서 사용할 수 있는 Generic Timer의 physical counter 예를 들면 CNTFRQ_EL0는 보고된 counter frequency, CNTPCT_EL0는 counter 값, CNTP_CVAL_EL0는 compare 값과 관련됩니다. 접근 권한·virtual timer·인터럽트 라우팅은 실행 EL과 플랫폼 설정에 달려 있습니다. Cortex-A9의 AArch32 전용 포트와 같은 레지스터 이름으로 혼합하지 않습니다.
 
 ```c
-// CNTFRQ_EL0 — 시스템 frequency (보통 24 MHz)
-// CNTPCT_EL0 — 64-bit physical counter (count up)
-// CNTP_CVAL_EL0 — compare value (interrupt trigger)
+/* Conceptual API: board/privilege-specific accessors are required. */
+uint64_t deadline = read_physical_counter() + period_counts;
+write_physical_compare(deadline);
 ```
 
-```c
-uint64_t now = read_cntpct();
-uint64_t deadline = now + ticks_per_ms;
-write_cntp_cval(deadline);
-```
-
-64-bit counter라 wraparound가 사실상 일어나지 않습니다. 24 MHz로 돌려도 64-bit를 다 채우려면 약 24,000년이 걸립니다.
+24 MHz에서 64-bit 전체 범위를 한 바퀴 도는 산술 시간은 약 24,356년입니다. 다만 실제 counter 구현 폭과 초기값·접근 계약을 먼저 확인해야 하며 “wrap은 절대 없다”는 코드 가정으로 바꾸면 안 됩니다.
 
 ## RISC-V — mtime / mtimecmp
 
-```c
-// PLIC·CLINT의 mtime memory-mapped
-#define MTIME        (*(volatile uint64_t *)0x0200BFF8)
-#define MTIMECMP     (*(volatile uint64_t *)0x02004000)
+RISC-V machine timer가 제공되는 플랫폼에서는 unsigned mtime과 mtimecmp 비교가 timer interrupt pending 조건을 만듭니다. 이것은 PLIC의 timer 레지스터가 아니며 주소와 interrupt routing은 플랫폼에 따라 다릅니다. CLINT 이름과 예시 주소를 모든 MCU에 적용하지 않습니다.
 
-// Tick 설정
-MTIMECMP = MTIME + (FREQ_HZ / TICK_HZ);
-```
+RV32에서는 64-bit volatile 접근 한 번이 원자적이라고 가정할 수 없습니다. 안정적인 mtime 읽기에는 상위/하위/상위 재확인 같은 절차가 필요하고, mtimecmp 갱신도 중간 비교로 인한 의도하지 않은 interrupt를 피해야 합니다. 공식 machine ISA의 little-endian RV32 예는 low word를 최댓값으로 쓴 뒤 high, 마지막 low를 갱신합니다. 실제 코드는 vendor의 검증된 accessor를 사용합니다.
 
-`mtime`은 64-bit입니다. `mtimecmp ≤ mtime` 조건이 성립하면 `mip.MTIP`가 set되어 interrupt가 pending됩니다. wraparound는 사실상 없습니다.
+counter가 64-bit여도 compare 이후 pending 반영·해제 지연과 wrap 경계는 고려해야 합니다. 주소가 없는 이 설명만으로 장치 timer 설정을 완료할 수는 없습니다.
 
 ## Time Slicing
 
-`configUSE_TIME_SLICING = 1`(기본값)이면 매 tick마다 같은 priority 안에서 round-robin이 발생합니다. 다른 priority에는 영향을 주지 않습니다.
+FreeRTOS의 선점형 구성에서 configUSE_TIME_SLICING=1이면 tick 처리 중 같은 최고 우선순위 ready task가 둘 이상일 때 전환을 요청할 수 있습니다. 매 tick마다 항상 태스크가 바뀌는 것은 아닙니다.
 
-```c
-// vTaskSwitchContext
-if (uxTopReadyPriority == pxCurrentTCB->uxPriority) {
-    // 다른 same-priority task가 있으면 yield
-    listGET_OWNER_OF_NEXT_ENTRY(...);
-}
-```
-
-`configUSE_TIME_SLICING = 0`으로 두면 같은 priority의 task끼리는 명시적으로 yield할 때만 전환됩니다.
+configUSE_TIME_SLICING=0은 **tick에 의한 자동 slicing**을 끕니다. 명시적 yield뿐 아니라 blocking·우선순위 변화·다른 스케줄링 계기로 동일 우선순위 task가 선택될 수도 있습니다. 이미 앞 장에서 실제 POSIX kernel로 확인한 것처럼 slicing을 꺼도 명시적 yield의 회전은 남습니다.
 
 ## vTaskDelay vs vTaskDelayUntil
 
-```c
-// Relative delay
-vTaskDelay(100);                   // 지금부터 100 tick 대기
+vTaskDelay는 호출 시점의 tick을 기준으로 상대 대기합니다. 주기 작업에는 이전 기준 tick을 갱신하는 xTaskDelayUntil을 사용할 수 있습니다. 다음은 configTICK_RATE_HZ=1000과 필요한 API 포함 설정을 전제로 한 예제입니다.
 
-// Absolute periodic delay
-TickType_t xLastWake = xTaskGetTickCount();
-while (1) {
-    do_work();
-    vTaskDelayUntil(&xLastWake, 100);  // 정확한 100 tick 주기
+```c title="periodic-task.c"
+#include "FreeRTOS.h"
+#include "task.h"
+extern void do_work(void);
+extern void report_overrun(void);
+void periodic_task(void *arg) {
+    (void)arg;
+    const TickType_t period = pdMS_TO_TICKS(100);
+    configASSERT(period > 0);
+    TickType_t previous = xTaskGetTickCount();
+    for (;;) {
+        do_work();
+        if (xTaskDelayUntil(&previous, period) == pdFALSE)
+            report_overrun();
+    }
 }
 ```
 
-`vTaskDelayUntil`은 주기를 정확히 유지합니다. `do_work()`가 50 ms를 잡아먹어도 다음 wake는 여전히 `xLastWake + 100 tick`입니다.
+이 API는 다음 **기준 시각**을 유지하지만 실행 시각이나 deadline 충족을 보장하지 않습니다. 주기를 놓치면 block하지 않고 기준을 갱신하는 경우가 있으므로 반환값과 실제 응답 시간을 확인해야 합니다. vTaskDelayUntil은 호환 매크로로 제공될 수 있으며 새 코드는 해당 태그의 API 계약을 확인합니다.
 
 ## Tickless Idle
 
-`configUSE_TICKLESS_IDLE = 1`을 켜면 다음과 같이 동작합니다.
+tickless idle은 유휴 구간의 주기 interrupt를 줄이도록 timer를 다음 필요한 시점에 맞추는 기법입니다. ARM_CM4F 기본 포트는 SysTick을 잠시 멈췄다가 긴 interval로 재설정하고, wake 후 완료 tick과 남은 부분 tick을 보정합니다.
 
-Idle 동안 SysTick을 멈춰 두고 CPU를 더 오래 sleep시킵니다. 깨어날 때 그동안 놓친 tick을 한 번에 보충합니다.
-
-```c
-void vPortSuppressTicksAndSleep(TickType_t xExpectedIdleTime) {
-    /* SysTick 다음 wake까지 reprogram */
-    uint32_t ulReloadValue = ulTimerCountsForOneTick * xExpectedIdleTime;
-    portNVIC_SYSTICK_LOAD_REG = ulReloadValue;
-    
-    __WFI();  /* sleep */
-    
-    /* 깨어났을 때 — 실제 경과 tick 보충 */
-    TickType_t ulCompleteTickPeriods = 
-        (configSYSTICK_CLOCK_HZ - portNVIC_SYSTICK_CURRENT_VALUE_REG)
-        / ulTimerCountsForOneTick;
-    vTaskStepTick(ulCompleteTickPeriods);
-}
-```
-
-5년 이상 동작해야 하는 배터리 기반 IoT 디바이스의 핵심 기술입니다.
+단순히 클록 Hz에서 CURRENT를 빼는 식은 단위와 경계가 맞지 않습니다. 원본은 24-bit 한계·진입 중 pending tick·일찍 깨운 IRQ·COUNTFLAG·보정 오차·vTaskStepTick의 계약을 함께 처리합니다. 다음 장에서 이를 구분하며, 출처 없는 축약 C를 완성 포트처럼 제시하지 않습니다.
 
 ## Tick 정확도 — Drift
 
-내부 RC oscillator(HSI)는 ±1~2%의 drift를 보입니다. 외부 crystal(HSE)은 ±50 ppm 수준으로 훨씬 안정적입니다.
+tick 정확도는 사용한 oscillator의 오차와 온도·보정·clock source, timer 정수 분주에 영향을 받습니다. HSI/HSE라는 이름만으로 ±1.5%나 ±50 ppm을 모든 MCU에 고정할 수는 없습니다.
 
-```text
-HSI @ 168 MHz, ±1.5%:
-1 day = 86400 sec × 0.015 = 1296 sec drift = 21분 오차
-
-HSE @ 168 MHz, ±50 ppm:
-1 day × 0.005% = 4.3 sec drift
-```
-
-장시간 동작하거나 NTP, time-stamp처럼 동기화에 민감한 시스템에는 외부 crystal이 필수입니다.
+가정한 주파수 오차 ε에 대해 하루의 시간 오차 크기는 86,400 × ε 초입니다. **가정값** 1.5%는 1,296초, 50 ppm은 4.32초입니다. 외부 crystal도 부품·보드·온도 특성에 의존하며, 장시간 동기화는 별도 clock discipline과 검증이 필요합니다.
 
 ## RTC와의 차이
 
-| | RTC (Real-Time Clock) | RTOS Tick |
+| 항목 | RTC | RTOS tick |
 | --- | --- | --- |
-| 용도 | Wall clock (date, time) | Scheduler·timeout |
-| 정밀도 | 초 단위 | µs 단위 |
-| 저전력 모드 | 동작 (battery) | 멈춤 (tickless 제외) |
-| 정확도 | 32 kHz crystal | 시스템 클럭 |
+| 주된 역할 | 날짜·시각, 장기 경과·alarm 등 | 커널 timeout·스케줄링 기준 |
+| 해상도·정확도 | RTC 구현·clock·보정별로 다름 | tick rate·clock·보정별로 다름 |
+| 저전력 중 동작 | power domain과 mode별 확인 | 선택 timer와 clock에 따라 유지·중단·대체 |
 
-대부분의 시스템은 RTC와 Tick을 동시에 사용합니다. RTC가 시간을 추적하고, Tick이 제어를 담당합니다.
+RTC가 항상 초 단위이고 RTOS tick이 항상 µs 단위라는 구분은 성립하지 않습니다. tickless 중에는 다른 저전력 counter를 시간 기준으로 활용하는 포트도 있습니다.
 
 ## 자주 하는 실수
 
-> ⚠️ Tick rate를 임의로 가정합니다
-
-`vTaskDelay(10)`을 10 ms라고 가정하기 쉽지만 실제로는 `configTICK_RATE_HZ`에 따라 달라집니다. `pdMS_TO_TICKS()` 매크로로 명시 변환을 거쳐야 합니다.
-
-```c
-vTaskDelay(pdMS_TO_TICKS(10));   // 명시적
-```
-
-> ⚠️ Tickless에서 wake source를 빠뜨립니다
-
-WFI 이후 깨울 수단이 SysTick뿐인데 그것까지 꺼 버리면 영원히 sleep 상태에 머뭅니다. RTC alarm이나 GPIO IRQ 같은 다른 wake source를 반드시 마련해 둬야 합니다.
-
-> ⚠️ HSI로 장시간 sync를 시도합니다
-
-±1% drift만으로도 하루에 14분이 어긋납니다. 장시간 동기화가 필요하다면 HSE가 필수입니다.
-
-> ⚠️ vTaskDelay 대신 busy-wait를 씁니다
-
-짧은 delay라도 busy-wait를 쓰면 CPU가 100%에 머물러 다른 task가 굶게 됩니다. 항상 `vTaskDelay`를 사용해야 합니다.
+- **tick 단위를 ms로 간주합니다.** 변환 뒤 0 tick·overflow·실제 block 양자화까지 확인합니다.
+- **SysTick을 끄기만 합니다.** 기본 tickless도 재설정한 SysTick으로 깰 수 있으며, 깊은 sleep에서 멈춘다면 살아 있는 다른 wake source와 시간 기준이 필요합니다.
+- **clock 이름만으로 drift를 보장합니다.** 데이터시트·부품·온도·보정 조건을 확인합니다.
+- **모든 짧은 대기를 vTaskDelay로 처리합니다.** sub-tick 요구에는 적절한 hardware timer나 bounded polling이 필요할 수 있습니다. busy wait의 CPU 점유와 스케줄링 영향도 따로 분석합니다.
 
 ## 정리
 
-- Cortex-M의 SysTick, Cortex-A의 Generic Timer, RISC-V의 mtime이 tick source입니다.
-- 1 kHz가 RTOS의 표준 tick rate입니다.
-- Tick ISR overhead는 약 0.1% CPU 수준이라 부담이 작습니다.
-- Tickless mode가 배터리 동작의 핵심입니다.
-- `pdMS_TO_TICKS()`로 절대 시간을 명시해 tick rate 의존을 피합니다.
+- tick source와 rate는 포트·제품 요구에 따라 정합니다.
+- SysTick의 LOAD는 counts − 1이며 24-bit 한계와 정수 분주를 확인합니다.
+- tick delay의 ready 시점과 실제 task 실행 시점은 다릅니다.
+- time slicing을 꺼도 다른 스케줄링 계기의 전환은 남습니다.
+- tickless·RTC·Generic Timer·mtime은 clock·권한·원자성 계약을 각각 확인해야 합니다.
 
-다음 편은 tickless 모드 구현을 자세히 다룹니다.
+다음 편에서는 tickless idle의 race 방지와 wake 후 보정을 구체적으로 살펴봅니다.
+
+## 근거 자료
+
+- [FreeRTOS V11.2.0 ARM_CM4F port.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c): SysTick setup·tickless.
+- [같은 태그 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c), [task.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/task.h): tick·delay·time slicing.
+- [RISC-V Machine-Level ISA 1.13](https://docs.riscv.org/reference/isa/v20260120/priv/machine.html): machine timer·RV32 64-bit 접근.
 
 ## 관련 항목
 

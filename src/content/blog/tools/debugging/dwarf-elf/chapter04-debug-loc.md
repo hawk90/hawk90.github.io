@@ -10,9 +10,9 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-`print x`라고 했을 때 GDB는 `x`가 *지금 어디 있는지* 어떻게 알까요. 답은 `.debug_loc` (DWARF 4) 또는 `.debug_loclists` (DWARF 5) 안의 **DWARF expression** — 또 하나의 바이트코드 *스택 머신*.
+`print x`라고 했을 때 GDB는 `x`가 *지금 어디 있는지* 어떻게 알까요. DW_AT_location은 DIE에 직접 넣은 표현식이나 .debug_loc (DWARF 4)/.debug_loclists (DWARF 5)의 목록을 가리킬 수 있습니다. 표현식은 레지스터 위치·메모리 주소·값·조각을 기술합니다.
 
-이 장은 그 VM의 정체를 다룹니다. 왜 변수 위치가 *식*이어야 하는지, 모든 `DW_OP_*` opcode의 의미, location list로 *PC 구간별* 다른 위치를 표현하는 법, 그리고 DWARF 5의 `DW_OP_entry_value`가 어떻게 "optimized out" 문제를 줄였는지.
+이 장은 그 VM의 정체를 다룹니다. 왜 변수 위치가 *식*이어야 하는지, 주요 `DW_OP_*` opcode의 의미, location list로 *PC 구간별* 다른 위치를 표현하는 법, 그리고 DWARF 5의 `DW_OP_entry_value`가 어떻게 "optimized out" 문제를 줄였는지.
 
 ## 왜 표현식인가
 
@@ -85,7 +85,7 @@ DWARF expression은 *스택 머신*의 명령어 시퀀스.
 |--------|------|------|
 | `DW_OP_deref` | - | 스택 top 주소를 dereference (full word) |
 | `DW_OP_deref_size` | u1 | n 바이트만 |
-| `DW_OP_deref_type` | uleb128, sleb128 | typed deref (DWARF 5) |
+| `DW_OP_deref_type` | 1-byte unsigned 크기, unsigned LEB128 타입 DIE offset | typed deref (DWARF 5 §2.5.1.3) |
 | `DW_OP_xderef` | - | 다중 주소 공간 deref |
 
 ### 산술
@@ -119,8 +119,8 @@ DWARF expression은 *스택 머신*의 명령어 시퀀스.
 | Opcode | 의미 |
 |--------|------|
 | `DW_OP_eq`/`ne`/`lt`/`le`/`gt`/`ge` | 비교, 1 또는 0 push |
-| `DW_OP_skip` | sleb16, 무조건 점프 |
-| `DW_OP_bra` | sleb16, 조건부 (top != 0) 점프 |
+| `DW_OP_skip` | 2-byte signed 고정 폭 변위, 무조건 점프 |
+| `DW_OP_bra` | 2-byte signed 고정 폭 변위, 조건부 점프 |
 
 ### 결과 표현 — 메모리 / 값 / 조각
 
@@ -159,11 +159,11 @@ DW_AT_location = DW_OP_addr 0x600100
 DW_AT_location = DW_OP_breg6 -8
 ```
 
-r6 - 8 *주소*에 변수. r6이 frame pointer가 아닐 때.
+DWARF register 6의 값에서 8을 뺀 주소입니다. 레지스터 번호의 의미는 psABI를 따르며 x86-64에서는 rbp입니다. frame pointer로 쓰이는지와 별개로 계산할 수 있습니다.
 
 ## 복잡한 예 — 조각난 변수
 
-ARM의 32-bit 아키텍처에서 64-bit `long long`은 *두 레지스터*에 쪼개질 수 있음.
+little-endian ARM 32-bit를 예로 들면 64-bit `long long`은 *두 레지스터*에 쪼개질 수 있음.
 
 ```text
 DW_AT_location = DW_OP_reg0 DW_OP_piece 4 DW_OP_reg1 DW_OP_piece 4
@@ -196,20 +196,20 @@ DW_AT_location = DW_OP_implicit_value 8 0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08
 
 함수 진입 시 인자가 r0에 있지만, 본문 중간에 r0이 *다른 용도*로 재사용되면 *원래 인자값*이 사라집니다. 이전 DWARF는 그 시점부터 "optimized out".
 
-DWARF 5는 *함수 진입 시점의 표현식 값*을 보존:
+DWARF 5의 entry_value는 함수 진입 시 표현식의 값을 기술합니다. 실행 중 이력을 자동 저장하는 기능은 아닙니다:
 
 ```text
 DW_AT_location = DW_OP_entry_value <block: DW_OP_reg0> DW_OP_stack_value
 ```
 
-"이 변수의 값은 *함수 진입 시 r0의 값*". 디버거는 콜스택의 *호출자 측 정보*에서 r0이 그 시점에 무엇이었는지 알아내 (CFI 또는 호출 사이트 메타) 값을 복원.
+"이 변수의 값은 *함수 진입 시 r0의 값*". 디버거는 호출자와 call-site의 DW_AT_call_value 등 사용 가능한 정보를 이용해 복원을 시도합니다. CFI만으로 임의의 과거 인자값을 알아낼 수는 없습니다.
 
 ```text
 (gdb) print arg
 $1 = 42
 ```
 
-본문에서 r0이 이미 사라졌어도 entry value로 원래 인자값이 복원됩니다. GCC 8+ / Clang 11+가 광범위 사용. `<optimized out>` 발생률이 크게 줄어듭니다.
+복원에 필요한 호출 정보가 없으면 여전히 optimized out일 수 있습니다. 컴파일러·최적화·소비자의 지원을 실제 출력으로 확인하며 발생률 감소를 측정 없이 수치화하지 않습니다.
 
 ## DW_OP_implicit_pointer — 포인터가 사라짐
 
@@ -268,7 +268,7 @@ DWARF 4의 `.debug_loc`은 *모든 location list*를 한 섹션에 둠. DWARF 5�
 - DW_LLE_default_location: PC와 무관, default
 - DW_LLE_end_of_list: 끝
 
-base address 트릭이 핵심 — *대부분의 PC는 가까이*에 있으므로 *상대 offset*만 저장. 같은 long range를 표현하는 데 *바이트가 절반*.
+base address 트릭이 핵심 — *대부분의 PC는 가까이*에 있으므로 *상대 offset*만 저장. 같은 범위라도 선택한 entry 인코딩과 base에 따라 크기가 달라지므로 실제 결과를 비교합니다.
 
 ## DW_AT_location 평가 흐름
 
@@ -289,47 +289,20 @@ Value evaluate_location(DIE var_die, uint64_t pc) {
 }
 
 Value run_expr_vm(Bytes expr) {
-    Stack<Value> stack;
-    while (expr.has_more()) {
-        Opcode op = expr.next_byte();
-        switch (op) {
-        case DW_OP_lit0..lit31:
-            stack.push(op - DW_OP_lit0); break;
-        case DW_OP_reg0..reg31:
-            return Value::in_register(op - DW_OP_reg0);
-        case DW_OP_breg0..breg31: {
-            int64_t offset = decode_sleb128(expr);
-            uint64_t reg_val = read_register(op - DW_OP_breg0);
-            stack.push(reg_val + offset);
-            break;
-        }
-        case DW_OP_fbreg: {
-            int64_t offset = decode_sleb128(expr);
-            uint64_t fb = evaluate_frame_base();
-            stack.push(fb + offset);
-            break;
-        }
-        case DW_OP_plus:
-            stack.push(stack.pop() + stack.pop()); break;
-        case DW_OP_stack_value:
-            return Value::implicit(stack.pop());
-        case DW_OP_piece: {
-            uint64_t size = decode_uleb128(expr);
-            // 누적 — 위에서 본 표현식이 size 바이트 조각
-            ...
-        }
-        ...
-        }
-    }
-    return Value::at_address(stack.top());
+    // 완전한 구현이 아닌 조각 처리의 개요
+    // reg*는 즉시 반환하지 않고 현재 조각의 register location을 설정
+    // stack_value는 현재 조각을 값으로 표시
+    // piece는 현재 location/value를 누적하고 다음 조각의 평가 상태를 초기화
+    // 모든 opcode 처리 후 단일 location 또는 piece 모음을 반환
+    return evaluate_all_operations_and_pieces(expr);
 }
 ```
 
-평가 끝에 스택 top이 *주소* (그 주소를 deref해 값). `DW_OP_stack_value` 만나면 *값 자체*. `DW_OP_piece` 누적되면 *여러 조각의 모음*.
+레지스터 위치는 메모리 주소와 다른 결과 종류입니다. reg*에서 곧바로 반환하면 뒤의 piece를 처리할 수 없습니다. 위 코드는 상태 구분의 개요이며 stack_value·piece·typed opcode 전체를 구현한 평가기가 아닙니다.
 
 ## Type-aware 표현 (DWARF 5)
 
-이전 DWARF는 *모든 산술이 generic 64-bit*. DWARF 5는 *typed* opcode:
+기본 generic 타입의 폭은 address_size에 관련되며 항상 64-bit인 것은 아닙니다. DWARF 5는 *typed* opcode:
 
 ```text
 DW_OP_const_type    <type_die>, <byte_size>, <bytes>
@@ -383,20 +356,7 @@ $ readelf --debug-dump=info my_prog | grep -A 2 DW_AT_location
 
 pyelftools.
 
-```python
-from elftools.dwarf.descriptions import describe_attr_value
-from elftools.dwarf.locationlists import LocationParser
-
-for cu in dwarf.iter_CUs():
-    parser = LocationParser(dwarf.location_lists())
-    for die in cu.iter_DIEs():
-        if die.tag != 'DW_TAG_variable': continue
-        loc_attr = die.attributes.get('DW_AT_location')
-        if not loc_attr: continue
-        loc = parser.parse_from_attribute(loc_attr, cu['version'], die=die)
-        # loc은 LocationExpr 또는 LocationList
-        print(die.attributes['DW_AT_name'].value.decode(), '@', loc)
-```
+아래 직접 확인의 locations.py가 파일 열기와 DWARF 객체 생성을 포함한 pyelftools 0.32 예제입니다. 목록을 파싱하는 것과 대상 프로세스 레지스터·메모리에서 실제 값을 평가하는 것은 별개입니다.
 
 자체 도구로 *변수가 어디 살아 있는지* 코드 영역별 통계를 낼 수 있습니다 — *최적화로 인한 가시성 분석*.
 
@@ -416,7 +376,7 @@ $1 = <optimized out>
 해법.
 
 - `-Og` 빌드 → 더 많은 PC에 location 표시.
-- `-g3` → 매크로 정보 + 더 풍부한 DWARF.
+- g3의 매크로 정보가 최적화로 사라진 값을 되살리는 것은 아닙니다. 필요한 경우 최적화 수준과 변수 추적 지원을 별도로 확인합니다.
 - DWARF 5의 `DW_OP_entry_value`로 함수 진입값 보존.
 - 정 안되면 *어셈블리 보고 레지스터 직접* (GDB Ch 11).
 
@@ -426,7 +386,7 @@ $1 = <optimized out>
 constexpr int kMax = 100;
 ```
 
-`constexpr`은 *컴파일 시 결정*. 컴파일러는 *변수 자체를 안 만들고* 사용 위치에 *상수*로 인라인. DWARF 5의 `DW_OP_implicit_value`로 *그래도 디버거가 보이게* 표현.
+`constexpr`은 *컴파일 시 결정*. 컴파일러는 *변수 자체를 안 만들고* 사용 위치에 *상수*로 인라인. 상수 값은 DW_AT_const_value나 값 표현식으로 남을 수 있습니다. DW_OP_implicit_value는 DWARF 4부터 있으며 아래 두 예제가 모두 그 opcode인 것은 아닙니다.
 
 ```text
 DW_TAG_variable [kMax]
@@ -441,6 +401,62 @@ DW_TAG_variable [kMax]
 ```
 
 `print kMax`가 100을 답.
+
+## 직접 확인 — 위치 목록과 typed 인자 파싱
+
+locals.c를 DWARF 4/5와 O0/O2로 만들어 전역 변수의 단일 표현식과 지역 변수의 위치 표현을 비교합니다. O2의 위치 목록은 컴파일러 출력에 따라 달라지며 특정 레지스터 배치를 고정하지 않습니다.
+
+```c title="locals.c"
+int global = 7;
+extern int consume(int);
+int sample(int input) {
+    int tracked = input + 3;
+    consume(tracked);
+    return tracked + input + global;
+}
+```
+
+```python title="locations.py"
+import sys
+from elftools.elf.elffile import ELFFile
+from elftools.dwarf.locationlists import LocationParser
+
+with open(sys.argv[1], "rb") as stream:
+    dwarf = ELFFile(stream).get_dwarf_info()
+    parser = LocationParser(dwarf.location_lists())
+    for cu in dwarf.iter_CUs():
+        for die in cu.iter_DIEs():
+            if die.tag != "DW_TAG_variable":
+                continue
+            attr = die.attributes.get("DW_AT_location")
+            if attr is None:
+                continue
+            name = die.attributes.get("DW_AT_name")
+            location = parser.parse_from_attribute(attr, cu["version"], die=die)
+            print(name.value.decode() if name else "<unnamed>", type(location).__name__)
+```
+
+```python title="expr-bytes.py"
+from elftools.dwarf.dwarf_expr import DWARFExprParser
+from elftools.dwarf.structs import DWARFStructs
+
+structs = DWARFStructs(little_endian=True, dwarf_format=32, address_size=8)
+parser = DWARFExprParser(structs)
+ops = parser.parse_expr([0xa6, 4, 0x40, 0x9f])
+assert ops[0].op_name == "DW_OP_deref_type"
+assert ops[0].args == [4, 64]
+assert ops[1].op_name == "DW_OP_stack_value"
+print("typed size=4 type_offset=64")
+```
+
+```bash
+clang --target=x86_64-unknown-linux-gnu -g -gdwarf-5 -O2 -c locals.c -o locals.o
+llvm-dwarfdump --debug-info --debug-loclists locals.o
+python3 locations.py locals.o
+python3 expr-bytes.py
+```
+
+typed 예제는 크기 1바이트와 unsigned LEB128 offset 64를 읽고 다음 opcode까지 정확히 이동하는지 검사합니다. 타입 DIE가 실제로 있는 대상에서 메모리를 dereference한 실행은 아닙니다.
 
 ## 정리
 

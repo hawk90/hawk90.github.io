@@ -11,17 +11,19 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"ftrace는 커널을 다시 컴파일하지 않고 모든 함수 진입과 이탈, 인터럽트 지연을 추적하는 빌트인 도구입니다."**
+> **"ftrace는 활성화된 kernel configuration에서 함수·이벤트·지연을 추적하는 built-in 도구입니다."**
 
 ## 어떤 문제를 푸는가
 
 커널의 어느 함수에서 시간이 새는지, 인터럽트가 얼마나 오래 disable되는지, real-time task가 왜 wake-up이 늦었는지 같은 질문은 perf의 sampling만으로는 답하기 어렵습니다. Sampling은 통계적이며 짧은 spike를 놓칠 수 있기 때문입니다.
 
-ftrace는 GCC의 `-pg`로 모든 커널 함수 앞뒤에 trace hook이 삽입된 상태에서, runtime에 그 hook을 켜고 끄는 방식입니다. 비활성 상태에서는 NOP 두 명령과 같아 거의 zero overhead이며, 활성화 시에만 측정 비용이 발생합니다.
+ftrace의 function tracer는 커널 빌드와 `CONFIG_DYNAMIC_FTRACE` 등 설정에 따라 생성된 함수 진입 지점을 동적으로 켭니다. 일부 함수는 inline되거나 `notrace` 등으로 제외되며, 사용 가능한 함수는 `available_filter_functions`에서 확인합니다. 동적 ftrace가 비활성일 때 오버헤드를 줄이지만, 정확한 비용은 빌드·CPU에 따라 다릅니다.
 
 이 글에서는 `/sys/kernel/debug/tracing` 인터페이스, function tracer, function_graph, latency tracer를 다루며, `trace-cmd`와 KernelShark도 짧게 살펴봅니다.
 
 ## tracefs 인터페이스
+
+Function tracer의 build 조건, 동적 추적 가능 함수와 제외 규칙은 [Linux ftrace 공식 문서](https://docs.kernel.org/trace/ftrace.html)에 정리되어 있습니다.
 
 ftrace는 tracefs라는 가상 파일시스템으로 노출됩니다.
 
@@ -48,7 +50,7 @@ echo 0 > tracing_on                  # 정지
 cat trace                            # 결과 확인
 ```
 
-## Function Tracer — 모든 함수 진입 기록
+## Function Tracer — 사용 가능한 함수 진입 기록
 
 ```bash
 cd /sys/kernel/tracing
@@ -189,19 +191,9 @@ cat trace_pipe
 
 이는 ftrace의 정적 hook을 보완하며, 모듈 함수나 inline되지 않은 함수에 사용합니다. eBPF의 base가 같은 mechanism입니다.
 
-## Overhead — Nop의 이점
+## 측정 비용
 
-ftrace의 가장 큰 장점은 비활성 상태의 거의 zero overhead입니다.
-
-```text
-비활성 (nop):  ~1-2% (NOP 명령 비용)
-function:     ~10-30% (모든 함수 hook)
-function_graph: ~30-50%
-event tracing: 1-5% (event 빈도 의존)
-latency tracer: 5-15%
-```
-
-Production에서 latency tracer는 background로 켜 두고, function tracer는 디버깅 세션에만 사용하는 것이 보통입니다.
+동적 ftrace가 비활성일 때는 추적 지점을 비활성화하지만, tracer를 켠 뒤의 비용은 함수 호출 빈도·버퍼·커널 구성에 따라 달라집니다. 먼저 좁은 함수 필터를 적용하고, tracing 전후에 같은 workload를 측정해 영향을 확인합니다. 수치를 다른 커널·플랫폼에 일반화하지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -243,9 +235,9 @@ stable한 snapshot이 필요하면 먼저 `echo 0 > tracing_on`을 실행합니�
 
 ## 정리
 
-- ftrace는 GCC `-pg` hook을 runtime에 토글하는 방식으로 비활성 시 zero overhead입니다.
+- ftrace는 설정된 커널 추적 지점을 runtime에 활성화하며, 사용 가능한 함수와 비용은 kernel config와 플랫폼에서 확인합니다.
 - `function` tracer는 모든 진입을, `function_graph`는 호출 그래프와 시간을 보여줍니다.
-- `irqsoff`, `preemptoff`, `wakeup_rt`로 worst-case latency를 측정합니다.
+- `irqsoff`, `preemptoff`, `wakeup` tracer의 가용성과 세부 동작은 커널 configuration과 version에서 확인합니다.
 - Tracepoint는 ftrace와 perf가 공유하는 정적 probe입니다.
 - `trace-cmd`와 KernelShark로 record와 GUI 시각화가 가능합니다.
 - Filter 없는 function tracer는 ring buffer를 즉시 wrap시키므로 좁은 범위 지정이 필수입니다.

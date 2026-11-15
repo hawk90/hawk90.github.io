@@ -62,13 +62,15 @@ Reader가 도착하면 다른 reader가 있을 때 즉시 함께 진입합니다
 
 문제는 writer starvation입니다. 연속해서 reader가 도착하면 writer는 영원히 대기할 수 있습니다. Web cache나 DNS 같은 read-heavy 시스템에서는 write가 드물어 큰 문제가 안 되지만, sensor data처럼 write가 주기적으로 도착하는 시스템에서는 deadline을 놓칠 수 있습니다.
 
-Linux의 기본 `rwlock_t`가 unfair reader-preferring입니다.
+Linux kernel의 `rwlock_t`와 userspace `pthread_rwlock_t`는 별도 API이며, 공정성은 구현과 kernel 설정에 따라 달라집니다. 현재 Linux kernel 문서는 non-PREEMPT_RT `rwlock_t`를 writer starvation을 막는 fair 구현으로 설명하고, PREEMPT_RT에서는 동작 차이를 명시합니다. 대상 kernel 버전과 설정을 확인해야 합니다 ([kernel lock types](https://docs.kernel.org/6.1/locking/locktypes.html)).
 
 ## Writer Preference
 
 Writer가 대기 중일 때는 새 reader도 대기합니다. Writer가 처리된 뒤에야 reader가 진행됩니다.
 
-이 정책은 writer starvation을 방지하지만, read가 압도적이면 reader starvation이 발생할 수 있습니다. POSIX `PTHREAD_RWLOCK_PREFER_WRITER_NP`로 선택할 수 있으며, database나 sensor write가 중요한 시스템에 적합합니다.
+glibc에서는 GNU 확장 `pthread_rwlockattr_setkind_np()`와 `PTHREAD_RWLOCK_PREFER_WRITER_NONRECURSIVE_NP`로 writer preference를 선택할 수 있습니다. 이 설정은 recursive read lock을 사용하지 않는다는 전제가 필요합니다. `PTHREAD_RWLOCK_PREFER_WRITER_NP`는 glibc에서 무시되므로 writer starvation 방지 설정으로 쓰지 않습니다. Writer preference에서는 reader starvation이 생길 수 있습니다.
+
+glibc의 동작과 재귀 read-lock 제한은 [`pthread_rwlockattr_setkind_np(3)` 매뉴얼](https://www.man7.org/linux/man-pages/man3/pthread_rwlockattr_setkind_np.3.html)에 설명되어 있습니다.
 
 ## Fair RW-Lock (FIFO)
 
@@ -82,7 +84,7 @@ Batch 3: R4 R5 동시 진행
 Batch 4: W2 exclusive
 ```
 
-Starvation이 양쪽 모두에서 없습니다. 일부 platform의 `pthread_rwlock_init` 기본 동작입니다.
+FIFO 정책은 대기 순서를 보존해 양쪽 starvation을 줄이는 한 가지 구현입니다. `pthread_rwlock_init`의 기본 동작이라고 가정하지 말고, 실제 library와 lock policy를 확인해야 합니다.
 
 ## 성능 비교 — Mutex vs RW-Lock
 
@@ -233,19 +235,18 @@ Free는 반드시 `synchronize_rcu()` 또는 `call_rcu()` 콜백 안에서 합�
 
 Seqlock은 value 데이터에만 안전합니다. Pointer를 저장하면 retry 사이에 원본이 변경되어 잘못된 메모리를 dereference할 수 있습니다.
 
-## 측정 — 실측 결과
+## 측정 — 비교 실험 설계
 
-Cortex-A72 4-core, 4 thread에서 read:write 비율을 바꿔 가며 측정한 throughput(ops/sec)입니다.
+이 저장소에는 Cortex-A72/4-thread 결과를 재현할 benchmark 코드와 원시 로그가 없습니다. 따라서 고정 throughput 표 대신, 비교 시 동일 조건에서 기록할 항목을 정리합니다.
 
-```text
-              Mutex      RW-Lock    RCU       Seqlock
-99:1 read    1.2 M       8.5 M    180 M      120 M
-90:10        1.1 M       4.2 M     22 M       15 M
-70:30        0.9 M       1.5 M      8 M        3 M
-50:50        0.7 M       0.6 M      4 M        1 M
-```
+| 비교 항목 | 통제하거나 기록할 조건 |
+|-----------|-----------------------|
+| Mutex, RW-lock, RCU, seqlock 구현 | library/kernel 버전, read/write API와 메모리 회수 정책 |
+| Read/write 비율 | 실제 작업량과 write critical-section 길이 |
+| Throughput와 latency | thread 수, affinity, warm-up, 반복 횟수, 분포 |
+| RCU/seqlock 안전성 | grace-period 대기, retry 횟수, reader가 값을 복사하는 방식 |
 
-RCU와 seqlock은 read-heavy에서 압도적입니다. RW-lock의 효과는 90:10 이상에서만 분명하며, 50:50에서는 오히려 mutex보다 느려집니다.
+측정 전에는 어느 lock이 빠른지 단정하지 않습니다. 특히 seqlock retry와 RCU 회수 비용을 빼고 read throughput만 비교하면 비용을 과소평가할 수 있습니다.
 
 ## 정리
 

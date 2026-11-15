@@ -12,13 +12,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**Secondary CPU는 reset 직후 *깨어 있지만 멈춰 있는* 상태입니다.** Boot CPU가 명시적으로 "여기로 점프해서 일을 시작해"라고 알려줘야 비로소 SMP가 시작됩니다. PSCI는 이 약속을 펌웨어 레벨로 표준화한 인터페이스입니다.
+**Secondary CPU의 시작·대기 상태는 SoC와 firmware boot design에 따라 달라집니다.** Linux는 DT/firmware가 설명한 CPU enable method를 사용해 추가 CPU를 온라인 상태로 가져옵니다. PSCI는 이 약속을 펌웨어 레벨로 표준화한 인터페이스입니다.
 
-ARM Cortex-A 코어가 여러 개인 SoC를 켜면 BootROM은 *CPU0 하나만* 실제로 코드를 실행합니다. 나머지 코어들은 WFE(Wait For Event) 또는 WFI 상태로 reset 직후 정지해 있습니다. 그래서 BSP의 책임 중 하나는 *secondary CPU를 깨우는 신호*를 정확히 보내는 일입니다. 잘못된 부팅 주소나 stack을 주면 secondary CPU가 첫 명령어에서 그대로 죽고, 사용자는 dmesg에 `CPU1: failed to come online`만 보게 됩니다.
+많은 SoC는 reset 뒤 boot CPU를 선택하고 다른 CPU를 firmware 대기 루프나 저전력 상태에 둡니다. 이 동작은 보편적인 BootROM 규칙이 아니므로 SoC TRM과 boot firmware에서 확인합니다. 그래서 BSP의 책임 중 하나는 *secondary CPU를 깨우는 신호*를 정확히 보내는 일입니다. 잘못된 부팅 주소나 stack을 주면 secondary CPU가 첫 명령어에서 그대로 죽고, 사용자는 dmesg에 `CPU1: failed to come online`만 보게 됩니다.
 
 ## CPU bring-up의 큰 그림
 
-Boot CPU(CPU0)는 `ROM → SPL → ATF → U-Boot`를 거쳐 커널의 `start_kernel()`에 진입한 뒤 `smp_init()`에서 각 CPU의 enable-method를 확인합니다. 그 사이 secondary CPU(CPU1..N)는 WFE 상태로 정지해 있습니다. Boot CPU가 `PSCI_CPU_ON` SMC를 호출하거나(또는 spin-table 주소를 갱신하고 SEV를 보내면), ATF/펌웨어가 그 코어를 깨웁니다. 깨어난 코어는 `EL3 → EL2 → EL1` 순으로 예외 레벨을 낮추며 점프해 커널의 `secondary_entry`에 도달하고, 여기서 C 코드가 준비되면 CPU가 online 상태가 됩니다.
+Boot CPU와 secondary CPU의 단계는 boot firmware와 `enable-method`에 따라 다릅니다. PSCI를 사용하면 Linux가 firmware interface로 CPU_ON을 요청하고, spin-table을 사용하면 kernel과 platform이 release location을 통해 handoff합니다. secondary CPU가 Linux kernel에 진입할 때의 exception level은 arm64 boot protocol 조건을 따라야 하며, 모든 구성에서 `EL3 → EL2 → EL1` 순으로 내려간다고 볼 수 없습니다.
 
 <!-- TODO: TikZ — boot CPU와 secondary CPU의 병렬 bring-up 흐름도 -->
 
@@ -67,15 +67,15 @@ psci {
 
 | 방식 | 동작 | 보드 예 |
 |------|------|---------|
-| `psci` | Boot CPU가 SMC instruction으로 펌웨어(ATF BL31)에 요청. 펌웨어가 secondary CPU 깨움 | i.MX8M, RK3588, BCM2711, 최신 arm64 전부 |
+| `psci` | kernel이 DT에 지정한 SMC/HVC conduit로 PSCI firmware에 요청 | 해당 보드의 firmware·DT 조합에서 확인 |
 | `spin-table` | DT에 적힌 *release address*에 secondary CPU 점프 주소를 쓰고 SEV로 깨움 | 초기 arm64, 일부 32-bit ARM |
 | `local-timer` (32-bit ARM) | 보드 specific 메커니즘 | 오래된 OMAP, i.MX6 등 |
 
-mainline에서는 PSCI를 기본 선택지로 보고 있고, 32-bit ARM 보드도 점차 PSCI로 이동했습니다.
+arm64 DT binding은 `psci` 또는 `spin-table`을 enable method로 정의합니다. 32-bit ARM은 SoC별 method가 다양하므로 대상 DTS와 kernel binding을 확인합니다.
 
 ## PSCI 흐름 — CPU_ON
 
-ARMv8 PSCI 1.0+ 기준으로, CPU_ON 요청은 세 단계를 거칩니다.
+PSCI CPU_ON 개념 흐름은 kernel, firmware, target CPU 단계로 나눠 볼 수 있습니다. 구체 함수와 exception-level handoff는 커널 및 firmware 버전에 따라 달라집니다.
 
 - **Linux side** (`arch/arm64/kernel/psci.c`) — `cpu_psci_cpu_boot()`가 `invoke_psci_fn(PSCI_0_2_FN_CPU_ON, mpidr, entry_point, 0)`을 호출하고, 이는 다시 `smc #0`(또는 configurable하게 `hvc`)을 발행합니다.
 - **Firmware side** (ATF BL31, `services/std_svc/psci/`) — `psci_cpu_on_start()`가 secondary CPU의 power domain을 켜고 reset을 풀며, `entry_point`를 보안 RAM에 stash한 뒤 secondary CPU의 ROM이 BL31의 warm boot vector로 점프하게 합니다.
@@ -110,11 +110,11 @@ cpu1: cpu@1 {
     compatible = "arm,cortex-a53";
     reg = <0x0 0x1>;
     enable-method = "spin-table";
-    cpu-release-addr = <0x0 0x80000fff8>;
+    cpu-release-addr = <0x0 0x80000ff8>;
 };
 ```
 
-`cpu-release-addr`이 가리키는 메모리는 SPL/U-Boot가 secondary CPU에게 *busy-wait loop*를 미리 심어 놓은 곳입니다. Loop는 대략 다음과 같습니다.
+``cpu-release-addr`은 자연 정렬된 64-bit zero-initialized memory location을 가리키며, secondary CPU의 polling code가 이를 읽습니다. 해당 location은 Linux가 일반 RAM으로 사용할 수 없도록 reserved area에 두어야 합니다. 아래 DT fragment는 이 reservation과 firmware setup을 포함하지 않은 설명용 예시입니다. 실제 설정은 SoC와 boot firmware 문서에 맞춰야 합니다. Loop는 대략 다음과 같습니다.
 
 **secondary_holding_pen:**
 
@@ -122,12 +122,12 @@ cpu1: cpu@1 {
 - cbz  x0, secondary_holding_pen   ; 0이면 계속 spin
 - br   x0                   ; 0 아니면 그 주소로 점프
 
-Linux가 `cpu-release-addr`에 `secondary_entry`의 물리 주소를 쓰고 SEV를 보냅니다. Secondary CPU는 그 주소로 점프해 커널 코드 실행을 시작합니다.
+arm64 boot protocol의 spin-table 흐름에서 boot CPU는 release location에 secondary entry address를 쓰고 필요하면 SEV를 보냅니다. 이 설명은 protocol 조건을 설명하며, 이 글의 샘플 주소를 실제 보드에서 사용할 수 있다는 뜻은 아닙니다.
 
 PSCI에 비해 단순하지만 단점이 명확합니다.
 
-- CPU off (전력 절감)가 불가능합니다. 한번 깨운 코어를 다시 재울 방법이 없습니다.
-- Secure firmware가 없어 secure side의 컨텍스트를 못 설정합니다.
+- 단순 spin-table 구현은 PSCI처럼 CPU power management 기능을 제공하지 않습니다. 구체적인 CPU off/hotplug 지원은 SoC firmware와 kernel 구현을 확인합니다.
+- spin-table은 CPU enable protocol이며 secure-world 기능은 별도의 firmware/security design 문제입니다.
 - Hotplug, idle 진입 등 power management 통합이 어렵습니다.
 
 ## CPU 부팅 인자
@@ -231,11 +231,11 @@ Secondary CPU의 PLL이 boot CPU와 다른 도메인에 있으면 BSP가 명시�
 - Secondary CPU는 reset 직후 WFE 상태로 정지해 있으며, boot CPU가 명시적으로 깨워야 합니다.
 - 깨우는 방법은 DT `cpus` 노드의 `enable-method`로 선택하며, 최신 arm64는 `psci`가 표준입니다.
 - PSCI는 SMC instruction으로 ATF BL31에 요청을 보내는 펌웨어 인터페이스입니다.
-- `psci.method = "smc"`와 `cpu_on` 함수 ID(`0xc4000003`)가 핵심 binding입니다.
+- PSCI v0.2 이상에서는 표준 function ID를 사용하고, v0.1 compatibility binding은 function ID를 DT에 제공할 수 있습니다. `method`는 firmware가 제공하는 SMC 또는 HVC conduit와 일치해야 합니다.
 - spin-table은 단순하지만 power off가 안 되고 hotplug·idle과 연동하기 어렵습니다.
 - Secondary CPU는 자기 stack과 task_struct를 가져야 하며, boot CPU가 `secondary_data`로 전달합니다.
 - 부팅 성공 시 dmesg에 `CPU1: Booted secondary processor` 라인이 보이고, 실패 시 `-EINVAL` 같은 오류로 가시화됩니다.
-- 부팅 후 `/sys/devices/system/cpu/cpu*/online`으로 CPU hotplug가 가능해집니다.
+- CPU hotplug는 kernel config, platform firmware, CPU topology 및 해당 CPU의 disable support에 달려 있습니다. `/sys/devices/system/cpu/` 노출만으로 hotplug 동작을 보장하지 않습니다.
 
 ## 다음 편 예고
 

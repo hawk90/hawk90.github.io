@@ -15,12 +15,14 @@ topics: ["tools", "tools/debugging"]
 프로그램이 어떤 자리에 멈췄을 때, *어떻게 거기까지 왔는지*를 알아야 합니다. 답이 *호출 스택* (call stack)이고, 디버거가 보여 주는 게 *backtrace*.
 
 ```c
-void deepest() { *(int*)0 = 1; }   // SIGSEGV
+void deepest() { /* 이 자리에서 대상 프로그램이 멈춘 상황을 가정 */ }
 
 void deeper()  { deepest(); }
 void deep()    { deeper(); }
 int main()     { deep(); return 0; }
 ```
+
+아래는 프레임 순서를 설명하는 축약 예시입니다. 주소와 줄 번호는 실제 빌드에서 얻은 출력이 아닙니다.
 
 ```text
 (gdb) run
@@ -34,7 +36,7 @@ Program received signal SIGSEGV, Segmentation fault.
 #3  0x0000555555555158 in main () at crash.c:5
 ```
 
-*충돌이 deepest에서 일어났고*, 거기까지 deeper→deep→main 순으로 왔다는 사실이 한눈에. 이게 *bt의 가치*입니다.
+가정한 정지 지점이 `deepest`이고 호출 경로가 `deeper`→`deep`→`main`이면 프레임의 안쪽에서 바깥쪽 순서를 볼 수 있습니다. 이 예시는 신호 발생이나 프레임 출력을 재현하는 실행 코드가 아닙니다.
 
 ---
 
@@ -112,7 +114,7 @@ LLDB:
 (gdb) down 2
 ```
 
-`up`은 *스택 깊이 줄임*(호출자 방향), `down`은 *깊어짐*. `bt`에서 *번호가 큰 쪽이 깊은 호출*이고, *up은 번호 증가, down은 감소*.
+`up`은 *스택 깊이 줄임*(호출자 방향), `down`은 *깊어짐*. `bt`에서 *번호가 큰 쪽이 바깥 호출자*이고, *up은 번호 증가, down은 감소*.
 
 이름이 헷갈리기 쉽습니다. 외울 때:
 - 호출자(*caller*) = `up` (먼저 호출한 쪽 = *위*)
@@ -121,6 +123,8 @@ LLDB:
 ---
 
 ## `info frame` — 프레임 *상세 정보*
+
+아래 `info frame`은 항목을 보여 주기 위한 축약 형식이며, 주소와 문구는 실제 세션 출력이 아닙니다.
 
 ```text
 (gdb) info frame
@@ -153,7 +157,7 @@ LLDB:
 ## 인라인 함수의 *까다로움*
 
 ```c
-inline int small() { return 42; }
+static inline int small() { return 42; }
 
 int main() {
     int x = small();    // 컴파일러가 small() 인라인 가능
@@ -169,7 +173,7 @@ int main() {
 #1  main () at inline.c:5
 ```
 
-GDB 7+는 *인라인 표시*를 잘합니다. `#0`이 *진짜 스택 프레임이 아니라* "*main 안의 인라인된 자리*"라는 의미.
+지원되는 DWARF 인라인 정보를 읽으면 논리적 인라인 프레임을 표시할 수 있습니다. `#0`이 *진짜 스택 프레임이 아니라* "*main 안의 인라인된 자리*"라는 의미.
 
 ```text
 (gdb) info frame
@@ -281,7 +285,7 @@ Backtrace stopped: previous frame inner to this frame (corrupt stack?)
 원인: *스택 오버런*이 backtrace 정보까지 망가뜨림.
 
 해결 시도:
-1. **`bt no-filters`** — Python 필터 비활성화. 가끔 깨진 자리 통과.
+1. **`bt no-filters`** — Python frame filter의 표시 영향을 제거합니다. 메모리 손상이나 unwinding 정보를 복구하지는 않습니다.
 2. **`info registers`** — *수동으로 스택 따라가기*. `rbp`, `rsp`로 프레임 추적.
 3. **메모리 검사** — `x/64xg $rsp`로 스택 내용 확인.
 
@@ -289,14 +293,14 @@ Backtrace stopped: previous frame inner to this frame (corrupt stack?)
 
 ---
 
-## *외부 라이브러리* 프레임 숨기기
+## step에서 외부 함수 진입 건너뛰기
 
 ```text
-(gdb) skip function pthread_*
-(gdb) skip function __libc_*
+(gdb) skip -rfunction ^pthread_.*
+(gdb) skip -rfunction ^__libc_.*
 ```
 
-`bt`에서 *pthread_* 와 __libc_* 프레임을 숨김. *우리 코드만* 보고 싶을 때.
+skip은 step 도중 지정 함수로 진입하지 않도록 합니다. backtrace에서 프레임을 숨기는 기능은 아닙니다. 표시 가공은 Python frame filter처럼 별도 기능을 사용합니다.
 
 ```text
 (gdb) info skip
@@ -304,7 +308,7 @@ Backtrace stopped: previous frame inner to this frame (corrupt stack?)
 (gdb) skip enable 1
 ```
 
-`step`이나 `next`도 *건너뛴 함수는 안 들어감*. 외부 라이브러리에 *들어가지 않고* 한 줄씩 진행.
+next는 원래 함수 호출을 넘기며 skip은 step의 진입 선택에 영향을 줍니다. 외부 라이브러리에 *들어가지 않고* 한 줄씩 진행.
 
 ---
 
@@ -323,7 +327,7 @@ Program terminated with signal SIGSEGV, Segmentation fault.
 #3  0x0000555555555158 in main () at crash.c:5
 ```
 
-코어 덤프는 *프로세스 죽은 순간의 메모리 스냅샷*. 거기서도 `bt`가 정상 동작. *프로덕션 사고 분석*의 기본.
+코어 덤프는 *프로세스 죽은 순간의 메모리 스냅샷*. 거기서도 저장된 스택·레지스터와 맞는 unwinder가 있어야 bt를 복원할 수 있습니다. *프로덕션 사고 분석*의 기본.
 
 자세한 코어 덤프 분석은 [Ch 7](/blog/tools/debugging/gdb-lldb/chapter07-core-dump)에서.
 
@@ -373,9 +377,9 @@ n = 0x0
 (gdb) info args         # n = 50
 ```
 
-### 시나리오 3: 데드락 진단
+### 시나리오 3: 데드락 후보 진단
 
-두 스레드가 서로 다른 mutex를 기다린다 → *데드락*.
+서로 다른 mutex 대기는 데드락의 단서일 뿐입니다. 각 mutex의 소유자와 기다리는 스레드를 연결해 대기 사이클을 확인해야 합니다.
 
 ```text
 (gdb) thread apply all bt
@@ -425,7 +429,7 @@ sudo dnf debuginfo-install glibc libstdc++
 - 인라인 함수는 *별도 프레임으로 표시*되지만 *진짜 스택 아님*.
 - Tail call optimization으로 *프레임이 사라질 수* 있음. `-fno-optimize-sibling-calls` 또는 `-O0`.
 - **`thread apply all bt`** — *모든 스레드의 스택*. 데드락 진단 필수.
-- **`skip function`** — 외부 라이브러리 프레임 숨김.
+- skip은 stepping의 함수 진입을 건너뛰며 backtrace의 프레임은 숨기지 않습니다.
 - 코어 덤프에서도 `bt` 동작.
 - 깨진 스택은 *근본 원인이 따로* — 보통 buffer overflow.
 

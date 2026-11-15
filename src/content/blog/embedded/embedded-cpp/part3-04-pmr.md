@@ -68,7 +68,7 @@ protected:
 };
 ```
 
-virtual 함수가 3개이며 vptr 1개(4 byte)가 추가됩니다.
+이 스케치는 핵심 세 customization 함수를 보여 줍니다. 가상 소멸자도 존재하며 vptr의 존재·크기와 레이아웃은 ABI에 따릅니다. 4바이트로 고정되지 않습니다.
 
 `std::pmr::polymorphic_allocator<T>`가 memory_resource를 wrap해 STL allocator interface를 제공합니다.
 
@@ -83,7 +83,7 @@ auto* mr = std::pmr::new_delete_resource();
 std::pmr::vector<int> v(mr);   // heap에서
 ```
 
-기본 `std::pmr::vector<int>`의 default resource입니다. 임베디드에서는 회피합니다.
+초기 default resource는 new_delete_resource이며 set_default_resource로 바뀔 수 있습니다. heap 금지 경로에서는 default에 기대지 않고 명시적으로 resource를 전달합니다.
 
 ### 2. `null_memory_resource` — 항상 실패
 
@@ -101,12 +101,13 @@ v.push_back(1);   // throws std::bad_alloc
 
 ```cpp
 std::array<std::byte, 4096> buffer;
-std::pmr::monotonic_buffer_resource mr(buffer.data(), buffer.size());
+std::pmr::monotonic_buffer_resource mr(
+    buffer.data(), buffer.size(), std::pmr::null_memory_resource());
 
 std::pmr::vector<int> v(&mr);
 v.reserve(100);
 for (int i = 0; i < 100; ++i) v.push_back(i);
-// 모든 메모리는 stack buffer에서
+// 버퍼 고갈 시 upstream이 bad_alloc을 던짐
 // mr 소멸 또는 release() 호출 시 일괄 reset
 ```
 
@@ -118,7 +119,8 @@ for (int i = 0; i < 100; ++i) v.push_back(i);
 // 전역 static buffer
 constexpr size_t kPoolSize = 8192;
 alignas(std::max_align_t) std::byte g_pool_buffer[kPoolSize];
-std::pmr::monotonic_buffer_resource g_pool(g_pool_buffer, kPoolSize);
+std::pmr::monotonic_buffer_resource g_pool(
+    g_pool_buffer, kPoolSize, std::pmr::null_memory_resource());
 
 void process_request() {
     std::pmr::vector<Order> orders(&g_pool);
@@ -155,7 +157,7 @@ std::pmr::unsynchronized_pool_resource pool(opts);
 std::pmr::vector<int> v(&pool);
 ```
 
-보통은 직접 구현한 pool이 더 작고 빠릅니다. 표준 제공 pool은 데스크톱 기본 환경을 지향합니다.
+unsynchronized_pool_resource는 다중 크기 등급과 chunk 재사용을 제공합니다. 크기·속도·고갈 정책은 실제 라이브러리와 workload로 확인해야 하며, static pool이 항상 더 빠르다는 보장은 없습니다. 위 지정 초기화 문법은 C++20이 필요합니다. C++17에서는 pool_options opts{} 선언 뒤 멤버를 대입합니다.
 
 ## Custom memory_resource — 직접 정의
 
@@ -168,7 +170,9 @@ public:
 
 protected:
     void* do_allocate(size_t bytes, size_t alignment) override {
-        return pool_->allocate(bytes, alignment);
+        void* p = pool_->allocate(bytes, alignment);
+        if (!p) throw std::bad_alloc();
+        return p;
     }
 
     void do_deallocate(void* p, size_t /*bytes*/, size_t /*align*/) override {
@@ -192,28 +196,28 @@ std::pmr::vector<int> v(&mr);
 
 ## RTTI 없는 비교
 
-```cpp
-class PoolMemoryResource : public std::pmr::memory_resource {
-    Pool* pool_;
-    static inline int s_type_id;   // unique tag
+memory_resource의 do_is_equal은 순수 가상 함수이며 기본 dynamic_cast 구현이 없습니다. 서로 다른 resource 종류가 들어올 수 있으므로 먼저 derived 포인터로 static_cast한 뒤 type id를 검사하는 방식은 안전하지 않습니다. 타입을 알기 전에는 그 파생 타입 멤버를 호출할 수 없습니다.
 
-public:
-    static const void* type_id() { return &s_type_id; }
+다른 인스턴스와 교차 해제할 필요가 없다면 객체 identity 비교가 가장 작은 안전한 구현입니다. 아래 resource는 allocation을 upstream에 위임하지만 equality는 자기 자신만 참으로 답합니다. 같은 upstream을 쓴다는 사실만으로 다른 타입으로 downcast하지 않습니다.
 
-    explicit PoolMemoryResource(Pool* pool) : pool_(pool) {}
-
-    virtual const void* get_type_id() const { return &s_type_id; }
-
-protected:
-    bool do_is_equal(const std::pmr::memory_resource& other) const noexcept override {
-        auto* o = static_cast<const PoolMemoryResource*>(&other);
-        if (o->get_type_id() != &s_type_id) return false;
-        return o->pool_ == pool_;
+```cpp title="identity-resource.hpp"
+#include <memory_resource>
+class IdentityResource final : public std::pmr::memory_resource {
+    std::pmr::memory_resource* upstream_;
+    void* do_allocate(std::size_t n, std::size_t a) override {
+        return upstream_->allocate(n, a);
     }
+    void do_deallocate(void* p, std::size_t n, std::size_t a) override {
+        upstream_->deallocate(p, n, a);
+    }
+    bool do_is_equal(const std::pmr::memory_resource& other) const noexcept override {
+        return this == &other;
+    }
+public:
+    explicit IdentityResource(std::pmr::memory_resource& upstream) noexcept
+        : upstream_(&upstream) {}
 };
 ```
-
-`get_type_id()` virtual로 type을 식별하면 RTTI 없이도 type-safe하게 비교할 수 있습니다.
 
 ## 함수 매개변수에 pmr
 
@@ -251,7 +255,7 @@ void process(std::vector<int, Alloc>& v) {   // 매 호출마다 인스턴스화
 constexpr size_t kFrameBufferSize = 16 * 1024;
 alignas(std::max_align_t) static std::byte frame_buffer[kFrameBufferSize];
 static std::pmr::monotonic_buffer_resource frame_pool(
-    frame_buffer, kFrameBufferSize);
+    frame_buffer, kFrameBufferSize, std::pmr::null_memory_resource());
 
 void process_frame() {
     // 매 frame 시작 시 reset
@@ -270,11 +274,11 @@ void process_frame() {
 }
 ```
 
-매우 빠른 alloc과 dealloc이 가능하고 deterministic합니다.
+release는 이전 frame의 모든 컨테이너·원소가 소멸하고 외부 참조가 없어졌을 때만 호출합니다. upstream 할당, 원소 생성, 버퍼 고갈 경로까지 포함한 WCET는 별도로 검증해야 합니다.
 
 ## std::pmr 가용 컨테이너
 
-C++17 `<memory_resource>`가 제공하는 `std::pmr::*` 컨테이너는 다음과 같습니다.
+C++17 pmr 별칭은 각 컨테이너 헤더에서 제공합니다. 예를 들어 vector는 <vector>, string은 <string>이 필요하며 <memory_resource>만으로 모두 선언되는 것은 아닙니다.
 
 ```cpp
 std::pmr::vector<T>
@@ -321,7 +325,7 @@ resource는 vector보다 오래 살아 있어야 합니다.
 `std::pmr`은 virtual function을 호출하므로 간접 호출 비용이 듭니다. 극히 hot path에서만 측정해 판단하고 대부분 무시할 만합니다.
 
 ### 5. RTTI 의존 비교
-default `do_is_equal`이 `dynamic_cast`를 사용합니다. RTTI를 끄면 우회가 필요합니다.
+do_is_equal은 사용자 구현이 필요한 순수 가상 함수입니다. identity 비교에는 RTTI가 필요하지 않습니다.
 
 ### 6. bytes/alignment 인자 무시
 ```cpp
@@ -331,30 +335,55 @@ void do_deallocate(void* p, size_t, size_t) {
 ```
 pool 구현에 따라 bytes가 필요하거나 자체 추적이 필요합니다.
 
-## 측정 — pmr vs 직접 allocator
+## 실행 확인 — 고갈과 서로 다른 resource 비교
 
-같은 vector를 `std::vector<int, MyAlloc>`와 `std::pmr::vector<int>`로 비교합니다.
+```cpp title="pmr-check.cpp"
+#include "identity-resource.hpp"
+#include <array>
+#include <cassert>
+#include <cstddef>
+#include <new>
+#include <vector>
+int main() {
+    std::array<std::byte, 256> bytes{};
+    std::pmr::monotonic_buffer_resource arena(
+        bytes.data(), bytes.size(), std::pmr::null_memory_resource());
+    IdentityResource a(arena), b(arena);
+    assert(a.is_equal(a) && !a.is_equal(b));
+    assert(!a.is_equal(*std::pmr::new_delete_resource()));
+    {
+        std::pmr::vector<int> values(&a);
+        values.reserve(4); values.push_back(42);
+        assert(values[0] == 42);
+    }
 
-```text
-# std::vector<int, MyAlloc> (3 allocator 인스턴스)
-.text       : +2.4 KB  (3개 vector specialization)
-runtime alloc: 직접 호출, ~10 cycles
-
-# std::pmr::vector<int> (3 resource)
-.text       : +0.8 KB  (한 vector specialization)
-runtime alloc: virtual 호출, ~15 cycles
+#ifndef IDENTITY_ONLY
+    bool exhausted = false;
+    try { (void)a.allocate(4096, alignof(std::max_align_t)); }
+    catch (const std::bad_alloc&) { exhausted = true; }
+    assert(exhausted);
+#endif
+    arena.release(); // 모든 컨테이너 소멸 후
+    (void)a.allocate(16, alignof(int)); // 고갈 이후 release로 다시 할당 가능
+}
 ```
 
-pmr이 코드는 작고 런타임은 약간 느립니다. 대부분 작은 차이이며, 코드 크기가 중요한 임베디드에서는 pmr이 유리합니다.
+모든 컨테이너가 소멸한 뒤에만 release합니다. 고갈 예외 검사는 RTTI를 켠 기본 빌드에서 실행하고, -fno-rtti -DIDENTITY_ONLY 빌드는 identity 비교·정상 할당·release 후 재할당만 확인합니다. 이 host 구성의 RTTI 비활성 빌드에서는 std::bad_alloc의 타입별 catch가 처리되지 않아 두 검사를 분리했습니다. 예외 비활성 고갈과 다른 toolchain의 catch 동작은 별도로 확인해야 합니다. 코드 크기·cycle 차이는 측정하지 않았습니다.
 
 ## 정리
 
 - `std::pmr`(C++17)은 polymorphic memory resource로, 런타임에 allocator를 선택합니다.
 - `std::pmr::vector<int>`는 type을 통일하면서 다른 resource를 사용할 수 있습니다.
-- 표준 resource는 세 가지입니다 — `new_delete`(heap), `null`(실패), `monotonic`(bump pointer).
+- new/delete·null resource 외에 monotonic과 동기화·비동기화 pool resource도 있습니다.
 - Custom resource는 `memory_resource`를 상속하고 virtual 함수 3개를 구현합니다.
 - 임베디드 패턴은 static buffer와 monotonic_buffer_resource를 frame 단위로 reset하는 것입니다.
-- RTTI 없는 환경에서는 `do_is_equal`에 직접 type id를 다룹니다.
+- RTTI 없이 identity 비교를 구현할 수 있으며, 고갈 시 upstream 정책을 명시합니다.
+
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [memory_resource와 표준 resource 계약](https://eel.is/c++draft/mem.res)
 
 ## 관련 항목
 

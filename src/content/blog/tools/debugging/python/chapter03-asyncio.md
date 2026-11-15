@@ -28,7 +28,7 @@ async def handle(req):
 
 `fetch_user`에서 정지하면 콜스택에 `handle`이 *없을 수 있습니다*. await 지점이 yield point가 되어 호출자의 스택이 잠시 사라졌다가 깨어남에서 복원되기 때문입니다.
 
-해결: `asyncio` 디버그 모드.
+디버그 모드는 생성 위치와 느린 콜백을 진단하는 보조 수단입니다. 켠다고 모든 태스크의 논리적 await 호출 체인을 일반 스레드 콜스택으로 복원하지는 않습니다.
 
 ## asyncio.run(..., debug=True)
 
@@ -47,7 +47,7 @@ $ PYTHONASYNCIODEBUG=1 python main.py
 1. *코루틴 생성 위치*가 트레이스백에 포함됨.
 2. `await` 안 한 코루틴 경고.
 3. *slow callback* 경고 (100 ms 이상 동기 블록).
-4. 컨텍스트 누수 검출.
+4. 일부 비스레드 안전 API를 잘못된 스레드에서 호출한 경우의 진단.
 
 ```text
 Task was destroyed but it is pending!
@@ -103,7 +103,7 @@ Executing <Task ...> took 0.523 seconds
 
 ## 콜스택 보기 — Task.get_stack
 
-`asyncio.all_tasks()`로 현재 태스크 목록을 얻은 뒤 각 태스크의 `get_stack()`을 호출.
+현재 루프에서 끝나지 않은 태스크를 all_tasks()로 열거하고 get_stack()을 확인합니다. 중단된 코루틴은 한 스택 프레임만 반환하므로 이를 전체 awaiter 체인으로 간주하지 않습니다. [Task.get_stack](https://docs.python.org/3.15/library/asyncio-task.html#asyncio.Task.get_stack)의 반환 범위를 확인합니다.
 
 ```python
 import asyncio, traceback
@@ -131,11 +131,11 @@ $ kill -USR1 <pid>
 [stdout에 모든 태스크 콜스택 출력]
 ```
 
-데드락·hung 상태일 때 가장 빠른 진단.
+이벤트 루프가 콜백을 실행할 수 있을 때의 진단입니다. 루프가 동기 호출에 막혀 있으면 예약한 dump 태스크도 실행되지 않으므로 별도 faulthandler나 외부 스택 덤프와 구분합니다.
 
 ## debugpy + asyncio
 
-`debugpy`는 `asyncio` 콜스택을 잘 표현합니다 — VSCode의 *Call Stack* 패널에 awaiter 체인이 합성되어 나옵니다.
+debugpy에서 비동기 코드를 멈출 수 있지만 모든 중단 태스크의 awaiter 체인을 항상 합성한다고 보장하지 않습니다. 아래는 디버그 모드를 켜는 launch 설정이며 IDE의 태스크 표시 범위는 실제 Python·debugpy·확장 버전에서 확인합니다.
 
 ```json
 {
@@ -171,11 +171,18 @@ for r in results:
 asyncio.create_task(do_work())     # ← 결과·예외가 어디로?
 ```
 
-태스크가 죽으면 *어디서도* 보고되지 않습니다(태스크가 GC될 때 경고만 뜸). 해법.
+예외를 회수하지 않은 태스크는 event loop의 예외 처리 경로로 보고될 수 있습니다. 보고 시점을 GC에 의존하지 않으려면 태스크를 보관하고 결과를 await하거나 완료 콜백에서 확인합니다. 취소된 태스크에는 exception()이 CancelledError를 발생시키므로 따로 처리합니다.
 
 ```python
 task = asyncio.create_task(do_work())
-task.add_done_callback(lambda t: t.exception() and log.exception("task failed", exc_info=t.exception()))
+def report_task(t):
+    if t.cancelled():
+        return
+    exc = t.exception()
+    if exc is not None:
+        log.error("task failed", exc_info=(type(exc), exc, exc.__traceback__))
+
+task.add_done_callback(report_task)
 ```
 
 또는 `asyncio.gather(*tasks)`로 명시적으로 await.
@@ -188,10 +195,10 @@ async def work():
     try:
         await use(conn)
     finally:
-        await conn.close()        # ← cancellation 중에는 await가 즉시 CancelledError
+        await conn.close()        # 단일 취소를 finally에서 처리하며 await 가능
 ```
 
-해법: `asyncio.shield`로 cleanup 보호.
+취소가 한 번 전달된 뒤 finally 안에서 await하는 것 자체가 즉시 실패하는 것은 아닙니다. 추가 취소가 정리 중에 다시 들어오는 상황과 구분합니다. shield는 내부 작업을 외부 취소로부터 보호하지만 호출자에게 오는 CancelledError까지 없애거나 정리 완료를 자동 대기하는 보장은 아닙니다.
 
 ```python
 finally:
@@ -203,11 +210,11 @@ finally:
 ### 4. event loop 충돌
 
 ```python
-asyncio.run(main())                # 새 루프
-asyncio.run(main())                # ← RuntimeError: Event loop is closed
+asyncio.run(main())                # 새 루프에서 실행하고 닫음
+asyncio.run(main())                # 순차 호출 자체는 허용됨
 ```
 
-`asyncio.run`은 매번 새 루프를 만들고 닫습니다. 여러 번 호출하면 에러. 보통 진입점이 한 번이라 문제 없지만, *테스트 코드*에서 자주 만남.
+asyncio.run의 순차 호출은 허용됩니다. 같은 스레드에서 이미 실행 중인 이벤트 루프 안에서 중첩 호출하면 RuntimeError가 납니다. 이전 루프에 종속된 세션·Future·자원을 다음 루프에서 재사용하는 문제도 별개입니다. [Runner 문서](https://docs.python.org/3.15/library/asyncio-runner.html#running-an-asyncio-program)를 기준으로 구분합니다.
 
 ```python
 # pytest-asyncio가 알아서 처리
@@ -215,6 +222,95 @@ asyncio.run(main())                # ← RuntimeError: Event loop is closed
 async def test_something():
     ...
 ```
+
+## 직접 확인 — 순차 실행과 중첩 실행
+
+다음 세 파일은 CPython 3.15.0·macOS에서 실행했습니다. 외부 라이브러리를 설치하지 않습니다. 첫 파일은 순차 run 두 번과 실행 중인 루프 안의 중첩 호출을 구분합니다.
+
+```python title="runners.py"
+import asyncio
+
+async def value():
+    return 1
+
+print(f"sequential={asyncio.run(value())},{asyncio.run(value())}")
+
+async def nested():
+    coro = value()
+    try:
+        asyncio.run(coro)
+    except RuntimeError:
+        print("nested=blocked")
+    finally:
+        coro.close()
+
+asyncio.run(nested())
+```
+
+결과는 sequential=1,1과 nested=blocked입니다. 생성해 둔 coro는 중첩 호출에서 소비되지 않으므로 finally에서 닫아 never-awaited 경고를 만들지 않습니다.
+
+## 직접 확인 — 취소 뒤 finally의 await
+
+두 번째 파일은 태스크가 대기에 들어간 뒤 취소를 한 번 전달합니다. 취소가 작업을 중단시켜도 finally의 비동기 정리가 완료되는지 확인합니다.
+
+```python title="cancellation.py"
+import asyncio
+
+async def main():
+    started = asyncio.Event()
+    cleaned = asyncio.Event()
+    async def worker():
+        try:
+            started.set()
+            await asyncio.Future()
+        finally:
+            await asyncio.sleep(0)
+            cleaned.set()
+    task = asyncio.create_task(worker())
+    await started.wait()
+    task.cancel()
+    try:
+        await task
+    except asyncio.CancelledError:
+        print(f"cleanup={cleaned.is_set()}")
+
+asyncio.run(main())
+```
+
+출력은 cleanup=True입니다. 반복 취소나 외부 I/O 장애까지 이 한 예제로 해결했다고 판단하지 않습니다.
+
+## 직접 확인 — await 사이의 갱신 유실
+
+단일 스레드의 이벤트 루프에서도 읽기와 쓰기 사이에 await가 있으면 다른 태스크가 같은 값을 읽을 수 있습니다. 세 번째 파일은 같은 입력을 잠금 없이, 잠금 안에서 각각 실행합니다.
+
+```python title="race.py"
+import asyncio
+
+async def count(use_lock):
+    total = 0
+    lock = asyncio.Lock()
+    async def increment():
+        nonlocal total
+        if use_lock:
+            async with lock:
+                old = total
+                await asyncio.sleep(0)
+                total = old + 1
+        else:
+            old = total
+            await asyncio.sleep(0)
+            total = old + 1
+    await asyncio.gather(increment(), increment())
+    return total
+
+async def main():
+    print(f"unlocked={await count(False)}")
+    print(f"locked={await count(True)}")
+
+asyncio.run(main(), debug=True)
+```
+
+`python3 race.py`는 unlocked=1, locked=2를 출력합니다. 두 태스크가 같은 옛 값을 읽는 지점이 문제이며 debug=True가 경쟁 조건을 자동으로 수정해 주지는 않습니다. 보호 범위는 읽기부터 쓰기까지입니다.
 
 ## aiomonitor — 운영 중 콘솔
 
@@ -262,14 +358,14 @@ KCachegrind / qcachegrind로 시각화.
 - `slow callback` 검출은 디버그 모드만 켜면 자동.
 - await 안 한 코루틴은 `tracemalloc=10`으로 생성 위치 추적.
 - 모든 태스크 콜스택은 `Task.get_stack()` + SIGUSR1.
-- debugpy가 코루틴 awaiter 체인을 IDE에 합성해 보여 준다.
+- Task.get_stack과 IDE 표시가 모든 논리적 awaiter 체인을 복원한다는 가정은 피합니다.
 - fire-and-forget 태스크의 예외는 명시적으로 캡처.
 - 운영 콘솔은 `aiomonitor`.
 - 프로파일링은 `yappi` (wall-clock 모드).
 
 ## 다음 장 예고
 
-Ch 4 — `py-spy` 샘플링 프로파일러. 운영 프로세스의 콜스택을 *수정 없이* 1초 만에 캡처하는 도구.
+Ch 4 — `py-spy` 샘플링 프로파일러. 운영 프로세스의 콜스택을 외부에서 수집하는 도구. 권한과 인터프리터 지원 범위도 확인합니다.
 
 ## 관련 항목
 

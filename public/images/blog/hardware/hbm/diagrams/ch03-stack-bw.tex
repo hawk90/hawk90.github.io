@@ -2,39 +2,21 @@
 \usepackage{fontspec}
 \setmainfont{Apple SD Gothic Neo}
 \setsansfont{Apple SD Gothic Neo}
-\usepackage{tikz}
-\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
 \begin{document}
 \input{../../../_design.tex}
-\begin{tikzpicture}[blog,
-  axisLine/.style={draw=inkc, line width=0.6pt, -{Stealth[length=2.2mm]}},
-  tick/.style={draw=mutec, line width=0.4pt},
-  ticklabel/.style={font=\sffamily\footnotesize, text=mutec},
-  bar/.style={draw=absbord, fill=absfill, line width=0.4pt}
-]
-
-\draw[axisLine] (0,0) -- (12,0) node[ticklabel, below=4pt, midway, yshift=-12pt] {연도};
-\draw[axisLine] (0,0) -- (0,7.5) node[ticklabel, left=4pt, midway, xshift=-22pt, rotate=90] {Stack BW (GB/s)};
-
-\foreach \y/\lab in {0.5/128, 1.2/307, 1.8/410, 3.2/819, 5.0/1230, 6.5/2000} {
-  \draw[tick] (-0.1, \y) -- (0.1, \y);
-  \node[ticklabel, anchor=east] at (-0.15, \y) {\lab};
+\begin{tikzpicture}[blog]
+\draw[draw=inkc,->] (0,0) -- (13,0);
+\draw[draw=inkc,->] (0,0) -- (0,7.6);
+\foreach \v in {0,500,1000,1500,2000} {
+  \draw[draw=mutec] (-0.08,\v/300) -- (12.8,\v/300);
+  \node[font=\sffamily\footnotesize,text=mutec,anchor=east] at (-0.2,\v/300) {\v};
 }
-\foreach \x/\lab in {1.0/2015, 3.0/2018, 5.0/2020, 7.0/2022, 9.0/2024, 11.0/2026} {
-  \draw[tick] (\x, -0.1) -- (\x, 0.1);
-  \node[ticklabel, anchor=north] at (\x, -0.15) {\lab};
+\foreach \x/\v/\name/\yr in {1/128/HBM/2015,3/307.2/HBM2/2018,5/409.6/HBM2E/2020,7/819.2/HBM3/2022,9/1228.8/HBM3E/2024,11/2048/HBM4/2025} {
+  \draw[draw=absbord,fill=absfill] (\x-0.35,0) rectangle (\x+0.35,\v/300);
+  \node[font=\sffamily\scriptsize,text=inkc,anchor=south] at (\x,\v/300+0.12) {\v};
+  \node[font=\sffamily\footnotesize,text=inkc,align=center,anchor=north] at (\x,-0.2) {\name\\[2pt]\yr};
 }
-
-\foreach \x/\y/\lab in {1.0/0.5/HBM, 3.0/1.2/HBM2, 5.0/1.8/HBM2E, 7.0/3.2/HBM3, 9.0/5.0/HBM3E} {
-  \draw[bar] (\x-0.3, 0) rectangle (\x+0.3, \y);
-  \node[font=\sffamily\scriptsize\bfseries, text=absbord, anchor=south] at (\x, \y+0.03) {\lab};
-}
-
-% HBM4 dashed (JESD270-4, Apr 2025)
-\draw[draw=absbord, fill=absfill, line width=0.5pt, dashed] (11.0-0.3, 0) rectangle (11.0+0.3, 6.5);
-\node[font=\sffamily\scriptsize\bfseries, text=absbord, anchor=south] at (11.0, 6.55) {HBM4 (JESD270-4)};
-
-\node[font=\sffamily\bfseries\small, text=inkc] at (6, 8.2) {세대별 Stack BW};
-
+\node[font=\sffamily\small,text=inkc,anchor=west] at (0,8.2) {Reference bandwidth (GB/s, linear scale)};
+\node[font=\sffamily\footnotesize,text=mutec,align=left,anchor=north west] at (0,-1.25) {HBM3E: SK hynix 2024 product; HBM4: initial 2025 standard.\\[2pt]Historical references, not measured throughput or current product maxima.};
 \end{tikzpicture}
 \end{document}

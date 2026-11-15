@@ -71,9 +71,9 @@ void c_write_mmio(int addr, int data) {
 | 형태 | 시간 소모 가능 | 비고 |
 |------|----------------|------|
 | `function` | 불가 (0-time) | C 함수가 즉시 반환해야 함 |
-| `task` | 가능 (waiting OK) | C 함수가 simulation 시간 진행시킬 수 있음 |
+| `task` | 가능 (waiting OK) | imported task가 context 경로로 exported SV task를 호출해 simulation 시간을 기다릴 수 있음 |
 
-cosim에서 driver의 `writel`을 부를 때는 보통 `function`을 씁니다. *register write는 0-time event*로 모델링하기 때문입니다. 반면 *long-running C 함수*(예: image decode를 reference model로 돌릴 때)는 `task`로 선언합니다.
+cosim에서 driver의 `writel`을 부를 때는 보통 `function`을 씁니다. *register write는 0-time event*로 모델링하기 때문입니다. C 계산에 host 시간이 오래 걸리는 것만으로 task가 필요한 것은 아닙니다. simulation 시간 대기를 하는 exported SV task와 연결할 때 imported context task 계약을 사용합니다. host sleep이나 별도 thread는 simulation clock을 자동 진행시키지 않습니다.
 
 ## Export — C가 SV를 호출
 
@@ -140,8 +140,8 @@ DPI-C가 *좁다*는 이유 중 하나가 data type 집합을 제한한다는 �
 | `real` | `double` | |
 | `shortreal` | `float` | |
 | `string` | `const char *` | NUL-terminated |
-| packed array `[N-1:0]` | `svBitVecVal[N/32]` | 32-bit chunk array |
-| 4-state packed | `svLogicVecVal[N/32]` | aval/bval 쌍 |
+| packed array `[N-1:0]` | `svBitVecVal[ceil(N/32)]` | 32-bit chunk array |
+| 4-state packed | `svLogicVecVal[ceil(N/32)]` | aval/bval 쌍 |
 | open array `[]` | `svOpenArrayHandle` | 런타임 핸들 |
 
 `logic`(4-state)을 C 쪽에서 다룰 때는 simulator가 제공하는 헤더(`svdpi.h`)를 include해야 합니다. 그 안에 `svGetBitselLogic`·`svPutBitselLogic` 같은 helper가 들어 있습니다.
@@ -156,17 +156,45 @@ import "DPI-C" function void c_dma_write(input bit [255:0] data, input int len);
 
 ```c
 #include "svdpi.h"
-
+#include <stdint.h>
+#include <stddef.h>
+// unpack_words는 아래 host 검사에서 사용한 byte encoding helper입니다.
+int unpack_words(const uint32_t words[8], int len, uint8_t out[32]);
 void c_dma_write(const svBitVecVal *data, int len) {
-    // 256-bit data는 32-bit chunk 8개로 packed.
     uint8_t bytes[32];
-    for (int i = 0; i < 8; i++) {
-        uint32_t chunk = data[i];
-        memcpy(&bytes[i*4], &chunk, 4);
-    }
-    driver_dma_write(bytes, len);
+    if (!unpack_words(data, len, bytes)) return;
+    driver_dma_write(bytes, (size_t)len);  // 별도 선언/실패 정책이 필요한 harness callback
 }
 ```
+
+여기서는 낮은 bit를 낮은 byte 주소에 두는 little-endian byte 계약을 명시합니다. host의 uint32_t를 memcpy하는 것만으로 모든 host에서 같은 byte 순서가 되지는 않습니다. len 범위와 출력 buffer 길이를 먼저 검사합니다.
+
+```c title="unpack-words.c"
+#include <stdint.h>
+#include <stddef.h>
+int unpack_words(const uint32_t words[8], int len, uint8_t out[32]) {
+    if (!words || !out || len < 0 || len > 32) return 0;
+    for (int i = 0; i < len; ++i)
+        out[i] = (uint8_t)(words[(unsigned)i / 4] >> (8 * ((unsigned)i % 4)));
+    return 1;
+}
+```
+
+```c title="unpack-check.c"
+#include <stdint.h>
+#include <assert.h>
+#include <stdio.h>
+int unpack_words(const uint32_t words[8], int len, uint8_t out[32]);
+int main(void) {
+    uint32_t words[8] = {0x78563412U, 0xEFCDAB90U}; uint8_t out[32] = {0};
+    assert(unpack_words(words, 8, out));
+    assert(out[0] == 0x12 && out[3] == 0x78 && out[4] == 0x90 && out[7] == 0xEF);
+    assert(!unpack_words(words, 33, out) && !unpack_words(words, -1, out));
+    assert(!unpack_words(0, 4, out) && !unpack_words(words, 4, 0));
+    puts("packed word byte-order and bounds checks passed");
+}
+```
+
 
 256-bit를 받을 때 C는 32-bit chunk 8개로 풀어서 봅니다. 이 변환을 BFM 안에 캡슐화해 두면 driver 쪽은 byte buffer만 보면 됩니다.
 
@@ -212,13 +240,11 @@ driver-RTL cosim에서는 보통:
 
 표준은 깔끔하지만 vendor마다 빌드 명령과 일부 옵션이 다릅니다.
 
-| Simulator | 빌드 옵션 | C 헤더 위치 | 비고 |
-|-----------|-----------|--------------|------|
-| Verilator | `--cc --exe driver.c` | `obj_dir/Vtop_dpi.h` | open-source, 가장 빠름 |
-| Synopsys VCS | `-debug_access+all` + `-cflags` | `${VCS_HOME}/include/svdpi.h` | 산업 표준, 4-state 지원 |
-| Mentor Questa | `vlog -dpiheader top_dpi.h` + `vsim -c` | auto-generated | 4-state, partial reload |
-| Cadence Xcelium | `-sv -dpiheader top_dpi.h` | auto-generated | UVM 친화 |
-| Icarus Verilog | `-g2012 -tdll`, VPI 대안 | 기본 DPI 부분 지원 | DPI-C는 일부만 |
+| 대상 | 확인할 계약 |
+| --- | --- |
+| Verilator | generated Vtop__Dpi.h와 설치판의 svdpi.h를 구분하고 실제 compile/link 옵션을 고정 |
+| VCS/Questa/Xcelium | vendor 판별 DPI header 생성과 shared-library load 절차를 해당 manual에서 확인 |
+| Icarus | 여기서는 DPI-C backend로 검증하지 않음. VPI 지원을 DPI 지원으로 해석하지 않음 |
 
 Verilator의 경우, RTL을 `verilator --cc top.sv --exe main.cpp driver.c`로 빌드하면 다음이 자동으로 생긴다:
 
@@ -241,10 +267,10 @@ void c_write_mmio(int addr, int data) {
 
 DPI-C를 처음 쓰면 자주 막히는 지점들.
 
-- **scope 누락** — `context` 안 붙이고 `svGetScope()` 같은 SV scope 함수 호출 → 미정의 동작. 4-state vector를 다루는 거의 모든 함수가 context를 요구합니다.
-- **packed array stride** — SV에서 `bit [127:0]`은 C에서 32-bit chunk 4개. 4 ≠ 16/4가 아니라 *128/32 = 4*. 처음 한두 번 헷갈립니다.
+- **scope 누락** — `context` 안 붙이고 `svGetScope()` 같은 SV scope 함수 호출 → 미정의 동작. vector bit helper를 쓴다는 사실만으로 context가 필요한 것은 아닙니다. scope 조회·export callback이 필요한 경로를 따로 구분합니다.
+- **packed array stride** — SV에서 `bit [127:0]`은 C에서 32-bit chunk 4개. 일반적으로 ceil(N/32)개의 word를 사용하며 마지막 word의 유효 bit 수를 확인합니다.
 - **string lifetime** — `import "DPI-C" function string c_get_name()` 형태로 C가 string을 반환하면, 그 메모리는 *C가 관리*. SV 쪽이 보관하려면 즉시 복사해야 합니다.
-- **race 보호** — IRQ injection thread에서 DPI 호출할 때, simulator의 내부 state에 동시 접근하면 깨집니다. *clock edge 동기화* 또는 *mutex 사용*. Verilator는 single-thread이므로 보통 큰 문제 없지만, 멀티스레드 simulator는 주의.
+- **race 보호** — IRQ injection thread에서 DPI 호출할 때, simulator의 내부 state에 동시 접근하면 깨집니다. *clock edge 동기화* 또는 *mutex 사용*. Verilator도 --threads 모델 실행 옵션이 있습니다. model eval과 DPI/export 호출을 임의 host thread에서 동시에 실행하지 않고 simulator 소유 thread와 요청 queue의 경계를 설계합니다.
 
 ## 정리
 
@@ -253,14 +279,21 @@ DPI-C를 처음 쓰면 자주 막히는 지점들.
 - `pure`/기본/`context` 세 단계. context가 가장 강력하고 가장 흔히 씁니다.
 - Data type 매핑은 32-bit chunk(packed array)와 svBitVecVal/svLogicVecVal에 익숙해지면 충분.
 - Lifecycle 패턴: clock-driven · initial setup · task-driven scenario.
-- Vendor마다 빌드 명령은 다르지만 *코드*는 그대로 휴대. Verilator가 가장 빠르고 open-source.
+- DPI 선언의 이식성만으로 모든 simulator ABI와 호출 thread가 검증되는 것은 아닙니다. generated header와 실제 target build로 확인합니다.
 
 ## 다음 장 예고
 
 다음 장에서는 이 표준을 *실제로 돌리는* 가장 가벼운 도구인 **Verilator**를 다룹니다. RTL을 C++ 클래스로 변환해 native 속도로 simulation을 돌리고, DPI-C를 통해 driver C 코드를 link하는 흐름까지.
 
+## 1차 자료와 검증 범위
+
+- [Verilator Connecting/DPI](https://verilator.org/guide/latest/connecting.html) — generated header·scope·model thread 경계
+- [AMD UG900: open arrays](https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Open-Arrays-in-DPI) — raw pointer와 open-array handle 구분
+
+Clang 23.1.3 host의 C11·ASan·UBSan으로 unpack helper의 byte 순서·정상 길이·범위/NULL 거부를 실행했습니다. svdpi.h가 필요한 실제 DPI wrapper·SV import/export·simulator scope는 실행하지 않았습니다. 위 wrapper는 연결 골격이며 helper 검사로 DPI ABI가 검증되었다고 보지 않습니다.
+
 ## 관련 항목
 
 - [Ch 1: Why Pre-Silicon Driver Verification](/blog/tools/emulation/driver-cosim/chapter01-why-cosim)
 - [Ch 3: Verilator — Open Source SV Simulator](/blog/tools/emulation/driver-cosim/chapter03-verilator)
-- QEMU Internals — QOM Deep Dive — functional model과의 비교
+- [Ch 7: Reference Model 공유](/blog/tools/emulation/driver-cosim/chapter07-uvm-c-model) — open-array adapter와 C API를 분리

@@ -12,9 +12,11 @@ topics: ["tools", "tools/debugging"]
 
 GDB 명령을 *내가 만든다*는 것이 Python API의 두 번째 즐거움입니다. 단순 매크로부터 자동 BP 액션, 정지마다 떨어지는 통계까지 — 모두 같은 패턴 (gdb.Command / gdb.Function / gdb.Breakpoint / 이벤트 hook)으로 가능합니다.
 
+이 장은 GDB 17.2 Python API를 기준으로 합니다. 명령의 argument/실패, event 연결 수명과 breakpoint callback의 실행 제약을 함께 다룹니다.
+
 ## gdb.Command — 사용자 명령
 
-```python
+```python title="hello-command.py"
 import gdb
 
 class HelloCmd(gdb.Command):
@@ -23,6 +25,9 @@ class HelloCmd(gdb.Command):
         super().__init__("hello", gdb.COMMAND_USER)
     def invoke(self, arg, from_tty):
         argv = gdb.string_to_argv(arg)
+        self.dont_repeat()
+        if len(argv) > 1:
+            raise gdb.GdbError('usage: hello ["NAME"]')
         name = argv[0] if argv else "world"
         gdb.write(f"hello, {name}\n")
 
@@ -121,7 +126,7 @@ MyTop(); MyList(); MyStop()
 
 ## Parameter — 사용자 설정 가능 옵션
 
-```python
+```python title="verbosity-parameter.py"
 import gdb
 
 class MyVerbosity(gdb.Parameter):
@@ -161,81 +166,85 @@ if v > 1:
 
 `$<name>(...)` 형태로 *표현식 안*에서 호출 가능한 함수.
 
-```python
+```python title="string-length-function.py"
 import gdb
 
 class StrLen(gdb.Function):
-    """문자열 길이 반환."""
+    """UTF-8 decoding한 Python 문자열의 문자 수. C strlen byte 수 아님."""
     def __init__(self):
         super().__init__("strlen2")
-    def invoke(self, str_arg):
-        s = str_arg.string()
-        return len(s)
+    def invoke(self, str_arg, byte_length):
+        n = int(byte_length)
+        if not 0 <= n <= 4096:
+            raise gdb.GdbError("length must be 0..4096 bytes")
+        s = str_arg.string(encoding="utf-8", errors="strict", length=n)
+        return len(s.split("\0", 1)[0])
 
 StrLen()
 ```
 
 ```text
-(gdb) print $strlen2(msg)
+(gdb) print $strlen2(msg, sizeof(msg))
 $1 = 12
 
-(gdb) break process if $strlen2(buffer) > 100
+(gdb) break process if $strlen2(buffer, sizeof(buffer)) > 100
 ```
 
-조건부 BP에서 매우 강력. *복잡한 조건*을 함수로 캡슐화.
+두 번째 인자 길이는 실제 readable buffer 범위를 넘으면 안 됩니다. 아래 함수는 strlen 대체가 아니라 길이가 알려진 debug array용 UTF-8 문자 수 예입니다. C byte length와 문자 수, 읽기 실패·최대 범위를 구분합니다.
 
 ## 이벤트 훅
 
-```python
+```python title="session-hooks.py"
 import gdb
 
-def on_stop(event):
-    if isinstance(event, gdb.BreakpointEvent):
-        bps = event.breakpoints
-        gdb.write(f"stopped at BP #{bps[0].number}\n")
-    elif isinstance(event, gdb.SignalEvent):
-        gdb.write(f"stopped by signal {event.stop_signal}\n")
+class SessionHooks:
+    def __init__(self):
+        self.count = 0
+        self.connections = []
+        self.closed = False
+        for registry, callback in ((gdb.events.stop, self.on_stop),
+                                   (gdb.events.exited, self.on_exited)):
+            registry.connect(callback)
+            self.connections.append((registry, callback))
 
-def on_exited(event):
-    gdb.write(f"exit code {event.exit_code}\n")
+    def on_stop(self, event):
+        if self.closed:
+            return
+        self.count += 1
+        if isinstance(event, gdb.SignalEvent):
+            reason = f"signal {event.stop_signal}"
+        elif isinstance(event, gdb.BreakpointEvent):
+            reason = "breakpoints " + ",".join(str(bp.number) for bp in event.breakpoints)
+        else:
+            reason = "stop"
+        gdb.write(f"stop {self.count}: {reason}\n")
 
-def on_new_obj(event):
-    gdb.write(f"loaded {event.new_objfile.filename}\n")
+    def on_exited(self, event):
+        # signal로 종료된 경우 등 exit_code가 없을 수 있음.
+        code = getattr(event, "exit_code", None)
+        gdb.write(f"inferior {event.inferior.num} exited: {code}\n")
 
-def on_cont(event):
-    gdb.write("continuing...\n")
+    def close(self):
+        if not self.closed:
+            self.closed = True
+            for registry, callback in self.connections:
+                registry.disconnect(callback)
+            self.connections.clear()
 
-gdb.events.stop.connect(on_stop)
-gdb.events.exited.connect(on_exited)
-gdb.events.new_objfile.connect(on_new_obj)
-gdb.events.cont.connect(on_cont)
+old_hooks = globals().get("article_session_hooks")
+if old_hooks is not None:
+    old_hooks.close()
+article_session_hooks = SessionHooks()
 ```
 
-이벤트 종류.
-
-| 이벤트 | 의미 |
-|--------|------|
-| `gdb.events.stop` | 정지 (BP, signal, watch) |
-| `gdb.events.cont` | continue |
-| `gdb.events.exited` | 프로세스 종료 |
-| `gdb.events.new_objfile` | 새 ELF 로드 |
-| `gdb.events.free_objfile` | ELF unload |
-| `gdb.events.clear_objfiles` | 모든 ELF 클리어 |
-| `gdb.events.new_inferior` | 새 인페리어 (fork 등) |
-| `gdb.events.inferior_deleted` | 인페리어 제거 |
-| `gdb.events.new_thread` | 새 스레드 |
-| `gdb.events.gdb_exiting` | GDB 종료 |
-| `gdb.events.before_prompt` | 프롬프트 표시 전 |
-| `gdb.events.memory_changed` | 메모리 쓰기 |
-| `gdb.events.register_changed` | 레지스터 쓰기 |
-| `gdb.events.breakpoint_created/modified/deleted` | BP 관리 |
+반복 source 시 이전 연결을 해제합니다. event 종류/속성은 해당 registry와 GDB revision을 따르고, memory/register change event를 모든 inferior write의 기록으로 해석하지 않습니다. all-stop/non-stop의 selected context도 구분합니다.
 
 ### 활용 — 특정 라이브러리 로드 시 자동 셋업
 
 ```python
 def on_new_obj(event):
     name = event.new_objfile.filename
-    if 'libmylib.so' in name:
+    if name is not None and name.endswith("/libmylib.so"):
         gdb.execute("source /opt/mylib/gdb-helpers.py")
         gdb.write(f"loaded mylib helpers\n")
 
@@ -243,6 +252,8 @@ gdb.events.new_objfile.connect(on_new_obj)
 ```
 
 ### 활용 — 매 정지마다 통계
+
+앞 SessionHooks.count처럼 session별로 수집하고 더 이상 쓰지 않을 때 close/disconnect합니다. 다음은 개념 fragment이며 반복 등록하지 않습니다.
 
 ```python
 class StopCounter:
@@ -258,26 +269,9 @@ StopCounter()
 
 ### 활용 — 무한 루프 진단
 
-별도 스레드에서 1초마다 `info threads`.
+GDB API 대부분은 GDB main thread에서만 사용합니다. worker가 필요하면 gdb.post_event로 작은 callback을 예약할 수 있지만 실행 시점·지연 상한은 보장되지 않습니다. 종료 후 이미 queue에 든 callback과 반복 예약 backlog도 처리해야 합니다.
 
-```python
-import threading, time, gdb
-
-class ThreadDumper:
-    def __init__(self):
-        self.stop_event = threading.Event()
-        self.thread = threading.Thread(target=self.loop)
-        self.thread.daemon = True
-    def start(self):
-        self.thread.start()
-    def stop(self):
-        self.stop_event.set()
-    def loop(self):
-        while not self.stop_event.wait(1.0):
-            gdb.post_event(lambda: gdb.execute("info threads"))
-```
-
-`gdb.post_event(...)`이 *GDB 메인 스레드*에서 콜백 실행 — GDB API는 *main thread only*.
+`threading.Thread`를 daemon으로 만들고 1초마다 무제한 post하면 stop 이후에도 callback이 남을 수 있습니다. GDB의 Python thread/signal·event 계약을 확인하고 pending 한 개와 closed flag·disconnect/join 등을 설계합니다. 별도 thread dumper를 곧바로 hang detector로 제시하지 않습니다.
 
 ## gdb.Breakpoint — Python 서브클래스
 
@@ -290,12 +284,14 @@ class LogAllocs(gdb.Breakpoint):
     def __init__(self):
         super().__init__("malloc")
     def stop(self):
-        size = int(gdb.parse_and_eval("$rdi"))   # x86-64 첫 인자
+        size = int(gdb.parse_and_eval("$rdi"))   # x86-64 System V ABI의 정수/포인터 첫 인자
         gdb.write(f"malloc({size})\n")
         return False    # False = 정지하지 않고 continue
 
 LogAllocs()
 ```
+
+이 register 예는 x86-64 System V ABI 전용이며 Windows x64·AArch64에 그대로 쓸 수 없습니다. breakpoint hit의 observer overhead와 재귀·여러 thread도 고려합니다.
 
 `stop()` 반환값.
 
@@ -326,10 +322,11 @@ BigMalloc()
 ```python
 class TrackWrites(gdb.Breakpoint):
     def __init__(self, expr):
+        self.expr = expr
         super().__init__(expr, gdb.BP_WATCHPOINT, gdb.WP_WRITE)
     def stop(self):
-        val = gdb.parse_and_eval(self.location)
-        gdb.write(f"{self.location} = {val}\n")
+        val = gdb.parse_and_eval(self.expr)
+        gdb.write(f"{self.expr} = {val}\n")
         return False
 
 TrackWrites("g_counter")
@@ -343,7 +340,7 @@ GDB의 `watch g_counter`를 *프로그램 측에서* 설치.
 super().__init__("malloc", internal=True)
 ```
 
-`internal=True`면 *사용자 BP 목록에 안 보임*. 자동화 도구가 *몰래* BP 설치할 때.
+`internal=True`면 *사용자 BP 목록에 안 보임*. 도구 내부 breakpoint를 일반 목록과 구분할 때 사용합니다. maint info breakpoints 등에서는 보이며 비밀/보안 경계가 아닙니다.
 
 ## .gdbinit으로 자동 로드
 
@@ -360,65 +357,39 @@ myhelpers.register_all()
 end
 ```
 
-또는 *프로젝트별 .gdbinit* (GDB 8.0+, 보안상 `add-auto-load-safe-path`).
+프로젝트별 .gdbinit을 자동 실행하려면 **신뢰 설정을 이미 읽히는 user 설정 또는 command-line에** 둡니다. 아직 신뢰되지 않아 읽히지 않는 project .gdbinit이 자기 자신을 허용하는 흐름은 성립하지 않습니다.
 
 ```text
-# project/.gdbinit
-add-auto-load-safe-path .
-source ./gdb-helpers/init.py
+# 신뢰하는 user ~/.gdbinit에서 exact project path만 지정하는 예
+add-auto-load-safe-path /absolute/trusted/project/.gdbinit
 ```
 
-```text
-(gdb) set auto-load local-gdbinit on
-```
+전체 / 또는 현재 디렉터리 전체를 항상 신뢰하도록 넓히기 전에 script의 출처와 적용 범위를 확인합니다. 이 글의 검증은 user 설정을 수정하지 않고 gdb -nx -batch에서 source를 명시합니다.
 
 ## 자주 쓰는 패턴
 
-### 1. 메모리 누수 추적
+### 1. 반환값과 누수 추적의 경계
 
-```python
+malloc entry에서 stop=False로 넘긴 뒤 다음 임의 gdb.events.stop의 RAX를 반환값으로 수집하면 다른 함수/스레드의 값을 기록할 수 있습니다. 기존 예는 그 이유로 사용하지 않습니다.
+
+```python title="return-watch.py"
 import gdb
-from collections import defaultdict
 
-alloc_table = {}
-alloc_count = defaultdict(int)
-
-class MallocTrack(gdb.Breakpoint):
+class ReturnWatch(gdb.FinishBreakpoint):
+    """정지된 non-inline newest frame에서 명시적으로 생성하는 반환 관찰."""
     def __init__(self):
-        super().__init__("malloc", internal=True)
+        super().__init__(gdb.newest_frame(), internal=True)
     def stop(self):
-        size = int(gdb.parse_and_eval("$rdi"))
-        # rax는 return 후 — finish 사용
-        gdb.events.stop.connect(self._capture_return)
-        self.size = size
-        return False
-    def _capture_return(self, event):
-        addr = int(gdb.parse_and_eval("$rax"))
-        alloc_table[addr] = self.size
-        alloc_count[self.size] += 1
-        gdb.events.stop.disconnect(self._capture_return)
-
-class FreeTrack(gdb.Breakpoint):
-    def __init__(self):
-        super().__init__("free", internal=True)
-    def stop(self):
-        addr = int(gdb.parse_and_eval("$rdi"))
-        if addr in alloc_table:
-            del alloc_table[addr]
-        return False
-
-MallocTrack(); FreeTrack()
-
-def dump_leaks(_evt=None):
-    if not alloc_table:
-        gdb.write("no leaks\n"); return
-    total = sum(alloc_table.values())
-    gdb.write(f"{len(alloc_table)} allocations leaked, {total} bytes\n")
-
-gdb.events.exited.connect(dump_leaks)
+        value = self.return_value
+        gdb.write("return unavailable\n" if value is None else f"return: {value}\n")
+        return True
+    def out_of_scope(self):
+        gdb.write("frame left without a captured normal return\n")
 ```
 
-운영에는 ASan을 쓰지만 *원리 학습*에 매우 유용.
+이 observer는 complete allocator/leak tracker가 아닙니다. stopped frame에서 ReturnWatch()를 설치한 뒤 사용하고 정상 return·out_of_scope·return_value=None을 구분합니다. Breakpoint.stop 안에서 continue/step·frame 변경·breakpoint 추가/삭제를 하는 방식은 API 제약을 위반할 수 있습니다.
+
+실제 할당 추적에는 thread별 call/return, NULL·realloc·free·주소 재사용·비정상 종료와 tracker 시작 이전 할당을 다뤄야 합니다. 수집 표가 비었다고 no leaks를 증명하지 않습니다.
 
 ### 2. 함수 호출 통계
 
@@ -442,7 +413,7 @@ def report(_evt=None):
 gdb.events.exited.connect(report)
 ```
 
-`perf`로 할 수도 있지만 *정확한 조건부 카운트*는 GDB가 유리.
+설치한 symbol/location과 그 이후 관찰한 hit만 셉니다. inline·최적화·lost event·여러 inferior와 instrumentation 비용을 분리합니다. 함수 전체 실제 호출 수의 보편적인 정확성 보증은 아닙니다.
 
 ### 3. 표현식 추적 (display의 자동화)
 
@@ -459,10 +430,10 @@ class Tracer:
             except gdb.error:
                 gdb.write(f"  {e} = <error>\n")
 
-Tracer(['counter', 'state', 'queue.size()'])
+Tracer(['counter', 'state'])
 ```
 
-매 정지마다 *지정 표현식*들 출력. `display`의 Python 버전.
+매 정지의 selected context에서 값만 읽습니다. queue.size() 같은 expression은 실제 inferior 함수 호출이나 부작용을 일으킬 수 있어 observer에 무조건 넣지 않습니다. 연결 해제와 unavailable/error 처리도 필요합니다.
 
 ## 헤드리스 모드 — batch
 

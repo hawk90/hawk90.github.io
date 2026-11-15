@@ -3,7 +3,7 @@
 - TeX sources: 1041
 - SVG assets: 1072
 - Structural findings: 0
-- Temporary build files: 0
+- Temporary build files: 9
 - SVGs without a sibling TeX source (manual/imported assets): 35
 
 ## Structural findings

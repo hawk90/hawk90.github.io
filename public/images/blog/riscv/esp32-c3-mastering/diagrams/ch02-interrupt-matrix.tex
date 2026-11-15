@@ -11,24 +11,24 @@
 \node[font=\sffamily\bfseries\large] at (0,4.0) {ESP32-C3 Interrupt Flow};
 
 \node[neut, minimum width=70mm, minimum height=11mm, align=center] (src) at (0,2.4)
-  {31 external interrupt sources\\\small (peripherals)};
+  {Peripheral interrupt sources\\[2pt]\small (peripherals)};
 
 \node[abs, minimum width=70mm, minimum height=11mm, align=center] (mtx) at (0,0.6)
-  {\textbf{Interrupt Matrix}\\\small (peripheral $\to$ CPU INT 매핑, runtime configurable)};
+  {\textbf{Interrupt Matrix}\\[2pt]\small (runtime signal routing)};
 
 \node[hi, minimum width=70mm, minimum height=11mm, align=center] (cpu) at (0,-1.2)
-  {CPU INT 0$\sim$30\\\small (vectored 또는 single)};
+  {CPU interrupts 1--31\\[2pt]\small (priority and threshold)};
 
 \node[imp, minimum width=70mm, minimum height=11mm, align=center] (trap) at (0,-3.0)
-  {RV32 trap vector\\\small (\texttt{mtvec} 기준 진입점)};
+  {RV32 trap vector\\[2pt]\small (entry based on mtvec)};
 
 \draw[arr, line width=0.8pt] (src.south)  -- (mtx.north);
 \draw[arr, line width=0.8pt] (mtx.south)  -- (cpu.north);
 \draw[arr, line width=0.8pt] (cpu.south)  -- (trap.north);
 
 \node[caption, anchor=west, align=left] at (4.0,0.6)
-  {\texttt{esp\_intr\_alloc()}이\\
-   자동으로 source $\to$ INT 매핑};
+  {\texttt{esp\_intr\_alloc()}\\[2pt]
+   selects a CPU interrupt};
 
 \end{tikzpicture}
 \end{document}

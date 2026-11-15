@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**부팅은 "한 번에 성공"이 아니라 *7~10개의 짧은 단계가 차례로 성공*하는 과정입니다.** 각 단계가 시리얼에 어떤 신호를 남기는지 미리 알아두면, 어디서 멈췄는지 5초 안에 판별할 수 있습니다.
+**부팅은 여러 firmware·kernel·userspace 단계가 이어지는 과정입니다.** 단계와 로그는 SoC, boot media, image 구성, kernel 및 rootfs에 따라 달라집니다. 이 장은 i.MX8M Mini 계열을 가정한 예시이며 실제 시간 측정 자료가 아닙니다.
 
 새 보드의 전원 스위치를 처음 누를 때, BSP 엔지니어는 시리얼 콘솔의 빈 화면을 30초 정도 응시하게 됩니다. 그동안 어떤 문자가 언제 떠야 하는지의 *기대치*가 있어야 디버깅이 가능합니다. 이번 글은 i.MX8M Mini 보드를 기준으로 BootROM부터 systemd login까지의 단계를 시간 순서대로, 각 단계가 남기는 흔적과 함께 정리합니다.
 
@@ -33,14 +33,14 @@ topics: ["embedded"]
 | ~2.5 s | systemd 또는 BusyBox init |
 | ~5.0 s | getty 시작 → login prompt |
 
-타이밍은 보드와 스토리지 속도에 따라 ±50% 변동이 흔합니다. 핵심은 *순서*와 *어떤 signal이 나오느냐*입니다.
+표의 시각은 측정값이나 예측 기준이 아닌 설명용 값입니다. 실제 단계와 순서는 해당 보드의 boot chain 및 계측 결과로 확인합니다.
 
 ## 단계 1 — BootROM
 
 전원이 들어오면 SoC 내부의 mask ROM이 실행됩니다. BootROM의 동작은 SoC TRM에 적혀 있으며 수정 불가능합니다.
 
 - 보안 fuse(eFuse) 확인. 보안 부팅 활성화 여부, secure key, lifecycle state 확인.
-- 부팅 모드 핀 읽기. SD, eMMC, USB, QSPI 중 어디서 부팅할지 결정.
+- boot source 선택은 SoC별 strap, fuse 및 ROM 정책에 따릅니다.
 - 1차 부트로더(SPL 또는 FIT 헤더) 로드.
 
 i.MX 계열은 BootROM이 시리얼에 출력을 *거의 안 남깁니다*. 출력이 있다면 보통 다음 같은 짧은 stamp입니다.
@@ -55,20 +55,15 @@ mode: sd
 ### BootROM이 의심될 때
 
 - 전원 시퀀스: PMIC가 정확한 순서로 전압을 올렸는지 오실로스코프 확인.
-- 부팅 모드 핀: BOOT_MODE[2:0] 핀이 의도한 strap 값인지 측정.
+- 부팅 모드 핀: SoC 문서에 지정된 boot-mode strap pins가 의도한 값인지 측정.
 - 32 kHz 또는 24 MHz 크리스털: SoC reset 직후 안정적으로 oscillation하는지 확인.
 - eFuse: factory에서 무심코 burn한 보안 옵션이 부팅을 막을 수 있습니다.
 
-## 단계 2 — SPL (Secondary Program Loader)
+## 단계 2 — SPL (Secondary Program Loader, 사용하는 구성에서)
 
 BootROM이 SPL을 SRAM에 올리고 점프합니다. SPL은 *작은* U-Boot입니다(보통 ≤ 256 KB). SRAM은 64~256 KB 정도라서 모든 코드가 들어가지 못해 SPL과 U-Boot proper로 분리합니다.
 
-SPL의 책임:
-
-1. UART 콘솔 활성화. 첫 디버그 출력이 가능한 시점.
-2. DRAM 초기화. DDR 컨트롤러를 셋업, 메모리 trim/calibration.
-3. ATF BL31 + U-Boot proper를 DRAM에 로드.
-4. ATF BL31로 점프.
+SPL을 사용하는 구성에서 SPL은 보통 초기 console을 설정하고, 필요한 DRAM 초기화와 후속 image 적재를 맡습니다. 구체적인 단계와 BL31 handoff는 SoC·U-Boot·TF-A·image packaging 버전에 따라 다릅니다.
 
 성공하면 시리얼에 다음과 유사한 첫 라인이 보입니다.
 
@@ -82,7 +77,7 @@ Booting BL31...
 
 이 시점이 **"보드가 살아 있다"의 첫 증거**입니다. 여기까지 못 오면 콘솔 UART pinmux, baud rate, DRAM 초기화 중 하나가 의심됩니다.
 
-## 단계 3 — ATF BL31
+## 단계 3 — ATF BL31 (사용하는 구성에서)
 
 Arm Trusted Firmware의 EL3 runtime입니다. 한 번 동작이 시작되면 PSCI, SMC handler, secure monitor로서 시스템 전체 기간 동안 살아 있습니다.
 
@@ -132,11 +127,11 @@ bootcmd=fatload mmc 0:1 ${loadaddr} Image; \
 bootargs=console=ttymxc0,115200 root=/dev/mmcblk0p2 rootwait rw
 ```
 
-`bootargs`가 kernel command line입니다. 부트로더 → 커널로 넘어가는 *유일한* 텍스트 인터페이스이며, 여기서 잘못된 콘솔이나 root device를 넘기면 커널이 침묵하거나 panic으로 끝납니다.
+`bootargs`는 kernel command line을 전달하는 한 경로입니다. Device Tree의 `/chosen/bootargs`나 다른 boot protocol도 사용할 수 있으며, 실제로 kernel이 받은 인자는 `/proc/cmdline` 등으로 확인합니다.
 
 ## 단계 5 — Kernel decompress와 첫 printk
 
-`booti`(arm64) 또는 `bootm`(arm 32)이 호출되면 U-Boot가 커널 entry로 점프합니다. arm64의 `Image`는 압축 안 한 raw이므로 decompress 단계가 없지만, `Image.gz`는 self-decompressing 헤더가 압축을 풉니다.
+`booti`(arm64) 또는 `bootm`(arm 32)이 호출되면 U-Boot가 커널 entry로 점프합니다. arm64 `Image`는 비압축 kernel image입니다. `Image.gz`를 쓸 때 압축 해제를 수행하는 주체와 포맷 지원은 bootloader 설정 및 kernel build에 따르므로 board guide에서 확인합니다.
 
 이 시점에 *earlycon*이 활성이면 다음 같은 라인이 보입니다.
 
@@ -150,7 +145,7 @@ bootargs=console=ttymxc0,115200 root=/dev/mmcblk0p2 rootwait rw
 [    0.000000] Memory limited to 2048MB
 ```
 
-`earlycon`이 없으면 *완전히 침묵*합니다. 커널이 죽었는지 살아 있는지조차 모릅니다. 그래서 BSP 초기에는 `bootargs`에 항상 `earlycon=ec_imx6q0,0x30890000,115200n8` 같은 형식을 넣어 둡니다.
+`earlycon`이 활성화되지 않으면 정식 console이 준비될 때까지 로그가 보이지 않을 수 있습니다. earlycon driver와 주소·baud 인자는 SoC UART, kernel config 및 command line syntax에 맞춰 지정해야 합니다.
 
 ## 단계 6 — start_kernel과 driver probe
 
@@ -169,7 +164,7 @@ bootargs=console=ttymxc0,115200 root=/dev/mmcblk0p2 rootwait rw
 [    0.890123] Calibrating delay loop (skipped), value calculated using timer frequency.. 16.00 BogoMIPS (lpj=80000)
 ```
 
-`bootconsole disabled`가 보이면 *정식 console*이 인계받은 시점입니다. 다음 줄부터는 `earlycon`이 아니라 `console=ttymxc0,115200`에서 정한 UART에서 출력됩니다.
+`bootconsole disabled`는 boot console이 비활성화된 로그입니다. 정식 console의 인계 여부와 대상은 kernel 설정 및 command line으로 확인합니다.
 
 이후 driver probe 단계에서 다음과 같은 라인이 줄줄이 흐릅니다.
 

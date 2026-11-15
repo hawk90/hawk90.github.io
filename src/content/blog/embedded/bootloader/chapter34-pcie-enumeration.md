@@ -1,8 +1,8 @@
 ---
-title: "U-Boot PCIe Enumeration — 부트로더가 디바이스를 찾는 흐름 분석"
+title: "U-Boot PCIe Enumeration — 장치 발견·BAR 할당과 CXL 메모리의 구분"
 slug: "embedded/bootloader/chapter34-pcie-enumeration"
 date: 2026-06-19T09:01:00
-description: "U-Boot PCIe 열거 과정 — Root Complex 초기화·Config Space scan·BAR sizing·resource 할당, CXL DVSEC 인식까지."
+description: "U-Boot PCI driver model의 probe·bind와 BAR 자원 배치를 살펴보고, PCI MMIO window와 CXL.mem의 HDM decoder 주소 공간을 구분합니다."
 series: "Bootloader Internals"
 seriesOrder: 34
 tags: [embedded, bootloader, u-boot, pcie, enumeration, cxl, root-complex]
@@ -11,254 +11,126 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"PCIe enumeration은 *부트로더가 깨어 있는 동안 한 번만 하는 가장 비싼 트리 탐색*입니다."** — Root Complex가 Bus 0부터 시작해 *config space를 깊이우선*으로 훑고, 디바이스마다 *BAR sizing*과 *resource 할당*을 끝낸 뒤에야 커널이 *완성된 PCIe 토폴로지*를 인계받습니다. CXL 디바이스는 이 흐름의 *마지막 단계*에서 *DVSEC 캡슐*로 자신을 추가 신원합니다.
+PCIe 열거는 장치를 찾고 BAR·bridge window를 배치하는 과정입니다. **CXL.mem 용량은 PCI BAR의 크기와 다릅니다.** BAR로 제어 레지스터에 접근할 수 있어도, 메모리를 사용하려면 별도의 host physical address 범위와 HDM decoder 경로가 필요합니다.
 
-[Ch 19](/blog/embedded/bootloader/chapter19-kernel-handoff)에서 *부트로더가 커널에 인계*하는 흐름을 봤습니다. 인계 전에 부트로더가 *반드시 끝내야 하는 일* 중 하나가 *PCIe enumeration*입니다. SoC가 *root complex*를 가졌고 *PCIe 디바이스가 슬롯에 꽂혀 있으면*, U-Boot은 *각 디바이스의 BAR을 sizing하고 메모리 공간을 할당*해 *DTB의 ranges 속성*에 기록한 뒤 커널에 넘깁니다.
-
-데이터센터·AI 가속기 서버에서는 *CXL 디바이스가 이 경로*를 타고 인식됩니다. 표준 PCIe enumeration *그 자체*는 변하지 않았지만, *CXL DVSEC을 인식하는 추가 단계*가 *최신 부트로더*에 들어왔습니다. 이 장은 *U-Boot의 PCIe enumeration*을 단계별로 분해하고, *CXL이 어디서 끼어드는지*를 정리합니다.
+[Ch 19](/blog/embedded/bootloader/chapter19-kernel-handoff)의 커널 인계 전에 PCIe를 어디까지 준비할지는 부팅 장치와 플랫폼에 달려 있습니다. U-Boot이 NVMe에서 커널을 읽는 경우에는 PCI 지원이 필요하지만, 모든 보드가 모든 PCI 장치를 부트로더에서 초기화해야 하는 것은 아닙니다. 이 글은 U-Boot **v2025.01 driver model 문서**의 탐색 방식과 CXL의 주소 공간 구분을 기준으로 설명합니다.
 
 ## Root Complex 초기화
 
-PCIe enumeration은 *Root Complex가 깨어 있는 상태*에서 시작됩니다. SoC마다 *PCIe controller IP*가 다르지만 *공통 시퀀스*가 있습니다.
+controller의 power·clock·reset·PHY·link 설정은 SoC 드라이버와 보드 구성이 담당합니다. downstream 장치의 config space 접근에는 동작하는 link가 필요하지만, RC 자체의 로컬 레지스터 접근까지 link-up 이후에만 가능하다는 뜻은 아닙니다.
 
-U-Boot PCIe RC init 시퀀스:
+| 확인 단계 | 확인할 근거 |
+| --- | --- |
+| 전원·reference clock·reset | 보드 회로와 controller의 순서·지연 조건 |
+| PHY와 link training | 해당 드라이버의 상태 레지스터와 실제 로그 |
+| speed·width | 양쪽 장치가 지원하고 협상한 값 |
+| config access | controller의 config mapping과 bus 번호 설정 |
 
-| 단계 | 작업 |
-|------|------|
-| 1. PCIe controller power-on | PMU에서 power domain 활성화 |
-| 2. Reference clock 공급 | 100 MHz |
-| 3. PHY 초기화 | PIPE interface, equalization, lane bring-up |
-| 4. Link training (LTSSM) | Detect → Polling → Configuration. L0 도달 시 link active. 실패 시 PERST# assert 후 재시도 |
-| 5. Speed negotiation | Gen1 → Gen2 → Gen3 → Gen4 → Gen5 |
-| 6. Width negotiation | x1·x4·x8·x16 |
-| 7. Root Complex Config Space 초기화 | Bus 0, Device 0, Function 0이 RC |
+항상 Gen1부터 Gen5까지 차례로 올라가거나 RC가 모든 플랫폼에서 00:00.0이라는 가정을 두지 않습니다. link 실패와 config read 오류를 먼저 구분해야 이후의 resource 문제를 제대로 조사할 수 있습니다.
 
-*LTSSM(Link Training and Status State Machine)*이 *L0 상태*에 도달해야 *config space access가 가능*합니다. 이 단계에서 *cable 문제·전원 부족·PHY 설정 오류*가 자주 잡힙니다.
+## Config Space Scan — Driver Model 경로
 
-## Config Space Scan — 깊이우선 탐색
+U-Boot 문서에서 PCI bus는 요청에 따라 probe되며, bus probe가 장치를 탐색하고 드라이버에 bind합니다. 따라서 전원 인가 직후 전체 PCI 트리를 반드시 한 번 탐색한다고 일반화할 수 없습니다. PCI 버스의 driver-model 트리와 커널에 전달하는 flattened DT도 구분해야 합니다.
 
-LTSSM이 L0에 도달하면 *Bus 0*부터 *config space를 훑기* 시작합니다.
+bridge 아래를 탐색할 때는 primary·secondary·subordinate bus 번호와 forwarding window를 함께 관리합니다. secondary 번호만 쓴 뒤 재귀하는 축약 함수는 완성된 열거 구현이 아닙니다. multifunction 처리, config 접근 실패, 64-bit BAR와 자원 부족도 실제 구현이 처리해야 합니다.
 
-```c
-// U-Boot drivers/pci/pci.c (단순화)
-int pci_hose_scan_bus(struct pci_controller *hose, int bus)
-{
-    for (dev = 0; dev < PCI_MAX_DEVICES; dev++) {
-        for (func = 0; func < PCI_MAX_FUNCTIONS; func++) {
-            bdf = PCI_BDF(bus, dev, func);
+타깃 U-Boot에서 지원 명령부터 확인하는 읽기용 예시는 다음과 같습니다. 명령 지원과 출력은 해당 빌드 설정에 달려 있습니다.
 
-            // Vendor ID 읽기 — 0xFFFF면 디바이스 없음
-            vid = pci_read_config_word(bdf, PCI_VENDOR_ID);
-            if (vid == 0xFFFF)
-                continue;
-
-            // Header type — 0x01이면 bridge (재귀)
-            htype = pci_read_config_byte(bdf, PCI_HEADER_TYPE);
-            if ((htype & 0x7F) == PCI_HEADER_TYPE_BRIDGE) {
-                // Secondary bus 번호 할당하고 재귀 scan
-                sec_bus = ++max_bus;
-                pci_write_config_byte(bdf, PCI_SECONDARY_BUS, sec_bus);
-                pci_hose_scan_bus(hose, sec_bus);
-            } else {
-                // Endpoint — BAR sizing
-                pci_size_bars(bdf);
-            }
-        }
-    }
-}
+```text
+=> version
+=> help pci
+=> pci
+=> dm tree
 ```
 
-*깊이 우선*으로 *bridge를 만나면 secondary bus를 할당하고 재귀*합니다. *endpoint를 만나면 BAR sizing*을 끝냅니다. 이 과정이 *수십~수백 ms* 걸립니다 — 디바이스 수와 link 안정성에 따라.
+보드·defconfig·U-Boot commit과 함께 출력 전체를 보존합니다. 이 글에는 위 명령을 실행한 타깃 로그나 열거 시간 실측이 없습니다.
 
 ## BAR Sizing
 
-각 endpoint의 *BAR*은 *디바이스가 요청하는 메모리 크기*를 알려 줍니다.
+memory BAR의 size probe는 주소 비트의 구현 마스크를 이용합니다. I/O BAR는 하위 비트 해석이 다르고, 64-bit memory BAR는 두 DWORD가 한 쌍입니다. 실제 장치에 probe write를 할 때는 decode와 장치 상태, 원래 BAR 및 command 값의 보존·복구를 해당 PCI 구현에 맡겨야 합니다.
 
-```c
-// BAR sizing 절차
-uint32_t orig = pci_read_config_dword(bdf, PCI_BAR0);
-pci_write_config_dword(bdf, PCI_BAR0, 0xFFFFFFFF);
-uint32_t mask = pci_read_config_dword(bdf, PCI_BAR0);
-pci_write_config_dword(bdf, PCI_BAR0, orig);
+다음은 **이미 수집한 memory BAR 마스크의 산술만** 검사하는 예제입니다. 장치 레지스터를 읽거나 쓰지 않습니다. 0 주소 마스크는 미구현과 전체 폭 크기를 이 입력만으로 구별하지 못하므로 거부하는 정책을 택합니다.
 
-// 크기 계산
-uint32_t size = (~(mask & 0xFFFFFFF0)) + 1;
-// 예: mask=0xFFF00000 → size=0x100000 (1 MB)
-```
-
-*BAR에 모두 1을 쓰고 다시 읽으면* *하위 R/W bit는 0으로 굳고 상위는 1로 남는* 형태가 됩니다. 이 *반전된 마스크*가 *BAR이 차지하는 영역 크기*입니다.
-
-64-bit BAR이면 *BAR0과 BAR1을 합쳐* sizing합니다. CXL 디바이스의 *HDM Decoder는 64-bit BAR*로 노출되어 *512 GB~2 TB DRAM*을 매핑합니다.
-
-## Resource 할당
-
-모든 endpoint의 BAR 크기가 수집되면, *RC가 가진 memory window*를 *분할*해 할당합니다.
-
-```text
-[U-Boot pci_setup_resources 흐름]
-
-RC memory window: 0x40000000 ~ 0x4FFFFFFF (256 MB)
-
-Endpoint 1: 64 MB 요구 → 0x40000000 ~ 0x43FFFFFF
-Endpoint 2: 1 MB 요구 → 0x44000000 ~ 0x440FFFFF
-Endpoint 3: 4 GB 요구 → ✗ window 부족! → enumeration 실패
-```
-
-*4 GB·512 GB 같은 큰 BAR*은 *RC의 prefetchable window*가 *그만큼 커야* 합니다. CXL 메모리 디바이스는 보통 *64-bit prefetchable BAR*로 매핑되며, *DTB의 ranges 속성*이 *충분히 큰 window를 정의*해 줘야 합니다.
-
-```dts
-// arch/arm64/boot/dts/example-board.dts
-pcie@30000000 {
-    compatible = "vendor,pcie-rc";
-    reg = <0x0 0x30000000 0x0 0x10000>;
-    ranges = <
-        0x82000000 0x0 0x40000000 0x0 0x40000000 0x0 0x10000000  // 32-bit MMIO 256 MB
-        0xc3000000 0x0 0x80000000 0x80 0x0 0x80 0x0              // 64-bit prefetch 512 GB
-    >;
-};
-```
-
-*마지막 항목*이 *0x80_00000000 ~ 0x100_00000000 (512 GB)*의 *prefetchable window*를 정의합니다. CXL.mem 디바이스가 *256 GB*를 요청해도 이 안에 들어갑니다.
-
-## CXL DVSEC 인식
-
-Modern U-Boot (2024+)은 *PCIe enumeration 끝에 DVSEC scan*을 추가합니다. CXL 디바이스는 *Vendor=0x1e98(CXL Consortium)*의 *DVSEC*을 가집니다.
-
-```c
-// U-Boot drivers/pci/pci_cxl.c (개념적)
-int pci_scan_cxl_dvsec(pci_dev_t bdf)
-{
-    int cap_offset = pci_find_ext_capability(bdf, PCI_EXT_CAP_ID_DVSEC);
-    while (cap_offset) {
-        uint16_t vid = pci_read_config_word(bdf, cap_offset + 4);
-        uint16_t dvsec_id = pci_read_config_word(bdf, cap_offset + 8);
-
-        if (vid == PCI_VENDOR_ID_CXL_CONSORTIUM) {
-            switch (dvsec_id) {
-                case CXL_DVSEC_DEVICE:
-                    printf("CXL device found at %02x:%02x.%x\n",
-                           PCI_BUS(bdf), PCI_DEV(bdf), PCI_FUNC(bdf));
-                    add_cedt_entry(bdf);
-                    break;
-                case CXL_DVSEC_PORT:
-                    register_cxl_port(bdf);
-                    break;
-            }
-        }
-        cap_offset = pci_find_next_ext_capability(bdf, cap_offset, PCI_EXT_CAP_ID_DVSEC);
-    }
+```js title="memory-bar-size.mjs"
+export function memoryBarSize(rawMask, width = 32) {
+  if (![32, 64].includes(width) || typeof rawMask !== 'bigint')
+    throw new RangeError('width or mask');
+  const all = (1n << BigInt(width)) - 1n;
+  if (rawMask < 0n || rawMask > all || (rawMask & 1n) !== 0n ||
+      (rawMask & 6n) !== (width === 64 ? 4n : 0n))
+    throw new RangeError('memory BAR encoding');
+  const address = rawMask & (all ^ 15n);
+  if (address === 0n) throw new RangeError('ambiguous zero mask');
+  const size = ((~address) & all) + 1n;
+  if (size < 16n || (size & (size - 1n)) !== 0n)
+    throw new RangeError('non-contiguous mask');
+  return size;
 }
 ```
 
-*CXL DVSEC을 발견*하면 *부트로더가 ACPI CEDT(CXL Early Discovery Table)에 항목을 추가*해 *커널에 인계*합니다. 커널은 *CEDT를 보고 cxl_acpi 드라이버를 활성화*합니다.
+32-bit 마스크 0xFFF00000은 0x100000, 즉 1 MiB입니다. 64-bit memory BAR의 두 DWORD를 합친 0xFFFFFFFF00000004는 4 GiB를 나타냅니다. 하위 type 비트를 제거하기 전에 BAR 종류와 폭을 확인하며, 이 계산을 그대로 CXL.mem 용량 계산으로 사용하지 않습니다.
 
-[Modern Embedded Recipes Ch 151](/blog/embedded/modern-recipes/part11-17-linux-cxl-driver)에서 *cxl_acpi → cxl_pci → cxl_mem* 의존성 체인을 볼 수 있습니다.
+## Resource 할당
 
-## DTB로 결과 인계
+BAR는 크기에 맞는 정렬과 주소 제약을 만족하는 window에 배치해야 합니다. 다음은 256 MiB window를 가정한 계산 예제이며 실장치의 resource dump가 아닙니다. 범위는 끝 주소를 포함하지 않습니다.
 
-U-Boot은 enumeration 결과를 *DTB의 ranges와 device node*로 인계합니다.
+| 항목 | 크기 | 배치 예 |
+| --- | --- | --- |
+| RC MMIO window | 256 MiB | [0x40000000, 0x50000000) |
+| Endpoint A BAR | 64 MiB | [0x40000000, 0x44000000) |
+| Endpoint B BAR | 1 MiB | [0x44000000, 0x44100000) |
+| Endpoint C BAR | 4 GiB | 이 window에는 배치 불가 |
 
-```dts
-// 부트로더가 update한 후의 DTB (예시)
-pcie@30000000 {
-    ranges = <...>;     // RC window 그대로
-    bus-range = <0x0 0x20>;  // U-Boot이 찾은 max bus
+자원 배치 실패가 곧 장치의 Vendor ID도 읽지 못했다는 뜻은 아닙니다. bus 탐색 성공·BAR 배치·드라이버 사용 가능 여부를 각각 확인합니다. bridge window와 CPU↔PCI 주소 변환도 맞아야 합니다.
 
-    cxl-mem@5e000000 {  // U-Boot이 추가한 노드
-        compatible = "cxl,memory-device";
-        reg = <0x80 0x00000000 0x40 0x00000000>;  // 256 GB
-        cxl,dvsec-rev = <1>;
-    };
-};
-```
+## CXL DVSEC과 HDM Decoder
 
-*수동 DTB*에는 *PCIe 디바이스 노드를 미리 정의 안 함*이 권장됩니다 — *enumeration 결과로 부트로더가 동적 추가*하는 게 *권장 흐름*입니다.
+DVSEC은 PCIe **extended capability**입니다. 존재 여부뿐 아니라 vendor·DVSEC ID·revision·length와 register locator를 해석해야 CXL 기능을 식별할 수 있습니다. 표준 capability 탐색과 extended capability 탐색은 다른 경로입니다.
 
-## 임베디드에서 PCIe·CXL을 만나는 자리
+QEMU CXL 문서는 BAR가 register·mailbox 접근에 쓰이고, Type 3 메모리의 HDM decoder는 host physical address를 device physical address로 변환한다고 구분합니다. **256 GiB CXL 메모리가 있다고 256 GiB BAR가 필요한 것은 아닙니다.** CXL protocol 지원도 PCIe 세대나 RC 기능만으로 따라오지 않습니다.
 
-*임베디드 SoC*는 보통 *root complex* 없이 *endpoint*로 동작하는 경우가 많습니다. 그러나 *AI Edge·Industrial Gateway·NVR* 같은 *상위 SoC*들이 *PCIe 5.0 RC*를 갖추면서 *CXL device attach*가 가능해졌습니다.
+U-Boot 전체에 공통인 pci_cxl.c·DVSEC scan 후 CEDT 자동 생성 흐름을 전제하지 않습니다. 그런 기능을 설명하려면 실제 fork·commit·빌드 설정과 table 생성 코드를 제시해야 합니다. ACPI 기반 Linux의 CXL 발견 과정은 [다음 장](/blog/embedded/bootloader/chapter35-uefi-cxl-init)에서 다룹니다.
 
-| 임베디드 시나리오 | RC 또는 EP | 부트로더 enumeration |
-|------------------|-----------|---------------------|
-| MCU + Sensor | 없음 | N/A |
-| AI Edge box (Jetson Orin 등) | RC | NVMe·CXL.mem 인식 |
-| NVR·NAS | RC | NVMe storage 인식 |
-| 5G RU·DU | RC | accelerator (FPGA/NPU) 인식 |
-| Automotive ADAS | RC + EP | inter-ECU PCIe·CXL fabric |
+## DTB·ACPI로 인계할 정보
 
-부트로더의 PCIe enumeration은 *commercial 서버만의 일이 아닙니다*.
+DT의 PCI host ranges는 PCI 주소와 CPU 주소 사이 window를 기술합니다. 개별 endpoint BAR 배치를 모두 기록하는 일반 목록이 아닙니다. U-Boot 문서는 discoverable PCI 장치라도 추가 보드 정보를 주기 위한 DT 노드를 허용하며, 무조건 동적 노드만 쓰라고 권하지 않습니다.
 
-## 자주 하는 실수
+ACPI의 CEDT는 host bridge와 CXL fixed memory window 등을 기술합니다. 각 endpoint마다 임의의 cxl,memory-device DT 노드를 추가하거나 DVSEC 발견마다 CEDT 항목을 하나 만든다는 규칙은 없습니다. 타깃 플랫폼의 DT binding 또는 ACPI 계약을 먼저 확인해야 합니다.
 
-### Link Training 실패를 enumeration 실패로 오인
+## 실패 구간을 나누어 조사하기
 
-```text
-[U-Boot 로그]
-pcie@30000000: link not up after 100ms, giving up
-pcie@30000000: no devices found
-```
+| 증상 | 다음 확인 |
+| --- | --- |
+| link가 올라오지 않음 | 전원·reset·clock·PHY·케이블과 양쪽 link 상태 |
+| config read 실패 | bus 번호·config mapping·link 및 접근 오류 |
+| BAR 자원 부족 | 크기·정렬·32/64-bit 제한·bridge/RC window |
+| PCI 장치는 보이나 CXL 메모리가 없음 | CXL protocol·ACPI·decoder·region·driver 상태 |
+| 부팅 뒤 새 장치가 보이지 않음 | OS와 플랫폼의 hotplug 지원·자원·정책 |
 
-이 메시지는 *LTSSM이 L0에 도달 못 한 것*입니다. *enumeration이 실패한 게 아니라 link 자체가 안 올라온* 상태입니다. PHY 설정·전원·신호 무결성을 먼저 점검해야지 enumeration 코드를 뒤져선 안 됩니다.
-
-### Prefetchable Window가 작아 큰 BAR 매핑 실패
-
-```text
-pcie@30000000: out of mem space for device 02:00.0 (req 0x40000000 bytes)
-```
-
-*1 GB 이상 BAR*을 요청하는 디바이스(GPU·CXL.mem)가 *작은 prefetchable window*에 안 들어가는 경우입니다. DTB의 `ranges`를 *충분히 큰 window*로 정의해야 합니다. *최소 64 GB* 권장 — CXL 디바이스를 고려하면 *512 GB 이상*도 흔합니다.
-
-### BAR Sizing 후 원래 값 복원 안 함
-
-```c
-// 잘못된 sizing
-pci_write_config_dword(bdf, PCI_BAR0, 0xFFFFFFFF);
-mask = pci_read_config_dword(bdf, PCI_BAR0);
-// orig 복원 안 함! → 디바이스가 비정상 BAR 값으로 동작
-```
-
-*BAR에 0xFFFFFFFF를 쓰면* 그 사이 *디바이스가 잘못된 주소를 본다*고 생각할 수 있습니다. *반드시 원래 값을 복원*한 뒤 *resource 할당 단계*에서 *새 주소를 다시 씁니다*.
-
-### CXL DVSEC을 표준 PCIe Capability로 처리
-
-```c
-// 잘못 — DVSEC은 Extended Capability지 표준 Cap 아님
-int cap = pci_find_capability(bdf, PCI_CAP_ID_DVSEC);  // 항상 0 리턴
-
-// 올바름 — Extended Capability (offset 0x100+)에서 찾아야 함
-int cap = pci_find_ext_capability(bdf, PCI_EXT_CAP_ID_DVSEC);
-```
-
-DVSEC은 *PCIe 4 KB extended config space*에 있습니다. *256 byte 표준 config space*에서는 찾을 수 없습니다.
-
-### Hot-plug Device를 모름 enumeration
-
-```text
-[부팅 후 hot-plug]
-pcie@30000000: hot-plug event ignored
-```
-
-*U-Boot의 enumeration*은 *부팅 시 한 번*만입니다. *부팅 후 슬롯에 끼운 디바이스*는 *커널의 PCIe hot-plug 메커니즘*이 담당합니다. 부트로더에서 처리 시도 자체가 *책임 위반*입니다.
+prefetchable window를 임의로 512 GiB까지 늘리는 처방은 피합니다. 실제 BAR 요구와 SoC 주소 공간을 확인해야 하며, CXL memory window는 별도 문제입니다. hotplug 역시 U-Boot이 절대로 처리할 수 없다는 규칙이 아니라 해당 펌웨어와 OS가 제공하는 기능의 범위로 판단합니다.
 
 ## 정리
 
-- U-Boot PCIe enumeration은 *Root Complex가 LTSSM L0에 도달*한 뒤 *Bus 0부터 깊이우선*으로 진행됩니다.
-- 각 endpoint의 *BAR sizing*은 *0xFFFFFFFF write/read 반전 마스크*로 *요청 크기*를 알아냅니다.
-- *Resource 할당*은 *RC가 가진 memory window를 분할*해 endpoint마다 *실 주소*를 부여합니다.
-- 큰 BAR(GPU·CXL.mem)을 위해 *DTB의 prefetchable window를 충분히 크게* 정의해야 합니다.
-- *CXL 디바이스는 DVSEC을 가집니다*. Modern U-Boot은 *enumeration 끝에 DVSEC scan*해 *ACPI CEDT에 항목을 추가*합니다.
-- enumeration 결과는 *DTB의 ranges와 동적 노드*로 *커널에 인계*되며, 커널은 *cxl_acpi 드라이버*로 CXL을 인식합니다.
-- 임베디드 SoC도 *Jetson Orin·NVR·5G DU 같은 상위 시스템*은 *PCIe 5.0 RC + CXL device attach*가 *현실*입니다.
+- PCIe link 준비·장치 발견·BAR 배치·드라이버 활성화는 서로 다른 확인 단계입니다.
+- U-Boot driver model의 probe 시점은 요청과 설정에 달려 있습니다.
+- BAR probe는 type·폭·decode·복구를 포함한 구현을 사용해야 합니다.
+- CXL.mem 용량과 제어 레지스터 BAR 크기를 혼동하지 않습니다.
+- DT ranges·ACPI CEDT·HDM decoder의 역할을 각각 확인합니다.
 
 ## 다음 편
 
-[Ch 35: EFI·UEFI에서 CXL 초기화](/blog/embedded/bootloader/chapter35-uefi-cxl-init)에서는 *EDK II 기반 BIOS·UEFI*가 *CEDT(CXL Early Discovery Table)를 생성*하고 *HDM Decoder를 사전 설정*해 *커널이 깨어났을 때 즉시 메모리를 인식*하게 하는 흐름을 분해합니다.
+[Ch 35: EFI·UEFI에서 CXL 초기화](/blog/embedded/bootloader/chapter35-uefi-cxl-init)에서는 CEDT와 decoder 설정을 나누고, firmware가 준비할 정보와 Linux가 구성할 자원을 구분합니다.
+
+## 근거 자료
+
+- [U-Boot v2025.01 PCI with Driver Model](https://docs.u-boot.org/en/v2025.01/develop/driver-model/pci-info.html): probe·bind·DT의 PCI 노드.
+- [QEMU CXL 문서](https://www.qemu.org/docs/master/system/devices/cxl.html): BAR register·mailbox와 HDM decoder 구분.
+- [Linux CXL BIOS/EFI Configuration](https://docs.kernel.org/driver-api/cxl/platform/bios-and-efi.html): firmware 정보와 runtime decoder 설정의 경계.
 
 ## 관련 항목
 
-- [Ch 19: Linux Boot ABI — ARM/ARM64 커널 진입 규약 추적](/blog/embedded/bootloader/chapter19-kernel-handoff)
-- [Ch 25: ARM Trusted Firmware-A 통합](/blog/embedded/bootloader/chapter25-tfa-optee)
-- [Ch 35: EFI·UEFI에서 CXL 초기화](/blog/embedded/bootloader/chapter35-uefi-cxl-init) (다음 편)
-- [Ch 36: 부트 시 메모리 토폴로지 결정 — DDR + CXL.mem 통합 인식](/blog/embedded/bootloader/chapter36-boot-memory-topology)
-- [Modern Embedded Recipes Ch 149: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
-- [Modern Embedded Recipes Ch 151: Linux CXL 드라이버 분석](/blog/embedded/modern-recipes/part11-17-linux-cxl-driver)
+- [Ch 19: Linux Boot ABI](/blog/embedded/bootloader/chapter19-kernel-handoff)
+- [Ch 35: EFI·UEFI에서 CXL 초기화](/blog/embedded/bootloader/chapter35-uefi-cxl-init)
+- [Ch 36: 부트 시 메모리 토폴로지](/blog/embedded/bootloader/chapter36-boot-memory-topology)
+- [Modern Embedded Recipes: PCIe에서 CXL로](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)
+- [Modern Embedded Recipes: Linux CXL 드라이버](/blog/embedded/modern-recipes/part11-17-linux-cxl-driver)

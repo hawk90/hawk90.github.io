@@ -12,9 +12,9 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"U-Boot은 *Linux Kbuild를 그대로 가져다 씁니다*."** — `make <board>_defconfig`로 *옵션 한 묶음을 한 번에* 적용하고, `menuconfig`로 *세부 조정*하고, `make`로 *빌드*합니다. 흐름은 커널과 똑같습니다.
+> **"U-Boot의 설정과 빌드는 Linux Kconfig·Kbuild에서 출발한 흐름을 사용합니다."** — 공통 개념을 재사용하지만 U-Boot 고유 설정·산출물과 SPL/TPL 단계가 더해집니다.
 
-U-Boot 소스 트리를 처음 열면 *수만 개의 파일*에 압도됩니다. arch/ 아래만 해도 *수십 개의 아키텍처*, drivers/ 아래는 *수백 개의 driver*, configs/ 아래는 *천 개가 넘는 defconfig*. 다행히 *빌드 시스템은 단순*합니다. Linux 커널과 *같은 Kbuild*입니다. 한 번 익히면 *어떤 보드든* 같은 흐름으로 빌드합니다.
+U-Boot 소스 트리를 처음 열면 많은 파일과 보드 설정에 압도될 수 있습니다. 설정·빌드 구조는 Linux Kconfig/Kbuild와 닮았지만, U-Boot에는 호환성을 위한 추가 생성물과 SPL/TPL 빌드 흐름이 있습니다. 공통 개념을 익힌 뒤에는 대상 보드 문서와 해당 버전의 설정을 확인해야 합니다.
 
 ## 빌드의 세 단계
 
@@ -40,18 +40,7 @@ make qemu_arm64_defconfig
 make -j$(nproc)
 ```
 
-빌드 결과는 *소스 트리 루트*에 생깁니다.
-
-```text
-u-boot.bin           ← raw binary (TF-A의 BL33으로 사용)
-u-boot              ← ELF binary (디버깅용)
-u-boot.dtb           ← control DTB (CONFIG_OF_SEPARATE인 경우)
-u-boot-dtb.bin       ← u-boot.bin + u-boot.dtb (concat)
-u-boot-spl.bin       ← SPL (CONFIG_SPL=y인 경우)
-u-boot-spl-dtb.bin   ← SPL + SPL용 DTB
-spl/u-boot-spl       ← SPL ELF
-u-boot.itb           ← FIT image (CONFIG_FIT=y인 경우)
-```
+빌드 결과는 기본 설정에서는 소스 트리에 생성되며, `O=<dir>`를 지정하면 그 출력 디렉터리에 생성됩니다. 설정에 따라 `u-boot`, `u-boot.bin`, control DTB, SPL/TPL 산출물 또는 FIT 이미지가 나올 수 있습니다. 파일 이름과 포함 여부는 해당 버전의 보드 설정과 실제 build log에서 확인하세요.
 
 ## 디렉터리 구조
 
@@ -204,40 +193,12 @@ Prompt: Enable SPL
 
 ## defconfig — 옵션 묶음
 
-`configs/<board>_defconfig`는 *해당 보드에서 활성화된 옵션만* 모은 *압축 .config*입니다.
+`configs/<board>_defconfig`는 기본값에서 달라지는 설정을 저장한 간결한 입력 파일입니다. 이를 직접 `.config`처럼 사용하지 않고, U-Boot의 `make <board>_defconfig` target으로 해당 버전의 전체 설정 파일을 생성합니다.
 
 ```text
-# configs/qemu_arm64_defconfig (발췌)
+# configs/qemu_arm64_defconfig의 축약된 형태; 실제 항목은 버전에 따라 다름
 CONFIG_ARM=y
 CONFIG_ARCH_QEMU=y
-CONFIG_SYS_TEXT_BASE=0x00000000
-CONFIG_NR_DRAM_BANKS=1
-CONFIG_DEFAULT_DEVICE_TREE="qemu-arm64"
-CONFIG_OF_BOARD=y
-CONFIG_DISTRO_DEFAULTS=y
-CONFIG_FIT=y
-CONFIG_FIT_SIGNATURE=y
-CONFIG_BOOTDELAY=0
-CONFIG_SYS_PROMPT="=> "
-CONFIG_CMD_BOOTEFI_HELLO=y
-CONFIG_CMD_BOOTEFI_SELFTEST=y
-CONFIG_CMD_PCI=y
-CONFIG_CMD_DHCP=y
-CONFIG_CMD_TFTPBOOT=y
-CONFIG_CMD_EXT2=y
-CONFIG_CMD_EXT4=y
-CONFIG_CMD_FAT=y
-CONFIG_OF_CONTROL=y
-CONFIG_NET=y
-CONFIG_DM=y
-CONFIG_DM_USB=y
-CONFIG_USB=y
-CONFIG_USB_XHCI_HCD=y
-CONFIG_USB_XHCI_PCI=y
-CONFIG_VIRTIO_PCI=y
-CONFIG_VIRTIO_NET=y
-CONFIG_VIRTIO_BLK=y
-CONFIG_EFI_LOADER=y
 ```
 
 `make <board>_defconfig`는 *이 파일을 .config로 풀어*, *Kconfig의 default 값을 채워*, *전체 .config를 만듭니다*.
@@ -265,7 +226,7 @@ cp defconfig configs/my_board_defconfig
 
 ## Makefile — Kbuild
 
-U-Boot의 Makefile은 *Linux Kbuild*를 거의 그대로 씁니다. 모듈 단위 Makefile은 `obj-y`로 *해당 디렉터리에서 빌드할 파일*을 명시합니다.
+U-Boot은 Kbuild의 Makefile 형식과 개념을 사용하지만, 빌드 규칙 전체가 Linux 커널과 동일한 것은 아닙니다. 예를 들어 U-Boot 구성에서는 `obj-y`와 함께 SPL/TPL 단계별 조건을 사용할 수 있습니다. 모듈 단위 Makefile은 `obj-y`로 해당 디렉터리에서 빌드할 파일을 명시합니다.
 
 ```make
 # drivers/mmc/Makefile (발췌)
@@ -378,31 +339,19 @@ arch/arm/mach-imx/spl.c:42:5: error: 'CONFIG_FOO' undeclared
 
 산출물 크기를 보려면:
 
-```bash
-$ ls -l u-boot*.bin
--rw-r--r-- 1 user user  812032 May 19 09:00 u-boot.bin
--rw-r--r-- 1 user user   84368 May 19 09:00 u-boot-spl.bin
-```
+`ls -l` 또는 `stat`로 실제 파일 크기를 확인하고, 보드의 SRAM 적재 한계와 대조합니다. 여기서는 U-Boot 소스와 cross-toolchain을 빌드하지 않았으므로 특정 파일 크기나 날짜를 결과로 제시하지 않습니다.
 
-SPL은 *수십 KB 안에 들어가야* 합니다. SoC 내부 SRAM 크기를 넘으면 빌드는 통과해도 *부팅이 안 됩니다*.
+SPL이 실제로 적재·실행되는 초기 메모리 영역은 플랫폼별로 다릅니다. 해당 보드의 linker script, SPL memory map, BootROM 제한을 확인해 산출물이 허용 영역에 들어가는지 검증합니다.
 
-`make u-boot.map`을 열면 *심볼별 크기*를 봅니다.
+map file의 실제 섹션 주소와 크기를 보고, SPL이 사용하는 영역이 보드의 메모리 배치와 겹치지 않는지 확인합니다. 특정 주소와 심볼 크기는 SoC·보드·설정별 산출물이므로 여기서는 고정 예시로 제시하지 않습니다.
 
-```text
-.text          0x40200000   0x6a2c8
- ...
- mmc.o          .text       0x402030c0   0x2c84
- net.o          .text       0x40205d44   0x4a18
- ...
-```
-
-크기를 줄이려면 *불필요한 driver를 끄거나* `CONFIG_LTO=y`(link-time optimization)를 활성화합니다.
+크기를 줄이려면 불필요한 기능을 비활성화하는 방법을 우선 검토합니다. LTO 지원 여부와 크기·부팅 영향은 toolchain 및 보드 설정에 따라 달라지므로 적용 전후 산출물을 측정해야 합니다.
 
 ## 자주 하는 실수
 
-### `make clean` 안 하고 defconfig 변경
+### 여러 보드 설정의 output directory 분리
 
-`.config`가 *덮어쓰기*는 되지만 *.o 파일이 stale* 상태가 됩니다. *Kconfig 옵션이 바뀐 파일*은 재컴파일되는데, *간접 의존이 빠질* 수 있습니다. 큰 변경 후에는:
+여러 보드나 설정을 번갈아 빌드할 때는 `O=<dir>`로 output directory를 분리하면 `.config`와 생성 파일이 섞이지 않습니다. 기존 output tree를 재사용할 경우에는 해당 U-Boot 버전과 보드의 clean 절차를 확인하고, `distclean`이 필요한지 판단합니다.
 
 ```bash
 make distclean
@@ -410,9 +359,9 @@ make <board>_defconfig
 make
 ```
 
-### `ARCH` 환경 변수 누락
+### 타깃 아키텍처와 cross-compiler 확인
 
-`make qemu_arm64_defconfig` 시 ARCH가 *호스트로 잡혀* 빌드 산출물이 *x86*이 되는 경우. 항상 환경 변수를 *셸 프로필이나 export*로 고정합니다.
+defconfig와 cross-compiler prefix는 의도한 타깃과 일치해야 합니다. 설정 후 `.config`의 아키텍처 옵션, 빌드 로그의 compiler prefix, 결과 ELF의 machine type을 확인하세요. 저장소의 build system이 `ARCH`를 요구하는 구성이라면 해당 값을 지정하고, 보드 문서의 빌드 절차를 따릅니다.
 
 ### `CROSS_COMPILE`을 *상대 경로*로
 
@@ -446,14 +395,14 @@ Ubuntu/Debian: `sudo apt install libncurses-dev`. macOS: `brew install ncurses`.
 
 ## 정리
 
-- U-Boot은 *Linux Kbuild를 그대로* 사용합니다. `make <board>_defconfig` → `make menuconfig` → `make`.
+- U-Boot은 Linux Kconfig/Kbuild에서 파생된 설정·Makefile 흐름을 사용하며, 호환성 설정과 SPL/TPL 같은 자체 동작도 확인해야 합니다.
 - 디렉터리는 *영역별*입니다. arch/, board/, configs/, include/configs/, common/, drivers/, cmd/.
 - Kconfig가 옵션을 정의하고, defconfig가 *옵션 묶음*을 저장합니다.
-- 같은 소스를 *SPL용 .config*, *U-Boot Proper용 .config*로 *두 번* 빌드해 *두 binary*를 만듭니다.
+- 하나의 U-Boot 설정에서 stage별 옵션으로 SPL과 U-Boot Proper 같은 별도 산출물을 만들 수 있습니다. 실제 선택 옵션은 `CONFIG_SPL_*` 등 해당 보드의 설정에서 확인합니다.
 - `make savedefconfig`로 menuconfig 변경을 *defconfig 형태*로 저장합니다.
 - out-of-tree 빌드는 `O=<dir>`로 합니다. 여러 보드 개발에 편리합니다.
 - cross-compile은 `ARCH=arm CROSS_COMPILE=aarch64-linux-gnu-` 환경 변수로 정합니다.
-- SPL binary 크기는 *SoC 내부 SRAM 크기 안*에 들어가야 합니다. `u-boot.map`으로 점검합니다.
+- SPL 산출물의 적재·실행 메모리 한계는 보드 문서와 map file로 확인합니다.
 
 ## 다음 편
 
@@ -469,3 +418,5 @@ Ubuntu/Debian: `sudo apt install libncurses-dev`. macOS: `brew install ncurses`.
 - [Buildroot Ch 4: 패키지와 옵션](/blog/embedded/buildroot/chapter04-first-build)
 - [원문 — U-Boot README](https://source.denx.de/u-boot/u-boot/-/blob/master/README)
 - [원문 — Kbuild documentation](https://www.kernel.org/doc/Documentation/kbuild/)
+- [U-Boot: Kconfig in U-Boot](https://docs.u-boot.org/en/stable/develop/kconfig.html)
+- [U-Boot v2024.01: Building with GCC](https://docs.u-boot.org/en/v2024.01/build/gcc.html)

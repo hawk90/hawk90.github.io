@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-OpenOCD(Open On-Chip Debugger)는 *오픈 소스* 임베디드 디버그 데몬입니다. 거의 모든 프로브와 거의 모든 칩을 다루며, *TCL 인터프리터*가 내장돼 있어 모든 동작을 스크립트로 자동화할 수 있습니다. 이 장은 OpenOCD를 *블랙박스*로 두지 않고 그 안쪽까지 본격적으로 다룹니다. TCL 명령 체계, flash driver, target 정의, custom 명령이 차례로 나옵니다.
+OpenOCD(Open On-Chip Debugger)는 *오픈 소스* 임베디드 디버그 데몬입니다. 지원하는 adapter·target·flash driver 조합을 다루며, *TCL 인터프리터*가 내장돼 있어 모든 동작을 스크립트로 자동화할 수 있습니다. 이 장은 OpenOCD를 *블랙박스*로 두지 않고 그 안쪽까지 본격적으로 다룹니다. TCL 명령 체계, flash driver, target 정의, custom 명령이 차례로 나옵니다.
 
 :::tldr
 JTAG/SWD 프로브와 칩 사이의 매개 데몬. GDB 측엔 RSP 서버로 보이고, 내부엔 TCL 스크립트 + 칩별 driver가 묶여 있는 구조.
@@ -49,13 +49,13 @@ $ openocd -d3 \
 
 `-c`는 *TCL 명령*. 여러 번 누적되며 마지막에 `init`이 자동으로 실행되거나 명시적으로.
 
-`-d3`는 디버그 레벨 3(최대). 신호 무결성 문제 추적에 유용.
+`-d3`는 디버그 레벨3입니다. 신호 무결성 문제 추적에 유용.
 
 ```bash
 $ openocd -d3 2> /tmp/openocd.log
 ```
 
-문제 발생 시 `/tmp/openocd.log`에 *모든 SWD 트랜잭션*이 남습니다.
+문제 발생 시 `/tmp/openocd.log`에 *활성 driver가 출력하는 debug 메시지*이 남습니다.
 
 ### 포트
 
@@ -72,13 +72,13 @@ $ telnet localhost 4444
 > flash write_image erase firmware.elf
 ```
 
-4444는 *사람용*. TCL 명령을 직접 입력하면서 칩을 두드립니다. CI 자동화는 6666(JSON-RPC 비슷)으로.
+4444는 *사람용*. TCL 명령을 직접 입력하면서 칩을 두드립니다. CI 자동화는 6666(Tcl 문자열을 0x1a로 구분하는 RPC)으로.
 
 ### 설정 파일이 어디 있나
 
 ```bash
-$ openocd --search-dir
-/usr/share/openocd/scripts
+$ openocd --help
+# -s <dir> 또는 --search <dir>로 검색 디렉터리를 추가
 
 $ ls /usr/share/openocd/scripts/
 board/        # 보드 단위 (interface + target 묶음)
@@ -101,15 +101,15 @@ $ cat interface/stlink.cfg
 adapter driver hla
 hla_layout stlink
 hla_device_desc "ST-LINK"
-hla_vid_pid 0x0483 0x3744 0x0483 0x3748 0x0483 0x374b ...
+hla_vid_pid 0x0483 0x3744 0x0483 0x3748
 
 $ cat interface/cmsis-dap.cfg
 adapter driver cmsis-dap
 ```
 
-`adapter driver`가 *어떤 드라이버를 쓸지*. `hla`는 *High-Level Adapter* — ST-Link 같은 폐쇄 펌웨어 프로브용 추상 계층. *raw* SWD 명령을 못 보내고 *고수준* 명령만 (예: "메모리 X 읽기"). 일부 디버깅 기능(예: Watchpoint with mask)이 제한됩니다.
+위 내용은 OpenOCD v0.12.0의 `interface/stlink.cfg`에 있는 HLA 구성의 발췌입니다. 지원 버전·native ST-Link 구성을 혼합하지 말고 설치한 파일을 확인합니다. `adapter driver`가 *어떤 드라이버를 쓸지*. `hla`는 *High-Level Adapter* — ST-Link 같은 폐쇄 펌웨어 프로브용 추상 계층. *raw* SWD 명령을 못 보내고 *고수준* 명령만 (예: "메모리 X 읽기"). 일부 디버깅 기능(예: Watchpoint with mask)이 제한됩니다.
 
-CMSIS-DAP, J-Link, FT2232는 *raw* SWD를 지원해 모든 OpenOCD 기능 사용 가능.
+adapter가 SWD를 지원하더라도 watchpoint·trace·flash의 모든 기능을 보장하지는 않습니다. driver·프로브 firmware·target 구현의 조합으로 확인합니다.
 
 ```tcl
 # interface 설정 예 (CMSIS-DAP 권장)
@@ -170,13 +170,14 @@ reset init                  # 리셋 + halt + reset-init 이벤트 핸들러 실
 
 ```tcl
 $_TARGETNAME configure -event reset-init {
-    # 외부 클럭으로 전환
-    mww 0x40023800 0x00000001
-    sleep 2
-    # 워치독 비활성화
-    mww 0x40002000 0x12345678
+    # 보드 매뉴얼로 확인한 clock/memory 초기화 proc만 호출
+    # board_clock_init
 }
 ```
+
+STM32 RCC 주소에1을 쓰는 것으로 외부 clock 전환이 완료되지 않으며 watchdog 주소에 임의 magic을 쓰지 않습니다. PLL ready·flash wait-state·bus prescaler 등의 순서와 reset 후 유효한 보드 계약을 구현해야 합니다.
+
+
 
 이벤트 종류.
 
@@ -227,7 +228,7 @@ flash banks                 # 등록된 flash 정보
 flash erase_sector 0 0 last
 flash write_image erase fw.elf
 flash write_image fw.bin 0x08000000
-flash verify_image fw.elf
+verify_image fw.elf
 flash protect 0 0 last on   # 보호
 ```
 
@@ -293,8 +294,8 @@ proc dump_rtt {} {
 
 # reset 후 외부 클럭으로 전환
 $_TARGETNAME configure -event reset-init {
-    mww 0x40000700 1
-    sleep 10
+    # nRF52에서 확인하지 않은 clock 주소에 임의값을 쓰지 않음
+    # 실제 보드 초기화는 target/board script와 매뉴얼을 따름
 }
 ```
 
@@ -322,7 +323,7 @@ OpenOCD 소스 `src/flash/nor/*.c` 파일들에 칩별 알고리즘. 새 칩 지
 
 ### Async 쓰기
 
-OpenOCD 0.11+의 `flash write_image`는 *async transfer*를 사용 — 호스트가 다음 청크를 USB로 보내는 동안 칩 CPU는 *이전 청크*를 flash에 굽습니다. 대역폭이 ~2배 향상.
+일부 flash driver는 target algorithm과 공유 버퍼로 비동기 전송을 구현합니다. 모든 버전·칩의 `flash write_image`가 같은 방식이거나2배 빨라지는 것은 아니므로 driver 구현과 보드에서 확인합니다.
 
 ## RTT (Real-Time Transfer)
 
@@ -341,7 +342,7 @@ $ nc localhost 9090
 [펌웨어의 RTT 채널 0 stdout 실시간]
 ```
 
-J-Link RTT보다 *폴링 빈도*가 낮아 (수십 Hz vs 수백 Hz) 살짝 둔하지만 충분.
+RTT의 폴링과 throughput은 adapter·타깃 메모리 접근·설정에 따라 달라 보편적인 Hz나 도구 간 속도 순위를 가정하지 않습니다.
 
 ## SWO / ITM trace
 
@@ -362,7 +363,7 @@ itm ports on               # 모든 채널 (32개)
 
 ## Multi-core
 
-Cortex-A9 + Cortex-M3 같은 *비대칭 멀티프로세싱* (i.MX6, OMAP4) 또는 듀얼 Cortex-A 같은 *대칭* SoC.
+다음은 가상의 Cortex-A + Cortex-M 타깃 구성을 설명하는 스케치입니다. 실제 i.MX6·OMAP4 등 부품은 코어 종류·DAP/AP·reset 구조를 부품별로 확인하며 이 구성을 그대로 적용하지 않습니다.
 
 ```tcl
 # 두 개의 cortex_a + 한 개의 cortex_m
@@ -438,36 +439,23 @@ Debug: 1237 2ms transport.c:227 jtag_libusb_bulk_read() 64 bytes read in 0ms
 
 각 줄이 SWD/DAP 트랜잭션 한 단위 가까이. 끊김의 *어느 단계*에서 일어났는지 정확히 파악 가능.
 
-## 자동화 — CI
+## 자동화 — 검증 실패 뒤 재개하지 않기
 
-```bash
-#!/usr/bin/env bash
-# fw-test.sh — CI에서 보드 펌웨어 검증
+firmware를 쓴 뒤 실행 검증과 byte 검증은 별개입니다. 다음 proc는 verify에 실패하면 reset run을 실행하지 않습니다. UART/RTT 부트 로그를 수집한다면 수집기를 reset 전에 시작해 부팅 초반 로그가 빠지지 않게 합니다.
 
-set -e
-
-# 1. 새 펌웨어 굽기 + reset
-openocd -f board/my.cfg -c "init; reset halt; \
-    flash erase_sector 0 0 last; \
-    flash write_image firmware.elf; \
-    reset run; \
-    sleep 100; \
-    shutdown"
-
-# 2. UART 콘솔에서 부팅 로그 검증
-timeout 30 cat /dev/ttyACM0 > /tmp/boot.log &
-sleep 5
-
-if grep -q "BOOT OK" /tmp/boot.log; then
-    echo "PASS"
-else
-    echo "FAIL"
-    cat /tmp/boot.log
-    exit 1
-fi
+```tcl title="flash-plan.tcl"
+proc flash_app {filename} {
+    reset init
+    program $filename verify
+    reset run
+    echo "verified and running: $filename"
+}
+flash_app firmware.elf
 ```
 
-자체 하드웨어 룰의 *기본 CI*. 큰 회사면 보드 farm + 자동 굽기 + 자동 테스트.
+OpenOCD의 `program` helper는 flash 쓰기와 선택한 verify를 수행합니다. 실제 target cfg를 로드하고 init한 실행 context에서 사용합니다. [공식 program 문서](https://openocd.org/doc/html/Flash-Commands.html)와 [Tcl RPC framing](https://openocd.org/doc/html/Tcl-Scripting-API.html)을 참고합니다.
+
+이 환경에는 OpenOCD·프로브·보드가 없어 위 명령의 장치 실행은 하지 않았습니다. 로컬 Tcl interpreter에 reset/program/echo mock을 주입해 명령 순서와 program 오류 시 reset run에 도달하지 않는 경로만 검사했습니다. 실제 flash erase/write/verify 성공으로 기록하지 않습니다.
 
 ## 자주 만나는 문제
 

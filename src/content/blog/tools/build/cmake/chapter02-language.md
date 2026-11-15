@@ -29,18 +29,20 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
 ```
 
-겉으로 평범해 보이는 위 코드에 *CMake 언어의 특이점이 모두* 담겨 있습니다. 변수 참조, 문자열 비교, 조건 분기, 컴파일러 식별. 이 장은 그 언어의 *핵심 어휘*를 다룹니다.
+이 코드는 이미 만든 `app` 타겟에 컴파일러별 옵션을 붙이는 일부입니다. 이 장에서는 이런 설정이 예상과 다르게 동작할 때 확인할 변수 참조, 인자 분리, 조건 평가와 스코프를 다룹니다.
 
 CMake 언어는 다른 스크립팅 언어와 비교했을 때 *기묘하게 느껴지는 자리*가 몇 군데 있습니다. 변수가 *문자열만 있는 점*, 리스트가 *세미콜론으로 구분되는 점*, `if()`가 *변수 이름을 자동 역참조하는 점*. 다른 언어 경험이 있다면 이런 자리에서 한 번씩 발을 헛디딥니다. 본 장은 그런 함정들을 미리 짚어 둡니다.
+
+문서와 실행 확인의 기준은 **CMake 4.4.4**입니다. 아래 최소 프로젝트는 정책 기준을 3.25로 지정하지만, 이전 버전에서 실행한 결과는 아닙니다. 변수·리스트·함수 예제는 `cmake -P script.cmake`로 실행하고, `project()`나 `target_*()`가 있는 코드는 `CMakeLists.txt`에서 실행합니다. [스크립트 모드](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html#scripts)는 빌드 타겟을 생성하지 않습니다.
 
 ---
 
 ## CMake 언어 기초
 
-CMake는 *명령어 기반* 언어입니다. 모든 구문이 `명령(인자1 인자2 ...)` 모양입니다. Python·JavaScript처럼 *연산자나 표현식*이 없습니다. 대입도 `=`이 아니라 `set(...)`이라는 명령입니다. 이 사실이 처음에는 어색하지만, 곧 *대부분의 일이 명령 호출 한 줄로 끝나는 깔끔함*으로 다가옵니다.
+CMake는 *명령어 기반* 언어입니다. 명령 호출은 `명령(인자1 인자2 ...)` 모양입니다. 대입은 `set(...)`, 산술은 `math(EXPR ...)`, 조건식은 `if(...)`의 인자로 적습니다. 연산자를 독립된 대입문에 쓰는 방식과 구분해야 합니다.
 
 ```cmake
-cmake_minimum_required(VERSION 3.15)
+cmake_minimum_required(VERSION 3.25)
 project(MyApp LANGUAGES CXX)
 add_executable(app main.cpp)
 ```
@@ -75,7 +77,7 @@ CMake 3.0 이상에서 지원
 
 ### 인자 구분
 
-인자는 공백이나 세미콜론으로 구분합니다.
+소스에 적힌 따옴표 없는 인자는 공백으로 구분합니다. 따옴표 없는 인자를 평가한 결과는 다시 세미콜론에 따라 리스트 요소로 나뉩니다. 따옴표로 감싼 인자는 공백이나 세미콜론이 있어도 인자 하나로 전달합니다. 이 구분은 [명령 인자 규칙](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html#command-arguments)에 정의되어 있습니다.
 
 ```cmake
 # 이 세 줄은 같습니다
@@ -90,7 +92,7 @@ set(SRCS main.cpp;utils.cpp;config.cpp)
 
 CMake의 가장 큰 특징 중 하나: *모든 변수는 문자열*입니다. 숫자도, 리스트도, 불리언도 결국 문자열입니다. `10`이라는 변수의 *내부 표현*은 문자열 `"10"`이고, `TRUE`도 문자열 `"TRUE"`입니다. 비교 시점에 CMake가 의미를 *해석*합니다.
 
-이 단일 타입 모델은 단순하지만 함정도 있습니다. *빈 문자열*과 *정의되지 않은 변수*가 거의 같은 식으로 동작하고, 리스트는 *세미콜론으로 구분된 문자열*이기 때문에 공백이 끼면 의미가 달라집니다.
+이 단일 타입 모델은 단순하지만 함정도 있습니다. 빈 문자열인 변수와 정의되지 않은 변수는 모두 빈 문자열로 확장되지만, `if(DEFINED ...)`로 구분합니다. 리스트를 여러 인자로 전달할지, 문자열 하나로 전달할지는 참조를 따옴표로 감쌌는지에 따라 달라집니다.
 
 ### 변수 설정과 참조
 
@@ -103,7 +105,7 @@ message("${MY_VAR}")      # Hello
 message("Say: ${MY_VAR}") # Say: Hello
 ```
 
-따옴표 안에서도 변수가 확장됩니다. 공백이 포함된 값은 따옴표로 감싸야 합니다.
+따옴표 안에서도 변수가 확장됩니다. 소스에 공백이 포함된 값을 직접 적을 때는 따옴표로 묶습니다. 변수 확장 결과의 공백을 셸처럼 다시 분리하지는 않지만, 빈 값과 세미콜론까지 보존해 인자 하나로 전달하려면 `"${MY_VAR}"` 형태를 사용합니다.
 
 ```cmake
 set(PATH "/usr/local/bin")
@@ -121,13 +123,9 @@ message("${MY_VAR}")  # (빈 문자열)
 
 ### 변수 스코프
 
-CMake 변수는 세 가지 스코프를 가집니다.
+일반 변수는 디렉터리, 함수 호출, `block(SCOPE_FOR VARIABLES)`에서 만든 스코프에 놓입니다. `block()`은 CMake 3.25에 도입됐습니다. 함수는 호출자의 변수를 읽지만, 함수 내부의 일반 `set()`은 함수 스코프에만 기록합니다.
 
-**CMake 변수 스코프 계층**
-
-- **캐시 스코프** (`CMakeCache.txt`에 저장, 영구)
-- **디렉터리 스코프** (`CMakeLists.txt`별)
-  - **함수 스코프** (`function` 내부, 호출당 하나)
+캐시는 그 계층의 부모 스코프가 아니라 별도의 저장소입니다. 변수 참조는 일반 변수를 먼저 찾고, 없으면 캐시를 찾습니다. 프로젝트 구성에서 캐시 값은 빌드 디렉터리의 `CMakeCache.txt`에 저장됩니다. `unset(VAR)` 뒤에 같은 이름의 캐시 값이 보일 수 있는 이유도 이 검색 순서 때문입니다. [변수 스코프](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html#variables)와 [set()](https://cmake.org/cmake/help/v4.4/command/set.html) 문서에 두 저장 방식이 구분되어 있습니다.
 
 ```cmake
 # 현재 스코프
@@ -146,7 +144,7 @@ set(VAR "value" CACHE STRING "설명")
 # 환경 변수 읽기
 message("HOME: $ENV{HOME}")
 
-# 환경 변수 설정 (CMake 프로세스 내에서만)
+# 현재 CMake 프로세스와 이후 실행하는 자식 프로세스에 적용
 set(ENV{MY_VAR} "value")
 ```
 
@@ -211,7 +209,7 @@ foreach(SRC ${SRCS})
 endforeach()
 ```
 
-출력은 `Source: main.cpp`, `Source: utils.cpp`, `Source: config.cpp`.
+출력은 `Source: main.cpp`, `Source: utils.cpp`, `Source: config.cpp`입니다.
 
 범위 반복도 지원합니다.
 
@@ -266,7 +264,7 @@ string(TOLOWER "${STR}" LOWER)  # LOWER = hello, world!
 string(STRIP "  hello  " STRIPPED)  # STRIPPED = hello
 
 # 비교
-string(COMPARE EQUAL "abc" "abc" IS_EQUAL)  # IS_EQUAL = TRUE
+string(COMPARE EQUAL "abc" "abc" IS_EQUAL)  # IS_EQUAL = 1
 ```
 
 ### 정규식
@@ -313,14 +311,18 @@ endif()
 
 ### 조건식 종류
 
+아래 블록은 조건식 형태를 비교하기 위한 일부입니다. 실행할 때는 각 `if()`에 본문과 `endif()`를 붙입니다.
+
 **불리언 값:**
 
 ```cmake
 if(TRUE)      # 참
 if(FALSE)     # 거짓
-if(VAR)       # VAR이 TRUE, ON, YES, 1, Y 또는 비어 있지 않으면 참
+if(VAR)       # 정의되어 있고 값이 false 상수가 아니면 참
 if(NOT VAR)   # 부정
 ```
+
+`if(VAR)`는 빈 문자열뿐 아니라 `0`, `OFF`, `NO`, `FALSE`, `N`, `IGNORE`, `NOTFOUND`, `-NOTFOUND`로 끝나는 값도 거짓으로 판정합니다. 이름으로 된 불리언 상수는 대소문자를 구분하지 않습니다. 따라서 `set(VAR OFF)` 뒤의 `if(VAR)`는 거짓입니다. 존재 여부만 확인할 때는 `if(DEFINED VAR)`를 씁니다. [if()의 기본 조건](https://cmake.org/cmake/help/v4.4/command/if.html#basic-expressions)을 기준으로 구분합니다.
 
 **문자열 비교:**
 
@@ -376,7 +378,7 @@ if(PROJECT_VERSION VERSION_GREATER_EQUAL "2.0.0")
 ```cmake
 # 빌드 타입별 설정
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
-    message(STATUS "Debug build - adding debug symbols")
+    message(STATUS "Debug build - defining DEBUG_MODE")
     add_compile_definitions(DEBUG_MODE)
 endif()
 
@@ -384,7 +386,7 @@ endif()
 if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    target_compile_options(app PRIVATE -Wall -Wextra -Weverything)
+    target_compile_options(app PRIVATE -Wall -Wextra -Wpedantic)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
     target_compile_options(app PRIVATE /W4 /permissive-)
 endif()
@@ -394,7 +396,7 @@ if(WIN32)
     target_compile_definitions(app PRIVATE PLATFORM_WINDOWS)
 elseif(APPLE)
     target_compile_definitions(app PRIVATE PLATFORM_MACOS)
-elseif(UNIX)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     target_compile_definitions(app PRIVATE PLATFORM_LINUX)
 endif()
 
@@ -424,7 +426,7 @@ endfunction()
 my_function("Hello" "World" "Extra1" "Extra2")
 ```
 
-출력은 다음과 같다.
+출력은 다음과 같습니다.
 
 - `ARG1 = Hello`
 - `ARG2 = World`
@@ -432,7 +434,7 @@ my_function("Hello" "World" "Extra1" "Extra2")
 - `ARGV = Hello;World;Extra1;Extra2`
 - `ARGN = Extra1;Extra2`
 
-함수는 **자체 스코프**를 가집니다. 함수 안에서 설정한 변수는 함수 밖에서 보이지 않습니다.
+함수는 **자체 스코프**를 가집니다. 함수 안의 일반 `set()`은 바깥 변수를 덮어쓰지 않습니다. 다음 예제는 호출 전에 `MY_VAR`를 해제해 바깥 출력이 빈 문자열이 되도록 합니다.
 
 ```cmake
 function(set_var)
@@ -440,6 +442,7 @@ function(set_var)
     message("Inside: ${MY_VAR}")  # inside function
 endfunction()
 
+unset(MY_VAR)
 set_var()
 message("Outside: ${MY_VAR}")     # (빈 문자열)
 ```
@@ -457,7 +460,7 @@ message("Version: ${VERSION}")    # Version: 1.2.3
 
 ### macro
 
-매크로는 **호출 위치에서 텍스트 치환**됩니다. 자체 스코프가 없습니다.
+매크로는 **별도 변수 스코프 없이 호출자 스코프에서 실행**됩니다. 매크로의 인자 참조는 함수의 지역 변수와 달리 문자열 치환입니다. 매크로 전체가 C/C++ 전처리기처럼 임의의 소스 텍스트를 바꾸는 도구라는 뜻은 아닙니다. [macro() 문서](https://cmake.org/cmake/help/v4.4/command/macro.html#macro-vs-function)는 인자와 제어 흐름의 차이도 설명합니다.
 
 ```cmake
 macro(set_var_macro)
@@ -474,10 +477,10 @@ message("${MY_VAR}")  # from macro (호출자 스코프에서 설정됨)
 |------|----------|-------|
 | 스코프 | 자체 스코프 | 호출자 스코프 |
 | 변수 전달 | `PARENT_SCOPE` 필요 | 자동 반영 |
-| 동작 방식 | 함수 호출 | 텍스트 치환 |
+| 인자 처리 | 지역 변수 | 인자 참조의 문자열 치환 |
 | 디버깅 | 예측 가능 | 예상치 못한 부작용 가능 |
 
-**권장**: 대부분의 경우 `function`을 사용하세요. 스코프가 격리되어 예측 가능한 동작을 보장합니다. 매크로는 간단한 텍스트 치환이 필요할 때만 사용합니다.
+이 글의 공통 타겟 설정에는 `function()`을 사용합니다. 임시 변수가 호출자에게 남지 않기 때문입니다. 함수 안에서도 `target_*()`로 타겟 속성을 바꿀 수 있으므로, 타겟을 설정하려고 매크로를 선택할 필요는 없습니다.
 
 ### 실전 예시
 
@@ -519,7 +522,7 @@ add_my_executable(app2 main2.cpp)
 일반 변수는 CMake 실행 시점에 평가됩니다. 그러나 어떤 정보는 빌드 시스템이 생성될 때까지 알 수 없습니다.
 
 ```cmake
-# 문제: CMAKE_BUILD_TYPE은 multi-config 생성기에서 빈 문자열
+# 문제: multi-config 생성기는 CMAKE_BUILD_TYPE으로 구성을 선택하지 않음
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(app PRIVATE DEBUG_MODE)
 endif()
@@ -528,7 +531,7 @@ endif()
 Visual Studio나 Xcode는 **multi-config 생성기**입니다. 구성 시점에는 빌드 타입을 모르고, 빌드 시점에 선택합니다. 이때 제너레이터 표현식을 사용합니다.
 
 ```cmake
-# 해결: 빌드 시점에 평가
+# 해결: 생성 시점에 각 구성에 맞는 정의를 기록
 target_compile_definitions(app PRIVATE
     $<$<CONFIG:Debug>:DEBUG_MODE>
 )
@@ -583,7 +586,7 @@ target_compile_definitions(app PRIVATE
 
 ### `$<IF:...>` — 명시적 if-else
 
-위와 같은 효과를 *if-else 형태*로 적을 수도 있습니다.
+두 분기에 서로 다른 값을 넣으려면 *if-else 형태*를 사용합니다. 다음 예제는 앞선 예제와 달리 Debug 이외 구성에 `NDEBUG`도 추가합니다.
 
 ```cmake
 target_compile_definitions(app PRIVATE
@@ -594,7 +597,7 @@ target_compile_definitions(app PRIVATE
 - Debug → `DEBUG_MODE`
 - Release/기타 → `NDEBUG`
 
-빈 문자열 분기가 의미 있을 때(예: 위처럼 Release에서 *대체값*이 있을 때)는 `$<IF:...>`가 더 명확합니다. 빈 문자열로 충분하면 짧은 `$<조건:값>` 형태가 관용입니다.
+대체값이 필요하면 `$<IF:...>`를 사용합니다. 거짓 분기가 빈 문자열이면 짧은 `$<조건:값>` 형태로 적습니다.
 
 ### 왜 `if`로는 안 되는가
 
@@ -607,9 +610,9 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")
 endif()
 ```
 
-문제는 *multi-config 생성기*(Visual Studio, Xcode)입니다. 이들은 *구성 시점에 빌드 타입을 정하지 않습니다*. 하나의 솔루션·프로젝트 안에 Debug·Release·RelWithDebInfo가 *공존*하고, 사용자가 IDE에서 *빌드 시점에* 선택합니다. 따라서 구성 시점에 `CMAKE_BUILD_TYPE`은 *빈 문자열*이고, 위 `if`는 *항상 false*가 되어 `DEBUG_MODE`가 어디에도 들어가지 않습니다.
+문제는 *multi-config 생성기*(Visual Studio, Xcode, Ninja Multi-Config)입니다. 이들은 여러 구성을 생성하고, 빌드할 때 `--config Debug`처럼 하나를 선택합니다. [`CMAKE_BUILD_TYPE`](https://cmake.org/cmake/help/v4.4/variable/CMAKE_BUILD_TYPE.html)은 이 선택을 제어하지 않습니다. 값을 명시적으로 넣어 위 `if()`가 참이 되더라도, 그 정의는 Debug 전용이 아니라 모든 구성에 붙습니다.
 
-제너레이터 식은 이 한계를 정확히 풀어 줍니다. *구성 시점이 아니라 각 빌드 생성 시점에 평가*되므로, multi-config에서도 각 구성마다 올바른 결과가 들어갑니다.
+제너레이터 식은 **빌드 시스템 생성 시점에 구성별로 평가**됩니다. 빌드할 때는 이미 생성된 규칙 중 선택한 구성의 규칙을 실행합니다. [평가 시점](https://cmake.org/cmake/help/v4.4/manual/cmake-generator-expressions.7.html#introduction)과 빌드 시점의 구성 선택을 구분해야 합니다.
 
 ### 자주 쓰는 표현식
 
@@ -626,7 +629,7 @@ target_compile_definitions(app PRIVATE
 
 ```cmake
 target_compile_options(app PRIVATE
-    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>
+    "$<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra>"
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 ```
@@ -651,6 +654,8 @@ target_include_directories(mylib PUBLIC
 
 이 패턴은 라이브러리를 만들 때 중요합니다. 빌드할 때는 소스 디렉터리의 include를, 설치 후에는 설치된 include 경로를 사용합니다.
 
+여러 옵션을 내는 표현식은 위 컴파일러 예제처럼 전체를 따옴표로 묶고 내부 값을 세미콜론으로 구분합니다. 공백을 그대로 넣으면 제너레이터 식을 평가하기 전에 명령 인자가 나뉩니다. 자세한 규칙은 [제너레이터 식의 공백과 따옴표](https://cmake.org/cmake/help/v4.4/manual/cmake-generator-expressions.7.html#whitespace-and-quoting)에 있습니다. `INSTALL_INTERFACE`는 설치 명령을 실행할 때 평가한다는 뜻이 아니라, 설치용으로 내보낸 타겟의 사용 요구사항을 나타냅니다.
+
 ### 정리 표
 
 | 표현식 | 의미 |
@@ -660,8 +665,8 @@ target_include_directories(mylib PUBLIC
 | `$<CXX_COMPILER_ID:GNU>` | 컴파일러가 GCC면 1 |
 | `$<TARGET_FILE:tgt>` | 타겟의 출력 파일 전체 경로 |
 | `$<TARGET_FILE_DIR:tgt>` | 타겟의 출력 디렉터리 |
-| `$<BUILD_INTERFACE:...>` | 빌드 시에만 적용 |
-| `$<INSTALL_INTERFACE:...>` | 설치 시에만 적용 |
+| `$<BUILD_INTERFACE:...>` | 같은 빌드 트리에서 사용하거나 빌드 트리를 내보낼 때의 내용 |
+| `$<INSTALL_INTERFACE:...>` | 설치용 타겟을 내보낼 때의 내용 |
 | `$<BOOL:val>` | val이 참이면 1 |
 | `$<AND:a,b>` | a AND b |
 | `$<OR:a,b>` | a OR b |
@@ -711,36 +716,40 @@ if("${MY_VAR}" STREQUAL "value")
 set(PATH "C:/Program Files/MyApp")
 message("${PATH}")  # C:/Program Files/MyApp
 
-# 위험: 공백이 리스트 구분자로 해석될 수 있음
+# 공백은 변수 확장 후 다시 분리하지 않음
 foreach(P ${PATH})
-    message("${P}")  # C:/Program, Files/MyApp (두 개로 분리!)
+    message("${P}")  # C:/Program Files/MyApp (한 번 출력)
 endforeach()
 
-# Good: 따옴표로 감싸기
-foreach(P "${PATH}")
-    message("${P}")  # C:/Program Files/MyApp
+# 리스트는 세미콜론으로 요소를 나눔
+set(PATHS "C:/Program Files/MyApp;D:/SDK")
+foreach(P IN LISTS PATHS)
+    message("${P}")  # 두 경로를 각각 출력
 endforeach()
 ```
+
+경로 하나를 인자 하나로 넘길 때는 `"${PATH}"`, 리스트를 순회할 때는 `foreach(P IN LISTS PATHS)`로 의도를 드러냅니다. `foreach(P "${PATHS}")`는 전체 문자열 하나를 순회하므로 리스트 순회와 다릅니다.
 
 ### if() 조건의 자동 변수 역참조
 
 ```cmake
 set(VAR "SOME_VALUE")
-set(SOME_VALUE "Hello")
+set(SOME_VALUE OFF)
 
-# CMake의 자동 역참조 (혼란스러움)
+# VAR의 값은 SOME_VALUE라는 비어 있지 않은 문자열
 if(VAR)
-    # VAR이 "SOME_VALUE"이고, SOME_VALUE도 정의되어 있으므로
-    # 이중 역참조가 발생할 수 있음
+    message("VAR=true")
 endif()
 
-# Good: 명시적으로 참조
-if(DEFINED VAR)
-    message("VAR is defined: ${VAR}")
+# 먼저 ${VAR}를 확장하면 if(SOME_VALUE)가 되어 OFF를 검사
+if(${VAR})
+    message("expanded=true")
+else()
+    message("expanded=false")
 endif()
 ```
 
-CMake의 `if()`는 변수 이름을 자동으로 역참조하는 특이한 동작이 있습니다. 명시적으로 `${VAR}`를 사용하거나 `DEFINED`를 사용하는 것이 안전합니다.
+결과는 `VAR=true`, `expanded=false`입니다. `if(VAR)`가 변수 이름을 계속 따라가는 것은 아닙니다. `${VAR}`를 먼저 확장한 뒤 `if()`가 받은 인자가 달라진 결과입니다. 존재 여부는 `if(DEFINED VAR)`, 불리언 해석은 `if(VAR)`, 문자열 비교는 `if("${VAR}" STREQUAL "SOME_VALUE")`로 목적에 맞게 구분합니다.
 
 ### function에서 PARENT_SCOPE 누락
 
@@ -768,30 +777,18 @@ message("${MY_RESULT}")  # result
 # 회피: 구성 시점에 출력하면 리터럴 문자열
 message("Value: $<CONFIG>")  # 출력: Value: $<CONFIG>
 
-# 제너레이터 표현식은 빌드 시점에 평가됨
-# 디버깅하려면 file(GENERATE ...) 사용
+# 생성 시점에 평가한 값을 구성별 파일에 기록
 file(GENERATE
-    OUTPUT "${CMAKE_BINARY_DIR}/debug-genex.txt"
+    OUTPUT "${CMAKE_BINARY_DIR}/debug-genex-$<CONFIG>.txt"
     CONTENT "Config: $<CONFIG>\n"
 )
 ```
 
 ---
 
-## 정리
-
-- CMake는 **명령어 기반** 스크립팅 언어입니다.
-- **변수**는 `set()`으로 설정, `${}`로 참조합니다.
-- **리스트**는 세미콜론으로 구분된 문자열이며, `list()` 명령으로 조작합니다.
-- **조건문**: `if()`, `elseif()`, `else()`, `endif()`.
-- **반복문**: `foreach()`, `while()`.
-- **함수**는 자체 스코프를 가지고, **매크로**는 텍스트 치환입니다.
-- **제너레이터 표현식**은 빌드 시스템 생성 시점에 평가되며, `$<...>` 문법을 사용합니다.
-- 변수 참조 시 따옴표로 감싸는 것이 안전합니다.
-
 ## `cmake_policy()` — 정책 시스템
 
-[Ch 1](/blog/tools/build/cmake/chapter01-intro)에서 `cmake_minimum_required(VERSION 3.20)`이 *정책 데이터베이스*를 그 버전의 동작으로 설정한다고 했습니다. 이제 그 정책 시스템 자체를 봅니다.
+`cmake_minimum_required(VERSION 3.25)`는 3.25까지 도입된 정책을 `NEW`로 설정합니다. 그 뒤에 도입된 정책까지 자동으로 설정하는 것은 아닙니다. 정책은 CMake가 기존 동작을 바꿀 때 호환성을 관리하는 장치입니다.
 
 CMake는 버전이 올라가면서 *기존 동작을 바꿔야 했던 결정*들을 *번호가 매겨진 정책*으로 등록합니다. 예: `CMP0048`, `CMP0077`, `CMP0135`.
 
@@ -801,36 +798,144 @@ CMake는 버전이 올라가면서 *기존 동작을 바꿔야 했던 결정*들
 
 ```cmake
 cmake_policy(GET CMP0077 RESULT)
-message("CMP0077: ${RESULT}")    # NEW 또는 OLD
+message("CMP0077: ${RESULT}")    # 위 최소 버전 선언 뒤에는 NEW
 
 # 특정 정책을 명시적으로 설정
 cmake_policy(SET CMP0077 NEW)
 ```
 
-대부분의 경우 *`cmake_minimum_required`가 한 번에 정책을 정해 줍니다*. 하지만 다음 두 자리에서는 *명시적 `cmake_policy()`*가 필요합니다.
-
-1. *외부 모듈을 가져왔는데* 그 모듈이 옛 정책을 요구할 때. `include`로 들어온 코드의 정책을 우리 의도와 다르게 설정해야 할 때.
-2. *서드파티 빌드*에서 사용하는 `FetchContent`로 가져온 라이브러리가 옛 정책을 가정해 경고를 띄울 때.
+대부분의 경우 최소 버전 선언이 정책을 함께 설정합니다. 특정 정책을 직접 설정할 때는 경고를 숨기는 데 그치지 말고, 바뀐 동작이 프로젝트에 맞는지 확인합니다. `cmake_policy(GET ...)`은 아직 설정되지 않은 정책에 빈 문자열을 돌려줄 수도 있습니다.
 
 ```cmake
-# FetchContent 가져오기 전에 정책 명시
-cmake_policy(SET CMP0135 NEW)   # URL_HASH 경고 끄기
-
-include(FetchContent)
-FetchContent_Declare(...)
+# CMake 3.24에 도입된 아카이브 추출 시각 정책
+cmake_policy(GET CMP0135 TIMESTAMP_POLICY)
+message("CMP0135: ${TIMESTAMP_POLICY}")  # 최소 버전 3.25이면 NEW
 ```
 
-정책 번호와 이름은 [공식 문서](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html)에 모여 있습니다. 일상 작업에서는 외울 필요 없고, *경고 메시지가 뜨면 그때 검색*하면 됩니다. 경고는 친절하게 정책 번호를 알려 줍니다 — `CMake Warning (dev) at CMakeLists.txt:5 (FetchContent_Declare): Policy CMP0135 is not set: ...`.
+[`CMP0135`](https://cmake.org/cmake/help/v4.4/policy/CMP0135.html)는 URL로 받은 아카이브를 풀 때 파일 시각을 어떻게 정할지 다룹니다. `DOWNLOAD_EXTRACT_TIMESTAMP`를 지정하지 않았을 때 `OLD`는 아카이브 안의 시각을 복원하고, `NEW`는 추출 시각을 사용합니다. 해시 검증을 설정하는 `URL_HASH`와는 다른 기능입니다. 정책 전체 목록은 [공식 정책 문서](https://cmake.org/cmake/help/v4.4/manual/cmake-policies.7.html)에 있습니다.
+
+## 직접 실행해 확인하기
+
+문법 조각만 보고 넘어가면 공백·세미콜론·불리언의 차이를 놓치기 쉽습니다. 다음 내용을 `language-check.cmake`로 저장하면 타겟이나 컴파일러 없이 세 동작을 확인할 수 있습니다.
+
+```cmake title="language-check.cmake"
+cmake_minimum_required(VERSION 3.25)
+set(APP_PATH "C:/Program Files/MyApp")
+foreach(P ${APP_PATH})
+    message(STATUS "path=[${P}]")
+endforeach()
+set(PATHS "${APP_PATH};D:/SDK")
+list(LENGTH PATHS PATH_COUNT)
+message(STATUS "paths=${PATH_COUNT}")
+foreach(V IN ITEMS OFF "" SOME_VALUE)
+    if(V)
+        message(STATUS "bool=[${V}]:true")
+    else()
+        message(STATUS "bool=[${V}]:false")
+    endif()
+endforeach()
+set(VAR SOME_VALUE)
+set(SOME_VALUE OFF)
+if(VAR)
+    message(STATUS "VAR=true")
+endif()
+if(NOT ${VAR})
+    message(STATUS "expanded=false")
+endif()
+string(COMPARE EQUAL "abc" "abc" IS_EQUAL)
+message(STATUS "equal=${IS_EQUAL}")
+cmake_policy(GET CMP0135 TIMESTAMP_POLICY)
+message(STATUS "CMP0135=${TIMESTAMP_POLICY}")
+```
+
+저장한 파일이 있는 디렉터리에서 실행합니다.
+
+```bash
+cmake -P language-check.cmake
+```
+
+CMake 4.4.4에서 확인한 출력은 다음과 같습니다. 경로의 공백은 보존되고, `OFF`는 비어 있지 않아도 거짓이며, 문자열 비교 결과는 `1`입니다.
+
+```text
+-- path=[C:/Program Files/MyApp]
+-- paths=2
+-- bool=[OFF]:false
+-- bool=[]:false
+-- bool=[SOME_VALUE]:true
+-- VAR=true
+-- expanded=false
+-- equal=1
+-- CMP0135=NEW
+```
+
+제너레이터 식은 `-P` 대신 최소 프로젝트로 확인합니다. 별도 빈 디렉터리에 다음 `CMakeLists.txt`와 `main.cpp`를 저장합니다. `file(GENERATE)`의 파일명에 구성을 넣었으므로 여러 구성의 결과가 같은 파일을 덮어쓰지 않습니다.
+
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(LanguageCheck LANGUAGES CXX)
+add_executable(app main.cpp)
+target_compile_definitions(app PRIVATE
+    $<$<CONFIG:Debug>:DEBUG_MODE>
+)
+target_compile_options(app PRIVATE
+    "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall;-Wextra>"
+)
+file(GENERATE
+    OUTPUT "${CMAKE_BINARY_DIR}/config-$<CONFIG>.txt"
+    CONTENT "Config: $<CONFIG>\nDebug: $<IF:$<CONFIG:Debug>,ON,OFF>\n"
+)
+```
+
+이 프로그램은 실제 컴파일에 `DEBUG_MODE`가 전달됐는지 출력합니다.
+
+```cpp title="main.cpp"
+#include <iostream>
+int main() {
+#ifdef DEBUG_MODE
+    std::cout << "DEBUG_MODE=ON\n";
+#else
+    std::cout << "DEBUG_MODE=OFF\n";
+#endif
+}
+```
+
+아래 명령은 Ninja가 설치된 macOS·Linux 셸을 기준으로 합니다. 단일 구성 생성기는 빌드 디렉터리를 나누고, 다중 구성 생성기는 같은 디렉터리에서 구성을 선택합니다.
+
+```bash
+cmake -S . -B build-debug -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build-debug
+./build-debug/app
+cmake -S . -B build-release -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build-release
+./build-release/app
+
+cmake -S . -B build-multi -G "Ninja Multi-Config"
+cmake --build build-multi --config Debug
+./build-multi/Debug/app
+cmake --build build-multi --config Release
+./build-multi/Release/app
+```
+
+실행 결과는 순서대로 `DEBUG_MODE=ON`, `DEBUG_MODE=OFF`, `DEBUG_MODE=ON`, `DEBUG_MODE=OFF`입니다. 구성 명령이 끝나면 각 빌드 디렉터리에 `config-Debug.txt` 또는 `config-Release.txt`가 이미 생겨 있습니다. 파일 내용의 `Debug: ON/OFF`와 프로그램 출력을 대조하면 생성 시점의 평가와 빌드 시점의 구성 선택을 각각 확인할 수 있습니다.
+
+## 정리
+
+- 변수 확장 결과의 공백은 다시 인자로 나뉘지 않습니다. 세미콜론 리스트와 구분합니다.
+- 문자열 하나를 전달할 때는 `"${VAR}"`, 리스트 순회에는 `foreach(... IN LISTS VAR)`를 사용합니다.
+- `if(VAR)`의 불리언 해석, `if(DEFINED VAR)`의 존재 검사, `STREQUAL`의 문자열 비교를 구분합니다.
+- 함수의 일반 변수 변경은 함수 스코프에 남습니다. 값을 호출자에게 전달할 때는 `PARENT_SCOPE`를 사용합니다.
+- 제너레이터 식은 빌드 시스템 생성 시점에 구성별로 평가합니다. 여러 옵션을 내는 식은 전체를 따옴표로 묶습니다.
+- 정책은 호환 동작을 선택합니다. `CMP0135`의 추출 시각과 `URL_HASH`의 해시 검증은 별개입니다.
 
 ## 다음 장 예고
 
-[Ch 3: 타겟](/blog/tools/build/cmake/chapter03-targets)에서는 *Modern CMake의 심장* — 타겟(target)을 다룹니다. `add_executable`·`add_library`·`target_link_libraries`와 그 모든 곳에 등장하는 *PRIVATE / PUBLIC / INTERFACE* 세 가시성. 이 셋의 의미를 정확히 잡으면 의존성 추적의 90%가 끝납니다.
+[Ch 3: 타겟](/blog/tools/build/cmake/chapter03-targets)에서는 `add_executable`·`add_library`·`target_link_libraries`와 `PRIVATE / PUBLIC / INTERFACE`를 다룹니다. 이번 장에서 확인한 변수와 스코프가 타겟의 속성·사용 요구사항과 어떻게 다른지 이어서 살펴봅니다.
 
 ## 참고 자료
 
-- [CMake Language](https://cmake.org/cmake/help/latest/manual/cmake-language.7.html)
-- [CMake Variables](https://cmake.org/cmake/help/latest/manual/cmake-variables.7.html)
-- [Generator Expressions](https://cmake.org/cmake/help/latest/manual/cmake-generator-expressions.7.html)
+- [CMake Language 4.4](https://cmake.org/cmake/help/v4.4/manual/cmake-language.7.html)
+- [CMake Variables 4.4](https://cmake.org/cmake/help/v4.4/manual/cmake-variables.7.html)
+- [Generator Expressions 4.4](https://cmake.org/cmake/help/v4.4/manual/cmake-generator-expressions.7.html)
 
 ## 관련 항목
 
@@ -838,4 +943,4 @@ FetchContent_Declare(...)
 - [Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 변수 대신 타겟에 정보를 붙이는 방식
 - [Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options) — 일반 변수와 캐시 변수의 차이를 더 파고드는 장
 - [GNU Make 변수와 자동 변수](/blog/tools/build/gnu-make/chapter03-variables) — 재귀 확장과 단순 확장, 같은 문제를 Make는 어떻게 푸는가
-- [cmake-policies(7)](https://cmake.org/cmake/help/latest/manual/cmake-policies.7.html) — `cmake_policy()`가 다루는 정책 목록
+- [cmake-policies(7)](https://cmake.org/cmake/help/v4.4/manual/cmake-policies.7.html) — `cmake_policy()`가 다루는 정책 목록

@@ -2,7 +2,7 @@
 title: "GPIO 추상화 패턴 — Template·Concept으로 보드 독립성"
 slug: "embedded/embedded-cpp/part5-02-gpio-abstraction"
 date: 2026-05-02T09:38:00
-description: "GPIO pin = type — 컴파일 타임에 핀 설정 검증, runtime 비용 0."
+description: "GPIO pin을 타입으로 표현하고, 컴파일 타임 설정·가짜 backend·concept으로 계약을 검사합니다."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 38
 tags: [cpp, embedded, gpio, template, type-safe, hal]
@@ -20,13 +20,13 @@ topics: ["embedded"]
 
 ```c
 #define LED_PORT GPIOA
-#define LED_PIN  5
+#define LED_PIN  GPIO_PIN_5
 
 HAL_GPIO_WritePin(LED_PORT, LED_PIN, GPIO_PIN_SET);
 
 // 다른 곳
 #define BUTTON_PORT GPIOC
-#define BUTTON_PIN  13
+#define BUTTON_PIN  GPIO_PIN_13
 
 HAL_GPIO_WritePin(LED_PORT, BUTTON_PIN, GPIO_PIN_SET);   // 오타 — 컴파일 통과
 ```
@@ -36,8 +36,8 @@ HAL_GPIO_WritePin(LED_PORT, BUTTON_PIN, GPIO_PIN_SET);   // 오타 — 컴파일
 C++ template 기반 GPIO는 다음과 같습니다.
 
 ```cpp
-using Led    = Gpio<GpioA, 5>;
-using Button = Gpio<GpioC, 13>;
+using Led    = Gpio<0x40020000, 5>;
+using Button = Gpio<0x40020800, 13>;
 
 Led::set();          // OK
 Button::set();       // OK
@@ -45,7 +45,7 @@ Led::set();          // 다른 함수에서 다시 OK
 // Led::set(Button); // 컴파일 에러
 ```
 
-Pin이 type이므로 섞이지 않습니다.
+같은 Port·Pin 조합의 alias는 같은 타입입니다. 각 이름이 고유한 소유권을 만들지는 않으며 `Button::set()`도 API에 있으면 호출할 수 있습니다. 입력 전용·출력 전용 정책까지 검사하려면 제공하는 메서드를 분리해야 합니다.
 
 ## 기본 — Static GPIO class
 
@@ -55,6 +55,7 @@ Pin이 type이므로 섞이지 않습니다.
 template<uintptr_t Port, uint8_t Pin>
 class Gpio {
     static_assert(Pin < 16, "Pin must be 0-15");
+    // <cstdint> 포함; GpioMode enum은 Part 5-01 또는 아래 완전 예제 참조
 
     struct PortRegs {
         volatile uint32_t MODER;
@@ -124,7 +125,7 @@ LedRed::set():
     bx      lr
 ```
 
-C 매크로의 결과와 완전히 동일합니다. zero-cost abstraction입니다.
+명령 형태 설명용 예시이며 대상 빌드에서 측정한 출력은 아닙니다. 인라인·코드 크기·실제 GPIO 파형은 실제 toolchain과 보드에서 확인합니다.
 
 ## Pin 그룹 — 여러 pin 동시 조작
 
@@ -142,13 +143,14 @@ Leds::set_all();
 Leds::clear_all();
 ```
 
-C++17 fold expression으로 variadic을 처리합니다. 각 호출은 별도 어셈블리로 나오지만 같은 port면 컴파일러가 자동으로 결합할 수 있습니다.
+C++17 fold expression으로 variadic을 처리합니다. 각 호출이 volatile BSRR store를 수행하므로 하나의 store로 합쳐질 것이라 가정하지 않습니다. 같은 port에서 한 번에 변경하려면 아래의 mask API로 한 번의 쓰기를 명시합니다.
 
 ## Pin 출력 직접 조작 (한 번에)
 
 ```cpp
 template<uintptr_t Port, uint32_t Mask>
 class GpioMask {
+    static_assert((Mask & 0xffff0000u) == 0, "only pins 0..15");
 public:
     static void set_all() {
         *reinterpret_cast<volatile uint32_t*>(Port + 0x18) = Mask;
@@ -164,7 +166,7 @@ using LedGroup = GpioMask<0x40020000, (1<<5) | (1<<6) | (1<<7)>;
 LedGroup::set_all();   // 3 pin 한 번에 set
 ```
 
-한 번의 atomic store로 끝나 빠릅니다. 단 같은 port에 한정됩니다.
+같은 port의 BSRR에 한 번의 쓰기로 여러 출력 비트를 set/reset합니다. ODR 읽기와 쓰기를 나눌 필요가 없다는 의미이며 C++ thread atomic이나 여러 port 동시 변경을 의미하지는 않습니다.
 
 ## Configuration — Compile-time 검증
 
@@ -179,8 +181,7 @@ struct PinConfig {
 template<uintptr_t Port, uint8_t Pin, PinConfig Cfg>
 class ConfiguredGpio {
     static_assert(Pin < 16);
-    static_assert(!(Cfg.mode == GpioMode::Output && Cfg.pull_up),
-                  "Output mode shouldn't have pull-up");
+    // output의 pull-up도 허용되는 하드웨어 설정; 회로 정책은 별도 검사
 
 public:
     static void init() {
@@ -198,7 +199,7 @@ Led::init();
 Led::set();
 ```
 
-잘못된 configuration이 빌드 에러로 잡힙니다. C++20의 NTTP(non-type template parameter) 객체를 활용합니다.
+이 스케치는 C++20 structural type NTTP 표현만 보이며 init/set은 구현하지 않았습니다. 출력 모드의 pull-up을 무조건 금지하면 open-drain 등의 유효한 회로를 거부할 수 있습니다. 아래 완전한 fake backend 예제에서 mode·pull·open-drain 필드를 실제 반영하고 경계를 확인합니다.
 
 ## Concept으로 GPIO interface 정의 (C++20)
 
@@ -243,7 +244,7 @@ class Gpio {
 public:
     template<AltFn Af>
     static void configure_alt() {
-        configure(GpioMode::AlternateFn);
+        configure(GpioMode::Alt);
         // AFR[0] for pin 0-7, AFR[1] for pin 8-15
         constexpr int afr_idx = Pin / 8;
         constexpr int shift = (Pin % 8) * 4;
@@ -259,27 +260,11 @@ using Usart2Tx = Gpio<0x40020000, 2>;
 Usart2Tx::configure_alt<AltFn::AF7>();
 ```
 
-template parameter로 AF를 컴파일 타임에 결정합니다. runtime 비교가 없습니다.
+template parameter로 AF를 컴파일 타임에 결정합니다. AF 번호를 상수로 고정할 수 있지만 그 번호가 해당 핀에서 어떤 peripheral 기능을 뜻하는지는 MCU·패키지별 datasheet를 확인해야 합니다. 타입의 숫자 범위 검사만으로 연결 유효성을 증명하지 않습니다.
 
 ## Interrupt — EXTI 통합
 
-```cpp
-template<typename Pin>
-class GpioInterrupt {
-public:
-    static void enable(InterruptEdge edge) {
-        // EXTI 설정 — Pin의 port/pin을 기반
-        constexpr uint32_t exti_line = Pin::pin_number;
-        // ...
-    }
-
-    static void on_interrupt() {
-        // 호출자가 정의
-    }
-};
-```
-
-ARM CMSIS NVIC API와 통합하면 interrupt handler도 type-safe해집니다.
+GPIO 타입에 port·pin 정보를 담아 EXTI 매핑에 전달할 수 있습니다. 실제 구현은 SYSCFG 매핑, trigger edge, pending 해제, 공유 IRQ handler와 NVIC 설정을 포함해야 합니다. GPIO concept을 만족하는 것만으로 이 설정이나 ISR 안전성이 보장되지는 않으며 여기서는 EXTI 드라이버를 구현하지 않습니다.
 
 ## 임베디드 — 보드 설정 헤더
 
@@ -311,11 +296,11 @@ Led1::set();
 ## 다중 보드 지원
 
 ```cpp
-#if defined(BOARD_STM32_DISCOVERY)
+#if defined(BOARD_CUSTOM_A)
     using Led1   = Gpio<0x40020000, 5>;
     using Button = Gpio<0x40020800, 13>;
-#elif defined(BOARD_NUCLEO_F401)
-    using Led1   = Gpio<0x40020000, 5>;
+#elif defined(BOARD_CUSTOM_B)
+    using Led1   = Gpio<0x40020c00, 12>;
     using Button = Gpio<0x40020800, 13>;
 #elif defined(BOARD_CUSTOM)
     using Led1   = Gpio<0x40020800, 0>;
@@ -323,7 +308,7 @@ Led1::set();
 #endif
 ```
 
-build flag로 보드를 선택합니다. application 코드는 그대로입니다.
+위 분기는 실제 Discovery/Nucleo 보드 핀맵이 아닌 사용자 보드 alias 예시입니다. 보드의 회로도·LED active level·버튼 pull과 pin mux를 확인해 별도로 정의합니다. application API가 같은 경우 호출부를 유지할 수 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -372,48 +357,57 @@ using LedDup = Gpio<0x40020000, 5>;   // 같은 pin — 의도 모호
 
 production에서 pin이 변경되어야 한다면 template 방식으로는 부족합니다. runtime 설정이 필요합니다.
 
-### 6. Speed 설정 누락
+### 6. 출력 slew 설정 누락
 
-high-speed peripheral(SPI, UART)에 low speed pin을 쓰면 signal을 따라가지 못합니다. configure에서 speed를 명시합니다.
+GPIO speed 필드는 보통 출력 드라이버 slew 특성이며 UART baud나 SPI clock 주파수 그 자체가 아닙니다. 부하·전압·EMI·신호 무결성을 고려해 설정하고 보드에서 확인합니다.
 
-## 측정 — Macro vs Template GPIO
+## 작은 예제 — 설정을 실제 backend에 적용
 
-같은 LED blink loop 비교입니다.
+다음 코드는 MMIO 주소 대신 fake 저장소에 설정을 적용합니다. 핀 범위·concept·필드 보존을 검증하지만 실제 레지스터의 쓰기 부작용이나 전기 신호를 대신하지 않습니다.
 
-```text
-# C macro
-#define LED_SET()   (GPIOA->BSRR = 1<<5)
-#define LED_CLEAR() (GPIOA->BSRR = 1<<21)
-
-while (1) {
-    LED_SET();
-    delay_ms(500);
-    LED_CLEAR();
-    delay_ms(500);
+```cpp title="gpio-check.cpp"
+#include <cassert>
+#include <concepts>
+#include <cstdint>
+enum class Mode : std::uint32_t { Input, Output, Alternate, Analog };
+struct Config { Mode mode; bool pull_up; bool open_drain; };
+struct Fake {
+    static inline std::uint32_t mode=0, pull=0, type=0, last=0;
+    static inline int writes=0;
+    static void command(std::uint32_t v) { last=v; ++writes; }
+};
+template<class Bus, unsigned Pin, Config Cfg> struct Gpio {
+    static_assert(Pin < 16, "pin must be below 16");
+    static void init() {
+        constexpr unsigned shift=Pin*2;
+        Bus::mode=(Bus::mode & ~(3u<<shift)) | (static_cast<unsigned>(Cfg.mode)<<shift);
+        Bus::pull=(Bus::pull & ~(3u<<shift)) | (unsigned(Cfg.pull_up)<<shift);
+        Bus::type=(Bus::type & ~(1u<<Pin)) | (unsigned(Cfg.open_drain)<<Pin);
+    }
+    static void set() { Bus::command(1u<<Pin); }
+    static void clear() { Bus::command(1u<<(Pin+16)); }
+};
+template<class T> concept Output = requires {
+    { T::set() } -> std::same_as<void>;
+    { T::clear() } -> std::same_as<void>;
+};
+using Led=Gpio<Fake,5,Config{Mode::Output,true,true}>;
+static_assert(Output<Led>);
+int main() {
+    Fake::mode=3; Led::init();
+    assert(Fake::mode==(3u|(1u<<10)));
+    assert(Fake::pull==(1u<<10) && Fake::type==(1u<<5));
+    Led::set(); assert(Fake::last==32 && Fake::writes==1);
+    Led::clear(); assert(Fake::last==(1u<<21) && Fake::writes==2);
+#ifdef BAD_PIN
+    Gpio<Fake,16,Config{Mode::Output,false,false}>::set();
+#endif
 }
-
-# 어셈블리 (set):
-ldr     r3, =0x40020018
-movs    r2, #32
-str     r2, [r3]
-
-# C++ template
-while (1) {
-    Led::set();
-    delay_ms(500);
-    Led::clear();
-    delay_ms(500);
-}
-
-# 어셈블리 (set):
-ldr     r3, =0x40020018
-movs    r2, #32
-str     r2, [r3]
-
-# 완전 동일
 ```
 
-C++ 추가 비용은 0입니다. 추가로 type safety와 IDE 지원을 얻습니다.
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors gpio-check.cpp -o gpio-check && ./gpio-check`로 출력+pull-up·open-drain 허용, 다른 mode 필드 보존, 두 BSRR 명령을 확인했습니다. `-DBAD_PIN`은 컴파일 실패합니다.
+
+[ST HAL GPIO v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_gpio.c)는 pin 인자를 비트 mask로 받고 set/reset에 BSRR을 사용합니다. 실제 MCU 주소와 비트 정의는 [STM32F407xx CMSIS v2.6.10](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.10/Include/stm32f407xx.h)을 참고합니다.
 
 ## 정리
 

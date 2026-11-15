@@ -12,19 +12,19 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"기본 C++ 설정은 데스크톱용입니다."** 임베디드는 예외 끄기, RTTI 끄기, 크기 최적화가 출발점입니다.
+> 타깃 ABI와 런타임 정책을 정하고, 예외·RTTI·초기화·최적화 옵션이 만드는 코드와 미정의 심볼을 확인합니다. 기능을 끄는 것 자체가 항상 정답은 아닙니다.
 
 ## 어떤 문제를 푸는가
 
-GCC와 Clang의 기본 C++ 설정은 데스크톱 가정입니다. 동적 할당이 풍부하고, 예외가 자유롭고, RTTI가 켜져 있습니다. 임베디드에서는 이 기본을 거의 모두 끄거나 바꿉니다.
+GCC와 Clang의 기본 C++ 설정은 데스크톱 가정입니다. 동적 할당이 풍부하고, 예외가 자유롭고, RTTI가 켜져 있습니다. bare-metal과 임베디드 Linux는 요구가 다르며, 선택한 런타임에서 지원하는 기능과 정책을 먼저 정합니다.
 
 문제는 어떤 플래그를 어떤 순서로 켜야 하는지 명확하지 않다는 점입니다. 잘못된 조합은 링크 실패를 만들고, 옳은 조합은 수십 KB의 코드를 사라지게 합니다.
 
 이 글은 임베디드 C++ 프로젝트의 표준 플래그 셋과 각 플래그가 실제로 무엇을 하는지 정리합니다.
 
-## 임베디드 표준 플래그 셋
+## 타깃·정책별 플래그 예시
 
-대부분의 임베디드 C++ 프로젝트가 시작점으로 쓸 만한 조합입니다.
+다음은 ARM bare-metal을 가정한 선택지입니다. 초기화 동기화·소멸자 등록 옵션을 공통 안전 기본값처럼 복사하지 않습니다. --gc-sections는 GNU 호환 ELF 링커용이며 -flto는 대응 도구 체인이 필요합니다.
 
 ```makefile
 # 언어 표준
@@ -33,8 +33,9 @@ CXXFLAGS += -std=c++17
 # 임베디드 핵심
 CXXFLAGS += -fno-exceptions
 CXXFLAGS += -fno-rtti
-CXXFLAGS += -fno-threadsafe-statics
-CXXFLAGS += -fno-use-cxa-atexit
+# 동시 초기화가 없다고 입증한 경우에만 선택
+# CXXFLAGS += -fno-threadsafe-statics
+# -fno-use-cxa-atexit는 등록 제거가 아니라 등록 방식 변경
 
 # 최적화
 CXXFLAGS += -Os
@@ -63,15 +64,13 @@ CXXFLAGS += -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16
 
 C++ 표준을 명시합니다. 표준에 따라 사용 가능한 기능과 표준 라이브러리가 달라집니다.
 
-| 표준 | 권장 환경 | 핵심 |
-| --- | --- | --- |
-| C++11 | 모든 임베디드 | RAII, constexpr 기초, unique_ptr |
-| C++14 | GCC 4.9+ | constexpr 확장, generic lambda |
-| **C++17** | **권장 기본** | `std::optional`, `std::variant`, structured bindings |
-| C++20 | GCC 10+, 신규 프로젝트 | concepts, `std::span`, consteval |
-| C++23 | GCC 13+, 실험적 | `std::expected`, `<print>` |
+| 표준 | 주요 기능 예 |
+| --- | --- |
+| C++11/14 | RAII·constexpr·generic lambda 등 언어 기능과 라이브러리 구현을 함께 확인합니다. |
+| C++17 | optional·variant·structured bindings 등을 지원하는 도구 체인을 선택합니다. |
+| C++20/23 | concepts·span·expected 등 필요한 기능별 구현 상태와 타깃 라이브러리를 확인합니다. |
 
-ARM Compiler 6(armclang)은 C++17을 완전히 지원합니다. legacy ARM Compiler 5는 C++03만 지원하므로 새 프로젝트에서는 피합니다.
+같은 컴파일러 버전이라도 언어 모드와 표준 라이브러리의 제공 범위는 다릅니다. ARM Compiler도 정확한 제품 버전·타깃·설정을 확인하며 이름 하나로 완전 지원을 보장하지 않습니다.
 
 자세한 표준 선택 기준은 [Part 1-08](/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice)에서 다룹니다.
 
@@ -90,22 +89,17 @@ int divide(int a, int b) {
 `-fno-exceptions` 효과:
 
 - throw 문이 컴파일 에러가 됩니다
-- 표준 라이브러리의 예외 던지는 함수가 `abort()` 또는 undefined behavior로 동작합니다
-- unwind table이 제거되어 보통 5-20KB가 감소합니다
+- 이미 빌드된 라이브러리를 재작성하지 않습니다. 라이브러리의 no-exception 모드와 오류 경로를 따로 확인합니다.
+- C++ 예외 관련 코드 생성이 달라지지만 모든 unwind 정보의 제거와 고정 크기 감소를 보장하지 않습니다.
 - `noexcept` 명시 함수의 코드가 더 단순해집니다
 
-```text
-# 같은 함수, 예외 켜짐 vs 꺼짐 (ARM Cortex-M4, -Os)
-
-# -fexceptions: 312 B (함수 본문 + unwind 정보)
-# -fno-exceptions: 32 B
-```
+throw를 포함한 동일 함수는 -fno-exceptions에서 컴파일되지 않으므로 그 상태의 작은 함수 크기를 성공 측정값으로 제시할 수 없습니다. 예외를 쓰지 않는 대안 구현과 비교한다면 소스 차이와 전체 링크 조건도 기록해야 합니다.
 
 대안으로는 `std::optional`, `std::expected`(C++23), error code 반환이 있습니다. 자세한 내용은 [Part 3-05](/blog/embedded/embedded-cpp/part3-05-no-exception-design)에서 다룹니다.
 
 ### 주의 — STL 함수가 던지는 예외
 
-`std::vector::at()`은 예외를 던집니다. `-fno-exceptions`에서 호출하면 컴파일 에러나 abort로 이어집니다. `operator[]`를 쓰거나 직접 검사합니다.
+`std::vector::at()`은 예외를 던집니다. 플래그만으로 모든 at 호출이 컴파일 오류가 되는 것은 아닙니다. 범위 밖 처리 동작은 사용한 표준 라이브러리 빌드 정책을 확인합니다. operator[]로 바꾸기만 하면 경계 밖 UB를 만들 수 있으므로 명시적 범위 검사가 먼저입니다.
 
 ```cpp
 // Bad with -fno-exceptions
@@ -123,7 +117,7 @@ Run-Time Type Information을 끕니다. `typeid`와 `dynamic_cast`가 무력화�
 
 ```cpp
 // RTTI 켜짐: type info 테이블 생성
-class Base { virtual ~Base() = default; };
+struct Base { virtual ~Base() = default; };
 class Derived : public Base {};
 
 Base* b = new Derived;
@@ -134,8 +128,8 @@ if (auto* d = dynamic_cast<Derived*>(b)) {
 
 `-fno-rtti` 효과:
 
-- type info 테이블이 제거되어 1-5KB가 감소합니다
-- `dynamic_cast`, `typeid`가 컴파일 에러가 됩니다
+- RTTI 정보를 생성하는 범위가 달라지며 크기 효과는 실제 사용 코드에서 측정합니다.
+- RTTI가 필요한 downcast·crosscast와 typeid 사용이 제한됩니다. 접근 가능한 기반으로의 upcast나 dynamic_cast<void*>까지 모두 금지되는 것은 아닙니다.
 - `std::any`, `std::function`도 일부 제한됩니다
 
 대안은 다음과 같습니다.
@@ -151,36 +145,31 @@ if (auto* d = dynamic_cast<Derived*>(b)) {
 C++11부터 함수 내 static 변수의 초기화는 thread-safe입니다. GCC는 이를 위해 추가 lock과 initialization guard를 삽입합니다.
 
 ```cpp
+extern int initialize_counter();
 int& get_counter() {
-    static int counter = 0;   // C++11: thread-safe 초기화
+    static int counter = initialize_counter();  // 동적 초기화, 함수 선언 필요
     return counter;
 }
 ```
 
 `-fno-threadsafe-statics` 효과:
 
-- guard 코드가 제거되어 함수당 수십 바이트가 절약됩니다
+- 동적 초기화 guard 코드가 달라지며 실제 심볼·크기 변화를 확인합니다
 - bare-metal이거나 initialization을 한 thread에서만 한다고 보장되면 안전합니다
 - 다중 thread에서 동시에 init하면 race가 발생합니다
 
-bare-metal과 single-core RTOS는 거의 항상 안전하게 끌 수 있습니다. 다중 core나 다중 task에서 동시 init하는 경우만 주의합니다.
+상수 초기화의 static int counter=0은 동적 초기화 guard 비용의 예가 아닙니다. 단일 코어도 task 선점·ISR 재진입이 있으므로 동시 초기화가 없다는 근거가 필요합니다.
 
-## `-fno-use-cxa-atexit` — atexit 등록 끄기
+## -fno-use-cxa-atexit — 등록 방식 변경
 
-C++ 표준은 static 객체의 소멸자를 `atexit`로 등록합니다. 임베디드에서 프로그램이 영원히 돌면 소멸자는 호출되지 않습니다. 등록 코드만 공간을 낭비할 뿐입니다.
+[GCC 공식 옵션](https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html)은 -fuse-cxa-atexit를 atexit 대신 __cxa_atexit로 정적 소멸자를 등록하는 선택으로 설명합니다. 반대 옵션은 일반 atexit 경로로 바꿀 수 있으며 소멸자 등록 전체를 제거한다는 뜻이 아닙니다.
 
 ```cpp
-struct Logger {
-    ~Logger() { /* never called in embedded */ }
-};
+struct Logger { ~Logger(); };
 Logger global_logger;
 ```
 
-`-fno-use-cxa-atexit` 효과:
-
-- `__cxa_atexit` 호출이 제거됩니다
-- 수십에서 수백 바이트가 절약됩니다
-- RTOS 환경에서도 거의 항상 안전합니다
+프로그램이 종료하지 않는 firmware에서도 재시작·모듈 수명·테스트 종료 정책을 먼저 정합니다. 등록을 제거할 별도 정책을 선택한다면 그 옵션과 소스·startup 동작을 명시하고 생성 심볼을 확인해야 합니다.
 
 ## `-Os` vs `-O2` vs `-O3`
 
@@ -191,21 +180,12 @@ Logger global_logger;
 | `-O2` | 균형 | 일반 release |
 | **`-Os`** | **크기 우선** | **임베디드 기본** |
 | `-O3` | 속도 극대 | 코드 크기 폭증 가능 |
-| `-Oz` (Clang) | 더 공격적 크기 | tight 환경 |
+| `-Oz` (지원 컴파일러) | 더 공격적 크기 | tight 환경 |
 | `-Ofast` | 표준 위반 허용 | 임베디드에서 위험 |
 
-`-Os`가 임베디드의 기본입니다. 같은 코드, 같은 컴파일러로 측정한 결과는 다음과 같습니다.
+Os는 크기 우선 후보이며 O2/O3/Oz와 실제 Flash·RAM·지연 시간을 비교합니다. 동일 프로젝트의 재현 가능한 소스·컴파일러·링커 스크립트 없이 임의 KB 표를 측정 결과로 넣지 않습니다.
 
-```text
-# 한 임베디드 프로젝트 (STM32F4)
--O0  : 152 KB
--O1  : 84 KB
--O2  : 76 KB
--Os  : 68 KB    ← 임베디드 기본
--O3  : 92 KB    ← 인라인 폭증
-```
-
-핫 패스만 `-O2` 또는 `-O3` 함수 attribute로 분리하는 기법도 흔합니다.
+GCC는 다음 optimize attribute를 제공하지만 Clang에 같은 의미로 복사하지 않습니다. 함수별 최적화는 해당 컴파일러 지원과 측정 결과를 확인합니다.
 
 ```cpp
 __attribute__((optimize("O3")))
@@ -220,7 +200,7 @@ void hot_loop() { /* */ }
 
 - inter-procedural 인라인이 가능합니다(다른 .o 파일의 함수도 인라인)
 - 사용되지 않는 함수가 제거됩니다
-- 코드 크기가 일반적으로 5-15% 감소합니다
+- 전체 도구 체인과 입력에 따라 코드 크기가 늘거나 줄 수 있어 실제 산출물로 비교합니다
 
 비용은 다음과 같습니다.
 
@@ -235,7 +215,7 @@ release 빌드에만 활성화하고 개발 빌드에서는 끕니다.
 함수와 데이터를 각자 별도 섹션에 두고, 링커가 사용하지 않는 섹션을 제거합니다.
 
 ```text
-# 없으면: main만 쓰는데도 라이브러리 전체 링크
+# 분리 전: 선택된 오브젝트 멤버의 여러 함수가 하나의 .text에 있음
 .text: foo, bar, baz, qux, ...
 
 # 있으면: 사용한 것만
@@ -243,7 +223,7 @@ release 빌드에만 활성화하고 개발 빌드에서는 끕니다.
 → linker가 .text.bar만 남김
 ```
 
-드라이버 코드의 30-60%를 잘라낼 수 있습니다. 거의 항상 켜는 편이 이득입니다.
+크기 효과는 입력에 따라 다릅니다. 정적 아카이브는 원래도 필요한 멤버 단위로 선택되며, section GC는 선택된 멤버 안의 더 작은 제거 단위를 제공합니다. ISR·등록 테이블 등은 KEEP 또는 참조 보존 규칙이 필요할 수 있습니다.
 
 ## 경고 플래그 — 임베디드에서 더 엄격
 
@@ -268,18 +248,14 @@ CXXFLAGS += -Werror            # 경고 = 에러
 특히 임베디드에서 중요한 항목은 다음과 같습니다.
 
 - `-Wdouble-promotion`: float promotion이 FPU 없는 MCU에서 softfloat 호출을 부르기 때문에 성능이 폭락합니다
-- `-Wcast-align`: ARM에서 unaligned access는 bus fault로 이어집니다
+- -Wcast-align: 정렬 요구를 바꾸는 캐스트를 검토합니다. 비정렬 접근의 허용·fault는 CPU·명령·메모리 속성·설정에 따라 다릅니다.
 - `-Wnon-virtual-dtor`: 메모리 누수의 단골 원인입니다
 
 ## 디버그 정보 — `-g3 -gdwarf-4`
 
 release 빌드에도 디버그 정보를 유지합니다. ELF 파일에는 들어가지만 Flash에는 들어가지 않습니다(링커가 `.debug_*` 섹션을 제외합니다).
 
-```text
-# 같은 빌드, 디버그 정보 유무
-program.elf       : 142 KB (with debug)
-program.bin       : 64 KB  (Flash 들어가는 부분)
-```
+ELF 파일 크기와 Flash에 프로그래밍하는 loadable 영역은 다른 측정량입니다. 디버그 정보의 비할당 섹션, objcopy 출력 형식, 링커 스크립트를 확인하고 고정 KB 예시를 측정값으로 쓰지 않습니다.
 
 장점은 다음과 같습니다.
 
@@ -349,7 +325,7 @@ assertion은 debug에서만 활성화하는 게 일반적입니다.
 
 ### 1. `-fno-exceptions` 늦게 적용
 
-수만 줄 작성 후 끄면 표준 라이브러리 호출이 대거 컴파일 실패합니다. 처음부터 켭니다.
+예외 정책을 바꾸면 직접 throw/catch 코드와 라이브러리 오류 처리 경로를 함께 검토해야 합니다. 프로젝트 초기부터 선택한 정책을 컴파일·링크 테스트로 확인합니다.
 
 ### 2. `-O3`를 임베디드 기본으로 사용
 
@@ -382,29 +358,51 @@ CXXFLAGS += -fno-c++-static-destructors  # 명시적 ~atexit 끔
 CXXFLAGS += -fno-asynchronous-unwind-tables
 ```
 
-`-fno-asynchronous-unwind-tables`는 예외 unwind 테이블까지 모두 제거합니다. 추가로 1-3KB가 절약됩니다.
+이 옵션은 비동기 지점의 unwind table 생성을 제어합니다. C++ 예외 정보 전체를 제거하는 옵션과 같지 않으며 크기 효과도 실제 파일에서 확인합니다.
 
 ## 측정 — 플래그 효과 누적
 
-빈 main 함수에 플래그를 하나씩 추가하면서 크기를 측정합니다(STM32F4, GCC 13).
+빈 main만으로 예외·RTTI·동적 static 초기화 비용을 모두 측정할 수는 없습니다. 기능을 실제 사용한 소스, 성공·실패한 구성, map/section 크기, 런타임 링크와 Flash/RAM의 포함 범위를 함께 기록합니다. 아래 예제는 바이트 절감률 대신 옵션의 의미를 확인합니다.
 
-```text
-default                                    : 24 KB
-+ -Os                                      : 12 KB
-+ -fno-exceptions                          : 8 KB
-+ -fno-rtti                                : 7.5 KB
-+ -fno-threadsafe-statics                  : 7.4 KB
-+ -ffunction-sections + --gc-sections      : 6 KB
-+ -flto                                    : 5.6 KB
-+ -fno-use-cxa-atexit                      : 5.5 KB
+
+## 직접 확인 — 금지되는 코드와 남는 런타임 심볼
+
+다음 소스는 Homebrew Clang 23.1.3에서 x86-64 Linux ELF 오브젝트로 컴파일합니다. 실제 firmware 링크·크기·MCU 실행을 검증한 기록은 아닙니다.
+
+```cpp title="flags.cpp"
+struct Base { virtual ~Base() = default; };
+struct Derived : Base {};
+Base* up(Derived* value) { return dynamic_cast<Base*>(value); }
+#ifdef DOWNCAST
+Derived* down(Base* value) { return dynamic_cast<Derived*>(value); }
+#endif
+#ifdef THROW
+int fail() { throw 7; }
+#endif
+extern int initialize();
+int& instance() { static int value = initialize(); return value; }
 ```
 
-80%가 감소합니다. 빈 함수 하나만으로도 기본 설정과 임베디드 설정의 차이가 거대합니다.
+```cpp title="registration.cpp"
+struct Logger { ~Logger(); };
+Logger logger;
+```
+
+```bash
+clang++ --target=x86_64-unknown-linux-gnu -std=c++17 -fno-rtti -c flags.cpp -o up.o
+clang++ --target=x86_64-unknown-linux-gnu -std=c++17 -fno-rtti -DDOWNCAST -c flags.cpp -o down.o
+clang++ --target=x86_64-unknown-linux-gnu -std=c++17 -fno-exceptions -DTHROW -c flags.cpp -o throw.o
+clang++ --target=x86_64-unknown-linux-gnu -std=c++17 -c registration.cpp -o cxa.o
+clang++ --target=x86_64-unknown-linux-gnu -std=c++17 -fno-use-cxa-atexit -c registration.cpp -o plain.o
+llvm-nm -u cxa.o plain.o
+```
+
+upcast는 성공하지만 DOWNCAST·THROW 구성은 원인에 맞는 컴파일 실패를 기대합니다. registration의 미정의 심볼은 기본 __cxa_atexit와 반대 옵션의 atexit를 구분합니다. flags.cpp의 동적 static은 guard 관련 심볼을 만들며 no-threadsafe-statics 구성과 비교합니다.
 
 ## 정리
 
-- 임베디드 C++ 표준 플래그는 예외/RTTI/threadsafe-statics 끄기와 크기 최적화, LTO, gc-sections의 조합입니다.
-- 각 플래그는 측정 가능한 효과를 갖고, 끄기만 해도 5-10배 크기 감소가 가능합니다.
+- 타깃 ABI·런타임·동시 초기화 정책에 맞춰 옵션을 고르고 blanket disable을 공통 기본값으로 두지 않습니다.
+- 크기 효과는 같은 소스·도구 체인·링크 조건에서 측정하며 기능 금지와 등록 방식 변경을 구분합니다.
 - 경고는 처음부터 모두 켜고 Werror로 다룹니다. 나중에 끄는 편이 추가하는 것보다 쉽습니다.
 - 디버그와 release를 분리해 release에는 LTO를, debug에는 `-O0 -g3`를 적용합니다.
 - ARM 특화 플래그는 반드시 지정해 CPU, FPU, ABI를 일치시킵니다.

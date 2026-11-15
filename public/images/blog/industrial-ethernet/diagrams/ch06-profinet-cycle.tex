@@ -8,7 +8,7 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-\node[font=\sffamily\bfseries\large] at (5,2.0) {PROFINET CC-C IRT Cycle (1 ms)};
+\node[font=\sffamily\bfseries\large] at (5,2.0) {IRT cycle example (assumed 1 ms)};
 
 % Two-slot cycle bar
 % IRT: 200 μs → width 2.0
@@ -19,20 +19,14 @@
 \definecolor{greenphase}{RGB}{205,235,210}
 \definecolor{greenphaseBord}{RGB}{ 90,150, 95}
 
-\node[cls, minimum width=20mm, minimum height=14mm, anchor=west, align=center,
-      fill=redphase, draw=redphaseBord] (irt) at (0,0)
-  {IRT (red phase)\\\small hw-scheduled};
-\node[cls, minimum width=80mm, minimum height=14mm, anchor=west, align=center,
-      fill=greenphase, draw=greenphaseBord] (nrt) at (2.0,0)
-  {NRT / RT (green phase)\\\small best-effort + priority};
-
-% Labels under each slot
-\node[caption] at (1.0,-1.2) {200 $\mu$s reserved for IRT};
-\node[caption] at (6.0,-1.2) {800 $\mu$s for everything else};
+\draw[fill=redphase,draw=redphaseBord] (0,0) rectangle (2,0.6);
+\draw[fill=greenphase,draw=greenphaseBord] (2,0) rectangle (10,0.6);
+\node[caption,anchor=north,align=center] at (1,-0.25) {IRT reserved\\200 $\mu$s};
+\node[caption,anchor=north,align=center] at (6,-0.25) {Open interval\\800 $\mu$s};
 
 % IRT schedule excerpt — short text on the side
 \node[caption, anchor=north west, align=left] at (-0.3,-2.0)
-  {IRT 트래픽 예 (compile-time scheduled):\\
+  {IRT 트래픽 예 (illustrative schedule):\\
    $\bullet$ t = 0   $\mu$s: Controller $\rightarrow$ Device 1, 32 B\\
    $\bullet$ t = 50  $\mu$s: Controller $\rightarrow$ Device 2, 64 B\\
    $\bullet$ t = 110 $\mu$s: Device 1 $\rightarrow$ Controller, 32 B};

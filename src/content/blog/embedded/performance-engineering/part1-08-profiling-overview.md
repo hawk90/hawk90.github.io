@@ -2,7 +2,7 @@
 title: "프로파일링 기법 개요 — Sampling vs Instrumentation·PGO·LTO"
 slug: "embedded/performance-engineering/part1-08-profiling-overview"
 date: 2026-04-23T09:08:00
-description: "두 가지 큰 접근을 비교합니다. Sampling은 perf처럼 가볍고 Instrumentation은 gprof처럼 정확하지만 무겁습니다. PGO로 최적화하는 방법도 다룹니다."
+description: "Sampling과 instrumentation의 수집 방식과 해석상 주의점을 비교합니다. perf·gprof·PGO·LTO를 살펴봅니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 8
 tags: [profiling, sampling, instrumentation, gprof, perf, pgo, lto]
@@ -12,22 +12,22 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **Sampling은 가볍지만 noisy하고, Instrumentation은 정확하지만 무겁습니다.** 상황에 맞춰 골라야 합니다.
+> **Sampling은 표본 기반 추정이고, instrumentation은 실행 경로에 계측 hook을 넣습니다.** overhead와 해석 한계는 도구와 환경에 따라 확인해야 합니다.
 
 ## Sampling Profiling
 
 **주기적 interrupt**로 *현재 PC를 캡처*하는 통계적 추정 방식입니다.
 
 ```text
-1000 Hz timer interrupt:
-매 1 ms마다 PC 기록
-1초 동안 1000 sample
-주요 hot function = sample 많은 곳
+Example with a configured sampling frequency:
+At a 1000 Hz target, expect at most about 1000 samples per second.
+Actual count can vary with throttling, permissions, events, and runtime.
+A high sample count marks a hot-path candidate, not a conclusive diagnosis.
 ```
 
 ### 장단점
 
-- **낮은 overhead** (1-5%)입니다.
+- Overhead는 event, sample rate, call-chain 수집, workload와 시스템에 따라 측정합니다.
 - Production에서 사용할 수 있습니다.
 - 외부 sampling tool이므로 *코드 수정이 필요 없습니다*.
 - 짧은 함수 (< 1ms)는 놓칠 수 있습니다.
@@ -35,7 +35,7 @@ topics: ["embedded"]
 
 ### 대표 도구
 
-- **perf** (Linux) — 1 kHz 기본입니다.
+- **perf** (Linux) — sample frequency는 `-F`로 지정할 수 있으며 기본값/상한은 버전과 설정을 확인합니다.
 - **gperftools** (Google) — user-space입니다.
 - **Instruments** (macOS)
 - **Visual Studio Profiler** (Windows)
@@ -44,21 +44,24 @@ topics: ["embedded"]
 
 각 함수 진입과 exit에 *카운터와 시간을 기록*합니다.
 
-```c
-// 컴파일러가 자동 삽입 (-pg)
-void func() {
-    __cyg_profile_func_enter(...);
-    // ...
-    __cyg_profile_func_exit(...);
+```c title="gcc-function-instrumentation-hooks"
+/* GCC -finstrument-functions가 함수 진입/종료 hook을 삽입합니다.
+   -pg는 gprof용 profiling instrumentation 옵션이며 같은 옵션이 아닙니다. */
+void __cyg_profile_func_enter(void *this_fn, void *call_site) {
+    (void)this_fn; (void)call_site;
 }
+void __cyg_profile_func_exit(void *this_fn, void *call_site) {
+    (void)this_fn; (void)call_site;
+}
+void func(void) { /* work */ }
 ```
 
 ### 장단점
 
-- **정확합니다.** 모든 호출이 카운트됩니다.
-- Call graph가 정확합니다.
+- Instrumentation은 hook이 실행된 호출을 기록할 수 있지만, 계측 코드와 빌드 설정의 영향 및 누락 가능성을 확인해야 합니다.
+- Call graph의 완전성과 정확도는 도구, 최적화, tail call 및 수집 설정에 좌우됩니다.
 - 짧은 함수도 잡힙니다.
-- Overhead가 큽니다 (20-200%).
+- 계측 비용은 대상 workload에서 별도로 측정해야 합니다.
 - 측정값이 *현실과 다를 수* 있습니다 (probe effect).
 
 ### 대표 도구
@@ -70,14 +73,13 @@ void func() {
 
 ## perf — Linux 표준
 
-```bash
-# Sampling
-perf record -F 999 -p PID -g -- sleep 30
+```bash title="perf-sampling-and-stat"
+# Sampling: rate와 event를 명시하고 실행 환경에서 지원 여부를 확인
+perf record -F 999 -e cycles -p PID -g -- sleep 30
 perf report
 
-# Aggregate stats
-perf stat ./myapp
-# task-clock, cycles, instructions, cache-misses 등 자동 수집
+# Aggregate stats: 필요한 event를 명시
+perf stat -e task-clock,cycles,instructions,cache-misses -- ./myapp
 ```
 
 ### Flamegraph
@@ -91,7 +93,7 @@ CPU 사용 분포가 *시각화*되어 hot path를 즉시 인식할 수 있습�
 
 ## eBPF — 모던 Dynamic Tracing
 
-Linux kernel과 user-space에 *bytecode를 주입*합니다. 정확하면서 low overhead입니다.
+eBPF 프로그램은 검증을 거쳐 kernel의 지원 hook/attachment에 연결됩니다. 일부 도구는 user-space probe도 활용합니다. 정확도와 overhead는 probe 위치, 수집 코드, sampling 및 실행 환경에 따라 달라집니다.
 
 ```bash
 # bpftrace
@@ -122,7 +124,7 @@ Kernel-only입니다. *Function entry/exit*와 *latency·event tracers*를 제�
 | 도구 | RTOS | 특징 |
 | --- | --- | --- |
 | **Tracealyzer** (Percepio) | FreeRTOS·Zephyr·SafeRTOS | 상용이며 강력합니다 |
-| **SystemView** (Segger) | FreeRTOS·embOS·µC/OS | 무료지만 J-Link가 필수입니다 |
+| **SystemView** (Segger) | FreeRTOS·embOS·µC/OS | 대상과 설정에 맞는 recorder/전송 경로가 필요합니다 |
 | **Zephyr Tracing** | Zephyr | 내장입니다 |
 | **CTF** (Common Trace Format) | 모든 RTOS | 표준 포맷입니다 |
 
@@ -151,8 +153,8 @@ gcc -fprofile-use -O3 -o app app.c
 ### 효과
 
 ```text
-Without PGO:  100 ms
-With PGO:      85-90 ms (10-15% 개선)
+Without PGO:  측정 기준선
+With PGO:      결과는 training workload와 compiler에 따라 달라짐
 ```
 
 - *Branch unlikely* 자동 hint를 줍니다.
@@ -170,12 +172,12 @@ gcc -flto -O3 -o app *.c
 ### 효과
 
 ```text
-Without LTO:  100 ms
-With LTO:      90-95 ms (5-10%)
-With PGO + LTO: 80-85 ms (15-20%)
+Without LTO:  측정 기준선
+With LTO:      결과는 target과 toolchain에 따라 달라짐
+With PGO + LTO: 결과는 workload와 build 조건에 따라 달라짐
 ```
 
-조합하면 *순수 algorithmic 변화 없이도* 15-20%가 개선됩니다.
+PGO와 LTO의 효과는 workload, toolchain, code size 및 build flags에 따라 달라집니다. 비교 조건과 결과를 기록합니다.
 
 ## 임베디드 적용
 
@@ -186,7 +188,7 @@ arm-none-eabi-gcc -flto -O2 -ffunction-sections -fdata-sections \
 
 - `-flto`는 link-time optimization을 켭니다.
 - `-ffunction-sections -fdata-sections` + `--gc-sections`로 미사용 코드를 제거합니다.
-- 코드 크기는 *10-20% 감소*하고 성능은 *5-10% 향상*됩니다.
+- 코드 크기와 실행 시간 변화는 target과 link 구성에 따라 달라지므로 각 빌드 결과를 측정합니다.
 
 ## Microbenchmark vs System Benchmark
 
@@ -242,7 +244,7 @@ foo의 exclusive (self): 10 ms (bar·baz 제외)
 
 > ⚠️ Sample rate 너무 낮음
 
-10 Hz로 5초 sampling은 50 sample뿐이라 결론을 낼 수 없습니다. **최소 99 Hz × 30초 이상**이 필요합니다.
+10 Hz로 5초 sampling은 50 sample뿐이라 결론을 낼 수 없습니다. 표본 수는 목표로 삼는 기능/지연과 신뢰도에 맞춰 정하며, 낮은 sample 수의 해석 한계를 기록합니다.
 
 > ⚠️ Debug build profile
 
@@ -254,15 +256,15 @@ Profile 결과가 *예상과 다를 때* 진짜 학습이 됩니다. *측정이 
 
 > ⚠️ Production에서 instrumentation
 
-20-200% overhead로 *production이 망가집니다*. *Production에서는 sampling만* 사용해야 합니다.
+Instrumentation은 관측 대상을 바꿀 수 있습니다. Production에서 사용할지는 위험·overhead 평가와 운영 요구사항에 따라 결정합니다.
 
 ## 정리 — Part 1 마무리
 
-- **Sampling**은 low overhead의 statistical 방식이고, **Instrumentation**은 accurate하지만 heavy합니다.
+- Sampling은 표본 기반 추정이며 instrumentation은 hook 계측입니다. overhead와 누락·교란은 환경에서 평가합니다.
 - **perf**는 Linux 표준이고, **eBPF**는 모던 dynamic tracing입니다.
 - **SystemView, Tracealyzer**는 임베디드 RTOS trace에 씁니다.
-- **PGO와 LTO**를 결합하면 15-20%의 무료 성능을 얻습니다.
-- Release build로 profile하고 production에서는 sampling만 사용합니다.
+- **PGO와 LTO**의 성능·코드 크기 효과를 target workload에서 측정합니다.
+- Release 조건에 가까운 빌드로 profile하고, production 계측은 overhead와 운영 위험을 평가해 결정합니다.
 
 **Part 1 (Performance Analysis Fundamentals)이 끝났습니다.** Part 2부터는 CPU와 Microarchitecture를 깊이 다룹니다.
 
@@ -271,3 +273,8 @@ Profile 결과가 *예상과 다를 때* 진짜 학습이 됩니다. *측정이 
 - [1-07: 성능 모델링](/blog/embedded/performance-engineering/part1-07-modeling)
 - [5-01: perf 기초](/blog/embedded/performance-engineering/part5-01-perf-basics)
 - [5-05: Flamegraph 분석](/blog/embedded/performance-engineering/part5-05-flamegraph)
+
+## 참고 자료
+
+- [GCC instrumentation options](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html)
+- [Linux `perf record` manual](https://man7.org/linux/man-pages/man1/perf-record.1.html)

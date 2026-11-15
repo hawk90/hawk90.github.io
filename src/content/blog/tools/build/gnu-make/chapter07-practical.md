@@ -2,7 +2,7 @@
 title: "실전 Makefile 예제 — C/C++ 프로젝트용 기본 골격"
 slug: "tools/build/gnu-make/chapter07-practical"
 date: 2026-06-03T09:07:00
-description: "기본 C/C++부터 라이브러리, 크로스 컴파일, 테스트 통합까지 — 실제 프로젝트에 그대로 쓰는 Makefile 패턴."
+description: "모드별 빌드와 자동 의존성, 크로스 도구 선택, 테스트·설치 규칙을 검증하는 Makefile 예제."
 tags: [make, build, practical]
 series: "GNU Make"
 seriesOrder: 7
@@ -12,7 +12,7 @@ topics: ["tools", "tools/build"]
 
 ## 이 장에서 다루는 것
 
-[Ch 1](/blog/tools/build/gnu-make/chapter01-intro)부터 [Ch 6](/blog/tools/build/gnu-make/chapter06-conditionals)까지의 도구를 한 자리에 모읍니다. 가공의 예제가 아니라 *실제 프로젝트에 그대로 옮겨 쓸 수 있는* Makefile입니다.
+[Ch 1](/blog/tools/build/gnu-make/chapter01-intro)부터 [Ch 6](/blog/tools/build/gnu-make/chapter06-conditionals)까지의 도구를 한 자리에 모읍니다. 프로젝트의 도구·플랫폼·파일 구조에 맞춰 적용할 예제입니다. 실행 확인은 GNU Make 4.4.1·macOS·AppleClang 21의 gcc 드라이버를 기준으로 하며, 크로스 부분은 도구 이름 선택을 확인합니다. 타겟 보드에서 실행한 결과는 아닙니다.
 
 - 기본 C 프로젝트
 - C++ + 정적 분석 통합
@@ -42,7 +42,7 @@ myproject/
 
 `src/`와 `include/`를 분리해 *공개 헤더*와 *구현*을 명확히 갈라 두는 게 표준입니다.
 
-```makefile
+```makefile title="Makefile"
 # === 설정 ===
 CC := gcc
 CFLAGS := -Wall -Wextra -std=c11
@@ -63,6 +63,9 @@ endif
 # === 파일 목록 ===
 SRCDIR := src
 SRCS := $(wildcard $(SRCDIR)/*.c)
+ifeq ($(strip $(SRCS)),)
+$(error No C sources found under $(SRCDIR))
+endif
 OBJS := $(patsubst $(SRCDIR)/%.c,$(BUILDDIR)/%.o,$(SRCS))
 DEPS := $(OBJS:.o=.d)
 
@@ -88,7 +91,9 @@ clean:
 	@echo "[CLEAN]"
 	@$(RM) -r build
 
-rebuild: clean all
+rebuild:
+	$(MAKE) clean
+	$(MAKE) all
 
 run: $(TARGET)
 	@./$(TARGET)
@@ -105,6 +110,28 @@ run: $(TARGET)
 
 ### 사용법
 
+위 Makefile을 다음 세 소스 파일과 함께 저장하면 그대로 실행할 수 있습니다. 헤더를 두 C 파일이 사용하므로 헤더 변경 시 두 오브젝트의 재빌드도 확인할 수 있습니다.
+
+```c title="include/mylib.h"
+#define ANSWER 42
+int answer(void);
+```
+
+라이브러리 구현은 매크로를 읽어 값을 반환합니다.
+
+```c title="src/mylib.c"
+#include "mylib.h"
+int answer(void) { return ANSWER; }
+```
+
+실행 파일에서 결과를 출력합니다.
+
+```c title="src/main.c"
+#include "mylib.h"
+#include <stdio.h>
+int main(void) { printf("answer=%d\n", answer()); }
+```
+
 ```bash
 make              # 릴리스
 make DEBUG=1      # 디버그
@@ -112,6 +139,8 @@ make run          # 빌드 후 실행
 make clean        # 정리
 make rebuild      # clean + 빌드
 ```
+
+make run과 DEBUG=1의 실행 결과는 모두 answer=42입니다. rebuild는 clean과 all을 별도 재귀 호출로 순서대로 실행합니다. `rebuild: clean all`처럼 선행 조건만 나열하면 병렬 빌드에서 삭제와 컴파일이 겹칠 수 있으므로 구분합니다.
 
 ---
 
@@ -173,7 +202,9 @@ clean:
 	@$(RM) -r build
 	@echo "[CLEAN]"
 
-rebuild: clean all
+rebuild:
+	$(MAKE) clean
+	$(MAKE) all
 
 run: $(TARGET)
 	@./$(TARGET)
@@ -194,7 +225,7 @@ format:
 
 ### Sanitizer가 디버그에서만 켜지는 이유
 
-AddressSanitizer는 *런타임 비용*이 매우 큽니다(보통 2~3배 느림, 메모리 사용 3배). 릴리스에서는 끄고, 디버그에서만 켜는 것이 표준입니다. `-fsanitize=address,undefined`는 한 번에 둘을 켭니다.
+Sanitizer를 실행하는 별도 빌드 구성을 둡니다. 실행 시간·메모리 비용은 해당 프로그램과 환경에서 측정해야 하며 이 글은 측정값을 제공하지 않습니다. `-fsanitize=address,undefined`는 한 번에 둘을 켭니다.
 
 ---
 
@@ -223,7 +254,7 @@ app: main.o lib$(LIBNAME).a
 | `c` | 아카이브가 없을 때 새로 생성 |
 | `s` | 인덱스 생성 (옛 `ranlib`을 통합) |
 
-큰 정적 라이브러리에서 `ar`이 느려진다면, 한 번에 모든 오브젝트를 묶는 *Thin Archive* (`ar Trcs`)도 검토할 만합니다. 빌드 시간이 줄어드는 대신 *모든 `.o`가 그대로 디스크에 살아 있어야 하는* 의존성이 생깁니다.
+큰 정적 라이브러리에서 `ar`이 느려진다면, 한 번에 모든 오브젝트를 묶는 *Thin Archive* (`ar Trcs`)도 검토할 만합니다. 일반 아카이브와 시간을 비교해 선택하고 *모든 `.o`가 그대로 디스크에 살아 있어야 하는* 의존성이 생깁니다.
 
 ### 동적 라이브러리 (`.so` / `.dylib`)
 
@@ -251,7 +282,7 @@ lib/%.o: lib/%.c
 	$(CC) -fPIC $(CFLAGS) -c $< -o $@
 ```
 
-`-fPIC`(Position Independent Code)는 *동적 라이브러리에서 절대 빼면 안 되는* 옵션입니다. 라이브러리가 실행 시점에 임의 주소로 로드되므로, 코드가 그 주소에 의존하지 않게 만들어 두어야 합니다. 정적 라이브러리는 굳이 `-fPIC`이 필요 없지만, 켜 두는 게 결과의 *재사용성*을 높입니다.
+위 공유 라이브러리 조각은 Unix 계열 toolchain의 예입니다. 위치 독립 코드의 기본값·옵션·필요 조건은 타겟에 따라 다르므로 모든 플랫폼에서 -fPIC가 필수라고 일반화하지 않습니다. Linux의 공유 라이브러리에 넣을 정적 오브젝트도 해당 링크 조건을 만족해야 합니다.
 
 > 💡 *SONAME 관리*: 실무 동적 라이브러리는 `lib.so.1`, `lib.so.1.2.3` 같은 *심볼릭 링크 체인*을 사용합니다. 이는 ABI 호환성 표현 방식이고, Makefile 한 줄로 처리하기 까다로워 보통은 GNU libtool이나 CMake에 위임합니다.
 
@@ -265,12 +296,6 @@ lib/%.o: lib/%.c
 
 ```makefile
 CROSS_COMPILE ?=
-CC := $(CROSS_COMPILE)gcc
-CXX := $(CROSS_COMPILE)g++
-AR := $(CROSS_COMPILE)ar
-STRIP := $(CROSS_COMPILE)strip
-OBJCOPY := $(CROSS_COMPILE)objcopy
-
 ARCH ?= native
 
 ifeq ($(ARCH),arm)
@@ -283,6 +308,13 @@ else ifeq ($(ARCH),riscv64)
     CROSS_COMPILE := riscv64-linux-gnu-
     CFLAGS += -march=rv64gc
 endif
+
+# 접두사 결정 뒤 도구 이름을 즉시 확장
+CC := $(CROSS_COMPILE)gcc
+CXX := $(CROSS_COMPILE)g++
+AR := $(CROSS_COMPILE)ar
+STRIP := $(CROSS_COMPILE)strip
+OBJCOPY := $(CROSS_COMPILE)objcopy
 
 # 릴리스 빌드에서 심볼 제거
 ifneq ($(DEBUG),1)
@@ -305,6 +337,28 @@ make                 # 네이티브
 
 ### 빌드 환경 격리
 
+도구 선택만 확인하려면 다음 cross-check.mk를 별도로 실행합니다. 실제 ARM/RISC-V 컴파일은 도구 설치와 sysroot 준비 뒤 별도로 수행해야 합니다.
+
+```makefile title="cross-check.mk"
+ARCH ?= native
+CROSS_COMPILE ?=
+ifeq ($(ARCH),arm)
+CROSS_COMPILE := arm-linux-gnueabihf-
+else ifeq ($(ARCH),aarch64)
+CROSS_COMPILE := aarch64-linux-gnu-
+else ifeq ($(ARCH),riscv64)
+CROSS_COMPILE := riscv64-linux-gnu-
+else ifneq ($(ARCH),native)
+$(error Unsupported ARCH: $(ARCH))
+endif
+CC := $(CROSS_COMPILE)gcc
+.PHONY: show
+show:
+	@printf 'CC=%s\n' '$(CC)'
+```
+
+`make -f cross-check.mk ARCH=arm`은 CC=arm-linux-gnueabihf-gcc, ARCH=aarch64는 CC=aarch64-linux-gnu-gcc를 출력합니다. 이는 접두사 확장 순서의 검증이며 크로스 컴파일러를 실행하지 않습니다.
+
 크로스 컴파일 환경에서는 *호스트 라이브러리가 끼어드는* 사고가 흔합니다. 격리를 위해 `--sysroot`를 명시하는 게 안전합니다.
 
 ```makefile
@@ -318,6 +372,8 @@ endif
 ---
 
 ## 테스트 통합
+
+아래 test-verbose도 테스트 실패를 호출자에게 전달해야 합니다. 출력을 보여 주기 위해 실패 상태를 `|| true`로 버리면 CI가 정상으로 오인합니다.
 
 `tests/` 디렉터리에 *각 테스트가 별도 실행 파일*인 구조가 가장 단순합니다.
 
@@ -333,7 +389,7 @@ project/
 └── Makefile
 ```
 
-```makefile
+```makefile title="test-rules.mk"
 TESTSRCDIR := tests
 TESTSRCS := $(wildcard $(TESTSRCDIR)/*.c)
 TESTOBJS := $(patsubst $(TESTSRCDIR)/%.c,$(BUILDDIR)/tests/%.o,$(TESTSRCS))
@@ -364,11 +420,11 @@ test: $(TESTS)
 	fi
 
 test-verbose: $(TESTS)
-	@for t in $(TESTS); do \
+	@failed=0; for t in $(TESTS); do \
 		echo "=== $$(basename $$t) ==="; \
-		$$t || true; \
+		$$t || failed=1; \
 		echo ""; \
-	done
+	done; exit $$failed
 
 $(BUILDDIR)/tests/%: $(BUILDDIR)/tests/%.o $(LIBOBJS) | $(BUILDDIR)/tests
 	$(CC) $(LDFLAGS) -o $@ $^ $(LDLIBS)
@@ -450,7 +506,7 @@ make DESTDIR=/tmp/pkg install   # 패키징용 — 모든 경로 앞에 /tmp/pkg
 - **`PREFIX`**: *최종 설치 위치*의 prefix. 예: `/usr/local/bin/myapp`.
 - **`DESTDIR`**: *임시 stage* 영역. 패키지 빌드 시 모든 경로 앞에 붙입니다. `DESTDIR=/tmp/stage PREFIX=/usr/local` → 파일은 `/tmp/stage/usr/local/bin/myapp`. 이후 *패키저가 /tmp/stage를 tar로 묶어* 배포합니다.
 
-이 둘은 GNU Coding Standards가 정의한 *표준*이라, 모든 패키지 매니저(rpm, deb, pkgsrc, Homebrew)가 이 관용을 따릅니다.
+DESTDIR의 staging 관례는 [GNU Coding Standards](https://www.gnu.org/prep/standards/html_node/DESTDIR.html)를 참고합니다. 모든 패키지 매니저가 같은 변수와 설치 절차를 사용한다는 뜻은 아닙니다.
 
 ### `help` 타겟
 
@@ -515,7 +571,7 @@ CI에서는 보통 `V=1`로 돌려 *전체 명령 로그*를 확보하고, 개�
 SRCS := $(wildcard srcs/*.c)   # 오타 (src가 의도)
 ```
 
-빈 결과 → 빌드가 "할 일 없음"으로 끝납니다. 디버깅이 까다로워 보입니다.
+소스 목록이 비어도 링크 타겟이 있으면 입력 없이 링크를 시도해 실패할 수 있습니다. 할 일 없음으로 끝난다고 가정하지 말고 빈 목록을 검사합니다.
 
 **해결**: `$(info SRCS = [$(SRCS)])`로 즉시 확인.
 
@@ -596,9 +652,9 @@ Make 변수는 `$(...)`, 셸 변수는 `$$...`. *한 번에 두 가지를 다루
 
 ## 시리즈 마무리
 
-GNU Make는 1976년 Stuart Feldman이 만든 도구입니다. 50년 가까이 지난 지금도 거의 모든 C/C++ 프로젝트가 직접 혹은 간접적으로 Make를 거쳐 빌드됩니다. *이렇게 오래 살아남은 도구는 드뭅니다.* 단순한 mtime 비교 + 의존성 그래프 + 셸 호출이라는 *작고 일관된 원리* 덕분입니다.
+이 시리즈는 GNU Make에서 규칙·변수·레시피를 연결하는 동작을 확인했습니다. 원조 make의 역사와 GNU Make 구현을 섞거나 모든 C/C++ 프로젝트가 같은 빌드 경로를 따른다고 일반화하지 않습니다.
 
-이 시리즈가 다룬 내용은 *실무에 들어갈 만한 모든 패턴*입니다. 더 큰 프로젝트가 되면 자연스럽게 CMake·Bazel·Meson·Ninja 같은 메타 빌드 도구를 만나게 됩니다. 흥미로운 점은, 그 도구들도 *결국 Make나 Ninja 파일을 생성*해 그 위에서 빌드한다는 사실입니다. 즉 이 시리즈에서 본 mtime·의존성·incremental build의 원리는 *그 위 계층에서도 계속 동작*합니다.
+이 시리즈가 다룬 내용은 *실무에 들어갈 만한 모든 패턴*입니다. 더 큰 프로젝트가 되면 자연스럽게 CMake·Bazel·Meson·Ninja 같은 메타 빌드 도구를 만나게 됩니다. CMake와 Meson처럼 생성기를 사용하는 도구와 Bazel처럼 자체 빌드 모델을 가진 도구를 구분해야 합니다. Ninja 자체도 빌드 실행 도구입니다. 즉 이 시리즈에서 본 mtime·의존성·incremental build의 원리는 *그 위 계층에서도 계속 동작*합니다.
 
 다음 단계로 [CMake 시리즈](/blog/tools/build/cmake/chapter01-intro)를 권합니다. CMake는 *Make/Ninja를 자동 생성*하는 메타 빌드 시스템으로, 크로스 플랫폼·IDE 통합·외부 라이브러리 탐색을 단번에 해결합니다.
 

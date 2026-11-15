@@ -1,0 +1,113 @@
+{
+  "date": "2026-10-22",
+  "baseline": "HEAD source hashes; chapters 01 and 02 already had partial workspace edits before this continuation, so their original pre-edit workspace hashes are unavailable.",
+  "rescored": false,
+  "articles": [
+    {
+      "path": "src/content/blog/tools/debugging/postmortem/chapter01-core-generation.md",
+      "beforeSha256": "476bfdb39b34a00962768b0e60e349d705aa0e9465c35c882efa94a27bf121f2",
+      "afterSha256": "b63e0e1709dcb2279012c47ceec3c6e911b0ddb8e5457c40bbbfb74c37b8a70d",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static API contract passed: PR_SET_DUMPABLE 0/1 separated from suid_dumpable; pipe limit caveat present; named Linux C sample source checked; Linux headers/runtime unavailable, so no compile or execution; article publish gate blocking checks PASS; upstream cited-symbol audit SKIPPED (not a pass); inline math check PASS; git diff --check PASS",
+      "dispositionEvidence": {
+        "contextAndScope": "Linux 프로세스의 core 생성 설정, `/blog/tools/debugging/postmortem/chapter01-core-generation`.",
+        "signalAndRefutation": "`PR_SET_DUMPABLE=2`를 쓰는 API 예제와 suid_dumpable 설명 혼동이 문제 신호. 두 설정은 별개이며 2는 현대 API 값이 아님.",
+        "causeAndAlternatives": "역사적 `suid_dumpable` mode 2를 `PR_SET_DUMPABLE` 인자로 옮긴 혼동. 각각의 man page와 커널 sysctl 문서로 분리해 설명.",
+        "evidence": "[PR_SET_DUMPABLE man page](https://man7.org/linux/man-pages/man2/PR_SET_DUMPABLE.2const.html), [kernel suid_dumpable docs](https://docs.kernel.org/admin-guide/sysctl/fs.html#suid-dumpable), [core_pattern docs](https://docs.kernel.org/admin-guide/sysctl/kernel.html#core-pattern).",
+        "sampleScope": "본문 전체와 titled C fence를 확인; C 예제는 Linux API가 없는 로컬 환경에서 컴파일/실행하지 않았고, 코드 상수는 정적 검사.",
+        "decision": "remediated: 0/1 API 호출만 보이고, 별도 sysctl=2 의미와 pipe/file 경로 조건을 분리해 서술.",
+        "smallestSafeChangeAndRollback": "본문 두 설정 설명과 named example만 변경. URL/frontmatter 보존. 되돌릴 경계는 이 파일의 diff.",
+        "validationAndResidualRisk": "static contract PASS. Linux core 생성, systemd-coredump와 핸들러 실행은 미검증; 대상 배포판에서 재검토 필요."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/postmortem/chapter02-elf-core-format.md",
+      "beforeSha256": "d7f781f51e9555a781a903486b440d5293a8ae71070173578fe0831c277b9e45",
+      "afterSha256": "69349514a631f086c385b5679f9300b9c5910f5520e217520ef19c6e378e4928",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; Linux si_code values checked against official signal documentation; named C layout arithmetic model compile/run and SIZE_MAX overflow rejection passed; this is not a kernel ABI test; article publish gate blocking checks PASS; upstream cited-symbol audit SKIPPED (not a pass); inline math check PASS; git diff --check PASS",
+      "dispositionEvidence": {
+        "contextAndScope": "ELF core notes와 Linux siginfo 설명, `/blog/tools/debugging/postmortem/chapter02-elf-core-format`.",
+        "signalAndRefutation": "SEGV_BNDERR/PKUERR 및 ILL_PRVOPC/PRVREG의 숫자가 Linux ABI 값과 달랐음.",
+        "causeAndAlternatives": "상수 값의 오기. 구조 전체가 동일하다고 확장하지 않고 아키텍처/커널 의존 caveat 유지.",
+        "evidence": "[Linux sigaction si_code docs](https://man7.org/linux/man-pages/man2/sigaction.2.html#The_si_code_field); 공식 값: SIGSEGV 3/4, SIGILL 5/6.",
+        "sampleScope": "전체 글과 titled ELF note arithmetic C fixture 확인; 실제 core ABI·아키텍처 레지스터 layout은 시험하지 않음.",
+        "decision": "remediated: 잘못된 값 수정, note layout C 예제는 ABI 구현이 아니라 align 계산 모델로 한정.",
+        "smallestSafeChangeAndRollback": "상수/범위 표현과 모델 주석만 변경. 고정 URL과 메타데이터 보존.",
+        "validationAndResidualRisk": "clang compile 및 모델 체크 PASS; 실제 Linux kernel note emit/reader interop 미검증."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis.md",
+      "beforeSha256": "d7b794e6a38ec9ecffd96eb6daa87c06ac2a3e857f76d26105a6a29d8f9acd7c",
+      "afterSha256": "9a63c403b064fc8518e5c38873d4d71c843855585b1774164a984e95b7620fff",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; Linux si_code values checked; series handoff points to chapters 5 and 6; named gdb-core-batch.sh extracted from article and bash -n passed; article publish gate blocking checks PASS; upstream cited-symbol audit SKIPPED (not a pass); inline math check PASS; git diff --check PASS",
+      "dispositionEvidence": {
+        "contextAndScope": "GDB로 core 파일을 여는 절차와 시그널 표, `/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis`.",
+        "signalAndRefutation": "siginfo 숫자 6/7은 Linux 정의와 불일치; `coredumpctl debug` 설명은 자동 debuginfo 확보까지 단정했음; Ch4를 series 마지막으로 표기.",
+        "causeAndAlternatives": "상수 복사 오류 및 debugger 시작과 심볼 다운로드를 같은 기능으로 묶은 설명. 실행 파일/core 지정과 debuginfod 설정을 구분.",
+        "evidence": "[Linux si_code docs](https://man7.org/linux/man-pages/man2/sigaction.2.html#The_si_code_field), [GDB command-line docs](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Invocation.html), [GDB debuginfod settings](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debuginfod-Settings.html).",
+        "sampleScope": "GDB batch/open commands directly extracted and shell syntax checked; GDB is unavailable, no actual core opened.",
+        "decision": "remediated: corrected table, described debugger launch without promising symbols, added non-running batch invocation and fixed series handoff.",
+        "smallestSafeChangeAndRollback": "Text and two titled shell snippets only; URL and order preserved. Revert is confined to chapter03 diff.",
+        "validationAndResidualRisk": "static check and bash -n PASS; user GDB config, auto-load behavior, actual core symbols and outputs remain unverified."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation.md",
+      "beforeSha256": "0f4e6b8fec6c9d0b049c2e285cafafaa963491a1593df6a80cc8673d090e1e4d",
+      "afterSha256": "278fd72b7909a963a1c2157c8434c35e6a3a5d6e47e516d37614f15caa9e3e18",
+      "status": "remediated",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; static contracts passed: CI step ordering, Python string grouping, SHA-1 length, debuginfod defaults and variable minidump scope; named postmortem.sh extracted from article and bash -n passed; named analyze-and-alert.py extracted and Python syntax-compiled (no GDB/drgn execution); named core-notes.py extracted and Python syntax-compiled (no GDB/drgn execution); named pyelftools example parsed a synthetic ELF64 PT_NOTE fixture with pyelftools 0.32; not a Linux core test; article publish gate blocking checks PASS; upstream cited-symbol audit SKIPPED (not a pass); inline math check PASS; git diff --check PASS",
+      "dispositionEvidence": {
+        "contextAndScope": "Build-ID matching, debuginfod, minidump, CI, and Python/pyelftools examples, `/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation`.",
+        "signalAndRefutation": "SHA-1 length claim, unconditional core build-id, noninteractive GDB download assumption, CI `|| true` plus `failure()`, Python join TypeError and incomplete ELF parser were incorrect or overbroad.",
+        "causeAndAlternatives": "Format lengths, core contents, debugger defaults, Actions status conditions and Python types were conflated. Clarify conditional behavior; require explicit inputs; keep unsupported ABI decoding out of sample.",
+        "evidence": "[GNU ld build-id docs](https://sourceware.org/binutils/docs/ld/Options.html), [GDB debuginfod settings](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debuginfod-Settings.html), [elfutils debuginfod](https://sourceware.org/elfutils/Debuginfod.html), [GitHub Actions status functions](https://docs.github.com/en/actions/reference/workflows-and-actions/expressions), [Sanitizer common flags](https://github.com/google/sanitizers/wiki/SanitizerCommonFlags).",
+        "sampleScope": "Named shell/Python/YAML excerpts extracted from the article; bash syntax, Python syntax, synthetic ELF PT_NOTE fixture tested. No GDB, CI runner, production debuginfod, Breakpad/crashpad, Sentry or real core.",
+        "decision": "remediated: corrected SHA-1 to 20 bytes; made build-id/core and debuginfod conditional; fixed CI and join; limited pyelftools output to note inventory; made minidump claims variable.",
+        "smallestSafeChangeAndRollback": "Only confirmed description/body/fence corrections; URL/date/order unchanged. Revert boundary is this chapter.",
+        "validationAndResidualRisk": "bash -n, Python compile, synthetic PT_NOTE parser and static contracts PASS. Service URLs, versions, YAML workflow integration and real artifacts still need environment testing."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem.md",
+      "beforeSha256": "dc6125affae1664d4ba9d19182c5d24bbbdc986d0dfd99556bac03a34b393f8f",
+      "afterSha256": "b70244efa3b13e0ce385d563932579f2fd70f60b6fb69987e8f615626cd4113e",
+      "status": "unassessed",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; named drgn-cxl-region.py extracted and Python syntax-compiled (no GDB/drgn execution); named drgn-cxl-nodes.py extracted and Python syntax-compiled (no GDB/drgn execution); CXL runtime boundary explicitly stated; no hardware/vmcore validation claimed; article publish gate blocking checks PASS; upstream cited-symbol audit SKIPPED (not a pass); inline math check PASS; git diff --check PASS",
+      "dispositionEvidence": {
+        "contextAndScope": "CXL device vmcore/drgn article, `/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem`.",
+        "signalAndRefutation": "Prior published-loop calls factcheck verified based on source inspection; that does not establish drgn execution or device/vmcore behavior.",
+        "causeAndAlternatives": "Source-code inspection and runtime/hardware evidence are different scopes. Preserve source-derived explanation but state runtime limit.",
+        "evidence": "[Linux CXL core RAS source](https://github.com/torvalds/linux/blob/master/drivers/cxl/core/ras.c), [CXL structures](https://github.com/torvalds/linux/blob/master/drivers/cxl/cxl.h), [kernel CXL docs](https://cdn.kernel.org/doc/html/latest/driver-api/cxl/linux/cxl-driver.html).",
+        "sampleScope": "Read the chapter and named drgn Python fences; syntax compilation only. No drgn, Linux kernel vmcore, CXL device, or live host used.",
+        "decision": "unassessed: added an explicit source/hardware validation limit. Do not treat previous source comparison as runtime verification.",
+        "smallestSafeChangeAndRollback": "Added scope note and fence labels only; no CXL implementation claim changed. Revert confined to this chapter.",
+        "validationAndResidualRisk": "Python syntax and text-scope checks PASS; field validity and runtime walker behavior remain unverified; manual review question: 명시한 drgn 버전과 고정 Linux kernel build/vmcore에서 각 필드와 walker가 실행되는가?"
+      },
+      "nextAction": "manual-review",
+      "reviewQuestion": "명시한 drgn 버전과 고정 Linux kernel build/vmcore에서 각 필드와 walker가 실행되는가?"
+    },
+    {
+      "path": "src/content/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem.md",
+      "beforeSha256": "55b0c34418afa82529941bc7b52a381c79bd04efa938f8aa3bed45e327f3af92",
+      "afterSha256": "af63dffab0b6688638cd8f65e64c82d7410bbd6c6b2c8a3a9a08d844db06f296",
+      "status": "unassessed",
+      "validation": "slug/date/series/seriesOrder/draft match HEAD; named drgn-fabric-concept.py extracted and Python syntax-compiled (no GDB/drgn execution); concept-only scope explicit; unverified runtime identifiers are not marked as verified; article publish gate blocking checks PASS; upstream cited-symbol audit SKIPPED (not a pass); inline math check PASS; git diff --check PASS",
+      "dispositionEvidence": {
+        "contextAndScope": "CXL fabric multi-host postmortem article, `/blog/tools/debugging/postmortem/chapter06-cxl-fabric-postmortem`.",
+        "signalAndRefutation": "The article contains unverified ptime, tracepoint, BISnp, time-accuracy, drgn and LWP claims; a proposed scenario is not reproduced evidence.",
+        "causeAndAlternatives": "Conceptual operational guidance is written in declarative form. Explicitly label examples as plans and avoid claiming kernel-version support for a fabric helper.",
+        "evidence": "Published-loop-34 marks the entire article unverified and lists ptime/PROC TIME, BISnp count, cxl_mem read/write tracepoint and LWP as unconfirmed. No new hardware source was available for those claims.",
+        "sampleScope": "Full article read and conceptual Python fence syntax-compiled. No CXL fabric, FM, switch, CXL kernel, vmcore, or trace session.",
+        "decision": "unassessed: retain the scenario framework with an explicit validation caveat; no technical claims promoted to verified.",
+        "smallestSafeChangeAndRollback": "Added conceptual-scope note, marked precision estimates as environment-dependent, removed unverified kernel 6.5+ helper claim; preserve article URL and order.",
+        "validationAndResidualRisk": "Syntax/static scope checks PASS only; all environment-specific claims need manual review. Review question: 지원되는 CXL fabric, FM, switch, kernel 조합에서 각 자료원과 시나리오를 재현할 수 있는가?"
+      },
+      "nextAction": "manual-review",
+      "reviewQuestion": "지원되는 CXL fabric, FM, switch, kernel 조합에서 각 자료원과 시나리오를 재현할 수 있는가?"
+    }
+  ]
+}

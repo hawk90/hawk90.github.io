@@ -1,0 +1,58 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-24",
+  "series": "CXL 4.0 Internals",
+  "batch": "Ch11",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-10.md"
+  ],
+  "primarySources": [
+    "https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a/drivers/cxl",
+    "https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/pci.c",
+    "https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/hdm.c",
+    "https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/mbox.c",
+    "https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/region.c",
+    "https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/cxl/mailbox.h"
+  ],
+  "validationCommands": [
+    "node scripts/verify-cxl-driver-boundaries.mjs",
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md"
+  ],
+  "scope": "Full original/loop10 entry and actual Linuxv6.12Makefile,probe,HDMcommit,region,mailbox,struct,PCIerrorandDAXpathreview. Actual unchanged mailbox function/commandstruct/returncodetable extracted with explicit host shims and mock transport ASan/UBSan.",
+  "limits": "No kernel build/run, real kernel ABI/locking/MMIO/mailbox,decodercommit/reset,regioncreation/unbinding,DAX/SystemRAMchange,PCIerrorinjectionorType2/4.0supportclaim. Hostmockusesvalidinitializedpointersanddefineddevicereturncodes,notunknown-codeboundary. Generic clone gate skipped,notpassed. Frozen scores unchanged.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md",
+      "status": "remediated",
+      "beforeSha256": "a1745a0f72079d0b0f6b166dbf5a89107ede8e874d13d1aefc893d992302411b",
+      "afterSha256": "d196eb110a146ff0a0f1fd8266ba8d6517a5c503021027847090f1effd8d99f3",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Hostverifier,gate,mathandscopeddiffpass. Nohardware/kernelrunorlocked/active-memoryrollbacktested. Doesnotcertifynewerkernelor4.0support.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/cxl/chapter11-linux-driver.md",
+        "problemSignalAndCounterevidence": "Loop10flagsinheritedunverifiedv7.3-rc6sourceandduplication/recipesnumber. Actualv6.12differsinprobeorder,names,HDMsetup/reset,locks,errorfile/structlocationsandregistration;originalfuturecodecannotberepresentedasverifiedv6.12.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "Readoriginal294linesandfullfrozenentry. Actualv6.12 adc2186 Makefile/struct/probe/cxld_await_commit/cxl_decoder_commit/commit_store/cxl_internal_send_cmd/cxl_error_detected andDAXselectedpathscompared. HostharnessextractsunchangedkernelCwithactualcommandstructandrcmappingtable/helpers,articlematchesaftercomment/whitespaceremoval;oversizeblocksdispatch,transporttimeout/EIOremap,success/background/definederrorcodesandshortoutputASan/UBSan.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Rewritefocusedmanagement/failure-boundarychapteragainstactualv6.12. Separateprobe/memdev/commit/DAXRAM,correctrealprobecallsandcore/pci.cRAS,source-qualifiedcommitresetandtimeoutsemantics,removelatestType2claims/internaltrackingmetadataandblanketrollbackpromise. Includeonlyrealmailboxfunctionwithtokencomparison;manuallynarrowdescription.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Hostverifier,gate,mathandscopeddiffpass. Nohardware/kernelrunorlocked/active-memoryrollbacktested. Doesnotcertifynewerkernelor4.0support. No kernel build/run, real kernel ABI/locking/MMIO/mailbox,decodercommit/reset,regioncreation/unbinding,DAX/SystemRAMchange,PCIerrorinjectionorType2/4.0supportclaim. Hostmockusesvalidinitializedpointersanddefineddevicereturncodes,notunknown-codeboundary. Generic clone gate skipped,notpassed. Frozen scores unchanged."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Foranactualkernel/firmware/topology,whichprobe/region/mailboxstateandfailuretracesdemonstrateusablemappingandsaferecoverywithoutlosingactive-memorydata?"
+        }
+      ]
+    }
+  ]
+}

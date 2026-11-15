@@ -29,7 +29,7 @@ Rust는 이를 컴파일러 차원에서 강제하지만, C++는 프로그래머
 
 ## 세 역할 — Owner, Observer, Borrower
 
-C++ 스마트 포인터의 세 가지 소유권 모델을 그림으로 보면 차이가 분명합니다. `unique_ptr`은 단일 소유자가 자원을 직접 가리키고, `shared_ptr`은 control block을 매개로 여러 소유자가 공유합니다. `weak_ptr`은 refcount에 영향을 주지 않고 약하게 참조만 합니다.
+C++ 스마트 포인터의 세 가지 소유권 모델을 그림으로 보면 차이가 분명합니다. `unique_ptr`은 단일 소유자가 자원을 직접 가리키고, `shared_ptr`은 control block을 매개로 여러 소유자가 공유합니다. weak_ptr는 strong count를 늘리지 않지만 control block의 weak 수명 관리에는 참여합니다.
 
 ![unique/shared/weak 소유권 모델](/images/blog/embedded-cpp/diagrams/part3-10-ownership-graph.svg)
 
@@ -86,7 +86,7 @@ void process(const Data& data) {   // borrower
 }
 ```
 
-함수 매개변수가 전형적인 borrower이며 함수 scope 동안만 유효합니다.
+이 글에서 borrower는 호출 동안만 사용하는 계약, observer는 멤버 등에 보관하는 비소유 참조를 뜻합니다. C++의 참조 타입이 이 기간을 강제하지는 않습니다. 실제 객체는 호출보다 오래 살 수 있지만 참조를 저장하려면 별도 수명 계약이 필요합니다.
 
 C++에서 borrowing은 다음과 같이 표현합니다.
 
@@ -110,7 +110,7 @@ C++에서 borrowing은 다음과 같이 표현합니다.
 ```cpp
 class Display {
 public:
-    Display(Bus& bus) : bus_(bus) {}   // borrower — bus는 외부 소유
+    Display(Bus& bus) : bus_(bus) {}   // observer — bus는 외부 소유
 
     void clear() { bus_.write(CLEAR_CMD); }
 
@@ -213,7 +213,7 @@ void consumer() {
 }
 ```
 
-copy로 소유권을 이전하므로 두 task는 공유 메모리를 갖지 않고 race도 발생하지 않습니다.
+이벤트 값은 queue가 복사하며 producer의 원본 소유권은 이전되지 않습니다. queue item size가 sizeof(Event)로 설정되어 있고 send가 성공해야 합니다. 포인터가 없는 이 Event payload는 별도 복사본이므로 payload 자체의 공유 race를 피하지만 task가 접근하는 다른 전역 상태까지 보호하지는 않습니다.
 
 ### 2. Pool + handle
 
@@ -222,21 +222,26 @@ ObjectPool<LargeMessage, 16> pool;
 QueueHandle_t handle_queue;
 
 void producer() {
-    auto* msg = pool.allocate();
-    msg->fill(...);
-    xQueueSend(handle_queue, &msg, portMAX_DELAY);   // pointer pass
+    auto* msg = pool.construct(/* 생성 인자 */);
+    if (!msg) return; // 고갈 정책
+    msg->fill(/* 데이터 */);
+    if (xQueueSend(handle_queue, &msg, 0) != pdPASS) {
+        pool.destroy(msg); // 전송 실패: producer가 계속 owner
+        return;
+    }
+    // 전송 성공: 이제 producer는 msg에 접근하지 않음
 }
 
 void consumer() {
     LargeMessage* msg;
     if (xQueueReceive(handle_queue, &msg, portMAX_DELAY)) {
         process(*msg);
-        pool.deallocate(msg);   // 소유권 명시적 해제
+        pool.destroy(msg);   // 소멸 후 슬롯 반환
     }
 }
 ```
 
-큰 객체는 copy 비용이 크므로 pool과 pointer로 전달합니다. 소유권은 producer에서 consumer로 명확히 이동합니다.
+이 스케치는 queue item size=sizeof(LargeMessage*)와 성공한 queue 생성을 전제로 합니다. 소유권은 send 성공 시에만 consumer로 이전합니다. 실패·queue 삭제·shutdown 때 남은 메시지의 반환 정책이 필요하고, producer와 consumer가 pool을 동시에 사용하면 pool 메타데이터를 task-safe하게 보호해야 합니다. pointer 전달 자체가 이 계약을 강제하지는 않습니다.
 
 ### 3. Shared state with mutex
 
@@ -263,7 +268,7 @@ void read(SystemState& out) {
 }
 ```
 
-공유 객체에 lock을 걸어 보호합니다. 소유권은 시스템 전체에 속하며 각 task는 non-owning ref만 사용합니다.
+이 스케치는 mutex 생성·획득 성공을 전제로 합니다. 모든 접근 경로가 같은 lock을 지켜야 하며 mutex는 ISR에서 사용할 수 없습니다. 소유자는 정적 저장 기간의 시스템 객체이고 각 task는 잠시 비소유 접근합니다.
 
 ## 임베디드 — Callback 소유권
 
@@ -300,7 +305,7 @@ void setup() {
 }
 ```
 
-lambda를 reference로 capture하면 함수 scope가 끝나는 순간 dangling이 됩니다. value capture로 잡거나 외부 owner를 둡니다.
+lambda를 reference로 capture하면 함수 scope가 끝나는 순간 dangling이 됩니다. value capture로 잡거나 외부 owner를 둡니다. 다만 data가 포인터·span·string_view를 포함하면 복사는 얕은 참조를 남길 수 있으며 callback 등록 해제와 실행 중 호출의 수명도 관리해야 합니다.
 
 ## C++ Core Guidelines
 
@@ -355,7 +360,7 @@ public:
     // A를 어떻게 copy/move? b_ 못 재바인딩
 };
 ```
-reference 멤버는 immutable이라 copy/move가 어렵습니다. pointer 멤버를 검토합니다.
+참조 멤버를 가진 타입도 복사·이동 생성될 수 있으며 새 객체의 참조는 같은 대상을 가리킵니다. 반면 암시적 copy/move 대입은 참조를 재바인딩할 수 없어 삭제됩니다. 생성과 대입을 구분하고, 보관 대상의 수명이 두 객체보다 긴지 확인합니다.
 
 ### 5. Borrowed 객체 저장
 ```cpp
@@ -371,23 +376,55 @@ void register_callback(void* ctx, void (*cb)(void*));
 ```
 type 정보가 사라집니다. C 인터페이스에서만 쓰고, C++에서는 template이나 std::function을 활용합니다.
 
-## 측정 — 소유권 명시의 효과
+## 실행 확인 — 전달 성공·실패와 보관 참조
 
-같은 모듈을 명시적 소유권 버전과 raw pointer 버전으로 비교합니다.
+다음 host 예제는 용량 1인 queue 모형으로 소유권 계약을 검증합니다. 실제 FreeRTOS scheduler나 queue 구현을 실행한 것은 아닙니다. 성공하면 caller의 unique_ptr가 비고 실패하면 caller가 계속 소유해야 합니다.
 
-```text
-# Raw pointer + new/delete
-모듈 크기: 4.2 KB
-메모리 leak (1주일 stress): 3-5건/일
-use-after-free: 1-2건/주
-
-# unique_ptr 명시적 owner
-모듈 크기: 4.3 KB (+100 B)
-메모리 leak: 0
-use-after-free: 0
+```cpp title="ownership.cpp"
+#include <cassert>
+#include <memory>
+#include <type_traits>
+#include <utility>
+struct Message {
+    static inline int live = 0;
+    Message() { ++live; }
+    ~Message() { --live; }
+};
+class Queue {
+    std::unique_ptr<Message> slot_;
+public:
+    bool send(std::unique_ptr<Message>& owner) {
+        if (slot_ || !owner) return false;
+        slot_ = std::move(owner);
+        return true;
+    }
+    std::unique_ptr<Message> receive() { return std::move(slot_); }
+};
+struct Observer { int& value; };
+static_assert(std::is_copy_constructible_v<Observer>);
+static_assert(std::is_move_constructible_v<Observer>);
+static_assert(!std::is_copy_assignable_v<Observer>);
+int main() {
+    Queue queue;
+    auto a = std::make_unique<Message>();
+    auto b = std::make_unique<Message>();
+    assert(queue.send(a) && !a);
+    assert(!queue.send(b) && b && Message::live == 2);
+    auto received = queue.receive();
+    assert(received); received.reset();
+    assert(Message::live == 1);
+    assert(queue.send(b) && !b);
+    queue.receive().reset();
+    assert(Message::live == 0 && !queue.receive());
+    int bus = 7; Observer first{bus}; Observer second = first;
+    assert(&first.value == &second.value);
+#ifdef ASSIGN_OBSERVER
+    first = second;
+#endif
+}
 ```
 
-100 B 추가만으로 버그가 완전히 사라집니다. 모범 사례로 자리잡은 이유입니다.
+명시적 owner만으로 dangling 참조나 race가 사라지지는 않습니다. 실제 RTOS에서는 queue 성공·실패·shutdown·pool 고갈·consumer 중단도 시험하고 callback 해제 뒤 실행 중 호출이 남는지 확인합니다. 버그 감소·코드 크기 수치는 측정하지 않았습니다.
 
 ## 정리
 
@@ -398,11 +435,17 @@ use-after-free: 0
 - RTOS task 간에는 message passing (copy)이나 pool + handle로 전달합니다.
 - Lambda를 reference로 capture하면 dangling 위험이 있으므로 value capture나 외부 owner를 씁니다.
 
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [참조 멤버와 암시적 copy/move 대입](https://eel.is/c++draft/class.copy.assign)
+
 ## 관련 항목
 
 - [Part 3-09: 스마트 포인터 선택](/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice)
 - [Part 2-01: RAII 기초](/blog/embedded/embedded-cpp/part2-01-raii-basics)
-- Refactoring Pattern 33: Change Reference to Value
+- [FreeRTOS xQueueSend — 값 복사와 반환 상태](https://www.freertos.org/Documentation/02-Kernel/04-API-references/06-Queues/03-xQueueSend)
 - [C++ Core Guidelines — Resource Management](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource)
 
 ## 다음 글 (Part 4 시작)

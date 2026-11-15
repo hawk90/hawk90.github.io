@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"표준 라이브러리가 5개의 RAII 도구를 제공합니다."** — `lock_guard`, `scoped_lock`, `unique_lock`, `unique_ptr`, `ScopeGuard` 패턴.
+> **"표준 RAII 도구와 ScopeGuard 패턴을 용도별로 구분합니다."** — `lock_guard`, `scoped_lock`, `unique_lock`, `unique_ptr`, `ScopeGuard` 패턴. 이 글의 `ScopeGuard`는 직접 구현한 도구이며 C++17/20 표준 라이브러리 타입이 아닙니다.
 
 ## 어떤 문제를 푸는가
 
@@ -65,23 +65,28 @@ class FreeRtosMutex {
     SemaphoreHandle_t handle_;
 public:
     FreeRtosMutex() : handle_(xSemaphoreCreateMutex()) {}
-    ~FreeRtosMutex() { vSemaphoreDelete(handle_); }
+    ~FreeRtosMutex() { if (handle_) vSemaphoreDelete(handle_); }
     SemaphoreHandle_t native() { return handle_; }
 
     FreeRtosMutex(const FreeRtosMutex&) = delete;
+    FreeRtosMutex& operator=(const FreeRtosMutex&) = delete;
 };
 
 class FreeRtosLockGuard {
     SemaphoreHandle_t handle_;
 public:
+    bool locked_ = false;
+public:
+    bool owns_lock() const noexcept { return locked_; }
     explicit FreeRtosLockGuard(FreeRtosMutex& m) : handle_(m.native()) {
-        xSemaphoreTake(handle_, portMAX_DELAY);
+        locked_ = handle_ && xSemaphoreTake(handle_, portMAX_DELAY) == pdTRUE;
     }
     ~FreeRtosLockGuard() {
-        xSemaphoreGive(handle_);
+        if (locked_) xSemaphoreGive(handle_);
     }
 
     FreeRtosLockGuard(const FreeRtosLockGuard&) = delete;
+    FreeRtosLockGuard& operator=(const FreeRtosLockGuard&) = delete;
 };
 ```
 
@@ -93,13 +98,16 @@ int counter = 0;
 
 void increment() {
     FreeRtosLockGuard lock(m);
+    if (!lock.owns_lock()) return;
     counter++;
 }
 ```
 
+이 FreeRTOS 스케치는 mutex 생성·획득 실패를 호출자가 확인하는 구조입니다. mutex의 수명은 guard보다 길어야 하고 ISR에서는 사용할 수 없습니다. `portMAX_DELAY`의 무기한 대기 여부는 FreeRTOS 설정에도 의존합니다.
+
 ## 패턴 2 — `std::scoped_lock` (C++17)
 
-여러 mutex를 deadlock 없이 동시에 lock합니다.
+서로 다른 mutex 여러 개를 deadlock 회피 알고리즘으로 획득합니다. 원자적인 동시 획득은 아니며, 같은 비재귀 mutex를 두 번 전달하거나 외부에서 중첩 잠금을 잘못 구성한 경우까지 해결하지 않습니다.
 
 ```cpp
 std::mutex m1, m2;
@@ -180,21 +188,7 @@ UniqueFd open_file(const char* path) {
 }
 ```
 
-`new int`가 들어가 조금 무겁습니다. 값 타입을 활용하면 더 가볍게 만들 수 있습니다.
-
-```cpp
-struct Fd {
-    int value;
-    operator int() const { return value; }
-};
-
-struct FdDeleter {
-    void operator()(Fd* fd) const {
-        if (fd && fd->value >= 0) close(fd->value);
-        delete fd;
-    }
-};
-```
+위 구현은 파일 descriptor를 담기 위해 별도 heap 할당을 사용합니다. `new int`가 실패하면 이미 연 descriptor도 정리해야 하므로 실제 코드에서는 아래의 값 기반 move-only `FileHandle`을 사용하거나 할당 실패 경로를 별도로 처리해야 합니다. `Fd*`로 감싸는 것만으로 heap 할당은 없어지지 않습니다.
 
 ### 임베디드 — Pool에서 할당된 객체
 
@@ -224,7 +218,7 @@ using UniqueFile = std::unique_ptr<FILE, decltype(&fclose)>;
 UniqueFile f(fopen("data.bin", "r"), &fclose);
 ```
 
-`sizeof(UniqueFile)`이 8바이트가 됩니다(포인터 + 함수 포인터). struct나 lambda 같은 empty class deleter는 empty base optimization으로 4바이트로 줄어듭니다.
+함수 포인터 deleter는 주소를 저장할 공간이 필요할 수 있습니다. 32비트 ABI의 흔한 구현은 두 포인터 크기지만, 정확한 크기는 ABI와 라이브러리 구현에 달립니다. 빈 deleter는 압축될 수 있으며 `sizeof`로 확인합니다.
 
 임베디드에서는 empty struct deleter를 권장합니다.
 
@@ -244,6 +238,7 @@ public:
     void dismiss() { dismissed_ = true; }
 
     ScopeGuard(const ScopeGuard&) = delete;
+    ScopeGuard& operator=(const ScopeGuard&) = delete;
 };
 
 // 헬퍼
@@ -251,7 +246,9 @@ template<typename F>
 ScopeGuard<F> make_scope_guard(F f) { return ScopeGuard<F>(std::move(f)); }
 
 // 매크로 (선택)
-#define FINALLY(code) auto _guard_##__LINE__ = make_scope_guard([&]{ code; })
+#define GUARD_JOIN_IMPL(a, b) a##b
+#define GUARD_JOIN(a, b) GUARD_JOIN_IMPL(a, b)
+#define FINALLY(code) auto GUARD_JOIN(_guard_, __LINE__) = make_scope_guard([&]{ code; })
 ```
 
 사용은 다음과 같습니다.
@@ -267,7 +264,7 @@ void process() {
 }
 ```
 
-C++ Core Guidelines의 `gsl::finally`도 같은 패턴입니다.
+매크로를 여러 번 쓰려면 서로 다른 줄에 둡니다. `##`에 직접 붙은 `__LINE__`은 먼저 확장되지 않으므로 두 단계 결합이 필요합니다. 정리 함수는 예외를 던지지 않아야 하고 guard가 참조하는 자원의 수명도 유지되어야 합니다. C++ Core Guidelines의 `gsl::finally`도 같은 패턴입니다.
 
 ### 임베디드 — peripheral 일시 활성
 
@@ -285,7 +282,7 @@ void send_uart_burst(const uint8_t* data, size_t len) {
 }
 ```
 
-함수 종료, return, 예외 어느 경로에서도 UART off가 보장됩니다.
+정상 scope 이탈과 stack unwinding에서는 UART off가 실행됩니다. reset·abort는 별개이며, 이미 활성화된 UART의 상태를 보존해야 하거나 공유 소유자가 있다면 이 enable/disable 쌍을 그대로 적용하지 않습니다.
 
 ### `dismiss` — commit 패턴
 
@@ -313,6 +310,7 @@ struct Scoped {
     Scoped() { Enable(); }
     ~Scoped() { Disable(); }
     Scoped(const Scoped&) = delete;
+    Scoped& operator=(const Scoped&) = delete;
 };
 
 // 사용
@@ -327,7 +325,7 @@ void use_pins() {
 }
 ```
 
-C++17의 `auto` non-type template parameter를 활용합니다. 함수 포인터가 컴파일 타임에 박히므로 오버헤드가 0입니다.
+C++17의 `auto` non-type template parameter를 활용합니다. 호출 대상이 컴파일 타임에 정해져 인라인 기회를 제공합니다. 인라인과 추가 비용의 제거는 최적화 결과로 확인합니다.
 
 ## 패턴 7 — Resource Handle with Move
 
@@ -388,6 +386,7 @@ public:
     }
 
     CriticalSection(const CriticalSection&) = delete;
+    CriticalSection& operator=(const CriticalSection&) = delete;
 };
 ```
 
@@ -427,7 +426,7 @@ void inner() {
 
 ### 1. temporary lock_guard
 ```cpp
-std::lock_guard(m);   // 임시 객체 — 즉시 소멸 → lock 안 됨!
+std::lock_guard<std::mutex>{m};   // 임시 객체 — 문장 끝에 즉시 unlock
 ```
 임시 객체는 즉시 소멸하므로 lock이 유지되지 않습니다. 반드시 변수에 바인딩해 `std::lock_guard lock(m)` 형태로 씁니다.
 
@@ -435,7 +434,7 @@ std::lock_guard(m);   // 임시 객체 — 즉시 소멸 → lock 안 됨!
 ```cpp
 std::unique_ptr<FILE, decltype(&fclose)> f(fopen(...), &fclose);
 ```
-sizeof가 두 배로 늘어납니다. struct deleter를 권장합니다.
+함수 포인터 상태 때문에 크기가 커질 수 있습니다. 정확한 크기는 대상에서 측정하고 상태가 필요 없다면 빈 struct deleter를 고려합니다.
 
 ### 3. ScopeGuard 함수 호출 빠짐
 ```cpp
@@ -471,33 +470,49 @@ Handle(Handle&& other) : fd_(other.fd_) {}   // other.fd_ 안 비움
 ```
 move 시 원본을 `other.fd_ = -1`처럼 무효화해야 합니다.
 
-## 측정 — `lock_guard` 오버헤드
+## 작은 예제 — 두 정리와 취소
 
-```text
-# 수동 lock/unlock
-manual_lock:
-    bl      mutex_lock
-    ldr     r3, [counter]; adds r3, #1; str r3, [counter]
-    bl      mutex_unlock
-    bx      lr
+C++17의 두 단계 매크로 결합과 취소 경로를 실제 실행합니다. 이 호스트 예제는 RTOS mutex나 MMIO 동작을 검증하지 않습니다.
 
-# lock_guard 사용
-raii_lock:
-    bl      mutex_lock           ; constructor 인라인
-    ldr     r3, [counter]; adds r3, #1; str r3, [counter]
-    bl      mutex_unlock         ; destructor 인라인
-    bx      lr
+```cpp title="scope-check.cpp"
+#include <cassert>
+#include <utility>
+template<class F> struct ScopeGuard {
+    F f; bool active = true;
+    explicit ScopeGuard(F fn) : f(std::move(fn)) {}
+    ~ScopeGuard() noexcept { if (active) f(); }
+    void dismiss() noexcept { active = false; }
+    ScopeGuard(const ScopeGuard&) = delete;
+};
+template<class F> auto make_scope_guard(F f) {
+    return ScopeGuard<F>(std::move(f));
+}
+#define GUARD_JOIN_IMPL(a,b) a##b
+#define GUARD_JOIN(a,b) GUARD_JOIN_IMPL(a,b)
+#define FINALLY(code) auto GUARD_JOIN(guard_,__LINE__) = make_scope_guard([&]{code;})
+int main() {
+    int n = 0;
+    {
+        FINALLY(++n);
+        FINALLY(n += 2);
+    }
+    assert(n == 3);
+    { auto g = make_scope_guard([&]{++n;}); g.dismiss(); }
+    assert(n == 3);
+}
 ```
 
-완전히 동일합니다. RAII는 zero-cost입니다.
+실행: `clang++ -std=c++17 -Wall -Wextra -pedantic-errors scope-check.cpp -o scope-check && ./scope-check`. Clang 23.1.3 arm64 macOS에서 확인했습니다. 기존의 단일 단계 결합은 같은 scope의 두 선언이 `guard___LINE__`으로 겹쳐 컴파일에 실패합니다.
+
+[표준 초안의 전처리 결합 규칙](https://eel.is/c++draft/cpp.concat)과 [Core Guidelines의 finally 권고](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#e19-use-a-final_action-object-to-express-cleanup-if-no-suitable-resource-handle-is-available)를 참고합니다.
 
 ## 정리
 
-- 표준 RAII 패턴은 5가지입니다 — `lock_guard`, `scoped_lock`, `unique_lock`, `unique_ptr+deleter`, `ScopeGuard`.
+- 여기서 다룬 RAII 도구와 패턴은 `lock_guard`, `scoped_lock`, `unique_lock`, `unique_ptr+deleter`, `ScopeGuard`.
 - 임베디드에서는 Scoped enable/disable, Move-only handle, Critical section with preservation 패턴이 추가됩니다.
 - Custom deleter는 struct나 lambda로 작성해 empty class optimization을 받으며, 함수 포인터는 sizeof를 늘립니다.
 - ScopeGuard는 일회성 cleanup의 보편 패턴이며 `gsl::finally`도 같은 역할을 합니다.
-- 모든 RAII는 zero-cost이며 컴파일러가 생성자와 소멸자를 인라인합니다.
+- RAII의 추가 비용과 객체 크기는 ABI·최적화·필요한 상태에 따라 확인합니다.
 
 ## 관련 항목
 
@@ -508,4 +523,4 @@ raii_lock:
 
 ## 다음 글
 
-[Part 2-03: constexpr 기초](/blog/embedded/embedded-cpp/part2-03-constexpr-basics) — 컴파일 타임 계산으로 런타임 코드를 제거합니다. `-Os`보다 더 강력한 기능적 0 비용을 달성합니다.
+[Part 2-03: constexpr 기초](/blog/embedded/embedded-cpp/part2-03-constexpr-basics) — 컴파일 타임 계산으로 런타임 코드를 제거합니다. 상수 평가가 필요한 위치와 최적화의 차이를 확인합니다.

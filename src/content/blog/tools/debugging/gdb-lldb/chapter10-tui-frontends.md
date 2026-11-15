@@ -60,7 +60,7 @@ TUI는 `ncurses` 위에 구현됐습니다. 정지·재개 이벤트마다 GDB�
 
 ### 제약
 
-- 윈도 깨짐이 자주 일어남(`Ctrl-l` 자주 누르게 됨). 이유는 GDB가 ncurses 화면 위에 그대로 `print` 출력을 던지면서 화면이 망가지기 때문입니다. *Python으로* 직접 ncurses와 통합한 cgdb·dashboard가 더 안정적인 이유.
+- 윈도 깨짐이 자주 일어남(`Ctrl-l` 자주 누르게 됨). 이유는 GDB가 ncurses 화면 위에 그대로 `print` 출력을 던지면서 화면이 망가지기 때문입니다. cgdb는 별도 terminal frontend이며 dashboard는 GDB Python으로 텍스트를 다시 그립니다. 서로 다른 구조이므로 모두 Python·ncurses 통합이라고 설명하면 안 됩니다.
 - 마우스 안 됨.
 - 일부 환경에서 color 안 나옴.
 - 변수·watch 패널 없음.
@@ -82,9 +82,9 @@ $ cgdb ./my_program
 
 ### 동작 원리
 
-cgdb는 GDB를 *서브프로세스*로 띄우고 stdin/stdout을 가로챕니다. *MI*(머신 인터페이스) 명령을 보내 *현재 PC, 소스 파일, 콜스택*을 구조적으로 받아 자체 ncurses UI를 그립니다. GDB 내장 TUI보다 ncurses와 충돌이 적은 이유.
+cgdb는 별도 GDB 프로세스와 통신하는 terminal frontend입니다. 통신 인터페이스와 지원 GDB 범위는 선택한 cgdb release 문서로 확인하며, 이 검증에서는 cgdb를 실행하지 않았습니다.
 
-GDB 내장 TUI보다 *훨씬* 안정적입니다. 패키지 매니저로 바로 설치되므로 첫 선택지로 추천.
+GDB 내장 TUI와 별도 terminal frontend 중 필요한 소스 탐색·키 바인딩·출력 흐름을 비교합니다. 안정성 우열은 이 검증에서 측정하지 않았습니다.
 
 ```text
 ~/.cgdb/cgdbrc            # 설정
@@ -100,7 +100,8 @@ map <C-n> :gdb next<CR>
 [cyrus-and/gdb-dashboard](https://github.com/cyrus-and/gdb-dashboard) — 한 파이썬 스크립트(`~/.gdbinit`에 source)로 콘솔에 멀티 패널을 그립니다.
 
 ```bash
-$ wget -O ~/.gdbinit https://raw.githubusercontent.com/cyrus-and/gdb-dashboard/master/.gdbinit
+$ curl -L https://raw.githubusercontent.com/cyrus-and/gdb-dashboard/master/.gdbinit -o /tmp/gdb-dashboard.gdbinit
+# 내용을 검토한 뒤 필요한 설정을 기존 ~/.gdbinit에 source로 추가
 $ gdb ./my_program
 ```
 
@@ -116,7 +117,7 @@ $ gdb ./my_program
 
 ### 어떻게 그리는가
 
-`gdb.events.stop`에 훅을 걸어 정지마다 *각 패널의 콘텐츠*를 Python으로 수집해 print. ncurses를 쓰지 않으므로 화면 깨짐 없음. 매 정지마다 *위에서 아래로 다시 그려지는* 식이라 스크롤백을 잃지 않습니다.
+`gdb.events.stop`에 훅을 걸어 정지마다 패널 내용을 Python으로 수집해 terminal에 그립니다. ncurses window를 쓰지는 않지만 ANSI escape sequence·다른 확장과의 출력 상호작용은 여전히 확인해야 합니다. 화면 갱신과 스크롤백 동작은 확장 버전과 terminal 설정으로 확인합니다.
 
 장점 — Python 한 파일이라 설정/이식 쉬움. TUI 모드처럼 화면이 깨지지 않고, 매 정지마다 위쪽에 패널이 다시 그려집니다.
 
@@ -156,7 +157,7 @@ $ cd pwndbg && ./setup.sh
 
 터미널을 벗어나면 VSCode가 가장 많이 쓰는 프런트엔드입니다. GDB 사용자 입장에서 알아 둘 것은 *두 익스텐션이 GDB와 대화하는 방식이 다르다*는 점입니다.
 
-`cppdbg`는 Microsoft가 만든 C/C++ 익스텐션으로, GDB와 *MI 프로토콜*로 통신합니다. GDB의 명령이 그대로 전달되므로 `.gdbinit`의 pretty-printer 설정이 살아 있고, `setupCommands`로 GDB 명령을 직접 밀어 넣을 수도 있습니다. `CodeLLDB`는 LLDB의 DAP 서버를 직접 띄우는 쪽이라 macOS·Rust·Swift에서 강합니다.
+`cppdbg`는 Microsoft가 만든 C/C++ 익스텐션으로, GDB와 *MI 프로토콜*로 통신합니다. GDB의 명령이 그대로 전달되므로 `.gdbinit`의 pretty-printer 설정이 살아 있고, `setupCommands`로 GDB 명령을 직접 밀어 넣을 수도 있습니다. `CodeLLDB`는 자체 DAP adapter와 LLDB backend를 통합합니다. LLVM lldb-dap와 동일 executable이라고 가정하지 않습니다.
 
 MI를 한 겹 거치기 때문에 생기는 어긋남도 있습니다. 조건부 breakpoint의 표현식이 GDB에서 직접 칠 때와 미묘하게 다르게 평가되는 경우가 있고, `fork` 추적은 GDB에서 `set follow-fork-mode`로 다루던 만큼 정교하지 않습니다. 콘솔 입력이 필요한 프로그램은 `"externalConsole": true`가 필요하고, core dump는 `coreDumpPath`를 따로 줘야 합니다.
 
@@ -171,7 +172,7 @@ local dap = require('dap')
 
 dap.adapters.lldb = {
   type = 'executable',
-  command = '/usr/bin/lldb-vscode',
+  command = 'lldb-dap', -- 설치 경로/PATH와 선택한 adapter의 지원 버전 확인
   name = 'lldb',
 }
 
@@ -226,7 +227,7 @@ Neovim 안에서 디버그 패널 띄우고, REPL로 표현식 평가. Vim 키�
 
 ## DAP — 표준 프로토콜의 의미
 
-VSCode·Neovim·Emacs(dap-mode)·Sublime·Helix가 모두 *같은* DAP를 씁니다. 따라서 한 어댑터(`cppdbg`)를 설치하면 어느 에디터든 동일한 디버깅 경험을 얻을 수 있습니다. RSP가 *디버거 ↔ 타깃* 표준이라면 DAP는 *IDE ↔ 디버거* 표준.
+여러 editor와 debug adapter가 DAP를 사용합니다. 프로토콜을 공유해도 adapter 지원 기능·editor UI·설정 방식은 서로 다르며, `cppdbg`를 모든 editor에서 쓸 수 있는 것은 아닙니다. RSP가 *디버거 ↔ 타깃* 연결에 쓰이는 반면 DAP는 editor와 debug adapter 사이의 통신 규약입니다.
 
 ```text
 [에디터] ← DAP → [adapter (예: cppdbg)] ← MI → [GDB]
@@ -236,7 +237,7 @@ VSCode·Neovim·Emacs(dap-mode)·Sublime·Helix가 모두 *같은* DAP를 씁니
 
 ### DAP 메시지
 
-JSON-RPC over TCP/stdio. 모든 메시지가 *request / response / event* 셋.
+DAP는 자체 request/response/event schema를 가진 프로토콜이며 JSON-RPC 2.0이 아닙니다. UTF-8 JSON body 앞에 Content-Length: <바이트 수>와 CRLF 두 번을 붙이고 stdio 또는 socket stream으로 전달합니다.
 
 ```json
 // 요청
@@ -246,7 +247,7 @@ JSON-RPC over TCP/stdio. 모든 메시지가 *request / response / event* 셋.
 // 응답
 {"seq": 2, "type": "response", "request_seq": 1, "success": true,
  "command": "initialize",
- "body": {"supportsConfigurationDoneRequest": true, ...}}
+ "body": {"supportsConfigurationDoneRequest": true}}
 
 // 이벤트
 {"seq": 3, "type": "event", "event": "stopped",
@@ -330,11 +331,11 @@ class ViewImage(gdb.Command):
 ViewImage()
 ```
 
-컴퓨터 비전·비디오 코덱·머신러닝 디버깅에서 가시화는 *콜스택을 100번 들여다보는 것보다* 빠릅니다.
+이 예제는 width/height/data를 가진 packed RGB8 구조를 가정합니다. 실제 NumPy ndarray·stride·pixel format을 자동으로 해석하는 코드는 아니며 버퍼 크기·접근 권한을 먼저 확인합니다.
 
 ## Cortex-Debug — Cortex-M을 붙일 때
 
-Cortex-M 펌웨어라면 [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)가 IDE 쪽 표준입니다. OpenOCD·J-Link·ST-Link·Black Magic Probe를 자동으로 띄우고 GDB를 붙여 주므로, [Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)에서 손으로 하던 gdbserver 연결이 설정 한 덩어리로 줄어듭니다.
+Cortex-M용 VS Code 선택지 중 하나는 [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)입니다. 지원되는 probe·server에 맞는 launch 설정을 제공하며, 실제 시작·연결 절차는 extension 버전과 설정에 따릅니다. [Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)의 원격 연결 흐름을 이해한 뒤 사용합니다.
 
 이 시리즈의 관심사는 GDB 쪽이므로 여기서는 GDB 사용자가 얻는 것만 짚습니다. SVD 파일을 읽어 peripheral 레지스터를 비트 단위로 펼쳐 주고, Segger RTT 출력을 콘솔에 얹어 주며, J-Link에서는 CPU를 세우지 않고도 변수를 갱신합니다.
 
@@ -356,20 +357,20 @@ Cortex-M 펌웨어라면 [Cortex-Debug](https://marketplace.visualstudio.com/ite
 ## 정리
 
 - 내장 TUI(`Ctrl-x a`)는 빠른 시각화, 화면 깨짐만 감수하면 충분.
-- cgdb·gdb-dashboard가 터미널에서 가장 안정적.
+- cgdb·gdb-dashboard는 터미널에서 쓸 수 있는 두 가지 선택지입니다. 안정성은 GDB·extension·terminal 조합에서 확인합니다.
 - gef/pwndbg는 보안·CTF 용으로 강력하지만 일반 작업엔 시끄러움.
 - IDE 통합은 VSCode + cppdbg/CodeLLDB 또는 nvim-dap.
-- DAP가 IDE↔디버거 표준 — request/response/event 셋의 JSON-RPC.
+- DAP가 IDE↔디버거 표준 — request/response/event 셋의 자체 JSON 메시지와 Content-Length framing.
 - 변수 트리는 `variables` 재귀 호출로 지연 로드.
-- Cortex-M은 VSCode Cortex-Debug 익스텐션이 자동으로 OpenOCD/J-Link까지 묶어 줌. SVD/RTT 통합.
+- Cortex-M은 probe·server·launch 구성을 확인하고 Cortex-Debug 같은 extension을 선택합니다. SVD·RTT 기능은 extension과 probe 설정 지원을 확인합니다.
 
 ## 다음 장 예고
 
-Ch 11(시리즈 마지막) — 실전 팁. STL pretty-printer, -O2로 빌드된 코드 디버깅, `.gdbinit` 추천 설정, time-travel(rr)으로 마무리.
+Ch 11 — 실전 팁. STL pretty-printer, -O2로 빌드된 코드 디버깅, `.gdbinit` 추천 설정, time-travel(rr)으로 마무리.
 
 ## 관련 항목
 
-- [Ch 8: 원격 디버깅](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging) — Cortex-Debug 익스텐션이 OpenOCD를 띄움
+- [Ch 8: 원격 디버깅](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging) — probe와 server 연결 설정
 - [Ch 9: Python 스크립팅](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting) — dashboard도 Python 확장
 - [DAP 명세](https://microsoft.github.io/debug-adapter-protocol/)
 - [cgdb 공식](https://cgdb.github.io/)

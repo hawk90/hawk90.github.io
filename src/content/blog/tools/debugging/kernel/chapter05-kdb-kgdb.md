@@ -47,7 +47,7 @@ $ make -j$(nproc)
 # 2. QEMU 실행 — kgdb on serial + console
 $ qemu-system-x86_64 \
     -kernel arch/x86/boot/bzImage \
-    -append "console=ttyS0 kgdbwait kgdboc=ttyS1,115200 nokaslr" \
+    -append "root=/dev/sda rw rootwait console=ttyS0 kgdboc=ttyS1,115200 kgdbwait nokaslr" \
     -serial mon:stdio \
     -serial tcp::4444,server,nowait \
     -hda rootfs.img \
@@ -56,7 +56,7 @@ $ qemu-system-x86_64 \
 
 부팅 옵션 핵심.
 
-- `kgdbwait` — *부팅 초기*에 디버거 대기 (안 켜면 부팅 진행).
+- `kgdbwait` — *부팅 초기*에 디버거 대기. KGDB I/O 드라이버가 built-in이어야 하며, 드라이버 설정(`kgdboc`) 뒤에 둡니다.
 - `kgdboc=ttyS1,115200` — kgdb를 두 번째 시리얼에.
 - `nokaslr` — KASLR 비활성 (디버깅 시 주소 일관성).
 - `console=ttyS0` — 첫 시리얼에 콘솔.
@@ -125,7 +125,7 @@ $ gdb vmlinux
 $ echo g | sudo tee /proc/sysrq-trigger    # kgdb 진입
 ```
 
-`g`가 kgdb. *어디서든* 즉시 break — 호스트의 대기 중인 gdb가 prompt.
+`g`는 kgdb 진입을 요청합니다. KGDB와 I/O transport가 초기화되어 있고 타깃이 해당 경로를 처리할 수 있어야 호스트의 대기 중인 GDB가 연결됩니다.
 
 ### Method 2 — 부팅 시 wait
 
@@ -145,7 +145,7 @@ kgdb_breakpoint();    // 또는 KGDB_BREAKPOINT 매크로
 kgdb 없이 *타깃 콘솔에서 직접* 디버그.
 
 ```bash
-$ echo kbd | sudo tee /sys/module/kgdboc/parameters/kgdboc
+$ echo kbd | sudo tee /sys/module/kgdboc/parameters/kgdboc  # CONFIG_KDB_KEYBOARD 필요
 $ echo g | sudo tee /proc/sysrq-trigger
 [Entering kdb (current=...) on processor 0 due to Keyboard Entry]
 kdb> ?
@@ -215,23 +215,11 @@ $ cat /sys/fs/pstore/dmesg-ramoops-0
 [이전 부팅의 panic 직전 dmesg]
 ```
 
-특정 메모리 영역을 *부팅 간 보존* → ring buffer 저장. NV-SRAM 또는 보호된 영역 사용.
+이 값은 실제 기기의 예약된 메모리 영역과 겹치지 않도록 플랫폼에 맞게 설정해야 합니다. 메모리 주소·크기를 임의로 복사하지 말고 firmware/device tree와 ramoops binding 설정을 확인하세요. 지원 구성이면 panic 로그를 재부팅 뒤 pstore에서 읽을 수 있습니다.
 
-## kgdboe — Ethernet
+## Ethernet transport
 
-시리얼 대신 *UDP over Ethernet*. 매우 빠름.
-
-```text
-kgdbwait kgdboe=@<host-ip>/eth0,@<target-ip>
-```
-
-호스트:
-```bash
-$ gdb vmlinux
-(gdb) target remote udp:<target-ip>:6443
-```
-
-매우 새 기능. 시리얼이 표준.
+이 문서가 기준으로 삼는 mainline Linux의 `kgdboc` 경로는 시리얼 콘솔 또는 지원되는 keyboard 입력을 설정합니다. `kgdboe`라는 이름의 일반 부팅 인자와 위 UDP 연결 명령은 현재 upstream KGDB 문서에서 확인되지 않으므로 재현 가능한 mainline 예제로 제시하지 않습니다. Ethernet 연결이 필요하면 대상 커널의 실제 transport 드라이버·문서·빌드 설정을 먼저 확인하세요.
 
 ## 실전 — 한 흐름
 
@@ -295,7 +283,7 @@ NFS 함수에서 멈춘 스레드 발견 → 그 콜스택의 *대기 객체* �
 | `target remote` 응답 없음 | kgdbwait 안 켰음, 또는 시리얼 포트 잘못 |
 | 콜스택이 깨짐 | CONFIG_FRAME_POINTER 안 켜져 있거나 inline 많음 |
 | 주소가 안 맞음 | nokaslr 안 켜졌음 |
-| 부팅 후 응답 없음 | kgdboc=ttyS1인데 console=ttyS1로 충돌 |
+| 부팅 후 응답 없음 | `kgdbwait` 위치·built-in 여부·tty 장치와 baud를 확인. tty 공유 제약은 console/driver 구성에 따라 다르며 `kgdbcon` 제약과 구분 |
 | `Could not find vmlinux` | gdb가 -g 없는 vmlinux 사용. debuginfo 별 패키지 |
 | step 한 줄에 *수십 명령* | 인라인 + 최적화. CONFIG_DEBUG_INFO_REDUCED 끄기 |
 

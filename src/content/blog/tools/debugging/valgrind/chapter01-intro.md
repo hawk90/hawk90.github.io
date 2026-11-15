@@ -24,7 +24,7 @@ Valgrind를 한 줄로 요약하면 *바이너리 위에서 가상 머신을 띄
 - ↑
 - 여기서 메모리·동기화 관찰
 
-핵심은 *재컴파일이 필요 없다*는 것입니다. 이미 만들어진 바이너리에 Valgrind만 붙이면 동작합니다.
+핵심은 *재컴파일이 필요 없다*는 것입니다. 지원되는 OS·아키텍처·명령어의 바이너리를 Valgrind 아래에서 처음부터 실행합니다. 이미 실행 중인 임의의 프로세스에 attach하는 방식과는 다릅니다.
 
 ```bash
 $ ./myapp                       # 정상 실행
@@ -38,26 +38,16 @@ $ valgrind --tool=helgrind ./myapp   # 다른 도구
 
 ## *Sanitizer 시대*에 Valgrind가 살아남은 이유
 
-Sanitizer가 더 빠르고 정확한데도 Valgrind가 사라지지 않는 이유는 *서로 닿는 영역이 다르기* 때문입니다.
+도구마다 검사 방식과 필요한 준비가 다릅니다. 하나가 항상 더 정확하거나 다른 하나만 특정 오류를 검출한다고 단정하지 않습니다.
 
-| 자리 | Sanitizer | Valgrind |
-|------|-----------|----------|
-| 재컴파일 가능 | 우월 (2~3× 오버헤드) | 느림 (10~50×) |
-| 재컴파일 불가능 | *동작 안 함* | *유일한 선택지* |
-| 시스템 호출 추적 | 부분적 | *완전* |
-| 외부 .so 라이브러리 내부 | 계측 안 됨 → 부분 검사 | *모든 코드 추적* |
-| 컴파일러 의존 | GCC/Clang 필수 | *무관* (바이너리만 있으면) |
-| 초기화 안 된 메모리 | MSan (Clang only) | *Memcheck 기본 동작* |
-| 시스템·임베디드 | *제한적* | *광범위* |
+| 조건 | Sanitizer | Valgrind |
+| --- | --- | --- |
+| 검사 준비 | 대상 코드·종속 코드의 계측 범위를 확인합니다. | 지원되는 바이너리를 분석 환경 아래에서 실행합니다. |
+| 초기화되지 않은 값 | MSan 등 해당 검사를 선택합니다. | Memcheck가 값의 정의 상태와 사용을 검사합니다. |
+| 외부 라이브러리 | 비계측 코드에 탐지 공백이 생길 수 있습니다. | 재계측 없이 분석하지만 OS·명령어·동기화 모델의 제한이 있습니다. |
+| 비용 | 검사·입력별로 측정합니다. | 도구·입력별로 측정합니다. |
 
-요약: **Sanitizer를 일상에서 쓰고, Valgrind를 *닿지 못하는 자리*에서 씁니다**. 둘이 경쟁이 아니라 *보완*인 이유입니다.
-
-대표적인 Valgrind만 가능한 자리:
-
-- **상용 라이브러리·SDK** — 소스 없이 바이너리만 받은 경우. 재컴파일 자체가 불가능.
-- **레거시 시스템** — 옛 GCC, 임베디드 cross compiler, 오래된 RHEL/CentOS.
-- **시스템 호출 깊이 추적** — `read()`/`write()`/`mmap()` 같은 syscall 단위 동작을 정확히.
-- ***초기화 안 된 메모리 사용*의 정확한 시작점** — Memcheck가 *바이트 단위 정의/미정의 상태*를 추적.
+소스 없는 SDK의 지원 바이너리나 다른 계측 빌드를 준비하기 어려운 경우에 Valgrind를 검토합니다. 시스템 호출에 넘기는 버퍼를 검사하는 기능은 모든 syscall을 완전하게 추적한다는 뜻이 아닙니다. 단순 호출 흐름 추적은 해당 OS의 syscall 추적 도구와 구분합니다.
 
 ---
 
@@ -88,7 +78,7 @@ valgrind --tool=memcheck ./app
 
 - 메모리 누수 (alloc 후 free 안 함)
 - Invalid read/write (해제된 메모리 접근, 경계 침범)
-- *Uninitialized value 사용* (Valgrind만의 강점)
+- *Uninitialized value 사용* (MSan과도 검사 목적이 겹칩니다.)
 - Double free / mismatched free (`malloc`/`new[]`/`delete` 짝 오류)
 - Overlapping memcpy
 
@@ -102,7 +92,7 @@ valgrind --tool=helgrind ./app
 
 잡는 것:
 
-- POSIX pthreads의 잘못된 사용 (락 해제 안 함, 이미 잠긴 락에 unlock)
+- POSIX pthreads의 잘못된 사용 (소유하지 않은 mutex unlock 등)
 - 데이터 레이스 (동기화 없이 동시 접근)
 - 락 순서 위반 (deadlock potential)
 - pthread cond signal/wait 패턴 오류
@@ -115,12 +105,7 @@ valgrind --tool=helgrind ./app
 valgrind --tool=drd ./app
 ```
 
-Helgrind와 *영역이 겹치지만 알고리즘이 다릅니다*. DRD는 *Lamport's vector clock*을 기반으로, Helgrind는 *happens-before + 락 추적*. 둘 중:
-
-- **Helgrind**: 락 오용에 강함, false positive 적음.
-- **DRD**: 메모리 사용량 적음, 큰 코드에 유리, 일부 데이터 레이스를 Helgrind보다 잘 잡음.
-
-실무에서는 *Helgrind를 먼저 시도*하고, 그래도 안 잡히면 DRD로 확인하는 식.
+Helgrind와 DRD는 POSIX 동기화와 데이터 접근을 관찰하는 동적 분석 도구입니다. Helgrind는 happens-before 기반 레이스 검사와 잠금 순서 검사 등을 제공하고, DRD도 happens-before 관계를 이용하며 잠금 보유 시간의 경합 진단 옵션이 있습니다. 어느 쪽이 항상 더 적은 메모리를 쓰거나 더 정확하다는 순위를 이 글의 측정 없이 제시하지 않습니다.
 
 ---
 
@@ -129,11 +114,11 @@ Helgrind와 *영역이 겹치지만 알고리즘이 다릅니다*. DRD는 *Lampo
 | 상황 | 권장 도구 |
 |------|----------|
 | 일반 메모리 버그 (alloc/free/access) | **Memcheck** |
-| 초기화 안 된 값 사용 의심 | **Memcheck** (Sanitizer로 못 잡음) |
+| 초기화 안 된 값 사용 의심 | **Memcheck** 또는 지원 환경의 **MSan** |
 | 멀티스레드 락 오용 | **Helgrind** |
 | 데이터 레이스 추적 | **Helgrind** 또는 **DRD** |
 | 락 순서 / deadlock 가능성 | **Helgrind** |
-| 큰 코드 + 메모리 부족 | **DRD** (Helgrind보다 가벼움) |
+| 큰 코드 + 메모리 부족 | 실제 입력으로 두 도구의 메모리 비용을 비교합니다. |
 | 캐시 미스 분석 | **Cachegrind** |
 | 호출 그래프 + 프로파일 | **Callgrind** |
 | 힙 메모리 추세 분석 | **Massif** |
@@ -144,20 +129,25 @@ Helgrind와 *영역이 겹치지만 알고리즘이 다릅니다*. DRD는 *Lampo
 
 ## 첫 사용 — Hello, Memcheck
 
-```c
+```c title="leak.c"
 // leak.c
 #include <stdlib.h>
 #include <string.h>
 
-int main() {
+int main(int argc, char** argv) {
+    (void)argv;
     char* buf = malloc(40);
+    if (!buf) return 1;
     strcpy(buf, "hello");
-    // free(buf) 빠뜨림
+    if (argc > 1) free(buf);
+    // 인자가 없으면 의도적으로 해제하지 않는 진단 입력
     return 0;
 }
 ```
 
-```bash
+다음 로그는 Linux 보고 형식 예시이며 이번 macOS 환경에서 수집한 실측 결과가 아닙니다.
+
+```text
 $ gcc -g leak.c -o leak
 $ valgrind --leak-check=full ./leak
 ==12345== Memcheck, a memory error detector
@@ -185,11 +175,11 @@ $ valgrind --leak-check=full ./leak
 핵심 줄들:
 
 1. **`HEAP SUMMARY`** — 종료 시 살아 있는 할당 요약.
-2. **`definitely lost`** — *진짜 누수*. 어디서도 못 가리키는 메모리. Sanitizer의 *Direct leak*과 동일.
+2. **`definitely lost`** — *진짜 누수*. 어디서도 못 가리키는 메모리. LSan의 direct leak과 목적은 비슷하지만 루트·휴리스틱·보고 기준까지 동일하지는 않습니다.
 3. **스택 트레이스** — `leak.c:5`까지 정확히 가리킴.
 4. **`LEAK SUMMARY`** — 네 가지 누수 종류로 분류 (definitely / indirectly / possibly / still reachable).
 
-`leak.c:5`가 *줄 번호*까지 정확합니다. 이게 `-g` 디버그 심볼 덕분.
+파일·줄 번호를 읽으려면 -g와 지원되는 디버그 형식이 필요합니다. 위 예시의 고정 줄 번호가 현재 파일의 실행 결과를 증명하지는 않습니다.
 
 ---
 
@@ -209,24 +199,19 @@ sudo dnf install valgrind
 
 ### macOS
 
-```bash
-brew install --HEAD valgrind   # macOS는 공식 지원이 약함
-```
-
-macOS는 Apple Silicon에서 *공식 지원이 사라졌습니다*. Intel Mac에서만 어느 정도 동작. *최근 macOS = Sanitizer 우선*이고, 깊은 Valgrind 분석은 Linux 환경에서 합니다.
+[공식 지원 플랫폼](https://valgrind.org/info/platforms.html)은 Darwin의 일부 Intel OS 버전을 열거하지만 Apple Silicon/macOS는 열거하지 않습니다. Apple Silicon 지원이 있었다가 사라졌다고 설명하지 않습니다. 현재 Mac에서 brew --HEAD 설치가 동작한다고 보장하지 않으며, 분석할 바이너리를 지원되는 Linux 환경에서 준비하는 방식을 검토합니다.
 
 ### Windows
 
-WSL이 정답입니다. *네이티브 Windows Valgrind는 없습니다*.
+네이티브 Windows를 공식 지원 대상으로 가정하지 않습니다. WSL이나 Linux VM을 쓸 때도 해당 커널·아키텍처·배포판과 도구의 지원 여부를 확인합니다.
 
-### 권장 버전
-
-3.18.0+ — 최신 GCC·Clang의 디버그 심볼 형식 지원.
+### 버전과 검증 범위
 
 ```bash
-$ valgrind --version
-valgrind-3.22.0
+valgrind --version
 ```
+
+사용 중인 버전과 대상 바이너리의 디버그 형식·명령어 지원을 함께 기록합니다. 특정 최소 버전 하나로 최신 컴파일러 전체 지원을 보장하지 않습니다. 이번 환경에는 Valgrind가 없어 leak.c의 컴파일과 free 분기 정상 실행만 확인하며, 실제 Memcheck 보고는 Linux 검증 대기입니다.
 
 ---
 
@@ -242,10 +227,10 @@ valgrind-3.22.0
 
 ## 정리
 
-- **Valgrind**는 *바이너리 가상 머신*. 재컴파일 없이 분석. 10~50× 느림.
+- **Valgrind**는 지원 바이너리를 동적으로 분석하며 도구·입력별 비용을 확인합니다.
 - *Sanitizer와 보완 관계*. 닿지 못하는 자리(상용 SDK / 시스템 호출 / 외부 .so)에 씀.
 - 세 핵심 도구: **Memcheck** (메모리 + 초기화), **Helgrind** (락 + race), **DRD** (race).
-- macOS는 *공식 지원 약함*. Linux + WSL이 사실상 표준 환경.
+- OS·CPU·명령어·디버그 형식 지원을 확인합니다. 이 환경의 Apple Silicon/macOS 실행은 미지원 범위입니다.
 - 권장 운영: 일상 = Sanitizer, *릴리스 전 점검* = Valgrind Memcheck.
 
 ## 다음 장 예고

@@ -1,0 +1,137 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Bootloader Internals",
+  "batch": "chapter16–chapter18",
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-02.md"
+  ],
+  "rescore": false,
+  "readyForIntegration": true,
+  "scope": "Only Bootloader Internals chapter16–18 source articles and this batch evidence. No score, grade, rubric, or evaluation status generated or modified.",
+  "metadataException": {
+    "path": "src/content/blog/embedded/bootloader/chapter17-ab-update.md",
+    "field": "description",
+    "reason": "Manually narrowed the description because the former broad fallback phrasing implied generic U-Boot slot switching; official bootcount documentation separates core boot-count policy from product slot selection and health handling."
+  },
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh <chapter16-18> — all blocking checks pass; manual source review completed; upstream clone-only checks SKIPPED (not PASS)",
+    "node scripts/check-inline-math.mjs <chapter16-18> — pass",
+    "git diff --check -- <chapter16-18> — pass",
+    "Frontmatter title/slug/date/series/seriesOrder/draft compared with pre-edit HEAD — unchanged; chapter17 description exception recorded above",
+    "Markdown fenced code block delimiters counted and validated as even for all three articles"
+  ],
+  "primarySources": [
+    "https://docs.u-boot.org/en/v2025.01/usage/fit/signature.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/bootm.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/uefi/uefi.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/bootefi.html",
+    "https://docs.u-boot.org/en/v2025.01/api/bootcount.html",
+    "https://rauc.readthedocs.io/en/latest/integration.html",
+    "https://rauc.readthedocs.io/en/latest/basic.html",
+    "https://uefi.org/specs/UEFI/2.10/13_Protocols_Media_Access.html"
+  ],
+  "runtimeAvailability": {
+    "uBootBuild": "not available",
+    "uBootBoard": "not available",
+    "mkimage": "not found on PATH",
+    "dtc": "not found on PATH",
+    "EFIvariableBackend": "not available",
+    "RAUCTarget": "not available"
+  },
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter16-verified-boot.md",
+      "beforeSha256": "1274a34cbaceef40c688b13128678c69abd81f7f8465da23e5e471b6c830e05d",
+      "afterSha256": "8385c4f5e96d98832410bb871a0421bd8d06f4a2f99e0a35f023c0f751bf68fe",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "U-Boot FIT signatures, required-key policy, signing/control-FDT sample, bootm path, anti-rollback boundary, dm-verity handoff and all remaining command/transcript claims.",
+        "problemSignalAndCounterevidence": "The original presented a verified chain and automatic rejection as universal, used conflicting signing flags, treated CONFIG_FIT_SIGNATURE alone as mandatory enforcement, asserted FIT format checking consults OTP, and treated cmdline/root-hash provenance as inherent.",
+        "causeHypothesisAndAlternatives": "FIT signature verification is conditional on required-key policy and selected execution path. U-Boot generic FIT format checking does not establish product anti-rollback. The cited docs distinguish selected configuration and required keys.",
+        "evidence": "U-Boot v2025.01 FIT signature and bootm documentation, linked in the article and below.",
+        "sampleCoverage": "Read the entire article, read-only published evaluation, ITS/signing/Kconfig/bootm/anti-rollback/dm-verity examples, and cited documentation. No U-Boot build, mkimage/dtc/fdtdump or target was available; no FIT artifact or positive/negative signature test was run.",
+        "decision": "Retain a compact account of the U-Boot FIT verification boundary; remove duplicated unsupported internals and fabricated step-by-step logs. Mark the remaining console snippets illustrative, not executed.",
+        "smallestSafeChange": "Edited chapter16 only; no keys, firmware, FIT, media, board, or persistent state was created or changed. Rollback boundary is the article source.",
+        "validationAndResidualRisk": "Static blocking gate, inline-math, diff check and metadata invariants passed. Upstream clone checks SKIPPED (not PASS). FIT generation, trusted-key enrollment, positive/negative verification, config selection and actual anti-rollback remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 pinned U-Boot tag, board defconfig, signing key/control-DT pipeline과 unsigned/invalid FIT samples로 required-signature의 positive/negative boot 결과를 확인할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter17-ab-update.md",
+      "beforeSha256": "210d343f7d4bcfda491bfc01b70b4977e2836f26a12ab98c256559b7906a4e94",
+      "afterSha256": "37aa6e95f89d23cd4935c27c757e78becd0aab6f4c6e6697b02fd2f5f4f890b9",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass_with_recorded_description_exception",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "A/B slot layout and update flow, U-Boot bootcount/altbootcmd semantics, userspace success, backend behavior, Android metadata and RAUC contract.",
+        "problemSignalAndCounterevidence": "The original conflated core bootcount with slot switching, generalized upgrade_available, used mismatched variable names and sample commands, presented RAUC handler/variables incorrectly, and promised automatic recovery.",
+        "causeHypothesisAndAlternatives": "U-Boot bootcount increments on reset and altbootcmd condition is bootcount > bootlimit when configured; slot switching/health policy is separate. RAUC U-Boot bootchooser has a documented bootname/BOOT_ORDER/BOOT_*_LEFT contract and requires a matching script.",
+        "evidence": "U-Boot v2025.01 bootcount docs and RAUC integration/basic docs, linked below.",
+        "sampleCoverage": "Read the entire article, read-only published evaluation and all state diagrams, command/service samples, backend and RAUC/Android claims. No board, U-Boot runtime or update framework target was available; no writes/power-cut or fallback test was run.",
+        "decision": "Remove unverified generic command recipes and backend table; state the documented boundaries and retain only the framework contract checked against the official docs.",
+        "smallestSafeChange": "Edited chapter17 only; no environment, boot metadata, persistent storage, firmware or board was modified. Rollback boundary is the article source.",
+        "validationAndResidualRisk": "Static blocking gate, inline-math, diff check and metadata invariants passed with the recorded description exception. Upstream clone checks SKIPPED (not PASS). Board-specific backend persistence, slot transition, watchdog/health, RAUC runtime and power-loss recovery remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 board revision, U-Boot bootcount backend와 RAUC/update-framework version/script를 기준으로 bootcount, health marker, slot fallback 및 power-loss recovery를 시험할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter18-efi-in-uboot.md",
+      "beforeSha256": "17271443b6eeda9390c7a0309fb8c8e899908ece645d6b245433203050e7f2f0",
+      "afterSha256": "868650e6a14cbf2382ec14d39ea72f3ef99897697c2d471f9aef49b05f746ef2",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "U-Boot EFI command/configuration, Boot Manager, variable persistence, Secure Boot, EBBR/SystemReady, UEFI partition formats, Linux EFI stub and distro installer examples.",
+        "problemSignalAndCounterevidence": "The original asserted a nonexistent bootefi setup command, universal EFI variable file/env backends, unqualified Secure Boot behavior, GPT-only media assumptions and generic distro-installer compatibility; multiple logs/defconfig blocks looked executed or universal.",
+        "causeHypothesisAndAlternatives": "U-Boot v2025.01 bootefi synopsis has no setup subcommand and documents bootefi image/FDT and bootmgr forms. UEFI 2.10 permits GPT or MBR system-partition layouts and distinguishes FAT requirements. U-Boot EFI features/storage depend on tag and board configuration.",
+        "evidence": "U-Boot v2025.01 EFI/bootefi docs; UEFI 2.10 Media Access; linked below.",
+        "sampleCoverage": "Read the entire article, read-only published evaluation, command/configuration/EFI variables/Secure Boot/EBBR/SystemReady/partition/GRUB/initrd and installer sections. No board, EFI variables backend or U-Boot target was available; no EFI command or OS boot was executed.",
+        "decision": "Narrow config and compatibility claims; remove unsupported provisioning/backend recipes and qualify synthetic outputs. Link the UEFI primary source for media access rules.",
+        "smallestSafeChange": "Edited chapter18 only; no UEFI variable, partition, firmware, media or board was changed. Rollback boundary is the article source.",
+        "validationAndResidualRisk": "Static blocking gate, inline-math, diff check and metadata invariants passed. Upstream clone checks SKIPPED (not PASS). Board Kconfig, variable retention, secure-boot enforcement, Boot Manager, initrd and distro boot remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 U-Boot tag/board configuration, EFI variable backend와 UEFI test suite로 Boot Manager, variable retention, Secure Boot 및 distro image compatibility를 확인할 것인가?"
+        }
+      ]
+    }
+  ]
+}

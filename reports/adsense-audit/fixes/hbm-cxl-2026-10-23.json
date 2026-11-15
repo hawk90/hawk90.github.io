@@ -1,0 +1,152 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-23",
+  "series": "HBM·GDDR 심화",
+  "batch": "chapter09–12",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-29.md"
+  ],
+  "primarySources": [
+    "https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a",
+    "https://github.com/pmem/ndctl/tree/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3",
+    "https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-1.1-Specification.pdf",
+    "https://tianyin.github.io/pub/cxl-mem.pdf",
+    "https://arxiv.org/abs/2206.02878",
+    "https://arxiv.org/abs/2203.00241",
+    "https://computeexpresslink.org/wp-content/uploads/2024/02/0c1418_caa15c61bc7b499087ad4ec3713df1ec.pdf",
+    "https://computeexpresslink.org/event/cxl-3-0-enabling-composable-systems-with-expanded-fabric-capabilities/",
+    "https://www.globenewswire.com/news-release/2025/11/18/3190508/0/en/astera-labs-leo-cxl-smart-memory-controllers-on-microsoft-azure-m-series-virtual-machines-overcome-the-memory-wall.html"
+  ],
+  "validationCommands": [
+    "node scripts/verify-hbm-cxl-examples.mjs",
+    "bash scripts/audit-publish-gate.sh <fourfiles>",
+    "node scripts/check-inline-math.mjs <fourfiles>",
+    "git diff --check -- <scopedfiles>"
+  ],
+  "scope": "Fullfourchapters andloop29evaluationsread; CXL1.1architecture/bias/memorytransactionsections, primaryresearchandpinnedLinux/ndctlsourcecontractsreviewed. Extractedhelpers andteachingmodels tested.",
+  "limits": "NoCXL/GPUhardware, QEMU, kernelmodule/runtime, sysfswrites, regioncreation, online/RAM/DAXchanges, true latency/bandwidth/credit behavior or pooldeployment/costsavings measured. ActualLinuxhelper extraction usesminimalmacro/type shims; notfullkernelbuild. ndctlbinarynotbuilt/run. Genericclone-discoverygate skipped (notpass); pinnedtemp sourcechecks separately executed.",
+  "articles": [
+    {
+      "path": "src/content/blog/embedded/hardware/hbm/chapter09-cxl-mem.md",
+      "status": "remediated",
+      "beforeSha256": "41f04daf7661afd4c0485b3fd067eae7fe9319c268b4a71628b6e7e843864a4e",
+      "afterSha256": "e9dbee0f665e138053ccef98b849429e38b574eb79dd400a54b95ec6c93ddd88",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Pinnedsource/doccontracts inspected; commonCXLbatch helperchecks pass; noactualcxl/daxctl invocation orregioncreation/deviceenumeration.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/hbm/chapter09-cxl-mem.md",
+        "problemSignalAndCounterevidence": "Description placedCXLbetweenHBM/DDR whilebodyDDR/SSD; GPUOOM framedassolvedbyCPUloadstore; unlabeledCZ12036GB/s direction; unqualifiedvendorvalidationstatus andbarecreate-region impliedautomaticSystemRAM.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "PinnedLinuxv6.12 CXLmemorydocs/ABI, ndctlv80list/create-region/docs/region.c;CXL2/3issuerannouncements andAsteraissuerprivatepreview release.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Manualdescriptioncorrection; separatedCPUtier/GPUoffload, DQ/rawdirection andproducthistoricalscope; removedunverified36GB/sandvalidationstatus; citedAstera2025privatepreview; read-onlyCLIinventorywithpinnedsource/docs, RAM/PMEM regiontype separatedfromdevdax/SystemRAM online.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Pinnedsource/doccontracts inspected; commonCXLbatch helperchecks pass; noactualcxl/daxctl invocation orregioncreation/deviceenumeration. NoCXL/GPUhardware, QEMU, kernelmodule/runtime, sysfswrites, regioncreation, online/RAM/DAXchanges, true latency/bandwidth/credit behavior or pooldeployment/costsavings measured. ActualLinuxhelper extraction usesminimalmacro/type shims; notfullkernelbuild. ndctlbinarynotbuilt/run. Genericclone-discoverygate skipped (notpass); pinnedtemp sourcechecks separately executed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Whichexacthost/GPU/firmware/kernel/driver/region/online and supportedoffloadcopy/addresspath makes expandedcapacityusable for this workload?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol.md",
+      "status": "remediated",
+      "beforeSha256": "18f9ec455929eb8453359b4c16231b94a4c03b5bdbb603a6a8e78badf4bea1c9",
+      "afterSha256": "022b0618fded635452f8553ed33551b85c1c8e10169a991e39d7094bdfddaba3",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Actualextractedupstreamencode/decode functions withexplicitmacroshims exhaustivelytestedintegerg-1024..32768/e7..65535underASan/UBSan; extractedCaccessnormal/null/outofrange/modulosum tests; stripecounterexamples+invalids and157ceilpass. Noactualkernel/sysfs/credit/timing/deviceperformance.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/hbm/chapter10-cxl-mem-protocol.md",
+        "problemSignalAndCounterevidence": "CPUinstructionvswiretransaction confusion; storeCmpvsretirement/persistence; optionalbias framedrequired;156.25line capacity roundeddown; credit=request assumption; uncheckedpointerwalkcalledmeasurement; universalrandom-small/sequential-large interleave prescription.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "CXL1.1§2.2.1.3/§3.3accessflows/partialwrite; SunMICRO2023genuineCXLpaperTable1/O2; actualLinuxgranularityhelpers andregionrootconstraint.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Narroweddescription; cited1.1normativesections/researchscope; separatedtransaction/CPUcompletion andoptionalbias; necessaryLittlelawceil157; boundedhostaccessshapes, teachingstripecounterexamples and pinnedrootgranularityconstraints; removeduniversalperformanceclaims andwrongreference labels.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Actualextractedupstreamencode/decode functions withexplicitmacroshims exhaustivelytestedintegerg-1024..32768/e7..65535underASan/UBSan; extractedCaccessnormal/null/outofrange/modulosum tests; stripecounterexamples+invalids and157ceilpass. Noactualkernel/sysfs/credit/timing/deviceperformance. NoCXL/GPUhardware, QEMU, kernelmodule/runtime, sysfswrites, regioncreation, online/RAM/DAXchanges, true latency/bandwidth/credit behavior or pooldeployment/costsavings measured. ActualLinuxhelper extraction usesminimalmacro/type shims; notfullkernelbuild. ndctlbinarynotbuilt/run. Genericclone-discoverygate skipped (notpass); pinnedtemp sourcechecks separately executed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Whichcachemisses/ordering/bias/credits/queue/resource/topology andtimedrequesttracesestablishactualread-writecost, concurrentlimits andbestgranularity?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/hbm/chapter11-cxl-device-types.md",
+      "status": "remediated",
+      "beforeSha256": "cbca782b8739ed6a59599efe433c5265c7e1f7870603d23ff2ac145b3704272f",
+      "afterSha256": "43856e5f9ff8664992fdfb740d20f5bd073538655a82a9773e748d95694b3610",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Source-contractreview andsharedbatchfunctionalchecks only. NoType2driver/device, memoryhotplug/NUMA/DAXorcoherencyruntime validation.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/hbm/chapter11-cxl-device-types.md",
+        "problemSignalAndCounterevidence": "Type3exclusivehostcapacity claimcontradictedType2HDM mapping; optionalbiasmandatory; CPUlessNUMAnodeorabsence usedassufficienttype/DAXdiagnosis; unqualifiedport/runtimepredictions.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "ActualCXL1.1§2.1–2.3definesType2HDM and§2.2.1.3allowsallHostBias; pinnedLinuxv6.12CXLdocs/ABI andndctlDAXinventory docs.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Correctedtypecapability vsOSallocationpolicy; Type2HDMcanmaptohostaddressspace, biasoptional; separatedregion/dax/online/NUMAlocalitymetadata andinventoryabsences; repairedcrosslinks/labels.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Source-contractreview andsharedbatchfunctionalchecks only. NoType2driver/device, memoryhotplug/NUMA/DAXorcoherencyruntime validation. NoCXL/GPUhardware, QEMU, kernelmodule/runtime, sysfswrites, regioncreation, online/RAM/DAXchanges, true latency/bandwidth/credit behavior or pooldeployment/costsavings measured. ActualLinuxhelper extraction usesminimalmacro/type shims; notfullkernelbuild. ndctlbinarynotbuilt/run. Genericclone-discoverygate skipped (notpass); pinnedtemp sourcechecks separately executed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "WhichactualHDM mapping/driverallocationpolicy, regionbinding/DAX/memoryblock/online topologyestablishhostcapacityanddevicecoherencybehavior?"
+        }
+      ]
+    },
+    {
+      "path": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
+      "status": "remediated",
+      "beforeSha256": "94e5e4f963b310e14d0ce6e819ef69f9c1265790d9da8fe1730692ded1d5328e",
+      "afterSha256": "15b4e6e8fd8729fdddda43330701b2a43a6db3ed24cd5b9828e95271e758a7ad",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "scopedChecks": "Extractedpooldemandnormalzero/disjoint/coincidentandmissing/sparse/nonrectangular/negative/nonfinite/overflow casespass. Noactualproductiontrace, poolsetup, failure/reservecostmodel, performanceorsavingsreplication.",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetRuntime": "See explicit scoped validation and limits"
+      },
+      "evidence": {
+        "contextAndScope": "src/content/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric.md",
+        "problemSignalAndCounterevidence": "DescriptionpromisedlatencynumbersbutTBD; poolimplicitlyextendsGPUHBM; host/poollimitsunbounded, pooling/sharingandcapacity/BWblurred; TPP/Pondresults universalwithoutpaperlinks; noactualsimultaneousdemandmethod.",
+        "causeHypothesisAndAlternatives": "The source mixed an unpinned implementation, simplified examples or unsupported generalizations with interface contracts. Compare exact source/documents and separate host-functional checks from target behavior.",
+        "evidence": "TPP arXiv2206.02878v2/ASPLOS2023andPond2203.00241v4/ASPLOS2023primaryauthorabstracts; CXL2/3issuerfeatureannouncements andsourcebounds.",
+        "sampleCoverage": "Full chapter source and its pre-existing evaluation entry were read; source examples and relevant primary references reviewed. Validation covers only the declared configuration and normal/failure cases.",
+        "decision": "Manualdescriptioncorrection; separatedhostpool/GPUaccess, allocationandsharedbytes, perhostlink/systemBW; bounded demandmatrixcalculator showsdisjointvscoincidentpeakswithoutcostsavingclaim; linkedresearchandbaseline/workloadlimits, correctedCh9measurementreference.",
+        "smallestSafeChange": "Only this article, scoped verification examples and batch evidence. Public URL/date/draft/seriesOrder preserved; manual title/description corrections, if any, documented with the chapter. No score ledger changed.",
+        "validationAndResidualRisk": "Extractedpooldemandnormalzero/disjoint/coincidentandmissing/sparse/nonrectangular/negative/nonfinite/overflow casespass. Noactualproductiontrace, poolsetup, failure/reservecostmodel, performanceorsavingsreplication. NoCXL/GPUhardware, QEMU, kernelmodule/runtime, sysfswrites, regioncreation, online/RAM/DAXchanges, true latency/bandwidth/credit behavior or pooldeployment/costsavings measured. ActualLinuxhelper extraction usesminimalmacro/type shims; notfullkernelbuild. ndctlbinarynotbuilt/run. Genericclone-discoverygate skipped (notpass); pinnedtemp sourcechecks separately executed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Whichaligned demand/access traces, allocationgranularity/headroom/failurepolicy, perhostpath andtail-latencycostsestablishactualpoolbenefit andrequiredreserve?"
+        }
+      ]
+    }
+  ]
+}

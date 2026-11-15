@@ -1,0 +1,469 @@
+
+### src/content/blog/tools/debugging/embedded/chapter01-rsp-protocol.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter03-openocd.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter04-jlink.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter05-elf-map.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter06-trace.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter08-cxl-link-debug.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+
+### src/content/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot.md
+
+═══ 1/4 ASCII 박스 다이어그램 검사 (CLAUDE.md §6) ═══
+✓ PASS
+
+═══ 3/4 코드 블록 내 한국어 산문 후보 ═══
+✓ PASS
+
+═══ 3b/10 Tone 일관성 (CLAUDE.md §1, MIXED 차단) ═══
+✓ PASS
+
+═══ 3c/10 번역체·AI 상투구 후보 (CLAUDE.md §2) ═══
+✓ PASS
+
+═══ 4/10 Hallucination 후보 (CLAUDE.md §10) ═══
+✓ PASS
+
+═══ 5/10 Known-fact whitelist (data/known-facts.yaml) ═══
+✓ PASS
+
+═══ 5b/10 Known falsehoods (data/known-falsehoods.yaml) ═══
+✓ PASS
+
+═══ 6/10 Fact-density 분석 (universal, 모든 챕터) ═══
+✓ PASS
+
+═══ 7/10 Upstream freshness (code-review·spec) ═══
+## Folly Code Review
+## Abseil Code Review
+## CXL 4.0 Internals (Linux drivers/cxl)
+## PCIe Deep Dive (Linux drivers/pci)
+ℹ  상세는 'npm run audit:upstream' 실행 (fetch 포함)
+
+═══ 7b/10 Cited-symbol existence (rename·hallucination) ═══
+  SKIP Folly Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/folly) — freshness audit 먼저 실행
+  SKIP Abseil Code Review: clone 없음 (/Users/hawk/Workspaces/code-review-sources/abseil-cpp) — freshness audit 먼저 실행
+  SKIP CXL 4.0 Internals (Linux drivers/cxl): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+  SKIP PCIe Deep Dive (Linux drivers/pci): clone 없음 (/Users/hawk/Workspaces/code-review-sources/linux) — freshness audit 먼저 실행
+− SKIPPED — upstream clone이 없어 아무것도 검사하지 않음 (PASS 아님)
+
+═══ 8/10 Internal link rot (/blog/... page link) ═══
+✓ PASS
+
+═══ 9/10 Series integrity (frontmatter 일관성) ═══
+=== Series Integrity Audit ===
+  Total series: 178, chapters: 3403
+  Blocking: 0, Warning: 0
+ℹ  상세는 'npm run audit:series' 실행
+
+═══════════════════════════════════════
+✓ All blocking gates pass. Publish OK.
+✓ 의도하지 않은 인라인 수식 없음 (9개 파일)

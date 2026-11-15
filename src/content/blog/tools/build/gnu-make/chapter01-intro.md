@@ -18,7 +18,7 @@ C나 C++ 프로젝트를 빌드하는 가장 단순한 방법은 모든 소스�
 gcc main.c utils.c config.c network.c -o myapp
 ```
 
-파일이 네댓 개일 때는 이 방법이 충분히 빠릅니다. 하지만 소스가 수십 개를 넘어가면 이야기가 달라집니다. `utils.c`의 한 줄만 고쳐도 위 명령은 *모든* 파일을 다시 컴파일합니다. 컴파일러는 매번 헤더를 다시 파싱하고, 같은 함수를 다시 코드 생성하고, 변하지 않은 결과물을 또 한 번 만들어 냅니다. 작은 프로젝트라면 1~2초의 낭비이지만, 리눅스 커널이나 Chromium 같은 거대 코드베이스에서는 이런 방식이 몇 분에서 몇 시간으로 부풀어 오릅니다.
+파일이 네댓 개일 때는 이 방법이 충분히 빠릅니다. 하지만 소스가 수십 개를 넘어가면 이야기가 달라집니다. `utils.c`의 한 줄만 고쳐도 위 명령은 *모든* 파일을 다시 컴파일합니다. 컴파일러는 매번 헤더를 다시 파싱하고, 같은 함수를 다시 코드 생성하고, 변하지 않은 결과물을 또 한 번 만들어 냅니다. 불필요한 컴파일 비용은 소스 규모와 컴파일 환경에 따라 달라집니다. 이 글은 빌드 시간의 절대값 대신 어떤 파일을 다시 만드는지 확인합니다.
 
 **Make**는 이 낭비를 정확히 겨냥합니다. Make는 각 파일의 *수정 시간*(mtime)을 추적해서, *변경된 파일에서 시작되는 의존성*만 다시 빌드합니다. `utils.c`만 고쳤다면 `utils.o`를 다시 만들고 최종 실행 파일을 다시 링크합니다. 그 외의 `.o` 파일은 손대지 않습니다. 이 방식을 **증분 빌드**(incremental build)라고 부릅니다.
 
@@ -29,7 +29,7 @@ gcc main.c utils.c config.c network.c -o myapp
 | config.c | → config.o 재컴파일 | 건너뜀 |
 | 최종 | myapp 재링크 | myapp 재링크 |
 
-Make는 1976년 Bell Labs의 Stuart Feldman이 만들었습니다. 일화에 따르면 동료의 한 시간짜리 빌드가 매번 처음부터 다시 도는 걸 보다 못해 하룻밤 만에 만들었다고 합니다. 50년 가까이 지난 지금도 이 원리는 그대로이고, 그 위에 CMake·Bazel·Ninja 같은 도구들이 얹혀 있을 뿐입니다. 리눅스 커널, Git, Python 인터프리터, GCC 자체까지 — 오늘날 우리가 매일 쓰는 소프트웨어의 상당수가 Make 위에서 빌드됩니다.
+이 시리즈는 Makefile의 규칙과 GNU Make의 동작을 다룹니다. CMake는 Makefile을 생성하는 생성기를 선택할 수 있지만, Bazel이나 Ninja가 GNU Make 위에서 동작하는 도구라는 뜻은 아닙니다. 도구 간 역사는 첫 빌드의 전제에서 제외합니다.
 
 이 시리즈에서 다루는 것은 그중 가장 널리 쓰이는 **GNU Make**입니다. POSIX Make의 상위 호환으로, 패턴 규칙·자동 변수·함수 라이브러리 같은 확장을 더해 실용성을 크게 끌어올렸습니다.
 
@@ -51,7 +51,7 @@ Make가 무엇을 하는지를 한 문장으로 줄이면 "*의존성 그래프�
 
 `hello.c`를 수정하면 `hello.c`의 mtime이 `hello.o`보다 커지고, `hello.o`의 mtime은 `hello`보다 커집니다. 이 연쇄가 끝까지 전파되어 최종 실행 파일까지 갱신됩니다. 반대로 `main.c`는 그대로이므로 `main.o`도 갱신될 이유가 없고, 결과적으로 Make는 그쪽 가지를 통째로 건너뜁니다.
 
-이 mtime 비교 한 줄이 Make 전체의 작동 원리입니다. 빌드 시스템 입문서들이 흔히 "타임스탬프"라고 부르는 것이 바로 이것이고, 빌드 캐시나 콘텐츠 해시 기반 시스템(Bazel, Ninja 일부 옵션)도 결국 이 mtime 비교를 더 정확하게 만들려는 시도에 가깝습니다.
+이것은 일반 파일 타겟과 일반 의존성의 기본 규칙입니다. 타겟이 없으면 새로 만들고, .PHONY나 order-only 의존성은 별도로 처리합니다. 콘텐츠 해시 기반 캐시와 mtime 비교는 서로 다른 변경 판정 방식이므로 같은 원리로 일반화하지 않습니다. [규칙의 동작](https://www.gnu.org/software/make/manual/html_node/How-Make-Works.html)을 기준으로 확인합니다.
 
 ---
 
@@ -84,13 +84,13 @@ macOS는 Xcode Command Line Tools를 깔면 Make가 따라옵니다.
 xcode-select --install
 ```
 
-다만 이때 설치되는 것은 *BSD Make*입니다. 이 시리즈에서 다루는 패턴 규칙·함수·고급 변수는 대부분 GNU Make 전용 기능이라, BSD Make에서는 동작하지 않거나 문법이 다릅니다. macOS에서 GNU Make를 따로 받으려면 Homebrew를 씁니다.
+시스템 Make의 구현과 버전은 `make --version`으로 확인합니다. 이 글을 확인한 macOS의 /usr/bin/make는 GNU Make 3.81이었습니다. 이 값을 모든 macOS 환경의 보장으로 사용하지 않습니다. 4.x 기능이 필요하면 Homebrew GNU Make 같은 별도 도구를 사용합니다.
 
 ```bash
 brew install make
 ```
 
-Homebrew 버전은 시스템 BSD Make와 충돌을 피하려고 `gmake`라는 별도 이름으로 설치됩니다. 이 시리즈의 예제를 그대로 따라 하려면 `make` 대신 `gmake`를 입력하거나, 셸 alias를 걸어 두세요.
+Homebrew 버전은 시스템 Make와 구분하도록 `gmake`라는 별도 이름으로 설치됩니다. 이 시리즈의 예제를 그대로 따라 하려면 `make` 대신 `gmake`를 입력하거나, 셸 alias를 걸어 두세요.
 
 ```bash
 alias make='gmake'
@@ -124,7 +124,7 @@ Built for x86_64-pc-linux-gnu
 Copyright (C) 1988-2020 Free Software Foundation, Inc.
 ```
 
-첫 줄에 "GNU Make"가 보이면 준비 끝입니다. 이 시리즈는 GNU Make 4.0 이상을 가정합니다(`.RECIPEPREFIX`, `$(file ...)` 같은 함수가 4.0에서 추가됐습니다).
+완성 예제의 실행 기준은 GNU Make 4.4.1·macOS·AppleClang 21의 gcc 호환 드라이버입니다. 4.3의 grouped target까지 사용하므로 시리즈의 전체 예제에는 GNU Make 4.3 이상이 필요합니다. .RECIPEPREFIX는 3.82, $(file ...)은 4.0 도입으로 서로 다릅니다. [릴리스 기록](https://ftp.gnu.org/gnu/make/)의 4.4.1 소스 NEWS와 대조했습니다.
 
 ---
 
@@ -144,7 +144,7 @@ hello/
 
 ### 소스 파일
 
-```c
+```c title="hello.h"
 // hello.h
 #ifndef HELLO_H
 #define HELLO_H
@@ -154,7 +154,7 @@ void say_hello(const char *name);
 #endif
 ```
 
-```c
+```c title="hello.c"
 // hello.c
 #include <stdio.h>
 #include "hello.h"
@@ -164,7 +164,7 @@ void say_hello(const char *name) {
 }
 ```
 
-```c
+```c title="main.c"
 // main.c
 #include "hello.h"
 
@@ -178,7 +178,7 @@ int main(void) {
 
 이제 Makefile을 만듭니다. 이름은 `Makefile`(대문자 M)이 가장 무난합니다. `makefile`도 인식되지만, 대문자 쪽이 `ls` 결과에서 먼저 눈에 띄어 관행이 됐습니다.
 
-```makefile
+```makefile title="Makefile"
 # 실행 파일 빌드 규칙
 hello: main.o hello.o
 	gcc -o hello main.o hello.o
@@ -195,7 +195,7 @@ clean:
 	rm -f hello main.o hello.o
 ```
 
-> ⚠️ **탭 주의**: 명령어 줄(`gcc ...`, `rm ...`) 앞의 들여쓰기는 반드시 **탭 한 글자**여야 합니다. 스페이스 여덟 개로 들여쓰면 Make는 그 줄이 명령어임을 인식하지 못하고 `Makefile:2: *** missing separator. Stop.` 으로 멈춥니다. 에디터에서 "탭을 스페이스로 자동 변환" 옵션이 켜져 있으면 Makefile 편집 시에는 반드시 꺼 두세요. VS Code는 파일 단위로 `.editorconfig`나 `files.insertSpaces` 설정으로 다룰 수 있고, Vim에서는 `:set noexpandtab`을 자주 봅니다.
+> ⚠️ **탭 주의**: 명령어 줄(`gcc ...`, `rm ...`) 앞의 들여쓰기는 반드시 **탭 한 글자**여야 합니다. 스페이스 여덟 개로 들여쓰면 Make는 그 줄이 명령어임을 인식하지 못하고 `Makefile:3: *** missing separator. Stop.` 으로 멈춥니다. 에디터에서 "탭을 스페이스로 자동 변환" 옵션이 켜져 있으면 Makefile 편집 시에는 반드시 꺼 두세요. VS Code는 파일 단위로 `.editorconfig`나 `files.insertSpaces` 설정으로 다룰 수 있고, Vim에서는 `:set noexpandtab`을 자주 봅니다.
 
 이 Makefile은 사람이 읽기에도 자연스럽습니다.
 - `hello`를 만들려면 `main.o`와 `hello.o`가 필요하고, 둘이 준비되면 `gcc -o`로 묶어라.
@@ -256,7 +256,7 @@ gcc -c hello.c
 gcc -o hello main.o hello.o
 ```
 
-수정된 `hello.c`로 인해 `hello.o`가 옛 것이 됐고, 그 결과 `hello`도 옛 것이 됐습니다. 그래서 두 단계가 다시 돌고, `main.o`는 그대로입니다. 큰 프로젝트에서는 이 한 줄의 차이가 빌드 시간을 분 단위에서 초 단위로 줄여 줍니다.
+수정된 `hello.c`로 인해 `hello.o`가 옛 것이 됐고, 그 결과 `hello`도 옛 것이 됐습니다. 그래서 두 단계가 다시 돌고, `main.o`는 그대로입니다. 실제 시간 단축은 환경에 따라 측정합니다. 여기서는 main.o를 다시 만들지 않는다는 동작을 확인합니다.
 
 ### 특정 타겟만 실행
 
@@ -356,7 +356,7 @@ hello: main.o
 Makefile:2: *** missing separator.  Stop.
 ```
 
-Make는 레시피임을 *탭 한 글자*로만 판단합니다. 다른 언어처럼 "들여쓰기 양식이 일관되면 OK"가 아닙니다. 에디터 설정을 꺼 두는 게 가장 안전하지만, 4.0부터는 `.RECIPEPREFIX` 변수로 다른 문자를 지정할 수도 있습니다(거의 안 씁니다만 알아 두면 좋습니다).
+Make는 레시피임을 *탭 한 글자*로만 판단합니다. 다른 언어처럼 "들여쓰기 양식이 일관되면 OK"가 아닙니다. 에디터 설정을 꺼 두는 게 가장 안전하지만, 3.82부터는 `.RECIPEPREFIX` 변수로 다른 문자를 지정할 수도 있습니다(거의 안 씁니다만 알아 두면 좋습니다).
 
 ```makefile
 .RECIPEPREFIX = >
@@ -431,7 +431,7 @@ build:
 
 지금까지의 내용을 한 Makefile에 모으면 다음과 같습니다.
 
-```makefile
+```makefile title="complete.mk"
 .PHONY: all clean
 all: hello
 

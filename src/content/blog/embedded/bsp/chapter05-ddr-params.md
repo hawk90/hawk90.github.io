@@ -24,11 +24,11 @@ SRAM과 다릅니다. DDR은 *수십 개의 timing 파라미터*가 모두 *데�
 |------|------|
 | 너무 빠른 timing | 비트가 가끔 깨짐. 압축·해시·암호화에서 발견. |
 | 너무 느린 timing | 동작은 하나 성능 하락. spec 위반은 *아닐 수도 있음*. |
-| ZQ calibration 누락 | DRAM이 *온도 drift* 후 misread. 1시간 뒤 행. |
+| ZQ calibration 누락 | 신호 품질·전기적 특성에 영향을 줄 수 있어 해당 DRAM·controller 자료와 training log를 확인. |
 | Refresh interval 잘못 | 데이터 *조용히 사라짐*. 가장 미묘. |
 | 임피던스 mismatch | EMI 증가, FCC 인증 실패. 보드 layout 문제. |
 
-이 중 *대부분*을 BSP가 *부트로더 단계*에서 설정합니다. 부트로더의 첫 단계인 SPL/BL2가 *DDR을 깨우는 코드*입니다. DDR이 깨지 않으면 그 뒤 *어떤 것도* 동작할 수 없습니다.
+많은 임베디드 플랫폼은 초기 firmware 단계에서 DDR controller와 PHY를 설정합니다. 그 단계가 U-Boot SPL인지 TF-A BL2인지, 설정을 어느 firmware가 맡는지는 SoC와 boot design에 따라 다릅니다. 외부 DRAM이 초기화되지 않으면 그 메모리를 필요로 하는 후속 단계는 진행할 수 없습니다.
 
 ## DDR3 / DDR4 / LPDDR4 — 임베디드에서의 선택
 
@@ -39,8 +39,8 @@ SRAM과 다릅니다. DDR은 *수십 개의 timing 파라미터*가 모두 *데�
 | LPDDR3 | 1.2V | 800~2133 MT/s | 모바일, 저전력 |
 | LPDDR4 | 1.1V | 1600~4266 MT/s | 모바일·임베디드 보드 |
 | LPDDR4X | 0.6V I/O | 동상 | 더 낮은 전력 |
-| LPDDR5 | 1.05V | 4266~6400 MT/s | 최신 스마트폰·서버 |
-| DDR5 | 1.1V | 4800~8400 MT/s | 새 데스크톱·서버 |
+| LPDDR5 | 세대·속도 등급에 따라 다름 | 세대·속도 등급에 따라 다름 | 모바일·임베디드 등 |
+| DDR5 | 1.1V class; exact range depends on grade | 세대·속도 등급에 따라 다름 | 데스크톱·서버 등 |
 
 임베디드 보드는 *DDR4 또는 LPDDR4*가 가장 흔합니다. 산업용은 *DDR3*가 아직 살아 있습니다. 자동차 ADAS와 mobile은 *LPDDR4/5*입니다.
 
@@ -129,20 +129,20 @@ NXP DDR Tool의 흐름은 세 단계입니다.
 | `ddr_data.c` | 레지스터 값 array |
 | `timing.h` | 매크로 정의 |
 
-이 출력을 그대로 U-Boot 또는 TF-A에 *include*합니다.
+생성된 코드의 입력 조건, 대상 SoC/보드, DDR part number와 도구 버전을 검토한 뒤 해당 platform의 초기화 firmware에 통합합니다. 다음 코드는 형식 설명용 축약 예이며 특정 도구의 실제 출력이나 보드 설정값이 아닙니다.
 
-## NXP DDR Tool 출력 예시
+## DDR 설정 구조 예시
 
-i.MX 8M Plus + Micron LPDDR4 2GB의 출력 일부입니다.
+아래 코드는 NXP DDR Tool의 실제 산출물이 아니라 자료 구조를 보여주는 축약 의사 예시입니다. 주소·레지스터 값·training 상태를 실제 i.MX 8M Plus 보드에 사용할 수 있다고 해석하지 않습니다.
 
 ```c
-/* ddr_init.c — NXP DDR Tool 생성 */
+/* ddr_init.c — illustrative pseudocode; not generated output */
 
 #include "ddr.h"
 
 static struct dram_cfg_param ddr_ddrc_cfg[] = {
     { 0x3d400000, 0x81040020 },  /* DDRC_MSTR */
-    { 0x3d400064, 0x006180e },   /* DDRC_RFSHTMG */
+    { 0x3d400064, 0x006180e0 },  /* DDRC_RFSHTMG; illustrative value */
     { 0x3d4000d0, 0x40020083 },  /* DDRC_INIT0 */
     { 0x3d4000d4, 0x00350000 },  /* DDRC_INIT1 */
     { 0x3d4000dc, 0xd4002d70 },  /* DDRC_INIT3 */
@@ -201,9 +201,9 @@ DDR Init 흐름은 다음과 같습니다.
 5. Training 결과를 CSR(Configuration and Status Register)에 저장.
 6. Frequency change 점들을 미리 계산해 둠 (DVFS용).
 
-Training firmware는 SoC 벤더가 제공하는 *blob*입니다. NXP의 경우 `firmware-imx` 패키지에 들어 있고, BL2에 함께 link됩니다.
+Training firmware의 존재, 제공 패키지, 라이선스, 로딩 단계는 SoC·DDR PHY와 BSP 구성에 따라 다릅니다. 사용 중인 SDK의 공급 경로와 firmware 단계는 해당 플랫폼 문서에서 확인해야 합니다.
 
-Training이 실패하면 다음 메시지가 시리얼에 나옵니다.
+Training 실패 로그는 플랫폼별로 다릅니다. 다음은 출력 형식이 아니라 실패 상황을 설명하기 위한 가상 예시입니다.
 
 ```text
 DDR training FAILED at frequency 0

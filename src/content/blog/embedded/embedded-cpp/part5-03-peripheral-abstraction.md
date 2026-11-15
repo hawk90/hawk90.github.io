@@ -24,7 +24,7 @@ HAL_UART_Transmit_IT(&huart2, data, len);
 HAL_UART_Transmit_DMA(&huart2, data, len);
 ```
 
-타입이 없어 어떤 UART든 같은 함수로 호출합니다. C++ wrapping으로 다음을 얻습니다.
+C HAL도 `UART_HandleTypeDef*`처럼 타입을 가진 handle을 받지만 같은 handle 타입으로 여러 인스턴스를 표현합니다. C++에서는 주소나 인스턴스를 타입 인자로 분리하는 선택지가 있습니다. C++ wrapping으로 다음을 얻습니다.
 
 - **Type-safe**: UART2와 UART3가 섞이지 않습니다
 - **RAII**: 자원 lifecycle을 관리합니다
@@ -70,60 +70,17 @@ public:
 
 using Uart2 = Uart<0x40004400>;
 
-Uart2::init(115200, 84'000'000);
+Uart2::init(115200, 42'000'000);   // 예: APB1이 실제 42MHz인 구성
 Uart2::send(reinterpret_cast<const uint8_t*>("Hello\n"), 6);
 ```
 
-type별로 wrapper가 갈립니다. Uart2와 Uart3는 다른 type입니다.
+이 UART 스케치는 STM32F407식 SR/DR/CR1, OVER8=0을 가정하며 실제 APB1 PCLK를 전달해야 합니다. baud=0·반올림·오류와 timeout·RCC/AF 핀 설정은 생략했으므로 완전한 드라이버가 아닙니다. Uart2/Uart3는 주소 인자가 다르면 다른 type이지만 자원 독점이나 초기화 완료까지 보장하지 않습니다.
 
 ## Interrupt-driven UART
 
-```cpp
-template<uintptr_t Address>
-class IsrUart {
-    // ... 기본 regs
+interrupt 송신에서는 UART interrupt flag와 enable 상태를 확인하고, 새 버퍼 공개와 상태 변경을 하나의 계약으로 직렬화해야 합니다. 두 atomic 변수에 각각 포인터·남은 길이를 저장하는 것만으로 여러 송신자의 검사와 획득을 원자적으로 만들 수는 없습니다.
 
-    static inline std::atomic<volatile uint8_t*> tx_buf_{nullptr};
-    static inline std::atomic<size_t> tx_remaining_{0};
-
-public:
-    static void init(uint32_t baud, uint32_t pclk) {
-        regs().BRR = pclk / baud;
-        regs().CR1 = (1 << 13) | (1 << 3) | (1 << 7);   // UE | TE | TXEIE
-    }
-
-    // Non-blocking send
-    static bool send_async(const uint8_t* data, size_t len) {
-        if (tx_remaining_.load() > 0) return false;   // busy
-        tx_buf_.store(const_cast<volatile uint8_t*>(data));
-        tx_remaining_.store(len);
-        // Enable TX interrupt
-        regs().CR1 |= (1 << 7);
-        return true;
-    }
-
-    static void irq_handler() {
-        auto* buf = tx_buf_.load();
-        auto remaining = tx_remaining_.load();
-
-        if (remaining > 0) {
-            regs().DR = *buf;
-            tx_buf_.store(buf + 1);
-            tx_remaining_.store(remaining - 1);
-        } else {
-            // Disable TX interrupt
-            regs().CR1 &= ~(1 << 7);
-        }
-    }
-};
-
-// ISR
-extern "C" void USART2_IRQHandler() {
-    IsrUart<0x40004400>::irq_handler();
-}
-```
-
-CPU가 묶이지 않습니다. 전송 중에 다른 일을 할 수 있습니다.
+버퍼를 publish하기 전에 TXE interrupt를 켜거나 마지막 바이트를 DR에 쓴 직후 버퍼 소유권을 반환하면 초기화되지 않은 상태·실제 wire 전송 미완료 문제도 생깁니다. 아래 호스트 예제는 단일 실행 문맥의 queued 상태와 borrowed buffer 수명만 검사합니다. 실제 ISR에서는 critical section 또는 검증된 상태 전이, IRQ flag 처리, release/acquire 정책을 별도로 구현합니다.
 
 ## DMA UART
 
@@ -154,12 +111,12 @@ public:
     }
 };
 
-using LogUart = DmaUart<0x40004400, 7>;   // DMA1 Channel 7
+using LogUart = DmaUart<0x40004400, 4>;   // 예시 요청 channel 값; stream도 별도 선택 필요
 
 LogUart::send_dma(big_buffer, 1024);   // CPU 거의 안 씀
 ```
 
-CPU 사용이 거의 0입니다. 큰 buffer 전송에 적합합니다.
+이 코드는 DMA adapter의 인터페이스 스케치이며 `dma_*` 함수·stream 선택·error IRQ·cache 처리·완료 통지는 구현하지 않았습니다. STM32F4는 stream과 channel 조합을 선택하며 USART2 TX의 유효한 연결은 reference manual로 확인합니다. DMA 완료와 UART TC(wire 송신 완료)는 다른 사건이고, 버퍼는 DMA 완료 또는 취소 확인까지 살아 있어야 합니다. 설정·인터럽트·cache 관리 CPU 비용이 0이 되는 것도 아닙니다.
 
 ## Concept으로 UART interface 통일
 
@@ -183,7 +140,7 @@ using LogChannel = Logger<Uart2>;
 LogChannel::log("hello");
 ```
 
-UART implementation을 blocking, interrupt, DMA 중 어느 것으로도 교체할 수 있습니다. Logger는 변경할 필요가 없습니다.
+이 concept은 위 blocking Uart의 `send`/`recv_byte` 계약에만 맞습니다. `send_async`나 `send_dma`만 제공하는 타입은 만족하지 않습니다. 비동기로 교체하려면 시작 결과·busy·완료/취소·버퍼 수명 계약을 별도 API로 정의하고 Logger도 그 계약을 따라야 합니다.
 
 ## SPI 추상화
 
@@ -244,8 +201,8 @@ public:
     static auto transfer(const std::array<uint8_t, N>& tx) {
         std::array<uint8_t, N> rx{};
         select();
+        struct CsGuard { ~CsGuard() { CsPin::set(); } } guard;
         Spi::transfer(tx, rx);
-        deselect();
         return rx;
     }
 };
@@ -255,41 +212,13 @@ using AccelChip = SpiDevice<Spi1, GpioPin<GpioPortA, 4>>;
 auto response = AccelChip::transfer<2>({0x80, 0x00});
 ```
 
-SPI와 CS pin이 하나의 device로 묶입니다. 매번 CS toggle이 자동으로 일어납니다.
+SPI와 CS pin이 하나의 device로 묶입니다. scope 이탈에서 CS를 복원하지만 전송 함수가 실패를 보고하지 않으면 데이터 오류를 알 수 없습니다. 실제 driver는 timeout·OVR·BUSY와 CS setup/hold 시간을 정의해야 합니다. 위 `Spi1`, `GpioPin`은 보드 adapter가 제공해야 하는 설명용 이름입니다.
 
 ## I2C 추상화
 
-```cpp
-template<uintptr_t Address>
-class I2c {
-public:
-    static void init(uint32_t speed_hz) {
-        // ... I2C regs setup
-    }
+I2C의 실패 경로에서도 버스 소유권에 맞게 정리해야 합니다. START에 성공한 뒤 address NACK나 data NACK가 나면 보통 STOP 처리가 필요하지만 arbitration을 잃은 master가 무조건 STOP을 보내면 안 됩니다.
 
-    static bool write(uint8_t addr, const uint8_t* data, size_t len) {
-        if (!start()) return false;
-        if (!send_address(addr, /*write=*/true)) return false;
-        for (size_t i = 0; i < len; ++i) {
-            if (!send_byte(data[i])) return false;
-        }
-        stop();
-        return true;
-    }
-
-    static bool read(uint8_t addr, uint8_t* data, size_t len) {
-        if (!start()) return false;
-        if (!send_address(addr, /*read=*/false)) return false;
-        for (size_t i = 0; i < len; ++i) {
-            data[i] = recv_byte(i == len - 1);   // last → NACK
-        }
-        stop();
-        return true;
-    }
-};
-```
-
-I2C protocol은 복잡합니다. bus arbitration, ACK/NACK, restart 등을 다뤄야 합니다. 벤더 HAL을 wrapping하는 방식이 대부분 실용적입니다.
+따라서 adapter에는 START/주소/byte 전송뿐 아니라 현재 bus ownership과 제한 시간, NACK·arbitration lost·bus error 구분이 필요합니다. 아래 실행 예제의 transaction guard는 소유 중일 때만 STOP을 보냅니다. 이는 프로토콜 흐름 검사이며 실제 STM32 I2C ACK/STOP 레지스터 시퀀스를 구현한 것은 아닙니다.
 
 ## ADC 추상화
 
@@ -303,7 +232,7 @@ public:
 
     static uint16_t read_blocking() {
         // 변환 시작
-        ADC_REG(Address)->CR2 |= (1 << 0);   // SWSTART
+        ADC_REG(Address)->CR2 |= (1u << 30);   // STM32F407 SWSTART; bit0은 ADON
         while (!(ADC_REG(Address)->SR & (1 << 1)));   // EOC
         return ADC_REG(Address)->DR;
     }
@@ -314,71 +243,21 @@ public:
     }
 };
 
-using Ch_Temp = AdcChannel<0x40012000, 5>;
-float v = Ch_Temp::read_voltage();
+using ExternalAdc5 = AdcChannel<0x40012000, 5>;
+float v = ExternalAdc5::read_voltage();
 ```
 
-Channel을 type parameter로 두면 runtime channel 선택 비용이 0입니다.
+이 스케치의 init은 비어 있으므로 Channel을 sequence와 sample time 레지스터에 반영해야 실제 선택이 이뤄집니다. STM32F407의 SWSTART는 bit30이며 bit0은 ADON입니다. 12비트 변환, EOC 확인, timeout, Vref와 양자화 오차를 대상 보드에서 확인해야 합니다. 위 ADC5는 내부 온도 센서라는 뜻이 아닙니다.
 
 ## RAII 통합 — Peripheral Guard
 
-```cpp
-template<typename Peripheral>
-class PeripheralGuard {
-public:
-    PeripheralGuard() {
-        Peripheral::enable_clock();
-        Peripheral::init();
-    }
+guard가 요구하는 함수 시그니처는 실제 peripheral adapter와 일치해야 합니다. 위 Uart는 init(baud,pclk)를 받으며 enable_clock/shutdown/disable_clock을 제공하지 않으므로 generic guard에 그대로 넣을 수 없습니다.
 
-    ~PeripheralGuard() {
-        Peripheral::shutdown();
-        Peripheral::disable_clock();
-    }
+완전한 adapter를 구현할 때는 초기화 성공 뒤에만 소유권을 얻고, 종료 전에 TC 또는 취소 완료를 확인합니다. 소멸자에서 무제한 대기를 하지 않도록 timeout·오류 기록 경로를 정하고, copy를 금지해 중복 종료를 막습니다.
 
-    PeripheralGuard(const PeripheralGuard&) = delete;
-};
+## Peripheral pool과 runtime 선택
 
-void burst_log(const char* msg) {
-    PeripheralGuard<Uart2> uart;   // turn on, init
-    Uart2::send(...);
-    // 자동 power down + clock off
-}
-```
-
-power saving이 자연스럽게 됩니다. function scope를 벗어나면 clock이 꺼집니다.
-
-## Peripheral Pool — 동적 할당 (드물게)
-
-```cpp
-class UartPool {
-    static inline std::array<Uart*, 5> pool_;
-    static inline std::array<bool, 5> in_use_{false, false, false, false, false};
-
-public:
-    static Uart* acquire() {
-        for (size_t i = 0; i < pool_.size(); ++i) {
-            if (!in_use_[i]) {
-                in_use_[i] = true;
-                return pool_[i];
-            }
-        }
-        return nullptr;
-    }
-
-    static void release(Uart* p) {
-        for (size_t i = 0; i < pool_.size(); ++i) {
-            if (pool_[i] == p) {
-                in_use_[i] = false;
-                p->shutdown();
-                return;
-            }
-        }
-    }
-};
-```
-
-runtime peripheral 선택이 필요한 경우에 씁니다. 임베디드 대부분은 static을 씁니다. 동적이 필요할 때 pool을 활용합니다.
+주소 기반 class template의 이름 `Uart`만으로 `Uart*` 배열을 만들 수는 없습니다. runtime에 서로 다른 UART를 같은 풀에서 선택하려면 공통 interface나 type erasure가 필요합니다. pool의 모든 슬롯을 실제 객체로 초기화하고, acquire/release를 동시 접근에서 직렬화하며, 이미 반환된 handle과 실패 획득을 구분합니다. 하드웨어가 고정된 단순 보드는 명시적 소유 객체와 DI부터 검토합니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -392,7 +271,7 @@ blocking send 중 ISR이 같은 peripheral을 접근하면 race가 발생합니�
 
 ### 3. DMA buffer alignment
 
-DMA는 특정 alignment를 요구합니다. `alignas(4)`로 맞춰 줍니다.
+DMA의 전송 폭·burst·controller에 따라 정렬 조건이 다릅니다. `alignas(4)` 하나로 모든 DMA를 해결하지 않으며 DMA 접근 가능 RAM·cache line·버퍼 수명도 확인합니다.
 
 ### 4. Volatile 누락
 
@@ -406,30 +285,62 @@ static peripheral은 영원히 살아 있습니다. power down이 명시적으�
 
 mutex나 queue로 직렬화합니다.
 
-## 측정 — C++ peripheral vs HAL
+## 작은 예제 — busy·NACK·arbitration 정리
 
-같은 UART 100 byte 전송 비교입니다(STM32F4, 115200 baud).
+버퍼는 송신 완료를 호출할 때까지 호출자가 보존하며 동시 호출은 외부에서 직렬화한다고 가정합니다. 이 예제의 complete는 fake 상태 전이이고 실제 IRQ·DMA 완료가 아닙니다.
 
-```text
-HAL_UART_Transmit (blocking):
-  코드: 1.2 KB (HAL library)
-  실행: ~8.7 ms (115200 baud bound)
-
-C++ Uart<...>::send (blocking):
-  코드: 80 B
-  실행: ~8.7 ms (동일)
+```cpp title="peripheral-check.cpp"
+#include <cassert>
+#include <cstddef>
+#include <cstdint>
+struct AsyncTx {
+    const std::uint8_t* data=nullptr; std::size_t size=0;
+    bool start(const std::uint8_t* p, std::size_t n) {
+        if (size || (n && !p)) return false;
+        if (!n) return true;
+        data=p; size=n; return true;
+    }
+    void complete() { data=nullptr; size=0; }
+};
+struct Bus {
+    bool owned=false, address_ack=true, lost=false; int stops=0;
+    bool start() { owned=true; return true; }
+    bool address() { if(lost) owned=false; return address_ack && !lost; }
+    void stop() { assert(owned); owned=false; ++stops; }
+};
+bool transaction(Bus& b) {
+    if(!b.start()) return false;
+    struct Guard { Bus& b; ~Guard(){ if(b.owned) b.stop(); } } guard{b};
+    if(!b.address()) return false;
+    return true;
+}
+int main() {
+    AsyncTx tx; std::uint8_t data[]{1,2};
+    assert(tx.start(nullptr,0));
+    assert(!tx.start(nullptr,2));
+    assert(tx.start(data,2));
+    assert(!tx.start(data,2)); tx.complete();
+    assert(tx.start(data,2)); tx.complete();
+    Bus ok; assert(transaction(ok) && ok.stops==1);
+    Bus nack; nack.address_ack=false;
+    assert(!transaction(nack) && nack.stops==1);
+    Bus lost; lost.lost=true;
+    assert(!transaction(lost) && lost.stops==0);
+}
 ```
 
-속도는 동일합니다. C++가 15배 작은 코드입니다. HAL은 generic 처리와 safety check로 코드가 큽니다.
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors peripheral-check.cpp -o peripheral-check && ./peripheral-check`로 확인했습니다. 실제 송신 파형·ISR publication·DMA cache·I2C timing은 미검증입니다. 100바이트 8N1/115200 baud의 이상적인 wire 시간은 약 8.68ms이나 드라이버 실행시간 측정값은 아닙니다.
+
+레지스터 정의는 [ST CMSIS STM32F407xx v2.6.10](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.10/Include/stm32f407xx.h), 실제 상태·오류 처리는 [ST HAL UART v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_uart.c) 및 [ST HAL I2C v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_i2c.c)를 기준으로 대상 구현을 확인합니다. 이 글의 fake 검사를 실제 HAL의 성능 비교로 해석하지 않습니다.
 
 ## 정리
 
 - Peripheral은 address를 가진 template class로 표현하며 type-safe합니다.
-- 세 가지 모드를 다룹니다 — Blocking(simple), Interrupt(non-blocking), DMA(CPU 0).
-- Concept으로 interface를 통일하면 mode를 교체할 수 있습니다.
+- 세 가지 모드를 다룹니다 — Blocking(simple), Interrupt(non-blocking), DMA(설정·완료 처리 필요).
+- Concept은 인터페이스 형태를 검사하며 모드별 완료·수명 계약을 맞춘 adapter가 있어야 교체할 수 있습니다.
 - SPI에 CS pin을 묶는 device wrapper로 더 높은 abstraction을 만듭니다.
 - RAII guard로 clock과 power를 관리합니다.
-- HAL을 wrap하는 방식이 대부분 더 빠르고 작습니다.
+- HAL wrapper와 직접 구현의 크기·시간은 같은 기능·오류 처리 조건으로 비교합니다.
 
 ## 관련 항목
 

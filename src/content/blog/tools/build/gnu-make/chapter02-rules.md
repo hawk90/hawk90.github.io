@@ -35,7 +35,7 @@ hello.o: hello.c hello.h
 	gcc -c hello.c -o hello.o
 ```
 
-`hello.o`라는 파일이 `hello.c`와 `hello.h`보다 새것이 아닐 때 레시피가 돕니다. 가장 흔한 형태입니다.
+hello.o가 없거나 일반 의존성이 hello.o보다 더 새로울 때 레시피가 실행됩니다. 시간이 같은 것만으로 재컴파일하지는 않습니다. 가장 흔한 형태입니다.
 
 ### 다중 타겟 — 한 번에 여러 개 묶기
 
@@ -141,7 +141,7 @@ main.o: main.c hello.h config.h
 
 ### Order-only 의존성 — "있기만 하면 OK"
 
-`|` 기호 뒤에 적는 의존성은 *order-only*입니다. Make는 이 파일이 *존재하는지*만 확인하고, mtime은 무시합니다.
+`|` 기호 뒤에 적는 의존성은 *order-only*입니다. Make는 이 의존성도 먼저 갱신하지만, 그 mtime 때문에 현재 타겟을 다시 만들지는 않습니다. 단순한 존재 검사만 수행하는 것은 아닙니다.
 
 ```makefile
 build/hello.o: hello.c | build
@@ -153,14 +153,14 @@ build:
 
 왜 일반 의존성이 아니라 order-only가 필요할까요? 답은 *디렉터리의 mtime이 바뀌는 시점*에 있습니다.
 
-리눅스에서 디렉터리의 mtime은 *그 안에 파일이 추가/삭제될 때마다* 갱신됩니다. `build/hello.o`를 만드는 순간 `build/`의 mtime은 `hello.o`보다 더 새것이 됩니다. 다음 빌드에서 Make는 의존성 `build`가 `build/hello.o`보다 새것이라고 판단하고, 멀쩡한 `hello.o`를 또 컴파일합니다. 그 결과로 또 mtime이 갱신되고… 영원히 같은 일을 반복합니다.
+디렉터리의 mtime은 그 안의 항목 추가·삭제로 바뀝니다. 다른 오브젝트나 임시 파일이 추가되기만 해도 관련 없는 타겟을 오래된 것으로 판단할 수 있습니다. 기존 파일의 내용만 다시 쓰면 디렉터리 mtime이 바뀌지 않을 수 있으므로 무한 재빌드가 항상 발생하는 것은 아닙니다.
 
 Order-only는 이 함정을 피하는 정답입니다. "디렉터리가 *없으면* 만들어라. 있으면 신경 쓰지 마라"라는 의미를 정확히 표현하는 방법이기 때문입니다. 실무에서 `mkdir -p build` 패턴이 등장할 때 거의 무조건 `|` 뒤에 두는 이유가 이것입니다.
 
-또 다른 흔한 케이스는 *생성 도구 의존성*입니다. 코드 생성기(예: `protoc`)는 한 번만 만들면 충분하고, 이후 mtime 변경으로 전체 재빌드를 유발하면 곤란합니다. 이때도 order-only가 답입니다.
+생성 도구 자체가 바뀌면 출력을 다시 생성해야 하는지도 판단해야 합니다. 보통 생성기의 동작 변경을 반영하려면 일반 의존성으로 연결합니다. 도구의 존재만 선행 조건으로 보장하고 변경 시 재생성을 원하지 않을 때에만 order-only를 선택합니다.
 
 ```makefile
-output.h: schema.proto | $(PROTOC)
+output.h: schema.proto $(PROTOC)
 	$(PROTOC) --cpp_out=. $<
 
 $(PROTOC):
@@ -227,7 +227,7 @@ correct:
 `.ONESHELL`을 켜면 *한 레시피의 모든 줄이 한 셸에서* 실행됩니다. 직관에 가깝지만 두 가지 부작용이 있습니다.
 
 - 에러 처리: 기본 동작은 *각 줄별 종료 코드 확인*입니다. `.ONESHELL`은 그 단위가 *레시피 전체*로 바뀌어, `set -e` 같은 셸 옵션을 직접 켜야 정확한 실패 감지가 됩니다.
-- 접두사: `@` 같은 줄별 접두사는 첫 줄에만 적용됩니다.
+- 접두사: 전체 레시피의 특수 접두사는 첫 줄에서 판정합니다. POSIX 계열 셸로 판단되면 내부 줄의 @·-·+도 제거하므로, 스크립트 문자로 전달된다고 가정하지 않습니다.
 
 큰 프로젝트에서는 일관된 셸 동작이 더 중요해서, `.ONESHELL` 대신 `&&` 연결을 선호합니다.
 
@@ -334,7 +334,7 @@ SHELL := /bin/bash
 
 ## 이중 콜론 규칙(`::`)
 
-같은 타겟에 *여러 독립 레시피*를 정의하고 싶을 때 씁니다. 보통 콜론(`:`)으로는 같은 타겟을 두 번 적으면 오류이지만, 이중 콜론은 허용됩니다.
+같은 타겟에 *여러 독립 레시피*를 정의하고 싶을 때 씁니다. 일반 콜론 규칙도 의존성을 여러 번 추가할 수 있습니다. 두 레시피를 정의하면 GNU Make는 경고하고 마지막 레시피를 사용합니다. 이중 콜론은 여러 레시피를 독립 규칙으로 유지합니다.
 
 ```makefile
 clean::
@@ -420,9 +420,9 @@ downloaded-archive.tar.gz:
 	curl -O https://example.com/big-file.tar.gz
 ```
 
-`.PRECIOUS`로 묶인 파일은 *중단 시에도 보존*됩니다. 다음 빌드에서 그대로 재사용되어 다시 받지 않아도 됩니다.
+PRECIOUS로 지정한 타겟은 중단 시 삭제를 막지만, 부분 다운로드의 완전성을 보장하지 않습니다. 임시 파일로 받은 뒤 검증하고 최종 이름으로 옮기는 절차가 별도로 필요합니다.
 
-`.SECONDARY`와의 차이: `.SECONDARY`는 *빌드 후 자동 삭제 방지*, `.PRECIOUS`는 *중단 시 부분 산물 삭제 방지*. 둘 다 켜면 *어떤 상황에서도 안 지워집니다*.
+`.SECONDARY`와의 차이: `.SECONDARY`는 *빌드 후 자동 삭제 방지*, `.PRECIOUS`는 *중단 시 부분 산물 삭제 방지*. 둘 다 명시적 clean이나 외부 프로그램의 삭제까지 막는 보호 장치는 아닙니다. PRECIOUS는 중간 파일 보존에도 영향을 주므로 삭제 조건별로 선택합니다.
 
 ### `.DELETE_ON_ERROR` — *반대 방향, 실패 시 강제 삭제*
 
@@ -446,14 +446,14 @@ build/output.tar.gz: input.txt
 
 이제 `gzip`이 실패하면 *Make가 부분 `output.tar.gz`를 자동으로 삭제*합니다. 다음 빌드가 새로 시도합니다.
 
-> 💡 *항상 켜 두면 좋은 옵션*입니다. 안 켜면 *언젠가* 위 사고가 납니다. 큰 Makefile 첫 줄(또는 `cmake_minimum_required`처럼 표준 헤더)에 `.DELETE_ON_ERROR:` 한 줄을 더하는 게 권장 관행입니다.
+파일을 쓰다가 실패하는 규칙에는 .DELETE_ON_ERROR 적용을 검토합니다. 기존 정상 파일을 직접 덮어쓰는 레시피라면 원자적 교체도 함께 설계합니다. [특수 타겟 문서](https://www.gnu.org/software/make/manual/html_node/Special-Targets.html)는 삭제와 보존 조건을 구분합니다.
 
 ### 그 외 자주 보는 특수 타겟
 
 | 특수 타겟 | 의미 |
 |-----------|------|
 | `.PHONY: a b c` | a/b/c가 *동작 이름*임을 알림. 같은 이름 파일이 있어도 매번 실행. |
-| `.SUFFIXES:` | *옛 접미사 규칙*을 비우거나 추가. `.SUFFIXES:` (비우기)는 암시적 규칙 끄는 표준 패턴. |
+| `.SUFFIXES:` | *옛 접미사 규칙*을 비우거나 추가. 비워도 내장 패턴 규칙까지 모두 끄지는 않음. 내장 규칙 전체 제거는 -r. |
 | `.ONESHELL:` | 한 레시피 안의 모든 줄을 *한 셸*에서 실행 (3.82+). |
 | `.NOTPARALLEL:` | 이 Makefile은 *병렬 빌드 금지*. 단계별 의존성이 자동 추적 불가할 때. |
 | `.EXPORT_ALL_VARIABLES:` | 이 Makefile의 모든 변수를 *환경 변수로* 자식 프로세스에 노출. |
@@ -475,7 +475,7 @@ build/hello.o: hello.c build
 	gcc -c hello.c -o build/hello.o
 ```
 
-`build/` 디렉터리는 *그 안에 파일이 들어올 때마다* mtime이 갱신됩니다. 결과적으로 디렉터리가 항상 `hello.o`보다 새것이 되어 무한 재빌드가 일어납니다.
+`build/` 디렉터리는 *그 안에 파일이 들어올 때마다* mtime이 갱신됩니다. 관련 없는 파일의 추가·삭제도 hello.o의 불필요한 재빌드를 유발합니다. 언제나 무한히 반복된다는 뜻은 아닙니다.
 
 **해결**: order-only 의존성
 ```makefile
@@ -497,7 +497,7 @@ deploy:
 	cd /var/www && cp -r $(CURDIR)/dist/* .
 ```
 
-`$(CURDIR)`은 Make가 시작될 때 작업 디렉터리를 담아 두는 자동 변수입니다. `cd` 이후에도 원래 디렉터리를 가리키므로 절대 경로처럼 안전합니다.
+`$(CURDIR)`은 Make가 시작될 때 작업 디렉터리를 담아 두는 내장 변수입니다. `cd` 이후에도 원래 디렉터리를 가리키므로 절대 경로처럼 안전합니다.
 
 ### 3. 셸 변수에 `$$` 안 붙임
 
@@ -522,7 +522,7 @@ test:
 Makefile:5: *** missing separator.  Stop.
 ```
 
-이 메시지가 보이면 99%는 탭이 아닌 공백 들여쓰기입니다.
+탭 누락뿐 아니라 규칙 구분자가 잘못됐거나 확장된 문자열이 Makefile 문법을 깨뜨렸는지도 확인합니다.
 
 ### 5. 첫 타겟이 `clean`
 
@@ -538,7 +538,45 @@ hello: main.o
 
 ---
 
-## 작은 예시 — 모든 요소 적용
+## 직접 확인 — 디렉터리 변경과 실패한 출력
+
+GNU Make 4.4.1·macOS에서 다음 두 파일로 order-only와 DELETE_ON_ERROR를 확인했습니다. 실제 컴파일과 무관한 규칙이므로 C 컴파일러 없이 실행합니다.
+
+```makefile title="Makefile"
+.DEFAULT_GOAL := all
+.DELETE_ON_ERROR:
+.PHONY: all
+all: build/output.txt
+
+build/output.txt: input.txt | build
+	cp $< $@
+
+build:
+	mkdir -p $@
+
+partial.txt:
+	printf 'partial\n' > $@; false
+```
+
+입력은 간단한 텍스트 파일입니다.
+
+```text title="input.txt"
+input version 1
+```
+
+빈 디렉터리에서 두 파일을 저장한 뒤 실행합니다.
+
+```bash
+make
+touch build/unrelated.txt
+make
+make partial.txt
+test ! -e partial.txt
+```
+
+두 번째 make는 output.txt를 다시 복사하지 않습니다. 반면 partial.txt 명령은 실패하고 Make가 해당 출력을 지웁니다. 마지막 test는 삭제를 확인합니다. DELETE_ON_ERROR 선언을 제거해 비교하면 실패 뒤 partial.txt가 남습니다. 반환 코드가 실패했다는 사실과 파일이 남았는지를 별도로 확인해야 합니다.
+
+## 작은 예시 — 주요 요소 적용
 
 지금까지의 도구를 한 자리에 모은 Makefile입니다.
 
@@ -595,7 +633,7 @@ clean::
 
 ## 다음 장 예고
 
-[Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables)에서는 Make의 변수를 다룹니다. 사용자 정의, 자동 변수(`$@`, `$<`, `$^`, `$?`), 두 가지 확장 방식(`=` vs `:=`), 환경 변수와의 관계까지 — Make에서 "왜 같은 코드가 미묘하게 다르게 동작하지?"의 9할이 이 장에서 풀립니다.
+[Ch 3: 변수](/blog/tools/build/gnu-make/chapter03-variables)에서는 Make의 변수를 다룹니다. 사용자 정의, 자동 변수(`$@`, `$<`, `$^`, `$?`), 두 가지 확장 방식(`=` vs `:=`), 환경 변수와의 관계까지 — Make에서 "왜 같은 코드가 미묘하게 다르게 동작하지?"를 확장 시점과 출처로 나누어 확인합니다.
 
 ## 참고 자료
 

@@ -23,21 +23,18 @@ Spinlock은 짧은 critical section에 적합하지만 hold time이 µs 단위�
 
 ## Mutex 비용 분해
 
-| 경로 | 항목 | 비용 |
-|------|------|------|
-| Uncontended (waiter 없음) | atomic CAS | 5-20 cycle |
-| | 함수 호출 overhead | 10 cycle |
-| | **총합** | ~30 cycle ≈ 10-100 ns |
-| Contended (waiter 있음) | waiter park (syscall) | 1-3 µs |
-| | holder unlock + wake | 1-3 µs |
-| | context switch | 1-3 µs |
-| | **총합** | ~10 µs |
+| 경로 | 보통 관찰할 동작 | 비용을 바꾸는 요인 |
+|------|------------------|-------------------|
+| Uncontended (waiter 없음) | userspace atomic fast path | mutex 구현, CPU, compiler |
+| Contended (waiter 있음) | park/wake 및 scheduler 개입 가능 | scheduler, runnable task, affinity, load |
 
-Uncontended path는 lock-free 수준으로 빠릅니다. 비용은 contention에서만 발생합니다. 따라서 같은 mutex라도 contention rate에 따라 100배 이상 비용이 달라집니다.
+Uncontended path에서 syscall이 생략되는 구현이 많지만, 정확한 instruction 수와 latency는 platform과 library에 따라 다릅니다. Contention은 대기와 scheduling 비용을 추가할 수 있으므로 target에서 경로별로 측정합니다.
 
 ## Linux Futex — Fast Userspace Mutex
 
 Linux는 mutex를 futex 위에 구현합니다. Uncontended 시에는 userspace atomic만으로 끝나고, contended 시에만 kernel이 개입합니다.
+
+Linux의 futex는 userspace word와 kernel wait/wake operation을 결합하는 primitive입니다. 실제 pthread mutex 구현은 glibc 및 mutex 종류에 따라 달라집니다 ([`futex(2)` 매뉴얼](https://man7.org/linux/man-pages/man2/futex.2.html)).
 
 ```c
 /* Pseudo-code */
@@ -96,13 +93,7 @@ if (lock_held_by_lower_priority_task) {
 restore_priority();
 ```
 
-Overhead는 다음과 같습니다.
-
-- Chain inheritance가 발생하면 수십 µs까지 늘어날 수 있습니다
-- Wait list 재정렬에 O(log N) 또는 O(N)이 필요합니다
-- Holder TCB 접근으로 cache miss가 추가됩니다
-
-ASIL-D 자동차나 항공 시스템에서는 chain depth가 유한임을 보장해야 하며, 보통 3 이하로 제한합니다.
+Priority inheritance는 holder의 priority와 대기열을 갱신하므로 구현과 lock chain에 따라 추가 비용이 생깁니다. 고정된 최대 비용이나 공통 chain-depth 한계는 여기서 가정하지 않습니다. 실시간 시스템에서는 대상 RTOS의 PI 프로토콜과 최대 동시 lock chain을 확인하고, 그 조건을 응답시간 분석에 포함해야 합니다.
 
 ## FreeRTOS Mutex 측정
 
@@ -115,14 +106,16 @@ TickType_t wait = xTaskGetTickCount() - start;
 Tick 단위 측정은 해상도가 낮으므로, 정확한 분석에는 SEGGER SystemView나 Percepio Tracealyzer를 사용합니다.
 
 ```text
-Mutex_DB:
+Mutex_DB (일관성을 보이는 예시 데이터):
   total_acquired:   12345
-  total_block_time: 1234 ms
+  total_block_time: 12.34 ms
   max_block_time:     45 µs
   blocked_count:    2345
 ```
 
-`max_block_time`이 RTOS에서는 평균보다 중요합니다. Worst case가 deadline 안에 들어와야 schedulable합니다.
+이 값은 실제 측정 결과가 아닙니다. `max_block_time × blocked_count`가 total보다 크므로 합계 조건과 양립할 수 있는 예시값입니다.
+
+`max_block_time`은 RTOS에서 평균과 별도로 봐야 합니다. 관측한 최댓값도 workload와 측정 구간에 한정되므로, worst-case schedulability 증명과 같지는 않습니다.
 
 ## Robust Mutex
 
@@ -130,7 +123,9 @@ Mutex_DB:
 pthread_mutexattr_setrobust(&attr, PTHREAD_MUTEX_ROBUST);
 ```
 
-Mutex를 보유한 thread가 죽으면 다음 take 시 `EOWNERDEAD`를 반환해 복구할 기회를 줍니다.
+공유 프로세스 사이에서 쓰려면 robust 설정과 별도로 `pthread_mutexattr_setpshared(&attr, PTHREAD_PROCESS_SHARED)`도 설정해야 합니다. 기본 process-private mutex는 다른 프로세스와 공유할 수 없습니다 ([`pthread_mutexattr_setpshared(3)`](https://man7.org/linux/man-pages/man3/pthread_mutexattr_setpshared.3.html)).
+
+이 속성은 robust mutex를 만들기 위한 일부 설정이며 실제 mutex 생성까지는 생략한 개요입니다. Robust mutex의 owner가 종료되면 다음 `pthread_mutex_lock()`은 lock을 획득하면서 `EOWNERDEAD`를 반환합니다. 보호 상태를 복구한 뒤 `pthread_mutex_consistent()`를 호출해야 합니다 ([robust mutex 매뉴얼](https://man7.org/linux/man-pages/man3/pthread_mutexattr_setrobust.3.html), [`pthread_mutex_consistent(3)`](https://man7.org/linux/man-pages/man3/pthread_mutex_consistent.3.html)).
 
 ```c
 int err = pthread_mutex_lock(&mtx);
@@ -222,28 +217,25 @@ Lock ordering 규칙을 정해 모든 코드가 같은 순서로 잡도록 해�
 
 Low priority task가 mutex를 잡고 있을 때 medium이 CPU를 점유하면 high priority task가 deadline을 놓칩니다. PI mutex를 쓰고 WCET 분석을 같이 해야 합니다.
 
-## 측정 — 실측 결과
+## 측정 — 기록해야 할 항목
 
-Cortex-A53 4-core, glibc futex mutex의 결과입니다.
+아래 값은 결과 보고서에서 기록할 항목의 예시이며, 특정 Cortex-A53/glibc 시스템의 측정값이 아닙니다. Uncontended 경로와 contention 경로를 분리하고 CPU, OS/libc, mutex 종류, thread 수, 반복 횟수, 분포를 함께 기록해야 비교할 수 있습니다.
 
-| 항목 | Latency | 비고 |
-|------|---------|------|
-| Uncontended lock | 30 ns | atomic CAS만 |
-| Uncontended unlock | 20 ns | atomic store |
-| Contended lock | 8 µs | `futex_wait` + switch |
-| Contended unlock | 3 µs | `futex_wake` |
-| Adaptive spin success | 200 ns | spin 단계에서 성공 |
-| PI inherit (depth 1) | 1 µs | priority boost |
-| PI inherit (depth 3) | 4 µs | chain propagation |
+| 경로 | 측정할 항목 | 함께 기록할 조건 |
+|------|-------------|----------------|
+| Uncontended lock/unlock | latency 분포 | CPU, OS/libc, mutex 종류, compiler |
+| Contended lock/unlock | waiter 대기와 wake latency | thread 수, affinity, critical-section 시간 |
+| Adaptive mutex | spin 성공 비율과 park 횟수 | 구현별 정책과 관측 도구 |
+| PI mutex | boost/chain 구간의 latency | RT 정책, priority, lock-chain 길이 |
 
-Uncontended path와 contended path가 100배 이상 차이가 납니다. Contention이 빈번한 lock은 lock-free나 striping으로 분산하는 것이 필요합니다.
+일반적으로 contention은 추가 대기와 scheduler 개입을 만들 수 있지만, 그 크기는 구현과 부하에 따라 달라집니다. 수치 없이 lock-free나 striping이 더 낫다고 결론내리지 말고 대표 workload에서 비교합니다.
 
 ## 정리
 
 - Mutex는 block 가능한 lock이며 hold time이 길 때 spinlock보다 유리합니다.
 - Linux futex는 uncontended path에서 syscall이 0이므로 매우 빠릅니다.
 - Adaptive mutex는 짧은 spin 후 block으로 두 방식의 장점을 결합합니다.
-- Priority inheritance는 chain overhead가 있으며 자동차 시스템에서는 depth 제한이 필요합니다.
+- Priority inheritance 비용은 구현과 lock chain에 따라 달라지므로 대상 RTOS 설정과 응답시간 분석으로 확인합니다.
 - Mutex는 자원 보호용, semaphore는 signaling용으로 구분합니다.
 - Real-time loop에서는 항상 finite timeout과 fault path를 둡니다.
 

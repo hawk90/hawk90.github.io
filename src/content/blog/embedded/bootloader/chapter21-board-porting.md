@@ -10,390 +10,127 @@ draft: false
 topics: ["embedded"]
 ---
 
-새 보드를 받아 U-Boot부터 띄울 때, 백지에서 시작하면 며칠을 그냥 잡아먹습니다. 다행히 거의 항상 *비슷한 보드*가 이미 mainline U-Boot에 들어 있습니다. 그 보드를 복사해 차이만 고치는 게 정석입니다.
+새 보드 U-Boot 포팅은 공통 작업 순서를 참고할 수 있지만, 파일 layout, Kconfig symbol, SPL 단계, DDR 초기화와 부팅 media는 SoC와 선택한 U-Boot tag에 따라 달라집니다. 이 장은 mainline U-Boot 포팅을 위한 checklist이며 특정 i.MX board의 완성된 port나 실행 결과가 아닙니다.
 
 ## 한 줄 요약
 
-**같은 SoC·비슷한 주변 회로의 reference 보드를 *템플릿*으로 복사한 다음, defconfig·DT·보드 코드·환경 변수 다섯 군데를 차례로 바꾸면 대부분 첫 시리얼 출력까지 도달합니다.**
+**가장 가까운 mainline board port를 조사한 뒤, defconfig·Kconfig/Kbuild·DTS·early-phase device·SoC firmware/DDR 의존성을 target에 맞춰 정리합니다.** Reference board를 통째로 복사하거나 generic `dd` 명령으로 첫 부팅을 시도하는 절차는 안전한 porting recipe가 아닙니다.
 
-## 시작 — 비슷한 보드 찾기
+## 시작 — 유사 port 조사
 
-U-Boot 소스에서 `configs/`를 훑어봅니다.
-
-```bash
-ls configs | grep -i imx8m
-imx8mm_evk_defconfig
-imx8mn_evk_defconfig
-imx8mp_evk_defconfig
-imx8mq_evk_defconfig
-imx8mq_phanbell_defconfig
-verdin-imx8mm_defconfig
-verdin-imx8mp_defconfig
-```
-
-SoC가 같고 DDR 종류와 PMIC가 비슷한 것이 후보입니다. `imx8mm_evk`처럼 NXP reference는 *가장 많이 검증*되어 있으니 후보 1번으로 둡니다.
+같은 SoC family, DRAM part/topology, PMIC, boot media, clock/pinmux와 security firmware가 비슷한 in-tree board를 후보로 찾습니다. SoC가 같다는 것만으로 DDR timing이나 flash layout을 복사해도 된다는 뜻은 아닙니다.
 
 ```bash
-# 후보 보드의 파일 리스트
-grep -l "imx8mm_evk" configs/ \
-    board/freescale/imx8mm_evk/* \
-    arch/arm/dts/imx8mm-evk*.dts*
+# U-Boot source tree에서 후보 파일과 DT/Kconfig 참조를 찾아 비교
+rg -n "<soc-or-board-id>" configs/ board/ arch/arm/dts/
 ```
 
-## 바꿀 파일 여섯 군데
+실제 port 전에 pinned U-Boot tag, vendor BSP version, SoC reference manual, board schematic, DRAM/PMIC datasheet 및 ROM boot requirements를 기록합니다. 이 환경에는 특정 board schematic이나 SoC documentation이 제공되지 않아 실제 target design을 검증하지 않았습니다.
 
-새 보드 `boardx`를 추가한다고 하면, 손대는 곳은 보통 이렇습니다.
+## Board port 구성 요소
 
-**1. configs/boardx_defconfig**
+필요한 경로는 architecture, SoC family와 기존 tree 구조에 따라 다릅니다. 보통 defconfig, board-specific Kconfig/Kbuild, board DTS/U-Boot DTS additions, optional board code, documentation, MAINTAINERS가 관련됩니다. 모든 port에서 `include/configs/<board>.h`나 SoC Kconfig 파일을 새로 만드는 것은 아닙니다. U-Boot system configuration 문서는 board header를 last resort로 두고 Kconfig/device tree를 우선하도록 안내합니다.
 
+U-Boot의 board best practices는 platform defconfig를 `make savedefconfig`로 생성하고 Kconfig fragments를 top-level `configs/` 대신 board directory에 두도록 권고합니다. Standard Boot 지원도 고려할 항목입니다.
 
-**2. board/myvendor/boardx/**
+```text
+# Conceptual tree only; exact location and files vary by U-Boot tag/platform
+board/<vendor>/<board>/
+  Kconfig
+  MAINTAINERS
+  <board-specific-source-if-needed>
+configs/<board>_defconfig
+arch/<arch>/dts/<board>.dts
+```
 
-- ├── Kconfig
-- ├── Makefile
-- ├── boardx.c        (보드 초기화, DRAM 크기 검출)
-- ├── spl.c           (SPL 단계 DDR 초기화)
-- ├── lpddr4_timing.c (DDR 타이밍, NXP 도구로 생성)
-- └── MAINTAINERS
+보드 코드와 hooks는 실제 초기화 sequence/source를 먼저 확인한 뒤 추가합니다. `board_init()`, `dram_init()`, SPL `board_init_f()` 구현을 다른 SoC에서 이름만 맞춰 복사하면 안 됩니다.
 
-**3. arch/arm/dts/boardx.dts**
+## defconfig와 Kconfig
 
-- arch/arm/dts/boardx-u-boot.dtsi
+기존 board의 defconfig를 비교 자료로 쓸 수는 있지만, 해당 파일을 그대로 복사하는 대신 config dependencies와 source paths를 확인합니다. Kconfig symbol은 pinned tree에서 정의 여부, dependency, select/imply effect를 확인한 뒤 설정합니다. `CONFIG_SYS_TEXT_BASE`, `CONFIG_DEFAULT_DEVICE_TREE`, boot command 및 SPL options는 모든 SoC에 공통인 checklist가 아닙니다.
 
-**4. include/configs/boardx.h**
-
-
-**5. board/myvendor/Kconfig (subsystem 등록)**
-
-
-**6. arch/arm/mach-imx/imx8m/Kconfig (보드 선택 옵션 추가)**
-
-`-u-boot.dtsi`는 *U-Boot 단계 전용 DT 추가분*입니다. 본 DT는 Linux와 공유하고, U-Boot 만의 필요(예: SPL 단계 사용 device, bootph-pre-ram 같은 노드 속성)는 `.dtsi`로 끼워 넣습니다.
-
-## defconfig 복사
+대표적인 build workflow는 다음과 같지만 `<board>_defconfig`, cross compiler와 output path는 실제 tree가 제공하는 target에 맞춰야 합니다.
 
 ```bash
-cp configs/imx8mm_evk_defconfig configs/boardx_defconfig
+make <board>_defconfig
+make savedefconfig
+make O=<build-dir> CROSS_COMPILE=<toolchain-prefix>
 ```
 
-열어서 보드 식별 부분을 바꿉니다.
+U-Boot v2025.01 board-port guidance, system configuration 및 Kconfig 문서를 읽고 defconfig diff를 review합니다. 이 글의 placeholder 명령은 실행하지 않았으며 여기에는 해당 build tree/toolchain이 없습니다.
 
-```text
-CONFIG_ARM=y
-CONFIG_ARCH_IMX8M=y
-CONFIG_SYS_TEXT_BASE=0x40200000
-CONFIG_TARGET_BOARDX=y
-CONFIG_SYS_LOAD_ADDR=0x40400000
-CONFIG_SYS_CONFIG_NAME="boardx"
-CONFIG_DEFAULT_DEVICE_TREE="boardx"
-CONFIG_SPL_LDSCRIPT="arch/arm/cpu/armv8/u-boot-spl.lds"
-CONFIG_SPL=y
-CONFIG_SPL_FIT=y
-CONFIG_BOOTCOMMAND="run distro_bootcmd"
-CONFIG_BOOTSTD_FULL=y
-CONFIG_DEFAULT_FDT_FILE="boardx.dtb"
-```
+## Device tree와 SPL/TPL 단계
 
-`CONFIG_TARGET_BOARDX=y`는 *우리가 아직 만들지 않은* 옵션입니다. 그래서 `arch/arm/mach-imx/imx8m/Kconfig`에 등록해 둬야 합니다.
+Linux/U-Boot 공유 DTS와 U-Boot 전용 DTS additions의 사용 방식은 architecture/tree에 따라 다릅니다. U-Boot SPL/TPL은 build 중 일부 DT node를 필터링할 수 있습니다. `bootph-pre-ram`, `bootph-pre-sram`, `bootph-all`은 노드가 특정 phase에 포함되어야 하는지 표시하며, 필요한 parent/bus dependency와 driver Kconfig도 함께 맞아야 합니다. `bootph-pre-ram` 하나만 넣는 것으로 device를 사용할 수 있다는 보장은 없습니다.
 
-```text
-# arch/arm/mach-imx/imx8m/Kconfig 에 추가
-config TARGET_BOARDX
-    bool "boardx"
-    select BINMAN
-    select IMX8MM
-    select SUPPORT_SPL
-    select OF_BOARD_FIXUP
-    help
-      boardx is a custom imx8mm-based industrial board.
-```
-
-## board/myvendor/boardx/Kconfig·Makefile
-
-`board/myvendor/Kconfig`에 등록:
-
-```text
-if TARGET_BOARDX
-config SYS_BOARD
-    default "boardx"
-
-config SYS_VENDOR
-    default "myvendor"
-
-config SYS_CONFIG_NAME
-    default "boardx"
-
-source "board/myvendor/boardx/Kconfig"
-endif
-```
-
-`board/myvendor/boardx/Kconfig`:
-
-```text
-config SYS_BOARD_PINMUX
-    default "boardx_pinmux"
-
-config IMX_CONFIG
-    default "board/myvendor/boardx/imximage.cfg"
-```
-
-`board/myvendor/boardx/Makefile`:
-
-```makefile
-obj-y += boardx.o
-ifdef CONFIG_SPL_BUILD
-obj-y += spl.o lpddr4_timing.o
-endif
-```
-
-`SPL_BUILD` 시점에는 SPL용 파일만, U-Boot proper 시점에는 보드 본체 코드만 빌드됩니다. 두 단계가 한 트리에서 *분리 컴파일*된다는 점이 처음엔 헷갈리지만 익숙해지면 자연스럽습니다.
-
-## boardx.c — 최소 보드 초기화
-
-```c
-// board/myvendor/boardx/boardx.c
-#include <common.h>
-#include <init.h>
-#include <asm/arch/sys_proto.h>
-#include <asm/io.h>
-
-int board_init(void)
-{
-    /* DRAM, console 이후 한 번만 호출 */
-    return 0;
-}
-
-int dram_init(void)
-{
-    /* DRAM 크기를 SoC 레지스터에서 읽음 */
-    gd->ram_size = imx_ddr_size();
-    return 0;
-}
-
-int board_phys_sdram_size(phys_size_t *size)
-{
-    *size = imx_ddr_size();
-    return 0;
-}
-
-int board_late_init(void)
-{
-    /* env로 보드 식별, MAC 주소 등 */
-    env_set("board_name", "boardx");
-    env_set("board_rev", "A1");
-    return 0;
-}
-```
-
-처음 한 사이클에는 이 정도면 충분합니다. 나중에 PHY reset·LED·watchdog feed 등을 더해 갑니다.
-
-## spl.c — SPL 단계 DDR
-
-가장 위험한 부분입니다. DDR 타이밍이 틀리면 *SPL이 메모리 첫 접근에서 hang*합니다.
-
-```c
-// board/myvendor/boardx/spl.c
-#include <common.h>
-#include <hang.h>
-#include <init.h>
-#include <spl.h>
-#include <asm/arch/clock.h>
-#include <asm/arch/ddr.h>
-
-extern struct dram_timing_info dram_timing;
-
-void spl_dram_init(void)
-{
-    ddr_init(&dram_timing);
-}
-
-void board_init_f(ulong dummy)
-{
-    int ret;
-
-    arch_cpu_init();
-    init_uart_clk(1);
-
-    ret = spl_init();
-    if (ret) {
-        debug("spl_init failed: %d\n", ret);
-        hang();
-    }
-
-    preloader_console_init();
-    enable_tzc380();
-    spl_dram_init();
-    board_init_r(NULL, 0);
-}
-```
-
-`dram_timing`은 NXP DDR Tool 또는 벤더가 제공한 calibration 결과를 그대로 가져옵니다. *직접 계산하지 않습니다*. 잘못된 timing은 *언젠가* 메모리 corruption으로 드러나는데, 그 시점이 부팅 직후가 아니라 *부팅한 지 한참 뒤 random crash*로 나타나니 무서운 버그입니다.
-
-## DT — boardx.dts
-
-reference 보드의 DT를 복사해서 시작합니다.
-
-```text
-// arch/arm/dts/boardx.dts
-/dts-v1/;
-
-#include "imx8mm.dtsi"
-#include "imx8mm-boardx.dtsi"
-
-/ {
-    model = "MyVendor BoardX";
-    compatible = "myvendor,boardx", "fsl,imx8mm";
-
-    chosen {
-        stdout-path = &uart2;
-    };
-
-    memory@40000000 {
-        device_type = "memory";
-        reg = <0x0 0x40000000 0 0x40000000>;  /* 1 GB */
-    };
-
-    reg_usdhc2_vmmc: regulator-usdhc2-vmmc {
-        compatible = "regulator-fixed";
-        regulator-name = "VSD_3V3";
-        regulator-min-microvolt = <3300000>;
-        regulator-max-microvolt = <3300000>;
-        gpio = <&gpio2 19 GPIO_ACTIVE_HIGH>;
-        enable-active-high;
-    };
-};
-
-&uart2 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_uart2>;
-    status = "okay";
-};
-
-&usdhc2 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_usdhc2>;
-    vmmc-supply = <&reg_usdhc2_vmmc>;
-    cd-gpios = <&gpio2 12 GPIO_ACTIVE_LOW>;
-    bus-width = <4>;
-    status = "okay";
-};
-```
-
-`-u-boot.dtsi`로 U-Boot 전용 속성을 추가합니다.
-
-```text
-// arch/arm/dts/boardx-u-boot.dtsi
-&{/soc@0} {
-    bootph-all;
-};
-
-&osc_24m {
-    bootph-all;
-};
-
-&uart2 {
-    bootph-all;
-};
-
-&usdhc2 {
+```dts
+/* Illustration: use only when the pinned tree binding and phase need it */
+&uartX {
     bootph-pre-ram;
 };
 ```
 
-`bootph-pre-ram`이 *SPL에서 쓰이는* 노드, `bootph-all`이 *모든 단계에서 쓰이는* 노드를 표시합니다. 이걸 빠뜨리면 SPL이 해당 device를 못 봅니다.
+SPL에서 해당 노드가 실제로 포함되고 driver가 연결됐는지는 생성된 SPL DT와 build output으로 확인합니다. 이 기사에서는 target DT, generated SPL tree 또는 driver binding을 실행 확인하지 않았습니다.
 
-## 첫 빌드와 첫 부팅
+## DRAM과 early serial
 
-다 채웠으면 빌드:
+SPL DRAM path는 controller/PHY, memory part, board routing, voltage/clock, vendor firmware/calibration, training result와 pinned source에 의존합니다. Reference-board timing source나 `dram_timing` C structure를 다른 board에 그대로 넣지 않습니다. 구체 API와 init order는 target SoC port를 따라야 하므로, 이 글은 generic `board_init_f()` pseudo-implementation을 제시하지 않습니다.
 
-```bash
-make boardx_defconfig
-make -j$(nproc) ARCH=arm CROSS_COMPILE=aarch64-linux-gnu-
-```
+Early console 역시 UART instance, clock, pinmux, address mapping, phase-specific driver와 CONFIG_DEBUG_UART settings에 의존합니다. “UART pinmux/clock이 켜지지 않았을 수 있다”는 진단 가설이지, 모든 첫 출력 실패의 원인을 뜻하지는 않습니다.
 
-`u-boot.bin`·`spl/u-boot-spl.bin`·`flash.bin`(NXP의 묶인 이미지)이 나옵니다. `flash.bin`을 SD에 dd해 보드를 켭니다.
+## Build와 실제 첫 부팅
 
-```bash
-sudo dd if=flash.bin of=/dev/sdb bs=1k seek=33 conv=fsync
-```
+먼저 isolated build host에서 pinned tree와 target defconfig를 build하고, expected artifacts와 ROM packaging requirements를 확인합니다. `u-boot.bin`, SPL image, signed/container image의 이름과 구성은 platform마다 다릅니다.
 
-시리얼 콘솔(115200 8N1)을 띄우고 전원을 넣습니다. *아무것도 안 나오는* 게 흔한 첫 결과입니다.
+기존 기사의 `flash.bin`·`seek=33` 및 `/dev/sdb` write 예는 특정 ROM/media 조건을 근거 없이 보편화하고 실수로 host disk를 덮을 위험이 있어 제거했습니다. 실제 flashing은 보드 제조사의 recovery method, exact device identity, image layout, backup와 recovery plan을 확인한 뒤 대상별 절차로 수행해야 합니다. 여기서는 어떤 media/board write도 하지 않았습니다.
 
-## 첫 시리얼 출력까지의 단계
+## Boot 단계별 관측
 
-이 흐름이 사실상 표준 디버깅 순서입니다.
+아래 그림은 조사 순서를 나타내는 개념도입니다. UART/ROM→SPL→DRAM→U-Boot proper→OS handoff 단계와 실제 console messages는 SoC/board/boot source에 따라 달라집니다.
 
-![새 보드 첫 부팅의 5단계 — 멈춘 단계가 의심 대상](/images/blog/bootloader/diagrams/chapter21-first-boot-stages.svg)
+![새 보드 first-boot 진단 단계의 개념도](/images/blog/bootloader/diagrams/chapter21-first-boot-stages.svg)
 
-각 단계에서 어떤 출력이 나오는지 예시:
+문제 기록에는 board revision, SoC/DRAM/PMIC, boot strap state, U-Boot tag/commit, defconfig, build artifacts, serial adapter/baud, 전원 조건 및 정확한 마지막 출력이 필요합니다. Synthetic transcript를 실행 증거처럼 사용하지 않습니다. 이 환경에서 보드 로그나 first-boot result는 수집하지 않았습니다.
 
-```text
-[2] U-Boot SPL 2026.04 (May 09 2026 - 16:01:23)
-    DDRINFO: start DRAM init
-    DDRINFO: DRAM rate 3000MTS
-    DDRINFO: ddrphy calibration done
-    DDRINFO: complete DRAM PHY training
+## MAINTAINERS와 upstream 제출
 
-[3] U-Boot 2026.04 (May 09 2026 - 16:01:23)
-    CPU:   i.MX8MM rev1.0 1600 MHz (running at 1200 MHz)
-    ...
-    Net:   eth0: ethernet@30be0000
-    Hit any key to stop autoboot:
-```
-
-각 단계에서 멈추면 그 구간의 코드가 의심 대상입니다. 1단계가 안 되면 *DEBUG_UART 설정·UART pinmux·UART clock*, 2단계가 안 되면 *DDR timing*, 3단계가 안 되면 *cache/MMU/clock*, 4단계가 안 되면 *MMC/Net driver*, 5단계가 안 되면 *DTB·cmdline·kernel ABI*입니다.
-
-## MAINTAINERS와 commit 분리
-
-mainline에 올릴 생각이면 `board/myvendor/boardx/MAINTAINERS`에 자신을 넣습니다.
+MAINTAINERS entry와 file patterns, patch organization은 pinned U-Boot tree의 convention을 확인합니다. 이름과 주소는 실제 maintainer의 동의를 받아 입력하며 template의 연락처를 그대로 사용하지 않습니다. Device tree, board support, config와 docs 변경을 검토 가능한 단위로 나눌 수 있지만 project review가 요구하는 순서가 우선입니다.
 
 ```text
-BOARDX BOARD
-M:  Hawk Yoon (contact via the site's Contact page)
-S:  Maintained
-F:  arch/arm/dts/boardx.dts
-F:  arch/arm/dts/boardx-u-boot.dtsi
-F:  board/myvendor/boardx/
-F:  configs/boardx_defconfig
-F:  include/configs/boardx.h
+BOARD <vendor> <board>
+M: <maintainer name> <maintainer email>
+S: Maintained
+F: board/<vendor>/<board>/
+F: configs/<board>_defconfig
 ```
-
-commit은 *기능별로 분리*합니다. 통째로 한 patch보다 다음 흐름이 받아들여지기 좋습니다.
-
-1. `arm: dts: add boardx device tree`
-2. `board: myvendor: add boardx board support`
-3. `configs: add boardx_defconfig`
-4. `doc: add boardx documentation`
 
 ## 자주 하는 실수
 
-새 보드 포팅에서 자주 만나는 함정입니다.
-
-- **DDR timing을 reference 보드 그대로 둔다.** 같은 SoC라도 PCB layout·DDR chip·전압이 다르면 *언젠가* 깨집니다. DDR Tool로 재calibration이 정석입니다.
-- **`-u-boot.dtsi`를 잊는다.** `bootph-pre-ram` 속성이 없어 SPL에서 device가 안 보이는데, 에러는 *"MMC not found"*처럼 device 차원에서 나오기 때문에 원인 찾기 까다롭습니다.
-- **`CONFIG_SYS_TEXT_BASE`를 reference에서 안 바꾼다.** DRAM 크기와 layout이 다르면 *부팅 도중 자기 자신을 덮어쓰기* 합니다.
-- **UART 핀mux는 켰는데 *UART clock이 안 켜진* 상태.** 가장 흔한 "첫 출력이 안 나오는" 원인. `init_uart_clk()` 호출 빠짐.
-- **defconfig 옵션을 너무 많이 켠다.** 첫 부팅까지는 *최소 기능*만 켜고, 부팅 후 하나씩 추가하는 편이 디버깅하기 좋습니다.
-- **DT 노드는 추가했는데 `status="okay"`를 빼먹어** device가 disable된 채로 부팅.
-- **eMMC·NOR boot mode 핀이 안 맞아서** SoC ROM이 SD가 아닌 다른 매체를 본다. SoC datasheet의 BOOT_MODE 핀 도해를 PCB와 한 번 더 대조해야 합니다.
+- **same SoC라며 DDR timing을 복사한다.** DRAM part, topology, layout, PMIC/clock과 training evidence를 board documentation으로 확인해야 합니다.
+- **Kconfig symbol을 근거 없이 추가한다.** pinned tree의 Kconfig/Kbuild path와 dependency를 대조하고 defconfig를 generated config로 검증합니다.
+- **SPL DTS에서 필요한 node/driver 의존성을 누락한다.** phase property와 parent node, Kconfig, SPL build output을 함께 확인합니다.
+- **board API 이름만 보고 초기화 순서를 가정한다.** 해당 architecture/SoC의 current port와 init sequence를 따라갑니다.
+- **가공한 first-boot output을 증거로 남긴다.** 실제 target log와 build identity를 분리해 기록합니다.
+- **명령 예시의 media address를 그대로 복사한다.** image format, ROM layout과 recovery route가 보드별로 다르므로 generic host write command를 쓰지 않습니다.
 
 ## 정리
 
-- 새 보드는 *비슷한 reference 보드 복사*로 시작하는 것이 가장 빠르고 안전합니다.
-- 손대는 곳은 `configs/`·`board/<vendor>/<board>/`·`arch/arm/dts/`·`include/configs/` 네 곳이 핵심입니다.
-- DDR timing은 *직접 계산하지 않고* 벤더 도구의 결과를 그대로 가져옵니다.
-- `-u-boot.dtsi`로 SPL 단계의 device를 명시(`bootph-pre-ram`)해야 합니다.
-- 첫 시리얼 출력 → SPL → DDR init → proper U-Boot → autoboot → Linux 다섯 단계의 *어디서 멈췄는지*가 디버깅 분기점입니다.
-- `CONFIG_DEBUG_UART`는 SPL보다도 이른 시점의 출력을 켜는 마지막 보루입니다.
-- mainline 제출을 위해서는 기능별 commit 분리와 MAINTAINERS 등록이 필요합니다.
+- Reference port는 조사 출발점이지 복사해도 되는 보장된 template이 아닙니다.
+- Defconfig, Kconfig/Kbuild, DTS/SPL phase, DDR/firmware와 ROM packaging은 pinned tag와 board source를 기준으로 확인합니다.
+- U-Boot best practice에 따라 defconfig는 `savedefconfig`로 정리하고 Standard Boot와 documentation도 검토합니다.
+- First-boot 진단은 단계 구분과 실제 log/build identity를 기록하되, target evidence 없이 성공했다고 주장하지 않습니다.
+- 이 문서에는 특정 board port, build, flash write 또는 first-boot runtime 결과가 없습니다.
 
 ## 다음 장 예고
 
-다음 장이 시리즈 마지막입니다. 새 보드를 포팅하면서 자주 만나는 *부팅 안 됨* 상황을 어떻게 진단하는지를 정리합니다. DEBUG_UART·JTAG·OpenOCD·post-mortem·실패 매트릭스까지 다루고, 그다음 시리즈로 어떻게 이어갈지도 안내합니다.
+다음은 이 시리즈의 22편입니다. 부팅 실패를 진단하는 방법은 UART/SPL/DDR/relocation/OS handoff의 실제 증거를 모으고 target-specific failure matrix로 좁혀 봅니다.
 
 ## 관련 항목
 
-- [Ch 20: RAUC / SWUpdate — 펌웨어 업데이트 프레임워크](/blog/embedded/bootloader/chapter20-rauc-swupdate)
-- [Ch 22: 디버깅 — DEBUG, JTAG, serial, post-mortem](/blog/embedded/bootloader/chapter22-debugging)
-- [BSP Development Ch 6: BSP 첫 단계 — 부트로더에서 첫 시리얼까지](/blog/embedded/bsp/chapter01-what-is-bsp) — 같은 흐름을 BSP 시점에서
-- [원문 — U-Boot doc/board/](https://u-boot.readthedocs.io/en/latest/board/index.html)
+- [Ch 20: RAUC / SWUpdate](/blog/embedded/bootloader/chapter20-rauc-swupdate)
+- [Ch 22: U-Boot 디버깅](/blog/embedded/bootloader/chapter22-debugging)
+- [BSP Development Ch 1: What is BSP](/blog/embedded/bsp/chapter01-what-is-bsp)
+- [U-Boot v2025.01 Board Port Best Practices](https://docs.u-boot.org/en/v2025.01/develop/board_best_practices.html)
+- [U-Boot v2025.01 System Configuration](https://docs.u-boot.org/en/v2025.01/develop/system_configuration.html)
+- [U-Boot v2025.01 Generic xPL/SPL Framework](https://docs.u-boot.org/en/v2025.01/develop/spl.html)
+- [U-Boot v2025.01 Driver Model design: pre-relocation support](https://docs.u-boot.org/en/v2025.01/develop/driver-model/design.html)

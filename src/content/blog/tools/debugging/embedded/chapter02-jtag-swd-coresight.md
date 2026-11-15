@@ -116,7 +116,7 @@ ARM이 핀 수를 줄이기 위해 만든 *2핀* 대체. JTAG 5핀 → SWD 2핀(
 
 **JTAG → SWD 전환 시퀀스 (16-bit on SWDIO):**
 
-- 0x79E7
+- 시간 순서를 MSB-first 문자열로 적으면 0x79E7, LSB-first로 보내는 16비트 값은 0xE79E입니다. CMSIS-DAP의 SWJ sequence는 LSB부터 보냅니다. line reset과 전환 순서도 함께 따라야 합니다.
 
 SWD → JTAG도 비슷한 매직 시퀀스 존재.
 
@@ -126,21 +126,21 @@ JTAG의 상태 머신과 달리 *패킷 기반*.
 
 ![SWD 패킷 구조](/images/blog/tools/diagrams/swd-packet-format.svg)
 
-- `APnDP` — Access Port(0)인가 Debug Port(1)인가?
+- `APnDP` — Access Port(1)인가 Debug Port(0)인가?
 - `RnW` — read(1) or write(0)?
 - `A2..A3` — 4바이트 정렬 주소 비트.
 - `Parity` — request의 APnDP+RnW+A2+A3 패리티.
 
 ### DP — Debug Port 레지스터
 
-**A2 A3:**
+**주소 A[3:2] (ADIv5 DP bank0 예):**
 
 - 00  IDCODE (read) / ABORT (write)
 - 01  CTRL/STAT  (control + status)
 - 10  SELECT     (어느 AP의 어느 뱅크?)
 - 11  RDBUFF (read) / 미사용 (write)
 
-`SELECT`로 *어느 AP*에 접근할지 + 그 AP의 *어느 256바이트 뱅크*인지 지정. AP 안의 4바이트 레지스터 16개 = 64바이트 단위로 잡지만 ARM의 표준 AP는 4개 뱅크 = 256바이트.
+ADIv5의 SELECT는 APSEL과 APBANKSEL 등을 지정합니다. APBANKSEL은 A[7:4], request의 A[3:2]는 뱅크 안 네 개의 32비트 레지스터를 고르므로 뱅크 하나는16바이트입니다. ADIv6의 AP 주소 모델까지 이 규칙으로 일반화하지 않습니다.
 
 ### AP — Access Port 레지스터
 
@@ -163,9 +163,9 @@ SWD 패킷 한 단위로 *32비트만* 전송. 그러므로 *임의 주소의 �
 1. DP-SELECT로 *AP*와 *뱅크* 선택.
 2. AP-CSW로 *32-bit access* 설정 (보통 디버거가 이미 해 둠).
 3. AP-TAR에 주소 쓰기.
-4. AP-DRW 읽기 → 그 주소의 데이터.
+4. AP-DRW 읽기를 요청합니다. ADIv5의 AP 읽기는 posted이므로 유효한 결과는 다음 AP 읽기 응답 또는 DP RDBUFF에서 회수해야 합니다.
 
-총 *3-4 패킷*. 한 워드 읽기가 SWD 약 30-40 클럭. 4 MHz SWCLK에서 ~10µs.
+한 SWD 전송은 request8비트·turnaround·ACK3비트·데이터32비트·parity 등을 포함합니다. 최소 네 번의 전송 전체를 30~40클럭으로 볼 수 없으며 WAIT/FAULT·idle·posted read를 포함한 지연은 실제 캡처로 확인합니다.
 
 연속 읽기는 CSW의 *AddrInc* 비트로 가속 — TAR을 한 번 쓰고 DRW를 연속 읽기, AP가 자동으로 주소 증분.
 
@@ -190,7 +190,7 @@ JTAG/SWD가 *물리 인터페이스*라면 그 위에서 실제로 일하는 게
 | 블록 | 메모리 위치 (Cortex-M) | 역할 |
 |------|--------|------|
 | DAP | (전용 SWD/JTAG 인터페이스) | 외부 ↔ 내부 버스 게이트웨이 |
-| **SCS/SCB** | `0xE000ED00` 시작 | System Control Block — DHCSR 등 |
+| **SCB** | `0xE000ED00` | System Control Block; DHCSR은 별도의 CoreDebug/DCB `0xE000EDF0` |
 | **DWT** | `0xE0001000` | Data Watchpoint and Trace — 4 워치포인트, 사이클 카운터 |
 | **FPB** | `0xE0002000` | Flash Patch and Breakpoint — 6 hardware BP |
 | **ITM** | `0xE0000000` | Instrumentation Trace Macrocell — software trace |
@@ -212,8 +212,8 @@ JTAG/SWD가 *물리 인터페이스*라면 그 위에서 실제로 일하는 게
 - [18]    S_SLEEP
 - [17]    S_HALT     ← 1이면 정지
 - [16]    S_REGRDY
-- [5:2]   reserved
-- [3]     C_MASKINTS  (mask interrupts in halt)
+- [5] C_SNAPSTALL, [4] reserved
+- [3]     C_MASKINTS (debug stepping 중 configurable interrupt 마스크 제어)
 - [2]     C_STEP
 - [1]     C_HALT     ← 1로 쓰면 정지
 - [0]     C_DEBUGEN  ← 1이면 디버그 가능
@@ -232,7 +232,7 @@ DHCSR을 직접 들여다보면 *왜 CPU가 안 멈추는지*를 디버깅할 �
 
 ```bash
 (openocd) mdw 0xe000edf0
-0xe000edf0: 00010003   ← S_HALT=1, C_DEBUGEN=1, C_HALT=1
+0xe000edf0: 00030003   ← S_HALT(bit17)=1, S_REGRDY(bit16)=1, C_DEBUGEN=1, C_HALT=1
 ```
 
 ### DCRSR / DCRDR — 레지스터 읽기
@@ -251,7 +251,7 @@ DCRDR (0xE000EDF8): 데이터 워드
 2. DHCSR.S_REGRDY 폴링 (작업 완료).
 3. DCRDR 읽기 → R0 값.
 
-레지스터 16개를 모두 받으면 *17 패킷 왕복*. SWD에서 그래도 ~1ms 안에 끝.
+레지스터마다 DCRSR 쓰기·S_REGRDY 확인·DCRDR 읽기가 필요하고 MEM-AP 접근 자체도 여러 SWD 전송으로 구성됩니다. 16개 읽기를 고정17패킷이나1ms로 단정하지 않습니다.
 
 ## FPB — 브레이크포인트
 
@@ -259,7 +259,7 @@ Flash Patch and Breakpoint Unit. 6개의 *주소 비교기*(comparator) + 2개�
 
 **FP_COMP0 (0xE0002008):**
 
-- [31:30] REPLACE — 00=BP, 01/10/11=instruction patch
+- [31:30] REPLACE — FPB revision1의 breakpoint 비교에서 lower/upper halfword 선택(01/10/11); remap 모드는 별도 계약
 - [28:2]  COMP — 비교 주소 (4바이트 정렬, 비트 0 무시)
 - [0]     ENABLE
 
@@ -267,15 +267,15 @@ GDB의 `break main` → 디버거가 FPB에 `&main`을 기록 + ENABLE.
 
 ```bash
 (openocd) mdw 0xe0002000 8
-0xe0002000: 00000010 ...     ← FP_CTRL: NUM_CODE=2, NUM_LIT=0
-0xe0002008: 08000125 ...     ← FP_COMP0: BP at 0x08000124+1 (Thumb)
+0xe0002000: 00000020 ...     ← FP_CTRL: NUM_CODE=2, NUM_LIT=0 (revision1 예)
+0xe0002008: 48000125 ...     ← FPB revision1 lower-halfword BP at 0x08000124, ENABLE=1
 ```
 
-Cortex-M0/M0+는 보통 4개, M3/M4/M7은 6개, M33+은 8개. *flash patch*는 별도 라이센스 + 칩 옵션.
+코어·구현·FPB revision별 비교기 수와 기능을 FP_CTRL 및 대상 매뉴얼로 확인합니다. 위6개 예를 모든 M3/M4/M7에 보장된 수로 해석하지 않습니다.
 
 ### Software vs Hardware BP
 
-`Z0` (sw): 명령어 한 바이트를 `BKPT #0` (Thumb: 0xBExx)로 갈아 끼우고 원래 명령은 별도 저장. *개수 무제한*이지만 *flash엔 못 씀*.
+`Z0` (sw): 타깃 명령어를 breakpoint opcode로 (Thumb: 0xBExx)로 갈아 끼우고 원래 명령은 별도 저장. 개수는 구현·저장 공간에 영향을 받으며 일반 RAM 패치와 flash 재프로그래밍은 다릅니다. Thumb BKPT는16비트입니다.
 
 `Z1` (hw): FPB 비교기 1개 소모. *flash·ROM에서 동작*하지만 *유한*.
 
@@ -303,6 +303,7 @@ GDB의 `watch *my_var` → DWT 비교기 한 개 소모. 4개 한도.
 사이클 카운터는 µs 측정에 매우 유용.
 
 ```c
+CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 uint32_t start = DWT->CYCCNT;
 do_work();
@@ -353,7 +354,7 @@ SEGGER J-Trace, Lauterbach TRACE32 같은 고가 도구가 받습니다.
 - 인터럽트 latency 측정.
 - 캐시 hit/miss 통계.
 
-Cortex-M7/M33은 ETM-M4 옵션 탑재. 모든 칩에 있는 건 아닙니다. *opdata*: M0/M0+는 ETM 없음, M3/M4는 옵션, M7은 보통 탑재.
+ETM 버전·trace sink·timestamp 및 핀 노출은 코어와 SoC 구현별로 다릅니다. Cortex-M7·M33을 모두 ETM-M4라고 부르거나 ETM에서 cache hit/miss를 직접 전부 얻는 것으로 설명하지 않습니다. 이 장의 Cortex-M 예와 Cortex-A CoreSight 구성은 별도로 확인합니다.
 
 ## CTI — Cross Trigger Interface
 
@@ -390,7 +391,7 @@ reset_config srst_only srst_nogate connect_assert_srst
 
 ### 디커플링
 
-칩 가까이 100nF 디커플링 캡이 없으면 디버그 자체 트랜잭션이 일으키는 *순간 전류*가 칩에 노이즈를 줘 SWD가 자꾸 끊깁니다. 자체 보드면 *항상* 0.1µF 디커플링 + 10µF 벌크.
+칩 가까이 100nF 디커플링 캡이 없으면 디버그 자체 트랜잭션이 일으키는 *순간 전류*가 칩에 노이즈를 줘 SWD가 자꾸 끊깁니다. 회로도·전원망·MCU 하드웨어 가이드의 정격·배치 조건을 확인하고 파형으로 판단합니다. 한 조합의 capacitor 값을 모든 보드에 보장하지 않습니다.
 
 ## 프로브 종류
 
@@ -407,6 +408,32 @@ reset_config srst_only srst_nogate connect_assert_srst
 
 CMSIS-DAP가 *표준* — 같은 펌웨어가 거의 모든 보드의 디버그 인터페이스에 호환. 새 칩 → CMSIS-DAP 검증 → 그 다음 다른 프로브 시도.
 
+## 작은 예제 — DHCSR 덤프 해독
+
+보드에서 읽은 값과 설명의 일치를 먼저 확인하는 오프라인 검사입니다. SWD 파형이나 실제 halt는 수행하지 않습니다.
+
+```js title="dhcsr-check.mjs"
+import assert from 'node:assert/strict';
+const decode = word => ({
+    halted:Boolean(word & (1<<17)),
+    registerReady:Boolean(word & (1<<16)),
+    haltRequested:Boolean(word & 2), debugEnabled:Boolean(word & 1)
+});
+assert.deepEqual(decode(0x00030003),{halted:true,registerReady:true,haltRequested:true,debugEnabled:true});
+assert.equal(decode(0x00010003).halted,false);
+const apBank = address => (address>>>4)&15;
+const requestAddress = address => (address>>>2)&3;
+assert.equal(apBank(0xfc),15);
+assert.equal(requestAddress(0xfc),3);
+assert.equal(apBank(0x0c),0);
+const swj=0xe79e;
+const bits=Array.from({length:16},(_,i)=>(swj>>>i)&1).join('');
+assert.equal(bits,'0111100111100111');
+console.log('PASS DHCSR, AP bank/address, SWJ LSB-first vector');
+```
+
+Node24.21.0에서 `node dhcsr-check.mjs`를 확인했습니다. [CMSIS5.9.0 core_cm4.h](https://github.com/ARM-software/CMSIS_5/blob/5.9.0/CMSIS/Core/Include/core_cm4.h)의 DHCSR mask와 [CMSIS-DAP transfer의 APnDP](https://arm-software.github.io/CMSIS-DAP/latest/group__DAP__Transfer.html), [Arm debug description의 SWJ 전환](https://arm-software.github.io/CMSIS_5/5.7.0/Pack/html/debug_description.html)을 대조했습니다. 보드별 comparator 수와 trace 지원은 이 입력 검사로 검증되지 않습니다.
+
 ## 정리
 
 - JTAG = 5핀 + TAP 16-상태 FSM. boundary scan에서 디버그까지.
@@ -417,7 +444,7 @@ CMSIS-DAP가 *표준* — 같은 펌웨어가 거의 모든 보드의 디버그 
 - FPB가 hardware BP를 제공 (M3/M4=6, M0=4).
 - DWT가 watchpoint + cycle counter.
 - ITM/SWO가 가벼운 trace, ETM이 완전 trace.
-- 신호 무결성(케이블 길이·디커플링·Vref·SRST)이 트러블슈팅의 80%.
+- 신호 무결성과 전원·reset은 관찰한 전압·파형·실패 단계로 확인합니다.
 
 ## 다음 장 예고
 

@@ -59,7 +59,7 @@ $ arm-none-eabi-readelf -S firmware.elf
 $ arm-none-eabi-readelf -l firmware.elf
 Program Headers:
   Type    Offset             VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
-  LOAD    0x0000000000010000 0x0000000008000000 0x0000000008000000 0x09f80  0x09f80  R E 0x10000
+  LOAD    0x0000000000010000 0x0000000008000000 0x0000000008000000 0x0a3b0  0x0a3b0  R E 0x10000
   LOAD    0x0000000000020000 0x0000000020000000 0x000000000800a4c0 0x00140  0x00140  RW  0x10000
   LOAD    0x0000000000020140 0x0000000020000140 0x000000000800a600 0x00000  0x01000  RW  0x10000
 
@@ -100,14 +100,14 @@ $ arm-none-eabi-readelf -l firmware.elf | grep LOAD
 
 ```c
 // startup_stm32f4xx.s (단순화 C 버전)
-extern int __etext;      // .data의 LMA 끝 = flash 안의 .data 값들
+extern int _sidata;      // 아래 링커 스크립트가 정의한 .data의 flash 시작 주소
 extern int __data_start__, __data_end__;  // .data의 VMA (SRAM)
 extern int __bss_start__, __bss_end__;
 extern int main(void);
 
 void Reset_Handler(void) {
     // 1. .data 초기화 (flash → SRAM 복사)
-    int *src = &__etext;
+    int *src = &_sidata;
     int *dst = &__data_start__;
     while (dst < &__data_end__) *dst++ = *src++;
 

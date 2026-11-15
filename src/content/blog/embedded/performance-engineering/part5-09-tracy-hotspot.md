@@ -50,12 +50,12 @@ void process_frame() {
 }
 ```
 
-`ZoneScoped`은 RAII로 진입과 이탈을 자동 기록하며, marker 한 개당 약 50-100 ns의 비용입니다. Network 한 줄로 profiler GUI에 실시간 송신되어, ns resolution timeline을 즉시 봅니다.
+`ZoneScoped`은 RAII로 진입과 이탈을 기록합니다. 비용은 compiler, build mode, zone 빈도, capture 설정에 따라 달라지므로 대상 build에서 측정해야 합니다. Tracy는 timestamp resolution 정보를 보존하지만 resolution이 곧 측정 정확도를 보장하지는 않습니다.
 
 Tracy의 강점은 다음과 같습니다.
 
 ```text
-- Marker 비용 50-100 ns
+- Marker 비용은 대상 build에서 측정
 - 실시간 네트워크 송신 (target과 GUI 분리)
 - Memory allocation tracking, lock tracking
 - GPU(OpenGL, Vulkan, DirectX, CUDA) annotation 지원
@@ -99,6 +99,8 @@ Flamegraph를 별도 스크립트 없이 GUI에서 바로 그릴 수 있고, 클
 
 ## uftrace — 사용자 함수 전체 trace
 
+uftrace의 replay 출력에서 duration은 함수 실행시간이며, 진입 행에는 아직 duration이 없고 return 행에 기록됩니다([공식 replay 문서](https://github.com/namhyung/uftrace/blob/master/doc/uftrace-replay.md)).
+
 uftrace는 Linux 사용자 공간 함수 진입/이탈을 ftrace 스타일로 기록하는 도구입니다. ftrace가 커널을 대상으로 했다면 uftrace는 사용자 application이 대상입니다.
 
 ```bash
@@ -120,11 +122,11 @@ uftrace graph
 # uftrace replay
    DURATION    TID     FUNCTION
             [ 1234] | main() {
-   12.345 us [ 1234] |   parse_input() {
+            [ 1234] |   parse_input() {
     1.234 us [ 1234] |     malloc();
     2.345 us [ 1234] |     memcpy();
    12.000 us [ 1234] |   } /* parse_input */
-   45.678 us [ 1234] |   process() {
+            [ 1234] |   process() {
             [ 1234] |     compute() {
    30.000 us [ 1234] |       inner_loop();
    30.500 us [ 1234] |     } /* compute */
@@ -234,7 +236,7 @@ Tracy marker는 가볍지만 0은 아닙니다. 평가용 build에만 enable하�
 gcc -pg ./app                    # 모든 함수에 hook 삽입
 ```
 
-`-pg`는 모든 함수 prologue에 mcount 호출을 추가하므로 5-20% overhead입니다. Production binary에는 절대 빌드하지 않습니다.
+`-pg`는 계측 지점을 추가하므로 함수 호출 빈도와 workload에 따라 비용이 커질 수 있습니다. 배포용 성능을 평가할 때는 계측 build와 실제 build를 구분하고 영향을 대상 환경에서 측정합니다.
 
 > ⚠️ Coz의 progress point 위치를 잘못 선택
 
@@ -255,14 +257,14 @@ Hotspot도 perf와 같은 데이터를 보므로 frame pointer가 없으면 call
 
 ## 정리
 
-- Tracy는 ns 단위 marker로 frame 기반 시스템에 적합하며 marker 비용이 50-100 ns입니다.
+- Tracy는 instrumented zone의 timestamp와 duration을 보여주며, marker 비용은 대상 build에서 확인합니다.
 - Hotspot은 perf.data를 Qt GUI로 보여 주며 flamegraph를 GUI 안에서 생성합니다.
 - uftrace는 ftrace 스타일로 사용자 함수 전체 호출 trace를 제공합니다.
 - Coz는 causal profiler로 가상의 속도 향상이 전체 throughput에 미치는 효과를 측정합니다.
 - 도구들은 perf의 대체가 아니라 보완이며, 함께 조합해 사용합니다.
 - Apple Instruments는 macOS/iOS의 통합 대안이며 Metal GPU trace를 포함합니다.
 
-다음 편은 **Continuous Profiling** — production 24/7 항상 켠 상태로 분석.
+다음 편은 **Continuous Profiling** — profile을 시간에 따라 저장하고 비교하는 방법.
 
 ## 관련 항목
 

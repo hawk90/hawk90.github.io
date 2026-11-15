@@ -2,7 +2,7 @@
 title: "Make 변수와 자동 변수 — $@·$<·$^·재귀 vs 단순 할당"
 slug: "tools/build/gnu-make/chapter03-variables"
 date: 2026-06-03T09:03:00
-description: "Make 변수의 두 가지 확장 방식, 자동 변수, 우선순위 — 같은 코드가 미묘하게 다르게 도는 9할의 원인."
+description: "GNU Make 변수의 확장 시점, 자동 변수와 명령줄·환경·내장 기본값의 우선순위를 실행 예제로 비교합니다."
 tags: [make, build, variables]
 series: "GNU Make"
 seriesOrder: 3
@@ -71,7 +71,7 @@ test:
 
 ## 변수 확장의 두 모델 — Make의 가장 중요한 한 가지
 
-Make의 모든 미묘한 버그의 80%는 *변수가 언제 확장되는가*에서 옵니다. 이 절을 제대로 잡으면 이후 Makefile을 보는 눈이 달라집니다.
+변수의 확장 시점은 의존성 누락과 예상 밖 명령을 구분하는 핵심입니다. 이 절을 제대로 잡으면 이후 Makefile을 보는 눈이 달라집니다.
 
 ### `=` — 재귀적 확장(recursively expanded)
 
@@ -93,7 +93,7 @@ A = hello $(B)
 B = universe
 
 test:
-	@echo $(A)    # hello universe!
+	@echo $(A)    # hello universe
 ```
 
 `A`는 손대지 않았는데 출력이 바뀌었습니다. `B`가 *나중에* 재정의되어 다음번 `$(A)` 평가 때 새 `B`를 들고 오기 때문입니다.
@@ -101,12 +101,13 @@ test:
 장점: *늦게 정의되는 변수를 미리 참조*할 수 있습니다. 다음 패턴이 가능한 이유가 바로 이것입니다.
 
 ```makefile
-# OBJS는 아직 정의 안 됨, 그래도 OK
-all: $(OBJS)
-	$(CC) -o app $^
-
-# 한참 아래에서 OBJS 정의
+# LINK는 나중에 정의할 OBJS를 참조하는 재귀 변수
+LINK = $(CC) -o app $(OBJS)
 OBJS = main.o utils.o
+
+# 규칙의 의존성은 읽는 즉시 확장하므로 OBJS 정의 뒤에 배치
+all: $(OBJS)
+	$(LINK)
 ```
 
 단점: *자기 자신을 참조하면 무한 재귀*가 됩니다.
@@ -145,7 +146,7 @@ CFLAGS := $(CFLAGS) -Wall    # OK → "-g -Wall"
 
 ### 둘 중 어느 것을 쓸까
 
-GNU Make 매뉴얼과 실무 관행이 모두 같은 답을 줍니다.
+이 글에서는 값을 정의 시점에 고정하려면 :=, 참조 시점의 값이나 자동 변수가 필요하면 =를 선택합니다. 매뉴얼의 일괄 권고를 인용하는 규칙은 아닙니다.
 
 > 명시적인 이유가 없으면 **`:=`**를 쓴다.
 
@@ -157,7 +158,7 @@ GNU Make 매뉴얼과 실무 관행이 모두 같은 답을 줍니다.
 
 `=`를 쓸 자리는 거의 두 가지입니다.
 
-- *나중에 정의되는 변수를 미리 참조*해야 할 때 (위의 `OBJS` 예).
+- 변수 정의의 우변에서 나중에 정의할 변수를 참조할 때. 규칙의 타겟·의존성 자체는 읽을 때 확장된다는 점은 별개입니다.
 - *자동 변수가 들어가야* 하는 자리. `$@`처럼 *규칙마다 다르게 풀리는* 값을 변수 안에 가두려면 `=`로 정의해 늦게 풀려야 합니다.
 
 ### `?=` — "없으면 채우기"
@@ -168,14 +169,14 @@ GNU Make 매뉴얼과 실무 관행이 모두 같은 답을 줍니다.
 CC ?= gcc
 ```
 
-이미 누가 `CC`를 정해 놓았으면(환경 변수, 명령줄, 위쪽 줄에서 모두 포함) 그 값을 존중합니다. 라이브러리·도구 Makefile에서 자주 봅니다. "기본은 gcc인데, 사용자가 다른 걸 쓰고 싶으면 그대로 두겠다"는 약속입니다.
+환경·명령줄·앞선 Makefile뿐 아니라 내장 기본값도 정의로 취급합니다. CC에는 일반적으로 cc라는 내장 기본값이 있으므로 위 ?=gcc는 이를 바꾸지 않습니다. 기본값의 출처는 $(origin CC)로 확인합니다.
 
 ```bash
 # 사용자가 컴파일러 지정
 CC=clang make    # CC=clang으로 빌드
 
 # 기본값 사용
-make             # CC=gcc로 빌드
+make             # 이 예제만으로는 내장 CC=cc를 그대로 사용
 ```
 
 ### `+=` — "이어 붙이기"
@@ -200,7 +201,7 @@ GIT_HASH != git rev-parse --short HEAD
 DATE != date '+%Y-%m-%d'
 ```
 
-`:=` + `$(shell ...)` 조합과 결과는 같지만 더 짧습니다. 단, *Makefile이 파싱되는 매 순간 실행*되므로, 비싼 명령은 피해야 합니다. `make` 한 번에 Makefile은 보통 한 번만 파싱되지만, `MAKEFLAGS`에 따라 여러 번 파싱될 수도 있습니다.
+!=는 대입할 때 셸을 실행하지만 저장되는 변수는 재귀 확장 변수입니다. :=와 종류가 같다는 뜻은 아닙니다. 출력에 달러가 있으면 나중에 Make 변수 참조로 다시 해석될 수 있습니다. Makefile 자체가 재생성되어 재시작되는 경우에도 실행 횟수가 늘어납니다. [셸 대입](https://www.gnu.org/software/make/manual/html_node/Setting.html)을 참고합니다.
 
 ---
 
@@ -421,7 +422,7 @@ make CFLAGS="-O3"
 # override +=: CFLAGS = "-O3 -Wall"  (override가 더해짐)
 ```
 
-`override`는 `+=`/`set` 양쪽 모두에 쓸 수 있고, 명령줄을 이깁니다. 보통은 *프로젝트 필수 플래그*(Wall, std=cXX, 보안 옵션)에 씁니다.
+override는 =, :=, += 같은 변수 대입 앞에 쓸 수 있고, 명령줄을 이깁니다. 보통은 *프로젝트 필수 플래그*(Wall, std=cXX, 보안 옵션)에 씁니다.
 
 다만 `override`를 남용하면 *사용자가 무엇을 줘도 영향이 안 미치는* 답답한 Makefile이 됩니다. 진짜 필수 옵션만 골라서 쓰세요.
 
@@ -433,7 +434,7 @@ make CFLAGS="-O3"
 
 ### `$(info ...)`·`$(warning ...)`·`$(error ...)`
 
-세 함수는 *Makefile 파싱 중에* 메시지를 띄웁니다.
+이 함수들은 자신이 확장되는 시점에 동작합니다. 최상위의 즉시 확장 문맥은 읽기 중, 레시피 안의 호출은 해당 레시피를 확장할 때 실행합니다.
 
 ```makefile
 $(info CFLAGS = [$(CFLAGS)])
@@ -462,6 +463,42 @@ make --debug=jobs    # 병렬 빌드 상세
 타임스탬프 비교 결과가 보여서 "왜 이게 재빌드되지?" 같은 의문을 풀 때 좋습니다.
 
 ---
+
+## 직접 확인 — 변수와 의존성의 확장 시점
+
+GNU Make 4.4.1에서 다음 파일을 실행해 두 종류의 변수와 규칙의 즉시 확장을 구분합니다. `all`의 의존성을 읽을 때 OBJECTS는 아직 없으므로, 나중에 정의해도 all의 의존성은 소급해서 채워지지 않습니다. [Makefile 읽기 단계](https://www.gnu.org/software/make/manual/html_node/Reading-Makefiles.html)의 규칙입니다.
+
+```makefile title="Makefile"
+.PHONY: all late shell
+BASE = before
+RECURSIVE = $(BASE)
+SIMPLE := $(BASE)
+BASE = after
+CC ?= gcc
+
+all: $(OBJECTS)
+	@printf 'recursive=%s simple=%s prerequisites=[%s]\n' '$(RECURSIVE)' '$(SIMPLE)' '$^'
+	@printf 'cc=%s origin=%s\n' '$(CC)' '$(origin CC)'
+
+OBJECTS = generated.txt
+late: $(OBJECTS)
+	@printf 'late prerequisites=[%s]\n' '$^'
+generated.txt:
+	@printf 'generated\n' > $@
+shell:
+	@name=world; printf 'Hello, %s\n' "$$name"
+```
+
+관련 환경 변수를 별도로 설정하지 않고 실행합니다.
+
+```bash
+make
+make late
+make CC=clang
+make shell
+```
+
+첫 호출은 `recursive=after simple=before prerequisites=[]`와 `cc=cc origin=default`를 출력합니다. late는 generated.txt를 생성한 뒤 의존성을 출력합니다. 명령줄 CC=clang은 origin=command line으로 표시되고 마지막 셸 예제는 `Hello, world`를 출력합니다. 이 결과는 자동 변수와 지연 변수가 규칙의 의존성 읽기를 자동으로 늦춰 주지 않는다는 것을 보여 줍니다.
 
 ## 실전 예시 — 변수로 다시 쓴 작은 빌드
 
@@ -531,7 +568,7 @@ FILES := $(FILES) extra.c   # OK
 
 ```makefile
 test:
-	name=world; echo "Hello, $name"   # 빈 출력
+	name=world; echo "Hello, $name"   # n이 미정의이면 Hello, ame 출력
 ```
 
 `$n`을 Make가 변수로 해석합니다.
@@ -549,7 +586,7 @@ $@: main.c       # 동작 안 함
 	gcc -c main.c -o $@
 ```
 
-자동 변수는 *레시피 안*에서만 풀립니다. 타겟·의존성 줄에서는 빈 문자열이라 위 코드는 빈 타겟이 됩니다.
+자동 변수는 *레시피 안*에서만 풀립니다. 타겟·의존성 줄에서는 빈 문자열이라 위 조각만으로는 유효한 타겟을 만들지 못해 No targets 오류가 납니다.
 
 **해결**: *Secondary expansion*(`.SECONDEXPANSION`)을 쓰면 의존성 줄에서도 자동 변수를 쓸 수 있지만, 진입 장벽이 높습니다. 보통은 *명시적 변수*로 풀어 둡니다.
 

@@ -42,7 +42,7 @@ topics: ["embedded"]
 
 $$U_{CPU} = \frac{t_{busy}}{t_{total}}, \quad U_{mem} = \frac{u}{m_{total}}, \quad U_{bus} = \frac{c_{active}}{c_{total}}$$
 
-100%에 도달하면 saturation 상태가 되고, queueing이 발생하면서 latency가 증가합니다.
+포화는 자원별 서비스 능력과 도착 부하에 따라 나타납니다. 이용률이 100%에 가까워지면 대기 시간이 급격히 커질 수 있지만, 특정 임계 비율은 작업량과 시스템의 변동성에 따라 달라집니다.
 
 ## Latency vs Throughput — 상호 의존
 
@@ -51,7 +51,7 @@ $$U_{CPU} = \frac{t_{busy}}{t_{total}}, \quad U_{mem} = \frac{u}{m_{total}}, \qu
 ```text
 초기 (utilization 낮음):  throughput↑ → latency 거의 변화 X
 중간 (50-70%):           throughput↑ → latency 살짝 증가
-포화 (90%+):             throughput 한계 → latency 폭증
+포화 (자원별 임계점 부근): throughput 한계 → latency 증가
 ```
 
 **Queueing Theory** (Little's Law)는 다음과 같습니다.
@@ -60,7 +60,7 @@ $$L = \lambda \cdot W$$
 
 여기서 $L$은 평균 대기 수, $\lambda$는 도착률, $W$는 평균 대기 시간입니다.
 
-자원 utilization이 100%에 근접하면 $W \to \infty$가 됩니다. 그래서 임베디드에서는 *80% 한계*를 권장합니다.
+안정된 단일 큐 모델에서 이용률이 1에 가까워지면 대기 시간이 크게 늘어날 수 있습니다. 실제 임계점은 도착·서비스 분포와 자원 구조에 달려 있으므로 고정된 80% 한계로 일반화하지 않습니다.
 
 ## Service Time vs Response Time
 
@@ -82,19 +82,20 @@ Latency의 *변동성*을 의미합니다.
 
 $$\text{Jitter} = \max - \min = 6\ \mu s$$
 
-평균이 양호한데 jitter가 크면 *실시간 제어가 불가능*합니다. Audio, motor, camera 동기처럼 동기화가 핵심인 영역에서는 치명적입니다.
+jitter가 허용 범위를 넘으면 제어·동기화 품질에 영향을 줄 수 있습니다. 허용 한계는 시스템 요구사항으로 정합니다.
 
 ### Jitter 측정
 
-```c
-TickType_t xLastWake = xTaskGetTickCount();
+```c title="phase-jitter-sample"
+TickType_t last_wake = xTaskGetTickCount();
+uint32_t expected_cycles = DWT->CYCCNT;
 while (1) {
+    vTaskDelayUntil(&last_wake, period);
+    expected_cycles += (uint32_t)period * CYCLES_PER_TICK;
+    uint32_t actual_cycles = DWT->CYCCNT;
+    int32_t phase_error = (int32_t)(actual_cycles - expected_cycles);
+    log_phase_error_cycles(phase_error);
     do_work();
-    vTaskDelayUntil(&xLastWake, period);
-    
-    uint32_t actual = DWT->CYCCNT;
-    uint32_t expected = xLastWake * CYCLES_PER_TICK;
-    log_jitter(actual - expected);
 }
 ```
 
@@ -106,9 +107,9 @@ Histogram을 누적하면서 분포를 분석합니다.
 
 | Type | Miss 결과 |
 | --- | --- |
-| **Hard** | 시스템 실패 (브레이크, 인공호흡기) |
-| **Firm** | 결과 무효 (실시간 거래) |
-| **Soft** | 품질 저하 (비디오 frame drop) |
+| **Hard** | deadline miss가 허용되지 않도록 요구되는 작업; 결과는 시스템 위험 분석에 따름 |
+| **Firm** | 늦은 결과는 사용하지 않지만 제한된 miss가 시스템 실패를 뜻하지는 않음 |
+| **Soft** | 늦은 결과의 유용성이 감소하며, 품질 저하는 애플리케이션에 따라 정의 |
 
 Latency 대신 deadline 만족 여부가 metric이 됩니다. 즉, *deadline 안에 들어왔는가? 몇 % 들어왔는가?*를 봅니다.
 
@@ -123,7 +124,7 @@ Latency 대신 deadline 만족 여부가 metric이 됩니다. 즉, *deadline 안
 | p9999 | 0.01% |
 | max | worst-case |
 
-Hard real-time은 *max ≤ deadline*을 요구합니다. Soft는 *p99·p999 ≤ deadline*이면 됩니다.
+요구사항과 분석 모델에 따라 deadline 충족을 평가합니다. 유한한 시험에서 관측한 max는 하드 실시간 보장을 증명하지 않으며, p99/p999 목표는 소프트 실시간 서비스 목표의 한 예일 뿐입니다.
 
 ## Long Tail
 
@@ -140,9 +141,9 @@ Hard real-time은 *max ≤ deadline*을 요구합니다. Soft는 *p99·p999 ≤ 
 
 ## Saturation 측정
 
-![Resource 사용률과 응답 시간의 관계 — 80% 이상에서 exponential 증가](/images/blog/perf-eng/diagrams/part1-02-saturation-curve.svg)
+![Resource 사용률과 응답 시간의 관계 — 부하 증가에 따른 대기 시간 예시](/images/blog/perf-eng/diagrams/part1-02-saturation-curve.svg)
 
-80%를 넘으면 exponential하게 증가합니다. 그래서 **70-80%가 안전 한계**입니다.
+이 곡선은 특정 대기열 모델의 예시입니다. 안전 한계는 시스템 요구사항과 측정 결과로 설정합니다.
 
 ## 임베디드 추가 지표
 
@@ -152,9 +153,9 @@ Hard real-time은 *max ≤ deadline*을 요구합니다. Soft는 *p99·p999 ≤ 
 
 | IPC | 해석 |
 |-----|------|
-| 0.5 | 스트레스 (memory bound, stall) |
-| 1.0 | 정상 |
-| 2.0+ | 슈퍼스칼라 활용 |
+| 0.5 | 해당 실행에서 평균 0.5 instructions/cycle |
+| 1.0 | 해당 실행에서 평균 1 instruction/cycle |
+| 2.0+ | 다중 발행이 가능한 구현에서는 가능할 수 있음 |
 
 IPC가 낮으면 *왜 낮은지* 분석합니다. 원인은 cache miss, branch mispredict, stall 등입니다.
 
@@ -164,64 +165,59 @@ IPC가 낮으면 *왜 낮은지* 분석합니다. 원인은 cache miss, branch m
 double hit_rate = 1.0 - (cache_miss / cache_access);
 ```
 
-L1은 보통 95-99%, L2는 80-95%, L3는 60-80%입니다. *임베디드(1-2 KB L1)*에서는 *작은 working set*을 가정합니다.
+Cache hit rate는 작업량, 계층, 계측 event 정의에 따라 달라집니다. 비교할 때는 같은 workload와 counter 정의를 사용합니다.
 
 ### MIPS / DMIPS
 
 옛 단위입니다. **MIPS**는 millions of instructions per second입니다. **DMIPS**는 Dhrystone MIPS 벤치마크입니다.
 
-```text
-Cortex-M0+ @ 50 MHz: 45 DMIPS
-Cortex-M4 @ 168 MHz: 350 DMIPS
-Cortex-A53 @ 1.5 GHz: 3500 DMIPS
-```
+CPU별 DMIPS 수치를 비교할 때는 Dhrystone 구현, compiler flags, clock, memory placement와 보고 규칙을 함께 확인해야 합니다. 단일 표의 수치만으로 실제 workload 성능을 예측하지 않습니다.
 
 DMIPS는 *아주 거친* 비교에만 적합합니다. 더 정밀하게 비교하려면 CoreMark나 EEMBC를 씁니다.
 
 ### CoreMark
 
-비영리 EEMBC가 만든 임베디드 표준 벤치입니다. *Standardized integer workload*를 측정합니다.
+EEMBC가 만든 임베디드 benchmark로 정해진 integer workload를 측정합니다.
 
-```text
-Cortex-M0+ @ 50 MHz:  100 CoreMark
-Cortex-M4F @ 168 MHz: 850 CoreMark
-RISC-V SiFive E31:     150 CoreMark
-```
+CoreMark 결과는 해당 benchmark의 validation/run rules, compiler와 flags, memory placement, clock frequency를 함께 기록해 비교합니다. 이 글은 특정 칩 점수를 제시하지 않습니다.
 
-CoreMark/MHz가 *효율*(architecture 능력)을 비교하는 지표입니다.
+CoreMark/MHz는 동일한 검증 조건과 보고 규칙을 지켰을 때 참고할 수 있는 정규화 값이며, 단독으로 architecture 효율 전체를 나타내지는 않습니다.
 
 ## 측정 — Time Source
 
-| 시계 | 정밀도 | 사용 |
+| 시계 | 반환 단위·해상도 | 사용 |
 | --- | --- | --- |
-| `xTaskGetTickCount()` | tick (1-10 ms) | task 단위 timing |
-| `DWT->CYCCNT` | 1 cycle | µs 단위 (Cortex-M) |
-| `clock_gettime(CLOCK_MONOTONIC_RAW)` | ns | Linux 정밀 |
-| GPIO + 로직 분석기 | 1 ns | 외부 측정 (HW) |
+| `xTaskGetTickCount()` | RTOS tick 단위; tick period 설정에 따름 | task 단위 timing |
+| `DWT->CYCCNT` | 코어 cycle 단위 (지원·활성화된 경우) | 짧은 구간; 타깃별 확인 |
+| `clock_gettime(CLOCK_MONOTONIC_RAW)` | ns 단위 반환; 실제 해상도는 플랫폼별 확인 | Linux 경과시간 측정 |
+| GPIO + 로직 분석기 | 장비·샘플링 설정에 따름 | 외부 측정 (HW) |
 | HW timer | clock 단위 | 임베디드 정밀 |
 
 ## Latency 분포 측정 예
 
-```c
-#define BUCKETS 64
-static uint32_t hist[BUCKETS];
-static uint32_t max_val = 0;
+```c title="bounded-latency-histogram"
+#include <assert.h>
+#include <stdint.h>
 
-void log_latency_us(uint32_t us) {
-    int idx;
-    // log2 bucket
-    if (us < 1) idx = 0;
-    else if (us < 4096) idx = 32 - __clz(us);
-    else idx = BUCKETS - 1;
-    hist[idx]++;
+#define BUCKETS 32
+static uint32_t hist[BUCKETS];
+static uint32_t max_val;
+
+static unsigned bucket_index(uint32_t us) {
+    unsigned i = 0;
+    while (us > 1u) { us >>= 1; ++i; }
+    return i;
+}
+static void log_latency_us(uint32_t us) {
+    ++hist[bucket_index(us)];
     if (us > max_val) max_val = us;
 }
-
-// 주기적 출력
-void print_hist(void) {
-    for (int i = 0; i < BUCKETS; i++)
-        if (hist[i]) printf("%d-%d us: %u\n", 1<<i, (1<<(i+1))-1, hist[i]);
-    printf("max: %u us\n", max_val);
+int main(void) {
+    log_latency_us(0); log_latency_us(1); log_latency_us(2);
+    log_latency_us(UINT32_MAX);
+    assert(hist[0] == 2 && hist[1] == 1 && hist[31] == 1);
+    assert(max_val == UINT32_MAX);
+    return 0;
 }
 ```
 
@@ -233,7 +229,7 @@ Median이 좋아도 *long tail*은 보이지 않습니다. 항상 *p99·max*를 
 
 > ⚠️ Utilization 90%+ 목표
 
-Queueing latency가 폭증합니다. **70-80%가 한계**입니다.
+Queueing latency는 부하와 자원 모델에 따라 달라집니다. 고정 이용률을 보편적 한계로 두지 않습니다.
 
 > ⚠️ Tick rate으로 µs 측정 시도
 
@@ -248,9 +244,9 @@ Throughput을 2배 빠르게 했는데 *p99 latency가 3배 느려지면* 사용
 - 3 핵심 지표는 **Latency, Throughput, Utilization**입니다.
 - 임베디드에서는 **Jitter와 Deadline**이 추가됩니다.
 - Service time과 Response time은 다릅니다(queueing 영향).
-- Percentile과 max로 *long tail*을 추적합니다.
-- Utilization은 70-80%가 한계이며, 그 위에서는 *queueing이 폭발*합니다.
-- IPC와 CoreMark가 *아키텍처 효율*을 비교합니다.
+- 분포, 표본 수와 표본 최대를 요구사항에 맞춰 해석합니다.
+- 포화 임계점은 작업량과 자원에 따라 측정하고 요구사항에 맞춰 정합니다.
+- IPC와 CoreMark는 event 정의와 검증 조건을 함께 고려해 제한된 비교에 사용합니다.
 
 다음 편은 **측정의 기본**입니다. wall-clock, CPU cycle, instruction count를 다룹니다.
 
@@ -259,3 +255,8 @@ Throughput을 2배 빠르게 했는데 *p99 latency가 3배 느려지면* 사용
 - [1-01: 성능 분석 방법론](/blog/embedded/performance-engineering/part1-01-methodology)
 - [1-03: 측정의 기본](/blog/embedded/performance-engineering/part1-03-measurement)
 - [1-04: 통계적 분석](/blog/embedded/performance-engineering/part1-04-statistics)
+
+## 참고 자료
+
+- [FreeRTOS `vTaskDelayUntil()` API](https://freertos.org/Documentation/02-Kernel/04-API-references/02-Task-control/02-vTaskDelayUntil)
+- [EEMBC CoreMark](https://github.com/eembc/coremark/blob/main/README.md)

@@ -14,6 +14,8 @@ topics: ["embedded", "embedded/rtos"]
 
 > **"FromISR API는 block이 불가능하고 yield를 명시해야 합니다"** — task API와 분리해 안전성을 확보합니다.
 
+이 글의 register·PendSV 설명은 **FreeRTOS V11.2.0 GCC/ARM_CM4F** 범위입니다. 다른 architecture의 FromISR 계약은 해당 port를 확인합니다.
+
 ## API 명명 규칙
 
 ```c
@@ -37,54 +39,37 @@ xSemaphoreGiveFromISR(sem, &xHigherPriorityTaskWoken);
 
 ## pxHigherPriorityTaskWoken은 왜 필요한가
 
-ISR이 어떤 task를 wake했을 때, 깨어난 task의 priority가 interrupted task보다 높으면 ISR 종료 후 context switch가 발생합니다. 그러나 ISR 자체는 task switch를 직접 호출할 수 없습니다. 대신 pending 비트만 set해 두고, ISR exit 시점에 실제 switch가 처리됩니다.
+허용된 ISR에서 API가 더 높은 priority task를 unblock하면 woken을 pdTRUE로 표시할 수 있습니다. 여러 API가 같은 변수를 누적해서 사용하므로 ISR 처음에만 pdFALSE로 초기화합니다. 끝에서 portYIELD_FROM_ISR로 필요한 switch를 요청합니다.
 
-```c
-void uart_rx_isr(void) {
-    uint8_t byte = UART->RDR;
-    BaseType_t xHigherPriorityTaskWoken = pdFALSE;
-    
-    xQueueSendFromISR(rx_queue, &byte, &xHigherPriorityTaskWoken);
-    
-    /* ISR 끝에서 — 더 높은 priority task wake됐다면 yield */
-    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
+```c title="deferred-queue-irq.c"
+#include <stdint.h>
+#include "FreeRTOS.h"
+#include "queue.h"
+extern QueueHandle_t rx_queue;
+extern uint8_t read_and_ack_rx(void);
+extern void count_rx_drop(void);
+void rx_irq(void) {
+    BaseType_t woken = pdFALSE;
+    uint8_t byte = read_and_ack_rx();
+    if (xQueueSendFromISR(rx_queue, &byte, &woken) != pdTRUE)
+        count_rx_drop();
+    portYIELD_FROM_ISR(woken);
 }
 ```
 
-`portYIELD_FROM_ISR`은 Cortex-M에서 `SCB->ICSR = PENDSVSET`을 통해 PendSV를 호출합니다.
+실제 peripheral ACK·error 처리·queue 수명·IRQ priority와 ISR-safe drop counter를 board 코드가 제공해야 합니다. ARM_CM4F에서는 PendSV를 pending으로 만들며, mask·다른 예외·port 상태에 따라 실제 실행 시점이 달라집니다.
 
 ## portENTER_CRITICAL_FROM_ISR
 
-```c
-uint32_t saved = portSET_INTERRUPT_MASK_FROM_ISR();
-{
-    /* ISR-safe critical — IRQ priority temp boost */
-}
-portCLEAR_INTERRUPT_MASK_FROM_ISR(saved);
-```
+ARM_CM4F의 taskENTER_CRITICAL_FROM_ISR는 이전 BASEPRI 상태를 받아 mask를 설정하고, taskEXIT_CRITICAL_FROM_ISR가 저장값을 복원하는 경로를 제공합니다. threshold보다 수치가 작아 긴급도가 높은 IRQ까지 모두 막는 것은 아닙니다. 해당 IRQ는 RTOS API를 사용하면 안 됩니다.
 
-ISR 내부에서 더 높은 priority ISR을 차단할 때는 `BASEPRI`를 설정합니다. 이때 기존 BASEPRI 값을 save/restore하는 것이 핵심입니다.
-
-```c
-static inline uint32_t portSET_INTERRUPT_MASK_FROM_ISR(void) {
-    uint32_t saved_basepri;
-    __asm volatile (
-        "mrs %0, basepri              \n"
-        "mov r0, %1                   \n"
-        "msr basepri, r0              \n"
-        : "=r"(saved_basepri)
-        : "i"(configMAX_SYSCALL_INTERRUPT_PRIORITY)
-        : "r0"
-    );
-    return saved_basepri;
-}
-```
+실제 portmacro.h의 ulPortRaiseBASEPRI·vPortSetBASEPRI를 확인합니다. 함수와 macro 이름을 재정의하는 축약 assembly를 application 구현으로 제공하지 않습니다.
 
 ## ISR 내부에서 Block을 금지하는 이유
 
 ```c
 void some_isr(void) {
-    xSemaphoreTake(sem, 100);   // ✗ 컴파일 에러
+    xSemaphoreTake(sem, 100);   // Invalid ISR use; it may compile.
 }
 ```
 
@@ -92,7 +77,7 @@ void some_isr(void) {
 
 - ISR은 task가 아니므로 TCB가 없고 block list에도 들어갈 수 없습니다.
 - Block이 발생하면 다른 ISR이나 task가 무한 대기에 빠져 deadlock으로 이어집니다.
-- ISR 길이가 곧 system response time을 결정합니다.
+- ISR 길이는 응답 시간에 기여하며 다른 IRQ·mask·스케줄링 간섭도 포함해야 합니다.
 
 **규칙은 단순합니다.** ISR은 비동기 신호 송신만 담당하고, 실제 처리는 task에 위임해야 합니다.
 
@@ -120,97 +105,27 @@ void uart_irq(void) {
 
 장점은 세 가지입니다.
 
-- ISR 길이를 수 µs 수준으로 최소화할 수 있습니다.
-- Task context에서 blocking API를 자유롭게 사용할 수 있습니다.
+- ISR에서 수행하는 작업을 줄일 수 있지만 실제 길이는 타깃에서 측정해야 합니다.
+- task context에서도 lock·deadline·callback 계약에 맞게 blocking을 선택합니다.
 - Priority 조정으로 latency를 제어할 수 있습니다.
 
 ## Timer Service (Daemon) Task
 
-```c
-/* FreeRTOS internal — config로 활성화 */
-void prvTimerTask(void *p) {
-    for (;;) {
-        /* Wait for command */
-        xQueueReceive(xTimerQueue, &cmd, portMAX_DELAY);
-        
-        switch (cmd.type) {
-            case PEND_FUNC_CALL:
-                cmd.func(cmd.arg1, cmd.arg2);   // ISR에서 요청한 함수 실행
-                break;
-            case TIMER_EXPIRED:
-                cmd.timer->callback();
-                break;
-        }
-    }
-}
-```
+xTimerPendFunctionCallFromISR는 함수 실행 요청을 timer command queue로 보냅니다. 반환값은 enqueue 성공 여부이며 queue가 가득 차면 실패할 수 있습니다. callback과 인자 저장소는 실행 시점까지 유효해야 합니다.
 
-ISR이 복잡한 작업을 수행해야 한다면 다음과 같이 위임합니다.
+callback은 timer daemon에서 실행되므로 긴 처리나 blocking을 넣으면 다른 timer·deferred event도 지연됩니다. 큰 작업은 별도 worker task로 넘기고 daemon callback은 짧고 block하지 않게 유지합니다. 실제 timer loop는 timers.c의 명령 처리와 만료 목록을 확인하며, 가상의 TIMER_EXPIRED command switch로 설명하지 않습니다.
 
-```c
-void heavy_isr(void) {
-    BaseType_t pxHP = pdFALSE;
-    
-    xTimerPendFunctionCallFromISR(do_heavy_work, arg1, arg2, &pxHP);
-    portYIELD_FROM_ISR(pxHP);
-}
-```
+## ISR Priority와 Yield의 범위
 
-이렇게 하면 daemon task가 `do_heavy_work(arg1, arg2)`를 대신 실행합니다.
+configMAX_SYSCALL_INTERRUPT_PRIORITY는 port가 사용하는 encoded register 값입니다. 예를 들어 구현 priority bit가 4개이고 논리 threshold가 5이면 0x50을 사용하지만, 이 값도 MCU·priority grouping과 포트 설정이 일치해야 합니다. 0xBF를 모든 Cortex-M의 유효 threshold로 복사하지 않습니다.
 
-## ISR Priority와 configMAX_SYSCALL_INTERRUPT_PRIORITY
-
-FreeRTOS API는 낮은 priority ISR에서만 호출할 수 있습니다.
-
-```c
-/* FreeRTOSConfig.h */
-#define configMAX_SYSCALL_INTERRUPT_PRIORITY     191   // = 0xBF
-#define configKERNEL_INTERRUPT_PRIORITY          255   // = 0xFF (lowest)
-```
-
-![Cortex-M priority bands separated by configMAX_SYSCALL_INTERRUPT_PRIORITY](/images/blog/practical-internals/diagrams/part3-09-priority-bands.svg)
-
-> ⚠️ Cortex-M에서 priority는 수치가 클수록 실제 우선순위가 낮아집니다. 헷갈리기 쉬운 부분입니다.
-
-## taskYIELD_FROM_ISR (Cortex-M)
-
-```c
-#define portYIELD_FROM_ISR(x) do { \
-    if (x != pdFALSE) { \
-        portYIELD();   /* SCB->ICSR = PENDSVSET */ \
-    } \
-} while (0)
-```
-
-또는 일부 포트:
-
-```c
-portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
-```
-
-`xHigherPriorityTaskWoken == pdFALSE`이면 그대로 ISR이 종료되고 같은 task로 복귀합니다.
-`xHigherPriorityTaskWoken == pdTRUE`이면 ISR 종료 직후 PendSV가 발생하고 context switch가 일어납니다.
+NVIC_SetPriority의 논리 priority와 BASEPRI register 값을 구분합니다. woken=false는 이 API가 더 높은 task를 깨우지 않았다는 의미이지 다른 pending switch나 IRQ가 없다는 뜻은 아닙니다. yield 요청 역시 곧바로 다음 한 명령에 task가 실행된다는 보장이 아닙니다.
 
 ## ISR과 Task 간 공유 변수의 Atomic Operation
 
-ISR이 task와 공유 변수를 읽고 쓸 때는 barrier가 필요합니다.
+volatile은 접근 관찰과 관련되며 C의 상호 배제·동기화를 대신하지 않습니다. 정렬된 단일 load/store가 hardware에서 분할되지 않는 경우에도 shared_counter++는 read-modify-write이므로 둘 이상의 writer와 경쟁할 수 있습니다.
 
-```c
-volatile uint32_t shared_counter;
-
-void task(void *p) {
-    portENTER_CRITICAL();
-    uint32_t v = shared_counter;
-    portEXIT_CRITICAL();
-    /* use v */
-}
-
-void isr(void) {
-    shared_counter++;   // 32-bit atomic on M-class
-}
-```
-
-Cortex-M에서 32-bit alignment에 32-bit access는 atomic입니다. 그러나 64-bit 변수는 split read가 발생하므로 critical section이 반드시 필요합니다.
+task의 critical 구간이 그 ISR을 실제로 mask하는지 확인하고 다른 core·DMA·고긴급도 ISR도 고려합니다. atomic API 역시 해당 target에서 lock-free인지와 ISR에서 허용되는지를 확인해야 합니다. barrier 하나로 data race가 해결된다고 설명하지 않습니다.
 
 ## 자주 하는 실수
 
@@ -222,7 +137,7 @@ void isr(void) {
 }
 ```
 
-이 코드는 block이 가능한 API를 ISR에서 부르는 형태입니다. 컴파일은 통과하지만 런타임에 hard fault나 데이터 corruption이 발생합니다. 항상 `*FromISR` 변형을 사용해야 합니다.
+이 코드는 ISR 사용 계약 위반입니다. 컴파일 성공이나 특정 실행에서 문제가 보이지 않았다는 사실로 안전성을 판단할 수 없습니다. 항상 `*FromISR` 변형을 사용해야 합니다.
 
 > ⚠️ pxHigherPriorityTaskWoken을 누락하는 경우
 
@@ -246,7 +161,7 @@ NVIC_SetPriority(UART1_IRQn, 0);   // Highest — FreeRTOS API 금지 영역
 
 > ⚠️ Critical section 안에서 nested ISR이 BASEPRI를 직접 변경하는 경우
 
-낮은 priority IRQ 안에서 `portENTER_CRITICAL_FROM_ISR()`을 호출한 뒤 BASEPRI를 직접 바꾸면 stack이 깨집니다.
+kernel이 관리하는 mask를 직접 완화하면 보호 구간에 IRQ가 끼어들어 공유 상태를 훼손할 수 있습니다. 특정 결과를 stack 손상으로 고정하지 않습니다.
 
 ## 정리
 
@@ -257,6 +172,10 @@ NVIC_SetPriority(UART1_IRQn, 0);   // Highest — FreeRTOS API 금지 영역
 - `configMAX_SYSCALL_INTERRUPT_PRIORITY`보다 우선순위가 높은 IRQ에서는 FreeRTOS API를 호출하면 안 됩니다.
 
 다음 편에서는 deadlock 패턴의 발견과 예방을 다룹니다.
+
+## 근거 자료
+
+- [FreeRTOS V11.2.0 ARM_CM4F portmacro.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/portmacro.h), [queue.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/queue.c), [timers.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/timers.c).
 
 ## 관련 항목
 

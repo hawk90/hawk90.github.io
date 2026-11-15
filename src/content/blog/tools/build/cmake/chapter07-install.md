@@ -38,7 +38,7 @@ build/
 | `build/libmylib.so` | `/usr/local/lib/libmylib.so` |
 | `src/include/mylib/*.h` | `/usr/local/include/mylib/*.h` |
 
-`install()` 명령은 이 *매핑 규칙*을 CMakeLists.txt에 *선언*하는 도구입니다. 한 번 적어 두면 `cmake --install build`로 *항상 같은 결과*를 얻습니다. *어떤 플랫폼에서도, 어느 PREFIX로 호출해도, 어느 패키저가 호출해도* 결과는 일관됩니다.
+`install()`은 이 매핑 규칙을 선언합니다. 설치 prefix·구성·컴포넌트에 따라 선택되는 파일이 달라지므로 실제 산출물을 확인해야 합니다. 이 글의 실행 기준은 CMake/CPack 4.4.4·Ninja 1.13.2·macOS·AppleClang 21입니다. 마지막 예제는 임시 prefix에 설치한 정적 라이브러리를 다른 프로젝트에서 찾아 링크하고, TGZ 패키지를 생성합니다.
 
 이 챕터의 두 큰 주제는 다음과 같습니다.
 
@@ -88,7 +88,7 @@ cmake --install build --config Release
 cmake --install build --verbose
 ```
 
-`CMAKE_INSTALL_PREFIX`가 설치 루트입니다. 기본값은 Unix에서 `/usr/local`, Windows에서 `C:/Program Files/${PROJECT_NAME}`입니다.
+`CMAKE_INSTALL_PREFIX`가 설치 루트입니다. 환경·캐시로 설정하지 않았다면 일반적인 기본값은 Unix에서 `/usr/local`, Windows에서 `C:/Program Files/${PROJECT_NAME}`입니다. 설치 확인에는 시스템 디렉터리 대신 `cmake --install build --prefix ./stage`처럼 별도 경로를 사용합니다.
 
 ### DESTDIR: 패키징용 가상 루트
 
@@ -261,8 +261,8 @@ ${PREFIX}/
 
 세 파일이 만들어내는 그림:
 
-- **Config.cmake** — *진입점*. `find_package(MyLib)`이 가장 먼저 찾는 파일. 다른 두 파일을 include하고, 의존성을 확인합니다.
-- **ConfigVersion.cmake** — *버전 검사*. `find_package(MyLib 1.0)` 호출에서 `1.0`이 호환되는지 결정합니다.
+- **ConfigVersion.cmake** — 버전을 요청하면 `find_package()`가 후보 Config를 채택하기 전에 별도 스코프에서 버전 호환성을 확인하는 파일입니다.
+- **Config.cmake** — 채택된 패키지의 진입점입니다. Targets를 include하고 필요한 외부 의존성을 확인합니다. ConfigVersion을 직접 include하는 역할이 아닙니다.
 - **Targets.cmake** — *imported 타겟 정의*. `MyLib::mylib`라는 타겟에 *설치된 위치 기반의 include / library 경로*를 박아 둡니다.
 
 이 셋이 *함께* 작동해야 사용자 측에서 `find_package(MyLib REQUIRED)` 한 줄이 깨끗하게 풀립니다. 단계별로 만들어 갑니다.
@@ -297,8 +297,8 @@ write_basic_package_version_file(
 | 값 | 의미 |
 |-----|------|
 | `ExactVersion` | 정확히 일치해야 함 |
-| `SameMajorVersion` | 메이저 버전만 일치하면 됨 (권장) |
-| `SameMinorVersion` | 메이저.마이너 버전 일치 |
+| `SameMajorVersion` | 설치 버전이 요청 이상이고 메이저 버전이 같아야 함 |
+| `SameMinorVersion` | 설치 버전이 요청 이상이고 메이저·마이너 버전이 같아야 함 |
 | `AnyNewerVersion` | 요청 버전 이상이면 됨 |
 
 ### 3단계: 타겟 내보내기 — `install(TARGETS ... EXPORT ...)`
@@ -375,11 +375,7 @@ find_package(MyLib 1.0 REQUIRED)
 target_link_libraries(app PRIVATE MyLib::mylib)
 ```
 
-`find_package`는 다음 경로에서 `MyLibConfig.cmake`를 찾습니다:
-
-- `${CMAKE_INSTALL_PREFIX}/lib/cmake/MyLib/`
-- `/usr/lib/cmake/MyLib/`
-- `~/.cmake/packages/MyLib/` (등록된 경우)
+소비자는 `CMAKE_PREFIX_PATH`로 설치 prefix를 추가하거나 `MyLib_DIR`로 Config 디렉터리를 지정합니다. 패키지 레지스트리는 설치 파일을 그 안에 복사하는 위치가 아니라 빌드 트리 등의 경로를 등록하는 장치입니다. [패키지 버전 파일과 레지스트리](https://cmake.org/cmake/help/v4.4/manual/cmake-packages.7.html)를 구분합니다.
 
 ---
 
@@ -473,9 +469,8 @@ install(TARGETS myapp
 
 # 라이브러리 — Libraries 컴포넌트
 install(TARGETS mylib
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    COMPONENT Libraries
+    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
+    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR} COMPONENT Libraries
 )
 
 # 헤더 — Development 컴포넌트
@@ -515,7 +510,7 @@ include(CPack)
 
 ### 컴포넌트별 패키지 생성
 
-```bash
+```cmake
 # DEB: 컴포넌트별 패키지
 set(CPACK_DEB_COMPONENT_INSTALL ON)
 ```
@@ -524,116 +519,101 @@ set(CPACK_DEB_COMPONENT_INSTALL ON)
 
 ---
 
-## 실전 예시: 완전한 설치 설정
+## 실전 예시 — 설치한 라이브러리를 별도 프로젝트에서 사용하기
 
-```cmake
-cmake_minimum_required(VERSION 3.20)
+생산자와 소비자를 분리해야 소스 트리의 경로가 우연히 전달된 문제를 발견할 수 있습니다. 아래 파일들은 생산자 루트와 그 안의 `consumer/`에 저장합니다. 설치 대상은 정적 라이브러리이므로 공유 라이브러리의 런타임 탐색 문제는 이 예제의 범위 밖입니다.
+
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
 project(MyLib VERSION 1.2.3 LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 include(GNUInstallDirs)
-include(CMakePackageConfigHelpers)
-
-# === 라이브러리 ===
-add_library(mylib src/mylib.cpp)
-add_library(MyLib::mylib ALIAS mylib)  # 빌드 트리에서도 네임스페이스 사용
-
+add_library(mylib STATIC src/mylib.cpp)
 target_include_directories(mylib PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>
+    "$<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>"
+    "$<INSTALL_INTERFACE:${CMAKE_INSTALL_INCLUDEDIR}>"
 )
-
-target_compile_features(mylib PUBLIC cxx_std_17)
-
-set_target_properties(mylib PROPERTIES
-    VERSION ${PROJECT_VERSION}
-    SOVERSION ${PROJECT_VERSION_MAJOR}
-)
-
-# === 설치 규칙 ===
-install(TARGETS mylib
-    EXPORT MyLibTargets
-    LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT Runtime
-        NAMELINK_COMPONENT Development
-    ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
-        COMPONENT Development
-    RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
-        COMPONENT Runtime
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-)
-
-install(DIRECTORY include/
-    DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
-    COMPONENT Development
-)
-
-# === 패키지 설정 파일 ===
-install(EXPORT MyLibTargets
-    FILE MyLibTargets.cmake
-    NAMESPACE MyLib::
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MyLib
-    COMPONENT Development
-)
-
-write_basic_package_version_file(
-    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfigVersion.cmake"
-    VERSION ${PROJECT_VERSION}
-    COMPATIBILITY SameMajorVersion
-)
-
-configure_package_config_file(
-    "${CMAKE_CURRENT_SOURCE_DIR}/cmake/MyLibConfig.cmake.in"
-    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfig.cmake"
-    INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MyLib
-)
-
-install(FILES
-    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfig.cmake"
-    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfigVersion.cmake"
-    DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/MyLib
-    COMPONENT Development
-)
-
-# === CPack 설정 ===
-set(CPACK_PACKAGE_NAME "${PROJECT_NAME}")
+include(cmake/install.cmake)
+set(CPACK_GENERATOR TGZ)
+set(CPACK_PACKAGE_NAME MyLib)
 set(CPACK_PACKAGE_VERSION "${PROJECT_VERSION}")
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "My awesome library")
-set(CPACK_PACKAGE_VENDOR "Example Inc.")
-set(CPACK_PACKAGE_CONTACT "maintainer@example.com")
-set(CPACK_RESOURCE_FILE_LICENSE "${CMAKE_CURRENT_SOURCE_DIR}/LICENSE")
-
-set(CPACK_COMPONENTS_ALL Runtime Development)
-set(CPACK_DEB_COMPONENT_INSTALL ON)
-set(CPACK_RPM_COMPONENT_INSTALL ON)
-
-set(CPACK_DEBIAN_PACKAGE_MAINTAINER "${CPACK_PACKAGE_CONTACT}")
-set(CPACK_DEBIAN_RUNTIME_PACKAGE_DEPENDS "libc6 (>= 2.17)")
-set(CPACK_DEBIAN_DEVELOPMENT_PACKAGE_DEPENDS "mylib (= ${PROJECT_VERSION})")
-
 include(CPack)
 ```
 
-### 빌드 및 패키징
+설치 규칙과 패키지 파일 생성은 별도 파일에 모읍니다. include 경로는 INSTALL_INTERFACE가 제공하므로 INCLUDES DESTINATION을 중복 지정하지 않습니다.
 
-```bash
-# 빌드
-cmake -B build -DCMAKE_BUILD_TYPE=Release
-cmake --build build
-
-# 로컬 설치 테스트
-DESTDIR=/tmp/test cmake --install build
-tree /tmp/test
-
-# 패키지 생성
-cd build
-cpack -G DEB
-cpack -G TGZ
+```cmake title="cmake/install.cmake"
+include(CMakePackageConfigHelpers)
+set(PACKAGE_DIR "${CMAKE_INSTALL_LIBDIR}/cmake/MyLib")
+install(TARGETS mylib EXPORT MyLibTargets
+    ARCHIVE DESTINATION "${CMAKE_INSTALL_LIBDIR}")
+install(DIRECTORY include/ DESTINATION "${CMAKE_INSTALL_INCLUDEDIR}")
+install(EXPORT MyLibTargets NAMESPACE MyLib::
+    DESTINATION "${PACKAGE_DIR}")
+write_basic_package_version_file(
+    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfigVersion.cmake"
+    VERSION "${PROJECT_VERSION}" COMPATIBILITY SameMajorVersion)
+configure_package_config_file(cmake/MyLibConfig.cmake.in
+    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfig.cmake"
+    INSTALL_DESTINATION "${PACKAGE_DIR}")
+install(FILES
+    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfig.cmake"
+    "${CMAKE_CURRENT_BINARY_DIR}/MyLibConfigVersion.cmake"
+    DESTINATION "${PACKAGE_DIR}")
 ```
 
----
+Config는 Targets만 읽습니다. 버전 검사는 find_package가 따로 수행합니다.
+
+```cmake title="cmake/MyLibConfig.cmake.in"
+@PACKAGE_INIT@
+include("${CMAKE_CURRENT_LIST_DIR}/MyLibTargets.cmake")
+check_required_components(MyLib)
+```
+
+라이브러리는 확인하기 쉬운 상수 반환 API를 제공합니다.
+
+```cpp title="include/mylib/api.hpp"
+#pragma once
+int answer();
+```
+
+구현은 공개 헤더를 사용합니다.
+
+```cpp title="src/mylib.cpp"
+#include <mylib/api.hpp>
+int answer() { return 42; }
+```
+
+소비자는 생산자의 타겟을 직접 참조하거나 add_subdirectory로 가져오지 않습니다.
+
+```cmake title="consumer/CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(Consumer LANGUAGES CXX)
+find_package(MyLib 1.0 CONFIG REQUIRED)
+add_executable(app main.cpp)
+target_link_libraries(app PRIVATE MyLib::mylib)
+```
+
+소비자 프로그램에서 헤더 탐색·링크·실행을 확인합니다.
+
+```cpp title="consumer/main.cpp"
+#include <mylib/api.hpp>
+#include <iostream>
+int main() { std::cout << "answer=" << answer() << '\n'; }
+```
+
+Ninja가 있는 macOS·Linux 셸에서 실행합니다. `stage`는 이 예제 디렉터리 안의 임시 설치 prefix입니다.
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
+cmake --build build
+cmake --install build --prefix "$PWD/stage"
+cmake -S consumer -B consumer-build -G Ninja -DCMAKE_PREFIX_PATH="$PWD/stage"
+cmake --build consumer-build
+./consumer-build/app
+cpack --config build/CPackConfig.cmake -G TGZ -B packages
+```
+
+실행 결과는 `answer=42`입니다. `stage`를 다른 위치로 옮기고 새 소비자 빌드 디렉터리에서 새 prefix를 지정해도 같은 결과가 나와야 합니다. 요청 버전을 1.9로 바꾸면 설치 버전 1.2.3보다 높아 호환성 검사에서 거절됩니다. TGZ에는 라이브러리·헤더·CMake 패키지 파일이 포함됩니다. DEB/RPM/NSIS/DMG 생성은 이 실행 기록에서 검증하지 않았습니다.
 
 ## 정리
 
@@ -685,7 +665,7 @@ install(TARGETS mylib
 install(DIRECTORY include/ DESTINATION include)  # 이것이 중복
 ```
 
-하나만 선택하세요. `EXPORT` + `install(DIRECTORY ...)`가 더 유연합니다.
+중복은 EXPORT 자체가 아니라 같은 헤더를 두 설치 규칙으로 지정했을 때 생깁니다. PUBLIC_HEADER 속성에 실제 헤더가 지정되어 있는지도 확인합니다. 타겟 export는 두 방식 모두와 함께 사용할 수 있습니다.
 
 ### INCLUDES DESTINATION 누락
 
@@ -697,13 +677,13 @@ install(TARGETS mylib
 )
 ```
 
-`INCLUDES DESTINATION`이 없으면 `MyLibTargets.cmake`에 include 경로가 포함되지 않습니다. 사용측에서 `target_include_directories()`를 별도로 호출해야 합니다.
+`INCLUDES DESTINATION`은 설치된 타겟의 include 사용 요구사항을 추가하는 방법 중 하나입니다. 이미 `target_include_directories(mylib PUBLIC $<INSTALL_INTERFACE:include>)`를 설정했다면 그 경로가 export되므로 이 옵션이 필수는 아닙니다. 마지막 완성 예제는 이 옵션 없이 소비자가 헤더를 찾는 것을 확인합니다. [install의 include 경로 처리](https://cmake.org/cmake/help/v4.4/command/install.html#installing-targets)를 참고합니다.
 
 ```cmake
 install(TARGETS mylib
     EXPORT MyLibTargets
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
-    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}  # 필수!
+    INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}  # 추가 경로를 제공하는 대안
 )
 ```
 
@@ -733,10 +713,10 @@ Ch 8에서는 **Modern CMake 베스트 프랙티스**를 다룹니다. 타겟 �
 
 ## 참고 자료
 
-- [CMake - install 명령](https://cmake.org/cmake/help/latest/command/install.html)
-- [CMake - CPack](https://cmake.org/cmake/help/latest/module/CPack.html)
-- [CMake - 패키지 생성](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html)
-- [GNUInstallDirs 모듈](https://cmake.org/cmake/help/latest/module/GNUInstallDirs.html)
+- [CMake - install 명령](https://cmake.org/cmake/help/v4.4/command/install.html)
+- [CMake - CPack](https://cmake.org/cmake/help/v4.4/module/CPack.html)
+- [CMake - 패키지 생성](https://cmake.org/cmake/help/v4.4/manual/cmake-packages.7.html)
+- [GNUInstallDirs 모듈](https://cmake.org/cmake/help/v4.4/module/GNUInstallDirs.html)
 
 ## 관련 항목
 
@@ -744,4 +724,4 @@ Ch 8에서는 **Modern CMake 베스트 프랙티스**를 다룹니다. 타겟 �
 - [Ch 8: Modern CMake 베스트 프랙티스](/blog/tools/build/cmake/chapter08-best-practices) — 설치까지 고려한 프로젝트 구조 정리
 - [Ch 5: find_package와 외부 의존성](/blog/tools/build/cmake/chapter05-find-package) — 내가 export한 패키지를 남이 찾아 쓰는 반대편 시점
 - [실전 Makefile 예제](/blog/tools/build/gnu-make/chapter07-practical) — `install` 타겟과 DESTDIR을 Make에서 직접 쓰는 방식
-- [CPackComponent 모듈](https://cmake.org/cmake/help/latest/module/CPackComponent.html) — 컴포넌트 기반 패키징 옵션 전체
+- [CPackComponent 모듈](https://cmake.org/cmake/help/v4.4/module/CPackComponent.html) — 컴포넌트 기반 패키징 옵션 전체

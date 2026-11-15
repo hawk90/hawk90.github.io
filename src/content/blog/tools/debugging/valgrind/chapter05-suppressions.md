@@ -12,7 +12,7 @@ topics: ["tools", "tools/debugging"]
 
 ## *Suppression이 필요한 이유*
 
-Valgrind를 실제 프로젝트에서 돌리면 *반드시* 만나는 패턴이 있습니다.
+외부 라이브러리의 접근을 포함한 보고가 나타날 수 있습니다. 다음은 형식 설명용 예시이며 특정 OpenSSL 버전의 결함을 확인한 기록은 아닙니다.
 
 ```text
 ==12345== Conditional jump or move depends on uninitialised value(s)
@@ -23,9 +23,9 @@ Valgrind를 실제 프로젝트에서 돌리면 *반드시* 만나는 패턴이 
 
 `OpenSSL_init` 안의 *uninitialized value*. 우리가 OpenSSL을 수정할 수 있나? 못합니다. 외부 라이브러리이기 때문.
 
-이런 보고는 *반드시 발생*하지만, *우리가 고칠 수 없습니다*. 매번 노이즈로 남으면 진짜 우리 코드의 문제를 *놓치기 쉽습니다*.
+외부 라이브러리에서도 업데이트·잘못된 호출 수정·upstream 수정 등의 대안이 있습니다. 원인이 실제 버그인지 도구 모델의 한계인지 확인한 뒤 제외 여부를 결정합니다.
 
-**Suppression**은 이런 *알려진 false positive*를 *조용히 무시*하는 메커니즘입니다.
+**Suppression**은 매칭한 보고를 숨기는 기능입니다. 오탐만 골라 숨기는 것이 아니므로 실제 결함도 가릴 수 있습니다. 사유·대상 버전·재검토 조건을 남깁니다.
 
 ---
 
@@ -79,13 +79,11 @@ Valgrind를 실제 프로젝트에서 돌리면 *반드시* 만나는 패턴이 
 | `Helgrind:Race` | 데이터 레이스 |
 | `Helgrind:Misc` | 락 오용 등 |
 | `Helgrind:LockOrder` | 락 순서 위반 |
-| `DRD:Race` | DRD의 데이터 레이스 |
-| `DRD:MutexErr` | DRD의 mutex 오류 |
-| `DRD:CondErr` | DRD의 condvar 오류 |
+| DRD에서 자동 생성한 종류 | 도구가 출력한 suppression의 종류와 추가 정보 줄을 그대로 확인합니다. 다른 도구의 이름을 추측해 쓰지 않습니다. |
 
 ### 세 번째 줄 — 추가 옵션 (선택)
 
-`Memcheck:Leak`만 별도 옵션을 받습니다.
+추가 정보의 필요 여부는 종류마다 다릅니다. Memcheck:Param에는 잘못된 syscall 매개변수 이름을 적는 줄이 필수입니다. Leak에는 match-leak-kinds 선택 줄을 둘 수 있습니다.
 
 ```text
 Memcheck:Leak
@@ -109,7 +107,7 @@ fun:main
 |------|------|
 | `fun:malloc` | 정확히 일치 |
 | `fun:OpenSSL_*` | 와일드카드 |
-| `fun:my_*_function` | 정규식 모양 (limited) |
+| `fun:my_*_function` | *와 ?를 사용하는 glob 패턴이며 일반 정규식이 아닙니다. |
 | `obj:/usr/lib/libcrypto*.so*` | 라이브러리 이름 |
 | `...` | 모든 프레임 매칭 (0개 이상) |
 | `fun:*` | 임의의 *한* 프레임만 |
@@ -133,7 +131,7 @@ fun:main
 }
 ```
 
-`malloc`이 *어느 자리에 있든* 그 위에 `libcrypto`가 끼어 있으면 무시. `...`이 *임의 프레임*을 받아 줍니다.
+첫 매칭 프레임은 malloc이며, 그 바깥 호출자 방향에서 0개 이상의 프레임을 건너뛴 뒤 libcrypto 모듈 프레임이 있어야 합니다. malloc 앞의 임의 프레임까지 허용하려면 선행 ...가 별도로 필요합니다. 위·아래라는 말 대신 실제 할당 지점→바깥 호출자 순서로 확인합니다.
 
 ### 예 2: 특정 함수의 미초기화 무시
 
@@ -248,7 +246,7 @@ valgrind --leak-check=full --gen-suppressions=all ./myapp 2>&1 | tee vg.out
 }
 ```
 
-세 프레임 모두 *OpenSSL 내부*. 우리 코드와는 *완전히 분리*. 안전.
+이 패턴도 이름만으로 안전해지는 것은 아닙니다. malloc은 할당 프레임이고, 뒤의 바깥 호출자가 패턴과 일치할 때 보고를 숨깁니다. 적용 전후 우리 코드의 알려진 결함이 계속 보고되는지 확인해야 합니다.
 
 ---
 
@@ -267,9 +265,9 @@ valgrind --leak-check=full \
 ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 47 from 12)
 ```
 
-`suppressed: 47 from 12` = *12종의 suppression*이 *47번 적용됨*. 이 숫자로 *suppression의 영향*을 측정.
+이 요약은 숨겨진 에러 수와 에러 컨텍스트 수를 나타내며 suppression 규칙 12개라는 뜻은 아닙니다. 규칙별 사용량은 -v 또는 --show-error-list=yes에서 used_suppression 항목으로 확인합니다.
 
-너무 많이 적용되면 *우리 코드의 진짜 문제까지 가린 게 아닌지* 점검. `--gen-suppressions=all`로 *각 무시된 사례*를 보고, 의도와 다르면 *suppression을 좁힘*.
+너무 많이 적용되면 *우리 코드의 진짜 문제까지 가린 게 아닌지* 점검. gen-suppressions는 보고되는 에러의 템플릿을 생성합니다. 이미 숨겨진 에러를 전부 다시 출력하는 옵션으로 쓰지 않습니다. 별도 비교 실행이나 지원 버전의 --show-error-list=all로 제외 영향을 조사합니다.
 
 ---
 
@@ -326,7 +324,7 @@ valgrind --suppressions=tests/project.supp \
 | 일상 메모리 오류 | Sanitizer (ASan) |
 | 미초기화 값 (GCC) | Valgrind (Memcheck) ← Sanitizer는 MSan이 Clang only |
 | 깊은 누수 분석 (loss record) | Valgrind (Memcheck) |
-| 시스템 호출 추적 | Valgrind (모든 도구) |
+| 시스템 호출 인자 버퍼의 주소·정의 상태 | Memcheck의 지원 syscall 검사 |
 | 외부 .so 내부 | Valgrind (재컴파일 불필요) |
 | 빠른 race 검사 | Sanitizer (TSan) |
 | 락 오용 (deadlock potential) | Valgrind (Helgrind) |
@@ -408,7 +406,7 @@ jobs:
 
 ```yaml
 valgrind:nightly:
-  stage: nightly
+  stage: test
   rules:
     - if: '$CI_PIPELINE_SOURCE == "schedule"'
   image: ubuntu:22.04
@@ -427,7 +425,7 @@ valgrind:nightly:
                ./build/test_runner
 ```
 
-`rules: schedule`로 *스케줄러로 트리거된 빌드*에만 실행.
+rules의 CI_PIPELINE_SOURCE 비교로 예약 파이프라인에서만 실행합니다. stage: test는 기본 stage 목록에 존재하며 사용자 정의 nightly stage를 쓰려면 stages에도 선언해야 합니다.
 
 ---
 
@@ -442,7 +440,7 @@ Valgrind는 느려서 *큰 시나리오*에 돌리기 어렵습니다. 다음 �
 ctest -R "FailingTestName" --output-on-failure
 ```
 
-문제 있는 *한 테스트만* Valgrind로.
+이 ctest 명령만으로 테스트가 Valgrind 아래에서 실행되지는 않습니다. ctest -N -V로 실제 실행 파일·인자를 확인한 뒤 Valgrind로 직접 감싸거나 CTest MemCheck 구성을 별도로 준비합니다.
 
 ### 2. 가짜 데이터 작게
 
@@ -463,13 +461,59 @@ load_data("small_test_input.csv");   // 10MB 대신 100KB
 #endif
 ```
 
-`VALGRIND` 매크로로 *Valgrind 빌드*만 짧게 도는 시나리오.
+이 VALGRIND는 사용자가 -DVALGRIND로 정의해야 하는 예시 매크로입니다. 도구 실행만으로 자동 정의되지 않습니다. 진단 목적이 유지된다면 요청 수를 실행 인자로 조절해 별도 빌드 없이 같은 바이너리를 비교할 수도 있습니다.
 
 ### 4. `--track-origins=no` (필요시)
 
-미초기화 추적은 *2~3× 추가 비용*. 디버깅이 필요 없다면 끔.
+origins 추적은 실행·메모리 비용을 추가합니다. 해당 입력에서 측정한 뒤 불필요한 경우 끕니다. 미초기화 값의 사용 검사 자체가 꺼지는 것은 아닙니다.
 
 ---
+
+## 실행 입력 — 좁은 suppression의 부정 대조군
+
+known_site의 16바이트와 own_site의 32바이트 누수를 분리합니다. 아래 fixture.supp는 진단용 첫 할당만 숨기는 입력이며 실제 프로젝트에 적용할 권고가 아닙니다. 두 번째 누수가 계속 보고돼야 범위가 좁다는 근거가 됩니다.
+
+```c title="suppression-case.c"
+#include <stdlib.h>
+char* volatile retained;
+__attribute__((noinline)) void known_site(int clean) {
+    retained = malloc(16);
+    if (!retained) abort();
+    if (clean) free(retained);
+    retained = NULL;
+}
+__attribute__((noinline)) void own_site(int clean) {
+    retained = malloc(32);
+    if (!retained) abort();
+    if (clean) free(retained);
+    retained = NULL;
+}
+int main(int argc, char** argv) {
+    (void)argv;
+    known_site(argc > 1);
+    own_site(argc > 1);
+    return 0;
+}
+```
+
+```text title="fixture.supp"
+{
+   fixture_known_site_only
+   Memcheck:Leak
+   match-leak-kinds: definite
+   fun:malloc
+   fun:known_site
+}
+```
+
+```bash
+cc -g -O0 suppression-case.c -o suppression-case
+valgrind --leak-check=full --error-exitcode=97 ./suppression-case
+valgrind --leak-check=full --error-exitcode=97 --suppressions=fixture.supp ./suppression-case
+valgrind --leak-check=full --error-exitcode=97 ./suppression-case clean
+```
+
+이 환경에서는 소스 컴파일·clean 정상 실행만 확인했습니다. 자동 생성된 스택과 fixture.supp 일치, 16바이트만 suppression되는지, 32바이트가 계속 에러인지, clean의 무경고 여부는 Linux 도구 실행으로 확인해야 합니다. 컴파일 성공을 suppression 검증 성공으로 세지 않습니다.
 
 ## 시리즈 마무리
 
@@ -485,7 +529,7 @@ Valgrind 시리즈 다섯 챕터를 마칩니다.
 
 핵심 사고 정리:
 
-1. **Valgrind는 *재컴파일 없이* 동작**. Sanitizer가 닿지 못하는 자리의 *유일한 도구*.
+1. **Valgrind는 *재컴파일 없이* 동작**. 재컴파일 없이 분석할 수 있는 선택지이며 플랫폼 지원을 확인합니다.
 2. **느리지만 정확**. 일상은 Sanitizer, *깊은 점검*은 Valgrind.
 3. **Memcheck = 메모리 + 미초기화**. 누수 보고는 *4종으로 분류*해 우선순위 결정.
 4. **Helgrind = 락 추적**, **DRD = vector clock**. 둘은 *서로 다른 강점*. 함께 사용 가능.

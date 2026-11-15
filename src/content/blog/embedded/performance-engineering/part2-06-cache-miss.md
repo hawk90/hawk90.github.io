@@ -19,8 +19,8 @@ topics: ["embedded"]
 **처음 access** 시 무조건 miss입니다. Cache가 비어 있기 때문입니다.
 
 ```c
-int data[1000];   // 새로 할당 — cache 안에 없음
-sum += data[0];   // ← compulsory miss
+int data[1000] = {0};   // 초기화·할당만으로 cache miss를 단정하지 않음
+sum += data[0];          // 이 주소의 cache state가 cold라면 compulsory miss
 ```
 
 해결책은 사실상 불가피하지만, **prefetch**로 latency를 숨길 수 있습니다.
@@ -76,7 +76,7 @@ int C[2048];
 
 // A, B, C가 같은 set에 mapping된다면
 for (i = 0; i < 2048; i++) {
-    A[i] += B[i] * C[i];   // 매 access conflict
+    A[i] += B[i] * C[i];   // 같은 set에 mapping되어도 3 line이 4-way에 들어가면 이 셋만으로 thrash하지 않음
 }
 ```
 
@@ -95,6 +95,8 @@ int C[2048];
 
 ## 측정 — PMU 이벤트
 
+아래 raw event 번호는 Cortex-A53 예시입니다. 커널 PMU driver, core revision과 event 의미를 확인하고, 다른 코어에 그대로 적용하지 않습니다.
+
 **Cortex-A53 perf events:**
 
 - 0x03 L1D_CACHE_REFILL    L1 D 미스 (refill 횟수)
@@ -109,8 +111,7 @@ $$\text{L1 miss rate} = \frac{\text{L1D\_CACHE\_REFILL}}{\text{L1D\_CACHE}}, \qu
 ```bash
 perf stat -e r03,r04,r17,r16 ./prog
 
-# 좋음: L1 miss < 5%, L2 miss < 30%
-# 나쁨: L1 miss > 15%
+# 해석은 target workload와 cache level에 따라 달라지므로 보편 임계값을 두지 않음
 ```
 
 ## Cold vs Capacity vs Conflict 구분
@@ -128,15 +129,14 @@ perf stat -e r03,r04,r17,r16 ./prog
 // → 128 set, set당 4 line
 // → 같은 set 주기 = 32 KB / 4 = 8 KB
 
-int A[2048];  // 8 KB — set 모두 다 차지
-int B[2048];  // 8 KB — A와 같은 set들에 매핑 → conflict
-
+int A[2048], B[2048], C[2048], D[2048], E[2048]; // 각 배열 8 KB
+// 배열 시작 주소가 cache size 간격이면 대응 line이 같은 set으로 mapping될 수 있음
 for (i = 0; i < 2048; i++) {
-    A[i] = B[i];   // ← 매번 conflict
+    A[i] += B[i] + C[i] + D[i] + E[i];  // 같은 set의 5 lines > 4 ways
 }
 ```
 
-C 표준 `malloc`도 page align이라 8KB나 64KB 같은 깔끔한 숫자에 정렬되기 때문에 conflict가 빈번합니다.
+`malloc`의 정렬은 구현이 보장하는 요구 수준과 allocator 동작을 따릅니다. page-aligned 주소나 특정 conflict를 일반화하지 말고, 실제 주소·stride·cache geometry를 측정해 확인합니다.
 
 ## False Sharing (SMP 시)
 
@@ -188,7 +188,7 @@ GEMM(matrix multiply)의 표준 최적화 기법입니다. BLIS·MKL·OpenBLAS �
 
 ### Hardware Prefetcher
 
-Cortex-A57 이상은 stride를 자동으로 감지합니다. 같은 간격으로 access하는 패턴을 발견하면 자동으로 prefetch합니다.
+일부 Cortex-A 코어에는 hardware prefetcher가 있지만 지원 패턴과 제어는 구현별입니다. 대상 TRM에서 확인합니다. 같은 간격으로 access하는 패턴을 발견하면 자동으로 prefetch합니다.
 
 ### Software Prefetch
 
@@ -226,7 +226,7 @@ for (i = 0; i < N; i++) {
 }
 ```
 
-Hardware prefetch는 stride detect만 합니다. Random access는 매번 cold miss를 일으킵니다.
+Prefetcher가 감지하는 패턴은 구현별입니다. random access가 매번 cache miss를 일으키는 것은 아니며, working set과 cache state에 따라 hit/miss가 달라집니다.
 
 > ⚠️ 깊은 union, struct로 false sharing
 
@@ -265,7 +265,7 @@ process(arr);            // 작은 working set — fast
 - Capacity는 **blocking/tiling**으로 working set을 축소합니다.
 - Conflict는 **padding이나 rearrangement**로 해결합니다.
 - 측정은 PMU의 L1D_CACHE_REFILL로 합니다.
-- False sharing은 SMP에서 발생하는 또 다른 conflict입니다.
+- False sharing은 SMP에서 cache coherence 때문에 생기는 별도 현상이며 3C cache miss taxonomy와 구분합니다.
 
 다음 편은 **Cache Line 최적화**입니다.
 

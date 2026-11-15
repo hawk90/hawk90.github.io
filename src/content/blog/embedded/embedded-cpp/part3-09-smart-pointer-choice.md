@@ -39,7 +39,7 @@ auto other = std::move(sensor);   // sensor → other로 소유권 이전
 // sensor는 이제 nullptr
 ```
 
-크기는 deleter가 비어 있다면 정확히 `sizeof(T*)`입니다. 추가 오버헤드가 0입니다.
+빈 deleter를 압축하는 일반적인 구현에서는 sizeof(T*)와 같을 수 있습니다. 표준이 모든 ABI의 동일 크기를 보장하는 것은 아니며 상태 있는 deleter·fancy pointer는 크기를 바꿀 수 있습니다.
 
 ### 임베디드 활용
 
@@ -62,7 +62,7 @@ void setup() {
 }
 ```
 
-RAII와 명시적 소유권을 동시에 제공하므로 가장 권장합니다.
+RAII와 명시적 소유권을 제공합니다. make_unique는 할당 실패를 nullptr로 바꾸지 않습니다. 복구 가능한 OOM이 필요하면 예외 정책에 맞는 nothrow factory나 pool API를 별도로 설계합니다.
 
 ### Custom deleter — pool 활용
 
@@ -91,14 +91,14 @@ auto b = a;   // copy — 카운터 증가 (atomic)
 // a와 b 모두 owner — 마지막이 사라질 때 delete
 ```
 
-크기는 T pointer와 control block pointer를 합쳐 8 byte입니다(32-bit ARM에서도 8 byte).
+일반적인 구현은 객체 포인터와 control block 포인터를 저장하므로 32비트에서 흔히 8바이트, 64비트에서 흔히 16바이트입니다. 정확한 크기는 구현·ABI별로 확인합니다.
 
-내부의 control block은 별도로 할당되며 다음을 포함합니다.
+control block은 객체와 수명이 다른 관리 정보이며, make_shared에서는 객체와 한 allocation에 묶일 수 있습니다. 보통 다음 정보를 포함하지만 표준이 고정 레이아웃을 정하지는 않습니다.
 
 - strong과 weak 두 개의 atomic 카운터
 - deleter
 - allocator
-- 보통 16~32 byte의 heap
+- 구현별 관리 정보와 정렬 공간
 
 ### 임베디드에서의 문제
 
@@ -106,12 +106,12 @@ auto b = a;   // copy — 카운터 증가 (atomic)
 2. control block이 heap을 사용합니다(`make_shared`는 1번, 별도 `new`는 2번 할당).
 3. cyclic reference에서 `weak_ptr`을 쓰지 않으면 leak이 발생합니다.
 
-대부분의 임베디드 환경에서는 shared_ptr을 회피합니다. 사용하려면 명확한 정당화가 필요합니다.
+공유 수명 관리가 필요한지 먼저 확인합니다. control block의 thread safety는 pointee 데이터의 thread safety가 아니며, 같은 shared_ptr 객체의 동시 변경도 별도 동기화가 필요합니다.
 
 ### shared_ptr이 정말 필요한 경우
 
 - 여러 owner가 진짜로 필요해서 한 명의 owner로 표현이 어려운 경우
-- RTOS 다중 task에서 동시 접근이 필요한 경우
+- 서로 다른 task가 독립적으로 객체의 수명을 연장해야 하는 경우
 - 비동기 callback에서 객체 lifetime을 보장해야 하는 경우
 
 ```cpp
@@ -259,7 +259,7 @@ public:
 ```cpp
 auto* p = new Foo();   // raw owning pointer — 어떻게 delete?
 ```
-항상 `make_unique`를 씁니다. raw owning은 금지합니다.
+일반 생성은 make_unique를 우선합니다. private 생성자에 접근하는 클래스 내부 factory나 nothrow 할당처럼 직접 new가 필요한 경우에는 즉시 owner로 감쌉니다.
 
 ### 2. shared_ptr 무심코 사용
 ```cpp
@@ -271,7 +271,7 @@ unique_ptr로 충분하면 unique로 갑니다. shared는 정당화가 필요합
 ```cpp
 std::unique_ptr<FILE, decltype(&fclose)> f(fopen(...), &fclose);
 ```
-sizeof가 두 배가 됩니다. struct나 lambda deleter를 씁니다.
+함수 포인터 deleter는 별도 상태 저장 공간이 들 수 있습니다. ABI에 따라 크기를 확인하고, 상태가 필요 없다면 빈 functor deleter를 검토합니다.
 
 ### 4. weak_ptr 없이 cycle
 ```cpp
@@ -290,44 +290,54 @@ move를 씁니다(`auto b = std::move(a);`).
 ### 6. shared_ptr atomic overhead 무시
 multi-core에서는 카피마다 atomic 연산이 일어나므로 hot path에 부담이 됩니다. raw pointer와 명확한 owner로 대체합니다.
 
-## 측정 — 스마트 포인터 비교
+## 실행 확인 — 해제 횟수와 공유 수명
 
-같은 객체를 1만 회 생성하고 해제합니다.
+다음 독립 파일은 custom deleter의 해제 횟수, unique 소유권 이동, weak 관찰의 만료를 검증합니다. 시간·cycle 비교는 수행하지 않았고, 원래 표의 120/15=8배를 10배로 적은 결론도 근거로 사용하지 않습니다.
 
-| 방식 | alloc cycles | total (1만회) | 비고 |
-| --- | --- | --- | --- |
-| new/delete (raw) | ~120 | 1.2 ms | — |
-| unique_ptr | ~120 | 1.2 ms | make_unique + new |
-| shared_ptr | ~200 | 2.0 ms | control block 추가, copy +10 cycles |
-| unique_ptr + pool | ~15 | 0.15 ms | pool 할당 |
-
-pool과 unique_ptr 조합이 10배 빠릅니다. shared_ptr은 두 배 가까이 느립니다.
-
-## std::shared_ptr 대안 — Reference counting을 직접
-
-```cpp
-class RefCounted {
-    mutable int count_ = 1;
-public:
-    void add_ref() const { ++count_; }
-    void release() const {
-        if (--count_ == 0) delete this;
+```cpp title="smart-pointers.cpp"
+#include <cassert>
+#include <memory>
+struct Resource {
+    static inline int live = 0;
+    Resource() { ++live; }
+    ~Resource() { --live; }
+};
+struct CountDelete {
+    int* released;
+    void operator()(Resource* p) const noexcept { ++*released; delete p; }
+};
+int main() {
+    int released = 0;
+    {
+        std::unique_ptr<Resource, CountDelete> first(new Resource, {&released});
+#ifdef COPY_OWNER
+        auto copy = first;
+#endif
+        auto second = std::move(first);
+        assert(!first && second && Resource::live == 1);
+        second.reset();
+        assert(Resource::live == 0 && released == 1);
     }
-protected:
-    virtual ~RefCounted() = default;
-};
-
-template<typename T>
-class IntrusivePtr {
-    T* p_;
-public:
-    explicit IntrusivePtr(T* p) : p_(p) { if (p_) p_->add_ref(); }
-    ~IntrusivePtr() { if (p_) p_->release(); }
-    // ...
-};
+    assert(released == 1);
+    std::weak_ptr<Resource> observer;
+    {
+        auto owner = std::make_shared<Resource>();
+        observer = owner;
+        auto pin = observer.lock();
+        owner.reset();
+        assert(pin && !observer.expired() && Resource::live == 1);
+    }
+    assert(observer.expired() && Resource::live == 0);
+}
 ```
 
-Boost.IntrusivePtr와 같은 아이디어입니다. 별도의 control block이 없고 메모리 추가도 적습니다. multi-thread 환경에서는 `count_`를 atomic으로 둡니다.
+heap 금지 설계에서는 이 heap 기반 실험을 그대로 채택하지 말고 Part 3-03의 pool 계약과 deleter를 조합합니다.
+
+## 직접 reference counting을 만들기 전의 계약
+
+Intrusive reference count는 객체에 카운터를 넣는 방식입니다. 초기 count=1인 객체를 포인터 생성자에서 다시 add_ref하면 한 번의 release 뒤 count가 1로 남을 수 있습니다. adopt와 retain 생성 경로를 구분하거나 count=0에서 첫 owner가 증가시키도록 계약을 정해야 합니다.
+
+copy는 add_ref, move는 증가 없이 이전, 소멸은 release이며 대입·자기 대입·빈 상태까지 구현해야 합니다. delete this를 쓸 객체는 그 delete 정책과 맞게 생성되어야 하며 stack·pool 객체를 같은 경로로 해제하면 안 됩니다. 카운터를 atomic으로 바꾸는 것만으로 객체 데이터·회수 프로토콜·overflow·ISR 안전성까지 해결되지 않습니다. 이 장은 불완전한 intrusive pointer를 완성 구현으로 제시하지 않습니다.
 
 ## 정리
 
@@ -337,13 +347,19 @@ Boost.IntrusivePtr와 같은 아이디어입니다. 별도의 control block이 �
 - Custom deleter(struct나 lambda)로 pool, FD, 비-heap 자원을 관리합니다.
 - Optional 멤버는 `std::optional<T>`(heap 0)를 우선합니다.
 
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [shared_ptr의 공유 소유 계약](https://eel.is/c++draft/util.smartptr.shared)
+
 ## 관련 항목
 
 - [Part 2-01: RAII 기초](/blog/embedded/embedded-cpp/part2-01-raii-basics)
 - [Part 2-02: RAII 실전 패턴](/blog/embedded/embedded-cpp/part2-02-raii-patterns) — custom deleter
 - [Part 3-03: Pool Allocator](/blog/embedded/embedded-cpp/part3-03-pool-allocator) — pool + unique_ptr
 - [Part 3-10: 소유권 모델](/blog/embedded/embedded-cpp/part3-10-ownership-model)
-- Refactoring Pattern 33: Change Reference to Value
+- [C++ Core Guidelines R.20–R.24](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#S-resource)
 
 ## 다음 글
 

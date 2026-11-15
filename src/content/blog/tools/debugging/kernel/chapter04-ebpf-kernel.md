@@ -10,17 +10,17 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-eBPF(extended Berkeley Packet Filter)는 *커널 안에서 안전하게 실행되는 바이트코드 VM*입니다. 원래 패킷 필터링용이었지만 지금은 *trace·observability·security*의 표준 인프라. bpftrace는 그 위의 *고급 언어*로, ftrace의 모든 기능에 *표현력*과 *집계 능력*을 더합니다.
+eBPF(extended Berkeley Packet Filter)는 커널 기능에 연결되는 프로그램 형식입니다. 원래 패킷 필터링에서 시작해 tracing·observability·security 등 여러 용도로 쓰입니다. bpftrace는 이를 위한 상위 수준 tracing 언어이며, 지원 probe·기능은 커널과 bpftrace 버전에 따라 달라집니다.
 
 :::tldr
-`bpftrace -e 'kprobe:do_sys_open { printf("%s opens %s\n", comm, str(arg1)); }'` — 한 줄로 *시스템 전체의 file open* 추적.
+`tracepoint:syscalls:sys_enter_openat { printf("%s opens %s\\n", comm, str(args.filename)); }` — 해당 tracepoint가 있는 시스템에서 openat 경로를 관찰하는 예입니다.
 :::
 
 ## eBPF 모델
 
 ![eBPF execution pipeline — 사용자 코드가 BPF 바이트코드로 컴파일된 뒤 커널 verifier·JIT를 거쳐 hook에서 실행되고 결과가 perf buffer로 돌아온다](/images/blog/debugging/kernel/diagrams/ch04-ebpf-pipeline.svg)
 
-핵심: **verifier가 모든 프로그램을 검증** → 검증 통과 = *커널 crash 불가*. 운영 환경에 부담 없이.
+핵심: verifier는 허용된 메모리 접근·제어 흐름 등 안전성 조건을 검사해 부적합한 프로그램을 거부합니다. 검증 통과가 커널·드라이버 결함, 잘못된 관측 로직, 과도한 부하나 정보 노출까지 막는다는 뜻은 아니므로 운영 영향과 권한을 함께 검토합니다.
 
 ## bpftrace 설치
 
@@ -46,7 +46,7 @@ v0.20.0
 # 모든 file open 추적
 $ sudo bpftrace -e '
   tracepoint:syscalls:sys_enter_openat {
-    printf("%s opens %s\n", comm, str(args->filename));
+    printf("%s opens %s\n", comm, str(args.filename));
   }
 '
 bash opens /etc/passwd
@@ -103,7 +103,7 @@ nsecs              # 현재 시각 (ns)
 cpu                # 현재 CPU
 elapsed            # 프로그램 시작 후 ns
 args               # tracepoint 인자 (구조체)
-arg0, arg1, ...    # kprobe 인자 (register-based)
+arg0, arg1, ...    # kprobe 인자 (0부터 시작; 함수 서명·아키텍처에 의존)
 retval             # kretprobe 반환값
 ```
 
@@ -169,18 +169,18 @@ $ sudo bpftrace -e '
 # 새 프로세스
 $ sudo bpftrace -e '
   tracepoint:syscalls:sys_enter_execve {
-    printf("%s -> %s\n", comm, str(args->filename));
+    printf("%s -> %s\n", comm, str(args.filename));
   }
 '
 
 # 죽은 프로세스
 $ sudo bpftrace -e '
   tracepoint:syscalls:sys_enter_exit_group {
-    printf("%-16s pid=%d exit=%d\n", comm, pid, args->error_code);
+    printf("%-16s pid=%d exit=%d\n", comm, pid, args.error_code);
   }
 '
 
-# disk I/O 크기
+# vfs_read 요청 크기 집계 (블록 장치의 실제 disk I/O 바이트가 아님)
 $ sudo bpftrace -e '
   kprobe:vfs_read {
     @reads[comm] = sum(arg2);
@@ -284,19 +284,19 @@ BPF_HASH(start, u32);
 BPF_HISTOGRAM(dist);
 
 int trace_enter(struct pt_regs *ctx) {
-    u32 pid = bpf_get_current_pid_tgid();
+    u32 tid = (u32)bpf_get_current_pid_tgid();
     u64 ts = bpf_ktime_get_ns();
-    start.update(&pid, &ts);
+    start.update(&tid, &ts);
     return 0;
 }
 
 int trace_return(struct pt_regs *ctx) {
-    u32 pid = bpf_get_current_pid_tgid();
-    u64 *tsp = start.lookup(&pid);
+    u32 tid = (u32)bpf_get_current_pid_tgid();
+    u64 *tsp = start.lookup(&tid);
     if (tsp) {
         u64 delta = bpf_ktime_get_ns() - *tsp;
         dist.increment(bpf_log2l(delta / 1000));
-        start.delete(&pid);
+        start.delete(&tid);
     }
     return 0;
 }
@@ -318,9 +318,9 @@ b["dist"].print_log2_hist("us")
 
 bpftrace 한 줄로 가능하지만 *복잡한 자료구조·로직*은 BCC.
 
-## libbpf-tools — 새 표준
+## libbpf 기반 도구 — 다른 구현 선택지
 
-BCC의 후속 — *BPF CO-RE* (Compile Once Run Everywhere). 컴파일 시 vmlinux.h 사용 → 한 binary가 *여러 커널 버전*에서 동작.
+libbpf 기반 도구는 *BPF CO-RE* (Compile Once Run Everywhere)와 BTF relocation을 이용해 여러 호환 커널에서 실행되도록 빌드할 수 있습니다. 실제 호환성은 사용하는 커널 기능·BTF 제공 여부와 도구 구현에 달려 있습니다. BCC와는 서로 다른 개발 방식이며 일대일 후속 관계는 아닙니다.
 
 ```bash
 $ git clone https://github.com/iovisor/bcc.git
@@ -329,7 +329,7 @@ $ make
 $ ./opensnoop      # BCC 버전과 호환되지만 훨씬 가벼움
 ```
 
-대규모 운영에선 libbpf-tools가 *표준*. BCC는 *Python 의존*이라 매번 컴파일 → CO-RE는 정적 바이너리.
+CO-RE 도구도 배포·권한·커널 호환성 검증이 필요합니다. CO-RE가 자동으로 정적 바이너리를 만들거나 모든 커널에서 동작하게 보장하지는 않습니다.
 
 ## eBPF + 커널 추적의 강력함
 
@@ -338,7 +338,7 @@ $ ./opensnoop      # BCC 버전과 호환되지만 훨씬 가벼움
 ```bash
 $ sudo bpftrace -e '
   tracepoint:syscalls:sys_enter_write {
-    @bytes[comm, args->fd] = sum(args->count);
+    @bytes[comm, args.fd] = sum(args.count);
   }
 ' | head
 ```
@@ -367,31 +367,31 @@ $ sudo bpftrace -e '
 
 ## 안전성 — Verifier
 
-eBPF의 핵심 차별점. 모든 프로그램이 *커널에 로드되기 전 정적 검증*.
+eBPF 프로그램은 커널에 로드될 때 verifier 검사를 받습니다. 검사 범위와 허용 기능은 커널 버전, 프로그램 유형, 권한에 따라 다릅니다.
 
 검증 내용:
-- 무한 루프 금지 (bounded loops만, 또는 BPF_LOOP).
-- 메모리 접근이 *항상 valid pointer*.
+- 실행을 제한할 수 없는 제어 흐름은 거부됩니다. 지원 커널은 제한된 반복을 허용할 수 있습니다.
+- 메모리 접근은 verifier가 추적 가능한 포인터·범위 규칙을 따라야 합니다; 이는 모든 실행 오류가 불가능하다는 뜻은 아닙니다.
 - 스택 사용량 ≤ 512 bytes.
-- 명령 수 ≤ 1M (kernel 5.2+).
+- 명령 수·검증 복잡도 한도는 커널 버전과 프로그램 유형에 따라 달라집니다.
 - helper 함수 인자 타입 일치.
 
-검증 실패 시 *load 거부*. 즉 *crash가 불가능*.
+검증 실패 시 load가 거부됩니다. 이 검사는 임의의 잘못된 프로그램 실행을 제한하지만 시스템 전체의 crash 부재를 보장하지는 않습니다.
 
 ```bash
 $ sudo bpftrace -e 'kprobe:do_sys_open { while (1) { } }'
-ERROR: Unbounded loop detected
+이 예시의 진단 문구는 bpftrace 버전에 따라 다르며, 이를 특정 커널 verifier의 실행 결과로 간주하면 안 됩니다. 지원되지 않는 무한 반복이 거부되는 동작을 보이려면 대상 환경에서 별도로 실행해야 합니다.
 ```
 
 ## 부하
 
-eBPF 자체 비용은 *매우 작음* — 단순 카운터는 *수십 ns*. ftrace보다 *살짝 무겁지만* expressive. 일반 운영에 *상시* 켜 둘 수도 있음.
+eBPF 비용은 probe 빈도, 프로그램 복잡도, map·출력 방식, 커널과 하드웨어에 따라 달라집니다. 단일 비용 수치 대신 대상 workload에서 손실·지연·CPU 사용량을 측정하고 필요한 범위에서만 활성화합니다.
 
 ```bash
 # 시스템 전체 syscall 카운트 (지속 실행 가능)
 $ sudo bpftrace -e '
   tracepoint:raw_syscalls:sys_enter {
-    @[comm, args->id] = count();
+    @[comm, args.id] = count();
   }
   interval:s:10 {
     print(@);
@@ -404,7 +404,7 @@ $ sudo bpftrace -e '
 
 | 증상 | 원인 / 해법 |
 |------|-------------|
-| `Permission denied` | root 필요. 또는 `CAP_BPF`, `CAP_PERFMON` |
+| `Permission denied` | 권한·capability뿐 아니라 sysctl, LSM, lockdown, 커널 설정 확인 |
 | `Verifier denied` | 메모리 안전 위반. 코드 단순화 |
 | 함수 없음 | inline 되었거나 다른 이름. `bpftrace -l 'kprobe:*pattern*'`로 검색 |
 | `Unable to attach probe` | 모듈 미로드 또는 권한 |
@@ -417,9 +417,9 @@ $ sudo bpftrace -e '
 - bpftrace가 *고급 언어* — ftrace보다 표현력 ↑.
 - probe: tracepoint / kprobe / uprobe / USDT / interval.
 - map으로 *집계*, hist로 *히스토그램*.
-- BCC = Python+C frontend, libbpf-tools = CO-RE static.
-- verifier가 crash 불가능 보장.
-- 일반 운영에 *상시* 켜 둘 수 있는 정도의 부하.
+- BCC와 libbpf 기반 CO-RE 도구는 서로 다른 구현 선택지입니다.
+- verifier는 허용되지 않은 프로그램을 거부하지만 시스템 전체의 crash 부재를 보장하지 않습니다.
+- 운영 적용 전 workload에서 비용·손실·권한 범위를 검증합니다.
 
 ## 다음 장 예고
 

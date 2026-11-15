@@ -44,7 +44,7 @@ API 사용법을 아는 것과 **내부 동작을 이해하는 것**은 완전�
 
 ## 시리즈 구성
 
-**총 5개 Part, 52개 글**로 구성됩니다.
+**총 5개 Part의 본문 52편과 이 소개 글 1편**으로 구성됩니다.
 
 RTOS의 핵심 개념부터 소스 코드 분석, 직접 구현, RTOS 비교까지 체계적으로 다룹니다.
 
@@ -105,7 +105,7 @@ RTOS의 심장인 스케줄러와 컨텍스트 스위치를 깊이 분석합니�
 | 3-08 | Event Group 구현 | 비트 플래그, AND/OR 대기 |
 | 3-09 | ISR-safe API 설계 | FromISR 패턴, 지연 처리 |
 | 3-10 | 데드락 탐지와 회피 | 탐지 알고리즘, timeout 활용 |
-| 3-11 | Stream Buffer와 Message Buffer | FreeRTOS 10+ lock-free SPSC IPC |
+| 3-11 | Stream Buffer와 Message Buffer | FreeRTOS 단일 writer/reader IPC, ISR·동기화 계약 |
 
 ---
 
@@ -151,14 +151,16 @@ RTOS의 심장인 스케줄러와 컨텍스트 스위치를 깊이 분석합니�
 
 | RTOS | 버전 | 특징 |
 |------|-----|------|
-| FreeRTOS | 11.2 | 가장 널리 사용, 단순한 구조, AWS IoT 통합 |
-| Zephyr | 4.0 LTS | Linux Foundation, 풍부한 드라이버, devicetree |
+| FreeRTOS | [V11.2.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0) | 단일/SMP 구성·포트별 조건을 구분 |
+| Zephyr | [3.7.0 LTS](https://docs.zephyrproject.org/latest/releases/release-notes-3.7.html) | 4.0을 LTS로 간주하지 않음. 장별 분석 revision을 별도 확인 |
 | RT-Thread | 5.x | 경량 RTOS, 중국 생태계, 다양한 컴포넌트 |
-| Eclipse ThreadX | 6.4 | 구 Azure RTOS — 2024-01 Eclipse Foundation 기증 후 오픈소스화 |
+| Eclipse ThreadX | 장별 tag 확인 | 구 Azure RTOS. 소스·릴리스의 실제 라이선스와 인증 범위를 확인 |
 | Apache NuttX | 12.x | POSIX-compliant, PX4·NASA Ingenuity |
-| Linux (PREEMPT_RT) | 6.12+ | 2024-09 mainline merge — soft RTOS 대안 |
+| Linux (PREEMPT_RT) | 6.12 계열부터 mainline 지원 | 아키텍처·설정·드라이버별 preemption 제약 확인 |
 
-> **참고**: Arm mbed OS는 2026년 7월 EOL로 신규 프로젝트에서 제외됩니다.
+이 표는 모든 RTOS를 해당 버전에서 실행 검증했다는 뜻이 아닙니다. 내부 구현을 따라갈 때 장별 tag·포트·설정을 고정하고, 라이브러리/API 소개와 실제 측정을 구분합니다. RT-Thread/NuttX의 `x` 표기는 계열이므로 특정 함수의 근거로 쓰려면 정확한 tag가 추가로 필요합니다.
+
+> **참고**: Arm은 Mbed의 2026년 7월 서비스 종료와 지원 중단을 공지했습니다. 기존 소스는 공개되어 있으며, Mbed CE는 별도 커뮤니티 프로젝트입니다. [ArmMbed 공식 안내](https://github.com/ARMmbed)를 확인합니다.
 
 ## 학습 로드맵
 

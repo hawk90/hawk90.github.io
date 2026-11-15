@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"CXL은 PCIe 위에 cache coherency를 올린 interconnect입니다."** — CPU·가속기·메모리 풀이 *같은 주소 공간*을 공유하면서도 PCIe 인프라를 그대로 씁니다.
+> **"CXL은 PCIe 기반의 cache-coherent interconnect입니다."** — 지원되는 프로토콜과 플랫폼 구성에 따라 CPU·가속기·메모리가 coherent하게 데이터를 주고받습니다.
 
 ## 어떤 문제를 푸는가
 
@@ -19,7 +19,7 @@ topics: ["embedded"]
 
 AI 워크로드는 이 한계를 점점 더 아프게 건드립니다. 모델 파라미터가 GPU HBM에 다 들어가지 않고, CPU DRAM에서 frequent하게 swap이 필요합니다. PCIe 5.0 x16의 원시 전송률은 한 방향 약 64 GB/s(32 GT/s × 16 ÷ 8)이고, 이 경로로 매번 복사하는 비용이 한계가 됩니다. 데이터 이동을 줄이거나 *없애야* 합니다.
 
-CXL(Compute Express Link)은 이 문제를 두 방향으로 해결합니다. 첫째, *cache coherency를 hardware에 위임*해서 DMA 없이도 CPU·가속기가 같은 메모리를 봅니다. 둘째, *memory expansion*과 *pooling*을 가능하게 만들어서 한 서버가 수 TB의 unified memory를 쓸 수 있게 합니다.
+CXL(Compute Express Link)은 이 문제를 두 방향으로 다룹니다. 첫째, 지원되는 CXL.cache/CXL.mem 구성에서 cache coherency를 hardware에 위임해 CPU·가속기 간 공유를 지원합니다. 모든 장치가 같은 주소 공간을 무조건 공유하는 것은 아닙니다. 둘째, *memory expansion*과 *pooling*을 가능하게 만들어서 한 서버가 추가 메모리를 사용할 수 있게 합니다.
 
 이 글에서는 CXL의 세 프로토콜, Type 1/2/3 디바이스 분류, ARM Neoverse V2의 CHI-E와의 통합, 그리고 latency·대역폭의 실측 의미를 살펴봅니다.
 
@@ -114,24 +114,27 @@ CXL expander는 *coreless NUMA node*입니다. `node distances` 값은 펌웨어
 ```c
 // 간단한 latency 측정
 void measure_latency(void *buf, size_t size) {
-    uint64_t start, end;
+    uint64_t start, end, freq;
     volatile uint64_t *p = buf;
-    asm volatile("mrs %0, cntvct_el0" : "=r"(start));
+    /* buf는 사전에 구성한 pointer chain을 가리켜야 합니다. */
+    asm volatile("isb; mrs %0, cntvct_el0" : "=r"(start));
     for (int i = 0; i < 1000000; i++) {
-        p = (uint64_t *)*p;     // pointer chase — cache miss 강제
+        p = (uint64_t *)*p;     // pointer chase; cache miss 자체를 보장하지는 않음
     }
-    asm volatile("mrs %0, cntvct_el0" : "=r"(end));
-    printf("Avg latency: %lu ns\n", (end - start) / 1000000);
+    asm volatile("isb; mrs %0, cntvct_el0" : "=r"(end));
+    asm volatile("mrs %0, cntfrq_el0" : "=r"(freq));
+    printf("Avg latency: %.2f ns\n",
+           (double)(end - start) * 1e9 / (double)freq / 1000000.0);
 }
 ```
 
-Buf를 local·remote·CXL 노드에 각각 할당해(`numactl --membind`) 같은 코드를 돌리면 내 시스템의 비율이 나옵니다. `cntvct_el0`는 tick 단위이므로 `cntfrq_el0`로 나눠 ns로 바꿔야 합니다.
+이 예는 `buf`에 유효한 pointer chain이 미리 구성되어 있고 모든 접근이 의도한 메모리 tier에 도달한다는 전제의 윤곽 코드입니다. 실제 cache miss를 보장하려면 working set·cache 상태·NUMA 배치를 통제하고 검증해야 합니다. 코드는 하드웨어에서 실행하지 않았습니다.
 
 ## 대역폭 — Peak vs Sustained
 
 CXL 2.0 x16 링크의 원시 전송률은 한 방향 약 64 GB/s입니다. 실효 대역폭은 flit·프로토콜 오버헤드와 디바이스 구현에 따라 그보다 낮고, 그 비율은 STREAM·mlc로 직접 잽니다.
 
-- 68B flit은 2 B Protocol ID + 16 B slot 4개 + 2 B CRC로 구성되므로(CXL 3.1 §4.2) 64 B 데이터마다 헤더·CRC가 붙습니다.
+- CXL 3.1의 68B Flit mode는 링크상 68-byte 단위입니다. 프로토콜별 유효 데이터량은 다르므로 68B를 64B payload에 고정 헤더·CRC를 더한 데이터 단위로 해석하지 않습니다([CXL 3.1 specification, §4.2](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)).
 - CXL.io와 CXL.cache·CXL.mem이 *같은 링크를 나눠 쓰므로* 트래픽이 섞이면 서로의 몫이 줄어듭니다.
 
 ## CXL.cache 트랜잭션 흐름

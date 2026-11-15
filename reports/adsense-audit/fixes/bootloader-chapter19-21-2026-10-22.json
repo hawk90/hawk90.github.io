@@ -1,0 +1,149 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Bootloader Internals",
+  "batch": "chapter19–chapter21",
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-02.md",
+    "reports/adsense-audit/published-loop-03.md"
+  ],
+  "rescore": false,
+  "readyForIntegration": true,
+  "scope": "Only Bootloader Internals chapter19–21 source articles and this batch evidence. No new score, grade, rubric result or evaluation status generated or modified.",
+  "metadataExceptions": [
+    {
+      "path": "src/content/blog/embedded/bootloader/chapter19-kernel-handoff.md",
+      "field": "title and description",
+      "reason": "Manually aligned the visible scope with the article body, which covers ARM32, AArch64, RISC-V and x86 rather than ARM/ARM64 alone."
+    }
+  ],
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh <chapter19-21> — all blocking checks pass; upstream clone-only checks SKIPPED (not PASS)",
+    "node scripts/check-inline-math.mjs <chapter19-21> — pass",
+    "git diff --check -- <chapter19-21> — pass",
+    "Frontmatter slug/date/series/seriesOrder/draft compared with pre-edit HEAD — unchanged; chapter19 title/description exception recorded above",
+    "Markdown code fence delimiters checked for balanced open/close fences"
+  ],
+  "primarySources": [
+    "https://docs.kernel.org/6.12/arch/arm64/booting.html",
+    "https://docs.kernel.org/6.12/arch/arm/booting.html",
+    "https://docs.kernel.org/6.12/arch/riscv/boot.html",
+    "https://docs.kernel.org/6.12/arch/x86/boot.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/bootm.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/booti.html",
+    "https://docs.u-boot.org/en/v2025.01/usage/cmd/bootz.html",
+    "https://rauc.readthedocs.io/en/latest/integration.html",
+    "https://rauc.readthedocs.io/en/latest/using.html",
+    "https://rauc.readthedocs.io/en/latest/reference.html",
+    "https://sbabic.github.io/swupdate/sw-description.html",
+    "https://sbabic.github.io/swupdate/swupdate.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/board_best_practices.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/system_configuration.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/spl.html",
+    "https://docs.u-boot.org/en/v2025.01/develop/driver-model/design.html"
+  ],
+  "runtimeAvailability": {
+    "LinuxKernelBuild": "not available",
+    "uBootCheckout": "not available",
+    "uBootToolchain": "not available",
+    "RAUC": "not available",
+    "SWUpdate": "not available",
+    "targetBoard": "not available",
+    "flashMedia": "not available"
+  },
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter19-kernel-handoff.md",
+      "beforeSha256": "83ca86f021e84f491873abda22a97f27e51551a03a38d3208d21313be184bdfa",
+      "afterSha256": "aeae38ef9ddad6e657109d05c08925e6453edc557d2840a4f99995212b8fcbfb",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass_with_recorded_exception",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "Linux ARM32, AArch64, RISC-V and x86 entry requirements, U-Boot image commands, memory placement, cache/MMU/interrupt state and diagnostic guidance in chapter19.",
+        "problemSignalAndCounterevidence": "The article placed the AArch64 DTB within a same 512 MiB region as a current rule (kernel docs limit that note to pre-v4.2); stated booti supports zImage; asserted fixed 1,024-byte cmdline and first-4-GiB x86 identity mapping; described D-cache as off; claimed OpenSBI is always present; used an entry address and synthetic U-Boot call sequence as universal. Title/description scope also omitted RISC-V/x86 content.",
+        "causeHypothesisAndAlternatives": "Legacy protocol notes, current boot protocol and U-Boot command implementation were combined as a single architecture-independent rule. Rewrote each architecture section against Linux v6.12 primary docs and separated direct Image entry from EFI/application path.",
+        "evidence": "Linux v6.12 AArch64 docs require x0=DTB, x1–x3=0, non-secure EL1/EL2, interrupts masked, MMU off, image cache clean to PoC, DTB aligned/size bound and initrd window. ARM docs define r2 boot data and DT-only r1. RISC-V docs define a0/a1 and satp=0. x86 docs define protocol-specific boot_params/entry requirements. U-Boot v2025.01 command docs define bootm/booti/bootz syntax. See primarySources.",
+        "sampleCoverage": "Read the full original chapter, existing published-loop-02 remediation notes and every architecture/command/DTB/initrd/cmdline/transcript section. Removed unsupported exact-address/code examples and success-rate claim. No kernel, U-Boot build, board or command was run.",
+        "decision": "Corrected verified protocol errors, removed unverified behavior, pinned explanation to Linux v6.12 and U-Boot v2025.01 sources, and manually aligned title/description with the four architectures in scope. Slug/date/series/order/draft unchanged.",
+        "smallestSafeChange": "Edited chapter19 only; replaced its body with architecture-separated summaries, source links and a placeholder-only command shape. No kernel image, DT, bootargs, firmware or board state was changed. Rollback boundary is the article.",
+        "validationAndResidualRisk": "Static blocking publish gate, inline-math, diff and metadata invariants passed with title/description exception recorded. Upstream clone-only checks SKIPPED (not PASS). Actual ARM/ARM64/RISC-V/x86 boot, SoC register state, U-Boot command path and EFI handoff remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 kernel tag와 board/firmware path로 AArch64, ARM32, RISC-V, x86 protocol의 entry state, load range, DT/ACPI/initrd 및 U-Boot command 결과를 각각 검증할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter20-rauc-swupdate.md",
+      "beforeSha256": "3c83c82cbd0422f91529b4bd0d92c2603e3764340c589b2c41ca77632f5fcdd9",
+      "afterSha256": "1db2ea6e640b30915adfbbf4e8457e82f50aca475b88c2fbdf2e80a80ce62509",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "RAUC system.conf/manifest, signing/bundle/install/mark-good and U-Boot bootchooser integration; SWUpdate parser, archive, bootenv, collection/mode and product selection guidance.",
+        "problemSignalAndCounterevidence": "The original equated RAUC bootname with generic BOOT_SLOT, claimed automatic env toggles and generic bootcount/upgrade_available mark-good writes, described SWUpdate default sw-description as YAML, claimed copy-1/copy-2 automatically select inactive slot, and presented a generic U-Boot slot script. Comparison recommendations were categorical without a specified build/target.",
+        "causeHypothesisAndAlternatives": "Framework artifact installation was conflated with product-specific boot selection, health policy and persistent state. Corrected RAUC documented U-Boot variable/script contract; SWUpdate default parser/collection semantics and archive structure use official docs.",
+        "evidence": "RAUC current integration docs require `bootloader=uboot`, bootname, U-Boot script and use `BOOT_ORDER`/`BOOT_<bootname>_LEFT`; status commands can mark a slot good/bad. SWUpdate docs describe libconfig as default parser, cpio `.swu` with `sw-description` first, bootenv writes and collection/mode to implement explicit dual-copy strategy. Official bundle/format syntax cited in primarySources.",
+        "sampleCoverage": "Read entire original chapter and published-loop-02 notes; reviewed comparison, system.conf/manifest, commands, service behavior, SWUpdate archive/config/collection, U-Boot settings and recovery claims. Replaced unsupported examples and removed generic script. No framework binary, bundle, board, env, install or interruption test was run.",
+        "decision": "Corrected confirmed framework contract errors; retained syntax examples supported by official docs with placeholders and explicit non-execution; replaced tool ranking with target-specific criteria. Metadata unchanged.",
+        "smallestSafeChange": "Edited chapter20 only; no bundle/key, package, target storage, environment, boot slot, network or service was modified. Rollback boundary is the article.",
+        "validationAndResidualRisk": "Static blocking publish gate, inline-math, diff and frontmatter invariants passed. Upstream clone-only checks SKIPPED (not PASS). Pinned RAUC/SWUpdate version, board-specific script, slot map, health timing, interruption recovery and signature-failure behavior remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 pinned RAUC/SWUpdate version, bootloader script, slot map, update bundle/SWU와 power-cut fixture로 signature rejection, inactive-slot write, state update, mark-good 및 rollback을 검증할 것인가?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter21-board-porting.md",
+      "beforeSha256": "52a2f72dee216e48d59af178aa5ab780ea57bab5db6c621a2d0e2442695a86d2",
+      "afterSha256": "75985fb699a387e99b4786004bd83b285204667f66e209dc4f504e50c5a552fd",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "gitDiffCheck": "pass",
+        "metadata": "pass",
+        "upstreamCloneOnlyChecks": "skipped_not_pass",
+        "targetRuntime": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "New U-Boot board-port workflow, reference port selection, config/Kconfig/Kbuild, DT/SPL phase tagging, DRAM/UART initialization, build/flashing and first-boot evidence.",
+        "problemSignalAndCounterevidence": "The original treated an i.MX8MM layout/API as a generic port template, supplied unverified Kconfig symbols, DDR API and bootph semantics, hard-coded flash output/offset and `/dev/sdb` dd command, and fabricated 2026.04 console results. Link text said series last although Bootloader chapters continue.",
+        "causeHypothesisAndAlternatives": "A board-specific port example and synthetic log were presented without a pinned U-Boot tree, board schematic or actual hardware. Replaced them with a source-backed checklist and removed the destructive generic write command.",
+        "evidence": "U-Boot v2025.01 board best practices say implement Standard Boot, generate defconfig via `make savedefconfig`, and put Kconfig fragments in board directory; system configuration describes Kconfig/DT preference and board headers as last resort; SPL/device-tree docs define phase properties. No device manual or board-specific primary source was available, so target details remain unassessed.",
+        "sampleCoverage": "Read entire chapter, existing published-loop-03 notes, linked diagram reference, Kconfig/defconfig, i.MX8MM board source snippets, DDR code, DTS/bootph, compile/flash, transcript, MAINTAINERS and next-link sections. Removed unsupported board-specific code/log/write recipe; kept placeholder syntax only. No U-Boot build, board, flash or UART execution occurred.",
+        "decision": "Corrected unsupported generic port claims, destructive host write and synthetic output; aligned next chapter link with existing series and corrected BSP link label. No title/description change was needed; all frontmatter preserved.",
+        "smallestSafeChange": "Edited chapter21 only. No board, disk, media, firmware, DTS artifact or build output was modified; the existing conceptual SVG was left untouched. Rollback boundary is the article.",
+        "validationAndResidualRisk": "Static blocking publish gate, inline-math, diff and metadata invariants passed. Upstream clone-only checks SKIPPED (not PASS). Actual Kconfig resolution, SPL/DDR initialization, ROM packaging, UART output and first boot require pinned board/toolchain/hardware and remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 SoC/board revision, U-Boot tag, DRAM/PMIC datasheet, ROM media layout 및 approved recovery method를 기준으로 defconfig/SPL/DDR/UART/first boot를 검증할 것인가?"
+        }
+      ]
+    }
+  ]
+}

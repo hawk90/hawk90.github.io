@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**BSP의 드라이버 작업 80%는 *새 드라이버를 쓰는 게 아니라* DT에 노드를 추가하는 일입니다.** 기존 mainline 드라이버는 이미 충분히 풍부하므로, 보드별 peripheral을 통합할 때는 먼저 *어떤 드라이버가 이 칩을 이미 지원하는지* 찾는 것이 첫걸음입니다.
+**드라이버 통합을 시작할 때는 기존 드라이버와 binding 지원 여부부터 확인합니다.** 보드 설정만으로 충분한 경우도 있지만, 신규 드라이버가 필요한지는 칩 기능과 subsystem 지원에 따라 달라집니다. 기존 mainline 드라이버는 이미 충분히 풍부하므로, 보드별 peripheral을 통합할 때는 먼저 *어떤 드라이버가 이 칩을 이미 지원하는지* 찾는 것이 첫걸음입니다.
 
 새 보드에 EEPROM, ADC, 가속도계, RTC를 붙였다고 가정합시다. 이때 BSP 엔지니어가 새 C 코드를 짤 일은 거의 없습니다. Linux는 이미 수천 개의 디바이스 드라이버를 갖고 있고, 대부분의 표준 chip(24c256 EEPROM, ads1015 ADC, mpu6050 IMU 등)은 그대로 동작합니다. *적절한 DT 노드만 작성*하면 됩니다. 이 글은 그 흐름을 정리합니다.
 
@@ -33,7 +33,7 @@ $ find Documentation/devicetree/bindings -name "*ads1015*"
 Documentation/devicetree/bindings/iio/adc/ti,ads1015.yaml
 ```
 
-거의 모든 흔한 chip은 이미 드라이버가 있습니다. 없는 것이 오히려 예외입니다.
+많은 흔한 chip은 기존 driver를 제공하지만, part number·revision·subsystem 및 kernel version을 확인하기 전에는 지원 여부를 단정할 수 없습니다.
 
 binding 문서는 *DT 노드를 어떻게 써야 하는지*의 정답입니다. 새 노드를 작성하기 전에 반드시 읽어야 합니다.
 
@@ -41,7 +41,7 @@ binding 문서는 *DT 노드를 어떻게 써야 하는지*의 정답입니다. 
 
 24c256 EEPROM을 I2C 버스에 추가합니다.
 
-먼저 보드의 schematic을 확인합니다. EEPROM의 SDA/SCL이 어느 I2C 컨트롤러에 연결됐는지, 7-bit 주소(WP 핀 strap에 따라 결정)가 무엇인지 확인합니다.
+먼저 보드의 schematic을 확인합니다. EEPROM의 SDA/SCL이 어느 I2C controller에 연결됐는지, A0–A2 address pin strap이 만드는 7-bit 주소가 무엇인지 확인합니다. WP(write-protect) pin은 쓰기 허용 여부를 제어하며 I2C 주소를 정하지 않습니다.
 
 ```text
 EEPROM: AT24C256
@@ -76,7 +76,7 @@ $ cat /sys/bus/i2c/devices/0-0050/eeprom | hexdump -C
 00000000  00 ff ff ff ff ff ff ff  ff ff ff ff ff ff ff ff  |................|
 ```
 
-새 C 코드 한 줄도 안 쓰고 EEPROM이 동작합니다. 이것이 device tree의 가치입니다.
+이 예시가 해당 EEPROM의 DT binding·kernel config·배선과 맞으면 기존 driver를 사용할 수 있습니다. 실제 읽기·쓰기 결과와 쓰기 보호 동작은 board에서 검증해야 합니다.
 
 ## 사례 2 — I2C ADC 추가 (IIO subsystem)
 

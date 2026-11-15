@@ -14,11 +14,11 @@ topics: ["embedded"]
 
 > **"BSP 관점의 U-Boot 포팅은 *시리얼 첫 한 줄*에 도달하기까지의 디버깅 사이클입니다."** — 이후 부분은 *환경 설정과 부트 명령 튜닝*입니다.
 
-U-Boot은 거의 모든 ARM SoC에서 *사실상 표준* 부트로더입니다. NXP, TI, ST, Rockchip, Broadcom이 모두 vendor BSP에서 U-Boot을 씁니다. Zephyr나 Xen 환경이 아니라면 BSP의 부트로더는 *U-Boot입니다*.
+U-Boot은 여러 Arm SoC와 vendor BSP에서 널리 쓰이는 bootloader입니다. 제품은 U-Boot 외에도 vendor firmware나 다른 boot manager를 사용할 수 있으므로 실제 boot chain은 보드 문서와 소스에서 확인합니다.
 
-## U-Boot의 두 단계
+## U-Boot의 boot phases
 
-요즘 SoC의 U-Boot은 *항상 두 단계*입니다. BootROM이 SPL을 불러오고, SPL이 U-Boot proper를 불러오는 흐름입니다.
+U-Boot은 보드 설정에 따라 SPL·TPL·VPL 같은 선택적 초기 단계를 둘 수 있습니다. SPL을 사용한다면 일반적으로 BootROM 또는 앞선 firmware가 이를 불러오고, SPL이 SDRAM 설정과 후속 image 적재를 맡을 수 있습니다.
 
 <!-- TODO: TikZ -->
 ```text
@@ -98,7 +98,7 @@ DDR 코드는 NXP의 경우 `board/<vendor>/<board>/lpddr4_timing.c`로 별도, 
 
 ## 가장 빠른 출발 — *비슷한* reference 보드 복사
 
-vendor reference 보드와 *가장 비슷한* 것을 골라 *통째로* 복사한 뒤 수정합니다.
+대상 SoC와 주변장치 구성이 가까운 reference board를 출발점으로 삼을 수 있습니다. 파일을 통째로 복사하기보다 Kconfig, DTS, 초기화 코드의 실제 의존성과 라이선스를 확인하고 필요한 부분만 이식합니다.
 
 NXP i.MX 8M Plus 기반 ACME 카메라 보드를 예로 들면 *imx8mp_evk*가 베이스입니다.
 
@@ -133,7 +133,7 @@ make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
 
 ## defconfig 핵심 옵션
 
-i.MX 8M Plus용 defconfig에서 보드별로 *반드시* 확인할 항목입니다.
+아래는 i.MX 8M Plus 기반 가상 보드의 defconfig 항목 예시입니다. 주소와 크기는 복사해 쓸 수 있는 검증된 보드 값이 아닙니다. target U-Boot revision, linker map, SoC SRAM map, board DTS로 각각 확인해야 합니다.
 
 ```text
 CONFIG_ARM=y
@@ -199,7 +199,7 @@ CONFIG_ENV_SIZE=0x2000
 | `CONFIG_SPL_TEXT_BASE` | `0x920000` | SPL 적재 주소이며 SoC SRAM 안입니다 |
 | `CONFIG_DEBUG_UART_BASE` | `0x30890000` | UART2 base 주소이며 보드별로 확인해야 합니다 |
 
-`CONFIG_DEBUG_UART_*` 네 줄이 *첫 시리얼 출력*을 결정합니다. base address, clock 주파수, baud rate가 정확해야 합니다.
+`CONFIG_DEBUG_UART_*` 옵션과 baud 설정이 초기 출력 경로에 관여합니다. 필요한 옵션과 적용 단계는 U-Boot 버전·드라이버·보드 설정에 따라 달라집니다.
 
 `CONFIG_SYS_TEXT_BASE`는 U-Boot proper가 *DDR의 어느 주소*에서 동작할지입니다. DDR 영역 안이어야 하고, *충분한 공간*이 위·아래로 있어야 합니다.
 
@@ -271,13 +271,13 @@ void board_init_f(ulong dummy)
 
 새 보드의 BSP에서 *가장 시간이 많이 드는* 부분이 SPL부터 첫 시리얼까지입니다. 다음 순서로 점검합니다.
 
-### 단계 1: SPL이 *실행 자체* 안 되는가
+### 단계 1: 초기 firmware가 *실행 자체* 안 되는가
 
 시리얼이 *아무것도* 안 나오면 SPL이 *실행 시작도 안 한 것*일 수 있습니다. BootROM이 SPL 이미지를 *못 찾았거나* 못 *적재한 것*입니다.
 
 확인할 것:
 
-- SD 카드의 *오프셋 1KB*에 imx8mp의 boot image가 있는가 (`dd ... seek=2 bs=512`).
+- boot image 이름, boot device와 저장 위치가 해당 SoC boot ROM 문서 및 U-Boot board guide에 맞는가. 예를 들어 U-Boot v2024.01 i.MX8MP EVK 안내는 SD에 `flash.bin`을 32 KiB offset으로 기록합니다. 이는 다른 i.MX 계열·매체에 일반화할 수 없습니다.
 - BOOT_MODE 핀의 strap이 SD를 가리키는가.
 - 보드에 *전원이 정상*인가.
 - 보드의 reset 핀이 안정적인가.
@@ -295,24 +295,18 @@ JTAG이 있으면 *SPL의 첫 명령어 주소(0x920000)*에 break하고 *PC가 
 - UART parent clock이 enable됨
 - USB-TTL 어댑터의 baud rate 일치
 
-가장 빠른 진단은 *DEBUG_UART를 manual로 토글*하는 것입니다.
+직접 MMIO를 쓰는 진단 코드는 pinmux, register base/offset, clock, access state를 모두 알아야 하며 잘못된 주소 쓰기는 안전하지 않습니다. 아래 주소 예시는 검증되지 않은 값이므로 실행하지 말고, board DTS 및 SoC 문서로 검증된 vendor API나 디버거를 사용합니다.
 
 ```c
 /* SPL 초기에 강제로 'A'를 보내기 */
 void board_init_f(ulong dummy) {
     /* IOMUXC 직접 set */
-    writel(0x0, 0x303404f0);   /* UART2 RXD MUX_MODE = ALT0 */
-    writel(0x140, 0x30340754); /* PAD_CTL */
-    writel(0x0, 0x303404f4);   /* UART2 TXD MUX_MODE = ALT0 */
-    writel(0x140, 0x30340758);
-
-    /* UART 직접 send */
-    writel('A', 0x30890040);   /* UART2_UTXD */
-    while(1);
+    /* 주소와 값은 보드 문서로 확인한 뒤, 해당 SoC의 U-Boot API를 사용 */
+    hang();
 }
 ```
 
-'A'가 *시리얼에 한 글자라도* 나오면 *시리얼 path는 살아 있는 것*입니다. 안 나오면 *pad mux 또는 baud rate*가 틀린 것입니다.
+검증된 UART 출력이 관찰되면 그 실행 경로에서 TX가 동작했다는 증거입니다. 출력이 없다는 사실만으로 pinmux나 baud 오류라고 단정할 수 없으며, boot stage·전원·reset·console·clock·배선도 분리해 확인합니다.
 
 ### 단계 3: 시리얼은 뜨는데 *DDR training 실패*
 
@@ -332,7 +326,7 @@ Trying to boot from MMC1
 SPL: failed to boot from all boot devices
 ```
 
-SPL이 SD/eMMC에서 *u-boot.itb*(또는 u-boot.img)를 못 찾는 것입니다. 확인:
+가능한 원인 중 하나는 SPL이 SD/eMMC에서 설정된 U-Boot image를 찾지 못하는 경우입니다. 먼저 board config에서 기대 파일명과 저장 위치를 확인합니다.
 
 - u-boot.itb가 SD의 *기대 오프셋*에 있는가
 - MMC 컨트롤러 핀이 설정됐는가 (SPL의 board_init_f에서)
@@ -349,7 +343,7 @@ DRAM:  2 GiB
 (아무 응답 없음)
 ```
 
-MMC driver가 probe 실패한 것입니다. `dm tree`로 driver model 트리 확인.
+MMC 명령이 동작하지 않는 원인은 driver probe 실패 외에도 명령 비활성화나 장치 미인식이 있습니다. `dm tree`와 `mmc list` 결과를 함께 확인합니다.
 
 ```text
 => dm tree
@@ -422,11 +416,11 @@ Loading: #################################################  41.6 MiB
 => booti ${loadaddr} - ${fdt_addr}
 ```
 
-호스트에 dnsmasq나 tftpd-hpa를 띄우면 build 결과를 *바로 부팅*할 수 있습니다. 1초 컴파일 후 1초 부팅이 BSP 개발 속도의 핵심입니다.
+호스트에 dnsmasq나 tftpd-hpa를 구성하면 build 결과를 네트워크로 시험할 수 있습니다. 실제 준비 시간과 부팅 시간은 target과 개발 환경에서 측정합니다.
 
-## U-Boot의 첫 출력 — 표준 형태
+## U-Boot의 첫 출력 — 가상 로그 예시
 
-성공적으로 동작하는 i.MX 8M Plus 보드의 첫 출력입니다.
+다음은 i.MX 8M Plus 계열 포팅에서 볼 수 있는 항목을 설명하기 위해 만든 가상 로그입니다. 실제 보드 출력이나 검증 결과가 아닙니다.
 
 ```text
 U-Boot SPL 2024.04 (May 19 2026 - 14:23:01 +0900)
@@ -458,13 +452,13 @@ Hit any key to stop autoboot:  0
 
 이 메시지의 *각 줄*이 살아 있다는 것은 BSP의 *큰 부분*이 완성됐다는 뜻입니다.
 
-- `DDRINFO` — DDR이 깨졌습니다.
-- `CPU:` — clock tree가 정상입니다.
-- `Model:` — DT가 맞게 적재됐습니다.
-- `MMC:` — eMMC controller가 probe됐습니다.
-- `Net:` — PHY가 잡혔습니다.
+- `DDRINFO` — 예시 로그상 DDR 초기화 메시지가 나왔다는 뜻입니다.
+- `CPU:` — CPU 정보 출력이며 clock tree 전체 정상 동작을 증명하지 않습니다.
+- `Model:` — 모델 문자열이 표시됐다는 뜻이며 DT 전체 정확성을 증명하지 않습니다.
+- `MMC:` — MMC 관련 출력이며 저장 매체 동작 전체를 증명하지 않습니다.
+- `Net:` — 네트워크 장치명이 출력됐다는 뜻이며 링크·패킷 동작 검증은 별도입니다.
 
-이제 *커널 부팅* 단계로 갑니다.
+이 출력은 예시 로그이며 장치 probe나 제품 BSP 완료를 단독으로 입증하지 않습니다. 추가로 각 driver 기능과 오류 경로를 보드 요구사항에 맞게 검증한 뒤 커널 부팅 단계로 넘어갑니다.
 
 ## 자주 하는 실수
 
@@ -474,7 +468,7 @@ Hit any key to stop autoboot:  0
 
 ### SD 이미지의 *오프셋*을 놓침
 
-i.MX는 boot image를 *오프셋 1KB(SD)* 또는 *오프셋 0(eMMC boot partition)*에서 찾습니다. `dd seek=2 bs=512`처럼 정확히 굽지 않으면 BootROM이 못 찾습니다.
+boot image 기록 위치는 SoC·매체·boot mode에 따라 다릅니다. 대상 SoC의 boot ROM 문서와 같은 버전의 board guide를 확인하고, 쓰기 전 장치 경로·offset을 검증합니다. 예를 들어 U-Boot v2024.01 i.MX8MP EVK 문서는 SD의 `flash.bin` 위치로 32 KiB를 지정합니다.
 
 ### 시리얼 *둘 다* (UART1/UART2) 다른 것 사용
 
@@ -500,17 +494,17 @@ PHY 0x01: OUI = 0x001CC8, Model = 0x05, Rev = 0x01,  100baseT,  FDX
 ## 정리
 
 - BSP에서의 U-Boot 포팅은 *시리얼 첫 한 줄*에 도달하기까지가 핵심입니다.
-- 가장 비슷한 vendor reference 보드를 *통째로 복사*해서 시작합니다. board 디렉터리·defconfig·dts 6개 파일을 만듭니다.
-- defconfig의 `CONFIG_DEBUG_UART_*` 네 줄이 첫 시리얼 출력을 결정합니다. base, clock, baud rate가 정확해야 합니다.
-- SPL은 *DDR 없는 SRAM 안*에서 동작합니다. *console init → DDR init → 다음 단계 적재*의 흐름입니다.
+- reference board를 출발점으로 삼을 수 있지만, 필요한 구성요소와 의존성을 확인해 선택적으로 이식합니다. board 파일 구성은 U-Boot 버전과 보드 구조에 따라 다릅니다.
+- defconfig의 초기 UART 출력은 관련 `CONFIG_DEBUG_UART_*` 옵션과 baud 설정, UART clock·pinmux에 좌우됩니다. 필요한 설정과 적용 시점은 U-Boot 버전 및 보드에 따라 확인합니다.
+- SPL은 보통 초기 SDRAM 설정 전 SRAM에서 실행하지만, 해당 보드의 boot phase와 메모리 배치를 문서에서 확인합니다.
 - 첫 부팅 디버깅 사이클은 *5단계*입니다. SPL 실행 → 시리얼 출력 → DDR training → U-Boot proper 적재 → driver probe.
 - 환경 변수는 `CONFIG_EXTRA_ENV_SETTINGS`에 기본을 정의하고, `setenv` + `saveenv`로 영구 변경합니다.
 - 개발 중에는 *TFTP*로 SD 굽는 시간을 절약합니다. dnsmasq 또는 tftpd-hpa로 호스트에 서버 설치.
-- 첫 출력의 `DDRINFO`, `CPU:`, `Model:`, `MMC:`, `Net:`이 *모두 나오면* BSP의 큰 부분이 완성된 것입니다.
+- `DDRINFO`, `CPU:`, `Model:`, `MMC:`, `Net:` 로그가 나타나면 해당 부트 단계가 이 항목까지 진행했다는 뜻입니다. peripheral 기능과 안정성은 별도의 시험으로 확인합니다.
 
 ## 다음 편
 
-[Ch 7 — TF-A와 TrustZone 통합](/blog/embedded/bsp/chapter07-tfa-trustzone)에서는 ARMv8 보드에 *반드시* 들어가는 ARM Trusted Firmware-A를 BSP에 통합하고, U-Boot이 BL33으로 동작하는 구조를 다룹니다.
+[Ch 7 — TF-A와 TrustZone 통합](/blog/embedded/bsp/chapter07-tfa-trustzone)에서는 TF-A를 사용하는 보드의 firmware 단계와 U-Boot BL33 handoff를 다룹니다. TF-A 사용 여부와 역할은 SoC·boot chain 및 firmware 구성에서 확인합니다.
 
 ## 관련 항목
 

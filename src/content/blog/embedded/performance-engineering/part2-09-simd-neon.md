@@ -34,7 +34,7 @@ void scale(float *a, float k, int N) {
 }
 ```
 
-`-O3`를 켜면 컴파일러가 자동으로 NEON `fmul.f32 q0, q1, q2`로 4-way 처리합니다.
+이 loop은 NEON auto-vectorization이 가능한 후보입니다. 실제 vectorization은 compiler version, target ISA, alias/alignment 조건과 floating-point 옵션에 따라 달라지며 vectorizer report 또는 assembly로 확인합니다.
 
 조건은 다음과 같습니다.
 
@@ -108,7 +108,7 @@ float dot(const float *a, const float *b, int N) {
 }
 ```
 
-Scalar 대비 3-4배 빠릅니다.
+SIMD 적용으로 처리량이 올라갈 수 있지만 실제 speedup은 memory bandwidth, dependency, compiler, core와 측정 조건에 따라 달라집니다. 이 예에서는 특정 배수의 성능 향상을 주장하지 않습니다.
 
 ## Helium (MVE) — Cortex-M 용 SIMD
 
@@ -118,26 +118,27 @@ Cortex-M55와 M85에서는 MVE(M-profile Vector Extension)를 제공합니다.
 #include <arm_mve.h>
 
 void add_mve(int16_t *a, int16_t *b, int16_t *c, int N) {
-    for (int i = 0; i < N; i += 8) {
+    int i = 0;
+    for (; i + 8 <= N; i += 8) {
         int16x8_t va = vld1q(&a[i]);
         int16x8_t vb = vld1q(&b[i]);
         int16x8_t vc = vaddq(va, vb);
         vst1q(&c[i], vc);
     }
+    for (; i < N; ++i) c[i] = a[i] + b[i];
 }
 ```
 
 NEON과 다른 점은 다음과 같습니다.
 
-- *Beat scheme*: 4 beat를 한 cycle씩 처리합니다 (low power).
-- *Predication*: tail handling을 자동으로 처리합니다.
-- 레지스터가 8개뿐입니다 (NEON은 32개).
+- MVE는 predicated vector operation을 제공합니다. Tail을 자동으로 처리하지는 않으므로 predicate를 구성하거나 scalar epilogue를 작성해야 합니다.
+- 벡터 register의 수·구성은 execution state와 ISA 설명서에 맞춰 표현해야 하며, NEON과 단순 개수로 비교하지 않습니다.
 
 주로 DSP, 오디오, ML inference에 사용합니다.
 
 ## SVE — 가변폭 SIMD
 
-Cortex-A510·A78·X1 등에 SVE 또는 SVE2가 들어 있습니다. 폭은 구현에 따라 128 ~ 2048 bit으로 다양합니다.
+SVE/SVE2는 구현 선택 가능한 ISA extension이며 Cortex-A510/A78/X1의 일반 기능으로 취급하지 않습니다. SVE vector length는 구현에 따라 128~2048 bits 범위에서 선택됩니다.
 
 ```c
 #include <arm_sve.h>
@@ -155,7 +156,7 @@ void add_sve(float *a, float *b, float *c, int N) {
 }
 ```
 
-**Predication**(mask)으로 tail handling이 자동으로 됩니다. 길이를 모르는 loop도 안전합니다.
+SVE predicate는 loop의 tail을 안전하게 처리할 수 있는 수단을 제공합니다. 프로그램이 매 반복에서 predicate를 올바르게 갱신해야 합니다.
 
 같은 binary가 128-bit, 256-bit SVE 양쪽에서 그대로 동작합니다.
 
@@ -204,12 +205,12 @@ __attribute__((aligned(16))) float a[1024];
 float32x4_t v = vld1q_f32(a);   // ← aligned load 빠름
 ```
 
-NEON은 misaligned 접근도 가능하지만, 정렬해 두면 10-20% 더 빠릅니다. Cortex-M MVE는 정렬을 권장합니다.
+NEON은 misaligned 접근도 가능하지만, 정렬은 일부 target에서 vector access 비용이나 code generation에 영향을 줄 수 있지만 고정된 speedup 비율은 없습니다. target ISA와 측정 결과를 확인합니다. Cortex-M MVE는 정렬을 권장합니다.
 
 ## SIMD 적용 어려운 경우
 
 - **Branch가 많은 경우**: predicated 명령으로 회피합니다.
-- **Indirect access**: gather/scatter를 써야 하는데 SVE2만 지원합니다.
+- **Indirect access**: gather/scatter 지원 범위와 효율은 ISA extension과 대상 core에 따라 다릅니다. SVE2만 지원한다고 일반화하지 않습니다.
 - **Cross-element dependency**: prefix sum 같은 recurrence가 어렵습니다.
 - **Bit-level operation**: bit manipulation은 vector에 친화적이지 않습니다.
 
@@ -248,7 +249,7 @@ NEON `vcvtq_f32_s16`를 명시하거나, 아예 fixed-point로 유지합니다.
 
 > ⚠️ FP exception 가정
 
-NEON에서는 NaN/Inf 동작이 IEEE-754 flush-to-zero 모드일 수 있습니다. 정밀 수치 코드를 다룬다면 주의가 필요합니다.
+FP flush-to-zero와 denormal 처리 방식은 FPCR 설정 및 구현에 따릅니다. NaN/Inf 동작과 구분해 target의 floating-point control 문서를 확인합니다.
 
 ## 정리
 

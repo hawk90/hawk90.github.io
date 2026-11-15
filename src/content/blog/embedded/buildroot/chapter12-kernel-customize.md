@@ -288,8 +288,8 @@ Buildroot의 커널 빌드는 *step별*로 나뉘어 있어 개별 호출이 가
 
 ```bash
 $ make linux-menuconfig            # 옵션 토글
-$ make linux-rebuild               # 다시 빌드
-$ make linux-reinstall             # rootfs와 output/images/ 갱신
+$ make linux-rebuild               # 커널을 다시 빌드
+$ make linux-reinstall             # target/staging에 재설치
 $ make                             # 최종 rootfs 이미지 재포장
 ```
 

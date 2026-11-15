@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"평균이 아니라 worst"**입니다. Real-time에서는 *max ≤ deadline*이 기준이며, 일반 시스템과 평가 기준 자체가 다릅니다.
+> **"요구 deadline과 증거를 함께 본다"**가 핵심입니다. 표본 최대, 정적 상한, 시험 환경, 작업량 모델은 서로 다른 증거입니다.
 
 ## Real-Time의 핵심 지표
 
@@ -36,18 +36,25 @@ $$\text{WCET}_{\text{func}} = \max_{p \in \text{paths}} \text{WCET}(p)$$
 
 ### 2. Measurement-Based
 
-```c
-uint32_t max_cycles = 0;
-for (int i = 0; i < N; i++) {
-    uint32_t t = DWT->CYCCNT;
-    work(input[i]);
-    uint32_t elapsed = DWT->CYCCNT - t;
-    if (elapsed > max_cycles) max_cycles = elapsed;
+```c title="observed-maximum-is-not-wcet"
+#include <assert.h>
+#include <stdint.h>
+static uint32_t observed_max(const uint32_t *samples, unsigned n) {
+    uint32_t max = 0;
+    for (unsigned i = 0; i < n; ++i) if (samples[i] > max) max = samples[i];
+    return max;
 }
-WCET_est = max_cycles * SAFETY_FACTOR;   // 보통 1.2-1.5×
+int main(void) {
+    const uint32_t tested[] = {12, 18, 15};
+    const uint32_t later_unseen_path = 1000;
+    uint32_t maximum = observed_max(tested, 3);
+    assert(maximum == 18);
+    assert(maximum < later_unseen_path); /* sampled max is not a bound */
+    return 0;
+}
 ```
 
-**Coverage가 보장되지 않습니다**. 측정하지 않은 path가 더 느릴 가능성이 있습니다.
+이 코드는 시험한 입력·환경에서의 **관측 최대**만 계산합니다. 미실행 경로, 인터럽트, 캐시·메모리 상태를 포괄하는 WCET 상한이 아니며, 임의의 safety factor를 곱해도 보장으로 바뀌지 않습니다. 측정 기반 추정은 시험 범위와 가정, 초과 확률 또는 한계가 있으면 이를 명시합니다.
 
 ### 3. Hybrid
 
@@ -59,22 +66,20 @@ Static analysis로 *bound를 계산*하고 measurement로 *typical case*를 잡�
 
 ## Jitter 분석
 
-```c
-// 1ms 주기 task
-TickType_t xLast = xTaskGetTickCount();
-while (1) {
-    uint32_t t = DWT->CYCCNT;
+```c title="periodic-release-phase-sample"
+TickType_t last_wake = xTaskGetTickCount();
+uint32_t expected_cycles = DWT->CYCCNT;
+for (;;) {
+    vTaskDelayUntil(&last_wake, pdMS_TO_TICKS(1));
+    expected_cycles += CYCLES_PER_TICK * pdMS_TO_TICKS(1);
+    uint32_t actual_cycles = DWT->CYCCNT;
+    int32_t phase_error = (int32_t)(actual_cycles - expected_cycles);
+    log_phase_error_cycles(phase_error);
     process();
-    vTaskDelayUntil(&xLast, pdMS_TO_TICKS(1));
-    
-    uint32_t period_actual = DWT->CYCCNT - t;
-    uint32_t period_expected = SystemCoreClock / 1000;
-    int32_t jitter = period_actual - period_expected;
-    log_jitter(jitter);
 }
 ```
 
-Jitter 분포를 보면서 *기준 ±10% 안*이면 OK로 판정합니다. 더 크면 *원인을 추적*합니다.
+이 예제는 scheduled wake 기준의 phase error 표본을 기록합니다. tick 양자화, cycle frequency 변화, counter wrap, API tick conversion을 타깃에서 확인하고, 허용 범위는 요구사항으로 정합니다.
 
 ### Jitter 원인
 
@@ -86,20 +91,21 @@ Jitter 분포를 보면서 *기준 ±10% 안*이면 OK로 판정합니다. 더 �
 
 ## Deadline Miss 카운트
 
-```c
-void task(void *arg) {
-    TickType_t deadline = xTaskGetTickCount() + DEADLINE_TICKS;
-    while (1) {
-        if (xTaskGetTickCount() > deadline) {
-            miss_count++;
-        }
-        process();
-        deadline = xTaskGetTickCount() + DEADLINE_TICKS;
-    }
+```c title="fixed-release-deadline-check"
+#include <stdint.h>
+static unsigned miss_count;
+static int deadline_missed(uint32_t completed, uint32_t deadline) {
+    return (int32_t)(completed - deadline) > 0;
+}
+int main(void) {
+    const uint32_t release = 100, deadline = 110;
+    if (deadline_missed(111, deadline)) ++miss_count;
+    if (deadline_missed(110, deadline)) ++miss_count;
+    return miss_count == 1 && release + 10 == deadline ? 0 : 1;
 }
 ```
 
-*Counter를 누적*하고 주기적으로 출력합니다. Production에서는 *miss rate에 대한 alerting*을 둡니다.
+각 작업의 완료를 예정 release 기준 deadline과 비교합니다. 제품에서는 요구된 miss 정책과 timer 해상도로 검증합니다.
 
 ## Tardiness — 얼마나 늦었나
 
@@ -120,12 +126,12 @@ sudo cyclictest -p 80 -t 1 -i 1000 -l 100000 -m
 # T: 0 (12345) P:80 I:1000 C:100000 Min:5 Avg:7 Max:23
 ```
 
-p99와 max latency를 측정합니다. PREEMPT_RT에서 worst-case를 검증할 때 씁니다. 핵심은 *수일에 걸친 측정*으로 outlier를 capture하는 것입니다.
+cyclictest는 설정한 조건에서 timer wake-up latency 표본과 요약 통계를 수집하는 도구입니다. 실행 결과만으로 worst-case 보장이나 WCET를 증명하지 않습니다. 핵심은 *수일에 걸친 측정*으로 outlier를 capture하는 것입니다.
 
-## Latency Budget 분석
+## Latency Budget 분석 예시
 
 ```text
-PID 1ms 주기, deadline 1ms
+PID 1ms 주기, deadline 1ms (숫자는 계산 예시이며 측정값이 아님)
 
 ISR latency      :  50 ns
 Scheduler latency:  2 µs
@@ -135,36 +141,36 @@ Actuator write  :  10 µs
 ────────────────────────
 Total worst case: ~110 µs
 
-여유 = 890 µs (89%) — 안전
+계산 예시의 여유 = 890 µs (89%); 이 값만으로 시스템 안전을 판정할 수 없음
 ```
 
-Component별로 budget을 *고정*해 두고, 컴포넌트별로 *WCET를 분석*합니다.
+이 수치는 계산 예시일 뿐 실제 보드의 관측값이나 검증된 WCET가 아닙니다. 실제 시스템에서는 component별 상한의 근거와 동시성·차단·인터럽트 가정을 확인합니다.
 
 ## Hard vs Soft RT — 측정 차이
 
-| | Hard RT | Soft RT |
+| 구분 | Hard real-time | Soft real-time |
 | --- | --- | --- |
-| Deadline miss | 0회 (모든 경우) | <1% |
-| 측정 기간 | *무한* (수학 증명) | 수일 |
-| WCET 산출 | Static analysis | Measurement + 1.5× |
-| Test coverage | MC/DC | functional |
-| 인증 | DO-178C·ISO 26262 ASIL D | 없음 |
+| deadline miss | 시스템 요구사항과 안전 분석으로 허용 여부 정의 | 허용 빈도와 품질 저하를 요구사항으로 정의 |
+| 증거 | 명시된 모델·가정에 따른 분석과 검증 | workload에서 측정한 분포와 서비스 목표 |
+| 실행시간 근거 | 검증된 상한 또는 안전한 분석 | 관측 표본과 통계적 목표를 구분 |
 
 ## Schedulability Analysis
 
-WCET를 알면 *전체 시스템의 schedulability를 증명*할 수 있습니다.
+실행시간 상한과 task/scheduler 모델이 확보되면 해당 가정 아래 schedulability를 분석할 수 있습니다. 입력 상한, blocking, interrupt, overhead 등 빠진 요인은 결과 범위 밖입니다.
 
-### Utilization Bound (Liu-Layland)
+### Rate-Monotonic Utilization Sufficient Bound (Liu–Layland)
 
 $$\sum_{i=1}^{n} \frac{C_i}{T_i} \leq n \cdot (2^{1/n} - 1)$$
+
+이 고전적 충분 조건은 단일 CPU, 독립된 주기 task, 고정 우선순위 RM, deadline=period 등 논문 모델을 전제로 합니다. 조건을 벗어나면 이 식만으로 schedulability를 판단하지 않습니다.
 
 ### Response Time Analysis (RTA)
 
 각 task의 *worst response time*은 다음과 같이 구합니다.
 
-$$R_i = C_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i}{T_j} \right\rceil \cdot C_j$$
+$$R_i = C_i + B_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i}{T_j} \right\rceil \cdot C_j$$
 
-Iterative하게 풉니다. $R_i \leq D_i$(deadline)이면 schedulable입니다.
+여기서 $B_i$는 lower-priority task의 blocking입니다. 단일 CPU fixed-priority preemptive 모델에서 blocking과 interrupt/계측 overhead를 적절히 포함해 반복 계산하며, $R_i \leq D_i$일 때 해당 가정 아래 schedulable입니다.
 
 Cheddar와 SymTA/S 같은 도구가 이 과정을 자동화합니다.
 
@@ -200,9 +206,9 @@ release jitter = 5.30 - 5.00 = 0.30 ms
 
 ## 자주 하는 실수
 
-> ⚠️ Avg WCET 사용
+> ⚠️ 표본 최대를 WCET 보장으로 부르기
 
-평균은 WCET가 아닙니다. *Max에 safety factor*를 곱한 값을 씁니다.
+시험한 표본 최대와 검증된 실행시간 상한을 구분합니다. 임의의 safety factor는 상한 증명이 아닙니다.
 
 > ⚠️ Single workload만
 
@@ -214,13 +220,13 @@ Production 환경에는 *DMA, noise, thermal*이 추가됩니다. 실 환경에�
 
 > ⚠️ Linux mainline = real-time
 
-Mainline은 best-effort입니다. *PREEMPT_RT 패치*만 RT-capable입니다.
+PREEMPT_RT는 선점 가능성을 높이고 IRQ 처리를 조정합니다. 구성·장치·펌웨어·workload에 따라 결과가 달라지므로 이를 단독 보장으로 해석하지 않습니다.
 
 ## 정리
 
 - Real-time에서는 **WCET, jitter, deadline miss, tardiness**를 측정합니다.
 - WCET 측정에는 4가지 방법이 있습니다. static, measurement, hybrid, probabilistic입니다.
-- **Cyclictest**가 Linux RT의 표준입니다.
+- **cyclictest**는 Linux timer wake-up latency를 측정하는 도구이며, 표본 측정과 WCET 증명은 구분합니다.
 - Latency budget 분석으로 컴포넌트별 *WCET 책임*을 나눕니다.
 - **Schedulability proof**는 RTA와 WCET의 조합으로 가능합니다.
 
@@ -231,3 +237,10 @@ Mainline은 best-effort입니다. *PREEMPT_RT 패치*만 RT-capable입니다.
 - [1-04: 통계적 분석](/blog/embedded/performance-engineering/part1-04-statistics)
 - [1-06: 벤치마킹 기초](/blog/embedded/performance-engineering/part1-06-benchmark)
 - [Practical RTOS Internals 1-10](/blog/embedded/rtos/practical-internals/part1-10-realtime-analysis)
+
+## 참고 자료
+
+- [Linux PREEMPT_RT theory](https://docs.kernel.org/core-api/real-time/theory.html)
+- [Linux RT kernel configuration](https://docs.kernel.org/next/core-api/real-time/kernel-configuration.html)
+- [Linux `rtla timerlat hist`](https://docs.kernel.org/tools/rtla/rtla-timerlat-hist.html)
+- [Liu and Layland, Scheduling Algorithms for Multiprogramming in a Hard-Real-Time Environment (1973)](https://web.cs.wpi.edu/~cs3013/a09/Papers/Liu%20%26%20Layland%2C%20Real-time%20Scheduling.pdf)

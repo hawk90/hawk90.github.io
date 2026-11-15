@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**커널 설정은 "어떤 드라이버를 넣을지"가 아니라 "언제 로드할지"를 결정하는 작업입니다.** 빌트인은 부팅 경로에 필요하고, 모듈은 필요할 때 불러옵니다. 그 경계가 BSP의 첫 정체성입니다.
+**커널 설정은 어떤 기능을 포함하고, 무엇을 built-in 또는 module로 제공할지 정하는 작업입니다.** 빌트인은 부팅 경로에 필요하고, 모듈은 필요할 때 불러옵니다. 그 경계가 BSP의 첫 정체성입니다.
 
 부트로더가 끝나면 커널이 자기 자신을 푸는 작업부터 시작합니다. 이때 사용 가능한 디스크도, RAM도, 콘솔도 모두 *커널 빌드 당시*의 설정에 의해 결정됩니다. 빌드 시점에 잘못된 결정을 하면 부팅 후 어떤 명령으로도 복구할 수 없습니다. 그래서 BSP에서 가장 먼저 마주하는 회의는 "어떤 옵션을 빌트인하고, 어떤 옵션을 모듈로 미루는가"입니다.
 
@@ -63,12 +63,12 @@ make menuconfig
 | DT | `CONFIG_OF` / `CONFIG_OF_OVERLAY` | Device Tree 지원, overlay |
 | Debug | `CONFIG_DEBUG_FS` | `/sys/kernel/debug/` 마운트 가능 |
 | Debug | `CONFIG_DEBUG_INFO` | DWARF 디버그 정보 (gdb·perf) |
-| Debug | `CONFIG_MAGIC_SYSRQ` | 시리얼에서 강제 sysrq |
+| Debug | `CONFIG_MAGIC_SYSRQ` | kernel SysRq 기능; 입력 경로와 허용 mask는 별도 설정 |
 | Tracing | `CONFIG_FTRACE` / `CONFIG_FUNCTION_TRACER` | ftrace 활성 |
 | Modules | `CONFIG_MODULES` / `CONFIG_MODULE_UNLOAD` | LKM 빌드와 unload |
 | initramfs | `CONFIG_BLK_DEV_INITRD` | initrd/initramfs |
 
-`CONFIG_HZ`는 임베디드 보드 RTOS-like 응답이 필요하면 1000으로, 배터리 친화적이라면 100으로 둡니다. `CONFIG_PREEMPT`는 인터랙티브 응답이 필요하면 활성화합니다.
+`CONFIG_HZ`와 preemption model은 latency·throughput·전력 요구사항과 kernel version에 따라 선택하고, target workload에서 측정합니다. 설정값 하나만으로 응답성을 보장하지 않습니다.
 
 ## 빌트인(`=y`) vs 모듈(`=m`)
 
@@ -123,7 +123,7 @@ git diff arch/arm64/configs/myboard_defconfig
 # 변경된 항목만 보임
 ```
 
-`savedefconfig`의 출력은 입력 `.config`와 *의미적으로 동일*합니다. 다만 표현이 짧을 뿐입니다. 새 보드를 추가할 때는 vendor 가까운 보드의 defconfig를 복사해서 시작합니다.
+`savedefconfig`는 현재 Kconfig tree의 기본값과 다른 설정을 간결하게 기록합니다. 재현 시에는 같은 커널 revision과 Kconfig 환경에서 `olddefconfig` 후 결과를 비교해야 하며, 다른 revision에서 의미가 같다고 보장하지 않습니다. 새 보드를 추가할 때는 vendor 가까운 보드의 defconfig를 복사해서 시작합니다.
 
 ### defconfig 비교와 merge 예시
 
@@ -207,13 +207,13 @@ dtb-$(CONFIG_ARCH_MXC) += imx8mm-myboard.dtb
 
 ### DT overlay
 
-런타임에 DT를 패치하고 싶다면 overlay를 씁니다. 같은 보드에서 카메라 모듈, 디스플레이 모듈을 끼고 빼는 시나리오에 적합합니다.
+런타임에 DT를 패치하고 싶다면 overlay를 검토할 수 있습니다. 지원하는 build target과 적용 방법은 kernel tree, firmware, bootloader 및 배포판에 따라 달라집니다.
 
 ```bash
-make broadcom/overlays/imx219.dtbo
+make dtbs
 ```
 
-`/boot/overlays/`에 두고 `config.txt`(라즈베리파이) 또는 `extlinux.conf`에서 활성화합니다.
+overlay의 빌드 target과 적용 방법은 bootloader 및 배포판에 따라 다릅니다. Raspberry Pi downstream의 firmware는 `config.txt`와 overlay 파일을 사용할 수 있지만, 이를 일반 Linux `extlinux.conf` 설정과 동일하게 취급하지 않습니다.
 
 ## vendor 커널 vs mainline 커널
 
@@ -228,7 +228,7 @@ BSP 초기에 마주하는 큰 결정입니다.
 | 라이선스 위험 | proprietary 혼재 가능 | GPL 명확 |
 | 장기 유지 비용 | vendor가 떠나면 부담 | 자체 흡수 가능 |
 
-신생 SoC라면 vendor 커널에서 출발해 *upstream 패치를 따라가는* 전략이 보통입니다. 성숙한 SoC(BCM2711, i.MX8M, RK3588)는 mainline이 충분히 커버합니다.
+vendor kernel과 mainline 중 선택할 때 필요한 장치 기능, security maintenance, 지원 기간, patch burden을 SoC·board·kernel revision별로 비교합니다. SoC가 성숙했다는 이유만으로 제품 요구사항을 mainline이 충족한다고 단정할 수 없습니다.
 
 ## 빌드 산출물
 
@@ -253,8 +253,8 @@ make INSTALL_MOD_PATH=/tmp/rootfs modules_install
 ## 흔한 실수
 
 - **모듈로 둔 MMC 드라이버**: `rootwait`로 기다려도 모듈이 로드 안 됐으니 영원히 못 마운트합니다. 빌트인이 정답입니다.
-- **`CONFIG_DEBUG_FS=n`으로 빌드한 양산 커널**: 필드 디버깅에서 `/sys/kernel/debug/`가 없어 ftrace·gpio dump·clk tree를 못 봅니다. 양산에서도 켜 두는 편이 안전합니다.
-- **`CONFIG_MAGIC_SYSRQ=n`**: 시스템이 hang했을 때 시리얼로 `echo b > /proc/sysrq-trigger`를 못 씁니다. 필드 trouble shooting이 어려워집니다.
+- **`CONFIG_DEBUG_FS=n`으로 빌드한 양산 커널**: 필드 디버깅에서 `/sys/kernel/debug/`가 없어 ftrace·gpio dump·clk tree를 못 봅니다. 제품에서 켤지는 debugfs 인터페이스 노출, 보안 및 운영 정책을 검토해 정합니다.
+- **`CONFIG_MAGIC_SYSRQ=n`**: 커널 SysRq 기능을 사용할 수 없습니다. `/proc/sysrq-trigger`는 접근 권한과 커널 설정을 확인해 userspace에서 쓸 수 있고, serial keyboard SysRq는 별도의 입력 경로와 정책이 필요합니다. SysRq의 destructive command는 운영 절차에 따라 제한합니다.
 - **`CONFIG_PRINTK_TIME=n`**: dmesg에 timestamp가 없어 boot 단계별 지연을 분석 못 합니다.
 - **defconfig를 직접 편집**: 사람이 `.config` 형식을 직접 쓰면 충돌·누락이 생깁니다. 항상 `menuconfig` → `savedefconfig` 사이클을 씁니다.
 
@@ -264,7 +264,7 @@ make INSTALL_MOD_PATH=/tmp/rootfs modules_install
 - `ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu-` 환경 변수로 cross compile합니다.
 - 빌트인은 *부팅에 필요한* 드라이버에만, 모듈은 나중에 로드해도 되는 것에만 씁니다.
 - `CONFIG_PREEMPT`, `CONFIG_HZ`, `CONFIG_DEBUG_FS`, `CONFIG_MAGIC_SYSRQ`는 응답성·디버깅에 큰 영향을 줍니다.
-- `menuconfig` 후에는 반드시 `savedefconfig`로 최소 diff를 만들어 커밋합니다.
+- 설정을 재현 가능한 fragment 또는 defconfig 형태로 보관하고, 같은 kernel revision에서 재적용·비교합니다. 저장 방식은 프로젝트의 Kconfig 관리 정책을 따릅니다.
 - Kconfig의 `depends on`은 따라가는 의존성, `select`는 끌고 가는 의존성입니다.
 - DTB는 `make dtbs`로 빌드하고 보드 `Makefile`에 `dtb-y +=`로 등록합니다.
 - vendor 커널은 빠른 양산, mainline 커널은 장기 유지에 유리합니다.

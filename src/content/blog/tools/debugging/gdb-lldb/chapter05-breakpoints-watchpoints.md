@@ -115,8 +115,8 @@ Loop 3: x=22 y=15
 
 LLDB:
 ```text
-(lldb) breakpoint set --one-shot --name main
-(lldb) b -o main
+(lldb) breakpoint set --one-shot true --name main
+(lldb) breakpoint set -o true -n main
 ```
 
 ### `rbreak` — 정규식 매칭
@@ -169,7 +169,7 @@ bug_function () at bug.c:18
 18      balance = -1;       # ← 여기 범인!
 ```
 
-*수동으로 찾으면 며칠 걸릴* 사고를 *몇 분 만에* 잡습니다.
+첫 변경 지점을 좁히는 데 도움이 됩니다. 실제로 잡을 수 있는 변경은 watch 범위·하드웨어 자원·스레드와 서버 지원에 따라 달라집니다.
 
 ### 종류 — `rwatch`, `awatch`
 
@@ -183,7 +183,7 @@ bug_function () at bug.c:18
 - **`rwatch`** — *읽기*만. 변수가 *사용될 때*.
 - **`awatch`** — *읽기와 쓰기 모두*. 모든 접근.
 
-`rwatch`는 *변수가 안 쓰이는지* 확인할 때. 데드 코드 탐색.
+rwatch가 정지하면 읽기 접근의 증거가 됩니다. 한 번 정지하지 않았다고 모든 입력에서 dead code라는 결론을 내릴 수는 없습니다.
 
 ### Hardware vs Software Watchpoint
 
@@ -192,15 +192,15 @@ bug_function () at bug.c:18
 Hardware watchpoint 1: x        # 빠름!
 ```
 
-CPU의 *디버그 레지스터*를 사용. 보통 *x86은 4개, ARM은 더 많음*. 빠르고 *프로그램이 거의 느려지지 않습니다*.
+CPU의 *디버그 레지스터*를 사용. 자원 수·추적 크기·정렬·접근 종류는 CPU와 디버그 backend에 따릅니다. ARM이 항상 더 많다는 보장은 없으며 정지·원격 왕복 비용도 남습니다.
 
 ```text
-(gdb) watch (long array)[100]   # 큰 영역
+(gdb) watch big_array   # 실제 배열 식: 크기·지원 여부 확인
 Hardware watchpoint 2: ...
 warning: Could not insert hardware watchpoint 2.
 ```
 
-*하드웨어 한도 초과* 또는 *추적 영역 너무 큼*. 그러면 GDB가 *software watchpoint*로 대체:
+하드웨어 한도·추적 크기 초과는 등록 실패로 나타날 수 있으며 항상 자동 software fallback이 되는 것은 아닙니다. watch의 software 방식을 명시적으로 시험하려면 다음 설정을 사용합니다. rwatch/awatch는 hardware 지원이 필요합니다.
 
 ```text
 (gdb) set can-use-hw-watchpoints 0   # software 강제
@@ -208,7 +208,7 @@ warning: Could not insert hardware watchpoint 2.
 Watchpoint 3: big_array
 ```
 
-Software watchpoint는 *매 명령어마다 변수 값 비교*. *극도로 느립니다* (수십~수백× 느림). 작은 변수에만 hardware watchpoint를 쓰세요.
+Software watchpoint는 *매 명령어마다 변수 값 비교*. 프로그램을 single-step하며 식을 비교하므로 실행에 큰 영향을 줍니다. 이 글은 slowdown 배율을 측정하지 않았습니다. 작은 변수에만 hardware watchpoint를 쓰세요.
 
 ### Watchpoint 함정 — *스코프*
 
@@ -241,7 +241,7 @@ GDB가 알려 줍니다. 전역 변수나 *생존 기간이 긴* 변수에 watch
 (gdb) catch throw       # 모든 C++ 예외 throw
 (gdb) catch catch       # 모든 catch
 (gdb) catch signal SIGSEGV    # SIGSEGV 발생 시
-(gdb) catch syscall open      # open() 시스템 콜
+(gdb) catch syscall open openat   # 타깃에 존재하는 syscall 이름 확인
 (gdb) catch fork              # fork()
 (gdb) catch exec              # exec()
 (gdb) catch load              # 동적 라이브러리 로드
@@ -277,7 +277,7 @@ LLDB:
 ### `catch syscall` — 시스템 콜 추적
 
 ```text
-(gdb) catch syscall open
+(gdb) catch syscall open openat
 Catchpoint 1 (syscall 'open' [2])
 
 (gdb) run
@@ -312,10 +312,10 @@ CPU의 *디버그 레지스터* 사용. 일반 `break`와 차이:
 
 | 방식 | 동작 | 한계 | 사용 자리 |
 |------|------|------|-----------|
-| `break` (software) | 명령어를 `int3`(x86)으로 *교체* | 무제한 | 일반 코드 |
-| `hbreak` (hardware) | 디버그 레지스터 사용 | x86은 4개 | ROM·플래시·*수정 불가* 메모리 |
+| break (software) | 타깃의 trap 명령으로 교체 | 메모리·backend 등 제약 | 일반 코드 |
+| `hbreak` (hardware) | target의 하드웨어 비교기 사용 | 아키텍처·칩·debug backend별 유한 자원 | ROM·플래시·*수정 불가* 메모리 |
 
-소프트웨어 break는 *메모리 쓰기*를 요구합니다. *읽기 전용 영역*(ROM, 매핑된 라이브러리 부분)에서는 `hbreak` 필수.
+소프트웨어 break에는 backend의 코드 패치 지원이 필요합니다. OS의 read-only executable mapping도 디버거가 패치할 수 있으므로 공유 라이브러리라고 hardware break가 필수는 아닙니다. 실제 ROM/flash는 서버의 패치·flash-breakpoint 기능까지 확인합니다.
 
 ---
 
@@ -386,7 +386,7 @@ SIGPIPE      No    Yes   Yes   Broken pipe
 (gdb) handle SIGSEGV stop print pass
 ```
 
-`SIGPIPE`를 무시하면 *broken pipe 처리 코드*를 *디버거가 가로채지 않습니다*. 네트워크 코드 디버깅에 유용.
+SIGPIPE에서 디버거의 정지만 생략하면 *broken pipe 처리 코드*를 *디버거가 가로채지 않습니다*. 네트워크 코드 디버깅에 유용.
 
 ---
 

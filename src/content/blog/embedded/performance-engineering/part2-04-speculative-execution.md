@@ -62,15 +62,15 @@ WAR·WAW 의존성이 제거되어 진짜 RAW만 남습니다.
 ## Reorder Buffer (ROB)
 
 ```text
-ROB entry (in fetch order):
-  [add ✓ r0=12] [sub ✓ r3=10] [ldr ⏳ r1=?] [add ⏳] [mul ⏳]
-                                 ↑ load miss (대기)
+ROB entry (in program order):
+  [ldr ⏳ r0=?] [add ✓ r2=...] [sub ✓ r5=...] [mul ⏳]
+     ↑ older load waits; younger independent ops may finish but cannot retire past it
 ```
 <!-- TODO: TikZ -->
 
 이미 실행 완료된 `sub`, `add`도 ROB에서 대기합니다. `ldr`이 완료된 뒤에야 fetch 순서대로 commit합니다.
 
-ROB 크기는 곧 OoO window입니다. Cortex-A72는 128 entry이고 Apple M1은 630+ entry로 괴물 수준입니다.
+ROB·rename·issue queue의 크기는 코어별 구현 세부 사항이며 OoO window 전체와 동일하다고 단정할 수 없습니다. 구체 수치는 해당 코어의 공개 TRM/공식 자료를 인용할 수 있을 때만 제시합니다.
 
 ## Speculative Load — Load Hoisting
 
@@ -82,7 +82,7 @@ if (ptr != NULL) {
 
 Modern CPU는 branch resolve 전에 미리 load를 실행합니다. Branch 예측이 맞으면 결과를 사용하고, 틀리면 결과를 폐기합니다. 다만 cache 상태는 그대로 남습니다.
 
-이것이 **Spectre v1**의 토대입니다.
+경계 검사 뒤의 transient load는 특정 조건에서 Spectre v1 계열의 공격 표면이 될 수 있습니다. 취약 여부와 완화는 코어·코드 생성·운영 환경에 따라 달라집니다.
 
 ## Wrong-Path Execution
 
@@ -124,7 +124,7 @@ Cortex-A72는 *Memory Order Buffer* (MOB)로 store/load 순서를 관리합니�
 ## Speculative Execution의 측정
 
 ```bash
-perf stat -e instructions,cycles,br_pred_retired,br_misp_retired ./prog
+perf stat -e instructions,cycles,branches,branch-misses ./prog
 
 # IPC = instructions / cycles
 # Cortex-A72 ideal: 2-3
@@ -150,19 +150,19 @@ perf stat -e instructions,cycles,br_pred_retired,br_misp_retired ./prog
 
 | 단점 | 영향 |
 |---|---|
-| **전력** | Rename·ROB·issue queue = die area 2-3배 |
+| **전력·면적** | OoO 구조의 비용은 구현 및 비교 대상에 따라 달라짐 |
 | **검증 비용** | 의존성·forwarding 경우의 수 폭증 |
 | **Spectre·Meltdown** | speculation 부작용 |
 | **WCET 예측 곤란** | 분석 어려움 → 안전성 critical 시스템 회피 |
 
-자동차·항공기 flight control은 OoO를 회피하고 in-order Cortex-R5나 Cortex-A53 in-order를 사용합니다.
+실시간·안전 등급 시스템은 코어의 실행 특성만으로 선택하지 않습니다. 인증된 SoC 구성, 메모리·인터럽트 지연, WCET 분석 가능성과 safety case를 함께 평가합니다.
 
 ## In-Order의 부활 — Embedded·자동차
 
 | CPU | OoO? | 용도 |
 |---|---|---|
 | Cortex-R5 | In-order | 자동차 brake·airbag |
-| Cortex-A53 | In-order | 라즈베리 파이 3, 저전력 SoC |
+| Cortex-A53 | in-order issue | 라즈베리 파이 3 계열의 SoC에 사용 |
 | Cortex-R52 | In-order | 자동차 ASIL D ECU |
 | Cortex-A72 | OoO | Linux server, 라즈베리 파이 4 |
 | Cortex-A78 | OoO | 모바일 flagship |
@@ -189,7 +189,7 @@ perf stat -e instructions,cycles,br_pred_retired,br_misp_retired ./prog
 
 > ⚠️ Spectre 무시
 
-Linux server나 multi-tenant 환경에서는 Spectre mitigation이 필수입니다 (`RETBLEED`·`SBB` 패치). 임베디드의 fully trusted 환경에서는 비활성화도 가능합니다.
+취약점 완화는 CPU, OS, workload trust boundary와 운영 정책에 따라 결정합니다. `RETBLEED`는 별도 취약점 이름이며 Spectre 일반 mitigation의 대체 표기가 아닙니다.
 
 > ⚠️ Speculation barrier 남발
 
@@ -197,7 +197,7 @@ Linux server나 multi-tenant 환경에서는 Spectre mitigation이 필수입니�
 __asm__("dsb sy; isb");   // 매 라인 → OoO 효과 무력화
 ```
 
-특정 보안 critical 지점에만 적용합니다. 일반 코드는 컴파일러가 알아서 처리합니다.
+barrier는 ISA·OS·compiler가 정한 보안 프로토콜에 맞춰 적용합니다. 일반 최적화만으로 speculation 보안이 보장되지는 않습니다.
 
 > ⚠️ WCET = average
 

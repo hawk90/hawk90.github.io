@@ -12,9 +12,9 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"BSP는 *이 SoC*와 *이 보드*가 *이 운영체제*를 부팅시키기 위해 필요한 모든 것이다."** — 부트로더, 커널 패치, 디바이스 트리, rootfs 빌드 레시피, factory provisioning 절차까지가 한 묶음입니다.
+> **"BSP는 이 SoC와 보드에서 선택한 운영체제를 제품 요구사항에 맞게 시작·운영하기 위한 기반입니다."** — 팀과 벤더에 따라 범위가 달라지며, 이 시리즈는 부트로더·커널·디바이스 트리·이미지 빌드를 중심으로 다룹니다.
 
-데스크톱에서는 OS를 깐 다음 *드라이버 한두 개*만 더 깔면 끝납니다. 디스크 컨트롤러, 그래픽, 사운드 정도가 *이미 알려진 표준*이고, ACPI가 보드 토폴로지를 운영체제에 *직접* 알려주기 때문입니다.
+일반 PC는 표준화된 하드웨어 설명 방식과 폭넓은 드라이버 지원을 활용하는 경우가 많습니다. 임베디드 보드는 SoC, 부품 선택, 배선과 firmware가 제품별로 달라질 수 있어 보드별 통합 작업이 더 필요합니다.
 
 임베디드는 다릅니다. 같은 i.MX 8M Plus SoC라 해도 *NXP의 EVK 보드*와 *우리 회사의 카메라 보드*는 클럭, DDR 타이밍, 핀 멀티플렉싱, 부트 미디어, 외부 칩 구성이 모두 다릅니다. 운영체제는 이 정보를 *어딘가에서 받아야* 부팅합니다. 그 "어딘가"의 묶음이 BSP입니다.
 
@@ -32,12 +32,12 @@ topics: ["embedded"]
 이 시리즈에서는 *Linux 기반 임베디드 시스템*을 기준으로 다음 다섯 가지를 BSP에 포함시킵니다.
 
 1. **부트로더** — U-Boot 포트. SPL/BL2 단계, DDR 초기화, 부트 미디어 선택, 부트 명령 환경.
-2. **TF-A (ARMv8 보드)** — BL31 secure monitor. ARMv8 부트 체인의 필수 구성.
+2. **TF-A (일부 Arm 시스템)** — 선택된 boot chain에서 BL2/BL31 등 단계와 secure-monitor 기능을 제공합니다. 모든 Armv8 보드가 동일한 TF-A 구성을 쓰는 것은 아닙니다.
 3. **Linux 커널** — 보드 패치, defconfig 분기, in-tree 또는 out-of-tree 드라이버.
 4. **디바이스 트리** — `<soc>.dtsi` + `<board>.dts` + 가능하다면 overlay.
 5. **빌드 시스템 통합** — Buildroot defconfig, Yocto layer, 또는 둘 다.
 
-이외에 *factory provisioning*(eFuse 굽기, MAC 주소 주입, 시리얼 번호 등록)과 *OTA 흐름*은 BSP에 가까운 작업이지만 별도 시리즈로 다룹니다.
+제품에 따라 factory provisioning(eFuse, MAC 주소, serial number 관리)과 OTA도 BSP 통합 범위에 포함될 수 있습니다. 이 시리즈 후반에서 관련 설계와 운영 흐름을 다룹니다.
 
 ## BSP가 끝나는 곳, 애플리케이션이 시작되는 곳
 
@@ -46,12 +46,12 @@ topics: ["embedded"]
 | BSP의 책임 | 애플리케이션의 책임 |
 |-----------|-------------------|
 | 부팅 후 `login:` 프롬프트가 뜸 | 그 위에서 동작하는 서비스 |
-| 모든 peripheral이 `/dev/`에 노출됨 | `/dev/spidev0.0`을 *어떻게* 쓸지 |
+| 요구사항에 정한 peripheral 기능이 제공됨 | 그 기능을 제품 서비스에서 *어떻게* 쓸지 |
 | `dmesg`에 에러가 없음 | 자체 로그에 에러가 없음 |
 | Wi-Fi 드라이버가 로드됨 | 어느 SSID에 어떤 자격증명으로 연결할지 |
 | `iperf3`가 link rate를 채움 | TLS handshake가 끝나는 시간 |
 
-엄지 손가락 규칙입니다. **`uname -a`로 답이 안 나오는 것은 BSP의 책임이 아닙니다.** 커널 버전, 아키텍처, 기본 toolchain은 BSP가 책임지고, 그 위 모든 서비스는 애플리케이션 팀의 영역입니다.
+이 경계는 프로젝트가 합의할 acceptance criteria로 정합니다. `uname -a`는 커널 버전·빌드 정보를 보여줄 뿐, 주변장치나 제품 서비스를 어느 팀이 책임지는지는 결정하지 않습니다.
 
 ## 구성요소 한 장 정리
 
@@ -59,9 +59,9 @@ topics: ["embedded"]
 
 각 컴포넌트가 *어디서 시작해 어디서 끝나는지*가 BSP 작업의 출발점입니다.
 
-## 부트 체인 — ARMv8 SoC 기준
+## 부트 체인 — TF-A/U-Boot을 쓰는 한 가지 구성
 
-요즘 출고되는 SoC 거의 모두가 ARMv8입니다. 부트 체인은 다음 흐름을 따릅니다.
+많은 최신 Linux application processor가 Armv8 이상을 사용하지만, SoC와 firmware 구성에 따라 boot chain은 달라집니다. 아래는 TF-A와 U-Boot SPL을 사용하는 한 가지 흔한 흐름입니다.
 
 <!-- TODO: TikZ (_design.tex) — 부트 체인 세로 흐름도로 교체 -->
 
@@ -91,19 +91,19 @@ Linux Kernel
 
 | 단계 | 책임 |
 |------|------|
-| BootROM | Mask ROM. SoC 안에 *영구히* 박힌 코드. 부트 미디어(eMMC, SD, NAND, USB)를 정해진 우선순위로 시도. |
-| SPL / BL2 | Secondary Program Loader (U-Boot SPL) 또는 TF-A BL2. DDR 초기화, clk, pinmux, console. 다음 단계를 DDR로 적재. |
-| BL31 | TF-A의 secure monitor. ARMv8 EL3에서 영구히 거주. PSCI(전원 관리), SMC handler. |
+| BootROM | SoC 내 고정 firmware. strap/fuse와 SoC boot policy에 따라 부트 소스를 선택하고 다음 단계를 적재. 매체 검색 순서는 SoC별 문서에서 확인. |
+| SPL / BL2 | U-Boot SPL 또는 TF-A BL2처럼 선택된 초기 firmware 단계. 플랫폼에 필요한 초기화와 다음 단계 적재를 수행. |
+| BL31 | TF-A 구성에서 EL3 runtime firmware로 동작하며 PSCI 등 서비스를 제공할 수 있음. 사용 여부와 역할은 boot design에 따름. |
 | BL33 | U-Boot proper (또는 다른 normal-world 부트로더). 부트 환경, 사용자 입력, 커널 적재. |
 | Linux Kernel | 커널 시작. DT 파싱, 드라이버 probe. init 실행. |
 
-ARMv7(Cortex-A8, Cortex-A9, Cortex-A15) 보드는 BL31이 없습니다. SPL → U-Boot → Kernel의 *3단 구조*입니다. RISC-V는 OpenSBI가 BL31의 자리에 들어갑니다.
+BeagleBone Black처럼 오래된 ARMv7 U-Boot 보드는 보통 SPL → U-Boot → Linux 흐름을 사용하고 TF-A BL31 단계가 없습니다. architecture 이름만으로 모든 제품의 boot stages를 단정하지 말고 SoC·board documentation으로 확인합니다. RISC-V에서는 OpenSBI가 machine-mode runtime firmware 역할을 맡을 수 있지만 Arm BL31과 같은 구성요소는 아닙니다.
 
 BSP 작업은 이 *각 단계의 책임*을 자기 보드에 맞게 채우는 것입니다.
 
 ## 보드별로 달라지는 것 — 차이의 원천
 
-같은 SoC를 쓰는 두 보드가 *어디서* 갈리는지를 알면 BSP 작업의 80%가 정해집니다.
+같은 SoC를 쓰는 두 보드의 차이를 파악하면 schematic과 software tree에서 확인할 작업을 좁힐 수 있습니다.
 
 **SoC가 결정하는 것** — 보드와 무관, `dtsi`에 들어감.
 
@@ -130,7 +130,7 @@ BSP 작업은 이 *각 단계의 책임*을 자기 보드에 맞게 채우는 �
 
 ## 시리즈에서 다룰 보드 — BeagleBone Black
 
-이론은 추상적이고 실전은 구체적입니다. 시리즈 내내 *한 보드*를 메인 예시로 씁니다.
+이론은 추상적이고 실전은 구체적입니다. 시리즈에서는 *한 보드*를 메인 예시로 쓰되, 일부 장에서는 다른 SoC의 자료도 비교합니다.
 
 **BeagleBone Black**을 고른 이유는 다음과 같습니다.
 
@@ -138,7 +138,7 @@ BSP 작업은 이 *각 단계의 책임*을 자기 보드에 맞게 채우는 �
 - 회로도와 부품 BOM이 *완전히 공개*. CC-BY-SA.
 - *Buildroot에 defconfig가 이미 존재* — 비교 베이스가 명확.
 - 시리얼 콘솔이 6핀 헤더 하나로 잡힘. USB-TTL 어댑터 1개만 필요.
-- 전 세계적으로 *재고가 안정적*. 50달러 안팎.
+- 공개된 설계 자료와 메인라인/Buildroot 지원을 따라갈 수 있어 교육용 예제로 적합합니다. 가격과 재고는 지역·시점에 따라 달라지므로 선택 기준에서 제외합니다.
 
 ARMv8 예시(TF-A 포함)는 **Raspberry Pi 4 (BCM2711)** 또는 **TI AM62x**를 *부분적으로* 참조합니다. 데이터시트 읽기(Ch 2), DDR 매개변수(Ch 5), TF-A 통합(Ch 7)에서 ARMv8 예시가 등장합니다.
 
@@ -173,11 +173,11 @@ ARMv8 예시(TF-A 포함)는 **Raspberry Pi 4 (BCM2711)** 또는 **TI AM62x**를
 - [ ] Bus pirate 또는 Glasgow (저속 prototyping)
 - [ ] TFTP 서버 (개발 PC에 dnsmasq)
 
-JTAG 디버거가 *가장 자주 빠지는* 항목입니다. *시리얼이 안 뜨는* 상황에서 JTAG가 없으면 디버깅이 거의 불가능합니다. 첫 부팅에 도달하기 전까지는 JTAG가 필수에 가깝습니다.
+JTAG 디버거는 초기화 단계에서 유용한 선택지지만 필수는 아닙니다. SoC ROM download, bootloader 진단, GPIO/전원 계측, serial 경로 등 가능한 대체 수단도 보드 설계 단계에서 확인합니다.
 
 ## BSP 작업의 *전형적* 일정
 
-신규 보드를 *반드시 빨리* 띄워야 한다면 다음 일정을 기준으로 잡습니다.
+일정 산정의 출발점으로 아래 계획 예시를 참고할 수 있습니다. 실제 소요 기간은 팀의 기존 지원 코드, 자료 접근성, 보드 상태, 검증 범위에 따라 달라집니다.
 
 | 단계 | 기간 | 핵심 산출물 |
 |------|------|-----------|
@@ -189,13 +189,13 @@ JTAG 디버거가 *가장 자주 빠지는* 항목입니다. *시리얼이 안 �
 | Buildroot/Yocto 통합 | 1~2주 | 한 명령으로 SD 이미지 생성 |
 | 자동화·factory provisioning | 1~2주 | 공장에서 1대당 N분 |
 
-새 SoC와 새 보드라면 *3~4개월*이 정상입니다. 기존 reference 보드의 변형이면 *2~4주*로 줄어듭니다. 변형의 정도가 작을수록 vendor reference BSP를 그대로 활용할 여지가 큽니다.
+표의 기간은 특정 프로젝트의 실측치나 보편적인 납기 기준이 아닙니다. 일정은 SoC familiarity, 자료 접근, DDR·전원 설계, 부품 차이와 검증 범위에 따라 달라지므로 각 단계의 산출물과 위험을 기준으로 프로젝트별로 추정합니다.
 
 ## 흔한 오해와 함정
 
 ### "Vendor reference BSP를 그대로 쓰면 된다"
 
-부분적으로 맞습니다. SoC 벤더의 reference BSP는 *그들의 EVK*에 맞춰져 있습니다. 우리 보드의 DDR, PMIC, 외부 칩이 다르면 *반드시* 수정이 필요합니다. 보통 *80%는 그대로*, *20%는 분기*가 됩니다.
+부분적으로 맞습니다. SoC 벤더의 reference BSP는 *그들의 EVK*에 맞춰져 있습니다. 우리 보드의 DDR, PMIC, 외부 칩이 다르면 *반드시* 수정이 필요합니다. 재사용 가능한 비율은 보드의 부품·전원·메모리·배선 차이와 vendor tree에 따라 달라집니다. 고정 비율로 계획하지 말고 각 변경점을 schematic 및 SoC 자료와 대조합니다.
 
 ### "BSP는 한 번만 만들면 끝"
 
@@ -203,7 +203,7 @@ JTAG 디버거가 *가장 자주 빠지는* 항목입니다. *시리얼이 안 �
 
 ### "메인라인 Linux 커널이면 다 된다"
 
-벤더가 메인라인 지원에 *얼마나 적극적인지*에 따라 천차만별입니다. TI, NXP, ST는 메인라인 지원이 *상대적으로 좋고*, Rockchip, Allwinner, Amlogic은 *vendor fork에 크게 의존*합니다. 메인라인을 *목표*로 하되, *현실*은 vendor tree에서 시작해 천천히 메인라인으로 옮겨가는 것이 흔한 경로입니다.
+메인라인 지원은 vendor 이름만으로 순위를 정하기보다 대상 SoC와 개별 peripheral의 현재 DTS, driver, binding, maintenance 상태를 확인해야 합니다. 제품 요구사항에 맞춰 mainline 또는 vendor tree를 선택하고, 차이와 update plan을 기록합니다.
 
 ## 시리즈 로드맵
 
@@ -239,11 +239,11 @@ SPL이 죽었는지, U-Boot proper가 죽었는지, 커널이 죽었는지 *시�
 ## 정리
 
 - BSP는 *이 SoC + 이 보드 + 이 OS*가 부팅하기 위한 *모든 것*입니다. 부트로더, TF-A(ARMv8), 커널, 디바이스 트리, 빌드 통합이 핵심 다섯 컴포넌트입니다.
-- "BSP가 끝난다"는 것은 `login:` 프롬프트가 뜨고 모든 peripheral이 `/dev/`에 노출되는 상태입니다. 그 위의 서비스는 애플리케이션의 영역입니다.
-- ARMv8 부트 체인은 *BootROM → SPL/BL2 → BL31 → BL33(U-Boot) → Linux*입니다. ARMv7은 BL31이 없습니다.
+- 이 프로젝트에서 BSP 완료는 `login:`만이 아니라 요구한 부트 경로, 장치 기능, 보안·업데이트·복구 기준을 충족하는지로 정의합니다. 일부 장치는 `/dev`가 아닌 다른 kernel interface로 노출됩니다.
+- BootROM → 초기 firmware → optional secure runtime → normal-world bootloader → Linux는 흔한 구성 예입니다. 단계와 역할은 architecture, SoC, vendor boot design에 따라 달라집니다.
 - SoC가 결정하는 것은 `<soc>.dtsi`에, 보드가 결정하는 것은 `<board>.dts`에 들어갑니다. 보드별 차이의 원천을 분리해 두는 것이 BSP의 기본 구조입니다.
 - 시리즈 메인 예시는 BeagleBone Black입니다. TF-A 관련 부분에서는 i.MX 8M·AM62x·BCM2711을 참조합니다.
-- 새 SoC + 새 보드의 신규 BSP는 *3~4개월*이 정상입니다. Reference 보드 변형이면 *2~4주*로 줄어듭니다.
+- 신규 보드 일정은 자료·기존 port·검증 조건에 따라 달라져 단일 기간으로 일반화하지 않습니다.
 - vendor reference BSP는 *시작점*입니다. 그대로 쓸 수 있는 경우는 거의 없습니다.
 
 ## 다음 편

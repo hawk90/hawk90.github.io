@@ -10,140 +10,92 @@ draft: false
 topics: ["embedded", "embedded/hardware"]
 ---
 
-## 한 줄 요약
 
-> **"PCIe 전력은 *device state (D)*와 *link state (L)* 두 축으로 관리됩니다."** — D0(active)부터 D3cold(완전 차단)까지·L0(active)·L0s·L1·L1.1·L1.2·L2·L3까지. *ASPM*은 *link이 idle일 때 자동으로 L0s/L1 진입*. *L1 substates*가 *모바일·노트북의 BAR 대기 전력*을 *수십 mW에서 mW급*으로 떨어뜨렸습니다.
+## 두 축을 나눠야 하는 이유
 
-[Ch 5 Interrupts](/blog/embedded/hardware/pcie/chapter05-interrupts)에서 *MSI Memory Write*가 *interrupt 전달의 핵심*임을 봤습니다. PM 상태에서는 *PME (Power Management Event)*가 *wake-up* 책임. 이 장은 *D-state·L-state·ASPM·sub-states*를 본격적으로 분해합니다.
+장치가 한동안 I/O를 하지 않는다고 장치 전원과 링크 클럭을 모두 꺼도 되는 것은 아닙니다. 복귀 지연, wake 경로, 공유하는 upstream port가 각각 제약을 만듭니다. PCIe 전력 관리는 **장치 상태 D-state**와 **링크 상태 L-state**를 나눠 봐야 합니다.
 
-## Device States (D0 ~ D3cold)
+이 장은 [Linux v6.12 PCI PM 문서](https://www.kernel.org/doc/html/v6.12/power/pci.html)와 [동일 판의 ASPM 구현](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/pci/pcie/aspm.c)을 기준으로 정책과 관찰 방법을 설명합니다. 실제 suspend·wake 시험이나 전력·지연 측정은 수행하지 않았습니다. 특정 제품의 mW·복귀 시간도 일반적인 PCIe 수치로 제시하지 않습니다.
 
-| State | 의미 |
-|-------|------|
-| **D0** | Active, 정상 동작 |
-| **D1** | Light sleep — 일부 기능 비활성, 빠른 복귀 (optional) |
-| **D2** | Deeper sleep (optional) |
-| **D3hot** | Configuration Space 외 *대부분 차단*, configuration 통한 wake 가능 |
-| **D3cold** | *전원 완전 차단* — *Vaux만 유지*, PME가 wake |
+## 장치 상태와 링크 상태
 
-*D1·D2는 거의 안 씀*. 실용은 *D0 → D3hot → D3cold*. D3cold가 *최대 절전*. *PCI-PM Capability (ID 0x01)*가 D-state 전환 제어.
+D-state는 장치 기능과 공급 전원에 관한 상태입니다. 반면 L-state는 연결의 동작·절전을 표현합니다. 장치의 문을 닫는 것과 연결 통로의 조명을 끄는 일을 나눠 생각하면 됩니다. D0라는 이유만으로 link가 항상 L0인 것은 아닙니다.
 
-## Link States (L0 ~ L3)
-
-| State | 의미 |
-|-------|------|
-| **L0** | Active, normal traffic |
-| **L0s** | Lower power active — *수 µs 진입·복귀*. *one direction*만 power down |
-| **L1** | Standby — *수 µs ~ 수십 µs*, *양방향 power down* |
-| **L1.1** | L1 substate — *CLKREQ# 유지*, 더 깊은 절전 |
-| **L1.2** | L1 substate — *CLKREQ# off*, *최대 절전*, *복귀 수백 µs* |
-| **L2** | Sleep — *주 전원 off*, *Vaux 유지*, PME 가능 |
-| **L3** | Off — *완전 차단*, PCIe 없음 |
-
-## ASPM — Active State Power Management
-
-*PCIe Cap의 Link Control register*에서 활성화. *idle 시 자동으로 L0s 또는 L1 진입*:
-
-| 설정 | 동작 |
+| 장치 상태 | 확인할 의미 |
 |------|------|
-| Disabled | L0 고정 |
-| L0s | idle 시 L0s 진입 (수 µs 절전) |
-| L1 | idle 시 L1 진입 (더 깊은 절전, 진입·복귀 더 느림) |
-| L0s+L1 | 둘 다 활성 |
+| D0 | 정상 기능을 수행할 수 있는 상태 |
+| D1·D2 | 선택적 저전력 상태. 지원 여부를 확인 |
+| D3hot | 표준 config 접근은 가능하고 I/O·memory 공간은 비활성 |
+| D3cold | 주 전원 제거. PMCSR의 D-state 값만 써서 직접 만드는 상태가 아니며 플랫폼 전원 제어가 관여 |
 
-*양단 (RC·EP) 모두 동일 설정* 필요. ASPM 협상은 *Link Cap*의 *L0s/L1 Exit Latency*로 *application latency budget* 결정.
+D3cold에서 PME wake를 지원하려면 필요한 보조 전원과 wake 경로가 있어야 합니다. 모든 장치가 이를 지원하지는 않습니다. Linux PM 문서는 전원을 다시 공급하면 power-on reset과 기본 설정 복원이 일어난다고 설명하므로, 기존 runtime 설정이 남아 있다고 가정해서는 안 됩니다.
 
-## L1 Substates — L1.1·L1.2
-
-PCIe 4.0+ device·노트북·모바일에서 *기본 활성*:
-
-| State | CLKREQ# | RefCLK | 진입 latency | 복귀 latency |
-|-------|---------|--------|--------------|--------------|
-| L1.1 | 유지 | 유지 | µs | µs |
-| L1.2 | off | off | µs | 수백 µs |
-
-*L1.2*가 *RefCLK까지 차단*해서 *최대 절전*. NVMe SSD가 *idle 시 L1.2*로 *수 mW만 소비*. 다만 *복귀 latency 길어 throughput burst*에 영향.
-
-*Latency Tolerance Reporting (LTR)*과 결합 — *EP가 OS에 latency budget 알리고* RC가 *deeper state 결정*.
-
-## PME — Power Management Event
-
-*D3hot·D3cold에서 wake-up*은 *PME Message*로:
-
-| 단계 | 동작 |
+| 링크 상태 | 의미와 제약 |
 |------|------|
-| 1 | Device에 *wake event* (예: NIC가 magic packet 수신) |
-| 2 | Device가 *PME Message* TLP 발송 (Vaux 전원으로) |
-| 3 | RC가 *PME 받고 ACPI handler 호출* |
-| 4 | OS가 *device를 D0로 복귀·driver resume* |
+| L0 | 정상 트래픽 전송 |
+| L0s | 한 방향의 저전력 상태. Non-Flit Mode 설명과 구분 필요 |
+| L1 | 더 깊은 링크 절전 상태 |
+| L1.1·L1.2 | L1 substates. 지원·활성화·타이밍과 플랫폼 clock 설계를 확인 |
+| L2·L3 | 더 깊은 절전·전원 제거 문맥. 비활성 link에서 즉시 정상 TLP를 전송한다고 가정할 수 없음 |
 
-*Wake-on-LAN*이 이 메커니즘. *Vaux 전원이 항상 살아있어야* 가능 — *standby 전력 소비*.
+각 상태의 복귀 시간을 보편적인 상수로 적을 수는 없습니다. Link Capability, L1 PM Substates Capability와 플랫폼 제약을 함께 봐야 합니다.
 
-## CLKREQ# — Clock Request
+## ASPM과 CLKREQ#
 
-*PCIe RefCLK*은 *100 MHz differential signal*. *device가 필요할 때만 활성*:
+ASPM은 장치가 D0일 때도 idle link를 절전 상태로 전환할 수 있게 합니다. Linux의 선택은 양단 capability, firmware가 허용한 제어권, latency 제약, quirk와 policy에 영향을 받습니다. `powersave` 같은 policy 이름은 요청한 정책이며 실제 L1.2 체류 시간이나 절감 전력을 입증하지 않습니다.
 
-| 시나리오 | CLKREQ# |
-|---------|---------|
-| L0·L0s·L1·L1.1 | low (CLK 필요) |
-| L1.2 | high (CLK 차단 가능) |
-| L2·L3 | high |
+CLKREQ#는 active-low clock 요청 신호입니다. 요청 여부와 실제 clock 공급·차단은 보드의 clock 구조와 절전 진입 절차에 따라 해석합니다. L1.2를 단순히 “CLKREQ# off”라는 고정 전압 상태로 외우거나, 모든 L1.2 지원 장치가 항상 같은 복귀 지연을 갖는다고 해석하면 안 됩니다.
 
-*노트북의 RefCLK 발진기*가 *L1.2 진입 시 stop* → *수십 mW 절감*. *L1.2가 모바일 PCIe SSD의 필수 기능*인 이유.
+LTR은 장치가 견딜 수 있는 snoop·non-snoop 지연 정보를 전달해 전력 관리에 활용하게 합니다. 이는 CPU가 측정한 애플리케이션의 p99 latency budget과 동일한 수치가 아닙니다.
 
-## D-state 전환 흐름
+## PME와 실제 wake 순서
 
-| 단계 | 동작 |
+Wake는 호출벨에 가깝습니다. 벨에 전원이 있고 소리가 담당자에게 전달돼야 문을 열 수 있습니다. PME 지원, 장치의 wake enable, upstream·플랫폼의 전달 경로, OS 정책을 모두 확인해야 합니다.
+
+| 단계 | 확인할 조건 |
 |------|------|
-| 1 | OS가 *driver suspend handler 호출* |
-| 2 | Driver가 *device internal save·outstanding I/O drain* |
-| 3 | Driver가 *PCI-PM Capability의 Power State 비트 write* (D0→D3) |
-| 4 | Device가 *internal context save·power gating* |
-| 5 | RC가 *bridge·switch port도 함께 lower state* (이전 device가 다 D3면) |
-| 6 | Resume 시 *역순* |
+| 외부 이벤트 발생 | NIC packet 등 해당 장치의 wake 기능과 보조 전원 |
+| wake 신호 전달 | 현재 link·전원 상태에서 지원하는 sideband·플랫폼 경로 또는 PME 전달 |
+| 링크·전원 복원 | 비활성 링크라면 정상 메시지를 전송할 수 있는 상태로 복귀 |
+| OS 통지와 resume | firmware ownership·native PME 처리, 장치 설정과 driver 상태 복구 |
 
-## Linux PCIe PM 동작
+따라서 “D3cold·L3 상태에서 Vaux만으로 바로 PME TLP를 보낸다”는 하나의 흐름으로 묶으면 안 됩니다. Native PCIe PME는 in-band 메시지이지만, 시스템을 깨우기 위한 전원·링크 복원 과정은 그 이전에 필요할 수 있습니다. Firmware가 native PME 제어권을 OS에 주지 않는 플랫폼에서는 처리 경로도 다릅니다.
 
-| 영역 | 위치 |
-|------|------|
-| Driver runtime PM | `pm_runtime_*` API |
-| `/sys/bus/pci/devices/<BDF>/power/control` | "auto" or "on" |
-| `/sys/bus/pci/devices/<BDF>/power/wakeup` | wake-up 활성 여부 |
-| ASPM policy | `/sys/module/pcie_aspm/parameters/policy` |
+## Linux에서 관찰하기
 
-`lspci -vv | grep -E "Power|ASPM"`으로 *현재 PM 설정* 확인.
+먼저 바꿀 설정을 정하기보다 현재 요청 정책과 관찰 상태를 모읍니다. 아래는 대상 Linux에서 실행할 수 있는 조회 예이며, 이 작업에서는 실제 PCI 장치에 실행하지 않았습니다. `0000:01:00.0`은 예시 BDF이며 대상 장치로 바꿔야 합니다.
 
-## 자주 하는 실수
+```bash
+bdf=0000:01:00.0
+lspci -s "$bdf" -vv
+cat "/sys/bus/pci/devices/$bdf/power/control"
+cat "/sys/bus/pci/devices/$bdf/power/runtime_status"
+cat "/sys/bus/pci/devices/$bdf/power/wakeup"
+cat /sys/module/pcie_aspm/parameters/policy
+```
 
-### "ASPM은 그냥 활성하면 좋다"
+`power/control`의 `auto`는 runtime PM을 허용하는 정책이며, 이미 suspend됐다는 뜻이 아닙니다. `runtime_status`와 driver 동작을 함께 확인합니다. 속성 부재·권한 오류를 `disabled`나 `active` 같은 정상 상태로 채우지 않습니다. `lspci`의 설정 비트도 실제 절전 체류율을 직접 측정한 결과는 아닙니다.
 
-*Latency-critical workload*에서 *ASPM L1* 진입·복귀가 *µs latency spike*. NVMe random IOPS·latency 측정에서 *ASPM 활성/비활성 차이* 큼. *production NVMe·high-throughput NIC*는 *L0s/L1 비활성*이 일반.
+설정을 비교하는 실험에서는 같은 장치·firmware·kernel·부하를 유지하고 전력, throughput, p50·p99, wake 실패 횟수를 함께 기록합니다. idle 소비 전력만 줄어도 반복되는 wake 실패나 tail latency 증가가 있으면 그 정책이 목적을 만족한다고 판정할 수 없습니다. 이 글에서는 policy 변경이나 sysfs write를 실행하지 않았습니다.
 
-### "L1.2가 항상 더 좋다"
+## 실패를 가르는 기준
 
-*복귀 latency 수백 µs* — *burst workload*에는 *throughput drop*. 노트북 *idle*에는 좋지만 *server*에는 비추.
-
-### "D3cold면 device가 완전 reset"
-
-*D3cold도 internal context 일부 유지* (vendor 구현). *Driver는 항상 resume 시 full reinitialize* 가정해야 안전.
-
-### "PME는 항상 wake한다"
-
-*OS·BIOS·driver 모두 wake-up 활성화*해야. `/sys/.../wakeup`이 *enabled*여야. *security 정책*으로 차단되기도.
-
-### "ASPM이 boot loader 단계에 동작"
-
-UEFI·BIOS 단계 *ASPM 비활성*이 일반. OS 진입 후 *driver·ACPI*로 활성. *boot 시 link instability*는 *ASPM과 무관*.
+| 증상 | 먼저 나눌 원인 | 단정하면 안 되는 것 |
+|------|------|------|
+| `auto`인데 계속 active | driver 지원, 사용 중인 reference, 실제 idle 여부 | ASPM 미지원 하나로 확정 |
+| 절전 뒤 장치 접근 실패 | 전원 복원·link·config 복원·driver resume | 단순 link 속도 부족 |
+| wake가 오지 않음 | wake capability·enable·보조 전원·전달 경로 | PME bit만 켜면 항상 성공 |
+| burst latency 증가 | 절전 진입·복귀와 workload의 시간 상관관계 | 모든 서버에서 ASPM을 꺼야 함 |
+| boot부터 불안정 | firmware 초기 설정·quirk·신호·전원 조건 | OS 진입 전이므로 ASPM과 무관 |
 
 ## 정리
 
-- *D-state*는 *device 단위*, *L-state*는 *link 단위* 전력 관리.
-- 실용: *D0·D3hot·D3cold + L0·L0s·L1·L1.2*.
-- *ASPM*이 *link idle 시 자동 lower state* 진입. *latency budget* 고려 필요.
-- *L1 substates (L1.1·L1.2)*가 *모바일·노트북 PCIe의 mW급 절전* 가능하게.
-- *CLKREQ#*가 *RefCLK 활성 control*. *L1.2 = CLK off*.
-- *PME Message*가 *D3cold·L2/L3에서 wake-up* 트리거.
-- Linux PM: *pm_runtime API + sysfs control + ASPM policy*.
+- D-state와 L-state는 다른 축이며, D0에서도 link 절전이 가능합니다.
+- D3cold는 주 전원 제거 상태이고, 복원 시 reset·설정 복구가 필요합니다.
+- ASPM 지원·활성 설정·실제 체류와 절감 효과를 구분합니다.
+- CLKREQ#와 L1 substates는 플랫폼의 clock·타이밍 조건을 함께 봅니다.
+- PME wake에는 장치·링크·플랫폼·OS의 전달과 복원 과정이 필요합니다.
+- 전력과 평균 성능만 보지 않고 tail latency·wake 실패를 함께 비교합니다.
 
 ## 다음 편
 
@@ -152,7 +104,7 @@ UEFI·BIOS 단계 *ASPM 비활성*이 일반. OS 진입 후 *driver·ACPI*로 �
 ## 관련 항목
 
 - [Ch 3: Configuration Space](/blog/embedded/hardware/pcie/chapter03-config-space) — PCI-PM Cap·LTR
-- [Ch 5: Interrupts](/blog/embedded/hardware/pcie/chapter05-interrupts) — PME 흐름
+- [Ch 5: Interrupts](/blog/embedded/hardware/pcie/chapter05-interrupts) — MSI·MSI-X와 인터럽트 전달
 - [Ch 9: Physical Layer](/blog/embedded/hardware/pcie/chapter09-physical-layer) — LTSSM·L states 진입
 - [BSP: SoC 데이터시트 읽기](/blog/embedded/bsp/chapter02-datasheet) — L1 timeout을 일으키는 i.MX erratum과 커널 driver 속 workaround 위치
 

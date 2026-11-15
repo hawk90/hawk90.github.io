@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"State machine은 세 단계로 발전합니다."** enum + switch는 간단하고, `std::variant`는 type-safe하며, `etl::fsm`은 정식 구현입니다.
+> **상태 표현과 전이 검증은 별개로 선택합니다.** enum+switch, variant+visit, table, ETL은 상태 수만으로 정하는 발전 단계가 아니라 데이터·오류 정책·외부 의존에 따른 대안입니다.
 
 ## 어떤 문제를 푸는가
 
@@ -41,7 +41,7 @@ void play() {
 
 상태 invariant가 깨지기 쉽고 전이도 모호합니다.
 
-State machine 패턴은 세 단계로 점진적으로 개선합니다.
+아래 예시는 각 방식에서 전이와 상태별 데이터를 어떻게 표현하는지 비교합니다.
 
 ## 미디어 플레이어 — 예시 FSM
 
@@ -65,12 +65,18 @@ void on_play() {
             current_state = State::Playing;
             break;
         case State::Paused:
-            resume_playback();
-            current_state = State::Playing;
+            // 재개는 별도 Resume event가 담당
             break;
         case State::Playing:
             // 이미 재생 중 — 무시
             break;
+    }
+}
+
+void on_resume() {
+    if (current_state == State::Paused) {
+        resume_playback();
+        current_state = State::Playing;
     }
 }
 
@@ -91,14 +97,14 @@ void on_stop() {
 
 장점은 다음과 같습니다.
 
-- 가장 적은 코드로 구현할 수 있습니다.
+- 작은 전이 집합을 직접 분기로 표현하기 쉽습니다.
 - 디버깅이 쉽습니다.
 - Cortex-M0+에서도 동작합니다.
 
 단점은 다음과 같습니다.
 
 - 전이 로직이 여러 함수에 흩어집니다.
-- 새 state를 추가하면 모든 함수를 수정해야 합니다.
+- 새 state를 추가할 때 관련 분기와 누락 event 정책을 점검해야 합니다.
 - invariant 강제가 어렵습니다.
 
 ## 단계 2 — std::variant + std::visit
@@ -107,6 +113,8 @@ C++17부터 가능합니다. 각 state를 type으로 표현하므로 type system
 
 ```cpp
 #include <variant>
+#include <cstdint>
+#include <type_traits>
 
 struct Stopped {};
 struct Playing { uint32_t position; };
@@ -122,10 +130,6 @@ State on_play(State s) {
         if constexpr (std::is_same_v<T, Stopped>) {
             start_playback();
             return Playing{0};
-        }
-        else if constexpr (std::is_same_v<T, Paused>) {
-            resume_playback(state.position);
-            return Playing{state.position};
         }
         else {
             return state;   // 이미 Playing
@@ -152,7 +156,7 @@ current_state = on_pause(current_state);
 
 - 각 state가 자기 데이터를 가집니다. 예를 들어 Playing은 position을 보유합니다.
 - 전이가 명시적이며 함수가 새 state를 반환합니다.
-- `if constexpr` 패턴으로 variant의 모든 type을 처리하도록 강제할 수 있어 exhaustive check가 가능합니다.
+- 위 fallback은 미처리 조합을 그대로 유지합니다. 새 type 누락을 컴파일 오류로 만들려면 명시적인 overload 목록이나 dependent static_assert를 포함한 별도 exhaustive 정책이 필요합니다.
 
 단점은 다음과 같습니다.
 
@@ -192,84 +196,50 @@ TcpState handle_ack(TcpState s, const Packet& p) {
 }
 ```
 
-각 state에 필요한 데이터만 두고 다른 state에는 두지 않으므로 RAM이 절약됩니다.
+variant는 가장 큰 alternative의 저장 공간과 discriminator·정렬을 포함합니다. 모든 state 데이터를 따로 보관하는 설계보다 줄일 수 있지만 항상 절감된다고 보장하지는 않습니다.
 
 ## 단계 3 — etl::fsm
 
 [Part 4-02](/blog/embedded/embedded-cpp/part4-02-etl-library)에서 본 ETL FSM은 대규모 FSM을 형식화할 때 적합합니다.
 
-```cpp
+```cpp title="etl-media.cpp"
 #include <etl/fsm.h>
-
-// Event 정의
-class PlayEvent  : public etl::message<1> {};
-class PauseEvent : public etl::message<2> {};
-class StopEvent  : public etl::message<3> {};
-
-// State ID
-enum class StateId : etl::fsm_state_id_t {
-    Stopped,
-    Playing,
-    Paused,
+#include <cassert>
+#include <iostream>
+struct Play : etl::message<1> {}; struct Pause : etl::message<2> {};
+struct Resume : etl::message<3> {}; struct Stop : etl::message<4> {};
+struct Player : etl::fsm { Player() : etl::fsm(0) {} };
+struct Stopped : etl::fsm_state<Player, Stopped, 0, Play> {
+    etl::fsm_state_id_t on_event(const Play&) { return 1; }
+    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) { return STATE_ID; }
 };
-
-// FSM 클래스
-class MediaPlayerFsm : public etl::fsm {
-public:
-    MediaPlayerFsm() : fsm(0) {}
-    void log_transition(const char* msg) { /* */ }
+struct Playing : etl::fsm_state<Player, Playing, 1, Pause, Stop> {
+    etl::fsm_state_id_t on_event(const Pause&) { return 2; }
+    etl::fsm_state_id_t on_event(const Stop&) { return 0; }
+    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) { return STATE_ID; }
 };
-
-// State 구현
-class StoppedState : public etl::fsm_state<MediaPlayerFsm, StoppedState,
-                                              (etl::fsm_state_id_t)StateId::Stopped,
-                                              PlayEvent> {
-public:
-    etl::fsm_state_id_t on_event(const PlayEvent&) {
-        get_fsm_context().log_transition("Stopped → Playing");
-        start_playback();
-        return (etl::fsm_state_id_t)StateId::Playing;
-    }
-
-    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) {
-        return STATE_ID;
-    }
+struct Paused : etl::fsm_state<Player, Paused, 2, Resume, Stop> {
+    etl::fsm_state_id_t on_event(const Resume&) { return 1; }
+    etl::fsm_state_id_t on_event(const Stop&) { return 0; }
+    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) { return STATE_ID; }
 };
-
-class PlayingState : public etl::fsm_state<MediaPlayerFsm, PlayingState,
-                                              (etl::fsm_state_id_t)StateId::Playing,
-                                              PauseEvent, StopEvent> {
-public:
-    etl::fsm_state_id_t on_event(const PauseEvent&) {
-        pause_playback();
-        return (etl::fsm_state_id_t)StateId::Paused;
-    }
-
-    etl::fsm_state_id_t on_event(const StopEvent&) {
-        stop_playback();
-        return (etl::fsm_state_id_t)StateId::Stopped;
-    }
-
-    etl::fsm_state_id_t on_event_unknown(const etl::imessage&) {
-        return STATE_ID;
-    }
-};
-
-// 사용
-StoppedState stopped;
-PlayingState playing;
-PausedState paused;
-
-etl::ifsm_state* states[] = {&stopped, &playing, &paused};
-
-MediaPlayerFsm fsm;
-fsm.set_states(states, etl::size(states));
-fsm.start();
-
-fsm.receive(PlayEvent{});
-fsm.receive(PauseEvent{});
-fsm.receive(StopEvent{});
+int main() {
+    Stopped stopped; Playing playing; Paused paused;
+    etl::ifsm_state* states[] = {&stopped, &playing, &paused};
+    Player player; player.set_states(states, 3); player.start();
+    assert(player.get_state_id() == 0);
+    player.receive(Pause{}); assert(player.get_state_id() == 0);
+    player.receive(Play{}); assert(player.get_state_id() == 1);
+    player.receive(Pause{}); assert(player.get_state_id() == 2);
+    player.receive(Play{}); assert(player.get_state_id() == 2);
+    player.receive(Resume{}); assert(player.get_state_id() == 1);
+    player.receive(Stop{}); assert(player.get_state_id() == 0);
+    std::cout << "etl media play/pause/resume/stop and ignored events passed\n";
+}
 ```
+
+ETL 20.49.0에서 세 상태를 모두 정의하고 상태 ID와 배열 순서를 맞춘 완성 예시입니다. diagram과 같이 Resume를 별도 event로 쓰며 Paused+Play는 무시합니다. 위 variant 조각도 재개를 추가하려면 별도 on_resume 전이를 구현해야 합니다.
+
 
 장점은 다음과 같습니다.
 
@@ -285,11 +255,12 @@ fsm.receive(StopEvent{});
 
 ## 패턴 비교
 
-| 패턴 | 코드 크기 | 표현력 | 적합 |
-| --- | --- | --- | --- |
-| Enum + switch | 가장 작음 | 낮음 | 3-5 state |
-| std::variant + visit | 중간 | 높음 | 5-15 state |
-| etl::fsm | 큼 | 매우 높음 | 15+ state, 형식 검증 |
+| 방식 | 주된 선택 이유 | 확인할 비용과 계약 |
+| --- | --- | --- |
+| Enum + switch | 단순 상태와 직접 분기 | 빠진 전이·switch 경고·공유 데이터 invariant |
+| Variant + visit | 상태별 데이터 type | 최대 alternative 크기·copy/move·valueless 예외 경로 |
+| Table | 전이를 데이터로 비교·검증 | lookup·action·guard·중복 pair 정책 |
+| ETL FSM | message/state interface와 외부 library 계약 | 고정한 판·state 수명·unknown-event·재진입 정책 |
 
 ## Hierarchical State Machine (HSM)
 
@@ -301,37 +272,34 @@ fsm.receive(StopEvent{});
 
 ## 임베디드 — Compile-time FSM
 
-C++23의 `constexpr`로 컴파일 타임에 검증할 수 있습니다.
+이처럼 loop를 사용하는 constexpr 함수는 C++14부터 표현할 수 있습니다. 아래 완성 table 예시는 C++17로 검증했으며 C++23을 요구하지 않습니다.
 
-```cpp
-// transition table — 컴파일 타임 데이터
-struct Transition {
-    StateId from;
-    EventId event;
-    StateId to;
-};
-
+```cpp title="media-table.cpp"
+#include <cassert>
+#include <iostream>
+enum class State { Stopped, Playing, Paused };
+enum class Event { Play, Pause, Resume, Stop };
+struct Transition { State from; Event event; State to; };
 constexpr Transition transitions[] = {
-    {StateId::Stopped, EventId::Play,  StateId::Playing},
-    {StateId::Playing, EventId::Pause, StateId::Paused},
-    {StateId::Playing, EventId::Stop,  StateId::Stopped},
-    {StateId::Paused,  EventId::Play,  StateId::Playing},
-    {StateId::Paused,  EventId::Stop,  StateId::Stopped},
+    {State::Stopped, Event::Play, State::Playing},
+    {State::Playing, Event::Pause, State::Paused},
+    {State::Playing, Event::Stop, State::Stopped},
+    {State::Paused, Event::Resume, State::Playing},
+    {State::Paused, Event::Stop, State::Stopped},
 };
-
-constexpr StateId next_state(StateId current, EventId event) {
-    for (const auto& t : transitions) {
-        if (t.from == current && t.event == event) return t.to;
-    }
+constexpr State next_state(State current, Event event) {
+    for (const auto& t : transitions) if (t.from == current && t.event == event) return t.to;
     return current;
 }
-
-// 런타임 또는 컴파일 타임
-constexpr StateId s1 = next_state(StateId::Stopped, EventId::Play);
-static_assert(s1 == StateId::Playing);
-
-StateId state = StateId::Stopped;
-state = next_state(state, EventId::Play);
+static_assert(next_state(State::Stopped, Event::Play) == State::Playing);
+static_assert(next_state(State::Paused, Event::Play) == State::Paused);
+int main() {
+    State state = State::Stopped;
+    for (auto event : {Event::Play, Event::Pause, Event::Resume, Event::Stop}) state = next_state(state, event);
+    assert(state == State::Stopped);
+    assert(next_state(state, Event::Resume) == state);
+    std::cout << "table media sequence and unknown transition passed\n";
+}
 ```
 
 상태 전이를 table로 만들어 데이터로 다루면 검증이 쉽고, 새 전이도 table에 한 줄만 추가하면 됩니다.
@@ -393,26 +361,22 @@ default + assert를 추가하거나 exhaustive check를 강제합니다.
 ISR과 main이 동시에 receive하면 race가 발생합니다. mutex나 queue를 둡니다.
 
 ### 6. Hardcoded transition
-새 state를 추가할 때 모든 switch를 수정해야 하므로 transition table을 data-driven으로 만듭니다.
+새 state를 추가할 때 영향을 받는 switch와 전이 정책을 점검합니다. table을 쓰면 비교·검증을 모을 수 있지만 action·guard·중복 pair 정책이 추가로 필요합니다.
 
-## 측정 — 패턴별 코드 크기
+## 검증 범위와 1차 자료
 
-같은 5-state FSM 기준입니다 (STM32F4, -Os).
+Clang 23.1.3 host의 C++17에서 media-table.cpp와 ETL 20.49.0의 etl-media.cpp를 실행했습니다. Play/Pause/Resume/Stop 정상 전이와 잘못된 event의 상태 유지를 확인했습니다. 실제 playback action·하드웨어·board code size는 측정하지 않았습니다. state 수별 임의의 B/KB 비교표는 채택 기준으로 쓰지 않습니다.
 
-| 패턴 | 코드 크기 | 비고 |
-| --- | --- | --- |
-| Enum + switch | ~400 B | — |
-| std::variant + visit | ~800 B | variant 인스턴스 |
-| etl::fsm | ~1.6 KB | 5 state class + FSM base |
-
-작은 FSM에는 enum이, 큰 FSM에는 `etl::fsm`이 적합합니다.
+- [C++ draft: variant visitation](https://eel.is/c++draft/variant.visit) — visit가 모든 alternative에 대해 유효해야 하는 계약
+- [ETL 20.49.0 fsm.h](https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/fsm.h) — state array·ID·unknown event·재진입 검사
+- [C++ draft: constexpr functions](https://eel.is/c++draft/dcl.constexpr) — 컴파일 타임 호출과 runtime 호출의 구분
 
 ## 정리
 
-- State machine은 세 단계로 발전합니다 — enum+switch(작음), variant(type-safe), etl::fsm(formal).
+- enum, variant, table과 ETL은 제약에 따라 고르는 대안이며 상태 수만으로 크기·안전 순위를 정하지 않습니다.
 - State invariant는 variant나 single enum으로 강제합니다.
 - 전이를 한 곳에 모아 중앙화합니다.
-- State별 데이터를 다룰 때는 variant가 최적입니다.
+- 상태별 데이터 표현에는 variant를 검토하고 실제 크기·이동·예외 조건을 확인합니다.
 - Logging을 통합하면 production debugging이 가능합니다.
 - Compile-time FSM은 검증과 안전을 함께 얻습니다.
 
@@ -421,7 +385,7 @@ ISR과 main이 동시에 receive하면 race가 발생합니다. mutex나 queue�
 - [Part 4-02: ETL 라이브러리](/blog/embedded/embedded-cpp/part4-02-etl-library) — etl::fsm
 - [Part 4-07: Compile-time FSM](/blog/embedded/embedded-cpp/part4-07-compile-time-fsm)
 - [Part 3-08: No-RTTI 설계](/blog/embedded/embedded-cpp/part3-08-no-rtti-design) — std::variant
-- GoF 20: State
+- [C++ variant 계약](https://eel.is/c++draft/variant) — 단일 활성 상태 표현의 조건
 
 ## 다음 글
 

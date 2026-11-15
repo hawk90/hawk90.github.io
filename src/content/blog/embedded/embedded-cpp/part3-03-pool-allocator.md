@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Pool은 같은 크기 블록의 묶음에 free list를 더한 구조입니다."** O(1) 할당과 해제, fragmentation 0, deterministic이라는 세 가지를 동시에 제공합니다.
+> **"Pool은 같은 크기 블록의 묶음에 free list를 더한 구조입니다."** free-list 조작은 O(1)이지만 동기화 대기와 T의 생성·소멸까지 일정 시간을 보장하지는 않습니다. 고정 크기 블록에는 외부 단편화가 없고, 정렬·작은 객체에 따른 내부 낭비는 남습니다.
 
 ## 어떤 문제를 푸는가
 
@@ -20,7 +20,7 @@ topics: ["embedded"]
 
 요구사항은 이렇습니다.
 
-- **O(1) 할당과 해제** — 어떤 상태에서도 일정 시간이 걸려야 합니다.
+- **O(1) 할당과 해제** — 슬롯 선택 단계가 N에 비례해 늘어나지 않아야 합니다.
 - **Fragmentation 0** — 같은 크기 블록만 다룹니다.
 - **Thread-safe (선택)** — RTOS 환경에서 필요합니다.
 - **Statistics** — 사용량을 추적할 수 있어야 합니다.
@@ -38,7 +38,7 @@ assert(pool.available() == 31);
 
 ## Pool의 핵심 — Free List
 
-free 블록들을 연결 리스트로 관리합니다. 할당된 블록의 메모리에는 next pointer를 저장해 둡니다.
+free 블록들을 연결 리스트로 관리합니다. 비어 있는 블록에만 next pointer를 저장하고, 사용 중인 블록에는 T를 생성합니다.
 
 ![Pool free list — 초기 상태와 두 블록 할당 후](/images/blog/embedded-cpp/diagrams/part3-03-pool-free-list.svg)
 
@@ -60,13 +60,22 @@ free list에서 빠져나온 `block0`의 메모리는 그 순간부터 사용자
 
 ## 기본 구현
 
-```cpp
+```cpp title="object-pool.hpp"
+#include <cstddef>
+#include <new>
+#include <type_traits>
+#include <utility>
+using std::size_t;
 template<typename T, size_t N>
 class ObjectPool {
+    static_assert(N > 0, "pool capacity must be positive");
+    static_assert(std::is_nothrow_destructible_v<T>);
     // 각 슬롯 — T 또는 next pointer
     union Slot {
-        alignas(T) std::byte storage[sizeof(T)];
+        T value;
         Slot* next;
+        Slot() noexcept : next(nullptr) {}
+        ~Slot() noexcept {} // 활성 T는 destroy에서 소멸
     };
 
     Slot slots_[N];
@@ -83,13 +92,16 @@ public:
         free_head_ = &slots_[0];
     }
 
+    ObjectPool(const ObjectPool&) = delete;
+    ObjectPool& operator=(const ObjectPool&) = delete;
+
     T* allocate() noexcept {
         if (!free_head_) return nullptr;   // 고갈
 
         Slot* slot = free_head_;
         free_head_ = slot->next;
         ++allocated_;
-        return reinterpret_cast<T*>(&slot->storage);
+        return &slot->value;
     }
 
     void deallocate(T* p) noexcept {
@@ -105,7 +117,9 @@ public:
     template<typename... Args>
     T* construct(Args&&... args) noexcept {
         T* p = allocate();
-        if (p) new (p) T(std::forward<Args>(args)...);
+        static_assert(std::is_nothrow_constructible_v<T, Args...>,
+                      "this pool requires a nothrow constructor");
+        if (p) p = new (p) T(std::forward<Args>(args)...);
         return p;
     }
 
@@ -124,7 +138,7 @@ public:
 };
 ```
 
-핵심 아이디어는 `union`을 활용해 같은 메모리를 객체 또는 next pointer로 양분한다는 점입니다. 추가 메모리가 전혀 들지 않습니다.
+핵심 아이디어는 `union`을 활용해 같은 메모리를 객체 또는 next pointer로 양분한다는 점입니다. 각 슬롯은 max(sizeof(T), sizeof(Slot*))와 정렬 패딩만큼 차지합니다. free-head와 통계도 별도로 필요합니다. allocate/deallocate는 원시 저장소를, construct/destroy는 객체 수명을 다루며 서로 짝을 맞춥니다. 같은 pool의 활성 포인터만 반환하고 pool보다 객체·wrapper를 먼저 소멸시켜야 합니다.
 
 ## 사용 예 — Order Pool
 
@@ -133,7 +147,7 @@ struct Order {
     int id;
     int quantity;
     float price;
-    Order(int i, int q, float p) : id(i), quantity(q), price(p) {}
+    Order(int i, int q, float p) noexcept : id(i), quantity(q), price(p) {}
 };
 
 ObjectPool<Order, 32> order_pool;
@@ -152,7 +166,7 @@ void process_request(int id, int qty, float price) {
 }
 ```
 
-`construct`와 `destroy`로 RAII와 자연스럽게 어울리며, 실패 시 nullptr를 반환합니다.
+`construct`와 `destroy`로 RAII와 자연스럽게 어울리며, 고갈 시 nullptr를 반환합니다. 이 구현은 nothrow 생성·소멸 타입으로 제한합니다. 생성 예외까지 지원하려면 실패한 슬롯을 free-list로 돌려보내는 복구가 필요합니다.
 
 ## RAII wrapper — Pool unique_ptr
 
@@ -215,92 +229,15 @@ void process() {
 
 `std::unique_ptr`처럼 예외 안전과 자동 해제를 모두 챙길 수 있습니다.
 
-## Thread-safe pool
+## Thread-safe pool의 경계
 
-RTOS multi-task에서 동시에 할당과 해제가 일어나면 race condition이 생깁니다. mutex나 atomic으로 보호합니다.
+다중 task가 하나의 pool을 쓰면 free-list와 통계를 함께 보호해야 합니다. mutex wrapper는 초기화된 ObjectPool을 멤버로 두고, mutex 생성 실패와 획득 결과를 확인한 뒤 allocate/deallocate를 호출하는 형태로 설계합니다. FreeRTOS mutex는 ISR에서 사용할 수 없으므로 ISR 경로에는 해당 포트의 ISR용 API·critical section 정책을 별도로 적용합니다.
 
-```cpp
-template<typename T, size_t N>
-class ThreadSafePool {
-    Slot slots_[N];
-    Slot* free_head_;
-    SemaphoreHandle_t mutex_;   // FreeRTOS 예
+mutex는 슬롯 조작뿐 아니라 대기 시간을 추가합니다. 이 장은 RTOS 실행 시간과 ISR 안전성을 검증하지 않았으며, 임의의 μs 값으로 비용을 단정하지 않습니다.
 
-public:
-    ThreadSafePool() {
-        // 초기화
-        mutex_ = xSemaphoreCreateMutex();
-    }
+### atomic head만으로 lock-free가 되지 않는 이유
 
-    T* allocate() noexcept {
-        xSemaphoreTake(mutex_, portMAX_DELAY);
-        T* result = nullptr;
-        if (free_head_) {
-            Slot* slot = free_head_;
-            free_head_ = slot->next;
-            result = reinterpret_cast<T*>(&slot->storage);
-        }
-        xSemaphoreGive(mutex_);
-        return result;
-    }
-
-    void deallocate(T* p) noexcept {
-        if (!p) return;
-        xSemaphoreTake(mutex_, portMAX_DELAY);
-        Slot* slot = reinterpret_cast<Slot*>(p);
-        slot->next = free_head_;
-        free_head_ = slot;
-        xSemaphoreGive(mutex_);
-    }
-};
-```
-
-mutex 비용은 일반적인 RTOS에서 1~2 μs 수준입니다. critical section이 짧기 때문에 보통 수용 가능합니다.
-
-### Lock-free pool — atomic free list
-
-더 빠른 옵션입니다. CAS(Compare-And-Swap)로 lock 없이 처리합니다.
-
-```cpp
-template<typename T, size_t N>
-class LockFreePool {
-    Slot slots_[N];
-    std::atomic<Slot*> free_head_;
-
-public:
-    T* allocate() noexcept {
-        Slot* head = free_head_.load(std::memory_order_acquire);
-        while (head) {
-            Slot* next = head->next;
-            if (free_head_.compare_exchange_weak(
-                    head, next,
-                    std::memory_order_release,
-                    std::memory_order_acquire)) {
-                return reinterpret_cast<T*>(&head->storage);
-            }
-        }
-        return nullptr;
-    }
-
-    void deallocate(T* p) noexcept {
-        if (!p) return;
-        Slot* slot = reinterpret_cast<Slot*>(p);
-        Slot* head = free_head_.load(std::memory_order_relaxed);
-        do {
-            slot->next = head;
-        } while (!free_head_.compare_exchange_weak(
-            head, slot,
-            std::memory_order_release,
-            std::memory_order_relaxed));
-    }
-};
-```
-
-ABA problem을 주의해야 합니다. 다른 thread가 같은 주소를 재할당하면 CAS가 잘못 성공합니다. tagged pointer나 hazard pointer로 해결합니다.
-
-대부분의 임베디드에서는 mutex 기반이면 충분합니다. lock-free는 극한 환경에서만 고려합니다.
-
-자세한 lock-free는 [Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics)에서 다룹니다.
+Treiber 형태의 head CAS만 붙인 pool에는 ABA뿐 아니라 슬롯 재사용 중 next를 읽고 쓰는 수명·data race 문제가 있습니다. acquire/release 순서만 바꿔서 해결되지 않습니다. tagged pointer, 안전한 회수·재사용 프로토콜, 타깃에서의 원자 연산 보장까지 검토해야 합니다. 이 글은 검증되지 않은 CAS pool을 완성 예제로 제공하지 않습니다. 알고리즘의 전제는 [Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics)에서 다룹니다.
 
 ## 통계와 디버깅
 
@@ -391,7 +328,7 @@ RAII로 lifetime을 명확히 합니다.
 ```cpp
 ObjectPool<HugeStruct, 10000> pool;   // sizeof(HugeStruct) * 10000
 ```
-N은 측정을 바탕으로 결정합니다. peak_allocated를 추적한 뒤 10~20% 마진을 둡니다.
+N은 동시 최대 수요·실패 정책·RAM 예산으로 정합니다. peak_allocated는 관찰 표본일 뿐 최악 입력의 상한이 아니며 임의의 비율을 더한다고 충분성이 보장되지는 않습니다.
 
 ### 4. Thread safety 가정
 single-thread pool을 RTOS task끼리 공유하면 race가 발생합니다. mutex를 두거나 task별로 별도 pool을 씁니다.
@@ -408,9 +345,12 @@ init 시점에 next pointer가 누락되면 null deref가 발생합니다. 모�
 
 ```cpp
 class MultiPool {
-    ObjectPool<std::byte, 16> small_pool_;   // 16 byte 블록
-    ObjectPool<std::byte, 64> medium_pool_;  // 64 byte
-    ObjectPool<std::byte, 256> large_pool_;  // 256 byte
+    struct alignas(std::max_align_t) Small { std::byte bytes[16]; };
+    struct alignas(std::max_align_t) Medium { std::byte bytes[64]; };
+    struct alignas(std::max_align_t) Large { std::byte bytes[256]; };
+    ObjectPool<Small, 8> small_pool_;    // 16바이트 payload 8개
+    ObjectPool<Medium, 8> medium_pool_;  // 64바이트 payload 8개
+    ObjectPool<Large, 4> large_pool_;    // 256바이트 payload 4개
 
 public:
     void* allocate(size_t n) {
@@ -422,46 +362,65 @@ public:
 };
 ```
 
-크기를 추적해야 하므로 pool마다 별도의 deallocate가 필요합니다.
+위 코드는 분류 구조를 보여 주는 부분 예제입니다. 해제는 클래스 멤버로 구현하고 small/medium/large 모두에 대응해야 합니다. 요청 n뿐 아니라 alignment도 검사해야 하며, 이 설계는 max_align_t보다 큰 정렬을 지원하지 않습니다. 원래 선택된 크기 등급·활성 할당 상태를 보존해야 합니다.
 
 ```cpp
 void deallocate(void* p, size_t n) {
-    if (n <= 16) small_pool_.deallocate(static_cast<std::byte*>(p));
-    else if (n <= 64) medium_pool_.deallocate(static_cast<std::byte*>(p));
+    if (n <= 16) small_pool_.deallocate(static_cast<Small*>(p));
+    else if (n <= 64) medium_pool_.deallocate(static_cast<Medium*>(p));
     // ...
 }
 ```
 
 malloc과 비슷한 generic allocator가 됩니다. 각 pool 내부에는 fragmentation이 없지만, pool 간 균형이 안 맞으면 일부 fragmentation이 발생할 수 있습니다.
 
-## 측정 — pool vs malloc
+## 실행 확인 — 고갈·재사용·정렬·수명
 
-같은 패턴(10000회 alloc/free)을 STM32F4에서 측정합니다.
+앞의 object-pool.hpp와 다음 파일을 같은 디렉터리에 둡니다. 빈 pool, N=2 고갈, 반환 슬롯 재사용, 64바이트 정렬, 소멸 횟수를 확인합니다. 잘못된 포인터와 double-free는 계약 위반이며 이 간단한 pool은 이를 검출하지 않습니다.
 
-```text
-malloc/free (newlib-nano):
-  alloc: 평균 ~120 cycles, max 800+ (worst case)
-  free:  평균 ~80 cycles
-  fragmentation: 시간에 따라 증가
-  determinism: 낮음
-
-ObjectPool<Order, 100>:
-  alloc: 12 cycles (constant)
-  free:  10 cycles (constant)
-  fragmentation: 0
-  determinism: 완벽
+```cpp title="pool-check.cpp"
+#include "object-pool.hpp"
+#include <cassert>
+#include <cstdint>
+struct alignas(64) Message {
+    static inline int live = 0;
+    int value;
+    explicit Message(int n) noexcept : value(n) { ++live; }
+    ~Message() noexcept { --live; }
+};
+int main() {
+    ObjectPool<Message, 2> pool;
+    assert(pool.empty() && pool.available() == 2);
+    auto* a = pool.construct(1);
+    auto* b = pool.construct(2);
+    assert(a && b && Message::live == 2 && pool.full());
+    assert(reinterpret_cast<std::uintptr_t>(a) % alignof(Message) == 0);
+    assert(pool.construct(3) == nullptr);
+    pool.destroy(a);
+    auto* c = pool.construct(3);
+    assert(c == a && c->value == 3);
+    pool.destroy(b); pool.destroy(c);
+    assert(pool.empty() && Message::live == 0);
+}
 ```
 
-Pool이 약 10배 빠르고 결정적입니다. real-time critical 환경에서는 사실상 필수입니다.
+이 장은 malloc 대비 속도·보드 cycle·동시성 안전성을 측정하지 않았습니다. 크기와 결정성 판단은 타깃의 allocator, 캐시·인터럽트·동기화 조건을 포함해 측정해야 합니다.
 
 ## 정리
 
 - Pool은 고정 크기 블록과 free list로 구성되며 O(1)에 할당과 해제가 가능합니다.
-- `union` 트릭으로 추가 메모리 없이 free list를 둘 수 있습니다.
-- Thread safety는 mutex(간단)나 atomic CAS(lock-free)로 확보합니다.
-- RAII wrapper인 `PoolUniquePtr`로 예외 안전과 자동 해제를 보장합니다.
+- union 슬롯은 T와 next 포인터 중 큰 쪽 및 정렬 패딩을 수용합니다.
+- 동시성 보호는 별도 설계하며 atomic head만으로 안전한 lock-free pool이 되지는 않습니다.
+- PoolUniquePtr는 소유권 자동 반환을 돕지만 pool 수명과 nothrow 생성 계약은 별도로 지켜야 합니다.
 - 통계를 추적하면 capacity tuning이 가능합니다.
 - 여러 크기를 다룰 때는 multi-pool로 가며 fragmentation이 일부 발생합니다.
+
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [객체 수명·저장소 재사용](https://eel.is/c++draft/basic.life)
+- [union 활성 멤버 수명](https://eel.is/c++draft/class.union)
 
 ## 관련 항목
 

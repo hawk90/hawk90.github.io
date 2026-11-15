@@ -23,7 +23,7 @@ CXL은 *세 단계*로 *multi-host 메모리 공유*를 진화시켰습니다.
 | 단계 | CXL 버전 | 토폴로지 | 특징 |
 |------|---------|---------|------|
 | **Direct Attach** | 1.1 | 호스트 1 ↔ 디바이스 1 | 단순. PCIe 카드 한 장 |
-| **Switching·Pooling** | 2.0 | 호스트 N ↔ Switch ↔ 디바이스 N | fan-out, multi-LD time-share |
+| **Switching·Pooling** | 2.0 | 호스트 N ↔ Switch ↔ 디바이스 N | fan-out, host별 LD 할당 |
 | **Fabric** | 3.0 / 3.x | 호스트 N ↔ Multi-level Switch ↔ 디바이스 M | coherent multi-host, GFAM |
 
 각 단계가 *해결하는 문제*:
@@ -42,38 +42,38 @@ CXL 2.0의 *single-level switch*는 *한 host*가 *여러 CXL 디바이스*를 *
 | CXL Switch | 1대, 여러 downstream port |
 | Memory Devices | 각 port에 attach |
 
-*Host CPU 입장*에서는 *여러 mem device*가 *각각 별도 NUMA 노드*로 보이거나, *HDM Decoder의 interleave region*으로 *하나의 큰 NUMA로 묶을 수* 있습니다.
+memdev·region과 NUMA node는 서로 다른 객체입니다. decoder interleave는 주소 분산을 구성하고, NUMA topology와 System RAM 노출은 firmware의 proximity 정보와 OS 메모리 관리 조건도 따릅니다. “장치 하나당 NUMA node 하나” 또는 “interleave region 하나면 NUMA node 하나”라는 보편 대응은 두지 않습니다.
 
 ## CXL 2.0 Pooling — Multi-Host LD
 
-같은 디바이스를 *여러 host가 시간 분할*해 사용하는 게 *pooling*입니다.
+Pooling에서는 같은 물리 디바이스의 서로 다른 영역을 host별로 전용 할당할 수 있습니다. 여러 host가 각자 할당받은 LD를 동시에 사용하는 것과 한 영역을 여러 host가 동시에 공유하는 것은 다릅니다.
 
 | 요소 | 의미 |
 |------|------|
 | Logical Device (LD) | 디바이스 메모리의 *논리적 분할 단위* |
 | LD-ID | host·디바이스 양쪽에서 LD 식별 |
-| Time-share | 한 시점에 *한 host만* 특정 LD 사용 |
+| 전용 할당 | 해당 pooled 영역은 한 host interface에 전용으로 배정합니다. |
 | Re-allocation | 워크로드 변화에 따라 *동적 재할당* |
 
-운영 예시 — *2 TB pool memory를 4개 LD로 분할*:
+가상 운영 예입니다. 2 TB를 512 GB씩 나누었다고 가정하며, 실제 장치의 지원 단위나 FM 명령 결과는 아닙니다. 회수·재할당 사이에는 다음과 같은 host 측 준비가 필요합니다.
 
-| LD | 초기 할당 | 시간 t1 | 시간 t2 |
-|----|---------|---------|---------|
-| LD0 (512 GB) | Host A | (회수, unallocated) | Host C에 재할당 |
-| LD1 (512 GB) | Host B | Host B 유지 | Host B 유지 |
-| LD2 (512 GB) | Host C | Host C 유지 | Host D에 새로 할당 |
-| LD3 (512 GB) | 미할당 | Host A에 할당 | Host A 유지 |
+| 단계 | LD0의 예 | 확인할 조건 |
+|---|---|---|
+| 사용 중 | Host A에 배정 | 페이지·DAX mapping·DMA 등 실제 사용자 추적 |
+| 반환 준비 | A가 사용을 중지 | OS offline·unmap·cache·데이터 수명과 오류 처리 |
+| 회수 | FM이 배정을 변경 | 이전 접근이 중단되었고 필요한 격리·데이터 정리가 완료됨 |
+| 새 배정 | Host C에 제공 | C의 decoder·OS 매핑과 사용 가능 상태 확인 |
 
-*Fabric Manager*가 *out-of-band control*로 이 할당을 관리합니다.
+Fabric Manager가 구성 명령을 내리는 것과 운영체제가 사용 중인 메모리를 안전하게 반환하는 것은 서로 다른 작업입니다. 여기서는 실제 메모리를 offline하거나 LD를 bind/unbind하지 않습니다.
 
 ## CXL 3.0 Fabric — Coherent Multi-Host
 
-CXL 3.0은 *2.0의 time-share pooling*을 넘어 *multi-host가 동시에 같은 메모리 영역 접근*을 가능하게 합니다 — *coherency를 유지하면서*.
+CXL 3.0 계열은 multi-host가 같은 영역에 접근하는 Shared FAM과 fabric 기능을 추가합니다. 영역의 hardware/software coherency 모델과 참여 host의 지원 조건이 맞아야 하며, 모든 공유 영역에 hardware coherence가 자동으로 생기는 것은 아닙니다.
 
 | 구성 요소 | 역할 |
 |---------|------|
 | Multi-level Switch | PBR로 라우팅, multi-hop fabric 가능 |
-| Fabric Manager | out-of-band control + topology 관리 |
+| Fabric Manager | 구성 정책·명령과 topology 관리. 실제 관리 transport는 별도 확인합니다. |
 | Shared FAM | 여러 host가 *한 HDM 영역에 동시 접근* |
 | BISnp | HDM-DB 영역에서 device가 host cache를 snoop·무효화 |
 
@@ -110,11 +110,13 @@ CXL switch에는 *HBR(Hierarchy Based Routing)* switch와 *PBR(Port Based Routin
 
 PBR이 있어야 계층 구조를 벗어난 *큰 fabric*을 만들 수 있습니다.
 
-## Fabric Manager — Out-of-band Control
+## Fabric Manager: 논리적 관리와 실제 transport
 
 지금까지 본 pooling에는 *누가 LD를 어느 host에 붙일지 정하는가*라는 빈칸이 있습니다. 그 자리를 채우는 것이 *Fabric Manager (FM)*입니다.
 
-규격(CXL 3.1 §7.6.1)은 FM을 *재구성이 필요한 시점을 정하고 구성 명령을 내리는 논리적 프로세스*로 정의합니다. 형태는 정해져 있지 않습니다. host에서 도는 소프트웨어, BMC의 embedded software, 다른 CXL 디바이스나 switch의 펌웨어, 디바이스 안의 state machine 어느 것이든 될 수 있습니다. FM은 규격의 *FM API* 명령으로 디바이스와 switch를 구성합니다.
+[규격(CXL 3.1 §7.6.1)](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)은 FM을 *재구성이 필요한 시점을 정하고 구성 명령을 내리는 논리적 프로세스*로 정의합니다. 형태는 정해져 있지 않습니다. host에서 도는 소프트웨어, BMC의 embedded software, 다른 CXL 디바이스나 switch의 펌웨어, 디바이스 안의 state machine 어느 것이든 될 수 있습니다. FM은 규격의 *FM API* 명령으로 디바이스와 switch를 구성합니다.
+
+§2.9와 §7.6.2는 CCI를 mailbox 또는 MCTP-capable interface로 노출하는 경로를 설명합니다. MCTP도 PCIe VDM의 in-band 경로와 별도 관리 interconnect의 out-of-band 경로를 구분해야 합니다. FM이 BMC에서 실행된다는 사실만으로 모든 명령이 out-of-band라고 판정하지 않습니다.
 
 FM의 spec 정의(§7.6.1), FM API가 CCI로 전달되는 경로, bind·unbind 흐름은 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric#fabric-manager)에서 다룹니다.
 
@@ -124,16 +126,18 @@ FM의 spec 정의(§7.6.1), FM API가 CCI로 전달되는 경로, bind·unbind �
 
 | 연구 | 내용 |
 |------|------|
-| Pond (Microsoft Azure 외, ASPLOS 2023) | 클라우드 trace 분석: 8~16 소켓 범위 풀링으로 이득 대부분. DRAM 비용 7% 절감, 성능은 같은 NUMA 노드 대비 1~5% 이내 |
-| TPP (Meta 외, ASPLOS 2023) | 애플리케이션을 고치지 않는 OS 수준 hot/cold 페이지 배치. 기본 Linux 대비 18% 성능 향상 |
+| [Pond (ASPLOS 2023)](https://arxiv.org/abs/2203.00241v4) | 클라우드 trace 기반 설계와 158 workload 평가. 논문 조건에서 DRAM 비용 7% 절감과 같은 NUMA node 기준 1~5% 이내 성능 차이를 보고합니다. |
+| [TPP (ASPLOS 2023)](https://arxiv.org/abs/2206.02878v2) | OS 수준 hot/cold 페이지 배치. 논문 조건에서 기본 Linux보다 18%, NUMA Balancing·AutoTiering 등을 포함한 비교 대상보다 5~17% 성능 향상을 보고합니다. |
 
-Microsoft는 Azure M-series VM 프리뷰에서 CXL 메모리 확장을 발표했습니다(Astera Labs Leo, 2025년 11월).
+이 결과는 논문의 장치·배치 정책·workload와 비교 기준에 한정되며 상용 cloud 전체의 절감률이 아닙니다. 세부 비용·수요 모델은 [HBM Ch 12](/blog/embedded/hardware/hbm/chapter12-cxl-pooling-fabric)에서 구분합니다.
+
+별도 상용 발표로 [Astera Labs의 2025년 11월 18일 자료](https://ir.asteralabs.com/news-releases/news-release-details/astera-labs-leo-cxl-smart-memory-controllers-microsoft-azure-m)는 Azure M-series의 CXL 메모리 확장 **private preview**를 설명합니다. 당시 preview 발표는 전체 서비스의 GA나 multi-host coherent fabric 배치를 증명하지 않습니다.
 
 ## Composability — 데이터센터 비전
 
 CXL 컨소시엄은 3.x의 방향을 *메모리와 가속기를 분리해 조합하는 composable fabric*으로 설명합니다.
 
-**현재 — 정적 서버**: 서버마다 CPU·메모리·가속기가 고정 비율로 묶여 있어, 워크로드가 메모리를 더 원해도 옮길 수 없습니다.
+**고정 구성의 제약**: 서버별 물리 자원 비율 때문에 한 서버의 여유를 다른 서버에 바로 제공하기 어려울 수 있습니다. 가상화·migration 등 기존 소프트웨어 수단까지 불가능하다는 뜻은 아닙니다.
 
 **Composable — 동적 조합**: 자원을 종류별 풀로 나눠 두고, 워크로드가 시작할 때 필요한 만큼 빌리고 끝날 때 돌려줍니다.
 
@@ -147,11 +151,11 @@ CXL 컨소시엄은 3.x의 방향을 *메모리와 가속기를 분리해 조합
 
 ### "GFAM은 멀티 host가 자유롭게 read/write"
 
-일관성 모델에 달렸습니다. FM이 영역마다 *hardware coherency*(HDM-DB, write는 소유권을 먼저 얻는 2단계) 또는 *software-managed coherency*를 지정합니다. software 모델이면 일관성은 애플리케이션 몫입니다.
+일관성 모델에 달렸습니다. FM이 영역마다 *hardware coherency*(HDM-DB, write는 소유권을 먼저 얻는 2단계) 또는 *software-managed coherency*를 지정합니다. software 모델이면 host 간 소프트웨어 ownership·flush/invalidate와 동기화 조건이 필요합니다. §2.4.4의 No Clean Writebacks 관련 조건 등도 확인해야 하며, 단순히 같은 주소를 mmap하는 것만으로 충분하지 않습니다.
 
 ### "Fabric Manager는 single point of failure"
 
-FM의 형태는 규격이 정하지 않습니다. host 소프트웨어, BMC, switch 펌웨어 등 어디서든 돌 수 있으므로, 가용성은 *FM을 어디에 어떻게 두느냐*의 설계 문제입니다.
+FM의 형태는 규격이 정하지 않습니다. host 소프트웨어, BMC, switch 펌웨어 등 어디서든 돌 수 있으므로, 가용성은 FM의 배치뿐 아니라 상태 저장·중복 제어 방지·복구 정책·공유 관리 경로를 포함한 설계 문제입니다. 구현 위치가 자유롭다는 사실이 single point of failure를 제거하지는 않습니다.
 
 ### "PBR fabric은 정해진 토폴로지만 된다"
 

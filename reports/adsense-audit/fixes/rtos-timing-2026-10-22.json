@@ -1,0 +1,147 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Practical RTOS Internals",
+  "batch": "part2-08–part2-11",
+  "rescore": false,
+  "readyForIntegration": true,
+  "readOnlyEvaluationReferences": [
+    "reports/adsense-audit/published-loop-36.md"
+  ],
+  "kernelCommit": "0adc196d4bd52a2d91102b525b0aafc1e14a2386",
+  "primarySources": [
+    "https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0",
+    "https://docs.zephyrproject.org/3.7.0/services/pm/system.html",
+    "https://doc.segger.com/UM08027_SystemView.html",
+    "https://github.com/ARM-software/CMSIS_6/blob/v6.1.0/CMSIS/Core/Include/core_cm4.h",
+    "https://docs.kernel.org/trace/ftrace.html"
+  ],
+  "validationCommands": [
+    "node scripts/verify-rtos-timing-examples.mjs",
+    "bash scripts/audit-publish-gate.sh <four chapter paths>",
+    "node scripts/check-inline-math.mjs <four chapter paths>"
+  ],
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-08-tick-timer.md",
+      "beforeSha256": "c1bc605d393aebfae43b09165094ab4b864bb82e094639d6dc70c171cbbd6045",
+      "afterSha256": "cf3cb7a14105f732b58ae3c8d16e9484c606944268b8c7b042e2ade3072951f2",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "sourceExamples": "pass_with_scoped_runtime",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetHardware": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "Tick source, quantization, integer SysTick reload, periodic delay and time slicing.",
+        "problemSignalAndCounterevidence": "Unpinned timer/clock explanations, fixed-rate assumptions and unchecked integer/width boundaries.",
+        "causeHypothesisAndAlternatives": "An unspecified RTOS/MCU implementation and assumed measurement values were mixed with API descriptions. Scope exact source behavior, pure arithmetic and hardware-dependent observations separately.",
+        "evidence": "Pinned FreeRTOS V11.2.0 ARM_CM4F source; port.c setup/handler and tasks.c tick/delay behavior; RISC-V machine timer documentation.",
+        "sampleCoverage": "Full current source and matching published-loop-36 entry read. Resumed edits inherited from the interrupted session, reviewed current fences, examples, links and summary. beforeSha256 is tracked HEAD, not a claim to have authored every inherited change.",
+        "decision": "Remediated the documented content/example defects; no score or hardware-performance claim generated.",
+        "smallestSafeChange": "Only this chapter, the timing verifier and batch evidence. Preserved URL/date/seriesOrder/draft; existing manual description corrections retained. Removed nonexistent next-article reference in 2-11.",
+        "validationAndResidualRisk": "Source C sanitizer execution covers min/max reload, zero/null/noninteger/overflow rejection; periodic task compiled against the real Cortex-M4F port headers. Batch publish gate and inline math pass. ARM tests are compile-only; physical timer/IRQ/sleep, energy, trace transport and performance remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which exact MCU/board, timer and clock setup, IRQ priority, power mode, recorder version and raw trace/current data will validate this chapter’s hardware-dependent behavior?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-09-tickless.md",
+      "beforeSha256": "6eaca58770efb057d1e522927c4dfc6ad45468df982084179fa27f13d0265c15",
+      "afterSha256": "874f7738192d7c2828d9c8df7209e7ea6010e0625d190ca92a3582f00b330a03",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "sourceExamples": "pass_with_scoped_runtime",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetHardware": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "Idle suppression, race recheck, 24-bit interval, hook mutability and assumed energy budget.",
+        "problemSignalAndCounterevidence": "Omitted sleep compensation branches, unsupported long SysTick sleeps, MCU mode/current and battery claims without hardware.",
+        "causeHypothesisAndAlternatives": "An unspecified RTOS/MCU implementation and assumed measurement values were mixed with API descriptions. Scope exact source behavior, pure arithmetic and hardware-dependent observations separately.",
+        "evidence": "Read actual V11.2.0 port.c branches 591–818; maximum suppressed ticks is 0xFFFFFF/counts-per-tick. Zephyr 3.7.0 PM docs define mode-dependent wake responsibility.",
+        "sampleCoverage": "Full current source and matching published-loop-36 entry read. Resumed edits inherited from the interrupted session, reviewed current fences, examples, links and summary. beforeSha256 is tracked HEAD, not a claim to have authored every inherited change.",
+        "decision": "Remediated the documented content/example defects; no score or hardware-performance claim generated.",
+        "smallestSafeChange": "Only this chapter, the timing verifier and batch evidence. Preserved URL/date/seriesOrder/draft; existing manual description corrections retained. Removed nonexistent next-article reference in 2-11.",
+        "validationAndResidualRisk": "Compiled actual ARM_CM4F tickless port and verified vPortSuppressTicksAndSleep symbol; source JS validates assumed 30.997 uA and 271.53372 mAh/year plus invalid inputs. No sleep instruction executed. Batch publish gate and inline math pass. ARM tests are compile-only; physical timer/IRQ/sleep, energy, trace transport and performance remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which exact MCU/board, timer and clock setup, IRQ priority, power mode, recorder version and raw trace/current data will validate this chapter’s hardware-dependent behavior?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-10-scheduler-latency.md",
+      "beforeSha256": "e248b586b858c8da934cd42f4cdb7d208e7e8c134fa2113bef438d71428014ac",
+      "afterSha256": "9cc3f23a603b4de79e2fba26dad18212eaeefe0fe523a19ffdaa78dd31140643",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "sourceExamples": "pass_with_scoped_runtime",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetHardware": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "GPIO observation boundaries, wrap-aware DWT arithmetic, event tracing and tail histogram.",
+        "problemSignalAndCounterevidence": "Repeated single-pin set/clear/toggle loses edges; trace tools measured different intervals; unverified OS timing tables and dropped histogram tail.",
+        "causeHypothesisAndAlternatives": "An unspecified RTOS/MCU implementation and assumed measurement values were mixed with API descriptions. Scope exact source behavior, pure arithmetic and hardware-dependent observations separately.",
+        "evidence": "V11.2.0 queue API plus Linux ftrace/event docs and cyclictest source distinguish IRQ-off, event wake-to-run and periodic timer wake observations.",
+        "sampleCoverage": "Full current source and matching published-loop-36 entry read. Resumed edits inherited from the interrupted session, reviewed current fences, examples, links and summary. beforeSha256 is tracked HEAD, not a claim to have authored every inherited change.",
+        "decision": "Remediated the documented content/example defects; no score or hardware-performance claim generated.",
+        "smallestSafeChange": "Only this chapter, the timing verifier and batch evidence. Preserved URL/date/seriesOrder/draft; existing manual description corrections retained. Removed nonexistent next-article reference in 2-11.",
+        "validationAndResidualRisk": "Extracted markers compile for Cortex-M4F. ASan/UBSan host checks cover modulo wrap, ns conversion, invalid clock/null, tail bucketing and sample saturation; shell syntax passes. No GPIO/DWT/Linux tracing run. Batch publish gate and inline math pass. ARM tests are compile-only; physical timer/IRQ/sleep, energy, trace transport and performance remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which exact MCU/board, timer and clock setup, IRQ priority, power mode, recorder version and raw trace/current data will validate this chapter’s hardware-dependent behavior?"
+        }
+      ]
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/rtos/practical-internals/part2-11-tracing-observability.md",
+      "beforeSha256": "43b5870d93e7ad55212bc89f5e852ff8ea7dd79afc362f8102f34a91b838a033",
+      "afterSha256": "fcbfe48bb548b840891ebca25083ea90fef814a2f422f04cf9e94cfbdd81cb5f",
+      "validation": {
+        "blockingPublishGate": "pass",
+        "inlineMath": "pass",
+        "sourceExamples": "pass_with_scoped_runtime",
+        "upstreamCloneChecks": "skipped_not_pass",
+        "targetHardware": "not_run"
+      },
+      "evidence": {
+        "contextAndScope": "Software hooks, ITM/DWT/ETM information, recorder integration and bounded runtime stats.",
+        "problemSignalAndCounterevidence": "Contradictory ITM-only-print claim, unlimited busy waiting, unsafe fixed text buffer, unsupported costs/licensing and nonexistent next-chapter link.",
+        "causeHypothesisAndAlternatives": "An unspecified RTOS/MCU implementation and assumed measurement values were mixed with API descriptions. Scope exact source behavior, pure arithmetic and hardware-dependent observations separately.",
+        "evidence": "CMSIS 6.1.0 core_cm4.h; vendor SystemView/Tracealyzer docs; V11.2.0 task.h/tasks.c raw stats API; actual following article is part3-01-critical-section.",
+        "sampleCoverage": "Full current source and matching published-loop-36 entry read. Resumed edits inherited from the interrupted session, reviewed current fences, examples, links and summary. beforeSha256 is tracked HEAD, not a claim to have authored every inherited change.",
+        "decision": "Remediated the documented content/example defects; no score or hardware-performance claim generated.",
+        "smallestSafeChange": "Only this chapter, the timing verifier and batch evidence. Preserved URL/date/seriesOrder/draft; existing manual description corrections retained. Removed nonexistent next-article reference in 2-11.",
+        "validationAndResidualRisk": "ITM conditional policy executes with a CMSIS-shaped fake only. Extracted raw snapshot compiled for ARM and executed with actual POSIX kernel: reports tasks and rejects more than 8 tasks. No physical ITM or host recorder executed. Batch publish gate and inline math pass. ARM tests are compile-only; physical timer/IRQ/sleep, energy, trace transport and performance remain unassessed."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "Which exact MCU/board, timer and clock setup, IRQ priority, power mode, recorder version and raw trace/current data will validate this chapter’s hardware-dependent behavior?"
+        }
+      ]
+    }
+  ],
+  "finalCheckpoint": "reports/adsense-audit/fixes/repair-resume-checkpoint-2026-10-22.md"
+}

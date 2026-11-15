@@ -10,57 +10,50 @@ draft: false
 topics: ["embedded"]
 ---
 
-A/B 슬롯·서명·다운로드·진행 보고·롤백 정책을 직접 짜기 시작하면, 비슷한 코드를 여러 프로젝트에서 다시 짜는 자신을 발견합니다. RAUC와 SWUpdate는 그 *반복되는 뼈대*를 미리 마련해 둔 오픈소스 프레임워크입니다. 둘 다 U-Boot의 A/B 슬롯과 정확히 맞물려 동작합니다.
+RAUC와 SWUpdate는 업데이트 artifact를 검증·설치하는 framework입니다. 어느 쪽도 U-Boot의 A/B slot script, storage layout, health policy를 보드 설정 없이 자동으로 만들어 주지 않습니다. 이 장은 RAUC 1.15 문서와 SWUpdate 2026.05 문서를 기준으로 interface 차이를 정리합니다.
 
 ## 한 줄 요약
 
-**RAUC는 *bundle*이라는 서명된 업데이트 단위로 슬롯을 갈아 끼우고, SWUpdate는 *sw-description*이라는 YAML/Lua 스크립트로 더 유연한 업데이트를 지원합니다. 둘 다 U-Boot의 env로 슬롯을 표시합니다.**
+**RAUC는 signed bundle과 configured slot/bootloader integration을 제공하고, SWUpdate는 `sw-description`이 정의하는 image/file/bootenv 작업을 제공합니다.** A/B 선택, boot success 판단, rollback은 제품의 bootloader contract와 일치해야 합니다.
 
-## 왜 프레임워크인가
+## 업데이트 경계
 
-직접 짜면 다음을 모두 다뤄야 합니다.
+보드에서 확인할 계약은 다음과 같습니다.
 
-- 다운로드 (HTTP/HTTPS/MQTT/USB)
-- 무결성 검증 (체크섬·서명)
-- 슬롯 선택과 토글
-- 진행 상태 표시·로그
-- 실패 시 롤백
-- 부분 업데이트 (rootfs만, bootloader만, etc.)
-- 동시성 (다운로드 중에도 정상 서비스)
+1. 업데이트할 inactive target과 booted slot을 어떻게 찾는가.
+2. bundle signature, compatible/revision, artifact hashes를 어떤 정책으로 검증하는가.
+3. 어떤 device/partition에 image를 기록하며 interruption 시 기존 bootable system을 어떻게 보존하는가.
+4. U-Boot environment 또는 다른 bootchooser state를 어떤 interface로 갱신하는가.
+5. 어떤 health check가 성공을 결정하고 실패 뒤 누가 fallback을 수행하는가.
 
-매번 다시 만들면 *버그가 매번 새로* 들어옵니다. 프레임워크는 이 흐름을 검증된 형태로 묶어 둡니다. RAUC와 SWUpdate가 가장 널리 쓰입니다.
+문서에 명시한 bundle format이나 command example만으로 실제 제품의 atomicity, power-loss safety 및 recovery를 판정하지 않습니다.
 
-## RAUC와 SWUpdate의 철학 차이
+## 기능 차이
 
-| 항목 | RAUC | SWUpdate |
+| 주제 | RAUC | SWUpdate |
 |------|------|----------|
-| 주도 | Pengutronix | sbabic·DENX |
-| 설정 형식 | INI 풍 system.conf | libconfig 풍 sw-description |
-| bundle 형식 | SquashFS + CMS 서명 | cpio + 이미지 + 서명 |
-| GUI | 별도 | 내장 Mongoose 웹 UI |
-| 원격 업데이트 | hawkBit 호환 | suricatta(hawkBit·자체) |
-| Lua 후킹 | 제한적 | 풍부 |
-| 부분 업데이트 | slot 단위 | image 단위, 더 세분화 |
-| 학습 곡선 | 낮은 편 | 가팔라 보일 수 있음 |
+| Description | `system.conf`와 `manifest.raucm` | 기본 parser는 libconfig 문법의 `sw-description`; 다른 parser도 구성 가능 |
+| Container | bundle; signing/keyring과 bundle format은 RAUC configuration에 따름 | `.swu`는 기본적으로 cpio container이며 `sw-description`이 archive 첫 항목 |
+| Slot selection | system.conf의 slot/bootname과 bootloader backend; U-Boot에는 matching script 필요 | image target, `bootenv`, collection/mode를 description과 invocation/config로 정함 |
+| Success state | RAUC status/D-Bus API로 booted slot good/bad 표시 가능 | update transaction marker/state와 product-specific health/boot policy를 연동 |
+| Extension | system/install/slot hooks와 handlers | handlers, Lua/shell scripts, webserver/Suricatta는 build/runtime configuration에 따름 |
 
-성격을 한 줄로 추리면, **RAUC는 *기본을 안전하게* 깔아 두는 도구**이고, **SWUpdate는 *복잡한 시나리오까지 유연하게* 짤 수 있는 도구**입니다. 표준 A/B만 필요하면 RAUC가 빠르고, 부분 업데이트·복잡한 시퀀스·자체 hook이 많으면 SWUpdate 쪽이 자유롭습니다.
+각 문서의 version, build options, target configuration이 기능 가용성과 구문을 결정합니다.
 
-## RAUC — system.conf
+## RAUC 설정과 bootchooser
 
-장치 측에서 RAUC가 어떤 슬롯·어떤 키로 동작할지 적는 파일입니다.
+RAUC의 U-Boot backend는 `bootloader=uboot`, slot bootname과 별도의 U-Boot script를 요구합니다. 기본 interface는 `BOOT_ORDER`와 `BOOT_<bootname>_LEFT` 변수를 이용합니다. 따라서 slot bootname `A`/`B`를 설정하면 예시 변수는 `BOOT_A_LEFT`/`BOOT_B_LEFT`이며, `BOOT_SLOT`을 자동으로 바꾼다고 가정하지 않습니다. Script의 boot command와 storage mapping은 제품에 맞춰야 합니다.
+
+다음은 RAUC 문서 형식에 맞춘 축약 예시입니다. target slot device, type와 keyring은 보드에서 확정해야 합니다.
 
 ```ini
 # /etc/rauc/system.conf
 [system]
-compatible=boardX-v1
+compatible=boardx-v1
 bootloader=uboot
-mountprefix=/run/rauc
 
 [keyring]
 path=/etc/rauc/keyring.pem
-
-[handlers]
-post-install=/usr/lib/rauc/post-install.sh
 
 [slot.rootfs.0]
 device=/dev/mmcblk0p2
@@ -71,254 +64,90 @@ bootname=A
 device=/dev/mmcblk0p3
 type=ext4
 bootname=B
-
-[slot.kernel.0]
-device=/dev/mmcblk0p4
-type=raw
-parent=rootfs.0
-
-[slot.kernel.1]
-device=/dev/mmcblk0p5
-type=raw
-parent=rootfs.1
 ```
 
-`bootname=A`·`bootname=B`가 *U-Boot env의 `BOOT_SLOT`* 값과 매핑됩니다. RAUC는 부팅 성공이 확정되면 이 값을 자동으로 토글합니다.
-
-## RAUC bundle 만들기
-
-bundle은 *서명된 SquashFS*입니다. manifest.raucm과 이미지를 묶어 빌드 호스트에서 만듭니다.
-
-```text
-# manifest.raucm
+```ini
+# bundle input directory의 manifest.raucm
 [update]
-compatible=boardX-v1
-version=2026.05.0
+compatible=boardx-v1
+version=1.2.3
 
 [bundle]
 format=verity
 
 [image.rootfs]
 filename=rootfs.ext4
-sha256=...
-
-[image.kernel]
-filename=boot.itb
-sha256=...
 ```
+
+Build host에서 bundle을 만들고 target에서 install할 수 있습니다. 아래 명령은 syntax example이며 이 작업에서 실행하거나 target에 설치하지 않았습니다.
 
 ```bash
-rauc --cert=cert.pem --key=key.pem \
-     bundle ./bundle-content/ \
-     boardX-v2026.05.0.raucb
+rauc --cert=<certificate.pem> --key=<private-key.pem> bundle <input-dir> <bundle.raucb>
+rauc install <bundle.raucb>
+rauc status mark-good booted
 ```
 
-`.raucb` 한 파일이 결과물입니다. CMS 서명이 박혀 있고, `compatible`이 안 맞으면 RAUC가 거부합니다. 다른 보드의 bundle을 *실수로 받아 끼우는* 사고가 그래서 잘 안 일어납니다.
+`mark-good`은 RAUC의 slot state interface를 통해 요청합니다. 이를 `fw_setenv bootcount=0` 또는 `upgrade_available=0`과 동일하다고 일반화하지 않습니다. Bootcount/attempt persistence는 연결한 bootchooser script와 board config에 따릅니다.
 
-## RAUC 설치 흐름
+## SWUpdate description과 A/B
 
-장치 측에서 한 줄입니다.
-
-```bash
-# 다운로드한 bundle 설치
-rauc install /tmp/boardX-v2026.05.0.raucb
-```
-
-RAUC가 내부에서 다음을 합니다.
-
-1. bundle 서명 확인 (`keyring.pem`의 인증서로).
-2. compatible·version 검사.
-3. 비활성 슬롯 결정 (현재 A면 B).
-4. 비활성 슬롯에 이미지 기록.
-5. `fw_setenv`로 `BOOT_SLOT=B`, `bootcount=0`, `upgrade_available=1` 설정.
-6. (옵션) post-install handler 실행.
-7. exit.
-
-그다음 `reboot`은 사용자(또는 update agent)가 합니다. 자동 reboot이 *항상* 좋은 동작이 아니라 그렇게 분리한 설계입니다.
-
-부팅 성공 표시는 `rauc status mark-good`이 담당합니다.
-
-```bash
-# systemd unit (부팅 성공 확정 시 실행)
-ExecStart=/usr/bin/rauc status mark-good booted
-```
-
-이 명령이 호출되면 RAUC가 `fw_setenv bootcount=0`·`upgrade_available=0`을 박아 다음 부팅에서 fallback이 발동하지 않게 합니다.
-
-## SWUpdate — sw-description
-
-SWUpdate의 같은 시나리오는 *bundle 안에 sw-description 파일*이 들어 있는 형태입니다.
+SWUpdate의 기본 `sw-description` parser는 YAML이 아니라 libconfig 문법을 사용합니다. `.swu` archive에 description을 먼저 넣고 images/scripts 등을 뒤에 포함합니다. `bootenv`는 지정한 U-Boot environment variables를 갱신하는 mechanism이지 자동 A/B policy가 아닙니다.
 
 ```text
 software =
 {
-    version = "2026.05.0";
-    description = "boardX rootfs + kernel update";
-
-    boardX = {
-        stable = {
-            copy-1 = {
-                images: (
-                    {
-                        filename = "rootfs.ext4";
-                        device = "/dev/mmcblk0p3";
-                        type = "raw";
-                        sha256 = "...";
-                    },
-                    {
-                        filename = "boot.itb";
-                        device = "/dev/mmcblk0p5";
-                        type = "raw";
-                        sha256 = "...";
-                    }
-                );
-
-                bootenv: (
-                    {
-                        name = "BOOT_SLOT";
-                        value = "B";
-                    },
-                    {
-                        name = "bootcount";
-                        value = "0";
-                    },
-                    {
-                        name = "upgrade_available";
-                        value = "1";
-                    }
-                );
-            };
-        };
-    };
-};
+    version = "1.2.3";
+    hardware-compatibility = [ "boardx-revA" ];
+    images: (
+        {
+            filename = "rootfs.ext4";
+            device = "/dev/mmcblk0p3";
+            type = "raw";
+        }
+    );
+    bootenv: (
+        {
+            name = "bootpart";
+            value = "0:2";
+        }
+    );
+}
 ```
 
-`copy-1`이 *비활성 슬롯 한 벌*입니다. `copy-2`까지 정의해 두면 SWUpdate가 *어느 슬롯이 비활성인지*에 따라 알아서 선택합니다.
+위 device와 bootenv 값은 설명용 placeholder일 뿐 실제 layout이 아닙니다. SWUpdate collection/mode mechanism은 dual-copy 설계에 쓸 수 있지만 inactive copy를 실행 전에 product가 결정해 mode로 넘겨야 합니다. 두 copy를 자동 발견한다고 가정하지 않습니다.
 
-bundle은 cpio로 묶습니다.
+SWUpdate documents cpio packaging, `sw-description` ordering, signature configuration and `swupdate -c -i` archive check. 실제 installation `swupdate -i`는 target write를 수행할 수 있으므로 build-specific target checklist와 recovery path 없이 실행하지 않습니다.
 
-```bash
-ls files/
-sw-description rootfs.ext4 boot.itb
+## 운영 선택 기준
 
-cd files
-for f in sw-description rootfs.ext4 boot.itb; do
-    echo $f
-done | cpio -ov -H crc > ../boardX-v2026.05.0.swu
-```
+제품의 storage layout, build system, bootloader integration, package signing, health confirmation과 update service lifecycle을 기준으로 선택합니다. “RAUC는 항상 안전/빠름”, “SWUpdate는 항상 더 유연” 같은 순위는 board, version, configuration과 operational evidence 없이 결론내리지 않습니다. 둘을 평가할 때는 동일 hardware revision, slot map, interrupted-write test, invalid-signature test, rollback/mark-good test를 사용합니다.
 
-서명은 별도 `sw-description.sig`를 함께 cpio에 넣어 처리합니다.
+## 흔한 실패
 
-## SWUpdate 설치 흐름
-
-`swupdate` 데몬이 늘 떠 있고, 웹 UI·MQTT·USB·HTTP 등 다양한 소스에서 `.swu`를 받습니다.
-
-```text
-# /etc/swupdate.cfg (요지)
-globals: {
-    verbose = true;
-    loglevel = 5;
-    public-key-file = "/etc/swupdate/key.pub";
-};
-
-webserver: {
-    document_root = "/usr/share/swupdate/www";
-    port = 8080;
-};
-
-suricatta: {
-    tenant = "default";
-    id = "boardX-0001";
-    url = "https://hawkbit.example.com";
-};
-```
-
-```bash
-# CLI로 직접 설치
-swupdate -i /tmp/boardX-v2026.05.0.swu
-```
-
-웹 UI나 hawkBit 콘솔에서 push해도 같은 결과입니다. SWUpdate는 설치 후 *Lua hook*으로 추가 동작을 끼워 넣을 수 있어 "설치 직후 디바이스 ID 등록"·"수동 reboot 대신 5분 카운트다운" 같은 시나리오가 자연스럽습니다.
-
-## U-Boot 측 설정
-
-두 프레임워크 모두 U-Boot 측 부담은 거의 같습니다.
-
-```text
-# defconfig
-CONFIG_BOOTCOUNT_LIMIT=y
-CONFIG_BOOTCOUNT_ENV=y
-CONFIG_CMD_SAVEENV=y
-CONFIG_ENV_IS_IN_MMC=y
-
-# boot script
-setenv altbootcmd 'run switch_slot; run boot_active'
-setenv bootcmd 'run boot_active'
-setenv boot_active '
-    if test "${BOOT_SLOT}" = "A"; then
-        load mmc 0:1 ${kernel_addr_r} boot.itb;
-    else
-        load mmc 0:2 ${kernel_addr_r} boot.itb;
-    fi;
-    bootm ${kernel_addr_r}'
-setenv switch_slot '
-    if test "${BOOT_SLOT}" = "A"; then
-        setenv BOOT_SLOT B;
-    else
-        setenv BOOT_SLOT A;
-    fi;
-    setenv bootcount 0;
-    saveenv'
-saveenv
-```
-
-이 부분이 Ch 17의 A/B 셋업과 거의 같습니다. RAUC·SWUpdate는 *그 위에서* 동작합니다.
-
-## 어느 도구를 고르나
-
-선택 기준을 정리하면 이렇습니다.
-
-| 상황 | 권장 |
-|------|------|
-| 표준 A/B만 필요, 빨리 띄우고 싶다 | RAUC |
-| Yocto 기반, Pengutronix layer를 이미 쓴다 | RAUC |
-| hawkBit 서버를 사용한다 | 둘 다 OK, 다만 SWUpdate가 suricatta로 더 통합 |
-| 부분 업데이트, 복잡한 시퀀스, Lua hook | SWUpdate |
-| 웹 UI를 장치에 내장하고 싶다 | SWUpdate |
-| Buildroot이고 가벼움 우선 | SWUpdate (RAUC도 가능) |
-| CMS 서명만으로 충분 | RAUC |
-| 오프라인 USB 업데이트도 자주 한다 | SWUpdate |
-
-둘 중 무엇이든, *직접 짜는 것보다는* 거의 항상 안전합니다.
-
-## 자주 하는 실수
-
-OTA 운영에서 자주 만나는 함정입니다.
-
-- **mark-good을 너무 빨리 호출한다.** 부팅 직후 systemd unit으로 mark-good을 박으면 *문제가 5분 뒤* 드러나는 경우 fallback이 동작하지 않습니다. 핵심 서비스가 안정될 때까지 지연시키는 편이 안전합니다.
-- **compatible 필드를 보드 모델로만** 정한다. SoC revision이 바뀌었는데 같은 compatible로 잡혀 잘못된 bundle이 설치됩니다. revision까지 포함시키는 편이 안전합니다.
-- **서명 검증 키를 squashfs 안에 같이 둔다.** 키를 자기 검증에 쓰는 셈이라 chain이 의미가 없습니다. 키는 *불변 영역* 또는 *읽기 전용 rootfs*에 박혀 있어야 합니다.
-- **fw_setenv가 atomic이라고 가정한다.** 실제로는 *env 한 사본을 통째로 다시 쓰는* 동작이라, 두 사본을 두는 redundant env 설정을 권합니다.
-- **bundle을 그대로 슬롯에 dd한다.** rauc·swupdate가 *각 image 별로* 별도 슬롯에 풉니다. bundle 자체는 슬롯에 들어가지 않습니다.
-- **post-install handler에서 reboot한다.** RAUC가 *비활성 슬롯에 마운트한 상태*에서 reboot이 일어나면 sync가 덜 된 상태로 끝납니다. reboot은 RAUC 종료 이후 별도 명령으로.
+- **RAUC bootname을 U-Boot variable 하나와 동일시한다.** 기본 RAUC U-Boot backend는 documented `BOOT_ORDER`/`BOOT_<bootname>_LEFT` contract와 matching script를 씁니다.
+- **RAUC가 generic U-Boot script를 자동 설치한다고 생각한다.** boot command와 partition mapping은 product script가 담당합니다.
+- **SWUpdate collection/mode가 inactive copy를 알아서 찾는다고 가정한다.** 선택은 updater invocation 또는 제품 integration에서 명시해야 합니다.
+- **mark-good을 boot 후 즉시 실행한다.** success condition은 application/service health policy가 정해야 합니다.
+- **artifact compatibility만 확인하고 storage recovery를 생략한다.** signatures, slot writes, bootloader state, redundant environment 및 power-cut recovery를 분리해 검증합니다.
+- **실행되지 않은 board transcript를 test result로 기록한다.** source, tag, board revision, configuration과 실제 output을 함께 남깁니다.
 
 ## 정리
 
-- RAUC는 *bundle 단위*, SWUpdate는 *image 단위*로 업데이트를 다룹니다.
-- 둘 다 *비활성 슬롯에 기록*하고 *U-Boot env를 토글*해 다음 부팅에서 새 슬롯을 시도합니다.
-- 부팅 성공 표시는 mark-good(RAUC) 또는 후속 스크립트(SWUpdate)가 담당합니다.
-- compatible·version 검사가 *잘못된 bundle 끼우는* 사고를 막아 줍니다.
-- RAUC는 *빠른 표준*, SWUpdate는 *유연한 hook과 웹 UI*가 강점입니다.
-- U-Boot 측은 Ch 17의 A/B 셋업과 거의 같고, 프레임워크는 *그 위에서* 동작합니다.
-- mark-good 호출 시점이 *실제 fallback 안전망*의 두께를 결정합니다.
+- RAUC와 SWUpdate는 artifact install frameworks이며 A/B boot policy 그 자체는 아닙니다.
+- RAUC U-Boot integration은 bootname, documented state variables 및 matching script가 필요합니다.
+- SWUpdate는 기본 libconfig `sw-description`과 cpio container를 사용하고, bootenv/collection/mode는 제품 정책에 연결해야 합니다.
+- bundle signing, target compatibility, slot persistence, mark-good와 rollback은 pinned version과 target에서 각각 확인합니다.
+- 본문 예시는 문서 기반 syntax/reference이고 이 환경에서 생성/실행한 artifact나 board log가 아닙니다.
 
 ## 다음 장 예고
 
-이제까지 부트로더의 *기능*을 봤다면, 다음 두 장은 *실전 작업*입니다. 새 보드를 U-Boot에 어떻게 포팅하는지(Ch 21), 그리고 부트로더 자체가 문제 일으킬 때 어떻게 디버깅하는지(Ch 22)를 봅니다.
+다음 장에서는 새 보드 포팅의 공통 workflow를 다룹니다. 보드별 Kconfig, DTS, early phase devices, DDR 설정과 first serial output은 reference board만으로 추정하지 않고 해당 U-Boot/SoC source와 hardware에 맞춥니다.
 
 ## 관련 항목
 
-- [Ch 17: A/B 업데이트와 boot 이중화](/blog/embedded/bootloader/chapter17-ab-update)
-- [Ch 21: 새 보드 포팅 — defconfig부터 첫 부팅까지](/blog/embedded/bootloader/chapter21-board-porting)
-- [원문 — RAUC documentation](https://rauc.readthedocs.io/)
-- [원문 — SWUpdate documentation](https://sbabic.github.io/swupdate/)
+- [Ch 17: A/B 업데이트와 boot 이중화](/blog/embedded/bootloader/chapter17-ab-update) — U-Boot bootcount와 product bootchooser 경계
+- [Ch 21: 새 보드 U-Boot 포팅](/blog/embedded/bootloader/chapter21-board-porting)
+- [RAUC U-Boot integration](https://rauc.readthedocs.io/en/latest/integration.html)
+- [RAUC using and status](https://rauc.readthedocs.io/en/latest/using.html)
+- [SWUpdate description syntax](https://sbabic.github.io/swupdate/sw-description.html)
+- [SWUpdate archive format/checking](https://sbabic.github.io/swupdate/swupdate.html)

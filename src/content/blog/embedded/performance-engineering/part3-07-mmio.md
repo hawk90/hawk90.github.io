@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## MMIO Cache Policy
 
-ARM v7/v8 Memory Type:
+ARM의 메모리 속성은 아키텍처 버전과 translation 설정에 따라 다릅니다. 아래는 대표적인 속성 이름을 요약한 것이며, 모든 OS나 SoC의 MMIO 매핑을 뜻하지 않습니다.
 
 | Type | Cache | Order | Speculation | 사용 |
 |---|---|---|---|---|
@@ -28,14 +28,14 @@ ARM v7/v8 Memory Type:
 
 **nGnRnE**는 no Gather, no Reorder, no Early Write의 약자입니다.
 
-MMIO는 보통 **Device-nGnRE**를 씁니다. Read는 *cache와 prefetch가 없고*, write는 *순서가 보장*됩니다.
+MMIO에는 보통 Device 속성을 사용하지만 구체적인 속성은 플랫폼의 page table과 OS 매핑 API가 결정합니다. 같은 장치에 대한 접근 순서도 사용하는 accessor와 매핑 속성의 계약을 확인해야 합니다.
 
 ## Linux ioremap
 
 ```c
 void __iomem *mmio = ioremap(0xC0000000, 0x1000);
                               /* phys */ /* size */
-/* Returns virtual address mapped to Device-nGnRnE */
+/* 속성은 아키텍처와 OS 구현에 따라 정해집니다. */
 iowrite32(0x12345678, mmio + 0x10);
 val = ioread32(mmio + 0x20);
 iounmap(mmio);
@@ -47,15 +47,13 @@ iounmap(mmio);
 
 **일반 MMIO write:**
 
-- 매 store → 즉시 transaction
-- → 32 × 4-byte write = 32 transaction
+- 개별 store가 어떤 transaction으로 나뉘는지는 매핑 속성·버스·장치에 따라 다릅니다.
 
 **Write-combining:**
 
-- store buffer가 *근접 주소 합침*
-- → 32 × 4-byte → 4 × 32-byte burst transaction
+- 허용된 write-combining 매핑은 연속 store를 합칠 수 있습니다.
 
-PCIe BAR에서 GPU framebuffer 같은 *큰 sequential write*를 할 때 *bandwidth가 8배*로 늘어납니다.
+PCIe에서 write-combining은 prefetch 가능한 framebuffer 같은 큰 순차 쓰기에 유용할 수 있습니다. 성능 이득은 장치와 플랫폼에 따라 측정해야 하며, 고정된 배수로 표현하지 않습니다. Linux에서는 [기본 MMIO accessor와 `ioremap_wc()`의 ordering 차이](https://docs.kernel.org/driver-api/device-io.html)를 확인해야 합니다.
 
 ```c
 mmio = ioremap_wc(phys, size);   // Write-combining

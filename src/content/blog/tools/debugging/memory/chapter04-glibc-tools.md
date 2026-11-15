@@ -2,7 +2,7 @@
 title: "glibc 메모리 도구 — mtrace·mcheck·MALLOC_CHECK_"
 slug: "tools/debugging/memory/chapter04-glibc-tools"
 date: 2026-05-31T09:04:00
-description: "별 라이브러리 없이 glibc 만으로 메모리 디버깅. mtrace, mcheck, MALLOC_CHECK_."
+description: "glibc 버전별 debug-library 조건과 mtrace·mcheck·malloc 통계 기능의 진단 범위."
 tags: [memory, glibc, mtrace, mcheck, malloc-check]
 series: "Memory Diagnostics"
 seriesOrder: 4
@@ -10,41 +10,25 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-ASan·Valgrind·heaptrack을 못 쓰는 환경 (오래된 시스템, 빌드 도구 부재, 임베디드 등)에서 *glibc 자체*가 제공하는 도구들. 정밀도는 낮지만 *환경 변수 하나*로 켜고 끄는 단순함이 매력.
+glibc의 malloc 진단 기능은 버전과 설치된 debug library에 따라 사용할 수 있는 방식이 다릅니다. 특히 glibc 2.34 이후 `MALLOC_CHECK_`·`mtrace`·`mcheck` 기능은 기본 libc에서 비활성화되어 있으므로, 해당 시스템의 `libc_malloc_debug` 지원과 로딩 방법을 먼저 확인합니다.
 
 :::tldr
-`MALLOC_CHECK_=3` → glibc malloc이 *간단한 corruption 검출*. `mtrace()` → 모든 alloc/free 로깅.
+지원되는 glibc에서 debug library를 preload한 뒤 `MALLOC_CHECK_`로 단순 heap 오류 검사를 켤 수 있습니다. `mtrace()`는 alloc/free 추적이며 정상 운영에는 켜 두지 않습니다.
 :::
 
 ## MALLOC_CHECK_
 
-가장 단순. 환경 변수 한 줄로 *double-free·overflow*의 *기본 검사*.
+지원되는 glibc에서 debug library를 preload하고 환경 변수로 *일부 heap 오류 검사*를 켭니다.
 
 ```bash
-$ MALLOC_CHECK_=3 ./myprog
-malloc(): unaligned tcache chunk detected
-Aborted
+$ LD_PRELOAD=libc_malloc_debug.so MALLOC_CHECK_=3 ./myprog
 ```
 
-레벨:
-- `MALLOC_CHECK_=0` — 비활성 (기본).
-- `MALLOC_CHECK_=1` — 검출 시 stderr 출력.
-- `MALLOC_CHECK_=2` — 검출 시 abort (core dump).
-- `MALLOC_CHECK_=3` — 위 둘 다.
+`MALLOC_CHECK_`의 숫자를 1/2/3으로 나눠 서로 다른 출력·중단 동작이라고 해석하지 않습니다. 현재 glibc 매뉴얼은 0이 아닌 4 미만 값을 검사 모드 선택으로 설명하며, 검출 시 프로세스가 종료될 수 있습니다. preload하지 않으면 설정이 효과가 없을 수 있습니다.
 
-부하: *매우 작음* (10-20% 정도). 운영에 *상시 활성* 가능.
+이 검사는 일반 allocator보다 비효율적일 수 있고, 프로세스 동작을 바꿉니다. 오버헤드는 직접 측정하고 재현/진단 세션에서 제한적으로 사용합니다.
 
-검출 가능한 것:
-- Double-free
-- 일부 buffer overflow (인접 chunk 메타 오염)
-- 잘못된 포인터 free
-
-검출 못 하는 것:
-- 미세한 overflow (한 바이트)
-- Use-after-free의 일부
-- Leak
-
-운영 환경의 *minimum safety net*.
+검사는 단순 heap corruption 일부를 탐지하도록 설계됐지만 모든 오류를 잡지 않으며, 메모리 안전성 도구나 leak detector를 대체하지 않습니다.
 
 ## MALLOC_PERTURB_
 
@@ -54,20 +38,11 @@ Aborted
 $ MALLOC_PERTURB_=0xAB ./myprog
 ```
 
-- 새 malloc: `0xAB` 채움 → 미초기화 변수가 `0xAB`로.
-- free: `~0xAB = 0x54` 채움 → use-after-free가 *눈에 띄는 garbage 값*.
+- 할당·해제 메모리는 설정값에 따라 패턴으로 채워질 수 있어 미초기화 읽기나 해제 후 접근을 드러내는 데 도움을 줍니다. 정확한 바이트 패턴은 glibc 구현과 설정을 확인해야 하며, 이 기법은 UAF를 안전하게 검출하거나 재현을 보장하지 않습니다.
 
-```c
-int *p = malloc(4);
-printf("%x\n", *p);    // → abababab (미초기화)
+패턴을 읽는 코드는 초기화되지 않은 메모리를 읽거나 해제 후 메모리에 접근하는 undefined behavior가 될 수 있습니다. 오류를 재현하려고 그런 코드를 실행하지 말고 sanitizer 등 안전한 진단 도구를 사용합니다.
 
-free(p);
-printf("%x\n", *p);    // → 54545454 (UAF)
-```
-
-`MALLOC_CHECK_`와 *함께* 활성화 권장.
-
-## mtrace — 모든 alloc 로깅
+## mtrace — malloc/free 추적 기록
 
 ```c
 #include <mcheck.h>
@@ -79,15 +54,16 @@ int main() {
 }
 ```
 
-```bash
-$ MALLOC_TRACE=/tmp/mtrace.log ./myprog
-$ cat /tmp/mtrace.log
+실행 시 `LD_PRELOAD=libc_malloc_debug.so`와 `MALLOC_TRACE`를 함께 설정합니다. 다음은 추적 파일 형식을 설명하는 축약 예시이며 주소와 호출자 표기는 실행마다 달라집니다.
+
+```text
 = Start
-@ ./myprog:[0x40123a] + 0x556... 0x100
-@ ./myprog:[0x40124a] + 0x557... 0x200
-@ ./myprog:[0x40125a] - 0x556...
+@ ./myprog:[caller] + <address> <size>
+@ ./myprog:[caller] - <address>
 = End
 ```
+
+glibc 2.34 이상에서는 `mtrace()`도 debug library가 필요합니다. `MALLOC_TRACE`는 추적 파일을 가리키며, 이 모드는 할당 호출을 기록해 비용이 있으므로 민감한 서비스에서 상시 켜지 않습니다.
 
 기호:
 - `+ <addr> <size>` — alloc
@@ -99,6 +75,11 @@ $ cat /tmp/mtrace.log
 
 ```bash
 $ mtrace ./myprog /tmp/mtrace.log
+```
+
+결과는 버전과 실행에 따라 달라지며 다음 형식은 축약 예시입니다.
+
+```text
 - 0x00007f1234567890 Free 4 was never alloc'd
 Memory not freed:
 -----------------
@@ -107,11 +88,11 @@ Memory not freed:
 0x00005557abc  0x200  at /home/me/myprog.c:60
 ```
 
-해방 안 된 메모리 + 콜 사이트. *간단한 누수 검출*.
+추적 시점에 남은 allocation과 호출 지점을 찾는 데 씁니다. 프로세스 종료 시 해제되지 않았다는 사실만으로 논리적 누수를 확정하지 않습니다.
 
 ## mcheck
 
-malloc 메타데이터의 *일관성 자동 검사*.
+malloc 메타데이터의 *일관성 검사*입니다. `mcheck()`는 첫 malloc 호출 전에 활성화해야 합니다. debug library/링크 조건을 확인하고 진단 빌드에서만 사용합니다.
 
 ```c
 #include <mcheck.h>
@@ -122,7 +103,7 @@ int main() {
 }
 ```
 
-매 malloc/free 시 인접 chunk 헤더 검사. 매우 느림 (10-20x) — 디버그 빌드에만.
+`mcheck()`는 할당 블록 경계의 일부 손상을 검사합니다. 매 할당/해제마다 모든 메모리 경계를 검사하는 도구로 이해하면 안 됩니다.
 
 콜백 형식:
 ```c
@@ -131,6 +112,7 @@ void my_abort(enum mcheck_status status) {
     case MCHECK_FREE:  fprintf(stderr, "double free\n"); break;
     case MCHECK_HEAD:  fprintf(stderr, "header corruption\n"); break;
     case MCHECK_TAIL:  fprintf(stderr, "tail corruption\n"); break;
+    case MCHECK_DISABLED: fprintf(stderr, "mcheck was enabled too late\n"); break;
     }
 }
 
@@ -150,7 +132,7 @@ printf("Total system bytes: %zu\n", mi.arena);
 
 | 필드 | 의미 |
 |------|------|
-| `arena` | 총 heap 메모리 (brk + mmap) |
+| `arena` | non-mmap arena가 시스템에서 받은 메모리 |
 | `ordblks` | free chunk 개수 |
 | `hblks` | mmap된 chunk 개수 |
 | `hblkhd` | mmap 총 크기 |
@@ -192,7 +174,7 @@ max mmap regions =          5
 max mmap bytes   =     262144
 ```
 
-각 *arena*의 사용량. glibc는 *멀티 스레드 환경*에서 thread별 arena (보통 `8 × ncpus`).
+각 *arena*의 사용량입니다. arena 수는 glibc 버전, CPU 수, tunable과 workload의 영향을 받으므로 스레드마다 하나이거나 고정된 `8 × ncpus`라고 단정하지 않습니다.
 
 ## malloc_trim — OS에 반환
 
@@ -214,7 +196,7 @@ while (1) {
 
 ## M_MMAP_THRESHOLD — 큰 alloc은 mmap으로
 
-기본 128KB. 그 이상은 mmap → free 시 *즉시 OS 반환*.
+기본 임계값은 보통 128 KiB에서 출발하지만 glibc가 allocation 패턴에 맞춰 동적으로 조정할 수 있습니다. mmap으로 할당된 블록은 free 시 unmap 대상이 되지만, 임계값만 조정해 전체 RSS 감소를 보장할 수는 없습니다.
 
 ```c
 mallopt(M_MMAP_THRESHOLD, 64 * 1024);     // 64KB 이상 mmap
@@ -224,7 +206,7 @@ mallopt(M_MMAP_THRESHOLD, 64 * 1024);     // 64KB 이상 mmap
 
 ## M_ARENA_MAX — Arena 수 제한
 
-기본 `8 × ncpus`. 너무 많은 arena = *fragmentation* + *RSS 부풀어 보임*.
+기본 arena 한도는 시스템 CPU 수와 glibc 버전/설정의 영향을 받습니다. arena 수를 줄이면 lock 경합과 메모리 사용 양쪽이 달라질 수 있으므로 측정 없이 고정값을 적용하지 않습니다.
 
 ```bash
 $ MALLOC_ARENA_MAX=2 ./myprog
@@ -235,7 +217,7 @@ $ MALLOC_ARENA_MAX=2 ./myprog
 mallopt(M_ARENA_MAX, 2);
 ```
 
-Java/Hadoop 환경에서 *RSS 감소 표준 trick*. 단일 스레드면 1.
+arena 수 제한은 lock contention과 메모리 보유량을 함께 바꿉니다. 특정 Java/Hadoop 값이나 단일 스레드 최적값을 보편 규칙으로 쓰지 말고 workload에서 검증합니다.
 
 ## TCache — Thread Cache
 
@@ -246,23 +228,9 @@ $ GLIBC_TUNABLES="glibc.malloc.tcache_max=0" ./myprog   # 비활성
 $ GLIBC_TUNABLES="glibc.malloc.tcache_count=128" ./myprog
 ```
 
-## __malloc_hook (deprecated)
+## `__malloc_hook`과 allocator interposition
 
-옛 방법으로 *malloc/free 가로채기*. C++에선 weak symbol override가 권장.
-
-```c
-// 함수 자체를 override
-void *malloc(size_t size) {
-    // 자체 로직
-    static void *(*real_malloc)(size_t) = NULL;
-    if (!real_malloc) real_malloc = dlsym(RTLD_NEXT, "malloc");
-    void *p = real_malloc(size);
-    fprintf(stderr, "malloc(%zu) = %p\n", size, p);
-    return p;
-}
-```
-
-heaptrack의 기본 메커니즘. 디버그 빌드의 *최소 누수 추적기*도 이렇게.
+`__malloc_hook` 계열은 glibc 2.34에서 제거된 호환 심볼이며 새 추적기의 구현 예제로 권장하지 않습니다. `LD_PRELOAD`로 allocator를 가로채는 코드는 재진입·스레드 안전·로더 초기화 문제를 직접 다뤄야 하므로, 직접 구현 대신 heaptrack 등 유지되는 도구를 사용합니다.
 
 ## 자주 만나는 함정
 
@@ -280,13 +248,13 @@ heaptrack의 기본 메커니즘. 디버그 빌드의 *최소 누수 추적기*�
 
 ```bash
 # 1단계 — MALLOC_CHECK_으로 빠른 검사
-$ MALLOC_CHECK_=3 ./myprog
+$ LD_PRELOAD=libc_malloc_debug.so MALLOC_CHECK_=3 ./myprog
 
 # 2단계 — PERTURB로 UAF·미초기화 잡기
-$ MALLOC_CHECK_=3 MALLOC_PERTURB_=0xAB ./myprog
+$ LD_PRELOAD=libc_malloc_debug.so MALLOC_CHECK_=3 MALLOC_PERTURB_=0xAB ./myprog
 
 # 3단계 — mtrace로 누수 위치
-$ MALLOC_TRACE=/tmp/mt.log ./myprog
+$ LD_PRELOAD=libc_malloc_debug.so MALLOC_TRACE=/tmp/mt.log ./myprog
 $ mtrace ./myprog /tmp/mt.log
 
 # 4단계 — 안 잡히면 ASan/Valgrind/heaptrack
@@ -312,18 +280,18 @@ heap_arena_bytes / 시간
 
 ## 정리
 
-- `MALLOC_CHECK_=3`이 *최소 안전망*.
+- `MALLOC_CHECK_`는 버전·debug-library 조건을 확인할 진단 기능이며 일반적인 안전망으로 간주하지 않습니다.
 - `MALLOC_PERTURB_`로 UAF·미초기화 가시화.
 - `mtrace()`로 alloc/free 로깅 → mtrace 명령으로 분석.
 - `mcheck()`로 메타 일관성 자동 검사 (느림).
 - `mallinfo2()` + `malloc_stats()`로 통계.
 - `malloc_trim(0)`으로 OS 반환.
 - `MALLOC_ARENA_MAX`로 arena 제한 → RSS 감소.
-- LD_PRELOAD malloc override로 *자체 도구* 작성 가능.
+- `__malloc_hook` 기반 코드는 현재 glibc용 신규 계측 방식으로 권장하지 않습니다.
 
 ## 다음 장 예고
 
-Ch 5 (마지막) — 운영 메모리 누수 진단. 장기 실행 서비스에 *상시 모니터링* 셋업.
+Ch 5 — 운영 메모리 누수 진단. 장기 실행 서비스에서 관찰 지표와 표본 수집을 조합합니다.
 
 ## 관련 항목
 
@@ -334,3 +302,5 @@ Ch 5 (마지막) — 운영 메모리 누수 진단. 장기 실행 서비스에 
 - `man 3 malloc_hook`, `man 3 mtrace`, `man 3 mcheck`
 - `man 1 mtrace`
 - [glibc malloc tunables](https://www.gnu.org/software/libc/manual/html_node/Memory-Allocation-Tunables.html)
+- [glibc malloc debugging and tracing](https://sourceware.org/glibc/manual/latest/html_node/Heap-Consistency-Checking.html)
+- [glibc memory tracing](https://sourceware.org/glibc/manual/latest/html_node/Tracing-malloc.html)

@@ -1,0 +1,170 @@
+{
+  "date": "2026-10-22",
+  "scope": "Memory Diagnostics published chapters 1–7; selected named-example verifier and evidence bundle.",
+  "baselineHead": "d55f8d66ece6acb8ebb274df7c843ce6b4054853",
+  "scoresRecalculated": false,
+  "scoreLedger": "Not edited; no published-scores or published-summary files changed by this task.",
+  "invariants": {
+    "slug": "preserved",
+    "date": "preserved",
+    "draft": "preserved",
+    "seriesOrder": "preserved"
+  },
+  "sources": [
+    "https://docs.kernel.org/filesystems/proc.html",
+    "https://docs.kernel.org/admin-guide/cgroup-v2.html#memory",
+    "https://github.com/KDE/heaptrack/blob/master/README.md",
+    "https://github.com/KDE/heaptrack/blob/master/src/track/heaptrack.sh.cmake",
+    "https://github.com/jemalloc/jemalloc/wiki/Use-Case%3A-Heap-Profiling",
+    "https://github.com/gperftools/gperftools/blob/master/docs/heapprofile.adoc",
+    "https://github.com/google/tcmalloc/blob/master/docs/overview.md",
+    "https://doc.rust-lang.org/stable/std/alloc/",
+    "https://sourceware.org/glibc/manual/latest/html_node/Heap-Consistency-Checking.html",
+    "https://sourceware.org/glibc/manual/latest/html_node/Tracing-malloc.html",
+    "https://docs.kernel.org/accounting/psi.html",
+    "https://docs.kernel.org/admin-guide/cgroup-v2.html#memory",
+    "https://pmem.io/ndctl/cxl/cxl-list.html",
+    "https://docs.kernel.org/driver-api/cxl/theory-of-operation.html",
+    "https://docs.kernel.org/mm/damon/design.html",
+    "https://docs.kernel.org/admin-guide/mm/damon/usage.html",
+    "https://docs.kernel.org/admin-guide/sysctl/kernel.html#numa-balancing",
+    "https://github.com/torvalds/linux/blob/master/mm/memory-tiers.c",
+    "https://github.com/torvalds/linux/blob/master/include/trace/events/migrate.h"
+  ],
+  "checks": {
+    "articlePublishGates": "All seven per-file blocking publish gates pass. Upstream freshness/symbol checks are SKIPPED because local source clones are absent; SKIPPED is not PASS.",
+    "inlineMath": "PASS for seven files.",
+    "namedExamples": "PASS: 7 article-scoped semantic guards and 3 injected negative fixtures rejected; not a whole-article fact-check.",
+    "gitDiffCheck": "PASS.",
+    "host": "Darwin 25.6 arm64, Node v24.21.0. `jeprof` found. `heaptrack`, Linux/glibc runtime, tcmalloc, `damo`, `bpftrace`, `perf`, `valgrind`, and `cxl` not found in PATH.",
+    "execution": "No Linux-only tools, sysfs policy writes, CXL commands, hardware, or device behavior executed. No full site build (parent owns it)."
+  },
+  "articles": [
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter01-memory-accounting.md",
+      "status": "remediated",
+      "beforeSha256": "13dbc90ecd91eda60766e7b097346552b2dd5261ffa4fc0a113f4ae42cb4d3ad",
+      "handoffStartSha256": null,
+      "handoffStartNote": "The continuation began with pre-existing worktree edits from prior remediation. Exact stage-start SHA-256 was not captured; beforeSha256 records tracked HEAD only.",
+      "afterSha256": "8a058bb113bbef9b35be490d5413148a01b2e13c7f0a8db3f5022cb5e2f95333",
+      "validation": {
+        "contextAndScope": "Process memory accounting: RSS/PSS, smaps, OOM and reclaim indicators.",
+        "signalAndRefutation": "PSS and individual mapping counters could be read as exact system totals or proof of a leak. Cross-checking `/proc` definitions and cgroup/kernel accounting shows these are scoped estimates and diagnostic signals.",
+        "causeAndAlternatives": "The draft conflated per-process mappings with system-wide accounting and treated candidate counters as diagnoses; shared mappings, kernel/page-cache use, allocator retention and concurrent mappings are alternatives.",
+        "evidence": "Compared procfs status/smaps documentation and cgroup v2 memory accounting. Qualified PSS, Private_Dirty, MemAvailable, OOM scoring, smaps races/THP, and free-after-RSS behavior; added primary-source references.",
+        "sampleScope": "Full chapter text and all commands/code blocks were read. Linux `/proc`, cgroup and NUMA commands were not run on this Darwin host.",
+        "decision": "Remediated: present counters as scoped estimates and trends, not exact totals or standalone leak proof.",
+        "smallestSafeChangeAndRollback": "Article-body clarifications and references only in this continuation; preserve route/date/draft/seriesOrder. Rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Article gate, inline-math and diff checks pass. No Linux kernel/cgroup execution; other process and system memory remain outside any single process counter."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter02-heaptrack.md",
+      "status": "remediated",
+      "beforeSha256": "321bf3fef078a0b37b0fb5473a15a5b0ba63b7b7dc581af72250b3454632d5f2",
+      "handoffStartSha256": null,
+      "handoffStartNote": "The continuation began with pre-existing worktree edits from prior remediation. Exact stage-start SHA-256 was not captured; beforeSha256 records tracked HEAD only.",
+      "afterSha256": "8f0fbb38d4ed579655018dc4cd0cb4d3ba9efff8acc4ea462cc2933fc4341a14",
+      "validation": {
+        "contextAndScope": "Heaptrack Linux allocator-call tracing and CLI/GUI workflows.",
+        "signalAndRefutation": "Claims of universal allocation interception, fixed speedup, exact leak proof, stable runtime attach, and RSS-equivalent GUI graphs were too broad. Official README/source limits these claims.",
+        "causeAndAlternatives": "Heaptrack observes supported allocator calls and can miss custom pools; attach stability, output compression and analysis workflow depend on version/build. Outstanding allocations alone do not prove logical leaks.",
+        "evidence": "Compared KDE heaptrack README and tracking wrapper docs; corrected scope, `.gz`/build compression, `--record-only`, attach warning, removed unsupported environment options/compare command, and revised description to match content.",
+        "sampleScope": "Full chapter and named shell/CLI examples reviewed. No Linux heaptrack executable is installed here; no trace was recorded or analyzed.",
+        "decision": "Remediated. Chapter description was manually corrected to describe Linux allocation-stack/hotspot and outstanding-allocation analysis; status does not claim a leak detector guarantee.",
+        "smallestSafeChangeAndRollback": "Description and article body only; slug/date/draft/order preserved. Rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Selected verifier, gates, inline-math pass. Runtime traces, custom allocator coverage, attach, compression and distro CLI remain untested."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter03-jemalloc-tcmalloc.md",
+      "status": "remediated",
+      "beforeSha256": "1e4b6357a8b436df10e047f16b09d2408b91f0b8e572876ea35d1d152faffda2",
+      "handoffStartSha256": null,
+      "handoffStartNote": "The continuation began with pre-existing worktree edits from prior remediation. Exact stage-start SHA-256 was not captured; beforeSha256 records tracked HEAD only.",
+      "afterSha256": "574ccb1c670252555f8b4e47d4eb89ab2ddbccfdfc00ecb6811c416667dd6180",
+      "validation": {
+        "contextAndScope": "jemalloc, gperftools TCMalloc, Google TCMalloc, Rust allocator and profile formats.",
+        "signalAndRefutation": "Allocator rankings, expected savings, default configuration values, sample interpretation and universal workload recommendations were unsupported. Primary documentation shows build- and workload-dependent behavior.",
+        "causeAndAlternatives": "Statistical sampling is not an exact census; allocator forks/profile formats differ; Rust default allocator is unspecified; Go pprof is scoped to Go runtime profiles.",
+        "evidence": "Compared jemalloc heap profiling wiki, gperftools heap profiler docs, Google TCMalloc overview and Rust std allocator docs. Corrected sample/default claims, tool distinction and profile support; replaced workload recommendations with controlled comparison.",
+        "sampleScope": "Full chapter text and code/configuration examples reviewed. No target Linux allocator or profile tools were present; no allocator benchmark/profile was run.",
+        "decision": "Remediated: require identical representative workload comparison and verify version/build/profile support before selection.",
+        "smallestSafeChangeAndRollback": "Article prose/table corrections only in this continuation; route/date/draft/order preserved. Rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Gates, inline-math, selected verifier and diff checks pass. `jeprof` exists but jemalloc runtime, TCMalloc runtime and Linux profile collection were unavailable."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter04-glibc-tools.md",
+      "status": "remediated",
+      "beforeSha256": "5785439582486e33aa0d71fd7aa06c0de1e77cad65933142bed37fd9bbed883b",
+      "handoffStartSha256": null,
+      "handoffStartNote": "The continuation began with pre-existing worktree edits from prior remediation. Exact stage-start SHA-256 was not captured; beforeSha256 records tracked HEAD only.",
+      "afterSha256": "4c2e725df1c5536e2a7c07a02ac6c98450cbb6bc457d479d2e7fe73379d3a14e",
+      "validation": {
+        "contextAndScope": "glibc allocator diagnostics: MALLOC_CHECK_, perturbation, mtrace, mcheck, mallinfo2 and tunables.",
+        "signalAndRefutation": "The original one-line `MALLOC_CHECK_` framing omitted the glibc 2.34+ debug-library requirement and overstated byte patterns, check modes, and RSS return guarantees.",
+        "causeAndAlternatives": "glibc version/configuration and `libc_malloc_debug` loading alter availability; debug checks are limited and can change process behavior. mcheck has a before-first-allocation condition.",
+        "evidence": "Compared GNU libc manual sections for heap checking, mtrace and tunables. Corrected preload examples, mode interpretation, mtrace framing, mcheck timing, pattern caveat and claims about allocator statistics/trim. Description now names version/debug-library conditions.",
+        "sampleScope": "Full chapter including code and shell examples reviewed. No GNU/Linux glibc runtime is available on this Darwin host; unsafe/stateful diagnostics were not executed.",
+        "decision": "Remediated; chapter description was manually corrected and is recorded here. Treat debug features as limited diagnostic options, not production safety guarantees.",
+        "smallestSafeChangeAndRollback": "Description and article body only; slug/date/draft/order preserved. Rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Gate, inline-math and diff checks pass. The glibc 2.34+ runtime path and distro library names remain platform/version dependent."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter05-prod-leak-diagnosis.md",
+      "status": "remediated",
+      "beforeSha256": "ceb072fe841fd7a6029f319ab3f368c0131e6bf7ca0dc953d52a7112bddfffbc",
+      "handoffStartSha256": null,
+      "handoffStartNote": "The continuation began with pre-existing worktree edits from prior remediation. Exact stage-start SHA-256 was not captured; beforeSha256 records tracked HEAD only.",
+      "afterSha256": "87af7981f486f99536da391087e6bc68bea8c869fff3d560c1888aec363fb48d",
+      "validation": {
+        "contextAndScope": "Production leak diagnosis: PSS trends, profiler sampling, BCC, drgn, cgroup, PSI and graceful degradation.",
+        "signalAndRefutation": "Trend slopes and outstanding stacks could be mistaken for leak proof; ru_maxrss as current RSS, PSI semantics, cgroup limits and automatic recovery behavior were overclaimed.",
+        "causeAndAlternatives": "Signals have different scopes and windows; `ru_maxrss` is a maximum, allocator profiling has overhead, cgroup reclaim/OOM is group-scoped, and a one-minute 50% trigger misses slow leaks.",
+        "evidence": "Compared kernel PSI and cgroup v2 docs, systemd-oomd docs, profiler docs and allocator interfaces. Qualified trend interpretation, sampling overhead, PSI some/full, cgroup behavior, automatic dump trigger and systemd-oomd behavior; removed unsafe current-RSS/trim sample.",
+        "sampleScope": "Full article read, including examples. Linux PSI/BCC/drgn/cgroup/JVM/Python tools and allocator-profiler paths were not run on this host.",
+        "decision": "Remediated: use multiple scoped signals and label automatic dump logic as a narrow trigger, not general leak detection.",
+        "smallestSafeChangeAndRollback": "Article-body claims/examples only; route/date/draft/order preserved. Rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Gates, inline-math and verifier pass. Linux collection, production impact, BCC/drgn availability, and every language/runtime integration remain untested."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics.md",
+      "status": "remediated",
+      "beforeSha256": "0beb57ab825281b004fc075e6ff87d987b05995c3fb12bced7a5edf350fdcc23",
+      "handoffStartSha256": null,
+      "handoffStartNote": "The continuation began with pre-existing worktree edits from prior remediation. Exact stage-start SHA-256 was not captured; beforeSha256 records tracked HEAD only.",
+      "afterSha256": "ae5c61387cf6d6b9577259970845dee55aa363f16ecdcbcc63056c60afcdab50",
+      "validation": {
+        "contextAndScope": "CXL memory diagnostics: NUMA exposure, cxl-cli health/poison/event commands, DAMON access data.",
+        "signalAndRefutation": "DAMON access output was framed as proof of CXL tier efficacy/promotion, and CXL NUMA exposure could be read as guaranteed.",
+        "causeAndAlternatives": "Region access does not encode placement or successful migration; host region/device configuration, NUMA policy, locality and workload are alternative determinants.",
+        "evidence": "Compared ndctl CXL list docs, Linux CXL driver theory and DAMON design docs. Clarified conditional NUMA exposure and required node allocation/migration stats plus application latency alongside DAMON.",
+        "sampleScope": "Full article and named commands reviewed. No CXL node/device, Linux `cxl`, DAMON or event tracing available; no device command executed.",
+        "decision": "Remediated: DAMON is one input, and tier validation uses independent placement/migration and latency evidence.",
+        "smallestSafeChangeAndRollback": "Article body clarifications only; route/date/draft/order preserved. Rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Gates, inline-math and diff pass. Device health, poison, event delivery and actual tier behavior remain hardware/kernel specific and untested."
+      }
+    },
+    {
+      "path": "src/content/blog/tools/debugging/memory/chapter07-tiered-memory-diagnostics.md",
+      "status": "remediated",
+      "beforeSha256": "ea1cdf2cc7b4d0e78bb0251a3dc4e89266966f8132b60e3a820f18c9c6998d19",
+      "handoffStartSha256": null,
+      "handoffStartNote": "The continuation began with pre-existing worktree edits from prior remediation. Exact stage-start SHA-256 was not captured; beforeSha256 records tracked HEAD only.",
+      "afterSha256": "12e976437c7123ddaa2c3cace4e0f8eb246843c89051b45c9fe5def6e1eb03c8",
+      "validation": {
+        "contextAndScope": "DAMON/DAMOS tier configuration, migration tracing, NUMA balancing, workload tuning.",
+        "signalAndRefutation": "A fake migration trace format claimed node direction/page counts; hard-coded workload settings and a DAMON sample containing node placement overstated what the interface provides.",
+        "causeAndAlternatives": "The Linux migration tracepoint exposes aggregate succeeded/failed/reason fields, not source/destination node pairs; access sampling and NUMA placement are different observations. Arbitrary intervals/quota cannot be universal recommendations.",
+        "evidence": "Compared Linux DAMON design and sysfs usage, NUMA balancing sysctl, memory tier implementation and `include/trace/events/migrate.h`. Removed fake node fields, corrected tracepoint fields, marked monitor samples/version output, removed fixed workload table, and used illustrative rather than captured outputs.",
+        "sampleScope": "Full chapter text and all named examples reviewed. Static sysfs writes, DAMON, bpftrace, perf and migration events were not executed; these are Linux-specific and some change kernel policy.",
+        "decision": "Remediated. Validate read-only observation first, check target tracefs schema, and benchmark policy/quota per system; no universal settings are asserted.",
+        "smallestSafeChangeAndRollback": "Article body/example corrections only; route/date/draft/order preserved. Rollback boundary is this article file.",
+        "verificationAndResidualRisk": "Verifier checks selected blocks/guard phrases and rejects three injected failures; per-file gates, inline-math and diff pass. This is not whole-article automated fact-check or a Linux run; kernel schema/version/platform behavior remains."
+      }
+    }
+  ]
+}

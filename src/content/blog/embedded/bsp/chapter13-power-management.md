@@ -25,7 +25,7 @@ topics: ["embedded"]
 | **cpuidle** | CPU의 짧은 idle 진입, C-state 진입·탈출 | `/sys/devices/system/cpu/cpu*/cpuidle/` |
 | **cpufreq** | 동작 중 CPU의 frequency·voltage 조정 (DVFS) | `/sys/devices/system/cpu/cpu*/cpufreq/` |
 
-각 축은 *독립적*으로 동작하지만 같은 PMIC, 같은 regulator를 공유합니다.
+네 축은 별도 framework지만 device·clock·regulator 및 firmware 전원 정책을 공유할 수 있어 상호작용을 확인해야 합니다.
 
 ## System sleep — suspend states
 
@@ -135,9 +135,9 @@ static struct platform_driver mychip_driver = {
 /* 디바이스 사용 직전 */
 pm_runtime_get_sync(dev);    /* resume까지 동기 대기 */
 /* 또는 */
-pm_runtime_get(dev);         /* 비동기 */
+pm_runtime_get(dev);         /* reference count 증가; resume 완료를 기다리지 않음 */
 
-/* I/O 수행 */
+/* 필요한 경우 resume 완료를 확인한 뒤 I/O 수행 */
 readl(base + DATA_REG);
 
 /* 사용 끝 */
@@ -176,7 +176,7 @@ $ cat /sys/devices/.../power/runtime_suspended_time
 8765432
 ```
 
-active/suspended 시간 비율로 절전 효과를 측정합니다.
+active/suspended 시간은 사용 상태를 확인하는 자료입니다. 실제 전력 절감은 전력 rail 측정과 workload 조건을 함께 비교해야 합니다.
 
 ## cpuidle — CPU 짧은 휴식
 
@@ -233,7 +233,7 @@ cpus {
 };
 ```
 
-governor는 보통 `menu`(idle 시간 예측 기반) 또는 `teo`(timer event 기반).
+governor는 kernel과 driver가 제공하는 후보 중에서 선택하며, 실제 현재 governor는 sysfs에서 확인합니다.
 
 ```bash
 $ cat /sys/devices/system/cpu/cpuidle/current_governor
@@ -262,11 +262,11 @@ governor 선택:
 
 | governor | 동작 |
 |----------|------|
-| `performance` | 항상 최고 주파수 |
-| `powersave` | 항상 최저 주파수 |
-| `ondemand` | 부하에 따라 빠른 ramp up/down (legacy) |
-| `conservative` | 천천히 ramp |
-| `schedutil` | 스케줄러 신호 기반 (최신 권장) |
+| `performance` | policy가 허용하는 범위에서 높은 주파수를 요청 |
+| `powersave` | policy가 허용하는 범위에서 낮은 주파수를 요청 |
+| `ondemand` | kernel·driver가 제공할 때 부하 기반 주파수 정책 |
+| `conservative` | 사용 가능 여부와 동작은 kernel·driver 구성에 따름 |
+| `schedutil` | scheduler utilization 기반; 사용 가능 여부는 구성에 따름 |
 | `userspace` | 사용자가 직접 설정 |
 
 설정:

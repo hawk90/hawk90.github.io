@@ -47,7 +47,7 @@ LBA -1         : GPT Header (backup)
 
 - **16KB 예약**. LBA 0~33이 partition table용입니다. 0~33 = 34 LBA = 17KB이지만 보통 첫 partition을 *최소 1MB*부터 시작하도록 정렬합니다.
 - **backup GPT**. 디스크 끝에 동일 정보가 한 번 더 있습니다. primary가 깨져도 복구 가능합니다.
-- **partition UUID**. 각 파티션은 고유 UUID를 갖습니다. kernel의 `root=PARTUUID=...`로 참조하면 sda/mmcblk0/nvme0n1 같은 device 이름 변화에 흔들리지 않습니다.
+- **partition UUID**. GPT partition에는 고유한 partition UUID가 있습니다. kernel의 `root=PARTUUID=...`는 장치 이름의 열거 순서가 달라질 때 root partition을 식별하는 한 방법입니다. image format과 rootfs 구성에 따라 다른 식별 방법도 쓸 수 있습니다.
 
 `sgdisk`나 `parted`로 확인할 수 있습니다.
 
@@ -120,20 +120,20 @@ SoC마다 부트 ROM이 읽는 첫 영역이 다릅니다. GPT가 이 영역을 
 | Tegra | BCT | sector 0 |
 | TI AM335x | MLO | FAT 파티션 또는 raw |
 
-GPT의 partition 1 시작 위치를 SoC 부트 영역 *뒤*로 옮겨야 합니다. 보통 첫 partition을 1MB 또는 8MB부터 시작하는 방식이 안전합니다.
+GPT partition 1의 시작 위치는 SoC 부트 image가 사용하는 raw 영역 뒤로 정할 수 있습니다. 하지만 GPT metadata 자체는 표준 위치에 남겨야 하며, 실제 offset은 vendor image와 disk layout으로 확인합니다.
 
 i.MX 8M의 예입니다.
 
 ```text
-0x000000 (0KB)    : (사용 안 함)
-0x008000 (32KB)   : flash.bin (SPL + ATF + U-Boot, ~2MB)
-0x100000 (1MB)    : GPT primary header
-0x100200 (1MB+)   : Partition entry array
-0x800000 (8MB)    : partition 1 (boot)
+LBA 0              : Protective MBR
+LBA 1              : Primary GPT header
+LBA 2..33          : Primary GPT partition entries
+byte offset 32 KiB : i.MX8M example flash.bin placement (SoC/medium-specific)
+byte offset 8 MiB  : Example first partition start, leaving room for boot image
 ...
 ```
 
-GPT primary header가 1MB offset에 있으면 표준 GPT 도구로 인식이 안 될 수 있습니다. SoC vendor가 권장하는 layout을 따르거나, GPT를 8MB 이후에 두고 그 앞은 *unused* 영역으로 비워 두는 패턴이 흔합니다.
+GPT header와 primary entry array는 표준 레이아웃에서 LBA 1과 LBA 2부터 시작합니다. 첫 partition의 data 시작 위치는 boot image 영역을 피하도록 조정할 수 있지만, GPT header 자체를 1MB나 8MB로 옮기면 일반 GPT layout과 호환되지 않습니다. boot image가 GPT metadata와 겹치지 않는지, 해당 BootROM과 writer가 요구하는 배치를 함께 검증합니다.
 
 ## genimage로 이미지 조립
 
@@ -338,9 +338,9 @@ $ sudo uuu flash.uuu
 
 ## 자주 하는 실수
 
-**GPT primary가 SoC 부트 영역과 겹침.** i.MX 8M의 SPL은 32KB부터, GPT는 보통 1MB부터. 첫 partition은 8MB 이후로 두는 것이 안전합니다.
+**GPT와 SoC 부트 영역 배치를 혼동.** GPT primary header는 LBA 1에 있고 entry array는 그 뒤에 놓입니다. 1 MiB는 흔히 첫 partition 시작 경계로 쓰는 값이지 GPT header 시작 위치가 아닙니다. SoC의 부트 image가 차지하는 영역과 GPT entry array의 크기·위치를 실제 layout에서 대조하고, 첫 partition 시작 LBA는 매체와 부트 형식의 제약에 맞춰 정합니다.
 
-**partition UUID 미사용.** kernel cmdline에 `root=/dev/mmcblk0p2`로 박으면 SD가 USB로 바뀌면 panic. 항상 `PARTUUID=`.
+**변할 수 있는 장치 이름을 고정.** storage 연결과 열거 순서가 달라질 수 있다면 장치 이름만으로 root partition을 식별하지 않는 편이 안전합니다. `PARTUUID=` 등 선택한 식별자의 생성·전달·복구 경로를 확인합니다.
 
 **A/B 슬롯에서 환경 변수 동기화 실패.** 두 슬롯이 같은 `bootloader-env` partition을 공유해야 하는데 각 slot의 rootfs에 따로 두면 inconsistent. env는 *별도 partition*.
 

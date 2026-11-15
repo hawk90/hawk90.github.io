@@ -1,8 +1,8 @@
 ---
-title: "BSP 부트 시간 최적화 — Bootchart·initcall_debug·Parallel Init"
+title: "BSP 부트 시간 최적화 — Bootchart·initcall_debug·부팅 경로 측정"
 slug: "embedded/bsp/chapter15-boot-time-optimization"
 date: 2026-05-18T09:15:00
-description: "boot에서 application까지 시간을 줄이는 기법 — measurement, Falcon, deferred init, kernel slim."
+description: "대상 보드에서 부트 단계를 측정하고, 병목과 복구 조건을 확인하며 최적화하는 방법."
 series: "BSP Development"
 seriesOrder: 15
 tags: [embedded, bsp, boot-time, optimization, sub-second]
@@ -14,7 +14,7 @@ topics: ["embedded"]
 
 **부트 시간 최적화는 추측이 아니라 측정으로 시작합니다.** 각 단계의 시간을 ms 단위로 쪼개 본 다음, 가장 비싼 단계부터 깎아내려 갑니다.
 
-자동차 인포테인먼트는 후방 카메라를 2초 안에 표시해야 합니다. 산업용 컨트롤러는 정전 복구 후 1초 안에 안전 상태로 돌아와야 합니다. 가전 제품은 사용자가 버튼을 누른 직후 LED가 켜져야 합니다. 부팅이 5초 걸리는 BSP는 이런 요구를 통과하지 못합니다.
+제품마다 부팅 완료의 정의와 시간 예산이 다릅니다. 후방 카메라 영상 표시, 안전 상태 복구, 사용자 인터페이스 준비처럼 완료 조건을 먼저 정하고, 대상 제품의 요구사항과 실제 측정 결과를 비교합니다.
 
 이번 글은 ROM에서 application 첫 줄까지의 전 구간을 *측정 가능한 단계*로 나눕니다. 그리고 각 단계에서 시간을 깎는 실전 기법을 정리합니다.
 
@@ -24,17 +24,14 @@ topics: ["embedded"]
 
 ![부트 시간 분석 — ROM부터 Application까지 각 단계의 시간 비중](/images/blog/bsp/diagrams/ch15-boot-time-breakdown.svg)
 
-| 단계 | 일반 BSP | 최적화 후 |
-|------|----------|-----------|
-| ROM → SPL | 50~200ms | 50~80ms |
-| SPL → U-Boot | 100~500ms | 30~100ms |
-| U-Boot → kernel load | 200ms~2s | 50~200ms |
-| Kernel decompress + init | 1~3s | 300~800ms |
-| Initramfs → real rootfs | 200~800ms | 0~100ms |
-| init → application | 1~5s | 200~500ms |
-| **합계** | **3~10s** | **0.6~1.5s** |
+| 단계 | 시작 이벤트 | 끝 이벤트 | 기준 측정 | 변경 후 측정 |
+|------|-------------|-----------|------------|---------------|
+| ROM → SPL | 보드 전원/리셋 기준점 | SPL 첫 관측점 | 대상 보드에서 기록 | 같은 조건으로 재측정 |
+| SPL/U-Boot | SPL 진입 | 커널 handoff | 대상 보드에서 기록 | 같은 조건으로 재측정 |
+| Kernel | kernel entry | 정의한 kernel milestone | 대상 보드에서 기록 | 같은 조건으로 재측정 |
+| Userspace | init 시작 | 제품 완료 조건 | 대상 보드에서 기록 | 같은 조건으로 재측정 |
 
-각 단계를 측정하지 않고는 어디를 깎을지 알 수 없습니다. 측정 도구를 먼저 갖추는 것이 출발점입니다.
+표는 결과를 기록할 틀입니다. 숫자는 대상 하드웨어와 동일한 완료 조건에서 측정한 뒤 채우며, 다른 보드의 수치를 일반 기준으로 옮기지 않습니다.
 
 ## 측정 — printk timestamps와 bootchart
 
@@ -108,17 +105,18 @@ dmesg에 모든 initcall이 시간과 함께 찍힙니다.
 
 ### 부트 시간 측정 스크립트 예시
 
-자동화된 측정을 위해 시리얼 로그를 파싱하는 스크립트입니다.
+아래는 kernel dmesg의 한 milestone과 systemd journal의 별도 milestone을 표시하는 shell 예시입니다. 두 로그의 이벤트가 보장된 것은 아니므로 실제 target에서 확인합니다.
 
 ```bash
 #!/bin/bash
 # boot-time-analyze.sh - dmesg에서 부트 단계별 시간 추출
+set -euo pipefail
 
 # 커널 부트 완료 시점
-KERNEL_DONE=$(dmesg | grep "Freeing unused kernel" | awk '{print $1}' | tr -d '[]')
+dmesg | awk '/Freeing unused kernel/ { stamp = $2; sub(/\].*/, "", stamp); print "kernel milestone:", stamp; found = 1; exit } END { if (!found) exit 1 }'
 
-# systemd 도달 시점
-SYSTEMD_START=$(dmesg | grep "systemd\[1\]: Detected" | awk '{print $1}' | tr -d '[]')
+# systemd journal은 dmesg와 별도 출처
+journalctl -b -o short-monotonic | awk '/Reached target Multi-User System/ { print; exit }'
 
 # 가장 느린 initcall 상위 10개
 echo "=== Slowest initcalls ==="
@@ -126,9 +124,6 @@ dmesg | grep "initcall.*returned 0 after" | \
     sed 's/.*initcall \(.*\) returned 0 after \([0-9]*\) msecs/\2 \1/' | \
     sort -rn | head -10
 
-echo ""
-echo "Kernel boot: ${KERNEL_DONE}s"
-echo "systemd reached: ${SYSTEMD_START}s"
 ```
 
 U-Boot의 bootstage 정보를 환경 변수로 내보내 커널에서 전체 부트 시간을 추적할 수도 있습니다.
@@ -140,20 +135,16 @@ U-Boot의 bootstage 정보를 환경 변수로 내보내 커널에서 전체 부
 
 ## SPL과 U-Boot 단계 — Falcon mode
 
-U-Boot가 *대화형 셸*을 제공하는 비용은 작지 않습니다. 환경 변수 로드, console 초기화, USB 스캔 같은 단계가 다 부팅 시간을 잡아먹습니다. Falcon mode는 SPL이 *바로* 커널을 로드하도록 합니다. 평소에는 SPL → kernel, 특수 키를 누르거나 부팅 실패 시에만 full U-Boot로 떨어집니다.
+U-Boot가 *대화형 셸*을 제공하는 단계와 장치 초기화가 부트 경로에 포함될 수 있습니다. Falcon mode는 설정된 보드에서 SPL이 커널을 직접 적재하는 경로를 제공합니다. 특수 키 입력이나 실패 때 full U-Boot로 전환되는지는 보드의 SPL 정책이 별도로 구현해야 합니다.
 
 ```text
 CONFIG_SPL_OS_BOOT=y
 CONFIG_SPL_FALCON_BOOT_MMC=y
 ```
 
-```bash
-# Falcon mode 준비 - kernel과 dtb를 SPL이 기대하는 위치에 둠
-=> spl export fdt $kernel_addr_r - $fdt_addr_r
-=> mmc write $fdt_addr_r 0x500 0x80
-```
+Falcon용 kernel·DTB의 형식과 저장 위치는 board code 및 U-Boot 버전이 정합니다. 저장 매체를 갱신하는 명령은 대상 장치·offset·복구 경로를 확인한 뒤 해당 보드 문서를 따라야 하므로 범용 쓰기 명령은 제시하지 않습니다.
 
-Falcon mode는 U-Boot의 *유연성*과 *부팅 속도*를 맞바꿉니다. 양산 펌웨어에 권장됩니다.
+Falcon mode는 U-Boot의 유연성과 빠른 handoff 사이의 trade-off입니다. 이를 쓸지는 boot failure recovery, security/update 경로와 target board support를 검증한 뒤 정합니다.
 
 DRAM 초기화 조기 종료, console 끄기, 불필요한 드라이버 제외도 누적되면 큽니다. defconfig에서 제거할 후보는 다음과 같습니다.
 
@@ -165,11 +156,11 @@ CONFIG_CONSOLE_MUX=n
 CONFIG_HUSH_PARSER=n       # 양산이면 셸 자체를 빼도 됨
 ```
 
-이더넷 PHY autoneg은 1~3초가 걸리므로 부팅 경로에 *절대* 두지 말아야 합니다.
+Ethernet PHY auto-negotiation은 link partner와 설정에 따라 지연될 수 있습니다. 네트워크가 즉시 필요하지 않다면 이를 boot critical path에서 분리할지 측정 결과로 판단합니다.
 
 ## Kernel 단계 — 슬림화
 
-커널 decompression 자체가 무거운 단계입니다. `zImage`는 gzip, `Image.gz`는 동일 압축이고 `Image`는 비압축입니다. 비압축은 디스크 공간을 더 쓰지만 decompress 시간이 0입니다.
+압축 해제 비용은 image format, bootloader, CPU 및 storage에 따라 달라집니다. `zImage`는 ARM용 self-decompressing image, `Image.gz`는 gzip-compressed arm64 image, `Image`는 비압축 image입니다. 누가 압축을 푸는지는 boot flow로 확인하고 실제 boot time을 측정합니다.
 
 ```bash
 # arch/arm/boot/Makefile
@@ -199,7 +190,7 @@ console=ttyS0,115200 earlycon loglevel=7
 console=null loglevel=0 quiet
 ```
 
-root는 `PARTUUID=`로 지정하면 rootfs 검색 단계의 random poll이 짧아집니다.
+`PARTUUID=`는 장치 열거 순서가 바뀌어도 partition 식별자를 유지하는 방법입니다. 이를 지정해도 장치 준비 대기 시간이 자동으로 줄어드는 것은 아니므로 storage 초기화와 mount 시간을 따로 측정합니다.
 
 ```text
 root=PARTUUID=12345678-02 rootwait
@@ -216,7 +207,7 @@ root=PARTUUID=12345678-02 rootwait
 CONFIG_INITRAMFS_SOURCE=""   # 비움
 ```
 
-initramfs를 꼭 써야 한다면(예: dm-verity 검증) busybox 정적 빌드 + 최소 init 스크립트로 100KB 이내로 만듭니다.
+initramfs가 필요하다면(예: rootfs를 검증하거나 암호화된 volume을 여는 경우) 포함한 도구와 파일을 기록하고, 이미지 크기와 실행 시간을 대상 구성에서 측정합니다.
 
 ```bash
 #!/bin/sh
@@ -239,9 +230,9 @@ $ systemctl disable NetworkManager-wait-online.service
 $ systemctl mask wpa_supplicant.service
 ```
 
-`NetworkManager-wait-online.service`는 자주 5~30초 timeout으로 박힙니다. 네트워크가 application 시작 후 올라와도 되는 시스템에서는 mask가 안전합니다.
+`NetworkManager-wait-online.service`가 application 시작을 막는지는 unit dependency와 실제 journal로 확인합니다. 네트워크가 application 시작 후 올라와도 되는 제품에서만 dependency를 조정하고 기능 회귀를 시험합니다.
 
-systemd 자체가 무거우면 BusyBox init이나 finit, OpenRC를 대안으로 검토합니다. systemd → BusyBox init만 바꿔도 userspace 부팅이 1~2초 빨라집니다.
+다른 init 시스템은 기능과 의존성이 다릅니다. systemd를 BusyBox init 등으로 바꾸면 부팅 시간이 얼마나 달라지는지 같은 보드와 완료 조건으로 측정하고, 서비스 관리·로그·업데이트 동작도 함께 검증합니다.
 
 application을 직접 init으로 등록하는 극단도 가능합니다.
 
@@ -249,51 +240,33 @@ application을 직접 init으로 등록하는 극단도 가능합니다.
 init=/usr/bin/my-app
 ```
 
-이 경우 my-app이 mount, network, log 같은 모든 setup을 책임집니다. 부팅 0.5초 안에 application LED가 켜져야 하는 케이스에서 검토할 만합니다.
+이 경우 my-app이 필요한 mount, network, log 초기화를 책임져야 합니다. 제품의 완료 조건을 만족하는지와 장애 복구 경로를 함께 검증해야 합니다.
 
-## 실전 사례 — STM32MP1에서 1초 이내
+## 실측 사례를 비교하는 방법
 
-ST가 공개한 STM32MP157 0-to-login 최적화는 단계별 숫자를 보여 줍니다.
-
-| 단계 | 기본 | 최적화 |
-|------|------|--------|
-| ROM bootloader | 60ms | 60ms |
-| FSBL (TF-A BL2) | 250ms | 80ms |
-| SSBL (U-Boot) | 700ms | 60ms (Falcon) |
-| Kernel | 1900ms | 480ms |
-| Userspace | 2100ms | 320ms |
-| **합계** | **5010ms** | **1000ms** |
-
-깎은 항목은 다음과 같습니다.
-
-- TF-A BL2에서 사용하지 않는 STORAGE/USB 드라이버 제외
-- U-Boot Falcon mode 적용
-- Kernel `Image.gz` → `Image` (비압축)
-- Initramfs 제거, rootfs PARTUUID 직접 root
-- systemd → BusyBox init
-- application의 의존 라이브러리를 LTO + strip
+다른 보드의 공개 사례를 인용하려면 제조사 문서나 재현 가능한 시험 자료에서 보드 revision, 이미지·커널 버전, 측정 시작점과 완료 조건, 변경 항목을 함께 확인합니다. 이 장에서는 출처와 조건이 확인된 STM32MP1 측정 사례를 제시하지 않으므로 수치를 싣지 않습니다. 자체 결과에는 기준 이미지와 변경 이미지를 같은 장비·전원·저장 매체·완료 조건으로 측정한 기록을 남깁니다.
 
 ## 자주 하는 실수
 
-**측정 없이 깎기.** `quiet` 하나 넣고 만족하는 경우가 많습니다. dmesg 안 보고 PHY autoneg 1초를 그대로 두는 BSP가 흔합니다.
+**측정 없이 깎기.** console 출력이나 PHY negotiation을 먼저 끄기보다, 실제 부트 경로에서 어느 단계가 지연되는지 확인합니다.
 
 **release에서 console 끄기 잊기.** `loglevel=7`이면 매 줄마다 직렬 송신에 시간이 듭니다. 양산에서는 0으로.
 
-**Falcon mode 실패 경로 미준비.** Falcon이 실패하면 보드가 벽돌이 됩니다. SPL이 fallback으로 U-Boot 전체를 로드할 수 있도록 환경을 짜둡니다.
+**Falcon mode 실패 경로 미준비.** Falcon이 실패하면 보드가 벽돌이 됩니다. Fallback을 제공하는지, 실패 시 recovery 진입이 가능한지는 실제 SPL/boot policy에서 확인합니다. Falcon 자체가 자동으로 full U-Boot fallback을 보장하지 않습니다.
 
-**Userspace에서 sleep 박기.** 어떤 service가 race condition을 피하려고 `sleep 2`를 박아두는 경우가 있습니다. 부팅 2초가 사라집니다. systemd `After=`/`Wants=`로 해결합니다.
+**Userspace에서 고정 sleep 사용.** 고정 지연은 실제 의존성을 표현하지 못합니다. systemd unit 사이의 순서·요구 관계를 확인해 적절한 dependency로 표현하고, 서비스가 준비되기 전에 다음 단계가 진행되는 실패 사례도 시험합니다.
 
-**autoneg을 부팅 경로에.** 이더넷 PHY autoneg은 1.5~3초입니다. application이 네트워크를 필요로 한다면 application 시작 후 비동기로 처리합니다.
+**네트워크 초기화를 측정 없이 이동하기.** PHY negotiation 시간과 네트워크 준비 의존성은 PHY, link partner, 설정에 따라 달라집니다. 네트워크가 application 시작 조건인지 확인하고 변경 전후의 시간을 기록합니다.
 
 ## 정리
 
 - 부트 시간 최적화는 측정으로 시작합니다. `printk.time=1`, `bootstage report`, `systemd-analyze blame`이 기본 도구입니다.
-- 가장 큰 한 덩어리부터 깎습니다. 1초짜리 PHY autoneg 한 개가 0.1초짜리 10개보다 우선입니다.
-- U-Boot Falcon mode는 부트로더 단계 시간을 한 자릿수 ms로 끌어내립니다.
+- 측정에서 가장 큰 지연 구간부터 검토합니다. 변경 후에도 같은 milestone과 workload로 비교합니다.
+- U-Boot Falcon mode는 일부 보드에서 bootloader 작업을 줄일 수 있지만 단축 시간은 platform 설정과 측정에 따릅니다.
 - Kernel은 `Image` 비압축 + initcall_debug로 무거운 driver 제거 + `quiet loglevel=0`이 기본 조합입니다.
 - Initramfs는 보안 검증이 필요하지 않다면 제거하고 PARTUUID로 직접 root mount 합니다.
 - systemd는 무겁습니다. BusyBox init이나 application init으로 대체하는 극단을 검토하세요.
-- STM32MP1, i.MX8M, RK3568 같은 메인스트림 SoC에서 1초 이내 부팅이 실현 가능합니다.
+- 부팅 시간 주장은 특정 제품·완료 기준·측정 조건을 함께 적습니다. 이 장에서는 target board를 사용한 실측을 하지 않았습니다.
 
 ## 다음 편 예고
 

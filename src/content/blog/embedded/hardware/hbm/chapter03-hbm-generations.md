@@ -12,20 +12,22 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"세대마다 *pin rate 1.5~2배*가 표준 행보입니다."** — HBM2(2.4 Gbps) → HBM2E(3.6) → HBM3(6.4) → HBM3E(9.6) 순으로 *pin rate*가 뛰었습니다. *stack당 bandwidth*는 *307 GB/s(2018) → 1.23 TB/s(2024)*로 *6년 만에 4배*가 됐습니다. HBM4는 *bus width를 2배(2048-bit)*로 늘려, pin rate는 *최대 8 Gbps*로 오히려 낮추고도 대역폭을 *최대 2 TB/s*로 올렸습니다.
+> **"표준의 상한과 벤더 제품의 속도 등급을 구별해야 합니다."** — HBM2(2.4 Gbps) → HBM2E(3.6) → HBM3(6.4) → HBM3E(9.6) 순으로 *pin rate*가 뛰었습니다. *stack당 bandwidth*는 *307 GB/s(2018) → 1.23 TB/s(2024)*로 *6년 만에 4배*가 됐습니다. HBM4는 *bus width를 2배(2048-bit)*로 늘려, 2025년 최초 표준 발표의 *8 Gbps* 기준으로도 대역폭을 *최대 2 TB/s*로 올렸습니다.
 
 [Ch 2](/blog/embedded/hardware/hbm/chapter02-hbm-stack)에서 *물리적 구조*를 봤습니다. 이번 장은 *시간 축*입니다. 같은 *base die + DRAM die* 골격이 *세대마다 어떻게 진화*했는지, JEDEC 표준이 *어떤 새 기능*을 더했는지를 봅니다.
 
 ## 한눈에 보는 표
 
-| 세대 | JEDEC 표준 | 양산 시기 | per-pin | Stack BW | Stack capacity | I/O | VDD |
+이 표는 역사적 기준값과 발표 제품의 예를 비교합니다. 최신 제품 카탈로그가 아니며, HBM3E 행은 JEDEC revision 상한이 아닌 2024년 두 제조사의 발표값입니다.
+
+| 세대 | 기준 문서 | 발표·제품 시점 | per-pin | Stack BW | Stack capacity | I/O | VDD |
 |------|-----------|-----------|---------|----------|----------------|-----|-----|
 | HBM | JESD235 | 2015 | 1.0 Gbps | 128 GB/s | TBD | 1024-bit | 1.2 V |
 | HBM2 | JESD235A·B | 2016 | 2.0~2.4 Gbps | 256~307 GB/s | 4·8 GB | 1024-bit | TBD |
 | HBM2E | JESD235C | 2020 | 3.2~3.6 Gbps | 410~460 GB/s | 16 GB | 1024-bit | TBD |
 | HBM3 | JESD238 | 2022 | 6.4 Gbps | 819 GB/s | 16·24 GB | 1024-bit | 1.1 V |
-| HBM3E | TBD | 2024 | 9.2~9.6 Gbps | 1.18~1.23 TB/s | 24·36 GB | 1024-bit | TBD |
-| HBM4 | JESD270-4 | 2026 | 최대 8.0 Gbps | 최대 2.0 TB/s | 최대 64 GB | 2048-bit | 1.0·1.05 V |
+| HBM3E | 아래 벤더 발표 | 2024 | Micron >9.2 / SK hynix 9.6 Gbps | Micron >1.2 / SK hynix 약 1.23 TB/s | 24·36 GB | 1024-bit | TBD |
+| HBM4 | JESD270-4 | 2025 표준 발표 | 최대 8.0 Gbps | 최대 2.0 TB/s | 최대 64 GB | 2048-bit | 1.0·1.05 V |
 
 (JEDEC 문서 번호·revision은 시기에 따라 갱신됩니다. HBM4는 *2025년 4월 JESD270-4로 표준이 확정*됐습니다. JESD235 계열이 아니라 *새 번호 체계*를 씁니다. HBM2의 2.4 Gbps는 2018년 JESD235B에서, HBM2E의 3.2 Gbps는 2020년 JESD235C에서 정의됐습니다. HBM2E의 3.6 Gbps·460 GB/s는 JEDEC 정격 위로 SK hynix가 낸 제품 속도입니다. 양산 시기와 HBM2E 이후 칸의 속도·용량은 벤더의 양산 발표 기준이고, 근거를 찾지 못한 칸은 TBD로 두었습니다. HBM4의 VDD 칸은 core 전압(VDDC)이고, I/O 전압 VDDQ는 0.7~0.9 V 중 벤더가 고릅니다.)
 
@@ -99,7 +101,7 @@ per-pin이 *2.4 → 3.6 Gbps*로 *50% 증가*했고, DRAM die가 *16 Gb*로 커�
 
 ## HBM3 (2022) — 세대 변곡
 
-JEDEC가 *큰 폭의 사양 변경*을 한 세대입니다.
+[JEDEC의 2022년 1월 27일 최초 발표](https://www.businesswire.com/news/home/20220127005320/en/)를 기준으로 channel·적층 수·밀도·on-die ECC를 정리합니다.
 
 **HBM3 (JESD238, 2022년 1월):**
 
@@ -120,7 +122,7 @@ JEDEC가 *큰 폭의 사양 변경*을 한 세대입니다.
 
 **on-die ECC 표준화.** HBM3부터 *symbol 기반 ECC*가 *DRAM die 안에* 들어갑니다.
 
-**clock 구조 변경.** command clock(CK)과 data strobe(WDQS·RDQS)가 분리됐습니다. 6.4 Gbps에서 data strobe는 3.2 GHz, CK는 최대 1.6 GHz입니다.
+**clock 구조 변경.** [Synopsys의 HBM3 인터페이스 설명](https://www.synopsys.com/articles/hbm3-ip-dwtb.html)에 따르면 command clock(CK)과 data strobe(WDQS·RDQS)가 분리됐습니다. 6.4 Gbps에서 data strobe는 3.2 GHz, CK는 최대 1.6 GHz입니다.
 
 ## HBM3E (2024)
 
@@ -130,13 +132,14 @@ NVIDIA H200(141 GB, 4.8 TB/s)과 B200(8 TB/s)이 HBM3e를 씁니다.
 
 | 벤더 | per-pin | stack BW (× 1024-bit) | 구성 | 양산 발표 |
 |------|---------|----------------------|------|-----------|
-| Micron | 9.2 Gbps | 1.18 TB/s | 8-Hi, 24 GB | 2024년 2월 |
-| SK hynix | 9.6 Gbps | 1.23 TB/s | 12-Hi, 36 GB | 2024년 9월 |
-| Samsung | TBD | TBD | TBD | TBD |
+| [Micron](https://micron.gcs-web.com/news-releases/news-release-details/micron-commences-volume-production-industry-leading-hbm3e) | 9.2 Gbps 초과 | 1.2 TB/s 초과 (발표값) | 8-Hi, 24 GB | 2024년 2월 |
+| [SK hynix](https://news.skhynix.com/en/sk-hynix-begins-volume-production-of-the-world-first-12-layer-hbm3e/) | 9.6 Gbps | 1.23 TB/s | 12-Hi, 36 GB | 2024년 9월 |
 
 12-Hi 36 GB stack은 *24 Gb DRAM die* 12장입니다.
 
 ## HBM4 (2025) — 광폭 인터페이스로
+
+아래는 [JEDEC이 2025년 4월 16일 배포한 최초 JESD270-4 발표](https://www.businesswire.com/news/home/20250416843598/en/)의 범위입니다. 이후 제품 등급의 최고 속도나 현재 양산 상태를 정리한 표가 아닙니다. 8 Gbps × 2048 ÷ 8은 2048 GB/s이며, 발표문의 2 TB/s는 이를 요약한 표현입니다.
 
 HBM4는 *흐름을 바꿉니다*. pin rate를 크게 올리는 대신 *bus width를 2배(2048-bit)*로 늘렸습니다.
 
@@ -153,7 +156,7 @@ HBM4는 *흐름을 바꿉니다*. pin rate를 크게 올리는 대신 *bus width
 | max capacity | 64 GB / stack (32 Gb × 16) |
 | VDDC / VDDQ | 1.0·1.05 V / 0.7·0.75·0.8·0.9 V (벤더 선택) |
 | RAS | DRFM(directed refresh management) |
-| 호환 | 기존 HBM3 controller와 하위 호환 |
+| 호환 | 하나의 controller로 HBM3·HBM4를 지원할 수 있도록 인터페이스 정의. 기존 패키지의 교체 호환성을 뜻하지 않음 |
 
 ## RAS — 신뢰성 기능
 
@@ -161,23 +164,20 @@ HBM4는 *흐름을 바꿉니다*. pin rate를 크게 올리는 대신 *bus width
 
 | 세대 | RAS 기능 |
 |------|---------|
-| HBM2 | TBD |
-| HBM2E | TBD |
 | HBM3 | on-die ECC(symbol 기반) 표준화 |
-| HBM3E | TBD |
 | HBM4 | DRFM(directed refresh management)으로 row hammer 대응 |
 
 AI training cluster는 *수만 개의 stack*을 *몇 주씩 쉬지 않고* 돌립니다. stack 수가 이만큼 많으면 드문 soft error도 클러스터 전체로는 자주 일어나고, 오류 하나가 긴 training job을 멈출 수 있습니다. 그래서 HBM3부터 *on-die ECC가 표준에 들어가고* RAS가 *사실상 필수*가 됐습니다.
 
 ## bandwidth 그래프
 
-세대별 *stack 1개*의 *bandwidth* 진화입니다.
+세대별 stack 1개의 기준 대역폭 비교입니다. HBM3E는 SK hynix 2024년 제품, HBM4는 2025년 최초 표준 발표 기준입니다. 막대는 동일한 선형 축을 사용하며 최신 제품 최고 속도를 뜻하지 않습니다.
 
-![세대별 stack 1개의 bandwidth 진화](/images/blog/hardware/hbm/diagrams/ch03-stack-bw.svg)
+![HBM 세대별 기준 대역폭 — 선형 GB/s 축, 표준 발표와 제품 예 구분](/images/blog/hardware/hbm/diagrams/ch03-stack-bw.svg)
 
-GPU 카드 한 장의 총 BW는 다음과 같습니다. stack당 실효 BW는 총 BW를 stack 수로 나눈 값입니다.
+[NVIDIA의 Volta](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf)·[Ampere](https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf) 백서와 [H100 제품 사양](https://www.nvidia.com/en-us/data-center/h100/)에 기초한 카드 비교입니다. GPU 카드 한 장의 총 BW는 다음과 같습니다. 마지막 열은 공개 peak를 stack 수로 나눈 산술 평균입니다. sustained 대역폭의 관측값이나 효율이 아닙니다.
 
-| 카드 | HBM | stack 수 | 총 BW | stack당 실효 BW |
+| 카드 | HBM | stack 수 | 총 BW | stack당 공칭 평균 BW |
 |------|-----|---------|--------|----------------|
 | V100 (16 GB) | HBM2 | 4 | 900 GB/s | 225 GB/s |
 | A100 (40 GB) | HBM2 | 5 | 1,555 GB/s | 311 GB/s |
@@ -185,9 +185,9 @@ GPU 카드 한 장의 총 BW는 다음과 같습니다. stack당 실효 BW는 �
 | H200 | HBM3e | — | 4.8 TB/s | — |
 | B200 | HBM3e | — | 8 TB/s | — |
 
-stack당 실효 BW가 세대 최대치(HBM3라면 819 GB/s)보다 낮은 것은 카드가 HBM을 정격 최대 속도보다 낮게 돌리기 때문입니다. H200·B200의 stack 수는 NVIDIA 공개 자료에 나오지 않아 비워 두었습니다.
+카드의 구성·속도 등급과 표의 기준 revision이 다르므로 평균을 세대 대표 수치로 나누어 효율이라고 해석하지 않습니다. 예를 들어 A100 40GB의 311 GB/s는 위 HBM2 기준 307 GB/s보다 높습니다. H200·B200의 stack 수는 NVIDIA 공개 자료에 나오지 않아 비워 두었습니다.
 
-*8년 만에 6.25배*가 늘었습니다. 같은 기간 *GPU compute*는 *25배*(FP16 기준)가 늘었습니다. *compute가 더 빠르게 늘어* *memory가 병목*이 되는 흐름이 확실합니다. Ch 5에서 이 *memory wall*을 자세히 봅니다.
+연산과 메모리의 증가율을 비교하려면 같은 제품 구성·정밀도·dense/sparse 기준을 먼저 정해야 합니다. 세대 이름만으로 일정 배수의 memory wall을 결론낼 수 없습니다. [Ch 5](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)에서 workload의 연산 집약도와 roofline을 함께 계산합니다.
 
 ## 자주 하는 실수
 
@@ -216,11 +216,11 @@ HBM4는 *bus width 자체가 2배*입니다. JEDEC는 HBM4가 *기존 HBM3 contr
 - HBM3에서 *on-die ECC*가 표준에 들어갔습니다.
 - HBM4는 pin rate 대신 *bus width(2048-bit)*를 늘려 대역폭을 올렸습니다.
 - 벤더별 *pin rate grade*가 다르므로 *세대 이름만으로 호환을 가정*하면 안 됩니다.
-- 다음 장에서 *반대편의 GDDR*을 봅니다. *32 Gbps per-pin*이 *어떻게 가능한지*가 핵심입니다.
+- 다음 장에서 *반대편의 GDDR*을 봅니다. PAM 신호의 symbol rate와 데이터 전송률을 구별하는 것이 핵심입니다.
 
 ## 다음 편
 
-[Ch 4: GDDR6·GDDR6X·GDDR7](/blog/embedded/hardware/hbm/chapter04-gddr)에서는 *PAM4·PAM3* 같은 *멀티 레벨 signaling*이 *어떻게 pin rate를 32 Gbps까지* 끌어올렸는지 봅니다. *PCB 라우팅*과 *signal integrity* 부담도 같이 다룹니다.
+[Ch 4: GDDR6·GDDR6X·GDDR7](/blog/embedded/hardware/hbm/chapter04-gddr)에서는 *PAM4·PAM3* 같은 *멀티 레벨 signaling*이 symbol당 bit 수와 전압 여유를 어떻게 바꾸는지 봅니다. *PCB 라우팅*과 *signal integrity* 부담도 같이 다룹니다.
 
 ## 관련 항목
 
@@ -228,4 +228,3 @@ HBM4는 *bus width 자체가 2배*입니다. JEDEC는 HBM4가 *기존 HBM3 contr
 - [Ch 2: HBM 스택 구조와 TSV](/blog/embedded/hardware/hbm/chapter02-hbm-stack)
 - [Ch 4: GDDR6·GDDR6X·GDDR7](/blog/embedded/hardware/hbm/chapter04-gddr)
 - [Ch 5: 대역폭 계산과 병목 분석](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)
-- UCIe Ch 5: 버전 비교 — 표준 세대 진화 패턴

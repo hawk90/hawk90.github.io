@@ -2,7 +2,7 @@
 title: "Stack Overflow 탐지 — Canary·MPU·Watermark 3중 방어"
 slug: "embedded/rtos/practical-internals/part4-06-stack-overflow"
 date: 2026-05-07T09:38:00
-description: "임베디드 가장 흔한 silent bug가 스택 오버플로우입니다. FreeRTOS canary, MPU region 기반 hardware 보호, high-water mark 측정, 정적 분석 도구까지 다층 방어 전략을 정리합니다."
+description: "FreeRTOS V11.2.0의 stack 검사와 관찰 watermark의 한계를 구분합니다. MPU guard, compiler protector, 정적 stack 분석을 실제 port와 build 조건에 맞춰 조합합니다."
 series: "Practical RTOS Internals"
 seriesOrder: 38
 tags: [stack-overflow, canary, mpu, watermark]
@@ -11,15 +11,11 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> **"Stack overflow는 즉시 죽지 않는 silent corruption입니다."** — canary·MPU·watermark *세 층*으로 막아야 안전합니다.
+stack overflow는 즉시 fault가 날 수도, 다른 memory를 훼손한 뒤 드러날 수도 있습니다. **canary·watermark·MPU·compiler 보호는 검출 시점과 범위가 다릅니다.** 한 검사나 관찰값만으로 모든 경로의 stack 안전을 보장하지 않습니다.
 
 ## 어떤 문제를 푸는가
 
-스택 오버플로우는 임베디드에서 *재현이 가장 어려운 버그*입니다. C에서 stack은 *그냥 메모리 영역*이고 hardware는 *경계를 모릅니다*. SP가 region 밖으로 내려가도 CPU는 그냥 *다음 word*에 push할 뿐입니다.
-
-문제가 가시화되는 시점은 *훨씬 나중*입니다. 침범당한 영역이 다른 task의 TCB라면 *다음 context switch*에서 깨지고, heap 영역이라면 *몇 ms 뒤 다른 task의 alloc*이 이상해집니다. 원인과 결과 사이 *수십 ms*가 벌어져 디버거로 잡기가 거의 불가능합니다.
-
-방어는 *한 층으로 부족*합니다. FreeRTOS의 canary, MPU 기반 hardware boundary, 운영 중 watermark monitoring, 그리고 컴파일 단계 정적 분석을 *겹쳐* 적용해야 합니다. 이번 편은 각 방어 층의 원리와 함정을 정리합니다.
+task·exception·library 호출이 예상보다 큰 stack을 쓰면 이웃 영역을 훼손하거나 보호 fault를 만들 수 있습니다. 어느 증상이 몇 ms 뒤 발생한다고 고정할 수는 없습니다. 이 글은 FreeRTOS **V11.2.0**의 일반 비-MPU stack macro를 기준으로 하고 port·hardware 보호는 별도로 구분합니다.
 
 ## Stack의 방향과 침범 양상
 
@@ -27,59 +23,39 @@ Cortex-M의 stack은 *높은 주소에서 낮은 주소로* 자랍니다. SP가 
 
 ![Cortex-M stack은 높은 주소에서 낮은 주소로 자라며, overflow 시 인접 메모리를 침범한다](/images/blog/rtos/diagrams/part4-06-stack-layout.svg)
 
-침범 첫 byte부터 *fault가 나는 것은 아닙니다*. read/write가 *그냥 성공*합니다. CPU는 침범을 모릅니다. 그래서 *소프트웨어 또는 MPU가 명시적으로 검사*해야 합니다.
+보호·mapping·access 조건에 따라 fault 여부가 달라집니다. Cortex-M의 아래 방향 stack에서도 SP 이동과 실제 memory access는 다르므로 byte 경계와 검출 시점을 나누어 봐야 합니다.
 
 ## Canary 패턴 — FreeRTOS Method 2
 
-가장 보편적인 방어가 *stack 끝에 magic value*를 심어 두고 주기적으로 검사하는 것입니다. FreeRTOS는 `configCHECK_FOR_STACK_OVERFLOW`에 *세 단계*를 제공합니다.
+V11.2.0의 include/stack_macros.h에서 아래 방향 일반 비-MPU port의 Method 1은 저장된 SP와 경계를 비교합니다. configCHECK_FOR_STACK_OVERFLOW>1 경로는 **SP 경계 검사와 stack 시작의 4개 uint32_t 패턴 비교**를 함께 수행합니다. MPU wrapper나 다른 port의 검사 계약은 다릅니다.
 
 ```c
 #define configCHECK_FOR_STACK_OVERFLOW 2
 ```
 
-값이 0이면 검사 없음, 1이면 SP 위치 검사, 2이면 *canary 검사*입니다. Method 2는 task 생성 시 stack을 *0xA5 패턴*으로 채웁니다.
+4개 word 중 하나라도 0xA5A5A5A5와 다르면 이 비교 조건에 걸릴 수 있습니다. “16 byte가 전부 깨져야 하고 그보다 작은 손상은 못 잡는다”는 설명은 틀립니다. 다만 경계를 건너뛰는 write·원래와 같은 값·검사 전에 SP가 돌아온 경로 등 모든 overflow가 검출되는 것은 아닙니다.
 
-```c
-/* task 생성 시 */
-memset(stack, 0xA5, stack_size);
-
-/* 매 context switch 시 */
-uint32_t *bottom = (uint32_t*)task->pxStack;
-if (bottom[0] != 0xA5A5A5A5 || bottom[1] != 0xA5A5A5A5 ||
-    bottom[2] != 0xA5A5A5A5 || bottom[3] != 0xA5A5A5A5) {
-    vApplicationStackOverflowHook(task, task->pcTaskName);
-}
-```
-
-stack 끝 16 byte가 깨졌다면 *최소한 그만큼은 침범*했다는 뜻입니다. 16 byte보다 작은 침범은 놓치지만, 그 정도라도 *대부분의 overflow*는 잡힙니다.
-
-Method 1은 더 가볍습니다. context switch 시 *SP가 stack base 이하*인지만 봅니다. 이미 침범이 *발생한 뒤*에 잡힌다는 한계가 있습니다. Method 2는 *경계를 살짝 침범한 순간*까지도 잡습니다. 양산 빌드도 최소 Method 1, 가능하면 Method 2로 둡니다.
+검사는 해당 kernel의 전환 경로에서 실행되며 손상 순간을 항상 포착하지 않습니다. 아래 방향 검사와 위 방향 검사에서 비교 크기·조건도 같다고 가정하지 않습니다.
 
 ## Application Hook
 
-overflow가 검출되면 RTOS가 *application hook*을 호출합니다. 시스템이 *이미 corrupt 상태*이므로 hook 안에서는 *최소한의 작업*만 합니다.
+hook이 호출될 때에는 이미 memory·task 이름·TCB 상태가 손상되었을 수 있습니다. 사용 stack과 호출 문맥은 실제 port 경로를 확인해야 합니다. 무조건 overflow된 task stack에서 실행된다거나 printf·ITM이 안전하다고 가정하지 않습니다.
 
-```c
-void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
-    /* 로컬 변수는 호출 측 stack — overflow된 task의 stack */
-    /* 가능한 가벼운 작업만 */
-
-    log_critical_isr("stack overflow: %s", pcTaskName);
-
-    /* 양산 — 즉시 reset, watchdog에게 맡기는 것이 가장 안전 */
-    NVIC_SystemReset();
-
-    /* debug — halt for inspection */
-    __BKPT(0);
-    for (;;);
+```c title="overflow-hook.c"
+#include "FreeRTOS.h"
+#include "task.h"
+_Noreturn extern void board_fail_stop(void);
+void vApplicationStackOverflowHook(TaskHandle_t task, char *name) {
+    (void)task; (void)name;
+    board_fail_stop();
 }
 ```
 
-hook 안에서 *큰 stack을 쓰는 함수* (printf, malloc 등)를 호출하면 *2차 overflow*가 납니다. 메시지는 *최소 길이*로, 가능하면 *ITM trace*로만 떨어뜨립니다. 그리고 watchdog reset이나 `NVIC_SystemReset()`으로 *깨끗한 부팅*을 유도합니다.
+board_fail_stop은 제품이 검증한 최소 실패 대응을 제공해야 합니다. reset이 언제나 가장 안전한 결과는 아니며, 보존할 진단 정보·외부 출력·watchdog·안전 상태를 설계해야 합니다.
 
 ## High Water Mark — 운영 중 측정
 
-`uxTaskGetStackHighWaterMark`가 *지금까지 사용하지 않은 stack의 최소량*을 반환합니다. canary가 *깨지지는 않았지만 얼마나 가까이 갔는지*를 측정합니다.
+`uxTaskGetStackHighWaterMark`는 fill pattern이 남은 연속 영역을 StackType_t 단위로 관찰합니다. 쓰지 않은 예약 frame·같은 pattern의 데이터 때문에 정확한 최대 SP 이동량과 다를 수 있습니다.
 
 ```c
 UBaseType_t hw = uxTaskGetStackHighWaterMark(task);
@@ -102,7 +78,7 @@ void monitor_stacks(void) {
 }
 ```
 
-watermark가 *총 stack의 10% 이하*로 떨어지면 *위험*입니다. stack을 늘리거나 해당 task의 worst path를 다시 분석합니다.
+threshold는 전체 stack·예외 frame·분석 여유·관찰 조건으로 정합니다. 위 snapshot 이후 task가 삭제되면 handle·name 수명 문제가 생길 수 있으므로 monitor 중 task lifecycle 계약도 필요합니다.
 
 ## 정적 분석 — `-fstack-usage`
 
@@ -110,7 +86,7 @@ watermark가 *총 stack의 10% 이하*로 떨어지면 *위험*입니다. stack�
 
 `.su` 파일을 읽어 call graph의 worst path를 합산하는 절차는 [Ch 4-4: 정적 할당](/blog/embedded/rtos/practical-internals/part4-04-static-allocation#stack-size-계산---fstack-usage)에서 예제와 함께 다뤘습니다. 여기서는 그 값을 *overflow 대응에 어떻게 쓰는지*만 봅니다.
 
-핵심은 두 숫자를 나란히 놓는 것입니다. 정적 분석이 낸 worst path와 `uxTaskGetStackHighWaterMark`가 낸 실측 최대치가 *2배 이상 벌어지면* 둘 중 하나가 틀렸습니다. 실측이 훨씬 작다면 아직 worst path를 타 보지 않은 것이고 — 그 경로가 필드에서 처음 실행되는 날 overflow가 납니다. 실측이 정적 분석보다 크다면 `.su`에 안 잡히는 무언가가 있습니다. 재귀, 함수 포인터를 통한 간접 호출, 또는 `alloca`·가변 길이 배열입니다.
+정적 상한과 관찰 watermark는 서로 다른 지표입니다. 차이가 두 배라는 이유만으로 하나가 틀렸다고 판정하지 않습니다. 실행하지 않은 경로·간접 호출·재귀·alloca·library·FP/예외 frame과 fill-pattern 측정의 한계를 대조합니다.
 
 수동으로 트리를 따라가는 것이 번거롭다면 *Memfault puncover* 같은 도구가 자동화해 줍니다. ELF와 `.su` 파일을 입력으로 받아 call graph와 stack 합산을 보여 줍니다.
 
@@ -132,31 +108,13 @@ size_t measure_stack_used(uint32_t *stack, size_t words) {
 }
 ```
 
-stress test 후 *몇 word까지 패턴이 살아 있는지*를 보면 *그때까지의 최대 사용량*을 정확히 알 수 있습니다. canary는 *침범 여부*만, 이 방법은 *침범 거리*까지 알려 줍니다.
+이 패턴은 **비활성 scratch stack 또는 안전하게 초기화할 수 있는 저장소**에만 적용합니다. 살아 있는 task·MSP stack을 칠하면 실행 상태를 훼손합니다. untouched pattern은 실제 write 관찰치이며 SP가 예약만 하고 쓰지 않은 영역이나 같은 패턴의 write를 놓칠 수 있습니다.
 
 ## MPU로 Hardware 보호
 
-가장 강력한 방어는 *MPU(Memory Protection Unit)*입니다. task stack 바로 아래에 *no-access region*을 두면, overflow 시 *즉시 MemManageFault*가 발생합니다.
+guard region에 대한 금지된 access가 발생하면 설정에 따라 fault를 만들 수 있습니다. SP를 이동하는 것만으로 즉시 fault가 나거나 큰 frame이 guard를 절대로 건너뛰지 못한다는 보장은 없습니다. privileged access·background mapping·region 우선순위·fault enable·정렬·granularity를 확인합니다.
 
-```c
-/* task stack 직전 32 byte를 no-access region으로 */
-MPU->RNR  = MPU_REGION_NUMBER;
-MPU->RBAR = (uint32_t)(stack_base - 32);
-MPU->RASR = MPU_REGION_SIZE_32B
-          | MPU_REGION_NO_ACCESS
-          | MPU_REGION_ENABLE;
-```
-
-stack을 *1 byte라도 넘기는 순간* MemManageFault가 발생합니다. canary처럼 *주기 검사*가 필요 없고, *침범과 동시에 검출*됩니다.
-
-FreeRTOS는 *MPU 지원 port*가 별도로 있습니다(`port_mpu.c`). task 생성 시 *각 task의 stack region을 MPU로 보호*하고, context switch 시 *region을 갱신*합니다. ARMv7-M (Cortex-M3/M4/M7)와 ARMv8-M (Cortex-M23/M33)에서 지원됩니다.
-
-```c
-xTaskCreateRestricted(&task_params, &task_handle);
-/* task_params.xRegions에 MPU region 정의 */
-```
-
-MPU region 수가 제한적(보통 8 또는 16개)이라는 점을 감안해 *핵심 task에만 우선 적용*하는 것이 현실적입니다.
+FreeRTOS의 MPU 지원은 architecture별 전용 port와 task API/config를 사용합니다. 임의의 MPU_RASR 이름과 32-byte 주소만 써서 모든 Cortex-M의 stack을 보호하는 완성 설정으로 제시하지 않습니다. 실제 MPU register·task memory map·target fault 주입 검증이 필요합니다.
 
 ## GCC Stack Protector — Per-Function Canary
 
@@ -166,92 +124,48 @@ MPU region 수가 제한적(보통 8 또는 16개)이라는 점을 감안해 *�
 gcc -fstack-protector-strong source.c
 ```
 
-```c
-void some_function(void) {
-    uint32_t __stack_chk_guard_copy = __stack_chk_guard;
-    /* local 변수들 */
-    /* ... */
-    if (__stack_chk_guard != __stack_chk_guard_copy) {
-        __stack_chk_fail();
+```c title="protected-frame.c"
+#include <stddef.h>
+unsigned inspect_stack_frame(const unsigned char *src, size_t length) {
+    volatile unsigned char probe[64];
+    if (src == NULL || length > sizeof probe) return 0;
+    unsigned sum = 0;
+    for (size_t i = 0; i < length; ++i) {
+        probe[i] = src[i]; sum += probe[i];
     }
+    return sum;
 }
 ```
 
-buffer overrun이 *함수 내부에서* canary를 덮어쓰는 즉시 잡힙니다. RTOS canary가 *task 단위 침범*을 잡는다면, 이쪽은 *함수 단위 침범*을 잡습니다. 두 방어가 *겹치지 않는 영역*을 막습니다.
+stack protector는 compiler가 선택한 함수의 반환 등 검사 지점에서 canary를 검사합니다. overwrite 순간을 즉시 trap하거나 모든 stack 오류를 검출하는 것은 아닙니다. RTOS stack 경계 검사와 함수 protector는 검사 위치가 달라 서로 보완하지만 검출 범위가 겹치거나 빠질 수 있습니다.
 
 ## ISR Stack 분리
 
-Cortex-M은 *MSP*(Main Stack Pointer, ISR용)와 *PSP*(Process Stack Pointer, task용)를 분리합니다. ISR이 *task stack을 침범하지 않는다*는 보장입니다.
+Cortex-M은 *MSP*(Main Stack Pointer, ISR용)와 *PSP*(Process Stack Pointer, task용)를 분리합니다. task에서 exception에 들어갈 때 hardware가 만드는 frame은 당시 task의 PSP에 놓일 수 있고 handler 본문은 MSP를 사용합니다. 분리만으로 task stack에 exception frame 비용이 없다고 할 수는 없습니다.
 
 [2-05편](/blog/embedded/rtos/practical-internals/part2-05-cortex-m-context)에서 본 것처럼 task는 PSP, ISR은 MSP를 씁니다. MSP 크기는 *모든 nested ISR worst case*를 합산해 정합니다.
 
-MSP 분석
+MSP 예산에는 handler 호출 경로·중첩·FP/security 상태·port의 scheduler 처리와 분석 여유를 포함합니다. `_estack` 같은 초기 top symbol 하나만으로 저장소 크기가 정해지는 것은 아니며, linker의 범위와 startup 설정을 함께 확인합니다. 보호 검사도 MSP와 PSP에 각각 어떤 범위를 제공하는지 검증해야 합니다.
 
-| 항목 | Byte |
-|---|---|
-| outer ISR worst | 128 |
-| nested ISR worst | +64 |
-| nested ISR worst | +64 |
-| context switch frame | +64 |
-| margin (25%) | +80 |
-| **MSP size** | 400 → 512 |
+## Stack Probe — -fstack-clash-protection
 
-MSP 크기는 linker script의 `_estack` 심볼로 정합니다. MSP overflow는 *PSP 검사로는 잡히지 않습니다*. 별도로 *MSP base 부근에 canary*를 두어 부팅 후 주기적으로 검사하는 패턴이 안전합니다.
+지원 target에서 stack-clash protection은 큰 frame의 probe를 도입해 guard를 건너뛰는 일부 경로를 제한합니다. compiler version과 target 지원·실제 assembly를 확인해야 하며 모든 embedded GCC나 MPU 설정에서 일정한 4 KiB 간격·완전한 검출이 보장되지는 않습니다.
 
-## Stack Probe — `-fstack-clash-protection`
-
-큰 stack frame을 잡는 함수가 *guard page를 건너뛰고* 침범할 가능성이 있습니다. GCC의 `-fstack-clash-protection`은 *큰 frame을 작은 조각으로 나누어 단계적으로 probe*하는 코드를 삽입합니다.
-
-```c
-void big_func(void) {
-    char large_buffer[16384];   /* 16 KB */
-    /* 컴파일러가 자동으로 매 4 KB마다 stack 접근 명령 삽입 */
-}
+```bash
+gcc -fstack-clash-protection -c source.c
 ```
 
-guard page 또는 MPU no-access region이 *반드시 건드려지므로* overflow가 즉시 검출됩니다. desktop에서는 표준 옵션이지만 embedded toolchain에서도 *최근 GCC*는 지원합니다.
+성공한 옵션 parsing만으로 필요한 probe가 생성됐다고 판정하지 않습니다. guard 크기·배치·접근 권한과 실제 target 동작도 함께 확인합니다.
 
-## Recursion과 printf의 위험
+## Recursion과 printf의 비용
 
-embedded에서 *recursion은 사실상 금기*입니다. 깊이를 컴파일 타임에 알 수 없으면 *worst stack 분석이 불가능*합니다.
+재귀 깊이에 상한이 없으면 stack 상한 분석이 어렵습니다. 깊이를 제한하고 함수별 frame·tail-call 최적화 등 실제 build를 확인해야 합니다. newlib printf와 대체 library도 format·FP·구현·compiler에 따라 stack과 reentrancy 비용이 다릅니다.
 
-```c
-void recursive(int n) {
-    char local[1024];
-    if (n == 0) return;
-    recursive(n - 1);
-}
-recursive(10);   /* 10 KB stack — 추정 불가 영역 */
-```
+출처 없는 256/512/64 byte를 모든 제품의 stack 예산으로 사용하지 않습니다. ISR의 ITM print도 busy wait·지원 trace 경로를 확인해야 하므로 무조건 안전한 대체로 제시하지 않습니다.
 
-비슷하게 위험한 것이 *newlib `printf`*입니다. format string 처리, float 변환, locale 처리에 *256~512 byte stack*을 소모합니다.
+## 제품 검증 기록
 
-```c
-printf("value: %f\n", fp_val);   /* 512+ byte stack */
-```
-
-embedded에서는 *`tinyprintf` / `mini-printf` / `embedded-printf`* 같은 *작은 구현*으로 교체합니다. stack 사용량이 *64 byte 수준*으로 줄어듭니다. ISR 안에서 출력이 필요하다면 *ITM_SendChar* 또는 *ring buffer + 별도 task*가 답입니다.
-
-## 자동차·항공 표준
-
-safety-critical 도메인은 stack 분석을 *증명*해야 합니다.
-
-ASIL-D / DO-178C Level A
-
-- 모든 함수의 stack 사용량 *정적 분석*
-- worst path 산출 및 문서화
-- canary + MPU 둘 다 활성화
-- 운영 중 watermark monitoring
-- recursion 금지
-
-KSLV-II 누리호 비행 컴퓨터
-
-- stack size *고정* + 50% margin
-- 매 task 종료 시 watermark check
-- telemetry로 ground에 전송
-- canary 깨짐 시 즉시 redundant unit 전환
-
-3중 4중 방어가 *과하다고 느껴질 정도*로 겹쳐 있습니다. 한 층의 실패가 *다른 층으로 흡수*되어야 *시스템 신뢰성*이 만들어집니다.
+제품별로 stack 배치·최악 호출/예외 경로·도구의 적용 범위·관찰 workload·fault 대응을 기록합니다. 특정 표준 등급이면 canary·MPU·watermark의 같은 조합이 모두 강제된다고 일반화하지 않습니다. 공개 근거 없는 누리호의 50% margin·redundant unit 전환 절차도 제품 사실로 제시하지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -261,7 +175,7 @@ KSLV-II 누리호 비행 컴퓨터
 
 > ⚠️ 양산 빌드에서 canary 끔
 
-성능 이유로 `configCHECK_FOR_STACK_OVERFLOW = 0`으로 두는 경우가 있습니다. canary 검사는 *context switch 당 십 cycle 수준*이라 영향이 미미합니다. 양산에서도 *최소 Method 1*은 유지합니다.
+성능 이유로 `configCHECK_FOR_STACK_OVERFLOW = 0`으로 두는 경우가 있습니다. 검사 비용과 config는 port·compiler·메모리·제품 요구로 판단합니다. 기능을 켰다는 사실과 시간 예산·검출 범위 검증을 구분합니다.
 
 > ⚠️ ISR 안에서 큰 local 변수
 
@@ -275,7 +189,7 @@ ISR 안의 local은 *MSP를 직접 갉아먹습니다*. ISR에서 buffer가 필�
 
 > ⚠️ ISR 안에서 printf
 
-newlib `printf`는 *256+ byte stack*을 씁니다. MSP가 작으면 *MSP overflow*가 즉시 발생합니다. ISR 출력은 ITM 또는 ring buffer 패턴으로 옮깁니다.
+사용하는 printf의 stack·reentrancy·blocking 문맥을 확인합니다. ISR 출력에는 검증한 non-blocking 기록이나 별도 task 전달을 검토하며, 실제 비용은 target에서 확인합니다.
 
 > ⚠️ Recursion 사용
 
@@ -283,20 +197,25 @@ newlib `printf`는 *256+ byte stack*을 씁니다. MSP가 작으면 *MSP overflo
 
 > ⚠️ MSP canary 누락
 
-PSP만 canary로 보호하면 *ISR overflow는 silent*입니다. MSP에도 *부팅 시 magic pattern*을 채우고 주기적으로 검사합니다.
+PSP 검사만으로 MSP overflow를 검출한다고 가정할 수 없습니다. MSP 역시 별도 분석과 보호가 필요하지만, 현재 실행 중인 MSP 영역을 임의로 pattern-fill하면 안 됩니다. startup과 검사 문맥을 검증해야 합니다.
 
 ## 정리
 
-- Stack overflow는 *즉시 fault가 나지 않는 silent corruption*이며 임베디드에서 가장 재현이 어려운 버그입니다.
-- FreeRTOS `configCHECK_FOR_STACK_OVERFLOW = 2`는 stack 끝의 *canary 패턴*을 매 context switch마다 검사합니다.
-- `uxTaskGetStackHighWaterMark`로 *운영 중 사용량*을 측정하고 임계 이하 시 alarm을 띄웁니다.
-- *MPU region*으로 task stack을 보호하면 침범과 동시에 *MemManageFault*가 발생해 hardware 수준 방어가 됩니다.
+- Stack overflow는 즉시 fault 또는 지연된 memory corruption으로 드러날 수 있습니다.
+- FreeRTOS V11.2.0의 비-MPU macro와 port별 SP·pattern 검사 조건을 확인합니다.
+- watermark 관찰값은 실행 경로·fill pattern의 한계와 함께 보고합니다.
+- MPU는 금지 access의 fault를 제공하며 guard·권한·probe와 target 조건을 확인합니다.
 - GCC `-fstack-usage`로 *컴파일 타임 worst path 분석*, `-fstack-protector-strong`으로 *함수 단위 canary*를 추가합니다.
-- ISR stack(MSP)은 *task stack(PSP)과 별도*이므로 *별도 분석과 별도 canary*가 필요합니다.
-- recursion과 newlib `printf`는 *stack 큰손*이므로 embedded에서는 *피하거나 대체*합니다.
-- safety-critical 도메인은 *정적 분석 + canary + MPU + watermark monitoring*을 모두 겹쳐 적용합니다.
+- 해당 Cortex-M port에서 ISR 본문의 MSP와 task PSP를 구분해 각각 분석·보호합니다.
+- recursion 상한과 library의 실제 build별 stack 사용을 확인합니다.
+- 제품의 요구와 분석 한계에 맞춰 서로 다른 검출 수단을 조합합니다.
 
 다음 편은 [4-07 SMP RTOS](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)에서 *멀티코어 RTOS 스케줄링*을 다룹니다.
+
+## 근거 자료
+
+- [FreeRTOS V11.2.0 stack_macros.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/stack_macros.h), [tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): 실제 검사·watermark 경로.
+- [GCC instrumentation options](https://gcc.gnu.org/onlinedocs/gcc/Instrumentation-Options.html): protector·stack-clash의 target별 범위.
 
 ## 관련 항목
 

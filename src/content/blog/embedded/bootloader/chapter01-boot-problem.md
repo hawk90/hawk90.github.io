@@ -1,8 +1,8 @@
 ---
-title: "ROM부터 init까지 — 임베디드 부팅 단계의 빈자리 분석"
+title: "ROM부터 init까지 — 부트로더가 채우는 부팅 단계"
 slug: "embedded/bootloader/chapter01-boot-problem"
 date: 2026-05-09T09:01:00
-description: "ROM부터 init까지의 전체 흐름과, 부트로더가 그 사이에서 채우는 자리."
+description: "BootROM에서 커널과 init으로 이어지는 흐름에서 부트로더가 맡는 초기화·이미지 적재·인계 역할을 설명합니다."
 series: "Bootloader Internals"
 seriesOrder: 1
 tags: [embedded, bootloader, u-boot, boot]
@@ -12,13 +12,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"부트로더는 *아무것도 동작하지 않는 CPU*를 *커널이 동작할 수 있는 환경*으로 만드는 다리입니다."** — DDR이 없고, 클럭이 안 잡혀 있고, 페리페럴이 죽어 있고, 파일 시스템이 보이지 않는 상태에서 *그 모든 것을 차례로 깨우는* 일을 합니다.
+> **"부트로더는 *초기화가 끝나지 않은 시스템*을 *커널이 동작할 수 있는 환경*으로 만드는 다리입니다."** — 일부 보드에서는 DDR이나 부트 미디어를 아직 사용할 수 없으므로, 펌웨어 단계가 필요한 장치를 초기화하고 다음 단계에 제어를 넘깁니다.
 
-전원을 인가한 직후의 ARM Cortex-A 코어는 *거의 아무것도* 할 수 없습니다. 32KB의 on-chip SRAM 안에서 *명령 한 줄씩* 실행할 수 있을 뿐, DDR도 없고, MMC controller도 없고, ethernet도 없습니다. 이 상태에서 *수십 MB짜리 커널 이미지*를 어떻게 적재하고, *4GB의 가상 메모리*를 어떻게 매핑하며, *시스템콜이 동작하는 user space*까지 어떻게 도달할까요. 부트로더는 그 *간격*을 채우는 코드입니다.
+전원이 들어온 직후의 코어가 사용할 수 있는 메모리와 주변 장치는 SoC와 보드의 초기화 상태에 따라 다릅니다. 많은 시스템은 초기 코드가 사용할 SRAM을 제공하고, DDR controller와 부트 미디어를 사용할 수 있게 하는 일은 이후 firmware 단계에서 진행합니다. 커널 이미지를 적재하고 커널이 사용할 하드웨어 정보를 전달한 뒤, 커널이 초기화되어 user space의 `init`을 실행하기까지의 간격을 부트 체인이 채웁니다.
 
 ## 전원이 들어온 직후의 CPU
 
-ARM64 CPU가 reset signal을 받으면 *reset vector*로 점프합니다. ARMv8의 경우 EL3(secure monitor)에서 시작하고, reset vector 주소는 SoC 설계에 따라 고정되어 있습니다.
+Armv8-A에서 reset 후 실행 위치는 구현된 Exception level과 플랫폼 firmware 구성에 좌우됩니다. EL3가 구현된 PE는 EL3에서 reset을 시작하지만, EL3는 선택 사항이므로 모든 Armv8-A 시스템이 EL3에서 시작한다고 일반화할 수 없습니다. reset vector의 주소와 초기 메모리 배치는 SoC가 정합니다.
 
 ![Reset 직후 흐름 — 전원 → POR(PMIC rail + PLL lock + CPU deassert) → Reset Vector(SoC 고정 주소) → BootROM(boot mode strap에 따라 다음 단계 적재)](/images/blog/bootloader/diagrams/ch01-reset-flow.svg)
 
@@ -48,15 +48,15 @@ ARM64 커널은 *PC 주소가 어디든* 동작하지만, 진입 시점에 *특�
 
 ARM64 Linux 커널 진입 요구사항은 다음과 같습니다.
 
-- `x0` = physical address of device tree blob (DTB)
+- `x0` = physical address of device tree blob (DTB) in system RAM
 - `x1` = 0 (reserved)
 - `x2` = 0 (reserved)
 - `x3` = 0 (reserved)
-- MMU off, D-cache off, I-cache on (optional)
-- EL2 권장 (KVM 사용을 위해)
-- 모든 CPU가 secondary boot 진입점에 wait
+- non-secure EL2 (권장) 또는 EL1, MMU off
+- 인터럽트 마스크 및 캐시 일관성 등 추가 진입 조건 준수
+- 부팅 대상 CPU는 같은 Exception level에서 커널에 진입
 
-부트로더가 *이 ABI를 정확히 맞춰* 커널로 점프합니다. 한 가지라도 어긋나면 커널은 *첫 줄도 출력하지 못하고* 죽습니다.
+부트로더가 이 진입 조건을 맞춰 커널로 점프합니다. 조건을 어기면 초기 진입 실패나 부팅 중단으로 이어질 수 있습니다.
 
 ### 4. 환경 변수와 부트 정책
 
@@ -80,30 +80,15 @@ ARM64 Linux 커널 진입 요구사항은 다음과 같습니다.
 | BeagleBone Black | TI AM335x | ARMv7-A | 단순한 부트 흐름, SPL 학습에 좋음 |
 | NXP i.MX 8M Plus EVK | i.MX 8M Plus | ARMv8-A | 실제 산업용, TF-A + U-Boot |
 
-`make qemu_arm64_defconfig`로 빌드한 U-Boot은 *QEMU virt*에서 *몇 초 안에* 부팅합니다. 학습 사이클이 짧습니다. 실제 하드웨어로 가기 전에 QEMU에서 *흐름을 익히는* 것을 권합니다.
+U-Boot 소스와 필요한 cross-toolchain, QEMU를 준비하면 `qemu_arm64_defconfig` 대상으로 QEMU virt 부트 흐름을 실험할 수 있습니다. 이 문서 작성 환경에서는 U-Boot 빌드나 QEMU 실행을 하지 않았으므로 실행 시간과 콘솔 결과는 확인하지 않았습니다.
 
 ```bash
 # QEMU virt에서 U-Boot 실행
-qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic \
+qemu-system-aarch64 -machine virt -nographic -cpu cortex-a57 \
     -bios u-boot.bin
 ```
 
-```text
-U-Boot 2024.04 (May 19 2026 - 09:00:00 +0000)
-
-DRAM:  128 MiB
-Core:  35 devices, 14 uclasses, devicetree: board
-Flash: 64 MiB
-Loading Environment from Flash... *** Warning - bad CRC, using default
-In:    serial,usbkbd
-Out:   serial,vidconsole
-Err:   serial,vidconsole
-Net:   eth0: virtio-net#32
-Hit any key to stop autoboot:  0
-=>
-```
-
-이 한 줄(`=>`)에 도달하면 시리즈의 *반은 이미 이해한 것*입니다.
+명령이 실행되면 대상 U-Boot 버전과 defconfig에 맞는 실제 콘솔 출력을 기록하세요. 이 문서에서는 확인하지 않은 보드 장치 수, 메모리 크기, 버전 날짜를 예시 출력으로 고정하지 않습니다. U-Boot prompt가 나오는 것은 실험 시작점이지 부트 체인 전체를 이해했다는 검증은 아닙니다.
 
 ## 아키텍처별 차이
 
@@ -133,19 +118,18 @@ ARMv7, ARMv8-A, RISC-V는 부트 흐름의 *세부가 다릅니다*. 시리즈�
 
 ## 부트 시간의 한계
 
-산업용 시스템은 *부트 시간이 곧 사용자 경험*입니다. 자동차 인포테인먼트는 *2초 안에* 후방 카메라가 떠야 합니다. 산업용 HMI는 *1초 안에* user space가 동작해야 합니다.
+제품은 사용 시나리오에 맞는 부팅 완료 기준과 목표 시간을 정합니다. 예를 들어 화면 출력, 입력 수용, 네트워크 연결, 사용자 공간 서비스 준비는 서로 다른 완료 지점입니다.
 
-전형적인 부트 시간 분포(i.MX 8M Plus, 2GB DDR, eMMC)는 다음과 같습니다.
+부트 시간은 보드, firmware 설정, 저장 장치, 커널·드라이버 구성, 측정 시작·종료 지점에 따라 달라집니다. 특정 보드의 수치를 일반화하지 말고, 같은 조건에서 단계별 로그나 계측으로 기준선을 잡아야 합니다.
 
-| 구간 | 단계 | 비고 |
-|------|------|------|
-| 0.0 ~ 0.3 s | BootROM + SPL | DDR training이 절반 |
-| 0.3 ~ 1.0 s | U-Boot Proper | driver probe + 환경 변수 |
-| 1.0 ~ 1.5 s | bootcmd 실행 | 커널 적재 |
-| 1.5 ~ 3.5 s | Linux kernel | driver probe |
-| 3.5 ~ 5.0 s | systemd / user space | |
+| 단계 | 확인할 구간 |
+|------|-----------|
+| BootROM·초기 firmware | reset부터 다음 단계 인계까지 |
+| SPL·U-Boot Proper | DDR 초기화, 장치 초기화, 이미지 적재 |
+| 커널 | 진입부터 사용자 공간 실행 준비까지 |
+| init·서비스 | `init` 실행부터 제품이 정의한 준비 상태까지 |
 
-U-Boot Proper는 *시간 도둑*입니다. SPL이 *커널을 직접 부트*하는 [Falcon Mode](/blog/embedded/bootloader/chapter05-falcon-mode)가 양산용 옵션입니다.
+측정 결과에서 U-Boot Proper가 병목으로 확인되면 초기화 항목을 줄이거나, SPL이 커널을 직접 부트하는 [Falcon Mode](/blog/embedded/bootloader/chapter05-falcon-mode)를 검토할 수 있습니다. 적용 가능성은 보드의 부트 구성과 복구 요구사항에 따라 확인해야 합니다.
 
 ## 자주 하는 오해
 
@@ -170,11 +154,11 @@ x86은 BIOS/UEFI가 합니다. 임베디드는 *SPL의 보드 코드*가 직접 
 - 부트로더는 *아무것도 동작하지 않는 CPU*를 *커널이 동작할 수 있는 환경*으로 만드는 다리입니다.
 - BootROM은 SoC mask ROM이고 수정 불가능합니다. boot mode strap을 읽어 다음 단계를 SRAM에 적재합니다.
 - 부트로더가 책임지는 일은 *DDR 초기화*, *부트 미디어 추상화*, *커널 로딩 ABI 정합*, *환경 변수와 부트 정책*입니다.
-- 전체 부트 체인은 BootROM → SPL → BL31 → U-Boot Proper → Linux → user space의 수직 인계 구조입니다.
-- ARM64 커널은 진입 시점에 *x0에 DTB physical address*, *MMU off*, *D-cache off*를 요구합니다. ABI 한 줄이라도 어긋나면 커널이 시작 못 합니다.
+- 한 가지 부트 체인 예는 BootROM → SPL → BL31 → U-Boot Proper → Linux → user space입니다. 실제 단계와 각 단계를 제공하는 프로젝트는 SoC·보드 구성에 따라 달라집니다.
+- AArch64 Linux 진입 시에는 *x0에 DTB physical address*, *x1~x3에 0*, *MMU off*, *non-secure EL2 또는 EL1* 등 boot protocol 조건을 맞춰야 합니다. instruction cache는 on/off 모두 가능하며 stale entry가 없어야 합니다.
 - ARMv7-A, ARMv8-A, RISC-V는 *세부가 다르지만 큰 흐름은 같습니다*. 시리즈는 ARMv8-A를 기준으로 합니다.
-- QEMU virt에서 `qemu-system-aarch64 -bios u-boot.bin`으로 *몇 초 안에* 학습 사이클을 돌릴 수 있습니다.
-- 부트 시간은 *산업용에서 곧 사용자 경험*입니다. U-Boot Proper를 건너뛰는 Falcon Mode가 양산 옵션입니다.
+- U-Boot와 QEMU를 준비하면 QEMU virt에서 부트 체인을 실험할 수 있습니다. 실제 실행 시간과 결과는 빌드·실행 환경에서 확인해야 합니다.
+- 부트 시간 목표는 제품의 준비 상태와 측정 기준으로 정의합니다. 병목이 확인된 경우에만 Falcon Mode 같은 대안을 검토합니다.
 
 ## 다음 편
 
@@ -189,3 +173,6 @@ x86은 BIOS/UEFI가 합니다. 임베디드는 *SPL의 보드 코드*가 직접 
 - [Embedded Security Ch 2: Secure Boot 체인](/blog/embedded/embedded-security/chapter02-secure-boot)
 - [원문 — U-Boot 공식 사이트](https://www.denx.de/wiki/U-Boot)
 - [원문 — Linux ARM64 booting requirements](https://www.kernel.org/doc/Documentation/arm64/booting.txt)
+- [Arm AArch64 Exception model](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Learn%20the%20Architecture/Exception%20model.pdf)
+- [Linux kernel: Booting AArch64 Linux](https://docs.kernel.org/6.18/arch/arm64/booting.html)
+- [U-Boot v2024.01: QEMU ARM](https://docs.u-boot.org/en/v2024.01/board/emulation/qemu-arm.html)

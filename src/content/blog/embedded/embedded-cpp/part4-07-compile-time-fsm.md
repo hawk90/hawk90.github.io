@@ -2,7 +2,7 @@
 title: "Compile-time FSM 구현 — 템플릿으로 상태 전이 검증"
 slug: "embedded/embedded-cpp/part4-07-compile-time-fsm"
 date: 2026-05-01T09:35:00
-description: "constexpr state machine — 컴파일 타임에 전이 검증, runtime 코드 0."
+description: "constexpr state machine — 컴파일 타임 전이 검증과 runtime dispatch의 역할을 구분합니다."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 35
 tags: [cpp, embedded, fsm, constexpr, compile-time, template-meta]
@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"FSM을 컴파일 타임 table로 표현합니다."** invalid 전이는 빌드 실패로 잡히고 런타임 코드는 최소가 됩니다.
+> **고정된 전이 규칙은 컴파일 타임에 검증하고, 실제 event 처리는 runtime에 남을 수 있습니다.** template 인자로 고정한 잘못된 전이와 runtime에 입력되는 잘못된 event를 구분합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -36,7 +36,7 @@ constexpr auto bad = transition<State::Idle, Event::Stop>();    // 컴파일 에
 // error: invalid transition
 ```
 
-런타임 코드와 데이터 모두 0이며 수 KB를 절약할 수 있습니다.
+전체 연산이 상수 평가되고 결과만 사용되는 경우 실행 시 계산을 없앨 수 있습니다. runtime state·event·action이 있는 FSM의 코드와 저장 공간이 0이라는 뜻은 아니며 절감 바이트는 실제 산출물로 측정합니다.
 
 ## 기본 — Transition table as data
 
@@ -70,7 +70,7 @@ constexpr State s = next_state(State::Idle, Event::Start);
 static_assert(s == State::Running);
 ```
 
-table은 `.rodata`에 들어가고, `next_state`는 컴파일 타임에도 호출할 수 있습니다.
+runtime 경로에서 table을 실제로 사용하면 읽기 전용 데이터로 남을 수 있습니다. 상수 평가로만 사용하는 table은 최적화로 사라질 수 있어 section을 단정하지 않습니다.
 
 ## Template-based — invalid 전이 컴파일 에러
 
@@ -131,26 +131,25 @@ struct ResumeEvent {};
 struct StopEvent {};
 
 // 전이 함수 — 각 (state, event) 조합
-constexpr State transition(Idle, StartEvent) {
+State transition(Idle, StartEvent) {
     return Running{get_time()};
 }
 
-constexpr State transition(Running r, PauseEvent) {
+State transition(Running r, PauseEvent) {
     return Paused{r.since};
 }
 
-constexpr State transition(Running, StopEvent) {
+State transition(Running, StopEvent) {
     return Stopped{};
 }
 
-constexpr State transition(Paused p, ResumeEvent) {
+State transition(Paused p, ResumeEvent) {
     return Running{p.since};
 }
 
-// catch-all — invalid transition은 현재 state 유지
+// runtime 정책: 미정의 (state, event)는 현재 state 유지
 template<typename S, typename E>
-constexpr State transition(S s, E) {
-    static_assert(sizeof(E) == 0, "Invalid transition");
+State transition(S s, E) {
     return s;
 }
 
@@ -164,14 +163,45 @@ void send_event(State& current, E ev) {
 
 State machine = Idle{};
 send_event(machine, StartEvent{});   // Idle → Running
-// send_event(machine, StopEvent{});   // Idle + StopEvent — static_assert 실패
+send_event(machine, StopEvent{});   // 현재 state에 전이가 없으면 유지
 ```
 
-overload resolution이 valid transition만 찾고, 없으면 `static_assert`가 실패합니다.
+std::visit는 현재 활성 alternative뿐 아니라 모든 alternative와 event 조합에 대해 visitor가 유효해야 합니다. catch-all에 무조건 실패하는 static_assert를 두면 정상 Start event도 다른 state 조합 때문에 컴파일 실패합니다. 이 예시는 fallback을 상태 유지로 정하고, 전이가 없는 조합을 정적으로 금지하려면 앞의 template 인자 API처럼 호출 시 state도 type/value로 고정합니다. get_time은 runtime 함수이므로 해당 전이를 constexpr라고 표시하지 않습니다.
 
-## Boost.SML — 정식 compile-time FSM
+## 재현 — visit의 모든 alternative 검사
 
-[Boost.SML](https://github.com/boost-ext/sml)은 정식 State Machine Library이며 DSL과 비슷한 syntax를 제공합니다.
+```cpp title="variant-visit.cpp"
+#include <variant>
+#include <cassert>
+#include <iostream>
+struct Idle {}; struct Running {}; struct Start {}; struct Stop {};
+using MachineState = std::variant<Idle, Running>;
+MachineState step(Idle, Start) { return Running{}; }
+MachineState step(Running, Stop) { return Idle{}; }
+template<typename S, typename E> MachineState step(S state, E) {
+#ifdef BAD_VISIT_FALLBACK
+    static_assert(sizeof(E) == 0, "Unhandled variant alternative");
+#endif
+    return state;
+}
+template<typename E> void send(MachineState& current, E event) {
+    current = std::visit([&](auto state) { return step(state, event); }, current);
+}
+int main() {
+    MachineState state = Idle{};
+    send(state, Stop{}); assert(std::holds_alternative<Idle>(state));
+    send(state, Start{}); assert(std::holds_alternative<Running>(state));
+    send(state, Start{}); assert(std::holds_alternative<Running>(state));
+    send(state, Stop{}); assert(std::holds_alternative<Idle>(state));
+    std::cout << "variant fallback keeps invalid runtime state/event passed\n";
+}
+```
+
+정상 fallback은 미정의 조합을 유지합니다. BAD_VISIT_FALLBACK을 정의하면 실제 현재 상태와 관계없이 std::visit가 검사하는 다른 alternative에서 static_assert가 실패합니다. 이를 compile-time invalid 전이와 runtime 오류 정책의 차이로 확인합니다.
+
+## Boost.SML — 외부 compile-time FSM
+
+[Boost.SML](https://github.com/boost-ext/sml)은 외부 State Machine Library이며 DSL과 비슷한 syntax를 제공합니다.
 
 ```cpp
 #include <boost/sml.hpp>
@@ -207,7 +237,7 @@ fsm.process_event(Resume{});
 - DSL syntax가 UML state diagram에 가깝습니다.
 - 컴파일 타임에 검증됩니다.
 - guard, action, sub-state machine을 지원합니다.
-- meta-programming으로 최적화되어 거의 zero-cost입니다.
+- 고정된 전이 구조를 compiler가 최적화할 수 있습니다. 실제 dispatch·action·state 저장 공간은 별도로 남습니다.
 
 단점은 다음과 같습니다.
 
@@ -218,7 +248,7 @@ fsm.process_event(Resume{});
 
 ## 임베디드 — Compile-time HSM
 
-Hierarchical State Machine을 template으로 만드는 방법입니다.
+다음은 상태의 부모 type 관계만 표현하는 설계 조각입니다. 동작 가능한 HSM이나 부모 탐색 구현은 아닙니다.
 
 ```cpp
 template<typename Parent = void>
@@ -232,56 +262,70 @@ struct Reading : StateBase<Working> {};   // Working의 substate
 struct Writing : StateBase<Working> {};
 
 template<typename State>
-constexpr bool is_in_state(/* ... */) {
-    // ... 부모 상태 chain 추적
-}
+constexpr bool is_in_state();  // 부모 탐색은 여기서 구현하지 않음
 ```
 
-구현이 복잡하므로 Boost.SML이 대부분을 처리합니다. 직접 구현은 학습 목적에만 권합니다.
+구현이 복잡하므로 Boost.SML이 대부분을 처리합니다. 실제 HSM은 event 전파·entry/exit·부모 전이 규칙까지 선택한 library와 판에서 검증합니다.
 
-## Compile-time 검증 — Unreachable state
+## 재현 — 전이 오류와 cycle을 포함한 도달성 검사
 
-전이 table에서 도달 불가능한 state를 찾을 수 있습니다.
+단순 recursive reachability는 graph에 cycle이 있으면 종료하지 않을 수 있습니다. 아래는 방문 집합을 유한 횟수 갱신해 graph cycle을 처리합니다. entry state에서 도달 가능한지와 의도한 terminal state인지를 따로 검사합니다.
 
-```cpp
-constexpr Transition trs[] = {
-    {State::Idle,    Event::Start, State::Running},
-    {State::Running, Event::Stop,  State::Stopped},
-    // State::Paused — 도달 불가능
+```cpp title="compile-fsm.cpp"
+#include <cstddef>
+#include <cassert>
+#include <iostream>
+enum class State : std::size_t { Idle, Running, Paused, Stopped, Orphan, Count };
+enum class Event { Start, Pause, Resume, Stop };
+struct Edge { State from; Event event; State to; };
+constexpr Edge edges[] = {
+    {State::Idle, Event::Start, State::Running},
+    {State::Running, Event::Pause, State::Paused},
+    {State::Paused, Event::Resume, State::Running},
+    {State::Running, Event::Stop, State::Stopped},
+    {State::Paused, Event::Stop, State::Stopped},
 };
-
-constexpr bool is_reachable(State s) {
-    if (s == State::Idle) return true;   // 시작 state
-    for (const auto& t : trs) {
-        if (t.to == s && is_reachable(t.from)) return true;
-    }
+constexpr State next(State from, Event event) {
+    for (auto edge : edges) if (edge.from == from && edge.event == event) return edge.to;
+    return from;
+}
+template<State From, Event Ev> constexpr State checked_transition() {
+    constexpr State to = next(From, Ev);
+    // 이 예시는 self-transition이 없는 graph를 전제로 합니다.
+    static_assert(to != From, "Invalid state transition");
+    return to;
+}
+constexpr bool reachable(State target) {
+    constexpr auto count = static_cast<std::size_t>(State::Count);
+    if (static_cast<std::size_t>(target) >= count) return false;
+    bool seen[count]{}; seen[0] = true;
+    for (std::size_t round = 0; round < count; ++round)
+        for (auto edge : edges) if (seen[static_cast<std::size_t>(edge.from)]) seen[static_cast<std::size_t>(edge.to)] = true;
+    return seen[static_cast<std::size_t>(target)];
+}
+constexpr bool has_outgoing(State state) {
+    for (auto edge : edges) if (edge.from == state) return true;
     return false;
 }
-
-static_assert(is_reachable(State::Running));
-static_assert(is_reachable(State::Stopped));
-// static_assert(is_reachable(State::Paused));   // 컴파일 에러 — unreachable
-```
-
-컴파일 시점에 unreachable state를 발견할 수 있어 디자인을 검증할 수 있습니다.
-
-## Compile-time 검증 — Dead-end state
-
-빠져나갈 수 없는 dead state를 찾을 수도 있습니다.
-
-```cpp
-constexpr bool has_outgoing(State s) {
-    for (const auto& t : trs) {
-        if (t.from == s) return true;
-    }
-    return false;
+static_assert(checked_transition<State::Idle, Event::Start>() == State::Running);
+static_assert(reachable(State::Paused) && reachable(State::Stopped));
+static_assert(!reachable(State::Orphan));
+static_assert(!has_outgoing(State::Stopped));
+#ifdef BAD_TRANSITION
+constexpr auto bad = checked_transition<State::Idle, Event::Stop>();
+#endif
+#ifdef BAD_REACHABILITY
+static_assert(reachable(State::Orphan), "Unreachable state");
+#endif
+int main() {
+    State state = State::Idle;
+    for (auto event : {Event::Start, Event::Pause, Event::Resume, Event::Stop}) state = next(state, event);
+    assert(state == State::Stopped);
+    std::cout << "compile-time checks and runtime event sequence passed\n";
 }
-
-static_assert(has_outgoing(State::Running));
-// static_assert(has_outgoing(State::Stopped));   // dead state
 ```
 
-Stopped 같은 종착 state는 의도된 dead state이므로 명시합니다. 의도하지 않은 dead state는 bug입니다.
+이 graph에는 self-transition이 없으므로 next==from을 미정의 전이로 판정합니다. self-transition을 추가한다면 별도의 found/valid 값을 반환해야 합니다. graph 자체가 고정된 유효 enum 값으로 구성된 예시이며 외부 입력으로 table을 생성할 때는 index 범위와 중복 (from,event)도 검증합니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -303,36 +347,20 @@ Stopped 같은 종착 state는 의도된 dead state이므로 명시합니다. �
 ### 6. Sub-machine 결합
 큰 시스템에서는 sub-FSM이 필요해집니다. 직접 구현이 어렵다면 Boost.SML이나 `etl::hsm`을 씁니다.
 
-## 측정 — Compile vs Runtime FSM
+## 검증 범위와 1차 자료
 
-같은 5-state FSM에서 1000 event를 처리한 결과입니다.
+Clang 23.1.3 C++17 host에서 compile-fsm.cpp를 실행했습니다. cycle이 있는 Running↔Paused graph의 도달성, terminal Stopped, 고립 Orphan, runtime event sequence를 확인했습니다. BAD_TRANSITION과 BAD_REACHABILITY는 각각 의도한 static_assert 실패입니다. runtime dispatch·action의 크기와 board cycle 수는 측정하지 않았습니다.
 
-```text
-# Runtime FSM (enum + switch)
-.text: 380 B
-total cycles: 8000
-
-# Variant + visit
-.text: 720 B
-total cycles: 9000 (variant copy + visit)
-
-# Compile-time (template specialization)
-.text: 180 B   (대부분 인라인)
-total cycles: 5000 (직접 dispatch)
-
-# Boost.SML
-.text: 920 B
-total cycles: 7500
-```
-
-Compile-time이 가장 작고 빠르지만 유연성은 낮습니다.
+- [C++ draft constexpr](https://eel.is/c++draft/dcl.constexpr) — 상수 평가 가능한 함수와 실제 runtime 호출 구분
+- [variant visitation](https://eel.is/c++draft/variant.visit) — 모든 alternative에 대한 호출 유효성
+- [Boost.SML repository](https://github.com/boost-ext/sml) — 외부 library 설명. 이 글에서는 SML 버전을 설치·빌드하지 않았습니다.
 
 ## 정리
 
 - Compile-time FSM은 constexpr table이나 template specialization으로 구현합니다.
-- Invalid 전이는 `static_assert`로 컴파일 에러를 냅니다.
+- 호출 시 state/event가 template 인자로 고정된 잘못된 전이는 static_assert로 막고 runtime event는 별도 오류 정책을 둡니다.
 - Type-based state(variant)로 각 state의 데이터를 분리합니다.
-- Boost.SML이 정식 라이브러리이며 DSL syntax와 guard/action을 지원합니다.
+- Boost.SML 같은 외부 library는 전이 DSL과 guard/action의 표현을 제공하며 실제 채택 판에서 검증합니다.
 - Unreachable이나 dead state도 컴파일 타임에 검증할 수 있습니다.
 - 작은 FSM은 enum으로, 큰 FSM은 Boost.SML로 다룹니다.
 

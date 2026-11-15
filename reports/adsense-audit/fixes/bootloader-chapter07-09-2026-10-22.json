@@ -1,0 +1,110 @@
+{
+  "schemaVersion": 1,
+  "createdAt": "2026-10-22",
+  "series": "Bootloader Internals",
+  "batch": "chapter07–chapter09",
+  "readOnlyEvaluationReference": "reports/adsense-audit/published-loop-01.md",
+  "rescore": false,
+  "readyForIntegration": true,
+  "scope": "Only Bootloader Internals chapter07–09 source articles and this batch evidence. No score/rubric/factcheck status changes; no rescore.",
+  "validationCommands": [
+    "bash scripts/audit-publish-gate.sh src/content/blog/embedded/bootloader/chapter07-driver-model.md src/content/blog/embedded/bootloader/chapter08-board-init.md src/content/blog/embedded/bootloader/chapter09-dram-init.md",
+    "node scripts/check-inline-math.mjs src/content/blog/embedded/bootloader/chapter07-driver-model.md src/content/blog/embedded/bootloader/chapter08-board-init.md src/content/blog/embedded/bootloader/chapter09-dram-init.md",
+    "git diff --check",
+    "frontmatter invariants compared with pre-edit HEAD; only chapter09 description corrected"
+  ],
+  "primarySources": [
+    "https://docs.u-boot.org/en/v2024.04/develop/driver-model/design.html",
+    "https://github.com/u-boot/u-boot/blob/v2024.04/common/board_f.c",
+    "https://docs.u-boot.org/en/stable/develop/init.html"
+  ],
+  "runtimeAvailability": {
+    "uBootCheckout": "/tmp/u-boot missing",
+    "uBootTarget": "not available",
+    "dramControllerAndPhyTarget": "not available",
+    "boardHardware": "not available"
+  },
+  "articles": [
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter07-driver-model.md",
+      "beforeSha256": "36f1eafd6a12425822567fcf83f2ffe20f06e441eb886bd8e56b1e2465346975",
+      "afterSha256": "6737a8ae415f01ad088dc26a821801ede5f0b7f615df875f4870f9840f5277c6",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 7편의 Driver Model 개념, DT binding, bind/probe, SPL/pre-relocation driver 조건 및 예시 API를 검토했다.",
+        "problemSignalAndCounterevidence": "원문은 DT만으로 초기화가 끝난다고 단정하고 probe가 항상 첫 사용자 요청까지 지연된다고 설명했다. `priv_auto`/`platdata_auto`, flag 의미, I2C/sensor API 및 가공된 `dm tree` 출력은 version/tag 확인 없이 실행 가능한 사실처럼 제시됐다. 공식 v2024.04 문서는 uclass/driver/device 역할과 bind→of_to_plat→probe 순서를 설명하고, `uclass_get_device()` 예는 자동 활성화를 보여 준다.",
+        "causeHypothesisAndAlternatives": "일반적인 구조 설명과 특정 U-Boot 버전의 API·출력 예가 섞여 version-specific 동작이 공통 규칙처럼 보였다. 핵심 개념은 공식 설계 문서로 한정하고 미검증 세부 API와 transcript를 제거했다.",
+        "evidence": "U-Boot v2024.04 Driver Model design은 uclass, driver, device의 역할, device tree/platform data의 대안, bind/of_to_plat/probe 순서와 uclass lookup 시 activation을 설명한다. https://docs.u-boot.org/en/v2024.04/develop/driver-model/design.html",
+        "sampleCoverage": "원문의 API 코드, fake `dm tree`/`dm uclass` output과 sensor 예를 제거했다. 남은 `dm tree`, `dm uclass <uclass_name>`는 실행 예가 아니라 command 형태로 표기했다. U-Boot checkout/target이 없어 sandbox 또는 board 실행은 하지 않았다.",
+        "decision": "핵심 구조 설명은 유지하고 DT, bind/probe, 단계별 설정을 조건부로 표현했다. 확인되지 않은 API signature와 장치별 출력은 target source를 확인할 후속 항목으로 남겼다.",
+        "smallestSafeChange": "chapter07 본문만 정리했다. title, description, slug, date, draft, series, seriesOrder와 관련 링크를 유지했다. 되돌릴 범위는 해당 기사 본문이다.",
+        "validationAndResidualRisk": "해당 3편 publish gate의 blocking checks와 inline-math 검사, git diff --check를 통과했다. gate upstream clone-only checks는 SKIPPED(Not PASS). U-Boot sandbox/board runtime과 version-specific API 확인은 미실행이다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어느 U-Boot tag와 target board를 기준으로 `.priv_auto`/`.platdata_auto`, PRE_RELOC flags, I2C child API와 sensor uclass의 실제 signature 및 SPL 동작을 확인할 것인가?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; documentation and static gates pass; U-Boot runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter08-board-init.md",
+      "beforeSha256": "6ecb2ebbf10b193e76e37872cfaa0be643495dd67b1b651646d7f393d87fccbe",
+      "afterSha256": "dd79bbba3c7de3992ca89c8b397d2796949e38cc393163ebe708d858943ca49e",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 8편의 pre-relocation 실행 조건, `init_sequence_f`, DRAM 준비와 relocation destination/reservation 계산을 검토했다.",
+        "problemSignalAndCounterevidence": "원문은 SRAM 출발을 일반화했고 자작 `bdinfo`/bootstage 출력의 주소 관계를 실제 관측처럼 제시했다. `common/board_f.c` v2024.04의 조건부 init array와 `setup_dest_addr()`/`reserve_uboot()`는 선택된 설정, usable RAM, monitor 길이 및 후속 reservations를 반영하므로 단일 시작/최종 주소 규칙은 성립하지 않는다.",
+        "causeHypothesisAndAlternatives": "한 board/architecture 실행 모델을 공통 초기화 흐름으로 확대하고 실행 기록 없는 수치 출력이 증거처럼 배치된 것으로 보인다. 조건부 공통 코드와 board-specific 경로를 구분하고 fake output을 제거했다.",
+        "evidence": "U-Boot v2024.04 common/board_f.c에서 `init_sequence_f`의 config/architecture 조건, `setup_dest_addr()`, `reserve_uboot()` 및 이후 memory reservations를 확인했다. https://github.com/u-boot/u-boot/blob/v2024.04/common/board_f.c ; board initialization 설명은 일부 board/architecture가 흐름을 따르지 않을 수 있다고 명시한다: https://docs.u-boot.org/en/stable/develop/init.html",
+        "sampleCoverage": "SRAM universal claim, 특정 relocation 주소 계산과 가공된 bootstage/bdinfo transcripts를 제거했다. 명령 형태만 남겼고 실제 U-Boot/보드 runtime 및 diagram의 board-specific 값은 검사하지 않았다.",
+        "decision": "보편 주소 대신 config/architecture에 따른 단계와 reservation 영향 설명을 남겼다. 발견된 source-only 범위 오류를 수정했고 미확인 diagram, DDR training 결과 및 board hook 동작은 별도 검토로 분리했다.",
+        "smallestSafeChange": "chapter08의 기술 설명과 미실행 숫자 transcript만 수정했다. title, description, slug, date, draft, series, seriesOrder를 보존했다. parent가 금지한 보고서 주소 계산은 remediation evidence로 사용하지 않았다.",
+        "validationAndResidualRisk": "해당 3편 publish gate의 blocking checks와 inline-math 검사, git diff --check를 통과했다. upstream clone-only checks는 SKIPPED(Not PASS). 대상 board, diagram 입력 및 runtime output 검증은 미실행이다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어느 architecture, defconfig와 board revision을 기준으로 SRAM/XIP 진입, BSS·stack 조건, init hook 순서, diagram 및 `bdinfo`/bootstage 결과를 확인할 것인가?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; documentation and static gates pass; board runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    },
+    {
+      "status": "remediated",
+      "path": "src/content/blog/embedded/bootloader/chapter09-dram-init.md",
+      "beforeSha256": "878ac8f72380ebc8f73cb39868cd32ff51f1eb4c7a40693f58ac4f93bf593672",
+      "afterSha256": "c5ff18382d288ee58db4cfa9616eaae27347b6ed7920c173cf8f9a8559e000ce",
+      "evidence": {
+        "contextAndScope": "Bootloader Internals 9편의 DDR controller/PHY 초기화 설명, MR0 계산, 주소 mapping 예시, MSTR 해석, training/ECC/DCD/resume 주장과 테스트 transcript를 검토했다.",
+        "problemSignalAndCounterevidence": "원문의 MR0 상수 조합은 주석의 필드 값 및 표시된 hex 결과와 일치하지 않았다. 1 GiB 주소 설명은 bank 폭이 서로 충돌했고, MSTR 주장은 다른 예제 값과 모순됐다. 추가로 board/source/version 없는 register 값, MRS 순서, PHY firmware, training 로그와 임의 주소 메모리 테스트가 있었다. JEDEC primary material과 특정 controller/board source를 이 환경에서 확인할 수 없어 replacement values를 만들지 않았다.",
+        "causeHypothesisAndAlternatives": "표준 개념, 특정 controller IP, 특정 SoC의 vendor settings와 가공된 test output이 한 설명에 합쳐져 플랫폼 종속 세부가 보편 값처럼 보였다. 숫자를 새로 추정하는 대신 대상별 설정 출처를 설명하고 검증되지 않은 코드·숫자·출력을 제거했다.",
+        "evidence": "U-Boot board initialization 문서는 xPL에서 DRAM 준비가 board/architecture 흐름의 일부일 수 있으며 예외가 있음을 설명한다: https://docs.u-boot.org/en/stable/develop/init.html. DDR 표준의 MR field/order와 해당 SoC의 controller/PHY 설정은 primary source/tag가 특정되어 있지 않아 이번 수정에서 확인 완료로 주장하지 않았다.",
+        "sampleCoverage": "MR0 decode, invalid physical-address split, conflicting MSTR example, specific register maps, fabricated training output, unsupported ECC/DCD/resume claims, and unexecuted memory-test outputs were removed or narrowed. No DDR controller, PHY, target board, U-Boot checkout or isolated DRAM test environment was available; no normal or failure runtime case was run. The remaining test discussion has no executable range or output.",
+        "decision": "설명은 controller/PHY/DRAM/board configuration에 따른다는 범위로 줄였고, 미검증 description을 본문 범위에 맞춰 수동 수정했다. title, slug, date, draft, series, seriesOrder는 보존했다.",
+        "smallestSafeChange": "chapter09에서 오류가 확인된 숫자·코드와 근거 없는 실행 transcript를 삭제하고 일반 설명을 남겼다. 새 score, rubric 판단, factcheck status를 만들지 않았다. rollback 경계는 chapter09 source 한 파일이다.",
+        "validationAndResidualRisk": "chapter07–09 publish gate의 blocking checks와 inline-math 검사, git diff --check를 통과했으며 metadata invariants를 비교했다. upstream clone-only checks는 SKIPPED(Not PASS). DRAM 절차, timing, MR semantics, vendor blobs, ECC policy와 board-specific behavior는 pinned primary sources 및 hardware가 없어 unassessed로 남긴다."
+      },
+      "unassessedFollowups": [
+        {
+          "status": "unassessed",
+          "nextAction": "manual-review",
+          "question": "어떤 pinned DRAM standard, SoC revision, controller/PHY manuals, U-Boot/BSP tag, memory part number와 board revision을 근거로 MR field/order, address map, training, ECC/DCD 및 resume 동작을 검증할 것인가?"
+        }
+      ],
+      "validation": {
+        "reportedSummary": "edited; documentation and static gates pass; DRAM target runtime not run",
+        "upstreamCloneChecks": "skipped_not_pass"
+      }
+    }
+  ]
+}

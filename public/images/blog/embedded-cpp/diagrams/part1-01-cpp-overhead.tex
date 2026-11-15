@@ -15,10 +15,10 @@
 ]
 
 % Title
-\node[hdr] at (0, 6.5) {Modern C++ 기능별 런타임 비용};
+\node[hdr] at (0, 6.5) {Modern C++ 비용 검토 지점 (개념 분류)};
 
 % Zero-cost column (left)
-\node[font=\sffamily\bfseries\footnotesize, text=impbord] at (-5, 5.5) {Zero-cost (0)};
+\node[font=\sffamily\bfseries\footnotesize, text=impbord] at (-5, 5.5) {수동 구현과 비교};
 \node[zero] (z1) at (-5, 4.6) {클래스 + 멤버 함수};
 \node[zero, below=2mm of z1] (z2) {RAII (소멸자)};
 \node[zero, below=2mm of z2] (z3) {Templates};
@@ -27,22 +27,22 @@
 \node[zero, below=2mm of z5] (z6) {unique\_ptr};
 \node[zero, below=2mm of z6] (z7) {std::optional / variant};
 
-% Small cost (middle)
-\node[font=\sffamily\bfseries\footnotesize, text=clibord] at (0, 5.5) {Small cost};
-\node[small] (s1) at (0, 4.6) {Virtual function (1 vtable lookup)};
+% 객체·호출 비용 확인 (middle)
+\node[font=\sffamily\bfseries\footnotesize, text=clibord] at (0, 5.5) {객체·호출 비용 확인};
+\node[small] (s1) at (0, 4.6) {Virtual (devirtualization 가능)};
 \node[small, below=2mm of s1] (s2) {shared\_ptr (atomic counter)};
-\node[small, below=2mm of s2] (s3) {std::function (capture-less)};
+\node[small, below=2mm of s2] (s3) {std::function (대상·SBO 조건)};
 
 % Big cost (right)
-\node[font=\sffamily\bfseries\footnotesize, text=conbord] at (5, 5.5) {Big cost — 보통 끔};
+\node[font=\sffamily\bfseries\footnotesize, text=conbord] at (5, 5.5) {라이브러리·실패 경로 확인};
 \node[big] (b1) at (5, 4.6) {Exception handling};
 \node[big, below=2mm of b1] (b2) {RTTI (dynamic\_cast)};
 \node[big, below=2mm of b2] (b3) {iostream (cout, etc.)};
 \node[big, below=2mm of b3] (b4) {Heap (new, malloc)};
-\node[big, below=2mm of b4] (b5) {std::function (with capture)};
+\node[big, below=2mm of b4] (b5) {동적 할당·최대 지연};
 
 % Bottom note — z7 (y=-1.4) 아래로 충분한 거리 확보
-\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm] at (-7, -2.7) {임베디드의 핵심 = 우측 영역을 끄거나 대체. -fno-exceptions, -fno-rtti, -Os};
+\node[font=\sffamily\bfseries\footnotesize, text=focusc, anchor=west, text width=14cm] at (-7, -2.7) {비용 0 또는 대소 관계를 보장하는 표가 아닙니다. 타깃·최적화·수명·오류 경로별로 측정합니다.};
 
 \end{tikzpicture}
 \end{document}

@@ -37,26 +37,27 @@ Ch 7에서 post-build·post-image의 존재는 짚었습니다. 이번 장은 �
 
 ## 환경 변수 — 각 hook이 받는 것
 
-세 hook 모두 *동일한 환경 변수*를 받습니다. 의미 있게 사용 가능한지가 다를 뿐입니다.
+세 hook은 공통 환경 변수를 받지만, 각 릴리스의 매뉴얼에 나열된 값만 사용하세요.
 
 | 변수 | 값 (예시) | post-build | post-fakeroot | post-image |
 |---|---|---|---|---|
-| `TARGET_DIR` | `output/target/` | 읽기·쓰기 | 읽기·쓰기 | 읽기만 (변경 무시) |
-| `BINARIES_DIR` | `output/images/` | 비어 있음 | 비어 있음 | 읽기·쓰기 |
+| `TARGET_DIR` | `output/target/` | 읽기·쓰기 | 읽기·쓰기 | 접근 가능하지만 rootfs image 생성 뒤라 수정해도 이미 만든 이미지에는 반영되지 않음 |
+| `BINARIES_DIR` | `output/images/` | 이전 단계 산출물이 있을 수 있음 | 이전 단계 산출물이 있을 수 있음 | 읽기·쓰기 |
 | `BUILD_DIR` | `output/build/` | 읽기 | 읽기 | 읽기 |
 | `HOST_DIR` | `output/host/` | 읽기 (도구 호출용) | 읽기 | 읽기 |
 | `STAGING_DIR` | `output/staging/` | 읽기 | 읽기 | 읽기 |
 | `BR2_CONFIG` | `.config` 경로 | 읽기 | 읽기 | 읽기 |
-| `BR2_EXTERNAL` | external tree 경로 | 읽기 | 읽기 | 읽기 |
+| `CONFIG_DIR` | 설정 파일과 top-level Makefile 디렉터리 | 읽기 | 읽기 | 읽기 |
+| `BASE_DIR` | output 디렉터리 | 읽기 | 읽기 | 읽기 |
 
-post-image 스크립트는 *추가 인자*로 `BR2_ROOTFS_POST_IMAGE_SCRIPT`의 *공백 뒤 값*을 받습니다. 예를 들어 `BR2_ROOTFS_POST_IMAGE_SCRIPT="board/myboard/post-image.sh extra-arg"`이면 스크립트의 `$1 = "extra-arg"`. 보드별 분기에 유용합니다.
+post-image 스크립트의 `$1`은 images 출력 디렉터리입니다. 추가 공통 인자는 `BR2_ROOTFS_POST_SCRIPT_ARGS`, post-image 전용 인자는 `BR2_ROOTFS_POST_IMAGE_SCRIPT_ARGS`로 전달하며 스크립트에서는 `$2`부터 읽습니다. `BR2_ROOTFS_POST_IMAGE_SCRIPT`에는 스크립트 경로만 적습니다.
 
 호스트 도구를 호출할 때는 `$HOST_DIR/bin`을 PATH에 명시적으로 넣는 게 안전합니다.
 
 ```bash
 #!/bin/sh
 set -e
-export PATH="${HOST_DIR}/bin:${HOST_DIR}/sbin:${PATH}"
+    export PATH="${HOST_DIR}/bin:${HOST_DIR}/sbin:${PATH}"
 mkimage -f "${BOARD_DIR}/u-boot.its" "${BINARIES_DIR}/fitImage"
 ```
 
@@ -77,9 +78,9 @@ board/myboard/rootfs-overlay/
 
 이 방식의 결정적 한계가 셋 있습니다.
 
-- **소유권은 항상 `root:root`** — overlay의 파일이 호스트에서 어떤 소유자였든 무시. UID 1000으로 두고 싶어도 옵션 없음.
-- **모드는 호스트 그대로** — 호스트의 umask와 실행 비트가 그대로 복사됩니다. git clone 직후 실행 비트가 누락된 스크립트가 자주 사고 원인.
-- **특수 파일 불가능** — `/dev/console`, FIFO, named socket, file capabilities 모두 표현 불가.
+- **소유권과 device metadata** — overlay 복사만으로 target의 소유권을 이식할 수 있다고 가정하지 말고, 필요한 UID/GID·device node는 Buildroot device table 또는 fakeroot 단계에서 명시합니다.
+- **모드와 실행 비트** — overlay 파일의 mode를 확인하고 실행 파일은 저장소에도 실행 비트를 기록합니다. 빌드 결과의 mode는 device table로 다시 지정할 수 있습니다.
+- **특수 파일** — 일반 overlay 복사 대신 device table과 rootfs 생성 단계를 사용해 지원되는 file type과 metadata를 선언합니다.
 
 권한 한 줄을 정확히 박아야 하면 *system_table.txt* 또는 *post-fakeroot*로 옮겨야 합니다.
 
@@ -104,7 +105,7 @@ device table은 fakeroot 안에서 적용되는 권한·devnode 명세입니다.
 | `path` | rootfs 안의 절대 경로 |
 | `type` | `f` 일반 파일, `d` 디렉터리, `c` char device, `b` block device, `p` FIFO, `l` symlink |
 | `mode` | 8진 mode (`644`, `755`) |
-| `uid`/`gid` | 숫자 (이름 사용 불가) |
+| `uid`/`gid` | 숫자 또는 Buildroot가 해석할 수 있는 계정 이름 |
 | `major`/`minor` | char/block 전용 |
 | `start`/`inc`/`count` | minor를 *연속 생성*할 때. `/dev/loop0` ~ `/dev/loop7` 같은 패턴 |
 
@@ -116,9 +117,7 @@ fakeroot는 *모든 root 권한을 흉내내지는 못합니다*. 다음 세 가
 
 ### File capabilities
 
-`setcap cap_net_raw+ep /usr/bin/ping` 같은 capability는 *real root*가 아니면 설정해도 디스크에 안 박힙니다. fakeroot는 chown·chmod는 가짜로 추적하지만, xattr `security.capability`는 대부분의 호스트 fs(ext4·tmpfs)에서 잡지 못합니다.
-
-해결은 두 가지. post-image에서 `setcap`을 real root로 실행하거나(sudo 필요, CI에는 부적절), systemd `AmbientCapabilities=` 또는 `CapabilityBoundingSet=`로 서비스 단위 부여(setcap 회피)입니다. 가능하면 systemd 단위로 처리하는 게 서명·OTA에도 친화적입니다.
+post-build에서 일반 사용자 권한으로 `setcap`을 실행해도 최종 rootfs image에 capability가 반영된다고 가정하면 안 됩니다. Buildroot의 rootfs metadata 경로를 사용하고, 대상 릴리스의 device-table 문법과 생성 이미지에서 실제 capability를 확인하세요. CI에서 임의로 `sudo setcap`을 호출하는 절차는 host 권한·파일시스템 의존성을 늘리므로 피합니다. 서비스 권한만 필요한 경우에는 systemd의 `AmbientCapabilities=` 같은 제한된 권한 설정도 검토할 수 있습니다.
 
 ### Extended attributes (xattr)
 
@@ -133,7 +132,7 @@ ext4 이미지로 만들 때는 `genext2fs`·`make_ext4fs`의 xattr 지원 여�
 
 ### SELinux context
 
-SELinux를 켠 시스템이면 file context를 어딘가에서 박아야 합니다. fakeroot로는 완전히 불가능합니다. 두 가지 길이 있습니다. post-image에서 `setfiles`를 부르거나(host에 SELinux policy 필요), target에서 첫 부팅 시 `restorecon -R /`를 돌립니다(kernel cmdline에 `autorelabel` 추가). 대부분의 임베디드 시스템은 autorelabel 1회 패턴이 가장 단순합니다.
+SELinux를 켠 시스템은 Buildroot의 SELinux policy와 rootfs labeling 설정으로 file context를 구성하고, 최종 이미지의 label을 확인해야 합니다. host의 policy·도구와 target init 흐름에 따라 필요한 절차가 달라지므로 임의의 `setfiles`나 첫 부팅 `restorecon -R /`를 보편적인 대안으로 복사하지 마세요.
 
 ## post-image use cases
 
@@ -161,8 +160,8 @@ mkdir -p "${TARGET_DIR}/etc/systemd/system/multi-user.target.wants"
 ln -sf /etc/systemd/system/myapp.service \
     "${TARGET_DIR}/etc/systemd/system/multi-user.target.wants/myapp.service"
 
-# 빌드 timestamp를 /etc/os-release에 박기
-sed -i "s|^BUILD_ID=.*|BUILD_ID=$(date -u +%Y%m%d%H%M%S)|" \
+# 고정 release identifier를 /etc/os-release에 기록
+sed -i "s|^BUILD_ID=.*|BUILD_ID=${RELEASE_ID:?set a fixed release identifier}|" \
     "${TARGET_DIR}/etc/os-release"
 ```
 
@@ -232,8 +231,9 @@ image sdcard.img {
 ```bash
 #!/bin/sh
 set -e
-GENIMAGE_TMP="${BUILD_DIR}/genimage.tmp"
-rm -rf "${GENIMAGE_TMP}"
+BOARD_DIR="$(dirname "$0")"
+GENIMAGE_TMP="$(mktemp -d "${BINARIES_DIR}/genimage.tmp.XXXXXX")"
+trap 'rm -rf -- "$GENIMAGE_TMP"' EXIT HUP INT TERM
 
 genimage \
     --rootpath "${TARGET_DIR}" \
@@ -250,7 +250,7 @@ genimage \
 | `--rootpath` | rootfs 트리. genimage가 *읽기 참고용*으로만 사용 |
 | `--inputpath` | 입력 이미지·바이너리들이 있는 디렉터리 (BINARIES_DIR) |
 | `--outputpath` | 최종 이미지가 떨어질 곳 (보통 BINARIES_DIR) |
-| `--tmppath` | 작업 공간. 매번 rm -rf 해야 *재실행 시 stale 충돌* 없음 |
+| `--tmppath` | 이번 실행 전용 임시 작업 공간. 스크립트가 생성한 경로만 종료 시 제거 |
 
 A/B 업데이트를 염두에 두면 partition 두 개를 *같은 이미지로* 채우는 위 cfg가 시작점입니다. data 파티션은 첫 부팅 시 `mkfs`로 다시 만드는 게 보통입니다.
 
@@ -261,7 +261,8 @@ A/B 업데이트를 염두에 두면 partition 두 개를 *같은 이미지로* 
 ```bash
 #!/bin/sh
 set -e
-KEY="${BR2_EXTERNAL}/keys/signing-key.pem"
+BOARD_DIR="$(dirname "$0")"
+KEY="${SIGNING_KEY:?set SIGNING_KEY to the provisioned signing key path}"
 
 # 1) FIT 이미지에 서명 — mkimage가 .its 안의 signature node를 채움
 mkimage -f "${BOARD_DIR}/u-boot-signed.its" \
@@ -293,8 +294,8 @@ vendor signing tool(NXP HABv4의 `cst`, TI의 `image_create.sh` 등)도 같은 �
 | 이미지 안에 setuid 비트가 사라짐 | overlay의 mode가 호스트 umask | device table에서 *재지정* |
 | post-image 결과가 *비어 있음* | TARGET_DIR을 건드림 | BINARIES_DIR로 작업 대상 옮기기 |
 | `mkimage: command not found` | PATH에 `$HOST_DIR/bin` 누락 | 스크립트 상단에 명시 |
-| 이미지가 늘 stale | `--tmppath`를 매번 `rm -rf` 안 함 | 스크립트 첫 줄에 cleanup |
-| capabilities가 안 박힘 | fakeroot 한계 | systemd `AmbientCapabilities`로 대체 |
+| 이미지가 늘 stale | 이전 임시 상태를 재사용 | 실행마다 새 임시 디렉터리를 만들고 그 경로만 제거 |
+| 권한·metadata가 기대와 다름 | 일반 overlay 복사만으로 UID/GID/device metadata를 설정하려 함 | device table 또는 fakeroot 단계에서 명시 |
 | SELinux label 누락 | fakeroot 한계 | autorelabel 또는 post-image에서 `setfiles` |
 | `Permission denied: ./post-build.sh` | 스크립트 실행 비트 누락 | `chmod +x` 후 git에 등록 |
 | `${BUILD_DIR}/something` 경로가 없음 | BUILD_DIR을 패키지별로 추정 | 패키지별 경로는 `${BUILD_DIR}/<pkg>-<version>/`으로 *명시* |
@@ -306,10 +307,10 @@ vendor signing tool(NXP HABv4의 `cst`, TI의 `image_create.sh` 등)도 같은 �
 
 - 세 hook은 *시점·디렉터리·권한*이 다릅니다. post-build는 fakeroot 밖에서 TARGET_DIR, post-fakeroot는 fakeroot 안에서 권한·devnode, post-image는 BINARIES_DIR 조립.
 - post-build에서 `chown`·`mknod`는 의미가 없고, post-image에서 TARGET_DIR 수정도 의미가 없습니다. 잘못 두면 silent failure.
-- 환경 변수 7개(`TARGET_DIR`·`BINARIES_DIR`·`BUILD_DIR`·`HOST_DIR`·`STAGING_DIR`·`BR2_CONFIG`·`BR2_EXTERNAL`)는 모든 hook이 받습니다. `set -e`와 PATH 명시는 필수.
-- `BR2_ROOTFS_OVERLAY`는 가장 단순하지만 *root:root + 호스트 mode + 일반 파일*만 표현 가능. 그 너머가 필요하면 device table·post-fakeroot.
+- 공통 환경 변수는 Buildroot 릴리스 매뉴얼에 따라 확인하고 사용합니다. post-image의 첫 인자는 images 디렉터리이며 추가 인자는 별도 Kconfig 옵션으로 전달됩니다.
+- `BR2_ROOTFS_OVERLAY`는 정적 파일 복사에 쓰고, UID/GID·device metadata는 device table 또는 post-fakeroot로 지정합니다.
 - `system_table.txt`로 char/block devnode·정확한 mode·uid·gid·연속 minor를 박을 수 있습니다. overlay 위를 *덮어쓰는* 용도로도 표준.
-- fakeroot로는 file capabilities·xattr·SELinux context를 *완전히* 표현할 수 없습니다. 각각 systemd 단위·tar `--xattrs`·autorelabel 같은 대안이 표준.
+- capabilities·xattr·SELinux context는 대상 Buildroot 릴리스의 device-table·filesystem·policy 경로를 확인하고, 실제 생성 이미지에서 검증합니다.
 - post-image의 4대 시나리오는 FIT·partition image·squashfs·signed bundle. `genimage` cfg 한 장으로 MBR/GPT partition 이미지를 만들 수 있습니다.
 - secure boot는 post-image에서 처리. key는 *트리 밖*에 두고 환경 변수로 주입.
 

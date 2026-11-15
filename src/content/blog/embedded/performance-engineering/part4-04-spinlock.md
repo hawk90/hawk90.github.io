@@ -113,32 +113,54 @@ void ticket_unlock(ticket_lock_t *l) {
 ## MCS Lock — Scalable
 
 ```c
+#include <stdatomic.h>
+#include <stdbool.h>
+#include <stddef.h>
+
+typedef struct mcs_node mcs_node;
 struct mcs_node {
-    struct mcs_node *next;
-    atomic_int locked;
+    _Atomic(mcs_node *) next;
+    atomic_bool waiting;
 };
+typedef struct {
+    _Atomic(mcs_node *) tail;
+} mcs_lock_t;
 
-void mcs_lock(struct mcs_node *l, struct mcs_node *self) {
-    self->next = NULL;
-    self->locked = 1;
+/* Call once before sharing the lock. Each contender supplies its own node. */
+void mcs_lock_init(mcs_lock_t *lock) {
+    atomic_init(&lock->tail, NULL);
+}
 
-    struct mcs_node *prev = atomic_exchange(l, self);
-    if (prev) {
-        prev->next = self;
-        while (atomic_load(&self->locked)) cpu_relax();
+void mcs_lock_acquire(mcs_lock_t *lock, mcs_node *node) {
+    atomic_store_explicit(&node->next, NULL, memory_order_relaxed);
+    atomic_store_explicit(&node->waiting, true, memory_order_relaxed);
+    mcs_node *pred = atomic_exchange_explicit(&lock->tail, node,
+                                              memory_order_acq_rel);
+    if (pred != NULL) {
+        atomic_store_explicit(&pred->next, node, memory_order_release);
+        while (atomic_load_explicit(&node->waiting, memory_order_acquire)) {
+            /* Use the target's PAUSE/YIELD hint here when available. */
+        }
     }
 }
 
-void mcs_unlock(struct mcs_node *l, struct mcs_node *self) {
-    if (!self->next) {
-        if (atomic_compare_exchange(l, &self, NULL)) return;
-        while (!self->next) cpu_relax();
+void mcs_lock_release(mcs_lock_t *lock, mcs_node *node) {
+    mcs_node *succ = atomic_load_explicit(&node->next, memory_order_acquire);
+    if (succ == NULL) {
+        mcs_node *expected = node;
+        if (atomic_compare_exchange_strong_explicit(&lock->tail, &expected,
+                NULL, memory_order_release, memory_order_relaxed)) {
+            return;
+        }
+        do {
+            succ = atomic_load_explicit(&node->next, memory_order_acquire);
+        } while (succ == NULL);
     }
-    atomic_store(&self->next->locked, 0);
+    atomic_store_explicit(&succ->waiting, false, memory_order_release);
 }
 ```
 
-각 waiter가 자기 `mcs_node->locked`만 spin합니다. Cache line이 코어별로 분리되어 있으므로 bus traffic이 0이 됩니다. Unlock은 다음 노드의 `locked`를 0으로 쓰는 한 번의 store만 발생합니다.
+각 waiter는 자기 `mcs_node->waiting`을 spin하고, unlock은 다음 노드에 한 번 handoff합니다. 노드와 tail은 atomic이며 release/acquire가 연결 상태와 critical section을 전달합니다. 원격 coherence traffic이 0이 되는 것은 아니며, successor가 있을 때 다음 노드의 cache line 갱신이 필요합니다.
 
 Linux kernel의 `qspinlock`이 이 아이디어를 발전시킨 구현으로, 4.2 이후 표준 spinlock으로 자리 잡았습니다.
 

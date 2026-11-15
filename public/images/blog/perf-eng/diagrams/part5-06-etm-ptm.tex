@@ -18,24 +18,24 @@
 
 % ETM container
 \node[box, draw=absbord, fill=absfill!30] (etm) at (0, 2) {};
-\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 3.75) {ETM (Embedded Trace)};
+\node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 4.0) {ETM (Embedded Trace)};
 
 % ETM items
 \node[item, draw=impbord, fill=impfill] at (0, 2.8) {Instruction trace (PC)};
-\node[item, draw=clibord, fill=clifill] at (0, 1.9) {Data trace (load/store)};
-\node[item, draw=hibord, fill=hifill] at (0, 1.0) {Cycle accurate timing};
+\node[item, draw=clibord, fill=clifill] at (0, 1.9) {Data 지원은 구현별 확인};
+\node[item, draw=hibord, fill=hifill] at (0, 1.0) {Timing 옵션은 구성별 확인};
 
 % PTM container
 \node[box, draw=prpbord, fill=prpfill!30] (ptm) at (5.5, 2) {};
-\node[font=\sffamily\bfseries\footnotesize, text=prpbord, anchor=north] at (5.5, 3.75) {PTM (Program Trace)};
+\node[font=\sffamily\bfseries\footnotesize, text=prpbord, anchor=north] at (5.5, 4.0) {PTM (Program Trace)};
 
 % PTM items
-\node[item] at (5.5, 2.8) {Cortex-A8, A9};
+\node[item] at (5.5, 2.8) {지원 core / TRM 확인};
 \node[item] at (5.5, 1.9) {분기 정보만 (PC 재구성)};
-\node[item, draw=tealbord, fill=tealfill] at (5.5, 1.0) {ETM보다 대역폭 낮음};
+\node[item, draw=tealbord, fill=tealfill] at (5.5, 1.0) {출력량은 설정별 확인};
 
 % ETM output format (bottom)
-\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (3.5, -0.3) {ETM 출력 포맷};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (3.5, -0.3) {Trace 구성별 확인할 정보};
 
 \node[item, draw=absbord, fill=absfill, minimum width=32mm] at (0.5, -1.1) {Branch packet};
 \node[item, draw=absbord, fill=absfill, minimum width=32mm] at (0.5, -1.9) {Address packet};

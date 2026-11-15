@@ -113,11 +113,9 @@ ccache는 *컴파일러 결과*를 캐싱합니다. 같은 source + 같은 컴�
 ```text
 BR2_CCACHE=y
 BR2_CCACHE_DIR="$(HOME)/.buildroot-ccache"
-BR2_CCACHE_SIZE="5G"
-BR2_CCACHE_INITIAL_SETUP=""
 ```
 
-`BR2_CCACHE=y`가 켜지면 Buildroot가 host toolchain과 cross toolchain 모두에서 *gcc·g++ wrapper를 ccache로 교체*합니다. 빌드 시스템의 makefile은 *그대로*이고 ccache가 투명하게 끼어들어 캐싱합니다.
+`BR2_CCACHE=y`와 `BR2_CCACHE_DIR`은 Buildroot 설정입니다. 캐시 크기는 ccache 설정으로 별도 지정합니다(예: `ccache --max-size=5G`). Buildroot가 활성화한 compiler cache wrapper를 통해 컴파일 요청이 전달됩니다.
 
 ### Hit rate 확인
 
@@ -154,11 +152,11 @@ output-rpi4/host/aarch64-buildroot-linux-gnu/bin/aarch64-buildroot-linux-gnu-gcc
 
 ### 크기 관리
 
-`BR2_CCACHE_SIZE`가 한계입니다. 초과하면 LRU로 자동 evict됩니다.
+캐시 한도는 ccache 자체 설정으로 관리합니다. 설정한 크기를 초과하면 ccache가 오래된 항목을 제거할 수 있습니다.
 
 ```text
-BR2_CCACHE_SIZE="5G"        # 일반 워크스테이션
-BR2_CCACHE_SIZE="20G"       # 멀티 보드를 자주 빌드하는 CI
+ccache --max-size=5G    # 예: 일반 워크스테이션
+ccache --max-size=20G   # 예: 여러 보드를 빌드하는 CI
 ```
 
 5 GB로 시작해서 hit rate가 80% 이하로 떨어지면 늘립니다.
@@ -299,7 +297,7 @@ BR2_REPRODUCIBLE=y          # 재현성 위해 timestamp 고정
 | **git branch 전환** (toolchain 그대로) | 영향받은 패키지들 | 10-30분 |
 | **git branch 전환** (toolchain 변경 포함) | *전체 재빌드* | 30-50분 |
 
-가장 비싼 시나리오는 *branch 전환에 toolchain 변경이 끼는 경우*입니다. 두 브랜치가 같은 toolchain을 쓴다면 *ccache가 살아남아* 두 번째 빌드가 빠릅니다. 다른 toolchain을 쓴다면 ccache는 hit가 나지만 *toolchain 자체 재빌드*가 30분.
+defconfig나 패키지 옵션을 바꿔도 Buildroot가 모든 기존 패키지의 설정 변화를 자동 추적해 재구성하지는 않습니다. 관련 package target을 명시적으로 rebuild/reconfigure 하거나, 영향이 불명확하면 해당 패키지의 `-dirclean` 후 다시 빌드하세요. 구체적인 무효화 범위는 패키지 infra와 릴리스에 따라 확인해야 합니다.
 
 실무 팁: *toolchain 옵션은 거의 안 바꾸도록* 트리 설계. 보드별 차이는 *kernel·rootfs·패키지 선택*으로 흡수하고 toolchain은 *프로젝트 전체에서 한 가지*로 유지합니다.
 
@@ -352,7 +350,7 @@ CI 환경은 *모든 빌드가 cold start*입니다. 캐싱이 없으면 매 PR�
 - **`BR2_PER_PACKAGE_DIRECTORIES`를 incremental 가속 도구로 오해** — 켜면 *더 빨라질 것*이라 기대하지만 실제는 *느려집니다*. 켜는 이유는 *reproducibility*. 빠르게 iterate하고 싶은 워크스테이션이면 *꺼야* 합니다.
 - **`BR2_DL_DIR`을 `/tmp` 안에 둠** — 재부팅마다 `dl/`이 사라짐. 매번 다운로드. `BR2_DL_DIR`은 *영속적인* 경로에 두는 게 원칙.
 - **`BR2_PRIMARY_SITE_ONLY=y`인데 사내 mirror가 죽음** — 빌드가 *전부 실패*합니다. fallback 차단은 *양산용 환경*에서만 켜고 *개발 환경*에서는 끕니다.
-- **`BR2_CCACHE_SIZE`가 너무 작음** — 5 GB로 시작했는데 멀티 보드를 자주 빌드하면 LRU evict가 자주 일어남. hit rate가 떨어지면 20 GB로 늘립니다.
+- **ccache 상한이 작음** — 캐시 통계에서 eviction이 잦은지 확인한 뒤 ccache의 max-size를 조정합니다.
 - **clean rebuild를 안 함** — 캐시만 신뢰하다 보면 *defconfig가 만든 binary*와 *지금 디스크에 있는 binary*가 다른 사고가 옴. 양산 전에는 항상 `make distclean && make`.
 
 ## 정리

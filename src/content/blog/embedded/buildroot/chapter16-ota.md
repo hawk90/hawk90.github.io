@@ -240,18 +240,18 @@ main_boot=if test ${BOOT_ORDER} = "A B"; then \
           fi
 
 # 부팅 N회 실패 시 altbootcmd로 전환
-altbootcmd=setenv BOOT_ORDER "B A" && saveenv && reset
+altbootcmd=if test ${BOOT_ORDER} = "A B"; then setenv BOOT_ORDER "B A"; else setenv BOOT_ORDER "A B"; fi; saveenv; reset
 bootlimit=3
 ```
 
-U-Boot가 *bootcount > bootlimit*이면 `altbootcmd`를 실행해 *반대 슬롯*으로 강제 전환합니다. 이게 **passive rollback의 핵심**입니다. RAUC는 `system.conf`의 `bootloader=uboot` 설정으로 install 완료 시 `BOOT_ORDER`를 갱신하고, `rauc status mark-good` 호출 시 `bootcount`를 리셋합니다.
+U-Boot의 bootcount 제한 기능이 설정되고 bootcount 저장 방식이 구성되어 있어야 `altbootcmd`가 호출됩니다. 위 예시는 현재 `BOOT_ORDER`가 `A B`면 `B A`로, 그 외에는 `A B`로 바꿉니다. 보드에서 사용하는 U-Boot와 RAUC 버전에 맞춰 상태 변수 이름, bootcount 초기화, 성공 마킹 연동을 별도로 검증하세요.
 
-이 helper들은 *u-boot-tools*의 `fw_setenv`·`fw_printenv`를 호출합니다. Buildroot가 자동으로 `/etc/fw_env.config`를 만들어 *환경 partition의 위치·크기*를 알려 줍니다.
+userspace의 `fw_setenv`·`fw_printenv`는 `fw_env.config`를 읽습니다. Buildroot가 보드별 환경 위치를 자동 추론해 이 파일을 만들어 주지는 않으므로, U-Boot의 environment device, offset, size, erase geometry와 맞는 파일을 제품 구성에 직접 포함하세요.
 
 ```text
 # /etc/fw_env.config
-# MTD/MMC device   offset      env-size    sector-size   N-sectors
-/dev/mmcblk0       0x100000    0x4000      0x4000        2
+# 보드별 U-Boot 환경 설정에 맞는 장치와 offset을 기입한다.
+# 아래 장치는 예시를 복사하지 말고, CONFIG_ENV_IS_IN_* 및 실제 partition과 대조한다.
 ```
 
 이 파일이 *부정확*하면 `fw_setenv`가 *엉뚱한 위치를 덮어써* 부팅이 깨집니다. Ch 13의 U-Boot env 정렬을 다시 확인해야 하는 부분입니다.

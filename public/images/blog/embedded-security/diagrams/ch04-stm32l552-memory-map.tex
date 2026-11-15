@@ -14,7 +14,7 @@
   addr/.style={font=\ttfamily\scriptsize, text=mutec, anchor=east}
 ]
 
-\node[title] at (3.5, 5.6) {Memory Map — STM32L552};
+\node[title] at (3.5, 5.6) {Security partition example};
 
 % Four memory regions stacked
 \node[ns] (nsflash) at (3.5, 4.5) {Non-secure flash\\[1pt]\scriptsize application};
@@ -22,15 +22,9 @@
 \node[ns] (nssram)  at (3.5, 1.5) {Non-secure SRAM};
 \node[s]  (ssram)   at (3.5, 0.0) {Secure SRAM};
 
-% Address labels (right side)
-\node[addr, anchor=west] at ([xshift=4pt]nsflash.north east) {0x00000000};
-\node[addr, anchor=west] at ([xshift=4pt]nsflash.south east) {0x07FFFFFF};
-\node[addr, anchor=west] at ([xshift=4pt]sflash.north east)  {0x0C000000};
-\node[addr, anchor=west] at ([xshift=4pt]sflash.south east)  {0x0FFFFFFF};
-\node[addr, anchor=west] at ([xshift=4pt]nssram.north east)  {0x20000000};
-\node[addr, anchor=west] at ([xshift=4pt]nssram.south east)  {0x2002FFFF};
-\node[addr, anchor=west] at ([xshift=4pt]ssram.north east)   {0x30000000};
-\node[addr, anchor=west] at ([xshift=4pt]ssram.south east)   {0x3000FFFF};
+% Roles only: no invented device address ranges.
+\node[font=\sffamily\scriptsize, text=mutec, align=center]
+  at (3.5, -1.1) {Conceptual partition roles\\[2pt]Actual addresses and aliases are platform-specific};
 
 \end{tikzpicture}
 \end{document}

@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"HAL은 application과 hardware 사이의 통역입니다."** 벤더를 바꿔도 application 영향이 0이 되는 것이 목표입니다.
+> **"HAL은 application과 hardware 사이의 통역입니다."** 벤더별 설정과 호출을 adapter 뒤에 모아 application 변경 범위를 줄입니다.
 
 ## 어떤 문제를 푸는가
 
@@ -29,7 +29,7 @@ GPIO_PortToggle(GPIO5, 1u << 6);
 nrf_gpio_pin_set(LED_PIN);
 ```
 
-같은 LED toggle이지만 API가 완전히 다릅니다. application이 이 모두를 알아야 하니 이식이 불가능해집니다.
+위 예는 GPIO 출력 조작이며 set과 toggle은 같은 동작이 아닙니다. 이식 시에는 함수 이름뿐 아니라 active level·초기 상태·timing·오류 처리 계약도 맞춰야 합니다. application이 벤더 호출에 직접 의존하면 변경 범위가 커집니다.
 
 **HAL**(Hardware Abstraction Layer)은 통일된 interface를 제공합니다.
 
@@ -111,11 +111,11 @@ blink(led);
 단점은 다음과 같습니다.
 
 - Virtual call overhead가 작지만 존재합니다
-- vtable과 RTTI 비용이 듭니다
+- ABI에 따른 vtable·객체 상태가 필요할 수 있습니다. virtual 호출 자체가 RTTI 사용을 요구하는 것은 아니며 `-fno-rtti`로도 이 인터페이스 패턴을 구현할 수 있습니다.
 
-## 패턴 2 — Template-based HAL (Zero-cost)
+## 패턴 2 — Template-based HAL (정적 dispatch)
 
-Virtual 대신 CRTP를 씁니다.
+여기서는 CRTP로 공통 forwarding을 표현합니다. 단순 generic 함수는 CRTP 상속 없이도 작성할 수 있습니다.
 
 ```cpp
 // hal/gpio_base.h
@@ -166,7 +166,7 @@ blink(led);   // 컴파일 타임 dispatch, zero cost
 
 장점은 다음과 같습니다.
 
-- Zero overhead로 virtual call이 없습니다
+- 가상 dispatch를 쓰지 않으며 인라인 기회를 제공합니다
 - Compile-time 검증이 가능합니다
 - Inline이 가능합니다
 
@@ -191,9 +191,10 @@ blink(led);   // 컴파일 타임 dispatch, zero cost
 ```cpp
 // application
 void blink() {
-    LedGpio::set();
+    LedGpio led;
+    led.set();
     sleep_ms(500);
-    LedGpio::clear();
+    led.clear();
     sleep_ms(500);
 }
 ```
@@ -201,8 +202,8 @@ void blink() {
 장점은 다음과 같습니다.
 
 - Compile-time에 보드를 선택합니다
-- Application은 그냥 `LedGpio`를 씁니다
-- zero overhead입니다
+- Application은 `LedGpio` 객체의 인스턴스 메서드를 씁니다
+- alias 자체는 런타임 상태를 추가하지 않습니다. 구현 메서드 비용은 별도입니다
 
 단점은 다음과 같습니다.
 
@@ -275,92 +276,68 @@ if(BOARD STREQUAL "STM32_DISCOVERY")
 elseif(BOARD STREQUAL "NRF_DK")
     add_subdirectory(hal/nrf)
     set(BOARD_HEADER "board/nrf_dk.h")
+else()
+    message(FATAL_ERROR "Unsupported BOARD: ${BOARD}")
 endif()
 
 target_compile_definitions(${TARGET} PRIVATE BOARD_HEADER="${BOARD_HEADER}")
 ```
 
-## Mock HAL — Testing
+## 작은 예제 — Static·Dynamic·Hybrid의 같은 관찰 계약
 
-```cpp
-class MockGpio : public hal::IGpio {
-public:
-    bool state = false;
-    std::vector<bool> history;
+호스트 fake 출력이 두 번의 set/clear 순서를 기록합니다. virtual DI, template 호출, template adapter를 virtual interface로 사용하는 hybrid를 같은 기대 관찰로 비교합니다. delay와 보드 I/O를 제외하므로 이 결과는 파형·시간·Flash 사용량의 비교가 아닙니다.
 
-    void set() override { state = true; history.push_back(true); }
-    void clear() override { state = false; history.push_back(false); }
-    bool read() const override { return state; }
-    void toggle() override { state = !state; history.push_back(state); }
+```cpp title="hal-check.cpp"
+#include <array>
+#include <cassert>
+struct History {
+    std::array<bool,4> values{}; unsigned size=0;
+    void push(bool v) { assert(size<values.size()); values[size++]=v; }
 };
-
-TEST(BlinkTest, BlinksTwice) {
-    MockGpio led;
-    blink_twice(led);
-
-    EXPECT_EQ(led.history.size(), 4);   // set, clear, set, clear
-    EXPECT_TRUE(led.history[0]);
-    EXPECT_FALSE(led.history[1]);
+struct IGpio {
+    virtual ~IGpio() = default;
+    virtual void set() = 0; virtual void clear() = 0;
+};
+struct Mock : IGpio {
+    History history;
+    void set() override { history.push(true); }
+    void clear() override { history.push(false); }
+};
+template<class Backend> struct Adapter : IGpio {
+    Backend& backend; explicit Adapter(Backend& b):backend(b) {}
+    void set() override { backend.set(); }
+    void clear() override { backend.clear(); }
+};
+template<class Pin> void blink_twice(Pin& p) {
+    for(int i=0;i<2;++i) { p.set(); p.clear(); }
+}
+void dynamic_blink(IGpio& p) { blink_twice(p); }
+struct StaticPin {
+    History history;
+    void set() { history.push(true); }
+    void clear() { history.push(false); }
+};
+void check(const History& h) {
+    assert(h.size==4 && h.values[0] && !h.values[1] && h.values[2] && !h.values[3]);
+}
+int main() {
+    Mock dynamic; dynamic_blink(dynamic); check(dynamic.history);
+    StaticPin direct; blink_twice(direct); check(direct.history);
+    StaticPin backend; Adapter<StaticPin> hybrid(backend);
+    dynamic_blink(hybrid); check(backend.history);
+#ifdef BAD_STATIC
+    StaticPin::set();
+#endif
 }
 ```
 
-application 로직을 host에서 테스트할 수 있습니다. 하드웨어 없이도 가능합니다.
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors -fno-rtti hal-check.cpp -o hal-check && ./hal-check`로 세 방식의 동일한 출력 순서를 확인했습니다. `-DBAD_STATIC`은 nonstatic 메서드를 객체 없이 호출해 실패합니다. alias는 원래 메서드를 static으로 바꾸지 않습니다.
 
 ## Application 설계 — Dependency Injection
 
-[Part 4-08](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives)의 패턴을 적용합니다.
+위 hybrid 예제는 board에서 만든 backend를 adapter에 주입하고 application은 IGpio 참조를 받습니다. mock의 history는 hardware 효과와 별개로 application 호출 순서를 검증합니다. 실제 프로젝트에서는 UART·SPI도 각자의 전송 결과·timeout·버퍼 소유권 계약을 완성한 인터페이스로 주입합니다. 존재하지 않는 send_string이나 초기화되지 않은 SPI 객체를 가정하지 않습니다.
 
-```cpp
-class System {
-    hal::IGpio& led_;
-    hal::IUart& uart_;
-    hal::ISpi& spi_;
-
-public:
-    System(hal::IGpio& led, hal::IUart& uart, hal::ISpi& spi)
-        : led_(led), uart_(uart), spi_(spi) {}
-
-    void run() {
-        led_.set();
-        uart_.send_string("Started\n");
-        // ...
-    }
-};
-
-// main
-hal::stm32::StmGpio led(GPIOA, GPIO_PIN_5);
-hal::stm32::StmUart uart(USART2);
-hal::stm32::StmSpi spi(SPI1);
-
-System system(led, uart, spi);
-system.run();
-```
-
-모든 dependency를 명시합니다. test에서는 mock을 주입할 수 있습니다.
-
-## 임베디드 — Vendor switch 시나리오
-
-같은 application을 STM32에서 NXP로 옮기는 경우입니다.
-
-```cpp
-// Application — 변경 없음
-void process(hal::IUart& uart, hal::IGpio& led) {
-    uart.send_string("hello");
-    led.toggle();
-}
-
-// main — STM32 build
-hal::stm32::StmUart uart(USART2);
-hal::stm32::StmGpio led(GPIOA, 5);
-process(uart, led);
-
-// main — NXP build (다른 파일)
-hal::nxp::NxpUart uart(UART2);
-hal::nxp::NxpGpio led(GPIO5, 6);
-process(uart, led);
-```
-
-HAL implementation만 다릅니다. application 코드는 변경되지 않습니다. 이것이 HAL의 목적입니다.
+벤더를 바꿀 때 GPIO high가 실제 LED on인지, DMA 완료가 wire 완료인지, blocking 호출의 timeout 단위가 같은지까지 확인해야 합니다. 타입 이름만 바꾸는 것으로 이 계약이 자동으로 같아지지는 않습니다. [Core Guidelines I.25](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#i25-prefer-empty-abstract-classes-as-interfaces-to-class-hierarchies)는 상태가 없는 추상 클래스를 인터페이스로 두는 원칙을 설명합니다.
 
 ## 시리즈 마무리 — 40 chapter 정리
 
@@ -413,8 +390,8 @@ HAL implementation만 다릅니다. application 코드는 변경되지 않습니
 
 ## 핵심 메시지
 
-1. **Modern C++의 대부분은 zero-cost입니다** — 측정한 뒤에 사용합니다
-2. **임베디드는 끄는 기술입니다** — `-fno-exceptions`, `-fno-rtti`, `-fno-threadsafe-statics`
+1. **추가 비용은 측정합니다** — 언어 기능별 계약을 이해하고 같은 기능의 코드를 비교합니다
+2. **런타임 기능은 요구에 맞춰 선택합니다** — 예외·RTTI·local static 동기화를 끄기 전에 프로그램과 라이브러리의 전제를 확인합니다
 3. **정적 할당을 우선합니다** — `std::array`, ETL, pool, placement new
 4. **컴파일 타임으로 옮깁니다** — `constexpr`, template, CRTP, concepts
 5. **소유권을 명시합니다** — `unique_ptr`이 기본, `shared_ptr`은 드물게, raw pointer는 non-owning에만 씁니다
@@ -425,11 +402,9 @@ HAL implementation만 다릅니다. application 코드는 변경되지 않습니
 
 이 시리즈가 Modern C++ in Embedded를 다뤘다면 다음으로는 이런 시리즈를 추천합니다.
 
-- **[Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface)** — 측정과 최적화 (50 chapters)
-- **[Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)** — FreeRTOS/Zephyr/RT-Thread 소스 분석 (45 chapters)
-- **[Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface)** — 일상 recipe 모음 (145 recipes)
-- **Refactoring Catalog** — Fowler 61 패턴
-- **GoF Design Patterns** — 23 패턴
+- **[Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface)** — 측정과 최적화
+- **[Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface)** — FreeRTOS/Zephyr/RT-Thread 소스 분석
+- **[Modern Embedded Recipes](/blog/embedded/modern-recipes/00-preface)** — 일상 recipe 모음
 
 ## 자주 보는 함정과 안티패턴
 
@@ -465,7 +440,7 @@ HAL이 얼마나 비싼지를 모릅니다. 측정 도구를 활용합니다([Pa
 ## 정리
 
 - HAL은 application과 vendor 사이의 통역 계층입니다.
-- 패턴은 3가지로 나뉩니다 — Interface (virtual), Template (CRTP), Typedef (compile-time).
+- 여기서는 Interface(virtual), Template, alias 기반 board 선택, Hybrid를 구분했습니다.
 - Board-specific 헤더로 type alias를 통일합니다.
 - Mock HAL을 두면 host에서 테스트할 수 있습니다.
 - DI로 dependency wiring을 명시합니다.
@@ -477,13 +452,12 @@ HAL이 얼마나 비싼지를 모릅니다. 측정 도구를 활용합니다([Pa
 - [Part 5-03: Peripheral 추상화](/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction)
 - [Part 2-08: Static Polymorphism](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)
 - [Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives)
-- TDD Pattern 49: Extract Interface
 
 ## 시리즈 마무리
 
-40 chapter, 5 Part로 Modern C++의 임베디드 사용을 전 범위에서 다뤘습니다. 측정 가능한 주장만 사용했고, 끄는 기술과 켜는 기술의 균형을 강조했습니다.
+40 chapter, 5 Part로 Modern C++의 임베디드 사용을 전 범위에서 다뤘습니다. 각 기능의 언어 계약과 실제 대상에서 측정해야 할 비용을 구분했습니다.
 
-C++가 임베디드에서 안전하게 강력하다는 사실을 증명하는 것이 시리즈의 목표였습니다. RAII, constexpr, templates, concepts, `std::expected`, `std::variant` 같은 도구는 런타임 비용 없이 코드 품질을 끌어올립니다.
+C++가 임베디드에서 안전하게 강력하다는 사실을 증명하는 것이 시리즈의 목표였습니다. RAII, constexpr, templates, concepts, `std::expected`, `std::variant` 같은 도구는 목적에 맞는 계약을 표현하는 선택지이며 메모리·호출·코드 크기 비용은 구현과 사용 조건에 따라 확인합니다.
 
 C++ 도입을 망설이던 팀에는 증거가 되기를, 이미 C++를 쓰는 팀에는 더 깊은 활용이 되기를, 처음 임베디드를 만나는 Modern C++ 개발자에게는 낯선 영역의 지도가 되기를 바랍니다.
 

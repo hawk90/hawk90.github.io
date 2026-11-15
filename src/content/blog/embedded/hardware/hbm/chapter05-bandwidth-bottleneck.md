@@ -1,8 +1,8 @@
 ---
-title: "메모리 대역폭 병목 분석 — Theoretical vs Achievable·Roofline·Memory Wall"
+title: "메모리 대역폭 병목 분석 — 공칭값·측정 기준·Roofline"
 slug: "embedded/hardware/hbm/chapter05-bandwidth-bottleneck"
 date: 2026-05-16T09:05:00
-description: "Theoretical vs achievable — 메모리 대역폭의 실제와 roofline·memory wall."
+description: "공칭 대역폭과 관측한 트래픽을 구분하고, roofline과 가상 읽기 시간 하한을 계산합니다."
 series: "HBM·GDDR 심화"
 seriesOrder: 5
 tags: [hbm, bandwidth, roofline, bottleneck]
@@ -20,25 +20,16 @@ topics: ["embedded", "embedded/hardware"]
 
 먼저 *공칭 대역폭*은 단순합니다.
 
-```text
-공식: BW = pin_rate × bus_width / 8
+공식은 `BW(GB/s) = pin rate(Gbps) × DQ width ÷ 8`입니다.
 
-HBM3 stack:
-  6.4 Gbps × 1024-bit / 8 = 819 GB/s
+| 구성 | 입력값 | 산술 결과 |
+|---|---|---|
+| HBM3 | 6.4 × 1024 ÷ 8 | 819.2 GB/s |
+| HBM3E의 9.6 Gbps 등급 | 9.6 × 1024 ÷ 8 | 1228.8 GB/s |
+| 최초 HBM4 표준 기준 | 8 × 2048 ÷ 8 | 2048 GB/s |
+| GDDR6X x32 예 | 21 × 32 ÷ 8 | 84 GB/s |
 
-HBM3E stack (9.6 Gbps):
-  9.6 Gbps × 1024-bit / 8 = 1,229 GB/s ≈ 1.23 TB/s
-
-HBM4 stack (8.0 Gbps × 2048-bit):
-  8.0 Gbps × 2048-bit / 8 = 2,048 GB/s ≈ 2.0 TB/s
-
-GDDR6X chip (21 Gbps × 32-bit):
-  21 Gbps × 32-bit / 8 = 84 GB/s
-
-NVIDIA H100 SXM5 (HBM3 5 stack):
-  HBM3 정격으로 돌리면 5 × 819 = 4,096 GB/s
-  실제 spec: 3.35 TB/s
-```
+기준 발표와 속도 등급은 [Ch 3](/blog/embedded/hardware/hbm/chapter03-hbm-generations)을 참조합니다. HBM3 5 stack을 6.4 Gbps로 계산하면 `5 × 819.2 = 4096 GB/s`입니다.
 
 H100의 *3.35 TB/s*는 HBM3를 *정격(6.4 Gbps)보다 낮은 속도*로 돌린 *peak*입니다. 효율 손실을 뺀 값이 아닙니다. 실제 application이 쓰는 대역폭은 이 peak보다 *더 낮습니다*.
 
@@ -73,28 +64,27 @@ HBM3는 stack당 *16 channel*에 channel마다 pseudo channel이 2개라, 독립
 
 실제 BW를 측정하는 가장 간단한 방법은 *STREAM* 벤치마크입니다.
 
-```c
-// STREAM Triad: a[i] = b[i] + scalar * c[i]
-// memory traffic = 3N (2 read, 1 write) × sizeof(double)
+Triad는 `a[i] = b[i] + scalar × c[i]`이며, 유효 데이터 기준으로 원소당 입력 2회·출력 1회, FP64라면 24 byte를 셉니다. 이것이 실제 DRAM의 모든 트래픽과 같다는 뜻은 아닙니다. 캐시 hit·write policy·중복 transaction은 별도로 확인해야 합니다.
 
-#define N (1<<28)  // 256M elements
-double *a, *b, *c;
-double scalar = 3.0;
+GPU 구현·할당·오류 처리·event timing은 [NVIDIA CUDA Samples](https://github.com/NVIDIA/cuda-samples)의 bandwidth 예제와 [CUDA 12.8.1 가이드](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-c-programming-guide/index.html)를 출발점으로 삼습니다. memcopy benchmark는 Triad benchmark와 다르므로 결과를 그대로 바꿔 부르면 안 됩니다. 다음 계산기는 측정된 초와 논리적 byte 수를 받아 환산만 합니다.
 
-cudaMalloc(&a, N * sizeof(double));
-cudaMalloc(&b, N * sizeof(double));
-cudaMalloc(&c, N * sizeof(double));
-
-// kernel
-__global__ void triad(double *a, double *b, double *c, double s, int n) {
-    int i = blockIdx.x * blockDim.x + threadIdx.x;
-    if (i < n) a[i] = b[i] + s * c[i];
+```js title="hbm-roofline.mjs"
+export function roofline({bytes, seconds, flops, peakGBs, peakGFLOPs}) {
+  if (![bytes, seconds, flops, peakGBs, peakGFLOPs].every(
+      x => Number.isFinite(x) && x > 0)) throw new RangeError("positive finite inputs");
+  const intensity = flops / bytes;
+  const logicalGBs = bytes / seconds / 1e9;
+  const knee = peakGFLOPs / peakGBs;
+  const ceilingGFLOPs = Math.min(peakGFLOPs, peakGBs * intensity);
+  if (![intensity, logicalGBs, knee, ceilingGFLOPs].every(
+      x => Number.isFinite(x) && x > 0)) throw new RangeError("numeric range");
+  return {intensity, logicalGBs, knee, ceilingGFLOPs};
 }
-
-// measure time → BW = 3 * N * 8 / time
 ```
 
-측정값은 GPU, driver, 메모리 클럭 설정에 따라 달라지므로 *자기 환경에서 직접* 재야 합니다. STREAM은 *순차 access*라서 random access가 섞인 실제 workload보다 *좋게* 나옵니다.
+예를 들어 FP64 Triad의 N=1,000,000, 가상 시간 0.001초이면 24 MB/0.001초=24 GB/s입니다. **가상의 산술 입력이며 GPU 측정 결과가 아닙니다.** 실제 측정 기록에는 GPU/driver/toolkit·클럭·전력 제한·N·warmup·반복별 시간·검산 결과·cache보다 큰 working set 여부를 함께 남깁니다.
+
+측정값은 GPU, driver, 메모리 클럭 설정에 따라 달라지므로 *자기 환경에서 직접* 재야 합니다. 순차 Triad와 실제 workload는 access pattern이 다르므로 같은 대역폭을 기대하지 않습니다.
 
 ## Roofline 모델
 
@@ -102,7 +92,7 @@ __global__ void triad(double *a, double *b, double *c, double s, int n) {
 
 ![Roofline 모델 — memory bound와 compute bound 영역, knee point](/images/blog/hardware/hbm/diagrams/ch05-roofline.svg)
 
-knee = peak_compute / peak_BW. H100 SXM은 FP16 Tensor Core가 *1,979 TFLOPS(sparsity 적용)*, dense로는 그 절반인 *약 990 TFLOPS*입니다. knee는 `990 TFLOPS ÷ 3.35 TB/s ≈ 295 FLOP/Byte`입니다.
+knee = peak_compute / peak_BW입니다. [NVIDIA H100 제품 사양](https://www.nvidia.com/en-us/data-center/h100/)에서 H100 SXM은 FP16 Tensor Core가 *1,979 TFLOPS(sparsity 적용)*, dense로는 그 절반인 *약 990 TFLOPS*입니다. knee는 `990 TFLOPS ÷ 3.35 TB/s ≈ 295 FLOP/Byte`입니다.
 
 *Arithmetic Intensity*는 *byte 1개당 몇 FLOP*를 하는지입니다. 몇 가지 연산을 직접 계산하면 다음과 같습니다.
 
@@ -116,6 +106,8 @@ LLM decode의 batch 1 연산은 GEMV에 가까워 *intensity가 1 근처*입니�
 
 ## Memory wall
 
+이 절의 V100 입력은 [NVIDIA Volta 백서](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf), H100 입력은 앞의 제품 사양을 사용합니다. 다른 정밀도·sparsity·모델의 실측 성능을 비교한 값이 아닙니다.
+
 *compute*와 *memory BW*의 *증가 속도 차이*가 *벌어지고 있습니다*.
 
 | GPU | 출시 | FP16 Tensor (dense) | HBM BW | knee (FLOP/B) |
@@ -128,8 +120,8 @@ knee가 *오른쪽으로 이동*하면 같은 workload라도 *memory bound* 쪽�
 
 해결 방향은 *세 갈래*입니다.
 
-1. **on-chip cache 늘리기** — H100의 L2는 *50 MB*입니다. 그래도 *LLM weight 수십~수백 GB*에는 *턱없이 부족*합니다.
-2. **HBM 세대 진화** — HBM3E(stack당 1.23 TB/s) → HBM4(최대 2 TB/s).
+1. **on-chip cache 늘리기** — [Hopper 구조 설명](https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/)에서 H100의 L2는 *50 MB*입니다. 그래도 *LLM weight 수십~수백 GB*에는 *턱없이 부족*합니다.
+2. **HBM 세대 진화** — 2024년 HBM3E 제품 예(약 1.23 TB/s)와 2025년 최초 HBM4 표준 예(약 2 TB/s)를 비교할 수 있습니다.
 3. **알고리즘 측에서 intensity 올리기** — batch 키우기, FlashAttention처럼 tile로 HBM 왕복 줄이기.
 
 ## LLM inference의 MBU
@@ -139,41 +131,26 @@ LLM 추론에서는 *Memory Bandwidth Utilization(MBU)*을 함께 봅니다. 추
 1. **Prefill (prompt encoding)** — prompt 토큰을 한꺼번에 처리하므로 weight 재사용이 커 compute bound에 가깝습니다.
 2. **Decode (token by token)** — 매 토큰마다 weight를 다시 읽고, sequence 길이에 비례해 KV cache를 추가로 읽습니다. memory bound입니다.
 
-```text
-MBU = actual BW used / peak BW
-MFU = actual FLOPS / peak FLOPS
+MBU를 논리적 byte 수/시간/공칭 BW로 정의했다면, 하드웨어 DRAM 활성 비율과 구별해 보고해야 합니다. MFU도 실행 FLOP 산정·정밀도·sparsity·시간 구간을 명시해야 합니다.
 
-Llama 2 70B (FP16) decode, batch 1, H100 SXM:
-  weight 140 GB를 한 번 읽는 시간 하한
-  = 140 GB / 3.35 TB/s ≈ 42 ms/token
-```
+70B를 2 byte로 저장한 140 GB를 **가상의 단일 3.35 TB/s 메모리 경로**로 한 번 읽으면 `140/3350 ≈ 0.04179초`입니다. H100 SXM 80 GB 한 장에는 이 weight가 들어가지 않으므로 이것을 단일 H100의 Llama 2 70B 실행 latency라고 부를 수 없습니다.
 
-batch 1 decode는 토큰 하나에 *최소 42 ms*가 걸리고, 그동안 계산 유닛은 대부분 놉니다. batch를 키우면 같은 weight read로 여러 토큰을 만들어 MFU가 올라가지만, 토큰 하나의 *latency*는 줄지 않습니다.
+여러 GPU로 나누면 각 GPU의 weight 분담·실제 BW·통신·실행 중첩으로 시간을 다시 계산해야 합니다. Batch는 weight 읽기 비용을 토큰 여러 개에 나누는 효과가 있지만, 사용자별 latency와 전체 token throughput은 서로 다른 지표입니다.
 
 ## 측정 도구
 
 GPU에서 *어디가 병목*인지 보는 도구가 있습니다.
 
+[Nsight Compute CLI 2023.1.1](https://docs.nvidia.com/nsight-compute/2023.1/pdf/NsightComputeCli.pdf)의 full set 예입니다. 설치된 버전과 권한·지원 GPU를 먼저 기록합니다.
+
 ```bash
-# NVIDIA — Nsight Compute (kernel profiling)
+ncu --version
 ncu --set full ./inference
-# 보고서의 "Memory Workload Analysis" 섹션에서 DRAM throughput, L2 hit rate
-
-# AMD — ROCm Profiler
-rocprof --hsa-trace --hip-trace ./inference
-
-# Linux generic — perf (CPU 쪽 cache)
-perf stat -e cache-references,cache-misses,LLC-load-misses ./app
 ```
 
-데이터센터에서는 *DCGM(NVIDIA Data Center GPU Manager)*으로 GPU 여러 장의 메모리 사용률을 함께 봅니다.
+Memory Workload Analysis에서 DRAM 전송과 L2 hit를 workload 구간별로 봅니다. 이 환경에서는 GPU profiling을 실행하지 않았으므로 관측 수치는 제시하지 않습니다.
 
-```bash
-# DCGM field: 204 = DCGM_FI_DEV_MEM_COPY_UTIL,
-#             1005 = DCGM_FI_PROF_DRAM_ACTIVE,
-#             1008 = DCGM_FI_PROF_PIPE_FP16_ACTIVE
-dcgmi dmon -e 204,1005,1008
-```
+DCGM의 메모리 사용 시간 비율과 profiler의 DRAM 활성 비율도 byte/s와 같지 않습니다. 필드 ID·지원 기능을 설치 버전 문서로 확인하고 실제 전송량 지표와 함께 해석합니다.
 
 ## 자주 하는 실수
 
@@ -187,11 +164,11 @@ profiling 없이 *BW upgrade*만 하면 *효과가 없을 수* 있습니다. *co
 
 ### "STREAM이 충분한 벤치마크다"
 
-STREAM은 *순차 access*입니다. 실제 LLM은 *KV cache 접근*이 섞입니다. *효율 측정*은 *대표 workload*로 해야 합니다. *MLPerf Inference*가 그런 기준입니다.
+STREAM은 *순차 access*입니다. 실제 LLM은 *KV cache 접근*이 섞입니다. *효율 측정*은 *대표 workload*로 해야 합니다. 측정 workload의 모델·batch·sequence 길이·정밀도와 결과 분포를 함께 공개해야 다른 환경과 비교할 수 있습니다.
 
 ### "MFU만 보면 시스템 효율을 안다"
 
-MFU만 보면 *compute 사용률*은 알지만 *memory 사용률은 모릅니다*. *MBU와 함께* 봐야 *진짜 병목*이 보입니다. MFU가 낮고 MBU가 높으면 *memory bound*, MFU가 높고 MBU가 낮으면 *compute bound*입니다.
+MFU만 보면 *compute 사용률*은 알지만 *memory 사용률은 모릅니다*. *MBU와 함께* 봐야 *진짜 병목*이 보입니다. 이 두 지표는 병목의 단서입니다. 낮은 MFU는 통신·동기화·작은 kernel·CPU 대기에서도 나타나므로, 두 비율만으로 병목을 확정하지 않습니다.
 
 ### bank conflict를 *컨트롤러 책임*으로만 가정
 
@@ -203,8 +180,8 @@ MFU만 보면 *compute 사용률*은 알지만 *memory 사용률은 모릅니다
 - 실제 대역폭은 *refresh·row activation·bank conflict·명령 overhead*로 깎이며, 정도는 *측정*으로 확인합니다.
 - *Roofline*에서 H100의 knee는 *약 295 FLOP/Byte*입니다. batch 1 LLM decode는 intensity가 *약 1*이라 강한 memory bound입니다.
 - V100 → H100에서 연산은 *약 7.9배*, 대역폭은 *약 3.7배* 늘어 knee가 *약 2배* 오른쪽으로 갔습니다.
-- batch 1 decode는 Llama 2 70B에서 토큰당 *최소 42 ms*입니다.
-- 측정은 *Nsight Compute, rocprof, DCGM*으로 합니다.
+- 140 GB/3.35 TB/s의 약 42 ms는 가상 경로의 weight 읽기 하한이며, 실제 다중 GPU latency가 아닙니다.
+- Nsight Compute의 관측 범위와 논리적 BW·하드웨어 사용 비율을 구별합니다.
 
 ## 다음 편
 
@@ -215,4 +192,3 @@ MFU만 보면 *compute 사용률*은 알지만 *memory 사용률은 모릅니다
 - [Ch 3: HBM 세대 비교](/blog/embedded/hardware/hbm/chapter03-hbm-generations)
 - [Ch 6: 열 설계와 전력 관리](/blog/embedded/hardware/hbm/chapter06-thermal-power)
 - [Ch 8: NPU·GPU 활용](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)
-- CXL Ch 8: ML 가속기 — memory wall 보완 경로

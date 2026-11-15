@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"본 reference는 *PCIe 진단·tuning에 자주 쓰이는 register*의 비트 layout을 모은 *cheat sheet*입니다."** — 정확한 spec은 *PCIe Base 6.1 § 7*가 1차 자료. 본 reference는 *setpci·driver 코드 작성 시 빠른 lookup*용. *Linux `include/uapi/linux/pci_regs.h`*가 *symbolic 이름 출처*.
+> **"본 reference는 *PCIe 진단·tuning에 자주 쓰이는 register*의 비트 layout을 모은 *cheat sheet*입니다."** — 이 글의 구현 기준은 [Linux v6.12 pci_regs.h](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h)이며, 장치별 register의 실제 구현·접근 속성은 해당 규격 판과 device 자료로 확인합니다. 본 reference는 *setpci·driver 코드 작성 시 빠른 lookup*용. *Linux `include/uapi/linux/pci_regs.h`*가 *symbolic 이름 출처*.
 
 [Ch 1~17](/blog/embedded/hardware/pcie/chapter01-fundamentals)에서 *각 register의 의미·동작*을 봤습니다. 이 장은 *비트 layout을 한 곳에 모은 reference*입니다.
 
@@ -101,7 +101,7 @@ topics: ["embedded", "embedded/hardware"]
 
 | Offset | 필드 |
 |--------|------|
-| +0x00 | PCIe Cap List (ID + Next + Cap Version) |
+| +0x00 | PCIe Cap List (ID + Next). Version은 +0x02 |
 | +0x02 | PCIe Capabilities (Device/Port Type) |
 | +0x04 | Device Capabilities |
 | +0x08 | Device Control |
@@ -136,7 +136,9 @@ topics: ["embedded", "embedded/hardware"]
 | 10 | Auxiliary Power PM Enable |
 | 11 | No Snoop Enable |
 | 12~14 | MaxReadRequest (000=128, ..., 101=4096) |
-| 15 | Initiate Function Level Reset (FLR) |
+| 15 | 해당 function type에서 FLR 개시 또는 Bridge Configuration Retry. 장치 유형·지원 확인 |
+
+예를 들어 합성 Device Control `0x2810`에서 `(value & 0x00e0) >> 5`는 0이므로 MPS 128 B, `(value & 0x7000) >> 12`는 2이므로 MRRS 512 B입니다. 이 해석은 [Ch 15](/blog/embedded/hardware/pcie/chapter15-tools#실제-도구로-합성-필드-해석하기)의 실제 pciutils dump decoder로 확인했습니다. 값을 실제 장치에 쓰는 tuning 예가 아닙니다.
 
 ## Link Status (+0x12)
 
@@ -209,8 +211,8 @@ topics: ["embedded", "embedded/hardware"]
 | +0x04 | Message Address (32-bit) |
 | +0x08 | Message Address Upper (64-bit MSI만) |
 | +0x08 또는 +0x0C | Message Data |
-| +0x10 | Mask Bits (per-vector mask 지원 시) |
-| +0x14 | Pending Bits |
+| +0x0C 또는 +0x10 | Mask Bits. 각각 32-bit·64-bit MSI이며 masking 지원 시 |
+| +0x10 또는 +0x14 | Pending Bits. 각각 32-bit·64-bit MSI이며 masking 지원 시 |
 
 ### Message Control
 
@@ -268,7 +270,7 @@ topics: ["embedded", "embedded/hardware"]
 | +0x24~0x38 | VF BAR 0~5 |
 | +0x3C | VF Migration State Array Offset |
 
-## ACS Capability (Extended ID 0x000F)
+## ACS Capability (Extended ID 0x000D)
 
 | Offset | 필드 |
 |--------|------|
@@ -303,7 +305,9 @@ topics: ["embedded", "embedded/hardware"]
 |-----|------|
 | 0~9 | Value |
 | 10~12 | Scale (0=1ns·1=32ns·2=1024ns·3=32768ns·4=1048576ns·5=33554432ns) |
-| 15 | Requirement (1: Required) |
+| 13~15 | Max Latency config register의 reserved. LTR message의 Requirement bit와 혼동하지 않음 |
+
+LTR config의 reserved 범위는 [Intel DSA architecture specification의 Max Snoop Latency](https://cdrdv2-public.intel.com/857060/341204-006-intel-data-streaming-accelerator-spec.pdf)와도 대조했습니다. 실제 latency message 형식과 config register 형식을 섞지 않습니다.
 
 ## ECAM 주소 계산
 
@@ -322,9 +326,11 @@ ECAM_address = ECAM_BASE
 | 1 bus (32 devices) | 1 MB |
 | 1 segment (256 buses) | 256 MB |
 
+ECAM_BASE는 사용하는 segment·bus 범위의 기준을 명시해야 합니다. 위 식은 bus 0 기준 base의 기본 식이며, Linux의 window mapping 구현은 시작 bus를 뺀 상대 bus를 사용하는 경우도 있습니다. 주소를 계산했다고 실제 config 접근이 허용되거나 장치가 존재한다는 뜻은 아닙니다.
+
 ## Linux `include/uapi/linux/pci_regs.h`
 
-이 헤더가 *모든 register·bit symbolic 이름*. 예:
+이 고정판 헤더에서 사용하는 주요 symbolic 이름입니다. 최신 규격의 모든 field를 포함한다는 뜻은 아닙니다.
 
 | 상수 | 값 |
 |------|------|
@@ -334,15 +340,15 @@ ECAM_address = ECAM_BASE
 | `PCI_EXP_DEVCTL_PAYLOAD` | 0x00e0 |
 | `PCI_EXP_LNKSTA_CLS` | 0x000f |
 | `PCI_ERR_UNCOR_STATUS` | 0x04 (AER offset) |
-| `PCI_MSIX_TBL_BIR` | 0x07 |
-| `PCI_EXT_CAP_ID_AER` | 0x01 |
+| `PCI_MSIX_TABLE_BIR` | 0x07 |
+| `PCI_EXT_CAP_ID_ERR` | 0x01 |
 | `PCI_EXT_CAP_ID_SRIOV` | 0x10 |
 
 driver 코드는 *symbolic 이름 사용 권장* — *magic number 회피*.
 
-## 시리즈 마무리 — 18편 회고
+## 지금까지 다룬 내용과 다음 장
 
-본 시리즈는 *PCIe의 동작·구현·운영*을 *18편*으로 풀었습니다.
+전체 19편 중 이 장은 register lookup을 담당합니다. 다음 [Ch 19 고급 기능](/blog/embedded/hardware/pcie/chapter19-advanced-features)에서 Lane Margining·10-bit Tag·TPH·ACS·L0p를 이어갑니다.
 
 - Ch 1: Fundamentals — Gen·encoding·stack·topology
 - Ch 2: TLP — 5 가족·split transaction·routing·ordering
@@ -363,7 +369,7 @@ driver 코드는 *symbolic 이름 사용 권장* — *magic number 회피*.
 - Ch 17: Performance — BW·MPS·NUMA·DDIO·P2P
 - Ch 18: Register Maps — 본 reference
 
-PCIe는 *CXL·UCIe·NVMe의 토대*이고 *2025~2026 datacenter interconnect의 공유 인프라*입니다. Gen 6 FLIT mode·PAM4·Confidential I/O·IOMMUFD·Scalable IOV 등의 *최신 기능*도 함께 다뤘습니다. *upstream tracking 인프라*(audit-upstream-freshness.py)로 *Linux drivers/pci/*의 변경을 *자동 추적*합니다.
+Lookup에 쓰는 register offset은 일반적인 config 시작점, capability 시작점, extended capability 시작점 중 어느 기준인지 먼저 확인합니다. 실제 장치에 읽기·쓰기나 reset을 실행하지 않았으며, 이 표를 완전한 모든 세대 register 목록으로 해석하면 안 됩니다.
 
 ## 관련 항목
 

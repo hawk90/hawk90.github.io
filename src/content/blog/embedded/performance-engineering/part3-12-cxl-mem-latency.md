@@ -35,7 +35,7 @@ CXL.mem 배치 형태는 *세 단계*로 나뉩니다.
 
 ## 공개된 실측 — 실제 CXL 디바이스 3종
 
-Sun et al.(MICRO 2023)은 Intel Sapphire Rapids 서버에 *실제 CXL 메모리 디바이스 3종*(CXL-A·B·C, ASIC 기반 hard IP와 FPGA 기반 soft IP)을 붙이고 Intel MLC와 자체 마이크로벤치마크로 쟀습니다. 비교 기준은 원격 NUMA 노드의 DDR5(DDR5-R)입니다.
+[Sun et al. (MICRO 2023)](https://arxiv.org/abs/2303.15375)은 Intel Sapphire Rapids 서버에 *실제 CXL 메모리 디바이스 3종*(CXL-A·B·C, ASIC 기반 hard IP와 FPGA 기반 soft IP)을 붙이고 Intel MLC와 자체 마이크로벤치마크로 쟀습니다. 비교 기준은 원격 NUMA 노드의 DDR5(DDR5-R)입니다.
 
 | 디바이스 | load(ld) 지연, DDR5-R 대비 |
 |---------|----------|
@@ -43,7 +43,7 @@ Sun et al.(MICRO 2023)은 Intel Sapphire Rapids 서버에 *실제 CXL 메모리 
 | CXL-B | 약 2배 |
 | CXL-C | 약 3배 |
 
-논문의 결론은 *CXL 메모리 지연이 CXL 컨트롤러 설계에 크게 좌우된다*는 것입니다. 같은 DDR4를 써도 CXL-C(DDR4-3200)가 CXL-B(DDR4-2400)보다 ld 지연이 67% 길었습니다. 이 측정은 direct attach 디바이스 기준이고, switch·pool 토폴로지의 실측은 이 글의 자료에 없습니다(TBD).
+논문의 결론은 *CXL 메모리 지연이 CXL 컨트롤러 설계에 크게 좌우된다*는 것입니다. 같은 DDR4를 써도 CXL-C(DDR4-3200)는 CXL-B(DDR4-2400)보다 ld 지연이 67% 길었습니다. 이 비교는 논문이 보고한 측정값이며, 표의 반올림된 2배·3배 상대값만으로 재계산한 값은 아닙니다. 이 측정은 direct attach 디바이스 기준이고, switch·pool 토폴로지의 실측은 이 글의 자료에 없습니다(TBD).
 
 ## 측정 방법 — mlc
 

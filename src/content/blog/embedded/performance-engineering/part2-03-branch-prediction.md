@@ -24,14 +24,11 @@ Misprediction → 5 cycle flush → 5 cycle 손실
 
 | CPU | Pipeline | Mispredict Penalty |
 |---|---|---|
-| Cortex-M0 | 2 | 1 cycle |
-| Cortex-M3/M4 | 3 | **2 cycle** |
-| Cortex-M7 | 6 | 4~5 cycle |
-| Cortex-A53 | 8 | **8 cycle** |
-| Cortex-A72 | 15 | **15 cycle** |
-| Intel Skylake | 14~19 | **15+ cycle** |
+| Cortex-M0/M3/M4 | 구현별 branch handling 확인 | target TRM과 측정 필요 |
+| Cortex-M7 | six-stage dual-issue pipeline | mispredict cost는 target에서 확인 |
+| Cortex-A / x86 | core별 pipeline·predictor 구현 | target TRM과 측정 필요 |
 
-깊은 pipeline일수록 예측 실패 비용이 커집니다. Modern CPU에서 mispredict는 cache miss와 비슷한 비용을 갖습니다.
+깊은 pipeline은 비용에 영향을 줄 수 있지만, mispredict penalty는 pipeline depth만으로 산출할 수 없습니다. cache miss와의 상대 비용 역시 workload와 target에서 측정합니다.
 
 ## Static Prediction — BTFNT
 
@@ -63,7 +60,7 @@ predict = last result
 for (int i = 0; i < 10; i++) { ... }   // 9 taken + 1 not-taken
 ```
 
-루프 끝에서 두 번 mispredict가 발생합니다 (taken→not-taken 전환과 다음 루프 시작 not-taken→taken). 정확도는 70-80%입니다.
+단순히 매번 taken인 loop가 끝에서 not-taken이 되면 predictor history와 재진입 시점에 따라 예측 결과가 달라집니다. accuracy 비율은 workload·predictor 상태에 따라 측정합니다.
 
 ## 2-bit Saturating Counter — 표준
 
@@ -80,7 +77,7 @@ Update on actual outcome:
   Not Taken → counter--  (saturate at 00)
 ```
 
-루프 끝에서 한 번만 mispredict가 발생합니다. 한 번의 예외로 바로 flip되지 않기 때문입니다. 정확도는 85-95%입니다.
+루프 끝에서 한 번만 mispredict가 발생합니다. 한 번의 예외로 바로 flip되지 않기 때문입니다. 정확도는 branch 분포와 초기 predictor 상태에 따라 달라집니다.
 
 ## BHT (Branch History Table)
 
@@ -90,7 +87,7 @@ Update on actual outcome:
 PC (12-bit hash) → Index → 2-bit counter
 ```
 
-크기는 보통 1k~16k entry입니다. ARM Cortex-A53은 256 entry × 4-way set associative 구조를 갖습니다.
+크기는 보통 1k~16k entry입니다. Cortex-A53 예측기의 구체적인 크기·구성은 공개된 ISA의 보장으로 취급하지 않습니다. 코어 revision의 TRM 또는 vendor 자료가 없으면 구현별 세부값은 생략합니다.
 
 ## BTB (Branch Target Buffer)
 
@@ -145,33 +142,29 @@ beq label       ; static prediction만 (BTFNT 기본)
 bx lr           ; return — *prediction 없음*, 항상 flush
 ```
 
-Cortex-M3는 branch 자체에 prefetch buffer를 둡니다. mispredict는 2 cycle이고 그 외 hit은 0 cycle입니다.
+Cortex-M3는 분기 target 쪽 명령을 speculative prefetch할 수 있습니다. branch cost는 target revision과 memory system에 따라 달라지므로 고정 cycle을 제시하지 않습니다.
 
-## Cortex-A53 — Branch Predictor Spec
+## Cortex-A53 — 구현별 세부 사양 확인
 
-| 항목 | 사양 |
+| 항목 | 범위 |
 |---|---|
-| BTB | 256 entry, 4-way set assoc |
-| BHT | 6144 entry |
-| Return Stack | 8-entry |
-| Predict per cycle | 1 |
-| Mispredict penalty | 8 cycle |
+| BTB·BHT·return stack | 구현 세부 사항이며 이 글에서 보편 사양으로 단정하지 않음 |
+| 예측 폭·mispredict 비용 | 코어, 메모리 응답, branch 위치에 따라 달라짐; 대상 TRM과 측정으로 확인 |
 
 ## 측정 — PMU Event
 
 | Event | 의미 |
 |---|---|
-| `0x10` BR_PRED | 분기 명령 수 |
-| `0x11` BR_MIS_PRED | 잘못 예측한 분기 수 |
-| `0x18` BR_RETURN_MIS_PRED | 잘못 예측한 return |
+| `0x10` BR_MIS_PRED | 잘못 예측한 분기 수 (architectural PMUv3 event) |
+| `0x11` CPU_CYCLES | cycle counter event (구현·권한 설정 확인) |
+| `0x12` BR_PRED | 분기 예측 이벤트; 대상에서 지원하는지 확인 |
+| Return mispredict | event 매핑은 CPU/TRM 및 OS perf PMU driver에서 확인 |
 
 ```bash
 # Linux perf
 perf stat -e branches,branch-misses ./prog
 # branch-miss-rate = branch-misses / branches
-# 일반 코드: < 5%
-# 잘 짜인 코드: < 1%
-# branch-heavy worst case: 15~20%
+# 해석은 target workload와 branch mix를 함께 고려합니다.
 ```
 
 ## Branchless Code
@@ -228,7 +221,7 @@ if (x < array_size) {            // mispredict → speculative execution
 }
 ```
 
-CVE-2017-5754 Meltdown·Spectre 계열입니다. ARM에서도 Cortex-A75 이상에서 영향이 있습니다. 완화 기법으로는 `csdb` barrier와 KAISER 기법이 있습니다.
+CVE-2017-5754는 Meltdown로, Spectre v1/v2는 각각 CVE-2017-5753/5715로 보고되었습니다. 영향을 받는 코어와 완화책은 취약점 변형 및 구현에 따라 달라집니다. `CSDB`는 특정 speculation-sensitive 코드 패턴의 완화에 쓰일 수 있지만, KAISER/KPTI는 Meltdown 대응과 관련되며 일반적인 Spectre 대책으로 묶지 않습니다.
 
 ## 자주 하는 실수
 
@@ -262,10 +255,10 @@ asm volatile ("b label");   // 직접 jump → mispredict 가능성 ↑ (BHT 학
 
 ## 정리
 
-- Mispredict 비용은 pipeline 깊이만큼 cycle을 손실합니다.
+- Mispredict 비용은 pipeline 깊이만으로 결정되지 않습니다. 분기 해석 시점, fetch 재시작, 메모리 계층과 코어 구현을 확인하고 대상에서 측정합니다.
 - Static BTFNT에서 2-bit saturating, BTB + BHT + return stack 순으로 발전합니다.
 - Cortex-A는 *tournament + indirect predictor*까지 지원합니다.
-- PMU **BR_MIS_PRED**로 측정하며, 목표는 5% 미만입니다.
+- PMU event의 존재와 의미를 target TRM/perf driver로 확인해 분기 예측을 측정합니다.
 - `__builtin_expect`·branchless·jump table을 적극 활용합니다.
 
 다음 편은 **Speculative Execution**입니다.
