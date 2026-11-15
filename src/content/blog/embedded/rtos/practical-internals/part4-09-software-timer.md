@@ -11,81 +11,36 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> **"Software Timer는 하나의 hardware tick으로 수많은 software 만기를 관리합니다."** — 정확도는 떨어지지만 갯수가 사실상 무제한입니다.
+> FreeRTOS software timer의 만기 callback은 timer daemon에서 실행됩니다. 수량·tick 해상도·command queue·daemon 응답 시간에 한계가 있습니다.
 
 ## 어떤 문제를 푸는가
 
-hardware timer는 정확합니다. STM32 TIM2 같은 peripheral은 *수십 ns 단위*로 만기를 잡고 ISR을 직접 호출합니다. 다만 그 수가 한정적입니다. STM32F4에 들어 있는 general-purpose timer는 10개 남짓에 불과합니다.
+peripheral timer를 timeout마다 하나씩 배정할 수는 없습니다. software timer는 여러 논리적 만기를 kernel tick과 daemon으로 관리합니다. 이 글은 FreeRTOS-Kernel **V11.2.0 timers.c**를 기준으로 합니다.
 
-현실 시스템은 *수십~수백 개의 timeout*을 동시에 관리합니다. TCP retransmit timer, watchdog kick, LED blink, 센서 polling, session timeout, heartbeat. 모두에 hardware timer를 하나씩 붙일 수는 없습니다.
-
-해결책이 software timer입니다. 단 *하나의 hardware tick*만 받고, 그 위에서 *수많은 software timer를 sorted 구조로 관리*합니다. tick마다 가장 가까운 만기를 검사해 expire된 timer의 callback을 실행합니다.
-
-대표 구현이 FreeRTOS의 timer service task입니다. 이번 편은 이 구조의 자료구조 선택과 ISR-safe API를 풀어 봅니다.
+hardware compare 해상도와 ISR/task가 실제로 실행되는 지연은 다릅니다. software timer도 메모리·queue·CPU 예산의 유한한 범위에서 사용할 수 있으며 수량 무제한이나 보편적인 수 ms 오차를 보장하지 않습니다.
 
 ## Hardware vs Software Timer
 
-| 항목 | Hardware Timer | Software Timer |
+| 항목 | Peripheral timer/compare | FreeRTOS software timer |
 |---|---|---|
-| 정확도 | cycle 단위 | tick 단위 (보통 1~10 ms) |
-| 갯수 | peripheral 수 | 메모리만큼 |
-| 만기 처리 | IRQ에서 직접 | daemon task의 callback |
-| 비용 | 매우 낮음 | tick + daemon overhead |
-| 적합 용도 | 정확 주기 control loop | 일반 timeout, LED, polling |
+| 시간 기준 | peripheral clock·prescaler | kernel tick |
+| 처리 문맥 | IRQ 또는 hardware output | daemon callback |
+| 자원 한계 | channel·IRQ·clock | 객체 메모리·queue·daemon 처리량 |
+| 검증할 지연 | compare부터 ISR/task까지 | command 수용·만기부터 callback까지 |
 
-RT 제어 루프처럼 *주기 정확성이 핵심*인 작업은 hardware timer가 맞습니다. 반대로 watchdog 갱신이나 session timeout처럼 *수 ms 오차가 무관한 작업*은 software timer가 효율적입니다.
+출력 edge가 중요하면 hardware output compare와 task wake를 구분합니다. watchdog·control loop의 허용 오차는 제품 요구에 따라 분석합니다.
 
 ## FreeRTOS Timer 구조
 
-각 timer는 *list item + 만기 tick + period + callback*을 가진 구조체입니다.
+V11.2.0의 Timer_t는 pcTimerName, xTimerListItem, xTimerPeriodInTicks, pvTimerID, pxCallbackFunction과 ucStatus 등의 상태를 가집니다. expiry는 list item value에 보관합니다. auto-reload 여부 등은 status bit로 관리되므로 독립 auto_reload field를 가정하지 않습니다.
 
-```c
-typedef struct timer_t {
-    char                    *name;
-    ListItem_t               list_item;   /* sorted list 노드 */
-    TickType_t               period;
-    UBaseType_t              auto_reload;
-    void                    *id;
-    TimerCallbackFunction_t  callback;
-} Timer_t;
-```
-
-활성 timer들은 *만기 tick 오름차순*의 단일 list에 매달려 있습니다. head가 *가장 빨리 만료될 timer*입니다.
+active timer에는 current/overflow **두 list**를 사용하며 tick wrap 때 전환합니다. 한 list에서 head 조회는 O(1), 정렬 삽입은 O(N)입니다. 단순 now >= expiry 비교만 있는 의사 loop는 wrap·command timestamp·reload catch-up을 재현하지 못합니다.
 
 ## Timer Service Task — Daemon
 
-FreeRTOS는 timer 처리를 위한 *전용 task*를 부팅 시 자동으로 만듭니다. 일반적으로 `Tmr Svc`라는 이름으로 보이는 그 task입니다.
+configUSE_TIMERS가 켜지면 scheduler 시작 과정에서 timer service task가 준비됩니다. daemon은 다음 만기 또는 command 도착까지 기다리고, timer command와 만료 처리를 수행합니다. callback은 tick ISR이 아니라 **daemon task**에서 직렬 실행됩니다.
 
-```c
-void prvTimerTask(void *p) {
-    for (;;) {
-        TickType_t now = xTaskGetTickCount();
-
-        /* 1. 만기 도달한 timer들 처리 */
-        while (head && head->expiry_tick <= now) {
-            Timer_t *t = pop_head(timer_list);
-            t->callback(t);
-            if (t->auto_reload) {
-                t->expiry_tick = now + t->period;
-                insert_sorted(t);
-            }
-        }
-
-        /* 2. 다음 만기까지 또는 새 command까지 wait */
-        TickType_t wait = head
-                          ? head->expiry_tick - now
-                          : portMAX_DELAY;
-        TimerCmd_t cmd;
-        if (xQueueReceive(timer_cmd_queue, &cmd, wait)) {
-            process_command(&cmd);
-        }
-    }
-}
-```
-
-핵심은 *tick ISR이 직접 callback을 호출하지 않는다*는 것입니다. SysTick은 tick count만 증가시키고, *daemon task가 깨어나 처리*합니다. 이 한 단계가 *callback을 task 컨텍스트*에서 실행하게 하여 RTOS API 호출을 안전하게 만듭니다.
-
-`configTIMER_TASK_PRIORITY`로 daemon priority를 정합니다. 일반적으로 *높은 priority*를 줘서 timer 처리가 다른 task에 밀리지 않게 합니다.
+callback에서 blocking I/O·vTaskDelay·양의 block time을 쓰는 API 호출은 daemon 전체를 지연시킬 수 있습니다. task context라는 이유로 모든 API를 무제약 호출할 수 있는 것은 아닙니다. command queue에 자기 자신이 기다리는 식의 교착도 피해야 합니다. priority와 stack은 workload·timer budget·다른 task deadline을 함께 분석해 설정합니다.
 
 ## 자료구조 — Sorted List, Delta List, Timer Wheel, Heap
 
@@ -126,235 +81,122 @@ slot[N-1] → timer D
 - **insert** — O(1), `slot index = expiry_tick % N`
 - **expire check** — O(slot 안 timer 수), 보통 O(1)
 
-Linux kernel의 `hrtimer`는 *hierarchical timer wheel*을 씁니다. 수 ms 정확도에서 *수천 개 timer를 O(1)*로 다룹니다.
+Linux hrtimer는 time-ordered red-black tree 기반입니다. 일반 timeout용 timer wheel과 구분해야 합니다. 단순 modulo slot만으로 먼 만기·round 수·wrap 처리가 해결되지는 않습니다.
 
 ### Min-Heap
 
-priority queue로 구현하면 *insert와 pop 모두 O(log N)*입니다. Linux `posix-timers`가 이 구조 위에서 동작합니다.
+priority queue로 구현하면 *insert와 pop 모두 O(log N)*입니다. 이는 일반적인 자료구조 대안입니다. Linux POSIX timer가 모두 min-heap이라는 뜻은 아닙니다.
 
 ### 비교
 
-| Timer 수 | Sorted list | Min-heap | Timer wheel |
-|---|---|---|---|
-| 10 | insert 5 cycle 평균 | — | 4 cycle (slot 접근) |
-| 1000 | 500 cycle 평균 (worst 1000) | ~30 cycle (log₂ 1000 ≈ 10) | 4 cycle |
-| 10000 | 사실상 못 씀 | ~40 cycle | 4 cycle |
+| 구조 | 삽입 | 다음 만기/제거에서 확인할 점 |
+|---|---|---|
+| sorted list | O(N) | head 조회 O(1), 동시 만료 처리량 |
+| min-heap | O(log N) | head O(1), pop O(log N) |
+| wheel | 설계/범위에 따라 다름 | slot 충돌·round·cascade·동시 만료 |
 
-embedded에서 timer 수가 수십 개라면 sorted list로 충분합니다. 수백 개 이상이면 wheel이 답입니다.
+Big-O를 cycle 수로 바꿀 수는 없습니다. timer 수만으로 수백 개부터 wheel이 정답이라고 결정하지 말고, 범위·정확도·취소 빈도·burst와 실제 구현을 측정합니다.
 
 ## API 사용
 
-FreeRTOS의 timer API는 모두 *command를 timer queue로 보내는 형태*입니다. 실제 작업은 daemon이 합니다.
+xTimerCreate와 조회 API까지 모두 queue command인 것은 아닙니다. start/stop/reset/change/delete 같은 제어 명령은 queue를 거치며 **pdPASS는 enqueue 성공이지 완료 확인이 아닙니다.** 생성 실패와 command 실패를 각각 처리합니다.
 
-```c
-TimerHandle_t led = xTimerCreate(
-    "LED",                       /* name */
-    pdMS_TO_TICKS(500),          /* period */
-    pdTRUE,                      /* auto-reload */
-    (void*)0,                    /* timer id */
-    led_callback);                /* callback */
+```c title="timer-once.c"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
 
-xTimerStart(led, 0);                                 /* 시작 */
-xTimerStop(led, 0);                                  /* 정지 */
-xTimerReset(led, 0);                                 /* 만기 시각 = now + period */
-xTimerChangePeriod(led, pdMS_TO_TICKS(1000), 0);    /* 주기 변경 */
-xTimerDelete(led, 0);                                /* 제거 */
+static TaskHandle_t receiver;
+static void once_callback(TimerHandle_t timer)
+{
+    (void)timer;
+    xTaskNotifyGive(receiver); /* nonblocking; receiver 수명은 timer보다 길어야 함 */
+}
+
+/* 시작 전에 호출. 생성 성공/command 실패면 dormant handle을 호출자에게 돌려줌. */
+BaseType_t create_once(TaskHandle_t target, TimerHandle_t *out)
+{
+    if (target == NULL || out == NULL || receiver != NULL) return pdFAIL;
+    *out = xTimerCreate("once", 3, pdFALSE, NULL, once_callback);
+    if (*out == NULL) return pdFAIL;
+    receiver = target;
+    return xTimerStart(*out, 0);
+}
 ```
 
-마지막 인자는 *command queue가 가득 찼을 때 block할 tick 수*입니다. 0이면 immediate fail/return입니다.
+예제는 한 receiver/한 timer, period 3 tick입니다. start가 실패하면 handle은 생성되었지만 dormant이므로 호출자가 retry 또는 delete 수용·완료를 관리합니다. 이 storage/lifetime을 여러 timer에 공유하지 않습니다. callback 통지의 최종 소비·작업 실행 시간도 별도입니다.
 
 ## One-Shot vs Auto-Reload
 
-```c
-/* One-shot — 한 번 발화 후 자동 stop */
-TimerHandle_t once = xTimerCreate(
-    "delay", pdMS_TO_TICKS(1000), pdFALSE, NULL, cb);
-xTimerStart(once, 0);
-/* callback 한 번 실행 후 timer는 dormant 상태. 다시 start 호출로 재실행 */
+one-shot은 만료 뒤 dormant이 됩니다. 다시 start/reset할 수 있습니다. auto-reload는 period 기준으로 다음 만기를 관리하지만 daemon이 늦어지면 이미 지난 여러 만기에 대한 callback이 밀려 실행될 수 있습니다. 모든 callback이 정확한 wall-clock 간격으로 불린다고 가정하지 않습니다.
 
-/* Auto-reload — 주기적 발화 */
-TimerHandle_t periodic = xTimerCreate(
-    "tick", pdMS_TO_TICKS(100), pdTRUE, NULL, cb);
-xTimerStart(periodic, 0);
-/* 매 100 ms마다 callback 자동 호출 */
-```
-
-one-shot은 *timeout 처리*에, auto-reload는 *주기 작업*에 씁니다.
+둘 다 command 처리 시점·tick wrap와 pending command를 포함한 상태 계약을 확인합니다.
 
 ## Callback Context — Daemon Task에서 실행
 
-callback은 *daemon task 컨텍스트*에서 실행됩니다. 일반 task API를 모두 호출할 수 있습니다.
-
-```c
-static void worker_callback(TimerHandle_t t) {
-    /* daemon task context — RTOS API 모두 사용 가능 */
-    int id = (int)pvTimerGetTimerID(t);
-    work_item_t w = make_work(id);
-    xQueueSend(work_queue, &w, 0);
-}
-```
-
-다만 *callback이 길어지면 모든 timer가 늦어집니다*. daemon이 한 callback을 처리하는 동안 다른 timer는 처리되지 않기 때문입니다.
-
-```c
-static void bad_callback(TimerHandle_t t) {
-    vTaskDelay(pdMS_TO_TICKS(100));   /* daemon이 100 ms 동안 멈춤 */
-    process_heavy();                   /* 다른 timer 모두 지연 */
-}
-```
-
-원칙은 *callback은 짧게, 무거운 일은 work queue로 defer*입니다.
+callback은 daemon의 stack과 실행 시간을 공유합니다. 짧은 nonblocking signal/copy만 하고, 시간이 긴 일은 별도 worker에 맡깁니다. queue send를 쓰면 0 block time과 반환값을 검사하고 포화 시 drop/coalesce/fault 정책을 정합니다. pvTimerGetTimerID의 void pointer를 int로 좁히지 말고 실제 객체 포인터 또는 명시한 uintptr_t 범위를 사용합니다.
 
 ## ISR-Safe API
 
-ISR에서는 일반 API 대신 `*FromISR` 변형을 씁니다.
+ISR에서는 지원되는 FromISR 변형과 해당 port의 IRQ priority 계약을 사용합니다.
 
-```c
-void some_isr(void) {
-    BaseType_t higher_prio_woken = pdFALSE;
+```c title="timer-irq.c"
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
 
-    xTimerStartFromISR(t, &higher_prio_woken);
-    xTimerStopFromISR(t, &higher_prio_woken);
-    xTimerResetFromISR(t, &higher_prio_woken);
-
-    portYIELD_FROM_ISR(higher_prio_woken);
+/* 실제 ISR에서 ACK 이후 호출. 실패는 호출자가 기록/재시도 정책으로 처리. */
+BaseType_t request_timer_start_from_irq(TimerHandle_t timer)
+{
+    BaseType_t woken = pdFALSE;
+    BaseType_t result = xTimerStartFromISR(timer, &woken);
+    portYIELD_FROM_ISR(woken);
+    return result;
 }
 ```
 
-내부적으로 *interrupt-safe queue API*로 command를 daemon에 전달합니다. daemon이 그 명령을 받아 *task 컨텍스트*에서 처리하므로 *ISR이 timer 자료구조를 직접 만지지 않습니다*.
+queue가 full이면 pdFAIL이 반환됩니다. 수용되더라도 daemon 실행 전이므로 ISR이 timer를 즉시 active로 바꾸었다고 해석하지 않습니다. header compile 검사는 실제 IRQ ACK·priority·queue 포화 동작을 검증하지 않습니다.
 
 ## xTimerPendFunctionCall — 임의 함수 Deferral
 
-timer 자체가 필요 없을 때도 daemon을 *워크 deferral 큐*로 활용할 수 있습니다.
+xTimerPendFunctionCall/FromISR도 같은 daemon queue를 사용합니다. callback function과 pointer payload는 daemon이 소비할 때까지 살아 있어야 합니다. ISR stack의 지역 객체 주소를 넘겨 나중에 읽게 해서는 안 됩니다. payload 복사·pool·ownership 이전 등 수명 계약을 정하고 enqueue 실패도 처리합니다.
 
-```c
-static void deferred_work(void *arg1, uint32_t arg2) {
-    /* daemon task context */
-    process_isr_event((int)arg2, arg1);
-}
-
-void __attribute__((interrupt)) some_isr(void) {
-    BaseType_t higher_prio_woken = pdFALSE;
-    xTimerPendFunctionCallFromISR(
-        deferred_work,
-        event_data,
-        event_id,
-        &higher_prio_woken);
-    portYIELD_FROM_ISR(higher_prio_woken);
-}
-```
-
-ISR에서 *복잡한 처리를 직접 하지 않고* daemon으로 미루는 *deferred interrupt handling*의 전형입니다. ISR을 짧게 유지하면서 task 컨텍스트의 자유로움을 얻습니다.
+deferred work를 무제한 늘리면 timer 자체의 응답 시간도 나빠집니다. 긴 작업은 별도 worker queue로 분리할 수 있습니다.
 
 ## 정확도 한계
 
-software timer의 정확도는 *tick 주기 + daemon scheduling*의 합으로 제한됩니다.
+100 Hz에서 5 tick은 명목상 50 ms지만 start 호출의 tick phase에 따라 실제 남은 시간은 달라집니다. daemon scheduling·command backlog·다른 callback·IRQ·tickless 보정도 영향을 줍니다. 50.0 ms best case나 51–52 ms worst case 같은 보편값은 없습니다.
 
-`configTICK_RATE_HZ = 100`이면 tick 주기는 10 ms입니다. timer 만기를 50 ms로 설정하면 5 tick 후에 daemon이 처리합니다.
-
-- **best case** — 50.0 ms
-- **worst case** — 50 ms + daemon 대기 + 다른 callback 처리 시간 → 보통 51~52 ms, 부하 심하면 60+ ms
-
-수 µs 정확도가 필요한 control loop은 *hardware timer + semaphore*로 가야 합니다.
-
-```c
-/* Hardware timer ISR */
-void TIM2_IRQHandler(void) {
-    HAL_TIM_IRQHandler(&brake_tim);
-}
-
-void HAL_TIM_PeriodElapsedCallback(TIM_HandleTypeDef *t) {
-    if (t == &brake_tim) {
-        BaseType_t hp = pdFALSE;
-        xSemaphoreGiveFromISR(brake_sem, &hp);
-        portYIELD_FROM_ISR(hp);
-    }
-}
-
-/* 제어 task — 1 ms 정확 주기 */
-void brake_task(void *p) {
-    for (;;) {
-        xSemaphoreTake(brake_sem, portMAX_DELAY);
-        do_brake_cycle();
-    }
-}
-```
-
-hardware timer가 *정확한 주기*를, semaphore가 *task 컨텍스트로의 전달*을 담당합니다.
+hardware timer가 semaphore/notification으로 task를 깨워도 task 실행 지연은 남습니다. µs deadline은 compare/ISR/task 각각의 latency budget과 측정으로 검증해야 합니다.
 
 ## Tickless Idle — Battery 시스템
 
-저전력이 중요한 IoT에서는 *tick 자체를 끄고* 다음 만기에 깨어나는 *tickless* 모드를 씁니다.
+tickless idle은 지원 port가 다음 unblock 시점과 sleep 허용 상태를 확인하고 timer 중단·복귀·elapsed tick 보정을 처리하는 기능입니다. 단순히 SysTick LOAD에 idle_ticks를 곱하고 WFI 뒤 vTaskStepTick을 호출하는 예제는 race·counter 폭·조기 wake를 처리하지 못해 사용하지 않습니다.
 
-```c
-#define configUSE_TICKLESS_IDLE 1
-```
-
-```c
-void portSUPPRESS_TICKS_AND_SLEEP(TickType_t idle_ticks) {
-    /* 다음 만기에 맞춰 SysTick reload */
-    uint32_t reload = idle_ticks * cycles_per_tick - 1;
-    SysTick->LOAD = reload;
-    SysTick->VAL  = 0;
-
-    __WFI();   /* sleep */
-
-    /* 깨어난 뒤 실제 경과 tick 보정 */
-    TickType_t actual = compute_elapsed();
-    vTaskStepTick(actual);
-}
-```
-
-활성 timer 중 가장 가까운 만기까지 *MCU 전체가 sleep*하므로 평균 전류가 *수십 µA* 수준으로 떨어집니다. 배터리 IoT 펌웨어의 표준입니다.
+자세한 port 조건은 [2-09 Tickless Idle](/blog/embedded/rtos/practical-internals/part2-09-tickless)을 따릅니다. 전체 MCU sleep 여부·소비 전류는 board clock·다른 peripheral·debug와 함께 측정합니다.
 
 ## 자주 보는 함정과 안티패턴
 
-> 경고 — callback에서 긴 작업
-
-```c
-static void cb(TimerHandle_t t) {
-    long_blocking_io();         /* 다른 timer 모두 정지 */
-    vTaskDelay(pdMS_TO_TICKS(100));   /* daemon이 100 ms 멈춤 */
-}
-```
-
-callback은 *수 µs 안에* 끝내거나 *signal만 보내고 즉시 return*하는 형태로 짭니다.
-
-> 경고 — daemon priority가 너무 낮음
-
-```c
-#define configTIMER_TASK_PRIORITY 1   /* 다른 task가 daemon을 자주 막음 */
-```
-
-낮은 priority면 timer 정확도가 떨어지고 callback이 *수 tick씩 늦게 호출*됩니다. 일반적으로 *application의 highest priority 근처*로 둡니다.
-
-> 경고 — timer command queue가 너무 작음
-
-```c
-#define configTIMER_QUEUE_LENGTH 5   /* burst 시 overflow */
-```
-
-`xTimerStart`가 silent fail하기 시작합니다. 동시에 만지는 timer 수의 *2~3배 이상*으로 잡습니다.
-
-> 경고 — ISR에서 task API 사용
-
-```c
-void isr(void) {
-    xTimerStart(t, 0);    /* 잘못 — `*FromISR` 변형 필요 */
-}
-```
-
-immediate hard fault가 나지 않고 *silent 자료구조 corruption*으로 이어지는 경우가 많습니다. `xTimerStartFromISR`로 교체합니다.
+- callback에서 blocking API를 호출해 daemon과 다른 timer를 지연시키는 경우.
+- pdPASS를 command 완료로 보거나 delete 뒤 pending callback·payload 수명을 무시하는 경우.
+- command queue 용량을 timer 수의 고정 배수로 정하고 producer burst·daemon service rate를 분석하지 않는 경우.
+- daemon priority를 무조건 최고로 높여 다른 deadline을 침해하는 경우.
+- tick 해상도와 callback/worker 실제 실행 지연을 혼동하는 경우.
 
 ## 정리
 
-- Software timer는 *하나의 hardware tick으로 수많은 software 만기*를 관리하며, 갯수 제한 없이 timeout, polling, blink 같은 작업을 처리합니다.
-- 만기 처리는 *daemon task*에서 수행되어 callback이 *task 컨텍스트*에서 동작합니다.
-- 자료구조는 *sorted list, delta list, timer wheel, min-heap* 중에서 timer 수와 정확도 요구에 맞춰 고릅니다. 수십 개면 sorted list, 수백 이상이면 wheel이 합리적입니다.
-- one-shot은 timeout에, auto-reload는 주기 작업에 어울리며, callback은 *짧게 + signal*이 원칙입니다.
-- ISR에서는 `*FromISR` 변형과 `xTimerPendFunctionCall`로 *작업을 daemon에 deferral*합니다.
-- µs 단위 정확도가 필요하면 *hardware timer + semaphore* 조합으로 가야 합니다.
-- 저전력이 중요하면 *tickless idle*로 sleep 시간을 극대화합니다.
+- timer 수는 메모리·queue·처리 예산으로 제한됩니다.
+- V11.2.0은 current/overflow sorted list와 daemon task를 사용합니다.
+- 제어 명령 enqueue와 실제 상태 변경·callback 완료는 구분합니다.
+- callback은 nonblocking으로 짧게 유지하고 ISR/payload 수명·포화를 처리합니다.
+- Linux hrtimer는 timer wheel과 다른 tree 기반이며 Big-O는 cycle 측정값이 아닙니다.
+
+## 근거 자료
+
+- [FreeRTOS V11.2.0 timers.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/timers.c), [timers.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/timers.h): 구조·command·callback·overflow/reload.
+- [Linux hrtimers 설계](https://docs.kernel.org/timers/hrtimers.html): 정렬 tree와 timeout wheel 구분.
+
+
 
 다음 편은 [4-10 System Call](/blog/embedded/rtos/practical-internals/part4-10-syscall)에서 user/kernel 모드 분리와 SVC trap을 다룹니다.
 

@@ -2,7 +2,7 @@
 title: "Event Group 분석 — Bit Flag·AND/OR Wait·Sync Barrier"
 slug: "embedded/rtos/practical-internals/part3-08-event-group"
 date: 2026-05-06T09:29:00
-description: "FreeRTOS Event Group — 24-bit flag, AND·OR semantics, clear-on-exit, multi-task sync."
+description: "FreeRTOS V11.2.0의 tick 폭에 따른 event bits, AND·OR·clear-on-exit·broadcast와 timer daemon으로 미루는 ISR 요청을 살펴봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 29
 tags: [event-group, bit-flag, and-or, sync-barrier]
@@ -12,134 +12,46 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> **"Event Group은 24-bit flag와 wait list로 구성된다"** — *여러 task를 한 번에 wake*할 수 있다는 점이 핵심입니다.
+FreeRTOS **V11.2.0** Event Group은 bit 상태와 wait list를 사용합니다. 여러 task의 조건을 한 set 동작에서 만족시킬 수 있지만, ready 전이와 CPU에서의 동시 실행은 다른 의미입니다.
 
 이번 글에서는 Event Group의 자료구조와 동작을 살펴봅니다. SetBits, WaitBits, Sync barrier까지 한꺼번에 다룹니다.
 
 ## 자료 구조
 
-```c
-typedef struct EventGroupDef_t {
-    EventBits_t uxEventBits;          // 24-bit flag (8 bits = control)
-    List_t xTasksWaitingForBits;      // 대기 task list
-    
-    UBaseType_t uxEventGroupNumber;   // debug
-    uint8_t ucStaticallyAllocated;
-} EventGroup_t;
+EventBits_t는 TickType_t와 연결됩니다. V11.2.0은 상위 8개 bit를 control 용도로 예약하므로 16/32/64-bit tick 구성의 user bit 수는 각각 **8/24/56**입니다. 이 값은 configTICK_TYPE_WIDTH_IN_BITS와 해당 태그 event_groups.h로 확인합니다.
 
-typedef uint32_t EventBits_t;
-#define eventEVENT_BITS_CONTROL_BYTES  0xff000000UL   // 상위 8-bit 예약
-```
-
-24-bit는 사용자 flag로 쓰이고, 나머지는 컨트롤 비트(clear-on-exit, wait-for-all, unblocked)로 예약돼 있습니다.
+내부 EventGroup_t에는 현재 event bits와 대기 task 목록, config별 관리 필드가 있습니다. application은 control bit를 user flag로 사용하면 안 됩니다.
 
 ## SetBits — Bit 켜기와 Wake
 
-```c
-EventBits_t xEventGroupSetBits(EventGroupHandle_t xEventGroup,
-                                const EventBits_t uxBitsToSet) {
-    EventBits_t uxBitsToClear = 0;
-    BaseType_t xMatchFound = pdFALSE;
-    
-    vTaskSuspendAll();
-    {
-        ListItem_t *pxListItem = listGET_HEAD_ENTRY(&xEventGroup->xTasksWaitingForBits);
-        
-        eventGroup->uxEventBits |= uxBitsToSet;
-        
-        /* 대기 task 순회 — 조건 만족 시 wake */
-        while (pxListItem != listGET_END_MARKER(&xEventGroup->xTasksWaitingForBits)) {
-            EventBits_t uxBitsWaitedFor = listGET_LIST_ITEM_VALUE(pxListItem);
-            EventBits_t uxControlBits = uxBitsWaitedFor & eventEVENT_BITS_CONTROL_BYTES;
-            uxBitsWaitedFor &= ~eventEVENT_BITS_CONTROL_BYTES;
-            
-            if ((uxControlBits & eventWAIT_FOR_ALL_BITS) == 0) {
-                /* OR — 하나라도 match */
-                if ((uxBitsWaitedFor & xEventGroup->uxEventBits) != 0) {
-                    xMatchFound = pdTRUE;
-                }
-            } else {
-                /* AND — 모두 match */
-                if ((uxBitsWaitedFor & xEventGroup->uxEventBits) == uxBitsWaitedFor) {
-                    xMatchFound = pdTRUE;
-                }
-            }
-            
-            if (xMatchFound) {
-                if (uxControlBits & eventCLEAR_EVENTS_ON_EXIT_BIT) {
-                    uxBitsToClear |= uxBitsWaitedFor;
-                }
-                vTaskRemoveFromUnorderedEventList(pxListItem,
-                    xEventGroup->uxEventBits | eventUNBLOCKED_DUE_TO_BIT_SET);
-            }
-            pxListItem = pxNext;
-            xMatchFound = pdFALSE;
-        }
-        
-        /* Clear-on-exit 누적 적용 */
-        xEventGroup->uxEventBits &= ~uxBitsToClear;
-    }
-    xTaskResumeAll();
-    
-    return xEventGroup->uxEventBits;
-}
-```
+xEventGroupSetBits는 bit를 OR한 뒤 기다리는 task를 순회합니다. 각 task의 AND/OR 조건과 clear-on-exit flag를 해석하고, 조건을 만족하면 관찰 snapshot을 event item에 저장해 task를 unblock합니다. clear 대상 bits는 누적하여 순회 뒤 적용합니다.
 
-핵심은 *모든 대기 task를 순회하면서 조건을 만족하는 task를 모두 wake*한다는 점입니다. Queue나 Mutex와 다른 부분이 바로 여기입니다.
+따라서 동일 bit를 기다리는 여러 task가 모두 깨어날 수 있습니다. clear-on-exit는 token을 단 하나의 consumer에게 독점 배분하는 mutex/semaphore 규칙이 아닙니다. task가 실제 실행할 때의 현재 bits와 반환된 snapshot도 구분해야 합니다.
 
 ## WaitBits — AND/OR/Clear-on-exit
 
-```c
-EventBits_t xEventGroupWaitBits(EventGroupHandle_t xEventGroup,
-                                 const EventBits_t uxBitsToWaitFor,
-                                 const BaseType_t xClearOnExit,
-                                 const BaseType_t xWaitForAllBits,
-                                 TickType_t xTicksToWait) {
-    EventBits_t uxReturn;
-    
-    vTaskSuspendAll();
-    {
-        EventBits_t uxCurrentEventBits = xEventGroup->uxEventBits;
-        
-        /* 즉시 만족하는가? */
-        if (xWaitForAllBits == pdFALSE) {
-            /* OR */
-            if ((uxCurrentEventBits & uxBitsToWaitFor) != 0) {
-                uxReturn = uxCurrentEventBits;
-                if (xClearOnExit) {
-                    xEventGroup->uxEventBits &= ~uxBitsToWaitFor;
-                }
-                xTaskResumeAll();
-                return uxReturn;
-            }
-        } else {
-            /* AND */
-            if ((uxCurrentEventBits & uxBitsToWaitFor) == uxBitsToWaitFor) {
-                uxReturn = uxCurrentEventBits;
-                if (xClearOnExit) {
-                    xEventGroup->uxEventBits &= ~uxBitsToWaitFor;
-                }
-                xTaskResumeAll();
-                return uxReturn;
-            }
-        }
-        
-        /* 만족하지 않음 — block */
-        if (xTicksToWait != 0) {
-            EventBits_t uxControlBits = 0;
-            if (xClearOnExit) uxControlBits |= eventCLEAR_EVENTS_ON_EXIT_BIT;
-            if (xWaitForAllBits) uxControlBits |= eventWAIT_FOR_ALL_BITS;
-            
-            vTaskPlaceOnUnorderedEventList(&xEventGroup->xTasksWaitingForBits,
-                uxBitsToWaitFor | uxControlBits, xTicksToWait);
-        }
-    }
-    xTaskResumeAll();
-    portYIELD_WITHIN_API();
-    
-    /* Wake 후 — list item value에 결과가 인코딩돼 있음 */
-    uxReturn = uxTaskResetEventItemValue();
-    return uxReturn & ~eventEVENT_BITS_CONTROL_BYTES;
+즉시 만족하면 검사 시점 snapshot을 반환하고 요청에 따라 bits를 clear합니다. 불만족이면 timeout에 따라 대기하며, timeout 후에도 실제 bits를 재확인하는 경로가 있습니다. 반환값이 success bool인 것처럼 해석하지 말고 기다린 조건을 다시 검사합니다.
+
+다음은 assert가 켜진 test task용 계약 검사입니다. 동적 allocation과 event-group 지원을 전제로 합니다.
+
+```c title="event-contract.c"
+#include <assert.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "event_groups.h"
+void check_event_contract(void) {
+    EventGroupHandle_t e = xEventGroupCreate(); assert(e != NULL);
+    assert(xEventGroupSetBits(e, 1) == 1);
+    assert(xEventGroupWaitBits(e, 3, pdFALSE, pdTRUE, 0) == 1);
+    assert(xEventGroupWaitBits(e, 3, pdTRUE, pdFALSE, 0) == 1);
+    assert(xEventGroupGetBits(e) == 0);
+    assert(xEventGroupSetBits(e, 3) == 3);
+    assert(xEventGroupWaitBits(e, 3, pdTRUE, pdTRUE, 0) == 3);
+    assert(xEventGroupGetBits(e) == 0);
+    TickType_t start = xTaskGetTickCount();
+    assert(xEventGroupWaitBits(e, 1, pdFALSE, pdTRUE, 3) == 0);
+    assert((TickType_t)(xTaskGetTickCount() - start) >= 3);
+    vEventGroupDelete(e);
 }
 ```
 
@@ -164,7 +76,7 @@ void task_a(void *p) {
 }
 ```
 
-*Set과 Wait, Auto-clear*가 원자적으로 묶여 있습니다. 3개 task가 모두 도착하면 세 task가 동시에 wake됩니다.
+*Set과 Wait, Auto-clear*가 원자적으로 묶여 있습니다. 모든 참여 bit가 모이면 조건을 만족한 task들이 ready가 됩니다. timeout·task 삭제·여러 세대의 barrier 재사용 계약을 함께 확인해야 하며, 동시에 실행된다는 뜻은 아닙니다.
 
 ## ISR-safe variant
 
@@ -176,7 +88,7 @@ BaseType_t xEventGroupSetBitsFromISR(EventGroupHandle_t eg,
 
 ISR에서 *task를 깨우는 작업*은 **timer service task에 defer**됩니다. daemon task가 실제 set 처리를 맡습니다. 이렇게 해야 ISR이 짧게 유지됩니다.
 
-처리 흐름은 두 단계로 나뉩니다. 먼저 ISR이 `xTimerPendFunctionCallFromISR(set_bits_fn, eg, bits)`로 실제 작업을 예약합니다. 그러면 daemon task가 깨어나 실제 `SetBits` 호출을 수행합니다.
+처리 흐름은 두 단계로 나뉩니다. 먼저 ISR이 `xTimerPendFunctionCallFromISR(set_bits_fn, eg, bits)`로 실제 작업을 예약합니다. 그러면 daemon task가 요청을 받아 실제 set 동작을 수행합니다. command queue가 가득 차면 요청이 실패할 수 있으므로 반환값을 확인합니다. woken은 이 deferred command에 따른 daemon wake와 관련되며 최종 waiter 전원이 즉시 실행됐다는 뜻이 아닙니다.
 
 ## 사용 예 — Wi-Fi 연결 상태 머신
 
@@ -208,25 +120,13 @@ void app_task(void *p) {
 
 ## Performance
 
-```text
-SetBits: 
-- vTaskSuspendAll: 5 cycle
-- iterate wait list: 30 cycle × N waiters
-- match check: 10 cycle × N
-- portYIELD_WITHIN_API: 50 cycle
-Total ≈ 60 + N × 40 cycle
-
-WaitBits (즉시 만족): 30 cycle
-WaitBits (block + wake): ~200 cycle
-```
-
-Critical section 대신 *scheduler suspend*를 사용하므로 ISR 잠금이 발생하지 않습니다.
+SetBits는 waiter를 순회하므로 대기 수와 조건·trace·port 경로에 영향을 받습니다. 출처 없는 waiter당 40 cycle이나 block+wake 200 cycle 표를 실측으로 사용하지 않습니다. scheduler suspend를 사용해도 내부 kernel 경로의 interrupt mask까지 전혀 없다는 보장은 아닙니다.
 
 ## 자주 하는 실수
 
 > ⚠️ 24-bit를 넘는 사용
 
-`(1 << 24)` 이상은 컨트롤 비트와 충돌합니다. `configUSE_16_BIT_TICKS=1` 환경에서는 *8-bit*만 가능합니다.
+32-bit tick 구성에서 user bits는 24개이며, 16/64-bit 구성은 각각 8/56개입니다. 실제 폭을 확인하고 EventBits_t 폭에 맞는 상수를 사용합니다.
 
 > ⚠️ Clear-on-exit와 Wait-for-all 혼동
 
@@ -246,17 +146,21 @@ if (bits & BIT_X) {
 }
 ```
 
-`xEventGroupWaitBits + ClearOnExit`로 원자성을 확보하는 것이 안전합니다.
+wait와 clear를 kernel API에 맡길 수 있지만 broadcast 규칙 때문에 자원의 단일 소비까지 보장하지는 않습니다. 독점 획득이면 mutex·semaphore 등 목적에 맞는 객체를 선택합니다.
 
 ## 정리
 
-- Event Group은 **24-bit flag와 wait list** 조합입니다.
+- Event Group의 user bit 폭은 tick 구성에 따라 8/24/56개입니다.
 - **AND / OR / Clear-on-exit** 세 조합으로 다양한 동기화 패턴을 만들 수 있습니다.
-- **SetBits**는 모든 대기 task를 동시에 wake합니다(queue/mutex와 다른 점입니다).
+- **SetBits**는 조건을 만족한 여러 waiter를 ready로 옮길 수 있습니다.
 - **xEventGroupSync**는 barrier 역할을 합니다. 다중 task rendezvous에 적합합니다.
 - ISR에서의 set은 *daemon task에 defer*됩니다.
 
 다음 편은 **ISR-safe API**, 즉 *FromISR* 함수군의 내부 구현입니다.
+
+## 근거 자료
+
+- [FreeRTOS V11.2.0 event_groups.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/event_groups.c), [event_groups.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/event_groups.h): 폭·snapshot·clear·deferred ISR 처리.
 
 ## 관련 항목
 

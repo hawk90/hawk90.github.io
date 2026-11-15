@@ -11,11 +11,11 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> **"FreeRTOS 커널은 세 파일만 이해하면 전체가 보입니다."** — `tasks.c`가 스케줄러, `queue.c`가 IPC, `port.c`가 아키텍처 경계입니다.
+> 세 파일을 출발점으로 읽되 config·header·port와 호출자를 함께 추적합니다. — `tasks.c`가 스케줄러, `queue.c`가 IPC, `port.c`가 아키텍처 경계입니다.
 
 ## 어떤 문제를 푸는가
 
-FreeRTOS는 1만 줄 안팎의 작은 커널입니다. 그래도 처음 소스를 열면 어디부터 읽어야 할지 막막합니다. 파일 수십 개, 매크로 수백 개, `#if` 분기가 함수 한 줄 단위로 박혀 있습니다.
+이 글은 **FreeRTOS-Kernel V11.2.0**, commit 0adc196d4bd52a2d91102b525b0aafc1e14a2386을 기준으로 합니다. LoC는 포함 파일·config·comment 계산법에 따라 달라 고정된 전체 크기로 비교하지 않습니다. 그래도 처음 소스를 열면 어디부터 읽어야 할지 막막합니다. 파일 수십 개, 매크로 수백 개, `#if` 분기가 함수 한 줄 단위로 박혀 있습니다.
 
 이 글의 목표는 *세 핵심 파일*만 골라 읽는 길을 만드는 것입니다. `tasks.c`에서 스케줄러의 자료구조와 진입점을 따라가고, `queue.c`에서 큐·세마포어·뮤텍스가 같은 구현을 공유하는 모습을 보고, `port.c`에서 아키텍처에 의존하는 경계가 어디까지인지 확인합니다. 이 흐름을 한 번 잡아 두면 SMP, MPU, tickless 같은 확장 옵션도 같은 지도 위에서 자연스럽게 읽힙니다.
 
@@ -30,7 +30,7 @@ FreeRTOS-Kernel/
 │   ├── task.h
 │   ├── queue.h
 │   └── semphr.h
-├── tasks.c                        # 스케줄러 본체 (~5000 lines)
+├── tasks.c                        # 스케줄러 본체
 ├── queue.c                        # 큐·세마포어·뮤텍스 통합
 ├── timers.c                       # software timer
 ├── event_groups.c
@@ -38,7 +38,7 @@ FreeRTOS-Kernel/
 ├── list.c                         # 양방향 list 자료구조
 ├── portable/                      # 아키텍처별 port
 │   ├── GCC/ARM_CM4F/
-│   ├── GCC/ARM_CM33_NTZ/
+│   ├── GCC/ARM_CM33_NTZ/non_secure/
 │   ├── GCC/RISC-V/
 │   └── MemMang/                   # heap_1 ~ heap_5
 └── License/
@@ -54,9 +54,9 @@ FreeRTOS-Kernel/
 PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 ```
 
-지금 어느 CPU에서 *어느 task가 돌고 있는지*를 가리키는 단일 포인터입니다. 컨텍스트 스위치는 결국 이 포인터를 바꾸고 그 안의 `pxTopOfStack`을 새 PSP로 옮기는 일입니다.
+위는 single-core 조건의 설명입니다. SMP에서는 current TCB 배열과 선택 경로가 다릅니다. 컨텍스트 스위치는 결국 이 포인터를 바꾸고 그 안의 `pxTopOfStack`을 새 PSP로 옮기는 일입니다.
 
-TCB는 task의 모든 상태를 담는 구조체입니다.
+TCB는 task 상태를 담습니다. 아래는 주요 필드만 고른 설명용 발췌이며 실제 config별 전체 layout은 tasks.c를 따릅니다.
 
 ```c
 typedef struct tskTaskControlBlock {
@@ -88,7 +88,7 @@ ready list는 priority별로 분리되어 있습니다.
 PRIVILEGED_DATA static List_t pxReadyTasksLists[configMAX_PRIORITIES];
 ```
 
-각 priority가 *FIFO list*입니다. 같은 priority 안에서 round-robin이 자연스럽게 돌아가는 이유입니다. 최상위 priority를 찾는 일은 별도의 비트맵으로 가속됩니다.
+priority별 ready list를 사용합니다. 같은 priority의 순환 선택과 tick time slicing·yield·preemption 정책을 구분합니다. 비트맵은 port-optimized selection을 사용하는 config의 경로입니다.
 
 ```c
 #if (configUSE_PORT_OPTIMISED_TASK_SELECTION == 1)
@@ -101,298 +101,94 @@ PRIVILEGED_DATA static List_t pxReadyTasksLists[configMAX_PRIORITIES];
     uxTopPriority = (31U - __CLZ(uxReadyPriorities))
 ```
 
-Cortex-M의 `CLZ` 한 명령으로 최상위 ready priority가 한 사이클에 나옵니다. 32개 priority 안에서는 *O(1) 결정*입니다.
+이 절의 macro는 bitmap 개념 설명이며 실제 ARM_CM4F portmacro.h와 비교합니다. 32-bit bitmap·지원 priority 범위·nonzero 조건과 config를 확인하고 전체 scheduler 비용을 CLZ 한 명령의 cycle로 환산하지 않습니다.
 
 ## xTaskCreate부터 PendSV까지
 
-새 task 하나가 만들어져서 실제로 실행되기까지의 흐름을 함수 이름으로만 추리면 다음과 같습니다.
+실제 소스를 읽을 때 다음 순서로 함수와 실패 경로를 대조합니다. 복사 가능한 대체 kernel 구현은 아닙니다.
 
-```c
-BaseType_t xTaskCreate(TaskFunction_t pxTaskCode,
-                       const char *pcName,
-                       configSTACK_DEPTH_TYPE usStackDepth,
-                       void *pvParameters,
-                       UBaseType_t uxPriority,
-                       TaskHandle_t *pxCreatedTask)
-{
-    StackType_t *pxStack = pvPortMalloc(usStackDepth * sizeof(StackType_t));
-    TCB_t *pxNewTCB = pvPortMalloc(sizeof(TCB_t));
+| 단계 | V11.2.0의 확인 지점 | 빠뜨리면 생기는 오해 |
+|---|---|---|
+| 생성 | xTaskCreate → prvCreateTask | stack/TCB 실패·해제·stack depth 산술을 무시 |
+| 초기화 | prvInitialiseNewTask → pxPortInitialiseStack | 할당한 stack이 TCB와 연결되지 않은 의사 코드 |
+| ready 등록 | prvAddNewTaskToReadyList | scheduler 실행 여부·preemption을 무시 |
+| 첫 실행 | xPortStartScheduler → prvPortStartFirstTask → SVC | 첫 task를 반드시 첫 PendSV가 시작한다고 오해 |
+| 이후 switch | xPortPendSVHandler → vTaskSwitchContext | IRQ mask·ABI·FP frame·scheduler suspended 경로 누락 |
 
-    prvInitialiseNewTask(pxTaskCode, pcName, usStackDepth, pvParameters,
-                         uxPriority, pxCreatedTask, pxNewTCB, NULL);
+**ARM_CM4F의 initial frame에는 R4–R11 다음 EXC_RETURN slot이 있어야 합니다.** V11.2.0은 R0 아래에 portINITIAL_EXC_RETURN을 저장한 뒤 8 register 공간을 남깁니다. 이 slot을 빼면 PendSV/SVC의 복원 순서와 맞지 않습니다. PC의 Thumb 주소 bit 처리·xPSR와 task return error 경로도 실제 port를 따릅니다.
 
-    prvAddNewTaskToReadyList(pxNewTCB);
-    return pdPASS;
-}
-```
+PendSV는 task의 R4–R11/EXC_RETURN과 조건부 S16–S31을 저장합니다. scheduler 호출 전 BASEPRI를 설정하고 ABI에 맞게 MSP를 사용합니다. FAULTMASK를 켜는 cpsid f와 single-word push를 넣은 기존 재구성 assembly는 upstream 구현이 아니므로 사용하지 않습니다. [Cortex-M context](/blog/embedded/rtos/practical-internals/part2-05-cortex-m-context)와 [포팅 검증](/blog/embedded/rtos/practical-internals/part5-04-porting)에서 frame과 검증 범위를 이어갑니다.
 
-`prvInitialiseNewTask` 안에서 *initial stack frame*이 만들어집니다. 이 부분이 port 계층으로 위임됩니다.
-
-```c
-/* portable/GCC/ARM_CM4F/port.c */
-StackType_t *pxPortInitialiseStack(StackType_t *pxTopOfStack,
-                                    TaskFunction_t pxCode,
-                                    void *pvParameters)
-{
-    pxTopOfStack--; *pxTopOfStack = portINITIAL_XPSR;
-    pxTopOfStack--; *pxTopOfStack = (StackType_t)pxCode;
-    pxTopOfStack--; *pxTopOfStack = (StackType_t)prvTaskExitError;
-    pxTopOfStack -= 5;                              /* R12, R3, R2, R1 */
-    *pxTopOfStack = (StackType_t)pvParameters;      /* R0 */
-    pxTopOfStack -= 8;                              /* R4-R11 */
-    return pxTopOfStack;
-}
-```
-
-이렇게 *가짜 컨텍스트 스위치*가 stack 위에 한 번 펼쳐져 있어야 첫 PendSV가 pop할 때 자연스럽게 task의 진입점으로 점프합니다.
-
-스케줄러는 `vTaskSwitchContext`에서 다음 실행 대상을 결정합니다.
-
-```c
-void vTaskSwitchContext(void)
-{
-    if (uxSchedulerSuspended != pdFALSE) {
-        xYieldPending = pdTRUE;
-        return;
-    }
-    xYieldPending = pdFALSE;
-    taskSELECT_HIGHEST_PRIORITY_TASK();
-}
-
-#define taskSELECT_HIGHEST_PRIORITY_TASK()                          \
-    UBaseType_t uxTopPriority;                                      \
-    portGET_HIGHEST_PRIORITY(uxTopPriority, uxTopReadyPriority);    \
-    listGET_OWNER_OF_NEXT_ENTRY(pxCurrentTCB,                       \
-                                &(pxReadyTasksLists[uxTopPriority]))
-```
-
-`listGET_OWNER_OF_NEXT_ENTRY`가 같은 priority list 안에서 *다음 항목*을 가리키므로, 같은 priority의 task들은 자연스럽게 round-robin으로 순환합니다.
-
-실제 레지스터 교체는 PendSV 핸들러가 합니다.
-
-```asm
-PendSV_Handler:
-    mrs r0, psp
-    isb
-    ldr r3, =pxCurrentTCB
-    ldr r2, [r3]
-
-    tst lr, #0x10
-    it eq
-    vstmdbeq r0!, {s16-s31}
-
-    stmdb r0!, {r4-r11, lr}
-    str r0, [r2]               ; save SP into TCB
-
-    push {r3}
-    cpsid f
-    bl vTaskSwitchContext
-    cpsie f
-    pop {r3}
-
-    ldr r1, [r3]               ; new pxCurrentTCB
-    ldr r0, [r1]               ; new SP
-    ldmia r0!, {r4-r11, lr}
-
-    tst lr, #0x10
-    it eq
-    vldmiaeq r0!, {s16-s31}
-
-    msr psp, r0
-    isb
-    bx lr                      ; HW pops {R0-R3, R12, LR, PC, xPSR}
-```
-
-Cortex-M4 168 MHz에서 한 번 스위치에 30~50 사이클입니다. 300 ns 안쪽으로 마무리됩니다.
+30–50 cycle 같은 switch 시간은 이 source tour에서 측정하지 않았습니다.
 
 ## queue.c — 하나의 구현으로 세 가지 IPC
 
-`queue.c`를 처음 보면 놀라는 부분이 있습니다. 큐, 세마포어, 뮤텍스가 *같은 자료구조*를 공유합니다.
+Queue_t는 queue data pointer를 가진 QueuePointers_t와 mutex holder/recursive count를 가진 SemaphoreData_t의 union을 사용합니다. pcReadFrom 하나와 recursive count 하나만의 union으로 대체하면 실제 field layout을 설명하지 못합니다.
 
-```c
-typedef struct QueueDefinition {
-    int8_t *pcHead;
-    int8_t *pcWriteTo;
-    union {
-        int8_t *pcReadFrom;                   /* 큐 모드 */
-        UBaseType_t uxRecursiveCallCount;     /* recursive mutex */
-    } u;
+binary semaphore는 item size 0·최대 count 1, counting semaphore는 지정한 최대 count를 사용합니다. mutex는 소유자와 priority inheritance 경로가 더해집니다. 관련 symbol은 xQueueGenericSend, xQueueReceive, xQueueSemaphoreTake와 prvCopyDataToQueue에서 따라갑니다.
 
-    List_t xTasksWaitingToSend;
-    List_t xTasksWaitingToReceive;
-
-    volatile UBaseType_t uxMessagesWaiting;
-    UBaseType_t uxLength;
-    UBaseType_t uxItemSize;
-
-    volatile int8_t cRxLock;
-    volatile int8_t cTxLock;
-
-    UBaseType_t uxQueueType;
-} Queue_t;
-
-typedef Queue_t Semaphore_t;
-typedef Queue_t Mutex_t;
-```
-
-세마포어는 *길이 1, item 크기 0인 큐*이고, 뮤텍스는 추가로 owner와 recursion count를 들고 다니는 큐입니다. 한 구현을 셋이 공유하므로 버그 수정과 검증이 한 곳에 집중됩니다.
-
-송신 경로는 [3-07: Queue 구현](/blog/embedded/rtos/practical-internals/part3-07-queue-impl)에서 더 자세히 다루지만, 골격만 보면 critical section과 event list 패턴이 그대로 드러납니다.
-
-```c
-BaseType_t xQueueGenericSend(QueueHandle_t xQueue,
-                              const void *pvItemToQueue,
-                              TickType_t xTicksToWait,
-                              BaseType_t xCopyPosition)
-{
-    Queue_t *pxQueue = xQueue;
-    for (;;) {
-        taskENTER_CRITICAL();
-        {
-            if (pxQueue->uxMessagesWaiting < pxQueue->uxLength) {
-                prvCopyDataToQueue(pxQueue, pvItemToQueue, xCopyPosition);
-
-                if (listLIST_IS_EMPTY(&pxQueue->xTasksWaitingToReceive) == pdFALSE) {
-                    if (xTaskRemoveFromEventList(&pxQueue->xTasksWaitingToReceive) != pdFALSE) {
-                        queueYIELD_IF_USING_PREEMPTION();
-                    }
-                }
-                taskEXIT_CRITICAL();
-                return pdPASS;
-            }
-            if (xTicksToWait == 0) {
-                taskEXIT_CRITICAL();
-                return errQUEUE_FULL;
-            }
-            vTaskPlaceOnEventList(&pxQueue->xTasksWaitingToSend, xTicksToWait);
-        }
-        taskEXIT_CRITICAL();
-        portYIELD_WITHIN_API();
-    }
-}
-```
-
-`vTaskPlaceOnEventList`는 현재 task를 *event list*에 끼우고 ready list에서 빼는 작업입니다. 깨우는 쪽은 `xTaskRemoveFromEventList`로 빼서 ready로 돌립니다. 큐, 세마포어, 뮤텍스가 모두 이 한 쌍의 함수에 의존합니다.
+blocking send는 단순 critical 안에서 event list를 등록하는 loop 하나가 아닙니다. scheduler suspend·queue lock·조건 재검사·timeout bookkeeping·event list·resume/yield가 함께 필요합니다. 실제로 빼먹은 코드를 source 전체처럼 제시하지 않습니다. [Queue 구현](/blog/embedded/rtos/practical-internals/part3-07-queue-impl)의 실제 API 검증으로 연결합니다.
 
 ## port.c — 아키텍처 경계
 
-`portable/<toolchain>/<arch>/port.c`가 아키텍처에 의존하는 모든 동작을 떠맡습니다. Cortex-M4F를 예로 보면, 스케줄러의 시작 자체가 SVC 한 줄로 압축됩니다.
+이 글의 ARM_CM4F port에서 다음 항목을 확인합니다. 다른 ISA·MPU·SMP port로 일반화하지 않습니다.
 
-```c
-BaseType_t xPortStartScheduler(void)
-{
-    portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;
-    portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+- pxPortInitialiseStack의 task 첫 frame과 xPortStartScheduler/prvPortStartFirstTask의 시작 조건.
+- xPortSysTickHandler의 tick 증가와 PendSV 요청. delayed list는 단순 task별 countdown array가 아닙니다.
+- portmacro.h의 portYIELD·vPortRaiseBASEPRI·critical nesting·FromISR mask save/restore.
+- xPortPendSVHandler의 저장/복원, FP 조건과 configMAX_SYSCALL_INTERRUPT_PRIORITY.
 
-    vPortSetupTimerInterrupt();      /* SysTick */
-    vPortEnableVFP();
-    *(portFPCCR) |= portASPEN_AND_LSPEN_BITS;
-
-    __asm volatile ("svc 0");        /* 첫 task로 진입 */
-    return 0;
-}
-```
-
-`svc 0`이 `SVC_Handler`로 떨어지면 그 안에서 `pxCurrentTCB`가 가리키는 task의 stack을 PSP로 옮기고 `bx lr`로 빠져나오면서 첫 task가 시작됩니다.
-
-매 tick의 진입점은 SysTick 핸들러입니다.
-
-```c
-void xPortSysTickHandler(void)
-{
-    portDISABLE_INTERRUPTS();
-    {
-        if (xTaskIncrementTick() != pdFALSE) {
-            portNVIC_INT_CTRL_REG = portNVIC_PENDSVSET_BIT;
-        }
-    }
-    portENABLE_INTERRUPTS();
-}
-```
-
-`xTaskIncrementTick`이 time slice 만료와 delay 카운트다운을 모두 처리하고, 더 높은 priority의 task가 깨어났다면 PendSV bit를 set해서 핸들러 복귀 직후에 컨텍스트 스위치가 일어나도록 합니다.
-
-critical section은 BASEPRI를 사용합니다.
-
-```c
-#define portDISABLE_INTERRUPTS()                                  \
-    __asm volatile (                                              \
-        "msr basepri, %0\n"                                       \
-        "isb\n" "dsb\n"                                           \
-        : : "r"(configMAX_SYSCALL_INTERRUPT_PRIORITY)             \
-    )
-
-#define portENABLE_INTERRUPTS()  __set_BASEPRI(0)
-```
-
-`configMAX_SYSCALL_INTERRUPT_PRIORITY`보다 *낮은 priority의 IRQ만* 막힙니다. 그보다 높은 hard-RT IRQ는 critical section 안에서도 그대로 통과하므로, 안전 회로처럼 응답 시간이 절대적으로 중요한 IRQ는 FreeRTOS의 영향을 받지 않게 설계할 수 있습니다.
+BASEPRI는 priority encoding에서 threshold와 같거나 수치가 큰, 즉 덜 긴급한 IRQ를 mask합니다. 더 긴급한 IRQ에는 해당 FreeRTOS API 제한이 있으며, mask를 통과한다는 사실만으로 shared bus/다른 IRQ 간섭이나 timing 영향이 없어지지는 않습니다.
 
 ## 흥미로운 세 곳
 
-소스를 끝까지 따라가 보면 의외로 인상적인 코드가 모입니다. 세 곳을 꼽으면 다음과 같습니다.
-
-첫째, `uxTopReadyPriority` 비트맵과 `CLZ` 결합입니다. 평범한 정수 한 워드가 *32 priority에 대한 O(1) lookup*을 만들어 냅니다. 비트맵의 단순함과 명령어 한 줄이 합쳐졌습니다.
-
-둘째, `Queue_t`가 세 IPC를 동시에 표현하는 union 설계입니다. 큐의 read 포인터와 뮤텍스의 recursion count가 같은 union 자리를 공유합니다. 코드가 늘지 않은 채 기능이 셋으로 갈라집니다.
-
-셋째, 첫 task의 진입을 위한 *가짜 stack frame*입니다. `pxPortInitialiseStack`이 만든 모양은 *PendSV가 어떻게 pop할지*를 정확히 모사합니다. 실행과 자료구조가 서로를 거울처럼 비추는 부분입니다.
+소스 탐색에서는 선언과 호출자를 왕복합니다. 예를 들어 allocation failure가 반환값으로 어떻게 전달되는지, wake가 어느 list를 바꾸는지, scheduler suspended 상태에서 무엇이 pending되는지를 함께 봅니다. 자료구조 그림만으로 실행 조건을 확정하지 않습니다.
 
 ## SMP — FreeRTOS 11
 
-FreeRTOS 11에서 SMP가 공식화되면서 `pxCurrentTCB`가 *배열*로 바뀌었습니다.
-
-```c
-TCB_t * volatile pxCurrentTCBs[configNUMBER_OF_CORES];
-#define pxCurrentTCB  pxCurrentTCBs[xPortGetCoreID()]
-```
-
-매크로 한 줄로 단일 코어 코드가 그대로 동작합니다. ready list는 여전히 *하나*이고, task/ISR 두 단계 spinlock으로 보호됩니다. 구조의 자세한 비교는 [4-07: SMP RTOS](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)에서 다룹니다.
+V11.2.0의 SMP 조건에는 pxCurrentTCBs 배열과 portGET_CORE_ID 기반 접근, 공유 priority별 ready list와 task/ISR port lock이 있습니다. 배열 매크로 하나만 추가하면 단일 core port가 SMP가 되는 것은 아닙니다. [SMP 설명](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)의 affinity·port 계약을 함께 확인합니다.
 
 ## 빌드 — CMake 모듈로 묶기
 
-최근 FreeRTOS는 CMake 통합이 깔끔해졌습니다.
+V11.2.0의 CMake는 freertos_config target을 **add_subdirectory 이전에** 요구합니다. port와 heap 선택도 명시합니다. 다음은 kernel source를 command-line 경로로 받은 POSIX host 검사용 최소 project입니다.
 
-```cmake
-add_subdirectory(FreeRTOS-Kernel)
-
-target_link_libraries(my_firmware PRIVATE
-    freertos_kernel
-    freertos_config       # FreeRTOSConfig.h 가진 INTERFACE 타깃
-)
-
-target_include_directories(freertos_config INTERFACE
-    ${CMAKE_SOURCE_DIR}/config)
+```cmake title="freertos-tour-CMakeLists.txt"
+cmake_minimum_required(VERSION 3.20)
+project(freertos_tour C)
+if(NOT FREERTOS_SOURCE_DIR)
+  message(FATAL_ERROR "Set FREERTOS_SOURCE_DIR to the pinned kernel")
+endif()
+add_library(freertos_config INTERFACE)
+target_include_directories(freertos_config INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}/config")
+set(FREERTOS_PORT GCC_POSIX CACHE STRING "")
+set(FREERTOS_HEAP 3 CACHE STRING "")
+add_subdirectory("${FREERTOS_SOURCE_DIR}" kernel)
+add_executable(tour main.c)
+target_link_libraries(tour PRIVATE freertos_kernel)
 ```
 
-`freertos_config`는 사용자 측에서 정의하는 INTERFACE 타깃입니다. 여기에 `FreeRTOSConfig.h`의 위치를 알려 주면 커널이 그 헤더를 끌어다 씁니다.
+FreeRTOSConfig.h와 main.c는 별도 application 입력입니다. 이 구성은 실제 CMake target 연결 검증에 사용하며 MCU firmware link/실행을 뜻하지 않습니다.
 
 ## 자주 보는 함정
 
-> 경고 — `pxTopOfStack`을 첫 필드에서 옮김
-
-TCB 구조체 안에서 `pxTopOfStack`이 첫 필드가 아니면 컨텍스트 스위치 어셈블리가 엉뚱한 주소를 SP로 사용합니다. 첫 PendSV 직후 hard fault로 죽습니다.
-
-> 경고 — Cortex-M3 binary에 Cortex-M4F port 링크
-
-`portable/GCC/ARM_CM3`과 `ARM_CM4F`는 FPU 처리와 BASEPRI 사용이 다릅니다. 디렉터리 한 단계 잘못 잡으면 빌드는 통과해도 런타임에 무한 fault가 납니다.
-
-> 경고 — critical section 안에서 긴 작업
-
-`taskENTER_CRITICAL`이 BASEPRI로 IRQ를 막는 동안은 SysTick도 멈춥니다. 안에서 hash 계산이나 printf를 호출하면 *수 ms 동안 모든 RT IRQ가 막힙니다*. critical은 수 µs 안에 끝나는 작업에만 씁니다.
-
-> 경고 — heap_1에서 `vTaskDelete` 반복
-
-heap_1은 free가 동작하지 않으므로 `vTaskDelete`를 호출해도 메모리가 돌아오지 않습니다. 동적 생성/삭제가 있는 시스템은 heap_4 이상으로 옮겨야 합니다.
+- source tag와 config 없이 재구성한 field/assembly를 upstream 원문으로 제시하지 않습니다.
+- initial frame·EXC_RETURN·port FPU/ABI 조건을 서로 다른 port에서 섞지 않습니다.
+- configASSERT가 켜진 heap_1에서 non-NULL free는 assertion이므로 task 삭제를 단순 memory leak 실험처럼 취급하지 않습니다.
+- port 선택·heap·freertos_config target 정의 순서와 실제 생성/대기 실패 경로를 검사합니다.
 
 ## 정리
 
-- FreeRTOS 커널은 `tasks.c` + `queue.c` + `port.c` 세 파일을 중심으로 읽으면 전체 구조가 잡힙니다.
-- `pxCurrentTCB`는 시스템 전체에서 *현재 실행 중인 task*를 가리키는 단일 포인터이며, 컨텍스트 스위치의 회전축입니다.
-- ready list는 priority별 FIFO이며, `uxTopReadyPriority` 비트맵과 `CLZ`로 최상위 priority를 한 사이클에 찾습니다.
-- 큐·세마포어·뮤텍스는 `Queue_t` 하나를 공유하므로 검증과 버그 수정이 한 곳에 모입니다.
-- port 계층은 `pxPortInitialiseStack`, `xPortStartScheduler`, `xPortSysTickHandler`, PendSV 핸들러, BASEPRI 매크로로 좁혀집니다.
-- SMP는 `pxCurrentTCB`를 배열로 바꾸고 spinlock을 추가한 확장이며, 단일 코어 구조와 같은 지도 위에서 읽힙니다.
-- critical section은 BASEPRI 기반이므로 *configMAX_SYSCALL_INTERRUPT_PRIORITY*보다 높은 IRQ는 그대로 통과합니다.
+- source tour는 tasks/queue/port의 경계와 호출·실패 경로를 함께 읽는 지도입니다.
+- single-core·SMP·MPU·optimized-selection 조건을 구분합니다.
+- 첫 task의 SVC와 이후 PendSV, initial frame의 EXC_RETURN을 맞춥니다.
+- source·object 검사는 target timing·IRQ/FP 실행 검증과 구분합니다.
+
+## 근거 자료
+
+- [V11.2.0 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c), [queue.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/queue.c).
+- [ARM_CM4F port.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c), [portmacro.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/portmacro.h), [CMake](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/CMakeLists.txt).
+
+
 
 다음 편은 [5-02 Zephyr 커널 분석](/blog/embedded/rtos/practical-internals/part5-02-zephyr-source)에서 devicetree와 driver model 위에서 동작하는 더 큰 RTOS를 봅니다.
 

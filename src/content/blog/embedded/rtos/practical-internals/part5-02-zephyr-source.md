@@ -11,7 +11,7 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> **"Zephyr는 RTOS 모양의 미니 Linux입니다."** — devicetree·KConfig·driver model이 모두 Linux 스타일이며, 커널만 봐도 FreeRTOS의 두세 배 규모입니다.
+> Zephyr의 kernel·device·build를 연결해 읽되 Linux와 API/driver ABI가 같다고 가정하지 않습니다.
 
 ## 어떤 문제를 푸는가
 
@@ -19,7 +19,7 @@ topics: ["embedded", "embedded/rtos"]
 
 이번 편은 두 가지를 노립니다. 첫째, `kernel/` 서브트리에서 스레드와 동기화 객체가 어떻게 구현되는지 골라 봅니다. 둘째, 드라이버 인스턴스가 devicetree에서 어떻게 *컴파일 시간에* 만들어지는지를 추적합니다. 이 두 축을 잡으면 Zephyr 코드를 처음 보더라도 길을 잃지 않습니다.
 
-저장소는 `github.com/zephyrproject-rtos/zephyr`이고, 커널만 보려면 `kernel/`과 `include/zephyr/kernel.h` 두 디렉터리면 충분합니다.
+기준은 **Zephyr v3.7.0**, commit 36940db938a8f4a1e919496793ed439850a221c2입니다. kernel/과 include/zephyr/kernel.h를 출발점으로 개별 kernel header·arch·generated config/syscall code까지 추적합니다.
 
 ## 저장소 구조
 
@@ -52,114 +52,39 @@ zephyr/
 └── samples/
 ```
 
-커널만 ~50K LoC, 드라이버와 서브시스템까지 합치면 수백 MB가 되는 거대한 트리입니다. 처음 들어갈 때는 `kernel/` 안에서 `sched.c`와 `sem.c`만 골라 보는 편이 좋습니다.
+LoC·크기는 포함 경로·comment·config와 측정법에 따라 달라 고정 배수로 비교하지 않습니다. 처음 들어갈 때는 `kernel/` 안에서 `sched.c`와 `sem.c`만 골라 보는 편이 좋습니다.
 
 ## k_thread — TCB의 Zephyr 버전
 
-`struct k_thread`는 FreeRTOS의 TCB와 비슷한 역할입니다. 다만 userspace 격리와 mem_domain까지 들고 있어서 구조가 더 큽니다.
+v3.7.0의 include/zephyr/kernel/thread.h에서 struct k_thread를 확인합니다. base, callee_saved, init_data, join_queue가 있고 뒤의 stack 정보·userspace·resource pool·name 등은 config와 개별 구조체를 따릅니다. join_queue가 CONFIG_USERSPACE에서만 존재한다거나 stack_size가 항상 직접 멤버라고 적은 재구성 struct는 실제 layout이 아닙니다.
 
-```c
-struct k_thread {
-    struct _thread_base base;          /* priority, state, queue node */
-    struct _callee_saved callee_saved; /* 아키텍처별 콜백 저장 */
-    void *init_data;
+_thread_base의 state/priority/queue node와 arch별 callee_saved를 따로 읽습니다. callee_saved는 architecture가 보존하는 register context이며 callback 저장 공간이 아닙니다. state bit를 조합한다는 사실만으로 모든 bit 조합이 유효하지는 않으며 전이 조건은 sched.c/thread.c를 확인합니다.
 
-    #if defined(CONFIG_USERSPACE)
-    _wait_q_t join_queue;
-    struct k_mem_domain *mem_domain;
-    #endif
+## sched.c — Config별 Ready Queue
 
-    k_thread_stack_t *stack_obj;
-    size_t stack_size;
-    char name[CONFIG_THREAD_MAX_NAME_LEN];
+CONFIG_SCHED_DUMB, CONFIG_SCHED_SCALABLE, CONFIG_SCHED_MULTIQ는 서로 다른 자료구조 경로를 선택합니다. priority 수뿐 아니라 runnable thread 수·CPU mask·memory와 삽입/선택 비용을 함께 봅니다.
 
-    struct k_heap *resource_pool;
-    /* ... */
-};
-```
+SMP라고 per-CPU runqueue와 push/pull balancing으로 자동 바뀌지는 않습니다. v3.7.0 SMP 문서는 per-CPU runqueue를 유지하지 않는다고 명시하며 CPU-mask 처리의 backend 제약도 설명합니다. [SMP 비교](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)와 kernel/sched.c·include/zephyr/kernel/priority_q.h의 실제 조건을 대조합니다.
 
-`_thread_base`가 스케줄러가 보는 *공통 헤더*입니다. priority, 상태 비트, 큐에 끼울 dnode가 여기 모입니다.
-
-```c
-struct _thread_base {
-    sys_dnode_t qnode_dlist;   /* per-priority 또는 wait queue */
-    uint32_t order_key;
-    uint8_t prio;
-    uint8_t user_options;
-    uint8_t thread_state;
-    /* ... */
-};
-```
-
-`thread_state`는 `_THREAD_PENDING`, `_THREAD_PRESTART`, `_THREAD_DEAD` 같은 비트 모음입니다. 한 스레드가 여러 상태를 동시에 가질 수 있도록 비트 OR로 누적합니다.
-
-## sched.c — 두 가지 ready queue
-
-Zephyr는 빌드 옵션에 따라 *다른 ready queue 자료구조*를 고를 수 있습니다. 기본은 단순한 dumb queue, 큰 시스템에서는 multiqueue 또는 rbtree 기반 scalable queue가 활성화됩니다.
-
-```c
-static inline struct k_thread *_priq_dumb_best(sys_dlist_t *pq)
-{
-    struct k_thread *t = NULL;
-    sys_dnode_t *n = sys_dlist_peek_head(pq);
-    if (n != NULL) {
-        t = CONTAINER_OF(n, struct k_thread, base.qnode_dlist);
-    }
-    return t;
-}
-```
-
-`dumb`는 한 linked list 안에 priority 순으로 정렬해 두는 방식입니다. priority 수가 적고 ready 스레드가 많지 않은 임베디드 시스템에서는 이 단순함이 그대로 이득입니다.
-
-조금 큰 시스템에서는 multiqueue가 켜집니다.
-
-```c
-#if defined(CONFIG_SCHED_MULTIQ)
-    uint32_t multiq_bitmap[CONFIG_NUM_BITMAP_WORDS];
-    sys_dlist_t multiq_queues[K_NUM_PRIO_BITMAP];
-#endif
-```
-
-priority별 큐와 비트맵을 함께 두는 구조입니다. `find_lsb_set(bitmap)` 한 번이면 최상위 priority가 나오므로 FreeRTOS의 `uxTopReadyPriority` + CLZ 조합과 같은 효과를 봅니다. SMP 빌드에서는 *per-CPU runqueue*에 push/pull balancing이 얹힌 형태로 확장됩니다. 이 구조의 비교는 [4-07: SMP RTOS](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)에서 다룹니다.
+비트 찾기 한 번의 비용을 전체 scheduler의 일정 cycle·상수 응답 시간으로 환산하지 않습니다.
 
 ## k_sem — spinlock 기반 동기화 객체
 
-`kernel/sem.c`의 take 함수는 SMP를 고려한 일반적인 구조를 보여 줍니다.
+v3.7.0의 struct k_sem에는 wait_q, count, limit와 선택적 poll/tracing/object-core 상태가 있으며 **sem->lock 멤버는 없습니다.** kernel/sem.c의 파일 범위 static struct k_spinlock lock을 사용합니다.
 
-```c
-struct k_sem {
-    _wait_q_t wait_q;
-    uint32_t count;
-    uint32_t limit;
-};
+| 경로 | 실제 source 동작 |
+|---|---|
+| z_impl_k_sem_take, count > 0 | 공통 lock 아래 감소 후 unlock |
+| count 0 + K_NO_WAIT | unlock 후 -EBUSY |
+| count 0 + 대기 | z_pend_curr(&lock, key, &sem->wait_q, timeout) |
+| give | waiter를 깨우거나 limit까지 count 증가 |
+| user call | z_vrfy 경로의 object 검증 뒤 implementation 호출 |
 
-int k_sem_take(struct k_sem *sem, k_timeout_t timeout)
-{
-    int ret = 0;
-    k_spinlock_key_t key = k_spin_lock(&sem->lock);
-
-    if (sem->count > 0) {
-        sem->count--;
-        ret = 0;
-    } else if (K_TIMEOUT_EQ(timeout, K_NO_WAIT)) {
-        ret = -EBUSY;
-    } else {
-        ret = z_pend_curr(&sem->lock, key, &sem->wait_q, timeout);
-        return ret;
-    }
-
-    k_spin_unlock(&sem->lock, key);
-    return ret;
-}
-```
-
-`k_spin_lock`은 단일 코어 빌드에서 IRQ disable로 축약되고, SMP 빌드에서는 *spinlock + IRQ disable*로 확장됩니다. 같은 소스가 두 빌드에서 모두 정확합니다.
-
-`z_pend_curr`는 현재 스레드를 wait queue에 끼우고 락을 풀면서 스케줄러로 돌아갑니다. timeout이 지나면 다시 ready로 돌리고 적절한 errno로 빠져나옵니다. 이 패턴이 mutex, msg queue, k_poll에서 그대로 재사용됩니다.
+ISR take는 K_NO_WAIT 제약이 있으며 timeout/cancel/reset의 반환도 실제 계약을 따릅니다. 이 source tour는 공통 lock의 메모리/경쟁 trade-off를 보여 주며 Zephyr scheduler를 host에서 실행한 결과는 아닙니다.
 
 ## Driver Model — vtable + devicetree
 
-Zephyr 드라이버는 *vtable + per-instance data + per-instance config*의 삼각형으로 구성됩니다. UART 드라이버 예를 보면 분리가 분명합니다.
+Zephyr 드라이버는 *vtable + per-instance data + per-instance config*의 삼각형으로 구성됩니다. 아래는 세 요소를 보여 주는 구성 예이며 실제 STM32 driver 전체나 build 가능한 application은 아닙니다. 함수 본체·instance data·clock/IRQ 설정은 해당 driver source에서 확인합니다.
 
 ```c
 /* drivers/uart/uart_stm32.c */
@@ -180,12 +105,12 @@ DEVICE_DT_INST_DEFINE(0, uart_stm32_init, NULL,
     &uart_stm32_driver_api);
 ```
 
-`DEVICE_DT_INST_DEFINE`이 핵심 매크로입니다. devicetree에서 같은 compatible을 가진 *모든 인스턴스*에 대해 `device` 구조체를 컴파일 시간에 만들어 둡니다. 런타임 dynamic registration이 필요 없으므로 ROM에 그대로 자리잡습니다.
+`DEVICE_DT_INST_DEFINE(inst, ...)`는 지정한 **한 instance**를 정의합니다. 모든 status-okay instance에 반복 적용하려면 보통 DT_INST_FOREACH_STATUS_OKAY와 driver의 instance 생성 macro를 함께 사용합니다. 런타임 dynamic registration이 필요 없으므로 ROM에 그대로 자리잡습니다.
 
 devicetree 입력은 Linux DTS와 같은 문법입니다.
 
 ```dts
-/* boards/arm/nucleo_f407g/nucleo_f407g.dts */
+/* board overlay 개념 예. 실제 v3.7.0 board 경로·pinctrl 이름 확인 필요. */
 /dts-v1/;
 #include <st/f4/stm32f407Xg.dtsi>
 
@@ -205,7 +130,7 @@ devicetree 입력은 Linux DTS와 같은 문법입니다.
 };
 ```
 
-빌드 시 `dts/`의 바인딩과 매칭되어 *generated header*로 변환되고, 드라이버 매크로가 그 header를 consume합니다. 보드를 바꿔도 드라이버 코드는 한 줄도 변하지 않습니다.
+빌드 시 `dts/`의 바인딩과 매칭되어 *generated header*로 변환되고, 드라이버 매크로가 그 header를 consume합니다. 같은 driver를 재사용할 수 있지만 binding·clock·pinctrl·IRQ·지원 feature가 실제 새 board와 맞아야 합니다.
 
 ## KConfig — feature를 컴파일에서 잘라내기
 
@@ -217,7 +142,7 @@ CONFIG_MAIN_STACK_SIZE=2048
 CONFIG_LOG=y
 ```
 
-Linux의 KConfig 문법 그대로입니다. 켜지 않은 기능은 *링크 단계에서 사라지므로* 작은 MCU에서도 footprint를 통제할 수 있습니다. `menuconfig`로 인터랙티브 탐색이 가능합니다.
+Linux의 KConfig 문법 그대로입니다. Kconfig는 CMake source 선택·preprocessor·generated config에 영향을 줍니다. 모든 비활성 기능이 오직 링크 단계에서 사라진다는 뜻은 아닙니다. `menuconfig`로 인터랙티브 탐색이 가능합니다.
 
 ```bash
 west build -b nucleo_f407g samples/hello_world -t menuconfig
@@ -225,36 +150,21 @@ west build -b nucleo_f407g samples/hello_world -t menuconfig
 
 ## west — 멀티 저장소 메타툴
 
-Zephyr는 단일 저장소가 아니라 *Zephyr core + 수십 개 module*로 분산되어 있습니다. `west`가 manifest를 읽어 모두 동기화합니다.
+west는 manifest의 repository revision을 동기화하는 workspace 도구입니다. v3.7.0 문서/board 이름에 맞춘 workspace 예는 다음과 같습니다.
 
 ```bash
-west init -m https://github.com/zephyrproject-rtos/zephyr --mr main
-cd zephyrproject
+west init -m https://github.com/zephyrproject-rtos/zephyr --mr v3.7.0 zephyr-workspace
+cd zephyr-workspace
 west update
-
+cd zephyr
 west build -b nucleo_f407g samples/hello_world
-west flash
 ```
 
-`west`가 git 작업, 빌드, 플래시, signing을 한 인터페이스로 묶습니다. Linux 세계의 `apt + cmake + ninja`를 단일 도구로 뭉친 셈입니다.
+별도 host dependencies·Python 환경·Zephyr SDK와 module 다운로드가 필요합니다. 위 명령은 이 검증에서 board firmware로 build/flash하지 않았습니다. manifest root와 source tree의 현재 작업 경로를 구분합니다. flash/sign은 해당 runner·board 설정을 확인한 뒤 사용합니다.
 
 ## POSIX 서브시스템
 
-`subsys/posix`를 활성화하면 pthread, semaphore, signal API의 일부가 그대로 사용 가능해집니다.
-
-```c
-#include <pthread.h>
-
-pthread_t tid;
-pthread_create(&tid, NULL, thread_entry, NULL);
-pthread_join(tid, NULL);
-
-pthread_mutex_t mtx = PTHREAD_MUTEX_INITIALIZER;
-pthread_mutex_lock(&mtx);
-pthread_mutex_unlock(&mtx);
-```
-
-Linux에서 쓰던 코드가 *재컴파일만으로* MCU에서 도는 경우가 많습니다. 다만 fork, mmap, signal handler에는 제약이 있으므로 *호환되는 부분만* 의존하는 편이 안전합니다.
+POSIX 지원은 선택한 Kconfig feature·libc·지원 API와 resource limit에 따릅니다. pthread/socket/signal 일부가 지원된다는 사실을 Linux binary/syscall ABI 또는 모든 Linux source의 재컴파일 호환으로 확대하지 않습니다. 사용 API 목록을 고정해 성공·실패/timeout·signal semantics를 확인합니다.
 
 ## Network·BLE — 통합 서브시스템
 
@@ -268,11 +178,11 @@ subsys/fs/          LittleFS·FATFS·NVS
 subsys/logging/     LOG_INF·LOG_ERR + 백엔드 (UART·RTT·net)
 ```
 
-각 서브시스템이 KConfig로 켜고 끌 수 있도록 모듈화되어 있습니다. BLE는 특히 *현재 가장 많이 채택되는 RTOS*가 Zephyr입니다. Nordic nRF Connect SDK가 Zephyr 기반이고, Espressif도 ESP32에 Zephyr를 정식 지원합니다.
+각 서브시스템이 KConfig로 켜고 끌 수 있도록 모듈화되어 있습니다. 시장 점유·최다 채택·vendor 지원 범위는 이 source 분석에서 조사하지 않았습니다. 실제 대상 board와 controller/host driver·module revision을 고정해 통합을 확인합니다.
 
 ## User Mode — MPU/MMU 분리
 
-`CONFIG_USERSPACE=y`로 빌드하면 스레드가 *user mode*로 동작합니다.
+CONFIG_USERSPACE는 기능을 활성화합니다. 실제 user thread 생성에는 K_USER 등 해당 API 옵션이 필요하며 모든 thread가 자동 unprivileged가 되지는 않습니다.
 
 ```c
 K_THREAD_DEFINE(user_thr, 2048, user_entry, NULL, NULL, NULL,
@@ -283,75 +193,34 @@ User 스레드는 커널 데이터에 직접 접근할 수 없고, `k_sem_take` 
 
 ## FreeRTOS와 Zephyr — 한 줄 비교
 
-| 항목 | FreeRTOS | Zephyr |
-|---|---|---|
-| 커널 LoC | ~20K | ~50K+ |
-| devicetree | × | ✓ |
-| KConfig | × (`FreeRTOSConfig.h`) | ✓ |
-| 드라이버 모델 | × (HAL 별도) | ✓ |
-| Network stack | external | built-in |
-| BLE | external | built-in |
-| POSIX | × | partial |
-| User mode (MPU) | partial | full |
-| 적합한 규모 | 작은 센서·MCU | 중급·고급 MCU·SoC |
-| 인증 | SafeRTOS 상업 변종 | Auto Cert·DO-178C 진행 |
-
-작은 펌웨어는 FreeRTOS의 단순함이 이깁니다. 통신 스택과 드라이버가 많이 필요한 IoT 게이트웨이나 BLE 디바이스는 Zephyr가 합리적입니다.
+비교할 때는 kernel뿐 아니라 driver·network·libc·port·build 도구를 같은 기능 범위로 맞춥니다. FreeRTOS에도 MPU/SMP port와 별도 POSIX/network component가 있으므로 단순 없음/partial/full 표로 제품 전체 기능과 인증 수준을 등급화하지 않습니다. source 수만으로 RAM/Flash나 검증 비용을 예측하지 않습니다.
 
 ## SMP Support
 
-Zephyr SMP는 [4-07: SMP RTOS](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)에서 깊게 다루지만, 코어 API 자체는 단순합니다.
+CPU mask 변경은 thread가 runnable 상태가 아닐 때 해야 합니다. v3.7.0의 k_thread_cpu_mask_clear/k_thread_cpu_pin 등 실제 API를 사용하고 config·반환값을 확인합니다. 생성 시 K_FOREVER로 시작을 보류한 뒤 권한·affinity를 준비하고 k_thread_start로 시작하는 흐름이 한 방법입니다.
 
-```c
-K_THREAD_DEFINE(thr0, 2048, entry, NULL, NULL, NULL, 5, 0, 0);
-
-k_thread_cpu_mask_disable_all(&thr0_thread);
-k_thread_cpu_mask_enable(&thr0_thread, 0);   /* CPU 0 affinity */
-```
-
-ARM Cortex-A, ARMv8-M dual-core, RISC-V SMP를 모두 지원하며, FreeRTOS 11 SMP보다 *runqueue 자료구조와 balancing 알고리즘*이 더 일찍 안정화되어 있습니다.
+FreeRTOS보다 먼저 안정화되었다는 일반 비교 대신 선택한 revision과 workload의 실행 증거를 수집합니다.
 
 ## 자주 보는 함정
 
-> 경고 — devicetree 변경 후 캐시된 빌드 사용
-
-`west build` 직후 DTS만 바꾸고 다시 빌드하면 *이전 generated header*가 그대로 남아 있는 경우가 있습니다. `west build --pristine`이나 빌드 디렉터리 삭제로 강제 재생성을 시킵니다.
-
-> 경고 — KConfig 의존성 미설정
-
-```text
-CONFIG_BT=y
-# CONFIG_BT_CTLR 또는 BT_HCI_RAW 미설정 → 런타임에 동작하지 않음
-```
-
-심볼 하나를 켰는데 *짝이 되는 옵션*을 빠뜨리면 빌드는 통과해도 BLE adv가 시작되지 않습니다. `menuconfig`로 의존성을 확인하는 습관이 필요합니다.
-
-> 경고 — 스택 크기를 FreeRTOS 감각으로 잡기
-
-```c
-K_THREAD_DEFINE(thr, 512, entry, ...);
-```
-
-Zephyr는 logging, k_poll, 드라이버 syscall 등이 스택을 더 씁니다. 최소 1024바이트, 일반적인 작업은 2048바이트가 안전한 기준입니다.
-
-> 경고 — User mode에서 직접 레지스터 접근
-
-```c
-SCB->ICSR = ...;   /* user 스레드 → fault */
-```
-
-User mode 스레드는 커널 영역에 직접 접근할 수 없습니다. syscall로 wrap된 API만 사용해야 하며, 그렇지 않으면 MPU fault로 죽습니다.
+- generated header가 의심되면 실제 build dependency와 DTS/config 산출물을 확인하고 pristine rebuild로 비교합니다. DTS를 바꾸면 항상 stale이라는 뜻은 아닙니다.
+- Kconfig 경고·최종 .config와 driver readiness를 확인합니다. BLE host/controller 조합은 선택한 architecture에 따릅니다.
+- 1024/2048 byte가 보편적인 안전 stack 크기는 아닙니다. 실제 call path·exception·library와 관찰 workload를 분석합니다.
+- user object grant와 buffer memory domain, direct MMIO 권한을 구분합니다.
 
 ## 정리
 
-- Zephyr 커널은 `kernel/sched.c`와 `kernel/sem.c`를 중심으로 읽으면 동기화와 스케줄러의 골격이 잡힙니다.
-- 스레드 상태는 비트 OR로 누적되며, ready queue는 dumb/multiqueue/scalable 중 빌드 옵션으로 선택됩니다.
-- 동기화 객체는 `k_spinlock`을 통해 단일 코어와 SMP에서 동일한 코드가 동작하도록 일반화되어 있습니다.
-- 드라이버 모델은 vtable + devicetree-driven 인스턴스 정의가 핵심이며, 보드를 바꿔도 드라이버 코드가 변하지 않습니다.
-- KConfig가 모든 기능을 *컴파일 단계에서* 잘라내므로 작은 MCU에서도 footprint 통제가 가능합니다.
-- `west`는 멀티 저장소 manifest와 빌드·플래시·signing을 묶는 메타툴입니다.
-- POSIX 서브시스템과 BLE/네트워크 스택이 *내장*되어 있어 IoT 게이트웨이급 시스템에 잘 맞습니다.
-- User mode와 mem_domain으로 MPU/MMU 기반 권한 분리를 제공하므로 safety-critical 격리를 일찍 도입할 수 있습니다.
+- v3.7.0의 실제 field·semaphore 공통 lock·ready queue config를 따라갑니다.
+- device instance 하나의 정의와 instance 전체 반복 macro를 구분합니다.
+- west workspace 경로·module/config/generated code를 함께 고정합니다.
+- source tour는 board 실행·IRQ/SMP·USERSPACE fault 검증을 대신하지 않습니다.
+
+## 근거 자료
+
+- [v3.7.0 sem.c](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/kernel/sem.c), [thread.h](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/include/zephyr/kernel/thread.h), [device.h](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/include/zephyr/device.h).
+- [v3.7.0 SMP](https://docs.zephyrproject.org/3.7.0/kernel/services/smp/smp.html), [kernel objects](https://docs.zephyrproject.org/3.7.0/kernel/usermode/kernelobjects.html).
+
+
 
 다음 편은 [5-03 RT-Thread](/blog/embedded/rtos/practical-internals/part5-03-rt-thread)에서 경량 커널과 풍부한 component를 함께 가진 중국 출신 RTOS를 봅니다.
 

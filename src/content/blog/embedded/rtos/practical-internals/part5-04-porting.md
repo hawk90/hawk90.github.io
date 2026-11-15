@@ -11,7 +11,7 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> **"포팅은 여섯 가지만 구현하면 끝납니다."** — 초기 스택, 스케줄러 시작, 수동 yield, tick, critical section 진입/탈출 그리고 context switch 핸들러입니다.
+> 시작·저장/복원·tick·mask를 출발점으로 ABI와 board integration을 검증합니다. — 초기 스택, 스케줄러 시작, 수동 yield, tick, critical section 진입/탈출 그리고 context switch 핸들러입니다.
 
 ## 어떤 문제를 푸는가
 
@@ -19,7 +19,7 @@ topics: ["embedded", "embedded/rtos"]
 
 이번 편의 목표는 두 가지입니다. 첫째, port layer가 RTOS와 아키텍처 사이에 *정확히 어느 경계*를 그리는지 정리합니다. 둘째, FreeRTOS Cortex-M port를 기준으로 *최소 여섯 가지 구현물*을 추리고, RISC-V와 Cortex-A로 확장될 때 무엇이 추가되는지를 봅니다.
 
-전체 구조를 잡아 두면 새 아키텍처 포팅이 *2~3일짜리 작업*으로 좁혀집니다.
+이 글은 FreeRTOS V11.2.0 ARM_CM4F를 기준으로 포팅 경계를 설명합니다. 실제 새 architecture port의 기간·완료 여부는 ABI·interrupt controller·memory·SMP/MPU와 검증 범위에 따라 달라집니다.
 
 ## 포팅 대상 — 여섯 가지 함수
 
@@ -32,57 +32,34 @@ topics: ["embedded", "embedded/rtos"]
 
 여기에 Context switch 본체(PendSV·trap·SWI 어셈블리)가 추가됩니다.
 
-이 여섯 가지가 RTOS 본체와 아키텍처 사이의 *유일한 인터페이스*입니다. 다른 코드는 모두 C 표준에 머뭅니다.
+여섯 항목은 읽는 출발점입니다. portmacro.h의 type/alignment/barrier·mask save/restore, startup/linker·IRQ vector·heap/library와 MPU/SMP 추가 계약까지 확인해야 합니다. yield가 모든 port에서 vPortYield라는 C 함수인 것도 아닙니다.
 
 ## 1. 초기 스택 프레임
 
-가장 미묘한 부분입니다. *첫 task가 실행되기 전에* stack 위에 *컨텍스트 스위치가 한 번 일어났던 흔적*을 만들어 두어야 합니다. PendSV(또는 trap)가 pop할 때 자동으로 task 진입점으로 점프하도록 모양을 모사합니다.
+실제 V11.2.0 ARM_CM4F의 pxPortInitialiseStack과 SVC/PendSV 복원 순서를 맞춥니다. 저장 SP에서 R4–R11, EXC_RETURN, hardware frame의 R0–R3/R12/LR/PC/xPSR 순서입니다. 기존 예는 EXC_RETURN slot을 빼먹었습니다.
 
-```c
-StackType_t *pxPortInitialiseStack(StackType_t *pxTopOfStack,
-                                    TaskFunction_t pxCode,
-                                    void *pvParameters)
+```c title="m4-frame-fixture.c"
+#include <stdint.h>
+/* Layout 비교용 fixture. MCU port나 실제 실행 가능한 task stack 생성기가 아님. */
+void make_m4_basic_fixture(uint32_t storage[18], uint32_t pc,
+                           uint32_t argument, uint32_t task_return)
 {
-    /* Cortex-M의 하드웨어 stack frame */
-    pxTopOfStack--; *pxTopOfStack = portINITIAL_XPSR;          /* Thumb bit */
-    pxTopOfStack--; *pxTopOfStack = (StackType_t)pxCode;       /* PC */
-    pxTopOfStack--; *pxTopOfStack = (StackType_t)prvTaskExitError;  /* LR */
-    pxTopOfStack -= 5;                                          /* R12,R3,R2,R1 */
-    *pxTopOfStack = (StackType_t)pvParameters;                 /* R0 */
-
-    /* 소프트웨어 stack frame — R4-R11 */
-    pxTopOfStack -= 8;
-    return pxTopOfStack;
+    for (unsigned i = 0; i < 18; ++i) storage[i] = 0;
+    storage[8] = UINT32_C(0xfffffffd); /* EXC_RETURN */
+    storage[9] = argument;           /* R0 */
+    storage[14] = task_return;       /* task LR */
+    storage[15] = pc & UINT32_C(0xfffffffe);
+    storage[16] = UINT32_C(0x01000000); /* xPSR Thumb state */
 }
 ```
 
-Cortex-M에서는 하드웨어가 IRQ entry/exit에서 R0-R3, R12, LR, PC, xPSR을 *자동 push/pop*합니다. 그래서 초기 stack에 *하드웨어가 pop할 영역*과 *소프트웨어가 직접 복원할 영역*을 둘 다 미리 깔아 둡니다.
-
-첫 PendSV가 끝나면 자연스럽게 R0=`pvParameters`, PC=`pxCode` 상태로 task가 시작됩니다.
+실제 port는 사용하지 않는 register slot을 모두 0으로 초기화하지 않습니다. fixture는 initialized slot의 상대 위치만 비교합니다. initial top 정렬·reserved word·FP/exception alignment 추가 조건도 port별로 확인합니다. 첫 실행은 해당 port의 SVC 경로이며 반드시 첫 PendSV가 시작하는 것은 아닙니다.
 
 ## 2. 스케줄러 시작
 
-```c
-BaseType_t xPortStartScheduler(void)
-{
-    portNVIC_SHPR3_REG |= portNVIC_PENDSV_PRI;     /* PendSV·SysTick 최저 */
-    portNVIC_SHPR3_REG |= portNVIC_SYSTICK_PRI;
+V11.2.0 xPortStartScheduler는 priority·FPU·timer·critical nesting 등을 준비한 뒤 prvPortStartFirstTask로 들어갑니다. 이 startup helper가 MSP/interrupt 상태와 SVC 시작을 처리합니다. `svc 0` 한 줄만 일반 C 함수에 넣은 코드가 완전한 startup을 대체하지 않습니다.
 
-    portNVIC_SYSTICK_LOAD = (configCPU_CLOCK_HZ / configTICK_RATE_HZ) - 1;
-    portNVIC_SYSTICK_CTRL = portNVIC_SYSTICK_ENABLE | portNVIC_SYSTICK_INT
-                          | portNVIC_SYSTICK_CLK;
-
-    vPortEnableVFP();
-    *(portFPCCR) |= portASPEN_AND_LSPEN_BITS;
-
-    __asm volatile ("svc 0");      /* 첫 task로 진입 */
-    return 0;                       /* never reached */
-}
-```
-
-PendSV는 *항상 최저 priority*여야 합니다. 그래야 다른 모든 IRQ가 끝난 뒤에야 컨텍스트 스위치가 일어납니다. SysTick도 같은 priority로 두는 것이 보통입니다.
-
-`svc 0`이 `SVC_Handler`로 진입하면 그 안에서 `pxCurrentTCB`의 stack을 PSP로 옮기고 `bx lr`로 빠져나오면서 첫 task가 시작됩니다.
+vector alias·VTOR/MSP·ISR priority validation·clock/tick와 port config를 실제 board에 맞춰 확인합니다. 해당 CM4F port의 PendSV/SysTick priority 조건을 다른 architecture의 규칙으로 일반화하지 않습니다.
 
 ## 3. 수동 yield
 
@@ -97,7 +74,7 @@ static inline void vPortYield(void)
 }
 ```
 
-`dsb`와 `isb`가 핵심입니다. PendSV가 *즉시* 발생해 다음 명령 전에 컨텍스트 스위치가 일어나도록 메모리 배리어를 강제합니다.
+`dsb`와 `isb`가 핵심입니다. 요청 store와 instruction stream의 ordering을 맞춥니다. masking·현재 exception priority·scheduler 상태가 남아 있으므로 다음 명령 전에 반드시 task가 바뀐다는 보장은 아닙니다.
 
 ## 4. Tick 핸들러
 
@@ -118,181 +95,41 @@ Tick의 두 역할이 한 줄에 모입니다. *time slice 만료* 검사와 *de
 
 ## 5/6. Critical Section
 
-```c
-static portFORCE_INLINE void vPortEnterCritical(void)
-{
-    portDISABLE_INTERRUPTS();
-    uxCriticalNesting++;
-}
+실제 CM4F task critical은 nesting counter와 BASEPRI를 함께 사용하며 entry 문맥과 exit underflow를 검사합니다. 저장된 mask를 복원하는 FromISR 경로와 구분합니다. 어설픈 decrement/enable 조각을 port 구현으로 복사하지 않습니다.
 
-static portFORCE_INLINE void vPortExitCritical(void)
-{
-    if (--uxCriticalNesting == 0) {
-        portENABLE_INTERRUPTS();
-    }
-}
-
-#define portDISABLE_INTERRUPTS()  \
-    __set_BASEPRI(configMAX_SYSCALL_INTERRUPT_PRIORITY)
-#define portENABLE_INTERRUPTS()   __set_BASEPRI(0)
-```
-
-nesting counter가 *중첩 critical section*을 안전하게 만듭니다. 안쪽 함수가 critical 안에서 또 critical을 호출해도 *가장 바깥*에서만 IRQ가 다시 enable됩니다.
-
-BASEPRI를 쓰면 *configMAX_SYSCALL_INTERRUPT_PRIORITY*보다 낮은 IRQ만 막힙니다. 높은 priority의 hard-RT IRQ는 critical section 안에서도 통과합니다.
+threshold와 같거나 수치가 큰 encoded IRQ priority가 mask되며, 더 긴급한 IRQ는 kernel API 호출 제한을 지켜야 합니다. PRIMASK/BASEPRI는 DMA나 다른 core를 정지시키지 않습니다. [Critical section](/blog/embedded/rtos/practical-internals/part3-01-critical-section)을 따릅니다.
 
 ## PendSV 핸들러 — 컨텍스트 스위치 본체
 
-```asm
-PendSV_Handler:
-    cpsid i                     ; disable IRQ
-    mrs r0, psp
-    isb
+복사할 정본은 [V11.2.0 ARM_CM4F port.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c)의 xPortPendSVHandler입니다. R4–R11/EXC_RETURN과 조건부 FP register, task SP·MSP의 ABI 정렬, BASEPRI와 scheduler 호출을 함께 보존합니다.
 
-    ldr r3, =pxCurrentTCB
-    ldr r2, [r3]
-
-    ; FPU 컨텍스트 (lazy stacking 체크)
-    tst lr, #0x10
-    it eq
-    vstmdbeq r0!, {s16-s31}
-
-    ; R4-R11 + EXC_RETURN
-    stmdb r0!, {r4-r11, lr}
-    str r0, [r2]                ; SP 저장
-
-    push {r0, r3}
-    bl vTaskSwitchContext       ; C 스케줄러 호출
-    pop {r0, r3}
-
-    ldr r1, [r3]                ; new pxCurrentTCB
-    ldr r0, [r1]                ; new SP
-    ldmia r0!, {r4-r11, lr}
-
-    tst lr, #0x10
-    it eq
-    vldmiaeq r0!, {s16-s31}
-
-    msr psp, r0
-    isb
-    cpsie i
-    bx lr                       ; HW pops {R0-R3,R12,LR,PC,xPSR}
-```
-
-Cortex-M4F 168 MHz 기준 30~50 사이클이면 끝납니다. *FPU lazy stacking*을 잘못 다루면 다음 task가 *FPU 레지스터 garbage*를 가지고 시작하므로 `tst lr, #0x10`으로 EXC_RETURN의 *FP 비트*를 확인하는 것이 중요합니다.
+PRIMASK를 전체 함수에서 임의로 켜거나 외부 출처 없는 30–50 cycle 수치를 채택하지 않습니다. 실제 port object compile/disassembly가 성공해도 task·FP switch·IRQ nesting이 실행 검증된 것은 아닙니다.
 
 ## RISC-V Port — Trap 한 진입점
 
-```asm
-trap_handler:
-    csrrw sp, mscratch, sp      ; user SP ↔ kernel SP swap
-    addi sp, sp, -(32 * 4)
-    sw x1, 1*4(sp)
-    sw x2, 2*4(sp)
-    /* x3..x31 저장 */
+trap entry는 mtvec의 direct/vectored 설정과 delegation에 따라 다릅니다. M-mode의 mcause/mepc/mstatus, 원래 SP·caller/callee-saved register, interrupt nesting과 FP/vector 상태를 실제 port 계약대로 저장합니다.
 
-    csrr a0, mcause
-    csrr a1, mepc
-    call handle_trap            ; C 핸들러 — 결과적으로 새 task SP 반환
-
-    lw x1, 1*4(sp)
-    /* 복원 */
-    addi sp, sp, 32 * 4
-    csrrw sp, mscratch, sp
-    mret
-```
-
-RISC-V는 *trap entry가 한 곳*으로 모입니다. timer interrupt, ecall, exception이 같은 `mtvec`을 거치므로 핸들러 진입에서 `mcause`를 분기합니다. `mscratch`에 kernel SP를 보관해 user/kernel SP swap을 한 명령으로 처리하는 패턴이 ARM의 MSP/PSP와 비슷합니다.
-
-자세한 컨텍스트 스위치 절차는 [2-07: RISC-V Context Switch](/blog/embedded/rtos/practical-internals/part2-07-riscv-context)에서 다룹니다.
+mscratch swap은 한 설계 패턴이지 모든 RTOS의 필수 규칙이 아닙니다. swap 직후 kernel SP를 task x2 슬롯에 저장하거나 handler가 반환한 새 SP를 무시하는 불완전한 trap 조각은 사용하지 않습니다. [RISC-V context](/blog/embedded/rtos/practical-internals/part2-07-riscv-context)의 저장/복원 모델과 실제 port를 대조합니다.
 
 ## Cortex-A Port — 더 큰 컨텍스트
 
-Cortex-A는 컨텍스트가 훨씬 큽니다.
+AArch32는 R0–R15·CPSR/SPSR·mode bank와 VFP/NEON을, AArch64는 X register·SP·ELR/SPSR와 FP/SIMD·exception level을 구분합니다. 두 ISA의 register 목록과 system-register assembly를 섞지 않습니다.
 
-Cortex-A 컨텍스트
-
-- R0-R15 + CPSR + 모드별 SPSR
-- VFP/NEON s0-s31 또는 d0-d31
-- 여러 mode (SVC·IRQ·FIQ·Abort·System·User)
-- MMU page table base (TTBR0/TTBR1)
-- L1·L2 cache 영향
-
-포팅 분량은 Cortex-M port의 약 5배입니다. GIC를 통한 interrupt routing, generic timer 기반 tick, EL0/EL1 분리(armv8) 같은 요소가 추가됩니다.
-
-```c
-void vPortSetupTimerInterrupt(void)
-{
-    uint64_t freq;
-    __asm volatile ("mrs %0, cntfrq_el0" : "=r"(freq));
-    uint64_t reload = freq / configTICK_RATE_HZ;
-    __asm volatile ("msr cntp_tval_el0, %0" :: "r"(reload));
-    __asm volatile ("msr cntp_ctl_el0, %0" :: "r"(1U));
-    gic_enable_irq(TIMER_IRQ);
-}
-```
-
-Cortex-A의 `cntpct_el0`는 *모든 코어가 공유하는 free-running counter*입니다. SMP에서 코어별로 같은 시간 축을 보장하므로 tick source로 적합합니다.
+GIC와 architectural timer·memory attributes·MMU/TLB·cache와 IRQ routing은 사용 port/SoC가 정합니다. Cortex-M의 다섯 배라는 고정 분량이나 모든 core가 완전히 같은 counter를 자동 제공한다는 설명은 검증 근거가 아닙니다. timer compare 재설정·IRQ ACK와 counter 주파수도 확인합니다.
 
 ## SMP Port — Per-Core current
 
-```c
-TCB_t *pxCurrentTCBs[configNUMBER_OF_CORES];
-#define pxCurrentTCB pxCurrentTCBs[portGET_CORE_ID()]
-
-static inline uint32_t portGET_CORE_ID(void)
-{
-    uint32_t mpidr;
-    __asm volatile ("mrs %0, mpidr_el1" : "=r"(mpidr));
-    return mpidr & 0xFF;
-}
-```
-
-`pxCurrentTCB`를 코어 수만큼 둡니다. 단일 코어 코드가 매크로만으로 SMP에서 동작하도록 설계된 부분입니다. critical section은 *spinlock + IRQ disable* 조합으로 확장됩니다. 자세한 구조는 [4-07: SMP RTOS](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)에서 다룹니다.
+core별 current TCB 외에도 inter-core lock·memory ordering·IPI·초기화·scheduler reservation·affinity·per-core interrupt와 timer 계약이 필요합니다. MPIDR affinity field를 무조건 연속 CPU index로 사용하는 mapping은 안전하지 않습니다. [SMP 설명](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)과 실제 port를 함께 확인합니다.
 
 ## Zephyr arch/ 디렉터리
 
-Zephyr는 *arch와 SoC를 분리*합니다.
-
-```text
-zephyr/arch/
-├── arm/
-│   └── core/cortex_m/        # 공통 Cortex-M
-├── riscv/
-└── arm64/
-
-zephyr/soc/
-├── arm/st_stm32/
-├── riscv/sifive_freedom/
-└── ...
-```
-
-새 SoC를 지원하려면 `soc/` 아래 디렉터리를 만들고 devicetree binding을 추가합니다. arch 자체에 손댈 일은 *완전히 새 ISA가 아닌 한* 거의 없습니다.
+Zephyr v3.7.0의 arch·soc·board·devicetree와 Kconfig를 구분합니다. 기존 architecture가 있어도 exception·timer·interrupt controller·cache/MPU와 SoC integration의 추가 검증이 필요합니다. 과거 soc/arm/... 경로를 모든 release의 현재 구조라고 제시하지 않습니다.
 
 ## Tickless Idle Port
 
-```c
-void portSUPPRESS_TICKS_AND_SLEEP(TickType_t xExpectedIdleTime)
-{
-    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
-    SysTick->LOAD = xExpectedIdleTime *
-                    (configCPU_CLOCK_HZ / configTICK_RATE_HZ);
-    SysTick->VAL = 0;
-    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
+tickless는 counter 최대 폭·idle 재확인 race·IRQ pending·조기 wake·elapsed tick와 next unblock 경계를 함께 처리합니다. macro 이름을 임의 C 함수로 다시 정의하고 idle_ticks를 SysTick LOAD에 곱하는 조각은 올바른 port가 아닙니다.
 
-    __WFI();
-
-    SysTick->CTRL &= ~SysTick_CTRL_ENABLE_Msk;
-    TickType_t elapsed = /* counter에서 계산 */;
-    vTaskStepTick(elapsed);
-
-    SysTick->LOAD = (configCPU_CLOCK_HZ / configTICK_RATE_HZ) - 1;
-    SysTick->VAL = 0;
-    SysTick->CTRL |= SysTick_CTRL_ENABLE_Msk;
-}
-```
-
-idle 시 SysTick을 *다음 wake까지의 시간*으로 재설정하고 `WFI`로 CPU를 잠재웁니다. 깨어난 뒤 경과 시간을 `vTaskStepTick`으로 보정합니다. 배터리 구동 시스템에서 핵심적인 power 절감 경로입니다.
+[Tickless Idle](/blog/embedded/rtos/practical-internals/part2-09-tickless)과 실제 V11.2.0 port의 vPortSuppressTicksAndSleep를 기준으로 구현합니다. hardware sleep·wake clock·power 결과는 board에서 따로 검증합니다.
 
 ## 새 아키텍처에 옮길 때 — 단계 절차
 
@@ -303,55 +140,27 @@ idle 시 SysTick을 *다음 wake까지의 시간*으로 재설정하고 `WFI`로
 5. **Critical section primitive** — IRQ disable/enable, atomic 명령 (LDREX/STREX, LR/SC, csrrci).
 6. **검증** — 단순 task 두 개로 ping-pong delay, semaphore·queue 단위 테스트, stack overflow hook 동작 확인.
 
-FreeRTOS는 `portable/` 아래 *port template*을 두고 있고, Zephyr는 `arch/template`이 있으니 그대로 복사해서 시작하는 편이 빠릅니다.
+지원되는 유사 port를 고정 revision에서 비교하되 존재를 확인하지 않은 arch/template 경로를 출발점으로 제시하지 않습니다. compiler·ABI·privilege·interrupt controller가 같은지 먼저 확인합니다.
 
 ## 자주 보는 함정
 
-> 경고 — EXC_RETURN 값 잘못
-
-Cortex-M에서 PendSV 진입 시 LR에 들어 있는 *EXC_RETURN*은 정확한 비트 패턴이어야 합니다. PSP·Thumb·non-FP 컨텍스트의 경우 `0xFFFFFFFD`입니다. 잘못 저장/복원하면 다음 task의 첫 명령에서 hard fault가 납니다.
-
-> 경고 — PendSV priority를 최고로 설정
-
-```c
-portNVIC_PENDSV_PRI = 0;   /* 최고 priority */
-```
-
-PendSV는 *최저 priority*여야 합니다. 그래야 다른 ISR이 모두 끝난 뒤에야 컨텍스트 스위치가 일어납니다. 잘못 설정하면 IRQ 안에서 컨텍스트 스위치가 발생해 어셈블리 상태가 깨집니다.
-
-> 경고 — Tick frequency 과도
-
-```c
-configTICK_RATE_HZ = 10000;   /* 100 µs tick */
-```
-
-매 tick의 SysTick ISR + 잠재적 PendSV로 overhead가 누적됩니다. 일반 시스템에서는 1000 Hz가 표준이고, tickless를 켜면 더 낮춰도 무방합니다.
-
-> 경고 — Critical section nesting 무시
-
-```c
-portENTER_CRITICAL();
-portENTER_CRITICAL();
-portEXIT_CRITICAL();    /* 여기서 IRQ가 풀려 버림 */
-portEXIT_CRITICAL();
-```
-
-nesting counter 없이 IRQ를 직접 enable/disable하면 안쪽 함수가 critical 안에서 또 critical을 호출했을 때 *가장 안쪽 EXIT*에서 IRQ가 풀려 race가 발생합니다.
-
-> 경고 — FPU lazy stacking 무시
-
-Cortex-M4F에서 FPU를 사용하면 EXC_RETURN의 FP 비트를 확인해 S16-S31을 *조건부로* save/restore해야 합니다. 무조건 저장하면 overhead가 늘고, 무조건 생략하면 다음 task가 *FPU garbage*를 가지고 시작합니다.
+- EXC_RETURN과 basic/extended frame·Thumb state를 혼동하지 않습니다.
+- tick rate는 해상도·IRQ overhead·sleep 요구로 선택하며 1000 Hz가 모든 시스템의 표준은 아닙니다.
+- nested critical의 mask/owner 규칙과 ISR API 경계를 구분합니다.
+- FPU/vector context와 AAPCS/RISC-V stack alignment를 실제 build로 검사합니다.
+- 최소 검증은 첫 실행·반복 switch·preemption·block/unblock·timeout/wrap·IRQ nesting·fault와 SMP/MPU 활성 조합을 포함해야 합니다.
 
 ## 정리
 
-- RTOS 포팅은 *여섯 가지 함수 + 컨텍스트 스위치 어셈블리*로 좁힙니다.
-- 초기 스택 프레임은 *컨텍스트 스위치가 한 번 일어났던 흔적*을 미리 만들어 두는 작업입니다.
-- 스케줄러 시작은 SVC나 trap을 거쳐 첫 task의 PSP를 set하고 진입점으로 점프합니다.
-- Tick은 *time slice 만료*와 *delay countdown*을 함께 처리하며, 필요 시 PendSV를 set해 스위치를 트리거합니다.
-- Critical section은 nesting counter + IRQ disable로 *중첩 안전*을 보장합니다.
-- RISC-V는 trap이 한 진입점으로 모이며, `mscratch`로 SP swap을 한 명령에 처리합니다.
-- Cortex-A는 컨텍스트와 mode가 많아 포팅 분량이 약 5배로 늘고, GIC와 generic timer가 추가됩니다.
-- SMP는 `pxCurrentTCB`를 코어별 배열로 두고 spinlock을 더하는 확장이며, 매크로 한 줄로 단일 코어 코드와 호환을 유지합니다.
+포팅은 정해진 여섯 함수의 작성만으로 끝나지 않습니다. source/config를 고정하고 frame·ABI·IRQ·timer·memory·library 통합을 단계별로 확인합니다. host fixture·object compile은 유용하지만 실제 새 board port의 실행 완료와 다릅니다.
+
+## 근거 자료
+
+- [FreeRTOS V11.2.0 ARM_CM4F](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0/portable/GCC/ARM_CM4F).
+- [FreeRTOS V11.2.0 RISC-V](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0/portable/GCC/RISC-V).
+- [Zephyr v3.7.0](https://github.com/zephyrproject-rtos/zephyr/tree/v3.7.0).
+
+
 
 다음 편은 [5-05 RTOS 선택 가이드](/blog/embedded/rtos/practical-internals/part5-05-selection-guide)에서 프로젝트별로 어떤 RTOS를 골라야 하는지 결정 매트릭스를 정리합니다.
 

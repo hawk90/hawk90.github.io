@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-> **"Deadlock은 네 조건이 동시에 성립할 때 발생합니다."** 그중 하나만 깨도 회피할 수 있습니다.
+Deadlock에는 자원·대기 모델에 따른 필요 조건이 있습니다. 네 조건이 가능한 시스템이라고 해서 모든 실행이 deadlock인 것은 아니며, 실제 owner·waiter·진행 가능성을 확인해야 합니다.
 
 ## Coffman의 네 조건 (1971)
 
@@ -20,7 +20,7 @@ topics: ["embedded", "embedded/rtos"]
 |---|---|---|
 | **Mutual Exclusion** | 자원이 한 task만 보유 | Mutex 대신 lock-free 사용 |
 | **Hold and Wait** | 자원 보유 중 다른 자원 요청 | Try-lock 또는 atomic acquire |
-| **No Preemption** | 강제 회수 불가 | Timeout과 rollback |
+| **No Preemption** | 보유 자원을 임의로 강제 회수하지 않음 | 안전한 상태 회수 protocol 검토 |
 | **Circular Wait** | A→B→C→A 순환 대기 | **Lock ordering** |
 
 네 가지를 모두 만족할 때만 deadlock이 성립합니다. 하나라도 깨면 회피할 수 있습니다.
@@ -48,16 +48,14 @@ Task1은 A를 잡은 채 B를 기다리고, Task2는 B를 잡은 채 A를 기다
 
 ## Wait-for Graph
 
-```text
-       T1 ──── waiting for ────→ T2
-        ↑                          │
-        │                       holds
-       holds              waiting for
-        │                          ↓
-       mtx_A    ←── waiting for ── mtx_B
-```
+단일 instance의 배타 자원과 실제 대기 관계를 모델링할 때 T1이 T2의 자원을 기다리고 T2도 T1의 자원을 기다리면 cycle을 확인할 수 있습니다. 여러 instance·timeout·취소·외부 event가 있으면 그 조건까지 포함해야 합니다.
 
-Graph에 cycle이 있으면 곧 deadlock입니다. RTOS는 이 graph가 동적으로 만들어지므로 컴파일 타임에 확인할 수 없습니다.
+| 기다리는 task | 자원 | 보유 task |
+| --- | --- | --- |
+| T1 | B | T2 |
+| T2 | A | T1 |
+
+실제 상태를 보는 wait-for graph와 lock 획득 이력을 보는 dependency graph도 다릅니다. 정적 분석이 모든 실행을 판단하지 못할 수 있지만 코드·lock 순서 규약으로 일부 위반을 찾아낼 수는 있습니다.
 
 ## 해결 1: Lock Ordering (가장 흔한 방법)
 
@@ -83,20 +81,29 @@ void any_task(void) {
 
 이 방식의 장점은 컴파일 타임에 도구나 문서로 검증할 수 있다는 점입니다. Linux 커널이나 DB 엔진에서도 표준 관행입니다.
 
-## 해결 2: Timeout으로 No Preemption 깨기
+## 해결 2: Timeout과 Rollback
 
-```c
-if (xSemaphoreTake(mtx_A, pdMS_TO_TICKS(100)) != pdPASS) {
-    log_warning("mtx_A acquire timeout — possible deadlock");
-    return ERROR_TIMEOUT;
-}
-if (xSemaphoreTake(mtx_B, pdMS_TO_TICKS(100)) != pdPASS) {
-    xSemaphoreGive(mtx_A);   // 보유 자원 release
-    return ERROR_TIMEOUT;
+timeout은 **기다리는 요청**을 실패시키는 것이지 다른 task가 보유한 mutex를 강제로 빼앗는 동작은 아닙니다. 실패 뒤 자신이 보유한 lock을 반납하고 부분 작업을 복구해야 순환 대기를 끊는 데 도움이 됩니다. timeout만으로 원인을 확정하거나 전체 복구를 자동 보장하지 않습니다.
+
+다음은 서로 다른 일반 mutex 두 개를 순서대로 획득하며 두 번째 실패 시 첫 번째를 반납하는 예제입니다. callback·ISR용 함수가 아니며 호출자는 성공 후 둘 다 반납해야 합니다.
+
+```c title="take-pair.c"
+#include <stdbool.h>
+#include "FreeRTOS.h"
+#include "semphr.h"
+bool take_pair(SemaphoreHandle_t a, SemaphoreHandle_t b,
+               TickType_t timeout) {
+    if (a == NULL || b == NULL || a == b) return false;
+    if (xSemaphoreTake(a, timeout) != pdTRUE) return false;
+    if (xSemaphoreTake(b, timeout) != pdTRUE) {
+        (void)xSemaphoreGive(a);
+        return false;
+    }
+    return true;
 }
 ```
 
-감지와 복구를 한 번에 처리할 수 있습니다. 모든 lock acquisition에 유한 timeout을 지정하고, `portMAX_DELAY` 사용은 자제해야 합니다.
+각 획득에 timeout을 따로 쓰므로 함수 전체의 대기 예산이 timeout 하나로 제한되지는 않습니다. 전체 deadline을 제한하려면 남은 시간 예산을 계산해 전달해야 합니다.
 
 ## 해결 3: Try-Lock과 Rollback으로 Hold and Wait 깨기
 
@@ -129,32 +136,11 @@ while (!try_acquire_all()) {
 }
 ```
 
-## 해결 4: Hierarchical Locking (Linux lockdep 방식)
+## 해결 4: Lock 순서 검증
 
-각 lock에 level을 부여합니다. 같은 level의 lock을 동시에 보유할 수 없고, 다른 level은 오름차순으로만 잡을 수 있습니다.
+application이 각 lock에 순위를 주고 task별 보유 순서를 검사하는 방법이 있습니다. 획득 실패 때는 보유 기록을 추가하지 않아야 하며, release·재귀·예외 경로의 기록도 일치해야 합니다.
 
-```c
-typedef struct {
-    SemaphoreHandle_t sem;
-    int level;
-    const char *name;
-} hier_mutex_t;
-
-bool hier_take(hier_mutex_t *m, TickType_t timeout) {
-    /* TLS 또는 TCB 확장에 현재 task의 보유 level set 보관 */
-    for (each held lock h) {
-        if (h.level >= m->level) {
-            panic("Lock order violation: hold %s (L%d), taking %s (L%d)",
-                  h.name, h.level, m->name, m->level);
-        }
-    }
-    xSemaphoreTake(m->sem, timeout);
-    record_held(m);
-    return true;
-}
-```
-
-Runtime에서 lock 순서를 검증하는 방식입니다. Linux lockdep이 이 기법으로 실제 deadlock이 발생하기 전에 위반을 잡아냅니다.
+Linux lockdep은 단순한 정수 level 검사만으로 구현되지 않습니다. lock class의 획득 의존성과 IRQ 사용 이력을 추적하고 관찰한 경로에서 잠재적인 순환 등을 검출합니다. [공식 설계](https://docs.kernel.org/locking/lockdep-design.html)의 가정과 검사 범위를 확인하며, application의 축약 level wrapper와 동일시하지 않습니다.
 
 ## Reader-Writer Lock Deadlock
 
@@ -166,9 +152,9 @@ read_lock(&rw);
 write_lock(&rw);   // ✗ Recursive read-then-write
 ```
 
-같은 task가 read lock을 보유한 상태에서 write lock을 요청하면 자기 자신을 기다리는 deadlock에 빠집니다. recursive variant나 lock upgrade API로 해결합니다.
+같은 task가 read lock을 보유한 상태에서 write lock을 요청하면 자기 자신을 기다리는 deadlock에 빠집니다. 해당 API가 지원하는 upgrade protocol이 있는지 확인합니다. 지원하지 않으면 read lock을 놓고 write lock을 획득한 뒤 상태를 재검사해야 합니다. 단순 recursive 변형으로 모든 read→write upgrade가 해결되지는 않습니다.
 
-## ABA 변형: Priority Inversion 결합
+## Priority Inversion과의 구분
 
 ```text
 Low task L:  mtx 보유, M에 의해 선점
@@ -180,22 +166,11 @@ High task H: mtx 대기 → L 못 풀고 M이 CPU → unbounded wait
 
 ## 검출 도구
 
-### FreeRTOS Trace + Sysview (Segger)
+### FreeRTOS Trace와 Task Snapshot
 
-```c
-/* configUSE_TRACE_FACILITY = 1 */
-TaskStatus_t arr[20];
-uxTaskGetSystemState(arr, 20, NULL);
+V11.2.0 TaskStatus_t에는 xEventListItem 필드가 없습니다. uxTaskGetSystemState의 반환 count와 buffer 크기를 확인해 task 상태를 수집할 수 있지만, blocked라는 상태만으로 기다리는 mutex·owner를 복원할 수는 없습니다. 필요한 object·take/give·timeout 이벤트를 지원되는 recorder나 application 계측으로 기록합니다.
 
-for (int i = 0; i < N; i++) {
-    if (arr[i].eCurrentState == eBlocked) {
-        printf("Task %s blocked on %p\n",
-               arr[i].pcTaskName, arr[i].xEventListItem);
-    }
-}
-```
-
-모든 task가 blocked 상태이고 tick도 진행되지 않으면 deadlock을 의심합니다.
+일부 task의 deadlock 중에도 idle·다른 task·tick은 계속 진행할 수 있습니다. tick이 멈춘다는 조건을 deadlock의 필요 조건으로 삼지 않습니다.
 
 ### Static Analysis (Coverity, Klocwork)
 
@@ -203,27 +178,7 @@ for (int i = 0; i < N; i++) {
 
 ### Runtime Watchdog
 
-```c
-void wd_task(void *p) {
-    for (;;) {
-        vTaskDelay(pdMS_TO_TICKS(1000));
-        if (system_alive_flag == 0) {
-            log_panic("Possible deadlock — resetting");
-            HAL_NVIC_SystemReset();
-        }
-        system_alive_flag = 0;
-    }
-}
-
-void main_task(void *p) {
-    for (;;) {
-        do_work();
-        system_alive_flag = 1;
-    }
-}
-```
-
-Lock acquisition timeout과 watchdog reset의 조합은 최후의 보루입니다.
+watchdog은 기대한 진행 신호가 사라졌을 때 대응하는 장치이며 deadlock만을 구별하는 검출기는 아닙니다. 특정 task의 shared bool 한 개를 volatile 없이 읽고 쓰는 예제로 동기화를 대신하지 않습니다. 실제 watchdog driver·heartbeat ownership·atomic 또는 kernel 전달 계약과 reset 뒤 복구를 설계해야 합니다.
 
 ## Livelock: Deadlock의 사촌
 
@@ -234,7 +189,7 @@ while (try_take_all() == false) {
 }
 ```
 
-Task A와 Task B가 동시에 release하고 다시 retry하는 패턴이 반복되면 영원히 진전이 없습니다. random backoff로 해결합니다.
+Task A와 Task B가 동시에 release하고 다시 retry하는 패턴이 반복되면 영원히 진전이 없습니다. random backoff가 충돌을 줄일 수 있지만 유한 시간 내 진행과 공정성을 보장하지는 않습니다. retry 한계와 취소·복구 정책도 필요합니다.
 
 ```c
 vTaskDelay(pdMS_TO_TICKS(rand() % 10));
@@ -248,7 +203,7 @@ vTaskDelay(pdMS_TO_TICKS(rand() % 10));
 xSemaphoreTake(mtx, portMAX_DELAY);   // ✗ deadlock 감지 불가
 ```
 
-Production code에는 반드시 유한한 timeout을 지정해야 합니다. Debug build에서만 무한 대기를 허용합니다.
+제품의 수명·종료·복구 계약에 따라 무한 대기가 적절한 event wait도 있습니다. 자원 대기 상한이 필요한 경로에는 유한 예산과 실패 처리를 설계합니다.
 
 > ⚠️ Recursive lock을 잘못 사용하는 경우
 
@@ -277,17 +232,22 @@ xSemaphoreTake(mtx_A, ...);
 xQueueReceive(q, &item, portMAX_DELAY);   // ✗ mtx_A 보유 중 무한 대기
 ```
 
-Lock hold time은 짧게 유지하고, blocking call 전에는 반드시 release합니다.
+lock 보유 중 block이 생기면 dependency와 상한을 함께 분석합니다. 보호해야 할 상태를 중간에 무조건 release하는 것 역시 정확성을 깨뜨릴 수 있습니다.
 
 ## 정리
 
-- Deadlock은 Coffman의 네 조건이 동시에 성립할 때 발생합니다.
+- Coffman의 네 조건은 필요 조건이며 실제 대기·owner와 진행 가능성을 함께 확인합니다.
 - Lock ordering이 가장 실용적인 해결책이며 모든 lock에 전역 순서를 부여합니다.
 - Timeout과 rollback으로 감지하고 복구할 수 있습니다.
 - Hierarchical lock으로 runtime에 lock 순서를 검증할 수 있습니다.
-- 모든 production lock에는 유한 timeout과 watchdog을 함께 두어야 합니다.
+- timeout·watchdog은 요구에 맞춰 선택하고 rollback·복구까지 설계합니다.
 
-다음 part에서는 memory management를 다룹니다. heap, stack, MPU 순서로 살펴봅니다.
+다음 [3-11 Stream/Message Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer)를 거쳐 Part 4의 memory management로 이어집니다.
+
+## 근거 자료
+
+- [Linux lockdep design](https://docs.kernel.org/locking/lockdep-design.html): class·dependency·IRQ 규칙과 검증 가정.
+- [FreeRTOS V11.2.0 task.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/task.h), [semphr.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/semphr.h): snapshot 필드·mutex 획득 계약.
 
 ## 관련 항목
 
