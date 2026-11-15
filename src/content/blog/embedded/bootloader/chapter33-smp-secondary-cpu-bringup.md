@@ -48,7 +48,7 @@ DTB를 그대로 두고 부팅한 커널 로그입니다(CPU 기능 줄은 생�
 [    0.380175] SMP: Total of 4 processors activated.
 ```
 
-앞부분 다섯 줄은 [Ch 31](/blog/embedded/bootloader/chapter31-tfa-bl31-runtime)·[Ch 32](/blog/embedded/bootloader/chapter32-psci-smccc)에서 U-Boot `smc`로 직접 받은 값과 같습니다. 커널은 `/psci` 노드의 `method`로 SMC를 골랐고(`probing for conduit method from DT`), `PSCI_VERSION`으로 1.1을, `SMCCC_VERSION`으로 v1.5를 확인했습니다. `MIGRATE_INFO_TYPE not supported`는 Trusted OS 이동 기능을 물었다가 -1을 받은 것입니다. U-Boot에서 `smc 0x84000006`을 보내도 `0xffffffffffffffff`가 돌아왔습니다. TF-A는 SPD(Trusted OS 디스패처)가 `psci_register_spd_pm_hook()`(`lib/psci/psci_common.c`)으로 등록될 때만 `PSCI_MIG_INFO_TYPE`을 지원 목록(`psci_caps`)에 넣는데, 이 빌드에는 SPD가 없습니다.
+`psci:` 다섯 줄은 [Ch 31](/blog/embedded/bootloader/chapter31-tfa-bl31-runtime)·[Ch 32](/blog/embedded/bootloader/chapter32-psci-smccc)에서 U-Boot `smc`로 직접 받은 값과 같습니다. 커널은 `/psci` 노드의 `method`로 SMC를 골랐고(`probing for conduit method from DT`), `PSCI_VERSION`으로 1.1을, `SMCCC_VERSION`으로 v1.5를 확인했습니다. `MIGRATE_INFO_TYPE not supported`는 Trusted OS 이동 기능을 물었다가 -1을 받은 것입니다. U-Boot에서 `smc 0x84000006`을 보내도 `0xffffffffffffffff`가 돌아왔습니다. TF-A는 SPD(Trusted OS 디스패처)가 `psci_register_spd_pm_hook()`(`lib/psci/psci_common.c`)으로 등록될 때만 `PSCI_MIG_INFO_TYPE`을 지원 목록(`psci_caps`)에 넣는데, 이 빌드에는 SPD가 없습니다.
 
 `smp: Bringing up secondary CPUs ...`(0.227초)부터 `Brought up 1 node, 4 CPUs`(0.380초)까지가 커널이 `enable-method = "psci"`인 CPU 1~3을 PSCI로 올린 구간입니다. Ch 32에서 손으로 보낸 요청을 커널이 대신 한 셈입니다. CPU 1이 올라오는 데 약 0.1초 걸린 것은 QEMU TCG(소프트웨어 에뮬레이션) 위의 시간이므로 실제 하드웨어의 시간으로 읽으면 안 됩니다. 이 로그만으로는 각 `CPU_ON`이 언제 호출됐는지 알 수 없고, CPU가 커널 코드에 도착한 시점(`Booted secondary processor`)만 보입니다.
 
@@ -83,7 +83,7 @@ CPU 1은 안내문이 아예 없고, CPU 2는 "사물함에서 열쇠를 가져�
 
 ## spin-table 방식 — 사물함과 wfe
 
-spin-table에 대한 Linux 6.12 문서의 요구는 구체적입니다. spin-table CPU의 노드에는 `cpu-release-addr`가 있어야 하고, 그 주소는 "a naturally-aligned 64-bit zero-initalised memory location"입니다. CPU들은 "in a reserved area of memory (communicated to the kernel by a /memreserve/ region in the device tree)"에서 그 주소를 읽으며 돌고, "A wfe instruction may be inserted to reduce the overhead of the busy-loop and a sev will be issued by the primary CPU"입니다. 읽은 값이 0이 아니면 그 주소로 점프합니다. 위 실험의 CPU 2는 첫 조건(`cpu-release-addr`)부터 어겨서 거절됐습니다.
+spin-table에 대한 Linux 6.12 문서의 요구는 구체적입니다. spin-table CPU의 노드에는 `cpu-release-addr`가 있어야 하고, 그 주소는 "a naturally-aligned 64-bit zero-initialised memory location"입니다. CPU들은 "in a reserved area of memory (communicated to the kernel by a /memreserve/ region in the device tree)"에서 그 주소를 읽으며 돌고, "A wfe instruction may be inserted to reduce the overhead of the busy-loop and a sev will be issued by the primary CPU"입니다. 읽은 값이 0이 아니면 그 주소로 점프합니다. 위 실험의 CPU 2는 첫 조건(`cpu-release-addr`)부터 어겨서 거절됐습니다.
 
 U-Boot v2024.04에는 이 약속을 지키는 구현이 있습니다. 대기 루프 `arch/arm/cpu/armv8/spin_table_v8.S`는 문서의 문장을 그대로 네 줄로 옮긴 모양입니다.
 
@@ -104,7 +104,7 @@ spin_table_reserve_end:
 ENDPROC(spin_table_secondary_jump)
 ```
 
-`wfe`로 잠들었다가 깨면 `spin_table_cpu_release_addr`를 읽고, 0이면 다시 잠들고, 아니면 그 주소로 갑니다. release 주소는 `.align 3`(8바이트 정렬)에 `.quad 0`으로 0에서 시작합니다. 문서의 "naturally-aligned 64-bit zero-initalised"와 그대로 맞습니다.
+`wfe`로 잠들었다가 깨면 `spin_table_cpu_release_addr`를 읽고, 0이면 다시 잠들고, 아니면 그 주소로 갑니다. release 주소는 `.align 3`(8바이트 정렬)에 `.quad 0`으로 0에서 시작합니다. 문서의 "naturally-aligned 64-bit zero-initialised"와 그대로 맞습니다.
 
 DTB 쪽은 `arch/arm/cpu/armv8/spin_table.c`의 `spin_table_update_dt()`가 채웁니다. 이 함수는 첫 루프에서 **모든** CPU 노드의 `enable-method`가 `"spin-table"`인지 확인하고, 하나라도 아니면 "just return successfully to not disturb other methods, like psci"라는 주석대로 아무것도 하지 않습니다. 모두 spin-table이면 각 노드에 `cpu-release-addr`를 `spin_table_cpu_release_addr`의 주소로 쓰고, `spin_table_reserve_begin`~`spin_table_reserve_end`를 `fdt_add_mem_rsv()`로 `/memreserve/`에 넣은 뒤 `Reserved memory region for spin-table: addr=%lx size=%lx`를 찍습니다. 문서가 요구한 "reserved area"와 "contained in the reserved region"이 이 두 줄입니다.
 

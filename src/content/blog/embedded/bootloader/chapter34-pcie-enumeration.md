@@ -67,7 +67,7 @@ scan으로 장치가 *bind*되는 것과 드라이버가 *probe*되는 것은 �
  bootdev       1  [   ]   nvme_bootdev          |       `-- nvme#0.blk#1.bootdev
 ```
 
-U-Boot v2024.04 문서의 표현도 같습니다. `uclass_get_device()`가 PCI bus를 probe하고 그 probe가 bus를 scan하며, 장치는 쓰이기 전까지 probe되지 않습니다. 즉 "PCI 열거가 끝났다"와 "NVMe를 읽을 수 있다"는 따로 확인해야 합니다.
+U-Boot v2024.04 문서는 `uclass_get_device()`가 PCI bus를 probe하고, 그 probe가 bus를 scan해 장치를 bind한다고 설명합니다. 문서의 lazy probe 문장은 bus에 대한 것이고, 장치 드라이버가 쓰일 때 probe된다는 것은 위 `dm tree` 결과로 확인한 사실입니다. 즉 "PCI 열거가 끝났다"와 "NVMe를 읽을 수 있다"는 따로 확인해야 합니다.
 
 ## 장치 목록과 bridge가 여는 window
 
@@ -197,7 +197,7 @@ Buses 00-00
 2   0x0000000040000000 0x0000000040000000 0x0000000040000000  mem sysmem 
 ```
 
-`ranges`에는 세 window가 있습니다. I/O 64 KiB, 32-bit memory 0x10000000부터 0x2eff0000(약 751 MiB), 그리고 0x8000000000부터 512 GiB인 64-bit memory(첫 셀 0x03000000)입니다. 그런데 `pci regions`에는 64-bit window가 없습니다. 2번 줄은 DMA용으로 추가한 DRAM 영역입니다.
+`ranges`에는 세 window가 있습니다. I/O 64 KiB, 32-bit memory 0x10000000부터 0x2eff0000(약 752 MiB), 그리고 0x8000000000부터 512 GiB인 64-bit memory(첫 셀 0x03000000)입니다. 그런데 `pci regions`에는 64-bit window가 없습니다. 2번 줄은 DMA용으로 추가한 DRAM 영역입니다.
 
 ### 1 GiB BAR가 32-bit window에 들어가지 않는다
 
@@ -219,7 +219,7 @@ In:    serial,usbkbd
 		}
 ```
 
-남은 window는 751 MiB짜리 하나이고, 1 GiB BAR는 1 GiB 정렬로 그 안에 들어갈 수 없습니다. 256 MiB BAR는 0x20000000에 놓였습니다. 64-bit BAR이지만 위 DWORD에 0을 써서 4 GiB 아래에 둡니다.
+남은 window는 약 752 MiB짜리 하나이고, 1 GiB BAR는 1 GiB 정렬로 그 안에 들어갈 수 없습니다. 256 MiB BAR는 0x20000000에 놓였습니다. 64-bit BAR이지만 위 DWORD에 0을 써서 4 GiB 아래에 둡니다.
 
 ```text
 => pci bar 0.1.0
@@ -229,6 +229,7 @@ ID   Base                Size                Width  Type
  1   0x0000000000001000  0x0000000000000100  32     I/O   
  2   0xffffffffc0000000  0x0000000040000000  64     MEM   Prefetchable
 => pci bar 0.2.0
+(헤더와 BAR 0·1 줄 생략)
  2   0x0000000020000000  0x0000000010000000  64     MEM   Prefetchable
 ```
 
@@ -326,7 +327,7 @@ No such bus
 class 0x050210은 memory controller / CXL(0x0502), prog-if 0x10입니다. extended config space 0x100부터는 capability 사슬이 이어집니다.
 
 ```text
-=> md.l 0x4010d00100 0x40
+=> md.l 0x4010d00100 0x80
 4010d00100: 13c10023 03c31e98 001e0000 00000002  #...............
 4010d00110: 00020000 00000000 00000000 1000004b  ............K...
 4010d00120: 00000000 00000000 00000000 00000000  ................
@@ -339,7 +340,7 @@ class 0x050210은 memory controller / CXL(0x0502), prog-if 0x10입니다. extend
 4010d00190: 2001002e 00000001 00000000 00000000  ... ............
 ```
 
-(0x200의 AER 이후 생략)
+(0x1a0–0x1f0의 0 줄과 0x200의 AER부터 0x2f0까지 생략)
 
 extended capability header는 하위 16비트가 ID, 상위 12비트가 다음 offset입니다. DVSEC(ID 0x23)은 header1에 vendor(0x1e98 = CXL)·revision·length, header2 하위 16비트에 DVSEC ID가 있습니다. Linux v6.12의 `drivers/cxl/cxlpci.h`와 `include/uapi/linux/pci_regs.h` 정의로 읽으면 다음과 같습니다.
 

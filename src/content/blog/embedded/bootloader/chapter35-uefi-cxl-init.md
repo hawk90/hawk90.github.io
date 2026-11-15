@@ -35,17 +35,18 @@ U-Boot은 [Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)에서 `p
 ```text
 [    0.484469] acpi ACPI0016:00: _OSC: OS supports [CXL11PortRegAccess CXL20PortDevRegAccess CXLProtocolErrorReporting CXLNativeHot]
 [    0.487809] acpi ACPI0016:00: _OSC: OS now controls [CXLMemErrorReporting]
-[    0.803472] pci 0000:0c:00.0: [8086:7075] type 01 class 0x060400 PCIe Root Port
-[    0.828242] pci 0000:0d:00.0: [8086:0d93] type 00 class 0x050210 PCIe Endpoint
-[    0.828509] pci 0000:0d:00.0: BAR 0 [mem 0x10200000-0x1020ffff 64bit]
-[    0.828644] pci 0000:0d:00.0: BAR 2 [mem 0x10210000-0x10210fff 64bit]
-[    0.828779] pci 0000:0d:00.0: BAR 4 [mem 0x10211000-0x10211fff]
+[    0.491581] acpi ACPI0016:00: ECAM at [mem 0x4010c00000-0x4010dfffff] for [bus 0c-0d]
+[    0.496964] pci 0000:0c:00.0: [8086:7075] type 01 class 0x060400 PCIe Root Port
+[    0.505817] pci 0000:0d:00.0: [8086:0d93] type 00 class 0x050210 PCIe Endpoint
+[    0.506011] pci 0000:0d:00.0: BAR 0 [mem 0x10200000-0x1020ffff 64bit]
+[    0.506182] pci 0000:0d:00.0: BAR 2 [mem 0x10210000-0x10210fff 64bit]
+[    0.506332] pci 0000:0d:00.0: BAR 4 [mem 0x10211000-0x10211fff]
 ...
 [   13.926929]  pci0000:0c: host supports CXL
 [   14.022995] cxl_pci 0000:0d:00.0: enabling device (0000 -> 0002)
 ```
 
-Ch 34에서 ECAM으로 재 본 BAR 크기 64 KiB·4 KiB·4 KiB가 커널 로그의 BAR 범위와 같습니다. 게스트의 ACPI 테이블 목록은 다음과 같습니다.
+ECAM 범위 0x4010c00000은 Ch 34에서 `md`로 직접 읽은 bus 12의 주소와 같습니다. Ch 34에서 재 본 BAR 크기 64 KiB·4 KiB·4 KiB도 커널 로그의 BAR 범위와 같습니다. 게스트의 ACPI 테이블 목록은 다음과 같습니다.
 
 ```text
 # ls /sys/firmware/acpi/tables/
@@ -137,11 +138,21 @@ decoder0.0  decoder1.0	decoder2.0  decoder2.1	decoder2.2  decoder2.3	endpoint2  
 | 객체 | 정체 | 부팅 직후 |
 | --- | --- | --- |
 | decoder0.0 | root decoder, CFMWS 하나에 대응 | start 1 TiB, size 4 GiB (CEDT 값) |
-| decoder1.0 | port1(host bridge)의 HDM decoder | start 0, size 0 |
+| decoder1.0 | port1(host bridge)의 passthrough decoder (아래 설명) | start 0, size 0 |
 | decoder2.0–2.3 | endpoint2(Type 3 장치)의 HDM decoder 4개 | start 0, size 0, `mode=none` |
 | mem0 | memory device | `ram/size=0x10000000` |
 
-endpoint decoder가 4개인 것은 DVSEC의 HDM_Count(1)가 아니라 component register 안 HDM decoder capability의 개수입니다. QEMU v11.1.0의 `CXL_HDM_DECODER_COUNT`가 4이고, Linux `cxl/core/hdm.c`는 이 capability에서 `decoder_count`를 읽습니다. 두 port 모두 `decoders_committed`가 0입니다. 이 구성의 펌웨어는 HDM decoder를 하나도 프로그래밍하지 않았습니다.
+endpoint decoder가 4개인 것은 DVSEC의 HDM_Count(1)가 아니라 component register 안 HDM decoder capability의 개수입니다. QEMU v11.1.0의 `CXL_HDM_DECODER_COUNT`가 4이고, Linux `cxl/core/hdm.c`는 이 capability에서 `decoder_count`를 읽습니다. port1 쪽은 하드웨어 decoder가 아닙니다. dynamic debug를 켜고 port1 드라이버를 unbind·bind하면 커널이 이렇게 남깁니다.
+
+```text
+[   22.984864] pcieport 0000:0c:00.0: found HDM decoder capability (0x128)
+[   22.985085] pcieport 0000:0c:00.0: dport added to port1
+[   22.985129] cxl_port port1: HDM decoder registers not implemented
+[   22.985164] cxl_port port1: Fallback to passthrough decoder
+[   22.985524] cxl decoder1.0: Added to port port1
+```
+
+Linux v6.12 `drivers/cxl/port.c`의 `cxl_switch_port_probe()`는 port에서 HDM decoder 레지스터를 찾지 못하고(`-ENODEV`) downstream port가 하나뿐이면 `devm_cxl_add_passthrough_decoder()`로 소프트웨어 decoder 하나를 만듭니다. decoder1.0이 그것이고, 하드웨어에 commit할 대상이 없습니다. 실제 HDM decoder는 endpoint의 4개입니다. 부팅 직후 endpoint2의 `decoders_committed`는 0이고 decoder2.0–2.3은 모두 size 0입니다. 이 구성의 펌웨어는 endpoint HDM decoder를 하나도 프로그래밍하지 않았습니다.
 
 Linux의 CXL BIOS/EFI 문서도 "Programming of HDM decoders and switch ports is not required"라고 적습니다. 펌웨어가 미리 decoder를 설정하고 잠그는 플랫폼도 있지만, 이 구성은 그렇지 않습니다. 나머지는 OS가 맡습니다.
 
@@ -226,7 +237,7 @@ static int cxl_region_invalidate_memregion(struct cxl_region *cxlr)
 }
 ```
 
-region을 새로 켜면 같은 HPA에 남아 있을 수 있는 CPU cache line을 무효화해야 합니다. 이 수단은 `mm/Kconfig`의 `ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`으로 표시됩니다. v6.12에서 `arch/x86/Kconfig`는 이 심볼을 select하지만 `arch/arm64/Kconfig`에는 이 심볼이 없습니다. 우회 옵션 `CONFIG_CXL_REGION_INVALIDATION_TEST`의 Kconfig 도움말은 이 옵션이 데이터 무결성 안전장치를 끈다고 설명합니다. Debian 커널은 이 옵션을 켜지 않았습니다.
+region을 새로 켜면 같은 HPA에 남아 있을 수 있는 CPU cache line을 무효화해야 합니다. 이 수단은 `lib/Kconfig`의 `ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`으로 표시됩니다. v6.12에서 `arch/x86/Kconfig`는 이 심볼을 select하지만 `arch/arm64/Kconfig`에는 이 심볼이 없습니다. 우회 옵션 `CONFIG_CXL_REGION_INVALIDATION_TEST`의 Kconfig 도움말은 이 옵션이 데이터 무결성 안전장치를 끈다고 설명합니다. Debian 커널은 이 옵션을 켜지 않았습니다.
 
 ```text
 CONFIG_CXL_REGION=y
@@ -272,7 +283,7 @@ SRAT는 DRAM 4 GiB와 `maxmem`용 hotplug 범위만 기술하고, 1 TiB의 CXL w
 
 ## 근거 자료
 
-- Linux v6.12 소스: `include/acpi/actbl1.h`(CEDT 구조와 `ACPI_CEDT_CFMWS_RESTRICT_*`), `drivers/cxl/core/region.c`(`cxl_region_invalidate_memregion`, `commit_store`, autodiscovery 경로), `drivers/cxl/core/hdm.c`, `drivers/cxl/Kconfig`(`CXL_REGION_INVALIDATION_TEST`), `drivers/acpi/numa/srat.c`(`acpi_parse_cfmws`), `mm/Kconfig`·`arch/x86/Kconfig`·`arch/arm64/Kconfig`, `Documentation/ABI/testing/sysfs-bus-cxl`.
+- Linux v6.12 소스: `include/acpi/actbl1.h`(CEDT 구조와 `ACPI_CEDT_CFMWS_RESTRICT_*`), `drivers/cxl/core/region.c`(`cxl_region_invalidate_memregion`, `commit_store`, autodiscovery 경로), `drivers/cxl/core/hdm.c`, `drivers/cxl/port.c`(`cxl_switch_port_probe`), `drivers/cxl/Kconfig`(`CXL_REGION_INVALIDATION_TEST`), `drivers/acpi/numa/srat.c`(`acpi_parse_cfmws`), `lib/Kconfig`·`arch/x86/Kconfig`·`arch/arm64/Kconfig`, `Documentation/ABI/testing/sysfs-bus-cxl`.
 - QEMU v11.1.0 소스: `hw/acpi/cxl.c`(`cxl_build_cedt`, `cedt_build_chbs`, `cedt_build_cfmws`), `hw/arm/virt-acpi-build.c`, `include/hw/cxl/cxl_component.h`(`CXL_HDM_DECODER_COUNT`), `docs/system/devices/cxl.rst`.
 - [Linux CXL CEDT](https://docs.kernel.org/driver-api/cxl/platform/acpi/cedt.html): CHBS·CFMWS와 Restrictions 비트.
 - [Linux CXL BIOS/EFI Configuration](https://docs.kernel.org/driver-api/cxl/platform/bios-and-efi.html): 펌웨어의 decoder 사전 프로그래밍이 필수가 아니라는 경계.
