@@ -265,10 +265,10 @@
   pattern: 'mm/Kconfig[^\n]{0,20}ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION'
   correction: 'v6.12에서 ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION은 lib/Kconfig에 정의되고 arch/x86/Kconfig가 select한다'
   source: 'Linux v6.12 lib/Kconfig:680, arch/x86/Kconfig:76'
-  fixed_in: aa7b83b6
+  fixed_in: f3b70730
 
 - id: linux-cxl-qemu-hb-decoder-hdm
   pattern: 'decoder1\.0 \| port1\(host bridge\)의 HDM decoder'
   correction: 'QEMU pxb-cxl 단일 dport에서 port1의 decoder1.0은 cxl_switch_port_probe의 passthrough decoder ("Fallback to passthrough decoder")'
   source: 'Linux v6.12 drivers/cxl/port.c cxl_switch_port_probe; guest dyndbg log'
-  fixed_in: aa7b83b6
+  fixed_in: f3b70730
