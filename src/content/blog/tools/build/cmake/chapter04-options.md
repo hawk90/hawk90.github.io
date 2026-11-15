@@ -19,7 +19,9 @@ topics: ["tools", "tools/build"]
 cmake -B build -DCMAKE_BUILD_TYPE=Debug -DENABLE_TESTS=ON -DUSE_SYSTEM_ZLIB=OFF
 ```
 
-CMake의 답은 *캐시*입니다. `cmake -B build`가 끝나는 순간, *그때 사용된 모든 설정*이 `build/CMakeCache.txt`라는 파일에 저장됩니다. 다음 호출에서 CMake는 이 캐시를 *기본값으로* 가져옵니다. `-D`로 새 값을 명시한 변수만 갱신됩니다.
+CMake의 답은 *캐시*입니다. 캐시 항목은 `build/CMakeCache.txt`에 저장되어 다음 구성 호출에서도 유지됩니다. 일반 변수나 타겟 속성까지 모두 이 파일에 저장되는 것은 아닙니다. `-D`로 캐시 값을 바꿀 수 있고, 프로젝트의 `FORCE` 설정이나 탐색 로직도 값을 갱신할 수 있습니다.
+
+실행 기준은 CMake 4.4.4·Ninja 1.13.2·macOS·AppleClang 21입니다. 완성 예제의 최소 정책 기준은 3.25입니다. 이전 버전이나 Windows에서 실행한 결과는 아닙니다.
 
 ```bash
 # 처음 — 모든 설정 명시
@@ -33,7 +35,7 @@ cmake -B build -DENABLE_TESTS=OFF        # 변경할 것만
 이게 *캐시 변수*의 첫 용도입니다. 그 외에도 캐시는 두 가지 역할을 더 합니다.
 
 - **사용자 옵션**: 프로젝트가 사용자에게 노출하는 설정(`ENABLE_TESTS`, `BUILD_SHARED_LIBS` 등). `cmake-gui`나 `ccmake`에 보이는 모든 항목이 캐시 변수입니다.
-- **탐지 결과 저장**: `find_package`가 찾은 라이브러리 경로, 컴파일러 위치, 시스템 라이브러리 버전 — 한 번 탐지한 결과를 *재탐지 없이* 재사용합니다. 큰 프로젝트에서 `find_package`가 수십 개 있으면, 캐시가 없을 때 매번 *수십 초의 탐지 시간*이 추가됩니다.
+- **탐지 결과 저장**: 탐색 명령이나 모듈이 캐시한 경로를 다음 구성에서 재사용합니다. 모든 `find_package()` 호출의 결과가 통째로 캐시되거나 모듈 실행 자체가 생략된다는 뜻은 아닙니다. 탐색 시간을 비교하려면 같은 환경의 새 빌드 디렉터리와 재구성 로그를 별도로 측정합니다.
 
 캐시 파일은 *그냥 텍스트*입니다. 직접 열어 보면 CMake가 무엇을 알고 있는지 한눈에 보입니다.
 
@@ -118,17 +120,13 @@ set(MY_VAR "new_value" CACHE STRING "설명" FORCE)
 ```cmake
 option(ENABLE_TESTS "Enable unit tests" ON)
 
-# 위 한 줄은 다음과 동치
+# 캐시가 없는 상태에서 BOOL 기본값을 제공하는 비슷한 예
 set(ENABLE_TESTS ON CACHE BOOL "Enable unit tests")
 ```
 
-겉모습은 비슷하지만 둘 사이엔 *세 가지 미묘한 차이*가 있습니다.
+`option()`은 켜기/끄기 설정을 제공하며, 새 캐시 항목을 만들 때 BOOL 타입을 사용합니다. `yes`도 참으로 해석하므로 `option(X "" yes)`는 유효합니다. 다중 선택 문자열은 `set(... CACHE STRING ...)`으로 구분합니다.
 
-1. **타입 강제**. `option()`은 *반드시 BOOL*입니다. `STRING` 같은 다른 타입을 못 만듭니다. STRING이 필요하면 `set(... CACHE STRING ...)`이 답.
-2. **`ON`/`OFF` 외 값 거부**. `option(X "" yes)`는 동작하지 않습니다. 정해진 키워드만 받습니다.
-3. **CMake 3.13+ 정책 차이**. 3.13부터 `option`은 *일반 변수가 이미 같은 이름으로 정의되어 있으면* 그걸 그대로 사용합니다 (`CMP0077`). 그 이전엔 캐시 변수가 일반 변수를 덮어썼습니다.
-
-세 번째 점이 종종 사고를 부릅니다. CMake 호출 전에 일반 변수로 미리 값을 설정해 두면, `option()`이 그걸 보고 캐시 작성을 *건너뛸 수* 있습니다. 의도된 동작이지만 모르고 만나면 헷갈립니다.
+일반 변수가 이미 존재할 때는 [`CMP0077`](https://cmake.org/cmake/help/v4.4/policy/CMP0077.html)의 상태가 중요합니다. 이 글의 최소 버전 3.25 선언은 해당 정책을 NEW로 설정하므로, `set(X OFF)` 뒤의 `option(X "" ON)`은 일반 변수 OFF를 보존하고 새 캐시를 만들지 않습니다. 단순히 실행 중인 CMake가 3.13 이상이라는 조건만으로 같은 정책 상태를 보장하지는 않습니다. [option() 문서](https://cmake.org/cmake/help/v4.4/command/option.html)를 기준으로 캐시와 일반 변수를 구분합니다.
 
 ### `option()` vs `set(... CACHE STRING ...)` — 언제 무엇을
 
@@ -140,11 +138,15 @@ set(ENABLE_TESTS ON CACHE BOOL "Enable unit tests")
 | *파일 경로* | `set(NAME "/path/file" CACHE FILEPATH "doc")` |
 | *사용자가 보면 안 되는 내부* | `set(NAME val CACHE INTERNAL "doc")` |
 
-`set_property(CACHE ... PROPERTY STRINGS ...)`이 흥미롭습니다. STRING 캐시 변수에 *허용 값 목록*을 붙이면 `cmake-gui`나 `ccmake`에 *드롭다운*으로 표시됩니다. 사용자가 임의 문자열을 입력하는 사고를 막아 줍니다.
+`set_property(CACHE ... PROPERTY STRINGS ...)`는 GUI에 선택 목록을 제공하는 메타데이터입니다. 명령줄에서 다른 값을 넣는 것을 막는 검증 규칙은 아닙니다. [STRINGS 속성](https://cmake.org/cmake/help/v4.4/prop_cache/STRINGS.html)으로 후보를 안내하고, 허용 여부는 별도로 검사합니다.
 
 ```cmake
 set(MYAPP_BACKEND "OpenGL" CACHE STRING "Rendering backend")
 set_property(CACHE MYAPP_BACKEND PROPERTY STRINGS OpenGL Vulkan DirectX)
+set(SUPPORTED_BACKENDS OpenGL Vulkan DirectX)
+if(NOT MYAPP_BACKEND IN_LIST SUPPORTED_BACKENDS)
+    message(FATAL_ERROR "Unsupported backend: ${MYAPP_BACKEND}")
+endif()
 ```
 
 ### 일반적인 옵션 패턴
@@ -273,7 +275,7 @@ feature_summary(WHAT ALL)
 
 ### 기본 빌드 타입 설정
 
-빌드 타입을 지정하지 않으면 빈 문자열이 됩니다. 기본값을 설정하는 패턴입니다.
+단일 구성 생성기의 빌드 타입은 캐시·환경·toolchain의 영향을 받습니다. 아래는 기존 값이 없을 때 Release 기본값을 제공하는 패턴입니다.
 
 ```cmake
 # 단일 설정 생성기(Make, Ninja)에서만 유효
@@ -292,27 +294,32 @@ endif()
 
 ### 빌드 타입별 설정
 
-**if문 방식** (단일 설정 생성기에서만 동작):
+아래 sanitizer 옵션은 GCC·Clang 계열을 전제로 합니다. MSVC의 옵션이나 지원 범위와 동일하지 않습니다. 실제 사용 시 두 방식 모두 해당 컴파일러인지 먼저 검사합니다.
+
+**if문 방식** (단일 설정 생성기):
 
 ```cmake
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")
+if(CMAKE_BUILD_TYPE STREQUAL "Debug" AND
+   CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
     target_compile_options(myapp PRIVATE -fsanitize=address)
     target_link_options(myapp PRIVATE -fsanitize=address)
 endif()
 ```
 
-**제너레이터 표현식 방식** (모든 생성기에서 동작):
+**제너레이터 표현식 방식** (구성 선택에 독립적):
 
 ```cmake
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
 target_compile_options(myapp PRIVATE
     $<$<CONFIG:Debug>:-fsanitize=address,undefined>
 )
 target_link_options(myapp PRIVATE
     $<$<CONFIG:Debug>:-fsanitize=address,undefined>
 )
+endif()
 ```
 
-제너레이터 표현식 방식을 권장합니다. Visual Studio에서도 Debug 빌드 시에만 sanitizer가 활성화됩니다.
+제너레이터 표현식은 여러 구성 중 Debug에만 옵션을 붙이는 데 사용합니다. 생성기 호환성과 컴파일러의 sanitizer 지원은 별도로 확인합니다. 아래 완성 예제에서는 sanitizer 실행을 주장하지 않고 캐시와 설정 헤더만 검증합니다.
 
 ---
 
@@ -365,7 +372,7 @@ target_include_directories(myapp PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 #define VERSION_PATCH 0
 
 #define ENABLE_FEATURE_X
-/* #undef ENABLE_FEATURE_Y */
+#define ENABLE_FEATURE_Y 0
 
 #endif
 ```
@@ -374,12 +381,14 @@ target_include_directories(myapp PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 | 템플릿 | 결과 (값이 참) | 결과 (값이 거짓/미정의) |
 |--------|---------------|----------------------|
-| `@VAR@` | 변수 값 그대로 | 빈 문자열 |
-| `${VAR}` | 변수 값 그대로 | 빈 문자열 (기본 모드) |
-| `#cmakedefine VAR` | `#define VAR <값>` | `/* #undef VAR */` |
+| `@VAR@` | 변수 값 그대로 | OFF·0도 그대로, 미정의이면 빈 문자열 |
+| `${VAR}` | 변수 값 그대로 | OFF·0도 그대로, 미정의이면 빈 문자열 (기본 모드) |
+| `#cmakedefine VAR` | `#define VAR` | `/* #undef VAR */` |
 | `#cmakedefine01 VAR` | `#define VAR 1` | `#define VAR 0` |
 
 `@VAR@`과 `${VAR}` 두 형태가 같은 효과를 갖는데, 굳이 둘이 있는 이유는 *셸 스크립트 템플릿*과의 호환성입니다. 셸 스크립트는 `$`을 자기 변수로 쓰기 때문에 `${VAR}`이 의도와 다르게 풀릴 수 있습니다. 그런 경우 `configure_file(... @ONLY)`을 써서 `@...@`만 치환되도록 강제합니다.
+
+일반 `#cmakedefine`은 변수의 값을 뒤에 자동으로 붙이지 않습니다. 문자열 값까지 출력하려면 `#cmakedefine VAR "@VAR@"`처럼 템플릿에 적습니다. 반면 `#cmakedefine01`은 정의를 항상 만들고 값만 0/1로 바꾸므로 C/C++에서는 `#ifdef` 대신 `#if VAR`로 검사합니다. [configure_file 변환 규칙](https://cmake.org/cmake/help/v4.4/command/configure_file.html#transformations)을 기준으로 읽습니다.
 
 ```cmake
 configure_file(
@@ -396,8 +405,8 @@ configure_file(
 | | `configure_file()` | `file(GENERATE ...)` |
 |---|---|---|
 | 평가 시점 | *CMake 구성 시점* | *빌드 시스템 생성 시점* |
-| 제너레이터 식 (`$<...>`) | *지원 안 함* (리터럴로 나옴) | *지원* — 빌드 시점에 풀림 |
-| 입력 | `.in` 파일 또는 `INPUT` 옵션 | `CONTENT` 인라인 또는 `INPUT` |
+| 제너레이터 식 (`$<...>`) | *지원 안 함* (리터럴로 나옴) | *지원* — 생성 시점에 풀림 |
+| 입력 | 첫 위치 인자로 입력 파일 지정 | `CONTENT` 인라인 또는 `INPUT` |
 | 구성당 출력 | 1개 | 구성마다 *다른 파일*도 가능 |
 
 `configure_file()`은 *컴파일 시점에 고정될 정보*(버전 번호, 빌드 타입과 무관한 매크로)에 씁니다. 빌드 구성에 따라 *내용이 달라야 할 파일*은 `file(GENERATE ...)`을 씁니다.
@@ -417,7 +426,7 @@ file(GENERATE
 
 ## CMakePresets.json
 
-CMake 3.19부터 **프리셋**으로 빌드 구성을 미리 정의할 수 있습니다.
+CMake 3.19부터 **프리셋**을 지원합니다. 아래 JSON은 스키마 version 6을 사용하므로 CMake 3.25 이상이 필요합니다. 기능 도입 버전과 파일 스키마의 최소 버전을 구분합니다. [프리셋 형식 버전](https://cmake.org/cmake/help/v4.4/manual/cmake-presets.7.html#format)을 참고합니다.
 
 ### 기본 구조
 
@@ -547,79 +556,63 @@ cmake -B build
 
 ---
 
-## 실전 예시
+## 실전 예시 — OFF가 생성 헤더까지 전달되는지 확인하기
 
-```cmake
-cmake_minimum_required(VERSION 3.15)
-project(MyApp VERSION 1.0.0 LANGUAGES CXX)
+옵션 값이 CMakeCache.txt에만 있고 프로그램에 전달되지 않으면 사용자 설정은 효과가 없습니다. 다음 세 파일은 옵션·생성 헤더·실행 결과를 함께 확인하는 최소 프로젝트입니다.
 
-# === 옵션 ===
-option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
-option(ENABLE_TESTING "Enable unit tests" ON)
-option(ENABLE_COVERAGE "Enable code coverage" OFF)
-option(ENABLE_SANITIZERS "Enable sanitizers in Debug" ON)
-option(USE_SYSTEM_JSON "Use system nlohmann_json" OFF)
-
-include(CMakeDependentOption)
-cmake_dependent_option(
-    ENABLE_COVERAGE_HTML "Generate HTML coverage report" ON
-    "ENABLE_COVERAGE" OFF
-)
-
-# === 빌드 타입 기본값 ===
-if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
-    message(STATUS "Setting build type to 'Release'")
-    set(CMAKE_BUILD_TYPE Release CACHE STRING "" FORCE)
-    set_property(CACHE CMAKE_BUILD_TYPE PROPERTY STRINGS
-        Debug Release MinSizeRel RelWithDebInfo
-    )
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(CacheCheck VERSION 1.0.0 LANGUAGES CXX)
+option(ENABLE_FEATURE_X "Enable feature X" ON)
+option(ENABLE_FEATURE_Y "Enable feature Y" OFF)
+set(BACKEND "cpu" CACHE STRING "Execution backend")
+set_property(CACHE BACKEND PROPERTY STRINGS cpu gpu)
+set(SUPPORTED_BACKENDS cpu gpu)
+if(NOT BACKEND IN_LIST SUPPORTED_BACKENDS)
+    message(FATAL_ERROR "Unsupported backend: ${BACKEND}")
 endif()
-
-# === 설정 헤더 생성 ===
-configure_file(config.h.in config.h)
-
-# === 컴파일러 설정 ===
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# === 라이브러리 ===
-add_library(mylib src/mylib.cpp)
-target_include_directories(mylib
-    PUBLIC include
-    PRIVATE ${CMAKE_CURRENT_BINARY_DIR}
-)
-
-# === 실행 파일 ===
-add_executable(myapp src/main.cpp)
-target_link_libraries(myapp PRIVATE mylib)
-
-# === Sanitizers ===
-if(ENABLE_SANITIZERS)
-    target_compile_options(mylib PRIVATE
-        $<$<CONFIG:Debug>:-fsanitize=address,undefined>
-    )
-    target_link_options(mylib PRIVATE
-        $<$<CONFIG:Debug>:-fsanitize=address,undefined>
-    )
-endif()
-
-# === 테스트 ===
-if(ENABLE_TESTING)
-    enable_testing()
-    add_subdirectory(tests)
-endif()
-
-# === 요약 출력 ===
-include(FeatureSummary)
-add_feature_info(Testing ENABLE_TESTING "Unit tests")
-add_feature_info(Coverage ENABLE_COVERAGE "Code coverage")
-add_feature_info(Sanitizers ENABLE_SANITIZERS "Address/UB sanitizers")
-add_feature_info(SystemJSON USE_SYSTEM_JSON "System nlohmann_json")
-feature_summary(WHAT ALL)
+configure_file(config.h.in config.h @ONLY)
+add_executable(app main.cpp)
+target_include_directories(app PRIVATE "${CMAKE_CURRENT_BINARY_DIR}")
 ```
 
----
+두 매크로의 생성 규칙을 같은 헤더에서 비교합니다.
+
+```c title="config.h.in"
+#pragma once
+#cmakedefine ENABLE_FEATURE_X
+#cmakedefine01 ENABLE_FEATURE_Y
+#define APP_BACKEND "@BACKEND@"
+```
+
+`ENABLE_FEATURE_Y`는 OFF일 때도 정의되어 있으므로 값으로 분기합니다.
+
+```cpp title="main.cpp"
+#include "config.h"
+#include <iostream>
+int main() {
+#if ENABLE_FEATURE_Y
+    std::cout << "Y=ON\n";
+#else
+    std::cout << "Y=OFF\n";
+#endif
+    std::cout << "backend=" << APP_BACKEND << '\n';
+}
+```
+
+Ninja가 있는 macOS·Linux 셸에서 같은 빌드 디렉터리를 재사용합니다.
+
+```bash
+cmake -S . -B build -G Ninja -DENABLE_FEATURE_Y=OFF -DBACKEND=cpu
+cmake --build build
+./build/app
+cmake -S . -B build -DENABLE_FEATURE_Y=ON -DBACKEND=gpu
+cmake --build build
+./build/app
+cmake -S . -B build
+```
+
+첫 실행은 `Y=OFF`, `backend=cpu`를 출력하고, 두 번째는 `Y=ON`, `backend=gpu`를 출력합니다. 마지막 구성은 ON/gpu를 보존합니다. 첫 구성의 `build/config.h`에는 `#define ENABLE_FEATURE_Y 0`, 두 번째에는 `#define ENABLE_FEATURE_Y 1`이 있습니다. `-DBACKEND=typo`로 구성하면 선택 목록과 별도로 작성한 검사에서 실패합니다.
 
 ## 흔한 실수
 
@@ -641,11 +634,11 @@ rm build/CMakeCache.txt && cmake -B build
 ### if(CMAKE_BUILD_TYPE)가 multi-config에서 동작 안 함
 
 ```cmake
-# 회피: Visual Studio에서 CMAKE_BUILD_TYPE은 빈 문자열
+# 회피: multi-config의 실제 구성 선택을 제어하지 못함
 if(CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_definitions(app PRIVATE DEBUG_MODE)
 endif()
-# Visual Studio에서는 항상 거짓
+# 값이 있어 참이 되더라도 모든 구성에 정의를 붙이는 문제가 있음
 
 # Good: 제너레이터 표현식 사용
 target_compile_definitions(app PRIVATE
@@ -698,13 +691,13 @@ Ch 5에서는 `find_package`와 외부 의존성을 다룹니다. 시스템 라�
 
 ## 참고 자료
 
-- [CMake - set](https://cmake.org/cmake/help/latest/command/set.html)
-- [CMake - option](https://cmake.org/cmake/help/latest/command/option.html)
-- [CMake Presets](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)
+- [CMake - set](https://cmake.org/cmake/help/v4.4/command/set.html)
+- [CMake - option](https://cmake.org/cmake/help/v4.4/command/option.html)
+- [CMake Presets](https://cmake.org/cmake/help/v4.4/manual/cmake-presets.7.html)
 
 ## 관련 항목
 
 - [Ch 3: CMake 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 옵션이 붙는 대상인 타겟
 - [Ch 5: find_package와 외부 의존성](/blog/tools/build/cmake/chapter05-find-package) — 옵션으로 의존성 탐색을 제어하는 법
-- [GNU Make 소개](/blog/tools/build/gnu-make/chapter01-intro) — 조건부 변수를 Make에서는 어떻게 다루는가
+- [GNU Make 변수와 자동 변수](/blog/tools/build/gnu-make/chapter03-variables) — 변수 확장과 대입 연산 비교
 - [Sanitizer를 CMake와 CI에 통합](/blog/tools/debugging/sanitizers/chapter05-cmake-ci) — ENABLE_SANITIZERS 하나를 ASan·TSan별 옵션과 preset으로 나누고 CI job으로 돌리는 법

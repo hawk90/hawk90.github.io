@@ -209,7 +209,7 @@ $(firstword $(LIST))      # one
 $(lastword $(LIST))       # five
 ```
 
-인덱스가 *1부터* 시작한다는 점이 다른 언어와 다릅니다. Make 매뉴얼은 "이게 학생들의 자연수 직관에 더 가깝다"는 설명을 곁들이지만, 실제로는 자주 헷갈리는 자리입니다. `$(word 1,$(LIST))`이 `$(firstword $(LIST))`와 같다는 사실을 기억해 두세요.
+인덱스는 1부터 시작합니다. 매뉴얼의 원문에 없는 이유를 인용하지 않고 입력과 결과로 확인합니다. `$(word 1,$(LIST))`이 `$(firstword $(LIST))`와 같다는 사실을 기억해 두세요.
 
 ---
 
@@ -255,7 +255,7 @@ OBJS := $(addprefix build/,$(addsuffix .o,$(MODULES)))
 $(wildcard pattern)
 ```
 
-다른 함수들이 *문자열만* 다루는 반면, `wildcard`는 *디스크에 있는 실제 파일*을 검색합니다. Make에서 "파일이 있는지 알아내는" 유일한 1차 함수입니다.
+다른 함수들이 *문자열만* 다루는 반면, `wildcard`는 *디스크에 있는 실제 파일*을 검색합니다. 실제 파일 목록을 찾는 함수입니다. realpath도 파일의 존재 여부와 심볼릭 링크를 확인하므로 유일한 존재 검사 함수라는 뜻은 아닙니다.
 
 ```makefile
 SRCS := $(wildcard src/*.c)
@@ -268,17 +268,17 @@ HEADERS := $(wildcard include/*.h)
 ALL := $(wildcard *.c *.cpp *.cxx)
 ```
 
-재귀 매칭(`**`)은 *Make 4.0+*에서 셸 globstar에 위임됩니다.
+GNU Make의 wildcard는 셸 globstar 기능에 위임하지 않습니다. src/**/*.c를 임의 깊이의 재귀 검색으로 해석해서는 안 됩니다. 이 패턴은 여기서 src 바로 아래의 한 디렉터리 계층을 확인하는 비교 예로 사용합니다.
 
 ```makefile
-# 4.0 이상에서만 동작
+# 임의 깊이 재귀 검색이 아님
 ALL := $(wildcard src/**/*.c)
 
 # 호환성 있는 대안: shell + find
 ALL := $(shell find src -name '*.c')
 ```
 
-`shell` 호출은 빌드 시작 시점에 한 번 도므로, 거의 같은 효과를 더 안정적으로 얻습니다.
+위 := 문맥에서는 Makefile을 읽을 때 find를 실행합니다. 파일명에 공백이나 줄바꿈이 있으면 결과가 Make 단어 목록으로 안전하게 표현되지 않으므로 이 예제는 그런 경로를 지원하지 않습니다.
 
 > 💡 *`wildcard`는 평가 시점에 즉시 디스크를 본다*는 사실을 잊지 마세요. 그래서 `:=`로 쓰면 *Makefile 파싱 때 한 번* 디스크 조회, `=`로 쓰면 *변수 사용 때마다* 매번 조회. 거의 항상 `:=`가 답입니다.
 
@@ -354,7 +354,7 @@ NPROC := $(shell nproc)
 CPPFLAGS += -DBUILD_DATE=\"$(DATE)\" -DGIT_HASH=\"$(GIT_HASH)\"
 ```
 
-주의할 점은 *모든 호출이 Makefile 파싱 시점*에 일어난다는 것입니다. 한 줄에 `$(shell)`이 10개 있으면 셸 10개를 띄웁니다. 비싼 명령(`find`, `cmake`, 네트워크 호출)이라면 결과를 변수에 저장해 한 번만 호출하도록 합니다.
+shell 함수는 자신이 참조되어 확장되는 시점에 실행됩니다. 최상위 :=는 읽을 때, 재귀 변수나 레시피의 참조는 그 참조를 확장할 때 실행합니다. 한 줄에 `$(shell)`이 10개 있으면 셸 10개를 띄웁니다. 비싼 명령(`find`, `cmake`, 네트워크 호출)이라면 결과를 변수에 저장해 한 번만 호출하도록 합니다.
 
 ```makefile
 # 비쌈: ALL_SOURCES를 참조할 때마다 find가 돈다 (지연 평가)
@@ -402,12 +402,12 @@ Welcome to Make.
 endef
 
 test:
-	@echo "$(greeting)"
+	$(info $(greeting))
 ```
 
-`define`과 `endef` *사이의 모든 줄*이 한 변수의 값이 됩니다. 줄바꿈도 그대로 보존됩니다.
+define과 endef 사이의 줄바꿈은 값에 보존됩니다. 위 info는 그 값을 출력합니다. 이를 `echo "$(greeting)"`로 넣으면 여러 레시피 줄과 닫히지 않은 셸 인용부호가 되어 실패할 수 있으므로 구분합니다.
 
-`define` 자체는 *재귀적 변수*(=)와 같은 의미입니다. 즉시 평가하려면 `:=`을 결합할 수 있습니다 (4.0+).
+연산자를 생략한 define은 재귀 변수입니다. 즉시 평가하는 := 등의 연산자 형식은 GNU Make 3.82에 도입됐습니다. 이 글은 GNU Make 4.4.1에서 실행 확인했습니다.
 
 ```makefile
 define version :=
@@ -474,7 +474,7 @@ SRCS += $(THIS_DIR)foo.c $(THIS_DIR)bar.c
 - `$(lastword ...)`은 *마지막 단어*를 뽑습니다 — 즉 *방금 include된 그 Makefile의 경로*.
 - `$(dir ...)`은 그 경로에서 디렉터리 부분만 추출.
 
-각 서브 Makefile이 *자기 디렉터리를 자동으로 알게 되어*, 비재귀적 Make에서 *모듈 단위 격리*가 가능해집니다. ([Ch 6](/blog/tools/build/gnu-make/chapter06-conditionals#makefile-분할-패턴)에서 본 multi-module 패턴이 이 트릭 위에 서 있습니다.)
+각 서브 Makefile이 *자기 디렉터리를 자동으로 알게 되어*, 비재귀적 Make에서 *모듈 단위 격리*가 가능해집니다. ([Ch 6](/blog/tools/build/gnu-make/chapter06-conditionals#makefile-분할-패턴)에서 다룰 multi-module 패턴이 이 트릭 위에 서 있습니다.)
 
 주의: `THIS_DIR`을 *그 자리에서* 즉시 평가하려면 *반드시 `:=`*을 써야 합니다. `=`로 적으면 `$(lastword $(MAKEFILE_LIST))`가 *나중에 평가*되어 그때의 마지막 파일을 가져오게 되는데, 그건 *이미 다른 파일*이 될 수 있습니다.
 
@@ -508,6 +508,34 @@ endif
 
 ---
 
+## 직접 확인 — 재귀 검색과 여러 줄 값
+
+다음 Makefile은 GNU Make 4.4.1에서 wildcard와 POSIX find를 비교하고, define의 여러 줄 값을 셸 인용 오류 없이 출력합니다. 아래 명령에서 만드는 세 파일 외에는 src 아래에 다른 파일이 없는 상태를 기준으로 합니다.
+
+```makefile title="Makefile"
+.PHONY: all
+DIRECT := $(wildcard src/**/*.c)
+RECURSIVE := $(sort $(shell find src -name '*.c'))
+define greeting
+Hello, World!
+Welcome to Make.
+endef
+all:
+	@printf 'wildcard=[%s]\n' '$(DIRECT)'
+	@printf 'find=[%s]\n' '$(RECURSIVE)'
+	$(info $(greeting))
+```
+
+POSIX 셸에서 빈 입력 파일을 만듭니다. 이 절은 C 소스의 컴파일이 아니라 파일 목록을 검사합니다.
+
+```bash
+mkdir -p src/one/two
+touch src/root.c src/one/child.c src/one/two/deep.c
+make
+```
+
+wildcard 결과에는 `src/one/child.c`만 있고, find 결과에는 세 경로가 모두 있습니다. Make는 셸 명령을 실행하기 전에 레시피를 확장하므로 info의 두 인사 줄이 printf 결과보다 먼저 보일 수 있습니다. 여러 줄 값을 인용된 echo 한 줄로 바꾼 경우에는 셸 오류가 발생하는지도 함께 비교합니다.
+
 ## 실전 예시
 
 함수를 본격 활용한 Makefile입니다.
@@ -520,7 +548,7 @@ CPPFLAGS := -Iinclude
 SRCDIR := src
 BUILDDIR := build
 
-# 1. 소스 자동 감지 — 하위 디렉터리까지 (4.0+ globstar 또는 find)
+# 1. POSIX find로 하위 디렉터리까지 소스 수집
 SRCS := $(shell find $(SRCDIR) -name '*.c')
 
 # 2. .c → .o (디렉터리 구조 보존)
@@ -563,7 +591,7 @@ info:
 - `$(shell find ...)`로 *재귀적 소스 감지* (`wildcard`보다 호환성 좋음).
 - `patsubst`로 *경로 변환*.
 - `sort` + `dir`로 *유일한 디렉터리 목록* 추출.
-- `$(info ...)` + `info` 타겟으로 *디버깅용 변수 덤프* (`@true`는 레시피가 비면 안 되어서 넣는 no-op).
+- `$(info ...)` + `info` 타겟으로 *디버깅용 변수 덤프* (@true는 선택적인 no-op이며, 레시피가 Make 확장 후 비어 있어도 그 자체로 오류는 아닙니다).
 
 ---
 
@@ -634,7 +662,7 @@ $(error build/output.bin not built yet)
 endif
 ```
 
-`realpath`는 *대상이 존재하지 않으면 빈 문자열*이라는 사실을 활용한 깔끔한 검사입니다. `[ -e ... ]` 같은 셸 호출보다 빠릅니다.
+realpath는 존재하지 않거나 해석할 수 없는 경로를 결과에서 제외합니다. abspath와 구분해 사용하고 셸 검사와의 성능 차이는 측정 없이 단정하지 않습니다.
 
 ---
 

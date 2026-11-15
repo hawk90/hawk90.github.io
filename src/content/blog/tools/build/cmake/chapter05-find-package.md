@@ -47,7 +47,7 @@ target_link_libraries(myapp PRIVATE
 )
 ```
 
-이 다섯 줄이 *모든 OS*에서 동작합니다. CMake는:
+이 코드는 패키지의 개발 파일과 탐색 경로가 준비되어 있다는 전제에서 사용합니다. 모든 OS에서 패키지를 자동 설치한다는 뜻은 아닙니다. CMake는:
 1. OS와 패키지 매니저별 *표준 경로*를 순회하며 라이브러리를 찾고,
 2. 헤더 경로·라이브러리 경로를 *임포트 타겟*(`OpenSSL::SSL`, `ZLIB::ZLIB`)에 묶고,
 3. 그 타겟을 사용하는 모든 코드에 *전이적으로 옵션을 전파*합니다.
@@ -58,7 +58,9 @@ target_link_libraries(myapp PRIVATE
 
 1. `find_package`의 *두 가지 동작 모드* — Module 모드와 Config 모드.
 2. 라이브러리가 없는 시스템에서 *FetchContent로 자동 다운로드*하기.
-3. `find_package` + FetchContent의 *하이브리드 패턴* (3.25+).
+3. `find_package` + FetchContent의 *하이브리드 패턴* (3.24+).
+
+실행 확인은 CMake 4.4.4·Ninja 1.13.2·macOS·AppleClang 21을 기준으로 합니다. 마지막 예제는 로컬에서 만든 Find 모듈과 Config 파일을 대조하고 로컬 FetchContent를 연결합니다. 외부 패키지의 설치 상태나 네트워크에 따라 결과가 바뀌지 않도록 범위를 정했습니다.
 
 ---
 
@@ -122,9 +124,9 @@ Config 모드 흐름:
 
 라이브러리가 *자기 정보를 직접 들고 다닌다*는 점에서 훨씬 정확합니다. CMake가 새 버전 라이브러리를 알 필요가 없습니다.
 
-**우선순위 — Config가 먼저**
+**우선순위 — 기본 서명은 Module이 먼저**
 
-`find_package(X)`는 *기본적으로 Config 모드를 먼저* 시도합니다. 시스템에 `XConfig.cmake`가 있으면 그쪽을, 없으면 `FindX.cmake`로 폴백합니다.
+일반적인 `find_package(X)` 호출은 Module을 먼저 시도하고, 찾지 못하면 Config로 폴백합니다. `CMAKE_FIND_PACKAGE_PREFER_CONFIG=ON`이면 순서를 바꿉니다. 명시적인 CONFIG/MODULE 모드나 dependency provider·FetchContent 리디렉션을 쓰는 경우는 기본 탐색 순서와 구분합니다. [공식 탐색 모드](https://cmake.org/cmake/help/v4.4/command/find_package.html#search-modes)를 기준으로 판단합니다.
 
 특정 모드만 쓰고 싶을 때는 명시할 수 있습니다.
 
@@ -152,8 +154,8 @@ cmake --debug-find-pkg=fmt -B build
 
 | 변수 | 의미 |
 |------|------|
-| `CMAKE_PREFIX_PATH` | 가장 강력. 콜론(`;`) 구분 prefix 목록. `/opt/myapp:/usr/local` 식. |
-| `<Package>_DIR` | 특정 패키지의 Config 파일 위치를 *직접* 지정. `-DZLIB_DIR=/opt/zlib/lib/cmake/zlib` |
+| `CMAKE_PREFIX_PATH` | CMake 변수는 세미콜론 구분 prefix 목록. `"/opt/myapp;/usr/local"` 형태 |
+| `<Package>_DIR` | Config 파일이 들어 있는 디렉터리 지정. 해당 패키지가 Config를 제공할 때 사용 |
 | `CMAKE_MODULE_PATH` | Module 모드에서 *사용자 Find 스크립트* 추가 경로 |
 | 환경변수 `<Package>_ROOT` | 패키지별 root prefix (3.12+) |
 
@@ -350,12 +352,12 @@ pkg_check_modules(FOO REQUIRED IMPORTED_TARGET foo)
 
 지금까지 본 `find_package`는 *시스템에 이미 설치된* 라이브러리를 찾습니다. 사용자가 직접 `apt install`이나 `brew install`을 해야 한다는 뜻입니다. 사용자 환경에 따라 *있을 수도, 없을 수도, 버전이 다를 수도* 있어 불안정합니다.
 
-`FetchContent`는 이 의존성을 *프로젝트 안으로 통째로 끌고 옵니다*. CMake 구성 시점에 Git이나 URL에서 라이브러리를 내려받아, *내 빌드의 일부*로 함께 컴파일합니다. 사용자는 `cmake -B build` 한 번이면 모든 의존성이 자동으로 갖춰집니다.
+`FetchContent`는 구성 시점에 소스를 준비하고, CMake 프로젝트이면 그 타겟을 메인 빌드에 추가합니다. 컴파일은 그 뒤 빌드 단계에서 수행합니다. 원격 소스를 사용하려면 네트워크·Git 등의 도구가 필요하고, 의존성의 자체 시스템 요구사항까지 자동으로 해결하는 것은 아닙니다.
 
 이 모델의 장단점은 명확합니다.
 
 **장점**
-- *사용자 환경 무관*. 어디서든 같은 라이브러리·버전이 동작.
+- *소스 버전 통일*. 같은 소스를 지정할 수 있지만 컴파일러·플랫폼 호환성은 별도로 확인.
 - *디버깅 가능*. 의존 라이브러리도 내 빌드에 같이 들어가서 *그 안까지 스텝 인*이 됨.
 - *버전 고정*. Git tag로 정확한 상태를 묶을 수 있음.
 
@@ -373,15 +375,13 @@ CMake에는 외부 의존성을 다루는 *두 가지 도구*가 있습니다.
 | | `ExternalProject` | `FetchContent` |
 |---|---|---|
 | 등장 시기 | CMake 2.8 (오래됨) | CMake 3.11 (2018) |
-| 시점 | *빌드 시점*에 다운로드·빌드 | *구성 시점*에 다운로드 (3.12+) |
+| 시점 | *빌드 시점*에 다운로드·빌드 | *구성 시점*에 소스 준비 |
 | 타겟 노출 | *아니오* — 자체 외부 빌드로 묶임 | *예* — 메인 빌드에 함께 흡수 |
 | `target_link_libraries` | 직접 불가, ExternalProject 출력 경로 수동 지정 | 일반 타겟처럼 즉시 링크 가능 |
 | 디버깅 | 별도 빌드로 *스텝 인 어려움* | 메인 빌드 일부라 자유롭게 가능 |
 | 적합한 자리 | 거대한 외부 도구 (CMake로 안 만든 것도 됨) | C++ 라이브러리 의존성 (대부분의 경우) |
 
-요약: *C++ 라이브러리 의존성*은 거의 항상 `FetchContent`. `ExternalProject`는 *CMake와 무관한 빌드 시스템*을 가진 외부 도구(autotools, scons로 빌드되는 것들)에만 씁니다.
-
-### 기본 사용법
+같은 구성에서 타겟을 연결해야 하면 FetchContent를 선택합니다. 별도 toolchain·캐시·설치 단계로 의존성을 격리해야 하면 ExternalProject를 검토합니다. ExternalProject도 CMake 프로젝트를 빌드할 수 있습니다. [FetchContent 개요](https://cmake.org/cmake/help/v4.4/module/FetchContent.html#overview)의 실행 시점 차이가 선택 기준입니다.
 
 ### 기본 사용법
 
@@ -436,13 +436,13 @@ Git 대신 아카이브 파일을 다운로드할 수도 있습니다.
 FetchContent_Declare(
     json
     URL https://github.com/nlohmann/json/releases/download/v3.11.3/json.tar.xz
-    URL_HASH SHA256=8c4b26bf4b422252e13f332bc5e388ec0ab5c3443d24f...
+    URL_HASH "SHA256=${JSON_ARCHIVE_SHA256}"
 )
 
 FetchContent_MakeAvailable(json)
 ```
 
-`URL_HASH`로 무결성을 검증합니다.
+이 코드는 선언 형식입니다. 실행 전에 해당 릴리스의 신뢰할 수 있는 체크섬을 확인해 `JSON_ARCHIVE_SHA256`에 64자리 SHA-256 값을 설정해야 합니다. 이 글에서는 원격 아카이브를 내려받거나 체크섬을 검증하지 않았습니다. 생략 기호가 든 값을 실제 해시처럼 사용하지 않습니다.
 
 ### 의존성 옵션 설정
 
@@ -521,7 +521,7 @@ include(ExternalProject)
 ExternalProject_Add(
     external_zlib
     URL https://zlib.net/zlib-1.3.tar.gz
-    URL_HASH SHA256=...
+    URL_HASH "SHA256=${ZLIB_ARCHIVE_SHA256}"
     PREFIX ${CMAKE_BINARY_DIR}/external
     CMAKE_ARGS
         -DCMAKE_INSTALL_PREFIX=${CMAKE_BINARY_DIR}/external/install
@@ -538,7 +538,7 @@ ExternalProject_Add(
 | CMake가 아닌 프로젝트 | 어려움 | 쉬움 |
 | 일반적인 용도 | CMake 프로젝트 | 레거시/비-CMake |
 
-**권장**: 가능하면 `FetchContent`를 사용하세요. ExternalProject는 CMake 프로젝트가 아닌 레거시 라이브러리에 적합합니다.
+위 코드는 `ZLIB_ARCHIVE_SHA256`에 검증된 체크섬을 제공해야 하는 선언 예제입니다. ExternalProject의 결과를 링크하려면 별도의 IMPORTED 타겟과 산출물·빌드 의존성도 연결해야 합니다.
 
 ---
 
@@ -569,6 +569,8 @@ CMake 3.12부터 `<PackageName>_ROOT` 변수가 자동으로 탐색 경로에 �
 
 ### 환경 변수
 
+환경 변수는 CMake 리스트 변수와 달리 호스트 OS의 경로 구분자를 사용합니다. 아래는 Unix 계열 셸의 콜론 구분 예이며, Windows 환경 변수는 세미콜론을 사용합니다. [CMAKE_PREFIX_PATH 환경 변수](https://cmake.org/cmake/help/v4.4/envvar/CMAKE_PREFIX_PATH.html)와 CMake 변수의 표현을 구분합니다.
+
 ```bash
 export CMAKE_PREFIX_PATH="/opt/mylibs:$CMAKE_PREFIX_PATH"
 export Boost_ROOT="/opt/boost-1.80"
@@ -577,62 +579,76 @@ cmake -B build
 
 ---
 
-## 실전 예시
+## 실전 예시 — 설치 패키지 없이 탐색 순서 확인하기
 
-```cmake
-cmake_minimum_required(VERSION 3.20)
-project(MyServer VERSION 1.0.0 LANGUAGES CXX)
+외부 패키지 설치 상태를 추측하는 대신, 같은 이름의 Find 모듈과 Config 파일을 직접 만들어 어느 쪽이 선택되는지 확인합니다. 다음 다섯 파일은 이 절에서 만든 검증용 패키지입니다. 실제 배포 패키지의 구현 예제가 아닙니다.
 
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(FindCheck LANGUAGES CXX)
+option(PREFER_CONFIG "Search Config before Module" OFF)
+set(CMAKE_FIND_PACKAGE_PREFER_CONFIG "${PREFER_CONFIG}")
+list(PREPEND CMAKE_MODULE_PATH "${CMAKE_CURRENT_SOURCE_DIR}/cmake")
+list(PREPEND CMAKE_PREFIX_PATH "${CMAKE_CURRENT_SOURCE_DIR}/prefix")
+find_package(Demo REQUIRED)
 include(FetchContent)
-
-# === 필수 시스템 의존성 ===
-find_package(Threads REQUIRED)
-find_package(OpenSSL REQUIRED)
-
-# === 선택적 의존성 (시스템 또는 FetchContent) ===
-
-# fmt: 시스템에 있으면 사용, 없으면 다운로드
-find_package(fmt 10.0 QUIET)
-if(NOT fmt_FOUND)
-    message(STATUS "fmt not found, fetching...")
-    FetchContent_Declare(fmt
-        GIT_REPOSITORY https://github.com/fmtlib/fmt.git
-        GIT_TAG        11.0.2
-    )
-    FetchContent_MakeAvailable(fmt)
-endif()
-
-# spdlog: 위와 같은 패턴
-find_package(spdlog 1.12 QUIET)
-if(NOT spdlog_FOUND)
-    message(STATUS "spdlog not found, fetching...")
-    set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "" FORCE)
-    FetchContent_Declare(spdlog
-        GIT_REPOSITORY https://github.com/gabime/spdlog.git
-        GIT_TAG        v1.15.0
-    )
-    FetchContent_MakeAvailable(spdlog)
-endif()
-
-# === 실행 파일 ===
-add_executable(myserver
-    src/main.cpp
-    src/server.cpp
+FetchContent_Declare(Greeter
+    SOURCE_DIR "${CMAKE_CURRENT_SOURCE_DIR}/vendor/greeter"
 )
-
-target_link_libraries(myserver PRIVATE
-    Threads::Threads
-    OpenSSL::SSL
-    OpenSSL::Crypto
-    fmt::fmt
-    spdlog::spdlog
-)
+FetchContent_MakeAvailable(Greeter)
+add_executable(app main.cpp)
+target_link_libraries(app PRIVATE Demo::Demo Local::Greeter)
 ```
 
----
+Find 모듈은 선택된 경로를 소비자 매크로로 전달합니다.
+
+```cmake title="cmake/FindDemo.cmake"
+add_library(Demo::Demo INTERFACE IMPORTED)
+set_property(TARGET Demo::Demo PROPERTY
+    INTERFACE_COMPILE_DEFINITIONS DEMO_SOURCE="module")
+set(Demo_FOUND TRUE)
+```
+
+Config 파일은 같은 타겟 이름에 다른 값을 설정합니다.
+
+```cmake title="prefix/lib/cmake/Demo/DemoConfig.cmake"
+add_library(Demo::Demo INTERFACE IMPORTED)
+set_property(TARGET Demo::Demo PROPERTY
+    INTERFACE_COMPILE_DEFINITIONS DEMO_SOURCE="config")
+```
+
+로컬 FetchContent 프로젝트는 추가 사용 요구사항을 제공합니다. 이 예제는 원격 다운로드를 수행하지 않습니다.
+
+```cmake title="vendor/greeter/CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(Greeter LANGUAGES NONE)
+add_library(greeter INTERFACE)
+add_library(Local::Greeter ALIAS greeter)
+target_compile_definitions(greeter INTERFACE LOCAL_AVAILABLE=1)
+```
+
+프로그램은 선택된 패키지와 로컬 의존성의 값을 출력합니다.
+
+```cpp title="main.cpp"
+#include <iostream>
+int main() {
+    std::cout << "source=" << DEMO_SOURCE << '\n';
+    std::cout << "local=" << LOCAL_AVAILABLE << '\n';
+}
+```
+
+Ninja가 있는 macOS·Linux 셸에서 빌드 디렉터리를 나누어 실행합니다.
+
+```bash
+cmake -S . -B build-module -G Ninja
+cmake --build build-module
+./build-module/app
+cmake -S . -B build-config -G Ninja -DPREFER_CONFIG=ON
+cmake --build build-config
+./build-config/app
+```
+
+기본 호출은 `source=module`, Config 우선 호출은 `source=config`를 출력하며 둘 다 `local=1`을 출력합니다. 기본 호출에서도 `find_package(Demo CONFIG REQUIRED)`로 바꾸면 Config만 선택합니다. Config 파일을 치우고 CONFIG만 요구하면 Find 모듈이 있어도 탐색에 실패합니다. 각 경우 새 빌드 디렉터리를 사용해야 이전 `Demo_DIR` 캐시의 영향을 구분하기 쉽습니다.
 
 ## 흔한 실수
 
@@ -713,9 +729,9 @@ Ch 6에서는 테스트와 CTest를 다룹니다. `enable_testing()`, `add_test(
 
 ## 참고 자료
 
-- [CMake - find_package](https://cmake.org/cmake/help/latest/command/find_package.html)
-- [CMake - FetchContent](https://cmake.org/cmake/help/latest/module/FetchContent.html)
-- [cmake-packages(7)](https://cmake.org/cmake/help/latest/manual/cmake-packages.7.html)
+- [CMake - find_package](https://cmake.org/cmake/help/v4.4/command/find_package.html)
+- [CMake - FetchContent](https://cmake.org/cmake/help/v4.4/module/FetchContent.html)
+- [cmake-packages(7)](https://cmake.org/cmake/help/v4.4/manual/cmake-packages.7.html)
 
 ## 관련 항목
 

@@ -12,12 +12,12 @@ topics: ["tools", "tools/build"]
 
 ## 왜 베스트 프랙티스가 필요한가
 
-CMake의 문제이자 강점은 *유연함*입니다. 같은 일을 *여러 방식으로* 적을 수 있고, 2.x 시절의 옛 문법도 *여전히 동작합니다*. 이 호환성이 50년 가까이 살아남은 비결이지만, 새로 CMake를 배우는 사람에게는 *어느 방식이 옳은지* 구분이 어렵습니다.
+CMake에서는 같은 설정을 디렉터리 명령, 전역 플래그 변수, 타겟 속성 등 여러 방식으로 표현합니다. 선택 기준은 문법이 오래됐는지가 아니라 다른 타겟과 소비자에게 어떤 설정이 전달되는지입니다. 이 장은 서브프로젝트로 포함했을 때도 의도한 범위를 유지하는 데 초점을 둡니다.
 
 다음 코드를 봅시다.
 
 ```cmake
-# 2010년대 방식 — 여전히 동작합니다. 그러나 권장되지 않습니다.
+# 과거 프로젝트의 형태. CMake 4.x 실행용이 아님
 cmake_minimum_required(VERSION 2.8)
 project(MyApp)
 
@@ -31,7 +31,7 @@ add_executable(myapp ${SRCS})
 target_link_libraries(myapp foo bar)
 ```
 
-빌드는 됩니다. 하지만 *네 가지 함정*이 깔려 있습니다.
+CMake 4.x는 최소 정책 버전 3.5 미만의 호환성을 제거했으므로 위 예제는 그대로 구성되지 않습니다. 정책 버전을 올리는 것과 설정의 영향을 줄이는 작업은 별개입니다. 아래에서는 네 가지 설계 문제를 구분합니다.
 
 1. **전역 오염**. `include_directories()`·`add_definitions()`가 *그 디렉터리의 모든 타겟*에 영향을 줍니다. 라이브러리 A와 B가 같은 매크로를 강제로 받습니다.
 2. **플래그 문자열 조작**. `CMAKE_CXX_FLAGS`를 직접 합치면, 다른 자리에서 같은 변수에 추가한 플래그와 *순서·중복 충돌*이 납니다. 디버깅이 어렵습니다.
@@ -108,7 +108,7 @@ target_compile_features(myheaders INTERFACE cxx_std_17)
 # 컴파일 설정 모음
 add_library(mywarnings INTERFACE)
 target_compile_options(mywarnings INTERFACE
-    $<$<CXX_COMPILER_ID:GNU,Clang>:-Wall -Wextra -Wpedantic>
+    "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall;-Wextra;-Wpedantic>"
     $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 
@@ -160,7 +160,7 @@ add_executable(myapp
 3. `cmake --build build`로 빌드 — *새 파일을 모름*. 빌드 산물에 누락됩니다.
 4. 알아채려면 `cmake -B build`를 다시 돌려 *재구성*해야 함.
 
-이게 "*명시적 나열*이 권장되는 이유"입니다. 손으로 적은 목록은 *Makefile 자체가 변경*되므로 CMake가 자동 재구성을 트리거합니다. 새 파일을 빠뜨릴 수 없습니다.
+명시적 목록을 수정하면 CMakeLists.txt 변경으로 재구성됩니다. 새 파일을 목록에 추가하는 것을 잊을 가능성까지 없애 주는 것은 아닙니다. 대신 코드 리뷰에서 빌드 입력의 추가·삭제를 함께 확인할 수 있습니다.
 
 **`CONFIGURE_DEPENDS` (CMake 3.12+)** — *file(GLOB)을 그래도 쓰고 싶을 때*
 
@@ -173,10 +173,10 @@ file(GLOB SRCS CONFIGURE_DEPENDS src/*.cpp)
 함정은 *성능*입니다.
 
 - 매 빌드마다 *디렉터리 stat*을 합니다. 작은 프로젝트에서는 무시할 만하지만, 모듈이 수십·수백 개면 누적이 됩니다.
-- 일부 *생성기*(Visual Studio, Xcode)는 이 기능을 *지원하지 않거나 불완전*하게 지원합니다. 크로스 플랫폼 프로젝트에서 미묘한 차이가 생깁니다.
-- *재구성이 자동으로 자주 일어나는* 자체가 빌드 안정성을 해칠 수 있습니다.
+- 공식 문서는 모든 생성기에서의 신뢰성을 보장하지 않으며 디렉터리 재검사 비용을 설명합니다. 특정 생성기의 미지원 여부는 해당 버전의 실행 근거로 판단합니다.
+- 빌드 입력을 리뷰할 때 파일 목록 변경이 CMakeLists.txt diff로 나타나지 않습니다.
 
-CMake 매뉴얼 자체가 *"CONFIGURE_DEPENDS는 가능하면 피하라"*고 적습니다. 그래도 쓴다면, 큰 프로젝트보다 *연구·실험 코드*나 *문서 / 에셋 디렉터리* 같은 *변동이 잦은 비-소스* 자리에 한정하는 게 안전합니다.
+[file(GLOB) 공식 문서](https://cmake.org/cmake/help/v4.4/command/file.html#glob)는 소스 목록을 GLOB으로 수집하는 방식을 권장하지 않습니다. 자산 수집에 사용하더라도 같은 생성기·파일 시스템에서 추가/삭제가 반영되는지 확인합니다. 프로젝트 크기만으로 사용 가능 여부를 정하지 않습니다.
 
 ```cmake
 # 가능한 사용 예 — 자산 파일 자동 인식
@@ -270,7 +270,7 @@ project/
 ### 최상위 CMakeLists.txt 템플릿
 
 ```cmake
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 project(MyProject
     VERSION 1.0.0
@@ -337,6 +337,8 @@ option(ENABLE_X "Enable X" OFF)       # 너무 일반적
 
 CMake 3.21+에서 제공하는 `PROJECT_IS_TOP_LEVEL`은 현재 프로젝트가 최상위인지 확인합니다. 서브프로젝트로 포함될 때 테스트나 문서 빌드를 건너뛸 수 있습니다.
 
+위 템플릿은 최소 버전을 3.25로 지정해 이 변수를 사용할 수 있도록 했습니다. 기능 도입 버전과 최소 지원 버전의 계약을 맞춘 것입니다. [PROJECT_IS_TOP_LEVEL](https://cmake.org/cmake/help/v4.4/variable/PROJECT_IS_TOP_LEVEL.html)의 도입 버전을 참고합니다.
+
 ```cmake
 # 최상위 프로젝트일 때만 테스트 빌드
 if(MYPROJECT_BUILD_TESTS AND PROJECT_IS_TOP_LEVEL)
@@ -373,7 +375,7 @@ target_link_libraries(app PRIVATE MyProject::mylib)
 
 ```cmake
 target_link_libraries(app PRIVATE mylob)  # 타이포!
-# 별칭 없으면: 경고만 나오고 링크 시 실패
+# 일반 이름은 라이브러리 검색 이름으로 처리되어 링크 시 실패할 수 있음
 # 별칭 있으면: MyProject::mylob을 찾을 수 없다고 즉시 에러
 ```
 
@@ -396,24 +398,11 @@ target_compile_features(myheaders INTERFACE cxx_std_17)
 
 ```cmake
 add_library(project_warnings INTERFACE)
-
-target_compile_options(project_warnings INTERFACE
-    $<$<CXX_COMPILER_ID:GNU>:
-        -Wall -Wextra -Wpedantic
-        -Wshadow -Wnon-virtual-dtor -Wold-style-cast
-        -Wcast-align -Wunused -Woverloaded-virtual
-        -Wconversion -Wsign-conversion
-    >
-    $<$<CXX_COMPILER_ID:Clang>:
-        -Wall -Wextra -Wpedantic
-        -Wshadow -Wnon-virtual-dtor -Wold-style-cast
-    >
-    $<$<CXX_COMPILER_ID:MSVC>:
-        /W4 /permissive-
-    >
-)
-
-# 사용
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
+    target_compile_options(project_warnings INTERFACE -Wall -Wextra -Wpedantic)
+elseif(MSVC)
+    target_compile_options(project_warnings INTERFACE /W4 /permissive-)
+endif()
 target_link_libraries(mylib PRIVATE project_warnings)
 target_link_libraries(myapp PRIVATE project_warnings)
 ```
@@ -429,20 +418,18 @@ target_link_libraries(myapp PRIVATE project_warnings)
 ```cmake
 # 컴파일러별 옵션
 target_compile_options(myapp PRIVATE
-    $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -Wpedantic>
-    $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wpedantic>
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+    "$<$<CXX_COMPILER_ID:GNU,Clang,AppleClang>:-Wall;-Wextra;-Wpedantic>"
+    "$<$<CXX_COMPILER_ID:MSVC>:/W4;/WX>"
 )
 
 # 빌드 설정별 옵션
-target_compile_options(myapp PRIVATE
-    $<$<CONFIG:Debug>:-O0 -g>
-    $<$<CONFIG:Release>:-O3 -DNDEBUG>
+target_compile_definitions(myapp PRIVATE
+    $<$<CONFIG:Debug>:APP_DEBUG>
 )
 
 # 플랫폼별 정의
 target_compile_definitions(myapp PRIVATE
-    $<$<PLATFORM_ID:Windows>:WIN32_LEAN_AND_MEAN NOMINMAX>
+    "$<$<PLATFORM_ID:Windows>:WIN32_LEAN_AND_MEAN;NOMINMAX>"
     $<$<PLATFORM_ID:Linux>:_GNU_SOURCE>
 )
 
@@ -459,6 +446,8 @@ target_link_libraries(myapp PRIVATE
 
 ```cmake
 include(CheckCXXSourceCompiles)
+set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 check_cxx_source_compiles("
     #include <filesystem>
@@ -469,7 +458,7 @@ check_cxx_source_compiles("
 " HAS_STD_FILESYSTEM)
 
 if(NOT HAS_STD_FILESYSTEM)
-    target_link_libraries(myapp PRIVATE stdc++fs)
+    message(FATAL_ERROR "Selected C++17 toolchain cannot build the filesystem probe")
 endif()
 ```
 
@@ -505,17 +494,74 @@ target_link_libraries(myapp PRIVATE fmt::fmt spdlog::spdlog)
 
 ### 서브프로젝트 옵션 격리
 
-서브프로젝트의 옵션이 메인 프로젝트에 영향을 주지 않도록 `FORCE`로 덮어씁니다.
+`CACHE ... FORCE`는 공용 캐시 값을 강제로 바꾸므로 옵션 격리 수단이 아닙니다. 서브프로젝트가 CMP0077 NEW를 따를 때 일반 변수로 의도한 값을 먼저 전달할 수 있습니다. 소비자에게 옵션 선택권을 제공할지, 상위 프로젝트가 고정할지도 구분합니다.
 
 ```cmake
 # FetchContent 전에 옵션 설정
-set(FMT_INSTALL OFF CACHE BOOL "" FORCE)           # fmt 설치 비활성화
-set(SPDLOG_FMT_EXTERNAL ON CACHE BOOL "" FORCE)    # spdlog가 외부 fmt 사용
+set(FMT_INSTALL OFF)
+set(SPDLOG_FMT_EXTERNAL ON)
 
 FetchContent_MakeAvailable(fmt spdlog)
 ```
 
 ---
+
+## 실전 예시 — 단독 빌드와 서브프로젝트 빌드 비교
+
+같은 소스를 단독 프로젝트와 서브프로젝트로 빌드해 테스트 기본값과 경고 옵션의 범위를 확인합니다. 실행 환경은 CMake 4.4.4·Ninja 1.13.2·macOS·AppleClang 21입니다. 다음 두 파일을 저장합니다.
+
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(Checklist LANGUAGES CXX)
+option(CHECKLIST_BUILD_TESTS "Build standalone tests" "${PROJECT_IS_TOP_LEVEL}")
+add_library(checklist_warnings INTERFACE)
+if(CMAKE_CXX_COMPILER_ID MATCHES "^(GNU|Clang|AppleClang)$")
+    target_compile_options(checklist_warnings INTERFACE -Wall -Wextra -Wpedantic)
+elseif(MSVC)
+    target_compile_options(checklist_warnings INTERFACE /W4)
+endif()
+add_executable(checklist_app main.cpp)
+target_link_libraries(checklist_app PRIVATE checklist_warnings)
+if(CHECKLIST_BUILD_TESTS)
+    enable_testing()
+    add_test(NAME ChecklistRuns COMMAND checklist_app)
+endif()
+message(STATUS "top=${PROJECT_IS_TOP_LEVEL}; tests=${CHECKLIST_BUILD_TESTS}")
+```
+
+실행 파일은 구성 확인용 문자열을 출력합니다.
+
+```cpp title="main.cpp"
+#include <iostream>
+int main() { std::cout << "checklist ready\n"; }
+```
+
+Ninja를 사용하는 macOS·Linux 셸에서 단독 빌드를 확인합니다.
+
+```bash
+cmake -S . -B build -G Ninja
+cmake --build build --verbose
+ctest --test-dir build --output-on-failure
+```
+
+단독 빌드는 `top=ON; tests=ON`을 출력하고 ChecklistRuns가 통과합니다. 다음 파일은 `parent/CMakeLists.txt`로 저장합니다. 상위 프로젝트에서 빌드 루트의 테스트 탐색을 활성화하고 같은 소스를 하위 디렉터리로 포함합니다.
+
+```cmake title="parent/CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(Parent LANGUAGES CXX)
+enable_testing()
+add_subdirectory(.. checklist)
+```
+
+서브프로젝트 기본값은 새 빌드 디렉터리에서 확인합니다.
+
+```bash
+cmake -S parent -B parent-build -G Ninja
+cmake --build parent-build --verbose
+ctest --test-dir parent-build -N
+```
+
+이때 하위 프로젝트는 `top=OFF; tests=OFF`를 출력하고 테스트는 등록되지 않습니다. 사용자가 `-DCHECKLIST_BUILD_TESTS=ON`으로 명시하면 서브프로젝트에서도 테스트를 켤 수 있습니다. 캐시에 이전 값이 있으면 option 기본값보다 우선하므로 독립된 빌드 디렉터리로 비교합니다. 실제 경고 옵션은 빌드 로그에서 확인합니다.
 
 ## 다음 단계 — Modern Advanced
 
@@ -595,11 +641,11 @@ if(CMAKE_BUILD_TYPE STREQUAL "Debug")  # ❌ Multi-config에서 항상 빈 문�
 endif()
 ```
 
-Visual Studio나 Ninja Multi-Config에서는 `CMAKE_BUILD_TYPE`이 구성 시점에 설정되지 않습니다.
+Visual Studio나 Ninja Multi-Config는 `CMAKE_BUILD_TYPE`으로 실제 구성을 선택하지 않습니다. 값이 있더라도 위 if는 Debug만의 설정을 표현하지 못합니다. 아래는 컴파일러에 독립적인 구성 매크로 예입니다.
 
 ```cmake
-target_compile_options(myapp PRIVATE
-    $<$<CONFIG:Debug>:-O0 -g>  # ✓ 제너레이터 표현식
+target_compile_definitions(myapp PRIVATE
+    $<$<CONFIG:Debug>:APP_DEBUG>
 )
 ```
 
@@ -629,7 +675,7 @@ Modern find 모듈은 imported 타겟을 제공합니다. 타겟을 링크하면
 - [Modern CMake](https://cliutils.gitlab.io/modern-cmake/) — 현대적 CMake 가이드
 - [Effective CMake (Daniel Pfeifer)](https://www.youtube.com/watch?v=bsXLMQ6WgIk) — CppCon 발표
 - [It's Time To Do CMake Right](https://pabloariasal.github.io/2018/02/19/its-time-to-do-cmake-right/)
-- [CMake Buildsystem](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html) — 공식 문서
+- [CMake Buildsystem](https://cmake.org/cmake/help/v4.4/manual/cmake-buildsystem.7.html) — 공식 문서
 - [Professional CMake (Book)](https://crascit.com/professional-cmake/) — 심화 학습용 책
 
 ---
@@ -640,4 +686,4 @@ Modern find 모듈은 imported 타겟을 제공합니다. 타겟을 링크하면
 - [Ch 9: Modern CMake 고급](/blog/tools/build/cmake/chapter09-modern-advanced) — 이 원칙 위에 얹는 고급 도구 모음
 - [Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 타겟 중심 설계의 출발점
 - [실전 Makefile 예제](/blog/tools/build/gnu-make/chapter07-practical) — 같은 운영 패턴을 Make로 구성했을 때의 골격
-- [cmake-toolchains(7)](https://cmake.org/cmake/help/latest/manual/cmake-toolchains.7.html) — 크로스 플랫폼·크로스 컴파일 설정의 공식 기준
+- [cmake-toolchains(7)](https://cmake.org/cmake/help/v4.4/manual/cmake-toolchains.7.html) — 크로스 플랫폼·크로스 컴파일 설정의 공식 기준

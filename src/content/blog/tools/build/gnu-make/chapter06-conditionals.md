@@ -110,33 +110,33 @@ endif
 
 GCC와 Clang은 *대부분*의 경고를 공유하지만, 일부는 한쪽에만 있습니다(`-Weverything`은 Clang 전용). 위처럼 분기해 두면 두 컴파일러 모두에서 깔끔하게 빌드됩니다.
 
-### `ifdef` / `ifndef` — 정의 여부
+### `ifdef` / `ifndef` — 저장된 값의 유무
 
 ```makefile
 ifdef VAR
-# VAR이 정의되어 있으면 (빈 문자열도 정의된 것)
+# VAR의 저장된 값이 비어 있지 않으면
 endif
 
 ifndef VAR
-# 정의되지 않았으면
+# 저장된 값이 비어 있거나 미정의이면
 endif
 ```
 
-여기서 헷갈리기 쉬운 함정 하나. `ifdef`는 *값이 비어 있어도 정의된 것으로 간주*합니다.
+ifdef는 변수가 존재하는지만 검사하지 않습니다. 빈 값으로 정의한 변수도 거짓입니다. 또 변수 값 내부를 재귀 확장해 최종 결과를 검사하는 것은 아닙니다.
 
 ```makefile
 VAR :=          # 빈 문자열로 정의
 
 ifdef VAR
-$(info VAR is defined)        # ← 출력됨
+$(info VAR has a nonempty value)  # 출력되지 않음
 endif
 
 ifeq ($(VAR),)
-$(info VAR is empty)          # ← 이것도 출력됨
+$(info VAR is empty)              # 출력됨
 endif
 ```
 
-즉 `ifdef`는 *"누가 이 변수에 손이라도 댔는가"*를 묻는 거고, `ifeq ($(VAR),)`은 *"값이 비어 있는가"*를 묻는 겁니다.
+정의 여부 자체는 $(origin VAR)가 undefined인지로 구분합니다. ifeq는 인자를 확장해서 비교하므로, 다른 빈 변수를 참조하는 재귀 변수도 최종 빈 값으로 비교합니다. [조건 지시자 문법](https://www.gnu.org/software/make/manual/html_node/Conditional-Syntax.html)의 ifdef 예제와 구분합니다.
 
 대부분의 실무 상황에서는 *값의 유무*가 의도이므로 `ifeq` 쪽을 씁니다.
 
@@ -146,7 +146,7 @@ LDLIBS += $(EXTRA_LIBS)
 endif
 ```
 
-`ifdef`는 *"이 변수를 외부에서 명시적으로 줬는가"*를 알고 싶을 때만 쓰는 게 안전합니다.
+외부의 명령줄 입력 여부가 필요하면 $(origin VAR)가 command line인지 확인합니다. ifdef만으로 변수의 출처를 알 수는 없습니다.
 
 ### `else if`
 
@@ -160,7 +160,7 @@ CFLAGS += -Wall   # 기본값
 endif
 ```
 
-`else if`는 *문법적으로 `else` + 새 `ifeq`*입니다. 한 줄로 적든 두 줄로 적든 동일합니다. 들여쓰기는 가독성을 위한 것일 뿐 의미는 없습니다.
+else ifeq처럼 한 줄에 이어 쓴 조건 체인은 마지막 endif 하나로 닫습니다. else와 새 ifeq를 별도 줄에 적어 중첩하면 안쪽 조건을 닫는 endif도 필요하므로 줄바꿈만 자유롭게 바꿔도 같은 문법이라는 뜻은 아닙니다.
 
 ---
 
@@ -247,7 +247,7 @@ include $(wildcard modules/*.mk)
 -include deps/*.d
 ```
 
-`include`는 *대상 파일이 없으면 에러*를 냅니다. 빌드를 처음 돌릴 때 `.d`(자동 생성 의존성) 파일이 아직 없는 상황에서는 곤란합니다. `-include`는 *없으면 조용히 건너뜁니다*. `sinclude`는 같은 동작의 POSIX 호환 별명입니다.
+`include`는 *대상 파일이 없으면 에러*를 냅니다. 빌드를 처음 돌릴 때 `.d`(자동 생성 의존성) 파일이 아직 없는 상황에서는 곤란합니다. `-include`는 *없으면 조용히 건너뜁니다*. sinclude는 -include와 같은 동작을 하는 호환용 별명이지만 POSIX 표준 구문이라고 일반화하지 않습니다.
 
 이 한 글자 `-`가 *자동 의존성 추적 패턴*의 핵심입니다(아래에서 본격).
 
@@ -320,7 +320,7 @@ DEPS := $(OBJS:.o=.d)
 두 번째 빌드 이후:
 - `.d`에 정확한 의존성이 들어 있어 헤더 수정도 정상 감지
 
-이 한 패턴이 *대부분의 C/C++ Makefile 프로젝트*가 따르는 표준입니다. 이걸 모르고 손으로 의존성을 적던 시절은 1990년대 후반에 끝났습니다.
+이 패턴은 컴파일러가 제공한 의존성을 Make에 반영하는 방법입니다. .d를 만들었다는 사실만으로 충분하지 않고 실제로 include되는지도 확인합니다.
 
 ### `-MP`의 정확한 효과
 
@@ -337,7 +337,7 @@ header.h:           ← 빈 규칙
 
 이 빈 규칙은 *`header.h`가 없는 상태에서 Make가 폭발하지 않게* 만듭니다. 헤더를 일부러 지운 경우(예: refactoring 후 헤더 통합)에 Make는 `header.h:`을 만나 "이거 만드는 법 있음 — 빈 규칙"으로 받아들이고, 그 의존성을 가진 `.o`는 *다시 컴파일이 필요하다*고 판단합니다. 컴파일러는 새 `main.c`를 다시 읽어 새 의존성 트리를 만들고 `.d`를 갱신합니다. 한 사이클이면 정상화됩니다.
 
-`-MP` 없이는 같은 상황에서 `Makefile:N: header.h: No such file or directory. Stop.`이 납니다.
+-MP 없이 옛 .d가 삭제된 헤더를 계속 요구하면 Make 단계에서 No rule to make target 오류가 납니다. -MP가 있어도 소스가 삭제된 헤더를 계속 include하면 컴파일러 단계에서 실패합니다. 소스의 include 제거와 의존성 재생성을 함께 확인합니다.
 
 ---
 
@@ -399,13 +399,13 @@ $(SUBDIRS):
 	$(MAKE) -C $@
 ```
 
-단순해 보이지만 *치명적 단점*들이 있습니다.
+디렉터리별 호출로 나누면 다음 문제를 검토해야 합니다.
 
-- 병렬 빌드 효율이 *극단적으로 떨어집니다*. 각 서브 Make는 자기 디렉터리만 봐서 *전역 의존성*을 못 잡아내고, 결과적으로 잡 슬롯을 잘 못 활용합니다.
+- 디렉터리 경계의 의존성을 상위 Make에서 충분히 표현하지 않으면 준비되지 않은 라이브러리를 먼저 링크하거나 빌드를 불필요하게 직렬화할 수 있습니다.
 - 디렉터리 *경계를 가로지르는 의존성*이 깨집니다. lib의 헤더 변경이 app에 반영되지 않을 수 있습니다.
 - 같은 파일이 *여러 번 컴파일*될 수 있습니다.
 
-이 문제들은 1997년 Peter Miller의 "Recursive Make Considered Harmful" 논문에서 정리됐고, 그 이후 *비재귀적 Make*가 표준으로 자리잡았습니다.
+이런 그래프 분할 문제는 Peter Miller의 Recursive Make Considered Harmful에서 다룹니다. 모든 재귀 Make가 잘못됐거나 비재귀 방식이 유일한 표준이라는 결론으로 일반화하지 않습니다.
 
 **비재귀적 Make** — 모든 모듈을 한 Make에:
 
@@ -418,7 +418,7 @@ all: $(ALL_TARGETS)
 
 한 Make 프로세스가 *전체 그래프*를 가지므로 병렬 빌드가 정확하고, 의존성도 빠지지 않습니다. 단점은 *초기 셋업이 좀 더 복잡*하다는 것뿐입니다.
 
-큰 오픈소스 프로젝트의 Makefile(Linux 커널의 Kbuild, U-Boot)이 모두 비재귀적입니다. 새 프로젝트라면 이쪽을 권합니다.
+재귀 호출 여부와 올바른 의존성 추적은 별개의 설계 문제입니다. include로 합쳤다고 파일 의존성이 자동 완성되지 않으며 재귀 Make도 명시적 그래프와 jobserver를 활용합니다. 개별 프로젝트의 소스를 확인하지 않고 모두 비재귀적이라고 분류하지 않습니다.
 
 ---
 
@@ -479,7 +479,7 @@ myapp: main.o utils.o
 
 `myapp` 빌드 시 *직접 의존성*인 `main.o`, `utils.o`까지 새 `CFLAGS` 값을 받습니다. 즉 `main.c`와 `utils.c`가 컴파일될 때 *`-DAPP_BUILD`*가 들어갑니다.
 
-이 *전파 규칙* 때문에 타겟별 변수는 *위에서 아래로* 영향을 줍니다. 같은 `.o`가 다른 실행 파일의 의존성이라면 *그 실행 파일의 타겟별 변수*에 따라 다르게 컴파일됩니다. 매우 강력하지만 *디버깅이 어려워질 수 있어* 신중히 씁니다.
+이 *전파 규칙* 때문에 타겟별 변수는 *위에서 아래로* 영향을 줍니다. 같은 오브젝트를 두 상위 타겟이 공유하면 먼저 빌드하는 타겟의 값으로 한 번 만들어집니다. 타겟마다 다른 옵션의 오브젝트가 필요하면 파일 경로도 분리해야 합니다. 타겟별 변수를 지정하는 것만으로 두 벌이 생성되지는 않습니다.
 
 ### 적용 시점 — *레시피 실행 시*
 
@@ -497,9 +497,37 @@ critical.o: %.o: %.c
 
 ---
 
+## 직접 확인 — 빈 값과 조건식 공백
+
+다음 조건 비교는 GNU Make 4.4.1에서 확인했습니다. conditions.mk로 저장하고 `make -f conditions.mk DEBUG=1`로 실행합니다.
+
+```makefile title="conditions.mk"
+EMPTY :=
+REFERENCE = $(EMPTY)
+ifdef EMPTY
+$(error EMPTY must be false)
+endif
+ifdef REFERENCE
+$(info stored-reference=true)
+endif
+ifeq ($(REFERENCE),)
+$(info expanded-reference=empty)
+endif
+ifeq ($(DEBUG), 1)
+$(info debug-match=true)
+endif
+.PHONY: all
+all:
+	@printf 'conditions checked\n'
+```
+
+출력에는 stored-reference=true, expanded-reference=empty, debug-match=true가 있습니다. EMPTY 자체는 ifdef에서 거짓이지만 REFERENCE에는 확장 전의 참조 문자열이 저장되어 있어 ifdef에서 참입니다.
+
 ## 실전 예시 — 모드 분기 + 자동 의존성
 
-```makefile
+이 절의 두 Makefile과 다음 두 소스 파일을 저장하면 실제 헤더 변경을 확인할 수 있습니다. 실행 환경은 GNU Make 4.4.1·macOS·AppleClang 21의 gcc 드라이버입니다.
+
+```makefile title="config.mk"
 # === config.mk ===
 CC := gcc
 CXX := g++
@@ -518,7 +546,7 @@ BUILDDIR := build/release
 endif
 ```
 
-```makefile
+```makefile title="Makefile"
 # === Makefile ===
 include config.mk
 
@@ -554,6 +582,22 @@ make DEBUG=1         # 디버그 (별도 디렉터리)
 make clean           # 모든 모드 정리
 ```
 
+소스는 같은 src 디렉터리에 둡니다.
+
+```c title="src/header.h"
+#define VALUE 7
+```
+
+실행 파일은 헤더의 값을 출력합니다.
+
+```c title="src/main.c"
+#include "header.h"
+#include <stdio.h>
+int main(void) { printf("value=%d\n", VALUE); }
+```
+
+첫 `make` 뒤 build/release/myapp은 value=7을 출력합니다. header.h의 값을 8로 바꾸고 make를 실행하면 오브젝트를 다시 컴파일해 value=8을 출력합니다. 헤더를 삭제할 때는 main.c의 include도 제거하거나 대체해야 합니다. -MP는 소스의 누락된 include를 해결하지 않습니다.
+
 이 Makefile이 만족하는 것들:
 
 - *모드 분기*: 디버그·릴리스가 *별도 디렉터리*에 빌드되어 서로 안 망친다.
@@ -568,10 +612,10 @@ make clean           # 모든 모드 정리
 ### 1. `ifeq` 비교 안에 공백
 
 ```makefile
-ifeq ($(DEBUG), 1)   # " 1"과 비교 → 거의 항상 false
+ifeq ($(DEBUG), 1)   # DEBUG=1이면 참: 쉼표 다음의 구문 공백은 무시
 ```
 
-함수 호출과 마찬가지로 *쉼표 뒤 공백이 인자에 흡수*됩니다.
+ifeq 지시자의 구문 공백과 함수 인자의 공백을 혼동하면 안 됩니다. 반면 변수 값 자체에 저장된 공백은 비교에 영향을 주므로 필요한 경우 $(strip $(DEBUG))로 정규화합니다.
 
 **해결**: `ifeq ($(DEBUG),1)`.
 
@@ -585,7 +629,7 @@ LDLIBS += $(EXTRA_LIBS)   # 의도와 다르게 실행됨
 endif
 ```
 
-빈 문자열로 정의된 변수도 `ifdef`에는 *정의됨*으로 잡힙니다.
+위 EXTRA_LIBS는 빈 값이므로 블록에 들어가지 않습니다. 다른 변수를 참조하는 재귀 변수의 최종 확장 결과를 검사하려면 ifneq ($(strip $(EXTRA_LIBS)),)처럼 명시합니다.
 
 **해결**: `ifneq ($(EXTRA_LIBS),)`.
 
@@ -630,7 +674,7 @@ CFLAGS += -MMD
 ## 정리
 
 - **조건 지시자**: `ifeq` / `ifneq` / `ifdef` / `ifndef` — 모두 *파싱 시점*.
-- `ifdef`는 *정의 여부*만, 값이 빈 검사는 `ifeq ($(VAR),)`.
+- ifdef는 저장된 값의 유무를 검사하며 빈 값은 거짓입니다. 재귀 확장 후의 값은 ifeq로 비교합니다.
 - 레시피 안 조건은 *셸 조건문*이나 *분기 결과 변수*로 풀자.
 - **`include`**: Makefile 인라인. **`-include`**: 없어도 무시.
 - 표준 자동 의존성 패턴: `CFLAGS += -MMD -MP` + `-include $(DEPS)`.

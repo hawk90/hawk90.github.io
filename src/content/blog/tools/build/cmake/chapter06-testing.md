@@ -29,11 +29,11 @@ topics: ["tools", "tools/build"]
 3. **병렬 실행** — 직렬로 돌면 CI가 *몇 분 걸려야 할 일을 몇십 분* 걸립니다.
 4. **CI 연동** — Jenkins·GitHub Actions·GitLab CI 모두 *표준 입출력 포맷*을 요구합니다. 직접 만든 셸 루프로는 한계가 있습니다.
 
-CTest는 이 모든 문제를 한 번에 해결하는 CMake 내장 테스트 러너입니다. *별도 설치 없이* CMake와 함께 깔리고, 모든 CI 시스템이 *기본으로 지원*하며, 병렬 실행과 JUnit·SubunitXML 출력을 내장합니다.
+CTest는 CMake와 함께 제공되는 테스트 러너입니다. 테스트 목록·종료 상태·병렬 실행을 관리하고 JUnit XML 리포트를 생성합니다. CI에서는 테스트 실행과 리포트 수집 단계를 별도로 설정합니다.
 
 ![CTest 실행 흐름](/images/blog/cmake/diagrams/ch06-ctest-flow.svg)
 
-CTest의 좋은 점은 *프레임워크 비종속성*입니다. Google Test, Catch2, Boost.Test, doctest, 그리고 *그냥 셸 스크립트*까지 — 종료 코드 0/비-0만 돌려주면 CTest가 받아 줍니다. 이 단순함이 50년 가까이 살아남은 빌드 도구의 미학입니다.
+CTest는 테스트 프레임워크에 종속되지 않습니다. 실행 파일이나 스크립트를 등록하고 종료 상태를 확인합니다. 이 글의 실행 기준은 CMake/CTest 4.4.4·Ninja 1.13.2·macOS입니다. 마지막 완성 예제는 외부 테스트 프레임워크 없이 실행 순서와 fixture 실패 처리를 재현합니다.
 
 ---
 
@@ -41,7 +41,7 @@ CTest의 좋은 점은 *프레임워크 비종속성*입니다. Google Test, Cat
 
 ### 테스트 활성화
 
-CTest를 사용하려면 `enable_testing()`을 호출해야 합니다. 이 명령은 반드시 최상위 `CMakeLists.txt`에 위치해야 합니다. 하위 디렉터리에서 호출하면 CTest가 테스트를 인식하지 못합니다.
+프로젝트의 빌드 루트에서 CTest를 실행하려면 최상위 `CMakeLists.txt`에서 `enable_testing()`을 호출합니다. 하위 디렉터리에서만 활성화하면 그 디렉터리의 테스트 파일은 만들어지지만 루트의 탐색 진입 파일이 없을 수 있습니다.
 
 ```cmake
 # 최상위 CMakeLists.txt
@@ -90,8 +90,7 @@ add_test(NAME MathTest COMMAND test_math --verbose --filter=Add*)
 
 ```bash
 # 기본 실행
-cd build
-ctest
+ctest --test-dir build
 
 # CMake를 통한 실행
 cmake --build build --target test
@@ -144,7 +143,7 @@ ctest -LE slow            # slow 라벨 제외
 
 ```bash
 ctest -j 4                # 4개 병렬 실행
-ctest -j $(nproc)         # CPU 코어 수만큼 병렬 실행
+ctest --parallel 4        # 명시적으로 동시 실행 수 지정
 ctest --parallel 8        # -j와 동일
 ```
 
@@ -162,7 +161,7 @@ set_tests_properties(DBTest1 DBTest2 PROPERTIES
 ctest --output-on-failure     # 실패한 테스트의 출력만 표시 (CI에서 권장)
 ctest --stop-on-failure       # 첫 실패에서 즉시 중단
 ctest --rerun-failed          # 이전에 실패한 테스트만 재실행
-ctest --repeat until-fail:10  # 10번 연속 성공할 때까지 반복 (플레이키 테스트 탐지)
+ctest --repeat until-fail:10  # 최대 10회, 처음 실패하면 해당 테스트 반복 중단
 ```
 
 ---
@@ -173,7 +172,7 @@ ctest --repeat until-fail:10  # 10번 연속 성공할 때까지 반복 (플레�
 
 ### 타임아웃
 
-무한 루프에 빠진 테스트를 방지합니다. 기본 타임아웃은 1500초(25분)입니다.
+무한 루프에 빠진 테스트를 제한하려면 테스트별 `TIMEOUT`을 명시합니다. 설정하지 않은 경우의 제한은 실행 방식과 전역 timeout 설정에 영향을 받으므로 특정 값을 모든 CTest 실행의 기본값으로 가정하지 않습니다. [TIMEOUT 속성](https://cmake.org/cmake/help/v4.4/prop_test/TIMEOUT.html)을 참고합니다.
 
 ```cmake
 add_test(NAME SlowTest COMMAND slow_test)
@@ -297,7 +296,7 @@ CTest는 *자동으로 순서를 잡습니다*:
 3. `TestQuery` 실행
 4. `StopDB`(CLEANUP) 마지막 실행 — *다른 테스트가 다 끝나기를 기다림*
 
-여러 테스트가 같은 fixture를 공유해도 *setup/cleanup은 한 번만* 실행됩니다. xUnit·Pytest의 fixture와 같은 개념입니다.
+하나의 setup/cleanup 테스트를 여러 테스트가 공유할 수 있습니다. 같은 fixture에 setup 테스트를 여러 개 지정하면 그 테스트들이 모두 실행됩니다. setup이 실패하면 해당 fixture를 요구하는 테스트는 실행하지 않고 cleanup은 실행합니다. fixture가 동시 자원 사용을 직렬화하지는 않으므로 공유 DB 접근에는 별도 `RESOURCE_LOCK`이 필요합니다.
 
 `ctest -j4`로 병렬 실행할 때도 fixture가 자동 보호되어, setup 중인 동안 다른 의존 테스트가 *기다립니다*.
 
@@ -314,9 +313,9 @@ CTest는 *자동으로 순서를 잡습니다*:
 | `PROCESSORS 4` | 이 테스트가 4 CPU 슬롯을 사용 (자원 추적) |
 | `ENVIRONMENT "VAR=value"` | 환경 변수 설정 |
 | `WORKING_DIRECTORY "..."` | 시작 디렉터리 |
-| `DEPENDS OtherTest` | 다른 테스트 *통과 후* 실행 |
+| `DEPENDS OtherTest` | 선행 테스트가 끝난 뒤 실행. 성공 여부는 조건이 아님 |
 
-`PROCESSORS`가 흥미롭습니다. 한 테스트가 *내부적으로 멀티 스레드*를 쓴다면 (예: 4 스레드 사용), `PROCESSORS 4`로 알려 주세요. `ctest -j8`로 호출해도 *2개씩만* 동시 실행해 시스템 과부하를 막습니다.
+`DEPENDS`는 실행 순서만 정합니다. 선행 테스트의 성공이 필요하면 [fixture](https://cmake.org/cmake/help/v4.4/prop_test/FIXTURES_REQUIRED.html)를 사용합니다. [DEPENDS 문서](https://cmake.org/cmake/help/v4.4/prop_test/DEPENDS.html)는 선행 결과를 고려하지 않는다고 명시합니다. `PROCESSORS 4`는 병렬 스케줄러에 슬롯 사용량을 알리는 속성이며, 프로그램의 스레드 수나 CPU 사용을 강제로 제한하는 기능은 아닙니다.
 
 ### `ctest_*` 명령 — 스크립트 모드
 
@@ -368,6 +367,7 @@ FetchContent_MakeAvailable(googletest)
 ```cpp
 // tests/test_math.cpp
 #include <gtest/gtest.h>
+#include <limits>
 #include "mylib/math.hpp"
 
 TEST(MathTest, Add) {
@@ -381,9 +381,10 @@ TEST(MathTest, Subtract) {
     EXPECT_EQ(subtract(3, 5), -2);
 }
 
-TEST(MathTest, Overflow) {
-    // int 오버플로우 테스트
-    EXPECT_EQ(add(INT_MAX, 1), INT_MIN);  // 정의되지 않은 동작 주의
+TEST(MathTest, Boundary) {
+    // 오버플로우를 일으키지 않는 경계값 검사
+    EXPECT_EQ(add(std::numeric_limits<int>::max(), 0),
+              std::numeric_limits<int>::max());
 }
 ```
 
@@ -409,7 +410,7 @@ gtest_discover_tests(test_math)
 $ ctest -N  # 테스트 목록 확인
 Test #1: MathTest.Add
 Test #2: MathTest.Subtract
-Test #3: MathTest.Overflow
+Test #3: MathTest.Boundary
 ```
 
 ### 수동 등록 vs 자동 발견
@@ -423,7 +424,7 @@ add_test(NAME MathTests COMMAND test_math)
 gtest_discover_tests(test_math)
 # ctest -N 결과: Test #1: MathTest.Add
 #               Test #2: MathTest.Subtract
-#               Test #3: MathTest.Overflow
+#               Test #3: MathTest.Boundary
 ```
 
 자동 발견의 장점:
@@ -447,7 +448,7 @@ gtest_discover_tests(test_math
 
 ## Catch2 연동
 
-Catch2는 헤더 온리로 시작할 수 있는 가벼운 테스트 프레임워크입니다. v3부터는 컴파일된 라이브러리 형태도 지원합니다.
+이 절은 Catch2 v3.5.0의 컴파일된 라이브러리를 연결하는 형태입니다. v2의 헤더 전용 통합 방식과 구분합니다. 아래 GTest·Catch2 조각은 외부 라이브러리 소스가 필요한 연동 예이며, 이 글의 로컬 CTest 검증에서 해당 의존성을 다운로드해 실행한 것은 아닙니다.
 
 ### FetchContent로 가져오기
 
@@ -468,6 +469,7 @@ FetchContent_MakeAvailable(Catch2)
 ```cpp
 // tests/test_math.cpp
 #include <catch2/catch_test_macros.hpp>
+#include <limits>
 #include "mylib/math.hpp"
 
 TEST_CASE("Addition works correctly", "[math]") {
@@ -476,7 +478,8 @@ TEST_CASE("Addition works correctly", "[math]") {
 
     SECTION("Edge cases") {
         REQUIRE(add(0, 0) == 0);
-        REQUIRE(add(INT_MAX, 0) == INT_MAX);
+        REQUIRE(add(std::numeric_limits<int>::max(), 0) ==
+                std::numeric_limits<int>::max());
     }
 }
 
@@ -495,11 +498,12 @@ target_link_libraries(test_math PRIVATE
     Catch2::Catch2WithMain  # main() 함수 포함
 )
 
+list(APPEND CMAKE_MODULE_PATH "${catch2_SOURCE_DIR}/extras")
 include(Catch)
 catch_discover_tests(test_math)
 ```
 
-Catch2의 `SECTION`은 테스트 케이스 안에서 분기를 만들어 코드 재사용을 돕습니다. 각 `SECTION`은 별도의 테스트 실행으로 등록됩니다.
+`catch_discover_tests()`는 테스트 케이스를 CTest에 등록합니다. `SECTION`마다 별도 CTest 항목을 만드는 것은 아닙니다. SECTION은 해당 테스트 케이스 안의 실행 경로를 나누며 실행은 Catch2가 관리합니다. [v3.5.0 CMake 통합 문서](https://github.com/catchorg/Catch2/blob/v3.5.0/docs/cmake-integration.md)를 참고합니다.
 
 ---
 
@@ -570,150 +574,47 @@ GitHub Actions 예시:
 
 ---
 
-## 실전 예시: 완전한 테스트 설정
+## 실전 예시 — 순서 의존과 성공 의존을 구분하기
 
-프로젝트 구조:
+다음 두 파일은 외부 프레임워크 없이 CTest의 실패 전파를 확인합니다. OrderFirst는 의도적으로 실패하지만 DEPENDS로 연결한 OrderNext는 실행됩니다. fixture 테스트는 setup 실패 시 본문을 건너뛰고 cleanup을 실행합니다.
 
-```text
-mymath/
-├── CMakeLists.txt
-├── include/
-│   └── mymath/
-│       ├── add.hpp
-│       ├── subtract.hpp
-│       └── multiply.hpp
-├── src/
-│   ├── add.cpp
-│   ├── subtract.cpp
-│   ├── multiply.cpp
-│   └── main.cpp
-└── tests/
-    ├── CMakeLists.txt
-    ├── test_add.cpp
-    ├── test_subtract.cpp
-    ├── test_multiply.cpp
-    └── test_integration.cpp
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(CTestCheck LANGUAGES NONE)
+enable_testing()
+option(FAIL_SETUP "Make fixture setup fail" OFF)
+add_test(NAME OrderFirst COMMAND "${CMAKE_COMMAND}" -E false)
+add_test(NAME OrderNext COMMAND "${CMAKE_COMMAND}" -E echo ORDER_NEXT_RAN)
+set_tests_properties(OrderNext PROPERTIES DEPENDS OrderFirst)
+add_test(NAME FixtureSetup COMMAND "${CMAKE_COMMAND}"
+    "-DFAIL_SETUP=${FAIL_SETUP}" -P "${CMAKE_CURRENT_SOURCE_DIR}/setup.cmake")
+set_tests_properties(FixtureSetup PROPERTIES FIXTURES_SETUP DB)
+add_test(NAME FixtureBody COMMAND "${CMAKE_COMMAND}" -E echo FIXTURE_BODY_RAN)
+set_tests_properties(FixtureBody PROPERTIES FIXTURES_REQUIRED DB)
+add_test(NAME FixtureCleanup COMMAND "${CMAKE_COMMAND}" -E echo FIXTURE_CLEANUP_RAN)
+set_tests_properties(FixtureCleanup PROPERTIES FIXTURES_CLEANUP DB)
 ```
 
-### 최상위 CMakeLists.txt
+setup 스크립트는 옵션에 따라 성공 또는 실패합니다.
 
-```cmake
-cmake_minimum_required(VERSION 3.20)
-project(MyMath VERSION 1.0.0 LANGUAGES CXX)
-
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# === 라이브러리 ===
-add_library(mymath
-    src/add.cpp
-    src/subtract.cpp
-    src/multiply.cpp
-)
-target_include_directories(mymath PUBLIC
-    $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-    $<INSTALL_INTERFACE:include>
-)
-
-# === 실행 파일 ===
-add_executable(calculator src/main.cpp)
-target_link_libraries(calculator PRIVATE mymath)
-
-# === 테스트 ===
-option(BUILD_TESTING "Enable testing" ON)
-option(ENABLE_COVERAGE "Enable coverage" OFF)
-
-if(BUILD_TESTING)
-    enable_testing()
-    add_subdirectory(tests)
+```cmake title="setup.cmake"
+if(FAIL_SETUP)
+    message(FATAL_ERROR "Fixture setup deliberately failed")
 endif()
+message(STATUS "Fixture setup ready")
 ```
 
-### tests/CMakeLists.txt
-
-```cmake
-include(FetchContent)
-
-# === Google Test 가져오기 ===
-FetchContent_Declare(
-    googletest
-    GIT_REPOSITORY https://github.com/google/googletest.git
-    GIT_TAG        v1.15.2
-)
-set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
-FetchContent_MakeAvailable(googletest)
-
-# === 커버리지 함수 ===
-function(add_coverage_flags target)
-    if(ENABLE_COVERAGE AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
-        target_compile_options(${target} PRIVATE --coverage -O0 -g)
-        target_link_options(${target} PRIVATE --coverage)
-    endif()
-endfunction()
-
-# === 단위 테스트 ===
-add_executable(test_math
-    test_add.cpp
-    test_subtract.cpp
-    test_multiply.cpp
-)
-target_link_libraries(test_math PRIVATE
-    mymath
-    GTest::gtest_main
-)
-add_coverage_flags(test_math)
-
-include(GoogleTest)
-gtest_discover_tests(test_math
-    PROPERTIES LABELS "unit"
-    DISCOVERY_TIMEOUT 30
-)
-
-# === 통합 테스트 ===
-add_executable(test_integration test_integration.cpp)
-target_link_libraries(test_integration PRIVATE
-    mymath
-    GTest::gtest_main
-)
-add_coverage_flags(test_integration)
-
-gtest_discover_tests(test_integration
-    PROPERTIES
-        LABELS "integration"
-        TIMEOUT 120
-)
-
-# === 부모 타겟에도 커버리지 적용 ===
-if(ENABLE_COVERAGE)
-    add_coverage_flags(mymath)
-endif()
-```
-
-### 실행 예시
+다음은 같은 빌드 디렉터리를 재구성하는 명령입니다.
 
 ```bash
-# 빌드
-cmake -B build
-cmake --build build
-
-# 모든 테스트 실행
-ctest --test-dir build --output-on-failure
-
-# 단위 테스트만
-ctest --test-dir build -L unit -j 8
-
-# 특정 테스트만
-ctest --test-dir build -R "Add"
-
-# 커버리지 포함 빌드
-cmake -B build-cov -DENABLE_COVERAGE=ON -DCMAKE_BUILD_TYPE=Debug
-cmake --build build-cov
-ctest --test-dir build-cov
-gcovr -r . --html -o coverage.html
+cmake -S . -B build -G Ninja
+ctest --test-dir build -R '^Order' -V
+ctest --test-dir build -R '^Fixture' -V
+cmake -S . -B build -DFAIL_SETUP=ON
+ctest --test-dir build -R '^Fixture' -V
 ```
 
----
+첫 CTest 호출은 의도된 실패 때문에 비정상 종료하지만 `ORDER_NEXT_RAN`이 출력됩니다. 두 번째 호출은 fixture 세 테스트가 모두 통과합니다. 마지막 호출은 setup 실패, FixtureBody의 Not Run, cleanup 통과를 보고합니다. 실패를 정상 통과로 바꾸는 예제가 아니라 두 의존성의 차이를 재현하는 예제입니다.
 
 ## 정리
 
@@ -738,12 +639,12 @@ enable_testing()  # ❌ 여기서 호출하면 CTest가 테스트를 못 찾음
 add_test(NAME MyTest COMMAND test_app)
 ```
 
-`enable_testing()`은 반드시 최상위 `CMakeLists.txt`에서 호출해야 합니다. 그래야 `CTestTestfile.cmake`가 올바른 위치에 생성됩니다.
+빌드 루트에서 하위 테스트까지 찾도록 최상위에서 활성화합니다. 하위 디렉터리만 활성화한 경우에는 `ctest --test-dir build/tests`처럼 그 디렉터리를 직접 지정하면 테스트를 찾을 수 있습니다.
 
 ### gtest_force_shared_crt 누락 (Windows)
 
 ```cmake
-FetchContent_MakeAvailable(googletest)  # ❌ Windows에서 링크 에러
+FetchContent_MakeAvailable(googletest)  # 사용하는 CRT 설정과 맞는지 확인 필요
 
 # 올바른 방법
 set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)  # MakeAvailable 전에!
@@ -756,12 +657,13 @@ FetchContent_MakeAvailable(googletest)
 gtest_discover_tests(test_math)  # ❌ 크로스 컴파일 시 실패할 수 있음
 ```
 
-`gtest_discover_tests()`는 빌드된 실행 파일을 실행해서 테스트 목록을 추출합니다. 크로스 컴파일 환경에서는 호스트에서 타겟 바이너리를 실행할 수 없으므로 실패합니다.
+`gtest_discover_tests()`는 실행 파일을 실행해 목록을 추출합니다. 크로스 컴파일에서는 호스트에서 실행 가능한 에뮬레이터나 타겟 실행 경로를 준비해야 합니다. 단순히 수동 `add_test()`로 바꿔도 바이너리가 호스트에서 실행 가능해지는 것은 아닙니다. `CROSSCOMPILING_EMULATOR` 설정과 실제 실행 환경을 먼저 확인합니다.
 
 ```cmake
 # 크로스 컴파일 시 대안
 if(CMAKE_CROSSCOMPILING)
-    add_test(NAME MathTests COMMAND test_math)  # 수동 등록
+    # 타겟 장치 실행이나 에뮬레이터를 준비한 뒤 테스트 등록
+    message(STATUS "Configure a target runner before registering tests")
 else()
     gtest_discover_tests(test_math)
 endif()
@@ -796,7 +698,7 @@ if(ENABLE_COVERAGE)
 endif()
 ```
 
-커버리지 측정은 항상 Debug 빌드(`-O0`)에서 해야 정확합니다.
+소스 줄과 실행 결과의 대응을 읽기 쉽게 하려면 최적화를 끈 측정용 구성을 사용합니다. Debug라는 이름 자체가 -O0를 보장하지 않으므로 상세 컴파일 명령을 확인합니다. 최적화된 빌드의 커버리지는 별도의 해석 기준으로 다룹니다.
 
 ---
 
@@ -808,8 +710,8 @@ Ch 7에서는 **설치와 패키징**을 다룹니다. `install()` 명령으로 
 
 ## 참고 자료
 
-- [CMake - ctest](https://cmake.org/cmake/help/latest/manual/ctest.1.html)
-- [CMake - GoogleTest 모듈](https://cmake.org/cmake/help/latest/module/GoogleTest.html)
+- [CMake - ctest](https://cmake.org/cmake/help/v4.4/manual/ctest.1.html)
+- [CMake - GoogleTest 모듈](https://cmake.org/cmake/help/v4.4/module/GoogleTest.html)
 - [Google Test 문서](https://google.github.io/googletest/)
 - [Catch2 문서](https://github.com/catchorg/Catch2/blob/devel/docs/Readme.md)
 

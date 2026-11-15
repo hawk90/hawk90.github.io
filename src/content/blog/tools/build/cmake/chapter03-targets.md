@@ -52,6 +52,8 @@ target_include_directories(app2 PRIVATE include)
 
 이 챕터의 목표는 셋입니다.
 
+실행 확인은 macOS의 CMake 4.4.4·Ninja 1.13.2·AppleClang 21을 기준으로 합니다. 아래 완성 예제는 C++ 헤더·소스까지 제공하며, 공개 경로와 매크로가 소비자에게 전달되는지 컴파일 단계에서 확인합니다.
+
 1. 타겟의 *세 종류*(실행 파일·라이브러리·커스텀)와 그 차이.
 2. *PRIVATE / PUBLIC / INTERFACE* 세 가시성의 의미와 선택 기준.
 3. 라이브러리를 *재사용 가능한 단위*로 만드는 표준 패턴.
@@ -117,7 +119,7 @@ target_link_options(myapp PRIVATE -static)
 target_link_libraries(myapp PRIVATE pthread mylib)
 ```
 
-모든 `target_*` 명령에는 **가시성 키워드**(PRIVATE, PUBLIC, INTERFACE)가 필요합니다. 실행 파일의 경우 대부분 `PRIVATE`을 씁니다.
+위 설정 명령에는 **가시성 키워드**(PRIVATE, PUBLIC, INTERFACE)를 명시합니다. 다만 `target_link_libraries(myapp mylib)`처럼 키워드를 생략하는 유효한 서명도 있습니다. 한 타겟에서 두 서명을 섞으면 오류가 나므로, 이 글은 명시적인 서명으로 통일합니다. 실행 파일 자체에 필요한 설정은 `PRIVATE`으로 지정합니다.
 
 ---
 
@@ -138,7 +140,7 @@ add_library(mylib STATIC
 | Linux/macOS | `.a` |
 | Windows | `.lib` |
 
-정적 라이브러리를 링크하면 코드가 실행 파일에 **복사**됩니다. 실행 파일이 커지지만, 배포 시 추가 파일이 필요 없습니다.
+정적 라이브러리는 링크할 때 필요한 오브젝트를 실행 파일에 포함시킵니다. 해당 `.a`나 `.lib` 자체는 실행할 때 필요하지 않지만, 프로그램이 사용하는 다른 공유 라이브러리나 데이터 파일까지 없어지는 것은 아닙니다.
 
 ### 동적 라이브러리 (SHARED)
 
@@ -168,7 +170,7 @@ target_compile_definitions(mylib INTERFACE USE_MYLIB)
 
 컴파일할 소스가 없고 헤더만 있는 라이브러리입니다. 템플릿 라이브러리나 헤더 전용 라이브러리(Boost.Hana, Eigen 등)에 사용합니다.
 
-INTERFACE 라이브러리의 모든 속성은 `INTERFACE`로 지정합니다. 자체 빌드가 없으므로 PRIVATE이나 PUBLIC은 의미가 없습니다.
+위처럼 소스가 없는 INTERFACE 라이브러리의 사용 요구사항은 `INTERFACE`로 지정합니다. 모든 속성의 이름이 INTERFACE로 시작한다는 뜻은 아닙니다. 소스를 가진 INTERFACE 타겟이나 `target_sources(... PRIVATE ...)` 같은 별도 형식도 있으므로, 이 예제의 범위를 헤더 전용 사용 요구사항으로 한정합니다. [add_library의 INTERFACE 형식](https://cmake.org/cmake/help/v4.4/command/add_library.html#interface-libraries)에 차이가 정리되어 있습니다.
 
 ### 오브젝트 라이브러리 (OBJECT)
 
@@ -192,6 +194,8 @@ target_link_libraries(app2 PRIVATE common)
 add_executable(app3 src/app3.cpp $<TARGET_OBJECTS:common>)
 ```
 
+`target_link_libraries(... common)`은 오브젝트와 사용 요구사항을 함께 전달합니다. 소스에 `$<TARGET_OBJECTS:common>`만 넣는 형식은 오브젝트를 넣을 뿐, `common`의 인클루드 경로나 매크로를 자동 상속하는 대체 문법은 아닙니다. [오브젝트 라이브러리 연결](https://cmake.org/cmake/help/v4.4/command/target_link_libraries.html#linking-object-libraries)을 참고합니다.
+
 ### 라이브러리 타입 미지정
 
 ```cmake
@@ -203,8 +207,10 @@ add_library(mylib src/mylib.cpp)
 ```bash
 cmake -B build -DBUILD_SHARED_LIBS=ON   # SHARED
 cmake -B build -DBUILD_SHARED_LIBS=OFF  # STATIC (기본)
-cmake -B build                          # STATIC (기본)
+cmake -B build                          # 기존 캐시 값을 유지
 ```
+
+새 빌드 디렉터리에서 변수를 정의하지 않았다면 STATIC입니다. 같은 `build`에서 앞서 ON을 캐시에 기록했다면 마지막 명령도 SHARED를 유지합니다.
 
 ---
 
@@ -217,6 +223,8 @@ cmake -B build                          # STATIC (기본)
 | `PRIVATE` | ✓ | ✗ |
 | `PUBLIC` | ✓ | ✓ |
 | `INTERFACE` | ✗ | ✓ |
+
+이 표는 컴파일 옵션·헤더 경로·매크로 같은 **사용 요구사항**의 전파를 설명합니다. 정적 라이브러리의 PRIVATE 링크 의존성은 최종 실행 파일의 심볼을 해결하기 위해 링크 단계까지 따라갈 수 있습니다. PRIVATE을 모든 의존성이 최종 링크 명령에서 사라진다는 뜻으로 해석하면 안 됩니다. [정적 라이브러리의 링크 의존성](https://cmake.org/cmake/help/v4.4/manual/cmake-buildsystem.7.html#static-libraries)을 구분합니다.
 
 ### 한 줄 정의
 
@@ -278,36 +286,6 @@ target_link_libraries(app PRIVATE mylib)
 | ✗ | ✓ | **INTERFACE** |
 
 가장 흔한 패턴은 `target_include_directories`의 *공개 헤더 경로는 PUBLIC*, *내부 소스의 헤더 경로는 PRIVATE*입니다. 라이브러리 사용자가 보아야 할 헤더 경로가 PUBLIC으로 전파되어, `target_link_libraries`만 호출해도 자동으로 인클루드 경로가 더해집니다.
-
-### 예시로 이해하기
-
-```cmake
-add_library(mylib src/mylib.cpp)
-
-# PRIVATE: mylib 빌드에만 필요, 사용자에게는 전파 안 됨
-target_include_directories(mylib PRIVATE src/internal)
-target_compile_options(mylib PRIVATE -Wno-unused-parameter)
-
-# PUBLIC: mylib 빌드에도 필요하고, 사용자에게도 전파됨
-target_include_directories(mylib PUBLIC include)
-target_compile_features(mylib PUBLIC cxx_std_17)
-
-# INTERFACE: mylib 빌드에는 필요 없지만, 사용자에게 전파됨
-target_compile_definitions(mylib INTERFACE USE_MYLIB)
-```
-
-```cmake
-add_executable(app src/main.cpp)
-target_link_libraries(app PRIVATE mylib)
-```
-
-`app`이 `mylib`에 링크하면:
-
-- `include` 디렉터리 상속 (PUBLIC)
-- C++17 요구 상속 (PUBLIC)
-- `USE_MYLIB` 정의 상속 (INTERFACE)
-- `src/internal`은 상속 안 함 (PRIVATE)
-- `-Wno-unused-parameter`는 상속 안 함 (PRIVATE)
 
 ### 가시성 결정 가이드
 
@@ -411,7 +389,7 @@ target_compile_features(mylib PUBLIC cxx_std_17)
 # 컴파일 옵션
 target_compile_options(mylib
     PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra>
+        "$<$<CXX_COMPILER_ID:GNU>:-Wall;-Wextra>"
         $<$<CXX_COMPILER_ID:MSVC>:/W4>
 )
 ```
@@ -421,7 +399,7 @@ target_compile_options(mylib
 - `BUILD_INTERFACE`: 빌드 트리에서 라이브러리를 사용할 때의 경로
 - `INSTALL_INTERFACE`: `make install` 후 사용할 때의 경로
 
-이렇게 하면 빌드할 때와 설치 후 모두 올바른 경로가 적용됩니다.
+이 코드는 빌드 트리와 설치용 export에 사용할 경로를 구분합니다. 이것만으로 설치 패키지가 만들어지지는 않습니다. 설치·export·Config 파일을 연결하는 절차는 [Ch 7](/blog/tools/build/cmake/chapter07-install)에서 다룹니다.
 
 ---
 
@@ -495,7 +473,7 @@ message("After change: ${MY_VAR}")   # "child value"
 
 ### 타겟은 스코프를 가로질러 *전역*이다
 
-변수와 달리, *타겟은 한 번 정의되면 프로젝트 전체에서 보입니다*. 이 차이가 매우 중요합니다.
+일반 빌드 타겟의 이름은 프로젝트 전체에서 사용할 수 있습니다. 다만 타겟을 만든 뒤 참조하는 순서가 필요합니다. IMPORTED 타겟과 그 ALIAS는 디렉터리 범위로 제한될 수 있으므로, 모든 종류의 타겟이 전역이라고 일반화하지 않습니다. [별칭 타겟 범위](https://cmake.org/cmake/help/v4.4/command/add_library.html#alias-libraries)를 참고합니다.
 
 ```cmake
 # libs/mylib/CMakeLists.txt
@@ -519,7 +497,7 @@ target_link_libraries(myapp PRIVATE mylib)   # 자식이 만든 타겟이 보임
 add_subdirectory(third_party/google-benchmark EXCLUDE_FROM_ALL)
 ```
 
-`EXCLUDE_FROM_ALL`을 주면 *이 서브디렉터리의 타겟이 디폴트 빌드에 포함되지 않습니다*. 사용자가 그 타겟을 *명시적으로 링크*할 때만 빌드됩니다. 외부 라이브러리를 통째로 가져왔지만 *우리 빌드에는 일부만 필요*할 때 자주 등장합니다.
+`EXCLUDE_FROM_ALL`은 서브디렉터리의 타겟을 상위 디렉터리의 기본 빌드에서 제외합니다. 다른 빌드 타겟이 의존하면 그 의존성을 만족시키기 위해 빌드하고, `cmake --build build --target target_name`으로 직접 지정해도 빌드합니다. 명시적 링크만 유일한 빌드 조건인 것은 아닙니다. [디렉터리 속성 문서](https://cmake.org/cmake/help/v4.4/prop_dir/EXCLUDE_FROM_ALL.html)에 예외가 정리되어 있습니다.
 
 ### 프로젝트 구조 예시
 
@@ -588,53 +566,68 @@ target_compile_features(math PUBLIC cxx_std_17)
 
 ---
 
-## 실전 예시
+## 실전 예시 — 전파를 컴파일로 확인하기
 
-계산기 프로젝트의 전체 CMakeLists.txt입니다.
+아래 네 파일을 같은 디렉터리 아래에 저장합니다. 공개 헤더 경로는 PUBLIC, 구현용 매크로는 PRIVATE, 소비자 전용 매크로는 INTERFACE로 지정합니다. 소스의 전처리 조건은 세 설정 중 하나라도 잘못 전파되면 컴파일 오류를 냅니다.
 
-```cmake
-cmake_minimum_required(VERSION 3.15)
-project(Calculator VERSION 1.0.0 LANGUAGES CXX)
-
-# === 전역 설정 (최소화) ===
-set(CMAKE_CXX_STANDARD 17)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_EXTENSIONS OFF)
-
-# === 라이브러리 ===
-add_library(calclib
-    src/calc/add.cpp
-    src/calc/subtract.cpp
-    src/calc/multiply.cpp
-    src/calc/divide.cpp
-)
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
+project(TargetCheck LANGUAGES CXX)
+add_library(calclib STATIC src/calc.cpp)
 add_library(Calculator::calclib ALIAS calclib)
-
-target_include_directories(calclib
-    PUBLIC
-        $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
-        $<INSTALL_INTERFACE:include>
-    PRIVATE
-        ${CMAKE_CURRENT_SOURCE_DIR}/src
-)
-
-target_compile_options(calclib
-    PRIVATE
-        $<$<CXX_COMPILER_ID:GNU>:-Wall -Wextra -Wpedantic>
-        $<$<CXX_COMPILER_ID:Clang>:-Wall -Wextra -Wpedantic>
-        $<$<CXX_COMPILER_ID:MSVC>:/W4 /permissive->
-)
-
-# === 메인 실행 파일 ===
-add_executable(calc apps/main.cpp)
+target_include_directories(calclib PUBLIC include)
+target_compile_features(calclib PUBLIC cxx_std_17)
+target_compile_definitions(calclib PRIVATE CALC_INTERNAL)
+target_compile_definitions(calclib INTERFACE CALC_CONSUMER)
+add_executable(calc main.cpp)
 target_link_libraries(calc PRIVATE Calculator::calclib)
-
-# === 테스트 ===
-add_executable(calc_test tests/test_calc.cpp)
-target_link_libraries(calc_test PRIVATE Calculator::calclib)
 ```
 
----
+공개 헤더는 구현용 매크로에 의존하지 않습니다.
+
+```cpp title="include/calc.hpp"
+#pragma once
+int add(int left, int right);
+```
+
+라이브러리 구현은 PRIVATE 매크로를 받고, 소비자 전용 매크로는 받지 않아야 합니다.
+
+```cpp title="src/calc.cpp"
+#include <calc.hpp>
+#ifndef CALC_INTERNAL
+#error "Library must receive CALC_INTERNAL"
+#endif
+#ifdef CALC_CONSUMER
+#error "Library must not receive CALC_CONSUMER"
+#endif
+int add(int left, int right) { return left + right; }
+```
+
+소비자는 반대 조건을 검사합니다. 공개 헤더는 경로를 다시 지정하지 않아도 찾아야 합니다.
+
+```cpp title="main.cpp"
+#include <calc.hpp>
+#include <iostream>
+#ifdef CALC_INTERNAL
+#error "Consumer must not receive CALC_INTERNAL"
+#endif
+#ifndef CALC_CONSUMER
+#error "Consumer must receive CALC_CONSUMER"
+#endif
+int main() { std::cout << "sum=" << add(2, 3) << '\n'; }
+```
+
+Ninja와 C++ 컴파일러가 설치된 macOS·Linux 셸에서 실행합니다.
+
+```bash
+cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+cmake --build build --verbose
+./build/calc
+```
+
+CMake 4.4.4·AppleClang 21에서 실행 결과는 `sum=5`입니다. 상세 빌드 명령에는 라이브러리 컴파일에 `-DCALC_INTERNAL`, 실행 파일 컴파일에 `-DCALC_CONSUMER`가 각각 나타납니다. 두 컴파일 모두 공개 include 경로를 받습니다.
+
+반대로 `target_include_directories(calclib PUBLIC include)`를 PRIVATE으로 바꾸면 라이브러리는 빌드되지만 소비자가 `calc.hpp`를 찾지 못해 실패합니다. INTERFACE 매크로를 PRIVATE으로 바꾸면 소스에 적은 전처리 검사에서 실패합니다. 이 두 실패를 원복한 뒤 다시 빌드하면, 설정 누락과 전파 범위의 차이를 구분할 수 있습니다.
 
 ## 흔한 실수
 
@@ -654,15 +647,18 @@ add_executable(app2 src/app2.cpp)
 target_include_directories(app2 PRIVATE other_include)
 ```
 
-### 가시성 키워드 누락
+### 링크 서명을 섞어서 사용
 
 ```cmake
-# 회피: CMake 3.x에서 경고 또는 오류
-target_link_libraries(app mylib)  # 가시성 없음
+# 유효한 plain 서명
+target_link_libraries(app mylib)
 
-# Good: 명시적 가시성
+# 별도 대안: 이 타겟의 호출을 처음부터 명시적 서명으로 통일
+# 위 plain 호출과 같은 app에 섞어 호출하지 않음
 target_link_libraries(app PRIVATE mylib)
 ```
+
+키워드 생략 자체는 오류가 아닙니다. 위 두 줄을 같은 타겟에 함께 호출하는 것이 오류입니다. [target_link_libraries()의 서명](https://cmake.org/cmake/help/v4.4/command/target_link_libraries.html#libraries-for-both-a-target-and-its-dependents)과 혼용 제한을 구분합니다.
 
 ### 라이브러리에 모든 설정을 PRIVATE으로
 
@@ -693,6 +689,8 @@ target_link_libraries(app PRIVATE MyLib::myliib)  # 오타!
 ```
 
 ### 순환 의존성
+
+CMake는 정적 라이브러리 사이의 일부 순환을 지원합니다. 순환 자체가 언제나 구성 오류라는 뜻은 아닙니다. 아래는 순환을 공통 구현으로 분리해 의존 방향을 단순화하는 설계 대안입니다.
 
 ```cmake
 # 회피: A → B → A
@@ -727,8 +725,8 @@ Ch 4에서는 옵션과 캐시 변수를 다룹니다. `option()`, `set(... CACH
 
 ## 참고 자료
 
-- [CMake - add_library](https://cmake.org/cmake/help/latest/command/add_library.html)
-- [CMake - target_link_libraries](https://cmake.org/cmake/help/latest/command/target_link_libraries.html)
+- [CMake - add_library](https://cmake.org/cmake/help/v4.4/command/add_library.html)
+- [CMake - target_link_libraries](https://cmake.org/cmake/help/v4.4/command/target_link_libraries.html)
 - [It's Time To Do CMake Right](https://pabloariasal.github.io/2018/02/19/its-time-to-do-cmake-right/)
 
 ## 관련 항목
@@ -737,4 +735,4 @@ Ch 4에서는 옵션과 캐시 변수를 다룹니다. `option()`, `set(... CACH
 - [Ch 4: 옵션과 캐시 변수](/blog/tools/build/cmake/chapter04-options) — 타겟 구성을 사용자가 고를 수 있게 만들기
 - [Ch 8: Modern CMake 베스트 프랙티스](/blog/tools/build/cmake/chapter08-best-practices) — 타겟 중심 설계를 프로젝트 규모로 확장한 정리
 - [GNU Make 규칙 분석](/blog/tools/build/gnu-make/chapter02-rules) — Make의 타겟은 파일, CMake의 타겟은 속성 묶음이라는 차이
-- [cmake-buildsystem(7)](https://cmake.org/cmake/help/latest/manual/cmake-buildsystem.7.html) — 타겟과 사용 요구사항(usage requirements)의 공식 설명
+- [cmake-buildsystem(7)](https://cmake.org/cmake/help/v4.4/manual/cmake-buildsystem.7.html) — 타겟과 사용 요구사항(usage requirements)의 공식 설명

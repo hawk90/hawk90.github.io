@@ -16,15 +16,15 @@ C++ 프로젝트를 Windows·Linux·macOS에서 *모두* 빌드해야 한다고 
 
 ```makefile
 # Linux용 Makefile
-CC = gcc
-CFLAGS = -Wall -g
+CXX = g++
+CXXFLAGS = -Wall -g
 LDFLAGS = -lpthread
 
 app: main.o utils.o
-	$(CC) -o $@ $^ $(LDFLAGS)
+	$(CXX) -o $@ $^ $(LDFLAGS)
 
-%.o: %.c
-	$(CC) $(CFLAGS) -c $< -o $@
+%.o: %.cpp
+	$(CXX) $(CXXFLAGS) -c $< -o $@
 ```
 
 이걸로 Linux는 빌드됩니다. 그런데 Windows에는 Makefile을 보지 않는 *Visual Studio*가 있고, macOS에는 Xcode가 있습니다. *동일한 코드*를 위해 세 종류의 빌드 파일을 별도로 만들고, 동기화하고, 컴파일러별 옵션 차이(`-Wall` vs `/W4`)를 손으로 맞춰야 합니다. 결과는 다음과 같이 부풀어 오릅니다.
@@ -37,7 +37,7 @@ CMake는 정확히 이 문제를 풉니다. *한 개의 `CMakeLists.txt`*에서 
 
 ![CMake — 메타 빌드 시스템 흐름](/images/blog/cmake/diagrams/ch01-cmake-meta-build.svg)
 
-CMake는 *직접 컴파일하지 않습니다*. 호스트 환경을 살피고, 컴파일러를 찾고, 그에 맞는 *생성기*(generator)를 골라 Makefile·Ninja 파일·Visual Studio 솔루션·Xcode 프로젝트를 만들어 냅니다. 실제 컴파일은 그 다음 단계에서 *각 생성기가 알아서* 합니다. 이 분리가 *메타 빌드 시스템*이라는 이름의 핵심입니다.
+CMake는 *직접 컴파일하지 않습니다*. 호스트 환경을 살피고, 컴파일러를 찾고, 그에 맞는 *생성기*(generator)를 골라 Makefile·Ninja 파일·Visual Studio 솔루션·Xcode 프로젝트를 만들어 냅니다. 실제 컴파일은 생성된 빌드 시스템이 컴파일러를 호출해 수행합니다. 이 분리가 *메타 빌드 시스템*이라는 이름의 핵심입니다.
 
 ---
 
@@ -72,7 +72,7 @@ target_include_directories(app PRIVATE include)
 target_compile_features(app PRIVATE cxx_std_17)
 ```
 
-CMake는 *무엇*을 만들지를 선언하고, *어떻게*는 CMake가 결정합니다. 컴파일러는 환경에서 자동 탐지되고, `cxx_std_17`은 GCC에서는 `-std=c++17`이 되고 MSVC에서는 `/std:c++17`이 됩니다. 같은 표현 한 줄이 *모든 컴파일러에서 의미를 보존*합니다.
+CMake는 타겟과 필요한 기능을 선언받아 toolchain에 맞는 빌드 규칙을 만듭니다. `cxx_std_17`은 C++17 이상을 요구하며, 컴파일러의 기본 모드로 이미 만족하면 별도 표준 옵션을 붙이지 않을 수도 있습니다. 특정 플래그 문자열을 강제하는 기능과 구분합니다. [컴파일 기능 명령](https://cmake.org/cmake/help/v4.4/command/target_compile_features.html)을 참고합니다.
 
 이런 *선언형 모델*의 진가는 외부 라이브러리를 가져올 때 드러납니다. Makefile에서는 "사용자가 OpenSSL을 깔았는지 확인하고 경로를 찾아 `-lssl -lcrypto`를 붙이는" 코드를 직접 짜야 합니다. CMake에서는 `find_package(OpenSSL REQUIRED)`라는 한 줄이 그 일을 *모든 OS에서 동일하게* 처리합니다.
 
@@ -89,15 +89,7 @@ sudo apt update
 sudo apt install cmake
 ```
 
-배포판 패키지가 *오래된 버전*일 때가 많습니다(Ubuntu 22.04 LTS는 3.22). 최신 기능(프리셋, FetchContent 개선)이 필요하면 Kitware 공식 저장소를 추가합니다.
-
-```bash
-wget -O - https://apt.kitware.com/keys/kitware-archive-latest.asc 2>/dev/null | \
-    gpg --dearmor - | sudo tee /etc/apt/trusted.gpg.d/kitware.gpg >/dev/null
-sudo apt-add-repository "deb https://apt.kitware.com/ubuntu/ $(lsb_release -cs) main"
-sudo apt update
-sudo apt install cmake
-```
+설치 후 `cmake --version`을 확인합니다. 이 시리즈의 완성 예제는 최소 정책 버전 3.25를 사용합니다. 배포판 패키지가 이를 만족하지 않으면 [Kitware 공식 APT 안내](https://apt.kitware.com/)에서 지원하는 배포판과 signed-by keyring 설정 절차를 확인합니다. 패키지 저장소 추가 명령을 모든 Ubuntu 버전에 공통으로 적용하지 않습니다.
 
 ### Linux (Fedora/RHEL)
 
@@ -132,12 +124,12 @@ scoop install cmake
 
 ### 버전 확인
 
-```bash
+```text
 $ cmake --version
-cmake version 3.28.1
+cmake version 4.4.4
 ```
 
-**권장 최소 버전**: 3.20+ (modern CMake 기능 대부분 사용 가능). 가능하면 *3.25+*(`FetchContent`의 `FIND_PACKAGE_ARGS`, presets v6, `CMakeLists.txt` 모듈 개선 등).
+이 글의 실행 기준은 **CMake 4.4.4·Ninja 1.13.2·macOS·AppleClang 21**입니다. 최소 정책 버전은 3.25로 통일합니다. FetchContent의 FIND_PACKAGE_ARGS는 3.24, presets 스키마 version 6은 3.25에 도입됐습니다. 이전 버전이나 다른 OS에서 실행한 결과는 아닙니다. CMake 외에 선택한 빌드 도구와 C++ 컴파일러도 준비해야 합니다.
 
 3.0 이전과 3.x는 *완전히 다른 도구*에 가깝습니다. "modern CMake"라는 용어는 3.0+ 이후 *타겟 중심* 모델을 가리킵니다. 2.x의 *변수 중심* 모델은 더 이상 권장되지 않습니다.
 
@@ -153,7 +145,7 @@ hello/
 └── main.cpp
 ```
 
-```cpp
+```cpp title="main.cpp"
 // main.cpp
 #include <iostream>
 
@@ -163,8 +155,8 @@ int main() {
 }
 ```
 
-```cmake
-cmake_minimum_required(VERSION 3.20)
+```cmake title="CMakeLists.txt"
+cmake_minimum_required(VERSION 3.25)
 
 project(Hello
     VERSION 1.0.0
@@ -174,25 +166,25 @@ project(Hello
 add_executable(hello main.cpp)
 ```
 
-세 줄이 전부입니다. 한 줄씩 무엇을 하는지 봅니다.
+세 명령이 기본 타겟을 만듭니다. 하나씩 무엇을 하는지 봅니다.
 
-### `cmake_minimum_required(VERSION 3.20)`
+### `cmake_minimum_required(VERSION 3.25)`
 
-CMake 최소 버전 선언. 이 버전보다 *낮은 CMake*로 빌드하면 즉시 에러가 납니다 — `CMake Error at CMakeLists.txt:1 (cmake_minimum_required): CMake 3.20 or higher is required.`
+CMake 최소 버전 선언. 이 버전보다 *낮은 CMake*로 빌드하면 즉시 에러가 납니다 — `CMake Error at CMakeLists.txt:1 (cmake_minimum_required): CMake 3.25 or higher is required.`
 
 이 선언은 *단순한 버전 체크가 아닙니다*. CMake의 *정책(policy)* 데이터베이스를 *그 버전의 동작*으로 설정합니다. CMake는 버전이 올라가면서 *행동을 바꿔야 했던 결정*들을 정책으로 가지고 있는데(예: `OLD` 정책 N과 `NEW` 정책 N), `cmake_minimum_required`가 그 정책의 기본값을 한꺼번에 정합니다.
 
-정책이 왜 필요한가? CMake는 *역호환성*을 매우 강하게 보존합니다. 2.6 시절 작성된 `CMakeLists.txt`도 CMake 3.x에서 거의 그대로 돕니다. 다만 그 동안 일부 동작이 바뀌었는데, 옛 동작을 그대로 유지할지(`OLD`) 새 동작을 따를지(`NEW`)를 *프로젝트가 선택*합니다. `cmake_minimum_required(VERSION 3.20)`은 "내 코드는 3.20 시점의 동작을 가정한다"는 명시입니다.
+정책은 기존 동작과 새 동작의 호환성을 관리합니다. 최소 버전 3.25 선언은 그 버전까지 도입된 정책을 NEW로 설정합니다. 이후 정책까지 자동 설정하거나 제거된 OLD 호환성을 되살리는 선언은 아닙니다.
 
 버전 범위도 지정할 수 있습니다.
 
 ```cmake
-cmake_minimum_required(VERSION 3.20...3.30)
+cmake_minimum_required(VERSION 3.25...3.30)
 ```
 
-이 형태는 "*3.20을 최소로 요구*하되, *3.30의 정책*까지 새 동작을 활성화하라"는 의미입니다. 점진적으로 새 CMake 버전의 모범 사례를 따라가는 권장 방식입니다.
+이 형태는 "*3.25을 최소로 요구*하되, *3.30의 정책*까지 새 동작을 활성화하라"는 의미입니다. 점진적으로 새 CMake 버전의 모범 사례를 따라가는 권장 방식입니다.
 
-`cmake_minimum_required`는 *Makefile의 첫 줄*에 와야 합니다. 정책이 *위쪽 줄부터 적용*되기 때문입니다.
+`cmake_minimum_required()`는 최상위 CMakeLists.txt에서 project()보다 먼저 선언합니다. Makefile에 적는 명령이 아닙니다.
 
 ### `project(...)`
 
@@ -284,27 +276,29 @@ cmake --build build
 
 `-B build`는 *빌드 디렉터리를 build로* 지정합니다(없으면 자동 생성). CMake 3.13+ 문법으로, 옛 방식(`mkdir build; cd build; cmake ..`)보다 *디렉터리 이동이 없어* 편합니다.
 
+위 두 소스 파일로 CMake 4.4.4에서 Ninja와 Unix Makefiles를 각각 구성·빌드해 `Hello, CMake!` 출력을 확인했습니다. 생성기별 새 빌드 디렉터리를 사용했고 실행 파일은 각 디렉터리의 `hello`입니다. Windows에서는 생성기와 구성에 따라 실행 파일 경로와 확장자가 달라집니다.
+
 `cmake --build build`는 *생성기에 무관하게* 빌드를 실행합니다. 내부적으로는 `make -C build` 또는 `ninja -C build` 또는 Visual Studio MSBuild 호출이 됩니다. *한 명령으로 모든 플랫폼*에서 동작하는 것이 핵심입니다.
 
 ### 생성기 선택 — `-G`
 
 ```bash
-# Ninja — 가장 빠름, 강력 권장
-cmake -B build -G Ninja
+# Ninja가 설치된 경우
+cmake -B build-ninja -G Ninja
 
 # Unix Makefiles — 기본값 (Linux/macOS에서)
-cmake -B build -G "Unix Makefiles"
+cmake -B build-make -G "Unix Makefiles"
 
 # Visual Studio 2022
-cmake -B build -G "Visual Studio 17 2022"
+cmake -B build-vs -G "Visual Studio 17 2022"
 
 # Xcode
-cmake -B build -G Xcode
+cmake -B build-xcode -G Xcode
 ```
 
 *사용 가능한 생성기 전체 목록*은 `cmake --help` 출력 끝부분에 있습니다. 흥미로운 점은, Visual Studio·Xcode 생성기는 *프로젝트 파일*(`.sln`, `.xcodeproj`)을 만들어 두어 IDE에서 그대로 열 수 있다는 것입니다.
 
-**Ninja가 왜 권장**되는가? Make와 같은 일을 하지만 *훨씬 빠릅니다*. Make는 *셸 호출 다음 셸 호출*을 직렬화하느라 시간을 잃는데, Ninja는 *모든 명령을 미리 계획*해 두고 가능한 한 빠르게 병렬 실행합니다. 대형 프로젝트에서는 *2~3배 빠른* 빌드 시간 차가 흔합니다.
+생성기를 바꾸려면 별도 빌드 디렉터리를 사용합니다. 기존 CMakeCache.txt가 있는 디렉터리에 다른 생성기를 지정하면 오류가 납니다. Make와 Ninja 모두 병렬 빌드를 지원하므로, 실행 시간을 측정하지 않고 어느 쪽이 몇 배 빠르다고 판단하지 않습니다. [생성기 선택](https://cmake.org/cmake/help/v4.4/manual/cmake.1.html#options)을 참고합니다.
 
 ### 빌드 타입 — `-DCMAKE_BUILD_TYPE`
 
@@ -320,7 +314,7 @@ cmake -B build -DCMAKE_BUILD_TYPE=Release    # 릴리스
 | `RelWithDebInfo` | `-O2 -g` | 포함 | 프로파일링 |
 | `MinSizeRel` | `-Os` | 없음 | 임베디드 |
 
-`Release`만 따로 보면 *최적화 + assert 비활성화 + 디버그 심볼 제거*가 한 번에 됩니다.
+표의 플래그는 GCC·Clang 계열의 대표적인 설정 예입니다. 정확한 값은 toolchain과 CMAKE_CXX_FLAGS_<CONFIG> 캐시 항목 및 상세 빌드 명령으로 확인합니다. Release가 항상 바이너리의 모든 심볼을 strip한다는 뜻은 아닙니다.
 
 ### Multi-config 생성기 — 빌드 시점 결정
 
@@ -354,7 +348,7 @@ myproject/
 ```
 
 ```cmake
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 
 project(MyProject VERSION 1.0.0 LANGUAGES CXX)
 
@@ -401,7 +395,7 @@ target_compile_features(myapp PRIVATE cxx_std_17)
 | `CMAKE_CXX_STANDARD_REQUIRED=ON` | 지원 없으면 *에러*, 폴백 금지 |
 | `CMAKE_CXX_EXTENSIONS=OFF` | `-std=c++17` (표준 모드), `ON`이면 `-std=gnu++17` (확장 허용) |
 
-`EXTENSIONS=OFF`를 권장합니다. 컴파일러별 확장(GCC의 `__attribute__` 등)에 무심코 의존하면 *다른 컴파일러에서 깨지는* 코드가 됩니다.
+`EXTENSIONS=OFF`는 확장을 켠 언어 모드 대신 표준 모드를 요청합니다. 모든 컴파일러 확장을 거부하는 정적 검사라는 뜻은 아닙니다. 실제 이식성은 다른 컴파일러에서도 소스를 빌드해 확인합니다.
 
 ---
 
@@ -429,7 +423,7 @@ cmake --build build
 ```cmake
 # 안 좋음
 project(Hello)
-cmake_minimum_required(VERSION 3.20)   # 늦음
+cmake_minimum_required(VERSION 3.25)   # 늦음
 ```
 
 CMake는 첫 호출 전까지 *어떤 정책*을 따를지 모릅니다. 정책이 늦게 설정되면 위쪽 코드는 *기본(아주 옛) 동작*을 사용합니다.
@@ -437,7 +431,7 @@ CMake는 첫 호출 전까지 *어떤 정책*을 따를지 모릅니다. 정책�
 **해결**: 무조건 첫 줄.
 
 ```cmake
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.25)
 project(Hello)
 ```
 
@@ -447,7 +441,7 @@ project(Hello)
 cmake -B build       # CMAKE_BUILD_TYPE 빈 문자열
 ```
 
-CMake는 *Debug도 Release도 아닌 빈 상태*로 빌드합니다. 컴파일러 기본값(GCC는 `-O0`, MSVC는 Debug 비슷)이 적용되어 *느린데 디버그 심볼은 없는* 어중간한 결과가 됩니다.
+단일 구성 생성기에서 캐시·환경·toolchain에 기본값이 없다면 빈 구성으로 빌드합니다. 이를 Debug나 Release와 같다고 가정하지 않고 필요한 구성을 명시합니다.
 
 **해결**: 명시적으로 지정.
 
@@ -463,16 +457,14 @@ if(NOT CMAKE_BUILD_TYPE AND NOT CMAKE_CONFIGURATION_TYPES)
 endif()
 ```
 
-### 4. CMakeLists.txt 수정 후 재구성 누락
+### 4. 자동 재구성을 수동 빌드와 혼동
 
 ```bash
 # CMakeLists.txt 수정...
 cmake --build build         # "CMakeLists.txt 변경이 반영 안 됨"
 ```
 
-`cmake --build`는 *빌드만* 합니다. CMakeLists.txt를 수정한 경우 CMake가 다시 한 번 *구성 단계*를 돌아야 합니다.
-
-실제로는 CMake가 *대부분의 경우 자동 재구성*을 감지합니다(`build/`의 의존성 추적). 그래도 확실히 하려면 명시적 재구성을 합니다.
+기본적으로 생성된 빌드 시스템은 CMakeLists.txt 변경을 추적하고, 빌드할 때 필요한 재구성을 먼저 실행합니다. 매번 수동 구성 명령이 필수인 것은 아닙니다. 생성기·toolchain을 바꾸거나 캐시 값을 명시적으로 조정할 때는 구성 명령을 직접 실행해 입력과 결과를 확인합니다.
 
 ```bash
 cmake -B build       # 재구성
@@ -519,9 +511,9 @@ target_compile_definitions(app PRIVATE DEBUG)
 
 ## 참고 자료
 
-- [CMake Tutorial](https://cmake.org/cmake/help/latest/guide/tutorial/index.html) — 공식 튜토리얼
+- [CMake Tutorial](https://cmake.org/cmake/help/v4.4/guide/tutorial/index.html) — 공식 튜토리얼
 - [Modern CMake](https://cliutils.gitlab.io/modern-cmake/) — Henry Schreiner의 무료 책. Modern CMake 가이드의 정전.
-- [CMake Documentation](https://cmake.org/cmake/help/latest/) — 매뉴얼 검색의 출발점
+- [CMake Documentation](https://cmake.org/cmake/help/v4.4/) — 매뉴얼 검색의 출발점
 - [Effective Modern CMake (gist)](https://gist.github.com/mbinna/c61dbb39bca0e4fb7d1f73b0d66a4fd1) — 한 페이지 요약
 
 ## 관련 항목
@@ -529,4 +521,4 @@ target_compile_definitions(app PRIVATE DEBUG)
 - [Ch 2: CMake 언어](/blog/tools/build/cmake/chapter02-language) — 첫 프로젝트에서 쓴 명령들의 문법 자체
 - [Ch 3: 타겟과 라이브러리](/blog/tools/build/cmake/chapter03-targets) — 프로젝트 구조를 확장할 때 기준이 되는 단위
 - [GNU Make 소개](/blog/tools/build/gnu-make/chapter01-intro) — CMake가 생성해 주는 빌드 파일을 직접 쓰면 어떤 모습인가
-- [cmake(1) 매뉴얼](https://cmake.org/cmake/help/latest/manual/cmake.1.html) — configure·build·install 명령행 옵션 전체
+- [cmake(1) 매뉴얼](https://cmake.org/cmake/help/v4.4/manual/cmake.1.html) — configure·build·install 명령행 옵션 전체
