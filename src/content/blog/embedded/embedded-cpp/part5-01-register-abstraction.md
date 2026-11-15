@@ -133,6 +133,10 @@ GPIOA_BSRR::write(1 << 5);     // Atomic set (HW supported)
 | TE | 3 |
 | RE | 2 |
 
+![STM32F407xx USART_CR1 비트 15부터 0 — UE 13, M 12, PCE 10, TXEIE 7, RXNEIE 5, TE 3, RE 2를 강조하고 나머지 비트는 회색으로 둔 그림](/images/blog/embedded-cpp/diagrams/part5-01-mmio-bitfield.svg)
+
+그림처럼 필드마다 비트 위치가 하나씩 정해져 있으므로, 아래 `BitField<13>`처럼 위치를 타입에 담으면 마스크를 손으로 적을 일이 사라집니다.
+
 매직 넘버 대신 *타입으로 명명된 비트*를 두면 컴파일러가 검사하고 가독성이 살아납니다.
 
 ```cpp

@@ -119,6 +119,10 @@ callback은 timer daemon에서 실행되므로 긴 처리나 blocking을 넣으�
 
 configMAX_SYSCALL_INTERRUPT_PRIORITY는 port가 사용하는 encoded register 값입니다. 예를 들어 구현 priority bit가 4개이고 논리 threshold가 5이면 0x50을 사용하지만, 이 값도 MCU·priority grouping과 포트 설정이 일치해야 합니다. 0xBF를 모든 Cortex-M의 유효 threshold로 복사하지 않습니다.
 
+![ARM_CM4F의 interrupt priority 구간 — threshold보다 register 값이 작은 IRQ는 FreeRTOS API 금지, 같거나 큰 IRQ는 FromISR API 사용 가능, PendSV와 SysTick은 가장 낮은 priority](/images/blog/practical-internals/diagrams/part3-09-priority-bands.svg)
+
+그림의 경계선 하나가 이 절의 규칙 전부입니다. port.c의 `vPortValidateInterruptPriority()`도 현재 IRQ의 priority 값이 threshold 이상인지를 configASSERT로 검사합니다.
+
 NVIC_SetPriority의 논리 priority와 BASEPRI register 값을 구분합니다. woken=false는 이 API가 더 높은 task를 깨우지 않았다는 의미이지 다른 pending switch나 IRQ가 없다는 뜻은 아닙니다. yield 요청 역시 곧바로 다음 한 명령에 task가 실행된다는 보장이 아닙니다.
 
 ## ISR과 Task 간 공유 변수의 Atomic Operation
