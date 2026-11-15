@@ -35,7 +35,7 @@ Image 'u-boot-spl-ddr' is missing external blobs and is non-functional: ddr-1d-i
 Image 'itb' is missing external blobs and is non-functional: atf-blob
 ```
 
-`flash.bin`의 첫 64바이트입니다.
+`flash.bin`의 첫 48바이트입니다.
 
 ```text
 00000000: d100 2041 0010 7e00 0000 0000 0000 0000  .. A..~.........
@@ -193,7 +193,7 @@ No HAB Events Found!
 		/* Display HAB events */
 ```
 
-성공이면 `No HAB Events Found!`를 찍고, 실패면 `--------- HAB Event 1 -----------------` 같은 블록으로 이벤트 데이터를 덤프합니다. 이벤트가 하나라도 남아 있는 상태에서 닫으면 그 이미지는 다음 부팅부터 실행되지 않습니다.
+성공이면 `No HAB Events Found!`를 찍고, 실패면 `--------- HAB Event 1 -----------------` 같은 블록으로 이벤트 데이터를 덤프합니다. 가이드 1.7절은 닫은 뒤에는 올바른 PKI로 서명되지 않은 이미지를 칩이 로드하지 않는다고 적으므로, 이벤트가 남은 이미지를 그대로 둔 채 닫는 것은 피해야 합니다.
 
 `Secure boot enabled` 여부는 `imx_hab_is_enabled()`(`hab.c:872`)가 정합니다. 이 함수는 SoC별 SEC_CONFIG fuse를 `fuse_read()`로 읽어 특정 비트를 봅니다. i.MX8M의 위치는 소스에 있습니다.
 

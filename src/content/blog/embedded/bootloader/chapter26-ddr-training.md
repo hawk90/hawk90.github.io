@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-binman은 SPL 바이너리 안의 `_binman_ddr_*` 심볼에 firmware 위치와 크기를 써 넣고, SPL은 그 값으로 IMEM 32 KiB·DMEM 16 KiB를 PHY에 복사합니다. 주파수별 입력은 DMEM `0x54000` 영역(message block)에 쓰고, PMU의 응답은 mailbox로 받는데 이 대기에는 타임아웃이 없습니다. training이 끝나면 message block의 결과로 컨트롤러 타이밍(`DRAMTMG2`·`DRAMTMG9`·`RANKCTL`)을 고치고, PHY CSR 719개를 저장해 TF-A에 넘깁니다.
+binman은 SPL 바이너리 안의 `_binman_ddr_*` 심볼에 firmware 위치와 크기를 써 넣고, SPL은 그 값으로 IMEM 32 KiB·DMEM 16 KiB를 PHY에 복사합니다. 주파수별 입력은 DMEM `0x54000` 영역(message block)에 쓰고, PMU의 응답은 mailbox로 받는데 이 대기에는 타임아웃이 없습니다. training이 끝나면 message block의 결과로 컨트롤러 타이밍(LPDDR4에서는 `DRAMTMG2`·`RANKCTL`)을 고치고, PHY CSR 719개를 저장해 TF-A에 넘깁니다.
 
 ## firmware가 PHY까지 가는 길
 
@@ -67,7 +67,7 @@ ImagePos    Offset      Size  Name
 
 SPL 로드 주소 `0x7E1000` + 오프셋 `0x25418` = `0x806418`입니다. 네 firmware 슬롯이 모두 같은 위치에 크기 0으로 놓인 것은 파일이 없어서입니다. 정상 빌드라면 `lpddr4_pmu_train_1d_imem.bin` 같은 파일 크기만큼 슬롯이 차례로 늘어서고, `size` 심볼에 그 크기가 들어갑니다(`arch/arm/dts/imx8mm-u-boot.dtsi`의 각 노드는 `align-end = <4>`).
 
-여기서 중요한 결론이 하나 나옵니다. **firmware를 빼먹고 빌드한 SPL은 크기 0을 그대로 믿습니다.** `ddr_load_train_firmware()`는 `BINMAN_SYMS_OK`가 참이면 `imem_len = binman_sym(..., size)`로 길이를 덮어쓰므로 복사 루프가 한 번도 돌지 않습니다. PMU는 빈 IMEM으로 실행됩니다. 빌드 로그에 `Image 'u-boot-spl-ddr' is missing external blobs and is non-functional`이 찍혔다면 그 이미지를 보드에 올려서는 안 됩니다. binman 심볼이 없는 예전 방식(`BINMAN_SYMS_OK`가 거짓)에서는 `_end` 뒤 DTB 다음 위치를 firmware로 가정하는 fallback 코드가 대신 돕니다(같은 함수의 `CONFIG_SPL_OF_CONTROL` 블록).
+여기서 중요한 결론이 하나 나옵니다. **firmware를 빼먹고 빌드한 SPL은 크기 0을 그대로 믿습니다.** `ddr_load_train_firmware()`는 `BINMAN_SYMS_OK`가 참이면 `imem_len = binman_sym(..., size)`로 길이를 덮어쓰므로 복사 루프가 한 번도 돌지 않습니다. PMU는 IMEM에 아무것도 쓰지 않은 채 실행됩니다. 빌드 로그에 `Image 'u-boot-spl-ddr' is missing external blobs and is non-functional`이 찍혔다면 그 이미지를 보드에 올려서는 안 됩니다. binman 심볼이 없는 예전 방식(`BINMAN_SYMS_OK`가 거짓)에서는 `_end` 뒤 DTB 다음 위치를 firmware로 가정하는 fallback 코드가 대신 돕니다(같은 함수의 `CONFIG_SPL_OF_CONTROL` 블록).
 
 ### 1D firmware는 한 번만 올린다
 
@@ -131,7 +131,7 @@ PMU를 깨운 뒤 SPL은 결과를 기다립니다. 둘 사이의 대화는 교�
 
 첫째, **성공은 조용합니다.** `Training PASS`는 `debug()`라서 `DEBUG`를 정의하지 않은 빌드에서는 찍히지 않습니다. 실패만 `printf`로 `Training FAILED`가 나옵니다.
 
-둘째, **타임아웃이 없습니다.** `while (1)`도, 그 안의 `poll_pmu_message_ready()`의 `do ... while (reg & 0x1)`도 횟수나 시간 제한이 없습니다. PMU가 `0x07`도 `0xff`도 보내지 않으면 SPL은 그 자리에서 영원히 기다립니다. 앞 절처럼 firmware 없이 빌드한 이미지에서는 빈 IMEM으로 실행된 PMU가 무엇을 보낼지 코드로 알 수 없습니다. 확실한 것은 PMU가 `0x07`이나 `0xff`를 보내기 전까지 SPL이 **아무것도 출력하지 않고** 이 루프에 머문다는 점입니다. 실제 보드에서 확인한 것은 아니고, 위 두 루프를 읽은 결론입니다. "SPL 배너 다음에 아무것도 안 나온다"는 증상에서 DDR training 대기를 의심해야 하는 이유입니다.
+둘째, **타임아웃이 없습니다.** `while (1)`도, 그 안의 `poll_pmu_message_ready()`의 `do ... while (reg & 0x1)`도 횟수나 시간 제한이 없습니다. PMU가 `0x07`도 `0xff`도 보내지 않으면 SPL은 그 자리에서 영원히 기다립니다. 앞 절처럼 firmware 없이 빌드한 이미지에서는 IMEM에 아무것도 쓰지 않은 채 실행된 PMU가 무엇을 보낼지 코드로 알 수 없습니다. 확실한 것은 PMU가 `0x07`이나 `0xff`를 보내기 전까지 SPL이 **아무것도 출력하지 않고** 이 루프에 머문다는 점입니다. 실제 보드에서 확인한 것은 아니고, 위 두 루프를 읽은 결론입니다. "SPL 배너 다음에 아무것도 안 나온다"는 증상에서 DDR training 대기를 의심해야 하는 이유입니다.
 
 셋째, **`0x08` 스트리밍 메시지는 숫자로만 나옵니다.** `decode_streaming_message()`는 문자열 인덱스와 인자를 `debug("PMU String index = 0x%08x\n", ...)`로 찍을 뿐 사람이 읽는 문장으로 바꾸지 않습니다. 인덱스를 문장으로 바꾸는 표는 U-Boot 소스에 없으므로, 이 값을 해석하려면 PHY firmware와 함께 배포되는 자료가 필요합니다.
 
@@ -151,15 +151,15 @@ training의 목적은 PHY 안 지연값만 맞추는 데 그치지 않습니다.
 		}
 ```
 
-입력을 썼던 그 DMEM 영역(`0x54013`부터, 채널 B는 `0x5402c`부터)에서 이번에는 결과를 읽습니다. `ddr_type == 0x20`은 LPDDR4 분기이고, DDR4는 다른 위치에서 64개 값을 읽습니다. 읽은 값은 read→read, read→write, write→read, write→write 네 묶음으로 나눠 묶음별 최댓값을 `g_cdd_rr_max[]`, `g_cdd_rw_max[]`, `g_cdd_wr_max[]`, `g_cdd_ww_max[]`에 주파수별로 저장합니다.
+입력을 썼던 그 DMEM 영역(`0x54013`부터, 채널 B는 `0x5402c`부터)에서 이번에는 결과를 읽습니다. `ddr_type == 0x20`은 LPDDR4 분기이고, DDR4 분기는 `0x54012`부터 29워드(58개 값)를 읽습니다. 읽은 값은 read→read, read→write, write→read, write→write 네 묶음으로 나눠 묶음별 최댓값을 `g_cdd_rr_max[]`, `g_cdd_rw_max[]`, `g_cdd_wr_max[]`, `g_cdd_ww_max[]`에 주파수별로 저장합니다.
 
-이 값을 쓰는 곳이 `update_umctl2_rank_space_setting()`(221행)이고, `ddr_init()`이 PHY 설정 뒤에 `update_umctl2_rank_space_setting(dram_timing->fsp_msg_num - 1)`로 부릅니다(414행). 이 함수는 `DDRC_DRAMTMG2`의 write→read(`& 0x3f`)·read→write(`>> 8`) 간격과 `DDRC_DRAMTMG9`의 write→read 간격에 CDD 최댓값의 절반(`>> 1`)을 더하고, 6비트 필드 한계인 `0x3f`에서 자릅니다. `DDRC_RANKCTL`의 `wr_gap`(비트 11:8)과 `rd_gap`(비트 7:4)에도 write→write, read→read 최댓값의 절반을 더하고 4비트 한계 `0xf`에서 자릅니다. 공장에서 정한 신호등 주기(`lpddr4_timing.c`의 컨트롤러 표)를 실제로 측정한 교통량(training 결과)에 맞춰 늘리는 셈입니다. 그래서 이 레지스터들의 최종값은 `lpddr4_timing.c`에 적힌 값이 아니라, 그 부팅에서 나온 training 결과에 따라 정해집니다.
+이 값을 쓰는 곳이 `update_umctl2_rank_space_setting()`(221행)이고, `ddr_init()`이 PHY 설정 뒤에 `update_umctl2_rank_space_setting(dram_timing->fsp_msg_num - 1)`로 부릅니다(414행). LPDDR4 분기(`ddr_type == 0x20`)에서 이 함수는 `DDRC_DRAMTMG2`의 write→read(`& 0x3f`)·read→write(`>> 8`) 간격에 CDD 최댓값의 절반에 1을 더한 값(`(max >> 1) + 1`, i.MX8MP만 `+1` 없음)을 더하고, 6비트 필드 한계인 `0x3f`에서 자릅니다. `DDRC_RANKCTL`의 `wr_gap`(비트 11:8)과 `rd_gap`(비트 7:4)에도 write→write, read→read 최댓값으로 같은 계산을 하고 4비트 한계 `0xf`에서 자릅니다. `DDRC_DRAMTMG9`를 고치는 것은 DDR4 분기뿐입니다. 공장에서 정한 신호등 주기(`lpddr4_timing.c`의 컨트롤러 표)를 실제로 측정한 교통량(training 결과)에 맞춰 늘리는 셈입니다. 그래서 이 레지스터들의 최종값은 `lpddr4_timing.c`에 적힌 값이 아니라, 그 부팅에서 나온 training 결과에 따라 정해집니다.
 
 ## 저장해서 TF-A에 넘긴다
 
-PHY 설정의 마지막 단계는 `ddrphy_trained_csr_save()`(`helper.c:160`)입니다. `drivers/ddr/imx/phy/ddrphy_csr.c`의 `ddrphy_trained_csr[]` 목록에 있는 PHY 레지스터 **719개**를 하나씩 `dwc_ddrphy_apb_rd()`로 읽어 값 칸을 채웁니다. 보드 파일의 `ddr_ddrphy_trained_csr[]`도 719개이고 값은 모두 `0x0`으로 시작합니다. 빈 표를 training 뒤 실측값으로 채우는 구조입니다.
+PHY 설정의 마지막 단계는 `ddrphy_trained_csr_save()`(`helper.c:160`)입니다. `drivers/ddr/imx/phy/ddrphy_csr.c`의 `ddrphy_trained_csr[]` 목록에 있는 PHY 레지스터 **719개**를 하나씩 `dwc_ddrphy_apb_rd()`로 읽어 값 칸을 채웁니다. `dram_config_save()`도 이 전역 목록을 저장합니다(`helper.c:211-216`). 보드 파일 `lpddr4_timing.c:331`에도 같은 719개짜리 `ddr_ddrphy_trained_csr[]`가 값 `0x0`으로 있고 `dram_timing.ddrphy_trained_csr`에 연결돼 있지만, 이 저장 경로는 그 표를 읽지 않습니다.
 
-그다음 `ddr_init()` 끝의 `dram_config_save()`가 표 전체를 `CONFIG_SAVED_DRAM_TIMING_BASE`로 복사합니다. 빌드한 `.config`에서 이 값은 `0x180000`이고, U-Boot i.MX8M MMU 맵(`arch/arm/mach-imx/imx8m/soc.c`)에서 `OCRAM_S`(32 KiB)가 시작하는 주소입니다. TF-A v2.15.0의 i.MX8MM 포트는 같은 주소를 `SAVED_DRAM_TIMING_BASE = OCRAM_S_BASE`로 정하고(`plat/imx/imx8m/imx8mm/include/platform_def.h:173`), `imx8mm_bl31_setup.c:247`에서 `dram_info_init(SAVED_DRAM_TIMING_BASE)`로 읽어 갑니다. `plat/imx/imx8m/ddr/dram.c`는 그 내용을 자기 영역 `dram_timing_saved[13 * 1024]`로 복사하고 표 포인터를 새 위치에 맞게 고칩니다. 그래서 TF-A는 Linux가 DDR 주파수를 바꾸거나 저전력에서 돌아올 때 training을 다시 돌리지 않고 이 값을 씁니다. [Ch 9](/blog/embedded/bootloader/chapter09-dram-init)에서 본 것처럼, SPL 쪽 표를 바꾸면 런타임 동작도 같이 바뀝니다.
+그다음 `ddr_init()` 끝의 `dram_config_save()`가 표 전체를 `CONFIG_SAVED_DRAM_TIMING_BASE`로 복사합니다. 빌드한 `.config`에서 이 값은 `0x180000`이고, U-Boot i.MX8M MMU 맵(`arch/arm/mach-imx/imx8m/soc.c`)에서 `OCRAM_S`(32 KiB)가 시작하는 주소입니다. TF-A v2.15.0의 i.MX8MM 포트는 같은 주소를 `SAVED_DRAM_TIMING_BASE = OCRAM_S_BASE`로 정하고(`plat/imx/imx8m/imx8mm/include/platform_def.h:173`), `imx8mm_bl31_setup.c:247`에서 `dram_info_init(SAVED_DRAM_TIMING_BASE)`로 읽어 갑니다. i.MX8MM에서는 `plat/imx/imx8m/ddr/dram.c:240`이 `dram_info.timing_info`를 그 주소에 바로 연결해, OCRAM_S의 표를 제자리에서 씁니다. 같은 파일의 `dram_timing_saved[13 * 1024]`로 복사하는 코드는 `#if defined(PLAT_imx8mq)` 안에 있어 i.MX8MQ에만 해당합니다. 그래서 TF-A는 Linux가 DDR 주파수를 바꾸거나 저전력에서 돌아올 때 training을 다시 돌리지 않고 이 값을 씁니다. [Ch 9](/blog/embedded/bootloader/chapter09-dram-init)에서 본 것처럼, SPL 쪽 표를 바꾸면 런타임 동작도 같이 바뀝니다.
 
 ## 실패를 조사하는 순서
 
@@ -170,9 +170,9 @@ PHY 설정의 마지막 단계는 `ddrphy_trained_csr_save()`(`helper.c:160`)입
 | SPL 배너 뒤 아무 출력 없이 멈춤 | firmware 누락 여부(빌드 로그의 `missing external blobs`, binman map의 firmware 크기), mailbox 무한 대기 |
 | `Training FAILED` 출력 | 그 주파수의 message block 표, DRAM 부품과 `lpddr4_timing.c` 생성 조건 일치 여부 |
 | `check ddr_pmu_train_imem code fail=` 출력 | IMEM 복사 후 읽기 검증 실패(`helper.c`), firmware 파일 손상이나 PHY 접근 문제 |
-| 부팅은 되지만 간헐 오류 | training 결과 의존 레지스터(`DRAMTMG2`·`DRAMTMG9`·`RANKCTL`), 온도·전압 조건 |
+| 부팅은 되지만 간헐 오류 | training 결과 의존 레지스터(LPDDR4는 `DRAMTMG2`·`RANKCTL`), 온도·전압 조건 |
 
-가장 먼저 할 일은 출력이 없는 상태를 없애는 것입니다. `ddrphy_utils.c`와 `ddr_init.c` 맨 위에 `#define DEBUG`를 넣고 SPL을 다시 빌드하면 `DDRINFO: start DRAM init`부터 `[PMU Major message = 0x%08x]`, `Training PASS`까지 단계별 `debug()` 출력이 살아납니다. 소스를 고치지 않고 `make ... CFLAGS_ddrphy_utils.o=-DDEBUG CFLAGS_ddr_init.o=-DDEBUG spl/u-boot-spl`처럼 두 파일에만 DEBUG를 줄 수도 있습니다. 이렇게 빌드해 보니 SPL `.text`가 115,537 B에서 116,032 B로 495 B 늘었고, 바이너리에 `DDRINFO: start DRAM init`, `[PMU Major message = 0x%08x]`, `Training PASS` 문자열이 들어갔습니다. [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 잰 코드·데이터 여유 15,344 B 안에 넉넉히 들어갑니다. 파일 전체에 DEBUG를 켜면 이야기가 달라지므로, 범위는 이렇게 좁혀 둡니다.
+가장 먼저 할 일은 출력이 없는 상태를 없애는 것입니다. `ddrphy_utils.c`와 `ddr_init.c` 맨 위에 `#define DEBUG`를 넣고 SPL을 다시 빌드하면 `DDRINFO: start DRAM init`부터 `[PMU Major message = 0x%08x]`, `Training PASS`까지 단계별 `debug()` 출력이 살아납니다. 소스를 고치지 않고 `make ... CFLAGS_ddrphy_utils.o=-DDEBUG CFLAGS_ddr_init.o=-DDEBUG spl/u-boot-spl`처럼 두 파일에만 DEBUG를 줄 수도 있습니다. 이렇게 빌드해 보니 `size`의 text 열(코드+rodata)이 115,537 B에서 116,032 B로 495 B 늘었고(`.text` 섹션만 보면 97,160 B → 97,352 B), 바이너리에 `DDRINFO: start DRAM init`, `[PMU Major message = 0x%08x]`, `Training PASS` 문자열이 들어갔습니다. [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 잰 코드·데이터 여유 15,344 B 안에 넉넉히 들어갑니다. 파일 전체에 DEBUG를 켜면 이야기가 달라지므로, 범위는 이렇게 좁혀 둡니다.
 
 ## 정리
 
@@ -180,7 +180,7 @@ PHY 설정의 마지막 단계는 `ddrphy_trained_csr_save()`(`helper.c:160`)입
 - firmware가 빠진 빌드는 크기 0을 믿고 아무것도 복사하지 않습니다. `missing external blobs` 경고가 있는 이미지는 보드에 올리지 않습니다.
 - PMU 입력(message block)은 DMEM `0x54000` 영역에 쓰며, `0x54003`이 data rate(3000/400/100)와 일치합니다. 1D firmware는 세 주파수에 한 번만 올립니다.
 - mailbox는 `0x07` PASS, `0xff` FAIL이고, PASS는 `debug()`라 기본 빌드에서 보이지 않습니다. 대기 루프에 타임아웃이 없어서, PMU가 응답하지 않으면 SPL은 아무 출력 없이 멈춥니다.
-- 1D training 결과(CDD)는 `DDRC_DRAMTMG2`·`DRAMTMG9`·`RANKCTL`의 rank 간 간격에 더해집니다.
+- LPDDR4에서 1D training 결과(CDD)는 `DDRC_DRAMTMG2`·`RANKCTL`의 rank 간 간격에 더해집니다(`DRAMTMG9`는 DDR4 분기만).
 - training 뒤 PHY CSR 719개를 읽어 OCRAM_S `0x180000`에 저장하고, TF-A가 DVFS·저전력 복귀에 다시 씁니다.
 
 ## 다음 장 예고

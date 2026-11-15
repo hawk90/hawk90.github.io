@@ -63,11 +63,11 @@ qemu-system-aarch64 -nographic -machine virt,secure=on \
     -cpu cortex-a57 -smp 2 -m 1024 -bios flash.bin
 ```
 
-문서는 FIP를 `-fw_cfg name=opt/tf-a/fip,...`로 넘기는 방법도 소개합니다. 이 환경에서 그렇게 실행하면 `NOTICE:  BL1: Built : ...`까지만 찍히고 다음 줄이 나오지 않았습니다. 원인은 따로 추적하지 않았고, 여기서는 flash 방식의 결과만 씁니다.
+처음에는 FIP를 `-fw_cfg name=opt/tf-a/fip,...`로 넘겨 봤는데 `NOTICE:  BL1: Built : ...`까지만 찍히고 멈췄습니다. 원인은 제 쪽 실수였습니다. 그 방법을 설명한 문서는 TF-A main 브랜치의 `docs/plat/qemu.rst`였고, v2.15.0 태그의 문서와 `plat/qemu` 코드에는 `opt/tf-a`가 없습니다. v2.15.0 BL1에는 fw_cfg에서 FIP를 읽는 코드가 없으니 FIP를 찾지 못한 것입니다. 태그와 문서 버전을 맞춰야 한다는 교훈을 남겨 둡니다.
 
 ## 부팅 로그 — 단계마다 entry와 SPSR
 
-release 빌드는 `NOTICE`만 찍어서 단계 이름 정도만 보입니다. 단계 사이에 무엇이 넘어가는지 보려고 `DEBUG=1 LOG_LEVEL=40`으로 다시 빌드했습니다. CPU errata 줄을 빼고 옮긴 로그입니다.
+release 빌드는 `NOTICE`만 찍어서 단계 이름 정도만 보입니다. 단계 사이에 무엇이 넘어가는지 보려고 `DEBUG=1 LOG_LEVEL=40`으로 다시 빌드했습니다. CPU errata 줄과 각 단계의 `Built : ...` 줄을 빼고 옮긴 로그입니다.
 
 ```text
 NOTICE:  Booting Trusted Firmware
@@ -162,11 +162,12 @@ BL31의 QEMU 포트는 `plat/qemu/common/qemu_pm.c:204`의 `qemu_system_reset()`
 ```text
 => reset
 resetting ...
+ERROR:   QEMU System Reset: with GPIO.
 NOTICE:  Booting Trusted Firmware
 NOTICE:  BL1: v2.15.0(release):v2.15.0
 ```
 
-`resetting ...` 바로 다음 줄이 BL1입니다. U-Boot → SMC → BL31 → GPIO → 리셋 → BL1로 이어지는 경로가 로그 두 줄 사이에 들어 있습니다. 실제 SoC에서 리부팅이 안 되면 U-Boot 쪽 sysreset 드라이버만 보지 말고 BL31의 `system_reset` 구현까지 따라가야 하는 이유입니다.
+`resetting ...` 다음 줄은 BL31이 찍은 것입니다. `qemu_pm.c:206`의 `qemu_system_reset()`이 GPIO를 토글하기 직전에 `ERROR("QEMU System Reset: with GPIO.\n")`을 남기고, 그다음 줄이 다시 BL1입니다. U-Boot → SMC → BL31 → GPIO → 리셋 → BL1로 이어지는 경로가 로그 세 줄에 그대로 들어 있습니다. 실제 SoC에서 리부팅이 안 되면 U-Boot 쪽 sysreset 드라이버만 보지 말고 BL31의 `system_reset` 구현까지 따라가야 하는 이유입니다.
 
 ## OP-TEE(BL32)를 넣으려면
 

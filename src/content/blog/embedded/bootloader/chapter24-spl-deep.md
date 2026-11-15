@@ -60,7 +60,7 @@ SPL의 메모리 사정은 이사 첫날과 비슷합니다. 큰 집(DDR)은 아
   7f8b1c:	97ffa74d 	bl	7e2850 <board_init_f_alloc_reserve>
 ```
 
-`0x7f8b70`의 8바이트는 `00009200 00000000`, 즉 `0x920000`입니다. 그 아래로 `board_init_f_alloc_reserve()`(`common/init/board_init.c:78`)가 `global_data`(이 빌드에서 `GD_SIZE` 448바이트)를 잡고, 스택은 그 밑으로 자랍니다. 이 함수는 `CFG_MALLOC_F_ADDR`가 정의돼 있으면 early malloc을 스택 쪽에 잡지 않습니다(81행 `#ifndef`). 대신 `spl_common_init()`(`common/spl/spl.c:463`)이 `gd->malloc_base = CFG_MALLOC_F_ADDR`로 `0x930000`을 씁니다.
+`0x7f8b70`의 8바이트는 `00009200 00000000`, 즉 `0x920000`입니다. 그 아래로 `board_init_f_alloc_reserve()`(`common/init/board_init.c:78`)가 `global_data`(SPL 빌드의 `spl/include/generated/generic-asm-offsets.h`에서 `GD_SIZE` 424바이트, 디스어셈블에서도 `sub x0, x0, #0x1a8`)를 잡고, 스택은 그 밑으로 자랍니다. 이 함수는 `CFG_MALLOC_F_ADDR`가 정의돼 있으면 early malloc을 스택 쪽에 잡지 않습니다(81행 `#ifndef`). 대신 `spl_common_init()`(`common/spl/spl.c:457`)의 464행이 `gd->malloc_base = CFG_MALLOC_F_ADDR`로 `0x930000`을 씁니다.
 
 > ⚠️ 이 숫자를 얻기까지 한 번 틀렸습니다. 처음에 `make imx8mm_evk_defconfig`를 `CROSS_COMPILE` 없이 실행했더니 macOS의 clang 전처리기가 defconfig의 `# CONFIG_SPL_SHARES_INIT_SP_ADDR is not set` 줄 앞에 공백을 넣었습니다. Kconfig는 `unexpected data` 경고만 내고 그 줄을 무시했고, 스택이 DDR 주소인 `0x401FFE50`으로 잡혔습니다. DDR 초기화 전에 쓰는 스택이 DDR에 있으면 부팅이 되지 않습니다. defconfig 단계에서도 `CROSS_COMPILE`을 주고 다시 빌드하자 `CONFIG_SPL_STACK=0x920000`이 살아났습니다. SPL 메모리 배치를 볼 때는 빌드 로그의 Kconfig 경고부터 확인하세요.
 
@@ -87,7 +87,7 @@ void board_init_f(ulong dummy)
 }
 ```
 
-BSS를 직접 `memset`으로 지우는 줄이 눈에 띕니다. `crt0_64.S`에도 `board_init_f()`가 돌아온 뒤 BSS를 지우는 `clear_loop`가 있습니다(SPL에서는 143~168행 경로). 그런데 이 보드의 `board_init_f()`는 마지막 줄에서 `board_init_r()`을 직접 부르고 돌아오지 않으므로 그 루프까지 가지 않습니다. 그래서 보드 파일이 C 코드 초반에 BSS를 지웁니다. `spl_early_init()`이 driver model을 띄우고, `preloader_console_init()`이 콘솔을 엽니다. 이 함수(`common/spl/spl.c:836`)가 찍는 첫 줄이 `U-Boot SPL 2024.04 (날짜 - 시각)` 형식의 배너입니다. 그다음 `power_init_board()`가 PMIC(PCA9450)를 I2C로 설정하고, 그 뒤에야 `spl_dram_init()`이 `ddr_init(&dram_timing)`을 부릅니다. DDR에 전원이 들어가야 training을 할 수 있으므로, PMIC가 DDR보다 먼저입니다.
+BSS를 직접 `memset`으로 지우는 줄이 눈에 띕니다. `crt0_64.S`에도 `board_init_f()`가 돌아온 뒤 BSS를 지우는 `clear_loop`가 있습니다(SPL에서는 143~168행 경로). 그런데 이 보드의 `board_init_f()`는 마지막 줄에서 `board_init_r()`을 직접 부르고 돌아오지 않으므로 그 루프까지 가지 않습니다. 그래서 보드 파일이 C 코드 초반에 BSS를 지웁니다. `spl_early_init()`이 driver model을 띄우고, `preloader_console_init()`이 콘솔을 엽니다. 이 함수(`common/spl/spl.c:826`)의 836행이 찍는 첫 줄이 `U-Boot SPL 2024.04 (날짜 - 시각)` 형식의 배너입니다. 그다음 `power_init_board()`가 PMIC(PCA9450) 전압을 고친 뒤 `spl_dram_init()`이 `ddr_init(&dram_timing)`을 부르도록 짜여 있습니다. DDR 전원 설정이 training보다 먼저라는 의도입니다. 그런데 v2024.04 코드를 그대로 읽으면 이 단계는 실제로 아무것도 쓰지 않습니다. `power_init_board()`(`board/freescale/imx8mm_evk/spl.c:77`)는 `pmic_get("pca9450@25", &dev)`로 장치를 이름으로 찾는데, DT의 PMIC 노드 이름은 `pmic@4b`입니다(`arch/arm/dts/imx8mm-evk.dtsi:186`, 빌드한 SPL DTB에서도 같음). 이름이 맞지 않으면 `-ENODEV`가 되고, 함수는 `No pmic`을 찍고 0을 돌려줍니다. 실제 보드에서 이 줄이 찍히는지는 확인하지 않았지만, 소스 기준으로는 PMIC 레지스터 쓰기 없이 DDR 초기화로 넘어갑니다. 함수 이름과 순서만 보고 "PMIC를 설정했다"고 판단하면 안 되는 예입니다.
 
 `board_init_r()`로 넘어간 뒤에는 `common/spl/spl.c:685`에서 `mem_malloc_init()`으로 DDR의 `0x42200000`에 전체 malloc을 열고 `GD_FLG_FULL_MALLOC_INIT`을 세웁니다. 그림의 "DDR 초기화 뒤 전환"이 이 지점입니다.
 
@@ -114,7 +114,7 @@ collect2: error: ld returned 1 exit status
 
 13,328은 SPL 코드·데이터 144,400바이트에서 `0x20000`(131,072)을 뺀 값과 정확히 같습니다. 원래 설정 `0x27000`(159,744)과 비교하면 코드·데이터에 15,344바이트가 남아 있습니다. 다만 이 검사는 링커가 보는 ELF 섹션만 셉니다. 빌드 끝에 붙는 DTB 8,199바이트는 `.sram` 영역 밖이라 이 검사에 들어가지 않고, 최종 바이너리 크기를 보는 `CONFIG_SPL_SIZE_LIMIT`은 이 보드에서 `0x0`(검사 안 함)입니다. 드라이버를 추가해 DTB가 커질 때는 링커가 경고하지 않으므로 `spl/u-boot-spl.bin` 크기를 직접 봐야 합니다.
 
-`nm --size-sort`로 본 큰 덩어리는 USB 쪽입니다. `ehci_hcd`, `usb_uclass`, `g_dnl`, `ehci_mx6`이 각각 10~12 KiB입니다. i.MX8MM SPL은 USB SDP(Serial Download Protocol, `CONFIG_SPL_USB_SDP_SUPPORT=y`)로 PC에서 이미지를 받는 복구 경로를 갖고 있어서 이 코드가 들어갑니다. SPL이 넘칠 때 가장 먼저 검토할 후보가 이런 *부팅 경로 하나를 위한* 기능입니다.
+어디가 큰지는 `nm -S --size-sort`를 코드·데이터 심볼(타입 `T/t/D/d/R/r`)로 좁혀 봅니다. 그냥 정렬하면 `ehci_hcd.c.d8603c20` 같은 `.debug_info` 쪽 숨은 심볼이 위로 올라오는데, 이것은 디버그 정보 크기라 SPL 바이너리와 무관합니다. 실제 상위 항목은 `board_init_f` 0x1704 B, `ddrphy_trained_csr` 0x1678 B, `ddr_phy_pie` 0x1280 B, `imx8mm_clk_probe` 0xcf4 B, `composite_setup` 0x9b0 B, `ehci_usb_probe` 0x944 B였습니다. `board_init_f`가 큰 것은 LTO가 보드 초기화 함수들을 안으로 합쳤기 때문이고, `ddrphy_trained_csr`와 `ddr_phy_pie`는 [Ch 26](/blog/embedded/bootloader/chapter26-ddr-training)에서 볼 DDR 표입니다. `composite_setup`과 `ehci_usb_probe`는 USB SDP(Serial Download Protocol, `CONFIG_SPL_USB_SDP_SUPPORT=y`) 복구 경로의 코드라서, SPL이 넘칠 때 *부팅 경로 하나를 위한* 기능부터 검토하는 근거가 됩니다.
 
 ## SPL용 DTB — 241개 노드에서 42개로
 
@@ -153,7 +153,7 @@ i.MX8MM EVK에서 이 표시는 U-Boot 전용 `.dtsi`에 있습니다. `arch/arm
 
 DDR이 살아나면 SPL은 다음 이미지를 찾습니다. 보드의 `spl_board_boot_device()`(`board/freescale/imx8mm_evk/spl.c:34`)가 ROM이 알려 준 부팅 장치를 SPL 장치 번호로 바꿉니다. `SD2_BOOT`/`MMC2_BOOT`는 `BOOT_DEVICE_MMC1`, `SD3_BOOT`/`MMC3_BOOT`는 `BOOT_DEVICE_MMC2`, `USB_BOOT`는 `BOOT_DEVICE_BOARD`가 됩니다. `boot_from_devices()`는 장치마다 `Trying to boot from %s`를 찍고(`common/spl/spl.c:627`), MMC raw 모드에서 섹터 `0x300`(`CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR`)을 읽습니다.
 
-거기 있는 `u-boot.itb`를 빌드 디렉터리의 `mkimage -l`로 열면 FIT 구조가 보입니다.
+거기 있는 `u-boot.itb`를 빌드 디렉터리의 `mkimage -l`로 열면 FIT 구조가 보입니다(`Created`·`Compression` 줄과 Image 2 `fip`, Image 3 `fdt-1`은 생략).
 
 ```text
 FIT description: Configuration to load ATF before U-Boot
@@ -168,6 +168,8 @@ FIT description: Configuration to load ATF before U-Boot
   Description:  ARM Trusted Firmware
   Type:         Firmware
   Data Size:    0 Bytes = 0.00 KiB = 0.00 MiB
+  Architecture: AArch64
+  OS:           Unknown OS
   Load Address: 0x00920000
 ```
 
@@ -185,9 +187,9 @@ FIT description: Configuration to load ATF before U-Boot
 			spl_image->entry_point = image_info.entry_point;
 ```
 
-firmware인 U-Boot에 entry가 없으니 첫 loadable인 BL31의 `0x920000`이 점프 주소가 됩니다. i.MX의 `jump_to_image_no_args()`(`arch/arm/mach-imx/spl.c:279`)는 `SPL_FIT_FOUND` 플래그가 있으면 그 주소를 그대로 호출합니다. TF-A 쪽도 같은 주소를 씁니다. upstream TF-A v2.15.0 태그의 `plat/imx/imx8m/imx8mm/include/platform_def.h`는 BL2를 쓰지 않는 구성에서 `BL31_BASE`를 `0x920000`, 비보안 U-Boot 주소 `PLAT_NS_IMAGE_OFFSET`을 `0x40200000`으로 정합니다. 그래서 BL31은 OCRAM `0x920000`에서 시작하고, 일을 마치면 BL33인 U-Boot proper(`0x40200000`)로 넘어갑니다. U-Boot 보드 문서가 안내하는 것은 NXP의 `imx-atf` 브랜치이므로, 실제 제품에서는 그 트리의 값을 확인합니다. 앞의 메모리 표에서 BL31 적재 주소가 SPL 초기 스택 꼭대기와 같은 `0x920000`인 것도 이 흐름 때문에 가능합니다. 스택은 `0x920000` 아래로 자라고, BL31은 위로 놓이며, SPL이 BL31로 점프하는 순간 SPL 스택은 더 필요 없습니다.
+firmware인 U-Boot에 entry가 없으니 첫 loadable인 BL31의 `0x920000`이 점프 주소가 됩니다. 점프 자체는 `common/spl/spl.c:384`의 weak 함수 `jump_to_image_no_args()`가 `spl_image->entry_point`를 그대로 호출하는 것입니다. `arch/arm/mach-imx/spl.c:279`에도 같은 이름의 함수가 있지만 `#if defined(CONFIG_IMX_HAB)`(246행) 안에 있어서, HAB를 끈 이 빌드에서는 쓰이지 않습니다. TF-A 쪽도 같은 주소를 씁니다. upstream TF-A v2.15.0 태그의 `plat/imx/imx8m/imx8mm/include/platform_def.h`는 BL2를 쓰지 않는 구성에서 `BL31_BASE`를 `0x920000`, 비보안 U-Boot 주소 `PLAT_NS_IMAGE_OFFSET`을 `0x40200000`으로 정합니다. 그래서 BL31은 OCRAM `0x920000`에서 시작하고, 일을 마치면 BL33인 U-Boot proper(`0x40200000`)로 넘어갑니다. U-Boot 보드 문서가 안내하는 것은 NXP의 `imx-atf` 브랜치이므로, 실제 제품에서는 그 트리의 값을 확인합니다. 앞의 메모리 표에서 BL31 적재 주소가 SPL 초기 스택 꼭대기와 같은 `0x920000`인 것도 이 흐름 때문에 가능합니다. 스택은 `0x920000` 아래로 자라고, BL31은 위로 놓이며, SPL이 BL31로 점프하는 순간 SPL 스택은 더 필요 없습니다.
 
-`CONFIG_SPL_ATF`가 꺼져 있는데도 BL31로 가는 점이 흥미롭습니다. 범용 경로(`spl.c:763`)는 이미지 `os`가 `IH_OS_ARM_TRUSTED_FIRMWARE`일 때 `spl_invoke_atf()`로 BL31에 인자를 넘기지만, 이 보드의 FIT는 `atf`에 `os`를 주지 않아서(`OS: Unknown OS`) 그 경로를 타지 않습니다. 대신 entry 주소 규칙만으로 BL31에 도착합니다. 같은 "SPL → BL31" 그림이라도 실제 코드 경로는 FIT 내용에 따라 갈리므로, `mkimage -l`과 `spl_fit.c`를 함께 봅니다.
+`CONFIG_SPL_ATF`가 꺼져 있는데도 BL31로 가는 점이 흥미롭습니다. `board_init_r()`의 분기(`spl.c:761-763`)는 `spl_image.os`로 갈리는데, 이 값은 loadable이 아니라 *firmware* 이미지(`uboot`)에서 옵니다(`spl_fit.c:771-774`). `uboot`에는 `os`가 없으므로 `IH_OS_U_BOOT`가 되고, `IH_OS_ARM_TRUSTED_FIRMWARE` 분기는 애초에 `CONFIG_IS_ENABLED(ATF)`가 꺼져 있어 쓰이지 않습니다. 그래서 SPL은 "U-Boot로 점프한다"는 분기를 타면서, 실제로는 entry 주소 규칙 때문에 BL31에 도착합니다. 같은 "SPL → BL31" 그림이라도 실제 코드 경로는 FIT 내용에 따라 갈리므로, `mkimage -l`과 `spl_fit.c`를 함께 봅니다.
 
 ## 실기 없이 확인한 것과 못 한 것
 
@@ -199,7 +201,7 @@ firmware인 U-Boot에 entry가 없으니 첫 loadable인 BL31의 `0x920000`이 �
 - SPL 코드는 TCM `0x7E1000`, BSS(456 B)는 OCRAM `0x910000`, 초기 스택은 `0x920000`, early malloc은 `0x930000`, 전체 malloc은 DDR `0x42200000`에 있습니다.
 - `CONFIG_SPL_MAX_SIZE`는 링커 `MEMORY` 영역으로 강제되어, `0x20000`으로 줄이면 "overflowed by 13328 bytes"로 실패합니다. 뒤에 붙는 DTB는 이 검사에 들어가지 않습니다.
 - fdtgrep은 `bootph-pre-ram`/`bootph-all` 노드만 남겨 DTB를 241개 노드·41,168 B에서 42개 노드·8,199 B로 줄입니다.
-- `board_init_f()`는 BSS 클리어 → driver model → 콘솔 → PMIC → DDR 순서로 진행합니다.
+- `board_init_f()`는 BSS 클리어 → driver model → 콘솔 → PMIC → DDR 순서로 짜여 있지만, v2024.04의 PMIC 조회 이름(`pca9450@25`)은 DT 노드(`pmic@4b`)와 맞지 않아 PMIC 쓰기는 건너뜁니다.
 - FIT의 U-Boot 이미지에 entry가 없으면 첫 loadable(BL31)의 entry가 점프 주소가 됩니다(`spl_fit.c:826`).
 - defconfig를 cross 전처리기 없이 처리하면 `# ... is not set` 줄이 무시될 수 있으니 Kconfig 경고를 확인합니다.
 
