@@ -6,40 +6,57 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog,node distance=8mm]
+\begin{tikzpicture}[blog,
+  stage/.style={cls, draw=absbord, fill=absfill, minimum width=62mm, minimum height=13mm, align=center},
+  cnt/.style={font=\sffamily\footnotesize, text=mutec, anchor=west, align=left},
+  drop/.style={cls, draw=warnbord, fill=warnfill, minimum width=24mm, minimum height=8mm, font=\sffamily\footnotesize}
+]
 
-\node[font=\sffamily\bfseries\large] at (0,4.4) {802.1Qci — Per-Stream Filtering \& Policing};
+\node[font=\sffamily\bfseries\large, text=inkc] at (0,2.3) {802.1Qci PSFP --- 수신 프레임의 처리 순서};
 
-\node[neut, minimum width=42mm, minimum height=11mm] (inc)    at (0, 3.2)
-  {incoming frame};
+\node[neut, minimum width=62mm, minimum height=10mm, align=center] (inc) at (0,1.0)
+  {수신 프레임\\[2pt]\footnotesize stream 식별 결과 stream\_handle + priority};
 
-\node[abs, minimum width=42mm, minimum height=11mm] (sid)     at (0, 1.6)
-  {\textbf{Stream ID}\\[1pt]\small hash $\to$ stream\_handle = 17};
+\node[stage] (filt) at (0,-1.0)
+  {\textbf{Stream filter}\\[2pt]\footnotesize stream\_handle과 priority로 filter 선택};
 
-\node[abs, minimum width=42mm, minimum height=11mm] (filter)  at (0, 0.0)
-  {\textbf{Filter}\\[1pt]\small Stream 17 allowed at port 3? Yes};
+\node[stage] (sdu) at (0,-3.0)
+  {\textbf{Maximum SDU size filter}\\[2pt]\footnotesize filter에 지정된 최대 SDU 크기};
 
-\node[abs, minimum width=42mm, minimum height=11mm] (gate)    at (0, -1.6)
-  {\textbf{Gate}\\[1pt]\small expected at t = 100\,$\mu$s $\pm$ 5\,$\mu$s? Yes};
+\node[stage] (gate) at (0,-5.0)
+  {\textbf{Stream gate} (지정된 경우)\\[2pt]\footnotesize open/closed 상태, IPV 지정};
 
-\node[abs, minimum width=42mm, minimum height=11mm] (meter)   at (0, -3.2)
-  {\textbf{Meter}\\[1pt]\small max rate 100\,Mbps? Within budget};
+\node[stage] (meter) at (0,-7.0)
+  {\textbf{Flow meter} (지정된 경우)\\[2pt]\footnotesize 폐기 또는 drop eligible 표시};
 
-\node[hi,  minimum width=42mm, minimum height=11mm] (out)     at (0, -4.8)
-  {forward to output queue};
+\node[ok, minimum width=62mm, minimum height=10mm] (out) at (0,-9.0)
+  {출력 queue로 전달};
 
-% Arrows
-\draw[arr] (inc.south)    -- (sid.north);
-\draw[arr] (sid.south)    -- (filter.north);
-\draw[arr] (filter.south) -- (gate.north);
-\draw[arr] (gate.south)   -- (meter.north);
-\draw[arr] (meter.south)  -- (out.north);
+\draw[arr] (inc.south)   -- (filt.north);
+\draw[arr] (filt.south)  -- (sdu.north);
+\draw[arr] (sdu.south)   -- (gate.north);
+\draw[arr] (gate.south)  -- (meter.north);
+\draw[arr] (meter.south) -- (out.north);
 
-% Side note
-\node[caption, anchor=west, align=left] at (3.0, -1.6)
-  {각 단계가 fail이면\\
-   $\to$ frame drop\\
-   $\to$ violation 카운터 증가};
+% bypass: no matching filter
+\draw[arr, dashed, draw=edgesc] (filt.west) -- ++(-1.2,0) |- (out.west)
+  node[pos=0.25, left, font=\sffamily\footnotesize, text=mutec, align=right]
+  {일치하는\\[2pt]filter 없음:\\[2pt]PSFP 없이\\[2pt]queue로};
+
+% drop side
+\node[drop] (d1) at (6.2,-3.0) {폐기};
+\node[drop] (d2) at (6.2,-5.0) {폐기};
+\node[drop] (d3) at (6.2,-7.0) {폐기};
+\draw[arr, draw=warnbord] (sdu.east)   -- (d1.west);
+\draw[arr, draw=warnbord] (gate.east)  -- (d2.west);
+\draw[arr, draw=warnbord] (meter.east) -- (d3.west);
+
+% counters
+\node[cnt] at (7.6,-1.0) {MatchingFramesCount};
+\node[cnt] at (7.6,-3.0) {PassingSDUCount\\[2pt]NotPassingSDUCount};
+\node[cnt] at (7.6,-5.0) {PassingFrameCount\\[2pt]NotPassingFrameCount};
+\node[cnt] at (7.6,-7.0) {RedFramesCount};
+\node[font=\sffamily\footnotesize\bfseries, text=mutec, anchor=west] at (7.6,0.0) {stream filter 계수기};
 
 \end{tikzpicture}
 \end{document}

@@ -6,24 +6,37 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  lay/.style={cls, minimum width=46mm, minimum height=9mm, font=\sffamily\footnotesize}
+]
 
-\node[font=\sffamily\bfseries\large] at (0,2.6) {TSN Backbone (Future)};
+\node[font=\sffamily\bfseries\large, text=inkc] at (3.5,4.4) {TSN은 IO 프로토콜과 다른 층위};
 
-% Unified backbone
-\node[abs, minimum width=110mm, minimum height=18mm, align=center, inner sep=6pt] (bb) at (0,1.0)
-  {\textbf{TSN backbone (IEEE 802.1Qbv + 1AS)}\\[2pt]
-   \small OPC UA Pub-Sub semantic 위에 모든 데이터};
+% column A
+\node[font=\sffamily\bfseries\small, text=inkc] at (0,3.5) {체계 A};
+\node[lay, draw=impbord, fill=impfill] (a1) at (0,2.7) {장치 데이터 모델};
+\node[lay, draw=impbord, fill=impfill] (a2) at (0,1.7) {제어 상태};
+\node[lay, draw=impbord, fill=impfill] (a3) at (0,0.7) {안전 프로토콜};
 
-% Three branches
-\node[imp, minimum width=28mm, minimum height=12mm, align=center] (motion) at (-4,-1.5) {모션\\\small (PubSub)};
-\node[imp, minimum width=28mm, minimum height=12mm, align=center] (safety) at ( 0,-1.5) {safety\\\small (PubSub)};
-\node[imp, minimum width=28mm, minimum height=12mm, align=center] (vision) at ( 4,-1.5) {vision\\\small (PubSub)};
+% column B
+\node[font=\sffamily\bfseries\small, text=inkc] at (7,3.5) {체계 B};
+\node[lay, draw=prpbord, fill=prpfill] (b1) at (7,2.7) {장치 데이터 모델};
+\node[lay, draw=prpbord, fill=prpfill] (b2) at (7,1.7) {제어 상태};
+\node[lay, draw=prpbord, fill=prpfill] (b3) at (7,0.7) {안전 프로토콜};
 
-% Arrows down
-\draw[arr] (bb.south -| motion) -- (motion.north);
-\draw[arr] (bb.south -| safety) -- (safety.north);
-\draw[arr] (bb.south -| vision) -- (vision.north);
+% not automatically compatible
+\node[font=\sffamily\footnotesize, text=focusc, align=center] at (3.5,1.7)
+  {같은 TSN 기능을\\[2pt]사용해도\\[2pt]자동 호환 아님};
+
+% TSN layer
+\node[cls, draw=absbord, fill=absfill, minimum width=116mm, minimum height=14mm, align=center] (tsn) at (3.5,-1.0)
+  {\textbf{TSN 기능 (적용 profile에 따라 선택)}\\[2pt]\footnotesize 시계 · gate · policing · 설정 경로};
+
+\node[neut, minimum width=116mm, minimum height=9mm] (eth) at (3.5,-2.6)
+  {Ethernet 링크와 스위치};
+
+\draw[arr] (a3.south) -- (a3.south |- tsn.north);
+\draw[arr] (b3.south) -- (b3.south |- tsn.north);
 
 \end{tikzpicture}
 \end{document}

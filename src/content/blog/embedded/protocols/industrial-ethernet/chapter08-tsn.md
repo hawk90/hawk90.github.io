@@ -55,11 +55,19 @@ Qbv의 GCL은 출력 traffic class의 게이트 상태를 시간에 따라 바�
 
 Qbu는 선점 가능한 traffic class와 express traffic class의 사용을 다루고, 802.3br의 MAC Merge가 하위 전송 메커니즘을 제공합니다. 이를 단순한 PHY multiplexer라고 부르지는 않습니다. 잔여 blocking은 링크 속도, fragment 조건과 구현 지연에 따르므로 “항상 1 μs 이하”라는 보장은 둘 수 없습니다.
 
+![express traffic class는 eMAC, preemptible traffic class는 pMAC으로 가서 MAC Merge에서 합쳐지고, 링크에서는 preemptible 프레임의 fragment 사이에 express 프레임이 끼어드는 개념 timeline](/images/blog/industrial-ethernet/diagrams/ch08-qbu-preemption.svg)
+
+그림의 timeline에는 수치를 두지 않았습니다. express 프레임이 도착한 뒤 송신을 시작하기까지의 잔여 blocking은 위에서 말한 조건으로 따로 계산합니다.
+
 예를 들어 MAC 프레임 길이를 FCS 포함 1522 B, preamble/SFD를 8 B, IPG를 12 B로 가정하면 1 Gbit/s에서 차지하는 선로 시간은 1542 × 8 ns = **12,336 ns**입니다. 이 값은 VLAN 태그 한 개를 포함하는 예제의 계산입니다. 추가 캡슐화, jumbo frame, 속도와 구현 여유가 달라지면 guard band도 다시 산정합니다.
 
 ## Qci와 CB: 잘못된 송신과 경로 장애
 
 [Qci](https://1.ieee802.org/tsn/802-1qci/)는 stream별 계수·필터링·policing 기능을 다룹니다. 과도한 트래픽이나 정해진 조건을 벗어나는 송신이 다른 stream에 미치는 영향을 제한하는 수단입니다. 분류와 정책이 틀리면 정상 트래픽도 버릴 수 있으므로 drop counter를 실제 stream·gate·meter 설정과 연결해서 봅니다.
+
+![수신 프레임이 stream filter, maximum SDU size filter, stream gate, flow meter를 차례로 거쳐 출력 queue로 가고 단계마다 폐기와 계수기가 있는 PSFP 처리 순서](/images/blog/industrial-ethernet/diagrams/ch08-qci-pipeline.svg)
+
+이 순서는 IEEE 802.1 작업 그룹의 [P802.1Qcr 8.6.5 정리 제안](https://grouper.ieee.org/groups/802/1/files/public/docs2019/cr-seaman-8-6-5-organization-0719-v02.pdf)을 따른 것이며, 단계마다 계수기가 따로 있으므로 어느 단계에서 프레임이 버려졌는지 구분해서 읽을 수 있습니다.
 
 Qci를 보안 인증이나 기능 안전의 완성으로 취급하지 않습니다. 정상 메시지의 의미를 이해하거나 모든 공격을 차단하는 기능은 아닙니다. ingress 정책을 구성했다는 사실과 전체 경로의 deadline 만족은 별도 검증 대상입니다.
 

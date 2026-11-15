@@ -22,6 +22,10 @@ topics: ["embedded", "embedded/protocols"]
 
 EtherCAT·PROFINET·EtherNet/IP·POWERLINK·Sercos는 각각의 통신·애플리케이션 체계를 갖습니다. TSN은 이들과 동일한 층위의 단일 IO 프로토콜이 아닙니다. TSN의 기능을 쓴다고 장치 데이터 모델·제어 상태·안전 프로토콜이 자동으로 호환되지는 않습니다.
 
+![두 체계가 각자의 장치 데이터 모델·제어 상태·안전 프로토콜을 가진 채 같은 TSN 기능 층과 Ethernet 위에 놓이는 층위 구분](/images/blog/industrial-ethernet/diagrams/ch12-tsn-backbone.svg)
+
+그림처럼 같은 TSN 기능 층을 공유해도 그 위의 층은 체계마다 따로 남습니다.
+
 | 후보 체계 | 먼저 확인할 기능 | 이름만으로 결정되지 않는 것 |
 |---|---|---|
 | EtherCAT | master·ESC·PDO·DC·상태 감시 | 목표 topology와 IO량에서의 cycle·유효 데이터 나이 |
@@ -101,6 +105,10 @@ FRER·MRP 같은 통신 가용성 기능은 안전 통신 프로토콜 자체가
 [IEC 61784-3-13:2021의 공개 범위](https://webstore.iec.ch/en/publication/68897)도 safety communication layer를 안전 장치에 구현하는 대상으로 구분합니다. 따라서 일반 통신 스택을 선택한 사실만으로 시스템의 안전 등급을 선언하지 않습니다. DO-178C·DO-254는 항공 분야의 별도 맥락이며 산업용 SIL 3 인증 절차의 대체 설명으로 연결하지 않습니다.
 
 Gateway로 다른 망을 연결할 때는 안전·보안·시간 기준이 자동으로 이어지지 않습니다. 재전송·queue·데이터 변환으로 늘어나는 지연과 오래된 값의 표시를 확인합니다. 한쪽 통신이 끊겼을 때 다른 쪽에 유효한 데이터처럼 남는 경우도 시험해야 합니다.
+
+![망 A와 망 B를 gateway로 연결할 때 자동으로 이어지지 않는 기능 안전·보안·시간 기준과, 따로 설계하고 시험할 지연·오래된 값·통신 단절 시의 값](/images/blog/industrial-ethernet/diagrams/ch12-vendor-locked.svg)
+
+그림의 두 상자는 gateway를 넣을 때 설계 문서와 시험 항목에 각각 따로 적어야 하는 목록입니다.
 
 ## 비용과 운영 자료를 남기기
 

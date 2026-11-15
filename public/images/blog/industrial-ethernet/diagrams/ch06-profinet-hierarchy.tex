@@ -7,28 +7,46 @@
 \begin{document}
 \input{../../_design.tex}
 \begin{tikzpicture}[blog,
-  node/.style={cls, align=center, minimum height=12mm}
+  crlab/.style={font=\sffamily\footnotesize, text=inkc, fill=white, inner sep=2pt, align=center}
 ]
 
-\node[node, fill=clifill, draw=clibord, minimum width=44mm] (sup) at (0, 0)
-  {IO-Supervisor (PC)};
-\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3, 0) {TIA Portal};
+\node[font=\sffamily\bfseries\large, text=inkc] at (5.5,2.9) {PROFINET IO의 역할과 AR 안의 CR};
 
-\draw[uses] (sup.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {TCP/IP (best-effort)} ++(0, -1.5);
+% IO-Controller
+\node[cls, draw=absbord, fill=absfill, minimum width=36mm, minimum height=34mm, align=center] (ctl) at (0,0)
+  {\textbf{IO-Controller}\\[2pt]\footnotesize 제어 프로그램 실행\\[2pt]\footnotesize AR 설정};
 
-\node[node, fill=absfill, draw=absbord, minimum width=44mm, minimum height=14mm] (ctl) at (0, -3)
-  {IO-Controller \\[1pt] \footnotesize (PLC scan)};
-\node[font=\sffamily\footnotesize, text=mutec, anchor=west] at (3, -3) {S7-1500 PLC};
+% IO-Device 1
+\node[cls, draw=impbord, fill=impfill, minimum width=30mm, minimum height=34mm, align=center] (d1) at (11,0)
+  {\textbf{IO-Device 1}\\[2pt]\footnotesize 모듈·서브모듈};
 
-\draw[flow] (ctl.south) -- node[right, font=\sffamily\scriptsize, text=mutec] {PROFINET RT/IRT (cyclic)} ++(0, -1.5);
+% AR panel
+\node[cls, draw=neutbord, fill=neutfill!50, dashed, minimum width=62mm, minimum height=38mm] (ar) at (5.5,0) {};
+\node[font=\sffamily\bfseries\small, text=inkc, anchor=north west] at (ar.north west) {AR (Application Relation)};
 
-\node[node, fill=impfill, draw=impbord, minimum width=28mm] (d1) at (-4, -6) {IO-Device 1};
-\node[node, fill=impfill, draw=impbord, minimum width=28mm] (d2) at ( 0, -6) {IO-Device 2};
-\node[node, fill=impfill, draw=impbord, minimum width=28mm] (d3) at ( 4, -6) {IO-Device 3};
+% CR arrows inside AR
+\draw[arr, line width=0.8pt] (ctl.east |- 0,1.0) -- (d1.west |- 0,1.0)
+  node[midway, crlab] {IO data CR: 출력 (provider = Controller)};
+\draw[arr, line width=0.8pt] (d1.west |- 0,0.2) -- (ctl.east |- 0,0.2)
+  node[midway, crlab] {IO data CR: 입력 (provider = Device)};
+\draw[arr, {Latex}-{Latex}] (ctl.east |- 0,-0.6) -- (d1.west |- 0,-0.6)
+  node[midway, crlab] {record data CR: 비주기 read/write};
+\draw[arr, {Latex}-{Latex}] (ctl.east |- 0,-1.4) -- (d1.west |- 0,-1.4)
+  node[midway, crlab] {alarm CR: alarm과 확인 응답};
 
-\draw[edge] ($(ctl.south) + (0,-1.5)$) -- ++(-4, 0) |- (d1.north);
-\draw[edge] ($(ctl.south) + (0,-1.5)$) -- (d2.north);
-\draw[edge] ($(ctl.south) + (0,-1.5)$) -- ++( 4, 0) |- (d3.north);
+% IO-Device 2
+\node[cls, draw=impbord, fill=impfill, minimum width=30mm, minimum height=12mm, align=center] (d2) at (11,-3.5)
+  {\textbf{IO-Device 2}};
+\draw[arr, {Latex}-{Latex}] ($(ctl.south)+(0.8,0)$) |- (d2.west)
+  node[pos=0.75, crlab] {별도 AR (같은 방식의 CR)};
+
+% IO-Supervisor
+\node[cls, draw=clibord, fill=clifill, minimum width=36mm, minimum height=14mm, align=center] (sup) at (0,-5.6)
+  {\textbf{IO-Supervisor}\\[2pt]\footnotesize PG·PC·HMI};
+\draw[alt] (sup.east) -| (d2.south)
+  node[pos=0.25, below, font=\sffamily\footnotesize, text=mutec, align=center]
+  {Controller·Device의 시운전·진단\\[2pt]보통 일시적으로 연결};
+\draw[alt] ($(sup.north)+(-0.8,0)$) -- ($(ctl.south)+(-0.8,0)$);
 
 \end{tikzpicture}
 \end{document}
