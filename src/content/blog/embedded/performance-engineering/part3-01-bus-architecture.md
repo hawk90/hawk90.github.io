@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 | Bus | 도입 | 특징 | 사용처 |
 |---|---|---|---|
-| **APB** (Advanced Peripheral Bus) | 1996 | 단일 사이클, 단순 | UART·timer·GPIO |
+| **APB** (Advanced Peripheral Bus) | 1996 | 최소 2단계(Setup·Access) | UART·timer·GPIO |
 | **AHB** (High-perf) | 1999 | Burst, pipeline | Cortex-M, 옛 Cortex-A |
 | **AXI** (eXtensible Interface) | 2003 | 5 channel, OoO | Cortex-A, GPU |
 | **ACE** (AXI Coherency Ext) | 2011 | Cache coherence | big.LITTLE |
@@ -120,7 +120,7 @@ AHB는 간단해서 작은 MCU에 적합합니다. AXI는 복잡하지만 throug
 
 ## APB — Peripheral 전용
 
-**2-cycle (setup + access):**
+APB 전송은 최소 2단계(Setup 뒤 Access)로 진행합니다. 대기 상태가 삽입되면 Access 단계가 더 길어질 수 있습니다. Arm의 [AMBA AXI4 introduction](https://developer.arm.com/-/media/Arm%20Developer%20Community/PDF/Learn%20the%20Architecture/102202_0100_01_Introduction_to_AMBA_AXI.pdf)도 APB의 address·data phase와 비파이프라인 특성을 설명합니다.
 
 - Cycle 1: PSEL=1, PENABLE=0, PADDR set
 - Cycle 2: PENABLE=1, PRDATA returned (read) / PWDATA captured (write)

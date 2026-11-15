@@ -18,15 +18,15 @@ topics: ["embedded"]
 
 | 레벨 | 접근 시간 | 크기 (Cortex-A72) | 위치 |
 |---|---|---|---|
-| **Register** | 0 cycle | 32 × 32-bit | CPU 내부 |
+| **Register** | core register-file access | architecture/core별 구현 | CPU 내부 |
 | **L1 Cache** | 3-4 cycle | I:48KB + D:32KB | CPU core 옆 |
-| **L2 Cache** | 10-15 cycle | 1MB shared (4-core) | Cluster |
-| **L3 Cache** (있다면) | 30-50 cycle | 4-8MB | SoC 공유 |
-| **DRAM** | 100-300 cycle | GB | external |
+| **L2 Cache** | 구현·구성에 따라 다름 | Cortex-A72 SoC의 cluster cache; 크기와 지연은 SoC 구성 확인 | Cluster |
+| **L3 Cache** (있다면) | 구현·SoC에 따라 다름 | 선택적 system cache일 수 있음 | SoC 공유 |
+| **DRAM** | target-dependent | platform capacity | external |
 
-매 단계마다 약 10배 느려지고 10배 커집니다. 그림으로 보면 hierarchy의 폭과 latency가 한눈에 들어옵니다.
+계층이 내려갈수록 일반적으로 용량은 커지고 접근 지연도 늘지만, 비율은 코어·SoC·작업에 따라 달라집니다. 그림으로 보면 hierarchy의 폭과 latency가 한눈에 들어옵니다.
 
-![L1/L2/L3/DRAM 메모리 hierarchy — 단계마다 약 10배 커지고 10배 느려진다](/images/blog/perf-eng/diagrams/part2-05-cache-hierarchy.svg)
+![L1/L2/L3/DRAM 메모리 hierarchy — 계층별 용량과 지연은 구현에 따라 달라진다](/images/blog/perf-eng/diagrams/part2-05-cache-hierarchy.svg)
 
 ## L1 — Split I/D (Harvard)
 
@@ -49,11 +49,7 @@ L2 이상은 instruction과 data를 통합합니다. Inclusive와 Exclusive로 �
 
 ## Cache Line
 
-```text
-일반적 line size — 64 bytes (Cortex-A, x86)
-                  32 bytes (Cortex-M7)
-                   16 bytes (Cortex-M4 cache)
-```
+Cortex-A·x86 line size는 구현별로 확인하며, Cortex-M7은 해당 revision TRM과 SoC 문서를 참조합니다. Cortex-M4 코어 자체에는 L1 cache가 없습니다.
 
 CPU가 1 byte만 읽어도 전체 line이 fetch되어 *spatial locality*를 활용합니다.
 
@@ -69,14 +65,15 @@ arr[16];  // ← 다른 line, miss
 **Address bits:**
 
 - [Tag] [Index] [Offset]
-- 20    8       6        (64 KB cache, 64 byte line)
+- 20    10      6        (가정: 64 KiB direct-mapped cache, 64-byte line; 1024 lines)
 
 각 메모리 주소는 유일한 cache line에만 들어갑니다.
 
 ```text
-addr 0x1000 → line 64
-addr 0x5000 → line 64 (conflict! evict 0x1000)
-addr 0x9000 → line 64 (conflict!)
+가정: 64 KiB direct-mapped cache, 64-byte line
+addr 0x1000  → line 64
+addr 0x11000 → line 64 (conflict! evict 0x1000)
+addr 0x21000 → line 64 (conflict!)
 ```
 
 Conflict miss가 빈번합니다. hardware는 단순하지만 hit rate가 낮습니다.
@@ -164,7 +161,7 @@ Eviction or flush → memory 업데이트
 
 장점은 write traffic이 적다는 점입니다. 단점은 DMA·SMP coherence가 복잡하다는 점입니다.
 
-ARM L1 D-cache는 write-back에 write-allocate 방식입니다.
+Write-back/write-allocate 정책은 cache level과 processor implementation마다 다르므로 해당 TRM을 확인합니다.
 
 ### Write-Allocate vs No-Write-Allocate
 
@@ -179,9 +176,9 @@ Streaming write(한 번 쓰고 다시 읽지 않는 패턴)에는 no-write-alloc
 
 ## Cortex-M Cache
 
-| MCU | Cache |
+| MCU core | Cache note |
 |---|---|
-| Cortex-M0/M3/M4 | **없음** (TCM 또는 직접 flash 실행) |
+| Cortex-M0/M3/M4 | 코어 자체에는 L1 data/instruction cache가 없습니다 (시스템에 별도 cache가 통합될 수 있음). TCM 존재 여부는 코어/SoC 구성에 따라 다릅니다. |
 | Cortex-M7 | L1 I + L1 D (선택적 enable) |
 | Cortex-M33 | optional |
 | Cortex-M55 | optional |
@@ -210,9 +207,7 @@ Cache miss가 없는 결정성 메모리입니다. Cortex-M7·R52 등에 32-256 
 perf stat -e cache-references,cache-misses ./prog
 
 # miss-rate = misses / references
-# < 5% — 좋음
-# 10-20% — 보통
-# > 30% — 문제
+# interpret against the workload, cache level, and target PMU event definition
 ```
 
 PMU event:
@@ -264,7 +259,7 @@ __attribute__((aligned(32))) uint8_t dma_buf[256];
 ## 정리
 
 - Hierarchy는 L1 split(I+D)에서 L2/L3 unified, DRAM 순으로 이어집니다.
-- Cache line은 Cortex-A에서 **64 byte**, Cortex-M7에서 **32 byte**입니다.
+- Cache line size와 cache geometry는 target TRM/SoC 문서에서 확인합니다.
 - **N-way set associative**는 Cortex-A에서 4-16 way로 사용합니다.
 - Replacement는 LRU, **PLRU**, Random(WCET용)으로 나뉩니다.
 - Write-back + write-allocate가 표준입니다.

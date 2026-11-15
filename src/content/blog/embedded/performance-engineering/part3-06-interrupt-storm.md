@@ -16,16 +16,16 @@ topics: ["embedded"]
 
 ## Storm 발생 시나리오
 
-Gigabit Ethernet에서 1 Gbps × 64-byte frame = *1.95 Mpps*. 매 패킷마다 IRQ를 걸면:
+Gigabit Ethernet에서 최소 64-byte Ethernet frame마다 IRQ가 발생한다고 가정해도, 선로 점유에는 preamble/SFD 8 byte와 inter-frame gap 12 byte가 더해집니다. 따라서 1 Gbps line rate의 상한은 `1e9 / (84 × 8) ≈ 1.488 Mpps`입니다. 매 패킷마다 IRQ를 걸면:
 
 | 항목 | 값 |
 |------|-----|
-| IRQ 빈도 | 1.95 M IRQ/sec |
+| IRQ 빈도 상한 | 약 1.488 M IRQ/sec |
 | ISR 비용 | 진입 12 cycle + 처리 100 cycle |
-| 총 cycle | 112 × 1.95 M = 220 Mcycle/sec |
-| 1 GHz CPU 점유 | *22% ISR overhead만으로* |
+| 총 cycle | 112 × 1.488 M ≈ 166.7 Mcycle/sec |
+| 1 GHz CPU 점유 | *약 16.7%* (가정한 112 cycle/IRQ만 계산) |
 
-10 Gbit에서는 CPU 100%까지 갈 수 있습니다. 그러면 데이터 처리를 *전혀 못 해서* throughput이 0이 됩니다.
+같은 단순 가정을 10 Gbit/s에 적용하면 IRQ 진입·처리에만 CPU 용량을 넘는 시간이 필요합니다. 실제 NIC는 coalescing이나 queueing 같은 동작이 개입하므로 이 계산은 패킷 처리 성능 측정값이 아니라 line-rate 상한에 대한 비용 예시입니다.
 
 ## Top-Half 짧음 + Bottom-Half에서 batch
 
@@ -51,7 +51,8 @@ void net_task(void) {
 ## NAPI - Linux Pattern
 
 ```c
-/* NAPI (New API) - Linux network driver 표준 */
+/* NAPI (New API) - Linux network driver 표준
+ * poll/completion/IRQ 재활성화 순서는 kernel 및 driver API 문서를 따릅니다. */
 
 static int net_napi_poll(struct napi_struct *napi, int budget) {
     int packets = 0;
@@ -63,8 +64,9 @@ static int net_napi_poll(struct napi_struct *napi, int budget) {
     }
     
     if (packets < budget) {
-        napi_complete(napi);     // budget 안 채움 → IRQ 다시 enable
-        enable_rx_irq();
+        if (napi_complete_done(napi, packets)) {
+            enable_rx_irq(); // poll ownership을 놓은 경우에만 IRQ 재활성화
+        }
     }
     return packets;
 }
@@ -80,7 +82,9 @@ static irqreturn_t net_irq(int irq, void *dev_id) {
 - Budget만큼 처리합니다 (예: 64 packet).
 - Queue가 비면 IRQ를 다시 enable합니다.
 
-**효과**는 트래픽이 많을 때는 polling으로 overhead가 0이 되고, 적을 때는 IRQ로 짧은 latency를 얻는 것입니다.
+실제 드라이버는 [Linux NAPI completion contract](https://docs.kernel.org/networking/napi.html)에 따라 poll 소유권을 넘긴 경우에만 IRQ를 재활성화해야 합니다.
+
+**효과**는 트래픽이 많을 때 interrupt 횟수를 줄여 batch 처리하는 것입니다. polling도 CPU 시간을 사용하므로 비용이 0은 아닙니다. 트래픽이 적을 때는 IRQ 기반 처리로 불필요한 polling을 줄일 수 있습니다.
 
 ## Interrupt Coalescing (Hardware)
 
@@ -130,7 +134,7 @@ while (1) {
 }
 ```
 
-DPDK와 SPDK 패턴이 바로 이 *user-space polling*입니다. IRQ 0개로 *60 Mpps*까지 달성합니다.
+DPDK와 SPDK는 설정에 따라 user-space polling을 사용할 수 있습니다. polling 처리량은 NIC·queue 수·CPU·packet 크기와 workload에 따라 달라지므로 고정 PPS 값으로 일반화하지 않습니다.
 
 ## Hybrid - busy-poll Linux
 
@@ -160,10 +164,10 @@ ethtool -X eth0 equal 4   # 4 CPU에 균등 분산
 ```
 
 해결책은 다음과 같습니다.
-- `sysctl net.ipv4.icmp_ratelimit = 100`으로 rate limit을 겁니다.
-- 방화벽에서 *NIC IRQ 전에 drop*합니다 (XDP 사용).
+- `net.ipv4.icmp_ratelimit`은 커널이 생성하는 일부 ICMP 오류 메시지의 rate limit 설정입니다. 수신 ICMP flood 전체를 제한하는 입력 rate limiter로 간주하지 않습니다.
+- XDP는 지원되는 드라이버의 RX 처리 경로에서 패킷을 일찍 drop할 수 있습니다. 일반적으로 NIC가 interrupt를 만들기 전 drop한다고 보장하지 않으며, 하드웨어 offload 여부는 NIC·드라이버에 따릅니다.
 
-XDP (eXpress Data Path)는 Linux BPF로 *driver 단계에서 drop*하는 기법입니다.
+XDP (eXpress Data Path)는 Linux BPF로 *RX 경로 초기에 처리·drop*하는 기법입니다.
 
 ## Embedded - IRQ Budget 계산
 

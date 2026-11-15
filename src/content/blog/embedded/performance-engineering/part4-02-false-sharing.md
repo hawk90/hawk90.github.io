@@ -12,292 +12,75 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"False Sharing = 다른 변수, 같은 cache line"** 입니다. 코어 간 ping-pong이 일어나 10~100배까지 느려집니다.
+> 다른 변수를 다루어도 같은 coherence line을 공유하며 적어도 한쪽이 쓰면 불필요한 coherence traffic이 생길 수 있습니다. 느려지는 배수는 측정 조건에 따라 다릅니다.
 
 ## 메커니즘
 
-```text
-struct {
-    int counter_a;   // CPU 0 사용
-    int counter_b;   // CPU 1 사용
-} stats;   // 8 byte — 같은 64-byte line
+[Linux6.12 false-sharing 문서](https://www.kernel.org/doc/html/v6.12/kernel-hacking/false-sharing.html)는 write/write뿐 아니라 write/read 사례도 설명합니다. 수정한 field와 다른 field를 읽는 CPU도 line을 다시 가져와야 할 수 있습니다. 각 store마다 반드시 DRAM flush·L2 왕복이 발생하는 고정 MESI 시퀀스로 쓰지 않습니다. 실제 protocol·cache hierarchy·ownership에 따라 경로가 다릅니다.
 
-CPU 0: writes counter_a
-  → cache line state = Modified (CPU 0)
-  → CPU 1 line state = Invalid
+![64-byte coherence line을 가정한 두 코어의 다른 변수 접근과 ownership 이동](/images/blog/perf-eng/diagrams/part4-02-false-sharing.svg)
 
-CPU 1: writes counter_b
-  → coherence protocol triggered
-  → CPU 0 line evict (flush to L2)
-  → CPU 1 fetch from L2 (or CPU 0 cache)
-  → CPU 1 cache state = Modified
-  → CPU 0 = Invalid
-```
+그림의64byte는 예시 가정이며 모든 CPU의 line 크기가 아닙니다. Read-only 공유와 같은 변수의 true sharing도 구분합니다.
 
-매 access마다 line이 두 cache 사이를 왕복합니다(ping-pong). 실제로 공유되는 데이터는 하나도 없는데, 단지 같은 line에 들어 있다는 이유로 coherence가 계속 동작합니다.
+## 배치부터 확인 — 배열 시작 정렬과 원소 stride
 
-그림으로 보면 두 코어가 *같은 line*을 두고 핑퐁하는 모습이 분명해집니다.
+배열 전체만 정렬하면 연속 원소가 분리되지는 않습니다. 다음은 **64byte 분리 가정의 C11 배치·동작 fixture**입니다. 실제 CPU line 크기를 탐지하거나 성능을 측정하는 코드는 아닙니다.
 
-![두 코어가 같은 cache line의 다른 변수에 접근할 때의 invalidate ping-pong](/images/blog/perf-eng/diagrams/part4-02-false-sharing.svg)
+```c title="sharing-layout.c"
+#include <stdatomic.h>
+#include <stddef.h>
+#include <stdalign.h>
 
-## MESI Protocol
+typedef struct {
+    alignas(64) atomic_uint value;
+} counter_slot;
 
-```text
-M (Modified)  — 이 cache만 valid, dirty
-E (Exclusive) — 이 cache만 valid, clean
-S (Shared)    — 여러 cache valid, clean
-I (Invalid)   — 무효
-```
-
-State 변화는 다음과 같이 일어납니다.
-
-```text
-CPU 0 write: I → M, 다른 cache invalidate broadcast
-CPU 1 read after CPU 0 write: 
-  - CPU 0 cache의 M line → flush to memory
-  - CPU 0: M → S, CPU 1: I → S
-  
-False sharing = 매번 M → I → M → I 반복.
-```
-
-## 측정 — 실 cycle
-
-```c
-struct {
-    atomic_int a;
-    atomic_int b;
-} bad;
-
-struct {
-    alignas(64) atomic_int a;
-    alignas(64) atomic_int b;
-} good;
-
-void thread1_func(void *p) {
-    for (int i = 0; i < 10M; i++) atomic_fetch_add(&bad.a, 1);
-}
-void thread2_func(void *p) {
-    for (int i = 0; i < 10M; i++) atomic_fetch_add(&bad.b, 1);
-}
-```
-
-Cortex-A72 4-core 환경에서 실측한 결과는 다음과 같습니다.
-
-```text
-Bad (false sharing):  4.2 sec
-Good (padded):        0.3 sec
-                      → 14x slowdown
-```
-
-## Padding
-
-```c
-struct counters {
-    alignas(64) atomic_int a;
-    char pad_a[64 - sizeof(atomic_int)];
-    
-    alignas(64) atomic_int b;
-    char pad_b[64 - sizeof(atomic_int)];
-};
-```
-
-또는 C++17:
-
-```cpp
-#include <new>
-struct alignas(std::hardware_destructive_interference_size) Counter {
-    std::atomic<int> value;
+struct dense_counters {
+    atomic_uint a;
+    atomic_uint b;
 };
 
-std::array<Counter, 4> counters;   // 각 element가 다른 line
+static counter_slot slots[2];
+alignas(64) static struct dense_counters dense;
 ```
 
-`hardware_destructive_interference_size`는 일반적으로 64이고, Apple M1은 128입니다.
+실제 compiler로 alignment·sizeof·배열 원소 주소와 64byte block 분리를 확인했습니다. 같은 block에 두 atomic이 있는 dense와 분리된 slots에서 각각 두 pthread가 증가시키고 최종값을 확인했습니다. 정확성·배치 검증이며 speedup·coherence traffic 측정은 아닙니다. 기존 Cortex-A72의4.2초/0.3초·14배 실측 표는 재현 환경이 없어 제거했습니다.
 
-## 흔한 false sharing 패턴
+`std::hardware_destructive_interference_size`도 implementation이 정한 분리 권장 상수이며 모든 runtime CPU의 실제 line을 측정한 값이 아닙니다. 특정 vendor를 보고 무조건64/128byte로 고정하지 않습니다.
 
-### 1. Per-CPU 변수
+## 흔한 패턴의 판정
 
-```c
-int counters[NUM_CPUS];   // ← 8개 × 4 byte = 32 byte → 한 line 안
-each cpu: counters[cpu]++ 
-→ false sharing
-```
+| 배치 | 확인할 것 | 무조건 padding하지 않는 이유 |
+|------|------|------|
+| Per-worker counter | 원소의 alignment와 stride, 동시 writer | 읽기 위주·저빈도면 footprint가 더 중요할 수 있음 |
+| SPSC head/tail | 서로 다른 writer·읽기 빈도·data slots | index 분리만으로 buffer 내 공유까지 제거되지는 않음 |
+| Spinlock 옆 데이터 | 기다리는 CPU와 owner의 접근 line | 같이 둘 때 locality가 유리한 workload도 있음 |
+| 같은 global atomic | 모든 thread가 같은 값을 수정 | true sharing이라 padding만으로 해소 안 됨 |
 
-padding을 넣거나 per-CPU memory로 분리해야 합니다.
+Linux `DEFINE_PER_CPU`나 RTOS 배열 정렬을 개별 field의 자동 cache-line 분리라고 단정하지 않습니다. Zephyr stack 선언도 arbitrary counter 배열의 stride를 바꾸지 않습니다. Compiler가 지원하는 `alignas`는 stack object에도 정렬 요구를 표현하며, 항상 무시되어 `-mstackrealign`이 필요하다는 설명은 잘못입니다.
 
-```c
-struct counter_per_cpu {
-    alignas(64) int value;
-};
-struct counter_per_cpu counters[NUM_CPUS];
-```
-
-### 2. Producer/Consumer Queue
-
-```c
-struct queue {
-    size_t head;   // producer writes
-    size_t tail;   // consumer writes
-    /* ... data ... */
-};
-```
-
-producer와 consumer가 다른 코어에서 동작하면 head와 tail이 같은 line에 들어가서 ping-pong이 발생합니다.
-
-```c
-struct queue {
-    alignas(64) atomic_size_t head;
-    char pad[64 - sizeof(atomic_size_t)];
-    alignas(64) atomic_size_t tail;
-    char pad2[64 - sizeof(atomic_size_t)];
-    /* ... data ... */
-};
-```
-
-### 3. Spinlock 인접 데이터
-
-```c
-struct {
-    spinlock_t lock;
-    int data1;   // ← lock 잡힌 코어와 다른 코어가 동시 access 시 ping-pong
-    int data2;
-} resource;
-```
-
-lock과 data를 서로 다른 line에 분리해야 합니다.
-
-## perf c2c — Cache-to-Cache 진단
+## perf c2c — 대상 PMU와 report를 연결
 
 ```bash
-sudo perf c2c record ./prog
-sudo perf c2c report
-
-# Output:
-# - HITM events (Hit in Modified state — false sharing 시그너처)
-# - Per-cache-line contention
-# - Source code location
+sudo perf c2c record -- ./prog
+perf c2c report
 ```
 
-Linux kernel 4.10 이상에서 사용할 수 있으며, false sharing을 탐지하는 가장 강력한 도구입니다.
+이 명령은 지원 Linux target에서의 조사 예이며 여기서 실행하지 않았습니다. CPU·PMU·kernel/config·권한·event 지원을 확인합니다. HITM이나 관련 memory-source sample을 찾았다고 모두 false sharing은 아닙니다. Line 안의 offset·writer/readers·source access와 실제 layout을 연결해 같은 변수의 true sharing인지 다른 field의 공유인지 구분합니다.
 
-## Intel VTune Memory Access
-
-VTune의 Memory Access analysis는 다음과 같은 정보를 제공합니다.
-
-- Per cache line latency
-- Local vs Remote DRAM access
-- Contended cache lines 보고
-
-## Embedded — Cortex-A SMP
-
-```c
-/* Linux on Cortex-A — 4 코어 */
-DEFINE_PER_CPU(int, my_counter);   // 자동 padded
-
-/* RTOS SMP — FreeRTOS 11 SMP 또는 Zephyr */
-static atomic_t counters[NUM_CORES] __attribute__((aligned(64)));
-```
-
-Zephyr는 `Z_KERNEL_STACK_DEFINE` 등을 통해 자동으로 정렬을 맞춰 줍니다.
-
-## False Sharing은 항상 나쁜가?
-
-반드시 그렇지는 않습니다. Workload에 따라 다음과 같이 갈립니다.
-
-- Read 위주 → 모든 cache S state, ping-pong 없음, OK
-- Per-CPU 누적 → padding 필요
-- 가끔 write → 측정해서 결정
-
-모든 변수에 padding을 넣으면 line 하나당 실제 정보가 1 byte 수준으로 줄어 cache 효율이 떨어집니다.
-
-## True Sharing — 진짜 공유 시
-
-```c
-atomic_int global_counter;
-/* 모든 thread가 update */
-```
-
-이런 경우는 진짜 공유이지 false sharing이 아닙니다. 해결책으로는 다음 두 가지가 있습니다.
-
-- Per-CPU에서 누적한 뒤 주기적으로 합산
-- Sharded counter
-
-```c
-atomic_int counter[NUM_CPUS];
-
-int total(void) {
-    int sum = 0;
-    for (i = 0) sum += counter[i];
-    return sum;
-}
-```
-
-Read는 가끔이고 write가 자주 일어나는 경우라면 per-CPU shard를 쓰는 편이 좋습니다.
-
-## Lock-free Queue 디자인
-
-```c
-struct lockfree_spsc {
-    alignas(64) atomic_size_t head;   // producer-only
-    alignas(64) atomic_size_t tail;   // consumer-only
-    alignas(64) T buf[CAPACITY];      // 별도 line
-};
-```
-
-각 hot field가 서로 다른 line에 놓이도록 해서 false sharing을 0으로 만듭니다.
+지원 event가 없거나 sample이 부족한 경우 검출 없음으로 결론내리지 않습니다. Layout 변경 전후를 같은 workload·affinity·compiler·NUMA·thermal 조건으로 반복하고 throughput·tail latency·footprint를 함께 비교해야 합니다.
 
 ## 자주 하는 실수
 
-> ⚠️ 작은 변수만 padding
+한 field의 시작 주소만 정렬하고 이웃 field가 같은 line을 쓰는지 보지 않는 경우가 있습니다. 반대로 모든 field를 분리하면 cache·TLB footprint가 커질 수 있습니다. 구조체의 alignment와 size, 각 offset, 실제 할당 주소를 확인합니다.
 
-```c
-alignas(64) int a;
-int b;                 // ← a 같은 line에 들어감
-```
-
-`a` 뒤 64 byte 영역은 다른 변수가 차지할 수 있습니다. 모든 변수에 alignas를 붙이거나 명시적으로 pad를 넣어야 합니다.
-
-> ⚠️ Padding 안에 다른 data
-
-```c
-struct foo {
-    alignas(64) int a;
-    char tmp[60];
-    alignas(64) int b;
-    /* tmp 안 다른 데이터 두지 마라 — 그것도 line bouncing */
-};
-```
-
-> ⚠️ Stack 변수 padding
-
-```c
-void func(void) {
-    alignas(64) int x;   // ← stack alignment 보장 안 됨
-}
-```
-
-GCC의 `-mstackrealign` 옵션을 쓰거나, 해당 변수를 heap이나 static 영역에 두는 방식으로 해결합니다.
-
-> ⚠️ 작은 시스템에서 over-pad
-
-```c
-/* Cortex-M7 — 32 byte cache line */
-alignas(64) int x;   // ← 32 byte로 충분
-```
-
-Embedded 환경에서는 cache line size를 확인한 다음 정확히 그 크기에 맞춰 align해야 합니다.
+단순 정수의 서로 다른 원소를 서로 다른 thread가 소유하면 별개 object라는 점과, 다른 thread가 동시에 집계할 때 data race가 생기는 문제는 별도입니다. 동시 집계에는 해당 memory model의 atomic·동기화가 필요하며 atomic 합계도 자동으로 일관된 순간 snapshot은 아닙니다.
 
 ## 정리
 
-- False sharing은 **다른 변수가 같은 line**에 있어서 coherence ping-pong이 발생하는 현상입니다.
-- 해결책은 line size에 맞춘 **`alignas(64)` padding**입니다.
-- 진단에는 **perf c2c**를 사용합니다.
-- Producer/consumer queue와 per-CPU counter는 기본적으로 padding을 넣어야 합니다.
-- True sharing은 별도의 문제이며, sharding으로 해결합니다.
-- Cache line size는 Cortex-M7에서 32, 대부분의 CPU에서 64, Apple M1에서 128입니다.
+False sharing은 layout만으로 성능 손실이 확정되는 문제가 아닙니다. 동시 접근·write·coherence 경로를 확인하고, compiler의 배치 증거와 실제 PMU·성능 관찰을 구분합니다. 이 장의 host 실험은 64byte 가정의 배치와 atomic 최종값만 확인했습니다.
 
-다음 편은 **Lock Contention**을 다룹니다.
+다음 편은 [4-03: Lock Contention](/blog/embedded/performance-engineering/part4-03-lock-contention)입니다.
 
 ## 관련 항목
 

@@ -54,9 +54,9 @@ HPC와 과학계산에 적용됩니다. 임베디드에서는 문제 크기가 �
 
 **Operational Intensity (OI)**, **Peak FLOPS**, **Memory Bandwidth**로 *상한선*을 결정합니다.
 
-$$\text{OI} = \frac{\text{FLOP}}{\text{byte loaded}}$$
+$$\text{OI} = \frac{\text{FLOP}}{\text{byte transferred at a specified memory level}}$$
 
-각 알고리즘이 *1 byte memory access마다 몇 FLOP*을 하는지 나타냅니다.
+OI는 지정한 메모리 계층에서 전송되는 byte당 연산 수입니다. 재사용, write allocate, cache hit를 어떤 계층의 traffic으로 셌는지 명시해야 합니다.
 
 ### Roofline 그래프
 
@@ -72,11 +72,9 @@ for (i = 0; i < N; i++)
     a[i] = b[i] + c[i] * d;
 ```
 
-- 3 byte load와 1 byte store (assuming 1 byte per element)
-- 2 FLOP (mul + add)
-- **OI = 2/16 = 0.125 FLOP/byte** (assuming float = 4 byte, total 16 byte/iter)
-
-Memory-bound입니다. 더 빠른 CPU는 의미가 없습니다. **메모리 BW를 늘리거나** *cache locality*를 개선해야 합니다.
+- `float` 원소 4 byte, 배열 `b`와 `c`에서 각각 한 번 읽고 `a`에 한 번 씁니다.
+- 이 단순 모델은 반복당 12 byte traffic과 2 FLOP으로 **OI = 2/12 ≈ 0.167 FLOP/byte**를 가정합니다.
+- 실제 DRAM traffic은 cache 재사용, write allocate, 배열 배치와 측정 계층에 따라 달라집니다. 그 가정에서 Roofline의 memory roof 아래라면 memory-bound로 분류합니다. 이때도 compute 최적화가 무의미하다고 단정하지 않습니다.
 
 ### 예 — Matrix Multiplication (Naive)
 
@@ -85,11 +83,9 @@ for (i) for (j) for (k)
     C[i][j] += A[i][k] * B[k][j];
 ```
 
-- 2 byte load + 1 store = 3 byte
-- 2 FLOP
-- **OI = 2/12 = 0.17 (cold cache)**
-
-Naive matmul도 memory-bound입니다. **Blocking·tiling**으로 OI를 키우면 compute-bound 영역으로 옮길 수 있습니다.
+- 반복당 산술 연산은 보통 곱셈과 덧셈 2 FLOP으로 셉니다.
+- DRAM byte 수는 행렬 원소 형식, cache 상태, loop order, 재사용에 따라 달라지므로 이 코드만으로 고정 OI를 정할 수 없습니다.
+- Blocking·tiling은 데이터 재사용을 높여 지정 계층의 traffic을 줄일 수 있습니다. 실제 bound는 측정된 traffic과 해당 시스템의 roof로 판단합니다.
 
 ### Roofline 활용
 
@@ -109,7 +105,7 @@ $$L = \lambda \cdot W$$
 
 $$\text{Bytes-in-flight} = \text{BW} \cdot \text{latency} = 10\ \text{GB/s} \cdot 100\ \text{ns} = 1000\ \text{byte}$$
 
-DRAM access latency 100 ns 동안 *1 KB pipeline을 채워야* 최대 BW에 도달합니다.
+가정한 10 GB/s와 100 ns의 곱은 1000 byte입니다. 이는 그 대역폭을 latency 동안 유지하기 위한 대략적인 동시 in-flight 데이터 양이며, 실제 요구량은 측정 단위와 프로토콜 overhead에 달려 있습니다.
 
 ## Universal Scalability Law (USL)
 
@@ -140,7 +136,7 @@ Used: 50,200 cycle (30%)
 Free: 117,800 cycle (70%)
 ```
 
-각 컴포넌트에 *cycle budget*을 할당하고, 초과 시 *해당 컴포넌트를 최적화*합니다.
+수치는 allocation을 보여주는 가정 예시이며 실제 측정이 아닙니다. 실제 target에서는 component별 budget과 분석 근거를 요구사항에 맞춰 정합니다.
 
 ## Speedup Saturation
 
@@ -153,13 +149,13 @@ Multi-core 임베디드 (Cortex-A SMP)에서는 다음과 같습니다.
 8 core: 35 ms (2.86× — 거의 한계)
 ```
 
-Cache와 bus contention 증가로 diminishing returns가 나타납니다.
+이 수열은 scaling 저하를 보여주는 가상 예시입니다. 실제 scaling 원인은 profiling과 자원 계측으로 확인합니다.
 
 ## 인터프리터 모델
 
-Performance = *Best of (memory, compute, control)*.
+지정한 Roofline 모델에서 달성 가능한 성능은 compute roof와 bandwidth × operational intensity roof 중 더 낮은 값으로 제한됩니다.
 
-각 path가 *독립적 maximum*을 가집니다. 한 path가 saturate 되어도 다른 path는 *idle*일 수 있습니다.
+모델을 확장해 control 및 다른 자원을 고려할 수 있지만, path가 독립적이거나 한 자원의 포화가 다른 자원을 idle 상태로 만든다고 일반화하지 않습니다.
 
 OoO CPU의 *ILP, MLP, TLP*가 이걸 활용합니다.
 
@@ -171,7 +167,7 @@ Amdahl 법칙에서 작은 serial 부분이 한계를 결정합니다. *측정 �
 
 > ⚠️ Memory-bound 코드를 CPU 최적화
 
-Cache miss가 90% 시간을 차지하면 SIMD나 intrinsics는 의미가 없습니다. *DRAM access를 줄여야* 합니다.
+데이터 이동이 병목이라는 증거가 있으면 먼저 재사용·배치를 조사하고, SIMD가 측정된 상한을 바꾸는지도 따로 평가합니다. *DRAM access를 줄여야* 합니다.
 
 > ⚠️ Roofline 무시
 
@@ -197,3 +193,7 @@ USL의 coherency cost 때문에 *2-4 core에서 plateau*가 흔합니다.
 - [1-06: 벤치마킹 기초](/blog/embedded/performance-engineering/part1-06-benchmark)
 - [1-08: 프로파일링 개요](/blog/embedded/performance-engineering/part1-08-profiling-overview)
 - [2-08: Memory Bandwidth](/blog/embedded/performance-engineering/part2-08-memory-bandwidth)
+
+## 참고 자료
+
+- [Williams, Waterman, and Patterson, Roofline model](https://escholarship.org/uc/item/5tz795vq)

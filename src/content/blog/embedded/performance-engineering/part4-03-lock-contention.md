@@ -28,60 +28,28 @@ Contention을 줄이려면 먼저 측정이 필요합니다. "느린 것 같다"
 | **Hold time** | lock을 보유한 시간 |
 | **Wait time** | lock을 얻기까지 대기한 시간 |
 | **Acquisition rate** | 초당 lock 횟수 |
-| **Contention ratio** | wait / (wait + hold) |
+| **호출의 대기 비율** | wait / (wait + hold) |
 
-```text
-이상적: contention < 5%
-주의:   5-20%
-심각:   > 20% — 재설계가 필요합니다
-```
+이 비율은 같은 호출에서 정의한 wait·hold의 비교 예이며 모든 도구의 표준 contention ratio가 아닙니다. 여러 thread의 wait 합은 wall time보다 클 수 있습니다. 보편적인5/20% 임계값을 두지 않고 호출 수·누적 wait·tail·workload 전체 지연을 함께 봅니다.
 
-특히 contention ratio가 20%를 넘으면, lock 자체보다 큰 구조적 문제가 있을 가능성이 높습니다. 한 코어가 lock을 푼 순간 모든 다른 코어가 깨어나는 thundering herd 같은 패턴도 같은 증상을 만들어 냅니다.
+## perf lock — kernel lock과 userspace mutex 구분
 
-## perf lock — Linux 측정
+[Linux6.12 perf-lock 문서](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-lock.txt)의 `record/report/contention`은 kernel lock event·지원 BPF 수집 경로를 사용합니다. 임의 pthread mutex의 모든 acquire/hold를 자동 계측하는 도구가 아닙니다. Config·tracepoint·BPF·권한과 event 유무를 먼저 확인합니다.
 
 ```bash
-sudo perf lock record ./prog
-sudo perf lock report
-
-# 출력 예
-# Name                  acquired   wait_total(s)    wait_avg(s)
-# spinlock_a               12345          0.234       0.000019
-# mutex_b                    400          1.520       0.003800
+perf lock record -- ./prog
+perf lock report -k wait_total
 ```
 
-`wait_total`이 큰 lock이 bottleneck입니다. 위 예시에서는 `mutex_b`가 400번만 acquire되지만 누적 대기 시간이 1.52초로 전체의 대부분을 차지하므로, 이 lock을 먼저 분석해야 합니다.
+미실행 조사 예입니다. `acquired`, `contended`, `avg_wait`, `wait_total` 등의 지원 field와 단위를 선택한 release의 help/report로 확인합니다. 평균이 어떤 표본을 분모로 쓰는지 모른 채 acquired × average로 누적 시간을 재구성하지 않습니다. Userspace lock은 동일한 mutex의 요청·성공·release를 직접 instrument하거나 검증된 uprobe/라이브러리 도구를 사용하고, futex slow path만의 관측과 구분합니다.
 
-`acquired × wait_avg`로 정렬하면 시스템 전체의 누적 손실을 한눈에 볼 수 있습니다.
+## ftrace — 이름·상태 전이·누락을 확인
 
-## ftrace lock_events
-
-`perf lock`이 통계라면 `ftrace`는 시계열입니다.
-
-```bash
-echo lock_acquire > /sys/kernel/debug/tracing/set_event
-echo lock_release >> /sys/kernel/debug/tracing/set_event
-cat /sys/kernel/debug/tracing/trace_pipe
-```
-
-각 lock event마다 timestamp가 찍히므로 특정 시점에 어떤 thread가 어느 lock을 잡고 있었는지 재구성할 수 있습니다. Lock convoy나 priority inversion처럼 패턴이 중요한 문제에 효과적입니다.
+Tracefs의 `available_events`와 해당 `events/.../format`을 읽습니다. Kernel6.12의 lock acquire/release와 contention begin/end는 서로 다른 관측점이며, 단순 acquire 요청 시각을 실제 소유 시작 시각으로 보지 않습니다. 한 task가 요청·성공·해제를 맞출 수 있는지, reset·lost event·recursive path를 어떻게 처리하는지 확인해야 합니다. 이 환경에서는 실제 perf/ftrace session을 실행하지 않았습니다.
 
 ## FreeRTOS — Lock 통계
 
-`configUSE_TRACE_FACILITY=1` 옵션을 켜고 Tracealyzer나 SystemView를 연결하면 per-task, per-semaphore 통계를 받을 수 있습니다.
-
-```text
-Per-task:
-  - blocked on which semaphore
-  - total blocked time
-  - max wait time
-
-Per-semaphore:
-  - total give count
-  - max queue waiters
-```
-
-RTOS에서는 max wait time이 평균보다 중요합니다. Real-time deadline은 worst case로 결정되기 때문입니다.
+Tracealyzer·SystemView 등의 integration은 kernel·recorder·trace hook·transport version에 따라 구성합니다. `configUSE_TRACE_FACILITY=1` 하나가 모든 통계를 제공한다고 가정하지 않습니다. Task block·ready·running과 lock 소유 시간을 구분하고 ISR·overflow·lost event를 기록합니다. 관측한 최대 wait가 WCET 증명은 아닙니다.
 
 ## Amdahl과 Gunther — Lock의 영향
 
@@ -93,7 +61,7 @@ $$S = \frac{1}{s + \frac{1 - s}{N}}$$
 
 $$S(s=0.1, N=8) = \frac{1}{0.1 + 0.9 / 8} = 4.7, \quad S(s=0.1, N=64) = \frac{1}{0.1 + 0.9 / 64} = 8.8$$
 
-Serial fraction이 10%만 되어도 CPU 64개를 줘도 8.8배만 빨라집니다. Gunther의 Universal Scalability Law는 contention과 coherency overhead를 추가로 모델링하므로, 실측 데이터와 더 잘 맞습니다.
+Serial fraction이 10%만 되어도 CPU 64개를 줘도 8.8배만 빨라집니다. 추가 contention·coherency 비용은 별도 모델로 fit할 수 있지만 더 복잡한 식이 항상 실측에 맞는 것은 아닙니다.
 
 ## Lock Convoy
 
@@ -129,7 +97,7 @@ work_b();
 mutex_give(&lock_b);
 ```
 
-Fine-grained는 contention을 분산하지만 deadlock 위험이 올라갑니다. 두 lock을 잡는 순서가 thread마다 다르면 즉시 데드락이 발생합니다. Lock ordering 규칙을 문서화하고 정적 분석으로 검증하는 것이 안전합니다.
+Fine-grained는 contention을 분산하지만 deadlock 위험이 올라갑니다. 서로 반대 순서로 lock을 얻는 경로가 있으면 deadlock 가능한 실행이 생깁니다. 매번 즉시 발생한다는 뜻은 아닙니다. Lock ordering 규칙을 문서화하고 정적 분석으로 검증하는 것이 안전합니다.
 
 ## Striped Lock
 
@@ -146,7 +114,7 @@ void access(int key) {
 }
 ```
 
-같은 키는 같은 lock으로 직렬화되지만, 다른 키는 16배까지 동시 처리됩니다. Java의 `ConcurrentHashMap`이 이 방식을 씁니다.
+같은 키는 같은 lock으로 직렬화되지만, 다른 키도 같은 stripe에 충돌할 수 있습니다. 현재 Java 구현을 고정16stripe라고 가정하거나16배 성능을 약속하지 않습니다. 예시의 key는 음수가 아닌 값이라는 전제가 필요합니다.
 
 ## RW-Lock으로 read 분산
 
@@ -166,7 +134,7 @@ void writer(void) {
 }
 ```
 
-읽기가 압도적인 워크로드에서 reader 동시성을 활용할 수 있습니다. 단, write가 30%를 넘으면 RW-lock의 내부 state 관리 비용이 mutex보다 비싸지므로 효과가 줄어듭니다. 자세한 내용은 4-06 편에서 다룹니다.
+읽기가 압도적인 워크로드에서 reader 동시성을 활용할 수 있습니다. 전환점은 reader 비용·writer 빈도·fairness·구현에 따라 달라 보편적인 write30% 기준을 두지 않습니다. 자세한 내용은 4-06 편에서 다룹니다.
 
 ## Hold Time을 짧게
 
@@ -184,33 +152,11 @@ update_var();
 mutex_give(&mtx);
 ```
 
-가장 효과 큰 최적화는 lock granularity 조정도 striping도 아닌, hold time을 줄이는 것입니다. Critical section을 좁히는 것이 lock 자체를 바꾸는 것보다 항상 우선합니다.
+가장 효과 큰 최적화는 lock granularity 조정도 striping도 아닌, hold time을 줄이는 것입니다. 계산을 lock 밖으로 옮길 때 snapshot·재검증·다른 writer와의 일관성이 유지되는지 먼저 확인합니다.
 
 ## Latency-Sensitive 코드에서 try-lock
 
-```c
-/* ISR 또는 RT task */
-if (mutex_try_take(&mtx, 0)) {
-    update();
-    mutex_give(&mtx);
-} else {
-    log_skipped();
-}
-```
-
-Real-time task가 block되면 deadline을 놓치므로, try-lock으로 우회 경로를 만듭니다. 놓친 update는 다음 cycle에서 처리하거나 deferred queue로 넘깁니다.
-
-## 자동차 — Lock Profile 예
-
-```text
-Brake ECU loop 1 ms:
-  - measurement: 200 µs
-  - control:     300 µs
-  - actuator:    200 µs
-  - logging:     300 µs   ← lock 잡으면 risk
-```
-
-ASIL-D 시스템에서는 critical section의 worst case가 보장되어야 합니다. Logging처럼 비결정적 길이의 작업은 lock-free queue로 deferred 처리해 control loop를 막지 않도록 설계합니다.
+Try-lock 실패를 처리할 수 있는 task 경로에서만 우회 정책을 검토합니다. 일반 mutex를 ISR에서 호출해도 된다는 뜻은 아닙니다. ISR/task 간에는 해당 OS의 ISR-safe API·critical-section 규칙·우선순위 조건을 따릅니다. Deferred queue도 용량·overflow·deadline 실패 정책을 검증해야 하며 lock-free라는 이름만으로 안전·WCET를 보장하지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -236,7 +182,7 @@ int v = cfg.value;
 mutex_give(&cfg_lock);
 ```
 
-32-bit aligned 정수 read는 atomic합니다. `atomic_load`나 RCU로 대체하면 contention을 0으로 줄일 수 있습니다.
+Hardware의 aligned load 가능성과 C/C++ data-race 규칙은 다릅니다. Concurrent writer가 있으면 적절한 atomic 또는 동기화가 필요하며, 여러 field의 일관성·object lifetime은 추가 계약입니다.
 
 > ⚠️ ISR과 task에 다른 lock
 
@@ -247,26 +193,16 @@ Task: mutex_take(&mtx);   /* 다른 lock — 보호 안 됨 */
 
 ISR과 task 사이는 event group이나 queue로 동기화해야 하며, 같은 mutex를 공유하면 ISR에서 block될 수 없으므로 의미가 없습니다.
 
-## 측정 — 실측 결과
+## 측정 계획과 한계
 
-Cortex-A72 4-core에서 같은 mutex를 100 thread가 경쟁할 때 측정한 결과입니다.
-
-```text
-Hold time   Wait avg    Wait p99    Contention ratio
-  100 ns     50 ns       200 ns       33%
-    1 µs    700 ns         5 µs       41%
-   10 µs     30 µs       150 µs       75%
-  100 µs    400 µs       2 ms         80%
-```
-
-Hold time이 10 µs를 넘기 시작하면 contention ratio가 70%를 넘어 throughput이 거의 1-core 수준이 됩니다. 측정 데이터로 hold time 1 µs를 목표선으로 잡는 근거가 됩니다.
+기존 A72·100thread wait/p99 표는 실제 명령·환경·raw 결과가 없어 제거했습니다. 이 장에서는 target lock benchmark를 실행하지 않았습니다. 같은 lock identity에 대한 요청·성공·release 시각, sample 누락, CPU migration·preemption, workload 결과를 함께 남겨야 합니다. 누적 wait가 큰 lock을 찾은 뒤 hold 자체가 긴지 owner가 deschedule됐는지 다른 원인을 비교합니다.
 
 ## 정리
 
 - Lock contention의 핵심 지표는 hold time, wait time, contention ratio입니다.
-- Linux에서는 `perf lock`과 ftrace, RTOS에서는 Tracealyzer로 측정합니다.
+- Kernel lock·userspace mutex·RTOS event의 계측 경계를 구분합니다.
 - Amdahl 식으로 serial fraction 10%만 되어도 64-core scaling이 9배 한계입니다.
-- Lock convoy는 fair queueing의 부작용이며 unfair 정책이 throughput에는 유리합니다.
+- Fairness 변경은 starvation·tail latency·locality의 영향을 함께 평가합니다.
 - Granularity 조정, striping, RW-lock, lock-free로 contention을 분산할 수 있습니다.
 - 가장 효과 큰 최적화는 hold time 자체를 줄이는 것입니다.
 

@@ -16,16 +16,14 @@ topics: ["embedded"]
 
 ## Cortex-M Interrupt Latency
 
-| CPU | Cycle | @ 168 MHz |
+| CPU | Cycle | 조건 |
 |---|---|---|
-| Cortex-M0 | 16 | 95 ns |
-| Cortex-M0+ | 15 | 89 ns |
-| Cortex-M3 | 12 | 71 ns |
-| Cortex-M4 | 12 | 71 ns |
-| Cortex-M7 | 12 (lower with cache) | 71 ns |
-| Cortex-M33 | 11 | 65 ns |
+| Cortex-M0 | 16 | zero-wait-state memory |
+| Cortex-M0+ | 15 | zero-wait-state memory |
+| Cortex-M3 | 12 | zero-wait-state memory |
+| Cortex-M4 | 12 | zero-wait-state memory, FPU lazy stacking 사용 |
 
-내부적으로는 *8개 register의 hardware push*와 *vector fetch*, *pipeline refill*로 구성됩니다.
+위 값은 [Arm이 제시한 Cortex-M0/M0+/M3/M4의 기준 latency](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/beginner-guide-on-interrupt-latency-and-interrupt-latency-of-the-arm-cortex-m-processors)이며, 메모리 대기 상태·SoC 연결 지연·현재 실행 중인 예외의 영향을 제외한 조건입니다. Cortex-M7·M33의 수치는 이 표에 일반값으로 넣지 않습니다. 내부적으로는 register stacking과 vector fetch 등이 포함됩니다.
 
 ![Cortex-M interrupt latency 구성 — instruction 완료, register push, vector fetch, pipeline refill](/images/blog/perf-eng/diagrams/part3-05-irq-latency.svg)
 
@@ -33,7 +31,7 @@ topics: ["embedded"]
 
 ![Tail-chaining 비교 — 옛 ARM7은 pop/push를 반복하지만 Cortex-M은 pop을 생략하고 곧바로 ISR B에 진입한다](/images/blog/perf-eng/diagrams/part3-05-tail-chaining.svg)
 
-연속 IRQ 상황에서 *50% 효율*을 얻습니다.
+연속 IRQ에서 기존 문맥 복원·저장 일부를 생략합니다. 실제 절약 cycle 수는 프로세서 조건에 따르며, 고정된 효율 비율로 일반화하지 않습니다.
 
 ## Late Arrival
 
@@ -43,7 +41,7 @@ Higher priority IRQ가 *최소 손실로 선점*합니다. Cortex-M3 이상의 �
 
 ## Lazy Stacking (M4·M7 with FP)
 
-FPU를 사용할 때는 *16개 floating register*를 추가로 push해야 해서 latency가 *32 cycle 더 늘어납니다*.
+FPU context를 저장하면 추가 상태 저장 비용이 발생합니다. 지연 시간은 FPU 설정, 메모리 대기 상태와 lazy stacking 여부에 따라 달라지므로 고정 cycle 증가량으로 두지 않습니다.
 
 ```text
 ISR 진입 시 FPU context는 *push하지 않음* (lazy)
@@ -229,8 +227,8 @@ FP를 사용하지 않을 때는 lazy stacking을 활용합니다. FPU register�
 
 ## 정리
 
-- Cortex-M의 IRQ latency는 M3와 M4 기준 **12 cycle**입니다.
-- **Tail-chaining**은 6 cycle, **late arrival**은 seamless하게 선점합니다.
+- zero-wait-state 조건에서 Cortex-M3/M4 IRQ latency는 **12 cycle**입니다.
+- **Tail-chaining**은 불필요한 unstack/stack을 줄입니다. 실제 시간은 프로세서와 메모리 조건에 좌우됩니다.
 - Lazy FP stacking은 M4/M7의 latency를 줄여 줍니다.
 - ISR top half는 *짧게* 유지하고 bottom half는 task로 미룹니다.
 - `BASEPRI`로 선택적 disable을 걸면 high IRQ는 통과시킬 수 있습니다.

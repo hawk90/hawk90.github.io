@@ -27,10 +27,10 @@ eBPF 프로그램은 64-bit register 10개의 가상 머신에서 실행됩니�
 
 - 모든 분기가 유한 시간 안에 종료되는가
 - 모든 메모리 접근이 유효한 범위 안인가
-- Loop은 bounded인가 (5.3+ bounded loop 허용)
+- Loop은 검증 가능한가 (허용 기능은 커널 버전과 verifier 규칙에 따름)
 - 사용 가능한 helper function만 호출하는가
 
-검증을 통과한 BPF는 JIT 컴파일되어 native 속도로 실행됩니다. 따라서 잘못 짠 BPF는 시스템을 죽이지 않고 로드 자체가 실패합니다.
+검증된 BPF는 설정과 아키텍처에 따라 interpreter 또는 JIT 경로로 실행됩니다. verifier는 허용된 메모리 접근과 제어 흐름을 검사하지만, 프로그램 비용이 항상 0이거나 모든 운영상 위험이 사라지는 뜻은 아닙니다.
 
 ```bash
 uname -r                              # 4.9+ 권장, 5.x 이상 활용도 ↑
@@ -81,12 +81,12 @@ bpftrace -e '
 
 | 종류 | 위치 | 안정성 | 비용 |
 |---|---|---|---|
-| Tracepoint | 커널 정적 probe | 안정 | 낮음 |
+| Tracepoint | 커널 정적 probe | 커널 버전·이벤트별 확인 | 이벤트·수집 방식에 따름 |
 | Kprobe | 커널 임의 함수 | 불안정 | 중간 |
 | Uprobe | 사용자 함수 | 사용자 ABI 의존 | 중간-높음 |
 | USDT | 사용자 정적 probe | 안정 | 낮음 |
 
-Tracepoint는 커널이 보장하는 API이므로 버전이 바뀌어도 잘 동작합니다. Kprobe는 임의 함수에 hook을 걸 수 있지만 함수 이름이 바뀌면 깨집니다.
+Tracepoint 이름과 필드는 대상 커널의 tracefs `events/.../format`에서 확인합니다. 커널 내부 이벤트는 안정된 userspace ABI로 보장되지 않으므로, 커널 변경 때 재검증합니다. Kprobe는 내부 함수 이름과 ABI 변화에도 취약합니다.
 
 ```bash
 # kprobe — 임의 커널 함수
@@ -105,6 +105,8 @@ USDT는 application이 `DTRACE_PROBE` 매크로로 미리 정의해 둔 probe입
 
 ## BCC — Python으로 복잡한 분석
 
+BCC `profile` 옵션은 [공식 source](https://github.com/iovisor/bcc/blob/master/tools/profile.py)의 CLI 정의를 기준으로 확인합니다. 이 예시에서 `-a`는 annotation, `-f`는 folded output입니다.
+
 BCC(BPF Compiler Collection)는 C로 BPF를 작성하고 Python으로 결과를 처리하는 framework입니다. 즉시 쓰는 도구가 풍부합니다.
 
 ```bash
@@ -115,7 +117,7 @@ execsnoop-bpfcc                       # exec 호출 실시간
 biolatency-bpfcc                      # block I/O latency histogram
 runqlat-bpfcc                         # run queue latency
 tcpconnect-bpfcc                      # TCP connect 호출
-profile-bpfcc -F 99 -ag 30            # 99 Hz CPU profile
+profile-bpfcc -F 99 -f 30             # 99 Hz, 30초 folded output
 ```
 
 `profile-bpfcc`는 stack collapsed 형식으로 출력하므로 flamegraph로 바로 그릴 수 있습니다.
@@ -129,12 +131,14 @@ flamegraph.pl < out.stacks > flame.svg
 
 | 도구 | Overhead | 수집 데이터 |
 |------|----------|-------------|
-| `perf record -F 4000` | 3-5% | sample stack |
-| ftrace function | 10-30% | 전 함수 진입 |
-| ftrace tracepoint | 1-5% | 선택 event |
-| bpftrace tracepoint | 0.5-2% | 집계된 결과 |
-| bpftrace kprobe | 1-3% | 집계된 결과 |
-| BCC profile | 1-2% | sample stack |
+| 도구 | 비용을 좌우하는 조건 | 수집 데이터 |
+|------|--------------------|-------------|
+| `perf record` | sample rate·call graph 방식 | sample stack |
+| ftrace function | 활성 함수 수·호출 빈도 | 함수 진입/이탈 |
+| ftrace/eBPF tracepoint | 이벤트 빈도·필터·집계 | 선택 event |
+| bpftrace kprobe | probe 빈도·프로그램 동작 | 집계 결과 |
+
+고정된 overhead 퍼센트는 플랫폼·버전·부하에 따라 달라지므로, production 적용 전 대상 시스템에서 측정합니다.
 
 eBPF의 핵심 이득은 raw event를 dump하지 않고 커널 안에서 집계하는 점입니다. 100만 event를 1000 bucket histogram으로 압축하면 사용자 공간으로 가는 데이터는 수 KB로 끝납니다.
 
@@ -217,10 +221,10 @@ libc 업그레이드로 symbol이 사라지거나 inline되면 즉시 깨집니�
 
 ## 정리
 
-- eBPF는 검증된 BPF bytecode를 커널 hook에서 JIT 실행하는 framework입니다.
+- eBPF는 verifier 검사를 거쳐 커널 hook에 연결되며, 실행 경로는 interpreter 또는 설정된 JIT입니다.
 - bpftrace는 awk 같은 DSL로 one-liner부터 복잡한 분석까지 작성 가능합니다.
 - BCC는 Python framework이며 opensnoop, biolatency, runqlat 등 즉시 쓰는 도구를 제공합니다.
-- Tracepoint와 USDT는 안정적이며, kprobe와 uprobe는 강력하지만 ABI에 의존합니다.
+- Tracepoint·USDT는 hook 지점을 명시적으로 제공하지만, 이름·필드·가용성은 대상 시스템에서 확인합니다. kprobe·uprobe는 내부 ABI와 symbol에 의존합니다.
 - 커널 안에서 hash map으로 집계하므로 raw event dump보다 overhead가 훨씬 낮습니다.
 - BPF_LSM으로 보안 hook까지 확장 가능합니다.
 

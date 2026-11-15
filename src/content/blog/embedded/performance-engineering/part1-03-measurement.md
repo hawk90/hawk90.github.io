@@ -32,7 +32,7 @@ long ns = (t2.tv_sec - t1.tv_sec) * 1e9 + (t2.tv_nsec - t1.tv_nsec);
 
 ### CPU Cycle (CPU Time)
 
-*실제 코드가 실행된 cycle*입니다. IRQ나 idle은 제외됩니다.
+DWT cycle counter는 활성화된 구현에서 코어 cycle을 셉니다. 계측 구간에 인터럽트나 context switch가 들어오면 그 구간의 경과 cycle에도 반영될 수 있으며, idle·정지 동작의 처리 방식은 타깃 문서에서 확인해야 합니다.
 
 ```c
 // Cortex-M
@@ -41,7 +41,7 @@ work();
 uint32_t cycles = DWT->CYCCNT;
 ```
 
-*pure compute time*에 가깝습니다. CYCCNT는 cycle을 그대로 세기 때문에 context switch의 영향을 받지 않습니다.
+CYCCNT 차이는 실행 구간의 cycle 수이지, 호출한 함수만의 순수 실행 시간이라고 단정할 수 없습니다.
 
 ### Instruction Count
 
@@ -57,7 +57,7 @@ IPC는 inst / cycle로 계산합니다. *architecture 효율*을 분석할 때 �
 
 ## Bare-Metal — DWT_CYCCNT
 
-Cortex-M3+에 내장된 32-bit cycle counter입니다.
+DWT cycle counter는 여러 Cortex-M 구현에서 제공되지만 모든 Cortex-M 구성에 보장되는 것은 아닙니다. 해당 코어와 SoC의 TRM 및 설정을 확인합니다.
 
 ```c
 // Initialization (once)
@@ -72,11 +72,11 @@ uint32_t cycles = DWT->CYCCNT - start;
 uint32_t us = cycles / (SystemCoreClock / 1000000);
 ```
 
-**1-cycle 정밀**이 장점입니다. 32-bit @ 168 MHz에서는 약 25초마다 wraparound가 일어나므로 *짧은 측정*에만 적합합니다.
+카운터 단위는 코어 cycle입니다. 읽기 지연과 타이밍 불확실성은 코어·버스·컴파일러에 따라 확인해야 합니다. 32-bit @ 168 MHz에서는 약 25초마다 wraparound가 일어나므로 *짧은 측정*에만 적합합니다.
 
-### Cortex-M0 — DWT 없음
+### Cortex-M0 계열의 대체 타이머
 
-ARMv6-M에는 DWT가 없습니다. 그래서 **SysTick**을 씁니다.
+Armv6-M 코어에는 DWT가 없으므로 대상 SoC의 타이머나 SysTick 같은 대안을 확인합니다. SysTick 자체도 SoC에서 제공·설정되는지 확인합니다.
 
 ```c
 uint32_t systick_get_us(void) {
@@ -118,7 +118,7 @@ static inline uint64_t rdtsc(void) {
 }
 ```
 
-⚠️ **out-of-order execution** 때문에 진짜 측정에는 `rdtscp`와 `cpuid` barrier가 필요합니다.
+⚠️ **out-of-order execution** 때문에 측정 구간의 직렬화가 필요할 수 있습니다. 적절한 fence와 counter semantics는 CPU vendor manual 및 대상 microarchitecture에서 확인합니다.
 
 ## PMU — Hardware Performance Counters
 
@@ -138,11 +138,11 @@ asm volatile ("mrs %0, pmccntr_el0" : "=r"(cnt));   // CPU cycles
 - `L2D_CACHE_REFILL` (0x17)
 - `BR_MIS_PRED` (0x10)
 
-각 PMU는 *제한된 counter 수*(보통 4-6개)만 가집니다. Linux의 `perf`는 다중 event를 측정할 때 *time-multiplex*로 처리합니다.
+가용 programmable counter 수와 event 지원은 PMU 구현에 따라 다릅니다. `perf`는 counter가 부족할 때 event를 multiplex할 수 있으며, 결과의 running/enabled time을 확인해야 합니다.
 
 ## GPIO + 로직 분석기 — 외부 측정
 
-가장 *비침습적*인 방법입니다. 코드에 GPIO toggle만 추가합니다.
+외부 계측은 CPU counter에 의존하지 않지만 GPIO 쓰기와 보드 신호 경로의 영향은 남습니다. 코드에 GPIO 전환을 추가합니다.
 
 ```c
 void critical_function(void) {
@@ -152,7 +152,7 @@ void critical_function(void) {
 }
 ```
 
-**Saleae나 Sigrok**으로 펄스 폭을 측정합니다. CPU 자체의 측정 도구가 가지는 *overhead가 0*입니다.
+로직 분석기나 오실로스코프로 펄스 폭을 측정합니다. 해상도와 입력 경로는 장비 설정 및 신호 경로에 따릅니다.
 
 ### Latency between events
 
@@ -172,11 +172,11 @@ TASK_START: GPIO_TOGGLE(TASK_PIN);
 
 | 측정 | Overhead |
 | --- | --- |
-| DWT_CYCCNT read | 1 cycle |
-| GPIO toggle | 2-4 cycle |
-| `clock_gettime` (Linux user) | ~30 ns |
-| `printf` | 수 µs-ms |
-| Trace ring buffer | 수십 cycle |
+| DWT_CYCCNT read | 코어·버스·컴파일러별 측정 필요 |
+| GPIO toggle | SoC·핀·버스별 측정 필요 |
+| `clock_gettime` (Linux user) | vDSO·커널·플랫폼별 측정 필요 |
+| `printf` | 포맷·출력 경로에 따라 다름 |
+| Trace ring buffer | 구현·동기화·메모리 경로별 측정 필요 |
 
 **Lightweight tracing**의 예는 다음과 같습니다.
 
@@ -197,7 +197,7 @@ static volatile int trace_idx;
 } while (0)
 ```
 
-각 trace가 *5 cycle* 정도입니다. 1000개를 모아도 5 KB라 충분합니다.
+Trace 비용과 저장 용량은 구현, 정렬, 동기화, 메모리 경로와 버퍼 크기에 따라 측정합니다. 단일 writer인지 확인하고 덮어쓰기 정책도 정합니다.
 
 ## SystemView / Segger RTT
 
@@ -214,12 +214,12 @@ PC 측에서는 *Timeline viewer*로 ms 단위로 시각화합니다.
 
 ## Hardware Trace (ETM·ITM)
 
-Cortex-M3+의 **Embedded Trace Macrocell (ETM)**은 *모든 명령을 trace*합니다. J-Trace 같은 비싼 도구가 필요합니다.
+ETM은 지원되는 구현과 외부 trace 경로에서 명령 추적을 제공할 수 있습니다. trace 포트·압축·필터 설정과 디버그 도구 지원은 SoC별로 확인해야 합니다.
 
 **ITM (Instrumentation Trace Macrocell)**은 *32 channel debug print*를 제공하며, RTT보다 가볍습니다.
 
 ```c
-ITM->PORT[0].u8 = 'A';   // 1 cycle, non-intrusive
+ITM->PORT[0].u8 = 'A';   // write latency and trace impact are implementation-specific
 ```
 
 ## Profile-Guided Optimization (PGO)
@@ -243,13 +243,13 @@ gcc -fprofile-use -O3 -o app app.c
 
 DMA와 context switch가 포함되면서 코드 자체의 시간이 과대 추정됩니다.
 
-> ⚠️ DWT_CYCCNT init 누락
+> ⚠️ DWT_CYCCNT 설정 확인
 
-`DEMCR.TRCENA`를 활성화하지 않으면 CYCCNT는 항상 0입니다.
+TRCENA와 CYCCNTENA 설정만으로 동작이 보장되지는 않습니다. 타깃 구현, debug/auth 설정, clock gating을 확인합니다.
 
 > ⚠️ Out-of-order CPU에서 단순 RDTSC
 
-명령이 reorder되면서 *측정 영역 밖*에서 실행됩니다. `rdtscp`와 memory barrier로 해결합니다.
+명령이 reorder되면서 *측정 영역 밖*에서 실행됩니다. target manual에 맞는 serialization과 compiler barrier를 사용합니다.
 
 > ⚠️ printf로 timing 측정
 
@@ -258,7 +258,7 @@ printf 자체가 ms 단위입니다. 그래서 *Trace buffer*나 GPIO를 씁니�
 ## 정리
 
 - Wall-clock, CPU cycle, instruction은 *각각 다른 답*을 제공합니다.
-- **DWT_CYCCNT**(Cortex-M3+)가 µs 측정의 표준입니다.
+- DWT_CYCCNT는 지원되는 Cortex-M에서 쓸 수 있는 cycle source 중 하나입니다. 모든 M-class 타깃에서 사용할 수 있는 표준이라고 단정하지 않습니다.
 - Linux에서는 `CLOCK_MONOTONIC_RAW`와 PMU를 씁니다.
 - **GPIO + 로직 분석기**가 외부 정밀 측정 수단입니다.
 - Trace buffer로 *lightweight production tracing*을 구현합니다.
@@ -270,3 +270,8 @@ printf 자체가 ms 단위입니다. 그래서 *Trace buffer*나 GPIO를 씁니�
 - [1-04: 통계적 분석](/blog/embedded/performance-engineering/part1-04-statistics)
 - [2-10: PMU와 하드웨어 카운터](/blog/embedded/performance-engineering/part2-10-pmu)
 - [5-07: Bare-metal 프로파일링](/blog/embedded/performance-engineering/part5-07-baremetal-profiling)
+
+## 참고 자료
+
+- [Arm Cortex-M7 Processor Datasheet](https://developer.arm.com/documentation/100166/latest/)
+- [Arm PMU profiling overview](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/profile-firmware-with-performance-monitor-unit-in-armv8-a-cpu)

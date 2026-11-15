@@ -18,13 +18,12 @@ topics: ["embedded"]
 
 | 항목 | 사양 |
 |---|---|
-| Counter 수 | Cortex-A53 = 6, A72 = 6, M-class = 4~ |
-| Counter 폭 | 32-bit (overflow interrupt) |
-| Cycle counter | 별도 64-bit (PMCCNTR_EL0) |
+| Event counter 수·폭 | PMU version 및 core implementation이 제공하는 값; PMCR/PMCEID와 TRM 확인 |
+| Cycle counter | 별도 cycle counter; 폭·overflow handling은 PMU version/구현 설정에 따름 |
 | Event 선택 | 각 counter에 event ID 할당 |
 
 ```c
-/* User mode access 활성화 (kernel 권한 필요) */
+/* EL1/kernel code only: configure PMU access for EL0 per OS policy. */
 asm volatile ("msr pmuserenr_el0, %0" :: "r"(1));
 asm volatile ("msr pmcntenset_el0, %0" :: "r"(0x80000000));   // CCNT enable
 asm volatile ("msr pmcr_el0, %0" :: "r"(1));                  // PMU enable
@@ -33,7 +32,7 @@ uint64_t cycles;
 asm volatile ("mrs %0, pmccntr_el0" : "=r"(cycles));
 ```
 
-## ARMv8 표준 Event IDs
+## ARM PMUv3 Event IDs
 
 | ID | 이름 | 의미 |
 |---|---|---|
@@ -46,11 +45,11 @@ asm volatile ("mrs %0, pmccntr_el0" : "=r"(cycles));
 | 0x11 | CPU_CYCLES | cycle (CCNT와 동일) |
 | 0x13 | MEM_ACCESS | memory access |
 | 0x17 | L2D_CACHE_REFILL | L2 miss |
-| 0x18 | L2D_CACHE_ACCESS | L2 access |
+| 0x18 | L2D_CACHE | L2 data-cache access event |
 | 0x23 | STALL_FRONTEND | front-end stall |
 | 0x24 | STALL_BACKEND | back-end stall |
 
-각 CPU별 Technical Reference Manual을 확인해야 합니다. CPU마다 implementation-specific event가 추가로 정의되어 있습니다.
+각 CPU별 Technical Reference Manual과 PMU version을 확인해야 합니다. event count/width/권한/지원 ID는 implementation별이며, Linux에서는 kernel perf driver의 매핑도 확인합니다.
 
 ## Linux perf — 가장 흔한 도구
 
@@ -63,7 +62,7 @@ perf stat -e cycles,instructions,branches,branch-misses ./prog
 
 # Raw event (PMU 직접)
 perf stat -e r03,r04 ./prog   # L1D_CACHE_REFILL, L1D_CACHE
-perf stat -e r23,r24 ./prog   # STALL_FRONTEND, STALL_BACKEND
+perf list   # 대상 PMU driver가 제공하는 event name 확인
 
 # Profiling
 perf record -e cycles -g ./prog
@@ -78,19 +77,15 @@ $$\text{IPC} = \frac{\text{INST\_RETIRED}}{\text{CPU\_CYCLES}} \quad (\text{높�
 
 $$\text{MPKI} = \frac{\text{L1D\_CACHE\_REFILL} \times 1000}{\text{INST\_RETIRED}} \quad (\text{낮을수록 좋음})$$
 
-```text
-MPKI < 10  — cache 효율 좋음
-MPKI 10-30 — 보통
-MPKI > 30  — cache 문제
-```
+MPKI는 workload·cache level·PMU event definition을 함께 보고 해석합니다. 보편적인 임계값은 두지 않습니다.
 
 $$\text{Branch mispredict rate} = \frac{\text{BR\_MIS\_PRED}}{\text{BRANCHES}}$$
 
-5% 미만이면 양호, 10% 초과면 문제입니다.
+mispredict ratio는 workload와 target에서 관찰하고, 보편적인 합격 임계값으로 해석하지 않습니다.
 
 $$\text{Frontend bound} = \frac{\text{STALL\_FRONTEND}}{\text{CYCLES}}, \quad \text{Backend bound} = \frac{\text{STALL\_BACKEND}}{\text{CYCLES}}$$
 
-둘 합이 50% 이상이면 stall 지배적입니다.
+counter의 정의·overlap을 확인하지 않은 채 두 비율을 더해 bottleneck으로 판정하지 않습니다.
 
 ## Top-Down Microarchitecture Analysis
 
@@ -102,7 +97,7 @@ Bottleneck을 식별한 뒤 적절한 최적화를 적용합니다. cache miss�
 
 ## Cortex-M PMU
 
-Cortex-M3/M4는 작은 PMU를 가집니다.
+Cortex-M3/M4 코어는 PMUv3 event counters가 아니라 구현에 포함된 DWT cycle counter 등 CoreDebug/DWT 기능으로 측정할 수 있습니다. DWT 기능·권한·가용성은 core/SoC 설정을 확인합니다.
 
 ```c
 DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
@@ -111,7 +106,7 @@ uint32_t cycles_start = DWT->CYCCNT;
 uint32_t cycles_end = DWT->CYCCNT;
 ```
 
-Cortex-M7 이상은 LSU·FOLD·CPI 등 추가 counter를 제공합니다.
+일부 Cortex-M 구현의 DWT는 LSUCNT·CPICNT·EXCCNT·FOLDCNT·SLEEPCNT를 제공합니다. 실제 존재 여부·계산 의미는 core revision TRM을 확인합니다.
 
 ```c
 DWT->LSUCNT  // load/store cycle
@@ -122,33 +117,13 @@ DWT->SLEEPCNT // sleep cycle
 ```
 
 ```c
-float cpi = (float)(DWT->CPICNT + DWT->CYCCNT) / DWT->CYCCNT;
+/* CPI = measured cycles / retired instructions.
+   CYCCNT and CPICNT alone do not provide retired-instruction count. */
 ```
 
 ## RISC-V HPM (Hardware Performance Monitor)
 
-```text
-mcycle      — cycle counter (64-bit)
-minstret    — instruction retired
-mhpmcounter3 — mhpmcounter31 — 28 programmable counter
-mhpmevent3  — mhpmevent31    — event ID 선택
-```
-
-Event ID는 vendor마다 다릅니다. SiFive U74 예시는 다음과 같습니다.
-
-| ID | 의미 |
-|---|---|
-| 0x100 | I-cache miss |
-| 0x101 | I-cache busy |
-| 0x800 | D-cache miss |
-| 0x801 | D-cache busy |
-| 0x100A | Branch mispredict |
-
-```c
-asm volatile ("csrw mhpmevent3, %0" :: "r"(0x800));   // D-cache miss
-uint64_t count;
-asm volatile ("csrr %0, mhpmcounter3" : "=r"(count));
-```
+RISC-V Privileged Architecture defines `mcycle` and `minstret` as 64-bit precision counters and provides `mhpmcounter3`–`mhpmcounter31` slots. Implementations may make a counter/event selector read-only zero; event meanings are platform-defined. Lower-privilege access is controlled by `mcounteren`/`scounteren`. Read the platform manual before configuring a selector.
 
 ## Sampling — Statistical Profiling
 
@@ -157,13 +132,13 @@ perf record -F 1000 -g ./prog   # 1000 Hz sampling
 perf report --stdio
 ```
 
-매 1 ms마다 PC와 call stack을 캡쳐합니다. Flamegraph로 시각화하면 다음과 같습니다.
+`-F 1000`은 요청 sampling frequency이며 실제 rate·lost sample 수·call-chain 정확도는 perf, PMU, 권한과 workload에 따라 달라집니다. Flamegraph로 시각화하면 다음과 같습니다.
 
 ```bash
 perf script | stackcollapse-perf.pl | flamegraph.pl > flame.svg
 ```
 
-overhead가 1-3% 정도로 매우 적어서 production 환경에서도 사용할 수 있습니다.
+sampling overhead는 frequency, call-chain capture, workload와 platform에 따라 달라집니다. production 수용 전 대상에서 overhead를 측정합니다.
 
 ## Streamline (ARM) / VTune (Intel)
 
@@ -196,12 +171,11 @@ KSLV-II 누리 flight computer에서도 task별 cycle budget을 측정해 안전
 
 ## Event Multiplexing
 
-PMU counter는 6개인데 측정하고 싶은 event가 12개라면 time-sharing이 필요합니다.
+사용 가능한 hardware counters보다 더 많은 event를 동시에 요청하면 Linux perf가 multiplex할 수 있습니다.
 
 ```bash
 perf stat -e r03,r04,r10,r11,r17,r23,r24 ./prog
-# 6 이하면 동시, 초과시 자동 multiplex
-# perf가 결과를 normalize (scaling factor)
+# # perf reports scaling when multiplexing is used; inspect enabled/running time
 ```
 
 다만 sampling 방식이라 정확도는 떨어집니다. 가능하면 측정 event 수를 counter 수 이하로 유지하는 것이 좋습니다.
@@ -228,7 +202,7 @@ uint32_t end = DWT->CYCCNT;
 
 > ⚠️ Counter overflow
 
-32-bit 카운터를 1 GHz에서 돌리면 약 4초만에 overflow가 납니다. 긴 측정에서는 overflow handler를 두거나 64-bit cycle counter(ARMv8 PMCCNTR)를 사용합니다.
+32-bit counter는 일정 시간 후 wraparound할 수 있지만, counter 폭과 overflow 동작은 PMU/DWT 구현에 따릅니다. 측정 구간을 확인하고 필요하면 wraparound를 처리합니다.
 
 > ⚠️ User-mode PMU 접근
 
@@ -246,8 +220,8 @@ PMU counter는 ISR도 함께 카운트합니다. ISR이 빈번하면 측정 결�
 
 ## 정리
 
-- PMU는 **CPU 내장 hardware counter**입니다. overhead가 거의 0입니다.
-- ARMv8은 6개 counter와 별도의 cycle counter를 제공합니다.
+- PMU는 **CPU 내장 hardware counter**이며, 수집·sampling overhead는 구성과 workload에서 확인합니다.
+- PMU event counter 수와 cycle counter 폭은 PMU version 및 CPU implementation에 따라 달라집니다.
 - 핵심 metric은 **IPC, MPKI, mispredict rate, STALL**입니다.
 - Linux `perf`가 사실상 표준 도구입니다.
 - Cortex-M은 **DWT counter**, Cortex-A는 PMU를 씁니다.

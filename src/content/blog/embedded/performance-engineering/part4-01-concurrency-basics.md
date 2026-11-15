@@ -25,11 +25,21 @@ topics: ["embedded"]
 여러 thread가 순서 보장 없이 공유 자원에 접근하는 상황을 race condition이라 합니다.
 
 ```c
-int counter = 0;
+#include <stdatomic.h>
 
-void task1(void) { counter++; }   // RMW: read, add 1, write
-void task2(void) { counter++; }
+atomic_int counter = 0;
+
+void task1(void) {
+    int old = atomic_load_explicit(&counter, memory_order_relaxed);
+    atomic_store_explicit(&counter, old + 1, memory_order_relaxed);
+}
+void task2(void) {
+    int old = atomic_load_explicit(&counter, memory_order_relaxed);
+    atomic_store_explicit(&counter, old + 1, memory_order_relaxed);
+}
 ```
+
+두 함수는 원자 load와 store로 데이터 race는 피하지만, read-modify-write 전체가 하나의 연산은 아니므로 두 실행이 같은 값을 읽고 최종값이 1이 될 수 있습니다. 이는 가능한 interleaving을 보여 주는 예이며, C의 일반 `int`를 여러 thread에서 동기화 없이 갱신해도 된다는 뜻은 아닙니다.
 
 가능한 결과:
 
@@ -43,7 +53,7 @@ write 1
                     write 1            ← 1 (잘못! 2여야)
 ```
 
-`counter++`는 실제로는 3개의 명령으로 나뉘기 때문에, 중간에 인터럽트가 들어올 수 있습니다.
+일반 비원자적 `counter++`는 read-modify-write를 하나의 원자 연산으로 보장하지 않으므로, ISR이나 다른 thread가 끼어들면 update를 잃을 수 있습니다.
 
 ## Atomic
 
@@ -76,7 +86,21 @@ if (y == 1)
     assert(x == 1);   // ← 항상 참? OoO·cache 때문에 *아닐 수 있음*
 ```
 
-CPU와 컴파일러가 명령을 재정렬할 수 있기 때문에, Thread 2가 y=1을 보고도 x=0을 볼 가능성이 생깁니다.
+아래처럼 relaxed atomic으로 바꾸면 data race 없이도 CPU와 컴파일러가 명령을 재정렬할 수 있기 때문에, Thread 2가 y=1을 보고도 x=0을 볼 가능성이 생깁니다.
+
+```c
+#include <stdatomic.h>
+#include <assert.h>
+_Atomic int x = 0, y = 0;
+
+/* Thread 1 */
+atomic_store_explicit(&x, 1, memory_order_relaxed);
+atomic_store_explicit(&y, 1, memory_order_relaxed);
+
+/* Thread 2 */
+if (atomic_load_explicit(&y, memory_order_relaxed) == 1)
+    assert(atomic_load_explicit(&x, memory_order_relaxed) == 1); /* 항상 참은 아님 */
+```
 
 **Memory model**은 어떤 재정렬이 허용되는지를 정의합니다.
 
@@ -159,12 +183,7 @@ Sequential consistency는 모든 thread가 같은 글로벌 순서를 보게 만
 
 ## ARM·POWER에서 SC 비용
 
-```text
-ARM: seq_cst store → DMB ISH 명령 추가 (~30 cycle)
-     release store → 더 가벼움 (~5 cycle)
-
-Linux kernel — 대부분 release/acquire 사용.
-```
+ARM·POWER에서 명령이 어떤 barrier로 구현되는지는 compiler, ISA extension, target에 따라 다릅니다. cycle 비용은 고정값으로 두지 않고 생성된 assembly와 대상 CPU에서 따로 확인합니다. Linux kernel API는 C11/C++ memory order와 다른 계약을 가지므로 해당 API 문서를 확인해야 합니다.
 
 ## DMB·DSB·ISB
 

@@ -36,19 +36,13 @@ for (i = 0; i < N; i++) c[i] = a[i] + 3.0 * b[i];   // Triad
 
 **실측 예 — Raspberry Pi 4 (LPDDR4-3200, 32-bit bus):**
 
-- Copy:   4.2 GB/s
-- Scale:  3.8 GB/s
-- Add:    3.5 GB/s
-- Triad:  3.4 GB/s
+- Copy·Scale·Add·Triad 결과는 보드, compiler, STREAM version, 배열 크기와 thread 수가 고정되지 않아 삭제합니다. 재현 가능한 benchmark 결과를 추가할 때는 해당 조건과 원자료를 함께 기록합니다.
 
-이론치는 `3200 × 4 byte / 8 = 1600 MB/s × 2 = 12.8 GB/s`인데, 실측은 그중 25-30%만 활용합니다.
+이론 최대치는 데이터율 3200 MT/s와 32-bit(4-byte) bus 폭을 가정하면 `3200 × 4 byte = 12.8 GB/s`입니다. 1600 MT/s로 표기하는 경우 DDR의 두 전송/clock을 이미 반영하므로 다시 ×2 하지 않습니다. Raspberry Pi 4의 아래 throughput 값은 특정 board·OS·STREAM build·thread 설정의 측정치가 아니므로 대표 측정 결과로 인용하지 않습니다.
 
-## 왜 이론치의 30%?
+## 이론치와 실효 대역폭의 차이
 
-- **Refresh**: DRAM은 매 64ms마다 행 refresh를 수행하며, 약 3%를 손실합니다.
-- **Row activation**: 다른 row에 접근할 때 15-30 cycle의 overhead가 붙습니다.
-- **Bus turnaround**: read와 write를 전환할 때 5-10 cycle이 소모됩니다.
-- **Refresh 우선**: refresh가 진행되는 동안 CPU는 대기합니다.
+실효 대역폭은 DRAM timing, access pattern, read/write 전환, refresh, memory controller 정책, 동시 bus master 등 여러 요인의 영향을 받습니다. 각 비용은 memory part와 controller 설정에 따라 달라지므로 데이터시트 및 측정으로 확인합니다.
 
 이 주제는 Hennessy & Patterson의 *Bandwidth Limited or Latency Limited?* 논문이 잘 정리해 두었습니다.
 
@@ -60,75 +54,54 @@ for (i = 0; i < N; i++) c[i] = a[i] + 3.0 * b[i];   // Triad
 - intensity가 ridge point보다 낮으면 memory-bound, 높으면 compute-bound입니다.
 
 ```c
-// Vector add: 1 FLOP per 2 read + 1 write = 1/24 byte → memory bound
+// float32 vector add: 1 FLOP / (2 × 4-byte read + 4-byte write) = 1/12 FLOP per byte → 보통 memory-bound
 // Matrix multiply: 2 N^3 FLOP / 3 N^2 byte = O(N) intensity → compute bound (큰 N)
 ```
 
 ## ARM CCN — Coherent Mesh Network
 
-Cortex-A57 이상 SoC는 4-cluster mesh 구조를 사용합니다.
+Cortex-A SoC interconnect의 구조와 cluster 수는 구현·제품별입니다.
 
 ![ARM CCN — Coherent Mesh Network 구조](/images/blog/perf-eng/diagrams/part2-08-ccn-mesh.svg)
 
-L3 bandwidth는 DRAM bandwidth보다 훨씬 큽니다. 그래서 L3 hit율이 핵심입니다.
+cache와 DRAM의 대역폭은 target과 access pattern에 따라 달라집니다. cache hit rate와 memory bandwidth를 함께 측정합니다.
 
 ## DRAM 측정 — perf event
 
 ```bash
-# Cortex-A53
-perf stat -e r19 ./prog   # BUS_ACCESS (bus 총 access 수)
-perf stat -e r1a ./prog   # MEMORY_ERROR
-perf stat -e r1d ./prog   # BUS_CYCLES
+# Generic Linux events are preferred when supported by the PMU driver
+perf stat -e cycles,instructions,cache-misses ./prog
 
-# 환산
-bandwidth = BUS_ACCESS × line_size / elapsed_time
+# Raw PMU events and BUS_ACCESS semantics are core/SoC-specific.
+# A generic event count is not automatically a byte count; validate the
+# vendor event definition and transaction width before converting to bytes/s.
 ```
 
 Intel 플랫폼에서는 `pcm-memory`로 측정하고, `dmidecode -t memory`로 사양을 확인할 수 있습니다.
 
 ## STM32H7 — Memory Hierarchy
 
-Cortex-M7 STM32H743의 메모리 계층은 다음과 같습니다.
-
-| 메모리 | 크기 | 속도 |
-|---|---|---|
-| ITCM | 64 KB | 0 wait state @ 480 MHz |
-| DTCM | 128 KB | 0 ws |
-| AXI SRAM | 512 KB | 1 ws |
-| AHB SRAM | 288 KB | 2 ws |
-| Flash | 2 MB | 7 ws @ 480 MHz (cache로 hide) |
-| External SDRAM (FMC) | optional | ~10x slow |
+STM32H743에서 TCM, SRAM, Flash, FMC 외부 메모리의 지연과 대역폭은 part number, clock, voltage, wait-state와 cache/ART 설정을 포함한 target 조건으로 확인합니다. 이 글에서는 board 측정 없이 수치 사양을 단정하지 않습니다.
 
 ```c
 __attribute__((section(".dtcm"))) float dtcm_buf[256];   // fastest
 ```
 
-External SDRAM은 bandwidth가 발목을 잡습니다. 큰 LCD framebuffer를 쓰면 그 자리에서 frame rate가 결정됩니다.
+External SDRAM은 CPU와 DMA/display가 공유하는 bus의 병목이 될 수 있습니다. 실제 frame rate 영향은 target에서 측정합니다.
 
 ## Cortex-A72 + LPDDR4 — 모바일
 
-Snapdragon 845는 4-channel LPDDR4-1866으로 이론 대역폭이 약 30 GB/s입니다. 실측 STREAM은 약 17 GB/s 수준입니다.
+Snapdragon 845 계열 SoC의 LPDDR 채널 수와 data rate는 실제 제품 구성에 따라 확인해야 합니다. STREAM 수치가 필요하면 특정 기기·버전·실행 조건을 명시한 1차 벤치마크 결과를 인용해야 합니다. 여기서는 확인 가능한 원출처가 없어 값을 제시하지 않습니다.
 
-```text
-4K@60fps decode: 1.5 GB/s
-Display refresh: 2 GB/s
-GPU: 5-10 GB/s
-CPU: 2-3 GB/s
-       총 ~15 GB/s → 거의 saturation
-```
+Display·decode·GPU·CPU traffic은 device 설계와 동시 workload에 따라 다르므로 출처 없는 고정 GB/s 값을 합산해 saturation을 판정하지 않습니다.
 
-게임이 thermal throttle을 일으키는 한 가지 이유가 바로 이것입니다.
+memory traffic과 thermal throttling의 인과관계는 해당 device 측정으로 확인합니다.
 
-## 자동차·항공 LV — DDR3·SDRAM·SRAM
+## 자동차·항공 LV — 메모리 구성
 
-| 시스템 | 메모리 |
-|---|---|
-| 자동차 ECU (저급) | 내장 flash + SRAM, 512 KB |
-| 자동차 ECU (Cortex-A 인포테인먼트) | LPDDR3/4, 2-8 GB |
-| 누리·항공기 FCC | rad-hard SRAM, 1-4 MB |
-| 위성 OBC | rad-hard SDRAM, 16-128 MB |
+자동차·항공·위성 시스템의 메모리 종류와 용량은 platform, safety·radiation requirements와 product generation에 따라 다릅니다. system datasheet/reference manual을 확인합니다.
 
-Rad-hard memory는 일반 메모리에 비해 약 10배 비싸고 5배 느립니다. Bandwidth 사양은 200-400 MB/s 수준입니다.
+radiation-hardened 메모리의 용량·대역폭·가격은 제품·등급·구성에 따라 달라집니다. 원출처 제품 자료 없이 보편 수치를 제시하지 않습니다.
 
 ## NUMA — Multi-Socket
 
@@ -145,7 +118,7 @@ numactl --hardware
 numactl --cpunodebind=0 --membind=0 ./prog
 ```
 
-같은 node에 CPU와 memory를 바인딩하면 bandwidth가 최적이 됩니다.
+CPU와 memory node를 함께 바인딩하면 local access를 유도할 수 있지만, 실제 throughput은 workload와 system topology를 측정해 확인합니다.
 
 임베디드에서는 NUMA가 드물지만, AMP 시스템에서 비슷한 구조를 만나게 됩니다. CPU마다 별도의 SRAM 영역을 분리해 두는 식입니다.
 
@@ -159,7 +132,7 @@ HAL_DMA_Start(&hdma, src, dst, len);   // CPU 자유
 
 특히 Cortex-M에서는 large buffer를 copy할 때 DMA를 우선 고려합니다.
 
-다만 small copy는 DMA 셋업 overhead가 오히려 더 큽니다. 경계점은 대략 256 byte 정도입니다.
+DMA setup overhead와 CPU copy 비용의 break-even은 DMA engine, memory location, cache 상태와 driver에서 달라집니다. 대상에서 길이별로 측정합니다.
 
 ## Streaming Store — Cache 우회
 
@@ -172,32 +145,28 @@ for (i = 0; i < N; i++) {
 
 큰 stream write를 할 때 cache evict pressure를 피하는 용도입니다.
 
-ARM에서는 `STNP`, x86에서는 `MOVNTPS`가 같은 역할을 합니다.
+AArch64와 x86의 non-temporal store instruction은 architecture별 hint·ordering semantics가 다르며 서로 완전히 같은 동작으로 간주하지 않습니다.
 
 ## 자주 하는 실수
 
 > ⚠️ "RAM이 크면 빠름" 오해
 
-용량과 bandwidth는 다릅니다. DDR4-2666 32GB가 DDR4-3200 16GB보다 오히려 느립니다. 결국 속도가 결정합니다.
+용량과 bandwidth는 다릅니다. 용량과 theoretical bandwidth는 서로 다른 사양입니다. module data rate 외에도 channel count, rank, timings와 controller 설정을 함께 확인합니다.
 
 > ⚠️ Single-channel 사용
 
-```text
-Dual-channel: 2x bandwidth
-Quad-channel: 4x (서버급)
-```
+이론 최대 대역폭은 channel 수·data rate·bus width에 따라 달라지며 실제 throughput은 병렬성·timing·controller 설정의 영향을 받습니다.
 
-PC를 자작할 때는 RAM을 2 slot에 같은 모듈로 꽂아야 합니다. 모르고 single channel로 사용하는 경우가 흔합니다.
+채널 구성이 지원되는지와 실제 channel interleave 동작은 CPU·mainboard·DIMM 구성 문서에서 확인합니다.
 
 > ⚠️ memcpy를 모두 같다고 가정
 
 ```c
-memcpy(d, s, 32);     // ~5 cycle — inline
-memcpy(d, s, 16384);  // SIMD + non-temporal — DMA보다 빠름 가능
-memcpy(d, s, 16M);    // ← DMA 또는 hardware copy engine 고려
+memcpy(d, s, small_size);  // libc가 size별 구현을 선택할 수 있음
+memcpy(d, s, large_size);  // CPU, DMA, copy engine을 대상에서 비교
 ```
 
-libc memcpy는 size별로 자동 최적화됩니다. 그렇다고 DMA가 항상 더 좋은 것은 아닙니다.
+libc `memcpy` 구현은 compiler/libc/target 별로 다릅니다. DMA와 CPU copy는 대상 memory와 transfer size에서 비교합니다.
 
 > ⚠️ Bandwidth 측정 시 cache warm-up 안 함
 
@@ -207,7 +176,7 @@ start = now();
 benchmark();         // 진짜 측정
 ```
 
-Cold cache 측정에는 compulsory miss가 포함되어 결과가 부정확해집니다.
+Cold-cache와 warm-cache는 서로 다른 측정 질문에 답합니다. 측정 목적에 맞게 cache state를 통제·보고합니다.
 
 ## 정리
 

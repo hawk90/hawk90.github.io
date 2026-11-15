@@ -38,13 +38,15 @@ Cache coherence protocol은 이 문제를 hardware 차원에서 자동으로 해
 
 | 동작 | 조건 | 전이 |
 |------|------|------|
-| Read miss | 다른 cache에 M | 그 cache가 flush 후 I, this → S, memory 갱신 |
+| Read miss | 다른 cache에 M | 보유 cache가 최신 데이터를 제공하고 M → S로 전이, 요청 cache도 S가 됨 |
 | Read miss | 다른 cache에 E | 양쪽 모두 → S |
 | Read miss | 다른 cache에 S | this → S |
 | Read miss | 어떤 cache에도 없음 | memory에서 읽어 → E |
 | Write to S | 다른 cache가 S | Invalidate broadcast로 그쪽은 → I, this → M |
 | Write to M | — | 이미 exclusive이므로 cache에 그냥 write |
 | Write to I (write miss) | — | RFO(Read For Ownership)로 다른 cache invalidate, this → M, memory는 갱신하지 않음 |
+
+MESI에서 다른 코어가 M 상태 line을 읽을 때 owner가 최신 데이터를 제공하고 S 상태로 내려가는 경로는 [Intel의 core-to-core 통신 설명](https://www.intel.com/content/www/us/en/developer/articles/technical/fast-core-to-core-communications.html)의 예와 같습니다. 구체적인 coherence 메시지와 상태 전이는 프로세서 구현에 따라 달라질 수 있습니다.
 
 RFO는 write 직전에 발생하는 read입니다. Write할 cache line을 먼저 자기 cache로 가져오면서 다른 cache의 동일 line을 invalidate합니다. 이 트래픽이 false sharing의 주범입니다.
 

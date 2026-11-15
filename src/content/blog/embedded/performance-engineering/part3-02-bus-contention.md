@@ -64,27 +64,20 @@ ARM CCI-400과 CMN의 표준 방식이며, Cortex-A SoC에서 흔히 사용합�
 [VPU (video)]          AXI ─→
 ```
 
-CCI-400은 5 master와 3 slave까지 지원합니다. master별 QoS regulator와 bandwidth limiter를 함께 제공합니다.
+CCI-400은 최대 2개의 ACE fully-coherent processor interface와 3개의 ACE-Lite I/O-coherent interface를 지원합니다. interface 종류와 연결은 설계 구성에 따라 달라집니다([Arm CCI-400 overview](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/extended-system-coherency---part-2---implementation-big-little-gpu-compute-and-enterprise)).
 
 ```c
-/* CCI-400 register */
-CCI->QoS[CLUSTER0] = 0xC;   // medium-high
-CCI->QoS[DPU]      = 0xF;   // highest — frame drop 방지
-CCI->QoS[GPU]      = 0x8;   // medium
+/* 의사코드: 실제 CCI-400 레지스터 이름·필드·QoS 설정은 해당 SoC TRM에서 확인 */
+set_platform_qos(cluster0, MEDIUM_HIGH);
+set_platform_qos(dpu, HIGH);
+set_platform_qos(gpu, MEDIUM);
 ```
 
 ## STM32H7 — AXI Bus Matrix
 
-Slave 6개, master 7개로 42 path가 만들어집니다. 각 path별로 *fixed priority* 또는 *round-robin*을 설정합니다.
+STM32H743은 D1 AXI와 D2/D3 AHB bus matrix 및 bus bridge로 구성됩니다. RM0433은 전체 연결을 19개 bus master와 18개 bus slave의 interconnect 표로 정리하며, 실제 접근 가능 경로는 master/slave 조합마다 다릅니다. arbitration 정책은 matrix와 domain에 따라 확인해야 합니다([ST RM0433](https://www.st.com/resource/en/reference_manual/rm0433-stm32h743-753-and-stm32h750-value-line-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)).
 
-- 기본 — round-robin
-- critical (LTDC for display) — fixed high priority
-
-```c
-/* HAL */
-__HAL_RCC_AXI_CLK_ENABLE();
-HAL_AXIBusMatrix_ConfigPriority(M5_LTDC, AXI_PRIORITY_HIGH);
-```
+RM0433은 bus matrix 별 arbitration을 설명하지만, 이 글에서는 STM32H743용 임의 QoS 설정 API를 제시하지 않습니다. 우선순위 설정이 필요한 경우 해당 MCU reference manual이 명시한 설정 항목과 영향을 확인합니다.
 
 ## Starvation 시나리오
 
@@ -101,7 +94,8 @@ B의 latency-sensitive 작업 (LCD refresh) → frame drop
 ### 해결 1: Bandwidth Limit on A
 
 ```c
-CCI->BW_REGULATOR[A] = LIMIT_50_PCT;   // A는 50%만 사용
+/* 의사코드: bus bandwidth limiter가 구현된 SoC에서만 사용 */
+set_master_bandwidth_limit(master_a, 50_percent);
 ```
 
 A의 throughput을 일부 손실하는 대신 B의 latency를 개선할 수 있습니다.
@@ -109,24 +103,24 @@ A의 throughput을 일부 손실하는 대신 B의 latency를 개선할 수 있�
 ### 해결 2: Latency-based QoS
 
 ```c
-ARQOS = LATENCY_CRITICAL;   // arbiter가 *delay 안 우선*
+/* 의사코드: 실제 ARQOS 신호 생성과 중재 정책은 SoC별로 다름 */
+set_master_qos(master, LATENCY_CRITICAL);
 ```
 
-CCI가 대기 시간까지 고려해서, 오래 기다린 transaction일수록 priority를 올려 줍니다.
+QoS 값의 중재 효과는 interconnect 구현과 설정에 따릅니다. 대기 시간에 따라 priority가 자동 상승한다고 일반화하지 않습니다.
 
 ## 측정 — AXI Monitor
 
 ARM CoreSight와 DSU PMU를 함께 활용합니다.
 
-- **BUS_ACCESS_LD / BUS_ACCESS_ST** — Load/Store bus access events
-- **BUS_ACCESS_CHKD** — 외부 bus 접근만
-- **BUS_CYCLES** — bus active cycle
+- 일부 PMU에는 load/store bus access나 bus-cycle 이벤트가 있지만, 이름과 의미는 core·SoC별로 다릅니다. 아래 이름을 보편적인 ARM PMU 이벤트로 가정하지 말고 해당 PMU 문서를 확인해야 합니다.
 
-$$U_{bus} = \frac{\text{BUS\_ACCESS}}{\text{BUS\_CYCLES}}$$
+$$\text{access/cycle 비} = \frac{\text{BUS\_ACCESS}}{\text{BUS\_CYCLES}}$$
 
 ```bash
 perf stat -e r19,r1d ./prog
-# BUS_ACCESS=10M, BUS_CYCLES=100M → 10% utilization
+# 예시 값에서 access/cycle 비는 0.1입니다. 이것은 bus utilization이 아닙니다.
+# bus-active-cycle counter가 제공될 때만 active_cycles / total_cycles로 점유율을 계산합니다.
 ```
 
 ## VTune Memory Bandwidth Analysis
@@ -179,36 +173,19 @@ DMA ─→ DDR2
 
 ## Cortex-M Bus Matrix — STM32 사례
 
-```text
-Master:    M0 CPU
-           M1 DMA1
-           M2 DMA2
-           M3 Ethernet
-           M4 USB
+RM0433의 STM32H743 연결 표는 AXI/AHB/TCM bus master와 memory/peripheral slave별 허용 경로를 구분합니다. CPU와 DMA가 동시에 접근할 수 있는지 여부는 각 경로와 대상 메모리의 조합으로 확인해야 합니다.
 
-Slave:     S0 Flash
-           S1 SRAM1
-           S2 SRAM2
-           S3 AHB1 peripherals
-           S4 APB1
-           S5 APB2
-
-→ M0 ↔ S0 (code fetch)
-   M1 ↔ S1 (DMA data)
-   M2 ↔ S2 (DMA data)
-   동시 — *4 simultaneous transfer*
-```
-
-bus matrix 덕분에 같은 buffer만 쓰지 않으면 대역폭이 4배까지 늘어납니다.
+독립 경로가 병렬 동작할 수는 있지만, 같은 buffer를 피하는 것만으로 처리량이 4배가 된다고 보장되지는 않습니다.
 
 ## QoS 동적 조정 — 자동차 사례
 
 ```c
+/* 의사코드: CCI-400 register name은 platform-specific */
 void on_brake_event(void) {
     /* 브레이크 신호 — critical */
-    CCI->QOS[BRAKE_ECU] = MAX_PRIORITY;
+    set_platform_qos(BRAKE_ECU, MAX_PRIORITY);
     /* 다른 master → 낮춤 */
-    CCI->QOS[INFOTAINMENT] = LOW;
+    set_platform_qos(INFOTAINMENT, LOW);
 }
 ```
 
@@ -218,10 +195,10 @@ void on_brake_event(void) {
 
 ```c
 /* CCI-400 — per master */
-CCI->REG_THROTTLE[GPU] = TOKEN_BUCKET(
+set_platform_bandwidth_policy(GPU, TOKEN_BUCKET(
     .max_burst = 64,         // 64 transfer
     .replenish_rate = 100    // 100 transfer/µs
-);
+));
 ```
 
 Token bucket 방식은 peak는 허용하면서 평균을 제한합니다. GPU와 DPU에 흔히 사용하며, frame drop을 막으면서도 CPU 대역폭을 함께 보장합니다.
@@ -237,9 +214,9 @@ Cluster와 Core별로 unique ID를 부여해야 합니다. Cortex-A72의 ARID는
 > ⚠️ QoS 모든 master 최대
 
 ```c
-CCI->QOS[CPU] = 15;
-CCI->QOS[GPU] = 15;
-CCI->QOS[DMA] = 15;
+set_platform_qos(cpu, MAX_PRIORITY);
+set_platform_qos(gpu, MAX_PRIORITY);
+set_platform_qos(dma, MAX_PRIORITY);
 ```
 
 모두 max로 설정하면 의미가 없어집니다. 결과적으로 모두 동등해져 round-robin으로 fallback됩니다.
@@ -262,9 +239,9 @@ CPU를 sleep(WFI) 상태로 두거나 다른 일을 시켜서 bus를 양보해�
 - Arbitration 방식은 **round-robin, priority, weighted, QoS**가 있습니다.
 - AXI는 **ARQOS** 4-bit으로 master별 우선순위를 표현합니다.
 - **Starvation** 방지를 위해 bandwidth regulator와 latency-based QoS를 활용합니다.
-- STM32H7은 7×6 bus matrix로 parallel transfer를 지원합니다.
+- STM32H743의 bus master/slave 접근 가능 조합은 RM0433 interconnect 표에서 확인합니다.
 - 자동차 시스템에서는 상황에 따라 QoS를 동적으로 조정합니다.
-- 측정은 PMU의 `BUS_ACCESS`와 `BUS_CYCLES`로 수행합니다.
+- 점유율은 해당 SoC가 제공하는 bus-active-cycle counter 정의를 확인해 계산합니다. access 수를 cycle 수로 나눈 값을 utilization으로 부르지 않습니다.
 
 다음 편에서는 **DMA Performance**를 다룹니다.
 

@@ -34,7 +34,7 @@ memory_order_acq_rel    /* 양쪽 */
 memory_order_seq_cst    /* 모든 thread가 같은 순서로 관찰 */
 ```
 
-가장 비싼 것이 `seq_cst`이며 기본값이기도 합니다. 의도적으로 약한 order를 지정해야 성능 이점을 얻습니다.
+`seq_cst`는 가장 강한 ordering을 제공하고 구현에 따라 추가 비용이 생길 수 있습니다. C11/C++에서 atomic 연산의 기본 order입니다. 더 약한 order는 그 알고리즘이 필요로 하는 보장에 맞춰 선택해야 합니다.
 
 ## 각 Order가 막는 방향
 
@@ -86,7 +86,7 @@ Dekker나 Peterson 알고리즘은 acquire-release만으로는 깨집니다. 두
 | Store relaxed | — | `STR` |
 | Store release | release | `STLR` (ARMv8) |
 | Load seq_cst | seq_cst | `LDAR` |
-| Store seq_cst | seq_cst | `STLR` + barrier |
+| Store seq_cst | seq_cst | compiler/target mapping에 따름 |
 | CAS | varies | `CASAL`, `CAS` (ARMv8.1+) |
 
 ARMv8의 `LDAR`과 `STLR`은 atomic과 half-fence를 single instruction으로 처리하므로 매우 효율적입니다. ARMv7 시절에는 atomic 명령에 DMB를 별도로 붙여야 했습니다.
@@ -118,26 +118,9 @@ __DMB_OSH();     /* Outer Shareable, across clusters */
 
 좁은 scope일수록 빠릅니다. SMP cluster 내부에만 영향을 주는 경우는 `DMB ISH`로 충분합니다. 멀티 cluster나 GPU와의 동기화에만 `OSH`가 필요합니다.
 
-## x86 vs ARM — 비용 비교
+## x86 vs ARM — 구현 비용은 target에서 확인
 
-```text
-x86 (strong ordering):
-  Load relaxed/acquire    1 cycle
-  Store relaxed/release   1 cycle
-  Store seq_cst (MFENCE)  10 cycle
-  CAS (LOCK CMPXCHG)      20 cycle
-
-ARM (weak ordering):
-  Load relaxed            1 cycle
-  LDAR (acquire)          5 cycle
-  STLR (release)          5 cycle
-  Store seq_cst           5 cycle (LDAR/STLR과 동일)
-  DMB ISH                 20-50 cycle
-```
-
-x86은 거의 모든 load와 store가 자동으로 acquire와 release 의미를 가지므로 비용이 거의 무료입니다. ARM은 명시적으로 acquire/release를 지정해야 하지만 그 비용이 명확히 보입니다.
-
-이 차이 때문에 x86에서 잘 동작하던 코드가 ARM에서 race를 일으키는 경우가 자주 발생합니다. ARM에서는 항상 의도된 memory order를 명시해야 합니다.
+고정된 cycle 표는 CPU 모델, compiler·optimization, cache state, contention을 생략하므로 일반적인 비용표로 쓸 수 없습니다. 예를 들어 x86-64의 acquire load와 release store는 보통 일반 load/store로 구현되지만, seq_cst 및 RMW 선택은 compiler와 target에 따라 달라질 수 있습니다. Arm도 acquire/release 명령이나 barrier 조합을 사용할 수 있으며, 정확한 코드는 mapping 예제처럼 assembly를 확인해야 합니다. Latency는 같은 환경에서 별도 benchmark로 측정합니다.
 
 ## Release-Consume Pattern (deprecated)
 
@@ -243,23 +226,19 @@ __DMB();
 
 Barrier는 이미 atomic으로 발행된 access의 순서만 통제합니다. Non-atomic 변수에 대한 동시 접근은 여전히 race입니다.
 
-## 측정 — 실측 비용
+## Mapping을 확인하기
 
-Cortex-A72에서 측정한 단일 atomic 연산 비용입니다.
+Memory order는 언어 수준의 계약이고, 이를 구현하는 instruction은 compiler·architecture target에 따라 달라집니다. 예를 들어 다음 코드를 최적화해 assembly로 확인하면 해당 compiler/target의 mapping을 볼 수 있습니다.
 
-```text
-                          Latency    비고
-Load relaxed (LDR)         1 cycle    cache hit
-Load acquire (LDAR)        5 cycle    pipeline drain
-Store relaxed (STR)        1 cycle    store buffer
-Store release (STLR)       5 cycle    store buffer drain
-CAS (CASAL)               15 cycle    contention 없을 때
-DMB ISH                   30 cycle    cluster 내
-DMB OSH                   80 cycle    cluster 간
-ISB                       40 cycle    pipeline flush
+```cpp
+#include <atomic>
+std::atomic<int> value{0};
+void store_relaxed(int v) { value.store(v, std::memory_order_relaxed); }
+void store_release(int v) { value.store(v, std::memory_order_release); }
+void store_seq_cst(int v) { value.store(v, std::memory_order_seq_cst); }
 ```
 
-같은 cluster 내 DMB는 30 cycle이지만 cluster를 넘는 OSH는 80 cycle로 두 배 이상입니다. Scope를 좁히는 것이 중요합니다.
+`clang++ -std=c++20 -O2 -S -target arm64-apple-macos13 example.cpp`처럼 target을 지정해 결과를 읽습니다. Apple Clang 21.0에서 확인한 이 target의 예에서는 relaxed store가 `STR`, release와 seq_cst store가 `STLR`로 나왔습니다. 이는 그 compiler 설정의 assembly 관찰이지, 모든 Arm target의 고정 mapping이나 cycle 측정값은 아닙니다. Latency는 CPU, memory state, contention과 benchmark 방법을 고정해 별도로 재야 합니다.
 
 ## 정리
 

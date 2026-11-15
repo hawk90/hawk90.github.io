@@ -59,7 +59,7 @@ topics: ["embedded"]
 
 ## 시리즈 구성
 
-**총 6개 Part, 53개 글**로 구성됩니다.
+**총 6개 Part, 56개 글**로 구성됩니다. 소개 글을 포함하면 이 시리즈는 57편입니다.
 
 성능 분석의 기초부터 마이크로아키텍처, 시스템 레벨, 병렬 처리, 도구 활용, 실전 사례까지 체계적으로 다룹니다.
 
@@ -101,7 +101,7 @@ topics: ["embedded"]
 
 ---
 
-### Part 3: System Level Performance (11개)
+### Part 3: System Level Performance (12개)
 
 시스템 수준의 병목을 분석합니다.
 
@@ -118,6 +118,7 @@ topics: ["embedded"]
 | 3-09 | Power vs Performance | DVFS, 저전력 모드 영향 |
 | 3-10 | Thermal Throttling | 온도 모니터링, 성능 저하 |
 | 3-11 | CXL·Interconnect | CXL 2.0/3.1, Neoverse V2, AI 메모리 대역폭 |
+| 3-12 | CXL 메모리 지연 | 지연 시간 측정과 메모리 계층 |
 
 ---
 
@@ -140,7 +141,7 @@ topics: ["embedded"]
 
 ---
 
-### Part 5: Profiling Tools (10개)
+### Part 5: Profiling Tools (11개)
 
 도구별 실전 가이드를 제공합니다.
 
@@ -156,10 +157,11 @@ topics: ["embedded"]
 | 5-08 | Nsight Systems | GPU/NPU 포함 시스템 |
 | 5-09 | Tracy·Hotspot·uftrace | 저오버헤드 모던 프로파일러 |
 | 5-10 | Parca·Pixie·Cilium | eBPF 연속 프로파일링 |
+| 5-11 | CXL 프로파일링 도구 | CXL 메모리 계층 관측 도구 |
 
 ---
 
-### Part 6: Real-World Case Studies (4개)
+### Part 6: Real-World Case Studies (5개)
 
 실전 사례를 통해 분석 과정을 보여줍니다.
 
@@ -169,6 +171,7 @@ topics: ["embedded"]
 | 6-02 | 사례: Cache Thrashing | 메모리 레이아웃 최적화 |
 | 6-03 | 사례: Lock Contention | 동기화 구조 개선 |
 | 6-04 | 사례: DMA 성능 튜닝 | 버스 최적화 |
+| 6-05 | 사례: CXL LLM KV cache | 대용량 메모리 계층 분석 |
 
 ---
 

@@ -214,17 +214,17 @@ Amdahl은 contention만 모델링하지만 USL은 coherency overhead까지 포�
 
 ```text
 α=0.1, β=0.01인 시스템:
-  4 core:  3.0x
-  8 core:  4.7x
-  16 core: 5.8x
-  32 core: 5.7x   ← peak 후 하락
+  4 core:  2.82x
+  8 core:  3.54x
+  16 core: 3.27x
+  32 core: 2.28x   ← peak 후 하락
 ```
 
 USL은 coherency overhead 때문에 어느 시점부터 코어를 늘릴수록 성능이 떨어지는 현상을 잘 설명합니다.
 
 ## Power Capping과 Thermal
 
-TDP 65 W 시스템을 예로 들어 봅니다. 4 core × 16 W = 64 W로 이미 saturated이므로 6 core를 모두 100%로 돌릴 수 없습니다. 결국 일부 core를 throttle하거나, 모든 core를 절반 freq로 떨어뜨리게 됩니다.
+가정한 package power budget이 65 W인 시스템을 예로 들어 봅니다. 4 core × 16 W = 64 W라는 단순 모델에서는 이 예산에 거의 도달하지만, 그 값만으로 6 core 동시 처리나 frequency를 예측할 수는 없습니다. 실제 전력 분배·throttle 동작은 CPU와 platform 정책에 따라 측정해야 합니다.
 
 전력과 발열 제약 때문에 모든 코어가 동시에 max를 낼 수 없는 경우가 흔합니다. 워크로드를 일부 코어에 boost로 몰고 나머지를 idle로 두는 것이 평균 throughput에 유리하기도 합니다.
 
@@ -259,7 +259,7 @@ sched_setscheduler(0, SCHED_FIFO, &sp);
 
 FIFO는 같은 priority의 task가 자발적으로 yield하지 않으면 영원히 실행됩니다. `sched_setattr`로 budget을 두거나 hardware watchdog을 활성화해야 합니다.
 
-## 측정 — Scalability Curve
+## 비교 예시 — Scalability Curve
 
 같은 워크로드를 N개 thread로 돌리면서 throughput을 측정합니다.
 
@@ -273,7 +273,7 @@ Thread count   Throughput (ops/sec)   Speedup
     32               540 K              5.4   ← 하락
 ```
 
-8 thread까지는 거의 선형이지만 16에서 둔화되고 32에서 오히려 떨어집니다. USL fitting으로 α와 β를 추출하면 어느 동기화가 bottleneck인지 정량화할 수 있습니다.
+아래는 감소 구간을 보여 주는 가상 예시이지 실측 결과가 아닙니다. 실제로는 같은 build와 workload를 여러 번 실행하고 분포를 기록해야 합니다. USL fitting은 전체 scaling curve를 요약하지만, 그 자체로 어떤 동기화가 bottleneck인지 식별하지는 않습니다.
 
 ## 정리
 

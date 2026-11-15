@@ -16,13 +16,10 @@ topics: ["embedded"]
 
 ## Cache Line 크기
 
-| CPU | Line Size |
+| 대상 | line size 확인 방법 |
 |---|---|
-| Cortex-M7 | 32 byte |
-| Cortex-A53/A72/A78 | 64 byte |
-| Intel/AMD x86 | 64 byte |
-| Apple M1/M2 | **128 byte** (특이) |
-| IBM POWER | 128 byte |
+| Cortex-M7 | 해당 revision TRM 및 MCU cache 구성 확인 |
+| Cortex-A / x86 / Apple / IBM POWER | 코어 세대와 cache level별 공식 자료 또는 런타임 조회 확인; 하나의 값으로 일반화하지 않음 |
 
 매크로:
 
@@ -56,7 +53,7 @@ alignas(64) struct Foo { ... };
 __attribute__((aligned(64))) static int matrix[1024][1024];
 ```
 
-DMA와 SIMD에서는 필수입니다. Misaligned access는 2 cycle을 추가로 소모하거나 Cortex-M0에서는 fault를 일으킵니다.
+DMA descriptor/buffer alignment는 주변장치·DMA·cache maintenance 규칙을 따릅니다. SIMD load는 ISA가 허용하는 정렬을 확인합니다. misaligned access의 penalty 또는 fault 여부는 target core와 memory region에 따라 다릅니다.
 
 64-byte line 안의 데이터 배치가 성능을 결정합니다. 같은 line에 무엇이 들어 있느냐에 따라 좋은/나쁜 패턴이 갈립니다.
 
@@ -78,7 +75,7 @@ struct counters {
 };
 ```
 
-SMP 환경에서는 false sharing이 10x slowdown을 일으키는 경우가 흔합니다. 측정 시에는 `cache-references`가 폭증합니다.
+false sharing의 비용은 coherence protocol, access rate, thread placement와 workload에 따라 달라집니다. 원인을 확인하려면 대상 PMU/coherence event 또는 대조 실험을 사용합니다.
 
 ## Hot-Cold Splitting
 
@@ -158,12 +155,7 @@ pli [r0, #64]    ; preload instruction
 
 ## Hardware Prefetcher 활성화
 
-Cortex-A는 stride를 자동으로 감지합니다. Cortex-M7은 `MEMCTL` register로 제어합니다.
-
-```c
-SCB->CCR |= SCB_CCR_BP_Msk;   // Branch prediction enable
-// Cortex-M7 prefetch는 자동 (instruction은)
-```
+Hardware prefetcher의 존재·제어 방법은 코어 구현별입니다. Cortex-M7의 `CCR.BP`는 branch prediction 관련 비트이지 일반 data prefetch 제어 레지스터가 아닙니다. 해당 MCU TRM을 확인합니다.
 
 ## Streaming Access — Non-Temporal Stores
 
@@ -173,7 +165,7 @@ for (i = 0; i < N; i++) {
 }
 ```
 
-ARM `STNP`(Store Non-temporal Pair)는 cache를 우회하는 store입니다. x86에서는 `MOVNT`에 해당합니다.
+AArch64 `STNP`는 non-temporal hint가 붙은 pair store입니다. 이것만으로 모든 구현에서 cache bypass를 보장한다고 해석하지 않습니다. x86에서는 `MOVNT`에 해당합니다.
 
 ```c
 __builtin_nontemporal_store(value, &arr[i]);
@@ -248,7 +240,7 @@ struct {
 } thing;             // → 12 byte? sizeof 확인
 ```
 
-ARMv6+에서는 misaligned access를 일부 지원하지만 느립니다. Cortex-M0/M1은 fault를 일으킵니다.
+Unaligned access의 지원과 예외 동작은 instruction, memory type, core와 configuration에 따라 다릅니다. Target TRM과 memory attributes를 확인합니다.
 
 > ⚠️ Prefetch 거리 잘못
 
@@ -273,11 +265,11 @@ Random access나 한 객체의 여러 field를 동시에 사용하는 패턴에�
 
 ## 정리
 
-- Cache line은 Cortex-A와 Intel에서 **64 byte**이며 `alignas`로 정렬합니다.
+- Cache line 크기는 target별로 확인하고 필요한 alignment를 `alignas` 등으로 지정합니다.
 - **False sharing**은 multi-CPU 변수를 line 단위로 분리해 회피합니다.
 - **SoA**는 SIMD와 streaming에 유리합니다.
 - **Software prefetch**는 적절한 거리에서만 효과가 있습니다.
-- Cortex-M7에서 DMA를 쓸 때는 cache maintenance가 필수입니다.
+- data cache가 활성화된 Cortex-M7 MCU에서 non-coherent DMA buffer를 공유할 때는 DMA 방향·ownership 전환·cache line 정렬에 맞춰 clean/invalidate를 수행합니다. MCU reference manual과 vendor HAL 요구사항을 따릅니다.
 
 다음 편은 **Memory Bandwidth**입니다.
 
