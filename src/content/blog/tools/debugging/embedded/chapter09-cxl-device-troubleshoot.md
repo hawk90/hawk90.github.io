@@ -102,12 +102,14 @@ $ cxl monitor --daemon --log=/var/log/cxl-monitor.log
 
 memdev로 조회하면 `offset`은 디바이스 DPA, region으로 조회하면 region 시작 기준입니다. `--media-errors`는 ndctl을 `-Dlibtracefs=enabled`로 빌드했을 때만 쓸 수 있습니다.
 
-테스트용 poison 주입·제거는 `cxl inject-media-poison`과 `cxl clear-media-poison`입니다. 주소는 DPA로 줍니다.
+테스트용 poison 주입·제거 명령은 `cxl inject-media-poison`과 `cxl clear-media-poison`입니다. 아래 명령은 장치 상태를 바꾸므로, 먼저 `cxl list -m mem0 -L -u`로 대상 DPA와 `source`를 확인합니다. `Injected`로 확인한 테스트 항목만 테스트 절차에 따라 제거하세요.
 
 ```bash
 # cxl clear-media-poison mem0 -a 0x1000
 poison cleared at mem0:0x1000
 ```
+
+> ⚠️ **Clear Poison은 데이터 복구 명령이 아닙니다.** Linux CXL 드라이버의 Clear Poison 경로는 64바이트 zero write-data를 mailbox에 전달합니다. 이 동작은 poison 상태를 지우면서 해당 granule의 기존 내용을 보존하지 않을 수 있습니다. 운영 데이터의 오류를 임의로 지우지 말고, 먼저 영향을 받은 데이터를 백업·복구하고 장치/플랫폼 문서와 오류 출처를 확인하세요. `cxl list -L`에서 항목이 사라져도 원래 데이터가 복원되거나 매체가 수리됐다는 뜻은 아닙니다.
 
 ## Linux 통합 — sysfs·debugfs
 
@@ -169,7 +171,7 @@ $ bpftrace -e '
 - Event Log는 *Informational·Warning·Failure·Fatal* 네 종류이고, 드라이버는 interrupt를 받아 Get Event Records(0x0100)로 가져옵니다.
 - health는 `cxl list -H`(Get Health Info, 0x4200), poison은 `cxl list -L`(Get Poison List, 0x4300)로 봅니다.
 - 이벤트 처리 주체는 플랫폼의 `native_cxl_error` 설정이 정합니다.
-- 운영에서는 *media error 수·`life_used_percent`·`dirty_shutdowns`*를 *장기 추적*해 디바이스 교체를 판단합니다.
+- 운영에서는 *media error 수·`life_used_percent`·`dirty_shutdowns`*의 시간 추세와 벤더의 서비스 기준을 함께 봅니다. 보편적인 단일 교체 임계값은 없으며, 한 지표만으로 교체를 결정하지 않습니다.
 
 ## 다음 장 예고
 
@@ -181,3 +183,10 @@ Embedded Debugging 시리즈에 *CXL 관련 추가 챕터는 여기까지*. 다�
 - [Kernel Debugging Ch 8: CXL 커널 드라이버 디버깅](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)
 - [Memory Diagnostics Ch 6: CXL 메모리 진단](/blog/tools/debugging/memory/chapter06-cxl-memory-diagnostics)
 - [Postmortem Debugging Ch 5: CXL 디바이스 Core Dump 분석](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)
+
+## 공식 자료
+
+- [ndctl `cxl list` — health와 media-error 옵션](https://pmem.io/ndctl/cxl/cxl-list.html)
+- [Linux CXL Clear Poison 구현](https://github.com/torvalds/linux/blob/master/drivers/cxl/core/memdev.c)
+- [Linux CXL tracepoint 정의](https://github.com/torvalds/linux/blob/master/drivers/cxl/core/trace.h)
+- [Linux CXL event 처리](https://github.com/torvalds/linux/blob/master/drivers/cxl/pci.c)

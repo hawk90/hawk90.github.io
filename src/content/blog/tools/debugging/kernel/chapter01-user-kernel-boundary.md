@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-지금까지 다룬 GDB·Sanitizer·Valgrind는 모두 *user-space 프로세스*가 대상이었습니다. 커널은 다릅니다 — 멈춰서 들여다볼 *프로세스 컨텍스트*가 없고, *전체 시스템*이 한 컨텍스트로 도는 데다, *디버거 자체*가 그 위에서 돌고 있어 평소 도구가 안 통합니다.
+지금까지 다룬 GDB·Sanitizer·Valgrind는 모두 *user-space 프로세스*가 대상이었습니다. 커널 코드는 각 프로세스의 커널 모드 실행 경로와 인터럽트·커널 스레드에서도 동작합니다. 사용자 프로세스 하나에 붙는 `ptrace` 디버거와 달리, 커널을 조사하려면 실행 중인 커널에 맞는 심볼·디버그 정보·추적 지점이 필요합니다. kgdb로 멈추면 설정에 따라 다른 CPU의 실행도 정지할 수 있으므로 운영 시스템에서는 영향을 먼저 고려해야 합니다.
 
 이 시리즈는 *Linux 커널 디버깅*의 전체 흐름을 다룹니다. 첫 장은 *왜 어렵나*부터 — user/kernel 경계, /proc 인터페이스, 커널 심볼·debug info의 구조까지.
 
@@ -22,18 +22,18 @@ topics: ["tools", "tools/debugging"]
 
 | | user-space | kernel-space |
 |---|------------|--------------|
-| 주소 공간 | 프로세스별 분리 | 단일 (모든 프로세스 공유) |
-| 보호 | 페이지 권한 | 전 access |
-| 정지 | ptrace로 가능 | 정지 = 시스템 정지 |
-| crash 영향 | 그 프로세스만 | 시스템 전체 (panic) |
-| 디버거 attach | gdb -p PID | kgdb (별 머신 필요) |
+| 주소 공간 | 프로세스별 사용자 매핑 | 커널 매핑은 프로세스 간 공유되며 페이지 테이블 구현은 아키텍처·설정에 따름 |
+| 보호 | 프로세스 격리와 페이지 권한 | CPU privilege level과 페이지 권한으로 제한 |
+| 정지 | `ptrace`로 대상 프로세스를 제어 | kgdb 등으로 정지할 수 있으나 CPU·설정에 따라 영향 범위가 다름 |
+| crash 영향 | 보통 해당 프로세스에 국한 | 오류 종류·문맥에 따라 복구 가능한 oops부터 panic까지 다름 |
+| 디버거 attach | `gdb -p PID`는 ptrace 권한·정책 범위에서 동작 | kgdb는 별도 I/O 경로와 호환되는 `vmlinux`가 필요 |
 | 표준 도구 | printf | printk |
-| Backtrace | DWARF + libunwind | objtool + ORC unwinder |
+| Backtrace | DWARF·프레임 정보 등 | 설정된 unwinder와 일치하는 커널 심볼·디버그 정보 |
 | Memory | malloc | kmalloc / vmalloc / get_free_pages |
 
-자기 자신을 디버깅하는 *bootstrap 문제*가 핵심. CPU 한 개에서 도는 single-machine 환경에서는 *디버거를 띄울 컨텍스트가 없기* 때문.
+커널 디버깅의 어려움은 대상 코드와 디버거가 같은 커널·하드웨어 자원을 공유한다는 점입니다. 별도 호스트와 kgdb 같은 원격 경로는 필수 조건이 아니라, 타깃이 멈추거나 콘솔을 점유할 때 제어·관찰 수단을 분리하는 실용적인 방법입니다.
 
-## Kernel 디버깅 다섯 가지 방법
+## Kernel 디버깅 도구
 
 | 방법 | 사용 | 위험도 |
 |------|------|--------|
@@ -45,7 +45,7 @@ topics: ["tools", "tools/debugging"]
 | **kdump + crash** | 사후 분석 (vmcore 덤프) | 낮음 (사고 후) |
 | **drgn** | Python으로 라이브/vmcore 분석 | 낮음 |
 
-대부분의 일상은 *printk + ftrace + bpftrace*로 해결. 인터랙티브 step 디버깅은 *드물지만* kgdb.
+도구 선택은 재현 가능성, 관측 지점, 커널 설정, 운영 영향에 따라 달라집니다. `printk`, ftrace, eBPF는 관측용이며 인터랙티브 정지 조사는 별도 KGDB 설정이 필요합니다.
 
 ## /proc — 커널 상태의 표준 인터페이스
 
@@ -71,11 +71,11 @@ softirqs  stat  swaps  sys/  uptime  version  vmallocinfo  vmstat
 | `/proc/vmstat` | 가상 메모리 통계 |
 | `/proc/modules` | 로드된 모듈 |
 | `/proc/kallsyms` | 커널 심볼 테이블 |
-| `/proc/kmsg` | 커널 메시지 큐 (`dmesg` raw source) |
+| `/proc/kmsg` | 커널 메시지 읽기 인터페이스 (접근·소비 방식은 `/dev/kmsg` 및 `dmesg`와 다름) |
 | `/proc/sys/` | sysctl 인터페이스 |
 | `/proc/[pid]/` | 프로세스별 정보 (Ch에서 다룸) |
 
-`/proc/kallsyms`이 특히 중요. 커널의 *모든 함수·변수 주소*가 있어 추적·디버깅의 기반.
+`/proc/kallsyms`는 커널이 노출하는 심볼과 주소를 보여 주지만, 모든 심볼이 항상 포함되거나 주소가 공개되는 것은 아닙니다. 빌드 설정, 권한 정책, KASLR, `kptr_restrict`가 결과에 영향을 줍니다.
 
 ```bash
 $ sudo cat /proc/kallsyms | grep -E "T do_fork$"
@@ -95,7 +95,7 @@ ffffffff8100007e T verify_cpu
 - `R` — read-only data
 - `t` — local function
 
-`sudo`로 봐야 *실제 주소*가 나옴 (보안상 일반 사용자에겐 0으로 마스킹). KASLR 활성이면 부팅마다 주소 다름.
+주소가 0으로 보일 때는 `/proc/sys/kernel/kptr_restrict`, 커널 설정, 배포판 정책을 함께 확인합니다. `sudo`만으로 모든 정책을 우회할 수 있는 것은 아닙니다. KASLR이 켜져 있으면 런타임 주소가 부팅마다 달라질 수 있으므로, 주소 해석에는 같은 빌드의 심볼과 런타임 기준을 맞춰야 합니다.
 
 ## Kernel 심볼과 debug info
 
@@ -154,25 +154,30 @@ $ cat /proc/sys/kernel/tainted
 0
 ```
 
-0이 아니면 *비-vanilla* 상태. 비트별 의미.
+0이 아니면 하나 이상의 taint 사유가 기록된 상태입니다. 이는 곧바로 비표준 커널이나 결함을 뜻하지 않으며, 원인 분석 때 각 비트를 해석해야 합니다. 아래 비트 번호와 문자는 Linux v7.3-rc6 공식 문서 기준입니다.
 
 | 비트 | 문자 | 의미 |
 |------|------|------|
-| 0 | G/P | proprietary 모듈 로드 |
+| 0 | G/P | `G`: GPL 호환 모듈, `P`: 독점 모듈 로드 |
 | 1 | F | force module load |
-| 2 | S | SMP 검증 안 됨 |
+| 2 | S | 사양 밖 하드웨어·설정에서 실행 |
 | 3 | R | force unload |
 | 4 | M | MCE 발생 |
 | 5 | B | bad page 발견 |
-| 6 | U | user-space에서 tainted 설정 |
+| 6 | U | user-space가 taint 설정 요청 |
 | 7 | D | die (oops/panic 후) |
-| 9 | A | ACPI table 덮어씀 |
-| 10 | W | warning 발생 |
-| 12 | I | tainted via ad-hoc |
-| 13 | C | staging driver 로드 |
-| 14 | O | out-of-tree 모듈 |
-| 17 | K | kexec |
-| 18 | X | proprietary firmware |
+| 8 | A | ACPI table 덮어씀 |
+| 9 | W | warning 발생 |
+| 10 | C | staging driver 로드 |
+| 11 | I | 플랫폼 펌웨어 결함 우회 적용 |
+| 12 | O | out-of-tree 모듈 |
+| 13 | E | 서명되지 않은 모듈 로드 |
+| 14 | L | soft lockup 발생 |
+| 15 | K | livepatch 적용 |
+| 16 | X | 배포판별 보조 taint |
+| 17 | T | randstruct 플러그인으로 빌드 |
+| 18 | N | 커널 내 테스트 실행 |
+| 19 | J | fwctl의 변경 가능한 debug 작업 사용 |
 
 ```bash
 $ dmesg | grep -i taint
@@ -180,13 +185,13 @@ $ dmesg | grep -i taint
 [...] BUG: ... Tainted: G        W  OE     5.15.0-...
 ```
 
-`Tainted: G W OE` = proprietary + warning + out-of-tree. 버그 리포트 시 *vanilla 커널에서 재현*해야 하는 이유.
+`Tainted: G W OE`라면 GPL 호환 모듈만 로드된 상태(`G`), 이전 warning(`W`), out-of-tree 모듈(`O`), 서명되지 않은 모듈(`E`)을 뜻합니다. 원인 조사 시 taint 사유를 확인하고, 가능하면 깨끗한 커널에서도 재현되는지 비교합니다.
 
 ## sysrq — Magic SysRq
 
 ```bash
 $ echo 1 | sudo tee /proc/sys/kernel/sysrq    # 활성화
-$ echo b | sudo tee /proc/sysrq-trigger        # immediate reboot
+$ echo b | sudo tee /proc/sysrq-trigger        # sync 없이 즉시 재부팅 — 데이터 손실 위험
 $ echo s | sudo tee /proc/sysrq-trigger        # sync all filesystems
 $ echo t | sudo tee /proc/sysrq-trigger        # dump all task stacks → dmesg
 $ echo m | sudo tee /proc/sysrq-trigger        # dump memory info
@@ -194,7 +199,7 @@ $ echo w | sudo tee /proc/sysrq-trigger        # dump tasks in D state
 $ echo c | sudo tee /proc/sysrq-trigger        # trigger kernel crash → kdump
 ```
 
-물리적 키보드는 `Alt+SysRq+<key>`. 시스템 hang 상태에서 *유일하게* 응답하는 경로. `t`로 모든 스레드 stack 덤프 → dmesg에서 *hang 원인* 추적.
+물리 키 조합은 `Alt+SysRq+<key>`입니다. SysRq도 커널이 완전히 잠기거나 기능이 비활성화된 경우 응답하지 않을 수 있습니다. `t`는 task 상태를 콘솔에 덤프하며, 출력은 콘솔 log level과 로그 보존 설정을 고려해 확인합니다. `b`는 파일시스템 동기화 없이 재부팅하므로 진단 중 실행하지 마세요.
 
 ## addr2line on vmlinux
 
@@ -215,7 +220,7 @@ user-space addr2line과 같음 — *vmlinux를 인자로 줌*만 차이.
 
 ## kpatch / livepatch
 
-커널 *재부팅 없이* 패치 적용. 핫픽스 표준 도구.
+지원되는 함수에 호환 패치를 적용해 일부 수정은 재부팅 없이 반영할 수 있습니다. 배포판·커널 설정·패치 형식에 의존하며, 임의의 디버그 빌드를 실행 중인 커널과 교체하는 기능은 아닙니다.
 
 ```bash
 $ sudo kpatch load /lib/modules/.../my-patch.ko
@@ -224,13 +229,13 @@ Loaded patch modules:
 my-patch
 ```
 
-디버깅에 직접 쓰는 도구는 아니지만 *프로덕션에서 디버그 빌드를 라이브로 swap*하는 데 유용.
+장애 대응에서는 패치의 적용 가능성과 운영 절차를 별도로 검토해야 합니다.
 
 ## 자주 만나는 함정
 
 | 증상 | 원인 |
 |------|------|
-| `/proc/kallsyms` 주소가 모두 0 | `/proc/sys/kernel/kptr_restrict=2` (보안 기본). `sudo` 또는 root로. |
+| `/proc/kallsyms` 주소가 모두 0 | `kptr_restrict`, 커널 설정·배포판 정책을 확인. 값 2에서는 root 권한만으로 공개되지 않을 수 있음. |
 | `printk` 출력 안 보임 | log level이 낮음. `dmesg -n 7` 또는 `/proc/sys/kernel/printk` |
 | kdump 파일 안 만들어짐 | kdump 서비스 비활성 또는 `crashkernel` 부팅 옵션 누락 |
 | eBPF "Permission denied" | `CAP_BPF` 또는 root 권한 |
@@ -246,7 +251,7 @@ $ gdb /usr/lib/debug/.../vmlinux /var/crash/.../vmcore
 [자동 vmlinux + 모듈 debuginfo 다운로드]
 ```
 
-대형 SaaS 사업자 (CoreOS, AWS) 환경에서 vmlinux를 *어디서나 자동 매칭*하는 표준 경로.
+debuginfod 서버가 해당 빌드의 build-id와 아티팩트를 제공할 때에만 자동 조회가 됩니다. 서버·클라이언트 설정과 빌드 보관 정책에 따라 달라지므로, 모든 배포 환경의 표준 경로로 간주하지 않습니다.
 
 ## 정리
 
@@ -255,7 +260,7 @@ $ gdb /usr/lib/debug/.../vmlinux /var/crash/.../vmcore
 - /proc이 표준 상태 인터페이스. /proc/kallsyms이 심볼 진입점.
 - vmlinux + DWARF가 debug info의 기반.
 - Tainted 커널은 *vanilla 재현* 필요.
-- Magic SysRq는 hang 상태의 유일한 응답 경로.
+- Magic SysRq는 지원·활성화된 경우 저수준 진단 명령을 제공하며, 완전 정지 상태에서도 항상 동작한다고 보장되지는 않습니다.
 - addr2line은 같지만 vmlinux를 인자로.
 
 ## 다음 장 예고

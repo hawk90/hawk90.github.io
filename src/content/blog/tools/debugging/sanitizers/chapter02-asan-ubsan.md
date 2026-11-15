@@ -24,7 +24,7 @@ topics: ["tools", "tools/debugging"]
 
 ## 컴파일과 링크 둘 다 적용해야 한다
 
-가장 흔한 첫 실수입니다. Sanitizer는 *컴파일 시점*에 코드 계측을 하고, *링크 시점*에 sanitizer 런타임 라이브러리를 함께 묶습니다. 둘 중 하나라도 빠지면 빌드는 되지만 *동작이 이상*해집니다.
+가장 흔한 첫 실수입니다. Sanitizer는 *컴파일 시점*에 코드 계측을 하고, *링크 시점*에 sanitizer 런타임 라이브러리를 함께 묶습니다. 계측된 오브젝트를 런타임 없이 링크하면 보통 미정의 sanitizer 심볼로 링크가 실패합니다. 반대로 링크 단계에만 옵션을 주면 기존 오브젝트의 메모리 접근에 검사 코드를 추가하지 못합니다.
 
 ```bash
 # 잘못된 예 — 컴파일에만
@@ -64,7 +64,7 @@ target_link_options(myapp PRIVATE
 
 Sanitizer가 에러를 보고할 때, *어디서 발생했는지*를 알려면 스택 트레이스가 필요합니다. 컴파일러는 최적화 차원에서 frame pointer를 생략하는데(`-fomit-frame-pointer`, 대부분 `-O1` 이상에서 기본 켜짐), 그러면 일부 함수가 트레이스에서 *사라집니다*.
 
-`-fno-omit-frame-pointer`는 이걸 강제로 끄고 *완전한 트레이스*를 보장합니다.
+`-fno-omit-frame-pointer`는 frame pointer를 유지합니다. 인라인과 tail call 최적화까지 되돌리지는 않으므로 완전한 트레이스를 보장하지 않습니다. 필요하면 `-fno-optimize-sibling-calls` 등도 검토합니다.
 
 ```text
 ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
@@ -73,7 +73,7 @@ ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
     #2 main.c:103 in main
 ```
 
-이 줄들이 *모두* 보여야 디버깅이 가능합니다. 빠뜨리면 트레이스가 짧아지거나 `??`로 채워집니다.
+위 출력은 형식 설명용입니다. 함수명·줄 번호는 디버그 정보, 심볼라이저, 최적화에 따라 달라집니다.
 
 ### `-O1` — 약한 최적화
 
@@ -81,7 +81,7 @@ ERROR: AddressSanitizer: heap-buffer-overflow on address 0x...
 
 | 최적화 | 효과 |
 |--------|------|
-| `-O0` | *너무 약함*. 컴파일러가 일부 UB를 *그대로 흘려보내* sanitizer 오탐 증가. |
+| `-O0` | 계측 검사는 동작합니다. 최적화가 적어 실행 비용과 진단 형태가 달라집니다. |
 | `-O1` | *권장*. 대부분의 UB 검사가 잘 동작하면서 속도도 견딜 만함. |
 | `-O2`/`-O3` | UB 위반 코드를 *제거*해 sanitizer가 찾지 못할 수 있음. |
 
@@ -126,21 +126,19 @@ ASAN_OPTIONS=\
 detect_leaks=1:\
 halt_on_error=1:\
 abort_on_error=1:\
-print_stacktrace=1:\
 symbolize=1:\
 print_summary=1
 ```
 
 | 키 | 의미 |
 |------|------|
-| `detect_leaks=1` | LSan을 ASan에서 활성화 (Linux 기본 1, macOS 기본 0) |
-| `halt_on_error=1` | 첫 에러에서 즉시 종료 (기본 0 — 계속 진행) |
-| `abort_on_error=1` | `exit()`가 아니라 `abort()`로 종료 → coredump 생성 |
+| `detect_leaks=1` | 지원되는 ASan 런타임에서 LSan을 활성화합니다. 배포판·타깃 지원도 확인합니다. |
+| `halt_on_error=1` | ASan 기본값은 true입니다. 복구 실행은 컴파일 시 `-fsanitize-recover=address`와 런타임 `halt_on_error=0`가 모두 필요합니다. |
+| `abort_on_error=1` | 종료 경로에서 abort를 사용합니다. 코어 저장은 OS 정책과 제한에 따라 별도로 결정됩니다. |
 | `symbolize=1` | 주소를 함수명·줄 번호로 변환 (`llvm-symbolizer` 또는 `addr2line` 사용) |
-| `print_stacktrace=1` | 모든 보고에 스택 트레이스 포함 |
 | `print_summary=1` | 종료 시 요약 출력 |
-| `strict_string_checks=1` | `strcpy` 등의 *교차* 영역 검사 (느려짐) |
-| `check_initialization_order=1` | 전역 변수 초기화 순서 의존 검사 |
+| `strict_string_checks=1` | 문자열 인자가 NUL 종료 문자열이라는 조건을 추가로 검사합니다. |
+| `check_initialization_order=1` | 번역 단위 간 동적 초기화 순서를 검사하며 macOS에서는 지원하지 않습니다. |
 
 CI에서는 보통 `halt_on_error=1:abort_on_error=1`을 켜서 첫 실패가 *프로세스 종료 코드 비-0*으로 즉시 보고되도록 합니다.
 
@@ -162,17 +160,14 @@ UBSan은 ASan보다 옵션이 적습니다. 가장 중요한 두 가지:
 
 ### `symbolize`가 동작 안 할 때
 
-ASan은 *외부 심볼라이저*를 호출해 주소→줄 번호 변환을 합니다. 환경에 `llvm-symbolizer`가 없으면 *숫자 주소만 보입니다*.
+ASan의 주소 해석에는 디버그 정보와 사용 가능한 심볼라이저가 필요합니다. macOS에서는 dsymutil로 별도 디버그 정보를 만들어야 할 수도 있습니다. 도구가 없다는 이유만으로 모든 함수명이 사라지는 것은 아닙니다.
 
 ```bash
-# llvm-symbolizer 경로 명시
-export ASAN_SYMBOLIZER_PATH=/usr/bin/llvm-symbolizer
-
-# 또는 환경에 없으면 GCC 빌드용 addr2line
-export ASAN_SYMBOLIZER_PATH=$(which addr2line)
+export ASAN_SYMBOLIZER_PATH="$(command -v llvm-symbolizer)"
 ```
 
-Ubuntu/Debian: `sudo apt install llvm`로 설치하면 함께 들어옵니다. macOS: Xcode Command Line Tools에 포함.
+위 경로가 실제 실행 파일인지 먼저 확인합니다. addr2line을 ASAN_SYMBOLIZER_PATH에 그대로 넣는 방식은 llvm-symbolizer의 대체 설정이 아닙니다. 설치된 compiler-rt의 addr2line 지원 여부와 allow_addr2line 옵션을 별도로 확인합니다. Xcode 도구와 Homebrew LLVM이 같은 실행 파일을 제공한다고 가정하지 않습니다.
+
 
 ---
 
@@ -180,31 +175,28 @@ Ubuntu/Debian: `sudo apt install llvm`로 설치하면 함께 들어옵니다. m
 
 Sanitizer가 외부 라이브러리(OpenSSL, glibc, Qt)에서 *우리가 못 고치는 자리*를 보고할 때, suppression 파일로 *그 자리만 무시*할 수 있습니다.
 
-```bash
-# suppression 파일 — asan.supp
-leak:libcrypto.so
-leak:libssl.so
-interceptor_via_fun:OpenSSL_*
+LSan과 ASan interceptor용 파일을 분리합니다. leak 규칙을 ASAN_OPTIONS의 suppression 파일에 섞지 않습니다.
+
+```text
+# lsan.supp
+leak:known_third_party_leak
+```
+
+```text
+# asan.supp
+interceptor_via_fun:known_third_party_function
 ```
 
 ```bash
-LSAN_OPTIONS=suppressions=asan.supp ./myapp
+LSAN_OPTIONS=suppressions=lsan.supp ./myapp
 ASAN_OPTIONS=suppressions=asan.supp ./myapp
 UBSAN_OPTIONS=suppressions=ubsan.supp ./myapp
 ```
 
-각 sanitizer가 자기 suppression 파일을 따로 가집니다. 패턴은 함수명 / 모듈명 / 정규식을 지원합니다.
+UBSan은 검사 종류와 위치를 적습니다. 예를 들어 signed-integer-overflow:known_file.cpp입니다. 런타임 suppression은 복구 가능한 검사에만 적용되고, 심볼·소스 위치를 해석할 정보도 필요합니다. ASan interceptor suppression은 이미 ASan으로 계측된 우리 코드의 임의 오류를 끄는 기능이 아닙니다.
 
-**suppression 패턴 예:**
+패턴은 도구별 규칙을 따릅니다. 모든 suppression이 일반 정규식이라는 가정은 틀립니다. 원인·수정 불가 사유·재검토 조건을 기록하고 범위를 최소화합니다. 외부 라이브러리에서 발생했다는 사실만으로 오탐으로 분류하지 않습니다.
 
-| 패턴 | 의미 |
-|------|------|
-| `leak:my_known_leak_function` | 함수명 |
-| `leak:libfoo.so` | 라이브러리 |
-| `interceptor_via_fun:^OpenSSL_*` | 정규식 (interceptor) |
-| `signed-integer-overflow:somefile.cpp` | UBSan 전용 |
-
-Suppression은 *최후의 수단*입니다. 우리 코드의 버그를 가리면 안 됩니다. 외부 라이브러리·CRT의 *알려진 false positive*에만 씁니다.
 
 ---
 
@@ -224,7 +216,7 @@ B b;
 
 전역 객체 `a`와 `b`의 *초기화 순서가 .cpp 파일 사이에서 정의되지 않습니다*. `a`의 생성자가 `b`를 쓰는데 `b`가 아직 초기화 안 됐을 수 있습니다.
 
-ASan은 `check_initialization_order=1`로 이 자리를 잡지만, 기본은 꺼져 있습니다. 대신 *Construct On First Use* 관용으로 회피합니다.
+지원 플랫폼의 ASan은 `check_initialization_order=1`로 검사할 수 있지만, 기본은 꺼져 있으며 macOS에서는 이 검사를 지원하지 않습니다. 대신 *Construct On First Use* 관용으로 회피합니다.
 
 ```cpp
 B& get_b() {
@@ -240,42 +232,19 @@ std::vector<int> v(10);
 int x = v[20];   // ❌ container-overflow (ASan 옵션 필요)
 ```
 
-기본 ASan은 `std::vector`의 *논리적 크기*까지만 검사하고, *물리 capacity*가 더 크면 그 안은 잡지 못합니다. 켜려면:
+기본 ASan의 메모리 경계와 vector의 논리적 size는 다릅니다. 위의 v[20]이 실제 할당 밖이면 heap-buffer-overflow일 수 있고, size 밖이지만 capacity 안인 접근은 container annotation이 있어야 container-overflow로 잡힐 수 있습니다.
 
-```bash
-ASAN_OPTIONS=detect_container_overflow=1
-# 컴파일 시
--D_LIBCPP_HAS_ASAN_CONTAINER_ANNOTATIONS  # libc++
-```
+[libstdc++ 문서](https://gcc.gnu.org/onlinedocs/libstdc++/manual/debug.html)는 vector의 추가 계측을 -D_GLIBCXX_SANITIZE_VECTOR로 명시적으로 켜도록 안내합니다. libc++는 배포 버전과 allocator의 annotation 지원을 확인합니다. 라이브러리 내부 매크로를 임의로 정의하거나, 런타임 detect_container_overflow만으로 계측이 생긴다고 가정하지 않습니다.
 
-libstdc++(GCC 기본)는 *이미 활성화*되어 있고, libc++(Clang/macOS)는 명시적으로 켜야 합니다.
 
-### 3. `dlsym`이 ASan과 충돌
+### 3. 동적 로딩·비표준 스택·시그널
 
-```c
-// Sanitizer에 잘못 잡히는 패턴
-void* sym = dlsym(handle, "func");
-typedef int (*FN)(int);
-FN fn = (FN)sym;
-fn(42);  // ASan이 false positive 보고 가능
-```
+비계측 플러그인은 탐지 공백을 만들 수 있습니다. dlsym으로 얻은 함수 주소를 호출했다는 사실만으로 ASan 오탐이라고 판정하지 않습니다. 보고된 접근과 실제 함수 시그니처·수명·호출 규약을 먼저 확인합니다.
 
-`dlsym`은 *주소를 동적으로 얻어*와서 호출하는데, sanitizer 계측 정보가 없습니다. 보통 외부 plugin 시스템에서 등장하고, 이 자리는 *suppression*으로 우회합니다.
+ASan은 일반적인 예외 처리와 longjmp를 지원합니다. 사용자 정의 스택 전환이나 coroutine/fiber는 런타임 연동을 추가로 검토할 대상이며, 일반 C++ 예외가 곧 오탐 원인이라는 설명은 맞지 않습니다.
 
-### 4. `setjmp`/`longjmp`와 sanitizer
+시그널 핸들러의 malloc·printf 사용은 POSIX의 async-signal-safe 규칙으로 판단합니다. ASan은 그 규칙을 빠짐없이 검사하는 도구가 아니므로 경고가 없어도 안전하다고 결론 내리지 않습니다.
 
-`longjmp`로 *스택을 풀어 버리는* 코드는 ASan이 *use-after-return false positive*를 보고할 수 있습니다. C++ 예외와도 비슷한 문제 — sanitizer가 일부 스택 시나리오를 추적 못 합니다.
-
-### 5. 시그널 핸들러 안에서
-
-```c
-void handler(int sig) {
-    // ❌ malloc, printf 등 비-async-safe 호출
-    char* buf = malloc(100);
-}
-```
-
-ASan은 *시그널 핸들러 안에서의 할당*을 의심할 수 있습니다. 표준 POSIX에서도 시그널 핸들러는 *async-signal-safe 함수만* 호출해야 합니다. ASan은 이를 *상기시켜 주는 효과*가 있습니다.
 
 ---
 
@@ -292,7 +261,7 @@ Sanitizer를 *모든 빌드에 항상* 켤 수는 없습니다. 오버헤드도 
 
 ### 끌 자리
 
-- **릴리스 빌드**: 무조건 끄기. 사용자에게 2배 느린 바이너리를 줄 수는 없습니다.
+- **일반 배포 빌드**: ASan 런타임은 진단용으로 분리합니다. UBSan trap/minimal-runtime 같은 배포 전략은 비용과 지원 범위를 별도로 검토합니다.
 - **벤치마크**: 끄기. 측정 결과가 의미 없어짐.
 - **임베디드/모바일**: 메모리 오버헤드 큼. 디바이스 위에서 못 돌릴 수 있음.
 
@@ -311,7 +280,7 @@ endif()
 
 ---
 
-## 보고 읽기 — *실제 ASan 출력 해부*
+## 보고 읽기 — ASan 출력 형식
 
 ```c
 // main.c
@@ -323,7 +292,9 @@ int main() {
 }
 ```
 
-```bash
+다음 로그는 필드를 설명하는 예시이며 이번 환경의 실측 로그가 아닙니다.
+
+```text
 $ gcc -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1 main.c -o test
 $ ./test
 =================================================================
@@ -357,6 +328,43 @@ SUMMARY: AddressSanitizer: stack-buffer-overflow on main.c:4 in main
 
 ---
 
+## 직접 확인 — 탐지·복구·종료를 나눠 실행
+
+다음 두 파일은 정상 입력, ASan 경계 위반, UBSan 복구·중단을 분리하기 위한 작은 예제입니다. 결과 로그의 주소와 줄 번호를 고정하지 않고 오류 종류와 종료 여부를 확인합니다.
+
+```cpp title="bounds.cpp"
+#include <cstdio>
+int main(int argc, char**) {
+    volatile int* values = new int[1];
+    int index = argc - 1;
+    values[index] = 42;
+    std::printf("value=%d\n", values[0]);
+    delete[] values;
+}
+```
+
+```cpp title="overflow.cpp"
+#include <climits>
+#include <cstdio>
+int main() {
+    volatile int maximum = INT_MAX;
+    int result = maximum + 1;
+    std::puts("continued");
+    return result == 0;
+}
+```
+
+```bash
+clang++ -O1 -g -fsanitize=address bounds.cpp -o bounds
+./bounds
+./bounds bad
+clang++ -O1 -g -fsanitize=undefined overflow.cpp -o overflow
+./overflow
+UBSAN_OPTIONS=halt_on_error=1 ./overflow
+```
+
+bounds는 인자 없이 value=42를 출력합니다. bad 인자를 주면 heap-buffer-overflow로 중단합니다. overflow의 기본 복구 모드는 signed integer overflow를 보고한 뒤 continued를 출력하며, halt_on_error=1은 continued 전에 중단합니다. trap 검사는 -fsanitize-trap=undefined로 별도 빌드해 진단 런타임 출력 없이 중단되는지 확인합니다. 누수 검사는 3장의 별도 입력으로 검증합니다.
+
 ## 정리
 
 - ASan + UBSan은 *컴파일과 링크 둘 다*에 적용. 한쪽이라도 빠지면 미동작.
@@ -364,7 +372,7 @@ SUMMARY: AddressSanitizer: stack-buffer-overflow on main.c:4 in main
 - 환경 변수 `ASAN_OPTIONS` / `UBSAN_OPTIONS`로 런타임 동작 제어. CI는 `halt_on_error=1` 권장.
 - `symbolize=1`로 줄 번호 보고. `ASAN_SYMBOLIZER_PATH`로 심볼라이저 경로 명시 가능.
 - *Suppression*은 외부 라이브러리·알려진 false positive에만. 우리 코드 버그를 가리지 마라.
-- 오탐 함정: SIOF, container overflow, dlsym, longjmp, async-signal-safe.
+- 초기화 순서·container annotation·비계측 코드·사용자 스택 전환은 지원 범위를 나눠 확인합니다.
 - 켤 자리: 로컬 개발, 단위 테스트, PR CI. 끌 자리: 릴리스, 벤치마크.
 
 ## 다음 장 예고

@@ -36,7 +36,7 @@ f: 형식 (x=16진수, d=10진수, s=문자열, i=명령어 등)
 u: 단위 (b=byte, h=halfword, w=word, g=giant)
 ```
 
-### 예시
+### x86-64 Linux 형식 예시 — 실행 기록 아님
 
 ```text
 (gdb) x/16xb 0x7fff1234       # 16바이트를 byte 단위 16진수로
@@ -154,6 +154,8 @@ cs  0x33  51
 ss  0x2b  43
 ```
 
+아래 레지스터 표시는 x86-64 System V ABI의 정수·포인터 인자 예입니다. 부동소수·큰 구조체·다른 ABI는 별도 규칙을 사용하며 Apple Silicon에서는 pc/sp/x0 등 이름도 다릅니다.
+
 자주 보는 레지스터:
 - **`rip`** (또는 `pc`) — *명령어 포인터*. 다음에 실행할 명령.
 - **`rsp`** — *스택 포인터*. 현재 스택 top.
@@ -221,7 +223,7 @@ $1 = {_M_impl = {<std::allocator<int>> = {<__gnu_cxx::new_allocator<int>>...
 (gdb) info pretty-printer
 ```
 
-목록에 *libstdc++*가 없으면 설치 또는 GDB 설정 필요.
+목록에 libstdc++가 없으면 auto-load 로그·safe-path·해당 라이브러리 판의 printer 설치를 확인합니다. [Ch 9](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting)의 등록 절차와 [GDB Pretty-Printer 심화](/blog/tools/debugging/gdb-extension/chapter03-pretty-printers)를 따릅니다.
 
 ### LLDB의 STL
 
@@ -324,15 +326,15 @@ $7 = 3
 $1 = 1000
 ```
 
-리스트가 *무한 루프*인지, *예상한 길이*인지 즉시 확인.
+위 루프는 순환 리스트에서 끝나지 않습니다. 최대 노드 수나 방문 주소 집합을 두어 중단하고, 반복 주소가 발견되었을 때만 cycle의 근거로 삼습니다.
 
 ---
 
 ## *동적 캐스트* — 다형성 객체
 
 ```cpp
-class Base { virtual ~Base() {} };
-class Derived : public Base { int extra; };
+class Base { public: virtual ~Base() = default; };
+class Derived : public Base { public: int extra = 42; };
 
 Base* p = new Derived();
 ```
@@ -371,7 +373,7 @@ $3 = {<Base> = ..., extra = 42}
 (gdb) compare-sections
 ```
 
-코어 덤프와 실행 파일의 *.text section을 비교*. *바이너리 변조* 의심 시 사용.
+원격 타깃에 적재된 loadable section의 메모리와 실행 파일 내용을 비교하는 명령입니다. 지원되는 원격 기능과 타깃 범위를 확인해야 하며 core 분석용 일반 비교 명령이라고 가정하면 안 됩니다.
 
 ---
 
@@ -402,14 +404,11 @@ LLDB:
 ## 문자열 안의 문자 코드
 
 ```text
-(gdb) print "hello"[2]
-$1 = 0x6c 'l'
-
 (gdb) printf "%d\n", "hello"[2]
 108
 ```
 
-C/C++ 문자열을 *코드 포인트*로 보고 싶을 때. ASCII 코드를 알아내려고 외부 도구를 쓰지 않아도 됨.
+정수형 결과를 명시해 C 문자열의 세 번째 바이트 값을 10진수로 봅니다. GDB의 문자 출력 형식은 타입·설정에 따라 달라질 수 있습니다.
 
 ---
 
@@ -461,7 +460,7 @@ $1 = <optimized out>
 2. **레지스터 확인** — 변수가 *레지스터에 살아 있을 수* 있음. `info registers`.
 3. **함수 인자로 추정** — 호출 시점에 *어디 들어갔는지* 디스어셈블리.
 
-`<optimized out>`을 만나면 *재컴파일이 가장 안전*합니다.
+사고 당시 바이너리와 core는 보존합니다. 원본 상태를 바꾸는 재빌드 대신 먼저 frame·PC·심볼 일치를 확인하고 [Ch 11](/blog/tools/debugging/gdb-lldb/chapter11-practical-tips)의 진단 순서를 사용합니다.
 
 ---
 

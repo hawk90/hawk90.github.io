@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-VSCode·PyCharm·Neovim·Emacs가 모두 *같은 디버거*에 붙는 비결은 두 프로토콜에 있습니다. *MI* (GDB/MI — GDB Machine Interface)가 *GDB 측 표준*, *DAP* (Debug Adapter Protocol)가 *IDE 측 표준*. 두 프로토콜이 한 어댑터에서 매개되어 *어떤 IDE*에서든 *어떤 디버거*에 붙을 수 있습니다.
+VSCode·PyCharm·Neovim·Emacs가 모두 *같은 디버거*에 붙는 비결은 두 프로토콜에 있습니다. *MI* (GDB/MI — GDB Machine Interface)가 *GDB 측 표준*, *DAP* (Debug Adapter Protocol)가 *IDE 측 표준*. client와 adapter가 지원하는 capability·대상 runtime·실행 환경이 맞아야 연결할 수 있습니다. DAP adapter가 MI를 사용하는 것은 여러 구현 중 하나입니다.
 
 이 장은 두 프로토콜의 정체와 그 사이 매개의 흐름을 다룹니다.
 
@@ -29,11 +29,11 @@ CLI(`(gdb)` 프롬프트의 일반 명령)는 *사람용*. 출력이 자유로�
 ```bash
 $ gdb --interpreter=mi3 ./my_prog
 =thread-group-added,id="i1"
-=cmd-param-changed,param="auto-load safe-path",value="$debugdir:$datadir/auto-load:/"
+=cmd-param-changed,param="pagination",value="off"
 (gdb)
 ```
 
-`(gdb)` 프롬프트가 보이지만 내부는 MI 모드. `mi`, `mi2`, `mi3`이 버전 — `mi3`이 현재 표준.
+`(gdb)` 프롬프트가 보이지만 내부는 MI 모드. mi/mi2/mi3 interpreter와 버전별 출력 차이는 GDB manual 및 사용하는 adapter 요구에 맞춥니다. GDB17.2에서 MI3를 사용할 수 있다는 사실이 모든 client가 MI3를 요구한다는 뜻은 아닙니다.
 
 ### 명령 형식
 
@@ -95,8 +95,8 @@ $ gdb --interpreter=mi3 ./my_prog
 -thread-info
 
 -data-evaluate-expression "x + 1"
--data-read-memory 0x401200 x 1 1 16
--data-write-memory 0x401200 x 1 1 0xff
+-data-read-memory-bytes 0x401200 16
+-data-write-memory-bytes 0x401200 ff
 
 -var-create name * expression : watch 변수 생성
 -var-update *                  : 모든 watch 갱신
@@ -109,7 +109,7 @@ $ gdb --interpreter=mi3 ./my_prog
 -target-detach
 ```
 
-전체 명세는 [GDB/MI 문서](https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI.html). 200+ 명령.
+전체 명세는 [GDB/MI 문서](https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI.html). 이 글의 예는 record 형식 설명이며 실제 target transcript가 아닙니다.
 
 ### 응답 예 — backtrace
 
@@ -173,11 +173,11 @@ IDE는 이 구조에서 *각 frame*을 추출해 콜스택 패널에 표시.
 | `print x` | `-data-evaluate-expression x` |
 | `next` | `-exec-next` |
 
-`-` 접두사 + 이름 약간 다름. 거의 1:1 매핑.
+표는 대표 대응이며 state/argument/result·async handling은 별도입니다. CLI 출력 parse나 단순 1:1 문자열 치환만으로 올바른 adapter가 되지는 않습니다.
 
 ## DAP — Debug Adapter Protocol
 
-MI가 *GDB 측*이라면 DAP는 *IDE 측*. Microsoft가 2016년 도입, 이제 거의 모든 IDE의 표준.
+MI가 *GDB 측*이라면 DAP는 *IDE 측*. Microsoft의 공개 DAP specification이 client/adapter 사이 request·response·event를 정의합니다.
 
 핵심 아이디어: *IDE가 한 프로토콜만 알면 어떤 디버거도 쓸 수 있게*. 어댑터가 DAP ↔ 디버거 프로토콜(MI/RSP/자체)을 매개.
 
@@ -185,14 +185,66 @@ MI가 *GDB 측*이라면 DAP는 *IDE 측*. Microsoft가 2016년 도입, 이제 �
 
 ### 전송
 
-JSON-RPC over TCP/stdio. 메시지는 *길이 header + JSON body*.
+DAP는 JSON-RPC 2.0 wire format이 아닙니다. seq/type/command 또는 event/request_seq/success 등의 **DAP envelope**를 사용합니다. stdio/TCP 등의 byte stream에서 ASCII Content-Length header와 UTF-8 JSON body를 분리합니다. 길이는 문자 수가 아니라 **body byte 수**입니다.
 
-```text
-Content-Length: 119\r\n
-\r\n
-{"seq":1,"type":"request","command":"initialize",
- "arguments":{"clientID":"vscode","linesStartAt1":true}}
+```js title="dap-framing.mjs"
+import {TextDecoder} from 'node:util';
+const LIMIT = 1024 * 1024;
+function validate(message) {
+    if (!message || !Number.isSafeInteger(message.seq) || message.seq < 1 || message.seq > 2147483647)
+        throw new TypeError('invalid seq');
+    if (message.type === 'request') {
+        if (typeof message.command !== 'string' || !message.command) throw new TypeError('command');
+    } else if (message.type === 'response') {
+        if (typeof message.command !== 'string' || !message.command ||
+            !Number.isSafeInteger(message.request_seq) || message.request_seq < 1 || message.request_seq > 2147483647 ||
+            typeof message.success !== 'boolean') throw new TypeError('response');
+    } else if (message.type === 'event') {
+        if (typeof message.event !== 'string' || !message.event) throw new TypeError('event');
+    } else throw new TypeError('type');
+    return message;
+}
+export function encodeDAP(message) {
+    validate(message);
+    const body = Buffer.from(JSON.stringify(message), 'utf8');
+    if (body.length > LIMIT) throw new RangeError('body too large');
+    return Buffer.concat([Buffer.from(`Content-Length: ${body.length}\r\n\r\n`, 'ascii'), body]);
+}
+export class DAPFramer {
+    constructor() { this.buffer = Buffer.alloc(0); this.failed = false; }
+    push(chunk) {
+        if (this.failed) throw new Error('discard failed framer');
+        try {
+            this.buffer = Buffer.concat([this.buffer, chunk]);
+            const messages = [];
+            for (;;) {
+                const end = this.buffer.indexOf('\r\n\r\n');
+                if (end < 0) {
+                    if (this.buffer.length > 8192) throw new RangeError('header too large');
+                    break;
+                }
+                if (end > 8192) throw new RangeError('header too large');
+                const headerBytes = this.buffer.subarray(0, end);
+                if (headerBytes.some(byte => byte > 127)) throw new TypeError('non-ASCII header');
+                const header = headerBytes.toString('ascii');
+                const match = /^Content-Length: ([0-9]+)$/.exec(header);
+                if (!match) throw new TypeError('unsupported/duplicate header');
+                const length = Number(match[1]);
+                if (!Number.isSafeInteger(length) || length <= 0 || length > LIMIT)
+                    throw new RangeError('invalid length');
+                if (this.buffer.length < end + 4 + length) break;
+                const body = this.buffer.subarray(end + 4, end + 4 + length);
+                messages.push(validate(JSON.parse(new TextDecoder('utf-8', {fatal:true}).decode(body))));
+                this.buffer = this.buffer.subarray(end + 4 + length);
+            }
+            return messages;
+        } catch (error) { this.failed = true; this.buffer = Buffer.alloc(0); throw error; }
+    }
+    finish() { if (this.failed || this.buffer.length) throw new Error('failed/truncated stream'); }
+}
 ```
+
+이 예는 한 Content-Length header만 허용하는 bounded 기본 형식이며 full DAP schema/state machine은 아닙니다. transport read chunk 크기도 호출자가 제한해야 하며 connection 종료 시 finish로 잘린 body를 확인합니다. 본문에 제시한 119 같은 고정 길이를 임의 JSON에 복사하지 않고 encode 결과로 계산합니다.
 
 ### 메시지 종류
 
@@ -202,9 +254,11 @@ response  : 어댑터 → 클라이언트, request에 대한 답
 event     : 어댑터 → 클라이언트, 비동기 알림
 ```
 
+이하 JSON block은 request/response body의 발췌입니다. comment·ellipsis는 설명용이며 실제 전송 시 seq/type·response correlation과 완전한 JSON을 구성합니다.
+
 ### 초기 핸드셰이크
 
-```json
+```text
 // 1. Initialize
 {"seq": 1, "type": "request", "command": "initialize",
  "arguments": {"clientID": "vscode", "adapterID": "cppdbg",
@@ -239,7 +293,7 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 ### Launch / Attach
 
-```json
+```text
 {"seq": 4, "type": "request", "command": "launch",
  "arguments": {
    "program": "/path/to/my_prog",
@@ -260,7 +314,7 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 ### 브레이크포인트 설정
 
-```json
+```text
 {"command": "setBreakpoints",
  "arguments": {
    "source": {"path": "/home/me/main.cpp"},
@@ -280,20 +334,20 @@ event     : 어댑터 → 클라이언트, 비동기 알림
  }}
 ```
 
-`logMessage`가 *VSCode의 logpoint*. 어댑터가 `commands silent printf` 등으로 변환.
+logMessage는 DAP의 logpoint 요청입니다. 지원 capability와 expression escaping·target side effects/로그 비용은 adapter별로 다릅니다. 모든 adapter가 같은 GDB commands/printf로 변환하지 않습니다.
 
-`verified: false`면 *그 위치에 BP 설치 실패* — 회색으로 표시.
+verified=false는 아직 검증/설정되지 않은 상태일 수 있으며 module load 뒤 breakpoint event로 바뀔 수도 있습니다. 영구 설치 실패와 즉시 동일시하지 않습니다.
 
 ### Function breakpoint
 
-```json
+```text
 {"command": "setFunctionBreakpoints",
  "arguments": {"breakpoints": [{"name": "main"}, {"name": "process"}]}}
 ```
 
 ### Data breakpoint (watchpoint)
 
-```json
+```text
 {"command": "setDataBreakpoints",
  "arguments": {"breakpoints": [
    {"dataId": "x@0x7fffffff", "accessType": "write"}
@@ -302,7 +356,7 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 ### Stack trace
 
-```json
+```text
 {"command": "stackTrace",
  "arguments": {"threadId": 1, "startFrame": 0, "levels": 20}}
 
@@ -320,7 +374,7 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 ### Variables — 트리
 
-```json
+```text
 // 1. 프레임의 스코프
 {"command": "scopes", "arguments": {"frameId": 1000}}
 
@@ -352,11 +406,11 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 *재귀적 variables 요청*이 VSCode의 변수 트리를 *지연 로드*로 그리는 메커니즘.
 
-`indexedVariables: 3`이 pretty-printer의 `display_hint = "array"`에서 옴.
+display hint는 모양 힌트입니다. indexedVariables=3이라는 원소 수가 hint 문자열만으로 계산되지는 않습니다. adapter가 실제 child count/varobj와 target 정보를 매개하며 reference 수명·paging도 관리합니다.
 
 ### Evaluate
 
-```json
+```text
 {"command": "evaluate",
  "arguments": {"expression": "x + 1", "frameId": 1000, "context": "watch"}}
 
@@ -368,7 +422,7 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 ### 진행 명령
 
-```json
+```text
 {"command": "continue", "arguments": {"threadId": 1}}
 {"command": "next", "arguments": {"threadId": 1}}
 {"command": "stepIn", "arguments": {"threadId": 1, "targetId": 0}}
@@ -376,11 +430,11 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 {"command": "pause", "arguments": {"threadId": 1}}
 ```
 
-각각 *thread별로*. 멀티스레드 디버깅 시 *어느 스레드를 진행*하는지 명시.
+threadId와 singleThread 지원·all-stop/non-stop, response/event의 allThreadsContinued 등을 함께 해석합니다. threadId가 있다는 사실만으로 다른 thread가 항상 정지한 채 남는 것은 아닙니다.
 
 ### 이벤트
 
-```json
+```text
 // 정지
 {"type": "event", "event": "stopped",
  "body": {"reason": "breakpoint", "threadId": 1, "allThreadsStopped": true,
@@ -409,18 +463,11 @@ event     : 어댑터 → 클라이언트, 비동기 알림
 
 VSCode의 *cppdbg* 어댑터가 어떻게 동작하는가.
 
-```text
-VSCode  ─DAP─>  cppdbg adapter  ─MI─>  gdb (--interpreter=mi3)
-                                          │
-                                          ▼
-                                       디버기
-```
-
-`launch` request 받으면 → `gdb --interpreter=mi3 program` 실행 + `-exec-run`. `stackTrace` request → `-stack-list-frames`. `evaluate` → `-data-evaluate-expression`.
+cppdbg는 DAP request를 MIEngine/GDB 상태에 맞춰 매개할 수 있습니다. launch 초기화·symbol·breakpoint 설정과 실행 순서는 adapter/config별입니다. stackTrace/evaluate를 대응 MI request로 바꿀 때 thread/frame 선택, error와 async stop·request token·reference lifetime도 관리해야 합니다.
 
 ### CodeLLDB는 다름
 
-`CodeLLDB` 어댑터는 *직접 LLDB SB API*를 호출. MI를 거치지 않음. 그래서 macOS·Rust·Swift 환경에서 더 빠르고 안정.
+`CodeLLDB` 어댑터는 *직접 LLDB SB API*를 호출. MI를 거치지 않음. 직접 SB API를 쓴다는 구조만으로 속도·안정성 우열을 단정하지 않습니다. target/toolchain·symbol format과 adapter release별로 검증합니다.
 
 ```text
 VSCode  ─DAP─>  CodeLLDB adapter  ─SB API─>  lldb
@@ -434,7 +481,7 @@ Python의 `debugpy`도 DAP 어댑터 + Python 디버거 내장.
 VSCode  ─DAP─>  debugpy  ─PyFrame inspection─>  사용자 Python 코드
 ```
 
-거의 모든 언어가 *자체 DAP 어댑터*를 제공: Go (`delve --dap`), Rust (`codelldb` 또는 `rust-analyzer`), C# (`netcoredbg`), Java (`java-debug`), ...
+거의 모든 언어가 *자체 DAP 어댑터*를 제공: Go (`delve --dap`), Rust (CodeLLDB 같은 debug adapter; rust-analyzer는 주로 language server), C# (`netcoredbg`), Java (`java-debug`), ...
 
 ## 직접 DAP 사용 — Neovim
 
@@ -464,7 +511,7 @@ dap.configurations.cpp = {
 }
 ```
 
-Lua로 `launch.json` 동치를 정의. 동일 어댑터를 사용하므로 *VSCode와 같은 경험*.
+Lua로 `launch.json` 동치를 정의. 같은 adapter를 재사용해도 client가 구현한 capability/UI·configuration 차이와 extension version을 확인합니다.
 
 ## Emacs — dap-mode
 
@@ -481,66 +528,32 @@ DAP 클라이언트 + UI. `dap-cpptools`/`dap-lldb` 모듈이 어댑터 등록.
 
 ## DAP 어댑터 만들기
 
-새 언어·런타임의 디버거를 만들 때 DAP 어댑터를 작성하면 *모든 IDE*에서 즉시 동작.
+adapter는 framing뿐 아니라 initialize/capability, launch/attach와 configurationDone 순서, breakpoint lifecycle·request cancellation/errors, stop/continue와 thread/frame/variable reference 수명을 구현해야 합니다. stdio stdout에는 protocol 외 log를 섞지 않고 diagnostics는 별도 채널로 보냅니다.
 
-기본 흐름:
-
-1. stdin에서 JSON-RPC request 읽기.
-2. command 분기 처리.
-3. response를 stdout으로.
-4. event를 stdout으로 (비동기).
-
-[debug-adapter-protocol-node](https://github.com/microsoft/vscode-debugadapter-node) 같은 라이브러리가 boilerplate 제거.
-
-```typescript
-// TypeScript 예
-import { DebugSession, InitializedEvent, StoppedEvent, ... } from 'vscode-debugadapter';
-
-class MyAdapter extends DebugSession {
-  protected initializeRequest(response, args) {
-    response.body.supportsConfigurationDoneRequest = true;
-    this.sendResponse(response);
-    this.sendEvent(new InitializedEvent());
-  }
-  
-  protected launchRequest(response, args) {
-    this.startDebugger(args.program);
-    this.sendResponse(response);
-  }
-  
-  protected setBreakPointsRequest(response, args) {
-    // BP 설정 로직
-    this.sendResponse(response);
-  }
-  
-  // ...
-}
-
-DebugSession.run(MyAdapter);
-```
+@vscode/debugadapter 같은 공식 library를 사용할 수 있지만 package/version을 고정해야 합니다. 미정의 startDebugger·ellipsis import가 든 TypeScript 조각은 실행 가능한 adapter로 제시하지 않습니다. 새 adapter를 만들었다고 모든 DAP client가 모든 기능을 즉시 지원하는 것도 아닙니다.
 
 ## MI vs DAP 한 표
 
 | | MI | DAP |
 |---|-----|-----|
 | 위치 | GDB 측 | IDE 측 |
-| 형식 | 텍스트 (key=value) | JSON-RPC |
-| 도입 | 1990s | 2016 |
+| 형식 | MI record grammar | DAP JSON envelope + byte framing |
+| scope | GDB interpreter version | DAP specification/capability |
 | Async | `*notification` | event |
 | 변수 트리 | `-var-*` 명령 | variables 재귀 |
 | 표준 | GDB가 정의 | MS가 정의 |
-| 구현 디버거 | GDB, LLDB(부분) | GDB(via cppdbg), LLDB(via lldb-vscode), debugpy, delve, ... |
+| 구현 디버거 | GDB, LLDB(부분) | GDB(via cppdbg), LLDB(via lldb-dap), debugpy, delve, ... |
 
 ## 정리
 
 - MI = GDB의 *기계용* 인터페이스. 거의 모든 명령에 `-cmd` 형식.
-- DAP = IDE ↔ 디버거 표준 (JSON-RPC).
+- DAP = IDE ↔ 디버거 protocol (DAP envelope).
 - IDE 어댑터가 DAP ↔ MI (또는 SB API, 자체 프로토콜) 매개.
 - 변수 트리는 *재귀적 variables 요청*으로 지연 로드.
 - `displayhint = "array"` 같은 pretty-printer 메타가 IDE 트리 모양 결정.
 - cppdbg = GDB/LLDB via MI. CodeLLDB = LLDB via SB. debugpy = Python 내장.
 - Neovim·Emacs도 *같은 DAP 어댑터*로 동일 경험.
-- 새 언어 디버거는 *자체 DAP 어댑터*로 모든 IDE에 즉시 통합.
+- 새 언어 디버거는 *자체 DAP 어댑터*로 client capability와 구현에 맞춰 통합.
 
 ## 다음 장 예고
 
@@ -553,3 +566,7 @@ Ch 6 (마지막) — 프런트엔드 비교. TUI / cgdb / dashboard / gef / VSCo
 - [GDB/MI 공식 문서](https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI.html)
 - [Debug Adapter Protocol 명세](https://microsoft.github.io/debug-adapter-protocol/)
 - [DAP overview & implementations](https://microsoft.github.io/debug-adapter-protocol/implementors/adapters/)
+
+## 검증 기준
+
+GDB17.2 source/manual의 MI record·varobj와 [DAP 공식 overview](https://microsoft.github.io/debug-adapter-protocol/overview)·[protocol schema](https://github.com/microsoft/debug-adapter-protocol/blob/main/debugAdapterProtocol.json)를 대조합니다. framing helper의 split/coalesced·UTF-8·invalid/truncated 검사는 실제 adapter/IDE launch 검증과 구분합니다.

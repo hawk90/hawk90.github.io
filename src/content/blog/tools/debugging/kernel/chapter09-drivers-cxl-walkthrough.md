@@ -12,7 +12,7 @@ topics: ["tools", "tools/debugging"]
 
 ## 디렉터리 구조
 
-mainline(v7.3-rc6 기준) `drivers/cxl/` 주요 파일:
+mainline Linux `v7.3-rc6` 기준 `drivers/cxl/` 주요 파일:
 
 | 파일·디렉터리 | 모듈 | 역할 |
 |-------------|------|------|
@@ -78,7 +78,7 @@ module_init(cxl_pci_driver_init);
 module_cxl_driver(cxl_mem_driver);
 ```
 
-각 모듈이 *다른 bus*에 드라이버를 등록합니다 — `cxl_acpi`는 platform bus, `cxl_pci`는 PCI bus, `cxl_mem`·`cxl_port`는 CXL bus(`cxl_driver_register()`). `cxl_acpi`는 `module_init()`이 아니라 `subsys_initcall_sync()`를 씁니다. 소스 주석은 dax_hmem이 'Soft Reserved' CXL 범위를 보기 전에 올라와야 하기 때문이라고 설명합니다.
+각 모듈이 *다른 bus*에 드라이버를 등록합니다 — `cxl_acpi`는 platform bus, `cxl_pci`는 PCI bus, `cxl_mem`·`cxl_port`는 CXL bus(`cxl_driver_register()`). `cxl_acpi`는 `module_init()`이 아니라 `subsys_initcall_sync()`를 씁니다. 주석은 dax_hmem이 'Soft Reserved' CXL 범위를 보기 전에 로드되어야 한다고 밝히며, initcall 순서에는 `subsys_initcall(efisubsys_init)`가 먼저 실행되어야 하는 의존성이 있다고 구체적으로 설명합니다.
 
 ## 핵심 자료 구조
 
@@ -101,19 +101,20 @@ module_cxl_driver(cxl_mem_driver);
 
 | 단계 | 함수 | 동작 |
 |------|------|------|
-| 1 | `pcim_enable_device()` | PCI 디바이스 enable |
-| 2 | `pci_find_dvsec_capability()` | CXL Device DVSEC 찾기. 없으면 경고만 하고 CXL.mem 초기화를 건너뜀 |
-| 3 | `cxl_memdev_state_create()` | 상태 구조체 할당 |
-| 4 | `cxl_pci_setup_regs()` | 레지스터 블록 찾아 매핑 |
-| 5 | `cxl_await_media_ready()` | 미디어 준비 대기 |
-| 6 | `cxl_alloc_irq_vectors()` | MSI/MSI-X 할당 |
-| 7 | `cxl_pci_setup_mailbox()` | mailbox 초기화 |
+| 1 | `pcim_enable_device()`·`pci_set_master()` | PCI 디바이스 활성화·bus mastering 설정 |
+| 2 | `pci_find_dvsec_capability()` | CXL Device DVSEC 조회; 없으면 경고를 남기지만 관리 기능을 위해 뒤 절차를 계속 시도 |
+| 3 | `cxl_memdev_state_create()` | 상태 구조체 할당, PCI driver data 설정 |
+| 4 | `cxl_pci_setup_regs()`·`cxl_map_device_regs()` | memdev register block 탐색·매핑; component register 부재는 일부 기능 제한으로 처리될 수 있음 |
+| 5 | `cxl_pci_type3_init_mailbox()` | mailbox context 초기화 |
+| 6 | `cxl_await_media_ready()` | media ready 확인; 실패 시 경고 후 계속 진행 |
+| 7 | `cxl_alloc_irq_vectors()`·`cxl_pci_setup_mailbox()` | IRQ vector 요청 후 mailbox capability/ready 설정 |
 | 8 | `cxl_enumerate_cmds()` | 지원 명령 목록 조회 |
-| 9 | `cxl_set_timestamp()`·`cxl_poison_state_init()` | 시각 설정, poison 상태 초기화 |
+| 9 | `cxl_set_timestamp()`·`cxl_poison_state_init()` | timestamp 설정, poison 상태 초기화 |
 | 10 | `cxl_dev_state_identify()` | Identify Memory Device 명령 |
-| 11 | `cxl_mem_dpa_fetch()`·`cxl_dpa_setup()` | DPA 파티션 정보 |
-| 12 | `devm_cxl_add_classdev()` | memdev 생성, sysfs 등록 |
-| 13 | `cxl_event_config()` | 이벤트 로그·인터럽트 설정 |
+| 11 | `cxl_mem_dpa_fetch()`·`cxl_dpa_setup()` | DPA partition 정보와 decoder 상태 설정 |
+| 12 | `devm_cxl_setup_features()`·`devm_cxl_add_classdev()` | feature 준비와 memdev class device 등록 |
+| 13 | firmware upload·sanitize·fwctl·PMU 설정 | 선택 기능을 등록; 각 실패 처리는 호출별로 다름 |
+| 14 | `cxl_event_config()`·`pci_save_state()` | event 설정 후 PCI 상태 저장 |
 
 PCI 오류 처리는 probe에서 등록하지 않고, 드라이버 구조체의 정적 `cxl_error_handlers`가 맡습니다. ftrace function_graph로 이 흐름을 볼 수 있습니다([Ch 8](/blog/tools/debugging/kernel/chapter08-cxl-driver-debug)).
 
@@ -292,6 +293,10 @@ dax 장치가 `system-ram` 모드면 kmem이 붙어 `numactl --hardware`에 노�
 ## 다음 장 예고
 
 Kernel Debugging 시리즈의 *CXL 관련 추가 챕터는 여기까지*. 다음 깊이는 *Memory Diagnostics*와 *Postmortem Debugging*에 분산된 챕터로 자연 연결.
+
+## 소스 기준과 실행 범위
+
+주요 항목은 Linux `v7.3-rc6`의 `drivers/cxl/Makefile`, `drivers/cxl/pci.c`, `drivers/cxl/core/hdm.c`, `drivers/cxl/core/mbox.c`, `drivers/cxl/core/region.c`, `drivers/cxl/core/ras.c`, `drivers/cxl/acpi.c`, `drivers/cxl/mem.c`, `drivers/cxl/port.c`와 대조했습니다. 발췌 코드 전체를 빌드하거나 CXL 장치에서 실행하지 않았으며, hardware probe·mailbox·decoder commit·region 생성 동작은 실행 검증하지 않았습니다.
 
 ## 관련 항목
 

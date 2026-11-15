@@ -56,12 +56,12 @@ C/C++ 프로그램을 작성하다 보면 *예상과 다르게 죽거나* *의�
 #include <sys/ptrace.h>
 
 ptrace(PTRACE_ATTACH, pid, NULL, NULL);
-// 이제 pid 프로세스가 STOPPED 상태
+// 성공 후 waitpid(pid, &status, 0)로 실제 정지를 확인
 // 레지스터·메모리 읽기·쓰기 가능
 ptrace(PTRACE_DETACH, pid, NULL, NULL);
 ```
 
-GDB·LLDB 모두 *Linux에서는 `ptrace`*를 사용합니다. 이 한 시스템 콜이 *디버거의 모든 마법*의 근간.
+GDB·LLDB 모두 *Linux에서는 `ptrace`*를 사용합니다. attach·wait·메모리 접근·재개를 결합하며 ptrace 한 번으로 전체 세션이 끝나지는 않습니다.
 
 `ptrace`가 하는 일:
 - 다른 프로세스의 *레지스터 읽기/쓰기*.
@@ -75,7 +75,7 @@ macOS는 `ptrace`가 *제한적*입니다. 대신 *Mach* 메시지를 통해 같
 
 ### Windows — `DebugActiveProcess`
 
-Windows는 또 다른 API. GDB·LLDB의 Windows 포트가 *완벽하지 않은* 이유.
+Windows는 별도 debugging API와 target 지원 조합을 사용합니다. Windows target을 선택할 때는 GDB·LLDB의 해당 target 지원 범위와 Visual Studio debugger를 비교합니다.
 
 이 시리즈는 *Linux와 macOS*에 집중합니다. Windows는 Visual Studio 디버거가 훨씬 잘 동작합니다.
 
@@ -87,11 +87,11 @@ Windows는 또 다른 API. GDB·LLDB의 Windows 포트가 *완벽하지 않은* 
 
 | 측면 | GDB | LLDB |
 |------|-----|------|
-| 출신 | GNU 프로젝트 (1986) | LLVM 프로젝트 (2007) |
-| 주 플랫폼 | Linux, *대부분의 Unix* | macOS, *iOS* |
-| 기본 컴파일러 | GCC | Clang (둘 다 호환) |
+| 출신 | GNU 프로젝트 | LLVM 프로젝트 |
+| 주 플랫폼 | Linux와 여러 Unix 계열 | macOS·iOS와 LLVM 생태계 (지원은 target별 확인) |
+| 자주 쓰는 컴파일러 | GCC·Clang | Clang (둘 다 호환 가능한 조합이 많음) |
 | Python 스크립트 | 매우 강력 | 강력 (다른 API) |
-| TUI | `gdb -tui` | `lldb`의 *내장 GUI* |
+| 터미널 화면 | `gdb -tui` | LLDB CLI; IDE·별도 프런트엔드와 함께 사용 |
 | 명령 스타일 | 짧고 관용적 (`b`, `n`, `s`) | 풀 명령 (`breakpoint set`) + alias |
 | 원격 디버깅 | `gdbserver` | `lldb-server` |
 
@@ -103,22 +103,22 @@ Windows는 또 다른 API. GDB·LLDB의 Windows 포트가 *완벽하지 않은* 
 | 실행 | `run` (또는 `r`) | `run` (또는 `r`) |
 | 다음 줄 (step over) | `next` (`n`) | `next` (`n`) |
 | 함수 진입 (step into) | `step` (`s`) | `step` (`s`) |
-| 한 줄 실행 (스텝아웃) | `finish` | `finish` |
+| 현재 함수 반환까지 (스텝아웃) | `finish` | `finish` |
 | 계속 실행 | `continue` (`c`) | `continue` (`c`) |
 | Breakpoint 설정 | `break main` (`b main`) | `breakpoint set --name main` (또는 `b main`) |
 | 변수 보기 | `print x` (`p x`) | `print x` (`p x`) |
 | Backtrace | `backtrace` (`bt`) | `bt` |
 | 종료 | `quit` (`q`) | `quit` (`q`) |
 
-LLDB는 *풀 명령*이 길지만 *alias*가 거의 모든 GDB 명령에 대응합니다. *GDB 사용자가 LLDB로 옮겨도* 큰 학습 비용 없이 적응 가능.
+LLDB는 *풀 명령*이 길고 GDB와 비슷한 alias도 제공합니다. 명령 이름이 같아도 옵션·동작이 완전히 같다고 가정하지 말고 LLDB help와 command map으로 확인합니다.
 
 ### 어느 것을 쓸까
 
 플랫폼이 가장 중요한 결정 요인.
 
-- **Linux**: *GDB*. 모든 배포판에 기본 설치. 대부분의 도구가 GDB와 통합 (perf, valgrind --vgdb 등).
-- **macOS (Apple Silicon)**: *LLDB*. Xcode와 같이 설치. *공식 지원되는 유일한 디버거*.
-- **임베디드/크로스 컴파일**: *GDB*. `gdb-multiarch`로 다양한 아키텍처 지원.
+- **Linux**: GDB와 LLDB 중 타깃·도구 호환성을 확인해 선택합니다. 두 도구는 주요 배포판에서 패키지로 제공되지만 기본 설치 여부는 배포판·이미지마다 다릅니다.
+- **macOS (Apple Silicon)**: *LLDB*. Xcode와 같이 설치. Xcode 도구와 통합됩니다.
+- **임베디드/크로스 컴파일**: GDB 또는 LLDB를 서버·아키텍처 지원과 함께 선택합니다. Debian 계열의 `gdb-multiarch`는 여러 아키텍처를 다룰 때 쓸 수 있는 한 선택지입니다.
 - **iOS / Swift**: *LLDB*. Apple이 만든 거라 통합 최강.
 
 크로스 플랫폼 코드에서는 *둘 다* 알아 두는 게 좋습니다. 이 시리즈는 *두 도구 병행 학습*으로 진행합니다 — 명령어를 GDB/LLDB 양쪽으로 같이 보여 줍니다.
@@ -155,7 +155,7 @@ brew install gdb
 macOS에서 GDB를 쓰려면 *코드 사이닝*이 필요합니다. Apple의 보안 정책이 디버거 권한을 제한하기 때문. Homebrew brew 설치 후:
 
 ```bash
-# 사이닝 (LLDB는 자동, GDB만 수동)
+# GDB는 별도 서명 설정이 필요할 수 있음; 자세한 조건은 macOS/Xcode 버전에 따라 확인
 # 자세한 절차는 https://sourceware.org/gdb/wiki/PermissionsDarwin
 ```
 
@@ -185,7 +185,7 @@ $ lldb --version
 lldb version 15.0.7
 ```
 
-*GDB 10+, LLDB 13+*가 권장. 이전 버전은 *현대 컴파일러의 디버그 정보* (DWARF 5)를 못 읽을 수 있음.
+위 버전 출력은 형식 예이며 이번 검증 환경과 다릅니다. 실제로 사용하는 디버거·컴파일러·DWARF 버전을 기록하고 해당 라이브러리·타깃 지원을 확인합니다.
 
 ---
 
@@ -200,8 +200,8 @@ gcc -g -O0 -fno-omit-frame-pointer main.c -o myapp
 각 옵션:
 
 - **`-g`** — *DWARF 디버그 정보 생성*. 변수, 함수, 타입, 줄 번호 모두 포함. *필수*.
-- **`-O0`** — 최적화 *없음*. 컴파일러가 코드를 변형하지 않아 *소스 그대로* 추적 가능.
-- **`-fno-omit-frame-pointer`** — *스택 프레임 포인터 유지*. backtrace 정확도.
+- **`-O0`** — 최적화 *없음*. 최적화에 따른 변형을 줄입니다. 명령어·줄 매핑이 소스 문장과 일대일이라는 보장은 없습니다.
+- **`-fno-omit-frame-pointer`** — 가능한 경우 프레임 포인터를 유지해 일부 환경에서 스택 조사에 도움을 줍니다. 정확한 backtrace는 unwind 정보·ABI·최적화와도 관련되며 이 옵션만으로 보장되지는 않습니다.
 
 ### 최적화 레벨과 디버깅
 
@@ -209,14 +209,14 @@ gcc -g -O0 -fno-omit-frame-pointer main.c -o myapp
 gcc -g -O0 myapp.c    # 디버깅 친화적. 가장 권장.
 gcc -g -O1 myapp.c    # 일부 최적화. 보통 디버깅 가능.
 gcc -g -O2 myapp.c    # 인라인 많음. 변수 사라짐.
-gcc -g -Og myapp.c    # 디버깅용 최적화. GCC 4.8+ 권장.
+gcc -g -Og myapp.c    # 디버깅용 최적화. 컴파일러의 지원 여부를 확인합니다.
 ```
 
-**`-Og`**는 *디버깅을 깨지 않는 선*에서 최적화합니다. *릴리스에 가까운 행동*을 디버깅하고 싶을 때 좋습니다.
+**`-Og`**는 디버깅 친화적인 최적화를 선택하지만 변수 위치와 제어 흐름이 원본 그대로 보존되지는 않습니다. *릴리스에 가까운 행동*을 디버깅하고 싶을 때 좋습니다.
 
 `-O2`에서는 변수가 *레지스터에 살아 사라지거나*, *루프가 합쳐지거나*, *조건문이 통째로 사라질* 수 있습니다. 디버거에서 `print x`했을 때 `<optimized out>` 메시지를 만나면 그 자리.
 
-### 디버그 심볼 분리
+### 디버그 심볼 분리 — Linux ELF
 
 릴리스 바이너리에는 디버그 심볼을 *제거*하지만, *나중에 디버깅용*으로 따로 보관합니다.
 
@@ -240,7 +240,7 @@ objcopy --add-gnu-debuglink=myapp.debug myapp
 
 ## 첫 세션 — *간단한 프로그램 디버깅*
 
-```c
+```c title="hello.c"
 // hello.c
 #include <stdio.h>
 
@@ -261,103 +261,32 @@ int main() {
 $ gcc -g -O0 hello.c -o hello
 ```
 
-### GDB 세션
+### GDB 명령 순서
+
+다음은 GDB에서 따라 할 입력이며 이 macOS 검증에서 GDB를 실행한 기록은 아닙니다. 주소·줄 번호가 섞인 가공 출력은 싣지 않습니다.
 
 ```text
-$ gdb ./hello
-GNU gdb (Ubuntu 12.1-0ubuntu1~22.04) 12.1
-...
-Reading symbols from ./hello...
-
-(gdb) break main
-Breakpoint 1 at 0x114e: file hello.c, line 8.
-
+(gdb) break factorial
 (gdb) run
-Starting program: /tmp/hello
-Breakpoint 1, main () at hello.c:8
-8       int n = 5;
-
-(gdb) next
-9       int result = factorial(n);
-
 (gdb) print n
-$1 = 5
-
-(gdb) step
-factorial (n=5) at hello.c:4
-4       if (n <= 1) return 1;
-
 (gdb) backtrace
-#0  factorial (n=5) at hello.c:4
-#1  0x000055555555515f in main () at hello.c:9
-
+(gdb) disable 1
 (gdb) finish
-Run till exit from #0  factorial (n=5) at hello.c:4
-0x000055555555515f in main () at hello.c:9
-9       int result = factorial(n);
-Value returned is $2 = 120
-
 (gdb) continue
-Continuing.
-5! = 120
-[Inferior 1 (process 12345) exited normally]
-
-(gdb) quit
 ```
 
-### LLDB 세션
+### LLDB 명령 순서
 
-```text
-$ lldb ./hello
-(lldb) target create "./hello"
-Current executable set to '/tmp/hello' (x86_64).
+위 hello.c를 -g -O0로 빌드한 뒤 첫 factorial 진입에서 n=5와 호출자 main을 확인합니다. break를 비활성화한 뒤 계속하면 프로그램은 5! = 120을 출력합니다. 실행 파일 경로·주소·PID는 매 실행 달라집니다.
 
-(lldb) breakpoint set --name main
-Breakpoint 1: where = hello`main + 4 at hello.c:8, address = 0x114e
-
-(lldb) run
-Process 12345 launched: '/tmp/hello' (x86_64)
-Process 12345 stopped
-* thread #1, queue = 'com.apple.main-thread', stop reason = breakpoint 1.1
-    frame #0: 0x55555555514e hello`main at hello.c:8
-   5      }
-   6
-   7      int main() {
--> 8          int n = 5;
-   9          int result = factorial(n);
-
-(lldb) next
-* thread #1, stop reason = step over
-    frame #0: hello`main at hello.c:9
-
-(lldb) print n
-(int) $0 = 5
-
-(lldb) step
-* thread #1, stop reason = step in
-    frame #0: hello`factorial(n=5) at hello.c:4
-
-(lldb) bt
-* thread #1, queue = 'com.apple.main-thread'
-  * frame #0: hello`factorial(n=5) at hello.c:4
-    frame #1: hello`main at hello.c:9
-
-(lldb) finish
-* thread #1, stop reason = step out
-    frame #0: hello`main at hello.c:9
-Return value: (int) $1 = 120
-
-(lldb) continue
-Process 12345 resuming
-5! = 120
-Process 12345 exited with status = 0
-
-(lldb) quit
+```text title="intro.lldb"
+breakpoint set --name factorial
+run
+frame variable n
+thread backtrace
+breakpoint disable 1
+continue
 ```
-
-같은 시나리오를 *두 디버거로* 따라갔습니다. 명령은 *거의 동일*하고, 출력 형식만 조금 다릅니다.
-
----
 
 ## 자주 만나는 첫 문제
 
@@ -368,7 +297,7 @@ Process 12345 exited with status = 0
 No symbol table is loaded.  Use the "file" command.
 ```
 
-원인: `-g` 옵션 없이 컴파일.
+실행 파일이 로드되지 않았거나 디버그 심볼을 찾지 못했는지 확인합니다. -g 없이 빌드한 파일도 main 같은 일반 심볼은 남을 수 있어 두 상황은 구분해야 합니다.
 
 해결:
 ```bash
@@ -402,14 +331,7 @@ ptrace: Operation not permitted.
 
 원인: Linux의 `ptrace_scope` 보안 설정.
 
-해결:
-```bash
-# 임시
-echo 0 | sudo tee /proc/sys/kernel/yama/ptrace_scope
-
-# 영구 (root 권한 필요)
-echo 'kernel.yama.ptrace_scope = 0' | sudo tee -a /etc/sysctl.conf
-```
+확인: 같은 사용자·PID namespace·dumpable·ptrace 정책·컨테이너 권한을 먼저 조사합니다. 프로젝트에서 직접 실행한 자식 프로세스를 디버깅하는 방법을 우선 사용하며, 이 문제만으로 호스트 전체 ptrace_scope를 영구 완화하지 않습니다.
 
 ---
 
@@ -428,6 +350,7 @@ echo 'kernel.yama.ptrace_scope = 0' | sudo tee -a /etc/sysctl.conf
 | **Ch 9** | Python 스크립팅 |
 | **Ch 10** | TUI와 GUI 프론트엔드 |
 | **Ch 11** | 실무 팁 — `.gdbinit`, signal, watchpoint 함정 |
+| **Ch 12** | DWARF와 심볼·소스 매핑 진단 |
 
 ---
 

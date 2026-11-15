@@ -28,17 +28,19 @@ hello
 3.11.5 (main, ...)
 ```
 
-GDB 빌드 시 `--with-python` 옵션이 켜져 있어야 합니다. 모든 배포판의 기본 패키지가 켭니다. 안 켜진 GDB면 `python` 명령이 에러.
+GDB 빌드 시 `--with-python` 옵션이 켜져 있어야 합니다. 패키지·cross debugger마다 지원 여부가 다르므로 해당 실행 파일에서 확인합니다. 안 켜진 GDB면 `python` 명령이 에러.
 
 내장 Python의 버전은 GDB 빌드 시점에 결정. *외부 시스템 Python*의 venv·third-party 패키지는 별도 설정 필요.
 
 ```python
 (gdb) python
->>> import sys
->>> sys.path.insert(0, '/home/me/venv/lib/python3.11/site-packages')
->>> import numpy   # 이제 외부 패키지 사용 가능
->>> end
+>import sys
+>sys.path.insert(0, '/path/to/compatible/pure-python-modules')
+>import my_pure_python_helper
+>end
 ```
+
+sys.path를 추가해도 다른 Python ABI의 NumPy 같은 native extension이 호환되는 것은 아닙니다. GDB가 내장한 Python·extension ABI·shared library와 dependency를 맞춰야 합니다. 아래 API 설명은 GDB 17.2 source/manual을 기준으로 확인합니다.
 
 ## 실행 방법
 
@@ -76,7 +78,7 @@ end
 | `gdb.Symbol` | 변수·함수 심볼 |
 | `gdb.Block` | 스코프 블록 |
 | `gdb.Inferior` | 프로세스 |
-| `gdb.Thread` | 스레드 |
+| `gdb.InferiorThread` | 스레드 |
 | `gdb.Breakpoint` | 브레이크포인트 |
 | `gdb.Objfile` | 로드된 ELF/공유라이브러리 |
 | `gdb.Architecture` | 아키텍처 (x86-64, ARM, ...) |
@@ -122,7 +124,7 @@ target = p.dereference()      # *ptr
 # 배열 인덱스
 arr = gdb.parse_and_eval("my_array")
 first = arr[0]                # my_array[0]
-slice = arr[0:10]             # 10개
+prefix = [arr[i] for i in range(10)]  # 크기/접근 가능 여부를 먼저 확인
 ```
 
 ### Python 타입으로
@@ -140,10 +142,13 @@ s = v.string(encoding='utf-8', length=20)
 f = float(v['ratio'])
 
 # byte buffer
-buf = bytes(v['data'])
+data = v['data']
+# 대상 ABI의 주소/길이를 검증한 뒤 raw memory를 읽음
+address = int(data.address)
+buf = bytes(gdb.selected_inferior().read_memory(address, data.type.sizeof))
 ```
 
-`string()`은 *C 스타일 문자열* (NUL terminated 또는 길이 지정). `bytes()`는 *raw 메모리*.
+`string()`은 *C 스타일 문자열* (NUL terminated 또는 길이 지정). raw byte는 검증한 범위를 inferior.read_memory로 읽고 반환 buffer를 bytes로 바꿉니다. bytes(gdb.Value)를 임의 struct/array의 memory dump로 일반화하지 않습니다.
 
 ### 산술
 
@@ -151,14 +156,11 @@ buf = bytes(v['data'])
 v = gdb.parse_and_eval("a")
 w = gdb.parse_and_eval("b")
 
-result = v + w               # 디버기 안에서 평가 안 됨, Python 측 산술
+result = v + w               # 결과도 gdb.Value, target 타입 의미를 따름
 result = v * 2
-
-# 디버기 안에서 평가
-result = gdb.parse_and_eval(f"({v}) + ({w})")
 ```
 
-`gdb.Value` 끼리의 산술은 *Python 측*에서 일어남. 디버기 측 함수 호출은 `gdb.parse_and_eval` 안에서.
+GDB evaluator가 target type의 연산을 수행합니다. C++ overloaded operator는 inferior function call을 일으킬 수도 있으므로 순수 Python 정수 산술과 같다고 볼 수 없습니다. Python int 산술이 목적이면 범위·available 상태를 확인해 명시적으로 int로 바꿉니다. pretty-printed Value를 f-string으로 다시 expression에 삽입하는 방식은 사용하지 않습니다.
 
 ### Cast
 
@@ -177,10 +179,12 @@ print(val['field'])
 ```python
 base_ptr = gdb.parse_and_eval("base")
 derived_t = gdb.lookup_type("Derived").pointer()
-derived = base_ptr.dynamic_cast(derived_t)  # 또는 None
+derived = base_ptr.dynamic_cast(derived_t)
+if int(derived) == 0:
+    gdb.write("cast failed: null target pointer\n")
 ```
 
-`set print object on` 효과의 프로그램적 버전.
+C++ dynamic_cast 의미의 변환입니다. pointer cast 실패는 null pointer Value와 Python None을 구분하고 reference 실패·부적절한 타입·unavailable 값의 예외도 처리합니다. 단순 출력 option과 동일한 API는 아닙니다.
 
 ## gdb.Type
 
@@ -238,10 +242,6 @@ print(t.target())            # 포인터/typedef의 base
 
 ```python
 t = gdb.lookup_type("std::vector<int>")
-for i in range(t.target_type.fields().__len__()):
-    pass
-
-# 또는 template 인자 직접
 print(t.template_argument(0))   # 첫 template 인자 (예: int)
 ```
 
@@ -321,7 +321,7 @@ inferior.write_memory(0x600000, b'\x01\x02\x03')
 
 # 메모리 검색
 found = inferior.search_memory(0x400000, 0x100000, b'hello')
-if found:
+if found is not None:
     print(f"found at {found:#x}")
 ```
 
@@ -341,7 +341,8 @@ for inf in gdb.inferiors():
 ```python
 # 이름으로 lookup
 sym, is_field = gdb.lookup_symbol("main")
-print(sym.name, sym.type, sym.value())
+if sym is not None:
+    print(sym.name, sym.type, sym.value())
 
 # 전역 심볼
 sym = gdb.lookup_global_symbol("g_config")
@@ -425,9 +426,9 @@ except gdb.error as e:
     gdb.write(f"error: {e}\n")
 ```
 
-`gdb.error`가 모든 GDB API 오류의 base.
+GDB 오류에는 gdb.error/gdb.MemoryError 등이 있고 Python TypeError·ValueError·RuntimeError도 생길 수 있습니다. unavailable/optimized-out 상태와 API별 예외를 구분합니다.
 
-### 무한 정지 방지
+### 실패를 구분해 반환
 
 ```python
 def safe_eval(expr):
@@ -437,7 +438,7 @@ def safe_eval(expr):
         return None
 ```
 
-pretty-printer에서 *없는 멤버 접근*이 흔하므로 wrapper로 보호.
+이 wrapper는 gdb.error만 None으로 바꿉니다. timeout·hang·inferior function의 부작용을 막지 않으며 호출자가 실패를 무시하지 않도록 결과를 구분해야 합니다.
 
 ## 디버깅 — print-stack
 
@@ -458,92 +459,86 @@ gdb.error: There is no member named nonexistent.
 
 ## 한 예 — 짧은 진단 명령
 
-```python
+```python title="whereami.py"
 import gdb
 
 class WhereAmI(gdb.Command):
-    """현재 위치 종합 정보."""
-
+    """정지된 selected frame의 위치와 argument를 출력."""
     def __init__(self):
         super().__init__("whereami", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
+        self.dont_repeat()
+        if gdb.string_to_argv(arg):
+            raise gdb.GdbError("usage: whereami")
+        thread = gdb.selected_thread()
+        if thread is None or not thread.is_stopped():
+            raise gdb.GdbError("select a stopped thread")
         try:
             frame = gdb.selected_frame()
-        except gdb.error:
-            gdb.write("no frame (process not running?)\n")
-            return
-
-        pc = int(frame.pc())
-        name = frame.name() or '??'
-        sal = frame.find_sal()
-        file = sal.symtab.filename if sal.symtab else '??'
-        line = sal.line
-
-        thread = gdb.selected_thread()
-        tid = thread.num
-
-        gdb.write(f"thread {tid}, PC = {pc:#x}\n")
-        gdb.write(f"function: {name}\n")
-        gdb.write(f"location: {file}:{line}\n")
-
-        # 인자
-        block = frame.block()
-        gdb.write("args:\n")
-        for sym in block:
-            if sym.is_argument:
-                try:
-                    val = sym.value(frame)
-                    gdb.write(f"  {sym.name} = {val}\n")
-                except gdb.error:
-                    gdb.write(f"  {sym.name} = <optimized out>\n")
+            sal = frame.find_sal()
+            filename = sal.symtab.filename if sal.symtab else "??"
+            gdb.write(f"thread {thread.num}, PC={frame.pc():#x}\n")
+            gdb.write(f"function: {frame.name() or '??'}\nlocation: {filename}:{sal.line}\n")
+            try:
+                block = frame.block()
+            except (gdb.error, RuntimeError):
+                gdb.write("arguments: debug block unavailable\n")
+                return
+            while block is not None:
+                for symbol in block:
+                    if symbol.is_argument:
+                        try:
+                            gdb.write(f"  {symbol.name} = {symbol.value(frame)}\n")
+                        except gdb.error as error:
+                            gdb.write(f"  {symbol.name} = <unavailable: {error}>\n")
+                if block.function is not None:
+                    break
+                block = block.superblock
+        except gdb.error as error:
+            raise gdb.GdbError(str(error))
 
 WhereAmI()
 ```
 
-`(gdb) source whereami.py` → `(gdb) whereami` → 한 화면에 모든 정보. 일상 디버깅에 매우 유용.
+source로 등록한 뒤 whereami를 실행합니다. frame은 resume/다른 session 뒤에도 같은 상태를 보존하는 snapshot이 아닙니다.
 
 ## 메모리 검색 — 한 예
 
-```python
+Linux info proc mappings의 human-readable 출력을 permission 검사 없이 parse해 모든 영역을 읽는 예제 대신, 사용자가 확인한 범위를 제한합니다. 아래는 UTF-8 byte pattern의 **첫 일치**만 검색합니다.
+
+```python title="findstr.py"
 import gdb
 
 class FindStr(gdb.Command):
-    """프로세스 메모리에서 문자열 검색."""
-
     def __init__(self):
-        super().__init__("findstr", gdb.COMMAND_USER)
+        super().__init__("findstr", gdb.COMMAND_DATA)
 
     def invoke(self, arg, from_tty):
-        inf = gdb.selected_inferior()
-        pattern = arg.encode()
-        # vmap에서 모든 R/W 영역 (info proc mappings 필요)
-        mappings = gdb.execute("info proc mappings", to_string=True)
-        for line in mappings.splitlines():
-            parts = line.split()
-            if len(parts) < 5: continue
-            try:
-                start = int(parts[0], 16)
-                end = int(parts[1], 16)
-            except ValueError:
-                continue
-            size = end - start
-            if size > 100*1024*1024: continue   # skip huge
-            try:
-                found = inf.search_memory(start, size, pattern)
-                if found:
-                    gdb.write(f"found at {found:#x}\n")
-            except gdb.error:
-                pass
+        self.dont_repeat()
+        argv = gdb.string_to_argv(arg)
+        if len(argv) != 3:
+            raise gdb.GdbError('usage: findstr START LENGTH "TEXT"')
+        try:
+            start, size = int(argv[0], 0), int(argv[1], 0)
+        except ValueError:
+            raise gdb.GdbError("START/LENGTH must be integers")
+        pattern = argv[2].encode("utf-8")
+        bits = gdb.lookup_type("void").pointer().sizeof * 8
+        if (start < 0 or not 0 < size <= 1024 * 1024 or
+                start >= 1 << bits or size > (1 << bits) - start or
+                not pattern or len(pattern) > size):
+            raise gdb.GdbError("invalid/oversized search range or pattern")
+        try:
+            found = gdb.selected_inferior().search_memory(start, size, pattern)
+        except gdb.error as error:
+            raise gdb.GdbError(str(error))
+        gdb.write("not found\n" if found is None else f"found at {found:#x}\n")
 
 FindStr()
 ```
 
-```text
-(gdb) findstr password
-found at 0x7ffff7d2c8a0
-found at 0x55555556a280
-```
+대상 memory가 읽기 가능한지와 stale/unavailable 범위는 target/core 조건을 따릅니다. memory-mapped I/O 등 읽기 부작용이 있는 영역을 임의로 검색하지 않습니다. 주소 0의 일치를 False로 버리지 않고 None과 구분합니다.
 
 ## 정리
 
@@ -552,12 +547,12 @@ found at 0x55555556a280
 - `gdb.parse_and_eval(expr)`이 만능 진입점.
 - `gdb.execute(..., to_string=True)`로 명령 출력 캡처.
 - `inferior.read_memory/write_memory/search_memory`로 raw 메모리.
-- 예외는 `gdb.error`. `set python print-stack full`로 디버깅.
+- GDB 작업의 `gdb.error`와 API별 Python 예외를 구분. `set python print-stack full`로 디버깅.
 - 짧은 명령 한 두 개로도 일상 디버깅 효율이 크게 늘어남.
 
 ## 다음 장 예고
 
-Ch 2 — 커스텀 명령, Convenience function, Event hook, Breakpoint subclass.
+[Ch 2](/blog/tools/debugging/gdb-extension/chapter02-commands-events) — 커스텀 명령, Convenience function, Event hook, Breakpoint subclass.
 
 ## 관련 항목
 
@@ -565,3 +560,7 @@ Ch 2 — 커스텀 명령, Convenience function, Event hook, Breakpoint subclass
 - [GDB Python API 공식 문서](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Python-API.html)
 - [Ch 6: 프런트엔드](/blog/tools/debugging/gdb-extension/chapter06-frontends)
 - `set python print-stack full` — 스크립트 디버깅
+
+## 검증 기준
+
+GDB 17.2의 gdb/python/py-value.c·py-type.c·py-symbol.c 및 동봉 manual과 대조합니다. 실제 target execution과 source/API·synthetic core 검증 범위는 별도 근거 기록을 따릅니다. [기본 Python scripting](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting) 뒤에서 이 장의 Value/Type/Frame 활용을 이어갈 수 있습니다.

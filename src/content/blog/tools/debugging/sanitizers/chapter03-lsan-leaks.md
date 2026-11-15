@@ -22,7 +22,7 @@ void leak_demo() {
 
 이 함수는 *호출될 때마다 40바이트씩* 누적됩니다. 짧게 도는 프로그램이면 문제 안 되지만, *오래 도는 서버*에서는 시간이 지나면 메모리가 바닥납니다.
 
-LSan(`LeakSanitizer`)은 *프로세스 종료 시점*에 살아 있는 모든 할당을 검사해 *어떤 할당이 회수되지 않았는지* 보고합니다.
+LSan은 전역·스택·레지스터 등 루트에서 도달 가능한 할당을 제외하고 누수 후보를 찾습니다. 모든 미해제 할당을 나열하는 도구는 아니며, 아래 출력은 보고 형식의 예시입니다.
 
 ```text
 =================================================================
@@ -46,10 +46,10 @@ SUMMARY: AddressSanitizer: 40 byte(s) leaked in 1 allocation(s).
 
 LSan은 *마지막 순간의 reachability 분석*입니다. 프로세스 종료 시점에:
 
-1. *루트 집합*을 결정 — 전역 변수, 스택의 모든 포인터, 레지스터 값, TLS.
+1. 다른 스레드를 일시 정지시키고 전역 영역·스택·레지스터·TLS 등 루트를 조사합니다. 구체적인 정지·스캔 방식은 플랫폼 구현에 따릅니다.
 2. 이 루트들로부터 *도달 가능한* 모든 힙 할당을 마킹.
-3. 마킹되지 않은 할당이 *Direct leak*.
-4. Direct leak이 가리키던 할당은 *Indirect leak*.
+3. 도달 불가능한 할당을 누수 후보로 분류합니다.
+4. 누수 후보 사이의 포인터 관계를 이용해 direct/indirect를 구분합니다. 순환에서는 모든 노드가 direct로 표시되는 것은 아닙니다.
 
 이 모델 덕분에 *순환 참조*도 잡힙니다. 두 객체가 서로만 가리킨다면, 둘 다 루트에서 도달 불가능하므로 누수입니다.
 
@@ -86,20 +86,17 @@ LSan만 독립으로 쓰려면:
 gcc -fsanitize=leak -g main.c -o myapp
 ```
 
-LSan 단독 모드는 *훨씬 빠릅니다* (ASan 같은 메모리 추적 없음, 종료 시점만 검사). 누수만 추적하고 다른 버그는 무시할 때 유용합니다.
+LSan 단독 모드는 ASan의 접근별 경계 검사를 추가하지 않습니다. 실행 중 할당 추적과 누수 검사 비용은 남으므로 속도는 해당 작업에서 측정합니다. 누수만 추적하고 다른 버그는 무시할 때 유용합니다.
 
 ### 플랫폼별 차이
 
-- **Linux**: ASan과 함께 LSan이 *자동 활성화*.
-- **macOS**: `ASAN_OPTIONS=detect_leaks=1` 환경 변수가 *반드시 필요*. 기본은 꺼져 있음.
-- **Windows**: LSan 미지원.
-
-macOS에서 누수 추적 안 되어 보이면 거의 100% 환경 변수 누락입니다.
+지원되는 Linux ASan에서는 보통 누수 검사가 기본 활성화됩니다. upstream은 macOS에서도 detect_leaks=1로 켜는 방식을 설명하지만, Apple Clang과 다른 LLVM 배포판의 runtime 지원을 같은 것으로 취급하면 안 됩니다. 옵션 누락 외에 지원 아키텍처·런타임·스레드 정지 권한도 확인합니다.
 
 ```bash
-# macOS
 ASAN_OPTIONS=detect_leaks=1 ./myapp
 ```
+
+이번 재현은 Homebrew Clang 23.1.3의 별도 -fsanitize=leak 런타임을 대상으로 합니다. Windows 등 다른 플랫폼의 실행 성공을 주장하지 않습니다. [현재 지원 플랫폼](https://clang.llvm.org/docs/LeakSanitizer.html#supported-platforms)을 확인합니다.
 
 ---
 
@@ -174,10 +171,10 @@ leak:my_known_leaking_function
 # 모듈명 (라이브러리)
 leak:libfoo.so
 
-# 정규식 (앞에 ^ 또는 $ 또는 .* 같은 형태)
-leak:^OpenSSL_init.*
+# 와일드카드 패턴
+leak:OpenSSL_init*
 
-# 정확히 일치
+# 이름에 대한 부분 매칭
 leak:dl_init
 ```
 
@@ -212,17 +209,19 @@ $ ASAN_OPTIONS=detect_leaks=1:halt_on_error=1 ./myapp test-input.txt
 ...
 ```
 
-`halt_on_error=1`로 첫 누수에서 즉시 종료. CI에서 이 옵션이 표준입니다.
+ASan의 halt_on_error는 접근 오류의 종료 정책입니다. LSan 종료 검사에서는 누수 보고와 LSAN_OPTIONS의 exitcode를 구분합니다. recoverable API는 보고 후에도 반환합니다.
 
 ### 반복 분석 — *변화 추적*
 
 기능을 추가/수정하면서 *누수가 줄어드는지 늘어나는지* 추적할 때.
 
 ```bash
-$ for i in 1 2 3; do
-    ASAN_OPTIONS=detect_leaks=1 ./myapp > /dev/null 2>&1
-    echo "Run $i: $(./myapp 2>&1 | grep 'SUMMARY' | tail -1)"
-  done
+for i in 1 2 3; do
+    status=0
+    ASAN_OPTIONS=detect_leaks=1 ./myapp > "leak-$i.log" 2>&1 || status=$?
+    echo "Run $i: exit=$status"
+    grep 'SUMMARY' "leak-$i.log" || true
+done
 ```
 
 CI 시스템에 누수 카운트를 *시계열로* 기록하면, 회귀 즉시 알람을 받을 수 있습니다.
@@ -233,17 +232,18 @@ CI 시스템에 누수 카운트를 *시계열로* 기록하면, 회귀 즉시 �
 
 ```c
 #include <sanitizer/lsan_interface.h>
+#include <stdio.h>
 
 void checkpoint() {
     // 이 시점까지의 누수 검사 (프로세스 종료 없이)
     int leaks = __lsan_do_recoverable_leak_check();
     if (leaks > 0) {
-        fprintf(stderr, "Leaks at checkpoint: %d\n", leaks);
+        fprintf(stderr, "Leaks found at checkpoint\n");
     }
 }
 ```
 
-서버 코드에서 *각 요청 처리 후*에 호출하면, *어느 요청이 누수를 유발했는지* 시점별로 추적할 수 있습니다. 단, 함수 자체가 무거우므로 *프로덕션이 아닌 진단 빌드*에서만 씁니다.
+반환값은 누수 개수가 아니라 발견 여부입니다. 이전에 잃어버린 할당도 다시 보고하므로 요청별 신규 누수 수와 같지 않습니다. 서버 코드에서 진단용 체크포인트로 호출하면, *어느 요청이 누수를 유발했는지* 시점별로 추적할 수 있습니다. 단, 함수 자체가 무거우므로 *프로덕션이 아닌 진단 빌드*에서만 씁니다.
 
 ---
 
@@ -259,7 +259,7 @@ char* process(int input) {
     }
     // ... use buf
     free(buf);
-    return result;
+    return NULL;
 }
 ```
 
@@ -320,7 +320,7 @@ Base* b = new Derived();
 delete b;   // ❌ Derived의 소멸자가 호출 안 됨 → data 누수
 ```
 
-기본 클래스가 *상속 가능*하면 소멸자를 *반드시* 가상으로. UBSan이 이 자리도 잡을 수 있습니다.
+파생 객체를 기본 포인터로 delete할 설계라면 접근 가능한 가상 소멸자를 둡니다. 기본 클래스 포인터로 삭제하지 못하게 하는 protected 비가상 소멸자 설계도 가능합니다. 잘못된 삭제는 UB이며, UBSan이 모든 이런 사례를 진단한다고 보장하지 않습니다.
 
 ```cpp
 class Base { public: virtual ~Base() = default; };
@@ -335,9 +335,9 @@ const char* get_config_path() {
 }
 ```
 
-`static`은 프로세스 종료 시까지 살아 있어 *의도된 누수*입니다. LSan은 이를 *잡지 않습니다* — 정적 저장 영역이라 *루트로 도달 가능*하기 때문입니다.
+이 static std::string은 정상 종료 시 소멸자가 실행되는 객체로, 그 자체를 의도적 누수라고 부르지 않습니다. 루트에서 계속 도달 가능한 캐시를 LSan이 보고하지 않는 문제와도 구분합니다.
 
-진짜 의도된 누수(예: 단일 인스턴스 캐시)는 `__attribute__((no_sanitize("leak")))`나 suppression으로 처리합니다.
+의도적으로 제외할 힙 객체는 __lsan_ignore_object를, 제한된 할당 구간은 __lsan_disable/__lsan_enable을 검토합니다. no_sanitize("leak") 함수 속성이 LSan 할당 제외 API를 대신한다고 가정하지 않습니다. 소유권과 재검토 조건을 먼저 기록합니다.
 
 ---
 
@@ -374,12 +374,51 @@ const char* get_config_path() {
 
 ---
 
+## 직접 확인 — 도달 가능·누수·정리의 차이
+
+작업 스레드가 만든 두 할당을 전역 루트에 보관합니다. 스레드 종료 후 첫 검사는 루트에서 도달 가능하므로 0입니다. 이후 루트를 비우면 direct/indirect 누수가 보고되고, free 인자로 실행하면 두 할당을 먼저 해제해 후속 검사도 0입니다.
+
+```cpp title="leak-check.cpp"
+#include <sanitizer/lsan_interface.h>
+#include <cstdio>
+#include <cstdlib>
+#include <thread>
+
+struct Node { void* child; };
+Node* volatile retained = nullptr;
+int main(int argc, char**) {
+    std::thread([] {
+        auto* node = static_cast<Node*>(std::malloc(sizeof(Node)));
+        if (!node) std::abort();
+        node->child = std::malloc(80);
+        if (!node->child) std::abort();
+        retained = node;
+    }).join();
+    int reachable = __lsan_do_recoverable_leak_check();
+    if (argc > 1) {
+        std::free(retained->child);
+        std::free(retained);
+    }
+    retained = nullptr;
+    int after = __lsan_do_recoverable_leak_check();
+    std::printf("reachable=%d after=%d\n", reachable, after != 0);
+}
+```
+
+```bash
+clang++ -std=c++17 -g -O1 -fsanitize=leak leak-check.cpp -o leak-check
+LSAN_OPTIONS=leak_check_at_exit=0 ./leak-check
+LSAN_OPTIONS=leak_check_at_exit=0 ./leak-check free
+```
+
+누수 실행은 reachable=0 after=1, 정리 실행은 reachable=0 after=0을 기대합니다. leak_check_at_exit=0은 이 진단 예제에서 중복 종료 검사를 막기 위한 설정입니다. 실제 서비스의 검사를 끄라는 지침이 아닙니다.
+
 ## 정리
 
 - LSan은 *프로세스 종료 시 reachability 분석*으로 누수를 찾는다.
 - *Direct leak* — 진짜 잃어버린 할당. *Indirect leak* — 그 자식들. Direct에 집중.
-- ASan에 자동 포함 (Linux). macOS는 `detect_leaks=1` 명시 필요.
-- 단독 사용은 `-fsanitize=leak` — 훨씬 빠름.
+- ASan 통합 여부·기본값은 타깃과 런타임을 확인합니다. macOS의 미검출을 옵션 누락 하나로 단정하지 않습니다.
+- 단독 사용은 `-fsanitize=leak`이며 접근별 경계 검사와 누수 검사의 비용을 구분합니다.
 - Suppression으로 외부 라이브러리의 알려진 누수 무시. `print_suppressions=1`로 통계.
 - 실행 중간 검사는 `__lsan_do_recoverable_leak_check()`.
 - 흔한 사고 — 조기 반환·예외·콜백·가상 소멸자·정적 변수.

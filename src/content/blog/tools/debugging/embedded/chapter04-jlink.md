@@ -10,27 +10,17 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-J-Link는 *상용 표준*입니다. OpenOCD가 오픈·범용이라면 J-Link는 *속도·안정성·완성도*가 압도적. 특히 신호 무결성 안 좋은 보드, 큰 펌웨어, 시간 sensitive한 디버깅에서 OpenOCD가 자꾸 끊긴다면 J-Link로 전환하면 거의 모든 문제가 사라집니다.
+J-Link는 SEGGER의 디버그 프로브와 소프트웨어 도구 체인입니다. 지원 칩·프로브 모델·firmware와 host 도구 조합을 확인해야 하며 신호 무결성·전원·reset 문제를 프로브 교체만으로 해결한다고 보장하지 않습니다.
 
 이 장은 Segger의 도구 체인 전체를 다룹니다. J-Link GDB Server, JLinkExe(commander), J-Run, J-Trace, Ozone GUI, Unlimited Flash Breakpoints, RTT가 그 대상입니다.
 
 :::tldr
-Segger의 디버그 프로브 + 데몬 + GUI 일체. *비상업·교육용 무료*이지만 상업 라이선스 별도.
+SEGGER의 프로브·서버·Commander·RTT·GUI 도구를 용도별로 구분합니다. EDU 제한과 기능별 라이선스는 해당 제품의 현재 조건을 확인합니다.
 :::
 
-## 하드웨어 라인업
+## 프로브와 기능 선택
 
-| 모델 | SWD/JTAG | 속도 | 대상 |
-|------|----------|------|------|
-| J-Link EDU mini | SWD | 3 MHz | 학습·취미 (~$20) |
-| J-Link EDU | SWD/JTAG | 15 MHz | 학습·취미 |
-| J-Link BASE | SWD/JTAG | 15 MHz | 상업용 시작 |
-| J-Link PLUS | SWD/JTAG | 50 MHz | 빠른 다운로드 |
-| J-Link PRO | SWD/JTAG + Eth | 50 MHz | 네트워크 |
-| J-Trace PRO | SWD/JTAG + ETM | ETM trace |
-| Flasher | 자동 양산 굽기 |
-
-EDU 모델은 *비상업·교육·취미용*. 상업적 사용은 BASE 이상 필요. EDU mini가 *원가 가까운 가격*이라 입문에 추천.
+모델마다 지원 인터페이스·최대 속도·trace 캡처·Ethernet·포함 기능이 다릅니다. [J-Link 제품 목록](https://www.segger.com/products/debug-probes/j-link/)과 [EDU Mini 조건](https://www.segger.com/products/debug-probes/j-link/models/j-link-edu-mini/)에서 정확한 모델을 확인합니다. 이 글은 가격이나 모든 모델의 속도 순위를 측정·비교하지 않습니다.
 
 ## 설치
 
@@ -66,7 +56,7 @@ J-Link> connect
 J-Link> r           # reset + halt
 J-Link> h           # halt
 J-Link> g           # go (resume)
-J-Link> mem 0x20000000 16    # 16 워드 dump
+J-Link> mem32 0x20000000 16  # 32비트 워드16개
 J-Link> w4 0x20000100 0xdead # 4바이트 쓰기
 J-Link> regs        # 모든 레지스터
 J-Link> reg pc      # PC만
@@ -74,8 +64,7 @@ J-Link> loadfile firmware.bin 0x08000000
 J-Link> verifybin firmware.bin 0x08000000
 J-Link> erase
 J-Link> savebin /tmp/dump.bin 0x08000000 0x1000
-J-Link> rtt setup    # RTT 시작
-J-Link> rtt read 0   # 채널 0 읽기
+
 ```
 
 `JLinkExe -device STM32F407VG -if SWD -speed 4000 -autoconnect 1 -CommandFile script.jlink`으로 배치.
@@ -153,8 +142,8 @@ Loading section .isr_vector, size 0x1c0 lma 0x8000000
 Loading section .text, size 0x9d20 lma 0x80001c0
 Loading section .rodata, size 0x4c0 lma 0x8009ee0
 Loading section .data, size 0x140 lma 0x800a3a0
-Start address 0x080001b8, load size 41960
-Transfer rate: 90 KB/sec, 4195 bytes/write.    ← 4 MHz SWD 기준
+Start address 0x080001b8, load size 42208
+Transfer rate: ...   ← 설명용 출력; 이 환경의 실측값 아님
 (gdb) monitor reset halt
 (gdb) break main
 (gdb) continue
@@ -173,26 +162,11 @@ Transfer rate: 90 KB/sec, 4195 bytes/write.    ← 4 MHz SWD 기준
 (gdb) monitor exec SetRTTAddr 0x20000000
 ```
 
-`exec` 접두사는 *J-Link Commander 명령을 그대로* 실행. 도구 체인 전체를 GDB 안에서.
+GDB Server의 monitor 명령과 Commander의 명령 집합은 같지 않습니다. `monitor exec`는 지원하는 J-Link command string을 전달하는 경로이며 Commander의 모든 명령을 그대로 실행하는 것으로 가정하지 않습니다. 설치한 GDB Server의 monitor 도움말을 기준으로 확인합니다.
 
-## 속도 비교 — OpenOCD vs J-Link
+## 속도 비교를 위한 조건
 
-대표적 차이.
-
-| | OpenOCD + CMSIS-DAP | J-Link PLUS |
-|---|----------------------|--------------|
-| 64KB flash 굽기 | ~6초 | ~1.5초 |
-| 메모리 read 1MB | ~10초 | ~3초 |
-| BP 설치/제거 | ~5ms | ~1ms |
-| 안정성 (signal noise) | 보통 | 매우 좋음 |
-
-J-Link의 우위 원인.
-
-1. *USB → SWD 변환 펌웨어*가 효율적 — 한 USB 트랜잭션에 여러 SWD 패킷 묶음.
-2. *Adaptive Clocking* — 신호 무결성에 따라 SWCLK 자동 조정.
-3. *Memory transfer optimization* — DAP의 *block transfer* 적극 활용.
-
-대형 펌웨어 또는 자주 굽는 환경에서 *시간이 곧 돈*. J-Link 가격이 충분히 회수됩니다.
+프로브 간 속도를 비교하려면 동일한 타깃·전원·케이블·SWD/JTAG 속도·flash 영역·이미지·erase/verify 범위를 고정해야 합니다. USB 전송 묶음, target flash algorithm, work area, 실제 flash 대기 시간이 결과를 바꿉니다. 여기서는 재현할 측정 자료가 없어 초 단위 순위나 안정성 우열을 제시하지 않습니다.
 
 ## Unlimited Flash Breakpoints
 
@@ -200,35 +174,17 @@ J-Link만의 상용 기능. FPB의 HW BP 개수(6개) 제한을 *flash patching*
 
 ### 동작 원리
 
-![Unlimited Flash BP 메커니즘](/images/blog/tools/diagrams/jlink-unlimited-fbp.svg)
+SEGGER는 hardware breakpoint를 우선 사용하고 자원이 부족하면 지원하는 flash 영역에 software breakpoint를 적용한다고 설명합니다. 이를 FP_REMAP으로 flash page를 SRAM에 alias하는 방식이라고 일반화하지 않습니다. flash 패치와 복원은 flash 재프로그래밍을 포함할 수 있으며 지원 장치·영역과 라이선스를 확인합니다.
 
-1. BP 7번째 설정 → J-Link 펌웨어가 *flash 페이지 전체*를 SRAM 임시 영역에 복사.
-2. SRAM 사본에서 해당 위치를 `BKPT` 명령으로 패치.
-3. CPU의 메모리 매핑 (또는 *aliasing*)을 활용해 *그 페이지만* SRAM 사본을 보도록.
-4. CPU가 fetch → 패치된 BKPT → halt.
-5. Resume 시 원래 flash로 복원.
-
-마법처럼 보이지만 *FPB의 flash patch* 메커니즘을 잘 활용한 것. 일부 칩(Cortex-M의 FP_REMAP 지원)에만 동작.
-
-큰 펌웨어에서 *모든 함수에 BP 걸기* 같은 작업이 가능해집니다. 매우 비싸지만 BP 부족이 일상인 환경에서 가치 있음.
-
-```text
-# 활성화
-J-Link> SetUnlimitedBP 1
-```
-
-GDB에서는 자동.
+[Unlimited Flash Breakpoints 공식 문서](https://www.segger.com/products/debug-probes/j-link/technology/flash-breakpoints/)를 기준으로 했습니다. 실제 장치의 BP 전환·erase 횟수·성능은 이 환경에서 실행하지 않았습니다.
 
 ## RTT — Segger의 진짜 강점
 
-[Ch 6 trace 장]에서 자세히 다루지만 J-Link의 RTT는 *가장 빠르고 안정적*. 100 KB/s 이상의 throughput.
+[Ch6 trace 장](/blog/tools/debugging/embedded/chapter06-trace)에서 채널·버퍼 모드·블로킹 조건을 구분합니다. throughput은 buffer·프로브·타깃 메모리·host polling 조건에 달립니다.
 
-```text
-# JLinkExe에서
-J-Link> rtt setup
-J-Link> rtt start
-J-Link> rtt read 0           # 채널 0 일회 읽기
-```
+RTT Client는 RTT를 제공하는 J-Link 연결 프로세스가 실행 중이어야 합니다. Commander를 종료한 뒤 Client만 시작해 메모리 폴링이 계속된다고 가정하지 않습니다.
+
+
 
 별도 *RTT Viewer* GUI.
 
@@ -249,9 +205,9 @@ SEGGER_RTT_Write(1, sensor_data, 256);   // 채널 1에 raw 데이터
 
 ### RTT vs 기존 printf
 
-기존 UART printf는 *블로킹* — UART FIFO 빌 때까지 대기. 1초에 수십~수백 라인이 한계. RTT는 *non-blocking* — 링 버퍼에 워드만 쓰고 즉시 반환. ISR 안에서도 안전. 디버거 측이 백그라운드로 폴링해 가져갑니다.
+UART도 queue·DMA 방식으로 비동기화할 수 있습니다. RTT는 NO_BLOCK_SKIP/TRIM이면 버퍼 부족 시 데이터를 버리거나 줄이고, BLOCK_IF_FIFO_FULL이면 호스트가 읽지 않을 때 대기할 수 있습니다. ISR 사용 여부는 buffer locking·중첩 interrupt·포트별 임계구역 구현까지 확인해야 합니다.
 
-ISR latency가 중요한 RT 시스템에서는 RTT가 사실상 필수.
+ISR latency가 중요하면 로그를 줄이거나 버리는 정책과 임계구역 최대 시간을 먼저 확인합니다.
 
 ## J-Run — 자동 펌웨어 실행
 
@@ -271,9 +227,9 @@ $ grep "BOOT OK" /tmp/boot.log && echo PASS || echo FAIL
 
 J-Trace PRO는 ETM trace 핀을 받습니다. *CPU의 모든 명령 실행*을 기록.
 
-```bash
-$ JTraceExe -device STM32F767ZI -if SWD -tracesink SWO
-```
+J-Trace의 실제 trace 설정은 대상 MCU의 trace port·프로브와 호환되는 Ozone/IDE 설정을 사용합니다. 확인하지 않은 `JTraceExe -tracesink SWO` 명령을 ETM 캡처 절차로 제시하지 않습니다. ITM/SWO와 ETM 병렬 trace를 구분합니다.
+
+
 
 쓰임:
 
@@ -312,13 +268,7 @@ CI에서 *보드별로 다른 프로브*에 동시 접근할 때 필수.
 
 ## Adaptive Clocking
 
-신호 무결성이 안 좋을 때 J-Link가 *자동으로* SWCLK를 낮춥니다.
-
-```text
-J-Link> speed adaptive     # CPU가 보내는 RTCK 신호를 따라
-```
-
-OpenOCD에 없는 기능. 케이블이 길거나 잡음이 많은 환경에서 효과적.
+RTCK를 제공하는 JTAG 타깃에서는 반환 clock에 맞추는 adaptive clocking을 사용할 수 있습니다. 이것은 신호 잡음을 감지해 SWCLK를 자동으로 낮추는 SWD 기능이 아닙니다. [SEGGER UM08001](https://kb.segger.com/UM08001)의 JTAG/SWD speed 설명과 [OpenOCD FAQ](https://openocd.org/doc/html/FAQ.html)를 참고합니다. OpenOCD도 hardware 조합이 지원하면 RTCK 기반 adaptive JTAG clocking을 사용할 수 있습니다.
 
 ## 보안 — Lock 해제
 
@@ -330,75 +280,37 @@ J-Link> erase
 
 칩별로 명령이 다릅니다. STM32는 OpenOCD와 비슷한 방식 (`option_write`).
 
-## CI 패턴
+## CI에서 BIN과 ELF 검증을 구분
 
-```bash
-#!/usr/bin/env bash
-# fw-test.sh
+Commander의 verifybin은 raw binary 비교입니다. ELF 파일을 binary로 오해해 0x08000000의 flash 바이트와 비교하면 ELF header·주소 정보까지 비교하게 됩니다. 아래는 BIN 입력만 받는 오프라인 계획 생성기입니다. 실제 Commander 실행은 하지 않습니다.
 
-set -e
-DEVICE=STM32F407VG
-ELF=$1
-
-# 1. 굽기 + reset
-cat > /tmp/flash.jlink <<EOF
-device $DEVICE
-si SWD
-speed 4000
-connect
-r
-loadfile $ELF
-verifybin $ELF 0x08000000
-g
-qc
-EOF
-JLinkExe -CommandFile /tmp/flash.jlink
-
-# 2. RTT 캡처 30초
-timeout 30 JLinkRTTClient > /tmp/rtt.log &
-sleep 31
-
-# 3. 검증
-if grep -q "TEST PASS" /tmp/rtt.log; then
-    echo "PASS"
-    exit 0
-else
-    echo "FAIL"
-    cat /tmp/rtt.log
-    exit 1
-fi
+```js title="jlink-plan-check.mjs"
+import assert from 'node:assert/strict';
+function plan(name, bytes) {
+    if(!/^[A-Za-z0-9_-]+\.bin$/.test(name)) throw Error('raw .bin file required');
+    if(bytes.length<4 || bytes.subarray(0,4).equals(Buffer.from([127,69,76,70])))
+        throw Error('ELF or empty input is not a raw flash image');
+    return ['ExitOnError 1','device STM32F407VG','si SWD','speed 4000',
+        'connect','r','h','loadfile '+name+' 0x08000000',
+        'verifybin '+name+' 0x08000000','r','g','exit'];
+}
+const commands=plan('firmware.bin',Buffer.from([0,0,2,32,1,1,0,8]));
+assert(commands.includes('verifybin firmware.bin 0x08000000'));
+assert.throws(()=>plan('firmware.elf',Buffer.alloc(8)));
+assert.throws(()=>plan('firmware.bin',Buffer.from([127,69,76,70])));
+assert.throws(()=>plan('firmware.bin',Buffer.alloc(0)));
+console.log(commands.join('\n'));
 ```
 
-J-Link Commander가 *non-interactive*로 동작하므로 CI에 자연스럽게 끼워집니다.
+Node24.21.0에서 정상BIN·ELF명·ELFmagic·빈입력을 확인했습니다. 이 검사만으로 BIN의 base주소·벡터·기기 적합성을 보증하지 않습니다. [Commander verifybin·ExitOnError](https://kb.segger.com/J-Link_Commander)를 기준으로 했으며 J-Link·프로브·보드가 없어 실제 erase/write/verify는 미검증입니다. RTT/UART 수집기는 reset/run 전에 준비하고 byte 검증 성공과 부트 테스트 성공을 별도 상태로 기록합니다.
 
 ## License 모델
 
-| 라이선스 | 가능 |
-|---------|------|
-| EDU (Educational) | 학생·취미·교육. *상업적 제품 개발 불가*. |
-| BASE / PLUS / PRO | 상업적 사용 (개발자 1인). 회사 단위는 별도. |
-| 양산 (Flasher) | 공장 자동 굽기. 별도 라이선스. |
+EDU/EDU Mini는 벤더가 정한 교육·비상업 용도 제한을 확인해야 합니다. 상용 모델도 Ozone·Unlimited Flash Breakpoints 등 기능별 포함 조건이 다를 수 있습니다. 라이선스가 개발자1인 기준이라는 단정이나 프로브 serial number 때문에 바이너리 배포 속성이 자동으로 바뀐다는 설명 대신, 사용 제품의 라이선스 문서를 확인합니다.
 
-EDU mini의 *시리얼 번호*가 EDU로 표시되므로, 그 프로브로 굽힌 펌웨어는 *상업적 배포 불가*. 회사에서 정식 BASE를 사야 합니다.
+## OpenOCD와 J-Link 선택
 
-## OpenOCD vs J-Link 비교 정리
-
-| | OpenOCD | J-Link |
-|---|---------|--------|
-| 가격 | 0 (프로브만) | \$50~\$1000+ |
-| 라이선스 | GPL | 상용 |
-| 칩 지원 폭 | 매우 넓음 | 매우 넓음 (Segger DB) |
-| 신호 안정성 | 보통 | 매우 좋음 |
-| 굽기 속도 | 보통 | 빠름 |
-| RTT | 지원 (느림) | 빠름 |
-| GUI | 별도 (VSCode 등) | Ozone 무료 |
-| Unlimited Flash BP | 없음 | 있음 |
-| ETM trace | 별도 J-Trace 펌웨어 | J-Trace 모델 |
-| Live Variable | 없음 | 있음 (Ozone) |
-| 디버그 가능성 (자체) | TCL · 소스 공개 | 블랙박스 펌웨어 |
-| 자동화 | TCL | 자체 셸 + JLinkScript |
-
-*시작은 OpenOCD, 본격 작업은 J-Link*가 일반적인 발전 경로. 첫 보드 bring-up에서는 OpenOCD가 *소스 추적이 가능*해 유리, 일상은 J-Link가 빠릅니다.
+OpenOCD는 공개된 driver·Tcl 설정을 추적할 수 있고 J-Link는 SEGGER의 도구·지원 device database를 사용합니다. 지원 기능·접근 방식·유지보수 요구를 기준으로 선택하고 속도·안정성은 동일 조건에서 직접 비교합니다. Live memory 접근이나 trace의 존재 여부를 제품군 전체에 대해 단정하지 않습니다.
 
 ## 정리
 
@@ -406,10 +318,10 @@ EDU mini의 *시리얼 번호*가 EDU로 표시되므로, 그 프로브로 굽�
 - J-Link Commander가 *직접 셸*, JLinkGDBServer가 *GDB 데몬*.
 - `-device` 이름이 정확해야 flash 굽기가 정상.
 - Unlimited Flash BP가 *flash patching*으로 BP 무한 흉내.
-- RTT가 *최고 속도·안정성*의 trace 채널.
+- RTT는 buffer 모드와 수명·동시성 조건을 확인하는 메모리 trace 채널.
 - J-Run으로 한 줄 굽기 + 실행 + RTT 캡처.
-- Ozone이 풀 GUI, *Live Variable* 등 OpenOCD에 없는 기능.
-- EDU 모델은 교육·취미 한정 — 상업적 제품에는 BASE 이상.
+- Ozone은 GUI·변수 관찰·trace 분석 기능을 제공하며 해당 제품의 포함 조건을 확인합니다.
+- EDU / EDU Mini의 사용 제한과 상용 도구 기능별 라이선스는 구매 모델의 현재 약관으로 확인합니다.
 
 ## 다음 장 예고
 

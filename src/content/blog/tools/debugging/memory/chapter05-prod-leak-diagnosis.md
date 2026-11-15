@@ -10,10 +10,10 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-이 시리즈의 마지막 장 — *재현 환경 없는* 운영의 누수 진단. ASan은 빌드 다시 필요, Valgrind는 너무 느림, heaptrack은 trace 너무 큼. 그래서 *프로덕션 친화 도구 셋*이 필요합니다.
+이 장은 운영 환경에서 누수 의심 신호를 좁히는 방법을 다룹니다. ASan·Valgrind·heaptrack은 각기 빌드·성능·기록량 제약이 있으므로, 운영 수집은 영향과 안전성을 검증한 제한된 방법으로 시작합니다.
 
 :::tldr
-`/proc/[pid]/smaps_rollup` 폴링 + jemalloc 상시 profiler + cgroup `memory.max`로 보호 + drgn으로 *라이브 분석*.
+`/proc/[pid]/smaps_rollup` 추세와 cgroup 지표를 우선 비교하고, allocator profiler나 drgn은 지원되는 범위와 측정 영향을 확인한 뒤 사용합니다.
 :::
 
 ## 1단계 — 누수 *확인*
@@ -29,11 +29,7 @@ $ for i in $(seq 1 100); do
   done > /tmp/pss.log
 ```
 
-추세:
-- *우상향 무한* → 누수.
-- *우상향 후 수렴* → 캐시 (정상).
-- *주기적 sawtooth* → GC가 있는 언어 (Go/Java) 또는 explicit `free`.
-- *플랫* → 누수 없음.
+추세는 진단 신호이지 누수 판정기가 아닙니다. 비교 가능한 workload 구간에서 여러 차례 측정하고, 캐시·allocator retention·파일 매핑·cgroup 제한 등 다른 원인을 함께 확인합니다. 일시적으로 수렴하거나 평평해도 누수를 배제할 수 없고, 증가 곡선만으로 누수를 확정할 수도 없습니다.
 
 `gnuplot` / `matplotlib`로 시각화:
 
@@ -54,7 +50,7 @@ RssFile:    200000 kB     # 정상 범위
 RssShmem:    50000 kB     # 정상
 ```
 
-RssAnon만 폭주 → 일반 heap 또는 mmap 누수. RssFile 폭주 → 파일 매핑 누수 (Drogon 같은 framework의 *log file mmap* 등).
+RssAnon 증가는 heap 또는 익명 mmap의 후보 신호이고 RssFile 증가는 resident file mapping 후보입니다. RSS 분류만으로 누수 원인을 확정하지 말고 `smaps`의 매핑과 애플리케이션 동작을 대조합니다.
 
 ```bash
 $ sudo cat /proc/$PID/smaps | awk '
@@ -83,7 +79,7 @@ MALLOC_CONF=prof:true,prof_active:true,prof_prefix:/var/log/myprog/jeprof,lg_pro
 LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 ```
 
-부하: < 5%. 운영에 *상시 활성* 가능.
+프로파일링은 통계적 샘플링과 backtrace 비용이 있습니다. 고정 overhead 수치를 가정하지 말고 대표 workload에서 latency·CPU·RSS 영향을 측정한 뒤 상시 활성화 여부를 결정합니다.
 
 자동 dump 트리거 (SIGUSR2 등):
 
@@ -91,13 +87,15 @@ LD_PRELOAD=/usr/lib/x86_64-linux-gnu/libjemalloc.so.2
 #include <signal.h>
 #include <jemalloc/jemalloc.h>
 
+volatile sig_atomic_t dump_requested;
+
 void dump_handler(int sig) {
-    mallctl("prof.dump", NULL, NULL, NULL, 0);
+    dump_requested = 1;  // signal handler에서는 async-signal-safe 작업만 수행
 }
 
 int main() {
     signal(SIGUSR2, dump_handler);
-    // ...
+    // 일반 실행 흐름에서 dump_requested를 확인한 뒤 mallctl("prof.dump", ...)
 }
 ```
 
@@ -127,8 +125,7 @@ Attaching to pid 12345, Ctrl+C to quit.
         ...
 ```
 
-- 5초 대기 → *그 5초 동안* alloc + 추적 안 된 free의 *누적 누수*.
-- 운영에 부담 적음 (eBPF verifier 통과).
+- `memleak`이 보고하는 outstanding allocation은 후보일 뿐입니다. 추적 구간·stack 수집 방식·도구 버전에 따라 결과와 overhead가 달라지므로, 실제 시스템에서 검증합니다.
 
 ### 옵션 C — heaptrack attach
 
@@ -139,9 +136,9 @@ $ heaptrack -p $PID
 $ heaptrack_gui heaptrack.myprog.*.zst
 ```
 
-`heaptrack-gui`의 *Consumed* 탭에서 *시간별 메모리 그래프* + 콜스택. 한 화면.
+GUI의 allocation-cost 그래프와 호출 스택은 heaptrack 기록 안의 할당 정보를 보여 줍니다. RSS·cgroup 사용량 그래프와 같은 값은 아닙니다.
 
-부하: 2-3x. 운영 영향 있으나 *짧은 샘플*은 허용.
+heaptrack의 runtime attach는 공식 문서에서 unstable로 안내되며 대상 프로세스가 중단될 수 있습니다. 운영 대상에 적용하기 전 재현 환경에서 검증하고, 가능하면 프로세스 시작 시점부터 기록합니다.
 
 ### 옵션 D — drgn으로 라이브 분석
 
@@ -149,16 +146,11 @@ $ heaptrack_gui heaptrack.myprog.*.zst
 $ sudo drgn -p $PID
 >>> from drgn.helpers.linux import *
 
-# vmalloc 영역
->>> for addr, info in vmalloc_areas(prog):
-...     print(hex(addr), info.size)
-
-# slab 통계 (커널)
->>> for slab in for_each_slab_cache(prog):
-...     print(slab.name.string_(), slab.size)
+>>> # drgn은 주로 커널 메모리와 커널 자료구조 분석에 사용합니다.
+>>> # user-space heap allocation stack을 자동으로 복원하는 도구로 간주하지 않습니다.
 ```
 
-drgn은 *user-space 프로세스의 동적 정보*에도 활용 가능 (커널 측에서 본 정보 + procfs).
+drgn은 주로 커널 메모리와 커널 자료구조의 라이브 분석에 씁니다. user-space allocation stack을 procfs에서 복원하는 도구로 사용하지 말고, 해당 heap profiler나 디버거를 선택합니다.
 
 ## 4단계 — 누수 *수정 후 검증*
 
@@ -172,7 +164,7 @@ import numpy as np
 data = np.loadtxt('pss-after.log')[:, 1]
 slope = np.polyfit(range(len(data)), data, 1)[0]
 print(f'slope: {slope:.2f} KB/sec')
-print('LEAK' if slope > 1024 else 'OK')
+print('증가 추세 검토 필요' if slope > 1024 else '이 표본에서 임계 초과 없음')
 "
 ```
 
@@ -180,7 +172,7 @@ CI에 통합 — 매 배포 시 *짧은 load test* + slope 검증으로 회귀 �
 
 ## cgroup memory.max — 보호
 
-운영 환경에서 *프로세스 단일 메모리 사용 제한*. OOM이 *해당 cgroup* 안에서만 일어남.
+`memory.max`는 프로세스 한 개가 아니라 cgroup 전체의 메모리 사용을 제한합니다. 한도에 닿으면 reclaim 후 cgroup 내 OOM 처리로 이어질 수 있지만, 시스템 OOM과 무관하게 모든 할당이 즉시 실패한다고 단정할 수는 없습니다.
 
 ```bash
 # systemd unit
@@ -199,9 +191,9 @@ $ echo 4G | sudo tee /sys/fs/cgroup/myapp/memory.max
 $ echo $PID | sudo tee /sys/fs/cgroup/myapp/cgroup.procs
 ```
 
-- **memory.max** — *hard limit*. 초과 시 OOM killer.
-- **memory.high** — *soft limit*. 초과 시 throttle (reclaim 가속).
-- **memory.low** — *minimum*. OOM 시 마지막.
+- **memory.max** — cgroup의 hard limit. 도달하면 reclaim을 시도하고, 계속 한도를 넘으면 cgroup OOM이 발생할 수 있습니다.
+- **memory.high** — 초과 시 reclaim 압력을 높이는 throttle 경계이며 OOM 경계와 다릅니다.
+- **memory.low** — 하위 경계 아래의 사용량에 best-effort 보호를 주는 값입니다.
 - **memory.swap.max** — swap 한도.
 
 ```bash
@@ -217,28 +209,13 @@ pagetables 524288
 ...
 ```
 
-container 환경(Docker/K8s)은 이미 cgroup 사용. K8s `resources.limits.memory`가 *memory.max*에 매핑.
+컨테이너 runtime은 cgroup을 사용합니다. Kubernetes memory limit은 보통 해당 컨테이너 cgroup의 memory limit으로 전달되며, 정확한 적용값은 노드의 cgroup 버전과 runtime 설정에서 확인합니다.
 
 ## OOM 회피 — graceful degradation
 
-OOM 직전에 *서비스가 알아채고* 캐시 비우기.
+OOM 직전 회복을 보장하는 패턴은 없습니다. `getrusage(RUSAGE_SELF).ru_maxrss`는 현재 RSS가 아니라 최대 RSS이며 플랫폼별 단위도 다릅니다. 이를 현재 pressure 센서처럼 쓰지 말고 PSI/cgroup 지표를 사용하며, 아래의 임계값·복구 동작은 서비스별 검토가 필요한 의사코드입니다.
 
-```c
-// 주기적 RSS 체크
-#include <sys/resource.h>
-
-void check_memory() {
-    struct rusage ru;
-    getrusage(RUSAGE_SELF, &ru);
-    long rss_kb = ru.ru_maxrss;
-    
-    if (rss_kb > 3 * 1024 * 1024) {  // 3GB 이상
-        log_warning("memory pressure, clearing caches");
-        clear_caches();
-        malloc_trim(0);
-    }
-}
-```
+애플리케이션이 소유한 캐시를 줄일지는 서비스의 자체 pressure 정책으로 결정합니다. `malloc_trim()`은 glibc allocator를 사용할 때만 후보이며, 호출 자체가 RSS 감소를 보장하지 않습니다.
 
 또는 *PSI* (Pressure Stall Information):
 
@@ -249,7 +226,7 @@ full avg10=0.10 avg60=0.05 avg300=0.02 total=234567
 ```
 
 - `some` — *일부* 프로세스가 메모리 대기.
-- `full` — *모든* 프로세스가 대기.
+- `full` — 해당 PSI 집계 범위에서 실행 중인 모든 비-idle 작업이 자원 압력으로 지연.
 - 임계값 등록 → poll/epoll 알림.
 
 ```c
@@ -258,7 +235,7 @@ write(fd, "some 150000 1000000", 19);  // 1초 중 150ms 이상 stall이면 알�
 // poll(...)으로 대기
 ```
 
-systemd-OOMD가 이걸 활용 — *완전 OOM 전에* memory.swap.max 늘리거나 worst 프로세스 종료.
+systemd-oomd는 PSI와 cgroup 상태를 정책에 따라 사용해 cgroup을 종료할 수 있습니다. `memory.swap.max`를 자동으로 늘리는 기능이라고 설명하지 않습니다.
 
 ## 자동 dump 트리거
 
@@ -269,7 +246,7 @@ void *monitor_thread(void *arg) {
     while (1) {
         sleep(60);
         long rss = get_rss();
-        if (rss > last_rss * 1.5) {
+        if (last_rss > 0 && rss > last_rss * 1.5) {
             // 50% 급증 → dump
             mallctl("prof.dump", NULL, NULL, NULL, 0);
             log_info("auto-dumped at RSS=%ld", rss);
@@ -279,7 +256,7 @@ void *monitor_thread(void *arg) {
 }
 ```
 
-대규모 서비스에서 *모든 누수가 자동 캡처* → 사후 분석.
+이 예시는 직전 1분보다 RSS가 50% 늘어난 경우만 포착합니다. 느린 누수, baseline 설정, allocator retention은 놓칠 수 있으므로 모든 누수를 자동 포착하지 않습니다.
 
 ## 로그 통합 — Prometheus + Grafana
 
@@ -364,7 +341,7 @@ Go는 GC. 누수는 *goroutine leak* 또는 *map에 무한 key* 형태가 흔함
 - 누수 *영역* → smaps의 Private_Dirty 정렬.
 - 누수 *콜스택* → jemalloc prof (상시) 또는 BCC memleak.
 - cgroup memory.max로 보호 + PSI로 graceful degradation.
-- 자동 dump로 모든 사고 캡처.
+- 자동 dump 조건은 누락 사례를 만들 수 있으므로 별도 관측과 재현 절차를 유지합니다.
 - Java/Python/Go는 자체 도구 병용.
 
 ## 관련 항목 (시리즈 전체)
@@ -383,3 +360,6 @@ Go는 GC. 누수는 *goroutine leak* 또는 *map에 무한 key* 형태가 흔함
 - [PSI 공식 문서](https://www.kernel.org/doc/html/latest/accounting/psi.html)
 - [systemd-oomd](https://www.freedesktop.org/software/systemd/man/systemd-oomd.html)
 - [Brendan Gregg — Memory leak flame graph](https://www.brendangregg.com/FlameGraphs/memoryflamegraphs.html)
+- [Linux PSI — pressure triggers](https://docs.kernel.org/accounting/psi.html)
+- [Linux cgroup v2 memory controller](https://docs.kernel.org/admin-guide/cgroup-v2.html#memory)
+- [systemd-oomd](https://www.freedesktop.org/software/systemd/man/latest/systemd-oomd.service.html)

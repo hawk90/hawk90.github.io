@@ -27,7 +27,7 @@ topics: ["tools", "tools/debugging"]
 | `list` | `l` | 소스 코드 표시 |
 | `quit` | `q` | 디버거 종료 |
 
-이 10개를 외우면 *디버거 사용 90%*가 끝납니다.
+이 명령을 기준으로 정지·조회·재개의 기본 흐름을 익힙니다.
 
 ---
 
@@ -42,7 +42,7 @@ topics: ["tools", "tools/debugging"]
 (gdb) c
 ```
 
-`run`은 *처음부터*, `continue`는 *멈춘 자리부터*. `continue N`으로 *N번 무시*하고 진행 가능.
+`run`은 *처음부터*, `continue`는 *멈춘 자리부터*. 현재 [GDB 매뉴얼의 continue ignore-count](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Continuing-and-Stepping.html)는 중단점 정지일 때 같은 위치의 추가 hit를 무시하는 인자로 설명합니다. 다른 이유로 정지했다면 이 인자는 적용되지 않습니다. 설치된 GDB의 help continue로 해당 판의 정의를 확인합니다.
 
 LLDB:
 ```text
@@ -102,7 +102,7 @@ LLDB:
 
 LLDB:
 ```text
-(lldb) breakpoint set --one-shot --name main
+(lldb) breakpoint set --one-shot true --name main
 ```
 
 ### 모든 함수에 자동
@@ -162,8 +162,8 @@ int main() {
 
 | 명령 | 4 → ? |
 |------|-------|
-| `next` | 5 (return 후 main으로) |
-| `finish` | 5 (현재 함수 끝까지) |
+| `next` | 반환·줄 정보에 따라 함수 끝 또는 호출자 지점에 정지 |
+| `finish` | 호출자 add 호출 직후에 정지; z 대입이 완료됐는지는 확인 필요 |
 
 요약:
 - **`next`** — 한 줄. 함수 호출은 *통째로* 실행.
@@ -189,7 +189,7 @@ C/C++ 줄이 아니라 *기계어 한 줄*씩. *최적화된 코드*나 *디스�
 (gdb) until 50    # 50번 줄까지 같은 자리에 안 멈춤
 ```
 
-루프 안의 break가 *매번 멈추는 게 싫을 때*. 50번 줄까지 *통과해 진행*.
+until도 사용자 중단점·시그널을 무시하지 않습니다. 현재 프레임에서 목표 줄 또는 함수 반환까지 진행하되 그 전에 다른 정지 원인이 발생할 수 있습니다.
 
 ---
 
@@ -206,7 +206,7 @@ $1 = 42
 $2 = 100
 ```
 
-C/C++ *식 전부*가 평가 가능. 함수 호출도 됩니다 (side effect 주의).
+디버거가 지원하고 현재 컨텍스트에서 해석할 수 있는 C/C++ 식을 평가합니다. 함수 호출도 됩니다 (side effect 주의).
 
 ```text
 (gdb) print strlen(str)
@@ -240,7 +240,7 @@ LLDB:
 ```text
 (lldb) print x
 (lldb) p/x x          # 16진수
-(lldb) print --format hex x
+(lldb) expression --format hex -- x
 ```
 
 ### 배열·메모리

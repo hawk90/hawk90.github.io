@@ -42,12 +42,12 @@ $ python script.py
 | `step` | `s` | 다음 줄(함수에 들어감) |
 | `return` | `r` | 현재 함수 끝까지 |
 | `continue` | `c` | 실행 재개 |
-| `print x` | `p x` | 표현식 평가 |
+| `p x` | `p` | 표현식 평가 |
 | `pp x` | | pretty-print |
 | `where` / `bt` | `w` | 콜스택 |
 | `up` / `down` | `u` / `d` | 프레임 이동 |
 | `args` | `a` | 현재 함수 인자 |
-| `locals()` | | 로컬 변수 dict |
+| `p locals()` | | 로컬 변수 dict |
 | `break` | `b` | 브레이크포인트 |
 | `quit` | `q` | 디버거 종료 |
 
@@ -124,7 +124,7 @@ Num Type         Disp Enb   Where
  'port': 5432,
  'pool_size': 10}
 
-(Pdb) !x = 5                       # 변수 *대입*. ! 접두사 필요
+(Pdb) !x = 5                       # Python 문장으로 명시해 명령 이름 충돌 방지
 (Pdb) interact                     # 일반 파이썬 REPL 진입
 >>> import json
 >>> json.dumps(config, indent=2)
@@ -210,7 +210,7 @@ display total: 5    [old: 0]
 ### 예외 시 자동 진입
 
 ```python
-import sys, pdb
+import sys, pdb, traceback
 
 def excepthook(type, value, tb):
     traceback.print_exception(type, value, tb)
@@ -219,7 +219,7 @@ def excepthook(type, value, tb):
 sys.excepthook = excepthook
 ```
 
-전역 `sys.excepthook`을 갈아 끼우면 *어떤* 미처리 예외에서든 자동으로 post-mortem 진입.
+sys.excepthook은 인터프리터 최상위의 미처리 예외를 다룹니다. 별도 스레드의 threading.excepthook이나 unraisable 예외까지 같은 훅이 처리하는 것은 아닙니다. [sys.excepthook](https://docs.python.org/3.15/library/sys.html#sys.excepthook)의 범위를 확인합니다.
 
 ### 시그널로 외부에서 진입
 
@@ -236,21 +236,45 @@ signal.signal(signal.SIGUSR1, handler)
 $ kill -USR1 <pid>
 ```
 
-서버가 *멈춘 듯한* 상태일 때 외부에서 시그널로 디버거 진입. 다음 장의 `py-spy`가 더 부드러운 대안입니다.
+이 방식은 시그널 지원과 연결 가능한 입력 터미널이 있는 Unix 프로세스를 전제로 합니다. 입력을 받을 수 없는 서비스에 대화형 디버거를 열기 전에 [4장의 py-spy](/blog/tools/debugging/python/chapter04-py-spy)나 5장의 비대화형 traceback dump를 검토합니다. 다음 장은 debugpy입니다.
 
 ## pdb의 한계
 
 - *멀티 스레드 정지 시점*이 흔들립니다. 한 스레드가 멈춰도 다른 스레드는 계속 실행 — GIL 때문에 결정적 디버깅이 어렵습니다.
 - 비동기(`asyncio`)는 `await`가 코루틴을 떠나는 순간 컨텍스트가 사라져 콜스택이 짧게 보입니다 (Ch 3에서 다룸).
 - 원격·운영 서비스에 콘솔 진입은 위험 — `py-spy`나 `debugpy` 쪽이 안전.
-- 큰 객체 print는 터미널을 마비시킴 — `pp`와 `set_trace`의 `header` 옵션 활용.
+- 큰 객체 출력은 범위를 제한합니다. `p items[:5]`나 타입·길이부터 확인하며, set_trace의 header는 정지 안내 문자열이지 객체 출력 제한 기능이 아닙니다.
+
+## 직접 확인 — 예외 훅에서 실제 로컬 변수 검사
+
+다음 파일은 CPython 3.15.0·macOS에서 실행했습니다. traceback 임포트가 빠지면 원래 예외를 분석하기 전에 훅 자체가 NameError로 실패하므로 임포트와 진입을 함께 확인합니다.
+
+```python title="postmortem.py"
+import pdb
+import sys
+import traceback
+
+def excepthook(exc_type, value, tb):
+    traceback.print_exception(exc_type, value, tb)
+    pdb.post_mortem(tb)
+
+def divide():
+    numerator = 42
+    denominator = 0
+    return numerator / denominator
+
+sys.excepthook = excepthook
+divide()
+```
+
+`python3 postmortem.py`를 실행하고 Pdb에서 `p numerator`를 입력하면 42를 읽습니다. `where`로 divide 프레임을 확인하고 `continue`로 빠져나옵니다. 프로그램은 원래의 미처리 ZeroDivisionError로 실패 종료하며, 디버거를 방문했다고 오류가 복구되는 것은 아닙니다. 스크립트 전체 재실행 대신 실패 당시 traceback의 변수를 검사하는 예입니다. [post_mortem 문서](https://docs.python.org/3.15/library/pdb.html#pdb.post_mortem)를 참고합니다.
 
 ## 정리
 
 - 표준 라이브러리 `pdb` + `breakpoint()`가 가장 빠른 진입.
 - `PYTHONBREAKPOINT` 환경 변수로 디버거 선택·비활성화.
 - 명령은 GDB와 거의 같음 — `n`/`s`/`c`/`p`/`w`/`u`/`d`.
-- 변수 *대입*은 `!`로 시작, `interact`로 일반 REPL 진입.
+- Python 문장은 `!`로 명시해 디버거 명령과 구분하고 interact로 일반 REPL에 진입합니다.
 - 운영 친화: `ipdb`로 컬러·자동 완성, `PYTHONBREAKPOINT=0`으로 비활성.
 - 예외 자동 진입(`sys.excepthook` / `pdb.post_mortem`)이 *사후 분석* 표준 패턴.
 

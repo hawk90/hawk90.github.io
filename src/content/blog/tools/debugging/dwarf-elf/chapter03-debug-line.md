@@ -20,9 +20,9 @@ topics: ["tools", "tools/debugging"]
 
 ## 왜 VM인가
 
-`main.cpp` 한 파일이 수천 PC↔줄 매핑을 생성합니다. 단순 표로 저장하면 *수십 KB*. 하지만 *대부분의 연속 행은 작은 차분*만 다릅니다 (PC가 1-2 명령어 진행, 줄이 1-2 줄 변화). 이 패턴을 *작은 명령어*로 표현하면 1바이트로 한 행 추가 가능 — 압축비 10배 이상.
+`main.cpp` 한 파일이 수천 PC↔줄 매핑을 생성합니다. 단순 표로 저장하면 *수십 KB*. 하지만 *대부분의 연속 행은 작은 차분*만 다릅니다 (PC가 1-2 명령어 진행, 줄이 1-2 줄 변화). 이 패턴을 작은 명령으로 표현하면 조건에 맞는 행은 special opcode 한 바이트로 추가할 수 있습니다. 전체 크기는 헤더·테이블·주소 설정·행 수에 따라 달라집니다.
 
-VM 모델은 1990년대 ANSI C standard committee가 본 그대로 PostScript·PDF의 상태 머신 인코딩 영향을 받았습니다.
+VM 동작은 [DWARF 5 §6.2](https://dwarfstd.org/doc/DWARF5.pdf)를 기준으로 설명합니다. 출처가 없는 설계 영향·압축 배율을 역사적 사실로 단정하지 않습니다.
 
 ## 상태 머신 레지스터
 
@@ -84,15 +84,17 @@ struct LineHeader {
 
 **directories[]:**
 
-- 0: "src"
-- 1: "include"
-- 2: "third_party"
+- 1: "src"
+- 2: "include"
+- 3: "third_party"
 
 **files[]:**
 
-- 1: { name: "main.cpp", dir: 0, mtime: 0, size: 0 }
-- 2: { name: "utils.h",  dir: 1, mtime: 0, size: 0 }
-- 3: { name: "math.cpp", dir: 0, mtime: 0, size: 0 }
+- 1: { name: "main.cpp", dir: 1, mtime: 0, size: 0 }
+- 2: { name: "utils.h", dir: 2, mtime: 0, size: 0 }
+- 3: { name: "math.cpp", dir: 1, mtime: 0, size: 0 }
+
+DWARF 4의 directory index 0은 컴파일 디렉터리를 뜻하며 include directory 목록 자체는 1부터 참조합니다.
 
 `file` 레지스터가 1부터 시작 (DWARF 4까지). `0`은 무효.
 
@@ -116,7 +118,7 @@ MD5 hash가 있어 *디버거가 소스 파일의 변경을 검출* 가능. `lis
 
 ### 1. 표준 opcode (DW_LNS_*)
 
-`opcode_base` 미만의 값. 각각이 *0개 이상의 LEB128 인자*를 가짐.
+0보다 크고 opcode_base 미만인 값. 각각이 *0개 이상의 LEB128 인자*를 가짐.
 
 | Opcode | 인자 | 동작 |
 |--------|------|------|
@@ -127,7 +129,7 @@ MD5 hash가 있어 *디버거가 소스 파일의 변경을 검출* 가능. `lis
 | `DW_LNS_set_column` | uleb128 | `column = operand` |
 | `DW_LNS_negate_stmt` | - | `is_stmt = !is_stmt` |
 | `DW_LNS_set_basic_block` | - | `basic_block = true` |
-| `DW_LNS_const_add_pc` | - | (255 - opcode_base) / line_range만큼 address 증가 |
+| `DW_LNS_const_add_pc` | - | special opcode 255와 같은 address/op_index 증가를 적용합니다. min_inst_len과 max_ops 조건을 포함합니다. |
 | `DW_LNS_fixed_advance_pc` | uhalf | `address += operand`, op_index=0 |
 | `DW_LNS_set_prologue_end` | - | prologue_end = true |
 | `DW_LNS_set_epilogue_begin` | - | epilogue_begin = true |
@@ -155,7 +157,8 @@ adjusted_opcode = opcode - opcode_base
 operation_advance = adjusted_opcode / line_range
 line_increment    = line_base + (adjusted_opcode % line_range)
 
-새 address = address + operation_advance * min_inst_len
+새 address = address + min_inst_len * ((op_index + operation_advance) / max_ops)
+새 op_index = (op_index + operation_advance) % max_ops
 새 line    = line + line_increment
 copy
 
@@ -181,7 +184,7 @@ opcode 0x35 → adjusted = 40
               copy
 ```
 
-1바이트가 *세 연산*. *한 줄 코드가 평균 3-5 명령어*로 번역되고 곧 다음 줄로 넘어가는 C 코드의 일반적 패턴에 정확히 맞춰 설계됐습니다.
+max_ops=1에서는 위 식이 단순한 바이트 주소 증분으로 줄어듭니다. 한 바이트로 표현할 수 있는 증분 조합은 opcode 범위 안으로 제한되며 모든 address/line 조합을 담지는 못합니다.
 
 ## 실행 예 — 짧은 함수
 
@@ -210,17 +213,20 @@ DWARF line program (의사 코드).
 
 ```text
 DW_LNE_set_address    0x401120
-DW_LNS_advance_line   1        ; line = 2
+DW_LNS_copy                    ; emit (0x401120, line=1)
+DW_LNS_advance_pc     7
+DW_LNS_advance_line   1
 DW_LNS_set_prologue_end
-DW_LNS_copy                    ; emit (0x401120, line=2, prologue_end)
-[Special opcode]               ; address += 7, line += 0, copy
-                               ; emit (0x401127, line=2)
-[Special opcode]               ; address += 7, line += 1, copy
-                               ; emit (0x40112e, line=3)
-DW_LNE_end_sequence
+DW_LNS_copy                    ; emit (0x401127, line=2, prologue_end)
+DW_LNS_advance_pc     7
+DW_LNS_advance_line   1
+DW_LNS_set_epilogue_begin
+DW_LNS_copy                    ; emit (0x40112e, line=3, epilogue_begin)
+DW_LNS_advance_pc     2
+DW_LNE_end_sequence             ; exclusive sequence end 0x401130
 ```
 
-10개 매핑이 약 12바이트.
+위는 어셈블리와 경계 표시를 맞춘 설명용 프로그램입니다. 실제 컴파일러 출력이나 고정 바이트 수를 주장하지 않으며, 세 일반 행과 시퀀스 끝 행을 구분합니다. 실제 줄 테이블은 뒤의 직접 확인 절에서 생성합니다.
 
 ## addr2line의 안쪽
 
@@ -237,20 +243,20 @@ int addr2line(elf *e, uint64_t target_pc) {
 }
 ```
 
-VM을 실행하면서 각 *emit*마다 target_pc와 비교. *target_pc 이상의 첫 번째 행 직전*이 답.
+일반적으로 같은 시퀀스 안에서 row.address <= target < next.address인 구간의 행을 고릅니다. end_sequence는 제외 상한이며, 빈 구간·같은 주소의 여러 행·시퀀스 사이 간격을 처리해야 합니다. 단순히 이전 CU의 마지막 행을 재사용하면 안 됩니다.
 
 ```text
 PC          file:line
-0x401120    main.cpp:2
+0x401120    main.cpp:1
 0x401127    main.cpp:2
 0x40112e    main.cpp:3
 
-target = 0x401125 → 0x401120 ≤ 0x401125 < 0x401127 → main.cpp:2
+target = 0x401125 → 0x401120 ≤ 0x401125 < 0x401127 → main.cpp:1
 target = 0x40112d → main.cpp:2
 target = 0x4011f0 → 다음 sequence
 ```
 
-`.debug_aranges` 인덱스가 있으면 *첫 CU 검색*이 빠릅니다. 없으면 전체 CU 순회.
+aranges나 도구가 구축한 별도 인덱스로 CU 탐색을 줄일 수 있습니다. aranges가 없다고 반드시 모든 도구가 매번 전체 CU를 순회하는 것은 아닙니다.
 
 ```bash
 $ llvm-dwarfdump --debug-aranges my_prog | head -10
@@ -279,7 +285,7 @@ foo at f.cpp:10
 
 ## is_stmt — BP 가능 위치
 
-`is_stmt = 1`인 행만 *문장 시작*. GDB의 줄 단위 BP는 `is_stmt`만 후보로 봅니다.
+is_stmt는 컴파일러가 문장 경계로 추천하는 행을 나타냅니다. 디버거가 breakpoint 위치를 고를 때 활용할 수 있지만 모든 breakpoint가 이 행에만 허용된다는 뜻은 아닙니다.
 
 ```c
 int f() {
@@ -289,7 +295,7 @@ int f() {
 
 컴파일러는 *최적의 BP 위치*를 `is_stmt=1`로 표시. 보통은 *문장 시작 명령어*. 인라인이 많은 코드에서는 `is_stmt`가 적게 표시돼 "BP가 그 줄에 못 걸린다"가 됨.
 
-`-Og`는 *더 많은 위치에 is_stmt=1*을 표시 — 디버깅이 쉬워지는 이유.
+Og는 디버깅에 유리한 최적화 선택지이지만 is_stmt 행 수 증가를 보장하지 않습니다. 실제 컴파일러의 줄 테이블로 비교합니다.
 
 ## Discriminator — 같은 줄의 구분자
 
@@ -309,7 +315,7 @@ PC          file:line:discriminator
 0x40113a    main.cpp:5:3     ← c() 호출 후
 ```
 
-`info line main.cpp:5`가 *세 후보*를 보여 줌. profiler/coverage 도구가 *호출 site*별 통계를 낼 수 있게 함.
+discriminator는 같은 소스 위치의 서로 다른 실행 블록을 profiler/coverage가 구분하는 데 쓰입니다. 호출마다 값이 하나씩 생기거나 GDB info line이 위 후보를 그대로 나열한다고 보장하지 않습니다.
 
 ## prologue_end / epilogue_begin
 
@@ -348,27 +354,7 @@ DWARF 4까지는 line program 안의 파일/디렉터리 이름이 *인라인 NU
 
 ## 직접 디코딩 — pyelftools
 
-```python
-from elftools.elf.elffile import ELFFile
-
-with open('my_prog', 'rb') as f:
-    elf = ELFFile(f)
-    dwarf = elf.get_dwarf_info()
-    target = 0x401234
-
-    for cu in dwarf.iter_CUs():
-        lineprog = dwarf.line_program_for_CU(cu)
-        prev = None
-        for entry in lineprog.get_entries():
-            if entry.state is None: continue
-            s = entry.state
-            if prev and prev.address <= target < s.address:
-                file_idx = prev.file
-                file_entry = lineprog['file_entry'][file_idx - 1]
-                print(f"{file_entry.name.decode()}:{prev.line}")
-                exit()
-            prev = s
-```
+아래 직접 확인의 decode-line.py는 pyelftools 0.32에서 DWARF 4/5 파일 인덱스 차이와 end_sequence 경계를 처리하는 최소 예제입니다.
 
 이 방식으로 자체 *crash log 분석 도구*를 작성하거나, *coverage*를 자체 측정.
 
@@ -439,9 +425,9 @@ done
 $ clang -gline-tables-only -O2 ...
 ```
 
-`.debug_info`, `.debug_loc`, `.debug_ranges`가 거의 비어 있고 `.debug_line`만. 크기는 *1/10 이하*. addr2line은 정상 동작.
+줄 조회에 필요한 최소 debug_info·inline 정보 등이 함께 남을 수 있으므로 .debug_line만 있다고 단정하지 않습니다. 크기 감소량은 실제 파일로 측정합니다.
 
-`print x`는 *못 하지만* `bt`의 줄 번호는 나옵니다. 운영 빌드의 표준 옵션.
+지역 변수·타입 정보의 가시성을 줄이고 소스 위치 조회를 유지하려는 선택입니다. 모든 운영 빌드에 공통인 표준 옵션은 아니며 실제 요구에 맞춰 결정합니다.
 
 ## DWARF 5의 변화 요약
 
@@ -450,13 +436,67 @@ $ clang -gline-tables-only -O2 ...
 - `DW_LNCT_*` content type → 유연한 file entry format.
 - `DW_LNCT_MD5`로 소스 무결성 검사.
 
+## 직접 확인 — DWARF 4·5에서 주소 조회
+
+같은 소스의 ELF 오브젝트를 두 버전으로 만들고 sum의 첫 주소를 줄 정보로 조회합니다. 함수의 상대 주소를 읽는 파일 분석이며 해당 Linux 오브젝트를 macOS에서 실행하지 않습니다.
+
+```c title="lines.c"
+int sum(int left, int right) {
+    int result = left + right;
+    return result;
+}
+```
+
+```python title="decode-line.py"
+import sys
+from elftools.elf.elffile import ELFFile
+
+def file_index(version, number):
+    return number if version >= 5 else number - 1
+
+def lookup(path, target):
+    with open(path, "rb") as stream:
+        dwarf = ELFFile(stream).get_dwarf_info()
+        for cu in dwarf.iter_CUs():
+            program = dwarf.line_program_for_CU(cu)
+            if program is None:
+                continue
+            previous = None
+            for entry in program.get_entries():
+                state = entry.state
+                if state is None:
+                    continue
+                if previous and previous.address <= target < state.address:
+                    index = file_index(program["version"], previous.file)
+                    files = program["file_entry"]
+                    if 0 <= index < len(files):
+                        return f"{files[index].name.decode()}:{previous.line}"
+                previous = None if state.end_sequence else state
+    return None
+
+if __name__ == "__main__":
+    result = lookup(sys.argv[1], int(sys.argv[2], 0))
+    print(result or "not found")
+    sys.exit(0 if result else 1)
+```
+
+```bash
+clang --target=x86_64-unknown-linux-gnu -g -gdwarf-4 -O0 -c lines.c -o lines4.o
+clang --target=x86_64-unknown-linux-gnu -g -gdwarf-5 -O0 -c lines.c -o lines5.o
+llvm-dwarfdump --debug-line lines5.o
+python3 decode-line.py lines4.o 0
+python3 decode-line.py lines5.o 0
+```
+
+이번 sum은 오브젝트의 첫 함수여서 상대 주소 0을 조회합니다. 임의 바이너리에도 0을 고정하지 말고 실제 symbol/section 주소를 확인합니다. 시퀀스 밖 주소는 not found와 비정상 종료를 기대합니다.
+
 ## 정리
 
 - `.debug_line`은 *(PC, file, line, ...)* 행을 표현하는 *바이트코드 VM*.
 - 상태 머신 레지스터를 갱신하며 `DW_LNS_copy`로 한 행씩 emit.
 - 표준 opcode + 확장 opcode + 특수 opcode (한 바이트로 세 연산).
-- 압축비가 매우 높음 — 수천 행이 수십~수백 바이트.
-- `is_stmt`가 BP 가능 위치 표시 — `-Og`로 늘림.
+- 행·헤더·파일 테이블·주소 설정의 크기를 합쳐 실제 압축 결과를 확인합니다.
+- is_stmt는 권장 문장 경계이며 breakpoint 허용 위치 전체와 같지는 않습니다.
 - `discriminator`로 같은 줄의 호출 site 구분.
 - `prologue_end`/`epilogue_begin`으로 함수 진입/종료 정밀 표시.
 - addr2line이 VM을 실행하며 PC 검색.

@@ -10,9 +10,9 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-DWARF를 깊이 다루기 전에 그 컨테이너인 *ELF*부터 봅니다. Linux·BSD·일부 임베디드 환경의 표준 바이너리 포맷. 50년 가까이 거의 변함없이 살아남았고, 디버그 정보·심볼·실행 가능 코드·동적 링크 메타데이터를 *한 파일*에 모두 담는 결정적인 추상화입니다.
+DWARF를 깊이 다루기 전에 그 컨테이너인 *ELF*부터 봅니다. Linux·BSD·일부 임베디드 환경의 표준 바이너리 포맷. 링크와 로드에 필요한 정보를 구분하며, 디버그 정보·심볼·실행 가능 코드·동적 링크 메타데이터를 *한 파일*에 모두 담는 결정적인 추상화입니다.
 
-이 시리즈는 ELF에서 출발해 DWARF의 모든 섹션 안쪽까지 들어갑니다. 첫 장은 ELF의 정체부터.
+이 시리즈는 ELF에서 출발해 주요 DWARF 섹션의 역할과 인코딩을 살펴봅니다. 첫 장은 ELF의 정체부터.
 
 :::tldr
 **Executable and Linkable Format**. 한 파일이 두 시각을 가짐 — 링커가 보는 *섹션* 모음과, 로더가 보는 *세그먼트* 모음.
@@ -20,7 +20,7 @@ DWARF를 깊이 다루기 전에 그 컨테이너인 *ELF*부터 봅니다. Linu
 
 ## 역사
 
-ELF는 1990년 *Unix System V Release 4*에서 도입됐습니다. 이전의 a.out, COFF를 대체. 1995년 TIS(Tool Interchange Standard)로 정식 표준화. 거의 모든 Unix·Linux·임베디드 베어메탈 (`arm-none-eabi-gcc`도 ELF)이 사용.
+ELF는 1990년 *Unix System V Release 4*에서 도입됐습니다. 이전의 a.out, COFF를 대체. 파일 구조는 [System V gABI](https://gabi.xinuos.com/elf/00-foreword.html)와 대상별 psABI를 함께 확인합니다. 거의 모든 Unix·Linux·임베디드 베어메탈 (`arm-none-eabi-gcc`도 ELF)이 사용.
 
 설계 의도 셋.
 
@@ -39,28 +39,10 @@ ELF는 1990년 *Unix System V Release 4*에서 도입됐습니다. 이전의 a.o
 
 ## readelf로 들여다보기
 
+아래 /usr/bin/ls 명령은 지원되는 Linux에서 실행할 안내입니다. 배포판과 빌드마다 헤더·주소·섹션 구성이 달라지므로 서로 다른 출력의 수치를 한 파일의 실측처럼 섞지 않습니다. macOS의 /usr/bin/ls는 ELF가 아니며, 아래 직접 확인 절은 별도의 ELF 오브젝트를 생성합니다.
+
 ```bash
-$ readelf -h /usr/bin/ls
-ELF Header:
-  Magic:   7f 45 4c 46 02 01 01 00 00 00 00 00 00 00 00 00
-  Class:                             ELF64
-  Data:                              2's complement, little endian
-  Version:                           1 (current)
-  OS/ABI:                            UNIX - System V
-  ABI Version:                       0
-  Type:                              DYN (Position-Independent Executable file)
-  Machine:                           Advanced Micro Devices X86-64
-  Version:                           0x1
-  Entry point address:               0x67d0
-  Start of program headers:          64 (bytes into file)
-  Start of section headers:          151456 (bytes into file)
-  Flags:                             0x0
-  Size of this header:               64 (bytes)
-  Size of program headers:           56 (bytes)
-  Number of program headers:         13
-  Size of section headers:           64 (bytes)
-  Number of section headers:         32
-  Section header string table index: 31
+readelf -h /usr/bin/ls
 ```
 
 ## ELF Header 구조
@@ -103,7 +85,7 @@ typedef struct {
 | 값 | 의미 |
 |----|------|
 | 1 (REL) | `.o` 재배치 가능 파일 |
-| 2 (EXEC) | 실행 파일 (정적, 절대 주소) |
+| 2 (EXEC) | 실행 파일. 정적 링크만을 뜻하지 않으며 동적 링크 실행 파일일 수도 있습니다. |
 | 3 (DYN) | 동적 라이브러리 또는 PIE 실행 파일 |
 | 4 (CORE) | core dump |
 
@@ -122,27 +104,7 @@ PIE(Position-Independent Executable)가 보안상 표준이 되면서 *최신 �
 ## Program Headers
 
 ```bash
-$ readelf -l /usr/bin/ls
-Elf file type is DYN (Position-Independent Executable file)
-Entry point 0x67d0
-There are 13 program headers, starting at offset 64
-
-Program Headers:
-  Type           Offset             VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
-  PHDR           0x0000000000000040 0x0000000000000040 0x0000000000000040 0x0002d8 0x0002d8  R   0x8
-  INTERP         0x0000000000000318 0x0000000000000318 0x0000000000000318 0x00001c 0x00001c  R   0x1
-      [Requesting program interpreter: /lib64/ld-linux-x86-64.so.2]
-  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000 0x004690 0x004690  R   0x1000
-  LOAD           0x0000000000005000 0x0000000000005000 0x0000000000005000 0x012e85 0x012e85  R E 0x1000
-  LOAD           0x0000000000018000 0x0000000000018000 0x0000000000018000 0x008b40 0x008b40  R   0x1000
-  LOAD           0x0000000000021890 0x0000000000022890 0x0000000000022890 0x0011c0 0x0026e0  RW  0x1000
-  DYNAMIC        0x00000000000228a8 0x00000000000238a8 0x00000000000238a8 0x000200 0x000200  RW  0x8
-  NOTE           0x0000000000000338 0x0000000000000338 0x0000000000000338 0x000020 0x000020  R   0x8
-  NOTE           0x0000000000000358 0x0000000000000358 0x0000000000000358 0x000044 0x000044  R   0x4
-  GNU_PROPERTY   0x0000000000000338 0x0000000000000338 0x0000000000000338 0x000020 0x000020  R   0x8
-  GNU_EH_FRAME   0x000000000001cee4 0x000000000001cee4 0x000000000001cee4 0x000ac4 0x000ac4  R   0x4
-  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000 0x000000 0x000000  RW  0x10
-  GNU_RELRO      0x0000000000021890 0x0000000000022890 0x0000000000022890 0x001770 0x001770  R   0x1
+readelf -l /usr/bin/ls
 ```
 
 ### Program Header 구조
@@ -193,43 +155,7 @@ LOAD (RW)          ← 이 LOAD 안에 있음
 ## Section Headers
 
 ```bash
-$ readelf -S /usr/bin/ls
-There are 32 section headers, starting at offset 0x24f60:
-
-Section Headers:
-  [Nr] Name              Type             Address           Offset Size      EntSize  Flg
-  [ 0]                   NULL             0000000000000000  000000 000000    000000   0
-  [ 1] .interp           PROGBITS         0000000000000318  000318 00001c    000000   A
-  [ 2] .note.gnu.proper  NOTE             0000000000000338  000338 000020    000000   A
-  [ 3] .note.gnu.build-i NOTE             0000000000000358  000358 000024    000000   A
-  [ 4] .note.ABI-tag     NOTE             000000000000037c  00037c 000020    000000   A
-  [ 5] .gnu.hash         GNU_HASH         00000000000003a0  0003a0 0000d8    000000   A
-  [ 6] .dynsym           DYNSYM           0000000000000478  000478 000ab0    000018  AL
-  [ 7] .dynstr           STRTAB           0000000000000f28  000f28 0009ac    000000   A
-  [ 8] .gnu.version      VERSYM           00000000000018d4  0018d4 0000e4    000002  AL
-  [ 9] .gnu.version_r    VERNEED          00000000000019c0  0019c0 000080    000000  AL
-  [10] .rela.dyn         RELA             0000000000001a40  001a40 001758    000018  AL
-  [11] .rela.plt         RELA             0000000000003198  003198 0014d0    000018  AILo
-  [12] .init             PROGBITS         0000000000005000  005000 00001b    000000  AX
-  [13] .plt              PROGBITS         0000000000005020  005020 000df0    000010  AX
-  [14] .plt.got          PROGBITS         0000000000005e10  005e10 000018    000010  AX
-  [15] .plt.sec          PROGBITS         0000000000005e30  005e30 000dd0    000010  AX
-  [16] .text             PROGBITS         0000000000006c00  006c00 010f95    000000  AX
-  [17] .fini             PROGBITS         0000000000017b98  017b98 00000d    000000  AX
-  [18] .rodata           PROGBITS         0000000000018000  018000 004ed5    000000   A
-  [19] .eh_frame_hdr     PROGBITS         000000000001ced8  01ced8 000ad0    000000   A
-  [20] .eh_frame         PROGBITS         000000000001d9a8  01d9a8 002b18    000000   A
-  [21] .init_array       INIT_ARRAY       0000000000022890  021890 000008    000008  WA
-  [22] .fini_array       FINI_ARRAY       0000000000022898  021898 000008    000008  WA
-  [23] .data.rel.ro      PROGBITS         00000000000228a0  0218a0 000008    000000  WA
-  [24] .dynamic          DYNAMIC          00000000000238a8  0228a8 000200    000010  WA
-  [25] .got              PROGBITS         0000000000023aa8  022aa8 000598    000008  WA
-  [26] .data             PROGBITS         0000000000024040  023040 0001a0    000000  WA
-  [27] .bss              NOBITS           00000000000241e0  0231e0 000d90    000000  WA
-  [28] .comment          PROGBITS         0000000000000000  0231e0 00002b    000001  MS
-  [29] .gnu.build.attrib LOOS+0xffffff5   0000000000027ed0  023210 005ae8    000000   o
-  [30] .symtab           SYMTAB           0000000000000000  023210 008298    000018   33
-  [31] .strtab           STRTAB           0000000000000000  02b4a8 003af4    000000   0
+readelf -S /usr/bin/ls
 ```
 
 ### Section Header 구조
@@ -283,28 +209,12 @@ typedef struct {
 | 0x100 (OS_NONCONFORMING) | OS별 |
 | 0x200 (GROUP) | 섹션 그룹 |
 | 0x400 (TLS) | thread-local |
-| 0x800 (COMPRESSED) | 압축됨 (`.zdebug_*`) |
+| 0x800 (COMPRESSED) | ELF 압축 헤더와 SHF_COMPRESSED로 표현합니다. 옛 GNU .zdebug_* 방식과 다릅니다. |
 
 ## Dynamic Linking — .dynamic
 
 ```bash
-$ readelf -d /usr/bin/ls
-Dynamic section at offset 0x228a8 contains 27 entries:
-  Tag        Type                         Name/Value
- 0x0000000000000001 (NEEDED)             Shared library: [libselinux.so.1]
- 0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
- 0x000000000000000c (INIT)               0x5000
- 0x000000000000000d (FINI)               0x17b98
- 0x0000000000000019 (INIT_ARRAY)         0x22890
- 0x000000000000001b (INIT_ARRAYSZ)       8 (bytes)
- 0x000000000000001a (FINI_ARRAY)         0x22898
- 0x000000000000001c (FINI_ARRAYSZ)       8 (bytes)
- 0x000000006ffffef5 (GNU_HASH)           0x3a0
- 0x0000000000000005 (STRTAB)             0xf28
- 0x0000000000000006 (SYMTAB)             0x478
- 0x000000000000000a (STRSZ)              2476 (bytes)
- 0x000000000000000b (SYMENT)             24 (bytes)
- ...
+readelf -d /usr/bin/ls
 ```
 
 각 엔트리가 `(d_tag, d_val_or_ptr)`. ld.so가 *프로세스 시작 시* 이 정보를 읽어 라이브러리를 로드·심볼을 바인딩.
@@ -315,13 +225,13 @@ Dynamic section at offset 0x228a8 contains 27 entries:
 | DT_PLTRELSZ / DT_PLTGOT / DT_HASH | PLT/GOT/해시 위치 |
 | DT_STRTAB / DT_SYMTAB | 문자열·심볼 테이블 |
 | DT_RPATH / DT_RUNPATH | 라이브러리 검색 경로 |
-| DT_INIT / DT_FINI | C++ ctor/dtor 함수 |
+| DT_INIT / DT_FINI | 객체 초기화·종료 함수 포인터이며 C++ 생성자·소멸자만을 뜻하지는 않습니다. |
 | DT_GNU_HASH | GNU 빠른 해시 |
 | DT_VERNEED | 심볼 버전 요구 |
 
 ### PLT / GOT
 
-`printf`를 호출할 때 첫 호출엔 ld.so가 *실제 주소를 lookup*. 두 번째 호출부터는 *바로* 점프.
+lazy PLT binding이 사용되는 경우 첫 호출에서 주소를 해결하고 이후 GOT를 통해 전달할 수 있습니다. eager binding, -fno-plt, 정적 링크 등에서는 이 경로와 다릅니다.
 
 ```text
 [caller] call printf@plt    ← PLT 슬롯
@@ -337,26 +247,18 @@ Dynamic section at offset 0x228a8 contains 27 entries:
 
 | 경로 출처 | 검색 순서 |
 |-----------|-----------|
-| DT_RPATH (deprecated) | 1순위 |
-| LD_LIBRARY_PATH | 2 (DT_RPATH 없으면) |
+| DT_RPATH | DT_RUNPATH가 없을 때만 적용합니다. |
+| LD_LIBRARY_PATH | 유효한 RPATH 다음, RUNPATH 이전이며 secure-execution에서는 무시될 수 있습니다. |
 | DT_RUNPATH | 3 |
 | /etc/ld.so.cache | 4 |
 | /lib, /usr/lib | 5 |
 
-`patchelf --set-rpath`로 변경 가능.
+위는 glibc 로더에서 이름에 슬래시가 없는 의존성을 찾는 순서의 요약입니다. RUNPATH는 직접 의존성에만 적용되는 등 범위가 다릅니다. [ld.so 검색 조건](https://man7.org/linux/man-pages/man8/ld.so.8.html)을 함께 확인합니다.
 
 ## Symbol Table
 
 ```bash
-$ readelf -s /usr/bin/ls | head -20
-Symbol table '.dynsym' contains 114 entries:
-   Num:    Value          Size Type    Bind   Vis      Ndx Name
-     0: 0000000000000000     0 NOTYPE  LOCAL  DEFAULT  UND
-     1: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND free@GLIBC_2.2.5 (2)
-     2: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND abort@GLIBC_2.2.5 (2)
-     3: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND __errno_location@GLIBC_2.2.5
-     4: 0000000000000000     0 FUNC    GLOBAL DEFAULT  UND strncpy@GLIBC_2.2.5
-     ...
+readelf -s /usr/bin/ls
 ```
 
 `.dynsym`은 동적 링크용. `.symtab`은 정적/디버깅용 (stripped 빌드는 제거).
@@ -392,16 +294,15 @@ typedef struct {
 - 1 = GLOBAL
 - 2 = WEAK         (override 가능)
 
-WEAK 심볼이 묘함 — 동명 GLOBAL이 있으면 그게 우선. malloc fork 같은 libc 함수가 WEAK. 그래서 `__libc_malloc`이 strong, `malloc`이 weak — 사용자가 자신만의 `malloc`을 정의하면 WEAK가 override 됨 (LD_PRELOAD).
+정적 링크에서 정의가 충돌할 때 GLOBAL과 WEAK의 선택 규칙을 구분합니다. 동적 로더의 interposition과 LD_PRELOAD 검색 순서는 WEAK 하나로 설명되지 않습니다. 특정 libc 함수의 binding은 해당 빌드의 dynsym으로 확인합니다.
 
 ## Build-ID — debuginfo 매칭
 
 ```bash
-$ readelf -n /usr/bin/ls | grep "Build ID"
-    Build ID: 4...8d3a91f0e5a3...
+readelf -n /usr/bin/ls
 ```
 
-링커가 `--build-id` 옵션으로 생성. 기본은 SHA-1 of section content. 이 ID가 *바이너리의 정체성*.
+링커의 --build-id로 생성하며 지원 스타일과 기본값은 링커·배포 설정을 확인합니다. GNU ld는 sha1 등 스타일을 제공하지만 build-id를 전체 파일의 무결성 체크섬으로 취급하면 안 됩니다. 파일을 나중에 변경해도 ID가 그대로 남을 수 있습니다. [GNU ld 옵션](https://sourceware.org/binutils/docs/ld/Options.html)을 참조합니다.
 
 활용:
 
@@ -418,21 +319,7 @@ $ ls /usr/lib/debug/.build-id/${build_id:0:2}/${build_id:2}.debug
 ## NOTE 섹션
 
 ```bash
-$ readelf -n /usr/bin/ls
-Displaying notes found in: .note.gnu.property
-  Owner                Data size 	Description
-  GNU                  0x00000010	NT_GNU_PROPERTY_TYPE_0
-      Properties: x86 feature: IBT, SHSTK
-
-Displaying notes found in: .note.gnu.build-id
-  Owner                Data size 	Description
-  GNU                  0x00000014	NT_GNU_BUILD_ID (unique build ID bitstring)
-    Build ID: 4f8d3a91f0e5a3...
-
-Displaying notes found in: .note.ABI-tag
-  Owner                Data size 	Description
-  GNU                  0x00000010	NT_GNU_ABI_TAG (ABI version tag)
-    OS: Linux, ABI: 3.2.0
+readelf -n /usr/bin/ls
 ```
 
 각 NOTE가 `(name, type, descriptor)` 트리플. 다양한 메타데이터:
@@ -442,7 +329,7 @@ Displaying notes found in: .note.ABI-tag
 - 보안 기능 (IBT, SHSTK, BTI for ARM64).
 - 패키지 정보 (배포판이 추가).
 
-NOTE는 *세그먼트로도 노출됨* (PT_NOTE) — core dump가 활용. core dump의 PT_NOTE가 NT_PRSTATUS(레지스터) 등을 담는 이유 (이 시리즈 Ch 6에서 자세히).
+NOTE는 *세그먼트로도 노출됨* (PT_NOTE) — core dump가 활용. core dump의 PT_NOTE가 NT_PRSTATUS(레지스터) 등을 담는 이유 ([Postmortem 2장](/blog/tools/debugging/postmortem/chapter02-elf-core-format)에서 자세히).
 
 ## 보안 — checksec
 
@@ -457,7 +344,7 @@ Full RELRO      Canary found      NX enabled    PIE enabled     No RPATH   No RU
 | RELRO | GOT 등 보호 | PT_GNU_RELRO 세그먼트 |
 | Stack Canary | 스택 overflow 검출 | `__stack_chk_fail` 심볼 |
 | NX | 비실행 스택 | PT_GNU_STACK의 X 비트 |
-| PIE | ASLR | e_type=DYN |
+| PIE | 재배치 가능한 실행 이미지 | ET_DYN만으로 공유 라이브러리와 PIE를 구분할 수는 없습니다. |
 | FORTIFY | libc 함수 안전 변형 | `__*_chk` 심볼 |
 
 ## ELF 변형
@@ -486,6 +373,27 @@ Full RELRO      Canary found      NX enabled    PIE enabled     No RPATH   No RU
 | `patchelf` | RPATH/INTERPRETER 변경 |
 | `llvm-readelf` / `llvm-objdump` | LLVM 버전 (대체 호환) |
 
+## 직접 확인 — 같은 ELF 오브젝트의 헤더·섹션·심볼
+
+다음 소스는 헤더나 Linux libc 없이 x86-64 ELF 오브젝트로 컴파일할 수 있습니다. 이번 검증은 macOS의 Homebrew LLVM 23.1.3에서 타깃을 명시해 수행하며, 이 파일을 macOS에서 실행하거나 Linux 로더를 검증한 기록은 아닙니다.
+
+```c title="sections.c"
+int initialized = 7;
+int zeroed[4];
+extern int external(int);
+int compute(int input) {
+    return external(input) + initialized + zeroed[0];
+}
+```
+
+```bash
+clang --target=x86_64-unknown-linux-gnu -g -O0 -c sections.c -o sections.o
+llvm-readelf -h -S -s -r sections.o
+llvm-readelf -l sections.o
+```
+
+헤더는 ELF64·REL·x86-64를 표시합니다. initialized는 .data, zeroed는 NOBITS .bss에 속하고 compute는 정의된 함수, external은 UND 심볼입니다. relocation이 외부 호출·전역 참조를 연결합니다. REL 파일에는 로드할 program header가 없으므로 segment 부재를 손상으로 보지 않습니다. 연결된 실행 파일의 section-to-segment 매핑은 지원 Linux의 readelf -l로 별도 확인합니다.
+
 ## 정리
 
 - ELF는 *링커 시각* (섹션) + *로더 시각* (세그먼트) 두 가지를 동시에.
@@ -496,7 +404,7 @@ Full RELRO      Canary found      NX enabled    PIE enabled     No RPATH   No RU
 - PLT/GOT가 lazy binding 메커니즘.
 - Symbol bind는 GLOBAL/LOCAL/WEAK, type은 FUNC/OBJECT 등.
 - `.note.gnu.build-id`가 바이너리의 정체성 — debuginfo 매칭의 핵심.
-- Linux 보안 기능들은 모두 ELF 메타데이터로 표현.
+- ELF 메타데이터는 보호 설정의 단서이며 실제 커널·로더의 적용까지 전수 증명하지는 않습니다.
 
 ## 다음 장 예고
 

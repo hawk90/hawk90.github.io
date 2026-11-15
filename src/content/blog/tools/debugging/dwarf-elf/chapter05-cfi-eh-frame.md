@@ -39,7 +39,7 @@ void h() { /* crash */ }
 
 각 PC 위치에서.
 
-**CFA** (Canonical Frame Address) = 호출자 측 SP의 값.
+**CFA**는 현재 프레임을 식별하는 안정된 기준 주소입니다. 일반적인 x86-64 호출에서는 호출 직전 호출자의 SP에 대응하지만, 실제 정의는 ABI·CFI 규칙을 확인합니다.
 
 호출자 측 각 레지스터의 위치(**register rule**):
 
@@ -107,7 +107,7 @@ PC          CFA         rbp (r6) 위치     rip (r16) 위치
 
 ## CIE — Common Information Entry
 
-같은 호출 규약을 공유하는 함수들의 *공통 정보*. 보통 ABI별 한 개.
+여러 FDE가 공유할 수 있는 공통 규칙입니다. 같은 ABI에서도 augmentation·초기 규칙 등에 따라 여러 CIE가 있을 수 있습니다.
 
 ```c
 struct CIE {
@@ -150,7 +150,7 @@ CIE 안에도 *CFI 명령*이 있어 *모든 FDE의 시작 상태*를 정의.
 
 ## FDE — Frame Description Entry
 
-함수 하나당 한 개. CIE를 가리키고 *함수의 PC 범위* + *그 함수만의 추가 CFI 명령*.
+PC 범위에 대한 항목입니다. 함수의 분리 범위 등에 따라 한 함수가 여러 FDE에 대응할 수 있으며 CIE를 가리키고 *함수의 PC 범위* + *그 함수만의 추가 CFI 명령*.
 
 ```c
 struct FDE {
@@ -254,7 +254,7 @@ $ llvm-dwarfdump --debug-frame my_prog
   DW_CFA_offset: r6 -16                    # rbp는 CFA-16에
   DW_CFA_advance_loc: 3 to 0x00401124     # mov rbp,rsp 후
   DW_CFA_def_cfa_register: r6              # CFA는 rbp 기준
-  DW_CFA_advance_loc: 54 to 0x0040115a    # leave 직전
+  DW_CFA_advance_loc: 55 to 0x0040115b    # leave 완료 직후
   DW_CFA_def_cfa: r7 +8                    # rsp 기준으로 복원
 ```
 
@@ -265,13 +265,11 @@ $ llvm-dwarfdump --debug-frame my_prog
 | | `.debug_frame` | `.eh_frame` |
 |---|----------------|--------------|
 | 용도 | 디버깅 전용 | C++ 예외 + 디버깅 |
-| 포함 조건 | `-g` 필요 | *항상* (stripped 빌드에도) |
+| 포함 조건 | 컴파일러의 debug frame 생성 설정을 확인합니다. | 런타임 unwind 설정·ABI에 따르며 항상 존재하지는 않습니다. |
 | 인코딩 | 표준 DWARF | 약간 다른 인코딩 |
-| length=0xFFFFFFFF | DWARF64 | terminator |
+| 종료·길이 | DWARF32/64 초기 길이 형식을 확인합니다. | 길이 0이 종료 표식이며 확장 길이 지원은 소비자·ABI를 확인합니다. |
 
-`.eh_frame`이 *항상 있다*는 게 중요합니다 — `-O2 -s` (strip) 빌드에도 unwinding 가능. 그래서 *stripped* 바이너리의 `bt`도 (함수명은 ??지만) 콜스택 구조는 복원됩니다.
-
-`-fno-asynchronous-unwind-tables`로 `.eh_frame`을 *없앨 수도* 있지만, libstdc++ 예외가 동작 안 함. 임베디드에서 *flash 절감* 목적으로 가끔 사용.
+디버그 심볼을 제거해도 런타임 unwind 정보가 남는 빌드가 있습니다. 그러나 strip 여부만으로 .eh_frame의 존재나 전체 backtrace 복원 성공을 보장할 수는 없습니다. -fno-asynchronous-unwind-tables는 비동기 지점의 unwind table 생성을 제어하며, 이것만으로 모든 예외 정보를 없애거나 C++ 예외가 반드시 깨진다고 단정하지 않습니다.
 
 ## .eh_frame_hdr — 이진 탐색 인덱스
 
@@ -304,7 +302,7 @@ PT_GNU_EH_FRAME 세그먼트가 `.eh_frame_hdr`의 주소를 가리킴 → 로�
 
 ## libunwind / glibc backtrace
 
-C 표준 `backtrace()` 함수가 `.eh_frame`의 CFI를 사용:
+glibc 등의 비표준 확장 backtrace()가 `.eh_frame`의 CFI를 사용:
 
 ```c
 #include <execinfo.h>
@@ -316,7 +314,7 @@ for (int i = 0; i < n; i++) puts(syms[i]);
 
 내부적으로 `_Unwind_Backtrace` (libgcc) 또는 libunwind를 호출 → 각 프레임에서 CFI lookup → 호출자 PC 복원.
 
-`__builtin_return_address(0)`은 직접 frame pointer 추적. `__builtin_return_address(N)`은 N단계 위 (CFI 없이 frame pointer만 보면 종종 깨짐).
+builtin_return_address는 컴파일러·타깃 ABI에 의존합니다. 항상 frame pointer로 구현된다고 가정하지 않습니다. [GCC 문서](https://gcc.gnu.org/onlinedocs/gcc/Return-Address.html)는 0보다 큰 level의 조회가 불안정하거나 크래시를 유발할 수 있다고 설명합니다.
 
 ## libgcc_s.so.1과 호환
 
@@ -329,19 +327,15 @@ CFI 처리가 *복잡*해 시스템마다 라이브러리가 다릅니다.
 
 C++ 예외를 던지는 함수는 자동으로 libgcc에 의존. 정적 링크 + 예외 사용 시 `libgcc_eh.a`가 따라옵니다.
 
-## DWARF 5의 변화
+## 표준 DWARF와 ABI 확장 구분
 
-- `DW_CFA_GNU_args_size`가 표준화.
-- `DW_CFA_val_offset` 도입.
-- 새 augmentation `"S"` (signal frame).
-
-기본 메커니즘은 DWARF 2 시절과 거의 동일. 매우 안정된 표준.
+DW_CFA_GNU_args_size는 GNU 확장이고 signal-frame의 S augmentation도 ABI 관례입니다. 이 항목들을 DWARF 5에서 새로 표준화된 기능으로 묶지 않습니다. val_offset 등의 규칙도 최초 도입 연도 대신 사용 중인 표준과 소비자 지원을 확인합니다.
 
 ## frame pointer vs CFI
 
 `-fomit-frame-pointer`(`-O2`의 기본)로 rbp가 *frame pointer 역할을 안 함*. `bt`는 그래도 동작 — `.eh_frame`의 CFI 덕분.
 
-다만 정밀도는 *frame pointer 있을 때*보다 떨어집니다 — 컴파일러가 CFI를 *모든 PC*에 대해 정확히 출력하지는 않거든요. 특히.
+정확한 CFI가 있으면 frame pointer 없이도 복원할 수 있습니다. frame pointer 유무만으로 품질 순위를 정하지 않고 다음처럼 수동 작성·전환이 있는 지점에서 규칙이 충분한지 확인합니다.
 
 - Inline asm.
 - Naked function (`__attribute__((naked))`).
@@ -379,22 +373,12 @@ $ readelf --debug-dump=frames-interp my_prog | head -20
 00401120 rsp+8    u    u    u    u    u    u    c-8
 00401121 rsp+16   u    c-16 u    u    u    u    c-8
 00401124 rbp+16   u    c-16 u    u    u    u    c-8
-0040115a rsp+8    u    c-16 u    u    u    u    c-8
+0040115b rsp+8    u    c-16 u    u    u    u    c-8
 ```
 
-`c-8` 같은 표기가 *CFA - 8 위치*. `u` = undefined (변경 안 됨).
+c-8은 CFA-8 주소의 저장 값입니다. u=undefined는 이전 프레임 값을 복원할 수 없다는 뜻이며, 변경되지 않았다는 same_value와 다릅니다. [DWARF 5 §6.4.1](https://dwarfstd.org/doc/DWARF5.pdf)의 규칙을 구분합니다.
 
-```python
-# pyelftools
-for cu in dwarf.iter_CUs():
-    for entry in dwarf.CFI_entries():
-        if entry.is_CIE():
-            print("CIE")
-        else:
-            print(f"FDE pc={entry.header.initial_location:#x}")
-            for instr in entry.instructions:
-                print(f"  {instr.opcode}")
-```
+pyelftools 0.32는 CIE/FDE 클래스로 항목을 구분합니다. is_CIE() 메서드를 가정하지 않고 아래 직접 확인 예제처럼 isinstance를 사용합니다. .debug_frame은 CFI_entries(), .eh_frame은 EH_CFI_entries()로 읽습니다. CU마다 같은 전체 CFI를 반복 순회하지 않습니다.
 
 ## CFI in JIT 코드
 
@@ -410,23 +394,68 @@ JIT의 콜스택 디버깅이 어려운 이유 — 이 등록이 잘 안 됐을 
 
 시그널 핸들러는 *커널이 자동으로 frame을 푸시*해 들어옵니다. 그 frame은 일반 함수 호출과 *다른 형태*.
 
-DWARF augmentation `"S"`로 표시. 또는 `DW_CFA_GNU_args_size` 같은 GNU 확장.
+지원 ABI의 S augmentation 등으로 signal frame을 구분합니다. GNU_args_size는 인자 크기 관련 확장이며 signal frame 표시의 대체가 아닙니다.
 
 GDB가 `bt`에서 `<signal handler called>`를 보여 주는 이유 — *시그널 frame*임을 인식.
 
 ## ARM64 — PAC + BTI
 
-ARM64는 *Pointer Authentication* 기능이 있어 return address가 *서명된* 상태로 스택에 저장. CFI에서 이를 인식하려면 `DW_CFA_AARCH64_negate_ra_state` 같은 새 opcode가 필요. DWARF 5에 표준화.
+ARM64는 *Pointer Authentication* 기능이 있어 return address가 *서명된* 상태로 스택에 저장. CFI에서 이를 인식하려면 `DW_CFA_AARCH64_negate_ra_state` 같은 새 opcode가 필요. 이것은 AArch64 ABI 확장이며 DWARF 5 일반 규격에 새로 표준화됐다는 뜻은 아닙니다. [AArch64 DWARF ABI](https://github.com/ARM-software/abi-aa/blob/main/aadwarf64/aadwarf64.rst)를 확인합니다.
 
 BTI(Branch Target Indicator)는 직접적 CFI 영향은 없지만 *인터프리터 디버거*가 valid 진입점을 인식할 때 사용.
+
+## 직접 확인 — CIE/FDE와 undefined/same_value
+
+다음 어셈블리는 ELF 오브젝트를 생성하는 진단 입력입니다. rbx의 첫 규칙을 undefined, nop 다음 규칙을 same_value로 바꾸며 실제 함수를 호출하지 않고 테이블을 파싱합니다.
+
+```asm title="rules.S"
+.text
+.globl demo
+.type demo,@function
+demo:
+.cfi_startproc
+.cfi_undefined %rbx
+nop
+.cfi_same_value %rbx
+ret
+.cfi_endproc
+.size demo, .-demo
+```
+
+```python title="cfi.py"
+import sys
+from elftools.elf.elffile import ELFFile
+from elftools.dwarf.callframe import CIE, FDE, RegisterRule
+
+with open(sys.argv[1], "rb") as stream:
+    elf = ELFFile(stream)
+    dwarf = elf.get_dwarf_info()
+    entries = dwarf.EH_CFI_entries()
+    print("CIE count=", sum(isinstance(e, CIE) for e in entries))
+    fdes = [entry for entry in entries if isinstance(entry, FDE)]
+    assert fdes
+    rules = [row[3].type for entry in fdes
+             for row in entry.get_decoded().table if 3 in row]
+    assert RegisterRule.UNDEFINED in rules
+    assert RegisterRule.SAME_VALUE in rules
+    print("undefined and same_value remain distinct")
+```
+
+```bash
+clang --target=x86_64-unknown-linux-gnu -c rules.S -o rules.o
+llvm-dwarfdump --eh-frame rules.o
+python3 cfi.py rules.o
+```
+
+이번 LLVM 23.1.3·pyelftools 0.32 결과는 두 규칙을 구분합니다. 소스 줄이 없는 .eh_frame-only 오브젝트도 파싱할 수 있습니다. 실제 프로세스의 전체 stack unwind, signal·PAC·JIT 등록 검증은 이 파일 분석으로 대체하지 않습니다.
 
 ## 정리
 
 - CFI = 각 PC에서 *CFA 정의* + *호출자 측 레지스터 위치*.
-- CIE가 공통 정보 (호출 규약), FDE가 함수 하나당.
+- CIE가 공통 규칙을 담고 FDE가 PC 범위별 규칙을 담습니다.
 - `DW_CFA_*` 명령으로 PC 진행 + CFA/register rule 변경.
 - 6-bit 인라인 opcode로 압축 (작은 PC delta).
-- `.eh_frame` = 항상 있음 (C++ 예외 + 디버깅).
+- .eh_frame은 런타임 unwind 설정과 ABI에 따라 생성되며 항상 있다고 가정하지 않습니다.
 - `.debug_frame` = 디버깅 전용.
 - `.eh_frame_hdr`이 이진 탐색 인덱스.
 - libgcc/libunwind가 CFI 처리.
@@ -443,6 +472,6 @@ Ch 6 (시리즈 마지막) — split-DWARF, dwz, debuginfod, 그리고 pyelftool
 - [Ch 4: DWARF expression VM](/blog/tools/debugging/dwarf-elf/chapter04-debug-loc)
 - [Ch 6: split-DWARF / debuginfod / pyelftools](/blog/tools/debugging/dwarf-elf/chapter06-split-dwarf-tools)
 - [DWARF 5 § 6.4 (Call Frame Information)](https://dwarfstd.org/doc/DWARF5.pdf)
-- [Itanium C++ ABI § 5 Exception Handling](https://itanium-cxx-abi.github.io/cxx-abi/abi-eh.html)
+- [Itanium C++ Exception Handling ABI](https://itanium-cxx-abi.github.io/cxx-abi/abi-eh.html)
 - [LLVM libunwind](https://github.com/llvm/llvm-project/tree/main/libunwind)
 - [Linux Standard Base — exception handling](https://refspecs.linuxfoundation.org/LSB_5.0.0/LSB-Core-generic/LSB-Core-generic/ehframechpt.html)

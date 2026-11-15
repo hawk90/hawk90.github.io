@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-UART 한 핀을 *놓치면* 펌웨어 디버깅이 거의 불가능해 보입니다. ISR 안에서 printf를 하면 시스템이 멈추고, 인터럽트가 100 Hz로 들어오는데 9600 baud UART로 로그를 빼면 *로그 자체가 타이밍을 바꿉니다*. 다행히 임베디드 디버깅에는 *non-blocking* trace 메커니즘이 다섯 가지나 있습니다.
+UART 한 핀을 *놓치면* 펌웨어 디버깅이 거의 불가능해 보입니다. ISR 안의 출력은 방식에 따라 대기하거나 타이밍을 바꿀 수 있고, 인터럽트가 100 Hz로 들어오는데 9600 baud UART로 로그를 빼면 로그 전송 시간이 관찰 대상을 바꿉니다. 임베디드에서는 호스트 정지 방식부터 하드웨어 trace까지 특성이 다른 방법을 골라야 합니다.
 
 이 장은 그 다섯, 즉 **RTT, ITM, SWO, ETM, Semihosting**을 비교하고, 어떤 상황에 어느 게 맞는지, 펌웨어·디버거 양쪽 설정을 깊이 다룹니다.
 
@@ -93,11 +93,11 @@ extern "C" int _write(int fd, char *ptr, int len) {
 | 0x05 | SYS_WRITE | fd에 buffer 쓰기 |
 | 0x06 | SYS_READ | fd에서 읽기 |
 | 0x07 | SYS_READC | stdin 한 문자 |
-| 0x0c | SYS_EXIT | 종료 |
-| 0x12 | SYS_HEAPINFO | 힙 정보 |
-| 0x13 | SYS_ELAPSED | 시간 |
+| 0x18 | SYS_EXIT | 종료 |
+| 0x16 | SYS_HEAPINFO | 힙 정보 |
+| 0x30 | SYS_ELAPSED | 시간 |
 
-전체 명세는 [ARM Semihosting](https://github.com/ARM-software/abi-aa/blob/main/semihosting/semihosting.rst).
+operation 번호는 [Arm ABI 2025Q4 Semihosting 명세](https://github.com/ARM-software/abi-aa/blob/2025Q4/semihosting/semihosting.rst)의 operation table과 대조합니다.
 
 ## 2. ITM (Instrumentation Trace Macrocell)
 
@@ -464,7 +464,7 @@ USB CDC나 UART 셸을 만드는 것보다 *훨씬 가벼움*. 개발 중에 매
 
 ## 다음 장 예고
 
-Ch 7 — RTOS-aware 디버깅 + 실전 트러블슈팅. FreeRTOS/Zephyr 등의 task별 콜스택, MMU·MPU, fault analyzer, 신호 무결성 문제 해결.
+Ch 7 — RTOS-aware 디버깅 + 실전 트러블슈팅. FreeRTOS/Zephyr 등의 task별 콜스택, MPU와 fault 분석, 신호 무결성 문제 해결.
 
 ## 관련 항목
 

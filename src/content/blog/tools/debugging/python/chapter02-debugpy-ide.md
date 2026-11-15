@@ -1,5 +1,5 @@
 ---
-title: "debugpy 활용 — VSCode·PyCharm·원격 attach 통합"
+title: "debugpy 활용 — VSCode·DAP·원격 attach 통합"
 slug: "tools/debugging/python/chapter02-debugpy-ide"
 date: 2026-05-30T09:02:00
 description: "debugpy로 IDE 디버깅, 원격 프로세스 attach, justMyCode, 멀티프로세스."
@@ -10,13 +10,13 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-`pdb`가 콘솔의 도구라면 [`debugpy`](https://github.com/microsoft/debugpy)는 IDE의 디버거입니다. Microsoft가 만들고 VSCode의 Python 익스텐션이 기본으로 깔아 두는 그 디버거. DAP(Debug Adapter Protocol)를 말하므로 VSCode·PyCharm·Neovim 모두 같은 어댑터를 씁니다.
+`pdb`가 콘솔의 도구라면 [`debugpy`](https://github.com/microsoft/debugpy)는 IDE의 디버거입니다. Microsoft가 만들고 VSCode의 Python 익스텐션이 기본으로 깔아 두는 그 디버거. debugpy는 DAP(Debug Adapter Protocol)를 구현하며 VSCode와 이를 설정한 Neovim 클라이언트에서 사용할 수 있습니다. PyCharm은 자체 Python 디버거와 pydevd-pycharm 연동 절차를 제공하므로 같은 어댑터라고 묶지 않습니다. [PyCharm 원격 디버깅](https://www.jetbrains.com/help/pycharm/remote-debugging-with-product.html)은 별도 절차입니다.
 
 ## launch.json — VSCode 기본
 
 `.vscode/launch.json`.
 
-```json
+```json title="launch.json"
 {
   "version": "0.2.0",
   "configurations": [
@@ -39,7 +39,7 @@ topics: ["tools", "tools/debugging"]
       "name": "Python: 원격 attach",
       "type": "debugpy",
       "request": "attach",
-      "connect": { "host": "192.168.1.20", "port": 5678 },
+      "connect": { "host": "127.0.0.1", "port": 5678 },
       "pathMappings": [
         {
           "localRoot": "${workspaceFolder}",
@@ -63,7 +63,7 @@ topics: ["tools", "tools/debugging"]
 ```python
 # 앱 시작 시
 import debugpy
-debugpy.listen(("0.0.0.0", 5678))
+debugpy.listen(("127.0.0.1", 5678))
 print("debugpy listening on 5678", flush=True)
 
 # (선택) 클라이언트가 붙을 때까지 기다림
@@ -90,7 +90,7 @@ CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", \
 
 `python -m debugpy --listen ... --wait-for-client script.py`는 *그 자체로* 앱을 띄우면서 5678에서 클라이언트를 기다립니다. `--wait-for-client`가 있으면 IDE가 연결되기 전까지 첫 줄도 실행 안 합니다.
 
-`docker run -p 5678:5678 myimage` 후 VSCode에서 attach.
+`docker run -p 127.0.0.1:5678:5678 myimage` 후 VSCode에서 attach.
 
 ## justMyCode — 라이브러리 안으로 들어갈까
 
@@ -122,23 +122,7 @@ VSCode IDE의 강력한 기능. *코드를 수정하지 않고도* 정지 조건
 }
 ```
 
-가장 흔한 사례: gunicorn/uvicorn 워커.
-
-```python
-# gunicorn config
-import debugpy
-debugpy.listen(("0.0.0.0", 5678))
-```
-
-워커가 fork되면 각 워커가 자기 포트로 서버를 띄우므로 포트 충돌이 일어납니다. 해법.
-
-```python
-import os, debugpy
-port = 5678 + os.getpid() % 1000
-debugpy.listen(("0.0.0.0", port))
-```
-
-또는 `--multiprocess` 옵션과 함께 VSCode의 multi-target 디버깅 기능을 씁니다.
+subProcess는 디버깅 세션이 자식 프로세스를 추적하도록 하는 설정입니다. 모든 워커에서 listen을 반복 호출하거나 PID 나머지로 포트를 나누는 방식과 다릅니다. PID 나머지는 충돌 가능성이 있어 포트 할당 보장이 아닙니다. 하나의 debugpy 시작 지점과 [공식 subprocess 설정](https://github.com/microsoft/debugpy#ignoring-subprocesses)을 사용하고, 해당 프레임워크의 spawn/fork 동작은 별도로 확인합니다. debugpy CLI에는 --multiprocess가 아니라 --configure-subProcess 같은 설정 형식이 있습니다.
 
 ## Django / Flask / FastAPI
 
@@ -158,7 +142,7 @@ if __name__ == "__main__":
   "type": "debugpy",
   "request": "launch",
   "module": "flask",
-  "env": { "FLASK_APP": "app.py", "FLASK_ENV": "development" },
+  "env": { "FLASK_APP": "app.py" },
   "args": ["run", "--no-debugger", "--no-reload"],
   "jinja": true
 }
@@ -171,7 +155,7 @@ if __name__ == "__main__":
   "type": "debugpy",
   "request": "launch",
   "module": "uvicorn",
-  "args": ["main:app", "--reload"],
+  "args": ["main:app"],
   "jinja": false
 }
 ```
@@ -217,13 +201,16 @@ $ ssh -L 5678:localhost:5678 user@server
 - 운영 코드에 `debugpy.listen`을 *항상* 켜두지 말 것. 환경 변수로 gating.
 
 ```python
+import os
+
 if os.getenv("DEBUGPY_ENABLE") == "1":
-    debugpy.listen(("0.0.0.0", 5678))
+    import debugpy
+    debugpy.listen(("127.0.0.1", 5678))
 ```
 
 ## DAP — IDE 호환성
 
-VSCode·PyCharm·Neovim(dap-python)이 모두 같은 debugpy를 어댑터로 씁니다. Neovim 설정 예.
+VSCode의 Python Debugger 확장과 Neovim의 nvim-dap-python처럼 debugpy를 지원하도록 설정한 클라이언트에서 사용합니다. PyCharm의 원격 Python Debug Server 설정과는 호환 절차가 다릅니다. Neovim 설정 예입니다.
 
 ```lua
 require('dap-python').setup('/usr/bin/python3')
@@ -232,6 +219,25 @@ require('dap-python').setup('/usr/bin/python3')
 `launch.json`이 없으면 `dap.configurations.python`을 Lua로 직접 정의. 인터페이스는 VSCode와 같습니다.
 
 ## 자주 만나는 문제
+
+확인 환경은 CPython 3.14.8·debugpy 1.8.20·macOS입니다. 설치된 VSCode 확장의 debugpy 라이브러리를 사용해 import·CLI 도움말과 loopback 임시 포트 listen을 확인했습니다. IDE 화면에서 브레이크포인트를 밟거나 프레임워크 워커에 attach한 검증은 아닙니다.
+
+다음 파일은 환경 변수로 시작 여부를 제어합니다. 활성화하지 않으면 debugpy를 import하거나 포트를 열지 않습니다.
+
+```python title="debug-start.py"
+import os
+
+if os.getenv("DEBUGPY_ENABLE") == "1":
+    import debugpy
+    endpoint = debugpy.listen(("127.0.0.1", int(os.getenv("DEBUGPY_PORT", "5678"))))
+    print(f"debugpy listening: {endpoint}", flush=True)
+    if os.getenv("DEBUGPY_WAIT_FOR_CLIENT") == "1":
+        debugpy.wait_for_client()
+
+print("application ready", flush=True)
+```
+
+`python3 debug-start.py`는 application ready만 출력합니다. debugpy가 설치된 환경에서 `DEBUGPY_ENABLE=1 DEBUGPY_PORT=0 python3 debug-start.py`로 실행하면 비어 있는 임시 loopback 포트를 선택합니다. 기본 예제는 IDE 연결을 기다리지 않습니다. 시작 지점 이전을 디버깅하려면 WAIT_FOR_CLIENT=1을 명시하고 클라이언트가 연결된 뒤 진행되는지 확인합니다. [debugpy API](https://github.com/microsoft/debugpy#debugpy-import-usage)의 listen과 wait 역할을 구분합니다.
 
 | 증상 | 원인 / 해법 |
 |------|-------------|
@@ -244,10 +250,10 @@ require('dap-python').setup('/usr/bin/python3')
 
 ## 정리
 
-- `debugpy`가 VSCode·PyCharm·Neovim 공용 어댑터.
+- debugpy는 DAP 구현이며 VSCode·설정된 Neovim 클라이언트에서 사용합니다. PyCharm의 Python 원격 디버깅은 별도 절차입니다.
 - `launch`/`attach` 구분 — 운영은 attach + listen.
 - 조건부 BP, Hit count, Logpoint로 코드 수정 없이 진단.
-- 멀티프로세스는 `subProcess: true` + 포트 분배.
+- subprocess 추적은 subProcess 설정을 사용하며 PID 기반 포트 분배를 해법으로 가정하지 않습니다.
 - 보안 — debugpy 포트는 인증 없음, SSH 터널 필수.
 - 같은 DAP 어댑터이므로 IDE 간 이식 쉽다.
 

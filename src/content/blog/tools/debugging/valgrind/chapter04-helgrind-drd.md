@@ -14,25 +14,21 @@ topics: ["tools", "tools/debugging"]
 
 Valgrind에는 멀티스레드 분석 도구가 *두 개* 있습니다 — Helgrind와 DRD. 같은 일을 한다면 *왜 둘인지* 궁금할 만합니다.
 
-답은 *알고리즘이 다르기* 때문입니다.
+두 도구는 happens-before 관계로 관찰된 충돌 접근을 분석합니다. Helgrind의 레이스 검사를 단순한 lockset 교집합 검사로만 설명하면 semaphore·condition variable 같은 동기화를 놓칩니다.
 
-| | Helgrind | DRD |
-|---|---|---|
-| 알고리즘 기반 | *Lock-set* + *happens-before* | *Lamport's vector clock* |
-| 메모리 사용 | 많음 | 적음 (큰 코드에 유리) |
-| 락 사용 오류 | *매우 강함* | 보통 |
-| 데이터 레이스 감지 | 강함 | *조금 더 정확* |
-| Lock-order inversion | 잡음 | 잡음 |
-| 시작 시간 | 빠름 | 빠름 |
-| False positive | 비교적 적음 | 비슷 |
+| 도구 | 문서로 확인할 검사 범위 |
+| --- | --- |
+| Helgrind | 데이터 레이스, POSIX pthread API 오용, 잠금 순서 역전 |
+| DRD | 데이터 레이스, POSIX API 오용, 잠금 보유 시간에 의한 경합 진단 |
 
-요약: **Helgrind는 락 오용에, DRD는 데이터 레이스에 약간 더 강합니다**. 실무에서는 *Helgrind를 먼저 시도*하고, 그래도 안 잡히는 자리에 DRD를 씁니다.
+DRD가 항상 더 정확하거나 적은 메모리를 쓴다는 순위를 제시하지 않습니다. 실제 재현 입력으로 양쪽의 보고·비용·지원 동기화를 비교합니다. DRD의 경합 진단은 Helgrind의 잠금 순서 그래프 검사와 같은 기능이 아닙니다.
+
 
 ---
 
 ## Helgrind — 락 추적
 
-Helgrind는 *각 메모리 접근에 대한 lockset*을 추적합니다. lockset이란 *접근 시점에 잡혀 있던 락의 집합*.
+같은 mutex로 접근을 보호하는 것은 대표적인 happens-before 동기화입니다. 다음은 서로 다른 mutex를 사용해 공유 counter가 보호되지 않는 경우입니다.
 
 ```cpp
 std::mutex m1, m2;
@@ -53,7 +49,7 @@ int counter = 0;
 
 두 접근의 lockset이 *교집합 없음* → *공통 보호 락 없음* → *데이터 레이스*.
 
-Helgrind의 lockset 모델은 *직관적*이고, *false positive가 비교적 적습니다*. 두 스레드가 *같은 락을 쥐고* 같은 변수에 접근하면 안전, 다른 락을 쥐고 접근하면 경고.
+이 예제의 두 임계구역은 서로를 배제하지 않습니다. 다만 다른 락을 사용한다는 사실만으로 모든 프로그램의 레이스를 판정할 수는 없으며, 다른 동기화 경로가 있는지도 확인합니다.
 
 ### Helgrind 실행
 
@@ -102,14 +98,14 @@ void buggy() {
 }
 ```
 
-Helgrind는 *unlock 안 된 락*을 추적합니다.
+조기 반환으로 lock을 보유한 채 남는 것은 실제 결함입니다. 스레드 종료·후속 lock 등 실행 경로와 런타임의 보고 조건에 따라 증상이 달라집니다. 아래는 API 실패 형식 예시이며 이 조각의 즉시 실행 결과는 아닙니다.
 
 ```text
 Thread #1's call to pthread_mutex_lock failed
    ...
 ```
 
-이런 자리는 *런타임에 보일 때까지* 디버깅이 어려운데, Helgrind가 *바로 잡아 줍니다*.
+Helgrind도 동적 분석이므로 관련 경로가 실제 실행되어야 합니다. RAII로 조기 반환의 unlock 누락을 막는 편이 명확합니다.
 
 ### Lock-order inversion
 
@@ -138,19 +134,7 @@ This required order was established by acquisition of lock at 0x...
 
 DRD는 *Lamport's vector clock* 알고리즘으로 *시간 순서*를 추적합니다.
 
-```text
-       T1: a=1
-        \
-         sem_post
-            \
-             sem_wait → T2 (a 읽기 안전)
-
-       T1: b=1
-                    
-        T2: b 읽기  ← 동기화 없음, race
-```
-
-각 스레드와 각 동기화 객체에 *vector clock*을 두고, 메모리 접근마다 이 clock으로 *happens-before 관계*를 정확히 계산.
+semaphore post를 성공적으로 소비하는 wait, mutex unlock 뒤의 lock 등 지원되는 동기화를 통해 접근의 순서를 모델링합니다. 별도의 동기화 없이 공유 데이터를 읽고 쓰면 검사 대상입니다.
 
 ### DRD 실행
 
@@ -160,30 +144,10 @@ valgrind --tool=drd ./myapp
 
 ### 잡는 것
 
-Helgrind와 *대부분 겹칩니다*. 차이:
+POSIX 기반 프로그램의 레이스·동기화 오용을 관찰합니다. [DRD의 검사 범위](https://valgrind.org/docs/manual/drd-manual.html)를 기준으로 적용하고, Helgrind보다 복잡한 동기화를 항상 더 정확히 처리한다고 가정하지 않습니다.
 
-- **DRD는 vector clock 기반**이라 *복잡한 동기화 패턴*에 더 정확.
-- **메모리를 덜 씀**. 큰 프로그램에서 Helgrind가 OOM 날 때 DRD는 동작.
-- **POSIX condvar 의미가 더 정확**. 일부 시그널/대기 패턴.
+relaxed atomic으로 비원자 데이터를 게시하면 C++의 release/acquire 동기화가 성립하지 않습니다. 어떤 도구가 이 레이스를 실제로 보고하는지는 버전·아키텍처·코드 생성에 따라 실행해서 확인해야 합니다. [TSan의 대응 예제](/blog/tools/debugging/sanitizers/chapter04-tsan)와도 검증 범위를 구분합니다.
 
-### 자주 추가 잡는 자리
-
-```cpp
-// Helgrind는 놓칠 수 있지만 DRD가 잡는 패턴
-std::atomic<int> seq{0};
-
-// 스레드 A
-data = compute();
-seq.store(seq.load() + 1, std::memory_order_relaxed);   // sequence number 갱신
-
-// 스레드 B
-int s = seq.load(std::memory_order_relaxed);
-if (s > last_seq) {
-    use(data);   // ← relaxed라 happens-before 없음. race
-}
-```
-
-`relaxed` atomic은 *순서 보장이 없는데*, Helgrind는 *atomic이라 OK라고 판단*할 수 있습니다. DRD는 vector clock으로 *정확히* 잡습니다.
 
 ---
 
@@ -207,16 +171,8 @@ valgrind --tool=drd ./myapp 2>&1 | tee drd.log
 
 ## 비용 — *얼마나 느린가*
 
-Helgrind와 DRD는 *Memcheck보다 약간 더 느림*. 보통 20~50× 정도.
+속도와 메모리 비용은 같은 바이너리·입력에서 측정합니다. 이 글에서 측정하지 않은 초 단위 표나 고정 배율을 실측 결과처럼 제시하지 않습니다. 실행 시나리오를 줄일 때는 원래 결함이 유지되는지 확인합니다.
 
-```text
-일반 실행:           1초
-Memcheck:           10~50초
-Helgrind:           30~100초
-DRD:                25~80초
-```
-
-큰 프로그램 + 멀티스레드 시나리오에서는 *분 → 시간* 단위가 됩니다. *짧은 시나리오*에서 호출.
 
 ---
 
@@ -234,11 +190,11 @@ valgrind --tool=helgrind \
 | 옵션 | 의미 |
 |------|------|
 | `--history-level=full` | 모든 race의 *과거 접근 트레이스* 포함 (기본). |
-| `--history-level=approx` | 트레이스 생략. *빠르지만 디버깅 어려워짐*. |
+| `--history-level=approx` | 이전 접근이 발생한 구간의 근사 스택 정보를 남깁니다. |
 | `--history-level=none` | 가장 빠름. 트레이스 없음. |
-| `--conflict-cache-size=N` | 충돌 추적 캐시. 크면 *더 많은 race* 잡지만 메모리 ↑. |
+| `--conflict-cache-size=N` | 과거 충돌 접근의 스택 캐시 크기입니다. 보존되는 진단 정보와 메모리 비용에 영향을 줍니다. |
 | `--check-stack-refs=no` | 스택 변수의 race 무시. 보통 켜 둠. |
-| `--ignore-thread-creation=yes` | 스레드 생성 시점의 race 무시. |
+| `--ignore-thread-creation=yes` | 생성 중 내부 접근·client request 등을 무시하는 범위가 생깁니다. 플랫폼별 기본값과 탐지 공백을 확인합니다. |
 
 ### DRD
 
@@ -253,8 +209,8 @@ valgrind --tool=drd \
 |------|------|
 | `--check-stack-var=yes` | 스택 변수의 race 검사. 기본 off. |
 | `--segment-merging=yes` | vector clock 세그먼트 병합 (메모리 절약). |
-| `--shared-threshold=N` | N 스레드 이상이 본 메모리만 검사. |
-| `--exclusive-threshold=N` | 락 N ms 이상 쥔 자리 보고 (데드락 분석). |
+| `--shared-threshold=N` | reader lock을 N ms 넘게 보유하면 보고합니다. 스레드 수 기준이 아닙니다. |
+| `--exclusive-threshold=N` | mutex 또는 writer lock을 N ms 넘게 보유하면 보고합니다. 경합 진단이며 데드락 판정과 다릅니다. |
 
 ---
 
@@ -283,7 +239,7 @@ t.detach();
 t.join();    // ❌ 이미 detach됨
 ```
 
-이런 API 오용을 *런타임에 발견하기 전에* Helgrind가 알려 줍니다.
+Helgrind는 API 호출이 실행됐을 때 진단합니다. 정적 분석처럼 실행 전에 예측하는 도구는 아닙니다. C++ detach 후 join은 std::system_error를 던질 수 있으므로 이 C++ 코드와 pthread 반환 코드를 구분합니다.
 
 ---
 
@@ -292,8 +248,8 @@ t.join();    // ❌ 이미 detach됨
 condition variable은 *잘못 쓰기 쉬운* 동기화 도구입니다. Helgrind와 DRD 모두 이를 추적.
 
 ```c
-pthread_mutex_t m;
-pthread_cond_t c;
+pthread_mutex_t m = PTHREAD_MUTEX_INITIALIZER;
+pthread_cond_t c = PTHREAD_COND_INITIALIZER;
 int ready = 0;
 
 // 스레드 A (waiter)
@@ -313,7 +269,8 @@ pthread_mutex_unlock(&m);
 흔한 실수들:
 
 ```c
-// ❌ 락 없이 signal
+// mutex 밖 signal 자체만으로 POSIX 위반은 아님
+// 조건 변수에 대응하는 공유 상태·predicate를 올바르게 보호해야 함
 pthread_cond_signal(&c);
 
 // ❌ if로 wait (spurious wakeup 무시)
@@ -326,53 +283,18 @@ pthread_mutex_t m1, m2;
 pthread_cond_wait(&c, &m1);    // 어떤 호출은 m1, 다른 호출은 m2 → 위험
 ```
 
-Helgrind/DRD는 *condition variable과 mutex의 일관성*을 추적해 이런 자리를 경고합니다.
+condition variable과 mutex의 연결을 확인합니다. signal 시 mutex 보유 여부에 관한 도구 권고와 POSIX 위반을 구분하고, spurious wakeup을 버틸 predicate 반복 검사도 코드에서 확인합니다. 도구가 모든 if/wait 논리 오류를 경고한다고 보장하지 않습니다.
 
 ---
 
 ## *Spinlock과 lock-free* 코드
 
-Spinlock과 lock-free 알고리즘은 *Helgrind/DRD가 잘 추적하지 못합니다*.
+사용자 정의 동기화는 버전·아키텍처·컴파일러가 생성한 atomic 명령에 대한 도구의 지원을 확인합니다. 모든 atomic 동기화를 모른다거나 모든 보고가 오탐이라고 단정하지 않습니다.
 
-```c
-std::atomic<bool> spinlock{false};
+Helgrind client request는 실제로 존재하는 동기화를 도구에 설명할 때 사용합니다. ANNOTATE_RWLOCK_CREATE/DESTROY와 ACQUIRED/RELEASED 등 전체 수명 규칙을 [공식 매뉴얼](https://valgrind.org/docs/manual/hg-manual.html#hg-manual.effective-use)과 헤더에 맞게 적용합니다. 잘못된 알고리즘에 annotation으로 가짜 순서를 넣으면 실제 레이스를 숨길 수 있습니다.
 
-void lock() {
-    while (spinlock.exchange(true, std::memory_order_acquire)) {
-        // spin
-    }
-}
+suppression은 모듈 전체에 바로 적용하지 않습니다. 원인·재검토 조건을 기록하고 알려진 결함을 재현한 부정 대조군이 계속 보고되는지 확인합니다.
 
-void unlock() {
-    spinlock.store(false, std::memory_order_release);
-}
-```
-
-이 자체는 정상이지만, Helgrind/DRD는 *atomic 기반 동기화*를 모릅니다. *모든 메모리 접근에 race 보고*가 쏟아집니다.
-
-해결책은 두 가지:
-
-1. **Annotation으로 알려 주기**
-
-```c
-#include <valgrind/helgrind.h>
-
-void lock() {
-    while (spinlock.exchange(true)) {}
-    ANNOTATE_RWLOCK_ACQUIRED(&spinlock, 1);
-}
-
-void unlock() {
-    ANNOTATE_RWLOCK_RELEASED(&spinlock, 1);
-    spinlock.store(false);
-}
-```
-
-`ANNOTATE_*` 매크로로 Valgrind에게 *명시적으로 happens-before*를 알려 줍니다.
-
-2. **Suppression으로 우회**
-
-해당 모듈의 race 보고를 *전부 무시*. lock-free 코드는 *별도 도구*(TSan, 정적 분석)로 검증.
 
 ---
 
@@ -419,7 +341,7 @@ std::cout << "T2\n";
 
 C++ stream 내부에 *공유 상태*가 있어 race 보고가 뜰 수 있습니다. 실제로는 *atomic operation으로 보호*되지만 Helgrind가 모를 수 있음.
 
-해결: I/O 라이브러리 suppression.
+확인: 표준 스트림 설정·구현의 동기화·다른 공유 쓰기를 조사합니다. I/O 라이브러리라는 이유만으로 곧바로 suppress하지 않습니다.
 
 ### 2. 글로벌 초기화
 
@@ -438,18 +360,55 @@ C++11부터 *function-local static* 초기화는 *스레드 안전*이 보장됩
 
 OpenMP·MPI·OpenSSL 같은 라이브러리는 *내부 동기화*가 복잡해 false positive가 많습니다.
 
-해결: 해당 라이브러리 함수 prefix로 suppression.
+확인: 실제 결함인지 도구 모델의 공백인지 최소 재현으로 구분합니다. 제외할 때도 특정 호출 맥락으로 좁히고 재검토 조건을 남깁니다.
 
 ---
+
+## 실행 입력 — 공유 counter 보호
+
+다음 파일은 기본 분기의 counter 접근을 같은 mutex로 보호합니다. RACY를 정의한 빌드는 진단용 결함 입력입니다. 현재 환경에서는 정상 분기의 counter=4000만 실행했고 Helgrind·DRD 결과는 Linux 검증 대기입니다.
+
+```cpp title="counter.cpp"
+#include <cstdio>
+#include <mutex>
+#include <thread>
+std::mutex guard;
+int counter = 0;
+void worker() {
+    for (int i = 0; i < 2000; ++i) {
+#ifndef RACY
+        std::lock_guard<std::mutex> lock(guard);
+#endif
+        ++counter;
+    }
+}
+int main() {
+    std::thread first(worker), second(worker);
+    first.join();
+    second.join();
+    std::printf("counter=%d\n", counter);
+}
+```
+
+```bash
+c++ -std=c++17 -g -O0 -pthread counter.cpp -o counter
+valgrind --tool=helgrind --error-exitcode=97 ./counter
+valgrind --tool=drd --error-exitcode=97 ./counter
+c++ -std=c++17 -g -O0 -pthread -DRACY counter.cpp -o racy
+valgrind --tool=helgrind --error-exitcode=97 ./racy
+valgrind --tool=drd --error-exitcode=97 ./racy
+```
+
+RACY의 출력 숫자를 1/2 같은 한정된 값으로 예측하지 않습니다. 데이터 레이스는 C++에서 UB이며 무경고 한 번으로 안전하다고 결론 내리지 않습니다.
 
 ## 정리
 
 - Valgrind는 *멀티스레드 분석 두 도구*: **Helgrind**(lockset + happens-before)와 **DRD**(vector clock).
-- 둘은 *대부분 겹치지만* Helgrind는 *락 오용*에, DRD는 *복잡한 동기화*에 약간 더 강함.
+- 각 도구의 지원 동기화와 보고를 비교하며 정확도 순위를 일괄 가정하지 않습니다.
 - *Helgrind를 먼저*, 안 잡히면 DRD.
-- 비용 20~50×. *짧은 시나리오*에 사용.
+- 비용은 실제 입력에서 측정하고 결함이 유지되는 짧은 시나리오를 사용합니다.
 - TSan과 분담: TSan = PR 빌드, Helgrind/DRD = 야간 + 외부 라이브러리.
-- Spinlock·lock-free 코드는 *annotation* (`ANNOTATE_*`) 또는 suppression.
+- 사용자 동기화는 지원 범위를 확인하고 annotation·suppression으로 실제 결함을 숨기지 않습니다.
 - Pthreads / Condvar 오용도 정확히 추적.
 
 ## 다음 장 예고
@@ -460,7 +419,7 @@ OpenMP·MPI·OpenSSL 같은 라이브러리는 *내부 동기화*가 복잡해 f
 
 - [Helgrind Manual](https://valgrind.org/docs/manual/hg-manual.html)
 - [DRD Manual](https://valgrind.org/docs/manual/drd-manual.html)
-- [Helgrind vs DRD 비교 (논문)](https://valgrind.org/docs/manual/drd-manual.html#drd-manual.intro) — DRD 매뉴얼 안에 비교 섹션
+- [DRD 공식 매뉴얼](https://valgrind.org/docs/manual/drd-manual.html#drd-manual.intro) — DRD 매뉴얼 안에 비교 섹션
 
 ## 관련 항목
 

@@ -12,8 +12,10 @@ topics: ["tools", "tools/debugging"]
 
 ## CXL.mem은 일반 메모리와 무엇이 다른가
 
-DDR DIMM과 달리 CXL 메모리 디바이스는:
-- *별도 NUMA 노드*로 등록됨 — `numastat`에 별도 항목
+DDR DIMM과 달리 host-managed CXL memory region은 구성에 따라 별도 NUMA node로 노출될 수 있습니다.
+
+CXL 메모리는 다음 관점에서 추가 진단이 필요합니다:
+- *별도 NUMA node로 노출된 구성*에서는 `numastat`에 node별 항목이 생김
 - *RAS 이벤트 채널*이 존재 — poison list, event log
 - *Mailbox 명령*으로 *디바이스 상태 query* 가능
 - *Tiered memory* 컨텍스트에서 *promotion/demotion* 트래픽 발생
@@ -77,7 +79,7 @@ $ echo on > /sys/kernel/mm/damon/admin/kdamonds/0/state
 $ damo report access
 ```
 
-*CXL 노드의 access 빈도*가 *DDR보다 낮으면* tier 배치가 의도대로 동작하고 있습니다. 비슷하면 *promotion이 잘 안 되고 있는 신호*입니다.
+`damo report access` 결과만으로 CXL tier의 효율이나 promotion 성공을 판정하지 않습니다. 접근 빈도는 placement, CPU affinity, NUMA policy, workload 특성의 영향을 받으므로 노드별 할당·이동 통계와 애플리케이션 latency를 함께 비교합니다.
 
 ## 자주 만나는 함정
 
@@ -85,10 +87,10 @@ $ damo report access
 
 | 증상 | 원인 |
 |------|------|
-| CXL 노드 메모리 안 보임 | `cxl create-region` 안 함 — region 생성해야 사용 가능 |
-| `numastat`에 node 2 없음 | `daxctl reconfigure-device -m system-ram` 누락 |
-| 승격(promotion)이 일어나지 않음 | `/proc/sys/kernel/numa_balancing`에 `NUMA_BALANCING_MEMORY_TIERING`(2)이 설정되지 않음 |
-| 강등(demotion)이 일어나지 않음 | `/sys/kernel/mm/numa/demotion_enabled`가 꺼져 있음 |
+| CXL node memory가 예상과 다름 | region 상태, decoder commit, device mode와 memory online 상태를 각각 확인 |
+| `numastat`에 대상 node가 없음 | region/NUMA 구성, dax device mode, system-RAM online 상태를 확인 |
+| 승격(promotion)이 관찰되지 않음 | NUMA balancing mode뿐 아니라 node tier 구성, CPU/access locality, kernel config와 workload를 확인 |
+| 강등(demotion)이 관찰되지 않음 | demotion policy/configuration과 memory pressure 조건을 확인 |
 
 health 이상, media error 증가, `cxl monitor`에 이벤트가 나오지 않는 경우 등 디바이스 자체의 이상은 [Embedded Debugging Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot#자주-만나는-함정)에 정리돼 있습니다.
 
@@ -103,11 +105,11 @@ health 이상, media error 증가, `cxl monitor`에 이벤트가 나오지 않�
 
 ## 정리
 
-- CXL 메모리는 *별도 NUMA 노드*로 등록되어 `numastat`에서 *디바이스 관점* 진단이 가능합니다.
+- CXL memory의 실제 NUMA/tier 노출은 host 설정에 따라 다르며, 노드로 노출된 경우 `numastat`에서 할당 관점을 확인할 수 있습니다.
 - *cxl-cli*의 `cxl list -H`·`-L`과 `cxl monitor`가 *디바이스 health·poison·event*를 보여 줍니다.
 - *Event Log는 Informational·Warning·Failure·Fatal* 네 종류입니다.
-- *DAMON*으로 *CXL 노드의 access pattern*을 확인해 *tier 정렬이 잘 동작하는지* 검증합니다.
-- 운영에서는 *media error 수·`life_used_percent`·`dirty_shutdowns`* 세 지표를 *장기 추적*합니다.
+- *DAMON* access pattern은 tier 동작을 살펴보는 한 입력입니다. 노드별 할당·이동 통계와 애플리케이션 latency를 함께 비교합니다.
+- 운영에서는 *media error 수·`life_used_percent`·`dirty_shutdowns`*의 변화와 벤더가 정한 서비스 기준을 함께 추적합니다. 단일 수치에서 보편적인 교체 임계값을 추론하지 않습니다.
 
 ## 다음 장 예고
 
@@ -119,3 +121,9 @@ Ch 7 — Tiered Memory 진단. DAMON·DAMOS·promotion/demotion debugging.
 - [HBM·GDDR 심화 Ch 9: CXL.mem 분석](/blog/embedded/hardware/hbm/chapter09-cxl-mem)
 - [Embedded Performance Engineering Ch 54: CXL.mem 지연·대역폭 실측](/blog/embedded/performance-engineering/part3-12-cxl-mem-latency)
 - [Embedded Debugging Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot)
+
+## 공식 자료
+
+- [ndctl CXL list options](https://pmem.io/ndctl/cxl/cxl-list.html)
+- [Linux CXL driver theory](https://docs.kernel.org/driver-api/cxl/theory-of-operation.html)
+- [Linux DAMON design](https://docs.kernel.org/mm/damon/design.html)

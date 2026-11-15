@@ -2,7 +2,7 @@
 title: "멀티스레드·멀티프로세스 디버깅 — Non-Stop·Scheduler-Locking·Fork"
 slug: "tools/debugging/gdb-lldb/chapter06-multithread-multiprocess"
 date: 2026-05-24T09:06:00
-description: "thread / process apply. scheduler-locking. follow-fork. rr 시간 역행 디버깅."
+description: "스레드별 backtrace와 정지 범위, scheduler-locking, fork/exec 추적과 rr의 검증 조건."
 tags: [gdb, Multithread, Multiprocess]
 series: "GDB and LLDB"
 seriesOrder: 6
@@ -11,7 +11,7 @@ topics: ["tools", "tools/debugging"]
 ---
 
 :::tip[Deep dive]
-이 챕터는 빠른 참조입니다. 깊은 내부 메커니즘은 Concurrency Debugging 시리즈를 참고하세요 — Linux 스레드 내부, futex 메커니즘, rr 워크플로, TSan/Helgrind 통합까지.
+이 챕터는 빠른 참조입니다. 재현 조건을 좁힌 뒤 [TSan](/blog/tools/debugging/sanitizers/chapter04-tsan)과 [Helgrind/DRD](/blog/tools/debugging/valgrind/chapter04-helgrind-drd)의 실행 범위를 함께 비교합니다.
 :::
 
 
@@ -37,9 +37,9 @@ clone(child_func, child_stack,
       arg, &parent_tid, tls, &child_tid);
 ```
 
-이 모든 플래그를 함께 켜면 *POSIX 스레드*. 일부만 켜면 *부모-자식 프로세스*. `CLONE_VM`만 켜면 vfork류.
+이 모든 플래그를 함께 켜면 *POSIX 스레드*. 일부만 켜면 *부모-자식 프로세스*. vfork의 부모 정지는 CLONE_VM만으로 설명되지 않고 CLONE_VFORK 등의 의미도 확인해야 합니다.
 
-**LWP**(Light Weight Process)가 *커널의* 스레드 ID. `top -H`에서 보이는 그 ID입니다. `pthread_self()`가 반환하는 사용자 공간 pthread_t와는 다른 개념 — pthread_t는 libpthread 안의 자료구조 포인터.
+**LWP**(Light Weight Process)가 *커널의* 스레드 ID. `top -H`에서 보이는 그 ID입니다. `pthread_self()`가 반환하는 사용자 공간 pthread_t와는 다른 개념 — pthread_t는 POSIX가 정수·포인터 중 하나로 고정하지 않는 불투명 타입입니다. glibc 내부 표현과 Linux tid를 혼동하지 않습니다.
 
 ```c
 #include <sys/syscall.h>
@@ -47,13 +47,13 @@ pid_t my_lwp = syscall(SYS_gettid);   // LWP id (= tid)
 pthread_t my_pth = pthread_self();    // glibc pthread descriptor
 ```
 
-GDB의 `info threads`가 보여 주는 `Thread 0x... (LWP nnnnn)`이 이 둘. `0x...`은 pthread_t, `LWP nnnnn`이 커널 tid.
+`info threads`의 `Target Id` 형식은 OS와 target backend에 따릅니다. Linux native target에서는 LWP 항목에 커널 TID가 표시될 수 있지만, 주소처럼 보이는 thread id를 `pthread_t`라고 단정하면 안 됩니다. `pthread_t`의 표현은 POSIX가 고정하지 않는 불투명 타입입니다.
 
 ## 정지의 의미
 
 기본적으로 GDB가 한 스레드를 멈추면 *모든* 스레드가 같이 멈춥니다 (`set non-stop off`, 기본값). 즉 브레이크포인트에 한 스레드가 도착하면 나머지 스레드도 그 자리에서 동결됩니다. 이때 콜스택을 찍으면 모든 스레드의 현재 위치가 동시에 보입니다 — 실시간이 아니라 정지 직후의 한 컷.
 
-내부적으로는 GDB가 *PTRACE_INTERRUPT* 또는 *SIGSTOP*을 각 LWP에 보내 멈춥니다. 그 사이에도 *마이크로초 단위*로 다른 스레드가 진행할 수 있으므로 "한 시점"은 *근사*입니다. 정밀한 시점 일관성이 필요하면 `set non-stop` 모드가 다릅니다.
+운영체제와 target backend는 실행 중인 다른 스레드를 정지시킬 수 있습니다. 전체가 멈추기까지 일부 스레드가 진행할 수 있으므로 all-stop의 관측값도 원자적인 동시 스냅샷이라고 보장되지는 않습니다. non-stop은 선택한 스레드를 제어하는 방식이며 전체 스냅샷을 강화하는 기능은 아닙니다.
 
 `set non-stop on`이면 멈춘 스레드만 멈추고 나머지는 계속 달립니다. 디버깅 중에도 일부 스레드가 진행돼야 할 때 (예: heartbeat 송신 스레드) 쓰지만 보통은 off로 둡니다.
 
@@ -79,7 +79,9 @@ non-stop 모드는 *모든 명령*이 스레드별로 독립적입니다. `conti
   4    Thread 0x7ffff65c2640 (LWP 12348) "io"     read at io.cpp:23
 ```
 
-별표(`*`)는 *현재 스레드*. `Id`는 GDB가 부여한 짧은 번호이고 `LWP`(Light Weight Process)는 OS가 본 thread id (Linux는 tid, macOS는 mach port).
+별표(`*`)는 *현재 스레드*. `Id`는 GDB가 부여한 짧은 번호입니다. Linux native target의 `LWP`(Light Weight Process)는 커널 thread ID를 가리킵니다. 다른 OS와 backend는 별도 thread-id 형식을 사용합니다.
+
+위 `info threads` 출력은 필드 모양을 설명하는 예시이며, 주소·PID·소스 위치는 실제 한 세션에서 수집한 값이 아닙니다.
 
 스레드 이름 (`"main"`, `"worker"`)은 `pthread_setname_np` 또는 `prctl(PR_SET_NAME)`로 설정한 것. 디버깅을 쉽게 하려면 워커마다 의미 있는 이름을 박는 게 좋습니다.
 
@@ -112,7 +114,7 @@ macOS는 *디스패치 큐* 정보도 함께 — `queue 'com.apple.main-thread'`
 
 `thread N`으로 전환하면 그 스레드의 콜스택과 레지스터·로컬 변수에 접근됩니다. 디버거의 *현재 컨텍스트*가 바뀐다고 생각하면 됩니다.
 
-LLDB는 `thread select N`. 사실 LLDB에서 콜스택을 찍으려면 `bt 3`처럼 한 번에 지정할 수도 있지만, 여러 작업을 그 스레드 컨텍스트에서 하려면 select가 편합니다.
+LLDB는 `thread select N`. 사실 LLDB에서는 `thread backtrace 3`으로 스레드 인덱스를 지정할 수 있지만 bt 3은 기본 alias에서 프레임 수 제한이므로 구분해야 합니다., 여러 작업을 그 스레드 컨텍스트에서 하려면 select가 편합니다.
 
 ## 모든 스레드에 명령 적용
 
@@ -139,7 +141,7 @@ LLDB는
 
 ### 출력이 너무 많을 때
 
-수백 스레드 환경(예: 서버)에서는 출력이 폭주합니다. 두 방법.
+스레드가 많은 환경에서는 출력이 커집니다. 다음 세 가지로 범위를 좁힙니다.
 
 1. **압축 — frame filter**
 
@@ -198,10 +200,10 @@ GDB로 보면 락 대기 중인 스레드는 `__lll_lock_wait` → `futex_wait` 
 (gdb) frame 3
 #3  pthread_mutex_lock (mutex=0x55555576a2c0) at ...
 (gdb) print *mutex
-$1 = {__data = {__lock = 2, __count = 0, __owner = 12346, ...}}
+$1 = {__data = {__lock = 2, __count = 0, __owner = 12347, ...}}
 ```
 
-`__owner`가 LWP. *12346 스레드가 이 락을 들고 있다*가 결정적 단서.
+이 축약 예시에서는 `__owner` 값이 Linux LWP 12347을 가리킨다고 가정합니다. 해당 TID가 실제로 이 mutex를 소유하는지 다른 스레드의 stack·mutex 주소와 함께 확인해야 합니다. glibc 내부 구조와 필드 의미는 버전에 따라 달라질 수 있습니다.
 
 ## 데드락 사례
 
@@ -233,9 +235,9 @@ T2는 Cache 락을 들고 Logger 락을 기다리고, T3는 Logger 락을 들고
 $1 = (std::mutex *) 0x55555576a2c0
 ```
 
-T2와 T3에서 모두 같은 주소가 보이면 데드락 확정.
+같은 mutex 주소는 경합 대상을 확인할 뿐입니다. T2가 소유한 A를 T3가 기다리고 T3가 소유한 B를 T2가 기다리는 사이클과 진행 불가 조건까지 확인해야 데드락의 근거가 됩니다.
 
-데드락 검출 자동화 — 모든 스레드의 *대기 중인 락 ↔ 보유 중인 락* 관계를 그래프로 그리고 사이클을 찾는 도구. `clang-tidy`의 `clang-analyzer-alpha.deadcode.*`나 [Helgrind](/blog/tools/debugging/valgrind/chapter04-helgrind-drd)가 정적/동적으로 시도합니다.
+데드락 검출 자동화 — 모든 스레드의 *대기 중인 락 ↔ 보유 중인 락* 관계를 그래프로 그리고 사이클을 찾는 도구. deadcode 검사는 lock-order 검사와 다릅니다. 동적 lock-order 검사인 [Helgrind](/blog/tools/debugging/valgrind/chapter04-helgrind-drd)가 정적/동적으로 시도합니다.
 
 ## scheduler-locking
 
@@ -252,9 +254,9 @@ T2와 T3에서 모두 같은 주소가 보이면 데드락 확정.
 - `on` — 현재 스레드만 진행.
 - `step` — `step` 시에만 단일 스레드, `continue` 시에는 모두.
 - `off` (기본) — 모두 같이 진행.
-- `replay` — rr 재생 모드에서만 유효, 기록된 스케줄 따라.
+- replay — 지원되는 replay target에서 재생 중 scheduler locking을 적용합니다. rr 전용 설정은 아닙니다.
 
-내부 메커니즘 — GDB가 진행시킬 LWP에만 `PTRACE_CONT`를 보내고 나머지는 `SIGSTOP` 상태 유지. 커널은 해당 LWP만 깨워 줍니다.
+정확한 정지·재개 동작은 OS와 target backend에 따릅니다. 모든 플랫폼에서 같은 ptrace 요청과 signal 조합을 쓴다고 일반화하지 않습니다.
 
 LLDB는 `settings set target.process.thread.step-avoid-libraries`와 `thread step-out`/`step-in --run-mode this-thread` 조합으로 비슷한 효과를 냅니다. GDB만큼 깔끔하지는 않습니다.
 
@@ -264,7 +266,7 @@ LLDB는 `settings set target.process.thread.step-avoid-libraries`와 `thread ste
 
 ### scheduler-locking이 부족할 때
 
-GDB의 LWP 정지는 *수 마이크로초 ~ 밀리초*의 지연이 있습니다. 그 사이 *원자 연산 한 줄*은 이미 끝났을 수 있어, 정밀 race 디버깅에는 부족합니다.
+디버거의 정지·단계 진행은 스케줄링과 타이밍을 바꾸므로 race를 숨기거나 드러낼 수 있습니다. 지연은 target·transport·환경에 따라 달라지며 이 글에서는 측정하지 않았습니다.
 
 해법: **rr**(Ch 끝부분) 또는 **TSan**(Sanitizer Ch 4)로 보강.
 
@@ -311,7 +313,7 @@ GDB에 영향:
 
 ### exec 추적
 
-`fork → exec`로 바이너리가 바뀌는 경우 (셸 → ls), `catch exec`로 exec 직전에 멈출 수 있습니다.
+`fork → exec`로 바이너리가 바뀌는 경우 (셸 → ls), catch exec는 지원 target에서 exec 사건을 포착하며 새 executable 전환 뒤의 상태를 조사합니다.
 
 ```text
 (gdb) catch exec
@@ -319,7 +321,7 @@ GDB에 영향:
 (gdb) run
 ```
 
-`same`이면 exec 후 새 바이너리를 즉시 디버깅. `new`(기본)이면 새 인페리어를 만들어 따로 다룹니다.
+same이 기본이며 exec 전후에 같은 inferior를 유지합니다. new는 새 inferior를 만들고 이전 executable을 다시 실행할 수 있도록 원래 inferior와 분리합니다.
 
 `exec` 직후엔 *주소 공간·매핑·심볼*이 모두 새로 로드됩니다. GDB가 기존 BP를 새 바이너리에 다시 *해석*하지만, 주소가 달라져 BP가 사라질 수 있습니다. `info breakpoints`로 확인.
 
@@ -337,7 +339,7 @@ rr은 *단일 코어*로 디버기를 실행합니다. 비결정성의 원인 �
 2. **시스템 콜 결과** — 모든 syscall 결과를 기록 → 재생 시 그대로 주입.
 3. **시그널** — 도달 시점을 기록.
 
-기록된 trace는 보통 *5-10배 느림*. 그래도 race·heisenbug를 한 번이라도 잡았다면 *몇 번이고 재생*할 수 있다는 것이 결정적 가치.
+기록 비용은 workload·CPU·커널에 따라 달라지며 여기서 slowdown을 측정하지 않았습니다. 그래도 race·heisenbug를 한 번이라도 잡았다면 *몇 번이고 재생*할 수 있다는 것이 결정적 가치.
 
 ```bash
 # 1. 기록 (한 번)
@@ -364,9 +366,13 @@ $ rr replay
 
 1. 버그 재현이 잘 안 되면 *루프*로 기록.
    ```bash
-   $ while ! rr record --no-syscall-buffer ./my_test; do :; done
+   for attempt in $(seq 1 20); do
+       rr record ./my_test
+       status=$?
+       if [ "$status" -ne 0 ]; then break; fi
+   done
    ```
-   재현될 때까지 무한 반복. 평균 10번 만에 한 번 재현된다면 30분 안에 trace를 확보.
+   테스트가 성공이면 0, 찾는 실패면 비0을 반환한다는 계약 아래 최대 20회만 실행합니다. 비0은 rr 자체의 실행 오류일 수도 있으므로 trace와 종료 사유를 확인합니다. 이 환경에서는 rr을 설치하거나 실행하지 않았습니다.
 2. trace 디렉터리 백업 (`~/.local/share/rr/latest-trace/`).
 3. `rr replay`로 재생. 같은 결과가 반복적으로 나옴.
 4. 원인 추적은 `reverse-continue` + `watch`.
@@ -374,14 +380,14 @@ $ rr replay
 
 ### 제약
 
-- x86 Linux만 (ARM 미지원).
+- Linux와 지원되는 CPU·커널·PMU가 필요합니다. x86 전용으로 고정하지 말고 [선택한 rr release의 문서](https://github.com/rr-debugger/rr)를 확인합니다.
 - 일부 CPU 이벤트(RDTSC, 일부 SIMD) 기록 안 됨.
 - 멀티 코어 동시성은 단일 코어 시뮬로만 — 진짜 메모리 모델 race(예: 다른 코어 캐시 사이의 reorder)는 재현 불가.
 - 비결정적 입력 출력(sound, GPU)은 어색.
 
-그래도 *재현 불가 버그*에는 거의 유일한 무기입니다.
+rr은 기록 중 실제로 재현된 실패를 반복 조사하는 방법입니다. 기록 자체가 스케줄을 바꾸어 실패를 숨길 수도 있습니다.
 
-LLDB에는 동등한 기능이 없고, macOS에서는 `chronicle` 같은 실험적 도구가 있긴 하지만 안정성은 rr이 압도적입니다. Microsoft의 [TTD](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/time-travel-debugging-overview)가 Windows 쪽 대안.
+이 장은 macOS LLDB에서 rr과 동등한 replay를 검증하지 않았습니다. Microsoft의 [TTD](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/time-travel-debugging-overview)가 Windows 쪽 대안.
 
 ### Pernosco — rr의 클라우드 후속
 
@@ -413,7 +419,7 @@ GDB로 데드락·경합을 찾는 건 *증상 확인* 단계. 사후에 어디�
 | follow-fork | `set follow-fork-mode child` | `settings set target.process.follow-fork-mode child` |
 | 인페리어 | `info inferiors` / `inferior N` | `target list` / `target select N` |
 
-LLDB의 멀티프로세스 디버깅은 GDB보다 거칠지만, 단일 프로세스 멀티스레드는 충분합니다.
+LLDB의 fork 추적 지원은 플랫폼/backend에 따라 확인합니다. target 목록이 GDB inferior와 모든 면에서 일대일 대응하는 것은 아닙니다.
 
 ## 정리
 
@@ -436,7 +442,7 @@ Ch 7 — core dump 분석. 프로세스가 이미 죽었을 때 시신을 부검
 
 - [Ch 5: 브레이크포인트와 워치포인트](/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints)
 - [Ch 7: core dump 분석](/blog/tools/debugging/gdb-lldb/chapter07-core-dump)
-- [Sanitizers Ch 4: TSan / MSan](/blog/tools/debugging/sanitizers/chapter04-tsan) — 동시성 버그 탐지
+- [Sanitizers Ch 4: TSan](/blog/tools/debugging/sanitizers/chapter04-tsan) — 동시성 버그 탐지
 - [Valgrind Ch 4: Helgrind / DRD](/blog/tools/debugging/valgrind/chapter04-helgrind-drd) — race / lock-order
 - [rr 프로젝트](https://rr-project.org/) — record-and-replay
 - [Pernosco](https://pernos.co/) — rr trace 인덱싱

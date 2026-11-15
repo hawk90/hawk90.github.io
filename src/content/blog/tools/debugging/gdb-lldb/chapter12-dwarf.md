@@ -15,13 +15,13 @@ topics: ["tools", "tools/debugging"]
 :::
 
 
-GDB가 `print x`라고 했을 때 `x`의 *타입*, *위치(메모리 주소 또는 레지스터)*, *어떤 라이브러리·소스 파일에 정의됐는지*를 어떻게 알까요. 답은 ELF 파일 안에 박힌 **DWARF**라는 디버그 정보 형식입니다. 이 정보 없이는 GDB가 그저 어셈블리 디스어셈블러에 불과합니다.
+GDB가 `print x`라고 했을 때 `x`의 *타입*, *위치(메모리 주소 또는 레지스터)*, *어떤 라이브러리·소스 파일에 정의됐는지*를 어떻게 알까요. 답은 ELF 파일 안에 박힌 **DWARF**라는 디버그 정보 형식입니다. DWARF가 없어도 일반 심볼·레지스터·메모리·어셈블리를 조사할 수 있지만 지역 변수와 소스 매핑에는 한계가 생깁니다.
 
 이 장은 DWARF가 무엇을 표현하고, 왜 그렇게 크고, 어떻게 줄이며, 흔한 트러블 ("심볼이 없다", "value optimized out")을 어떻게 진단할지를 다룹니다. 평소 *블랙박스*로 두던 DWARF를 한 번 열어 보면 디버거의 행동이 훨씬 또렷해집니다.
 
 ## DWARF가 뭔가
 
-DWARF(Debugging With Attributed Record Formats)는 1992년부터 ELF·Mach-O·COFF 등 거의 모든 ABI에서 *디버그 정보 표준*으로 쓰이고 있습니다. 현재 DWARF 5가 표준(2017). GCC/Clang의 `-g` 플래그가 만들어 내는 게 바로 이것.
+DWARF는 ELF·Mach-O 등에서 사용하는 언어 독립적인 디버그 정보 형식입니다. 이 글은 2017년 공개된 [DWARF 5](https://dwarfstd.org/doc/DWARF5.pdf)를 기준으로 용어를 설명합니다. 실제 -g 출력 형식·버전은 target과 toolchain 옵션에 따라 확인합니다.
 
 설계 목표 셋.
 
@@ -54,7 +54,7 @@ $ readelf -S my_prog | grep debug
 | `.debug_loc` | 변수 위치 표현(스코프별) | → `.debug_loclists` |
 | `.debug_ranges` | 함수·범위 주소 구간 | → `.debug_rnglists` |
 | `.debug_frame` | 콜스택 해제 정보 | 그대로 |
-| `.eh_frame` | 콜스택 해제 (C++ exception용, 항상 있음) | 그대로 |
+| `.eh_frame` | 콜스택 해제 (예외·unwinding에 사용; 존재는 toolchain·target에 따름) | 그대로 |
 | `.debug_aranges` | PC → 컴파일 유닛 빠른 인덱스 | (선택) |
 | `.debug_pubnames` / `.debug_pubtypes` | 공개 심볼 인덱스 | 폐기 → `.debug_names` |
 | `.debug_str_offsets` | 문자열 인덱스 (split-DWARF용) | DWARF 5 신규 |
@@ -84,7 +84,7 @@ DW_TAG_compile_unit
 │  ├─ DW_AT_external = true
 │  ├─ DW_AT_type = ref(<0x4e>)
 │  └─ DW_TAG_variable
-│     ├─ DW_AT_name = "argc"
+│     ├─ DW_AT_name = "local"
 │     ├─ DW_AT_type = ref(<0x4e>)
 │     └─ DW_AT_location = DW_OP_fbreg(-4)
 ```
@@ -187,13 +187,13 @@ DW_LNS_copy
 DW_LNE_end_sequence
 ```
 
-레지스터: PC, line, column, file, is_stmt, basic_block, end_sequence, prologue_end, epilogue_begin, ISA. 각 명령이 일부 레지스터를 갱신하고 `DW_LNS_copy`가 *그 시점*의 레지스터 값을 한 행으로 emit합니다.
+레지스터: PC, line, column, file, is_stmt, basic_block, end_sequence, prologue_end, epilogue_begin, ISA. 각 명령이 일부 레지스터를 갱신하고 `DW_LNS_copy`가 *그 시점*의 레지스터 값을 한 행으로 emit합니다. 위 주소·행 번호는 형식 설명용으로 구성한 예시이며, `my_prog`를 빌드해 얻은 결과가 아닙니다.
 
 압축비가 매우 높아 *수천 줄의 매핑*이 수십 바이트로 표현됩니다.
 
 ```bash
 $ addr2line -e my_prog 0x401134
-main.cpp:13
+main.cpp:14
 
 $ addr2line -e my_prog -f -i 0x401134
 main
@@ -201,14 +201,14 @@ main.cpp:13
 
 # -i는 인라인 호출 체인까지
 $ addr2line -e my_prog -f -i -p 0x401134
-foo at f.cpp:10 (inlined by) bar at g.cpp:30 (inlined by) main at main.cpp:13
+main at main.cpp:14
 ```
 
-크래시 로그의 주소를 소스로 되돌리는 거의 모든 도구가 안쪽에서 `.debug_line`을 본다고 보면 됩니다.
+위 -f -i와 -f -i -p는 같은 주소에 대해 같은 논리적 chain을 보여 줘야 하며 -p는 한 줄의 pretty 형식만 바꿉니다. 앞의 표를 가정하면 0x401134는 14행 범위입니다. 다른 바이너리의 inline chain을 같은 입력의 결과로 섞으면 안 됩니다.
 
 ### is_stmt — "이 줄에 BP를 걸 수 있나"
 
-`is_stmt = 1`인 행만 *문장 시작*. GDB의 줄 단위 BP는 `is_stmt`만 후보로 봅니다. `-O2`의 인라인된 코드는 `is_stmt`가 적게 표시돼 BP가 "한 줄 건너뛴" 곳에 걸리는 일이 흔합니다. `-Og`로 늘어남.
+DWARF의 is_stmt는 권장되는 중단 지점을 나타내며 다른 행에 중단점을 설정할 수 없다는 금지 규칙은 아닙니다. 실제 줄 중단점 선택은 debugger·prologue 처리·최적화된 line table에 따라 확인합니다.
 
 ### 인라인된 호출의 표현
 
@@ -278,7 +278,7 @@ GDB는 `print x`에 `42`로 답합니다. 메모리 어디에도 없지만 값�
 
 `bt`가 어떻게 SP·BP를 거꾸로 풀어 가는지의 답이 여기. 각 함수의 *프롤로그/에필로그*를 *Call Frame Information*(CFI)으로 기술합니다.
 
-- `.eh_frame` — C++ 예외 처리에도 쓰이므로 *항상 들어 있음*(stripped 빌드에도).
+- `.eh_frame` — unwinding에 사용되며 target·옵션에 따라 존재합니다. 모든 stripped 파일에 항상 있는 것은 아닙니다.
 - `.debug_frame` — 디버깅 전용, `-g`로만 들어감.
 
 ### CFI 모델
@@ -321,7 +321,7 @@ $ llvm-dwarfdump --debug-frame my_prog | head -30
 - **CIE** (Common Information Entry) — 같은 호출 규약을 공유하는 함수들의 공통 정보. 보통 ABI별 한 개.
 - **FDE** (Frame Description Entry) — 함수 하나당 한 개. CIE를 가리키고 함수의 PC 범위 + 차분 CFI 명령을 담음.
 
-코드 1MB 프로그램의 `.eh_frame`이 100KB 가까이 가는 건 FDE가 함수마다 하나씩 있기 때문입니다.
+CFI 크기는 함수·주소 범위·생성 옵션으로 측정합니다. FDE가 각 함수와 항상 일대일이거나 코드 크기의 고정 비율이라는 보장은 없습니다.
 
 ### libunwind와 .eh_frame_hdr
 
@@ -335,7 +335,7 @@ $ readelf -SW my_prog | grep eh_frame
 
 ## 크기와 골칫거리
 
-DWARF는 *큽니다*. C++ 템플릿이 많은 코드는 디버그 정보가 본 코드의 5~10배가 흔합니다.
+디버그 정보 크기는 프로그램·템플릿 인스턴스화·최적화·정보 수준에 따라 달라집니다. 아래 수치는 형식 예시이며 측정 비율로 사용하지 않습니다.
 
 ```bash
 $ size -A my_prog | grep debug
@@ -354,7 +354,7 @@ DWARF를 `.o`에 두지 않고 *별도 `.dwo` 파일*로 분리. 링크 시 본 
 
 ```bash
 $ clang++ -g -gsplit-dwarf -c foo.cpp     # foo.o + foo.dwo
-$ clang++ -g -gsplit-dwarf foo.o -o prog  # prog.dwo도 자동 검색
+$ clang++ -g -gsplit-dwarf foo.o -o prog  # 컴파일 단계에서 만든 foo.dwo를 보존; 링크가 prog.dwo를 생성하는 것은 아님
 ```
 
 큰 프로젝트(LLVM, Chromium)의 표준. 빌드 시간·메모리가 크게 줄어듭니다.
@@ -373,23 +373,23 @@ ELF 안에 남는 건 *skeleton CU* — DIE 트리는 `.dwo`에 두고, ELF는 �
 
 ### 2. dwz — 디덥
 
-[dwz](https://sourceware.org/dwz/) 도구가 중복 DIE를 제거합니다. 대규모 C++ 코드베이스에서 같은 STL 인스턴스화가 수십 번 반복되는 걸 한 번으로 합쳐 *20-40%* 크기 감소.
+[dwz](https://sourceware.org/dwz/) 도구가 중복 DIE를 제거합니다. 대규모 C++ 코드베이스에서 같은 STL 인스턴스화가 수십 번 반복되는 걸 한 번으로 합칠 수 있습니다. 실제 절감률과 지원 DWARF 형식은 사용한 dwz 판·입력 파일로 확인합니다.
 
 ```bash
 $ dwz -m common.debug a.out b.out c.out
 ```
 
-배포판 패키지 빌드 시 거의 표준으로 적용됩니다.
+패키지 제작 흐름은 배포판과 프로젝트마다 다르므로 적용 여부를 artifact에서 확인합니다.
 
 ### 3. -g1 / -gline-tables-only
 
 전체 디버그 정보는 필요 없고 *콜스택과 줄 정보*만 원할 때. 크래시 후처리 용도.
 
 ```bash
-$ clang -gline-tables-only -O2 ...   # .debug_line만
+$ clang -gline-tables-only -O2 ...   # 줄·인라인 후처리에 필요한 최소 정보; .debug_line만 생성된다는 뜻은 아님
 ```
 
-크기는 1/10 수준. `print var`은 못 하지만 `bt` 줄 번호는 나옵니다.
+이 검토에서는 크기 비율을 측정하지 않았습니다. `print var`은 못 하지만 `bt` 줄 번호는 나옵니다.
 
 ## 별도 debuginfo 파일
 
@@ -417,7 +417,7 @@ $ DEBUGINFOD_URLS="https://debuginfod.fedoraproject.org/" gdb /usr/bin/foo
 # stripped 바이너리지만 디버그 심볼이 네트워크로 자동 다운로드됨
 ```
 
-`debuginfod`는 HTTP 기반 + Cookie/Range 지원으로 *부분 다운로드*가 가능. 첫 콜스택에는 일부만, 사용자가 `print var`로 깊이 들어가면 그때 더 받습니다. 큰 debuginfo 다운로드의 전체 지연을 분산.
+debuginfod의 artifact·section 조회와 디버거의 요청 방식은 서비스·client 판에 따라 확인합니다. print var마다 자동으로 필요한 바이트만 가져오는 지연 다운로드가 항상 이루어진다고 가정하지 않습니다.
 
 ## 흔한 문제 진단
 
@@ -438,7 +438,7 @@ debuginfo 없음. 셋 중 하나.
 
 해당 구간의 location list가 비어 있음. `-Og` 빌드 또는 레지스터 직접 보기 (Ch 11 참고).
 
-DWARF 5의 `DW_OP_entry_value`가 도입되면서 GCC 8+/Clang 11+는 *함수 진입 시* 인자 값을 보존하는 경향이 있습니다. 일부 변수는 본문 중간에서도 `<entry value, 42>`로 보입니다.
+DWARF 5의 DW_OP_entry_value는 함수 진입 시 표현식을 기술합니다. 컴파일러가 관련 정보를 생성하고 debugger가 복원할 수 있어야 하며 특정 compiler 버전 숫자만으로 항상 보존된다고 가정할 수 없습니다. 일부 변수는 본문 중간에서도 `<entry value, 42>`로 보입니다.
 
 ### 잘못된 줄 번호
 
@@ -466,11 +466,11 @@ warning: Could not find DW_AT_name "src/main.cpp"
 
 ### LTO와 DWARF
 
-LTO(Link-Time Optimization)는 인라인을 *링크 시점*에 한 번 더 합니다. 함수의 origin CU가 사라지거나 합쳐져 DIE 참조가 깨질 수 있습니다. Clang의 `-flto=thin`이 표준 LTO보다 DWARF 보존이 낫습니다.
+LTO(Link-Time Optimization)는 인라인을 *링크 시점*에 한 번 더 합니다. 함수의 origin CU가 사라지거나 합쳐져 DIE 참조가 깨질 수 있습니다. ThinLTO와 full LTO의 debug 보존 우열을 이 글에서 검증하지 않았습니다. 동일 입력·최적화·linker로 생성한 정보를 비교해야 합니다.
 
 ### 누락된 colored output
 
-`set style sources on` (GDB 8+) + 빌드 시 `-fdiagnostics-color=always`가 같이 필요합니다. 일부 터미널은 환경 변수 `TERM=xterm-256color` 필수.
+debugger의 set style sources on과 terminal·source styling 지원을 확인합니다. 컴파일러 진단 색상 옵션 -fdiagnostics-color=always는 debugger 소스 색상의 필수 조건이 아닙니다. 일부 터미널은 환경 변수 `TERM=xterm-256color` 필수.
 
 ## DWARF 검사 도구
 
@@ -516,20 +516,21 @@ with open('my_prog', 'rb') as f:
             if child.tag == 'DW_TAG_subprogram':
                 name = child.attributes.get('DW_AT_name')
                 low_pc = child.attributes.get('DW_AT_low_pc')
-                print(f"  {name.value.decode()} @ {low_pc.value:#x}")
+                if name is not None and low_pc is not None:
+                    print(f"  {name.value.decode()} @ {low_pc.value:#x}")
 ```
 
-DWARF 인덱스 자체 도구, 코드 사이즈 분석, 미사용 함수 검출 — 모두 이 정도면 됩니다.
+이 예제는 이름·low_pc가 있는 직접 자식 subprogram을 훑는 최소 예입니다. abstract_origin·specification 참조, ranges, inline DIE, high_pc의 상수/주소 형식, Mach-O는 처리하지 않으므로 일반 코드 크기·미사용 함수 분석기로 쓰면 안 됩니다.
 
 ## DWARF 5의 변화
 
 - 새 섹션 `.debug_loclists`, `.debug_rnglists`, `.debug_str_offsets`, `.debug_addr` — 인덱싱이 더 효율적.
-- `.debug_names` — 빠른 심볼 인덱스(예전 `.debug_pubnames`/`pubtypes` 대체). GDB가 `bt`에서 함수 이름을 찾는 속도가 크게 빨라짐.
+- `.debug_names` — 심볼 인덱스 형식으로, 예전 `.debug_pubnames`/`pubtypes`를 대체합니다. 실제 debugger의 사용 여부와 조회 성능은 생성 옵션·도구 버전으로 확인합니다.
 - split-DWARF 표준화.
-- 새 op `DW_OP_implicit_value`, `DW_OP_entry_value`, `DW_OP_const_type` — 더 풍부한 위치 표현.
+- DW_OP_entry_value·DW_OP_const_type 등으로 위치 표현 확장. DW_OP_implicit_value는 이미 DWARF 4에 있었으므로 DWARF 5 신규와 구분.
 - DW_TAG_call_site* — 인라인되지 않은 호출도 호출 측 정보를 풍부히. tail call 추적 개선.
 
-GCC 11+ / Clang 11+ 가 기본으로 DWARF 5를 만듭니다. 오래된 GDB(<= 9)는 못 읽으니 호환을 위해 `-gdwarf-4` 강제할 수 있습니다.
+기본 DWARF 판은 컴파일러뿐 아니라 target·OS·벤더 설정에 따릅니다. -gdwarf-4/-gdwarf-5를 명시하고 생성 파일의 version과 실제 debugger 로드를 확인합니다. compiler나 debugger의 주 버전만으로 모든 DWARF 5 기능의 호환성을 단정하지 않습니다.
 
 ```bash
 $ clang -g -gdwarf-4 ...
@@ -562,7 +563,7 @@ $ clang++ -O2 -g main.cpp -o demo
 $ llvm-dwarfdump --debug-info demo | grep -A2 inlined
 ```
 
-`main`의 DIE 안에 `DW_TAG_inlined_subroutine` 두 개(둘 다 square, sum_of_squares까지 합치면 셋). 각각 `DW_AT_call_file/line`을 가지고 GDB는 *논리적 콜스택*을 다음처럼 재구성합니다.
+위 코드는 3과 4가 상수라 최적화로 25만 남을 수 있습니다. inline DIE 개수나 실제 정지 가능한 inline frame 세 개를 보장하지 않습니다. 아래는 가능한 논리적 관계를 설명하는 도식이며 GDB 실행 출력이 아닙니다.
 
 ```text
 #0  square at main.cpp:1
@@ -574,14 +575,14 @@ $ llvm-dwarfdump --debug-info demo | grep -A2 inlined
 
 ## 정리
 
-- DWARF가 디버거의 *눈*. 없으면 디스어셈블 외엔 거의 못 함.
+- DWARF는 소스·변수 위치 복원에 중요하며 일반 심볼·레지스터 조사와 구분합니다.
 - DIE 트리(`.debug_info`)가 메인, `.debug_line`이 PC↔소스, `.debug_loc`이 변수 위치.
 - `.debug_loc`의 표현식은 *스택 머신* — 변수가 두 레지스터에 쪼개져 있어도 표현 가능.
 - 콜스택 해제는 `.debug_frame`/`.eh_frame`. CFI 덕에 frame pointer 없이도 가능.
 - 크기 문제 → split-DWARF, dwz, 또는 `-gline-tables-only`.
 - 배포 바이너리는 strip + 별도 debuginfo + build-id로 매칭.
 - `addr2line`, `llvm-dwarfdump`, `readelf --debug-dump`로 진단.
-- DWARF 5의 `.debug_names`/`DW_OP_entry_value`가 큰 개선.
+- DWARF 5는 심볼 인덱스·위치 표현을 확장했습니다. 지원 범위는 실제 toolchain으로 확인합니다.
 - pyelftools로 자체 도구 작성 가능.
 
 ## 관련 항목

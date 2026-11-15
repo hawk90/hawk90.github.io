@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-GDB가 `print x`라고 했을 때 `x`의 *타입*, *위치*, *어떤 소스 파일에 정의됐는지*를 어떻게 알까요. 답은 ELF 파일 안에 박힌 **DWARF**라는 디버그 정보 형식입니다. 이 정보 없이는 GDB가 그저 어셈블리 디스어셈블러에 불과합니다.
+GDB가 `print x`라고 했을 때 `x`의 *타입*, *위치*, *어떤 소스 파일에 정의됐는지*를 어떻게 알까요. 답은 ELF 파일 안에 박힌 **DWARF**라는 디버그 정보 형식입니다. DWARF가 없으면 소스 타입·지역 변수 조회가 제한되지만, GDB의 레지스터·메모리·심볼·실행 제어 기능까지 사라지는 것은 아닙니다.
 
 이 장은 DWARF의 정체에서 시작합니다 — DIE 트리, abbreviation 인코딩, 컴파일 유닛 구조, 그리고 TAG/AT/FORM 카탈로그. 이후 장들은 `.debug_line` VM, `.debug_loc` expression VM, CFI 등 각 섹션을 깊이 봅니다.
 
@@ -20,28 +20,16 @@ DWARF = ELF 안의 *디버그 정보 표준*. 압축된 DIE 트리로 컴파일 
 
 ## DWARF의 역사와 의의
 
-- 1988년 — DWARF 1 (Bell Labs, SVR4).
-- 1992년 — DWARF 2 표준화.
-- 2005년 — DWARF 3.
-- 2010년 — DWARF 4 (대부분의 현대 도구가 기본).
-- 2017년 — DWARF 5 (현재 최신).
+[DWARF 5 표준 서문](https://dwarfstd.org/doc/DWARF5.pdf)은 DWARF 1의 1992년 공개 판과 DWARF 2의 1993년 검토 초안 등 발전 과정을 설명합니다. 이 장은 DWARF 5의 형식을 기준으로 하며 이전 형식과 다른 부분을 따로 표시합니다.
 
 C, C++, Fortran, Ada, Rust, Go, Zig, Swift 등 거의 모든 시스템 언어가 DWARF에 출력합니다. *언어 중립*이 핵심 설계 의도.
 
-Windows는 별도의 CodeView/PDB. macOS는 DWARF지만 *.dSYM 번들*에 별도 저장. Linux/BSD/임베디드는 ELF 안에 직접.
+Windows는 CodeView/PDB를 흔히 사용하고, macOS는 Mach-O 오브젝트의 DWARF를 dsymutil로 .dSYM에 모을 수 있습니다. ELF의 DWARF도 별도 debug 파일이나 .dwo로 분리할 수 있어 OS별 저장 위치 하나로 고정하지 않습니다.
 
 ## DWARF의 섹션들
 
 ```bash
-$ readelf -S my_prog | grep debug
-[35] .debug_info       PROGBITS         00000000  0001234c    52431892
-[36] .debug_abbrev     PROGBITS         00000000  00018765      234123
-[37] .debug_line       PROGBITS         00000000  0001b234    18937451
-[38] .debug_str        PROGBITS         00000000  0001d432    28453122
-[39] .debug_loc        PROGBITS         00000000  0001f987    45129812
-[40] .debug_ranges     PROGBITS         00000000  00022345    11234567
-[41] .debug_aranges    PROGBITS         00000000  00023145      234123
-[42] .debug_frame      PROGBITS         00000000  00023589     1234567
+readelf -S my_prog | grep debug
 ```
 
 각 섹션의 역할.
@@ -57,10 +45,10 @@ $ readelf -S my_prog | grep debug
 | `.debug_ranges` → `.debug_rnglists` | 주소 범위 | 동상 |
 | `.debug_addr` | 주소 풀 | 신규 (split-DWARF용) |
 | `.debug_frame` | 콜스택 unwind — Ch 5 | 그대로 |
-| `.eh_frame` | 예외 unwind (항상 있음) | 그대로 |
+| `.eh_frame` | 런타임 unwind 정보이며 항상 존재하는 것은 아닙니다. | DWARF debug 섹션과 저장 목적을 구분합니다. |
 | `.debug_aranges` | PC → CU 빠른 인덱스 | 선택 |
 | `.debug_names` | 빠른 심볼 검색 | 신규 (pubnames 대체) |
-| `.debug_pubnames` / `_pubtypes` | 공개 심볼 (deprecated) | 폐기 |
+| `.debug_pubnames` / `_pubtypes` | 이름 조회 인덱스 | DWARF 5는 .debug_names를 사용합니다. 이전 파일에서 존재할 수 있습니다. |
 
 이 장은 `.debug_info` + `.debug_abbrev` + `.debug_str` 세 개를 다룹니다 — 다른 섹션들이 모두 이 셋을 *참조*하므로 기초.
 
@@ -168,7 +156,7 @@ struct CU_Header {
     uint8_t   unit_type;          // DW_UT_compile, DW_UT_partial, ...
     uint8_t   address_size;       // 4 또는 8
     uint32_t  debug_abbrev_offset; // .debug_abbrev로의 오프셋
-    // 그 다음 첫 DIE (반드시 DW_TAG_compile_unit)
+    // unit_type에 맞는 추가 필드와 첫 DIE가 이어짐. 이 조각은 일반 DWARF32 compile unit의 개요
 };
 ```
 
@@ -180,14 +168,14 @@ DWARF 4까지는 `version=4, abbrev, addr_size`. DWARF 5에서 `unit_type` 추�
 
 ```text
 DW_UT_compile      일반
-DW_UT_type         타입 정의 전용 (.debug_types)
+DW_UT_type         타입 유닛 (DWARF 5에서는 .debug_info)
 DW_UT_partial      partial CU (include)
 DW_UT_skeleton     split-DWARF의 ELF 측
 DW_UT_split_compile  split-DWARF의 .dwo 측
 DW_UT_split_type
 ```
 
-split-DWARF가 도입되면서 *skeleton + split* 쌍이 표준이 됐습니다 (Ch 6).
+분리 디버그 정보를 선택하면 skeleton과 split 유닛을 대응시킵니다. 일반 compile unit이 모두 이 쌍으로 바뀌는 것은 아닙니다 (6장).
 
 ## Abbreviation 인코딩
 
@@ -234,9 +222,11 @@ DIE 하나하나를 단순 표현하면 *수백 메가*. 같은 형태의 DIE가
 
 `.debug_info` 안의 각 DIE는 *약어 번호* + *속성 값들의 raw 인코딩*만 가짐.
 
-**.debug_info:**
+**.debug_info 개념 예시:**
 
-- 0x0c: [Abbrev 1] producer=0x123 language=0x04 name=0x45 comp_dir=0x10 ...
+아래 offset은 실제 바이트 인코딩 결과가 아닌 관계 설명용 라벨입니다. 정확한 배치는 뒤의 직접 확인 예제에서 도구로 읽습니다.
+
+- 0x0c: [Abbrev 1] producer=0x12 language=0x04 name=0x45 comp_dir=0x10 ...
 - 0x2a: [Abbrev 2] name=0x67 encoding=0x05 byte_size=0x04
 - 0x31: [Abbrev 3] calling_conv=0x01 name=0x89 byte_size=0x10
 - 0x37: [Abbrev 4] name=0xAB type=0x2a data_member_location=0x00
@@ -338,7 +328,7 @@ C++ 특수.
 | AT | 의미 |
 |----|------|
 | `DW_AT_low_pc` | 함수/블록 시작 주소 |
-| `DW_AT_high_pc` | 끝 주소 (DWARF 4+: 길이) |
+| `DW_AT_high_pc` | address 클래스이면 끝 주소, constant 클래스이면 low_pc에 더할 길이입니다. FORM을 함께 봅니다. |
 | `DW_AT_ranges` | 여러 범위 (`.debug_ranges`/`rnglists` 참조) |
 | `DW_AT_entry_pc` | 진입점 (low_pc와 다를 수 있음) |
 | `DW_AT_location` | 변수의 위치 표현 (Ch 4) |
@@ -418,7 +408,7 @@ C++ 특수.
 | FORM | 인코딩 |
 |------|--------|
 | `DW_FORM_string` | 인라인 NUL-terminated |
-| `DW_FORM_strp` | `.debug_str` offset (4바이트) |
+| `DW_FORM_strp` | .debug_str offset이며 DWARF32/64에 따라 4/8바이트입니다. |
 | `DW_FORM_line_strp` | `.debug_line_str` offset (DWARF 5) |
 | `DW_FORM_strx1..4` | `.debug_str_offsets` 인덱스 (DWARF 5) |
 
@@ -434,9 +424,9 @@ C++ 특수.
 
 | FORM | 인코딩 |
 |------|--------|
-| `DW_FORM_ref1..8` | 같은 CU 안의 DIE offset |
-| `DW_FORM_ref_addr` | 다른 CU의 DIE offset |
-| `DW_FORM_ref_sig8` | 8바이트 type signature (`.debug_types`) |
+| `DW_FORM_ref1..8` | 해당 유닛 시작 기준 DIE offset이며 위치 계산 시 유닛의 섹션 offset을 더합니다. |
+| `DW_FORM_ref_addr` | .debug_info 섹션 기준 DIE offset이며 같은 CU도 참조할 수 있습니다. |
+| `DW_FORM_ref_sig8` | 8바이트 type signature입니다. type unit의 저장 섹션은 버전에 따라 다릅니다. |
 | `DW_FORM_ref_sup4`/`ref_sup8` | supplementary obj 참조 (DWARF 5) |
 
 ### 표현식
@@ -464,30 +454,17 @@ DWARF는 *작은 정수를 짧게* 표현하려고 LEB128(Little Endian Base 128
 - 마지막 청크는 MSB=0.
 - 나머지 청크는 MSB=1 (continue).
 
-`624485`(`0b100110000111011100101`)를 인코딩하면 이렇게 됩니다.
+`624485`(`0b10011000011101100101`)를 인코딩하면 이렇게 됩니다.
 
 | 단계 | 값 |
 |------|-----|
-| 7-bit 청크 (LE) | `0100101`, `0001110`, `0100110` |
+| 7-bit 청크 (LE) | `1100101`, `0001110`, `0100110` |
 | MSB를 붙인 바이트 | `11100101`, `10001110`, `00100110` |
 | 16진수 | `0xE5`, `0x8E`, `0x26` |
 
 작은 값(0-127)은 1바이트, 큰 값은 가변.
 
-```c
-// LEB128 디코딩 (unsigned)
-uint64_t decode_uleb128(const uint8_t **p) {
-    uint64_t result = 0;
-    int shift = 0;
-    while (1) {
-        uint8_t b = *(*p)++;
-        result |= ((uint64_t)(b & 0x7F)) << shift;
-        if ((b & 0x80) == 0) break;
-        shift += 7;
-    }
-    return result;
-}
-```
+실제 파일을 파싱할 때는 버퍼 끝·최대 폭·잘린 입력을 확인해야 합니다. 아래 직접 확인 절에 경계 검사를 포함한 디코더를 둡니다.
 
 `DW_FORM_udata`, `DW_FORM_sdata`, `.debug_line` 명령 인자 등 거의 모든 곳에서 등장. 작은 정수가 흔한 디버그 정보에 최적.
 
@@ -507,14 +484,14 @@ DIE의 `DW_FORM_strp` 값은 `.debug_str` 안의 NUL-terminated 문자열로의 
 
 같은 문자열이 *여러 DIE*에서 공유 → 중복 제거. 큰 프로젝트에서 클래스명·함수명이 수백 번 반복되므로 효과 큼.
 
-DWARF 5의 `.debug_str_offsets` + `DW_FORM_strx*`는 한 단계 더 — DIE 안에 *인덱스*만 두고, 인덱스 → `.debug_str_offsets` → `.debug_str` 두 단계 lookup. split-DWARF에서 `.dwo` 안의 짧은 인덱스로 ELF 측 큰 문자열 풀을 참조.
+DWARF 5의 `.debug_str_offsets` + `DW_FORM_strx*`는 한 단계 더 — DIE 안에 *인덱스*만 두고, 인덱스 → `.debug_str_offsets` → `.debug_str` 두 단계 lookup. split-DWARF에서는 .dwo의 문자열/offset 섹션과 각 유닛의 base 규칙을 확인합니다. 항상 skeleton ELF의 문자열 풀을 참조한다고 가정하지 않습니다.
 
-## ELF 형식 vs CIE 형식
+## ELF 클래스·주소 크기·DWARF32/64 구분
 
-DWARF 데이터의 endianness·word-size가 *ELF에 종속*.
+ELF에 담긴 DWARF의 endian은 컨테이너를 따르지만, 주소 크기는 CU의 address_size, 섹션 offset 폭은 DWARF32/64 형식을 확인합니다.
 
 - ELF가 little-endian → DWARF도 LE.
-- ELF가 64-bit → 주소 8바이트.
+- ELF64와 DWARF64는 다른 구분입니다. ELF64 파일에도 DWARF32가 흔히 들어갑니다.
 
 다만 `unit_length`가 *0xFFFFFFFF*면 *DWARF64* 모드 — 길이가 8바이트. 일반적인 DWARF는 *DWARF32*(섹션 offset이 4바이트). DWARF64는 매우 큰 디버그 정보(4 GB 초과)에서.
 
@@ -546,16 +523,7 @@ with open('my_prog', 'rb') as f:
 
 같은 코드라도 GCC와 Clang의 DWARF 출력이 *조금씩* 다릅니다.
 
-| | GCC | Clang |
-|---|-----|-------|
-| 기본 DWARF 버전 | 5 (GCC 11+) | 5 (Clang 11+) |
-| `.debug_aranges` | 출력 | `-gdwarf-aranges` 필요 |
-| 인라인 trace 깊이 | 더 깊음 | 보수적 |
-| `DW_OP_entry_value` | GCC 8+ | Clang 11+ |
-| LTO 보존 | 보통 | `-flto=thin` 권장 |
-| Split-DWARF | `-gsplit-dwarf` | `-gsplit-dwarf` |
-
-호환을 위해 `-gdwarf-4`로 다운그레이드 가능 — 오래된 GDB (<= 9) 환경.
+기본 DWARF 버전은 컴파일러 버전·타깃·드라이버 설정에 따라 달라집니다. 비교 시 -gdwarf-4 또는 -gdwarf-5를 명시하고 실제 CU 헤더를 확인합니다. aranges 생성, entry_value, LTO 보존도 대상 버전·최적화에 따라 관찰하며 근거 없는 공통 하한 버전이나 깊이 우열을 제시하지 않습니다.
 
 ## DWARF version 협상
 
@@ -566,6 +534,57 @@ $ llvm-dwarfdump my_prog | grep "version ="
 ```
 
 여러 version이 섞여 있으면 DWARF parser가 복잡해집니다 — 도구 호환성 문제의 원인이 되기도.
+
+## 직접 확인 — DIE와 정수 인코딩
+
+types.c는 x86-64 Linux ELF 오브젝트로만 생성하며 macOS에서 실행하지 않습니다. -gdwarf-5와 -gdwarf64 유무로 두 파일의 format을 비교하고, 구조체의 member 위치와 FORM을 덤프합니다.
+
+```c title="types.c"
+struct Pair { int left; int right; };
+struct Pair pair = {1, 2};
+int sum(struct Pair* value) { return value->left + value->right; }
+```
+
+```bash
+clang --target=x86_64-unknown-linux-gnu -g -gdwarf-5 -O0 -c types.c -o types.o
+llvm-dwarfdump --debug-info --show-form types.o
+llvm-dwarfdump --verify types.o
+clang --target=x86_64-unknown-linux-gnu -g -gdwarf-5 -gdwarf64 -O0 -c types.c -o types64.o
+llvm-dwarfdump --debug-info types64.o
+```
+
+ULEB128 예제는 네이티브 C 프로그램으로 별도 실행합니다. 정상 값 624485와 UINT64_MAX를 확인하고 잘린 입력·10바이트 overflow를 거부합니다. 이는 전체 DWARF 파서가 아니라 unsigned 정수 디코더의 검증입니다.
+
+```c title="uleb.c"
+#include <assert.h>
+#include <stdbool.h>
+#include <stddef.h>
+#include <stdint.h>
+#include <stdio.h>
+
+bool decode(const uint8_t* bytes, size_t size, uint64_t* result) {
+    uint64_t value = 0;
+    for (size_t i = 0; i < size && i < 10; ++i) {
+        uint8_t byte = bytes[i];
+        if (i == 9 && (byte & 0xfe)) return false;
+        value |= (uint64_t)(byte & 0x7f) << (i * 7);
+        if (!(byte & 0x80)) { *result = value; return true; }
+    }
+    return false;
+}
+int main(void) {
+    uint64_t value;
+    const uint8_t known[] = {0xe5, 0x8e, 0x26};
+    const uint8_t maximum[] = {255,255,255,255,255,255,255,255,255,1};
+    const uint8_t overflow[] = {255,255,255,255,255,255,255,255,255,2};
+    assert(decode(known, sizeof known, &value) && value == 624485);
+    assert(decode(maximum, sizeof maximum, &value) && value == UINT64_MAX);
+    assert(!decode(known, 1, &value));
+    assert(!decode(overflow, sizeof overflow, &value));
+    assert(!decode(known, 0, &value));
+    puts("ULEB128 valid/truncated/overflow checks passed");
+}
+```
 
 ## 정리
 
@@ -582,7 +601,7 @@ $ llvm-dwarfdump my_prog | grep "version ="
 
 ## 다음 장 예고
 
-Ch 3 — `.debug_line` 바이트코드 VM. 어떻게 *수천 줄의 PC↔소스 매핑*이 수십 바이트로 압축되는지.
+Ch 3 — `.debug_line` 바이트코드 VM. 주소·줄의 차분을 opcode로 인코딩하고 실제 줄 테이블을 읽는 방법을 다룹니다.
 
 ## 관련 항목
 

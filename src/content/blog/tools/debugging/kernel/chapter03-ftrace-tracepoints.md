@@ -10,10 +10,10 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-ftrace는 *커널의 내장 tracer*입니다. 별 도구 설치 없이 *모든 함수 호출·이벤트·latency*를 추적할 수 있습니다. printk로는 *너무 느려서* 못 잡는 핫 path 버그, *어디서 호출됐는지 모르는* 함수 호출의 출처 추적, *latency spike*의 원인 분석 — 모두 ftrace의 영역입니다.
+ftrace는 커널 설정과 빌드에서 지원되는 함수·이벤트·latency tracer를 관측하는 내장 추적 기반입니다. 추적 가능 범위는 아키텍처, 커널 설정, 개별 함수의 instrumentation 여부에 따라 달라집니다. 추적 자체도 부하와 버퍼 사용량을 만들기 때문에 범위를 좁혀 시작합니다.
 
 :::tldr
-`/sys/kernel/debug/tracing/` 디렉터리의 파일 셋으로 *모든 커널 함수 호출과 정의된 이벤트*를 ring buffer에 기록.
+tracefs의 control 파일로 지원되는 함수와 정의된 이벤트를 선택해 ring buffer에 기록합니다. 일반적인 mount 지점은 `/sys/kernel/tracing/`이며, 일부 시스템은 debugfs 아래 경로를 사용합니다.
 :::
 
 ## tracefs 진입
@@ -30,7 +30,7 @@ events/             set_event_notrace_pid  trace      uprobe_events
 free_buffer         set_ftrace_notrace  trace_clock   ...
 ```
 
-배포판은 `/sys/kernel/tracing/`에 *심볼릭 링크* 또는 별 mount. 권한 = root.
+tracefs가 `/sys/kernel/tracing/`에 직접 mount되거나 배포판에서 다른 위치를 제공할 수 있습니다. 쓰기 권한은 보통 관리자 권한이 필요하며, 커널 설정과 mount 상태를 확인합니다.
 
 ```bash
 $ sudo -i
@@ -61,6 +61,9 @@ hwlat blk function_graph wakeup_dl wakeup_rt wakeup function nop
 
 ```bash
 # cd /sys/kernel/debug/tracing
+# echo 0 > tracing_on
+# echo > set_ftrace_filter
+# echo do_sys_open > set_ftrace_filter
 # echo function > current_tracer
 # echo 1 > tracing_on
 # sleep 0.1
@@ -132,7 +135,7 @@ hwlat blk function_graph wakeup_dl wakeup_rt wakeup function nop
 67890
 ```
 
-수만 개. ftrace가 *모든 nm-가능 함수*에 hook을 설치 가능 — 컴파일 시 `-pg` 또는 `-mfentry`로 *모든 함수 시작*에 nop 5바이트 패딩을 둠. 활성화 시 nop → call _ftrace.
+목록은 현재 빌드에서 function tracer가 추적할 수 있도록 처리한 함수입니다. 포함 여부와 코드 패치 방식은 아키텍처·컴파일러·커널 설정에 따라 다르므로, 모든 `nm` 심볼이나 동일한 크기의 NOP가 있다고 가정하지 않습니다.
 
 ## PID 필터
 
@@ -141,7 +144,7 @@ hwlat blk function_graph wakeup_dl wakeup_rt wakeup function nop
 # echo $! > set_event_pid      # 마지막 백그라운드 작업
 ```
 
-특정 프로세스가 *어떤 syscall*을 부르는지 — strace보다 깊게 (커널 함수까지) 봅니다.
+PID 필터는 실행 주체를 제한합니다. syscall별 관측에는 해당 커널에서 제공되는 `syscalls:*` 이벤트를 켜야 하며, 함수 trace를 제한하는 것만으로 모든 syscall 기록이 생기지는 않습니다.
 
 ## set_event — Tracepoints
 
@@ -207,7 +210,7 @@ bpftrace·perf 같은 도구가 이 포맷을 보고 자체적으로 디코딩.
 
 ## 정의된 tracepoint 작성
 
-커널 모듈에 자체 tracepoint 추가.
+커널 코드에 trace event를 추가하는 형태의 개요입니다. 실제 모듈에서 사용할 수 있는 tracepoint 정의는 `TRACE_EVENT` 헤더, tracepoint 생성 translation unit, `CREATE_TRACE_POINTS`, Kbuild 설정과 이벤트 system 등록을 함께 구성해야 하므로 아래 조각만으로 컴파일되는 완성 모듈은 아닙니다.
 
 ```c
 #include <linux/tracepoint.h>
@@ -238,7 +241,7 @@ trace_my_event(42, "hello");
        myprog-1234  [002] ....  150.123: my_event: val=42 name=hello
 ```
 
-*프로덕션 코드*에 영구 설치 가능 — 비활성 시 *NOP 한 줄* 비용. 활성 시만 ring buffer 쓰기.
+프로젝트에서 유지하는 instrumentation은 해당 커널 빌드에 포함됩니다. 비활성 비용과 실행 비용은 구성과 아키텍처에 따라 달라지며, 활성화 시 버퍼 기록·성능 영향을 측정해야 합니다.
 
 ## kprobe / kretprobe
 
@@ -346,20 +349,20 @@ $ sudo trace-cmd record -p function_graph -l 'btrfs_*' sleep 5
 # echo 16384 > buffer_size_kb    # 16MB per CPU
 ```
 
-## trace-cmd extract + crash analysis
+## 크래시 전 trace 보존
 
-ftrace는 *crash 직전* ring buffer가 메모리에 있어 *vmcore에서 추출* 가능.
+ftrace ring buffer는 커널 메모리에 있으므로, panic 시점의 보존·추출은 kdump 설정, 덤프 포함 범위, 커널 버전 및 분석 도구 지원에 달려 있습니다. `trace-cmd extract -i vmcore`는 일반적인 vmcore 변환 명령이 아닙니다.
 
 ```bash
 $ crash vmlinux vmcore
 crash> trace dump
 [ring buffer 출력]
 
-# 또는 별 도구
-$ trace-cmd extract -i vmcore -o trace.dat
+# 저장된 trace.dat를 보고하는 경우
+$ trace-cmd report -i trace.dat | head
 ```
 
-panic 직전의 *모든 함수 호출* 분석. ftrace가 *postmortem 도구*로도 작동.
+미리 trace.dat를 저장하거나, 사용 중인 crash 분석 도구가 해당 커널의 tracing 자료를 지원하는지 확인해야 합니다. 이 예에서는 vmcore에서 ftrace를 추출했다고 주장하지 않습니다.
 
 ## ftrace + eBPF — 자리매김
 
@@ -372,7 +375,7 @@ panic 직전의 *모든 함수 호출* 분석. ftrace가 *postmortem 도구*로�
 | 인자 처리 | kprobe args | 자유 (struct 캐스팅) |
 | 출력 | text only | text / map / histogram |
 | in-kernel logic | 없음 | bytecode 검증 후 실행 |
-| 운영 안전 | 매우 안전 | 검증 통과 시 안전 |
+| 운영 영향 | instrumentation·버퍼 크기·선택한 tracer에 따라 다름 | verifier 검사 외에도 프로그램 부하·권한·커널/드라이버 결함을 고려 |
 | 학습 곡선 | 낮음 | 중-높음 |
 
 ftrace는 *exploratory*, eBPF는 *분석*. 둘 다 활용.
@@ -401,7 +404,7 @@ ftrace_filter=do_sys_*
 
 ## 정리
 
-- ftrace = 커널 내장 tracer. *모든 함수 호출 추적*.
+- ftrace = 커널 설정이 제공하는 tracer. 함수·이벤트 필터로 범위를 제한.
 - 진입은 `/sys/kernel/debug/tracing/`.
 - tracers: function / function_graph / latency / wakeup.
 - set_ftrace_filter로 함수 좁히기.

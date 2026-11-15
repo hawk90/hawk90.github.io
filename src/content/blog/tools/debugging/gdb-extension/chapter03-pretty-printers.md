@@ -16,6 +16,8 @@ topics: ["tools", "tools/debugging"]
 GDB의 `print val`이 *val의 타입*에 매칭된 Python 클래스를 호출하고, 그 클래스가 *문자열 + 자식 트리*로 표현을 반환.
 :::
 
+GDB 17.2 Python printing API를 기준으로 합니다. 표준 library 내부 field는 ABI·release에 묶이므로 보이는 이름만 보고 다른 구현에 적용하지 않습니다.
+
 ## Dispatch 메커니즘
 
 ![Pretty-printer dispatch 흐름](/images/blog/tools/diagrams/pretty-printer-dispatch.svg)
@@ -49,7 +51,7 @@ def build_pp():
     pp.add_printer('Point', '^Point$', PointPrinter)
     return pp
 
-gdb.printing.register_pretty_printer(gdb.current_objfile(), build_pp())
+gdb.printing.register_pretty_printer(gdb.current_objfile(), build_pp(), replace=True)
 ```
 
 ```text
@@ -67,37 +69,54 @@ pp.add_printer('std::vector', '^std::vector<.*>$', VectorPrinter)
 pp.add_printer('std::shared_ptr', '^std::shared_ptr<.*>$', SharedPtrPrinter)
 ```
 
-regex 매칭. `^std::vector<.*>$` 같은 패턴으로 *템플릿 인스턴스화 전체*를 한 패턴이 잡음.
+regex는 이름 매칭일 뿐입니다. inline namespace·debug/ABI variant·vector<bool> specialization·libc++/libstdc++의 layout이 달라 broad regex가 잘못된 구조를 같은 printer로 보낼 수 있습니다.
 
 ## 자식 노드 — children()
 
-```python
-class VectorPrinter:
-    def __init__(self, val):
-        self.val = val
+표준 STL의 미확인 private field 대신, layout이 알려진 작은 도메인 queue를 사용합니다. 대상 구조의 data는 고정 4-element int array입니다.
+
+```python title="debug-queue-printer.py"
+import gdb
+import gdb.printing
+
+class DebugQueuePrinter:
+    def __init__(self, value):
+        self.value = value
+        self.error = None
+        try:
+            self.capacity = int(value["capacity"])
+            self.used = int(value["used"])
+            self.head = int(value["head"])
+            low, high = value["data"].type.strip_typedefs().range()
+            if (low != 0 or not 1 <= self.capacity <= high + 1 or
+                    not 0 <= self.used <= self.capacity or
+                    not 0 <= self.head < self.capacity):
+                self.error = "invalid queue metadata"
+        except (gdb.error, TypeError, ValueError) as error:
+            self.error = str(error)
+
     def to_string(self):
-        size = int(self.val['_M_impl']['_M_finish'] - self.val['_M_impl']['_M_start'])
-        return f"std::vector of size {size}"
+        return f"DebugQueue <{self.error}>" if self.error else f"DebugQueue {self.used}/{self.capacity}"
+
     def children(self):
-        start = self.val['_M_impl']['_M_start']
-        finish = self.val['_M_impl']['_M_finish']
-        size = int(finish - start)
-        for i in range(size):
-            yield f"[{i}]", start[i]
+        if self.error:
+            return
+        for i in range(self.used):
+            index = (self.head + i) % self.capacity
+            yield f"[{i}]", self.value["data"][index]
+
     def display_hint(self):
         return "array"
+
+def register_debug_queue(objfile=None):
+    collection = gdb.printing.RegexpCollectionPrettyPrinter("article-queue")
+    collection.add_printer("DebugQueue", r"^DebugQueue$", DebugQueuePrinter)
+    gdb.printing.register_pretty_printer(objfile, collection, replace=True)
+
+register_debug_queue(gdb.current_objfile())
 ```
 
-```text
-(gdb) print v
-$1 = std::vector of size 3 = {
-  [0] = 1,
-  [1] = 2,
-  [2] = 3
-}
-```
-
-`children()`이 `(name, value)` 쌍을 yield. value는 `gdb.Value` 또는 Python 기본 타입.
+used/capacity/head 범위를 검사해 modulo-zero·out-of-bounds·거대한 corrupted iteration을 피합니다. children은 lazy iterator이며 caller의 CLI/MI 범위 요청에 따라 소비됩니다. 잘못된 metadata와 memory read failure를 empty queue로 위장하지 않습니다. 이것은 FreeRTOS Queue_t나 STL queue의 printer가 아닙니다.
 
 ### display_hint 종류
 
@@ -111,76 +130,19 @@ MI(머신 인터페이스) 프런트엔드(VSCode)가 이 힌트로 *트리 위�
 
 ### map printer
 
-```python
-class MapPrinter:
-    def __init__(self, val):
-        self.val = val
-    def to_string(self):
-        return f"std::map of {int(self.val['_M_t']['_M_impl']['_M_node_count'])} entries"
-    def children(self):
-        # red-black tree 순회
-        node = self.val['_M_t']['_M_impl']['_M_header']['_M_left']  # 최소
-        idx = 0
-        while node:
-            # key/value 추출 (단순화)
-            kv = node.cast(gdb.lookup_type("std::_Rb_tree_node<std::pair<KeyT, ValueT>>").pointer())
-            pair = kv['_M_storage']['_M_storage']
-            yield f"key{idx}", pair['first']
-            yield f"val{idx}", pair['second']
-            # 다음 노드
-            node = next_node(node)
-            idx += 1
-    def display_hint(self):
-        return "map"
-```
+map hint는 child가 key, value, key, value 순으로 나오는 계약입니다. child 이름 자체가 key라는 뜻은 아닙니다. 실제 tree의 sentinel·successor·payload storage는 ABI별로 달라, undefined next_node와 가짜 KeyT/ValueT cast가 들어간 이전 std::map 조각은 구현 예로 사용하지 않습니다.
 
-```text
-(gdb) print m
-$1 = std::map of 3 entries = {
-  ["a"] = 1,
-  ["b"] = 2,
-  ["c"] = 3
-}
-```
+선택한 compiler/runtime과 함께 배포되는 검증된 printer를 사용하거나, version을 고정한 실제 구조로 정상·empty·손상·순환 node를 검증합니다.
 
 ## String printer
 
-```python
-class StringPrinter:
-    def __init__(self, val):
-        self.val = val
-    def to_string(self):
-        # std::string 내부: _M_dataplus._M_p 가 char *
-        ptr = self.val['_M_dataplus']['_M_p']
-        return ptr.string(encoding='utf-8')
-    def display_hint(self):
-        return "string"
-```
+string hint는 quoting·escape·최종 표시 한계를 적용하도록 GDB에 알려 줍니다. std::string의 _M_p만 NUL까지 읽으면 embedded NUL·실제 length·손상/비종료 buffer를 잘못 처리할 수 있습니다. 해당 ABI의 length를 검증하고 pointer.string(length=...) 또는 lazy-string contract를 사용합니다.
 
-`display_hint = "string"`이면 GDB가 자동으로 `"..."`로 감싸고 이스케이프. `set print elements N`이 잘림 한계.
-
-## 똑똑한 printer — 크기 제한
-
-```python
-class VectorPrinter:
-    ...
-    def children(self):
-        max_elements = gdb.parameter("print elements")
-        start = self.val['_M_impl']['_M_start']
-        finish = self.val['_M_impl']['_M_finish']
-        size = int(finish - start)
-        n_show = min(size, max_elements) if max_elements else size
-        for i in range(n_show):
-            yield f"[{i}]", start[i]
-        if size > n_show:
-            yield "...", f"and {size - n_show} more"
-```
-
-큰 컨테이너 출력 시 *전체*를 yield하면 디버거가 느려집니다. `print elements`를 따라 자르기.
+print elements는 표시 한계이며 printer가 그 전에 unbounded string을 읽어도 안전하게 막아 주는 독립 memory budget은 아닙니다. children에서 가짜 "..." child를 추가하면 실제 container element와 혼동될 수 있어 사용하지 않습니다. CLI/MI의 lazy/range 계약과 제품별 안전 상한을 나눕니다.
 
 ## auto-load — 라이브러리 따라가는 printer
 
-`libfoo.so`와 같은 디렉터리에 `libfoo.so-gdb.py` 두면 GDB가 라이브러리 로드 시 *자동 source*.
+objfile에 대응하는 -gdb.py naming/search 규칙과 auto-load 설정·safe-path가 모두 맞아야 script를 실행합니다. 같은 디렉터리의 파일은 한 경로 예이지 무조건 실행된다는 보장은 아닙니다.
 
 ```text
 /usr/lib/libfoo.so
@@ -205,12 +167,12 @@ def build_pp():
     return pp
 
 # 등록 시 objfile=현재 로드된 객체
-gdb.printing.register_pretty_printer(gdb.current_objfile(), build_pp())
+gdb.printing.register_pretty_printer(gdb.current_objfile(), build_pp(), replace=True)
 ```
 
 ### 보안
 
-`set auto-load safe-path /` (또는 특정 디렉터리). 신뢰하는 환경.
+전체 /를 safe-path로 허용하지 말고 신뢰하는 정확한 script/경로만 user 설정에서 지정합니다. 현재 신뢰되지 않은 project script가 자기 자신을 허용하도록 두지 않습니다.
 
 ```text
 (gdb) info auto-load
@@ -222,124 +184,28 @@ Loaded  Script
 Yes     /usr/lib/libstdc++.so.6.0.32-gdb.py
 ```
 
-`/usr/lib/libstdc++.so.6.x.x-gdb.py`가 *libstdc++ pretty-printer*. 시스템에 자동 설치.
+경로와 자동 설치 여부는 distro/toolchain package에 따라 다릅니다. info auto-load python-scripts와 info pretty-printer로 실제 loaded/registered 상태를 확인합니다.
 
 ## libstdc++ printer 내부
 
-libstdc++의 표준 printer 분석. 소스: `gcc/libstdc++-v3/python/libstdcxx/v6/printers.py`.
+libstdc++ printer는 compiler release·ABI와 함께 맞춥니다. GCC source의 libstdc++-v3/python/libstdcxx/v6/printers.py에서 StdVectorPrinter·iterator와 registration을 확인할 수 있습니다.
 
-```python
-class StdVectorPrinter:
-    "Print a std::vector"
+일반 vector는 start/finish/end pointer 차이를 사용하지만 vector<bool>은 bit iterator의 word pointer·offset과 target word bit 폭을 함께 계산합니다. length는 word 차이 × word_bits + finish_offset - start_offset 형태의 실제 ABI 산술을 확인해야 합니다. start offset을 더하고 host의 8만 곱한 재구성 코드는 올바른 upstream 인용이 아니었습니다.
 
-    class _iterator(Iterator):
-        def __init__(self, start, finish, bitvec):
-            self.bitvec = bitvec
-            if bitvec:
-                self.item = start['_M_p']
-                self.so = 0
-                self.finish = finish['_M_p']
-                self.fo  = finish['_M_offset']
-                ...
-            else:
-                self.item = start
-                self.finish = finish
-            self.count = 0
-
-        def __next__(self):
-            count = self.count
-            self.count = self.count + 1
-            if self.bitvec:
-                # vector<bool> 특수 처리
-                ...
-            else:
-                if self.item == self.finish:
-                    raise StopIteration
-                elt = self.item.dereference()
-                self.item = self.item + 1
-                return ('[%d]' % count, elt)
-
-    def __init__(self, typename, val):
-        self.typename = strip_versioned_namespace(typename)
-        self.val = val
-        self.is_bool = val.type.template_argument(0).code == gdb.TYPE_CODE_BOOL
-
-    def children(self):
-        return self._iterator(self.val['_M_impl']['_M_start'],
-                              self.val['_M_impl']['_M_finish'],
-                              self.is_bool)
-
-    def to_string(self):
-        start = self.val['_M_impl']['_M_start']
-        finish = self.val['_M_impl']['_M_finish']
-        end = self.val['_M_impl']['_M_end_of_storage']
-        if self.is_bool:
-            length = start['_M_offset'] + finish['_M_p'] * 8 - start['_M_p'] * 8 + finish['_M_offset']
-            capacity = (end['_M_p'] - start['_M_p']) * 8
-            return ('%s<bool> of length %d, capacity %d'
-                    % (self.typename, int (length), int (capacity)))
-        return ('%s of length %d, capacity %d'
-                % (self.typename, int (finish - start), int (end - start)))
-
-    def display_hint(self):
-        return 'array'
-```
-
-핵심 패턴 셋.
-
-1. `__init__` — 타입 이름과 Value 저장.
-2. `to_string` — 한 줄 요약 ("vector of length N").
-3. `children` — Iterator를 yield하면서 원소 emit.
-4. `_iterator` — 별도 클래스로 *상태 머신* 보유 (vector<bool> 같은 특수 처리).
-5. `display_hint = 'array'`.
-
-GCC의 모든 STL printer가 같은 구조. unordered_map, list, map, set, multimap, ...
-
-### 등록 — 한 줄
-
-```python
-def build_libstdcxx_dictionary():
-    libstdcxx_printer = Printer("libstdc++-v6")
-    
-    # Add all the templated types
-    libstdcxx_printer.add_version('std::', 'vector', StdVectorPrinter)
-    libstdcxx_printer.add_version('std::', 'map', StdMapPrinter)
-    libstdcxx_printer.add_version('std::', 'unordered_map', Tr1UnorderedMapPrinter)
-    libstdcxx_printer.add_version('std::', 'shared_ptr', SharedPointerPrinter)
-    ...
-
-def register_libstdcxx_printers(obj):
-    gdb.printing.register_pretty_printer(obj, build_libstdcxx_dictionary())
-```
-
-수십 종류. 매 GCC 버전마다 추가·수정. 의외로 코드량 — printers.py가 *수천 줄*.
+이 글은 fake/ellipsis가 섞인 전체 클래스 대신 다음 검토 지점을 남깁니다: typedef/inline namespace stripping, specialization dispatch, lazy child, empty iterator, target type/width, corrupt length와 memory read failure, objfile scope와 registration lifecycle.
 
 ## libc++ printer
 
-LLVM 소스 `utils/gdb/libcxx/printers.py`. 비슷한 구조지만 `std::__1::` namespace.
-
-```python
-class StdVectorPrinter(object):
-    "Print a std::vector"
-
-    class _VectorIterator(object):
-        ...
-
-    def __init__(self, val):
-        self.val = val
-        ...
-```
-
-macOS의 기본 표준 라이브러리는 libc++. clang 빌드도 보통 libc++. 두 printer를 *함께 등록*하면 어느 라이브러리의 vector든 잘 표시.
+LLVM repository의 libcxx/utils/gdb/libcxx가 GDB용 libc++ printer 경로입니다. source root의 utils/gdb와 혼동하지 않습니다. Clang이 항상 libc++를 쓰는 것은 아니므로 target toolchain·linked library·ABI를 확인합니다. 두 printer를 등록했다는 사실만으로 모든 std::__1/버전/ABI가 자동 호환되지는 않습니다.
 
 ## 디스플레이 옵션
 
 ```text
 (gdb) set print pretty on            # 들여쓰기
 (gdb) set print elements 100         # 컨테이너 표시 한도
-(gdb) set print array on             # 배열 한 줄로
+(gdb) set print array on             # 배열을 여러 줄로 표시
 (gdb) set print array-indexes on     # 인덱스 표시
-(gdb) set print depth 5              # 중첩 깊이
+(gdb) set print max-depth 5              # 중첩 깊이
 (gdb) set print null-stop on         # NUL에서 string 자르기
 (gdb) set print address on
 ```
@@ -350,65 +216,17 @@ pretty-printer가 동작해도 이 옵션들이 *최종 표시*에 영향.
 
 `typedef`나 *긴 템플릿*을 짧은 이름으로 표시.
 
-```python
-import gdb, gdb.types
+type printer는 type 이름을 인식해 표시를 바꾸며 실제 type identity/ABI를 바꾸지 않습니다. unsigned long은 기본 타입이라 tag가 없을 수 있고 target에 따라 size_t의 underlying type도 다릅니다. tag == "unsigned long"인 모든 값을 size_t로 바꾸는 기존 예는 사용하지 않습니다.
 
-class SizeTPrinter:
-    name = "size_t"
-    enabled = True
-    def __init__(self):
-        pass
-    def instantiate(self):
-        return self.recognizer()
-    class recognizer:
-        def recognize(self, type_obj):
-            if type_obj.tag == 'unsigned long':
-                return 'size_t'
-            return None
-
-gdb.types.register_type_printer(gdb.current_objfile(), SizeTPrinter())
-```
-
-```text
-(gdb) ptype my_var
-type = size_t          ← unsigned long 대신
-```
-
-`std::__cxx11::basic_string<char, ...>` 같은 *지옥의 긴 이름*을 `std::string`으로 단순화하는 데 활용.
+프로젝트의 고유 typedef 이름·정확한 layout을 확인한 recognizer를 objfile scope에 등록하고 영향 범위를 제한합니다. ptype·CLI/MI에서 적용되는 출력도 해당 API 계약으로 확인합니다.
 
 ## Xmethod — 가짜 C++ 메서드
 
 C++ 객체에 *가짜 메서드*를 추가. 예: `std::vector::size()`가 *실제 호출 없이* Python으로 평가.
 
-```python
-import gdb.xmethod
+xmethod는 실제 inferior 함수 호출을 대신해 debugger가 값을 계산하도록 할 수 있습니다. match는 class_type·namespace/ABI·method와 signature를 함께 검사하고 result type/argument contract를 맞춰야 합니다. 이름이 size인 모든 클래스에 libstdc++ _M_impl를 읽는 matcher를 붙이면 다른 타입이 깨집니다.
 
-class VectorSizeWorker(gdb.xmethod.XMethodWorker):
-    def get_arg_types(self):
-        return None
-    def get_result_type(self, obj):
-        return gdb.lookup_type('size_t')
-    def __call__(self, obj):
-        start = obj['_M_impl']['_M_start']
-        finish = obj['_M_impl']['_M_finish']
-        return int(finish - start)
-
-class VectorSize(gdb.xmethod.XMethodMatcher):
-    def __init__(self):
-        super().__init__("vector_size")
-    def match(self, class_type, method_name):
-        if method_name != 'size': return None
-        return VectorSizeWorker()
-
-gdb.xmethod.register_xmethod_matcher(None, VectorSize())
-```
-
-```text
-(gdb) print v.size()
-$1 = 3
-```
-
-*실제 함수 호출* 없이 Python으로 계산. `print x.size()`이 *프로세스가 정지된 상태*에서도 동작 (실제 호출은 인라인됐을 때).
+코어·remote target에서 unavailable memory를 처리할 수 있는지 확인하고, container의 실제 method 실행과 xmethod의 debugger 계산을 구분합니다. 미검증 generic matcher는 실행 가능한 vector implementation으로 제시하지 않습니다.
 
 ## MI 출력 — IDE 트리
 
@@ -430,135 +248,21 @@ VSCode·Emacs gud 등 *MI 프로토콜*을 쓰는 프런트엔드에서 pretty-p
 
 `displayhint="array"`가 IDE에게 *트리 표시 방식*을 알림.
 
-`-var-list-children`은 *재귀 호출* — 사용자가 트리 노드를 펼치면 그때 호출. *지연 로드* 패턴.
+-var-list-children은 지정 varobj의 child를 요청합니다. 필요한 자식을 다시 요청하며 트리를 펼치는 것은 client의 동작이고 한 명령이 무조건 전체 tree를 재귀 순회한다는 뜻은 아닙니다. -enable-pretty-printing과 dynamic varobj의 numchild/has_more/표시 범위도 확인합니다.
 
 ## 활용 — 도메인 객체
 
-내 프로젝트의 핵심 객체에 printer를 만들면 디버깅이 *훨씬* 쉬워집니다.
-
-```python
-class TaskPrinter:
-    """RTOS Task 객체."""
-    def __init__(self, val):
-        self.val = val
-    def to_string(self):
-        name = self.val['name'].string()
-        prio = int(self.val['priority'])
-        state = int(self.val['state'])
-        state_str = ['ready', 'running', 'blocked', 'suspended'][state]
-        return f"Task '{name}' prio={prio} state={state_str}"
-    def children(self):
-        yield 'stack_used', self.val['stack_high_water_mark']
-        yield 'tick_count', self.val['tick_count']
-        yield 'name', self.val['name']
-
-class QueuePrinter:
-    def __init__(self, val):
-        self.val = val
-    def to_string(self):
-        used = int(self.val['used'])
-        cap = int(self.val['capacity'])
-        return f"Queue {used}/{cap}"
-    def children(self):
-        used = int(self.val['used'])
-        head = self.val['head']
-        data = self.val['data']
-        for i in range(used):
-            idx = (head + i) % int(self.val['capacity'])
-            yield f"[{i}]", data[idx]
-    def display_hint(self):
-        return "array"
-```
-
-```text
-(gdb) print *current_task
-$1 = Task 'worker' prio=5 state=running = {
-  stack_used = 1024,
-  tick_count = 12345,
-  name = "worker"
-}
-
-(gdb) print *queue
-$2 = Queue 3/16 = {
-  [0] = ...,
-  [1] = ...,
-  [2] = ...
-}
-```
-
-팀 단위로 *공통 printer*를 두면 신입 개발자가 디버깅을 빠르게 시작할 수 있습니다.
+위 DebugQueue처럼 layout·invariant를 정한 객체부터 시작합니다. task state를 고정 4-element list로 indexing하거나 watermark를 used stack byte로 바꾸는 등 실제 RTOS와 맞지 않는 decoder를 붙이지 않습니다. 원본 raw 값과 printer 해석을 나란히 확인하고 corrupt metadata를 별도 오류로 표시합니다.
 
 ## 디버깅 — print-pretty-printer-info
 
 ```text
 (gdb) info pretty-printer
-global pretty-printers:
-  builtin
-    mpx_bound128
-  myproject
-    Point
-    MyClass
-
-objfile /usr/lib/libstdc++.so.6 pretty-printers:
-  libstdc++-v6
-    __gnu_cxx::__normal_iterator
-    __gnu_cxx::_Slist_iterator
-    __gnu_debug::_Safe_iterator
-    std::__1::shared_ptr
-    std::__cxx11::basic_string
-    std::__cxx11::list
-    std::_Fwd_list_iterator
-    std::_Fwd_list_const_iterator
-    std::_List_iterator
-    std::_List_const_iterator
-    std::_Rb_tree_iterator
-    std::_Rb_tree_const_iterator
-    std::_Bit_iterator
-    std::_Bit_const_iterator
-    std::_Slist_iterator
-    std::_Slist_const_iterator
-    std::any
-    std::array
-    std::atomic
-    std::basic_string
-    std::bitset
-    std::deque
-    std::deque::iterator
-    std::error_code
-    std::experimental::any
-    std::experimental::basic_string_view
-    std::experimental::optional
-    std::forward_list
-    std::list
-    std::map
-    std::map::iterator
-    std::multimap
-    std::multimap::iterator
-    std::multiset
-    std::multiset::iterator
-    std::optional
-    std::pair
-    std::priority_queue
-    std::queue
-    std::set
-    std::set::iterator
-    std::shared_ptr
-    std::stack
-    std::tuple
-    std::unique_ptr
-    std::unordered_map
-    std::unordered_map::iterator
-    std::unordered_multimap
-    std::unordered_multimap::iterator
-    std::unordered_multiset
-    std::unordered_set
-    std::variant
-    std::vector
-    std::vector::iterator
-    std::weak_ptr
+(gdb) info auto-load python-scripts
+(gdb) print /r queue
 ```
 
-등록된 printer 전체. 이 목록을 보면 *어떤 STL 타입*이 지원되는지 한눈에.
+등록 scope·이름과 실제 선택된 collection을 확인합니다. 다른 standard library의 namespace가 뒤섞인 만들어 낸 전체 목록을 설치 결과로 제시하지 않습니다.
 
 ## 비활성화
 
@@ -570,7 +274,7 @@ objfile /usr/lib/libstdc++.so.6 pretty-printers:
 (gdb) print /r v       # 일시적 원시 출력
 ```
 
-가끔 printer가 *너무 적극적으로* 줄여 정보가 사라질 때 (`set print elements 0`도 도움).
+가끔 printer가 *너무 적극적으로* 줄여 정보가 사라질 때 (`set print elements 0`은 unlimited이므로 큰/손상된 container에서는 오히려 비용이 커질 수 있음).
 
 ## 정리
 

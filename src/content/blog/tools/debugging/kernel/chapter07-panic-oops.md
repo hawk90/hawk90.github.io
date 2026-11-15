@@ -10,16 +10,16 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-마지막 장 — *최소 정보로 가장 많이 추론*하는 기술. 운영 환경에서 vmcore 없이 *dmesg 한 줄*만으로 panic·oops를 해석합니다. 이게 모든 커널 디버깅의 *끝점*이자 *시작점*.
+이 장에서는 *최소 정보로 신중하게 추론*하는 방법을 다룹니다. 운영 환경에서 vmcore 없이도 보존된 dmesg 기록을 바탕으로 panic·oops의 단서를 읽는 방법을 다룹니다. 로그만으로 원인을 확정할 수 없는 경우에는 일치하는 심볼·빌드 정보나 vmcore가 필요합니다.
 
 ## Oops vs Panic
 
 | | Oops | Panic |
 |---|------|------|
-| 의미 | 회복 가능 | 시스템 정지 |
+| 의미 | 예외 처리 후 계속될 수 있지만, 상황에 따라 프로세스 종료·panic으로 이어질 수 있음 | 설정·상태에 따라 정지 또는 자동 재부팅 |
 | Tainted | T 비트 set | T 비트 set |
 | 다음 | task 강제 종료 | reboot (or hang) |
-| 발생 | NULL deref in process context | NULL deref in IRQ, BUG_ON, oops_count > limit |
+| 발생 | 아키텍처·오류 문맥에 따라 처리 | 명시적 panic, 복구할 수 없는 오류, 정책에 따른 oops 승격 등 |
 | 메시지 | "Oops: 0000..." | "Kernel panic - not syncing: ..." |
 
 `/proc/sys/kernel/panic_on_oops=1`로 oops를 panic으로 격상. 운영에서 *불안정 상태로 도는 것보다 죽는 게 안전*.
@@ -103,7 +103,7 @@ BUG: kernel NULL pointer dereference, address: 0000000000000010
 
 `0x0000` = supervisor + read + not-present. 가장 흔한 NULL deref.
 `0x0002` = supervisor + write + not-present (NULL에 *쓰기*).
-`0x0011` = user + write + protection (user RO에 쓰기).
+`0x0011` = present/protection bit와 instruction-fetch bit가 설정된 page fault입니다. supervisor/user와 read/write 여부는 이 값만으로 앞선 예시처럼 읽을 수 없으므로 실제 bitfield 및 커널 출력과 함께 해석해야 합니다. `user + write + protection` 조합은 이 문서에서 정의한 비트 기준으로 `0x0007`입니다.
 
 ## 3. Tainted
 
@@ -111,12 +111,12 @@ BUG: kernel NULL pointer dereference, address: 0000000000000010
 CPU: 2 PID: 1234 Comm: myprog Tainted: G        W  OE     6.5.0-...
 ```
 
-- `G` — proprietary 모듈 안 로드 (이게 정상)
+- `G` — 로드된 모듈이 GPL 호환. proprietary 모듈이 로드되면 `P`가 표시됨.
 - `W` — 이전 warning 있었음
 - `O` — out-of-tree 모듈
 - `E` — unsigned 모듈
 
-`G W OE` 의미: 이전 warn + out-of-tree (signed 안 된) 모듈 로드. *vanilla 커널 아님*. 버그 리포트 시 *재현 환경* 명시 필수.
+`G W OE` 의미: GPL 호환 모듈 상태, 이전 warning, out-of-tree 모듈, 서명되지 않은 모듈이 로드된 상태입니다. taint 사유를 조사하고 재현 환경을 함께 기록합니다.
 
 ## 4. RIP — 죽은 명령
 
@@ -131,17 +131,17 @@ RIP: 0010:my_function+0x42/0x80 [my_module]
 **여기가 원인 위치**. `addr2line`으로 변환:
 
 ```bash
-$ addr2line -e /lib/modules/.../my_module.ko -f \
-    $(printf "0x%x" $(objdump -d /lib/modules/.../my_module.ko | \
-                       awk '/<my_function>:/ {print strtonum("0x"$1)+0x42}'))
-my_function
+$ /path/to/linux/scripts/faddr2line /path/to/build/my_module.ko 'my_function+0x42/0x80'
+my_function+0x42/0x80:
 drivers/my_module/foo.c:42
 ```
 
-또는 *모듈을 알면* 직접:
+입력은 해당 커널 빌드와 일치하는 디버그 심볼이 포함된 모듈이어야 합니다. 런타임 절대 주소를 relocatable `.ko`의 section 주소처럼 `objdump --start-address`에 그대로 넣지 않습니다.
+
+모듈 자체를 disassemble하려면:
 
 ```bash
-$ objdump -d /lib/modules/.../my_module.ko --start-address=0xN --stop-address=0xM
+$ objdump -dr /path/to/build/my_module.ko | less
 ```
 
 ## 5. Code — 명령 hex dump
@@ -170,9 +170,9 @@ RDI: ffff...
 CR2: 0000000000000010  ← page fault 주소
 ```
 
-`CR2`가 *접근하려 한 주소*. NULL + 0x10 → 어떤 구조체의 멤버 offset 0x10 = 두 번째 64-bit 필드.
+`CR2`가 x86 page fault 주소입니다. NULL 근처 주소와 명령의 displacement가 맞으면 NULL 기반 접근을 의심할 수 있지만, `0x10`이 항상 두 번째 64-bit 필드라는 뜻은 아닙니다. 자료형, padding, 구조체 배치를 디버그 정보와 명령어로 확인합니다.
 
-`my_function`이 *어떤 인자*를 받는지 알면 (RDI = 1번 인자, RSI = 2번, ..., x86-64 SysV ABI) 어느 변수가 NULL인지 추정.
+레지스터 값은 fault 시점의 기계 상태입니다. x86-64 커널 함수의 인자 추정에는 실제 호출 규약·컴파일 결과·최적화를 확인해야 하며, user-space SysV ABI를 그대로 대입해 원인을 단정하지 않습니다.
 
 ## 7. Call Trace — 콜스택
 
@@ -335,9 +335,9 @@ RDI: ffff883456789abc
 5. `bio_alloc`이 *NULL 반환* (OOM 등) → 검사 없이 *bio*->* 접근.
 6. btrfs git log에서 *같은 버그 fix* 검색 → 이미 fix 됐는지 또는 새 보고.
 
-## 시리즈 정리
+## 일반 커널 디버깅 흐름
 
-7장으로 *Linux 커널 디버깅의 전체 흐름*을 다뤘습니다.
+Ch 1~7은 일반 커널 디버깅을 다루며, Ch 8~9는 CXL 드라이버 사례를 별도로 이어갑니다.
 
 - **Ch 1** User/Kernel 경계, /proc, kallsyms.
 - **Ch 2** printk + dmesg + dynamic_debug.
@@ -356,7 +356,7 @@ RDI: ffff883456789abc
 
 ## 정리
 
-- Oops·Panic 메시지의 각 줄에 의미가 있다.
+- Oops·Panic 메시지의 각 줄은 단서이며, 빌드·아키텍처 정보와 맞춰 해석해야 합니다.
 - RIP + CR2 + RAX/RDI가 사고 위치 + 원인.
 - Call Trace는 위→아래 (안→바깥). `?` = unreliable.
 - decode_stacktrace.sh로 자동 file:line 변환.

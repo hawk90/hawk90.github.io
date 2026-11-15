@@ -14,8 +14,8 @@ core 파일이 손에 들어왔습니다. *어디서 죽었나*, *왜 죽었나*
 
 ## 열기
 
-```bash
-$ gdb /usr/local/bin/server /var/crash/core.server.1234
+```bash title="open-core.gdb.sh"
+gdb /usr/local/bin/server /var/crash/core.server.1234
 ```
 
 순서가 *실행 파일, core*. 실행 파일을 안 주면 GDB는 함수 이름을 모름 (주소만 보임).
@@ -42,15 +42,23 @@ Program terminated with signal SIGSEGV, Segmentation fault.
 
 ### coredumpctl debug — 자동
 
-systemd 환경에선.
+systemd-coredump 환경에서는 저장된 core를 찾아 디버거로 열 수 있습니다.
 
 ```bash
 $ coredumpctl list
 $ coredumpctl debug 12345
-[GDB 자동 실행 + 매칭]
+[설정된 디버거로 core 열기]
 ```
 
-`debug` 명령이 *실행 파일·debuginfo 자동 매칭*. 가장 편한 진입점.
+`debug`는 해당 항목의 실행 파일과 core를 사용해 설정된 디버거를 시작합니다. 심볼이나 debuginfo의 자동 확보는 배포판·디버거 설정에 달렸습니다. 스크립트에서 GDB를 바로 열 때는 실행 파일과 core를 명시하고, `-ex` 명령을 지정할 수 있습니다. 다음은 출력만 하는 예이며 inferior를 실행하지 않습니다.
+
+```bash title="gdb-core-batch.sh"
+gdb -q -nx -batch \
+  -ex 'set pagination off' \
+  -ex 'bt' \
+  -ex 'thread apply all bt' \
+  /usr/local/bin/server /var/crash/core.server.1234
+```
 
 ## 첫 명령들
 
@@ -124,7 +132,7 @@ $1 = {si_signo = 11, si_errno = 0, si_code = 1,
 
 **$_siginfo.si_code:**
 
-- SIGSEGV: 1=SEGV_MAPERR, 2=SEGV_ACCERR, 6=SEGV_BNDERR, 7=SEGV_PKUERR
+- SIGSEGV: 1=SEGV_MAPERR, 2=SEGV_ACCERR, 3=SEGV_BNDERR, 4=SEGV_PKUERR
 - SIGBUS:  1=BUS_ADRALN, 2=BUS_ADRERR, 3=BUS_OBJERR, 4=BUS_MCEERR_AR
 - SIGILL:  1=ILL_ILLOPC, 2=ILL_ILLOPN, 3=ILL_ILLADR, 4=ILL_ILLTRP,
 - 5=ILL_PRVOPC, 6=ILL_PRVREG, 7=ILL_COPROC, 8=ILL_BADSTK
@@ -481,7 +489,7 @@ CoreInfo()
 
 ## 다음 장 예고
 
-Ch 4 (마지막) — debuginfod 자동 다운로드, minidump 분석, 자동화된 사고 분석.
+Ch 4 — debuginfod 설정, minidump, 사고 분석 자동화. 뒤에는 CXL 장치와 fabric 사례가 이어집니다.
 
 ## 관련 항목
 

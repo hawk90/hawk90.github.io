@@ -36,7 +36,7 @@ hello from gdb
 
 `python ... end`로 여러 줄, `python <expr>`로 한 줄. 외부 파일은 `source`. `.gdbinit`에 자동 로드되게 박아 둘 수 있습니다.
 
-GDB가 *내장한* Python의 버전은 GDB 빌드 시점의 옵션입니다. `python print(sys.version)`으로 확인. 보통 Python 3.6+. 대부분의 표준 라이브러리는 쓸 수 있지만, *외부 시스템* Python의 venv·third-party 패키지는 별도 설정이 필요합니다.
+GDB가 *내장한* Python의 버전은 GDB 빌드 시점의 옵션입니다. python import sys; print(sys.version)으로 확인합니다. 외부 시스템 Python과 버전·ABI가 같다고 가정하지 않습니다. 대부분의 표준 라이브러리는 쓸 수 있지만, *외부 시스템* Python의 venv·third-party 패키지는 별도 설정이 필요합니다.
 
 ```python
 (gdb) python
@@ -91,7 +91,7 @@ length = v['length']                       # 멤버 접근
 data = v['data']                           # 포인터
 first = data.dereference()                 # *data
 nth = data[5]                              # data[5]
-sliced = data[0:10]                        # 슬라이스 (10개)
+sliced = [data[i] for i in range(10)]      # 유효한 원소 수를 먼저 확인
 
 # Python 타입으로 변환
 n = int(v['count'])
@@ -195,63 +195,11 @@ def stop(self):
     return False
 ```
 
-### 종합 — 메모리 누수 추적
+### malloc 반환값을 추적하려면
 
-malloc/free의 짝을 카운트해 어디서 새는지 추적.
+malloc 진입 때 stop event에 lambda를 계속 연결하면 handler가 누적됩니다. 다음 stop이 malloc 반환이라는 보장도 없어 그때 rax를 읽는 것은 반환 주소 기록이 아닙니다. 해당 스레드·프레임의 [gdb.FinishBreakpoint](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Finish-Breakpoints-in-Python.html)와 return_value로 정상 반환을 포착하고 out_of_scope·종료에서 상태를 정리해야 합니다.
 
-```python
-import gdb
-from collections import defaultdict
-
-class MallocTrack(gdb.Breakpoint):
-    def __init__(self, table):
-        super().__init__("malloc")
-        self.table = table
-
-    def stop(self):
-        size = int(gdb.parse_and_eval("$rdi"))
-        # 콜스택 해시
-        frame = gdb.selected_frame()
-        callstack = []
-        for _ in range(5):
-            frame = frame.older()
-            if not frame: break
-            callstack.append(frame.name() or '??')
-        key = tuple(callstack)
-
-        # 다음 step에서 반환값(rax) 기록
-        gdb.events.stop.connect(lambda e: self._record(e, size, key))
-        return False
-
-    def _record(self, e, size, key):
-        ret = int(gdb.parse_and_eval("$rax"))
-        self.table[ret] = (size, key)
-
-class FreeTrack(gdb.Breakpoint):
-    def __init__(self, table):
-        super().__init__("free")
-        self.table = table
-    def stop(self):
-        addr = int(gdb.parse_and_eval("$rdi"))
-        self.table.pop(addr, None)
-        return False
-
-table = {}
-MallocTrack(table); FreeTrack(table)
-
-# 프로그램 종료 시 누수 출력
-def dump(_evt):
-    by_stack = defaultdict(lambda: [0, 0])
-    for addr, (size, stack) in table.items():
-        by_stack[stack][0] += size
-        by_stack[stack][1] += 1
-    for stack, (size, n) in sorted(by_stack.items(), key=lambda x: -x[1][0])[:20]:
-        print(f"{size:>10} bytes / {n:>6} blocks @ {' -> '.join(stack)}")
-
-gdb.events.exited.connect(dump)
-```
-
-ASan보다 거칠지만 *원리*가 보이는 미니 누수 추적기. 실제로는 `valgrind`나 ASan이 훨씬 견고합니다.
+인자 레지스터는 x86-64 SysV rdi, AArch64 x0처럼 ABI에 따라 달라집니다. inline frame·tail call·정지 콜백의 제약·realloc/calloc/aligned allocation까지 다루지 않은 코드를 일반 누수 검출기로 사용할 수 없습니다. 완성된 동적 검출은 [Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)나 [ASan/LSan](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)으로 보완합니다. 이 host에서는 GDB Python malloc 추적기를 실행하지 않았습니다.
 
 ## Pretty-Printer — 구조체를 사람 읽을 형태로
 
@@ -384,10 +332,10 @@ $1 = MyMap of 3 elements = {
 배포 시 라이브러리에 따라가는 pretty-printer를 *번들*로 제공하는 표준 방법. libstdc++의 STL printer가 이런 식으로 배포됩니다.
 
 ```text
-(gdb) set auto-load safe-path /
+(gdb) add-auto-load-safe-path /opt/myproject/debuggers
 ```
 
-보안상 *알려진 경로*만 auto-load가 허용. 신뢰하는 환경에선 `/`로 풀어 둡니다.
+보안상 *알려진 경로*만 auto-load가 허용. 신뢰하는 프로젝트의 정확한 디렉터리만 추가합니다. / 전체를 허용하면 임의 executable 옆의 스크립트까지 자동 실행될 수 있습니다.
 
 ## libstdc++ / libc++ pretty-printer
 
@@ -410,7 +358,7 @@ register_libstdcxx_printers(None)
 end
 ```
 
-대부분의 배포판은 GDB 패키지가 자동으로 등록합니다. macOS의 `libc++`는 LLVM 소스의 `utils/gdb/libcxx/printers.py`.
+대부분의 배포판은 GDB 패키지가 자동으로 등록합니다. macOS의 `libc++`는 LLVM 소스의 `libcxx/utils/gdb/libcxx/printers.py` (전체 llvm-project checkout 기준).
 
 이 패키지 안에 `StdVectorPrinter`, `StdMapPrinter`, `StdStringPrinter` 등 STL의 거의 모든 컨테이너 printer가 있습니다. 새 컨테이너가 추가될 때마다 (`std::span`, `std::flat_map`) 같이 갱신됩니다.
 
@@ -525,7 +473,7 @@ class FoldedCoroFrame(FrameDecorator):
         return ' → '.join(names)
 ```
 
-`std::coroutine`이나 `boost::asio`의 깊은 콜스택을 *논리적 한 단계*로 압축하는 데 유용. Stripe·Bloomberg 같은 대형 C++ 환경의 디버깅 인프라가 이런 식으로 비대한 콜스택을 다듬습니다.
+`std::coroutine`이나 `boost::asio`의 깊은 콜스택을 *논리적 한 단계*로 압축하는 데 유용. FrameDecorator만으로 실제 중단된 coroutine의 awaiter chain이 복원되지는 않습니다. 런타임 메타데이터를 읽고 논리적 관계를 구성하는 별도 코드가 필요하며 특정 회사의 내부 구현을 이 예제로 추정하지 않습니다.
 
 ## Unwinder — 콜스택 직접 풀기
 
@@ -549,7 +497,7 @@ class JitUnwinder(gdb.unwinder.Unwinder):
 gdb.unwinder.register_unwinder(None, JitUnwinder(), replace=False)
 ```
 
-V8, HotSpot JVM 같은 환경의 디버깅 지원이 이 메커니즘 위에 만들어집니다.
+이 코드는 JIT side table과 FrameId를 생략한 API 구조 스케치이며 실행 가능한 unwinder가 아닙니다. 특정 VM의 내부 구현 근거로 사용하지 않습니다.
 
 ## Event 훅
 
@@ -558,7 +506,7 @@ def on_stop(event):
     print(f"stopped at {gdb.selected_frame().name()}")
 
 def on_exit(event):
-    print(f"exit code {event.exit_code}")
+    print(f"exit code {getattr(event, 'exit_code', None)}")
 
 def on_new_obj(event):
     print(f"loaded {event.new_objfile.filename}")
@@ -598,7 +546,7 @@ LLDB도 Python 내장이지만 API가 다릅니다.
 >>> print(frame.GetFunctionName())
 ```
 
-핵심 클래스가 `SBTarget`, `SBProcess`, `SBThread`, `SBFrame`, `SBValue`. *SB*는 "Scripted Bridge". 모두 `lldb` 모듈에 있습니다.
+핵심 클래스가 `SBTarget`, `SBProcess`, `SBThread`, `SBFrame`, `SBValue`. SB는 [공식 문서의 Scripting Bridge](https://lldb.llvm.org/resources/sbapi.html) API입니다. 모두 `lldb` 모듈에 있습니다.
 
 | GDB | LLDB |
 |-----|------|
@@ -671,7 +619,7 @@ process = target.LaunchSimple(None, None, '.')
 print(process.GetSelectedThread().GetSelectedFrame())
 ```
 
-CI에서 자동 디버깅, 자체 디버거 UI, 테스트 자동화 — 모두 가능합니다. GDB도 `gdb.execute("python ...")`로 비슷한 일이 되지만 LLDB가 더 깔끔.
+CI에서 자동 디버깅, 자체 디버거 UI, 테스트 자동화 — 모두 가능합니다. gdb.execute는 실행 중인 GDB의 embedded Python API입니다. 일반 외부 Python에서 gdb를 import해 같은 기능을 쓴다는 뜻은 아니며 외부 제어는 GDB/MI·batch와 구분합니다.
 
 ## 실전 — .gdbinit 한 페이지
 
@@ -712,7 +660,7 @@ end
 ## 자주 쓰는 패턴
 
 1. **메모리 누수 추적** — `malloc`/`free`에 Python 브레이크 + 카운터 집계.
-2. **무한 루프 진단** — 1초마다 `info threads` 출력하는 백그라운드 Python.
+2. **무한 루프 진단** — 정지·thread-safety 조건을 지키는 event loop에서 상태 수집. 백그라운드 thread가 GDB API를 직접 호출하지 않습니다.
 3. **테스트 자동화** — `gdb -batch -ex "source script.py"`로 헤드리스 실행.
 4. **회귀 검증** — `parse_and_eval`로 변수 값 비교, 차이가 있으면 `gdb.write`.
 5. **JIT 디버깅** — Custom unwinder + 사이드 테이블 lookup.

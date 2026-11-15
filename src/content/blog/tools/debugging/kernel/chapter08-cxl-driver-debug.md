@@ -51,29 +51,31 @@ $ cat /sys/kernel/debug/tracing/trace
 
 CXL 디바이스와 호스트는 *mailbox*로 명령·응답을 주고받습니다. mailbox 명령이 *실패*하면 *디바이스 상태가 의심*되는데, 어떤 명령이 *언제 실패*했는지 알아야 합니다.
 
-커널 내부 명령의 공통 진입점은 `cxl_internal_send_cmd(struct cxl_mailbox *cxl_mbox, struct cxl_mbox_cmd *mbox_cmd)`(`drivers/cxl/core/mbox.c`)입니다. opcode는 두 번째 인자의 `opcode` 필드에 있습니다.
+커널 내부 명령의 공통 진입점은 `cxl_internal_send_cmd(struct cxl_mailbox *cxl_mbox, struct cxl_mbox_cmd *mbox_cmd)`(`drivers/cxl/core/mbox.c`)입니다. opcode는 두 번째 인자의 `opcode` 필드에 있습니다. 이 함수의 반환값은 transport·device status를 errno로 바꾼 커널 측 결과입니다. 장치가 성공을 보고한 명령도 정상 완료는 보통 0이므로 실패만 필터링합니다. 이 probe는 명령 payload나 장치 상태 전체를 캡처하지 않습니다.
 
 ```bash
 $ bpftrace -e '
   kprobe:cxl_internal_send_cmd {
     @op[tid] = ((struct cxl_mbox_cmd *)arg1)->opcode;
+    @seen[tid] = 1;
   }
-  kretprobe:cxl_internal_send_cmd /@op[tid]/ {
-    if (retval != 0) {
+  kretprobe:cxl_internal_send_cmd {
+    if (@seen[tid] && retval < 0) {
       printf("opcode=0x%04x ret=%d\n", @op[tid], retval);
     }
     delete(@op[tid]);
+    delete(@seen[tid]);
   }
 '
 ```
 
-`struct cxl_mbox_cmd`의 타입 정보는 커널 BTF에서 가져옵니다. doorbell 대기가 시간을 넘기면 `-ETIMEDOUT`(-110)이 돌아오고, dmesg에 `mailbox timeout (opcode: …)`가 찍힙니다(`drivers/cxl/pci.c`). opcode 값은 `drivers/cxl/cxlmem.h`의 `CXL_MBOX_OP_*`로 대조합니다. 예를 들어 Get Health Info는 0x4200, Get LSA는 0x4102입니다.
+`struct cxl_mbox_cmd`의 타입 정보는 호환되는 커널 BTF에서 가져옵니다. 실행에는 해당 함수가 kprobe 대상에 노출되고 BTF·권한·bpftrace가 맞아야 합니다. 이 예제는 실제 CXL 장치에서 실행하지 않았습니다. doorbell 대기가 시간을 넘기면 `-ETIMEDOUT`(-110)이 돌아오고, dmesg에 `mailbox timeout (opcode: …)`가 찍힙니다(`drivers/cxl/pci.c`). opcode 값은 `drivers/cxl/cxlmem.h`의 `CXL_MBOX_OP_*`로 대조합니다. 예를 들어 Get Health Info는 0x4200, Get LSA는 0x4102입니다.
 
-*Timeout이 나는 opcode*를 식별하면 *디바이스 firmware 문제*인지 *호스트 mailbox 드라이버 문제*인지 좁힐 수 있습니다.
+*실패 opcode는 추가 조사 대상을 좁히는 단서일 뿐, 장치 firmware와 호스트 드라이버 중 원인을 단독으로 판정하지 않습니다. dmesg, 반환 코드, 장치 상태, 링크·firmware 정보와 대조해야 합니다.
 
 ## drgn으로 커널 상태 검사
 
-drgn은 *살아 있는 커널의 데이터 구조를 Python으로 검사*하는 도구입니다. drgn의 `drgn/helpers/linux/`에는 CXL 전용 helper가 없으므로, 범용 `bus_for_each_dev()`로 CXL bus(`cxl_bus_type`)를 순회하고 `device_type` 이름으로 객체를 골라냅니다.
+drgn은 권한과 디버그 정보가 갖춰지면 살아 있는 커널 또는 vmcore의 데이터 구조를 Python으로 검사할 수 있습니다. 라이브 조회도 무비용·무위험은 아니며 읽기 전용 조사와 대상 시스템의 영향 범위를 확인해야 합니다. 아래 예시는 일반 Linux device helper로 CXL bus(`cxl_bus_type`)를 순회하고 `device_type` 이름으로 객체를 구분하려는 접근입니다. helper/API와 필드 이름은 선택한 drgn·커널 버전에서 확인해야 합니다.
 
 ```python
 from drgn import container_of
@@ -91,14 +93,14 @@ for dev in bus_for_each_dev(prog["cxl_bus_type"].address_of_()):
               "state", cxlr.params.state.format_(type_name=False))
 ```
 
-`device_type` 이름은 `cxl_port`, `cxl_region`, `cxl_memdev`, `cxl_decoder_root`·`cxl_decoder_switch`·`cxl_decoder_endpoint`입니다(`drivers/cxl/core/port.c`, `region.c`, `memdev.c`). decoder는 `struct cxl_decoder`의 `hpa_range`·`interleave_ways`·`interleave_granularity`를 봅니다. drgn은 *kdump core*나 *살아 있는 커널* 둘 다에서 동작합니다.
+이 예제의 `device_type` 판별과 `container_of()` 변환은 해당 커널 버전의 CXL 자료구조·BTF에 종속됩니다. 실제 타입 이름, helper import 경로, 필드 접근은 확인할 커널 소스·BTF와 대조해야 합니다. 아래 코드는 재현 검증하지 않은 버전 종속 예시입니다.
 
 ## 자주 만나는 함정
 
 | 증상 | 원인 |
 |------|------|
-| `cxl_pci_probe`가 호출 안 됨 | PCI driver match 실패 — `cxl_pci`는 class code(CXL Memory Device)로 match |
-| dmesg "Device DVSEC not present, skip CXL.mem init" | CXL Device DVSEC이 없어 `cxl_pci_probe()`가 CXL.mem 초기화를 건너뜀 |
+| `cxl_pci_probe`가 호출 안 됨 | PCI binding과 CXL Memory Device class code 일치 여부 확인 |
+| dmesg에서 `Device DVSEC not present, skip CXL.mem init` 경고 | 해당 소스의 문구대로 CXL.mem 초기화는 건너뜁니다. 다만 `cxl_pci_probe()`는 probe를 즉시 중단하지 않고 관리 경로 설정을 계속 시도하므로, 이 메시지만으로 PCI 장치 전체가 미등록됐다고 판단하지 말고 이후 반환값과 등록 상태를 확인합니다. |
 | Mailbox timeout 빈번 | 명령별 doorbell 대기 한도는 고정 2초(`CXL_MAILBOX_TIMEOUT_MS`). `mbox_ready_timeout` 모듈 파라미터는 초기화 때 mailbox ready를 기다리는 시간(기본 60초)이라 명령 timeout과 무관 |
 | ftrace에 함수가 안 보임 | inline된 static 함수는 trace 대상이 아님 |
 | `/sys/bus/cxl` 비어 있음 | `modprobe cxl_acpi` 안 함 또는 ACPI table 결함 |
@@ -108,13 +110,17 @@ for dev in bus_for_each_dev(prog["cxl_bus_type"].address_of_()):
 
 - CXL 드라이버는 *cxl_core*를 기반으로 *cxl_port·cxl_acpi·cxl_pmem·cxl_mem·cxl_pci*가 올라가는 구조라 추적이 까다롭습니다.
 - *ftrace function_graph*로 *probe 호출 순서*를 시각화합니다.
-- *bpftrace*로 `cxl_internal_send_cmd()`의 *mailbox 명령 호출과 실패*를 캡처합니다.
-- *drgn*으로 *살아 있는 커널의 port·decoder·region 객체*를 Python으로 검사합니다.
+- *bpftrace* 예제로 `cxl_internal_send_cmd()`의 opcode와 음수 반환을 관찰하도록 구성합니다. 장치 실행·장애 원인 판정은 포함하지 않습니다.
+- *drgn* 예제는 커널 BTF와 버전별 CXL 구조체에 의존하며, 실기기에서 실행하지 않았습니다.
 - 모듈 구성을 *항상 먼저 확인*합니다 — `lsmod | grep cxl`.
 
 ## 다음 장 예고
 
 Ch 9 — drivers/cxl 코드 분석. 드라이버 진입점부터 sysfs까지 *코드 경로*를 본격적으로 분해.
+
+## 소스 기준과 실행 범위
+
+소스 워크스루 기준은 Linux `v7.3-rc6`의 `drivers/cxl/Makefile`, `drivers/cxl/pci.c`, `drivers/cxl/core/mbox.c`, `drivers/cxl/core/port.c`입니다. 본문 ftrace·bpftrace·drgn 명령은 이 환경에서 실행하지 않았습니다.
 
 ## 관련 항목
 

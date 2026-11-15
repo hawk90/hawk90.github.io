@@ -32,7 +32,7 @@ Current thread 0x00007f3c... (most recent call first):
   File "myapp.py", line 80 in <module>
 ```
 
-운영 코드에 항상 켜 둘 수 있을 만큼 가벼움(거의 0 오버헤드).
+faulthandler의 적용 여부는 출력 파일·서비스 운영 방식과 함께 결정합니다. 이 글은 오버헤드 수치를 측정하지 않았습니다.
 
 ### 환경 변수로
 
@@ -54,7 +54,7 @@ $ kill -USR1 <pid>
 # 모든 스레드의 콜스택을 stderr로
 ```
 
-`py-spy dump`와 비슷하지만 *프로세스 안에서* 동작하므로 권한 문제 없음. 다만 hung된 프로세스에는 시그널이 도달하지 않을 수도 있어 py-spy가 더 견고합니다.
+faulthandler.register는 프로세스 내부에서 시그널에 대한 스택 덤프를 준비합니다. 외부에서 시그널을 보내는 권한·플랫폼 지원·출력 파일의 유효성을 확인해야 하며 외부 메모리 읽기 방식의 py-spy와 같은 경로는 아닙니다.
 
 ### dump_traceback_later — 데드락 감지
 
@@ -89,7 +89,7 @@ for stat in top_stats[:10]:
 ...
 ```
 
-`size=`이 누적 할당, `count=`가 객체 수. 큰 객체 1개인지 작은 객체 만 개인지가 한눈에.
+snapshot의 size는 추적 중인 메모리 블록의 현재 합이고 count는 해당 블록 수입니다. 지금까지의 누적 할당량이나 Python 객체 개수를 직접 뜻하지 않습니다. 시작 전에 할당한 메모리와 추적되지 않는 C 확장 할당은 별도입니다. [tracemalloc 통계](https://docs.python.org/3.15/library/tracemalloc.html#tracemalloc.Statistic)의 단위를 확인합니다.
 
 ### 누수 진단 — 두 시점 비교
 
@@ -106,11 +106,7 @@ for stat in diff[:10]:
     print(stat)
 ```
 
-```text
-/srv/app/cache.py:42: size=+50.0 MiB (+1.0 MiB/cycle), count=+10000
-```
-
-*증가량*만 보여 줍니다. "한 사이클 돌릴 때마다 cache.py:42에서 50KB씩 안 풀린다" → 그 줄로 가서 *왜* 모이는지 분석.
+compare_to 결과의 size_diff와 count_diff를 확인합니다. 전체 증가량을 작업 횟수로 나누면 회당 순증가의 평균을 구할 수 있지만, 모든 증가가 누수라는 뜻은 아닙니다. 예열·캐시·관측 도구 자체의 할당을 구분하고 같은 작업을 반복해 증가 추세를 확인합니다.
 
 ### 콜스택 보기
 
@@ -194,14 +190,14 @@ gc.collect()                       # 즉시 수집
 print(gc.get_count())              # (gen0, gen1, gen2) 카운터
 print(gc.get_stats())              # 세대별 통계
 
-# 순환 참조 객체 (수집 불가능한)
+# 진단용: 수집 가능한 객체도 garbage에 보존하는 모드
 gc.set_debug(gc.DEBUG_SAVEALL)
 gc.collect()
 for o in gc.garbage:
     print(type(o), o)
 ```
 
-`gc.garbage`는 `__del__`이 있어 GC가 수집을 미룬 객체들. Python 3.4+ 부터는 거의 비어 있지만 *오래된 코드*나 *순환 참조 + 파이널라이저* 조합은 여기로 떨어집니다.
+DEBUG_SAVEALL은 수집 가능한 도달 불가 객체도 해제하지 않고 gc.garbage에 넣습니다. 이 모드의 목록을 모두 수집 불가능한 누수로 분류하면 틀립니다. Python의 정상적인 __del__ 순환도 항상 수집 불가능한 것은 아닙니다. [gc.garbage와 디버그 플래그](https://docs.python.org/3.15/library/gc.html#gc.garbage)를 확인하고 진단 뒤 플래그와 보존한 참조를 복원합니다.
 
 ## memory_profiler — 줄 단위
 
@@ -212,23 +208,90 @@ from memory_profiler import profile
 
 @profile
 def load_data():
-    a = [0] * 10**7       # ~80 MB
-    b = list(range(10**6)) # ~30 MB
+    a = [0] * 10**7       # 참조 목록의 실제 크기는 환경에서 측정
+    b = list(range(10**6)) # 정수·목록 할당을 함께 관측
     return a, b
 ```
 
 ```bash
-$ python -m memory_profiler script.py
-Line #    Mem usage    Increment   Line Contents
-================================================
-     3     10.0 MiB     10.0 MiB   @profile
-     4                             def load_data():
-     5     90.0 MiB     80.0 MiB       a = [0] * 10**7
-     6    120.0 MiB     30.0 MiB       b = list(range(10**6))
-     7    120.0 MiB      0.0 MiB       return a, b
+python -m memory_profiler script.py
 ```
 
-tracemalloc은 *Python 객체* 단위, memory_profiler는 *프로세스 RSS* 단위. NumPy 배열·C 확장 메모리는 후자가 보여 줍니다.
+출력의 Mem usage와 Increment를 해당 환경에서 비교합니다. 이 절의 외부 패키지는 이번 검증에서 실행하지 않았으므로 예측한 MiB 값을 실행 결과로 싣지 않습니다. tracemalloc은 추적된 메모리 블록을, memory_profiler의 기본 psutil 백엔드는 프로세스 RSS를 관찰합니다. C 확장의 모든 할당이 tracemalloc에 잡히는 것은 아니며, RSS 변화만으로 할당 원인을 확정할 수도 없습니다.
+
+## 직접 확인 — 순증가·해제와 DEBUG_SAVEALL
+
+아래 세 파일은 CPython 3.15.0·macOS에서 실행했습니다. 측정값을 임의의 MiB/cycle 출력으로 만들지 않고, 명시적으로 보관한 페이로드의 바이트 수와 추적된 증가·감소의 방향을 구분합니다.
+
+```python title="memory-check.py"
+import gc
+import tracemalloc
+
+def allocate():
+    return [bytearray(4096) for _ in range(8)]
+
+allocation_line = allocate.__code__.co_firstlineno + 1
+def delta(new, old):
+    return sum(stat.size_diff for stat in new.compare_to(old, "lineno")
+               if stat.traceback[0].filename == __file__
+               and stat.traceback[0].lineno == allocation_line)
+
+tracemalloc.start()
+before = tracemalloc.take_snapshot()
+payload = allocate()
+after = tracemalloc.take_snapshot()
+print(f"payload_bytes={sum(map(len, payload))}")
+print(f"growth_positive={delta(after, before) > 0}")
+payload.clear()
+gc.collect()
+released = tracemalloc.take_snapshot()
+print(f"release_negative={delta(released, after) < 0}")
+tracemalloc.stop()
+```
+
+출력은 payload_bytes=32768, growth_positive=True, release_negative=True입니다. 32768은 페이로드 길이의 합이며 추적기의 오버헤드를 포함한 측정 크기가 아닙니다.
+
+두 번째 파일은 SAVEALL이 수집 가능한 순환도 붙잡는 것을 보여 줍니다. 이 예제는 별도 프로세스에서 실행하며 진단 플래그를 원래대로 되돌립니다.
+
+```python title="gc-check.py"
+import gc
+
+class Node:
+    pass
+
+previous = gc.get_debug()
+try:
+    gc.set_debug(gc.DEBUG_SAVEALL)
+    node = Node()
+    node.self = node
+    node_id = id(node)
+    del node
+    gc.collect()
+    print(f"saved={any(id(obj) == node_id for obj in gc.garbage)}")
+    gc.set_debug(previous)
+    gc.garbage.clear()
+    collected = gc.collect()
+    print(f"released={collected > 0}")
+finally:
+    gc.set_debug(previous)
+    gc.garbage.clear()
+```
+
+saved=True는 실제 수집 불가능 판정이 아니라 SAVEALL의 보존 효과입니다. 플래그를 되돌리고 보존 참조를 비운 뒤 후속 수집이 객체를 회수하면 released=True가 됩니다. 약한 참조는 첫 수집에서 이미 지워질 수 있으므로 보존 여부 검사에 사용하지 않습니다. 실행 중인 서비스의 gc.garbage를 무작정 비우라는 절차는 아닙니다.
+
+세 번째 파일은 실제 프로세스를 크래시시키지 않고 faulthandler 출력에 현재 함수가 잡히는지 검사합니다.
+
+```python title="traceback-check.py"
+import faulthandler
+
+def capture():
+    faulthandler.dump_traceback(all_threads=True)
+
+capture()
+print("traceback captured")
+```
+
+`python3 traceback-check.py`는 stderr에 capture와 호출 위치를 남기고 정상 종료합니다. 이것은 명시적 dump의 검증이며 실제 C 확장의 SIGSEGV나 프로덕션 데드락을 재현한 기록은 아닙니다.
 
 ## pyrasite / pyringe — 외부에서 코드 주입
 
@@ -268,7 +331,7 @@ $ pyrasite-shell <pid>
 
 ## 정리
 
-- `faulthandler.enable()` 두 줄을 모든 운영 코드에 박아 둘 것.
+- faulthandler는 비정상 종료·명시적 덤프의 출력 경로와 프로세스 조건을 확인해 적용합니다.
 - `tracemalloc`의 두 스냅샷 비교가 누수 진단의 표준.
 - `objgraph.show_backrefs`로 *왜* 살아 있는지 시각화.
 - `memory_profiler`는 줄 단위 RSS — NumPy/C 확장도 포함.
@@ -281,7 +344,7 @@ $ pyrasite-shell <pid>
 - [Ch 3: asyncio 디버깅](/blog/tools/debugging/python/chapter03-asyncio)
 - [Ch 4: py-spy 샘플링](/blog/tools/debugging/python/chapter04-py-spy)
 - [GDB and LLDB 시리즈](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install) — C 확장은 GDB로
-- [Valgrind Massif](/blog/tools/debugging/valgrind/chapter05-suppressions) — RSS heap 시각화 (C 확장 포함)
+- [Valgrind Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck) — C/C++ 확장의 잘못된 메모리 접근을 확인하는 별도 도구
 
 ## 외부 자료
 

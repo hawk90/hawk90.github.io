@@ -1,8 +1,8 @@
 ---
-title: "RTOS-aware 디버깅과 트러블슈팅 — Task·Queue·Stack 분석"
+title: "RTOS-aware 디버깅과 임베디드 트러블슈팅 — Task·Stack·Fault 분석"
 slug: "tools/debugging/embedded/chapter07-rtos-troubleshooting"
 date: 2026-05-26T09:07:00
-description: "FreeRTOS/Zephyr task 콜스택, Hardfault 분석, MPU, 신호 무결성, 보안 lock 해제."
+description: "FreeRTOS/Zephyr task와 스택 추적, Cortex-M fault 분석, MPU 및 보드 디버깅 문제 진단."
 tags: [rtos, freertos, zephyr, hardfault, mpu, troubleshooting, embedded]
 series: "Embedded Debugging"
 seriesOrder: 7
@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-이 시리즈의 마지막 장은 *실전에서 자주 만나는* 임베디드 디버깅 문제들을 모았습니다. RTOS-aware 디버깅으로 task별 콜스택 보기, Cortex-M의 Hardfault·UsageFault·MemFault 분석, MPU 위반 추적, 신호 무결성·전원 문제, flash 보호 lock 해제까지.
+이 장은 RTOS-aware 도구로 task별 콜스택을 보고, Cortex-M fault와 MPU 상태를 해석하며, 신호 무결성·전원·보호 lock 문제를 진단합니다. Queue 동작 자체를 분석하는 장은 아니므로 범위는 task·stack·fault와 보드 문제에 둡니다.
 
 ## RTOS-aware 디버깅
 
@@ -180,7 +180,7 @@ process_data
 - [17] INVSTATE     — invalid state (Thumb 비트?)
 - [16] UNDEFINSTR   — undefined instruction
 
-[12:8] BFSR (BusFault):
+[15:8] BFSR (BusFault):
 [15] BFARVALID  — BFAR 유효
 [12] STKERR     — exception 진입 시 stack push 실패
 [11] UNSTKERR   — return 시 stack pop 실패
@@ -223,7 +223,7 @@ SCnSCB->ACTLR |= (1 << 1);   // DISDEFWBUF
 
 ### 자동 진단 — 라이브러리
 
-[CMSIS 5의 Fault analysis 라이브러리](https://arm-software.github.io/CMSIS_6/latest/Core/group__usage__faults__gr.html) 또는 직접 짠 핸들러로 *상세 fault report*를 RTT로 출력 → 운영 환경에서도 사고 후 분석 가능.
+[CMSIS 6의 Fault analysis 라이브러리](https://arm-software.github.io/CMSIS_6/latest/Core/group__usage__faults__gr.html) 또는 직접 짠 핸들러로 *상세 fault report*를 RTT로 출력 → 운영 환경에서도 사고 후 분석 가능.
 
 ## MPU — Memory Protection Unit
 
@@ -272,15 +272,17 @@ RTOS task의 스택을 *너무 작게* 설정하면 함수 호출 깊이가 한�
 ### 검출 — FreeRTOS
 
 ```c
-configCHECK_FOR_STACK_OVERFLOW 2
+// FreeRTOSConfig.h
+#define configCHECK_FOR_STACK_OVERFLOW 2
 
+// 애플리케이션에서 hook을 제공해야 합니다.
 void vApplicationStackOverflowHook(TaskHandle_t xTask, char *name) {
     SEGGER_RTT_printf(0, "stack overflow: %s\n", name);
     while (1);
 }
 ```
 
-`2`는 *모든* context switch마다 검사 (느림). `1`은 magic word만.
+FreeRTOS 11.2.0에서 검사는 task 전환 중 현재 task를 내보낼 때 수행합니다. `1`은 현재 stack pointer가 경계 안에 있는지 확인하고, `2`는 stack 끝의 초기화 패턴도 확인합니다. 패턴 검사가 overflow를 모두 잡는다고 보장하지 않으며, 검출 설정은 포트별 제약도 확인해야 합니다.
 
 ### MSPLIM / PSPLIM (M33+)
 
@@ -295,12 +297,23 @@ M0/M3/M4/M7은 없음.
 
 ### High water mark
 
+`uxTaskGetStackHighWaterMark()`는 task가 생성된 뒤 관측한 최소 여유를 `StackType_t` 단위로 반환합니다. API를 빌드에 포함하려면 `FreeRTOSConfig.h`에서 `INCLUDE_uxTaskGetStackHighWaterMark`를 켭니다.
+
+다음 코드는 현재 task의 최소 여유를 출력합니다. `NULL`은 현재 task를 뜻하며, 다른 task를 조사하려면 해당 `TaskHandle_t`를 넘깁니다.
+
 ```c
-UBaseType_t hwm = uxTaskGetStackHighWaterMark(NULL);
-// 남은 공간 (words)
+// FreeRTOSConfig.h
+#define INCLUDE_uxTaskGetStackHighWaterMark 1
+
+void report_current_stack_margin(void) {
+    UBaseType_t words = uxTaskGetStackHighWaterMark(NULL);
+    printf("minimum free stack: %u words (%u bytes)\n",
+           (unsigned) words,
+           (unsigned) (words * sizeof(StackType_t)));
+}
 ```
 
-CI에서 모든 task의 hwm을 로그하면 *어느 task가 너무 빠듯한지* 추적 가능.
+CI에서 task별 high-water mark를 저장하면 어느 task의 여유가 빠듯한지 추적할 수 있습니다. 이 값은 실행한 입력과 경로 범위에서 관측한 최솟값이지, 모든 미래 실행의 보증치는 아닙니다.
 
 ## DMA · 캐시 일관성
 
@@ -439,7 +452,7 @@ void main() {
 
 운영 환경에서 fault 자동 수집 → 양산 후 결함 추적의 표준.
 
-## 정리 (시리즈 전체)
+## 정리
 
 - **Ch 1** RSP — `$payload#cs` ASCII 프로토콜. 모든 임베디드 디버깅의 인터페이스.
 - **Ch 2** JTAG/SWD/CoreSight — 핀과 회로. DAP·FPB·DWT·ITM·ETM.
@@ -449,7 +462,11 @@ void main() {
 - **Ch 6** Trace — RTT/ITM/SWO/ETM/Semihosting 비교.
 - **Ch 7 (이 장)** RTOS-aware + Hardfault 분석 + 보안 + 트러블슈팅.
 
-임베디드 디버깅의 80%는 위의 도구로 덮입니다. 나머지 20%는 *PCB 설계*와 *오실로스코프* — 그 영역은 별 주제.
+각 장비의 관측 범위와 보드 접근 조건을 확인한 뒤, 소프트웨어 상태와 전기 신호를 함께 비교합니다. CXL 링크와 디바이스 진단은 다음 두 장에서 이어집니다.
+
+## 다음 장 예고
+
+Ch 8 — CXL link training과 LTSSM 상태, Protocol Analyzer 캡처를 이용한 링크 문제 진단.
 
 ## 관련 항목 (시리즈 전체)
 
@@ -459,6 +476,8 @@ void main() {
 - [Ch 4: J-Link 도구 체인](/blog/tools/debugging/embedded/chapter04-jlink)
 - [Ch 5: ELF / MAP](/blog/tools/debugging/embedded/chapter05-elf-map)
 - [Ch 6: Trace](/blog/tools/debugging/embedded/chapter06-trace)
+- [Ch 8: CXL Link Training 디버깅](/blog/tools/debugging/embedded/chapter08-cxl-link-debug)
+- [Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot)
 
 ## 외부 자료
 

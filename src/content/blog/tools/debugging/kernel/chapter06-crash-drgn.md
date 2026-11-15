@@ -50,7 +50,9 @@ $ cat /proc/iomem | grep Crash
   04000000-23ffffff : Crash kernel    # 예약된 영역
 ```
 
-### 강제 패닉으로 테스트
+### 강제 패닉 테스트 (폐기 가능한 VM에서만)
+
+다음 명령은 실행 중인 커널을 의도적으로 panic시킵니다. 중요한 데이터가 없는 격리된 테스트 VM에서만 사용하고, 호스트나 운영 시스템에서는 실행하지 마세요. 아래 출력은 기대할 수 있는 흐름을 나타낸 예시이며 실제 실행 결과가 아닙니다.
 
 ```bash
 $ echo c | sudo tee /proc/sysrq-trigger
@@ -140,7 +142,7 @@ PID: 1234     TASK: ffff... CPU: 2  COMMAND: "myprog"
  #5 [ffff...] __do_page_fault at ffffffff8106f678
  #6 [ffff...] do_page_fault at ffffffff8106f9ab
  #7 [ffff...] page_fault at ffffffff819c5678
-    [exception RIP: my_driver_handler+0x42]
+    [exception RIP: my_driver_handler+0x46]
     RIP: ffffffffc0123456 RSP: ffff...
     RAX: 0000000000000000 ...
  #8 [ffff...] __handle_irq_event_percpu at ffffffff810abc01
@@ -149,11 +151,11 @@ PID: 1234     TASK: ffff... CPU: 2  COMMAND: "myprog"
 crash> dis my_driver_handler
 0xffffffffc0123410 <my_driver_handler>:  push %rbp
 ...
-0xffffffffc0123456 <my_driver_handler+0x42>:  mov 0x10(%rax),%rcx
+0xffffffffc0123456 <my_driver_handler+0x46>:  mov 0x10(%rax),%rcx
                                               ^^^ %rax = 0 → NULL deref
 
 crash> sym ffffffffc0123456
-my_driver_handler+0x42 at drivers/my_module.c:42
+my_driver_handler+0x46 at drivers/my_module.c:42
 ```
 
 NULL 역참조 위치 + 소스 줄. `my_module.c:42`의 `*(p + 0x10)`에서 `p == NULL`.
@@ -195,8 +197,8 @@ $ pip install drgn
 ### 진입
 
 ```bash
-$ sudo drgn -k -c /var/crash/.../vmcore  # vmcore
-$ sudo drgn                              # 라이브 커널 (/proc/kcore)
+$ sudo drgn -c /var/crash/.../vmcore -s /usr/lib/debug/.../vmlinux
+$ sudo drgn                              # 기본 설정에서 현재 커널 조사
 
 >>> 
 ```
@@ -226,16 +228,9 @@ Python REPL. 모든 *커널 변수·구조체*에 직접 접근.
 drgn에 *수많은 helper*. `drgn.helpers.linux.*`:
 
 ```python
-from drgn.helpers.linux import (
-    for_each_task,
-    for_each_online_cpu,
-    list_for_each_entry,
-    find_task,
-    pid_for_each_thread,
-    find_inode_by_path,
-    block_device_name,
-    ...
-)
+from drgn.helpers.linux import for_each_task, find_task
+from drgn.helpers.linux.fs import fget
+from drgn.helpers.linux.list import list_for_each_entry
 
 # 특정 PID
 task = find_task(prog, 1234)
@@ -251,7 +246,7 @@ print(file.f_path.dentry.d_name.name.string_())
 
 ```python
 >>> task = find_task(prog, 1234)
->>> for frame in task.stack_trace():
+>>> for frame in prog.stack_trace(task):
 ...     print(frame)
 #0  page_fault+0x...  at arch/x86/kernel/...
 #1  do_page_fault+0x...  at arch/x86/mm/...
@@ -279,13 +274,15 @@ drgn이 *작성하기 쉽고* Python 생태계와 자연스럽게 통합. crash�
 #!/usr/bin/env drgn
 # crash-info.py — vmcore 진단 자동화
 
-from drgn.helpers.linux import for_each_task
+from drgn.helpers.linux import for_each_task, for_each_online_cpu
+from drgn.helpers.linux.percpu import per_cpu
 
 print(f"Kernel: {prog['linux_banner'].string_().decode().strip()}")
 print(f"Uptime: ...")
 print()
 
 # CPU별 콜스택
+# `current_task` 변수·필드는 대상 아키텍처와 kernel build에 따라 확인한다.
 print("=== Per-CPU active task ===")
 for cpu in for_each_online_cpu(prog):
     task = per_cpu(prog['current_task'], cpu)
@@ -299,7 +296,7 @@ for task in for_each_task(prog):
 ```
 
 ```bash
-$ sudo drgn -k -c vmcore -s crash-info.py
+$ sudo drgn -c vmcore -s /usr/lib/debug/.../vmlinux crash-info.py
 ```
 
 운영 환경에서 *모든 panic*에 같은 분석을 자동 실행.
@@ -315,7 +312,7 @@ $ sudo drgn
 ...         print(t.comm.string_(), t.pid.value_())
 ```
 
-vmcore 없이 *동작 중 시스템* 분석. 커널 패닉 안 일으키므로 안전.
+vmcore 없이 동작 중 시스템의 상태를 읽을 수 있지만, 라이브 조회에도 권한·부하·대상 버전 제약이 있습니다. 비파괴 읽기만 사용하고 운영 영향은 별도로 평가합니다.
 
 ## 자주 만나는 사고 유형
 
@@ -338,7 +335,7 @@ PANIC: "Kernel panic - not syncing: softlockup: hung tasks"
 ### Hung task
 
 ```text
-PANIC: "Kernel panic - not syncing: hung_task: blocked tasks"
+INFO: task myprog:1234 blocked for more than 120 seconds.
 ```
 
 → D state task 추적 (drgn 스크립트 위 참고).
@@ -354,7 +351,7 @@ PANIC: "BUG: KASAN: use-after-free in ..."
 ### Out of memory
 
 ```text
-PANIC: "Out of memory: Killed process N (myprog) ..."
+Out of memory: Killed process N (myprog) ...
 ```
 
 → `kmem -i`로 메모리 요약. `vm <pid>`로 oom-killed task의 메모리.
@@ -404,13 +401,13 @@ $ cat /sys/kernel/debug/kprobes/list
 - crash (전통) 와 drgn (Python) 두 도구.
 - crash는 자체 DSL, drgn은 Python — 표현력 ↑.
 - helper 함수로 모든 task / cpu / fd / inode 순회.
-- live 분석은 `/proc/kcore` + drgn.
+- live 분석은 실행 중 커널 조회는 drgn 지원 구성과 권한이 있을 때 가능하며 무위험이라고 단정하지 않습니다.
 - 사고 유형: NULL deref / softlockup / hung / use-after-free / OOM.
 - 클라우드 환경은 NFS·SSH로 vmcore 업로드.
 
 ## 다음 장 예고
 
-Ch 7 (마지막) — Kernel panic / Oops 메시지 해석. crash 없이 dmesg만으로 분석.
+Ch 7 — Kernel panic / Oops 메시지 해석. Ch 8~9에서는 CXL 드라이버를 별도로 살펴봅니다.
 
 ## 관련 항목
 
