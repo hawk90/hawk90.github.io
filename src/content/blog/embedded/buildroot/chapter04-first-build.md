@@ -51,14 +51,14 @@ sudo apt install -y qemu-system-arm qemu-system-aarch64
 
 ## 클론 — 안정 릴리스 vs master
 
-Buildroot는 *분기별 릴리스*(`YYYY.MM`)와 *LTS*(`YYYY.02-LTS`, `YYYY.08-LTS`)를 운영합니다. 처음에는 *최신 LTS*가 안전합니다.
+Buildroot는 분기별 안정 릴리스를 내며, 장기 지원(LTS)은 모든 릴리스에 붙는 이름이 아닙니다. 2026.08은 안정 릴리스이고 현재 LTS 계열은 2025.02.x입니다. 프로젝트가 실제로 사용할 릴리스 또는 commit을 명시해 재현성을 확보하세요.
 
 ```text
-$ git clone --depth=1 --branch 2024.02.x \
+$ git clone --depth=1 --branch 2026.08 \
         https://gitlab.com/buildroot.org/buildroot.git
 $ cd buildroot
 $ git log --oneline -1
-abcdef0 Update for 2024.02.6 release
+d5180309 Update for 2026.08 release
 ```
 
 `--depth=1`은 *얕은 클론*입니다. 변경 이력을 추적할 필요가 없다면 깔끔합니다. 패키지 패치를 자주 보낼 계획이라면 full clone이 좋습니다.
@@ -99,10 +99,10 @@ BR2_PACKAGE_HOST_QEMU=y
 ## make — 30분의 풀 빌드
 
 ```text
-$ make -j$(nproc) 2>&1 | tee build.log
+$ make 2>&1 | tee build.log
 ```
 
-병렬 잡 수는 `-jN`으로 지정합니다. `$(nproc)`가 보통 가장 빠릅니다. `tee`로 log를 남기는 습관은 빌드가 깨졌을 때 *위치를 찾는 데* 거의 필수입니다.
+기본 `make`는 순차 빌드입니다. 최상위 병렬 빌드는 릴리스 매뉴얼에서 실험적 기능으로 안내하므로, 검증된 설정에서만 선택하세요. `tee`로 로그를 남기면 빌드 실패 위치를 찾기 쉽습니다.
 
 빌드는 대략 다음 순서로 진행됩니다. 각 단계가 화면에 흐를 때 *어디쯤인지* 감이 잡히도록 정리해 두면 좋습니다.
 
@@ -176,7 +176,7 @@ total 87M
 | 파일 | 의미 |
 |---|---|
 | `Image` | 압축 풀린 Linux 커널 |
-| `rootfs.ext4` | ext4 포맷의 rootfs (= `rootfs.ext2`의 symlink) |
+| `rootfs.ext4` | ext4 포맷의 root filesystem 이미지. 실제 출력 파일과 형식은 선택한 설정으로 확인합니다. |
 | `start-qemu.sh` | QEMU를 *이 산출물로* 띄우는 스크립트 |
 
 `start-qemu.sh`를 열어 보면 어떤 명령을 만들었는지 보입니다.

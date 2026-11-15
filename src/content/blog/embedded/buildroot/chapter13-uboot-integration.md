@@ -210,7 +210,7 @@ U-Boot env는 *재부팅 사이에 살아남아야 할 변수 집합*입니다. 
 ```text
 CONFIG_ENV_IS_IN_MMC=y
 CONFIG_SYS_MMC_ENV_DEV=0          # mmc 0번 디바이스
-CONFIG_SYS_MMC_ENV_PART=1         # boot partition 1
+CONFIG_SYS_MMC_ENV_PART=2         # Linux mmcblk0boot1과 맞추는 예. 보드 U-Boot의 hwpart numbering을 확인
 CONFIG_ENV_OFFSET=0xC0000         # boot partition 안에서 768KB offset
 CONFIG_ENV_SIZE=0x2000            # 8KB
 CONFIG_ENV_OFFSET_REDUND=0xC2000  # 이중화 (선택)

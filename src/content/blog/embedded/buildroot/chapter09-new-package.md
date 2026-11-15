@@ -366,7 +366,7 @@ patching file CRT.c
 | `<name>-build` | + 실제 컴파일 |
 | `<name>-install` | + target/staging install |
 | `<name>` | 위 전체 |
-| `<name>-rebuild` | extract 이후를 *처음부터* 다시 |
+| `<name>-rebuild` | build/install 단계를 다시 실행 (source를 다시 extract하지 않음) |
 | `<name>-reconfigure` | configure 이후를 다시 |
 | `<name>-dirclean` | build 디렉터리 완전 삭제 |
 | `<name>-show-info` | 메타데이터 JSON 출력 |
@@ -401,7 +401,7 @@ less output/build/htop-acme-3.3.0/config.log
 make htop-acme-reconfigure
 ```
 
-`-rebuild`는 *extract부터* 다시 합니다. patch가 늘었거나 시리즈 변경이 있을 때 씁니다. `-reconfigure`는 *configure부터* 다시. 옵션만 바꿀 때 충분합니다.
+`-rebuild`는 기존 추출·패치·설정 결과를 사용해 build/install 단계를 다시 실행합니다. 소스나 patch를 바꿨다면 `-dirclean` 후 다시 빌드하고, configure 옵션 변경은 `-reconfigure`가 적합한지 패키지의 빌드 방식을 확인하세요.
 
 ## License 표기
 

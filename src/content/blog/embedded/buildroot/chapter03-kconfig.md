@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Buildroot의 모든 설정은 Kconfig를 통과합니다."** — 리눅스 커널과 같은 도구이고, 익숙해지면 8개 메뉴에서 길을 잃지 않습니다.
+> **"Buildroot의 모든 설정은 Kconfig를 통과합니다."** — 리눅스 커널과 같은 도구이며, 메뉴별 역할을 알면 필요한 설정을 찾기 쉽습니다.
 
 ## Kconfig를 왜 다시 만나는가
 
@@ -34,7 +34,7 @@ clone 직후의 트리에서 menuconfig를 띄우면 다음과 같이 보입니�
 $ make menuconfig
 ```
 
-**Buildroot 2026.02 Configuration** 최상위 메뉴:
+**Buildroot 2026.08 Configuration** 최상위 메뉴:
 
 - Target options --->
 - Build options --->
@@ -48,7 +48,7 @@ $ make menuconfig
 - Legacy config options --->
 
 
-핵심은 위에서 보이는 **8개 메뉴**입니다. (`Legacy config options`는 maintainer가 *삭제 예정* 옵션을 정리하는 곳이고, 실무에서 직접 만질 일은 거의 없습니다.)
+위 목록에는 Legacy를 제외한 9개 메뉴와 `Legacy config options`가 있습니다. 메뉴 이름과 구성은 선택한 Buildroot 릴리스의 `menuconfig`에서 확인하세요.
 
 조작 키는 리눅스 커널 menuconfig와 동일합니다.
 
@@ -60,7 +60,7 @@ $ make menuconfig
 | `Y` / `N` | 강제 켜기 / 끄기 |
 | `?` | 현재 옵션의 help 보기 |
 | `/` | 옵션 이름·심볼 검색 |
-| `Esc Esc` | 한 단계 뒤로 / 저장하고 종료 |
+| `Esc` | 이전 메뉴로 이동. 최상위에서 종료하면 저장 여부를 별도 확인 |
 
 `/`를 누른 뒤 옵션 심볼(`BR2_PACKAGE_OPENSSH`)을 치면 *어디 메뉴 어느 옵션*인지 한 번에 찾아 줍니다. 메뉴 탐색에 익숙해지기 전까지 가장 자주 쓰는 키가 `/`입니다.
 
@@ -243,10 +243,10 @@ Location: -> Target packages -> Networking applications
 옵션 의존성은 `depends on`과 `select`로 표현됩니다. 예를 들어 `openssh`는 OpenSSL이나 libressl을 필요로 합니다. 한 패키지를 켜면 *암시적으로* 의존 패키지도 함께 켜지는 경우가 있고, *명시적으로* 켜야 옵션이 보이는 경우도 있습니다.
 
 ```text
-$ make graph-depends
+$ BR2_GRAPH_OUT=svg make graph-depends
 ```
 
-이 명령은 의존성 그래프를 SVG로 그려 `output/graphs/graph-depends.svg`에 남깁니다. 의존성이 꼬였을 때 시각적으로 추적하기 좋습니다.
+이 명령은 SVG 출력 형식을 명시해 의존성 그래프를 `output/graphs/graph-depends.svg`에 남깁니다. 출력 형식은 Buildroot의 `BR2_GRAPH_OUT` 설정에 따라 달라질 수 있습니다.
 
 ## 7) Filesystem images — *어떤 형식으로 패키징할까*
 
@@ -371,7 +371,7 @@ $ ./support/kconfig/merge_config.sh \
 ## 정리
 
 - Buildroot의 설정은 리눅스 커널과 같은 Kconfig 시스템 위에 있습니다.
-- menuconfig에는 8개의 핵심 메뉴가 있고, 각 메뉴는 *시스템의 한 단면*을 정의합니다.
+- menuconfig의 주요 메뉴는 target, build, toolchain, system, kernel, packages, filesystem, bootloader, host utilities로 나뉩니다.
 - 옵션 검색은 `/`로 빠르게, 의존성은 `make graph-depends`로 시각화합니다.
 - linux·u-boot·busybox 같이 자체 Kconfig를 가진 패키지는 `make <pkg>-menuconfig` / `make <pkg>-savedefconfig`로 다룹니다.
 - `make savedefconfig`로 *최소 차이*만 담은 defconfig를 추출해 git에 커밋합니다.

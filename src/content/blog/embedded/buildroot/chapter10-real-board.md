@@ -56,7 +56,7 @@ sudo apt install -y \
 $ cd ~/work
 $ git clone https://gitlab.com/buildroot.org/buildroot.git
 $ cd buildroot
-$ git checkout 2026.02      # LTS branch
+$ git checkout 2026.08      # pinned stable release (not an LTS label)
 ```
 
 외부 트리를 만듭니다. [Ch 6](/blog/embedded/buildroot/chapter06-br2-external)의 패턴을 따릅니다.
@@ -98,23 +98,28 @@ BR2_arm=y
 BR2_cortex_a8=y
 BR2_ARM_FPU_VFPV3=y
 BR2_TOOLCHAIN_EXTERNAL=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
+BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_STABLE=y
 BR2_LINUX_KERNEL=y
 BR2_LINUX_KERNEL_CUSTOM_VERSION=y
-BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.6.21"
-BR2_LINUX_KERNEL_DEFCONFIG="multi_v7"
+BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.18.38"
+BR2_LINUX_KERNEL_DEFCONFIG="omap2plus"
 BR2_LINUX_KERNEL_DTS_SUPPORT=y
-BR2_LINUX_KERNEL_INTREE_DTS_NAME="am335x-boneblack"
+BR2_LINUX_KERNEL_INTREE_DTS_NAME="ti/omap/am335x-boneblack"
 BR2_TARGET_ROOTFS_EXT2=y
 BR2_TARGET_ROOTFS_EXT2_4=y
-BR2_TARGET_ROOTFS_EXT2_SIZE="120M"
 BR2_TARGET_UBOOT=y
+BR2_TARGET_UBOOT_CUSTOM_VERSION_VALUE="2026.07"
 BR2_TARGET_UBOOT_BOARD_DEFCONFIG="am335x_evm"
 BR2_TARGET_UBOOT_FORMAT_IMG=y
 BR2_TARGET_UBOOT_SPL=y
 BR2_TARGET_UBOOT_SPL_NAME="MLO"
 BR2_PACKAGE_HOST_GENIMAGE=y
-BR2_ROOTFS_POST_IMAGE_SCRIPT="board/beaglebone/post-image.sh"
+BR2_ROOTFS_POST_IMAGE_SCRIPT="support/scripts/genimage.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="-c board/beagleboard/beaglebone/genimage.cfg"
 ```
+
+위 항목은 공식 `2026.08` 태그의 `configs/beaglebone_defconfig`에서 발췌했습니다. 실제 defconfig 전체를 `savedefconfig`한 결과는 외부 트리와 변경한 옵션에 따라 달라집니다.
 
 ## Step 3: 우리 식으로 defconfig 수정
 
@@ -289,8 +294,8 @@ $ chmod +x etc/init.d/S99led-blink
 set -e
 TARGET_DIR="$1"
 
-# Stamp build date into /etc/issue
-sed -i "s/@BUILDDATE@/$(date +%Y-%m-%d)/" "$TARGET_DIR/etc/issue"
+# Avoid injecting wall-clock build time into the image; use a fixed release ID.
+sed -i 's/@BUILDDATE@/release-1.0/' "$TARGET_DIR/etc/issue"
 ```
 
 `board/acme/bbb/post-image.sh`:
@@ -303,9 +308,8 @@ BINARIES_DIR="$1"
 BOARD=$2
 
 GENIMAGE_CFG="$BR2_EXTERNAL_ACME_PATH/board/acme/bbb/genimage.cfg"
-GENIMAGE_TMP="$BINARIES_DIR/genimage.tmp"
-
-rm -rf "$GENIMAGE_TMP"
+GENIMAGE_TMP="$(mktemp -d "$BINARIES_DIR/genimage.tmp.XXXXXX")"
+trap 'rm -rf -- "$GENIMAGE_TMP"' EXIT HUP INT TERM
 genimage \
     --rootpath "$TARGET_DIR" \
     --tmppath "$GENIMAGE_TMP" \
@@ -329,7 +333,7 @@ image boot.vfat {
             "uEnv.txt"
         }
     }
-    size = 16M
+    size = 32M
 }
 
 image sdcard.img {
@@ -349,9 +353,21 @@ image sdcard.img {
 
     partition data {
         partition-type = 0x83
-        image = "rootfs.ext4"
+        image = "data.ext4"
         size = 128M
     }
+}
+```
+
+`data.ext4`는 rootfs 이미지의 복사본이 아니라 genimage가 별도로 만드는 빈 ext4 파일시스템이어야 합니다. 아래 이미지를 `genimage.cfg`에 추가합니다.
+
+```text
+image data.ext4 {
+    ext4 {
+        label = "data"
+    }
+    size = 128M
+    empty = true
 }
 ```
 
@@ -404,7 +420,7 @@ uenvcmd=load mmc 0:1 ${loadaddr} ${bootdir}/${bootfile}; \
 
 ## Step 8: 빌드
 
-이제 모든 게 준비됐습니다. 빌드합니다.
+이제 모든 게 준비됐습니다. 아래 로그와 산출물은 예시이며 실제 Buildroot·보드에서 실행해 얻은 측정 결과가 아닙니다. 빌드 시간과 파일 크기는 host, 설정, package 버전에 따라 달라집니다.
 
 ```text
 $ cd ~/work/buildroot
@@ -453,22 +469,23 @@ sda         500G disk
 ├─sda1      500G part
 sdb         8G   disk     ← 이것이 SD
 ├─sdb1      ...
-$ sudo umount /dev/sdb*
+$ sudo umount /dev/sdb1
 ```
 
 **잘못된 장치를 고르면 호스트 디스크가 날아갑니다.** `lsblk`의 SIZE를 두 번 확인합니다.
 
 ```text
 $ sudo dd if=output/images/sdcard.img of=/dev/sdb bs=4M conv=fsync status=progress
-401MB transferred in 38s
+[예상 출력 형식이며 전송량·시간은 실제 이미지와 SD 카드에 따라 달라짐]
 $ sync
 ```
 
 `bs=4M`은 *큰 블록*으로 빨리 굽기 위함입니다. `conv=fsync`는 마지막에 *디스크에 flush*합니다.
 
-빨리 굽고 싶다면 `bmap-tools`를 씁니다. genimage는 `.bmap` 파일을 함께 만들 수 있어 *비어 있는 블록을 건너뜁니다*. 큰 ext4 파티션에서 시간 절약이 큽니다.
+빨리 굽고 싶다면 `bmap-tools`를 쓸 수 있습니다. genimage가 `.bmap`을 자동 생성하지는 않으므로 먼저 이미지 파일에서 map을 만든 뒤 복사합니다.
 
 ```text
+$ bmaptool create -o output/images/sdcard.bmap output/images/sdcard.img
 $ sudo bmaptool copy --bmap output/images/sdcard.bmap \
                      output/images/sdcard.img /dev/sdb
 ```
@@ -479,8 +496,8 @@ BeagleBone Black의 J1 헤더가 시리얼 콘솔입니다. 6핀 헤더이고, U
 
 ```text
 J1 pin 1  (GND, 보드 바깥쪽)  ── 어댑터 GND
-J1 pin 4  (RX,  보드 TX)      ── 어댑터 RX
-J1 pin 5  (TX,  보드 RX)      ── 어댑터 TX
+J1 pin 4  (RX, 보드 수신)     ── 어댑터 TX
+J1 pin 5  (TX, 보드 송신)     ── 어댑터 RX
 ```
 
 **어댑터의 VCC 핀은 연결하지 마세요.** BeagleBone은 자체 전원으로 동작합니다.
@@ -536,7 +553,7 @@ Starting dropbear sshd: OK
 Starting led-blink
 
 ACME BeagleBone Black system
-Built: 2026-05-19
+Build: release-1.0
 
 acme-bbb login:
 ```
@@ -549,7 +566,7 @@ acme-bbb login: root
 Linux acme-bbb 6.6.21 #1 SMP PREEMPT ... armv7l GNU/Linux
 # cat /etc/issue
 ACME BeagleBone Black system
-Built: 2026-05-19
+Build: release-1.0
 # df -h
 Filesystem                Size      Used Available Use% Mounted on
 /dev/root                43.0M     43.0M         0 100% /
@@ -571,7 +588,7 @@ USER0 LED가 1초 간격으로 깜빡이고 있을 겁니다. `acme-led-blink`�
 
 세 가지를 의심합니다.
 
-- *USB-TTL의 TX/RX 교차*. 보드 TX(pin 5)가 어댑터 RX에 가야 합니다.
+- *USB-TTL의 TX/RX 교차*. 보드 TX(pin 5)가 어댑터 RX에, 보드 RX(pin 4)가 어댑터 TX에 연결돼야 합니다.
 - *GND 안 연결*. 시그널 wire만 있고 GND가 없으면 신호가 떠다닙니다.
 - *baud rate 다름*. picocom에 `-b 115200`을 명시했는지.
 
@@ -589,14 +606,7 @@ $ mdir -i output/images/boot.vfat ::
 
 ### USER 버튼 효과가 없다
 
-BeagleBone Black의 *SYSBOOT 설정*은 USER 버튼이 *high*일 때 SD를 먼저 보게 됩니다. 어떤 rev의 보드는 button polarity가 다를 수 있습니다. 대안으로 eMMC를 *지우는* 방법이 있습니다. eMMC가 비어 있으면 ROM이 자동으로 SD를 fallback으로 시도합니다.
-
-```text
-# (eMMC를 마운트한 상태에서)
-sudo dd if=/dev/zero of=/dev/mmcblk1 bs=1M count=10
-```
-
-(eMMC 와이프는 *되돌릴 수 없습니다*. 신중히 하십시오.)
+부트 순서는 보드 revision과 저장된 bootloader 설정에 따라 달라집니다. eMMC를 지워 SD 부팅을 유도하는 절차는 사용하지 마세요. USER 버튼 절차가 실패하면 해당 revision의 BeagleBoard 문서와 UART 로그, SYSBOOT 설정을 먼저 확인합니다.
 
 ### squashfs는 떠 있는데 `acme-led-blink`가 없다
 

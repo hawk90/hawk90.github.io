@@ -83,10 +83,11 @@ U-Boot에서 다음과 같이 부팅합니다.
 ```text
 => tftp 0x82000000 Image
 => tftp 0x88000000 rootfs.cpio.gz
-=> booti 0x82000000 0x88000000 ${fdt_addr_r}
+=> setenv initrd_size ${filesize}
+=> booti 0x82000000 0x88000000:${initrd_size} ${fdt_addr_r}
 ```
 
-`booti`/`bootz`의 두 번째 인자가 initramfs입니다. 커널은 이 cpio를 압축 해제해 rootfs로 사용합니다.
+raw initramfs를 U-Boot `booti`에 넘길 때는 주소와 크기를 `주소:크기` 형식으로 전달해야 합니다. 위 예시는 두 번째 TFTP 전송이 설정한 `${filesize}`를 저장한 뒤 사용합니다. 실제 부팅 인자와 압축 형식은 보드의 U-Boot 버전으로 검증하세요.
 
 cpio는 *형식상* 쓰기가 가능하지만, 실제로는 initramfs로 마운트된 *tmpfs*에 쓰는 것이지 cpio 파일 자체를 수정하는 게 아닙니다.
 
@@ -114,9 +115,9 @@ BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y    # gzip < xz < zstd 권장
 
 squashfs는 쓰기를 지원하지 않습니다. 이게 단점이 아니라 *기능*입니다. read-only면 다음이 자동으로 보장됩니다.
 
-- 전원 끊김에 손상되지 않는다. 디스크 상태가 변할 일이 없다.
+- 읽기 전용 mount는 정상 동작 중 rootfs 변경을 막지만, 저장 매체 오류나 전원 차단에 따른 하드웨어 손상까지 막지는 않는다.
 - 마운트가 항상 깨끗하다. `fsck`가 필요 없다.
-- 보안 검사가 단순하다. squashfs hash를 검증하면 끝.
+- 이미지 hash는 바이트 무결성 확인에 쓰이며, 신뢰할 수 있는 공개키로 서명 검증하는 절차를 대신하지 않는다.
 
 문제는 *쓰기가 필요한 곳*입니다. `/var/log`, `/etc`, `/home`. 이건 overlayfs로 해결합니다.
 
@@ -161,7 +162,7 @@ overlay 백업 저장:
 
 부팅 흐름:
 
-1. 부트로더가 squashfs를 `/`로 마운트 (read-only).
+1. 커널이 squashfs를 `/`로 마운트 (read-only).
 2. init 초반에 *data 파티션*을 `/data`에 ext4로 마운트.
 3. `/data/overlay/etc`를 upper로, `/etc`(squashfs)를 lower로 overlayfs 마운트.
 4. 결과: `/etc`는 *읽기 가능 + 쓰기 가능*. 변경분은 `/data`에 저장됨.
@@ -173,11 +174,8 @@ overlay 백업 저장:
 BR2_TARGET_ROOTFS_SQUASHFS=y
 BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y
 
-# Optional: also build ext4 for data partition (we'll mkfs on first boot)
-BR2_TARGET_ROOTFS_EXT2=y
-BR2_TARGET_ROOTFS_EXT2_4=y
-BR2_TARGET_ROOTFS_EXT2_LABEL="data"
-BR2_TARGET_ROOTFS_EXT2_SIZE="64M"
+# Buildroot의 ext4 rootfs image는 초기화된 data volume이 아니다.
+# data partition은 제품의 provisioning 절차에서 별도로 생성·검증한다.
 
 # overlay support in kernel (in linux fragment)
 # CONFIG_OVERLAY_FS=y
@@ -199,9 +197,11 @@ DATA_MNT=/data
 
 case "$1" in
     start)
-        # 1. Ensure data partition exists; format on first boot
-        if ! blkid "$DATA_DEV" | grep -q ext4; then
-            mkfs.ext4 -L data "$DATA_DEV"
+        # 기존 데이터 파티션만 mount한다. 파일시스템이 없거나 예상과 다르면
+        # 중단하고 provisioning 절차로 복구한다. 부팅 중 자동 포맷하지 않는다.
+        if [ "$(blkid -s TYPE -o value "$DATA_DEV")" != ext4 ]; then
+            echo "Expected an ext4 data partition at $DATA_DEV" >&2
+            exit 1
         fi
 
         mkdir -p "$DATA_MNT"
@@ -224,7 +224,7 @@ esac
 
 이 패턴의 장점은 다음과 같습니다.
 
-- *base rootfs*는 squashfs라 절대 손상되지 않습니다.
+- *base rootfs*는 read-only라 일반적인 설정 변경으로 덮어쓰이지 않지만, 하드웨어·매체 손상으로부터 면역인 것은 아닙니다.
 - *factory reset*은 `/data`를 비우면 끝납니다.
 - *업데이트*는 squashfs 파일 하나만 교체합니다. 보통 A/B 슬롯으로 묶습니다.
 - log·config 변경은 자유롭게 가능합니다.
@@ -315,7 +315,7 @@ initramfs는 *부팅 전*에 전체가 RAM에 펼쳐집니다. 30MB가 넘어가
 
 - initramfs는 *RAM에 사는 rootfs*입니다. 작은 시스템·복구 환경에 적합합니다.
 - cpio는 initramfs의 *재료*입니다. 외부 initramfs 흐름에서 쓰입니다.
-- squashfs는 *read-only 압축*입니다. 크기 40~60% 절감 + 전원 끊김 면역의 두 이득을 동시에 줍니다.
+- squashfs는 *read-only 압축*입니다. 저장 매체와 내용에 따라 크기 절감률이 달라지며, 서명 검증은 별도로 설계해야 합니다.
 - ext4는 *쓰기 가능*하지만 *application 수준의 partial write* 위험은 그대로입니다.
 - **production 표준 패턴**: squashfs base + overlayfs + 별도 data 파티션.
 - 한 빌드에서 여러 포맷을 동시에 생성할 수 있습니다. 목적별로 골라 deploy합니다.

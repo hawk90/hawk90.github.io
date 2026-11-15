@@ -155,7 +155,7 @@ $(eval $(generic-package))
 | **autotools-package** | `./configure && make` (GNU autotools) | `$(eval $(autotools-package))` |
 | **cmake-package** | `cmake -B build && cmake --build build` | `$(eval $(cmake-package))` |
 | **meson-package** | `meson setup build && ninja -C build` | `$(eval $(meson-package))` |
-| **python-package** | Python `setup.py` / pyproject | `$(eval $(python-package))` |
+| **python-package** | Python 패키징 backend (예: setuptools, flit) | `$(eval $(python-package))` |
 | **kconfig-package** | 자체 Kconfig 가진 패키지 (busybox, linux) | `$(eval $(kconfig-package))` |
 
 대부분의 *오픈소스 라이브러리*는 autotools나 cmake입니다. 사내 application은 generic-package로 시작하는 경우가 많습니다. 각각 자세히 봅니다.
@@ -274,13 +274,13 @@ PYTHON_MYTOOL_SOURCE = mytool-$(PYTHON_MYTOOL_VERSION).tar.gz
 PYTHON_MYTOOL_SITE = https://example.com/mytool
 PYTHON_MYTOOL_LICENSE = Apache-2.0
 PYTHON_MYTOOL_LICENSE_FILES = LICENSE
-PYTHON_MYTOOL_SETUP_TYPE = pyproject
+PYTHON_MYTOOL_SETUP_TYPE = flit
 PYTHON_MYTOOL_DEPENDENCIES = host-python-flit-core
 
 $(eval $(python-package))
 ```
 
-`<NAME>_SETUP_TYPE`이 `setuptools` / `flit` / `pyproject` / `distutils` 중 하나입니다. 각각 *어떤 도구로* 빌드할지를 가립니다.
+이 예에서는 `<NAME>_SETUP_TYPE = flit`으로 backend를 명시합니다. 지원되는 값은 대상 Buildroot 릴리스의 `package/pkg-python.mk`를 확인하세요. `pyproject`는 설정 파일 형식이지 이 변수에 넣을 backend 이름이 아닙니다.
 
 ## host- prefix — 호스트용 패키지
 

@@ -73,7 +73,7 @@ PR마다 30분씩 빌드를 반복하면 한 달이면 *팀 전체에서 수십 
 | `system/skeleton/` | `recipes-core/base-files/` 안의 파일 | 기본 rootfs 골격 |
 | `make sdk` | `bitbake -c populate_sdk` | SDK 빌드 |
 | `output/images/rootfs.ext4` | `tmp/deploy/images/<machine>/<image>.ext4` | 산출물 |
-| `make <pkg>-rebuild` | `bitbake -c compile -f <recipe>` | 강제 재빌드 |
+| `make <pkg>-rebuild` | `bitbake -c compile -f <recipe>` | 비슷한 목적의 재빌드 명령이며 단계와 설치 동작은 동일하지 않음 |
 | `dl/` cache | `downloads/` + `sstate-cache/` | 다운로드와 sstate |
 | `BR2_TOOLCHAIN_EXTERNAL` | `TCMODE = "external-..."` | 외부 toolchain |
 
@@ -133,7 +133,7 @@ S = "${TOPDIR}/../buildroot"
 do_compile() {
     cd ${S}
     make ${BUILDROOT_DEFCONFIG}
-    make -j${BB_NUMBER_THREADS}
+    make
 }
 
 do_install() {
@@ -313,9 +313,9 @@ Ch 14에서 다룬 Buildroot의 `ccache + per-package directories`로 일부 격
 | 부 | 장 | 다룬 것 |
 |---|---|---|
 | **I. 기초** | Ch 1 ~ 5 | 철학, 디렉터리, Kconfig, 첫 빌드, 패키지 그래프 |
-| **II. 구성 요소** | Ch 6 ~ 10 | rootfs overlay, post-build·post-image, init system, networking, 실 보드 |
-| **III. 커스터마이제이션** | Ch 11 ~ 15 | toolchain, kernel, device tree, BR2_EXTERNAL, caching |
-| **IV. 운영** | Ch 16 ~ 19 | release branching, SDK, OTA·secure boot, CI 통합 |
+| **II. 구성 요소** | Ch 6 ~ 10 | BR2_EXTERNAL, 보드 설정·overlay, 파일시스템, 패키지, 실 보드 |
+| **III. 커스터마이제이션** | Ch 11 ~ 15 | toolchain, kernel, U-Boot, caching, post-build·post-image |
+| **IV. 운영** | Ch 16 ~ 19 | OTA, SDK, security·CVE, CI 통합 |
 | **V. 미래** | Ch 20 | Yocto 이전 결정 |
 
 이 시리즈를 졸업한 독자가 다음에 자연스럽게 향할 곳이 있습니다.

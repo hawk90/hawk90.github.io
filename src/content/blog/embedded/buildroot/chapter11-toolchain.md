@@ -144,14 +144,14 @@ BR2_TOOLCHAIN_EXTERNAL_ARM_AARCH64=y
 
 ARM 보드의 *공식 reference 환경*과 일치시킬 때 선택.
 
-### Custom external — vendor SDK 그대로
+### Custom external — 지원되는 toolchain만 가져오기
 
-NXP·TI·Xilinx 등 SoC vendor가 *자체 toolchain*을 배포하는 경우 그대로 가져와 씁니다.
+NXP·TI·Xilinx 등 SoC vendor가 toolchain을 배포하더라도 SDK 전체를 그대로 가져오면 안 됩니다. Buildroot 매뉴얼은 OpenEmbedded/Yocto SDK의 사전 빌드 라이브러리 구성이 Buildroot external toolchain 요건과 맞지 않아 직접 import를 지원하지 않는다고 설명합니다. 순수 cross toolchain만 분리해 사용할 때도 아래 요건을 실제 구성과 함께 확인하세요.
 
 ```text
 BR2_TOOLCHAIN_EXTERNAL_CUSTOM=y
-BR2_TOOLCHAIN_EXTERNAL_PATH="/opt/nxp/imx-toolchain/aarch64-poky-linux"
-BR2_TOOLCHAIN_EXTERNAL_PREFIX="aarch64-poky-linux"
+BR2_TOOLCHAIN_EXTERNAL_PATH="/opt/nxp/cross-toolchain"
+BR2_TOOLCHAIN_EXTERNAL_PREFIX="aarch64-linux-gnu"
 BR2_TOOLCHAIN_EXTERNAL_HEADERS_5_15=y
 BR2_TOOLCHAIN_EXTERNAL_GCC_12=y
 BR2_TOOLCHAIN_EXTERNAL_GLIBC=y

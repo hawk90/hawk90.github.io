@@ -189,7 +189,7 @@ fs/ext2/
 
 ![output 디렉터리 4구역](/images/blog/buildroot/diagrams/chapter02-output-layout.svg)
 
-빌드를 처음부터 다시 시작하고 싶을 때는 `make clean`이 *target만* 지우고, `output/host/`(toolchain)는 남깁니다. 정말 깨끗하게는 `rm -rf output/` 또는 `make distclean`을 씁니다.
+`make clean`은 `output/build/`, `output/host/`, `output/staging/`, `output/target/`, `output/images/` 등 빌드 산출물을 지웁니다. `make distclean`은 여기에 설정 파일도 제거합니다. ccache를 켰다면 clean/distclean은 별도 ccache 디렉터리를 비우지 않습니다.
 
 ## dl/ — 다운로드 캐시
 

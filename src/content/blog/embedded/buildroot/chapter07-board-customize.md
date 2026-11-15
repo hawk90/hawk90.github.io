@@ -112,8 +112,7 @@ set -e
 
 TARGET_DIR="$1"
 
-# 1. Build-time stamp
-date +"%Y-%m-%d %H:%M:%S" > "$TARGET_DIR/etc/build-date"
+# 1. Record the pinned source revision; avoid wall-clock timestamps in the image.
 git -C "$BR2_EXTERNAL_ACME_PATH" rev-parse --short HEAD \
     > "$TARGET_DIR/etc/build-revision" 2>/dev/null || echo "unknown" \
     > "$TARGET_DIR/etc/build-revision"
@@ -139,7 +138,7 @@ chmod 1777 "$TARGET_DIR/tmp"
 
 - *정적*이고 *그대로 복사*하면 되는 파일 → overlay.
 - 빌드 시점에 *값을 채워야* 하는 파일 → post-build.
-- *권한 조정*은 post-build에서. overlay에서 mode를 강제할 방법이 없습니다.
+- overlay 파일의 mode는 저장소에 기록된 값을 확인합니다. target UID/GID·device metadata를 강제해야 하면 device table 또는 fakeroot 단계에서 선언합니다.
 - *기존 파일 삭제*는 post-build에서. overlay는 삭제를 표현할 수 없습니다.
 
 ### Owner/Permission 표 — device table
@@ -198,9 +197,8 @@ BINARIES_DIR="$1"
 BOARD_NAME="$2"
 
 GENIMAGE_CFG="$BR2_EXTERNAL_ACME_PATH/board/acme/edge/genimage.cfg"
-GENIMAGE_TMP="$BINARIES_DIR/genimage.tmp"
-
-rm -rf "$GENIMAGE_TMP"
+GENIMAGE_TMP="$(mktemp -d "$BINARIES_DIR/genimage.tmp.XXXXXX")"
+trap 'rm -rf -- "$GENIMAGE_TMP"' EXIT HUP INT TERM
 
 genimage \
     --rootpath "$TARGET_DIR" \
@@ -332,7 +330,7 @@ post-build·post-image도 매 `make`마다 실행됩니다. 멱등(idempotent)�
 ## 정리
 
 - 세 hook은 *어떤 시점*에 *어떤 대상*을 수정하는지에 따라 구분됩니다.
-- `BR2_ROOTFS_OVERLAY`는 정적 파일 트리 복사. 권한·삭제는 표현 불가.
+- `BR2_ROOTFS_OVERLAY`는 정적 파일 트리 복사. 파일 mode는 보존 여부를 확인하고, target UID/GID·device node는 device table로 지정합니다. 기존 경로 삭제는 post-build에서 처리합니다.
 - `BR2_ROOTFS_POST_BUILD_SCRIPT`는 `$(TARGET_DIR)` 마지막 수정. 빌드 정보 주입, 권한 조정, 파일 삭제.
 - `BR2_ROOTFS_POST_IMAGE_SCRIPT`는 `output/images/`에서 flash 이미지 조립. `genimage`가 표준 도구.
 - 권한·SUID·디바이스 노드는 `BR2_ROOTFS_DEVICE_TABLE`로 일괄 관리합니다.
