@@ -73,9 +73,9 @@ binman이 남긴 `imx-boot.map`은 `flash.bin` 안의 두 조각을 보여 줍�
 
 ```text
 ImagePos    Offset      Size  Name
-00000000  00000000  0010bbf0  imx-boot
+00000000  00000000  001090a0  imx-boot
 00000000   00000000  00027600  spl
-00057c00   00057c00  000b3ff0  uboot
+00057c00   00057c00  000b14a0  uboot
 ```
 
 `u-boot.itb`(TF-A와 U-Boot proper를 담은 FIT)는 `flash.bin`의 0x57C00에 있습니다(`arch/arm/dts/imx8mm-u-boot.dtsi:201`). 카드 기준으로는 33 KiB(0x8400) + 0x57C00 = 0x60000바이트이고, 512바이트 섹터로 0x300입니다. 빌드된 `.config`의 `CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR=0x300`과 같습니다. ROM이 33 KiB에서 SPL을 찾듯, SPL은 섹터 0x300에서 FIT를 찾습니다. 두 숫자 중 하나만 바꾸면 SPL까지는 뜨고 U-Boot proper를 못 찾는 보드가 됩니다.
