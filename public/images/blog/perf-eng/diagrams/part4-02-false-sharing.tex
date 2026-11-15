@@ -16,20 +16,20 @@
 ]
 
 % Title
-\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {False Sharing — 다른 변수, 같은 64-byte line};
+\node[font=\sffamily\bfseries\small, text=inkc] at (0, 5.6) {False Sharing — 64-byte line을 가정한 예};
 
 % Core 0 (left) and Core 1 (right)
 \node[corebox] (c0) at (-6, 4.2) {Core 0\\[2pt] writes \texttt{a}};
 \node[corebox] (c1) at ( 6, 4.2) {Core 1\\[2pt] writes \texttt{b}};
 
 % Cache on each core — label outside the box
-\node[font=\sffamily\bfseries\footnotesize, text=inkc] at (-6, 3.0) {L1 Cache (Core 0)};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (-8.9, 3.25) {L1 Cache (Core 0)};
 \node[cachebox] (cache0) at (-6, 1.85) {};
 \node[varA] at (-7.5, 1.85) {a};
 \node[varB] at (-6.0, 1.85) {b};
 \node[blank] at (-4.5, 1.85) {...};
 
-\node[font=\sffamily\bfseries\footnotesize, text=inkc] at ( 6, 3.0) {L1 Cache (Core 1)};
+\node[font=\sffamily\bfseries\footnotesize, text=inkc, anchor=west] at (3.1, 3.25) {L1 Cache (Core 1)};
 \node[cachebox] (cache1) at ( 6, 1.85) {};
 \node[varA] at (4.5, 1.85) {a};
 \node[varB] at (6.0, 1.85) {b};
@@ -39,8 +39,8 @@
 \draw[arr] (c1.south) -- (cache1.north);
 
 % State labels
-\node[font=\sffamily\footnotesize, text=conbord] at (-6, 0.4) {MESI: M $\leftrightarrow$ I 반복};
-\node[font=\sffamily\footnotesize, text=conbord] at ( 6, 0.4) {MESI: I $\leftrightarrow$ M 반복};
+\node[font=\sffamily\footnotesize, text=conbord] at (-6, 0.0) {MESI: M $\leftrightarrow$ I 반복};
+\node[font=\sffamily\footnotesize, text=conbord] at ( 6, 0.0) {MESI: I $\leftrightarrow$ M 반복};
 
 % Coherence traffic — ping pong
 \draw[focus, draw=warnbord, line width=0.9pt, <->] (cache0.east) .. controls (-2, 2.4) and (2, 2.4) .. (cache1.west);
@@ -59,11 +59,11 @@
 % Bottom annotation
 \node[note, anchor=north, text width=160mm, align=left] at (0, -3.0) {
   \textbf{문제}: \texttt{a}와 \texttt{b}는 서로 다른 변수지만 같은 64-byte line에 속함. \\[2pt]
-  Core 0이 \texttt{a}에 write할 때마다 Core 1 line이 invalidate, 다음 \texttt{b} write가 line을 다시 fetch. \\[2pt]
-  \textbf{결과}: 매 write마다 cross-core coherence traffic. 측정 시 10$\sim$100배 slowdown 흔함.
+  서로 다른 field의 동시 접근 중 write가 있으면 ownership 이동과 invalidation이 발생할 수 있음. \\[2pt]
+  \textbf{확인}: 실제 cache protocol, field offset, PMU 표본과 workload 결과를 함께 대조.
 };
 \node[note, anchor=north, fill=okfill, draw=okbord, text width=160mm, align=left] at (0, -5.6) {
-  \textbf{해결}: \texttt{alignas(64)}로 각 변수를 별도 line에 배치. False sharing 사라지고 성능 회복.
+  \textbf{분리 예}: alignment와 원소 stride를 함께 확인. 이 가정의 배치 검증은 성능 실측과 별도.
 };
 
 \end{tikzpicture}

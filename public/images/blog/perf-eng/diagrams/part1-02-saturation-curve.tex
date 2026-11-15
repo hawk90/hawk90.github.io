@@ -44,20 +44,16 @@
   \fill[conbord] (\x, \y) circle (2pt);
 }
 
-% 80% threshold line
+% Example marker only; this is an illustrative curve, not a universal threshold
 \draw[dashed, line width=0.5pt, draw=warnbord] (5.6, 0) -- (5.6, 4.8);
-\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=south west] at (5.7, 3.5) {80\%};
+\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=south west] at (5.7, 3.5) {예시 80\%};
 
-% Safe zone annotation
-\draw[decorate, decoration={brace, amplitude=4pt, raise=2pt}, draw=okbord] (0, 4.6) -- (5.4, 4.6);
-\node[font=\sffamily\footnotesize, text=okbord, anchor=south] at (2.7, 4.9) {안전 영역 (70-80\%)};
-
-% Danger zone annotation
-\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=west] at (6.0, 4.0) {폭증};
+% Illustrative latency-growth annotation
+\node[font=\sffamily\footnotesize\bfseries, text=warnbord, anchor=west] at (6.0, 4.0) {지연 증가};
 
 % Caption
 \node[font=\sffamily\footnotesize, text=mutec, align=center, anchor=north] at (3.5, -0.8) {%
-80\%를 넘으면 queueing latency가 exponential하게 증가};
+대기 시간은 시스템과 workload에 따라 달라집니다. 이 곡선과 80\% 표시는 예시입니다};
 
 \end{tikzpicture}
 \end{document}

@@ -22,7 +22,6 @@
 \node[device] (d1) at (0, 2.5) {Device 1};
 \node[device] (d2) at (0, 1.3) {Device 2};
 \node[device] (dn) at (0, 0.1) {Device N};
-\node[font=\sffamily\footnotesize, text=mutec] at (0, 0.75) {$\vdots$};
 
 % Agents
 \node[agent] (a1) at (2.8, 2.5) {Parca agent};
@@ -42,17 +41,17 @@
 \draw[arr] (dn.east) -- (an.west);
 
 % Connections agent -> collector
-\draw[arr] (a1.east) -- (col.west |- a1.east);
+\draw[arr] (a1.east) -| (col.north);
 \draw[arr] (a2.east) -- (col.west);
-\draw[arr] (an.east) -- (col.west |- an.east);
+\draw[arr] (an.east) -| (col.south);
 
 % Collector -> alarm
 \draw[arr] (col.east) -- (alarm.west);
 
 % Annotation
 \node[font=\sffamily\scriptsize, text=mutec, anchor=north, align=center, text width=70mm] at (4, -0.8) {
-  \textbf{24/7 sampling, 1\% overhead}\\[2pt]
-  ARM aarch64 binary 제공 — 게이트웨이 급 보드에 배포 가능 (30-50 MB)
+  \textbf{개념적 배포 경로 — 실제 배포 결과 아님}\\[2pt]
+  지원 ISA·kernel·권한·전송량·자원 비용은 target에서 확인
 };
 
 \end{tikzpicture}

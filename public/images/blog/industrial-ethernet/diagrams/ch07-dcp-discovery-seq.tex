@@ -28,7 +28,7 @@
 \draw[msgret]  (dev |- 0,-6.3) -- node[msglabel]{ACK} (sup |- 0,-6.3);
 
 \node[seqnote, anchor=north] at (3.5,-7.2)
-  {DCP는 EtherType 0x8892 위의 frame type 0xFEFE (IP 없이 L2에서 동작)};
+  {EtherType 0x8892: Identify req FEFE / res FEFF; Set FEFD};
 
 \end{tikzpicture}
 \end{document}

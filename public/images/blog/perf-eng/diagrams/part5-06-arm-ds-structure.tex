@@ -15,14 +15,14 @@
 
 % Main container (ARM DS)
 \node[rectangle, rounded corners=4pt, draw=absbord, fill=absfill!30,
-      minimum width=55mm, minimum height=52mm, line width=0.6pt] (ds) at (0, 1.5) {};
+      minimum width=55mm, minimum height=56mm, line width=0.6pt] (ds) at (0, 1.4) {};
 \node[font=\sffamily\bfseries\footnotesize, text=absbord, anchor=north] at (0, 4.0) {ARM DS};
 
 % Components - increased vertical spacing
-\node[comp, draw=impbord, fill=impfill] (ds5) at (0, 3.0) {DS-5 (legacy, 통합됨)};
+\node[comp, draw=impbord, fill=impfill] (ds5) at (0, 3.0) {Debugger / build tools};
 \node[comp, draw=clibord, fill=clifill] (stream) at (0, 1.7) {Streamline Performance Analyzer};
 \node[comp, draw=hibord, fill=hifill] (probe) at (0, 0.4) {DSTREAM / DSTREAM-PT probe};
-\node[comp, draw=prpbord, fill=prpfill] (debug) at (0, -0.9) {Cortex-A/R/M 전 코어 디버깅};
+\node[comp, draw=prpbord, fill=prpfill] (debug) at (0, -0.9) {지원 core / target 조합 확인};
 
 % Tree structure lines (left side)
 \draw[draw=edgesc, line width=0.4pt] (-2.8, 3.0) -- (-2.6, 3.0);

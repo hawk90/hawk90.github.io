@@ -8,7 +8,7 @@
 \input{../../_design.tex}
 \begin{tikzpicture}[blog]
 
-\node[font=\sffamily\bfseries\large] at (5,3.6) {ESP32-C3 GPIO Matrix — 256 $\times$ 256 Crossbar};
+\node[font=\sffamily\bfseries\large] at (5,3.6) {ESP32-C3 GPIO Matrix — Signal Routing};
 
 % Left — peripheral signals
 \node[abs, minimum width=28mm, minimum height=8mm] (u0t) at (0, 2.4) {\texttt{UART0\_TX}};
@@ -20,7 +20,7 @@
 
 % Matrix center
 \node[hi, minimum width=50mm, minimum height=44mm, align=center] (mat) at (5, 0.5)
-  {\textbf{GPIO Matrix}\\\small (256 $\times$ 256)};
+  {\textbf{GPIO Matrix}\\[2pt]\small (target-specific signal indices)};
 
 % Right — GPIO pins
 \node[con, minimum width=24mm, minimum height=8mm] (g0)  at (10, 2.4) {GPIO 0};
