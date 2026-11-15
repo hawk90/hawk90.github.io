@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-cycle-accurate cosim은 *RTL의 진실*을 보여 주지만 느립니다. Hz~kHz 수준의 시뮬레이션 속도로는 Linux 한 번 boot시키기가 *몇 시간*이 걸리죠. driver의 *상위 레이어*(파일시스템 통합·user-space ioctl·multi-thread workload)를 검증하려면 이보다 *천 배 빠른* 환경이 필요합니다. 그 자리에 **SystemC TLM**(Transaction-Level Modeling)이 들어갑니다.
+cycle-accurate cosim은 signal과 cycle 동작을 관찰할 수 있지만 실행 시간은 설계·host·trace 조건에 따라 달라집니다. Linux boot나 긴 workload를 빠르게 시험하고 싶을 때는 transaction-level 모델이 선택지가 됩니다. 다만 TLM의 속도와 정확도도 모델의 상세도와 workload에 따라 측정해야 합니다. 그 한 방법이 **SystemC TLM**(Transaction-Level Modeling)입니다.
 
 이 장은 SystemC와 TLM 2.0의 핵심 어휘, virtual platform이라는 개념, 그리고 cosim 환경에서 *RTL 영역과 TLM 영역을 섞는* mixed-abstraction 패턴을 다룹니다.
 
@@ -23,7 +23,7 @@ Driver 개발에서 다음 검증 시나리오는 cycle-accurate cosim으로 풀
 - **End-to-end pipeline** — application → user library → ioctl → driver → device
 - **Long-running test** — 24시간 stability, memory leak 검출
 
-cycle-accurate에서는 Linux 한 번 boot에 *수 시간~수일*입니다. TLM은 *transaction*을 단위로 모델링해 같은 환경을 *몇 분 안에* 돌립니다.
+cycle-accurate와 TLM의 실행 시간은 한 숫자로 일반화할 수 없습니다. TLM은 signal 전이를 매 cycle 계산하지 않고 transaction을 단위로 다뤄 상위 소프트웨어 흐름을 빠르게 돌릴 수 있지만, 모델이 생략한 cycle-level 동작은 이 결과로 검증되지 않습니다.
 
 ## SystemC란 무엇인가
 
@@ -69,9 +69,9 @@ SystemC 자체는 cycle-accurate에도 쓰일 수 있지만, *그 진가는 TLM�
 | **LT** (Loosely-Timed) | transaction = 즉시 완료, 명목적 time annotation | 빠름(MHz~GHz 수준) | software 검증, boot |
 | **AT** (Approximately-Timed) | request·response phase 분리, latency 모델링 | 중간 | performance 평가 |
 
-LT는 *기능 정확*하되 *언제 일어났는가*는 명목적입니다. driver가 register를 100개 write하면 100번 호출되지만, 실 시간 진행은 거의 없죠. boot/functional 검증에 충분합니다.
+LT는 transaction 호출을 유지하면서 대기 시간을 `sc_time` annotation으로 표현할 수 있습니다. 실행 시간이 짧아도 모델의 기능 계약만 확인할 수 있으며, 실제 cycle timing이나 성능을 보장하지는 않습니다.
 
-AT는 *latency·throughput*을 어느 정도 보여 줍니다. 실제 cycle은 아니지만 *상대적 지연*은 의미가 있습니다. performance modeling에 적합.
+AT는 request·response phase와 annotation을 사용해 선택한 latency·contention 가정을 표현합니다. 실제 RTL cycle이나 성능과 일치한다고 보려면 별도 상관 검증이 필요합니다.
 
 ### 핵심 어휘
 
@@ -138,6 +138,24 @@ CPU 모델은 보통 *QEMU의 TCG*를 SystemC TLM bridge로 감싸 씁니다. AR
 
 이 환경에서는 driver 검증이 *진짜 Linux* 위에서 일어납니다. `insmod my_driver.ko`가 정상적으로 통하고, `cat /proc/interrupts`로 IRQ를 확인하고, user-space에서 `ioctl`을 호출할 수 있습니다. cycle-accurate가 *아니지만* functional 검증에는 압도적입니다.
 
+## `b_transport` 시간 계약
+
+`b_transport`에 전달되는 `delay`는 initiator와 target 사이의 annotated local time입니다. target은 지연을 annotation에 더하거나, 실제 kernel time을 `wait`로 진행할 수 있습니다. 양쪽 방식을 동시에 쓰면 같은 지연을 두 번 셀 수 있습니다. 다음 예시는 annotation만 사용하는 LT target입니다.
+
+```cpp
+void device_target::b_transport(tlm::tlm_generic_payload &trans, sc_time &delay) {
+  if (!valid_payload(trans)) {
+    trans.set_response_status(tlm::TLM_ADDRESS_ERROR_RESPONSE);
+    return;
+  }
+  access_registers(trans);
+  delay += sc_time(10, SC_NS);  // annotation만 증가
+  trans.set_response_status(tlm::TLM_OK_RESPONSE);
+}
+```
+
+initiator는 자신의 local-time 정책에 따라 annotation을 소비합니다. 간단한 target과 initiator가 모두 annotation을 쓰는지, target이 `wait`하는지 계약을 문서화하고 같은 transaction에서 중복 계상하지 마세요. TLM LRM §8.2.7의 blocking transport 규칙을 기준으로 합니다.
+
 ## Mixed-abstraction — TLM과 RTL 섞기
 
 핵심 패턴: *디바이스 일부*는 RTL로(verilator를 통해), *나머지*는 TLM으로 두는 것.
@@ -197,7 +215,7 @@ NPU/accelerator vendor 사이에서 *Fast Models + 사내 RTL* 조합이 *de fac
 
 ## 흔한 함정
 
-- **`b_transport`의 `delay`** — 인자로 받은 `sc_time delay`를 *증가시킨 후 wait* 해야 정상. 안 그러면 progress 0인 무한 호출.
+- **`b_transport`의 `delay`** — annotation 증가와 kernel `wait`는 서로 다른 시간 모델입니다. 어느 쪽을 소비하는지 initiator/target 계약을 정하고 같은 지연을 중복 적용하지 않습니다.
 - **DMI(Direct Memory Interface)** — RAM 모델에서 빠른 접근을 위한 hint. driver가 DMA로 RAM에 접근할 때 *DMI 허용 영역*과 *MMIO 영역*을 구분해야 함.
 - **endianness** — TLM의 `data_ptr`은 host endian. 디바이스 endian이 다르면 byte swap 명시.
 - **race** — `SC_THREAD` 두 개가 같은 신호에 동시 접근하면 깨짐. `sc_event`로 직렬화.
@@ -208,8 +226,8 @@ NPU/accelerator vendor 사이에서 *Fast Models + 사내 RTL* 조합이 *de fac
 - LT(loosely-timed)는 *기능*, AT(approximately-timed)는 *latency*. 대부분 cosim은 LT.
 - 핵심: `tlm_generic_payload`·`b_transport`·initiator/target socket.
 - **Virtual Platform**은 CPU+RAM+디바이스가 모두 SystemC인 환경. *진짜 Linux*가 boot되고 driver가 `.ko`로 로드됨.
-- **Mixed-abstraction**으로 *중요한 영역은 RTL(Verilator), 나머지는 TLM*. NPU vendor의 일반적 흐름.
-- 산업 표준: Arm Fast Models·Synopsys Platform Architect·QEMU SystemC bridge.
+- **Mixed-abstraction**으로 모델의 목적에 맞춰 일부 경계는 RTL, 나머지는 TLM으로 둡니다. 두 모델의 가정과 교체 시점을 기록합니다.
+- 상용 VP·ISS 제품과 오픈소스 bridge는 제공 범위가 다르므로 실제 지원 문서로 선택합니다.
 - pre-RTL driver dev 5-step: spec → TLM skeleton → VP boot → RTL 교체 → end-to-end.
 
 ## 다음 장 예고

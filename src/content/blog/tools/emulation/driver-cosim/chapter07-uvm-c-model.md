@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-검증 팀은 RTL이 *기대대로* 동작하는지 확인합니다. driver 팀은 RTL이 *driver가 가정한 대로* 동작하는지 확인합니다. 두 팀이 *같은 reference*를 두면 한 번의 수정이 양쪽을 모두 만족시킵니다. 이 single-source-of-truth 패턴이 **UVM C reference model**입니다.
+검증 팀과 driver 팀이 같은 알고리즘을 각각 다시 구현하면 동작 차이가 생길 수 있습니다. C reference를 공유하면 중복 구현을 줄일 수 있지만, 같은 결함을 양쪽에서 놓치는 위험은 독립 golden vector로 따로 점검해야 합니다. 이런 구조를 **UVM C reference model** 패턴으로 살펴봅니다.
 
 이 장은 UVM의 핵심 어휘를 짚고, reference model을 C로 두는 이유, driver와의 공유 패턴, 유지 관리 trade-off까지 다룹니다.
 
@@ -51,28 +51,38 @@ NPU 한 세대를 다시 가정합시다. matrix multiply unit이 들어 있고,
 
 ### C reference 작성
 
-```c
+```c title="matmul_ref.c"
 // matmul_ref.c — 모든 곳에서 공유되는 reference
-#include "matmul_ref.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <limits.h>
+int checked_count(int m, int n, int k, size_t *a_count,
+                  size_t *b_count, size_t *c_count);
 
-void matmul_ref(const int16_t *A, const int16_t *B,
-                int32_t *C, int M, int N, int K) {
-    for (int m = 0; m < M; m++) {
-        for (int n = 0; n < N; n++) {
-            int32_t acc = 0;
-            for (int k = 0; k < K; k++) {
-                acc += (int32_t)A[m*K + k] * (int32_t)B[k*N + n];
+int matmul_ref(const int16_t *A, const int16_t *B,
+               int32_t *C, int M, int N, int K) {
+    size_t a_count, b_count, c_count;
+    if (!A || !B || !C || !checked_count(M, N, K, &a_count, &b_count, &c_count))
+        return -1;
+    (void)a_count; (void)b_count;
+    for (size_t m = 0; m < (size_t)M; m++) {
+        for (size_t n = 0; n < (size_t)N; n++) {
+            int64_t acc = 0;
+            for (size_t k = 0; k < (size_t)K; k++) {
+                acc += (int64_t)A[m*(size_t)K + k] * (int64_t)B[k*(size_t)N + n];
             }
-            C[m*N + n] = acc;
+            if (acc < INT32_MIN || acc > INT32_MAX) return -2;
+            C[m*(size_t)N + n] = (int32_t)acc;
         }
     }
+    return 0;
 }
 ```
 
 ### DPI-C로 UVM에 노출
 
 ```systemverilog
-import "DPI-C" function void matmul_ref(
+import "DPI-C" function int matmul_ref_dpi(
     input  shortint A[],
     input  shortint B[],
     output int      C[],
@@ -80,10 +90,11 @@ import "DPI-C" function void matmul_ref(
 );
 
 class matmul_scoreboard extends uvm_scoreboard;
-  function void compare_output(int A[], int B[], int actual_C[], int M, int N, int K);
+  function void compare_output(shortint A[], shortint B[], int actual_C[], int M, int N, int K);
     int expected_C[];
     expected_C = new[M*N];
-    matmul_ref(A, B, expected_C, M, N, K);
+    if (matmul_ref_dpi(A, B, expected_C, M, N, K) != 0)
+      `uvm_fatal("MATMUL", "reference input invalid or result overflow")
     foreach (actual_C[i]) begin
       if (actual_C[i] !== expected_C[i]) begin
         `uvm_error("MATMUL", $sformatf("mismatch at %0d: got %0d expected %0d",
@@ -94,7 +105,59 @@ class matmul_scoreboard extends uvm_scoreboard;
 endclass
 ```
 
-UVM이 RTL 출력 `actual_C`를 추출하면, *동일 C reference*가 expected를 계산해 비교합니다.
+SV 선언의 open array는 C 쪽에서 raw pointer가 아니라 `svOpenArrayHandle`로 전달됩니다. 따라서 C core의 `const int16_t *` 인자와 바로 연결되지 않습니다. 다음 wrapper는 1D 배열 길이와 차원을 확인하고 simulator가 연속 storage를 제공하는 경우에만 core를 부르는 형태입니다. `svGetArrayPtr`가 NULL을 반환하는 layout을 지원하려면 element-wise copy 경로를 추가해야 합니다.
+
+```c title="matmul-dpi-adapter.c"
+#include "svdpi.h"
+#include <stdint.h>
+#include <stddef.h>
+#include <limits.h>
+int checked_count(int, int, int, size_t *, size_t *, size_t *);
+int matmul_ref(const int16_t *, const int16_t *, int32_t *, int, int, int);
+int matmul_ref_dpi(const svOpenArrayHandle A, const svOpenArrayHandle B,
+                   const svOpenArrayHandle C, int M, int N, int K) {
+    size_t a_count, b_count, c_count;
+    if (!A || !B || !C || !checked_count(M, N, K, &a_count, &b_count, &c_count))
+        return -1;
+    if (a_count > INT_MAX || b_count > INT_MAX || c_count > INT_MAX) return -1;
+    if (svDimensions(A) != 1 || svDimensions(B) != 1 || svDimensions(C) != 1 ||
+        (size_t)svSize(A, 1) != a_count || (size_t)svSize(B, 1) != b_count ||
+        (size_t)svSize(C, 1) != c_count || svLeft(A, 1) != 0 ||
+        svLeft(B, 1) != 0 || svLeft(C, 1) != 0 ||
+        svRight(A, 1) != (int)a_count - 1 || svRight(B, 1) != (int)b_count - 1 ||
+        svRight(C, 1) != (int)c_count - 1)
+        return -1;
+    const int16_t *a = (const int16_t *)svGetArrayPtr(A);
+    const int16_t *b = (const int16_t *)svGetArrayPtr(B);
+    int32_t *c = (int32_t *)svGetArrayPtr(C);
+    if (!a || !b || !c) return -1;
+    return matmul_ref(a, b, c, M, N, K);
+}
+```
+
+실제 wrapper의 API 지원과 contiguous storage 조건은 사용한 simulator의 DPI 문서와 array fixture로 검증합니다.
+
+`M*N`, `M*K`, `K*N` 계산과 accumulator 범위도 검사해야 합니다. 다음 helper는 dimension 곱을 `size_t` overflow 전에 확인합니다.
+
+```c title="checked-count.c"
+#include <stdint.h>
+#include <stddef.h>
+int checked_count(int m, int n, int k, size_t *a_count,
+                  size_t *b_count, size_t *c_count) {
+    if (m <= 0 || n <= 0 || k <= 0 || !a_count || !b_count || !c_count)
+        return 0;
+    if ((size_t)m > SIZE_MAX / (size_t)k ||
+        (size_t)k > SIZE_MAX / (size_t)n ||
+        (size_t)m > SIZE_MAX / (size_t)n)
+        return 0;
+    *a_count = (size_t)m * (size_t)k;
+    *b_count = (size_t)k * (size_t)n;
+    *c_count = (size_t)m * (size_t)n;
+    return 1;
+}
+```
+
+공유 C reference가 expected를 계산해 비교합니다. 다만 양쪽에서 같은 결함을 놓치지 않도록 고정 golden vector나 독립적인 작은 oracle도 둡니다.
 
 ### driver의 software fallback
 
@@ -133,7 +196,7 @@ reference를 *SV class*로 둘 수도 있습니다. 왜 굳이 C인가?
 - **언어 친화도** — driver 팀은 C를 씁니다. SV를 강제하면 진입장벽이 생김.
 - **포팅성** — Python(`ctypes`)·Rust(`extern "C"`)·Go(`cgo`) 모든 곳에서 사용 가능. compiler verifier 등 다양한 도구에 재사용.
 - **성능** — large workload reference 실행이 SV simulator에서보다 빠름.
-- **표준 ABI** — DPI-C 표준이 C 시그니처를 그대로 받음.
+- **명시적 ABI 경계** — DPI open array를 wrapper에서 검사하고 C core용 buffer로 변환.
 
 C++을 쓰면 좋은 경우도 있지만, *공유 헤더*만 plain C로 두고 구현은 C++로 가는 hybrid도 일반적입니다.
 
@@ -211,10 +274,10 @@ src/
 
 ## 정리
 
-- **UVM C reference model**은 검증·driver·compiler가 *동일 algorithm 구현*을 공유하는 패턴.
-- DPI-C로 SV에 노출되고 driver/컴파일러는 직접 link. *single source of truth*.
+- **UVM C reference model**은 검증·driver·compiler가 같은 알고리즘 구현을 공유해 중복을 줄이는 패턴.
+- DPI-C wrapper가 SV array와 C core 사이 ABI 경계를 처리합니다. 공유 reference는 independent golden check와 함께 씁니다.
 - Scoreboard와 reference는 다른 것: scoreboard는 *비교*, reference는 *기대값 계산*.
-- C로 두는 이유: 언어 친화·포팅성·성능·DPI-C 표준 ABI.
+- C로 두는 이유: 언어 친화·포팅성·성능. 배열·정수 범위·소유권은 각 ABI adapter에서 확인합니다.
 - NPU 연산·FEC·crypto·video codec·압축처럼 *알고리즘 자체가 product*인 도메인에 효과적.
 - Coverage feedback에도 활용: reference 안에서 path 기록 → UVM coverage로.
 - 유지 비용: 단일 진실의 책임·인터페이스 동결·버전 분기. 모든 sub-block에 적용하지는 않음.

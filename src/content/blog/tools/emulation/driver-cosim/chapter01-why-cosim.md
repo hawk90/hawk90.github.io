@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-칩이 silicon으로 나오기 전에 그 칩용 driver를 *어떻게 검증하는가*. 이 질문이 이 시리즈의 출발점입니다. NPU·chiplet·SoC 프로젝트에서 driver 팀은 보통 RTL 팀과 *같은 분기 또는 그 다음 분기*에 코드를 내야 하는데, 정작 동작할 silicon은 그로부터 6개월에서 1년 뒤에 도착합니다. 그 사이에 driver를 *어디서* 돌려 보고 *무엇으로* 검증할지가 실전 문제입니다.
+칩이 silicon으로 나오기 전에 그 칩용 driver를 *어떻게 검증하는가*. 이 질문이 이 시리즈의 출발점입니다. NPU·chiplet·SoC 프로젝트에서 driver 팀이 RTL과 병행해 개발해야 하는 시점에는 실행할 silicon이 없을 수 있습니다. 그 사이에 driver를 *어디서* 돌려 보고 *무엇으로* 검증할지가 실전 문제입니다.
 
 이 글은 그 빈 구간을 메우는 도구인 **co-simulation**(cosim)이 왜 필요한지, 다른 방법(QEMU·FPGA prototype·post-silicon test)과 어떻게 다른지를 정리합니다. 이후 챕터들이 다룰 DPI-C·Verilator·CocoTB·SystemC TLM의 *왜*에 해당하는 부분입니다.
 
@@ -28,25 +28,24 @@ driver 코드 자체를 *컴파일*하는 건 쉽습니다. 문제는 *돌려 �
 
 | 단계 | 어디서 돌리나 | 언제 가능한가 | 가성비 |
 |------|----------------|----------------|--------|
-| Post-silicon | 실 chip + 보드 | tape-out 이후 6~12개월 | bug 발견 시 최악 — 칩 다시 굽기 |
+| Post-silicon | 실 chip + 보드 | 사용 가능한 silicon·보드 도착 후 | 수정 경로가 firmware 우회·ECO·재제작 중 무엇인지 확인 |
 | FPGA prototype | Xilinx VCU/U250 등 | RTL 동결 후 합성 가능 시점 | 하드웨어·합성 시간 비쌈, 보드 공유 |
-| Functional model | QEMU·SystemC fast model | RTL과 동시 진행 가능 | 빠름, 그러나 *register-level*에 머무름 |
+| Functional model | QEMU·SystemC fast model | RTL과 동시 진행 가능 | transaction·기능 모델로 상위 stack 검증; 모델 범위는 구현에 따름 |
 
 이 세 가지가 채우지 못하는 *cycle-accurate + driver-integrated* 검증 구간이 cosim의 영역입니다.
 
-## 비용 그래프가 알려주는 것
+## 먼저 검증할 경계와 증거
 
-소프트웨어 산업에서 "버그는 일찍 잡을수록 싸다"는 말은 *완만한* 비용 곡선을 가정합니다. 하드웨어는 다릅니다. tape-out을 기점으로 비용이 단절적으로 뛰어 오릅니다.
+버그 수정 비용은 제품·계약·수정 가능성에 따라 달라집니다. 출처 없는 1배/1000배 비용표 대신 지금 관찰할 수 있는 실패를 각 모델의 책임에 연결합니다.
 
-| 단계에서 버그 발견 | 수정 비용(상대) | 일정 영향 |
-|---------------------|-----------------|----------|
-| RTL simulation | 1× | 분~시간 |
-| Cosim(driver+RTL) | 3× | 시간~일 |
-| FPGA prototype | 30× | 일~주 |
-| Post-silicon | 1,000× | 월~분기 |
-| ECO / metal spin | 10,000× | 분기~년 |
+| 경계 | 주입할 실패 | 남길 관찰 | 이 관찰만으로 알 수 없는 것 |
+| --- | --- | --- | --- |
+| MMIO encoding | 틀린 offset·reserved bit | 요청 trace와 실제 register 변화 | 물리 bus timing·cache ordering |
+| IRQ | 다른 bit가 이미 켜진 동안 새 bit 설정 | cycle별 pending mask와 ISR 순서 | 실제 interrupt controller와 OS 진입 |
+| DMA | 범위 초과·잘못된 descriptor | BFM 응답 오류와 buffer 변화 | IOMMU/cache 일관성·실제 bandwidth |
+| reference | 비대칭 입력·overflow | 독립 golden vector와 오류 정책 | 동일 reference를 공유한 공통 bug |
 
-10,000× 차이가 과장처럼 들리지만, 실제로 SoC 한 lot의 spin 비용은 마스크 수정만으로도 수십만 달러, full re-tape-out이라면 수백만 달러대입니다. 이 격차가 cosim에 시간을 *미리* 투자할 동기를 만듭니다.
+RTL·software·BFM의 revision과 simulator/compiler 옵션을 함께 고정해야 실패를 재현할 수 있습니다. host 단위 검증, RTL simulation, Linux 통합, board 실험은 서로 다른 증거 단계로 기록합니다.
 
 ## Cosim이란 무엇인가
 
@@ -55,7 +54,7 @@ driver 코드 자체를 *컴파일*하는 건 쉽습니다. 문제는 *돌려 �
 - **RTL** — Verilog/SystemVerilog로 기술된 silicon-bound 디자인. cycle accurate.
 - **Software** — driver C 코드, firmware, 또는 그 둘의 일부. host CPU에서 실행.
 
-둘 사이의 다리는 **DPI-C**(Direct Programming Interface, SystemVerilog LRM 표준)와 **VPI**/VHPI 같은 simulator hook입니다. driver의 `writel()` 한 줄이 simulation 안의 register write로 *그대로 도달*하고, RTL이 발생시킨 interrupt가 driver의 ISR을 *직접* 깨우는 식이죠.
+둘 사이의 다리는 **DPI-C**(Direct Programming Interface, SystemVerilog LRM 표준)와 **VPI**/VHPI 같은 simulator hook입니다. 공유 가능한 driver 핵심의 MMIO 추상 함수를 BFM transaction으로 바꾸고, RTL의 interrupt 신호를 harness가 ISR callback에 전달하도록 설계할 수 있습니다. Linux kernel module 자체가 host 프로세스에서 그대로 실행되는 것은 아닙니다.
 
 | 구성 요소 | 역할 |
 |-----------|------|
@@ -65,7 +64,7 @@ driver 코드 자체를 *컴파일*하는 건 쉽습니다. 문제는 *돌려 �
 | IRQ injection thread | RTL의 `irq` pin이 driver thread를 깨움 |
 | Test runner (pytest) | scenario·assertion·waveform 수집 |
 
-이 구성에서 핵심은 **driver와 RTL이 *같은 프로세스 안에서* 함수 호출 한 번 거리에 있다**는 점입니다. 어떤 register write가 어떤 internal signal을 토글했는지가 waveform에 그대로 찍힙니다. 재현 가능한 testbench가 만들어집니다.
+위 in-process 구성에서는 driver 핵심과 RTL 모델이 한 프로세스에서 연결됩니다. 다른 cosim은 IPC·socket·별도 CPU/OS 모델을 사용할 수도 있으므로 같은 프로세스가 cosim 정의의 필수조건은 아닙니다. 어떤 register write가 어떤 internal signal을 토글했는지가 waveform에 그대로 찍힙니다. 재현 가능한 testbench가 만들어집니다.
 
 ## 다른 방법과 어떻게 다른가
 
@@ -78,9 +77,9 @@ QEMU는 *functional model*입니다. 디바이스 모델은 "이 register write�
 | 항목 | QEMU device model | Cosim (RTL + driver) |
 |------|--------------------|----------------------|
 | 정확도 | functional (event 단위) | cycle-accurate |
-| 속도 | 거의 native | 수십~수백 cycle/s |
+| 속도 | CPU/device 모델·workload에 의존 | RTL 크기·trace·compile 옵션·workload에 의존 |
 | 검증 대상 | driver API · OS 통합 · 상위 stack | driver-RTL boundary · timing |
-| 합성 RTL 필요 | 아님 | 필수 |
+| RTL 필요 | device 기능 모델이면 불필요 | RTL을 검증하는 이 구성에서는 필요; 합성 불가능 testbench도 사용 가능 |
 | 가장 잘 잡는 버그 | API 오용 · 자료구조 · concurrency | register encoding · IRQ timing · DMA race |
 
 cosim은 QEMU를 *대체*하지 않습니다. *보완*합니다. QEMU로는 OS 통합·user-space API를 검증하고, cosim으로는 register-level 인터페이스의 cycle-accurate 동작을 검증합니다.
@@ -89,12 +88,12 @@ cosim은 QEMU를 *대체*하지 않습니다. *보완*합니다. QEMU로는 OS �
 
 FPGA prototype은 RTL을 *실제 게이트에 합성*해 보드에서 돌립니다. 속도가 빠르고(MHz 영역) 실 system bandwidth로 test 가능합니다. 그러나 합성 시간이 길고(수십 분~시간), 보드 수가 적어 공유 병목이 생기며, internal signal에 직접 접근하기 어렵습니다.
 
-cosim은 느립니다(Hz~kHz). 대신 **모든 internal signal이 waveform으로 노출**되고, **CI에 그대로 통합**되며, **bitstream 같은 가공 비용 없이** 코드 push마다 돌릴 수 있습니다.
+RTL simulation 속도는 설계와 옵션에 따라 달라집니다. trace 설정으로 선택한 signal을 waveform에 남길 수 있고, **CI에 그대로 통합**되며, **bitstream 같은 가공 비용 없이** 코드 push마다 돌릴 수 있습니다.
 
 | 항목 | FPGA prototype | Cosim |
 |------|-----------------|-------|
-| 속도 | MHz | Hz~kHz |
-| Internal observability | 제한적(probe 설정 필요) | 완전(waveform) |
+| 속도 | mapping·clock constraint·환경에 의존 | RTL·host·옵션·trace에 의존 |
+| Internal observability | probe·capture 설정 필요 | trace/public 설정·최적화·보호된 IP 범위에 의존 |
 | Iteration time | 수십 분(합성) | 분(컴파일) |
 | CI 친화도 | 낮음 | 높음 |
 | 비용 | 보드 + 라이선스 | open-source 가능 |
@@ -105,16 +104,9 @@ cosim은 느립니다(Hz~kHz). 대신 **모든 internal signal이 waveform으로
 
 Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 도착했을 땐 RTL이 *동결*되어 있고, register encoding 같은 근본적 실수는 metal spin 외에 고칠 길이 없습니다. cosim의 목적은 *그 단계에서 발견될 버그를 그 이전으로 끌어오는 것*입니다.
 
-## 누가 쓰나 — 산업에서의 표준 도구화
+## 도입 판단과 유지 비용
 
-10년 전만 해도 cosim은 일부 IP vendor와 대형 fabless의 *내부 도구*였습니다. 지금은 그렇지 않습니다.
-
-- **NPU vendor** — Tenstorrent·Tachyum·SambaNova 등은 cosim 환경을 사내 표준으로 공개·반공개합니다. pre-silicon driver 개발이 곧 제품 일정에 영향을 주기 때문입니다.
-- **Chiplet 생태계** — UCIe·BoW 인터커넥트가 도입되며 *partner IP*와 자사 IP 사이의 boundary를 검증할 필요가 커졌습니다. cosim에 BFM을 끼워 link-level 시나리오를 돌립니다.
-- **Open-source SoC** — Chipyard·OpenTitan·SiFive Freedom은 Verilator cosim을 기본 검증 흐름으로 둡니다.
-- **자동차/항공** — DO-178C/ISO-26262 같은 안전 표준에서 *조기 검증* 항목을 cosim 결과로 채우는 사례가 늘고 있습니다.
-
-처음 도입할 때 흔히 듣는 반론은 "cosim 환경 깔기 자체가 1인-월이다"입니다. 맞는 말이지만, *그 한 번의 투자가 모든 후속 chip generation에 재사용*됩니다. 그래서 한 세대만 보면 의문스럽지만, 로드맵 3년을 보면 명확히 흑자입니다.
+도구 도입은 재사용할 register/transaction 계약, CI 실행 시간, waveform 저장량, protocol checker와 누가 유지할지를 함께 정해야 합니다. 첫 구축 비용이 모든 세대에 그대로 재사용된다고 가정하면 register map·IP·toolchain 변경 비용을 놓칩니다. 안전 요구가 있는 제품도 cosim 결과만으로 특정 표준 인증을 충족했다고 결론내리지 않고 적용한 검증 목표와 도구 근거를 따로 남깁니다.
 
 ## 시리즈 로드맵
 
@@ -136,19 +128,24 @@ Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 도
 ## 정리
 
 - 칩 silicon 도착 *전*에 driver를 어디서 검증할지가 실전 문제고, **cosim**이 그 빈 구간을 메우는 도구입니다.
-- 버그 수정 비용은 단계마다 단절적으로 뛰어 오릅니다(1× → 1,000×). cosim은 그 비탈을 거꾸로 올라갑니다.
-- cosim은 *driver C 코드와 RTL을 같은 프로세스에 결합*해 cycle-accurate 검증을 만듭니다. 다리는 DPI-C·VPI.
+- 비용 배수 대신 MMIO·IRQ·DMA·reference의 주입 실패와 관찰 가능한 증거를 계획합니다.
+- 이 시리즈의 in-process 구성은 driver 핵심과 RTL을 BFM/DPI로 연결하며, OS·board 계약은 별도 검증합니다.
 - QEMU(functional)·FPGA prototype(가속)과 *대체* 관계가 아닌 *보완* 관계. 각자가 잡는 버그 종류가 다릅니다.
-- NPU·chiplet·open-source SoC에서 이미 표준 도구로 자리잡았고, 안전 표준에서도 조기 검증 자료로 인용되기 시작했습니다.
-- 도입 비용은 1회성이고, 이후 모든 chip generation에 재사용됩니다.
+- 선택한 모델의 관찰 범위와 생략한 실제 hardware 동작을 함께 기록합니다.
+- 구축 뒤에도 IP·register·simulator·CI 변경에 따른 유지 비용을 계산합니다.
 
 ## 다음 장 예고
 
 다음 장에서는 cosim의 *언어*에 해당하는 **SystemVerilog DPI-C**를 다룹니다. import/export 선언, data type 매핑, context vs pure function의 의미, simulator별 차이까지. driver C 코드가 RTL과 어떻게 손을 잡는지를 가장 낮은 층에서 봅니다.
 
+## 1차 자료와 확인 범위
+
+- [Verilator 모델 연결](https://verilator.org/guide/latest/connecting.html) — host harness와 RTL model 경계
+- [cocotb 2.0 timing model](https://docs.cocotb.org/en/v2.0.0/timing_model.html) — simulator scheduling과 관찰 시점
+
+2026-10-22 확인은 위 문서와 시리즈 예제의 계약 검토입니다. 이 도입 글에서 실제 RTL·Linux·board 실행이나 도입 비용을 측정하지 않았습니다.
+
 ## 관련 항목
 
 - [Ch 2: SystemVerilog DPI-C 기초](/blog/tools/emulation/driver-cosim/chapter02-dpi-c-basics)
-- QEMU Fake Device Driver — functional 모델로 driver 개발
-- FPGA Driver via QEMU+VFIO — QEMU와 실 FPGA를 4-step으로 잇기
-- CXL 4.0 Spec Full Review — chiplet 인터커넥트의 검증 시나리오
+- [Ch 8: 통합 검증 경계](/blog/tools/emulation/driver-cosim/chapter08-end-to-end) — host 계약과 RTL·OS 검증의 구분

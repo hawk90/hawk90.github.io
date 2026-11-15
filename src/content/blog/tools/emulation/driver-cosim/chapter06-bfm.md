@@ -28,13 +28,13 @@ writel(0xDEADBEEF, dev->regs + REG_CTRL);
 2. `WVALID=1`, `WDATA=0xDEADBEEF`, `WSTRB=0xF`, `WREADY=1`을 기다림
 3. `BVALID=1`을 기다리고 `BREADY=1`로 ack
 
-이 12줄짜리 handshake를 *driver 호출 한 건마다* 작성하는 건 비현실적입니다. BFM은 이 시퀀스를 *함수 하나*로 캡슐화합니다.
+AXI4-Lite의 AW와 W는 별도 채널입니다. 주소와 data handshake는 서로 다른 cycle에 끝날 수 있으므로 BFM은 두 완료 상태를 각각 기억해야 합니다. 응답을 받기 전까지 BFM이 이 상태를 보존하면 driver 호출 한 건으로 캡슐화할 수 있습니다.
 
 ```c
 axi_master_bfm_write(0x1000, 0xDEADBEEF);
 ```
 
-이 한 줄이 안에서 AXI handshake 전체를 처리합니다. driver와 RTL 사이의 의미 거리가 *대폭* 줄어듭니다.
+이 한 줄이 내부에서 AXI handshake를 처리합니다. AWREADY와 WREADY가 동시에 올라오는 경우만 가정하지 않고 각 채널의 handshake를 따로 처리해야 합니다.
 
 ## BFM의 종류
 
@@ -72,47 +72,80 @@ module axi_lite_master_bfm(
   export "DPI-C" task bfm_write;
   export "DPI-C" task bfm_read;
 
-  task automatic bfm_write(input int addr, input int data);
-    @(posedge clk);
-    awaddr  <= addr; awvalid <= 1;
-    wdata   <= data; wstrb   <= 4'hF; wvalid <= 1;
-    bready  <= 1;
-    @(posedge clk iff (awready && wready));
-    awvalid <= 0; wvalid <= 0;
-    @(posedge clk iff bvalid);
-    bready  <= 0;
+  task automatic bfm_write(input int unsigned addr, input int unsigned data,
+                           input int timeout_cycles);
+    bit aw_done, w_done;
+    int waited;
+    aw_done = 0; w_done = 0;
+    @(negedge clk);
+    awaddr = addr; awvalid = 1;
+    wdata = data; wstrb = 4'hF; wvalid = 1;
+    bready = 1;
+    waited = 0;
+    while ((!aw_done || !w_done) && waited < timeout_cycles) begin
+      @(posedge clk);
+      if (awvalid && awready) aw_done = 1;
+      if (wvalid && wready) w_done = 1;
+      waited++;
+      @(negedge clk);
+      if (aw_done) awvalid = 0;
+      if (w_done) wvalid = 0;
+    end
+    if (!aw_done || !w_done) $fatal(1, "AXI write address/data timeout");
+    waited = 0;
+    while (!bvalid && waited < timeout_cycles) begin
+      @(posedge clk);
+      waited++;
+    end
+    if (!bvalid) $fatal(1, "AXI write response timeout");
     if (bresp != 2'b00) $error("AXI write error resp=%h", bresp);
+    @(negedge clk);
+    bready = 0;
   endtask
 
-  task automatic bfm_read(input int addr, output int data);
-    @(posedge clk);
-    araddr  <= addr; arvalid <= 1;
-    rready  <= 1;
-    @(posedge clk iff arready);
-    arvalid <= 0;
-    @(posedge clk iff rvalid);
-    data    = rdata;
-    rready  <= 0;
+  task automatic bfm_read(input int unsigned addr, output int unsigned data,
+                          input int timeout_cycles);
+    int waited;
+    bit ar_done, r_done;
+    @(negedge clk);
+    araddr = addr; arvalid = 1; rready = 1;
+    waited = 0; ar_done = 0;
+    while (!ar_done && waited < timeout_cycles) begin
+      @(posedge clk);
+      if (arvalid && arready) ar_done = 1;
+      waited++;
+    end
+    if (!ar_done) $fatal(1, "AXI read address timeout");
+    @(negedge clk); arvalid = 0;
+    waited = 0; r_done = 0;
+    while (!r_done && waited < timeout_cycles) begin
+      @(posedge clk);
+      if (rvalid && rready) begin data = rdata; r_done = 1; end
+      waited++;
+    end
+    if (!r_done) $fatal(1, "AXI read response timeout");
+    @(negedge clk); rready = 0;
     if (rresp != 2'b00) $error("AXI read error resp=%h", rresp);
   endtask
 endmodule
 ```
 
-C 쪽에서는 같은 시그니처로 부릅니다.
+C helper의 호출 계약을 보여 주는 조각입니다. export된 task는 임의의 C thread에서 부를 수 있는 일반 함수가 아닙니다. caller가 SystemVerilog context 안에 있어야 하므로, 예를 들면 simulator가 호출한 DPI `context` 경로에서 실행합니다. Python coroutine이나 별도 host thread에서는 요청 queue와 simulator-owned coroutine으로 연결합니다.
 
 ```c
 // driver_harness.c
-extern void bfm_write(int addr, int data);
-extern void bfm_read(int addr, int *data);
+#include <stdint.h>
+extern void bfm_write(uint32_t addr, uint32_t data, int timeout_cycles);
+extern void bfm_read(uint32_t addr, uint32_t *data, int timeout_cycles);
 
 uint32_t my_driver_read(uint32_t offset) {
-    int val;
-    bfm_read(offset, &val);
-    return (uint32_t)val;
+    uint32_t val;
+    bfm_read(offset, &val, 1000);
+    return val;
 }
 
 void my_driver_write(uint32_t offset, uint32_t data) {
-    bfm_write(offset, (int)data);
+    bfm_write(offset, data, 1000);
 }
 ```
 
@@ -150,7 +183,7 @@ uint32_t bfm_slave_handle_ar(int id, uint32_t addr) {
 }
 ```
 
-이 함수들이 SV 쪽 AXI Slave BFM이 신호 토글마다 호출하는 callback입니다. driver가 DMA descriptor를 셋업하고 RTL이 메모리 fetch를 시작하면, *우리 C 코드의 fake_ram*에서 data가 흘러나옵니다.
+이 스케치는 burst ID·주소 범위·burst 길이·WSTRB·unaligned 접근·동시 outstanding transaction을 처리하지 않습니다. 여러 transaction을 허용하려면 ID별 상태가 필요하고, 실제 AXI 검증에는 독립 채널을 추적하는 protocol checker와 simulator 실행을 추가합니다. 위 코드를 완전한 AXI RAM으로 사용하지 않습니다.
 
 ## Monitor BFM — 위반을 잡다
 
@@ -186,10 +219,10 @@ cosim 환경에서 driver를 *얼마나 진짜처럼* 만들지가 설계 결정
 | 단계 | driver 변형 | 장점 | 단점 |
 |------|--------------|------|------|
 | A. 직접 호출 | `my_driver_write(offset, val)` 내부에서 BFM 호출 | 단순 | driver 코드 변경 필요 |
-| B. mmio 추상 | `writel`을 LD_PRELOAD로 가로채 BFM 호출로 redirect | driver 무변경 | preload 셋업 |
-| C. 가상 page mapping | `mmap`된 가상 페이지의 write가 SIGSEGV → handler에서 BFM 호출 | driver 무변경, address arithmetic 자연 | 셋업 복잡 |
+| B. host MMIO shim | 명시적 함수 포인터나 링크 시 대체 symbol로 요청 queue에 전달 | kernel 종속부 분리 | shim과 비동기 완료 계약 필요 |
+| C. 가상 page mapping | 보호된 페이지 접근을 fault handler에서 포착 | 일부 legacy 코드를 연결 가능 | signal 안전성·메모리 모델·재진입 위험이 커서 제한된 harness에서만 검토 |
 
-대부분 *A → C* 방향으로 발전합니다. A로 시작해 검증 자동화가 익숙해지면 C로 옮기는 흐름.
+구현은 작은 MMIO shim으로 시작해 driver 수정 범위와 시뮬레이터 계약을 확인합니다. fault 기반 우회는 signal handler의 안전성과 simulator scheduling을 별도로 검증할 때만 선택합니다.
 
 ## Protocol 별 BFM 라이브러리
 
@@ -204,7 +237,7 @@ cosim 환경에서 driver를 *얼마나 진짜처럼* 만들지가 설계 결정
 | UART | cocotbext-uart | RX/TX simple |
 | AMBA UVM-AXI | Cadence/Synopsys | 상용 UVM BFM |
 
-상업 영역에서는 UVM-AXI 또는 vendor compliance BFM이 표준. open-source 영역에서는 cocotbext-* 시리즈가 사실상 표준.
+선택한 BFM이 지원하는 AXI revision·channel·burst·assertion 범위를 확인하고 필요한 기능을 직접 검증합니다.
 
 ## Timing checker
 
@@ -256,7 +289,7 @@ C BFM과 Python BFM은 *같은 protocol* 같은 *transaction abstraction*을 다
 - Slave BFM은 *fake RAM* 등 응답 자원을 같이 제공. DMA 검증의 핵심.
 - Monitor BFM은 *protocol assertion + transaction log*. 위반을 cycle 단위로 잡음.
 - driver-BFM 결합은 A(직접 호출) → C(가상 page mapping)로 점진적 진화. 대부분은 A로 충분.
-- open-source: cocotbext-axi/pcie/eth가 사실상 표준. 상용: UVM-AXI.
+- BFM 선택은 protocol revision, channel coverage, assertion 구성, simulator 지원, 유지 비용을 기준으로 합니다.
 - Protocol assertion + timing checker가 RTL 버그를 *조용히* 통과시키지 않게 막음.
 
 ## 다음 장 예고
