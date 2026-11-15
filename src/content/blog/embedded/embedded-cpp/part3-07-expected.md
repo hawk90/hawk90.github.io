@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"`expected<T, E>`는 value 또는 error를 담습니다."** 예외 없이 풍부한 정보, 체인 가능, zero-cost라는 세 가지를 동시에 챙깁니다.
+> **"`expected<T, E>`는 value 또는 error를 담습니다."** 예외 없이 풍부한 정보, 체인 가능성을 제공합니다. 객체 크기와 호출 비용은 T·E·ABI·최적화로 확인합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -57,13 +57,13 @@ std::expected<int, Error> success() {
 
 // 실패
 std::expected<int, Error> failure() {
-    return std::unexpected(Error::SomeError);
+    return std::unexpected(Error::DivideByZero);
 }
 
 // 결과 확인
 auto r = some_function();
 if (r) {                    // 또는 r.has_value()
-    int value = *r;         // 또는 r.value()
+    int value = *r;         // 성공 확인 후 접근; value()는 실패 시 예외
 } else {
     Error e = r.error();
 }
@@ -83,38 +83,28 @@ sizeof(std::expected<HugeStruct, ErrorCode>);
 // max(sizeof HugeStruct, sizeof ErrorCode) + 정렬
 ```
 
-heap을 쓰지 않고 stack에 직접 들어가므로 임베디드 친화적입니다.
+expected 자체는 값을 내부에 보관합니다. 저장 기간은 expected 객체의 선언 위치에 따르고, T나 E의 생성·복사 자체는 heap을 사용할 수 있습니다.
 
-## 가용성 — toolchain 확인
+## 가용성 — 표준 라이브러리까지 확인
 
-| 컴파일러 | `std::expected` |
-| --- | --- |
-| GCC 12+ | OK (`<expected>` 헤더) |
-| Clang 16+ | OK |
-| MSVC 19.33+ | OK |
-| ARM Compiler 6 | 아직 미지원 (2026) |
-| IAR | 아직 미지원 |
-
-미지원 환경에서는 `tl::expected` 백포트를 씁니다. C++17부터 사용할 수 있습니다.
-
-```bash
-# Conan 또는 직접 download
-# https://github.com/TartanLlama/expected
-```
+컴파일러 버전만으로 가용성을 판단할 수 없습니다. 언어 모드와 libstdc++·libc++·MSVC STL의 버전을 함께 확인합니다. 다음 기능 매크로는 C++23의 기본 expected와 monadic 확장을 구분하는 기준입니다.
 
 ```cpp
-#include <tl/expected.hpp>
-
-tl::expected<int, Error> divide(int a, int b);
+#include <expected>
+#if !defined(__cpp_lib_expected) || __cpp_lib_expected < 202211L
+#error "expected monadic operations required"
+#endif
 ```
 
-API가 거의 동일합니다. 이후 toolchain이 업데이트되면 간단히 std로 마이그레이션할 수 있습니다.
+미지원 환경에서는 [TartanLlama/expected](https://github.com/TartanLlama/expected)의 C++11/14/17용 구현을 검토할 수 있습니다. release·구성 매크로를 고정하고 std와 API·실패 정책 차이를 확인합니다. 이 장의 실행 예제는 std만 사용하며 tl 라이브러리 성공을 검증했다고 주장하지 않습니다.
 
 ## Monadic operations (C++23)
 
 `std::expected`의 가장 강력한 기능입니다. Rust의 `?` operator처럼 체인을 만들 수 있습니다.
 
 ```cpp
+// 아래 개념 스케치에서는 공통 Error enum과 이 별칭을 정의합니다.
+template<class T, class E = Error> using Result = std::expected<T, E>;
 // 4단계 처리
 auto result = read_register(0x10)
     .and_then([](uint8_t raw) -> Result<float> {
@@ -128,7 +118,7 @@ auto result = read_register(0x10)
     })
     .or_else([](Error e) -> Result<float> {
         if (e == Error::NotReady) return last_known_value;
-        return tl::unexpected(e);
+        return std::unexpected(e);
     });
 ```
 
@@ -141,7 +131,7 @@ auto result = read_register(0x10)
 | `.value_or(default)` | 성공 값 또는 default를 반환합니다 |
 | `.has_value()` | bool로 보유 여부를 반환합니다 |
 
-체인 중 첫 실패에서 short-circuit되며, 이후 step은 실행되지 않습니다.
+실패 뒤 and_then·transform의 성공 콜백은 건너뜁니다. or_else·transform_error는 실패 시 호출되며 or_else가 복구하면 뒤의 성공 연산이 다시 실행될 수 있습니다. and_then은 동일 에러 타입, or_else는 동일 값 타입을 유지해야 합니다.
 
 ## 임베디드 — Driver chain
 
@@ -207,6 +197,7 @@ Result<Data, HighError> high_level_read() {
             case LowError::BusTimeout: return HighError::CommunicationFailed;
             case LowError::ChecksumFail: return HighError::DataCorrupted;
         }
+        return HighError::CommunicationFailed;
     });
 }
 ```
@@ -234,7 +225,7 @@ if (t_and_p) {
 }
 ```
 
-어느 한쪽이 실패하면 전체가 실패합니다. 여러 소스를 결합할 때 유용합니다.
+어느 한쪽이 실패하면 전체가 실패하며 양쪽 실패 시 a의 에러를 선택합니다. 단, read_temp()와 read_pressure()는 combine 호출 전에 둘 다 실행되고 인자 평가 순서는 지정되지 않습니다. 실패하면 두 번째 읽기 자체를 건너뛰려면 and_then을 사용합니다. 위 복사 기반 버전은 copyable 값에 한정됩니다.
 
 ## Move semantics — 큰 객체
 
@@ -258,7 +249,7 @@ HugeData d = std::move(*r);   // owner 이전
 auto r = read();
 auto v = r.value();   // r이 error면 std::bad_expected_access throw
 ```
-throw는 예외를 켠 환경에서만 발생하며, `-fno-exceptions`에서는 abort 또는 UB로 떨어집니다. 항상 `if (r)`로 먼저 확인합니다.
+표준의 value() 실패 동작은 bad_expected_access입니다. 예외 비활성 확장의 동작은 라이브러리별로 확인해야 합니다. *r·r.error()도 해당 상태라는 전제조건이 있으므로 항상 상태를 먼저 검사합니다.
 
 ### 2. Implicit conversion 함정
 ```cpp
@@ -278,7 +269,7 @@ if (r == true) { /* */ }   // 직관에 어긋남
 auto r = risky();
 proceed();   // r 확인 안 함
 ```
-`[[nodiscard]]`를 활용합니다(expected는 기본 nodiscard).
+실패 무시를 차단해야 하는 함수에 [[nodiscard]]를 직접 붙이고 -Werror=unused-result로 검증합니다. C++23 expected 타입 자체의 진단을 모든 라이브러리에서 보장한다고 가정하지 않습니다.
 
 ### 5. Result type 인스턴스화 폭증
 ```cpp
@@ -295,41 +286,63 @@ auto r = compute()
 ```
 lambda capture가 큰 객체를 들고 다니면 메모리 부담이 커집니다. references나 작은 객체로 좁힙니다.
 
-## 측정 — `expected` 비용
+## 실행 확인 — 경계값과 short-circuit
 
-같은 함수의 return value 형태를 비교합니다.
+다음 독립 파일은 동일 에러 타입을 유지하는 and_then, 실패 콜백 건너뛰기, transform_error, void 결과를 확인합니다. INT_MIN/-1은 정수 나눗셈의 overflow이므로 나눗셈 전에 차단합니다.
 
-```text
-# bool 반환
-bool f() { return true; }
-sizeof: 1 (or 4 with alignment)
-
-# error code
-ErrorCode f() { return Ok; }
-sizeof: 4
-
-# optional<int>
-std::optional<int> f() { return 42; }
-sizeof: 8
-
-# expected<int, ErrorCode>
-std::expected<int, ErrorCode> f() { return 42; }
-sizeof: 8 (int + ErrorCode + flag, well aligned)
-
-# 호출 어셈블리 (Cortex-M4 -O2)
-모든 형태: 거의 동일 (4-8 instructions)
+```cpp title="expected-check.cpp"
+#include <cassert>
+#include <climits>
+#include <expected>
+#if !defined(__cpp_lib_expected) || __cpp_lib_expected < 202211L
+#error "expected monadic operations required"
+#endif
+enum class Error { DivideByZero, Overflow };
+[[nodiscard]] std::expected<int, Error> divide(int a, int b) {
+    if (b == 0) return std::unexpected(Error::DivideByZero);
+    if (a == INT_MIN && b == -1) return std::unexpected(Error::Overflow);
+    return a / b;
+}
+int main() {
+    assert(divide(10, 2).value_or(-1) == 5);
+    assert(divide(INT_MIN, -1).error() == Error::Overflow);
+    int calls = 0;
+    auto step = [&](int n) -> std::expected<int, Error> { ++calls; return n+1; };
+    auto failure = divide(1, 0).and_then(step);
+    assert(!failure && calls == 0);
+    auto success = divide(8, 2).and_then(step).transform([](int n) { return n*2; });
+    assert(success.value_or(-1) == 10 && calls == 1);
+    auto translated = failure.transform_error([](Error e) { return e == Error::DivideByZero ? 7 : 8; });
+    assert(!translated && translated.error() == 7);
+    std::expected<void, Error> done;
+    assert(done.has_value());
+#ifdef IGNORE_RESULT
+    divide(1, 0);
+#endif
+}
 ```
 
-sizeof는 약간 크고 runtime 비용은 무시할 수준입니다. type 안전성과 monadic chain의 가치가 비용을 크게 웃돕니다.
+```bash
+clang++ -std=c++23 -fno-exceptions -Wall -Wextra -Werror expected-check.cpp -o expected-check
+./expected-check
+```
+
+sizeof는 객체 배치의 크기이며 함수의 기계어 크기가 아닙니다. 원래 제시했던 Cortex-M4 명령 수·고정 바이트 수 비교에는 재현 소스가 없으므로 측정 결과로 사용하지 않습니다.
 
 ## 정리
 
 - `std::expected<T, E>`(C++23)는 value 또는 error를 담으며 Rust의 `Result<T, E>`와 같습니다.
-- `tl::expected` 백포트로 C++17부터 사용할 수 있습니다.
+- tl::expected는 C++11/14/17 환경용 구현이며 고정 버전의 차이를 확인합니다.
 - Monadic operations(`and_then`, `or_else`, `transform`)로 체인을 구성합니다.
-- heap을 쓰지 않고 stack에 직접 두므로 임베디드에 친화적입니다.
+- expected는 값을 내부에 보관하지만 T·E의 내부 할당은 별도로 확인합니다.
 - 에러 변환은 `transform_error`로 계층화합니다.
-- `[[nodiscard]]`가 기본이므로 무시하면 컴파일러가 경고합니다.
+- 중요한 결과를 반환하는 함수에 직접 [[nodiscard]]를 붙여 무시 진단을 검증합니다.
+
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [expected 값·에러·monadic 계약](https://eel.is/c++draft/expected)
 
 ## 관련 항목
 

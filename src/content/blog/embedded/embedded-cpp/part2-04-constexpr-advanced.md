@@ -1,5 +1,5 @@
 ---
-title: "constexpr 고급 활용 — 룩업 테이블·CRC·해시 컴파일 타임 생성"
+title: "constexpr 고급 활용 — 정렬 테이블·검색·해시 컴파일 타임 생성"
 slug: "embedded/embedded-cpp/part2-04-constexpr-advanced"
 date: 2026-04-29T09:12:00
 description: "컴파일 타임 sort, search, 문자열 — constexpr 알고리즘의 한계와 가능성."
@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"컴파일러는 작은 컴파일 타임 인터프리터입니다."** — sort, search, parse까지 컴파일 타임에 가능합니다.
+> **"컴파일러는 작은 컴파일 타임 인터프리터입니다."** — sort, search, 문자열 처리까지 컴파일 타임에 가능합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -23,7 +23,7 @@ topics: ["embedded"]
 - 복잡한 데이터 구조를 Flash에 직접 박습니다.
 - 디자인 결정을 컴파일 타임에 검증합니다.
 
-이 모든 작업이 런타임 초기화 비용 0이며, Flash 사용량은 늘지만 RAM은 절약됩니다.
+상수식 문맥에서 완료한 계산에는 런타임 생성 루프가 필요하지 않습니다. 결과 데이터의 저장 위치와 전체 Flash/RAM 증감은 링커 배치와 비교 대상에 따라 확인합니다.
 
 ## 컴파일 타임 sort
 
@@ -32,7 +32,7 @@ topics: ["embedded"]
 ```cpp
 template<typename T, size_t N>
 constexpr void bubble_sort(std::array<T, N>& arr) {
-    for (size_t i = 0; i < N - 1; ++i) {
+    for (size_t i = 0; i + 1 < N; ++i) {
         for (size_t j = 0; j < N - 1 - i; ++j) {
             if (arr[j] > arr[j + 1]) {
                 T tmp = arr[j];
@@ -64,17 +64,17 @@ constexpr auto make_sorted() {
 }
 ```
 
-GCC 10+, Clang 12+에서 동작합니다. 임베디드 toolchain 지원을 먼저 확인합니다.
+컴파일러 언어 모드뿐 아니라 표준 라이브러리의 `__cpp_lib_constexpr_algorithms` 지원도 필요합니다. 아래 C++20 호스트 예제로 실제 조합을 확인합니다.
 
 ## 컴파일 타임 binary search
 
-정렬된 테이블에서 컴파일 타임 binary search를 수행합니다. 컴파일러가 분기 chain으로 변환합니다.
+정렬된 테이블에서 컴파일 타임 binary search를 수행합니다. 아래의 int 인덱스 예제는 N이 int로 표현되는 작은 배열을 전제로 합니다. 상수 인자로 상수식 문맥에서 호출하면 검색 결과 자체를 확정합니다. 런타임 인자를 받는 호출도 가능합니다.
 
 ```cpp
 template<typename T, size_t N>
 constexpr int binary_search(const std::array<T, N>& arr, T value) {
     int low = 0;
-    int high = N - 1;
+    int high = static_cast<int>(N) - 1;
     while (low <= high) {
         int mid = (low + high) / 2;
         if (arr[mid] == value) return mid;
@@ -122,7 +122,7 @@ C++20에서는 `std::string_view::starts_with`가 `constexpr`이므로 직접 �
 constexpr uint32_t fnv1a(std::string_view s) {
     uint32_t hash = 2166136261u;
     for (char c : s) {
-        hash ^= static_cast<uint32_t>(c);
+        hash ^= static_cast<unsigned char>(c);
         hash *= 16777619u;
     }
     return hash;
@@ -140,7 +140,7 @@ switch (event_hash) {
 }
 ```
 
-문자열 비교 대신 해시 비교(4바이트 정수 비교 한 번)로 끝납니다. 임베디드의 이벤트 dispatch에 유용합니다.
+32비트 해시는 충돌할 수 있습니다. 등록한 case 값끼리의 충돌은 컴파일 오류가 될 수 있지만 외부 입력이 같은 해시를 갖는 경우는 별도 원문 비교가 필요합니다. switch가 비교 한 번으로 끝나거나 입력 문자열의 해시 계산 비용까지 없어지는 것은 아닙니다.
 
 ## 컴파일 타임 데이터 변환
 
@@ -181,7 +181,7 @@ constexpr int kAvailableRamForStacks = 64 * 1024;   // 64 KB
 static_assert(kTotalStackMemory <= kAvailableRamForStacks,
               "Stack memory exceeds available RAM");
 
-// kMaxTasks를 32로 늘리면 — 컴파일 에러
+// 32는 65536 == 65536이므로 통과; 33부터 컴파일 에러
 ```
 
 RAM 부족이 production에서 발견되는 대신 빌드 시점에 차단됩니다.
@@ -192,7 +192,8 @@ RAM 부족이 production에서 발견되는 대신 빌드 시점에 차단됩니
 
 ```cpp
 constexpr uint32_t pin_mask(int pin) {
-    return 1u << pin;
+    if (pin < 0 || pin >= 32) throw "invalid pin";
+    return uint32_t{1} << pin;
 }
 
 constexpr uint32_t pins_mask(std::initializer_list<int> pins) {
@@ -249,7 +250,7 @@ constexpr int sum = sum_vector();   // = 5050
 
 컴파일 타임에 vector를 생성하고 사용하고 소멸시킵니다. 런타임 heap 사용량은 0입니다.
 
-단, vector 자체를 return하면 메모리 leak 컴파일 에러가 발생합니다. 결과 값만 반환해야 합니다.
+함수가 vector를 반환하는 선언 자체는 허용됩니다. 다만 C++20에서 할당을 유지하는 vector를 `constexpr` 변수로 보존할 수는 없습니다. 상수 평가 안에서 결과를 소비하고 할당을 해제하거나 고정 크기 배열로 결과를 반환합니다.
 
 ## 임베디드 — 컴파일 타임 device tree
 
@@ -270,13 +271,14 @@ constexpr DeviceConfig devices[] = {
     {"I2C1",  0x40005400, 31, 7},
 };
 
+// <string_view>와 <iterator> 포함
 constexpr size_t kDeviceCount = std::size(devices);
 
 // 컴파일 타임 검색
 constexpr int find_irq(const char* name) {
     for (size_t i = 0; i < kDeviceCount; ++i) {
-        // 컴파일 타임 string 비교 (C++17 string_view 또는 직접)
-        // ...
+        if (std::string_view(devices[i].name) == name)
+            return devices[i].irq_number;
     }
     return -1;
 }
@@ -299,13 +301,9 @@ int y = f(read_input());   // 런타임 호출 — constexpr 효과 없음
 ### 3. 큰 컴파일 타임 string 처리
 긴 문자열의 컴파일 타임 hash나 정규식은 분 단위가 걸립니다. 작은 set에만 사용합니다.
 
-### 4. constexpr 안에서 표준 라이브러리의 비-constexpr 함수 사용
-```cpp
-constexpr float f(float x) {
-    return std::sin(x);   // ERROR — std::sin은 constexpr 아님 (대부분)
-}
-```
-직접 구현하거나 C++26을 기다려야 합니다.
+### 4. 표준 라이브러리 지원 구분
+
+C++17/20에서 `std::sin`은 상수 평가용 표준 API가 아닙니다. 직접 근사를 구현하면 입력 범위와 오차를 별도로 검증합니다([Part 2-03](/blog/embedded/embedded-cpp/part2-03-constexpr-basics)).
 
 ### 5. static_assert 메시지 누락
 ```cpp
@@ -326,29 +324,45 @@ C++17 `constexpr` 기능과 C++20 사이에 차이가 큽니다. toolchain을 �
 
 이런 작업은 런타임에만 가능합니다. `constexpr`이 모든 것을 대체하지는 않습니다.
 
-## 측정 — 복잡한 LUT의 효과
+## 작은 예제 — 빈 테이블과 상한 경계
 
-256 entry sin table을 컴파일 타임과 런타임 초기화로 비교합니다(STM32F4).
+정렬·검색의 빈 입력, RAM 상한과 같은 값, 상한 초과를 나눠 확인합니다. 이 예제의 예산 검사는 stack 데이터만 검사하며 전체 RAM 사용량을 보장하지 않습니다.
 
-```text
-# 런타임 초기화 (main에서)
-.text       : +312 B (init function with sin loop)
-.bss        : +1024 B (table)
-init time   : ~12 ms (256 * sin calls)
-boot time   : main까지 +12 ms
-
-# constexpr
-.text       : 0 B
-.rodata     : +1024 B (Flash)
-init time   : 0
-boot time   : main까지 +0 ms
+```cpp title="advanced-check.cpp"
+#include <algorithm>
+#include <array>
+#include <cstddef>
+#ifndef TASKS
+#define TASKS 32
+#endif
+static_assert(TASKS * 2048 <= 64 * 1024, "stack budget exceeded");
+template<class T, std::size_t N>
+constexpr void bubble(std::array<T,N>& a) {
+    for (std::size_t i=0; i+1<N; ++i)
+        for (std::size_t j=0; j+1<N-i; ++j)
+            if (a[j]>a[j+1]) { T t=a[j]; a[j]=a[j+1]; a[j+1]=t; }
+}
+constexpr bool check() {
+    std::array<int,0> empty{}; bubble(empty);
+    std::array<int,5> a{5,2,8,1,4}; bubble(a);
+    return a == std::array<int,5>{1,2,4,5,8};
+}
+constexpr bool standard_sort() {
+    std::array<int,3> a{3,1,2};
+    std::sort(a.begin(),a.end()); return a[0]==1 && a[2]==3;
+}
+static_assert(check());
+static_assert(standard_sort());
+int main() {}
 ```
 
-RAM에서 Flash로 옮기면서 초기화 시간도 제거됩니다. Flash가 RAM보다 큰 대부분의 임베디드 환경에 유리합니다.
+Clang 23.1.3과 설치된 libc++ 조합에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors advanced-check.cpp -o advanced-check`로 확인했습니다. `-DTASKS=33`는 예산 static_assert로 거부됩니다.
+
+[C++20 N4861 sort 요건](https://timsong-cpp.github.io/cppwp/n4861/alg.sort)과 [상수식 요건](https://timsong-cpp.github.io/cppwp/n4861/expr.const)을 참고합니다. STM32의 초기화 시간과 크기는 이 예제로 측정하지 않았으며, 실제 저장 위치는 대상 링커 map으로 확인합니다.
 
 ## 정리
 
-- `constexpr` 함수로 컴파일 타임에 sort, search, hash, parse를 모두 수행할 수 있습니다(C++14+).
+- `constexpr` 함수로 컴파일 타임에 sort, search, hash, 문자열 처리를 수행할 수 있습니다(C++14+).
 - 임베디드에서는 LUT, fixed-point 변환, device tree, register mask에 활용합니다.
 - `static_assert`로 설계 결정을 컴파일 시점에 검증합니다.
 - C++20은 `constexpr new`/`delete`와 `constexpr std::sort`를 추가했고, 컴파일 타임 vector도 가능합니다.

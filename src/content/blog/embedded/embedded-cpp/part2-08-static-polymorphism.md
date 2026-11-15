@@ -18,12 +18,12 @@ topics: ["embedded"]
 
 런타임 다형성(virtual)에는 다음과 같은 비용이 따릅니다.
 
-- vtable이 클래스당 4~N 바이트를 차지합니다.
-- vptr이 객체당 4 바이트를 더합니다.
-- 간접 호출이 발생해 branch prediction이 어렵고 inline이 거의 되지 않습니다.
+- 동적 다형성에 필요한 테이블과 객체 레이아웃은 ABI에 따라 달라집니다.
+- 흔한 구현은 객체에 vptr을 두며 폭은 대상 ABI에 따릅니다.
+- 동적 타입을 모르면 간접 호출이 필요할 수 있지만, devirtualization으로 직접 호출·인라인될 수도 있습니다.
 - 가상 함수 코드와 vtable이 코드 크기에 더해집니다.
 
-소규모 MCU에서는 다형성 객체 수십 개만으로도 수 KB의 부담이 됩니다. 이때의 대안이 **CRTP**(Curiously Recurring Template Pattern)입니다.
+실제 부담은 객체 수와 vtable·정렬·제거 결과에 따라 측정해야 합니다. 이때의 대안이 **CRTP**(Curiously Recurring Template Pattern)입니다.
 
 ```cpp
 // 전통 — virtual
@@ -129,7 +129,7 @@ UartLogger uart;
 uart.log("hello");      // 컴파일 타임에 UartLogger::log_impl 호출
 ```
 
-`uart.log("hello")`의 어셈블리는 다음과 같습니다.
+다음은 dispatch의 전형적인 명령 형태를 설명한 예시입니다. 실제 빌드 출력이 아니며 인라인과 devirtualization은 생략했습니다.
 
 ```text
 # 전통 virtual
@@ -141,21 +141,21 @@ blx     r3               ; 간접 호출 — branch prediction 어려움
 bl      UartLogger::log_impl    ; 직접 호출 — 인라인 가능
 ```
 
-간접 호출이 제거되고 inline이 가능합니다. 함수가 작으면 완전히 인라인됩니다.
+간접 호출이 제거되고 inline이 가능합니다. 함수가 작으면 완전히 인라인될 수 있습니다.
 
 ## CRTP vs virtual — 비교
 
-호출 흐름의 차이부터 보면 다음과 같습니다. virtual은 vptr → vtable → 함수까지 두 단계의 메모리 indirection을 거치지만, CRTP는 컴파일 타임에 derived 함수로 바로 인라인됩니다.
+호출 흐름의 차이부터 보면 다음과 같습니다. virtual은 vptr → vtable → 함수까지 두 단계의 메모리 indirection을 거치지만, CRTP는 컴파일 타임에 derived 구현을 선택하며 인라인 여부는 최적화에 달립니다. 그림은 전형적인 간접 호출 경로를 보여 주며 devirtualization은 생략했습니다.
 
 ![CRTP vs virtual dispatch — indirection 단계 비교](/images/blog/embedded-cpp/diagrams/part2-08-crtp-vs-virtual.svg)
 
 | | virtual | CRTP |
 | --- | --- | --- |
 | Dispatch | 런타임 | 컴파일 타임 |
-| vptr | 객체당 1 (4 B) | 없음 |
-| vtable | 클래스당 (N * 4 B) | 없음 |
+| vptr | 흔한 구현에서 존재, ABI별 크기 | 이 예제는 가상 함수 없음 |
+| vtable | ABI·상속 구조별 | 이 예제는 가상 함수 없음 |
 | 간접 호출 | 있음 | 없음 |
-| Inline 가능 | 거의 없음 | 자주 |
+| Inline 가능 | devirtualization 시 가능 | 직접 호출이므로 기회 제공 |
 | Container 동질성 | OK (Shape*) | 제한 |
 | 런타임 type 결정 | OK | 컴파일 타임만 |
 
@@ -254,6 +254,7 @@ struct Comparable {
 class Version : public Comparable<Version> {
 public:
     int major, minor, patch;
+    Version(int a, int b, int c) : major(a), minor(b), patch(c) {}
 
     bool operator==(const Version& o) const {
         return major == o.major && minor == o.minor && patch == o.patch;
@@ -352,9 +353,9 @@ public:
 ### 2. Derived의 destructor가 호출되지 않음
 ```cpp
 Base<Derived>* ptr = new Derived;
-delete ptr;   // Base의 destructor만 호출 — Derived 자원 누수
+delete ptr;   // 비virtual base를 통한 다른 동적 타입 삭제: undefined behavior
 ```
-CRTP base는 보통 stack에서 쓰거나 derived로 직접 사용합니다. base pointer로 소유하는 패턴은 피해야 합니다.
+CRTP base는 보통 stack에서 쓰거나 derived로 직접 사용합니다. base pointer로 소유하는 패턴은 피해야 합니다. 보호된 base 소멸자로 base를 통한 삭제와 slicing을 차단하는 방법도 있습니다. 실제 downcast는 객체가 Derived의 base subobject인 경우에만 유효합니다.
 
 ### 3. 복사 동작이 의도와 어긋남
 ```cpp
@@ -376,24 +377,25 @@ class Concrete : public BaseA<Concrete>, public BaseB<Concrete>, public BaseC<Co
 
 ## C++20 concepts + CRTP
 
-CRTP의 흐릿한 interface 정의를 concept으로 명확하게 만들 수 있습니다.
+`class Good : LoggerBase<Good>`의 base를 지정할 때 Good은 아직 불완전합니다. 따라서 base 템플릿 자체에 Good의 멤버를 검사하는 concept을 걸면 올바른 구현도 거부될 수 있습니다. 제약 확인은 Derived의 정의가 완료된 뒤 호출되는 멤버로 미룹니다.
 
 ```cpp
 template<typename T>
 concept Logger = requires(T t, const char* msg) {
     { t.log_impl(msg) } -> std::same_as<void>;
 };
-
-template<Logger Derived>   // ← Derived는 Logger를 만족해야 함
+template<typename Derived>
 class LoggerBase {
 public:
-    void log(const char* msg) {
+    void log(const char* msg) requires Logger<Derived> {
         static_cast<Derived*>(this)->log_impl(msg);
     }
+protected:
+    ~LoggerBase() = default;
 };
 ```
 
-template error message가 한층 명확해집니다.
+`<concepts>`가 필요합니다. 잘못된 Derived를 정의하는 것만으로 항상 오류가 나는 것이 아니라, 이 제약 멤버를 호출할 때 거부됩니다. 정의가 완료된 지점의 `static_assert(Logger<Good>)`로 별도 검증할 수도 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -411,10 +413,10 @@ class Concrete : public Base<Concrete> {};
 template<typename D>
 class Base {
 public:
-    virtual void method() { /* */ }   // virtual + CRTP는 모순
+    virtual void method() { /* */ }   // 런타임 다형성과 정적 구현 공유를 함께 쓰는 설계
 };
 ```
-CRTP는 virtual을 회피하는 패턴이므로 의도가 모호해집니다.
+CRTP와 virtual을 함께 사용할 수는 있습니다. 그 경우 런타임 다형성 비용도 남으므로 각 계층의 목적을 구분합니다.
 
 ### 3. Multiple CRTP base 충돌
 ```cpp
@@ -432,37 +434,42 @@ c.foo();   // ERROR — A::foo와 B::foo 충돌
 ### 5. Sizeof 증가
 CRTP base가 멤버를 가지면 Concrete가 그만큼 커집니다. Empty Base Optimization 덕분에 보통은 추가 크기가 0으로 처리됩니다.
 
-## 측정 — CRTP의 효과
+## 작은 예제 — 올바른 downcast와 base 소유 차단
 
-같은 logger를 virtual과 CRTP로 비교합니다(ARM Cortex-M4, `-O2`).
+base를 독립 객체로 만들거나 삭제하는 경로를 막고, 완성된 구현을 정상 호출합니다.
 
-```text
-# Virtual
-class Logger { virtual void log_impl(const char*); };
-class UartLogger : public Logger { void log_impl(...) override; };
-
-uart_logger.log("hello");
-# 어셈블리:
-ldr     r3, [r0]         ; vptr 로드
-ldr     r3, [r3, #4]     ; vtable에서 log_impl 주소
-blx     r3               ; 간접 호출
-
-# vtable 크기: 12 B (Logger)
-# vptr: 4 B (UartLogger 인스턴스마다)
-
-# CRTP
-template<typename D> class LoggerBase { void log(...); };
-class UartLogger : public LoggerBase<UartLogger> { void log_impl(...); };
-
-uart_logger.log("hello");
-# 어셈블리:
-bl      UartLogger::log_impl   ; 직접 호출 — 인라인 가능
-
-# vtable: 0
-# vptr: 0
+```cpp title="crtp-check.cpp"
+#include <cassert>
+#include <concepts>
+template<class T> concept Logger = requires(T& t) {
+    { t.log_impl() } -> std::same_as<void>;
+};
+template<class D> class LoggerBase {
+    friend D;
+    LoggerBase() = default;
+    ~LoggerBase() = default;
+public:
+    void log() requires Logger<D> { static_cast<D*>(this)->log_impl(); }
+};
+struct Counter : LoggerBase<Counter> {
+    int n=0;
+    void log_impl() { ++n; }
+};
+static_assert(Logger<Counter>);
+int main() {
+    Counter c; c.log(); assert(c.n==1);
+#ifdef BAD_BASE
+    LoggerBase<Counter> bare;
+#endif
+#ifdef BAD_DELETE
+    LoggerBase<Counter>* p = &c; delete p;
+#endif
+}
 ```
 
-객체당 4 B, 클래스당 12 B를 절약합니다. 100 객체 50 클래스 기준이면 1000 B가 절약되며, 작은 차이지만 극소형 MCU에서는 의미가 있습니다.
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors crtp-check.cpp -o crtp-check && ./crtp-check`로 확인했습니다. `-DBAD_BASE`와 `-DBAD_DELETE`는 접근 제어 진단으로 거부됩니다. 이 결과는 호스트의 타입·수명 계약 검증이며 Cortex-M 명령 수나 절감 바이트를 측정한 것은 아닙니다.
+
+[표준의 삭제 규칙](https://eel.is/c++draft/expr.delete)과 [제약 만족도 규칙](https://eel.is/c++draft/temp.constr.atomic)을 참고합니다.
 
 ## CRTP의 실용과 과용
 
@@ -489,8 +496,7 @@ bl      UartLogger::log_impl   ; 직접 호출 — 인라인 가능
 - [Part 2-06: Templates 기초](/blog/embedded/embedded-cpp/part2-06-templates-basics)
 - [Part 2-09: Type Traits](/blog/embedded/embedded-cpp/part2-09-type-traits) — SFINAE 결합
 - [Part 2-10: Concepts (C++20)](/blog/embedded/embedded-cpp/part2-10-concepts) — CRTP 명확화
-- [Part 5-03: Peripheral 추상화](/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction) — CRTP peripheral
-- GoF 21: Strategy — virtual vs CRTP
+- [Part 5-03: Peripheral 추상화](/blog/embedded/embedded-cpp/part5-03-peripheral-abstraction) — concept 기반 peripheral 인터페이스
 
 ## 다음 글
 

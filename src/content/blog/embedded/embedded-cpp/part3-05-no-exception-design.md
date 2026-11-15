@@ -12,18 +12,18 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"임베디드에서는 예외를 끕니다."** error code, `std::optional`, `std::expected`로 명시적으로 에러를 처리합니다.
+> **"예외를 끈 프로젝트는 실패 전달과 복구 계약을 명시해야 합니다."** error code, `std::optional`, `std::expected`로 명시적으로 에러를 처리합니다.
 
 ## 어떤 문제를 푸는가
 
-C++ 예외는 런타임 비용이 큽니다.
+예외의 비용은 ABI·언어 런타임·실패 빈도·최적화에 따라 달라집니다.
 
-- Unwind table이 수 KB 추가됩니다.
-- `throw` 시 수십 μs의 지연이 생기며 deterministic하지 않습니다.
-- Stack unwinding으로 예측하지 못한 destructor가 호출됩니다.
-- 인증 환경에서는 대부분 금지됩니다.
+- Unwind table·런타임이 코드 크기에 영향을 줄 수 있습니다.
+- throw와 복구 경로의 최대 지연을 타깃에서 검증해야 합니다.
+- Stack unwinding은 생성이 완료된 자동 객체를 소멸시키는 정의된 동작입니다.
+- 예외 허용 범위는 프로젝트의 안전 요구·코딩 규칙으로 정합니다.
 
-임베디드는 거의 항상 `-fno-exceptions`로 빌드합니다. 그러나 에러는 여전히 발생하므로 예외 없이 어떻게 처리할지가 관건입니다.
+이 글은 `-fno-exceptions`를 채택한 프로젝트를 대상으로 합니다. 그러나 에러는 여전히 발생하므로 예외 없이 어떻게 처리할지가 관건입니다.
 
 이 글은 no-exception 환경에서 쓰는 에러 처리 패턴 네 가지를 정리합니다.
 
@@ -148,9 +148,9 @@ if (result) {
 
 자세한 내용은 [Part 3-07: std::expected](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
 
-## 패턴 4 — tl::expected (C++17 호환)
+## 패턴 4 — tl::expected (C++11 이후 백포트)
 
-C++23 `std::expected`의 header-only 백포트입니다. C++17부터 사용할 수 있습니다.
+[TartanLlama/expected](https://github.com/TartanLlama/expected)는 C++11/14/17용 expected 계열 구현입니다. std의 API와 monadic 함수 이름·오버로드가 완전히 같다고 가정하지 말고 고정한 release의 문서를 확인합니다.
 
 ```cpp
 #include <tl/expected.hpp>
@@ -170,7 +170,7 @@ API가 `std::expected`와 거의 동일합니다. 임베디드에서는 C++17과
 | Error code + out param | C++98 | 풍부 | 작음 | 보통 |
 | `std::optional<T>` | C++17 | 없음 (유/무만) | 작음 | 좋음 |
 | `std::expected<T, E>` | C++23 | 풍부 | 작음 | 매우 좋음 |
-| `tl::expected<T, E>` | C++17 (백포트) | 풍부 | 작음 | 매우 좋음 |
+| `tl::expected<T, E>` | C++11 이후 (백포트) | 풍부 | 작음 | 매우 좋음 |
 
 ## STL의 예외 던지는 함수
 
@@ -188,11 +188,7 @@ s.at(100);                   // throw
 std::stoi("not a number");   // throw
 ```
 
-`-fno-exceptions`로 컴파일하면 다음 동작이 섞입니다.
-
-- 일부는 abort를 호출합니다.
-- 일부는 UB를 일으킵니다.
-- 일부는 컴파일 에러로 떨어집니다.
+vec[10]의 범위 초과는 예외 플래그와 무관하게 계약 위반입니다. 직접 throw/try/catch를 쓴 translation unit은 Clang/GCC의 -fno-exceptions에서 컴파일 오류가 납니다. at/stoi처럼 표준상 예외를 던지는 라이브러리 함수가 실패했을 때의 결과는 라이브러리 빌드·구현에 따라 다르므로, 예외를 끄면 자동으로 안전한 오류 코드로 바뀐다고 가정하면 안 됩니다.
 
 해결책은 명시적인 검증입니다.
 
@@ -202,7 +198,7 @@ if (idx < v.size()) v[idx];
 // std::stoi 대신
 int result = 0;
 auto [ptr, ec] = std::from_chars(str, str + len, result);
-if (ec == std::errc{}) { /* OK */ }
+if (ec == std::errc{} && ptr == str + len) { /* 전체 입력 파싱 성공 */ }
 ```
 
 `std::from_chars`(C++17)는 예외를 던지지 않으므로 임베디드에서 안전합니다.
@@ -256,10 +252,10 @@ monadic operation으로 체인을 구성합니다.
 
 ```cpp
 auto result = read_register(0x10)
-    .and_then([](uint8_t raw) -> std::expected<float, Error> {
+    .and_then([](uint8_t raw) -> std::expected<float, ReadError> {
         return raw_to_celsius(raw);
     })
-    .and_then([](float celsius) -> std::expected<float, Error> {
+    .and_then([](float celsius) -> std::expected<float, ReadError> {
         return apply_calibration(celsius);
     });
 
@@ -294,7 +290,7 @@ constexpr const char* error_message(Error e) {
 }
 ```
 
-Flash에 박힌 문자열이므로 RAM과 heap 사용은 0입니다.
+문자열 리터럴은 정적 저장 기간을 갖지만 Flash/RAM 배치는 링커 스크립트·ABI에 따릅니다. 문자열 내용 자체는 동적 할당하지 않으며 포인터·오류 객체·조회 코드의 메모리는 남습니다.
 
 ## RAII와의 호환
 
@@ -364,32 +360,63 @@ auto x = read3(*w);
 ```
 C++23 `and_then`으로 체인을 구성하고, C++17이면 직접 마이그레이션합니다.
 
-## 측정 — 예외 켰을 때와 끈 시점의 코드 크기
+## 실행 확인 — 예외 없이 파싱 실패를 전달하기
 
-같은 단순 프로그램을 STM32F4에서 비교합니다.
+아래 파일은 C++23 expected를 지원하는 표준 라이브러리가 필요합니다. 성공, 잘못된 입력, 후행 문자, 범위 초과를 구분하며 RAII 소멸도 확인합니다. MCU 코드 크기·지연은 측정하지 않았습니다.
 
-```text
--fexceptions:
-  .text       : 42 KB
-  .ARM.extab  : 4.2 KB (unwind table)
-  .ARM.exidx  : 3.1 KB (exception index)
-  total       : ~49 KB
-
--fno-exceptions:
-  .text       : 38 KB
-  total       : ~38 KB
+```cpp title="no-exception.cpp"
+#include <cassert>
+#include <charconv>
+#include <expected>
+#include <string_view>
+#include <system_error>
+enum class ParseError { Invalid, Range };
+[[nodiscard]] std::expected<int, ParseError> parse(std::string_view text) {
+    if (text.empty()) return std::unexpected(ParseError::Invalid);
+    int value = 0;
+    auto [end, error] = std::from_chars(text.data(), text.data()+text.size(), value);
+    if (error == std::errc::result_out_of_range) return std::unexpected(ParseError::Range);
+    if (error != std::errc{} || end != text.data()+text.size())
+        return std::unexpected(ParseError::Invalid);
+    return value;
+}
+struct Guard { int& count; ~Guard() { ++count; } };
+int main() {
+    int cleaned = 0;
+    { Guard guard{cleaned}; assert(parse("42").value_or(-1) == 42); }
+    assert(cleaned == 1);
+    assert(parse("").error() == ParseError::Invalid);
+    assert(parse("bad").error() == ParseError::Invalid);
+    assert(parse("12x").error() == ParseError::Invalid);
+    assert(parse("999999999999999999999999").error() == ParseError::Range);
+#ifdef IGNORE_RESULT
+    parse("1"); // -Werror=unused-result에서 거부
+#endif
+}
 ```
 
-약 7 KB 차이가 납니다. 작은 프로젝트에서는 수십 퍼센트에 이릅니다.
+```bash
+clang++ -std=c++23 -fno-exceptions -Wall -Wextra -Werror no-exception.cpp -o no-exception
+./no-exception
+```
+
+예외를 꺼도 정상적인 scope 종료와 return에서는 destructor가 실행됩니다. abort·reset에서는 같은 보장이 없습니다.
 
 ## 정리
 
-- 임베디드는 `-fno-exceptions`로 빌드하며 예외 없이 에러를 처리합니다.
+- 예외를 끄기로 정했다면 라이브러리 실패 경로와 최대 복구 지연까지 확인합니다.
 - 4가지 패턴이 있습니다 — error code, `std::optional`, `std::expected`(C++23), `tl::expected`(백포트).
 - STL의 throw 함수(`at()`, `stoi()`)는 회피하고 `from_chars` 같은 대체를 씁니다.
 - 에러는 계층화하여 각 계층마다 의미 있는 enum을 정의합니다.
 - Constructor 실패는 factory function과 optional 조합으로 처리합니다.
 - `[[nodiscard]]`로 에러 무시를 방지합니다.
+
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [expected 관찰과 실패 계약](https://eel.is/c++draft/expected)
+- [from_chars 파싱 계약](https://eel.is/c++draft/charconv.from.chars)
 
 ## 관련 항목
 

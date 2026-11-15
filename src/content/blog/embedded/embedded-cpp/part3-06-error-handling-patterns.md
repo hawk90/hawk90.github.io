@@ -1,8 +1,8 @@
 ---
-title: "임베디드 에러 처리 패턴 — Result·errno·optional 비교"
+title: "임베디드 에러 처리 패턴 — Result 전파·재시도·복구 정책"
 slug: "embedded/embedded-cpp/part3-06-error-handling-patterns"
 date: 2026-04-30T09:24:00
-description: "Result types, error chains, exception-free RAII — 실용적 에러 시스템 구축 패턴."
+description: "Result의 에러 타입 일치, 유한 재시도, 실패 맥락과 reset 보존 조건을 연결합니다."
 series: "Embedded C++ for Real Systems"
 seriesOrder: 24
 tags: [cpp, embedded, error-handling, result-type, error-chain, fatal-error]
@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"에러 처리는 세 가지 결정으로 정리됩니다."** 어디서 발견할지, 어떻게 전파할지, 어떻게 복구할지를 정합니다.
+> **"에러 처리는 네 가지 결정으로 정리됩니다."** fatal 분류, 에러 코드, 결과 타입, 맥락 전파를 정합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -97,6 +97,7 @@ enum class Error : uint16_t {
     // 500-599: domain-specific
     SensorFault = 500,
     CalibrationFailed,
+    InternalError,
 };
 
 constexpr const char* error_name(Error e) {
@@ -164,14 +165,14 @@ struct ErrorContext {
 
 #define ERR_CTX(e, c) ErrorContext{(e), __func__, __LINE__, (c)}
 
-Result<float> read_temperature() {
+tl::expected<float, ErrorContext> read_temperature_with_context() {
     auto raw = read_register(0x10);
     if (!raw) return tl::unexpected(ERR_CTX(Error::SensorFault, raw.error()));
     return celsius(*raw);
 }
 ```
 
-옵션 2는 디버깅 정보가 풍부하지만 코드 크기가 늘어납니다. 트레이드오프입니다.
+옵션 2는 Error가 아닌 ErrorContext를 오류 타입으로 선언해야 합니다. 별칭 Result<float>에 ErrorContext를 그대로 반환하면 타입이 맞지 않습니다. 맥락을 추가할 경계·크기와 원인 보존 수준을 정합니다.
 
 ## 패턴 — Try Macro
 
@@ -331,7 +332,8 @@ CrashInfo g_crash_info;
     g_crash_info.stack_pointer = __get_MSP();
     // current PC 등...
     strncpy(g_crash_info.message, msg, sizeof(g_crash_info.message) - 1);
-    g_crash_info.crc = calculate_crc(&g_crash_info);
+    g_crash_info.message[sizeof(g_crash_info.message) - 1] = '\0';
+    g_crash_info.crc = crash_crc_excluding_crc_field(g_crash_info);
 
     NVIC_SystemReset();
 }
@@ -339,18 +341,18 @@ CrashInfo g_crash_info;
 // 부팅 시
 void check_crash_info() {
     if (g_crash_info.magic == 0xCAFEBABE &&
-        g_crash_info.crc == calculate_crc(&g_crash_info)) {
+        g_crash_info.crc == crash_crc_excluding_crc_field(g_crash_info)) {
         // 이전 crash 정보 있음
         log_persistent("Recovered from crash: %s", g_crash_info.message);
     }
 }
 ```
 
-reset 이후에도 `g_crash_info`가 보존되므로 반복 crash를 추적할 수 있습니다.
+이 부분은 보드 의존 스케치입니다. .noinit은 비휘발성을 뜻하지 않으며 linker 배치·startup 초기화 제외·reset 종류·RAM 보존에 따라 유지 여부가 달라집니다. CRC 함수는 crc 필드를 제외한 명시적으로 직렬화한 필드 바이트를 처리해야 하고 초기화되지 않은 padding은 포함하면 안 됩니다. reset_count·PC 캡처와 쓰기 중 reset 대책도 구현해야 합니다. NVIC_SystemReset은 되돌아오지 않는 보드 wrapper로 제공하고, 실제 전원 차단 보존은 검증하지 않았습니다.
 
-## 인증 환경 — DO-178C, ISO 26262
+## 안전 요구에 따른 검증 범위
 
-인증 환경에서는 에러 처리에 추가 제약이 붙습니다.
+다음은 프로젝트 검증 계획에서 검토할 항목입니다. DO-178C·ISO 26262의 특정 조항이나 인증 적합성을 이 예제로 입증하는 것은 아닙니다.
 
 - 모든 에러 경로를 테스트해야 합니다.
 - recovery time을 명시하고 검증해야 합니다.
@@ -358,7 +360,7 @@ reset 이후에도 `g_crash_info`가 보존되므로 반복 crash를 추적할 �
 - 로깅이 critical 메모리에 안전하게 기록되어야 합니다.
 
 ```cpp
-// 인증 환경 표준 패턴
+// 프로젝트의 pre/post-condition 예시
 [[nodiscard]] Error perform_operation(Input* in, Output* out) {
     // pre-condition
     if (!in || !out) return Error::InvalidParam;
@@ -418,33 +420,45 @@ try { foo(); } catch (...) {}   // 컴파일 에러
 ```
 예외를 끈 translation unit에서는 `try`/`catch`를 사용할 수 없으므로, 예외를 사용하지 않는 오류 전달 방식으로 바꿔야 합니다.
 
-## 측정 — 에러 처리 패턴의 코드 영향
+## 실행 확인 — 제한된 재시도와 맥락 변환
 
-같은 함수를 다른 에러 처리 방식으로 비교합니다.
+이 파일은 C++23 표준 expected를 사용합니다. 앞의 tl 예제와 같은 translation unit으로 이어 붙이는 코드는 아닙니다. Timeout만 정해진 횟수 안에서 재시도하고, 다른 에러는 즉시 전파합니다. 0회 요청은 실제 장치 호출 없이 Timeout을 반환하도록 계약을 정합니다.
 
-```text
-# bool 반환
-bool f() { return true; }
-크기: 8 B
-
-# error code
-ErrorCode f() { return ErrorCode::Ok; }
-크기: 10 B
-
-# optional<T>
-std::optional<int> f() { return 42; }
-크기: 16 B (return value + has_value flag)
-
-# expected<T, E>
-tl::expected<int, ErrorCode> f() { return 42; }
-크기: 18 B
-
-# 예외 (-fexceptions)
-int f() { throw std::runtime_error("err"); }
-크기: 312 B + unwind table 추가
+```cpp title="recovery.cpp"
+#include <cassert>
+#include <expected>
+enum class Error { Timeout, SensorFault, InternalError };
+template<class T> using Result = std::expected<T, Error>;
+struct ErrorContext { Error code; Error cause; };
+template<class Read> Result<int> retry(Read read, int attempts) {
+    for (int n = 0; n < attempts; ++n) {
+        auto result = read();
+        if (result || result.error() != Error::Timeout) return result;
+    }
+    return std::unexpected(Error::Timeout);
+}
+std::expected<int, ErrorContext> with_context(Result<int> value) {
+    if (!value) return std::unexpected(ErrorContext{Error::SensorFault, value.error()});
+    return *value;
+}
+int main() {
+    int calls = 0;
+    auto eventual = [&]() -> Result<int> {
+        if (++calls < 3) return std::unexpected(Error::Timeout);
+        return 42;
+    };
+    assert(retry(eventual, 3).value_or(-1) == 42 && calls == 3);
+    calls = 0;
+    assert(!retry(eventual, 0) && calls == 0);
+    auto fatal = [&]() -> Result<int> { ++calls; return std::unexpected(Error::InternalError); };
+    auto failed = retry(fatal, 3);
+    assert(!failed && calls == 1);
+    auto context = with_context(failed);
+    assert(context.error().cause == Error::InternalError);
+}
 ```
 
-예외가 압도적으로 크고, optional과 expected는 거의 동일합니다.
+C++23·-fno-exceptions로 실행 가능하며 예외를 던지는 value() 대신 검사·value_or를 사용합니다. 지연 함수·장치·RTOS·reset 보존과 표준 인증 적합성은 검증 범위 밖입니다. 실제 재시도에는 전체 시간 예산과 마지막 요청 뒤 불필요한 대기 제거도 필요합니다.
 
 ## 정리
 
@@ -455,12 +469,18 @@ int f() { throw std::runtime_error("err"); }
 - Recovery 패턴은 retry, fallback, state machine 전이로 구성됩니다.
 - Fatal error는 비휘발성 메모리에 정보를 보존한 뒤 reset합니다.
 
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [expected 오류 타입과 monadic 계약](https://eel.is/c++draft/expected)
+
 ## 관련 항목
 
 - [Part 3-05: No-Exception 설계](/blog/embedded/embedded-cpp/part3-05-no-exception-design)
 - [Part 3-07: std::expected](/blog/embedded/embedded-cpp/part3-07-expected)
 - [Part 4-06: State Machine](/blog/embedded/embedded-cpp/part4-06-state-machine)
-- Refactoring Pattern 40: Introduce Assertion — 검증
+- [C++ expected의 관찰·monadic 계약](https://eel.is/c++draft/expected)
 
 ## 다음 글
 

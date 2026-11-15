@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"권장은 C++17입니다. C++20은 concepts와 `std::span`의 가치가 큽니다."** C++23은 `std::expected`를 빼면 아직 적용하기 이른 표준입니다.
+> **표준은 필요한 기능과 실제 target toolchain의 언어·라이브러리 지원으로 고릅니다.** C++17을 비교 기준으로 삼고, C++20의 concepts·span이나 C++23의 expected가 필요한 경우 해당 기능의 컴파일·링크 probe를 추가합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -20,16 +20,16 @@ C++ 표준 선택은 프로젝트 수명 전체에 영향을 줍니다. 너무 �
 
 임베디드의 관점은 데스크톱과 다릅니다. 다음을 함께 평가해야 합니다.
 
-- **컴파일러 버전**: 벤더 toolchain은 몇 년 늦습니다(ARM, IAR)
+- **컴파일러와 라이브러리 판**: 같은 vendor도 제품·release·target에 따라 지원 범위가 다릅니다
 - **표준 라이브러리 크기**: 새 기능이 코드 bloat를 만들 수 있습니다
-- **인증 도구**: MISRA, AUTOSAR, DO-178C 도구가 새 표준 지원에 늦습니다
+- **안전 요구와 도구 근거**: 코딩 지침의 언어 판, 분석기 지원, compiler/tool qualification 범위를 구분합니다
 - **팀 친숙도**: C++20 concepts는 학습 곡선이 있습니다
 
 ## 각 표준의 핵심 기능
 
 ### C++11 — 임베디드의 최소 baseline
 
-GCC 4.8+, Clang 3.3+가 지원합니다. 임베디드 toolchain은 거의 모두 지원합니다.
+언어 기능은 해당 compiler의 지원 표에서 확인하고 표준 라이브러리는 별도로 확인합니다. GCC·Clang 버전 하나만으로 모든 target 라이브러리까지 보장되지는 않습니다.
 
 | 기능 | 임베디드 가치 |
 | --- | --- |
@@ -39,7 +39,7 @@ GCC 4.8+, Clang 3.3+가 지원합니다. 임베디드 toolchain은 거의 모두
 | `nullptr` | `NULL` 매크로 대체, 타입 안전 |
 | `enum class` | 네임스페이스 분리, 암묵 변환 차단 |
 | `static_assert` | 컴파일 타임 검증 |
-| `unique_ptr` | RAII 소유권, 0 비용 |
+| `unique_ptr` | 단독 소유권. deleter와 runtime 요구는 구현별 확인 |
 | `noexcept` | 예외 없음 명시 |
 | `final`, `override` | virtual 오류 잡기 |
 | Rvalue reference, move semantics | 복사 비용 감소 |
@@ -53,7 +53,7 @@ C++03에서 C++11로의 점프가 가장 큽니다. 새 프로젝트는 C++11이
 
 ### C++14 — 작은 개선
 
-GCC 4.9+에서 지원합니다. 사실상 C++11의 완성판입니다.
+loop를 포함한 constexpr와 generic lambda 등이 추가됩니다. compiler의 언어 지원 표와 target library를 함께 확인합니다.
 
 | 기능 | 임베디드 가치 |
 | --- | --- |
@@ -68,7 +68,7 @@ C++11에서 C++14로의 전환은 대부분 자연스러운 업그레이드입�
 
 ### C++17 — 권장 기본
 
-GCC 7+, Clang 5+에서 지원합니다. ARM Compiler 6도 완전히 지원합니다. 2025년 임베디드의 기본입니다.
+GCC와 Clang의 공식 C++ status 표는 개별 기능별 지원 판을 제공합니다. vendor toolchain은 정확한 release notes와 library 구성까지 확인해야 하므로 제품명만으로 완전 지원을 단정하지 않습니다.
 
 | 기능 | 임베디드 가치 |
 | --- | --- |
@@ -88,16 +88,16 @@ GCC 7+, Clang 5+에서 지원합니다. ARM Compiler 6도 완전히 지원합니
 
 ### C++20 — concept이 게임 체인저
 
-GCC 10+, Clang 12+에서 지원합니다. 일부 기능은 GCC 13+가 필요합니다. ARM Compiler 6은 부분 지원입니다.
+concepts·modules·coroutines 같은 언어 기능과 span·ranges 같은 라이브러리는 지원 시점이 서로 다릅니다. `-std=c++20`이 받아들여지는 것과 모든 기능이 구현되는 것은 다릅니다.
 
 | 기능 | 임베디드 가치 |
 | --- | --- |
 | Concepts | 템플릿 제약, 에러 메시지 명확 |
-| `std::span` | 포인터+길이 안전 wrap |
+| `std::span` | 비소유 연속 범위 view. 수명과 범위 접근 조건은 호출자가 지킴 |
 | Ranges (제한적) | `<algorithm>` 대체 |
 | `consteval` | 컴파일 타임 *강제* |
-| `constinit` | static 초기화 보장 |
-| Designated initializers | `S{.x=1, .y=2}` (C 스타일) |
+| `constinit` | static/thread 저장 기간 변수의 상수 초기화 요구 |
+| Designated initializers | `S{.x=1, .y=2}`. C++은 선언 순서 등 C와 다른 제약이 있음 |
 | Modules | 컴파일 시간 단축 (구현 미흡) |
 | Coroutines (기본) | async (heap 주의) |
 | `std::bit_cast` | type-safe bit manipulation |
@@ -105,19 +105,19 @@ GCC 10+, Clang 12+에서 지원합니다. 일부 기능은 GCC 13+가 필요합�
 | `std::endian` | 엔디안 컴파일 타임 확인 |
 | Lambda in unevaluated context | template 단순화 |
 
-C++20의 가장 큰 가치는 concepts와 `std::span`입니다. concepts는 template error message를 읽을 수 있게 만듭니다. `std::span`은 C-style 배열의 위험을 type-safe 함수 인자로 대체합니다.
+C++20의 가장 큰 가치는 concepts와 `std::span`입니다. concepts는 template error message를 읽을 수 있게 만듭니다. `std::span`은 포인터와 길이를 한 인자로 묶지만 기본 subscript의 범위 검사나 소유권을 보장하지 않습니다. 원본 배열보다 오래 저장한 span은 dangling이 됩니다.
 
 ```cpp
 // C++17 이전
 void process(int* buf, size_t len);
 
 // C++20
-void process(std::span<int> buf);   // 길이 자동 추적, .data() / .size() 안전
+void process(std::span<int> buf);   // pointer와 크기를 함께 전달. 수명·범위 조건 확인 필요
 ```
 
-### C++23 — 아직 이름
+### C++23 — 필요한 기능별로 확인
 
-GCC 13+, Clang 15+에서 지원합니다. toolchain 지원이 불확실합니다.
+C++23 mode와 개별 기능 지원을 구분합니다. `<expected>`, `<mdspan>`, `<print>` 등은 compiler 자체보다 표준 라이브러리와 target runtime의 제공 여부가 중요합니다.
 
 | 기능 | 임베디드 가치 |
 | --- | --- |
@@ -128,39 +128,23 @@ GCC 13+, Clang 15+에서 지원합니다. toolchain 지원이 불확실합니다
 | Deducing `this` | CRTP 단순화 |
 | `std::byteswap` | 엔디안 변환 |
 
-`std::expected`만 임베디드 가치가 큽니다. Rust의 `Result<T, E>`에 대응합니다. 자세한 내용은 [Part 3-07](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
+`std::expected`는 값과 오류를 표현하고, byteswap이나 mdspan도 각각 endian 변환과 다차원 view가 필요한 프로젝트에서 가치가 있습니다. Rust의 `Result<T, E>`에 대응합니다. 자세한 내용은 [Part 3-07](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
 
 새 프로젝트에서 C++20을 선택할지는 제품 수명, 인증 도구, 표준 라이브러리와 실제 toolchain 지원을 함께 보고 결정합니다. C++23은 `std::expected` 같은 기능이 필요하고 toolchain이 제공할 때 선택하는 식으로 범위를 좁힐 수 있습니다.
 
-## 임베디드 toolchain 지원 현황
+## 채택 전에 남길 toolchain 기록
 
-2026년 기준(대략)으로 정리하면 다음과 같습니다.
+"GCC 13이면 C++23", "vendor compiler는 C++17까지" 같은 최대 표준 표는 개별 기능과 라이브러리 구성을 놓칩니다. 다음 정보를 실제 빌드에서 수집하면 compiler 업그레이드 때도 같은 판단을 반복할 수 있습니다.
 
-| Toolchain | 최대 표준 | 비고 |
+| 확인 대상 | 남길 증거 | 실패 시 조치 |
 | --- | --- | --- |
-| GCC 13+ (ARM, RISC-V) | C++23 (대부분) | 가장 빠름 |
-| Clang 16+ | C++23 (대부분) | |
-| ARM Compiler 6 (armclang) | C++17 (완전), C++20 부분 | Cortex-M 표준 |
-| IAR EW (ARM) | C++17 (완전), C++20 부분 | 인증 환경 |
-| Keil MDK (armcc legacy) | C++03 (legacy), C++11 (armclang) | 새 프로젝트는 armclang |
-| Xilinx SDK / Vitis | GCC 기반, C++17 |  |
-| ESP-IDF (Xtensa GCC) | C++17 (GCC 12+) | |
-| Nordic SDK | GCC 기반 | |
-| TI Code Composer (CCSv12) | C++17 (Clang 기반) | |
-| Microchip XC32 | GCC 기반, C++17 | PIC32, SAM |
+| 언어 기능 | compiler 전체 버전·target triple·-std·기능별 compile probe | 지원되는 표현으로 대체하거나 compiler 변경 |
+| 표준 라이브러리 | libc++/libstdc++/vendor library 판·feature macro·link 결과 | 대체 타입 또는 제공되는 subset 선택 |
+| runtime | 예외·RTTI·heap·thread·OS 의존 symbol | runtime 제공 또는 기능 제한 |
+| 안전 요구 | 적용 지침 판·도구 지원 범위·프로젝트 qualification 근거 | 안전 계획과 도구 검증 갱신 |
+| 회귀 | 동일 workload의 기능·크기·경고·실시간 제약 결과 | 문제 기능을 좁혀 원인 분석 |
 
-최신 표준을 쓰려면 GCC 기반 toolchain이 유리합니다. 벤더 컴파일러(ARM, IAR, Keil)는 1-2 표준 정도 늦습니다.
-
-## 결정 트리
-
-프로젝트를 시작할 때 위에서부터 차례로 답하면 표준이 정해집니다.
-
-| 질문 | YES | NO |
-| --- | --- | --- |
-| 1. 인증 환경(DO-178C, ISO 26262)인가? | C++14 (보수적) 또는 C++17 (도구가 지원하면) | 2번으로 |
-| 2. 벤더 컴파일러(ARM, IAR, Keil)를 쓰는가? | C++17 (최대), 일부 GCC 기능 사용 자제 | 3번으로 (GCC/Clang) |
-| 3. 팀이 새 표준을 학습할 시간이 있는가? | C++20 (concepts 가치 큼) | C++17 (안정적) |
-| 4. `std::expected`가 강하게 필요한가? | C++23 (GCC 13+ 필수) | 위에서 결정한 표준 |
+C++17을 현재 프로젝트의 비교 baseline으로 둘 수 있지만, 이것이 모든 신규 임베디드 제품의 의무 표준은 아닙니다. C++20/23을 선택할 때는 필요한 기능을 좁히고 실제 target toolchain의 compile·link·runtime 결과로 판단합니다. 인증 환경에서도 특정 연도나 언어 판만으로 도구가 인증되었다고 결론내리지 않습니다.
 
 ## 컴파일러 플래그 — 표준 명시
 
@@ -175,7 +159,7 @@ CXXFLAGS += -std=c++20
 CXXFLAGS += -std=c++23   # 또는 c++2b (오래된 컴파일러)
 ```
 
-GNU 확장을 쓰려면 `-std=gnu++17`을 활성화합니다. 비표준 확장(예: `__attribute__`)을 사용할 수 있습니다. 임베디드에서는 gnu++가 일반적입니다.
+`-std=gnu++17`은 GNU dialect를 선택합니다. `-std=c++17`에서도 GCC/Clang이 예약 표기인 `__attribute__` 같은 확장을 허용할 수 있으므로 확장 하나가 컴파일된다고 dialect가 자동 변경되는 것은 아닙니다. 표준 진단은 `-pedantic-errors`와 함께 확인하되 모든 vendor attribute를 금지하는 옵션으로 해석하지 않습니다.
 
 ## 표준 라이브러리 vs 언어
 
@@ -205,22 +189,61 @@ GCC 10은 언어를 지원하지만 라이브러리는 늦게 갱신될 수 있�
 #endif
 ```
 
-## 표준별 코드 크기 영향
+## 실행 probe — 언어 모드와 라이브러리 지원
 
-같은 코드의 C++14, C++17, C++20 컴파일 크기입니다(STM32F4, GCC 13, `-Os -flto`).
+다음 예시는 동일한 compiler와 library 조합에서 span과 expected의 제공 여부를 구분합니다. Apple Silicon의 Clang 23.1.3/libc++ host에서는 아래 C++20·23 경로를 실행했습니다. 이 결과는 ARM bare-metal 표준 라이브러리 제공의 증거가 아닙니다.
 
-```text
-C++14: 42 KB
-C++17: 41 KB   (-1KB — std::optional이 boost::optional보다 작음)
-C++20: 40 KB   (-1KB — std::span이 별도 size 인자 제거)
-C++23: 39 KB   (std::expected가 직접 구현 Result보다 작음)
+```cpp title="standard-probe.cpp"
+#include <version>
+#include <iostream>
+#if defined(__cpp_lib_span) && __cpp_lib_span >= 202002L
+#include <span>
+#endif
+#if defined(__cpp_lib_expected) && __cpp_lib_expected >= 202202L
+#include <expected>
+#endif
+__attribute__((noinline)) int retained_extension() { return 7; }
+int main() {
+    std::cout << "cplusplus=" << __cplusplus << '\n';
+#if defined(REQUIRE_SPAN)
+#if !defined(__cpp_lib_span) || __cpp_lib_span < 202002L
+#error span support required
+#else
+    int values[] = {20, 22};
+    std::span<int> view(values);
+    if (view.size() != 2 || view[0] + view[1] != 42) return 1;
+    std::cout << "span=42\n";
+#endif
+#endif
+#if defined(REQUIRE_EXPECTED)
+#if !defined(__cpp_lib_expected) || __cpp_lib_expected < 202202L
+#error expected support required
+#else
+    std::expected<int, int> ok(42), error(std::unexpected(5));
+    if (!ok || *ok != 42 || error || error.error() != 5) return 2;
+    std::cout << "expected=42,error=5\n";
+#endif
+#endif
+    return retained_extension() == 7 ? 0 : 3;
+}
 ```
 
-새 표준이 코드를 더 크게 만들지는 않습니다. 오히려 표준 기능이 직접 구현보다 효율적입니다.
+```bash
+clang++ -std=c++17 -pedantic-errors standard-probe.cpp -o probe17
+./probe17
+clang++ -std=c++20 -pedantic-errors -DREQUIRE_SPAN standard-probe.cpp -o probe20
+./probe20
+clang++ -std=c++23 -pedantic-errors -DREQUIRE_EXPECTED standard-probe.cpp -o probe23
+./probe23
+# 필요한 기능이 없는 모드에서는 명시적으로 실패
+clang++ -std=c++17 -DREQUIRE_SPAN standard-probe.cpp -o missing-span
+```
+
+마지막 C++17 + REQUIRE_SPAN은 의도한 실패 예입니다. 실제 compiler가 그 모드에 해당 확장을 제공하면 실패하지 않을 수 있으므로 출력된 feature macro와 구현 정책을 함께 확인합니다. compiler mode만 비교해서 코드 크기가 항상 감소한다고 결론내리지 않으며, 동일 입력·옵션·linker script에서 실제 산출물을 측정합니다.
 
 ## 표준에 따라 변하는 best practice
 
-같은 일을 다르게 표현하는 예입니다.
+각 코드는 서로 다른 표준에서 쓰는 대안 조각입니다. 함께 붙여 컴파일하는 완성 프로그램이 아닙니다. 아래 나눗셈 예시는 int로 표현 가능한 몫과 유효한 out pointer를 전제로 하며, 실제 API는 INT_MIN/-1 overflow와 null 입력도 계약에 포함해야 합니다.
 
 ### Error 처리
 
@@ -251,10 +274,10 @@ std::expected<int, ErrorCode> divide(int a, int b) {
 // C++11 — pointer + length
 void process(int* data, size_t len);
 
-// C++17 — string_view 유사
-void process(const std::vector<int>& data);
+// C++17 — 고정 배열 크기를 template 인자로 유지
+template<std::size_t N> void process(int (&data)[N]);
 
-// C++20 — std::span (0-cost)
+// C++20 — std::span 비소유 view
 void process(std::span<int> data);
 ```
 
@@ -272,21 +295,11 @@ T add(T a, T b);
 
 C++20이 훨씬 읽기 좋습니다.
 
-## 인증 환경 — 표준 도구 비용
+## 안전 요구와 언어 표준을 구분하기
 
-DO-178C, ISO 26262, IEC 62304 환경에서는 각 표준에 대한 도구 인증이 별도입니다. 보통의 상황은 다음과 같습니다.
+코딩 지침 준수, 정적 분석기의 기능 지원, compiler/tool qualification은 서로 다른 근거입니다. AUTOSAR C++14나 MISRA C++의 특정 판을 적용한다면 그 지침이 대상으로 삼은 언어와 deviation 정책을 먼저 고정합니다. DO-178C·ISO 26262 등 프로젝트 요구에 맞는 tool confidence/qualification 근거는 안전 계획에서 확인하며, 분석기 제품명이 나열되어 있다는 이유만으로 compiler와 모든 C++ 기능이 인증되었다고 보지 않습니다.
 
-- C++14, C++17은 2026년 대부분 인증 가능합니다
-- C++20은 일부 도구만 인증되어 있습니다(CodeSonar, Coverity 일부)
-- C++23은 2027년 이후 인증이 시작될 것으로 예상됩니다
-
-특정 기능 금지 목록도 표준별로 다릅니다. AUTOSAR C++14와 JSF C++(C++03 기반)는 기능 subset만 허용합니다.
-
-자세한 비교는 다음을 참고합니다.
-
-- AUTOSAR C++14 Guidelines
-- JSF C++ Coding Standards
-- MISRA C — C 표준이지만 비교 참고용으로 유용합니다
+표준 변경에는 ABI, library, compiler warning, 회귀 시험과 도구 검증 범위의 변경 비용이 있을 수 있습니다. 이를 학습 시간만 드는 무료 변경으로 처리하지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -300,7 +313,7 @@ DO-178C, ISO 26262, IEC 62304 환경에서는 각 표준에 대한 도구 인증
 
 ### 3. gnu++와 c++ 혼동
 
-`-std=c++17`은 순수 표준만 허용합니다. `__attribute__`나 inline asm을 쓰면 gnu++17이 됩니다. 임베디드에서는 거의 항상 gnu++를 씁니다.
+`-std=c++17`과 `-std=gnu++17`은 선택한 dialect가 다릅니다. `__attribute__` 등 일부 확장은 전자에서도 허용될 수 있으며 그 사용이 mode를 자동으로 바꾸지는 않습니다. 실제 옵션과 진단 결과로 정책을 검사합니다.
 
 ### 4. feature test macro 미사용
 
@@ -314,23 +327,21 @@ DO-178C, ISO 26262, IEC 62304 환경에서는 각 표준에 대한 도구 인증
 
 `auto`, `constexpr`, `concept`가 익숙하지 않은 팀에 강제로 도입하면 학습 곡선이 생기고 bug가 발생합니다. 점진적으로 도입합니다.
 
-## 측정 — 표준 업그레이드 효과
+## 1차 자료와 확인 범위
 
-작은 프로젝트(약 5K 줄 C++)의 C++14 → C++17 업그레이드 결과입니다.
+- [GCC C++ language status](https://gcc.gnu.org/projects/cxx-status.html) — 기능별 언어 지원과 library 지원 표의 구분
+- [Clang C++ status](https://clang.llvm.org/cxx_status.html) — mode와 개별 기능의 구현 상태
+- [GCC language standards](https://gcc.gnu.org/onlinedocs/gcc/Standards.html) — ISO/GNU dialect
+- [C++ draft: span](https://eel.is/c++draft/views.span)와 [expected](https://eel.is/c++draft/expected) — 비소유 view와 값/오류 타입의 계약
 
-- 코드 크기: 41KB → 40KB (-2.4%)
-- 빌드 시간: -3%(template instantiation 효율)
-- 줄 수: -8%(`auto`, structured bindings, `std::optional` 활용)
-- 컴파일러 경고: -12%(`[[nodiscard]]`, `[[maybe_unused]]`)
-
-표준 업그레이드는 거의 무료입니다. 새 표준 학습 시간만 비용입니다.
+2026-10-22 host probe는 compiler mode, 확장 허용, span 범위 정보와 expected의 성공·오류 상태를 확인했습니다. target vendor compiler, bare-metal library 링크, 인증 근거와 코드 크기·시간 변화는 별도 검증 대상입니다.
 
 ## 정리
 
-- 권장 기본은 C++17입니다. 안정적이고 toolchain 호환이 좋으며 `optional`, `variant`, `if constexpr` 등 핵심 기능이 풍부합니다.
-- C++20은 concepts와 `std::span` 때문에 가치가 크며, GCC 13+가 보장되면 채택합니다.
-- C++23은 `std::expected`가 필요할 때만 고려하고 toolchain 지원을 확인합니다.
-- 벤더 컴파일러(ARM, IAR, Keil)는 1-2 표준 늦으므로 항상 지원 표를 확인합니다.
+- C++17을 비교 baseline으로 둘 수 있지만 필요한 기능과 실제 target 지원을 먼저 확인합니다.
+- C++20 concepts·span, C++23 expected 등 필요한 기능은 실제 compiler와 library 조합으로 probe합니다.
+- 새 표준의 가치는 필요한 기능별로 판단하며 언어 mode만으로 library 지원을 가정하지 않습니다.
+- vendor 이름이나 대략적인 버전 상한보다 정확한 release·target·library 지원 표를 확인합니다.
 - 인증 환경은 도구 인증에 따라 결정되며 AUTOSAR C++14나 JSF C++ 같은 subset 제약을 받습니다.
 
 ## 관련 항목
@@ -342,4 +353,4 @@ DO-178C, ISO 26262, IEC 62304 환경에서는 각 표준에 대한 도구 인증
 
 ## 다음 글 (Part 2 시작)
 
-[Part 2-01: RAII 기초](/blog/embedded/embedded-cpp/part2-01-raii-basics) — Modern C++의 가장 강력한 자원 관리 기법을 다룹니다. 소멸자가 반드시 호출됨을 언어가 보장합니다.
+[Part 2-01: RAII 기초](/blog/embedded/embedded-cpp/part2-01-raii-basics) — Modern C++의 가장 강력한 자원 관리 기법을 다룹니다. 정상적인 scope 이탈에서 소멸자가 자원을 정리하는 계약과, 강제 종료·reset 등 적용되지 않는 경계를 다룹니다.

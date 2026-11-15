@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"C++ 객체는 main 전에 생성됩니다."** `__libc_init_array`가 `.init_array` 섹션을 돌며 static 생성자를 차례로 호출합니다.
+> **정적 저장 기간 객체의 초기화에는 정적 초기화와 동적 초기화가 있습니다.** 이 글은 Cortex-M의 GNU/newlib 계열 startup이 `.data`·`.bss`를 준비하고 `.init_array`의 초기화 함수를 호출하는 흐름을 다룹니다. 모든 C++ 객체가 main 전에 생성되는 것은 아닙니다.
 
 ## 어떤 문제를 푸는가
 
-C++의 static 객체는 main 호출 전에 생성자가 실행되어야 합니다. 임베디드에서 이 시점이 언제이고 누가 호출하는지 알아야 함정을 피할 수 있습니다.
+비지역 static 객체에 필요한 동적 초기화는 구현의 startup 계약에 따라 실행됩니다. 상수 초기화로 끝나는 객체에는 실행할 초기화 함수가 없을 수 있고, 함수 내부 static 객체는 최초 진입 시 초기화됩니다. 표준은 일부 비지역 동적 초기화의 지연도 허용하므로 아래 흐름을 모든 C++ 구현의 유일한 실행 순서로 읽으면 안 됩니다. 임베디드에서 이 시점이 언제이고 누가 호출하는지 알아야 함정을 피할 수 있습니다.
 
 ```cpp
 // 이 두 객체는 main 전에 생성되어야 함
@@ -45,10 +45,10 @@ ARM Cortex-M 기준입니다. 다른 아키텍처도 개념은 동일합니다.
 
 
 1. **전원 ON 또는 Reset 핀** 입력으로 시작합니다.
-2. **ROM의 boot ROM 실행** — vendor가 넣어 둔 코드입니다.
+2. **부트 메모리 선택** — MCU의 boot 설정에 따라 사용자 Flash, 시스템 ROM, SRAM 등 reset vector를 읽을 메모리가 결정됩니다. 모든 Cortex-M이 항상 vendor boot ROM부터 실행하는 것은 아닙니다.
 3. **Reset Vector 읽음**
 4. **`Reset_Handler`** (어셈블리 또는 C)
-   - SP 초기화 — stack pointer를 vector table의 첫 값으로 맞춥니다
+   - reset 진입 전에 하드웨어가 vector table의 첫 값으로 MSP를 읽습니다. handler에서 다시 설정하는 코드는 장치 startup 구현에 따라 다릅니다
    - `.data` 섹션 복사 (Flash → RAM)
    - `.bss` 섹션 0으로 초기화
    - FPU 활성화 (있다면)
@@ -58,21 +58,21 @@ ARM Cortex-M 기준입니다. 다른 아키텍처도 개념은 동일합니다.
    - `_init()` 호출 (legacy)
    - `.init_array` 순회 호출 — *C++ static 객체 생성자*가 여기서 돕니다
 6. **`main()`**
-7. **`__libc_fini_array()`** — `main`이 return할 때 도는데, 임베디드는 `main`이 무한루프라 보통 호출되지 않습니다.
-8. **`exit()`** — 그대로 무한 루프에 들어갑니다.
+7. **main 반환 처리** — startup과 C runtime 구현에 따라 exit, 종료 hook, 정지 loop 등으로 이어집니다. `__libc_fini_array`와 `__cxa_atexit` 등록 소멸자는 같은 메커니즘이 아니므로 종료 경로를 따로 확인합니다.
 
-핵심은 `.bss` 초기화 → `.init_array` 호출 → `main` 순서입니다. 이 순서를 깨뜨려서는 안 됩니다.
+이 예시의 핵심 계약은 `.data`·`.bss` 준비 뒤 필요한 동적 초기화를 실행하고 application에 진입하는 것입니다. CMSIS startup은 `SystemInit`을 C runtime 초기화보다 먼저 부르기도 하므로 vendor 파일의 실제 순서를 확인합니다. FPU 명령을 쓰는 초기화 코드가 있다면 FPU 활성화도 그 전에 끝내야 합니다.
 
 ## Vector Table — Reset의 시작점
 
-ARM Cortex-M의 첫 256 바이트는 vector table입니다. 각 entry는 함수 포인터입니다.
+Cortex-M vector table에는 초기 MSP 값과 예외·장치별 interrupt handler 주소가 들어갑니다. 크기는 장치의 vector 수에 따라 달라지며 256바이트로 고정되지 않습니다. 첫 entry는 함수 포인터가 아니라 stack 주소입니다.
 
 ```cpp
-// vectors.cpp 또는 vectors.c
+// vectors.cpp: GNU 계열 Cortex-M용 배치 예시
+#include <stdint.h>
 extern "C" void Reset_Handler(void);
 extern "C" void Default_Handler(void);
 
-extern uint32_t _estack;   // 링커가 정의 — stack top
+extern "C" uint32_t _estack;   // 링커가 정의 — stack top
 
 __attribute__((section(".isr_vector")))
 const void* vectors[] = {
@@ -91,7 +91,7 @@ const void* vectors[] = {
 
 ## Reset_Handler — 첫 C++ 호출 전 준비
 
-전형적인 ARM Cortex-M 구현은 다음과 같습니다.
+GNU/newlib 계열의 흐름을 설명하는 골격입니다. `SystemInit`, runtime 함수와 `main`의 선언, linker symbol 정렬 및 vendor hook은 제품 startup에서 가져와야 합니다. 이 코드 조각은 단독 완성 startup이 아닙니다.
 
 ```cpp
 extern "C" {
@@ -135,7 +135,7 @@ extern "C" void Reset_Handler(void) {
 
 ## `__libc_init_array` — C++ static 생성자 호출
 
-GCC와 newlib이 제공하는 함수입니다. 세 개의 섹션을 차례로 호출합니다.
+newlib의 `libc/misc/init.c`에 있는 함수이며, GCC 언어 자체가 요구하는 함수 이름은 아닙니다. 아래는 개념적 구현입니다. `_init` 호출은 newlib 빌드 설정에 따라 조건부입니다. preinit array, 조건부 _init, init array 순으로 실행합니다.
 
 ```c
 // 개념적 구현 (newlib 내부)
@@ -170,7 +170,7 @@ void __libc_init_array(void) {
 } >FLASH
 ```
 
-각 static 객체의 생성자가 함수 포인터로 이 섹션에 들어갑니다.
+보통 compiler가 만든 초기화 wrapper의 주소가 들어갑니다. wrapper 하나가 여러 객체를 초기화할 수 있으므로 entry 수는 객체 수와 같지 않습니다.
 
 ## Static 객체 생성자가 들어가는 방법
 
@@ -190,9 +190,9 @@ Logger g_logger;   // static 객체
 
 ```cpp
 // 컴파일러가 만드는 hidden 코드 (개념)
-void __static_initialization_0() {
-    g_logger.Logger::Logger();   // 생성자 호출
-}
+// compiler 내부의 초기화 wrapper를 나타내는 선언입니다.
+// 직접 작성한 C++에서 생성자를 일반 member 함수처럼 호출할 수는 없습니다.
+void __static_initialization_0();
 
 // .init_array 섹션에 함수 포인터 등록
 __attribute__((section(".init_array")))
@@ -205,7 +205,7 @@ void (*__init_0)(void) = __static_initialization_0;
 
 ## Static 초기화 순서 — 같은 TU 안
 
-같은 Translation Unit(같은 .cpp 파일) 안의 static 객체는 선언 순서대로 초기화됩니다.
+같은 Translation Unit의 일반적인 비-inline 비-template 비지역 객체처럼 ordered dynamic initialization 대상은 정의 순서를 따릅니다. inline 변수와 template static data member 등은 별도 규칙이 있으므로 모든 static을 한 규칙으로 묶지 않습니다.
 
 ```cpp
 // file1.cpp
@@ -244,7 +244,7 @@ Logger& get_logger() {
 Timer g_timer(get_logger());   // 호출 시점에 instance 생성 보장
 ```
 
-함수 내 static 변수는 최초 호출 시점에 생성됩니다. 순서가 안전합니다.
+함수 내 static의 동적 초기화는 최초 제어 진입 시 실행됩니다. C++11 이후 동시 진입의 초기화 완료를 기다리는 보장이 있지만 `-fno-threadsafe-statics`를 사용하거나 필요한 guard runtime이 없으면 해당 계약을 다시 확인해야 합니다. 초기화 중 재귀 진입도 피해야 합니다.
 
 자세한 내용은 [Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives)에서 다룹니다.
 
@@ -257,7 +257,7 @@ static 생성자가 하드웨어를 만지면 문제가 됩니다. `__libc_init_
 class GPIO {
 public:
     GPIO() {
-        // peripheral 클럭 활성화 — Reset_Handler에서 안 했다면 실패
+        // 이 시점에 RCC 접근과 의존 클럭이 유효한지 별도 확인 필요
         RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
         // ...
     }
@@ -266,7 +266,7 @@ public:
 GPIO g_led_pin;   // SystemInit 후, main 전에 호출
 ```
 
-`SystemInit()` 다음, `main()` 직전입니다. 보통은 안전하지만 peripheral 초기화 순서에 의존성이 있으면 깨질 수 있습니다.
+이 글의 골격에서는 `SystemInit()` 다음, `main()` 직전입니다. RCC clock-enable 쓰기 하나만으로 외부 전원·핀·clock tree 등 다른 전제까지 성립하지는 않습니다. 생성자에서 접근할 수 있는 하드웨어 범위를 startup 계약으로 정해야 합니다.
 
 권장은 static 객체를 lazy 초기화하거나 main 안에서 명시적으로 init하는 것입니다.
 
@@ -289,25 +289,25 @@ int main() {
 }
 ```
 
-## `static_assert`로 생성자 trivial 강제
+## 상수 초기화와 trivial 생성자를 구분하기
 
-H/W 접근을 안 하는 static은 trivial constructor가 안전합니다.
+직접 작성한 constexpr 생성자는 상수 초기화를 가능하게 하지만 trivial 생성자는 아닙니다. C++20의 `constinit`으로 정적 저장 기간 변수의 상수 초기화를 요구할 수 있습니다. C++17 프로젝트는 constexpr 초기화식과 생성된 오브젝트를 함께 확인합니다.
 
-```cpp
-class Counter {
-public:
-    constexpr Counter() : count(0) {}
-    void increment() { ++count; }
-private:
+```cpp title="constant-init.cpp"
+#include <type_traits>
+struct Counter {
     int count;
+    constexpr Counter() : count(0) {}
 };
-
+static_assert(!std::is_trivially_default_constructible_v<Counter>);
+constinit Counter counter;
+#ifdef BAD_TRIVIAL_ASSERT
 static_assert(std::is_trivially_default_constructible_v<Counter>);
-
-Counter g_counter;   // .bss 0 초기화로 완성 (생성자 호출 불필요)
+#endif
+int main() { return counter.count; }
 ```
 
-trivial constructor는 `.init_array`에 추가되지 않습니다. `.bss` zero-init만으로 충분합니다. 부트가 빠르고 위험이 없습니다.
+`clang++ -std=c++20 constant-init.cpp -o constant-init`로 실행하면 exit 0입니다. `-DBAD_TRIVIAL_ASSERT`를 추가하면 이전 설명의 잘못된 trivial 가정이 컴파일 단계에서 드러납니다. 상수 초기화 여부와 .bss/.data 배치는 같은 개념이 아니며, nonzero 초기값이면 .data/읽기 전용 영역 등이 필요할 수 있습니다.
 
 ## `.init_array` 섹션이 Flash에 있는지
 
@@ -321,41 +321,26 @@ trivial constructor는 `.init_array`에 추가되지 않습니다. `.bss` zero-i
 } >FLASH
 ```
 
-`KEEP`가 중요합니다. `--gc-sections`가 `.init_array`를 제거하지 않도록 막아줍니다. 없으면 static 생성자가 사라지고 객체가 미초기화 상태로 남습니다.
+`KEEP`가 중요합니다. `--gc-sections`가 `.init_array`를 제거하지 않도록 막아줍니다. 보존하지 않으면 도달성 규칙과 linker 구현에 따라 필요한 초기화 entry가 제거될 수 있습니다. 실제 map과 ELF로 확인합니다.
 
-## `-fno-use-cxa-atexit` — atexit 등록 끄기
+## 소멸자 등록 옵션과 초기화 entry 확인
 
-C++ 표준은 static 객체의 소멸자를 `__cxa_atexit`로 등록합니다. 임베디드는 main이 끝나지 않으면 호출되지 않습니다. 등록 비용만 발생합니다.
+`-fno-use-cxa-atexit`는 소멸자를 없애는 옵션이 아닙니다. GCC 문서의 계약은 정적 객체 소멸자를 `__cxa_atexit` 대신 `atexit`로 등록하는 것입니다. 종료 없는 firmware에서의 등록 제거는 runtime 정책과 지원 옵션을 따로 검토합니다. 추정 절감 바이트를 근거로 이 옵션을 켜지 않습니다.
 
-```makefile
-CXXFLAGS += -fno-use-cxa-atexit
+```cpp title="dynamic-init.cpp"
+extern int read_boot_value();
+struct BootValue { int value; BootValue() : value(read_boot_value()) {} };
+BootValue first, second;
 ```
-
-생성자만 `.init_array`에 등록되고 소멸자는 완전히 제거됩니다. 수십에서 수백 바이트가 절약됩니다.
-
-## 측정 — static 객체 갯수와 init 시간
 
 ```bash
-# .init_array 크기 = static 생성자 수 × 4 (포인터 크기)
-arm-none-eabi-size -A firmware.elf | grep init_array
-
-.init_array         32       80014c0
-# 32 / 4 = 8개 static 생성자
+clang++ --target=arm-none-eabi -mcpu=cortex-m4 -mthumb -std=c++17 -O0 -c dynamic-init.cpp -o dynamic-init.o
+llvm-readelf -SW dynamic-init.o
+llvm-readelf -r dynamic-init.o
+llvm-nm --demangle dynamic-init.o
 ```
 
-`nm`으로 생성자 함수들을 확인합니다.
-
-```bash
-arm-none-eabi-nm --demangle firmware.elf | grep "_GLOBAL__sub_I_"
-
-00000a40 t _GLOBAL__sub_I_g_logger
-00000b20 t _GLOBAL__sub_I_g_timer
-00000c40 t _GLOBAL__sub_I_g_cache
-```
-
-각 `_GLOBAL__sub_I_*`가 한 TU의 static 초기화 함수입니다.
-
-수십 개의 static 객체가 있으면 `__libc_init_array` 자체에 수 ms가 소요됩니다. 부트 시간이 critical하면 명시적 init으로 옮깁니다.
+Clang 23.1.3의 위 ARM ELF 오브젝트에는 초기화할 객체가 두 개여도 .init_array entry가 하나이며, 그 relocation은 TU 초기화 wrapper를 가리켰습니다. 최종 firmware에서는 pointer 크기와 entry 개수를 확인하되 이를 곧바로 객체 수나 부트 시간으로 환산하지 않습니다. 부트 시간은 보드의 clock, 생성자 본문, 외부 장치 대기 등을 포함해 별도로 측정합니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -369,7 +354,7 @@ zero-init 가정 변수(`static int counter = 0;`)가 random이 됩니다. 카�
 
 ### 3. `__libc_init_array` 호출 누락
 
-static 객체 생성자가 호출되지 않습니다. vtable이 null이 됩니다. virtual 호출 시 crash가 납니다.
+필요한 동적 초기화가 실행되지 않습니다. 객체 수명과 상태 계약을 어긴 것이므로 가상 호출뿐 아니라 일반 함수 사용도 잘못될 수 있으며 특정 vptr 값이나 crash를 보장하지 않습니다.
 
 ### 4. Constructor에서 다른 TU의 static에 의존
 
@@ -377,7 +362,7 @@ static 객체 생성자가 호출되지 않습니다. vtable이 null이 됩니�
 
 ### 5. Constructor에서 RTOS 호출
 
-RTOS는 main 이후에 시작됩니다. static 생성자에서 task 생성이나 mutex 사용을 하면 crash가 납니다.
+스케줄러 시작 전 허용되는 API는 RTOS마다 다릅니다. 객체 생성 API와 blocking API를 구분하고, tick·scheduler·heap이 필요한 작업은 해당 runtime이 준비된 뒤 명시적으로 호출합니다.
 
 ### 6. `.init_array` 섹션 KEEP 누락
 
@@ -388,7 +373,8 @@ RTOS는 main 이후에 시작됩니다. static 생성자에서 task 생성이나
 극도로 작은 환경에서 startup을 직접 작성하는 패턴입니다.
 
 ```cpp
-// minimal_startup.cpp
+// minimal_startup.cpp: 생략된 platform hook은 아래 한계를 참고합니다.
+#include <stdint.h>
 extern "C" {
 
 extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss;
@@ -418,16 +404,25 @@ void Reset_Handler(void) {
 }   // extern "C"
 ```
 
-newlib 없이도 부트가 완성됩니다. 가장 작은 환경(수 KB Flash)에 유용합니다.
+이 골격은 .preinit_array, 소멸자 등록, FPU·clock·vector 설정, .ARM.exidx 등 제품별 요구를 생략했습니다. newlib을 쓰지 않는 설계의 출발점이며 이 코드만으로 실제 보드 부트가 검증된 것은 아닙니다. compiler가 copy loop를 memcpy/memset 호출로 바꾸는지도 오브젝트에서 확인해야 합니다.
 
 ## 정리
 
-- 부트 순서는 Reset → SP/.data/.bss → SystemInit → `__libc_init_array` → main입니다.
-- C++ static 객체 생성자는 `.init_array` 섹션에 함수 포인터로 등록되고 `__libc_init_array`가 차례로 호출합니다.
-- 같은 TU 내부는 선언 순서가 보장되지만 다른 TU 사이는 unspecified입니다. Construct-On-First-Use로 회피합니다.
-- 생성자에서 peripheral과 RTOS 호출은 금지합니다. 명시적 init를 main에 두는 것이 안전합니다.
-- trivial constructor와 `constexpr`을 활용하면 `.init_array`에 들어가지 않아 부담이 줄어듭니다.
+- 이 예시는 reset 하드웨어의 MSP 설정 후 .data/.bss와 platform 초기화, init-array 호출을 거쳐 main에 진입합니다. vendor별 순서는 startup 파일에서 확인합니다.
+- .init_array는 초기화 wrapper의 함수 포인터 목록이며 entry 수가 객체 수와 일치하지는 않습니다.
+- 일반 ordered dynamic initialization은 같은 TU의 정의 순서를 따릅니다. TU 사이 의존과 inline/template 변수는 별도 규칙을 확인합니다.
+- 생성자의 하드웨어·RTOS 접근은 준비 순서와 API 계약으로 판단하고, 전제가 많은 작업은 main의 명시적 init로 옮깁니다.
+- trivial 생성자와 constexpr 생성자는 다른 개념입니다. 상수 초기화를 요구할 때는 constinit 또는 상수 초기화식과 오브젝트 검사를 사용합니다.
 - 작은 환경에서는 startup 자체를 직접 작성할 수도 있습니다.
+
+## 1차 자료와 확인 범위
+
+- [CMSIS Cortex-M startup](https://arm-software.github.io/CMSIS_6/latest/Core/startup_c_pg.html) — vector와 SystemInit/runtime 진입
+- [newlib init.c](https://github.com/mirror/newlib-cygwin/blob/master/newlib/libc/misc/init.c) — array 순회와 조건부 _init
+- [GCC C++ dialect options](https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html) — cxa-atexit와 guard 옵션
+- [C++ draft: static initialization](https://eel.is/c++draft/basic.start.static)와 [dynamic initialization](https://eel.is/c++draft/basic.start.dynamic) — 언어 규칙
+
+2026-10-22 확인은 host의 상수 초기화 예제 실행과 ARM ELF 오브젝트의 .init_array·relocation 검사입니다. reset, FPU, 실제 newlib 링크와 보드 부팅은 실행하지 않았습니다.
 
 ## 관련 항목
 

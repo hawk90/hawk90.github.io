@@ -27,7 +27,7 @@ void process(T value) {
 }
 ```
 
-C에서는 불가능합니다(타입 정보가 없음). C++ Type Traits가 컴파일 타임 type query를 제공합니다.
+C11의 `_Generic`도 타입에 따라 식을 선택할 수 있습니다. C++에서는 표준 trait와 템플릿으로 타입 속성을 조합하고 제약을 표현합니다. C++ Type Traits가 컴파일 타임 type query를 제공합니다.
 
 ```cpp
 template<typename T>
@@ -67,7 +67,7 @@ std::is_union_v<T>
 std::is_arithmetic_v<T>   // integral || floating_point
 std::is_fundamental_v<T>  // arithmetic || void || nullptr_t
 std::is_object_v<T>       // 변수가 될 수 있는 타입
-std::is_scalar_v<T>       // arithmetic || enum || pointer
+std::is_scalar_v<T>       // arithmetic, enum, pointer, member pointer, nullptr_t
 ```
 
 ### Type properties
@@ -129,7 +129,7 @@ write_register<uint64_t>(...)                      // ERROR — too large
 
 ## SFINAE — Substitution Failure Is Not An Error
 
-C++의 오래된 idiom입니다. 템플릿 인스턴스화 실패가 컴파일 에러가 아니라 무시 처리되며, 이를 활용해 조건부 오버로드를 구성합니다.
+C++의 오래된 idiom입니다. 함수 템플릿의 타입 추론·치환 중 immediate context에서 생긴 실패는 후보를 제외하는 데 쓰이며, 이를 활용해 조건부 오버로드를 구성합니다.
 
 ```cpp
 // 정수 전용
@@ -153,7 +153,7 @@ process("str");  // ERROR — 둘 다 안 맞음
 
 `std::enable_if`는 조건이 true이면 정의를 남기고, false이면 substitution failure로 처리해 해당 오버로드를 무시합니다.
 
-C++17의 `if constexpr`이 대부분의 SFINAE를 대체합니다. 새 코드에서는 `if constexpr`을 우선합니다.
+C++17의 `if constexpr`은 함수 본문 안의 구현 선택을 단순하게 만듭니다. 후보 함수 자체를 오버로드 집합에서 제외하는 SFINAE와는 역할이 다릅니다. C++20 concepts도 시그니처의 제약을 표현하는 선택지입니다.
 
 ```cpp
 // if constexpr — 훨씬 깔끔
@@ -229,14 +229,17 @@ void log(T value) {
 template<typename T>
 size_t serialize(uint8_t* buf, T value) {
     if constexpr (std::is_integral_v<T>) {
+        static_assert(!std::is_same_v<T, bool>, "bool needs its own wire format");
+        using U = std::make_unsigned_t<T>;
+        U bits = static_cast<U>(value);
         // big-endian으로 정수 직렬화
         for (int i = sizeof(T) - 1; i >= 0; --i) {
-            buf[sizeof(T) - 1 - i] = (value >> (i * 8)) & 0xFF;
+            buf[sizeof(T) - 1 - i] = (bits >> (i * 8)) & 0xFF;
         }
         return sizeof(T);
     }
     else if constexpr (std::is_floating_point_v<T>) {
-        // IEEE 754 그대로 (host endian)
+        // host object representation; IEEE 754 여부와 endian은 별도 확인
         std::memcpy(buf, &value, sizeof(T));
         return sizeof(T);
     }
@@ -246,7 +249,7 @@ size_t serialize(uint8_t* buf, T value) {
         return serialize(buf, static_cast<U>(value));
     }
     else if constexpr (std::is_trivially_copyable_v<T>) {
-        // POD struct
+        // trivially copyable struct의 객체 표현; padding 포함
         std::memcpy(buf, &value, sizeof(T));
         return sizeof(T);
     }
@@ -263,7 +266,7 @@ serialize(buf, MyPOD{...});          // memcpy
 serialize(buf, std::string{});       // ERROR — not trivially copyable
 ```
 
-한 함수가 모든 타입을 처리하며, 컴파일러는 해당 분기만 생성합니다.
+이 함수는 표현을 복사하는 예이며 이식 가능한 wire format을 보장하지 않습니다. padding, 부동소수점 표현, endian, 포인터 멤버를 별도로 고려해야 합니다. 출력 버퍼에 `sizeof(T)` 이상 공간이 있다는 호출자 계약도 필요합니다.
 
 ## std::declval — 인스턴스 없이 type query
 
@@ -301,8 +304,8 @@ static_assert(!is_pointer_or_integer_v<float>);
 ```cpp
 template<typename T>
 constexpr bool is_register_safe_v =
-    std::is_trivially_copyable_v<T> &&
-    !std::is_pointer_v<T> &&
+    std::is_unsigned_v<T> && std::is_integral_v<T> &&
+    !std::is_same_v<T, bool> &&
     sizeof(T) <= 4 &&
     alignof(T) <= 4;
 
@@ -314,7 +317,7 @@ void write_register(uintptr_t addr, T value) {
 }
 ```
 
-여러 검증을 하나의 trait로 묶어 새 함수에서 재사용합니다.
+여러 타입 조건을 묶어 재사용하지만 이 trait만으로 MMIO 안전을 증명할 수는 없습니다. 허용된 레지스터 폭·주소 정렬·접근 권한·쓰기 부작용은 해당 MCU 매뉴얼 계약입니다. trivially copyable이라는 이유로 임의 struct를 volatile 대입하는 것도 일반적인 MMIO 구현이 아닙니다.
 
 ## Tag dispatch — SFINAE 대안
 
@@ -367,7 +370,7 @@ struct has_foo {
 조건 누락이나 false negative가 생길 수 있으므로, `static_assert`로 단위 테스트를 작성해 검증합니다.
 
 ### 3. void_t 패턴 오용
-SFINAE 검출이 컴파일러마다 다른 결과를 낼 수 있습니다. 표준 trait나 concept을 우선합니다.
+검출한 식이 반환 타입·const 자격·참조 수식까지 원하는 계약을 나타내는지 확인합니다. 올바른 표준 코드가 컴파일러마다 임의로 다르게 동작하는 것으로 설명하지 않습니다.
 
 ### 4. type_traits 미include
 ```cpp
@@ -383,7 +386,7 @@ void f(T x) {
     if constexpr (std::is_integral_v<T>) {
         // OK
     } else {
-        x.bar();   // T가 integral이면 — 분기 안 들어가지만 검사
+        x.bar();   // T가 integral이면 이 종속 식의 분기는 인스턴스화하지 않음
     }
 }
 ```
@@ -392,46 +395,55 @@ void f(T x) {
 ### 6. 사용하지 않는 trait 헤더 include
 `<type_traits>`는 작지만 컴파일 시간을 추가합니다. 쓰지 않으면 제거합니다.
 
-## 측정 — type traits의 코드 크기
+## is_pod 대신 필요한 계약 검사
 
-같은 함수를 virtual, SFINAE, `if constexpr`로 비교합니다.
+`std::is_pod`는 C++20에서 deprecated입니다. raw byte 복사의 전제에는 `is_trivially_copyable`, 레이아웃 관련 조건에는 `is_standard_layout`을 따로 검사합니다. 어느 trait도 padding·endianness·수신 바이트의 유효한 값 여부를 해결하지 않습니다.
 
-```cpp
-// V1 — virtual (런타임 분기)
-class Processor {
-    virtual void process(int) = 0;
-    virtual void process(float) = 0;
-};
+## 작은 예제 — 검출과 정수 직렬화 경계
 
-// V2 — SFINAE
-template<typename T, std::enable_if_t<std::is_integral_v<T>, int> = 0>
-void process(T);
-template<typename T, std::enable_if_t<std::is_floating_point_v<T>, int> = 0>
-void process(T);
-
-// V3 — if constexpr
-template<typename T>
-void process(T x) {
-    if constexpr (std::is_integral_v<T>) { /* */ }
-    else if constexpr (std::is_floating_point_v<T>) { /* */ }
+```cpp title="traits-check.cpp"
+#include <array>
+#include <cassert>
+#include <cstdint>
+#include <type_traits>
+#include <utility>
+template<class T, class=void> struct has_ready : std::false_type {};
+template<class T> struct has_ready<T, std::void_t<decltype(std::declval<const T&>().ready())>>
+    : std::is_same<decltype(std::declval<const T&>().ready()), bool> {};
+struct Good { bool ready() const { return true; } };
+struct Wrong { int ready() const { return 1; } };
+static_assert(has_ready<Good>::value && !has_ready<Wrong>::value);
+static_assert(std::is_scalar_v<decltype(nullptr)>);
+static_assert(std::is_scalar_v<int Good::*>);
+template<class T> auto big_endian(T value) {
+    static_assert(std::is_integral_v<T> && !std::is_same_v<T,bool>, "integer except bool");
+    using U=std::make_unsigned_t<T>;
+    U bits=static_cast<U>(value);
+    std::array<std::uint8_t,sizeof(T)> out{};
+    for (unsigned i=0; i<sizeof(T); ++i)
+        out[sizeof(T)-1-i]=static_cast<std::uint8_t>(bits>>(i*8));
+    return out;
+}
+int main() {
+    auto a=big_endian(std::uint16_t{0x1234});
+    assert(a[0]==0x12 && a[1]==0x34);
+    auto b=big_endian(std::int16_t{-2});
+    assert(b[0]==0xff && b[1]==0xfe);
+#ifdef BAD_BOOL
+    big_endian(true);
+#endif
 }
 ```
 
-5개 type별 호출 기준의 코드 크기입니다(STM32F4).
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors traits-check.cpp -o traits-check && ./traits-check`로 확인했습니다. `-DBAD_BOOL`은 컴파일 실패합니다. unsigned 변환 후 shift하여 음수 signed shift에 의존하지 않으며, 8비트 바이트와 고정 폭 정수 타입을 제공하는 환경을 대상으로 합니다.
 
-```text
-V1 (virtual): 460 B (vtable + 가상 호출)
-V2 (SFINAE): 320 B (per-type 인스턴스)
-V3 (if constexpr): 280 B (인라인 분기 제거)
-```
-
-`if constexpr`이 가장 작고 빠르며, modern C++에서 권장됩니다.
+[C++20 N4861 type traits](https://timsong-cpp.github.io/cppwp/n4861/meta.unary.cat)와 [타입 치환 규칙](https://timsong-cpp.github.io/cppwp/n4861/temp.deduct)을 참고합니다. virtual/SFINAE/if constexpr의 보편적인 크기 순위는 이 예제로 측정하지 않았습니다.
 
 ## 정리
 
 - Type Traits는 컴파일 타임 type query이며 `<type_traits>` 표준 헤더가 제공합니다.
 - 주요 trait는 `is_integral`, `is_pointer`, `is_trivially_copyable`, `is_same`, `decay` 등이 있습니다.
-- SFINAE와 `enable_if`로 조건부 오버로드를 만들며, C++17의 `if constexpr`이 이를 대체합니다.
+- SFINAE와 `enable_if`로 조건부 오버로드를 만들며, C++17의 `if constexpr`은 본문 분기를 선택하며 후보 제외와는 구분합니다.
 - 임베디드에서는 type-safe register access, serialization, custom domain traits에 활용합니다.
 - C++20 concepts가 훨씬 깔끔한 syntax이므로 가능하면 concept을 권장합니다.
 

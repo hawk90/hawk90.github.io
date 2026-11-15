@@ -29,19 +29,23 @@ topics: ["embedded"]
 
 ## SPSC Ring Buffer — 가장 기본
 
-Ring buffer의 구조는 다음과 같습니다. Producer는 head만 전진시키고 Consumer는 tail만 전진시키므로 두 인덱스가 같은 메모리를 동시에 건드릴 일이 없습니다.
+Ring buffer의 구조는 다음과 같습니다. Producer만 head를 쓰고 Consumer만 tail을 씁니다. 서로의 index를 읽는 일은 있으므로 atomic과 release/acquire로 slot 재사용 시점을 동기화합니다.
 
 ![SPSC ring buffer — head/tail 분리](/images/blog/embedded-cpp/diagrams/part4-04-spsc-ring-buffer.svg)
 
 [Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics)에서 본 코드를 다시 옮기면 다음과 같습니다.
 
-```cpp
+```cpp title="spsc.h"
+#pragma once
+#include <atomic>
+#include <cstddef>
+using std::size_t;
 template<typename T, size_t N>
 class SpscQueue {
-    static_assert((N & (N - 1)) == 0, "N must be power of 2");
+    static_assert(N >= 2 && (N & (N - 1)) == 0, "N must be a power of 2 >= 2");
 
     T buffer_[N];
-    alignas(64) std::atomic<size_t> head_{0};   // cache line 분리
+    alignas(64) std::atomic<size_t> head_{0};   // 64바이트 line을 가정한 정렬 예시
     alignas(64) std::atomic<size_t> tail_{0};
     static constexpr size_t kMask = N - 1;
 
@@ -68,11 +72,13 @@ public:
 };
 ```
 
+이 배열 기반 구현은 T의 기본 생성과 copy assignment를 요구합니다. ISR 경로에서는 T의 복사가 allocation·blocking·예외를 만들지 않는지도 확인해야 합니다.
+
 핵심은 다음과 같습니다.
 
 - Producer는 head만, Consumer는 tail만 수정합니다.
 - 서로의 변수는 `acquire`로 읽고 자기 것은 `release`로 씁니다.
-- `alignas(64)`로 head와 tail을 다른 cache line에 두어 false sharing을 회피합니다.
+- target의 destructive-interference 간격이 64바이트 이하인 경우 이 정렬로 두 index를 분리할 수 있습니다. 실제 target 간격과 RAM 비용을 확인합니다.
 
 ## False Sharing — `alignas(64)`의 의의
 
@@ -87,23 +93,25 @@ struct Bad {
 struct Good {
     alignas(64) std::atomic<size_t> a;
     alignas(64) std::atomic<size_t> b;
-};   // 다른 cache line — no false sharing
+};   // line 크기가 64바이트 이하일 때 분리
 ```
 
-ARM Cortex-A multi-core에서는 중요합니다. Cortex-M single core에서는 무관하지만 습관적으로 alignas를 붙입니다.
+ARM Cortex-A multi-core에서는 중요합니다. Cortex-M single core에서는 core 간 false sharing 방지를 위해 64바이트 정렬을 습관적으로 추가할 이유가 없습니다. 64는 모든 target의 cache line 크기가 아니며 RAM 낭비가 될 수 있습니다. 이 예시는 64바이트 line host의 설명용 설정입니다.
 
 ## Lock-free Stack (Treiber Stack)
 
-MPMC가 가능한 단순한 lock-free stack입니다.
+다음은 Treiber의 CAS 연결 동작만 보여 주는 골격입니다. 안전한 MPMC 객체 수명·재사용·reclamation 구현을 생략했으므로 제품용 컨테이너가 아닙니다.
 
 ```cpp
 template<typename T>
 class TreiberStack {
+public:
     struct Node {
         T value;
         Node* next;
     };
 
+private:
     std::atomic<Node*> top_{nullptr};
 
 public:
@@ -132,7 +140,7 @@ public:
 };
 ```
 
-MPMC이며 모든 thread가 push/pop 모두 수행할 수 있습니다.
+다중 thread로 사용하려면 읽는 동안 node가 해제되지 않고, 다른 thread가 next를 쓰거나 node를 다시 push하지 않도록 보장해야 합니다. 단순히 pop 후 delete하거나 pool에 즉시 반환하면 use-after-free·data race가 발생할 수 있습니다.
 
 문제는 **ABA problem**입니다. Pop이 `old_top->next`를 읽는 중에 다른 thread가 `old_top`을 pop했다가 다른 노드를 push한 뒤 다시 `old_top`을 push하면, CAS는 성공하지만 next pointer가 잘못된 값을 가리킵니다.
 
@@ -150,10 +158,10 @@ struct TaggedPtr {
     uintptr_t tag;
 };
 
-std::atomic<TaggedPtr<Node>> top;   // 16 byte atomic on 64-bit
+std::atomic<TaggedPtr<Node>> top{TaggedPtr<Node>{nullptr, 0}};   // 16 byte atomic on 64-bit
 ```
 
-ARM Cortex-M(32-bit)에서는 64-bit atomic이 불가능하므로 32-bit pointer에 작은 counter를 packing합니다.
+32-bit target에서 pointer+tag 묶음은 더 넓은 atomic 연산을 요구할 수 있습니다. 지원 여부는 target/toolchain으로 검사합니다. 아래 16-bit ptr 표현은 일반 Cortex-M의 0x20000000 SRAM 주소를 담지 못하므로 실제 pointer packing으로 쓰면 안 됩니다.
 
 ```cpp
 struct PackedPtr {
@@ -167,55 +175,18 @@ struct PackedPtr {
 
 [Part 3-03 Pool Allocator](/blog/embedded/embedded-cpp/part3-03-pool-allocator)의 lock-free 버전입니다.
 
+이전처럼 storage와 atomic next를 union으로 겹치면 T 사용 중에도 관찰자가 next를 읽을 수 있어 활성 member와 객체 수명 문제가 생깁니다. ABA뿐 아니라 누가 node를 읽는지, 언제 재사용할 수 있는지, T를 언제 생성·파괴할지의 프로토콜이 필요합니다.
+
 ```cpp
-template<typename T, size_t N>
-class LockFreePool {
-    union Slot {
-        alignas(T) std::byte storage[sizeof(T)];
-        std::atomic<Slot*> next;
-    };
-
-    Slot slots_[N];
-    std::atomic<Slot*> free_head_;
-
-public:
-    LockFreePool() {
-        for (size_t i = 0; i < N - 1; ++i) {
-            slots_[i].next.store(&slots_[i + 1], std::memory_order_relaxed);
-        }
-        slots_[N - 1].next.store(nullptr, std::memory_order_relaxed);
-        free_head_.store(&slots_[0], std::memory_order_release);
-    }
-
-    T* allocate() noexcept {
-        Slot* head = free_head_.load(std::memory_order_acquire);
-        while (head) {
-            Slot* next = head->next.load(std::memory_order_relaxed);
-            if (free_head_.compare_exchange_weak(
-                head, next,
-                std::memory_order_release,
-                std::memory_order_acquire)) {
-                return reinterpret_cast<T*>(&head->storage);
-            }
-        }
-        return nullptr;
-    }
-
-    void deallocate(T* p) noexcept {
-        if (!p) return;
-        Slot* slot = reinterpret_cast<Slot*>(p);
-        Slot* head = free_head_.load(std::memory_order_relaxed);
-        do {
-            slot->next.store(head, std::memory_order_relaxed);
-        } while (!free_head_.compare_exchange_weak(
-            head, slot,
-            std::memory_order_release,
-            std::memory_order_relaxed));
-    }
+// 저장 공간의 분리만 보여 주는 설계 조각이며 완성 lock-free pool이 아닙니다.
+template<typename T>
+struct PoolSlot {
+    std::atomic<PoolSlot*> next{nullptr};
+    alignas(T) std::byte storage[sizeof(T)];
 };
 ```
 
-ABA 문제가 발생할 수 있으므로 주의가 필요합니다.
+metadata를 분리해도 reclamation·ABA가 자동 해결되지는 않습니다. bounded critical section 또는 소유권이 명확한 RTOS pool부터 선택하고, MPMC가 필요할 때는 해당 library의 용량·lock-free·reclamation 계약을 확인합니다.
 
 ## Boost.Lockfree
 
@@ -242,7 +213,7 @@ Boost는 내부적으로 tagged pointer와 정교한 알고리즘을 쓰므로 �
 
 ## moodycamel::ConcurrentQueue
 
-가장 빠른 MPMC 구현으로, Cameron Desrochers의 고성능 lock-free queue입니다.
+Cameron Desrochers의 MPMC queue입니다. 성능 순위는 workload에 따라 달라지며 공식 README의 순서 보장·메모리 할당 정책을 확인해야 합니다.
 
 ```cpp
 #include <concurrentqueue.h>
@@ -253,17 +224,19 @@ int v;
 q.try_dequeue(v);
 ```
 
-수십만 ops/sec를 달성하며 임베디드 multi-core에 적합합니다.
+기본 enqueue는 필요하면 메모리를 할당할 수 있습니다. 순서 보장도 모든 producer에 걸친 전역 linearizable FIFO와 동일하지 않으므로 no-heap·엄격한 전역 순서 요구와 대조합니다.
 
-## 임베디드 — ISR + 여러 task
+## 임베디드 — ISR 한 개와 consumer task 한 개
 
 ```cpp
-// ISR가 producer, 여러 task가 consumer
+// 정확히 한 ISR producer와 한 task consumer
 class EventBus {
     SpscQueue<Event, 256> queue_;
     SemaphoreHandle_t event_sem_;
 
 public:
+    explicit EventBus(SemaphoreHandle_t sem) : event_sem_(sem) {}
+
     // ISR에서 호출
     void post_isr(const Event& e) {
         if (queue_.push(e)) {
@@ -273,7 +246,7 @@ public:
         }
     }
 
-    // Task에서 호출
+    // 지정된 단일 consumer task에서만 호출
     bool wait(Event& out, TickType_t timeout) {
         if (queue_.pop(out)) return true;
 
@@ -285,7 +258,7 @@ public:
 };
 ```
 
-SPSC queue로 ISR에서 단일 task로 전달합니다. 여러 task가 받아야 한다면 queue를 따로 둡니다.
+이 조각은 정상 생성된 semaphore를 주입하고 단일 task에서만 pop하는 흐름입니다. semaphore는 wake hint이므로 queue를 먼저 drain하면 stale token이 남을 수 있고 wait가 false를 반환해도 전체 timeout을 소진했다는 뜻은 아닙니다. 완전한 wait-until-deadline API는 timeout 잔여량과 재검사를 설계해야 합니다. 여러 task가 pop해야 한다면 RTOS queue 등 multi-consumer API로 바꿉니다. ISR priority·FromISR 허용 범위와 full/drop 정책도 별도입니다.
 
 ## 임베디드 — Atomic Counter
 
@@ -310,18 +283,35 @@ uint32_t get_stats_sent() {
 
 counter 값 자체가 의미를 갖고 순서는 무관하므로 `relaxed`로 충분합니다.
 
-## 측정 — SPSC queue 성능
+## 재현 — capacity, wrap-around와 두 thread
 
-```text
-# Cortex-M4, 1M operations
-
-Mutex-based queue:    ~10 M cycles
-SPSC lock-free:       ~1.2 M cycles    (~8x faster)
-Boost MPMC:           ~2.5 M cycles    (~4x faster)
-moodycamel MPMC:      ~1.8 M cycles    (~5x faster)
+```cpp title="spsc-check.cpp"
+#include "spsc.h"
+#include <cassert>
+#include <thread>
+#include <iostream>
+int main() {
+    SpscQueue<int, 4> small; int value = 0;
+    assert(!small.pop(value));
+    assert(small.push(1) && small.push(2) && small.push(3));
+    assert(!small.push(4));
+    assert(small.pop(value) && value == 1);
+    assert(small.push(4));
+    for (int expected = 2; expected <= 4; ++expected) assert(small.pop(value) && value == expected);
+    assert(!small.pop(value));
+    SpscQueue<int, 64> queue;
+    constexpr int count = 100000;
+    std::thread producer([&] { for (int n = 0; n < count; ++n) while (!queue.push(n)) std::this_thread::yield(); });
+    std::thread consumer([&] { for (int n = 0; n < count; ++n) { int got; while (!queue.pop(got)) std::this_thread::yield(); assert(got == n); } });
+    producer.join(); consumer.join();
+#ifdef BAD_CAPACITY
+    SpscQueue<int, 0> invalid;
+#endif
+    std::cout << "spsc N-1/full/wrap/fifo passed count=" << count << '\n';
+}
 ```
 
-SPSC가 가장 빠르지만 producer와 consumer가 정확히 하나씩일 때만 쓸 수 있습니다.
+Clang 23.1.3 host에서 AddressSanitizer·UBSan을 켜고 실행했습니다. N=4의 실제 capacity 3, full·empty·wrap-around, 100000개의 FIFO 전달을 확인했고 BAD_CAPACITY는 static_assert 실패입니다. host stress는 모든 interleaving의 증명이나 board ISR/WCET 검증이 아닙니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -329,11 +319,11 @@ SPSC가 가장 빠르지만 producer와 consumer가 정확히 하나씩일 때�
 Producer 둘이 push하면 race가 발생합니다. SPSC는 producer가 정확히 하나여야 합니다.
 
 ### 2. Memory order `seq_cst` 남용
-기본 `seq_cst`는 가장 느립니다. 필요한 최소 order만 씁니다.
+기본 seq_cst보다 약한 순서를 선택하기 전에 게시·회수의 happens-before 관계를 증명합니다. 성능은 target에서 비교합니다.
 
 ### 3. 큰 객체에 atomic 시도
 ```cpp
-std::atomic<HugeStruct> obj;   // hardware atomic 안 됨 → mutex fallback
+std::atomic<HugeStruct> obj;   // lock-free 여부와 runtime helper 제공 확인
 ```
 
 pointer를 atomic swap하는 방식으로 우회합니다.
@@ -370,40 +360,26 @@ loop:
     BNE    loop             ; 실패시 retry
 ```
 
-ARMv7-M의 exclusive monitor가 atomic을 보장합니다. DMA 같은 다른 master가 같은 주소에 접근하면 STREX가 실패합니다.
+ARMv7-M의 exclusive monitor가 atomic을 보장합니다. DMA의 쓰기가 exclusive monitor에 반영되는지는 시스템 interconnect와 메모리 속성에 따릅니다. CPU 간 atomic의 가시성 규칙을 DMA cache 일관성·barrier·buffer ownership의 대안으로 쓰면 안 됩니다.
 
 **중요**: 일부 peripheral 주소는 exclusive monitor를 지원하지 않으므로 RAM에서만 안전합니다.
 
-## Lock-free의 실용적 한계
+## 1차 자료와 적용 한계
 
-```text
-사용 OK:
-✓ ISR ↔ task 통신 (SPSC)
-✓ Statistics counter (atomic)
-✓ Flag/state (atomic)
-✓ 검증된 라이브러리 사용 (Boost, moodycamel)
+- [C++ atomic ordering](https://eel.is/c++draft/atomics.order) — release/acquire 게시와 회수
+- [Boost.Lockfree](https://www.boost.org/doc/libs/latest/doc/html/lockfree.html) — 자료구조별 제약과 용량 정책
+- [ConcurrentQueue README](https://github.com/cameron314/concurrentqueue) — producer 간 순서와 allocation 계약
 
-피하는 게 좋음:
-✗ 직접 MPMC 구현 (ABA, hazard pointer 복잡)
-✗ 복잡한 자료구조 (RB-tree, hash map)
-✗ Cortex-M0/M0+ (atomic 미지원)
-
-대안:
-- Critical section (짧음)
-- RTOS queue (xQueueSend) — 검증됨
-- Mutex + condition variable
-```
-
-대부분의 임베디드 multi-task는 RTOS queue로 충분합니다. Lock-free는 극한 성능이 필요하거나 ISR 통신이 필요할 때만 씁니다.
+SPSC는 정확히 한 producer/consumer라는 제약을 확인할 수 있을 때 사용합니다. target atomic helper·ISR 재진입·cache/DMA ownership은 host 실행과 분리해 검증하며, M0도 atomic API 지원과 lock-free 구현 여부를 따로 확인합니다.
 
 ## 정리
 
 - SPSC queue가 임베디드 lock-free의 표준이며, ISR과 task 통신에 적합합니다.
-- Producer는 head, Consumer는 tail만 다루므로 서로 무관하며 CAS가 필요 없습니다.
-- `alignas(64)`로 cache line을 정렬해 false sharing을 회피합니다.
+- index별 writer가 하나여서 CAS가 필요 없지만 서로의 index를 읽어 게시와 slot 재사용을 동기화합니다.
+- false sharing 정렬은 target 간격을 확인해 선택하며 64바이트를 모든 CPU의 고정값으로 쓰지 않습니다.
 - MPMC는 복잡하므로 검증된 라이브러리(Boost, moodycamel)를 사용합니다.
 - ABA problem에는 tagged pointer나 hazard pointer를 쓰거나 MPMC 자체를 회피합니다.
-- Cortex-M0/M0+는 atomic을 지원하지 않으므로 critical section을 사용합니다.
+- M0의 exclusive 명령 부재와 atomic API/helper 지원을 구분하고 ISR에서의 진행성을 따로 검증합니다.
 
 ## 관련 항목
 

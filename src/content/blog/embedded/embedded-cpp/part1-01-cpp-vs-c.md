@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Modern C++는 추상화 비용을 거의 0으로 만든다."** 단, 그 zero가 성립하는 전제 조건들을 알아야 합니다.
+> **C++ 추상화의 추가 비용은 기능 이름으로 정할 수 없습니다.** 같은 동작의 C 구현과 같은 타깃·옵션으로 비교합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -25,25 +25,24 @@ C++를 택하면 다음 두려움이 따라옵니다.
 - 디버깅이 더 까다로워질 것 같습니다
 - 인증(MISRA, DO-178C)에서 막힐 것 같습니다
 
-이 두려움 중 일부는 1990년대 C++의 잔영입니다. Modern C++(11/14/17/20)는 측정 가능한 *zero-cost abstraction*을 약속합니다. 다만 모든 기능이 그렇지는 않습니다. 어느 기능이 무료이고 어느 기능이 유료인지를 정확히 아는 것이 핵심입니다.
+zero-cost는 해당 추상화를 손으로 구현한 코드보다 추가 비용이 없도록 설계한다는 원칙입니다. 실제 실행 시간·저장 공간·초기화가 모두 0이라는 뜻은 아닙니다. 컴파일러 최적화, 라이브러리 구현, 타깃과 사용 방식별로 검증해야 합니다.
 
 ## C++가 C에 더하는 것
 
 C++는 C의 superset에 가깝지만 동일하지는 않습니다. C++가 더하는 도구는 크게 네 가지입니다.
 
-| 도구 | 컴파일 타임 비용 | 런타임 비용 |
-| --- | --- | --- |
-| 클래스 (멤버 함수, public/private) | 작음 | **0** (`call`만) |
-| 템플릿 | 큼 (bloat 가능) | **0** (인스턴스마다 코드) |
-| `constexpr` | 큼 | **0** 또는 음수(런타임 코드 제거) |
-| RAII (소멸자) | 작음 | **0** (생성자 인라인) |
-| 가상 함수 | 작음 | vtable 간접 호출 1회 |
-| 예외 처리 | 큼 | **있음** (대부분 환경에서 끔) |
-| RTTI (`typeid`, `dynamic_cast`) | 작음 | 있음 (끔) |
-| 스마트 포인터 | 작음 | `unique_ptr` 0, `shared_ptr` 있음 |
-| `iostream` | 큼 | 큼 (printf 대비 ~50KB) |
+| 도구 | 확인할 비용과 조건 |
+| --- | --- |
+| 클래스·비가상 멤버 함수 | 레이아웃·padding·호출 및 인라인 결과. 클래스 문법만으로 추가 런타임이 필수인 것은 아님 |
+| 템플릿 | 인스턴스별 코드·컴파일 시간, 중복 제거 여부 |
+| `constexpr` | 상수 평가가 필요한 문맥에서는 컴파일 시간 평가. 일반 호출은 런타임 실행 가능 |
+| RAII | 수동 정리와 같은 자원 해제 작업이 필요함. 인라인은 그 작업 자체를 제거하지 않음 |
+| 가상 함수 | vptr/vtable과 간접 호출. devirtualization되면 직접 호출·인라인 가능 |
+| 예외·RTTI | ABI·라이브러리별 메타데이터, 정상/오류 경로 실행 비용 |
+| 스마트 포인터 | `unique_ptr`의 deleter 상태와 정리, `shared_ptr`의 공유 제어 블록·참조 계수 |
+| 입출력·동적 할당 | 선택한 구현과 포맷 기능, allocation 빈도 및 실패 정책 |
 
-**핵심**: C와 동등한 런타임 비용을 가지는 기능이 대부분입니다. 비용을 가지는 것은 예외, RTTI, iostream, 동적 다형성 정도입니다. 이들을 끄거나 사용하지 않으면 C와 같은 영역에서 출발합니다.
+예외나 RTTI만 끈다고 나머지 코드의 크기와 지연 시간이 자동으로 C와 같아지지는 않습니다. 아래의 작은 비교는 특정 추상화가 최적화되는 사례를 보여줍니다.
 
 한눈에 보면 다음과 같이 정리됩니다.
 
@@ -53,110 +52,71 @@ C++는 C의 superset에 가깝지만 동일하지는 않습니다. C++가 더하
 
 말로는 부족합니다. 어셈블리를 직접 봅니다.
 
-같은 일을 하는 두 코드를 비교합니다. ARM Cortex-M4, `-O2`, GCC 13 환경입니다.
+같은 동작을 하는 C와 C++를 Cortex-M4 ELF object로 교차 컴파일합니다. 검증 환경은 Clang 23.1.3, `-O2 -ffreestanding`이며, GCC 13이나 실제 STM32 보드에서 실행한 결과로 제시하지 않습니다.
 
-```c
-// C 버전
-int add_one(int x) {
-    return x + 1;
-}
+```c title="comparison.c"
+typedef unsigned int u32;
+_Static_assert(sizeof(u32) == 4, "32-bit MMIO access required");
+int add_one(int x) { return x + 1; }
+void blink_on(void) { *(volatile u32*)0x40020018u = 1u << 5; }
+void blink_off(void) { *(volatile u32*)0x40020018u = 1u << 21; }
 ```
 
-```cpp
-// C++ 버전
+```cpp title="comparison.cpp"
+using u32 = unsigned int;
+static_assert(sizeof(u32) == 4);
 struct Counter {
     int value;
-    Counter(int v) : value(v) {}
+    explicit Counter(int v) : value(v) {}
     int add_one() const { return value + 1; }
 };
-
-int caller(int x) {
-    Counter c(x);
-    return c.add_one();
-}
-```
-
-어셈블리 결과:
-
-```text
-# C: add_one(int)
-add_one:
-    adds    r0, r0, #1
-    bx      lr
-
-# C++: caller(int)
-caller(int):
-    adds    r0, r0, #1
-    bx      lr
-```
-
-완전히 동일합니다. C++의 생성자 호출과 멤버 함수 호출이 컴파일러에 의해 사라졌습니다. 이것이 *zero-cost abstraction*의 가장 단순한 예입니다.
-
-## 측정 — Blink LED 비교
-
-조금 더 현실적인 예를 봅니다. STM32 보드의 GPIO blink입니다.
-
-```c
-// C 버전
-#define GPIOA_BSRR (*(volatile uint32_t*)0x40020018)
-
-void blink_on(void)  { GPIOA_BSRR = 1 << 5; }
-void blink_off(void) { GPIOA_BSRR = 1 << 21; }
-```
-
-```cpp
-// C++ 버전 (RAII + 템플릿)
-template<uint32_t Address, uint8_t Pin>
+template<unsigned Address, unsigned Pin>
 struct Gpio {
-    static void on()  { *reinterpret_cast<volatile uint32_t*>(Address + 0x18) = 1u << Pin; }
-    static void off() { *reinterpret_cast<volatile uint32_t*>(Address + 0x18) = 1u << (Pin + 16); }
+    static_assert(Pin < 16, "GPIO pin must be below 16");
+    static void on() { *reinterpret_cast<volatile u32*>(Address + 0x18u) = 1u << Pin; }
+    static void off() { *reinterpret_cast<volatile u32*>(Address + 0x18u) = 1u << (Pin + 16); }
 };
-
-using Led = Gpio<0x40020000, 5>;
-
-void blink_on()  { Led::on(); }
-void blink_off() { Led::off(); }
+using Led = Gpio<0x40020000u, 5>;
+extern "C" int add_one(int x) { Counter c(x); return c.add_one(); }
+extern "C" void blink_on() { Led::on(); }
+extern "C" void blink_off() { Led::off(); }
+#ifdef INVALID_PIN
+static_assert(sizeof(Gpio<0x40020000u, 16>) > 0);
+#endif
 ```
 
-`-O2` 어셈블리:
-
-```text
-# C: blink_on
-blink_on:
-    ldr     r3, =0x40020018
-    movs    r2, #32
-    str     r2, [r3]
-    bx      lr
-
-# C++: blink_on
-blink_on:
-    ldr     r3, =0x40020018
-    movs    r2, #32
-    str     r2, [r3]
-    bx      lr
+```bash
+clang --target=arm-none-eabi -mcpu=cortex-m4 -mthumb -O2 -ffreestanding -c comparison.c -o c.o
+clang++ --target=arm-none-eabi -mcpu=cortex-m4 -mthumb -O2 -ffreestanding -std=c++17 -c comparison.cpp -o cpp.o
+llvm-objdump -d c.o cpp.o
+llvm-objcopy --dump-section .text=c.text c.o
+llvm-objcopy --dump-section .text=cpp.text cpp.o
+cmp c.text cpp.text
 ```
 
-역시 동일합니다. C++의 템플릿은 컴파일 타임 추상화입니다. `Address`와 `Pin`이 상수로 박혀 어셈블리에서는 C 매크로와 같은 결과가 나옵니다.
+이 조건에서는 세 함수의 `.text` 바이트가 같습니다. 생성자와 멤버 호출이 최적화되고, 주소·핀 상수가 같은 volatile store로 내려갑니다. 전체 ELF 파일, startup, 라이브러리 크기까지 같다는 증거는 아닙니다. 이 GPIO 예제는 템플릿 기반 정적 함수이며 RAII를 사용하지 않습니다.
 
-장점은 타입 안전성입니다. `Gpio<0x40020000, 5>`와 `Gpio<0x40020400, 12>`는 다른 타입이라 서로 섞어 쓸 수 없습니다. C의 매크로로는 불가능한 보호입니다.
+주소는 STM32F4 계열 GPIOA BSRR 배치를 전제로 한 예입니다. 실제 접근 전에는 정확한 품번의 레지스터 주소·클록·핀 모드·보드 연결을 확인해야 합니다. 호스트에서는 실행하지 않습니다. 타입이 달라도 범용 템플릿 인자가 받을 수 있으므로 “서로 다른 타입이면 절대 섞어 쓸 수 없다”는 보장은 없으며, 이 예제의 직접적인 보호는 핀 범위 `static_assert`입니다.
+
+저장소의 `scripts/verify-embedded-cpp-comparison-examples.mjs`는 본문 소스를 추출해 바이트 동일성을 검사하고, 핀16 인스턴스가 컴파일에 실패하는지도 확인합니다.
 
 ## 비용이 진짜로 발생하는 영역
 
-zero-cost가 아닌 영역도 있습니다. 이것들을 알고 끄는 것이 임베디드 C++의 절반입니다.
+zero-cost가 아닌 영역도 있습니다. 기능별 필요성과 최악 경로 비용을 정하고 선택합니다.
 
 ### 1. 예외 처리
 
 예외는 unwind table과 런타임 핸들러를 함께 데려옵니다.
 
 ```cpp
-// 예외 사용
+// 예외 사용: <stdexcept> 필요, a / b의 정수 overflow 정책은 별도
 int divide(int a, int b) {
     if (b == 0) throw std::runtime_error("divide by zero");
     return a / b;
 }
 ```
 
-이 함수 하나가 3-10KB의 런타임을 요구합니다. 임베디드는 보통 예외 자체를 끕니다.
+추가 크기는 이미 링크된 런타임, 라이브러리 구성과 링크 옵션에 따라 달라집니다. 예외를 금지하는 프로젝트라면 throw를 오류 반환으로 바꾸고 애플리케이션과 라이브러리의 실패 경로를 함께 검토합니다. 다음 플래그만 추가하면 위 throw 예제는 컴파일되지 않습니다.
 
 ```makefile
 CXXFLAGS += -fno-exceptions
@@ -166,7 +126,7 @@ CXXFLAGS += -fno-exceptions
 
 ### 2. RTTI
 
-`dynamic_cast`와 `typeid`는 type info 테이블을 데려옵니다. 보통 수 KB 정도입니다.
+런타임 다운캐스트와 다형 객체의 `typeid`는 타입 메타데이터를 사용할 수 있습니다. 반면 단순 업캐스트는 `-fno-rtti`에서도 가능합니다. 크기는 클래스 계층과 ABI에 따라 측정합니다.
 
 ```makefile
 CXXFLAGS += -fno-rtti
@@ -176,42 +136,31 @@ CXXFLAGS += -fno-rtti
 
 ### 3. iostream
 
-`std::cout`은 50KB 이상의 코드를 데려옵니다. 임베디드에서는 printf보다 무겁습니다.
+`std::cout`은 locale·포맷·초기화 경로를 포함할 수 있습니다. 특정 KB 증가나 `printf`보다 항상 크다는 결론은 동일한 기능과 링크 조건의 비교가 있어야 합니다.
 
-대안으로는 `printf`(C 라이브러리), `fmt`(header-only, 작음), 직접 UART 출력 등이 있습니다.
+대안으로는 `printf`(C 라이브러리), `fmt`(버전·포맷 옵션·빌드 방식별 크기 확인), 직접 UART 출력 등이 있습니다.
 
 ### 4. 가상 함수
 
-vtable 간접 호출이 1회 발생합니다. 무료는 아니지만 대부분 무시할 수 있습니다. 인라인되지 않는다는 점이 단점입니다.
+동적 호출이 남으면 간접 분기와 vtable 접근이 필요합니다. 정확한 타입을 알면 컴파일러가 devirtualization하여 인라인할 수도 있습니다. ISR·타이밍 제약에서는 최악 지연 시간을 별도로 확인합니다.
 
 대안은 CRTP(static polymorphism, [Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism))입니다.
 
 ### 5. `std::function`
 
-내부적으로 heap 할당과 type erasure를 사용합니다. 임베디드에서는 함수 포인터나 FixedFunction(etl::delegate)을 씁니다.
+type erasure를 사용하며 저장 대상과 구현의 작은 객체 버퍼 조건에 따라 heap 할당 여부가 달라집니다. 캡처가 있다는 이유만으로 항상 할당되는 것은 아닙니다. 비소유 콜백에는 함수 포인터나 `etl::delegate`를 검토하되, 캡처 객체의 수명을 보장합니다. 소유하는 고정 용량 callable과 delegate는 같은 계약이 아닙니다.
 
-## 코드 크기 비교 — 실측
+## 코드 크기를 비교할 때 남길 자료
 
-같은 기능을 C와 C++로 작성했을 때의 실제 크기 비교입니다. STM32F4, `-Os -flto -fno-exceptions -fno-rtti` 환경입니다.
+STM32F4의 빈 main·UART·RTOS 등에 일률적인 바이트 수를 붙이려면 재현 소스와 linker script, 정확한 MCU·툴체인·라이브러리 버전, 빌드 옵션과 ELF/map이 필요합니다. 이 글의 검증은 위 세 함수의 object 코드에 한정합니다.
 
-| 항목 | C | C++ | 차이 |
-| --- | --- | --- | --- |
-| 빈 main | 240 B | 240 B | 0 |
-| GPIO blink | 312 B | 312 B | 0 |
-| UART driver | 1.2 KB | 1.2 KB | 0 |
-| Ring buffer | 480 B | 488 B | +8 B |
-| RTOS task (FreeRTOS) | 18 KB | 18 KB | 0 |
-| `printf` 사용 | +9 KB | +9 KB | 0 |
-| `std::cout` 사용 | — | +52 KB | +52 KB |
-| `dynamic_cast` 1회 | — | +3 KB | +3 KB |
-
-적절히 끄면 C++가 C와 같거나 수 바이트 차이입니다. 기본을 모르고 쓰면 수십 KB의 bloat가 한 번에 들어옵니다.
+전체 펌웨어를 비교할 때는 기능·오류 정책을 맞추고 독립된 빌드 디렉터리를 사용합니다. Flash 초기화 이미지와 정적 RAM, stack/heap의 최고 사용량을 분리하며, [코드 크기 분석](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)의 방법으로 차이가 생긴 심볼과 archive 멤버를 추적합니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. `-fno-exceptions` 없이 시작
 
-GCC 기본값은 예외 활성입니다. 임베디드 프로젝트는 처음부터 `-fno-exceptions`를 켜야 합니다. 늦게 끄면 기존 코드가 깨집니다.
+예외 사용 정책을 초기에 정합니다. 금지 정책이면 `-fno-exceptions`와 오류 반환을 일관되게 적용하고, 라이브러리의 allocation 실패·throw/abort 경로도 확인합니다. 예외가 필요한 시스템에 일괄 적용할 플래그는 아닙니다.
 
 ### 2. `std::vector`를 무심코 사용
 
@@ -223,11 +172,11 @@ GCC 기본값은 예외 활성입니다. 임베디드 프로젝트는 처음부�
 
 ### 4. `iostream` 사용 후 크기 폭증에 놀람
 
-`<<` 한 번에 50KB가 따라옵니다. printf 또는 fmt를 씁니다.
+첫 입출력 사용이 어떤 라이브러리 경로를 끌어오는지 map으로 확인합니다. printf·fmt·전용 UART 출력도 같은 포맷 요구로 비교합니다.
 
 ### 5. `std::shared_ptr`로 모든 소유권 표현
 
-`shared_ptr`은 atomic 카운터와 heap을 함께 끌고 옵니다. 임베디드는 `unique_ptr`이 기본이며 raw pointer와 명확한 소유자 지정도 괜찮습니다.
+`shared_ptr`은 공유 제어 블록과 참조 계수 관리가 필요하며, 보통 atomic 연산을 사용합니다. 할당 횟수는 생성 방식·allocator에 따라 달라집니다. 단독 소유에는 `unique_ptr`, 비소유 접근에는 수명이 보장된 참조·포인터를 사용합니다.
 
 ### 6. C++ 표준 라이브러리 전부 사용 가능하다고 가정
 
@@ -239,7 +188,7 @@ C++11 이전과 이후는 거의 다른 언어에 가깝습니다.
 
 | 기능 | 추가 표준 | 임베디드 가치 |
 | --- | --- | --- |
-| `constexpr` | C++11 | 런타임 → 컴파일 타임 |
+| `constexpr` | C++11 | 상수 평가 문맥에서 런타임 계산을 제거 |
 | `auto`, range-for | C++11 | 가독성 |
 | `nullptr` | C++11 | `NULL` 대체, 타입 안전 |
 | `enum class` | C++11 | 네임스페이스 분리 |
@@ -250,22 +199,22 @@ C++11 이전과 이후는 거의 다른 언어에 가깝습니다.
 | `std::array` | C++11 | 고정 크기 컨테이너 |
 | Variadic template | C++11 | 가변 인자 (printf 안전 대체) |
 | Concepts | C++20 | 템플릿 제약, 에러 메시지 |
-| `std::span` | C++20 | 포인터 + 길이 안전 wrap |
+| `std::span` | C++20 | 포인터 + 길이의 비소유 view, 수명·범위 검사는 별도 |
 | `std::expected` | C++23 | 예외 없는 에러 처리 |
 
-이 중 대부분이 zero-cost입니다. 템플릿 기반 + 컴파일 타임 기능들이 핵심입니다.
+상수 평가와 최적화로 추가 비용을 없앨 수 있는 도구들입니다. 기능마다 저장 공간·수명·오류 경로의 계약을 함께 확인합니다.
 
 ## C가 여전히 옳은 자리
 
 C++가 만능은 아닙니다. C가 더 적합한 경우는 다음과 같습니다.
 
-- **부트 코드 / 인터럽트 벡터 테이블**: 매우 초기 단계라 C++ 런타임이 초기화되지 않았습니다
-- **극소형 MCU**: ATtiny 같은 4KB 미만 Flash 환경에서는 C++ 런타임 자체가 부담입니다
-- **인증 제약**: DO-178C Level A 같은 환경에서는 C++ 도구 인증 비용이 큽니다
+- **부트 코드 / 인터럽트 벡터 테이블**: 구현 도구와 startup 계약에 따라 C·어셈블리·제한된 C++ 중 선택합니다
+- **극소형 MCU**: 사용할 언어 기능과 라이브러리의 실제 코드·RAM 크기가 제한에 맞는지 확인합니다
+- **인증 제약**: 적용 표준의 언어 사용 규칙과 도구 검증 계획, 팀의 증거 축적 비용을 비교합니다
 - **legacy 코드**: 수십만 줄의 C 코드베이스에 C++ 일부만 섞으면 복잡성이 커집니다
 - **팀 역량**: C++ 숙련도가 낮은 팀에서는 느린 도입이 빠른 도입보다 안전합니다
 
-특히 부트 코드는 거의 항상 C 또는 어셈블리입니다. `__libc_init_array`가 호출되기 전에는 static 생성자가 돌지 않았기 때문에 C++ 객체를 생성할 수 없습니다. 자세한 내용은 [Part 1-06: 스타트업 코드](/blog/embedded/embedded-cpp/part1-06-startup-code)에서 다룹니다.
+`__libc_init_array`는 일부 런타임의 초기화 경로입니다. 동적 초기화 전에는 그 결과에 의존하는 전역 객체를 사용하면 안 되지만, 상수 초기화된 객체나 필요한 메모리 초기화 뒤의 단순 지역 객체까지 금지되는 것은 아닙니다. 자세한 내용은 [Part 1-06: 스타트업 코드](/blog/embedded/embedded-cpp/part1-06-startup-code)에서 다룹니다.
 
 ## C와 C++의 공존 전략
 
@@ -293,10 +242,16 @@ C++의 강점인 추상화가 부담 없이 가능한지를 프로젝트마다 �
 
 ## 정리
 
-- Modern C++의 대부분은 zero-cost abstraction이며 어셈블리는 C와 동일하게 나옵니다.
+- 작은 클래스·템플릿 예제는 같은 조건의 C 코드와 같은 명령으로 최적화될 수 있습니다. 전체 시스템 비용은 별도로 검증합니다.
 - 비용이 발생하는 영역은 예외, RTTI, iostream, 동적 할당, `std::function`이며 알고 끄거나 대체합니다.
 - C는 부트 코드, 극소형 MCU, 인증 환경에서 여전히 적합합니다.
 - 결정은 언어 선택이 아니라 사용법 선택입니다. 위 네 가지 핵심 질문으로 매 결정을 평가합니다.
+
+## 1차 자료
+
+- [C++ Core Guidelines: zero-overhead 원칙과 자원 관리](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines)
+- [Clang 교차 컴파일 문서](https://clang.llvm.org/docs/CrossCompilation.html)
+- [GCC C++ 옵션: exceptions, RTTI, static 초기화](https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html)
 
 ## 관련 항목
 

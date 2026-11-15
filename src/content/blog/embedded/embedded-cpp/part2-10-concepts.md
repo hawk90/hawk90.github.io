@@ -98,7 +98,7 @@ auto square(std::integral auto x) {
 
 가장 짧고, 함수 시그니처 자체가 제약을 표현하므로 권장됩니다.
 
-## 표준 concepts (`<concepts>`)
+## 표준 concepts (`<concepts>`·`<compare>`·`<ranges>`)
 
 ```cpp
 // 기본 type
@@ -135,7 +135,7 @@ std::ranges::input_range<R>
 std::ranges::random_access_range<R>
 ```
 
-C++ Core Library가 대부분의 표준 concepts를 제공하므로 직접 정의할 일이 많지 않습니다.
+필요한 계약을 제공하는 표준 concept이 있는지 먼저 확인합니다. 비교용 `three_way_comparable`은 `<compare>`, 범위 concept은 `<ranges>`의 선언을 사용합니다.
 
 ## `requires` expression
 
@@ -195,18 +195,18 @@ template<typename T>
 bool decode(T& obj, const uint8_t* buf, size_t len) {
     if constexpr (HasUserDeserialize<T>) {
         return obj.deserialize(buf, len);
-    } else if constexpr (std::is_trivially_copyable_v<T>) {
+    } else if constexpr (std::is_same_v<T, std::array<std::uint8_t, 4>>) {
         if (len < sizeof(T)) return false;
         std::memcpy(&obj, buf, sizeof(T));
         return true;
     } else {
         static_assert(sizeof(T) == 0,
-                      "Type must have deserialize() or be trivially copyable");
+                      "Type must have deserialize() or be a four-byte array");
     }
 }
 ```
 
-우선순위가 코드에 그대로 드러나, type별 분기가 자연스럽게 읽힙니다.
+`<array>`, `<cstdint>`, `<cstring>`, `<type_traits>`가 필요합니다. raw byte fallback은 바이트 배열로 제한했습니다. trivially copyable인 임의 struct도 포인터·padding·잘못된 enum/bool 표현을 포함할 수 있어 외부 입력을 검증 없이 memcpy해도 안전하다는 뜻은 아닙니다.
 
 ## Concept 조합
 
@@ -244,10 +244,10 @@ concept LoggerImpl = requires(T t, const char* msg) {
     { t.log_impl(msg) } -> std::same_as<void>;
 };
 
-template<LoggerImpl Derived>
+template<typename Derived>
 class LoggerBase {
 public:
-    void log(const char* msg) {
+    void log(const char* msg) requires LoggerImpl<Derived> {
         static_cast<Derived*>(this)->log_impl(msg);
     }
 };
@@ -259,12 +259,12 @@ public:
 
 class BadLogger : public LoggerBase<BadLogger> {
 public:
-    // log_impl 누락 — 컴파일 에러
+    // 이 선언 자체는 가능; BadLogger{}.log("x") 호출 때 제약 실패
 };
 // error: BadLogger does not satisfy 'LoggerImpl'
 ```
 
-CRTP base의 type 매개변수가 concept을 만족해야 하므로, missing method가 명확한 에러로 잡힙니다.
+base를 지정할 때 Derived는 불완전하므로 class template 매개변수에 멤버 검사 concept을 적용하지 않습니다. Derived 정의가 끝난 뒤 멤버 호출의 제약을 평가하며, 정상 구현은 호출되고 누락된 구현의 호출만 거부됩니다.
 
 ## Concept으로 SFINAE 대체
 
@@ -288,7 +288,7 @@ auto abs(std::integral auto x) {
 }
 ```
 
-C++20 쪽이 압도적으로 짧고 명확합니다.
+C++20 쪽은 제약을 시그니처에 직접 표현합니다. 위 abs는 signed 최솟값의 부호 반전을 처리하지 않은 문법 비교용 예이므로 완전한 산술 API는 아닙니다.
 
 ## 임베디드 — Range-based 알고리즘
 
@@ -309,7 +309,7 @@ std::array<float, 3> floats = {1.0f, 2.0f, 3.0f};
 auto sf = sum(floats);   // 6.0f
 ```
 
-array, vector, `std::array`, 사용자 컨테이너 어느 것이든 concept만 만족하면 그대로 동작합니다.
+input_range는 반복 가능성만 검사합니다. 실제로는 값 타입의 기본 생성과 `total += val`도 유효해야 하고 overflow·정밀도 계약도 필요합니다. 숫자 합 전용 API라면 `std::integral<std::ranges::range_value_t<R>>` 같은 추가 제약을 둡니다.
 
 ## Concept 오버로드 — 더 specific 우선
 
@@ -328,7 +328,7 @@ print(1.5);     // float 버전
 print("str");   // fallback
 ```
 
-더 제약된 concept이 우선합니다. 오버로드 resolution이 명확해집니다.
+이 예제는 integral/floating_point 후보가 fallback보다 우선합니다. 일반적으로 제약의 우선순위는 논리적으로 더 강해 보이는 조건의 개수로 정해지지 않으며, 표준의 atomic constraint 동일성과 subsumption 규칙을 따릅니다. 서로 비교 불가능하면 모호해질 수 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -369,35 +369,46 @@ T process(T x);   // 어떤 T든 받음
 concept은 type system이고 macro는 텍스트 치환이므로 둘은 전혀 다릅니다.
 
 ### 5. toolchain 미지원
-ARM Compiler 6, IAR 일부는 C++20 concepts를 지원하지 않습니다. C++17과 SFINAE 폴백을 쓰거나 toolchain을 업그레이드합니다.
+설치한 컴파일러 버전의 언어 모드와 `__cpp_concepts`를 확인합니다. 벤더 제품군 이름만으로 지원 여부를 단정하지 않고 최소 예제를 컴파일합니다.
 
 ### 6. 직접 만든 concept 과용
 표준 concept이 이미 있는데도 직접 정의하는 경우가 있습니다. `std::integral` 대신 `MyInt`를 새로 만드는 식이 그 예입니다.
 
-## 측정 — concept 사용 시 코드 변화
+## 작은 예제 — CRTP 검사를 호출 시점으로 미루기
 
-같은 함수를 C++17 SFINAE와 C++20 concept으로 비교합니다.
-
-```cpp
-// C++17 — SFINAE
-template<typename T,
-         std::enable_if_t<std::is_integral_v<T>, int> = 0>
-T add(T a, T b) { return a + b; }
-
-// C++20 — concept
-template<std::integral T>
-T add(T a, T b) { return a + b; }
+```cpp title="concept-check.cpp"
+#include <cassert>
+#include <concepts>
+template<class T> concept LoggerImpl = requires(T& t) {
+    { t.log_impl() } -> std::same_as<void>;
+};
+template<class D> struct LoggerBase {
+    void log() requires LoggerImpl<D> { static_cast<D*>(this)->log_impl(); }
+};
+struct Good : LoggerBase<Good> {
+    int calls=0; void log_impl() { ++calls; }
+};
+struct Bad : LoggerBase<Bad> {};
+static_assert(LoggerImpl<Good>);
+static_assert(!LoggerImpl<Bad>);
+template<std::integral T> constexpr int choose(T) { return 1; }
+template<class T> constexpr int choose(T) { return 0; }
+static_assert(choose(1)==1 && choose(1.5)==0);
+int main() {
+    Good g; g.log(); assert(g.calls==1);
+#ifdef BAD_CALL
+    Bad b; b.log();
+#endif
+}
 ```
 
-코드 크기는 동일합니다. concept은 컴파일 시점에만 영향을 주며 런타임은 동일합니다.
+Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors concept-check.cpp -o concept-check && ./concept-check`로 정상 구현을 호출했습니다. `-DBAD_CALL`은 `constraints not satisfied` 진단으로 거부됩니다. 이전처럼 base 자체에 제약을 옮기면 Good의 base 지정 시점에도 멤버 검사가 실패합니다.
 
-컴파일 시간은 concept 쪽이 약간 빠릅니다. SFINAE 추론보다 단순하기 때문입니다.
-
-에러 메시지는 concept이 훨씬 짧고 명확합니다.
+[atomic constraint 규칙](https://eel.is/c++draft/temp.constr.atomic)과 [제약의 부분 순서 규칙](https://eel.is/c++draft/temp.constr.order)을 참고합니다. concept 사용 자체가 더 작은 코드나 더 빠른 컴파일을 보장하지 않으며 진단의 줄 수도 컴파일러에 따라 달라집니다.
 
 ## C++20 concepts의 실용 가치
 
-1. **에러 메시지** — 가장 큰 이점입니다. 30줄짜리 에러가 1~2줄로 줄어듭니다.
+1. **에러 메시지** — 가장 큰 이점입니다. 호출 위치에서 어떤 계약을 만족하지 않는지 드러낼 수 있습니다.
 2. **자체 문서화** — 함수 시그니처가 제약을 명시합니다.
 3. **오버로드 명확화** — 더 specific한 concept이 우선합니다.
 4. **SFINAE 대체** — 짧고 읽기 좋습니다.
@@ -409,7 +420,7 @@ T add(T a, T b) { return a + b; }
 - 3가지 syntax를 지원합니다 — `requires`, `template<Concept T>`, `auto func(Concept auto x)`.
 - CRTP와 concept을 함께 쓰면 interface가 명확해지고 누락된 멤버는 명확한 에러로 드러납니다.
 - SFINAE를 대체하며 짧고 읽기 좋고 에러 메시지가 훨씬 명확합니다.
-- toolchain 확인이 필수입니다 — GCC 10+, Clang 12+이며 ARM Compiler 6는 부분 지원입니다.
+- toolchain 버전·언어 모드·최소 예제로 실제 지원을 확인합니다.
 
 ## 관련 항목
 

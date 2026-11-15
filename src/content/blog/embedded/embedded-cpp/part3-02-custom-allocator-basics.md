@@ -32,9 +32,9 @@ v.push_back(1);   // pool에서 할당
 
 이 글은 STL allocator concept과 기본 구현을 다룹니다.
 
-## Allocator Concept (C++17 이전)
+## Allocator 요구사항과 C++11 allocator_traits
 
-STL 컨테이너는 allocator concept을 따르는 객체를 사용합니다. C++17 이전의 형태는 이렇습니다.
+STL 컨테이너는 allocator 요구사항을 따르는 객체를 사용합니다. `std::allocator_traits`는 C++11부터 존재하며, 아래처럼 타입 매개변수만 있는 stateless allocator의 기본 정보를 보완합니다. C++20 언어 concept으로 자동 검사한다는 뜻은 아닙니다.
 
 ```cpp
 template<typename T>
@@ -71,7 +71,7 @@ bool operator!=(const MyAllocator<T>&, const MyAllocator<U>&) { return false; }
 - `deallocate(p, n)`으로 메모리를 돌려줍니다.
 - `operator==`, `operator!=`로 컨테이너끼리 비교가 가능합니다.
 
-C++20에서는 concept으로 강제됩니다(`std::allocator_traits`).
+할당자는 n개 원소의 연속 저장소·정렬·고갈 처리와 동등성 계약을 만족해야 합니다. 객체 생성은 별도이며 컨테이너가 allocator_traits를 통해 처리합니다.
 
 ## 가장 단순한 예 — Pool Allocator
 
@@ -82,6 +82,7 @@ template<typename T, size_t N>
 class PoolAllocator {
 public:
     using value_type = T;
+    template<class U> struct rebind { using other = PoolAllocator<U, N>; };
 
     PoolAllocator() noexcept = default;
 
@@ -105,16 +106,16 @@ public:
     }
 
 private:
-    static inline alignas(T) std::byte storage_[sizeof(T) * N]{};
+    alignas(T) static inline std::byte storage_[sizeof(T) * N]{};
     static inline std::bitset<N> in_use_{};
 };
 ```
 
-문제는 throw입니다. `-fno-exceptions` 환경에서는 다른 패턴이 필요합니다.
+이 구현은 n==1만 받는 단일 객체 실험용입니다. 여러 원소를 연속으로 요구하는 vector·string의 일반 allocator로 쓸 수 없습니다. N은 슬롯 개수이며 노드 크기가 아닙니다. 비타입 매개변수 N을 포함하므로 rebind도 명시했습니다. 복사본은 같은 정적 저장소를 공유하고, 포인터는 해당 저장소에서 얻은 활성 슬롯이어야 합니다.
 
 ## No-exception allocator — abort 사용
 
-`-fno-exceptions`에서는 throw 대신 abort 또는 null을 사용합니다.
+`-fno-exceptions`에서 계속 실행해야 한다면 고갈을 사전 검사하는 비표준 컨테이너 API를 선택합니다. 표준 allocator의 allocate는 실패 시 null을 정상 결과로 반환하면 안 됩니다. 프로그램 종료가 정책이면 abort 같은 종료 경로를 사용할 수 있지만 복구할 수는 없습니다.
 
 ```cpp
 template<typename T, size_t N>
@@ -141,7 +142,7 @@ public:
 };
 ```
 
-표준 STL은 allocate가 throw하거나 정상 반환하는 것을 가정합니다. abort나 null을 쓰면 STL 호환이 깨지므로 ETL이나 직접 구현한 컨테이너를 권장합니다.
+정상 복귀하는 allocate는 요구 크기와 정렬을 만족하는 유효 저장소를 반환해야 합니다. null 반환과 프로세스 종료는 서로 다릅니다. 종료 정책은 오류를 반환하는 API로 대체할 수 있는지 먼저 검토합니다.
 
 ## C++17 — `std::pmr::polymorphic_allocator`
 
@@ -176,7 +177,10 @@ public:
     Arena* arena() const { return arena_; }
 
     T* allocate(std::size_t n) {
-        return static_cast<T*>(arena_->allocate(n * sizeof(T), alignof(T)));
+        if (n > static_cast<std::size_t>(-1) / sizeof(T)) throw std::bad_alloc();
+        void* p = arena_->allocate(n * sizeof(T), alignof(T));
+        if (!p) throw std::bad_alloc();
+        return static_cast<T*>(p);
     }
 
     void deallocate(T* p, std::size_t /*n*/) noexcept {
@@ -207,14 +211,12 @@ public:
         : base_(buffer), current_(buffer), end_(buffer + size) {}
 
     void* allocate(size_t bytes, size_t alignment) {
-        // align 맞추기
-        auto* aligned = reinterpret_cast<std::byte*>(
-            (reinterpret_cast<uintptr_t>(current_) + alignment - 1) & ~(alignment - 1));
-
-        if (aligned + bytes > end_) return nullptr;   // 부족
-
-        current_ = aligned + bytes;
-        return aligned;
+        // alignment는 0이 아닌 지원되는 2의 거듭제곱이어야 합니다.
+        void* p = current_;
+        auto remaining = static_cast<std::size_t>(end_ - current_);
+        if (!std::align(alignment, bytes, p, remaining)) return nullptr;
+        current_ = static_cast<std::byte*>(p) + bytes;
+        return p;
     }
 
     void reset() { current_ = base_; }   // 한 번에 모두 해제
@@ -263,55 +265,61 @@ void process_frame() {
     std::vector<int, TaskArenaAllocator<int>> v;
     v.push_back(1);   // arena에서
     v.push_back(2);
-    // 함수 끝
-    TaskArenaAllocator<int>::reset();   // 한 번에 해제
+    // v가 살아 있는 동안 reset하지 않습니다.
 }
 ```
 
-프레임 단위로 할당과 해제를 처리합니다. 매 프레임 시작 시점에 reset합니다.
+이 예제의 정적 arena는 T별로 따로 생기며 task-local이 아닙니다. 복사·rebind·동등성을 모두 구현한 완전한 allocator로 사용하기 전에는 설계 보완이 필요합니다. reset은 모든 관련 컨테이너를 먼저 소멸시킨 뒤 호출해야 합니다. 정적 저장소를 task끼리 공유하면 동기화도 필요합니다.
 
-## Allocator로 STL 컨테이너 사용
+## 실행 확인 — allocator_traits와 연속 할당
 
-```cpp
-// 정수 vector — pool에서 할당
-std::vector<int, PoolAllocator<int, 32>> v;
-v.push_back(1);
-v.push_back(2);
-// v가 사라지면 pool 자리 회수
+단일 슬롯 pool 대신 다음 allocator로 vector가 실제 요청하는 n을 확인합니다. 이 예제는 heap을 사용하며, allocator_traits의 C++11 기본 보완과 overflow 실패를 검증하기 위한 기준선입니다. over-aligned T는 지원하지 않는다고 명시적으로 제한합니다.
 
-// map — pool에서
-std::map<int, Order, std::less<>, PoolAllocator<std::pair<const int, Order>, 16>> m;
-m[1] = Order{};
-
-// string — pool에서
-std::basic_string<char, std::char_traits<char>, PoolAllocator<char, 256>> s;
-s = "hello";
-```
-
-STL 인터페이스를 그대로 쓰면서 메모리를 제어할 수 있습니다. 단점은 컨테이너 타입이 길어진다는 점입니다.
-
-C++17의 `std::pmr`가 훨씬 깔끔합니다. 같은 타입(`std::pmr::vector<int>`)으로 두고 런타임에 분기합니다.
-
-## C++20 allocator concept
-
-`std::allocator_traits`가 모든 기본 정의를 제공합니다. 최소 구현은 이렇습니다.
-
-```cpp
-template<typename T>
-struct MinimalAllocator {
+```cpp title="allocator.cpp"
+#include <cassert>
+#include <cstddef>
+#include <limits>
+#include <memory>
+#include <new>
+#include <vector>
+template<class T> struct CheckedAllocator {
     using value_type = T;
-
-    T* allocate(std::size_t n) { /* */ }
-    void deallocate(T* p, std::size_t n) { /* */ }
-
-    // 나머지는 allocator_traits가 default
+    static_assert(alignof(T) <= alignof(std::max_align_t), "alignment unsupported");
+    CheckedAllocator() noexcept = default;
+    template<class U> CheckedAllocator(const CheckedAllocator<U>&) noexcept {}
+    T* allocate(std::size_t n) {
+        if (n > std::numeric_limits<std::size_t>::max() / sizeof(T))
+            throw std::bad_alloc();
+        return static_cast<T*>(::operator new(n * sizeof(T)));
+    }
+    void deallocate(T* p, std::size_t) noexcept { ::operator delete(p); }
 };
-
-// 사용
-std::vector<int, MinimalAllocator<int>> v;
+template<class T, class U>
+bool operator==(const CheckedAllocator<T>&, const CheckedAllocator<U>&) { return true; }
+template<class T, class U>
+bool operator!=(const CheckedAllocator<T>&, const CheckedAllocator<U>&) { return false; }
+int main() {
+    std::vector<int, CheckedAllocator<int>> values;
+    values.reserve(4);
+    for (int n = 0; n != 4; ++n) values.push_back(n);
+    assert(values.size() == 4 && values[3] == 3);
+    using Rebound = std::allocator_traits<CheckedAllocator<int>>::rebind_alloc<long>;
+    Rebound a;
+    auto* p = a.allocate(2);
+    a.deallocate(p, 2);
+    bool rejected = false;
+    try { (void)a.allocate(std::numeric_limits<std::size_t>::max()); }
+    catch (const std::bad_alloc&) { rejected = true; }
+    assert(rejected);
+}
 ```
 
-C++17 이전에는 수많은 typedef가 필요했지만 이제 `value_type`, `allocate`, `deallocate` 셋이면 충분합니다.
+```bash
+clang++ -std=c++11 -Wall -Wextra -Werror allocator.cpp -o allocator
+./allocator
+```
+
+한 개만 할당하는 pool은 별도의 ObjectPool 인터페이스로 사용하는 편이 계약을 분명히 드러냅니다. 연속 저장소·컨테이너 수명·상태 전파를 구현하지 않은 allocator를 vector·map·string 모두에 그대로 적용하지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -321,7 +329,7 @@ std::list<int, MyAllocator<int>> l;
 // list 내부에 ListNode<int> 할당 필요
 // rebind로 MyAllocator<ListNode<int>> 만들어야
 ```
-`allocator_traits`가 자동으로 rebind해 주므로 C++17 이후로는 보통 신경 쓰지 않아도 됩니다.
+C++11부터 `A<T, 나머지 타입 인자...>` 형태는 traits가 rebind를 유추할 수 있습니다. `PoolAllocator<T, N>`처럼 비타입 인자가 섞이면 명시적인 rebind가 필요합니다.
 
 ### 2. allocator 비교 잘못
 ```cpp
@@ -335,10 +343,10 @@ void deallocate(T* p, size_t n) {
     free(p);   // n 무시 — array는 어떻게?
 }
 ```
-allocator에 따라 size가 필요합니다. pool은 무시해도 되지만 다른 경우엔 꼭 활용합니다.
+해제 정책에 따라 n이 필요할 수 있습니다. 원래 malloc으로 얻은 p를 free하는 구현은 n을 쓰지 않아도 되며, 단순히 n을 무시했다는 이유만으로 배열 해제가 틀린 것은 아닙니다.
 
 ### 4. throw 사용
-`-fno-exceptions` 환경에서 throw가 발생하면 abort로 떨어집니다. abort를 명시하거나 예외를 활성화합니다.
+Clang/GCC에서 `-fno-exceptions`인 translation unit에 throw를 직접 쓰면 컴파일 오류입니다. 이미 빌드된 라이브러리의 실패 경로는 그 라이브러리 구성에 따라 달라지므로 별도 확인합니다.
 
 ### 5. thread safety 가정
 multi-thread에서 같은 pool을 동시에 접근하면 race가 발생합니다. mutex나 thread-local pool을 씁니다.
@@ -346,31 +354,24 @@ multi-thread에서 같은 pool을 동시에 접근하면 race가 발생합니다
 ### 6. 복잡한 allocator
 간단한 pool로 충분한데 generic allocator를 만드는 경우가 많습니다. 프로젝트 요구에 맞게 단순하게 유지합니다.
 
-## 측정 — Pool vs heap allocator
+## 측정 범위
 
-같은 `std::vector<int>`로 10000회 push_back을 비교합니다.
-
-```text
-# heap (std::allocator)
-allocation: 변동 (realloc 시점)
-total time: 1.2 ms
-fragmentation: 시간에 따라 증가
-
-# pool (fixed size)
-allocation: 일정 (pool slot 1개)
-total time: 0.4 ms
-fragmentation: 0
-```
-
-Pool이 약 3배 빠르고 결정적입니다. 임베디드 real-time에서 중요한 차이입니다.
+이 장은 실행 시간이나 MCU cycle을 측정하지 않았습니다. 위 검증은 vector의 연속 할당·rebind·정수 overflow 실패 경로를 확인합니다. allocator 교체의 이득을 비교하려면 동일 프로그램, 입력, 라이브러리, 컴파일 옵션, allocation 요청 크기와 최대 지연을 함께 기록합니다.
 
 ## 정리
 
-- Custom allocator는 STL의 메모리 출처를 제어하며 `value_type`, `allocate`, `deallocate` 세 가지만 구현하면 됩니다.
+- Custom allocator는 STL의 메모리 출처를 제어하며 `value_type`, `allocate`, `deallocate` 기본 인터페이스 외에도 동등성·rebind·실패 계약을 만족해야 합니다.
 - Stateful allocator는 pool/arena 포인터를 보유하므로 컨테이너 간 비교에 의미가 있습니다.
 - Arena allocator는 bump pointer 방식이라 개별 해제는 불가하지만 일괄 reset이 가능해 transient 객체에 적합합니다.
-- `-fno-exceptions` 환경에서는 throw 대신 abort를 사용하며 STL 표준 호환이 깨질 수 있습니다.
-- C++17 `std::pmr`이 훨씬 단순하며 다음 chapter에서 다룹니다.
+- `-fno-exceptions` 환경에서는 throw 대신 실패 시 종료할지 오류 반환 API를 쓸지 정책을 정합니다.
+- C++17 `std::pmr`이 훨씬 단순하며 Part 3-04에서 다룹니다.
+
+## 근거와 검증 범위
+
+2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+
+- [C++11 이후 초안 N3337의 allocator_traits](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3337.pdf)
+- [Allocator 요구사항](https://eel.is/c++draft/allocator.requirements)
 
 ## 관련 항목
 

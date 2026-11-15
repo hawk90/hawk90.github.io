@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"자원 = 객체, 해제 = 소멸자."** — 함수가 어떻게 끝나든 소멸자가 반드시 호출됨을 언어가 보장합니다.
+> **"자원 = 객체, 해제 = 소멸자."** — 정상적인 scope 이탈과 처리되는 예외의 stack unwinding에서 정리를 실행합니다.
 
 ## 어떤 문제를 푸는가
 
@@ -56,7 +56,7 @@ void process() {
 }
 ```
 
-return이 어디서 일어나든 소멸자가 반드시 호출되므로 자원 누수가 원천적으로 불가능합니다.
+생성이 완료된 지역 객체는 정상적인 return에서 소멸합니다. 획득 실패 처리, 소유권 모델, 해제 함수 구현까지 올바른 경우 정리 누락을 줄일 수 있습니다. `abort`, `_Exit`, 리셋, 전원 차단은 이 보장에 포함되지 않습니다.
 
 ## RAII의 정의
 
@@ -69,7 +69,7 @@ return이 어디서 일어나든 소멸자가 반드시 호출되므로 자원 �
 C++ 표준이 다음 시점에 소멸자 호출을 보장합니다.
 
 - 함수가 return하면 모든 local 객체의 소멸자가 호출됩니다.
-- 함수에서 예외가 throw되면 stack unwinding이 모든 소멸자를 호출합니다.
+- 처리할 예외로 stack unwinding이 진행되면 생성이 완료된 자동 객체를 역순으로 소멸시킵니다. 생성에 실패한 객체 자체의 소멸자는 호출되지 않습니다. 처리되지 않은 예외와 `terminate` 경로에는 같은 정리 보장을 적용하지 않습니다.
 - 객체가 delete되면 소멸자가 호출됩니다.
 - 프로그램 종료 시 static 객체의 소멸자가 호출됩니다(임베디드에서는 보통 호출되지 않습니다).
 
@@ -105,11 +105,13 @@ void shared_function() {
 class MutexLock {
 public:
     explicit MutexLock(osMutexId_t m) : mutex_(m) {
-        osMutexAcquire(mutex_, osWaitForever);
+        locked_ = osMutexAcquire(mutex_, osWaitForever) == osOK;
     }
     ~MutexLock() {
-        osMutexRelease(mutex_);
+        if (locked_) osMutexRelease(mutex_);
     }
+
+    bool owns_lock() const noexcept { return locked_; }
 
     // 복사 금지 — 자원의 소유권 unique
     MutexLock(const MutexLock&) = delete;
@@ -117,11 +119,13 @@ public:
 
 private:
     osMutexId_t mutex_;
+    bool locked_ = false;
 };
 
 // 사용
 void shared_function() {
-    MutexLock lock(my_mutex);   // 획득
+    MutexLock lock(my_mutex);   // 획득 시도
+    if (!lock.owns_lock()) return;
 
     if (some_condition()) return;   // 자동 unlock
     do_work();
@@ -130,7 +134,7 @@ void shared_function() {
 ```
 
 핵심은 다음과 같습니다.
-- 생성자에서 `osMutexAcquire`를 호출합니다.
+- CMSIS-RTOS2의 `osMutexAcquire(id, timeout)` 결과가 `osOK`일 때만 보호 구역에 진입하고 해제합니다. mutex API는 ISR에서 호출하지 않습니다.
 - 소멸자에서 `osMutexRelease`를 호출합니다.
 - 복사를 금지해 자원은 한 객체만 소유하도록 합니다.
 
@@ -143,6 +147,8 @@ UART, SPI 같은 peripheral 활성화도 RAII로 묶을 수 있습니다.
 ```cpp
 class UartGuard {
 public:
+    UartGuard(const UartGuard&) = delete;
+    UartGuard& operator=(const UartGuard&) = delete;
     UartGuard() {
         RCC->APB1ENR |= RCC_APB1ENR_USART2EN;   // clock 활성
         USART2->CR1 |= USART_CR1_UE;            // peripheral 활성
@@ -163,7 +169,7 @@ void log_data() {
 }
 ```
 
-함수가 끝나면 UART가 자동으로 꺼지므로 전력 관리가 함께 처리됩니다.
+이 스케치는 STM32F4식 레지스터 이름을 사용하며, USART2와 해당 clock을 이 scope가 독점 소유한다는 전제입니다. 핀·baud 설정, TC 플래그 처리, timeout은 생략했으므로 보드에 그대로 적용하는 드라이버가 아닙니다. 다른 사용자가 이미 활성화한 peripheral이라면 이전 상태를 저장·복원하거나 참조 횟수로 소유권을 관리해야 합니다.
 
 ## RAII 패턴 3 — Critical Section (Interrupt Disable)
 
@@ -190,10 +196,11 @@ public:
         __disable_irq();
     }
     ~InterruptGuard() {
-        if (!prev_) __enable_irq();   // 진입 시 disabled였으면 그대로
+        __set_PRIMASK(prev_);   // 진입 시 상태 복원
     }
 
     InterruptGuard(const InterruptGuard&) = delete;
+    InterruptGuard& operator=(const InterruptGuard&) = delete;
 };
 
 void shared() {
@@ -248,39 +255,13 @@ private:
 
 DMA channel은 제한된 자원이므로 획득과 해제를 RAII로 묶습니다.
 
-```cpp
-class DmaChannel {
-public:
-    explicit DmaChannel(uint8_t ch) : channel_(ch) {
-        // 채널 활성화
-        DMA->CCR[channel_] |= DMA_CCR_EN;
-    }
-    ~DmaChannel() {
-        DMA->CCR[channel_] &= ~DMA_CCR_EN;
-        // 채널 인터럽트 끔
-        NVIC_DisableIRQ(static_cast<IRQn_Type>(DMA1_Channel1_IRQn + channel_));
-    }
+DMA는 비동기 작업이므로 소멸 전에 전송이 끝났거나 안전하게 취소되어야 합니다. 버퍼 수명, 채널 독점 소유권, IRQ와 DMA 요청 비활성화 순서는 대상 MCU의 reference manual에 따라 구현합니다. STM32F1 채널 IRQ 이름과 STM32F4 stream 레지스터를 섞은 범용 코드로는 이 계약을 구현할 수 없어, 여기서는 하드웨어 구현을 제시하지 않습니다.
 
-    void start_transfer(void* src, void* dst, size_t len) { /* */ }
-    bool is_done() const { /* */ }
+정리 인터페이스는 성공한 획득만 소유하고, 소멸자에서는 실패를 던지지 않으며, 제한 없는 busy wait를 피해야 합니다. 아래 호스트 예제는 소유권과 정리 횟수만 검증하며 실제 DMA 종료를 검증하지 않습니다.
 
-    DmaChannel(const DmaChannel&) = delete;
 
-private:
-    uint8_t channel_;
-};
 
-void send_buffer(const uint8_t* data, size_t len) {
-    DmaChannel ch(1);   // 채널 1 획득
-
-    ch.start_transfer(const_cast<uint8_t*>(data), &UART->TX, len);
-    while (!ch.is_done());
-
-    // 자동 해제
-}
-```
-
-## RAII의 핵심 — 3 of 5 규칙
+## RAII의 핵심 — Rule of Three/Five/Zero
 
 C++의 기본 복사/이동 동작은 자원 관리에 부적합합니다. RAII 클래스는 이를 명시적으로 정의해야 합니다.
 
@@ -368,16 +349,16 @@ Buffer create_buffer() {
 }
 ```
 
-Move 생성자는 `noexcept`로 표시하는 것이 강력히 권장됩니다. `std::vector` 등은 `noexcept`가 없으면 copy로 fallback해 성능이 떨어집니다.
+Move 생성자는 `noexcept`로 표시하는 것이 강력히 권장됩니다. `std::vector` 등의 재할당은 복사가 가능하고 이동이 예외를 던질 수 있을 때 복사를 선택할 수 있습니다. 복사 금지 타입에는 이 fallback이 없으며, 이동 실패 시 보장도 달라집니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. 소멸자에서 예외
-소멸자에서 예외를 던지면 stack unwinding 중 terminate됩니다. `-fno-exceptions` 환경에서도 abort로 이어질 수 있으므로, 소멸자는 항상 `noexcept`여야 합니다.
+소멸자에서 예외를 던지면 stack unwinding 중 terminate됩니다. 예외를 허용하지 않는 설계에서는 해제 API도 예외를 던지지 않도록 계약을 정합니다. `-fno-exceptions`에서는 소스의 `throw`나 `try/catch`가 컴파일되지 않을 수 있습니다.
 
 ```cpp
 ~Resource() noexcept {
-    release();   // try/catch로 모든 예외 잡기
+    release();   // 예외를 던지지 않는 해제 API
 }
 ```
 
@@ -385,7 +366,7 @@ Move 생성자는 `noexcept`로 표시하는 것이 강력히 권장됩니다. `
 ```cpp
 class MutexLock {
 public:
-    MutexLock(osMutexId_t m) : mutex_(m) { osMutexAcquire(mutex_); }
+    MutexLock(osMutexId_t m) : mutex_(m) { osMutexAcquire(mutex_, osWaitForever); }
     ~MutexLock() { osMutexRelease(mutex_); }
     // copy 정의 안 함 → 컴파일러 자동 생성 → double-release crash
 };
@@ -418,12 +399,7 @@ public:
 ```
 대안은 factory function이 `std::optional<Uart>`를 반환하도록 만드는 것입니다.
 
-```cpp
-std::optional<Uart> make_uart(int baud) {
-    if (init_uart(baud) < 0) return std::nullopt;
-    return Uart(/* private constructor */);
-}
-```
+factory는 초기화 성공 후에만 소유권을 가진 객체를 만들고, 실패하면 `std::nullopt`를 반환해야 합니다. 단순히 기존 생성자를 다시 호출하면 초기화를 두 번 수행할 수 있습니다. 생성자에서 값을 반환할 수는 없지만 빈 `return;` 자체는 허용되므로, 실패 상태를 멤버에 남기는 대안도 가능합니다.
 
 ### 5. Move 후 사용
 ```cpp
@@ -431,7 +407,7 @@ Buffer b1(1024);
 Buffer b2 = std::move(b1);
 b1.write(...);   // b1은 moved-from 상태 → null 접근
 ```
-move한 객체는 더 이상 사용하지 않는 것이 관례입니다.
+이 Buffer는 이동 후 `data_ == nullptr`, `size_ == 0`입니다. 이동 후 허용할 연산을 클래스 계약에 명시하고 그 전제에 맞게 사용합니다. 모든 moved-from 객체가 무조건 사용 불가인 것은 아닙니다.
 
 ### 6. RAII 객체의 scope가 너무 작음
 ```cpp
@@ -442,50 +418,51 @@ move한 객체는 더 이상 사용하지 않는 것이 관례입니다.
 ```
 scope가 너무 짧으면 필요한 critical section을 모두 덮지 못합니다. 의도가 정말 그것인지 확인합니다.
 
-## 측정 — RAII overhead
+## 작은 예제 — 획득 실패와 소유권 이전
 
-같은 코드를 C 수동 정리와 C++ RAII로 비교합니다(ARM Cortex-M4, `-O2`).
+다음은 하드웨어 대신 해제 횟수를 관찰하는 C++17 호스트 예제입니다. 조기 return, 이동, 획득 실패를 확인합니다.
 
-```text
-# C 수동 (mutex acquire/release)
-shared:
-    push    {r4, lr}
-    bl      osMutexAcquire
-    ldr     r3, [counter]
-    adds    r3, r3, #1
-    str     r3, [counter]
-    bl      osMutexRelease
-    pop     {r4, pc}
-# 24 bytes
-
-# C++ RAII (MutexLock 사용)
-shared:
-    push    {r4, lr}
-    bl      osMutexAcquire
-    ldr     r3, [counter]
-    adds    r3, r3, #1
-    str     r3, [counter]
-    bl      osMutexRelease
-    pop     {r4, pc}
-# 24 bytes — 동일
+```cpp title="raii-check.cpp"
+#include <cassert>
+#include <utility>
+struct Handle {
+    int* releases;
+    explicit Handle(int* p) : releases(p) {}
+    ~Handle() noexcept { if (releases) ++*releases; }
+    Handle(const Handle&) = delete;
+    Handle& operator=(const Handle&) = delete;
+    Handle(Handle&& other) noexcept
+        : releases(std::exchange(other.releases, nullptr)) {}
+};
+void early(int& n) { Handle h(&n); return; }
+int main() {
+    int n = 0;
+    early(n);
+    assert(n == 1);
+    { Handle a(&n); Handle b(std::move(a)); }
+    assert(n == 2);
+    { Handle failed(nullptr); }
+    assert(n == 2);
+}
 ```
 
-완전히 동일합니다. 생성자와 소멸자가 인라인되어 오버헤드가 0이며, 전형적인 zero-cost abstraction입니다.
+실행: `clang++ -std=c++17 -Wall -Wextra -pedantic-errors raii-check.cpp -o raii-check && ./raii-check`. Clang 23.1.3, arm64 macOS에서 확인했습니다. 크기와 명령 수가 수동 코드와 같은지는 대상 빌드의 디스어셈블리로 별도 비교해야 하며, 인라인이나 비용 0을 언어가 보장하지 않습니다.
+
+[표준 초안의 scope 이탈 규칙](https://eel.is/c++draft/stmt.dcl)과 [CMSIS-RTOS2 mutex 계약](https://arm-software.github.io/CMSIS_6/latest/RTOS2/group__CMSIS__RTOS__MutexMgmt.html)을 기준으로 정리 보장의 범위와 획득 성공 조건을 구분했습니다.
 
 ## 정리
 
 - RAII는 자원 lifetime을 객체 lifetime에 묶어 생성자에서 획득하고 소멸자에서 해제합니다.
 - 임베디드의 5가지 RAII 자원은 Mutex, Peripheral, Interrupt, Memory, DMA입니다.
 - Rule of Three/Five/Zero로 자원 관리를 명시하며, 복사 금지와 이동 허용을 택하거나 표준 클래스에 위임합니다.
-- 소멸자는 `noexcept`여야 하며 예외를 던지면 terminate됩니다.
-- 컴파일러가 생성자와 소멸자를 인라인하므로 오버헤드가 0입니다.
+- 정리 소멸자는 예외를 밖으로 던지지 않는 계약을 두고 실패 보고는 별도 경로로 설계합니다.
+- RAII의 추가 비용은 최적화 결과와 상태 보존 요구에 따라 확인합니다.
 
 ## 관련 항목
 
 - [Part 2-02: RAII 실전 패턴](/blog/embedded/embedded-cpp/part2-02-raii-patterns) — `std::scoped_lock`, Handle 패턴, ScopedXxx
 - [Part 3-05: No-Exception 설계](/blog/embedded/embedded-cpp/part3-05-no-exception-design) — 예외 없는 환경의 RAII
 - [Part 3-09: 스마트 포인터 선택](/blog/embedded/embedded-cpp/part3-09-smart-pointer-choice) — `unique_ptr`의 RAII
-- GoF 14: Command — Command + RAII undo
 
 ## 다음 글
 
