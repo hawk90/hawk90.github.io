@@ -155,7 +155,7 @@ EtherCAT 슬레이브는 다섯 상태를 가집니다. 마스터의 명령에 �
 
 EtherCAT은 *Beckhoff Automation*이 2003년에 발표한 프로토콜입니다. 그러나 ETG가 기술의 보급·상호운용 생태계를 운영합니다. 소유권 양도·라이선스·가입 비용은 별도의 공식 조건으로 확인해야 하며 이 글에서 추정하지 않습니다.
 
-![EtherCAT Ecosystem](/images/blog/industrial-ethernet/diagrams/ch03-ethercat-ecosystem.svg)
+![ETG가 생태계를 운영하고 Beckhoff(ET1100, 상용 master)와 다른 구현(LAN9252, SOEM·IgH)이 함께 있는 EtherCAT 생태계 구성](/images/blog/industrial-ethernet/diagrams/ch03-ethercat-ecosystem.svg)
 
 Beckhoff는 *ASIC IP와 master 상용 제품*을 통해 *생태계의 중심*에 남아 있지만, *프로토콜 자체는 개방*되어 있습니다. 이 균형이 EtherCAT의 빠른 채택을 가능하게 했습니다.
 
