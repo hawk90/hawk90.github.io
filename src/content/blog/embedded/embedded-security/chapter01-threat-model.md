@@ -1,8 +1,8 @@
 ---
-title: "임베디드 보안 위협 모델 — STRIDE·DFD·자산 식별 흐름"
+title: "임베디드 보안 위협 모델 — STRIDE·자산·우선순위"
 slug: "embedded/embedded-security/chapter01-threat-model"
 date: 2026-05-21T09:01:00
-description: "STRIDE / DREAD. 임베디드 특수 — 물리 접근 / 자원 제약."
+description: "자산과 공격 경로를 식별하고 임베디드 제품의 보안 우선순위를 정하는 방법."
 tags: [embedded-security, threat-model, STRIDE]
 series: "Embedded Security"
 seriesOrder: 1
@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 임베디드 시스템에 *보안 기능을 붙이자*고 결정하기 전에 답해야 할 질문이 세 개 있습니다. 무엇을 지키는가, 누구로부터 지키는가, 어떻게 들어올 수 있는가입니다. 이 세 질문에 대답하지 못한 상태에서 AES-256과 ECDSA를 켜면, 비용은 들었는데 정작 공격자가 지나가는 길은 그대로 열려 있는 결과가 나옵니다.
 
-위협 모델링은 위 세 질문에 *체계적으로* 답하는 절차입니다. 보안 학계와 산업에서 가장 널리 쓰이는 두 프레임워크가 STRIDE와 DREAD입니다. STRIDE는 *어떤 종류의 위협이 있는지*를 분류하고, DREAD는 *어떤 위협부터 막을지*의 순서를 매깁니다. 둘은 동전의 양면처럼 짝을 이룹니다.
+위협 모델링은 위 세 질문에 *체계적으로* 답하는 절차입니다. 이 장에서는 STRIDE를 위협 분류의 한 방법으로, DREAD를 팀이 위험을 비교할 때 쓸 수 있는 점수화 휴리스틱으로 사용합니다. 두 방법이 모든 조직에서 같은 형태로 채택되거나 동일한 결정을 내리는 표준 절차는 아닙니다. 조직은 자체 위험 분석과 규제 요구에 맞춰 평가 기준을 정해야 합니다.
 
 임베디드는 일반적인 IT 보안과 결정적으로 다른 점이 있습니다. 공격자가 *디바이스를 손에 쥡니다*. 데이터센터의 서버처럼 물리적으로 격리된 환경이 아니라, 실험실 책상에 올라와서 JTAG 프로브, 로직 애널라이저, 오실로스코프, 심지어 디캡(decapsulation)·SEM·FIB 같은 반도체 분석 장비까지 들어옵니다. 이 차이를 이해하지 못하면 데스크톱 보안 모델을 그대로 가져와 헛돈을 쓰게 됩니다.
 
@@ -63,11 +63,11 @@ topics: ["embedded"]
   - silicon 단위 reverse, mask ROM 추출
   - 동기: 산업 스파이, 군사 정보
 
-대부분의 *상용* 임베디드 제품은 Level 3까지를 막는 것을 목표로 합니다. Level 4를 막으려면 secure element(SE) 또는 PUF·glitch detector·shield wire 같은 *물리적* 대책이 필요하고, Level 5는 사실상 *시간을 버는 것*이 목표가 됩니다. 30분 만에 키가 나오느냐 30일이 걸리느냐가 비즈니스 결정 기준이 됩니다.
+이 단계는 이 장에서 위험 시나리오를 나누기 위해 만든 예시이며 업계 공통 등급이나 제품 인증 기준은 아닙니다. 제품의 가치, 노출 환경, 공격 비용과 규제 요구를 바탕으로 방어 범위를 정하고, 물리 공격에 대한 잔여 위험도 기록합니다.
 
 ## STRIDE — 위협의 6가지 종류
 
-STRIDE는 Microsoft가 정립한 분류 체계입니다. 머리글자가 6개 위협 카테고리를 담습니다.
+STRIDE는 [Microsoft Threat Modeling Tool 문서](https://learn.microsoft.com/en-us/azure/security/develop/threat-modeling-tool-threats)에 설명된 위협 분류 체계입니다. 머리글자가 6개 위협 카테고리를 담습니다.
 
 | 글자 | 위협 | 깨는 속성 | 임베디드 예시 |
 |---|---|---|---|
@@ -91,7 +91,7 @@ STRIDE는 Microsoft가 정립한 분류 체계입니다. 머리글자가 6개 �
 | D | 무한 update 요청으로 flash wear-out | rate limit + 인증 후 진행 |
 | E | 업데이트 중 권한 escalation | 검증 후에만 boot region write 허용 |
 
-이런 표 한 장이 *해당 기능에 대한 보안 요구사항 명세*가 됩니다. 이후 설계는 이 표의 각 항목을 어떻게 만족시키는지 적는 작업이 됩니다.
+이 표는 요구사항의 초안입니다. 각 대응의 책임자·검증 방법·실패 시 동작·잔여 위험을 더해야 검토 가능한 명세가 됩니다. 이후 설계는 이 표의 각 항목을 어떻게 만족시키는지 적는 작업이 됩니다.
 
 ## DREAD — 점수로 우선순위 매기기
 
@@ -105,14 +105,7 @@ STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때�
 | **A**ffected users | 영향 받는 사용자 비율 | 1% 미만 | 100% |
 | **D**iscoverability | 발견 난이도 | 내부자만 알 수 있음 | 공개 CVE, Shodan 검색 한 번 |
 
-평균 점수에 따라 우선순위를 매깁니다. 보통 다음과 같이 나눕니다.
-
-- 점수 8.0 이상 — Critical, 즉시 fix
-- 점수 6.0 ~ 7.9 — High, 이번 릴리스 안에
-- 점수 4.0 ~ 5.9 — Medium, 다음 분기
-- 점수 4.0 미만 — Low, backlog
-
-DREAD는 점수의 *정확도*가 목적이 아니라 *팀 내 합의*를 만드는 도구입니다. 두 엔지니어가 같은 위협에 7점과 4점을 매기면 그 차이를 토론하면서 위협에 대한 이해가 정렬됩니다.
+다음 절의 수치는 설명용 팀 입력값입니다. DREAD에는 모든 조직에 적용되는 보편 점수 경계가 없으므로, 심각도 구간을 쓴다면 조직이 기준과 조치 기한을 별도로 정해야 합니다. 점수는 정확한 확률이 아니라 가정을 드러내고 검토를 시작하기 위한 기록입니다.
 
 ## 임베디드 특화 공격 벡터
 
@@ -120,15 +113,15 @@ DREAD는 점수의 *정확도*가 목적이 아니라 *팀 내 합의*를 만드
 
 **디버그 인터페이스 — JTAG / SWD / UART**
 
-생산 라인에서는 켜져 있어야 하고, 양산 후에는 잠겨야 합니다. STM32의 RDP(Read-Out Protection) Level 2, NXP의 LP55, ESP32의 e-fuse JTAG disable 같은 메커니즘이 있습니다. *Level 2는 영구적*입니다. 한 번 잠그면 다시 못 엽니다. 디버그 락이 *제대로 활성화됐는지*를 양산 검사 단계에서 확인하는 절차가 필요합니다.
+디버그 보호의 이름과 가역성은 부품 계열에 따라 다릅니다. 예를 들어 STM32L552/L562의 RDP Level 2는 해당 제품에서 되돌릴 수 없는 설정입니다. 이 동작을 다른 STM32 계열이나 다른 벤더 제품에 그대로 일반화하지 말고, 실제 부품의 reference manual과 생산 검증 절차를 확인합니다.
 
 **외부 storage — SD / eMMC / SPI flash 스왑**
 
-루트 파일 시스템이 외부 SD에 있다면, 공격자가 카드를 빼서 PC에서 mount하고 init 스크립트 한 줄을 추가해 다시 끼우면 다음 부팅에 root shell이 열립니다. 방어는 dm-verity, fs-verity, 또는 디바이스 키로 암호화된 LUKS rootfs입니다.
+루트 파일 시스템이 외부 SD에 있다면, 공격자가 카드를 빼서 PC에서 mount하고 init 스크립트 한 줄을 추가해 다시 끼우면 다음 부팅에 root shell이 열립니다. 변조 방지에는 신뢰된 root hash와 연결된 [dm-verity](https://www.kernel.org/doc/html/v6.12/admin-guide/device-mapper/verity.html) 또는 서명·실행 정책과 연결된 fs-verity 등을 검토합니다. 기본 LUKS/dm-crypt 암호화만으로 rootfs의 authenticity·무결성까지 보장하지는 않습니다.
 
 **Glitch 공격 — voltage / clock / EM**
 
-CPU에 *순간적인 비정상*을 주입해 한 instruction을 건너뛰게 만듭니다. `if (signature_valid)` 분기에서 그 한 줄을 건너뛰면 부팅이 통과됩니다. 방어는 *redundancy* — 같은 결정을 두 번 다른 방식으로 검사하거나, fault injection 감지기를 두는 것입니다.
+Fault injection은 전원·clock·EM 등의 교란으로 실행·데이터에 오류를 유도하는 공격입니다. 특정 instruction 하나를 항상 원하는 대로 건너뛸 수 있다는 뜻은 아닙니다. `if (signature_valid)` 분기에서 그 한 줄을 건너뛰면 부팅이 통과됩니다. 중복 검사와 감지기를 검토하되 공통 원인 오류와 compiler 변환, 실패 시 동작까지 실제 타깃에서 확인해야 합니다. 검사 두 번만으로 공격 내성을 보장하지 않습니다.
 
 **Side-channel — power / EM / timing**
 
@@ -136,26 +129,20 @@ AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있�
 
 **Cold boot / RAM remanence**
 
-DRAM은 전원이 끊어진 직후 몇 초간 데이터가 남습니다. 액화 질소로 칩을 얼리면 수십 분까지 늘어납니다. 그동안 칩을 빼서 다른 보드에 꽂으면 RAM 내용을 읽을 수 있습니다. 방어는 *RAM 안에서도 키를 평문으로 두지 않기* — 사용 직후 zeroize, secure RAM 사용, encrypted RAM 같은 메커니즘입니다.
+일부 메모리에서 전원 차단 뒤 데이터가 남는 현상을 이용하는 공격이 연구됐지만, 잔류 시간과 획득 가능성은 메모리·온도·장비·절차에 따라 달라집니다. 이 장에서는 고정 시간을 주장하지 않습니다. 민감 정보를 오래 유지하지 않고, 제품의 메모리 보호 기능과 zeroization 동작을 위협 모델에 맞춰 검증합니다.
 
 ## 자원 제약 — MCU에서의 crypto 도전
 
 크립토는 *연산 비용*과 *메모리 비용*이 비쌉니다. 흔히 보는 제약은 다음과 같습니다.
 
-Cortex-M0+ @ 48 MHz, 32 KB RAM, 256 KB Flash:
-
-- RSA-2048 서명 검증 — 약 2~3초 (가능하지만 느림)
-- ECDSA P-256 검증 — 약 200~400 ms (실용적)
-- AES-128-GCM — HW 가속 있으면 수십 MB/s, SW만으로는 수 MB/s
-- SHA-256 — HW 있으면 수십 MB/s, SW로 1~3 MB/s
-- TLS 1.3 handshake — 메모리 부족할 가능성, 수십 KB RAM 소비
+연산 시간과 RAM/flash 점유는 MCU, 클록, 라이브러리 버전, 컴파일 옵션, 가속기 경로와 입력 크기에 따라 달라집니다. 특정 프로젝트의 선택은 고정된 표 수치가 아니라 실제 구성에서 측정한 시간·메모리 사용량과 보안 요구를 비교해 정합니다.
 
 이 제약 때문에 임베디드에서는 다음과 같은 *현실적인 타협*이 자주 일어납니다.
 
-- RSA 대신 ECC — 같은 보안 강도에서 키 크기 1/8, 연산 더 빠름.
-- 풀 TLS 대신 *pre-shared key* DTLS 또는 *certificate pinning*.
+- RSA 대신 ECC — 키·서명 형식과 연산 비용이 다르므로 지원 알고리즘, 보안 강도, 메시지 형식과 대상 MCU에서의 측정값을 함께 비교합니다.
+- 전송 protocol과 인증 정책을 따로 선택합니다. DTLS는 datagram 전송용이며 PSK·certificate pinning도 키 교체·폐기·상호운용 조건을 확인해야 합니다.
 - 매 패킷 서명 대신 *세션 시작에만* 서명, 이후 MAC으로.
-- 매 부팅 RSA 대신 *Merkle tree*로 부분 검증.
+- Merkle tree로 부분 검증할 때도 신뢰된 root hash의 인증과 실행 정책은 유지해야 합니다. Tree만으로 서명 기반 신뢰 시작점을 대체하지 않습니다.
 
 이 타협은 *위협 모델이 허용할 때*만 가능합니다. 그래서 위협 모델을 *먼저* 그려야 하는 것입니다.
 
@@ -165,22 +152,36 @@ Cortex-M0+ @ 48 MHz, 32 KB RAM, 256 KB Flash:
 
 ![신뢰 경계 — Cloud, CA root, Device의 NS/S/OTP 계층](/images/blog/embedded-security/diagrams/ch01-trust-boundaries.svg)
 
-박스 사이의 화살표 *각각*이 검증 지점입니다. Cloud → Device는 mutual TLS, NS → S는 SMC 인터페이스의 입력 검증, S → OTP는 access control 검사가 들어갑니다. 신뢰 경계가 그려지면 그 다음 챕터들이 다루는 메커니즘(Secure Boot, TrustZone, TEE)이 *어디서 어떤 경계를 지키는지* 분명해집니다.
+이 그림의 CA root는 TLS 인증의 신뢰 기준이고 boot image의 ROTPK와 자동으로 같은 키가 아닙니다. 박스 사이의 화살표 각각이 검증 지점입니다. Cloud → Device는 mutual TLS, NS → S는 SMC 인터페이스의 입력 검증, S → OTP는 access control 검사가 들어갑니다. 신뢰 경계가 그려지면 그 다음 챕터들이 다루는 메커니즘(Secure Boot, TrustZone, TEE)이 *어디서 어떤 경계를 지키는지* 분명해집니다.
+
+## 신뢰 경계를 검토 가능한 질문으로 바꾸기
+
+그림은 Cortex-A의 NS/S 분리와 cloud 인증을 택한 한 구성 예이며 모든 MCU에 그대로 적용하는 구조가 아닙니다. DFD를 작성할 때는 외부 주체·process·저장소·data flow를 정하고, 경계를 넘는 각 flow에 입력 형식·인증 주체·권한·실패 정책을 연결합니다.
+
+| Flow 예 | 먼저 확인할 가정 | 거부·복구 검증 |
+|------|------|------|
+| Cloud → update agent | 신뢰 anchor·서명키와 key rotation 책임 | 유효한 TLS라도 다른 제품·옛 보안 버전의 이미지는 거부하는가? |
+| Non-secure → secure service | 포인터·길이·공유 buffer의 변경 가능성 | 경계 밖 길이·호출 중 변경·권한 없는 key ID를 거부하는가? |
+| Update agent → flash | 쓰기 권한과 전원 차단 원자성 | 검증 후 변조와 중단 뒤에도 허용된 recovery만 실행되는가? |
+
+이 표는 실행 결과가 아니라 검증 계획입니다. 자산별 owner와 기한을 붙이고 제품·공격 환경이 바뀌면 가정을 다시 검토합니다. 이 글에서는 물리 공격이나 제품 인증을 수행하지 않았습니다.
 
 ## 위험 우선순위 표 — 한 장으로 정리
 
 자산 × STRIDE × DREAD를 합친 한 장의 표가 위협 모델의 결과물입니다.
 
-| 자산 | STRIDE | 시나리오 | DREAD 평균 | 대응 |
-|---|---|---|---|---|
-| 펌웨어 이미지 | T (Tamper) | OTA 중 MITM이 이미지 교체 | 8.2 | ECDSA P-256 서명 + TLS 1.3 |
-| 펌웨어 이미지 | I (Info) | flash dump로 IP 노출 | 5.6 | RDP Level 2 + 펌웨어 암호화 |
-| 디바이스 키 | I (Info) | DPA로 AES 키 추출 | 6.4 | masked AES + secure element |
-| 디버그 포트 | E (Elev) | JTAG로 root shell | 7.8 | RDP / e-fuse JTAG disable |
-| RoT 공개키 | T (Tamper) | OTP write가 열려 있음 | 9.0 | 양산 시 OTP lock 확인 |
-| 세션 키 | I (Info) | cold boot로 RAM dump | 4.2 | 사용 후 즉시 zeroize |
+| 자산 | STRIDE | 시나리오 | DREAD 입력 D/R/E/A/D | 평균 예시 | 검토할 대응 |
+|---|---|---|---|---:|---|
+| 펌웨어 이미지 | T (Tampering) | OTA 이미지 변조 | 9/7/8/9/8 | 8.2 | 서명 검증, 전송 보호 |
+| 펌웨어 이미지 | I (Information disclosure) | flash 분석으로 지식재산 노출 | 6/6/6/5/5 | 5.6 | 기밀성 요구와 저장 경로 검토 |
+| 디바이스 키 | I (Information disclosure) | 물리 분석으로 키 노출 | 8/6/7/6/5 | 6.4 | 키 보호 기능과 물리 공격 시험 검토 |
+| 디버그 포트 | E (Elevation of privilege) | 디버그 접근으로 권한 상승 | 8/9/9/7/6 | 7.8 | 부품별 debug lifecycle 설정 |
+| RoT 공개키 | T (Tampering) | 신뢰 기준 변경 | 10/8/9/9/9 | 9.0 | key provisioning·revocation 절차 검토 |
+| 세션 키 | I (Information disclosure) | 메모리에서 세션 키 노출 | 5/4/5/4/3 | 4.2 | 수명·메모리 보호·zeroization 검증 |
 
-이 한 장이 *이번 릴리스의 보안 작업 목록*이 됩니다. 9.0짜리 OTP lock 확인 절차가 빠지면 다른 모든 보안 기능이 무력화될 수 있다는 사실이 한눈에 보입니다.
+각 점수는 예시 담당자가 임의 기준으로 기록한 값이며 표준 점수나 측정 결과가 아닙니다. 팀은 각 축의 정의와 근거를 남기고 평균만으로 위험 수용을 결정하지 않습니다.
+
+이 표는 팀이 가정과 후속 검증을 검토하는 출발점입니다. 높은 점수만으로 우선순위나 위험 수용을 확정하지 말고, 자산 소유자·노출 조건·대응 비용과 잔여 위험을 함께 기록합니다.
 
 ## 자주 하는 실수
 
@@ -194,12 +195,12 @@ Cortex-M0+ @ 48 MHz, 32 KB RAM, 256 KB Flash:
 
 - 임베디드 보안은 자산·공격자·신뢰 경계를 정의하는 위협 모델에서 출발합니다.
 - 자산은 펌웨어·키·인증서·사용자 데이터·디버그 인터페이스 등으로 enumeration합니다.
-- 공격자는 원격(L1)부터 nation-state(L5)까지 5단계로 나누어 *어디까지 막을 것인지* 결정합니다.
+- 공격자 능력 단계는 이 장의 시나리오 예시이며, 제품별 가정과 잔여 위험을 명시합니다.
 - STRIDE는 위협의 6가지 종류(Spoofing·Tampering·Repudiation·Info disclosure·DoS·Elevation)를 분류합니다.
 - DREAD는 5축(Damage·Reproducibility·Exploitability·Affected users·Discoverability)으로 점수를 매겨 우선순위를 정합니다.
-- 임베디드 특화 벡터로 JTAG·storage 스왑·glitch·side-channel·cold boot가 있고, 각각 별도의 방어가 필요합니다.
-- MCU의 자원 제약 때문에 RSA 대신 ECC, 풀 TLS 대신 PSK 같은 현실적 타협이 필요합니다.
-- 위협 모델은 한 장의 위험 우선순위 표로 응축되어 *이번 릴리스의 보안 작업 목록*이 됩니다.
+- 검토할 수 있는 공격 벡터에는 JTAG·storage 스왑·glitch·side-channel·메모리 잔류가 있으며, 적용 가능성은 부품과 공격 환경에 따라 확인합니다.
+- MCU의 자원 제약은 알고리즘과 프로토콜 선택에 영향을 주므로 대상 구성에서 측정하고 보안 요구와 함께 판단합니다.
+- 위협 모델은 가정·검증 작업·잔여 위험을 기록하는 입력이며, 단일 평균 표가 릴리스 결정을 대신하지 않습니다.
 
 다음 편은 **Ch 2: Secure Boot — 부트 체인 검증**. 위협 모델 표의 최상위 항목인 "임의 펌웨어 실행"을 어떻게 막는지, ROM부터 application까지 체인을 따라가며 봅니다.
 

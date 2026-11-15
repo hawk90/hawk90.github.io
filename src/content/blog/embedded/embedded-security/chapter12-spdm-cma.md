@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"IDE가 *링크를 암호화*하기 *전에* 양쪽이 *서로 누구인지* 확인해야 합니다."** — SPDM은 *디바이스 인증·키 교환·세션 협상*을 담당하는 DMTF 표준입니다. *CMA*는 PCIe·CXL 디바이스가 *SPDM으로 인증받고 측정값을 내놓는* 방식입니다. 둘이 합쳐 *Confidential Computing의 신뢰 사슬 끝단*을 만듭니다.
+> **"IDE가 *링크를 암호화*하기 *전에* 양쪽이 *서로 누구인지* 확인해야 합니다."** — SPDM은 *디바이스 인증·키 교환·세션 협상*을 담당하는 DMTF 표준입니다. *CMA*는 PCIe·CXL 디바이스가 *SPDM으로 인증받고 측정값을 내놓는* 방식입니다. 프로토콜이 제공하는 증거와 호스트의 신뢰·수락 정책을 함께 확인해야 합니다.
 
 [Ch 11](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)에서 *IDE가 링크를 AES-GCM으로 암호화*하는 걸 봤습니다. 그런데 *키를 어떻게 안전하게 교환*하는지, *상대편이 진짜인지 어떻게 확인*하는지는 IDE 밖의 문제입니다. 그게 *SPDM·CMA의 역할*입니다.
 
@@ -34,8 +34,8 @@ SPDM은 이 시나리오를 판단할 *재료*를 줍니다. 디바이스의 *�
 |------|----|
 | 정의 단체 | DMTF (Distributed Management Task Force) |
 | 표준 번호 | DSP0274 |
-| 첫 릴리스 | 1.0.0 (2019-10-16) |
-| 현 릴리스 | 1.4.1 (2026-06-26) |
+| 이 장의 대조 판 | [DSP0274 1.2.3, 2024-08-21](https://www.dmtf.org/sites/default/files/standards/documents/DSP0274_1.2.3.pdf) |
+| 범위 | 선택한 절·메시지 표 대조, 최신 판이라는 뜻 아님 |
 | 전송 layer | PCIe DOE, MCTP(DSP0275) 등 |
 | 적용 | PCIe·CXL 디바이스 인증 (CMA-SPDM) |
 
@@ -43,7 +43,7 @@ SPDM 자체는 *전송 무관*입니다. *어느 채널*로 보낼지는 별도 
 
 ## SPDM 메시지 시퀀스
 
-표준 *디바이스 인증·키 교환 흐름*:
+다음은 인증서 기반 경로의 개념적 예입니다. 모든 구현이 18단계를 반드시 같은 순서로 수행하는 고정 handshake가 아닙니다. 협상 capability·인증 정책·PSK 경로·session 내 measurement 여부에 따라 달라집니다.
 
 | 순서 | 메시지 | 방향 | 내용 |
 |------|--------|------|------|
@@ -56,34 +56,28 @@ SPDM 자체는 *전송 무관*입니다. *어느 채널*로 보낼지는 별도 
 | 7 | GET_DIGESTS | Host → Device | 인증서 chain hash 요청 |
 | 8 | DIGESTS | Device → Host | hash 리스트 |
 | 9 | GET_CERTIFICATE | Host → Device | 특정 chain 요청 |
-| 10 | CERTIFICATE | Device → Host | X.509 인증서 chain 전송 |
+| 10 | CERTIFICATE | Device → Host | 요청 offset·길이에 맞춘 인증서 chain 조각 |
 | 11 | CHALLENGE | Host → Device | nonce + measurement summary 요청 |
 | 12 | CHALLENGE_AUTH | Device → Host | 서명된 응답 (proof of possession) |
 | 13 | GET_MEASUREMENTS | Host → Device | firmware hash 요청 |
-| 14 | MEASUREMENTS | Device → Host | 서명된 measurement block |
+| 14 | MEASUREMENTS | Device → Host | 요청·capability에 따른 measurement와 선택적 서명 |
 | 15 | KEY_EXCHANGE | Host → Device | session 키 교환 시작 |
 | 16 | KEY_EXCHANGE_RSP | Device → Host | 교환 응답 |
 | 17 | FINISH | Host → Device | 인증 완료 |
 | 18 | FINISH_RSP | Device → Host | 세션 활성화 |
 
-이 시퀀스가 끝나면 호스트는 디바이스의 신원을 확인했고, 둘은 *secure session*을 갖습니다. CXL에서는 이 session이 IDE 키를 설정하는 *CXL_IDE_KM* 메시지를 보호합니다(CXL 3.1 §11.4). session 키가 곧 IDE 키는 아닙니다.
+정상 응답을 받았다는 것만으로 수락하지 않습니다. 버전·algorithm downgrade 정책, chain 신뢰·용도·유효기간, transcript 서명·freshness, FINISH 검증 등 해당 경로의 조건을 확인해야 합니다. ERROR·Busy·ResponseNotReady·timeout·unsupported capability를 처리하고 제한 없이 재시도하거나 인증 없이 계속 진행하지 않습니다. 성공적으로 수립한 secure session에서는 필요한 key update·종료·재측정 정책을 적용합니다. CXL에서는 이 session이 IDE 키를 설정하는 *CXL_IDE_KM* 메시지를 보호합니다(CXL 3.1 §11.4). session 키가 곧 IDE 키는 아닙니다.
 
 ## DOE 채널 — SPDM 전송
 
-PCIe·CXL에서 SPDM 메시지는 *DOE (Data Object Exchange)*로 전송됩니다.
+DOE capability는 mailbox의 존재를 보여 주며 SPDM 인증 성공을 뜻하지 않습니다. [Linux ABI 문서](https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci)의 `doe_features` 예는 discovery 0001:00, CMA-SPDM 0001:01, secured CMA-SPDM 0001:02를 구분합니다. 해당 kernel/config·device가 지원해야 합니다. Linux6.12의 public DOE API만 보고 이 sysfs directory가 있다고 추정하지 않습니다.
 
 ```bash
-# DOE capability 레지스터 (pciutils는 DOECap·DOECtl·DOESta만 출력)
-$ lspci -vvv -s 5e:00.0 | grep -A 4 "Data Object Exchange"
-
-# 디바이스가 지원하는 DOE feature (Vendor ID:type)
-$ ls /sys/bus/pci/devices/0000:5e:00.0/doe_features/
-0001:01  0001:02  doe_discovery
+lspci -n -vv -s 0000:5e:00.0
+ls /sys/bus/pci/devices/0000:5e:00.0/doe_features/
 ```
 
-DOE feature는 `Vendor ID:data object type`으로 식별합니다. Vendor 0001h(PCI-SIG) 아래 type 0이 Discovery, 1이 CMA-SPDM, 2가 Secured CMA-SPDM입니다(Linux `include/linux/pci-doe.h`, `Documentation/ABI/testing/sysfs-bus-pci`). `lspci`는 이 목록을 출력하지 않습니다.
-
-DOE는 *config space에 mailbox*를 두고, *호스트가 명령 write → 디바이스 응답 read* 하는 단순 인터페이스입니다.
+명령과 BDF는 조사 예이며 실제 장치 출력은 아닙니다. 이 작업의 pciutils3.13.0 synthetic dump 실험은 DOECap·DOECtl·DOESta를 decode했지만 SPDM feature discovery나 mailbox 요청은 하지 않았습니다. `lspci`의 register 출력과 kernel이 수행한 DOE discovery를 구분합니다. Protocol의 vendor/type 식별자에서 PCI-SIG가 나온다고 SPDM 자체의 정의 주체가 DMTF에서 바뀌는 것은 아닙니다.
 
 ## CMA — Component Measurement and Authentication
 
@@ -97,7 +91,7 @@ DOE는 *config space에 mailbox*를 두고, *호스트가 명령 write → 디�
 | 0x01~0xFE | 그 index의 measurement block 요청 |
 | 0xFF | 모든 measurement block 요청 |
 
-index에 무엇을 둘지는 디바이스가 정하고, 각 block은 `DMTFSpecMeasurementValueType`으로 종류를 밝힙니다.
+index에 무엇을 둘지는 디바이스가 정하고, DMTF measurement format인 block은 `DMTFSpecMeasurementValueType`의 하위7bit로 종류를, bit7로 digest(0)/raw(1)를 밝힙니다. 모든 index가 firmware hash이거나 모든 값이 digest인 것은 아닙니다. DSP0274 1.2.3 Table38~43을 대조합니다.
 
 | 값 | 종류 |
 |----|------|
@@ -105,38 +99,66 @@ index에 무엇을 둘지는 디바이스가 정하고, 각 block은 `DMTFSpecMe
 | 0x1 | Mutable firmware |
 | 0x2 | Hardware configuration (strap 등) |
 | 0x3 | Firmware configuration |
-| 0x4 | Freeform measurement manifest |
+| 0x4 | Measurement manifest |
+| 0x5 | Debug·device mode의 구조화된 표현, raw 필수 |
+| 0x6 | Mutable firmware version |
+| 0x7 | Mutable firmware security version |
 
-Param1 bit 0을 켜서 요청하면 요청에 nonce가 붙고, 디바이스는 응답에 서명합니다.
+서명 가능한 capability를 협상하고 Param1 bit0을 켜면 요청에 nonce·slot 정보가 붙고 measurement log의 서명을 요청합니다. 서명 대상 transcript와 nonce를 검증해야 하며, raw firmware hash 하나의 서명을 확인하는 것과 같지 않습니다. 서명을 요청하지 않은 응답도 가능하므로 서명·session 보호·freshness 정책을 명시합니다.
 
 ## DICE — Device Identifier Composition Engine
 
-*DICE*는 TCG가 정의한 방식으로, *하드웨어 수준의 디바이스 고유 비밀(UDS)*과 *다음 단계 software의 측정값*을 섞어 *CDI(Compound Device Identifier)*를 만듭니다. 아래 식은 Open Profile for DICE(Google open-dice)의 구성입니다.
+[Open Profile for DICE v2.6](https://pigweed.googlesource.com/open-dice/+/refs/heads/main/docs/specification.md)은 TCG DICE를 기반으로 UDS·CDI·layering을 구체화합니다. Mutable software가 UDS를 직접 읽지 못하도록 하는 구현 경계가 전제입니다. 이 profile의 Attestation CDI와 Sealing CDI를 같은 간단한 식으로 쓰지 않습니다.
 
-| 단계 | 값 | 계산 |
-|-------|---------|--------|
-| 하드웨어 | UDS (Unique Device Secret) | 디바이스 고유 비밀. DICE가 쓴 뒤로는 접근 차단 |
-| 첫 software layer | CDI | KDF(UDS, H(code + config + …)) |
-| 다음 layer | CDI[n+1] | KDF(CDI[n], H(다음 layer의 code + config + …)) |
+| 종류 | profile 입력의 차이 | 관찰할 점 |
+|------|------|------|
+| CDI_Attest | code·config·authority·mode·hidden | 코드·설정 변경을 attestation identity에 반영 |
+| CDI_Seal | authority·mode·hidden의 stable 입력 | 코드가 바뀌면 모든 sealing identity도 반드시 바뀐다고 단정하지 않음 |
 
-핵심 성질: *측정된 software가 변하면 CDI가 변합니다*. mutable software는 UDS에 접근하지 못하고 자기 단계의 CDI만 받습니다.
+DICE에서 파생한 identity가 SPDM credential로 쓰이는지는 제품 provisioning·certificate chain·verifier 정책의 연결 문제입니다. DICE 구현이나 인증서를 실제 장치에서 검사한 결과는 아닙니다.
 
 ## 공격 시나리오와 SPDM의 방어
 
-| 공격 | SPDM 방어 |
-|------|----------|
-| Counterfeit 디바이스 spoofing | X.509 인증서 chain 검증 → 정품만 통과 |
-| Firmware downgrade | MEASUREMENT가 옛 firmware hash → 정상값과 다름 → 거부 |
-| Replay attack | CHALLENGE의 nonce가 매번 다름 → 재사용 불가 |
-| Man-in-the-middle | 서명 검증 → MITM은 서명 못 함 |
+| 상황 | 확인할 증거 | 수락하지 않아야 할 조건 |
+|------|------|------|
+| Device 교체 | 신뢰 anchor·identity·제품 정책 | 서명은 맞아도 허용하지 않은 issuer/장치 |
+| Firmware 변경 | 인증된 measurement와 version별 reference | 서명은 맞아도 금지된 구버전·설정 |
+| 응답 재사용 | nonce·transcript·session 상태 | 현재 요청과 결합되지 않은 과거 응답 |
+| Key·algorithm 교체 | 협상·용도·수명주기 정책 | 지원하지 않거나 금지된 경로로 fallback |
 
-SPDM 자체가 *MITM·spoofing·replay*를 막아 *IDE 키 교환*이 *진짜 정품 디바이스*와 이루어지게 보장합니다.
+SPDM만으로 정품·정상 firmware를 자동 판별하지 않습니다. Reference는 인증된 별도 경로로 확보하고 제품·revision·config·측정 index·정책 version을 연결합니다.
+
+## 작은 host 실험 — 서명 유효성과 정책 수락을 분리
+
+다음은 **SPDM wire format이 아닌 자체 고정 형식의 교육용 envelope**입니다. 이미 신뢰한 P-256 public key 하나와 SHA-256 digest·32-byte nonce를 받아, Node의 DER ECDSA 서명과 고정 reference 정책을 검사합니다. 실제 SPDM의 signature encoding·협상·transcript·certificate 검증을 구현한 코드가 아닙니다.
+
+```js title="measurement-policy-demo.mjs"
+import {verify, timingSafeEqual} from 'node:crypto';
+
+export function acceptDemo(trustedKey, expectedNonce, allowedDigest,
+                           nonce, digest, signature) {
+  if (![expectedNonce, allowedDigest, nonce, digest]
+        .every(b => Buffer.isBuffer(b) && b.length === 32) ||
+      !Buffer.isBuffer(signature) || signature.length < 8 ||
+      signature.length > 72)
+    return false;
+  if (!timingSafeEqual(nonce, expectedNonce))
+    return false;
+  const message = Buffer.concat([
+    Buffer.from('MEASUREMENT-DEMO-v1\0'), nonce, digest
+  ]);
+  return verify('sha256', message, trustedKey, signature) &&
+         timingSafeEqual(digest, allowedDigest);
+}
+```
+
+Trusted key는 caller가 별도 신뢰 경로로 정한 P-256 KeyObject라는 전제입니다. 합성 firmware bytes·일회용 key로 정상 수락, 다른 key·nonce·digest·signature·잘린 입력 거부를 실행했습니다. 특히 **금지한 구버전 digest는 올바르게 서명했어도 정책에서 거부**됐습니다. 이는 서명 확인만으로 정상 version을 정할 수 없다는 실험이며, 실제 SPDM device attestation 성공은 아닙니다.
 
 ## 자주 하는 실수
 
 ### "SPDM만 활성화하면 보안 끝"
 
-*디바이스 한 번 인증된 뒤 트래픽 자체*는 *별도 보호 메커니즘 (IDE)*이 필요합니다. SPDM은 *세션 시작 전 한 번*, IDE는 *세션 내내*. 둘이 *상호 보완*이지 *대체 관계가 아닙니다*.
+*디바이스 한 번 인증된 뒤 트래픽 자체*는 *별도 보호 메커니즘 (IDE)*이 필요합니다. SPDM은 초기 인증만으로 끝나는 개념이 아니며 secure session·key update·measurement·종료 등 기능을 포함합니다. IDE traffic 보호와 역할을 구분합니다.
 
 ### "MEASUREMENT의 hash를 어떤 값과 비교할지 SPDM이 정해 준다"
 
@@ -147,8 +169,8 @@ SPDM 자체가 *MITM·spoofing·replay*를 막아 *IDE 키 교환*이 *진짜 �
 - *SPDM*은 DMTF DSP0274 표준으로 *디바이스 인증·측정·secure session*을 담당합니다.
 - PCIe·CXL에서는 *DOE (Data Object Exchange)* 채널로 SPDM 메시지가 흐릅니다. DOE feature 0001:01이 CMA-SPDM입니다.
 - *CMA*(Component Measurement and Authentication)는 DOE 위의 SPDM 인증·측정 방식입니다.
-- *DICE*는 *UDS와 측정값으로 CDI를 derive*해 *software 변경 시 신원도 변경*되게 합니다.
-- *SPDM + IDE 조합*이 *Confidential Computing의 신원 검증 + 트래픽 보호* 두 축을 완성합니다.
+- DICE profile의 attestation·sealing 입력과 SPDM credential provisioning을 구분합니다.
+- 서명·freshness·reference 정책·session·실제 IDE traffic에는 각각 다른 증거가 필요합니다.
 
 다음 편은 **Ch 13: CXL TEE 확장** — *SPDM 위에서 디바이스가 인증*되면 *그 디바이스를 TVM (Trusted Virtual Machine)에 안전하게 attach*하는 PCI-SIG *TDISP*, CXL *TSP*, Linux PCI TSM 프레임워크를 분해합니다.
 
@@ -157,5 +179,5 @@ SPDM 자체가 *MITM·spoofing·replay*를 막아 *IDE 키 교환*이 *진짜 �
 - [Ch 11: PCIe·CXL IDE 분석 — 링크 무결성과 데이터 암호화](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)
 - [Ch 13: CXL TEE 확장](/blog/embedded/embedded-security/chapter13-cxl-tee) (다음 편)
 - [Ch 2: Secure Boot 분석](/blog/embedded/embedded-security/chapter02-secure-boot) — DICE와 같은 chain of trust
-- [Ch 5: TEE 비교 분석 — OP-TEE·ARM CCA·SGX](/blog/embedded/embedded-security/chapter05-tee)
+- [Ch 5: OP-TEE — 호출과 저장소 경계](/blog/embedded/embedded-security/chapter05-tee)
 - [원문 — DMTF DSP0274 (SPDM)](https://www.dmtf.org/standards/spdm)

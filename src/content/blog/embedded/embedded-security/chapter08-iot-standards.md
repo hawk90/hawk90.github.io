@@ -2,7 +2,7 @@
 title: "IoT 보안 표준 비교 — ETSI EN 303 645·IEC 62443·NIST 8259·EU CRA"
 slug: "embedded/embedded-security/chapter08-iot-standards"
 date: 2026-05-21T09:08:00
-description: "IoT 소비자·산업·자동차 보안 표준. 한국 KISA·KICS 포함."
+description: "소비자·산업 IoT 표준과 CRA·UK PSTI의 적용 범위, 일정, 검증 증거를 구분합니다."
 tags: [IoT, ETSI, iec-62443, NIST, CRA, Standards]
 series: "Embedded Security"
 seriesOrder: 8
@@ -12,32 +12,27 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"IoT 보안 표준은 *체크리스트*가 아니라 *법적 요구*가 되고 있습니다."** — 2025년 8월 EU Cyber Resilience Act 시행 이후 CE 마킹을 받으려면 표준 준수가 강제됩니다. 미국·영국도 비슷한 흐름입니다.
+> 표준의 기술 요구, 시장별 법적 의무, 제품 인증의 평가 범위를 구분해야 합니다. 같은 TLS·OTA 기능을 써도 적용 법규와 제출 증거가 같아지지는 않습니다.
 
-2010년대 IoT의 *기본값이 root/admin*이었던 시절이 끝나고 있습니다. Mirai botnet(2016) 이후 각국 규제 기관이 *최소한의 기준*을 법제화하기 시작했고, 2024~2026년 사이에 영국·EU·미국·일본·한국이 모두 단계적으로 시행에 들어갑니다.
-
-이 장은 IoT 제품을 출시하려는 엔지니어가 *어떤 표준을 무엇 때문에 봐야 하는지* 정리합니다. ETSI EN 303 645는 소비자 IoT의 최소선, IEC 62443은 산업 자동화, NIST IR 8259/8425는 미국 정부 조달 기준, UNECE WP.29는 자동차, EU CRA는 *광범위한 디지털 제품 전체*에 적용됩니다.
+이 장은 소비자·산업 IoT 제품의 적용 범위를 정리합니다. 법규 일정은 **2026-10-24 확인 기준**이며, 원래 글의 2025년 8월 CRA 시행·2027년 11월 완전 시행 표기는 잘못된 것입니다. EU CRA는 Regulation (EU) 2024/2847이고, RED의 무선기기 보안 요구와 별도입니다.
 
 ## 표준의 지형도
 
-| 표준 | 영역 | 시행 |
+| 문서·제도 | 주된 대상 | 구분할 것 |
 |------|------|------|
-| **ETSI EN 303 645** | 소비자 IoT | EU 사실상 표준, UK PSTI 법제화 |
-| **IEC 62443** | 산업 자동화 / OT | 글로벌, 발전소·공장 의무 다수 |
-| **NIST IR 8259 / IR 8425** | 미국 IoT 핵심 baseline | 연방 조달 필수 |
-| **NIST SP 800-213 / 213A** | 정부용 IoT 디바이스 | 연방 시스템 |
-| **UNECE WP.29 R155/R156** | 자동차 사이버보안·OTA | EU·일·한 강제, 2024부터 |
-| **ISO/SAE 21434** | 자동차 V&V | OEM·Tier1 사실상 의무 |
-| **EU CRA** | 광범위 디지털 제품 | 2027 11월 완전 시행 |
-| **US Cyber Trust Mark** | 자발적 라벨링 | 2024 시작 |
-| **KISA IoT 보안 인증** | 한국 | KCSP-IoT, 의무 아님 |
-| **K-ISMS / KICS** | 한국 시스템 보안 | 산업별 일부 의무 |
+| ETSI EN 303 645 V2.1.1 | 소비자 IoT 보안 baseline | 표준의 권고·필수·적용 조건과 법적 의무는 별도 |
+| IEC 62443 | 산업 자동화·제어 시스템 | 개발 프로세스, component, system의 평가 범위 |
+| NIST IR 8259 계열·8425 | 제조사 활동·기기 capability·소비자 제품 | 기술 지침과 실제 조달·인증 요구 |
+| EU CRA | 적용 범위에 해당하는 디지털 요소 제품 | 단계별 적용일, 제품 분류, 적합성평가 절차 |
+| UK PSTI | 적용 대상 consumer connectable product | 2024-04-29 적용, 세 보안 요구와 SoC |
+| UN R155/R156 | 적용 관할의 차량 형식승인 | 차량 범주·채택국·시행 조건별 확인 |
+| KISA IoT 보안인증 | IoT 제품 인증 | 제품·등급·시험 범위와 해외 제도 대응을 따로 확인 |
 
-각 표준이 *다른 자리*를 보고 있어 중복도 있지만, 핵심 보안 항목은 80% 이상 겹칩니다. ETSI EN 303 645가 가장 *명확하고 짧아서*, 처음 보는 표준으로 권장됩니다.
+B2B라는 이름이나 사용한 암호 library만으로 어느 제도의 적용 여부도 결정하지 않습니다.
 
 ## ETSI EN 303 645 — 소비자 IoT 13개 provision
 
-EU의 *공식 IoT 사이버보안 표준*입니다. 영국이 이를 그대로 받아 *PSTI Act 2022*로 법제화했고, 2024년 4월부터 영국에서 IoT 제품을 팔려면 자기적합선언이 필요합니다. EU CRA도 이 표준을 기반으로 합니다.
+[ETSI EN 303 645 V2.1.1 (2020-06)](https://www.etsi.org/deliver/etsi_en/303600_303699/303645/02.01.01_60/en_303645v020101p.pdf)의 §5는 아래 13개 주제이며 §6의 개인정보 보호 조항도 있습니다. 최신 판이라는 뜻이 아닙니다. Annex B의 필수·권고·조건부 항목을 제품 기능에 맞춰 읽으며, 이 표준을 읽었다는 사실만으로 CRA 적합성을 선언하지 않습니다.
 
 13개 provision의 요지입니다.
 
@@ -46,252 +41,135 @@ EU의 *공식 IoT 사이버보안 표준*입니다. 영국이 이를 그대로 �
 | 5.1 | No universal default passwords | 공장 출하 시 기기별 고유 패스워드 또는 사용자 설정 강제 |
 | 5.2 | Vulnerability disclosure | 보안 연락처 공개 + 처리 정책 |
 | 5.3 | Keep software updated | 업데이트 가능 + 지원 기간 공개 |
-| 5.4 | Securely store credentials | 평문 저장 금지, secure element 권장 |
+| 5.4 | Securely store credentials | 민감한 보안 parameter의 안전한 저장 |
 | 5.5 | Communicate securely | TLS / 인증된 채널 |
 | 5.6 | Minimize attack surfaces | 사용하지 않는 포트·서비스 비활성화 |
 | 5.7 | Ensure software integrity | secure boot, signed update |
-| 5.8 | Protect personal data | GDPR 정합성 |
+| 5.8 | Protect personal data | 전송 중 민감한 개인정보 보호 |
 | 5.9 | Make systems resilient to outages | 네트워크·전력 단절 시 안전 동작 |
 | 5.10 | Examine system telemetry | 이상징후 탐지, 감사로그 |
 | 5.11 | Make it easy to delete user data | 공장 초기화 |
 | 5.12 | Make installation/maintenance easy | 보안 관련 사용자 안내 |
 | 5.13 | Validate input data | 외부 입력 검증 |
 
-5.1, 5.2, 5.3 세 가지가 *최우선*입니다. UK PSTI는 이 셋만 강제하고 나머지는 권장입니다. 5.1의 "기기별 고유 패스워드"는 *MAC 주소 같은 추측 가능한 값으로 만들면 안 됩니다*. 보통 *공장에서 무작위 생성 + QR 스티커*로 처리합니다.
+5.1의 비밀번호 요구는 password를 사용하는 제품의 적용 조건까지 읽습니다. MAC 주소·단순 증가 counter 같은 추측 가능한 값을 비밀번호로 쓰지 않습니다. 각 항목의 구체적인 구현은 threat model과 수명주기에서 평가합니다.
 
-### 자기적합선언 (Statement of Compliance) 예
+### UK PSTI — 세 법적 요구와 Statement of Compliance
 
-```text
-Product: SmartLock-X1
-Manufacturer: ACME Corp.
-Standard: ETSI EN 303 645 V2.1.1
+[영국 정부 안내](https://www.gov.uk/government/publications/the-uk-product-security-and-telecommunications-infrastructure-product-security-regime)는 2024-04-29부터 적용되는 제도의 세 요구를 구분합니다. ETSI 전체를 그대로 법제화한 것과 같지 않습니다.
 
-Compliance:
-  5.1 No default passwords         COMPLIANT (per-device random)
-  5.2 Vulnerability disclosure     COMPLIANT (security@acme.example)
-  5.3 Software updates             COMPLIANT (signed OTA, 5 years)
-  5.4 Secure storage               COMPLIANT (ATECC608B secure element)
-  5.5 Secure communication         COMPLIANT (TLS 1.3)
-  5.6 Minimize attack surfaces     COMPLIANT (no debug port in production)
-  ...
+| 요구 | 준비할 증거 | 실패 예 |
+|------|------|------|
+| 비밀번호 | 기기별 고유 값 또는 사용자 설정, 추측 가능성 검토 | 전 제품 공통 admin·공개 serial로 유추 가능 |
+| 보안 문제 보고 정보 | 연락 경로, 수신 확인·처리 상태 안내 일정 | 메일 주소만 있고 답변 정책 없음 |
+| 최소 보안 업데이트 기간 정보 | 기간과 종료일을 이해하기 쉽게 공개 | 지원 종료일이 없거나 판매 자료와 불일치 |
 
-Minimum support period: 5 years from last unit shipped (2024-12-01)
-```
-
-영국은 이걸 *공개*해야 합니다. 거짓 선언은 행정 제재 대상입니다.
+[2023 Regulations Schedule 4](https://www.legislation.gov.uk/uksi/2023/1007/schedule/4/made)의 SoC 필드를 제품 식별·제조사·선언·지원 기간·서명 등 실제 법정 항목과 대조합니다. 특정 secure element와 TLS를 썼다는 목록은 SoC나 시험 결과를 대신하지 않습니다. SoC가 제품에 동반되어야 한다는 요구와 웹사이트 게시 요구를 같은 것으로 쓰지 않습니다. PSTI 자체에 보편적인 5년 지원 기간이 있다고 가정하지 않습니다.
 
 ## IEC 62443 — 산업 자동화 보안
 
-OT(Operational Technology) 영역의 *유일한 글로벌 표준*입니다. 발전소·정유·수처리·공장 자동화에 적용됩니다. 13개 문서로 나뉘는데, 임베디드 엔지니어가 주로 보는 것은 다음 셋입니다.
+산업 자동화·제어 시스템(IACS)의 보안을 다루는 표준 계열입니다. 모든 OT 시설에 일괄 의무이거나 유일한 표준이라고 일반화하지 않습니다. 이 글은 다음 판의 공개 IEC scope를 비교했습니다.
 
-| 문서 | 대상 |
-|------|------|
-| IEC 62443-3-3 | 시스템 수준 보안 요구 (SR) |
-| IEC 62443-4-1 | 제품 *개발 프로세스* 요구 |
-| IEC 62443-4-2 | 제품(component) *기술적* 요구 |
+| 문서 | 대상 | 평가 질문 |
+|------|------|------|
+| [IEC 62443-3-3:2013](https://webstore.iec.ch/en/publication/7033) | system 요구·security level | 정의한 system·zone·conduit에서 어떤 요구를 충족하는가? |
+| [IEC 62443-4-1:2018](https://webstore.iec.ch/en/publication/33615) | 공급자의 개발·유지·종료 프로세스 | 요구·검증·patch·end-of-life 절차의 증거가 있는가? |
+| [IEC 62443-4-2:2019](https://webstore.iec.ch/en/publication/34421) | IACS component의 기술 요구 | component capability가 통합 환경의 목표를 지원하는가? |
 
-핵심 개념은 *Zone*과 *Conduit*입니다.
+Zone은 보안 요구를 공유하는 자산을 묶고 conduit는 zone 사이 통신을 다룹니다. 사무망·제어망·안전망의 고정 3단 구성이나 물리적 분리만을 뜻하지 않습니다. 목표 SL-T와 capability SL-C를 구분하고 component 인증을 전체 system 달성 수준으로 확대하지 않습니다. Cybersecurity SL과 기능 안전의 SIL도 같은 척도가 아닙니다.
 
-```text
-[Enterprise Zone]            ← 사무망
-        |
-   Conduit (firewall)
-        |
-[Control Zone]               ← MES, SCADA
-        |
-   Conduit (data diode)
-        |
-[Safety Zone]                ← Safety PLC (SIL-rated)
-```
-
-각 Zone에 *Security Level (SL)*을 1~4로 부여합니다.
-
-| SL | 위협 모델 |
-|----|---------|
-| SL 1 | 우연한 위반, casual exposure |
-| SL 2 | 일반적 기술 + 적은 자원 |
-| SL 3 | 정교한 기술 + 중간 자원 |
-| SL 4 | 정교한 기술 + 많은 자원 (국가 단위) |
-
-대부분의 산업 시설은 *SL 2* 또는 *SL 3*를 목표로 합니다. SL 4는 핵발전소·국방 정도입니다.
-
-제품 인증은 *ISASecure CSA / SDLA / EDSA*가 가장 대표적입니다. Siemens, Schneider, ABB, Rockwell 같은 회사가 모두 받습니다. 한국에서는 *KTL*이 IEC 62443 인증 기관입니다.
+인증 범위·판·구성·통합 조건을 실제 certificate와 시험 문서로 확인합니다. 이 작업에서는 유료 표준 전문, 실제 제품 인증이나 공장 망 분리를 시험하지 않았습니다.
 
 ## NIST IR 8259 / IR 8425 — 미국 baseline
 
-NIST IR 8259는 *제조사가 IoT 디바이스에 *최소한* 갖춰야 할 6개 capability*를 정의합니다.
+[NIST의 문서 계열 안내](https://www.nist.gov/itl/applied-cybersecurity/nist-cybersecurity-iot-program/nistir-8259-series)는 제조사 활동인 8259와 기기 기술 capability baseline인 **8259A**, 비기술 지원 capability인 **8259B**를 구분합니다. 8259A의 여섯 영역은 다음처럼 제품 증거에 연결할 수 있습니다.
 
-**1. Device Identification          (각 디바이스를 유일하게 식별)**
+| 기기 capability | 검토할 제품 증거 |
+|------|------|
+| Device Identification | 재부팅·재등록 후 식별과 중복 처리 |
+| Device Configuration | 허용 주체·변경 이력·초기화 정책 |
+| Data Protection | 저장·전송 범위와 키 수명주기 |
+| Logical Access to Interfaces | 문서화한 interface의 인증·권한·비활성화 |
+| Software Update | 업데이트 주체·인증·실패 복구 |
+| Cybersecurity State Awareness | 상태의 관찰·보고 대상과 접근 제어 |
 
-
-**2. Device Configuration           (설정 변경, 인증된 접근)**
-
-
-**3. Data Protection                (저장·전송 데이터 보호)**
-
-
-**4. Logical Access to Interfaces   (인증된 접근만)**
-
-
-**5. Software Update                (signed, authenticated update)**
-
-
-**6. Cybersecurity State Awareness  (보안 상태 보고 가능)**
-
-IR 8425는 *소비자 IoT 제품*의 baseline으로 ETSI EN 303 645와 매우 유사합니다. *US Cyber Trust Mark*(2024 시작)가 이 기준을 씁니다.
-
-NIST SP 800-213은 *연방 정부가 IoT를 도입할 때* 보는 기준이고, SP 800-213A가 *카탈로그 형태*의 구체 요구입니다.
+[IR 8425 (2022)](https://csrc.nist.gov/pubs/ir/8425/final)는 소비자 IoT **제품 전체**의 profile입니다. 기기만 검사하고 cloud·app·운영 지원을 제외하지 않습니다. 이 문서들의 존재가 모든 미국 IoT 제품의 동일한 법적 의무를 뜻하지 않습니다. 연방 시스템은 SP 800-213/213A와 실제 기관 조달 조건을 별도로 대조합니다.
 
 ## EU Cyber Resilience Act (CRA) — 가장 광범위
 
-2024년 12월 발효, *2027년 12월 11일 완전 시행*. *디지털 요소가 있는 거의 모든 제품*에 적용됩니다. 라우터·카메라뿐 아니라 *펌웨어가 있는 모든 가전*, *데스크톱 소프트웨어*, *모바일 앱*까지 포함됩니다.
+[EU 집행위원회 시행 안내](https://digital-strategy.ec.europa.eu/en/factpages/cyber-resilience-act-implementation)와 [규정 요약](https://digital-strategy.ec.europa.eu/en/policies/cra-summary)은 적용 시점을 구분합니다.
 
-핵심 의무는 세 가지입니다.
-
-| 의무 | 내용 |
+| 사건 | 날짜 |
 |------|------|
-| Essential cybersecurity requirements | secure by default, 취약점 없는 출시, 업데이트 가능 |
-| Vulnerability handling | 24시간 내 ENISA에 actively exploited vuln 보고 |
-| Support period | 제품 *예상 수명* 동안 보안 업데이트 (최소 5년) |
+| Regulation (EU) 2024/2847 발효 | 2024-12-10 |
+| 적합성평가기관 통지 관련 Chapter IV 적용 | 2026-06-11 |
+| Article 14 보고 의무 적용 | 2026-09-11 |
+| 주요 제품 요구 적용 | 2027-12-11 |
 
-이 *24시간 보고* 요구가 가장 충격적입니다. 알고도 늦으면 *전 EU 매출의 2.5% 또는 1500만 EUR* 중 더 큰 금액의 벌금 대상입니다.
+2025-08-01은 특정 무선기기에 대한 [RED Delegated Regulation (EU) 2022/30 적용](https://single-market-economy.ec.europa.eu/sectors/electrical-and-electronic-engineering-industries-eei/radio-equipment-directive-red_en)과 구분합니다. CRA 대상은 EU 시장에 제공되는 디지털 요소 제품의 정의·연결 조건·제외 조항으로 판단하며, 펌웨어가 있다는 이유만으로 모든 제품을 포함하지 않습니다.
 
-제품은 위험도에 따라 분류됩니다.
+[제조사 안내](https://digital-strategy.ec.europa.eu/en/policies/cra-manufacturers)는 위험 평가·기술 문서·적합성평가, 시장 출시 시 표시·사용 정보, 출시 후 취약점 처리를 연결합니다. 지원 기간은 예상 사용 기간을 반영해야 합니다. [집행위원회 FAQ §4.5](https://ec.europa.eu/newsroom/dae/redirection/document/122331)가 설명하는 Article 13(8)의 최소 5년 원칙에는 예상 사용 기간이 5년 미만인 제품의 예외가 있으며, 오래 사용하는 제품의 지원을 무조건 5년으로 끝내는 뜻도 아닙니다.
 
-| Class | 대상 | 인증 |
-|-------|------|------|
-| **I** (default) | 일반 IoT | 자기적합선언 |
-| **II** (important) | OS, password manager, VPN, network mgmt | 자기적합선언 |
-| **III** (critical) | hardware security module, smart meter gateway | *제3자 인증 의무* |
+### 제품 분류는 I/II/III의 단일 등급표가 아닙니다
 
-대부분의 IoT는 *Class I*입니다. CE 마킹이 가능합니다. 다만 *secure boot 검증*, *서명된 업데이트*, *SBOM 제출*은 기본입니다. SBOM은 [Ch 10: SDLC](/blog/embedded/embedded-security/chapter10-sdlc)에서 다룹니다.
+[집행위원회 적합성평가 안내](https://digital-strategy.ec.europa.eu/en/policies/cra-conformity-assessment)에 따라 일반 제품, Annex III의 important Class I·II, Annex IV의 critical 제품을 구분합니다. 일반 제품은 자체 평가가 가능하지만, important 제품은 class와 적용한 조화표준 등 조건에 따라 제3자 평가가 필요합니다. Important Class II를 일괄 자기선언 가능이라고 적지 않습니다. Critical 제품은 더 엄격한 평가 경로를 확인합니다. 실제 제품 정의와 절차는 규정·관련 시행 규정으로 대조합니다.
+
+### 보고 시계는 인지 시점과 보고 종류에 따라 다릅니다
+
+[CRA 보고 안내](https://digital-strategy.ec.europa.eu/en/policies/cra-reporting)는 실제 악용 취약점과 제품 보안에 영향을 미치는 심각한 incident를 대상으로 합니다. 단순히 CVE가 검색된 모든 경우와 같지 않습니다. 인지 후 부당한 지체 없이, 각 기한 안에 SRP를 통해 지정 CSIRT와 ENISA에 보고하는 체계를 준비합니다.
+
+| 단계 | 실제 악용 취약점 | 심각한 incident |
+|------|------|------|
+| Early warning | 인지 후 24시간 이내 | 인지 후 24시간 이내 |
+| 후속 notification | 인지 후 72시간 이내 | 인지 후 72시간 이내 |
+| 최종 보고 | 시정·완화 조치가 제공된 뒤 14일 이내 | 72시간 notification 제출 뒤 1개월 이내 |
+
+24시간 내 모든 분석·수정을 끝내야 한다는 뜻은 아닙니다. 모든 사건을 고정 90일에 공개한다는 정책으로도 바꿀 수 없습니다. SBOM·영향 분석과 사고 대응 절차는 [Ch 10](/blog/embedded/embedded-security/chapter10-sdlc)에서 release별 증거로 연결합니다.
 
 ## UNECE WP.29 R155/R156 — 자동차
 
-자동차 사이버보안의 *국제 강제 표준*입니다.
+차량 보안과 업데이트는 형식승인 관할·차량 범주별 조건을 확인합니다. [UNECE R156](https://unece.org/transport/documents/2021/03/standards/un-regulation-no-156-software-update-and-software-update)은 소프트웨어 업데이트와 관리체계, R155는 차량 cybersecurity와 CSMS를 다룹니다. EU·일본·한국의 적용 날짜를 하나의 2022/2024 일정으로 합치지 않습니다. ISO/SAE 21434에 따른 개발 활동이나 OTA 서명 기능 하나로 형식승인 전체가 충족되지는 않습니다.
 
-| 규정 | 대상 |
-|------|------|
-| R155 | 차량 사이버보안 + CSMS (Cybersecurity Management System) |
-| R156 | 차량 *소프트웨어 업데이트* + SUMS |
+## 한국 — 제품 인증 범위를 먼저 확인
 
-EU·일본·한국에서 *2022년 7월 이후 신차 type approval*에 필수. *2024년 7월 이후 모든 신차*. 한국 KMVSS도 이를 반영합니다.
+[KISA IoT 보안인증 안내](https://www.kisa.or.kr/1050608)의 제품 인증과 조직의 ISMS·ISMS-P 관리체계를 구분합니다. 이 글의 이전 KCSP·KICS 명칭과 해외 표준과의 자동 동등성·추가 비용 주장은 확인 근거가 없어 제거했습니다. 국내 대상 제품·인증 등급·납품 요건은 해당 제도의 공고·시험 기준으로 판단하며, ETSI에 맞췄다는 이유로 시험을 생략하지 않습니다.
 
-R155는 *차량 자체*의 보안뿐 아니라 *OEM의 조직과 프로세스*를 평가합니다. ISO/SAE 21434가 R155 준수의 사실상 *기술적 표준*입니다. R156은 [Ch 6의 OTA](/blog/embedded/embedded-security/chapter06-ota-update) 요건을 강제합니다.
-
-자동차 분야는 Embedded Automotive 시리즈와 깊게 연결됩니다.
-
-## 항공·우주 — 별도 트랙
-
-항공기·우주기기는 별도 표준 트랙입니다.
-
-| 표준 | 대상 |
-|------|------|
-| DO-326A / ED-202A | 항공기 사이버보안 (Airworthiness) |
-| DO-356A / ED-203A | 보안 평가 방법론 |
-| DO-355A / ED-204A | 항공기 운영 보안 |
-| ECSS-Q-ST-80C | 우주 소프트웨어 |
-
-DO-178C가 *기능 안전*이라면 DO-326A는 *보안*입니다. 자세한 내용은 Aerospace Standards 시리즈를 참고합니다.
-
-## 한국 — KISA, KICS, KCSP
-
-한국은 *의무가 적고 자발 인증 위주*입니다.
-
-| 인증 | 운영 | 대상 |
-|------|------|------|
-| KISA IoT 보안 인증 | KISA | 소비자 IoT, 자발적 |
-| KCSP (사물인터넷 보안 인증) | KISA | 디바이스·게이트웨이·서비스 |
-| K-ISMS / K-ISMS-P | KISA | 정보보호 관리체계, 일부 사업자 의무 |
-| KICS (한국 산업 사이버보안) | 한전·산업부 | 발전·전력망 |
-| KMVSS-자동차 사이버보안 | 국토부 | UNECE R155 국내 적용 |
-
-KISA IoT 보안 인증의 평가 항목은 *ETSI EN 303 645와 매우 유사*합니다. *공식적 매핑*이 KISA 가이드라인에 정리되어 있어, 글로벌 표준을 충족하면 한국 인증은 추가 비용이 작습니다.
-
-K-ISMS는 *시스템 운영자*의 관리체계입니다. 통신사·금융사·일정 규모 이상 IT 서비스에 *법적 의무*가 있습니다. 일반 IoT 제조사는 *자발 인증*입니다.
+항공·우주·자동차와 산업별 인증은 소비자 IoT baseline과 평가 단위가 다릅니다. 이 장에서 특정 관할의 형식승인이나 제품 인증을 받았다고 주장하지 않습니다.
 
 ## 표준 매핑 — 공통 요구사항
 
-표준을 동시에 만족하려면 *공통 요구*를 먼저 다집니다. 다음 8개를 만족하면 거의 모든 표준의 핵심 요구를 80% 이상 커버합니다.
+공통 구현은 재사용할 수 있지만 요구사항별 증거를 따로 남겨야 합니다. 아래는 법적 동등성이나 충족률 표가 아니라 engineering evidence의 시작점입니다.
 
-| # | 요구 | 만족 도구 |
-|---|------|---------|
-| 1 | No default password | 기기별 random + QR |
-| 2 | Signed firmware + secure boot | [Ch 2](/blog/embedded/embedded-security/chapter02-secure-boot), MCUboot |
-| 3 | Signed OTA | [Ch 6](/blog/embedded/embedded-security/chapter06-ota-update), MCUboot/Mender |
-| 4 | TLS + cert pinning | mbedTLS, wolfSSL |
-| 5 | Secure credential storage | secure element / TrustZone |
-| 6 | Vulnerability disclosure policy | security.txt, contact email |
-| 7 | SBOM | SPDX / CycloneDX |
-| 8 | Support period | 5년 이상 공시 |
+| 관심 영역 | 정상 확인 | 실패·예외 확인 |
+|------|------|------|
+| 초기 인증 | 허용 사용자만 등록 | 공통·추측 가능한 credential, 재등록 |
+| Boot·OTA | 허용 key·제품·version 수락 | 변조·다른 제품·구버전·전원 차단 |
+| 통신·저장 | 신뢰 anchor·키 소유자·보호 범위 | 만료·폐기·분실·복구 |
+| 취약점 대응 | 담당자·지원 종료·release 식별 | 부재 시 대리인, 영향 판정 지연 |
+| SBOM | 배포 artifact와 component 대응 | 빠진 정적 library·변형 source·오탐 |
 
-이 8개를 *제품 출시 전*에 검증하면 ETSI/NIST/CRA/UNECE 다수가 동시에 처리됩니다.
+## 적용 워크플로 — 판정 결과를 남기기
 
-## 적용 워크플로
+| 단계 | 남길 결과 | 완료를 막는 조건 |
+|------|------|------|
+| 시장·제품 식별 | 판매 관할, 기기·app·서비스 경계 | 시장·수입자·제외 여부 미정 |
+| 적용성 판단 | 규정 번호·판·일정·제품 분류 | 인증 이름만 있고 적용 조문 없음 |
+| 요구 추적 | 각 요구와 설계·시험·문서의 연결 | TLS 사용처럼 구현명만 있음 |
+| 정상·실패 평가 | build·환경·입력·결과·잔여 제한 | 미실행 명령을 시험 성공으로 기록 |
+| 적합성평가·표시 | 해당 절차·담당자·SoC/DoC 등 | 제품·판·지원 종료일 불일치 |
+| 운영 유지 | 변경별 재평가·취약점·보고 책임 | release와 현장 장치 대응 불가 |
 
-새 제품 한 대를 출시할 때의 전형 흐름:
-
-**1. 시장 결정     : 어느 시장? (EU/US/KR/CN/JP)**
-
-
-**2. 표준 매핑    : 시장별 의무 표준 식별**
-
-
-**3. Gap 분석     : 현재 설계 대비 missing 요구 확인**
-
-
-**4. 설계 보강    : secure boot, 서명 OTA, secure storage 등**
-
-
-**5. 자체 평가    : ETSI 13개 등 체크리스트**
-
-
-**6. 인증 (필요시): KTL/TUV/Bureau Veritas**
-
-
-**7. 적합선언     : CE/UKCA + SoC 게시**
-
-
-**8. 사후 관리    : vuln disclosure, 24시간 보고 (CRA)**
-
-5번 *자체 평가*는 ETSI가 IXIT (Implementation eXtra InformaTion for Testing)라는 형식을 제공합니다. *질문에 답하는 형태*라 엔지니어가 작성 가능합니다.
+ETSI의 구현 적합성 선언 서식, 시험 정보(IXIT), 실제 평가 specification은 역할이 다릅니다. UK SoC·EU DoC를 같은 서식으로 취급하지 않습니다.
 
 ## 자주 하는 실수
 
-### "우리는 B2B니까 소비자 표준 안 봐도 된다"
+B2B 제품도 CRA 적용 가능성이 있지만 모든 B2B 제품이 같은 분류는 아닙니다. 최소 지원 기간의 예외와 장기 사용 제품 조건을 무시하지 않습니다. MAC 주소 같은 공개 식별자를 비밀번호로 바꾸는 대신 credential 생성·저장·초기화 전 과정을 검토합니다.
 
-CRA는 *B2B/B2C 구분 없이* 적용됩니다. *지원 기간 5년*과 *24시간 vuln 보고*는 모든 제품 대상입니다.
-
-### MAC 주소를 device-unique password로 사용
-
-ETSI 5.1 위반입니다. MAC은 *추측 가능*하고 *Wi-Fi probe로 노출*됩니다. *진짜 random*이어야 합니다.
-
-### 인증 받은 다음에 보안 업데이트 종료
-
-지원 기간을 *명시 공개*했으면 *그 기간 동안 유지*해야 합니다. CRA는 이를 *법적 의무*로 만듭니다.
-
-### SBOM을 한 번 만들고 끝
-
-SBOM은 *매 release마다* 갱신되어야 합니다. 자동 생성(CycloneDX-CLI, syft)을 CI에 묶습니다.
-
-### 한국 시장만 보고 글로벌 표준 무시
-
-한국 시장만 노린다고 해도, *EU CRA 호환*을 미리 맞춰 두면 나중 비용이 훨씬 작습니다. KCSP는 ETSI와 거의 동등하므로 *동시 인증*이 효율적입니다.
-
-### 표준 문서를 직접 보지 않고 컨설팅에 맡김
-
-표준 문서는 *읽으면 의외로 짧고 구체적*입니다. ETSI EN 303 645는 본문 24쪽입니다. 한 번은 직접 읽어야 *왜 그렇게 설계해야 하는지*가 보입니다.
+SBOM은 release와 일치해야 하며 단순 생성 성공이 누락 없는 inventory를 보장하지 않습니다. 표준 번호·판·제품 범위·시험 결과가 없으면 인증명이나 보안 chip만으로 적합성을 판단하지 않습니다.
 
 ## 정리
 
-- IoT 보안 표준은 *체크리스트*에서 *법적 요구*로 이동 중입니다. EU CRA가 분기점입니다.
-- ETSI EN 303 645의 13개 provision이 *공통 baseline*입니다. 처음 보는 표준으로 권장합니다.
-- IEC 62443은 *산업 자동화* 영역의 글로벌 표준, Zone/Conduit이 핵심 모델입니다.
-- NIST IR 8259/8425는 *미국 baseline*, US Cyber Trust Mark의 기반입니다.
-- EU CRA는 *24시간 vuln 보고*와 *5년 지원*을 강제합니다. 위반 시 매출 2.5% 벌금.
-- 자동차는 *UNECE R155/R156* 의무, ISO/SAE 21434가 기술 표준입니다.
-- 한국은 KISA IoT 보안 인증·KCSP가 ETSI와 거의 동등합니다. 글로벌 호환이 효율적입니다.
-- 8개의 *공통 요구*(no default password, signed FW/OTA, TLS, secure storage, vuln policy, SBOM, support period)를 만족하면 다수 표준의 핵심을 커버합니다.
+표준 비교의 산출물은 모든 제도에 통하는 공통 체크 표시가 아닙니다. 제품별 적용성, 요구와 증거의 연결, 실패 시험, 지원·보고 책임을 남깁니다. 이 장은 공개 공식 안내의 대조이며 실제 법적 적합성평가나 인증 시험을 수행한 결과가 아닙니다.
 
 다음 편은 **Ch 9: 펌웨어 분석 / 리버싱**.
 
@@ -300,12 +178,9 @@ SBOM은 *매 release마다* 갱신되어야 합니다. 자동 생성(CycloneDX-C
 - [Ch 2: Secure Boot](/blog/embedded/embedded-security/chapter02-secure-boot)
 - [Ch 6: OTA Update](/blog/embedded/embedded-security/chapter06-ota-update)
 - [Ch 10: 보안 SDLC + SBOM](/blog/embedded/embedded-security/chapter10-sdlc)
-- Embedded Automotive — MISRA C 시리즈
-- Embedded Automotive — AUTOSAR Adaptive 시리즈
-- Aerospace Standards — DO-178C 시리즈
 - [원문 — ETSI EN 303 645 V2.1.1](https://www.etsi.org/deliver/etsi_en/303600_303699/303645/02.01.01_60/en_303645v020101p.pdf)
 - [원문 — IEC 62443 (ISA)](https://www.isa.org/standards-and-publications/isa-standards/isa-iec-62443-series-of-standards)
-- [원문 — NIST IR 8259 / 8425](https://csrc.nist.gov/publications/detail/nistir/8425/final)
+- [원문 — NIST IR 8425](https://csrc.nist.gov/publications/detail/nistir/8425/final)
 - [원문 — EU Cyber Resilience Act](https://digital-strategy.ec.europa.eu/en/policies/cyber-resilience-act)
 - [원문 — UK PSTI Act 2022](https://www.legislation.gov.uk/ukpga/2022/46/contents)
-- [원문 — KISA IoT 보안 인증](https://www.kisa.or.kr/)
+- [원문 — KISA IoT 보안 인증](https://www.kisa.or.kr/1050608)

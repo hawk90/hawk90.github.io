@@ -1,8 +1,8 @@
 ---
-title: "MCU Crypto HW Accelerator 분석 — AES·SHA·ECC 가속기"
+title: "MCU 크립토 — AES·SHA API와 하드웨어 가속 검증"
 slug: "embedded/embedded-security/chapter03-mcu-crypto"
 date: 2026-05-21T09:03:00
-description: "MCU 내장 crypto 엔진. 소프트웨어 vs 하드웨어. constant-time."
+description: "Mbed TLS 3.6.4의 AES-GCM·SHA 예제와 MCU 가속기의 선택·실패·측정 조건을 구분합니다."
 tags: [Crypto, AES, ECC, MCU]
 series: "Embedded Security"
 seriesOrder: 3
@@ -10,350 +10,127 @@ draft: false
 topics: ["embedded"]
 ---
 
-## 한 줄 요약
 
-> **"MCU 크립토는 *알고리즘 선택* + *하드웨어 가속* + *constant-time 구현*의 삼각 균형입니다."** — 알고리즘은 자원과 위협 수준이 결정하고, HW 가속이 있으면 처리량이 수십 배 빨라지며, constant-time이 아니면 사이드채널로 키가 새 나갑니다.
+## 알고리즘과 실행 경로를 따로 확인하기
 
-## 왜 임베디드 크립토는 따로 다루는가
+MCU 크립토에서는 알고리즘의 보안 요구와 실제 구현 경로를 나눠 봐야 합니다. 하드웨어 엔진이 있어도 선택한 모드·키 저장 방식·driver가 그 엔진을 쓰는지 확인해야 하고, 빠른 구현이 물리 공격에도 안전하다는 뜻은 아닙니다. 타깃별 시간·RAM·flash·전력 측정과 실패 처리가 선택의 근거입니다.
 
-데스크톱 크립토 라이브러리(OpenSSL, libsodium)는 *프로세서가 빠르고 메모리가 충분*하다는 가정에서 출발합니다. 그래서 RSA-4096이나 SHA-3-512가 부담스럽지 않습니다. MCU는 정반대 환경입니다. Cortex-M0+ 48 MHz, RAM 16 KB, flash 64 KB가 흔합니다. 이 위에서 같은 보안 강도를 어떻게 확보하느냐가 임베디드 크립토의 핵심 질문입니다.
+이 장의 실행 예는 [Mbed TLS v3.6.4](https://github.com/Mbed-TLS/mbedtls/tree/c765c831e5c2a0971410692f92f7a81d6ec65ec2)입니다. macOS arm64에서 두 작업으로 라이브러리를 빌드하고 ASan·UBSan을 적용한 host 기능 검사를 수행했습니다. MCU HAL·DMA·hardware key slot·entropy source·timing 또는 전력 누출 시험을 수행한 것은 아닙니다.
 
-답은 세 갈래입니다. 첫째, *적절한 알고리즘*을 골라 연산량을 최소화합니다. 둘째, MCU 내부의 *crypto accelerator*를 활용해 처리량을 끌어올립니다. 셋째, *constant-time*과 *masking* 같은 사이드채널 방어를 빼먹지 않습니다. 이 세 가지 중 하나라도 균형을 잃으면 시스템이 무너집니다. 알고리즘은 강한데 SW로만 돌려서 너무 느리거나, HW로 빠르지만 timing leak이 있는 경우입니다.
+## AES-GCM — 반환값과 인증 실패
 
-## AES — 대칭키의 기본
+AES의 block은 16 B이고 키 길이는 128·192·256 bit입니다. AES 자체와 GCM·CCM 같은 authenticated encryption mode를 구분합니다. CBC·CTR 단독은 메시지 인증을 제공하지 않으며, 새 protocol을 임의로 조립하기보다 검증된 AEAD protocol과 해당 key·nonce 정책을 따릅니다.
 
-AES(Advanced Encryption Standard)는 임베디드에서 가장 흔히 만나는 대칭 암호입니다. 키 길이는 128·192·256비트, 블록 크기는 항상 128비트입니다.
+아래는 이 글에서 작성한 AES-128-GCM wrapper입니다. Caller는 명시한 길이만큼 유효한 buffer를 제공하고, input/output을 겹치지 않게 준비하며, 같은 key 아래 12 B nonce가 재사용되지 않도록 관리합니다. 이 함수가 nonce 상태나 key provisioning을 구현하는 것은 아닙니다.
 
-| 키 길이 | 라운드 | 용도 |
-|---------|--------|------|
-| AES-128 | 10회 | 일반 용도 |
-| AES-192 | 12회 | 거의 안 씀 |
-| AES-256 | 14회 | 고보안 또는 양자 저항 마진 |
-
-블록 cipher 자체는 *고정 크기 16바이트*를 변환할 뿐입니다. 실제 사용을 위해 *모드*가 필요합니다.
-
-| 모드 | 용도 | 특징 | 임베디드 추천 |
-|---|---|---|---|
-| ECB | (안 씀) | 같은 평문 → 같은 암호문, 패턴 노출 | X |
-| CBC | 디스크 암호화 (legacy) | IV 필요, 인증 없음, padding oracle 위험 | X (단독으로는) |
-| CTR | 스트림처럼 사용 | nonce 재사용 시 즉시 깨짐, 인증 없음 | 단독은 X |
-| GCM | 인증 암호 | CTR + GHASH, AEAD, 표준 | O (HW 가속 있을 때) |
-| CCM | 인증 암호 (IoT) | CTR + CBC-MAC, RFC 3610 | O (Zigbee, Thread) |
-| OFB | (거의 안 씀) | 스트림 모드, 인증 없음 | X |
-
-AEAD(Authenticated Encryption with Associated Data) 모드만 *기밀성 + 무결성*을 함께 줍니다. GCM과 CCM이 사실상 표준입니다. CBC를 쓴다면 *반드시* 별도의 HMAC을 붙여야 합니다.
-
-```c
-// mbedTLS로 AES-128-GCM 암호화 (HW 가속 채널 있을 때 자동 활용)
+```c title="article-gcm-encrypt.c"
+#include <stddef.h>
 #include "mbedtls/gcm.h"
 
-uint8_t key[16]   = { /* 키 */ };
-uint8_t iv[12]    = { /* 12바이트 nonce */ };
-uint8_t aad[8]    = { /* 인증만 받는 헤더 */ };
-uint8_t pt[64]    = { /* 평문 */ };
-uint8_t ct[64];
-uint8_t tag[16];
-
-mbedtls_gcm_context ctx;
-mbedtls_gcm_init(&ctx);
-mbedtls_gcm_setkey(&ctx, MBEDTLS_CIPHER_ID_AES, key, 128);
-
-mbedtls_gcm_crypt_and_tag(
-    &ctx, MBEDTLS_GCM_ENCRYPT,
-    sizeof(pt),
-    iv, sizeof(iv),
-    aad, sizeof(aad),
-    pt, ct,
-    sizeof(tag), tag);
-
-mbedtls_gcm_free(&ctx);
+int encrypt_packet(const unsigned char key[16],
+                   const unsigned char nonce[12],
+                   const unsigned char *aad, size_t aad_len,
+                   const unsigned char *plain, size_t length,
+                   unsigned char *cipher, unsigned char tag[16])
+{
+    mbedtls_gcm_context ctx;
+    mbedtls_gcm_init(&ctx);
+    int rc = mbedtls_gcm_setkey(&ctx, MBEDTLS_CIPHER_ID_AES,
+                              key, 128);
+    if (rc == 0)
+        rc = mbedtls_gcm_crypt_and_tag(
+            &ctx, MBEDTLS_GCM_ENCRYPT, length,
+            nonce, 12, aad, aad_len, plain, cipher, 16, tag);
+    mbedtls_gcm_free(&ctx);
+    return rc;
+}
 ```
 
-GCM에서 *nonce는 절대 재사용하지 않습니다*. 같은 키로 같은 nonce를 쓰면 인증 키가 즉시 복원됩니다. 12바이트 nonce 안에 보통 counter 또는 hardware-unique sequence를 박습니다.
+Caller는 반환 0을 확인한 뒤에만 cipher·tag를 전송합니다. 수신은 tag를 검증하는 `mbedtls_gcm_auth_decrypt()`로 처리하고 성공한 뒤에만 평문을 사용합니다. `crypt_and_tag()`의 decrypt mode로 평문과 tag를 계산한 것만으로 인증 성공으로 취급하면 안 됩니다.
 
-## SHA — 해시 함수
+같은 key·nonce의 재사용은 GCM의 기밀성·인증을 약화시킵니다. 재부팅·전원 차단·counter 복원·key 교체를 포함한 key 수명 전체에서 유일성을 설계해야 합니다. 난수 nonce도 충돌 가능성·사용량을 고려해야 하므로 “TRNG가 있다” 하나로 해결하지 않습니다. 기준은 [NIST SP 800-38D](https://csrc.nist.gov/pubs/sp/800/38/d/final)입니다.
 
-SHA-2 family가 임베디드의 표준입니다.
+## SHA-256 — 마지막 조각의 길이
 
-| 알고리즘 | 출력 | 블록 | 임베디드 메모 |
-|---|---|---|---|
-| SHA-1 | 160 bit | 512 bit | 충돌 발견됨, *새 설계에 쓰지 않음* |
-| SHA-224 | 224 bit | 512 bit | 거의 안 씀 |
-| SHA-256 | 256 bit | 512 bit | 표준. ECDSA P-256과 짝 |
-| SHA-384 | 384 bit | 1024 bit | ECDSA P-384와 짝 |
-| SHA-512 | 512 bit | 1024 bit | 64비트 연산 많음, 32비트 MCU에 느림 |
-| SHA-3 | 256/384/512 | Keccak | 새 표준, HW 가속 드뭄 |
+Flash image를 chunk로 읽을 때 마지막 조각은 chunk보다 짧을 수 있습니다. 매번 고정 CHUNK 길이를 hash하면 범위를 넘겨 읽거나 이미지 밖 데이터를 포함할 수 있습니다. 아래 함수는 이미 메모리에 읽힌 buffer의 streaming hash 예이며 실제 flash read 실패·부분 읽기는 caller가 처리해야 합니다.
 
-대부분의 새 임베디드 설계는 SHA-256입니다. HW 가속이 흔하고, ECDSA P-256과 길이가 맞고, 32비트 word 연산이라 Cortex-M에 잘 맞습니다.
-
-```c
-// SHA-256 한 번에
+```c title="article-sha256-chunks.c"
+#include <stddef.h>
 #include "mbedtls/sha256.h"
 
-uint8_t data[100] = { /* ... */ };
-uint8_t digest[32];
-
-mbedtls_sha256(data, sizeof(data), digest, 0 /* not SHA-224 */);
-```
-
-스트리밍 모드도 자주 씁니다. flash 전체를 한 번에 RAM에 못 올리니까요.
-
-```c
-mbedtls_sha256_context ctx;
-mbedtls_sha256_init(&ctx);
-mbedtls_sha256_starts(&ctx, 0);
-
-for (size_t off = 0; off < flash_size; off += CHUNK) {
-    flash_read(off, buf, CHUNK);
-    mbedtls_sha256_update(&ctx, buf, CHUNK);
-}
-
-mbedtls_sha256_finish(&ctx, digest);
-mbedtls_sha256_free(&ctx);
-```
-
-## HMAC — 키 있는 해시
-
-해시 자체로는 *무결성*만 보장합니다. *기원 인증*까지 보장하려면 키를 섞은 HMAC이 필요합니다.
-
-```text
-HMAC(K, m) = H((K' ⊕ opad) || H((K' ⊕ ipad) || m))
-```
-
-세션 키로 HMAC-SHA-256을 붙이면, 키 없이는 valid MAC을 만들 수 없으므로 *어디서 온 메시지인지*까지 알 수 있습니다. AEAD(GCM/CCM)가 인증을 포함하므로 *그 위에 또 HMAC*은 보통 필요 없습니다. HMAC은 AEAD가 아닌 채널에 별도로 무결성을 더할 때 씁니다.
-
-## ECC — 비대칭 키의 효율
-
-RSA-2048과 ECC P-256은 *비슷한 보안 강도*입니다. 그런데 키 크기와 연산량이 완전히 다릅니다.
-
-| 비교 항목 | RSA-2048 | ECC P-256 |
-|---|---|---|
-| 공개키 크기 | 256 bytes | 64 bytes |
-| 개인키 크기 | 256 bytes | 32 bytes |
-| 서명 크기 | 256 bytes | 64 bytes |
-| 서명 시간 (Cortex-M4 @ 100MHz) | 약 2~3 s | 약 200~400 ms |
-| 검증 시간 | 약 80 ms | 약 100~200 ms |
-| 코드 크기 | 약 8~12 KB | 약 15~20 KB |
-
-RSA는 *검증이 빠르고 서명이 느립니다*. ECC는 *검증과 서명이 비슷*합니다. 디바이스가 *서명도 하는* 시나리오(상호 인증)에서는 ECC가 압도적으로 유리합니다.
-
-ECC 곡선의 선택:
-
-| 곡선 | 출처 | 메모 |
-|---|---|---|
-| NIST P-256 (secp256r1) | NIST | 가장 흔함, NSA Suite B |
-| NIST P-384 | NIST | 고보안 |
-| Curve25519 / Ed25519 | Bernstein | 빠르고 사이드채널 안전, deterministic |
-| Brainpool P256r1 | EU | 유럽 인증 (eIDAS) |
-| secp256k1 | Bitcoin | 일반 임베디드에선 거의 안 씀 |
-
-새 설계라면 Ed25519를 강하게 추천합니다. RFC 8032가 nonce 생성을 *결정적*으로 정의해 ECDSA의 큰 함정인 nonce 재사용을 구조적으로 막습니다.
-
-```c
-// Ed25519 서명 (libsodium)
-#include "sodium.h"
-
-unsigned char sk[crypto_sign_SECRETKEYBYTES];
-unsigned char pk[crypto_sign_PUBLICKEYBYTES];
-crypto_sign_keypair(pk, sk);
-
-unsigned char sig[crypto_sign_BYTES];
-unsigned long long siglen;
-const unsigned char msg[] = "firmware payload";
-
-crypto_sign_detached(sig, &siglen,
-                     msg, sizeof(msg),
-                     sk);
-
-// 검증
-if (crypto_sign_verify_detached(sig, msg, sizeof(msg), pk) == 0) {
-    // OK
+int hash_chunks(const unsigned char *data, size_t length,
+                size_t chunk, unsigned char digest[32])
+{
+    if (chunk == 0)
+        return MBEDTLS_ERR_SHA256_BAD_INPUT_DATA;
+    mbedtls_sha256_context ctx;
+    mbedtls_sha256_init(&ctx);
+    int rc = mbedtls_sha256_starts(&ctx, 0);
+    size_t offset = 0;
+    while (rc == 0 && offset < length) {
+        size_t n = length - offset;
+        if (n > chunk) n = chunk;
+        rc = mbedtls_sha256_update(&ctx, data + offset, n);
+        offset += n;
+    }
+    if (rc == 0) rc = mbedtls_sha256_finish(&ctx, digest);
+    mbedtls_sha256_free(&ctx);
+    return rc;
 }
 ```
 
-## TRNG — 진짜 무작위가 필요한 이유
+Hash는 신뢰된 기준 digest와 비교해야 변조 탐지에 사용할 수 있습니다. 공격자가 이미지와 digest를 함께 바꿀 수 있으면 hash만으로 authenticity가 생기지 않습니다. HMAC은 공유 비밀키를 가진 주체가 생성한 메시지를 인증하지만, 같은 키를 공유한 여러 주체 중 누구인지까지 구분하지는 못합니다.
 
-키 생성, nonce 생성, IV 생성은 *예측 불가능한* 값이 있어야 합니다. `rand()`는 *수도*무작위라서 시드를 알면 다음 값을 예측할 수 있습니다.
+## 서명 알고리즘의 비교 기준
 
-TRNG(True Random Number Generator)는 열잡음, jitter, 양자 효과 같은 *물리적 잡음원*에서 entropy를 뽑습니다. 거의 모든 최신 MCU에 내장돼 있습니다.
+[NIST SP 800-57 Part 1 Rev.5 Table 2](https://nvlpubs.nist.gov/nistpubs/SpecialPublications/NIST.SP.800-57pt1r5.pdf)는 RSA-2048을 112-bit, ECC 256~383-bit 범위를 128-bit security strength에 대응시킵니다. 따라서 RSA-2048과 P-256을 같은 강도로 놓고 크기·시간만 비교하면 안 됩니다. 장치의 지원 알고리즘·image format·보안 수명과 실제 서명·검증 비용을 함께 비교합니다.
 
-```c
-// STM32 HAL의 TRNG
-#include "stm32h7xx_hal.h"
+| 항목 | 확인할 내용 |
+|------|------|
+| ECDSA | nonce 재사용 방지와 승인된 난수·deterministic 생성 방식. DER·raw 서명 형식을 구분 |
+| Ed25519 | [RFC 8032](https://www.rfc-editor.org/rfc/rfc8032)의 형식과 순수형·prehash형을 구분. 결정적 서명도 구현 결함·fault·key 유출을 막아 주지는 않음 |
+| RSA | modulus 크기·padding·hash·salt 조건과 검증 정책. 공개 지수와 구현에 따라 비용이 다름 |
+| Key storage | key ID를 쓴다고 비밀키가 반드시 secure element에 있는 것은 아님. 실제 lifetime·location·정책 확인 |
 
-RNG_HandleTypeDef hrng = { .Instance = RNG };
-HAL_RNG_Init(&hrng);
+한 알고리즘을 모든 MCU의 기본 선택으로 추천하지 않습니다. Constant-time 구현·hardware key 보호·상호운용성도 library와 platform 조건으로 확인합니다.
 
-uint32_t r;
-HAL_RNG_GenerateRandomNumber(&hrng, &r);
-```
+## 가속기 연결과 자원 수명
 
-TRNG의 출력을 직접 키로 쓰면 안 됩니다. *bias*나 *correlation*이 있을 수 있습니다. NIST SP 800-90A의 DRBG로 *whitening*을 거친 후 사용하는 것이 표준입니다. mbedTLS의 `mbedtls_ctr_drbg_seed`가 그 역할을 합니다.
+Mbed TLS의 ALT 구현과 PSA driver 경로는 설정·API가 다릅니다. `MBEDTLS_AES_ALT` 하나가 모든 GCM·SHA·ECC 연산의 hardware 사용을 보장하지 않습니다. 실제 빌드 설정·연결된 driver·fallback·실행 trace를 확인해야 합니다.
 
-```c
-mbedtls_ctr_drbg_context drbg;
-mbedtls_entropy_context entropy;
+| 확인 지점 | 실패 또는 반례 |
+|------|------|
+| 엔진의 알고리즘·모드 | AES를 지원해도 GCM·GHASH나 해당 key location을 지원하지 않을 수 있음 |
+| SDK API와 buffer | 정렬·cache·DMA 길이 단위가 맞지 않거나 마지막 block 처리 실패 |
+| 비동기 완료 | 제출 성공을 완료로 오인해 buffer·key를 먼저 해제 |
+| 동시 사용 | 여러 task의 key·context·DMA channel 소유권 충돌 |
+| Fallback | 지원되지 않은 크기·모드가 software로 내려가며 예상 지연을 초과 |
+| Key cleanup | library context 해제와 hardware key slot 삭제가 별도 절차 |
 
-mbedtls_entropy_init(&entropy);
-mbedtls_ctr_drbg_init(&drbg);
+STM32 CRYP/HASH, NXP DCP/CAAM, Nordic 보안 엔진은 부품·revision·SDK별 지원을 확인합니다. 이 장은 버전이 없는 HAL·DCP 코드 조각을 완성 가속 예제로 제시하지 않습니다. PSA API 역시 실제 driver와 key location을 연결하지 않으면 MCU 엔진 사용을 입증하지 못합니다.
 
-// entropy source로 TRNG를 등록 (board init에서)
-mbedtls_entropy_add_source(&entropy, board_trng_get, NULL,
-                           MBEDTLS_ENTROPY_MAX_GATHER,
-                           MBEDTLS_ENTROPY_SOURCE_STRONG);
+## Entropy와 side-channel 검증
 
-mbedtls_ctr_drbg_seed(&drbg, mbedtls_entropy_func, &entropy,
-                      (const uint8_t*)"app-v1", 6);
+Entropy source는 물리 source의 평가·health test, DRBG는 수집된 entropy를 바탕으로 하는 생성기로 역할이 다릅니다. [SP 800-90B](https://csrc.nist.gov/pubs/sp/800/90/b/final)와 [SP 800-90A Rev.1](https://csrc.nist.gov/pubs/sp/800/90/a/r1/final)의 범위를 구분합니다. 실패한 TRNG 출력을 계속 쓰거나 반환값을 버리고 seed 성공으로 처리하면 안 됩니다. GCM nonce의 유일성 요구와 CBC IV의 예측 불가능성 요구도 같은 규칙으로 묶지 않습니다.
 
-// 사용
-uint8_t nonce[12];
-mbedtls_ctr_drbg_random(&drbg, nonce, sizeof(nonce));
-```
+Timing 방어에는 검증된 비교 함수와 비밀값 의존 branch·memory access 검토가 필요합니다. Mbed TLS 3.6.4의 `mbedtls_ct_memcmp()`가 그 예입니다. 기능 검사로 같은·다른 값을 올바르게 판별했다는 사실은 target의 constant-time이나 power/EM 누출 부재를 입증하지 않습니다.
 
-TRNG의 entropy 품질 검증도 잊지 않습니다. NIST SP 800-90B health test(repetition count, adaptive proportion)를 통과하는지 부팅 시마다 검사합니다.
+Masking은 중간 비밀값 표현을 random share로 나누는 접근이며, 단순 delay 추가와 다릅니다. Randomness 품질·고차 누출·물리 구현에 따라 평가해야 하므로 “hardware면 side-channel 안전”으로 결론내리지 않습니다. 세부 공격·방어 평가는 [Ch 7](/blog/embedded/embedded-security/chapter07-side-channel)에서 다룹니다.
 
-## HW accelerator — 칩별 차이
+## 실행 결과와 남은 타깃 시험
 
-같은 AES라도 SW로 돌리느냐 HW 채널로 보내느냐에 따라 처리량이 10~100배 차이가 납니다.
+Host 검사는 본문의 두 C 함수를 그대로 추출해 실제 3.6.4 library에 연결했습니다. AES-GCM known-answer와 정상 복호화, tag·cipher·AAD·nonce·key 변조 거부, 잘못된 tag 길이, SHA의 빈 입력·마지막 부분 chunk·chunk 0 거부를 확인합니다. SHA 결과는 host의 독립 hash 구현과 비교했고, library의 AES·GCM·SHA self-test와 RFC 4231의 HMAC known-answer도 별도로 실행했습니다. 실제 실행 항목과 결과는 검증 기록에 남깁니다.
 
-**STM32H7 CRYP + HASH**
-
-STM32H7의 CRYP는 AES-128/192/256을 ECB/CBC/CTR/GCM/CCM 모두 지원하고, HASH는 SHA-1/224/256/MD5를 지원합니다. DMA 연동이 핵심입니다.
-
-```c
-// CRYP — AES-128-CBC, DMA 모드
-CRYP_HandleTypeDef hcryp = {
-    .Instance       = CRYP,
-    .Init.DataType  = CRYP_DATATYPE_8B,
-    .Init.KeySize   = CRYP_KEYSIZE_128B,
-    .Init.pKey      = key,
-    .Init.Algorithm = CRYP_AES_CBC,
-    .Init.pInitVect = iv,
-};
-HAL_CRYP_Init(&hcryp);
-
-HAL_CRYP_Encrypt_DMA(&hcryp, (uint32_t*)plain, length, (uint32_t*)cipher);
-// 인터럽트에서 완료 콜백
-```
-
-CRYP는 약 60~100 MB/s를 냅니다. SW mbedTLS는 같은 칩에서 5~10 MB/s 정도입니다.
-
-**NXP i.MX RT의 CAAM / DCP**
-
-i.MX RT 시리즈는 DCP(Data Co-Processor)를 가집니다. AES-128, SHA-1/256을 SHA blob 단위로 가속합니다.
-
-```c
-#include "fsl_dcp.h"
-
-dcp_handle_t handle = {
-    .channel    = kDCP_Channel0,
-    .keySlot    = kDCP_KeySlot0,
-    .swapConfig = kDCP_NoSwap,
-};
-
-DCP_AES_SetKey(DCP, &handle, key, 16);
-DCP_AES_EncryptCbc(DCP, &handle, plain, cipher, length, iv);
-```
-
-i.MX 8 시리즈의 CAAM(Cryptographic Acceleration and Assurance Module)은 더 강력합니다. RSA, ECC까지 HW로 처리하며 blob storage(키를 칩 고유 키로 wrap)도 지원합니다.
-
-**Nordic nRF52/53의 CryptoCell CC310/CC312**
-
-nRF의 CryptoCell은 ARM TrustZone CryptoCell IP입니다. PSA Crypto API와 직접 매핑됩니다.
-
-```c
-#include "psa/crypto.h"
-
-psa_crypto_init();
-
-psa_key_attributes_t attrs = PSA_KEY_ATTRIBUTES_INIT;
-psa_set_key_type(&attrs, PSA_KEY_TYPE_AES);
-psa_set_key_bits(&attrs, 128);
-psa_set_key_usage_flags(&attrs, PSA_KEY_USAGE_ENCRYPT);
-psa_set_key_algorithm(&attrs, PSA_ALG_GCM);
-
-psa_key_id_t key_id;
-psa_import_key(&attrs, raw_key, 16, &key_id);
-
-size_t out_len;
-psa_aead_encrypt(key_id, PSA_ALG_GCM,
-                 nonce, 12,
-                 aad, sizeof(aad),
-                 plain, sizeof(plain),
-                 out, sizeof(out), &out_len);
-```
-
-## KCAPI vs PSA Crypto API
-
-리눅스 진영에는 *Kernel Crypto API* (KCAPI)가 있고, 임베디드 진영에는 ARM의 *PSA Crypto API*가 있습니다.
-
-| 항목 | KCAPI | PSA Crypto |
-|---|---|---|
-| 대상 | Linux kernel + userspace | 임베디드, RTOS, Cortex-M |
-| 인터페이스 | `AF_ALG` socket, `libkcapi` | C API, `psa_*` 함수 |
-| 키 관리 | keyring | 키 ID, persistent storage |
-| HW 가속 | crypto driver 등록 | driver wrapper, secure element 통합 |
-| 표준 | Linux native | PSA Certified, GP TEE |
-
-리눅스 시스템에서는 KCAPI를 통해 dm-crypt, IPsec, fscrypt가 HW 가속을 받습니다. MCU/RTOS에서는 PSA Crypto API가 표준입니다. mbedTLS 3.x부터 내부 구현이 PSA Crypto로 이행되고 있어, 새 코드는 직접 PSA API를 호출하는 것이 좋습니다.
-
-## Constant-time — 타이밍 사이드채널 방어
-
-크립토 코드에서 *데이터에 의존하는 분기*나 *데이터에 의존하는 메모리 접근*은 timing side-channel을 만듭니다.
-
-```c
-// 회피 — early exit
-int memcmp_naive(const uint8_t* a, const uint8_t* b, size_t n) {
-    for (size_t i = 0; i < n; i++)
-        if (a[i] != b[i]) return -1;   // 첫 byte에서 끝나면 짧음
-    return 0;
-}
-
-// Good — 항상 같은 시간
-int memcmp_ct(const uint8_t* a, const uint8_t* b, size_t n) {
-    uint8_t diff = 0;
-    for (size_t i = 0; i < n; i++)
-        diff |= a[i] ^ b[i];
-    return diff;   // 0이면 같음
-}
-```
-
-MAC 검증 같은 곳에 일반 `memcmp`를 쓰면 attacker가 *몇 번째 byte까지 맞았는지*를 응답 시간 차이로 알아냅니다. 항상 `mbedtls_ct_memcmp`나 `sodium_memcmp` 같은 constant-time 함수를 씁니다.
-
-비슷하게 *데이터 의존 메모리 접근*도 위험합니다. AES의 S-box를 lookup table로 구현하면 *cache line*이 데이터에 의존해 cache timing 공격이 가능합니다. 그래서 비트슬라이스 AES나 HW 가속을 씁니다.
-
-## SW fallback — mbedTLS / wolfSSL / tinycrypt
-
-HW가 없는 곳에서는 SW로 떨어집니다. 후보가 셋입니다.
-
-| 라이브러리 | 메모리 footprint | 라이선스 | 메모 |
-|---|---|---|---|
-| **mbedTLS** | 중간 (~30 KB) | Apache 2.0 | TF-M, Zephyr 표준. PSA 통합. |
-| **wolfSSL** | 작음 (~20 KB) | GPL / 상용 | 매우 작게 줄일 수 있음. 인증서 많음(FIPS). |
-| **tinycrypt** | 매우 작음 (~5 KB) | BSD | Intel/Zephyr. ECDH P-256, ECDSA, AES만 |
-
-tinycrypt는 *최소한의 알고리즘만* 제공하므로, 정말 작은 BLE peripheral 같은 곳에 맞습니다. mbedTLS는 *대부분의 임베디드 설계*에 무난한 선택이며, PSA Crypto API의 reference implementation입니다.
-
-## 자주 하는 실수
-
-- **HW가속을 켰는데 mbedTLS config의 `MBEDTLS_AES_ALT`를 안 켰습니다.** SW 구현이 그대로 빌드돼 HW는 노는 채로 동작합니다. config에 alt 매크로를 켜고 driver를 연결해야 합니다.
-- **GCM nonce를 random으로만 생성합니다.** 12바이트의 random은 충돌 확률이 있습니다. counter 8바이트 + boot id 4바이트 같은 구조가 안전합니다.
-- **ECDSA nonce를 매번 다시 안 만듭니다.** 같은 nonce로 두 메시지 서명 → 즉시 private key 노출. Ed25519 또는 RFC 6979 deterministic ECDSA가 안전합니다.
-- **CBC 모드를 인증 없이 씁니다.** padding oracle 공격으로 평문이 한 byte씩 새 나갑니다. CBC를 쓴다면 *반드시* HMAC을 별도로 붙입니다. AEAD(GCM/CCM)면 이 문제가 없습니다.
-- **TRNG의 health test를 안 합니다.** TRNG 회로가 망가져도 0만 출력할 수 있습니다. 부팅 시 NIST SP 800-90B repetition count test를 돌려 1차 검증을 합니다.
-- **암호 비교에 일반 `memcmp`를 씁니다.** timing leak으로 MAC 한 byte씩 알아낼 수 있습니다. 항상 constant-time 비교를 씁니다.
-- **키를 zeroize하지 않습니다.** 사용이 끝난 키가 stack에 남으면 cold boot 공격이나 메모리 dump로 노출됩니다. `mbedtls_platform_zeroize`로 명시적으로 지웁니다.
+MCU의 가속 전후 비교는 같은 보안 설정·입력 크기·메모리 영역에서 CPU cycle, DMA 완료까지의 wall time, CPU 점유·전력·최대 RAM을 기록합니다. 작은 입력의 setup 비용과 긴 전송의 처리량을 나누고 오류·timeout·fallback 경로도 포함해야 합니다. 이 장의 host 기능 검사를 그 MCU 성능이나 보안 인증으로 확대하지 않습니다.
 
 ## 정리
 
-- AES는 128 또는 256비트로 GCM·CCM AEAD 모드에서 씁니다. ECB·CBC 단독은 피합니다.
-- SHA-256이 임베디드의 표준 해시이고, HMAC-SHA-256은 키 있는 무결성 확인에 쓰입니다.
-- ECC P-256 또는 Ed25519가 임베디드 비대칭 키의 기본입니다. RSA는 호환성이 필요할 때만.
-- TRNG는 거의 모든 최신 MCU에 내장돼 있으며, DRBG로 whitening 후 사용합니다.
-- HW accelerator는 STM32 CRYP, NXP CAAM/DCP, Nordic CryptoCell 등으로 처리량을 10~100배 끌어올립니다.
-- 임베디드/RTOS는 PSA Crypto API가 표준이고, Linux는 Kernel Crypto API가 표준입니다.
-- Constant-time 비교, masked 구현, 키 zeroize는 사이드채널 방어의 기본기입니다.
-- SW fallback은 mbedTLS(범용), wolfSSL(인증), tinycrypt(최소) 중에서 자원과 인증 요구로 고릅니다.
+- AES-GCM은 반환값과 인증 결과를 확인하고 key별 nonce 유일성을 관리합니다.
+- Streaming SHA는 실제 마지막 조각 길이와 read 실패를 처리합니다.
+- Hash·HMAC·서명은 다른 신뢰 가정을 가집니다.
+- 알고리즘 비교는 같은 security strength와 실제 platform 지원을 기준으로 합니다.
+- 가속은 빌드·driver·key location·완료·fallback을 관찰해 확인합니다.
+- Host known-answer 검증과 MCU 성능·entropy·side-channel 검증을 구분합니다.
 
 다음 편은 **Ch 4: TrustZone — Cortex-A / Cortex-M**. 지금까지의 키와 알고리즘을 *어디에 두고 누가 접근하게 할 것인가*를 결정하는 분리 메커니즘을 봅니다.
 
