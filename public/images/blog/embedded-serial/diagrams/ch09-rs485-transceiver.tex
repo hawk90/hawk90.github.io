@@ -6,7 +6,7 @@
 \setsansfont{Apple SD Gothic Neo}
 \ctikzset{bipoles/length=8mm}
 \begin{document}
-\begin{circuitikz}[scale=1.0, transform shape]
+\begin{tikzpicture}[scale=1.0, transform shape]
   % MAX485 IC box
   \draw (0,0) rectangle (4,3) node[midway, font=\footnotesize\bfseries] {MAX485};
   \node[font=\tiny, anchor=center] at (2, 2.4) {SN75176 호환};
@@ -58,5 +58,5 @@
   % Title
   \node[font=\footnotesize\bfseries, anchor=south] at (2.5, 4.5) {RS-485 Transceiver (MAX485) + Termination + Bias};
 
-\end{circuitikz}
+\end{tikzpicture}
 \end{document}

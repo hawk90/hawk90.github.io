@@ -7,7 +7,7 @@
 \ctikzset{bipoles/length=8mm}
 \begin{document}
 \input{../../../_design.tex}
-\begin{circuitikz}[blog]
+\begin{tikzpicture}[blog]
 \node[font=\sffamily\bfseries, anchor=south] at (1,5.3) {Example divider: nominal gain 2};
 \draw (0,4.5) node[above] {Battery input}
   -- (0,4) to[R] (0,2.5) coordinate (tap)
@@ -15,5 +15,5 @@
 \draw (tap) -- (2,2.5) node[right] {ADC GPIO0};
 \node[anchor=west] at (0.6,3.25) {R1: 100 kOhm};
 \node[anchor=west] at (0.6,1.75) {R2: 100 kOhm};
-\end{circuitikz}
+\end{tikzpicture}
 \end{document}
