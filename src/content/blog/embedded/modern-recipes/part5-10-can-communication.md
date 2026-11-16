@@ -51,7 +51,7 @@ STM32F407에는 CAN1·CAN2가 나눠 쓰는 filter bank가 있고, `FMR`의 CAN2
 
 ### Error counter와 상태
 
-Bosch CAN 2.0 Part A 7장(Fault Confinement)의 규칙에서 이 글과 관련된 것입니다.
+Bosch CAN 2.0 Part A 7장(Fault Confinement)에서 이 글과 관련된 규칙만 옮겼습니다.
 
 | 규칙 | 내용 |
 |---|---|
@@ -320,7 +320,7 @@ prescaler 4(21 TQ), 6(14 TQ), 7(12 TQ)에서 모두 21개 조합이 나오고, �
 
 ### 보드에서
 
-`can_selftest()`가 0을 돌려주면 BTR·filter·mailbox·FIFO 경로가 맞는 것입니다. `can_init_500k()`가 -1이면 init mode를 못 빠져나온 것이므로, RX 핀(PA11)의 배선과 transceiver 전원을 봅니다. 두 보드를 transceiver로 이어 시험할 때 송신 쪽 `ESR`의 TEC가 계속 오르면, 위 fault confinement 표대로 송신마다 error가 나고 있는 것이고 ACK를 줄 다른 node가 bus에 없는지부터 봅니다. 전기적인 확인 순서는 1-10을 따릅니다.
+`can_selftest()`가 0을 돌려주면 BTR·filter·mailbox·FIFO 경로가 모두 동작합니다. `can_init_500k()`가 -1이면 init mode를 못 빠져나왔으므로, RX 핀(PA11)의 배선과 transceiver 전원을 봅니다. 두 보드를 transceiver로 이어 시험할 때 송신 쪽 `ESR`의 TEC가 계속 오르면, 위 fault confinement 표대로 송신마다 error가 나고 있는 것이고 ACK를 줄 다른 node가 bus에 없는지부터 봅니다. 전기적인 확인 순서는 1-10을 따릅니다.
 
 ## 자주 보는 함정
 
