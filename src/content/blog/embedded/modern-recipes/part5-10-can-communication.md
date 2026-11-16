@@ -1,8 +1,8 @@
 ---
-title: "CAN 통신 구현 — bxCAN·Filter·Mailbox·CAN-FD"
+title: "CAN 통신 구현 — bxCAN Bit Timing·Filter·Mailbox·Error 상태"
 slug: "embedded/modern-recipes/part5-10-can-communication"
 date: 2026-04-14T09:58:00
-description: "Frame format·filter·bit timing·error frame."
+description: "STM32F407 bxCAN으로 500 kbit/s bit timing, 32-bit mask filter, 송신 mailbox, FIFO0 수신 인터럽트를 만들고, CAN 2.0 fault confinement 규칙으로 error 상태를 읽습니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 58
 tags: [recipes, peripheral, can]
@@ -12,193 +12,176 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Classical CAN의 payload는 0~8 byte이고, ACK는 다른 정상 수신 node가 송신."** ID의 arbitration 우선순위와 bus 오류 처리가 핵심이다.
+> **"bxCAN 설정은 bit timing(BTR), filter, mailbox 세 가지입니다."** 한 bit를 몇 개의 time quantum으로 나눌지, 어떤 ID를 FIFO로 들일지, 어느 mailbox로 보낼지를 정하면 frame이 오갑니다.
 
 ## 어떤 상황에서 쓰나
 
-자동차의 ECU 간 통신, 산업 PLC, 로봇 motor controller — *node가 여러 개 있고 서로 message를 broadcast* 하는 환경. 차량의 OBD-II가 곧 CAN. SPI/UART와 다른 점은 *multi-master arbitration*과 *오류 검출/복구가 hardware로 처리*된다는 것.
+여러 ECU, motor controller, PLC가 한 bus를 공유하며 message를 broadcast하는 곳입니다. CAN은 ID가 작은 frame이 arbitration에서 이기고, 오류 검출과 error counter 관리를 controller가 합니다.
 
-이 글은 STM32 bxCAN peripheral의 frame 송수신, acceptance filter, bit timing을 다룹니다.
+이 글은 STM32F407의 bxCAN(CAN1, PA11/PA12)으로 500 kbit/s 초기화, acceptance filter, 송신, FIFO0 수신 인터럽트, loopback 시험을 다룹니다. 출처는 Bosch CAN Specification Version 2.0(1991), CMSIS `stm32f407xx.h`(cmsis-device-f4)의 bit 정의, STM32CubeF4 HAL v1.8.3 `stm32f4xx_hal_can.c/.h`, Linux v6.12 `drivers/net/can/bxcan.c`, Zephyr v4.0.0 `drivers/can/can_stm32_bxcan.c`입니다. 버스 전기 특성(종단, transceiver, 전압 범위, 길이 예산)은 [1-10: CAN 버스 전기적 특성](/blog/embedded/modern-recipes/part1-10-can-electrical)이 다룹니다. 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall -Wextra` 경고 없이 빌드되고, bit timing 표는 host에서 계산했습니다. bxCAN은 QEMU에 model이 없어 frame 송수신은 돌려 보지 않았습니다.
 
 ## 핵심 개념
 
-### CAN 신호 (Classical 2.0)
+### Frame과 arbitration
 
-```text
-CAN_H ────╲╱──────────────╲╱──
-CAN_L ──── ╱╲──────────────╱╲──
-        Dominant       Recessive
-        (0)            (1)
-        H>L            H=L
-```
-
-* differential signal, 120 Ω termination at each bus end.
-* dominant (0)이 recessive (1)을 *overrides* — 이게 arbitration의 핵심.
-
-### Frame 구조 (Standard 11-bit ID)
-
-```text
-SOF | ID(11) | RTR | IDE | r0 | DLC(4) | DATA(0~8 byte) | CRC(15) | ACK | EOF
- │      │     │     │         │            │              │       │
- │   priority           data length        payload     receivers
- │                                                       ACK
-START dominant bit
-```
-
-Extended frame은 ID 29-bit (11 + 18). 일반 차량용은 Standard, J1939 등은 Extended.
+Standard data frame은 SOF, 11-bit identifier, RTR, IDE, r0, DLC(4 bit), data 0~8 byte, CRC(15 bit), ACK, EOF 순서입니다. Extended frame은 identifier가 11 + 18 = 29 bit입니다. dominant(0)가 recessive(1)를 덮으므로 identifier를 bit 단위로 보내는 동안 0을 보낸 node가 남고, 그래서 ID가 작을수록 우선순위가 높습니다.
 
 ### Bit timing
 
-```text
-1 bit = 1 + tseg1 + tseg2 quanta
-sample point at end of tseg1
+Bosch CAN 2.0 8장은 한 bit를 SYNC_SEG(1 TQ), PROP_SEG(1~8 TQ), PHASE_SEG1(1~8 TQ), PHASE_SEG2로 나누고, 한 bit의 TQ 수를 "at least from 8 to 25"로 프로그램할 수 있어야 한다고 합니다. sample point는 PHASE_SEG1의 끝입니다.
 
-baud = peripheral_clock / (prescaler × (1 + tseg1 + tseg2))
+bxCAN은 PROP_SEG와 PHASE_SEG1을 합친 TS1 하나를 받습니다. Linux bxcan driver는 TS1 field에 `phase_seg1 + prop_seg - 1`을 쓰고, 범위를 `tseg1_max = 16`, `sjw_max = 4`, `brp_max = 1024`로 둡니다. HAL의 `IS_CAN_PRESCALER`도 1~1024입니다.
 
-예시) 특정 bxCAN 설정에서 PCLK1 = 42 MHz, target 500 kbit/s
-    prescaler = 6, tseg1 = 11, tseg2 = 2
-    1 bit = (1 + 11 + 2) × 6 / 42M = 84 / 42M = 2 µs → 500 kHz
-    sample point = (1 + 11) / 14 = 85.7% (CiA recommended 87.5%)
-```
+| BTR field | bit | 값 |
+|---|---|---|
+| BRP | 9:0 | prescaler − 1 |
+| TS1 | 19:16 | tseg1 − 1 |
+| TS2 | 22:20 | tseg2 − 1 |
+| SJW | 25:24 | SJW − 1 |
+| LBKM | 30 | loopback mode |
+| SILM | 31 | silent mode |
 
-sample point는 bus 길이·transceiver·시스템 클록 오차에 맞춰 정합니다. 87.5%는 흔히 쓰이는 예시값이지 모든 네트워크의 고정 권장값은 아닙니다.
+bit 시간 = prescaler × (1 + tseg1 + tseg2) / f_PCLK1이고, sample point = (1 + tseg1) / (1 + tseg1 + tseg2)입니다. [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup)의 PCLK1 = 42 MHz에서 500 kbit/s는 한 bit가 84 clock이므로 prescaler × TQ 수 = 84입니다. 8~25 TQ 범위의 약수는 12, 14, 21이고, 이 글은 prescaler 6 × 14 TQ(tseg1 = 11, tseg2 = 2), sample point 12/14 = 85.7 %를 씁니다. 어느 sample point를 고를지는 bus 길이와 지연에 달린 문제이고, 1-10이 1 Mbit/s 예로 그 계산을 보입니다.
 
 ### Acceptance filter
 
-CAN bus는 *모든 node가 모든 message를 받습니다*. filter로 *원하는 ID만* CPU로 올림 — power와 ISR 시간 절약.
+bxCAN은 filter를 통과한 frame만 receive FIFO에 넣습니다. 32-bit scale·identifier mask mode에서 FR1은 비교할 identifier, FR2는 mask이고, mask가 1인 bit만 FR1과 같아야 통과합니다. 32-bit 배치는 Zephyr driver의 정의대로 STID가 bit 31:21, EXID가 bit 20:3, IDE가 bit 2, RTR가 bit 1입니다. Zephyr는 standard ID filter의 mask에 IDE bit를 항상 넣어 extended frame을 걸러 내고, Linux driver는 filter 0을 FR1 = FR2 = 0으로 두어 "Accept all messages"로 씁니다.
 
-**Mask mode:**
+STM32F407에는 CAN1·CAN2가 나눠 쓰는 filter bank가 있고, `FMR`의 CAN2SB field가 CAN2가 쓰기 시작하는 bank 번호입니다. Linux driver는 이 값을 14로 두어 CAN1에 0~13번을 줍니다.
 
-- ID & MASK == FILTER & MASK
+### Error counter와 상태
 
-**List mode:**
+Bosch CAN 2.0 Part A 7.2절(fault confinement)의 규칙에서 이 글과 관련된 것입니다.
 
-- ID == any of FILTER[]
+| 규칙 | 내용 |
+|---|---|
+| 송신 중 error flag | TEC + 8 (예외 있음) |
+| 송신 성공 | TEC − 1 (0이면 그대로) |
+| Error passive | "the TRANSMIT ERROR COUNT equals or exceeds 128, or when the RECEIVE ERROR COUNT equals or exceeds 128" |
+| Bus off | "the TRANSMIT ERROR COUNT is greater than or equal to 256" |
+| Error active 복귀 | TEC와 REC 모두 127 이하 |
+| Bus off 복귀 | "after 128 occurrence of 11 consecutive 'recessive' bits" 뒤 counter를 0으로 |
 
-bxCAN의 filter bank 수와 16/32-bit list·mask 구성은 STM32 family와 설정에 따라 다르므로 reference manual을 확인합니다.
-
-### Error frame과 bus-off
-
-CAN은 *적극적 error detection* — bit error, stuff error, CRC error, form error, ACK error. error 발생 시 *error frame* 송신 → 다른 node에게 알림.
-
-TEC(Transmit Error Counter)는 송신 error가 나면 +8, 정상 송신하면 -1 합니다. REC(Receive Error Counter)는 수신 측에서 비슷하게 동작합니다. 카운터 값에 따라 node 상태가 다음처럼 바뀝니다.
-
-| 조건 | 상태 |
-|------|------|
-| TEC ≥ 128 | Error Passive |
-| TEC ≥ 256 | Bus Off (송신 중단) |
-
-Bus-off 복구 방식과 자동 복구 여부는 CAN controller 설정에 따릅니다. CAN 규격의 bus-off recovery 조건을 만족하거나 controller가 제공하는 수동 복구 절차를 적용해야 합니다.
-
-bus-off는 *심각한 상태*. cable 단선, termination 누락, 다른 node baud 불일치.
+bxCAN은 TEC를 `ESR` bit 23:16, REC를 bit 31:24에 두고, 상태를 `ESR`의 BOFF(bit 2), EPVF(bit 1), EWGF(bit 0)로 알립니다. Linux driver는 이 세 bit로 bus-off, error passive, error warning을 가릅니다. bus-off에서 자동으로 돌아올지는 `MCR`의 ABOM(Automatic Bus-Off Management)이 정하고, Linux driver는 ABOM을 끄고 "bus-off state left on sw request"로 둡니다.
 
 ## 코드 예제
+
+`gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 것입니다.
 
 ### 1. CAN 초기화
 
 ```c
-void can_init_500k(void) {
+#define CAN_BTR(brp, ts1, ts2, sjw)                 \
+    ((((uint32_t)(sjw) - 1u) << CAN_BTR_SJW_Pos) |  \
+     (((uint32_t)(ts2) - 1u) << CAN_BTR_TS2_Pos) |  \
+     (((uint32_t)(ts1) - 1u) << CAN_BTR_TS1_Pos) |  \
+     (((uint32_t)(brp) - 1u) << CAN_BTR_BRP_Pos))
+
+int can_init_500k(int loopback) {
     RCC->APB1ENR |= RCC_APB1ENR_CAN1EN;
     RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 
-    // PA11 RX, PA12 TX (AF9)
+    // PA11 CAN1_RX, PA12 CAN1_TX (AF9)
     gpio_init(GPIOA, 11, &(gpio_config_t){.mode=GPIO_MODE_AF, .pull=GPIO_PULL_UP, .af=9});
     gpio_init(GPIOA, 12, &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_HIGH, .af=9});
 
-    // Enter init mode
+    // Same order as HAL_CAN_Init(): INRQ -> INAK, then leave sleep
     CAN1->MCR |= CAN_MCR_INRQ;
-    while (!(CAN1->MSR & CAN_MSR_INAK));
-
+    while (!(CAN1->MSR & CAN_MSR_INAK)) { }
     CAN1->MCR &= ~CAN_MCR_SLEEP;
-    CAN1->MCR |= CAN_MCR_TXFP | CAN_MCR_NART;
-    // TXFP = priority by request order
-    // NART = no auto retransmit
+    while (CAN1->MSR & CAN_MSR_SLAK) { }
 
-    // 예시: PCLK1 = 42 MHz에서 500 kbit/s
-    // prescaler 6, tseg1=11, tseg2=2 → (1+11+2)*6/42M = 2 µs
-    CAN1->BTR = (1u << 24)            // SJW = 2
-              | ((2 - 1) << 20)        // tseg2 = 2
-              | ((11 - 1) << 16)       // tseg1 = 11
-              | (6 - 1);               // prescaler = 6
+    CAN1->MCR |= CAN_MCR_TXFP;      // transmit in request order
+    CAN1->MCR &= ~(CAN_MCR_NART | CAN_MCR_ABOM);   // auto retransmit, sw bus-off recovery
 
-    // Exit init mode
-    CAN1->MCR &= ~CAN_MCR_INRQ;
-    while (CAN1->MSR & CAN_MSR_INAK);
+    // 42 MHz / 6 = 7 MHz TQ; 1 + 11 + 2 = 14 TQ -> 500 kbit/s, sample 85.7 %
+    CAN1->BTR = CAN_BTR(6, 11, 2, 2) | (loopback ? CAN_BTR_LBKM : 0u);
+
+    CAN1->MCR &= ~CAN_MCR_INRQ;     // leave init mode
+    for (uint32_t t = 0; CAN1->MSR & CAN_MSR_INAK; t++)
+        if (t > 1000000u) return -1;   // no 11 recessive bits seen
+    return 0;
 }
 ```
+
+HAL `HAL_CAN_Start()`도 INRQ를 지운 뒤 INAK가 0이 되기를 timeout과 함께 기다립니다. 그대로 기다리기만 하면 RX 핀이 recessive로 올라오지 않는 배선에서 멈추므로 위 코드도 횟수로 끊습니다.
 
 ### 2. Acceptance filter
 
 ```c
-void can_filter_init(void) {
+#define FILT_IDE (1u << 2)
+#define FILT_RTR (1u << 1)
+
+// bank 0: standard data frame with exactly this 11-bit ID -> FIFO0
+void can_filter_std(uint16_t id) {
     CAN1->FMR |= CAN_FMR_FINIT;
+    CAN1->FA1R &= ~(1u << 0);       // deactivate bank 0
+    CAN1->FM1R &= ~(1u << 0);       // identifier mask mode
+    CAN1->FS1R |=  (1u << 0);       // single 32-bit scale
+    CAN1->FFA1R &= ~(1u << 0);      // FIFO0
 
-    // Filter 0: accept ID 0x100 (11-bit, mask all bits)
-    CAN1->FA1R &= ~(1u << 0);
-    CAN1->FS1R |=  (1u << 0);    // 32-bit scale
-    CAN1->FM1R &= ~(1u << 0);    // mask mode
+    CAN1->sFilterRegister[0].FR1 = (uint32_t)id << 21;               // IDE = 0, RTR = 0
+    CAN1->sFilterRegister[0].FR2 = (0x7FFu << 21) | FILT_IDE | FILT_RTR;
 
-    CAN1->sFilterRegister[0].FR1 = (0x100 << 21);    // filter ID
-    CAN1->sFilterRegister[0].FR2 = (0x7FF << 21);    // mask: all 11 bits
-
-    CAN1->FFA1R &= ~(1u << 0);   // assign to FIFO 0
-    CAN1->FA1R  |=  (1u << 0);   // activate
-
+    CAN1->FA1R |= (1u << 0);
     CAN1->FMR &= ~CAN_FMR_FINIT;
 }
 
-// 모든 ID 수신
+// bank 0: accept everything (Linux bxcan does the same)
 void can_filter_pass_all(void) {
     CAN1->FMR |= CAN_FMR_FINIT;
     CAN1->FA1R &= ~(1u << 0);
     CAN1->FM1R &= ~(1u << 0);
     CAN1->FS1R |=  (1u << 0);
+    CAN1->FFA1R &= ~(1u << 0);
     CAN1->sFilterRegister[0].FR1 = 0;
-    CAN1->sFilterRegister[0].FR2 = 0;   // mask = 0 → don't care
+    CAN1->sFilterRegister[0].FR2 = 0;   // mask 0: every bit is don't-care
     CAN1->FA1R |= (1u << 0);
     CAN1->FMR &= ~CAN_FMR_FINIT;
 }
 ```
 
+mask에 IDE·RTR bit를 넣었으므로 `can_filter_std(0x100)`은 ID 0x100인 standard data frame만 받고, 상위 11 bit가 0x100인 extended frame이나 remote frame은 받지 않습니다.
+
 ### 3. Send frame
 
 ```c
-int can_send(uint32_t id, const uint8_t *data, uint8_t len) {
-    if (len > 8 || (len != 0 && data == NULL)) return -1;
-    // 빈 mailbox 찾기
-    int mb = -1;
-    if      (CAN1->TSR & CAN_TSR_TME0) mb = 0;
-    else if (CAN1->TSR & CAN_TSR_TME1) mb = 1;
-    else if (CAN1->TSR & CAN_TSR_TME2) mb = 2;
-    else return -1;
+int can_send_std(uint16_t id, const uint8_t *data, uint8_t len) {
+    if (id > 0x7FF || len > 8 || (len != 0 && data == NULL)) return -1;
 
-    CAN1->sTxMailBox[mb].TIR  = (id << 21);          // standard
-    CAN1->sTxMailBox[mb].TDTR = len & 0xF;
-    CAN1->sTxMailBox[mb].TDLR = (len > 0 ? data[0] : 0)
-                              | (len > 1 ? ((uint32_t)data[1] << 8) : 0)
-                              | (len > 2 ? ((uint32_t)data[2] << 16) : 0)
-                              | (len > 3 ? ((uint32_t)data[3] << 24) : 0);
-    CAN1->sTxMailBox[mb].TDHR = (len > 4 ? data[4] : 0)
-                              | (len > 5 ? ((uint32_t)data[5] << 8) : 0)
-                              | (len > 6 ? ((uint32_t)data[6] << 16) : 0)
-                              | (len > 7 ? ((uint32_t)data[7] << 24) : 0);
-    CAN1->sTxMailBox[mb].TIR |= CAN_TI0R_TXRQ;       // request transmit
-    return 0;
+    int mb;
+    uint32_t tsr = CAN1->TSR;
+    if      (tsr & CAN_TSR_TME0) mb = 0;
+    else if (tsr & CAN_TSR_TME1) mb = 1;
+    else if (tsr & CAN_TSR_TME2) mb = 2;
+    else return -1;                 // all three mailboxes busy
+
+    uint8_t b[8] = {0};
+    for (uint8_t i = 0; i < len; i++) b[i] = data[i];
+
+    CAN1->sTxMailBox[mb].TIR  = (uint32_t)id << CAN_TI0R_STID_Pos;   // IDE = 0, RTR = 0
+    CAN1->sTxMailBox[mb].TDTR = len;
+    CAN1->sTxMailBox[mb].TDLR = b[0] | (b[1] << 8) | (b[2] << 16) | ((uint32_t)b[3] << 24);
+    CAN1->sTxMailBox[mb].TDHR = b[4] | (b[5] << 8) | (b[6] << 16) | ((uint32_t)b[7] << 24);
+    CAN1->sTxMailBox[mb].TIR |= CAN_TI0R_TXRQ;                       // request
+    return mb;
 }
 ```
 
-### 4. Receive (FIFO + interrupt)
+TXRQ를 마지막에 따로 세우는 순서는 HAL `HAL_CAN_AddTxMessage()`와 같습니다.
+
+### 4. Receive (FIFO0 + interrupt)
 
 ```c
 typedef struct {
     uint32_t id;
-    uint8_t  len;
+    uint8_t  ext, rtr, len;
     uint8_t  data[8];
 } can_rx_t;
 
-#define RX_Q 32
-static volatile can_rx_t rx_q[RX_Q];
-static volatile int rx_head, rx_tail;
+#define RX_Q 32                         // power of two
+static can_rx_t rx_q[RX_Q];
+static volatile uint32_t rx_head, rx_tail;
 
 void can_rx_init(void) {
     CAN1->IER |= CAN_IER_FMPIE0;        // FIFO0 message pending
@@ -207,96 +190,147 @@ void can_rx_init(void) {
 
 void CAN1_RX0_IRQHandler(void) {
     while (CAN1->RF0R & CAN_RF0R_FMP0) {
+        uint32_t rir = CAN1->sFIFOMailBox[0].RIR;
         can_rx_t f;
-        f.id = CAN1->sFIFOMailBox[0].RIR >> 21;
-        f.len = CAN1->sFIFOMailBox[0].RDTR & 0xF;
+        f.ext = (rir & CAN_RI0R_IDE) != 0;
+        f.rtr = (rir & CAN_RI0R_RTR) != 0;
+        f.id  = f.ext ? rir >> CAN_RI0R_EXID_Pos : rir >> CAN_RI0R_STID_Pos;
+        f.len = CAN1->sFIFOMailBox[0].RDTR & CAN_RDT0R_DLC;
         uint32_t lo = CAN1->sFIFOMailBox[0].RDLR;
         uint32_t hi = CAN1->sFIFOMailBox[0].RDHR;
-        f.data[0] = lo;  f.data[1] = lo >> 8;  f.data[2] = lo >> 16; f.data[3] = lo >> 24;
-        f.data[4] = hi;  f.data[5] = hi >> 8;  f.data[6] = hi >> 16; f.data[7] = hi >> 24;
-        CAN1->RF0R |= CAN_RF0R_RFOM0;   // release
+        for (int i = 0; i < 4; i++) {
+            f.data[i]     = (uint8_t)(lo >> (8 * i));
+            f.data[i + 4] = (uint8_t)(hi >> (8 * i));
+        }
+        CAN1->RF0R |= CAN_RF0R_RFOM0;   // release the FIFO output mailbox
 
-        int next = (rx_head + 1) % RX_Q;
-        if (next != rx_tail) {
-            rx_q[rx_head] = f;
-            rx_head = next;
+        uint32_t head = rx_head;
+        if (head - rx_tail < RX_Q) {    // drop when full
+            rx_q[head % RX_Q] = f;
+            rx_head = head + 1;
         }
     }
 }
 
 int can_recv(can_rx_t *f) {
-    if (rx_head == rx_tail) return -1;
-    *f = rx_q[rx_tail];
-    rx_tail = (rx_tail + 1) % RX_Q;
+    uint32_t tail = rx_tail;
+    if (tail == rx_head) return -1;
+    *f = rx_q[tail % RX_Q];
+    rx_tail = tail + 1;
     return 0;
 }
 ```
 
-### 5. Loopback test
+IDE를 보고 standard·extended ID를 가르는 방식은 Zephyr `can_stm32_rx_fifo_pop()`과 같고, data를 읽은 뒤 `RF0R`에 RFOM0을 세워 FIFO를 비우는 것은 Linux `bxcan_handle_fifo()`와 같습니다.
 
-CAN transceiver 없이도 *loopback mode*로 자체 송수신 test 가능.
+### 5. Loopback 시험
+
+transceiver나 다른 node 없이 송수신 경로를 확인할 때 `can_init_500k(1)`로 LBKM을 켭니다. Linux driver도 `CAN_CTRLMODE_LOOPBACK`에서 LBKM을 세우고, 주석에 "loopback + silent mode put the controller in test mode, useful for hot self-test"라고 적습니다.
 
 ```c
-CAN1->MCR |= CAN_MCR_INRQ;
-while (!(CAN1->MSR & CAN_MSR_INAK));
-CAN1->BTR |= CAN_BTR_LBKM;   // loopback
-CAN1->MCR &= ~CAN_MCR_INRQ;
-```
+int can_selftest(void) {
+    if (can_init_500k(1) != 0) return -1;
+    can_filter_pass_all();
+    can_rx_init();
 
-real bus와 분리되어 자기 송신을 자기가 수신. 코드 검증에 유용.
+    const uint8_t tx[4] = {0x01, 0x02, 0x03, 0x04};
+    if (can_send_std(0x100, tx, 4) < 0) return -2;
+
+    can_rx_t f;
+    for (uint32_t t = 0; t < 1000000u; t++) {
+        if (can_recv(&f) == 0)
+            return (f.id == 0x100 && f.len == 4 && f.data[3] == 0x04) ? 0 : -3;
+    }
+    return -4;                          // nothing received
+}
+```
 
 ## 측정 / 동작 확인
 
-CAN 분석기 (PEAK PCAN-USB, Vector, Kvaser)로 message를 모니터링하면 가장 명확. 없으면 두 STM32 보드를 *transceiver (TJA1051, SN65HVD230) + 120Ω termination*으로 연결.
+### host에서 bit timing 표 확인
 
-**정상:**
+42 MHz에서 500 kbit/s를 내는 모든 (prescaler, tseg1, tseg2)를 host에서 셌습니다. 조건은 한 bit 8~25 TQ(CAN 2.0), tseg1 1~16, tseg2 1~8(bxCAN field 폭)이고, 각 조합의 sample point와 `CAN_BTR()` 값을 찍습니다.
 
-- Node A: send id=0x100, data=[01 02 03 04]
-- Node B: recv id=0x100, data=[01 02 03 04]  ✓
+```c
+/* can_timing.c */
+#include <stdio.h>
+#include <stdint.h>
 
-**문제 사례:**
+#define CAN_BTR_SJW_Pos 24
+#define CAN_BTR_TS2_Pos 20
+#define CAN_BTR_TS1_Pos 16
+#define CAN_BTR_BRP_Pos 0
+#define CAN_BTR(brp, ts1, ts2, sjw)                 \
+    ((((uint32_t)(sjw) - 1u) << CAN_BTR_SJW_Pos) |  \
+     (((uint32_t)(ts2) - 1u) << CAN_BTR_TS2_Pos) |  \
+     (((uint32_t)(ts1) - 1u) << CAN_BTR_TS1_Pos) |  \
+     (((uint32_t)(brp) - 1u) << CAN_BTR_BRP_Pos))
 
-- Send 후 TEC가 +8씩 증가 → 다른 node가 ACK 안 함
-- → cable, termination, baud 확인
+int main(void) {
+    const uint32_t pclk = 42000000, rate = 500000;
+    int n = 0;
+    for (uint32_t brp = 1; brp <= 1024; brp++) {
+        if (pclk % (brp * rate)) continue;
+        uint32_t tq = pclk / (brp * rate);
+        if (tq < 8 || tq > 25) continue;
+        for (uint32_t ts2 = 1; ts2 <= 8; ts2++) {
+            uint32_t ts1 = tq - 1 - ts2;
+            if (ts1 < 1 || ts1 > 16) continue;
+            if (ts2 > 2 && ts2 != 3 && (tq - 1 - ts2) * 100 / tq < 70) continue;
+            n++;
+            printf("brp=%2u tq=%2u ts1=%2u ts2=%u sample=%5.1f%% BTR=0x%08X\n",
+                   brp, tq, ts1, ts2, 100.0 * (1 + ts1) / tq,
+                   CAN_BTR(brp, ts1, ts2, ts2 < 4 ? ts2 : 4));
+        }
+    }
+    printf("%d combinations; this post: 0x%08X\n", n, CAN_BTR(6, 11, 2, 2));
+    return 0;
+}
+```
 
-TEC = 255 → Error Passive
-TEC가 bus-off 임계값에 도달 → Bus Off (정확한 상태 전이는 TEC/REC와 controller 규칙 확인)
+```bash
+clang -O2 -Wall -o can_timing can_timing.c && ./can_timing
+```
 
-scope로 CAN_H/CAN_L의 차동 상태와 common-mode 범위를 transceiver datasheet 기준으로 확인합니다.
+```text
+LOG_PLACEHOLDER
+```
+
+SUMMARY_PLACEHOLDER
+
+### 보드에서
+
+`can_selftest()`가 0을 돌려주면 BTR·filter·mailbox·FIFO 경로가 맞는 것입니다. `can_init_500k()`가 -1이면 init mode를 못 빠져나온 것이므로, RX 핀(PA11)의 배선과 transceiver 전원을 봅니다. 두 보드를 transceiver로 이어 시험할 때 송신 쪽 `ESR`의 TEC가 계속 오르면, 위 fault confinement 표대로 송신마다 error가 나고 있는 것이고 ACK를 줄 다른 node가 bus에 없는지부터 봅니다. 전기적인 확인 순서는 1-10을 따릅니다.
 
 ## 자주 보는 함정
 
-> ⚠️ Transceiver 누락
+> ⚠️ node 하나로 시험
 
-MCU의 CAN_TX/RX는 *TTL*. real CAN bus에는 *transceiver IC* (TJA1051, MCP2551, SN65HVD230) 필수.
+CAN frame의 ACK slot은 다른 node가 채웁니다. node가 하나뿐이면 송신마다 ACK error가 나고 TEC가 오릅니다. 혼자 시험할 때는 loopback mode(LBKM)를 씁니다.
 
-> ⚠️ 120 Ω termination 누락
+> ⚠️ node마다 bit timing이 다름
 
-bus 양 끝 각 120 Ω 없으면 reflection으로 신호 깨짐. 두 끝 사이 = 60 Ω.
+모든 node의 bit 시간이 같아야 합니다. 같은 500 kbit/s라도 sample point를 정하는 기준은 bus 길이 예산에서 나오므로 1-10의 계산을 따릅니다.
 
-> ⚠️ Baud 불일치
+> ⚠️ filter를 처음부터 좁게 잡음
 
-모든 node가 호환되는 nominal/data bit timing을 사용해야 합니다. 한 node의 설정이 다르면 bit·ACK·error 상태가 달라져 통신이 실패할 수 있습니다.
+mask 계산이 틀리면 아무것도 FIFO에 들어오지 않습니다. 먼저 `can_filter_pass_all()`로 수신을 확인한 뒤 `can_filter_std()`로 좁힙니다.
 
-> ⚠️ Single node 송신 → ACK error
+> ⚠️ standard filter에 IDE를 안 넣음
 
-CAN은 *다른 node가 ACK*. 1개 node만 있으면 모든 transmit이 ACK error. loopback mode 또는 silent mode로 test.
+mask에 IDE bit가 없으면 상위 11 bit가 같은 extended frame도 통과합니다. 수신 쪽에서 IDE를 확인하지 않으면 그 frame의 ID를 standard ID로 잘못 읽습니다.
 
-> ⚠️ Sample point 잘못
+> ⚠️ bus-off에서 멈춤
 
-cable 길이가 길거나 transceiver propagation delay 큰 경우 sample point 87.5%를 조정해야 함.
-
-> ⚠️ Filter 잘못 설정해 *아무것도 수신 안 함*
-
-mask = 0xFFFF로 두면 ID 정확히 일치만 수신. 처음에는 *pass-all* (mask=0)로 시작해 검증 후 좁힘.
+ABOM을 끈 상태에서 bus-off가 되면 software가 복구 절차를 밟아야 합니다. `ESR`의 BOFF를 주기적으로 보거나 error interrupt를 켜서 알아차립니다.
 
 ## 정리
 
-- CAN = differential, **dominant (0) overrides recessive (1)** — arbitration 자동.
-- ID = priority. **Acceptance filter**로 원하는 ID만 받음.
-- **Bit timing** = prescaler × (1 + tseg1 + tseg2). sample point 87.5% 권장.
-- **TJA1051 transceiver + 120Ω termination**이 hardware 필수.
-- **Error counter**로 bus-off detect → 복구 정책.
+- BTR = **(SJW−1)<<24 | (TS2−1)<<20 | (TS1−1)<<16 | (BRP−1)**. 42 MHz에서 6 × 14 TQ = 500 kbit/s, sample 85.7 %.
+- filter는 **32-bit mask mode, mask 1 bit만 비교**. standard filter에는 IDE·RTR를 mask에 넣습니다.
+- 송신은 **빈 mailbox → TIR/TDTR/TDLR/TDHR → TXRQ**.
+- 수신은 **FMPIE0 → RIR의 IDE로 ID 해석 → RFOM0**.
+- error 상태는 **ESR의 TEC/REC와 BOFF/EPVF/EWGF**, 규칙은 CAN 2.0 fault confinement.
 
 다음 편은 **USB Device 기초**입니다. CDC virtual COM, HID class, TinyUSB 통합을 다룹니다.
 

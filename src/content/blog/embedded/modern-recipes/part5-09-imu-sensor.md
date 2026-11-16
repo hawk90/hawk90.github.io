@@ -143,16 +143,16 @@ void gyro_calibrate(gyro_bias_t *b) {
     float sx = 0, sy = 0, sz = 0;
     const int N = 200;                              // 2 s at 100 Hz
     for (int i = 0; i < N; i++) {
+        while (!(mpu_read(0x3A) & 0x01)) { }        // INT_STATUS.DATA_RDY_INT
         mpu_data_t d;
         mpu_read_all(&d);
         sx += d.gx; sy += d.gy; sz += d.gz;
-        delay_ms(10);                               // one new sample per read
     }
     b->bx = sx / N; b->by = sy / N; b->bz = sz / N;
 }
 ```
 
-sample rate가 100 Hz이므로 10 ms보다 빨리 읽으면 같은 sample을 여러 번 더하게 됩니다.
+sample rate가 100 Hz이므로 고정 delay로 읽으면 같은 sample을 두 번 더하거나 건너뛸 수 있습니다. 그래서 INT_STATUS(0x3A)의 DATA_RDY_INT(bit 0)를 기다린 뒤 읽습니다. Register Map은 이 register의 bit가 "clear after the register is read"된다고 적으므로 다음 sample까지 다시 0입니다.
 
 ### 3. Roll/pitch와 complementary filter
 
@@ -296,7 +296,7 @@ max |accel-only error| = 2.86 deg
 max |filter error| for t >= 6 s = 0.79 deg
 ```
 
-gyro만 적분한 각도는 bias 때문에 10 s에 40°로, 실제보다 10° 위에 있습니다. accel만으로 구한 각도는 drift가 없지만 잡음 때문에 최대 2.86° 흔들립니다. filter는 6 s 이후 30.42~30.69°로, 계산한 정상 상태 오차 0.49° 근처에 머물고 잡음을 더해 최대 0.79° 어긋납니다. 2~3 s의 기울기 구간도 3 s에 30.65°로 따라옵니다.
+gyro만 적분한 각도는 bias 때문에 10 s에 40°로, 실제보다 10° 위에 있습니다. accel만으로 구한 각도는 drift가 없지만 잡음 때문에 최대 2.86° 흔들립니다. filter는 6 s 이후 1 s마다 찍은 값이 30.42~30.69°로 계산한 정상 상태 오차 0.49° 근처에 있고, 그 구간 모든 sample에서 잡음까지 더한 최대 오차는 0.79°입니다. 2~3 s의 기울기 구간도 3 s에 30.65°로 따라옵니다.
 
 ### 보드에서
 
@@ -306,7 +306,7 @@ gyro만 적분한 각도는 bias 때문에 10 s에 40°로, 실제보다 10° �
 
 > ⚠️ Wake up 안 함
 
-PWR_MGMT_1의 reset 값 0x40은 SLEEP = 1입니다. 0x00이나 0x01을 쓰기 전에는 data register가 바뀌지 않습니다.
+PWR_MGMT_1의 reset 값 0x40은 SLEEP = 1이고, Register Map은 "The device will come up in sleep mode upon power-up"이라고 적습니다. 0x00이나 0x01로 SLEEP을 지웁니다.
 
 > ⚠️ Scale factor 불일치
 
@@ -314,7 +314,7 @@ AFS_SEL = 1(±4 g)인데 16384로 나누면 값이 절반으로 나옵니다. �
 
 > ⚠️ Data를 여러 번에 나눠 읽음
 
-0x3B부터 14 byte를 한 번에 읽어야 accel·temp·gyro가 같은 sample입니다. 축마다 따로 읽으면 그 사이 sample이 바뀔 수 있습니다.
+0x3B부터 14 byte를 한 번에 읽어야 accel·temp·gyro가 같은 sample입니다. Register Map 4.18은 burst read가 "measurements from the same sampling instant"를 보장하고, single-byte read로 나눠 읽으면 Data Ready로 같은 sample인지 맞추는 것이 사용자 책임이라고 적습니다.
 
 > ⚠️ INT가 한 번만 들어옴
 
