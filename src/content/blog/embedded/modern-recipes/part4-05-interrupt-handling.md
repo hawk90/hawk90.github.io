@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"peripheral 설정 + ISR 이름 일치 + NVIC 설정."** Cortex-M 인터럽트의 기본 흐름은 이 세 축으로 확인하고, flag clear·priority grouping·vector 배치는 코어와 peripheral 문서로 함께 검증합니다.
+> **"peripheral 설정, ISR 이름 일치, NVIC 설정이 맞아야 인터럽트가 들어옵니다."** Cortex-M 인터럽트의 기본 흐름은 이 세 축으로 확인하고, flag clear·priority grouping·vector 배치는 코어와 peripheral 문서로 함께 검증합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -92,7 +92,7 @@ NVIC_SetPriorityGrouping(0);   // 4-bit 구현에서는 네 bit 모두 pre-empt
 
 ### Tail-Chaining과 Late Arrival
 
-Cortex-M4 TRM(DDI 0439B) 3.9절은 late-arrival과 tail-chaining을 "as defined by the ARMv7-M architecture"로 구현한다고 하고, zero wait state 메모리 기준으로 세 값을 적습니다. 인터럽트 assert부터 ISR 첫 명령까지 최대 12 cycle, 복귀도 12 cycle, tail-chaining은 "6 cycles"이고 이때는 "No stack pushes or pops are performed"입니다. 세 값 모두 wait state가 없는 메모리 기준입니다.
+Cortex-M4 TRM(DDI 0439B) 3.9절은 late-arrival과 tail-chaining을 "as defined by the ARMv7-M architecture"로 구현한다고 하고, zero wait state 메모리 기준으로 세 값을 적습니다. 인터럽트 assert부터 ISR 첫 명령까지 최대 12 cycle, 복귀도 12 cycle, tail-chaining은 "6 cycles"이고 이때는 "No stack pushes or pops are performed"입니다.
 
 ## 코드 예제
 
@@ -389,7 +389,7 @@ DDI 0403E.b B1.5.6의 exception entry 의사코드에서 `CONTROL.FPCA == '1'`�
 
 ## 정리
 
-- ISR은 **weak symbol을 덮는 방식**입니다. 이름이 다르면 링크는 성공하고 인터럽트는 `Default_Handler`의 무한 loop로 갑니다.
+- ISR은 **weak symbol을 같은 이름으로 덮어** 등록합니다. 이름이 다르면 링크는 성공하고 인터럽트는 `Default_Handler`의 무한 loop로 갑니다.
 - 세 단계: **peripheral configure → priority set → NVIC enable**. enable 전에 pending된 IRQ는 enable 순간 처리됩니다.
 - **Flag clear**는 ST HAL과 같은 형태(`EXTI->PR = line`, `TIM->SR = ~flag`)로 씁니다.
 - Cortex-M priority는 **값이 작을수록 높고**, 선점은 group priority로만 정해집니다.
