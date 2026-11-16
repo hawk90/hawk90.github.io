@@ -170,14 +170,18 @@ $(eval $(generic-package))
 | `cmake-package` | 382 |
 | `meson-package` | 207 |
 | `host-autotools-package` | 197 |
+| `host-generic-package` | 122 |
+| `host-python-package` | 118 |
 | `perl-package` | 117 |
+| `luarocks-package` | 74 |
+| `host-cmake-package` | 57 |
 | `kconfig-package` | 9 |
 
-autotools가 압도적으로 많고, 손으로 명령을 적는 generic이 그다음입니다. `kconfig-package`는 busybox·linux 같은 9곳에서만 씁니다. 각각 자세히 봅니다.
+위 표는 호출 수 상위 항목과 `kconfig-package`만 뽑은 것입니다. autotools가 가장 많고, python과 손으로 명령을 적는 generic이 그 뒤입니다. `kconfig-package`는 busybox·linux 같은 9곳에서만 씁니다. 각각 자세히 봅니다.
 
 ### generic-package — 가장 유연한 출발점
 
-빌드 시스템이 *비표준*이라면 generic-package입니다. 세 hook을 명시적으로 정의합니다.
+빌드 시스템이 *비표준*이라면 generic-package입니다. 아래 예는 두 hook(build, install-target)을 명시적으로 정의합니다.
 
 ```make
 MYAPP_VERSION = 1.0
@@ -278,6 +282,12 @@ CJSON_CONF_OPTS += \
 	-DENABLE_CJSON_TEST=OFF \
 	-DENABLE_CUSTOM_COMPILER_FLAGS=OFF
 
+ifeq ($(BR2_SHARED_STATIC_LIBS),y)
+CJSON_CONF_OPTS += -DBUILD_SHARED_AND_STATIC_LIBS=ON
+else
+CJSON_CONF_OPTS += -DBUILD_SHARED_AND_STATIC_LIBS=OFF
+endif
+
 ifeq ($(BR2_PACKAGE_CJSON_UTILS),y)
 CJSON_CONF_OPTS += -DENABLE_CJSON_UTILS=ON
 else
@@ -316,12 +326,11 @@ PYTHON_MYTOOL_SITE = https://example.com/mytool
 PYTHON_MYTOOL_LICENSE = Apache-2.0
 PYTHON_MYTOOL_LICENSE_FILES = LICENSE
 PYTHON_MYTOOL_SETUP_TYPE = flit
-PYTHON_MYTOOL_DEPENDENCIES = host-python-flit-core
 
 $(eval $(python-package))
 ```
 
-이 예에서는 `<NAME>_SETUP_TYPE = flit`으로 backend를 명시합니다. 2026.02.3 `package/pkg-python.mk` 314~315행이 허용 값을 강제합니다.
+이 예에서는 `<NAME>_SETUP_TYPE = flit`으로 backend를 명시합니다. `host-python-flit-core` 의존성은 `pkg-python.mk` 364행이 SETUP_TYPE에 맞춰 자동으로 붙이므로 따로 적지 않습니다. 2026.02.3 `package/pkg-python.mk` 314~315행이 허용 값을 강제합니다.
 
 ```makefile
 ifneq ($$(filter-out setuptools setuptools-rust pep517 flit flit-bootstrap hatch maturin poetry,$$($(2)_SETUP_TYPE)),)
@@ -386,7 +395,7 @@ package/myapp/
 └── 0002-add-musl-support.patch
 ```
 
-매뉴얼 "How patches are applied" 절에 따르면 패키지 디렉터리에 `series` 파일이 있으면 그 순서로, 없으면 `*.patch`를 *알파벳 순*으로 적용합니다. 그래서 `<번호>-<설명>.patch` 이름을 권합니다. 그다음 `BR2_GLOBAL_PATCH_DIR`에 나열한 디렉터리의 패치가 같은 규칙으로 이어지고, 3·4단계에서 하나라도 실패하면 빌드가 멈춥니다. 실제 `package/busybox/`에는 `0001-…`부터 `0014-wget-dont-allow-control-characters-or-spaces-in-the-URL.patch`까지 14개가 있습니다. `git format-patch` 출력 형식 그대로라 상류에 보내기도 쉽습니다.
+매뉴얼 "How patches are applied" 절에 따르면 패키지 디렉터리에 `series` 파일이 있으면 그 순서로, 없으면 `*.patch`를 *알파벳 순*으로 적용합니다. 그래서 `<번호>-<설명>.patch` 이름을 권합니다. 그다음 `BR2_GLOBAL_PATCH_DIR`에 나열한 디렉터리의 패치가 같은 규칙으로 이어집니다. 매뉴얼은 `<pkg>_PATCH`로 받은 패치와 패키지 디렉터리 패치를 적용하는 단계에서 하나라도 실패하면 빌드가 멈춘다고 적습니다. 실제 `package/busybox/`에는 `0001-…`부터 `0014-wget-dont-allow-control-characters-or-spaces-in-the-URL.patch`까지 14개가 있습니다. `git format-patch` 출력 형식 그대로라 상류에 보내기도 쉽습니다.
 
 ## 디버깅 흐름
 

@@ -122,7 +122,7 @@ touch Config.in
 
 ```text
 $ cd ~/work/buildroot
-$ make BR2_EXTERNAL=~/work/br2-acme qemu_aarch64_virt_defconfig
+$ make BR2_EXTERNAL=$HOME/work/br2-acme qemu_aarch64_virt_defconfig
 ```
 
 이 명령은 외부 트리 경로를 output 디렉터리의 `.br2-external.mk`에 기록합니다. 실제로 생긴 파일은 다음과 같습니다.
@@ -146,7 +146,7 @@ export BR2_EXTERNAL_ACME_DESC = ACME corporation Buildroot tree
 export BR2_EXTERNAL_ACME_VERSION = 
 ```
 
-`BR2_EXTERNAL ?=`라서 다음 `make`부터는 인자를 다시 줄 필요가 없습니다. 비우려면 매뉴얼 예시대로 `make BR2_EXTERNAL= menuconfig`처럼 빈 값을 넘깁니다. `_VERSION`은 `support/scripts/br2-external` 111행이 외부 트리에서 `setlocalversion`(git 정보)을 돌려 채우는 값이라, git 저장소가 아닌 스크래치 트리에서는 비었습니다.
+`BR2_EXTERNAL ?=`라서 다음 `make`부터는 인자를 다시 줄 필요가 없습니다. 비우려면 빈 값을 넘깁니다(매뉴얼 예시는 `make BR2_EXTERNAL= xconfig`). `_VERSION`은 `support/scripts/br2-external` 111행이 외부 트리에서 `setlocalversion`(git 정보)을 돌려 채우는 값이라, git 저장소가 아닌 스크래치 트리에서는 비었습니다.
 
 같은 단계에서 menuconfig용 파일 `.br2-external.in.menus`도 생깁니다.
 
@@ -180,6 +180,7 @@ defconfig를 외부 트리의 `configs/`에 두면 `make list-defconfigs`에 자
 ```text
 $ make -s O=$PWD/out6 list-defconfigs
 Built-in configs:
+  ...
   asus_tinker-s_rk3288_defconfig      - Build for asus_tinker-s_rk3288
   ...
 External configs in "ACME corporation Buildroot tree":
@@ -252,7 +253,7 @@ source "$BR2_EXTERNAL_ACME_PATH/package/acme-firmware/Config.in"
 `BR2_EXTERNAL`은 여러 외부 트리 경로를 공백으로 구분해 받습니다. 회사 공통 트리와 제품 트리를 함께 지정할 수 있습니다.
 
 ```text
-$ make BR2_EXTERNAL="~/work/br2-acme ~/work/br2-project-x" \
+$ make BR2_EXTERNAL="$HOME/work/br2-acme $HOME/work/br2-project-x" \
     qemu_aarch64_virt_defconfig
 ```
 

@@ -223,7 +223,7 @@ make linux-rebuild          # 컴파일 명령 재실행
 make linux-reconfigure      # configure부터 다시
 ```
 
-매뉴얼은 `rebuild`와 `reconfigure`를 "`OVERRIDE_SRCDIR`을 쓰거나 build 디렉터리의 파일을 직접 고쳤을 때만 의미가 있다"고 적습니다. 커널 `.config`만 바꿨다면 `linux-rebuild`가 그 경우에 해당합니다.
+매뉴얼은 `rebuild`와 `reconfigure`를 "`OVERRIDE_SRCDIR`을 쓰거나 build 디렉터리의 파일을 직접 고쳤을 때만 의미가 있다"고 적습니다. 커널 config는 해당하지 않습니다. `linux-menuconfig`는 그 자체로 configure·build stamp를 지우고(`package/pkg-kconfig.mk` 244~245행), `BR2_LINUX_KERNEL_CUSTOM_CONFIG_FILE`이 가리키는 파일을 고치면 `.config`가 그 파일에 의존하므로(같은 파일 157행) 다음 `make`가 커널을 다시 빌드합니다.
 
 ## 6) Target packages — 2,941개의 패키지 메뉴
 

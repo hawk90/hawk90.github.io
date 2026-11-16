@@ -193,7 +193,7 @@ erofs      ext2       f2fs       initramfs  iso9660    jffs2
 oci        squashfs   tar        ubi        ubifs      yaffs2
 ```
 
-서브디렉터리는 16개이고, 각 서브디렉터리에는 두 파일이 있습니다.
+서브디렉터리는 16개이고, 대부분 `Config.in`과 `<fs>.mk` 두 파일입니다(`cpio/`·`iso9660/`·`ubi/`에는 `dracut.conf`·`grub.cfg`·`ubinize.cfg` 같은 보조 파일이 더 있습니다).
 
 ```text
 $ ls fs/ext2 fs/squashfs

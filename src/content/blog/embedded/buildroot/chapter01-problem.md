@@ -215,7 +215,7 @@ lrwxrwxrwx 1 br br       11 Nov 16 03:07 rootfs.ext4 -> rootfs.ext2
 -rwxr-xr-x 1 br br      819 Nov 16 03:07 start-qemu.sh
 ```
 
-`Image`는 13 MB짜리 커널, `rootfs.ext2`는 defconfig가 정한 60 MiB 크기의 ext4 이미지(`rootfs.ext4`는 그 symlink), `start-qemu.sh`는 QEMU 부팅 스크립트입니다. `rootfs.ext2`가 디스크에서 실제로 차지하는 블록은 `du` 기준 8.6 MB였고, 부팅 뒤 `df -h /`는 51.1M 중 4.1M 사용을 보였습니다. 이 단순한 산출물 구조 자체가 Buildroot의 정체성입니다.
+`Image`는 13 MB짜리 커널, `rootfs.ext2`는 Kconfig 기본값(`BR2_TARGET_ROOTFS_EXT2_SIZE="60M"`, `fs/ext2/Config.in`)으로 정해진 60 MiB 크기의 ext4 이미지(`rootfs.ext4`는 그 symlink), `start-qemu.sh`는 QEMU 부팅 스크립트입니다. `rootfs.ext2`가 디스크에서 실제로 차지하는 블록은 `du` 기준 8.6 MB였고, 부팅 뒤 `df -h /`는 51.1M 중 4.1M 사용을 보였습니다. 이 단순한 산출물 구조 자체가 Buildroot의 정체성입니다.
 
 ## 숫자로 보는 규모
 

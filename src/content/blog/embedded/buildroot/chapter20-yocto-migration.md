@@ -2,7 +2,7 @@
 title: "Buildroot → Yocto 마이그레이션 — 언제·어떻게 옮길까"
 slug: "embedded/buildroot/chapter20-yocto-migration"
 date: 2026-05-19T09:20:00
-description: "Buildroot가 한계에 도달하는 신호와 Yocto/OE로 점진 이전하는 패턴, meta-buildroot 같은 hybrid 옵션."
+description: "Buildroot가 한계에 도달하는 신호, Buildroot ↔ Yocto/OE 개념 매핑, .mk → .bb 변환과 점진 이전 순서."
 series: "Buildroot Practical"
 seriesOrder: 20
 tags: [embedded, buildroot, yocto, openembedded, migration]
@@ -14,7 +14,9 @@ topics: ["embedded"]
 
 > **"Yocto로 옮길지의 결정은 *기능*이 아니라 *조직과 제품 라인*이 답을 줍니다."** — board 수, 팀 크기, vendor BSP 방향이 한계의 신호이며 migration은 *한 번에*가 아니라 *점진적으로* 진행하는 것이 합리적입니다.
 
-이 시리즈의 첫 장에서 두 시스템의 *철학적 트레이드오프*를 다뤘습니다. 마지막 장에서는 그 트레이드오프가 *실무에서 어떤 신호로 드러나는지*, 그리고 *옮길 결심이 섰을 때 어떤 순서로 진행하는지*를 정리합니다. Buildroot에서 시작한 프로젝트가 성장하면 어느 시점에 Yocto 쪽이 자연스러워지는 *변곡점*이 옵니다. 그 변곡점을 식별하는 안목이 이 장의 목표입니다.
+이 시리즈의 첫 장에서 두 시스템의 *철학적 트레이드오프*를 다뤘습니다. 마지막 장에서는 그 트레이드오프가 *실무에서 어떤 신호로 드러나는지*, 그리고 *옮길 결심이 섰을 때 어떤 순서로 진행하는지*를 정리합니다. 이사에 비유하면, 원룸(Buildroot)에서 짐이 늘어 투룸(Yocto)으로 옮길지 고민하는 시점입니다. 짐의 양보다 *같이 사는 사람 수*가 결정을 더 크게 좌우합니다.
+
+Buildroot 쪽 사실은 **Buildroot 2026.02.3** 소스, Yocto 쪽 사실은 **openembedded-core `scarthgap` 브랜치**(commit `fc431686`, 2026-11-10)의 `meta/` 디렉터리에서 확인했습니다. 이 글은 Yocto 빌드를 직접 돌리지 않았으므로, Yocto의 빌드 시간을 숫자로 적지 않습니다.
 
 ## 언제 Buildroot의 한계가 보이는가
 
@@ -22,132 +24,70 @@ topics: ["embedded"]
 
 **신호 1 — 보드 수가 3개 이상으로 늘어남**
 
-같은 SoC family의 변형 보드를 동시에 유지하는 순간 Buildroot의 *한 트리 한 타깃* 원칙이 비용으로 돌아옵니다. 보드별로 별도의 트리를 두면 패치가 세 번씩 적용돼야 하고, 단일 트리에 `BR2_EXTERNAL`로 묶으면 defconfig가 폭주합니다.
+같은 SoC family의 변형 보드를 동시에 유지하는 순간 Buildroot의 *한 output 디렉터리 한 설정* 원칙이 비용으로 돌아옵니다. 보드마다 `O=` 디렉터리를 따로 두고 toolchain부터 따로 빌드해야 하기 때문입니다. `BR2_EXTERNAL` 하나에 여러 defconfig를 두는 것은 가능하지만(Ch 6), 공통 부분이 defconfig마다 복제됩니다.
 
 **신호 2 — per-package 분기가 폭주함**
 
-특정 보드에서만 패키지의 다른 버전이 필요하거나, 특정 조건에서만 다른 옵션을 쓰는 분기가 늘어나면 `Config.in`이 *if-then-else 트리*로 변합니다. recipe별 격리가 없는 구조의 약점이 드러나는 지점입니다.
+특정 보드에서만 패키지의 다른 버전이 필요하거나, 특정 조건에서만 다른 옵션을 쓰는 분기가 늘어나면 `Config.in`과 `.mk`가 `ifeq` 분기로 채워집니다. Ch 6에서 확인했듯 외부 트리에서 본체 패키지를 같은 이름으로 다시 정의하면 `pkg-generic.mk`가 "defined a second time" 오류로 멈추므로, Yocto의 `.bbappend` 같은 덧씌우기 수단이 없습니다.
 
 **신호 3 — vendor BSP가 Yocto-only로 발표됨**
 
-NXP·TI·Xilinx·Qualcomm 같은 SoC vendor는 새 chip을 발표할 때 *meta-imx*·*meta-ti*·*meta-xilinx* 같은 Yocto 레이어로만 BSP를 배포하는 경우가 많습니다. Buildroot 트리에 vendor 패치를 직접 옮겨오는 작업이 *매 분기* 발생하면 그 비용이 마이그레이션 비용을 곧 넘어섭니다.
+NXP·TI·Xilinx 같은 SoC vendor는 BSP를 `meta-imx`·`meta-ti`·`meta-xilinx` 같은 Yocto 레이어로 배포합니다. Buildroot 본체에도 `freescale_imx8mpevk_defconfig`, `beagleplay_defconfig` 같은 보드 설정이 있지만(2026.02.3의 `configs/`는 308개), vendor가 새 chip의 커널·부트로더 fork를 레이어로만 내면 그 패치를 Buildroot 쪽으로 옮기는 일이 릴리스마다 반복됩니다.
 
 **신호 4 — SDK를 외부 개발자에게 배포해야 함**
 
-application 개발팀과 platform 팀이 분리되고, application 팀이 *별도의 SDK*로 cross-compile해야 한다면 Yocto의 `populate_sdk_ext`가 결정적으로 편합니다. Buildroot의 `make sdk`로도 가능하지만 *recipe 확장 가능한* eSDK 같은 기능이 없습니다.
+application 개발팀과 platform 팀이 분리되고, application 팀이 *별도의 SDK*로 cross-compile해야 한다면 Yocto의 eSDK(`meta/classes-recipe/populate_sdk_ext.bbclass`)가 편합니다. Buildroot의 `make sdk`(Ch 17)는 toolchain과 sysroot를 묶을 뿐, SDK 쪽에서 새 recipe를 추가하는 기능이 없습니다.
 
 **신호 5 — CI 시간이 sstate를 매력적으로 보이게 함**
 
-PR마다 30분씩 빌드를 반복하면 한 달이면 *팀 전체에서 수십 시간*이 누적됩니다. Yocto의 sstate-cache는 *signature 동일*이면 거의 무료로 산출물을 재사용하므로 4번째 빌드부터는 Buildroot보다 빨라지는 경우가 흔합니다.
+Ch 14에서 잰 것처럼 Buildroot는 `make clean` 뒤에 ccache가 있어도 모든 패키지를 configure·build 단계부터 다시 돕니다. Yocto는 task 입력의 signature가 같으면 `SSTATE_DIR`(기본값 `${TOPDIR}/sstate-cache`, `meta/conf/bitbake.conf` 844행)의 산출물을 그대로 가져옵니다. PR 빌드가 매번 깨끗한 환경에서 시작하는 CI라면 이 차이가 누적됩니다.
 
-이 다섯 신호 중 *셋 이상*이 동시에 켜져 있다면 이전 검토를 시작해도 늦지 않습니다.
+신호 하나만으로는 이전 근거가 약합니다. 신호 3(vendor BSP)처럼 외부에서 강제되는 것인지, 신호 1·5처럼 팀이 감수할 수 있는 비용인지를 나눠 봅니다.
 
-## migration 비용 추정
+## migration 비용을 가늠하는 단위
 
-이전 비용은 *코드 변환*보다 *팀 학습*과 *재테스트*가 차지합니다. 시스템 규모별 대략의 견적입니다.
+이전 견적을 "소형 1주, 대형 3개월" 같은 숫자로 적기는 쉽지만, 그런 숫자에는 출처가 없습니다. 대신 *세어 볼 수 있는 단위*로 비용을 쪼갭니다.
 
-| 규모 | 패키지 수 | 보드 수 | recipe 변환 | 팀 학습 | 재테스트 | 총합 |
-|---|---|---|---|---|---|---|
-| **소형** | 50 이하 | 1 ~ 2 | 1 ~ 2일 | 2 ~ 3일 | 2 ~ 3일 | **약 1주** |
-| **중형** | 100 ~ 250 | 2 ~ 4 | 1 ~ 2주 | 1주 | 1 ~ 2주 | **약 1개월** |
-| **대형** | 500+ | 5+ | 4 ~ 6주 | 2 ~ 3주 | 3 ~ 4주 | **약 3개월** |
+| 단위 | 세는 방법 | 비고 |
+|---|---|---|
+| 직접 작성한 패키지 | 외부 트리의 `package/*/` 디렉터리 수 | 본체 패키지는 대부분 OE 쪽에 같은 이름의 recipe가 있는지부터 확인 |
+| 본체 패키지에 얹은 패치 | `BR2_GLOBAL_PATCH_DIR` 아래 `.patch` 수 | `.bbappend` + `SRC_URI += "file://…"`로 옮길 대상 |
+| 보드 | 외부 트리 `configs/*_defconfig` 수 | MACHINE conf 하나씩 |
+| post-build·post-image 스크립트 | `BR2_ROOTFS_POST_*_SCRIPT`에 등록된 파일 | image recipe의 `ROOTFS_POSTPROCESS_COMMAND`, wic 등으로 재작성 |
+| 패키지 커버리지 차이 | 사용하는 본체 패키지가 OE 레이어에 있는가 | 2026.02.3의 `package/` 디렉터리는 2,941개, oe-core scarthgap `meta/`의 `.bb`는 920개라 meta-openembedded 등 추가 레이어를 같이 봐야 함 |
 
-소형 시스템은 *한 사람 한 주*면 끝나기도 합니다. 중형 이상은 *한 명이 전담*하기보다 *팀 전체가 일부 시간*을 떼어 진행하는 편이 안전합니다. 가장 큰 비용은 *예상 못 한 ABI 차이로 인한 런타임 사고*이며, 이는 *재테스트 단계*에 묶어 두는 게 통상입니다.
-
-대형 시스템에서 가장 큰 함정은 *recipe 100개를 한꺼번에 변환*하려는 시도입니다. *점진적으로*가 거의 항상 옳습니다.
+마지막 줄이 자주 놓치는 비용입니다. oe-core만으로는 Buildroot 본체가 가진 패키지의 일부만 덮기 때문에, 어떤 레이어를 추가로 의존할지 정하는 일이 변환 작업보다 먼저 옵니다.
 
 ## 개념 매핑 — Buildroot ↔ Yocto
 
-두 시스템은 같은 문제를 다른 어휘로 풉니다. 다음 표가 핵심 개념의 *1:1 대응*입니다.
+두 시스템은 같은 문제를 다른 어휘로 풉니다. Yocto 쪽 이름은 oe-core scarthgap에서 확인한 것입니다.
 
-| Buildroot | Yocto/OE | 비고 |
+| Buildroot | Yocto/OE | 확인 위치 / 비고 |
 |---|---|---|
 | `package/<name>/<name>.mk` | `recipes-<group>/<name>/<name>_<ver>.bb` | 패키지 정의 |
-| `package/<name>/Config.in` | recipe 안의 `PACKAGECONFIG` | 빌드 옵션 |
-| `package/<name>/<name>.hash` | recipe 안의 `SRC_URI[sha256sum]` | 무결성 |
-| `package/<name>/*.patch` | `recipes-.../<name>/<name>/<patch>` | 패치 |
-| `configs/<board>_defconfig` | `meta-myproject/conf/machine/<board>.conf` | 보드 정의 |
+| `package/<name>/Config.in`의 하위 옵션 | recipe 안의 `PACKAGECONFIG` | 빌드 옵션 |
+| `package/<name>/<name>.hash` | recipe 안의 `SRC_URI[sha256sum]`, `LIC_FILES_CHKSUM` | 소스·라이선스 무결성 |
+| `package/<name>/*.patch` | `SRC_URI += "file://<patch>"` | 패치 |
+| `configs/<board>_defconfig` | `conf/machine/<board>.conf` + image recipe | 보드 정의와 패키지 선택이 분리됨 |
 | `BR2_EXTERNAL` | `meta-<layer>` (`bblayers.conf`) | 외부 트리 |
-| `BR2_PACKAGE_<X>=y` | `IMAGE_INSTALL += "x"` | 이미지에 패키지 포함 |
-| `BR2_TARGET_GENERIC_HOSTNAME` | `hostname_pn-base-files = "..."` | 시스템 변수 |
-| `system/skeleton/` | `recipes-core/base-files/` 안의 파일 | 기본 rootfs 골격 |
-| `make sdk` | `bitbake -c populate_sdk` | SDK 빌드 |
-| `output/images/rootfs.ext4` | `tmp/deploy/images/<machine>/<image>.ext4` | 산출물 |
-| `make <pkg>-rebuild` | `bitbake -c compile -f <recipe>` | 비슷한 목적의 재빌드 명령이며 단계와 설치 동작은 동일하지 않음 |
-| `dl/` cache | `downloads/` + `sstate-cache/` | 다운로드와 sstate |
-| `BR2_TOOLCHAIN_EXTERNAL` | `TCMODE = "external-..."` | 외부 toolchain |
+| `BR2_PACKAGE_<X>=y` | `IMAGE_INSTALL += "x"` | `core-image-minimal.bb`는 `IMAGE_INSTALL = "packagegroup-core-boot ${CORE_IMAGE_EXTRA_INSTALL}"` |
+| `BR2_TARGET_GENERIC_HOSTNAME` | `hostname:pn-base-files = "..."` | `base-files_3.0.14.bb` 68행 주석이 이 방법을 안내하고, 기본값은 `${MACHINE}` |
+| `system/skeleton/` | `recipes-core/base-files/` | 기본 rootfs 골격 |
+| `make sdk` | `bitbake -c populate_sdk <image>` | SDK |
+| `output/images/` | `tmp/deploy/images/<machine>/` | 산출물 |
+| `make <pkg>-rebuild` | `bitbake -c compile -f <recipe>` | 목적은 비슷하지만 설치 단계 처리는 다름 |
+| `dl/` | `downloads/` + `sstate-cache/` | sstate는 Buildroot에 대응물이 없음 |
+| `BR2_TOOLCHAIN_EXTERNAL` | `TCMODE` | `bitbake.conf` 393행 `TCMODE ??= "default"`, 문서 문자열은 "Enables an external toolchain (where provided by an additional layer)" |
 
-대응이 명확하지 *않은* 항목이 두 가지 있습니다. 첫째, Buildroot에는 *per-recipe sysroot*가 없으므로 Yocto의 recipe 격리를 *그대로* 옮길 수 없습니다. 둘째, Buildroot의 `Config.in`은 *글로벌 dependency* 그래프를 만들지만 Yocto는 recipe별 `DEPENDS`·`RDEPENDS`로 *국소화*합니다. 이전 시 *글로벌 분기를 recipe별 분기로* 재구성하는 작업이 필요합니다.
+대응이 명확하지 *않은* 항목이 두 가지 있습니다. 첫째, Buildroot의 `BR2_PER_PACKAGE_DIRECTORIES`(Ch 14)는 패키지별 host/target 디렉터리를 만들지만 *experimental*이고 기본값이 꺼져 있습니다. Yocto는 recipe별 sysroot가 기본입니다. 둘째, Buildroot의 `Config.in`은 *하나의 전역 설정*을 만들지만 Yocto는 recipe별 `DEPENDS`·`RDEPENDS`로 의존성을 *국소화*합니다. 이전할 때 전역 `ifeq` 분기를 recipe별 `PACKAGECONFIG`나 MACHINE 변수로 다시 나눠야 합니다.
 
-## 점진적 이전 — hybrid 패턴
+## 점진적 이전 — 병행 기간을 두는 방식
 
-가장 안전한 이전은 *한 번에 전환*하지 않는 것입니다. 다음 두 가지 hybrid 패턴이 실무에서 자주 쓰입니다.
+가장 안전한 이전은 *한 번에 전환*하지 않는 것입니다. 기존 제품의 firmware는 Buildroot로 유지하고, *새로 시작하는 제품 라인*만 Yocto로 진행합니다. 두 시스템을 병행하는 동안 같은 패키지를 양쪽에서 빌드해 산출물을 비교할 수 있다는 것이 이 방식의 이점입니다.
 
-**패턴 1 — 새 시스템은 Yocto, 기존은 Buildroot**
+비교는 Buildroot가 이미 만들어 주는 자료로 시작합니다. Ch 6에서 인용한 매뉴얼 "Migrating from older versions"의 *General approach*는 Buildroot 버전을 올릴 때 `make graph-size`가 만드는 `file-size-stats.csv`를 전후로 비교하라고 권합니다. 같은 방법을 Yocto 이전에도 쓸 수 있습니다. Buildroot 쪽 `file-size-stats.csv`와 Yocto 이미지의 파일 목록을 대조하면 빠진 파일과 새로 생긴 큰 파일이 드러납니다.
 
-기존 제품의 firmware는 그대로 Buildroot로 유지하고, *새로 시작하는 제품 라인*만 Yocto로 진행합니다. 팀이 *두 시스템을 병행*하는 기간이 6 ~ 12개월 정도 생깁니다. 이 패턴의 장점은 *기존 출시 일정에 영향 없음*입니다.
-
-**패턴 2 — meta-buildroot으로 Buildroot 트리를 Yocto에 임베드**
-
-이 방식이 *덜 알려졌지만* 매우 유용합니다. `meta-buildroot` layer를 Yocto에 추가하면 Buildroot 트리 전체를 *한 recipe*로 감싸 빌드할 수 있습니다.
-
-```text
-yocto-build/
-├── sources/
-│   ├── poky/                       # Yocto 본가
-│   ├── meta-openembedded/
-│   ├── meta-imx/                   # vendor BSP
-│   └── meta-buildroot/             # bridge layer
-├── buildroot/                      # 기존 Buildroot 트리 그대로
-│   ├── package/
-│   ├── configs/
-│   └── ...
-└── build/
-    └── conf/
-        ├── bblayers.conf
-        └── local.conf
-```
-
-`meta-buildroot`의 layer.conf 예시.
-
-```bitbake
-# meta-buildroot/conf/layer.conf
-BBPATH .= ":${LAYERDIR}"
-BBFILES += "${LAYERDIR}/recipes-*/*/*.bb"
-
-BBFILE_COLLECTIONS += "buildroot"
-BBFILE_PATTERN_buildroot = "^${LAYERDIR}/"
-BBFILE_PRIORITY_buildroot = "10"
-LAYERSERIES_COMPAT_buildroot = "scarthgap kirkstone"
-```
-
-Buildroot 빌드 wrapper recipe.
-
-```bitbake
-# meta-buildroot/recipes-core/buildroot-rootfs/buildroot-rootfs.bb
-SUMMARY = "Buildroot-built rootfs wrapped as Yocto artifact"
-LICENSE = "CLOSED"
-
-S = "${TOPDIR}/../buildroot"
-
-do_compile() {
-    cd ${S}
-    make ${BUILDROOT_DEFCONFIG}
-    make
-}
-
-do_install() {
-    install -d ${D}/buildroot-output
-    cp -a ${S}/output/images/* ${D}/buildroot-output/
-}
-
-FILES:${PN} += "/buildroot-output"
-BUILDROOT_DEFCONFIG ?= "qemu_aarch64_virt_defconfig"
-```
-
-이 구조가 주는 이득이 큽니다. *기존 Buildroot 트리는 그대로* 유지하면서 *Yocto의 sstate·layer·SDK 인프라*를 점차 도입할 수 있습니다. 이전 기간 동안 패키지 하나씩 Buildroot에서 *떼어내* OE recipe로 옮기는 작업을 점진적으로 진행하면 됩니다.
-
-단점은 *두 시스템의 비용*을 모두 부담한다는 점입니다. *영구적인* 구조로 권장하지 않으며 *이전 기간 동안의 다리*로 사용합니다.
+이 글의 이전 판은 Buildroot 트리를 Yocto recipe 하나로 감싸는 `meta-buildroot` 레이어를 소개했습니다. OpenEmbedded Layer Index API에서 `name:meta-buildroot`, `name__icontains:buildroot`로 검색하면 빈 목록(`[]`)이 돌아와, 공개된 레이어로 확인할 수 없어 그 절을 삭제했습니다.
 
 ## recipe 변환 예 — .mk → .bb
 
@@ -184,10 +124,10 @@ $(eval $(generic-package))
 ```bitbake
 SUMMARY = "MyApp — example application"
 LICENSE = "MIT"
-LIC_FILES_CHKSUM = "file://LICENSE;md5=abc1234567890abcdef1234567890abcd"
+LIC_FILES_CHKSUM = "file://LICENSE;md5=<LICENSE 파일의 md5>"
 
 SRC_URI = "https://github.com/example/myapp/archive/refs/tags/myapp-${PV}.tar.gz"
-SRC_URI[sha256sum] = "1111aaaa2222bbbb3333cccc4444dddd5555eeee6666ffff7777000088889999"
+SRC_URI[sha256sum] = "<tarball의 sha256>"
 
 DEPENDS = "openssl curl"
 
@@ -201,13 +141,11 @@ do_install() {
     install -D -m 0755 ${S}/myapp ${D}${bindir}/myapp
     install -D -m 0644 ${S}/myapp.conf ${D}${sysconfdir}/myapp.conf
 }
-
-FILES:${PN} += "${sysconfdir}/myapp.conf"
 ```
 
-차이는 다음과 같습니다. Buildroot는 *make 함수*(`MYAPP_BUILD_CMDS`)로 호출되는 표준 매크로 패턴인 반면, OE는 *do_compile·do_install* 같은 *task 함수*로 분해됩니다. 변수 이름도 다릅니다. Buildroot의 `TARGET_CC`가 OE에서는 그냥 `CC`이며 cross-compile이 *암시적*으로 활성화됩니다. `TARGET_DIR`은 `${D}`, `/usr/bin`은 `${bindir}`로 *경로 변수화*가 강제됩니다.
+차이는 다음과 같습니다. Buildroot는 *make 함수*(`MYAPP_BUILD_CMDS`)로 호출되는 매크로 패턴인 반면, OE는 `do_compile`·`do_install` 같은 *task 함수*로 분해됩니다. Buildroot의 `TARGET_CC`가 OE에서는 `CC`이고, `TARGET_DIR`은 `${D}`, `/usr/bin`은 `${bindir}`로 바뀝니다. `S`는 지정하지 않으면 `bitbake.conf` 410행의 `S = "${WORKDIR}/${BP}"`가 기본값이라, tarball 최상위 디렉터리 이름이 `<pn>-<pv>`와 다를 때만 적습니다.
 
-변환 시 가장 자주 놓치는 부분이 `FILES:${PN}` 선언입니다. OE는 *패키지 분할*을 자동으로 하므로 `/etc` 아래 설치한 파일이 *main package*에 포함되도록 명시해야 합니다. 이 한 줄을 빠뜨리면 이미지에 `myapp.conf`가 *빠집니다*.
+OE는 설치된 파일을 `${PN}`, `${PN}-dev`, `${PN}-dbg` 같은 여러 패키지로 *자동 분할*합니다(`bitbake.conf` 327행 `PACKAGES`). 분할 규칙은 `FILES:<패키지>` 변수가 정합니다. 기본 `FILES:${PN}`에는 `${bindir}/*`와 함께 `${sysconfdir}`이 이미 들어 있어, `/etc/myapp.conf`는 따로 적지 않아도 main package에 포함됩니다. 이 글의 이전 판은 `FILES:${PN} += "${sysconfdir}/myapp.conf"`가 없으면 파일이 빠진다고 적었는데, oe-core의 기본값과 맞지 않아 지웠습니다. 별도 선언이 필요한 경우는 `/opt`처럼 기본 목록에 없는 경로에 설치할 때입니다.
 
 ## defconfig → MACHINE conf
 
@@ -222,7 +160,7 @@ Buildroot의 보드 정의는 한 줄짜리 `configs/<board>_defconfig` 파일�
 require conf/machine/include/imx-base.inc
 
 DEFAULTTUNE ?= "cortexa53-crypto"
-require conf/machine/include/tune-cortexa53.inc
+require conf/machine/include/arm/armv8a/tune-cortexa53.inc
 
 MACHINE_FEATURES += "pci wifi bluetooth"
 
@@ -260,48 +198,42 @@ IMAGE_FEATURES += "ssh-server-openssh"
 
 ## 빌드 시간 비교
 
-같은 "AArch64 + busybox + nginx + sshd + Python 3" 시스템을 양쪽으로 빌드한 측정값입니다. 8-core Ryzen 7 워크스테이션, NVMe SSD, 32 GB RAM, 캐시 없는 cold start 기준.
+이 글의 이전 판에는 "Buildroot 32분 / Yocto 110분" 같은 비교표가 있었지만, 측정 환경과 기록이 없어 삭제했습니다. 이 시리즈가 실제로 잰 것은 Buildroot 쪽뿐입니다. Ch 1에서 `qemu_aarch64_virt_defconfig` 첫 빌드, Ch 14에서 ccache와 per-package directories를 켜고 끈 재빌드 시간을 같은 VM에서 측정했습니다.
 
-| 시나리오 | Buildroot 2024.02 | Yocto Scarthgap | 비고 |
-|---|---|---|---|
-| **First build (cold)** | 32분 | 110분 | sstate 없음 |
-| **Second build (no change)** | 5초 | 8초 | 변경 감지만 |
-| **Second build (1 pkg 수정)** | 25초 | 12초 | sstate hit |
-| **Branch switch (200 pkgs)** | 32분 (대부분 rebuild) | 14분 (sstate hit 90%) | 동일 baseline 트리 |
-| **CI 4번째 빌드** | 32분 | 7분 | sstate 캐시 누적 |
-| **Toolchain만 교체** | 32분 (전체 재빌드) | 18분 (sstate signature 변경) | gcc 13 → 14 |
-| **Multi-board 5개 빌드** | 5 × 32분 = 160분 | 1 × 110분 + 4 × 8분 = 142분 | 첫 보드 후 sstate 공유 |
+Yocto와 비교하려면 같은 호스트에서 같은 패키지 집합으로 다음을 따로 재야 합니다.
 
-Buildroot가 빠른 시나리오는 *first build*와 *single board의 incremental* 두 가지뿐입니다. *팀 인원*과 *보드 수*가 늘어나는 순간 모든 후속 시나리오에서 Yocto가 우세합니다.
+| 시나리오 | 재야 할 것 |
+|---|---|
+| 첫 빌드 (캐시 없음) | `downloads/`·`sstate-cache/`를 비운 상태의 `bitbake <image>` wall time |
+| 변경 없는 재빌드 | 같은 명령 재실행 시간 |
+| 패키지 1개 수정 | 해당 recipe만 바뀐 뒤 재빌드 시간 |
+| CI 새 runner | 공유 `SSTATE_DIR`이 있을 때와 없을 때의 차이 |
 
-Ch 14에서 다룬 Buildroot의 `ccache + per-package directories`로 일부 격차를 좁힐 수 있지만, *cross-PR sstate 공유*는 구조적으로 불가능합니다. 이 한 가지가 5번째 빌드부터의 차이를 만들어 냅니다.
+구조상 확실한 차이는 하나입니다. Buildroot에는 sstate에 해당하는 *산출물 재사용 계층*이 없습니다. 그래서 output 디렉터리가 없는 새 runner에서는 ccache가 컴파일만 줄여 줄 뿐, 압축 해제·configure·install은 매번 다시 돕니다(Ch 14 실측).
 
 ## 운영 비용 비교
 
-빌드 시간 외의 *조직 비용*도 같이 봐야 합니다.
+빌드 시간 외의 *조직 비용*도 같이 봐야 합니다. 출처가 있는 항목과 팀이 직접 재야 하는 항목을 나눴습니다.
 
 | 항목 | Buildroot | Yocto/OE |
 |---|---|---|
-| **신규 팀원 학습** | 1주 | 1 ~ 2개월 |
-| **빌드 시스템 전담** | 불필요 | 1명 (5인 이상 팀일 때) |
-| **CI 인프라** | runner 1대로 충분 | sstate 서버 + runner 여러 대 |
-| **vendor BSP 적용** | 매 분기 patches 정리 | 새 layer 추가 |
-| **장기 LTS 유지** | 2년이 한계 | 5 ~ 10년 |
-| **다중 보드 추가 비용** | 보드 1개당 *주 단위* | 보드 1개당 *일 단위* |
-| **SDK 외부 배포** | tarball, 확장 어려움 | eSDK, devtool 워크플로 |
-| **빌드 디버깅** | `make V=1`로 즉시 | bitbake task graph, sstate 검증 필요 |
+| **릴리스 지원 기간** | 매뉴얼 "Release Engineering": LTS(매년 `.02`)는 *다음 LTS의 첫 bugfix 릴리스*까지, 일반 릴리스는 다음 릴리스의 첫 bugfix까지 | Yocto Project 릴리스 페이지의 LTS 일정 확인 |
+| **빌드 디버깅** | `make V=1`, `make printvars`로 변수 펼쳐 보기 | `bitbake -e <recipe>`, task 로그(`temp/log.do_*`) |
+| **외부 트리 덧씌우기** | 불가 (같은 이름 재정의는 오류) | `.bbappend`, 레이어 우선순위 |
+| **SDK 확장** | 불가 (재발급) | eSDK + `devtool` |
+| **신규 팀원 학습 기간** | 팀에서 측정 | 팀에서 측정 |
 
-작은 팀과 단일 제품에서는 Buildroot의 *학습 비용 1주*가 무엇과도 바꿀 수 없는 자산입니다. 큰 팀과 다중 제품에서는 Yocto의 *보드 추가 비용 일 단위*가 결정적 자산입니다.
+학습 기간을 "1주 vs 1~2개월"처럼 적던 칸은 근거가 없어 측정 항목으로 바꿨습니다. 팀에서 새 사람이 *패키지 하나를 추가해 이미지에 넣기까지* 걸린 시간을 기록해 두면 이전 결정의 근거가 됩니다.
 
 ## 옮기지 말아야 할 신호
 
 이전 결정만큼 *이전하지 않는* 결정도 중요합니다. 다음 신호가 보이면 Yocto 도입은 *과한 결정*일 가능성이 높습니다.
 
-- **팀이 5명 이하**이며 빌드 시스템 전담 인력이 없습니다.
-- **board가 1개**이고 향후 2년 내 추가 계획이 없습니다.
-- **rootfs가 64 MB 이하**이며 패키지 수가 50 이하입니다.
+- 빌드 시스템 전담 인력이 없습니다.
+- 보드가 1개이고 추가 계획이 없습니다.
+- 사용하는 본체 패키지 중 OE 레이어에 recipe가 없는 것이 많습니다(위 "비용을 가늠하는 단위" 표의 마지막 줄).
 - **vendor BSP가 mainline에 잘 들어가 있어** vendor layer 의존이 약합니다.
-- **출시 일정이 6개월 이하**로 임박해 *지금 이전*은 위험합니다.
+- 출시 일정이 임박해 재테스트 기간을 확보할 수 없습니다.
 - **OTA·SDK 배포가 불필요**하고 *flash 후 종료*형 firmware입니다.
 
 이 조건이 두세 개 겹치면 Yocto의 *유연함*은 그대로 *비용*입니다. Buildroot에 머무르면서 Ch 14 (caching), Ch 17 (SDK)에서 다룬 기술로 한계를 끌어올리는 편이 더 합리적입니다. 도구는 *문제에 맞는 것*이 답이며 *더 큰 도구*가 답인 경우는 의외로 드뭅니다.
@@ -320,7 +252,7 @@ Ch 14에서 다룬 Buildroot의 `ccache + per-package directories`로 일부 격
 
 이 시리즈를 졸업한 독자가 다음에 자연스럽게 향할 곳이 있습니다.
 
-- **Yocto/OpenEmbedded 학습** — 가장 직접적인 후속. 시작점은 *Yocto Mega-Manual*과 *OpenEmbedded Reference Manual*. 한국어 후속 시리즈는 현재 준비 중이며, 이 블로그의 *embedded/yocto* 카테고리가 생기면 그쪽으로 이어집니다.
+- **Yocto/OpenEmbedded 학습** — 가장 직접적인 후속. 시작점은 *Yocto Mega-Manual*과 *OpenEmbedded Reference Manual*입니다.
 - **Linux from Scratch (LFS)** — 빌드 시스템에 *의존하지 않고* 같은 시스템을 *손으로* 조립해 보는 경험. Buildroot가 *무엇을 자동화하는지* 가장 깊게 이해할 수 있습니다.
 - **BSP Development 시리즈** — 빌드 시스템 *아래*의 BSP 계층. U-Boot, device tree, kernel BSP를 다룹니다.
 - **Embedded C++ for Real Systems** — userland 쪽으로 시선을 옮길 때.
@@ -330,13 +262,13 @@ Ch 14에서 다룬 Buildroot의 `ccache + per-package directories`로 일부 격
 ## 정리
 
 - Yocto 이전의 다섯 가지 신호는 *board 수 3+*, *per-package 분기 폭주*, *vendor BSP가 Yocto-only*, *SDK 외부 배포*, *CI에 sstate가 매력적*입니다.
-- 이전 비용은 소형 1주, 중형 1개월, 대형 3개월 정도이며 *recipe 변환*보다 *팀 학습과 재테스트*가 비용 대부분을 차지합니다.
-- 개념 매핑은 대체로 1:1이지만 *per-recipe sysroot 부재*와 *글로벌 Config.in vs 국소 DEPENDS*가 변환의 어려운 지점입니다.
-- 점진적 이전은 *meta-buildroot*로 Buildroot 트리를 Yocto에 임베드해 두 시스템을 *다리 기간* 동안 병행하는 패턴이 안전합니다.
-- recipe 변환의 핵심은 *make 매크로 → task 함수*, *TARGET_CC → CC*, *TARGET_DIR → \${D}*, 그리고 `FILES:${PN}` 명시입니다.
+- 이전 비용은 직접 작성한 패키지·본체 패치·보드·후처리 스크립트 수와, 사용하는 패키지의 OE 레이어 커버리지로 셉니다. 2026.02.3 `package/` 2,941개 대 oe-core scarthgap `.bb` 920개라 추가 레이어 선택이 먼저입니다.
+- 개념 매핑은 대체로 1:1이지만 *전역 Config.in vs recipe별 DEPENDS*와 *덧씌우기(`.bbappend`) 유무*가 변환의 어려운 지점입니다.
+- 점진적 이전은 새 제품 라인만 Yocto로 시작하고, `graph-size`의 `file-size-stats.csv`로 양쪽 이미지를 비교하며 병행합니다.
+- recipe 변환의 핵심은 *make 매크로 → task 함수*, *TARGET_CC → CC*, *TARGET_DIR → \${D}*입니다. `/etc` 파일은 기본 `FILES:${PN}`에 이미 포함됩니다.
 - defconfig는 MACHINE conf로 *MACHINE 특성*만 옮기고 *패키지 선택*은 image recipe로 분리됩니다.
-- 4번째 빌드부터 Yocto가 빠르며, 5개 보드 빌드에서 sstate 공유로 누적 시간이 역전됩니다.
-- 옮기지 *말아야 할 신호*도 분명합니다. 팀 5명 이하·단일 보드·소형 rootfs라면 Yocto는 과한 결정입니다.
+- Buildroot에는 sstate 같은 산출물 재사용 계층이 없습니다. Yocto와의 시간 비교는 같은 호스트에서 직접 재야 하며, 이 시리즈는 Buildroot 쪽만 측정했습니다.
+- 옮기지 *말아야 할 신호*도 분명합니다. 전담 인력 없음·단일 보드·OE 레이어 커버리지 부족이 겹치면 Yocto는 과한 결정입니다.
 - 도구는 문제에 맞는 것이 답이며, *더 큰 도구*가 답인 경우는 의외로 드뭅니다.
 
 ## 관련 항목
