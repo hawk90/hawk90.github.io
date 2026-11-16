@@ -45,7 +45,7 @@ HD44780U datasheet의 pin function 표 기준입니다. 모듈의 핀 번호, �
 | PB0–PB3 | DB4–DB7 |
 | GND | R/W |
 
-MCU 쪽 신호선은 RS, E, DB4–DB7의 6개입니다. VCC 4.5 ~ 5.5 V에서 E·RS·DB 입력의 high 기준 VIH1은 최소 2.2 V이므로, 쓰기만 하는 이 배선에서는 3.3 V GPIO 출력이 그 기준을 넘습니다. R/W = 1로 읽으면 LCD가 DB를 구동하므로 그때는 MCU 핀의 전압 허용 범위를 따로 봐야 합니다.
+MCU 쪽 신호선은 RS, E, DB4–DB7의 6개입니다. VCC 4.5 ~ 5.5 V에서 E·RS·DB 입력의 high 기준 VIH1은 최소 2.2 V입니다. STM32F407 datasheet(DS8626 Rev 4) Table 48의 CMOS 출력 VOH는 2.7 V < VDD < 3.6 V에서 최소 VDD − 0.4 V(8 mA)이므로, VDD = 3.3 V면 2.9 V로 그 기준을 넘습니다. R/W = 1에서 E가 high가 되면 LCD가 DB를 구동하므로, 읽기를 쓸 때는 MCU 핀의 입력 전압 허용 범위를 따로 봐야 합니다.
 
 ### Bus timing
 
@@ -71,7 +71,7 @@ Table 6의 실행 시간은 "f cp or f OSC is 270 kHz"일 때의 최대값입니
 | Entry mode set, Display on/off, Cursor/display shift, Function set, Set CGRAM/DDRAM address, Write data | 37 µs |
 | Clear display | 표에 값이 없음 |
 
-datasheet는 clock이 바뀌면 시간도 바뀐다며 250 kHz 예로 "37 µs × 270/250 = 40 µs"를 듭니다. 아래 코드는 명령마다 50 µs를 기다리는데, 같은 비례식으로 37 µs × 270/f ≤ 50 µs가 되는 f ≥ 199.8 kHz까지 덮습니다. Clear display는 표에 시간이 비어 있어 Return home의 1.52 ms보다 긴 2 ms를 기다립니다.
+datasheet는 clock이 바뀌면 시간도 바뀐다며 250 kHz 예로 "37 µs × 270/250 = 40 µs"를 듭니다. 아래 코드는 명령마다 50 µs를 기다리는데, 같은 비례식으로 37 µs × 270/f ≤ 50 µs가 되는 f ≥ 199.8 kHz까지 덮습니다. Clear display는 datasheet 표에 시간이 비어 있어 근거가 되는 상한이 없습니다. 이 글은 2 ms를 기다리는 값으로 정했고, busy flag를 읽을 수 있는 배선이라면 BF가 0이 될 때까지 기다리는 쪽이 datasheet에 맞습니다.
 
 ### 4-bit 초기화 순서
 
@@ -96,7 +96,7 @@ CGRAM은 64 byte이고, 5 × 8 dot 글자 8개(character code 0x00–0x07)를 �
 
 ## 코드 예제
 
-`delay_us_dwt()`·`dwt_init()`·`delay_ms()`는 [4-06](/blog/embedded/modern-recipes/part4-06-systick-timer), `gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 것입니다. `CPU_HZ`는 [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup)의 168 MHz입니다.
+`delay_us_dwt()`·`dwt_init()`·`delay_ms()`는 [4-06](/blog/embedded/modern-recipes/part4-06-systick-timer), `gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 것입니다. `CPU_HZ`는 [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup)의 168 MHz입니다. `lcd_init()` 전에 4-06의 `systick_init_1ms(CPU_HZ)`와 `dwt_init()`을 불러 둡니다. `dwt_init()`이 없으면 `CYCCNT`가 늘지 않아 첫 `delay_us_dwt()`에서 멈춥니다.
 
 ### 1. 4-bit interface driver
 
@@ -112,8 +112,8 @@ CGRAM은 64 byte이고, 5 × 8 dot 글자 8개(character code 0x00–0x07)를 �
 #define LCD_D_SHIFT  0   // D4 = PB0
 
 static void lcd_write4(uint8_t nibble) {
-    LCD_D_PORT->BSRR = (0xFu << (LCD_D_SHIFT + 16))     // clear
-                     | ((nibble & 0xFu) << LCD_D_SHIFT); // set
+    LCD_D_PORT->BSRR = ((~nibble & 0xFu) << (LCD_D_SHIFT + 16))  // reset 0 bits
+                     | ((nibble & 0xFu) << LCD_D_SHIFT);         // set 1 bits
     delay_us_dwt(1, CPU_HZ);                  // tAS >= 60 ns, tDSW >= 195 ns
     LCD_E_PORT->BSRR = (1u << LCD_E_PIN);    // E high
     delay_us_dwt(1, CPU_HZ);                  // PWEH >= 450 ns
@@ -206,7 +206,7 @@ void demo(void) {
 
 PCF8574는 I2C로 받은 byte를 P0–P7 8개 핀에 그대로 내는 I/O expander입니다. LCD에 붙이는 확장기 보드는 P 핀과 LCD 신호의 연결이 보드마다 다르므로, 아래 코드는 이 연결을 가정합니다: P0 = RS, P1 = R/W, P2 = E, P3 = backlight 제어, P4–P7 = DB4–DB7.
 
-7-bit 주소는 datasheet 7.3.3 Address Reference 표대로 A2·A1·A0 핀에 따라 0x20(LLL) ~ 0x27(HHH)입니다.
+datasheet 7.3.3 Address Reference 표의 8-bit write 주소는 A2·A1·A0 핀에 따라 0x40(LLL) ~ 0x4E(HHH), 즉 7-bit 주소 0x20 ~ 0x27입니다.
 
 ```c
 #define LCD_I2C_ADDR  0x27          // PCF8574 with A2=A1=A0=H
@@ -215,6 +215,7 @@ static uint8_t bl = 0x08;           // P3: backlight on
 
 static void lcd_i2c_write4(uint8_t nibble_hi, int rs) {
     uint8_t v = (uint8_t)((nibble_hi & 0xF0u) | bl | (rs ? 0x01u : 0u));
+    i2c_write(LCD_I2C_ADDR, &v, 1); // RS, data settle with E low (tAS)
     v |= 0x04;                      // E high (P2)
     i2c_write(LCD_I2C_ADDR, &v, 1);
     v &= (uint8_t)~0x04u;           // E low: latch
@@ -228,7 +229,7 @@ void lcd_send_i2c(uint8_t byte, int rs) {
 }
 ```
 
-`i2c_write()`는 [4-09](/blog/embedded/modern-recipes/part4-09-i2c-driver)의 것입니다. PCF8574의 fSCL 최대값은 100 kHz이고, 주소 byte와 data byte 하나를 쓰는 데 start·stop을 빼고도 18 clock, 즉 180 µs가 걸립니다. E를 올린 쓰기와 내린 쓰기 사이가 이미 그만큼 벌어지므로 GPIO 경로처럼 1 µs 대기를 넣지 않았습니다. 초기화는 GPIO 경로의 `lcd_init()`과 같은 순서를, 1~5단계는 `lcd_i2c_write4(0x30, 0)`처럼 nibble 하나로 보냅니다.
+`i2c_write()`는 [4-09](/blog/embedded/modern-recipes/part4-09-i2c-driver)의 것이지만, 4-09의 초기화는 `I2C1->CCR = I2C_CCR_FS | 35`로 Fast-mode 400 kHz입니다. PCF8574의 fSCL 최대값은 100 kHz이므로 이 경로에서는 4-09의 식대로 Standard-mode로 바꿉니다. PCLK1 = 42 MHz에서 `CCR` = (42,000,000 − 1) / (2 × 100,000) + 1 = 210(FS = 0), `TRISE` = 42 + 1 = 43입니다. PCF8574는 data byte의 ACK에서 P 핀을 바꾸고, 주소 byte와 data byte 하나를 쓰는 데 100 kHz에서 start·stop을 빼고도 18 clock, 즉 180 µs 이상이 걸립니다. 그래서 RS·data를 E low로 먼저 내보내는 쓰기, E high, E low 사이가 각각 180 µs 이상 벌어져 tAS·PWEH·tDSW를 넘고, GPIO 경로의 1 µs 대기는 넣지 않았습니다. 초기화는 GPIO 경로의 `lcd_init()`과 같은 순서를, 1~5단계는 `lcd_i2c_write4(0x30, 0)`처럼 nibble 하나로 보냅니다.
 
 ## 측정 / 동작 확인
 
@@ -267,7 +268,7 @@ static void hd44780_edge(void) {
 }
 
 static void bsrr(port_t *p, uint32_t v) {
-    p->odr &= ~(v >> 16);           /* BR first: BS wins if both set */
+    p->odr &= ~(v >> 16);           /* the driver never sets BS and BR for one pin */
     p->odr |= v & 0xFFFF;
     int e = PA.odr >> 1 & 1;
     if (e_prev && !e) hd44780_edge();
@@ -342,7 +343,7 @@ datasheet의 power-on 대기는 VCC가 4.5 V에 오른 뒤 15 ms, 2.7 V 기준�
 
 > ⚠️ 4-bit 전환 전에 두 nibble로 보냄
 
-1~5단계는 controller가 아직 8-bit interface로 동작하는 구간이라 nibble 하나가 명령 하나입니다. 여기서 `lcd_cmd(0x33)`처럼 두 nibble을 보내면 순서가 어긋납니다.
+1~5단계는 controller가 아직 8-bit interface로 동작하는 구간이라 nibble 하나가 명령 하나입니다. 여기서 `lcd_cmd(0x33)`처럼 두 nibble을 한 번에 보내면 두 `0011` 사이가 3 µs뿐이라 4.1 ms·100 µs 대기를 지키지 못합니다.
 
 > ⚠️ CGRAM에 쓴 뒤 DDRAM 주소를 다시 안 잡음
 
@@ -350,7 +351,7 @@ datasheet의 power-on 대기는 VCC가 4.5 V에 오른 뒤 15 ms, 2.7 V 기준�
 
 > ⚠️ R/W를 GND에 묶지 않음
 
-R/W가 1이면 LCD가 DB를 출력으로 구동합니다. 쓰기만 하는 배선은 R/W를 GND에 묶습니다.
+R/W = 1에서 E가 high가 되면 LCD가 DB를 출력으로 구동합니다. 쓰기만 하는 배선은 R/W를 GND에 묶습니다.
 
 > ⚠️ 한글 표시
 
