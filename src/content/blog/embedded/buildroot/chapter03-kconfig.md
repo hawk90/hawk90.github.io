@@ -347,7 +347,7 @@ $ wc -l saved_defconfig
 18 saved_defconfig
 ```
 
-5,149줄이 18줄로 돌아오고, 원본 defconfig와 바이트 단위로 같습니다. 다음으로 openssh 한 줄을 켠 뒤 같은 과정을 거쳤습니다.
+5,149줄이 18줄로 돌아오고, 원본 defconfig와 바이트 단위로 같습니다. 같은 defconfig를 Debian 13 arm64 VM에서 적용하면 `.config`가 5,230줄이었습니다. 펼쳐지는 심볼 수가 호스트에 따라 달라지는 것으로, Ch 10에서 호스트 아키텍처에 묶인 toolchain 옵션이 빠진 것과 같은 성질입니다. 그래도 `savedefconfig` 결과는 VM에서도 원본과 같았습니다(`IDENTICAL`). 다음으로 openssh 한 줄을 켠 뒤 같은 과정을 거쳤습니다.
 
 ```text
 $ echo 'BR2_PACKAGE_OPENSSH=y' >> .config
@@ -382,13 +382,14 @@ make
 SSH 관련 두 줄을 fragment로 두고 QEMU defconfig에 합쳐 봤습니다. 이 스크립트는 GNU coreutils의 `cp`·`mktemp` 동작을 가정해서 macOS에서는 실패했고, Debian 13 VM에서 실행했습니다.
 
 ```text
-$ cat ~/frag/with-ssh.config
+$ cat ~/in/with-ssh.config
 BR2_PACKAGE_OPENSSH=y
 BR2_PACKAGE_DROPBEAR=y
 $ cd ~/out-merge
 $ ~/buildroot/support/kconfig/merge_config.sh -m \
-      ~/buildroot/configs/qemu_aarch64_virt_defconfig ~/frag/with-ssh.config
-Merging /home/br/frag/with-ssh.config
+      ~/buildroot/configs/qemu_aarch64_virt_defconfig ~/in/with-ssh.config
+Using /home/br/buildroot/configs/qemu_aarch64_virt_defconfig as base
+Merging /home/br/in/with-ssh.config
 #
 # merged configuration written to .config (needs make)
 #
