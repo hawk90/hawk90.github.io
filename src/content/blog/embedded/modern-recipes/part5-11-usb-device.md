@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"USB device를 만드는 일의 대부분은 descriptor를 쓰는 일입니다."** control transfer, enumeration, endpoint FIFO는 TinyUSB 같은 stack이 맡고, 애플리케이션은 자신이 어떤 device인지 descriptor로 적고 class API로 data를 주고받습니다.
+> **"이 글의 USB 쪽 애플리케이션 코드는 descriptor callback 세 개와 `tud_cdc_*` 호출이 전부입니다."** control transfer, enumeration, endpoint FIFO는 TinyUSB 같은 stack이 맡고, 애플리케이션은 자신이 어떤 device인지 descriptor로 적고 class API로 data를 주고받습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -36,7 +36,7 @@ STM32F407 datasheet(DS8626 Rev 4) 2.2.30절과 Table 58에서 이 글에 필요�
 | DP pull-up (RPU, PA12) | 1.5 / 1.8 / 2.1 kΩ (min / typ / max), chip 내부 |
 | USB 동작 전압 | VDD 3.0 ~ 3.6 V |
 
-48 MHz는 [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup)의 PLL 설정(HSE 8 MHz, M = 8, N = 336, Q = 7 → 336 / 7 = 48 MHz)이 이미 만듭니다. DP pull-up이 chip 안에 있으므로 외부 1.5 kΩ는 달지 않습니다. TinyUSB는 `dcd_connect()`에서 `DCTL`의 SDIS bit를 지워 이 pull-up을 켜고, host는 DP가 올라간 것을 보고 full-speed device가 붙었다고 판단합니다.
+48 MHz는 [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup)의 PLL 설정(HSE 8 MHz, M = 8, N = 336, Q = 7 → 336 / 7 = 48 MHz)이 이미 만듭니다. DP pull-up이 chip 안에 있으므로 외부 1.5 kΩ는 달지 않습니다. TinyUSB는 `dcd_connect()`에서 `DCTL`의 SDIS bit를 지워 이 pull-up을 켭니다. ST LL은 같은 동작을 "Connect the USB device by enabling Rpu"라고 적습니다.
 
 ### Descriptor
 
@@ -80,7 +80,7 @@ VID는 USB-IF가 할당하는 값입니다. 0xCAFE는 TinyUSB 예제의 값이�
 #endif
 ```
 
-`CFG_TUSB_MCU = OPT_MCU_STM32F4`가 TinyUSB에 Synopsys DWC2 core driver(`dcd_dwc2.c`)를 고르게 합니다. RTOS 없이(`OPT_OS_NONE`) 돌리므로 TinyUSB가 시간을 물을 `tusb_time_millis_api()`를 `main.c`가 제공합니다.
+`CFG_TUSB_MCU = OPT_MCU_STM32F4`가 TinyUSB에 Synopsys DWC2 core driver(`dcd_dwc2.c`)를 고르게 합니다. `tusb.h`는 `tusb_time_millis_api()`를 RTOS 없는 일부 port·구성에서 필요한 함수로 적습니다. 이 빌드에서는 부르는 곳이 없어 `--gc-sections`로 빠지지만, 다른 port로 옮길 때를 위해 `main.c`에 둡니다.
 
 ### 2. `usb_descriptors.c`
 
@@ -177,6 +177,9 @@ static void usb_hw_init(void) {
     gpio_init(GPIOA, 11, &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=10});
     gpio_init(GPIOA, 12, &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=10});
     RCC->AHB2ENR |= RCC_AHB2ENR_OTGFSEN;
+    // no VBUS on PA9: treat VBUS as always valid (ST LL USB_DevInit, F405/F407)
+    USB_OTG_FS->GCCFG |= USB_OTG_GCCFG_NOVBUSSENS;
+    USB_OTG_FS->GCCFG &= ~(USB_OTG_GCCFG_VBUSBSEN | USB_OTG_GCCFG_VBUSASEN);
 }
 
 int main(void) {
@@ -201,11 +204,11 @@ int main(void) {
 
 `clock_init_168mhz()`는 [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup), `gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)에서 가져옵니다. `OTG_FS_IRQHandler`의 이름은 CMSIS `startup_stm32f407xx.s`의 vector table 이름과 같아야 합니다. TinyUSB의 STM32F4 board 코드(`hw/bsp/stm32f4/family.c`)도 같은 handler에서 `tusb_int_handler(0, true)`를 부릅니다.
 
-VBUS 핀(PA9)은 쓰지 않았습니다. TinyUSB `dcd_dwc2.c`는 초기화에서 `GOTGCTL`에 BVALOEN·BVALOVAL을 세워 "force B Valid"로 두므로, VBUS를 감지하지 않아도 device로 동작합니다. 대신 케이블을 뽑아도 core가 그것을 VBUS로 알아차리지 못합니다.
+VBUS 핀(PA9)은 쓰지 않았습니다. TinyUSB `dcd_dwc2.c`는 초기화에서 `GOTGCTL`에 BVALOEN·BVALOVAL을 세워 "force B Valid"로 두지만, `stm32f407xx.h`의 `GOTGCTL`에는 이 두 bit가 정의돼 있지 않아 F407에서는 효과가 없습니다. 그래서 `usb_hw_init()`이 ST LL `USB_DevInit()`의 F405/F407 분기처럼 `GCCFG`의 NOVBUSSENS를 세우고 VBUSBSEN·VBUSASEN을 지웁니다. ST LL은 이 설정을 "VBUS is internally considered to be always at VBUS-Valid level (5V)"라고 설명하고, TinyUSB의 VBUS 없는 F407 보드(`hw/bsp/stm32f4/boards/stm32f407blackvet/board.h`)도 같은 두 줄을 씁니다. 대신 케이블을 뽑아도 core가 그것을 VBUS로 알아차리지 못합니다.
 
 ### 4. 빌드
 
-TinyUSB 0.18.0, CMSIS(cmsis-device-f4의 `startup_stm32f407xx.s`·`system_stm32f4xx.c`), 그리고 C 라이브러리가 필요합니다. 이 환경의 arm-none-eabi-gcc 16.2.0에는 newlib가 없어 Debian의 `picolibc-arm-none-eabi` 1.8.10-2 패키지에서 header와 `libc.a`(thumb/v7e-m/nofp)를 꺼내 썼습니다. linker script는 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 것(FLASH 512 KiB, RAM 128 KiB)입니다.
+TinyUSB 0.18.0, CMSIS_6 v6.1.0의 `CMSIS/Core/Include`, CMSIS device(cmsis-device-f4의 `startup_stm32f407xx.s`·`system_stm32f4xx.c`), 그리고 C 라이브러리가 필요합니다. 이 환경의 arm-none-eabi-gcc 16.2.0에는 newlib가 없어 Debian의 `picolibc-arm-none-eabi` 1.8.10-2 패키지에서 header와 `libc.a`(thumb/v7e-m/nofp)를 꺼내 썼습니다. linker script는 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 것(FLASH 512 KiB, RAM 128 KiB)입니다.
 
 ```bash
 git clone --depth 1 --branch 0.18.0 https://github.com/hathach/tinyusb.git
@@ -227,7 +230,7 @@ arm-none-eabi-size cdc.elf
 
 ```text
    text	   data	    bss	    dec	    hex	filename
-  12376	     21	    920	  13317	   3405	cdc.elf
+  12396	     21	    920	  13337	   3419	cdc.elf
 ```
 
 경고 없이 빌드되고, TinyUSB device stack과 CDC class, DWC2 driver를 합친 이미지가 flash 12.4 KB, RAM(data + bss) 941 byte입니다.
@@ -294,13 +297,13 @@ device descriptor의 `EF 02 01`, configuration의 `4B 00`(75), `80 32`, IAD(type
 
 보드를 꽂은 뒤 Linux에서 `lsusb`에 `cafe:4001`이 보이고, `cdc_acm` driver(Linux v6.12 `drivers/usb/class/cdc-acm.c`)가 붙으면 `dmesg`에 "ttyACM%d: USB ACM device" 형식의 줄이 나옵니다. `lsusb -v -d cafe:4001`은 위 dump의 값을 field 이름과 함께 풀어 보여 줍니다. 이 글은 보드로 이 단계를 실행하지 않았습니다.
 
-장치가 아예 안 보이면 48 MHz clock(PLLQ)과 PA11/PA12 AF10 설정, `OTG_FS_IRQHandler` 이름을 봅니다. 보이는데 descriptor 오류가 나면 위 dump로 wTotalLength와 실제 길이가 같은지 봅니다.
+장치가 아예 안 보이면 48 MHz clock(PLLQ)과 PA11/PA12 AF10 설정, VBUS sensing(NOVBUSSENS), `OTG_FS_IRQHandler` 이름을 봅니다. 보이는데 descriptor 오류가 나면 위 dump로 wTotalLength와 실제 길이가 같은지 봅니다.
 
 ## 자주 보는 함정
 
 > ⚠️ 48 MHz가 아님
 
-OTG_FS는 PLL의 Q 출력에서 전용 48 MHz를 받습니다. SYSCLK을 바꾸면서 Q를 그대로 두면 48 MHz가 깨집니다. 4-04가 인용한 HAL `stm32f4xx_hal_rcc_ex.h` 주석도 USB OTG FS를 쓰면 48 MHz가 되도록 PLLQ를 맞추라고 적습니다.
+OTG_FS는 PLL의 Q 출력에서 전용 48 MHz를 받습니다. VCO(M·N)를 바꿔 SYSCLK을 바꾸면서 Q를 그대로 두면 48 MHz가 깨집니다. 4-04가 인용한 HAL `stm32f4xx_hal_rcc_ex.h` 주석도 USB OTG FS를 쓰면 48 MHz가 되도록 PLLQ를 맞추라고 적습니다.
 
 > ⚠️ wTotalLength와 실제 길이 불일치
 
