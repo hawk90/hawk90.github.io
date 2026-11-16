@@ -158,7 +158,7 @@ AI 가속기 카드의 *HBM 구성*입니다. stack 구성은 벤더가 공개�
 |------|-----|-----------|----------|---------|-----|
 | NVIDIA H100 SXM5 | HBM3 | 5 stack ([Hopper 구조 설명](https://developer.nvidia.com/blog/nvidia-hopper-architecture-in-depth/)) | 80 GB | 3.35 TB/s | 최대 700 W |
 | NVIDIA H200 SXM | HBM3e | — | 141 GB | 4.8 TB/s | 최대 700 W |
-| NVIDIA B200 | HBM3e | — | 180 GB | 8 TB/s | TBD |
+| NVIDIA B200 | HBM3e | — | 180 GB | 8 TB/s | — (DGX B200 시스템 최대 ~14.3 kW) |
 | AMD Instinct MI300X | HBM3 | — | 192 GB | 5.3 TB/s | 최대 TBP 750 W |
 | AMD Instinct MI325X | HBM3E | — | 256 GB | 6 TB/s | TBP 1000 W peak |
 | Google TPU v5p | HBM | — | 95 GiB (물리 96 GiB) | 2,765 GB/s | — |
@@ -190,13 +190,14 @@ AI 가속기 카드의 *HBM 구성*입니다. stack 구성은 벤더가 공개�
 
 여러 가속기가 *메모리 semantic(read·write·atomic)으로* 서로 통신하도록 잇는 open 표준이 *UALink*입니다. [UALink Consortium의 2025년 4월 8일 발표](https://ualinkconsortium.org/wp-content/uploads/2025/04/UALink-1.0-Specification-PR_FINAL.pdf)는 *UALink 200G 1.0 Specification*의 비준을 알리고, 한 AI computing pod에서 *가속기 최대 1,024개*를 *lane당 200G*로 scale-up 연결한다고 적습니다.
 
-| 항목 | NVLink (NVIDIA) | UALink 200G 1.0 (open consortium) |
-|------|-----------------|-----------------------------------|
-| 신호 속도 | TBD | 200G per lane |
-| GPU 당 집계 BW | B200 `14.4 ÷ 8 = 1.8 TB/s` | TBD |
-| Fabric 규모 | DGX B200: NVSwitch 2개 | pod당 가속기 최대 1,024개 |
+| 항목 | 공개된 값 | 출처 |
+|------|-----------------|------|
+| NVLink, GPU 당 집계 BW | B200 `14.4 ÷ 8 = 1.8 TB/s` | DGX B200 페이지 *NVLink 14.4 TB/s aggregate* |
+| NVLink fabric | DGX B200 한 대에 NVSwitch 2개 | DGX B200 페이지 *NVSwitch 2x* |
+| UALink 신호 속도 | lane당 200G, lane 4개 station당 최대 800 Gb/s | 2025-04-08 발표, 2025-05-15 개요 |
+| UALink 규모 | pod당 가속기 최대 1,024개 | 2025-04-08 발표 |
 
-NVLink 열은 DGX B200 페이지의 *NVLink 14.4 TB/s aggregate bandwidth*와 *NVSwitch 2x*입니다. [UALink 1.0 개요 글(2025-05-15)](https://ualinkconsortium.org/blog/ualink-200g-1-0-specification-overview-802/)은 lane 4개를 묶은 station 하나가 v1.0에서 *최대 800 Gb/s*이고, coherency는 *software로 유지*한다고 설명합니다.
+두 기술을 같은 축으로 맞추는 값(NVLink의 lane 속도, UALink 가속기 하나당 집계 대역폭)은 인용한 자료에 없어 나란히 놓지 않았습니다. [UALink 1.0 개요 글(2025-05-15)](https://ualinkconsortium.org/blog/ualink-200g-1-0-specification-overview-802/)은 coherency를 *software로 유지*한다고 설명합니다.
 
 ## Ch 1~8 정리
 
