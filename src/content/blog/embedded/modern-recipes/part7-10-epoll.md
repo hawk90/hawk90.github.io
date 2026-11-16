@@ -166,14 +166,14 @@ static void loop(void)
 	sigprocmask(SIG_BLOCK, &m, NULL);
 	int sfd = signalfd(-1, &m, SFD_NONBLOCK | SFD_CLOEXEC);
 	add(ep, tfd, EPOLLIN); add(ep, efd, EPOLLIN); add(ep, sfd, EPOLLIN);
-	int ticks = 0;
+	int ticks = 0, sent_ev = 0, sent_sig = 0;
 	for (;;) {
 		struct epoll_event e;
 		epoll_wait(ep, &e, 1, -1);
 		if (e.data.fd == tfd) {
 			uint64_t n; read(tfd, &n, 8); ticks += n;
-			if (ticks == 3) { uint64_t one = 1; write(efd, &one, 8); }
-			if (ticks == 5) kill(getpid(), SIGTERM);
+			if (ticks >= 3 && !sent_ev) { sent_ev = 1; uint64_t one = 1; write(efd, &one, 8); }
+			if (ticks >= 5 && !sent_sig) { sent_sig = 1; kill(getpid(), SIGTERM); }
 		} else if (e.data.fd == efd) {
 			uint64_t v; read(efd, &v, 8); printf("loop: eventfd %llu at tick %d\n", (unsigned long long)v, ticks);
 		} else if (e.data.fd == sfd) {
@@ -208,7 +208,7 @@ ET: wakeups=1 bytes read=10 of 40
 ONESHOT: first=1 second=0 after MOD=1
 close+dup: epoll_wait=1, reported fd=3 (closed number), dup is fd 6
 EPOLL_CTL_DEL with the dup: -1 (No such file or directory)
-no EXCLUSIVE: 8 workers, 50 connections -> 81 wakeups, 50 accepted
+no EXCLUSIVE: 8 workers, 50 connections -> 50 wakeups, 50 accepted
 EPOLLEXCLUSIVE: 8 workers, 50 connections -> 50 wakeups, 50 accepted
 loop: eventfd 1 at tick 3
 loop: signal 15 (Terminated) at tick 5, leaving
@@ -224,11 +224,11 @@ ONESHOT으로 등록한 fd는 첫 `epoll_wait`에서 알린 뒤, 데이터가 �
 
 ### close와 dup
 
-`dupclose()`는 fd를 등록하고 `dup`한 뒤 원래 fd를 닫았습니다. 닫은 fd 번호(3)로 여전히 이벤트가 왔고, `dup`한 fd로 `EPOLL_CTL_DEL`을 하면 `ENOENT`였습니다. man page는 등록이 fd가 아니라 그 fd가 가리키는 open file description에 묶여 있어서, 그것을 가리키는 fd가 모두 닫혀야 관심 목록에서 빠진다고 설명합니다(`epoll(7)` Q&A "Will closing a file descriptor cause it to be removed from all epoll interest lists?"). 그래서 `dup`·`fork`가 섞인 코드는 `close` 전에 원래 fd로 `EPOLL_CTL_DEL`을 해야 합니다.
+`dupclose()`는 fd를 등록하고 `dup`한 뒤 원래 fd를 닫았습니다. 닫은 fd 번호(3)로 여전히 이벤트가 왔고, `dup`한 fd로 `EPOLL_CTL_DEL`을 하면 `ENOENT`였습니다. man page는 그 fd가 가리키는 open file description을 가리키는 fd가 모두 닫혀야 관심 목록에서 빠진다고 설명하고, 그래서 `dup` 하기 *전에* `EPOLL_CTL_DEL`로 빼라고 적습니다(`epoll(7)` Q&A "Will closing a file descriptor cause it to be removed from all epoll interest lists?"). 원래 fd가 아직 열려 있다면 `close` 전에 그 fd로 `EPOLL_CTL_DEL`을 해도 빠졌습니다(같은 VM에서 반환값 0, 이후 `epoll_wait` 0). `dup`한 fd로 지우면 `ENOENT`인 이유는, 커널이 관심 목록 항목을 (open file description, 등록할 때의 fd 번호) 쌍으로 찾기 때문입니다(v6.12 `fs/eventpoll.c`의 `ep_cmp_ffd`·`ep_find`).
 
 ### EPOLLEXCLUSIVE — accept thundering herd
 
-`herd()`는 thread 8개가 각자 epoll 인스턴스로 같은 listening socket을 감시하게 하고, 연결 50개를 5 ms 간격으로 보냈습니다. `EPOLLEXCLUSIVE` 없이는 50번의 연결에 81번 깨어났고(나머지는 `accept`가 `EAGAIN`), `EPOLLEXCLUSIVE`로는 정확히 50번이었습니다. 이 실행에서 잰 것은 위 두 줄(thread 8개, 5 ms 간격)뿐입니다. 여러 process가 각자 socket을 열어 커널이 연결을 나눠 주게 하는 `SO_REUSEPORT`는 다른 방식이고, 이 글에서는 재지 않았습니다.
+`herd()`는 thread 8개가 각자 epoll 인스턴스로 같은 listening socket을 감시하게 하고, 연결 50개를 5 ms 간격으로 보냈습니다. 위 출력의 실행에서는 두 경우 모두 `epoll_wait`가 50번 돌아왔습니다. 같은 프로그램의 앞선 실행에서는 `EPOLLEXCLUSIVE` 없이 81번이었고(나머지 31번은 `accept`가 `EAGAIN`), 독립 검증으로 여섯 번 더 돌렸을 때 56~80번이었습니다. `EPOLLEXCLUSIVE`로는 매번 정확히 50번이었습니다. 즉 이 조건(thread 8개, 연결 5 ms 간격)에서 차이는 실행마다 0~31번으로 흔들렸고, `EPOLLEXCLUSIVE`는 그 흔들림을 없앴습니다. 세는 값은 `epoll_wait`가 이벤트를 돌려준 횟수이고, 커널 안에서 깼다가 이벤트 없이 다시 잠든 횟수는 들어 있지 않습니다. 여러 process가 각자 socket을 열어 커널이 연결을 나눠 주게 하는 `SO_REUSEPORT`는 다른 방식이고, 이 글에서는 재지 않았습니다.
 
 ### timerfd·eventfd·signalfd를 한 loop에
 
@@ -347,11 +347,11 @@ ET의 "빌 때까지 읽기" loop는 `EAGAIN`으로 끝나야 하는데, blockin
 
 > ⚠️ 여러 thread가 ONESHOT 없이 같은 epoll fd를 기다림
 
-LT라면 한 연결이 준비된 동안 여러 thread가 같은 이벤트를 받을 수 있습니다. 처리 중인 연결을 다른 thread가 건드리지 않게 하려면 `EPOLLONESHOT`과 처리 후 `EPOLL_CTL_MOD`를 씁니다.
+같은 VM에서 thread 4개가 한 epoll fd를 기다리고 1바이트를 읽지 않은 채 두었더니, LT는 4개 모두 이벤트를 받았고 `EPOLLET`과 `EPOLLONESHOT`은 1개만 받았습니다. 처리 중인 연결을 다른 thread가 건드리지 않게 하려면 `EPOLLONESHOT`과 처리 후 `EPOLL_CTL_MOD`를 씁니다.
 
 > ⚠️ listening socket의 thundering herd
 
-위 실험에서 `EPOLLEXCLUSIVE` 없이는 연결 50개에 81번 깨어났습니다. 깨어난 thread 중 하나만 `accept`에 성공하고 나머지는 `EAGAIN`을 받습니다. `EPOLLEXCLUSIVE`로 등록하면 이 실행에서는 연결 수만큼만 깨어났습니다.
+위 실험의 한 실행에서 `EPOLLEXCLUSIVE` 없이는 연결 50개에 `epoll_wait`가 81번 돌아왔습니다. 돌아온 thread 중 하나만 `accept`에 성공하고 나머지는 `EAGAIN`을 받습니다. `EPOLLEXCLUSIVE`로 등록하면 모든 실행에서 연결 수만큼만 돌아왔습니다.
 
 ## 정리
 
@@ -359,8 +359,8 @@ LT라면 한 연결이 준비된 동안 여러 thread가 같은 이벤트를 받
 - `select`는 `FD_SETSIZE`(1024) 미만의 fd 번호만 다룹니다.
 - LT는 남은 데이터가 있는 동안 계속 알리고, ET는 바뀌는 순간 한 번만 알립니다. ET는 non-blocking fd에서 `EAGAIN`까지 읽습니다.
 - ONESHOT은 한 번 알린 fd를 `MOD`로 다시 켤 때까지 끕니다.
-- epoll 등록은 open file description에 묶이므로, `dup`이 남아 있으면 `close`로 빠지지 않습니다.
-- `EPOLLEXCLUSIVE`는 같은 fd를 감시하는 여러 epoll 인스턴스 중 일부만 깨웁니다.
+- epoll 등록은 (open file description, 등록한 fd 번호) 쌍으로 잡히므로, `dup`이 남아 있으면 `close`로 빠지지 않고 `dup`한 번호로는 지울 수도 없습니다.
+- `EPOLLEXCLUSIVE`는 같은 fd를 감시하는 여러 epoll 인스턴스 전부가 아니라 하나 이상만 깨웁니다(`epoll_ctl(2)`).
 - timerfd·eventfd·signalfd를 한 epoll에 묶으면 thread 하나의 loop로 타이머·알림·signal을 함께 처리합니다.
 
 다음 편은 **UIO·VFIO**입니다.
