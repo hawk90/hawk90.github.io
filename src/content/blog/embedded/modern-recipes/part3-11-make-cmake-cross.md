@@ -225,6 +225,31 @@ cmake --build --preset debug-arm
 
 `toolchainFile` 필드는 preset 파일 version 3 이상에서만 쓸 수 있고, version 3은 CMake 3.21에서 추가됐습니다(같은 문서). `CMakeLists.txt`의 `cmake_minimum_required(VERSION 3.21)`은 이 요구에 맞춘 값입니다.
 
+### 직접 빌드해 본 결과
+
+위 Makefile, toolchain file, `CMakeLists.txt`, `CMakePresets.json`을 그대로 한 디렉터리에 두고, [3-06](/blog/embedded/modern-recipes/part3-06-startup-code)의 `startup.s`·linker script와 `main.c` 하나를 더해 Debian 13 arm64 guest에서 빌드했습니다. 도구는 GNU Make 4.4.1, CMake 3.31.6, Ninja 1.12.1, `gcc-arm-none-eabi` 14.2.rel1(GCC 14.2.1)입니다.
+
+```text
+### make
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -Wextra -Os -g3 -ffunction-sections -fdata-sections -MMD -MP -c src/main.c -o build/src/main.o
+...
+   text	   data	    bss	    dec	    hex	filename
+    380	     12	   1568	   1960	    7a8	app.elf
+### cmake -G Ninja ... && cmake --build build-ninja
+[3/3] Linking C executable myapp.elf
+    400	     12	   1568	   1980	    7bc	/root/p311/proj/build-ninja/myapp.elf
+### cmake --build --preset release-arm
+    380	     12	   1568	   1960	    7a8	/root/p311/proj/build/release-arm/myapp.elf
+```
+
+`CMAKE_BUILD_TYPE` 없이 configure한 빌드와 `debug-arm` preset은 `-O` 없이 컴파일되어 text가 400 byte였고, `-Os`가 붙는 Makefile과 `release-arm`(MinSizeRel)은 380 byte로 같았습니다. `release-arm`의 실제 컴파일 명령에서 configuration 플래그가 `add_compile_options()`의 옵션보다 앞에 놓인 것도 보입니다.
+
+```text
+arm-none-eabi-gcc   -Os -DNDEBUG -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -Wextra -ffunction-sections -fdata-sections -MD -MT ... -c /root/p311/proj/src/main.c
+```
+
+처음 시도에서는 macOS에서 만든 tar로 소스를 옮겼다가 `src/._main.c`(AppleDouble 메타데이터 파일)가 함께 풀렸습니다. Makefile의 `$(wildcard src/*.c)`는 점으로 시작하는 이 파일을 잡지 않았지만, CMake의 `file(GLOB SRCS src/*.c)`는 잡아서 컴파일하다 "stray '\233' in program"으로 멈췄습니다. GLOB을 쓴다면 이런 숨은 파일이 소스 트리에 섞이지 않게 합니다.
+
 ## 코드 / 실제 사용 예
 
 ### 두 family를 한 CMakeLists로
@@ -320,11 +345,22 @@ jobs:
 
 > ⚠️ configure가 "is not able to compile a simple test program"으로 멈춤
 
-CMake가 compiler 검사에 실패하면 `The C compiler ... is not able to compile a simple test program.` 메시지 뒤에 compiler 출력을 붙여 configure를 멈춥니다([CMakeTestCCompiler.cmake L67-70, v3.31.0](https://github.com/Kitware/CMake/blob/v3.31.0/Modules/CMakeTestCCompiler.cmake#L67-L70)). 붙은 출력이 링크 단계 오류라면 toolchain file에 `CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY`가 빠진 경우입니다(CMake toolchain file 절).
+CMake가 compiler 검사에 실패하면 `The C compiler ... is not able to compile a simple test program.` 메시지 뒤에 compiler 출력을 붙여 configure를 멈춥니다([CMakeTestCCompiler.cmake L67-70, v3.31.0](https://github.com/Kitware/CMake/blob/v3.31.0/Modules/CMakeTestCCompiler.cmake#L67-L70)). 붙은 출력이 링크 단계 오류라면 toolchain file에 `CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY`가 빠진 경우입니다(CMake toolchain file 절). 위 프로젝트에서 그 줄만 지우고 configure하면 newlib의 system call이 없다는 링크 오류가 붙어 나옵니다.
+
+```text
+  is not able to compile a simple test program.
+    .../newlib/libc/stdlib/exit.c:65:(.text+0x28): undefined reference to `_exit'
+    .../newlib/libc/reent/sbrkr.c:51:(.text+0x18): undefined reference to `_sbrk'
+```
 
 > ⚠️ `-mcpu`·`-mfpu`·`-mfloat-abi`가 CFLAGS에만 있고 LDFLAGS에 없음
 
-GCC 문서는 hard-float ABI와 soft-float ABI가 링크 호환이 아니며, 프로그램 전체를 같은 ABI로 컴파일하고 호환되는 라이브러리와 링크해야 한다고 적습니다([GCC 14.2 ARM Options, `-mfloat-abi`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/ARM-Options.html)). gcc 드라이버는 명령줄의 다른 옵션으로 multilib을 고르고([`-print-multi-directory`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Developer-Options.html)), GCC의 `rmprofile` multilib 구성은 `march=armv7e-m+fp/mfloat-abi=hard`와 `march=armv7e-m+fp.dp/mfloat-abi=hard` 라이브러리를 soft-float 판과 따로 빌드합니다([t-rmprofile, GCC 14.2.0](https://github.com/gcc-mirror/gcc/blob/releases/gcc-14.2.0/gcc/config/arm/t-rmprofile)). 링크 명령에 FPU·ABI 옵션이 없으면 드라이버는 hard-float 판을 고를 근거가 없습니다. 이때 부동소수점을 쓰는 두 오브젝트의 `Tag_ABI_VFP_args` 속성이 다르면 GNU ld는 `error: X uses VFP register arguments, Y does not`를 내고 링크를 실패시킵니다([bfd/elf32-arm.c, binutils 2.43](https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=bfd/elf32-arm.c;hb=refs/tags/binutils-2_43)). Makefile 절이 `LDFLAGS`에 `CFLAGS`를 다시 넣고, CMakeLists.txt 작성 절이 `MCU_FLAGS`를 `add_link_options()`에도 넣은 이유입니다.
+GCC 문서는 hard-float ABI와 soft-float ABI가 링크 호환이 아니며, 프로그램 전체를 같은 ABI로 컴파일하고 호환되는 라이브러리와 링크해야 한다고 적습니다([GCC 14.2 ARM Options, `-mfloat-abi`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/ARM-Options.html)). gcc 드라이버는 명령줄의 다른 옵션으로 multilib을 고르고([`-print-multi-directory`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Developer-Options.html)), GCC의 `rmprofile` multilib 구성은 `march=armv7e-m+fp/mfloat-abi=hard`와 `march=armv7e-m+fp.dp/mfloat-abi=hard` 라이브러리를 soft-float 판과 따로 빌드합니다([t-rmprofile, GCC 14.2.0](https://github.com/gcc-mirror/gcc/blob/releases/gcc-14.2.0/gcc/config/arm/t-rmprofile)). 링크 명령에 FPU·ABI 옵션이 없으면 드라이버는 hard-float 판을 고를 근거가 없습니다. 이때 부동소수점을 쓰는 두 오브젝트의 `Tag_ABI_VFP_args` 속성이 다르면 GNU ld는 `error: X uses VFP register arguments, Y does not`를 내고 링크를 실패시킵니다([bfd/elf32-arm.c, binutils 2.43](https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=bfd/elf32-arm.c;hb=refs/tags/binutils-2_43)). Makefile 절이 `LDFLAGS`에 `CFLAGS`를 다시 넣고, CMakeLists.txt 작성 절이 `MCU_FLAGS`를 `add_link_options()`에도 넣은 이유입니다. 위 Makefile을 `make LDFLAGS="-T linker.ld -Wl,--gc-sections --specs=nano.specs"`로 CPU·FPU 옵션 없이 링크하면 그 오류가 그대로 납니다.
+
+```text
+ld: error: build/src/main.o uses VFP register arguments, app.elf does not
+ld: failed to merge target specific data of file build/src/main.o
+```
 
 > ⚠️ 생성 헤더가 다시 만들어지지 않음
 
