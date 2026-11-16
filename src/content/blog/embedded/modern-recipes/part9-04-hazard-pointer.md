@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 Lock-free stack이나 queue에서 가장 어려운 질문은 *언제 free할 수 있는가*입니다. 한 스레드가 node를 막 dereference하려는 순간 다른 스레드가 그 node를 꺼내 free하면 use-after-free가 납니다. 아래 "Hazard pointer가 없으면" 절에서 실제로 그렇게 됩니다.
 
-공사장 비유가 맞습니다. 작업자가 건물 안에 들어갈 때 입구 게시판에 이름표를 걸고, 철거반은 게시판에 이름표가 하나도 없는 건물만 허뭅니다. [9-03의 RCU](/blog/embedded/modern-recipes/part9-03-rcu-basics)가 "들어간 사람이 모두 나올 때까지 기다린다"면, hazard pointer는 "누가 *어느* 건물에 있는지"를 하나하나 적습니다. 그래서 한 작업자가 오래 머물러도 다른 건물은 허물 수 있습니다.
+공사장에 비유해 보겠습니다. 작업자가 건물 안에 들어갈 때 입구 게시판에 이름표를 걸고, 철거반은 게시판에 이름표가 하나도 없는 건물만 허뭅니다. [9-03의 RCU](/blog/embedded/modern-recipes/part9-03-rcu-basics)가 "들어간 사람이 모두 나올 때까지 기다린다"면, hazard pointer는 "누가 *어느* 건물에 있는지"를 하나하나 적습니다. 그래서 한 작업자가 오래 머물러도 다른 건물은 허물 수 있습니다.
 
 ## 핵심 개념
 
@@ -298,7 +298,7 @@ popped sum 159999200000, expected 159999200000
 exit=0
 ```
 
-이 stack의 CAS는 원래 ABA에 약한 형태입니다. 그런데도 합이 맞은 이유는 Michael 논문 2.3절에 있습니다. 논문은 hazard pointer가 ABA 방지에서 GC와 같은 힘을 갖는다고, 즉 GC 아래에서 ABA-safe인 lock-free 알고리즘에 hazard pointer를 붙이면 GC 없이도 ABA-safe가 된다고 적습니다. `pop`이 보호하는 동안 그 node는 해제·재사용되지 않으므로, `top`이 같은 주소로 돌아오는 경우가 생기지 않습니다. 다만 같은 절은 "GC가 ABA를 항상 막는다"는 것은 오해이고, node를 두 리스트 사이에서 옮기는 프로그램에서는 GC가 있어도 ABA가 난다고 덧붙입니다. Hazard pointer도 그 경우는 막지 못합니다. ABA 자체는 [9-08](/blog/embedded/modern-recipes/part9-08-aba-problem)에서 다룹니다.
+이 stack의 CAS는 원래 ABA에 약한 형태입니다. 그런데도 합이 맞은 이유는 Michael 논문 2.3절에 있습니다. 논문은 ABA를 막는 데 hazard pointer가 GC만큼 강하다고 적습니다. GC 아래에서 ABA-safe인 lock-free 알고리즘에 hazard pointer를 붙이면 GC 없이도 ABA-safe가 된다는 뜻입니다. `pop`이 보호하는 동안 그 node는 해제·재사용되지 않으므로, `top`이 같은 주소로 돌아오는 경우가 생기지 않습니다. 다만 같은 절은 "GC가 ABA를 항상 막는다"는 것은 오해이고, node를 두 리스트 사이에서 옮기는 프로그램에서는 GC가 있어도 ABA가 난다고 덧붙입니다. Hazard pointer도 그 경우는 막지 못합니다. ABA 자체는 [9-08](/blog/embedded/modern-recipes/part9-08-aba-problem)에서 다룹니다.
 
 ### Multiple hazard pointers per thread
 
