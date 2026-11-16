@@ -130,7 +130,7 @@ CPU part	: 0x000
 CPU revision	: 0
 ```
 
-`CPU op-mode(s)`가 `64-bit`만 나온 것도 의미가 있습니다. 이 host CPU는 AArch32 실행을 지원하지 않아서 `CONFIG_COMPAT=y` 커널이라도 32-bit 사용자 프로그램을 돌릴 수 없습니다.
+`CPU op-mode(s)`에 `64-bit`만 나온 것도 눈여겨볼 점입니다. 이 host CPU는 AArch32 실행을 지원하지 않아서 `CONFIG_COMPAT=y` 커널이라도 32-bit 사용자 프로그램을 돌릴 수 없습니다.
 
 cpufreq governor는 cpufreq driver가 있어야 보입니다. guest에는 cpufreq driver가 없어 디렉터리 자체가 없습니다.
 
@@ -190,7 +190,7 @@ running on CPU 2
 
 > ⚠️ governor를 확인하지 않고 big 코어 성능을 기대함
 
-`Documentation/admin-guide/pm/cpufreq.rst`의 `powersave` governor는 정책의 최저 주파수를 요청합니다. 이 상태에서는 big 코어도 최저 클럭으로 돕니다. EAS를 쓰려면 `sched-energy.rst` 6.4절대로 schedutil이 필요합니다. 먼저 `scaling_governor`가 있는지, 무엇인지 읽습니다.
+`Documentation/admin-guide/pm/cpufreq.rst`의 `powersave` governor는 정책의 최저 주파수를 요청합니다. 이 상태에서는 big 코어도 최저 클럭으로 돕니다. EAS를 쓰려면 `sched-energy.rst` 6.4절에 따르면 schedutil이 필요합니다. 먼저 `scaling_governor`가 있는지, 무엇인지 읽습니다.
 
 > ⚠️ 32-bit 사용자 공간을 새 코어로 그대로 옮김
 
