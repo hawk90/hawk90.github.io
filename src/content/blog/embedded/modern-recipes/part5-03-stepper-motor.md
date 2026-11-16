@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"step pulse 빈도가 회전 속도를, 누적 pulse 수가 명령 위치를 정합니다."** 1.8°/step은 흔한 모터 사양 중 하나일 뿐 모든 stepper의 공통값은 아닙니다.
+> **"step pulse 빈도가 회전 속도를, 누적 pulse 수가 명령 위치를 정합니다."**
 
 ## 어떤 상황에서 쓰나
 
@@ -26,12 +26,14 @@ stepper motor는 encoder 없이 보낸 step pulse 수로 위치를 아는 open-l
 
 2-phase bipolar stepper는 두 코일 (A: A+/A−, B: B+/B−)을 가집니다. 한 phase씩 ON 하면 full-step 시퀀스로 회전합니다.
 
-| Step | A | B | 각도 |
+| Step | A | B | 전기각 |
 | --- | --- | --- | --- |
 | 1 | + | 0 | 0° |
 | 2 | 0 | + | 90° |
 | 3 | − | 0 | 180° |
 | 4 | 0 | − | 270° |
+
+이 표는 한 코일씩 켜는 one-phase-on 순서입니다. DRV8825의 full step(MODE = 000)은 두 코일을 71 %씩 켜는 2-phase excitation이라, datasheet Table 2대로 45°(home state)·135°·225°·315°(전기각)에 섭니다.
 
 아래 표의 "200"은 한 바퀴 200 full step(1.8°/step) motor를 가정한 값입니다.
 
@@ -46,7 +48,7 @@ stepper motor는 encoder 없이 보낸 step pulse 수로 위치를 아는 open-l
 | 100 | 16 microsteps/step | 3200 |
 | 101, 110, 111 | 32 microsteps/step | 6400 |
 
-DRV8825 datasheet 8.3.4절은 "current regulation is used to vary the current in the two windings in a semi-sinusoidal fashion to provide smooth motion"이라고 설명합니다. micro-step은 두 코일 전류를 사인에 가까운 값으로 나눠 그 사이 위치를 만드는 방식입니다.
+DRV8825 datasheet 8.3.2절(Current Regulation)은 "current regulation is used to vary the current in the two windings in a semi-sinusoidal fashion to provide smooth motion"이라고 설명합니다. micro-step은 두 코일 전류를 사인에 가까운 값으로 나눠 그 사이 위치를 만드는 방식입니다.
 
 ### DRV8825 인터페이스
 
@@ -59,16 +61,19 @@ DRV8825 datasheet 8.3.4절은 "current regulation is used to vary the current in
 | — | AOUT1/2, BOUT1/2 | motor coil |
 | — | VMA, VMB | 8.2 ~ 45 V motor power |
 | — | AVREF, BVREF | 전류 한계 기준 전압 |
+| 3.3 V 또는 GPIO high | nSLEEP, nRESET | "need to be driven to logic high for device operation"(8.3.6절). 둘 다 내부 pulldown |
 
 전류 한계는 datasheet Equation 1의 ICHOP = V(xREF) / (5 × RISENSE)입니다. datasheet의 예는 0.25 Ω sense 저항과 VREF 2.5 V에서 2.5 / (5 × 0.25) = 2 A입니다. 보드마다 sense 저항 값이 다르므로 그 보드의 회로도에서 RISENSE를 읽어 넣습니다.
 
 ### Acceleration ramp
 
-정지 상태에서 바로 최고 속도의 pulse를 보내면 rotor와 부하가 따라가지 못해 step을 잃을 수 있으므로 속도를 가속도 a로 올립니다. 거리 d를 가속하는 동안 속도는 v² = v₀² + 2ad를 따르므로, step마다(d = 1) v_next = √(v² + 2a)로 올리고, 남은 거리 r에서는 √(2ar)로 내리면 가속 → 등속 → 감속의 사다리꼴(trapezoidal) profile이 됩니다.
+정지 상태에서 바로 최고 속도의 pulse를 보내면 rotor와 부하가 그 속도를 따라가지 못하므로 속도를 가속도 a로 올립니다. 거리 d를 가속하는 동안 속도는 v² = v₀² + 2ad를 따르므로, step마다(d = 1) v_next = √(v² + 2a)로 올리고, 남은 거리 r에서는 √(2ar)로 내리면 가속 → 등속 → 감속의 사다리꼴(trapezoidal) profile이 됩니다.
 
 ## 코드 예제
 
 ### 1. Basic step pulse
+
+`delay_us_dwt()`는 [4-06](/blog/embedded/modern-recipes/part4-06-systick-timer)의 함수이고, 쓰기 전에 `dwt_init()`을 한 번 불러야 `CYCCNT`가 셉니다.
 
 ```c
 // STEP = PA0, DIR = PA1, /EN = PA2
@@ -124,6 +129,7 @@ void stepper_tim_init(uint32_t step_hz) {
 void stepper_move(int32_t steps) {
     if (steps > 0) { step_dir = +1; GPIOA->BSRR = (1u << (1+16)); }
     else           { step_dir = -1; GPIOA->BSRR = (1u << 1); }
+    delay_us_dwt(1, CPU_HZ);           // tSU(STEP) >= 650 ns before the ISR's next STEP
     target_steps = current_steps + steps;
 }
 
