@@ -22,7 +22,7 @@ topics: ["tools", "tools/debugging"]
 
 ## Event Log 네 종류
 
-CXL 디바이스는 이벤트를 네 개의 Event Log에 나눠 쌓습니다. Linux 드라이버는 로그마다 interrupt 설정을 따로 두고(`info_settings`·`warn_settings`·`failure_settings`·`fatal_settings`), trace 출력에는 아래 이름을 씁니다(v6.12.116 `drivers/cxl/core/trace.h`의 `cxl_event_log_type_str`).
+CXL 3.1 명세 8.2.9.2.2 Get Event Records(Opcode 0100h)의 Table 8-52는 Event Log 필드로 00h Informational, 01h Warning, 02h Failure, 03h Fatal, 04h Dynamic Capacity를 정의합니다. v6.12.116 `drivers/cxl/cxlmem.h`의 `enum cxl_event_log_type`에는 앞의 네 개만 있습니다. 드라이버는 로그마다 interrupt 설정을 따로 두고(`info_settings`·`warn_settings`·`failure_settings`·`fatal_settings`), trace 출력에는 아래 이름을 씁니다(v6.12.116 `drivers/cxl/core/trace.h`의 `cxl_event_log_type_str`).
 
 | 로그 | 커널 enum | trace 문자열 |
 |------|-----------|-------------|
@@ -41,7 +41,7 @@ QMP로 Informational 로그에 General Media 이벤트를 넣자, 커널 trace�
  irq/60-0000:0d:-655     [001] .N...   208.424024: cxl_general_media: memdev=mem0 host=0000:0d:00.0 serial=5 log=Informational : time=1794816409283840244 uuid=fbcd0a77-c260-417f-85a9-088b1621eba6 len=128 flags='0x1' handle=1 related_handle=0 maint_op_class=0 : dpa=1000 dpa_flags='' descriptor='UNCORRECTABLE_EVENT|THRESHOLD_EVENT' type='0x3' transaction_type='0xc0' channel=0 rank=0 device=0 comp_id
 ```
 
-주입한 값(`dpa` 4096 = 0x1000, `descriptor` 3, `type` 3, `transaction-type` 192 = 0xc0)이 그대로 해석돼 나왔고, 이벤트를 처리한 것이 `irq/60-0000:0d:` 스레드라는 점에서 interrupt 경로로 왔음을 알 수 있습니다.
+주입한 값(`dpa` 4096 = 0x1000, `descriptor` 3, `type` 3, `transaction-type` 192 = 0xc0)이 그대로 해석돼 나왔고, 이벤트를 처리한 것이 `irq/60-0000:0d:` 스레드라는 점에서 interrupt 경로로 왔음을 알 수 있습니다. 레코드 형식은 CXL 3.1 8.2.9.2.1.1 General Media Event Record가 정의합니다.
 
 ## 이벤트 처리 주체 — OS냐 펌웨어냐
 
@@ -55,7 +55,7 @@ QMP로 Informational 로그에 General Media 이벤트를 넣자, 커널 trace�
 
 ## CXL Mailbox로 상태 확인
 
-디바이스 health는 Get Health Info(`CXL_MBOX_OP_GET_HEALTH_INFO`, 0x4200)로 읽고, `cxl list`의 `-H`(`--health`)가 이를 보여 줍니다. 아래는 [ndctl `cxl-list` 문서](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-list.txt)에 실린 예시입니다(이 장에서 받은 출력이 아닙니다).
+디바이스 health는 Get Health Info(`CXL_MBOX_OP_GET_HEALTH_INFO`, 0x4200, CXL 3.1 8.2.9.9.3.1, 출력은 Table 8-133)로 읽고, `cxl list`의 `-H`(`--health`)가 이를 보여 줍니다. 아래는 [ndctl `cxl-list` 문서](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-list.txt)에 실린 예시입니다(이 장에서 받은 출력이 아닙니다).
 
 ```text
 # cxl list -m mem0 -H
@@ -143,7 +143,7 @@ $ cxl list -m mem0 -L -u
 }
 ```
 
-같은 "주입"인데 `source`가 다릅니다. debugfs는 드라이버가 Inject Poison mailbox 명령을 보내는 경로라 `Injected`이고(커널 ABI 문서 `debugfs-cxl`도 "error source is set to Injected"라고 적습니다), QMP는 QEMU가 장치 모델 안에서 직접 레코드를 만들며, v11.1.3 `hw/mem/cxl_type3.c`의 `qmp_cxl_inject_poison()`이 그 레코드의 type을 `CXL_POISON_TYPE_INTERNAL`로 넣기 때문에 `Internal`로 보였습니다. 테스트에서 source로 걸러 낸다면 어떤 경로로 넣었는지에 따라 결과가 달라집니다. `source` 문자열은 커널 `trace.h`의 `__show_poison_source`(Unknown, External, Internal, Injected, Vendor)와 같고, ndctl 문서는 그 정의를 "CXL Specification v3.1 Table 8-140"으로 들고 있습니다. 이 장에서 CXL 명세 원문은 열람하지 못했습니다.
+같은 "주입"인데 `source`가 다릅니다. debugfs는 드라이버가 Inject Poison mailbox 명령을 보내는 경로라 `Injected`이고(커널 ABI 문서 `debugfs-cxl`도 "error source is set to Injected"라고 적습니다), QMP는 QEMU가 장치 모델 안에서 직접 레코드를 만들며, v11.1.3 `hw/mem/cxl_type3.c`의 `qmp_cxl_inject_poison()`이 그 레코드의 type을 `CXL_POISON_TYPE_INTERNAL`로 넣기 때문에 `Internal`로 보였습니다. 테스트에서 source로 걸러 낸다면 어떤 경로로 넣었는지에 따라 결과가 달라집니다. `source`는 CXL 3.1 8.2.9.9.4.1 Get Poison List(Opcode 4300h)의 Table 8-140 Media Error Record에서 Media Error Address의 비트 [2:0]입니다. 명세의 인코딩은 000b Unknown, 001b External(장치 밖에서 받은 poison), 010b Internal(장치 내부에서 생성), 011b Injected(시험용 주입), 111b Vendor Specific이고 나머지는 예약입니다. 커널 `trace.h`의 `__show_poison_source`가 같은 이름을 쓰며, 같은 표는 Media Error Length를 64바이트 단위로 정합니다. 8.2.9.9.4.2 Inject Poison(4301h)은 "error source shall be set to an injected error"라고 적으니, QMP 경로의 `Internal`은 명세의 Inject Poison 명령을 거치지 않았다는 뜻입니다.
 
 `offset`은 memdev로 조회하면 디바이스 DPA, region으로 조회하면 region 기준입니다(ndctl 문서). `trigger_poison_list`에 1을 쓰면 드라이버가 목록을 가져와, `cxl_poison` 이벤트 tracing이 켜져 있으면 trace event로 남깁니다(ABI 문서).
 
@@ -171,7 +171,7 @@ $ cxl list -m mem0 -L -u
 
 0x1000 항목이 사라졌습니다. 이 버전의 cxl-cli 81에는 `inject-media-poison`·`clear-media-poison` 하위 명령이 없어(`cxl --list-cmds`에 없음) debugfs를 썼습니다. ndctl 문서 기준으로 두 명령은 v84부터 문서에 나타나며, 문서의 예는 `cxl clear-media-poison mem0 -a 0x1000` → `poison cleared at mem0:0x1000`입니다.
 
-> ⚠️ **Clear Poison은 데이터 복구 명령이 아닙니다.** v6.12.116 `drivers/cxl/core/memdev.c`의 `cxl_clear_poison()` 주석은 Clear Poison mailbox 명령이 64바이트 write-data를 받으며 "이 드라이버는 write-data로 0을 쓴다"고 적고, ABI 문서도 clear가 그 주소부터 64바이트에 0을 쓴다고 설명합니다. 목록에서 항목이 사라져도 원래 데이터가 돌아오거나 매체가 고쳐진 것이 아닙니다. 운영 데이터라면 먼저 영향받은 데이터를 복구하고 오류 출처를 확인해야 합니다.
+> ⚠️ **Clear Poison은 데이터 복구 명령이 아닙니다.** CXL 3.1 8.2.9.9.4.3 Clear Poison(Opcode 4302h)은 poison을 지우면서 "포함된 데이터를 그 자리에 원자적으로 쓴다"고 정하고, Table 8-142는 그 Clear Poison Write Data를 64바이트로 둡니다. v6.12.116 `drivers/cxl/core/memdev.c`의 `cxl_clear_poison()` 주석은 Clear Poison mailbox 명령이 64바이트 write-data를 받으며 "이 드라이버는 write-data로 0을 쓴다"고 적고, ABI 문서도 clear가 그 주소부터 64바이트에 0을 쓴다고 설명합니다. 목록에서 항목이 사라져도 원래 데이터가 돌아오거나 매체가 고쳐진 것이 아닙니다. 운영 데이터라면 먼저 영향받은 데이터를 복구하고 오류 출처를 확인해야 합니다.
 
 ## Linux 인터페이스 — sysfs·debugfs
 
@@ -242,7 +242,7 @@ General Media 이벤트는 serial 5로 잡혔고, `@ce`는 비어 있었습니�
 
 ## 정리
 
-- Event Log는 Informational·Warning·Failure·Fatal 네 종류이고, 드라이버는 interrupt를 받아 Get Event Records(0x0100)로 가져옵니다. QEMU에 넣은 General Media 이벤트가 interrupt 스레드를 거쳐 trace에 찍혔습니다.
+- Linux 6.12가 처리하는 Event Log는 Informational·Warning·Failure·Fatal 네 종류이고(CXL 3.1은 Dynamic Capacity 로그도 정의), 드라이버는 interrupt를 받아 Get Event Records(0x0100)로 가져옵니다. QEMU에 넣은 General Media 이벤트가 interrupt 스레드를 거쳐 trace에 찍혔습니다.
 - 이벤트를 누가 처리할지는 `native_cxl_error`(_OSC 결과)가 정하며, 이 게스트는 OS가 `CXLMemErrorReporting`을 받았습니다.
 - `cxl list -H`는 장치가 Get Health Info를 지원하지 않으면 health를 조용히 생략합니다.
 - poison은 debugfs로 넣으면 `Injected`, QEMU QMP로 넣으면 `Internal`로 보였고, clear는 데이터를 복구하지 않고 0을 씁니다.
@@ -261,6 +261,7 @@ Embedded Debugging 시리즈에서 CXL을 다루는 장은 여기까지입니다
 
 ## 공식 자료
 
+- Compute Express Link Specification Revision 3.1, Version 1.0 (August 2023, publicly-available evaluation copy) — 8.2.9.2, 8.2.9.9.3.1, 8.2.9.9.4, Table 8-52/8-133/8-140/8-142. © 2019-2023 COMPUTE EXPRESS LINK CONSORTIUM, INC. ALL RIGHTS RESERVED.
 - [ndctl `cxl list` (v81)](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-list.txt)
 - [Linux CXL Clear Poison 구현 (`drivers/cxl/core/memdev.c`)](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/drivers/cxl/core/memdev.c?h=v6.12.116)
 - [Linux CXL tracepoint 정의 (`drivers/cxl/core/trace.h`)](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/drivers/cxl/core/trace.h?h=v6.12.116)
