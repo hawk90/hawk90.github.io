@@ -77,11 +77,13 @@ if (r) {                    // 또는 r.has_value()
 
 ```cpp
 sizeof(std::expected<int, ErrorEnum>);
-// 보통 8 byte (int 4 + bool 1 + 정렬 패딩)
+// g++-16·Clang 23.1.5: 8 byte (int 4 + 태그 1 + 정렬 패딩 3)
 
 sizeof(std::expected<HugeStruct, ErrorCode>);
-// max(sizeof HugeStruct, sizeof ErrorCode) + 정렬
+// max(sizeof HugeStruct, sizeof ErrorCode) + 태그 + 정렬
 ```
+
+첫 줄의 8바이트는 64비트 호스트에서 libstdc++·libc++ 모두 같았습니다. 에러 enum을 `uint8_t` 기반으로 두면 `expected<uint8_t, E>`가 2바이트까지 줄어드는 것은 [Part 3-05](/blog/embedded/embedded-cpp/part3-05-no-exception-design#패턴-3--stdexpected-c23)에서 쟀습니다.
 
 expected 자체는 값을 내부에 보관합니다. 저장 기간은 expected 객체의 선언 위치에 따르고, T나 E의 생성·복사 자체는 heap을 사용할 수 있습니다.
 
@@ -100,7 +102,7 @@ expected 자체는 값을 내부에 보관합니다. 저장 기간은 expected �
 
 ## Monadic operations (C++23)
 
-`std::expected`의 가장 강력한 기능입니다. Rust의 `?` operator처럼 체인을 만들 수 있습니다.
+C++23에서 `std::expected`와 함께 들어온 연산입니다(`__cpp_lib_expected` 202211L). 실패를 만나면 이후 단계를 건너뛰는 체인을 만듭니다.
 
 ```cpp
 // 아래 개념 스케치에서는 공통 Error enum과 이 별칭을 정의합니다.
@@ -162,7 +164,7 @@ if (data) {
 }
 ```
 
-여러 연속 호출과 실패 처리를 짧고 명확하게 표현할 수 있습니다.
+두 읽기 중 하나가 실패하면 그 에러가 그대로 반환되고, 압력 읽기는 온도 읽기가 성공했을 때만 실행됩니다.
 
 ## Result<void, E> — void 특수
 
@@ -240,7 +242,7 @@ auto r = create_data();
 HugeData d = std::move(*r);   // owner 이전
 ```
 
-`std::expected`도 move-aware하므로 큰 객체를 복사 없이 처리할 수 있습니다.
+`return d;`는 `HugeData`에서 `Result<HugeData>`로의 변환이라 복사 생략 대상이 아니지만, 지역 변수 반환이므로 이동 생성자로 옮겨집니다. 값은 expected 객체 안에 있으므로 이 크기가 반환값 자리를 차지합니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -249,7 +251,7 @@ HugeData d = std::move(*r);   // owner 이전
 auto r = read();
 auto v = r.value();   // r이 error면 std::bad_expected_access throw
 ```
-표준의 value() 실패 동작은 bad_expected_access입니다. 예외 비활성 확장의 동작은 라이브러리별로 확인해야 합니다. *r·r.error()도 해당 상태라는 전제조건이 있으므로 항상 상태를 먼저 검사합니다.
+표준의 value() 실패 동작은 `bad_expected_access`를 던지는 것입니다. `-fno-exceptions`로 에러 상태의 `value()`를 부르면 두 라이브러리 모두 프로그램을 끝냈습니다. g++-16(libstdc++)은 메시지 없이 abort(exit 134), Clang 23.1.5(libc++)는 `bad_expected_access was thrown in -fno-exceptions mode`를 출력한 뒤 exit 134였습니다. `*r`·`r.error()`도 해당 상태라는 전제조건이 있으므로 항상 상태를 먼저 검사합니다.
 
 ### 2. Implicit conversion 함정
 ```cpp
@@ -262,14 +264,14 @@ return 0;   // 0이 error로 의도? — 모호
 ```cpp
 if (r == true) { /* */ }   // 직관에 어긋남
 ```
-`if (r)` 또는 `r.has_value()`를 씁니다.
+`expected<T, E>`의 `==`는 bool 변환이 아니라 보유한 값과의 비교입니다. `std::expected<int, Error> r = 42;`에서 `bool(r)`은 1인데 `r == true`는 0이었습니다(두 라이브러리 동일). `42 == true`, 즉 `42 == 1`을 비교했기 때문입니다. `if (r)` 또는 `r.has_value()`를 씁니다.
 
 ### 4. 에러 무시
 ```cpp
 auto r = risky();
 proceed();   // r 확인 안 함
 ```
-실패 무시를 차단해야 하는 함수에 [[nodiscard]]를 직접 붙이고 -Werror=unused-result로 검증합니다. C++23 expected 타입 자체의 진단을 모든 라이브러리에서 보장한다고 가정하지 않습니다.
+`[[nodiscard]]`를 붙이지 않은 함수의 결과를 버리면 라이브러리마다 결과가 달랐습니다. g++-16은 libstdc++가 `std::expected` 클래스 자체에 `[[nodiscard]]`를 붙여 두어 `warning: ignoring returned value of type 'std::expected<int, Error>', declared with attribute 'nodiscard' [-Wunused-result]`를 냈고, Clang 23.1.5(libc++)는 아무 경고도 내지 않았습니다. 실패 무시를 차단해야 하는 함수에는 `[[nodiscard]]`를 직접 붙이고 `-Werror=unused-result`로 검증합니다.
 
 ### 5. Result type 인스턴스화 폭증
 ```cpp
@@ -277,7 +279,7 @@ Result<TypeA> ...
 Result<TypeB> ...
 // 각 T마다 expected 인스턴스
 ```
-보통은 신경 쓰지 않아도 됩니다. 다만 수십 타입에 달하면 코드 크기를 측정합니다.
+`expected`의 멤버는 대부분 인라인이라, 인스턴스마다 남는 코드는 실제로 쓰는 멤버의 크기만큼입니다. 이 글에서는 인스턴스 수에 따른 코드 크기를 재지 않았습니다. 늘어나는지 보려면 [Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)의 `nm -S -C | grep expected`로 확인합니다.
 
 ### 6. Monadic chain에서 lambda 캡처
 ```cpp
@@ -327,11 +329,11 @@ clang++ -std=c++23 -fno-exceptions -Wall -Wextra -Werror expected-check.cpp -o e
 ./expected-check
 ```
 
-sizeof는 객체 배치의 크기이며 함수의 기계어 크기가 아닙니다. 원래 제시했던 Cortex-M4 명령 수·고정 바이트 수 비교에는 재현 소스가 없으므로 측정 결과로 사용하지 않습니다.
+Homebrew Clang 23.1.5와 g++-16 모두 `-std=c++23 -fno-exceptions -Wall -Wextra -Werror`로 exit 0이었고, `-DIGNORE_RESULT`는 두 컴파일러 모두 `-Werror`에서 거부했습니다. 이 글의 ARM 툴체인에는 libstdc++가 없어 Cortex-M 코드 크기는 재지 못했습니다. sizeof는 객체 배치의 크기이며 함수의 기계어 크기가 아닙니다.
 
 ## 정리
 
-- `std::expected<T, E>`(C++23)는 value 또는 error를 담으며 Rust의 `Result<T, E>`와 같습니다.
+- `std::expected<T, E>`(C++23)는 value 또는 error를 담으며 Rust의 `Result<T, E>`에 대응합니다.
 - tl::expected는 C++11/14/17 환경용 구현이며 고정 버전의 차이를 확인합니다.
 - Monadic operations(`and_then`, `or_else`, `transform`)로 체인을 구성합니다.
 - expected는 값을 내부에 보관하지만 T·E의 내부 할당은 별도로 확인합니다.
@@ -340,7 +342,7 @@ sizeof는 객체 배치의 크기이며 함수의 기계어 크기가 아닙니�
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `expected-check.cpp`와 `sizeof`·`value()`·`==`·nodiscard 시험을 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 macOS arm64 host에서 실행했습니다. 보드 실행·WCET·tl::expected 빌드는 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [expected 값·에러·monadic 계약](https://eel.is/c++draft/expected)
 
