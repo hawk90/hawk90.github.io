@@ -497,7 +497,7 @@ $ eu-readelf -n gc.1054 | grep -E "^  (CORE|LINUX)" | awk '{print $1, $3}' | sor
       1 LINUX ARM_PAC_MASK
 ```
 
-커널 core에 있던 HW_BREAK, HW_WATCH, SYSTEM_CALL, PAC 키 노트가 없습니다. 디버깅에 필요한 노트는 남지만, 커널이 쓰는 core와 바이트 단위로 같지는 않습니다. 정지 시간은 Ch 1에서 RSS 1 GiB 프로세스 기준 1.8초로 쟀습니다.
+커널 core에 있던 HW_BREAK, HW_WATCH, SYSTEM_CALL, TAGGED_ADDR_CTRL, PAC_ENABLED_KEYS, PAC 키 노트가 없습니다. 디버깅에 필요한 노트는 남지만, 커널이 쓰는 core와 바이트 단위로 같지는 않습니다. 정지 시간은 Ch 1에서 RSS 1 GiB 프로세스 기준 1.8초로 쟀습니다.
 
 ## minicore — 핵심만
 
