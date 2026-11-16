@@ -215,7 +215,42 @@ Logger global_logger;
 | `-Oz` (지원 컴파일러) | 더 공격적 크기 | tight 환경 |
 | `-Ofast` | 표준 위반 허용 | 임베디드에서 위험 |
 
-작은 모듈 하나(비트 단위 CRC32, 64바이트 링 버퍼, `switch` 명령 파서, 16비트 fill 루프)를 레벨별로 컴파일한 `.text` 크기입니다(arm-none-eabi-g++ 16.2.0, `-mcpu=cortex-m4 -mthumb -fno-exceptions -fno-rtti -ffreestanding`).
+작은 모듈 하나(비트 단위 CRC32, 64바이트 링 버퍼, `switch` 명령 파서, 16비트 fill 루프)를 레벨별로 컴파일해 봅니다. 측정에 쓴 소스 전체입니다.
+
+```cpp title="opt-module.cpp"
+#include <stdint.h>
+#include <stddef.h>
+uint32_t crc32(const uint8_t* p, size_t n) {
+  uint32_t c = 0xFFFFFFFFu;
+  for (size_t i = 0; i < n; ++i) {
+    c ^= p[i];
+    for (int k = 0; k < 8; ++k) c = (c >> 1) ^ (0xEDB88320u & (0u - (c & 1u)));
+  }
+  return ~c;
+}
+struct Ring {
+  uint8_t buf[64]; uint32_t head, tail;
+  bool push(uint8_t b) { uint32_t n = (head + 1) & 63u; if (n == tail) return false; buf[head] = b; head = n; return true; }
+  bool pop(uint8_t& b) { if (head == tail) return false; b = buf[tail]; tail = (tail + 1) & 63u; return true; }
+};
+Ring rx;
+int parse_cmd(const char* s) {
+  switch (s[0]) { case 'R': return 1; case 'W': return 2; case 'S': return s[1] == 'T' ? 3 : 4; case 'Q': return 5; default: return -1; }
+}
+void fill(uint16_t* dst, uint16_t v, size_t n) { for (size_t i = 0; i < n; ++i) dst[i] = v; }
+int sum_rx() { uint8_t b; int s = 0; while (rx.pop(b)) s += b; return s; }
+bool feed(const uint8_t* p, size_t n) { for (size_t i = 0; i < n; ++i) if (!rx.push(p[i])) return false; return true; }
+```
+
+```bash
+F="-mcpu=cortex-m4 -mthumb -fno-exceptions -fno-rtti -ffreestanding"
+for o in -O0 -O1 -O2 -O3 -Os -Oz; do
+  arm-none-eabi-g++ $F $o -c opt-module.cpp -o m$o.o
+  arm-none-eabi-size -A m$o.o | awk '/^\.text/{s+=$2} END{print s}'
+done
+```
+
+arm-none-eabi-g++ 16.2.0(Homebrew)의 결과입니다.
 
 | 레벨 | `.text*` 합계 (바이트) |
 | --- | ---: |
@@ -226,7 +261,7 @@ Logger global_logger;
 | `-Os` | 204 |
 | `-Oz` | 204 |
 
-`-O0`에서는 `Ring`의 인라인 멤버 함수 두 개가 별도 COMDAT 섹션(`.text._ZN4Ring4pushEh` 66, `.text._ZN4Ring3popERh` 64)에 놓여 `.text` 376바이트와 합쳤고, 나머지 레벨은 `.text` 하나입니다. `-O3`의 증가분은 대부분 CRC32에서 나왔습니다. 안쪽 8회 루프를 펼쳐 함수가 48바이트(`-Os`)에서 116바이트(`-O3`)가 됐습니다. `-Oz`는 GCC 12에서 들어온 레벨이며, 이 모듈에서는 `-Os`와 결과가 같았습니다. 모듈 하나의 숫자이므로 프로젝트 전체의 비율로 옮기지 않습니다.
+`-O0`에서는 `Ring`의 인라인 멤버 함수 두 개가 별도 COMDAT 섹션(`.text._ZN4Ring4pushEh` 66, `.text._ZN4Ring3popERh` 64)에 놓여 `.text` 376바이트와 합쳤고, 나머지 레벨은 `.text` 하나입니다. `-Os` 대비 `-O3`의 증가분 128바이트 중 68바이트가 CRC32에서 나왔습니다. 안쪽 8회 루프를 펼쳐 함수가 48바이트(`-Os`)에서 116바이트(`-O3`)가 됐습니다. `-Oz`는 GCC 12에서 들어온 레벨이며, 이 모듈에서는 `-Os`와 결과가 같았습니다. 모듈 하나의 숫자이므로 프로젝트 전체의 비율로 옮기지 않습니다.
 
 GCC는 함수별로 최적화 레벨을 바꾸는 `optimize` attribute를 제공합니다. [GCC 문서](https://gcc.gnu.org/onlinedocs/gcc/Common-Attributes.html)는 "디버깅 목적으로만 쓰고 프로덕션 코드에는 맞지 않는다"고 적습니다. Clang 23.1.5는 이 attribute를 `warning: unknown attribute 'optimize' ignored`로 무시합니다.
 
@@ -267,15 +302,32 @@ release 빌드에만 활성화하고 개발 빌드에서는 끕니다.
 → linker가 .text.bar만 남김
 ```
 
-위 모듈과 `main.cpp`를 [Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts)과 같은 형태의 링커 스크립트·startup으로 Cortex-M4 ELF로 링크한 결과입니다(`-Os`, `-nostdlib -lgcc`).
+위 모듈에 `crc32()`와 `parse_cmd()`만 부르는 `main`을 붙여, startup 없이 `main`을 진입점으로 두고 링크합니다.
+
+```cpp title="opt-main.cpp"
+#include <stdint.h>
+#include <stddef.h>
+uint32_t crc32(const uint8_t* p, size_t n);
+int parse_cmd(const char* s);
+static const uint8_t msg[] = {'R', '1'};
+int main() { return (int)(crc32(msg, 2) & 0xff) + parse_cmd("ST"); }
+```
+
+```bash
+L="arm-none-eabi-g++ $F -Os -nostdlib -Wl,-e,main"
+$L opt-module.cpp opt-main.cpp -lgcc -o a.elf
+$L -ffunction-sections -fdata-sections -Wl,--gc-sections opt-module.cpp opt-main.cpp -lgcc -o b.elf
+$L -flto -ffunction-sections -fdata-sections -Wl,--gc-sections opt-module.cpp opt-main.cpp -lgcc -o c.elf
+arm-none-eabi-size a.elf b.elf c.elf
+```
 
 | 빌드 | text | data | bss | 남은 모듈 심볼 |
 | --- | ---: | ---: | ---: | --- |
-| 기본 | 433 | 8 | 72 | 모든 함수와 `rx` |
-| `-ffunction-sections -fdata-sections -Wl,--gc-sections` | 329 | 8 | 0 | `crc32`, `parse_cmd`, `main` |
-| 위 + `-flto` | 248 | 8 | 0 | `main` |
+| 기본 | 241 | 0 | 72 | 모든 함수와 `rx` |
+| `-ffunction-sections -fdata-sections -Wl,--gc-sections` | 135 | 0 | 0 | `crc32`, `parse_cmd`, `main` |
+| 위 + `-flto` | 56 | 0 | 0 | `main` |
 
-세 ELF 모두 QEMU `mps2-an386`(Cortex-M4)에서 실행해 같은 종료 코드 22를 냈습니다. 쓰지 않는 링 버퍼 `rx`(bss 72바이트)와 `fill`·`feed`·`sum_rx`가 섹션 단위로 지워졌습니다. 정적 아카이브는 원래도 필요한 멤버 단위로 선택되므로, section GC는 선택된 멤버 안에서 더 잘게 지우는 단위를 줍니다. 벡터 테이블처럼 코드에서 참조하지 않는 섹션은 링커 스크립트에서 `KEEP`으로 지켜야 GC에 지워지지 않습니다.
+startup 코드가 없으므로 이 ELF는 실행하지 않고 크기만 봤습니다. 쓰지 않는 링 버퍼 `rx`(bss 72바이트)와 `fill`·`feed`·`sum_rx`가 섹션 단위로 지워졌습니다. 정적 아카이브는 원래도 필요한 멤버 단위로 선택되므로, section GC는 선택된 멤버 안에서 더 잘게 지우는 단위를 줍니다. 벡터 테이블처럼 코드에서 참조하지 않는 섹션은 링커 스크립트에서 `KEEP`으로 지켜야 GC에 지워지지 않습니다.
 
 ## 경고 플래그 — 임베디드에서 더 엄격
 
@@ -329,10 +381,10 @@ release 빌드에도 디버그 정보를 유지합니다. `.debug_*` 섹션은 �
 
 | 빌드 | `size`의 text/data/bss | ELF 파일 크기 |
 | --- | --- | ---: |
-| `-flto ... --gc-sections` | 248 / 8 / 0 | 5,492 B |
-| 위 + `-g3` | 248 / 8 / 0 | 31,848 B |
+| `-flto ... --gc-sections` | 56 / 0 / 0 | 5,048 B |
+| 위 + `-g3` | 56 / 0 / 0 | 31,452 B |
 
-`arm-none-eabi-objcopy -O binary`로 만든 Flash 이미지는 loadable 섹션만 담으므로 두 빌드가 같습니다.
+`arm-none-eabi-objcopy -O binary`로 만든 Flash 이미지는 loadable 섹션만 담으므로 두 빌드가 같았습니다(`cmp` 일치, 56바이트). ELF 파일 크기의 디버그 정보 부분은 빌드 경로 문자열을 담으므로 디렉터리에 따라 수십 바이트 달라집니다.
 
 장점은 다음과 같습니다.
 
@@ -410,7 +462,7 @@ release의 `-DNDEBUG=1`은 `<cassert>`의 `assert`를 아무 일도 하지 않�
 
 ### 3. `-flto` 없이 `-ffunction-sections` 만 사용
 
-`--gc-sections`로 함수 제거는 되지만 cross-file 인라인은 되지 않습니다. 위 표에서 gc-sections만 쓴 빌드는 329바이트, LTO를 더한 빌드는 248바이트였습니다.
+`--gc-sections`로 함수 제거는 되지만 cross-file 인라인은 되지 않습니다. 위 표에서 gc-sections만 쓴 빌드는 135바이트, LTO를 더한 빌드는 56바이트였습니다.
 
 ### 4. 디버그 빌드에 `-flto`
 
