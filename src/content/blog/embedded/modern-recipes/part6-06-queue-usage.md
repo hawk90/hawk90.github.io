@@ -308,12 +308,11 @@ consumer가 멈추면 producer도 queue가 찬 시점에 영원히 멈춥니다.
 ## 정리
 
 - Queue는 send·receive 때 **item 크기만큼 memcpy**합니다. 위 측정에서 4 B → 256 B로 비용이 약 10.7배, heap이 344 → 16,472 B가 되었습니다.
-- 큰 record는 by-pointer + pool. 이때 buffer의 수명과 pool 고갈을 코드가 지켜야 합니다.
+- 큰 record는 by-pointer와 pool로 보냅니다. 이때 buffer의 수명과 pool 고갈을 코드가 지켜야 합니다.
 - ISR은 `xQueueSendFromISR`과 `portYIELD_FROM_ISR`을 함께 씁니다.
 - Backpressure 정책(block, drop, replace)을 코드 단위로 명시합니다.
 - Queue set은 여러 입력을 한 task에서 대기할 때 씁니다.
 - Stream buffer는 byte stream에, queue는 record 단위에 적합합니다.
-- By-pointer는 lifetime과 pool exhaustion을 항상 확인합니다.
 
 다음 편은 **Event Group**입니다. 여러 비트로 multi-condition wait을 다룹니다.
 
