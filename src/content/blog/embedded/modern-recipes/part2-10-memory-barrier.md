@@ -136,7 +136,7 @@ float x = compute_fp();
 
 ## DMB 범위 옵션 (Armv8-A)
 
-Armv8-A의 DMB·DSB는 어떤 access를 어느 범위의 관찰자에게 정렬할지 인자로 고릅니다. 102336의 인자 표에는 `SY`(any-any, full system), `ST`(store-store), `LD`(load-load·load-store), `OSH`(outer shareable) 등이 있고, AArch64에서는 인자를 반드시 명시해야 한다고 적습니다. `ISH`(inner shareable)·`NS`(non-shareable) 같은 shareability 인자도 같은 절에 나옵니다. 범위를 좁히면 "micro-architecture optimizations that could reduce some of the performance impacts"가 가능하다는 것이 이 가이드의 설명이고, 얼마나 빨라지는지는 적지 않습니다. 102336의 예제는 DMB가 없을 때 두 `STR`이 순서를 바꿔 관찰될 수 있고("Might be observed before the previous STR"), DMB를 넣으면 "Cannot observe this STR without first observing the previous STR"이 된다고 보입니다.
+Armv8-A의 DMB·DSB는 어떤 access를 어느 범위의 관찰자에게 정렬할지 인자로 고릅니다. 102336의 인자 표에는 `SY`(any-any, full system), `ST`(store-store), `LD`(load-load·load-store), `OSH`(outer shareable) 등이 있고, AArch64에서는 인자를 반드시 명시해야 한다고 적습니다. 같은 절은 `NS`·`ISH`·`OSH` shareability 인자를 이전 버전 아키텍처의 것으로 소개하고, "The shareability argument has been deprecated, and barriers with this argument behave the same as if the shareability option is not given"라고 적습니다. 범위를 좁히면 "micro-architecture optimizations that could reduce some of the performance impacts"가 가능하다는 것이 이 가이드의 설명이고, 얼마나 빨라지는지는 적지 않습니다. 102336의 예제는 DMB가 없을 때 두 `STR`이 순서를 바꿔 관찰될 수 있고("Might be observed before the previous STR"), DMB를 넣으면 "Cannot observe this STR without first observing the previous STR"이 된다고 보입니다.
 
 Linux arm64는 SMP barrier를 이 옵션으로 정의합니다. v6.12 `arch/arm64/include/asm/barrier.h`는 `__smp_mb()`를 `dmb(ish)`, `__smp_rmb()`를 `dmb(ishld)`, `__smp_wmb()`를 `dmb(ishst)`로 둡니다.
 
@@ -148,7 +148,7 @@ ish.c:2:16: error: implicit declaration of function '__DMB_ISH' [-Wimplicit-func
 
 ## Cortex-M Single Core
 
-AN321의 구현 설명을 요약하면, Cortex-M0/M0+/M3/M4는 data transfer 순서를 바꾸지 않고(4.2절), SCS 접근은 DSB처럼 동작합니다(4.11절). 그래서 이 코어들에서 아키텍처 규칙상 필요한 barrier 일부는 실제로 없어도 동작합니다. 그러나 AN321은 매 절마다 "ARM recommends that the architectural requirements are adopted"라고 적어, 이식성을 위해 아키텍처 규칙을 따르라고 권합니다.
+AN321의 구현 설명을 요약하면, Cortex-M 프로세서는 data transfer 순서를 바꾸지 않고(4.2절), Cortex-M0+/M3/M4의 SCS 접근은 DSB처럼 동작합니다(4.11절). 그래서 이 코어들에서 아키텍처 규칙상 필요한 barrier 일부는 실제로 없어도 동작합니다. 그러나 AN321은 대부분의 절에서 "ARM recommends that the architectural requirements are adopted"라고 적어, 이식성을 위해 아키텍처 규칙을 따르라고 권합니다.
 
 `volatile`은 컴파일러가 접근을 없애거나 합치지 못하게 할 뿐이고([2-05](/blog/embedded/modern-recipes/part2-05-arm-memory-map) 3절), 읽기-수정-쓰기를 원자적으로 만들지 않습니다.
 
@@ -178,7 +178,7 @@ AArch64에서는 release store가 `STLR`, acquire load가 `LDAR` 한 명령이 �
 
 ### 테스트는 순서를 증명하지 못한다
 
-Debian guest(Apple Silicon host, HVF, 4 vCPU)에서 writer가 `data = r; flag = r;`를 relaxed로 2억 번 쓰고, 다른 CPU의 reader가 `flag`·`data` 순으로 읽어 `data < flag`인 경우를 셌습니다.
+Debian guest(QEMU 11.1.3 `virt`, `-accel hvf -cpu host`, 4 vCPU)에서 writer가 `data = r; flag = r;`를 relaxed로 2억 번 쓰고, 다른 CPU의 reader가 `flag`·`data` 순으로 읽어 `data < flag`인 경우를 셌습니다.
 
 ```text
 relaxed: 0 of 88029858 reads saw data < flag
@@ -229,7 +229,7 @@ Debian guest에서 producer thread와 consumer thread로 1억 byte를 흘려 순
 100000000 items, 0 out-of-order or corrupted
 ```
 
-같은 `push`를 Cortex-M4로 컴파일하면 `strb`(buf) 앞뒤에 `dmb ish`가 들어가, 손으로 `__DMB()`를 넣은 버전과 같은 위치에 barrier가 생깁니다.
+같은 `push`를 Cortex-M4로 컴파일하면 `strb`(buf) 앞뒤에 `dmb ish`가 들어갑니다. 뒤쪽은 이전 판의 `__DMB()`(buf write → head write) 자리이고, 앞쪽은 tail을 acquire로 읽은 뒤에 하나가 더 붙은 것입니다.
 
 ```text
 push:
@@ -314,7 +314,7 @@ void core1_reset(void) {
 }
 ```
 
-두 코어가 같은 변수를 통해 시작 주소를 넘기는 경우입니다. 쓰는 쪽은 상대 코어를 깨우기 전에 write를 끝내고(DSB), 읽는 쪽은 flag를 본 뒤의 읽기가 앞서지 않게 DMB를 둡니다. `core1_wake()`는 칩마다 다른 메커니즘(reset release, mailbox, SEV)입니다.
+두 코어가 같은 변수를 통해 시작 주소를 넘기는 경우입니다. AN321 4.18절은 multi-master 시스템에서 "Either a DMB or DSB instruction is needed when handling shared data"라고 적습니다. 쓰는 쪽은 상대 코어를 깨우기 전에 write를 끝내고(DSB), 읽는 쪽은 flag를 본 뒤의 읽기가 앞서지 않게 DMB를 둡니다. `core1_wake()`는 칩마다 다른 메커니즘(reset release, mailbox, SEV)입니다.
 
 ## 자주 하는 실수
 
