@@ -132,8 +132,27 @@ FIT(Flattened Image Tree)은 한 파일에 kernel·DTB·initrd와 각각의 hash
 서명은 `mkimage -f fit.its` 만으로 생기지 않습니다. `signature.rst`의 절차는 키 디렉터리(`-k`)로 서명하고, 공개키를 U-Boot의 control DTB에 넣고(`-K control.dtb`), 키를 `required`로 표시(`-r`)하는 세 단계입니다.
 
 ```bash
+mkdir keys
+openssl genpkey -algorithm RSA -out keys/dev.key -pkeyopt rsa_keygen_bits:2048
+openssl req -batch -new -x509 -key keys/dev.key -out keys/dev.crt -subj /CN=dev
 mkimage -f fit.its -K control.dtb -k keys -r image.fit
 ```
+
+위 `.its`를 v2024.04로 빌드한 `tools/mkimage`에 그대로 넣어 봤습니다(`zImage`는 4 KiB 임의 데이터, `control.dtb`는 빌드 산출물의 DTB). 서명이 붙었다는 줄과 control DTB에 들어간 공개키 노드는 이렇습니다.
+
+```text
+  Hash algo:    sha256
+  Sign algo:    sha256,rsa2048:dev
+```
+
+```text
+	signature {
+
+		key-dev {
+			required = "image";
+```
+
+`key-name-hint = "dev"`가 키 파일 `keys/dev.key`/`dev.crt`를 고르고, 서명 노드가 image 아래 있으므로 `required = "image"`가 됐습니다.
 
 같은 문서는 이미지만 서명하면 서명된 이미지를 다른 구성으로 섞는 "mix and match" 공격과 옛 이미지로 바꾸는 roll-back 공격을 막지 못한다고 설명하고, 서명을 configuration 노드에 두라고 합니다. 실제 `.itb`의 hash 노드를 dump해서 맞춰 보는 과정은 [Bootloader 15장](/blog/embedded/bootloader/chapter15-fit-image)에 있습니다.
 
