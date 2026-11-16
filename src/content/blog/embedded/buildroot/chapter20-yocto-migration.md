@@ -198,7 +198,7 @@ IMAGE_FEATURES += "ssh-server-openssh"
 
 ## 빌드 시간 비교
 
-이 글의 이전 판에는 "Buildroot 32분 / Yocto 110분" 같은 비교표가 있었지만, 측정 환경과 기록이 없어 삭제했습니다. 이 시리즈가 실제로 잰 것은 Buildroot 쪽뿐입니다. Ch 1에서 `qemu_aarch64_virt_defconfig` 첫 빌드, Ch 14에서 ccache와 per-package directories를 켜고 끈 재빌드 시간을 같은 VM에서 측정했습니다.
+이 글의 이전 판에는 "Buildroot 32분 / Yocto 110분" 같은 비교표가 있었지만, 측정 환경과 기록이 없어 삭제했습니다. 이 시리즈가 실제로 잰 것은 Buildroot 쪽뿐입니다. Ch 1에서 `qemu_aarch64_virt_defconfig` 첫 빌드, Ch 14에서 ccache와 per-package directories를 켜고 끈 빌드 시간을 같은 사양의 VM에서 측정했습니다.
 
 Yocto와 비교하려면 같은 호스트에서 같은 패키지 집합으로 다음을 따로 재야 합니다.
 
