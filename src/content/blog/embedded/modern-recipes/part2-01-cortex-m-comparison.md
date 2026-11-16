@@ -107,7 +107,7 @@ ACLE 명세의 "Hardware floating point" 절에서 `__ARM_FP`는 비트 집합�
 | M7 | SP, DP (옵션) | FPv5, double-precision 명령은 옵션 (M7 TRM) |
 | M52 / M55 / M85 | HP, SP, DP (옵션) | — |
 
-double precision을 하드웨어로 처리하는 코어는 M7·M52·M55·M85입니다. FPU가 없는 코어에서 `float` 연산은 컴파일러 런타임의 소프트웨어 루틴으로 처리됩니다.
+double precision을 하드웨어로 처리하는 코어는 M7·M52·M55·M85입니다. FPU 없이(`soft` ABI) 빌드한 `float` 코드는 컴파일러 런타임 함수를 부릅니다. 아래 '자주 보는 함정'의 링크 출력에서 `float`→`int` 변환이 `__aeabi_f2iz` 호출로 바뀐 것이 그 예입니다.
 
 ### 5) Security — TrustZone-M
 
@@ -143,7 +143,7 @@ clang --target=arm-none-eabi -mcpu=cortex-m55 -mfloat-abi=hard -ffreestanding -O
 cortex-m0plus (gcc -O2)        muls     r2, r1
 cortex-m3     (gcc -O2)        mla      r0, lr, ip, r0
 cortex-m4     (gcc -O2)        smlabb   r0, lr, ip, r0
-cortex-m55    (gcc -O2)        smlabb   r0, ip, r2, r0 / le lr, .L3
+cortex-m55    (gcc -O2)        smlabb   r0, ip, r2, r0 / dls lr, lr / le lr, .L3
 cortex-m55    (gcc -O3, hard)  smlabb   r0, ip, r2, r0 / dls lr, lr / le lr, .L3
 cortex-m55    (clang 23.1.5)   dlstp.16 lr, r2
                                vldrh.u16 q0, [r0], #16
@@ -170,7 +170,7 @@ $ arm-none-eabi-gcc -ffreestanding -O2 -mthumb -mcpu=cortex-m3 -c acle.c
 acle.c:4:14: error: unknown type name 'int16x2_t'; did you mean 'int16_t'?
 ```
 
-실무에서는 CMSIS-DSP의 `arm_fir_q15`를 쓰는 편이 낫습니다. 다만 "코어를 자동으로 감지"하는 것은 아니고, *컴파일 시점*에 `arm_math_types.h`가 `__ARM_FEATURE_DSP`면 `ARM_MATH_DSP`를, `__ARM_FEATURE_MVE`면 `ARM_MATH_MVEI`를 정의하고, `arm_fir_q15.c`는 `#if defined(ARM_MATH_MVEI)`로 Helium 구현을 고릅니다. `arm_fir_init_q15`의 문서는 `numTaps`가 "even and greater than or equal to 4"여야 하고, `pState` 길이는 `numTaps+blockSize-1`(`ARM_MATH_LOOPUNROLL` 정의 시 `numTaps+blockSize`)이라고 적습니다.
+실무에서는 CMSIS-DSP의 `arm_fir_q15`를 쓰는 편이 낫습니다. 다만 "코어를 자동으로 감지"하는 것은 아니고, *컴파일 시점*에 `arm_math_types.h`가 `__ARM_FEATURE_DSP`면 `ARM_MATH_DSP`를, `__ARM_FEATURE_MVE`면 `ARM_MATH_MVEI`를 정의하고, `arm_fir_q15.c`는 `#if defined(ARM_MATH_MVEI) && !defined(ARM_MATH_AUTOVECTORIZE)`로 Helium 구현을 고릅니다. `arm_fir_init_q15`의 문서는 `numTaps`가 "even and greater than or equal to 4"여야 하고, `pState` 길이는 `numTaps+blockSize-1`(`ARM_MATH_LOOPUNROLL` 정의 시 `numTaps+blockSize`)이라고 적습니다.
 
 ```c
 #include "arm_math.h"
@@ -209,7 +209,7 @@ cortex-m4  (-DARM_MATH_LOOPUNROLL)   2 smlalbb, 6 smlald, 6 smlaldx
 cortex-m55                          24 vmlalva.s16
 ```
 
-같은 소스가 M4에서는 DSP의 dual-MAC `smlald`로, M55에서는 MVE의 `vmlalva.s16`으로 빌드됩니다. 반대로 M55용으로 빌드하면서 `-mfloat-abi=soft`를 쓰면 `__ARM_FEATURE_MVE`가 정의되지 않아 Helium 경로가 통째로 빠집니다.
+같은 소스가 M4에서는 기본 빌드가 `smlalbb`, `ARM_MATH_LOOPUNROLL`을 정의하면 DSP의 dual-MAC `smlald`로, M55에서는 MVE의 `vmlalva.s16`으로 빌드됩니다. 반대로 M55용으로 빌드하면서 `-mfloat-abi=soft`를 쓰면 `__ARM_FEATURE_MVE`가 정의되지 않아 Helium 경로가 통째로 빠집니다.
 
 ## 측정 / 비교
 
@@ -226,7 +226,7 @@ cortex-m55                          24 vmlalva.s16
 | M33 | `mps2-an505`, `mps2-an521`(dual), `mps3-an524`(dual), `musca-a`, `musca-b1` |
 | M55 | `mps3-an547` |
 
-QEMU는 cycle-accurate가 아니므로 명령 선택과 기능 확인에만 쓰고, 클럭당 성능은 실제 보드에서 잽니다.
+이 글은 QEMU를 명령 선택과 기능 확인에만 쓰고, 클럭당 성능 비교는 1절의 Arm 공식 값에 맡깁니다.
 
 ## 자주 보는 함정
 
@@ -242,15 +242,16 @@ Cortex-M7 TRM 4.1.3은 L1 cache가 구현돼 있으면 enable 전에 반드시 i
 $ arm-none-eabi-gcc -nostdlib -mthumb -mcpu=cortex-m4 ms.o fh.o -o x.elf
 arm-none-eabi-ld: error: fh.o uses VFP register arguments, x.elf does not
 arm-none-eabi-ld: failed to merge target specific data of file fh.o
+ms.c:(.text+0x10): undefined reference to `__aeabi_f2iz'
 ```
 
 > ⚠️ Helium을 지원하지 않는 컴파일러·옵션
 
-GCC 10 release notes는 Armv8.1-M Mainline(`-march=armv8.1-m.main`)과 MVE ACLE intrinsic(`arm_mve.h`, `+mve`/`+mve.fp`) 지원을 처음 추가했고, MVE auto-vectorization은 GCC 11 release notes에 "initial"로 들어갔습니다. 그 이전 GCC는 `-mcpu=cortex-m55`를 모릅니다. 최신 GCC라도 3절처럼 `-mfloat-abi=soft`면 MVE가 꺼집니다.
+GCC 10 release notes는 Armv8.1-M Mainline(`-march=armv8.1-m.main`)과 MVE *beta* ACLE intrinsic(`arm_mve.h`, `+mve`/`+mve.fp`) 지원을 처음 추가했고, MVE auto-vectorization은 GCC 11 release notes에 "initial"로 들어갔습니다. 그 이전 GCC는 `-mcpu=cortex-m55`를 모릅니다. 최신 GCC라도 3절처럼 `-mfloat-abi=soft`면 MVE가 꺼집니다.
 
 > ⚠️ TrustZone 코어에서 secure 분할을 미룸
 
-M33/M55에 Security Extension이 구현돼 있으면 reset 직후 Secure state에서 시작합니다(M33 TRM). Non-secure로 넘기는 코드를 쓰지 않으면 애플리케이션 전체가 Secure에서 돌고, 그러면 TrustZone으로 얻으려던 격리가 없습니다.
+M33/M55에 Security Extension이 구현돼 있으면 reset 직후 Secure state에서 시작합니다(M33 TRM, M55 TRM 모두 "always resets into Secure state"). Non-secure로 넘기는 코드를 쓰지 않으면 애플리케이션 전체가 Secure에서 돌고, 그러면 TrustZone으로 얻으려던 격리가 없습니다.
 
 > ⚠️ MPU region 수를 코어 이름으로 짐작
 
