@@ -39,7 +39,7 @@ Secure Boot의 신뢰는 펌웨어 NVRAM의 네 UEFI 변수에 저장됩니다.
 | db | Signature Database | 부팅을 허용할 서명자 인증서·해시 |
 | dbx | Forbidden Signatures | 부팅을 금지할 서명자·해시(revocation) |
 
-UEFI 2.10 §32.3.5에 따르면 User Mode의 KEK 갱신은 현재 PK의 private key로 서명해야 합니다. §32.6.3에서 db·dbx 갱신은 등록된 KEK 또는 PK의 private key로 인가합니다. 그래서 db에 새 CA를 넣으려면 KEK에 있는 키의 서명이 필요하고, KEK에 새 키를 넣으려면 PK 소유자(보통 OEM)의 서명이 필요합니다. 이 글의 실험은 변수 저장소를 부팅 전에 직접 만들었으므로 이 인가 절차를 거치지 않았습니다. 운영 중인 기기에서는 이 경로가 막혀 있습니다.
+UEFI 2.10 32장(Secure Boot and Driver Signing)에 따르면 User Mode의 KEK 갱신은 현재 PK의 private key로 서명해야 합니다. db·dbx 갱신은 등록된 KEK 또는 PK의 private key로 인가합니다. 그래서 db에 새 CA를 넣으려면 KEK에 있는 키의 서명이 필요하고, KEK에 새 키를 넣으려면 PK 소유자(보통 OEM)의 서명이 필요합니다. 이 글의 실험은 변수 저장소를 부팅 전에 직접 만들었으므로 이 인가 절차를 거치지 않았습니다. 운영 중인 기기에서는 이 경로가 막혀 있습니다.
 
 부팅 후 게스트에서 읽은 상태 변수입니다. efivarfs 파일의 앞 4바이트는 속성(0x06 = BOOTSERVICE_ACCESS | RUNTIME_ACCESS)이고 마지막 바이트가 값입니다.
 
@@ -104,7 +104,7 @@ type 0x2는 `WIN_CERT_TYPE_PKCS_SIGNED_DATA`(Authenticode)입니다. shim에는 
 
 ## 네 가지 db로 부팅하기
 
-PK는 `virt-fw-vars --enroll-generate`로 만든 테스트 키 하나로 고정하고, KEK에는 Microsoft 2011·2023을 모두 넣었습니다. db만 바꿔 가며 같은 디스크를 부팅했습니다.
+PK는 `virt-fw-vars --enroll-generate`로 만든 테스트 키 하나로 고정했습니다. KEK에는 그 테스트 키와 Microsoft KEK 2011·2023을 모두 넣었습니다. db만 바꿔 가며 같은 디스크를 부팅했습니다.
 
 | 구성 | db 내용 | 결과 |
 | --- | --- | --- |
@@ -122,6 +122,7 @@ SecureBoot enabled
 [    0.000000] secureboot: Secure boot enabled
 [    1.600331] integrity: Loaded X.509 cert 'Microsoft Corporation UEFI CA 2011: 13adbf4309bd82709c8cd54f316ed522988a1bd4'
 [    1.601369] integrity: secureboot mode enabled
+...
 ```
 
 게스트 시계는 UEFI CA 2011의 notAfter(2026-06-27)를 넉 달 넘긴 시점입니다. 이 실행에서 펌웨어는 만료된 CA로 이어지는 shim 서명을 받아들였습니다. 구성 B에서는 같은 자리에 `Microsoft UEFI CA 2023: 81aa6b3244c935bce0d6628af39827421e32497d`가 올라갔고, 나머지 로그는 같았습니다.
@@ -196,7 +197,7 @@ EFI 바이너리의 서명자는 PE Certificate Table에서 `WIN_CERTIFICATE`를
 
 ## Post-Quantum 서명과의 관계
 
-이번 전환은 알고리즘 전환이 아닙니다. 위 표의 KEK·UEFI CA·Windows CA를 `openssl x509 -text`로 보면 2011과 2023 인증서가 모두 RSA 2048비트 공개키입니다. 2023 KEK의 이름에 붙은 `2K`도 같은 뜻으로 읽힙니다. 다만 이 경험은 서명 알고리즘을 바꿀 때 무엇이 필요한지 미리 보여 줍니다.
+이번 전환은 알고리즘 전환이 아닙니다. 위 표의 KEK·UEFI CA·Windows CA를 `openssl x509 -text`로 보면 2011과 2023 인증서가 모두 RSA 2048비트 공개키입니다. 다만 이 경험은 서명 알고리즘을 바꿀 때 무엇이 필요한지 미리 보여 줍니다.
 
 [NIST FIPS 204](https://csrc.nist.gov/pubs/fips/204/final)의 ML-DSA는 디지털 서명이고, [FIPS 203](https://csrc.nist.gov/pubs/fips/203/final)의 ML-KEM은 키 캡슐화입니다. 펌웨어 이미지 서명에 해당하는 것은 ML-DSA 쪽입니다. 위 shim처럼 서명을 여러 개 다는 방식은 전환 기간의 호환성을 주지만, 그것은 검증하는 펌웨어가 두 서명 중 하나라도 이해할 때의 이야기입니다. 새 알고리즘이 들어오려면 db에 그 알고리즘의 인증서를 넣는 KEK·PK 경로와, 그 서명을 해석하는 펌웨어 verifier가 함께 바뀌어야 합니다. 이 글은 PQC 서명 검증을 실행하지 않았습니다.
 
@@ -222,7 +223,7 @@ EFI 바이너리의 서명자는 PE Certificate Table에서 `WIN_CERTIFICATE`를
 ## 근거 자료
 
 - [Microsoft 인증서 만료·CA 갱신 안내](https://support.microsoft.com/en-us/servicing/os/secure-boot/2025/06/windows-secure-boot-certificate-expiration-and-ca-updates): 일정, 새 CA 명칭, 미갱신 Windows 기기의 영향.
-- [UEFI 2.10 §32.3.5·§32.6.3](https://uefi.org/specs/UEFI/2.10/32_Secure_Boot_and_Driver_Signing.html?highlight=authenticated+variable): KEK과 db·dbx 갱신 인가.
+- [UEFI 2.10 32장 Secure Boot and Driver Signing](https://uefi.org/specs/UEFI/2.10/32_Secure_Boot_and_Driver_Signing.html?highlight=authenticated+variable): KEK과 db·dbx 갱신 인가.
 - Debian 13 `qemu-efi-aarch64` 2025.02-8+deb13u1: `AAVMF_CODE.secboot.fd`, `AAVMF_VARS.fd`, `AAVMF_VARS.ms.fd`.
 - `virt-firmware` 26.9: `virt-fw-vars`와 `virt/firmware/certs/microsoft.com/*.pem`.
 - [NIST FIPS 204](https://csrc.nist.gov/pubs/fips/204/final), [FIPS 203](https://csrc.nist.gov/pubs/fips/203/final): 서명과 키 캡슐화의 역할.

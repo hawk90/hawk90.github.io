@@ -153,7 +153,9 @@ tier 번호는 Linux v6.12 `mm/memory-tiers.c`의 계산 그대로입니다. 먼
 ```text
 [    0.000000] Zone ranges:
 [    0.000000]   DMA      [mem 0x0000000040000000-0x00000000ffffffff]
+[    0.000000]   DMA32    empty
 [    0.000000]   Normal   [mem 0x0000000100000000-0x000000013fffffff]
+[    0.000000]   Device   empty
 [    0.000000] Movable zone start for each node
 [    0.000000] Initmem setup node 0 [mem 0x0000000040000000-0x00000000bfffffff]
 [    0.000000] Initmem setup node 1 [mem 0x00000000c0000000-0x000000013fffffff]
@@ -185,12 +187,18 @@ node 1이 느린 tier라는 사실은 zone에 반영되지 않습니다. 펌웨�
 ```text
 online
 8000000
+32
+...
 CONFIG_MEMORY_HOTPLUG=y
+...
 CONFIG_MHP_DEFAULT_ONLINE_TYPE_ONLINE_AUTO=y
+...
 CONFIG_MEMORY_HOTREMOVE=y
 ```
 
-첫 줄은 `auto_online_blocks`, 둘째 줄은 block 크기 0x8000000(128 MiB)입니다. 기본 메모리 4 GiB는 128 MiB block 32개(`memory` 디렉터리 32개)입니다. `auto_online_blocks`를 `online_movable`로 바꾼 뒤 QEMU monitor에서 1 GiB DIMM을 node 1에 꽂았습니다.
+(관련 없는 CONFIG 줄 생략)
+
+첫 줄은 `auto_online_blocks`, 둘째 줄은 block 크기 0x8000000(128 MiB), 셋째 줄은 `memory` 디렉터리 수입니다. 기본 메모리 4 GiB는 128 MiB block 32개입니다. `auto_online_blocks`를 `online_movable`로 바꾼 뒤 QEMU monitor에서 1 GiB DIMM을 node 1에 꽂았습니다.
 
 ```text
 (qemu) info memory-devices
@@ -204,7 +212,7 @@ Memory device [dimm]: "dimm0"
   hotpluggable: true
 ```
 
-QEMU는 SRAT hotplug 범위의 시작 0x140000000에 DIMM을 놓았습니다. 그런데 게스트에서는 아무 일도 일어나지 않았습니다. 5초 뒤에도 `free -m`과 node 1의 `MemTotal`이 그대로였고, memory block은 32개, `/proc/iomem`의 마지막 System RAM은 `c0000000-13fffffff`였습니다. ACPI 장치 목록에는 메모리 장치 `PNP0C80:00`–`03` 4개가 있지만, 이 장치를 처리할 드라이버가 Debian 커널에 없습니다.
+QEMU는 SRAT hotplug 범위의 시작 0x140000000에 DIMM을 놓았습니다. 그런데 게스트에서는 아무 일도 일어나지 않았습니다. 2초 뒤에도 `free -m`의 total(3917 MiB)과 node 1의 `MemTotal`(1987852 kB)이 꽂기 전과 같았습니다. 별도 부팅에서 5초를 기다린 뒤에도 memory block은 32개였고, `/proc/iomem`의 마지막 System RAM은 `c0000000-13fffffff`, `free -m` total은 3917 MiB였습니다. ACPI 장치 목록에는 메모리 장치 `PNP0C80:00`–`03` 4개가 있지만, 이 장치를 처리할 드라이버가 Debian 커널에 없습니다.
 
 ```text
 # CONFIG_ACPI_HOTPLUG_MEMORY is not set
