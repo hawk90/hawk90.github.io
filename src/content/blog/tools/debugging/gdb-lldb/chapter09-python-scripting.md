@@ -15,97 +15,69 @@ topics: ["tools", "tools/debugging"]
 :::
 
 
-GDB와 LLDB 모두 Python 인터프리터를 내장합니다. 단순한 매크로는 GDB의 user-defined command로도 되지만, *데이터 구조 시각화*나 *조건이 복잡한 자동화*에는 Python이 거의 유일한 답입니다. STL 컨테이너가 `vector<int>{1, 2, 3}`처럼 깔끔히 보이는 것도 모두 pretty-printer 덕입니다.
+GDB와 LLDB 모두 Python 인터프리터를 내장합니다. 단순한 매크로는 GDB의 user-defined command로도 되지만, *데이터 구조 시각화*나 *조건이 복잡한 자동화*는 Python으로 짜는 편이 훨씬 수월합니다. [Ch 3](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state)에서 `std::vector`가 `{1, 2, 3, 4, 5}`로 보였던 것도 libstdc++가 배포하는 Python pretty-printer 덕입니다.
 
-이 장은 GDB Python API의 핵심 객체에서 출발해 *어떻게 pretty-printer가 동작하는지*, *MI 프런트엔드(VSCode 등)가 어떻게 트리를 그리는지*, *FrameDecorator로 콜스택을 변형*, 그리고 LLDB의 SB API까지 다룹니다.
+이 장의 코드는 모두 실제로 돌린 것입니다. 실습 프로그램 `py.c`(점·리스트·맵·트리 구조체, `helper`·`process` 함수, `malloc` 두 번)를 Debian 13 arm64의 GDB 16.3(내장 Python 3.13.5)과 lldb 19.1.7로 실행했고, 스크립트는 `tools.py` 한 파일에 모아 `source`했습니다.
+
+```c title="py.c (구조체 정의)"
+struct Point { int x; int y; };
+struct MyList { int size; int* data; };
+struct MapNode { const char* key; int value; struct MapNode* next; };
+struct MyMap { int size; struct MapNode* root; };
+struct Tree { int value; struct Tree* left; struct Tree* right; };
+```
 
 ## 시작 — 한 줄 Python
+
+`python <문장>`은 한 줄, `python` … `end`는 여러 줄, 외부 파일은 `source`입니다.
 
 ```text
 (gdb) python print("hello from gdb")
 hello from gdb
-
-(gdb) python
->import os
->print(os.getpid())
->end
-12345
-
-(gdb) source script.py
+(gdb) python import sys; print(sys.version)
+3.13.5 (main, Aug 10 2026, 12:06:59) [GCC 14.2.0]
+(gdb) source tools.py
 ```
 
-`python ... end`로 여러 줄, `python <expr>`로 한 줄. 외부 파일은 `source`. `.gdbinit`에 자동 로드되게 박아 둘 수 있습니다.
+GDB가 내장한 Python의 버전은 GDB를 빌드할 때 정해집니다. Debian 13의 GDB 16.3은 Python 3.13.5였습니다. 시스템 Python의 venv나 외부 패키지를 쓰려면 `sys.path`에 그 경로를 직접 넣어야 합니다.
 
-GDB가 *내장한* Python의 버전은 GDB 빌드 시점의 옵션입니다. python import sys; print(sys.version)으로 확인합니다. 외부 시스템 Python과 버전·ABI가 같다고 가정하지 않습니다. 대부분의 표준 라이브러리는 쓸 수 있지만, *외부 시스템* Python의 venv·third-party 패키지는 별도 설정이 필요합니다.
-
-```python
-(gdb) python
->>> import sys
->>> sys.path.insert(0, '/home/me/venv/lib/python3.10/site-packages')
->>> import numpy   # 이제 외부 패키지 사용 가능
-```
-
-LLDB는 `script`.
+LLDB는 `script`입니다.
 
 ```text
 (lldb) script print("hello")
-(lldb) command script import my_module.py
+hello
+(lldb) command script import /root/ch09/my_cmds.py
 ```
-
-LLDB는 `lldb` 모듈을 직접 import해 외부 스크립트로도 디버거를 *원격* 제어 가능합니다 (스크립트가 lldb 인스턴스를 생성).
 
 ## gdb 모듈 — 진입점
 
-```python
-import gdb
+`gdb` 모듈이 디버거와 대상 프로세스를 들여다보는 입구입니다. 33행에 멈춘 상태에서 몇 가지를 실행했습니다.
 
-gdb.execute("info threads")              # 명령 실행
-val = gdb.parse_and_eval("my_var + 1")   # 표현식 평가
-print(val, type(val))                    # gdb.Value, gdb.Type
-
-frame = gdb.selected_frame()             # 현재 프레임
-print(frame.name(), frame.pc())
-
-inferior = gdb.selected_inferior()
-print(inferior.pid)
+```text
+(gdb) python v = gdb.parse_and_eval("list"); print(v.type, v["size"], v["data"].dereference(), v["data"][2])
+struct MyList 3 10 30
+(gdb) python f = gdb.selected_frame(); print(f.name(), hex(f.pc()), gdb.selected_inferior().pid > 0)
+main 0xaaaaaaaa0a2c True
+(gdb) python print(gdb.parse_and_eval("msg").string())
+hello, world
 ```
 
-핵심 객체.
+`gdb.Value`는 대상 프로세스 안의 값을 가리키는 핸들입니다. `v["size"]`처럼 멤버에, `v["data"][2]`처럼 포인터 인덱스에 접근하고, `.string()`으로 C 문자열을 Python 문자열로 바꿉니다. 자주 쓰는 객체는 다음과 같습니다. 각 객체의 메서드 목록은 GDB 매뉴얼 Python API 절에 있습니다.
 
-| 객체 | 역할 | 주요 메서드 |
-|------|------|-------------|
-| `gdb.Value` | 디버기 안의 값(int/string/struct/포인터) | `int()`, `string()`, `[key]`, `cast()`, `dereference()` |
-| `gdb.Type` | 타입 정보(size, fields, target) | `sizeof`, `fields()`, `target()`, `tag` |
-| `gdb.Frame` | 콜스택 한 프레임 | `name()`, `pc()`, `function()`, `read_var()`, `older()`, `newer()` |
-| `gdb.Symbol` | 변수·함수 심볼 | `name`, `type`, `value()`, `is_function`, `addr_class` |
-| `gdb.Breakpoint` | 브레이크포인트 (subclass로 stop hook 구현) | `stop()`, `enabled`, `condition`, `commands` |
-| `gdb.Inferior` | 프로세스 | `pid`, `threads()`, `read_memory()`, `write_memory()`, `search_memory()` |
-| `gdb.Thread` | 스레드 | `switch()`, `is_stopped()`, `is_running()` |
-| `gdb.Objfile` | 로드된 ELF 파일 | `filename`, `build_id`, `progspace` |
-
-`gdb.Value`가 가장 자주 다루는 객체입니다. 내부적으로 *디버기 메모리의 한 영역을 가리키는 핸들*. 산술 연산도 가능.
-
-```python
-v = gdb.parse_and_eval("my_array")        # gdb.Value
-length = v['length']                       # 멤버 접근
-data = v['data']                           # 포인터
-first = data.dereference()                 # *data
-nth = data[5]                              # data[5]
-sliced = [data[i] for i in range(10)]      # 유효한 원소 수를 먼저 확인
-
-# Python 타입으로 변환
-n = int(v['count'])
-s = v['name'].string()                     # C string
-```
+| 객체 | 역할 |
+|------|------|
+| `gdb.Value` | 대상 안의 값(int/string/struct/포인터). 멤버 접근·산술·`cast()`·`dereference()` |
+| `gdb.Type` | 타입 정보(크기, 필드, 가리키는 타입) |
+| `gdb.Frame` | 콜스택 한 프레임(`name()`, `pc()`, `read_var()`, `older()`) |
+| `gdb.Breakpoint` | breakpoint. 서브클래스의 `stop()`으로 정지 여부 결정 |
+| `gdb.Inferior` | 프로세스(`pid`, `threads()`, `read_memory()`) |
+| `gdb.Objfile` | 로드된 ELF 파일 |
 
 ## 첫 예 — 커스텀 명령
 
-이름 그대로 GDB의 새 명령을 Python으로 정의합니다.
+`gdb.Command`를 상속하면 새 명령이 생깁니다. 클래스의 docstring이 `help` 문구가 됩니다.
 
 ```python
-# myhello.py
-import gdb
-
 class HelloCmd(gdb.Command):
     """간단한 인사 명령."""
 
@@ -116,151 +88,173 @@ class HelloCmd(gdb.Command):
         argv = gdb.string_to_argv(arg)
         name = argv[0] if argv else "world"
         gdb.write(f"hello, {name}\n")
-
-HelloCmd()
 ```
 
 ```text
-(gdb) source myhello.py
+(gdb) python HelloCmd()
 (gdb) hello
 hello, world
 (gdb) hello GDB
 hello, GDB
 ```
 
-`gdb.COMMAND_*` 카테고리: `BREAKPOINTS`, `DATA`, `STACK`, `RUNNING`, `USER`, `SUPPORT`. 사용자에게 `help <cat>`로 분류해 보여 줍니다.
+두 번째 인자는 `help` 분류입니다. GDB 16.3의 `gdb` 모듈에 실제로 있는 이름을 찍어 보면 다음과 같습니다.
 
-### 자동 완성
-
-```python
-class MyCmd(gdb.Command):
-    def __init__(self):
-        super().__init__("mycmd", gdb.COMMAND_USER, gdb.COMPLETE_SYMBOL)
-
-    def invoke(self, arg, from_tty):
-        ...
+```text
+(gdb) python print([c for c in dir(gdb) if c.startswith("COMMAND_")])
+['COMMAND_BREAKPOINTS', 'COMMAND_DATA', 'COMMAND_FILES', 'COMMAND_MAINTENANCE', 'COMMAND_NONE', 'COMMAND_OBSCURE', 'COMMAND_RUNNING', 'COMMAND_STACK', 'COMMAND_STATUS', 'COMMAND_SUPPORT', 'COMMAND_TRACEPOINTS', 'COMMAND_TUI', 'COMMAND_USER']
+(gdb) python print([c for c in dir(gdb) if c.startswith("COMPLETE_")])
+['COMPLETE_COMMAND', 'COMPLETE_EXPRESSION', 'COMPLETE_FILENAME', 'COMPLETE_LOCATION', 'COMPLETE_NONE', 'COMPLETE_SYMBOL']
 ```
 
-`COMPLETE_SYMBOL` / `COMPLETE_LOCATION` / `COMPLETE_FILENAME` / `COMPLETE_COMMAND` 중 하나. 탭으로 자동 완성됩니다.
+세 번째 인자로 `COMPLETE_*` 중 하나를 주면 탭 자동 완성 방식이 정해집니다.
 
 ### Prefix 명령 (서브 명령 트리)
 
+`prefix=True`로 만든 명령 아래에 `"my list"`처럼 이름을 붙이면 서브 명령이 됩니다. 도구가 많아지면 한 이름 아래로 묶습니다.
+
 ```python
 class MyTop(gdb.Command):
+    """my 도구 모음."""
     def __init__(self):
         super().__init__("my", gdb.COMMAND_USER, prefix=True)
-    def invoke(self, arg, from_tty):
-        gdb.execute("help my")    # 인자 없으면 도움말
 
 class MySub(gdb.Command):
+    """my list 서브 명령."""
     def __init__(self):
         super().__init__("my list", gdb.COMMAND_USER)
     def invoke(self, arg, from_tty):
         gdb.write("listing...\n")
-
-MyTop(); MySub()
 ```
 
-`my list` 형태로 호출. 큰 도구 모음을 `my <sub>` 트리로 묶으면 깔끔합니다.
+```text
+(gdb) my list
+listing...
+(gdb) help my
+my 도구 모음.
+
+List of my subcommands:
+
+my list -- my list 서브 명령.
+```
 
 ## 두 번째 예 — 자동 브레이크포인트 액션
 
-브레이크포인트가 잡힐 때마다 Python으로 처리.
+`gdb.Breakpoint`를 상속해 `stop()`을 정의하면 breakpoint에 걸릴 때마다 Python이 실행되고, `False`를 돌려주면 멈추지 않고 계속 갑니다. 첫 인자는 ABI가 정한 레지스터에 있으므로, arm64에서는 `$x0`을 읽습니다(AAPCS64의 parameter register, [Ch 3](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state) 참고). 1 MiB보다 큰 할당일 때만 멈추게 했습니다.
 
 ```python
-import gdb
-
 class LogAllocs(gdb.Breakpoint):
     def __init__(self):
-        super().__init__("malloc")
+        super().__init__("malloc", internal=False)
 
     def stop(self):
-        size = gdb.parse_and_eval("$rdi")   # x86-64 첫 인자
+        size = int(gdb.parse_and_eval("$x0"))    # AArch64 첫 인자
+        if size > 1024 * 1024:
+            gdb.write(f"big malloc: {size}\n")
+            return True
         gdb.write(f"malloc({size})\n")
-        return False                         # False = 정지하지 말고 계속
-
-LogAllocs()
+        return False
 ```
 
-`stop`이 `False`를 반환하면 사용자에게 제어가 안 넘어가고 자동으로 continue. Ch 5의 `commands silent`+`printf`와 같은 효과지만 *Python으로 조건을 만들 수 있습니다*.
+```text
+(gdb) break main
+(gdb) run
+(gdb) python LogAllocs()
+Breakpoint 2 at 0xfffff7e87804: malloc. (46 locations)
+(gdb) continue
+malloc(24)
+malloc(24)
+malloc(24)
+malloc(64)
+big malloc: 2097152
 
-```python
-def stop(self):
-    size = int(gdb.parse_and_eval("$rdi"))
-    if size > 1024 * 1024:
-        gdb.write(f"big malloc: {size}\n")
-        # 콜스택까지
-        gdb.execute("bt 5")
-        return True  # 큰 할당만 정지
-    return False
+Breakpoint 2.1, __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
+(gdb) bt 2
+#0  __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
+#1  0x0000aaaaaaaa0a34 in main () at py.c:33
 ```
+
+`malloc(24)` 세 번은 트리 노드 셋, `malloc(64)`는 `small`, 2 MiB가 `big`입니다. `(46 locations)`는 GDB가 `malloc`이라는 이름의 위치를 46곳 찾아 모두에 걸었다는 표시입니다. [Ch 5](/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints)의 `commands` + `silent` + `printf`와 같은 일을 하지만, 조건을 Python으로 짤 수 있다는 점이 다릅니다.
 
 ### malloc 반환값을 추적하려면
 
-malloc 진입 때 stop event에 lambda를 계속 연결하면 handler가 누적됩니다. 다음 stop이 malloc 반환이라는 보장도 없어 그때 rax를 읽는 것은 반환 주소 기록이 아닙니다. 해당 스레드·프레임의 [gdb.FinishBreakpoint](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Finish-Breakpoints-in-Python.html)와 return_value로 정상 반환을 포착하고 out_of_scope·종료에서 상태를 정리해야 합니다.
+반환값은 함수가 *끝날 때* 생깁니다. [GDB 매뉴얼 Finish Breakpoints in Python](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Finish-Breakpoints-in-Python.html)의 `gdb.FinishBreakpoint`는 지정한 프레임이 반환하는 자리에 임시 breakpoint를 걸고 `return_value`로 반환값을 줍니다. `malloc` 진입에서 하나씩 만들었습니다.
 
-인자 레지스터는 x86-64 SysV rdi, AArch64 x0처럼 ABI에 따라 달라집니다. inline frame·tail call·정지 콜백의 제약·realloc/calloc/aligned allocation까지 다루지 않은 코드를 일반 누수 검출기로 사용할 수 없습니다. 완성된 동적 검출은 [Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)나 [ASan/LSan](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)으로 보완합니다. 이 host에서는 GDB Python malloc 추적기를 실행하지 않았습니다.
+```python
+class MallocReturn(gdb.FinishBreakpoint):
+    def __init__(self, size):
+        super().__init__(gdb.newest_frame(), internal=True)
+        self.size = size
+
+    def stop(self):
+        gdb.write(f"malloc({self.size}) -> {int(self.return_value):#x}\n")
+        return False
+
+    def out_of_scope(self):
+        gdb.write("malloc frame left without return\n")
+
+
+class TraceMalloc(gdb.Breakpoint):
+    def stop(self):
+        MallocReturn(int(gdb.parse_and_eval("$x0")))
+        return False
+```
+
+위 세션에서 `big`의 `malloc`에 멈춘 뒤 `TraceMalloc("malloc")`을 걸고 계속하자, 그 뒤에 일어난 할당 하나가 잡혔습니다. `printf`가 stdout 버퍼로 잡은 4096바이트입니다.
+
+```text
+malloc(4096) -> 0xaaaaaaac1350
+```
+
+이 코드는 `malloc` 하나만 보고, `realloc`·`calloc`이나 스레드가 여럿인 경우는 다루지 않습니다. 누수 검출이 목적이라면 [Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)나 [ASan/LSan](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)을 씁니다.
 
 ## Pretty-Printer — 구조체를 사람 읽을 형태로
 
-가장 자주 만들어지는 확장. `std::vector<int>` 같은 STL 컨테이너가 멤버 변수의 원시 형태가 아니라 `{1, 2, 3, 4, 5}`로 보이는 이유입니다.
+가장 자주 만드는 확장입니다. 원시 출력 `{x = 3, y = 4}`를 `Point(3, 4)`처럼 바꿉니다.
 
 ### 동작 원리
 
-GDB가 `print v`를 받으면.
-
-1. `v`의 타입을 알아냄 (`gdb.Value.type`).
-2. 등록된 pretty-printer 중 *이 타입 이름이 매칭*되는 게 있는지 확인 (regex).
-3. 매칭되면 그 클래스 인스턴스를 만들어 `to_string()` 호출. 결과를 출력.
-4. `children()` 메서드가 있으면 자식 노드 순회.
-5. `display_hint()`가 있으면 그 힌트(`"array"`, `"map"`, `"string"`)로 표시 방식 결정.
-
-매칭이 없으면 원시 출력(`{x = 3, y = 4}`).
+GDB 매뉴얼 Pretty Printing API 절에 따르면, GDB는 값을 출력할 때 등록된 printer 목록에서 그 값을 맡을 printer를 찾고, 찾으면 `to_string()`의 결과를 출력합니다. `children()`이 있으면 자식 노드를 순회하고, `display_hint()`가 있으면 그 힌트로 표시 방식을 바꿉니다. 맞는 printer가 없으면 원시 형식으로 출력합니다.
 
 ### 단순 printer
 
 ```python
-import gdb
-import gdb.printing
-
-class MyPointPrinter:
-    """struct Point { int x, y; } 용 pretty-printer."""
-
+class PointPrinter:
     def __init__(self, val):
         self.val = val
 
     def to_string(self):
-        x = int(self.val['x'])
-        y = int(self.val['y'])
-        return f"Point({x}, {y})"
+        return f"Point({int(self.val['x'])}, {int(self.val['y'])})"
 
 def build_pretty_printer():
     pp = gdb.printing.RegexpCollectionPrettyPrinter("myproject")
-    pp.add_printer('Point', '^Point$', MyPointPrinter)
+    pp.add_printer('Point', '^Point$', PointPrinter)
+    pp.add_printer('MyList', '^MyList$', MyListPrinter)
+    pp.add_printer('MyMap', '^MyMap$', MyMapPrinter)
     return pp
 
-gdb.printing.register_pretty_printer(
-    gdb.current_objfile(),
-    build_pretty_printer())
+gdb.printing.register_pretty_printer(gdb.current_objfile(), build_pretty_printer())
 ```
-
-이제 `print` 했을 때:
 
 ```text
 (gdb) print p
 $1 = Point(3, 4)
-```
-
-원시 형태로 보고 싶으면 `/r`.
-
-```text
-(gdb) print /r p
+(gdb) print/r p
 $2 = {x = 3, y = 4}
+(gdb) info pretty-printer
+global pretty-printers:
+  builtin
+  myproject
+    MyList
+    MyMap
+    Point
 ```
+
+`/r`(raw)는 printer를 건너뜁니다. 매뉴얼에 따르면 `gdb.current_objfile()`은 스크립트를 auto-load하는 동안에만 해당 objfile을 돌려주고 그 밖에는 `None`입니다. `source`로 직접 읽었으므로 `None`이 넘어가 printer가 전역(`global pretty-printers`)에 등록됐습니다.
 
 ### 컬렉션 — children 추가
 
-벡터·맵 같은 시퀀스는 `children()` 메서드로 원소를 표현합니다.
+배열처럼 원소가 있는 타입은 `children()`이 `(이름, 값)` 쌍을 내놓습니다.
 
 ```python
 class MyListPrinter:
@@ -268,30 +262,33 @@ class MyListPrinter:
         self.val = val
 
     def to_string(self):
-        size = int(self.val['size'])
-        return f"MyList of length {size}"
+        return f"MyList of length {int(self.val['size'])}"
 
     def children(self):
-        size = int(self.val['size'])
         data = self.val['data']
-        for i in range(size):
+        for i in range(int(self.val['size'])):
             yield f"[{i}]", data[i]
 
     def display_hint(self):
         return "array"
 ```
 
-`display_hint`는 GDB에게 표시 방식을 알림.
+```text
+(gdb) print list
+$3 = MyList of length 3 = {10, 20, 30}
+```
 
-| hint | 표시 |
+`display_hint`의 값은 매뉴얼 Pretty Printing API 절이 정의합니다.
+
+| hint | 매뉴얼의 정의 |
 |------|------|
-| `"array"` | `[0] = .., [1] = ..` 인덱스 형식 |
-| `"map"` | `[key] = value` 쌍 (children이 key, value 교대 emit) |
-| `"string"` | 따옴표 + 이스케이프 |
-
-MI(머신 인터페이스) 프런트엔드(VSCode 등)가 이 힌트를 이용해 트리 위젯을 그립니다.
+| `"array"` | 배열 같은 값. CLI가 `set print elements`·`set print array`를 따름 |
+| `"map"` | 맵 같은 값. 자식이 key, value 순서로 번갈아 나온다고 가정 |
+| `"string"` | 문자열 같은 값. `to_string`이 Python 문자열을 돌려주면 언어별 문자열 형식으로 출력 |
 
 ### Map printer 예
+
+`"map"` 힌트에서는 자식을 key, value, key, value 순서로 내놓습니다.
 
 ```python
 class MyMapPrinter:
@@ -300,7 +297,6 @@ class MyMapPrinter:
     def to_string(self):
         return f"MyMap of {int(self.val['size'])} elements"
     def children(self):
-        # children이 (key0, value0, key1, value1, ...) 순서로 emit
         node = self.val['root']
         for i in range(int(self.val['size'])):
             yield f"key{i}", node['key']
@@ -312,104 +308,120 @@ class MyMapPrinter:
 
 ```text
 (gdb) print m
-$1 = MyMap of 3 elements = {
-  ["foo"] = 1,
-  ["bar"] = 2,
-  ["baz"] = 3
-}
+$4 = MyMap of 3 elements = {[0xaaaaaaaa0ac0 "foo"] = 1, [0xaaaaaaaa0ab8 "bar"] = 2, [0xaaaaaaaa0b00 "baz"] = 3}
 ```
 
-### auto-load — 빌드 시 자동 적용
+키가 `const char*`라 포인터 주소와 문자열이 함께 찍혔습니다. 키를 문자열만 보이게 하려면 `node['key'].string()`을 넘기면 됩니다.
 
-`libfoo.so`마다 `libfoo.so-gdb.py`가 같이 설치돼 있으면 GDB가 *그 라이브러리를 로드할 때* 자동으로 그 스크립트를 실행합니다 — pretty-printer가 *자동 등록*.
+### MI에도 그대로 반영된다
 
-```bash
-# 라이브러리와 같은 디렉터리에 두기
-/usr/lib/libfoo.so
-/usr/lib/libfoo.so-gdb.py    # 라이브러리 로드 시 source됨
-```
-
-배포 시 라이브러리에 따라가는 pretty-printer를 *번들*로 제공하는 표준 방법. libstdc++의 STL printer가 이런 식으로 배포됩니다.
+IDE는 GDB/MI로 GDB와 대화합니다. GDB 매뉴얼은 GDB/MI를 "a line based machine oriented text interface"로, 디버거를 큰 시스템의 한 부품으로 쓰는 프로그램을 위한 것이라고 설명합니다. `display_hint`는 MI 응답의 `displayhint` 필드로 나갑니다. 같은 printer를 등록하고 `gdb --interpreter=mi3`로 변수 객체를 만들었습니다.
 
 ```text
-(gdb) add-auto-load-safe-path /opt/myproject/debuggers
+-enable-pretty-printing
+^done
+-var-create pv * p
+^done,name="pv",numchild="0",value="Point(3, 4)",type="struct Point",thread-id="1",dynamic="1",has_more="0"
+-var-create lv * list
+^done,name="lv",numchild="0",value="MyList of length 3",type="struct MyList",thread-id="1",displayhint="array",dynamic="1",has_more="1"
+-var-list-children lv
+^done,numchild="3",displayhint="array",children=[child={name="lv.[0]",exp="[0]",numchild="0",type="int",thread-id="1"},child={name="lv.[1]",exp="[1]",numchild="0",type="int",thread-id="1"},child={name="lv.[2]",exp="[2]",numchild="0",type="int",thread-id="1"}],
 ```
 
-보안상 *알려진 경로*만 auto-load가 허용. 신뢰하는 프로젝트의 정확한 디렉터리만 추가합니다. / 전체를 허용하면 임의 executable 옆의 스크립트까지 자동 실행될 수 있습니다.
+자식 원소는 `-var-list-children`으로 따로 받습니다.
+
+### auto-load — 라이브러리에 printer 딸려 보내기
+
+GDB 매뉴얼 objfile-gdb.py file 절에 따르면 GDB는 새 objfile을 읽을 때 `<objfile>-gdb.py`라는 이름의 스크립트를 찾아 실행합니다. `libfoo.so` 옆에 `libfoo.so-gdb.py`를 두고 확인했습니다. 처음에는 safe-path 밖이라 거부됐고, `add-auto-load-safe-path`로 그 디렉터리를 허용하자 라이브러리가 로드될 때 스크립트가 실행됐습니다.
+
+```text
+$ gdb -q ./usefoo -ex 'break main' -ex run
+warning: File "/root/ch09/lib/libfoo.so-gdb.py" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+...
+$ gdb -q -iex 'add-auto-load-safe-path /root/ch09/lib' ./usefoo -ex 'break main' -ex run -ex 'info auto-load python-scripts'
+libfoo.so-gdb.py loaded
+...
+Loaded  Script
+Yes     /root/ch09/lib/libfoo.so-gdb.py
+```
+
+safe-path에는 신뢰하는 디렉터리만 넣습니다. `/` 전체를 허용하면 아무 실행 파일 옆의 스크립트까지 자동으로 실행됩니다.
 
 ## libstdc++ / libc++ pretty-printer
 
-이미 만들어진 것을 받아 쓰는 게 보통입니다.
+STL printer는 대부분 직접 만들 필요가 없습니다. Debian 13에서는 GCC 패키지가 `/usr/share/gcc/python/libstdcxx/v6/printers.py`를 설치하고, [Ch 3](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state)에서 본 auto-load 스크립트 `libstdc++.so.6.0.33-gdb.py`가 그 디렉터리를 `sys.path`에 넣은 뒤 등록합니다.
 
-```bash
-# libstdc++ (GCC 소스에 포함)
-$ git clone https://gcc.gnu.org/git/gcc.git
-$ ls gcc/libstdc++-v3/python/libstdcxx/v6/printers.py
+```text
+$ grep -n "register_libstdcxx_printers\|sys.path" /usr/share/gdb/auto-load/usr/lib/aarch64-linux-gnu/libstdc++.so.6.0.33-gdb.py
+55:    if not dir_ in sys.path:
+56:        sys.path.insert(0, dir_)
+60:from libstdcxx.v6 import register_libstdcxx_printers
+61:register_libstdcxx_printers(gdb.current_objfile())
+$ grep -c "^class Std" /usr/share/gcc/python/libstdcxx/v6/printers.py
+49
 ```
 
-`~/.gdbinit`에 등록.
+이 `printers.py`에는 `Std`로 시작하는 클래스가 49개 있고, `StdVectorPrinter`(520행)·`StdMapPrinter`(834행)·`StdSpanPrinter`(1906행)도 그중 하나입니다. 자동 등록이 안 되는 환경이라면 같은 두 줄을 `.gdbinit`에 직접 넣습니다.
 
 ```python
 python
 import sys
-sys.path.insert(0, '/path/to/libstdcxx/python')
+sys.path.insert(0, '/usr/share/gcc/python')
 from libstdcxx.v6.printers import register_libstdcxx_printers
 register_libstdcxx_printers(None)
 end
 ```
 
-대부분의 배포판은 GDB 패키지가 자동으로 등록합니다. macOS의 `libc++`는 LLVM 소스의 `libcxx/utils/gdb/libcxx/printers.py` (전체 llvm-project checkout 기준).
-
-이 패키지 안에 `StdVectorPrinter`, `StdMapPrinter`, `StdStringPrinter` 등 STL의 거의 모든 컨테이너 printer가 있습니다. 새 컨테이너가 추가될 때마다 (`std::span`, `std::flat_map`) 같이 갱신됩니다.
+LLVM의 libc++용 GDB printer는 llvm-project 저장소의 [`libcxx/utils/gdb/libcxx/printers.py`](https://github.com/llvm/llvm-project/blob/main/libcxx/utils/gdb/libcxx/printers.py)에 있습니다.
 
 ## 트리 / 그래프 시각화
 
-복잡한 구조는 그래프뷰가 가장 빠릅니다. `gdb.Command`로 `viz` 같은 명령을 만들어 자료구조를 DOT으로 출력하면 외부 graphviz로 PNG 변환.
+복잡한 구조는 그림으로 보는 편이 빠릅니다. 트리를 따라가며 Graphviz DOT 파일을 쓰는 명령을 만들었습니다.
 
 ```python
-import gdb
-
 class VizTree(gdb.Command):
     def __init__(self):
         super().__init__("viz_tree", gdb.COMMAND_USER)
 
     def invoke(self, arg, from_tty):
         root = gdb.parse_and_eval(arg)
-        with open("/tmp/tree.dot", "w") as f:
+        with open("/root/ch09/tree.dot", "w") as f:
             f.write("digraph G {\n")
             self._walk(root, f)
             f.write("}\n")
-        gdb.write("wrote /tmp/tree.dot\n")
+        gdb.write("wrote /root/ch09/tree.dot\n")
 
     def _walk(self, node, f):
         if int(node) == 0:
             return
-        val = int(node['value'])
-        f.write(f'  n{int(node)} [label="{val}"];\n')
+        f.write(f'  n{int(node)} [label="{int(node["value"])}"];\n')
         for side in ('left', 'right'):
             child = node[side]
             if int(child) != 0:
                 f.write(f'  n{int(node)} -> n{int(child)};\n')
                 self._walk(child, f)
-
-VizTree()
 ```
 
 ```text
 (gdb) viz_tree root
-wrote /tmp/tree.dot
-$ dot -Tpng /tmp/tree.dot > tree.png
+wrote /root/ch09/tree.dot
+(gdb) shell cat /root/ch09/tree.dot
+digraph G {
+  n187649984565984 [label="2"];
+  n187649984565984 -> n187649984565920;
+  n187649984565920 [label="1"];
+  n187649984565984 -> n187649984565952;
+  n187649984565952 [label="3"];
+}
 ```
 
-링크드 리스트·해시 테이블·트리·그래프 — 모두 같은 패턴. 큰 자료구조 디버깅에서 시각화는 *콘솔 출력*과 비교가 안 됩니다.
+노드 이름은 구조체의 주소(10진수)입니다. 이 파일을 `dot -Tpng tree.dot -o tree.png`로 그림으로 바꿉니다. 이 VM에는 Graphviz를 설치하지 않아 변환은 하지 않았습니다.
 
 ## Convenience function
 
-`$<name>(...)` 형태로 식 안에서 부를 수 있는 함수.
+`gdb.Function`을 상속하면 식 안에서 `$이름(...)`으로 부를 수 있는 함수가 생깁니다. GDB 안에서 계산하므로 대상 프로세스의 함수를 부르지 않습니다.
 
 ```python
-import gdb
-
 class StrLen(gdb.Function):
     """문자열 길이를 반환."""
 
@@ -417,89 +429,69 @@ class StrLen(gdb.Function):
         super().__init__("strlen2")
 
     def invoke(self, str_arg):
-        s = str_arg.string()
-        return len(s)
-
-StrLen()
+        return len(str_arg.string())
 ```
 
 ```text
 (gdb) print $strlen2(msg)
-$1 = 12
+$5 = 12
 ```
 
-조건부 BP에 쓰면 매우 강력합니다.
-
-```text
-(gdb) break process if $strlen2(msg) > 100
-```
+조건부 breakpoint에서 `break process if $strlen2(msg) > 100`처럼 쓰면, [Ch 2](/blog/tools/debugging/gdb-lldb/chapter02-basic-commands)에서 본 `strcmp` 반환 타입 문제 없이 문자열 조건을 걸 수 있습니다.
 
 ## Frame filter — 콜스택 가공
 
-특정 라이브러리 프레임을 숨기거나 합치고 싶을 때. 비동기 코드(future/coroutine)의 콜스택을 *의미 있는 단위*로 묶을 때 자주 씁니다.
+frame filter는 `bt`에 나갈 프레임을 걸러 내거나 바꿉니다. `helper` 프레임을 숨기고, 나머지 함수 이름을 `FrameDecorator`로 대문자로 바꾸는 filter를 만들었습니다.
 
 ```python
-class SkipBoostFilter:
+from gdb.FrameDecorator import FrameDecorator
+
+class UpperDecorator(FrameDecorator):
+    def function(self):
+        name = super().function()
+        return name.upper() if isinstance(name, str) else name
+
+class HideHelper:
     def __init__(self):
-        self.name = "skip-boost"
+        self.name = "hide-helper"
         self.priority = 100
         self.enabled = True
         gdb.frame_filters[self.name] = self
 
     def filter(self, frame_iter):
         for frame in frame_iter:
-            name = frame.function() or ""
-            if "boost::" not in name:
-                yield frame
-
-SkipBoostFilter()
+            if frame.function() == "helper":
+                continue
+            yield UpperDecorator(frame)
 ```
 
-### FrameDecorator — 프레임을 *변형*
-
-원본 프레임을 감싸 `function()`, `address()`, `frame_args()` 등을 가로채 다른 값을 반환할 수 있습니다.
-
-```python
-from gdb.FrameDecorator import FrameDecorator
-
-class FoldedCoroFrame(FrameDecorator):
-    def __init__(self, frame, inner_frames):
-        super().__init__(frame)
-        self.inner = inner_frames
-
-    def function(self):
-        # 코루틴 awaiter 체인을 한 줄로
-        names = [f.function() or '??' for f in self.inner]
-        return ' → '.join(names)
+```text
+(gdb) bt
+#0  helper (v=12) at py.c:15
+#1  0x0000aaaaaaaa08d8 in process (msg=0xaaaaaaaa0ac8 "hello, world") at py.c:16
+#2  0x0000aaaaaaaa0a40 in main () at py.c:34
+(gdb) python HideHelper()
+(gdb) bt
+#1  0x0000aaaaaaaa08d8 in PROCESS (msg=0xaaaaaaaa0ac8 "hello, world") at py.c:16
+#2  0x0000aaaaaaaa0a40 in MAIN () at py.c:34
+(gdb) bt -no-filters
+#0  helper (v=12) at py.c:15
+...
+(gdb) info frame-filter
+global frame-filters:
+  Priority  Enabled  Name
+  100       Yes      hide-helper
 ```
 
-`std::coroutine`이나 `boost::asio`의 깊은 콜스택을 *논리적 한 단계*로 압축하는 데 유용. FrameDecorator만으로 실제 중단된 coroutine의 awaiter chain이 복원되지는 않습니다. 런타임 메타데이터를 읽고 논리적 관계를 구성하는 별도 코드가 필요하며 특정 회사의 내부 구현을 이 예제로 추정하지 않습니다.
+프레임 번호(#1, #2)는 원래 번호 그대로이고, `bt -no-filters`([Ch 4](/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames)의 `bt no-filters`)로 원본을 다시 볼 수 있습니다.
 
 ## Unwinder — 콜스택 직접 풀기
 
-DWARF로 풀리지 않는 특수 frame이 있으면 (예: JIT 코드, 인터프리터) Python으로 직접 unwinder를 제공.
-
-```python
-class JitUnwinder(gdb.unwinder.Unwinder):
-    def __init__(self):
-        super().__init__("jit-unwinder")
-    def __call__(self, pending_frame):
-        pc = pending_frame.read_register("pc")
-        if not in_jit_region(int(pc)):
-            return None
-        # JIT 사이드 테이블에서 frame 정보 추출
-        next_pc = lookup_jit_frame(int(pc))
-        sp = pending_frame.read_register("sp")
-        unwind_info = pending_frame.create_unwind_info(...)
-        unwind_info.add_saved_register("pc", next_pc)
-        return unwind_info
-
-gdb.unwinder.register_unwinder(None, JitUnwinder(), replace=False)
-```
-
-이 코드는 JIT side table과 FrameId를 생략한 API 구조 스케치이며 실행 가능한 unwinder가 아닙니다. 특정 VM의 내부 구현 근거로 사용하지 않습니다.
+GDB 매뉴얼 Unwinding Frames in Python 절에 따르면 unwinder는 현재 프레임을 자기가 처리할 수 있는지 판단하고, 처리할 수 있으면 프레임 ID와 이전 프레임의 레지스터를 돌려줍니다. 매뉴얼은 GDB의 기본 unwinder가 다루지 못하는 프레임의 예로 Java 가상 머신을 돌리는 혼합 언어 애플리케이션을 듭니다. 이 장에서는 그런 대상이 없어 unwinder를 작성해 돌리지 않았습니다.
 
 ## Event 훅
+
+`gdb.events`에 함수를 연결하면 정지·종료·objfile 로드 같은 사건마다 불립니다.
 
 ```python
 def on_stop(event):
@@ -516,37 +508,39 @@ gdb.events.exited.connect(on_exit)
 gdb.events.new_objfile.connect(on_new_obj)
 ```
 
-특정 라이브러리가 로드되는 순간 자동으로 BP를 설치하거나, 매 정지 시 콜스택을 외부 파일로 떨어뜨리는 등의 자동화.
-
-## MI — 머신 인터페이스 (IDE 통합)
-
-VSCode·Emacs gud·DDD 같은 프런트엔드는 *MI* (Machine Interface) 프로토콜로 GDB와 통신합니다. CLI 출력 대신 *구조화된 명령·응답*.
-
 ```text
-(gdb) -exec-run
-^running
-(gdb) -break-insert main
-^done,bkpt={number="1",type="breakpoint",addr="0x...",func="main",...}
+(gdb) source events.py
+(gdb) break helper
+(gdb) run
+loaded /usr/lib/debug/.build-id/d7/be73c7b2bf2531fb3e11318f0949141af7063a.debug
+loaded /lib/ld-linux-aarch64.so.1
+loaded system-supplied DSO at 0xfffff7ffa000
+loaded /usr/lib/debug/.build-id/5f/3926d9963ff284b8173bf3601bbb00c3abad16.debug
+loaded /lib/aarch64-linux-gnu/libc.so.6
+
+Breakpoint 1, helper (v=12) at py.c:15
+stopped at helper
+(gdb) continue
+...
+[Inferior 1 (process 2394) exited with code 02]
+exit code 2
 ```
 
-Python pretty-printer는 *MI 출력에도 반영*됩니다 — VSCode의 변수 패널이 트리로 보이는 이유. `display_hint`의 `"array"`/`"map"`이 MI 응답에 포함돼 IDE가 트리를 그립니다.
-
-직접 MI를 다룰 일은 거의 없지만, IDE 디버깅이 *왜* 그렇게 보이는지의 답은 여기 있습니다.
+`new_objfile`은 공유 라이브러리뿐 아니라 build-id 경로에서 찾은 별도 디버그 파일에도 불렸습니다. 특정 라이브러리가 로드되는 순간에 breakpoint를 거는 자동화에 이 훅을 씁니다.
 
 ## LLDB의 Python — 다른 API
 
-LLDB도 Python 내장이지만 API가 다릅니다.
+LLDB의 Python API는 `SB`(Scripting Bridge)로 시작하는 클래스로 이루어집니다([LLDB SB API 문서](https://lldb.llvm.org/resources/sbapi.html)). `script` 안에서는 `lldb.frame`, `lldb.process` 같은 편의 변수가 현재 상태를 가리킵니다.
 
 ```text
-(lldb) script
->>> target = lldb.debugger.GetSelectedTarget()
->>> process = target.GetProcess()
->>> thread = process.GetSelectedThread()
->>> frame = thread.GetSelectedFrame()
->>> print(frame.GetFunctionName())
+(lldb) script print(lldb.frame.GetFunctionName(), lldb.process.GetSelectedThread().GetIndexID())
+main 1
+(lldb) script print(lldb.frame.EvaluateExpression("p.x + p.y"))
+(int) $0 = 7
+(lldb) script lldb.debugger.HandleCommand("bt 1")
+* thread #1, name = 'py', stop reason = breakpoint 1.1
+    frame #0: 0x0000aaaaaaaa0a2c py`main at py.c:33:17
 ```
-
-핵심 클래스가 `SBTarget`, `SBProcess`, `SBThread`, `SBFrame`, `SBValue`. SB는 [공식 문서의 Scripting Bridge](https://lldb.llvm.org/resources/sbapi.html) API입니다. 모두 `lldb` 모듈에 있습니다.
 
 | GDB | LLDB |
 |-----|------|
@@ -557,7 +551,9 @@ LLDB도 Python 내장이지만 API가 다릅니다.
 | `gdb.parse_and_eval(...)` | `frame.EvaluateExpression(...)` |
 | `gdb.execute(...)` | `lldb.debugger.HandleCommand(...)` |
 
-### LLDB 커스텀 명령
+### LLDB 커스텀 명령과 formatter
+
+LLDB에서는 모듈의 `__lldb_init_module`이 `command script import` 때 불립니다. 명령 하나와, GDB pretty-printer에 해당하는 summary(한 줄 요약)·synthetic(자식 목록) provider를 한 파일에 넣었습니다.
 
 ```python
 import lldb
@@ -565,21 +561,6 @@ import lldb
 def hello(debugger, command, result, internal_dict):
     result.PutCString(f"hello, {command or 'world'}")
 
-def __lldb_init_module(debugger, internal_dict):
-    debugger.HandleCommand('command script add -f my_cmds.hello hello')
-```
-
-```text
-(lldb) command script import my_cmds.py
-(lldb) hello LLDB
-hello, LLDB
-```
-
-### LLDB pretty-printer
-
-`type summary`와 `type synthetic`이 GDB의 pretty-printer 역할.
-
-```python
 def Point_SummaryProvider(valobj, internal_dict):
     x = valobj.GetChildMemberWithName('x').GetValueAsSigned()
     y = valobj.GetChildMemberWithName('y').GetValueAsSigned()
@@ -592,38 +573,61 @@ class MyListProvider:
         return self.valobj.GetChildMemberWithName('size').GetValueAsUnsigned()
     def get_child_at_index(self, idx):
         data = self.valobj.GetChildMemberWithName('data')
-        return data.GetChildAtIndex(idx, lldb.eNoDynamicValues, True)
+        return data.CreateChildAtOffset(f"[{idx}]", idx * 4, data.GetType().GetPointeeType())
     def update(self):
         pass
+
+def __lldb_init_module(debugger, internal_dict):
+    debugger.HandleCommand('command script add -f my_cmds.hello hello')
+    debugger.HandleCommand('type summary add -F my_cmds.Point_SummaryProvider Point')
+    debugger.HandleCommand('type synthetic add -l my_cmds.MyListProvider MyList')
 ```
 
 ```text
-(lldb) type summary add -F my_mod.Point_SummaryProvider Point
-(lldb) type synthetic add -l my_mod.MyListProvider MyList
+(lldb) command script import /root/ch09/my_cmds.py
+(lldb) hello LLDB
+hello, LLDB
+(lldb) frame variable p list
+(Point) p = Point(3, 4)
+(MyList) list = ([0] = 10, [1] = 20, [2] = 30)
 ```
 
-GDB보다 *summary*와 *synthetic*이 분리돼 있어 한 줄 표시(summary)와 자식 트리(synthetic)를 따로 정의합니다.
+GDB는 한 printer 클래스가 `to_string`과 `children`을 함께 갖지만, LLDB는 요약(`type summary`)과 자식 트리(`type synthetic`)를 따로 등록합니다.
 
-### LLDB의 platform 추상화
+### 외부 스크립트에서 LLDB 제어하기
 
-LLDB의 진짜 매력은 *외부 스크립트에서 디버거를 제어*할 수 있다는 점입니다.
+LLDB는 `lldb` 모듈을 일반 Python에서 import해 디버거 자체를 스크립트로 만들 수 있습니다. 아래는 breakpoint를 걸고 실행해 변수를 읽는 스크립트입니다.
 
 ```python
-#!/usr/bin/env python
+#!/usr/bin/env python3
 import lldb
 
 debugger = lldb.SBDebugger.Create()
-target = debugger.CreateTarget('./my_prog')
-target.BreakpointCreateByName('main')
+debugger.SetAsync(False)
+target = debugger.CreateTarget('./hello')
+bp = target.BreakpointCreateByName('factorial')
 process = target.LaunchSimple(None, None, '.')
-print(process.GetSelectedThread().GetSelectedFrame())
+frame = process.GetSelectedThread().GetSelectedFrame()
+print(frame)
+print(frame.FindVariable('n'))
+print(process.GetState() == lldb.eStateStopped, bp.GetHitCount())
+process.Kill()
 ```
 
-CI에서 자동 디버깅, 자체 디버거 UI, 테스트 자동화 — 모두 가능합니다. gdb.execute는 실행 중인 GDB의 embedded Python API입니다. 일반 외부 Python에서 gdb를 import해 같은 기능을 쓴다는 뜻은 아니며 외부 제어는 GDB/MI·batch와 구분합니다.
+macOS에서는 `lldb -P`가 알려 주는 경로를 `PYTHONPATH`에 넣고 Xcode의 Python(3.9.6)으로 실행해 동작했습니다. 실행 파일은 [Ch 1](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install)의 `hello`입니다.
+
+```text
+$ PYTHONPATH=$(lldb -P) xcrun python3 drive_lldb.py
+frame #0: 0x0000000100000470 hello`factorial(n=5) at hello.c:5:9
+(int) n = 5
+True 1
+```
+
+같은 스크립트가 Debian 13에서는 돌지 않았습니다. `lldb -P`가 가리키는 `/usr/lib/llvm-19/lib/python3.13/site-packages/lldb/_lldb.cpython-313-aarch64-linux-gnu.so`가 존재하지 않는 `../../../liblldb.so`를 가리켜 `ImportError: cannot import name '_lldb'`가 났고, `python3-lldb-19`를 설치한 상태였습니다. GDB의 `gdb` 모듈은 GDB 프로세스 안에서만 쓸 수 있으므로, GDB를 외부에서 제어할 때는 이런 방식 대신 GDB/MI나 `gdb -batch`를 씁니다.
 
 ## 실전 — .gdbinit 한 페이지
 
-자주 쓰는 셋업을 모아 두면 모든 세션에 자동 적용.
+위에서 확인한 설정을 모으면 다음과 같습니다. libstdc++ 경로는 Debian 13 기준입니다.
 
 ```python
 # ~/.gdbinit
@@ -634,12 +638,9 @@ set print pretty on
 set print object on
 set pagination off
 
-# 색깔
-set style sources on
-
 python
 import sys
-sys.path.insert(0, '/usr/share/gcc-13/python')
+sys.path.insert(0, '/usr/share/gcc/python')
 from libstdcxx.v6.printers import register_libstdcxx_printers
 register_libstdcxx_printers(None)
 
@@ -647,51 +648,48 @@ register_libstdcxx_printers(None)
 sys.path.insert(0, '/home/me/myproj/gdb')
 import myproj_printers
 myproj_printers.register_all()
-
-# 이벤트 훅
-def on_new_obj(event):
-    name = event.new_objfile.filename
-    if 'mylib.so' in name:
-        gdb.execute('source /opt/mylib-gdb-helpers.py')
-gdb.events.new_objfile.connect(on_new_obj)
 end
 ```
 
+`myproj_printers`는 위 `build_pretty_printer()` 같은 등록 함수를 담은 각자의 모듈 이름입니다.
+
 ## 자주 쓰는 패턴
 
-1. **메모리 누수 추적** — `malloc`/`free`에 Python 브레이크 + 카운터 집계.
-2. **무한 루프 진단** — 정지·thread-safety 조건을 지키는 event loop에서 상태 수집. 백그라운드 thread가 GDB API를 직접 호출하지 않습니다.
-3. **테스트 자동화** — `gdb -batch -ex "source script.py"`로 헤드리스 실행.
-4. **회귀 검증** — `parse_and_eval`로 변수 값 비교, 차이가 있으면 `gdb.write`.
-5. **JIT 디버깅** — Custom unwinder + 사이드 테이블 lookup.
-6. **포렌식** — 콜스택을 Sentry/Datadog 등 외부로 전송.
+1. **할당 추적** — `malloc`에 `gdb.Breakpoint` 서브클래스 + `FinishBreakpoint`로 크기와 반환 주소를 기록합니다.
+2. **테스트 자동화** — `gdb -batch -ex "source script.py"`로 헤드리스 실행합니다. 이 장의 세션이 모두 이 방식입니다.
+3. **회귀 검증** — `parse_and_eval`로 변수 값을 읽어 기대값과 비교하고, 다르면 `gdb.write`로 남깁니다.
+4. **사후 분석** — core를 열고 Python으로 자료구조를 순회해 요약을 파일로 남깁니다([Ch 7](/blog/tools/debugging/gdb-lldb/chapter07-core-dump)).
 
 ## 디버깅 자체의 디버깅
 
-Python 스크립트가 *조용히 실패*하면.
+Python 스크립트가 실패하면 기본값에서는 예외 메시지만 나옵니다. `set python print-stack full`을 켜면 traceback이 나옵니다.
 
 ```text
+(gdb) python 1/0
+Python Exception <class 'ZeroDivisionError'>: division by zero
+Error occurred in Python: division by zero
 (gdb) set python print-stack full
+(gdb) python 1/0
+Traceback (most recent call last):
+  File "<string>", line 1, in <module>
+ZeroDivisionError: division by zero
+Error occurred in Python: division by zero
 ```
-
-이후 모든 Python 예외의 콜스택이 표시됩니다. 사용자 명령 안에서 `try/except`로 명시적으로 잡는 것도 좋은 습관.
 
 ## 정리
 
-- `python ... end` / `source` / `.gdbinit`에서 자동 로드.
-- `gdb.Value`/`Type`/`Frame`이 핵심 객체.
-- `gdb.Command` 서브클래스로 새 명령, prefix로 트리 구성.
-- `gdb.Breakpoint.stop`으로 자동 처리(False면 정지하지 않고 continue).
-- pretty-printer = 구조체를 사람 읽을 형태로. `to_string`+`children`+`display_hint`.
-- `display_hint`의 `array`/`map`/`string`이 MI를 거쳐 IDE 트리로.
-- auto-load (`libfoo.so-gdb.py`)로 라이브러리 따라가는 printer 배포.
-- libstdc++/libc++ printer는 GCC/LLVM 소스에 있다.
-- FrameDecorator·Unwinder로 콜스택 변형·JIT 지원.
-- LLDB는 SB API — 외부 스크립트로 디버거 제어 가능.
+- `python ... end` / `source` / `.gdbinit`로 Python을 씁니다. Debian 13 GDB 16.3의 내장 Python은 3.13.5였습니다.
+- `gdb.Value`·`Frame`·`Inferior`가 핵심 객체입니다.
+- `gdb.Command`로 새 명령을, `prefix=True`로 명령 트리를 만듭니다.
+- `gdb.Breakpoint.stop()`이 `False`를 돌려주면 멈추지 않습니다. 반환값은 `gdb.FinishBreakpoint`로 받습니다.
+- pretty-printer는 `to_string` + `children` + `display_hint`이고, `displayhint`는 MI 응답에도 그대로 실립니다.
+- `<objfile>-gdb.py`는 safe-path 안에 있을 때만 자동 실행됩니다.
+- frame filter는 `bt`의 프레임을 숨기거나 바꾸고, `bt -no-filters`로 원본을 봅니다.
+- LLDB는 SB API를 쓰고 summary·synthetic을 따로 등록합니다. 외부 Python 제어는 macOS에서 동작했고 Debian 13 패키지에서는 import가 실패했습니다.
 
 ## 다음 장 예고
 
-Ch 10 — TUI와 프런트엔드. 터미널 UI, cgdb, gdb-dashboard, VSCode/Neovim DAP. 평소 작업 환경을 GDB와 어떻게 연결하나.
+[Ch 10: TUI와 프런트엔드](/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends)는 터미널 UI, cgdb, gdb-dashboard, VS Code·Neovim의 DAP를 다룹니다. 이 장의 pretty-printer와 MI가 그 프런트엔드들 밑에서 어떻게 쓰이는지 이어서 봅니다.
 
 ## 관련 항목
 
