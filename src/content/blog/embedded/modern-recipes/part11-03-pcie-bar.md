@@ -118,7 +118,7 @@ u32 size = ~mask + 1;                /* 0xfff00000 -> 0x00100000 */
 4. bridge의 window와 각 BAR에 주소를 배정합니다.
 5. 드라이버가 Command 레지스터의 Memory/I/O/Bus Master 비트를 켭니다.
 
-VM의 `dmesg`에서 이 과정이 보입니다. 처음 두 줄은 펌웨어(EDK2)가 둔 BAR 값을 Linux가 읽은 것이고, 아래 두 줄은 Linux가 주소를 다시 배정한 결과입니다.
+VM의 `dmesg`에서 이 과정이 보입니다. 첫 줄은 장치 발견, 둘째 줄은 펌웨어(EDK2)가 둔 BAR 값을 Linux가 읽은 것이고, 아래 두 줄은 Linux가 주소를 다시 배정한 결과입니다.
 
 ```text
 [    0.358611] pci 0000:00:03.0: [1234:11e8] type 00 class 0x00ff00 conventional PCI endpoint
@@ -179,14 +179,14 @@ module_pci_driver(edu_driver);
 MODULE_LICENSE("GPL");
 ```
 
-`obj-m += edu_bar.o` 한 줄짜리 Kbuild Makefile로 guest 안에서 `make -C /lib/modules/$(uname -r)/build M=$PWD modules`로 빌드해 올린 결과입니다.
+`obj-m += edu_bar.o`를 담은 Kbuild Makefile로 guest 안에서 `make -C /lib/modules/$(uname -r)/build M=$PWD modules`로 빌드해 올린 결과입니다.
 
 ```text
 edu_bar 0000:00:03.0: enabling device (0000 -> 0002)
 edu_bar 0000:00:03.0: BAR0 [mem 0x10000000-0x100fffff]
 edu_bar 0000:00:03.0: id=0x010000ed
 edu_bar 0000:00:03.0: liveness: wrote 0x12345678, read 0xedcba987
-$ grep edu_bar /proc/iomem
+$ grep -i edu_bar /proc/iomem
     10000000-100fffff : edu_bar
 ```
 
@@ -199,10 +199,15 @@ $ grep edu_bar /proc/iomem
 `void __iomem *`는 "이 포인터는 MMIO 주소"라는 표시입니다. gcc는 이 표시를 보지 않으므로, 포인터를 직접 역참조해도 컴파일 경고가 나지 않습니다. 잡아 주는 것은 정적 분석기 sparse입니다.
 
 ```c
+// SPDX-License-Identifier: GPL-2.0
+#include <linux/module.h>
+#include <linux/io.h>
+
 static u32 __maybe_unused bad_read(void __iomem *mmio)
 {
 	return *(u32 *)(mmio + 0x10);   /* __iomem 포인터를 직접 역참조 */
 }
+MODULE_LICENSE("GPL");
 ```
 
 같은 guest에서 sparse 0.6.4를 깔고 Kbuild의 `C=2`로 돌린 결과입니다.
@@ -218,7 +223,7 @@ $ make -C /lib/modules/$(uname -r)/build M=$PWD C=2 modules
 
 DMA 버퍼를 채운 뒤 장치 레지스터에 "시작"을 쓰는 순서가 뒤바뀌면, 장치가 아직 채워지지 않은 버퍼를 읽습니다. `Documentation/memory-barriers.txt`의 "KERNEL I/O BARRIER EFFECTS" 절은 `writeX()`에 대해 이렇게 보장합니다. CPU가 장치에 `writeX()`를 하기 전에, 같은 스레드가 앞서 한 메모리 쓰기가 모두 완료됩니다. 그래서 `dma_alloc_coherent()` 버퍼를 채우고 `writel()`로 시작 레지스터를 치는 코드에는 별도의 barrier가 필요 없습니다.
 
-arm64에서 이 보장이 어떻게 구현되는지도 소스로 확인할 수 있습니다. `include/asm-generic/io.h`의 `writel()`은 `__io_bw()`를 먼저 부르고, `arch/arm64/include/asm/io.h`는 `__io_bw()`를 `dma_wmb()`로 정의합니다. 원래 글에 있던 `__iowmb()`는 같은 파일이 "arm64-specific, don't use in portable drivers"라고 주석을 단 내부 매크로이므로 드라이버에서 직접 쓸 이유가 없습니다.
+arm64에서 이 보장이 어떻게 구현되는지도 소스로 확인할 수 있습니다. `include/asm-generic/io.h`의 `writel()`은 `__io_bw()`를 먼저 부르고, `arch/arm64/include/asm/io.h`는 `__io_bw()`를 `dma_wmb()`로 정의합니다. `arch/arm64/include/asm/io.h`의 `__iowmb()`는 같은 파일이 "arm64-specific, don't use in portable drivers"라고 주석을 단 내부 매크로이므로 드라이버에서 직접 쓸 이유가 없습니다.
 
 ```c
 memcpy(dma_buf, data, len);          /* 1. coherent 버퍼 채우기 */
@@ -273,7 +278,7 @@ liveness = 0x35010ff2
 
 `0xcafef00d`의 비트 반전이 `0x35010ff2`입니다. "레지스터가 전부 `0xffffffff`로 읽힌다"는 증상을 보면 Command 레지스터부터 확인합니다.
 
-DPDK 같은 user-space 드라이버 프레임워크는 sysfs보다 VFIO를 씁니다. DPDK 26.11 Getting Started Guide의 Linux Drivers 장은 DPDK가 쓰는 포트를 `vfio-pci`에 묶을 것을 권하고, IOMMU가 없으면 `vfio-pci`를 no-IOMMU 모드로 쓸 수 있다고 적습니다.
+DPDK 같은 user-space 드라이버 프레임워크는 sysfs보다 VFIO를 씁니다. DPDK 문서(26.11.0-rc3) Getting Started Guide의 Linux Drivers 장은 DPDK가 쓰는 포트를 `vfio-pci`에 묶을 것을 권하고, IOMMU가 없으면 `vfio-pci`를 no-IOMMU 모드로 쓸 수 있다고 적습니다.
 
 ## VFIO
 
@@ -303,7 +308,7 @@ bus master 비트가 꺼진 쪽은 DMA가 "완료"(`rc=0`, 장치의 RUN 비트�
 
 임베디드 SoC 중에는 PCIe root port를 내장한 것이 있습니다. 예를 들어 AMD DS891 v1.11.1에 따르면 Zynq UltraScale+ MPSoC의 PS에 있는 PCIe 블록은 PCI Express Base Specification 2.1을 따르고, Gen1/Gen2 속도로 x1·x2·x4 lane을 지원하며, endpoint 또는 단일 링크 root port로 동작합니다. root port 모드에서는 ECAM으로 config 요청을 만듭니다.
 
-링크가 협상한 속도와 폭은 `lspci -vv`의 `LnkCap`(장치가 지원하는 최대)과 `LnkSta`(현재 협상된 값)로 봅니다. VM의 NVMe 컨트롤러는 둘 다 2.5 GT/s x1이었고, 같은 VM의 QEMU root port는 `LnkCap: Speed 16GT/s, Width x32`인데 `LnkSta: Speed 2.5GT/s, Width x1`이었습니다. 이 root port 아래에 붙은 igb의 `LnkCap`이 2.5 GT/s x1이었으므로, root port의 `LnkSta`는 아래 장치와 맞춘 값입니다. `LnkSta`가 기대보다 낮을 때는 이렇게 링크 반대편의 `LnkCap`을 함께 봐야 원인이 어느 쪽인지 알 수 있습니다.
+링크가 협상한 속도와 폭은 `lspci -vv`의 `LnkCap`(장치가 지원하는 최대)과 `LnkSta`(현재 협상된 값)로 봅니다. VM의 NVMe 컨트롤러는 둘 다 2.5 GT/s x1이었고, 같은 VM의 QEMU root port는 `LnkCap: Speed 16GT/s, Width x32`인데 `LnkSta: Speed 2.5GT/s, Width x1`이었습니다. 이 root port 아래에 붙은 igb의 `LnkCap`이 2.5 GT/s x1이었고, QEMU는 링크 학습을 흉내 내지 않고 `hw/pci/pcie.c`의 `pcie_sync_bridge_lnk()`에서 아래 장치의 `LnkSta`를 root port에 복사합니다. 실제 하드웨어에서는 양쪽이 링크 학습으로 정하는 값입니다. `LnkSta`가 기대보다 낮을 때는 이렇게 링크 반대편의 `LnkCap`을 함께 봐야 원인이 어느 쪽인지 알 수 있습니다.
 
 ## Endpoint 쪽에서 BAR 만들기
 
@@ -332,7 +337,7 @@ RxErr 1
 TOTAL_ERR_COR 1
 ```
 
-같은 에러를 root port 아래의 igb NIC에 주입했을 때는 결과가 달랐습니다. 장치의 `CESta`에는 `RxErr+`가 남았지만 커널 로그와 `aer_dev_correctable`에는 아무것도 없었습니다. 그 장치의 `DevCtl`이 `CorrErr- NonFatalErr- FatalErr- UnsupReq-`, 즉 에러 보고가 꺼진 상태였기 때문입니다. Linux 6.12 `drivers/pci/pcie/aer.c`의 `is_error_source()`도 에러 원인을 찾을 때 `DevCtl`의 보고 비트(`PCI_EXP_AER_FLAGS`)가 꺼진 장치는 건너뜁니다. "AER 로그가 없다"가 "에러가 없다"를 뜻하지는 않으므로, 의심되는 장치는 `lspci -vv`의 `CESta`/`UESta`를 직접 봅니다.
+같은 에러를 root port 아래의 igb NIC에 주입했을 때는 결과가 달랐습니다. 장치의 `CESta`에는 `RxErr+`가 남았지만 커널 로그와 `aer_dev_correctable`에는 아무것도 없었습니다. 그 장치의 `DevCtl`이 `CorrErr- NonFatalErr- FatalErr- UnsupReq-`, 즉 에러 보고가 꺼진 상태였습니다. `setpci`로 해당 비트에 `000f`를 써도 `-`로 남았는데, QEMU v11.1.0의 igb 모델(`hw/net/igb.c`)은 root port와 달리 이 비트들을 쓰기 가능하게 만드는 `pcie_cap_deverr_init()`을 부르지 않기 때문입니다. 그리고 QEMU `hw/pci/pcie_aer.c`는 `DevCtl`의 CERE(Correctable Error Reporting Enable)가 꺼진 장치에서는 correctable 에러 메시지를 위로 보내지 않으므로, root port의 AER 드라이버에는 아무것도 도착하지 않습니다. Linux는 `pci_aer_init()`에서 이 비트를 켜려고 하지만(`drivers/pci/pcie/aer.c`), 장치가 받아 주지 않으면 소용이 없습니다. "AER 로그가 없다"가 "에러가 없다"를 뜻하지는 않으므로, 의심되는 장치는 `lspci -vv`의 `CESta`/`UESta`를 직접 봅니다.
 
 ## 자주 하는 실수
 
