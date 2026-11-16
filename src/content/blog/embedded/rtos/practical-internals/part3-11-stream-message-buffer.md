@@ -95,13 +95,13 @@ V11.2.0에는 trigger의 의미가 다른 두 종류가 있습니다. 일반 str
 
 일반 stream buffer는 2 byte로는 깨지 않고 4 byte가 되자 깨어나 4 byte를 받았습니다. 이미 데이터가 있으면 trigger보다 적은 2 byte도 바로 돌려줍니다. trigger는 최소 반환 크기가 아닙니다.
 
-batching buffer는 결과가 이상합니다. t=20에 깨어났는데 **0 byte**를 받았습니다. send 쪽은 4 ≥ 4라서 깨웠지만, receive 쪽은 `xBytesAvailable > xBytesToStoreMessageLength`(`:1142`)일 때만 읽고, batching buffer에서는 그 값이 trigger 4입니다(`:1079`). 4 > 4가 거짓이라 아무것도 읽지 않고 돌아온 것입니다. 깨우는 조건(`>=`)과 읽는 조건(`>`)이 한 byte 어긋나 있으니, batching buffer를 `portMAX_DELAY`로 읽더라도 반환값 0을 처리하는 루프로 감싸야 합니다.
+batching buffer는 결과가 이상합니다. t=20에 깨어났는데 **0 byte**를 받았습니다. send 쪽은 4 ≥ 4라서 깨웠지만, receive 쪽은 `xBytesAvailable > xBytesToStoreMessageLength`(`:1142`)일 때만 읽고, batching buffer에서는 그 값이 trigger 4입니다(`:1079`). 4 > 4가 거짓이라 아무것도 읽지 않고 돌아온 것입니다. 깨어난 뒤 0을 받았으므로 4 byte는 그대로 남았고, 2 byte를 더 넣은 뒤의 timeout 0 receive는 6 byte를 돌려줬습니다(6 > 4). 마지막 줄 출력의 "(2 bytes)"는 일반 stream buffer 기준으로 붙인 테스트 문구라 이 경우에는 맞지 않습니다. 깨우는 조건(`>=`)과 읽는 조건(`>`)이 한 byte 어긋나 있으니, batching buffer를 `portMAX_DELAY`로 읽더라도 반환값 0을 처리하는 루프로 감싸야 합니다.
 
 ## SPSC와 ISR 계약
 
 `include/stream_buffer.h:38-48`의 NOTE는 writer와 reader가 각각 하나라면 둘이 서로 다른 task나 interrupt여도 안전하다고 적습니다. UART ISR이 writer, 처리 task가 reader인 구성은 이 계약 그대로입니다. 반면 **ISR과 task가 모두 send**하면 writer가 둘입니다. 같은 NOTE는 writer가 여럿이면 application이 쓰기 호출을 직렬화해야 하고, 그 한 방법으로 "각 API 호출을 critical section 안에 두고 block time 0을 쓰라"고 적습니다. task용 mutex로는 ISR을 막을 수 없으므로 이 방법이 맞습니다.
 
-`xStreamBufferSendFromISR()`는 공간이 모자라면 들어가는 만큼만 쓰고 그 byte 수를 돌려줍니다. 반환값이 요청 길이보다 작으면 나머지는 버려진 것이므로 drop 카운터를 올립니다. DMA로 받은 버퍼를 넘긴다면 `memcpy()`가 끝난 뒤에야 DMA가 같은 버퍼를 다시 써도 됩니다.
+`xStreamBufferSendFromISR()`는 공간이 모자라면 들어가는 만큼만 쓰고 그 byte 수를 돌려줍니다(`stream_buffer.h:655-657`). 반환값이 요청 길이보다 작으면 나머지는 버려진 것이므로 drop 카운터를 올립니다. DMA로 받은 버퍼를 넘긴다면 `memcpy()`가 끝난 뒤에야 DMA가 같은 버퍼를 다시 써도 됩니다.
 
 ## 가변 길이 명령을 해석할 때
 

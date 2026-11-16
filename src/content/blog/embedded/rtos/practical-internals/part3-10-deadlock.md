@@ -2,7 +2,7 @@
 title: "Deadlock 분석 — 4 조건·Wait-for Graph·Lock Ordering·Timeout"
 slug: "embedded/rtos/practical-internals/part3-10-deadlock"
 date: 2026-05-06T09:31:00
-description: "Coffman의 네 조건과 wait-for graph 분석, lock ordering, timeout, hierarchical locking을 살펴봅니다."
+description: "Deadlock의 네 조건과 wait-for graph 분석, lock ordering, timeout, hierarchical locking을 살펴봅니다."
 series: "Practical RTOS Internals"
 seriesOrder: 31
 tags: [deadlock, detection, avoidance, lock-ordering]
@@ -23,7 +23,7 @@ Deadlock은 "서로가 쥔 것을 서로 기다리는" 순환입니다. 네 거�
 | **No Preemption** | 보유 자원을 임의로 강제 회수하지 않음 | 안전한 상태 회수 protocol 검토 |
 | **Circular Wait** | A→B→C→A 순환 대기 | **Lock ordering** |
 
-네 조건은 모두 필요 조건이라, 하나라도 성립하지 않게 만들면 deadlock이 생기지 않습니다. 아래 실행에서 lock ordering은 circular wait를, timeout rollback은 hold and wait를 깹니다.
+표의 오른쪽 열은 각 조건을 없애는 방법입니다. 아래 실행에서 lock ordering은 circular wait를, timeout rollback은 hold and wait를 깹니다.
 
 ## 전형적 시나리오: 2 Mutex 순환
 
@@ -68,7 +68,7 @@ FreeRTOS는 뒤쪽만 줍니다. `xSemaphoreGetMutexHolder()`(`include/semphr.h:
 
 wait-for graph는 지금 이 순간의 상태라 deadlock이 이미 일어난 뒤에야 cycle이 보입니다. 반대로 "L1을 쥔 채 L2를 잡은 적이 있다"는 획득 이력을 모은 dependency graph는 실제로 막히기 전에 순환 가능성을 보여 줍니다. 뒤에서 볼 Linux lockdep이 이 방식입니다.
 
-## 해결 1: Lock Ordering (가장 흔한 방법)
+## 해결 1: Lock Ordering
 
 규칙은 간단합니다. 모든 mutex에 전역 순서를 부여하고, 항상 낮은 순서부터 take합니다.
 
@@ -269,7 +269,7 @@ queue에 값을 넣어 줄 task가 `mtx_A`를 필요로 한다면 ABBA와 같은
 
 ## 정리
 
-- deadlock의 네 조건은 모두 필요 조건이라 하나만 깨도 됩니다. lock ordering은 circular wait를, rollback은 hold and wait를 깹니다.
+- lock ordering은 circular wait를, rollback은 hold and wait를 깹니다. 두 방법 모두 QEMU 실행에서 deadlock 없이 끝났습니다.
 - ABBA는 QEMU에서 네 번 돌려 네 번 모두 재현됐고, 멈춘 것은 두 task뿐이라 tick과 다른 task는 계속 돌았습니다.
 - FreeRTOS에서 wait-for graph는 `xSemaphoreGetMutexHolder()`와 application의 대기 기록을 합쳐야 그릴 수 있습니다.
 - 같은 순서로 바꾸자 두 task 모두 끝났고, `take_pair()`는 실패 시 첫 lock을 반납했습니다.

@@ -61,7 +61,7 @@ void rx_irq(void) {
 
 `read_and_ack_rx()`와 `count_rx_drop()`은 보드 코드가 채울 자리입니다. ARM_CM4F의 `portYIELD_FROM_ISR(x)`는 `portEND_SWITCHING_ISR(x)`이고(`portmacro.h:101-114`), `x`가 참이면 `portYIELD()`가 ICSR(`0xe000ed04`)에 `PENDSVSET`(bit 28)을 씁니다(`:88-100`). switch는 PendSV가 실행될 때 일어나는데, `xPortStartScheduler()`가 PendSV를 가장 낮은 priority(255)로 설정하므로(`port.c:65-66`, `:433`) 지금 ISR과 중첩된 다른 ISR이 모두 끝난 뒤에 돕니다.
 
-yield를 부를 때와 안 부를 때의 차이를 직접 쟀습니다. priority 1의 low task가 카운터를 올리는 도중 IRQ 3을 pending시키고, ISR이 binary semaphore를 give해 priority 3의 handler task를 깨웁니다. handler는 깨어난 순간의 카운터 값과 tick을 찍습니다.
+yield를 부를 때와 안 부를 때의 차이를 직접 쟀습니다. priority 1의 low task가 카운터 루프를 시작하기 직전에 IRQ 3을 pending시키고, ISR이 binary semaphore를 give해 priority 3의 handler task를 깨웁니다. handler는 깨어난 순간의 카운터 값과 tick을 찍습니다.
 
 ```text
 [with portYIELD_FROM_ISR]
@@ -90,7 +90,7 @@ void some_isr(void) {
 
 block은 "현재 task"의 TCB를 event list와 delayed list에 넣고 다른 task로 switch하는 일입니다. ISR이 실행 중일 때 `pxCurrentTCB`는 interrupt당한 task를 가리키므로, ISR에서 block하면 그 task를 엉뚱하게 재우게 됩니다. 게다가 ISR이 끝나지 않으면 PendSV도 돌 수 없어서 switch 자체가 일어나지 않습니다.
 
-ARM_CM4F 포트는 이 실수를 잡는 assert를 둡니다. `vPortEnterCritical()`은 nesting이 1일 때 ICSR의 `VECTACTIVE`가 0인지 확인합니다(`port.c:475-487`). 모든 task API는 critical section으로 들어가므로, ISR에서 task API를 부르면 여기서 걸립니다.
+ARM_CM4F 포트는 이 실수를 잡는 assert를 둡니다. `vPortEnterCritical()`은 nesting이 1일 때 ICSR의 `VECTACTIVE`가 0인지 확인합니다(`port.c:475-487`). queue·semaphore 계열 task API(`xQueueGenericSend()` 등)는 `taskENTER_CRITICAL()`로 들어가므로, ISR에서 task API를 부르면 여기서 걸립니다.
 
 **규칙은 단순합니다.** ISR은 비동기 신호 송신만 담당하고, 실제 처리는 task에 위임합니다.
 
@@ -124,7 +124,7 @@ void uart_irq(void) {
 
 ## Timer Service (Daemon) Task
 
-`xTimerPendFunctionCallFromISR()`는 `tmrCOMMAND_EXECUTE_CALLBACK_FROM_ISR` 메시지를 만들어 `xQueueSendFromISR()`로 timer command queue에 넣습니다(`timers.c:1248-1253`). 그래서 반환값은 enqueue 성공 여부이고, queue(`configTIMER_QUEUE_LENGTH`)가 차 있으면 `pdFAIL`입니다. 함수 포인터와 인자 두 개(`void *`, `uint32_t`)만 복사되므로, 포인터로 넘긴 데이터는 callback이 실행될 때까지 살아 있어야 합니다. 3-08의 `xEventGroupSetBitsFromISR()`가 이 경로로 bit 설정을 미룹니다.
+`xTimerPendFunctionCallFromISR()`는 `tmrCOMMAND_EXECUTE_CALLBACK_FROM_ISR` 메시지를 만들어 `xQueueSendFromISR()`로 timer command queue에 넣습니다(`timers.c:1248-1253`). 그래서 반환값은 enqueue 성공 여부이고, queue(`configTIMER_QUEUE_LENGTH`)가 차 있으면 `pdFALSE`입니다(`timers.h:1158-1159`). 함수 포인터와 인자 두 개(`void *`, `uint32_t`)만 복사되므로, 포인터로 넘긴 데이터는 callback이 실행될 때까지 살아 있어야 합니다. 3-08의 `xEventGroupSetBitsFromISR()`가 이 경로로 bit 설정을 미룹니다.
 
 callback은 timer daemon task 안에서 차례로 실행되므로, 한 callback이 오래 걸리면 다른 timer의 만료 처리도 그만큼 밀립니다. 큰 작업은 별도 worker task로 넘기고 daemon callback은 짧고 block하지 않게 유지합니다.
 

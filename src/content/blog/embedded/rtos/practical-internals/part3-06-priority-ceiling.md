@@ -23,7 +23,7 @@ PI(3-05)는 문제가 생긴 뒤에 대응합니다. 높은 task가 막혀야 �
 | 항목 | Original PCP (논문 IV장) | Immediate ceiling (POSIX `PTHREAD_PRIO_PROTECT`) |
 | --- | --- | --- |
 | ceiling 정의 | 그 semaphore를 lock할 수 있는 가장 높은 job의 priority | mutex 속성으로 지정한 `prioceiling` 값 |
-| lock 진입 | 다른 job이 잠근 semaphore들의 최고 ceiling(S*)보다 **엄격히 높아야** 통과 | 조건 없이 잡고, 잡은 동안 ceiling 이상으로 실행 |
+| lock 진입 | 다른 job이 잠근 semaphore들의 최고 ceiling(S*)보다 **엄격히 높아야** 통과 | 호출 thread priority가 ceiling 이하일 때만 잡고(초과 시 `EINVAL`, POSIX `pthread_mutex_lock()`), 잡은 동안 ceiling 이상으로 실행 |
 | priority 상승 시점 | 자기가 더 높은 job을 막을 때만, 막힌 job의 priority를 상속 | lock을 쥐는 순간. 대기자 유무와 무관 |
 | 원문의 보장 | deadlock 없음(Theorem 10), 낮은 job의 critical section 하나 이하만큼만 blocking(Theorem 12) | 표준은 스케줄링 규칙만 정하고 deadlock 정리는 말하지 않음 |
 
@@ -144,6 +144,7 @@ ceiling 값은 "자원을 쓰는 모든 task"의 정적 정보에 기대므로, 
 
 - [Sha·Rajkumar·Lehoczky, Priority Inheritance Protocols, IEEE Trans. Computers 39(9), 1990](https://www.math.unipd.it/~tullio/RTS/2009/SRL-1990.pdf): I·II장 가정, IV장 정의, Theorem 3·10·12.
 - [POSIX.1-2024 pthread_mutexattr_setprotocol()](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_mutexattr_setprotocol.html): `PTHREAD_PRIO_PROTECT`·`PTHREAD_PRIO_INHERIT` 정의.
+- [POSIX.1-2024 pthread_mutex_lock()](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_mutex_lock.html): `PTHREAD_PRIO_PROTECT`에서 ceiling보다 높은 호출자의 `EINVAL`.
 - [Zephyr v3.7.0 kernel/Kconfig](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/kernel/Kconfig), [mutex 문서](https://docs.zephyrproject.org/3.7.0/kernel/services/synchronization/mutexes.html): `CONFIG_PRIORITY_CEILING`의 의미.
 - [FreeRTOS V11.2.0 semphr.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/semphr.h): 제공되는 mutex API.
 

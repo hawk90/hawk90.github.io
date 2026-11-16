@@ -20,7 +20,7 @@ queue는 우체국 사서함 줄과 비슷합니다. 칸 수(`uxLength`)와 칸 
 
 ## Queue Structure
 
-`queue.c:103-136`의 `Queue_t`(typedef 이름 `QueueDefinition`)에서 핵심 필드만 역할별로 보면 다음과 같습니다. 표에 없는 필드(queue set 포인터, trace 번호, static 할당 표시 등)는 `configUSE_QUEUE_SETS`·`configUSE_TRACE_FACILITY` 같은 설정에 따라 붙습니다.
+`Queue_t`(struct tag `QueueDefinition`, `queue.c:103-140`)에서 핵심 필드만 역할별로 보면 다음과 같습니다. 표에 없는 필드(queue set 포인터, trace 번호, static 할당 표시 등)는 `configUSE_QUEUE_SETS`·`configUSE_TRACE_FACILITY` 같은 설정에 따라 붙습니다.
 
 | 필드 | 역할 |
 | --- | --- |
@@ -161,7 +161,7 @@ Static queue도 *storage buffer를 별도로 할당*해야 합니다. `xQueueCre
 
 > ⚠️ Pointer queue 후 free
 
-수신자가 read하기 전에 sender가 free하면 dangling pointer가 됩니다. *Memory pool*로 관리하는 것이 좋습니다.
+수신자가 read하기 전에 sender가 free하면 dangling pointer가 됩니다.포인터를 보낸 뒤에는 그 버퍼의 소유권이 수신자에게 넘어갔다고 정하고, 수신자가 처리한 뒤 반납하는 규칙을 둡니다.
 
 > ⚠️ Queue 크기 underestimate
 
@@ -173,7 +173,7 @@ burst가 `uxLength`를 넘으면 timeout 0 send는 `errQUEUE_FULL`을 돌려주�
 - **uxMessagesWaiting**이 상태를 표현하고, **pcWriteTo·pcReadFrom**이 ring 내 위치를 관리합니다.
 - **cTxLock·cRxLock**은 queue가 lock된 동안 ISR이 한 일을 세어 두었다가 unlock 때 처리하게 합니다.
 - wait list는 priority 순이라 먼저 기다린 task가 아니라 높은 priority task가 먼저 깨어납니다.
-- Send to front, overwrite, by-pointer 같은 variant가 있습니다.
+- Send to front, overwrite variant가 있고, 항목은 항상 값으로 복사됩니다(`queue.h:446`). 큰 데이터는 포인터를 값으로 넣습니다.
 
 다음 [3-08](/blog/embedded/rtos/practical-internals/part3-08-event-group)은 **Event Group**입니다.
 

@@ -44,7 +44,7 @@ broadcast: W1,W2 wait bit0 with clear-on-exit; set bit0 once
   W1 woke, returned 0x1, bits now 0x0
 ```
 
-둘 다 `0x1`을 받았습니다. clear-on-exit는 token을 한 명에게만 주는 semaphore 규칙이 아닙니다. `SetBits`의 반환값이 `0x0`인 것도 눈여겨볼 만합니다. `event_groups.h:485-486`은 반환값을 "the value of the event group at the time the call to xEventGroupSetBits() returns"라고 정의합니다. 깨어난 task가 bit를 지운 뒤의 값이라, 방금 켠 bit가 반환값에 없을 수 있습니다.
+둘 다 `0x1`을 받았습니다. clear-on-exit는 token을 한 명에게만 주는 semaphore 규칙이 아닙니다. `SetBits`의 반환값이 `0x0`인 것도 눈여겨볼 만합니다. `event_groups.h:485-486`은 반환값을 "the value of the event group at the time the call to xEventGroupSetBits() returns"라고 정의합니다. SetBits가 순회 끝에 clear-on-exit 대기 bit를 지운 뒤(`event_groups.c:637`)의 값이라, 방금 켠 bit가 반환값에 없을 수 있습니다.
 
 ## WaitBits — AND/OR/Clear-on-exit
 
@@ -110,7 +110,7 @@ BaseType_t xEventGroupSetBitsFromISR(EventGroupHandle_t eg,
                                       BaseType_t *pxHigherPriorityTaskWoken);
 ```
 
-SetBits는 waiter 수만큼 목록을 훑으므로 ISR 안에서 하기에는 길이가 정해지지 않은 작업입니다. 그래서 `xEventGroupSetBitsFromISR()`(`event_groups.c:817`)는 bit를 직접 켜지 않고 `xTimerPendFunctionCallFromISR(vEventGroupSetBitsCallback, xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken)`(`:826`)으로 timer daemon task에 일을 넘깁니다. command queue가 가득 차면 `pdFAIL`이 돌아옵니다.
+SetBits는 waiter 수만큼 목록을 훑으므로 ISR 안에서 하기에는 길이가 정해지지 않은 작업입니다. 그래서 `xEventGroupSetBitsFromISR()`(`event_groups.c:817`)는 bit를 직접 켜지 않고 `xTimerPendFunctionCallFromISR(vEventGroupSetBitsCallback, xEventGroup, uxBitsToSet, pxHigherPriorityTaskWoken)`(`:826`)으로 timer daemon task에 일을 넘깁니다. command queue가 가득 차면 `pdFALSE`가 돌아옵니다(`event_groups.h:570-572`).
 
 실제로 그런지 확인하려고 NVIC의 ISPR에 IRQ 5를 직접 pending시키고, 그 ISR에서 `xEventGroupSetBitsFromISR(eg, 0x4, &w)` 직후 `xEventGroupGetBitsFromISR()`로 bits를 읽었습니다. priority 5의 waiter가 bit 2를 기다리고, 제어 task는 priority 4, daemon은 priority 7입니다.
 

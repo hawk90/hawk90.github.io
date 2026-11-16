@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-FreeRTOS **V11.2.0**의 PI는 "지금 막 block하려는 task의 priority를 holder 한 명에게 넘긴다"는 규칙 하나로 동작합니다. 복원은 holder가 쥔 mutex 수(`uxMutexesHeld`)가 0이 될 때 한 번에 일어나고, chain은 순서에 따라 전파되기도 하고 안 되기도 합니다. 이 글은 `tasks.c`·`queue.c`의 해당 줄을 따라가고, 같은 커널을 QEMU에서 돌려 일곱 가지 시나리오의 priority 값을 직접 찍어 봅니다.
+FreeRTOS **V11.2.0**의 PI는 "지금 막 block하려는 task의 priority를 holder 한 명에게 넘긴다"는 규칙 하나로 동작합니다. 복원은 holder가 쥔 mutex 수(`uxMutexesHeld`)가 0이 될 때 한 번에 일어나고, chain은 순서에 따라 전파되기도 하고 안 되기도 합니다. 이 글은 `tasks.c`·`queue.c`의 해당 줄을 따라가고, 같은 커널을 QEMU에서 돌려 여덟 가지 시나리오(1~7, 2b)의 priority 값을 직접 찍어 봅니다.
 
 ## 실험 환경
 
@@ -36,10 +36,10 @@ PI에 쓰이는 필드는 세 개입니다. V11.2.0 `tasks.c`에서 그대로 �
 
 ```c
 /* tasks.c:388 */
-UBaseType_t uxPriority;      /* The priority of the task.  0 is the lowest priority. */
+UBaseType_t uxPriority;      /**< The priority of the task.  0 is the lowest priority. */
 /* tasks.c:413-416 */
 #if ( configUSE_MUTEXES == 1 )
-    UBaseType_t uxBasePriority; /* The priority last assigned to the task - used by the priority inheritance mechanism. */
+    UBaseType_t uxBasePriority; /**< The priority last assigned to the task - used by the priority inheritance mechanism. */
     UBaseType_t uxMutexesHeld;
 #endif
 ```
@@ -134,7 +134,18 @@ V11.2.0 소스 어디에도 `xTaskCheckForChainedInheritance`라는 함수는 �
   L gave mutex #0 -> cur=1
 ```
 
-H(5)가 Y에 block하면서 M은 5가 되지만, M이 기다리는 X의 holder L은 2에 머뭅니다. M은 blocked 상태라 `tasks.c:6699`의 "Just inherit" 분기만 타고, 그 아래 L에게 다시 넘기는 코드가 없습니다. 이 상태에서 priority 3·4의 task가 돌면 L이 밀리고, 결국 H도 밀립니다. chain 하나 건너로는 inversion이 그대로 남습니다.
+H(5)가 Y에 block하면서 M은 5가 되지만, M이 기다리는 X의 holder L은 2에 머뭅니다. M은 blocked 상태라 `tasks.c:6699`의 "Just inherit" 분기만 타고, 그 아래 L에게 다시 넘기는 코드가 없습니다. chain 하나 건너로는 inversion이 그대로 남습니다. 같은 배치에 priority 3의 busy task C를 더하고 L에게 X를 놓으라고 알렸습니다.
+
+```text
+[chain order 1 + load] L(1) holds X; M(2) holds Y, blocks on X; H(5) blocks on Y; C(3) busy; then L is told to release
+  t= 8 L prio=2, M prio=5
+  t= 8 C(3) starts 20-tick busy loop
+  t=28 C done
+  t=28 L releases X (prio 2)
+  t=28 H got Y
+```
+
+L은 priority 2라서 C(3)가 20 tick 동안 도는 내내 X를 놓지 못했고, H(5)는 C가 끝난 t=28에야 Y를 얻었습니다. H보다 낮은 C가 H를 20 tick 막은 셈입니다.
 
 다음은 H가 먼저 block하고 M이 나중에 block하는 순서입니다.
 
@@ -150,7 +161,7 @@ M이 이미 5로 올라간 상태에서 X에 block하므로 `xTaskPriorityInheri
 
 ## Disinherit After Timeout
 
-waiter가 기다리다 timeout되면 `queue.c:1852-1859`가 남은 waiter 중 최고 priority(`prvGetHighestPriorityOfWaitToReceiveList()`, `queue.c:2368`)를 구해 `vTaskPriorityDisinheritAfterTimeout()`(`tasks.c:6836`)에 넘깁니다. 이 함수는 base와 그 값 중 큰 쪽을 목표로 잡되, **holder가 mutex를 정확히 하나만 쥐고 있을 때만**(`tasks.c:6871`) 값을 바꿉니다. 소스 주석은 이것을 "a simplification in the priority inheritance implementation"이라고 부르고, 다른 mutex가 상속의 원인일 수 있어서라고 이유를 적어 둡니다.
+waiter가 기다리다 timeout되면 `queue.c:1850-1859`가 남은 waiter 중 최고 priority(`prvGetHighestPriorityOfWaitToReceiveList()`, `queue.c:2368`)를 구해 `vTaskPriorityDisinheritAfterTimeout()`(`tasks.c:6836`)에 넘깁니다. 이 함수는 base와 그 값 중 큰 쪽을 목표로 잡되, **holder가 mutex를 정확히 하나만 쥐고 있을 때만**(`tasks.c:6871`) 값을 바꿉니다. 소스 주석은 이것을 "a simplification in the priority inheritance implementation"이라고 부르고, 다른 mutex가 상속의 원인일 수 있어서라고 이유를 적어 둡니다.
 
 ```text
 [5] timeout, holder has 1 mutex: L(1) holds A; H(4) waits 20 ticks
@@ -170,7 +181,7 @@ waiter가 기다리다 timeout되면 `queue.c:1852-1859`가 남은 waiter 중 �
 
 ## Time Slicing과 Boost 상호작용
 
-`prvAddTaskToReadyList()`는 `listINSERT_END()`로 ready list의 **끝**에 붙입니다(`tasks.c:284-288`). 그래서 상속으로 priority 4가 된 holder 앞에 원래 priority 4인 다른 ready task가 있다면, `configUSE_TIME_SLICING 1`에서는 그 task가 먼저 한 tick을 받습니다. waiter가 block하는 순간 holder가 곧바로 CPU를 받는 것은 같은 priority에 다른 ready task가 없을 때뿐입니다.
+`prvAddTaskToReadyList()`는 `listINSERT_END()`로 ready list의 **끝**에 붙입니다(`tasks.c:284-288`). 그래서 상속으로 priority 4가 된 holder는 원래 priority 4인 다른 ready task들 뒤에 줄을 섭니다. 같은 priority의 task끼리는 `configUSE_TIME_SLICING 1`에서 tick마다 돌아가며 실행되므로(3-06의 immediate ceiling 실행에서 같은 priority 4의 H가 한 tick 늦게 돈 것이 그 예입니다), 상속 직후 holder가 곧바로 CPU를 받는다고 가정할 수 없습니다. 이 순서 효과를 holder 상속 상황에서 따로 돌려 보지는 않았습니다.
 
 ## Implementation Overhead
 
@@ -182,13 +193,13 @@ waiter가 기다리다 timeout되면 `queue.c:1852-1859`가 남은 waiter 중 �
 
 Zephyr v3.7.0(commit `36940db9`)의 mutex 문서(`doc/kernel/services/synchronization/mutexes.rst:62-89`)는 동작을 이렇게 설명합니다. holder의 base priority를 lock 시점에 **mutex 안에** 저장해 두고, 해제나 waiter timeout 때 그 값으로 되돌립니다. 이 방식은 mutex가 하나일 때는 잘 동작하지만, 여러 mutex를 priority가 올라간 순서의 역순으로 풀지 않으면 "sub-optimal behavior"가 생긴다고 문서가 직접 적습니다. 그래서 서로 다른 priority의 thread가 여러 mutex를 공유하면 한 번에 하나만 잠그라고 권합니다.
 
-FreeRTOS가 task마다 `uxMutexesHeld` 카운터 하나를 두는 것과 달리, Zephyr는 mutex마다 `owner_orig_prio`를 둡니다(`kernel/mutex.c:182`, `kernel/mutex.c:254`). 두 커널 모두 다중 mutex에서 완전한 복원을 하지 않지만, 틀리는 방향이 다릅니다.
+FreeRTOS가 task마다 `uxMutexesHeld` 카운터 하나를 두는 것과 달리, Zephyr는 mutex마다 `owner_orig_prio`를 둡니다(선언 `include/zephyr/kernel.h:2927`, lock 때 저장 `kernel/mutex.c:119`, unlock 때 복원 `:254`). 두 커널 모두 다중 mutex에서 완전한 복원을 하지 않지만, 틀리는 방향이 다릅니다.
 
 `CONFIG_PRIORITY_CEILING`은 PCP를 켜는 옵션이 아닙니다. `kernel/Kconfig:83-89`에서 이 옵션은 int이고, help 문구는 "k_mutex priority inheritance로 thread가 얻을 수 있는 최소 priority 값(논리적으로 가장 높은 priority)"이라고 정의합니다. Kconfig의 기본값은 `-127`입니다. 같은 태그의 문서 note(`mutexes.rst:74-76`)는 "기본값 0이 무제한 상승을 허용한다"고 적어 두어, 문서와 Kconfig가 기본값에서 서로 어긋납니다. 이 값은 `kernel/mutex.c:82`의 `new_prio_for_inheritance()`가 상속 priority를 자를 때 씁니다.
 
 ## Linux PREEMPT_RT rtmutex
 
-Linux v6.12의 `Documentation/locking/rt-mutex-design.rst`는 FreeRTOS와 반대 선택을 설명합니다. 각 rt_mutex는 waiter를 priority 순 rbtree에 두고(`rt-mutex-design.rst:200`), 각 task는 자기가 가진 mutex들의 top waiter만 모은 `pi_waiters` rbtree를 가집니다(`:208-219`). `rt_mutex_adjust_prio()`는 이 트리의 top waiter와 task 자신의 normal priority를 비교해 높은 쪽을 씁니다(`:355-362`). 문서는 같은 함수가 higher priority waiter가 timeout이나 signal로 떠날 때 priority를 내린다고도 적습니다(`:369-377`). 설계상 시나리오 2b·6 같은 과잉 boost가 남지 않는 구조입니다.
+Linux v6.12의 `Documentation/locking/rt-mutex-design.rst`는 FreeRTOS와 반대 선택을 설명합니다. 각 rt_mutex는 waiter를 priority 순 rbtree에 두고(`rt-mutex-design.rst:200`), 각 task는 자기가 가진 mutex들의 top waiter만 모은 `pi_waiters` rbtree를 가집니다(`:208-219`). `rt_mutex_adjust_prio()`는 이 트리의 top waiter와 task 자신의 normal priority를 비교해 높은 쪽을 씁니다(`:356-362`). 문서는 같은 함수가 higher priority waiter가 timeout이나 signal로 떠날 때 priority를 내린다고도 적습니다(`:370-378`). 설계상 시나리오 2b·6 같은 과잉 boost가 남지 않는 구조입니다.
 
 chain은 `rt_mutex_adjust_prio_chain()`(`kernel/locking/rtmutex.c:675`)이 따라 올라갑니다. 시나리오 3처럼 owner가 다른 lock에 block해 있으면 그 owner의 owner까지 priority를 전파합니다. 대신 한 번의 walk는 `max_lock_depth`(기본 1024, `kernel/locking/rtmutex_api.c:14`) 단계에서 멈추고, 넘으면 "Maximum lock depth %d reached" 경고를 한 번 찍습니다(`rtmutex.c:701-713`).
 
@@ -216,7 +227,7 @@ boost를 풀려고 priority를 낮춰도 current는 4로 남고, give 뒤에 새
 
 > ⚠️ ISR에서 mutex 사용
 
-`semphr.h:703`은 "Mutex type semaphores cannot be used from within interrupt service routines"라고 못 박습니다. holder가 ISR이면 `NULL`로 기록되어 상속 자체가 일어나지 않습니다(`tasks.c:6646-6648`). ISR에서 task를 깨우는 용도라면 같은 주석이 안내하듯 binary semaphore나 task notification을 씁니다.
+`semphr.h:703`은 "Mutex type semaphores cannot be used from within interrupt service routines"라고 못 박습니다. holder가 ISR이면 `NULL`로 기록되어 상속 자체가 일어나지 않습니다(`tasks.c:6646-6648`). ISR에서 task를 깨우는 용도라면 같은 주석(`semphr.h:705-708`)이 안내하듯 binary semaphore를 씁니다.
 
 ## 정리
 
