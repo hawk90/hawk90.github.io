@@ -16,46 +16,99 @@ topics: ["embedded"]
 
 ## CI에서 Buildroot의 특수성
 
-일반 application CI는 commit 단위로 *몇 분 안에* 끝납니다. Buildroot는 다릅니다. 깨끗한 환경에서 한 보드를 처음 빌드하면 toolchain 30 ~ 50분 + base packages 10 ~ 20분 + image 5분이 합쳐져 *40분에서 한 시간*이 기본입니다. 이걸 *매 PR마다 반복*하면 개발자가 commit한 뒤 한 시간 뒤에야 결과를 받습니다.
+일반 application CI는 commit 단위로 몇 분 안에 끝납니다. Buildroot는 다릅니다. 이 시리즈의 VM에서 `qemu_aarch64_virt_defconfig`를 빈 `dl/`에서 빌드하니 29분 50초가 걸렸고(Ch 1), 그중 소스 다운로드만 합산 607초였습니다. 이걸 매 PR마다 반복하면 개발자는 commit 뒤 30분을 기다립니다. 식당이 손님마다 장을 새로 보는 셈이라, CI 설계는 *장 본 재료(dl/)와 반조리 재료(ccache)를 어디에 보관하느냐*에서 시작합니다.
 
-그래서 Buildroot CI는 *cache 공유가 필수*입니다. Application CI에서 cache가 *optional 최적화*라면, Buildroot에서는 *기본 설계*입니다. 어떤 캐시를 어디에 두고, 키를 어떻게 정하고, 보드 변형 사이에서 어떻게 공유할지가 *CI 전체 시간*을 결정합니다.
-
-이 장은 다섯 가지를 다룹니다. Container base image, GitLab CI 작성, GitHub Actions 작성, dl/ccache 공유 전략, matrix build의 5개입니다.
+이 장의 사실은 **Buildroot 2026.02.3** 저장소가 *자기 자신*을 CI로 돌리는 데 쓰는 파일(`support/docker/Dockerfile`, `utils/docker-run`, `support/misc/gitlab-ci.yml.in`)과, Ch 14에서 같은 사양의 VM으로 잰 캐시 효과에서 가져왔습니다. GitLab·GitHub 설정 예는 형식 예시이며 이 장에서 실제 러너로 돌리지 않았습니다.
 
 ## Container base image
 
-CI runner마다 의존성을 설치하면 *runner 시작 시간*이 커집니다. base image 하나를 만들어 둡니다. Ch 4에서 본 의존성 목록을 그대로 옮깁니다.
+Buildroot 프로젝트는 CI용 이미지의 Dockerfile을 트리에 둡니다. `support/docker/Dockerfile`의 요지는 다음과 같습니다.
 
 ```dockerfile
-# Dockerfile
-FROM ubuntu:22.04
+FROM debian:bookworm-20250203
+...
+RUN apt-get -o APT::Retries=3 install -y --no-install-recommends \
+        bc \
+        build-essential \
+        bzr \
+        ca-certificates \
+        cmake \
+        cpio \
+        curl \
+        cvs \
+        file \
+        ...
+        git \
+        libncurses5-dev \
+        locales \
+        mercurial \
+        ...
+        python3 \
+        ...
+        rsync \
+        shellcheck \
+        subversion \
+        unzip \
+        wget \
+...
+# Build host-tar
+RUN curl -sfL https://ftpmirror.gnu.org/tar/tar-${TAR_VERSION}.tar.xz | \
+...
+RUN useradd -ms /bin/bash br-user && \
+    chown -R br-user:br-user /home/br-user
 
-ENV DEBIAN_FRONTEND=noninteractive \
-    LC_ALL=C.UTF-8 LANG=C.UTF-8
-
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential bc rsync cpio file unzip wget cvs git mercurial \
-    python3 python3-distutils ccache \
-    libncurses5-dev libssl-dev gawk \
-    bzip2 xz-utils zstd \
-    ca-certificates locales sudo \
- && rm -rf /var/lib/apt/lists/*
-
-RUN locale-gen en_US.UTF-8 && update-locale LANG=en_US.UTF-8
-
-# Buildroot는 non-root 빌드를 요구. user를 만들어 둠.
-RUN useradd -m -u 1000 -s /bin/bash builder
-USER builder
-WORKDIR /home/builder
-
-ENV BR2_DL_DIR=/cache/dl \
-    CCACHE_DIR=/cache/ccache \
-    CCACHE_MAXSIZE=10G
+USER br-user
+WORKDIR /home/br-user
+ENV HOME=/home/br-user
+ENV LC_ALL=en_US.UTF-8
 ```
 
-요점은 세 가지입니다. 첫째, *Buildroot는 root 빌드를 거부*하므로 `builder` user를 만들어야 합니다. 둘째, `BR2_DL_DIR`와 `CCACHE_DIR`를 *컨테이너 안의 고정 경로*로 정해 두면 CI runner가 volume·cache를 *그 경로에 mount*하기만 하면 됩니다. 셋째, Buildroot 트리 자체는 image에 *넣지 않습니다*. PR마다 다르기 때문에 runtime에 git clone하거나 mount합니다.
+읽을 점은 세 가지입니다.
 
-base image 빌드와 push는 별도 pipeline에서 *주 1회* 정도로 충분합니다. Buildroot 의존성이 자주 바뀌지 않기 때문입니다.
+- **base 이미지를 날짜 태그로 고정**합니다(`debian:bookworm-20250203`). 주석은 같은 날짜의 `apt-sources.list`를 함께 고치라고 적습니다. 호스트 도구 버전이 바뀌면 빌드 결과가 바뀔 수 있기 때문입니다.
+- **일반 사용자(`br-user`)로 빌드**합니다. Buildroot가 root를 거부해서가 아니라, 매뉴얼 quick start가 "you can and should *build everything as a normal user*"라고 권하기 때문입니다.
+- **tar를 소스에서 빌드**합니다(`TAR_VERSION="1.35"`, 주석 "We need tar >= 1.35"). git으로 받은 소스를 재현 가능한 tarball로 묶을 때 tar 버전이 영향을 주기 때문에, 이미지가 tar 버전까지 고정합니다.
+
+컨테이너 실행은 `utils/docker-run`이 맡습니다. `--user "$(id -u):$(id -g)"`로 호스트 사용자 권한을 쓰고, Buildroot 트리와 현재 디렉터리를 같은 경로로 bind mount하며, `BR2_DL_DIR`이 설정돼 있으면 그 디렉터리도 mount하고 환경 변수로 넘깁니다(95~97행). 이미지 이름은 `.gitlab-ci.yml`의 `image:` 줄(2026.02.3에서는 `$CI_REGISTRY/buildroot.org/buildroot/base:20250218.2110`)에서 읽습니다.
+
+```bash
+BR2_DL_DIR=/cache/dl utils/docker-run make qemu_aarch64_virt_defconfig
+BR2_DL_DIR=/cache/dl utils/docker-run make
+```
+
+트리를 이미지에 넣지 않고 mount하는 구조라 PR마다 이미지를 다시 만들 필요가 없습니다.
+
+### Buildroot 자체 CI가 defconfig마다 하는 일
+
+`support/misc/gitlab-ci.yml.in`의 `.defconfig_base` job은 다음 순서로 돕니다.
+
+```yaml
+.defconfig_base:
+    stage: test
+    script:
+        - DEFCONFIG_NAME=${CI_JOB_NAME}
+        - OUTPUT_DIR=output
+        - echo "Configure Buildroot for ${DEFCONFIG_NAME}"
+        - make ${DEFCONFIG_NAME}
+        - ./support/scripts/check-dotconfig.py .config ./configs/${DEFCONFIG_NAME}
+        - echo 'Build buildroot'
+        - *run_make
+        - |
+            ./support/scripts/boot-qemu-image.py "${DEFCONFIG_NAME}" > >(tee runtime-test.log) 2>&1 || {
+```
+
+`*run_make`는 `make O=${OUTPUT_DIR} world legal-info`이고, 산출물(`artifacts`)로 `.config`, `build.log`, `output/images/`, `output/build/build-time.log`, `output/build/packages-file-list.txt`를 2주간 남깁니다. 제품 CI에 그대로 가져올 만한 단계가 둘 있습니다.
+
+1. **`check-dotconfig.py`** — defconfig의 모든 `BR2_` 줄이 펼친 `.config`에 남았는지 확인합니다. 이 시리즈의 arm64 VM에서 `beaglebone_defconfig`를 적용했더니 다음 경고로 실패했습니다.
+
+   ```text
+   WARN: defconfig configs/beaglebone_defconfig can't be used:
+         Missing: BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
+         Missing: BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_STABLE=y
+   ```
+
+   Bootlin toolchain의 `Config.in`이 `depends on BR2_HOSTARCH = "x86_64"`라서 aarch64 호스트에서는 조용히 빠지고 다른 toolchain이 선택된 것입니다(Ch 10). Kconfig는 이런 줄을 오류 없이 지우므로, CI에서 이 검사를 돌리지 않으면 *다른 toolchain으로 빌드된 이미지*가 통과합니다.
+2. **`boot-qemu-image.py`** — QEMU defconfig는 빌드 뒤 실제로 부팅해 봅니다. Ch 4에서 손으로 한 부팅을 CI가 대신합니다.
 
 ## GitLab CI 예
 
@@ -130,7 +183,7 @@ deploy:artifacts:
   only: [main, /^release\//]
 ```
 
-`cache:` directive의 key가 `br-cache-${BOARD}`인 것이 중요합니다. *commit SHA를 키로 쓰면 매번 miss*가 납니다. 보드별로 한 키를 유지하면서 안에서 dl과 ccache가 누적되도록 설계합니다. `policy: pull-push`는 *시작 시 받고, 끝나면 다시 올림*. 변경이 거의 없는 dl도 매번 push하지만, GitLab cache는 차분만 올리므로 비용이 작습니다.
+`cache:` directive의 key가 `br-cache-${BOARD}`인 것이 중요합니다. *commit SHA를 키로 쓰면 매번 miss*가 납니다. 보드별로 한 키를 유지하면서 안에서 dl과 ccache가 누적되도록 설계합니다. `policy: pull-push`는 job 시작 때 받고 끝날 때 다시 올립니다. dl이 거의 바뀌지 않는 job이라면 업로드 비용을 줄이기 위해 dl만 다루는 job을 따로 두고 나머지 job은 `policy: pull`로 받기만 하게 나눌 수 있습니다.
 
 ## GitHub Actions 예
 
@@ -254,23 +307,24 @@ dl/ 키 설계 두 가지 모드:
 
 ccache는 *object cache*입니다. source A를 compile해서 object O를 만든 결과를 기억하고, 다음에 같은 source A가 들어오면 O를 *재사용*합니다. Buildroot에서는 `BR2_CCACHE=y`로 켭니다.
 
-```bash
-$ ccache -s
-Summary:
-  Hits:              12345 / 18567 (66.5 %)
-    Direct:           9876
-    Preprocessed:     2469
-  Misses:             6222
-  Cache size (GB):    7.8 / 10.0 (78.0 %)
+Ch 14에서 같은 사양의 VM으로 잰 값이 기준입니다. 빈 캐시로 첫 빌드를 하면 hit는 19.03%이고 시간은 ccache 없는 빌드보다 오히려 길었습니다(915.60초 대 500.78초). 같은 캐시로 `make clean` 뒤 다시 빌드하면 6,825회 중 6,811회 hit(99.79%), 423.88초였습니다.
+
+```text
+Cacheable calls:    6825 / 8774 (77.79%)
+  Hits:             6811 / 6825 (99.79%)
+    Direct:         6367 / 6811 (93.48%)
+    Preprocessed:    444 / 6811 ( 6.52%)
+  Misses:             14 / 6825 ( 0.21%)
+Uncacheable calls:  1949 / 8774 (22.21%)
 ```
 
-목표 hit rate는 *50 ~ 70%*입니다. 첫 빌드는 0%, 두 번째 빌드부터 50% 이상이 나와야 cache가 일하는 겁니다. 30% 이하가 지속되면 무언가 잘못된 겁니다.
+CI에 의미가 있는 것은 두 가지입니다. 첫째, *캐시가 이어지지 않으면 ccache는 비용*입니다. job마다 빈 캐시로 시작하면 이득이 없고 오히려 느렸습니다. 둘째, 캐시가 이어져도 줄어드는 것은 build 단계뿐이라 clean 빌드 전체로는 15% 단축이었습니다. 이 값을 기준으로 CI의 hit율과 시간을 비교합니다.
 
 ccache 공유의 흔한 함정 세 가지.
 
 - **권한** — root로 만든 ccache를 non-root user로 읽으면 hit가 안 됩니다. CI에서 `--user 1000:1000`으로 고정합니다.
-- **target 차이** — aarch64 ccache와 armv7 ccache는 *섞어 쓰면 안 됩니다*. compiler flag가 다르면 object가 다르기 때문입니다. 보드별로 ccache 디렉터리를 분리합니다.
-- **크기 한계** — `CCACHE_MAXSIZE`를 안 정하면 ccache가 무한 증가합니다. CI cache 용량 정책과 충돌합니다. 보통 10G가 무난합니다.
+- **target 차이** — ccache는 컴파일러와 인자를 hash에 넣으므로 aarch64와 armv7 결과가 섞여 잘못 쓰이지는 않습니다. 다만 한 디렉터리를 나눠 쓰면 서로의 항목이 용량 한도 안에서 경쟁해 밀려나므로, CI cache 단위(키)를 보드별로 나누는 편이 hit율 관리에 유리합니다. Buildroot internal toolchain은 wrapper가 `CCACHE_COMPILERCHECK=string:<gcc 설정 hash>`를 설정해(`toolchain/toolchain-wrapper.c` 512행, hash는 `package/gcc/gcc.mk` 334행에서 계산) output 디렉터리가 달라도 같은 gcc 설정이면 같은 컴파일러로 봅니다.
+- **크기 한계** — ccache의 기본 한도는 ccache 자체 설정을 따릅니다. Buildroot에서는 `BR2_CCACHE_INITIAL_SETUP`에 `--max-size` 같은 옵션을 적어 빌드 시작 때 적용하거나(`Config.in` help), `make CCACHE_OPTIONS="--max-size=5G" ccache-options`로 바꿉니다(매뉴얼 "Using ccache in Buildroot"). Ch 14의 QEMU 실측에서 캐시 디렉터리 크기는 그 장의 표에 있습니다.
 
 ccache 매체 결정은 dl과 다릅니다. ccache는 *수십만 개 작은 파일*입니다. S3에 raw로 올리면 *호출 수가 폭발*합니다. tarball로 묶어서 올립니다.
 
@@ -314,7 +368,7 @@ matrix에서의 cache 공유 원칙:
 - **ccache → 보드별 분리** — target architecture가 다르면 호환 안 됨.
 - **output/ → 분리** — 보드마다 다른 image.
 
-dl/을 전체 공유로 잡으면 *5 보드 × 600 MB = 3 GB*가 *공통 600 MB*로 줄어듭니다.
+이 시리즈의 실측으로는 QEMU defconfig의 `dl/`이 1.2 GB였고(Ch 2), BeagleBone 빌드는 같은 `dl/`을 공유해 커널·toolchain 등 다른 소스만 추가로 받았습니다(Ch 10). 보드가 늘어도 공통 패키지(busybox, gcc 소스 등)는 한 번만 받습니다.
 
 ## 자동 산출물 배포
 
@@ -325,8 +379,8 @@ CI 마지막 단계는 산출물을 *artifact repo*로 보내는 것입니다. �
 | `rootfs.tar.zst` / `*.img` | `output/images/` | 양산 라인 |
 | `<target-tuple>_sdk-buildroot.tar.gz` | `output/images/` → `make sdk` | application 개발자 |
 | `legal-info/` | `output/legal-info/` (Ch 18) | 법무 |
-| SBOM JSON | `output/sbom.json` | 보안 |
-| CVE report | `cve-check.txt` | 보안 / QA |
+| SBOM JSON | `make show-info \| utils/generate-cyclonedx > sbom.json` (Ch 18) | 보안 |
+| CVE report | `output/pkg-stats.json`, `pkg-stats.html` (`make pkg-stats`) | 보안 / QA |
 | OTA bundle | `update.raucb` (Ch 16) | OTA 서버 |
 
 ```bash
@@ -339,7 +393,7 @@ aws s3 cp output/images/sdcard.img \
 aws s3 cp output/images/aarch64-buildroot-linux-gnu_sdk-buildroot.tar.gz \
   "s3://artifacts.example.com/sdk/${TAG}-sdk.tar.gz"
 
-aws s3 cp output/sbom.json \
+aws s3 cp sbom.json \
   "s3://artifacts.example.com/sbom/${BOARD}/${TAG}.json"
 
 aws s3 cp output/update.raucb \
@@ -348,40 +402,31 @@ aws s3 cp output/update.raucb \
 
 산출물에는 *항상 git tag 또는 SHA*가 들어가야 합니다. 6개월 뒤 *이 image가 어느 commit에서 나왔는지* 추적해야 할 때를 위해 필수입니다.
 
-GitLab/Actions의 *artifact 크기 제한*에 주의합니다. GitHub Actions는 한 artifact당 *2 GB*, GitLab은 *서버 설정*입니다. rootfs.img가 1.5 GB라면 어떻게든 들어가지만 1.8 GB가 되는 순간 실패합니다. *큰 산출물은 S3로*, CI artifact는 *200 MB 이하의 메타데이터*만 두는 패턴이 안전합니다.
+CI 플랫폼마다 cache·artifact 크기 한도가 있고 요금제·서버 설정에 따라 다르므로, 쓰는 플랫폼의 문서에서 현재 한도를 확인합니다. 참고로 이 시리즈의 QEMU SDK tarball은 290 MB(Ch 17), BeagleBone `sdcard.img`는 208 MiB(Ch 10)였습니다. 큰 산출물은 object storage에 두고, CI artifact에는 Buildroot 자체 CI처럼 `.config`, `build.log`, `build-time.log` 같은 메타데이터를 남기는 구성이 한도 문제를 피합니다.
 
 ## 흔한 실수
 
 - **dl/ cache key를 git SHA로** — `key: dl-${{ github.sha }}` 같이 잡으면 *commit마다 새 캐시*. 항상 miss. 해결은 `hashFiles('**/*.hash')` 또는 보드별 고정 키.
-- **ccache를 root 권한으로** — base image의 user가 root인데 빌드는 builder user로 돌리면 ccache가 *읽기는 되지만 쓰기는 안 됨*. hit rate 0%. `--user 1000:1000` 명시.
-- **artifact 크기 제한 초과** — rootfs.img > 1 GB가 default artifact limit을 깸. S3로 우회.
+- **ccache 디렉터리 권한 불일치** — 캐시를 만든 사용자와 빌드하는 사용자가 다르면 ccache가 캐시에 쓰지 못합니다. Buildroot의 `utils/docker-run`처럼 `--user "$(id -u):$(id -g)"`로 맞춥니다.
+- **artifact 크기 제한 초과** — 이미지·SDK를 CI artifact로 올리다 플랫폼 한도에 걸립니다. 큰 파일은 object storage로 보냅니다.
 - **`cache: paths` 가 너무 큼** — `output/` 전체를 cache에 넣으면 *수십 GB*가 매번 transfer. dl/과 ccache만 캐시.
 - **matrix에 fail-fast 켜둠** — 한 보드 실패가 *다른 보드 빌드를 중단*시킴. embedded는 변형 보드 사이가 독립이므로 `fail-fast: false`가 정답.
 - **container image에 트리 포함** — base image 안에 buildroot tree를 박으면 *PR마다 image 재빌드*. 트리는 항상 *외부 mount* 또는 *checkout*.
-- **시간대 불일치** — runner 시간이 UTC인데 SBOM 생성 시간을 KST로 박으면 *동일 commit이 두 SBOM*. 항상 UTC.
-
-| CI 플랫폼 | cache 한도 | artifact 한도 | matrix |
-|---|---|---|---|
-| **GitHub Actions** | 10 GB / repo (LRU 삭제) | 2 GB / artifact, 90일 | yes |
-| **GitLab CI** | 서버 설정 (보통 5 GB) | 1 GB / job 기본 | parallel: matrix |
-| **CircleCI** | 무제한 (가격 차등) | 5 GB / job | parameters matrix |
-| **Drone** | volume mount 기반 | 외부 store 필요 | matrix |
-| **self-hosted runner** | 디스크 한도 | 디스크 한도 | 모두 가능 |
-
-규모가 커지면 *self-hosted runner + 큰 NFS*가 비용·속도 모두 유리해지는 임계점이 옵니다. 일반적으로 *동시 빌드 10개 이상*이 되면 검토할 가치가 있습니다.
+- **defconfig 줄이 조용히 빠짐** — 호스트에 따라 선택할 수 없는 옵션이 Kconfig에서 사라집니다(Ch 10의 Bootlin toolchain). Buildroot CI처럼 `support/scripts/check-dotconfig.py`를 돌립니다.
 
 ## 정리
 
 - Buildroot CI는 cache 공유가 *기본 설계*이지 *최적화*가 아닙니다.
-- Base image는 Ubuntu 22.04 + 빌드 의존성. 트리는 mount/clone으로 *image 밖*에 둡니다.
+- Buildroot 자체 CI 이미지는 날짜를 고정한 `debian:bookworm-20250203`에 일반 사용자 `br-user`, tar 1.35를 소스 빌드해 둡니다. 트리는 `utils/docker-run`처럼 mount합니다.
+- Buildroot CI의 defconfig job은 `make <defconfig>` → `check-dotconfig.py` → `make world legal-info` → `boot-qemu-image.py` 순서이고, aarch64 호스트에서 `beaglebone_defconfig`는 `check-dotconfig.py`에 걸렸습니다.
 - GitLab CI는 `cache:` directive에 보드별 키. `policy: pull-push`로 차분만 transfer.
 - GitHub Actions는 `actions/cache@v4` + `hashFiles('**/*.hash')`로 dl을 *실제 변경* 시점에만 갱신.
 - dl/은 *전체 공유*, ccache는 *보드별 분리*, output/은 *job별 분리*입니다.
 - 팀 규모에 따라 local volume → NFS → S3 단계로 매체를 키웁니다.
-- ccache hit rate 목표는 50 ~ 70%. 30% 이하면 권한·target 분리·MAXSIZE를 점검.
+- ccache 효과는 Ch 14에서 같은 VM으로 잰 값을 기준으로 삼고, 권한·cache 키·용량 한도를 점검합니다.
 - matrix build는 보드 변형 한 차원에서 시작. release type·toolchain은 main 머지 시점에만.
 - 산출물은 git tag/SHA로 식별. 큰 산출물은 S3로, CI artifact는 메타데이터만.
-- 흔한 함정은 SHA 키·root ccache·artifact 한도·output 캐시 6가지입니다.
+- 흔한 함정은 SHA 키, ccache 권한, artifact 한도, `output/` 전체 캐시, fail-fast, defconfig 줄 누락입니다.
 
 ## 다음 장 예고
 
