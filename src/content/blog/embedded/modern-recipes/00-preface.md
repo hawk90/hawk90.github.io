@@ -37,7 +37,7 @@ topics: ["embedded"]
 
 ## 시리즈 구성
 
-**총 12 Parts, 148 레시피**로 구성됩니다.
+**총 12 Parts, 152 레시피**로 구성됩니다. 아래 편수와 seriesOrder는 이 디렉터리의 실제 파일 152개에서 센 값입니다.
 
 ### 한눈에 보는 12 Parts
 
@@ -53,9 +53,9 @@ topics: ["embedded"]
 | 8 | Memory & 성능 실전 | 12 | 89~100 |
 | 9 | Concurrency 응용 | 10 | 101~110 |
 | 10 | 디버깅 & 트러블슈팅 | 12 | 111~122 |
-| 11 | FPGA & 가속기 | 14 | 123~136 |
-| 12 | Edge AI & 보안 | 12 | 137~148 |
-| **합** |  | **148** |  |
+| 11 | FPGA & 가속기 | 17 | 123~136, 150~152 |
+| 12 | Edge AI & 보안 | 13 | 137~149 |
+| **합** |  | **152** |  |
 
 ---
 
@@ -251,9 +251,9 @@ Lock-free·wait-free·RCU·hazard pointer·CAS·atomic 비용·spinlock vs mutex
 | 10-11 | 로깅 시스템 설계 | level·circular buffer·SWO·deferred |
 | 10-12 | 포스트모템 분석 | core dump·MCU mini-dump·Memfault |
 
-### Part 11 — FPGA & 가속기 (14편)
+### Part 11 — FPGA & 가속기 (17편)
 
-FPGA 기초·Vivado/Quartus·AXI·PCIe·Zynq PS-PL·mailbox·CQ/SQ·DMA·HLS·Vitis AI·OpenCL.
+FPGA 기초·Vivado/Quartus·AXI·PCIe·Zynq PS-PL·mailbox·CQ/SQ·DMA·HLS·Vitis AI·OpenCL, 그리고 PCIe에서 CXL로 넘어가는 세 편. 11-15~11-17은 나중에 추가되어 seriesOrder가 150~152입니다.
 
 | # | 레시피 | 핵심 |
 |---|--------|------|
@@ -271,6 +271,9 @@ FPGA 기초·Vivado/Quartus·AXI·PCIe·Zynq PS-PL·mailbox·CQ/SQ·DMA·HLS·Vi
 | 11-12 | Vitis AI | DPU·xmodel·VART·throughput vs latency |
 | 11-13 | OpenCL on FPGA | kernel·channel·burst memory |
 | 11-14 | Intel Quartus 사용법 | Platform Designer·Nios II·partial reconfig |
+| 11-15 | PCIe → CXL 진화 | 같은 PHY 위 CXL.io·CXL.cache·CXL.mem |
+| 11-16 | QEMU CXL Type 3 에뮬레이션 | 노트북에서 CXL 개발 환경 |
+| 11-17 | Linux CXL 드라이버 | cxl_pci·cxl_core·region·DAX |
 
 ### Part 12 — Edge AI & 보안 (13편)
 
@@ -317,7 +320,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 - **Part 8** — 메모리 정렬·캐시·DMA·SIMD·NEON·전력
 - **Part 9** — Lock-free·wait-free·RCU·CAS·MPMC
 
-### 전문 (Part 10~12, 38편)
+### 전문 (Part 10~12, 42편)
 
 현장 트러블슈팅과 modern 영역.
 
@@ -361,6 +364,8 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 ## 예제 환경
 
+본문이 예로 드는 플랫폼은 다음과 같습니다. 이 보드들에서 직접 잰 값이라고 적지 않은 수치는 보드 측정값이 아닙니다.
+
 | 플랫폼 | 용도 |
 |--------|------|
 | STM32F4·STM32H7·STM32U5 | Cortex-M4/M7/M33 — Part 2~6의 주력 |
@@ -371,6 +376,16 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 | Xilinx Zynq UltraScale+ | PS+PL·AXI — Part 11 |
 
 특정 보드에 종속되지 않게 *원리 + 한 가지 구체 예*를 함께 보입니다.
+
+실제로 돌린 예제는 보드 대신 다음 환경에서 실행했고, 글마다 명령과 출력을 함께 적습니다. 보드나 벤더 툴이 있어야 하는 내용(Vivado·Quartus 합성 결과, 오실로스코프 파형 등)은 실행하지 않았다고 밝히고 벤더 문서의 절 번호로 근거를 답니다.
+
+| 도구 | 버전 | 용도 |
+|------|------|------|
+| `arm-none-eabi-gcc` | 16.2.0 | Cortex-M 코드 빌드·디스어셈블 |
+| QEMU | 11.1.3 | `mps2-an385`(Cortex-M3)·`mps2-an386`(Cortex-M4)·`virt` |
+| Verilator / Icarus Verilog | 5.054 / 13.0 | HDL 시뮬레이션 |
+| CMake / GNU Make | 4.5.0 / 4.4.1 | 빌드 |
+| Debian 13 arm64 (QEMU `virt`) | — | Linux 전용 예제 |
 
 ## 레퍼런스
 
