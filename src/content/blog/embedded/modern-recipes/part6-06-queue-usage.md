@@ -11,13 +11,15 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Queue는 producer가 데이터를 *복사해 넣고* consumer가 *복사해 꺼내는* FIFO입니다."** 작은 데이터는 by-value, 큰 데이터는 by-pointer가 표준입니다.
+> **"Queue는 producer가 데이터를 *복사해 넣고* consumer가 *복사해 꺼내는* FIFO입니다."** 복사 비용이 item 크기에 비례하므로, 큰 데이터는 pool의 pointer만 넣는 by-pointer로 보냅니다.
 
 ## 어떤 상황에서 쓰나
 
-ISR이 ADC 샘플을 받아 task에 넘기고, BLE stack이 packet을 application에 전달하고, sensor task가 측정값을 logger에 보내는 모든 흐름이 queue입니다. Semaphore는 신호만 전달하지만 queue는 데이터까지 같이 보냅니다.
+ISR이 받은 byte를 task에 넘기거나, sensor task가 측정값을 logger task에 보낼 때 queue를 씁니다. semaphore는 "일어났다"는 신호만 전하고, queue는 데이터도 함께 보냅니다.
 
-선택지가 있는 부분은 *얼마나 큰 데이터를 어떻게 넘길지*입니다. 항상 by-value로 보내면 큰 buffer를 매번 복사하느라 CPU가 새고, 항상 by-pointer로 보내면 lifetime과 ownership을 잘못 설계해 use-after-free가 발생합니다.
+실행 환경은 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)과 같습니다(FreeRTOS V11.2.0 `ARM_CM3` + `heap_4`, QEMU 11.1.3 `mps2-an385` `-icount shift=5`). 아래 코드 중 `read_accel()`, `radio_read()`, `pool_pop()` 같은 함수는 애플리케이션 함수이고, 실행한 코드는 "측정" 절에 있습니다.
+
+정할 것은 데이터를 복사해 넣을지(by-value), 다른 곳에 둔 데이터의 pointer만 넣을지(by-pointer)입니다. by-value는 item 크기만큼 매번 복사하고, by-pointer는 데이터가 언제까지 살아 있어야 하는지를 코드가 지켜야 합니다.
 
 ## 핵심 개념
 
@@ -29,12 +31,12 @@ ISR이 ADC 샘플을 받아 task에 넘기고, BLE stack이 packet을 applicatio
 | `xQueueReceive` | 앞에서 제거 (by value, 복사) |
 | `xQueuePeek` | 제거하지 않고 읽기 |
 
-Queue는 내부에서 `memcpy(slot, &item, sizeof(T))`를 합니다. 그래서 `sizeof(T)`가 크면 send 비용이 그만큼 늘어납니다.
+`queue.c`의 `prvCopyDataToQueue()`는 `memcpy( pxQueue->pcWriteTo, pvItemToQueue, pxQueue->uxItemSize )`로 넣고, 꺼낼 때도 `uxItemSize`만큼 `memcpy`합니다. send와 receive가 각각 item 크기만큼 복사합니다.
 
 | 방식 | 적합한 경우 |
 |------|------------|
-| by-value | T가 32 B 이하 — 단순, 안전, lifetime 걱정 없음 |
-| by-pointer | T가 큼 — pool에서 받아 pointer만 send |
+| by-value | item이 작을 때. 복사본이 queue에 있으므로 보낸 쪽 변수는 바로 다시 써도 됨 |
+| by-pointer | item이 클 때. pool에서 받은 buffer의 pointer(4 B)만 넣음 |
 | zero-copy | DMA buffer를 미리 할당, index만 queue로 전달 |
 
 Backpressure는 queue가 full일 때 producer가 어떻게 행동할지의 정책입니다. block, drop, replace 세 가지 중 선택합니다.
@@ -70,7 +72,7 @@ int main(void) {
 }
 ```
 
-10 byte 정도의 sample은 by-value가 가장 단순합니다. lifetime 걱정이 없고 send 후 sender의 stack은 자유롭게 재사용할 수 있습니다.
+`sample_t`는 12 B입니다(정렬 포함). 복사본이 queue에 들어가므로 send 뒤 `s`를 바로 다시 채워도 됩니다.
 
 ### By-pointer (큰 메시지)
 
@@ -110,7 +112,7 @@ void task_parse(void *arg) {
 }
 ```
 
-큰 packet을 매번 복사하면 CPU와 latency 비용이 늘어납니다. Pool에서 미리 할당해 pointer만 send하면 복사량을 줄일 수 있지만, lifetime과 ownership을 명확히 관리해야 합니다.
+queue에는 pointer 4 B만 복사됩니다. 대신 buffer는 받는 쪽이 `pkt_free()`할 때까지 보낸 쪽이 건드리지 않아야 하고, pool이 비면 `pkt_alloc()`이 NULL을 돌려주므로 받는 쪽처럼 확인해야 합니다(위 `task_rx`는 그 확인을 생략한 발췌입니다).
 
 ### ISR에서 send
 
@@ -123,7 +125,7 @@ void UART_IRQHandler(void) {
 }
 ```
 
-`*FromISR`을 잊으면 critical section이 어긋납니다. ISR이 byte 단위로 push하고 task가 line 단위로 처리하는 패턴이 매우 흔합니다.
+ISR에서는 `FromISR` 변종을 씁니다. 일반 `xQueueSend()`를 ISR에서 부르면 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)의 실행처럼 port의 `configASSERT`에 걸립니다.
 
 ### Backpressure 정책 비교
 
@@ -138,7 +140,7 @@ xQueueSend(q, &item, portMAX_DELAY);
 xQueueOverwrite(latest_q, &item);    /* length=1 queue에만 */
 ```
 
-센서 stream처럼 손실해도 되는 데이터는 drop이 적절합니다. command queue는 block이, "현재 값"만 의미 있는 telemetry는 overwrite가 적절합니다.
+잃어도 되는 sample stream은 drop, 잃으면 안 되는 command는 block, 최신 값 하나만 의미 있는 상태값은 overwrite를 씁니다. `queue.h`는 `xQueueOverwrite()`를 "Only for use with queues that have a length of one"이라고 적습니다.
 
 ### Queue set으로 다중 입력 대기
 
@@ -161,7 +163,7 @@ void task_dispatch(void *arg) {
 }
 ```
 
-여러 queue를 동시에 기다리는 패턴입니다. Linux의 `epoll`에 해당합니다. 다만 queue set은 memory를 더 쓰니 정말 필요할 때만 씁니다.
+한 task가 여러 queue를 동시에 기다립니다. `configUSE_QUEUE_SETS`를 1로 두어야 쓸 수 있고, queue set 자체가 handle을 담는 queue(여기서는 20칸)이므로 그만큼 heap을 더 씁니다.
 
 ### Stream buffer (가변 길이)
 
@@ -176,28 +178,91 @@ char buf[64];
 size_t n = xStreamBufferReceive(sb, buf, sizeof(buf), portMAX_DELAY);
 ```
 
-UART나 USB CDC처럼 byte 단위로 들어오는 stream에는 queue보다 stream buffer가 자연스럽습니다.
+byte 단위로 들어오는 stream은 stream buffer로 받으면 byte마다 queue item을 쓰지 않고 한 번에 여러 byte를 꺼냅니다. `xStreamBufferCreate()`의 두 번째 인자는 받는 task를 깨우는 trigger level(byte)입니다.
 
-## 측정 / 성능 비교
+## 측정
 
-```text
-연산                              시간 (Cortex-M4 72 MHz)
-xQueueSend (sizeof 12 B)          측정 필요
-xQueueSend (sizeof 256 B)         측정 필요
-xQueueSend (pointer only)         측정 필요
-xQueueReceive (block → wake)      측정 필요
-xStreamBufferSend (32 B)          측정 필요
+### item 크기와 비용
+
+64칸 queue를 item 4 B(pointer), 12 B, 64 B, 256 B로 만들어 heap 사용량을 재고, 각각 send+receive를 20,000번 해서 지난 tick을 셌습니다.
+
+```c
+/* qcost.c: heap cost and send+receive time per item size.
+   Time is QEMU icount virtual time (instruction-count based), not board time. */
+#include <string.h>
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+
+static uint8_t item[256];
+
+static void run(size_t size, int n) {
+    size_t h0 = xPortGetFreeHeapSize();
+    QueueHandle_t q = xQueueCreate(64, size);
+    size_t used = h0 - xPortGetFreeHeapSize();
+    TickType_t t0 = xTaskGetTickCount();
+    for (int i = 0; i < n; i++) {                  /* send + receive, no blocking */
+        xQueueSend(q, item, 0);
+        xQueueReceive(q, item, 0);
+    }
+    TickType_t dt = xTaskGetTickCount() - t0;
+    pr("item %3u B: heap %5u B for 64 slots, %u send+receive pairs took %u ticks\n",
+       (unsigned)size, (unsigned)used, n, (unsigned)dt);
+    vQueueDelete(q);
+}
+
+static void t(void *a) {
+    (void)a;
+    run(4, 20000);      /* a pointer */
+    run(12, 20000);
+    run(64, 20000);
+    run(256, 20000);
+    hosted_exit(0);
+}
+
+int main(void) {
+    xTaskCreate(t, "t", 512, NULL, 1, NULL);
+    vTaskStartScheduler();
+    return 0;
+}
 ```
 
-대형 메시지를 by-value로 보내면 send 비용이 빠르게 증가합니다. 64 byte를 넘으면 pointer 방식을 검토할 가치가 있습니다.
-
 ```text
-RAM 사용량
-queue (N=64, item 12 B)           Queue 구조 + 768 B
-queue (N=8, pointer 4 B)          Queue 구조 + 32 B + pool 8 KB
+item   4 B: heap   344 B for 64 slots, 20000 send+receive pairs took 133 ticks
+item  12 B: heap   856 B for 64 slots, 20000 send+receive pairs took 175 ticks
+item  64 B: heap  4184 B for 64 slots, 20000 send+receive pairs took 442 ticks
+item 256 B: heap 16472 B for 64 slots, 20000 send+receive pairs took 1426 ticks
 ```
 
-By-pointer는 pool RAM이 별도로 필요하지만, 전체로 보면 비슷하거나 더 작은 경우가 많습니다.
+heap은 64 × item 크기에 queue 구조체와 heap_4 header를 더한 값입니다(4 B: 256 + 88 = 344). 시간은 QEMU icount의 명령 수 기반 가상 시간이라 보드의 시간이 아니고, 이 harness의 `memcpy`는 한 byte씩 복사하므로 word 단위로 복사하는 C 라이브러리보다 크기에 따른 증가가 가파릅니다. 그래도 item 크기가 커질수록 send+receive 비용이 복사량에 따라 늘어나는 모양은 그대로이고, 4 B와 256 B 사이가 약 10.7배였습니다.
+
+### create와 send의 크기가 다를 때
+
+```c
+/* mismatch.c: a queue created for pointers, sent a whole struct */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "queue.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
+typedef struct { uint32_t a, b, c; } pkt_t;
+static void t(void *arg) {
+    (void)arg;
+    QueueHandle_t q = xQueueCreate(4, sizeof(pkt_t *));   /* 4-byte slots */
+    pkt_t in = {0x11111111, 0x22222222, 0x33333333}, out = {0, 0, 0};
+    xQueueSend(q, &in, 0);                                /* copies 4 bytes */
+    xQueueReceive(q, &out, 0);
+    pr("out = %x %x %x\n", (unsigned)out.a, (unsigned)out.b, (unsigned)out.c);
+    hosted_exit(0);
+}
+int main(void) { xTaskCreate(t, "t", 256, NULL, 1, NULL); vTaskStartScheduler(); return 0; }
+```
+
+```text
+out = 11111111 0 0
+```
+
+queue는 만들 때 정한 `uxItemSize`(4 B)만 복사하므로 12 B 구조체의 첫 field만 건너갔습니다. 컴파일러는 이 차이를 잡지 못합니다.
 
 ## 자주 보는 함정
 
@@ -211,7 +276,7 @@ void send_msg(void) {
 }
 ```
 
-Stack 변수의 pointer를 send하면 receiver가 garbage를 읽습니다. Pool 또는 static buffer에서만 보내야 합니다.
+pointer queue에 stack 변수의 주소를 넣으면, 함수가 돌아간 뒤에는 그 stack 영역을 다른 호출이 덮어쓰므로, 받는 task는 덮어쓴 값을 읽습니다. pointer로 보내는 buffer는 pool이나 static에서 가져옵니다.
 
 > Pool exhaustion 무시
 
@@ -220,7 +285,7 @@ pkt_t *p = pkt_alloc();
 xQueueSend(q, &p, 0);    /* p가 NULL이면 receiver crash */
 ```
 
-Pool이 비면 alloc이 NULL을 돌려줍니다. 항상 check하고 backpressure 처리를 정의해둡니다.
+pool이 비면 `pkt_alloc()`이 NULL을 돌려주고, 받는 쪽은 NULL을 역참조합니다. 보내기 전에 확인하고, pool이 빈 경우의 정책(drop, 대기)을 정합니다.
 
 > sizeof 실수
 
@@ -230,7 +295,7 @@ pkt_t p;
 xQueueSend(q, &p, 0);    /* by-value인 줄 알았다면 첫 4 byte만 복사됨 */
 ```
 
-Create와 send/receive의 sizeof가 어긋나면 silent corruption이 발생합니다. by-pointer queue임을 명시적으로 표시합니다.
+위 측정처럼 앞 4 B만 복사되고 나머지는 조용히 빠집니다. pointer queue는 이름이나 typedef로 표시합니다.
 
 > Full에서 portMAX_DELAY로 sender block
 
@@ -238,12 +303,12 @@ Create와 send/receive의 sizeof가 어긋나면 silent corruption이 발생합�
 xQueueSend(q, &item, portMAX_DELAY);   /* consumer가 죽으면 producer도 영구 block */
 ```
 
-Backpressure 정책 없이 무한 대기하면 cascading failure가 발생합니다. timeout과 drop counter를 함께 둡니다.
+consumer가 멈추면 producer도 queue가 찬 시점에 영원히 멈춥니다. timeout을 두고 실패를 셉니다.
 
 ## 정리
 
-- Queue는 by-value memcpy가 기본입니다. sizeof가 클수록 send 비용이 늘어납니다.
-- 큰 record는 by-pointer + pool을 검토하되, ownership·fragmentation·cache 비용을 함께 측정합니다.
+- Queue는 send·receive 때 **item 크기만큼 memcpy**합니다. 위 측정에서 4 B → 256 B로 비용이 약 10.7배, heap이 344 → 16,472 B가 되었습니다.
+- 큰 record는 by-pointer + pool. 이때 buffer의 수명과 pool 고갈을 코드가 지켜야 합니다.
 - ISR은 `xQueueSendFromISR`과 `portYIELD_FROM_ISR`을 함께 씁니다.
 - Backpressure 정책(block, drop, replace)을 코드 단위로 명시합니다.
 - Queue set은 여러 입력을 한 task에서 대기할 때 씁니다.
