@@ -330,7 +330,7 @@ backtrace는 stack에 저장된 복귀 주소와 프레임 정보를 따라가�
 
 ## 정리
 
-- OpenOCD/pyOCD가 gdbserver, GDB가 client. JTAG/SWD를 통해 통신합니다.
+- OpenOCD·pyOCD가 gdbserver, GDB가 client이고, gdbserver가 JTAG/SWD로 target과 통신합니다.
 - `target extended-remote :3333`로 붙고, `monitor`로 OpenOCD 명령을 내립니다.
 - LLDB `-w write`는 값이 같아도 쓰기마다 멈추고(네 번), GDB `watch`와 같은 LLDB `-w modify`는 값이 바뀐 i = 11에서만 멈췄습니다(QEMU 실행). Cortex-M4의 watchpoint는 칩에 따라 1개 또는 4개입니다.
 - 프로젝트 `.gdbinit`은 `auto-load safe-path`에 등록해야 읽힙니다.
