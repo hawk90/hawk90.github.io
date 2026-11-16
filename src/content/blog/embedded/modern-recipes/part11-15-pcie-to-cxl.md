@@ -53,17 +53,16 @@ CXL 디바이스는 *지원 프로토콜 조합*으로 *세 타입*으로 나뉩
 
 ## Flex Bus — 한 링크에서 시분할
 
-같은 *CXL 링크*에서 *세 프로토콜이 동시에* 흐릅니다.
+같은 *CXL 링크*에서 세 프로토콜이 flit 단위로 섞여 흐릅니다. 장치가 어떤 프로토콜과 flit 형식을 지원하는지는 Flex Bus Port DVSEC에 적혀 있습니다. [Ch 150](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)의 QEMU Type 3 장치에서 읽은 값입니다.
 
 ```text
-[Flex Bus 시분할 — flit 단위]
-
-t=0   CXL.mem M2S Req   (host → device, load addr=0x1000)
-t=1   CXL.io  TLP       (config write)
-t=2   CXL.cache D2H Req (device → host, snoop addr=0x2000)
-t=3   CXL.mem S2M DRS   (device → host, data 64 B)
-...
+Capabilities: [170 v1] Designated Vendor-Specific: Vendor=1e98 ID=0007 Rev=2 Len=32: CXL
+	PCIe DVSEC for Flex Bus Port
+	FBCap:	Cache- IO+ Mem+ 68BFlit+ MltLogDev- 256BFlit- PBRFlit-
+	FBCtl:	Cache- IO+ Mem- SynHdrByp- DrftBuf- 68BFlit- MltLogDev- RCD- Retimer1- Retimer2- 256BFlit- PBRFlit-
 ```
+
+`Cache-`·`IO+`·`Mem+`가 Type 3 장치의 프로토콜 조합(CXL.io + CXL.mem)입니다.
 
 링크의 arbitration과 credit 정책은 구현·구성에 따라 여러 트래픽을 조정합니다. CXL.mem과 CXL.cache의 지연 특성은 링크·장치·큐 상태를 함께 측정해야 하며, 한 프로토콜이 항상 우선된다고 일반화할 수 없습니다.
 
@@ -71,23 +70,37 @@ t=3   CXL.mem S2M DRS   (device → host, data 64 B)
 
 Linux에서 CXL을 사용하려면 해당 kernel의 CXL 지원과 `CONFIG_CXL_*`, ACPI/firmware 및 플랫폼 지원을 함께 확인해야 합니다. 단순히 kernel 버전 하나만으로 동작 여부를 판단할 수 없습니다.
 
+아래는 QEMU 11.1.3의 Type 3 장치를 붙인 Debian 13 guest(kernel 6.12.116, `cxl` 81)에서 얻은 출력입니다([Ch 150](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)).
+
 ```bash
-# 1. lspci로 보면 PCIe device로 보임
-$ lspci -nn
-5e:00.0 CXL [0502]: <vendor> <device> [<vendor id>:<device id>]
+# 1. lspci로 보면 PCIe device로 보임 (class 0502)
+$ lspci -nn | grep -i cxl
+0d:00.0 CXL [0502]: Intel Corporation Device [8086:0d93] (rev 01)
 
 # 2. CXL DVSEC 확인 (CXLCap 줄은 -vv 이상에서 출력)
-$ sudo lspci -vvv -s 5e:00.0 | grep -A 1 "Designated Vendor"
-	Capabilities: [...] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=1 Len=56: CXL
+$ sudo lspci -vvv -s 0d:00.0 | grep -A3 "Designated Vendor-Specific: Vendor=1e98 ID=0000"
+	Capabilities: [100 v1] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=3 Len=60: CXL
+		PCIe DVSEC for CXL Devices
 		CXLCap:	Cache- IO+ Mem+ MemHWInit+ HDMCount 1 Viral-
 
 # 3. CXL 서브시스템에 등록 확인
 $ ls /sys/bus/cxl/devices/
-root0/  port0/  decoder0.0/  mem0/
+decoder0.0  decoder1.0  decoder2.0  decoder2.1  decoder2.2  decoder2.3  endpoint2  mem0  nvdimm-bridge0  port1  root0
 
-# 4. memdev 확인 (ram_size·pmem_size·serial·host 필드)
-$ cxl list -m mem0
+# 4. memdev 확인
+$ cxl list -M
+[
+  {
+    "memdev":"mem0",
+    "ram_size":268435456,
+    "serial":0,
+    "host":"0000:0d:00.0",
+    "firmware_version":"BWFW VERSION 00"
+  }
+]
 ```
+
+Vendor `1e98`은 CXL DVSEC의 vendor ID이고, ID `0000`이 CXL Device DVSEC입니다. 같은 장치에는 Register Locator(ID `0008`), GPF(ID `0005`), Flex Bus Port(ID `0007`) DVSEC도 함께 있었습니다.
 
 *PCI subsystem이 디바이스를 발견*하면 *CXL subsystem이 추가로 등록*해 *별도 sysfs entry*를 만듭니다. *cxl-cli*가 이 정보를 노출합니다.
 
@@ -105,7 +118,7 @@ SoC에 PCIe root port가 있다고 CXL 장치를 attach할 수 있는 것은 아
 # PCIe로만 본 enumeration — class 0502 (CXL)
 $ lspci -nn | grep 0502
 
-$ ls /sys/bus/pci/devices/0000:5e:00.0/
+$ ls /sys/bus/pci/devices/0000:0d:00.0/
 # → PCI 속성만 보이고 region·decoder·memdev는 없음
 ```
 
