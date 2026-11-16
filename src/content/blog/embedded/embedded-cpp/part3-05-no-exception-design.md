@@ -16,10 +16,10 @@ topics: ["embedded"]
 
 ## 어떤 문제를 푸는가
 
-예외의 비용은 ABI·언어 런타임·실패 빈도·최적화에 따라 달라집니다.
+예외를 켜면 무엇이 붙는지는 [Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#1-예외-처리)에서 오브젝트로 확인했습니다.
 
-- Unwind table·런타임이 코드 크기에 영향을 줄 수 있습니다.
-- throw와 복구 경로의 최대 지연을 타깃에서 검증해야 합니다.
+- 소멸자가 있는 지역 객체를 둔 함수마다 landing pad와 `.ARM.extab`/`.ARM.exidx` 테이블이 붙고, `__cxa_*`·personality 루틴을 libsupc++에서 끌어옵니다.
+- throw의 지연은 unwinder가 테이블을 따라 frame을 하나씩 푸는 시간이라 호출 깊이에 따라 늘어납니다. 이 글에서는 그 시간을 재지 않았습니다.
 - Stack unwinding은 생성이 완료된 자동 객체를 소멸시키는 정의된 동작입니다.
 - 예외 허용 범위는 프로젝트의 안전 요구·코딩 규칙으로 정합니다.
 
@@ -69,7 +69,7 @@ process(v);
 read_register(0x10, v);   // WARNING — return 값 무시
 ```
 
-`[[nodiscard]]`(C++17)가 컴파일러 경고를 띄우고, `-Werror`와 결합하면 에러로 승격됩니다.
+`[[nodiscard]]`(C++17)는 기본 경고로 동작합니다. 위 호출에 g++-16은 `warning: ignoring return value of 'ErrorCode read_register(unsigned char, unsigned char&)', declared with attribute 'nodiscard' [-Wunused-result]`, Clang 23.1.5는 `warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]`를 냈습니다. `-Werror`와 결합하면 에러로 승격됩니다. 함수마다 붙이는 대신 `enum class [[nodiscard]] ErrorCode`처럼 타입에 붙이면 그 타입을 반환하는 모든 함수에 적용됩니다.
 
 ## 패턴 2 — `std::optional` (C++17)
 
@@ -94,7 +94,7 @@ if (auto v = read_register(0x10)) {
 
 장점은 반환값과 결과가 하나로 통합되어 간결하다는 점이고, 단점은 에러 종류를 알 수 없다는 점입니다.
 
-`std::optional`은 내부적으로 union과 bool 조합이므로 heap을 쓰지 않고, sizeof는 `sizeof(T)`에 약간 더해진 정도입니다.
+`std::optional`은 값과 "값이 있는가" 플래그를 객체 안에 담으므로 heap을 쓰지 않습니다. 크기는 플래그에 T의 정렬만큼 padding이 붙어 정해집니다. g++-16과 Clang 23.1.5(64비트 호스트, 결과 동일)에서 `optional<uint8_t>`는 2바이트, `optional<float>`는 8바이트였습니다.
 
 ### 임베디드 — Optional 활용
 
@@ -144,7 +144,7 @@ if (result) {
 }
 ```
 
-장점은 값과 에러 종류가 하나로 통합되고 명시적이라는 점이고, 단점은 C++23이라 toolchain이 지원하지 않을 수 있다는 점입니다.
+장점은 값과 에러 종류가 하나로 통합되고 명시적이라는 점입니다. 위처럼 에러 enum을 `uint8_t` 기반으로 두면 `std::expected<uint8_t, ReadError>`는 2바이트였습니다(두 라이브러리 동일). 단점은 C++23 라이브러리 기능이라는 점입니다. libstdc++ 12·libc++ 16부터 들어 있습니다([Part 1-08](/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice#c23--필요한-기능별로-확인)).
 
 자세한 내용은 [Part 3-07: std::expected](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
 
@@ -161,16 +161,18 @@ tl::expected<uint8_t, ReadError> read_register(uint8_t addr) {
 }
 ```
 
-API가 `std::expected`와 거의 동일합니다. 임베디드에서는 C++17과 백포트를 함께 쓰는 패턴이 흔합니다.
+기본 사용법(`unexpected`, `operator bool`, `*`, `error()`)은 `std::expected`와 같은 모양입니다. 이 글에서는 tl::expected를 빌드하지 않았습니다.
 
 ## 비교 표
 
-| 패턴 | 표준 | 에러 정보 | 코드 크기 | 사용성 |
+| 패턴 | 표준 | 에러 정보 | 반환 객체 크기 (`uint8_t` 결과) | 값과 에러 |
 | --- | --- | --- | --- | --- |
-| Error code + out param | C++98 | 풍부 | 작음 | 보통 |
-| `std::optional<T>` | C++17 | 없음 (유/무만) | 작음 | 좋음 |
-| `std::expected<T, E>` | C++23 | 풍부 | 작음 | 매우 좋음 |
-| `tl::expected<T, E>` | C++11 이후 (백포트) | 풍부 | 작음 | 매우 좋음 |
+| Error code + out param | C++98 | enum 값 | 4 (`enum class` 기본 `int`) + out param | 분리 |
+| `std::optional<T>` | C++17 | 없음 (유/무만) | 2 | 하나 |
+| `std::expected<T, E>` | C++23 | enum 값 | 2 (E가 `uint8_t` 기반) | 하나 |
+| `tl::expected<T, E>` | C++11 이후 (백포트) | enum 값 | 측정 안 함 | 하나 |
+
+크기는 g++-16·Clang 23.1.5 64비트 호스트의 `sizeof`입니다.
 
 ## STL의 예외 던지는 함수
 
@@ -188,7 +190,7 @@ s.at(100);                   // throw
 std::stoi("not a number");   // throw
 ```
 
-vec[10]의 범위 초과는 예외 플래그와 무관하게 계약 위반입니다. 직접 throw/try/catch를 쓴 translation unit은 Clang/GCC의 -fno-exceptions에서 컴파일 오류가 납니다. at/stoi처럼 표준상 예외를 던지는 라이브러리 함수가 실패했을 때의 결과는 라이브러리 빌드·구현에 따라 다르므로, 예외를 끄면 자동으로 안전한 오류 코드로 바뀐다고 가정하면 안 됩니다.
+vec[10]의 범위 초과는 예외 플래그와 무관하게 계약 위반입니다. 직접 throw/try/catch를 쓴 translation unit은 Clang/GCC의 -fno-exceptions에서 컴파일 오류가 납니다. `at`·`stoi`처럼 라이브러리 안에서 던지는 함수는 컴파일되고, 실패하면 프로그램이 끝납니다. `-fno-exceptions`로 `std::stoi("not a number")`를 부르면 g++-16은 `terminate called after throwing an instance of 'std::invalid_argument'`, Clang 23.1.5(libc++)는 `libc++abi: terminating due to uncaught exception of type std::invalid_argument: stoi: no conversion`으로 둘 다 exit 134였습니다(`at()`은 [Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#주의--stl-함수가-던지는-예외)). 예외를 끈다고 오류 코드로 바뀌지 않습니다.
 
 해결책은 명시적인 검증입니다.
 
@@ -201,7 +203,7 @@ auto [ptr, ec] = std::from_chars(str, str + len, result);
 if (ec == std::errc{} && ptr == str + len) { /* 전체 입력 파싱 성공 */ }
 ```
 
-`std::from_chars`(C++17)는 예외를 던지지 않으므로 임베디드에서 안전합니다.
+`std::from_chars`(C++17)는 예외를 던지지 않고 결과를 `std::errc`로 돌려줍니다([charconv.from.chars]). 로케일도 쓰지 않습니다.
 
 ## 임베디드 패턴 — 계층화된 에러
 
@@ -270,7 +272,7 @@ pipe 스타일로 흘러가며, 첫 실패에서 체인이 short-circuit됩니�
 
 ## Heap 없는 string error message
 
-`std::string`은 heap을 사용하므로 고정 메시지만 권장합니다.
+`std::string`은 SSO 버퍼보다 긴 내용을 heap에 둡니다. 오류 객체에는 고정 메시지를 가리키는 방식이 맞습니다.
 
 ```cpp
 // BAD — dynamic string
@@ -325,7 +327,7 @@ if (auto r = Resource::create(42)) {
 ## 자주 보는 함정과 안티패턴
 
 ### 1. 예외 켜진 코드 link
-한 모듈만 `-fexceptions`로 빌드하면 unwind table이 다시 들어옵니다. 모든 모듈을 일치시킵니다.
+한 모듈만 `-fexceptions`로 빌드하면 그 모듈의 unwind table과 libsupc++의 `__cxa_*`·personality 루틴이 다시 링크됩니다. `-fno-exceptions` 모듈의 함수에는 cleanup 코드가 없으므로, 예외가 두 모듈의 경계를 넘는 설계 자체를 피합니다. 모든 모듈의 플래그를 일치시키고, 링크 결과에 `__cxa_throw`·`__gxx_personality_v0`가 없는지 `nm`으로 확인합니다.
 
 ### 2. STL throw 함수 호출
 `vec.at(idx)` 대신 `vec[idx]`로 쓰고 직접 검증합니다. `string::substr()`, `stoi()` 등에도 주의합니다.
@@ -339,9 +341,9 @@ foo();   // ignored
 
 ### 4. optional/expected에 큰 객체
 ```cpp
-std::optional<HugeStruct> result;   // sizeof(HugeStruct) + 1
+std::optional<HugeStruct> result;   // sizeof(HugeStruct) + 플래그 + padding
 ```
-pointer를 활용하거나 큰 객체를 분리합니다.
+`uint32_t` 256바이트 구조체로 재면 `optional<HugeStruct>`는 260바이트였습니다(플래그 1바이트 + 정렬 padding 3바이트). 반환값으로 쓰면 이 크기가 호출마다 stack에 잡히므로, 큰 결과는 호출자가 준 버퍼에 쓰고 `expected<void, E>`처럼 상태만 반환합니다.
 
 ### 5. 에러를 boolean으로 통합
 ```cpp
@@ -400,7 +402,7 @@ clang++ -std=c++23 -fno-exceptions -Wall -Wextra -Werror no-exception.cpp -o no-
 ./no-exception
 ```
 
-예외를 꺼도 정상적인 scope 종료와 return에서는 destructor가 실행됩니다. abort·reset에서는 같은 보장이 없습니다.
+Homebrew Clang 23.1.5와 g++-16 모두 `-fno-exceptions -Wall -Wextra -Werror`로 exit 0이었습니다. `-DIGNORE_RESULT`는 Clang에서 `error: ignoring return value of function declared with 'nodiscard' attribute [-Werror,-Wunused-result]`로 거부됩니다. 예외를 꺼도 정상적인 scope 종료와 return에서는 destructor가 실행됩니다(`cleaned == 1`). abort·reset에서는 같은 보장이 없습니다.
 
 ## 정리
 
@@ -413,7 +415,7 @@ clang++ -std=c++23 -fno-exceptions -Wall -Wextra -Werror no-exception.cpp -o no-
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `no-exception.cpp`, `sizeof` 측정, `stoi` 실험을 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 macOS arm64 host에서 실행했습니다. 보드 실행·WCET·tl::expected 빌드는 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [expected 관찰과 실패 계약](https://eel.is/c++draft/expected)
 - [from_chars 파싱 계약](https://eel.is/c++draft/charconv.from.chars)
