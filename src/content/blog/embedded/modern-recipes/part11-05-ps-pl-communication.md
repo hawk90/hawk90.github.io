@@ -27,7 +27,7 @@ Zynq처럼 Arm 코어(PS)와 FPGA fabric(PL)이 한 칩에 있으면, 둘이 데
 
 ## 인터페이스 종류
 
-UG585에 따르면 PS 쪽 AXI 인터페이스는 **AXI3** 사양을 따르고, PL로 나가는 AXI 인터페이스는 9개입니다. AXI3이므로 burst는 최대 16 beat입니다(Arm IHI 0022C 13.1.1).
+UG585에 따르면 PS 쪽 AXI 인터페이스는 **AXI3** 사양을 따르고, PL과 연결되는 AXI 인터페이스는 9개입니다. AXI3이므로 burst는 최대 16 beat입니다(Arm IHI 0022C 13.1.1).
 
 | 인터페이스 | Master → Slave | 데이터 폭 | 연결 | 주 용도 |
 |---|---|---|---|---|
@@ -113,9 +113,10 @@ int main(int argc, char **argv)
 }
 ```
 
-edu 장치의 BAR0(`0x10000000`)에 대해, 드라이버가 그 영역을 잡기 전과 후를 비교했습니다.
+edu 장치의 BAR0(`0x10000000`)에 대해, 드라이버가 그 영역을 잡기 전과 후를 비교했습니다. 드라이버가 없으면 Memory Space 비트가 꺼져 있으므로([11-03](/blog/embedded/modern-recipes/part11-03-pcie-bar) 참고) 먼저 `setpci`로 켰습니다.
 
 ```text
+$ setpci -s 00:03.0 COMMAND=0002:0002
 $ ./devmem
 0x10000000: id = 0x010000ed
 $ insmod edu_bar.ko && grep -i edu /proc/iomem
@@ -132,7 +133,7 @@ $ rmmod edu_bar && ./devmem
 
 UIO는 "레지스터 mmap과 인터럽트 대기만 커널이 해 주고 나머지는 user space가 하는" 프레임워크입니다. `/dev/uioN`을 mmap하면 장치 메모리가 보이고, `read()`로 4바이트를 읽으면 다음 인터럽트까지 잠들었다가 누적 인터럽트 횟수를 받습니다(`drivers/uio/uio.c`의 `uio_read()`는 `count != sizeof(s32)`이면 거부합니다).
 
-PCI 장치용 `uio_pci_generic`에는 주의할 점이 있습니다. `Documentation/driver-api/uio-howto.rst`에 따르면 이 드라이버는 인터럽트마다 PCI Command 레지스터의 Interrupt Disable 비트를 세우고, user space 드라이버가 기다리기 전에 이 비트를 config space로 직접 풀어야 합니다. `/dev/uio0`에 `write()`로 인터럽트를 다시 여는 방식(`irqcontrol`)은 이 드라이버가 구현하지 않으므로, 실제로 해 보면 `write: Function not implemented`가 돌아옵니다. 아래 코드는 문서의 예제 순서를 따릅니다.
+PCI 장치용 `uio_pci_generic`에는 주의할 점이 있습니다. `Documentation/driver-api/uio-howto.rst`에 따르면 이 드라이버는 인터럽트마다 PCI Command 레지스터의 Interrupt Disable 비트를 세우고, user space 드라이버가 기다리기 전에 이 비트를 config space로 직접 풀어야 합니다. `/dev/uio0`에 `write()`로 인터럽트를 다시 여는 방식은 쓸 수 없습니다. `drivers/uio/uio.c`의 `uio_write()`는 드라이버에 `irqcontrol`이 없으면 `-ENOSYS`(Function not implemented)를 돌려주는데, `uio_pci_generic`은 `irqcontrol`을 구현하지 않습니다. 아래 코드는 문서의 예제 순서를 따릅니다.
 
 ```c
 #include <fcntl.h>
@@ -196,7 +197,7 @@ $ grep uio /proc/interrupts
  48:          6          0          0          0     GICv3  38 Level     uio_pci_generic
 ```
 
-`map0`이 BAR0 1 MB 그대로입니다. 횟수가 2부터 시작하고 첫 status가 `0x101`인 것은, 앞서 Interrupt Disable을 풀지 않은 채 돌렸던 실행이 인터럽트 하나(0x100)를 ack하지 않고 남겼기 때문입니다. edu 문서대로 status는 raise 값의 bitwise OR이라 `0x100 | 0x101 = 0x101`이 됐습니다. 이런 잔여 인터럽트를 피하려면 시작할 때 status를 읽어 한 번 ack하고 들어갑니다.
+`map0`이 BAR0 1 MB 그대로입니다. 첫 status `0x101`에는 이번 실행이 올리지 않은 bit `0x001`이 들어 있습니다. edu 문서대로 status는 raise 값의 bitwise OR이므로, 이전 실행에서 ack되지 않은 `0x101`이 남아 있다가 이번에 올린 `0x100`과 OR되어 `0x101`이 된 것입니다. 횟수가 2부터 시작하고 `/proc/interrupts`가 6인 것도 이전 실행의 인터럽트 1회 + 이번 5회로 맞습니다. 이런 잔여 인터럽트를 피하려면 시작할 때 status를 읽어 한 번 ack하고 들어갑니다.
 
 `raise->wakeup` 5~9 µs는 HVF 가속 QEMU VM에서 MMIO 쓰기부터 `read()`가 깨어날 때까지의 시간입니다. 에뮬레이션 비용이 섞인 값이므로 Zynq에서의 인터럽트 지연으로 읽으면 안 됩니다.
 
@@ -213,7 +214,7 @@ my_accel@40000000 {
 };
 ```
 
-`reg`는 `M_AXI_GP0` 창(`0x4000_0000`부터) 안의 주소여야 합니다. 그리고 이 드라이버는 커널 설정에 따라 아예 없을 수도 있습니다. Debian 13 arm64 커널은 `# CONFIG_UIO_PDRV_GENIRQ is not set`이었습니다. 쓰려는 커널에 `CONFIG_UIO_PDRV_GENIRQ`가 켜져 있는지 먼저 확인합니다.
+`reg`는 `M_AXI_GP0`(`0x4000_0000`~) 또는 `M_AXI_GP1`(`0x8000_0000`~) 창 안의 주소여야 하고, 이 예는 GP0입니다. 또 Debian 13 arm64 커널(6.12.116)은 `# CONFIG_UIO_PDRV_GENIRQ is not set`으로 빌드되어 이 드라이버가 없습니다. 쓰려는 커널에 `CONFIG_UIO_PDRV_GENIRQ`가 켜져 있는지 먼저 확인합니다.
 
 ## DMA buffer와 cache
 
@@ -266,7 +267,7 @@ HP0과 HP1처럼 같은 쌍을 쓰면 DDR 앞 중재를 둘이 나눠 갖습니�
 
 > 인터럽트를 장치에서 ack하지 않음
 
-위 UIO 실습에서 ack하지 않은 인터럽트 하나가 다음 실행까지 남아 status에 섞였습니다. 인터럽트를 처리했으면 장치 쪽 원인 레지스터를 지우고, UIO라면 Interrupt Disable 비트를 다시 풀어야 다음 인터럽트가 옵니다.
+위 UIO 실습에서 이전 실행이 ack하지 않은 원인 비트가 다음 실행의 status에 섞였습니다. 인터럽트를 처리했으면 장치 쪽 원인 레지스터를 지우고, UIO라면 Interrupt Disable 비트를 다시 풀어야 다음 인터럽트가 옵니다.
 
 ## 정리
 
