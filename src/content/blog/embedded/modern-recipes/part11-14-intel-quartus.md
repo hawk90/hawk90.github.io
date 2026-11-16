@@ -11,247 +11,54 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Quartus Prime은 Intel(구 Altera) FPGA의 toolchain입니다."** 흐름은 Vivado와 비슷하지만 *Platform Designer(Qsys)*와 *Nios II*가 Intel만의 색깔입니다.
+> **"Quartus Prime은 Intel(현 Altera) FPGA의 vendor toolchain입니다."** 흐름은 Vivado와 같은 constraint → compile → timing 확인 → programming이지만, 이 글에서 직접 확인할 수 있었던 것은 그 앞뒤의 HDL과 시뮬레이션뿐이었습니다.
+
+## 이 글이 확인한 범위
+
+Quartus는 이 글을 쓴 환경(Apple Silicon Mac, Debian arm64 guest)에 설치할 수 없어 실행하지 않았습니다. 버전이 붙은 Intel/Altera 공식 문서도 확인하려 했지만, `intel.com/content/www/us/en/docs/programmable/...` 아래 Quartus·Nios II 문서 URL은 현재 404 redirect 또는 403을 돌려주고, 옮겨 간 `docs.altera.com`은 JavaScript 앱이라 본문을 받아 올 수 없었습니다.
+
+그래서 이전 판에 있던 다음 내용은 1차 자료로 확인하지 못해 뺐습니다.
+
+- edition(Lite/Standard/Pro)별 지원 device 목록
+- Nios II/e·/s·/f의 LE 수와 pipeline 구성
+- `quartus_pgm`·`quartus_cpf`·`quartus_sh` 명령의 옵션과 file format(`.sof`·`.pof`·`.jic`) 설명
+- Intel HLS의 `i++` 명령과 pragma, Partial Reconfiguration API
+- TimeQuest 보고서 예시 값, Cyclone V SoC bridge 주소
+
+남은 것은 어느 FPGA toolchain에서나 쓰는 HDL과 testbench, 그리고 그것을 오픈소스 시뮬레이터로 돌린 결과입니다. Quartus 고유 기능은 Altera 문서에 접근할 수 있을 때 그 문서의 버전을 붙여 다시 씁니다.
 
 ## 어떤 상황에서 쓰나
 
-Cyclone·Arria·Stratix·Agilex 계열 Intel FPGA에서 Quartus Prime을 사용합니다. 지원 device·edition·feature는 release와 device family별로 확인하며, Lite/Standard/Pro 구성도 버전 정책을 확인합니다.
+Cyclone·Arria·Stratix·Agilex 계열 FPGA를 쓰는 프로젝트에서 vendor toolchain에 넣기 전에 RTL을 검증할 때입니다. Quartus에 들어가기 전 단계(RTL 작성, testbench 시뮬레이션, lint)는 vendor 도구 없이도 할 수 있고, 여기서 잡은 오류는 긴 compile을 기다리지 않고 고칠 수 있습니다.
 
-```text
-Lite        : Cyclone 10 LP, MAX 10 — 무료
-Standard    : Cyclone V, Arria V, Stratix V — 유료
-Pro         : Arria 10, Stratix 10, Agilex — 유료
+## 예제 RTL
+
+50 MHz clock을 100 분주해 2-bit LED 카운터를 올리는 작은 모듈입니다.
+
+```verilog
+module top (
+    input  wire       clk_50,
+    output reg  [1:0] led = 2'b00
+);
+    reg [7:0] div = 8'd0;
+    always @(posedge clk_50) begin
+        div <= div + 8'd1;
+        if (div == 8'd99) begin
+            div <= 8'd0;
+            led <= led + 2'b01;
+        end
+    end
+endmodule
 ```
 
-## Project 생성
+## Testbench와 시뮬레이션
 
-GUI:
-
-**File → New Project Wizard**
-
-- location, name
-- target device family + part (예: `10CL025YU256C8G`)
-- EDA tool (ModelSim, Synplify 등 선택)
-- Finish
-
-TCL:
-
-```tcl
-project_new myproj -overwrite
-set_global_assignment -name FAMILY "Cyclone 10 LP"
-set_global_assignment -name DEVICE 10CL025YU256C8G
-set_global_assignment -name TOP_LEVEL_ENTITY top
-set_global_assignment -name VERILOG_FILE src/top.v
-set_global_assignment -name SDC_FILE constr/top.sdc
-project_close
-```
-
-## SDC Constraint
-
-Quartus는 *Synopsys Design Constraints (SDC)*. XDC와 표기 비슷.
-
-```tcl
-# Clock
-create_clock -period 20.000 -name clk_50 [get_ports clk_50]
-
-# Generated clock
-derive_pll_clocks
-derive_clock_uncertainty
-
-# False path
-set_false_path -from [get_ports reset_n]
-
-# I/O timing
-set_input_delay  -clock clk_50 -max 2 [get_ports rx]
-set_output_delay -clock clk_50 -max 2 [get_ports tx]
-```
-
-Pin assignment는 `.qsf` 파일에:
-
-```tcl
-set_location_assignment PIN_M9 -to clk_50
-set_location_assignment PIN_A15 -to "led[0]"
-set_location_assignment PIN_A13 -to "led[1]"
-set_instance_assignment -name IO_STANDARD "3.3-V LVTTL" -to clk_50
-```
-
-또는 Pin Planner GUI.
-
-## Compile
-
-```text
-Processing → Start Compilation
-```
-
-TCL:
-
-```tcl
-load_package flow
-execute_flow -compile
-```
-
-Compilation = Analysis & Synthesis + Fitter (P&R) + Assembler + TimeQuest.
-
-## TimeQuest — Timing Analysis
-
-```text
-Tools → TimeQuest Timing Analyzer
-
-Setup summary:
-  Worst-case slack:  0.523 ns   ← positive면 OK
-  Total negative slack: 0.000
-
-Hold summary:
-  Worst-case slack:  0.087 ns
-```
-
-Vivado의 WNS와 동일 개념. Slack 음수 path는 *highlight* 후 *resynthesize* 또는 pipeline 추가.
-
-## Bitstream Programming
-
-**Tools → Programmer**
-
-- Mode: JTAG
-- Add File: `output_files/top.sof`
-- Start
-
-CLI:
-
-```bash
-quartus_pgm -m jtag -o "p;output_files/top.sof"
-```
-
-`.sof`는 SRAM bitstream (volatile). `.pof`는 flash. `.jic`은 EPCS/EPCQ serial flash.
-
-```bash
-# .sof → .jic 변환 (flash 용)
-quartus_cpf -c convert.cof
-quartus_pgm -m jtag -o "p;top.jic"
-```
-
-## Platform Designer (Qsys)
-
-System Integration GUI. AXI/Avalon bus, Nios II processor, IP block을 GUI로 묶음.
-
-```text
-Tools → Platform Designer
-  - Add IP from library: Nios II/e (economy core)
-  - Add: On-Chip Memory (16 KB)
-  - Add: JTAG UART
-  - Add: PIO (parallel I/O)
-  - Connect:
-      Nios II data → onchip_memory s1
-      Nios II instr → onchip_memory s1
-      Nios II data → jtag_uart avalon_jtag_slave
-      Nios II data → pio s1
-  - Auto-assign base address
-  - Generate HDL
-  - Add wrapper to project
-```
-
-Vivado의 Block Design / IP Integrator와 같은 위치. *Avalon bus*는 Intel 독자 protocol (AXI와 유사).
-
-## Nios II Soft Processor
-
-```text
-Nios II/e : 가장 작은 (~700 LE), no pipeline
-Nios II/s : standard (~1500 LE), 5-stage pipeline
-Nios II/f : fast (~2000 LE), branch predictor, cache
-```
-
-C/C++ 코드 작성:
-
-```bash
-nios2-bsp default board.bsp
-cd board.bsp/app
-# Eclipse 또는 Nios II Software Build Tools
-```
-
-```c
-#include "sys/alt_stdio.h"
-#include "altera_avalon_pio_regs.h"
-
-int main(void) {
-    while (1) {
-        IOWR_ALTERA_AVALON_PIO_DATA(LED_PIO_BASE, 0x55);
-        alt_printf("Hello\n");
-    }
-}
-```
-
-JTAG UART로 stdout이 host에 보임. Eclipse-based IDE 또는 CLI build.
-
-## Intel HLS
-
-Quartus와 함께 Intel HLS compiler (C++ → HDL):
-
-```cpp
-#include "HLS/hls.h"
-
-component
-int add(int a, int b) {
-    return a + b;
-}
-```
-
-```bash
-i++ adder.cpp -o adder.fpga
-```
-
-Vivado HLS와 비슷. Pragma는 약간 다름:
-
-```cpp
-component
-void vec_add(int *a, int *b, int *c, int n) {
-    #pragma ii 1
-    for (int i = 0; i < n; i++) {
-        c[i] = a[i] + b[i];
-    }
-}
-```
-
-## Partial Reconfiguration
-
-큰 design의 일부 영역을 runtime에 교체하는 기능입니다. 지원 여부와 region·flow 제약은 device family와 Quartus release 문서를 확인합니다.
-
-1. PR region 정의 (Project → Assignments → PR Region)
-2. Static region (기본 동작) + PR region (교체 대상) 분리
-3. Persona별 `.rbf` 생성
-4. Runtime에 `PR_CONFIG_DATA`에 `.rbf` write
-
-```c
-// Runtime API
-alt_partial_reconfig_block(PR_CONTROLLER_BASE,
-                            persona_a_bin, sizeof(persona_a_bin));
-```
-
-대표 사례. Neural network model을 runtime에 교체, 다른 codec을 동일 region에 load.
-
-## Signal Tap — Internal Logic Analyzer
-
-Vivado ILA의 Intel 버전.
-
-**Tools → Signal Tap Logic Analyzer**
-
-- Add nodes: 보고 싶은 signal
-- Trigger condition
-- Compile (Signal Tap이 design에 포함)
-- Program board
-- Capture
-
-실제 hardware에서 wave를 잡습니다.
-
-## ModelSim 통합
-
-- **Tools → Launch Simulation Library Compiler** 로 Quartus 라이브러리를 ModelSim용으로 빌드합니다.
-- **Project → Settings → EDA Tool Settings → Simulation** 에서 Tool을 ModelSim-Intel FPGA로, Format을 Verilog HDL로 지정합니다.
-- **Tools → Run Simulation Tool → RTL Simulation** 으로 시뮬레이션을 띄웁니다.
-
-Testbench 작성 후 sim:
+clock 주기 20 ns(50 MHz)로 10 µs를 돌리고, `led`가 바뀔 때마다 시각을 찍습니다.
 
 ```verilog
 module top_tb;
     reg clk_50 = 0;
+    wire [1:0] led;
     always #10 clk_50 = ~clk_50;
 
     top dut (.clk_50(clk_50), .led(led));
@@ -261,113 +68,68 @@ module top_tb;
         $dumpvars(0, top_tb);
         #10000 $finish;
     end
+    always @(led) $display("t=%0t ns led=%b", $time, led);
 endmodule
 ```
 
-## Vivado와의 비교
+Icarus Verilog 13.0으로 돌린 결과입니다.
 
-| 항목 | Vivado | Quartus |
-|---|---|---|
-| Constraint | XDC (Synopsys-like) | SDC + QSF |
-| Block design | IP Integrator | Platform Designer (Qsys) |
-| Bus | AXI | Avalon (AXI 지원도) |
-| Soft CPU | MicroBlaze | Nios II, Nios V |
-| HLS | Vitis HLS | Intel HLS |
-| ILA | ChipScope/ILA | Signal Tap |
-| Bitstream | .bit, .mcs | .sof, .pof, .jic |
-| TCL | Vivado TCL | Quartus TCL |
-| OpenCL | Vitis | Intel FPGA OpenCL |
-
-두 flow 모두 constraint·compile·timing 검증 단계가 있지만 command·constraint semantics·IP와 file format은 다릅니다.
-
-## TCL 자동화
-
-```tcl
-# build.tcl
-project_open myproj.qpf
-
-# Compile
-load_package flow
-execute_flow -compile
-
-# Report
-load_report
-set wns [get_timing_analysis_summary_info -wns -setup]
-puts "Worst slack: $wns"
-unload_report
-
-project_close
+```text
+$ iverilog -g2012 -o tb top.v top_tb.v && vvp -n tb
+VCD info: dumpfile top.vcd opened for output.
+t=1990 ns led=01
+t=3990 ns led=10
+t=5990 ns led=11
+t=7990 ns led=00
+t=9990 ns led=01
+top_tb.v:11: $finish called at 10000 (1s)
 ```
 
-```bash
-quartus_sh -t build.tcl
+`led`는 100 clock(2 µs)마다 1씩 증가합니다. 첫 변화가 2,000 ns가 아니라 1,990 ns인 것은 clock이 0에서 시작해 첫 상승 edge가 10 ns에 오기 때문입니다. `top.vcd`를 GTKWave 같은 viewer로 열면 같은 내용을 파형으로 봅니다.
+
+이전 판의 testbench에는 `wire [1:0] led;` 선언이 없었습니다. Verilog는 선언하지 않은 이름을 1-bit implicit net으로 만들기 때문에, Icarus는 컴파일은 하되 다음 경고를 냅니다.
+
+```text
+top_tb_orig.v:5: warning: Port 2 (led) of module top expects 2 bit(s), given 1.
+top_tb_orig.v:5:        : Padding 1 high bits of the port.
 ```
 
-CI/CD에 그대로 연결.
+이 상태로는 `led[1]`이 testbench에서 보이지 않습니다. testbench 첫 줄에 `` `default_nettype none ``을 두면 이런 오타가 경고가 아니라 오류가 됩니다.
 
-## Cyclone V SoC — Hard ARM + Fabric
+## Lint
 
-Cyclone V SoC는 *dual-core ARM Cortex-A9 + fabric*. Zynq 7000과 같은 위치.
+같은 RTL을 Verilator 5.054의 `--lint-only -Wall`로 검사하면 선언 초기값에 대한 경고가 나옵니다.
 
-**Hard processor system (HPS):**
-
-- 2× Cortex-A9
-- L1/L2 cache
-- DDR3 controller
-- GMAC, USB, SD, UART, ...
-
-**FPGA fabric:**
-
-- LUT, FF, BRAM, DSP
-- HPS-FPGA bridge (Lightweight HPS-to-FPGA, HPS-to-FPGA, FPGA-to-HPS)
-
-HPS-FPGA bridge가 Zynq의 GP/HP/ACP에 해당.
-
-```c
-// Linux 측
-#include <hwlib.h>
-volatile uint32_t *regs = mmap(..., 0xC0000000);   // lwhps2fpga
-regs[0] = 0x1234;
+```text
+%Warning-PROCASSINIT: top.v:3:29: Procedural assignment to declaration with initial value: 'led'
+                      top.v:10:13: ... Location of variable process write
+                                 : ... Perhaps should initialize instead using a reset in this process
+%Warning-PROCASSINIT: top.v:5:21: Procedural assignment to declaration with initial value: 'div'
 ```
+
+선언에서 준 초기값(`= 2'b00`)은 시뮬레이션에서는 동작하지만, 실제 FPGA에서 그 값으로 시작하는지는 device와 toolchain이 power-up 초기값을 지원하느냐에 달렸고, 이 글에서는 Quartus 문서로 확인하지 못했습니다. Verilator가 권하는 대로 reset 입력을 두고 `always` 안에서 초기화하면 toolchain과 무관하게 같은 동작을 얻습니다.
+
+## Quartus로 넘어갈 때
+
+Quartus 단계에서 할 일은 Vivado와 같은 순서입니다([11-02 Vivado 사용법](/blog/embedded/modern-recipes/part11-02-vivado-usage)). timing constraint는 SDC 파일에 두고, pin 배정은 project 설정에 두며, compile 뒤 timing 보고서의 slack이 음수인 path가 없는지 봅니다. 각 단계의 정확한 명령·메뉴·옵션은 사용하는 Quartus 버전의 Altera 문서를 보고 적어야 하고, 이 글은 그 문서를 열지 못했으므로 적지 않았습니다.
 
 ## 자주 보는 함정
 
-> Edition 차이
+> ⚠️ testbench의 선언 누락
 
-Cyclone V는 Standard에서만. Lite는 안 됨. Stratix 10은 Pro에서만. Family/edition 매핑 확인.
+위 실행처럼 선언하지 않은 신호는 1-bit net이 되어 경고 한 줄로 지나갑니다. `` `default_nettype none ``으로 오류로 바꿉니다.
 
-> Pin assignment 잊음
+> ⚠️ 선언 초기값에 의존한 RTL
 
-QSF 또는 Pin Planner에서 핀 지정. 없으면 자동 배치 → 보드 신호 불일치.
-
-> Avalon vs AXI
-
-같은 design에 Avalon과 AXI 섞이면 bridge 필요. Platform Designer가 자동 삽입.
-
-> Nios II 코드 영역
-
-소형 Nios II/e + 16KB on-chip RAM이면 code/data가 모두 안 들어가는 경우. SDRAM controller IP를 추가하고 BSP에서 linker script 조정.
-
-> Signal Tap 빼는 걸 잊음
-
-Production build에서 Signal Tap이 LE를 잡아먹음. 분리된 build configuration 사용.
-
-> .pof vs .jic
-
-CFM (configuration flash memory)에 따라 format 다름. EPCS/EPCQ serial flash는 .jic, MAX 10 internal은 .pof.
+시뮬레이션에서는 초기값이 보이지만, 하드웨어 power-up 동작은 device와 toolchain의 지원에 달려 있습니다. reset으로 초기화합니다.
 
 ## 정리
 
-- Quartus Prime은 Intel FPGA toolchain. Lite/Standard/Pro edition.
-- Constraint는 SDC (timing) + QSF (pin, project setting).
-- Platform Designer (Qsys)가 block design / IP integration.
-- Nios II soft processor: /e/s/f 세 등급.
-- Intel HLS: Vivado HLS와 비슷, pragma만 다름.
-- Signal Tap이 Vivado ILA에 해당.
-- Cyclone V SoC = Zynq 7000과 같은 hard ARM + fabric 구조.
-- TCL `quartus_sh`로 CI 자동화.
+- Quartus는 실행하지 못했고 Altera 공식 문서도 열 수 없어, Quartus 고유 명령·옵션·자원 수치는 이 판에서 뺐습니다.
+- vendor toolchain에 넣기 전에 Icarus Verilog 시뮬레이션과 Verilator lint로 RTL을 먼저 검증할 수 있습니다.
+- 선언 누락은 implicit 1-bit net이 되고, 선언 초기값은 lint 경고 대상입니다.
 
-다음 편은 **Part 12 시작 — NPU 아키텍처**입니다.
+다음 편은 **Part 12 시작 — Edge Inference 분석**입니다.
 
 ## 관련 항목
 
