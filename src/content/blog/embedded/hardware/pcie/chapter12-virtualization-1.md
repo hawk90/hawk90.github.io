@@ -1,11 +1,11 @@
 ---
-title: "Ch 12: Virtualization I — Pass-through·SR-IOV·VFIO"
+title: "Ch 12: Virtualization I — Pass-through·SR-IOV·VFIO·DPDK·SPDK"
 slug: "embedded/hardware/pcie/chapter12-virtualization-1"
 date: 2026-05-19T09:12:00
 description: "PCIe hardware virtualization — SR-IOV PF/VF·VFIO container/group/device·DPDK·SPDK·ACS·FLR."
 series: "PCIe Deep Dive"
 seriesOrder: 12
-tags: [pcie, sr-iov, vfio, dpdk, spdk, passthrough]
+tags: [pcie, sr-iov, vfio, dpdk, spdk, virtualization, acs]
 draft: false
 topics: ["embedded", "embedded/hardware"]
 ---

@@ -1,11 +1,11 @@
 ---
-title: "Ch 14: Linux Operations — Hot-plug·AER·DPC·ARI"
+title: "Ch 14: Linux Operations — Hot-plug·AER Recovery·DPC·ARI"
 slug: "embedded/hardware/pcie/chapter14-linux-operations"
 date: 2026-05-19T09:14:00
-description: "운영 환경의 PCIe — pciehp hot-plug·AER recovery callback chain·DPC integration·ARI·EEH."
+description: "PCIe 운영 — pciehp surprise·orderly hot-plug·AER recovery callback chain·DPC integration·ARI 8-bit function 식별·EEH."
 series: "PCIe Deep Dive"
 seriesOrder: 14
-tags: [pcie, hot-plug, aer, dpc, ari, linux-operations]
+tags: [pcie, hotplug, aer-recovery, dpc, ari, linux-operations]
 draft: false
 topics: ["embedded", "embedded/hardware"]
 ---
