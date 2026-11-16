@@ -181,7 +181,7 @@ extern void bfm_write(unsigned int addr, unsigned int data, int timeout_cycles);
 
 ## Slave BFM — 응답을 누가 하나
 
-DUT가 메모리에 *DMA*를 요청한다면, 그 메모리 쪽에서 응답해 줄 무엇이 필요합니다. 그게 Slave BFM이고, 보통 *RAM 모델*과 결합합니다. 아래 C 모델은 4-byte beat의 INCR burst만 받는 단순 RAM이지만, 주소 범위·WSTRB·WLAST 불일치·동시 burst를 명시적으로 거절합니다.
+DUT가 메모리에 *DMA*를 요청한다면, 그 메모리 쪽에서 응답해 줄 무엇이 필요합니다. 그게 Slave BFM이고, 아래 예제는 *RAM 모델*과 결합합니다. 아래 C 모델은 4-byte beat의 INCR burst만 받는 단순 RAM이지만, 주소 범위·WSTRB·WLAST 불일치·동시 burst를 명시적으로 거절합니다.
 
 ```c title="axi_slave_ram.c"
 #include <stdint.h>

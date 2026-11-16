@@ -44,7 +44,7 @@ topics: ["tools", "tools/emulation"]
 
 ## Step 1 — RTL → Verilator
 
-RTL을 Verilated library로 빌드합니다. 뒤에서 Python이 `ctypes`로 열 shared library에 넣으려면 `-fPIC`가 필요하고, 5장에서 본 대로 Verilator 기본값 `-Os` 대신 `-O2`를 줍니다.
+RTL을 Verilated library로 빌드합니다. 뒤에서 Python이 `ctypes`로 열 shared library에 넣으려면 `-fPIC`가 필요합니다. 생성 코드는 Verilator 기본값 `-Os` 대신 `-O2`로 빌드했습니다.
 
 ```bash
 verilator --cc --build -j 0 -O3 -CFLAGS -fPIC \
@@ -164,7 +164,7 @@ c++ -std=c++17 -O2 -fPIC -shared -Iobj_dir -I$VL -I$VL/vltstd sim/harness.cpp ob
     -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv,-U,_vlog_startup_routines -o libcosim.so
 ```
 
-마지막 줄의 `-Wl,-U,...`가 없으면 macOS linker가 `Undefined symbols ... "sc_time_stamp()"`로 실패합니다. `libverilated.a`가 SystemC나 VPI와 함께 쓸 때 채워지는 symbol을 참조하기 때문이고, Verilator가 `--exe` 빌드에서 쓰는 link 줄에도 같은 옵션이 들어 있습니다.
+마지막 줄의 `-Wl,-U,...`가 없으면 macOS linker가 `Undefined symbols ... "sc_time_stamp()"`로 실패합니다. `libverilated.a`가 사용자가 선택적으로 정의하는 legacy 시간 함수 `sc_time_stamp()`·`vl_time_stamp64()`와 VPI의 `vlog_startup_routines`를 weak symbol로 참조하기 때문입니다(`verilated_funcs.h:436-441`). Verilator의 `include/verilated.mk:128-131`도 macOS에서 "specify all weak symbols as dynamic_lookup"이라는 주석과 함께 같은 `-Wl,-U` 옵션을 붙입니다.
 
 ```python
 # test_aristos1.py
@@ -263,7 +263,7 @@ cosim의 근본 제약은 RTL이 cycle 단위로 계산된다는 점입니다. �
 | SystemC TLM register write | 36.3 M transaction/s | 5장 |
 | 상용 simulator | 측정하지 않음 | — |
 
-축소판이 counter보다 느린 것은 AXI handshake마다 BFM이 핀을 쓰고 `eval()`을 추가로 부르기 때문입니다. 이 수치로 시나리오의 자리를 대략 정할 수 있습니다. 1 GHz로 도는 hardware의 1초는 10억 cycle이고, 이 축소판 속도(약 4 Mcycle/s)로도 250초가 걸립니다. 실제 NPU RTL은 이 축소판보다 훨씬 크므로 그보다 느립니다.
+축소판은 AXI-Lite slave RTL과 C++ BFM handshake가 들어간 다른 구성이라 counter보다 느렸습니다(원인별 분해는 측정하지 않았습니다). 이 수치로 시나리오의 자리를 대략 정할 수 있습니다. 1 GHz로 도는 hardware의 1초는 10억 cycle이고, 이 축소판 속도(약 4 Mcycle/s)로도 250초가 걸립니다.
 
 | 시나리오 | 이 시리즈가 보내는 곳 |
 |----------|-----------|

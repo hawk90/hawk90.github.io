@@ -311,7 +311,7 @@ src/
 ## 흔한 함정
 
 - **endian 차이** — driver는 host CPU endian, RTL은 device endian입니다. reference에서 byte 순서 정책을 헤더에 적어 둡니다(2장의 `unpack_words`처럼 shift로 명시).
-- **floating-point 순서** — float 덧셈은 결합 법칙이 성립하지 않습니다. 같은 네 값 `{1e8, 1, -1e8, 1}`을 순서대로 더하면 1, 두 개씩 묶어 더하면 2가 나왔습니다(`sequential=1 pairwise=2`). RTL accumulator의 덧셈 순서와 reference의 순서가 다르면 bit 단위 비교는 실패합니다. 이 장의 matmul이 정수(int16 × int16 → int64 누적)인 이유입니다.
+- **floating-point 순서** — float 덧셈은 결합 법칙이 성립하지 않습니다. 같은 네 값 `{1e8, 1, -1e8, 1}`을 순서대로 더하면 1, 큰 값끼리 먼저 묶어 `(1e8 + -1e8) + (1 + 1)`로 더하면 2가 나왔습니다(`sequential=1 pairwise=2`). RTL accumulator의 덧셈 순서와 reference의 순서가 다르면 bit 단위 비교는 실패합니다. 이 장의 matmul이 정수(int16 × int16 → int64 누적)인 이유입니다.
 - **side effect 금지** — reference는 인자만 읽고 쓰는 함수로 둡니다. global state가 있으면 여러 호출 측이 같은 상태를 공유합니다.
 - **버전 잠금** — RTL이 *새 feature*를 추가하는 시점에 reference의 호환 동작을 두지 않으면 testbench가 깨집니다.
 

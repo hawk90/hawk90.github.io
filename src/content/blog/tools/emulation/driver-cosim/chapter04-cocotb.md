@@ -182,7 +182,7 @@ async def axil_write_read(dut):
 50.00ns  cocotb.axil_regs.s_axil  Write complete addr: 0x00000004 prot: 2 resp: 0 length: 4
 80.00ns  cocotb.axil_regs.s_axil  Read complete addr: 0x00000004 prot: 2 resp: 0 data: 12 34 56 78
 120.00ns cocotb.axil_regs.s_axil  Write complete addr: 0x00000040 prot: 2 resp: 2 length: 4
-** TESTS=1 PASS=1 FAIL=0 SKIP=0   120.00   0.00   17291.35  **
+** TESTS=1 PASS=1 FAIL=0 SKIP=0   120.00   0.01   17291.35  **
 ```
 
 `AxiLiteMaster`가 AW·W·B 채널 handshake를 캡슐화하므로 test 작성자는 *transaction-level*에서 생각합니다. 위 로그에서 write 한 건이 10 ns clock으로 40 ns(4 cycle), read가 30 ns 걸린 것은 이 RTL slave의 구현 결과입니다. `from_prefix(dut, "s_axil")`은 `s_axil_awaddr`·`s_axil_wvalid` 같은 이름 규칙으로 port를 찾습니다.

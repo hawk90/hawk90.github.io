@@ -74,7 +74,7 @@ cosim의 자리가 보이려면 인접 방법들과 비교해 봐야 합니다.
 
 QEMU는 *functional model*입니다. 디바이스 모델은 "이 register write가 도착하면 internal state를 이렇게 바꿔라"라는 의미적 동작을 묘사하지, 그 동작이 어떤 cycle에 어떤 internal signal을 거쳐 일어났는지는 다루지 않습니다.
 
-QEMU 11.1.0 소스의 교육용 PCI 디바이스 `edu`가 이 구조를 그대로 보여 줍니다. MMIO 접근은 `include/system/memory.h:292-303`의 `MemoryRegionOps`에 등록한 `read`/`write` callback 한 번으로 처리됩니다. `hw/misc/edu.c:306`이 `edu_mmio_read`·`edu_mmio_write`를 이 구조체에 넣습니다. DMA는 command register에 쓰는 순간 `edu.c:191`의 `timer_mod(..., qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + 100)`로 가상 시간 100 ms 뒤의 timer를 걸고, `edu.c:142`의 `edu_dma_timer`가 그때 `pci_dma_read`/`pci_dma_write`로 buffer 전체를 한 번에 복사한 뒤 IRQ를 올립니다. 전송 길이가 4 byte든 4 KiB든 완료 시점은 같고, bus beat나 handshake는 모델 어디에도 없습니다. driver의 descriptor 처리 순서와 IRQ 처리는 이 모델로 확인되지만, RTL의 handshake·backpressure 버그는 원천적으로 나타나지 않습니다.
+QEMU 11.1.0 소스의 교육용 PCI 디바이스 `edu`가 이 구조를 그대로 보여 줍니다. MMIO 접근은 `include/system/memory.h:292-303`의 `MemoryRegionOps`에 등록한 `read`/`write` callback 한 번으로 처리됩니다. `hw/misc/edu.c:306-308`이 `edu_mmio_read`·`edu_mmio_write`를 이 구조체에 넣습니다. DMA는 command register에 쓰는 순간 `edu.c:191`의 `timer_mod(..., qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + 100)`로 가상 시간 100 ms 뒤의 timer를 걸고, `edu.c:142`의 `edu_dma_timer`가 그때 `pci_dma_read`/`pci_dma_write`로 buffer 전체를 한 번에 복사하고, command에 `EDU_DMA_IRQ` bit가 있으면 IRQ를 올립니다(`edu.c:168-173`). 전송 길이가 4 byte든 4 KiB든 완료 시점은 같고, bus beat나 handshake는 모델 어디에도 없습니다. driver의 descriptor 처리 순서와 IRQ 처리는 이 모델로 확인되지만, RTL의 handshake·backpressure 버그는 원천적으로 나타나지 않습니다.
 
 | 항목 | QEMU device model | Cosim (RTL + driver) |
 |------|--------------------|----------------------|
@@ -144,10 +144,10 @@ Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 sil
 
 - [Verilator 모델 연결](https://verilator.org/guide/latest/connecting.html) — host harness와 RTL model 경계
 - [cocotb 2.0 timing model](https://docs.cocotb.org/en/v2.0.0/timing_model.html) — simulator scheduling과 관찰 시점
-- QEMU 11.1.0 소스(`git clone --depth 1 --branch v11.1.0`) — `include/system/memory.h:292-303`, `hw/misc/edu.c:142`, `:191`, `:306`
+- QEMU 11.1.0 소스(`git clone --depth 1 --branch v11.1.0`) — `include/system/memory.h:292-303`, `hw/misc/edu.c:142`, `:168-173`, `:191`, `:306-308`
 - Verilator 5.054 배포판 `include/vltstd/svdpi.h` 첫머리 주석 — IEEE 1800-2023 Annex I 출처 표기
 
-Verilator 수치는 2026-11-16 macOS 27.2(Apple M2 Pro)에서 Homebrew Verilator 5.054로 3장의 counter를 빌드·실행한 결과입니다. FPGA 합성, post-silicon 보드, Linux 통합은 이 글에서 실행하지 않았고 도입 비용도 측정하지 않았습니다.
+Verilator 수치는 2026-11-16 macOS 27.2.1(Apple M2 Pro)에서 Homebrew Verilator 5.054로 3장의 counter를 빌드·실행한 결과입니다. FPGA 합성, post-silicon 보드, Linux 통합은 이 글에서 실행하지 않았고 도입 비용도 측정하지 않았습니다.
 
 ## 관련 항목
 

@@ -134,7 +134,7 @@ C: c_run_test start, cycle=102
 
 ## `context` — export를 부를 자격
 
-export된 SV 함수는 어느 module instance의 것인지(scope)를 알아야 실행됩니다. import 선언에 `context`를 붙이면 simulator가 호출 시점의 scope를 C에 넘겨 주고, 그 C 함수 안에서는 export를 부르거나 `svGetScope()`로 scope를 얻을 수 있습니다. `svdpi.h:296-300`의 주석은 `svGetScope`가 "imported function이 아닌 C 코드에서 불리면 NULL을 반환한다"고 적고 있습니다.
+export된 SV 함수는 어느 module instance의 것인지(scope)를 알아야 실행됩니다. import 선언에 `context`를 붙이면 그 C 함수가 실행되는 동안 import를 선언한 instance의 scope가 활성 scope가 되고, 그 안에서 export를 부르거나 `svGetScope()`로 scope를 얻을 수 있습니다. `svSetScope`로 바꾸지 않았다면 이 scope는 호출 위치가 아니라 선언 위치 기준입니다(`svdpi.h:294-298`). `svdpi.h:296-300`의 주석은 `svGetScope`가 "imported function이 아닌 C 코드에서 불리면 NULL을 반환한다"고 적고 있습니다.
 
 `context`를 빼면 어떻게 되는지 같은 설계에서 한 단어만 지우고 돌렸습니다(`import "DPI-C" function int c_run_test();`).
 
@@ -285,7 +285,7 @@ endtask
 | 대상 | 이 장에서 확인한 것 |
 | --- | --- |
 | Verilator 5.054 | import/export function, `context`, packed·open array 모두 빌드·실행. 시간 제어 있는 export task는 `%Error-UNSUPPORTED`. `shortreal`은 `double`로 승격 |
-| Icarus Verilog 13.0 | `iverilog -g2012 -o top.vvp top.sv`가 `import "DPI-C"` 줄마다 `syntax error` / `error: Invalid module item.`을 내고 rc=12로 끝남. DPI-C를 쓰는 cosim에는 쓸 수 없음 |
+| Icarus Verilog 13.0 | `iverilog -g2012 -o top.vvp top.sv`가 DPI `import`/`export` 선언 줄마다 `syntax error` / `error: Invalid module item.`을 내고 rc=12로 끝남. DPI-C를 쓰는 cosim에는 쓸 수 없음 |
 | VCS/Questa/Xcelium | 이 글에서 실행하지 않음. DPI header 생성과 shared library load 방법은 각 vendor manual을 따름 |
 
 Verilator로 DPI가 있는 RTL을 빌드하면 `obj_dir/`에 다음 파일이 생깁니다.

@@ -206,7 +206,7 @@ RTL path (0x00-0x0C): 200000 writes, 0.061 s wall, 3.29 M writes/s, annotated 8 
 TLM path (0x10-0x1C): 200000 writes, 0.006 s wall, 36.11 M writes/s, annotated 2 ms
 ```
 
-RTL 경로의 write는 요청 1 cycle + busy 3 cycle로 40 ns가 annotation됐고, 같은 driver 코드가 TLM 경로보다 약 11배 느렸습니다. 이로써 *검증하고 싶은 블록*만 RTL로 두고 *나머지*는 TLM으로 두는 절충의 비용이 숫자로 보입니다. 첫 빌드는 Verilator 기본값인 `-Os`로 사용자 파일이 컴파일돼 두 경로 모두 초당 100만 건 안팎이었습니다. `OPT_*`를 `-O2`로 올린 뒤의 수치가 위 결과입니다.
+RTL 경로의 write는 요청 1 cycle + busy 3 cycle로 40 ns가 annotation됐고, 같은 driver 코드가 TLM 경로보다 약 11배 느렸습니다. 이로써 *검증하고 싶은 블록*만 RTL로 두고 *나머지*는 TLM으로 두는 절충의 비용이 숫자로 보입니다.
 
 ## 산업 표준 도구
 
