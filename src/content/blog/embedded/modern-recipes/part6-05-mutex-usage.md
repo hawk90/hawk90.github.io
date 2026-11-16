@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Mutex = 누구나 못 들어오게 막는 문 + 누가 들어가 있는지 명패."** 명패가 있어서 priority inheritance와 owner-only release가 가능합니다.
+> **"Mutex는 남이 못 들어오게 막는 문에, 누가 안에 있는지 적은 명패를 단 것입니다."** 명패가 있어서 priority inheritance와 owner-only release가 가능합니다.
 
 ## 어떤 상황에서 쓰나
 
