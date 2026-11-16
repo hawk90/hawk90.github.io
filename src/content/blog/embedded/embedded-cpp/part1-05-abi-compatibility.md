@@ -362,7 +362,7 @@ static_assert(std::is_trivially_copyable_v<Packet>);
 static_assert(sizeof(Packet) == 264);
 ```
 
-이 세 `static_assert`는 arm-none-eabi-g++ 16.2.0과 호스트 g++-16에서 모두 통과했습니다.
+이 세 `static_assert`는 호스트 g++-16에서 그대로 통과했습니다. 이 글의 arm-none-eabi-g++ 16.2.0에는 `<type_traits>`가 없어, ARM 쪽에서는 `sizeof(Packet) == 264`와 같은 trait의 컴파일러 builtin(`__is_standard_layout`, `__is_trivially_copyable`)으로 확인했습니다.
 
 `std::is_standard_layout_v`는 C++의 standard-layout 조건을 검사합니다. C 쪽과의 실제 일치는 양쪽의 `sizeof`, `_Alignof`/`alignof`, `offsetof`와 빌드 옵션을 대조해야 합니다.
 `std::is_trivially_copyable_v`는 `memcpy`로 복사 가능한지를 확인합니다.

@@ -342,7 +342,7 @@ void uart_log(Args&&... args) {
 uart_log("counter: ", 42, " freq: ", 168.0f, " MHz\n");
 ```
 
-`%d`, `%f` 같은 포맷 매칭 오류가 일어날 수 없습니다. 비교를 위해 C의 `printf("value: %d", 1.5f)`를 컴파일하면 컴파일러는 경고만 냅니다. g++-16은 `warning: format '%d' expects argument of type 'int', but argument 2 has type 'double' [-Wformat=]`(가변 인자에서 float이 double로 승격되므로 double로 표시), Clang 23.1.5는 `warning: format specifies type 'int' but the argument has type 'float' [-Wformat]`였습니다.
+`%d`, `%f` 같은 포맷 매칭 오류가 일어날 수 없습니다. 비교를 위해 C의 `printf("value: %d", 1.5f)`를 `-Wall`로 컴파일하면 컴파일러는 경고만 냅니다. g++-16은 `warning: format '%d' expects argument of type 'int', but argument 2 has type 'double' [-Wformat=]`(가변 인자에서 float이 double로 승격되므로 double로 표시), Clang 23.1.5는 `warning: format specifies type 'int' but the argument has type 'float' [-Wformat]`였습니다.
 
 특수화가 없는 타입을 넘기면 어떻게 될까요. `uart_print`의 기본 템플릿은 선언만 있으므로 `uart_log(1.5)`는 컴파일은 되고 링크에서 `uart_print<double>(double)` 미정의 심볼로 멈춥니다(아래 함정 1과 같은 메커니즘). 컴파일 단계에서 막으려면 기본 템플릿을 `= delete`로 선언합니다.
 

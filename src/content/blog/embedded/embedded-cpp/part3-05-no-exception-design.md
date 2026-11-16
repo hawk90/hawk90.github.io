@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 예외를 켜면 무엇이 붙는지는 [Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#1-예외-처리)에서 오브젝트로 확인했습니다.
 
-- 소멸자가 있는 지역 객체를 둔 함수마다 landing pad와 `.ARM.extab`/`.ARM.exidx` 테이블이 붙고, `__cxa_*`·personality 루틴을 libsupc++에서 끌어옵니다.
+- `-fexceptions`에서는 모든 함수에 `.ARM.exidx` 항목이 붙고, 소멸자가 있는 지역 객체를 둔 함수에는 landing pad와 `.ARM.extab`이 더 붙으며, `__cxa_*`·personality 루틴을 libsupc++에서 끌어옵니다.
 - throw의 지연은 unwinder가 테이블을 따라 frame을 하나씩 푸는 시간이라 호출 깊이에 따라 늘어납니다. 이 글에서는 그 시간을 재지 않았습니다.
 - Stack unwinding은 생성이 완료된 자동 객체를 소멸시키는 정의된 동작입니다.
 - 예외 허용 범위는 프로젝트의 안전 요구·코딩 규칙으로 정합니다.
@@ -69,7 +69,7 @@ process(v);
 read_register(0x10, v);   // WARNING — return 값 무시
 ```
 
-`[[nodiscard]]`(C++17)는 기본 경고로 동작합니다. 위 호출에 g++-16은 `warning: ignoring return value of 'ErrorCode read_register(unsigned char, unsigned char&)', declared with attribute 'nodiscard' [-Wunused-result]`, Clang 23.1.5는 `warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]`를 냈습니다. `-Werror`와 결합하면 에러로 승격됩니다. 함수마다 붙이는 대신 `enum class [[nodiscard]] ErrorCode`처럼 타입에 붙이면 그 타입을 반환하는 모든 함수에 적용됩니다.
+`[[nodiscard]]`(C++17)는 기본 경고로 동작합니다. 위 호출에 g++-16은 `warning: ignoring return value of 'ErrorCode read_register(uint8_t, uint8_t&)', declared with attribute 'nodiscard' [-Wunused-result]`, Clang 23.1.5는 `warning: ignoring return value of function declared with 'nodiscard' attribute [-Wunused-result]`를 냈습니다. `-Werror`와 결합하면 에러로 승격됩니다. 함수마다 붙이는 대신 `enum class [[nodiscard]] ErrorCode`처럼 타입에 붙이면 그 타입을 반환하는 모든 함수에 적용됩니다.
 
 ## 패턴 2 — `std::optional` (C++17)
 
@@ -123,7 +123,7 @@ if (auto t = sensor.read_celsius()) {
 ```cpp
 #include <expected>
 
-enum class ReadError { InvalidAddr, Timeout, BusError };
+enum class ReadError : uint8_t { InvalidAddr, Timeout, BusError };
 
 std::expected<uint8_t, ReadError> read_register(uint8_t addr) {
     if (addr >= MAX_ADDR) return std::unexpected(ReadError::InvalidAddr);
@@ -144,7 +144,7 @@ if (result) {
 }
 ```
 
-장점은 값과 에러 종류가 하나로 통합되고 명시적이라는 점입니다. 위처럼 에러 enum을 `uint8_t` 기반으로 두면 `std::expected<uint8_t, ReadError>`는 2바이트였습니다(두 라이브러리 동일). 단점은 C++23 라이브러리 기능이라는 점입니다. libstdc++ 12·libc++ 16부터 들어 있습니다([Part 1-08](/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice#c23--필요한-기능별로-확인)).
+장점은 값과 에러 종류가 하나로 통합되고 명시적이라는 점입니다. 위처럼 에러 enum을 `uint8_t` 기반으로 두면 `std::expected<uint8_t, ReadError>`는 2바이트였고, 밑줄 타입을 적지 않은 기본 `int` enum이면 8바이트였습니다(두 라이브러리 동일). 단점은 C++23 라이브러리 기능이라는 점입니다. libstdc++ 12·libc++ 16부터 들어 있습니다([Part 1-08](/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice#c23--필요한-기능별로-확인)).
 
 자세한 내용은 [Part 3-07: std::expected](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
 

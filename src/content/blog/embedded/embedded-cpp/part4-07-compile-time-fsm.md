@@ -334,7 +334,7 @@ int main() {
 런타임 동적 변경이 필요한 시스템에서는 runtime FSM이 자연스럽습니다. compile-time은 trade-off가 있는 선택입니다.
 
 ### 2. Template error message 폭증
-`static_assert` 하나가 실패하면 출력은 짧습니다(위 `BAD_TRANSITION`은 g++-16에서 8줄, `BAD_REACHABILITY`는 3줄). 길어지는 것은 `std::visit` 쪽입니다. 아래 `BAD_VISIT_FALLBACK`은 Clang 23.1.5에서 25줄이었고, 활성 state와 무관하게 `step<Idle, Stop>` 같은 조합마다 `static assertion failed due to requirement 'sizeof(Stop) == 0'`이 반복됐습니다. `static_assert` 메시지에 어떤 조합인지 드러나게 적습니다.
+`static_assert` 하나가 실패하면 출력은 짧습니다(g++-16에서 `BAD_TRANSITION` 8줄, `BAD_REACHABILITY` 3줄). 길어지는 것은 `std::visit` 쪽입니다. 아래 `BAD_VISIT_FALLBACK`은 g++-16에서 75줄(Clang 23.1.5에서 25줄)이었고, 활성 state와 무관하게 `step<Idle, Stop>` 같은 조합마다 `static assertion failed due to requirement 'sizeof(Stop) == 0'`이 반복됐습니다. `static_assert` 메시지에 어떤 조합인지 드러나게 적습니다.
 
 ### 3. Compile time 폭증
 state × event 조합마다 template이 하나씩 인스턴스화되므로 조합 수에 비례해 컴파일러 작업이 늘어납니다. 이 글에서는 큰 FSM의 컴파일 시간을 재지 않았습니다.

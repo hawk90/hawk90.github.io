@@ -157,7 +157,7 @@ std::pmr::unsynchronized_pool_resource pool(opts);
 std::pmr::vector<int> v(&pool);
 ```
 
-unsynchronized_pool_resource는 다중 크기 등급과 chunk 재사용을 제공합니다. upstream을 따로 주지 않으면 default resource(초기값 `new_delete_resource`)를 씁니다. 호출을 세는 resource를 upstream으로 끼우고 `push_back` 한 번만 해 보면, libstdc++(g++-16)는 upstream을 3번(총 1,744바이트), libc++(Clang 23.1.5)는 2번(총 1,336바이트) 불렀습니다. 원소 4바이트 하나에 1KB가 넘는 관리 구조와 chunk를 받아 온 것이고, 그 크기는 라이브러리마다 다릅니다. heap을 금지한 시스템이라면 upstream을 `monotonic_buffer_resource` 같은 정적 버퍼로 둡니다. 위 지정 초기화 문법은 C++20이 필요합니다. C++17에서는 pool_options opts{} 선언 뒤 멤버를 대입합니다.
+unsynchronized_pool_resource는 다중 크기 등급과 chunk 재사용을 제공합니다. upstream을 따로 주지 않으면 default resource(초기값 `new_delete_resource`)를 씁니다. 호출을 세는 resource를 upstream으로 끼우고 기본 `pool_options`로 `push_back` 한 번만 해 보면, libstdc++(g++-16)는 upstream을 3번(총 1,744바이트), libc++(Clang 23.1.5)는 2번(총 1,336바이트) 불렀습니다. 위 `opts`(16, 256)로는 3번 608바이트, 2번 248바이트였습니다. 원소 4바이트 하나에 관리 구조와 chunk를 수백 바이트에서 1KB 넘게 받아 온 것이고, 그 크기는 라이브러리와 옵션마다 다릅니다. heap을 금지한 시스템이라면 upstream을 `monotonic_buffer_resource` 같은 정적 버퍼로 둡니다. 위 지정 초기화 문법은 C++20이 필요합니다. C++17에서는 pool_options opts{} 선언 뒤 멤버를 대입합니다.
 
 ## Custom memory_resource — 직접 정의
 

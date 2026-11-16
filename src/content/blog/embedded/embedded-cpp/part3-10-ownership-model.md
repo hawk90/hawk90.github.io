@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"객체마다 owner는 한 명이고 나머지는 non-owning 참조입니다."** 누가 해제하는지를 타입으로 드러내면 leak·double free는 컴파일러와 정적 분석기가 잡을 수 있는 실수가 됩니다. dangling 참조는 여전히 수명 계약으로 지켜야 합니다.
+> **"객체마다 owner는 한 명이고 나머지는 non-owning 참조입니다."** 누가 해제하는지를 타입으로 드러내면 복사로 생기는 double free는 컴파일 오류가 되고, raw `new`/`delete` 경로는 clang-tidy `cppcoreguidelines-owning-memory`가 지적합니다. dangling 참조는 여전히 수명 계약으로 지켜야 합니다.
 
 ## 어떤 문제를 푸는가
 

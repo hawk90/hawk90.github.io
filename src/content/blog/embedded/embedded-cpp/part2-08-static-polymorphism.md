@@ -133,7 +133,7 @@ uart.log("hello");      // 컴파일 타임에 UartLogger::log_impl 호출
 ```text
 00000000 <v_area(VShape const&)>:
    0:	ldr	r3, [r0, #0]       ; vptr 로드
-   2:	ldr	r3, [r3, #0]       ; vtable에서 area 주소
+   2:	ldr	r3, [r3, #0]       ; vtable에서 area 주소 (첫 슬롯)
    4:	bx	r3                 ; 간접 tail call
 
 00000000 <int c_area<Circle>(Circle const&)>:
@@ -143,7 +143,7 @@ uart.log("hello");      // 컴파일 타임에 UartLogger::log_impl 호출
    8:	bx	lr
 ```
 
-virtual 쪽은 메모리 load 두 번과 간접 분기로 `area`를 찾아가고, 본문은 다른 함수에 있습니다. CRTP 쪽은 `area_impl`이 인라인되어 `3 * r * r` 계산이 호출자 안에 들어왔습니다.
+측정에 쓴 `VShape`는 가상 소멸자 없이 `area()`만 가진 interface라 `area`가 vtable 첫 슬롯(offset 0)이었습니다. 위 글의 `Shape`처럼 `virtual ~Shape()`를 먼저 선언하면 소멸자 두 진입점이 앞 슬롯을 차지해 두 번째 load가 `ldr r3, [r3, #8]`이 됩니다. 어느 쪽이든 virtual 쪽은 메모리 load 두 번과 간접 분기로 `area`를 찾아가고, 본문은 다른 함수에 있습니다. CRTP 쪽은 `area_impl`이 인라인되어 `3 * r * r` 계산이 호출자 안에 들어왔습니다.
 
 ## CRTP vs virtual — 비교
 

@@ -279,7 +279,7 @@ Result<TypeA> ...
 Result<TypeB> ...
 // 각 T마다 expected 인스턴스
 ```
-`expected`의 멤버는 대부분 인라인이라, 인스턴스마다 남는 코드는 실제로 쓰는 멤버의 크기만큼입니다. 이 글에서는 인스턴스 수에 따른 코드 크기를 재지 않았습니다. 늘어나는지 보려면 [Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)의 `nm -S -C | grep expected`로 확인합니다.
+클래스 템플릿의 멤버는 쓰인 것만 인스턴스화되므로, 인스턴스마다 남는 코드는 실제로 쓰는 멤버만큼입니다. 이 글에서는 인스턴스 수에 따른 코드 크기를 재지 않았습니다. 늘어나는지 보려면 [Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)의 `nm -S -C | grep expected`로 확인합니다.
 
 ### 6. Monadic chain에서 lambda 캡처
 ```cpp

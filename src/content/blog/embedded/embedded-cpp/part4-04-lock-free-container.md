@@ -169,7 +169,7 @@ struct PackedPtr {
 };
 ```
 
-32비트 Cortex-M에서 포인터 32비트와 tag를 함께 CAS하려면 64비트 CAS가 필요한데, ARMv7-M에는 `ldrexd`/`strexd`가 없습니다([Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics#aba-problem)). 그래서 Cortex-M에서는 이 방식의 lock-free MPMC 대신 critical section을 씁니다.
+32비트 Cortex-M에서 포인터 32비트와 tag를 함께 CAS하려면 64비트 CAS가 필요한데, ARMv7-M에는 `ldrexd`/`strexd`가 없습니다([Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics#aba-problem)). 그래서 Cortex-M에서는 pointer 대신 pool index와 tag를 32비트 하나에 묶지 않는 한 critical section을 씁니다.
 
 ## Lock-free Free List
 
@@ -222,7 +222,7 @@ int v;
 q.try_dequeue(v);
 ```
 
-README는 `enqueue`가 "필요하면 추가 공간을 할당"하고 `try_enqueue`는 "이미 할당된 메모리가 충분할 때만" 넣는다고 적습니다. 암묵적 enqueue는 producer마다 thread-local sub-queue를 자동 할당합니다. README는 또 이 queue가 "linearizable하지 않다"고 적으므로, 모든 producer에 걸친 전역 FIFO를 기대할 수 없습니다. heap 금지 시스템이라면 `try_enqueue`와 미리 할당한 용량, explicit producer token만 씁니다.
+README는 `enqueue`가 "필요하면 추가 공간을 할당"하고 `try_enqueue`는 "이미 할당된 메모리가 충분할 때만" 넣는다고 적습니다. 암묵적 enqueue는 producer마다 thread-local sub-queue를 자동 할당합니다. README는 또 이 queue가 "linearizable하지 않다"고 적으므로, 모든 producer에 걸친 전역 FIFO를 기대할 수 없습니다. 런타임 할당을 막으려면 `try_enqueue`와 생성 시 미리 할당한 용량, explicit producer token만 씁니다. 초기 할당도 Traits의 malloc을 쓰므로, heap 자체를 금지한 시스템이면 Traits의 malloc/free를 정적 pool로 바꿔야 합니다.
 
 ## 임베디드 — ISR 한 개와 consumer task 한 개
 
@@ -333,7 +333,7 @@ Treiber stack 같은 복잡한 lock-free에는 tagged pointer를 적용하거나
 multi-core target이라면 위 측정처럼 같은 line의 두 카운터가 세 배가량 느려집니다. target의 line 크기로 `alignas`를 줍니다. single core Cortex-M에서는 해당하지 않습니다.
 
 ### 6. retry loop 무한 반복 가능성
-lock-free는 시스템 전체의 진행만 보장하므로, 경쟁이 계속되면 특정 스레드의 CAS retry에는 상한이 없습니다. 시간 상한이 필요한 경로에는 retry 횟수 limit과 실패 처리를 둡니다.
+C++ 표준은 lock-free 연산에 시스템 전체의 진행조차 권고(should)로만 두므로([intro.progress]/2), 경쟁이 계속되면 특정 스레드의 CAS retry에는 상한이 없습니다. 시간 상한이 필요한 경로에는 retry 횟수 limit과 실패 처리를 둡니다.
 
 ```cpp
 int retries = 0;

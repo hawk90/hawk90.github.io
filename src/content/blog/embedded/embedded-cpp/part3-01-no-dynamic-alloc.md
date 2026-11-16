@@ -307,7 +307,7 @@ std::function<void(int)> cb = [](int x) { /* */ };   // 구현의 내부 버퍼�
 ## 자주 보는 함정과 안티패턴
 
 ### 1. std::vector 무심코 사용
-`std::array`를 제외한 표준 시퀀스·연관 컨테이너(`vector`, `deque`, `list`, `map`, `unordered_map` 등)는 기본 allocator `std::allocator`로 heap을 씁니다. pmr 버전이나 고정 용량 대체 컨테이너로 바꿉니다.
+`std::array`(와 C++26 `std::inplace_vector`, g++-16의 libstdc++에 있음)를 제외한 표준 시퀀스·연관 컨테이너(`vector`, `deque`, `list`, `map`, `unordered_map` 등)는 기본 allocator `std::allocator`로 heap을 씁니다. pmr 버전이나 고정 용량 대체 컨테이너로 바꿉니다.
 
 ### 2. std::string concatenation
 ```cpp
@@ -351,7 +351,7 @@ malloc 호출 횟수와 크기를 런타임에 추적합니다.
 ```cpp
 extern "C" {
     static size_t total_alloc = 0;
-    static size_t total_free = 0;
+    static size_t free_count = 0;
     static size_t alloc_count = 0;
 
     void* __wrap_malloc(size_t n) {
@@ -362,7 +362,7 @@ extern "C" {
 
     void __wrap_free(void* p) {
         // 크기 추적 어려움 — newlib에 기록 필요
-        total_free++;
+        free_count++;
         __real_free(p);
     }
 }

@@ -21,7 +21,7 @@ Mutex는 다음과 같은 비용을 동반합니다.
 - context switch가 발생해 RTOS task가 block됩니다.
 - Priority inversion이 일어납니다. 낮은 priority가 lock을 잡으면 높은 priority가 막힙니다.
 - Deadlock 가능성이 있습니다. 두 개 이상의 mutex를 잘못 잡으면 발생합니다.
-- ISR에서는 mutex를 쓸 수 없습니다. CMSIS-RTOS2 문서는 mutex 관리 함수 전체를 ISR에서 호출할 수 없다고 적고, FreeRTOS도 mutex에는 ISR용 API를 두지 않습니다.
+- ISR에서는 mutex를 쓸 수 없습니다. CMSIS-RTOS2 문서는 mutex 관리 함수 전체를 ISR에서 호출할 수 없다고 적고, FreeRTOS `semphr.h`도 mutex 타입 semaphore는 ISR에서 쓸 수 없다고 적습니다.
 
 **Lock-free**는 mutex 없이 동시에 접근하면서 atomic 명령으로 consistency를 보장합니다.
 
@@ -63,7 +63,7 @@ bool success = counter.compare_exchange_weak(expected, 10);
 // 아니면 expected = current value + false
 ```
 
-정렬된 단일 load/store와 fetch_add 같은 read-modify-write를 구분합니다. arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`에서 relaxed load는 `ldr` 하나였고, `fetch_add`는 `ldrex` → `adds` → `strex` → 실패 시 되돌아가는 6명령 loop였습니다. `is_always_lock_free`/`is_lock_free()`와 생성된 오브젝트를 함께 확인합니다.
+정렬된 단일 load/store와 fetch_add 같은 read-modify-write를 구분합니다. arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`에서 relaxed load는 `ldr` 하나였고, `fetch_add`는 `ldrex` → `adds` → `strex` → `cmp` → `bne`의 5명령 loop였습니다. `is_always_lock_free`/`is_lock_free()`와 생성된 오브젝트를 함께 확인합니다.
 
 ## CAS — Compare-And-Swap
 
@@ -90,7 +90,7 @@ void push(Node* n) {
 3. CAS로 `head == old_head`면 `n`으로 교체합니다.
 4. 다른 thread가 끼어들어 `head`가 변경되었으면 CAS가 실패하므로 retry합니다.
 
-retry loop이 lock-free의 특징이며 deadlock이 없습니다. lock-free는 "어떤 스레드든 하나는 진행한다"는 보장이라([atomics.lockfree]), 특정 스레드가 계속 CAS에 실패하는 starvation은 막지 않습니다.
+retry loop이 lock-free의 특징이며 deadlock이 없습니다. C++ 표준은 lock-free 실행이 다른 스레드가 모두 막혀 있을 때 완료되는 것만 요구하고, 동시에 돌 때 적어도 하나가 완료되는 것은 권고(should)로 둡니다([intro.progress]/2). 어느 쪽도 특정 스레드가 계속 CAS에 실패하는 starvation은 막지 않습니다.
 
 ## ABA Problem
 
@@ -111,7 +111,7 @@ top.compare_exchange_weak(old_top, old_top->next);
 - Hazard pointer — 다른 thread가 현재 사용 중인 pointer를 추적합니다.
 - Epoch-based reclamation — gc 비슷한 방식입니다.
 
-tagged pointer는 포인터와 카운터를 한 번에 CAS해야 하므로 32비트 Cortex-M에서는 64비트 CAS가 필요하고, M4의 `ldrexd`/`strexd`는 ARMv7-M에 없습니다. 그래서 Cortex-M에서 ABA 회피가 필요한 구조라면 critical section이나 mutex가 더 단순합니다.
+tagged pointer는 포인터와 카운터를 한 번에 CAS해야 하므로 32비트 Cortex-M에서는 64비트 CAS가 필요하고, ARMv7-M(M3/M4/M7)에는 `ldrexd`/`strexd`가 없습니다. 그래서 Cortex-M에서 ABA 회피가 필요한 구조라면 critical section이나 mutex가 더 단순합니다.
 
 ## Memory Order
 

@@ -335,7 +335,7 @@ C++11부터 `A<T, 나머지 타입 인자...>` 형태는 traits가 rebind를 유
 ```cpp
 bool operator==(const MyAlloc&, const MyAlloc&) { return true; }   // 다른 pool도 같다고?
 ```
-상태 있는 allocator는 상태 자체를 비교해야 합니다. 컨테이너의 move 대입은 allocator를 전파하지 않을 때(`propagate_on_container_move_assignment`가 false) 두 allocator가 같다고 판단되면 원소를 옮기지 않고 저장소를 그대로 가져옵니다. 다른 arena를 같다고 답하면, 가져온 저장소를 나중에 엉뚱한 arena에 반환하게 됩니다([container.reqmts]의 allocator-aware 요구사항).
+상태 있는 allocator는 상태 자체를 비교해야 합니다. 컨테이너의 move 대입은 allocator를 전파하지 않을 때(`propagate_on_container_move_assignment`가 false) 두 allocator가 같다고 판단되면 원소를 옮기지 않고 저장소를 그대로 가져옵니다. 다른 arena를 같다고 답하면, 가져온 저장소를 나중에 엉뚱한 arena에 반환하게 됩니다(g++-16·Clang 23.1.5 모두 같은 arena를 동등하다고 답했을 때 원본 버퍼를 그대로 가져갔습니다. 요구사항은 [container.alloc.reqmts]).
 
 ### 3. deallocate에서 size 무시
 ```cpp

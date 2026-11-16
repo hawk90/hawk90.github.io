@@ -111,7 +111,7 @@ blink(led);
 단점은 다음과 같습니다.
 
 - 호출마다 vtable을 거칩니다. 아래 [비교](#패턴-2--template-based-hal-정적-dispatch)에서 `blink`의 `set()`·`clear()`가 각각 load 2번과 `blx` 간접 호출이 됐습니다
-- 구현 클래스마다 vtable(아래 예에서 16바이트)과 객체 안의 vptr이 필요합니다. virtual 호출 자체가 RTTI를 요구하지는 않으며, 아래 `hal-check.cpp`도 `-fno-rtti`로 빌드했습니다.
+- 구현 클래스마다 vtable과 객체 안의 vptr이 필요합니다. 아래 측정은 `set()`·`clear()`만 가진 가상 소멸자 없는 interface로 해 vtable이 16바이트였고, 위 `hal::IGpio`(가상 소멸자 + 네 함수)라면 더 큽니다. virtual 호출 자체가 RTTI를 요구하지는 않으며, 아래 `hal-check.cpp`도 `-fno-rtti`로 빌드했습니다.
 
 ## 패턴 2 — Template-based HAL (정적 dispatch)
 

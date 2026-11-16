@@ -58,7 +58,7 @@ Logger::instance().log("hello");
 단점은 다음과 같습니다.
 
 - 여전히 전역이라 테스트에서 mock하기 어렵습니다.
-- 생성자가 하는 일에 따라 비용이 갈립니다. arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`에서 위 `Logger`(멤버 없음, `= default` 생성자)의 `instance()`는 상수 초기화로 끝나 주소를 돌려주는 2명령(8바이트)이었습니다. 생성자에서 `uart_init()`을 부르는 `Uart0::instance()`는 guard 검사·`dmb ish`·`__cxa_guard_acquire`/`__cxa_guard_release` 호출이 붙어 44바이트였습니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-threadsafe-statics--magic-static-끄기)). guard를 옵션으로 끄는 것은 size 최적화가 아니라 동기화 계약 변경입니다.
+- 생성자가 하는 일에 따라 비용이 갈립니다. arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os -fno-exceptions`에서 위 `Logger`(멤버 없음, `= default` 생성자)의 `instance()`는 상수 초기화로 끝나 주소를 돌려주는 2명령(8바이트)이었습니다. 생성자에서 `uart_init()`을 부르는 `Uart0::instance()`는 guard 검사·`dmb ish`·`__cxa_guard_acquire`/`__cxa_guard_release` 호출이 붙어 44바이트였습니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-threadsafe-statics--magic-static-끄기)). guard를 옵션으로 끄는 것은 size 최적화가 아니라 동기화 계약 변경입니다.
 
 ## 대안 2 — Static DI (생성자 주입)
 

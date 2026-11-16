@@ -116,7 +116,7 @@ using LogUart = DmaUart<0x40004400, 4>;   // 예시 요청 channel 값; stream�
 LogUart::send_dma(big_buffer, 1024);   // 전송 중 CPU는 설정·완료 처리만
 ```
 
-이 코드는 DMA adapter의 인터페이스 스케치이며 `dma_*` 함수·stream 선택·error IRQ·cache 처리·완료 통지는 구현하지 않았습니다. STM32F4는 stream과 channel 조합을 선택합니다. RM0090의 DMA1 request mapping 표에서 USART2_TX는 Stream 6의 Channel 4이므로, 템플릿 인자에 channel만 두면 stream 선택이 빠집니다. DMA 완료와 UART TC(wire 송신 완료)는 다른 사건이고, 버퍼는 DMA 완료 또는 취소 확인까지 살아 있어야 합니다. 설정·인터럽트·cache 관리 CPU 비용이 0이 되는 것도 아닙니다.
+이 코드는 DMA adapter의 인터페이스 스케치이며 `dma_*` 함수·stream 선택·error IRQ·cache 처리·완료 통지는 구현하지 않았습니다. STM32F4는 stream과 channel 조합을 선택합니다. ST의 STM32CubeF4 예제(`STM32F4-Discovery/Examples/UART/UART_TwoBoards_ComDMA/Inc/main.h`)가 USART2_TX를 DMA1 Stream 6·Channel 4로 정의하므로(RM0090 DMA1 request mapping 표와 같은 조합), 템플릿 인자에 channel만 두면 stream 선택이 빠집니다. DMA 완료와 UART TC(wire 송신 완료)는 다른 사건이고, 버퍼는 DMA 완료 또는 취소 확인까지 살아 있어야 합니다. 설정·인터럽트·cache 관리 CPU 비용이 0이 되는 것도 아닙니다.
 
 ## Concept으로 UART interface 통일
 

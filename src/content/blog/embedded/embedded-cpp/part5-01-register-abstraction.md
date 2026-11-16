@@ -67,7 +67,7 @@ volatile uint32_t* reg = reinterpret_cast<volatile uint32_t*>(0x40020014);
 *reg = 0xFF;   // 두 번 모두 실행 (hardware sequencing 필요)
 ```
 
-두 함수를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`로 컴파일하면 volatile 없는 쪽은 `str` 한 번, volatile 쪽은 `str r3, [r0, #0]` 두 번이 나왔습니다. 이처럼 volatile 접근은 구현이 관찰 가능한 접근으로 취급해 지우거나 합치지 않습니다([intro.abstract]). 그러나 volatile은 스레드 간 동기화·atomic RMW·CPU 메모리 배리어를 제공하지 않으며, 일반 RAM 쓰기와 DMA 시작의 순서를 보장하지도 않습니다. 접근 폭·정렬·메모리 속성은 CPU와 주변장치 계약에 따릅니다. [GCC volatile 문서](https://gcc.gnu.org/onlinedocs/gcc/Volatiles.html)는 일반 메모리 접근과의 순서 한계를 설명합니다.
+두 함수를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`로 컴파일하면 volatile 없는 쪽은 `str` 한 번, volatile 쪽은 `str`이 두 번 나왔습니다(포인터를 인자로 받는 함수로 컴파일). 이처럼 volatile 접근은 구현이 관찰 가능한 접근으로 취급해 지우거나 합치지 않습니다([intro.abstract]). 그러나 volatile은 스레드 간 동기화·atomic RMW·CPU 메모리 배리어를 제공하지 않으며, 일반 RAM 쓰기와 DMA 시작의 순서를 보장하지도 않습니다. 접근 폭·정렬·메모리 속성은 CPU와 주변장치 계약에 따릅니다. [GCC volatile 문서](https://gcc.gnu.org/onlinedocs/gcc/Volatiles.html)는 일반 메모리 접근과의 순서 한계를 설명합니다.
 
 ## 단순 wrapper
 

@@ -249,7 +249,7 @@ void uart_isr() {
 }
 ```
 
-비트 번호는 RM0090의 STM32F407 USART_SR 배치(PE bit 0, FE bit 1, NE bit 2, ORE bit 3, RXNE bit 5)를 따랐습니다. `has_any(status, UartStatus::AnyError)` 한 줄이 네 오류 비트를 함께 검사합니다. 이 스케치는 보드에서 실행하지 않았습니다.
+비트 번호는 ST `cmsis-device-f4`의 `stm32f407xx.h`(RM0090과 같은 정의)에 있는 STM32F407 USART_SR 배치(PE bit 0, FE bit 1, NE bit 2, ORE bit 3, RXNE bit 5)를 따랐습니다. `has_any(status, UartStatus::AnyError)` 한 줄이 네 오류 비트를 함께 검사합니다. 이 스케치는 보드에서 실행하지 않았습니다.
 
 ## To-string과 bounded 출력
 

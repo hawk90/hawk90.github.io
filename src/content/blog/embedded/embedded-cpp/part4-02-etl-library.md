@@ -263,7 +263,7 @@ etl::array<int, 8> a = {1, 2, 3};
 // std::array와 거의 동일 API
 ```
 
-20.49.0의 `etl::array::at()`은 `ETL_ASSERT(i < SIZE, ETL_ERROR(array_out_of_range))`로 검사합니다. 그런데 `error_handler.h`를 보면 `ETL_THROW_EXCEPTIONS`·`ETL_LOG_ERRORS`·`ETL_USE_ASSERT_FUNCTION`·`ETL_DEBUG` 중 아무것도 정의하지 않은 기본 구성에서 `ETL_ASSERT`는 `static_cast<void>(sizeof(b))`, 즉 아무 일도 하지 않습니다. `std::array::at()`은 `-fno-exceptions`에서도 라이브러리가 던져 `terminate`로 끝나지만([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#주의--stl-함수가-던지는-예외)), `etl::array::at()`은 설정하지 않으면 범위 밖 접근을 그대로 합니다. `at()`을 쓰지 않는 코드라면 `std::array`로 충분합니다.
+20.49.0의 `etl::array::at()`은 `ETL_ASSERT(i < SIZE, ETL_ERROR(array_out_of_range))`로 검사합니다. 그런데 `error_handler.h`를 보면 `ETL_THROW_EXCEPTIONS`·`ETL_LOG_ERRORS`·`ETL_USE_ASSERT_FUNCTION`·`ETL_DEBUG`(`DEBUG`나 `_DEBUG`를 정의하면 `platform.h`가 자동으로 켬) 중 아무것도 정의하지 않은 기본 구성에서 `ETL_ASSERT`는 `static_cast<void>(sizeof(b))`, 즉 아무 일도 하지 않습니다. `std::array::at()`은 `-fno-exceptions`에서도 라이브러리가 던져 `terminate`로 끝나지만([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#주의--stl-함수가-던지는-예외)), `etl::array::at()`은 설정하지 않으면 범위 밖 접근을 그대로 합니다. `at()`을 쓰지 않는 코드라면 `std::array`로 충분합니다.
 
 ## etl::optional
 
@@ -331,7 +331,7 @@ etl::vector<int, 4> v;
 for (int i = 0; i < 10; ++i) v.push_back(i);   // 기본 구성: 5번째부터 검사 없음
 ```
 
-20.49.0의 `push_back`은 `ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() != CAPACITY, ETL_ERROR(vector_full))`로 시작합니다. 이 매크로는 `ETL_CHECK_PUSH_POP`을 정의했을 때만 검사로 바뀌고, 정의하지 않으면 빈 매크로입니다(`error_handler.h`). 그래서 기본 구성에서는 5번째 `push_back`이 실패하지 않고 capacity를 넘어 씁니다. 위 `etl-capacity-check.cpp`가 `-DETL_CHECK_PUSH_POP`을 주는 이유입니다. `full()`을 먼저 체크하거나, 검사 매크로와 오류 처리 정책을 함께 켭니다.
+20.49.0의 `push_back`은 `ETL_ASSERT_CHECK_PUSH_POP_OR_RETURN(size() != CAPACITY, ETL_ERROR(vector_full))`로 시작합니다. 이 매크로는 `ETL_CHECK_PUSH_POP`을 정의했을 때만 검사로 바뀌고, 정의하지 않으면 빈 매크로입니다(`error_handler.h`). 그래서 기본 구성에서는 5번째 `push_back`이 실패하지 않고 capacity를 넘어 씁니다. 위 `etl-capacity-check.cpp`가 `-DETL_CHECK_PUSH_POP`을 주는 이유입니다. 다만 `ETL_CHECK_PUSH_POP`만 켜고 오류 처리 매크로를 고르지 않으면, 5번째 `push_back`은 아무 알림 없이 반환합니다. `full()`을 먼저 체크하거나, 검사 매크로와 오류 처리 정책을 함께 켭니다.
 
 ### 2. STL과 혼용
 ```cpp

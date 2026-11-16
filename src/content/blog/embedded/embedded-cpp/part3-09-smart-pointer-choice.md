@@ -152,7 +152,7 @@ struct Child {
 };
 ```
 
-weak_ptr은 shared_ptr의 control block을 공유하므로(같은 16바이트 크기) shared_ptr 없이 쓸 수 없습니다. heap을 피하는 설계라면 둘을 함께 피합니다.
+weak_ptr은 shared_ptr이 만든 control block을 가리키므로 shared_ptr 없이 쓸 수 없습니다(크기도 포인터 두 개, 16바이트). heap을 피하는 설계라면 둘을 함께 피합니다.
 
 ## Raw pointer — non-owning
 
