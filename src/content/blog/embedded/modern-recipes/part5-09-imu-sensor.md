@@ -131,7 +131,7 @@ void mpu_read_all(mpu_data_t *d) {
 }
 ```
 
-CLKSEL = 1은 Register Map이 "it is highly recommended that the device be configured to use one of the gyroscopes (or an external clock source) as the clock reference for improved stability"라고 한 데 따른 것입니다.
+CLKSEL = 1은 Register Map의 권고 "it is highly recommended that the device be configured to use one of the gyroscopes (or an external clock source) as the clock reference for improved stability"를 따릅니다.
 
 ### 2. Gyro bias
 
@@ -300,7 +300,7 @@ gyro만 적분한 각도는 bias 때문에 10 s에 40°로, 실제보다 10° �
 
 ### 보드에서
 
-보드를 평평하게 두면 az ≈ +1 g, 나머지 accel ≈ 0이어야 하고, `accel_to_rp()`가 roll·pitch ≈ 0을 냅니다. x축으로 기울이면 ay = sin φ로 바뀌고 roll이 따라 움직입니다. 부호가 반대면 MPU-6050이 보드에 붙은 방향(Product Specification 11.1 "Orientation of Axes")과 이 글의 축 정의가 다른 것이므로, 축이나 부호를 바꿔 맞춥니다.
+보드를 평평하게 두면 az ≈ +1 g, 나머지 accel ≈ 0이어야 하고, `accel_to_rp()`가 roll·pitch ≈ 0을 냅니다. x축으로 기울이면 ay = sin φ로 바뀌고 roll이 따라 움직입니다. 부호가 반대면 MPU-6050이 보드에 붙은 방향(Product Specification 11.1 "Orientation of Axes")과 이 글의 축 정의가 다르므로, 축이나 부호를 바꿔 맞춥니다.
 
 ## 자주 보는 함정
 
