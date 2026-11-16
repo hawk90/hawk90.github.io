@@ -12,401 +12,256 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"U-Boot의 설정과 빌드는 Linux Kconfig·Kbuild에서 출발한 흐름을 사용합니다."** — 공통 개념을 재사용하지만 U-Boot 고유 설정·산출물과 SPL/TPL 단계가 더해집니다.
+U-Boot의 빌드는 Linux에서 가져온 Kconfig·Kbuild 위에 세 가지가 더해진 구조입니다. defconfig를 C 전처리기에 먼저 통과시키고, 아키텍처를 `.config`에서 읽고, 같은 `.config` 하나로 SPL과 U-Boot Proper를 따로 빌드합니다. 이 장의 모든 출력은 U-Boot v2024.04 소스와 이 시리즈의 빌드 디렉터리(`qemu_arm64`, `imx8mm_evk`)에서 나왔습니다. 70줄짜리 defconfig가 1,382줄의 `.config`가 되는 과정을 따라가고, 실제로 겪은 함정 하나(CROSS_COMPILE 없이 defconfig를 적용하면 옵션이 조용히 사라짐)를 짚습니다.
 
-U-Boot 소스 트리를 처음 열면 많은 파일과 보드 설정에 압도될 수 있습니다. 설정·빌드 구조는 Linux Kconfig/Kbuild와 닮았지만, U-Boot에는 호환성을 위한 추가 생성물과 SPL/TPL 빌드 흐름이 있습니다. 공통 개념을 익힌 뒤에는 대상 보드 문서와 해당 버전의 설정을 확인해야 합니다.
+## 빌드 명령
 
-## 빌드의 세 단계
+이 시리즈의 모든 U-Boot는 macOS에서 Homebrew의 `aarch64-elf-gcc` 16.2.0으로, 소스 밖 디렉터리에 빌드했습니다.
 
-U-Boot 빌드는 *세 단계*입니다.
-
-![U-Boot 빌드 흐름 — defconfig → menuconfig → make와 주요 산출물](/images/blog/bootloader/diagrams/chapter03-build-flow.svg)
-
-가장 자주 쓰는 흐름은 다음과 같습니다.
-
-```bash
-# 1. U-Boot 소스 받기
-git clone https://source.denx.de/u-boot/u-boot.git
-cd u-boot
-
-# 2. cross-compiler 환경 변수
-export ARCH=arm
-export CROSS_COMPILE=aarch64-linux-gnu-
-
-# 3. defconfig 적용
-make qemu_arm64_defconfig
-
-# 4. 빌드
-make -j$(nproc)
+```bash title="build-qemu-arm64.sh"
+cd ~/Workspaces/code-review-sources/u-boot-v2024.04
+make O=$OUT CROSS_COMPILE=aarch64-elf- qemu_arm64_defconfig
+make O=$OUT -j8 CROSS_COMPILE=aarch64-elf- \
+    HOSTCFLAGS=-I/opt/homebrew/opt/openssl@3/include \
+    HOSTLDFLAGS=-L/opt/homebrew/opt/openssl@3/lib
 ```
 
-빌드 결과는 기본 설정에서는 소스 트리에 생성되며, `O=<dir>`를 지정하면 그 출력 디렉터리에 생성됩니다. 설정에 따라 `u-boot`, `u-boot.bin`, control DTB, SPL/TPL 산출물 또는 FIT 이미지가 나올 수 있습니다. 파일 이름과 포함 여부는 해당 버전의 보드 설정과 실제 build log에서 확인하세요.
+`ARCH`는 지정하지 않았습니다. U-Boot v2024.04의 `config.mk` 22행이 `ARCH := $(CONFIG_SYS_ARCH:"%"=%)`로 `.config`에서 아키텍처를 읽기 때문입니다. Linux 커널처럼 `ARCH=arm`을 넘길 필요가 없습니다. `HOSTCFLAGS`·`HOSTLDFLAGS`는 호스트 도구(`mkimage` 등)가 OpenSSL을 찾게 하려는 macOS 사정입니다.
 
-## 디렉터리 구조
+`qemu_arm64` 빌드 로그의 명령 종류를 세면 빌드가 무엇으로 이뤄지는지 보입니다.
 
-U-Boot 소스 트리는 *영역별*로 디렉터리가 나뉩니다.
+| 단계 표시 | 개수 | 뜻 |
+| --- | ---: | --- |
+| `CC` | 417 | 타깃용 C 컴파일 (`$(CROSS_COMPILE)gcc`) |
+| `HOSTCC` | 104 | 호스트용 컴파일 (`scripts/`, `tools/`) |
+| `AS` | 17 | 어셈블리 |
+| `LD` | 8 | 링크 |
+| `DTC` | 2 | Device Tree 컴파일 |
+
+로그는 이렇게 끝납니다.
 
 ```text
-u-boot/
-├── arch/                      ← 아키텍처별 코드
-│   ├── arm/
-│   │   ├── cpu/               ← cortex-a53, armv8 등
-│   │   ├── mach-imx/          ← SoC 패밀리 코드
-│   │   ├── mach-rockchip/
-│   │   ├── dts/               ← Device Tree source
-│   │   └── lib/               ← 아키텍처 헬퍼
-│   ├── riscv/
-│   └── x86/
-│
-├── board/                     ← 보드별 코드
-│   ├── freescale/imx8mp_evk/
-│   ├── ti/am335x/
-│   ├── rockchip/evb_rk3399/
-│   └── beagle/beagleboneblack/
-│
-├── configs/                   ← defconfig 모음
-│   ├── qemu_arm64_defconfig
-│   ├── am335x_evm_defconfig
-│   ├── imx8mp_evk_defconfig
-│   └── ...
-│
-├── include/                   ← 헤더
-│   ├── configs/               ← 보드별 헤더 (CONFIG_*)
-│   ├── dt-bindings/
-│   └── ...
-│
-├── common/                    ← 공통 코드
-│   ├── board_f.c              ← board_init_f
-│   ├── board_r.c              ← board_init_r
-│   ├── main.c                 ← 명령 인터프리터
-│   ├── cli.c
-│   └── spl/
-│       └── spl.c              ← SPL 메인
-│
-├── drivers/                   ← 드라이버 (DM 기반)
-│   ├── mmc/
-│   ├── net/
-│   ├── serial/
-│   ├── usb/
-│   └── ...
-│
-├── fs/                        ← 파일 시스템
-│   ├── ext4/
-│   ├── fat/
-│   └── ubifs/
-│
-├── lib/                       ← 라이브러리
-│   ├── libfdt/                ← DT 처리
-│   ├── crypto/
-│   └── ...
-│
-├── cmd/                       ← 명령 구현
-│   ├── mmc.c
-│   ├── tftp.c
-│   ├── boot.c
-│   └── ...
-│
-├── tools/                     ← 호스트 도구
-│   ├── mkimage.c
-│   └── ...
-│
-├── Kconfig                    ← 최상위 Kconfig
-├── Makefile
-├── scripts/
-│   ├── Kbuild.include
-│   └── ...
-└── doc/
+  RELOC   u-boot-nodtb.bin
+  SYM     u-boot.sym
+  DTC     arch/arm/dts/qemu-arm.dtb
+  DTC     arch/arm/dts/qemu-arm64.dtb
+  COPY    u-boot.bin
+  SHIPPED dts/dt.dtb
+  OFCHK   .config
 ```
 
-이 중 *보드 포팅에 가장 자주 손대는 곳*은 `board/`, `configs/`, `arch/<arch>/dts/`, `include/configs/`입니다. [BSP Ch 6](/blog/embedded/bsp/chapter06-u-boot-porting)에서 다룬 적이 있습니다.
+`RELOC`은 `CONFIG_STATIC_RELA=y`일 때 `tools/relocate-rela`가 RELA relocation을 raw 바이너리에 미리 적용하는 단계입니다. `Makefile`의 주석은 이것이 "currently arm64 only"라고 적습니다. relocation 자체는 [Ch 8](/blog/embedded/bootloader/chapter08-board-init)에서 다룹니다. `qemu_arm64`는 DTB를 QEMU에서 받으므로(`CONFIG_OF_BOARD=y`) `CONFIG_OF_OMIT_DTB=y`입니다. 그래서 `u-boot.bin`은 `u-boot-nodtb.bin`을 그대로 복사한 것이고 둘 다 1,047,344바이트입니다. `dts/dt.dtb`는 72바이트짜리 빈 DTB입니다.
+
+## 소스 트리에서 자주 여는 곳
+
+| 경로 | 내용 | 이 시리즈의 예 |
+| --- | --- | --- |
+| `configs/` | 보드별 defconfig | `qemu_arm64_defconfig`(70줄), `imx8mm_evk_defconfig`(120줄) |
+| `board/<vendor>/<board>/` | 보드 코드 | `board/freescale/imx8mm_evk/spl.c` |
+| `arch/arm/mach-imx/imx8m/` | SoC 계열 코드 | i.MX 8M 클록·DDR |
+| `arch/arm/dts/` | Device Tree 소스 | `imx8mm-evk.dts` |
+| `include/configs/` | 보드 헤더 (기본 환경 변수 등) | `qemu-arm.h`, `imx8mm_evk.h` |
+| `common/` | 공통 흐름 | `board_f.c`, `board_r.c`, `main.c`, `cli.c`, `spl/spl.c` |
+| `drivers/`, `fs/`, `net/`, `cmd/` | 드라이버, 파일 시스템, 네트워크, 명령 | `drivers/mmc/`, `fs/ext4/`, `cmd/mmc.c` |
+| `tools/` | 호스트 도구 | `mkimage`, binman |
+
+보드를 포팅할 때 손대는 곳은 주로 `configs/`, `board/`, `arch/arm/dts/`, `include/configs/`입니다([BSP Ch 6](/blog/embedded/bsp/chapter06-u-boot-porting)).
 
 ## Kconfig — 옵션 정의
 
-Kconfig 파일이 *모든 옵션*을 정의합니다. 옵션은 *bool, tristate, string, int, hex*가 가능하고, *의존 관계*를 표현할 수 있습니다.
+v2024.04 `drivers/mmc/Kconfig`의 실제 정의입니다.
 
 ```make
-# drivers/mmc/Kconfig (발췌)
-
 menu "MMC Host controller Support"
 
 config MMC
-    bool "MMC/SD/SDIO card support"
-    default ARM || PPC || SANDBOX
-    help
-      MMC/SD card support.
+	bool "MMC/SD/SDIO card support"
+	default ARM || PPC || SANDBOX
+	select DM_MMC if DM
+	help
+	  This selects MultiMediaCard, Secure Digital and Secure
+	  Digital I/O support.
+```
 
+```make
 config DM_MMC
-    bool "Enable MMC controllers using Driver Model"
-    depends on MMC && DM
-    help
-      Use Driver Model for MMC.
+	bool "Enable MMC controllers using Driver Model"
+	depends on DM
+	select BLK
+```
 
+```make
 config FSL_USDHC
-    bool "Freescale/NXP i.MX uSDHC controller"
-    depends on DM_MMC && BLK
-    select MMC_SDHCI
-    help
-      Driver for i.MX MMC controller.
-
-endmenu
+	bool "Freescale/NXP i.MX uSDHC controller support"
+	depends on MX6 || MX7 ||ARCH_MX7ULP || IMX8 || IMX8M || IMX8ULP || IMX9 || IMXRT
+	select FSL_ESDHC_IMX
 ```
 
-`depends on`은 *활성화 조건*, `select`는 *자동 활성화*. `CONFIG_FSL_USDHC=y`를 켜면 *MMC_SDHCI*가 자동으로 켜집니다.
+(help 문구 일부 생략)
 
-### menuconfig
+`depends on`은 이 옵션을 켤 수 있는 조건이고, `select`는 이 옵션이 켜질 때 함께 켜는 옵션입니다. `select`는 대상의 `depends on`을 확인하지 않고 강제로 켜므로, 쓰는 쪽이 조건을 맞춰야 합니다. `imx8mm_evk`의 `.config`에서는 `CONFIG_FSL_USDHC=y`와 그 결과인 `CONFIG_FSL_ESDHC_IMX=y`가 함께 보입니다.
 
-`make menuconfig`는 *대화식 TUI*로 .config를 편집합니다.
+`make menuconfig`의 `/` 검색은 옵션이 어디에 정의됐는지 알려 줍니다. `SPL`은 `common/spl/Kconfig` 13행에 `bool "Enable SPL"`, `depends on SUPPORT_SPL`로 정의돼 있습니다.
 
-**U-Boot Configuration** 최상위 메뉴:
+## defconfig에서 .config로
 
-- General setup --->
-- ARM architecture --->
-- Boot media --->
-- Boot images --->
-- Boot timing --->
-- Boot count support --->
-- Console --->
-- Device Tree Control --->
-- Environment --->
-- Network --->
-- Library routines --->
+### 전처리기를 먼저 거친다
 
-
-옵션을 검색하려면 `/`를 누르고 검색어를 입력합니다.
-
-```text
-Search Results
-──────────────
-Symbol: SPL [=y]
-Type  : bool
-Prompt: Enable SPL
-  Location:
-    -> Boot images
-  Defined at common/spl/Kconfig:33
-  Selected by:
-    - ARCH_OMAP2PLUS && ...
-  Selects:
-    SUPPORT_OF_CONTROL && ...
-```
-
-옵션 하나를 찾는 가장 빠른 방법입니다.
-
-## defconfig — 옵션 묶음
-
-`configs/<board>_defconfig`는 기본값에서 달라지는 설정을 저장한 간결한 입력 파일입니다. 이를 직접 `.config`처럼 사용하지 않고, U-Boot의 `make <board>_defconfig` target으로 해당 버전의 전체 설정 파일을 생성합니다.
-
-```text
-# configs/qemu_arm64_defconfig의 축약된 형태; 실제 항목은 버전에 따라 다름
-CONFIG_ARM=y
-CONFIG_ARCH_QEMU=y
-```
-
-`make <board>_defconfig`는 *이 파일을 .config로 풀어*, *Kconfig의 default 값을 채워*, *전체 .config를 만듭니다*.
-
-### 새 defconfig 만들기
-
-`menuconfig`로 옵션을 수정한 뒤 *defconfig를 저장*하려면 `make savedefconfig`를 씁니다.
-
-```bash
-# 1. 적용
-make qemu_arm64_defconfig
-
-# 2. 수정
-make menuconfig
-# (옵션 추가/삭제)
-
-# 3. 새 defconfig 저장
-make savedefconfig
-
-# 4. configs/ 안으로
-cp defconfig configs/my_board_defconfig
-```
-
-`savedefconfig`는 *기본값과 다른 옵션만* 저장합니다. 그래서 defconfig 파일이 *짧고 가독성 있게* 유지됩니다.
-
-## Makefile — Kbuild
-
-U-Boot은 Kbuild의 Makefile 형식과 개념을 사용하지만, 빌드 규칙 전체가 Linux 커널과 동일한 것은 아닙니다. 예를 들어 U-Boot 구성에서는 `obj-y`와 함께 SPL/TPL 단계별 조건을 사용할 수 있습니다. 모듈 단위 Makefile은 `obj-y`로 해당 디렉터리에서 빌드할 파일을 명시합니다.
+U-Boot의 `scripts/kconfig/Makefile`은 Linux와 달리 defconfig를 C 전처리기에 먼저 넣습니다.
 
 ```make
-# drivers/mmc/Makefile (발췌)
-obj-$(CONFIG_$(SPL_TPL_)MMC)      += mmc.o mmc-uclass.o
-obj-$(CONFIG_DM_MMC)              += mmc-uclass.o
-obj-$(CONFIG_FSL_USDHC)           += fsl_esdhc_imx.o
-obj-$(CONFIG_MMC_SDHCI)           += sdhci.o
-obj-$(CONFIG_MMC_BCM2835)         += bcm2835_sdhost.o
+%_defconfig: $(obj)/conf
+	$(Q)$(CPP) -nostdinc -I $(srctree) -undef -x assembler-with-cpp $(srctree)/arch/$(SRCARCH)/configs/$@ -o generated_defconfig
+	$(Q)$< $(silent) --defconfig=generated_defconfig $(Kconfig)
 ```
 
-`obj-$(CONFIG_FSL_USDHC) += fsl_esdhc_imx.o`는 `CONFIG_FSL_USDHC=y`일 때만 *fsl_esdhc_imx.o를 빌드 대상에 추가*합니다.
+그래서 defconfig 안에서 `#include`로 다른 조각을 가져올 수 있습니다. 그리고 최상위 `Makefile` 402행이 `CPP = $(CC) -E`이고 `CC`는 `$(CROSS_COMPILE)gcc`입니다. 결국 defconfig를 적용하는 단계부터 어떤 컴파일러가 쓰이는지가 결과에 영향을 줍니다.
 
-### SPL vs U-Boot Proper 빌드
+### 실제로 겪은 함정 — CROSS_COMPILE 없는 defconfig
 
-`$(SPL_TPL_)` 접두사가 *어느 단계에서 활성화할지*를 분리합니다.
+[Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)를 준비하면서 `imx8mm_evk_defconfig`를 `CROSS_COMPILE` 없이 적용한 적이 있습니다. 그러자 macOS의 `gcc`(Apple clang)가 전처리를 맡았고, Kconfig가 이런 경고를 냈습니다. 같은 현상을 [Ch 30](/blog/embedded/bootloader/chapter30-bootloader-ci)에서 다시 재현한 로그입니다.
+
+```text
+generated_defconfig:40:warning: unexpected data:  # CONFIG_SPL_SHARES_INIT_SP_ADDR is not set
+generated_defconfig:51:warning: unexpected data:  # CONFIG_CMD_EXPORTENV is not set
+generated_defconfig:52:warning: unexpected data:  # CONFIG_CMD_IMPORTENV is not set
+generated_defconfig:53:warning: unexpected data:  # CONFIG_CMD_CRC32 is not set
+generated_defconfig:117:warning: unexpected data:  # CONFIG_USB_STORAGE is not set
+```
+
+clang 전처리기가 `# CONFIG_... is not set` 줄 앞에 공백을 넣었고, Kconfig는 그 줄을 주석으로도 설정으로도 읽지 못해 버렸습니다. 결과적으로 "끄라"는 지시 5개가 사라져 Kconfig 기본값으로 돌아갔습니다. 빌드는 성공했습니다. 그러나 그 기본값 중 하나가 SPL 스택 위치를 바꿔, SPL 스택 포인터가 0x401FFE50이라는 엉뚱한 곳을 가리키는 이미지가 나왔습니다. 경고 몇 줄 외에는 실패 신호가 없었습니다. 그 뒤로는 defconfig 단계에도 항상 `CROSS_COMPILE`을 넘기고, 출력에서 "unexpected"를 grep합니다.
+
+### savedefconfig는 원본을 그대로 돌려준다
+
+defconfig는 기본값과 다른 옵션만 적은 축약본입니다. `make <board>_defconfig`가 Kconfig 기본값을 채워 전체 `.config`를 만들고, `make savedefconfig`가 반대로 축약합니다. 수정하지 않은 `qemu_arm64` 빌드에서 `savedefconfig`를 돌려 원본과 비교했습니다.
+
+```text
+$ make O=$OUT CROSS_COMPILE=aarch64-elf- savedefconfig
+scripts/kconfig/conf  --savedefconfig=defconfig Kconfig
+$ diff configs/qemu_arm64_defconfig $OUT/defconfig && echo IDENTICAL
+IDENTICAL
+```
+
+| 파일 | 줄 수 |
+| --- | ---: |
+| `configs/qemu_arm64_defconfig` | 70 |
+| `savedefconfig` 결과 | 70 (원본과 동일) |
+| `.config`의 `CONFIG_` 줄 | 1,382 |
+
+업스트림 defconfig가 `savedefconfig`의 출력 형식 그대로 관리된다는 뜻입니다. 옵션 순서도 알파벳순이 아니라 Kconfig 트리 순서입니다. 손으로 정렬하거나 빈 줄을 넣으면 다음 `savedefconfig`에서 원래 모양으로 돌아갑니다. 보드 defconfig를 고칠 때는 `menuconfig`로 바꾸고 `savedefconfig` 결과를 `configs/`에 복사하는 흐름이 diff를 깔끔하게 유지합니다.
+
+## Makefile — 같은 .config, 두 번의 빌드
+
+v2024.04 `drivers/mmc/Makefile`의 앞부분입니다.
 
 ```make
-obj-$(CONFIG_$(SPL_TPL_)MMC) += mmc.o
+obj-y += mmc.o
+obj-$(CONFIG_$(SPL_)DM_MMC) += mmc-uclass.o
+
+ifdef CONFIG_$(SPL_TPL_)DM_MMC
+obj-$(CONFIG_$(SPL_TPL_)BOOTSTD) += mmc_bootdev.o
+endif
 ```
 
-빌드되는 경우:
-- U-Boot Proper 빌드 시: `CONFIG_MMC=y`이면 컴파일
-- SPL 빌드 시: `CONFIG_SPL_MMC=y`이면 컴파일
-- TPL 빌드 시: `CONFIG_TPL_MMC=y`이면 컴파일
+`$(SPL_)`와 `$(SPL_TPL_)`는 `scripts/Kbuild.include`에 이렇게 정의돼 있습니다.
 
-같은 소스를 *다른 .config로 세 번* 컴파일하는 구조입니다. SPL은 *공간이 작으므로* `CONFIG_SPL_MMC=y`지만 `CONFIG_SPL_MMC_WRITE`는 *꺼서* 코드를 줄이는 식입니다.
-
-## out-of-tree 빌드
-
-소스 트리를 *건드리지 않고* 빌드 산출물을 별도 디렉터리에 두려면 `O=`를 씁니다.
-
-```bash
-# 소스는 ~/u-boot, 빌드는 ~/build/u-boot
-mkdir -p ~/build/u-boot
-make -C ~/u-boot O=~/build/u-boot qemu_arm64_defconfig
-make -C ~/u-boot O=~/build/u-boot -j$(nproc)
+```make
+ifdef CONFIG_SPL_BUILD
+SPL_ := SPL_
+ifeq ($(CONFIG_VPL_BUILD),y)
+SPL_TPL_ := VPL_
+else
+ifeq ($(CONFIG_TPL_BUILD),y)
+SPL_TPL_ := TPL_
+else
+SPL_TPL_ := SPL_
+endif
+endif
+else
+SPL_ :=
+SPL_TPL_ :=
+endif
 ```
 
-여러 보드를 동시에 개발할 때 유용합니다. 같은 소스로 *여러 빌드 디렉터리*를 만들 수 있습니다.
-
-```bash
-~/build/qemu_arm64/
-~/build/beagle/
-~/build/imx8mp_evk/
-```
-
-## cross-compile 환경
-
-ARM 보드를 빌드하려면 *aarch64 cross-compiler*가 필요합니다. Ubuntu/Debian:
-
-```bash
-sudo apt install gcc-aarch64-linux-gnu
-```
-
-환경 변수:
-
-```bash
-export ARCH=arm
-export CROSS_COMPILE=aarch64-linux-gnu-
-```
-
-`ARCH=arm`은 ARMv7과 ARMv8 *공통*으로 씁니다. `CROSS_COMPILE`이 *aarch64-* 또는 *arm-*인지로 32/64 비트를 구분합니다.
-
-| 타깃 | ARCH | CROSS_COMPILE |
-|------|------|---------------|
-| ARMv7-A 32bit | arm | arm-linux-gnueabihf- |
-| ARMv8-A 64bit | arm | aarch64-linux-gnu- |
-| RISC-V 64bit | riscv | riscv64-linux-gnu- |
-| MIPS | mips | mips-linux-gnu- |
-
-CROSS_COMPILE의 *끝 dash가 중요*합니다. `aarch64-linux-gnu-gcc`가 *컴파일러 이름*인데, Makefile은 `$(CROSS_COMPILE)gcc`로 조립합니다.
-
-## 빌드 출력 읽기
-
-`make`의 출력을 읽을 줄 알아야 *어디서 실패했는지* 압니다.
+U-Boot Proper를 빌드할 때는 둘 다 빈 문자열이라 `CONFIG_DM_MMC`를 보고, SPL을 빌드할 때는 `CONFIG_SPL_DM_MMC`를 봅니다. `$(SPL_)`는 TPL·VPL 빌드에서도 `SPL_`이고, 단계를 구분하려면 `$(SPL_TPL_)`를 씁니다. `.config`는 하나이고, 그 안에 두 단계의 옵션이 함께 있습니다. `imx8mm_evk`의 MMC 관련 줄입니다.
 
 ```text
-$ make -j8
-  HOSTCC  scripts/basic/fixdep
-  HOSTCC  scripts/kconfig/conf.o
-  ...
-  GEN     include/autoconf.mk
-  CHK     include/config/uboot.release
-  CHK     include/generated/version_autogenerated.h
-  ...
-  CC      arch/arm/cpu/armv8/cache.o
-  CC      arch/arm/cpu/armv8/cpu.o
-  ...
-  CC      common/board_f.o
-  CC      common/board_r.o
-  ...
-  LD      u-boot
-  OBJCOPY u-boot-nodtb.bin
-  CAT     u-boot-dtb.bin
-  COPY    u-boot.bin
-  SYM     u-boot.sym
+CONFIG_MMC=y
+CONFIG_DM_MMC=y
+CONFIG_SPL_MMC=y
+CONFIG_SPL_DM_MMC=y
+CONFIG_MMC_WRITE=y
+# CONFIG_SPL_MMC_WRITE is not set
 ```
 
-`HOSTCC`는 *host 컴파일러*(scripts/, tools/), `CC`는 *cross 컴파일러*. `LD`는 *링크*, `OBJCOPY`는 *binary 변환*.
+빌드 디렉터리에 남은 오브젝트를 비교하면 차이가 그대로 나옵니다.
 
-빌드 실패 시 줄의 *맨 앞 단어*가 *어느 도구가 실패했는지* 알려 줍니다.
+| 오브젝트 | U-Boot Proper (`drivers/mmc/`) | SPL (`spl/drivers/mmc/`) |
+| --- | --- | --- |
+| `mmc.o`, `mmc-uclass.o`, `mmc_boot.o`, `fsl_esdhc_imx.o` | 있음 | 있음 |
+| `mmc_write.o` | 있음 | 없음 (`SPL_MMC_WRITE` 꺼짐) |
+| `mmc_bootdev.o` | 있음 | 없음 (SPL에 bootstd 없음) |
+
+SPL 빌드는 `spl/` 아래 별도 디렉터리에서 `scripts/Makefile.spl`로 돌고, 이 빌드의 로그에서 `spl/`로 시작하는 `CC`·`LD`·`AS` 줄이 189개였습니다. 같은 소스 파일을 다른 매크로로 한 번 더 컴파일하는 것입니다.
+
+## SPL 크기 한계는 링커가 지킨다
+
+SPL은 SoC 내부 SRAM에 들어가야 합니다. `imx8mm_evk`의 관련 설정과 실제 크기입니다.
 
 ```text
-arch/arm/mach-imx/spl.c:42:5: error: 'CONFIG_FOO' undeclared
+CONFIG_SPL_TEXT_BASE=0x7E1000
+CONFIG_SPL_MAX_SIZE=0x27000
+CONFIG_SPL_BSS_START_ADDR=0x910000
+CONFIG_SPL_BSS_MAX_SIZE=0x2000
+CONFIG_SPL_STACK=0x920000
 ```
 
-이런 메시지는 *Kconfig에서 옵션 누락*입니다. defconfig를 점검합니다.
+```text
+$ aarch64-elf-size spl/u-boot-spl u-boot
+   text	   data	    bss	    dec	    hex	filename
+ 115537	  28849	    456	 144842	  235ca	spl/u-boot-spl
+ 636322	  35512	  24928	 696762	  aa1ba	u-boot
+```
 
-## binary 크기 확인
+(경로 줄임)
 
-산출물 크기를 보려면:
+`spl/u-boot-spl.bin`은 152,599바이트이고 한계 0x27000(159,744바이트)의 95.5%입니다. 남은 여유는 7,145바이트입니다. 이 한계는 SPL 링커 스크립트 `arch/arm/cpu/armv8/u-boot-spl.lds`가 지킵니다.
 
-`ls -l` 또는 `stat`로 실제 파일 크기를 확인하고, 보드의 SRAM 적재 한계와 대조합니다. 여기서는 U-Boot 소스와 cross-toolchain을 빌드하지 않았으므로 특정 파일 크기나 날짜를 결과로 제시하지 않습니다.
+```text
+MEMORY { .sram : ORIGIN = IMAGE_TEXT_BASE,
+		LENGTH = IMAGE_MAX_SIZE }
+MEMORY { .sdram : ORIGIN = CONFIG_SPL_BSS_START_ADDR,
+		LENGTH = CONFIG_SPL_BSS_MAX_SIZE }
+```
 
-SPL이 실제로 적재·실행되는 초기 메모리 영역은 플랫폼별로 다릅니다. 해당 보드의 linker script, SPL memory map, BootROM 제한을 확인해 산출물이 허용 영역에 들어가는지 검증합니다.
-
-map file의 실제 섹션 주소와 크기를 보고, SPL이 사용하는 영역이 보드의 메모리 배치와 겹치지 않는지 확인합니다. 특정 주소와 심볼 크기는 SoC·보드·설정별 산출물이므로 여기서는 고정 예시로 제시하지 않습니다.
-
-크기를 줄이려면 불필요한 기능을 비활성화하는 방법을 우선 검토합니다. LTO 지원 여부와 크기·부팅 영향은 toolchain 및 보드 설정에 따라 달라지므로 적용 전후 산출물을 측정해야 합니다.
+`scripts/Makefile.spl` 199행이 `-DIMAGE_MAX_SIZE=$(CONFIG_$(SPL_TPL_)MAX_SIZE)`로 값을 넣습니다. SPL에 기능을 더해 0x27000을 넘기면 링크가 실패합니다. 크기를 줄일 때는 `aarch64-elf-size`와 `u-boot-spl.map`으로 큰 오브젝트를 찾고, 그 기능의 `CONFIG_SPL_*`를 끄는 것부터 봅니다. 이 SRAM 배치 전체는 [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 다룹니다.
 
 ## 자주 하는 실수
 
-### 여러 보드 설정의 output directory 분리
-
-여러 보드나 설정을 번갈아 빌드할 때는 `O=<dir>`로 output directory를 분리하면 `.config`와 생성 파일이 섞이지 않습니다. 기존 output tree를 재사용할 경우에는 해당 U-Boot 버전과 보드의 clean 절차를 확인하고, `distclean`이 필요한지 판단합니다.
-
-```bash
-make distclean
-make <board>_defconfig
-make
-```
-
-### 타깃 아키텍처와 cross-compiler 확인
-
-defconfig와 cross-compiler prefix는 의도한 타깃과 일치해야 합니다. 설정 후 `.config`의 아키텍처 옵션, 빌드 로그의 compiler prefix, 결과 ELF의 machine type을 확인하세요. 저장소의 build system이 `ARCH`를 요구하는 구성이라면 해당 값을 지정하고, 보드 문서의 빌드 절차를 따릅니다.
-
-### `CROSS_COMPILE`을 *상대 경로*로
-
-```bash
-# Bad
-export CROSS_COMPILE=./toolchain/bin/aarch64-linux-gnu-
-
-# Good (절대 경로 또는 PATH)
-export PATH=$HOME/toolchain/bin:$PATH
-export CROSS_COMPILE=aarch64-linux-gnu-
-```
-
-빌드 중 sub-make에서 *cwd가 바뀌면* 상대 경로가 깨집니다.
-
-### `savedefconfig`로 만든 파일 *그대로* 커밋
-
-`savedefconfig`가 *정확히 정렬*해 주지만, 알파벳 순이 아닌 *Kconfig 트리 순*입니다. 가독성을 위해 *그룹별 빈 줄*을 수동으로 넣지 마세요. 다음 `savedefconfig`에서 사라집니다.
-
-### `obj-y` 대신 `obj-$(CONFIG_X)`를 빼먹음
-
-새 driver 파일을 추가할 때 Makefile에 `obj-y += my_driver.o`라고 쓰면 *모든 빌드에 무조건 포함*됩니다. 보통은 `obj-$(CONFIG_MY_DRIVER) += my_driver.o`로 *Kconfig와 연결*합니다.
-
-### `menuconfig`가 `ncurses-dev` 없이 안 됨
-
-```text
-*** Unable to find the ncurses libraries.
-*** make[1]: *** [scripts/kconfig/Makefile:14: menuconfig] Error 1
-```
-
-Ubuntu/Debian: `sudo apt install libncurses-dev`. macOS: `brew install ncurses`.
+- **defconfig 단계에서 `CROSS_COMPILE`을 빼먹음** — 위에서 본 대로 옵션이 조용히 사라질 수 있습니다. defconfig 출력의 "unexpected data"를 확인합니다.
+- **보드를 바꿔 같은 출력 디렉터리를 재사용** — `.config`와 생성 파일이 섞입니다. 보드마다 `O=`를 따로 둡니다. 이 시리즈는 `qemu_arm64` 변형을 `uboot-qemu-arm64`, `uboot-smc`, `uboot-ubi`, `uboot-pci64` 등 여러 디렉터리로 나눠 빌드했습니다.
+- **`savedefconfig` 결과를 손으로 정렬** — 다음 저장에서 되돌아가고 diff만 커집니다.
+- **새 드라이버를 `obj-y`로 추가** — 모든 빌드에 들어갑니다. `obj-$(CONFIG_MY_DRIVER)`로 Kconfig와 연결하고, SPL에도 필요하면 `$(SPL_)`·`$(SPL_TPL_)` 형태를 씁니다.
+- **`select`로 의존성이 없는 옵션을 켬** — `select`는 대상의 `depends on`을 무시합니다. 조건이 맞지 않는 조합이 만들어질 수 있습니다.
 
 ## 정리
 
-- U-Boot은 Linux Kconfig/Kbuild에서 파생된 설정·Makefile 흐름을 사용하며, 호환성 설정과 SPL/TPL 같은 자체 동작도 확인해야 합니다.
-- 디렉터리는 *영역별*입니다. arch/, board/, configs/, include/configs/, common/, drivers/, cmd/.
-- Kconfig가 옵션을 정의하고, defconfig가 *옵션 묶음*을 저장합니다.
-- 하나의 U-Boot 설정에서 stage별 옵션으로 SPL과 U-Boot Proper 같은 별도 산출물을 만들 수 있습니다. 실제 선택 옵션은 `CONFIG_SPL_*` 등 해당 보드의 설정에서 확인합니다.
-- `make savedefconfig`로 menuconfig 변경을 *defconfig 형태*로 저장합니다.
-- out-of-tree 빌드는 `O=<dir>`로 합니다. 여러 보드 개발에 편리합니다.
-- cross-compile은 `ARCH=arm CROSS_COMPILE=aarch64-linux-gnu-` 환경 변수로 정합니다.
-- SPL 산출물의 적재·실행 메모리 한계는 보드 문서와 map file로 확인합니다.
+- U-Boot은 Linux Kconfig·Kbuild를 쓰되 defconfig를 `$(CPP)`로 먼저 전처리하고, `ARCH`는 `.config`의 `CONFIG_SYS_ARCH`에서 읽습니다.
+- defconfig 단계에도 `CROSS_COMPILE`이 필요합니다. 없으면 호스트 전처리기 때문에 "is not set" 줄이 사라질 수 있습니다.
+- `qemu_arm64_defconfig` 70줄은 `.config` 1,382줄로 펼쳐지고, `savedefconfig`는 원본과 똑같은 70줄을 돌려줍니다.
+- `.config` 하나에 Proper와 SPL 옵션이 함께 있고, `$(SPL_)`·`$(SPL_TPL_)`가 단계별로 다른 오브젝트를 고릅니다.
+- SPL 크기 한계 `CONFIG_SPL_MAX_SIZE`는 링커 스크립트의 MEMORY 영역 길이가 됩니다.
 
 ## 다음 편
 
-[Ch 4: 부트 단계 — BL1 → SPL → TPL → U-Boot Proper](/blog/embedded/bootloader/chapter04-boot-stages)에서는 ARMv8-A의 BL1·BL2·BL31·BL33과 U-Boot의 SPL·TPL·U-Boot Proper의 책임을 정리합니다. 각 단계의 *메모리 모델*과 *권한 수준*도 함께 봅니다.
+[Ch 4: 부트 단계 — BL1 → SPL → TPL → U-Boot Proper](/blog/embedded/bootloader/chapter04-boot-stages)에서는 ARMv8-A의 BL1·BL2·BL31·BL33과 U-Boot의 SPL·TPL·U-Boot Proper의 책임을 정리합니다. 각 단계의 메모리 모델과 권한 수준도 함께 봅니다.
+
+## 근거 자료
+
+- U-Boot v2024.04 소스: `config.mk`(22행 `ARCH`), `Makefile`(402행 `CPP`), `scripts/kconfig/Makefile`(defconfig 전처리), `scripts/Kbuild.include`(`SPL_`, `SPL_TPL_`), `scripts/Makefile.spl`(199행 `IMAGE_MAX_SIZE`), `arch/arm/cpu/armv8/u-boot-spl.lds`, `drivers/mmc/Kconfig`, `drivers/mmc/Makefile`, `common/spl/Kconfig`.
+- 이 시리즈의 빌드: `qemu_arm64` 빌드 로그와 `savedefconfig` 결과, `imx8mm_evk` `.config`·오브젝트·`aarch64-elf-size`, CROSS_COMPILE 없는 defconfig 재현 로그.
+- [U-Boot v2024.04: Building with GCC](https://docs.u-boot.org/en/v2024.04/build/gcc.html).
+- U-Boot v2024.04 `Makefile`(`u-boot.bin` 규칙, `quiet_cmd_static_rela`).
 
 ## 관련 항목
 
@@ -416,7 +271,3 @@ Ubuntu/Debian: `sudo apt install libncurses-dev`. macOS: `brew install ncurses`.
 - [Ch 7: Driver Model](/blog/embedded/bootloader/chapter07-driver-model)
 - [BSP Ch 6: U-Boot 보드 포팅](/blog/embedded/bsp/chapter06-u-boot-porting)
 - [Buildroot Ch 4: 패키지와 옵션](/blog/embedded/buildroot/chapter04-first-build)
-- [원문 — U-Boot README](https://source.denx.de/u-boot/u-boot/-/blob/master/README)
-- [원문 — Kbuild documentation](https://www.kernel.org/doc/Documentation/kbuild/)
-- [U-Boot: Kconfig in U-Boot](https://docs.u-boot.org/en/stable/develop/kconfig.html)
-- [U-Boot v2024.01: Building with GCC](https://docs.u-boot.org/en/v2024.01/build/gcc.html)
