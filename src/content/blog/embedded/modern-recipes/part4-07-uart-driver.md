@@ -215,6 +215,8 @@ void uart_send_dma(const uint8_t *buf, uint16_t len) {
 
 stream·channel 번호는 ST의 STM32CubeF4 `Projects/STM32F429I-Discovery/Examples/UART/UART_TwoBoards_ComDMA/Inc/main.h`가 USART1에 쓰는 `USARTx_RX_DMA_STREAM DMA2_Stream5`, `USARTx_TX_DMA_STREAM DMA2_Stream7`, 둘 다 `DMA_CHANNEL_4`를 따랐습니다. F429는 F407과 같은 reference manual(RM0090) 계열이지만, 이 글은 RM0090의 DMA request 표를 열어 보지 못했으므로 F407 보드에서는 그 표로 한 번 더 맞춰 봅니다. `CHSEL`은 bit 27:25(`DMA_SxCR_CHSEL_Pos` 25)라 `4u << 25`가 channel 4이고, stream 7의 flag는 `HIFCR`의 bit 22·24~27입니다.
 
+F407의 RM0090 Rev 22(st.com이 응답하지 않아 [stm32.dirba.io](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/)의 본문 판으로 확인) Table 44(DMA2 request mapping)에서도 channel 4의 stream 5가 USART1_RX, stream 7이 USART1_TX입니다.
+
 RX는 circular mode(`DMA_SxCR_CIRC`)로 두면 DMA가 buffer 끝에서 처음으로 돌아가며 계속 씁니다. main은 `NDTR`(남은 개수)을 읽어 `sizeof(dma_rx_buf) - NDTR`로 쓰기 위치를 알아냅니다.
 
 ## 측정 / 동작 확인
