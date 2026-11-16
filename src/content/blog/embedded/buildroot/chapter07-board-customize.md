@@ -241,12 +241,12 @@ drwx------ 500:500 opt/acme
 
 ```text
 $ tar tvf output/images/rootfs.tar | grep -E "etc/hostname$|opt/acme|bin/busybox$|var/log/acme"
--rwsr-xr-x 0/0          817608 2026-11-16 03:41 ./bin/busybox
--rw------- 0/0              10 2026-11-16 03:04 ./etc/hostname
-drwx------ 500/500           0 2026-11-16 03:04 ./opt/acme/
--rw-r--r-- 0/0               0 2026-11-16 03:04 ./opt/acme/.gitkeep
--rwsr-xr-x 0/0               8 2026-11-16 03:04 ./opt/acme/config.json
-drwxr-xr-x 0/0               0 2026-11-16 03:04 ./var/log/acme/
+-rwsr-xr-x 0/0          817608 2026-11-16 07:19 ./bin/busybox
+-rw------- 0/0              10 2026-11-16 05:16 ./etc/hostname
+drwx------ 500/500           0 2026-11-16 05:16 ./opt/acme/
+-rw-r--r-- 0/0               0 2026-11-16 05:16 ./opt/acme/.gitkeep
+-rwsr-xr-x 0/0               8 2026-11-16 05:16 ./opt/acme/config.json
+drwxr-xr-x 0/0               0 2026-11-16 05:16 ./var/log/acme/
 ```
 
 overlay에서 644로 바뀌었던 `hostname`이 device table대로 600·root가 됐고, `/opt/acme`는 700·500:500입니다. capability는 ext4 이미지에 들어갔습니다.
