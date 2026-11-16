@@ -28,7 +28,7 @@ topics: ["embedded"]
 | RTOS 검사 (`configCHECK_FOR_STACK_OVERFLOW`) | context switch 때 SP와 stack 끝 패턴을 검사 | [6-12](/blog/embedded/modern-recipes/part6-12-rtos-debugging#overflow-감지)에서 실행 |
 | MPU guard | stack 바닥 바로 위 region을 접근 금지로 두어 하드웨어가 fault | guard 주소에서 fault, 다만 handler 처리에 함정이 있음 |
 
-세 기법은 잡는 시점이 다릅니다. high-water mark는 넘치기 전에 여유를 알려 주고, canary는 함수가 return할 때, RTOS 검사는 task가 전환될 때, MPU guard는 넘치는 바로 그 접근에서 잡습니다.
+네 기법은 잡는 시점이 다릅니다. high-water mark는 넘치기 전에 여유를 알려 주고, canary는 함수가 return할 때, RTOS 검사는 task가 전환될 때, MPU guard는 넘치는 바로 그 접근에서 잡습니다.
 
 ## 코드 / 실제 사용 예
 
