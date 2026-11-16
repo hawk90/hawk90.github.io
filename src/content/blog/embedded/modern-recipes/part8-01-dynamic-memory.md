@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 양산 firmware가 며칠 돌다 할당에 실패했다면 원인은 하나가 아닙니다. 누수(leak), 순간 최대 수요(peak), 그리고 남은 총량은 충분한데 연속된 빈 영역이 없는 단편화가 모두 같은 증상을 냅니다. [6-12](/blog/embedded/modern-recipes/part6-12-rtos-debugging)의 실행에서 heap_4는 28,168 B가 비어 있는데도 1 KiB 할당에 실패했습니다.
 
-또 하나는 실행 시간입니다. 범용 allocator는 빈 블록 목록을 훑으므로, 한 번의 호출 비용이 그때까지 쌓인 빈 블록 수에 따라 달라집니다. 제어 루프 안에서는 "평균"이 아니라 "최악"이 문제이므로, 이 비용이 무엇에 비례하는지 알아야 allocator를 고를 수 있습니다. 아래 측정이 그 비례 관계를 보여 줍니다.
+또 하나는 실행 시간입니다. heap_4 같은 first-fit allocator는 빈 블록 목록을 앞에서부터 훑으므로, 한 번의 호출 비용이 그때까지 쌓인 빈 블록 수에 따라 달라집니다. 제어 루프 안에서는 "평균"이 아니라 "최악"이 문제이므로, 이 비용이 무엇에 비례하는지 알아야 allocator를 고를 수 있습니다. 아래 측정이 그 비례 관계를 보여 줍니다.
 
 ## 핵심 개념
 
@@ -62,7 +62,7 @@ void vApplicationMallocFailedHook(void) { }
 
 ### Pool allocator (vanilla FreeRTOS)
 
-같은 크기 블록 16개를 배열로 잡고, 사용 여부를 byte 하나로 표시합니다. 보호는 vanilla FreeRTOS의 `taskENTER_CRITICAL()`로 합니다. ESP-IDF의 `portMUX_TYPE`·`portENTER_CRITICAL(&mux)`는 ESP-IDF 포트의 확장이라 FreeRTOS-Kernel 포트에는 없습니다. `pool_free`는 포인터가 이 pool의 블록 경계인지 먼저 확인합니다.
+같은 크기 블록 16개를 배열로 잡고, 사용 여부를 byte 하나로 표시합니다. 보호는 vanilla FreeRTOS의 `taskENTER_CRITICAL()`로 합니다. 이 글이 쓰는 ARM_CM3 포트의 `portENTER_CRITICAL()`은 인자가 없고(`portable/GCC/ARM_CM3/portmacro.h:121`) `portMUX_TYPE`도 없습니다. `portMUX_TYPE`과 `portENTER_CRITICAL(&mux)`는 FreeRTOS-Kernel 안에서도 ESP32용 `portable/ThirdParty/GCC/Xtensa_ESP32` 포트에만 있습니다(`include/portmacro.h:141`, `:200`). `pool_free`는 포인터가 이 pool의 블록 경계인지 먼저 확인합니다.
 
 ```c
 /* ---- fixed-size pool, vanilla FreeRTOS critical section ---- */
@@ -336,7 +336,7 @@ tlsf  : 400 small holes in front -> malloc(200) ok, 240 insn
 
 `xQueueCreate(64, 16)`는 heap에서 1,112 B를 가져갔습니다. 저장 영역 64 × 16 = 1,024 B, queue 구조체(`sizeof(StaticQueue_t)` = 80 B), heap_4 헤더 8 B를 더한 값입니다. `xQueueCreateStatic`은 heap을 전혀 쓰지 않았습니다.
 
-이 숫자는 QEMU의 명령 수라 실제 Cortex-M3의 사이클(파이프라인, flash wait state, bus)과는 다릅니다. 실제 보드에서는 같은 코드를 DWT `CYCCNT` 같은 사이클 카운터로 다시 재야 합니다. 비례 관계(heap_4는 구멍 수에 비례, TLSF·pool·slab은 무관)는 코드 경로에서 나오는 성질이라 보드가 바뀌어도 같습니다.
+이 숫자는 QEMU의 명령 수라 실제 Cortex-M3의 사이클(파이프라인, flash wait state, bus)과는 다릅니다. 실제 보드에서는 같은 코드를 DWT `CYCCNT` 같은 사이클 카운터로 다시 재야 합니다. 비례 관계(heap_4는 구멍 수에 비례, TLSF는 무관, slab은 상수, pool은 앞쪽 사용 중 칸 수에 비례)는 코드 경로에서 나오는 성질이라 보드가 바뀌어도 같습니다.
 
 ## 자주 보는 함정
 

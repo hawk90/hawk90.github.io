@@ -213,7 +213,7 @@ slot stride   8 B:  T=1 0.210 s  T=2 1.208 s  T=4 5.970 s  T=8 8.069 s
 slot stride 128 B:  T=1 0.262 s  T=2 0.259 s  T=4 0.217 s  T=8 0.251 s
 ```
 
-128 B 간격에서는 thread가 8개로 늘어도 시간이 0.22~0.26초로 그대로였습니다. 일이 thread 수만큼 늘었는데 시간이 같으니 처리량은 thread 수에 비례해 늘었습니다. 8 B 간격(배열에 붙여 둔 경우)은 자기 T=1 시간(0.210초)보다 thread 2개에서 5.8배, 8개에서 38배 오래 걸렸습니다. 이 Mac의 P-core는 8개라(`hw.perflevel0.physicalcpu` = 8) T=8까지만 쟀습니다.
+128 B 간격에서는 thread가 8개로 늘어도 시간이 0.22~0.26초로 그대로였습니다. 일이 thread 수만큼 늘었는데 시간이 같으니 처리량은 thread 수에 비례해 늘었습니다. 8 B 간격(배열에 붙여 둔 경우)은 자기 T=1 시간(0.210초)보다 thread 2개에서 5.8배, 4개에서 약 28배 오래 걸렸습니다. 8개에서는 이 실행에서 38배였지만, 독립 검증으로 다시 돌리자 25배와 78배로 크게 흔들렸습니다. 이 Mac의 P-core는 8개라(`hw.perflevel0.physicalcpu` = 8) T=8까지만 쟀습니다.
 
 ### Linux 커널 매크로
 
@@ -232,7 +232,7 @@ v6.12 `include/linux/cache.h:67`은 `____cacheline_aligned`를 `__attribute__((_
 
 ## 측정 / 성능 비교
 
-두 thread가 각자 `std::atomic<long>` 카운터를 `fetch_add(1, relaxed)`로 1억 번 증가시킨 시간입니다. Apple M2 Pro, macOS, Apple clang 21.0.0 `-std=c++17 -O2 -pthread`, 각 배치 5회 중앙값입니다. macOS에는 CPU affinity API가 없어 thread마다 `QOS_CLASS_USER_INTERACTIVE`로 P-core 배치를 요청만 했습니다.
+두 thread가 각자 `std::atomic<long>` 카운터를 `fetch_add(1, relaxed)`로 1억 번 증가시킨 시간입니다. Apple M2 Pro, macOS, Apple clang 21.0.0 `-std=c++17 -O2 -pthread`, 각 배치 5회 중앙값입니다. macOS에서 Mach `THREAD_AFFINITY_POLICY`는 이 M2 Pro에서 `KERN_NOT_SUPPORTED`(46)를 돌려주고 thread를 특정 core에 고정하는 API는 없어, thread마다 `QOS_CLASS_USER_INTERACTIVE`로 P-core 배치를 요청만 했습니다.
 
 ```cpp
 // false sharing: two threads, each fetch_add on its own counter, 1e8 times
@@ -468,7 +468,7 @@ int main()
 - line 크기는 Cortex-M7 32 B, Linux arm64 매크로 64 B, M2 Pro `hw.cachelinesize` 128 B로 서로 달랐고, 같은 Mac의 Linux 게스트는 64를 보고했습니다.
 - struct 머리의 `alignas(64)`는 멤버 사이 간격을 바꾸지 않습니다. 멤버마다 `alignas`를 붙이면 수동 padding은 필요 없습니다.
 - M2 Pro에서 같은 line의 두 카운터는 128 B 간격보다 5.5배, 64 B 간격도 2.3배 느렸습니다.
-- 128 B 간격의 per-thread counter는 thread 8개까지 시간이 그대로였고, 8 B 간격은 8개에서 1개일 때의 38배가 걸렸습니다.
+- 128 B 간격의 per-thread counter는 thread 8개까지 시간이 그대로였고, 8 B 간격은 4개에서 1개일 때의 약 28배가 걸렸고, 8개에서는 실행마다 25~78배로 흔들렸습니다.
 - SoA는 이 루프에서 AoS보다 4.3배 빨랐습니다(가져오는 byte 수와 vectorize된 코드의 차이가 함께 들어 있습니다).
 - DMA buffer는 시작과 크기를 line 단위로 맞춥니다. CMSIS의 invalidate는 32 B line 단위로 동작합니다.
 - Linux는 `____cacheline_aligned`(`SMP_CACHE_BYTES` 정렬)를 v6.12에서 332곳에 씁니다.
