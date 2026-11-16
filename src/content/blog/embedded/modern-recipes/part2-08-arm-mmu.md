@@ -115,7 +115,7 @@ bit 9:8은 구성에 따라 뜻이 바뀝니다. 4 KB·16 KB page에서 52-bit V
 
 parent 쪽 write-protect는 valid 번역을 바꾸는 일이라 TLBI가 필요합니다. 그래서 `dup_mmap()`은 복사를 마친 뒤 `flush_tlb_mm(oldmm)`으로 parent ASID의 entry를 지웁니다. TLB entry를 지우지 않으면 processor가 옛 번역을 계속 쓸 수 있으므로(Arm 가이드 8장), 이 flush가 없으면 parent의 write가 TLB에 남은 writable 번역으로 fault 없이 child와 공유하는 page에 들어갈 수 있습니다.
 
-이렇게 fork 직후 두 process는 같은 물리 page를 각자의 page table에서 read-only로 가리킵니다. 어느 쪽이든 write하면 permission fault가 나고 `do_wp_page()`로 갑니다. 그 page를 이 process만 쓰고 있으면 그대로 쓰기 가능으로 바꾸고(`wp_page_reuse`), 아니면 `wp_page_copy()`가 새 page를 할당해 내용을 복사합니다. `wp_page_copy()`는 PTE를 `ptep_clear_flush()`로 지우고 TLB를 flush한 뒤 새 PTE를 씁니다. 코드 주석은 예전처럼 새 PTE를 먼저 쓰고 flush하면 TLB마다 옛 PTE와 새 PTE가 섞이는 구간이 생긴다고 설명합니다. 위 BBM 순서입니다.
+이렇게 fork 직후 두 process는 같은 물리 page를 각자의 page table에서 read-only로 가리킵니다. 어느 쪽이든 write하면 permission fault가 나고 `do_wp_page()`로 갑니다. 그 page를 이 process만 쓰고 있으면 그대로 쓰기 가능으로 바꾸고(`wp_page_reuse`), 아니면 `wp_page_copy()`가 새 page를 할당해 내용을 복사합니다. `wp_page_copy()`는 PTE를 `ptep_clear_flush()`로 지우고 TLB를 flush한 뒤 새 PTE를 씁니다. 코드 주석은 예전처럼 새 PTE를 먼저 쓰고 flush하면 TLB마다 옛 PTE와 새 PTE가 섞이는 구간이 생긴다고 설명합니다. 이것이 앞에서 본 BBM 순서입니다.
 
 ### Page fault 처리
 
