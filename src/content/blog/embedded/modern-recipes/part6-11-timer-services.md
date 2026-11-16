@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 이 글은 MCU·RTOS에서 타이머 모듈을 직접 고르거나 짜는 독자를 기준으로 합니다. RTOS software timer API를 쓰는 법은 [6-08: RTOS Software Timer 활용](/blog/embedded/modern-recipes/part6-08-software-timer)에서 다뤘고, 여기서는 그 아래의 자료구조를 비용으로 비교합니다.
 
-타이머 모듈은 세 연산을 제공합니다. 타이머 시작(add), 정지(cancel), 그리고 하드웨어 tick마다 만료를 확인하는 bookkeeping입니다. Varghese·Lauck의 1987년 논문([SOSP '87, pp. 25–38](https://doi.org/10.1145/41457.37504))은 이 세 연산의 비용을 기준으로 타이머 자료구조를 Scheme 1~7로 나눴고, 이 글의 비교도 그 번호를 따릅니다. 논문 서론의 예는 연결 200개에 연결마다 타이머 3개를 둔 서버이고, 기존 알고리즘은 타이머 하나를 시작하거나 유지하는 데 O(n)이 걸려 n이 크면 비싸다는 것이 논문의 문제 제기입니다. 만료 전에 취소되는 타이머가 많으면 tick 처리만이 아니라 시작·정지 비용도 중요해집니다. Linux 커널 주석도 timeout 타이머(네트워킹, disk I/O)는 대부분 만료 전에 취소된다고 적습니다([`kernel/time/timer.c` v6.6 L83-L87](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L83-L87)).
+타이머 모듈은 세 연산을 제공합니다. 타이머 시작(add), 정지(cancel), 그리고 하드웨어 tick마다 만료를 확인하는 bookkeeping입니다. Varghese·Lauck의 1987년 논문([SOSP '87, pp. 25–38](https://doi.org/10.1145/41457.37504))은 이 세 연산의 비용을 기준으로 타이머 자료구조를 Scheme 1~7로 나눴고, 이 글의 비교도 그 번호를 따릅니다. 논문 서론의 예는 연결 200개에 연결마다 타이머 3개를 둔 서버이고, 논문은 기존 알고리즘이 타이머 하나를 시작하거나 유지하는 데 O(n)이 걸려 n이 크면 비싸다는 점을 문제로 듭니다. 만료 전에 취소되는 타이머가 많으면 tick 처리만이 아니라 시작·정지 비용도 중요해집니다. Linux 커널 주석도 timeout 타이머(네트워킹, disk I/O)는 대부분 만료 전에 취소된다고 적습니다([`kernel/time/timer.c` v6.6 L83-L87](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L83-L87)).
 
 ## 정렬 리스트와 트리
 
