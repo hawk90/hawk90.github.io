@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 같은 보드에 LCD나 센서를 옵션으로 다는 경우, 사용자가 확장 핀에 외부 모듈을 꽂는 경우, 한 보드가 여러 변형을 가지는 경우에 overlay를 씁니다. 건물 도면 원본은 그대로 두고, 증축한 방만 그린 투명 필름을 위에 겹치는 방식입니다. Base DTB는 보드의 고정 구성만 담고, 옵션은 `.dtbo` 파일로 나눠 부팅 때 고릅니다.
 
-Raspberry Pi는 펌웨어 loader가 `config.txt`의 `dtoverlay=` 줄을 읽어 `overlays/<이름>.dtbo`를 base DTB에 합친 뒤 커널에 넘깁니다(Raspberry Pi documentation `computers/configuration/reference.adoc` 849-856행, 저장소 `c6a6496`). 다른 보드에서는 U-Boot `fdt apply`나 빌드 시점의 `fdtoverlay`가 같은 일을 합니다.
+Raspberry Pi는 펌웨어 loader가 `config.txt`의 `dtoverlay=` 줄을 읽어 `overlays/<이름>.dtbo`를 base DTB에 합친 뒤 커널에 넘깁니다(Raspberry Pi documentation `computers/configuration/reference.adoc` 841행, 849-856행, 저장소 `c6a6496`). 다른 보드에서는 U-Boot `fdt apply`나 빌드 시점의 `fdtoverlay`가 같은 일을 합니다.
 
 ## 핵심 개념
 
@@ -84,7 +84,7 @@ fdtdump bme280.dtbo
 
 ### Base DT의 symbol 활성화
 
-v6.12 `make dtbs`가 만든 `imx8mm-evk.dtb`에는 `__symbols__`가 없습니다. 커널 빌드 시스템이 `-@`를 붙이는 경우는 두 가지입니다. 하나는 Makefile에 `<이름>-dtbs := base.dtb overlay.dtbo` 형태로 overlay와 합칠 base로 등록된 DTB이고(`scripts/Makefile.dtbs:11`, `:113-114`, 예: `arch/arm64/boot/dts/freescale/Makefile:61`), 다른 하나는 `DTC_FLAGS_<보드> := -@`를 지정한 DTB입니다(`scripts/Makefile.dtbs:111`).
+v6.12 `make dtbs`가 만든 `imx8mm-evk.dtb`에는 `__symbols__`가 없습니다. 커널 빌드 시스템이 `-@`를 붙이는 경우는 세 가지입니다. 첫째는 Makefile에 `<이름>-dtbs := base.dtb overlay.dtbo` 형태로 overlay와 합칠 base로 등록된 DTB이고(`scripts/Makefile.dtbs:11`, `:113-114`, 예: `arch/arm64/boot/dts/freescale/Makefile:61`), 둘째는 `DTC_FLAGS_<보드> := -@`를 지정한 DTB이고(`scripts/Makefile.dtbs:111`), 셋째는 디렉터리 Makefile이 `DTC_FLAGS := -@`로 그 디렉터리 전체에 붙이는 경우입니다(예: `arch/arm64/boot/dts/broadcom/Makefile:4`).
 
 보드 하나에만 `-@`를 붙이려면 그 변수를 명령줄로 줍니다. `V=1`로 본 `dtc` 명령에 기존 warning 옵션이 남은 채 `-@`가 더해졌고, DTB는 41,122 B에서 53,965 B로 커졌습니다.
 
@@ -97,10 +97,10 @@ fdtget arch/arm64/boot/dts/freescale/imx8mm-evk.dtb /__symbols__ i2c3
 /soc@0/bus@30800000/i2c@30a40000
 ```
 
-`make dtbs DTC_FLAGS=-@`도 `__symbols__`를 만들지만, 명령줄의 `DTC_FLAGS`가 Makefile 안의 `DTC_FLAGS +=` 값을 덮어씁니다. 같은 `V=1`로 보면 커널이 넣던 `-Wno-unique_unit_address` 등의 옵션이 모두 빠지고 `-@`만 남았습니다.
+`make dtbs DTC_FLAGS=-@`도 `__symbols__`를 만들지만, 명령줄의 `DTC_FLAGS`가 Makefile 안의 `DTC_FLAGS +=` 값을 덮어씁니다. 같은 `V=1`로 보면 커널이 넣던 `-Wno-unique_unit_address` 등의 옵션이 모두 빠지고 `-@`만 남았습니다. 아래는 그 명령줄 중 `dtc` 부분입니다.
 
 ```text
-scripts/dtc/dtc -o arch/arm64/boot/dts/freescale/imx8mm-evk.dtb -b 0 -iarch/arm64/boot/dts/freescale/ -i./scripts/dtc/include-prefixes -@ -d arch/arm64/boot/dts/freescale/.imx8mm-evk.dtb.d.dtc.tmp arch/arm64/boot/dts/freescale/.imx8mm-evk.dtb.dts.tmp 
+./scripts/dtc/dtc -o arch/arm64/boot/dts/freescale/imx8mm-evk.dtb -b 0 -iarch/arm64/boot/dts/freescale/ -i./scripts/dtc/include-prefixes -@ -d arch/arm64/boot/dts/freescale/.imx8mm-evk.dtb.d.dtc.tmp arch/arm64/boot/dts/freescale/.imx8mm-evk.dtb.dts.tmp 
 ```
 
 ### `fdtoverlay`로 빌드 시점에 합치기
@@ -124,7 +124,7 @@ base blob does not have a '/__symbols__' node, make sure you have compiled the b
 
 ### U-Boot `fdt apply`로 부팅 때 합치기
 
-U-Boot의 `fdt apply`는 `CONFIG_OF_LIBFDT_OVERLAY`가 있어야 합니다. U-Boot v2025.04 `qemu_arm64_defconfig`에는 꺼져 있어서(`# CONFIG_OF_LIBFDT_OVERLAY is not set`), 이 한 줄을 켜고 다시 빌드했습니다. QEMU `virt`가 넘기는 DTB에는 label도 `__symbols__`도 없으므로, label을 쓰는 overlay는 실패합니다.
+U-Boot의 `fdt apply`는 `CONFIG_OF_LIBFDT_OVERLAY`가 있어야 합니다. U-Boot v2025.04 `qemu_arm64_defconfig`로 만든 `.config`에는 꺼져 있어서(`# CONFIG_OF_LIBFDT_OVERLAY is not set`), 이 한 줄을 켜고 다시 빌드했습니다. QEMU `virt`가 넘기는 DTB에는 label도 `__symbols__`도 없으므로, label을 쓰는 overlay는 실패합니다.
 
 ```dts
 /dts-v1/;
@@ -136,6 +136,7 @@ U-Boot의 `fdt apply`는 `CONFIG_OF_LIBFDT_OVERLAY`가 있어야 합니다. U-Bo
 ```
 
 ```text
+=> setenv fdtovaddr 0x48000000
 => fdt addr ${fdtcontroladdr}
 Working FDT set to 7e577df0
 => fdt resize 8192
@@ -148,7 +149,7 @@ base fdt does not have a /__symbols__ node
 make sure you've compiled with -@
 ```
 
-`fdt resize`는 overlay가 들어갈 여유를 base에 만드는 단계로, U-Boot 문서의 절차에도 들어 있습니다(`doc/usage/fdt_overlays.rst`). 실패한 apply 뒤의 DTB는 쓰지 않고, QEMU를 새로 띄워 경로로 대상을 가리키는 overlay를 적용했습니다. [7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)의 demo 노드를 루트에 더하는 overlay입니다.
+`fdt resize`는 overlay가 들어갈 여유를 base에 만드는 단계로, U-Boot 문서의 절차에도 들어 있습니다(`doc/usage/fdt_overlays.rst`). 실패한 apply 뒤의 DTB는 쓰지 않고, QEMU를 새로 띄워 같은 순서(`dhcp`, `setenv fdtovaddr 0x48000000`, `fdt addr`, `fdt resize 8192`, `tftp`)로 경로로 대상을 가리키는 overlay를 적용했습니다. [7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)의 demo 노드를 루트에 더하는 overlay입니다.
 
 ```dts
 /dts-v1/;
@@ -189,7 +190,7 @@ status: okay
 /sys/bus/platform/devices/9100000.demo
 ```
 
-이 overlay를 `dtc`로 컴파일할 때는 경고가 났습니다. Overlay 파일 안에서는 대상 노드의 `#address-cells`·`#size-cells`를 모르므로 `dtc`는 기본값(2·1)을 가정하고, cell 네 개짜리 `reg`를 틀린 길이로 봅니다. 실제 대상인 QEMU `virt` 루트는 2·2라서 적용 결과는 맞았습니다.
+이 overlay를 `dtc`로 컴파일할 때는 경고가 났습니다. Overlay 파일 안에서는 대상 노드의 `#address-cells`·`#size-cells`를 모르므로 `dtc`는 기본값(2·1)을 가정하고, cell 네 개짜리 `reg`를 틀린 길이로 봅니다. 실제 대상인 QEMU `virt` 루트는 2·2라서 적용 결과는 맞았습니다. 아래는 `dtc` 경고 10줄 중 첫 줄이고, 뒤에는 `#address-cells`·`#size-cells` 기본값에 기댄다는 `avoid_default_addr_size` 경고 등이 이어졌습니다.
 
 ```text
 ov-path.dts:10.5-39: Warning (reg_format): /fragment@0/__overlay__/demo@9100000:reg: property has invalid length (16 bytes) (#address-cells == 2, #size-cells == 1)
@@ -258,7 +259,7 @@ RPi(BCM2835 계열) 핀 설정은 `brcm,pins`와 `brcm,function`으로 적습니
 
 ### Parameter 노출
 
-RPi overlay는 `__overrides__` 노드로 `dtoverlay=` 줄의 파라미터를 받습니다. 값은 대상 label의 phandle과 속성 이름의 쌍이고, 속성 이름 뒤의 `:`와 숫자는 그 속성 안의 바이트 오프셋에 32비트 정수를 쓴다는 뜻입니다(RPi `reference.adoc` 435행, 452-462행).
+RPi overlay는 `__overrides__` 노드로 `dtoverlay=` 줄의 파라미터를 받습니다. 값은 대상 label의 phandle과 속성 이름의 쌍이고, 속성 이름 뒤의 `:`와 숫자는 그 속성 안의 바이트 오프셋에 32비트 정수를 쓴다는 뜻입니다(RPi `reference.adoc` 435행, 452-464행).
 
 ```dts
 / {
@@ -300,7 +301,7 @@ BME280 칩에 `compatible = "bosch,bmp280"`을 적으면 probe가 조용히 실�
 
 > ⚠️ base 노드와 같은 이름의 노드를 fragment로 새로 만듦
 
-RPi 문서는 fragment 안에서 base에 이미 있는 노드를 새로 만들면 커널이 새 노드의 이름을 바꿔 둘 다 남긴다고 적고, 기존 노드의 속성을 바꾸려면 그 노드를 target으로 삼으라고 권합니다(`reference.adoc` 990행). 이것은 런타임 overlay의 동작이고, 위 `fdtoverlay` 실험처럼 빌드 시점에 합치면 같은 경로는 덮어쓰기가 됩니다.
+RPi 문서는 fragment 안에서 base에 이미 있는 노드를 새로 만들면 커널이 새 노드의 이름을 바꿔 둘 다 남긴다고 적고, 기존 노드의 속성을 바꾸려면 그 노드를 target으로 삼으라고 권합니다(`reference.adoc` 991행). 이것은 런타임 overlay의 동작이고, 위 `fdtoverlay` 실험처럼 빌드 시점에 합치면 같은 경로는 덮어쓰기가 됩니다.
 
 ## 정리
 
