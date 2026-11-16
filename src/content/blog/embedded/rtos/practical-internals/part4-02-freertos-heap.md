@@ -25,7 +25,7 @@ FreeRTOS는 이 문제를 *컴파일 타임 선택*으로 풉니다. `pvPortMall
 
 heap_1의 `pvPortMalloc()`(`heap_1.c:79`)은 요청을 `portBYTE_ALIGNMENT`(이 포트에서 8)로 올린 뒤 다음 위치를 돌려주고 index를 전진시킵니다. header가 없어서 100 byte 요청은 104 byte, 1 byte 요청은 8 byte만 씁니다. 탐색이 없으니 시간도 요청 크기와 무관합니다.
 
-**V11.2.0 `vPortFree()`는 non-NULL 포인터를 받지 않습니다.** 본문은 `configASSERT(pv == NULL)` 한 줄입니다(`heap_1.c:151`). 실제로 넘기면 멈춥니다.
+**V11.2.0 `vPortFree()`는 non-NULL 포인터를 받지 않습니다.** 본문은 `( void ) pv;`와 `configASSERT(pv == NULL)`뿐입니다(`heap_1.c:143-151`). 실제로 넘기면 멈춥니다.
 
 ```text
 heap_1, configTOTAL_HEAP_SIZE=65536, portBYTE_ALIGNMENT=8
@@ -94,7 +94,7 @@ void vPortFree( void * pv )
 
 heap_3.c에는 `ucHeap` 배열이 없으므로 `configTOTAL_HEAP_SIZE`는 쓰이지 않습니다. 파일 머리 주석(`heap_3.c:30-34`)은 "linker가 heap 영역을 만들도록 설정된 경우에만" 쓸 수 있다고 적습니다. 즉, FreeRTOS heap이 아니라 *toolchain heap*을 그대로 빌려옵니다.
 
-보호 범위도 코드 그대로입니다. `vTaskSuspendAll()`은 다른 task로의 전환만 막으므로, 이 wrapper를 거치지 않고 libc `malloc()`을 직접 부르는 코드(예: libc 내부의 `printf()`)나 ISR과의 경쟁은 막지 않습니다. 이 툴체인(Homebrew `arm-none-eabi-gcc` 16.2.0)에는 C 라이브러리가 없어 heap_3은 돌리지 않았습니다.
+보호 범위도 코드 그대로입니다. `vTaskSuspendAll()`은 다른 task로의 전환만 막으므로, 이 wrapper를 거치지 않고 libc `malloc()`을 직접 부르는 코드나 ISR과의 경쟁은 막지 않습니다. 이 툴체인(Homebrew `arm-none-eabi-gcc` 16.2.0)에는 C 라이브러리가 없어 heap_3은 돌리지 않았습니다.
 
 ## Heap_4 — First Fit + Coalesce
 
@@ -121,7 +121,7 @@ heap_4, configTOTAL_HEAP_SIZE=65536, portBYTE_ALIGNMENT=8
   after freeing all          avail=59832 largest=59832 smallest=59832 freeblocks=1 min_ever=32
 ```
 
-100 byte 요청이 112 byte를 쓰는 것은 8 byte header 때문이고, 1 byte가 16 byte인 것은 최소 block 크기 `heapMINIMUM_BLOCK_SIZE = xHeapStructSize << 1`(`heap_4.c:59`) 때문입니다. fresh 상태가 65536이 아니라 59832인 것은 제어 task의 stack과 TCB, timer task가 이미 heap에서 나갔기 때문입니다. 마지막 줄에서 다시 block 하나로 돌아온 것이 coalesce의 증거입니다.
+100 byte 요청이 112 byte를 쓰는 것은 8 byte header 때문이고, 1 byte가 16 byte인 것은 8 byte header를 더한 9 byte가 8 byte 정렬로 16이 되기 때문입니다(`heap_4.c:182-200`). fresh 상태가 65536이 아니라 59832인 것은 제어 task·idle task·timer task의 stack과 TCB, timer queue, 그리고 heap 끝 marker와 정렬 손실이 이미 나갔기 때문입니다. 마지막 줄에서 다시 block 하나로 돌아온 것이 coalesce의 증거입니다.
 
 ## Heap_5 — Multi-Region (Non-contiguous)
 
@@ -166,7 +166,7 @@ heap_5, configTOTAL_HEAP_SIZE=65536, portBYTE_ALIGNMENT=8
   after freeing all          avail=59824 largest=27072 smallest=16376 freeblocks=4 min_ever=880
 ```
 
-세 배열은 실제로 주소가 맞붙어 있는데도, 전부 반납한 뒤 가장 큰 block은 첫 region의 남은 크기 27072에 머뭅니다. 각 region 끝에 크기 0인 연결 block(`pxEnd`, `heap_5.c:629-631`)이 놓이므로 region 사이는 합쳐지지 않습니다. 출력 첫 줄의 `configTOTAL_HEAP_SIZE`는 테스트 프로그램이 찍은 설정값일 뿐 heap_5는 이 값을 쓰지 않습니다. 실제 총량은 region 크기의 합입니다.
+세 배열은 실제로 주소가 맞붙어 있는데도, 전부 반납한 뒤 가장 큰 block은 첫 region의 남은 크기 27072에 머뭅니다. 마지막 줄의 `freeblocks=4`는 반납된 block이 바로 뒤의 중간 marker(`pxEnd`가 아닌 것)를 흡수했기 때문이고(`heap_5.c:519-528`), marker가 있던 자리 때문에 region끼리는 여전히 합쳐지지 않습니다. 각 region 끝에 크기 0인 연결 block(`pxEnd`, `heap_5.c:629-631`)이 놓이므로 region 사이는 합쳐지지 않습니다. 출력 첫 줄의 `configTOTAL_HEAP_SIZE`는 테스트 프로그램이 찍은 설정값일 뿐 heap_5는 이 값을 쓰지 않습니다. 실제 총량은 region 크기의 합입니다.
 
 어느 region에서 할당될지는 사용자가 고르지 못합니다. 주소순 free list에서 처음 맞는 block이 선택됩니다. DMA가 접근할 수 있는 영역에서만 buffer를 받아야 한다면 그 영역은 heap_5에 넣지 말고 별도 pool로 관리합니다.
 
@@ -197,7 +197,7 @@ printf("alloc total      : %u\n", (unsigned)stats.xNumberOfSuccessfulAllocations
 printf("free total       : %u\n", (unsigned)stats.xNumberOfSuccessfulFrees);
 ```
 
-요청이 성공할지는 `xSizeOfLargestFreeBlockInBytes`가 요청 크기 + 8 byte header를 넘는지로 봅니다. 앞의 heap_4 실행처럼 총량이 54320 byte여도 가장 큰 block이 1008 byte면 2000 byte 요청은 실패합니다.
+요청이 성공할지는 `xSizeOfLargestFreeBlockInBytes`가 요청 크기 + 8 byte header를 8 byte 단위로 올린 값 이상인지로 봅니다(`heap_4.c:248`의 루프는 `xBlockSize < xWantedSize`일 때만 넘어갑니다). 앞의 heap_4 실행처럼 총량이 54320 byte여도 가장 큰 block이 1008 byte면 2000 byte 요청은 실패합니다.
 
 ## Malloc Failure Hook
 
@@ -246,7 +246,7 @@ coalesce는 이웃이 비어 있을 때만 합칩니다. 앞의 실행처럼 오
 
 > ⚠️ heap_5 region 경계 겹침
 
-`heap_5.c:607`의 assert는 새 region의 시작 주소가 앞 region 끝에 둔 marker(`pxEnd`)보다 큰지 봅니다. 순서가 틀리거나 앞 region과 겹치면 시작 주소가 그 marker 이하가 되므로 앞의 실행처럼 걸립니다. assert를 끈 빌드에서는 이 검사가 사라지므로, region은 linker script의 심볼로 정의해 linker가 겹침을 막게 합니다.
+`heap_5.c:607`의 assert는 새 region의 시작 주소가 앞 region 끝에 둔 marker(`pxEnd`)보다 큰지 봅니다. 순서가 틀리거나 앞 region과 겹치면 시작 주소가 그 marker 이하가 되므로 앞의 실행처럼 걸립니다. assert를 끈 빌드에서는 이 검사가 사라지므로, region마다 별도 output section을 두고 map 파일로 겹침을 확인합니다.
 
 > ⚠️ malloc failure hook 비활성화
 

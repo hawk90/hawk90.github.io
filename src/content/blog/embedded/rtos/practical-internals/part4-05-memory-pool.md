@@ -66,7 +66,7 @@ checked pool: 32 allocs succeeded, next -> NULL; block stride 64 bytes, alignof(
 
 size class별 pool(예: 64·256·1024 byte)은 class마다 용량과 고갈을 따로 관리합니다. 그 대가로 64 byte class가 바닥나도 1024 byte class의 빈 block을 빌려 쓰지 못합니다. RAM 예산을 잡을 때는 payload뿐 아니라 metadata, padding, 그리고 class별로 비어 있는 block까지 셉니다. 위 예제의 metadata는 `next_index`(4 byte × 32)와 `used`(1 byte × 32)로 160 byte입니다.
 
-free block 안에 next pointer를 저장하는 흔한 구현은 metadata를 따로 두지 않아 RAM을 아끼지만, block이 pointer 정렬을 만족해야 하고 반납된 block의 앞 4 byte가 list로 덮어써집니다. Zephyr의 `k_mem_slab`이 이 방식입니다. v3.7.0 문서(`doc/kernel/memory_management/slabs.rst:60-61`)는 "the first 4 bytes of each unused block provide the necessary linkage"라고 적고, 버퍼를 4 이상의 2의 거듭제곱 N byte에 맞추고 block 크기도 N의 배수로 하라고 요구합니다(`:33-36`).
+free block 안에 next pointer를 저장하는 구현은 metadata를 따로 두지 않아 RAM을 아끼지만, block이 pointer 정렬을 만족해야 하고 반납된 block의 앞 4 byte가 list로 덮어써집니다. Zephyr의 `k_mem_slab`이 이 방식입니다. v3.7.0 문서(`doc/kernel/memory_management/slabs.rst:61-62`)는 "the first 4 bytes of each unused block provide the necessary linkage"라고 적고, 버퍼를 4 이상의 2의 거듭제곱 N byte에 맞추고 block 크기도 N의 배수로 하라고 요구합니다(`:33-36`).
 
 ## RTOS API로 Pool을 구성할 때
 
@@ -79,7 +79,7 @@ queue pool: return the same block twice -> 1, 1 (1 = accepted)
   then 5 allocs succeed from a 4-block pool, 1 pair(s) share one block
 ```
 
-queue는 두 번 다 받았고, 그 뒤 block 4개짜리 pool에서 할당이 5번 성공했으며 그중 두 번은 같은 block입니다. 두 task가 같은 buffer를 자기 것으로 알고 쓰게 됩니다. queue 길이를 block 수와 같게 잡으면 두 번째 반납이 queue full로 실패해 일부는 드러나지만, 그것도 다른 block이 이미 빠져 있을 때만입니다. **중복 반환·다른 pool의 block·반환 후 사용은 queue가 검사하지 않으니**, 위 checked pool처럼 반납할 때 주소와 사용 여부를 검사하는 층을 둡니다.
+queue는 두 번 다 받았고, 그 뒤 block 4개짜리 pool에서 할당이 5번 성공했으며 그중 두 번은 같은 block입니다. 두 task가 같은 buffer를 자기 것으로 알고 쓰게 됩니다. queue 길이를 block 수와 같게 잡으면 두 번째 반납이 queue full로 실패해 일부는 드러나지만, 그것도 다른 block이 하나도 나가 있지 않을 때만입니다. 다른 block이 하나라도 나가 있으면 빈자리가 있어 두 번째 반납도 받아들여집니다. **중복 반환·다른 pool의 block·반환 후 사용은 queue가 검사하지 않으니**, 위 checked pool처럼 반납할 때 주소와 사용 여부를 검사하는 층을 둡니다.
 
 ISR에서 반납한다면 `xQueueSendFromISR()`를 쓰고 반환값을 확인합니다. pool을 mutex로 보호했다면 그 pool은 ISR에서 부르지 못합니다(3-09).
 
@@ -87,7 +87,7 @@ ISR에서 반납한다면 `xQueueSendFromISR()`를 쓰고 반환값을 확인합
 
 free list의 head를 CAS로 바꾸는 lock-free pool은 ABA 문제를 겪습니다. 순서는 이렇습니다. task A가 head `X`와 `X->next == Y`를 읽고 CAS 직전에 밀립니다. 그 사이 다른 쪽이 `X`와 `Y`를 꺼내고 `X`만 반납하면 head는 다시 `X`가 됩니다. A가 돌아와 CAS(`head: X → Y`)를 하면 성공하지만, `Y`는 이미 누군가 쓰는 block입니다. head 값이 같다는 것만 보고 그 사이의 변화를 놓친 것입니다.
 
-흔한 대책은 head에 version tag를 붙여 함께 CAS하는 것인데, tag도 유한 폭이라 wrap됩니다. 단일 코어 RTOS라면 alloc/free를 짧은 critical section으로 감싸는 편이 훨씬 단순합니다. 이 글에서는 CAS pool을 구현하거나 돌리지 않았습니다.
+대책으로 head에 version tag를 붙여 함께 CAS하는 방법이 있는데, tag도 유한 폭이라 wrap됩니다. 단일 코어 RTOS라면 alloc/free를 짧은 critical section으로 감싸면 ABA가 생길 틈 자체가 없습니다. 이 글에서는 CAS pool을 구현하거나 돌리지 않았습니다.
 
 ## Pool Sizing — 평균과 Burst
 

@@ -40,7 +40,7 @@ internal fragmentation은 header·정렬·최소 크기 때문에 요청보다 �
 | 요청 | heap_1 소비 | heap_4 소비 | 이유 |
 | --- | --- | --- | --- |
 | 100 byte | 104 | 112 | 8 byte 정렬, heap_4는 8 byte `BlockLink_t` header 추가 |
-| 1 byte | 8 | 16 | heap_4의 최소 block은 `xHeapStructSize * 2`(`heap_4.c:59`) |
+| 1 byte | 8 | 16 | heap_4는 8 byte header를 더한 9 byte를 8 byte 단위로 올림(`heap_4.c:182-200`) |
 
 1 byte 요청이 16 byte를 쓰므로 작은 객체를 많이 할당하는 코드에서는 낭비 비율이 커집니다.
 
@@ -59,7 +59,7 @@ internal fragmentation은 header·정렬·최소 크기 때문에 요청보다 �
 
 DO-178C·ISO 26262 같은 안전 표준이 동적 할당을 어떻게 다루는지는 이 글에서 다루지 않습니다. 원문을 확인하지 않았기 때문에 "특정 등급이면 금지" 같은 문장도 쓰지 않습니다.
 
-CERT C의 MEM34-C는 제목 그대로 "Only free memory allocated dynamically"입니다. 이 규칙은 C 표준 Annex J를 인용해, 동적으로 할당하지 않은 포인터를 `free()`에 넘기면 undefined behavior라고 설명하고, `realloc()`에 그런 포인터를 넘겨도 같은 상황이라고 덧붙입니다. FreeRTOS에서도 같은 실수를 할 수 있습니다. heap_4의 `vPortFree()`는 먼저 포인터가 `ucHeap` 범위 안인지(`heapVALIDATE_BLOCK_POINTER`, `heap_4.c:134-136`, 호출은 `:368`), 그다음 header의 allocated bit를 `configASSERT`로 검사합니다(`:369-370`). static 배열 주소를 넘기면 첫 검사에서 멈춥니다.
+CERT C의 MEM34-C는 제목 그대로 "Only free memory allocated dynamically"입니다. 이 규칙은 C 표준 Annex J를 인용해, 동적으로 할당하지 않은 포인터를 `free()`에 넘기면 undefined behavior라고 설명하고, `realloc()`에 그런 포인터를 넘겨도 같은 상황이라고 덧붙입니다. FreeRTOS에서도 같은 실수를 할 수 있습니다. heap_4의 `vPortFree()`는 먼저 포인터가 `ucHeap` 범위 안인지(`heapVALIDATE_BLOCK_POINTER`, `heap_4.c:134-136`, 호출은 `:368`), 그다음 header의 allocated bit(`:369`)와 next 포인터가 NULL인지(`:370`)를 `configASSERT`로 검사합니다. static 배열 주소를 넘기면 첫 검사에서 멈춥니다.
 
 ```text
 vPortFree(&not_heap[2]) on heap_4 (static array, not from pvPortMalloc)
@@ -88,7 +88,7 @@ TaskHandle_t create_sample_task(void) {
 }
 ```
 
-이 코드는 `configSUPPORT_STATIC_ALLOCATION 1`이 필요하고, 그러면 application이 `vApplicationGetIdleTaskMemory()`와(timer를 쓰면) `vApplicationGetTimerTaskMemory()`도 제공해야 합니다. 그대로 빌드해 돌린 결과입니다.
+이 코드는 `configSUPPORT_STATIC_ALLOCATION 1`이 필요하고, `configKERNEL_PROVIDED_STATIC_MEMORY`가 0(기본값)이면 application이 `vApplicationGetIdleTaskMemory()`와(timer를 쓰면) `vApplicationGetTimerTaskMemory()`도 제공해야 합니다. 그대로 빌드해 돌린 결과입니다.
 
 ```text
 xTaskCreateStatic -> handle, free heap before scheduler=0
@@ -116,7 +116,7 @@ vPortGetHeapStats(&stats);
 /* stats.xSizeOfLargestFreeBlockInBytes, stats.xNumberOfFreeBlocks */
 ```
 
-V11.2.0에서 `vPortGetHeapStats()`는 `heap_4.c:572`와 `heap_5.c:672`에만 있습니다. heap_1·2·3을 쓰면 링크 오류가 납니다. 큰 요청이 성공할지는 `xSizeOfLargestFreeBlockInBytes`가 요청 크기 + header(heap_4에서 8 byte)를 넘는지로 봅니다. 앞의 실행처럼 총량이 54320 byte여도 largest가 1008이면 2000 byte는 실패합니다.
+V11.2.0에서 `vPortGetHeapStats()`는 `heap_4.c:572`와 `heap_5.c:672`에만 있습니다. heap_1·2·3을 쓰면 링크 오류가 납니다. 큰 요청이 성공할지는 `xSizeOfLargestFreeBlockInBytes`가 요청 크기 + header(heap_4에서 8 byte)를 8 byte 단위로 올린 값 이상인지로 봅니다. 앞의 실행처럼 총량이 54320 byte여도 largest가 1008이면 2000 byte는 실패합니다.
 
 ## Embedded에서 DRAM과 SRAM 분리
 

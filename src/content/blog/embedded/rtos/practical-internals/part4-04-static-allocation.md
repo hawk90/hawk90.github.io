@@ -167,7 +167,7 @@ $ grep -E "vsnprintf|printf" libc.su
 ../libc.c:46:5:printf	272	static
 ```
 
-`ctl`이 376 byte인 것은 `TaskStatus_t ts[8]` 배열 때문이고, `ctl`이 `printf()`를 부르면 272, 그 안의 `vsnprintf()`가 96을 더 씁니다. 이 경로만 해도 744 byte입니다. 여기에 커널 API 호출과 Cortex-M이 exception 진입 때 쌓는 frame이 더해집니다. 실행 중에 잰 watermark와 함께 봅니다. watermark는 task 생성 때 stack을 채워 둔 패턴(`tskSTACK_FILL_BYTE 0xa5`, `tasks.c:120`)이 지워지지 않은 깊이라, 실행해 보지 않은 경로는 반영하지 않습니다.
+`ctl`이 376 byte인 것은 `-O1`에서 `ctl`에 inline된 `report()`의 `TaskStatus_t ts[8]` 배열 때문이고, `ctl`이 `printf()`를 부르면 272, 그 안의 `vsnprintf()`가 96을 더 씁니다. 이 경로만 해도 744 byte입니다. 여기에 커널 API 호출과 Cortex-M이 exception 진입 때 쌓는 frame이 더해집니다. 실행 중에 잰 watermark와 함께 봅니다. watermark는 task 생성 때 stack을 채워 둔 패턴(`tskSTACK_FILL_BYTE 0xa5`, `tasks.c:120`)이 지워지지 않은 깊이라, 실행해 보지 않은 경로는 반영하지 않습니다.
 
 ```c
 UBaseType_t high_water = uxTaskGetStackHighWaterMark(task);
@@ -244,7 +244,7 @@ DO-178C·ISO 26262 같은 안전 표준이 static allocation을 어떻게 요구
 
 > ⚠️ static과 dynamic API 혼용
 
-한 시스템에 `xTaskCreate`와 `xTaskCreateStatic`이 섞이면 heap을 쓰게 됩니다. `configSUPPORT_DYNAMIC_ALLOCATION = 0`이면 `xTaskCreate()` 같은 동적 API가 조건부 컴파일에서 빠지므로, 누가 부르면 link 오류로 드러납니다. 앞의 빌드는 heap 파일 없이 link가 성공했으니 커널 쪽 동적 호출이 없었다는 뜻입니다.
+한 시스템에 `xTaskCreate`와 `xTaskCreateStatic`이 섞이면 heap을 쓰게 됩니다. `configSUPPORT_DYNAMIC_ALLOCATION = 0`이면 `xTaskCreate()` 같은 동적 API의 선언이 조건부 컴파일에서 빠지므로(`include/task.h:384`), 누가 부르면 implicit declaration compile 오류로 드러납니다(이 GCC 16.2에서는 오류). 앞의 빌드는 heap 파일 없이 link가 성공했으니 커널 쪽 동적 호출이 없었다는 뜻입니다.
 
 > ⚠️ const 데이터를 RAM에
 

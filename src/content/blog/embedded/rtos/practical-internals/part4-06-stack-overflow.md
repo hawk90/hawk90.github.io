@@ -27,7 +27,7 @@ SP가 stack 아래로 내려가는 것과 그 아래 memory에 실제로 쓰는 
 
 ## Canary 패턴 — FreeRTOS Method 2
 
-V11.2.0의 `include/stack_macros.h`에서 stack이 아래로 자라는 비-MPU port의 Method 1(`configCHECK_FOR_STACK_OVERFLOW 1`, `:67-79`)은 저장된 SP(`pxTopOfStack`)가 `pxStack`(stack의 가장 낮은 주소) 이하인지만 봅니다. Method 2(`> 1`, `:101-118`)는 그 검사에 더해 `pxStack`의 4개 `uint32_t`가 모두 `0xa5a5a5a5`인지 봅니다. 위로 자라는 port는 끝의 20 byte를 `memcmp()`로 비교합니다(`:123-138`). MPU wrapper port에서는 이 매크로가 정의되지 않고, 소스 주석(`:56-66`)은 MPU region이 unprivileged task의 overflow를 fault로 잡는다고 설명합니다.
+V11.2.0의 `include/stack_macros.h`에서 stack이 아래로 자라는 비-MPU port의 Method 1(`configCHECK_FOR_STACK_OVERFLOW 1`, `:67-79`)은 저장된 SP(`pxTopOfStack`)가 `pxStack`(stack의 가장 낮은 주소) 이하인지만 봅니다. Method 2(`> 1`, `:101-118`)는 그 검사에 더해 `pxStack`의 4개 `uint32_t`가 모두 `0xa5a5a5a5`인지 봅니다. 위로 자라는 port는 끝의 20 byte를 `memcmp()`로 비교합니다(`:123-138`). MPU wrapper port에서는 이 매크로의 본문이 비어 있고(`:148-151`), 소스 주석(`:56-66`)은 MPU region이 unprivileged task의 overflow를 fault로 잡는다고 설명합니다.
 
 ```c
 #define configCHECK_FOR_STACK_OVERFLOW 2
@@ -60,7 +60,7 @@ HardFault CFSR=0x01000000 HFSR=0x40000000 MMFAR=0x00000000
 
 - **word 하나만 깨져도 Method 2는 잡습니다.** "16 byte가 전부 깨져야 잡는다"는 설명은 틀립니다. 4개 word 중 하나만 달라도 조건이 참입니다.
 - **넘쳤다가 돌아온 frame은 Method 1이 놓칩니다.** switch 시점의 SP는 이미 정상 범위라서 SP 검사는 통과합니다. Method 2는 그 frame이 canary를 덮어썼기 때문에 잡았습니다.
-- **깊이 넘친 상태에서 block하면 둘 다 hook 전에 HardFault로 멈췄습니다.** 560 byte frame이 stack 아래 heap 영역까지 덮어써서, switch 검사에 이르기 전에 다른 곳이 깨졌습니다. 검사 방식과 상관없이 "hook이 반드시 불린다"는 보장은 없습니다.
+- **깊이 넘친 상태에서 block하면 둘 다 hook 전에 HardFault로 멈췄습니다.** 이 task의 stack은 `ucHeap`의 첫 block이라(`nm`: `ucHeap` = `0x200001a8`), 560 byte frame이 그 아래 커널 `.bss`(heap_4의 `xStart` `0x2000018c`, `pxEnd` `0x20000194` 등)를 덮었고, switch 검사에 이르기 전에 HardFault로 멈췄습니다. 검사 방식과 상관없이 "hook이 반드시 불린다"는 보장은 없습니다.
 
 ## Application Hook
 
@@ -71,7 +71,7 @@ HardFault CFSR=0x01000000 HFSR=0x40000000 MMFAR=0x00000000
      hook sp=0x203fffc0 (psp=0x20000348, task stack base 0x200001b0)
 ```
 
- 넘친 task의 stack이 아니라는 점은 다행이지만, 넘친 범위가 TCB까지 닿았다면 `pcTaskName`부터 깨져 있습니다. 위 SCEN 3이 보여 주듯 hook까지 가지도 못하는 경우도 있습니다. 그래서 hook은 최소한의 일만 합니다.
+ 넘친 task의 stack이 아니라는 점은 다행입니다. stack이 아래로 자라는 port에서 `xTaskCreate()`는 stack을 먼저, TCB를 나중에 할당하므로(`tasks.c:1651-1653` 주석) 아래로 넘친 write는 자기 TCB가 아니라 그 아래 메모리를 덮습니다. 그 메모리가 다른 task의 TCB라면 hook이 읽는 정보도 믿을 수 없습니다. 위 SCEN 3이 보여 주듯 hook까지 가지도 못하는 경우도 있습니다. 그래서 hook은 최소한의 일만 합니다.
 
 ```c title="overflow-hook.c"
 #include "FreeRTOS.h"
@@ -235,7 +235,7 @@ $ (same without -fstack-clash-protection)
 27:	sub	sp, sp, #4
 ```
 
-이 컴파일러는 Cortex-M3에서 4096 byte마다 `str` probe를 넣었습니다. 옵션이 없으면 SP를 한 번에 16 KiB 내립니다. 다만 probe 간격이 4096 byte이므로, 앞의 32 byte guard로는 여전히 건너뛸 수 있습니다. 이 옵션은 OS가 4 KiB guard page를 두는 환경을 전제로 설계됐고, MCU에서 효과를 보려면 guard도 그 간격보다 커야 합니다.
+이 컴파일러는 Cortex-M3에서 4096 byte마다 `str` probe를 넣었습니다. 옵션이 없으면 SP를 한 번에 16 KiB 내립니다. 다만 probe 간격이 4096 byte이므로, 앞의 32 byte guard로는 여전히 건너뛸 수 있습니다. GCC 매뉴얼은 이 옵션이 OS가 제공하는 guard page를 전제로 한다고 적고, 이 빌드의 probe 간격은 4096 byte였으므로 MCU에서 효과를 보려면 guard도 그보다 커야 합니다.
 
 ## Recursion과 printf의 비용
 
