@@ -375,7 +375,7 @@ bound driver: demo_v2
 [    0.738232] demo_v2 9100000.demo: demo_v2: probed, clock-frequency=24000000 label=status
 ```
 
-`compatible`의 첫 문자열은 `myco,demo-v2`인데도, `demo_generic`을 먼저 올리면 장치는 `demo_generic`에 묶였습니다. 구체적인 문자열을 쓰는 driver가 우선하려면 그 driver가 먼저 등록되어야 하고, 이 순서는 모듈이면 로드 순서가 정하고, built-in이면 커널 초기화 중 driver가 등록되는 순서가 정합니다. 그래서 일반 문자열에만 맞는 driver와 구체 문자열용 driver를 같은 커널에 함께 두는 경우에는 이 순서를 직접 확인해야 합니다.
+`compatible`의 첫 문자열은 `myco,demo-v2`인데도, `demo_generic`을 먼저 올리면 장치는 `demo_generic`에 묶였습니다. 구체적인 문자열을 쓰는 driver가 우선하려면 그 driver가 먼저 등록되어야 합니다. 등록 순서는 모듈이면 로드 순서가, built-in이면 커널 초기화 중 driver가 등록되는 순서가 정합니다. 그래서 일반 문자열에만 맞는 driver와 구체 문자열용 driver를 같은 커널에 함께 두는 경우에는 이 순서를 직접 확인해야 합니다.
 
 `devm_platform_ioremap_resource()`처럼 `devm_`으로 시작하는 함수는 자원을 장치의 devres 목록에 묶어 둡니다. 커널 문서는 "all devres entries are released on driver detach"라고 적습니다(`Documentation/driver-api/driver-model/devres.rst:50-55`). 위 `rmmod`에서 따로 `iounmap`을 부르지 않은 이유입니다.
 
