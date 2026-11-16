@@ -61,7 +61,7 @@ set_property -dict { PACKAGE_PIN C2  IOSTANDARD LVCMOS33 } [get_ports ck_rst]
 
 master XDC는 모든 줄이 주석 처리된 채로 배포되고, 파일 머리말이 "쓸 핀의 주석을 풀고 `get_ports` 뒤의 이름을 top-level 신호 이름에 맞추라"고 안내합니다. 위 블록은 그 지시를 따랐습니다.
 
-XDC에 핀이 빠진 포트가 있으면 어떻게 될까요. UG906 p.48에 따르면 위치가 없는 I/O는 DRC에서 critical warning으로 보고되고, `write_bitstream` 단계에서 error로 올라가 bitstream 생성을 막습니다. 즉 빠진 핀은 빌드가 잡아 줍니다. 잡아 주지 못하는 것은 *틀린* 핀입니다. 다른 보드의 XDC를 복사하면 문법도 DRC도 통과하므로, part 이름과 XDC가 같은 보드 것인지 먼저 확인합니다.
+XDC에 핀이 빠진 포트가 있으면 어떻게 될까요? UG906 p.48에 따르면 위치가 없는 I/O는 DRC에서 critical warning으로 보고되고, `write_bitstream` 단계에서 error로 올라가 bitstream 생성을 막습니다. 즉 빠진 핀은 빌드가 잡아 줍니다. 잡아 주지 못하는 것은 *틀린* 핀입니다. 다른 보드의 XDC를 복사하면 문법도 DRC도 통과하므로, part 이름과 XDC가 같은 보드 것인지 먼저 확인합니다.
 
 ## Synthesis 실행
 
@@ -110,7 +110,7 @@ WNS가 음수면 실패한 경로를 열어 봅니다. 경로 report에서 UG906
 - **Data Path Delay**: 경로의 논리 구간에서 누적된 지연입니다. clock을 데이터로 쓰는 경우가 아니면 clock 지연은 포함하지 않습니다.
 - **Logic Levels**: 데이터 경로에 있는 primitive의 종류별 개수입니다. 시작점과 끝점 셀은 빼고 셉니다.
 
-UG906 p.257은 실패 경로를 이렇게 읽으라고 안내합니다. Logic Delay가 전체 경로 지연의 50%를 넘으면 logic depth와 셀 종류를 보고 RTL이나 합성 설정을 바꿉니다. Net Delay가 지배적이면 high fanout net이나 hold fix 우회 배선 같은 물리적 원인을 봅니다. 다만 같은 쪽에 "7 series에서는 LUT 지연이 net delay에 포함된다"는 주석이 있어서, Arty A7 같은 7 series에서는 Net Delay 비율이 원래 높게 나온다는 점을 감안해야 합니다.
+UG906 p.257은 실패 경로를 이렇게 읽으라고 안내합니다. Logic Delay가 전체 경로 지연의 50%를 넘으면 logic depth와 셀 종류를 보고 RTL이나 합성 설정을 바꿉니다. Net Delay가 지배적이면 high fanout net이나 hold fix 우회 배선 같은 물리적 원인을 봅니다. 다만 같은 페이지에 "7 series에서는 LUT 지연이 net delay에 포함된다"는 주석이 있어서, Arty A7 같은 7 series에서는 Net Delay 비율이 원래 높게 나온다는 점을 감안해야 합니다.
 
 ## Bitstream 생성
 
