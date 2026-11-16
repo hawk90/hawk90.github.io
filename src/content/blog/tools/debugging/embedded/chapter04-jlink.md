@@ -241,7 +241,7 @@ RTCK를 제공하는 JTAG 타깃에서는 반환 클럭에 맞추는 adaptive cl
 
 ## CI에서 BIN과 ELF 검증을 구분
 
-Commander의 `VerifyBin`은 *raw binary* 파일을 지정 주소의 타깃 메모리와 비교합니다(문서 설명: "Verify if specified bin file is at the specified target memory location"). ELF를 binary로 착각해 넘기면 ELF 헤더와 주소 정보까지 flash 바이트와 비교하게 됩니다. 아래는 BIN 입력만 받는 오프라인 계획 생성기입니다. 실제 Commander는 실행하지 않습니다.
+Commander의 `VerifyBin`은 *raw binary* 파일을 지정 주소의 타깃 메모리와 비교합니다(문서 설명: "Verfy if specified bin file is at the specified target memory location"(원문 철자 그대로)). ELF를 binary로 착각해 넘기면 ELF 헤더와 주소 정보까지 flash 바이트와 비교하게 됩니다. 아래는 BIN 입력만 받는 오프라인 계획 생성기입니다. 실제 Commander는 실행하지 않습니다.
 
 ```js title="jlink-plan-check.mjs"
 import assert from 'node:assert/strict';
@@ -276,7 +276,7 @@ OpenOCD는 driver와 Tcl 설정을 소스로 추적할 수 있고, J-Link는 SEG
 - Unlimited Flash Breakpoints는 하드웨어 BP를 먼저 쓰고, 모자라면 flash sector를 다시 써서 BP를 겁니다.
 - RTT Client는 스스로 연결하지 않으며, control block 자동 검색은 정확한 장치 이름에 의존합니다.
 - J-Run은 semihosting exit나 `*STOP*` 문자열로 테스트를 끝냅니다.
-- Ozone 무료 라이선스는 PLUS·Ultra·Pro·J-Trace PRO에만 포함됩니다.
+- 상업용 Ozone 라이선스가 기본 포함된 모델은 PLUS·Ultra·Pro·J-Trace PRO입니다.
 
 ## 다음 장 예고
 

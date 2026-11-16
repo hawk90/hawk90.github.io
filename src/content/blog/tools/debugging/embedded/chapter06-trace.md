@@ -201,7 +201,7 @@ typedef struct {
 } SEGGER_RTT_CB;
 ```
 
-`SEGGER_RTT_ConfDefaults.h`의 기본값은 up 버퍼 1024바이트(`BUFFER_SIZE_UP`), up·down 버퍼 각 2개, 기본 모드 `SEGGER_RTT_MODE_NO_BLOCK_SKIP`입니다. 헤더 주석은 "가득 참과 비어 있음을 구분하려고 버퍼를 끝까지 채우지 않으므로 1바이트를 잃는다"고 적습니다. 호스트는 메모리에서 `acID`의 `"SEGGER RTT"` 문자열을 찾아 control block 위치를 알아냅니다(OpenOCD `rtt setup`의 ID 기본값, J-Link의 자동 검색이 모두 이 문자열입니다).
+`SEGGER_RTT_ConfDefaults.h`의 기본값은 up 버퍼 1024바이트(`BUFFER_SIZE_UP`), up·down 버퍼 각 3개(`SEGGER_RTT_MAX_NUM_UP_BUFFERS`/`DOWN_BUFFERS`), 기본 모드 `SEGGER_RTT_MODE_NO_BLOCK_SKIP`입니다. 헤더 주석은 "가득 참과 비어 있음을 구분하려고 버퍼를 끝까지 채우지 않으므로 1바이트를 잃는다"고 적습니다. 호스트는 메모리에서 `acID`의 `"SEGGER RTT"` 문자열을 찾아 control block 위치를 알아냅니다(OpenOCD `rtt setup`의 ID 기본값, J-Link의 자동 검색이 모두 이 문자열입니다).
 
 ### 펌웨어 크기
 
@@ -252,7 +252,7 @@ TRIM 30B after host read: returned 30, bytes in buffer 34
 
 마지막 줄의 `bytes in buffer 34`는 32바이트 버퍼로는 불가능한 값입니다. `SEGGER_RTT_GetBytesInBuffer()`(V8.58.0 `SEGGER_RTT.c` 2049~2053행)는 `RdOff > WrOff`인 경우 `SizeOfBuffer - (WrOff - RdOff)`를 계산하는데, unsigned 뺄셈이 음수가 되어 랩어라운드합니다. 이때 RdOff는 31, WrOff는 (31 + 30) mod 32 = 29이므로 32 − (29 − 31)이 unsigned로 34가 됩니다. 버퍼가 한 바퀴 돌면 이 함수의 값을 믿을 수 없다는 뜻이고, 이 실험에서만 확인한 동작입니다.
 
-**BLOCK_IF_FIFO_FULL**은 같은 32바이트 버퍼에 40바이트를 쓰게 했더니 함수가 돌아오지 않았습니다. 4초 뒤 GDB로 붙어 본 상태입니다.
+**BLOCK_IF_FIFO_FULL**은 같은 32바이트 버퍼에 40바이트를 쓰게 했더니 함수가 돌아오지 않았습니다. QEMU를 2초 돌린 뒤 GDB로 붙어 본 상태입니다.
 
 ```text
 #1  0x0800029e in _WriteBlocking (pRing=pRing@entry=0x20000510 <_SEGGER_RTT+48>, pBuffer=0x800193f <msg+30> "vwxyzABCD", NumBytes=9) at SEGGER_RTT.c:361
@@ -276,7 +276,7 @@ rtt start
 rtt server start 9090 0
 ```
 
-OpenOCD 소스(`src/rtt/rtt.c`)의 기본 폴링 주기는 100 ms이고 `rtt polling_interval`로 바꿉니다. 폴링 주기 동안 쓰인 데이터가 버퍼보다 크면 위의 SKIP·TRIM 결과처럼 데이터가 사라지므로, 버퍼 크기는 *폴링 주기 동안 쓰는 양*보다 커야 합니다. SEGGER 제품 페이지도 최소 버퍼 크기를 "1 ms 동안 쓰는 양과 한 번에 쓰는 최대량"으로 어림하라고 안내합니다(이 기준은 J-Link의 폴링을 전제로 한 설명입니다).
+OpenOCD 소스(`src/rtt/rtt.c`)의 기본 폴링 주기는 100 ms이고 `rtt polling_interval`로 바꿉니다. 폴링 주기 동안 쓰인 데이터가 버퍼보다 크면 위의 SKIP·TRIM 결과처럼 데이터가 사라지므로, 버퍼 크기는 *폴링 주기 동안 쓰는 양*보다 커야 합니다. SEGGER 제품 페이지도 최소 버퍼 크기를 "1 ms 동안 쓰는 양과 한 번에 쓰는 최대량"으로 어림하라고 안내합니다.
 
 ### Up vs Down
 
@@ -297,7 +297,7 @@ SEGGER 제품 페이지는 RTT가 *백그라운드 메모리 접근을 허용하
 
 ## 4. ETM (Embedded Trace Macrocell)
 
-ETM은 CPU가 실행한 *명령 흐름*을 trace로 내보내는 CoreSight 블록입니다. Cortex-M4 TRM은 ETM을 구현 선택으로 두고(1.1의 trace 구성 목록), TPIU 블록 그림에 병렬 trace port 출력 `TRACECLK`·`TRACEDATA[3:0]`를 보여 줍니다. ROM table에서 ETM이 없으면 해당 항목이 `0xFFF42002`로 읽힙니다(2장).
+ETM은 CPU가 실행한 *명령 흐름*을 trace로 내보내는 CoreSight 블록입니다. Cortex-M4 TRM은 ETM을 구현 선택으로 두고(1.4 Configurable options의 trace 구성 목록), TPIU 블록 그림에 병렬 trace port 출력 `TRACECLK`·`TRACEDATA[3:0]`를 보여 줍니다. ROM table에서 ETM이 없으면 해당 항목이 `0xFFF42002`로 읽힙니다(2장).
 
 ### 하드웨어
 

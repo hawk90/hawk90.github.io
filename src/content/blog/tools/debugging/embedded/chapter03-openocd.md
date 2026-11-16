@@ -414,7 +414,7 @@ Error: chip.cpu: IR capture error; saw 0x0f not 0x01
 Warn : Bypassing JTAG setup events due to errors
 ```
 
-읽는 법은 이렇습니다. IDCODE의 비트 0은 항상 1이어야 하는데(2장), 첫 값이 0이고 이후 값은 1이 한 비트씩 위에서 차오릅니다. 실제 TAP이 응답한 것이 아니라 TDO가 고정된 레벨로 읽히고 있다는 뜻입니다. 선언한 TAP 뒤로 21번째 위치까지 이상한 값이 이어지니 OpenOCD가 *체인 끝 뒤의 IDCODE*를 경고했고, IR capture 값도 기대한 `0x01` 대신 `0x0f`였습니다. 실물 보드에서 같은 패턴이 나오면 전원·배선·클럭 속도를 먼저 의심할 근거가 됩니다.
+읽는 법은 이렇습니다. IDCODE의 비트 0은 항상 1이어야 하는데(2장) 첫 값이 0이므로 유효한 IDCODE가 아닙니다. 이후 값에서 1이 한 비트씩 위에서 차오르는 것은 dummy 드라이버의 `dummy_read()`(`src/jtag/drivers/dummy.c`)가 비트를 오른쪽으로 밀며 최상위에 1을 넣기 때문입니다. 선언한 TAP 뒤로 21번째 위치까지 이상한 값이 이어지니 OpenOCD가 *체인 끝 뒤의 IDCODE*를 경고했고, IR capture 값도 기대한 `0x01` 대신 `0x0f`였습니다. 실물 보드에서 TDO가 0이나 1로 고정돼 있다면 OpenOCD는 `jtag_examine_chain_check()`(`src/jtag/core.c`)에서 `JTAG scan chain interrogation failed: all zeroes` 또는 `all ones`를 냅니다.
 
 소스에서 확인한 다른 메시지와 그 뜻입니다.
 
@@ -453,7 +453,7 @@ flash_app firmware.elf
 - STM32F4의 flash driver 이름은 `stm32f2x`이고, readout protection 명령도 `stm32f2x lock/unlock`입니다.
 - flash 쓰기는 work area에 올린 타깃 쪽 루틴(`target_run_flash_async_algorithm`)으로 수행합니다.
 - FreeRTOS awareness에는 `uxTopUsedPriority`를 포함한 커널 심볼이 필요합니다.
-- IDCODE가 0이나 1이 차오르는 값으로 읽히면 실제 TAP 응답이 아니라 TDO가 고정된 상태입니다.
+- 비트 0이 0인 IDCODE는 유효하지 않으며, TDO가 0/1로 고정되면 OpenOCD는 `JTAG scan chain interrogation failed: all zeroes/ones`를 냅니다.
 
 ## 다음 장 예고
 

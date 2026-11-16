@@ -38,7 +38,7 @@ JTAG의 표준 이름은 IEEE 1149.1 *Standard Test Access Port and Boundary Sca
 
 ### 핀
 
-ADIv5 B3.2(Table B3-1)가 정한 JTAG-DP 신호입니다.
+ADIv5 B3.2.2(Table B3-2)가 정한 JTAG-DP 신호입니다.
 
 | 핀 | 방향 | 의미 |
 |---|------|------|
@@ -56,7 +56,7 @@ TAP의 핵심은 TMS 값으로 천이하는 상태 머신입니다.
 
 ![JTAG TAP 상태 머신](/images/blog/tools/diagrams/jtag-tap-state-machine.svg)
 
-이 상태 머신에서 *명령 레지스터(IR)*와 *데이터 레지스터(DR)*를 시프트해 디버그 자원을 조작합니다. 아래 그림은 리셋 후 4비트 IR에 값을 시프트하는 TMS 순서입니다. 예시 값 0b0000은 ADIv5 Table B3-4가 boundary scan TAP의 EXTEST로 권장하는 인코딩입니다.
+이 상태 머신에서 *명령 레지스터(IR)*와 *데이터 레지스터(DR)*를 시프트해 디버그 자원을 조작합니다. 아래 그림은 리셋 후 4비트 IR에 값을 시프트하는 TMS 순서입니다. 예시 값 0b0000은 ADIv5 Table B3-4가 IEEE 1149.1 호환용 EXTEST 인코딩으로 둔 값입니다. Arm은 이 명령들을 JTAG-DP에 구현하지 말고 boundary scan용 TAP을 따로 두라고 권합니다.
 
 ![JTAG TAP TMS 시퀀스: TMS=1 다섯 번으로 Reset, Run-Test/Idle에서 Select-DR-Scan·Select-IR-Scan·Capture-IR를 거쳐 Shift-IR에서 TDI 4비트를 시프트하고 Exit1-IR·Update-IR 뒤 Run-Test/Idle로 복귀](/images/blog/debugging/embedded/diagrams/ch02-jtag-tap-sequence.svg)
 
@@ -75,7 +75,7 @@ Arm JTAG-DP의 IR 명령은 ADIv5 Table B3-3에 있습니다. 디버그는 *DPAC
 | `0b1111` | BYPASS | 1 | 체인 우회 |
 | `0b0xxx` | IMPLEMENTATION DEFINED | — | boundary scan 등 (Table B3-4) |
 
-구현하지 않은 IR 값은 BYPASS를 선택합니다. Test-Logic-Reset 상태에서는 IDCODE가 현재 명령이 되므로, 디버거는 리셋 직후 DR을 시프트하는 것만으로 IDCODE를 읽을 수 있습니다(B3.4.4).
+구현하지 않은 IR 값은 BYPASS를 선택합니다. Test-Logic-Reset 상태에서는 IDCODE가 현재 명령이 되므로, 디버거는 리셋 직후 DR을 시프트하는 것만으로 IDCODE를 읽을 수 있습니다(B3.3.3).
 
 IDCODE 형식도 B3.4.4가 정합니다.
 
@@ -269,7 +269,7 @@ FPB 레지스터는 FP_CTRL(`0xE0002000`), FP_REMAP(`0xE0002004`), FP_COMP0(`0xE
 
 ### Software vs Hardware BP
 
-`Z0`(소프트웨어 BP)은 명령을 BKPT로 바꿔 씁니다. GDB 16.3 `arm-tdep.c`의 Thumb BP 바이트는 `{0xbe,0xbe}`이고, 1장 로그처럼 원래 명령을 미리 읽어 두었다가 정지하면 되돌립니다. RAM에서는 일반 메모리 쓰기로 충분하지만 flash에서는 그렇게 쓸 수 없습니다.
+`Z0`(소프트웨어 BP)은 명령을 BKPT로 바꿔 씁니다. 스텁이 `Z0`을 지원하면 BKPT 삽입과 복원은 스텁이 합니다(1장 로그의 `Z0`/`z0`). GDB가 직접 메모리를 고쳐 쓰는 경우에 쓰는 Thumb BP 바이트가 GDB 16.3 `arm-tdep.c`의 `{0xbe,0xbe}`입니다. RAM에서는 일반 메모리 쓰기로 충분하지만 flash에서는 그렇게 쓸 수 없습니다.
 
 `Z1`(하드웨어 BP)은 FPB 비교기 하나를 씁니다. flash·ROM에서도 동작하지만 개수가 위처럼 제한됩니다.
 
@@ -326,7 +326,7 @@ ITM은 Armv7-M과 Armv8-M Mainline의 구성 요소입니다. CMSIS 5.9.0 `core_
 
 ## ETM — 명령 단위 Trace
 
-ETM(Embedded Trace Macrocell)이 있으면 실행한 명령 흐름을 trace로 내보낼 수 있습니다. Cortex-M4에서 ETM은 구현 선택이며(TRM 1.1의 구성 목록에 ITM·DWT·ETM 조합이 나옵니다), 자세한 내용은 별도의 ETM-M4 TRM(DDI 0440)이 다룹니다. TRM의 TPIU 블록 그림은 출력 핀으로 `TRACECLK`와 `TRACEDATA[3:0]`를 보여 줍니다. 이 병렬 trace port를 받으려면 전용 캡처 장비가 필요합니다.
+ETM(Embedded Trace Macrocell)이 있으면 실행한 명령 흐름을 trace로 내보낼 수 있습니다. Cortex-M4에서 ETM은 구현 선택이며(TRM 1.4 Configurable options에 ITM·DWT·ETM 조합이 나옵니다), 자세한 내용은 별도의 ETM-M4 TRM(DDI 0440)이 다룹니다. TRM의 TPIU 블록 그림은 출력 핀으로 `TRACECLK`와 `TRACEDATA[3:0]`를 보여 줍니다. 이 병렬 trace port를 받으려면 전용 캡처 장비가 필요합니다.
 
 ETM 버전·trace sink·timestamp·핀 노출은 코어와 SoC 구현마다 다릅니다. Cortex-M7·M33의 trace 구성은 각 코어 TRM에서 따로 확인해야 하고, 이 장의 M4 설명을 그대로 옮기지 않습니다.
 
@@ -336,7 +336,7 @@ ETM 버전·trace sink·timestamp·핀 노출은 코어와 SoC 구현마다 다�
 
 ### 전원과 Vref
 
-프로브는 타깃 전압을 감지하는 핀을 갖습니다. ST-Link 드라이버는 이 값을 `Target voltage: %f`로 찍고(`src/jtag/drivers/stlink_usb.c`), J-Link 드라이버는 전압이 낮으면 `Target voltage too low. Check target power`를 출력합니다(`src/jtag/drivers/jlink.c`). 여기서 0에 가까운 값이 나오면 디버그 프로토콜 이전에 전원·Vref 배선·GND 공통을 먼저 봐야 합니다.
+프로브는 타깃 전압을 감지하는 핀을 갖습니다. ST-Link 드라이버는 이 값을 `Target voltage: %f`로 찍고(`src/jtag/drivers/stlink_usb.c`), J-Link 드라이버의 `jlink hwstatus` 명령은 VTarget이 1500 mV 미만이면 `Target voltage too low. Check target power`를 출력합니다(`src/jtag/drivers/jlink.c`). 여기서 0에 가까운 값이 나오면 디버그 프로토콜 이전에 전원·Vref 배선·GND 공통을 먼저 봐야 합니다.
 
 ### 클럭 속도
 
@@ -356,7 +356,7 @@ reset_config srst_only srst_nogate connect_assert_srst
 
 | 프로브 | 인터페이스 | 비고 |
 |--------|------------|------|
-| ST-LINK | SWD/JTAG | OpenOCD에 HLA용 `interface/stlink.cfg`와 DAP용 `interface/stlink-dap.cfg`가 모두 있음 |
+| ST-LINK | SWD/JTAG | OpenOCD 0.12.0은 `interface/stlink.cfg`가 HLA, `stlink-dap.cfg`가 DAP 직접 접근. 현재 main은 `stlink.cfg`가 `st-link` 드라이버이고 HLA는 `stlink-hla.cfg`, `stlink-dap.cfg`는 deprecated |
 | CMSIS-DAP / DAPLink | SWD/JTAG | Arm의 프로토콜 명세, 디버거와는 USB로 통신([CMSIS-DAP](https://arm-software.github.io/CMSIS-DAP/latest/)) |
 | J-Link | SWD/JTAG | SEGGER 프로브, 4장에서 다룸 |
 | J-Trace | SWD/JTAG + trace | SEGGER 페이지 기준 Cortex-M ETM trace를 streaming으로 받음([J-Trace](https://www.segger.com/products/debug-probes/j-trace/)) |

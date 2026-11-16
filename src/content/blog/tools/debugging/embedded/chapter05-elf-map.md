@@ -20,7 +20,7 @@ ELF는 *굽는 단위*, 링커 스크립트는 *어디 둘지의 규칙*, MAP은
 
 ## 예제 펌웨어
 
-1장에서 QEMU로 디버깅한 `fw.elf`가 이 장의 예제입니다. STM32F405를 흉내 내는 QEMU `netduinoplus2` 보드(flash 0x08000000, SRAM 0x20000000)에서 돌고, 출력은 semihosting으로 냅니다. 파일은 `startup.c`, `main.c`, `sensor.c`, 링커 스크립트 `fw.ld` 네 개입니다.
+1장에서 QEMU로 디버깅한 `fw.elf`가 이 장의 예제입니다. STM32F405를 흉내 내는 QEMU `netduinoplus2` 보드(flash 0x08000000, SRAM 0x20000000)에서 돌고, 출력은 semihosting으로 냅니다. 파일은 `startup.c`, `main.c`, `sensor.c`, 헤더 `semihost.h`(6장), 링커 스크립트 `fw.ld` 다섯 개입니다.
 
 ```c title="main.c"
 #include <stdint.h>

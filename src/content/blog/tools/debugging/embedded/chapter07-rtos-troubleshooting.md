@@ -43,7 +43,7 @@ $2 = 4
 
 ### OpenOCD가 하는 일을 GDB Python으로
 
-OpenOCD의 FreeRTOS 지원(`src/rtos/freertos.c`)은 ELF에서 `pxCurrentTCB`, `pxReadyTasksLists`, `xDelayedTaskList1/2`, `pxDelayedTaskList`, `pxOverflowDelayedTaskList`, `xPendingReadyList`, `xSuspendedTaskList`, `uxCurrentNumberOfTasks`, `uxTopUsedPriority`, `xSchedulerRunning` 심볼을 찾고, 리스트를 따라가며 TCB를 읽습니다. 저장된 레지스터의 위치는 포트마다 다르며, OpenOCD `src/rtos/rtos_standard_stackings.c`의 Cortex-M3 표는 저장된 스택 포인터에서 PC가 `0x38` 오프셋에 있다고 정의합니다. FreeRTOS ARM_CM3 포트의 PendSV가 `stmdb r0!, {r4-r11}`로 r4~r11을 하드웨어 프레임 위에 쌓기 때문입니다(8워드 + 하드웨어 프레임의 7번째 워드 = 14번째 워드 = 0x38).
+OpenOCD의 FreeRTOS 지원(`src/rtos/freertos.c`)은 ELF에서 `pxCurrentTCB`, `pxReadyTasksLists`, `xDelayedTaskList1/2`, `pxDelayedTaskList`, `pxOverflowDelayedTaskList`, `xPendingReadyList`, `xTasksWaitingTermination`, `xSuspendedTaskList`, `uxCurrentNumberOfTasks`, `uxTopUsedPriority`, `xSchedulerRunning` 심볼을 찾고, 리스트를 따라가며 TCB를 읽습니다. 저장된 레지스터의 위치는 포트마다 다르며, OpenOCD `src/rtos/rtos_standard_stackings.c`의 Cortex-M3 표는 저장된 스택 포인터에서 PC가 `0x38` 오프셋에 있다고 정의합니다. FreeRTOS ARM_CM3 포트의 PendSV가 `stmdb r0!, {r4-r11}`로 r4~r11을 하드웨어 프레임 위에 쌓기 때문입니다(r4~r11 8워드 뒤 하드웨어 프레임의 PC는 워드 오프셋 14, 즉 0x38).
 
 같은 일을 하는 GDB Python 명령을 만들어 돌렸습니다(핵심 부분).
 

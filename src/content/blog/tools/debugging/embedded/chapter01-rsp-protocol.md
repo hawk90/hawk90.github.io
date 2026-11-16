@@ -30,7 +30,7 @@ GDB와 원격 스텁은 `$payload#checksum` 형태의 패킷을 주고받으며 
 | 펌웨어 | arm-none-eabi-gcc 16.2.0로 빌드한 `fw.elf` (5장에서 소스와 링커 스크립트를 다룹니다) |
 | 게스트 OS | Debian 13.7 arm64 (QEMU `virt`, HVF) |
 
-GDB 쪽 트래픽은 `set debug remote 1`로 봤습니다. 긴 패킷은 GDB가 `[333 bytes omitted]`처럼 잘라 보여 주므로 `set debug remote-packet-max-chars unlimited`를 함께 켰습니다.
+GDB 쪽 트래픽은 `set debug remote 1`로 봤습니다. 긴 패킷은 GDB가 `[457 bytes omitted]`처럼 잘라 보여 줍니다. gdbserver 세션에서는 `set debug remote-packet-max-chars unlimited`를 함께 켜 전체를 받았고, QEMU 세션의 target description XML은 잘린 채로 두었습니다.
 
 ## 왜 알아야 하나
 
@@ -142,7 +142,7 @@ LLDB에서 같은 로그를 보려면 `log enable -f <파일> gdb-remote packets
 
 ### 1. 정지 사유 보고 — `?`
 
-`?`에 대한 응답이 *stop reply*입니다. 형식은 [E.3 Stop Reply Packets](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Stop-Reply-Packets.html)에 정의돼 있습니다.
+`?`에 대한 응답이 *stop reply*입니다. 형식은 [E.4 Stop Reply Packets](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Stop-Reply-Packets.html)에 정의돼 있습니다.
 
 | 응답 | 의미 (매뉴얼 기준) |
 |------|------|
@@ -162,9 +162,9 @@ LLDB에서 같은 로그를 보려면 `log enable -f <파일> gdb-remote packets
 | gdbserver `--multi`, 아직 프로세스 없음 | `W00` |
 | gdbserver에서 브레이크포인트 도달 | `T05swbreak:;1d:f0f7ffffffff0000;1f:f0f7ffffffff0000;20:2005fcf7ffff0000;thread:p93a.93a;core:1;` |
 
-gdbserver의 응답에는 `1d`·`1f`·`20` 같은 *레지스터 번호:값* 쌍이 섞여 있습니다. 정지 직후 GDB가 꼭 필요로 하는 레지스터(AArch64에서는 x29, sp, pc)를 미리 실어 보내 `g` 요청 하나를 아끼는 방식입니다. 또 gdbserver는 `swbreak:`를 붙였고 QEMU는 붙이지 않았습니다. 이 차이는 협상에서 나옵니다. GDB가 `swbreak+;hwbreak+`를 제안했을 때 gdbserver는 응답에 `swbreak+;hwbreak+`를 넣었고, QEMU 응답에는 없었습니다.
+gdbserver의 응답에는 `1d`·`1f`·`20` 같은 *레지스터 번호:값* 쌍이 섞여 있습니다. AArch64에서는 x29, sp, pc입니다. 매뉴얼은 이런 쌍을 실어 보내는 목적을 왕복 지연을 줄이는 것이라고 적지만, 이 세션에서 GDB는 정지 직후 `g`를 다시 보냈습니다. 또 gdbserver는 `swbreak:`를 붙였고 QEMU는 붙이지 않았습니다. 이 차이는 협상에서 나옵니다. GDB가 `swbreak+;hwbreak+`를 제안했을 때 gdbserver는 응답에 `swbreak+;hwbreak+`를 넣었고, QEMU 응답에는 없었습니다.
 
-`T` 응답에 붙을 수 있는 키 가운데 자주 보는 것들입니다(모두 E.3에 정의).
+`T` 응답에 붙을 수 있는 키 가운데 자주 보는 것들입니다(모두 E.4에 정의).
 
 | 키 | 의미 |
 |----|------|
@@ -221,7 +221,7 @@ MSP는 `0x200023f8`, PSP는 0입니다. 이 펌웨어는 PSP를 쓰지 않으니
 Cannot access memory at address 0x60000000
 ```
 
-`E14`의 숫자는 프로토콜이 의미를 정하지 않습니다. 매뉴얼은 "거의 모든 경우 오류 번호의 의미를 정하지 않으며 GDB는 대개 무시한다"고 적고 있습니다([E.2 Standard Replies](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Standard-Replies.html)). 같은 절에 텍스트 오류 응답 `E.errtext`도 정의돼 있고, GDB 16.3은 `qSupported`에 `error-message+`를 실어 이를 받을 수 있다고 알립니다.
+`E14`의 숫자는 프로토콜이 의미를 정하지 않습니다. 매뉴얼은 "거의 모든 경우 오류 번호의 의미를 정하지 않으며 GDB는 대개 무시하거나 해석 없이 사용자에게 보여 준다"고 적고 있습니다([E.2 Standard Replies](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Standard-Replies.html)). 같은 절에 텍스트 오류 응답 `E.errtext`도 정의돼 있고, GDB 16.3은 `qSupported`에 `error-message+`를 실어 이를 받을 수 있다고 알립니다.
 
 #### 바이너리 형식 — `X`와 `x`
 
@@ -245,7 +245,7 @@ Cannot access memory at address 0x60000000
 | QEMU 11.1.3 | `vCont;c;C;s;S` |
 | gdbserver 16.3 | `vCont;c;C;t;s;S;r` |
 
-`t`는 스레드 정지, `r start,end`는 PC가 그 범위를 벗어날 때까지 step하는 *range step*입니다([E.4 Packets](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Packets.html)의 `vCont` 항목). QEMU 11.1.3은 둘 다 광고하지 않았습니다.
+`t`는 스레드 정지, `r start,end`는 PC가 그 범위를 벗어날 때까지 step하는 *range step*입니다([E.3 Packets](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Packets.html)의 `vCont` 항목). QEMU 11.1.3은 둘 다 광고하지 않았습니다.
 
 ### 6. 브레이크포인트 — `Z` / `z`
 
@@ -329,14 +329,14 @@ PacketSize=2001f;QPassSignals+;QProgramSignals+;QStartupWithShell+;QEnvironmentH
 
 `name+`는 지원, `name-`는 미지원, `name=value`는 값이 있는 feature입니다. 베어메탈 에뮬레이터는 레지스터 정의와 기본 실행 제어만 광고했고, Linux 프로세스용 gdbserver는 공유 라이브러리 목록·시그널 전달·fork 추적·tracepoint까지 광고했습니다. **이 한 줄이 그 스텁으로 할 수 있는 디버깅의 범위**입니다. QEMU에 `fork-events+`가 없으니 `catch fork`가 의미 없고, `QStartNoAckMode+`가 없으니 ACK 왕복이 끝까지 남습니다.
 
-자주 보는 feature를 [E.4 General Query Packets](https://sourceware.org/gdb/current/onlinedocs/gdb.html/General-Query-Packets.html)의 `qSupported` 설명에 맞춰 정리하면 다음과 같습니다.
+자주 보는 feature를 [E.5 General Query Packets](https://sourceware.org/gdb/current/onlinedocs/gdb.html/General-Query-Packets.html)의 `qSupported` 설명에 맞춰 정리하면 다음과 같습니다.
 
 | feature | 의미 |
 |---------|------|
 | `PacketSize=<hex>` | 스텁이 받을 수 있는 packet-data 최대 바이트(프레임·체크섬 제외) |
 | `multiprocess+` | `p<pid>.<tid>` 형식의 스레드 ID 사용 |
 | `swbreak+` / `hwbreak+` | 정지 응답에 `swbreak:`/`hwbreak:` 사유 표시 |
-| `vContSupported+` | 스텁이 `vCont`를 지원 |
+| `vContSupported+` | 스텁이 `vCont?` 응답에 지원 동작을 보고 |
 | `qXfer:features:read+` | target description XML 제공 |
 | `qXfer:libraries-svr4:read+` | 로드된 공유 라이브러리 목록 제공 |
 | `qXfer:memory-map:read+` | flash/RAM 영역 정의 제공 |
@@ -467,7 +467,7 @@ boot
   [remote] Sending packet: $F5#7b
 ```
 
-스텁이 "fd 2에 0x08000150부터 5바이트를 써 달라"고 부탁하면, GDB가 `m`으로 그 5바이트(`626f6f740a` = `boot\n`)를 읽어 자기 쪽에 출력하고 `F5`(5바이트 씀)로 답합니다. `target=native`로 띄우면 QEMU가 직접 호스트에 출력하므로 이 패킷은 나오지 않습니다. 즉 semihosting이 `F` 패킷이 되는지는 *스텁 구현과 설정*에 달린 문제이며, OpenOCD나 J-Link는 6장에서 보듯 자기 쪽에서 semihosting을 처리합니다.
+스텁이 "fd 2에 0x08000150부터 5바이트를 써 달라"고 부탁하면, GDB가 `m`으로 그 5바이트(`626f6f740a` = `boot\n`)를 읽어 자기 쪽에 출력하고 `F5`(5바이트 씀)로 답합니다. `target=native`로 띄우면 QEMU가 직접 호스트에 출력하므로 이 패킷은 나오지 않습니다. 즉 semihosting이 `F` 패킷이 되는지는 *스텁 구현과 설정*에 달린 문제입니다. OpenOCD는 기본으로 자체 처리하고, `arm semihosting_fileio enable`을 주면 GDB File-I/O(`F` 패킷)로 넘깁니다(`src/target/semihosting_common.c`의 `is_fileio`, 기본 false).
 
 ## 자체 스텁을 만들기 — 최소 구현
 
@@ -508,7 +508,7 @@ RSP에는 인증이 없습니다. 연결만 되면 임의 메모리 읽기·쓰�
 
 ### 사례 3. `continue`가 돌아오지 않음
 
-`vCont;c` 뒤로 정지 응답이 오지 않으면 타깃이 정말로 계속 실행 중인지부터 확인합니다. 이 장의 첫 실험에서 `counter++`만 도는 무한 루프에 `watch counter`를 걸고 `continue`했더니 정지 응답이 오지 않았습니다. `-O1`로 빌드한 그 루프는 `counter`를 레지스터에만 두고 메모리에 다시 쓰지 않아 watchpoint가 걸릴 일이 없었습니다. 스텁이 응답하지 않는 것과 타깃이 멈출 이유가 없는 것은 로그만으로 구분됩니다. 앞쪽이라면 `vCont;c`의 ACK(`+`)조차 오지 않습니다.
+`vCont;c` 뒤로 정지 응답이 오지 않으면, 스텁 문제를 의심하기 전에 타깃이 멈출 이유가 있는지부터 봅니다. 예제 `main()`의 마지막 `for (;;) { counter++; }`는 `-O1` 빌드에서 `8000114: e7fe b.n 8000114`, 즉 제자리 분기 한 명령으로 컴파일됐습니다(`objdump`). 이 루프는 `counter`에 전혀 접근하지 않으므로, 여기서 `watch counter`를 걸고 `continue`하면 watchpoint가 걸릴 일이 없습니다.
 
 ### 사례 4. flash 주소에 `load`가 실패
 
