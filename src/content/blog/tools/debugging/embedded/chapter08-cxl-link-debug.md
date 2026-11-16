@@ -12,115 +12,225 @@ topics: ["tools", "tools/debugging"]
 
 ## 왜 어려운가
 
-CXL 링크 문제는 *원인이 여러 층*에 흩어집니다. PCIe PHY·LTSSM·Flex Bus·CXL 프로토콜·DVSEC·CEDT 어디서든 막힐 수 있고, 각 층의 *진단 도구가 다릅니다*. *링크가 안 올라옴*이라는 한 증상으로 *최소 5가지 원인 후보*가 나옵니다.
+CXL 메모리 디바이스가 "안 보인다"는 한 증상 뒤에는 여러 층이 있습니다. PCIe 링크가 올라왔는지, PCIe enumeration이 됐는지, 디바이스가 CXL DVSEC을 광고하는지, 펌웨어가 CEDT로 CXL 토폴로지를 알려 줬는지, 그리고 Linux CXL 드라이버가 그 위에 객체를 만들었는지입니다. 층마다 보는 도구가 다르므로, 아래에서 위로 하나씩 확인하는 순서가 필요합니다.
 
-이 장은 *증상별 진단 흐름*을 정리합니다.
+이 장은 그 순서를 QEMU의 CXL 에뮬레이션에서 실제 출력으로 따라갑니다.
 
-## LTSSM 상태 — 어디서 멈췄나
+## 실험 환경과 한계
 
-LTSSM(Link Training and Status State Machine)이 *L0에 도달*하지 못하면 *config space access 자체가 불가능*합니다. 멈춘 상태가 어디인지를 먼저 알아야 합니다.
+| 항목 | 값 |
+|------|-----|
+| 에뮬레이터 | QEMU 11.1.3 `virt,cxl=on`, TCG |
+| CXL 구성 | `pxb-cxl` + `cxl-rp` + `cxl-type3`(volatile 256 MiB, LSA 256 MiB, serial 0x5), CFMW 4 GiB |
+| 게스트 | Debian 13.7 arm64, 커널 6.12.116+deb13-arm64 |
+| 도구 | pciutils 3.13.0, ndctl/cxl-cli 81 |
+| 소스 | Linux v6.12.116 `drivers/cxl/`, `drivers/pci/controller/dwc/pcie-designware.h` |
 
-LTSSM은 `Detect → Polling → Configuration → L0` 순으로 진행하며, L0 이후에는 일시 오류 시 `Recovery`로 빠졌다가 재training하거나 `L0s`/`L1`/`L2` 전력 절감 상태로 내려갑니다. 각 상태가 하는 일은 다음과 같습니다.
+QEMU의 CXL 장치는 *이미 올라온 링크*를 흉내 냅니다. LTSSM이나 물리 계층은 에뮬레이션하지 않으므로, 링크 학습 실패 자체는 이 장에서 재현하지 못했습니다. 그 부분은 소스로 확인할 수 있는 것만 적습니다.
 
-<!-- TODO: TikZ state machine (_design-state.tex) -->
-
-| 상태 | 하는 일 |
-|------|---------|
-| Detect | 슬롯에 디바이스가 있는지 확인 |
-| Polling | TS1/TS2 ordered set 교환 |
-| Configuration | Lane 번호 정렬, link width 협상 |
-| L0 | 정상 동작 |
-| Recovery | 일시 오류, 재training |
-| L0s / L1 / L2 | 전력 절감 상태 |
-
-| 멈춘 상태 | 의심 원인 |
-|----------|----------|
-| Detect | 디바이스 미인식 — 슬롯 불량·디바이스 전원 없음·reset 잘못 |
-| Polling | TS1/TS2 못 받음 — PHY 설정 오류·신호 무결성·equalization 실패 |
-| Configuration | Lane reverse·width mismatch·polarity 문제 |
-| Recovery 반복 | 신호 marginal — eye margin 부족, retimer 필요 |
-
-SoC의 *PCIe controller register*가 *LTSSM 상태 필드*를 노출하는 경우가 있습니다. 레지스터 offset과 상태 값 인코딩은 컨트롤러마다 다르므로, 해당 SoC reference manual에서 확인한 값으로 읽습니다.
-
-## Protocol Analyzer 캡처
-
-물리적 디버깅의 *마지막 무기*가 *protocol analyzer*입니다.
-
-| 도구 | 회사 | 가격대 | 용도 |
-|------|------|--------|------|
-| Summit T516 | Teledyne LeCroy | — | PCIe 5.0 / CXL, x16 32GT/s 캡처 |
-
-가격은 벤더가 공개하지 않아 `—`로 둡니다.
-
-캡처할 항목:
-- *TS1·TS2 ordered set* — Polling 단계 분석
-- *Flit 흐름* — CXL.mem M2S·S2M sequence
-- *Flex Bus 모드 협상* — link training 중 modified TS1/TS2 ordered set으로 CXL 지원 여부를 주고받는 구간
-
-## 호스트 측 진단 명령
+QEMU 명령줄의 CXL 부분입니다.
 
 ```bash
-# 1. 디바이스가 PCIe로 보이는지
-$ lspci -nn | grep -i cxl
-5e:00.0 CXL [0502]: ...
-
-# 안 보이면 — PCIe enumeration이 되지 않은 상태다. 이 결과만으로 LTSSM 정지 상태를 단정하지 말고, 전원·reset·firmware 설정과 SoC가 제공하는 LTSSM 진단을 함께 확인한다.
-
-# 2. Link 속도/폭 확인
-$ lspci -vvv -s 5e:00.0 | grep -E "LnkSta|LnkCap"
-LnkCap:	Port #0, Speed 32GT/s, Width x16, ASPM ...
-LnkSta:	Speed 32GT/s, Width x16
-
-# LnkSta 폭이 LnkCap보다 좁으면 — Configuration에서 일부 lane만으로 협상된 것
-
-# 3. CXL DVSEC 발견 여부
-$ lspci -vvv -s 5e:00.0 | grep -A 2 "Designated Vendor-Specific"
-	Capabilities: [...] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=1 Len=56: CXL
-		PCIe DVSEC for CXL Devices
-		CXLCap:	Cache- IO+ Mem+ ...
-
-# 없으면 — CXL 호환 디바이스 아니거나 firmware 문제
-
-# 4. CXL 서브시스템 등록
-$ ls /sys/bus/cxl/devices/
-
-# 비어 있으면 — CEDT 누락 또는 cxl_acpi 미로딩
-$ dmesg | grep -i cxl
-$ lsmod | grep cxl
+qemu-system-aarch64 -M virt,gic-version=3,cxl=on -m 4g,maxmem=8g,slots=4 -cpu max ... \
+  -object memory-backend-ram,id=vmem0,share=on,size=256M \
+  -object memory-backend-file,id=cxl-lsa0,share=on,mem-path=lsa0.raw,size=256M \
+  -device pxb-cxl,bus_nr=12,bus=pcie.0,id=cxl.1 \
+  -device cxl-rp,port=0,bus=cxl.1,id=root_port13,chassis=0,slot=2 \
+  -device cxl-type3,bus=root_port13,volatile-memdev=vmem0,lsa=cxl-lsa0,id=cxl-vmem0,sn=0x5 \
+  -M cxl-fmw.0.targets.0=cxl.1,cxl-fmw.0.size=4G
 ```
+
+## LTSSM — 어디서 멈췄나
+
+LTSSM(Link Training and Status State Machine)은 PCIe 링크를 학습시키는 상태 머신입니다. 상태별 정의는 PCI-SIG의 PCIe Base Specification에 있지만, 이 글을 쓰며 그 문서를 열람하지 못해 상태별 동작 설명은 적지 않습니다.
+
+CXL이 끼어드는 지점은 CXL 3.1 명세가 직접 정합니다. 6.4.1.1 Hardware Autonomous Mode Negotiation은 Flex Bus 모드(CXL로 동작할지) 협상이 *링크 학습 중 LTSSM Configuration 상태에서, L0에 들어가기 전, Gen 1 속도로* 일어나며, PCIe Base Specification의 alternate protocol negotiation 방식대로 modified TS1/TS2 ordered set을 주고받는다고 적습니다. Downstream Port가 TS1으로 Flex Bus 능력을 알리고, Upstream Port가 제안하고, 호스트가 modified TS2로 최종 결정을 보냅니다. 같은 절은 retimer가 있으면 협상 전에 소프트웨어가 Flex Bus Port DVSEC에 그 존재를 써 둬야 한다고 요구합니다. 그래서 CXL 모드로 올라오지 않는 링크는 PCIe 링크 문제와 함께 이 협상 단계와 Flex Bus Port DVSEC 설정을 봐야 합니다.
+
+현재 상태는 *컨트롤러 레지스터*로만 볼 수 있고, 위치와 인코딩은 컨트롤러마다 다릅니다. 예를 들어 Linux의 Synopsys DesignWare PCIe 드라이버(`drivers/pci/controller/dwc/pcie-designware.h`)는 `PCIE_PORT_DEBUG0`(0x728)의 비트 [5:0]에서 LTSSM 상태를 읽고(`PORT_LOGIC_LTSSM_STATE_MASK 0x3f`), 그 값을 `DW_PCIE_LTSSM_DETECT_QUIET = 0x0`, `DW_PCIE_LTSSM_DETECT_ACT = 0x1`, `DW_PCIE_LTSSM_L0 = 0x11`, `DW_PCIE_LTSSM_L2_IDLE = 0x15`로 해석합니다. 다른 컨트롤러라면 그 SoC의 레퍼런스 매뉴얼과 해당 Linux 드라이버에서 같은 정보를 찾아야 합니다.
+
+## 물리 계층 캡처
+
+링크 학습 중의 ordered set이나 CXL 모드 협상을 직접 보려면 protocol analyzer 같은 물리 계층 캡처 장비가 필요합니다. 이 장에는 장비가 없고 QEMU는 물리 계층을 흉내 내지 않아 캡처를 하지 않았습니다. 특정 제품의 사양도 1차 자료로 확인하지 못해 적지 않습니다.
+
+## 호스트 측 진단
+
+### 1. PCIe로 보이는가
+
+```text
+$ lspci -nn
+00:00.0 Host bridge [0600]: Red Hat, Inc. QEMU PCIe Host bridge [1b36:0008]
+00:01.0 Ethernet controller [0200]: Red Hat, Inc. Virtio network device [1af4:1000]
+00:02.0 SCSI storage controller [0100]: Red Hat, Inc. Virtio block device [1af4:1001]
+00:03.0 Host bridge [0600]: Red Hat, Inc. QEMU PCIe Expander bridge [1b36:000b]
+0c:00.0 PCI bridge [0604]: Intel Corporation Device [8086:7075]
+0d:00.0 CXL [0502]: Intel Corporation Device [8086:0d93] (rev 01)
+```
+
+CXL 메모리 디바이스는 클래스 코드 0x0502로 보이고, `lspci -vvv`는 이를 `CXL Memory Device (CXL 2.x)`(prog-if 10)로 풀어 줍니다. 여기에 디바이스가 없다면 PCIe enumeration 전 단계(전원, 리셋, 링크)의 문제이고, 위의 LTSSM 레지스터를 봐야 합니다. 이 결과만으로 LTSSM이 어디서 멈췄는지는 알 수 없습니다.
+
+### 2. 링크 속도·폭
+
+디바이스와 루트 포트의 `LnkCap`/`LnkSta`입니다(사이의 `LnkCtl` 등은 `...`로 생략).
+
+```text
+0d:00.0 (type 3 device)
+		LnkCap:	Port #0, Speed 32GT/s, Width x16, ASPM L0s, Exit Latency L0s <64ns
+		...
+		LnkSta:	Speed 32GT/s, Width x16
+			TrErr- Train- SlotClk- DLActive- BWMgmt- ABWMgmt-
+0c:00.0 (cxl-rp root port)
+		LnkCap:	Port #0, Speed 64GT/s, Width x32, ASPM L0s, Exit Latency L0s <64ns
+		...
+		LnkSta:	Speed 32GT/s, Width x16
+```
+
+루트 포트는 64GT/s x32를 광고하지만 현재 링크는 32GT/s x16입니다. 디바이스의 능력이 32GT/s x16이니 둘 중 낮은 쪽으로 맞춰진 결과이고, 이 경우 LnkSta < LnkCap은 정상입니다. **양쪽 LnkCap 중 작은 값과 LnkSta를 비교해야** 일부 lane만 협상된 문제인지 판단할 수 있습니다. 이 값들은 QEMU가 보고하는 값이며 실제 물리 링크가 아닙니다.
+
+### 3. CXL DVSEC
+
+`0d:00.0`의 `lspci -vvv` 출력에서 DVSEC 부분만 골랐습니다(생략한 줄은 `...`).
+
+```text
+	Capabilities: [10c v1] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=3 Len=60: CXL
+		PCIe DVSEC for CXL Devices
+		CXLCap:	Cache- IO+ Mem+ MemHWInit+ HDMCount 1 Viral-
+		CXLCtl:	Cache- IO+ Mem+ CacheSFCov 0 CacheSFGran 0 CacheClean- Viral-
+		...
+	Capabilities: [148 v1] Designated Vendor-Specific: Vendor=1e98 ID=0008 Rev=0 Len=36: CXL
+		Register Locator DVSEC
+		...
+		Block2: BIR: bar2, ID: CXL device registers, offset: 0000000000000000
+	Capabilities: [16c v1] Designated Vendor-Specific: Vendor=1e98 ID=0005 Rev=0 Len=16: CXL
+		GPF DVSEC for CXL Devices
+		...
+	Kernel driver in use: cxl_pci
+```
+
+`Vendor=1e98`의 DVSEC들이 CXL 능력이고, ID 배정은 CXL 3.1 Table 8-2 CXL DVSEC ID Assignment에 있습니다. 0000h는 PCIe DVSEC for CXL Devices(`Mem+`가 CXL.mem 지원), 0005h는 GPF DVSEC for CXL Devices, 0008h는 Register Locator DVSEC입니다. 디바이스와 루트 포트 모두에 보인 0007h는 위에서 말한 PCIe DVSEC for Flex Bus Port이고, 루트 포트의 0003h는 CXL Extensions DVSEC for Ports입니다.
+
+Linux `cxl_pci`(`drivers/cxl/pci.c`)는 CXL 디바이스 DVSEC을 찾지 못하면 `Device DVSEC not present, skip CXL.mem init`을 남깁니다. 이 실험의 디바이스는 DVSEC이 있어 그 메시지는 나오지 않았습니다.
+
+### 4. CXL 서브시스템 등록
+
+```text
+$ ls /sys/bus/cxl/devices/
+decoder0.0  decoder1.0  decoder2.0  decoder2.1  decoder2.2  decoder2.3
+endpoint2  mem0  nvdimm-bridge0  port1  root0
+$ ls /sys/firmware/acpi/tables/
+APIC CEDT DBG2 DSDT FACP GTDT IORT MCFG PPTT SPCR SRAT data dynamic
+$ dmesg | grep -i cxl
+[    1.153009] acpi ACPI0016:00: _OSC: OS supports [CXL11PortRegAccess CXL20PortDevRegAccess CXLProtocolErrorReporting CXLNativeHot]
+[    1.161007] acpi ACPI0016:00: _OSC: OS now controls [CXLMemErrorReporting]
+[   56.571528]  pci0000:0c: host supports CXL
+[   58.035896] cxl_pci 0000:0d:00.0: enabling device (0000 -> 0002)
+```
+
+`root0`(ACPI CXL 루트), `port1`(host bridge), `endpoint2`, `mem0`, 디코더들이 모두 있고, ACPI 테이블에 CEDT가 있습니다. `_OSC`에서 OS가 `CXLMemErrorReporting` 제어권을 받았다는 줄은 9장의 이벤트 처리와 이어집니다.
+
+### 드라이버가 일부만 있으면
+
+"lspci에는 있는데 CXL 토폴로지가 비어 있다"는 상황을 모듈을 빼서 재현했습니다(`lsmod`·`sleep` 줄과 디렉터리 목록 일부는 생략).
+
+```text
++ modprobe -r cxl_pmem cxl_mem cxl_pci cxl_acpi
++ ls /sys/bus/cxl/devices/
++ modprobe cxl_pci
++ ls /sys/bus/cxl/devices/
+mem0
++ cxl list -M -u
++ modprobe cxl_acpi
++ modprobe cxl_mem
++ ls /sys/bus/cxl/devices/
+decoder0.0
+decoder1.0
+...
+root0
++ cxl list -M -u
+{
+  "memdev":"mem0",
+  "ram_size":"256.00 MiB (268.44 MB)",
+  "serial":"0x5",
+  "host":"0000:0d:00.0",
+  "firmware_version":"BWFW VERSION 00"
+}
+```
+
+`cxl_pci`만 올리면 `mem0`은 생기지만 `cxl list -M`은 아무것도 출력하지 않았습니다. `cxl_acpi`(CEDT로 루트와 host bridge를 만듦)와 `cxl_mem`(endpoint를 붙임)까지 올라와야 `root0`·`port1`·디코더와 함께 memdev가 목록에 나왔습니다. 그러니 `/sys/bus/cxl/devices/`가 비거나 일부만 있으면 `lsmod | grep cxl`부터 봅니다. 실험 환경에서는 `cxl_pmem`, `cxl_mem`, `cxl_pci`, `cxl_acpi`가 기본으로 올라와 있었습니다.
+
+### 5. 토폴로지
+
+```text
+$ cxl list -M -D -P -T -u
+    "ports":[
+      {
+        "port":"port1",
+        "host":"pci0000:0c",
+        "depth":1,
+        "decoders_committed":0,
+        "nr_dports":1,
+        "dports":[ { "dport":"0000:0c:00.0", "id":"0" } ],
+        "memdevs:port1":[
+          {
+            "memdev":"mem0",
+            "ram_size":"256.00 MiB (268.44 MB)",
+            "serial":"0x5",
+            "host":"0000:0d:00.0",
+            "firmware_version":"BWFW VERSION 00"
+          }
+        ]
+      }
+    ]
+  ...
+    "root decoders":[
+      {
+        "decoder":"decoder0.0",
+        "resource":"0x10000000000",
+        "size":"4.00 GiB (4.29 GB)",
+        "interleave_ways":1,
+        ...
+        "targets":[ { "target":"pci0000:0c", "alias":"ACPI0016:00", "position":0, "id":"0xc" } ]
+      }
+    ]
+```
+
+(출력은 공백을 줄이고 일부 키를 `...`로 생략했습니다.) 루트 디코더 `decoder0.0`의 4 GiB는 QEMU 명령줄의 `cxl-fmw.0.size=4G`(CFMWS)이고, 대상이 host bridge `pci0000:0c`입니다. `decoders_committed`가 0인 것은 아직 region을 만들지 않았기 때문입니다. 이 arm64 커널에서 region 생성을 시도하면 커밋 단계에서 실패하는 과정은 [Postmortem Debugging Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)가 다룹니다.
 
 ## 자주 만나는 함정
 
-| 증상 | 원인 |
-|------|------|
-| `lspci`에 안 보임 | PCIe enumeration 실패. 슬롯·전원·reset·firmware 설정을 확인하고 LTSSM은 컨트롤러 상태로 따로 판독 |
-| `lspci`엔 있는데 cxl 디렉터리 비어 있음 | CEDT 누락 또는 cxl_acpi 미로딩 |
-| LinkSta "Train+" 깜빡임 | Recovery 반복 — eye margin 부족·retimer 필요 |
-| `dmesg`에 "Device DVSEC not present, skip CXL.mem init" | `cxl_pci`가 CXL Device DVSEC을 찾지 못해 CXL.mem 초기화를 건너뜀 (`drivers/cxl/pci.c`) |
+| 증상 | 확인한 것 | 원인 |
+|------|------|------|
+| `lspci`에 안 보임 | — | PCIe enumeration 전 단계. 컨트롤러의 LTSSM 레지스터로 따로 판독 |
+| LnkSta가 루트 포트 LnkCap보다 좁음 | 이 실험의 0c:00.0 | 디바이스 능력이 더 낮으면 정상. 양쪽 LnkCap의 최솟값과 비교 |
+| `lspci`엔 있는데 CXL 토폴로지 없음 | 이 실험의 모듈 제거 | `cxl_acpi`·`cxl_mem` 미로딩, 또는 CEDT 없음 |
+| dmesg `Device DVSEC not present, skip CXL.mem init` | `drivers/cxl/pci.c` | `cxl_pci`가 CXL 디바이스 DVSEC을 못 찾음 |
 
 ## 디버깅 체크리스트
 
-1. `lspci -nn`에 디바이스 보이는가 → 없으면 PCIe enumeration 경로를 조사하고 LTSSM 상태는 별도 관측
-2. `lspci -vvv`의 LnkSta가 정상인가 → Recovery 반복이면 신호 문제
-3. DVSEC이 있는가 → 없으면 CXL 미지원 디바이스
-4. `/sys/bus/cxl/devices/`에 등록되었는가 → 비면 CEDT 또는 드라이버 문제
-5. `cxl list -RT`로 토폴로지 확인 → 누락 노드 있으면 enumeration 문제
-6. Protocol analyzer 캡처 (마지막 수단)
+1. `lspci -nn`에 클래스 0502 디바이스가 보이는가 → 없으면 LTSSM·전원·리셋
+2. `lspci -vvv`의 LnkSta를 양쪽 LnkCap의 최솟값과 비교했는가
+3. `Vendor=1e98` CXL DVSEC이 있는가
+4. `lsmod`에 `cxl_acpi`·`cxl_pci`·`cxl_mem`이 있고, `/sys/firmware/acpi/tables/CEDT`가 있는가
+5. `cxl list -M -D -P -T`에 root decoder·port·memdev가 다 나오는가
+6. 그래도 링크 쪽이 의심되면 물리 계층 캡처
 
 ## 정리
 
-- CXL 링크 디버깅은 *원인이 PHY·LTSSM·Flex Bus·DVSEC·CEDT·드라이버* 여러 층에 흩어집니다.
-- *LTSSM 상태*를 먼저 확인해 *어느 단계에서 멈췄는지* 파악합니다.
-- *lspci → cxl-cli → dmesg* 순으로 *호스트 측 진단*을 진행합니다.
-- 신호 무결성 의심이면 *protocol analyzer*가 *마지막 무기*입니다.
+- CXL 디바이스가 안 보이는 문제는 링크, PCIe enumeration, DVSEC, CEDT, 드라이버 층으로 나눠 봅니다.
+- LTSSM 상태는 컨트롤러 레지스터로만 보이며, 예로 DesignWare는 `PCIE_PORT_DEBUG0`[5:0]에서 L0 = 0x11입니다.
+- LnkSta가 한쪽 LnkCap보다 낮은 것은 정상일 수 있으니 양쪽 능력의 최솟값과 비교합니다.
+- `cxl_pci`만으로는 `mem0`이 생겨도 토폴로지는 비고, `cxl_acpi`·`cxl_mem`까지 있어야 합니다.
+- QEMU는 링크 학습을 흉내 내지 않으므로, 이 장의 링크 실패 진단은 실물 장비에서 보완해야 합니다.
 
 ## 다음 장 예고
 
-Ch 9 — CXL 디바이스 트러블슈팅. RAS 이벤트·poison list·media error를 추적하는 흐름.
+Ch 9 — CXL 디바이스 트러블슈팅. 이벤트 레코드·poison list를 QEMU에서 직접 주입하며 추적합니다.
 
 ## 관련 항목
 
-- [Ch 2: JTAG·SWD·CoreSight 분석](/blog/tools/debugging/embedded/chapter02-jtag-swd-coresight)
+- Compute Express Link Specification Revision 3.1, Version 1.0 (August 2023, publicly-available evaluation copy) — 6.4.1.1, Table 8-2. © 2019-2023 COMPUTE EXPRESS LINK CONSORTIUM, INC. ALL RIGHTS RESERVED.
+
+- [Ch 7: RTOS-aware 디버깅과 트러블슈팅](/blog/tools/debugging/embedded/chapter07-rtos-troubleshooting)
+- [Ch 9: CXL 디바이스 트러블슈팅](/blog/tools/debugging/embedded/chapter09-cxl-device-troubleshoot)
 - [Bootloader Internals Ch 34: U-Boot PCIe Enumeration](/blog/embedded/bootloader/chapter34-pcie-enumeration)
 - [HBM·GDDR 심화 Ch 9: CXL.mem 분석](/blog/embedded/hardware/hbm/chapter09-cxl-mem)
 - [Modern Embedded Recipes Ch 150: PCIe → CXL 진화](/blog/embedded/modern-recipes/part11-15-pcie-to-cxl)

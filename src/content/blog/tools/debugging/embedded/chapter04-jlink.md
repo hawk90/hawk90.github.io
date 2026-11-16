@@ -10,194 +10,189 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-J-Link는 SEGGER의 디버그 프로브와 소프트웨어 도구 체인입니다. 지원 칩·프로브 모델·firmware와 host 도구 조합을 확인해야 하며 신호 무결성·전원·reset 문제를 프로브 교체만으로 해결한다고 보장하지 않습니다.
+J-Link는 SEGGER의 디버그 프로브와 그 소프트웨어 도구 체인입니다. 3장의 OpenOCD가 *공개 소스의 Tcl 데몬*이라면, J-Link는 프로브·DLL·GDB Server·Commander·RTT 도구를 한 벤더가 함께 만든 묶음입니다.
 
-이 장은 Segger의 도구 체인 전체를 다룹니다. J-Link GDB Server, JLinkExe(commander), J-Run, J-Trace, Ozone GUI, Unlimited Flash Breakpoints, RTT가 그 대상입니다.
+이 장은 그 도구들을 용도별로 나눠 봅니다. J-Link GDB Server, J-Link Commander, J-Run, Unlimited Flash Breakpoints, RTT, Ozone이 대상입니다.
 
 :::tldr
-SEGGER의 프로브·서버·Commander·RTT·GUI 도구를 용도별로 구분합니다. EDU 제한과 기능별 라이선스는 해당 제품의 현재 조건을 확인합니다.
+GDB를 붙일 때는 J-Link GDB Server(기본 포트 2331), 스크립트로 굽고 확인할 때는 J-Link Commander, CI에서 실행 결과를 받을 때는 J-Run을 씁니다. 기능별 포함 조건은 프로브 모델마다 다릅니다.
 :::
+
+## 이 장의 근거와 한계
+
+J-Link 소프트웨어는 SEGGER의 사용 약관에 동의해야 내려받을 수 있고, 이 장을 쓴 환경에는 J-Link 프로브와 보드도 없습니다. 그래서 **이 장의 J-Link 명령은 하나도 실행하지 않았습니다.** 명령 이름·옵션·기본값은 모두 2026-11에 확인한 SEGGER 문서에서 가져왔고, 세션 출력은 SEGGER 문서에 실린 예를 출처와 함께 옮겼습니다.
+
+| 문서 | 다루는 것 |
+|------|-----------|
+| [J-Link GDB Server](https://kb.segger.com/J-Link_GDB_Server) | 명령줄 옵션, monitor 명령, 포트 |
+| [J-Link Commander](https://kb.segger.com/J-Link_Commander) | Commander 명령과 batch 옵션 |
+| [J-Run](https://kb.segger.com/J-Run) | 자동 테스트 실행 |
+| [RTT](https://kb.segger.com/RTT) | control block 검색, 버퍼 모드, Telnet 채널 |
+| [Unlimited Flash Breakpoints](https://www.segger.com/products/debug-probes/j-link/technology/flash-breakpoints/) | flash BP 동작과 라이선스 |
 
 ## 프로브와 기능 선택
 
-모델마다 지원 인터페이스·최대 속도·trace 캡처·Ethernet·포함 기능이 다릅니다. [J-Link 제품 목록](https://www.segger.com/products/debug-probes/j-link/)과 [EDU Mini 조건](https://www.segger.com/products/debug-probes/j-link/models/j-link-edu-mini/)에서 정확한 모델을 확인합니다. 이 글은 가격이나 모든 모델의 속도 순위를 측정·비교하지 않습니다.
+모델마다 지원 인터페이스·trace 캡처·Ethernet·포함 소프트웨어 라이선스가 다릅니다. [J-Link 제품 목록](https://www.segger.com/products/debug-probes/j-link/)에서 모델을 확인합니다. 이 글은 가격이나 모델 간 속도를 비교하지 않습니다.
 
 ## 설치
 
 ```bash
-# Linux
-$ wget https://www.segger.com/downloads/jlink/JLink_Linux_V794_x86_64.deb
-$ sudo dpkg -i JLink_Linux_V794_x86_64.deb
-
-# macOS
-$ brew install --cask segger-jlink
-
-# 검증
-$ JLinkExe -CommandFile <(echo exit)
-SEGGER J-Link Commander V7.94 (Compiled May 17 2024 15:53:46)
-DLL version V7.94, compiled May 17 2024 15:52:55
-
-Connecting to J-Link via USB...O.K.
-Firmware: J-Link EDU Mini V1 compiled Jul 26 2023 13:29:34
-Hardware version: V1.00
-S/N: 80...
+# macOS (Homebrew cask)
+brew install --cask segger-jlink
 ```
 
-`JLinkExe`가 *J-Link Commander* — TCL이 아닌 자체 셸. OpenOCD의 telnet 4444와 비슷한 역할.
+2026-11에 `brew info --cask segger-jlink`가 보여 준 cask는 `segger-jlink (Segger J-Link Command Line Tools): 9.94`였습니다. Linux는 SEGGER 다운로드 페이지에서 약관에 동의하고 패키지를 받습니다.
 
 ## J-Link Commander
 
-```text
-J-Link> ?           # 명령 도움말
-J-Link> device STM32F407VG
-J-Link> si SWD      # SWD 모드
-J-Link> speed 4000  # kHz
-J-Link> connect
-J-Link> r           # reset + halt
-J-Link> h           # halt
-J-Link> g           # go (resume)
-J-Link> mem32 0x20000000 16  # 32비트 워드16개
-J-Link> w4 0x20000100 0xdead # 4바이트 쓰기
-J-Link> regs        # 모든 레지스터
-J-Link> reg pc      # PC만
-J-Link> loadfile firmware.bin 0x08000000
-J-Link> verifybin firmware.bin 0x08000000
-J-Link> erase
-J-Link> savebin /tmp/dump.bin 0x08000000 0x1000
+J-Link Commander(Linux·macOS 실행 파일 `JLinkExe`)는 프로브를 직접 다루는 대화형 셸입니다. OpenOCD의 telnet 4444와 비슷한 자리지만 Tcl이 아니라 자체 명령 언어입니다. 문서의 명령 표에서 자주 쓰는 것을 골랐습니다(괄호는 문서에 나온 짧은 이름).
 
+| 명령 | 동작 |
+|------|------|
+| `Device <name>` | 연결할 장치 선택 |
+| `SelectInterface` (`SI`) | 인터페이스 선택 (SWD/JTAG) |
+| `Speed` | 인터페이스 속도 |
+| `Connect` (`Con`) | 타깃 연결 |
+| `Reset` (`R`) / `Halt` (`H`) / `Go` (`G`) | 리셋·정지·실행 |
+| `Regs` / `RReg` / `WReg` | 레지스터 전체 표시·읽기·쓰기 |
+| `Mem32` / `Write4` (`W4`) | 32비트 메모리 읽기·쓰기 |
+| `Erase` / `LoadFile` / `VerifyBin` / `SaveBin` | flash 지우기·쓰기·raw binary 비교·덤프 |
+| `ExitOnError` (`EoE`) / `Exit` | 오류 시 종료 / 종료 |
+
+batch 실행에는 명령줄 옵션을 씁니다. 문서에 있는 옵션은 `-AutoConnect <Value>`, `-CommandFile <path>`, `-ExitOnError <Value>`, `-NoGui <Value>`, `-Device`, `-If`, `-Speed`, 여러 프로브를 꽂았을 때 고르는 `-USB <SerialNo / Nickname>`(V7.92d부터) 등입니다. 문서의 예입니다.
+
+```text
+JLink.exe -device CC2538SF53 -if JTAG -speed 4000 -jtagconf -1,-1 -autoconnect 1 -CommandFile C:\Work\JLinkCommandFile.jlink
 ```
 
-`JLinkExe -device STM32F407VG -if SWD -speed 4000 -autoconnect 1 -CommandFile script.jlink`으로 배치.
+명령 파일은 위 명령을 한 줄씩 적은 텍스트입니다.
 
 ```text
-$ cat script.jlink
+ExitOnError 1
 r
+h
 loadfile firmware.bin 0x08000000
 verifybin firmware.bin 0x08000000
+r
 g
-qc          # quit + close
+exit
 ```
 
-CI 굽기 자동화의 한 줄.
+문서는 `loadfile`이 flash download를 실행하고 성공하면 시간 통계를 출력한다고 설명합니다.
 
 ## J-Link GDB Server
 
-GDB 연결용 데몬.
+GDB를 붙이는 데몬입니다. 문서가 정한 기본 포트는 세 개입니다.
 
-```bash
-$ JLinkGDBServer -device STM32F407VG -if SWD -speed 4000 -port 2331
-SEGGER J-Link GDB Server V7.94
-Listening on TCP/IP port 2331
-Connected to target
-Waiting for GDB connection...
-```
+| 옵션 | 기본값 | 용도 |
+|------|--------|------|
+| `-port` | 2331 | GDB RSP |
+| `-swoport` | 2332 | SWO raw 출력 |
+| `-telnetport` | 2333 | printf 출력(semihosting, 해석된 SWO) |
+| `-RTTTelnetPort` | 19021 | RTT Telnet 채널 |
 
-자주 쓰는 옵션.
+GDB Server를 여러 개 띄울 때는 이 포트를 모두 따로 지정해야 한다고 문서가 적고 있습니다.
 
-| 옵션 | 의미 |
+자주 쓰는 옵션을 문서 설명대로 정리했습니다.
+
+| 옵션 | 의미 (문서 기준) |
 |------|------|
-| `-device <name>` | 칩 종류 (Segger 데이터베이스의 정확한 이름) |
-| `-if SWD` 또는 `JTAG` | 인터페이스 |
-| `-speed <kHz>` | SWCLK 속도 |
-| `-port <n>` | GDB RSP 포트 (기본 2331) |
-| `-swoport <n>` | SWO trace 포트 (기본 2332) |
-| `-telnetport <n>` | telnet 포트 (기본 2333) |
-| `-rtos <plugin>` | RTOS-aware (예: `GDBServer/RTOSPlugin_FreeRTOS`) |
-| `-singlerun` | 한 세션만, GDB detach 시 종료 |
-| `-strict` | API 엄격 (CI에 유용) |
-| `-vd` | 메모리 변경 시 자동 verify |
-| `-noir` | terminal interaction 없음 (CI) |
-| `-localhostonly 1` | 보안 (외부 차단) |
-| `-jlinkscriptfile <f>` | JLinkScript로 reset/init 커스터마이즈 |
+| `-device <name>` | 타깃 장치 이름 |
+| `-if <Interface>` | 인터페이스. JTAG, SWD, FINE, 2-wire-JTAG-PIC32. **기본값은 JTAG** |
+| `-speed <kHz>` | 초기 속도. `adaptive`, `auto` 또는 kHz 정수. CL 버전에서는 사실상 필수 |
+| `-rtos <file>` | RTOS 플러그인. embOS와 FreeRTOS 플러그인이 `GDBServer` 디렉터리에 기본 포함 |
+| `-singlerun` / `-s` | 모든 클라이언트가 끊기면 종료, 타깃 연결 실패 시 즉시 종료 |
+| `-strict` | 설정 검사. 장치 이름이 없거나 모르는 이름이면 "Unspecified"로 넘어가지 않고 종료 |
+| `-vd` / `-novd` | 다운로드한 데이터 검증 켜기 / 끄기(기본) |
+| `-ir` / `-noir` | 시작 시 CPU 레지스터 초기화 / 하지 않음 |
+| `-LocalhostOnly <0/1>` | 1이면 localhost만 받음. **기본은 Windows 1, Linux/macOS 0** |
+| `-jlinkscriptfile <f>` | J-Link script 파일 |
+| `-timeout <ms>` | 타깃 연결 대기. GUI 5초, CL 0 |
+
+두 가지는 특히 주의할 만합니다. `-if`를 주지 않으면 JTAG로 붙으려 하므로, SWD 전용 보드라면 `-if SWD`를 꼭 줘야 합니다. 그리고 Linux와 macOS에서는 기본적으로 *모든 주소*에서 접속을 받습니다. 1장 보안 절에서 본 문제와 같으므로 공유 네트워크에서는 `-LocalhostOnly 1`을 줍니다.
 
 ### -device 이름
 
-Segger의 *Supported Device 데이터베이스*에 등록된 정확한 부품 번호. 잘못 적으면.
-
-- *connect는 됨* (DAP·CPU는 표준이라 자동 검출).
-- *load는 됨* (메모리 쓰기는 일반).
-- *flash는 안 됨* (칩별 알고리즘이 잘못된 것을 골라 erase가 실패하거나 잘못된 sector를 건드림).
-
-이 차이가 디버깅을 매우 어렵게 만듭니다 — connect만 보고 *맞다*고 착각.
-
-```bash
-# 데이터베이스 검색
-$ JLinkExe -CommandFile <(echo "ShowSupportedDevices STM32F4") | head -20
-
-# 일반적인 이름들
-STM32F407VG, STM32F407VE, STM32F407IG, ...
-```
-
-[Segger Supported Devices](https://www.segger.com/supported-devices/jlink/)에서 검색.
+`-device`에는 SEGGER [Supported Devices](https://www.segger.com/supported-devices/jlink/) 목록에 있는 이름을 씁니다. 이 이름이 flash 알고리즘과 RAM 영역을 정하며, RTT 문서는 control block 자동 검색에도 "정확한 장치 이름이 필요하고 코어 이름만으로는 부족하다"고 적습니다. CI에서는 `-strict`를 켜면 이름이 틀렸을 때 조용히 진행하지 않고 종료합니다.
 
 ## GDB 연결
 
-```bash
-$ arm-none-eabi-gdb firmware.elf
-(gdb) target remote :2331
-0x080001b8 in Reset_Handler () at startup_stm32f407xx.s:62
-(gdb) monitor reset halt
-(gdb) load
-Loading section .isr_vector, size 0x1c0 lma 0x8000000
-Loading section .text, size 0x9d20 lma 0x80001c0
-Loading section .rodata, size 0x4c0 lma 0x8009ee0
-Loading section .data, size 0x140 lma 0x800a3a0
-Start address 0x080001b8, load size 42208
-Transfer rate: ...   ← 설명용 출력; 이 환경의 실측값 아님
-(gdb) monitor reset halt
-(gdb) break main
-(gdb) continue
-```
-
-`monitor`로 J-Link 명령을 직접 보낼 수 있습니다.
+SEGGER 문서에 실린 GDB 세션 예입니다(이 장에서 실행한 것이 아닙니다).
 
 ```text
-(gdb) monitor reset       # 그냥 reset
+(gdb) file C:/temp/Blinky.elf
+Reading symbols from C:/temp/Blinky.elf...done.
+(gdb) target remote localhost:2331
+Remote debugging using localhost:2331
+0x00000000 in ?? ()
+(gdb) monitor reset
+Resetting target
+(gdb) load
+Loading section .isr_vector, size 0x188 lma 0x8000000
+Loading section .text, size 0x568 lma 0x8000188
+Loading section .init_array, size 0x8 lma 0x80006f0
+Loading section .fini_array, size 0x4 lma 0x80006f8
+Loading section .data, size 0x428 lma 0x80006fc
+Start address 0x8000485, load size 2852
+Transfer rate: 146 KB/sec, 570 bytes/write.
+(gdb) break main
+Breakpoint 1 at 0x800037a: file Src\main.c, line 38.
+```
+
+`.data`의 lma가 flash 주소(0x80006fc)인 점에 주목합니다. 5장에서 다루는 LMA/VMA 구분 때문입니다.
+
+`monitor`로 GDB Server 명령을 보냅니다. 문서의 monitor 명령 목록에는 `clrbp`, `cp15`, `Exec`, `flash breakpoints`, `flash erase`, `go`, `halt`, `jtagconf`, `memU8`/`memU16`/`memU32`, `reg`, `regs`, `reset`, `semihosting ...`, `setbp`, `sleep`, `step`, `SWO ...`, `waithalt`, `ReadAP`/`ReadDP`/`WriteAP`/`WriteDP` 등이 있습니다.
+
+```text
+(gdb) monitor reset
 (gdb) monitor halt
 (gdb) monitor go
 (gdb) monitor regs
-(gdb) monitor mem 0x20000000 64
-(gdb) monitor flash device = STM32F407VG
-(gdb) monitor SetMemAccessHWBP 0x20000000 0x1000
+(gdb) monitor memU32 0x20000000
 (gdb) monitor exec SetRTTAddr 0x20000000
 ```
 
-GDB Server의 monitor 명령과 Commander의 명령 집합은 같지 않습니다. `monitor exec`는 지원하는 J-Link command string을 전달하는 경로이며 Commander의 모든 명령을 그대로 실행하는 것으로 가정하지 않습니다. 설치한 GDB Server의 monitor 도움말을 기준으로 확인합니다.
+`monitor exec`는 J-Link *command string*을 넘기는 통로입니다. 위 `SetRTTAddr`는 RTT 문서에 나오는 command string입니다. Commander의 명령 집합과 GDB Server의 monitor 명령은 서로 다른 목록이므로, Commander 명령이 monitor에서 그대로 된다고 가정하지 않습니다.
 
 ## 속도 비교를 위한 조건
 
-프로브 간 속도를 비교하려면 동일한 타깃·전원·케이블·SWD/JTAG 속도·flash 영역·이미지·erase/verify 범위를 고정해야 합니다. USB 전송 묶음, target flash algorithm, work area, 실제 flash 대기 시간이 결과를 바꿉니다. 여기서는 재현할 측정 자료가 없어 초 단위 순위나 안정성 우열을 제시하지 않습니다.
+프로브 간 속도를 비교하려면 같은 타깃·전원·케이블·인터페이스 속도·flash 영역·이미지·erase/verify 범위를 고정해야 합니다. 위 SEGGER 예의 `Transfer rate: 146 KB/sec`도 그 문서의 환경에서 나온 한 번의 값입니다. 이 장에는 재현할 측정 자료가 없어 순위를 매기지 않습니다.
 
 ## Unlimited Flash Breakpoints
 
-Unlimited Flash Breakpoints는 SEGGER가 J-Link용으로 제공하는 유료 기능입니다. FPB의 hardware breakpoint 비교기 수는 core마다 정해져 있는데, 이 기능은 비교기를 모두 쓴 뒤에도 flash를 다시 프로그래밍하는 방식으로 breakpoint를 더 설정합니다.
+SEGGER 페이지는 이 기능이 없으면 BP 개수가 CPU 디버그 유닛의 하드웨어 BP 수로 제한된다고 설명합니다(같은 페이지가 예로 든 수는 "ARM7/9에서 2, Cortex-M에서 4~6"입니다). Cortex-M4라면 2장에서 본 FPB 구성(6개 또는 2개)이 그 한계입니다.
 
 ### 동작 원리
 
-SEGGER는 hardware breakpoint를 우선 사용하고 자원이 부족하면 지원하는 flash 영역에 software breakpoint를 적용한다고 설명합니다. 이를 FP_REMAP으로 flash page를 SRAM에 alias하는 방식이라고 일반화하지 않습니다. flash 패치와 복원은 flash 재프로그래밍을 포함할 수 있으며 지원 장치·영역과 라이선스를 확인합니다.
+SEGGER가 설명하는 동작은 다음과 같습니다.
+
+- J-Link는 하드웨어 BP를 먼저 쓰고, 다 쓰면 flash BP로 넘어갑니다.
+- flash BP를 걸거나 풀 때 J-Link 소프트웨어가 *flash sector를 다시 프로그래밍*합니다. 이 작업은 RAM에 올린 전용 코드 모듈이 합니다.
+- sector 프로그래밍은 필요할 때만, 대개 타깃 실행을 시작하는 시점에 몰아서 합니다. 같은 sector의 여러 BP는 한 번에 처리하고, 프로그램 메모리 내용은 캐시합니다.
+- source-level step 중에는 하드웨어 BP를 쓰고, 내장 명령어 시뮬레이터로 flash 작업 수를 더 줄입니다.
+- FPB가 닿지 않는 외부 메모리(memory-mapped QSPI 등)에도 BP를 걸 수 있습니다. 페이지는 대부분의 Cortex-M3/M4에서 외부 메모리에는 하드웨어 BP를 걸 수 없다고 적습니다.
 
 ![J-Link Unlimited Flash Breakpoints 판단 흐름 — hardware breakpoint가 남아 있으면 그것을 쓰고, 모두 사용 중이면 flash sector를 다시 프로그래밍하는 flash breakpoint로 넘어간다](/images/blog/tools/diagrams/jlink-unlimited-fbp.svg)
 
-그림은 SEGGER 설명에 나온 순서만 옮긴 것으로, flash 쓰기는 필요할 때만 일어나고 보통 프로그램 실행을 시작하는 시점에 몰립니다.
+그림은 SEGGER 설명에 나온 순서만 옮긴 것입니다.
 
-[Unlimited Flash Breakpoints 공식 문서](https://www.segger.com/products/debug-probes/j-link/technology/flash-breakpoints/)를 기준으로 했습니다. 실제 장치의 BP 전환·erase 횟수·성능은 이 환경에서 실행하지 않았습니다.
+GDB Server에서는 `monitor flash breakpoints = <value>`로 켜고 끕니다. 문서는 기본으로 켜져 있고 평가 용도로 쓸 수 있다고 적습니다.
 
-## RTT — Segger의 진짜 강점
+### 라이선스
 
-[Ch6 trace 장](/blog/tools/debugging/embedded/chapter06-trace)에서 채널·버퍼 모드·블로킹 조건을 구분합니다. throughput은 buffer·프로브·타깃 메모리·host polling 조건에 달립니다.
+SEGGER 페이지 기준으로 이 기능은 *J-Link 한 대마다* 라이선스가 붙고, J-Link BASE보다 상위의 J-Link·J-Trace 모델에는 포함돼 있습니다. J-Link EDU Mini 페이지는 Unlimited Flash Breakpoints를 포함한 J-Link 관련 소프트웨어 라이선스가 무료로 들어 있다고 적지만, EDU Mini 자체는 비영리 교육 목적으로만 쓸 수 있습니다. 실제 장치에서 BP 전환이나 erase 횟수는 이 장에서 실행하지 않았습니다.
 
-RTT Client는 RTT를 제공하는 J-Link 연결 프로세스가 실행 중이어야 합니다. Commander를 종료한 뒤 Client만 시작해 메모리 폴링이 계속된다고 가정하지 않습니다.
+## RTT — 프로브가 메모리를 읽는 로그 채널
 
+RTT의 채널과 버퍼 모드는 [6장](/blog/tools/debugging/embedded/chapter06-trace)에서 다룹니다. 여기서는 J-Link 쪽 동작만 봅니다.
 
+- **control block 찾기.** RTT 문서는 기본이 자동 검색이며, J-Link가 먼저 *벡터 테이블 오프셋 0x20*에서 control block 주소를 찾고, 없으면 J-Link 소프트웨어가 아는 타깃 RAM 영역을 검색한다고 설명합니다. 많은 장치에서 RAM의 일부만 등록돼 있어, control block이 그 밖에 있으면 `SetRTTAddr`나 `SetRTTSearchRanges`로 직접 지정해야 합니다. 문서는 큰 RAM에서는 검색에 30초 넘게 걸릴 수 있다고도 적습니다.
+- **Telnet 채널.** J-Link 연결이 살아 있는 동안 localhost:19021에 RTT Telnet 서버가 열립니다.
+- **RTT Client의 제약.** J-Link RTT Client는 스스로 디버그 연결을 열지 않습니다. 문서는 RTT가 동작하려면 활성 디버그 연결이 필요하므로 J-Link Commander나 GDB Server처럼 연결을 여는 도구와 함께 써야 한다고 적고, Client는 up/down 채널 0만 지원한다고 밝힙니다.
 
-별도 *RTT Viewer* GUI.
+호스트 쪽 도구는 GUI인 J-Link RTT Viewer와 명령줄의 J-Link RTT Client가 있고, 둘 다 위의 활성 연결이 필요합니다.
 
-```bash
-$ JLinkRTTViewer    # GUI
-$ JLinkRTTClient    # CLI
-```
-
-펌웨어 측은 `SEGGER_RTT.c`/`SEGGER_RTT.h`를 포함. 100 KB 미만.
+펌웨어 쪽은 `SEGGER_RTT.c`/`SEGGER_RTT.h`를 넣고 `SEGGER_RTT_printf()`나 `SEGGER_RTT_Write()`를 부릅니다.
 
 ```c
 #include "SEGGER_RTT.h"
@@ -205,88 +200,48 @@ SEGGER_RTT_printf(0, "tick=%u\n", HAL_GetTick());
 SEGGER_RTT_Write(1, sensor_data, 256);   // 채널 1에 raw 데이터
 ```
 
-채널 0를 텍스트, 1을 binary 센서 데이터로 분리하는 패턴이 일반적.
+### RTT와 UART printf
 
-### RTT vs 기존 printf
+RTT 문서는 `SEGGER_RTT_MODE_BLOCK_IF_FIFO_FULL`을 제외한 모든 모드에서, 타깃이 호스트가 가져가는 속도보다 빨리 쓰면 RTT 데이터가 사라질 수 있다고 경고합니다. 반대로 `BLOCK_IF_FIFO_FULL`이면 호스트가 읽지 않을 때 타깃이 기다립니다. ISR에서 쓸지는 이 모드 선택과 버퍼 잠금 구현을 같이 보고 정해야 합니다.
 
-UART도 queue·DMA 방식으로 비동기화할 수 있습니다. RTT는 NO_BLOCK_SKIP/TRIM이면 버퍼 부족 시 데이터를 버리거나 줄이고, BLOCK_IF_FIFO_FULL이면 호스트가 읽지 않을 때 대기할 수 있습니다. ISR 사용 여부는 buffer locking·중첩 interrupt·포트별 임계구역 구현까지 확인해야 합니다.
+## J-Run — 자동 테스트 실행
 
-ISR latency가 중요하면 로그를 줄이거나 버리는 정책과 임계구역 최대 시간을 먼저 확인합니다.
+J-Run(실행 파일 `JRun`)은 ELF를 타깃에 올려 실행하고 출력을 받아 오는 명령줄 도구입니다. 문서의 사용법은 `JRun [options] elf-file`입니다.
 
-## J-Run — 자동 펌웨어 실행
+| 옵션 | 기본값 | 의미 |
+|------|--------|------|
+| `--device <str>` | STM32F407IE | 장치 이름 |
+| `--if SWD/JTAG` | SWD | 인터페이스 |
+| `--speed <khz>` | 4000 | 속도 |
+| `--rtt` / `--nortt` | Auto | RTT 강제 켜기 / 끄기 |
+| `--semihost` / `--nosemihost` | Auto | semihosting 강제 켜기 / 끄기 |
 
-```bash
-$ JRunExe -device STM32F407VG -if SWD -rtt firmware.elf
-[Load + reset + run + RTT 자동 캡처]
-```
-
-펌웨어를 *한 줄로* 굽고 실행하면서 RTT를 캡처. CI에서 *부트 로그 검증*에 매우 유용.
-
-```bash
-$ JRunExe -device STM32F407VG -if SWD -rtt firmware.elf > /tmp/boot.log
-$ grep "BOOT OK" /tmp/boot.log && echo PASS || echo FAIL
-```
-
-## J-Trace — ETM 명령 trace
-
-J-Trace PRO는 ETM trace 핀을 받습니다. *CPU의 모든 명령 실행*을 기록.
-
-J-Trace의 실제 trace 설정은 대상 MCU의 trace port·프로브와 호환되는 Ozone/IDE 설정을 사용합니다. 확인하지 않은 `JTraceExe -tracesink SWO` 명령을 ETM 캡처 절차로 제시하지 않습니다. ITM/SWO와 ETM 병렬 trace를 구분합니다.
-
-
-
-쓰임:
-
-- 인터럽트 latency 측정 — 인터럽트 발생 시각과 ISR 첫 명령 사이의 정확한 시간.
-- Code coverage — 어떤 함수가 *실제로* 실행됐는지.
-- 비결정적 버그의 *완전 재구성*.
-
-큰 칩(Cortex-M7+ 옵션 ETM 탑재)이어야 하고 J-Trace 하드웨어 자체가 매우 비쌉니다.
-
-## Ozone — GUI
-
-Segger의 풀 GUI 디버거. VSCode + Cortex-Debug의 대안.
+문서는 테스트 앱이 *semihosting exit 호출*을 하거나 와일드카드 종료 문자열(기본 `*STOP*`)을 출력하면 J-Run 테스트가 끝난다고 설명합니다. 타깃 출력은 터미널로 나오므로 파일로 돌려 CI에서 검사할 수 있습니다.
 
 ```bash
-$ Ozone firmware.elf
+JRun --device STM32F407VG --if SWD firmware.elf > boot.log
+grep "BOOT OK" boot.log && echo PASS || echo FAIL
 ```
 
-특징:
+## J-Trace — 명령 trace
 
-- *Live Variable Watch* — CPU 정지 없이 백그라운드로 변수 갱신 (SWD 백그라운드 폴링).
-- 메모리 hex 뷰.
-- ETM trace 디스플레이.
-- *Code Profile* — ETM 기반 함수별 시간 분포.
+[J-Trace 제품 페이지](https://www.segger.com/products/debug-probes/j-trace/)는 J-Trace를 *streaming trace probe*로 소개하고, 지원 trace encoder로 Cortex-M·A·R ETM Trace를, 기능으로 live code coverage와 live code profiling을 듭니다. 이 장에서는 J-Trace를 다루지 않았고, ITM/SWO와 ETM의 차이는 2장과 6장에 정리했습니다.
 
-상용이지만 J-Link 사용자는 무료. 풀스택을 한 GUI에서 다루고 싶을 때.
+## Ozone — GUI 디버거
 
-## J-Link Configurator
-
-여러 J-Link 프로브를 한 PC에 꽂으면 *어느 게 어느 거*인지 헷갈립니다. 시리얼 번호로 구분.
-
-```bash
-$ JLinkExe -SelectEmuBySN 80123456
-```
-
-CI에서 *보드별로 다른 프로브*에 동시 접근할 때 필수.
+Ozone은 SEGGER의 GUI 디버거입니다. Ozone 페이지는 상업적 사용에 SEGGER Commercial-use License가 필요하고 라이선스는 영구라고 적습니다. 그리고 *J-Link PLUS, J-Link Ultra, J-Link Pro, J-Trace PRO*에는 Ozone 무료 라이선스가 포함되며, 다른 프로브로 상업적으로 쓰려면 따로 라이선스를 사야 한다고 설명합니다. 모든 J-Link 사용자에게 무료인 것은 아닙니다.
 
 ## Adaptive Clocking
 
-RTCK를 제공하는 JTAG 타깃에서는 반환 clock에 맞추는 adaptive clocking을 사용할 수 있습니다. 이것은 신호 잡음을 감지해 SWCLK를 자동으로 낮추는 SWD 기능이 아닙니다. [SEGGER UM08001](https://kb.segger.com/UM08001)의 JTAG/SWD speed 설명과 [OpenOCD FAQ](https://openocd.org/doc/html/FAQ.html)를 참고합니다. OpenOCD도 hardware 조합이 지원하면 RTCK 기반 adaptive JTAG clocking을 사용할 수 있습니다.
+RTCK를 제공하는 JTAG 타깃에서는 반환 클럭에 맞추는 adaptive clocking을 쓸 수 있습니다(OpenOCD 매뉴얼은 RTCK를 "adaptive clocking"이라고도 부른다고 적습니다). GDB Server의 `-speed`도 `adaptive` 값을 받습니다. 문서는 고정 속도나, 타깃이 지원하면 adaptive 속도를 쓰라고 권합니다. 이 기능은 SWD 신호 잡음을 감지해 속도를 낮추는 기능이 아닙니다. OpenOCD 매뉴얼도 시스템이 RTCK를 지원하는 경우의 adaptive clocking 설정을 따로 설명합니다.
 
-## 보안 — Lock 해제
+## 보안 — 잠긴 칩
 
-```text
-J-Link> unlock         # nRF52 등의 APPROTECT 해제
-J-Link> exec EnableEraseAllFlashBanks
-J-Link> erase
-```
-
-칩별로 명령이 다릅니다. STM32는 OpenOCD와 비슷한 방식 (`option_write`).
+칩의 읽기 보호를 푸는 방법은 칩마다 다릅니다. 3장에서 본 OpenOCD의 `nrf52_recover`는 nRF52의 CTRL-AP로 ERASEALL을 걸어 잠금을 풉니다. 이 장에서 확인한 SEGGER 문서에는 장치 공통의 unlock 명령이 없어 J-Link 쪽 명령은 적지 않았습니다.
 
 ## CI에서 BIN과 ELF 검증을 구분
 
-Commander의 verifybin은 raw binary 비교입니다. ELF 파일을 binary로 오해해 0x08000000의 flash 바이트와 비교하면 ELF header·주소 정보까지 비교하게 됩니다. 아래는 BIN 입력만 받는 오프라인 계획 생성기입니다. 실제 Commander 실행은 하지 않습니다.
+Commander의 `VerifyBin`은 *raw binary* 파일을 지정 주소의 타깃 메모리와 비교합니다(문서 설명: "Verfy if specified bin file is at the specified target memory location"(원문 철자 그대로)). ELF를 binary로 착각해 넘기면 ELF 헤더와 주소 정보까지 flash 바이트와 비교하게 됩니다. 아래는 BIN 입력만 받는 오프라인 계획 생성기입니다. 실제 Commander는 실행하지 않습니다.
 
 ```js title="jlink-plan-check.mjs"
 import assert from 'node:assert/strict';
@@ -306,26 +261,22 @@ assert.throws(()=>plan('firmware.bin',Buffer.alloc(0)));
 console.log(commands.join('\n'));
 ```
 
-Node24.21.0에서 정상BIN·ELF명·ELFmagic·빈입력을 확인했습니다. 이 검사만으로 BIN의 base주소·벡터·기기 적합성을 보증하지 않습니다. [Commander verifybin·ExitOnError](https://kb.segger.com/J-Link_Commander)를 기준으로 했으며 J-Link·프로브·보드가 없어 실제 erase/write/verify는 미검증입니다. RTT/UART 수집기는 reset/run 전에 준비하고 byte 검증 성공과 부트 테스트 성공을 별도 상태로 기록합니다.
-
-## License 모델
-
-EDU/EDU Mini는 벤더가 정한 교육·비상업 용도 제한을 확인해야 합니다. 상용 모델도 Ozone·Unlimited Flash Breakpoints 등 기능별 포함 조건이 다를 수 있습니다. 라이선스가 개발자1인 기준이라는 단정이나 프로브 serial number 때문에 바이너리 배포 속성이 자동으로 바뀐다는 설명 대신, 사용 제품의 라이선스 문서를 확인합니다.
+Node 24.21.0에서 실행하면 `ExitOnError 1`부터 `exit`까지 12줄의 명령 파일이 출력되고, ELF 이름·ELF magic·빈 입력은 모두 예외로 거부됩니다. 이 검사만으로 BIN의 base 주소·벡터·장치 적합성을 보증하지는 않습니다. RTT/UART 수집기는 reset/run 전에 준비하고, byte 검증 성공과 부트 테스트 성공은 별도 상태로 기록합니다.
 
 ## OpenOCD와 J-Link 선택
 
-OpenOCD는 공개된 driver·Tcl 설정을 추적할 수 있고 J-Link는 SEGGER의 도구·지원 device database를 사용합니다. 지원 기능·접근 방식·유지보수 요구를 기준으로 선택하고 속도·안정성은 동일 조건에서 직접 비교합니다. Live memory 접근이나 trace의 존재 여부를 제품군 전체에 대해 단정하지 않습니다.
+OpenOCD는 driver와 Tcl 설정을 소스로 추적할 수 있고, J-Link는 SEGGER의 장치 데이터베이스와 도구 묶음을 씁니다. 선택은 지원 장치, 필요한 기능(flash BP, trace, RTT), 라이선스 조건, 팀이 유지할 수 있는 설정 방식으로 합니다. 속도와 안정성은 같은 조건에서 직접 비교해야 하며, 이 장은 그 측정을 하지 않았습니다.
 
 ## 정리
 
-- J-Link = Segger의 상용 디버그 프로브 + 도구 일체.
-- J-Link Commander가 *직접 셸*, JLinkGDBServer가 *GDB 데몬*.
-- `-device` 이름이 정확해야 flash 굽기가 정상.
-- Unlimited Flash BP가 *flash patching*으로 BP 무한 흉내.
-- RTT는 buffer 모드와 수명·동시성 조건을 확인하는 메모리 trace 채널.
-- J-Run으로 한 줄 굽기 + 실행 + RTT 캡처.
-- Ozone은 GUI·변수 관찰·trace 분석 기능을 제공하며 해당 제품의 포함 조건을 확인합니다.
-- EDU / EDU Mini의 사용 제한과 상용 도구 기능별 라이선스는 구매 모델의 현재 약관으로 확인합니다.
+- J-Link GDB Server의 기본 포트는 GDB 2331, SWO 2332, Telnet 2333, RTT Telnet 19021입니다.
+- `-if`의 기본값은 JTAG이고, Linux/macOS의 기본은 모든 주소에서 접속을 받는 것입니다.
+- `-strict`는 장치 이름이 틀리면 종료하므로 CI에 맞습니다.
+- Commander는 `ExitOnError`, `LoadFile`, `VerifyBin`, `Exit`로 batch 굽기를 할 수 있고, `VerifyBin`은 raw binary 전용입니다.
+- Unlimited Flash Breakpoints는 하드웨어 BP를 먼저 쓰고, 모자라면 flash sector를 다시 써서 BP를 겁니다.
+- RTT Client는 스스로 연결하지 않으며, control block 자동 검색은 정확한 장치 이름에 의존합니다.
+- J-Run은 semihosting exit나 `*STOP*` 문자열로 테스트를 끝냅니다.
+- 상업용 Ozone 라이선스가 기본 포함된 모델은 PLUS·Ultra·Pro·J-Trace PRO입니다.
 
 ## 다음 장 예고
 
@@ -335,6 +286,6 @@ Ch 5 — 베어메탈 ELF / MAP. 굽는 단위인 ELF의 LMA/VMA, 링커 스크�
 
 - [Ch 3: OpenOCD 깊이](/blog/tools/debugging/embedded/chapter03-openocd)
 - [Ch 5: ELF / MAP — 베어메탈 메모리](/blog/tools/debugging/embedded/chapter05-elf-map)
-- [Segger J-Link Wiki](https://wiki.segger.com/Main_Page)
-- [Segger Supported Devices](https://www.segger.com/supported-devices/jlink/)
-- [Ozone 사용자 가이드](https://www.segger.com/products/development-tools/ozone-j-link-debugger/)
+- [SEGGER Knowledge Base](https://kb.segger.com/)
+- [SEGGER Supported Devices](https://www.segger.com/supported-devices/jlink/)
+- [Ozone](https://www.segger.com/products/development-tools/ozone-j-link-debugger/)
