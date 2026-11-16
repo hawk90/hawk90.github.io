@@ -180,7 +180,18 @@ merge 절차는 `package/pkg-kconfig.mk` 63~69행의 `kconfig-package-merge-conf
 
 ### fragment를 바꿨을 때 다시 빌드되는가
 
-Ch 8에서 쓴 squashfs fragment(`CONFIG_SQUASHFS=y`, `CONFIG_SQUASHFS_ZSTD=y`)로 직접 확인했습니다. 먼저 `BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES`를 *새로 지정*한 뒤 `make linux-rebuild`를 불렀습니다.
+Ch 8에서 쓴 squashfs fragment(`CONFIG_SQUASHFS=y`, `CONFIG_SQUASHFS_ZSTD=y`)로 직접 확인했습니다. fragment 파일은 첫 빌드 *전에* 만들어 둔 것이고, 첫 빌드가 끝난 뒤 `BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES`에 이 파일을 *새로 지정*하고 `make linux-rebuild`를 불렀습니다.
+
+```text
+>>> linux 6.18.7 Building
+>>> linux 6.18.7 Installing to target
+>>> linux 6.18.7 Installing to images directory
+WALL 9.94
+```
+
+config merge도 configure도 돌지 않았습니다. 이어진 `make`도 커널을 건드리지 않았고, 만들어진 `Image`는 fragment 없는 것과 같은 13,236,736바이트였습니다. 설정에 fragment를 추가했는데 커널에는 반영되지 않은 것입니다.
+
+다음으로 fragment 파일에 `CONFIG_SQUASHFS_XZ=y` 한 줄을 *추가*하고 타깃 없이 `make`만 돌렸습니다.
 
 ```text
 >>> linux 6.18.7 Updating kernel config with fixups
@@ -188,10 +199,10 @@ Ch 8에서 쓴 squashfs fragment(`CONFIG_SQUASHFS=y`, `CONFIG_SQUASHFS_ZSTD=y`)�
 >>> linux 6.18.7 Building
 >>> linux 6.18.7 Installing to target
 >>> linux 6.18.7 Installing to images directory
-WALL 39.35
+WALL 22.59
 ```
 
-`rebuild`인데도 config를 다시 merge하고 configure부터 돌았습니다. 이어서 fragment 파일에 `CONFIG_SQUASHFS_XZ=y` 한 줄을 *추가*하고 타깃 없이 `make`만 돌려도 같은 다섯 줄이 나왔고(28.16초), 결과 `.config`에는 세 줄이 모두 들어 있었습니다.
+이번에는 merge부터 다시 돌았고, 결과 `.config`에는 세 줄이 모두 들어 있었습니다(`CONFIG_SQUASHFS_ZLIB=y` 등 기본값이 따라 켜진 줄은 생략).
 
 ```text
 CONFIG_SQUASHFS=y
@@ -199,7 +210,20 @@ CONFIG_SQUASHFS_XZ=y
 CONFIG_SQUASHFS_ZSTD=y
 ```
 
-이유는 `pkg-kconfig.mk` 158행의 규칙입니다. `.stamp_dotconfig`가 `$(2)_KCONFIG_FILE`과 `$(2)_KCONFIG_FRAGMENT_FILES`에 *파일 의존성*을 걸고 있어서, fragment가 stamp보다 새로우면 make가 merge부터 다시 합니다. 그래서 fragment를 고쳤을 때 `linux-reconfigure`를 따로 외울 필요는 없습니다.
+두 결과를 가른 것은 `pkg-kconfig.mk` 158행의 규칙입니다. `.stamp_dotconfig`가 `$(2)_KCONFIG_FILE`과 `$(2)_KCONFIG_FRAGMENT_FILES`에 *파일 의존성*을 걸고 있어서, make는 파일의 수정 시각만 봅니다. 파일을 고치면 stamp보다 새로워져 merge가 다시 돌지만, *변수 값이 바뀐 것*은 보지 못합니다. 그래서 이미 있던 오래된 파일을 fragment로 새로 지정하면 아무 일도 일어나지 않습니다. `linux-rebuild`는 build와 install stamp만 지우므로 이 경우를 해결하지 못합니다.
+
+이때 쓰는 타깃이 `linux-reconfigure`입니다. 같은 파일 190~193행에서 `clean-for-reconfigure`가 `.stamp_dotconfig`를 지우도록 걸려 있습니다("Force olddefconfig again on -reconfigure"). 같은 상황을 다시 만들어 확인했습니다. 수정 시각을 빌드보다 과거(`touch -d 2026-11-01`)로 둔 fragment를 목록에 넣고 `linux-rebuild`를 부르면 앞의 결과처럼 merge 없이 끝났고(19.64초) `.config`에 `CONFIG_SQUASHFS=y`가 없었습니다. 이어서 `linux-reconfigure`를 부르자 merge부터 돌았습니다.
+
+```text
+>>> linux 6.18.7 Updating kernel config with fixups
+>>> linux 6.18.7 Configuring
+>>> linux 6.18.7 Building
+>>> linux 6.18.7 Installing to target
+>>> linux 6.18.7 Installing to images directory
+WALL 26.29
+```
+
+`.config`에 `CONFIG_SQUASHFS=y`, `CONFIG_SQUASHFS_ZSTD=y`가 들어갔고, `Image`는 13,236,736바이트에서 13,302,272바이트로 커졌습니다. 정리하면 fragment *내용*을 고쳤으면 `make`, fragment *목록*을 바꿨으면 `make linux-reconfigure`입니다.
 
 기능별 분리가 fragment의 장점입니다. RT를 안 쓰는 보드는 fragment 한 줄을 빼면 끝나고, base defconfig를 매번 복제해 유지하지 않아도 됩니다. 다만 fragment를 쓰는 동안에는 `linux-update-config`가 막힙니다.
 
@@ -339,7 +363,7 @@ Buildroot의 커널 빌드는 *step별*로 나뉘어 있어 개별 호출이 가
 | `linux-build` | `make Image dtbs modules` 수행 |
 | `linux-install` | `modules_install` + `output/images/` 복사 |
 | `linux-rebuild` | build와 install stamp를 지우고 다시 (`pkg-generic.mk` 1065~1068행) |
-| `linux-reconfigure` | configure stamp까지 지우고 다시 |
+| `linux-reconfigure` | configure stamp와 `.stamp_dotconfig`까지 지우고 config merge부터 다시 (`pkg-kconfig.mk` 190~193행) |
 | `linux-reinstall` | install stamp만 지우고 다시 |
 | `linux-menuconfig` | 현재 `.config`로 menuconfig |
 | `linux-savedefconfig` | `make savedefconfig` |
@@ -395,7 +419,7 @@ Ch 11에서 다룬 ABI 문제의 *커널 쪽* 사례입니다. userspace가 보�
 - defconfig는 in-tree 이름 / custom config 파일 / menuconfig 중 시작점을 고르고, 그 위에 *fragment*로 기능별 옵션을 점진 추가합니다.
 - DTS는 in-tree 이름으로 골라도 되고, out-of-tree `.dts`를 `CUSTOM_DTS_DIR`로 가져와도 됩니다. mainline DTS를 `#include`로 깔고 사내 변경분만 얹는 패턴이 안전합니다.
 - out-of-tree 모듈은 `kernel-module` 인프라로 감싸면 자동으로 `lib/modules/<ver>/`에 들어갑니다.
-- fragment나 config 파일을 고치면 `.stamp_dotconfig`의 파일 의존성 때문에 `make`만으로 merge·configure·build가 다시 돕니다(실측 28.16초). `linux-menuconfig`도 stamp를 지웁니다.
+- fragment나 config 파일을 고치면 `.stamp_dotconfig`의 파일 의존성 때문에 `make`만으로 merge·configure·build가 다시 돕니다(실측 22.59초). 반면 fragment *목록*에 기존 파일을 추가하면 감지되지 않아 `linux-reconfigure`가 필요합니다(`linux-rebuild`는 merge 없이 끝났고, `linux-reconfigure`는 merge부터 26.29초).
 - `linux-rebuild`는 빌드와 *설치*를 다시 하지만 rootfs 이미지는 만들지 않습니다. 마지막에 `make`를 칩니다.
 - `linux-update-config`는 fragment가 있으면 거부되고, `linux-update-defconfig`는 `CUSTOM_CONFIG_FILE`을 직접 덮어씁니다. 실행 뒤 `git diff`로 확인합니다.
 - 외부 모듈은 `kernel-module` + 다른 infra 하나로 감싸고, `depmod`는 target-finalize의 `LINUX_RUN_DEPMOD`가 한 번 돌립니다.
