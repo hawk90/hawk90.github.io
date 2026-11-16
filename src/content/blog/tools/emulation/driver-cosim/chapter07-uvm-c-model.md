@@ -10,13 +10,13 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-검증 팀과 driver 팀이 같은 알고리즘을 각각 다시 구현하면 동작 차이가 생길 수 있습니다. C reference를 공유하면 중복 구현을 줄일 수 있지만, 같은 결함을 양쪽에서 놓치는 위험은 독립 golden vector로 따로 점검해야 합니다. 이런 구조를 **UVM C reference model** 패턴으로 살펴봅니다.
+검증 팀과 driver 팀이 같은 알고리즘을 각각 다시 구현하면, 두 구현이 어긋났을 때 어느 쪽이 맞는지부터 따져야 합니다. C reference 하나를 공유하면 중복 구현이 사라집니다. 대신 같은 결함을 양쪽이 함께 놓치는 위험이 생기므로, 손으로 계산한 golden vector로 reference 자체를 따로 점검합니다. 이런 구조를 **UVM C reference model** 패턴으로 살펴봅니다.
 
-이 장은 UVM의 핵심 어휘를 짚고, reference model을 C로 두는 이유, driver와의 공유 패턴, 유지 관리 trade-off까지 다룹니다.
+이 장은 UVM의 핵심 어휘를 짚고, reference model을 C로 두는 이유, driver와의 공유 패턴, 유지 관리 trade-off까지 다룹니다. C reference와 DPI open-array adapter는 macOS 27.2.1(Apple M2 Pro)에서 Homebrew clang 23.1.5와 Verilator 5.054로 실행했습니다. UVM library 자체는 실행하지 않았습니다.
 
 ## UVM이란 무엇인가
 
-**UVM**(Universal Verification Methodology)은 SystemVerilog 기반의 *검증 프레임워크*입니다. Accellera 표준이며, Cadence/Synopsys/Mentor 모든 상용 simulator가 지원합니다. UVM testbench의 표준 구성:
+**UVM**(Universal Verification Methodology)은 SystemVerilog 기반의 *검증 프레임워크*입니다. Accellera가 reference implementation을 배포하고, 표준 번호는 IEEE 1800.2입니다. Accellera 다운로드 페이지의 현재 판은 "UVM v2020.3.2 Library Code for IEEE 1800.2"입니다. UVM testbench의 구성 요소는 다음과 같습니다.
 
 | 컴포넌트 | 역할 |
 |----------|------|
@@ -29,7 +29,7 @@ topics: ["tools", "tools/emulation"]
 | **Reference Model** | "기대값"을 계산하는 알고리즘 |
 | **Env** | 위 모두를 묶는 환경 |
 
-UVM은 *재사용 가능한 testbench 구조*에 표준을 부여합니다. 그런데 한 가지 성가신 문제가 있습니다 — *reference model*이 SV로 작성되면 *driver 팀이 못 씁니다*. driver는 C로 같은 알고리즘을 *다시* 짜야 합니다. 두 구현이 차이가 나면 어느 쪽이 진실인지 모호해집니다.
+UVM은 *재사용 가능한 testbench 구조*에 표준을 부여합니다. 그런데 *reference model*을 SV class로 쓰면 driver 팀이 그 코드를 쓸 수 없습니다. driver는 C로 같은 알고리즘을 *다시* 짜야 하고, 두 구현이 어긋나면 어느 쪽이 맞는지 모호해집니다. 비유하면 시험 출제자와 학원 강사가 모범 답안을 따로 쓰는 상황입니다.
 
 ## 어떤 문제를 푸는가
 
@@ -39,7 +39,7 @@ NPU 한 세대를 다시 가정합시다. matrix multiply unit이 들어 있고,
 2. **driver의 software fallback** — 하드웨어 실패 시 CPU로 동일 결과를.
 3. **컴파일러의 emit verifier** — 컴파일러가 생성한 명령 sequence가 동일 출력을 내는지 끝-끝 확인.
 
-세 곳이 각자 알고리즘을 *재구현*하면 *세 가지 진실*이 생깁니다. 어디서 어긋났는지 추적 비용이 폭증합니다. 답: **알고리즘을 C 한 곳에 두고 세 영역이 그것을 import**.
+세 곳이 각자 알고리즘을 *재구현*하면 *세 가지 진실*이 생기고, 불일치가 나올 때마다 세 구현을 모두 의심해야 합니다. 이 장의 답은 **알고리즘을 C 한 곳에 두고 세 영역이 그것을 link하는 것**입니다.
 
 ## 패턴 — C reference + DPI 노출 + driver 공유
 
@@ -79,33 +79,47 @@ int matmul_ref(const int16_t *A, const int16_t *B,
 }
 ```
 
-### DPI-C로 UVM에 노출
+### DPI-C로 scoreboard에 노출
+
+scoreboard 쪽에서는 open array로 C reference를 import합니다. 처음에는 기대값 배열을 `output int C[]`로 선언하고 dynamic array를 넘겼는데, Verilator 5.054가 거부했습니다.
+
+```text
+%Error: sb.sv:12:30: DPI output open array argument 'C' may not be passed a dynamic array or queue (IEEE 1800-2023 7.7)
+```
+
+그래서 `C`를 `inout`으로 바꿨습니다. 아래는 UVM class 없이 module 함수로 쓴 scoreboard 비교 로직입니다. UVM에서는 이 함수를 `uvm_scoreboard`의 메서드로 옮기고 `$display`를 `` `uvm_error ``로 바꿉니다(그 UVM 판은 실행하지 않았습니다).
 
 ```systemverilog
 import "DPI-C" function int matmul_ref_dpi(
     input  shortint A[],
     input  shortint B[],
-    output int      C[],
+    inout  int      C[],
     input  int      M, input int N, input int K
 );
-
-class matmul_scoreboard extends uvm_scoreboard;
-  function void compare_output(shortint A[], shortint B[], int actual_C[], int M, int N, int K);
-    int expected_C[];
-    expected_C = new[M*N];
-    if (matmul_ref_dpi(A, B, expected_C, M, N, K) != 0)
-      `uvm_fatal("MATMUL", "reference input invalid or result overflow")
-    foreach (actual_C[i]) begin
-      if (actual_C[i] !== expected_C[i]) begin
-        `uvm_error("MATMUL", $sformatf("mismatch at %0d: got %0d expected %0d",
-                                       i, actual_C[i], expected_C[i]));
-      end
+function automatic int compare_output(shortint A[], shortint B[], int actual_C[], int M, int N, int K);
+  int expected_C[];
+  int errors = 0;
+  expected_C = new[M*N];
+  if (matmul_ref_dpi(A, B, expected_C, M, N, K) != 0) begin
+    $display("MATMUL: reference input invalid or result overflow");
+    return -1;
+  end
+  foreach (actual_C[i])
+    if (actual_C[i] !== expected_C[i]) begin
+      $display("MATMUL mismatch at %0d: got %0d expected %0d", i, actual_C[i], expected_C[i]);
+      errors++;
     end
-  endfunction
-endclass
+  return errors;
+endfunction
 ```
 
-SV 선언의 open array는 C 쪽에서 raw pointer가 아니라 `svOpenArrayHandle`로 전달됩니다. 따라서 C core의 `const int16_t *` 인자와 바로 연결되지 않습니다. 다음 wrapper는 1D 배열 길이와 차원을 확인하고 simulator가 연속 storage를 제공하는 경우에만 core를 부르는 형태입니다. `svGetArrayPtr`가 NULL을 반환하는 layout을 지원하려면 element-wise copy 경로를 추가해야 합니다.
+SV 선언의 open array는 C 쪽에서 raw pointer가 아니라 `svOpenArrayHandle`로 전달됩니다. Verilator가 생성한 prototype도 그렇습니다.
+
+```c
+extern int matmul_ref_dpi(const svOpenArrayHandle A, const svOpenArrayHandle B, const svOpenArrayHandle C, int M, int N, int K);
+```
+
+따라서 C core의 `const int16_t *` 인자와 바로 연결되지 않습니다. 다음 wrapper는 1D 배열 길이와 차원을 확인하고 simulator가 연속 storage를 제공하는 경우에만 core를 부릅니다. `svGetArrayPtr`가 NULL을 반환하는 layout을 지원하려면 element-wise copy 경로를 추가해야 합니다.
 
 ```c title="matmul-dpi-adapter.c"
 #include "svdpi.h"
@@ -135,7 +149,23 @@ int matmul_ref_dpi(const svOpenArrayHandle A, const svOpenArrayHandle B,
 }
 ```
 
-실제 wrapper의 API 지원과 contiguous storage 조건은 사용한 simulator의 DPI 문서와 array fixture로 검증합니다.
+빌드에서도 한 번 막혔습니다. Verilator는 `--binary`에 넘긴 `.c` 파일을 C++ 컴파일러로 컴파일해서 `matmul_ref_dpi`가 C++ 이름으로 mangling됐고, link 단계가 `Undefined symbols ... "_matmul_ref_dpi"`로 실패했습니다. C 파일을 C 컴파일러로 따로 묶어 넘기면 해결됩니다.
+
+```text
+$ VLTSTD=/opt/homebrew/Cellar/verilator/5.054/share/verilator/include/vltstd
+$ cc -std=c11 -O2 -Wall -c -I$VLTSTD matmul-dpi-adapter.c matmul_ref.c checked-count.c && ar rcs libmatmul.a matmul-dpi-adapter.o matmul_ref.o checked-count.o
+$ verilator --binary -j 0 sb.sv libmatmul.a
+$ ./obj_dir/Vsb
+good DUT: errors=0
+MATMUL mismatch at 2: got 42 expected 43
+bad DUT:  errors=1
+MATMUL: reference input invalid or result overflow
+overflow: rc=-1
+MATMUL: reference input invalid or result overflow
+wrong size (M=3): rc=-1
+```
+
+정상 DUT 출력, index 2에 오류를 넣은 DUT 출력, int32 overflow가 나는 입력, 배열 크기와 맞지 않는 M=3을 차례로 넣었습니다. Verilator 5.054는 dynamic array에 대해 `svGetArrayPtr`가 연속 storage를 돌려줘서 core까지 도달했고, 크기가 틀린 호출은 adapter의 `svSize` 검사에서 거절됐습니다.
 
 `M*N`, `M*K`, `K*N` 계산과 accumulator 범위도 검사해야 합니다. 다음 helper는 dimension 곱을 `size_t` overflow 전에 확인합니다.
 
@@ -157,19 +187,24 @@ int checked_count(int m, int n, int k, size_t *a_count,
 }
 ```
 
-공유 C reference가 expected를 계산해 비교합니다. 다만 양쪽에서 같은 결함을 놓치지 않도록 고정 golden vector나 독립적인 작은 oracle도 둡니다.
+공유 C reference가 expected를 계산해 비교합니다. 다만 reference 자체의 결함은 이 비교로 드러나지 않으므로, 손으로 계산한 golden vector로 reference를 따로 검사합니다. `[1 2; 3 4] × [5 6; 7 8] = [19 22; 43 50]`, int16 최솟값끼리의 곱 두 개가 int32를 넘는 경우(-2 반환), 잘못된 차원(-1 반환)을 host에서 ASan/UBSan으로 돌렸습니다.
+
+```text
+$ clang -std=c11 -Wall -Wextra -g -fsanitize=address,undefined matmul_ref.c checked-count.c check.c -o check && ./check
+golden [19 22 43 50], overflow -> -2, 1x1x1 extreme = 1073741824, invalid -> -1: passed
+```
 
 ### driver의 software fallback
 
+driver의 fallback도 같은 함수를 부릅니다. 이전 판은 `matmul_ref`의 반환값을 버리고 항상 0을 돌려줬는데, 그러면 overflow(-2)나 잘못된 차원(-1)이 성공으로 보고됩니다. 반환값을 그대로 올려야 합니다.
+
 ```c
-// my_driver.c
-int my_driver_matmul(struct device *dev, ...) {
-    if (dev->state == DEVICE_HEALTHY) {
+// my_driver.c (스케치: struct device와 hw_matmul은 driver 쪽 정의)
+int my_driver_matmul(struct device *dev, const int16_t *A, const int16_t *B,
+                     int32_t *C, int M, int N, int K) {
+    if (dev->state == DEVICE_HEALTHY)
         return hw_matmul(dev, A, B, C, M, N, K);
-    } else {
-        matmul_ref(A, B, C, M, N, K);   // 동일 알고리즘
-        return 0;
-    }
+    return matmul_ref(A, B, C, M, N, K);   /* 동일 알고리즘, 오류 코드도 그대로 */
 }
 ```
 
@@ -193,12 +228,11 @@ int my_driver_matmul(struct device *dev, ...) {
 
 reference를 *SV class*로 둘 수도 있습니다. 왜 굳이 C인가?
 
-- **언어 친화도** — driver 팀은 C를 씁니다. SV를 강제하면 진입장벽이 생김.
-- **포팅성** — Python(`ctypes`)·Rust(`extern "C"`)·Go(`cgo`) 모든 곳에서 사용 가능. compiler verifier 등 다양한 도구에 재사용.
-- **성능** — large workload reference 실행이 SV simulator에서보다 빠름.
-- **명시적 ABI 경계** — DPI open array를 wrapper에서 검사하고 C core용 buffer로 변환.
+- **언어 친화도** — driver 팀은 C를 씁니다. reference를 SV class로 두면 driver 팀이 읽고 고치기 어렵습니다.
+- **포팅성** — C ABI는 Python(`ctypes`)·Rust(`extern "C"`)·Go(`cgo`)에서 부를 수 있습니다. 4장에서 ctypes로 C callback을 부른 것이 그 예입니다.
+- **명시적 ABI 경계** — DPI open array는 wrapper에서 검사하고 C core용 pointer로 바꿉니다. core는 svdpi.h를 몰라도 됩니다.
 
-C++을 쓰면 좋은 경우도 있지만, *공유 헤더*만 plain C로 두고 구현은 C++로 가는 hybrid도 일반적입니다.
+구현을 C++로 하더라도 공유 헤더는 `extern "C"`의 plain C로 둡니다. 위 빌드에서 본 것처럼 C 선언이 C++로 컴파일되면 symbol 이름이 바뀌어 link가 깨집니다.
 
 ## 알고리즘 reference의 도메인 예
 
@@ -212,34 +246,43 @@ C++을 쓰면 좋은 경우도 있지만, *공유 헤더*만 plain C로 두고 �
 | Video codec | DCT, motion estimate | playback driver · encoder TB |
 | Compression | LZ77, Huffman | filesystem driver · TB |
 
-위 모든 경우에서 reference C 한 벌이 *기능적 진실*입니다.
+위 모든 경우에서 reference C 한 벌이 *기능적 진실* 역할을 합니다. 이 장에서 실행한 것은 matmul뿐입니다.
 
 ## Coverage feedback — reference로 coverage 채우기
 
 reference model은 *output*만 만들 게 아닙니다. *path*를 기록해 coverage로 환산할 수 있습니다.
 
 ```c
-// reference 안에서 path 기록
-void matmul_ref_with_cov(const int16_t *A, const int16_t *B, int32_t *C,
-                         int M, int N, int K, struct cov *cov) {
-    if (M == 1) cov->vec_dot = 1;        // 1×K · K×N 케이스
-    if (K > 64) cov->large_inner = 1;    // 큰 inner dim
-    if (any_negative(A, M*K) || any_negative(B, K*N)) cov->signed_input = 1;
-    // ... 알고리즘
+struct cov { unsigned vec_dot, large_inner, signed_input; };
+static int any_negative(const int16_t *v, int n) { for (int i = 0; i < n; ++i) if (v[i] < 0) return 1; return 0; }
+int matmul_ref_with_cov(const int16_t *A, const int16_t *B, int32_t *C,
+                        int M, int N, int K, struct cov *cov) {
+    int rc = matmul_ref(A, B, C, M, N, K);
+    if (rc != 0) return rc;                 /* record coverage only for valid calls */
+    if (M == 1) cov->vec_dot++;             /* 1×K · K×N 케이스 */
+    if (K > 64) cov->large_inner++;         /* 큰 inner dim */
+    if (any_negative(A, M * K) || any_negative(B, K * N)) cov->signed_input++;
+    return 0;
 }
 ```
 
-testbench가 reference를 부르고 나서 `cov`를 UVM coverage로 환산하면, *algorithm-level functional coverage*가 자동으로 모입니다.
+음수가 섞인 2×2와 1×2 입력을 한 번씩 넣으면 hit 수가 다음과 같습니다. `K > 64`는 한 번도 안 맞았으니, 이 test set에는 큰 inner dimension이 빠져 있다는 것이 숫자로 드러납니다.
+
+```text
+vec_dot=1 large_inner=0 signed_input=2
+```
+
+testbench가 reference를 부르고 나서 `cov`를 UVM covergroup으로 옮기면 *algorithm-level functional coverage*가 됩니다. 그 UVM 연결은 이 장에서 실행하지 않았습니다.
 
 ## Maintenance trade-off
 
 이 패턴의 비용도 명확합니다.
 
-- **단일 진실의 책임** — bug 수정이 검증·driver·compiler 셋 모두에 즉시 반영. 좋아 보이지만, *어느 한 영역이 임시 우회를 못 함*. 검증을 통과시키려고 reference를 살짝 비틀면 driver의 동작도 같이 바뀝니다.
-- **C 인터페이스 동결** — 시그니처 변경은 큰 일. 데이터 buffer가 누구 소유인지·endian·alignment 명시해야.
-- **버전 관리** — RTL feature branch와 reference 분기 처리. *RTL이 새 instruction을 추가*할 때 reference도 같이 분기.
+- **단일 진실의 책임** — bug 수정이 검증·driver·compiler 셋 모두에 즉시 반영됩니다. 반대로 *어느 한 영역만 임시 우회할 수 없습니다*. 검증을 통과시키려고 reference를 살짝 비틀면 driver의 동작도 같이 바뀝니다.
+- **C 인터페이스 동결** — 시그니처를 바꾸면 세 영역과 DPI adapter를 함께 고쳐야 합니다. buffer 소유권·endian·alignment를 헤더에 적어 둡니다.
+- **버전 관리** — *RTL이 새 instruction을 추가*할 때 reference도 같은 branch에서 함께 바뀌어야 합니다.
 
-이 비용을 감수할 수 있는 것은 *치명적 일치를 보장해야 하는 알고리즘*뿐입니다. 모든 sub-block에 적용하면 오히려 비용이 큽니다. NPU 연산·FEC·crypto처럼 *알고리즘 자체가 product*인 곳에만 적용.
+그래서 이 시리즈는 이 패턴을 *출력이 bit 단위로 일치해야 하는 알고리즘*(NPU 연산·FEC·crypto)에만 쓰고, control register 같은 sub-block에는 쓰지 않습니다.
 
 ## 코드 조직 예
 
@@ -267,17 +310,17 @@ src/
 
 ## 흔한 함정
 
-- **endian 차이** — driver는 host CPU endian, RTL은 device endian. reference에서 byte swap 정책을 *문서로 못박아*야 함.
-- **floating-point determinism** — reference가 float을 쓰면 host CPU 따라 결과가 다를 수 있음. NPU에서는 보통 fixed-point 또는 bit-exact float subset 사용.
-- **side effect 금지** — reference는 *순수 함수* 권장. global state는 모든 호출 측에서 race 위험.
-- **버전 잠금** — RTL이 *새 feature*를 추가하는 시점에 reference의 호환 동작을 두지 않으면 testbench가 깨짐.
+- **endian 차이** — driver는 host CPU endian, RTL은 device endian입니다. reference에서 byte 순서 정책을 헤더에 적어 둡니다(2장의 `unpack_words`처럼 shift로 명시).
+- **floating-point 순서** — float 덧셈은 결합 법칙이 성립하지 않습니다. 같은 네 값 `{1e8, 1, -1e8, 1}`을 순서대로 더하면 1, 두 개씩 묶어 더하면 2가 나왔습니다(`sequential=1 pairwise=2`). RTL accumulator의 덧셈 순서와 reference의 순서가 다르면 bit 단위 비교는 실패합니다. 이 장의 matmul이 정수(int16 × int16 → int64 누적)인 이유입니다.
+- **side effect 금지** — reference는 인자만 읽고 쓰는 함수로 둡니다. global state가 있으면 여러 호출 측이 같은 상태를 공유합니다.
+- **버전 잠금** — RTL이 *새 feature*를 추가하는 시점에 reference의 호환 동작을 두지 않으면 testbench가 깨집니다.
 
 ## 정리
 
 - **UVM C reference model**은 검증·driver·compiler가 같은 알고리즘 구현을 공유해 중복을 줄이는 패턴.
 - DPI-C wrapper가 SV array와 C core 사이 ABI 경계를 처리합니다. 공유 reference는 independent golden check와 함께 씁니다.
 - Scoreboard와 reference는 다른 것: scoreboard는 *비교*, reference는 *기대값 계산*.
-- C로 두는 이유: 언어 친화·포팅성·성능. 배열·정수 범위·소유권은 각 ABI adapter에서 확인합니다.
+- C로 두는 이유: 언어 친화·포팅성·명시적 ABI 경계. Verilator에서는 output open array에 dynamic array를 넘길 수 없고, C 파일이 C++로 컴파일되면 link가 깨지는 것까지 실행으로 확인했습니다.
 - NPU 연산·FEC·crypto·video codec·압축처럼 *알고리즘 자체가 product*인 도메인에 효과적.
 - Coverage feedback에도 활용: reference 안에서 path 기록 → UVM coverage로.
 - 유지 비용: 단일 진실의 책임·인터페이스 동결·버전 분기. 모든 sub-block에 적용하지는 않음.
@@ -285,6 +328,13 @@ src/
 ## 다음 장 예고
 
 마지막 장에서는 지금까지 다룬 도구(Verilator·DPI-C·CocoTB·BFM·reference model)를 *하나로 묶는* end-to-end cosim 청사진을 봅니다. 실 NPU prototype을 가정한 통합 환경 설계와 CI 파이프라인까지.
+
+## 1차 자료와 실행 환경
+
+- [Accellera UVM 다운로드](https://www.accellera.org/downloads/standards/uvm) — IEEE 1800.2, UVM v2020.3.2
+- Verilator 5.054가 생성한 `Vsb__Dpi.h`와 오류 메시지(IEEE 1800-2023 7.7 인용)
+
+실행 환경은 macOS 27.2.1, Apple M2 Pro, Homebrew clang 23.1.5, Apple clang 21.0.0(`cc`), Verilator 5.054입니다(2026-11-16). UVM library, 상용 simulator, compiler verifier는 실행하지 않았습니다.
 
 ## 관련 항목
 
