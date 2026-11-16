@@ -2,7 +2,7 @@
 title: "MPMC Queue 구현 — Multi-producer Multi-consumer Lock-Free"
 slug: "embedded/modern-recipes/part9-10-mpmc-queue"
 date: 2026-04-18T09:09:00
-description: "MPMC와 SPSC 차이, Vyukov 큐, Disruptor의 ring과 sequence, bounded와 unbounded 비교를 실측과 함께 정리합니다."
+description: "MPMC와 SPSC 차이, Vyukov bounded 큐 구현과 exactly-once 검사, mutex·moodycamel과의 처리량 비교, bounded와 unbounded를 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 110
 tags: [recipes, concurrency, queue, mpmc]
@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 Worker pool, packet pipeline, 로그 수집처럼 여러 스레드가 넣고 여러 스레드가 꺼내는 곳입니다. 은행 번호표에 비유하면, 손님(생산자)과 창구(소비자)가 모두 여럿이라 번호표 기계 하나와 전광판 하나로는 모자라고, 창구마다 "몇 번 손님 차례인지"를 따로 표시해야 합니다. 그 표시가 slot의 sequence 번호입니다.
 
-흔히 "lock-free MPMC가 mutex 큐보다 몇 배 빠르다"고 하지만, 아래 측정에서 이 Mac의 4P/4C 조건으로는 `std::mutex` + `std::queue`가 두 lock-free 큐보다 빨랐습니다. Lock-free를 고르는 이유는 처리량보다 *lock을 쥔 스레드가 멈춰도 다른 스레드가 진행한다*는 성질에 있고, 처리량은 자기 조건에서 재 봐야 합니다.
+아래 측정에서 이 Mac의 4P/4C 조건으로는 `std::mutex` + `std::queue`가 Vyukov 큐와 moodycamel 큐보다 빨랐습니다. Lock-free를 고르는 이유는 처리량보다 *lock을 쥔 스레드가 멈춰도 다른 스레드가 진행한다*는 성질에 있고, 처리량은 자기 조건에서 재 봐야 합니다.
 
 ## 핵심 개념
 
@@ -233,20 +233,20 @@ vyukov       1P/1C    49.1 M items/s  all items once
 vyukov       4P/4C     6.5 M items/s  all items once
 moodycamel   4P/4C     5.6 M items/s  all items once
 mutex+queue  4P/4C    15.6 M items/s  all items once
-$ clang++ -std=c++17 -O1 -g -fsanitize=thread qbench.cpp -o qbench_tsan && ./qbench_tsan 20000
+$ clang++ -std=c++17 -O1 -g -fsanitize=thread qbench.cpp -o qbench_tsan && ./qbench_tsan 20000 2>&1 | grep -E '^(spsc|vyukov|moodycamel|mutex)|SUMMARY' | sort | uniq -c
    1 moodycamel   4P/4C     0.2 M items/s  all items once
    1 mutex+queue  4P/4C     0.3 M items/s  all items once
-   1 spsc         1P/1C     1.3 M items/s  all items once
+   1 spsc         1P/1C     1.8 M items/s  all items once
    3 SUMMARY: ThreadSanitizer: data race concurrentqueue.h:2544 in bool moodycamel::ConcurrentQueue<unsigned long, moodycamel::ConcurrentQueueDefaultTraits>::ImplicitProducer::enqueue<(moodycamel::ConcurrentQueue<unsigned long, moodycamel::ConcurrentQueueDefaultTraits>::AllocationMode)1, unsigned long const&>(unsigned long const&)
-   1 vyukov       1P/1C     2.0 M items/s  all items once
-   1 vyukov       4P/4C     1.7 M items/s  all items once
+   1 vyukov       1P/1C     3.2 M items/s  all items once
+   1 vyukov       4P/4C     2.0 M items/s  all items once
 ```
 
 모든 실행에서 값이 정확히 한 번씩 나왔습니다. TSan 판에서 Vyukov 큐와 SPSC, mutex 큐는 경고가 없었고, moodycamel은 `concurrentqueue.h` 2544행(slot에 원소를 placement-new하는 줄)에서 data race 경고가 세 번 나왔습니다. 그 경고가 실제 버그인지 TSan이 이 라이브러리의 동기화를 이해하지 못한 것인지는 이 글에서 분석하지 않았습니다.
 
 ### SPSC 비교
 
-위 `spsc.h`는 [9-01](/blog/embedded/modern-recipes/part9-01-lock-free-ring)의 ring과 같은 구조입니다. 생산자·소비자가 하나씩이면 CAS 없이 load/store만으로 됩니다. 다만 이 측정의 1P/1C에서는 SPSC(18.5~21.7 M items/s)가 Vyukov 큐(49.1~75.9)보다 느렸습니다. SPSC는 원소마다 상대의 index(공유 head/tail)를 읽어야 하지만, Vyukov 큐는 각자 slot의 sequence만 보고 공유 위치는 자기 쪽 것만 건드리므로 두 스레드가 같은 line을 덜 주고받는 것으로 보입니다. 이 설명은 측정에서 나온 추론이고 따로 확인하지 않았습니다. "SPSC가 항상 가장 빠르다"는 이 측정에서는 성립하지 않았습니다.
+위 `spsc.h`는 [9-01](/blog/embedded/modern-recipes/part9-01-lock-free-ring)의 ring과 같은 구조입니다. 생산자·소비자가 하나씩이면 CAS 없이 load/store만으로 됩니다. 다만 이 측정의 1P/1C에서는 SPSC(18.5~21.7 M items/s)가 Vyukov 큐(49.1~75.9)보다 느렸습니다. SPSC는 원소마다 상대의 index(공유 head/tail)를 읽어야 하지만, Vyukov 큐는 각자 slot의 sequence만 봅니다. Vyukov는 이 구조를 "Producers and consumers are separated from each other (as in the two-lock queue), i.e. do not touch the same data while queue is not empty"라고 설명합니다(위 1024cores 보관본). "SPSC가 항상 가장 빠르다"는 이 측정에서는 성립하지 않았습니다.
 
 ### moodycamel::ConcurrentQueue
 
@@ -262,7 +262,7 @@ int items[16];
 size_t n = q.try_dequeue_bulk(items, 16);   /* take up to 16 at once */
 ```
 
-v1.0.4 헤더에서 `enqueue`(995행), `try_dequeue`(1125행), `try_dequeue_bulk`(1231행)를 확인했습니다. Unbounded가 기본이라 생산자가 계속 빠르면 메모리를 계속 씁니다. 위 측정의 4P/4C에서 5.6~6.2 M items/s였습니다.
+v1.0.4 헤더에서 `enqueue`(995행), `try_dequeue`(1125행), `try_dequeue_bulk`(1231행)를 확인했습니다. Unbounded가 기본이라 생산자가 계속 빠르면 메모리를 계속 씁니다. 위 측정의 4P/4C에서 5.6~6.2 M items/s였습니다. `qbench`는 `enqueue`가 아니라 `try_enqueue`를 부르는데, README(277행)는 "`try_enqueue`, unlike just plain `enqueue`, will never allocate memory"라고 적습니다. 따라서 이 수치는 메모리를 새로 할당하지 않는 경로의 값입니다.
 
 ## 측정 / 성능 비교
 
@@ -275,7 +275,7 @@ v1.0.4 헤더에서 `enqueue`(995행), `try_dequeue`(1125행), `try_dequeue_bulk
 | moodycamel `ConcurrentQueue` | — | 5.6~6.2 |
 | `std::mutex` + `std::queue` | — | 13.9~15.6 |
 
-4P/4C에서는 mutex 큐가 두 lock-free 큐의 두 배 넘게 빨랐습니다. 원소가 작고 enqueue·dequeue 사이에 하는 일이 없어 경합이 가장 심한 조건이고, macOS의 `std::mutex`가 이 조건에서 잘 동작한 결과입니다. 원소를 처리하는 일이 긴 경우나 스레드 수가 코어 수보다 많아 lock을 쥔 스레드가 선점되는 경우는 이 글에서 재지 않았으므로, 그런 조건에서는 실제 작업을 넣고 다시 잽니다. "lock-free MPMC가 mutex보다 5~10배"라는 주장은 이 측정으로 뒷받침되지 않았습니다.
+4P/4C에서는 mutex 큐가 Vyukov 큐와 moodycamel 큐의 두 배 넘게 빨랐습니다. 원소가 작고 enqueue·dequeue 사이에 하는 일이 없어 경합이 가장 심한 조건입니다. 원소를 처리하는 일이 긴 경우나 스레드 수가 코어 수보다 많아 lock을 쥔 스레드가 선점되는 경우는 이 글에서 재지 않았으므로, 그런 조건에서는 실제 작업을 넣고 다시 잽니다.
 
 ## 자주 보는 함정
 
