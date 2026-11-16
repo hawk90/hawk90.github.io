@@ -10,160 +10,208 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-마지막 장입니다. 지금까지 다룬 Verilator·DPI-C·CocoTB·BFM·reference model을 *하나의 환경*으로 묶어 봅니다. 실제 NPU prototype을 검증한다고 가정한 통합 청사진과 CI 파이프라인까지 그립니다. 시리즈 8장의 어휘를 모두 한 번에 쓰는 셈입니다.
+마지막 장입니다. 지금까지 다룬 Verilator·DPI-C·CocoTB·BFM·reference model을 *하나의 환경*으로 묶어 봅니다. NPU prototype을 검증한다고 가정한 통합 청사진을 그린 뒤, 그 축소판을 실제로 빌드해 pytest로 돌립니다. 축소판은 macOS 27.2.1(Apple M2 Pro)에서 Verilator 5.054, Apple clang 21.0.0, Python 3.13 venv의 pytest 9.2.0으로 실행했습니다.
 
 ## 목표 시나리오
 
-가상의 NPU "Aristos-1"을 검증합니다. 다음 요건:
+가상의 NPU "Aristos-1"을 검증합니다. 설계 요구는 다음과 같습니다.
 
 - AXI4 인터페이스 1개(control 32-bit)·AXI4 인터페이스 1개(data 256-bit DMA)
 - IRQ line 4개(done·error·queue-empty·perf-counter overflow)
 - Linux driver는 *진짜 .ko로 빌드 가능한 코드*
-- pre-silicon에 다음을 모두 검증해야 함:
+- pre-silicon에 다음을 검증:
   - register read/write 인코딩
   - DMA descriptor ring 한 바퀴
   - IRQ delivery + ISR 분기
-  - matmul reference 일치 (UVM C reference)
-  - 30분 stress test
+  - matmul reference 일치 (7장의 C reference)
+  - 긴 stress test
   - GitHub Actions에서 매 push마다 smoke
 
-실행 시간 목표는 RTL·host·trace 조건을 고정해 측정한 뒤 smoke와 긴 regression으로 나눕니다. 아래 수치는 설계 요구의 예이며 여기서 측정한 결과가 아닙니다.
+이 장에서 실제로 만든 축소판은 이 중 **AXI4-Lite control 인터페이스, IRQ 4개, ID/scratch/IRQ register**까지입니다. 256-bit DMA, descriptor ring, matmul datapath는 RTL에 넣지 않았습니다.
+
+| 축소판 register | offset | 동작 |
+|------|------|------|
+| ID | 0x00 | 읽기 전용 `0xA1A1A101` |
+| SCRATCH | 0x04 | 읽기/쓰기 |
+| IRQ_RAISE | 0x08 | 쓴 bit의 IRQ line을 올림(test용) |
+| IRQ_STATUS | 0x0C | 읽으면 현재 IRQ, 쓰면 해당 bit clear(W1C) |
 
 ## 아키텍처 한 장
 
 ![Cosim Process — End-to-End](/images/blog/driver-cosim/diagrams/ch08-cosim-process.svg)
 
-요지: *하나의 프로세스 안*에 driver·RTL·BFM·reference가 모두 들어 있고, pytest가 시나리오를 흘립니다.
+요지는 *하나의 프로세스 안*에 driver·RTL·BFM이 모두 들어 있고, pytest가 시나리오를 흘린다는 것입니다. 2장과 6장에서 본 대로 Verilator 5.054는 시간 제어가 있는 DPI export task를 거부하므로, 이 축소판은 SV BFM 대신 **C++ BFM**을 씁니다. driver가 `readl`을 부르면 C++ BFM이 AXI-Lite 핀을 직접 구동하고 handshake가 끝날 때까지 model을 tick합니다. thread는 하나뿐입니다.
 
 ## Step 1 — RTL → Verilator
 
+RTL을 Verilated library로 빌드합니다. 뒤에서 Python이 `ctypes`로 열 shared library에 넣으려면 `-fPIC`가 필요하고, 5장에서 본 대로 Verilator 기본값 `-Os` 대신 `-O2`를 줍니다.
+
 ```bash
-verilator --cc --exe --trace-fst \
-    -I rtl \
-    rtl/aristos1.sv rtl/axi_master_bfm.sv rtl/axi_slave_bfm.sv \
-    sim/main.cpp sim/driver_harness.c \
-    src/driver/aristos1_driver.c src/algo/matmul_ref.c \
-    -CFLAGS "-O2 -Isrc -DCOSIM_BUILD" \
-    --top-module aristos1_tb
-make -j -C obj_dir -f Varistos1_tb.mk Varistos1_tb
+verilator --cc --build -j 0 -O3 -CFLAGS -fPIC \
+    -MAKEFLAGS "OPT_FAST=-O2 OPT_SLOW=-O2 OPT_GLOBAL=-O2" rtl/aristos1.sv
 ```
 
-핵심 옵션:
-- `--trace-fst`: 실패 시 dump 보존, CI artifact용
-- `-CFLAGS -DCOSIM_BUILD`: driver 코드 안에서 *kernel header가 아닌 cosim shim header*를 include하도록 분기
-- `--top-module aristos1_tb`: testbench wrapper(BFM 묶음)
+`obj_dir/`에 `Varistos1__ALL.a`(설계)와 `libverilated.a`(runtime)가 생깁니다.
 
 ## Step 2 — Driver를 cosim-buildable로
 
-Linux driver를 *그대로* 가져와 cosim에서 컴파일하려면 *Linux kernel API의 일부를 shim*해 줘야 합니다.
+Linux driver를 *그대로* 가져와 cosim에서 컴파일하려면 Linux kernel API의 일부를 shim해야 합니다. 축소판에서 실제로 쓴 shim입니다.
 
-```c
-// cosim_shim.h — kernel header 대신
+```c title="cosim_shim.h"
+#ifndef COSIM_SHIM_H
+#define COSIM_SHIM_H
 #ifdef COSIM_BUILD
   #include <stdint.h>
   #include <stdio.h>
   #include <stdlib.h>
-  #include <string.h>
-
+  int bfm_read(uintptr_t addr, uint32_t *data);
+  int bfm_write(uintptr_t addr, uint32_t data);
   static inline uint32_t readl(volatile void *addr) {
-    extern int bfm_read(uintptr_t addr, uint32_t *data);
     uint32_t v = 0;
     if (bfm_read((uintptr_t)addr, &v) != 0) abort();
-    return (uint32_t)v;
+    return v;
   }
   static inline void writel(uint32_t val, volatile void *addr) {
-    extern int bfm_write(uintptr_t addr, uint32_t data);
     if (bfm_write((uintptr_t)addr, val) != 0) abort();
   }
-
   #define dev_info(d, fmt, ...)  printf("[driver] " fmt, ##__VA_ARGS__)
   #define dev_err(d, fmt, ...)   fprintf(stderr, "[driver] " fmt, ##__VA_ARGS__)
-  // dma_map_single, kmalloc, ... 등도 shim
 #else
   #include <linux/io.h>
   #include <linux/device.h>
 #endif
+#endif
 ```
 
-이 shim은 주소 폭과 오류 전달을 보여 주는 host 예시입니다. 실제 Linux `readl`은 kernel address-space와 ordering 계약을 가지므로, 이를 그대로 대체해 kernel module과 동등하다고 볼 수 없습니다. 재사용할 driver logic과 OS 종속부를 분리하고 각각 다른 검증으로 다룹니다.
+driver의 probe는 ID register를 읽어 맞지 않으면 `-19`(`-ENODEV`)를 돌려주고, ISR은 자기 line을 IRQ_STATUS에 써서 ack합니다.
 
-## Step 3 — IRQ injection
+```c
+int aristos1_probe(void) {
+    uint32_t id = readl(g_dev.regs + REG_ID);
+    if (id != ARISTOS1_ID) { dev_err(0, "bad id 0x%08x\n", id); return -19; /* -ENODEV */ }
+    dev_info(0, "probe ok, id=0x%08x\n", id);
+    return 0;
+}
+void aristos1_isr(unsigned vector) {
+    g_dev.irq_count[vector]++;
+    writel(1u << vector, g_dev.regs + REG_IRQ_STAT);
+}
+```
 
-RTL의 `irq` pin을 driver의 ISR에 *직접* 연결하는 thread.
+이 shim은 주소 폭과 오류 전달을 보여 주는 host용입니다. 실제 Linux `readl`은 kernel address-space와 ordering 계약을 가지므로, 이 shim으로 빌드한 코드가 kernel module과 동등하다고 볼 수 없습니다. 이 장에서 같은 소스를 `.ko`로 빌드하지는 않았습니다.
+
+## Step 3 — IRQ sampling과 재진입
+
+RTL의 `irq` 4 bit는 C++ harness의 `tick()`이 매 cycle 읽습니다. 이전 cycle 대비 새로 올라온 bit만 pending에 모읍니다.
 
 ```cpp
-// sim/main.cpp — IRQ sampling은 DUT를 소유한 simulator thread에서 수행
-#include "Varistos1_tb.h"
-extern "C" void aristos1_isr(unsigned vector);
 static uint8_t newly_pending(uint8_t current, uint8_t previous) {
   return current & (uint8_t)~previous;
 }
+static void tick() {
+  dut->clk = 0; ctx->timeInc(5); dut->eval();
+  dut->clk = 1; ctx->timeInc(5); dut->eval();
+  ++cycles;
+  const uint8_t cur = dut->irq;
+  pending |= newly_pending(cur, prev_irq);
+  prev_irq = cur;
+}
+```
 
-int main(int argc, char **argv) {
-  Verilated::commandArgs(argc, argv);
-  Varistos1_tb dut;
-  uint8_t prev = 0;
-  while (!Verilated::gotFinish()) {
-    eval_one_cycle(dut);
-    const uint8_t cur = dut.irq;
-    const uint8_t pending = newly_pending(cur, prev);
+여기서 바로 ISR을 부르고 싶어지지만, 그러면 안 됩니다. `tick()`은 BFM이 bus access 도중에 부르는 함수이고, ISR은 ack를 위해 다시 `writel`을 부릅니다. bus access 안에서 또 다른 bus access가 시작되는 것입니다. 실제로 `tick()` 안에서 ISR을 부르는 판(`-DNAIVE_ISR`)을 만들어 같은 test를 돌리면, 앞의 두 test는 통과하고 IRQ test에서 Python 프로세스가 통째로 죽습니다.
+
+```text
+$ pytest -q test_naive.py -m "not slow"   # ISR called from inside tick()
+..Fatal Python error: Aborted
+rc=134
+```
+
+같은 호출을 C main에서 lldb로 돌린 backtrace가 원인을 보여 줍니다. IRQ_RAISE에 쓰는 `bfm_write(addr=8, data=5)`가 아직 끝나지 않은 상태에서 `tick()`이 ISR을 불렀고, ISR 안의 `writel`이 실패해 shim의 `abort()`가 호출됐습니다.
+
+```text
+frame #2: libsystem_c.dylib`abort + 148
+frame #3: naive_main`aristos1_isr + 68
+frame #4: naive_main`tick() at harness_naive.cpp:33:68
+frame #5: naive_main`bfm_write(addr=8, data=5) at harness_naive.cpp:58:42
+frame #6: naive_main`aristos1_raise + 28
+frame #7: naive_main`cosim_irq(bits=5) at harness_naive.cpp:88:3
+```
+
+그래서 ISR dispatch는 bus access 바깥에서, 재진입 guard를 두고 합니다.
+
+```cpp
+static void dispatch_irqs() {        // never re-entered from inside a bus access
+  if (in_isr) return;
+  in_isr = true;
+  while (pending) {
     for (unsigned bit = 0; bit < 4; ++bit)
-      if (pending & (1u << bit)) aristos1_isr(bit);
-    prev = cur;
+      if (pending & (1u << bit)) { pending &= (uint8_t)~(1u << bit); aristos1_isr(bit); }
   }
+  in_isr = false;
 }
 ```
 
-```cpp title="irq-mask.cpp"
-#include <cstdint>
-uint8_t newly_pending(uint8_t current, uint8_t previous) {
-  return current & static_cast<uint8_t>(~previous);
-}
-```
-
-bit mask는 IRQ 0이 이미 high일 때 IRQ 1이 새로 올라오는 경우도 보존합니다. 이 sketch의 callback은 simulator 소유 thread에서만 호출합니다. Linux interrupt controller·ISR context·동시성·ack/clear 동작을 재현하는 것은 아니며, 실제 모델에서는 pending/level/edge 정책과 재진입을 따로 정의합니다.
+bit mask는 IRQ 0이 이미 high일 때 IRQ 1이 새로 올라오는 경우도 보존합니다. 이 harness는 Linux interrupt controller·ISR context·level/edge 정책을 재현하지 않습니다. 실제 모델에서는 그 정책을 따로 정의합니다.
 
 ## Step 4 — Pytest 시나리오
 
+Python은 `ctypes`로 `libcosim.so`를 엽니다. 이 library에는 harness가 export하는 C ABI(`cosim_probe`, `cosim_read_id`, `cosim_irq` 등)가 들어 있습니다. 실행 파일은 `ctypes.CDLL`로 열 수 없으므로 처음부터 shared library로 빌드했습니다.
+
+```bash
+cc -std=c11 -O2 -fPIC -DCOSIM_BUILD -Isrc/driver -c src/driver/aristos1_driver.c -o obj_dir/aristos1_driver.o
+c++ -std=c++17 -O2 -fPIC -shared -Iobj_dir -I$VL -I$VL/vltstd sim/harness.cpp obj_dir/aristos1_driver.o \
+    obj_dir/Varistos1__ALL.a obj_dir/libverilated.a \
+    -Wl,-U,__Z15vl_time_stamp64v,-U,__Z13sc_time_stampv,-U,_vlog_startup_routines -o libcosim.so
+```
+
+마지막 줄의 `-Wl,-U,...`가 없으면 macOS linker가 `Undefined symbols ... "sc_time_stamp()"`로 실패합니다. `libverilated.a`가 SystemC나 VPI와 함께 쓸 때 채워지는 symbol을 참조하기 때문이고, Verilator가 `--exe` 빌드에서 쓰는 link 줄에도 같은 옵션이 들어 있습니다.
+
 ```python
 # test_aristos1.py
-import pytest
-import ctypes
-
-driver = ctypes.CDLL("./libcosim.so")  # C ABI wrapper를 shared library로 빌드한 경우
-driver.cosim_probe.restype = ctypes.c_int
-
 @pytest.fixture(scope="module")
 def dut():
-    rc = driver.cosim_probe()
-    assert rc == 0
+    assert driver.cosim_probe() == 0
     yield
     driver.cosim_remove()
 
 class TestSmoke:
     def test_register_id(self, dut):
-        val = driver.cosim_read_id()
-        assert val == 0xA1A1A101
+        assert driver.cosim_read_id() == 0xA1A1A101
 
-    def test_simple_matmul(self, dut):
-        rc = driver.cosim_run_matmul_2x2()
-        assert rc == 0
+    def test_scratch_high_bit(self, dut):
+        assert driver.cosim_scratch(0x80000001) == 0
+
+    def test_irq_while_other_pending(self, dut):
+        # raise 0 and 2 together, then 1: every ISR must run once and ack
+        assert driver.cosim_irq(0b0101) == 0
+        assert driver.cosim_irq(0b0010) == 0
+        assert [driver.cosim_irq_count(i) for i in range(4)] == [1, 1, 1, 0]
 
 class TestStress:
     @pytest.mark.slow
-    def test_dma_throughput_30min(self, dut):
-        rc = driver.cosim_dma_loop(1800)
-        assert rc == 0
+    def test_scratch_loop(self, dut):
+        rate = driver.cosim_scratch_loop(200000)
+        print(f"\nscratch loop: {driver.cosim_cycles()} cycles total, {rate/1e6:.2f} Mcycle/s")
+        assert rate > 0
 ```
 
-```bash
-pytest -v test_aristos1.py -m "not slow"        # smoke
-pytest -v test_aristos1.py -m slow              # nightly
+```text
+$ pytest -v test_aristos1.py -m "not slow"
+test_aristos1.py::TestSmoke::test_register_id PASSED                     [ 33%]
+test_aristos1.py::TestSmoke::test_scratch_high_bit PASSED                [ 66%]
+test_aristos1.py::TestSmoke::test_irq_while_other_pending PASSED         [100%]
+======================= 3 passed, 1 deselected in 0.28s ========================
+[driver] probe ok, id=0xa1a1a101
+$ pytest -v -s test_aristos1.py -m slow
+scratch loop: 1000004 cycles total, 3.62 Mcycle/s
+======================= 1 passed, 3 deselected in 0.35s ========================
 ```
 
-`ctypes.CDLL`은 실행 파일을 임의로 shared library처럼 불러오지 않습니다. `libcosim.so`에는 위 Python이 호출하는 `cosim_probe`, `cosim_remove`, `cosim_read_id`, `cosim_run_matmul_2x2`, `cosim_dma_loop`의 C ABI export와 DUT 생성·평가·종료 경계가 구현되어 있어야 합니다. 실행 파일을 유지하려면 별도 IPC client/server를 두거나 cocotb runner에서 시나리오를 실행합니다. 이 다이어그램은 아직 그 wrapper를 제공하지 않습니다.
+`-m slow`는 `pytest.ini`에 `slow` marker를 등록해 두고 씁니다. 이 축소판의 "slow" test는 scratch write/read 20만 쌍(100만 cycle)이라 1초도 걸리지 않았습니다. 30분짜리 stress는 실행하지 않았습니다.
 
 ## Step 5 — CI 파이프라인
+
+아래 workflow는 위 축소판을 GitHub Actions에 올리는 형태입니다. 이 workflow는 실행하지 않았습니다.
 
 ```yaml
 # .github/workflows/cosim.yml
@@ -183,63 +231,52 @@ jobs:
       - name: Install
         run: sudo apt-get update && sudo apt-get install -y verilator python3-pip
       - name: pip
-        run: pip install cocotb cocotbext-axi pytest
+        run: pip install pytest
       - name: Build
         run: ./scripts/build_cosim.sh
       - name: Smoke
         run: pytest -v test_aristos1.py -m "not slow"
-      - name: Upload waves on failure
-        if: failure()
-        uses: actions/upload-artifact@v4
-        with:
-          name: waves
-          path: '*.fst'
 
   nightly:
     if: github.event_name == 'schedule'
-    runs-on: ubuntu-latest-4-cores   # 더 큰 runner
+    runs-on: cosim-large        # 조직에서 만든 larger runner 이름
     timeout-minutes: 120
     steps:
       - uses: actions/checkout@v4
-      - name: Install ...
-      - name: Build ...
+      - name: Build
+        run: ./scripts/build_cosim.sh
       - name: Nightly
         run: pytest -v test_aristos1.py -m slow
-      - name: Coverage report
-        run: ./scripts/cov_report.sh
-      - name: Upload coverage
-        uses: actions/upload-artifact@v4
-        with: { name: coverage, path: coverage.xml }
 ```
 
-이로써 PR마다 smoke가, 매일 밤 stress가 자동으로 돕니다. 실패하면 waveform이 artifact로 남아 *그 다음 날 아침* 분석 가능.
+cron은 UTC 기준이라 `0 18 * * *`이 한국 시간 03:00입니다. larger runner는 이름이 정해져 있지 않습니다. 조직이 만든 runner의 이름이 기본 label이 되며, GitHub changelog(2023-02-14)는 "Users will continue to be able to target their runners using the runner name as the default label"이라고 적습니다. 이전 판의 `ubuntu-latest-4-cores`는 그런 이름이 있다는 전제였으므로 예시 이름 `cosim-large`로 바꿨습니다. `build_cosim.sh`는 Linux에서는 위 macOS 전용 `-Wl,-U` 옵션 대신 그 platform의 link 방식을 써야 하며, 이 장에서 Linux 빌드는 하지 않았습니다.
 
 ## Performance — cycle-accurate cosim의 속도
 
-cosim의 *근본 제약*은 RTL이 cycle-accurate라는 점입니다. 대략 다음 정도의 throughput:
+cosim의 근본 제약은 RTL이 cycle 단위로 계산된다는 점입니다. 이 시리즈에서 같은 macOS host로 잰 수치를 모으면 다음과 같습니다.
 
-| 구성 | cycle/sec | 의미 |
+| 구성 | 측정값 | 측정한 장 |
 |------|-----------|------|
-| 구성 | 측정해야 할 조건 |
-|------|----------------|
-| Verilator + RTL | RTL 규모, host CPU, compile flags, threading, trace, testcase |
-| commercial simulator | 같은 RTL·입력·assertion·trace·host 조건과 라이선스 설정 |
+| 32-bit counter, trace 없음 | 16.6~19.6 Mcycle/s | 3장 |
+| 32-bit counter, VCD trace | 2.80~2.94 Mcycle/s | 3장 |
+| Aristos-1 축소판, C++ BFM으로 scratch write/read 반복 | 3.62 / 3.82 / 5.18 Mcycle/s (3회) | 이 장 |
+| SystemC TLM register write | 36.3 M transaction/s | 5장 |
+| 상용 simulator | 측정하지 않음 | — |
 
-이로부터 *어떤 시나리오를 cosim에 두고 어떤 시나리오를 다른 도구로 보내야* 하는지가 결정됩니다.
+축소판이 counter보다 느린 것은 AXI handshake마다 BFM이 핀을 쓰고 `eval()`을 추가로 부르기 때문입니다. 이 수치로 시나리오의 자리를 대략 정할 수 있습니다. 1 GHz로 도는 hardware의 1초는 10억 cycle이고, 이 축소판 속도(약 4 Mcycle/s)로도 250초가 걸립니다. 실제 NPU RTL은 이 축소판보다 훨씬 크므로 그보다 느립니다.
 
-| 시나리오 | 권장 도구 |
+| 시나리오 | 이 시리즈가 보내는 곳 |
 |----------|-----------|
 | register 검증·짧은 transaction | Verilator cosim |
-| DMA descriptor ring·IRQ scenario | Verilator cosim |
-| 1초 이상 stress·throughput | FPGA prototype |
+| IRQ scenario | Verilator cosim (이 장에서 실행) |
+| DMA descriptor ring | Verilator cosim (이 장에서는 구현하지 않음) |
+| hardware 시간 1초 이상의 stress·throughput | FPGA prototype |
 | Linux boot end-to-end | SystemC VP |
 | User-space app + driver | FPGA prototype 또는 QEMU + functional model |
 
-cosim은 *특정 깊이의 검증*에 최적입니다. 그 깊이 안에서는 다른 도구가 못 따라옵니다.
-
 ## 시리즈 마무리
 
-8장을 돌아보면.
+8장을 돌아보면 다음과 같습니다.
 
 | 장 | 어휘 | 무엇을 풀었나 |
 |----|------|----------------|
@@ -252,27 +289,30 @@ cosim은 *특정 깊이의 검증*에 최적입니다. 그 깊이 안에서는 �
 | 7 | UVM C reference | single source of truth |
 | 8 | end-to-end | 통합 청사진 |
 
-8장이 끝났을 때 머릿속에 남아야 할 것은 *조립 사고*입니다. cosim은 단일 도구가 아니라 *Verilator + DPI-C + driver + BFM + reference + pytest + CI*의 조립체입니다. 어느 부품이 빠지면 다른 부품으로 메우거나(예: Verilator 대신 Icarus, BFM 대신 SV task), 비용이 부족하면 축소(예: SystemC VP는 나중에)할 수 있습니다.
-
-NPU·chiplet·SoC가 가는 길에서 *pre-silicon driver 검증*은 더 이상 *옵션*이 아닙니다. 이 시리즈가 그 길의 어휘를 빌려 드리는 글이 되었으면 합니다.
+8장이 끝났을 때 머릿속에 남아야 할 것은 *조립 사고*입니다. cosim은 단일 도구가 아니라 *Verilator + driver shim + BFM + reference + pytest + CI*의 조립체입니다. 어느 부품이 도구의 한계에 막히면 다른 부품으로 메웁니다. 이 장에서 Verilator가 timed export task를 거부하자 SV BFM을 C++ BFM으로 바꾼 것이 그 예입니다.
 
 ## 정리
 
-- 통합 cosim 청사진: Verilator(RTL → C++ 클래스) + Linux driver shim + DPI-C BFM + reference model + pytest + CI.
-- driver는 `cosim_shim.h`로 *동일 source가 .ko와 cosim binary 양쪽으로* 빌드되게 함.
-- IRQ injection은 별도 thread에서 `dut->irq` rising edge를 polling. driver ISR을 *직접* 호출.
-- pytest mark로 *smoke*(PR마다)·*nightly*(stress) 분리. waveform은 실패 시 artifact.
-- 상대 성능은 같은 RTL·host·옵션·trace 조건으로 측정해 smoke, nightly, 다른 추상화 모델의 경계를 정합니다.
-- 시리즈가 가르치는 것은 *조립 사고*: 8개 어휘를 상황에 맞게 결합.
-- pre-silicon driver 검증은 NPU/chiplet/SoC의 표준 작업.
+- 통합 cosim 청사진: Verilator(RTL → C++ 클래스) + driver shim + BFM + reference model + pytest + CI. 축소판은 control 경로와 IRQ까지 실제로 돌렸습니다.
+- driver는 `cosim_shim.h`로 `readl`/`writel`을 BFM 호출로 바꿉니다. 같은 소스의 `.ko` 빌드는 이 장에서 하지 않았습니다.
+- IRQ는 simulator thread의 `tick()`에서 sampling하고, ISR dispatch는 bus access 바깥에서 합니다. 안에서 부르면 test 프로세스가 `abort()`로 죽었습니다.
+- pytest mark로 *smoke*(PR마다)와 *slow*(nightly)를 나눕니다. 축소판 smoke는 0.28초에 3개 test를 통과했습니다.
+- 축소판 속도는 3.6~5.2 Mcycle/s였고, 이 수치가 cosim·FPGA·VP 사이의 경계를 정하는 근거입니다.
 
 ## 다음 장 예고
 
-시리즈 마무리입니다. 더 깊이 들어가고 싶다면 다음 자료가 자연스러운 다음 단계입니다.
+시리즈 마무리입니다. 더 깊이 들어가고 싶다면 다음 자료가 다음 단계입니다.
 
-- Verilator 공식 manual의 multithreading·DPI scoping
-- *SystemVerilog for Verification* (Spear) — UVM 학습용
-- OpenTitan/Chipyard 저장소의 cosim 디렉터리 — 실제 산업 예제
+- Verilator 공식 manual의 multithreading·DPI scoping(`--threads-dpi`, `svSetScope`)
+- lowRISC Ibex 저장소의 `dv/cosim/` — `cosim_dpi.cc`·`spike_cosim.cc`로 RTL core를 Spike ISS와 DPI로 비교하는 실제 예
+- lowRISC OpenTitan 저장소의 `hw/dv/dpi/` — `uartdpi`·`jtagdpi`·`spidpi` 등 DPI로 붙인 host 측 device model
+
+## 1차 자료와 실행 환경
+
+- [GitHub changelog 2023-02-14: removal of additional label option for larger runners](https://github.blog/changelog/2023-02-14-github-actions-removal-of-additional-label-option-for-github-hosted-larger-runners/)
+- GitHub contents API(2026-11-16) — `lowRISC/ibex` `dv/cosim/`, `lowRISC/opentitan` `hw/dv/dpi/` 파일 목록
+
+실행 환경은 macOS 27.2.1, Apple M2 Pro, Verilator 5.054, Apple clang 21.0.0, Python 3.13 venv, pytest 9.2.0입니다(2026-11-16). GitHub Actions workflow, Linux 빌드, `.ko` 빌드, DMA·matmul RTL, 30분 stress, 상용 simulator는 실행하지 않았습니다.
 
 ## 관련 항목
 
