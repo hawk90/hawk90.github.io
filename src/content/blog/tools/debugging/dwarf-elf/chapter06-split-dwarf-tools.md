@@ -93,17 +93,20 @@ skeleton에는 자식 DIE가 없고, `DW_AT_dwo_name`·`DW_AT_comp_dir`이 `.dwo
 
 ### 효과와 배포 경계
 
-DWARF 5 §1.4는 split 형식의 목적을 실행 파일 크기 축소와 링크 시간 개선으로 적습니다. 링커가 읽고 복사할 디버그 바이트가 skeleton만큼으로 줄기 때문입니다. 대신 디버거가 `.dwo`를 찾지 못하면 그 CU의 타입·변수 정보가 없습니다. `foo.dwo`를 치우고 GDB 16.3으로 `prog`를 열었습니다.
+DWARF 5 §1.4는 split 형식의 목적을 실행 파일 크기 축소와 링크 시간 개선으로 적습니다. 링커가 읽고 복사할 디버그 바이트가 skeleton만큼으로 줄기 때문입니다. 대신 디버거가 `.dwo`를 찾지 못하면 그 CU의 함수·타입·변수 정보가 없습니다. `foo.dwo`를 치우고 GDB 16.3으로 `prog`를 열었습니다.
 
 ```text
 $ gdb -q -batch -ex 'break dist' -ex run -ex 'print p' ./prog
+During symbol reading: Could not find DWO CU foo.dwo(0x1c148ae7171b0d22) referenced by CU at offset 0x0 [in module /w6/prog]
 DWARF Error: unexpected tag 'DW_TAG_skeleton_unit' at offset 0x0
 warning: Could not find DWO CU foo.dwo(0x1c148ae7171b0d22) referenced by CU at offset 0x0 [in module /w6/prog]
+DWARF Error: unexpected tag 'DW_TAG_skeleton_unit' at offset 0x0
 ...
+[Inferior 1 (process 810) exited normally]
 No symbol "p" in current context.
 ```
 
-`.dwo`를 되돌리면 같은 명령이 `ptype p`에 `struct point { int x; int y; }`를 답했습니다. 그래서 split 빌드는 `.dwo`(또는 `.dwp`)를 실행 파일과 함께 보관하는 절차가 필요합니다.
+`break dist`도 걸리지 않아 프로그램이 그대로 끝났습니다. `.dwo`를 되돌리면 같은 명령이 `ptype p`에 `struct point { int x; int y; }`를 답했습니다. 그래서 split 빌드는 `.dwo`(또는 `.dwp`)를 실행 파일과 함께 보관하는 절차가 필요합니다.
 
 ### .dwp 패키지
 
@@ -146,34 +149,55 @@ The directory where separate debug symbols are searched for is "/usr/lib/debug".
 
 헤더에 정의한 구조체는 그 헤더를 include한 CU마다 같은 DIE로 반복됩니다. dwz는 이 공통 부분을 `DW_TAG_partial_unit`으로 한 번만 두고, 각 CU가 `DW_TAG_imported_unit`으로 가져오게 바꿉니다. DWARF 5 Appendix E.1 "Using Compilation Units"가 설명하는 기법입니다.
 
-게스트에서 같은 헤더 `big.h`(구조체 하나와 inline 함수 하나)를 include한 파일 4개와 `main`을 `-g -O0`로 링크하고 dwz 0.15를 돌렸습니다.
+게스트에서 같은 헤더 `big.h`(구조체 하나와 inline 함수 하나)를 include한 파일 4개와, 헤더를 include하지 않는 `bigmain.c`를 `-g -O0`로 링크하고 dwz 0.15를 돌렸습니다.
 
-```text
-$ readelf -SW shared.orig | grep -E "debug_(info|abbrev|str) "
-  [27] .debug_info       PROGBITS        0000000000000000 01013f 0004fa 00      0   0  1
-  [28] .debug_abbrev     PROGBITS        0000000000000000 010639 000391 00      0   0  1
-  [30] .debug_str        PROGBITS        0000000000000000 010bdb 0000b5 01  MS  0   0  1
-$ dwz shared
-$ readelf -SW shared | grep -E "debug_(info|abbrev|str) "
-  [27] .debug_info       PROGBITS        0000000000000000 01013f 0002ee 00      0   0  1
-  [28] .debug_abbrev     PROGBITS        0000000000000000 01042d 00011c 00      0   0  1
-  [30] .debug_str        PROGBITS        0000000000000000 01075a 0000b5 01  MS  0   0  1
+```c title="big.h"
+struct big { int a; long b; char name[16]; double d; };
+static inline int big_sum(const struct big *p) { return p->a + (int)p->b; }
 ```
 
-`.debug_info`가 0x4fa → 0x2ee, `.debug_abbrev`가 0x391 → 0x11c바이트로 줄었고, 파일은 74,672 → 73,520바이트가 됐습니다. `DW_TAG_structure_type`은 4개에서 1개로 줄었습니다. 바뀐 구조는 이렇습니다.
+```c title="u1.c"
+#include "big.h"
+int u1(const void *v) { const struct big *p = v; return big_sum(p) + 1; }
+```
+
+`u2.c`~`u4.c`는 함수 이름과 더하는 상수만 다릅니다.
+
+```c title="bigmain.c"
+int u1(const void *), u2(const void *), u3(const void *), u4(const void *);
+static long buf[8] = {1, 2};
+int main(void) { return (u1(buf) + u2(buf) + u3(buf) + u4(buf)) & 1; }
+```
+
+```text
+$ gcc -g -O0 bigmain.c u1.c u2.c u3.c u4.c -o shared; cp shared shared.orig
+$ readelf -SW shared.orig | grep -E "debug_(info|abbrev|str) "
+  [27] .debug_info       PROGBITS        0000000000000000 01017f 000511 00      0   0  1
+  [28] .debug_abbrev     PROGBITS        0000000000000000 010690 000417 00      0   0  1
+  [30] .debug_str        PROGBITS        0000000000000000 010ce3 000087 01  MS  0   0  1
+$ dwz shared
+$ readelf -SW shared | grep -E "debug_(info|abbrev|str) "
+  [27] .debug_info       PROGBITS        0000000000000000 01017f 00033b 00      0   0  1
+  [28] .debug_abbrev     PROGBITS        0000000000000000 0104ba 000180 00      0   0  1
+  [30] .debug_str        PROGBITS        0000000000000000 010876 000087 01  MS  0   0  1
+```
+
+`.debug_info`가 0x511 → 0x33b, `.debug_abbrev`가 0x417 → 0x180바이트로 줄었고, 파일은 74,944 → 73,808바이트가 됐습니다. `DW_TAG_structure_type`은 4개에서 1개로 줄었습니다. 바뀐 구조는 이렇습니다.
 
 ```text
 $ readelf --debug-dump=info shared | grep -E "Unit Type|partial_unit|imported_unit|DW_AT_import|compile_unit"
    Unit Type:     DW_UT_partial (3)
  <0><c>: Abbrev Number: 4 (DW_TAG_partial_unit)
  <1><15>: Abbrev Number: 2 (DW_TAG_imported_unit)
-    <16>   DW_AT_import      : <0x87>	[Abbrev Number: 4 (DW_TAG_partial_unit)]
+    <16>   DW_AT_import      : <0x7d>	[Abbrev Number: 4 (DW_TAG_partial_unit)]
    Unit Type:     DW_UT_partial (3)
- <0><87>: Abbrev Number: 4 (DW_TAG_partial_unit)
+ <0><7d>: Abbrev Number: 4 (DW_TAG_partial_unit)
    Unit Type:     DW_UT_compile (1)
- <0><a4>: Abbrev Number: 11 (DW_TAG_compile_unit)
- <1><bf>: Abbrev Number: 2 (DW_TAG_imported_unit)
-    <c0>   DW_AT_import      : <0xc>	[Abbrev Number: 4 (DW_TAG_partial_unit)]
+ <0><9b>: Abbrev Number: 15 (DW_TAG_compile_unit)
+ <1><b6>: Abbrev Number: 2 (DW_TAG_imported_unit)
+    <b7>   DW_AT_import      : <0x7d>	[Abbrev Number: 4 (DW_TAG_partial_unit)]
+   Unit Type:     DW_UT_compile (1)
+ <0><13f>: Abbrev Number: 15 (DW_TAG_compile_unit)
 ...
 ```
 
@@ -216,11 +240,11 @@ binutils 2.44 `ld`의 스타일별 결과입니다(게스트, 같은 `foo.c`).
 |------|------------------|
 | `-Wl,--build-id=sha1` | `faafc9c158f66a57c754ad8a0d431707dd034bec` (20바이트) |
 | `-Wl,--build-id=md5` | `6b598e26877b6f6bfad0fe7d4e3634b5` (16바이트) |
-| `-Wl,--build-id=uuid` | `3cf9dab6c48126cba356cc114531f6ab` (16바이트, 무작위) |
+| `-Wl,--build-id=uuid` | `0d1f9f2eb423a0a90d193adeef48e878` (16바이트, 무작위) |
 | `-Wl,--build-id=0xdeadbeef` | `deadbeef` |
 | 옵션 없음 | `faafc9c158f66a57c754ad8a0d431707dd034bec` |
 
-옵션 없이 링크한 결과가 `sha1`과 같은 ID인 것은, Debian GCC가 링커에 `--build-id`를 넘기고(1장) 스타일 없는 `--build-id`가 SHA-1을 쓰기 때문입니다. `sha1`·`md5`는 같은 입력이면 같은 ID가 나오는 결정적 해시이고, `uuid`는 링크할 때마다 바뀝니다.
+옵션 없이 링크한 결과가 `sha1`과 같은 ID인 것은, Debian GCC가 링커에 `--build-id`를 넘기고(1장) 스타일 없는 `--build-id`가 SHA-1을 쓰기 때문입니다. `sha1`·`md5`는 같은 입력이면 같은 ID가 나오는 결정적 해시이고, `uuid`는 링크할 때마다 바뀝니다. 같은 명령으로 한 번 더 링크하자 `a3f80f85ebffb2ed6289d9770fa401e7`이 나왔습니다.
 
 ## debuginfod — 네트워크 자동 다운로드
 
@@ -595,7 +619,7 @@ pyelftools 0.32는 압축된 `.debug_info`(`C` 플래그, 0xa9 → 0x84바이트
 
 - DWARF 크기 문제: split-DWARF (분리), dwz (중복 제거), `-gline-tables-only` (line만).
 - Split-DWARF: 링크 입력에서 디버그 본체를 빼고, `.dwo`/`.dwp`를 따로 보관해야 합니다.
-- dwz: 중복 DIE를 partial unit으로 공유합니다. 예제에서 `.debug_info`가 0x4fa → 0x2ee로 줄었고, Debian 디버그 파일도 dwz 공용 파일을 씁니다.
+- dwz: 중복 DIE를 partial unit으로 공유합니다. 예제에서 `.debug_info`가 0x511 → 0x33b로 줄었고, Debian 디버그 파일도 dwz 공용 파일을 씁니다.
 - Build-id가 *바이너리 정체성* — debuginfo 매칭의 핵심.
 - debuginfod로 *네트워크 자동 다운로드*.
 - ELF 압축 헤더·SHF_COMPRESSED와 옛 GNU .zdebug_* 방식을 구분합니다.
