@@ -19,17 +19,19 @@ Linux 커널처럼 인터럽트 문맥과 프로세스 문맥이 섞이는 곳�
 
 ## 핵심 개념
 
-Linux v6.12 소스와 문서에서 두 lock의 계약을 확인하면 다음과 같습니다.
+Linux v6.12 소스와 문서에서 두 lock의 계약을 확인하면 다음과 같습니다. 표의 spinlock 칸은 `CONFIG_PREEMPT_RT`가 꺼진 커널 기준입니다.
 
 | 항목 | spinlock | mutex | 근거 |
 |------|----------|-------|------|
 | 잡을 때 하는 일 | `spin_lock()`은 `preempt_disable()` 후 lock 획득 | `mutex_lock()`은 `might_sleep()`으로 시작 | `include/linux/spinlock_api_smp.h` 130–135행, `kernel/locking/mutex.c` 281–283행 |
 | IRQ 차단 | `spin_lock_irqsave()`는 `local_irq_save()` 후 `preempt_disable()` | 없음 | `spinlock_api_smp.h` 104–111행 |
-| 쓸 수 있는 문맥 | 인터럽트 문맥 포함 | "may not be used in hardware or software interrupt contexts such as tasklets and timers" | `Documentation/locking/mutex-design.rst` 89–90행 |
-| 기다리는 방식 | 돎 | 잠깐 돌다가(optimistic spinning) 대기열에서 잠듦 | `mutex-design.rst` 55–75행 |
+| 쓸 수 있는 문맥 | 인터럽트 문맥 포함 | "may not be used in hardware or software interrupt contexts such as tasklets and timers" | `Documentation/locking/mutex-design.rst` 88–89행 |
+| 기다리는 방식 | 돎 | 잠깐 돌다가(optimistic spinning) 대기열에서 잠듦 | `mutex-design.rst` 45–73행 |
 | 단일 CPU(UP) 커널 | `__LOCK()`이 `preempt_disable()`만 함 | — | `include/linux/spinlock_api_up.h` 27–31행 |
 
-Mutex 문서는 kernel mutex가 형식적으로는 잠드는 lock이지만 "busy-waiting for a few cycles instead of immediately sleeping"하는 optimistic spinning 경로 덕분에 실제로는 혼합형이라고 설명합니다(69–74행).
+v6.12의 `CONFIG_PREEMPT_RT` 커널에서는 `spinlock_t`가 rt_mutex 기반의 잠드는 lock이 되어(`spin_lock()`이 `rt_spin_lock()`을 부릅니다, `include/linux/spinlock_rt.h` 43–46행) 선점을 막지 않고, `_irqsave`도 CPU 인터럽트 상태를 바꾸지 않습니다(`Documentation/locking/locktypes.rst` 46–50행, 232–239행).
+
+Mutex 문서는 kernel mutex가 형식적으로는 잠드는 lock이지만 "busy-waiting for a few cycles instead of immediately sleeping"하는 optimistic spinning 경로 덕분에 실제로는 혼합형이라고 설명합니다(69–73행).
 
 ### 공정한 spinlock들
 
@@ -39,7 +41,7 @@ Mutex 문서는 kernel mutex가 형식적으로는 잠드는 lock이지만 "busy
 | MCS lock | 대기자가 각자 자기 node에서 돔. 큐 순서대로 획득 | Mellor-Crummey·Scott, ACM TOCS 9(1) 1991, Fig. 5 |
 | qspinlock | MCS를 바탕으로 {tail, next->locked}를 32비트 하나에 압축하고, 첫 대기자는 자기 node 대신 lock 비트에서 돎 | v6.12 `kernel/locking/qspinlock.c` 32–62행 |
 
-arm64는 `ARCH_USE_QUEUED_SPINLOCKS`를 선택합니다(`arch/arm64/Kconfig` 90행). 원래 이 글의 표에 있던 "짧은 contention은 ticket, 긴 건 MCS"라는 qspinlock 설명은 위 소스 주석과 맞지 않아 고쳤습니다.
+arm64는 `ARCH_USE_QUEUED_SPINLOCKS`를 선택합니다(`arch/arm64/Kconfig` 90행). qspinlock을 "짧은 contention은 ticket, 긴 건 MCS"인 혼합형으로 설명하는 글이 있지만, 위 소스 주석은 그런 전환을 말하지 않습니다.
 
 ## 코드 / 실제 사용 예
 
@@ -75,11 +77,11 @@ if (mutex_lock_interruptible(&my_mtx))
     return -ERESTARTSYS;      /* a signal arrived while waiting */
 ```
 
-`mutex_lock()`의 첫 줄이 `might_sleep()`이므로, 디버그 옵션이 켜진 커널에서는 잠들 수 없는 문맥에서 부르면 경고가 납니다. 인터럽트 문맥과 spinlock을 쥔 구간에서는 쓰지 않습니다.
+`mutex_lock()`의 첫 줄이 `might_sleep()`이므로, `CONFIG_DEBUG_ATOMIC_SLEEP`이 켜진 커널에서는 잠들 수 없는 문맥에서 부르면 경고가 납니다. 인터럽트 문맥과 spinlock을 쥔 구간에서는 쓰지 않습니다.
 
 ### Userspace spinlock 세 가지
 
-사용자 공간에서 측정하려고 세 spinlock을 한 헤더에 만들었습니다. TTAS(test-and-test-and-set)는 CAS가 실패하면 읽기만 하며 기다리고, ticket lock은 번호표, MCS lock은 Mellor-Crummey·Scott 논문 Fig. 5를 그대로 옮겼습니다.
+사용자 공간에서 측정하려고 세 spinlock을 한 헤더에 만들었습니다. TTAS(test-and-test-and-set)는 CAS가 실패하면 읽기만 하며 기다리고, ticket lock은 번호표, MCS lock은 Mellor-Crummey·Scott 논문 Fig. 5를 옮기되 `locked`를 exchange 전에 세웠습니다(논문은 exchange 뒤에 `I->locked := true`를 합니다).
 
 ```cpp
 // locks.h — test-and-test-and-set, ticket and MCS spinlocks
@@ -138,7 +140,7 @@ struct mcs_lock {
 };
 ```
 
-원래 이 글의 MCS 코드에는 `lock()` 첫 줄 `me->next = nullptr`가 없었습니다. 논문 Fig. 5는 `fetch_and_store` 전에 `I->next := nil`을 합니다. 같은 node를 다시 쓸 때 이전 `next`가 남아 있으면 `unlock()`이 엉뚱한 후계자에게 lock을 넘깁니다.
+MCS 코드에서 빠뜨리기 쉬운 줄이 `lock()` 첫 줄 `me->next = nullptr`입니다. 논문 Fig. 5는 `fetch_and_store` 전에 `I->next := nil`을 합니다. 같은 node를 다시 쓸 때 이전 `next`가 남아 있으면 `unlock()`이 엉뚱한 후계자에게 lock을 넘깁니다.
 
 ### 측정 프로그램
 
@@ -203,6 +205,7 @@ int main(int argc, char **argv)
 
 ```text
 $ clang++ -std=c++17 -O1 -g -fsanitize=thread lockbench.cpp -o lb_tsan   # Apple clang 21, M2 Pro
+$ for k in tas ticket mcs mutex; do ./lb_tsan $k 4 10 20000; done
 tas    threads= 4 hold=    10       966 k ops/s  cpu/wall  3.0  ok
 ticket threads= 4 hold=    10       137 k ops/s  cpu/wall  2.7  ok
 mcs    threads= 4 hold=    10       285 k ops/s  cpu/wall  2.9  ok
@@ -302,17 +305,15 @@ mutex  threads=12 hold= 20000        69 k ops/s  cpu/wall  1.1  ok
 
 위 두 측정에서 일관되게 나온 것은 세 가지입니다.
 
-- **스레드가 코어보다 많으면 ticket lock과 MCS lock은 30초 안에 끝나지 않았습니다.** Mac 24스레드(코어 12개), guest 12스레드(vCPU 6개) 모두, 세 hold time 모두에서 그랬습니다. 같은 조건에서 TTAS와 mutex는 끝났습니다. 공정한 lock은 *다음 차례*로 정해진 스레드가 실행 중이 아니면, 다른 스레드가 모두 돌며 기다려도 아무도 lock을 얻지 못합니다. 그 스레드가 다시 스케줄될 때까지 lock이 넘어가지 않기 때문입니다(측정 결과에서 끌어낸 설명입니다).
+- **스레드가 코어보다 많으면 ticket lock과 MCS lock은 30초 안에 끝나지 않았습니다.** Mac 24스레드(코어 12개), guest 12스레드(vCPU 6개) 모두, 세 hold time 모두에서 그랬습니다. 같은 조건에서 TTAS와 mutex는 끝났습니다. 공정한 lock은 *다음 차례*로 정해진 스레드가 실행 중이 아니면, 다른 스레드가 모두 돌며 기다려도 아무도 lock을 얻지 못합니다. 그 스레드가 다시 스케줄될 때까지 lock이 넘어가지 않기 때문입니다. MCS 논문도 FIFO lock은 "likely to waste CPU resources if spinning processes may be preempted"이고, 이때는 test-and-set lock이 "will allow latecomers to acquire the lock when processes that arrived earlier are not running"이라고 적습니다(Mellor-Crummey·Scott 1991, 'Discussion and Recommendations', 52쪽).
 - **기다리는 동안 spinlock은 CPU를 다 썼고 mutex는 덜 썼습니다.** Mac 4스레드·hold 20,000에서 ticket·MCS는 CPU/벽시계가 4.0, TTAS는 3.5였고, mutex는 1.1이었습니다. 처리량은 비슷하거나 mutex가 더 높았습니다. 기다리는 스레드가 잠들어 있으면 그 CPU를 다른 일에 쓸 수 있습니다.
-- **스레드가 하나일 때 숫자는 측정마다 크게 흔들렸습니다.** 예를 들어 Mac hold 20,000에서 TTAS와 MCS는 145~147 k ops/s였지만 ticket과 mutex는 37~38 k ops/s였습니다. 단일 스레드라 lock 경합은 없으므로 lock의 차이로 보기 어렵고, macOS가 그 프로세스를 P코어와 E코어 중 어디에 두었는지를 이 측정은 통제하지 않았습니다. 이 열은 lock 비교에 쓰지 않습니다.
-
-Hold time별 처리량 비교(예: "hold 100 ns에서 spinlock 0.4 µs/op")는 원래 이 글에 있었지만 출처가 없었고, 위 측정의 4스레드 열은 lock 종류보다 실행 사이 차이가 커서 대체 숫자로 삼지 않았습니다.
+- **스레드가 하나일 때도 lock 사이에 차이가 났습니다.** Mac hold 20,000에서 TTAS와 MCS는 145~147 k ops/s, ticket과 mutex는 37~38 k ops/s였습니다. 경합이 없는 열이고 이 측정은 그 차이의 원인을 가르지 않았으므로, 이 열은 lock 비교에 쓰지 않습니다.
 
 ## 자주 보는 함정
 
 > ⚠️ 스레드가 코어보다 많은데 공정한 spinlock
 
-위 측정의 timeout 줄이 이 경우입니다. 사용자 공간에서 스레드 수를 코어 수 이하로 묶을 수 없다면, 기다리다 잠드는 mutex를 씁니다. 커널 spinlock은 잡는 순간 선점을 막으므로(`preempt_disable()`) lock을 쥔 스레드가 그 사이 밀려나지 않습니다. 사용자 공간 spinlock에는 그런 보장이 없습니다.
+위 측정의 timeout 줄이 이 경우입니다. 사용자 공간에서 스레드 수를 코어 수 이하로 묶을 수 없다면, 기다리다 잠드는 mutex를 씁니다. PREEMPT_RT가 아닌 커널의 spinlock은 잡는 순간 선점을 막으므로(`preempt_disable()`) lock을 쥔 스레드가 그 사이 밀려나지 않습니다. 사용자 공간 spinlock에는 그런 보장이 없습니다.
 
 > ⚠️ 단일 CPU에서 spinlock을 "돌며 기다리는 lock"으로 생각
 
@@ -330,7 +331,7 @@ msleep(10);     /* sleeping while preemption is disabled */
 spin_unlock(&x);
 ```
 
-Spinlock은 선점을 막은 상태이므로 그 안에서 잠들 수 있는 함수를 부르지 않습니다. 이 글은 이 코드를 실행하지 않았습니다. 이 글의 Debian 커널은 `CONFIG_PREEMPT_COUNT`가 꺼져 있어([9-03](/blog/embedded/modern-recipes/part9-03-rcu-basics)) 선점 카운트로 이런 실수를 잡는 장치가 동작하지 않으므로, 개발 중에는 디버그 옵션을 켠 커널로 확인합니다.
+Spinlock은 선점을 막은 상태이므로 그 안에서 잠들 수 있는 함수를 부르지 않습니다. 이 글은 이 코드를 실행하지 않았습니다. 이 글의 Debian 커널은 `CONFIG_PREEMPT_COUNT`가 꺼져 있어([9-03](/blog/embedded/modern-recipes/part9-03-rcu-basics)) 선점 카운트로 이런 실수를 잡는 장치가 동작하지 않으므로, 개발 중에는 `CONFIG_DEBUG_ATOMIC_SLEEP`(이 옵션이 `PREEMPT_COUNT`를 select합니다, `lib/Kconfig.debug` 1573–1575행)을 켠 커널로 확인합니다.
 
 > ⚠️ 인터럽트 핸들러에서 mutex
 
@@ -357,7 +358,7 @@ spin_unlock(&x);
 
 ## 정리
 
-- `spin_lock`은 선점을 막고, `spin_lock_irqsave`는 인터럽트까지 막습니다. `mutex_lock`은 잠들 수 있어 인터럽트 문맥에서 쓰지 않습니다.
+- PREEMPT_RT가 아닌 커널에서 `spin_lock`은 선점을 막고, `spin_lock_irqsave`는 인터럽트까지 막습니다. PREEMPT_RT 커널에서는 `spinlock_t`가 잠드는 lock이 됩니다. `mutex_lock`은 잠들 수 있어 인터럽트 문맥에서 쓰지 않습니다.
 - Kernel mutex는 잠깐 돌다가 잠드는 혼합형이고, Linux의 qspinlock은 MCS를 32비트 word 하나로 압축한 구현입니다.
 - 사용자 공간에서 스레드가 코어보다 많으면 ticket·MCS lock은 30초 안에 끝나지 않았습니다(Mac, Linux guest 모두).
 - 기다리는 동안 spinlock은 CPU를 다 썼고 mutex는 그 CPU를 비워 두었습니다.
