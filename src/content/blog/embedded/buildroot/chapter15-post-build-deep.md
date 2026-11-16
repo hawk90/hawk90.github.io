@@ -202,7 +202,7 @@ mkimage -f u-boot.its fitImage
 rm -f u-boot.its
 ```
 
-`mkimage`는 `BR2_PACKAGE_HOST_UBOOT_TOOLS=y`면 `output/host/bin`에 설치됩니다. 위처럼 `.its`를 `BINARIES_DIR`에 복사하고 그 디렉터리에서 실행하면, `.its` 안의 `data = /incbin/("Image")` 같은 상대 경로가 산출물 파일을 그대로 가리킵니다. 이 FIT 예는 이 장에서 실행하지 않았습니다.
+`mkimage`는 `BR2_PACKAGE_HOST_UBOOT_TOOLS=y`면 `output/host/bin`에 설치되고, FIT를 만들려면 `BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SUPPORT=y`도 켭니다. 위처럼 `.its`를 `BINARIES_DIR`에 복사하고 그 디렉터리에서 실행하면, `.its` 안의 `data = /incbin/("zImage")` 같은 상대 경로가 산출물 파일을 그대로 가리킵니다. 서명 없는 FIT는 아래 서명 실험과 같은 `.its`(서명 노드 제외)로 만들 수 있고, 실제 서명 결과는 아래 절에 있습니다.
 
 ## genimage — SD/eMMC 이미지 생성
 
@@ -272,31 +272,86 @@ BR2_ROOTFS_POST_SCRIPT_ARGS="-c $(BR2_EXTERNAL_MYBOARD_PATH)/board/myboard/genim
 
 ## secure boot 통합 패턴
 
-서명은 *post-image에서* 처리합니다. fakeroot가 닫힌 뒤, rootfs와 FIT, kernel 같은 *최종 이미지*가 모두 BINARIES_DIR에 모인 시점이라 한 번에 묶기 좋습니다.
+서명은 *post-image에서* 처리합니다. fakeroot가 닫힌 뒤, rootfs와 FIT, kernel 같은 *최종 이미지*가 모두 BINARIES_DIR에 모인 시점이라 한 번에 묶기 좋습니다. 열쇠공에 비유하면, 문(이미지)이 다 달린 뒤에 자물쇠(서명)를 채우는 순서입니다.
+
+Ch 10의 BeagleBone 빌드 산출물(`zImage`, `am335x-boneblack.dtb`, U-Boot의 `u-boot.dtb`)로 FIT 서명을 실제로 돌려 봤습니다. `.its`의 configuration 노드에 서명 노드를 둡니다.
+
+```text
+	configurations {
+		default = "conf-1";
+		conf-1 {
+			kernel = "kernel-1"; fdt = "fdt-1";
+			signature-1 { algo = "sha256,rsa2048"; key-name-hint = "dev"; sign-images = "kernel", "fdt"; };
+		};
+	};
+```
+
+### host-uboot-tools의 mkimage는 서명하지 않았습니다
+
+먼저 `BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SUPPORT=y`와 `BR2_PACKAGE_HOST_UBOOT_TOOLS_FIT_SIGNATURE_SUPPORT=y`를 켜고 `host-uboot-tools`(2025.10)를 다시 빌드한 `output/host/bin/mkimage`로 서명했습니다. 명령은 `rc=0`으로 끝났지만 결과에는 서명이 없었습니다.
+
+```text
+$ mkimage -f fit.its -k keys -K u-boot.dtb -r fitImage
+...
+  Sign algo:    sha256,rsa2048:dev
+  Sign value:   unavailable
+  Timestamp:    unavailable
+rc=0
+$ fdtget -l u-boot.dtb /signature
+Error at '/signature': FDT_ERR_NOTFOUND
+$ mkimage -h 2>&1 | grep Signing
+Signing / verified boot not supported (CONFIG_TOOLS_FIT_SIGNATURE undefined)
+```
+
+원인은 이름이 바뀐 Kconfig 기호입니다. `package/uboot-tools/uboot-tools.mk` 129행은 이 옵션에 `#define CONFIG_FIT_SIGNATURE 1`을, 144~145행은 make 인자 `CONFIG_FIT_SIGNATURE=y`를 넘깁니다. 그런데 U-Boot의 `tools/Makefile`은 서명 코드를 `CONFIG_TOOLS_LIBCRYPTO`에 묶고(76행), `tools/mkimage.c` 135행은 `CONFIG_TOOLS_FIT_SIGNATURE`가 없으면 위 문구를 냅니다. 이 조합에서 `-k`는 오류 없이 무시됩니다.
+
+### U-Boot 빌드 디렉터리의 mkimage로 서명
+
+같은 트리의 `output/build/uboot-2026.01/tools/mkimage`는 보드 설정으로 빌드돼 `.config`에 `CONFIG_TOOLS_LIBCRYPTO=y`, `CONFIG_TOOLS_FIT_SIGNATURE=y`가 있습니다. 이것으로 다시 서명하자 서명 값이 채워지고 `u-boot.dtb`에 공개키 노드가 생겼습니다.
+
+```text
+$ mkimage -f fit.its -k keys -K u-boot.dtb -r fitImage
+  Sign algo:    sha256,rsa2048:dev
+  Sign value:   285dc755215a28535b55d86f1c85a356770c2165...
+  Timestamp:    Mon Nov 16 08:11:57 2026
+$ fdtget -l u-boot.dtb /signature
+key-dev
+$ fdtget u-boot.dtb /signature/key-dev required
+conf
+$ fit_check_sign -f fitImage -k u-boot.dtb
+Signature check OK
+$ fit_check_sign -f fitImage -k other.dtb
+Signature check bad (error 1)
+```
+
+`other.dtb`는 다른 키를 같은 이름(`key-dev`)으로 넣은 DTB입니다. 이름이 같아도 키가 다르면 검증이 실패했습니다. `-r`은 키를 `required`로 표시하는 옵션이고, 결과 노드의 `required = "conf"`가 그것입니다(U-Boot `doc/usage/fit/signature.rst`의 "required" 설명). 서명된 `fitImage`는 7,706,450바이트로, 커널(7,633,984)과 DTB(70,448)에 메타데이터가 붙은 크기입니다.
+
+post-image 스크립트로 옮기면 다음과 같습니다. `BUILD_DIR`은 post-image 스크립트에 export되는 변수입니다(Ch 7).
 
 ```bash
 #!/bin/sh
 set -e
 BOARD_DIR="$(dirname "$0")"
-KEY="${SIGNING_KEY:?set SIGNING_KEY to the provisioned signing key path}"
+KEYDIR="${SIGNING_KEYDIR:?set SIGNING_KEYDIR to the provisioned key directory}"
+# host-uboot-tools mkimage cannot sign in 2026.02.3 (see above)
+MKIMAGE="$(ls "${BUILD_DIR}"/uboot-*/tools/mkimage)"
 
-# 1) FIT 이미지에 서명 — mkimage가 .its 안의 signature node를 채움
-mkimage -f "${BOARD_DIR}/u-boot-signed.its" \
-        -k "$(dirname ${KEY})" \
-        -K "${BINARIES_DIR}/u-boot.dtb" \
-        -r "${BINARIES_DIR}/fitImage"
+cp "${BOARD_DIR}/fit.its" "${BINARIES_DIR}/fit.its"
+cp "${BINARIES_DIR}/u-boot.dtb" "${BINARIES_DIR}/u-boot-pubkey.dtb"
+cd "${BINARIES_DIR}"
+"${MKIMAGE}" -f fit.its -k "${KEYDIR}" -K u-boot-pubkey.dtb -r fitImage
+rm -f fit.its
 
-# 2) rootfs에 별도 detached signature
-openssl dgst -sha256 -sign "${KEY}" \
-    -out "${BINARIES_DIR}/rootfs.ext4.sig" \
-    "${BINARIES_DIR}/rootfs.ext4"
-
-# 3) update bundle 묶기
-tar -cf "${BINARIES_DIR}/update.tar" -C "${BINARIES_DIR}" \
-    fitImage rootfs.ext4 rootfs.ext4.sig
+# detached signature for the rootfs
+openssl dgst -sha256 -sign "${KEYDIR}/dev.key" \
+    -out rootfs.squashfs.sig rootfs.squashfs
 ```
 
-key 파일은 Buildroot 트리에도 외부 트리에도 커밋하지 않고, CI의 secret store 등에서 빌드 시점에 경로로 주입합니다. post-image 스크립트가 key 경로를 환경 변수에서 읽도록 짜면(`${SIGNING_KEY:?…}`) 키가 없을 때 바로 실패합니다. 이 장에서 서명 흐름은 실제로 실행하지 않았고, 명령 형식은 `mkimage`(`-k`/`-K`/`-r`)와 `openssl dgst` 문서를 따랐습니다.
+`openssl dgst -sha256 -sign`으로 만든 rootfs 서명은 인증서의 공개키로 `openssl dgst -sha256 -verify dev.pub -signature rootfs.sig rootfs.squashfs`를 돌려 `Verified OK`를 확인했습니다.
+
+남은 단계가 하나 있습니다. 공개키가 들어간 `u-boot-pubkey.dtb`는 U-Boot 바이너리 안에 들어가야 검증에 쓰입니다. U-Boot `doc/usage/fit/beaglebone_vboot.rst`의 6단계는 `make O=b/am335x_evm EXT_DTB=${WORK}/am335x-boneblack-pubkey.dtb`로 U-Boot를 다시 빌드합니다. Buildroot에서는 `BR2_TARGET_UBOOT_CUSTOM_MAKEOPTS`로 `EXT_DTB=`를 넘길 수 있지만, 그 DTB는 post-image보다 *먼저* 있어야 하므로 키를 넣은 DTB를 미리 만들어 두는 순서가 됩니다. 이 단계와 보드에서의 검증은 보드가 없어 돌리지 않았습니다.
+
+key 파일은 Buildroot 트리에도 외부 트리에도 커밋하지 않고, CI의 secret store 등에서 빌드 시점에 경로로 주입합니다. 스크립트가 경로를 환경 변수에서 읽게 하면(`${SIGNING_KEYDIR:?…}`) 키가 없을 때 바로 실패합니다.
 
 ## 흔한 실수
 
