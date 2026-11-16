@@ -54,7 +54,8 @@ HAL WWDG 주석에 따르면 "a reset is generated when the counter value rolls 
 | Counter 값 | 이때 refresh하면 |
 | --- | --- |
 | 0x7F ~ 0x61 | 너무 이름 → reset |
-| 0x60 ~ 0x40 (window) | refresh OK |
+| 0x60 (= W) | 경계. HAL 주석 두 문장이 다르게 읽히므로 피함 |
+| 0x5F ~ 0x40 (window) | refresh OK |
 | 0x40 → 0x3F로 내려감 | refresh 없이 시간 초과 → reset |
 
 ## 코드 예제
@@ -197,7 +198,7 @@ reset_cause_t get_reset_cause(void) {
 }
 ```
 
-검사 순서의 근거는 HAL v1.8.5 `stm32f4xx_hal_rcc.h`의 flag 설명입니다. `RCC_FLAG_BORRST`는 "POR/PDR or BOR reset", `RCC_FLAG_PORRST`는 "POR/PDR reset"이므로 전원 투입은 `BORRSTF`도 함께 세웁니다. 그래서 `PORRSTF`를 먼저 보지 않으면 모든 전원 투입이 brown-out으로 분류됩니다. flag는 `RMVF`로 지우기 전까지 남으므로(HAL `__HAL_RCC_CLEAR_RESET_FLAGS()`가 `RMVF`를 씀) 읽은 직후 지웁니다. 부트로더가 먼저 `RMVF`를 썼다면 application에서는 flag가 모두 0이고, 이 경우를 POR로 보고하지 않도록 `RESET_UNKNOWN`을 따로 둡니다. main 첫 줄에서 호출해 cause를 backup register나 Flash에 기록하면 field에서 IWDG reset 빈도를 셀 수 있습니다.
+검사 순서의 근거는 HAL v1.8.5 `stm32f4xx_hal_rcc.h`의 flag 설명입니다. `RCC_FLAG_BORRST`는 "POR/PDR or BOR reset", `RCC_FLAG_PORRST`는 "POR/PDR reset"이므로 전원 투입은 `BORRSTF`도 함께 세웁니다. 그래서 `PORRSTF`를 먼저 보지 않으면 모든 전원 투입이 brown-out으로 분류됩니다. flag는 `RMVF`로 지우기 전까지 남으므로(HAL `__HAL_RCC_CLEAR_RESET_FLAGS()`가 `RMVF`를 씀) 읽은 직후 지웁니다. HAL `__HAL_RCC_CLEAR_RESET_FLAGS()`의 설명은 RMVF가 지우는 flag로 PINRST, PORRST, SFTRST, IWDGRST, WWDGRST, LPWRRST를 듭니다. 부트로더가 먼저 `RMVF`를 썼다면 application에서는 이 flag들이 0이고, 아무 flag도 남지 않은 경우를 POR로 보고하지 않도록 `RESET_UNKNOWN`을 따로 둡니다. main 첫 줄에서 호출해 cause를 backup register나 Flash에 기록하면 field에서 IWDG reset 빈도를 셀 수 있습니다.
 
 ## 동작 확인
 
