@@ -187,7 +187,7 @@ QEMU가 흉내 내지 못하는 영역이 있습니다. 아래에 해당하는 �
 ## 정리
 
 - `truncate`로 backing store를 만들고 `-machine q35,cxl=on`에 `pxb-cxl → cxl-rp → cxl-type3`를 쌓습니다. disk·NIC은 `bus=pcie.0`으로 명시해야 QEMU가 시작합니다.
-- 가상 machine guest에서 region을 commit하려면 cache 무효화가 가능해야 합니다. 테스트 커널 option이나(TCG) `-cpu max,-hypervisor`가 필요했습니다.
+- 가상 machine guest에서 region을 commit하려면 cache 무효화가 가능해야 합니다. 테스트용 커널 option을 켜거나, TCG에서 `-cpu max,-hypervisor`를 줘야 했습니다.
 - volatile 메모리는 `volatile-memdev=`로 붙이고, FMW는 256 MiB 배수로 region 전체가 들어가게 잡습니다.
 - 검증은 `lspci` → `/sys/bus/cxl/devices/` → `cxl list -RT` → `numactl --hardware` 순서로 위에서부터 통과시킵니다.
 - 자주 걸리는 지점은 q35 미사용, `memdev=` 사용, FMW 크기, guest 커널 6.3 미만입니다.
