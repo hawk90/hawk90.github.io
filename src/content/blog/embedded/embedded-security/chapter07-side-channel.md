@@ -40,7 +40,7 @@ Square-and-multiply 지수승에서 지수 bit에 따라 multiply를 추가하�
 
 ## DPA / CPA — 통계적 공격
 
-SPA로 안 보이는 작은 누출은 trace를 많이 모아 평균을 내면 드러납니다. DPA는 key 후보로 계산한 중간값 bit 하나로 trace를 두 그룹으로 나누고 두 평균의 차이를 봅니다. 차이가 튀는 후보가 정답입니다. 논문의 DES 예는 1,000개 trace를 썼습니다. CPA는 Brier·Clavier·Olivier의 [CHES 2004 논문](https://www.iacr.org/archive/ches2004/31560016/31560016.pdf)이 정리한 방법으로, 그룹을 나누는 대신 누출 모델(논문은 Hamming distance)과 측정값의 상관계수를 씁니다.
+SPA로 안 보이는 작은 누출은 trace를 많이 모아 평균을 내면 드러납니다. DPA는 key 후보로 계산한 중간값 bit 하나로 trace를 두 그룹으로 나누고 두 평균의 차이를 봅니다. 차이가 튀는 후보가 정답입니다. 논문의 DES 예는 1,000개 trace를 썼습니다. CPA는 Brier·Clavier·Olivier의 [CHES 2004 논문 "Correlation Power Analysis with a Leakage Model"(LNCS 3156)](https://www.iacr.org/cryptodb/data/paper.php?pubkey=625)이 정리한 방법으로, 그룹을 나누는 대신 누출 모델과 측정값의 상관계수를 씁니다.
 
 AES의 첫 SubBytes를 표적으로 한 CPA의 골격:
 

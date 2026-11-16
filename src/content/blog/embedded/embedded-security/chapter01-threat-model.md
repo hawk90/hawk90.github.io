@@ -125,7 +125,7 @@ Fault injection은 전원·clock·EM 교란으로 실행이나 데이터에 오�
 
 **Side-channel — power / EM / timing**
 
-AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있습니다. 출발점은 Kocher의 timing 공격(CRYPTO 1996)과 DPA(Kocher·Jaffe·Jun, CRYPTO 1999)이고, CPA는 Brier·Clavier·Olivier의 [CHES 2004 논문](https://www.iacr.org/archive/ches2004/31560016/31560016.pdf)이 정리했습니다. 방어는 *masking*과 *constant-time* 구현입니다. Ch 7에서 따로 다룹니다.
+AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있습니다. 출발점은 Kocher의 timing 공격(CRYPTO 1996)과 DPA(Kocher·Jaffe·Jun, CRYPTO 1999)이고, CPA는 Brier·Clavier·Olivier의 [CHES 2004 논문](https://www.iacr.org/cryptodb/data/paper.php?pubkey=625)이 정리했습니다. 방어는 *masking*과 *constant-time* 구현입니다. Ch 7에서 따로 다룹니다.
 
 **Cold boot / RAM remanence**
 

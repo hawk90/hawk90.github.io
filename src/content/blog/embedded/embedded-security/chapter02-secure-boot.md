@@ -93,7 +93,7 @@ Digest를 여러 개 둘 수 있으면 키를 폐기하고 다음 키로 넘어�
 
 ## STM32 RDP — 가장 단순한 임베디드 보안
 
-[ST AN5347의 RDP 설명](https://www.st.com/content/st_com/en/technical-documents/an5347-introduction-to-arm-trustzone-features-on-stm32l5-stm32u5-and-stm32u3-mcus-stmicroelectronics_asset/chunk-003-topic-an5347-rdp.html)은 STM32L5·U5 계열의 RDP 단계별 debug 접근과 regression 조건을 다룹니다. STM32L5 HAL([stm32l5xx-hal-driver v1.0.7 `stm32l5xx_hal_flash.h`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Inc/stm32l5xx_hal_flash.h#L278-L283))은 option byte 값을 Level 0 = `0xAA`, 0.5 = `0x55`, 1 = `0xBB`, 2 = `0xCC`로 두고, Level 2에는 Level 1·0으로 돌아갈 수 없다는 경고를 붙입니다.
+STM32L5 HAL([stm32l5xx-hal-driver v1.0.7 `stm32l5xx_hal_flash.h`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Inc/stm32l5xx_hal_flash.h#L278-L283))은 option byte 값을 Level 0 = `0xAA`, 0.5 = `0x55`, 1 = `0xBB`, 2 = `0xCC`로 두고, Level 2에는 Level 1·0으로 돌아갈 수 없다는 경고를 붙입니다.
 
 RDP는 debug·flash 읽기 보호이고 image 서명 검증이 아닙니다. RDP Level 2로 잠근 STM32도 flash에 들어 있는 코드가 무엇이든 그대로 실행합니다. 실행할 이미지를 검증하려면 그 위에 MCUboot 같은 서명 검증 부트로더를 따로 올려야 합니다. 이 글에서는 option byte를 바꾸지 않았습니다.
 
@@ -111,7 +111,7 @@ NXP의 High Assurance Boot(HAB) version 4는 i.MX의 BootROM이 제공하는 sec
 
 HAB v4.1.2부터는 CSF key·IMG key 없이 SRK 하나로 CSF와 이미지를 함께 인증하는 "fast authentication" PKI tree도 쓸 수 있습니다(같은 문서 194행). 장치를 잠그는 fuse 위치는 SoC마다 다릅니다. U-Boot의 [`mx6_mx7_secure_boot.txt`](https://github.com/u-boot/u-boot/blob/v2024.04/doc/imx/habv4/guides/mx6_mx7_secure_boot.txt#L240-L265)는 `SEC_CONFIG[1]`를 i.MX6에서 bank 0 word 6의 `0x00000002`, i.MX7D/S에서 bank 1 word 3의 `0x02000000`, i.MX7ULP에서 bank 29 word 6의 `0x80000000`으로 적습니다. 이 bit를 구우면 올바른 PKI tree로 서명하지 않은 이미지는 load되지 않습니다. 문서는 그 전에 `hab_status`가 "No HAB Events Found!"를 내는지 먼저 확인하라고 합니다.
 
-[NXP의 HABv4 자료 안내](https://community.nxp.com/t5/i-MX-Security/i-MX-Security-Features-amp-Collateral/ta-p/1192496)도 함께 봅니다. i.MX 8·8X 계열(i.MX 8QM 등)은 HABv4가 아니라 SECO를 호출하는 AHAB를 씁니다([U-Boot `mx8_mx8x_encrypted_boot.txt`](https://github.com/u-boot/u-boot/blob/v2024.04/doc/imx/ahab/guides/mx8_mx8x_encrypted_boot.txt#L1-L25)).
+i.MX 8·8X 계열(i.MX 8QM 등)은 HABv4가 아니라 SECO를 호출하는 AHAB를 씁니다([U-Boot `mx8_mx8x_encrypted_boot.txt`](https://github.com/u-boot/u-boot/blob/v2024.04/doc/imx/ahab/guides/mx8_mx8x_encrypted_boot.txt#L1-L25)).
 
 | 단계 | 확인할 산출물 |
 |------|------|

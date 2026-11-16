@@ -97,7 +97,7 @@ Cortex-A의 TrustZone은 *OS-level 분리*입니다. Linux와 OP-TEE가 동시�
 
 ![Secure·Non-secure flash와 SRAM을 나눈 개념적 partition 예시](/images/blog/embedded-security/diagrams/ch04-stm32l552-memory-map.svg)
 
-위 그림은 partition 역할의 개념도이며 STM32L552의 실제 주소 범위나 기본 memory map이 아닙니다. STM32L5의 Secure·Non-secure alias와 option byte는 [ST AN5347](https://www.st.com/content/st_com/en/technical-documents/an5347-introduction-to-arm-trustzone-features-on-stm32l5-stm32u5-and-stm32u3-mcus-stmicroelectronics_asset/chunk-003-topic-an5347-rdp.html)이 다룹니다. 주소의 최종 보안 속성은 아래 SAU 절처럼 SAU와 IDAU가 함께 정합니다.
+위 그림은 partition 역할의 개념도이며 STM32L552의 실제 주소 범위나 기본 memory map이 아닙니다. 주소의 최종 보안 속성은 아래 SAU 절처럼 SAU와 IDAU가 함께 정합니다.
 
 ## SAU / IDAU 설정
 
