@@ -273,7 +273,7 @@ int i2c_bus_recover(void) {
 }
 ```
 
-핀을 GPIO 출력으로 바꾸기 전에 BSRR로 ODR8·ODR9를 1로 써 두는 이유는, 출력으로 바뀌는 순간 핀이 ODR 값을 내보내기 때문입니다. 이 동작은 F407 reference manual 대신 QEMU의 STM32L475 GPIO 모델([4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)에서 쓴 `b-l475e-iot01a`)로 PB9를 같은 순서로 바꿔 보면 이렇게 됩니다.
+핀을 GPIO 출력으로 바꾸기 전에 BSRR로 ODR8·ODR9를 1로 써 두는 이유는, 출력으로 바뀌는 순간 핀이 ODR 값을 내보내기 때문입니다. 이 동작은 F407 reference manual 대신 QEMU의 STM32L475 GPIO 모델([4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)에서 쓴 `b-l475e-iot01a`)로 확인했습니다. PB9를 같은 순서로 바꿔 보면 이렇게 됩니다.
 
 ```c
 /* od_test.c */
