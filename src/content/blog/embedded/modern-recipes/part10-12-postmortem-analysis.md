@@ -224,7 +224,10 @@ stack이 넘쳐 SP가 쓸 수 없는 곳을 가리키면 예외 진입의 stacki
 ```c
 __attribute__((naked)) void HardFault_Handler(void) {
     __asm volatile (
-        "mrs  r0, msp               \n"   /* original frame (if stacking succeeded) */
+        "tst  lr, #4                \n"   /* EXC_RETURN bit 2: which stack */
+        "ite  eq                    \n"
+        "mrseq r0, msp              \n"   /* original frame (if stacking succeeded) */
+        "mrsne r0, psp              \n"
         "ldr  r1, =_fault_stack_top \n"
         "mov  sp, r1                \n"   /* switch to a reserved stack */
         "b    hardfault_save_dump   \n");
@@ -256,4 +259,3 @@ dump의 PC는 그 빌드의 ELF가 있어야 함수와 줄로 풀립니다. 위 
 - [10-04: 하드폴트 분석](/blog/embedded/modern-recipes/part10-04-hardfault-analysis)
 - [10-08: 메모리 오염 진단](/blog/embedded/modern-recipes/part10-08-memory-corruption)
 - [10-11: 로깅 시스템 설계](/blog/embedded/modern-recipes/part10-11-logging-system)
-- RTOS 5-04: 시스템 진단
