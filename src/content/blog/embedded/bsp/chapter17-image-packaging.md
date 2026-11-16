@@ -46,7 +46,7 @@ LBA -1         : GPT Header (backup)
 
 - **앞쪽 34 LBA**. LBA 0~33(512바이트 섹터로 17 KiB)이 protective MBR, header, entry array입니다. 첫 partition을 어디서 시작할지는 따로 정하고, 아래 genimage 결과처럼 SoC 부트 이미지 뒤로 미룰 수 있습니다.
 - **backup GPT**. 디스크 끝에 동일 정보가 한 번 더 있습니다. primary가 깨져도 복구 가능합니다.
-- **partition UUID**. GPT partition에는 고유한 partition UUID가 있습니다. kernel의 `root=PARTUUID=...`는 장치 이름 열거 순서와 무관하게 root partition을 가리킵니다. 이 시리즈의 Debian guest도 `/proc/cmdline`에 `root=PARTUUID=1f342af3-...`를 씁니다(Ch 3).
+- **partition UUID**. GPT partition에는 고유한 partition UUID가 있습니다. kernel의 `root=PARTUUID=...`는 장치 이름 열거 순서와 무관하게 root partition을 가리킵니다. 이 시리즈의 Debian guest도 `/proc/cmdline`에 `root=PARTUUID=1f342af3-...`를 씁니다(Ch 10).
 
 `sgdisk -p`로 layout을 확인합니다. 출력 예는 아래 genimage 절에 있습니다.
 
@@ -65,7 +65,7 @@ GPT
 ├─ p7: data (remainder)             # 사용자 데이터
 ```
 
-이 layout은 설계 예입니다. A/B 슬롯의 동작 순서는 다음과 같습니다.
+이 layout은 설계 예입니다. A/B 슬롯의 동작을 설명용 변수 이름으로 적으면 다음과 같습니다. 남은 시도 횟수를 *줄여 가는* 이 방식은 RAUC의 U-Boot 연동(`BOOT_ORDER`, `BOOT_<슬롯>_LEFT`, Bootloader Ch 17)과 같은 설계이고, 아래 U-Boot `bootcount` 예는 횟수를 *올려 가며* `bootlimit`과 비교하는 다른 구현입니다.
 
 1. 부팅 직후: 부트로더가 `BOOT_SLOT` 환경 변수를 읽음. 기본 A.
 2. 슬롯 A의 boot와 rootfs를 mount.
@@ -85,10 +85,10 @@ bootcmd=run boot_main
 boot_main=if test "$boot_slot" = "B"; then run boot_b; else run boot_a; fi
 boot_a=load mmc 0:2 ${kernel_addr_r} Image; load mmc 0:2 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
 boot_b=load mmc 0:3 ${kernel_addr_r} Image; load mmc 0:3 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
-boot_alt=if test "$boot_slot" = "B"; then setenv boot_slot A; else setenv boot_slot B; fi; saveenv; reset
+boot_alt=if test "$boot_slot" = "B"; then setenv boot_slot A; else setenv boot_slot B; fi; setenv bootcount 0; saveenv; reset
 ```
 
-arm64 `Image`는 `booti`로 부팅합니다(Ch 6의 EVK 환경과 같은 명령). U-Boot v2024.04 `doc/README.bootcount`에 따르면 `CONFIG_BOOTCOUNT_LIMIT`이 켜진 U-Boot는 power-on reset 뒤 `bootcount`를 1로 두고 재부팅마다 1씩 올립니다. 그 값이 `bootlimit`을 넘으면 `bootcmd` 대신 `altbootcmd`를 실행하고(`include/bootcount.h:100-105`, `common/autoboot.c:476`), 성공한 부팅 뒤 `bootcount`를 0으로 돌리는 것은 Linux 쪽 application의 책임입니다. 이 흐름을 QEMU에서 실제로 돌린 기록은 [Bootloader Ch 17](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다.
+arm64 `Image`는 `booti`로 부팅합니다(Ch 6의 EVK 환경과 같은 명령). U-Boot v2024.04 `doc/README.bootcount`에 따르면 `CONFIG_BOOTCOUNT_LIMIT`이 켜진 U-Boot는 power-on reset 뒤 `bootcount`를 1로 두고 재부팅마다 1씩 올립니다. 그 값이 `bootlimit`을 넘으면 `bootcmd` 대신 `altbootcmd`를 실행하고(`include/bootcount.h:100-105`, `common/autoboot.c:476`), 성공한 부팅 뒤 `bootcount`를 0으로 돌리는 것은 Linux 쪽 application의 책임입니다. `boot_alt`에서 `bootcount`를 0으로 돌리지 않으면, 저장된 횟수가 계속 `bootlimit`을 넘은 채라 다음 부팅도 `altbootcmd`로 가서 슬롯을 다시 뒤집습니다. 그래서 슬롯을 바꾼 뒤 `setenv bootcount 0`을 함께 저장합니다. bootcount fallback을 QEMU에서 실제로 돌린 기록은 [Bootloader Ch 17](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다.
 
 ## SoC 부트 헤더와 첫 섹터
 
@@ -119,7 +119,6 @@ image boot.vfat {
         files = {
             "Image",
             "mybsp.dtb",
-            "boot.scr",
         }
     }
     size = 32M

@@ -36,9 +36,9 @@
 \node[font=\sffamily\tiny, text=mutec, anchor=north] at (8, 2.5) {15.22 s};
 
 % Measured hotspots
-\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (0, 1.1) {가장 큰 구간 (같은 실행):};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.5) {• U-Boot: 수동 입력 + TFTP 38 MB};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.0) {• Kernel: of\_platform\_default\_populate\_init 36 ms};
+\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (0, 1.1) {가장 큰 구간:};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.5) {• U-Boot: 수동 입력 + TFTP 38 MB (위 막대와 같은 실행)};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.0) {• Kernel: of\_platform\_default\_populate\_init 36 ms (initcall\_debug 별도 부팅)};
 \node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, -0.5) {• Userspace: dev-vda1.device 6.8 s, udev-trigger 5.8 s};
 
 \end{tikzpicture}

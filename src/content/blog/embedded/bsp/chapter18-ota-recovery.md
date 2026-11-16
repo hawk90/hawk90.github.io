@@ -14,7 +14,7 @@ topics: ["embedded"]
 
 **OTA는 업데이트 원자성, 실패 탐지, 복구 경로를 함께 설계해야 합니다.** A/B 슬롯과 서명 검증은 위험을 줄이는 구성요소이고, 전원·저장장치·부트로더 고장까지 막아 주지는 않습니다.
 
-이번 글은 슬롯 구성, U-Boot bootcount fallback, update agent, 서명, delta update, 복구 경로를 다룹니다. RAUC 1.13으로 3단 인증서 체인과 bundle을 실제로 만들어 검증했고, 인증서 만료 뒤의 동작, bsdiff와 casync의 delta도 Debian 13 guest에서 돌렸습니다. bootcount와 RAUC install을 U-Boot와 함께 끝까지 돌린 기록은 [Bootloader Ch 17](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다.
+이번 글은 슬롯 구성, U-Boot bootcount fallback, update agent, 서명, delta update, 복구 경로를 다룹니다. RAUC 1.13으로 3단 인증서 체인과 bundle을 실제로 만들어 검증했고, 인증서 만료 뒤의 동작, bsdiff와 casync의 delta도 Debian 13 guest에서 돌렸습니다. U-Boot bootcount fallback과 RAUC의 U-Boot 슬롯 스크립트(`BOOT_ORDER`/`BOOT_x_LEFT`)를 QEMU에서 돌린 기록은 [Bootloader Ch 17](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다. `rauc install`과 `mark-good`은 이 시리즈에서 실행하지 않았습니다.
 
 ## OTA 아키텍처 비교
 
@@ -40,7 +40,7 @@ altbootcmd=run switch_slot
 boot_active=if test "$slot" = "B"; then run boot_b; else run boot_a; fi
 boot_a=setenv bootargs root=PARTUUID=${uuid_rootfs_a} rootwait; load mmc 0:2 ${kernel_addr_r} Image; load mmc 0:2 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
 boot_b=setenv bootargs root=PARTUUID=${uuid_rootfs_b} rootwait; load mmc 0:3 ${kernel_addr_r} Image; load mmc 0:3 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
-switch_slot=if test "$slot" = "B"; then setenv slot A; else setenv slot B; fi; saveenv; reset
+switch_slot=if test "$slot" = "B"; then setenv slot A; else setenv slot B; fi; setenv bootcount 0; saveenv; reset
 ```
 
 Linux 쪽에서 bootcount를 0으로 돌리는 서비스는 핵심 서비스가 올라온 뒤에 실행합니다. 아래 C 코드는 흐름만 보이는 예이고 `check_critical_services_running()`은 제품이 정의해야 합니다.
@@ -84,6 +84,8 @@ WantedBy=multi-user.target
 ## RAUC — Robust Auto-Update Controller
 
 RAUC는 *bundle* 단위로 업데이트하고 서명을 검증합니다. 대상 시스템의 설정 예입니다. `bootloader` 값으로는 `barebox`, `grub`, `uboot`, `efi`, `custom`, `noop`이 있습니다(RAUC v1.13 Reference).
+
+`bootloader=uboot`로 두면 RAUC는 위의 `slot` 변수가 아니라 `BOOT_ORDER`와 `BOOT_<bootname>_LEFT` 환경 변수를 바꿉니다(RAUC 통합 문서, Bootloader Ch 17). 그래서 RAUC를 쓸 때는 위 스크립트 대신 그 변수를 읽는 boot script를 씁니다.
 
 ```ini
 # /etc/rauc/system.conf
@@ -144,7 +146,7 @@ Certificate Chain:
    Issuer: CN = MyBSP Root CA
 ```
 
-이 시험의 ext4에는 버전 파일 하나만 있었고, bundle은 15,550바이트였습니다. 대상 보드에서 `rauc install`로 비활성 슬롯에 쓰고, 다음 부팅이 성공하면 제품 로직이 `rauc status mark-good`을 부릅니다. RAUC는 application이 정상인지 스스로 판단하지 않습니다. 이 흐름은 Bootloader Ch 17에서 실행했습니다.
+이 시험의 ext4에는 버전 파일 하나만 있었고, bundle은 15,550바이트였습니다. 대상 보드에서 `rauc install`로 비활성 슬롯에 쓰고, 다음 부팅이 성공하면 제품 로직이 `rauc status mark-good`을 부릅니다. RAUC는 application이 정상인지 스스로 판단하지 않습니다.
 
 ## SWUpdate
 
@@ -294,5 +296,5 @@ GPT
 
 - [Ch 17: 이미지 패키징](/blog/embedded/bsp/chapter17-image-packaging) — A/B 파티션 layout
 - [Ch 20: 양산 환경](/blog/embedded/bsp/chapter20-production) — 키 관리와 CI
-- [Bootloader Ch 17 — A/B 부팅 이중화](/blog/embedded/bootloader/chapter17-ab-update) — bootcount와 RAUC를 QEMU에서 실행
+- [Bootloader Ch 17 — A/B 부팅 이중화](/blog/embedded/bootloader/chapter17-ab-update) — bootcount와 RAUC 슬롯 스크립트를 QEMU에서 실행
 - [Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model) — 서명, HSM, secure boot

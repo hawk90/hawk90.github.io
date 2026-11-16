@@ -127,8 +127,8 @@ linux-6.12의 `MAINTAINERS` 파일에서 이 시리즈와 관련된 항목의 `M
 | ARM/FREESCALE IMX / MXC ARM ARCHITECTURE | Shawn Guo, Sascha Hauer | imx@lists.linux.dev, linux-arm-kernel@lists.infradead.org |
 | IIO SUBSYSTEM AND DRIVERS | Jonathan Cameron | linux-iio@vger.kernel.org |
 | MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM | Ulf Hansson | linux-mmc@vger.kernel.org |
-| ARM/STM32 ARCHITECTURE | Maxime Coquelin, Alexandre Torgue | linux-stm32@st-md-mailman.stormreply.com |
-| ARM/Rockchip SoC support | Heiko Stuebner | linux-rockchip@lists.infradead.org |
+| ARM/STM32 ARCHITECTURE | Maxime Coquelin, Alexandre Torgue | linux-stm32@st-md-mailman.stormreply.com, linux-arm-kernel@lists.infradead.org |
+| ARM/Rockchip SoC support | Heiko Stuebner | linux-arm-kernel@lists.infradead.org, linux-rockchip@lists.infradead.org |
 
 담당자는 바뀌므로 표를 외우지 말고 보낼 때마다 `get_maintainer.pl`을 돌립니다. 보내기 전에 `Documentation/process/submitting-patches.rst`를 읽습니다.
 
@@ -206,7 +206,7 @@ $ git bisect run ./scripts/auto-test.sh
 
 커널의 보안 수정은 stable/LTS 릴리스로 나오지만, 제품 이미지에 들어가는 것은 BSP가 그 릴리스를 받아 다시 빌드했을 때뿐입니다. 커널 밖의 패키지(OpenSSL, BusyBox 등)는 빌드 시스템의 도구로 따라갑니다.
 
-- **Buildroot**: 2024.02 매뉴얼 `common-usage.adoc:165-182`. `make show-info`는 패키지와 버전·license를 JSON으로 내고(Ch 16에서 실행), `make pkg-stats`는 "whether known CVEs (security vulnerabilities) affect the packages in your current configuration"을 HTML·JSON으로 보여 줍니다.
+- **Buildroot**: 2024.02 매뉴얼 `common-usage.adoc:165-182`. `make show-info`는 패키지와 버전·license를 JSON으로 내고(Ch 16에서는 패키지 단위 `make mybsp-init-show-info`를 실행), `make pkg-stats`는 "whether known CVEs (security vulnerabilities) affect the packages in your current configuration"을 HTML·JSON으로 보여 줍니다.
 - **Yocto**: 5.0.17 Development Tasks Manual의 vulnerabilities 절은 `INHERIT += "cve-check"`로 이미지의 CVE를 검사하라고 적습니다.
 
 이 글은 두 검사를 실행하지 않았습니다. 찾은 CVE를 언제 반영할지는 제품의 정책입니다. 아래는 그런 정책의 예입니다.

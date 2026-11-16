@@ -79,7 +79,6 @@ include $(sort $(wildcard $(BR2_EXTERNAL_MYBSP_PATH)/package/*/*.mk))
 ```text
 # Config.in
 source "$BR2_EXTERNAL_MYBSP_PATH/package/mybsp-init/Config.in"
-source "$BR2_EXTERNAL_MYBSP_PATH/package/mybsp-firmware/Config.in"
 ```
 
 Buildroot 2024.02를 Debian 13 guest에 풀고 이 트리를 연결해 본 결과입니다.
@@ -89,7 +88,7 @@ $ make BR2_EXTERNAL=/root/br/bsp-mybsp list-defconfigs
 External configs in "BSP for MyBoard rev A/B":
   mybsp_defconfig                     - Build for mybsp
 $ make BR2_EXTERNAL=/root/br/bsp-mybsp mybsp_defconfig
-$ grep -E "^BR2_EXTERNAL|^BR2_PACKAGE_MYBSP_INIT|^BR2_ROOTFS_OVERLAY" .config
+$ grep -E "^BR2_EXTERNAL|^BR2_PACKAGE_MYBSP_INIT|^BR2_ROOTFS_OVERLAY" .config   # 출력 일부
 BR2_EXTERNAL_NAMES="MYBSP"
 BR2_EXTERNAL_MYBSP_PATH="/root/br/bsp-mybsp"
 BR2_EXTERNAL_MYBSP_VERSION=""

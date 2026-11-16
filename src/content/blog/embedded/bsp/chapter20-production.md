@@ -220,7 +220,7 @@ U-Boot v2024.04의 HABv4 안내(`doc/imx/habv4/guides/mx6_mx7_secure_boot.txt:12
 ./cst -i csf_uboot.txt -o csf_uboot.bin
 ```
 
-CSF 입력 파일 예는 같은 디렉터리의 `csf_examples/`에 있습니다. 이 글은 서명을 실행하지 않았습니다.
+CSF 입력 파일 예는 `doc/imx/habv4/csf_examples/`에 있습니다. 이 글은 서명을 실행하지 않았습니다.
 
 ARM Trusted Firmware(TF-A)의 BL2/BL31:
 

@@ -54,7 +54,7 @@ Accumulated time:
                  9,856  dm_r
 ```
 
-`board_init_r`에서 `eth_common_init`까지 67 ms가 가장 큽니다. `cli_loop`까지의 211 ms는 autoboot 카운트다운을 멈추고 명령을 친 시간이 섞인 값입니다. `bootm`이 커널로 넘어가기 직전 `start_kernel` 표시를 남기고 report를 찍으며(`arch/arm/lib/bootm.c:57-62`), `CONFIG_BOOTSTAGE_FDT`(`boot/Kconfig:955`)를 켜면 이 기록을 커널에 넘기는 DT에 넣습니다(`common/bootstage.c:321`).
+`board_init_r`에서 `eth_common_init`까지 67 ms가 가장 큽니다. `eth_common_init()`은 첫 줄에서 이 표시를 남기므로(`net/eth_common.c:32-34`), 이 67 ms는 네트워크 초기화가 아니라 그 *앞*의 일, 즉 `common/board_r.c`의 `init_sequence_r`에서 `initr_net` 전에 도는 flash·환경·stdio·콘솔 초기화 시간입니다. 같은 로그에는 `Flash: 64 MiB`, `Loading Environment from Flash...`가 있고 `Net: No ethernet found.`로 NIC는 없었습니다. `cli_loop`까지의 211 ms는 autoboot 카운트다운을 멈추고 명령을 친 시간이 섞인 값입니다. `bootm`이 커널로 넘어가기 직전 `start_kernel` 표시를 남기고 report를 찍으며(`arch/arm/lib/bootm.c:57-62`), `CONFIG_BOOTSTAGE_FDT`(`boot/Kconfig:955`)를 켜면 이 기록을 커널에 넘기는 DT에 넣습니다(`common/bootstage.c:321`).
 
 ### Kernel: printk 시각과 `initcall_debug`
 
@@ -113,13 +113,13 @@ graphical.target @11.432s
               └─systemd-tmpfiles-setup.service @9.586s +565ms
 ```
 
-`blame`은 각 unit이 걸린 시간이고, `critical-chain`은 목표에 이르는 경로입니다. 이 Debian 이미지에서는 `grub-common.service`, `unattended-upgrades.service`처럼 임베디드 제품에 필요 없는 unit이 경로에 들어 있습니다. 그래서 제품용 rootfs는 Buildroot·Yocto로 필요한 unit만 넣어 만듭니다(Ch 16). Buildroot에는 그래프로 보는 `systemd-bootchart` 패키지도 있습니다(`package/systemd-bootchart/Config.in`).
+`blame`은 각 unit이 걸린 시간이고, `critical-chain`은 목표에 이르는 경로입니다. 이 Debian 이미지의 `critical-chain`에는 `unattended-upgrades.service`가, `blame`에는 `grub-common.service`(935 ms)가 있습니다. 둘 다 임베디드 제품에 필요 없는 unit입니다. 그래서 제품용 rootfs는 Buildroot·Yocto로 필요한 unit만 넣어 만듭니다(Ch 16). Buildroot에는 그래프로 보는 `systemd-bootchart` 패키지도 있습니다(`package/systemd-bootchart/Config.in`).
 
 ## SPL과 U-Boot 단계 — Falcon mode
 
 U-Boot proper를 건너뛰고 SPL이 커널을 직접 적재하는 것이 Falcon mode입니다. Kconfig는 `CONFIG_SPL_OS_BOOT`(`common/spl/Kconfig:1108`)와 MMC/SD용 `CONFIG_SPL_FALCON_BOOT_MMCSD`(1134행)입니다. 예전 자료의 `CONFIG_SPL_FALCON_BOOT_MMC`라는 이름은 v2024.04에 없습니다. Falcon을 실제로 빌드하고 `spl export`로 준비하는 과정은 [Bootloader Ch 5](/blog/embedded/bootloader/chapter05-falcon-mode)에 있습니다. 실패했을 때 full U-Boot로 돌아가는 경로는 보드 코드가 따로 만들어야 합니다.
 
-U-Boot 자체를 줄일 때는 bootstage에서 큰 구간을 고릅니다. 위 측정에서는 `eth_common_init`까지가 가장 컸으므로, 네트워크 부팅이 필요 없는 제품이라면 `CONFIG_CMD_NET`(`cmd/Kconfig:1733`)과 네트워크 드라이버를 빼는 후보가 됩니다. 뺀 뒤 같은 `bootstage report`로 다시 잽니다.
+U-Boot 자체를 줄일 때는 bootstage에서 큰 구간을 고릅니다. 위 측정에서 가장 큰 구간은 `board_init_r`부터 네트워크 초기화 전까지(flash 탐색, 환경 적재, stdio·video 콘솔)였습니다. 이 구간을 더 쪼개려면 그 사이 함수에 `bootstage_mark()`를 더해 다시 잽니다. 무엇을 뺄지는 그렇게 나눈 결과로 정합니다.
 
 ## Kernel 단계 — 슬림화
 
@@ -168,7 +168,7 @@ systemctl mask grub-common.service
 
 - 부트 시간은 단계별 시작·끝 줄을 정해 같은 조건으로 잽니다.
 - U-Boot는 `bootstage report`, 커널은 printk 시각과 `initcall_debug ignore_loglevel`, userspace는 `systemd-analyze blame`/`critical-chain`으로 쪼갭니다.
-- QEMU 체인에서 가장 큰 구간은 userspace(약 11.6초)였고, 커널은 0.76초, U-Boot bootstage에서는 `eth_common_init`까지 67 ms가 가장 컸습니다.
+- QEMU 체인에서 가장 큰 구간은 userspace(약 11.6초)였고, 커널은 0.76초, U-Boot bootstage에서는 네트워크 초기화 전까지의 `board_init_r` 구간 67 ms가 가장 컸습니다.
 - 예전 이름 `CONFIG_BOOT_TRACER`, `lzImage`, `CONFIG_SPL_FALCON_BOOT_MMC`는 현재 소스에 없습니다.
 - 변경은 측정이 가리킨 곳부터 하고, 변경 뒤 같은 도구로 다시 잽니다.
 

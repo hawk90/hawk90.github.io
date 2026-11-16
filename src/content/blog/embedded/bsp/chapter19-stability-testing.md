@@ -30,7 +30,7 @@ stress-ng: info:  [140368] failed: 0
 stress-ng: info:  [140368] successful run completed in 30.06 secs
 ```
 
-`--metrics-brief`의 `bogo ops/s`는 같은 보드·같은 부하에서 두 빌드를 비교할 때 씁니다. 이 실행에서는 다른 작업이 같은 guest를 함께 쓰고 있어 `usr time`이 4 × 30초보다 적었습니다. 비교용 값은 다른 부하가 없을 때 잽니다.
+`--metrics-brief`의 `bogo ops/s`는 같은 보드·같은 부하에서 두 빌드를 비교할 때 씁니다. 이 실행의 `usr time`은 89.91초로 4 × 30초보다 적었습니다. 비교용 값은 같은 조건을 맞춰 잽니다.
 
 메모리 부하(`--vm`)는 Ch 5에서 돌렸습니다. `--vm-bytes 50%`가 *가용* 메모리 기준이라 생각보다 작은 영역만 시험한다는 점도 거기서 확인했습니다.
 
@@ -132,7 +132,7 @@ PATTERNS=(
     "BUG:"
     "WARNING:"
     "soft lockup"
-    "rcu_sched detected stalls"
+    "detected stalls"
     "Out of memory"
 )
 PATTERN=$(printf "|%s" "${PATTERNS[@]}")
@@ -149,7 +149,7 @@ $ cat /var/log/soak-alerts.log
 2026-11-16T08:38:16+00:00 [ 4138.860354] WARNING: injected by soak test
 ```
 
-경고 줄만 기록됐습니다. 같은 스크립트에서 `--line-buffered`만 빼고 다시 해 보면, 경고를 넣고 3초 뒤에도, 스크립트가 8초 timeout으로 끝난 뒤에도 로그 파일이 생기지 않았습니다. grep의 출력이 파이프 뒤 `while read`에 바로 전달되지 않은 것입니다. 감시 스크립트에는 이 옵션이 필요합니다. PCIe 오류를 감시하려면 커널이 찍는 `PCIe Bus Error: severity=...` 문자열(`drivers/pci/pcie/aer.c:717`)을 패턴에 더합니다.
+경고 줄만 기록됐습니다. RCU stall 패턴을 `rcu_sched detected stalls`가 아니라 `detected stalls`로 둔 것은, 커널이 `INFO: %s detected stalls on CPUs/tasks:`(`kernel/rcu/tree_stall.h:620`)의 `%s`에 RCU flavor 이름을 넣기 때문입니다. `CONFIG_PREEMPT_RCU`면 `rcu_preempt`, 아니면 `rcu_sched`입니다(`kernel/rcu/tree.h:453-458`). Ch 8의 `defconfig`는 `CONFIG_PREEMPT=y`라 `rcu_preempt`가 찍힙니다. 같은 스크립트에서 `--line-buffered`만 빼고 다시 해 보면, 경고를 넣고 3초 뒤에도, 스크립트가 8초 timeout으로 끝난 뒤에도 로그 파일이 생기지 않았습니다. grep의 출력이 파이프 뒤 `while read`에 바로 전달되지 않은 것입니다. 감시 스크립트에는 이 옵션이 필요합니다. PCIe 오류를 감시하려면 커널이 찍는 `PCIe Bus Error: severity=...` 문자열(`drivers/pci/pcie/aer.c:717`)을 패턴에 더합니다.
 
 온도 기록은 `/sys/class/thermal/thermal_zone*/temp`(밀리도)를 주기적으로 파일에 남기는 방식입니다(Ch 14). 이 guest에는 thermal zone이 없어 실행하지 않았습니다.
 
