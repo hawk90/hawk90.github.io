@@ -126,6 +126,57 @@ per-CPU IRQ는 `__setup_irq()`가 `IRQF_PERCPU`를 보고 `IRQD_PER_CPU`를 켭�
 
 managed IRQ에 대해서는 [kernel-parameters 문서](https://github.com/torvalds/linux/blob/v7.3-rc6/Documentation/admin-guide/kernel-parameters.txt)의 `isolcpus=managed_irq` 항목도 커널이 관리하며 `/proc/irq/*`로 바꿀 수 없다고 적습니다. 이 IRQ를 격리 코어에서 빼려면 부팅 파라미터를 씁니다("부팅 시 기본값 — irqaffinity와 isolcpus" 절). controller가 affinity를 지원하지 않는 경우는 커널 문서가 값이 기본값(전체 CPU)에서 바뀌지 않는다고 설명합니다.
 
+### 이 VM에서 실제로 확인
+
+위 규칙을 Debian 13 arm64 VM(QEMU `virt`, `-accel hvf`, vCPU 6, 커널 `6.12.116+deb13-arm64`, irqbalance는 `systemctl is-active`가 `inactive`)에서 확인했습니다. 이 글이 인용한 소스는 v7.3-rc6이고 실행한 커널은 v6.12 계열이라, 아래 결과는 두 버전에서 이 경로의 동작이 같다는 확인이기도 합니다. 이 VM의 GIC는 GICv3이고, PCIe MSI-X는 `/proc/interrupts`에 `GICv2m-PCI-MSIX`로 나와 GICv2m frame을 거쳐 SPI로 들어옵니다.
+
+대상은 세 IRQ입니다. 46은 virtio-net의 legacy INTx(GIC SPI, level), 53은 virtio-blk의 두 번째 queue IRQ(MSI-X, 커널이 queue마다 CPU를 배정한 managed IRQ), 10은 per-CPU인 architected timer입니다.
+
+```bash
+show() { for f in smp_affinity smp_affinity_list effective_affinity effective_affinity_list; do
+  printf "%s/%s: %s\n" $1 $f "$(cat /proc/irq/$1/$f 2>&1)"; done; }
+show 46
+echo c > /proc/irq/46/smp_affinity;        show 46
+echo 1-3 > /proc/irq/46/smp_affinity_list; show 46
+echo 3f > /proc/irq/46/smp_affinity        # restore
+show 53; echo 1 > /proc/irq/53/smp_affinity; echo "write rc=$?"
+cat /proc/irq/10/smp_affinity_list; echo 1 > /proc/irq/10/smp_affinity; echo "write rc=$?"
+```
+
+```text
+## IRQ 46 (virtio0, GIC SPI, level)
+46/smp_affinity: 3f
+46/smp_affinity_list: 0-5
+46/effective_affinity: 01
+46/effective_affinity_list: 0
+after: echo c > /proc/irq/46/smp_affinity
+46/smp_affinity: 0c
+46/smp_affinity_list: 2-3
+46/effective_affinity: 04
+46/effective_affinity_list: 2
+after: echo 1-3 > smp_affinity_list
+46/smp_affinity: 0e
+46/smp_affinity_list: 1-3
+46/effective_affinity: 02
+46/effective_affinity_list: 1
+## IRQ 53 (virtio1-req.1, MSI via ITS, managed)
+53/smp_affinity: 02
+53/smp_affinity_list: 1
+53/effective_affinity: 02
+53/effective_affinity_list: 1
+bash: line 1: echo: write error: Operation not permitted
+write rc=1
+## IRQ 10 (arch_timer, per-CPU)
+0-5
+write rc=1
+bash: line 1: echo: write error: Operation not permitted
+ 46:     129613          4          5          0          0          0     GICv3  36 Level     virtio0
+ 53:          0      62283          0          0          0          0  GICv2m-PCI-MSIX-0000:00:02.0   2 Edge      virti
+```
+
+- SPI 46에 `c`(CPU2·3)를 쓰자 `effective_affinity_list`는 2, `1-3`을 쓰자 1이었습니다. mask 안의 가장 낮은 번호 online CPU라는 위 `gic_set_affinity()` 규칙 그대로입니다. 마지막 줄의 `/proc/interrupts`에서 CPU0~2 열에 횟수가 붙은 것이 바꾼 순서의 흔적입니다.
+- managed IRQ 53과 per-CPU IRQ 10은 쓰기가 `Operation not permitted`(`EPERM`)로 거부됐습니다. 위 표의 managed·per-CPU 행입니다.
+
 ### irqbalance와 공존하기
 
 irqbalance는 `/proc/irq/N/smp_affinity`에 직접 써서 IRQ를 옮기는 daemon입니다. 부하 표본은 기본 10초마다 잽니다([`constants.h`](https://github.com/Irqbalance/irqbalance/blob/v1.9.5/constants.h)의 `SLEEP_INTERVAL`, man page의 `-t`/`--interval`).
