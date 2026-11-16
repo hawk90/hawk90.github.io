@@ -194,7 +194,7 @@ MemManage CFSR = 0x00000082
   stacked PC = 0x000003AA
 ```
 
-region 0의 RASR 0x06020027은 AP=110·C·SIZE=19·ENABLE, region 7의 0x10000009는 XN·AP=000·SIZE=4·ENABLE입니다. 표의 기대값이 모두 맞았고, `arm-none-eabi-addr2line -e mpu1.elf 0x3AA`는 stacked PC가 `mpu_guard_selftest`의 store(`str r2, [r3, #0]`)임을 보여 줍니다.
+region 0의 RASR 0x06020027은 AP=110·C·SIZE=19·ENABLE, region 7의 0x10000009는 XN·AP=000·SIZE=4·ENABLE입니다. 표의 기대값이 모두 맞았고, `arm-none-eabi-addr2line -e mpu1.elf 0x3AA`는 stacked PC가 `mpu_guard_selftest`의 store(`str r2, [r3, #0]`, `-O1`에서 `main`에 inline됨)임을 보여 줍니다. 경로 `harness/`·`CMSIS_5/`는 하네스와 CMSIS 5.9.0을 둔 위치에 맞춰 바꿉니다.
 
 실제 overflow는 이 시험과 다릅니다. Fault 순간 PSP가 guard 바로 위에 있으므로, guard 위 끝(0x20018020)과 PSP 사이가 stack frame보다 좁으면 진입 stacking도 guard에 씁니다. Frame은 8워드이고, 부동소수점 상태까지 쌓으면 S0~S15와 FPSCR이 더해집니다(2.3.7절, Figure 2-3). Stacking이 guard에 닿은 경우가 `MSTKERR`의 정의이고, 이때 stack의 context 값은 틀릴 수 있으므로(Table 4-25) stacked PC로 원인 함수를 찾지 않습니다.
 
@@ -239,7 +239,7 @@ MemManage CFSR = 0x00000092
   MMFAR = 0x1FFFFFE8
 ```
 
-region 밖 쓰기는 정확히 그 주소에서, stack overflow는 region 1 아래(0x1FFFFFE8)에서 fault가 났습니다. 앞 절의 "region 경계 자체가 guard"가 그대로 보입니다.
+위 블록은 두 실행에서 판단에 필요한 줄만 뽑은 것입니다. region 밖 쓰기는 정확히 그 주소에서, stack overflow는 region 1 아래(0x1FFFFFE8)에서 fault가 났습니다. 앞 절의 "region 경계 자체가 guard"가 그대로 보입니다.
 
 이 실험을 처음 짤 때 한 번 틀렸습니다. `main()` 안에서 `__set_PSP()`·`CONTROL.SPSEL`로 stack을 바꾸고 같은 함수에서 계속 실행하면, 컴파일러가 잡아 둔 지역 변수의 `[sp, #4]` 같은 offset이 새 stack 기준이 됩니다. PSP를 region 1 꼭대기(0x20001000)에 두었더니 지역 변수 store가 0x20001004로 가서 MemManage가 났습니다. stack을 바꾼 뒤에는 새 함수로 들어가거나, 새 SP 위에 여유를 둡니다.
 
