@@ -76,7 +76,7 @@ SoC(Statement of Compliance)의 필드는 [2023 Regulations Schedule 4](https://
 | [IEC 62443-4-1:2018](https://webstore.iec.ch/en/publication/33615) | 공급자의 개발·유지·종료 프로세스 | 요구·검증·patch·end-of-life 절차의 증거가 있는가? |
 | [IEC 62443-4-2:2019](https://webstore.iec.ch/en/publication/34421) | IACS component의 기술 요구 | component capability가 통합 환경의 목표를 지원하는가? |
 
-Zone은 보안 요구를 공유하는 자산을 묶고 conduit는 zone 사이 통신을 다룹니다. 사무망·제어망·안전망의 고정 3단 구성이나 물리적 분리만을 뜻하지 않습니다. 목표 SL-T와 capability SL-C를 구분하고 component 인증을 전체 system 달성 수준으로 확대하지 않습니다. Cybersecurity SL과 기능 안전의 SIL도 같은 척도가 아닙니다.
+IEC webstore의 62443-3-3:2013 설명은 이 표준이 IEC 62443-1-1의 일곱 foundational requirement(FR)에 대응하는 system requirement와 control system의 capability security level(SL-C)을 정하고, 사용자는 대상 system의 zone·conduit 정의와 함께 이를 써서 target SL(SL-T)을 정한다고 적습니다. 62443-4-2:2019는 같은 일곱 FR에 대응하는 component requirement와 SL-C(component)를 정합니다. SL-C는 제품이 낼 수 있는 수준이고 SL-T는 system이 목표로 하는 수준이므로, component의 SL-C 인증이 곧 system의 SL-T 달성은 아닙니다.
 
 이 글에서는 유료 표준 전문을 읽지 않았고, 위 내용은 IEC 공개 scope와 webstore 정보 범위입니다.
 

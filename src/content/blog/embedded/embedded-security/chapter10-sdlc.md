@@ -175,14 +175,15 @@ INHERIT += "create-spdx"
 
 ### VEX (Vulnerability Exploitability eXchange)
 
-[CycloneDX VEX 설명](https://cyclonedx.org/capabilities/vex/)은 제품과 취약점의 영향 상태를 표현합니다. `not_affected`라는 문자열만 선언하지 않고 판단 근거·대상 version·분석 일시·재검토 조건을 남깁니다. 불완전한 JSON 조각과 임의 CVE 번호를 완성된 VEX 예로 쓰지 않습니다.
+[CycloneDX VEX](https://cyclonedx.org/capabilities/vex/)는 제품 안에서 취약 component가 실제로 악용 가능한지를 표현합니다. [CycloneDX 1.6 JSON schema](https://github.com/CycloneDX/specification/blob/1.6/schema/bom-1.6.schema.json)의 `impactAnalysisState`는 `resolved`·`resolved_with_pedigree`·`exploitable`·`in_triage`·`false_positive`·`not_affected` 여섯 값이고, `not_affected`의 근거는 `impactAnalysisJustification`의 `code_not_present`·`code_not_reachable`·`requires_configuration`·`requires_dependency`·`requires_environment`·`protected_by_compiler`·`protected_at_runtime`·`protected_at_perimeter`·`protected_by_mitigating_control` 중에서 고릅니다. 아래 표는 각 판단을 schema 값에 대응시킨 것입니다.
 
-| 영향 판단 | 남길 증거 | 다시 판단할 조건 |
-|------|------|------|
-| Component 없음 | 실제 build inventory·누락 검토 | 새 component·link 방식 |
-| 취약 코드 제외 | build flag·link map·source 대응 | toolchain·구성 변경 |
-| 도달 불가 가설 | 호출·입력·권한 경계와 시험 | 기능·interface·권한 변경 |
-| 영향 있음/조사 중 | version·재현·완화·담당자 | patch·새 악용 정보 |
+| 영향 판단 | CycloneDX 1.6 값 | 남길 증거 | 다시 판단할 조건 |
+|------|------|------|------|
+| 취약 코드가 build에 없음 | `not_affected` + `code_not_present` | build flag·link map·source 대응 | toolchain·구성 변경 |
+| 취약 코드에 도달 불가 | `not_affected` + `code_not_reachable` | 호출·입력·권한 경계와 시험 | 기능·interface·권한 변경 |
+| 특정 설정에서만 취약 | `not_affected` + `requires_configuration` | 출하 설정과 변경 가능 여부 | 설정 노출·기본값 변경 |
+| 조사 중 | `in_triage` | version·재현 시도·담당자 | 새 악용 정보 |
+| 영향 있음 | `exploitable` | version·완화·patch 계획 | patch 배포 |
 
 VEX가 CRA 보고 대상 판단을 자동으로 대신하거나 법적 의무를 면제하지는 않습니다.
 
@@ -197,7 +198,7 @@ VEX가 CRA 보고 대상 판단을 자동으로 대신하거나 법적 의무를
 | Build L2 | hosted build platform이 생성한 서명된 provenance | build 뒤의 변조 |
 | Build L3 | 강화된(hardened) build platform | build 중의 변조 |
 
-Artifact 서명만으로 provenance의 정확성·builder 격리·해당 SLSA 수준이 증명되지 않습니다. Sigstore를 선택한다면 signature뿐 아니라 신뢰 key 또는 certificate identity·issuer, artifact digest와 적용한 verification policy를 확인합니다. Keyless도 identity 공급자·builder 권한의 신뢰를 검토해야 합니다. 여기서는 cosign 실행이나 SLSA 평가를 수행하지 않았습니다.
+Artifact 서명만으로 provenance의 정확성·builder 격리·해당 SLSA 수준이 증명되지 않습니다. Sigstore keyless 서명은 서명자의 OIDC identity로 발급한 인증서를 씁니다. 그래서 [cosign 검증 문서](https://docs.sigstore.dev/cosign/verifying/verify/)의 keyless 예는 `--certificate-identity`와 `--certificate-oidc-issuer`를 함께 주어, 누가 어느 issuer로 서명했는지까지 맞아야 통과하게 합니다. 이 둘을 빼고 "서명이 있다"만 확인하면 아무 identity의 서명이나 통과합니다. 여기서는 cosign 실행이나 SLSA 평가를 수행하지 않았습니다.
 
 ## 7. Response — 운영 단계의 보안
 

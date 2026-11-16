@@ -79,7 +79,7 @@ firmwalker 같은 규칙 검색은 파일 경로와 문자열 후보를 찾는 �
 
 ### Ghidra
 
-[Ghidra 공식 repository](https://github.com/NationalSecurityAgency/ghidra)는 disassembly·decompilation·scripting을 지원합니다. ELF처럼 header가 있는 파일은 import 때 ISA와 load address를 header에서 읽습니다. Raw flash dump에는 그런 정보가 없으므로 ISA·endianness·load address를 사람이 정합니다. Cortex-M이라면 image 첫 8 B가 초기 SP와 reset vector이므로, reset vector 값으로 load address를 추정하는 것이 출발점입니다.
+[Ghidra 공식 repository](https://github.com/NationalSecurityAgency/ghidra)는 disassembly·decompilation·scripting을 지원합니다. ELF처럼 header가 있는 파일은 import 때 ISA와 load address를 header에서 읽습니다. Raw flash dump에는 그런 정보가 없으므로 ISA·endianness·load address를 사람이 정합니다. Cortex-M이라면 vector table이 단서입니다. [Cortex-M33 TRM](https://developer.arm.com/documentation/100230/latest)(Issue 08)은 vector table의 모든 유효 entry가 bit 0을 1로 가져야 한다고 적습니다(Thumb 상태 표시). 그래서 dump 앞부분에 홀수 주소가 좁은 범위로 몰려 있으면 vector table일 가능성이 높고, 그 주소 범위가 load address의 후보가 됩니다.
 
 Decompiler의 C 비슷한 출력은 원본 소스가 아닙니다. 함수 경계·type·calling convention이 틀리면 해석도 틀릴 수 있습니다. 문자열 참조에서 비교 함수로 이어지는 call path와 실제 인증 결정을 함께 확인합니다. 문자열 `admin` 하나나 추정한 `strcmp`만으로 인증 우회를 선언하지 않습니다. 이 작업에서는 Ghidra를 실행하지 않았습니다.
 
@@ -128,7 +128,7 @@ $ echo $?
 
 정적 후보는 입력이 실제 보안 결정에 도달하는지 확인해야 합니다. [QEMU 사용자 모드](https://www.qemu.org/docs/master/user/main.html)는 guest kernel·모든 peripheral을 재현하는 장치 emulator가 아닙니다. `chroot`는 파일 경로의 root를 바꾸며 자체 보안 격리 경계가 아닙니다. 추출된 코드를 host root로 바로 실행하는 예를 사용하지 않습니다.
 
-Firmadyne은 Linux 기반 router류 이미지를 자체 kernel로 QEMU에서 띄우고 NVRAM을 흉내 냅니다. 웹 UI가 뜨더라도 실제 보드의 secure boot·key storage·DMA 동작은 그 환경에 없습니다. 장치 debugger의 `load`는 메모리나 flash에 쓰는 명령이므로 read-only 조사에 섞지 않습니다.
+[Firmadyne README](https://github.com/firmadyne/firmadyne)에 따르면 이 도구는 Linux 기반 embedded firmware를 자체 수정 kernel(MIPS v2.6, ARM v4.1·v3.10)로 QEMU에서 띄우고, userspace NVRAM library로 하드웨어 NVRAM을 흉내 냅니다. 웹 UI가 뜨더라도 실제 보드의 secure boot·key storage·DMA 동작은 그 환경에 없습니다. 장치 debugger의 `load`는 메모리나 flash에 쓰는 명령이므로 read-only 조사에 섞지 않습니다.
 
 ### Fuzzing — 입력 전달 계약부터
 
