@@ -16,12 +16,12 @@ topics: ["embedded"]
 
 ## 어떤 문제를 푸는가
 
-[Part 2-06](/blog/embedded/embedded-cpp/part2-06-templates-basics)에서 봤듯 템플릿은 zero-cost입니다. 다만 bloat가 두 형태로 나타납니다.
+[Part 2-06](/blog/embedded/embedded-cpp/part2-06-templates-basics)에서 봤듯 템플릿 호출에는 런타임 dispatch가 없습니다. 다만 비용이 두 형태로 나타납니다.
 
 1. **Code bloat** — 같은 함수가 여러 인스턴스로 중복됩니다.
 2. **Compile time** — 인스턴스마다 컴파일러가 추가 작업을 합니다.
 
-임베디드에서는 binary size가 critical합니다. 무심코 쓴 템플릿이 수 KB를 더할 수 있으므로 측정과 패턴으로 통제합니다.
+이 글의 숫자는 모두 Homebrew arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb -Os -ffreestanding -fno-exceptions -fno-rtti`)으로 컴파일한 오브젝트와 ELF에서 쟀습니다. 작은 예제라 바이트 수 자체보다 패턴 전후의 방향을 봅니다.
 
 ## bloat의 출처
 
@@ -43,21 +43,19 @@ process<double>(4.0);
 process<MyClass>(obj);
 ```
 
-5개의 전용 함수가 생성됩니다. 소스 줄 수를 기계어 크기로 환산할 수는 없으며 사용되지 않는 인스턴스는 출력되지 않을 수 있습니다.
-
-확인은 다음과 같이 합니다.
+5개의 전용 함수가 생성됩니다. 실제로 재 보기 위해 `process`의 본문을 "`value > 100`이면 외부 함수 세 개를 세 번 부르고, 타입별 `write_to_buffer`로 값을 쓴다"로 채우고 `int32_t`·`int64_t`·`float`·`double`·구조체 `Sample` 다섯 타입으로 불렀습니다. `-Os`에서는 다섯 인스턴스가 모두 호출자에 인라인되어 심볼이 남지 않으므로, 인스턴스를 보려고 `process`에 `__attribute__((noinline))`을 붙였습니다.
 
 ```text
-$ arm-none-eabi-nm --size-sort --print-size --demangle firmware.elf | grep "process<"
-
-00000200 T void process<int>(int)
-00000200 T void process<long>(long)
-000002a0 T void process<float>(float)
-000002a0 T void process<double>(double)
-000003c0 T void process<MyClass>(MyClass)
+$ arm-none-eabi-nm -S --size-sort -C bloat.o
+00000000 00000024 W void process<Sample>(Sample)
+00000000 00000024 W void process<long>(long)
+00000000 0000002c W void process<long long>(long long)
+00000000 00000042 T run(long, long long, float, double, Sample)
+00000000 00000048 W void process<double>(double)
+00000000 00000050 W void process<float>(float)
 ```
 
-위 값은 도구 형식을 설명하는 예시이며 실제 측정 자료가 아닙니다. 크기 열을 16진수로 읽으면 합계는 3328바이트입니다. 심볼 크기 합은 정렬·공유·링커 동작 때문에 전체 Flash 증가량과 다를 수 있습니다.
+다섯 인스턴스의 합은 36 + 36 + 44 + 72 + 80 = 268바이트, 오브젝트 `.text`는 334바이트였습니다. arm-none-eabi에서는 `int32_t`가 `long`이라 `process<long>`으로 보입니다. 같은 소스인데 `float`·`double`이 두 배쯤 큰 것은 `value > 100` 비교와 변환이 FPU 명령·libgcc 호출이 되기 때문입니다. 인스턴스 크기는 소스 줄 수가 아니라 타입이 만드는 명령이 정합니다.
 
 ## 패턴 1 — 비-템플릿 helper로 공통 부분 분리
 
@@ -91,9 +89,14 @@ void process(T value) {
 }
 ```
 
-각 인스턴스에는 작은 코드만 들어가고, 공통 부분은 한 번만 컴파일됩니다.
+위 측정 소스를 이렇게 바꾸면(공통 함수도 `noinline`) 다음과 같습니다.
 
-공통 함수가 다시 인라인될 수 있으므로 함수 분리만으로 특정 감소율을 보장하지 않습니다. 동일한 toolchain·플래그·호출 지점으로 최종 ELF와 map을 비교합니다.
+| | 인스턴스 5개 합 | 공통 함수 | `.text` |
+| --- | ---: | ---: | ---: |
+| 전체 템플릿 | 268 | — | 334 |
+| 공통 부분 분리 | 214 | 24 | 304 |
+
+인스턴스마다 반복되던 세 번의 호출 루프가 `process_common` 24바이트 하나로 모였고, `.text`가 30바이트 줄었습니다. 공통 함수를 `noinline`으로 두지 않으면 컴파일러가 다시 인라인해 이 차이가 사라질 수 있으므로, 분리한 뒤에는 같은 플래그로 다시 잽니다.
 
 ## 패턴 2 — 닫힌 타입 집합의 `std::variant`
 
@@ -175,7 +178,14 @@ public:
 };
 ```
 
-`push_impl`은 `Buffer<T>` 단위로 한 번만 컴파일되고, N별로 인스턴스화되지 않습니다. storage만 다른 크기가 됩니다. 이 구조는 기본 복사·이동 시 내부 포인터가 원본의 storage를 가리키게 되므로 여기서는 복사·이동을 금지했습니다. 지원하려면 목적 객체 storage로 포인터를 다시 묶고 원소를 옮기는 구현이 필요합니다.
+`push_impl`은 `Buffer<T>` 단위로 한 번만 컴파일되고, N별로 인스턴스화되지 않습니다. storage만 다른 크기가 됩니다. `Buffer<int, 16/32/64>` 전역 세 개에 `push`를 한 번씩 부르는 파일로 두 구조를 비교하면 이득과 대가가 함께 보입니다(`push`는 `noinline`).
+
+| | push 코드 | `.text` | `.text.startup` | `.bss` |
+| --- | --- | ---: | ---: | ---: |
+| N별 클래스 | 22 + 26 + 26 바이트 (세 인스턴스) | 116 | 20 | 460 |
+| 공통 base | 28 바이트 (하나) | 72 | 48 | 484 |
+
+push 코드는 세 개에서 하나가 됐지만, 객체마다 `data_` 포인터와 `capacity_`가 생겨 `.bss`가 24바이트 늘었습니다. 두 구조 모두 `.init_array` entry가 있었습니다. N별 클래스는 `T data_[N]`이 초기화되지 않아 기본 생성자가 상수 초기화가 되지 못했고, base 쪽은 생성자가 저장소 포인터를 기록하는 동적 초기화 코드가 48바이트였습니다. 인스턴스가 세 개 정도면 코드 절감과 RAM·startup 증가가 비슷한 크기라, 인스턴스가 많을 때 의미가 있습니다. 이 구조는 기본 복사·이동 시 내부 포인터가 원본의 storage를 가리키게 되므로 여기서는 복사·이동을 금지했습니다. 지원하려면 목적 객체 storage로 포인터를 다시 묶고 원소를 옮기는 구현이 필요합니다.
 
 ## 패턴 4 — extern template
 
@@ -205,7 +215,14 @@ template class Container<float>;
 
 `Container<int>`, `Container<float>` 코드가 `container.o`에만 들어가고, 다른 `.o` 파일은 extern 선언만 보고 link합니다.
 
-주된 목적은 여러 TU에서의 불필요한 인스턴스화 작업을 줄이는 것입니다. 일반 템플릿 중복은 링커가 이미 병합할 수 있으므로 최종 바이너리가 반드시 작아지지는 않습니다. inline 멤버에는 별도 예외도 있습니다.
+주된 목적은 여러 TU에서의 중복 인스턴스화 작업을 줄이는 것입니다. 최종 바이너리는 작아지지 않습니다. `Container<int>::method`를 쓰는 TU 두 개로 재면 이렇습니다.
+
+| | `a.o` | `b.o` | 명시적 인스턴스화 `inst.o` | 링크한 ELF text |
+| --- | ---: | ---: | ---: | ---: |
+| 암묵적 인스턴스화 | 48 | 48 | — | 282 |
+| `extern template` | 22 | 22 | 32 | 288 |
+
+암묵적 인스턴스화에서는 두 오브젝트가 각각 `method`를 COMDAT 섹션으로 들고 있다가 링커가 하나만 남겼습니다. `extern template`은 각 TU의 코드 생성을 없앴지만 ELF는 6바이트 늘었습니다. 클래스 전체를 명시적으로 인스턴스화하면 쓰지 않는 멤버 `get`까지 정의되기 때문입니다([temp.explicit]/9·10). `inst.o`를 빼고 링크하면 `undefined reference to 'Container<int>::method(int)'`로 실패합니다. 클래스 본문 안에서 정의한 멤버는 inline이라 extern 선언이 있어도 인라인에 쓰일 수 있습니다.
 
 ## 패턴 5 — virtual 대신 if constexpr
 
@@ -230,7 +247,7 @@ void process(T& obj) {
 }
 ```
 
-가상 함수의 vtable과 간접 호출이 제거되고, 각 인스턴스에는 해당 분기만 남습니다.
+가상 함수의 vtable과 간접 호출이 제거되고, 각 인스턴스에는 해당 분기만 남습니다. 간접 호출과 직접 호출이 각각 어떤 명령이 되는지는 [Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#4-가상-함수)의 디스어셈블리에 있습니다.
 
 타입 set이 닫혀 있고 작을 때 적합합니다. plug-in 시스템처럼 런타임 확장이 필요하면 virtual을 그대로 씁니다.
 
@@ -250,7 +267,7 @@ cp firmware.elf new.elf
 bloaty -d symbols --demangle=full new.elf -- base.elf
 ```
 
-증가된 함수 목록이 출력되어, 어느 인스턴스가 새로 추가됐는지 즉시 확인할 수 있습니다.
+증가된 함수 목록이 출력되어 어느 인스턴스가 새로 추가됐는지 보입니다. 이 글을 쓴 Mac에는 bloaty가 없어 이 명령은 실행하지 않았습니다.
 
 ### nm으로 인스턴스 개수
 
@@ -259,7 +276,7 @@ arm-none-eabi-nm --demangle firmware.elf | grep "Container<" | wc -l
 # 출력된 심볼 행 수 — 서로 다른 클래스 인스턴스 수와 같지는 않음
 ```
 
-너무 많으면 디자인을 재검토합니다.
+한 클래스 템플릿의 인스턴스가 늘어나는 추세를 PR마다 기록해 두면 위 패턴을 적용할 시점이 보입니다.
 
 ### __PRETTY_FUNCTION__ 디버깅
 
@@ -271,7 +288,7 @@ void func(T x) {
 }
 ```
 
-C++17/20의 static_assert 메시지는 문자열 리터럴이어야 하므로 `__PRETTY_FUNCTION__`을 그대로 메시지로 넘기지 않습니다. 위 의도적인 실패의 진단에 표시되는 타입과 호출 경로를 확인합니다.
+C++17/20의 static_assert 메시지는 문자열 리터럴이어야 하므로 `__PRETTY_FUNCTION__`을 그대로 메시지로 넘기지 않습니다. 대신 컴파일러가 진단에 인스턴스 정보를 붙입니다. `func(Order{})`로 부르면 g++-16은 `In instantiation of 'void func(T) [with T = Order]'`과 호출 위치(`required from here`)를, Clang 23.1.5는 `static assertion failed due to requirement 'sizeof(Order) == 0'`과 `note: in instantiation of function template specialization 'func<Order>' requested here`를 출력했습니다.
 
 ## 컴파일 시간 — 큰 문제
 
@@ -284,7 +301,7 @@ time make
 make -j1 -B 2>&1 | ts '[%H:%M:%S]'
 ```
 
-C++ 컴파일 시간이 수십 초에서 분 단위로 늘면 다음을 점검합니다.
+컴파일 시간이 늘면 다음을 점검합니다.
 
 - 자주 변경되는 파일이 큰 template header를 include하지는 않는지 확인합니다.
 - `#include <iostream>`이 곳곳에 흩어져 있지는 않은지 봅니다(iostream은 무거운 헤더입니다).
@@ -303,7 +320,7 @@ arm-none-eabi-g++ -x c++-header common.h -o common.h.gch
 arm-none-eabi-g++ -include common.h source.cpp ...
 ```
 
-효과는 헤더 구성과 캐시에 달립니다. PCH가 무효화되면 이를 사용하는 TU의 재빌드 비용도 비교해야 합니다.
+PCH에 들어간 헤더 하나가 바뀌면 PCH를 다시 만들고 이를 쓰는 모든 TU를 다시 컴파일합니다. 그래서 자주 바뀌는 프로젝트 헤더가 아니라 거의 바뀌지 않는 라이브러리 헤더를 넣습니다. 이 글에서는 PCH의 시간 효과를 재지 않았습니다.
 
 CMake에서는 다음과 같이 설정합니다.
 
@@ -320,7 +337,7 @@ target_precompile_headers(my_target PRIVATE common.h)
 set_target_properties(my_target PROPERTIES UNITY_BUILD ON)
 ```
 
-속도 개선은 프로젝트별로 측정합니다. 익명 namespace·static 이름 충돌, include 순서 의존, 병렬 작업 수 감소가 생길 수 있습니다.
+여러 `.cpp`가 한 TU가 되므로, 파일마다 따로 있던 익명 namespace·`static` 함수의 같은 이름이 충돌하고, 한 파일의 include가 다른 파일에 새어 들어갑니다. 합쳐진 TU 수만큼 병렬 컴파일 단위도 줄어듭니다. 이 글에서는 unity build의 시간 효과를 재지 않았습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -329,7 +346,7 @@ set_target_properties(my_target PROPERTIES UNITY_BUILD ON)
 template<typename T>
 T abs(T x) { return x < 0 ? -x : x; }
 ```
-여러 타입에 쓰더라도 인라인·병합으로 별도 함수가 남지 않을 수 있습니다. 이 signed abs는 최솟값의 부호 반전 overflow도 별도로 처리해야 합니다. 작은 함수의 비용까지 추정 수치로 단정하지 않습니다.
+이 정도 함수는 비용 걱정 대상이 아닙니다. 위 `process` 측정에서도 `noinline` 없이는 다섯 인스턴스가 모두 호출자에 인라인되어 별도 함수가 남지 않았습니다. 다만 이 signed abs는 `INT_MIN`의 부호 반전이 overflow라는 별개의 결함이 있습니다.
 
 ### 2. namespace 안 함수도 인스턴스화됨
 ```cpp
@@ -352,13 +369,13 @@ class Container {
 include할 때마다 파싱됩니다. PCH나 extern template으로 대응합니다.
 
 ### 4. 컴파일러가 dead code를 제거하지 못함
-사용하지 않는 template member도 호출 chain에 따라 인스턴스화될 수 있습니다. `gc-sections`를 활용하거나 직접 분리합니다.
+클래스 템플릿의 일반 멤버 함수는 쓰일 때만 인스턴스화됩니다([temp.inst]/4). 가상 멤버 함수는 다릅니다. `Holder<int>`의 `used()`만 부르는 파일에서 쓰지 않은 일반 멤버 `unused_plain()`은 오브젝트에 없었지만, 쓰지 않은 `virtual unused_virtual()`은 vtable이 가리켜야 하므로 정의가 생겼습니다(표준은 이 경우를 구현에 맡깁니다, [temp.inst]/12). 이런 멤버는 vtable이 참조하므로 `--gc-sections`로도 지워지지 않습니다.
 
 ### 5. macro와 template 혼동
 매크로는 텍스트 치환이고 템플릿은 컴파일러 평가입니다. 비슷해 보여도 동작이 다르며, 새 코드에서는 템플릿을 우선합니다.
 
 ### 6. 디버깅이 어려움
-템플릿 함수의 디버그 정보가 각 인스턴스마다 별도로 생성되어 디버그 정보 크기가 늘어납니다. 단 Flash와는 무관합니다(디버그 정보는 ELF에만 포함).
+템플릿 함수의 디버그 정보는 인스턴스마다 생성되어 디버그 정보 크기가 늘어납니다. 디버그 섹션은 할당 섹션이 아니라 Flash 이미지에는 들어가지 않습니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#디버그-정보---g3--gdwarf-4)에서 `-g3`가 ELF를 5,492 → 31,848바이트로 키웠지만 `size`와 binary 이미지는 그대로였습니다).
 
 ## 작은 예제 — extern template의 링크 계약
 
@@ -381,7 +398,7 @@ template struct Container<int>;
 int main() { Container<int> c; return c.twice(21)==42 ? 0 : 1; }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors container.cpp extern-main.cpp -o extern-check && ./extern-check`를 확인했습니다. `container.cpp`를 빼면 정의되지 않은 `Container<int>::twice(int) const` 심볼로 링크가 실패합니다. `-g` 디버그 정보를 포함한 산출물과 제거한 산출물의 파일 크기는 Flash 적재 크기와 별개입니다.
+Homebrew Clang 23.1.5, arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors container.cpp extern-main.cpp -o extern-check && ./extern-check`가 exit 0이었습니다. `container.cpp`를 빼면 정의되지 않은 `Container<int>::twice(int) const` 심볼로 링크가 실패합니다.
 
 [명시적 인스턴스화의 표준 규칙](https://eel.is/c++draft/temp.explicit)을 참고합니다. 실제 프로젝트의 Flash·컴파일 시간·debug 정보 분포는 해당 프로젝트의 ELF와 빌드 기록이 있어야 판단할 수 있습니다.
 
@@ -406,15 +423,15 @@ import container;
 Container<int> c;
 ```
 
-설치한 컴파일러·빌드 시스템의 모듈 지원과 의존성 스캔을 최소 프로젝트로 확인합니다. 벤더 전체의 지원율이나 향후 보급 시점을 추정하지 않습니다.
+GCC 16.2.0 문서는 C++20 modules 지원을 아직 실험적이라 적고 `-fmodules`로 켜게 합니다. 빌드 시스템도 모듈 의존성을 스캔해야 하므로, 쓰기 전에 설치한 컴파일러와 빌드 시스템으로 최소 프로젝트를 빌드해 봅니다. 이 글에서는 modules 빌드를 하지 않았습니다.
 
 ## 정리
 
 - 템플릿 자체의 런타임 dispatch 없이 구현할 수 있지만 연산·컴파일·최종 코드 크기 비용은 확인해야 합니다.
 - 큰 함수의 공통 부분을 helper로 분리하고 같은 조건의 최종 링크 결과를 비교합니다.
 - `std::variant`는 닫힌 type set을 표현하며 visitor별 인스턴스화 비용도 확인합니다.
-- `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드가 한 곳에 모입니다.
-- 측정 도구는 `nm`(인스턴스 수), `bloaty`(PR diff), `__PRETTY_FUNCTION__`(debug)입니다.
+- `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드 생성이 한 TU로 모입니다. 최종 크기는 줄지 않고, 쓰지 않는 멤버까지 정의되어 오히려 늘 수 있습니다.
+- 측정 도구는 `nm`(인스턴스 크기), `bloaty`(PR diff), 의도적 `static_assert` 진단(인스턴스 정보)입니다.
 - 컴파일 시간을 줄이려면 PCH, unity build, modules(C++20)를 활용합니다.
 
 ## 관련 항목
