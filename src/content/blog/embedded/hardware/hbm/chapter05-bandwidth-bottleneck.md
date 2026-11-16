@@ -246,7 +246,7 @@ MFU만 보면 *compute 사용률*은 알지만 *memory 사용률은 모릅니다
 ## 정리
 
 - *공칭 대역폭*은 `pin rate × bus width ÷ 8`이고, H100의 3.35 TB/s도 *peak*입니다.
-- 실제 대역폭은 *refresh·row activation·bank conflict·방향 전환* 같은 DRAM 쪽 요인으로 깎이며, HBM 컨트롤러 문서(AMD PG276)가 이 요인들을 줄이는 기능을 따로 둡니다.
+- 실제 대역폭은 *refresh·row activation·bank conflict·방향 전환* 같은 DRAM 쪽 요인으로 깎이며, HBM 컨트롤러 문서(AMD PG276)가 이 요인들을 줄이는 기능과 사용 지침(방향 전환 최소화)을 따로 둡니다.
 - 데이터시트 값은 peak이므로 자기 시스템에서 직접 잽니다. 이 글의 Triad 예는 측정 절차를 보이기 위한 LPDDR5 Mac 실행이며 HBM 효율이 아닙니다.
 - *Roofline*에서 H100의 knee는 *약 295 FLOP/Byte*입니다. batch 1 LLM decode는 intensity가 *약 1*이라 강한 memory bound입니다.
 - V100 → H100에서 연산은 *약 7.9배*, 대역폭은 *약 3.7배* 늘어 knee가 *약 2배* 오른쪽으로 갔습니다.
