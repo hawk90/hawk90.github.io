@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 새 보드를 받았거나, 새 toolchain을 구성했거나, 새 startup·linker script를 작성했을 때 처음 던지는 질문은 "이게 동작하는가"입니다. printf 한 줄이라도 보려면 UART의 clock, 핀 mux, baud rate 설정이 모두 맞아야 합니다. 그보다 단순한 답이 **LED toggle**입니다.
 
-GPIO 출력 핀 하나만 살아 있으면 됩니다. 일정한 주기로 깜빡이면 main이 돌고 있다는 뜻이고, 안 깜빡이면 reset부터 main까지의 어느 단계에서 멈췄다는 뜻입니다. 이 글은 Nucleo-F411RE용 최소 프로그램을 만들고, 같은 바이너리를 QEMU에서 돌려 reset 직후의 레지스터와 GPIO 쓰기를 직접 확인합니다.
+GPIO 출력 핀 하나만 살아 있으면 됩니다. 일정한 주기로 깜빡이면 main이 돌고 있다는 뜻이고, 안 깜빡이면 reset부터 GPIO 설정까지 어딘가가 틀렸다는 뜻입니다. 이 글은 Nucleo-F411RE용 최소 프로그램을 만들고, 같은 바이너리를 QEMU에서 돌려 reset 직후의 레지스터와 GPIO 쓰기를 직접 확인합니다.
 
 ## 핵심 개념
 
@@ -234,7 +234,7 @@ MODER(offset `0x000`)를 읽고 bit[11:10]을 지운 값, 다시 읽고 `0x400`(
 
 ### delay 주기
 
-`delay()`는 기본 최적화(-O0)에서 반복 한 번에 6개 명령(`nop`, `ldr`, `subs`, `str`, `cmp`, `bne`)으로 컴파일됐습니다(`objdump -d --disassemble=delay`). 이 코드는 clock 설정을 건드리지 않습니다. ST의 `system_stm32f4xx.c` 템플릿은 `SystemCoreClock`의 초기값을 `16000000`으로 두고 `HSI_VALUE`도 16000000으로 정의하는데, 주석은 실제 HSI 값이 "may vary depending on the variations in voltage and temperature"라고 덧붙입니다. 다만 명령당 cycle은 flash wait state와 분기 비용에 따라 달라서 명령 수만으로 주기를 계산할 수 없습니다. 보드에서 PA5를 scope로 재서 `delay()` 인자를 맞춥니다.
+`delay()`는 기본 최적화(-O0)에서 반복 한 번에 6개 명령(`nop`, `ldr`, `subs`, `str`, `cmp`, `bne`)으로 컴파일됐습니다(`objdump -d --disassemble=delay`). 이 코드는 clock 설정을 건드리지 않습니다. ST의 `system_stm32f4xx.c` 템플릿은 `SystemCoreClock`의 초기값을 `16000000`으로 두고 `HSI_VALUE`도 16000000으로 정의하는데, 주석은 실제 HSI 값이 "may vary depending on the variations in voltage and temperature"라고 덧붙입니다. 다만 Cortex-M4 TRM 3.3.1절의 cycle 표는 zero wait state를 전제하고, 분기는 "1 + P"(pipeline refill P는 1~3)라서 명령 수만으로 flash에서 도는 loop의 주기를 계산할 수 없습니다. 보드에서 PA5를 scope로 재서 `delay()` 인자를 맞춥니다.
 
 ![PA5 Output — Square Wave](/images/blog/modern-recipes/diagrams/part4-01-square-wave.svg)
 
@@ -248,7 +248,7 @@ MODER(offset `0x000`)를 읽고 bit[11:10]을 지운 값, 다시 읽고 `0x400`(
 
 > ⚠️ `RCC_AHB1ENR` enable을 빼먹음
 
-GPIOA의 clock enable bit는 `RCC_AHB1ENR`의 bit 0(`RCC_AHB1ENR_GPIOAEN`)입니다. ST HAL의 `__HAL_RCC_GPIOA_CLK_ENABLE()`(`stm32f4xx_hal_rcc.h`)은 이 bit를 set한 직후 같은 bit를 다시 읽는데, 주석이 "Delay after an RCC peripheral clock enabling"입니다. enable 직후 바로 GPIO register를 쓰는 코드라면 이 read-back을 따라 넣습니다.
+GPIOA의 clock enable bit는 `RCC_AHB1ENR`의 bit 0(`RCC_AHB1ENR_GPIOAEN`)입니다. ST HAL의 `__HAL_RCC_GPIOA_CLK_ENABLE()`(`stm32f4xx_hal_rcc.h`)은 이 bit를 set한 직후 같은 bit를 다시 읽는데, 주석이 "Delay after an RCC peripheral clock enabling"입니다. 이 글의 `main.c`는 이 read-back 없이 enable 다음 명령에서 바로 MODER를 읽습니다(`str` 뒤 바로 `ldr`). 보드에서 첫 MODER 쓰기가 먹지 않는다면 HAL처럼 `(void)RCC_AHB1ENR;` 한 줄을 넣어 봅니다.
 
 > ⚠️ MODER 비트를 OR만 하고 clear를 안 함
 
@@ -263,7 +263,21 @@ qemu: fatal: Lockup: can't escalate 3 to HardFault (current priority -1)
 R12=00000000 R13=b082b560 R14=fffffff9 R15=e007603a
 ```
 
-word 0 자리에 있던 `push {r7, lr}`(`b580`), `sub sp, #8`(`b082`)이 SP `0xb082b580`이 됐고, 예외 진입이 8 word(32 byte)를 쌓아 `0xb082b560`이 됐습니다. word 1(`0x4b10af00`)은 bit 0이 0이라 INVSTATE fault가 나고, 이것이 HardFault로 올라갑니다. 그런데 HardFault vector(word 3)도 코드 bytes인 `0xe007603b`라서 PC가 `0xe007603a`로 갔고, HardFault 안에서 다시 fault가 나 lockup이 됐습니다(`XPSR`의 exception 번호 3). linker script의 `KEEP(*(.isr_vector))`와 startup의 section 이름은 정확히 같아야 합니다.
+`-d int`를 더해 다시 돌리면 순서가 보입니다.
+
+```text
+Loaded reset SP 0xb082b580 PC 0x4b10af00 from vector table
+Taking exception 3 [Prefetch Abort] on CPU 0
+...at fault address 0x4b10af00
+...with CFSR.IACCVIOL
+...BusFault with BFSR.STKERR
+...loaded new PC 0xe007603b
+Taking exception 3 [Prefetch Abort] on CPU 0
+...at fault address 0xe007603a
+...with CFSR.IACCVIOL
+```
+
+word 0 자리에 있던 `push {r7, lr}`(`b580`), `sub sp, #8`(`b082`)이 SP `0xb082b580`이 됐습니다. word 1(`0x4b10af00`)은 DDI 0403E.b Table B3-1에서 XN(Execute Never)인 Peripheral 영역(`0x40000000`~`0x5FFFFFFF`)이라 명령 fetch가 MemManage `IACCVIOL` fault를 냈고, 이것이 HardFault(exception 3)로 올라갔습니다. 예외 진입은 SP를 8 word(32 byte) 내려 `0xb082b560`을 만들었지만 그 주소에는 메모리가 없어 쌓기 자체도 BusFault(`BFSR.STKERR`)였습니다. HardFault vector(word 3)도 코드 bytes인 `0xe007603b`라서 PC가 `0xe007603a`로 갔고, 그곳도 XN인 System 영역이라 HardFault 안에서 다시 `IACCVIOL`이 나 lockup이 됐습니다. linker script의 `KEEP(*(.isr_vector))`와 startup의 section 이름은 정확히 같아야 합니다.
 
 > ⚠️ startup·libc 옵션을 toolchain에 맞추지 않음
 
@@ -278,7 +292,7 @@ Black Pill의 PC13은 Zephyr DTS에 `GPIO_ACTIVE_LOW`로 적혀 있습니다. �
 - Bare-metal hello-world는 **LED toggle**입니다. UART보다 설정할 것이 적어 첫 진단에 알맞습니다.
 - 최소 구성은 **vector table + Reset_Handler + main**이고, 이 예제는 코드 228 byte(`.isr_vector` 16 + `.text` 212)입니다.
 - reset은 vector word 0을 MSP, word 1을 PC로 씁니다. QEMU의 `info registers`로 그대로 확인할 수 있습니다.
-- section 이름 하나가 틀려도 링크는 성공하고, 칩은 쓰레기 SP로 lockup됩니다.
+- section 이름 하나가 틀려도 링크는 성공하고, QEMU에서는 쓰레기 SP·PC로 바로 lockup됐습니다.
 - 보드의 LED 핀과 active-high/low는 schematic이나 board 정의를 먼저 확인합니다.
 
 다음 편은 **레지스터 직접 접근**입니다. `volatile`·MMIO·CMSIS 구조체의 의미를 깊이 들여다봅니다.
