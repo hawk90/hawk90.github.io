@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Quartus Prime은 Intel(현 Altera) FPGA의 vendor toolchain입니다."** 흐름은 Vivado와 같은 constraint → compile → timing 확인 → programming이지만, 이 글에서 직접 확인할 수 있었던 것은 그 앞뒤의 HDL과 시뮬레이션뿐이었습니다.
+> **"Quartus Prime은 Intel(현 Altera) FPGA의 vendor toolchain입니다."** 흐름은 Vivado와 같은 constraint → compile → timing 확인 → programming이지만, 이 글에서 직접 확인한 것은 그 앞 단계인 HDL과 시뮬레이션뿐이었습니다.
 
 ## 이 글이 확인한 범위
 
