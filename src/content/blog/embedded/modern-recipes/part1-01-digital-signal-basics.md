@@ -59,7 +59,7 @@ GPIOC->OSPEEDR |=  (0b11 << (5 * 2));   // 0b11 = very high speed
 | 0b10 | `GPIO_SPEED_FREQ_HIGH` | 25~100 MHz |
 | 0b11 | `GPIO_SPEED_FREQ_VERY_HIGH` | 50~200 MHz |
 
-상수 값과 주석은 ST의 `stm32f4xx-hal-driver`(v1.8.6) `Inc/stm32f4xx_hal_gpio.h` 141~144행에서 옮겼습니다. 같은 주석이 정확한 값은 제품 데이터시트를 보라고 적습니다. STM32F405/407 데이터시트(DS8626, DocID022152 Rev 4) Table 49 *I/O AC characteristics*는 설정별 최대 출력 주파수를 부하 조건과 함께 적지만(예: `11`은 C_L = 30 pF에서 100 MHz, 10 pF에서 200 MHz), 이 판은 rise/fall time 칸을 정하지 않은 값으로 비워 두었습니다. 그래서 여기서는 시간 대신 주파수만 쓰고, 설정별 f_max 전체 표는 [1-03](/blog/embedded/modern-recipes/part1-03-gpio-internals)에 있습니다.
+상수 값과 주석은 ST의 `stm32f4xx-hal-driver`(v1.8.6) `Inc/stm32f4xx_hal_gpio.h` 141~144행에서 옮겼습니다. 같은 주석이 정확한 값은 제품 데이터시트를 보라고 적습니다. STM32F405/407 데이터시트(DS8626, DocID022152 Rev 4) Table 49 *I/O AC characteristics*는 설정별 최대 출력 주파수를 부하 조건과 함께 적지만(예: `11`은 C_L = 30 pF에서 100 MHz, 10 pF에서 200 MHz), 이 판은 rise/fall time 칸을 값 없이 비워 두었습니다. 그래서 여기서는 시간 대신 주파수만 쓰고, 설정별 f_max 전체 표는 [1-03](/blog/embedded/modern-recipes/part1-03-gpio-internals)에 있습니다.
 
 ### 3) Noise margin과 신호 무결성
 
@@ -158,7 +158,7 @@ ratio 5:1 -> error 2.0%
 
 > ⚠️ 모든 GPIO를 최고 속도로 설정
 
-엣지가 빠를수록 측정 시스템도 빨라야 한다는 위 계산과 같은 이유로, 빠른 엣지는 높은 주파수 성분을 더 많이 담습니다. ST HAL 주석처럼 설정마다 정해진 동작 주파수 범위가 있으니, 그 핀이 실제로 내야 하는 주파수에 맞는 가장 낮은 설정을 고릅니다.
+위 계산에서 엣지가 빠를수록 측정 시스템도 빨라야 했던 것은, 빠른 엣지가 높은 주파수 성분을 더 많이 담기 때문입니다. ST HAL 주석처럼 설정마다 정해진 동작 주파수 범위가 있으니, 그 핀이 실제로 내야 하는 주파수에 맞는 가장 낮은 설정을 고릅니다.
 
 > ⚠️ V_IH 경계의 입력 신호
 
@@ -166,7 +166,7 @@ SN74LVC04A에 3.3 V 전원으로 2.1 V를 넣으면 V_IH(2 V) 이상이니 1로 
 
 > ⚠️ Open-drain 신호의 풀업 누락
 
-I2C나 alert 라인 같은 open-drain 출력에 풀업이 없으면, 0은 잘 나오지만 1은 끝없이 떠 있습니다. 입력 회로가 흔들립니다.
+I2C나 alert 라인 같은 open-drain 출력에 풀업이 없으면, 0은 잘 나오지만 1을 내야 할 때 라인이 떠 있어, 받는 쪽 입력이 흔들립니다.
 
 > ⚠️ 스코프 probe ground spring 미사용
 
