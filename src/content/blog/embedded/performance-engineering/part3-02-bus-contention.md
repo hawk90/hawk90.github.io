@@ -39,7 +39,7 @@ slave 하나를 여러 master가 원하면 arbiter가 cycle마다 하나를 고�
 | 고정 우선순위 (A > B) | 100.0% | 0 | 끝까지 받지 못함 |
 | Round-robin | 90.0% | 10,000 | 1 cycle |
 
-고정 우선순위에서는 A가 쉬지 않는 한 B는 영원히 기다립니다. 이것이 starvation입니다. round-robin은 B가 요청할 때마다 다음 cycle에 받게 해 주는 대신 A의 몫을 10% 덜어 냅니다. 가중 round-robin은 master마다 몫을 다르게 정하는 방식이고, QoS 기반 중재는 요청마다 붙은 값으로 고릅니다.
+고정 우선순위에서는 A가 쉬지 않는 한 B는 영원히 기다립니다. 이것이 starvation입니다. round-robin은 B가 요청하면 그 cycle 안에 받게 해 주는 대신(시뮬레이션 초기 상태 때문에 처음 한 번만 1 cycle) A의 몫을 10% 덜어 냅니다. 가중 round-robin은 master마다 몫을 다르게 정하는 방식이고, QoS 기반 중재는 요청마다 붙은 값으로 고릅니다.
 
 ### QoS-Based (AXI)
 
@@ -59,9 +59,9 @@ Cortex-M7 TRM(DDI 0489D) 1.1에 따르면 M7은 TCM을 전용 TCM 인터페이�
 |---|---|
 | `CTL` [1:0] | 0b00 AHBS 접근 우선순위 낮춤(리셋값), 0b01 소프트웨어 접근 우선순위 낮춤, 0b10 소프트웨어 실행 우선순위가 `TPRI` 이상이면 AHBS를 fairness counter로 낮추고 그 아래면 round-robin |
 | `TPRI` [10:2] | AHBS traffic을 낮출 실행 우선순위 문턱(NVIC 인코딩) |
-| `INITCOUNT` [15:11] | fairness counter 초기값. round-robin은 1(`0b01`). 0으로 두면 낮춘 쪽이 항상 이겨 livelock이 날 수 있음 |
+| `INITCOUNT` [15:11] | fairness counter 초기값(리셋값 0b01). round-robin은 1(`0b01`). 0으로 두면 낮춘 쪽이 항상 이겨 livelock이 날 수 있음 |
 
-리셋 상태에서는 TCM을 두고 다툴 때 CPU가 이깁니다. DMA가 TCM에 쓰는 시간이 중요하다면 `CTL`과 `TPRI`로, "높은 우선순위 ISR이 돌 때만 CPU를 먼저 보내고 평소에는 번갈아" 같은 정책을 고를 수 있습니다. 이 글에서는 보드에서 실행하지 않았습니다.
+리셋값은 `CTL` = 0b00, `INITCOUNT` = 0b01이고, 표 3-15의 주석대로 이 조합은 round-robin입니다(TRM 5.6.3은 fairness counter로 승자를 정하는 다섯 가지 중재 모드를 설명합니다). `INITCOUNT`를 키우면 낮춘 쪽(리셋값에서는 AHBS, 즉 DMA)의 몫이 줄어듭니다. DMA가 TCM에 쓰는 시간이 중요하다면 `CTL`과 `TPRI`로, "높은 우선순위 ISR이 돌 때만 CPU를 먼저 보내고 평소에는 번갈아" 같은 정책을 고를 수 있습니다. 이 글에서는 보드에서 실행하지 않았습니다.
 
 ## 측정 — PMU
 

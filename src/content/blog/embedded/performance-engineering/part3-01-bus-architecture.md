@@ -47,7 +47,7 @@ AMBA AXI Protocol Specification(IHI 0022, Issue L, 2025) A1.2는 transaction이 
 | W | WDATA, WSTRB, WLAST, WVALID, WREADY |
 | B | BID, BRESP, BVALID, BREADY |
 
-Valid-Ready transport에서는 송신 쪽이 VALID로 보낼 것이 있음을 알리고 수신 쪽이 READY로 받을 수 있음을 알리며, A2.3절의 말대로 "A transfer occurs when VALID and READY are both HIGH"입니다.
+Valid-Ready transport에서는 송신 쪽이 VALID로 보낼 것이 있음을 알리고 수신 쪽이 READY로 받을 수 있음을 알리며, A2.2절의 말대로 "A transfer occurs when VALID and READY are both HIGH"입니다.
 
 ## ID — Out-of-Order 지원
 
@@ -106,7 +106,7 @@ AMBA APB Protocol Specification(IHI 0024E) 1.1은 APB를 파이프라인이 없�
 
 ![NoC — Network-on-Chip Multi-core SoC 구조](/images/blog/perf-eng/diagrams/part3-01-noc.svg)
 
-Linux 커널 문서 `Documentation/admin-guide/perf/arm-cmn.rst`에 따르면 Arm CMN-600(Coherent Mesh Network)은 crosspoint(XP)를 직사각형 격자로 놓은 mesh interconnect이고, XP마다 AMBA CHI agent가 붙는 장치 포트가 두 개까지 있습니다. 이전 세대인 CCN-504는 XP 11개로 된 ring bus입니다(`arm-ccn.rst`). 그림의 XP 수와 배치는 예시입니다.
+Linux 커널 문서 `Documentation/admin-guide/perf/arm-cmn.rst`에 따르면 Arm CMN-600(Coherent Mesh Network)은 crosspoint(XP)를 직사각형 격자로 놓은 mesh interconnect이고, XP마다 AMBA CHI agent가 붙는 장치 포트가 두 개까지 있습니다. CCN-504는 XP 11개로 된 ring bus입니다(`arm-ccn.rst`). 그림의 XP 수와 배치는 예시입니다.
 
 ## Cortex-A 시스템의 버스 계층
 

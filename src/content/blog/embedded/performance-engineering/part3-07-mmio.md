@@ -132,7 +132,7 @@ bit_word_addr   = bit_band_base + bit_word_offset
 *BITBAND_SRAM(&flag_byte, 3) = 1;   /* flag_byte의 bit 3을 원자적으로 set */
 ```
 
-`flag_byte`가 SRAM bit-band 영역(0x2000_0000부터 1 MB) 밖에 있으면 이 주소는 의미가 없습니다. Cortex-M7 TRM(DDI 0489D)에는 bit-banding이 나오지 않습니다.
+`flag_byte`가 SRAM bit-band 영역(0x2000_0000부터 1 MB) 밖에 있으면 이 주소는 의미가 없습니다. Cortex-M7 TRM(DDI 0489D) 2.3.1은 M3·M4용 코드가 bit-banding에 의존하지 않는 한 M7과 호환된다고 적습니다. bit-banding에 의존하는 코드는 M7로 그대로 옮길 수 없습니다.
 
 ## PCIe MMIO — posted write
 
@@ -143,7 +143,7 @@ iowrite32(val, mmio);          /* posted */
 (void)ioread32(mmio + STATUS); /* 같은 장치 읽기로 앞 write를 밀어냄 */
 ```
 
-arm64에서는 `ioremap_np()`가 non-posted(nGnRnE) 매핑을 요청합니다. 같은 문서는 `ioremap_np()`가 일부 아키텍처에서만 있다고 적습니다.
+arm64에서는 `ioremap_np()`가 non-posted(nGnRnE) 매핑을 요청합니다. 같은 문서는 `ioremap_np()`가 일부 아키텍처에서만 있다고 적고, "ioremap_np() should never be used for PCI drivers"라며 PCI memory write는 항상 posted라고 덧붙입니다. PCI에서는 위의 읽기로 완료를 확인합니다.
 
 ## DMA와 MMIO Ordering
 

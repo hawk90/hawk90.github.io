@@ -225,7 +225,7 @@ int16_t a[N]; float b[N];
 for (i = 0; i < N; i++) b[i] = (float)a[i] * 2.0f;
 ```
 
-NEON에는 `int16`을 `float`으로 바로 바꾸는 intrinsic이 없습니다. 이전 판이 권한 `vcvtq_f32_s16`은 존재하지 않아, `clang -O2`가 `call to undeclared function 'vcvtq_f32_s16'` 오류를 냅니다(`bench/simd/cvt.log`). 먼저 `vmovl_s16`으로 32-bit로 넓힌 뒤 `vcvtq_f32_s32`로 바꿉니다. 이 둘은 `sshll.4s`와 `scvtf.4s` 두 명령이 됩니다. 16-bit 8개를 담던 128-bit 벡터가 32-bit로 넓어지면 4개만 들어가므로 같은 원소 수에 명령이 두 배로 듭니다. 변환 없이 정수 그대로 계산할 수 있다면 그쪽이 명령이 적습니다.
+NEON에는 `int16`을 `float`으로 바로 바꾸는 intrinsic이 없습니다. `vcvtq_f32_s16` 같은 이름은 존재하지 않아, `clang -O2`가 `call to undeclared function 'vcvtq_f32_s16'` 오류를 냅니다(`bench/simd/cvt.log`). 먼저 `vmovl_s16`으로 32-bit로 넓힌 뒤 `vcvtq_f32_s32`로 바꿉니다. 이 둘은 `sshll.4s`와 `scvtf.4s` 두 명령이 됩니다. 16-bit 8개를 담던 128-bit 벡터가 32-bit로 넓어지면 4개만 들어가므로 같은 원소 수에 명령이 두 배로 듭니다. 변환 없이 정수 그대로 계산할 수 있다면 그쪽이 명령이 적습니다.
 
 ## 정리
 

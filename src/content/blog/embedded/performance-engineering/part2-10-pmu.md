@@ -55,7 +55,7 @@ Linux `arm_pmuv3.h`의 공통 이벤트 번호와, Cortex-A53 TRM 12.9 표 12-28
 | 0x23 | STALL_FRONTEND | 없음 |
 | 0x24 | STALL_BACKEND | 없음 |
 
-이전 판은 0x18을 L2 data-cache access로 적었는데, 0x18은 `L2D_CACHE_WB`(L2 write-back)이고 access는 0x16 `L2D_CACHE`입니다. A53에서 stall을 보려면 0x23·0x24 대신 구현 정의 이벤트 0xE0~0xE7을 씁니다(2-02).
+0x18은 L2 access가 아니라 `L2D_CACHE_WB`(L2 write-back)이고, access는 0x16 `L2D_CACHE`입니다. A53에서 stall을 보려면 0x23·0x24 대신 구현 정의 이벤트 0xE0~0xE8을 씁니다(2-02).
 
 ## Linux perf
 

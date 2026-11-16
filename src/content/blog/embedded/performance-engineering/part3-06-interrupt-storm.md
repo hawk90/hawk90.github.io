@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"IRQ가 너무 많으면 CPU가 100% ISR에 잡힙니다."** context switch overhead 때문에 throughput이 오히려 떨어집니다.
+> **"IRQ가 너무 많으면 CPU가 100% ISR에 잡힙니다."** 인터럽트 진입·처리에 CPU가 다 쓰여 정작 데이터 처리가 밀립니다.
 
 ## Storm 발생 시나리오
 
@@ -65,13 +65,15 @@ static int net_napi_poll(struct napi_struct *napi, int budget) {
 }
 
 static irqreturn_t net_irq(int irq, void *dev_id) {
-    disable_rx_irq();
-    napi_schedule(&napi);
+    if (napi_schedule_prep(&napi)) {
+        disable_rx_irq();          /* mask한 뒤에 schedule (napi.rst) */
+        __napi_schedule(&napi);
+    }
     return IRQ_HANDLED;
 }
 ```
 
-드라이버가 흔히 쓰는 기본 budget은 `include/linux/netdevice.h`의 `NAPI_POLL_WEIGHT` 64입니다. `rx_one_packet()`·`enable_rx_irq()`·`disable_rx_irq()`는 드라이버마다 다른 하드웨어 접근을 나타낸 이름입니다.
+`netif_napi_add()`가 쓰는 기본 weight는 `NAPI_POLL_WEIGHT` 64입니다(`include/linux/netdevice.h` 2636·2654행). 인터럽트를 직접 mask하는 드라이버는 napi.rst의 예처럼 `napi_schedule_prep()` → mask → `__napi_schedule()` 순서로 씁니다. `rx_one_packet()`·`enable_rx_irq()`·`disable_rx_irq()`는 드라이버마다 다른 하드웨어 접근을 나타낸 이름입니다.
 
 ### 측정 — virtio-net의 패킷당 인터럽트
 
@@ -83,7 +85,7 @@ Debian 게스트의 `virtio_net` 드라이버도 NAPI를 씁니다(`drivers/net/
 | 2 | 9,564 | 147,705 | 15.4 |
 | 3 | 12,421 | 148,695 | 12.0 |
 
-패킷이 14만 7천 개 들어오는 동안 인터럽트는 8천~1만 2천 번이었습니다. 인터럽트 한 번에 평균 12~18개의 패킷이 처리됐습니다. 이 장치의 `ethtool -c enp0s1`은 `rx-usecs: 0`, `rx-frames: 1`, `Adaptive RX: off`로 coalescing이 꺼져 있었으므로, 이 묶음은 인터럽트를 막아 둔 동안 쌓인 패킷을 poll이 함께 처리한 결과로 볼 수 있습니다. QEMU 쪽 virtqueue 알림 동작은 따로 보지 않았습니다.
+패킷이 14만 7천 개 들어오는 동안 인터럽트는 8천~1만 2천 번이었습니다. 인터럽트 한 번에 평균 12~18개의 패킷이 처리됐습니다. `virtio0`은 장치의 모든 큐가 함께 쓰는 level 인터럽트 하나라 tx와 설정 알림도 이 수에 들어가므로, 인터럽트당 rx 패킷 수는 이보다 크거나 같습니다. 이 장치의 `ethtool -c enp0s1`은 `rx-usecs: 0`, `rx-frames: 1`, `Adaptive RX: off`로 coalescing이 꺼져 있었으므로, 이 묶음은 인터럽트를 막아 둔 동안 쌓인 패킷을 poll이 함께 처리한 결과로 볼 수 있습니다. QEMU 쪽 virtqueue 알림 동작은 따로 보지 않았습니다.
 
 ## Interrupt Coalescing (Hardware)
 
@@ -146,7 +148,7 @@ ethtool -X eth0 equal 4   # RSS indirection table을 4개 Rx 큐에 고르게
 
 ## 공격성 트래픽
 
-외부에서 패킷을 쏟아부으면 수신 인터럽트가 storm이 됩니다. `net.ipv4.icmp_ratelimit`은 이것을 막는 설정이 아닙니다. `Documentation/networking/ip-sysctl.rst`는 이 값을 `icmp_ratemask`에 해당하는 ICMP 패킷을 *보내는* 속도의 제한(응답 사이 최소 간격, ms)으로 정의합니다. 수신 쪽 대책은 위의 NAPI·coalescing과 eBPF/XDP 같은 이른 drop이고, 5-04에서 다룹니다.
+외부에서 패킷을 쏟아부으면 수신 인터럽트가 storm이 됩니다. `net.ipv4.icmp_ratelimit`은 이것을 막는 설정이 아닙니다. `Documentation/networking/ip-sysctl.rst`는 이 값을 `icmp_ratemask`에 해당하는 ICMP 패킷을 *보내는* 속도의 제한(응답 사이 최소 간격, ms)으로 정의합니다. 수신 쪽 대책은 위의 NAPI와 coalescing입니다.
 
 ## Embedded - IRQ Budget 계산
 
@@ -196,7 +198,7 @@ void net_irq(void) {
 ethtool -C eth0 rx-usecs 0 rx-frames 1
 ```
 
-패킷마다 인터럽트가 걸립니다. 위 virtio-net이 이 설정이었습니다. 지연 요구와 인터럽트 수를 함께 재고 값을 정합니다.
+장치가 패킷마다 인터럽트를 걸려고 합니다. 위 virtio-net이 이 설정이었지만, NAPI가 poll 동안 인터럽트를 막아 두어 인터럽트당 12~18 패킷이 됐습니다. 지연 요구와 인터럽트 수를 함께 재고 값을 정합니다.
 
 > ⚠️ DMA half-transfer callback 무시
 

@@ -61,7 +61,7 @@ $$\text{BRR} = \left\lfloor \frac{100{,}000{,}000 + 57{,}600}{115{,}200} \right\
 
 $$\text{실제 baud} = \frac{100{,}000{,}000}{868} = 115{,}207, \qquad \text{오차} = \frac{115{,}207 - 115{,}200}{115{,}200} = 0.006\%$$
 
-이 오차를 받아들일 수 있는지는 상대 장치와 프로토콜의 허용치로 판단합니다. 커널 clock이 baud의 16배의 정수배라면 오차는 0입니다.
+이 오차를 받아들일 수 있는지는 상대 장치와 프로토콜의 허용치로 판단합니다. 커널 clock이 baud의 정수배이면 반올림이 없으므로 오차는 0입니다.
 
 ## Clock Gating — Linux CCF
 
@@ -143,7 +143,7 @@ __WFI();
 
 /* Stop (STM32H7 HAL) */
 HAL_PWR_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI);
-HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI, PWR_D2_DOMAIN);
+HAL_PWREx_EnterSTOPMode(PWR_MAINREGULATOR_ON, PWR_STOPENTRY_WFI, PWR_D3_DOMAIN);
 
 /* Standby */
 HAL_PWR_EnterSTANDBYMode();

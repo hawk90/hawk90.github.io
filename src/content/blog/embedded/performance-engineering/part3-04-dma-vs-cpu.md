@@ -110,7 +110,7 @@ UART를 CPU로 받으면 byte마다 인터럽트나 polling이 필요합니다. 
 HAL_DCMI_Start_DMA(&hdcmi, DCMI_MODE_CONTINUOUS, (uint32_t)frame_buf, frame_len);
 ```
 
-1920 × 1080, 픽셀당 2 byte, 30 fps 카메라는 1920 × 1080 × 2 × 30 = 124.4 MB/s입니다. 이전 판은 60 MB/s로 적었는데 계산이 틀렸습니다. 위 M2 Pro 표의 1 MiB 복사 속도(63 GB/s)로 이 양을 CPU가 옮긴다면 초당 약 2 ms지만, Cortex-M4의 단순 루프(0.5~0.67 byte/cycle)라면 168 MHz에서 초당 1.1~1.5 s, 즉 CPU 하나로는 따라갈 수 없습니다. `HAL_DCMI_Start_DMA()`의 시그니처는 STM32H7 HAL `stm32h7xx_hal_dcmi.h` 542행에 있습니다.
+1920 × 1080, 픽셀당 2 byte, 30 fps 카메라는 1920 × 1080 × 2 × 30 = 124.4 MB/s입니다. 위 M2 Pro 표의 1 MiB 복사 속도(63 GB/s)로 이 양을 CPU가 옮긴다면 초당 약 2 ms지만, Cortex-M4의 단순 루프(0.5~0.67 byte/cycle)라면 168 MHz에서 초당 1.1~1.5 s, 즉 CPU 하나로는 따라갈 수 없습니다. `HAL_DCMI_Start_DMA()`의 시그니처는 STM32H7 HAL `stm32h7xx_hal_dcmi.h` 542행에 있습니다.
 
 ### 3. Cache pollution 회피
 
@@ -143,7 +143,7 @@ for (i = 0; i < 1000; i++) {
 
 ```c
 HAL_DMA_Start(...);
-while (DMA_Stream0->NDTR != 0) { }   /* 주변장치 레지스터를 계속 읽음 */
+while (DMA1_Stream0->NDTR != 0) { }   /* 주변장치 레지스터를 계속 읽음 */
 ```
 
 CPU가 기다리는 동안 다른 일을 못 하므로 DMA의 이점(CPU 점유 = T_setup + T_done)이 사라지고, 레지스터 읽기가 버스 transaction도 만듭니다(3-02). 완료 인터럽트와 `__WFI()`를 씁니다.

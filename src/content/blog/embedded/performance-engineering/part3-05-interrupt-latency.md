@@ -25,7 +25,7 @@ topics: ["embedded"]
 | Cortex-M3 | 12 | 같은 표 |
 | Cortex-M4 | 12 | 같은 표, Cortex-M4 TRM(DDI 0439B) 3.9.1 |
 
-[Yiu의 글](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/beginner-guide-on-interrupt-latency-and-interrupt-latency-of-the-arm-cortex-m-processors)은 이 값의 가정을 적습니다. 메모리 wait state가 0이고 다른 bus master가 자원을 쓰지 않으며, 다른 예외가 처리 중이지 않고, Cortex-M4에서 FPU를 켰다면 lazy stacking이 켜져 있고(기본값), 현재 명령이 unaligned·bit-band 전송이 아닐 때입니다. M4 TRM 3.9.1은 인터럽트 assert부터 ISR 첫 명령까지 *최대* 12 cycle(wait state 없는 메모리, 첫 명령 fetch는 stack push와 병렬), ISR 복귀도 12 cycle이라고 적습니다.
+[Yiu의 글](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/beginner-guide-on-interrupt-latency-and-interrupt-latency-of-the-arm-cortex-m-processors)은 이 값의 가정을 적습니다. 메모리 wait state가 0이고 다른 bus master가 자원을 쓰지 않으며, 다른 예외가 처리 중이지 않고, Cortex-M4에서 FPU를 켰다면 lazy stacking이 켜져 있고(기본값), 현재 명령이 unaligned·bit-band 전송이 아니고, 칩의 시스템 설계가 인터럽트 신호 연결에 지연을 더하지 않을 때입니다. M4 TRM 3.9.1은 인터럽트 assert부터 ISR 첫 명령까지 *최대* 12 cycle(wait state 없는 메모리, 첫 명령 fetch는 stack push와 병렬), ISR 복귀도 12 cycle이라고 적습니다.
 
 ![Cortex-M interrupt latency 구성 — instruction 완료, register push, vector fetch, pipeline refill](/images/blog/perf-eng/diagrams/part3-05-irq-latency.svg)
 
@@ -33,13 +33,13 @@ topics: ["embedded"]
 
 ![Tail-chaining 비교 — 옛 ARM7은 pop/push를 반복하지만 Cortex-M은 pop을 생략하고 곧바로 ISR B에 진입한다](/images/blog/perf-eng/diagrams/part3-05-tail-chaining.svg)
 
-ISR A가 끝날 때 다른 인터럽트 B가 pending이면, 레지스터를 stack에서 꺼냈다가 다시 넣는 대신 바로 B로 넘어갑니다. ARMv7-M ARM(DDI 0403E) B1.5는 이 최적화를 tail-chaining이라 부르고, M4 TRM 3.9.1은 wait state 없는 메모리에서 tail-chaining이 6 cycle이며 stack push·pop 없이 다음 ISR의 명령만 fetch한다고 적습니다. 복귀 12 cycle + 진입 12 cycle 대신 6 cycle입니다.
+ISR A가 끝날 때 다른 인터럽트 B가 pending이면, 레지스터를 stack에서 꺼냈다가 다시 넣는 대신 바로 B로 넘어갑니다. ARMv7-M ARM(DDI 0403E) B1.5.12는 이 최적화를 tail-chaining으로 설명하고, M4 TRM 3.9.1은 wait state 없는 메모리에서 tail-chaining이 6 cycle이며 stack push·pop 없이 다음 ISR의 명령만 fetch한다고 적습니다. 복귀 12 cycle + 진입 12 cycle 대신 6 cycle입니다.
 
 ## Late Arrival
 
 ![Late arrival — A의 push 진행 중에 더 높은 priority B가 도착하면 push를 그대로 활용하고 vector fetch만 B로 변경한다](/images/blog/perf-eng/diagrams/part3-05-late-arrival.svg)
 
-ARMv7-M ARM B1.5.11("Late-arriving exceptions")에 따르면, 예외 진입 sequence 도중에 더 높은 우선순위 인터럽트가 도착하면 진입 sequence를 다시 하지 않고 그 인터럽트가 이 sequence를 이어받습니다. 원래 예외는 나중에 도착한 예외에서 돌아온 뒤 처리됩니다. 아키텍처는 프로세서가 진입 도중 어느 시점까지 이것을 인식하는지는 정하지 않습니다. M4 TRM 3.9.1은 late-arrival과 tail-chaining을 모두 구현한다고 적습니다.
+ARMv7-M ARM B1.5.11의 "Late-arriving exceptions" 항목에 따르면, 예외 진입 sequence 도중에 더 높은 우선순위 인터럽트가 도착하면 진입 sequence를 다시 하지 않고 그 인터럽트가 이 sequence를 이어받습니다. 원래 예외는 나중에 도착한 예외에서 돌아온 뒤 처리됩니다. 아키텍처는 프로세서가 진입 도중 어느 시점까지 이것을 인식하는지는 정하지 않습니다. M4 TRM 3.9.1은 late-arrival과 tail-chaining을 모두 구현한다고 적습니다.
 
 ## Lazy Stacking (FPU가 있는 M4·M7)
 
@@ -111,7 +111,7 @@ NVIC_SetPriorityGrouping(3);
 NVIC_SetPriority(EXTI0_IRQn, NVIC_EncodePriority(3, 1, 0));   /* group, preempt, sub */
 ```
 
-`NVIC_SetPriorityGrouping(3)`의 뜻은 칩이 구현한 priority bit 수(`__NVIC_PRIO_BITS`)에 따라 달라집니다. CMSIS `core_cm4.h`의 `NVIC_EncodePriority()`(1902~1909행)는 preempt bit 수를 min(7 − PriorityGroup, `__NVIC_PRIO_BITS`), sub bit 수를 `PriorityGroup + __NVIC_PRIO_BITS < 7`이면 0, 아니면 `PriorityGroup − 7 + __NVIC_PRIO_BITS`로 계산합니다. `__NVIC_PRIO_BITS`가 4인 칩이라면 PriorityGroup 3에서 preempt 4 bit(16단계), sub 0 bit입니다. 이전 판의 "4 group, 4 sub-priority"는 이 계산과 맞지 않습니다.
+`NVIC_SetPriorityGrouping(3)`의 뜻은 칩이 구현한 priority bit 수(`__NVIC_PRIO_BITS`)에 따라 달라집니다. CMSIS `core_cm4.h`의 `NVIC_EncodePriority()`(1902~1909행)는 preempt bit 수를 min(7 − PriorityGroup, `__NVIC_PRIO_BITS`), sub bit 수를 `PriorityGroup + __NVIC_PRIO_BITS < 7`이면 0, 아니면 `PriorityGroup − 7 + __NVIC_PRIO_BITS`로 계산합니다. `__NVIC_PRIO_BITS`가 4인 칩이라면 PriorityGroup 3에서 preempt 4 bit(16단계), sub 0 bit입니다.
 
 - **Preempt priority**가 더 높은(숫자가 작은) 인터럽트만 실행 중인 ISR을 선점합니다.
 - **Sub priority**는 preempt priority가 같은 인터럽트가 동시에 pending일 때 고르는 순서입니다.
@@ -210,6 +210,6 @@ lazy stacking이 켜져 있으면 ISR이 FP 명령을 처음 쓰는 순간에 FP
 
 - [Joseph Yiu, A Beginner's Guide on Interrupt Latency - and Interrupt Latency of the Arm Cortex-M processors (2016)](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/beginner-guide-on-interrupt-latency-and-interrupt-latency-of-the-arm-cortex-m-processors)
 - Cortex-M4 Technical Reference Manual (DDI 0439B) 3.9.1
-- ARMv7-M Architecture Reference Manual (DDI 0403E) B1.5, B1.5.4, B1.5.11, B3.2.21
+- ARMv7-M Architecture Reference Manual (DDI 0403E) B1.5.4, B1.5.11, B1.5.12, B3.2.21
 - CMSIS_5 `core_cm4.h` `NVIC_EncodePriority()`
 - [*Mastering the FreeRTOS Real Time Kernel*](https://github.com/FreeRTOS/FreeRTOS-Kernel-Book) 7.2.1, 7.8

@@ -34,13 +34,15 @@ STM32H7 HAL의 DMA stream 설정에서 burst는 `Init.MemBurst`/`Init.PeriphBurs
 /* Instance, Request, Direction, Inc 같은 나머지 필드는 대상 칩과 요청에 맞춰 채운다 */
 hdma.Init.PeriphDataAlignment = DMA_PDATAALIGN_WORD;   /* 4 byte beat */
 hdma.Init.MemDataAlignment    = DMA_MDATAALIGN_WORD;
+hdma.Init.FIFOMode            = DMA_FIFOMODE_ENABLE;   /* burst는 FIFO 모드에서만 쓰임 */
+hdma.Init.FIFOThreshold       = DMA_FIFO_THRESHOLD_FULL;
 hdma.Init.MemBurst            = DMA_MBURST_INC4;       /* 4 beat burst */
 if (HAL_DMA_Init(&hdma) != HAL_OK) {
     Error_Handler();
 }
 ```
 
-beat 4개 × 4 byte = 16 byte가 burst 하나입니다. burst를 키우면 transaction마다 붙는 요청·응답 단계가 더 많은 데이터에 나뉘어 붙습니다. 실제 배수는 버스 구조와 상대 장치에 달려 있고, 이 글에서는 재지 않았습니다.
+STM32H7 HAL의 `HAL_DMA_Init()`은 FIFO가 꺼져 있으면 burst 설정을 레지스터에 넣지 않습니다(`stm32h7xx_hal_dma.c` 292~296행 "the Memory burst and peripheral burst are not used when the FIFO is disabled"). beat 4개 × 4 byte = 16 byte가 burst 하나입니다. burst를 키우면 transaction마다 붙는 요청·응답 단계가 더 많은 데이터에 나뉘어 붙습니다. 실제 배수는 버스 구조와 상대 장치에 달려 있고, 이 글에서는 재지 않았습니다.
 
 ## STM32H7 MDMA - Master DMA
 
@@ -57,10 +59,11 @@ hmdma.Init.DestDataSize = MDMA_DEST_DATASIZE_WORD;
 hmdma.Init.DataAlignment = MDMA_DATAALIGN_PACKENABLE;
 hmdma.Init.BufferTransferLength = 128;   /* buffer transfer 하나의 byte 수 */
 
+/* Instance, SourceBurst·DestBurst 등 나머지 필드와 HAL_MDMA_Init(&hmdma) 생략 */
 HAL_MDMA_Start(&hmdma, (uint32_t)src, (uint32_t)dst, len, 1);
 ```
 
-HAL 헤더 `stm32h7xx_hal_mdma.h` 80~81행은 `BufferTransferLength`를 "한 번의 transfer로 옮길 byte 수(1~128 byte)"로 설명합니다. 이전 판처럼 burst 길이로 읽으면 안 되고, burst는 별도 필드 `SourceBurst`·`DestBurst`가 정합니다. `HAL_MDMA_Start()`의 마지막 두 인자는 `BlockDataLength`와 `BlockCount`입니다(673행).
+HAL 헤더 `stm32h7xx_hal_mdma.h` 80~81행은 `BufferTransferLength`를 "한 번의 transfer로 옮길 byte 수(1~128 byte)"로 설명합니다. burst 길이가 아니고, burst는 별도 필드 `SourceBurst`·`DestBurst`가 정합니다. `HAL_MDMA_Start()`의 마지막 두 인자는 `BlockDataLength`와 `BlockCount`입니다(673행).
 
 ## Scatter-Gather
 
@@ -93,7 +96,7 @@ hdma.XferM1CpltCallback = rx_half1_done;   /* memory 1 완료 */
 HAL_DMAEx_MultiBufferStart_IT(&hdma, src, dst_a, dst_b, len);
 ```
 
-이전 판의 `HAL_DMA_M0CpltCallback()`·`HAL_DMA_M1CpltCallback()` 같은 weak 함수는 STM32H7 HAL에 없습니다. `DMA_HandleTypeDef`의 함수 포인터 `XferCpltCallback`(148행)과 `XferM1CpltCallback`(152행)을 채우고, 인터럽트 모드는 `HAL_DMAEx_MultiBufferStart_IT()`로 시작합니다(`stm32h7xx_hal_dma_ex.h` 237~238행). 같은 드라이버의 `HAL_DMAEx_MultiBufferStart()`는 첫머리에서 "Memory-to-memory transfer not supported in double buffering mode"라며 memory-to-memory 방향을 거부합니다(`stm32h7xx_hal_dma_ex.c` 129행). double buffer는 주변장치 ↔ 메모리 스트림용입니다.
+`HAL_DMA_M0CpltCallback()`·`HAL_DMA_M1CpltCallback()` 같은 weak 함수는 STM32H7 HAL에 없습니다. `DMA_HandleTypeDef`의 함수 포인터 `XferCpltCallback`(148행)과 `XferM1CpltCallback`(152행)을 채우고, 인터럽트 모드는 `HAL_DMAEx_MultiBufferStart_IT()`로 시작합니다(`stm32h7xx_hal_dma_ex.h` 237~238행). 같은 드라이버의 `HAL_DMAEx_MultiBufferStart()`는 첫머리에서 "Memory-to-memory transfer not supported in double buffering mode"라며 memory-to-memory 방향을 거부합니다(`stm32h7xx_hal_dma_ex.c` 129행). double buffer는 주변장치 ↔ 메모리 스트림용입니다.
 
 이득은 단순한 식으로 볼 수 있습니다. buffer 하나를 DMA가 채우는 시간을 T_dma, CPU가 처리하는 시간을 T_cpu라 하면, buffer 하나로는 둘이 번갈아 해야 하므로 buffer당 T_dma + T_cpu가 걸리고, 둘로 겹치면 max(T_dma, T_cpu)가 걸립니다. 둘이 같을 때 최대 2배이고, 한쪽이 훨씬 길면 이득이 거의 없습니다.
 
@@ -141,12 +144,13 @@ region.Number           = MPU_REGION_NUMBER0;
 region.BaseAddress      = (uint32_t)&__dma_region_start;   /* 링커가 정한 시작 주소 */
 region.Size             = MPU_REGION_SIZE_512KB;
 region.AccessPermission = MPU_REGION_FULL_ACCESS;
+region.TypeExtField     = MPU_TEX_LEVEL1;   /* TEX=001, C=0, B=0: Normal non-cacheable */
 region.IsCacheable      = MPU_ACCESS_NOT_CACHEABLE;
 region.IsBufferable     = MPU_ACCESS_NOT_BUFFERABLE;
 HAL_MPU_ConfigRegion(&region);
 ```
 
-`MPU_Region_InitTypeDef`의 첫 두 필드는 `Enable`과 `Number`입니다(`stm32h7xx_hal_cortex.h` 47~52행). 이전 판의 코드는 둘을 채우지 않아 `{0}` 초기화로 region이 꺼진 채였습니다. ARMv7-M ARM B3.5.3에 따르면 region 크기는 2^N(5 ≤ N ≤ 32) byte이고 시작 주소는 크기에 맞춰 정렬되어야 하며(RegionBaseAddress[(N−1):0] = 0), region이 겹치면 번호가 큰 region이 이깁니다. 이 영역의 buffer는 cache maintenance가 필요 없는 대신 CPU가 읽고 쓸 때도 cache를 쓰지 못합니다.
+`MPU_Region_InitTypeDef`의 첫 두 필드는 `Enable`과 `Number`입니다(`stm32h7xx_hal_cortex.h` 47~52행). `{0}`으로 초기화한 채 두면 region이 꺼진 상태로 남습니다. 또 ARMv7-M ARM 표 B3-13에 따르면 TEX·C·B가 모두 0이면 Strongly-ordered이고, Normal non-cacheable은 TEX = 001, C = 0, B = 0이므로 `TypeExtField`를 `MPU_TEX_LEVEL1`(`stm32h7xx_hal_cortex.h` 174행)로 둡니다. ARMv7-M ARM B3.5.3에 따르면 region 크기는 2^N(5 ≤ N ≤ 32) byte이고 시작 주소는 크기에 맞춰 정렬되어야 하며(RegionBaseAddress[(N−1):0] = 0), region이 겹치면 번호가 큰 region이 이깁니다. 이 영역의 buffer는 cache maintenance가 필요 없는 대신 CPU가 읽고 쓸 때도 cache를 쓰지 못합니다.
 
 ## DMA Latency
 
@@ -155,10 +159,17 @@ DMA 시작까지의 비용(설정 레지스터 쓰기, 요청 처리)과 완료 
 ## Linux dmaengine API
 
 ```c
-struct dma_chan *chan = dma_request_chan(dev, "rx");
+dma_cap_mask_t mask;
+dma_cap_zero(mask);
+dma_cap_set(DMA_MEMCPY, mask);
+struct dma_chan *chan = dma_request_chan_by_mask(&mask);   /* memcpy를 지원하는 channel */
+if (IS_ERR(chan))
+    return PTR_ERR(chan);
 struct dma_async_tx_descriptor *tx;
 
 tx = dmaengine_prep_dma_memcpy(chan, dst, src, len, DMA_PREP_INTERRUPT);
+if (!tx)
+    return -EIO;   /* channel이 memcpy를 지원하지 않으면 NULL */
 tx->callback = dma_done_cb;
 dma_cookie_t cookie = dmaengine_submit(tx);
 dma_async_issue_pending(chan);
