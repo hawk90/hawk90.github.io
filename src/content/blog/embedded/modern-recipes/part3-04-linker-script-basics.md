@@ -57,7 +57,7 @@ SECTIONS
 }
 ```
 
-이 작은 스크립트만으로 단순 펌웨어가 빌드됩니다.
+이것이 뼈대입니다. 이 script에는 startup 코드가 쓸 `_sdata`·`_edata` 같은 symbol이 없어서, 아래 5)절의 `copy_data()`를 그대로 링크하면 "undefined reference to `_sdata'"가 납니다. symbol 정의는 5)절에서 더합니다.
 
 ### 2) MEMORY 블록
 
@@ -341,7 +341,7 @@ ld: removing unused section '.isr_vector' in file '/tmp/ccrT11WV.o'
 
 > ⚠️ `.bss`에 `AT > FLASH`를 붙임
 
-`.bss`는 파일에 내용이 없는 `NOBITS` section이라 LMA를 줄 이유가 없습니다. `.bss`에 `AT > FLASH`를 붙여 링크해 봐도 `objcopy -O binary` 결과는 둘 다 596 byte로 같았고, program header에 FileSiz 0인 `LOAD` segment가 하나 더 생겼을 뿐입니다. 의미 없는 지정이므로 `> SRAM`만 씁니다.
+`.bss`는 파일에 내용이 없는 `NOBITS` section이라 LMA를 줄 이유가 없습니다. `.bss`에 `AT > FLASH`를 붙여 링크해 봐도 `objcopy -O binary` 결과는 둘 다 596 byte로 같았고, `readelf -lSW`로 본 section header·program header도 `AT`를 붙이지 않은 링크와 똑같았습니다. 효과가 없는 지정이므로 `> SRAM`만 씁니다.
 
 > ⚠️ Stack 영역 정의 누락
 
@@ -349,7 +349,7 @@ ld: removing unused section '.isr_vector' in file '/tmp/ccrT11WV.o'
 
 > ⚠️ Heap이 부족
 
-`malloc`을 쓰려면 linker script의 예약 영역뿐 아니라 runtime의 allocator와 `_sbrk` 구현이 실제 heap 경계를 올바르게 사용해야 합니다. `_Min_Heap_Size`만 설정한다고 모든 newlib 구성에서 할당이 보장되는 것은 아닙니다.
+newlib의 `malloc`은 `_sbrk`로 heap을 늘립니다. libgloss `libnosys/sbrk.c`의 `_sbrk`는 linker가 정한 `end` symbol에서 시작해 요청만큼 포인터를 올려 줄 뿐, 상한을 검사하지 않습니다. 위 script의 `PROVIDE(end = .)`가 그 시작점이고, `_Min_Heap_Size`는 link 때 RAM이 남는지 확인하는 용도일 뿐 실행 중의 heap 한도가 아닙니다. heap이 stack과 부딪히지 않게 하려면 `_sbrk`를 직접 구현해 상한을 검사합니다.
 
 > ⚠️ Section name이 input과 불일치
 
@@ -360,7 +360,7 @@ ld: warning: orphan section `.text.Default_Handler' from `/tmp/cckYw3C0.o' being
 ld: warning: orphan section `.text.copy_data' from `/tmp/cckYw3C0.o' being placed in section `.text.copy_data'
 ```
 
-ld 매뉴얼 3.10.4 "Orphan Sections"대로 linker는 orphan을 버리지 않고 같은 이름의 새 output section을 만들어 넣습니다. 링크는 성공하지만 배치가 script의 의도와 달라지므로, 기본값으로 경고가 나지 않는 이 상황을 `--orphan-handling=warn`이나 `error`로 잡아 둡니다.
+ld 매뉴얼 3.10.4 "Orphan Sections"대로 linker는 orphan을 버리지 않고 같은 이름의 새 output section을 만들어 넣습니다. 링크는 성공하지만 배치가 script의 의도와 달라집니다. 같은 링크를 `--orphan-handling` 없이 하면 경고가 한 줄도 나오지 않았으므로, 이 상황을 `--orphan-handling=warn`이나 `error`로 잡아 둡니다.
 
 ## 정리
 
