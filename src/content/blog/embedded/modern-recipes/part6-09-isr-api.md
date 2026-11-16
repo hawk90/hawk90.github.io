@@ -268,7 +268,7 @@ uint64_t t = timestamp;               /* task: two word reads may straddle an up
 
 - ISR에서 부르는 함수는 **막히지 않고, 짧고, 재진입 안전**해야 합니다.
 - **정렬된 32-bit load·store 하나**만 한 번에 끝납니다(DDI 0403E.b A3.5.3). `++`와 64-bit 접근은 위 측정처럼 깨집니다.
-- RTOS API는 **`FromISR` 변종**과 `portYIELD_FROM_ISR()`.
+- RTOS API는 **`FromISR` 변종**과 `portYIELD_FROM_ISR()`을 씁니다.
 - ISR은 **ring에 넣고 task를 깨우기만** 하고, 처리는 task에서 합니다.
 - task 쪽 공유 데이터 접근은 **PRIMASK 저장·복원 critical section**이나 FreeRTOS critical section으로 감쌉니다.
 
