@@ -14,44 +14,52 @@ topics: ["embedded"]
 
 > **"Reference Manual을 *처음부터 끝까지* 읽으면 BSP가 끝나기 전에 일정이 끝납니다."** — *어디를*, *왜*, *어떤 순서로* 읽어야 하는지가 BSP 엔지니어의 핵심 기술입니다.
 
-SoC reference manual은 수천 페이지에 이를 수 있고 판본에 따라 분량도 바뀝니다. 전체를 순서대로 읽기보다 부팅과 보드 통합에 필요한 부분을 우선 확인하는 방법을 설명합니다.
+이 글은 i.MX 8M Plus를 예로 RM에서 부팅과 보드 통합에 필요한 부분만 골라 읽는 방법을 다룹니다. RM의 숫자 하나하나는 결국 Linux와 U-Boot 소스의 상수가 되므로, 이 글의 주소·매크로·클록 값은 모두 Linux v6.12와 U-Boot v2024.04 소스에서 대조한 값입니다. 도서관에서 책 한 권을 다 읽는 대신 색인부터 펴는 것과 같습니다.
 
 ## SoC 문서의 종류
 
 벤더가 같은 SoC에 대해 *여러 종류의 문서*를 발행합니다. 이름이 비슷해 보여도 *대상이 완전히 다른* 문서입니다.
 
-| 문서 | 약어 | 대상 | 분량 |
-|------|------|------|------|
-| Datasheet | DS | 하드웨어 설계자 — 전기적 특성, 핀 정의, 패키지 | 판본·제품별 상이 |
-| Reference Manual | RM, TRM | 펌웨어·BSP 엔지니어 — register와 peripheral 동작 | 판본·제품별 상이 |
-| Errata | ER | 모두 — SoC errata와 workaround | 제품별 상이 |
-| Application Note | AN | 특정 주제 — DDR tuning, secure boot 흐름 | 주제·판본별 상이 |
-| Pin Mux Spreadsheet | — | 보드 설계자·BSP — 핀별 기능 매트릭스 | XLSX 1개 |
+| 문서 | 약어 | 대상 |
+|------|------|------|
+| Datasheet | DS | 하드웨어 설계자 — 전기적 특성, 핀 정의, 패키지 |
+| Reference Manual | RM, TRM | 펌웨어·BSP 엔지니어 — register와 peripheral 동작 |
+| Errata | ER | 모두 — SoC errata와 workaround |
+| Application Note | AN | 특정 주제 — DDR tuning, secure boot 흐름 |
+| Pin 설정 도구 | — | 보드 설계자·BSP — 핀별 기능 선택과 DT 조각 생성 |
 
-BSP 엔지니어는 *Datasheet*에서 핀과 부트 모드를, *Reference Manual*에서 레지스터와 클록 트리를, *Errata*에서 버그 workaround를, *Application Note*에서 DDR 같은 깊은 주제를 봅니다. *Pin Mux Spreadsheet*가 작업 효율을 좌우합니다.
+BSP 엔지니어는 *Datasheet*에서 핀과 전기 특성을, *Reference Manual*에서 레지스터와 클록 트리를, *Errata*에서 버그 workaround를, *Application Note*에서 DDR 같은 깊은 주제를 봅니다.
 
 ## 반드시 읽어야 할 4개 챕터
 
-많은 SoC reference manual에서 다음 주제가 초기 BSP 작업의 주요 입력입니다. 목차와 SoC/board 요구사항에 따라 추가 문서도 확인해야 합니다.
+첫 부팅까지 필요한 입력은 네 주제로 모입니다. 각 주제가 어떤 소스 파일의 어떤 값이 되는지를 짝지어 보면 읽는 목적이 분명해집니다.
+
+| RM 주제 | 소스에서 그 값이 들어가는 곳 (i.MX 8M Plus) |
+|---------|------------------------------------------|
+| Memory Map | `imx8mp.dtsi`의 `reg`, U-Boot `arch/arm/include/asm/arch-imx8m/imx-regs.h` |
+| Clock Tree | Linux `drivers/clk/imx/clk-imx8mp.c`, DT의 `assigned-clocks` |
+| Reset and Boot | 보드 boot switch, U-Boot `flash.bin` 오프셋 |
+| Pin Multiplexing | Linux `imx8mp-pinfunc.h`, 보드 dts의 `fsl,pins` |
 
 ### 1. Memory Map (또는 Address Map)
 
 SoC의 모든 *물리 주소 공간*을 한 표로 보여줍니다. DDR 영역, SRAM 영역, 모든 peripheral의 base address가 여기 있습니다.
 
-NXP i.MX 8M Plus의 메모리 맵 일부입니다.
+i.MX 8M Plus의 메모리 맵 중 BSP가 먼저 쓰는 주소를 U-Boot v2024.04 `arch/arm/include/asm/arch-imx8m/imx-regs.h`에서 옮기면 다음과 같습니다. 같은 값이 Linux v6.12 `imx8mp.dtsi`의 노드 이름(`gpio1: gpio@30200000`, `iomuxc: pinctrl@30330000`, `clk: clock-controller@30380000`, `uart1: serial@30860000`, `uart2: serial@30890000`)에도 있습니다.
 
-```text
-0x0000_0000 - 0x0007_FFFF   Boot ROM
-0x0010_0000 - 0x0011_FFFF   On-chip SRAM (128KB)
-0x3000_0000 - 0x303F_FFFF   AIPS-1 (peripheral bus 1)
-0x3033_0000 - 0x3033_FFFF   IOMUXC (pinmux 컨트롤러)
-0x3038_0000 - 0x3038_FFFF   CCM    (Clock Control Module)
-0x3086_0000 - 0x3086_FFFF   UART1
-0x3020_0000 - 0x3020_FFFF   GPIO1
-...
+```c
+#define GPIO1_BASE_ADDR		0X30200000
+#define IOMUXC_BASE_ADDR	0x30330000
+#define CCM_BASE_ADDR		0x30380000
+#define UART1_BASE_ADDR		0x30860000
+#define UART3_BASE_ADDR		0x30880000
+#define UART2_BASE_ADDR		0x30890000
+#define I2C1_BASE_ADDR		0x30A20000
 ```
 
-위 MMIO 주소는 Linux v6.12 `imx8mp.dtsi`의 IOMUXC·CCM·UART1·GPIO1 노드와 대조한 예입니다. DDR 시작 주소와 용량은 SoC의 고정 peripheral map으로 단정할 수 없으며 보드에 실제 탑재된 메모리 구성과 SoC 주소 규칙을 확인해야 합니다. 주소·크기는 디바이스 트리의 `reg`에 들어가고, 셀 수와 의미는 부모 bus의 `#address-cells`·`#size-cells` 및 해당 binding이 정합니다.
+UART 번호와 주소 순서가 일치하지 않는다는 점이 눈에 띕니다. UART3가 UART2보다 낮은 주소에 있으므로 "UART n의 주소 = UART1 + n × 0x10000" 같은 추측은 틀립니다. 주소는 항상 표에서 읽습니다.
+
+DDR은 SoC 표가 아니라 보드가 정합니다. EVK의 경우 U-Boot `include/configs/imx8mp_evk.h`가 `PHYS_SDRAM 0x40000000`, `PHYS_SDRAM_SIZE 0xC0000000 /* 3 GB */`, `PHYS_SDRAM_2 0x100000000`을 정의하고, Linux `imx8mp-evk.dts`의 `memory@40000000` 노드가 `reg = <0x0 0x40000000 0 0xc0000000>, <0x1 0x00000000 0 0xc0000000>`로 같은 두 영역을 적습니다. 주소·크기는 디바이스 트리의 `reg`에 들어가고, 셀 수는 부모 bus의 `#address-cells`·`#size-cells`가 정합니다.
 
 읽을 때 다음을 확인합니다.
 
@@ -62,16 +70,16 @@ NXP i.MX 8M Plus의 메모리 맵 일부입니다.
 
 ### 2. Clock Tree (또는 Clock and Reset)
 
-루트 oscillator에서 시작해 PLL과 divider를 거쳐 peripheral clock으로 연결되는 구조입니다. 노드 수와 topology는 SoC별로 다릅니다.
+루트 oscillator에서 시작해 PLL과 divider를 거쳐 peripheral clock으로 연결되는 구조입니다. 수도관에 비유하면 oscillator는 상수도 본관, PLL은 가압 펌프, divider는 감압 밸브, peripheral clock root는 각 집의 수도꼭지입니다.
 
-i.MX 8M Plus의 단순화된 흐름입니다.
+아래 그림은 Linux v6.12 `drivers/clk/imx/clk-imx8mp.c`에서 뽑은 일부입니다. `sys_pll1_out`에서 `sys_pll1_400m`(1/2), `sys_pll1_200m`(1/4), `sys_pll1_80m`(1/10)이 fixed factor로 갈라지고(484~493행), UART2 root의 mux 입력 목록 `imx8mp_uart2_sels`는 `osc_24m`, `sys_pll1_80m`, `sys_pll2_200m` 순으로 시작합니다(245행). ARM_PLL의 1.8 GHz는 `imx8mp.dtsi`의 A53 OPP 표 최고점 `opp-1800000000`입니다.
 
 ![i.MX 8M Plus clock tree](/images/blog/bsp/diagrams/ch02-clock-tree.svg)
 
 읽을 때 다음을 정합니다.
 
-- 외부 oscillator 주파수 (보드별로 다름, *회로도에서* 확인)
-- 각 PLL의 *목표 주파수* (벤더 BSP의 권장값)
+- 외부 oscillator 주파수 (회로도의 crystal 부품값)
+- 각 PLL의 *목표 주파수*. 예: `imx8mp.dtsi`는 `IMX8MP_CLK_NOC`를 `SYS_PLL2_1000M`에서 1 GHz로, `IMX8MP_CLK_GIC`를 `SYS_PLL2_500M`에서 500 MHz로 고정합니다(`assigned-clock-rates`).
 - UART, I2C, SPI, MMC의 *parent clock 선택*
 
 clock tree가 *디바이스 트리의 clocks 속성*과 *U-Boot SPL의 클록 초기화 코드*에 직접 반영됩니다. [Ch 4](/blog/embedded/bsp/chapter04-pinmux-clock)에서 자세히 다룹니다.
@@ -80,16 +88,7 @@ clock tree가 *디바이스 트리의 clocks 속성*과 *U-Boot SPL의 클록 �
 
 SoC가 power-on부터 *어떤 순서로* peripheral을 깨우고, *어디서* 첫 코드를 가져오는지를 다룹니다.
 
-BSP에서 먼저 확인할 항목 중 하나가 *boot source*입니다. 지원 매체와 부트 설정은 SoC의 boot mode 표, fuse 설정, 보드 strap 회로를 함께 봐야 합니다.
-
-| Boot mode | 출처 | 용도 |
-|----------|------|------|
-| eMMC | 보드 위 eMMC 칩 | 양산 제품 |
-| SD card | 외부 SD 슬롯 | 개발 |
-| USB serial download | USB OTG 포트 | 공장 provisioning, 복구 |
-| QSPI NOR flash | 외부 SPI flash | 작은 시스템 |
-
-Boot mode는 SoC boot configuration pins와 fuse 설정, 보드의 strap/switch 회로에 좌우됩니다. i.MX 8M Plus는 `BOOT_MODE[3:0]` 네 핀을 사용하며, 아래 표는 i.MX 8M Plus EVK의 스위치 표이지 모든 보드의 범용 strap 표가 아닙니다.
+BSP에서 먼저 확인할 항목이 *boot source*입니다. Boot mode는 SoC boot configuration 핀과 fuse 설정, 보드의 strap/switch 회로가 함께 정합니다. 아래 표는 i.MX 8M Plus EVK의 SW4 스위치 표입니다. 모든 보드의 범용 strap 표가 아니라 이 EVK의 배선입니다.
 
 | EVK boot device | SW4-1 | SW4-2 | SW4-3 | SW4-4 |
 |---|---:|---:|---:|---:|
@@ -103,43 +102,39 @@ Boot mode는 SoC boot configuration pins와 fuse 설정, 보드의 strap/switch 
 | QSPI Hyperflash | 0 | 1 | 1 | 1 |
 | ecSPI | 1 | 0 | 0 | 0 |
 
-EVK 매핑은 [NXP i.MX 8M Plus EVK boot-switch guide](https://www.nxp.com/document/guide/getting-started-with-the-i-mx-8m-plus-evk:GS-iMX-8M-Plus-EVK)를 기준으로 했습니다. 다른 보드의 switch 위치·극성·지원 미디어는 그 보드의 schematic과 SoC reference manual로 확인하세요. 설정이 어긋나면 의도한 boot source 대신 다른 경로로 진입하거나 부팅에 실패할 수 있습니다.
+표는 [NXP Getting Started with the i.MX 8M Plus EVK](https://www.nxp.com/document/guide/getting-started-with-the-i-mx-8m-plus-evk:GS-iMX-8M-Plus-EVK) 3.4절의 표와 같고, 같은 문서는 "1 = ON; 0 = OFF"와 "The default boot device is eMMC/uSDHC3"를 적습니다. 개발 중에 SD 카드로 부팅하려면 SW4를 `0011`로 바꿔야 한다는 뜻입니다. U-Boot `doc/board/nxp/imx8mp_evk.rst`의 절차도 `flash.bin`을 MicroSD의 32 KiB 오프셋에 씁니다(`dd ... bs=1K seek=32`).
 
 ### 4. Pin Multiplexing (IOMUXC, PINCTRL)
 
-SoC의 외부 pad는 여러 alternate function을 제공할 수 있지만, 기능 수와 선택지는 pad마다 다릅니다. 각 보드가 배선한 기능에 맞는 mux mode를 선택하는 것이 pin mux입니다.
+SoC의 외부 pad 하나는 여러 alternate function 중 하나를 고릅니다. 멀티탭 콘센트 하나에 어떤 가전을 꽂을지 정하는 일과 같습니다. 각 보드가 배선한 기능에 맞는 mux mode를 선택하는 것이 pin mux입니다.
 
-Linux v6.12 `imx8mp-pinfunc.h`에는 UART1_RXD pad를 UART1 DCE 수신 기능으로 설정하는 매크로가 있습니다. 이 파일은 커널 DTS에서 쓰는 mux/config/input 값과 기능 이름을 제공하지만 package ball 위치를 정하지는 않습니다. 따라서 실제 pad와 ball 매핑은 해당 SoC package의 pinout 자료에서 별도로 확인합니다.
+Linux v6.12 `imx8mp-pinfunc.h:732`에는 UART1_RXD pad를 UART1 DCE 수신 기능으로 설정하는 매크로가 있습니다. 이 파일은 mux/config/input 레지스터 오프셋과 기능 이름을 제공하지만 package ball 위치는 담지 않습니다. pad와 ball 매핑은 package pinout 자료에 있습니다.
 
 ```text
 MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX  0x220 0x480 0x5E8 0x0 0x4
 ```
 
-매크로의 다섯 값은 `<mux_reg conf_reg input_reg mux_mode input_val>` 순서입니다. 이 값만으로 특정 보드에서 UART1_RXD가 실제로 배선되었는지, pad control 값이 적절한지까지 확인되지는 않습니다.
+매크로의 다섯 값은 `<mux_reg conf_reg input_reg mux_mode input_val>` 순서입니다. 같은 파일의 `MX8MP_IOMUXC_UART2_TXD__UART2_DCE_TX`는 `0x22C 0x48C 0x000 0x0 0x0`으로 input_reg가 0인 반면, RX 쪽 `UART2_RXD__UART2_DCE_RX`는 input_reg `0x5F0`과 input_val `0x6`을 가집니다. 같은 UART라도 방향에 따라 설정할 레지스터 수가 다릅니다. 이 매크로는 SoC가 *할 수 있는* 선택이고, 보드가 실제로 그 pad를 무엇에 배선했는지는 회로도에 있습니다.
 
-Pin Mux Spreadsheet(별도 XLSX)가 *이 정보를 보드 단위로 정리해 주는* 보조 자료입니다. 다음 절에서 봅니다.
+## Pin 설정 도구 — 벤더가 주는 보조 자료
 
-## Pin Mux Spreadsheet — 가장 유용한 보조 자료
+SoC 벤더는 핀 선택을 GUI로 하는 도구를 제공합니다. 벤더 제품 페이지에서 확인한 기능은 다음과 같습니다.
 
-NXP, TI, ST는 *공식 Pin Mux 도구*를 제공합니다.
+| 벤더 | 도구 | 제품 페이지가 밝힌 기능 |
+|------|------|------------------------|
+| NXP | Config Tools for i.MX Applications Processors | Pins Tool이 C 코드와 "Device Tree Snippets Include (.dtsi) files", CSV 보고서를 생성. 지원 장치 목록에 i.MX8MPLUS 포함 |
+| TI | SysConfig | pin mux 설정 GUI. CCStudio 통합, 단독 데스크톱 앱, 클라우드 앱 세 형태 |
 
-| 벤더 | 도구 |
-|------|------|
-| NXP | MCUXpresso Config Tools (Pin Mux 탭) |
-| TI | SysConfig (브라우저 또는 IDE 통합) |
-| ST | STM32CubeMX |
-| Rockchip | Pin Spreadsheet (Excel, vendor에서 받음) |
+MCU용 MCUXpresso Config Tools 페이지는 Pins Tool 출력을 "ANSI-C source code"라고만 적으므로 i.MX 8M 계열에는 위의 i.MX용 Config Tools를 씁니다.
 
-도구가 *GUI*로 핀을 선택하면 *DT fragment*와 *U-Boot board 코드*를 생성해 줍니다. *직접 손으로 IOMUXC 레지스터 값을 계산하는 것은 거의 항상 실수의 원천*입니다.
+결과물인 보드 DT가 어떤 모습인지는 Linux v6.12 `imx8mp-evk.dts`가 보여 줍니다. EVK의 I2C1과 콘솔 UART2 핀 그룹입니다.
 
-NXP의 도구가 생성하는 i.MX 8M Plus DT fragment 예시입니다.
-
-```text
+```c
 &iomuxc {
-    pinctrl_uart1: uart1grp {
+    pinctrl_uart2: uart2grp {
         fsl,pins = <
-            MX8MP_IOMUXC_UART1_RXD__UART1_DCE_RX    0x140
-            MX8MP_IOMUXC_UART1_TXD__UART1_DCE_TX    0x140
+            MX8MP_IOMUXC_UART2_RXD__UART2_DCE_RX    0x140
+            MX8MP_IOMUXC_UART2_TXD__UART2_DCE_TX    0x140
         >;
     };
 
@@ -152,13 +147,13 @@ NXP의 도구가 생성하는 i.MX 8M Plus DT fragment 예시입니다.
 };
 ```
 
-Linux v6.12 [`imx8mp-pinfunc.h`](https://github.com/torvalds/linux/blob/v6.12/arch/arm64/boot/dts/freescale/imx8mp-pinfunc.h)는 `<mux_reg conf_reg input_reg mux_mode input_val>` 다섯 값으로 mux, pad-config, input-daisy 설정을 나타냅니다. `fsl,pins`의 pad control 값은 이 매크로와 별도입니다.
+각 줄의 마지막 값(`0x140`, `0x400001c2`)은 [`imx8mp-pinfunc.h`](https://github.com/torvalds/linux/blob/v6.12/arch/arm64/boot/dts/freescale/imx8mp-pinfunc.h) 매크로 밖에 있는 pad control 값입니다. 매크로가 *어느 기능*인지를 정하고, 이 값이 pull·drive strength 같은 *전기적 설정*을 정합니다. 두 값은 RM의 IOMUXC 장에서 서로 다른 레지스터(mux_reg와 conf_reg)에 들어갑니다.
 
 ## Errata는 *반드시* 읽는다
 
-Errata는 SoC의 *알려진 버그*입니다. 이걸 안 읽으면 *부팅이 잘 안 되는* 이유를 평생 찾습니다.
+Errata는 SoC의 *알려진 버그*와 그 우회 방법입니다. RM은 칩이 *설계대로* 동작한다고 가정하고 쓰였으므로, RM대로 했는데 안 되는 문제의 답은 errata에 있습니다.
 
-같은 NXP 계열인 i.MX 95의 PCIe erratum을 예로 듭니다. 메인라인 커널 `drivers/pci/controller/dwc/pci-imx6.c`가 workaround 코드 옆에 남긴 요약입니다.
+같은 NXP 계열인 i.MX 95의 PCIe erratum을 예로 듭니다. Linux v6.16의 `drivers/pci/controller/dwc/pci-imx6.c`가 workaround 코드 옆에 남긴 요약입니다.
 
 ```text
 ERR051586: Compliance with 8GT/s Receiver Impedance ECN
@@ -172,14 +167,16 @@ Workaround: Program GEN3_RELATED_OFF[GEN3_ZRXDC_NONCOMPL]
 to 0.
 ```
 
-workaround는 erratum에 따라 *U-Boot board 코드*나 *Linux 드라이버·quirk*에 들어갑니다. 위 erratum은 커널 PCIe host driver가 초기화 콜백(`imx_pcie_host_post_init`)에서 이 비트를 0으로 씁니다. 메인라인이나 vendor BSP에 이미 들어가 있는 경우가 많지만, *우리가 fork한 시점 이후의 erratum*은 직접 적용해야 합니다.
+위 erratum은 커널 PCIe host driver가 초기화 콜백 `imx_pcie_host_post_init`에서 이 비트를 0으로 씁니다. 적용 여부는 `IMX_PCIE_FLAG_8GT_ECN_ERR051586` 플래그로 정해지고, 이 플래그는 `[IMX95]` 항목에만 붙어 있습니다.
+
+이 코드가 *언제* 들어왔는지가 교훈입니다. kernel.org에서 받은 `pci-imx6.c`를 버전별로 grep하면 v6.15에는 `ERR051586`이 0번, v6.16에는 5번 나옵니다. 그러니 v6.12나 v6.15에서 fork한 i.MX 95 BSP에는 이 workaround가 없습니다. fork 시점 이후에 나온 erratum은 직접 백포트해야 합니다.
 
 읽는 순서는 다음과 같습니다.
 
 1. SoC vendor 사이트에서 *해당 SoC의 최신 errata*를 받습니다.
-2. *Severity High* 또는 *Critical*만 먼저 봅니다. 보통 10건 미만입니다.
-3. 각 erratum의 *workaround가 우리 코드에 적용되어 있는지* 확인합니다.
-4. 안 들어가 있다면 BSP의 *알려진 문제* 목록에 올립니다.
+2. 우리 보드가 쓰는 블록(DDR, USB, PCIe, 부트 미디어)에 해당하는 erratum을 먼저 고릅니다.
+3. 각 erratum 번호(`ERR051586` 같은)로 U-Boot와 커널 트리를 grep해 *workaround가 우리 코드에 있는지* 확인합니다.
+4. 없다면 upstream의 해당 커밋을 찾아 백포트하거나 BSP의 *알려진 문제* 목록에 올립니다.
 
 ## 무엇을 *건너뛰어도* 되는가
 
@@ -188,10 +185,10 @@ RM의 다음 부분은 BSP 첫 부팅 단계에서는 *건너뛰어도* 됩니�
 - **GPU/VPU/카메라 ISP 관련 챕터** — 대형 IP는 별도 드라이버 작업으로, 첫 부팅 이후 단계.
 - **PCIe 상세** — Wi-Fi가 PCIe면 필요. 아니면 후순위.
 - **CAN, FlexRay 같은 산업용 버스** — 그 기능을 쓰는 보드에서만.
-- **DSP, NPU 코어 챕터** — 대부분의 BSP가 *Linux 부팅까지*는 무시.
+- **DSP, NPU 코어 챕터** — Linux 부팅 경로에 들어가지 않음.
 - **Security IP 상세** — TF-A가 위임받는 부분. 따로 다룸.
 
-이런 챕터를 *제품 요구사항에 따라* 차차 읽어나갑니다. *첫 부팅까지는* 위 4개 챕터로 충분합니다.
+이런 챕터는 제품 요구사항에 그 기능이 들어갈 때 읽습니다.
 
 ## 회로도 읽기 — RM의 짝꿍
 
@@ -203,44 +200,42 @@ RM이 *SoC의 능력*을 보여준다면, 회로도는 *우리 보드가 그 능
 - [ ] `BOOT_MODE` 핀의 strap 저항값
 - [ ] UART1 (또는 console UART)의 RX/TX 핀 번호
 - [ ] 어느 USDHC가 SD에, 어느 USDHC가 eMMC에 연결되는지
-- [ ] Ethernet PHY 모델 (Atheros AR8031, RTL8211 등) + MDIO 주소
-- [ ] DDR 칩 모델 (Micron MT41K, SK Hynix H5AN 등)
+- [ ] Ethernet PHY 모델 + MDIO 주소
+- [ ] DDR 칩 모델
 - [ ] DDR 부품의 데이터 폭·rank·연결과 SoC DRAM bus 구성을 대조
 - [ ] PMIC 모델 + I2C 주소
-- [ ] Wi-Fi/BT 모듈 종류 (TI WL18xx, Cypress CYW43xx)
-- [ ] 각 power rail의 voltage (1.0V, 1.1V, 1.8V, 3.3V)
+- [ ] Wi-Fi/BT 모듈 종류
+- [ ] 각 power rail의 voltage
 - [ ] Reset 회로 (`POR_B`, watchdog reset)
 
-이 목록을 *완전히* 채울 때까지 BSP 작업을 시작하지 않습니다. 빈칸이 있다면 *부팅 도중* 발견하게 되는데, 그 시점에는 디버깅 비용이 훨씬 큽니다.
+이 목록의 칸 하나하나가 DT 노드 하나가 됩니다. BeagleBone Black을 예로 들면 PMIC 칸은 `am335x-bone-common.dtsi`의 `tps: tps@24`(I2C0, 주소 0x24)가 되고, PHY 칸은 `ethernet-phy@0`이 됩니다. 빈칸이 남으면 DT를 쓸 수 없으므로 목록을 다 채운 뒤에 DT 작업을 시작합니다.
 
 ## RM 읽기의 효율 — 검색과 구조 파악
 
-수천 페이지를 *순서대로 읽는 것*은 비효율적입니다. 다음 방식이 훨씬 빠릅니다.
+RM을 처음부터 순서대로 읽는 대신 다음 순서로 필요한 표에 바로 갑니다.
 
 1. **PDF reader에서 keyword 검색.** "UART1 base address"로 메모리 맵 표를, "PLL1"으로 clock 트리 그림을, "BOOT_MODE"로 boot mode 표를 곧장 찾습니다.
 2. **그림(figure) 중심으로 본다.** Clock tree, memory map, boot sequence 그림이 해당 챕터의 *요약*에 해당합니다.
-3. **표(table)를 우선 본다.** Pin mux 표, 레지스터 표, boot 모드 표가 핵심이고, 본문은 표를 *해설*하는 형태가 많습니다.
-4. **비슷한 SoC의 BSP source를 *반대로* 본다.** `arch/arm64/boot/dts/freescale/imx8mp-evk.dts`에서 `interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>`를 찾고, RM의 GIC interrupt 표에서 *왜 26인지* 역추적합니다.
+3. **표(table)를 우선 본다.** Pin mux 표, 레지스터 표, boot 모드 표가 핵심입니다.
+4. **동작하는 BSP source를 *반대로* 본다.** Linux `imx8mp.dtsi:1077`의 `uart1` 노드에 있는 `interrupts = <GIC_SPI 26 IRQ_TYPE_LEVEL_HIGH>`를 찾고(바로 아래 `uart2`는 `GIC_SPI 27`), RM의 interrupt 표에서 UART1이 26번인 근거를 역추적합니다.
 
-동작하는 BSP는 RM을 대신하지 않습니다. 다만 실제 설정이 어떤 문서 항목을 사용했는지 역추적하는 보조 자료로 쓸 수 있습니다.
+동작하는 BSP는 RM을 대신하지 않지만, 어떤 RM 항목이 실제로 쓰였는지 알려 주는 색인 역할을 합니다.
 
 ## 실전 예 — i.MX 8M Plus 콘솔 UART 결정
 
 새 보드의 console UART을 RM과 회로도를 *교차 참조*하면서 정하는 흐름을 봅시다.
 
-**단계 1: 회로도와 package pinout 확인.** debug 헤더의 RX/TX 신호를 회로도에서 따라가 SoC pad 이름을 찾고, package pinout에서 해당 pad의 ball 위치를 확인합니다. 이 예제에는 특정 보드의 회로도와 package가 지정되어 있지 않으므로 ball 번호는 제시하지 않습니다.
+EVK는 UART2를 콘솔로 씁니다. `imx8mp-evk.dts`의 `chosen` 노드가 `stdout-path = &uart2;`이고 `&uart2` 노드에 `/* console */` 주석이 있습니다. 이 결정을 RM과 회로도에서 다시 따라가 봅니다.
 
-**단계 2: pin function 자료 대조.** 확인한 pad 이름을 SoC reference manual과 커널의 해당 버전 pinfunc header에서 찾아 mux 선택을 대조합니다. 예를 들어 Linux v6.12 header의 UART1_RXD 항목은 `UART1_DCE_RX` 기능과 mux 값 `0x0`을 정의합니다. 이 정의만으로 특정 보드의 배선이나 console 설정을 증명하지는 않습니다.
+**단계 1: 회로도와 package pinout 확인.** debug 헤더의 RX/TX 신호를 회로도에서 따라가 SoC pad 이름(`UART2_RXD`, `UART2_TXD`)을 찾고, package pinout에서 ball 위치를 확인합니다. 이 글은 EVK 회로도를 인용하지 않으므로 ball 번호는 적지 않습니다.
 
-**단계 3: 메모리 맵에서 UART2 base address.** RM 메모리 맵 챕터.
+**단계 2: pin function 대조.** pad 이름을 `imx8mp-pinfunc.h`에서 찾습니다. `MX8MP_IOMUXC_UART2_RXD__UART2_DCE_RX`는 `0x228 0x488 0x5F0 0x0 0x6`(740행)이고, mux mode 0이 UART2 기능입니다.
 
-```text
-0x3089_0000 - 0x3089_FFFF   UART2
-```
+**단계 3: 메모리 맵에서 UART2 base address.** `imx-regs.h:42`의 `UART2_BASE_ADDR 0x30890000`이고, `imx8mp.dtsi`의 `uart2: serial@30890000`의 `reg = <0x30890000 0x10000>`과 같습니다.
 
-**단계 4: DT 작성.** `imx8mp.dtsi`에 이미 정의된 `&uart2` 노드를 활성화합니다.
+**단계 4: DT 작성.** `imx8mp.dtsi`에 이미 정의된 `&uart2` 노드를 활성화합니다. 아래는 `imx8mp-evk.dts:738-743`과 `:1028-1033`입니다.
 
-```text
+```c
 &uart2 {
     pinctrl-names = "default";
     pinctrl-0 = <&pinctrl_uart2>;
@@ -257,65 +252,57 @@ RM이 *SoC의 능력*을 보여준다면, 회로도는 *우리 보드가 그 능
 };
 ```
 
-**단계 5: U-Boot defconfig.**
+**단계 5: U-Boot 초기 디버그 UART.** `imx8mp_evk_defconfig`는 `CONFIG_MXC_UART=y`만 켜고 콘솔은 DT의 `stdout-path`를 따릅니다. driver model이 뜨기 전 SPL 초기에 문자를 찍고 싶다면 debug UART를 켭니다. 심볼 이름은 U-Boot v2024.04 `drivers/serial/Kconfig`의 `DEBUG_UART_MXC`(408행), `DEBUG_UART_BASE`(498행), `DEBUG_UART_CLOCK`(525행)이고, 클록 24 MHz는 같은 SoC를 쓰는 `imx8mp_dhcom_pdk2_defconfig:30`의 값입니다.
 
-```text
+```ini
 CONFIG_DEBUG_UART=y
+CONFIG_DEBUG_UART_MXC=y
 CONFIG_DEBUG_UART_BASE=0x30890000
 CONFIG_DEBUG_UART_CLOCK=24000000
-CONFIG_DEBUG_UART_IMX=y
 ```
 
-이렇게 *RM → 회로도 → DT → defconfig*의 일직선 흐름이 BSP 작업의 *최소 단위*입니다.
+`DEBUG_UART`의 드라이버 선택(choice)은 기본값이 `DEBUG_UART_NS16550`(Kconfig 235행)이므로 `DEBUG_UART_MXC=y`를 명시해야 i.MX UART 드라이버가 붙습니다. 이렇게 *RM → 회로도 → DT → defconfig*로 이어지는 흐름이 BSP 작업의 *최소 단위*입니다.
 
-## Reference Manual 첫 일주일 일정
+## 새 SoC를 받았을 때 읽는 순서
 
-새 SoC를 처음 받았을 때 일주일 안에 다음을 끝냅니다.
-
-| 일자 | 작업 |
-|------|------|
-| Day 1 | RM 목차 훑기. Memory Map 챕터 정독. |
-| Day 2 | Clock Tree 챕터. 권장 PLL 값을 노트에 정리. |
-| Day 3 | Boot Sequence 챕터. Boot mode 표를 회로도와 매칭. |
-| Day 4 | Pin Mux 챕터. Pin Mux Spreadsheet 도구 설치 및 익숙해지기. |
-| Day 5 | Errata 정독. Severity High 항목을 BSP 노트에 기록. |
-| Day 6 | 회로도 검토. 위의 *회로도에서 검색* 체크리스트 채우기. |
-| Day 7 | 비슷한 보드의 reference BSP source 디렉터리 구조 익히기. |
-
-이 일주일을 *충실히* 거치면 그 뒤 부팅 디버깅이 *훨씬* 효율적입니다.
+| 순서 | 작업 | 산출물 |
+|------|------|--------|
+| 1 | RM 목차 훑기, Memory Map 장 | console UART·IOMUXC·CCM·DDR 주소 표 |
+| 2 | Clock Tree 장 | 사용할 peripheral의 parent clock 목록 |
+| 3 | Boot 장 | boot mode 표와 회로도 strap 대조 |
+| 4 | Pin Mux 장, pin 설정 도구 | 보드 핀 표 |
+| 5 | Errata | 우리 보드 블록에 해당하는 erratum 목록과 코드 적용 여부 |
+| 6 | 회로도 | 위 회로도 체크리스트 |
+| 7 | reference BSP source | EVK dts·U-Boot board 디렉터리 구조 |
 
 ## 자주 하는 실수
 
 ### Datasheet와 Reference Manual을 *혼동*
 
-Datasheet는 *얇고* 전기적 특성 중심입니다. Reference Manual은 *두껍고* 레지스터 중심입니다. BSP는 RM을 봅니다. 자료를 받았는데 *얇으면* "혹시 datasheet만 받은 것 아닌가" 확인합니다.
+Datasheet는 전기적 특성 중심이고, Reference Manual은 레지스터 중심입니다. BSP는 RM을 봅니다. 받은 자료에 레지스터 표가 없으면 datasheet만 받은 것입니다.
 
 ### 영문 PDF에 *비활성 검색*
 
-스캔된 PDF는 검색이 안 됩니다. *digital born* PDF인지 확인합니다. 안 되면 OCR을 돌리거나 *벤더의 최신 버전*을 받습니다. 검색 안 되는 RM과 작업하는 것은 *눈 감고 코끼리 만지기*입니다.
+스캔된 PDF는 텍스트 레이어가 없어 검색이 안 됩니다. 이때는 OCR을 돌리거나 벤더 사이트에서 원본 PDF를 다시 받습니다. 검색 안 되는 RM과 작업하는 것은 *눈 감고 코끼리 만지기*입니다.
 
 ### Errata를 *최신본*으로 안 받음
 
-Errata는 *수시로 갱신*됩니다. 6개월 전에 받은 것이 *이미 outdated*일 수 있습니다. 새 erratum이 *우리 보드의 알 수 없는 문제*를 설명해 줄 수 있습니다.
+Errata 문서에는 개정 이력이 있고, 개정마다 erratum이 추가됩니다. 위의 ERR051586 workaround가 커널에 v6.16에서야 들어온 것처럼 erratum은 칩 출시 뒤에도 늘어납니다. 원인을 모르는 문제가 남아 있으면 최신 개정판을 다시 받아 개정 이력부터 봅니다.
 
 ### Pin Mux를 *손으로* 계산
 
-IOMUXC 레지스터의 5개 필드를 직접 비트 시프트로 계산하는 사람을 가끔 봅니다. 거의 항상 한두 비트가 틀립니다. *벤더 도구*가 만든 매크로를 씁니다.
-
-### Vendor 도구 *사용을 거부*
-
-"외부 도구는 못 믿겠다"고 손으로 모두 짜는 경우가 있습니다. NXP MCUXpresso Config Tools, TI SysConfig, ST CubeMX는 *벤더 reference BSP의 입력*입니다. 손으로 짜면 *벤더와 다른 길*로 가게 되어 디버깅 도움을 받기 어렵습니다.
+IOMUXC 레지스터 오프셋을 RM 표에서 손으로 옮겨 적으면 위의 UART2/UART3 주소 역전 같은 함정에 걸립니다. 커널 `imx8mp-pinfunc.h`의 매크로나 벤더 도구 출력을 씁니다.
 
 ## 정리
 
-- Memory Map, Clock Tree, Reset & Boot, Pin Multiplexing은 BSP 작업에서 우선 확인할 주제입니다. 실제 우선순위는 SoC와 보드 요구사항에 따라 달라집니다.
-- Datasheet와 Reference Manual은 *다른 문서*입니다. BSP는 RM을 봅니다.
-- Errata는 *반드시 최신본*을 받아 Severity High부터 봅니다.
-- Pin Mux Spreadsheet (NXP MCUXpresso, TI SysConfig, ST CubeMX)는 *반드시* 사용합니다. 손 계산은 실수의 원천입니다.
+- Memory Map, Clock Tree, Reset & Boot, Pin Multiplexing 네 주제가 첫 부팅의 입력이고, 각각 `imx-regs.h`·`clk-imx8mp.c`·boot switch·`imx8mp-pinfunc.h`로 이어집니다.
+- UART3가 UART2보다 낮은 주소에 있듯, 주소는 규칙으로 추측하지 않고 표에서 읽습니다.
+- Errata는 erratum 번호로 소스 트리를 grep해 적용 여부를 확인합니다. ERR051586은 Linux v6.16에서 들어왔습니다.
+- pin 설정은 커널 pinfunc 매크로나 벤더 도구(NXP Config Tools의 `.dtsi`, TI SysConfig) 출력을 씁니다.
 - 회로도와 RM은 *교차 참조*합니다. 회로도가 *우리 보드*를, RM이 *SoC의 능력*을 보여줍니다.
 - RM은 목차와 keyword 검색으로 필요한 장을 찾고, figure·table·관련 설명을 함께 확인합니다.
 - 비슷한 보드의 *동작하는 BSP source*가 가장 정확한 *RM 해석서*입니다.
-- 새 SoC 첫 일주일: Memory Map, Clock, Boot, Pin Mux, Errata, 회로도, reference BSP 구조 익히기.
+- U-Boot debug UART 드라이버 선택 기본값은 NS16550이므로 i.MX에서는 `DEBUG_UART_MXC=y`를 명시합니다.
 
 ## 다음 편
 
@@ -329,4 +316,4 @@ IOMUXC 레지스터의 5개 필드를 직접 비트 시프트로 계산하는 �
 - [Ch 5: DDR 매개변수 — 보드별 timing](/blog/embedded/bsp/chapter05-ddr-params)
 - [PCIe Ch 6: Power Management](/blog/embedded/hardware/pcie/chapter06-power-management) — erratum이 말하는 L1에서의 불필요한 timeout이 어떤 상태에서 일어나는지
 - [원문 — NXP i.MX 8M Plus Reference Manual](https://www.nxp.com/products/processors-and-microcontrollers/arm-processors/i-mx-applications-processors/i-mx-8-applications-processors/i-mx-8m-plus-arm-cortex-a53-machine-learning-vision-multimedia-and-industrial-iot:IMX8MPLUS)
-- [원문 — TI AM62x Technical Reference Manual](https://www.ti.com/product/AM625)
+- [NXP Config Tools for i.MX Applications Processors](https://www.nxp.com/design/design-center/software/development-software/config-tools-for-i-mx-applications-processors:CONFIG-TOOLS-IMX)
