@@ -12,20 +12,22 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"앞 아홉 장의 모든 개념을 *하나의 SD 카드*에 응축한다."** — BeagleBone Black을 켜 부팅 메시지가 흐르는 그 순간까지가 이 장의 목표입니다.
+> **"앞 아홉 장의 모든 개념을 *하나의 SD 카드 이미지*에 응축한다."** — BeagleBone Black용 `sdcard.img`를 실제로 빌드하고, 굽기 전에 검사하는 데까지가 이 장의 범위입니다.
 
 지금까지 다룬 것을 정리하면 다음과 같습니다. Buildroot의 위치(Ch 1), 디렉터리 구조(Ch 2), Kconfig(Ch 3), 첫 QEMU 빌드(Ch 4), 패키지 시스템(Ch 5), 외부 트리(Ch 6), 보드 customize(Ch 7), 파일시스템 포맷(Ch 8), 새 패키지 작성(Ch 9).
 
-이 장에서는 그 전체를 *실제 보드*에 적용합니다. BeagleBone Black을 고른 이유는 *Buildroot 본체에 defconfig가 있고*, *MMC 부팅이 단순하고*, *시리얼 콘솔이 USB-TTL 어댑터 하나로 잡히고*, *전 세계적으로 구하기 쉽기 때문*입니다. 같은 흐름이 Raspberry Pi, BeaglePlay, Variscite, Olimex 보드에 거의 그대로 적용됩니다.
+이 장에서는 그 전체를 *실제 보드용 설정*에 적용합니다. BeagleBone Black을 고른 이유는 Buildroot 본체에 `beaglebone_defconfig`와 `board/beagleboard/beaglebone/`가 있고, `readme.txt`가 "Tested hardware"로 beagleboneblack(rev. A5A)을 적고 있기 때문입니다. 본체의 `beagleplay_defconfig`, `raspberrypi4_64_defconfig`도 같은 구조(defconfig + board 디렉터리 + genimage)라 흐름이 그대로 옮겨집니다.
 
 ## 무엇을 만들 것인가
 
-- *부트로더*: U-Boot (MLO + u-boot.img)
-- *커널*: linux-am335x with am335x-boneblack.dtb
-- *rootfs*: squashfs (read-only) + ext4 data partition
-- *내 패키지*: `acme-led-blink` — 보드 LED를 깜빡이는 데몬 (Ch 9 자작)
+- *부트로더*: U-Boot 2026.01 (MLO + u-boot.img)
+- *커널*: Linux 6.18.1 (`omap2plus`) + `am335x-boneblack.dtb`
+- *rootfs*: squashfs (read-only) + 빈 ext4 data partition
+- *내 패키지*: `acme-led-blink` — 보드 LED를 깜빡이는 데몬 (Ch 9의 패턴)
 - *내 overlay*: `/etc/hostname`을 `acme-bbb`로 설정 (Ch 7)
-- *결과물*: `sdcard.img` 하나. `dd`로 SD 카드에 굽고 보드에 꽂으면 부팅.
+- *결과물*: `sdcard.img` 하나
+
+이 장은 **Buildroot 2026.02.3**으로 위 구성을 *실제로 빌드*하고, 결과 이미지의 파티션·파일을 호스트에서 검사한 기록입니다. 빌드는 Ch 1과 같은 Debian 13 arm64 VM에서 했습니다. **BeagleBone Black 실물에 굽고 부팅하는 단계(Step 9 이후)는 보드가 없어 실행하지 않았습니다.** 그 부분은 절차와 확인 방법만 적고, 부팅 로그는 싣지 않습니다. QEMU는 AM335x 보드를 에뮬레이트하지 않으므로 대신 쓸 수도 없습니다.
 
 이 장의 전체 흐름은 다음과 같습니다.
 
@@ -34,168 +36,143 @@ topics: ["embedded"]
 ## 준비물
 
 | 항목 | 사양 |
-|------|------|
-| BeagleBone Black | rev C 권장. eMMC 4GB 내장 |
-| MicroSD 카드 | 8GB 이상, class 10 |
-| USB-TTL 어댑터 | 3.3V level. FTDI 또는 CP2102 |
-| Jumper wires | F-F 3가닥 (GND, RX, TX) |
-| Host PC | Ubuntu 24.04 또는 동급. ~10GB 디스크 여유 |
+|---|---|
+| BeagleBone Black | 보드 |
+| MicroSD 카드 | 이 장의 이미지는 208 MiB이므로 그보다 큰 카드 |
+| USB-TTL 어댑터 | 3.3V level |
+| Host PC | Linux. 이 장의 빌드는 `output/` 외에 `dl/`도 공유 |
 
-호스트 의존성을 먼저 설치합니다.
-
-```bash
-sudo apt install -y \
-    build-essential bc bison flex libssl-dev libncurses-dev \
-    git wget cpio rsync unzip file python3 \
-    parted dosfstools mtools
-```
+호스트 도구는 Ch 4의 매뉴얼 필수 목록과 같습니다. SD 카드 이미지는 Buildroot가 `host-genimage`·`host-dosfstools`·`host-mtools`를 직접 빌드해 만들므로, 호스트에 `parted`나 `mtools`를 따로 깔 필요는 없습니다(`beaglebone_defconfig`가 `BR2_PACKAGE_HOST_DOSFSTOOLS`, `_GENIMAGE`, `_MTOOLS`를 켬).
 
 ## Step 1: Buildroot 가져오기 + 외부 트리 준비
 
 ```text
-$ cd ~/work
-$ git clone https://gitlab.com/buildroot.org/buildroot.git
-$ cd buildroot
-$ git checkout 2026.08      # pinned stable release (not an LTS label)
+$ git clone --depth=1 --branch 2026.02.3 https://gitlab.com/buildroot.org/buildroot.git
 ```
 
-외부 트리를 만듭니다. [Ch 6](/blog/embedded/buildroot/chapter06-br2-external)의 패턴을 따릅니다.
+외부 트리는 [Ch 6](/blog/embedded/buildroot/chapter06-br2-external)의 패턴 그대로입니다.
 
 ```text
-$ mkdir -p ~/work/br2-acme/{package,board/acme/bbb,configs}
-$ cd ~/work/br2-acme
-
-$ cat > external.desc <<'EOF'
-name: ACME
-desc: ACME corporation Buildroot tree
-EOF
-
-$ cat > external.mk <<'EOF'
-include $(sort $(wildcard $(BR2_EXTERNAL_ACME_PATH)/package/*/*.mk))
-EOF
-
-$ cat > Config.in <<'EOF'
-menu "ACME packages"
-    source "$BR2_EXTERNAL_ACME_PATH/package/acme-led-blink/Config.in"
-endmenu
-EOF
+br2-acme/
+├── Config.in
+├── configs/
+├── external.desc
+├── external.mk
+├── board/acme/bbb/
+│   ├── boot.cmd
+│   ├── genimage.cfg
+│   ├── linux-squashfs.config
+│   ├── post-build.sh
+│   ├── rootfs-overlay/
+│   │   ├── data/.empty
+│   │   └── etc/
+│   │       ├── hostname
+│   │       └── init.d/S99led-blink
+│   └── uEnv.txt
+└── package/acme-led-blink/
+    ├── Config.in
+    ├── acme-led-blink.mk
+    └── src/
+        ├── Makefile
+        └── led-blink.c
 ```
 
-## Step 2: defconfig 베이스 — beaglebone_defconfig 복사
+## Step 2: defconfig 베이스 — beaglebone_defconfig
 
-Buildroot 본체에 `beaglebone_defconfig`가 이미 있습니다. 이걸 *외부 트리의 시작점*으로 복사합니다.
+Buildroot 본체에 `beaglebone_defconfig`가 있습니다. 이걸 펼친 뒤 우리 옵션을 더해 외부 트리에 저장합니다.
 
-```text
-$ cd ~/work/buildroot
-$ make BR2_EXTERNAL=~/work/br2-acme beaglebone_defconfig
-$ make savedefconfig BR2_DEFCONFIG=~/work/br2-acme/configs/acme_bbb_defconfig
+```bash
+make O=$HOME/out-bbb BR2_EXTERNAL=$HOME/bbb/br2-acme beaglebone_defconfig
+# (아래 Step 3의 줄을 .config에 추가)
+make O=$HOME/out-bbb olddefconfig
+make O=$HOME/out-bbb savedefconfig BR2_DEFCONFIG=$HOME/bbb/br2-acme/configs/acme_bbb_defconfig
 ```
 
-이제 `~/work/br2-acme/configs/acme_bbb_defconfig`가 *최소 형태로 정규화된* defconfig입니다. 한번 열어 보면 핵심만 남아 있습니다.
+여기서 첫 함정을 만났습니다. 저장된 `acme_bbb_defconfig`의 앞부분입니다.
 
 ```text
 BR2_arm=y
 BR2_cortex_a8=y
 BR2_ARM_FPU_VFPV3=y
 BR2_TOOLCHAIN_EXTERNAL=y
-BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
-BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_STABLE=y
-BR2_LINUX_KERNEL=y
-BR2_LINUX_KERNEL_CUSTOM_VERSION=y
-BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.18.38"
-BR2_LINUX_KERNEL_DEFCONFIG="omap2plus"
-BR2_LINUX_KERNEL_DTS_SUPPORT=y
-BR2_LINUX_KERNEL_INTREE_DTS_NAME="ti/omap/am335x-boneblack"
-BR2_TARGET_ROOTFS_EXT2=y
-BR2_TARGET_ROOTFS_EXT2_4=y
-BR2_TARGET_UBOOT=y
-BR2_TARGET_UBOOT_CUSTOM_VERSION_VALUE="2026.07"
-BR2_TARGET_UBOOT_BOARD_DEFCONFIG="am335x_evm"
-BR2_TARGET_UBOOT_FORMAT_IMG=y
-BR2_TARGET_UBOOT_SPL=y
-BR2_TARGET_UBOOT_SPL_NAME="MLO"
-BR2_PACKAGE_HOST_GENIMAGE=y
-BR2_ROOTFS_POST_IMAGE_SCRIPT="support/scripts/genimage.sh"
-BR2_ROOTFS_POST_SCRIPT_ARGS="-c board/beagleboard/beaglebone/genimage.cfg"
+BR2_GLOBAL_PATCH_DIR="board/beagleboard/beaglebone/patches"
+...
 ```
 
-위 항목은 공식 `2026.08` 태그의 `configs/beaglebone_defconfig`에서 발췌했습니다. 실제 defconfig 전체를 `savedefconfig`한 결과는 외부 트리와 변경한 옵션에 따라 달라집니다.
+본체 `beaglebone_defconfig`에 있던 `BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y`와 `BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_STABLE=y`가 사라졌습니다. Buildroot의 `support/scripts/check-dotconfig.py`로 확인하면 원인이 드러납니다.
+
+```text
+$ support/scripts/check-dotconfig.py /tmp/obb/.config configs/beaglebone_defconfig
+WARN: defconfig configs/beaglebone_defconfig can't be used:
+      Missing: BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
+      Missing: BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_ARMV7_EABIHF_GLIBC_STABLE=y
+```
+
+`toolchain/toolchain-external/toolchain-external-bootlin/Config.in`이 `depends on BR2_HOSTARCH = "x86_64"`이기 때문입니다. 이 VM은 aarch64 호스트라 Bootlin toolchain이 선택될 수 없었고, Kconfig는 그 줄을 경고 없이 지운 뒤 기본 외부 toolchain을 골랐습니다. 실제 빌드는 `BR2_TOOLCHAIN_EXTERNAL_ARM_ARM=y`, 즉 "Arm ARM 14.2.rel1"(`depends on BR2_HOSTARCH = "x86_64" || BR2_HOSTARCH = "aarch64"`)로 진행됐습니다. x86_64 호스트에서 같은 명령을 치면 Bootlin toolchain으로 빌드되므로, *같은 defconfig라도 호스트 아키텍처에 따라 toolchain이 달라질 수 있습니다*. 팀에서 defconfig를 공유한다면 `check-dotconfig.py`를 CI에 넣어 이런 차이를 잡습니다(Ch 19).
 
 ## Step 3: 우리 식으로 defconfig 수정
 
-`acme_bbb_defconfig`를 우리 요구에 맞춥니다.
+`beaglebone_defconfig`에 다음을 더했습니다. 저장된 `acme_bbb_defconfig`에 실제로 남은 줄입니다.
 
 ```makefile
-# Read-only squashfs + data partition pattern (Ch 8)
-BR2_TARGET_ROOTFS_SQUASHFS=y
-BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y
-# ext4도 유지 — data partition 용도
-BR2_TARGET_ROOTFS_EXT2=y
-BR2_TARGET_ROOTFS_EXT2_4=y
-BR2_TARGET_ROOTFS_EXT2_SIZE="120M"
-
-# 외부 트리의 overlay + post-build + post-image (Ch 7)
 BR2_ROOTFS_OVERLAY="$(BR2_EXTERNAL_ACME_PATH)/board/acme/bbb/rootfs-overlay"
 BR2_ROOTFS_POST_BUILD_SCRIPT="$(BR2_EXTERNAL_ACME_PATH)/board/acme/bbb/post-build.sh"
-BR2_ROOTFS_POST_IMAGE_SCRIPT="$(BR2_EXTERNAL_ACME_PATH)/board/acme/bbb/post-image.sh"
-BR2_ROOTFS_POST_SCRIPT_ARGS="acme-bbb"
-
-# 우리 패키지 (Ch 9)
-BR2_PACKAGE_ACME_LED_BLINK=y
-
-# 유용한 디버깅 도구
+BR2_ROOTFS_POST_IMAGE_SCRIPT="support/scripts/genimage.sh"
+BR2_ROOTFS_POST_SCRIPT_ARGS="-c $(BR2_EXTERNAL_ACME_PATH)/board/acme/bbb/genimage.cfg"
+BR2_LINUX_KERNEL_CONFIG_FRAGMENT_FILES="$(BR2_EXTERNAL_ACME_PATH)/board/acme/bbb/linux-squashfs.config"
+BR2_PACKAGE_LIBUBOOTENV=y
 BR2_PACKAGE_DROPBEAR=y
-BR2_PACKAGE_HTOP=y
-BR2_PACKAGE_STRACE=y
-BR2_PACKAGE_NANO=y
+BR2_TARGET_ROOTFS_SQUASHFS=y
+BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y
+BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT_SOURCE="$(BR2_EXTERNAL_ACME_PATH)/board/acme/bbb/boot.cmd"
+BR2_PACKAGE_ACME_LED_BLINK=y
 ```
 
-수정 후 다시 적용합니다.
+post-image는 본체의 범용 `support/scripts/genimage.sh`를 그대로 쓰고 cfg만 바꿨습니다(Ch 7). post-build는 본체 보드의 것을 대신해 우리 `uEnv.txt`를 `BINARIES_DIR`로 복사합니다.
 
-```text
-$ make BR2_EXTERNAL=~/work/br2-acme acme_bbb_defconfig
+```bash
+#!/bin/sh
+set -eu
+BOARD_DIR="$(dirname "$0")"
+cp "${BOARD_DIR}/uEnv.txt" "${BINARIES_DIR}/uEnv.txt"
 ```
 
-## Step 4: acme-led-blink 패키지 작성
+`linux-squashfs.config`는 Ch 8과 같은 두 줄(`CONFIG_SQUASHFS=y`, `CONFIG_SQUASHFS_ZSTD=y`)입니다. 빌드 후 커널 `.config`에 두 줄이 모두 들어간 것을 확인했습니다.
 
-[Ch 9](/blog/embedded/buildroot/chapter09-new-package)의 패턴을 적용한 사례 패키지입니다.
+## Step 4: acme-led-blink 패키지
 
-```text
-br2-acme/package/acme-led-blink/
-├── Config.in
-├── acme-led-blink.mk
-├── acme-led-blink.hash
-└── src/
-    ├── Makefile
-    └── led-blink.c
-```
+[Ch 9](/blog/embedded/buildroot/chapter09-new-package)의 패턴을 적용한 패키지입니다. 소스를 외부 트리 안에 두고 `SITE_METHOD = local`로 가져옵니다.
 
-`src/led-blink.c`:
+`src/led-blink.c`는 `write()` 실패도 확인합니다.
 
 ```c
 #include <stdio.h>
 #include <unistd.h>
 #include <fcntl.h>
-#include <string.h>
 
 static const char *LED = "/sys/class/leds/beaglebone:green:usr0/brightness";
 
-int main(void) {
-    int fd = open(LED, O_WRONLY);
-    if (fd < 0) { perror("open"); return 1; }
-    for (;;) {
-        write(fd, "1", 1);
-        sleep(1);
-        write(fd, "0", 1);
-        sleep(1);
-    }
-    return 0;
+int main(void)
+{
+	int fd = open(LED, O_WRONLY);
+	if (fd < 0) { perror("open"); return 1; }
+	for (;;) {
+		if (write(fd, "1", 1) != 1) { perror("write"); return 1; }
+		sleep(1);
+		if (write(fd, "0", 1) != 1) { perror("write"); return 1; }
+		sleep(1);
+	}
+	return 0;
 }
 ```
 
+LED 경로(`beaglebone:green:usr0`)는 커널 DTS의 LED label에서 정해집니다. 보드에서 `ls /sys/class/leds/`로 실제 이름을 확인한 뒤 씁니다. 이 장에서는 보드에서 확인하지 못했습니다.
+
 `src/Makefile`:
 
-```make
+```makefile
 CC ?= gcc
 CFLAGS ?= -O2 -Wall
 
@@ -211,24 +188,9 @@ clean:
 .PHONY: install clean
 ```
 
-`Config.in`:
-
-```make
-config BR2_PACKAGE_ACME_LED_BLINK
-    bool "acme-led-blink"
-    help
-      Blinks the on-board USER0 LED of BeagleBone Black.
-```
-
 `acme-led-blink.mk`:
 
-```make
-################################################################################
-#
-# acme-led-blink
-#
-################################################################################
-
+```makefile
 ACME_LED_BLINK_VERSION = 1.0
 ACME_LED_BLINK_SITE = $(BR2_EXTERNAL_ACME_PATH)/package/acme-led-blink/src
 ACME_LED_BLINK_SITE_METHOD = local
@@ -245,32 +207,17 @@ endef
 $(eval $(generic-package))
 ```
 
-`SITE_METHOD = local`은 *외부 트리 안의 디렉터리*를 source로 사용합니다. tarball을 만들 필요가 없습니다. `.hash` 파일은 local 패키지면 *생략 가능*하지만, production에서는 별도 git tag로 받게 바꾸는 게 좋습니다.
-
-빈 hash 파일을 만들어 둡니다.
+`SITE_METHOD = local`이면 다운로드와 hash 검사 대신 소스 디렉터리를 *rsync*합니다. 실제 로그도 `>>> acme-led-blink 1.0 Syncing from source dir /home/br/bbb/br2-acme/package/acme-led-blink/src`였고, 빈 hash 파일은 만들지 않았습니다. 결과는 armhf 바이너리였습니다.
 
 ```text
-$ touch ~/work/br2-acme/package/acme-led-blink/acme-led-blink.hash
+target/usr/sbin/led-blink: ELF 32-bit LSB pie executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, stripped
 ```
 
-## Step 5: rootfs-overlay 작성
+## Step 5: rootfs-overlay
 
-[Ch 7](/blog/embedded/buildroot/chapter07-board-customize)의 패턴입니다.
+[Ch 7](/blog/embedded/buildroot/chapter07-board-customize)의 패턴입니다. overlay에는 `etc/hostname`(`acme-bbb`), 실행 비트를 준 `etc/init.d/S99led-blink`, 그리고 squashfs 위에서 mount 지점이 될 빈 `data/`(`data/.empty`)를 둡니다.
 
-```text
-$ mkdir -p ~/work/br2-acme/board/acme/bbb/rootfs-overlay/etc/init.d
-$ cd ~/work/br2-acme/board/acme/bbb/rootfs-overlay
-
-$ cat > etc/hostname <<'EOF'
-acme-bbb
-EOF
-
-$ cat > etc/issue <<'EOF'
-ACME BeagleBone Black system
-Built: @BUILDDATE@
-EOF
-
-$ cat > etc/init.d/S99led-blink <<'EOF'
+```sh
 #!/bin/sh
 case "$1" in
     start)
@@ -281,369 +228,266 @@ case "$1" in
         killall led-blink 2>/dev/null
         ;;
 esac
-EOF
-$ chmod +x etc/init.d/S99led-blink
 ```
 
-## Step 6: post-build.sh, post-image.sh, genimage.cfg
+## Step 6: genimage.cfg
 
-`board/acme/bbb/post-build.sh`:
-
-```bash
-#!/bin/sh
-set -e
-TARGET_DIR="$1"
-
-# Avoid injecting wall-clock build time into the image; use a fixed release ID.
-sed -i 's/@BUILDDATE@/release-1.0/' "$TARGET_DIR/etc/issue"
-```
-
-`board/acme/bbb/post-image.sh`:
-
-```bash
-#!/bin/sh
-set -e
-
-BINARIES_DIR="$1"
-BOARD=$2
-
-GENIMAGE_CFG="$BR2_EXTERNAL_ACME_PATH/board/acme/bbb/genimage.cfg"
-GENIMAGE_TMP="$(mktemp -d "$BINARIES_DIR/genimage.tmp.XXXXXX")"
-trap 'rm -rf -- "$GENIMAGE_TMP"' EXIT HUP INT TERM
-genimage \
-    --rootpath "$TARGET_DIR" \
-    --tmppath "$GENIMAGE_TMP" \
-    --inputpath "$BINARIES_DIR" \
-    --outputpath "$BINARIES_DIR" \
-    --config "$GENIMAGE_CFG"
-
-echo "[post-image] sdcard.img ready: $(du -h "$BINARIES_DIR/sdcard.img" | cut -f1)"
-```
-
-`board/acme/bbb/genimage.cfg`:
+본체 `board/beagleboard/beaglebone/genimage.cfg`에서 rootfs를 squashfs로 바꾸고 data 파티션을 더했습니다.
 
 ```text
 image boot.vfat {
-    vfat {
-        files = {
-            "MLO",
-            "u-boot.img",
-            "zImage",
-            "am335x-boneblack.dtb",
-            "uEnv.txt"
-        }
-    }
-    size = 32M
+	vfat {
+		files = {
+			"MLO",
+			"u-boot.img",
+			"zImage",
+			"uEnv.txt",
+			"am335x-boneblack.dtb",
+		}
+	}
+
+	size = 16M
+}
+
+image data.ext4 {
+	ext4 {
+		label = "data"
+	}
+	size = 64M
+	empty = true
 }
 
 image sdcard.img {
-    hdimage {}
+	hdimage {
+	}
 
-    partition u-boot {
-        partition-type = 0xC
-        bootable = "true"
-        image = "boot.vfat"
-    }
+	partition u-boot {
+		partition-type = 0xC
+		bootable = "true"
+		image = "boot.vfat"
+	}
 
-    partition rootfs {
-        partition-type = 0x83
-        image = "rootfs.squashfs"
-        size = 256M
-    }
+	partition rootfs {
+		partition-type = 0x83
+		image = "rootfs.squashfs"
+		size = 128M
+	}
 
-    partition data {
-        partition-type = 0x83
-        image = "data.ext4"
-        size = 128M
-    }
+	partition data {
+		partition-type = 0x83
+		image = "data.ext4"
+	}
 }
 ```
 
-`data.ext4`는 rootfs 이미지의 복사본이 아니라 genimage가 별도로 만드는 빈 ext4 파일시스템이어야 합니다. 아래 이미지를 `genimage.cfg`에 추가합니다.
-
-```text
-image data.ext4 {
-    ext4 {
-        label = "data"
-    }
-    size = 128M
-    empty = true
-}
-```
-
-스크립트에 실행 권한을 줍니다.
-
-```text
-$ chmod +x ~/work/br2-acme/board/acme/bbb/post-build.sh
-$ chmod +x ~/work/br2-acme/board/acme/bbb/post-image.sh
-```
+`data.ext4`는 rootfs의 복사본이 아니라 `empty = true`로 만드는 빈 ext4입니다. 이 genimage(`host-genimage` 19)가 실제로 64 MiB `data.ext4`를 만들었습니다.
 
 이 `genimage.cfg`가 만들어 내는 SD 카드 layout을 그림으로 보면 다음과 같습니다.
 
 ![sdcard.img 3-파티션 layout](/images/blog/buildroot/diagrams/chapter10-sd-layout.svg)
 
-## Step 7: uEnv.txt — U-Boot 환경
+## Step 7: uEnv.txt와 boot.scr
 
-U-Boot이 SD 카드 부팅 시점에 읽는 환경 파일입니다. 부트 명령을 *외부에 두는* 흐름의 핵심입니다.
-
-`rootfs-overlay`가 아니라 `board/acme/bbb/`에 `uEnv.txt`를 직접 둡니다. `genimage.cfg`가 boot 파티션에 포함시킵니다. 그러나 우리 genimage는 *binaries_dir 안의 파일*만 vfat에 넣을 수 있으므로, post-image에서 미리 복사합니다.
-
-post-image.sh 시작 부분에 추가:
-
-```bash
-cp "$BR2_EXTERNAL_ACME_PATH/board/acme/bbb/uEnv.txt" "$BINARIES_DIR/"
-```
-
-`board/acme/bbb/uEnv.txt`:
+AM335x U-Boot은 boot 파티션의 `uEnv.txt`를 읽습니다. 본체 `board/beagleboard/beaglebone/uEnv.txt`를 출발점으로, rootfs 인자만 squashfs로 바꿨습니다.
 
 ```text
-# BeagleBone Black boot env
-
-bootdir=/
+bootpart=0:1
+devtype=mmc
+bootdir=
 bootfile=zImage
-dtbfile=am335x-boneblack.dtb
-
-# console + read-only rootfs on p2 (squashfs)
-optargs=console=ttyO0,115200n8 root=/dev/mmcblk0p2 rootfstype=squashfs ro rootwait quiet
-
-uenvcmd=load mmc 0:1 ${loadaddr} ${bootdir}/${bootfile}; \
-        load mmc 0:1 ${fdtaddr} ${bootdir}/${dtbfile}; \
-        setenv bootargs ${optargs}; \
-        bootz ${loadaddr} - ${fdtaddr}
+bootpartition=mmcblk0p2
+console=ttyS0,115200n8
+loadaddr=0x82000000
+fdtaddr=0x88000000
+set_mmc1=if test $board_name = A33515BB; then setenv bootpartition mmcblk1p2; fi
+set_bootargs=setenv bootargs console=${console} root=/dev/${bootpartition} ro rootfstype=squashfs rootwait
+uenvcmd=run set_mmc1; run set_bootargs;run loadimage;run loadfdt;printenv bootargs;bootz ${loadaddr} - ${fdtaddr}
 ```
 
-핵심 라인입니다.
+- `console=ttyS0,115200n8` — 본체 `uEnv.txt`와 `extlinux.conf`가 모두 이 값을 씁니다. 옛 자료에 보이는 `ttyO0`를 그대로 옮기지 않습니다.
+- `set_mmc1`은 `board_name`이 `A33515BB`(eMMC가 있는 보드)일 때 rootfs를 `mmcblk1p2`로 바꿉니다. SD 카드가 `mmcblk0`이 될지 `mmcblk1`이 될지는 커널의 장치 순서에 달려 있어, 본체 파일도 이렇게 분기합니다.
+- `bootz` — zImage(ARM 32-bit) 부팅 명령입니다.
 
-- `console=ttyO0,115200n8` — AM335x의 UART0. BeagleBone Black의 J1 헤더가 여기 연결됩니다.
-- `root=/dev/mmcblk0p2 rootfstype=squashfs ro` — 두 번째 파티션이 squashfs rootfs.
-- `bootz` — zImage 부팅 명령. ARM 32-bit.
+같은 내용을 서명 없는 U-Boot script로도 만들어 봤습니다(`BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT`). 생성된 `images/boot.scr`를 `host/bin/mkimage -l`로 보면 다음과 같습니다(Ch 13에서 자세히).
+
+```text
+Image Type:   ARM Linux Script (uncompressed)
+Data Size:    209 Bytes = 0.20 KiB = 0.00 MiB
+```
+
+이 장의 genimage.cfg는 `boot.scr`를 boot 파티션에 넣지 않았습니다. 어느 쪽을 쓸지는 보드 U-Boot의 `bootcmd`가 무엇을 찾는지에 달렸습니다.
 
 ## Step 8: 빌드
 
-이제 모든 게 준비됐습니다. 아래 로그와 산출물은 예시이며 실제 Buildroot·보드에서 실행해 얻은 측정 결과가 아닙니다. 빌드 시간과 파일 크기는 host, 설정, package 버전에 따라 달라집니다.
-
 ```text
-$ cd ~/work/buildroot
-$ make
+$ make O=$HOME/out-bbb acme_bbb_defconfig
+$ make O=$HOME/out-bbb
 ```
 
-첫 빌드는 30~60분이 걸립니다. host에 toolchain·cross 도구·U-Boot·linux 커널·BusyBox·우리 패키지를 모두 빌드합니다. 빌드 진행은 단계별로 출력됩니다.
+빌드는 성공했고 벽시계로 53분 22초가 걸렸습니다. 다만 이 시간은 참고값이 아닙니다. `output/build/build-time.log`를 합산하면 다운로드가 1,777초였는데, 그중 외부 toolchain tarball이 963초, `am33x-cm3`(TI의 git 저장소)가 707초였습니다. `git.ti.com`의 `git fetch`가 진행하지 않아 해당 프로세스를 직접 종료했고, 그러자 `dl-wrapper`가 다음 URI인 `BR2_BACKUP_SITE`(기본 `https://sources.buildroot.net`)에서 tarball을 받아 hash를 확인한 뒤 계속했습니다.
 
 ```text
->>> host-tar 1.34 Downloading
->>> linux-headers 6.6.21 Configuring
->>> uclibc 1.0.50 Building
->>> uboot 2024.04 Configuring
->>> linux 6.6.21 Building (35%)
->>> busybox 1.36.1 Installing to target
->>> acme-led-blink 1.0 Building
->>> Generating root filesystems common tables
->>> Generating filesystem image rootfs.squashfs
->>> Generating filesystem image rootfs.ext4
->>> Executing post-image script board/acme/bbb/post-image.sh
-[post-image] sdcard.img ready: 401M
+--2026-11-16 04:22:56--  https://sources.buildroot.net/am33x-cm3/am33x-cm3-fb484c5e54f2e31cf0a338d2927a06a2870bcc2c-git4.tar.gz
+...
+am33x-cm3-fb484c5e54f2e31cf0a338d2927a06a2870bcc2c-git4.tar.gz: OK (sha256: b6020ce5fee52e8df6cf8e045c75064021760dd04e2923ad0e4bdd6e18ebaa49)
 ```
 
-완료 후 `output/images/`를 봅니다.
+다운로드를 뺀 주요 단계는 커널 build 475초, U-Boot build 11.9초, toolchain 압축 해제 14.5초였습니다. 같은 시간에 VM에서 다른 빌드가 함께 돌고 있었으므로 이 값도 단독 빌드 시간은 아닙니다. 로그의 주요 줄입니다.
 
 ```text
-$ ls -lh output/images/
--rw-r--r-- 1 user user  16M ...  MLO
--rw-r--r-- 1 user user  580K ... u-boot.img
--rw-r--r-- 1 user user  6.2M ... zImage
--rw-r--r-- 1 user user   62K ... am335x-boneblack.dtb
--rw-r--r-- 1 user user  43M ...  rootfs.squashfs
--rw-r--r-- 1 user user 120M ...  rootfs.ext4
--rw-r--r-- 1 user user 401M ...  sdcard.img
--rw-r--r-- 1 user user  16M ...  boot.vfat
+>>> toolchain-external-arm-arm 14.2.rel1 Downloading
+...
+>>> toolchain-external-arm-arm 14.2.rel1 Copying external toolchain sysroot to staging...
+...
+>>> uboot 2026.01 Building
+>>> uboot 2026.01 Installing to images directory
+>>> linux 6.18.1 Updating kernel config with fixups
+>>> linux 6.18.1 Building
+...
+>>> acme-led-blink 1.0 Syncing from source dir /home/br/bbb/br2-acme/package/acme-led-blink/src
+...
+>>>   Generating filesystem image rootfs.ext2
+>>>   Generating filesystem image rootfs.squashfs
+>>>   Generating filesystem image rootfs.tar
+>>>   Executing post-image script support/scripts/genimage.sh
+INFO: hdimage(sdcard.img): writing MBR
+```
+
+완료 후 `$HOME/out-bbb/images/`입니다.
+
+```text
+-rw-r--r-- 1 br br    110524 Nov 16 04:36 MLO
+-rwxr-xr-x 1 br br     66986 Nov 16 04:45 am335x-bone.dtb
+-rwxr-xr-x 1 br br     70173 Nov 16 04:45 am335x-boneblack-wireless.dtb
+-rwxr-xr-x 1 br br     70448 Nov 16 04:45 am335x-boneblack.dtb
+...
+-rwxr-xr-x 1 br br       273 Nov 16 04:34 boot.scr
+-rw-r--r-- 1 br br  16777216 Nov 16 04:45 boot.vfat
+-rw-r--r-- 1 br br  67108864 Nov 16 04:45 data.ext4
+-rw-r--r-- 1 br br  62914560 Nov 16 04:45 rootfs.ext2
+lrwxrwxrwx 1 br br        11 Nov 16 04:45 rootfs.ext4 -> rootfs.ext2
+-rw-r--r-- 1 br br  10219520 Nov 16 04:45 rootfs.squashfs
+-rw-r--r-- 1 br br  36864000 Nov 16 04:45 rootfs.tar
+-rw-r--r-- 1 br br 218104320 Nov 16 04:45 sdcard.img
+-rw-r--r-- 1 br br   1564932 Nov 16 04:36 u-boot.img
+-rw-r--r-- 1 br br       438 Nov 16 04:45 uEnv.txt
+-rw-r--r-- 1 br br   7633984 Nov 16 04:45 zImage
+```
+
+`BR2_LINUX_KERNEL_INTREE_DTS_NAME`에 적힌 9개 DTS가 모두 `.dtb`로 들어왔고(목록 일부 생략), squashfs rootfs는 10.2 MB로 60 MiB ext4 이미지의 1/6이었습니다. `beaglebone_defconfig`가 켜 둔 ext4와 tar도 그대로 만들어졌습니다.
+
+### 이미지 검사 — 굽기 전에 확인할 것
+
+보드가 없어도 호스트에서 이미지를 검사할 수 있습니다. 파티션 표입니다.
+
+`O=$HOME/out-bbb`로 빌드했으므로 아래 명령은 그 디렉터리에서 실행했습니다.
+
+```text
+$ cd $HOME/out-bbb
+$ sfdisk -l images/sdcard.img
+Disk images/sdcard.img: 208 MiB, 218104320 bytes, 425985 sectors
+...
+Disklabel type: dos
+
+Device             Boot  Start    End Sectors  Size Id Type
+images/sdcard.img1 *         1  32768   32768   16M  c W95 FAT32 (LBA)
+images/sdcard.img2       32769 294912  262144  128M 83 Linux
+images/sdcard.img3      294913 425984  131072   64M 83 Linux
+```
+
+genimage.cfg대로 FAT 16M(부팅 플래그) + squashfs 128M + data 64M입니다. boot 파티션 내용은 Buildroot가 빌드한 `mdir`로 봅니다.
+
+```text
+$ host/bin/mdir -i images/boot.vfat ::
+Directory for ::/
+
+MLO             110524 2026-11-16   4:45 
+u-boot   img   1564932 2026-11-16   4:45 
+ZIMAGE         7633984 2026-11-16   4:45  zImage
+UENV     TXT       438 2026-11-16   4:45  uEnv.txt
+AM335X~1 DTB     70448 2026-11-16   4:45  am335x-boneblack.dtb
+        5 files           9 380 326 bytes
+```
+
+rootfs 안에 우리 파일이 들어갔는지는 `unsquashfs -l`로 봅니다.
+
+```text
+$ host/bin/unsquashfs -l images/rootfs.squashfs | grep -E "led-blink|hostname$|S99"
+squashfs-root/bin/hostname
+squashfs-root/etc/hostname
+squashfs-root/etc/init.d/S99led-blink
+squashfs-root/usr/sbin/led-blink
 ```
 
 ## Step 9: SD 카드에 굽기
 
-SD 카드를 USB reader에 꽂고 *어떤 장치인지* 정확히 확인합니다.
+이후 단계는 실행하지 않은 절차입니다. SD 카드를 꽂고 *어떤 장치인지* 정확히 확인합니다.
 
-```text
-$ lsblk
-NAME        SIZE TYPE
-sda         500G disk
-├─sda1      500G part
-sdb         8G   disk     ← 이것이 SD
-├─sdb1      ...
-$ sudo umount /dev/sdb1
+```bash
+lsblk
+sudo umount /dev/sdX1
+sudo dd if=output/images/sdcard.img of=/dev/sdX bs=4M conv=fsync status=progress
 ```
 
-**잘못된 장치를 고르면 호스트 디스크가 날아갑니다.** `lsblk`의 SIZE를 두 번 확인합니다.
-
-```text
-$ sudo dd if=output/images/sdcard.img of=/dev/sdb bs=4M conv=fsync status=progress
-[예상 출력 형식이며 전송량·시간은 실제 이미지와 SD 카드에 따라 달라짐]
-$ sync
-```
-
-`bs=4M`은 *큰 블록*으로 빨리 굽기 위함입니다. `conv=fsync`는 마지막에 *디스크에 flush*합니다.
-
-빨리 굽고 싶다면 `bmap-tools`를 쓸 수 있습니다. genimage가 `.bmap`을 자동 생성하지는 않으므로 먼저 이미지 파일에서 map을 만든 뒤 복사합니다.
-
-```text
-$ bmaptool create -o output/images/sdcard.bmap output/images/sdcard.img
-$ sudo bmaptool copy --bmap output/images/sdcard.bmap \
-                     output/images/sdcard.img /dev/sdb
-```
+**잘못된 장치를 고르면 호스트 디스크가 지워집니다.** `lsblk`의 SIZE와 모델명을 두 번 확인합니다. Buildroot의 `support/scripts/genimage.sh`는 `BR2_PACKAGE_HOST_BMAP_TOOLS=y`면 이미지마다 `.bmap`을 자동으로 만들어 주므로, `bmaptool copy`를 쓰려면 그 옵션을 켭니다.
 
 ## Step 10: 시리얼 콘솔 연결
 
-BeagleBone Black의 J1 헤더가 시리얼 콘솔입니다. 6핀 헤더이고, USB-TTL 어댑터를 다음처럼 연결합니다.
+BeagleBone Black의 6핀 시리얼 헤더(J1)에 3.3V USB-TTL 어댑터의 GND·RX·TX를 연결하고 115200 bps로 엽니다. 핀 번호와 방향은 BeagleBoard의 보드 문서에서 확인합니다. 어댑터의 VCC 핀은 연결하지 않습니다.
 
-```text
-J1 pin 1  (GND, 보드 바깥쪽)  ── 어댑터 GND
-J1 pin 4  (RX, 보드 수신)     ── 어댑터 TX
-J1 pin 5  (TX, 보드 송신)     ── 어댑터 RX
+```bash
+picocom -b 115200 /dev/ttyUSB0
 ```
 
-**어댑터의 VCC 핀은 연결하지 마세요.** BeagleBone은 자체 전원으로 동작합니다.
+## Step 11: 첫 부팅에서 확인할 것
 
-호스트에서 minicom 또는 picocom을 띄웁니다.
+eMMC에 부트로더가 있는 보드는 SD보다 eMMC로 먼저 부팅할 수 있습니다. SD로 부팅하는 방법(boot 버튼 등)은 보드 revision의 BeagleBoard 문서를 따릅니다.
 
-```text
-$ sudo picocom -b 115200 /dev/ttyUSB0
-```
+부팅 로그는 싣지 않습니다. 대신 콘솔에서 다음을 차례로 확인합니다.
 
-## Step 11: 첫 부팅
-
-SD 카드를 BeagleBone Black에 꽂습니다. 그런데 *그냥 끼우면 eMMC가 우선*입니다. SD 부팅을 *강제*하려면 *USER 버튼을 누른 채로* 전원을 인가해야 합니다.
-
-- 전원을 빼고 SD를 슬롯에 꽂습니다.
-- 보드 위 **USER 버튼**(S2)을 누르고 유지합니다.
-- 전원을 인가합니다. 5초 후 USER 버튼을 놓습니다.
-
-시리얼에 다음과 같은 흐름이 나타납니다.
-
-```text
-U-Boot SPL 2024.04 ...
-Trying to boot from MMC1
-U-Boot 2024.04 ...
-DRAM:  512 MiB
-MMC:   OMAP SD/MMC: 0
-Loading Environment from FAT... OK
-Importing environment from mmc 0 ...
-=>
-Hit any key to stop autoboot:  0
-switch to partitions #0, OK
-mmc0(part 0) is current device
-SD/MMC found on device 0
-reading /uEnv.txt
-541 bytes read in 4 ms (132 KiB/s)
-Loaded environment from /uEnv.txt
-Importing environment from mmc0 ...
-Running uenvcmd ...
-6238208 bytes read in 421 ms (14.1 MiB/s)
-62236 bytes read in 11 ms (5.4 MiB/s)
-Kernel image @ 0x82000000 [ 0x000000 - 0x5f2400 ]
-## Flattened Device Tree blob at 88000000
-   Booting using the fdt blob at 0x88000000
-Starting kernel ...
-[    0.000000] Booting Linux on physical CPU 0x0
-[    0.000000] Linux version 6.6.21 ...
-...
-[    3.421855] Run /sbin/init as init process
-Starting syslogd: OK
-Starting klogd: OK
-...
-Starting dropbear sshd: OK
-Starting led-blink
-
-ACME BeagleBone Black system
-Build: release-1.0
-
-acme-bbb login:
-```
-
-`root`로 로그인합니다 (defconfig에서 비밀번호를 안 설정했으면 빈 비밀번호).
-
-```text
-acme-bbb login: root
-# uname -a
-Linux acme-bbb 6.6.21 #1 SMP PREEMPT ... armv7l GNU/Linux
-# cat /etc/issue
-ACME BeagleBone Black system
-Build: release-1.0
-# df -h
-Filesystem                Size      Used Available Use% Mounted on
-/dev/root                43.0M     43.0M         0 100% /
-tmpfs                   244.6M         0    244.6M   0% /tmp
-# mount | grep mmcblk
-/dev/mmcblk0p2 on / type squashfs (ro,relatime)
-# ls -la /sys/class/leds/
-beaglebone:green:usr0
-beaglebone:green:usr1
-beaglebone:green:usr2
-beaglebone:green:usr3
-```
-
-USER0 LED가 1초 간격으로 깜빡이고 있을 겁니다. `acme-led-blink`가 동작 중입니다.
+| 확인 | 기대값 (이 장의 이미지 기준) |
+|---|---|
+| U-Boot 버전 줄 | `U-Boot SPL 2026.01`, `U-Boot 2026.01` |
+| `printenv bootargs` 출력 (`uenvcmd`가 찍음) | `console=ttyS0,115200n8 root=/dev/mmcblk0p2 ro rootfstype=squashfs rootwait` (eMMC 보드면 `mmcblk1p2`) |
+| 커널 버전 | `Linux version 6.18.1` |
+| rootfs mount | `VFS: Mounted root (squashfs filesystem) readonly` |
+| 로그인 프롬프트 | `acme-bbb login:` |
+| 데몬 | `Starting led-blink` 뒤 USER0 LED 점멸 |
 
 ## Troubleshooting
 
 ### 시리얼에 아무것도 안 나온다
 
-세 가지를 의심합니다.
+어댑터의 TX와 RX를 보드 쪽과 엇갈려 연결했는지, GND를 연결했는지, 115200 bps로 열었는지를 확인합니다. 핀 배치는 BeagleBoard 보드 문서의 J1 설명을 따릅니다.
 
-- *USB-TTL의 TX/RX 교차*. 보드 TX(pin 5)가 어댑터 RX에, 보드 RX(pin 4)가 어댑터 TX에 연결돼야 합니다.
-- *GND 안 연결*. 시그널 wire만 있고 GND가 없으면 신호가 떠다닙니다.
-- *baud rate 다름*. picocom에 `-b 115200`을 명시했는지.
+### U-Boot까지는 나오는데 커널을 못 찾는다
 
-### `Bad Magic Number` U-Boot 에러
+`uEnv.txt`나 `zImage`·DTB가 boot 파티션에 없는 경우입니다. 위 "이미지 검사"처럼 굽기 전에 `host/bin/mdir -i images/boot.vfat ::`로 파일을 확인합니다. 파일 이름은 genimage.cfg의 `files` 목록과 `uEnv.txt`의 `bootfile`·DTB 이름이 같아야 합니다.
 
-`uEnv.txt`가 vfat에 들어가지 않았거나, `genimage.cfg`에 파일이 안 적힌 경우입니다. `mtools`로 boot.vfat을 열어 확인합니다.
+### Kernel panic — `VFS: Unable to mount root fs`
 
-```text
-$ mdir -i output/images/boot.vfat ::
-```
-
-### Kernel panic — `Cannot mount root`
-
-`uEnv.txt`의 `root=` 경로가 틀린 경우입니다. SD의 두 번째 파티션이 `mmcblk0p2`인지, `rootfstype`이 squashfs인지 확인합니다. 또는 *커널에 squashfs 모듈*이 안 들어간 경우. `CONFIG_SQUASHFS=y` + `CONFIG_SQUASHFS_ZSTD=y`를 linux fragment에 추가합니다.
-
-### USER 버튼 효과가 없다
-
-부트 순서는 보드 revision과 저장된 bootloader 설정에 따라 달라집니다. eMMC를 지워 SD 부팅을 유도하는 절차는 사용하지 마세요. USER 버튼 절차가 실패하면 해당 revision의 BeagleBoard 문서와 UART 로그, SYSBOOT 설정을 먼저 확인합니다.
+`root=` 장치가 틀렸거나 커널이 squashfs를 모르는 경우입니다. Ch 8에서 QEMU로 재현한 것과 같은 메시지가 납니다. 이 장의 빌드에서는 fragment 덕에 커널 `.config`에 `CONFIG_SQUASHFS=y`와 `CONFIG_SQUASHFS_ZSTD=y`가 들어간 것을 확인했습니다. 장치 이름은 `uenvcmd`가 찍는 `printenv bootargs`로 봅니다.
 
 ### squashfs는 떠 있는데 `acme-led-blink`가 없다
 
-`BR2_PACKAGE_ACME_LED_BLINK=y`가 defconfig에 없거나, `Config.in`이 외부 트리 최상위 `Config.in`에서 source되지 않은 경우입니다. `make printvars VARS=BR2_PACKAGE_ACME_LED_BLINK`로 확인합니다.
+`BR2_PACKAGE_ACME_LED_BLINK=y`가 `.config`에 없거나, 외부 트리 최상위 `Config.in`이 패키지 `Config.in`을 `source`하지 않은 경우입니다. `make O=$HOME/out-bbb -s printvars VARS=BR2_PACKAGE_ACME_LED_BLINK`로 확인하고, 굽기 전에 `unsquashfs -l`로 rootfs 안의 파일을 봅니다.
 
-## 시리즈 마무리
+### 다른 호스트에서 같은 defconfig인데 결과가 다르다
 
-여기까지 따라온 분이라면 이제 *Buildroot를 도구로 다룰 수 있습니다*. 회사·팀의 보드를 받아 한두 주 안에 *부팅하는 rootfs*를 만들고, 그 위에서 application 개발에 집중할 수 있는 상태입니다.
-
-이 시리즈가 의도적으로 다루지 *않은* 것들이 있습니다.
-
-- **A/B 슬롯 OTA 업데이트** — RAUC, Mender, swupdate 같은 framework. squashfs base 위에 자연스럽게 얹힙니다.
-- **Secure boot 체인** — TI HS device, OP-TEE, dm-verity 같은 보안 부팅.
-- **부트로더 자체 customize** — U-Boot의 board-specific 코드, SPL 단계 수정.
-- **커널 디바이스 트리 작성** — 새 보드의 DTS를 처음부터 적기.
-- **BSP 전체 통합** — 부트로더 + 커널 + DTB + rootfs를 *제품 라인* 수준에서 묶기.
-
-이 마지막 항목이 바로 다음 시리즈의 주제입니다.
-
-## 다음 시리즈 — Embedded BSP
-
-**Buildroot가 rootfs를 책임진다면, BSP는 모든 것의 통합을 책임집니다.**
-
-부트로더 포트, 커널 컨피그, 디바이스 트리, 전원 시퀀스, factory provisioning, OTA 흐름까지를 *한 보드의 일관된 패키지*로 묶는 작업이 BSP입니다. Buildroot는 BSP의 *rootfs 컴포넌트*에 해당합니다. 다음 시리즈에서는 이 위에 *부트로더 작성*, *커널 보드 포팅*, *디바이스 트리 작성*, *production provisioning*을 차례로 다룹니다.
+Step 2의 toolchain 사례처럼 호스트 아키텍처에 따라 선택 가능한 옵션이 다릅니다. `support/scripts/check-dotconfig.py <.config> <defconfig>`로 defconfig의 줄이 모두 살아남았는지 확인합니다.
 
 ## 정리
 
-- BeagleBone Black은 *defconfig·시리얼 콘솔·MMC 부팅*이 모두 단순해 첫 실전 보드로 적합합니다.
-- `beaglebone_defconfig`를 베이스로 외부 트리에 `acme_bbb_defconfig`로 정착시키는 흐름이 표준입니다.
-- *내 패키지 한 개*(`acme-led-blink`)와 *내 overlay 한 줄*(`/etc/hostname`)을 추가하는 절차가 외부 트리의 가장 작은 *살아 있는* 사례입니다.
-- *squashfs base + ext4 data partition* 구성은 production의 사실상 표준입니다.
-- `genimage`가 SD 카드 layout을 *선언적*으로 만들어 줍니다.
-- `dd` 굽기 전 `lsblk`로 *장치 식별*을 반드시 두 번 확인합니다.
-- BeagleBone Black의 *USER 버튼 + 전원*이 SD 부팅 강제 트릭입니다.
-- 부팅 메시지에서 `Starting led-blink`가 보이고 LED가 깜빡이면 *전 시리즈의 모든 개념*이 동시에 동작한 것입니다.
+- `beaglebone_defconfig`를 베이스로 외부 트리에 `acme_bbb_defconfig`를 만들고 실제로 빌드해 208 MiB `sdcard.img`(FAT 16M + squashfs 128M + data 64M)를 얻었습니다.
+- aarch64 호스트에서는 Bootlin toolchain 줄이 조용히 빠지고 Arm ARM 14.2.rel1로 빌드됐습니다. `check-dotconfig.py`가 이 차이를 잡습니다.
+- `SITE_METHOD = local` 패키지는 소스를 rsync하고 hash 검사를 하지 않습니다.
+- `empty = true`인 genimage 이미지로 빈 data 파티션을 만들었습니다.
+- `git.ti.com` 다운로드가 멈추자 `BR2_BACKUP_SITE`(`sources.buildroot.net`)에서 받아 hash를 확인하고 계속했습니다.
+- 보드에 굽고 부팅하는 단계는 실행하지 않았습니다. 굽기 전에 `sfdisk -l`, `mdir`, `unsquashfs -l`로 이미지를 검사할 수 있습니다.
 
-수고하셨습니다. 다음 시리즈는 **Embedded BSP — 부트로더부터 OTA까지**.
+## 다음 장 예고
+
+다음 편은 **Ch 11: Toolchain 선택 — internal vs external**. 이 장에서 호스트에 따라 바뀐 외부 toolchain을, QEMU 설정에서 internal toolchain과 직접 비교합니다.
 
 ## 관련 항목
 
@@ -651,5 +495,6 @@ $ mdir -i output/images/boot.vfat ::
 - [Ch 7: 보드 customize — overlay, post-build, post-image](/blog/embedded/buildroot/chapter07-board-customize)
 - [Ch 8: 출력 파일시스템 — initramfs, squashfs, ext4, cpio](/blog/embedded/buildroot/chapter08-filesystems)
 - [Ch 9: 새 패키지 작성 — autotools, cmake, python](/blog/embedded/buildroot/chapter09-new-package)
+- [Ch 11: Toolchain 선택 — internal vs external](/blog/embedded/buildroot/chapter11-toolchain)
 - [원문 — BeagleBoard 위키 BeagleBone Black](https://www.beagleboard.org/boards/beaglebone-black)
 - [Buildroot beaglebone defconfig (mainline)](https://gitlab.com/buildroot.org/buildroot/-/blob/master/configs/beaglebone_defconfig)
