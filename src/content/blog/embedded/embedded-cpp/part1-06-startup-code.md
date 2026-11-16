@@ -31,11 +31,11 @@ int main() {
 
 부트 순서를 모르면 다음과 같은 조용한 버그에 빠집니다.
 
-- static 객체 A의 생성자에서 B를 사용하는데 B가 아직 미생성이면 zero-initialized 상태로 쓰여 런타임에 충돌합니다
-- 부트 코드에서 C++ 객체에 접근하면 생성자가 호출되지 않아 vtable이 null이 되고 crash로 이어집니다
-- static initialization order fiasco가 발생해 빌드마다 결과가 달라집니다
+- static 객체 A의 생성자에서 B를 사용하는데 B가 아직 생성되지 않았으면, A는 zero-initialized 상태의 B를 읽습니다
+- 생성자가 돌기 전에 객체를 쓰면 멤버와 vptr이 0인 객체를 다루게 됩니다
+- 다른 파일의 static 객체끼리 의존하면 결과가 링크 순서에 따라 바뀝니다(아래 [다른 TU 사이](#static-초기화-순서--다른-tu-사이) 절에서 QEMU로 재현)
 
-이 글은 Reset에서 main까지의 정확한 흐름과 C++ 객체 초기화 시점을 다룹니다.
+이 글은 Reset에서 main까지의 흐름과 C++ 객체 초기화 시점을 다룹니다. 실행 결과는 모두 Homebrew arm-none-eabi-g++ 16.2.0으로 링크한 Cortex-M4 ELF를 QEMU 11.1.3의 `mps2-an386` 보드에서 semihosting으로 돌린 것입니다. startup은 이 글의 [최소 startup](#bare-metal-minimal-startup--직접-작성)과 같은 구조에 `.preinit_array` 순회와 semihosting 출력·종료 함수만 더했습니다.
 
 ## 부트 흐름 — Reset에서 main까지
 
@@ -52,7 +52,7 @@ ARM Cortex-M 기준입니다. 다른 아키텍처도 개념은 동일합니다.
    - `.data` 섹션 복사 (Flash → RAM)
    - `.bss` 섹션 0으로 초기화
    - FPU 활성화 (있다면)
-   - 시스템 클럭 설정 (선택, 보통 `SystemInit()`)
+   - 시스템 클럭 설정 (CMSIS startup이면 `SystemInit()`)
 5. **`__libc_init_array()`** — C++ 진입의 핵심입니다.
    - `.preinit_array` 순회 호출
    - `_init()` 호출 (legacy)
@@ -87,7 +87,7 @@ const void* vectors[] = {
 };
 ```
 
-링커 스크립트가 vectors를 Flash 시작 주소(0x08000000)에 배치합니다. 전원 ON 시 CPU가 첫 4 바이트를 SP로, 다음 4 바이트를 PC로 로드해 Reset_Handler를 실행합니다.
+링커 스크립트가 vectors를 Flash 시작 주소(STM32F4는 0x08000000, QEMU `mps2-an386`은 0x00000000)에 배치합니다. 리셋 시 CPU가 vector table의 첫 워드를 MSP로, 둘째 워드를 PC로 읽어 Reset_Handler를 실행합니다. 둘째 워드의 최하위 비트는 Thumb 상태를 뜻하는 1이어야 하며, 함수 주소를 그대로 넣으면 링커가 이 비트를 붙입니다.
 
 ## Reset_Handler — 첫 C++ 호출 전 준비
 
@@ -131,32 +131,43 @@ extern "C" void Reset_Handler(void) {
 }
 ```
 
-1, 2번이 안 끝난 상태에서 C++ 객체를 만지면 위험합니다. `.bss`가 0이 아닐 수 있고 `.data`가 random일 수 있습니다.
+1, 2번이 안 끝난 상태에서는 C든 C++든 전역 변수 값을 믿을 수 없습니다. 실제 SRAM은 전원 인가 직후 내용이 정해져 있지 않습니다. QEMU는 RAM을 0으로 채운 채 시작하므로 1번을 빼 보면 다른 증상이 나옵니다. `int boot_count = 42;`를 출력하는 프로그램에서 `.data` 복사 루프만 지운 startup으로 링크하니 이렇게 나왔습니다.
+
+```text
+# .data 복사 있음
+boot_count=42 zeroed=0
+# .data 복사 없음
+boot_count=0 zeroed=0
+```
+
+QEMU에서는 `.bss` 정리를 빼도 증상이 보이지 않습니다. 에뮬레이터에서 통과했다고 2번이 필요 없는 것이 아닙니다.
 
 ## `__libc_init_array` — C++ static 생성자 호출
 
-newlib의 `libc/misc/init.c`에 있는 함수이며, GCC 언어 자체가 요구하는 함수 이름은 아닙니다. 아래는 개념적 구현입니다. `_init` 호출은 newlib 빌드 설정에 따라 조건부입니다. preinit array, 조건부 _init, init array 순으로 실행합니다.
+newlib의 `libc/misc/init.c`에 있는 함수이며, C++ 언어가 요구하는 함수 이름은 아닙니다. 아래는 newlib-cygwin 저장소 HEAD의 함수 본문 그대로입니다. `_init` 호출은 `_HAVE_INIT_FINI`로 빌드했을 때만 들어갑니다.
 
 ```c
-// 개념적 구현 (newlib 내부)
-void __libc_init_array(void) {
-    size_t count;
-    size_t i;
+void
+__libc_init_array (void)
+{
+  size_t count;
+  size_t i;
 
-    // 1. .preinit_array — 가장 먼저
-    count = __preinit_array_end - __preinit_array_start;
-    for (i = 0; i < count; i++)
-        __preinit_array_start[i]();
+  count = __preinit_array_end - __preinit_array_start;
+  for (i = 0; i < count; i++)
+    __preinit_array_start[i] ();
 
-    // 2. _init — legacy GNU init
-    _init();
+#ifdef _HAVE_INIT_FINI
+  _init ();
+#endif
 
-    // 3. .init_array — C++ static 생성자가 들어 있음
-    count = __init_array_end - __init_array_start;
-    for (i = 0; i < count; i++)
-        __init_array_start[i]();
+  count = __init_array_end - __init_array_start;
+  for (i = 0; i < count; i++)
+    __init_array_start[i] ();
 }
 ```
+
+newlib의 ARM crt0(`libgloss/arm/crt0.S`)는 이 함수를 부르기 전에 `atexit(__libc_fini_array)`를 먼저 등록하고, `main`이 반환하면 `exit`를 부릅니다. 그래서 `__libc_fini_array`는 `exit` 안에서 돕니다([Part 1-03](/blog/embedded/embedded-cpp/part1-03-runtime-requirements#부트-시퀀스--무엇이-언제-실행되는가)).
 
 `__init_array_start`와 `__init_array_end`는 링커가 정의합니다. 링커 스크립트의 `.init_array` 섹션의 시작과 끝을 가리킵니다.
 
@@ -170,7 +181,7 @@ void __libc_init_array(void) {
 } >FLASH
 ```
 
-보통 compiler가 만든 초기화 wrapper의 주소가 들어갑니다. wrapper 하나가 여러 객체를 초기화할 수 있으므로 entry 수는 객체 수와 같지 않습니다.
+`.init_array`에는 컴파일러가 번역 단위(TU)마다 만든 초기화 wrapper의 주소가 들어갑니다. wrapper 하나가 그 TU의 객체를 모두 초기화하므로 entry 수는 객체 수와 같지 않습니다(아래 [소멸자 등록 옵션](#소멸자-등록-옵션과-초기화-entry-확인) 절의 `readelf` 결과).
 
 ## Static 객체 생성자가 들어가는 방법
 
@@ -186,26 +197,13 @@ public:
 Logger g_logger;   // static 객체
 ```
 
-컴파일러가 자동으로 다음 코드를 생성합니다.
+컴파일러는 이 TU를 위한 지역 함수 하나를 만들고, 그 주소를 `.init_array` 섹션에 4바이트 entry로 넣습니다. GCC 16.2.0은 이 함수를 TU의 첫 동적 초기화 객체 이름을 따서 `_GLOBAL__sub_I_g_logger`(지역 심볼 `t`)로 이름 붙였고, Clang 23.1.5는 파일 이름을 따서 `_GLOBAL__sub_I_dynamic_init.cpp`처럼 붙였습니다. 이 함수 안에서 `Logger::Logger()`를 부릅니다.
 
-```cpp
-// 컴파일러가 만드는 hidden 코드 (개념)
-// compiler 내부의 초기화 wrapper를 나타내는 선언입니다.
-// 직접 작성한 C++에서 생성자를 일반 member 함수처럼 호출할 수는 없습니다.
-void __static_initialization_0();
-
-// .init_array 섹션에 함수 포인터 등록
-__attribute__((section(".init_array")))
-void (*__init_0)(void) = __static_initialization_0;
-```
-
-링커가 모든 `.init_array.*` 섹션을 정렬해 결합합니다. `__libc_init_array`가 순회하며 호출합니다.
-
-결과적으로 `g_logger`는 main 호출 직전에 생성됩니다.
+링커가 모든 입력의 `.init_array.*`·`.init_array` 섹션을 한 섹션으로 모으고, `__libc_init_array`가 순회하며 호출합니다. 결과적으로 `g_logger`는 `main` 호출 전에 생성됩니다.
 
 ## Static 초기화 순서 — 같은 TU 안
 
-같은 Translation Unit의 일반적인 비-inline 비-template 비지역 객체처럼 ordered dynamic initialization 대상은 정의 순서를 따릅니다. inline 변수와 template static data member 등은 별도 규칙이 있으므로 모든 static을 한 규칙으로 묶지 않습니다.
+같은 Translation Unit 안에서 ordered initialization 대상인 두 변수는 정의 순서대로 초기화됩니다([basic.start.dynamic]/3). 표준은 template 특수화의 static 변수를 unordered, template이 아닌 inline 변수를 partially-ordered로 따로 분류합니다([basic.start.dynamic]/1).
 
 ```cpp
 // file1.cpp
@@ -214,11 +212,11 @@ Timer  g_timer(g_logger); // 2번째 — g_logger 이미 OK
 Cache  g_cache(g_timer);  // 3번째 — g_timer 이미 OK
 ```
 
-이 경우는 안전합니다. 순서가 보장됩니다.
+세 변수 모두 template도 inline도 아니므로 ordered이고, 이 순서가 보장됩니다.
 
 ## Static 초기화 순서 — 다른 TU 사이
 
-문제는 다른 .cpp 파일 간의 초기화 순서가 unspecified라는 점입니다.
+문제는 다른 .cpp 파일 사이입니다. 표준은 다른 TU의 두 변수 초기화를 indeterminately sequenced, 즉 어느 쪽이 먼저인지 정하지 않습니다([basic.start.dynamic]/3).
 
 ```cpp
 // file_a.cpp
@@ -229,9 +227,23 @@ extern Logger g_logger;
 Timer g_timer(g_logger);   // g_logger가 먼저 초기화 보장 X
 ```
 
-`g_timer`가 먼저 초기화되면 `g_logger`는 아직 zero-initialized 상태입니다. 객체에 따라 런타임에 충돌합니다.
+GNU 툴체인에서는 실제 순서를 링크 순서가 정합니다. `Logger`의 생성자가 `level`을 3으로 두고, `Timer`의 생성자가 그 값을 복사하는 두 파일을 순서만 바꿔 링크해 QEMU에서 실행한 결과입니다.
 
-이것이 **Static Initialization Order Fiasco**입니다. Modern C++가 가장 권장하는 해결책은 Construct-On-First-Use입니다.
+```text
+# arm-none-eabi-g++ ... file_a.cpp file_b.cpp
+ctor g_logger
+ctor g_timer
+main: g_timer.copied=3
+
+# arm-none-eabi-g++ ... file_b.cpp file_a.cpp
+ctor g_timer
+ctor g_logger
+main: g_timer.copied=0
+```
+
+두 ELF의 `.init_array`는 모두 8바이트(entry 2개)이고, entry 순서만 반대입니다. 두 번째 빌드에서 `g_timer`는 아직 zero-initialized 상태인 `g_logger`의 `level` 0을 복사했습니다. 컴파일 경고도 링크 에러도 없습니다. CMake가 소스 목록 순서를 바꾸거나 파일을 라이브러리로 옮기면 이런 변화가 생깁니다.
+
+이것이 **Static Initialization Order Fiasco**입니다. [ISO C++ FAQ](https://isocpp.org/wiki/faq/ctors#static-init-order)가 제시하는 해결책은 Construct-On-First-Use입니다.
 
 ```cpp
 // 해결 — Construct-On-First-Use
@@ -244,13 +256,13 @@ Logger& get_logger() {
 Timer g_timer(get_logger());   // 호출 시점에 instance 생성 보장
 ```
 
-함수 내 static의 동적 초기화는 최초 제어 진입 시 실행됩니다. C++11 이후 동시 진입의 초기화 완료를 기다리는 보장이 있지만 `-fno-threadsafe-statics`를 사용하거나 필요한 guard runtime이 없으면 해당 계약을 다시 확인해야 합니다. 초기화 중 재귀 진입도 피해야 합니다.
+함수 내 static의 동적 초기화는 최초 제어 진입 시 실행됩니다. C++11부터는 동시 진입이 초기화 완료를 기다립니다([stmt.dcl]/3). `-fno-threadsafe-statics`를 쓰면 이 대기 코드가 빠지고([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-threadsafe-statics--magic-static-끄기)의 디스어셈블), 기본 설정이면 `__cxa_guard_acquire`/`__cxa_guard_release`를 제공하는 libsupc++가 링크되어야 합니다. 초기화 도중 같은 선언에 재귀로 들어오면 미정의 동작입니다([stmt.dcl]/3).
 
 자세한 내용은 [Part 4-08: Singleton 대안](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives)에서 다룹니다.
 
 ## 임베디드의 함정 — Constructor에서 H/W 접근
 
-static 생성자가 하드웨어를 만지면 문제가 됩니다. `__libc_init_array` 시점에는 클럭만 설정되고 peripheral은 미초기화 상태일 수 있습니다.
+static 생성자가 하드웨어를 만지면 문제가 됩니다. 위 Reset_Handler 골격에서 `__libc_init_array` 시점에 끝난 하드웨어 설정은 `SystemInit()`이 한 일뿐입니다.
 
 ```cpp
 // 위험!
@@ -314,18 +326,24 @@ int main() { return counter.count; }
 링커 스크립트에서 `.init_array`가 어디에 배치되는지 확인합니다.
 
 ```ld
-/* 보통 — Flash에 배치 (RAM 절약) */
+/* Flash에 배치: 실행 중 바뀌지 않는 함수 포인터 표 */
 .init_array : {
     KEEP(*(SORT(.init_array.*)))
     KEEP(*(.init_array))
 } >FLASH
 ```
 
-`KEEP`가 중요합니다. `--gc-sections`가 `.init_array`를 제거하지 않도록 막아줍니다. 보존하지 않으면 도달성 규칙과 linker 구현에 따라 필요한 초기화 entry가 제거될 수 있습니다. 실제 map과 ELF로 확인합니다.
+`KEEP`가 중요합니다. `.init_array` entry는 코드 어디에서도 이름으로 참조하지 않으므로, `--gc-sections`는 이 섹션을 쓰지 않는 섹션으로 판단합니다. 위 `file_a.cpp`·`file_b.cpp`를 `KEEP`만 지운 링커 스크립트와 `-ffunction-sections -fdata-sections -Wl,--gc-sections`로 링크하면, 링크는 경고 없이 성공하고 ELF에서 `.init_array` 섹션이 사라집니다. 실행 결과입니다.
+
+```text
+main: g_timer.copied=0
+```
+
+두 생성자가 모두 지워져 `ctor` 줄이 하나도 찍히지 않았습니다.
 
 ## 소멸자 등록 옵션과 초기화 entry 확인
 
-`-fno-use-cxa-atexit`는 소멸자를 없애는 옵션이 아닙니다. GCC 문서의 계약은 정적 객체 소멸자를 `__cxa_atexit` 대신 `atexit`로 등록하는 것입니다. 종료 없는 firmware에서의 등록 제거는 runtime 정책과 지원 옵션을 따로 검토합니다. 추정 절감 바이트를 근거로 이 옵션을 켜지 않습니다.
+`-fno-use-cxa-atexit`는 소멸자를 없애는 옵션이 아닙니다. GCC 문서는 이 옵션을 `__cxa_atexit` 대신 `atexit`로 정적 소멸자를 등록하는 선택으로 설명합니다. arm-none-eabi-g++ 16.2.0에서는 기본값이 ARM EABI의 `__aeabi_atexit` 호출이었고, 이 옵션을 주면 소멸자가 `.fini_array` entry가 됐습니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-use-cxa-atexit--등록-방식-변경)). 등록 자체를 생략하는 옵션은 Clang의 `-fno-c++-static-destructors`입니다.
 
 ```cpp title="dynamic-init.cpp"
 extern int read_boot_value();
@@ -340,21 +358,33 @@ llvm-readelf -r dynamic-init.o
 llvm-nm --demangle dynamic-init.o
 ```
 
-Clang 23.1.3의 위 ARM ELF 오브젝트에는 초기화할 객체가 두 개여도 .init_array entry가 하나이며, 그 relocation은 TU 초기화 wrapper를 가리켰습니다. 최종 firmware에서는 pointer 크기와 entry 개수를 확인하되 이를 곧바로 객체 수나 부트 시간으로 환산하지 않습니다. 부트 시간은 보드의 clock, 생성자 본문, 외부 장치 대기 등을 포함해 별도로 측정합니다.
+Clang 23.1.5와 arm-none-eabi-g++ 16.2.0 모두 초기화할 객체가 두 개인데 `.init_array`가 4바이트, entry 하나였습니다. relocation은 TU 초기화 wrapper를 가리킵니다.
+
+```text
+# Clang 23.1.5
+  [12] .init_array       INIT_ARRAY      00000000 000098 000004 00  WA  0   0  4
+00000000  00000826 R_ARM_TARGET1          00000021   _GLOBAL__sub_I_dynamic_init.cpp
+
+# arm-none-eabi-g++ 16.2.0 (-Os)
+  [ 9] .init_array       INIT_ARRAY      00000000 000054 000004 04  WA  0   0  4
+00000000  00000726 R_ARM_TARGET1     00000001   _GLOBAL__sub_I_first
+```
+
+entry 수로 객체 수나 부트 시간을 셀 수는 없습니다. 부트 시간은 생성자 본문이 정합니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. Reset_Handler에서 .data 복사 누락
 
-초기값 있는 global이 random 상태가 됩니다. 정상 동작하다가 조용히 실패합니다.
+초기값 있는 global이 SRAM의 전원 인가 직후 값으로 시작합니다. 위 QEMU 실험에서는 `boot_count`가 42 대신 0이었습니다.
 
 ### 2. .bss 0 초기화 누락
 
-zero-init 가정 변수(`static int counter = 0;`)가 random이 됩니다. 카운터가 음수에서 시작하는 등의 silent bug가 발생합니다.
+zero-init 가정 변수(`static int counter = 0;`)가 SRAM에 남아 있던 값으로 시작합니다. QEMU는 RAM을 0으로 채워 시작하므로 이 실수를 에뮬레이터에서 잡지 못합니다.
 
 ### 3. `__libc_init_array` 호출 누락
 
-필요한 동적 초기화가 실행되지 않습니다. 객체 수명과 상태 계약을 어긴 것이므로 가상 호출뿐 아니라 일반 함수 사용도 잘못될 수 있으며 특정 vptr 값이나 crash를 보장하지 않습니다.
+필요한 동적 초기화가 실행되지 않습니다. 결과는 `KEEP` 누락 실험과 같아서, 생성자가 하나도 돌지 않고 객체가 zero-initialized 상태로 `main`에 들어갑니다. 가상 함수가 있는 객체라면 vptr도 0입니다.
 
 ### 4. Constructor에서 다른 TU의 static에 의존
 
@@ -366,7 +396,7 @@ zero-init 가정 변수(`static int counter = 0;`)가 random이 됩니다. 카�
 
 ### 6. `.init_array` 섹션 KEEP 누락
 
-`--gc-sections`가 static 생성자 함수를 제거합니다. 객체가 zero-init만으로 시작해 잘못된 동작을 합니다.
+`--gc-sections`가 `.init_array`와 static 생성자 함수를 제거합니다. 위 실험처럼 링크는 경고 없이 성공합니다.
 
 ## Bare-metal Minimal Startup — 직접 작성
 
@@ -404,7 +434,7 @@ void Reset_Handler(void) {
 }   // extern "C"
 ```
 
-이 골격은 .preinit_array, 소멸자 등록, FPU·clock·vector 설정, .ARM.exidx 등 제품별 요구를 생략했습니다. newlib을 쓰지 않는 설계의 출발점이며 이 코드만으로 실제 보드 부트가 검증된 것은 아닙니다. compiler가 copy loop를 memcpy/memset 호출로 바꾸는지도 오브젝트에서 확인해야 합니다.
+이 골격은 .preinit_array, 소멸자 등록, FPU·clock·vector 설정 등 제품별 요구를 생략했습니다. 이 글의 QEMU 실험은 이 골격에 `.preinit_array` 순회와 semihosting 함수만 더한 C 버전으로 했고, 실제 보드에서는 실행하지 않았습니다. 같은 C 버전을 arm-none-eabi-gcc 16.2.0 `-Os -ffreestanding`으로 컴파일한 오브젝트에는 미정의 심볼이 링커 심볼(`_sidata` 등)과 `main`뿐이었습니다. 같은 파일을 `-ffreestanding` 없이 `-O2`로 컴파일하면 GCC가 복사·정리 루프를 `memcpy`·`memset` 호출로 바꿔 두 심볼이 미정의로 남았습니다(`-Os`에서는 바꾸지 않았습니다). C 라이브러리 없이 링크하는 startup은 `-ffreestanding` 또는 `-fno-tree-loop-distribute-patterns`로 이 변환을 막고, 오브젝트에 `arm-none-eabi-nm -u`를 돌려 확인합니다.
 
 ## 정리
 
@@ -422,7 +452,7 @@ void Reset_Handler(void) {
 - [GCC C++ dialect options](https://gcc.gnu.org/onlinedocs/gcc/C_002b_002b-Dialect-Options.html) — cxa-atexit와 guard 옵션
 - [C++ draft: static initialization](https://eel.is/c++draft/basic.start.static)와 [dynamic initialization](https://eel.is/c++draft/basic.start.dynamic) — 언어 규칙
 
-2026-10-22 확인은 host의 상수 초기화 예제 실행과 ARM ELF 오브젝트의 .init_array·relocation 검사입니다. reset, FPU, 실제 newlib 링크와 보드 부팅은 실행하지 않았습니다.
+2026-11-16 확인은 QEMU `mps2-an386`(Cortex-M4) 부팅 실험(링크 순서, `KEEP` 누락, `.data` 복사 누락), ARM ELF 오브젝트의 .init_array·relocation 검사, host의 상수 초기화 예제 실행입니다. FPU 설정, newlib 링크와 실제 보드 부팅은 하지 않았습니다.
 
 ## 관련 항목
 
