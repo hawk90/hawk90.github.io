@@ -17,13 +17,19 @@ topics: ["embedded", "embedded/rtos"]
 
 [4-07편](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)에서 본 것처럼 같은 core ISR도 lock을 공유하는 경우 inter-core 배제와 local IRQ 재진입 방지가 함께 필요합니다. 그런데 spinlock 자체를 어떻게 구현해야 할까요. 다음 세 가지 요구를 동시에 만족시켜야 합니다.
 
-첫째, *짧은 critical section*에서만 씁니다. sleep이 불가능한 ISR 컨텍스트나 수십 cycle짜리 자료구조 갱신처럼 *block-based mutex로는 비용이 더 큰* 구간이 대상입니다. 둘째, *atomic하게* lock state를 갱신해야 합니다. test-and-set이 atomic하지 않으면 두 core가 동시에 lock을 잡는 race가 생깁니다. 셋째, *spin 동안 시스템에 미치는 영향*을 최소화해야 합니다. cache line이 core 사이를 핑퐁하면 다른 작업까지 느려집니다.
+첫째, *짧은 critical section*에서만 씁니다. sleep할 수 없는 ISR 문맥이나 몇 줄짜리 자료구조 갱신처럼, task를 재우고 깨우는 mutex보다 잠깐 도는 편이 나은 구간이 대상입니다. 둘째, lock 상태를 *atomic하게* 바꿔야 합니다. 셋째, 기다리는 동안 다른 core에 주는 부담을 줄여야 합니다. 화장실 문 앞에서 기다리는 사람이 손잡이를 계속 덜컥거리면(매번 쓰기) 안에 있는 사람도 방해받습니다.
 
-이번 편은 ARM atomic primitive에서 시작해 spinlock의 다양한 형태와 trade-off를 정리합니다.
+lock이 없으면 어떻게 되는지부터 봅니다. Debian 13 arm64 guest(QEMU `-M virt -accel hvf -cpu host`, vCPU 4개, Linux 6.12.116, gcc 14.2.0)에서 thread 4개가 lock 없이 `volatile long` 하나를 200만 번씩 올렸습니다.
+
+```text
+nolock 4 threads x 2000000 iters: counter=3143792 (expected 8000000)
+```
+
+800만이어야 할 값이 314만입니다. `counter++`가 load·add·store 세 단계라 다른 core의 증가분을 덮어썼기 때문입니다. 이 글의 VM 측정은 HVF 위 가상 CPU에서 한 것이라 실제 SoC의 cache·bus 동작과 같지 않습니다.
 
 ## LDREX/STREX — ARM Exclusive Monitor
 
-다음은 ARMv7-A A32의 lock 획득을 보여 주는 instruction 예입니다. 지원 memory type·alignment·shareability와 unlock release 경로가 필요합니다. Cortex-M0/M0+에는 LDREX/STREX가 없으므로 ARM 전체의 공통 구현으로 사용할 수 없습니다.
+다음은 ARMv7-A A32의 lock 획득 예입니다. 같은 파일을 `arm-none-eabi-as` 16.2.0(binutils 동봉)으로 세 target에 넣어 봤습니다. `-march=armv7-a`와 `-mcpu=cortex-m3 -mthumb`는 통과했고, `-mcpu=cortex-m0 -mthumb`는 "selected processor does not support `ldrex r1,[r0]' in Thumb mode"로 거절했습니다. Cortex-M0/M0+에서는 이 방식의 lock을 쓸 수 없습니다.
 
 ```asm title="armv7-lock.s"
 .syntax unified
@@ -41,13 +47,11 @@ armv7_lock:
     bx      lr
 ```
 
-핵심은 *exclusive monitor*입니다. local/global monitor와 reservation 범위는 architecture·memory 설정에 따릅니다. LDREX와 STREX 사이에 경쟁 write나 reservation 상실이 있으면 store가 실패할 수 있습니다. C thread-local 변수와 동일한 개념은 아닙니다.
-
-실패하면 retry입니다. 이 retry 경로의 성공 여부를 검사해야 하며 단일 명령 atomic을 포함한 모든 구현이 이 instruction sequence를 쓰지는 않습니다.
+LDREX는 값을 읽으면서 "이 주소를 지켜보겠다"는 표시(exclusive monitor)를 걸고, STREX는 그 표시가 아직 살아 있을 때만 씁니다. 그 사이 다른 core가 그 주소에 쓰면 표시가 풀리고 STREX는 실패를 뜻하는 1을 `r3`에 돌려줍니다. 그래서 `r3`를 검사해 다시 시도합니다. 마지막 `dmb`는 옵션이 없어 objdump에서 `dmb sy`로 나왔습니다.
 
 ## ARMv8.1 LSE — 단일 명령 Atomic
 
-AArch64의 LSE를 사용할 때는 target feature와 compiler 선택을 확인합니다. Cortex-A72에서 LSE CASAL을 측정한 것처럼 제시한 기존 표는 근거가 없고 target도 맞지 않아 제거했습니다. 단일 instruction이라는 사실만으로 3 cycle·항상 빠름을 보장하지 않습니다.
+ARMv8.1의 LSE(Large System Extensions)는 CAS·덧셈·교환을 한 명령으로 합니다. 예전 판의 "Cortex-A72에서 LSE CASAL 3 cycle" 표는 근거가 없어 지웠습니다.
 
 ```asm title="aarch64-lse.s"
 .text
@@ -59,11 +63,21 @@ lse_examples:
     ret
 ```
 
-위 코드는 armv8.1-a+lse 대상으로 assembler 문법을 확인하는 예이며 lock 함수는 아닙니다. C compiler는 memory order와 target에 따라 acquire-only CAS, LL/SC 또는 runtime helper를 선택할 수 있습니다. outline atomics도 toolchain/runtime 계약을 확인합니다.
+guest의 GNU as는 기본값과 `-march=armv8-a`에서 세 명령 모두 "selected processor does not support"로 거절했고, `-march=armv8.1-a`에서만 받았습니다. 이 guest의 `/proc/cpuinfo` Features에는 `atomics`가 있어 CPU 자체는 LSE를 지원합니다.
+
+C 컴파일러가 실제로 무엇을 만드는지는 옵션에 따라 다릅니다. 아래 `atomic-locks.c`를 Debian gcc 14.2.0 `-O2`로 세 가지로 빌드해 objdump를 봤습니다.
+
+| 빌드 | atomic 연산이 된 것 |
+| --- | --- |
+| 기본 옵션 | `__aarch64_cas1_acq`, `__aarch64_ldadd4_rel` 같은 libgcc helper 호출 (outline atomics) |
+| `-march=armv8.1-a` | `casa`·`ldadd`·`swp` 계열 명령을 직접 생성 |
+| `-mno-outline-atomics` | `ldaxr`/`stlxr` 같은 LL/SC loop |
+
+GCC 매뉴얼(AArch64 Options)은 `-moutline-atomics`가 기본으로 켜져 있고, 이 helper가 "at runtime, determine if the LSE instructions from ARMv8.1-A can be used"하며 아니면 ARMv8.0의 load/store-exclusive를 쓴다고 설명합니다. `-march=armv8.1-a`처럼 더 높은 revision을 주면 LSE 명령을 직접 씁니다. 같은 소스가 빌드 옵션 하나로 세 가지 코드가 됩니다. lock 성능을 잴 때는 어느 쪽으로 빌드됐는지 objdump로 먼저 확인합니다.
 
 ## C 추상화 — `<stdatomic.h>`
 
-다음 세 구현은 C11 atomic을 이용한 **task/thread 문맥의 교육용 코드**입니다. lock과 node는 접근 전에 초기화하고 같은 lock의 재귀 획득·소유자 아닌 unlock을 금지합니다. IRQ mask·scheduler preemption 제어는 포함하지 않습니다. 해당 atomic이 lock-free인지 확인하지 않고 ISR/RTOS kernel lock으로 가져가지 않습니다.
+다음 세 구현은 C11 atomic을 이용한 **thread 문맥의 교육용 코드**입니다. lock과 node는 쓰기 전에 초기화하고, 같은 lock을 재귀로 잡거나 소유자가 아닌 쪽이 unlock하지 않습니다. IRQ mask와 preemption 제어는 들어 있지 않습니다.
 
 ```c title="atomic-locks.c"
 #include <stdatomic.h>
@@ -128,33 +142,68 @@ static void mcs_unlock(mcs_t *l, mcs_node_t *me)
 }
 ```
 
-cpu_relax의 signal fence는 CPU sleep/hint 명령이 아닙니다. 이 예제는 busy wait이며 contention·전력 최적화는 target별 별도 구현과 측정이 필요합니다.
+`cpu_relax()`의 signal fence는 컴파일러 barrier일 뿐 CPU에게 쉬라는 힌트(`yield`, `wfe`)가 아닙니다.
+
+이 코드를 그대로 include한 stress test를 guest에서 돌렸습니다. thread 4개가 lock 안에서 공유 카운터를 200만 번씩 올립니다. 기본 빌드와 `-march=armv8.1-a` 빌드 모두 세 lock이 800만을 정확히 맞췄습니다.
+
+```text
+ttas   4 threads x 2000000 iters: counter=8000000 (expected 8000000) OK
+ticket 4 threads x 2000000 iters: counter=8000000 (expected 8000000) OK
+mcs    4 threads x 2000000 iters: counter=8000000 (expected 8000000) OK
+```
+
+이것은 세 lock이 이 guest에서 상호 배제를 지켰다는 결과이고, weak memory의 모든 실행 순서를 증명한 것은 아닙니다.
 
 ## Test-and-Test-and-Set — Cache 절약
 
-TTAS는 먼저 relaxed load로 잠김 상태를 관찰하고 비어 보일 때 CAS를 시도합니다. 보호 데이터 접근은 성공한 acquire 뒤에, 다음 소유자에 대한 공개는 release unlock 전에 둡니다. 경쟁 해제 순간의 여러 CAS와 starvation 가능성은 남습니다. bus traffic 0이나 일정 배수 성능 향상은 보장하지 않습니다.
+TTAS는 먼저 읽기만 하며 기다리다가, 비어 보일 때만 CAS를 시도합니다. 문 앞에서 손잡이 대신 "사용 중" 표시만 보다가 꺼지면 손잡이를 잡는 식입니다. 기다리는 동안 쓰기가 없으니 cache line을 덜 흔듭니다. 대신 순서가 없습니다. 풀리는 순간 여러 core가 동시에 CAS를 시도하고 아무나 이깁니다.
+
+같은 stress test에서 1초 동안 4 thread가 경쟁하게 두고 thread별 획득 횟수를 셌습니다. 기본 빌드로 세 번, LSE 빌드로 한 번 돌렸습니다.
+
+```text
+ttas   1 s contended: per-thread acquisitions 5202351 2847918 2016184 4539537 (max/min 2.58)
+ttas   1 s contended: per-thread acquisitions 1022046 1330933 1815819 767807 (max/min 2.36)
+ttas   1 s contended: per-thread acquisitions 3336160 846432 816997 621838 (max/min 5.36)
+ttas   1 s contended: per-thread acquisitions 679765 611025 471259 542843 (max/min 1.44)
+```
+
+가장 많이 얻은 thread가 가장 적게 얻은 thread의 1.4~5.4배를 가져갔습니다. 방금 풀어 준 thread가 그 line을 cache에 가진 채 바로 다시 잡는 일이 반복되면 이렇게 기웁니다.
 
 ## WFE / SEV — 저전력 Spin
 
-WFE/SEV는 architecture의 event mechanism을 사용하는 hint입니다. WFE가 반드시 clock을 정지하거나 일정 전류를 절감한다는 보장은 없습니다. 깨어난 뒤에도 lock 조건을 다시 확인해야 합니다.
+WFE는 "event가 올 때까지 기다리라"는 hint이고, SEV는 모든 core에 event를 보냅니다. spin loop 안에서 쓰면 core가 계속 load를 반복하는 대신 쉬다가, unlock 쪽 SEV에 깨어나 다시 확인합니다.
 
-C atomic loop에 wfe를 한 줄 추가하는 것으로 올바른 wait/wake protocol이 완성되지는 않습니다. unlock 공개 순서·event 전달·reservation·interrupt·spurious wake를 해당 architecture와 RTOS 구현에 맞춰 검토해야 합니다. 일반 STREX 실패가 항상 필요한 event를 발생시킨다는 가정도 사용하지 않습니다. 이 글은 board 전력/저전력 lock을 실행 검증하지 않았으므로 복사 가능한 WFE lock 구현을 제시하지 않습니다.
+이 글에서는 WFE lock을 돌리지 않았습니다. QEMU guest에서는 전력 효과를 볼 수 없고, WFE·SEV를 올바르게 짝짓는 순서는 ARM ARM의 event register 규칙을 따라야 하는데 그 원문을 이 글에서 확인하지 않았기 때문입니다. 그래서 복사해 쓸 WFE lock 코드는 싣지 않습니다.
 
 ## Ticket Lock — Fairness 보장
 
-ticket lock은 번호 배정 순서대로 진입시킵니다. unsigned counter는 modular 증가를 사용하며 동시에 미완료인 ticket 수가 번호 공간을 소진하지 않아야 합니다. 앞 ticket 소유자가 멈추면 뒤 waiter도 진행하지 못하므로 FIFO가 실시간 대기 시간 상한 자체를 보장하지는 않습니다.
+ticket lock은 은행 번호표입니다. `next`에서 번호표를 뽑고(`fetch_add`), 화면의 `serving`이 내 번호가 될 때까지 기다립니다. 뽑은 순서대로 들어가니 TTAS 같은 쏠림이 없습니다. 같은 1초 경쟁에서의 결과입니다.
 
-모든 waiter가 serving을 읽기 때문에 공유 line 갱신 비용이 남습니다. 몇 core 이상이면 반드시 느리다는 고정 경계는 두지 않습니다.
+```text
+ticket 1 s contended: per-thread acquisitions 924782 908285 907083 899895 (max/min 1.03)
+ticket 1 s contended: per-thread acquisitions 763925 758304 758371 758594 (max/min 1.01)
+ticket 1 s contended: per-thread acquisitions 1501584 1497508 1497680 1496527 (max/min 1.00)
+ticket 1 s contended: per-thread acquisitions 1141198 1137561 1136952 1135190 (max/min 1.01)
+```
+
+네 번 모두 max/min이 1.03 이하였습니다. 대가도 있습니다. 앞 번호 소유자가 멈추면(가상 CPU가 host에서 밀리는 경우 포함) 뒤 번호는 모두 그만큼 기다립니다. 모든 waiter가 같은 `serving`을 읽으므로 unlock 때마다 그 line이 모든 core로 다시 퍼집니다. `unsigned` 번호는 2^32에서 한 바퀴 돌지만, 동시에 기다리는 수가 그보다 작으면 비교가 맞습니다.
 
 ## MCS Lock — Per-CPU Cache Line
 
-MCS는 각 획득 시도에 고유하고 unlock이 끝날 때까지 살아 있는 node를 사용합니다. 반드시 per-CPU node 하나인 것은 아닙니다. 위 코드는 next도 atomic pointer로 만들어 predecessor의 공개와 unlock의 관찰 사이 C data race를 피하고, tail CAS의 expected 타입도 일치시킵니다.
+MCS(Mellor-Crummey·Scott, ACM TOCS 1991)는 대기 줄을 linked list로 만들고, 각 waiter가 **자기 node의 `waiting`**만 보며 기다립니다. 앞사람이 나갈 때 뒷사람 node의 `waiting`만 false로 바꾸므로, ticket lock처럼 모든 waiter가 같은 line을 보는 일이 없습니다. node는 획득 시도마다 하나씩 필요하고 unlock이 끝날 때까지 살아 있어야 합니다. 위 stress test는 thread마다 stack에 node 하나를 둡니다.
 
-각 waiter는 자신의 waiting을 읽고 predecessor가 후속 waiter를 깨웁니다. 실제 cache line 분리는 node alignment/layout의 별도 문제입니다. queue 순서는 소유자·앞 waiter의 진행을 전제로 하며 host 반복 검사만으로 weak-memory의 모든 실행을 증명하지 않습니다.
+```text
+mcs    1 s contended: per-thread acquisitions 840090 840065 832563 840575 (max/min 1.01)
+mcs    1 s contended: per-thread acquisitions 877154 590219 853962 789238 (max/min 1.49)
+mcs    1 s contended: per-thread acquisitions 1226849 1223051 1222945 1223670 (max/min 1.00)
+mcs    1 s contended: per-thread acquisitions 1138426 1141310 1136777 1139376 (max/min 1.00)
+```
+
+네 번 중 세 번은 1.01 이하였고 한 번은 1.49였습니다. FIFO 순서라도 줄에 선 thread의 vCPU가 host에서 밀리면 그 뒤가 모두 늦어지는데, VM에서는 이런 일이 실제 SoC보다 자주 일어납니다. 실제 core의 cache line 분리 효과를 보려면 node를 cache line 크기로 정렬하고 실보드에서 재야 합니다.
 
 ## ESP-IDF `portMUX_TYPE` — RTOS 통합 예
 
-ESP32(dual core)의 ESP-IDF는 FreeRTOS SMP variant 위에서 `portMUX_TYPE`을 제공합니다.
+ESP-IDF v5.4의 ESP32 "FreeRTOS (IDF)" 문서는 critical section을 spinlock 하나에 묶습니다. 문서 표현으로 spinlock은 `portMUX_TYPE`이고 "not to be confused to FreeRTOS mutexes"입니다. 문서는 SMP에서 "disabling interrupts is not a valid method of ensuring mutual exclusion"이라고 못 박고, 대신 아래 API를 씁니다.
 
 ```c
 #include "freertos/FreeRTOS.h"
@@ -162,15 +211,14 @@ ESP32(dual core)의 ESP-IDF는 FreeRTOS SMP variant 위에서 `portMUX_TYPE`을 
 
 static portMUX_TYPE mux = portMUX_INITIALIZER_UNLOCKED;
 
-void critical_section(void) {
-    portENTER_CRITICAL(&mux);
-    /* 수십 cycle짜리 짧은 작업 */
+void update_shared(void) {
+    taskENTER_CRITICAL(&mux);      /* ISR에서는 taskENTER_CRITICAL_ISR(&mux) */
     /* 이 mux로 보호하는 공유 상태만 짧게 갱신 */
-    portEXIT_CRITICAL(&mux);
+    taskEXIT_CRITICAL(&mux);
 }
 ```
 
-`portENTER_CRITICAL`이 *spinlock acquire + IRQ disable*을 한 번에 처리합니다. ISR 컨텍스트에서는 `portENTER_CRITICAL_ISR`을 씁니다. 이 절은 ESP-IDF v5.4 ESP32 문서의 spinlock critical-section 계약을 예로 듭니다. ESP32 Xtensa를 ARM LDREX/STREX 기반 ticket lock이라고 설명할 수 없습니다. 다른 ESP target·IDF revision의 구현도 별도로 확인합니다.
+같은 문서에 따르면 진입하는 core는 `configMAX_SYSCALL_INTERRUPT_PRIORITY`까지 interrupt를 막은 뒤 "atomic compare-and-set instruction"으로 spinlock을 돌며 잡습니다. critical section 안에서는 FreeRTOS API나 block·yield하는 함수를 부르지 말라고도 적습니다. 4-07에서 본 "IRQ mask + inter-core lock"을 API 하나로 묶은 형태입니다. 이 코드는 ESP32에서 돌리지 않았습니다.
 
 ## Spinlock vs Mutex — 결정 기준
 
@@ -180,17 +228,17 @@ void critical_section(void) {
 | ISR도 같은 상태 접근 | port가 허용하는 IRQ mask + inter-core 배제 |
 | owner가 preempt/suspend될 가능성 | 진행 조건과 최대 hold/wait 시간 분석 |
 
-context switch의 평균 비용과 비교하는 것만으로 선택하지 않습니다. IRQ latency·우선순위 역전·owner preemption·atomic lock-free 지원·contention 분포가 함께 필요합니다. 재현 자료 없는 Cortex-A72 4-core cycle 표는 사용하지 않습니다.
+spinlock은 쥐고 있는 시간만큼 다른 core를 돌게 만들고, IRQ를 막는 형태라면 그 시간만큼 이 core의 interrupt도 늦춥니다. 그래서 hold time이 짧고 상한이 분명할 때만 spinlock이 맞습니다. 예전 판의 Cortex-A72 4-core cycle 표는 재현 자료가 없어 지웠습니다.
 
 ## 자주 보는 함정과 안티패턴
 
 > 경고 — exclusive monitor 규칙을 단순화
 
-ordinary load 하나가 항상 reservation을 지워 STREX가 영원히 실패한다는 규칙은 없습니다. architecture별 제약·exception·reservation granule과 경쟁 접근을 확인하고 성공 여부를 검사합니다.
+STREX는 실패할 수 있는 명령이고, 실패하면 결과 레지스터에 1을 남길 뿐 아무 일도 하지 않습니다. 위 `armv7_lock`처럼 결과 레지스터를 매번 검사해 다시 시도해야 합니다. 검사를 빼면 lock을 잡지 못했는데 잡은 것으로 알고 진행합니다.
 
 > 경고 — release를 특정 instruction으로 단정
 
-memory_order_release는 언어 차원의 ordering입니다. compiler가 반드시 DMB ISH 하나를 삽입하는 것은 아니며 release store 등으로 구현할 수 있습니다. 생성 assembly와 target feature를 확인합니다.
+`memory_order_release` store와 `acquire` load 한 쌍을 두 target에서 컴파일했습니다. ARMv7-A(`arm-none-eabi-gcc -O2 -march=armv7-a -marm`)에서는 store 앞에 `dmb ish`, load 뒤에 `dmb ish`가 붙었습니다. AArch64(Debian gcc 14.2.0 `-O2`)에서는 barrier 없이 `stlrb`·`ldarb` 명령 하나씩이 됐습니다. 같은 C 코드가 target에 따라 별도 barrier가 되기도 하고 명령 자체에 ordering이 들어가기도 합니다.
 
 > 경고 — lock 내부 block과 잘못된 nesting
 
@@ -198,17 +246,17 @@ spinlock을 보유한 채 기다리면 다른 참여자의 진행을 막습니�
 
 ## 정리
 
-- acquire/release, 배제와 owner 진행 조건을 함께 다룹니다.
-- A32 exclusive, AArch64 LSE, Cortex-M0+는 동일한 명령 지원이 아닙니다.
-- TTAS·ticket·MCS는 contention·fairness·node 수명 비용이 다릅니다.
-- ticket의 번호 공간과 MCS의 atomic next·고유 node 조건을 지킵니다.
-- host 기능 검사는 MCU IRQ·전력·WCET나 exhaustive weak-memory 증명이 아닙니다.
+- lock 없는 4 thread 증가는 800만 중 314만만 남았고, 세 lock은 모두 800만을 맞췄습니다.
+- LDREX/STREX는 ARMv7-A와 Cortex-M3에서 assemble되고 Cortex-M0에서는 거절됩니다. LSE 명령은 `-march=armv8.1-a`에서만 assemble됩니다.
+- Debian gcc 14.2.0 기본 빌드는 atomic을 outline helper 호출로, `-march=armv8.1-a`는 LSE 명령으로, `-mno-outline-atomics`는 LL/SC loop로 만듭니다.
+- 1초 경쟁에서 TTAS는 thread 간 획득 횟수가 1.4~5.4배 차이 났고, ticket은 1.03 이하, MCS는 한 번을 빼고 1.01 이하였습니다.
+- release store는 ARMv7-A에서 `dmb ish` + store, AArch64에서 `stlr`이 됐습니다.
 
 ## 근거 자료
 
-- [Mellor-Crummey·Scott 원 저자의 알고리즘](https://www.cs.rochester.edu/research/synchronization/pseudocode/ss.html): ticket/MCS 구조와 진행 조건.
+- [Mellor-Crummey·Scott, Scalable Synchronization pseudocode](https://www.cs.rochester.edu/research/synchronization/pseudocode/ss.html): ACM TOCS 1991 논문의 ticket lock·MCS lock pseudocode.
 - [ESP-IDF v5.4 ESP32 FreeRTOS](https://docs.espressif.com/projects/esp-idf/en/v5.4/esp32/api-reference/system/freertos_idf.html): IDF critical section 계약.
-- [GCC atomic builtins](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html): target 구현과 lock-free 확인.
+- [GCC atomic builtins](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html), [AArch64 Options](https://gcc.gnu.org/onlinedocs/gcc/AArch64-Options.html): outline atomics와 LSE 선택.
 
 
 
