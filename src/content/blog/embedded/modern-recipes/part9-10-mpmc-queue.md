@@ -11,113 +11,193 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"MPMC 큐는 lock-free의 최고 난이도 자료구조입니다."** SPSC는 head/tail 두 atomic만으로 가능하지만, MPMC는 매 slot에 sequence number가 필요합니다.
+> **"MPMC 큐는 slot마다 '지금 누구 차례인가'를 적어 두는 자료구조입니다."** SPSC는 head/tail 두 index로 충분하지만, 생산자와 소비자가 여럿이면 slot마다 sequence 번호가 필요합니다. 이 글은 Vyukov의 bounded MPMC queue를 구현해 모든 값이 정확히 한 번 나오는지 확인하고, mutex 큐·moodycamel 큐와 처리량을 직접 비교합니다.
 
 ## 어떤 상황에서 쓰나
 
-worker pool, packet pipeline, telemetry aggregator처럼 여러 producer가 동시에 enqueue하고 여러 consumer가 동시에 dequeue하는 모든 곳에 MPMC가 필요합니다. mutex 기반 queue는 contention 시 throughput이 한계에 부딪힙니다. lock-free MPMC는 보통 5~10배의 throughput을 냅니다.
+Worker pool, packet pipeline, 로그 수집처럼 여러 스레드가 넣고 여러 스레드가 꺼내는 곳입니다. 은행 번호표에 비유하면, 손님(생산자)과 창구(소비자)가 모두 여럿이라 번호표 기계 하나와 전광판 하나로는 모자라고, 창구마다 "몇 번 손님 차례인지"를 따로 표시해야 합니다. 그 표시가 slot의 sequence 번호입니다.
 
-다만 *진짜 lock-free MPMC*는 구현이 까다롭습니다. 잘못된 구현은 ABA, ordering, 메모리 회수 모두 실패합니다. 검증된 algorithm(Vyukov, Disruptor)을 가져다 쓰는 것이 정석입니다.
+흔히 "lock-free MPMC가 mutex 큐보다 몇 배 빠르다"고 하지만, 아래 측정에서 이 Mac의 4P/4C 조건으로는 `std::mutex` + `std::queue`가 두 lock-free 큐보다 빨랐습니다. Lock-free를 고르는 이유는 처리량보다 *lock을 쥔 스레드가 멈춰도 다른 스레드가 진행한다*는 성질에 있고, 처리량은 자기 조건에서 재 봐야 합니다.
 
 ## 핵심 개념
 
-| SPSC | 1 producer, 1 consumer | head + tail 두 atomic이면 충분 |
-|---|---|---|
-| MPSC | N producer, 1 consumer | tail은 단일 owner, head는 CAS |
-| SPMC | 1 producer, N consumer | head는 단일 owner, tail은 CAS |
-| MPMC | N producer, M consumer | slot마다 sequence number 필요 |
+| 구성 | 필요한 것 |
+|---|---|
+| SPSC | head와 tail, 각자 한 스레드만 씀 ([9-01](/blog/embedded/modern-recipes/part9-01-lock-free-ring)) |
+| MPMC (bounded, Vyukov) | slot마다 sequence 번호, enqueue·dequeue 위치를 CAS로 예약 |
 
-MPMC의 두 대표 패턴입니다.
+Vyukov는 이 큐를 "MPMC, array-based, fails on overflow ... blocking producers and consumers queue"로 분류하고, "not lockfree in the official meaning, just implemented by means of atomic RMW operations w/o mutexes", 연산마다 CAS 한 번이라고 적습니다([1024cores, Bounded MPMC queue, 2022-11-27 보관본](https://web.archive.org/web/20221127075938/https://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue)). 생산자가 위치를 예약하고 데이터를 다 쓰기 전에 멈추면, 그 slot을 기다리는 소비자도 진행하지 못하기 때문입니다.
 
-| Queue | 특성 |
-|-------|------|
-| Vyukov bounded MPMC | slot마다 seq, CAS로 enqueue/dequeue 위치 예약 |
-| LMAX Disruptor | ring + cursor, batching 친화, 단일 producer 변종도 |
-| `boost::lockfree::queue` | Michael & Scott 기반, unbounded |
-| `moodycamel::ConcurrentQueue` | 매우 빠른 unbounded 구현 (open source) |
+라이브러리로는 다음이 있습니다.
 
-bounded는 capacity가 고정이라 *backpressure가 명확*하고, unbounded는 capacity가 무한이지만 메모리 사용량을 통제하기 어렵습니다.
+| 큐 | 설명 | 근거 |
+|-------|------|------|
+| `boost::lockfree::queue` | lock-free MPMC 큐, Michael·Scott의 *Simple, Fast, and Practical Non-Blocking and Blocking Concurrent Queue Algorithms* 기반. `fixed_sized`·`capacity`로 고정 크기 설정 가능 | Boost 1.86 문서, Boost.Lockfree 개요·Rationale |
+| `moodycamel::ConcurrentQueue` | MPMC 큐. README가 "not linearizable"이라고 밝힘. 한 생산자가 넣은 순서는 지키지만 생산자 사이의 전체 순서는 보장하지 않음 | concurrentqueue v1.0.4 README 48–52, 74–80행 |
+
+Boost는 이 글에서 빌드해 돌리지 않았고, moodycamel은 아래에서 돌렸습니다.
 
 ## 코드 / 실제 사용 예
 
 ### Vyukov bounded MPMC
 
-```cpp
-template <typename T, size_t N>
-struct mpmc_queue {
-    static_assert((N & (N - 1)) == 0, "N must be power of 2");
+1024cores 원문의 구조를 C++17로 옮겼습니다. `intptr_t` 차이 계산, 세 갈래 분기, `pos + N`으로 slot을 다음 바퀴에 넘기는 부분은 원문과 같습니다. 원문은 64바이트 패딩을 쓰지만, 이 글의 측정 기계(M2)의 cache line이 128 B라([9-09](/blog/embedded/modern-recipes/part9-09-false-sharing)) `alignas(128)`로 바꿨습니다.
 
-    struct slot {
-        std::atomic<uint64_t> seq;
+```cpp
+// mpmc.h — bounded MPMC queue after Dmitry Vyukov's 1024cores design
+#include <atomic>
+#include <cstddef>
+#include <cstdint>
+
+template <typename T, size_t N>                  // N must be a power of two
+class mpmc_queue {
+    static_assert(N >= 2 && (N & (N - 1)) == 0, "N must be a power of two");
+    struct cell {
+        std::atomic<size_t> seq;
         T data;
     };
+    alignas(128) cell buf_[N];
+    alignas(128) std::atomic<size_t> enq_pos_{0};
+    alignas(128) std::atomic<size_t> deq_pos_{0};
 
-    alignas(64) slot buf[N];
-    alignas(64) std::atomic<uint64_t> enq_pos{0};
-    alignas(64) std::atomic<uint64_t> deq_pos{0};
+public:
+    mpmc_queue() { for (size_t i = 0; i < N; i++) buf_[i].seq.store(i, std::memory_order_relaxed); }
 
-    mpmc_queue() {
-        for (size_t i = 0; i < N; i++)
-            buf[i].seq.store(i, std::memory_order_relaxed);
-    }
-
-    bool enqueue(const T &v) {
-        uint64_t pos = enq_pos.load(std::memory_order_relaxed);
-        slot *s;
+    bool try_enqueue(const T &v)
+    {
+        size_t pos = enq_pos_.load(std::memory_order_relaxed);
+        cell *c;
         for (;;) {
-            s = &buf[pos & (N - 1)];
-            uint64_t seq = s->seq.load(std::memory_order_acquire);
-            intptr_t diff = (intptr_t)seq - (intptr_t)pos;
-            if (diff == 0) {
-                if (enq_pos.compare_exchange_weak(pos, pos + 1,
-                        std::memory_order_relaxed)) break;
-            } else if (diff < 0) {
-                return false;    /* full */
+            c = &buf_[pos & (N - 1)];
+            size_t seq = c->seq.load(std::memory_order_acquire);
+            intptr_t dif = (intptr_t)seq - (intptr_t)pos;
+            if (dif == 0) {
+                if (enq_pos_.compare_exchange_weak(pos, pos + 1, std::memory_order_relaxed))
+                    break;                       // slot is ours
+            } else if (dif < 0) {
+                return false;                    // full
             } else {
-                pos = enq_pos.load(std::memory_order_relaxed);
+                pos = enq_pos_.load(std::memory_order_relaxed);   // someone moved ahead
             }
         }
-        s->data = v;
-        s->seq.store(pos + 1, std::memory_order_release);
+        c->data = v;
+        c->seq.store(pos + 1, std::memory_order_release);        // publish to consumers
         return true;
     }
 
-    bool dequeue(T &v) {
-        uint64_t pos = deq_pos.load(std::memory_order_relaxed);
-        slot *s;
+    bool try_dequeue(T &out)
+    {
+        size_t pos = deq_pos_.load(std::memory_order_relaxed);
+        cell *c;
         for (;;) {
-            s = &buf[pos & (N - 1)];
-            uint64_t seq = s->seq.load(std::memory_order_acquire);
-            intptr_t diff = (intptr_t)seq - (intptr_t)(pos + 1);
-            if (diff == 0) {
-                if (deq_pos.compare_exchange_weak(pos, pos + 1,
-                        std::memory_order_relaxed)) break;
-            } else if (diff < 0) {
-                return false;    /* empty */
+            c = &buf_[pos & (N - 1)];
+            size_t seq = c->seq.load(std::memory_order_acquire);
+            intptr_t dif = (intptr_t)seq - (intptr_t)(pos + 1);
+            if (dif == 0) {
+                if (deq_pos_.compare_exchange_weak(pos, pos + 1, std::memory_order_relaxed))
+                    break;
+            } else if (dif < 0) {
+                return false;                    // empty
             } else {
-                pos = deq_pos.load(std::memory_order_relaxed);
+                pos = deq_pos_.load(std::memory_order_relaxed);
             }
         }
-        v = s->data;
-        s->seq.store(pos + N, std::memory_order_release);
+        out = c->data;
+        c->seq.store(pos + N, std::memory_order_release);        // hand the slot back to producers
         return true;
     }
 };
 ```
 
-핵심 아이디어는 각 slot의 sequence number가 *현재 상태*를 인코딩하는 것입니다. enqueuer가 자기 자리를 예약(`seq == pos`)하고, 데이터를 쓴 후 `seq = pos + 1`로 publish합니다. dequeuer는 `seq == pos + 1`을 확인하고 데이터를 읽은 후 `seq = pos + N`으로 *다음 cycle*을 안내합니다.
+Slot의 sequence 번호가 상태를 나타냅니다.
 
-### SPSC 비교
+- `seq == pos`: 위치 `pos`의 생산자가 쓸 수 있습니다. 생산자가 `enq_pos_`를 CAS로 하나 올려 자리를 잡고, 데이터를 쓴 뒤 `seq = pos + 1`로 공개합니다.
+- `seq == pos + 1`: 위치 `pos`의 소비자가 읽을 수 있습니다. 소비자가 `deq_pos_`를 CAS로 잡고, 읽은 뒤 `seq = pos + N`으로 다음 바퀴의 생산자에게 넘깁니다.
+- 차이가 음수면 생산자 쪽은 가득 참, 소비자 쪽은 비었음입니다. 양수면 다른 스레드가 앞질렀으니 위치를 다시 읽습니다.
+
+### 시험: 모든 값이 정확히 한 번 나오는가
+
+생산자 P개가 각자 서로 다른 값 200만 개를 넣고, 소비자 C개가 꺼낸 값의 합과 개수를 셉니다. 합이 1부터 전체 개수까지의 합과 같고 개수도 같으면 잃어버리거나 두 번 나온 값이 없습니다. 소비자는 자기 몫을 지역 변수로 세고 끝날 때 한 번만 공유 카운터에 더합니다. 처음 판에서는 꺼낼 때마다 공유 카운터를 올렸는데, 그 카운터 자체가 경합 지점이 되어 모든 큐의 숫자를 낮췄습니다.
 
 ```cpp
+// qbench.cpp — P producers, C consumers move ITEMS values; checks every value arrives exactly once
+#include "mpmc.h"
+#include "spsc.h"
+#include "concurrentqueue.h"
+#include <chrono>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
+#include <mutex>
+#include <queue>
+#include <thread>
+#include <vector>
+
+struct mutex_queue {
+    std::mutex m; std::queue<unsigned long> q;
+    bool try_enqueue(unsigned long v) { std::lock_guard<std::mutex> g(m); q.push(v); return true; }
+    bool try_dequeue(unsigned long &v) { std::lock_guard<std::mutex> g(m); if (q.empty()) return false; v = q.front(); q.pop(); return true; }
+};
+
+template <class Q>
+void run(const char *name, Q &q, int P, int C, unsigned long per_producer)
+{
+    std::atomic<int> producers_done{0};
+    std::atomic<unsigned long> got{0}, sum{0};
+    const unsigned long total = per_producer * P;
+    std::vector<std::thread> t;
+    auto t0 = std::chrono::steady_clock::now();
+    for (int p = 0; p < P; p++)
+        t.emplace_back([&, p] {
+            for (unsigned long i = 0; i < per_producer; i++) {
+                unsigned long v = p * per_producer + i + 1;
+                while (!q.try_enqueue(v)) {}
+            }
+            producers_done.fetch_add(1, std::memory_order_release);
+        });
+    for (int c = 0; c < C; c++)
+        t.emplace_back([&] {                     // count locally; touch shared counters once at the end
+            unsigned long v, s = 0, n = 0;
+            for (;;) {
+                if (q.try_dequeue(v)) { s += v; n++; continue; }
+                if (producers_done.load(std::memory_order_acquire) == P) {
+                    while (q.try_dequeue(v)) { s += v; n++; }
+                    break;
+                }
+            }
+            sum += s; got += n;
+        });
+    for (auto &x : t) x.join();
+    std::chrono::duration<double> d = std::chrono::steady_clock::now() - t0;
+    unsigned long expect = total * (total + 1) / 2;
+    std::printf("%-12s %dP/%dC  %6.1f M items/s  %s\n", name, P, C, total / d.count() / 1e6,
+                sum == expect && got == total ? "all items once" : "LOST OR DUPLICATED");
+}
+
+int main(int argc, char **argv)
+{
+    unsigned long n = argc > 1 ? std::strtoul(argv[1], nullptr, 10) : 2000000;
+    { static spsc_queue<unsigned long, 1024> q; run("spsc", q, 1, 1, n); }
+    { static mpmc_queue<unsigned long, 1024> q; run("vyukov", q, 1, 1, n); }
+    { static mpmc_queue<unsigned long, 1024> q; run("vyukov", q, 4, 4, n); }
+    { moodycamel::ConcurrentQueue<unsigned long> q; run("moodycamel", q, 4, 4, n); }
+    { mutex_queue q; run("mutex+queue", q, 4, 4, n); }
+}
+```
+
+```cpp
+// spsc.h — single-producer single-consumer ring for comparison
+#include <atomic>
+#include <cstddef>
+
 template <typename T, size_t N>
 struct spsc_queue {
-    static_assert((N & (N - 1)) == 0);
-    alignas(64) std::atomic<size_t> head{0};
-    alignas(64) std::atomic<size_t> tail{0};
-    alignas(64) T buf[N];
+    static_assert((N & (N - 1)) == 0, "N must be a power of two");
+    alignas(128) std::atomic<size_t> head{0};
+    alignas(128) std::atomic<size_t> tail{0};
+    alignas(128) T buf[N];
 
-    bool push(const T &v) {
+    bool try_enqueue(const T &v) {
         size_t h = head.load(std::memory_order_relaxed);
         size_t n = (h + 1) & (N - 1);
         if (n == tail.load(std::memory_order_acquire)) return false;
@@ -125,8 +205,7 @@ struct spsc_queue {
         head.store(n, std::memory_order_release);
         return true;
     }
-
-    bool pop(T &v) {
+    bool try_dequeue(T &v) {
         size_t t = tail.load(std::memory_order_relaxed);
         if (t == head.load(std::memory_order_acquire)) return false;
         v = buf[t];
@@ -136,36 +215,38 @@ struct spsc_queue {
 };
 ```
 
-SPSC는 두 atomic이 거의 전부입니다. MPMC의 복잡성과 비교됩니다.
-
-### LMAX Disruptor 아이디어
-
 ```text
-Ring buffer + cursor (sequence)
-producer:
-  next = cursor.fetch_add(1)
-  buf[next & (N-1)] = item
-  available.set(next)
-
-consumer:
-  while (cursor_pub < target) yield;
-  process(buf[target & (N-1)])
+host: Apple M2 Pro (8P+4E), macOS 27.2.1, Apple clang 21.0.0; moodycamel concurrentqueue v1.0.4
+$ clang++ -std=c++17 -O2 qbench.cpp -o qbench && ./qbench   # 3 rounds, 2M items per producer
+spsc         1P/1C    21.7 M items/s  all items once
+vyukov       1P/1C    75.9 M items/s  all items once
+vyukov       4P/4C     5.4 M items/s  all items once
+moodycamel   4P/4C     6.2 M items/s  all items once
+mutex+queue  4P/4C    13.9 M items/s  all items once
+spsc         1P/1C    19.7 M items/s  all items once
+vyukov       1P/1C    63.1 M items/s  all items once
+vyukov       4P/4C     6.0 M items/s  all items once
+moodycamel   4P/4C     5.9 M items/s  all items once
+mutex+queue  4P/4C    14.5 M items/s  all items once
+spsc         1P/1C    18.5 M items/s  all items once
+vyukov       1P/1C    49.1 M items/s  all items once
+vyukov       4P/4C     6.5 M items/s  all items once
+moodycamel   4P/4C     5.6 M items/s  all items once
+mutex+queue  4P/4C    15.6 M items/s  all items once
+$ clang++ -std=c++17 -O1 -g -fsanitize=thread qbench.cpp -o qbench_tsan && ./qbench_tsan 20000
+   1 moodycamel   4P/4C     0.2 M items/s  all items once
+   1 mutex+queue  4P/4C     0.3 M items/s  all items once
+   1 spsc         1P/1C     1.3 M items/s  all items once
+   3 SUMMARY: ThreadSanitizer: data race concurrentqueue.h:2544 in bool moodycamel::ConcurrentQueue<unsigned long, moodycamel::ConcurrentQueueDefaultTraits>::ImplicitProducer::enqueue<(moodycamel::ConcurrentQueue<unsigned long, moodycamel::ConcurrentQueueDefaultTraits>::AllocationMode)1, unsigned long const&>(unsigned long const&)
+   1 vyukov       1P/1C     2.0 M items/s  all items once
+   1 vyukov       4P/4C     1.7 M items/s  all items once
 ```
 
-Disruptor는 *atomic cursor 하나*에 fetch_add로 자리를 예약합니다. consumer batching이 매우 효율적이지만 구현이 큽니다.
+모든 실행에서 값이 정확히 한 번씩 나왔습니다. TSan 판에서 Vyukov 큐와 SPSC, mutex 큐는 경고가 없었고, moodycamel은 `concurrentqueue.h` 2544행(slot에 원소를 placement-new하는 줄)에서 data race 경고가 세 번 나왔습니다. 그 경고가 실제 버그인지 TSan이 이 라이브러리의 동기화를 이해하지 못한 것인지는 이 글에서 분석하지 않았습니다.
 
-### boost::lockfree::queue
+### SPSC 비교
 
-```cpp
-#include <boost/lockfree/queue.hpp>
-
-boost::lockfree::queue<int> q(128);     /* unbounded라도 초기 size hint */
-
-void prod(void) { while (!q.push(42)); }
-void cons(void) { int v; while (!q.pop(v)); }
-```
-
-unbounded MPMC가 필요하면 가장 안전한 선택입니다. Michael & Scott 알고리즘 + tagged pointer.
+위 `spsc.h`는 [9-01](/blog/embedded/modern-recipes/part9-01-lock-free-ring)의 ring과 같은 구조입니다. 생산자·소비자가 하나씩이면 CAS 없이 load/store만으로 됩니다. 다만 이 측정의 1P/1C에서는 SPSC(18.5~21.7 M items/s)가 Vyukov 큐(49.1~75.9)보다 느렸습니다. SPSC는 원소마다 상대의 index(공유 head/tail)를 읽어야 하지만, Vyukov 큐는 각자 slot의 sequence만 보고 공유 위치는 자기 쪽 것만 건드리므로 두 스레드가 같은 line을 덜 주고받는 것으로 보입니다. 이 설명은 측정에서 나온 추론이고 따로 확인하지 않았습니다. "SPSC가 항상 가장 빠르다"는 이 측정에서는 성립하지 않았습니다.
 
 ### moodycamel::ConcurrentQueue
 
@@ -177,106 +258,91 @@ q.enqueue(42);
 int v;
 q.try_dequeue(v);
 
-/* 또는 batch */
 int items[16];
-size_t n = q.try_dequeue_bulk(items, 16);
+size_t n = q.try_dequeue_bulk(items, 16);   /* take up to 16 at once */
 ```
 
-구현 예시와 library API의 지원 범위·bounded 여부·성능은 버전과 platform을 확인해야 합니다.
+v1.0.4 헤더에서 `enqueue`(995행), `try_dequeue`(1125행), `try_dequeue_bulk`(1231행)를 확인했습니다. Unbounded가 기본이라 생산자가 계속 빠르면 메모리를 계속 씁니다. 위 측정의 4P/4C에서 5.6~6.2 M items/s였습니다.
 
 ## 측정 / 성능 비교
 
-예시 benchmark 형식입니다. CPU·compiler·메시지 크기·queue 설정·측정 방법을 고정해 대상 시스템에서 재측정해야 합니다.
+위 `qbench` 세 라운드의 범위입니다(Apple M2 Pro, macOS 27.2.1, Apple clang 21.0.0, `-O2`, 원소는 `unsigned long`, 큐 크기 1024).
 
-```text
-구조                        4P/4C throughput
-mutex + std::queue          측정 필요
-boost::lockfree::queue      측정 필요
-Vyukov MPMC                 측정 필요
-moodycamel ConcurrentQueue  측정 필요
-LMAX Disruptor (batched)    측정 필요
+| 큐 | 1P/1C (M items/s) | 4P/4C (M items/s) |
+| --- | --- | --- |
+| SPSC ring | 18.5~21.7 | — |
+| Vyukov bounded MPMC | 49.1~75.9 | 5.4~6.5 |
+| moodycamel `ConcurrentQueue` | — | 5.6~6.2 |
+| `std::mutex` + `std::queue` | — | 13.9~15.6 |
 
-SPSC만 (비교용)              측정 필요
-```
-
-SPSC가 가장 빠르고, MPMC는 잘 짜도 SPSC의 1/3 이하입니다. 단일 thread queue가 가능한 경우 굳이 MPMC를 안 쓰는 것이 best입니다.
-
-```text
-contention 영향 (Vyukov, 16 thread)
-4 producer, 4 consumer      측정 필요
-8 producer, 8 consumer      측정 필요
-16 producer, 16 consumer    측정 필요
-```
-
-contention이 늘수록 cache line ping-pong이 늘어 throughput이 떨어집니다.
+4P/4C에서는 mutex 큐가 두 lock-free 큐의 두 배 넘게 빨랐습니다. 원소가 작고 enqueue·dequeue 사이에 하는 일이 없어 경합이 가장 심한 조건이고, macOS의 `std::mutex`가 이 조건에서 잘 동작한 결과입니다. 원소를 처리하는 일이 긴 경우나 스레드 수가 코어 수보다 많아 lock을 쥔 스레드가 선점되는 경우는 이 글에서 재지 않았으므로, 그런 조건에서는 실제 작업을 넣고 다시 잽니다. "lock-free MPMC가 mutex보다 5~10배"라는 주장은 이 측정으로 뒷받침되지 않았습니다.
 
 ## 자주 보는 함정
 
-> 단순 fetch_add로 MPMC 구현
+> ⚠️ `fetch_add` 하나로 MPMC를 만듦
 
 ```cpp
 size_t pos = head.fetch_add(1);
-buf[pos & mask] = v;    /* 다른 producer가 이미 같은 slot 쓸 수 있음 */
+buf[pos & mask] = v;    /* no way to know the slot was consumed, or for a consumer to know it is filled */
 ```
 
-slot 단위 동기화가 없으면 race가 발생합니다. sequence number가 필수입니다.
+`fetch_add`는 생산자마다 다른 위치를 주므로 생산자끼리 같은 칸을 동시에 쓰지는 않습니다. 문제는 그 칸이 *이전 바퀴의 값이 아직 읽히지 않은 칸*인지, 소비자 입장에서 *값이 다 쓰인 칸*인지 알 방법이 없다는 것입니다. Vyukov 큐의 sequence 번호가 바로 그 두 정보를 칸마다 담습니다.
 
-> Unbounded라고 capacity 무시
+> ⚠️ Unbounded라고 capacity를 잊음
 
 ```cpp
-moodycamel::ConcurrentQueue<int> q;
-while (true) q.enqueue(big_item);    /* 메모리 폭주 */
+moodycamel::ConcurrentQueue<Big> q;
+for (;;) q.enqueue(make_big());    /* grows until memory runs out */
 ```
 
-unbounded는 producer가 너무 빠르면 메모리가 폭주합니다. backpressure 정책을 둡니다.
+생산자가 소비자보다 빠르면 메모리가 계속 늘어납니다. Bounded 큐는 `try_enqueue`가 `false`를 돌려주므로, 그때 버릴지·기다릴지·덮어쓸지를 정해 둡니다.
 
-> false sharing 무시
+> ⚠️ head와 tail을 같은 line에
 
 ```cpp
 struct queue {
     std::atomic<size_t> head;
-    std::atomic<size_t> tail;     /* 같은 line — false sharing */
+    std::atomic<size_t> tail;     /* same cache line */
 };
 ```
 
-head와 tail은 반드시 별도 line에 둡니다. 9-09편 참고.
+[9-09](/blog/embedded/modern-recipes/part9-09-false-sharing)의 측정처럼 간격은 대상 칩의 line 크기로 둡니다. M2에서는 64 B로도 부족했습니다.
 
-> SPSC 코드를 MPMC로 사용
-
-```cpp
-spsc_queue q;
-producer1.push(...);   /* race */
-producer2.push(...);
-```
-
-SPSC는 정확히 1 producer + 1 consumer만 보장합니다. type 단계에서 구별합니다.
-
-> 큰 항목을 by-value
+> ⚠️ SPSC 큐를 MPMC로 씀
 
 ```cpp
-mpmc_queue<huge_struct, 1024> q;    /* slot마다 huge_struct 복사 */
+spsc_queue<unsigned long, 1024> q;
+std::thread p1([&] { q.try_enqueue(1); });   /* two producers on an SPSC queue */
+std::thread p2([&] { q.try_enqueue(2); });
 ```
 
-큰 항목은 pointer만 큐에 넣고 pool에서 alloc합니다. 6-06편의 by-pointer 패턴 참고.
+SPSC의 `try_enqueue`는 `head`를 읽고 쓰는 사이에 다른 생산자가 끼어들지 않는다고 가정합니다. 생산자가 둘이면 같은 칸을 쓰고 한 값이 사라집니다. 타입 이름으로 구분해 섞어 쓰지 않습니다.
+
+> ⚠️ 큰 원소를 값으로 넣음
+
+```cpp
+mpmc_queue<huge_struct, 1024> q;    /* every enqueue/dequeue copies huge_struct */
+```
+
+큰 원소는 pool에서 할당한 포인터나 index만 큐에 넣습니다. FreeRTOS queue에서의 같은 판단은 [6-06](/blog/embedded/modern-recipes/part6-06-queue-usage)에 있습니다.
 
 ## 정리
 
-- SPSC는 head/tail 두 atomic으로 가능하지만 MPMC는 slot마다 sequence number가 필요합니다.
-- Vyukov bounded MPMC가 가장 친숙한 구현 패턴입니다.
-- unbounded는 boost::lockfree나 moodycamel을 가져다 쓰는 것이 안전합니다.
-- LMAX Disruptor는 batching이 가능해 throughput이 최고입니다.
-- false sharing(head와 tail) 회피와 power-of-two capacity가 필수입니다.
-- SPSC가 가능한 경우 굳이 MPMC를 쓰지 않습니다.
-- producer 수 만큼 backpressure 정책(drop, block, replace)을 명시합니다.
+- MPMC 큐는 slot마다 sequence 번호를 두어 "쓸 차례"와 "읽을 차례"를 칸 단위로 표시합니다.
+- Vyukov bounded 큐는 4P/4C에서 모든 값을 정확히 한 번 전달했고 TSan도 조용했습니다. 원저자는 이 큐를 엄밀한 의미의 lock-free가 아니라고 분류합니다.
+- 이 Mac의 4P/4C에서는 `std::mutex` + `std::queue`가 Vyukov 큐와 moodycamel보다 빨랐습니다. 처리량은 실제 작업으로 재야 합니다.
+- 1P/1C에서는 Vyukov 큐가 단순 SPSC ring보다 빨랐습니다.
+- moodycamel은 linearizable하지 않고, TSan이 내부에서 경고를 냈습니다.
+- Bounded 큐는 가득 찼을 때의 정책을, unbounded 큐는 메모리 상한을 정해 둡니다.
 
-이로써 Part 9 **Concurrency 응용**의 마지막 챕터입니다. 시리즈 전체를 마무리하며 처음부터 새로 만든 BSP/firmware의 모든 레이어가 한 자리에 모였습니다.
+이 글로 Part 9 **Concurrency 응용**을 마칩니다.
 
 ## 관련 항목
 
-- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
-- [6-06: Queue 활용](/blog/embedded/modern-recipes/part6-06-queue-usage)
+- [9-01: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
 - [9-05: CAS 패턴](/blog/embedded/modern-recipes/part9-05-cas-patterns)
 - [9-08: ABA 문제 회피](/blog/embedded/modern-recipes/part9-08-aba-problem)
-- [9-09: False sharing 해결](/blog/embedded/modern-recipes/part9-09-false-sharing)
+- [9-09: False Sharing 해결](/blog/embedded/modern-recipes/part9-09-false-sharing)
+- [6-06: Queue 활용](/blog/embedded/modern-recipes/part6-06-queue-usage)
 - [ECPP 4-04: Lock-Free Container](/blog/embedded/embedded-cpp/part4-04-lock-free-container)
 - [PE 4-07: Lock-Free](/blog/embedded/performance-engineering/part4-07-lock-free)
