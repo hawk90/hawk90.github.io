@@ -73,7 +73,7 @@ high-water mark는 "지금까지 한 번도 건드리지 않은 word 수"입니�
 | **Running** | 해당 코어에서 선택된 task. ISR 실행 중에는 그 task의 명령 실행은 중단됩니다. |
 | **Ready** | 실행 가능, CPU 대기 (scheduler가 골라줘야 합니다) |
 | **Blocked** | 이벤트 대기 (semaphore·queue·delay·notification) |
-| **Suspended** | `vTaskSuspend()`로 실행 후보에서 제외. timeout 없이(`portMAX_DELAY`) 기다리는 task도 내부적으로는 suspended list에 들어가지만 `eTaskGetState()`는 이를 `eBlocked`로 보고합니다 |
+| **Suspended** | `vTaskSuspend()`로 실행 후보에서 제외. timeout 없이(`portMAX_DELAY`) 기다리는 task도 내부적으로는 suspended list에 들어갑니다. `eTaskGetState()`는 그런 task가 queue·semaphore의 event list나 notification을 기다리면 `eBlocked`, `vTaskDelay(portMAX_DELAY)`처럼 아무것도 기다리지 않으면 `eSuspended`로 보고합니다(`tasks.c` L2554-L2590) |
 | **Deleted** | 자기 자신을 지운 task는 `xTasksWaitingTermination`에 들어가고 TCB·stack은 idle task가 해제합니다. 실행 중이 아닌 다른 task를 지우면 `vTaskDelete()`가 그 자리에서 `prvDeleteTCB()`를 부릅니다([`tasks.c` L2262-L2336](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L2262-L2336)) |
 
 ### 전이 — 누가 트리거하나

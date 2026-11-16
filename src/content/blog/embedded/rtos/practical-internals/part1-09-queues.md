@@ -245,7 +245,7 @@ sizeof(BigMsg_t)=1028, 5 items=5140 bytes
 send+receive, SysTick counts (QEMU icount virtual time): 4B item=153, 1028B item=6707, pointer item=154
 ```
 
-4바이트 item과 포인터 item은 거의 같았고, 1,028바이트 item은 약 44배였습니다. 두 가지를 감안해야 합니다. 첫째, 이 값은 icount 가상 시간이라 실행한 명령 수에 비례할 뿐 실제 보드의 cycle이 아닙니다. 둘째, 이 하네스의 `memcpy`는 바이트 단위 단순 루프입니다. word 단위로 복사하는 라이브러리 `memcpy`를 쓰면 1,028바이트 쪽이 훨씬 줄어듭니다. 그래도 "payload 크기가 커지면 by-value 비용이 그만큼 커지고, 포인터 queue는 크기와 무관하다"는 방향은 커널 코드(`memcpy( ..., uxItemSize )`)에서 그대로 나옵니다. 실제 보드의 cycle은 이 장에서 재지 않았습니다.
+4바이트 item과 포인터 item은 거의 같았고, 1,028바이트 item은 약 44배였습니다. 두 가지를 감안해야 합니다. 첫째, 이 값은 icount 가상 시간이라 실행한 명령 수에 비례할 뿐 실제 보드의 cycle이 아닙니다. 둘째, 이 하네스의 `memcpy`는 바이트 단위 단순 루프이고, 다른 구현으로는 재지 않았습니다. 그래도 "payload 크기가 커지면 by-value 비용이 그만큼 커지고, 포인터 queue는 크기와 무관하다"는 방향은 커널 코드(`memcpy( ..., uxItemSize )`)에서 그대로 나옵니다. 실제 보드의 cycle은 이 장에서 재지 않았습니다.
 
 ## ISR에서 사용
 

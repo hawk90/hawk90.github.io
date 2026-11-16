@@ -80,7 +80,7 @@ else
 }
 ```
 
-덧셈 결과가 원래 값보다 작아졌다면 wrap을 넘은 것이므로 overflow list에 넣습니다. `portMAX_DELAY`로 무한 대기하면 delayed list가 아니라 suspended list로 가므로 timeout 검사 대상에서 아예 빠집니다(1-02에서 `eTaskGetState()`가 이 경우를 `eBlocked`로 보고한 이유).
+덧셈 결과가 원래 값보다 작아졌다면 wrap을 넘은 것이므로 overflow list에 넣습니다. `portMAX_DELAY`로 무한 대기하면 delayed list가 아니라 suspended list로 가므로 timeout 검사 대상에서 아예 빠집니다(그래서 `eTaskGetState()`는 suspended list의 task라도 event list나 notification을 기다리면 `eBlocked`, `vTaskDelay(portMAX_DELAY)`처럼 아무것도 기다리지 않으면 `eSuspended`로 보고합니다, [`tasks.c` L2554-L2590](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L2554-L2590)).
 
 ### Tick ISR
 

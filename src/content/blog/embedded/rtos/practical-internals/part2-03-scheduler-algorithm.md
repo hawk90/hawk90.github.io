@@ -53,7 +53,7 @@ void vTaskSwitchContext( void )
 }
 ```
 
-scheduler가 멈춰 있으면 고르지 않고 `xYieldPendings[0]`만 세워 두고, 이 표시는 `xTaskResumeAll()`이 확인합니다(2-02). stack overflow 검사가 여기 있다는 점도 눈여겨볼 만합니다. 나가는 task의 stack을 전환할 때마다 검사하므로, overflow가 일어난 순간이 아니라 다음 전환 때 발견됩니다.
+scheduler가 멈춰 있으면 고르지 않고 `xYieldPendings[0]`만 세워 두고, 이 표시는 `xTaskResumeAll()`이 확인합니다(2-02). stack overflow 검사가 여기 있다는 점도 눈여겨볼 만합니다. `configCHECK_FOR_STACK_OVERFLOW`를 1이나 2로 두면(기본 0, `FreeRTOS.h` L701-L703, 이 장의 QEMU 구성도 0) 나가는 task의 stack을 전환할 때마다 검사하므로, overflow가 일어난 순간이 아니라 다음 전환 때 발견됩니다.
 
 ## Generic Selection (CLZ 없는 시스템)
 

@@ -64,7 +64,7 @@ PSP에서 실행하던 Thread가 예외에 진입하면 **자동 프레임은 PS
 
 ## PendSV 핸들러 — 한 줄씩 풀기
 
-원본 handler([`ARM_CM4F/port.c` L504-L550](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c#L504-L550))의 동작을 세 단계로 나눠 봅니다. 아래 세 조각은 원본 asm 문자열에서 주석과 빈 줄을 뺀 연속 발췌이고, `%0`(`configMAX_SYSCALL_INTERRUPT_PRIORITY` 입력 operand)만 이름으로 바꿔 적었습니다.
+원본 handler([`ARM_CM4F/port.c` L504-L550](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c#L504-L550))의 동작을 세 단계로 나눠 봅니다. 아래 세 조각은 원본 asm 문자열에서 주석과 빈 줄, XMC4000 errata용 `#ifdef WORKAROUND_PMU_CM001` 블록(L544-L549)을 뺀 연속 발췌이고, `%0`(`configMAX_SYSCALL_INTERRUPT_PRIORITY` 입력 operand)만 이름으로 바꿔 적었습니다.
 
 먼저 PSP를 읽고 FP 확장 여부에 따라 S16–S31을 저장합니다. 이어 R4–R11과 **현재 태스크의 EXC_RETURN**을 저장하고 그 주소를 TCB 첫 필드에 기록합니다.
 
@@ -171,7 +171,7 @@ PRIMASK를 설정하는 `cpsid i`는 실행 우선순위를 0으로 올립니다
 
 EXC_RETURN bit 4가 0이면 확장 FP 프레임 형식입니다. CONTROL.FPCA는 bit 2의 별도 상태이며 PendSV의 tst r14,#0x10을 FPCA 직접 검사라고 부르면 안 됩니다.
 
-HW 확장 공간은 S0–S15·FPSCR·reserved word의 18 word이고 SW는 S16–S31의 16 word를 추가 보존합니다. 기본 68 byte에 136 byte가 더해져 204 byte이고, 2-04의 QEMU `mps2-an386` 실험에서 FP를 쓴 task의 저장 frame이 정확히 51 word였습니다. FP 경로를 건너뛰는 task도 `tst`와 조건 명령은 거칩니다.
+HW 확장 공간은 S0–S15·FPSCR·reserved word의 18 word이고 SW는 S16–S31의 16 word를 추가 보존합니다. 기본 68 byte에 136 byte가 더해져 204 byte이고, 2-04의 QEMU `mps2-an386` 실험에서 FP를 쓴 task의 EXC_RETURN이 이 확장 형식(0xFFFFFFED)이었습니다. FP 경로를 건너뛰는 task도 `tst`와 조건 명령은 거칩니다.
 
 FreeRTOS CM4F 포트는 scheduler를 시작할 때 FPCCR의 ASPEN·LSPEN 두 bit를 켭니다([`port.c` L88-L89, L448](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c#L448)). ASPEN이 켜져 있으면 FP 명령을 쓴 문맥에서 예외가 날 때마다 하드웨어가 S0–S15·FPSCR 자리를 잡고, LSPEN이 켜져 있으면 실제 저장은 handler가 FP를 처음 쓸 때로 미룹니다. 그래서 ISR이 C 코드로 FP를 써도 S0–S15는 하드웨어가 보존하고, S16–S31은 AAPCS상 callee-saved라 컴파일러가 보존합니다.
 
@@ -180,7 +180,7 @@ FreeRTOS CM4F 포트는 scheduler를 시작할 때 FPCCR의 ASPEN·LSPEN 두 bit
 | | SVC | PendSV |
 | --- | --- | --- |
 | Trigger | `SVC #N` 명령 | ICSR.PENDSVSET = 1 |
-| Priority | 설정 가능(FreeRTOS CM4F 포트는 따로 설정하지 않음) | FreeRTOS 포트가 255로 설정 |
+| Priority | 설정 가능(FreeRTOS CM4F 포트는 `portNVIC_SHPR2_REG = 0`으로 최고 우선순위 0에 둠, [`port.c` L431-L435](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c#L431-L435)) | FreeRTOS 포트가 255로 설정 |
 | 용도 | OS API entry, 첫 task 시작 | Context switch |
 | 발생 시점 | 동기적 예외, 우선순위·마스크 제약 확인 | pending 뒤 우선순위·마스크 조건이 허용할 때 |
 
@@ -230,7 +230,7 @@ r11 saved=0xbbbbbbbb after=0xbbbbbbbb
 PASS r4-r11 stored in order and restored
 ```
 
-버퍼에 r4~r11이 순서대로 들어갔고 호출 뒤 레지스터도 그대로였습니다. 실제 ARM_CM0 포트의 PendSV는 이 전사에 더해 PSP 저장, `cpsid i`, `vTaskSwitchContext` 호출을 합니다([`ARM_CM0/port.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM0/port.c)).
+버퍼에 r4~r11이 순서대로 들어갔고, 루틴이 중간에 r4~r7을 덮어쓴 뒤 버퍼에서 되돌렸으므로 r4~r7 복원도 확인됩니다. r8~r11은 저장과 복원 사이에 바뀌지 않으므로 이 시험은 그 복원 경로까지는 검증하지 못합니다. 실제 ARM_CM0 포트의 PendSV는 이 전사에 더해 PSP 저장, `cpsid i`, `vTaskSwitchContext` 호출을 합니다([`ARM_CM0/port.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM0/port.c)).
 
 ## 자주 하는 실수
 
@@ -247,7 +247,7 @@ PASS r4-r11 stored in order and restored
 - SVC는 초기 스택의 EXC_RETURN을 읽어 첫 태스크로 복귀합니다.
 - BASEPRI 값은 NVIC 형식으로 인코딩하고 API 사용 가능 IRQ 계약을 지킵니다.
 - FP 확장은 HW 18 + SW 16 word이며 EXC_RETURN bit 4로 복원 형식을 구분합니다.
-- M0에서는 낮은 레지스터를 먼저 저장해야 높은 레지스터를 옮길 수 있습니다(QEMU에서 r4-r11 왕복 확인).
+- M0에서는 낮은 레지스터를 먼저 저장해야 높은 레지스터를 옮길 수 있습니다(QEMU에서 r4~r11 저장 순서와 r4~r7 복원 확인).
 
 다음 편은 ARMv7-A AArch32의 banked register와 실제 ARM_CA9 포트를 다룹니다.
 

@@ -110,7 +110,7 @@ $$R_i = C_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i}{T_j} \right\rceil \cdot 
 
 $R_i \leq D_i$ (deadline)이면 schedulable입니다.
 
-위 식에는 blocking이 없습니다. 낮은 우선순위 task가 mutex를 쥐거나 critical section 안에 있어서 task i가 기다려야 하는 최대 시간을 $B_i$라 하면, 식은 $R_i = C_i + B_i + \sum_{j \in hp(i)} \lceil R_i / T_j \rceil C_j$가 됩니다. [1-03의 예제](/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms) 세 task(C/T = 1/4, 2/5, 1/10)에 위 두 task만 $B = 2$를 넣어 Node로 계산했습니다.
+위 식에는 blocking이 없습니다. 낮은 우선순위 task가 mutex를 쥐거나 critical section 안에 있어서 task i가 기다려야 하는 최대 시간을 $B_i$라 하면, 식은 $R_i = C_i + B_i + \sum_{j \in hp(i)} \lceil R_i / T_j \rceil C_j$가 됩니다. [1-03의 예제](/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms) 세 task(C/T = 1/4, 2/5, 1/10)에 가장 낮은 우선순위 task D(C = 2, T = D = 1000)를 더하고, D가 세 task와 공유하는 lock을 2 단위 동안 쥔다고 두었습니다. $B_i$는 *더 낮은* task만 만들 수 있으므로 A·B·C의 $B$가 2이고 D의 $B$는 0입니다. Node로 계산했습니다.
 
 ```js title="rta-blocking.mjs"
 function rta(tasks) {
@@ -127,11 +127,12 @@ function rta(tasks) {
 ```
 
 ```text
-no blocking  : 1 3 4
-B=2 for A,B  : 3 6! 4
+U=0.752 n=4 RM bound=0.757
+no blocking   : 1 3 4 10
+B=2 for A,B,C : 3 6! 10 10
 ```
 
-U = 0.75로 RM bound(0.78) 안에 있던 task set인데, 두 번째 task의 응답 시간이 3에서 6으로 늘어 deadline 5를 넘었습니다(`!`). utilization은 그대로인데 blocking 2 단위만으로 실패한 것입니다. 그래서 critical section과 mutex 보유 시간은 WCET만큼 중요한 분석 입력입니다.
+U = 0.752로 n = 4의 RM bound(0.757) 안에 있던 task set인데, 두 번째 task의 응답 시간이 3에서 6으로 늘어 deadline 5를 넘었습니다(`!`). D가 거의 CPU를 쓰지 않는데도 그렇습니다. utilization은 그대로인데 blocking 2 단위만으로 실패한 것입니다. 그래서 critical section과 mutex 보유 시간은 WCET만큼 중요한 분석 입력입니다.
 
 ## Latency 원인 분석
 
@@ -163,7 +164,7 @@ CS_LEN=200 samples=500 min=128 avg=433 max=1039 (>1000: 4 samples)  [SysTick cou
 CS_LEN=2000 samples=500 min=128 avg=3322 max=9588 (>1000: 416 samples)  [SysTick counts, 25000 per tick]
 ```
 
-critical section이 없으면 최댓값이 147로 거의 일정했습니다. 이 128~147은 tick ISR과 PendSV, 전환 코드의 명령 수입니다. `CS_LEN=200`에서는 평균이 433인데 최댓값은 1,039로 평균의 2.4배였고, 500번 중 4번만 1,000을 넘었습니다. 짧은 측정이었다면 이 4번을 못 봤을 수 있습니다. `CS_LEN=2000`에서는 최댓값이 9,588로 tick의 38%에 달했습니다. 최솟값은 세 경우 모두 128로 같으므로, "가장 빨랐을 때"만 보고는 차이를 알 수 없습니다. count는 icount 가상 시간이라 명령 수에 비례할 뿐 실제 보드의 µs가 아닙니다.
+critical section이 없으면 최댓값이 147로 거의 일정했습니다. 이 128~147은 tick ISR과 PendSV, 전환 코드를 실행하는 동안 지나간 count입니다. `CS_LEN=200`에서는 평균이 433인데 최댓값은 1,039로 평균의 2.4배였고, 500번 중 4번만 1,000을 넘었습니다. 짧은 측정이었다면 이 4번을 못 봤을 수 있습니다. `CS_LEN=2000`에서는 최댓값이 9,588로 tick의 38%에 달했습니다. 최솟값은 세 경우 모두 128로 같으므로, "가장 빨랐을 때"만 보고는 차이를 알 수 없습니다. count는 icount 가상 시간이라 명령 수에 비례할 뿐 실제 보드의 µs가 아닙니다.
 
 ### Source 2: ISR Nesting
 
@@ -274,7 +275,7 @@ n=MAX, ones   : 6666
 
 > ⚠️ Utilization 99% 목표
 
-위 RTA 예처럼 U = 0.75인 task set도 blocking 2 단위로 deadline을 넘었습니다. utilization 목표는 "몇 %면 안전"이 아니라 blocking·ISR·전환 비용을 넣은 RTA의 결과로 정합니다.
+위 RTA 예처럼 U = 0.752인 task set도 가장 낮은 task의 lock 2 단위로 deadline을 넘었습니다. utilization 목표는 "몇 %면 안전"이 아니라 blocking·ISR·전환 비용을 넣은 RTA의 결과로 정합니다.
 
 > ⚠️ Critical section 길이 측정 안 함
 
@@ -284,7 +285,7 @@ critical section 길이는 위 RTA의 $B_i$에 들어갑니다. 디버그 print�
 
 - 4 지표는 **Latency, Jitter, Deadline, WCET**입니다.
 - **WCET**가 hard real-time의 핵심이며, 평균이 아닌 worst가 중요합니다.
-- **RMS** bound는 충분조건이고, **RTA**는 blocking을 넣어 계산할 수 있습니다(예: U = 0.75인 set이 B = 2로 실패).
+- **RMS** bound는 충분조건이고, **RTA**는 blocking을 넣어 계산할 수 있습니다(예: U = 0.752인 4 task set이 B = 2로 실패).
 - QEMU 측정에서 낮은 task의 critical section이 높은 task의 최대 release latency를 147에서 9,588 count로 늘렸습니다.
 - Latency 원인은 IRQ disable, ISR nesting, scheduler, context switch, cache, bus 등입니다.
 - 측정 도구로는 Linux의 `cyclictest`, bare-metal의 DWT+GPIO가 있습니다.

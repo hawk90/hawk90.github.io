@@ -34,11 +34,11 @@ Context switch가 트리거되는 시점은 크게 세 가지입니다.
 - **Blocking 시스템 호출** — `vTaskDelay`, `xSemaphoreTake` 등이 block을 유발
 - **ISR 종료 시점** — ISR이 더 우선순위 높은 task를 wake 시켰을 때
 
-세 경우 모두 결국 *스케줄러가 호출*되고, 스케줄러가 *현재와 다른 task*를 선택하면 switch가 일어납니다. 2-03의 QEMU 전환 기록이 세 경우를 모두 보여 줍니다.
+세 경우 모두 결국 *스케줄러가 호출*되고, 스케줄러가 *현재와 다른 task*를 선택하면 switch가 일어납니다. 2-03의 QEMU 전환 기록에는 tick(1:B time slice, 3:HI)과 blocking(4:B, 7:HI) 전환이 나오고, ISR 종료 시점 전환은 1-04의 QEMU 실험(`USE_YIELD=1 ... hi_ran right after IRQ=1`)이 보여 줍니다.
 
 ## Caller-saved vs Callee-saved
 
-AAPCS32의 일반 함수 호출에서는 R0–R3·R12가 임시값이고 "A subroutine must preserve the contents of the registers r4-r8, r10, r11 and SP"입니다([AAPCS32 2025Q1](https://github.com/ARM-software/abi-aa/blob/2025Q1/aapcs32/aapcs32.rst) L880-L881). R9는 "Platform register"로, 역할은 플랫폼이 정합니다(L866).
+AAPCS32의 일반 함수 호출에서는 R0–R3·R12가 임시값이고 "A subroutine must preserve the contents of the registers r4-r8, r10, r11 and SP"입니다([AAPCS32 2025Q1](https://github.com/ARM-software/abi-aa/blob/2025Q1/aapcs32/aapcs32.rst) L880-L881). R9는 "Platform register or Variable-register"(L828)로, 역할은 플랫폼이 정합니다(L866).
 
 그러나 인터럽트는 함수 호출 경계가 아닌 명령 사이에서도 발생합니다. 중단한 코드가 임시 레지스터의 값을 계속 사용할 수 있으므로, 일반 호출에서 caller-saved라는 이유로 버릴 수 없습니다. Cortex-M의 기본 예외 프레임과 포트의 소프트웨어 저장이 이 상태를 나눠 보존합니다.
 
@@ -113,7 +113,7 @@ int_task: EXC_RETURN=0xfffffffd FP frame=no   stacked PC=0x464 xPSR=0x1000000  c
 fp_task : EXC_RETURN=0xffffffed FP frame=yes  stacked PC=0x49e xPSR=0x1000000  context=51 words (204 bytes)
 ```
 
-생성 직후 frame에는 초기값이 그대로 있습니다. EXC_RETURN 0xFFFFFFFD, PC는 `int_task`의 주소(0x44c, `nm` 기준 0x44c~0x46d)에서 bit 0을 지운 값, xPSR 0x01000000, R0는 인자 0입니다. 실행 중 저장된 frame에서는 `fp_task`만 EXC_RETURN이 0xFFFFFFED로 bit 4가 0이었습니다. 이 가정대로 offset을 잡자 두 task 모두 stacked PC가 자기 함수 안(`int_task` 0x464, `fp_task` 0x49e, `nm` 기준 0x470~0x4af)을 가리키고 xPSR의 T bit가 서 있었습니다. 레이아웃 계산이 맞다는 뜻입니다. 정수 task는 17 word, FP task는 51 word를 썼습니다.
+생성 직후 frame에는 초기값이 그대로 있습니다. EXC_RETURN 0xFFFFFFFD, PC는 `int_task`의 주소(0x44c, `nm` 기준 0x44c~0x46d)에서 bit 0을 지운 값, xPSR 0x01000000, R0는 인자 0입니다. 실행 중 저장된 frame에서는 `fp_task`만 EXC_RETURN이 0xFFFFFFED로 bit 4가 0이었습니다. 이 가정대로 offset을 잡자 두 task 모두 stacked PC가 자기 함수 안(`int_task` 0x464, `fp_task` 0x49e, `nm` 기준 0x470~0x4af)을 가리키고 xPSR의 T bit가 서 있었습니다. 레이아웃 계산이 맞다는 뜻입니다. 이 offset에 DDI 0403E.b B1.5.7의 FP 확장 18 word를 더하면 정수 task 17 word, FP task 51 word입니다. 하드웨어 FP 확장 18 word 자체는 이 실험에서 따로 확인하지 않았습니다.
 
 ## Cooperative vs Preemptive
 
@@ -154,7 +154,7 @@ ARM_CM4F PendSV는 **EXC_RETURN bit 4**로 확장 프레임 여부를 판단하�
 
 ## RISC-V는 어떻게 다른가
 
-기본 RISC-V trap 진입은 mepc·mcause·mstatus 같은 CSR을 갱신하지만 범용 레지스터를 메모리에 자동 push하지 않습니다. privileged spec은 "When a trap is taken into M-mode, mepc is written with the virtual address of the instruction that was interrupted"라고만 적습니다([Machine-Level ISA](https://docs.riscv.org/reference/isa/v20260120/priv/machine.html) "Machine Exception Program Counter"). handler가 사용할 레지스터는 모두 소프트웨어로 보존합니다.
+기본 RISC-V trap 진입은 mepc·mcause·mstatus 같은 CSR을 갱신하지만 범용 레지스터를 메모리에 자동 push하지 않습니다. privileged spec은 "When a trap is taken into M-mode, mepc is written with the virtual address of the instruction that was interrupted or that encountered the exception"이라고 적고, 범용 레지스터 저장은 말하지 않습니다([Machine-Level ISA](https://docs.riscv.org/reference/isa/v20260120/priv/machine.html) "Machine Exception Program Counter"). handler가 사용할 레지스터는 모두 소프트웨어로 보존합니다.
 
 mscratch는 spec이 "Typically, it is used to hold a pointer to a machine-mode hart-local context space and swapped with a user register upon entry to an M-mode trap handler"라고 소개하는 레지스터입니다. "typically"라는 말 그대로 쓰는 방식은 포트가 정하며, FreeRTOS RISC-V 포트는 [2-07](/blog/embedded/rtos/practical-internals/part2-07-riscv-context)에서 봅니다.
 
@@ -176,7 +176,7 @@ MMU가 있는 시스템에서는 주소 공간도 context의 일부입니다. �
 - FP context 추가분은 reserved word를 포함해 136 byte이며 정렬 보정은 별도입니다.
 - TCB의 저장 SP는 복원 진입점이고 TCB 전체나 스케줄러 작업의 전부가 아닙니다.
 - 초기 프레임은 첫 예외 복귀를 태스크 진입점으로 연결합니다.
-- QEMU `mps2-an386`에서 저장된 frame을 직접 읽어 17 word(EXC_RETURN 0xFFFFFFFD)와 51 word(0xFFFFFFED)를 확인했습니다.
+- QEMU `mps2-an386`에서 저장된 frame의 EXC_RETURN(0xFFFFFFFD/0xFFFFFFED)과 stacked PC로 offset을 확인했고, 크기 17/51 word는 그 형식으로 계산했습니다.
 
 다음 편은 ARM Cortex-M Context Switch입니다. PendSV에서 EXC_RETURN을 태스크별로 저장하는 이유를 따라갑니다.
 

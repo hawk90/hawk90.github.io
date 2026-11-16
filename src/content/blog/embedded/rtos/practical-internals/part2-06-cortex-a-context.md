@@ -28,7 +28,7 @@ topics: ["embedded", "embedded/rtos"]
 
 이 표는 AArch32의 기본 모드 일곱 개이고, Security·Virtualization 확장이 있는 구현에는 Monitor·Hyp 모드가 더 있습니다. 예외 진입 시에는 해당 예외 모드로 CPSR.M이 바뀌고, privileged 모드에서는 `cps #모드` 명령으로도 바꿀 수 있습니다.
 
-QEMU 11.1.3 `vexpress-a9`(Cortex-A9)에서 bare-metal로 `cps`로 모드를 바꿔 가며 CPSR을 읽어 봤습니다. 하위 5비트가 표의 값과 같습니다.
+QEMU 11.1.3 `vexpress-a9`(Cortex-A9)에서 bare-metal로 `cps`로 모드를 바꿔 가며 CPSR을 읽어 봤습니다. 하위 5비트가 표의 값과 같습니다. 아래 두 출력 블록은 한 번의 실행 로그에서 해당 줄만 골라 주제별로 묶은 것이라, 실제 출력 순서와는 다릅니다.
 
 ```text
 CPSR in IRQ mode : 0x400001d2
@@ -52,7 +52,7 @@ CPSR after cps #0x1f in USR: 0x400001d0
 | R13(SP), R14(LR) | User와 System은 공유하며 IRQ·SVC·FIQ·Abort·Undefined는 각각 별도 bank |
 | SPSR | 예외 모드별 이전 CPSR 보존용 |
 
-같은 QEMU 프로그램에서 IRQ·SYS·SVC 모드마다 SP와 LR에 다른 값을 넣은 뒤 다시 읽었습니다. SVC 모드에서 `stmia r9, {sp, lr}^`로 *User bank*의 SP/LR을 저장하면, SYS 모드에서 넣은 값이 나옵니다.
+같은 QEMU 프로그램에서 IRQ·SYS·SVC 모드마다 SP와 LR에 다른 값을 넣은 뒤 다시 읽었습니다. SVC 모드에서 `stmia r7, {sp, lr}^`로 *User bank*의 SP/LR을 저장하면, SYS 모드에서 넣은 값이 나옵니다.
 
 ```text
 User-bank SP read from SVC (stm ^): 0x5a5a0000
@@ -67,7 +67,7 @@ UND SP : 0xdede0000
 SYS SP : 0x5a5a0000
 ```
 
-SYS에서 쓴 0x5A5A0000이 User bank로 읽혔으므로 User와 System은 SP/LR을 공유합니다. IRQ·SVC·FIQ·ABT·UND는 각자 SP에 넣은 값을 다른 모드를 거친 뒤에도 그대로 유지했습니다. 사물함이 모드별로 있지만 User와 System은 같은 사물함을 쓰는 셈입니다. R8–R12 쪽도 확인했습니다. SYS에서 r9에 0x99990000을 넣고 FIQ 모드에서 r9에 0xF1F10000을 쓴 뒤 SYS로 돌아오자 `r9 in SYS after setting FIQ r9=0xf1f10000: 0x99990000`이었습니다. FIQ만 R8–R12를 따로 가집니다. 처음 버전의 측정 코드는 결과 포인터를 r9에 두었다가 FIQ 모드의 저장이 엉뚱한 곳으로 가서, 이 bank를 의도치 않게 먼저 확인했습니다.
+SYS에서 쓴 0x5A5A0000이 User bank로 읽혔으므로 User와 System은 SP/LR을 공유합니다. IRQ·FIQ·ABT·UND는 각자 SP에 넣은 값을 다른 모드를 거친 뒤에도 그대로 유지했습니다. 사물함이 모드별로 있지만 User와 System은 같은 사물함을 쓰는 셈입니다. R8–R12 쪽도 확인했습니다. SYS에서 r9에 0x99990000을 넣고 FIQ 모드에서 r9에 0xF1F10000을 쓴 뒤 SYS로 돌아오자 `r9 in SYS after setting FIQ r9=0xf1f10000: 0x99990000`이었습니다. FIQ만 R8–R12를 따로 가집니다.
 
 banked SP가 있다고 모든 태스크마다 HW가 스택을 따로 마련하는 것은 아닙니다. FreeRTOS ARM_CA9 포트는 태스크를 System 모드에서 돌리므로, 위의 공유 SP 하나에 현재 태스크의 저장 SP를 번갈아 로드합니다. IRQ bank는 handler 진입에만 쓰고 task context는 태스크 스택에 저장합니다.
 
@@ -172,7 +172,7 @@ invalidate_el1_stage1:
 
 원본 ARM_CA9 포트의 FP 경로는 D0–D31의 256 byte에 FPSCR 4 byte를 더 저장합니다. 위 표처럼 FP task의 전체 context는 83 word = 332 byte입니다.
 
-어느 task가 FP를 쓰는지는 task가 스스로 `vPortTaskUsesFPU()`를 불러 `ulPortTaskHasFPUContext`를 1로 만들어 알립니다([`ARM_CA9/port.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/port.c)). Cortex-M4F처럼 하드웨어가 EXC_RETURN으로 알려 주는 방식이 아니어서, FP를 쓰면서 이 함수를 부르지 않은 task는 전환 때 FP 레지스터를 잃습니다.
+어느 task가 FP를 쓰는지는 task가 스스로 `vPortTaskUsesFPU()`를 불러 `ulPortTaskHasFPUContext`를 1로 만들어 알립니다([`ARM_CA9/port.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/port.c)). Cortex-M4F처럼 하드웨어가 EXC_RETURN으로 알려 주는 방식이 아니어서, `configUSE_TASK_FPU_SUPPORT`가 1이거나 정의하지 않았을 때 FP를 쓰면서 이 함수를 부르지 않은 task는 전환 때 FP 레지스터를 잃습니다. 2로 두면 모든 task가 FPU context를 갖고 시작합니다([`ARM_CA9/portmacro.h` L125-L129](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/portmacro.h#L125-L129), [`port.c` L293-L303](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/port.c#L293-L303)).
 
 ## TrustZone — Secure/Non-secure World
 
@@ -191,7 +191,7 @@ PendSV는 Cortex-M에만 있는 예외라서 Cortex-A 포트에는 없습니다.
 - **User와 System에 서로 다른 SP bank가 있다고 생각합니다.** 두 모드는 SP/LR을 공유하며 권한은 다릅니다.
 - **SVC stack에 push한 값을 task context로 취급합니다.** FreeRTOS ARM_CA9는 `SRSDB sp!, #SYS_MODE`로 복귀 상태를 *System* stack, 즉 task stack에 씁니다.
 - **AArch32 코드에 AArch64 TLBI를 섞습니다.** ISA와 exception-level 용어를 일관되게 사용합니다.
-- **FP task에서 `vPortTaskUsesFPU()`를 빠뜨립니다.** CA9 포트는 이 flag가 있는 task만 D0–D31을 저장합니다.
+- **FP task에서 `vPortTaskUsesFPU()`를 빠뜨립니다.** `configUSE_TASK_FPU_SUPPORT`가 1(기본)이면 CA9 포트는 이 flag가 있는 task만 D0–D31을 저장합니다.
 
 ## 정리
 
