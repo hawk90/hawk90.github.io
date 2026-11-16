@@ -120,7 +120,7 @@ static void unlock(UBaseType_t old) {
 
 ## 실제 RTOS 옵션 확인
 
-Zephyr v3.7.0의 `CONFIG_PRIORITY_CEILING`은 이름과 달리 PCP가 아닙니다. `kernel/Kconfig:83-89`에서 이 옵션은 int이고, help는 "k_mutex priority inheritance로 thread가 얻을 수 있는 최소 priority 값(논리적으로 가장 높은 priority)"이라고 정의합니다. 즉 **PI 상승의 상한**입니다. k_mutex에는 ceiling 필드가 없고, `CONFIG_PRIORITY_CEILING_PROTOCOL`이라는 Kconfig도 v3.7.0 트리에 없습니다(`grep -rn PRIORITY_CEILING_PROTOCOL` 0건). Zephyr는 낮은 숫자가 높은 priority여서, 위 JS 예제의 "높은 정수가 높은 priority" 모델과 방향이 반대입니다.
+Zephyr v3.7.0의 `CONFIG_PRIORITY_CEILING`은 이름과 달리 PCP가 아닙니다. `kernel/Kconfig:83-89`에서 이 옵션은 int이고, help는 "k_mutex priority inheritance로 thread가 얻을 수 있는 최소 priority 값(논리적으로 가장 높은 priority)"이라고 정의합니다. 즉 **PI 상승의 상한**입니다. `struct k_mutex`(`include/zephyr/kernel.h:2917-2927`)의 필드는 `wait_q`·`owner`·`lock_count`·`owner_orig_prio`뿐이라 ceiling을 담을 곳이 없고, `CONFIG_PRIORITY_CEILING_PROTOCOL`이라는 Kconfig도 v3.7.0 트리에 없습니다(`grep -rn PRIORITY_CEILING_PROTOCOL` 0건). Zephyr는 낮은 숫자가 높은 priority여서, 위 JS 예제의 "높은 정수가 높은 priority" 모델과 방향이 반대입니다.
 
 POSIX 계열에서는 `PTHREAD_PRIO_PROTECT` 자체가 표준 옵션입니다. 앞에서 본 POSIX.1-2024 페이지가 그 정의이고, ceiling 값은 `pthread_mutexattr_setprioceiling()`으로 지정합니다. 이 글에서 POSIX 구현은 실행하지 않았습니다.
 
