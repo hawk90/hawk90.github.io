@@ -585,7 +585,7 @@ Debian 13에서 이 실습에 쓴 디버그 패키지는 다음 두 개입니다
 sudo apt install libc6-dbg libstdc++6-14-dbg
 ```
 
-Fedora·RHEL의 `dnf debuginfo-install`은 이 시리즈에서 실행해 보지 않았습니다. 배포판이 debuginfod 서버를 운영한다면 패키지를 깔지 않고 내려받는 방법도 있으며, [Ch 7](/blog/tools/debugging/gdb-lldb/chapter07-core-dump)에서 다룹니다.
+디버그 패키지를 깔지 않고 build-id로 내려받는 debuginfod는 [Ch 7](/blog/tools/debugging/gdb-lldb/chapter07-core-dump)에서 다룹니다.
 
 ---
 

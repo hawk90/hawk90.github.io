@@ -65,7 +65,7 @@ GDB와 LLDB 모두 Linux에서는 `ptrace`로 대상 프로세스를 다룹니�
 
 - 다른 프로세스의 *레지스터 읽기/쓰기* (`PTRACE_GETREGSET`·`PTRACE_SETREGSET`)
 - *메모리 읽기/쓰기* (`PTRACE_PEEKDATA`·`PTRACE_POKEDATA`, 디버거가 변수를 보거나 바꿀 때)
-- *시스템 호출 추적* (`PTRACE_SYSCALL`, `strace`도 같은 메커니즘)
+- *시스템 호출 추적* (`PTRACE_SYSCALL`, ptrace(2)가 tracer의 예로 드는 `strace(1)`도 같은 메커니즘)
 - *시그널 가로채기* (SIGSEGV 같은 시그널이 대상보다 디버거에 먼저 보고됨)
 
 열쇠를 빌려주는 정책은 Yama LSM의 `/proc/sys/kernel/yama/ptrace_scope`가 정합니다. 이 글의 Debian 13 arm64 VM(커널 6.12.116)에서 기본값은 `0`이었고, 값을 `1`로 올리면 같은 사용자의 프로세스라도 *자식이 아니면* attach가 거부됩니다. 아래는 `dev` 사용자가 띄운 `sleep`에 같은 `dev` 사용자로 붙어 본 결과입니다.
@@ -139,7 +139,7 @@ $ ps -axo pid,ppid,comm | grep -E 'debugserver|lldb|hello'
 - **Linux**: 이 시리즈의 Linux 실습은 모두 GDB 16.3으로 했고, 같은 VM에 `apt install lldb`로 lldb 19.1.7을 깔아 LLDB 쪽 동작도 비교했습니다.
 - **macOS (Apple Silicon)**: *LLDB*를 씁니다. Xcode 또는 Command Line Tools에 들어 있고, 위에서 본 것처럼 `debugserver`가 함께 옵니다. GDB가 안 되는 이유는 바로 아래 설치 절에서 소스로 확인합니다.
 - **임베디드/크로스 컴파일**: 이 시리즈는 GDB와 `gdb-multiarch` 기준으로 설명합니다([Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)).
-- **iOS / Swift**: Xcode에 포함된 LLDB가 Apple이 배포하는 디버거입니다. 이 시리즈에서 iOS 기기는 다루지 않았습니다.
+- **iOS / Swift**: 이 시리즈에서 iOS 기기와 Swift는 다루지 않았습니다.
 
 크로스 플랫폼 코드를 다룬다면 둘 다 알아 두는 편이 낫습니다. 이 시리즈는 명령어를 GDB/LLDB 양쪽으로 같이 보여 줍니다.
 
@@ -157,21 +157,14 @@ sudo apt install lldb       # LLDB (선택)
 
 이 글의 Debian 13(trixie) arm64 VM에서는 위 명령으로 `gdb 16.3-1`과 `lldb 1:19.0-63`(실행 파일은 `lldb version 19.1.7`)이 설치됐습니다.
 
-### Linux (Fedora/RHEL)
-
-```bash
-sudo dnf install gdb
-sudo dnf install lldb
-```
-
-Fedora·RHEL에서는 실행해 보지 않았습니다. 패키지 이름만 적어 둡니다.
-
 ### macOS
 
 ```bash
 # LLDB — Xcode Command Line Tools에 포함
 xcode-select --install
 ```
+
+이 Mac에는 Command Line Tools가 깔려 있어 `/Library/Developer/CommandLineTools/usr/bin/lldb`가 있고, `xcode-select -p`가 가리키는 Xcode(`/Applications/Xcode.app/Contents/Developer`)의 lldb가 이 시리즈의 macOS 세션에 쓰였습니다.
 
 Homebrew에는 GDB 패키지가 있습니다. 이 글의 Apple Silicon Mac에서 `brew info gdb`를 실행하면 18.1 판과 함께 서명 경고가 나옵니다.
 

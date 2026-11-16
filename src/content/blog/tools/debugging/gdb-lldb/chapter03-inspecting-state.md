@@ -220,7 +220,7 @@ cpsr           0x60001000          [ EL=0 BTYPE=0 SSBS C Z ]
 | `x8` | Indirect result location register |
 | `x0`~`x7` | Parameter/result registers, 인자 1~8번째와 반환값 |
 
-x86-64 Linux라면 같은 역할이 System V ABI에 따라 `rip`·`rsp`·`rbp`·`rax`(반환값)·`rdi`/`rsi`/`rdx`/`rcx`/`r8`/`r9`(인자 1~6번째)로 바뀝니다. 이 시리즈는 x86-64 머신에서 실행하지 않았으므로 x86 출력은 싣지 않습니다.
+이 시리즈는 x86-64 머신에서 실행하지 않았으므로 x86-64의 레지스터 이름과 호출 규약은 다루지 않습니다.
 
 레지스터는 `$이름`으로 식 안에서 변수처럼 씁니다. GDB는 `$pc`와 `$sp`에 포인터 타입을 붙여 줍니다.
 

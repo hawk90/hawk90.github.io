@@ -465,7 +465,7 @@ Temporary breakpoint 3, handle_close () at bp.cpp:21
 | 방식 | 동작 | 한계 | 사용 자리 |
 |------|------|------|-----------|
 | `break` (software) | 대상 메모리의 명령을 trap 명령으로 교체 | 그 메모리를 쓸 수 있어야 함 | 일반 코드 |
-| `hbreak` (hardware) | CPU의 breakpoint 레지스터에 주소 등록 | 레지스터 개수(이 VM은 6개) | ROM·플래시처럼 쓸 수 없는 메모리 |
+| `hbreak` (hardware) | CPU의 breakpoint 레지스터에 주소 등록 | 레지스터 개수(이 VM은 6개) | 명령을 고쳐 쓸 수 없는 ROM 코드 (GDB 매뉴얼 Set Breaks: "The main purpose of this is EPROM/ROM code debugging") |
 
 Linux 프로세스에서는 실행 중에만 hardware breakpoint를 쓸 수 있었습니다. 프로그램을 시작하기 전에 `hbreak main`을 치면 `No hardware breakpoint support in the target.`이 나오고, `break main`으로 멈춘 뒤에는 `Hardware assisted breakpoint 2 at 0xaaaaaaaa1260: file bp.cpp, line 23.`처럼 등록됩니다. 커널이 보고한 6개는 그대로 들어갔고(여섯 개를 걸고 continue하면 차례로 멈춤), 일곱 개를 걸자 `continue`에서 `Cannot insert hardware breakpoint`와 `You may have requested too many hardware breakpoints/watchpoints.`로 중단됐습니다.
 
