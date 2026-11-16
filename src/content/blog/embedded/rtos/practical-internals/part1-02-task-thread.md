@@ -115,8 +115,8 @@ static void sup(void*a){(void)a;
 ```text
 sup (caller) = eRunning
 blk=eBlocked rdy=eReady sus=eSuspended del=eDeleted
-free heap before idle runs = 57448
-free heap after idle ran   = 58576
+free heap before idle runs = 57440
+free heap after idle ran   = 58568
 ```
 
 `del`은 이미 자기 자신을 지웠지만 `rdy`가 CPU를 놓지 않는 동안 idle task가 돌지 못해 TCB와 stack이 heap에 그대로 남아 있었습니다. `rdy`를 suspend해 idle에게 CPU가 돌아가자 free heap이 1,128바이트 늘었습니다. 이 구성의 TCB(`sizeof(StaticTask_t)`)는 88바이트이고 `heap_4`는 블록마다 8바이트 헤더를 붙이므로, stack (1,024 + 8)과 TCB (88 + 8)를 더하면 정확히 1,128바이트입니다. 높은 우선순위 task가 쉬지 않으면 삭제한 task의 메모리가 돌아오지 않는다는 뜻입니다.
@@ -224,7 +224,7 @@ ThreadX는 RTOS지만 API가 `tx_thread_create`입니다(`common/inc/tx_api.h`).
 
 > ⚠️ Stack 너무 작음
 
-32비트 StackType_t에서 256 words는 1 KiB라는 단위 변환일 뿐 충분성의 근거는 아닙니다. 같은 QEMU 예제에서 256 word task가 `uint32_t buf[128]` 하나를 채우자 high-water mark가 246에서 105 word로 떨어졌습니다. 배열 하나로 stack의 절반 넘게 쓴 셈입니다.
+32비트 StackType_t에서 256 words는 1 KiB라는 단위 변환일 뿐 충분성의 근거는 아닙니다. 같은 QEMU 예제에서 256 word task가 `uint32_t buf[128]` 하나를 채우자 high-water mark가 246에서 103 word로 떨어졌습니다. 배열 하나로 stack의 절반 넘게 쓴 셈입니다.
 
 ```c title="states.c (발췌)"
 static void stk(void*a){(void)a;
@@ -236,7 +236,7 @@ static void stk(void*a){(void)a;
 
 ```text
 stk: high-water mark at entry      = 246 words
-stk: after touching uint32_t[128]  = 105 words
+stk: after touching uint32_t[128]  = 103 words
 ```
 
 > ⚠️ Task에서 return

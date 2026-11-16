@@ -20,7 +20,7 @@ topics: ["embedded", "embedded/rtos"]
 
 ### Tick Preemption
 
-SysTick 인터럽트가 `xTaskIncrementTick()`을 부르고, 이 함수가 `pdTRUE`를 돌려주면 PendSV를 pend합니다. `pdTRUE`가 되는 경우는 두 가지입니다. delay가 끝나 깨어난 task의 우선순위가 현재 task보다 높을 때([`tasks.c` L4826-L4840](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L4826-L4840))와, time slicing이 켜져 있고 같은 우선순위 ready task가 둘 이상일 때(L4861)입니다. 두 경로 모두 `configUSE_PREEMPTION == 1`일 때만 컴파일됩니다.
+SysTick 인터럽트가 `xTaskIncrementTick()`을 부르고, 이 함수가 `pdTRUE`를 돌려주면 PendSV를 pend합니다. `pdTRUE`가 되는 경우는 세 가지입니다. (1) delay가 끝나 깨어난 task의 우선순위가 현재 task보다 높을 때([`tasks.c` L4826-L4840](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L4826-L4840)), (2) time slicing이 켜져 있고 같은 우선순위 ready task가 둘 이상일 때(L4861), (3) ISR이 `xHigherPriorityTaskWoken`을 버렸더라도 `xTaskRemoveFromEventList()`가 세워 둔 `xYieldPendings[0]`이 남아 있을 때(L5458, L4908-L4919)입니다. 세 경로 모두 `configUSE_PREEMPTION == 1`일 때만 컴파일됩니다.
 
 ### IRQ Preemption
 
@@ -44,7 +44,7 @@ USE_YIELD=0 PREEMPTION=1 woken=1 hi_ran right after IRQ=0, hi ran at tick +1
 USE_YIELD=1 PREEMPTION=0 woken=1 hi_ran right after IRQ=1, hi ran at tick +0
 ```
 
-yield 요청을 넘기면 ISR이 끝나자마자 `hi`가 돌았습니다. 넘기지 않으면 `hi`는 ready가 되었을 뿐 다음 tick 인터럽트에서야 돌았습니다. 네 번째 조합(`USE_YIELD=0`, `PREEMPTION=0`)은 5초 timeout으로 끝났습니다. 아래 cooperative 절에서 이유를 봅니다.
+yield 요청을 넘기면 ISR이 끝나자마자 `hi`가 돌았습니다. 넘기지 않으면 `hi`는 ready가 되었을 뿐 다음 tick 인터럽트에서야 돌았습니다. 이 다음 tick의 전환이 위 (3)번 경로입니다. `tasks.c` L5456-L5458의 주석은 이를 "in case the user is not using the xHigherPriorityTaskWoken parameter"라고 설명합니다. 네 번째 조합(`USE_YIELD=0`, `PREEMPTION=0`)은 5초 timeout으로 끝났습니다. 아래 cooperative 절에서 이유를 봅니다.
 
 ## Cooperation — 자발 양보
 
@@ -173,7 +173,7 @@ static uint32_t now(void){ uint32_t t1,c; do{ t1=xTaskGetTickCount(); c=CVR; }wh
 
 ```text
 SysTick reload+1 = 25000 cycles per tick
-right after tick: vTaskDelay(1) blocked for 25090 cycles (1.00 ticks)
+right after tick: vTaskDelay(1) blocked for 25088 cycles (1.00 ticks)
 late in tick : vTaskDelay(1) blocked for 2624 cycles (0.10 ticks)
 ```
 

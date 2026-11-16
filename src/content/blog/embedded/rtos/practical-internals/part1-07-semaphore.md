@@ -209,7 +209,7 @@ if (!ready) {                          // (1)
 
 (1)과 (2) 사이에 ISR이 give 하면 counter가 1이 되고, (2)에서 take가 가능합니다. Semaphore는 token을 기억하므로 이 순서 자체는 lost-wakeup이 아닙니다.
 
-상태를 기억하지 않는 신호라면 이야기가 다릅니다. POSIX `pthread_cond_signal()`은 그 순간 기다리는 thread가 없으면 아무 일도 하지 않으므로, (1)과 (2) 사이에 온 signal은 사라집니다. 그래서 condition variable은 mutex를 쥔 채 predicate를 반복 검사하는 형태로만 씁니다. semaphore에서도 남는 함정은 위 실험의 binary 합쳐짐과 최대 count 도달입니다.
+상태를 기억하지 않는 신호라면 이야기가 다릅니다. POSIX.1-2024의 [`pthread_cond_signal()`](https://pubs.opengroup.org/onlinepubs/9799919799/functions/pthread_cond_signal.html)은 "shall have no effect if they determine that there are no threads blocked on cond"이므로, (1)과 (2) 사이에 온 signal은 사라집니다. 그래서 condition variable은 mutex를 쥔 채 predicate를 반복 검사하는 형태로만 씁니다. semaphore에서도 남는 함정은 위 실험의 binary 합쳐짐과 최대 count 도달입니다.
 
 ## Priority Inversion 가능
 

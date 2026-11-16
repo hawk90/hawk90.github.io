@@ -224,7 +224,7 @@ void taskA(void *arg) {
 
 ## Priority Inversion (예고)
 
-Mars Pathfinder는 1997년 7월 4일 착륙 며칠 뒤부터 *total system reset*을 반복했습니다. JPL의 Glenn Reeves가 남긴 설명([Mike Jones 정리](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html), [Reeves 원문](https://www.cs.unc.edu/~anderson/teach/comp790/papers/mars_pathfinder_long_version.html))에 따르면 구조는 다음과 같았습니다.
+Mars Pathfinder는 1997년 7월 4일 착륙 며칠 뒤부터 *total system reset*을 반복했습니다. Wind River CTO David Wilner의 IEEE RTSS 기조연설을 Mike Jones가 정리한 글([Jones 정리](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html))과 JPL Glenn Reeves의 원문([Reeves 원문](https://www.cs.unc.edu/~anderson/teach/comp790/papers/mars_pathfinder_long_version.html))에 따르면 구조는 다음과 같았습니다.
 
 - 높은 우선순위의 bus management task — information bus를 보호하는 mutex 대기
 - 중간 우선순위의 communications task — 인터럽트로 깨어나 실행

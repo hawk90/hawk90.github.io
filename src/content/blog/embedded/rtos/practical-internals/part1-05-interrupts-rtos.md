@@ -88,7 +88,7 @@ void uart_rx_task(void *arg) {
 
 ### QEMU에서 실제 UART 인터럽트로 돌려 보기
 
-위 코드를 QEMU `mps2-an385`의 CMSDK APB UART0에 맞춰 그대로 돌렸습니다. 이 보드에서 UART0 RX 인터럽트는 IRQ 0, TX는 IRQ 1입니다(QEMU v11.1.3 `hw/arm/mps2.c` L294-L309). 레지스터는 DATA(0x40004000)·STATE(+0x04, bit 1 = RX full)·CTRL(+0x08, bit 3 = RX 인터럽트 enable)·INTSTATUS/INTCLEAR(+0x0C, bit 1 = RX, 1을 써서 지움)입니다. queue 길이는 4, IRQ 0 우선순위는 0xE0입니다. 호스트에서 `ABCDEFGHIJ` 10바이트를 한 번에 보냈습니다.
+같은 구조를 QEMU `mps2-an385`의 CMSDK APB UART0에 맞춰, handler 이름을 `UART0RX_IRQHandler`로 바꾸고 ISR별 기록과 첫 바이트 이후 200 tick receive timeout을 더해 돌렸습니다. 이 보드에서 UART0 RX 인터럽트는 IRQ 0, TX는 IRQ 1입니다(QEMU v11.1.3 `hw/arm/mps2.c` L294-L309). 레지스터는 DATA(0x40004000)·STATE(+0x04, bit 1 = RX full)·CTRL(+0x08, bit 3 = RX 인터럽트 enable)·INTSTATUS/INTCLEAR(+0x0C, bit 1 = RX, 1을 써서 지움)입니다. queue 길이는 4, IRQ 0 우선순위는 0xE0입니다. 호스트에서 `ABCDEFGHIJ` 10바이트를 한 번에 보냈습니다.
 
 ```c title="uart-handoff.c (보드 의존 부분)"
 static bool read_uart_byte_from_isr(uint8_t *out){ UART0_INTCLR=2; if(!(UART0_STATE & 2)) return false; *out=(uint8_t)UART0_DATA; return true; }  /* clear RX int before reading DATA */

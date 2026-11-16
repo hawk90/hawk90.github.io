@@ -159,7 +159,7 @@ atomic_int counter = 0;
 atomic_fetch_add(&counter, 1);   // counter++ atomic
 ```
 
-위 코드를 arm-none-eabi-gcc 16.2.0 `-O2 -std=c11`로 두 코어용으로 컴파일했습니다. Cortex-M3에서는 exclusive 재시도 루프가 됩니다.
+위 코드를 arm-none-eabi-gcc 16.2.0 `-O2 -std=c11`로 Cortex-M3와 Cortex-M0 두 타깃에 대해 따로 컴파일했습니다. Cortex-M3에서는 exclusive 재시도 루프가 됩니다.
 
 ```text
 00000000 <bump>:
@@ -186,7 +186,7 @@ atomic_fetch_add(&counter, 1);   // counter++ atomic
    c:	pop	{r4, pc}
 ```
 
-`nm`이 `U __atomic_fetch_add_4`를 보여 주듯 이 심볼은 링크 시 누군가 제공해야 합니다(`r2 = 5`는 `__ATOMIC_SEQ_CST`). [GCC 문서](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html)는 크기상 lock-free 명령을 쓸 수 없으면 "an external call is left to be resolved at run time"이라고 적습니다. 같은 C 코드라도 Cortex-M0에서는 시간과 ISR 안전성이 그 라이브러리 구현에 달려 있다는 뜻입니다.
+`nm`이 `U __atomic_fetch_add_4`를 보여 주듯 이 심볼은 링크 시 누군가 제공해야 합니다(`r2 = 5`는 `__ATOMIC_SEQ_CST`). [GCC 문서](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html)는 "If there is no pattern or mechanism to provide a lock-free instruction sequence, a call is made to an external routine with the same parameters to be resolved at run time."이라고 적습니다. 같은 C 코드라도 Cortex-M0에서는 시간과 ISR 안전성이 그 라이브러리 구현에 달려 있다는 뜻입니다.
 
 CAS 등의 원자 연산은 lock-free 알고리즘의 재료이지만, 연산 하나가 lock-free라고 전체 알고리즘이 wait-free이거나 ISR 안전한 것은 아닙니다.
 

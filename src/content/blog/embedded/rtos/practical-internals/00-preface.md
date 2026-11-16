@@ -149,8 +149,6 @@ RTOS의 심장인 스케줄러와 컨텍스트 스위치를 깊이 분석합니�
 
 ## 분석 대상 RTOS
 
-| RTOS | 버전 | 특징 |
-|------|-----|------|
 | RTOS | 기준 tag | 비고 |
 |------|-----|------|
 | FreeRTOS | [V11.2.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0) | `tskKERNEL_VERSION_NUMBER "V11.2.0"`(`include/task.h` L56). 단일 코어와 SMP(`configNUMBER_OF_CORES > 1`) 경로가 같은 `tasks.c`에 있음 |

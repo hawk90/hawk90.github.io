@@ -131,14 +131,14 @@ qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel de
 ```
 
 ```text
-iter 0 start=  0 end= 10 ret=pdTRUE  next_wake= 10 logger_loops=62369
-iter 1 start= 10 end= 20 ret=pdTRUE  next_wake= 20 logger_loops=124739
-iter 2 start= 20 end= 30 ret=pdTRUE  next_wake= 30 logger_loops=187108
-iter 3 start= 30 end= 55 ret=pdFALSE next_wake= 40 logger_loops=187108
-iter 4 start= 55 end= 57 ret=pdFALSE next_wake= 50 logger_loops=187108
-iter 5 start= 57 end= 60 ret=pdTRUE  next_wake= 60 logger_loops=194857
-iter 6 start= 60 end= 70 ret=pdTRUE  next_wake= 70 logger_loops=257226
-iter 7 start= 70 end= 80 ret=pdTRUE  next_wake= 80 logger_loops=319594
+iter 0 start=  0 end= 10 ret=pdTRUE  next_wake= 10 logger_loops=62368
+iter 1 start= 10 end= 20 ret=pdTRUE  next_wake= 20 logger_loops=124737
+iter 2 start= 20 end= 30 ret=pdTRUE  next_wake= 30 logger_loops=187107
+iter 3 start= 30 end= 55 ret=pdFALSE next_wake= 40 logger_loops=187107
+iter 4 start= 55 end= 57 ret=pdFALSE next_wake= 50 logger_loops=187107
+iter 5 start= 57 end= 60 ret=pdTRUE  next_wake= 60 logger_loops=194855
+iter 6 start= 60 end= 70 ret=pdTRUE  next_wake= 70 logger_loops=257225
+iter 7 start= 70 end= 80 ret=pdTRUE  next_wake= 80 logger_loops=319595
 ```
 
 세 가지를 읽을 수 있습니다.
@@ -173,7 +173,7 @@ console.log('PASS: 1ms rejected, 10ms passes the single-task budget only');
 
 ### 2. 우선순위 (Priority)
 
-우선순위 숫자의 방향은 커널마다 반대입니다. FreeRTOS에서는 `0..configMAX_PRIORITIES-1`이며 큰 숫자가 높은 우선순위입니다. idle task가 `tskIDLE_PRIORITY`(0, [`task.h` L199](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/task.h#L199))이고, 범위를 넘는 값은 `configMAX_PRIORITIES - 1`로 잘립니다([`tasks.c` L1914-L1918](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L1914-L1918)). Zephyr는 반대로 숫자가 *작을수록* 높고, 음수 우선순위는 선점되지 않는 cooperative thread입니다([Zephyr v3.7.0 threads 문서](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/doc/kernel/services/threads/index.rst) "Thread Priorities"). Cortex-M의 예외 우선순위도 숫자가 작을수록 높습니다(DDI 0403E.b B1.5.4). FreeRTOS on Cortex-M에서는 task와 인터럽트의 숫자 방향이 서로 반대인 셈입니다.
+우선순위 숫자의 방향은 커널마다 반대입니다. FreeRTOS에서는 `0..configMAX_PRIORITIES-1`이며 큰 숫자가 높은 우선순위입니다. idle task가 `tskIDLE_PRIORITY`(0, [`task.h` L199](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/task.h#L199))이고, 범위를 넘는 값은 `configASSERT`가 정의돼 있으면 L1914에서 멈추고, 없을 때만 `configMAX_PRIORITIES - 1`로 잘립니다([`tasks.c` L1914-L1918](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L1914-L1918)). Zephyr는 반대로 숫자가 *작을수록* 높고, 음수 우선순위는 선점되지 않는 cooperative thread입니다([Zephyr v3.7.0 threads 문서](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/doc/kernel/services/threads/index.rst) "Thread Priorities"). Cortex-M의 예외 우선순위도 숫자가 작을수록 높습니다(DDI 0403E.b B1.5.4). FreeRTOS on Cortex-M에서는 task와 인터럽트의 숫자 방향이 서로 반대인 셈입니다.
 
 ### 3. 동기화 프리미티브
 
@@ -196,7 +196,7 @@ RTOS는 우선순위와 bounded 동작을 설계하는 수단입니다. hard rea
 
 ## RTOS는 *Linux와 다르다*
 
-규모부터 다릅니다. 위 `delayuntil.c` 예제는 FreeRTOS 커널(`tasks.c`·`queue.c`·`list.c`·`timers.c`·`event_groups.c`·`port.c`·`heap_4.c`)을 모두 링크하고도 `arm-none-eabi-size`로 text 18,456바이트였습니다. bss 65,960바이트의 대부분은 `configTOTAL_HEAP_SIZE`로 잡은 64 KiB heap입니다.
+규모부터 다릅니다. 위 `delayuntil.c` 예제는 FreeRTOS 커널(`tasks.c`·`queue.c`·`list.c`·`timers.c`·`event_groups.c`·`port.c`·`heap_4.c`)을 모두 링크하고도 `arm-none-eabi-size`로 text 18,312바이트였습니다. bss 65,964바이트의 대부분은 `configTOTAL_HEAP_SIZE`로 잡은 64 KiB heap입니다.
 
 | 비교 항목 | FreeRTOS (이 시리즈 기준) | Linux |
 | --- | --- | --- |
