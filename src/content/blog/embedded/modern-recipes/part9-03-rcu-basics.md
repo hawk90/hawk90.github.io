@@ -39,6 +39,8 @@ Linux 커널 문서는 v4.20부터 한 커널에 RCU flavor가 하나만 있고,
 
 이 순서 덕분에 갱신 전부터 옛 객체를 들고 있던 reader가 끝나기 전에는 그 객체가 해제되지 않습니다. 대가는 세 가지입니다. Writer가 grace period만큼 기다리거나 callback이 그만큼 늦게 돕니다. 그동안 옛 객체와 새 객체가 함께 메모리에 있습니다. 그리고 writer끼리는 여전히 별도 lock이 필요합니다.
 
+Grace period가 끝났는지는 quiescent state로 압니다. Read-side 구간 안에서는 block할 수 없으므로, 어떤 CPU가 context switch를 했다면 그 CPU는 그 전에 시작한 read-side 구간을 모두 마친 것이고, 모든 CPU가 context switch를 한 번씩 하면 그 전의 read-side 구간은 모두 끝난 것입니다(`whatisRCU.rst` 762–766행). Tree RCU 문서는 CPU가 context switch를 하면 `rcu_note_context_switch()`가, user mode에서 scheduler-clock 인터럽트를 받으면 `rcu_sched_clock_irq()`가 quiescent state를 기록한다고 적습니다(`Documentation/RCU/Design/Memory-Ordering/Tree-RCU-Memory-Ordering.rst` 449–452행). 모든 CPU가 grace period 시작 뒤 quiescent state를 한 번씩 지나면 그 grace period가 끝납니다.
+
 ## 코드 / 실제 사용 예
 
 ### Linux kernel RCU — 측정 모듈
@@ -425,7 +427,7 @@ rwlock readers=5     9.1 M reads/s
 rcu    readers=5  3552.6 M reads/s
 ```
 
-`pthread_rwlock`은 reader가 하나일 때 초당 125~162M 번이었다가 둘이 되자 30.2~31.0M 번으로 떨어졌고, 다섯이면 9.0~16.3M 번이었습니다. Guest의 glibc 2.41에서 읽기 lock은 `rwlock->__data.__readers`에 `atomic_fetch_add_acquire`를 합니다(`nptl/pthread_rwlock_common.c` 353–355행). Reader가 모두 같은 word에 쓰므로 그 cache line이 코어 사이를 오갑니다. URCU reader는 공유 word에 쓰지 않아 reader 수에 따라 늘었습니다(1개 732~747M, 5개 2692~3638M). 5개 측정값의 폭이 넓은 것은 writer 스레드까지 vCPU 6개를 모두 쓰는 데다 host의 다른 작업과 겹쳤기 때문으로 보이며, 이 측정에서 그 원인을 따로 확인하지는 않았습니다. 이것은 이 guest의 숫자이고, 측정 루프가 하는 일이 포인터 두 번 읽기뿐이라 lock 비용이 그대로 드러나는 조건입니다.
+`pthread_rwlock`은 reader가 하나일 때 초당 125~162M 번이었다가 둘이 되자 30.2~31.0M 번으로 떨어졌고, 다섯이면 9.0~16.3M 번이었습니다. Guest의 glibc 2.41에서 읽기 lock은 `rwlock->__data.__readers`에 `atomic_fetch_add_acquire`를 합니다(`nptl/pthread_rwlock_common.c` 353–355행). Reader가 모두 같은 word에 쓰므로 그 cache line이 코어 사이를 오갑니다. URCU reader는 공유 word에 쓰지 않아 reader 수에 따라 늘었습니다(1개 732~747M, 5개 2692~3638M). 이것은 이 guest의 숫자이고, 측정 루프가 하는 일이 포인터 두 번 읽기뿐이라 lock 비용이 그대로 드러나는 조건입니다.
 
 ### call_rcu (비동기 free)
 
@@ -570,7 +572,7 @@ msleep(10);              /* illegal: blocks inside an RCU read-side critical sec
 rcu_read_unlock();
 ```
 
-문서는 "It is illegal to block while in an RCU read-side critical section"이라고 적습니다(`whatisRCU.rst` 166–167행). 구간 안에서 sleep해야 한다면 SRCU(`include/linux/srcu.h`, "Sleepable Read-Copy Update")를 쓰고, 이때 updater도 `synchronize_srcu()`/`call_srcu()`를 같은 `srcu_struct`로 써야 합니다(`checklist.rst` 238–240행).
+문서는 "It is illegal to block while in an RCU read-side critical section"이라고 적습니다(`whatisRCU.rst` 167–168행). 구간 안에서 sleep해야 한다면 SRCU(`include/linux/srcu.h`, "Sleepable Read-Copy Update")를 쓰고, 이때 updater도 `synchronize_srcu()`/`call_srcu()`를 같은 `srcu_struct`로 써야 합니다(`checklist.rst` 238–240행).
 
 > ⚠️ Writer끼리 lock 없이 add/del
 
