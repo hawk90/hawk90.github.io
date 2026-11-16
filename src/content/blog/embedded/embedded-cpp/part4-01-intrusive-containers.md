@@ -22,7 +22,7 @@ topics: ["embedded"]
 [head] → [Node{prev, next, T data}] → [Node{...}] → ...
 ```
 
-기본 allocator를 쓰면 각 Node의 저장 공간을 동적으로 확보하고, T 외에 두 pointer만큼 메모리가 더 필요합니다. 임베디드에는 부담이 됩니다.
+기본 allocator를 쓰면 각 Node의 저장 공간을 동적으로 확보하고, T 외에 두 pointer만큼 메모리가 더 필요합니다. 할당 크기를 기록하는 allocator로 재 보면, 16바이트 `Task`(int와 함수 포인터) 하나를 `push_back`할 때 libstdc++(g++-16)와 libc++(Clang 23.1.5) 모두 32바이트 노드를 요청했습니다(64비트 호스트). 원소마다 heap 할당 한 번과 16바이트가 붙습니다.
 
 **Intrusive container**는 구조가 반대입니다.
 
@@ -48,7 +48,7 @@ void add_task(Task* t) {
 }
 ```
 
-추가 할당이 0입니다. Linux의 list_head와 FreeRTOS의 ListItem_t처럼 객체에 link를 포함하는 구현이 있습니다. 모든 컨테이너와 연산이 같은 복잡도를 갖는다는 뜻은 아닙니다.
+추가 할당이 0입니다. Linux의 `list_head`와 FreeRTOS의 `ListItem_t`가 이 방식입니다. FreeRTOS-Kernel(main)의 `struct xLIST_ITEM`은 `xItemValue`, `pxNext`, `pxPrevious`, `pvOwner`(이 item을 담은 객체, 보통 TCB), `pxContainer`(들어 있는 list)를 갖고, `tasks.c`의 TCB는 `xStateListItem`과 `xEventListItem` 두 개를 멤버로 둡니다. 한 task가 ready/blocked list와 event list에 동시에 걸리는 구조입니다.
 
 ## Linux 커널 스타일 — `list_head`
 
@@ -163,11 +163,13 @@ for (auto& t : pending) {
 }
 ```
 
-같은 Task가 서로 다른 link를 두면 두 list에 동시에 들어갈 수도 있습니다. 매우 유연한 구조입니다.
+같은 Task가 서로 다른 link를 두면 두 list에 동시에 들어갈 수 있습니다. 위 FreeRTOS TCB의 두 list item이 같은 구조입니다.
+
+link 하나짜리 `Task`를 arm-none-eabi-g++ 16.2.0 `-Os`로 컴파일하면 `sizeof(Task)`는 16바이트(link 12 + int 4)였고, `push_front`·`erase`를 부르는 오브젝트의 미정의 심볼에 할당 함수가 없었습니다. 남은 미정의 심볼은 `__aeabi_atexit`·`__dso_handle` 둘이었는데, 전역 `IntrusiveList`의 소멸자(`clear()` 호출)를 등록하는 코드입니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-use-cxa-atexit--등록-방식-변경)). 종료하지 않는 firmware에서 이 등록이 필요 없다면 전역 list 타입의 소멸자를 trivial하게 두는 선택지도 있습니다.
 
 ## Boost.Intrusive
 
-Boost가 제공하는 intrusive container 라이브러리이며 임베디드 친화적입니다.
+Boost가 제공하는 intrusive container 라이브러리입니다. 컨테이너가 노드를 할당하지 않으므로 heap 없이 쓸 수 있습니다. 이 글을 쓴 Mac에는 Boost가 없어 아래 Boost 예제는 빌드하지 않았습니다.
 
 ```cpp
 #include <boost/intrusive/list.hpp>
@@ -248,7 +250,7 @@ tasks.push_back(t1);
 tasks.push_back(t2);
 ```
 
-ETL은 임베디드 친화적이며 Boost보다 가볍습니다.
+ETL도 이 글의 환경에 설치하지 않아 빌드하지 않았습니다. ETL은 header-only이고 Boost 의존성이 없습니다.
 
 ## 다른 intrusive 자료구조
 
@@ -338,7 +340,7 @@ void process_events() {
 }
 ```
 
-Pool에서 객체를 할당하고 intrusive list로 enqueue하는 방식이 임베디드 event-driven의 표준입니다.
+Pool에서 객체를 할당하고 intrusive list로 enqueue하면 queue 연산에 할당이 없습니다. 할당은 pool의 O(1) free list([Part 3-03](/blog/embedded/embedded-cpp/part3-03-pool-allocator))뿐입니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -413,7 +415,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 host에서 C++17·AddressSanitizer·UBSan으로 실행했고 정상 출력과 이중 삽입/잘못된 erase의 false 반환을 확인했습니다. BAD_COPY 정의는 삭제한 copy constructor 때문에 컴파일 실패합니다. 보드 cycle 수나 heap 포함 전체 workload의 성능 비교는 측정하지 않았습니다. 객체 저장 공간과 owner/link 메모리도 전체 RAM 예산에 포함합니다.
+Homebrew Clang 23.1.5와 g++-16에서 C++17·AddressSanitizer·UBSan으로 실행했고 둘 다 `intrusive membership checks passed`를 출력했습니다. `-DBAD_COPY`는 Clang에서 `error: call to deleted constructor of 'IntrusiveList<Task, &Task::pending>'`로 거부됩니다. 보드 cycle 수나 heap 포함 전체 workload의 성능 비교는 측정하지 않았습니다. 객체 저장 공간과 owner/link 메모리도 전체 RAM 예산에 포함합니다.
 
 ## 1차 자료
 
@@ -427,7 +429,7 @@ Clang 23.1.3 host에서 C++17·AddressSanitizer·UBSan으로 실행했고 정상
 - Linux 커널의 `list_head`와 `container_of`가 전통적인 패턴입니다.
 - C++ 라이브러리로는 Boost.Intrusive와 ETL의 intrusive_list가 있습니다.
 - 서로 다른 link를 두면 다중 list 가입이 자연스럽게 가능합니다.
-- RTOS scheduler, event queue, driver chain에서 표준 도구로 쓰입니다.
+- FreeRTOS의 TCB list item처럼 RTOS scheduler와 event queue에서 쓰입니다.
 - 컨테이너는 객체를 소유하지 않으므로 lifetime은 외부에서 관리해야 합니다.
 
 ## 관련 항목
