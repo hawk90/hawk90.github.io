@@ -6,28 +6,45 @@
 \usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds}
 \begin{document}
 \input{../../_design.tex}
-\begin{tikzpicture}[blog]
+\begin{tikzpicture}[blog,
+  res/.style={draw=inkc, thick, fill=white, minimum width=2.4mm, minimum height=8mm, inner sep=0pt},
+  lbl/.style={font=\sffamily\scriptsize, text=inkc}]
 
-\node[font=\sffamily\bfseries\large] at (4,2.0) {Fail-safe Biasing};
+\node[font=\sffamily\bfseries\large] at (3.5,3.6) {External idle-bus fail-safe biasing};
 
-% +5V rail
-\node[hi, minimum width=14mm, minimum height=8mm] (vcc) at (0,1) {+5 V};
+% supply and ground
+\node[lbl] (vb) at (0,3.0) {$V_\mathrm{BUS}$ (+5 V)};
+\node[lbl] (gnd) at (0,-2.6) {GND};
 
-% Pull-up resistor → A
-\draw[edgec, line width=0.5pt] (vcc.east) -- (1.4,1);
-\node[abs, minimum width=14mm, minimum height=8mm] (r1) at (2.6,1) {523 $\Omega$};
-\draw[edgec, line width=0.5pt] (r1.east) -- (5.0,1);
-\node[focus, font=\sffamily\bfseries] at (5.4,1) {A};
+% R_B (top) from V_BUS to A
+\node[res] (rb1) at (0,2.0) {};
+\draw[inkc] (vb.south) -- (rb1.north);
+\draw[inkc] (rb1.south) -- (0,1.0);
+\node[lbl, anchor=west] at (0.25,2.0) {$R_B$ 523 $\Omega$};
 
-% B line → pull-down → GND
-\node[focus, font=\sffamily\bfseries] at (5.4,-0.2) {B};
-\draw[edgec, line width=0.5pt] (5.0,-0.2) -- (5.8,-0.2);
-\node[abs, minimum width=14mm, minimum height=8mm] (r2) at (6.6,-0.2) {523 $\Omega$};
-\draw[edgec, line width=0.5pt] (r2.east) -- (8.0,-0.2);
-\node[hi, minimum width=14mm, minimum height=8mm] (gnd) at (8.7,-0.2) {GND};
+% A and B lines
+\draw[focus, -, line width=1.0pt] (0,1.0) -- (7,1.0);
+\draw[focus, -, line width=1.0pt] (0,-0.6) -- (7,-0.6);
+\node[caption, anchor=west] at (7.1,1.0) {A};
+\node[caption, anchor=west] at (7.1,-0.6) {B};
 
-% Caption
-\node[caption, anchor=north] at (4,-1.4) {idle 시 A $>$ B (살짝 양수) $\rightarrow$ receiver가 1 출력};
+% R_T at near end (between A and B)
+\node[res] (rt1) at (0,0.2) {};
+\draw[inkc] (0,1.0) -- (rt1.north); \draw[inkc] (rt1.south) -- (0,-0.6);
+\node[lbl, anchor=west] at (0.25,0.2) {$R_T$ 120 $\Omega$};
+
+% R_B (bottom) from B to GND
+\node[res] (rb2) at (0,-1.6) {};
+\draw[inkc] (0,-0.6) -- (rb2.north); \draw[inkc] (rb2.south) -- (gnd.north);
+\node[lbl, anchor=west] at (0.25,-1.6) {$R_B$ 523 $\Omega$};
+
+% R_T at far end
+\node[res] (rt2) at (6.2,0.2) {};
+\draw[inkc] (6.2,1.0) -- (rt2.north); \draw[inkc] (rt2.south) -- (6.2,-0.6);
+\node[lbl, anchor=east] at (5.95,0.2) {$R_T$ 120 $\Omega$ (원단)};
+
+\node[caption, anchor=north, align=center] at (3.5,-2.9)
+  {모든 driver가 꺼진 idle에서 $V_A > V_B$ $\rightarrow$ receiver 출력 1\\[2pt]\small (SLLA272D Fig.\ 7-1)};
 
 \end{tikzpicture}
 \end{document}
