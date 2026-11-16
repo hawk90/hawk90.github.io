@@ -66,7 +66,7 @@ BAR0는 64-bit, non-prefetchable, 16 KB입니다. NVMe 레지스터와 doorbell�
  63:          0          0          0          0  GICv2m-PCI-MSIX-0000:00:03.0   4 Edge      nvme0q4
 ```
 
-I/O 큐 1~3의 IRQ가 각각 CPU0, CPU1, CPU2에서만 셌습니다. 드라이버가 직접 affinity를 박은 것이 아니라, [`nvme/host/pci.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/nvme/host/pci.c#L2264)가 `PCI_IRQ_ALL_TYPES | PCI_IRQ_AFFINITY`로 vector를 요청해 PCI 코어가 CPU에 나눠 준 결과입니다.
+I/O 큐 1~3의 IRQ 횟수가 각각 CPU0, CPU1, CPU2에서만 올라갔습니다. 드라이버가 직접 affinity를 박은 것이 아니라, [`nvme/host/pci.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/nvme/host/pci.c#L2264)가 `PCI_IRQ_ALL_TYPES | PCI_IRQ_AFFINITY`로 vector를 요청해 PCI 코어가 CPU에 나눠 준 결과입니다.
 
 ### Linux PCIe 드라이버의 probe 순서
 
@@ -176,7 +176,7 @@ for (int i = 0; i < 100; i++)
 	s = ioread32(bar0 + STATUS);   /* each one waits for a completion */
 ```
 
-PCIe Memory Write는 posted라 CPU가 응답을 기다리지 않지만, Memory Read는 장치가 completion을 돌려줄 때까지 CPU 명령이 끝나지 않습니다. 그래서 hot loop에서 MMIO 읽기를 반복하면 그 왕복이 그대로 루프 시간이 됩니다. 장치가 완료를 host 메모리의 링에 쓰고 CPU는 그 메모리를 읽도록 바꾸는 것이 completion ring의 요점입니다([11-08 DMA Completion](/blog/embedded/modern-recipes/part11-08-dma-completion)). 실제 보드에서 MMIO 읽기 한 번이 몇 µs인지는 이 글이 잰 값이 없습니다. QEMU에서 잰 값은 에뮬레이션 비용이므로 쓸 수 없습니다.
+PCIe Memory Write는 posted라 CPU가 응답을 기다리지 않지만, Memory Read는 장치가 completion을 돌려줄 때까지 CPU 명령이 끝나지 않습니다. 그래서 hot loop에서 MMIO 읽기를 반복하면 그 왕복이 그대로 루프 시간이 됩니다. 장치가 완료를 host 메모리의 링에 쓰고 CPU는 그 메모리를 읽도록 바꾸는 것이 completion ring의 요점입니다([11-08 DMA Completion](/blog/embedded/modern-recipes/part11-08-dma-completion)). 실제 보드에서 MMIO 읽기 한 번이 몇 µs인지는 이 글에서 재지 않았습니다. QEMU에서 잰 값은 에뮬레이션 비용이므로 쓸 수 없습니다.
 
 ### VFIO + mmap으로 kernel bypass
 
@@ -224,7 +224,7 @@ while (outstanding)
 
 ## 측정 / 성능 비교
 
-이 글은 실제 PCIe 장치에서 잰 값을 갖고 있지 않습니다. 대신 계산으로 정할 수 있는 상한과, 재는 방법을 남깁니다.
+이 글에는 실제 PCIe 장치에서 잰 값이 없습니다. 대신 계산으로 정할 수 있는 상한과, 재는 방법을 남깁니다.
 
 PCI-SIG의 FAQ는 PCIe 3.0이 8 GT/s에 128b/130b 인코딩을 쓴다고 적습니다. 그러면 x16 링크 한 방향의 상한은 8 × 128/130 × 16 ÷ 8 ≈ 15.75 GB/s입니다. TLP 헤더와 DLLP 오버헤드가 더 빠지므로 실제 payload 대역은 이보다 작고, 얼마나 작은지는 MaxPayload(위 QEMU 장치는 128 bytes)와 MaxReadReq에 달려 있습니다.
 
@@ -274,7 +274,7 @@ readl(doorbell);                    /* waits for a completion */
 pci_read_config_dword(dev, PCI_BASE_ADDRESS_0, &lo);   /* only half */
 ```
 
-64-bit memory BAR는 다음 BAR 칸에 상위 32비트를 둡니다(`PCI_BASE_ADDRESS_MEM_TYPE_64`, PG213 "Memory BARs ... uses the next BAR"). 위 NVMe의 BAR0(0x8000008000)를 `setpci`로 읽으면 하위 dword에는 주소 하위와 플래그가, 상위 주소는 BAR1에 있습니다.
+64-bit memory BAR는 다음 BAR 칸에 상위 32비트를 둡니다(`PCI_BASE_ADDRESS_MEM_TYPE_64`, PG213 "Memory BARs ... uses the next BAR"). 위 NVMe의 BAR0(0x8000008000)를 `setpci`로 읽으면 하위 dword에는 주소 하위 비트와 플래그가 있고, 상위 주소는 BAR1에 있습니다.
 
 ```text
 + setpci -s 00:03.0 BASE_ADDRESS_0 BASE_ADDRESS_1
