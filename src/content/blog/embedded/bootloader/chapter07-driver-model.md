@@ -38,7 +38,7 @@ uclass 108: serial
 0   * pl011@9000000 @ 7e698d10, seq 0
 ```
 
-장치 하나(`pl011@9000000`)가 seq 0으로 있고, `*`는 현재 콘솔로 쓰이는 장치입니다. `@ 7e698d10`은 relocation 뒤 RAM에 있는 `struct udevice`의 주소입니다.
+장치 하나(`pl011@9000000`)가 seq 0으로 있고, `*`는 probe(activate)된 장치라는 표시입니다(`drivers/core/dump.c`의 `dm_display_line()`이 `DM_FLAG_ACTIVATED`일 때 `*`를 찍음). `@ 7e698d10`은 relocation 뒤 RAM에 있는 `struct udevice`의 주소입니다.
 
 ![uclass 하나에 MMC controller instance 두 개가 소속되고 두 instance가 같은 driver를 쓰는 관계, 그리고 DT node의 compatible이 bind와 probe를 거쳐 사용 가능한 device가 되는 순서](/images/blog/bootloader/diagrams/chapter07-driver-model.svg)
 
@@ -171,7 +171,7 @@ relocation 전에는 메모리가 적어서 모든 장치를 bind하지 않습�
 
 PL011 드라이버가 `DM_FLAG_PRE_RELOC`를 가진 것은 relocation 전부터 콘솔이 필요하기 때문입니다. 같은 문서는 두 방법의 차이도 적습니다. 플래그를 쓰면 그 드라이버를 쓰는 장치가 모두 bind되어 메모리를 더 쓰고, DT의 `bootph-*` 속성은 노드 단위로 고를 수 있습니다. DT 없이 `U_BOOT_DRVINFO()`로 선언한 장치는 이 플래그가 유일한 방법입니다.
 
-SPL에서는 이 선택이 DT 자체에 반영됩니다. [Ch 6](/blog/embedded/bootloader/chapter06-device-tree)에서 본 대로 imx8mm SPL의 DTB에는 `bootph-pre-ram`이 붙은 노드 42개만 남습니다. 거기 없는 장치는 SPL의 `dm tree`에 나타날 수 없습니다.
+SPL에서는 이 선택이 DT 자체에 반영됩니다. [Ch 6](/blog/embedded/bootloader/chapter06-device-tree)에서 본 대로 imx8mm SPL의 DTB에는 `bootph-pre-ram`·`bootph-all`이 붙은 노드와 그 부모, `/chosen`을 합쳐 42개만 남습니다. 거기 없는 장치는 SPL의 `dm tree`에 나타날 수 없습니다.
 
 ## 새 드라이버를 붙일 때의 확인 순서
 
@@ -206,7 +206,7 @@ serial_pl01x              108 serial               pl011@9000000
 ## 근거 자료
 
 - [U-Boot v2024.04 Driver Model design](https://docs.u-boot.org/en/v2024.04/develop/driver-model/design.html) (`doc/develop/driver-model/design.rst`): 용어 정의, Bind stage, Activation/probe, Pre-Relocation Support.
-- U-Boot v2024.04 소스: `drivers/serial/serial_pl01x.c`, `drivers/nvme/nvme_pci.c`, `include/dm/device.h`(`DM_FLAG_PRE_RELOC`, `DM_FLAG_PROBE_AFTER_BIND`).
+- U-Boot v2024.04 소스: `drivers/serial/serial_pl01x.c`, `drivers/nvme/nvme_pci.c`, `include/dm/device.h`(`DM_FLAG_PRE_RELOC`, `DM_FLAG_PROBE_AFTER_BIND`), `drivers/core/dump.c`.
 - 이 글의 실행: QEMU 11.1.3 `qemu_arm64`에 NVMe 하나를 붙이고 `dm uclass`·`dm compat`·`dm drivers`·`dm tree`·`nvme scan`·`fdt print`.
 
 ## 관련 항목

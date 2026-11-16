@@ -119,7 +119,7 @@ EDK II는 TianoCore가 관리하는 UEFI/PI firmware 개발 환경입니다. Arm
 | 구성 | 실행한 부트 체인 |
 | --- | --- |
 | QEMU virt + TF-A + U-Boot | BL1 → BL2 → BL31 → U-Boot(BL33) → `booti` → Linux |
-| QEMU virt + EDK II | UEFI firmware → shim → grub → Linux EFI stub |
+| QEMU virt + EDK II | UEFI firmware → shim(`EFI/BOOT/BOOTAA64.EFI`, 로그 출력 없음) → grub → Linux EFI stub |
 
 두 번째 구성에서 커널은 하드웨어 정보를 ACPI로 받습니다. EFI stub이 "Generating empty DTB"를 남겼습니다([Ch 1](/blog/embedded/bootloader/chapter01-boot-problem)).
 
@@ -181,7 +181,7 @@ U-Boot v2024.04 `doc/board/emulation/qemu-riscv.rst`는 U-Boot SPL과 함께 쓰
 - U-Boot v2024.04: `README`(Where we come from, Names and Spelling), `doc/develop/uefi/uefi.rst`(EBBR 목표), `doc/board/emulation/qemu-riscv.rst`(SPL + OpenSBI FW_DYNAMIC).
 - 이 시리즈의 빌드 산출물: `imx8mm_evk` binman 맵(`imx-boot.map`, `u-boot-spl-ddr.map`, `itb.map`)과 빌드 로그, TF-A v2.15.0 `PLAT=qemu` release 바이너리.
 - QEMU 11.1.3 `qemu-system-riscv64 -M virt` 부팅 로그(OpenSBI v1.8.1).
-- [Trusted Firmware-A: Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.10/design/firmware-design.html): BL 단계.
+- [Trusted Firmware-A: Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.15.0/design/firmware-design.html): BL 단계.
 - [OpenSBI](https://github.com/riscv-software-src/opensbi), [TianoCore EDK II](https://www.tianocore.org/).
 
 ## 관련 항목

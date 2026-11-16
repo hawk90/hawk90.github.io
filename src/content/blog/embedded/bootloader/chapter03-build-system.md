@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-U-Boot의 빌드는 Linux에서 가져온 Kconfig·Kbuild 위에 세 가지가 더해진 구조입니다. defconfig를 C 전처리기에 먼저 통과시키고, 아키텍처를 `.config`에서 읽고, 같은 `.config` 하나로 SPL과 U-Boot Proper를 따로 빌드합니다. 이 장의 모든 출력은 U-Boot v2024.04 소스와 이 시리즈의 빌드 디렉터리(`qemu_arm64`, `imx8mm_evk`)에서 나왔습니다. 70줄짜리 defconfig가 1,382줄의 `.config`가 되는 과정을 따라가고, 실제로 겪은 함정 하나(CROSS_COMPILE 없이 defconfig를 적용하면 옵션이 조용히 사라짐)를 짚습니다.
+U-Boot의 빌드는 Linux에서 가져온 Kconfig·Kbuild 위에 세 가지가 더해진 구조입니다. defconfig를 C 전처리기에 먼저 통과시키고, 아키텍처를 `.config`에서 읽고, 같은 `.config` 하나로 SPL과 U-Boot Proper를 따로 빌드합니다. 이 장의 모든 출력은 U-Boot v2024.04 소스와 이 시리즈의 빌드 디렉터리(`qemu_arm64`, `imx8mm_evk`)에서 나왔습니다. 70줄짜리 defconfig가 `CONFIG_` 줄 1,382개(파일 전체 1,802줄)의 `.config`가 되는 과정을 따라가고, 실제로 겪은 함정 하나(CROSS_COMPILE 없이 defconfig를 적용하면 옵션이 조용히 사라짐)를 짚습니다.
 
 ## 빌드 명령
 
@@ -248,7 +248,7 @@ MEMORY { .sdram : ORIGIN = CONFIG_SPL_BSS_START_ADDR,
 
 - U-Boot은 Linux Kconfig·Kbuild를 쓰되 defconfig를 `$(CPP)`로 먼저 전처리하고, `ARCH`는 `.config`의 `CONFIG_SYS_ARCH`에서 읽습니다.
 - defconfig 단계에도 `CROSS_COMPILE`이 필요합니다. 없으면 호스트 전처리기 때문에 "is not set" 줄이 사라질 수 있습니다.
-- `qemu_arm64_defconfig` 70줄은 `.config` 1,382줄로 펼쳐지고, `savedefconfig`는 원본과 똑같은 70줄을 돌려줍니다.
+- `qemu_arm64_defconfig` 70줄은 `CONFIG_` 줄 1,382개짜리 `.config`로 펼쳐지고, `savedefconfig`는 원본과 똑같은 70줄을 돌려줍니다.
 - `.config` 하나에 Proper와 SPL 옵션이 함께 있고, `$(SPL_)`·`$(SPL_TPL_)`가 단계별로 다른 오브젝트를 고릅니다.
 - SPL 크기 한계 `CONFIG_SPL_MAX_SIZE`는 링커 스크립트의 MEMORY 영역 길이가 됩니다.
 

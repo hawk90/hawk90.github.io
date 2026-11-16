@@ -100,7 +100,7 @@ FIT description: Configuration to load ATF before U-Boot
   Loadables:    atf
 ```
 
-(`Created`·`Compression`·`Architecture` 줄과 `Image 2 (fip)` 생략)
+(`Created`·`Compression`·`Architecture`·`OS` 줄과 `Image 2 (fip)` 생략)
 
 `atf`의 크기가 0인 것은 `bl31.bin` 없이 빌드했기 때문입니다([Ch 2](/blog/embedded/bootloader/chapter02-u-boot-position)). 읽을 것은 주소입니다. BL31은 OCRAM 0x920000, 즉 SPL 스택 꼭대기 바로 위에 놓이고, U-Boot Proper는 DRAM 0x40200000에 놓입니다. firmware인 `uboot`에 entry가 없어서 첫 loadable `atf`의 entry가 점프 주소가 됩니다. SPL은 "U-Boot로 간다"는 분기를 타면서 실제로는 BL31에 도착합니다. 이 경로는 [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 `common/spl/spl.c`와 `spl_fit.c`로 따라갑니다.
 
@@ -152,7 +152,7 @@ RISC-V의 privilege mode와 Arm의 Exception level은 다른 개념입니다. SB
 | --- | --- | --- |
 | BL2 → BL1 → BL31 | 다음 이미지들의 entry point·SPSR (`entry_point_info`) | TF-A 디버그 로그 |
 | BL31 → BL33 | entry 0x60000000, SPSR 0x3c5 | TF-A 디버그 로그 |
-| SPL → BL31 (imx8mm) | FIT `atf` 노드의 entry 0x920000 | `dumpimage -l`, [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep) |
+| SPL → BL31 (imx8mm) | FIT `atf` 노드의 load·entry 0x920000 | `arch/arm/dts/imx8mm-u-boot.dtsi`의 `entry = <0x920000>`, [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep) |
 | U-Boot → Linux | `x0` = DTB 물리 주소, `x1`–`x3` = 0 | gdb로 확인, [Ch 19](/blog/embedded/bootloader/chapter19-kernel-handoff) |
 
 `x0`에 DTB를 넣는 규약은 Linux AArch64 커널 진입에만 해당합니다. 앞선 firmware 단계 사이의 인계는 각 프로젝트가 정합니다.
@@ -187,7 +187,7 @@ RISC-V의 privilege mode와 Arm의 Exception level은 다른 개념입니다. SB
 
 - TF-A v2.15.0 `plat/qemu/qemu/include/platform_def.h`, QEMU 디버그 빌드 부팅 로그.
 - U-Boot v2024.04: `imx8mm_evk` `.config`, `flash.bin`에서 잘라낸 FIT의 `dumpimage -l`, `arch/arm/dts/imx8mm-u-boot.dtsi`, `common/spl/spl.c`(`preloader_console_init`), `include/spl.h`(`SPL_TPL_NAME`, `SPL_TPL_PROMPT`), `configs/*`(`CONFIG_TPL=y`), `doc/board/rockchip/rockchip.rst`(TPL), `doc/board/emulation/qemu-riscv.rst`.
-- [TF-A Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.10/design/firmware-design.html): BL 단계의 역할.
+- [TF-A Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.15.0/design/firmware-design.html): BL 단계의 역할.
 - [Linux AArch64 boot protocol](https://docs.kernel.org/6.12/arch/arm64/booting.html).
 
 ## 관련 항목

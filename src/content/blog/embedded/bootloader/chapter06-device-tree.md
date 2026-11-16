@@ -58,7 +58,7 @@ size_dt_struct:		0x1aac
 
 (`fdt header` 일부 생략)
 
-totalsize는 1 MiB이지만 실제 구조와 문자열은 0x1aec + 0x206, 약 7.4 KiB입니다. QEMU가 DTB를 1 MiB로 패딩해 넘기기 때문입니다. [Ch 27](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 이렇게 패딩된 DTB를 QEMU `-dtb`로 넘겼다가 TF-A BL2가 `Invalid Device Tree ... error -3`(`FDT_ERR_NOSPACE`)로 거부한 일이 있습니다. `qemu_arm64`의 기본 환경에는 `fdt_addr_r`도 없습니다. 이 보드는 커널용 DTB를 따로 읽어 오는 흐름을 기본으로 두지 않습니다.
+totalsize는 1 MiB이지만 실제 구조와 문자열은 0x1aec + 0x206 = 7,410바이트(약 7.2 KiB)입니다. QEMU가 DTB를 1 MiB로 패딩해 넘기기 때문입니다. [Ch 27](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 이렇게 패딩된 DTB를 QEMU `-dtb`로 넘겼다가 TF-A BL2가 `Invalid Device Tree ... error -3`(`FDT_ERR_NOSPACE`)로 거부한 일이 있습니다. `qemu_arm64`의 기본 환경에는 `fdt_addr_r`도 없습니다. 이 보드는 커널용 DTB를 따로 읽어 오는 흐름을 기본으로 두지 않습니다.
 
 control DTB는 U-Boot 전역 상태 `gd->fdt_blob`이 가리키고, driver model이 이 트리로 장치를 만듭니다([Ch 7](/blog/embedded/bootloader/chapter07-driver-model)).
 
@@ -84,7 +84,7 @@ quiet_cmd_fdtgrep = FDTGREP $@
 		$(addprefix -P ,$(subst $\",,$(CONFIG_OF_SPL_REMOVE_PROPS)))
 ```
 
-SPL 빌드에서 `fdtgrep_props`는 `-b bootph-all -b bootph-pre-ram`입니다. 첫 `fdtgrep`이 그 속성을 가진 노드와 부모만 남기고, 두 번째가 `bootph-*` 속성 자체와 `CONFIG_OF_SPL_REMOVE_PROPS`를 지웁니다. imx8mm은 그 값이 `"interrupt-parent interrupts"`라서 두 속성이 모두 사라졌습니다. 남은 42개 노드는 SPL이 DRAM을 켜고 다음 이미지를 읽는 데 필요한 것들입니다.
+SPL 빌드에서 `fdtgrep_props`는 `-b bootph-all -b bootph-pre-ram`입니다. 첫 `fdtgrep`이 그 속성을 가진 노드와 부모, 그리고 `-n`으로 지정한 `/chosen`·`/config`를 남기고, 두 번째가 `bootph-*` 속성 자체와 `CONFIG_OF_SPL_REMOVE_PROPS`를 지웁니다. imx8mm은 그 값이 `"interrupt-parent interrupts"`라서 두 속성이 모두 사라졌습니다. 남은 42개 노드는 SPL이 DRAM을 켜고 다음 이미지를 읽는 데 필요한 것들입니다.
 
 ```text
 aliases clock-osc-24m usbphynop1 soc@0 bus@30000000 spba-bus@30000000

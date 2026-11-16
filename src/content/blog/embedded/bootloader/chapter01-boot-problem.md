@@ -21,7 +21,7 @@ topics: ["embedded"]
 | QEMU | 11.1.3, `-M virt -cpu cortex-a57 -m 1024` |
 | U-Boot | v2024.04 `qemu_arm64_defconfig`, aarch64-elf-gcc 16.2.0 |
 | TF-A | v2.15.0 `PLAT=qemu` (BL33 = 위 U-Boot) |
-| UEFI 경로 | QEMU 포함 EDK2(`edk2-stable202408`) + Debian 13 arm64, 커널 6.12.116 |
+| UEFI 경로 | QEMU 포함 EDK2(`edk2-stable202408`) + Debian 13 arm64, 커널 6.12.116. 이 실행만 [Ch 35](/blog/embedded/bootloader/chapter35-uefi-cxl-init)의 VM(`-M virt,gic-version=3,cxl=on -cpu max -smp 4 -m 4g`) 로그 |
 
 이 시리즈의 실측은 대부분 이 QEMU 구성에서 나옵니다. 실제 SoC는 [Ch 23](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp)부터 U-Boot `imx8mm_evk` 빌드 산출물(SPL 배치, binman 이미지, DDR 설정 코드)로 다룹니다. 하드웨어 보드에서 실행한 기록은 없습니다.
 
@@ -82,7 +82,7 @@ fdt_blob    = 0x000000007e596d90
 
 (출력 일부 발췌)
 
-DTB(`fdt_blob`)는 QEMU가 만들어 RAM 끝 근처에 둔 것이고(`devicetree: board`), U-Boot는 자신을 RAM 위쪽 0x7f6d7000으로 relocation했습니다([Ch 8](/blog/embedded/bootloader/chapter08-board-init)).
+QEMU는 생성한 DTB를 RAM 시작(0x40000000)에 둡니다(`board/emulation/qemu-arm/qemu-arm.c`의 `board_fdt_blob_setup()`이 "QEMU loads a generated DTB for us at the start of RAM"이라며 `CFG_SYS_SDRAM_BASE`를 돌려줌, `devicetree: board`). `bdinfo`의 `fdt_blob` 0x7e596d90은 U-Boot가 relocation할 때 RAM 위쪽으로 복사한 사본입니다(`new_fdt`와 같은 값). U-Boot 자신은 0x7f6d7000으로 relocation했습니다([Ch 8](/blog/embedded/bootloader/chapter08-board-init)).
 
 ### TF-A BL1 → BL2 → BL31 → U-Boot
 
@@ -121,7 +121,7 @@ BL2가 BL31(image id 3)과 BL33(image id 5)을 둘 다 메모리에 올리고, B
 
 ### UEFI → shim·grub → Linux → init
 
-QEMU 포함 EDK2로 Debian 13을 부팅하면 U-Boot 없이 UEFI 펌웨어가 부트로더 자리에 섭니다. 로그에서 단계마다 한 줄씩 골랐습니다.
+QEMU 포함 EDK2로 Debian 13을 부팅하면 U-Boot 없이 UEFI 펌웨어가 부트로더 자리에 섭니다. 로그에서 단계마다 한 줄씩 골랐습니다. BdsDxe가 실행한 "UEFI Misc Device"는 ESP의 기본 경로 `EFI/BOOT/BOOTAA64.EFI`이고, 이 파일은 `EFI/debian/shimaa64.efi`와 SHA-256이 같은 shim입니다. shim은 콘솔에 아무것도 출력하지 않고 바로 grub을 실행하므로 로그에는 줄이 없습니다.
 
 ```text
 UEFI firmware (version edk2-stable202408-prebuilt.qemu.org built at 16:28:50 on Sep 12 2024)

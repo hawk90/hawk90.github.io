@@ -33,7 +33,7 @@ v2024.04 `common/spl/Kconfig`의 정의입니다.
 | `SPL_PAYLOAD_ARGS_ADDR` | `depends on SPL_OS_BOOT \|\| SPL_LOAD_FIT_OPENSBI_OS_BOOT`, OMAP만 기본값 0x88000000 | 인자 이미지를 올릴 RAM 주소 |
 | `SPL_FALCON_BOOT_MMCSD` | `depends on SPL_OS_BOOT && SPL_MMC`, `select SPL_LOAD_BLOCK`, `select SPL_SYS_MMCSD_RAW_MODE` | MMC/SD에서 커널을 raw로 읽음 |
 | `SYS_MMCSD_RAW_MODE_KERNEL_SECTOR` | `depends on SPL_FALCON_BOOT_MMCSD` | 커널 이미지 시작 섹터 |
-| `SYS_MMCSD_RAW_MODE_ARGS_SECTOR` / `_SECTORS` | 같음 | 인자 이미지 위치와 길이(섹터) |
+| `SYS_MMCSD_RAW_MODE_ARGS_SECTOR` / `_SECTORS` | 같음. `_SECTORS`는 `&& SYS_MMCSD_RAW_MODE_ARGS_SECTOR != 0x0`도 요구 | 인자 이미지 위치와 길이(섹터) |
 | `CMD_SPL` | `depends on SPL` | U-Boot Proper의 `spl export` 명령 |
 
 v2024.04에서 `CONFIG_SPL_OS_BOOT=y`인 defconfig는 38개입니다. TI AM335x·AM43xx·AM57xx·OMAP 계열과 i.MX6·i.MX28 보드가 대부분이고, 업스트림 `imx8mm_evk`와 QEMU 구성은 여기에 없습니다.
@@ -136,7 +136,7 @@ SPL: Direct Linux boot not active!
 	},
 ```
 
-`go`가 없습니다. 커널로 점프하기 직전까지 bootm을 진행한 뒤, 고쳐진 DTB의 주소와 크기를 `fdtargsaddr`·`fdtargslen` 환경 변수에 남기고 멈춥니다. `CMD_SPL`은 `depends on SPL`이라 SPL이 없는 `qemu_arm64`에서는 켤 수 없습니다. 그래서 같은 하위 명령을 QEMU U-Boot에서 직접 실행했습니다. 커널은 Debian 6.12 arm64 `Image`이고, QEMU `virt`의 DTB(`dumpdtb`로 받아 `dtc`로 7,785바이트로 정리)와 함께 `mkimage -f auto`로 FIT를 만들어 0x44000000에 올렸습니다.
+`go`가 없습니다. 커널로 점프하기 직전까지 bootm을 진행한 뒤, 고쳐진 DTB의 주소와 크기를 `fdtargsaddr`·`fdtargslen` 환경 변수에 남기고 멈춥니다. `CMD_SPL`은 `depends on SPL`이라 SPL이 없는 `qemu_arm64`에서는 켤 수 없습니다. 그래서 같은 하위 명령을 QEMU U-Boot에서 직접 실행했습니다. 이 빌드는 `CONFIG_SYS_BOOT_RAMDISK_HIGH=y`라 `spl export fdt`라면 `ramdisk`도 부르지만, initrd가 없으므로 그 단계는 뺐습니다. 커널은 Debian 6.12 arm64 `Image`이고, QEMU `virt`의 DTB(`dumpdtb`로 받아 `dtc`로 7,785바이트로 정리)와 함께 `mkimage -f auto`로 FIT를 만들어 0x44000000에 올렸습니다.
 
 ```text
 => setenv bootargs console=ttyAMA0 root=/dev/mmcblk0p2 falcon=yes
