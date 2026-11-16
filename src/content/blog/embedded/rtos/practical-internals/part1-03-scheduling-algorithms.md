@@ -19,20 +19,15 @@ topics: ["embedded", "embedded/rtos"]
 | 알고리즘 | 결정 기준 | 사용처 |
 | --- | --- | --- |
 | **Round Robin (RR)** | 시간 할당 (time slice) 회전 | 같은 우선순위 task 간 |
-| **Fixed-Priority Preemptive** | 고정 우선순위 | FreeRTOS 등에서 설정 가능한 방식 |
-| **Earliest Deadline First (EDF)** | 다음 deadline 임박 task 우선 | 학술·일부 hard real-time |
-| **Rate Monotonic (RM)** | 짧은 주기 task 우선 | 분석 가능한 hard real-time |
+| **Fixed-Priority Preemptive** | 고정 우선순위 | FreeRTOS(`configUSE_PREEMPTION=1`), Zephyr 기본 스케줄러 |
+| **Earliest Deadline First (EDF)** | 다음 deadline 임박 task 우선 | Zephyr `CONFIG_SCHED_DEADLINE`(같은 우선순위 안에서만) |
+| **Rate Monotonic (RM)** | 짧은 주기 task 우선 | 커널 기능이 아니라 응용이 우선순위를 정하는 규칙 |
 
 이 글의 FreeRTOS 예제는 단일 코어, `configUSE_PREEMPTION=1`, `configUSE_TIME_SLICING=1` 구성을 전제로 합니다. RM은 task의 주기를 바탕으로 애플리케이션이 우선순위를 배정하는 정책이며, 커널의 fixed-priority 선택과 같은 말이 아닙니다.
 
 ## Round Robin (RR)
 
-같은 우선순위 task들이 *time slice* 단위로 차례로 실행됩니다.
-
-```text
-시간 →
-[T1: 10ms][T2: 10ms][T3: 10ms][T1: 10ms]...
-```
+같은 우선순위 task들이 *time slice* 단위로 차례로 실행됩니다. 놀이공원의 한 줄 서기와 비슷합니다. 한 사람이 한 바퀴 타면 줄 맨 뒤로 가고 다음 사람이 탑니다. FreeRTOS에서 이 한 바퀴의 길이는 **1 tick**입니다. 따로 정하는 slice 길이가 없고, tick 인터럽트마다 같은 우선순위 ready task가 둘 이상이면 전환을 요청합니다([`tasks.c` L4861-L4872](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L4861-L4872)). Zephyr는 `CONFIG_TIMESLICE_SIZE`로 slice 길이를 따로 정합니다. Kconfig에는 단위가 ms, 기본값이 0으로 적혀 있습니다([v3.7.0 `kernel/Kconfig` L638-L644](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/kernel/Kconfig#L638-L644)). slice가 끝날 때 현재 thread가 선점 가능하면 커널이 대신 `k_yield()`를 부릅니다([scheduling 문서](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/doc/kernel/services/scheduling/index.rst) "Preemptive Time Slicing").
 
 ### 특징
 
@@ -42,7 +37,7 @@ topics: ["embedded", "embedded/rtos"]
 
 ### FreeRTOS 적용
 
-`configUSE_TIME_SLICING = 1`이 기본값입니다. 선점형 구성에서 같은 priority의 ready task 사이에 tick 기반 순환을 적용합니다. 더 높은 priority가 ready이면 우선 실행합니다.
+`configUSE_TIME_SLICING`을 정의하지 않으면 1입니다([`FreeRTOS.h` L2749-L2750](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/FreeRTOS.h#L2749-L2750)). 선점형 구성에서 같은 priority의 ready task 사이에 tick 기반 순환을 적용합니다. 더 높은 priority가 ready이면 우선 실행합니다.
 
 ```c
 xTaskCreate(taskA, "A", 256, NULL, 3, NULL);  // Priority 3
@@ -50,9 +45,31 @@ xTaskCreate(taskB, "B", 256, NULL, 3, NULL);  // Priority 3 → A와 RR
 xTaskCreate(taskC, "C", 256, NULL, 5, NULL);  // Priority 5 → A·B preempt
 ```
 
+이 구성을 QEMU에서 그대로 돌려 tick마다 누가 CPU를 잡는지 기록했습니다. A와 B는 쉬지 않고 돌며 현재 tick에 자기 이름을 적고, C는 4 tick에 깨어나 2 tick 동안 일한 뒤 잠듭니다. 우선순위 6의 감독 task가 14 tick 뒤에 표를 출력합니다.
+
+```c title="rr.c (발췌)"
+static volatile char who[N];
+static void mark(char me){ TickType_t t=xTaskGetTickCount(); if(t<N && who[t]==0) who[t]=me; }
+static void busy(void*a){ char me=*(char*)a; for(;;) mark(me); }
+static void hi(void*a){ (void)a; vTaskDelay(4); TickType_t s=xTaskGetTickCount(); while(xTaskGetTickCount()-s<2) mark('C'); vTaskDelay(100); }
+```
+
+FreeRTOS V11.2.0 `ARM_CM3`, arm-none-eabi-gcc 16.2.0 `-O2`, QEMU 11.1.3 `mps2-an385 -icount shift=5`에서 돌렸고, 두 번째 실행은 `-DconfigUSE_TIME_SLICING=0`으로 다시 빌드했습니다.
+
+```text
+configUSE_TIME_SLICING=1
+tick:  1  2  3  4  5  6  7  8  9 10 11 12 13 
+run :  B  A  B  C  C  A  B  A  B  A  B  A  B 
+configUSE_TIME_SLICING=0
+tick:  1  2  3  4  5  6  7  8  9 10 11 12 13 
+run :  A  A  A  C  C  B  B  B  B  B  B  B  B 
+```
+
+time slicing을 켜면 A와 B가 매 tick 번갈아 돕니다. 끄면 A가 C에게 선점될 때까지 계속 돌고, C가 잠든 뒤에는 B가 끝까지 CPU를 가집니다. 끈 경우에도 A에서 B로 한 번 넘어간 이유는 다음 task를 고르는 `listGET_OWNER_OF_NEXT_ENTRY()`가 ready list의 `pxIndex`를 한 칸 전진시킨 뒤 그 항목을 고르기 때문입니다([`list.h` L286-L297](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/list.h#L286-L297), [`tasks.c` L242](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L242)). time slicing은 tick마다 이 선택을 강제할 뿐이고, 선점이 끝난 뒤의 재선택에서도 같은 회전이 일어납니다.
+
 ## Fixed-Priority Preemptive
 
-**가장 흔한 RTOS 모델**입니다. 각 task에 *고정 우선순위*를 부여하고, 항상 *가장 높은 ready task*가 실행됩니다.
+FreeRTOS와 Zephyr의 기본 모델입니다. Zephyr 문서는 "The kernel's scheduler selects the highest priority ready thread"라고 적습니다([v3.7.0 scheduling 문서](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/doc/kernel/services/scheduling/index.rst) L38). 각 task에 *고정 우선순위*를 부여하고, 항상 *가장 높은 ready task*가 실행됩니다. 응급실 진료 순서와 비슷합니다. 먼저 온 환자보다 위급한 환자가 먼저 들어갑니다.
 
 ### 동작
 
@@ -78,7 +95,7 @@ PID의 실제 실행시간과 tick 주기에 따라 logger가 받는 CPU 예산�
 
 ### 우선순위 선택 — Rate Monotonic Theorem
 
-Liu & Layland (1973)의 독립적인 주기 task, 단일 CPU, 완전 선점, deadline=period, blocking·전환 오버헤드0 모델에서 **짧은 주기에 더 높은 priority**를 주는 RM은 fixed-priority 배정 중 최적입니다. 임의 deadline·공유 자원·SMP에도 그대로 최적이라는 뜻은 아닙니다.
+Liu & Layland (1973)은 단일 프로세서에서 다섯 가정을 둡니다. (A1) hard deadline이 있는 task는 일정한 주기로 요청되고, (A2) 각 요청은 다음 요청 전에 끝나야 하며(deadline = period), (A3) task끼리 독립이고, (A4) 실행 시간이 일정하며(최대 실행 시간으로 해석 가능), (A5) 비주기 task는 hard deadline이 없습니다. 이 모델에서 **짧은 주기에 더 높은 priority**를 주는 RM은 "어떤 고정 우선순위 배정이 가능하면 RM도 가능하다"는 의미로 최적입니다(Theorem 2). 공유 자원이 있으면 (A3)이 깨지므로 이 정리를 그대로 쓸 수 없습니다.
 
 | Task | 주기 | Priority |
 |---|---|---|
@@ -101,7 +118,7 @@ Liu & Layland (1973)의 독립적인 주기 task, 단일 CPU, 완전 선점, dea
 U = Σ (Ci / Ti) ≤ n × (2^(1/n) − 1)
 ```
 
-n이 무한대일 때 한계는 **ln(2) ≈ 0.693**입니다. 이는 task 수가 큰 경우의 충분조건 하한이며, 모든 RTOS가 CPU 69%까지 안전하다는 운용 규칙이 아닙니다.
+이 식은 논문의 Theorem 5("m개 task의 고정 우선순위 배정에서 utilization의 least upper bound는 m(2^(1/m) − 1)")이고, m이 커지면 **ln 2 ≈ 0.693**으로 내려갑니다. 이 값보다 낮으면 반드시 schedulable하다는 충분조건이지, CPU를 69%까지만 써야 한다는 운용 규칙이 아닙니다.
 
 ### 예 — 3 task
 
@@ -150,7 +167,7 @@ assert.throws(() => responseTimes([{C: 0, T: 1}]));
 console.log('PASS: R=[1,3,4], harmonic U=1 passes, overload deadline rejected');
 ```
 
-정수 시간 단위의 작은 모델을 Node로 실행한 결과입니다. 이 성공을 실제 RTOS의 WCET 증거나 하드웨어 deadline 증명으로 확대하지 않습니다.
+Node로 실행하면 `PASS: R=[1,3,4], harmonic U=1 passes, overload deadline rejected`를 출력합니다. 정수 시간 단위의 작은 모델이므로 WCET 값 자체는 별도로 재야 합니다. 1-10에서 이 계산에 blocking 항을 더합니다.
 
 ## Earliest Deadline First (EDF)
 
@@ -171,16 +188,14 @@ console.log('PASS: R=[1,3,4], harmonic U=1 passes, overload deadline rejected');
 
 ### 장점
 
-- 독립·완전 선점·단일 CPU·deadline=period·오버헤드 0 모델에서는 U≤1이면 가능하며, EDF가 최적입니다. 실제 하드웨어 예산에 100%를 그대로 배정할 근거는 아닙니다.
+- 같은 Liu & Layland 가정에서 deadline-driven(EDF) 스케줄은 ΣCi/Ti ≤ 1일 때 *그리고 그때만* 가능합니다(Theorem 7). 고정 우선순위의 bound보다 높지만, 문맥 전환 비용과 ISR은 모델 밖에 있습니다.
 - 더 이른 absolute deadline을 가진 job이 ready가 되면 현재 job을 선점할 수 있습니다. 시간이 흐른다는 이유만으로 기존 job들의 absolute deadline 순서가 바뀌는 것은 아닙니다.
 
 ### 단점
 
 - **구현이 복잡합니다.** ready job의 absolute deadline 순서를 관리해야 합니다. 매 tick에 모든 priority를 재계산해야 하는 것은 아닙니다.
-- **과부하에서는 연쇄 miss가 생길 수 있습니다.** 어떤 job을 거절·취소·예산 제한할지 오류 정책을 정해야 합니다.
-- FreeRTOS의 일반 task scheduler는 deadline을 보고 RM priority를 자동 배정하지 않습니다. Zephyr에는 `CONFIG_SCHED_DEADLINE`이 있어 같은 static priority 사이에서 deadline으로 순서를 세분할 수 있습니다. 이는 모든 task를 통합 EDF로 스케줄한다는 의미와 다릅니다. [Zephyr scheduling 문서](https://docs.zephyrproject.org/latest/kernel/services/scheduling/index.html)를 확인합니다.
-
-알고리즘의 이론적 장점과 특정 커널 구현·제품 인증은 별도로 확인합니다.
+- **과부하에서 어떤 job이 놓칠지 우선순위만으로 정해지지 않습니다.** 고정 우선순위에서는 낮은 우선순위 task부터 놓치지만, EDF에서는 deadline 순서에 따라 아무 task나 놓칠 수 있습니다. 어떤 job을 거절·취소·예산 제한할지 오류 정책을 정해야 합니다.
+- FreeRTOS의 task scheduler에는 deadline 필드가 없습니다(1-02의 `tskTCB`). Zephyr의 `CONFIG_SCHED_DEADLINE`은 Kconfig 도움말이 "Priority decisions within (!!) a single priority will choose the next expiring deadline"이라고 적듯 같은 static priority 안에서만 deadline으로 순서를 정합니다([v3.7.0 `kernel/Kconfig` L112-L119](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/kernel/Kconfig#L112-L119)). 모든 task를 하나의 EDF로 스케줄하는 기능이 아닙니다.
 
 ## Cooperative Scheduling
 
@@ -197,23 +212,25 @@ void taskA(void *arg) {
 
 ### 장점
 
-- task 간 전환 지점을 추적하기 쉽습니다. ISR·DMA·다른 코어와 공유하는 데이터의 race는 별도입니다.
-- 결정적입니다 (어디서 전환할지 명확합니다).
+- task 간 전환은 yield·block 지점에서만 일어나므로, 그 사이의 코드는 다른 task와의 race를 걱정하지 않아도 됩니다. ISR·DMA·다른 코어와 공유하는 데이터의 race는 그대로 남습니다.
+- 전환 지점이 소스에 드러나 있어 추적이 쉽습니다.
 
 ### 단점
 
-- 한 task가 block·yield 없이 계속 실행하면 다른 task의 실행을 막을 수 있습니다. ISR까지 반드시 멈추는 것은 아닙니다.
-- 실시간성이 없습니다.
+- 한 task가 block·yield 없이 계속 실행하면 다른 모든 task가 기다립니다. ISR은 그대로 돕니다.
+- 높은 우선순위 task의 응답 시간에 *낮은 우선순위 task가 yield 없이 도는 가장 긴 구간*이 더해집니다. 실시간 분석이 불가능해지는 것은 아니지만, 이 구간을 모든 task에 대해 알아야 합니다.
 
-`configUSE_PREEMPTION = 0`이면 FreeRTOS가 cooperative로 동작합니다. 작은 시스템이나 디버그용입니다.
+`configUSE_PREEMPTION = 0`이면 FreeRTOS가 cooperative로 동작합니다. 이때 idle task도 매 바퀴 `taskYIELD()`를 부릅니다([`tasks.c` L5830-L5836](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L5830-L5836)). Zephyr는 음수 우선순위 thread를 cooperative로 만들어 한 시스템 안에 두 방식을 섞습니다(1-01).
 
 ## Priority Inversion (예고)
 
-Mars Pathfinder (1997)는 화성 탐사선이 *지속적으로 reset*되는 문제를 겪었습니다. 원인은 다음과 같았습니다.
+Mars Pathfinder는 1997년 7월 4일 착륙 며칠 뒤부터 *total system reset*을 반복했습니다. JPL의 Glenn Reeves가 남긴 설명([Mike Jones 정리](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html), [Reeves 원문](https://www.cs.unc.edu/~anderson/teach/comp790/papers/mars_pathfinder_long_version.html))에 따르면 구조는 다음과 같았습니다.
 
-- `T_high` (priority 5) — mutex 대기
-- `T_med` (priority 3) — 계속 실행
-- `T_low` (priority 1) — mutex 보유, `T_med`에 preempt 당함 → 영원히 못 해제
+- 높은 우선순위의 bus management task — information bus를 보호하는 mutex 대기
+- 중간 우선순위의 communications task — 인터럽트로 깨어나 실행
+- 낮은 우선순위의 meteorological data task — mutex 보유 중 선점당해 해제하지 못함
+
+bus management task가 제때 돌지 못하자 watchdog이 이를 감지해 시스템 전체를 reset했습니다. 수정은 VxWorks mutex 생성 인자의 priority inheritance 옵션을 켜는 것이었습니다.
 
 해결책은 **Priority Inheritance**입니다 (3-04, 3-05 챕터에서 자세히 다룹니다).
 
@@ -229,7 +246,7 @@ Core 0: T_high1
 Core 1: T_high2
 ```
 
-장점은 *load balancing*이 자동이라는 점입니다. 단점은 *lock contention*과 *cache locality*가 깨진다는 점입니다.
+모든 코어가 하나의 ready 구조에서 task를 꺼냅니다. 어느 코어든 비면 가장 높은 ready task를 가져가므로 부하가 저절로 나뉩니다. 대신 모든 코어가 같은 자료구조를 고치므로 그 자료구조를 보호하는 lock을 함께 씁니다.
 
 ### 2. Partitioned Scheduling
 
@@ -238,9 +255,9 @@ Core 1: T_high2
 [Ready Queue Core 1] ← T4·T5
 ```
 
-장점은 *cache friendly*하다는 점입니다. 단점은 *manual balancing*이 필요하다는 점입니다.
+task를 코어에 미리 나눠 두고 코어마다 단일 코어 스케줄러를 돌립니다. 코어별로 단일 코어 분석을 그대로 쓸 수 있지만, 어느 task를 어느 코어에 둘지는 설계자가 정합니다.
 
-FreeRTOS V11.2.0 SMP는 공유 ready 구조에서 affinity·코어 상태 등의 제약을 적용해 실행 task를 선택합니다. affinity로 코어를 제한할 수 있지만 이를 곧 partitioned scheduler라고 분류하면 안 됩니다. `tasks.c`의 `prvSelectHighestPriorityTask`와 `uxCoreAffinityMask` 경로를 확인합니다. Zephyr의 CPU mask도 해당 설정의 실제 제약으로 확인하며 단순한 hint로만 보지 않습니다.
+FreeRTOS V11.2.0 SMP는 global 쪽입니다. 모든 코어가 같은 `pxReadyTasksLists[]`에서 고르고, `prvSelectHighestPriorityTask(xCoreID)`가 후보 task의 `uxCoreAffinityMask`에 그 코어 bit가 있는지 검사합니다([`tasks.c` L1005, L1089](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L1005)). affinity로 task를 한 코어에 묶을 수는 있지만 ready list가 코어별로 나뉘지는 않습니다. Zephyr의 `CONFIG_SCHED_CPU_MASK`는 `k_thread_cpu_mask_*()` API로 thread가 돌 수 있는 CPU를 제한하며, Kconfig 도움말은 이 기능이 DUMB 스케줄러에서만 동작하고 runnable thread 수에 O(N)으로 비례한다고 적습니다([v3.7.0 `kernel/Kconfig` L121-L131](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/kernel/Kconfig#L121-L131)). SMP는 [4-07](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)에서 자세히 다룹니다.
 
 ## 임베디드 RTOS 표준 답
 
@@ -272,7 +289,7 @@ deadline·period·blocking과 오류 정책으로 priority를 배정합니다. �
 
 > ⚠️ Priority 너무 많은 단계
 
-사용 가능한 priority 수와 분석에 필요한 구분을 확인합니다. 임의의 단계 수를 일반적인 충분조건으로 삼지 않습니다.
+FreeRTOS는 우선순위 하나마다 `pxReadyTasksLists[]`에 `List_t` 하나를 둡니다([`tasks.c` L475](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L475)). Cortex-M 포트에서 CLZ 명령을 쓰는 `configUSE_PORT_OPTIMISED_TASK_SELECTION = 1`(포트 기본값)은 `configMAX_PRIORITIES`가 32를 넘으면 컴파일 오류를 냅니다([`ARM_CM3/portmacro.h` L141-L159](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM3/portmacro.h#L141-L159)). 우선순위 수는 RM 분석에서 서로 다른 주기의 수만큼만 있으면 됩니다.
 
 > ⚠️ CPU 100% 가정
 
@@ -281,7 +298,7 @@ RM bound는 가정이 있는 충분조건입니다. 초과하면 RTA 등으로 �
 ## 정리
 
 - **Round Robin**은 같은 priority 내에서 시간 회전을 합니다.
-- **Fixed-Priority Preemptive**가 임베디드 RTOS의 표준입니다.
+- **Fixed-Priority Preemptive**가 FreeRTOS·Zephyr의 기본 모델입니다. FreeRTOS의 time slice는 1 tick입니다.
 - **Rate Monotonic**은 정해진 단일 CPU 모델에서 짧은 주기를 우선합니다. sufficient bound와 실패 판정은 구분합니다.
 - **EDF**의 최적성에는 모델 가정이 있고, 커널별 deadline 지원의 의미도 다릅니다.
 - 주기·deadline·최악 실행시간·blocking을 명시한 뒤 정책을 선택하고 분석합니다.
@@ -290,8 +307,9 @@ RM bound는 가정이 있는 충분조건입니다. 초과하면 RTA 등으로 �
 
 ## 1차 자료
 
-- [Liu & Layland 1973 원 논문](https://cse.unl.edu/~goddard/Courses/RealTimeSystems/Lectures/LiuLayland73.pdf): 단일 CPU 모델·RM bound·deadline 기반 배정
-- [FreeRTOS V11.2.0 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): 설정별 선점·tick slicing·SMP 선택 경로
+- C. L. Liu, J. W. Layland, "Scheduling Algorithms for Multiprogramming in a Hard-Real-Time Environment", *J. ACM* 20(1), pp. 46-61, 1973 ([PDF](https://www.cs.ru.nl/~hooman/DES/liu-layland.pdf)): 가정 (A1)-(A5), Theorem 2(RM 최적), Theorem 5(m(2^(1/m) − 1)), Theorem 7(EDF ΣC/T ≤ 1)
+- [FreeRTOS V11.2.0 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): time slicing(L4861), 선택 매크로(L242), SMP 선택(L1005)
+- [Zephyr v3.7.0 scheduling 문서](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/doc/kernel/services/scheduling/index.rst), [`kernel/Kconfig`](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/kernel/Kconfig)
 
 ## 관련 항목
 
