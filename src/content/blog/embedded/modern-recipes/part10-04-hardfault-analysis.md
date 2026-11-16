@@ -156,20 +156,20 @@ MMFAR= 0x00000000  BFAR = 0x00000000
 | 4 | `0x00020000` | UFSR `INVSTATE`(bit 17) | stacked PC = 0x280, Thumb 비트가 빠진 분기 대상 |
 | 5 | `0x02000000` | UFSR `DIVBYZERO`(bit 25) | `CCR.DIV_0_TRP`를 켠 경우에만 |
 
-CASE 1이 이 글의 가장 중요한 결과입니다. 빈 큐에서 `NULL->next`를 읽었는데 fault 없이 `queue_pop(empty) returned 67`이 나왔습니다. Cortex-M에서 0번지는 vector table이 놓이는 code 영역이고, 0x4의 내용은 reset vector 0x43(Reset_Handler 0x42 + Thumb 비트)입니다. STM32F405/407도 0x0000_0000~0x000F_FFFF가 BOOT 핀에 따라 Flash·system memory·SRAM의 alias라서(DS8626 memory map) 같은 일이 생깁니다. NULL 포인터 *읽기*는 fault로 잡히지 않고 엉뚱한 값을 돌려주며, 잡으려면 MPU로 0번지 영역을 접근 금지로 만들어야 합니다([10-08: 메모리 오염 진단](/blog/embedded/modern-recipes/part10-08-memory-corruption)).
+CASE 1이 이 글의 가장 중요한 결과입니다. QEMU mps2-an386처럼 0번지에 코드 메모리가 매핑된 칩에서는 빈 큐에서 `NULL->next`를 읽었는데 fault 없이 `queue_pop(empty) returned 67`이 나왔습니다. Cortex-M에서 0번지는 vector table이 놓이는 code 영역이고, 0x4의 내용은 reset vector 0x43(Reset_Handler 0x42 + Thumb 비트)입니다. STM32F405/407도 0x0000_0000~0x000F_FFFF가 BOOT 핀에 따라 Flash·system memory·SRAM의 alias라서(DS8626 memory map) 같은 일이 생깁니다. NULL 포인터 *읽기*는 fault로 잡히지 않고 엉뚱한 값을 돌려주며, 잡으려면 MPU로 0번지 영역을 접근 금지로 만들어야 합니다([10-08: 메모리 오염 진단](/blog/embedded/modern-recipes/part10-08-memory-corruption)).
 
 ## Step 3 — PC를 source line으로
 
 위 실행의 stacked PC를 `addr2line`에 넣으면 source 줄이 나옵니다.
 
 ```text
-$ arm-none-eabi-addr2line -e hf3.elf -f 0x000002fa
+$ arm-none-eabi-addr2line -s -e hf3.elf -f 0x000002fa
 read_unmapped
 hf.c:40
-$ arm-none-eabi-addr2line -e hf4.elf -f 0x00000280
+$ arm-none-eabi-addr2line -s -e hf4.elf -f 0x00000280
 write_null_next
 hf.c:35
-$ arm-none-eabi-addr2line -e hf5.elf -f 0x00000310
+$ arm-none-eabi-addr2line -s -e hf5.elf -f 0x00000310
 divide
 hf.c:48
 ```
@@ -190,7 +190,7 @@ IMPRECISERR는 store가 write buffer를 거쳐 나중에 끝나면서 bus error�
 *(volatile uint32_t*)0xE000E008 |= (1 << 1);  // DISDEFWBUF
 ```
 
-디버깅할 때만 켜고, 원인을 찾으면 끕니다. QEMU는 write buffer를 모델링하지 않아 위 CASE 3도 precise로 나왔으므로, imprecise fault는 이 실행으로 재현하지 못했습니다.
+디버깅할 때만 켜고, 원인을 찾으면 끕니다. 같은 주소에 *store*(`*(volatile uint32_t *)0x60000000 = 1`)를 해도 QEMU는 CFSR = 0x00008200, BFAR = 0x60000000, stacked PC = 그 `str` 명령(0x2ea)으로 precise하게 보고했으므로, imprecise fault는 이 실행으로 재현하지 못했습니다.
 
 ## 사용 권장 패턴 — fault 정보 NVRAM 저장
 
@@ -223,7 +223,7 @@ void boot_check_fault(void) {
 }
 ```
 
-다음 부팅에서 직전 fault의 PC와 CFSR을 읽을 수 있습니다. `BACKUP_SRAM_BASE`는 reset으로 지워지지 않는 영역이어야 합니다. STM32F405/407에는 4 KB backup SRAM이 있습니다(DS8626 첫 쪽 "192+4KB RAM"). 이 영역에 쓰려면 PWR·backup domain 접근을 먼저 열어야 하는데, 그 절차는 레퍼런스 매뉴얼의 PWR 절에 있습니다. 같은 일을 하는 코드는 [10-12: 포스트모템 분석](/blog/embedded/modern-recipes/part10-12-postmortem-analysis)에 있습니다.
+다음 부팅에서 직전 fault의 PC와 CFSR을 읽을 수 있습니다. `BACKUP_SRAM_BASE`는 reset으로 지워지지 않는 영역이어야 합니다. STM32F405/407에는 4 KB backup SRAM이 있습니다(DS8626 첫 쪽 "192+4KB RAM"). DS8626 2.2.18절은 이 backup SRAM이 전력을 아끼려고 기본으로 꺼져 있고 소프트웨어로 켤 수 있다고 적으므로, 기록 전에 켜는 코드가 있어야 합니다. 같은 일을 하는 코드는 [10-12: 포스트모템 분석](/blog/embedded/modern-recipes/part10-12-postmortem-analysis)에 있습니다.
 
 ## CFSR 비트에서 다음 행동으로
 
@@ -271,7 +271,7 @@ CFSR의 비트는 1을 써야 지워집니다(ARMv7-M ARM B3.2.15의 각 sub-reg
 - LR (EXC_RETURN) 비트 2로 MSP/PSP를 골라 stacked frame을 잡습니다.
 - precise fault에서 stacked PC는 fault를 낸 명령입니다(CASE 3·5). INVSTATE는 분기 대상이 PC이고 원인은 stacked LR 쪽입니다(CASE 4). imprecise bus fault는 PC가 뒤에 있습니다.
 - CFSR을 BFSR/UFSR/MMFSR로 나눠 읽고 BFAR/MMFAR을 함께 봅니다. 별도 핸들러가 없으면 `HFSR.FORCED`가 섭니다.
-- Cortex-M에서 NULL 읽기는 vector table을 읽을 뿐 fault가 나지 않습니다(CASE 1). MPU로 0번지를 막아야 잡힙니다.
+- 0번지에 Flash가 매핑된 칩(QEMU mps2-an386, STM32F405/407)에서는 NULL 읽기가 vector table을 읽을 뿐 fault가 나지 않습니다(CASE 1). MPU로 0번지를 막아야 잡힙니다.
 - Imprecise BFSR은 `ACTLR.DISDEFWBUF`로 precise하게 만듭니다(M4 TRM).
 - `STKERR`·`MSTKERR`가 서 있으면 stacked frame을 믿지 않습니다.
 
@@ -282,4 +282,3 @@ CFSR의 비트는 1을 써야 지워집니다(ARMv7-M ARM B3.2.15의 각 sub-reg
 - [10-03: GDB 원격 디버깅](/blog/embedded/modern-recipes/part10-03-gdb-remote-debug)
 - [10-08: 메모리 오염 진단](/blog/embedded/modern-recipes/part10-08-memory-corruption)
 - [10-12: 포스트모템 분석](/blog/embedded/modern-recipes/part10-12-postmortem-analysis)
-- [Embedded Performance Ch 8: Crash 분석](/blog/embedded/performance-engineering/part5-08-nsight)
