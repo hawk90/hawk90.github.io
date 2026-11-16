@@ -98,7 +98,6 @@ Altera 드라이버는 한 번에 하나만 보내므로 읽기 Tag 0x1d, 쓰기
 |------|------|
 | 8비트 Extended Tag | Device Capabilities의 `PCI_EXP_DEVCAP_EXT_TAG`, Device Control의 `PCI_EXP_DEVCTL_EXT_TAG`(`pci_regs.h:491,514`) |
 | 10비트 Tag | pciutils 3.13.0이 `DevCap2`의 `10BitTagComp`·`10BitTagReq`를 표시함. Linux v6.12 `pci_regs.h`에는 해당 정의가 없음 |
-| 14비트 Tag | [PCI-SIG FAQ](https://web.archive.org/web/20250117201651/https://pcisig.com/faq?page=3) "Were bit tags adjusted in the PCIe 6.0 specification?": 6.0에서 14비트로 늘렸다고 답함 |
 
 10비트 Tag의 사용 범위는 구현마다 다릅니다. 한 예로 [Altera R-Tile Avalon-ST IP 사용자 가이드 26.1](https://docs.altera.com/r/docs/683501/26.1/r-tile-avalon-streaming-ip-for-pci-express-user-guide/tag-allocation)은 x16 컨트롤러가 Tag 256~1023을 써서 최대 768개, x8·x4 컨트롤러는 256~768로 최대 512개의 Non-Posted request를 낸다고 적습니다. 이 숫자는 그 IP의 값이고, PCIe 전체의 한계로 일반화하지 않습니다.
 
@@ -204,7 +203,7 @@ Linux device-io 문서가 경고하는 대로 PCI 쓰기는 posted입니다. 도
 
 ### "Tag 수는 장치가 원하는 만큼"
 
-Tag 폭은 Extended Tag·10비트·14비트 기능을 지원하고 켰는지에 달렸고, 실제로 쓰는 범위는 구현이 정합니다. R-Tile IP처럼 x16과 x8 컨트롤러의 상한이 다른 경우도 있습니다. 그리고 시리즈 VM처럼 "enabling Extended Tags" 로그가 나와도 레지스터가 안 바뀔 수 있으니 `lspci -vv`로 확인합니다.
+Tag 폭은 Extended Tag·10비트 기능을 지원하고 켰는지에 달렸고, 실제로 쓰는 범위는 구현이 정합니다. R-Tile IP처럼 x16과 x8 컨트롤러의 상한이 다른 경우도 있습니다. 그리고 시리즈 VM처럼 "enabling Extended Tags" 로그가 나와도 레지스터가 안 바뀔 수 있으니 `lspci -vv`로 확인합니다.
 
 ### "Header Log는 그대로 읽으면 된다"
 
@@ -223,7 +222,7 @@ Altera 드라이버는 4바이트 config 접근에 Length 1을 씁니다. Length
 - TLP header 첫 바이트는 Fmt(상위 3비트)와 Type(하위 5비트)입니다. Config Read Type 0은 0x04, Write는 0x44입니다.
 - Configuration Request header는 3 DW이고, Requester ID·Tag·Byte Enable·대상 BDF·offset 위치가 Linux `pcie-altera.c` 매크로에 그대로 있습니다.
 - Type 값 Memory 0, I/O 2, CFG0 4, CFG1 5, Message 0x10은 DesignWare ATU 정의와 일치합니다.
-- Tag는 8비트(Extended), 10비트, 6.0의 14비트로 넓어졌고, 실제 범위는 구현마다 다릅니다.
+- Tag는 8비트(Extended)와 10비트 기능이 있고, 실제 범위는 구현마다 다릅니다.
 - MPS·MRRS는 128~4096바이트 인코딩이고, QEMU VM에서는 쓰기가 막혀 128바이트로 고정입니다.
 - AER Header Log로 오류 TLP를 보고, QEMU에서는 바이트 순서가 뒤집혀 보입니다.
 - posted write의 도착은 같은 장치 read-back으로 확인합니다.
