@@ -118,7 +118,55 @@ constexpr std::array<float, 256> generate_sin_table() {
 constexpr auto sin_table = generate_sin_table();   // 상수 초기화; 배치는 링커 설정
 ```
 
-아래 CRC 테이블과 함께 `std::array` 대신 같은 모양의 작은 `Array` 구조체로 바꿔(이 글의 ARM 툴체인에 libstdc++가 없어서) `sin_table`을 읽는 `fast_sin(uint8_t)`과 `compute_crc`를 함께 두고 arm-none-eabi-g++ 16.2.0 `-Os`로 컴파일하면, `sin_table`과 `crc_table`이 각각 1,024바이트 지역 읽기 전용 심볼(`r`)로 `.rodata`에 놓이고 `.data`·`.bss`·`.init_array`는 0입니다. `.rodata`가 Flash로 가는지는 링커 스크립트가 정합니다([Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts)). `constexpr`이 정하는 것은 초기화 시점이지 저장 위치가 아닙니다.
+아래 CRC 테이블과 함께 `std::array` 대신 같은 모양의 작은 `Array` 구조체로 바꿔(이 글의 ARM 툴체인에 libstdc++가 없어서) `sin_table`을 읽는 `fast_sin(uint8_t)`과 `compute_crc`를 함께 두고 arm-none-eabi-g++ 16.2.0으로 컴파일하면, `sin_table`과 `crc_table`이 각각 1,024바이트 지역 읽기 전용 심볼(`r`)로 `.rodata`에 놓이고 `.data`·`.bss`·`.init_array`는 0입니다. `.rodata`가 Flash로 가는지는 링커 스크립트가 정합니다([Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts)). `constexpr`이 정하는 것은 초기화 시점이지 저장 위치가 아닙니다.
+
+측정에 쓴 파일(`lut-arm.cpp`)과 명령입니다.
+
+```cpp
+#include <stdint.h>
+#include <stddef.h>
+template <class T, size_t N> struct Array {   // std::array 대용 (이 툴체인에 <array> 없음)
+    T v[N];
+    constexpr T& operator[](size_t i) { return v[i]; }
+    constexpr const T& operator[](size_t i) const { return v[i]; }
+};
+constexpr float taylor_sin(float x) {
+    constexpr float pi = 3.14159265358979323846f;
+    while (x > pi) x -= 2 * pi;
+    while (x < -pi) x += 2 * pi;
+    float result = x, term = x;
+    for (int n = 1; n < 7; ++n) { term *= -x * x / ((2 * n) * (2 * n + 1)); result += term; }
+    return result;
+}
+constexpr Array<float, 256> generate_sin_table() {
+    Array<float, 256> table{};
+    for (int i = 0; i < 256; ++i) table[i] = taylor_sin((i * 2.0f * 3.14159f) / 256.0f);
+    return table;
+}
+constexpr auto sin_table = generate_sin_table();
+constexpr Array<uint32_t, 256> generate_crc_table() {
+    Array<uint32_t, 256> table{};
+    for (uint32_t i = 0; i < 256; ++i) {
+        uint32_t crc = i;
+        for (int j = 0; j < 8; ++j) crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+        table[i] = crc;
+    }
+    return table;
+}
+constexpr auto crc_table = generate_crc_table();
+uint32_t compute_crc(const uint8_t* data, size_t len) {
+    uint32_t crc = 0xFFFFFFFF;
+    for (size_t i = 0; i < len; ++i) crc = (crc >> 8) ^ crc_table[(crc ^ data[i]) & 0xFF];
+    return ~crc;
+}
+float fast_sin(uint8_t idx) { return sin_table[idx]; }
+```
+
+```bash
+arm-none-eabi-g++ -std=c++17 -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Os -ffreestanding -fno-exceptions -c lut-arm.cpp -o lut.o
+arm-none-eabi-size -A lut.o
+arm-none-eabi-nm -S -C lut.o
+```
 
 ### Taylor series로 컴파일 타임 sin
 
