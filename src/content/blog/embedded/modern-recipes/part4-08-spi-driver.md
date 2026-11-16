@@ -190,7 +190,7 @@ void DMA2_Stream2_IRQHandler(void) {
 }
 ```
 
-stream·channel은 ST STM32CubeF4의 `Projects/STM32F412ZG-Nucleo/Examples/SPI/SPI_FullDuplex_ComDMA/Inc/main.h`(SPI1: `SPIx_RX_DMA_STREAM DMA2_Stream2`, `SPIx_TX_DMA_STREAM DMA2_Stream3`, 둘 다 `DMA_CHANNEL_3`)를 따랐습니다. F412는 F407과 다른 reference manual을 쓰는 칩이고 이 글은 RM0090의 DMA request 표를 열어 보지 못했으므로, F407 보드에서는 그 표로 확인합니다. 순서는 HAL v1.8.3 `HAL_SPI_TransmitReceive_DMA()`처럼 RX stream을 먼저, TX stream을 나중에 켭니다. stream을 켜기 전에는 HAL `HAL_DMA_Start_IT()`가 하는 `regs->IFCR = 0x3FU << hdma->StreamIndex`처럼 두 stream의 flag를 지웁니다(stream 2는 bit 16부터, stream 3은 bit 22부터). transaction의 끝은 RX 완료로 봅니다. HAL도 "the communication closing is performed in DMA reception complete callback"이라는 주석과 함께 TX 완료 callback을 비워 두고 RX 완료에서 닫습니다. 그래서 TX stream의 `DMA_SxCR_TCIE`는 쓰지 않습니다.
+stream·channel은 ST STM32CubeF4의 `Projects/STM32F412ZG-Nucleo/Examples/SPI/SPI_FullDuplex_ComDMA/Inc/main.h`(SPI1: `SPIx_RX_DMA_STREAM DMA2_Stream2`, `SPIx_TX_DMA_STREAM DMA2_Stream3`, 둘 다 `DMA_CHANNEL_3`)를 따랐습니다. F407의 RM0090 Rev 22(st.com이 응답하지 않아 [stm32.dirba.io](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/)의 본문 판으로 확인) Table 44(DMA2 request mapping)도 channel 3에 SPI1_RX를 stream 0·2, SPI1_TX를 stream 3·5로 두므로 F407에서도 같은 번호를 씁니다. 순서는 HAL v1.8.3 `HAL_SPI_TransmitReceive_DMA()`처럼 RX stream을 먼저, TX stream을 나중에 켭니다. stream을 켜기 전에는 HAL `HAL_DMA_Start_IT()`가 하는 `regs->IFCR = 0x3FU << hdma->StreamIndex`처럼 두 stream의 flag를 지웁니다(stream 2는 bit 16부터, stream 3은 bit 22부터). transaction의 끝은 RX 완료로 봅니다. HAL도 "the communication closing is performed in DMA reception complete callback"이라는 주석과 함께 TX 완료 callback을 비워 두고 RX 완료에서 닫습니다. 그래서 TX stream의 `DMA_SxCR_TCIE`는 쓰지 않습니다.
 
 ### 4. Multi-slave CS pattern
 
