@@ -409,7 +409,7 @@ public:
 Base<Derived>* ptr = new Derived;
 delete ptr;   // 비virtual base를 통한 다른 동적 타입 삭제: undefined behavior
 ```
-CRTP base는 보통 stack에서 쓰거나 derived로 직접 사용합니다. base pointer로 소유하는 패턴은 피해야 합니다. 보호된 base 소멸자로 base를 통한 삭제와 slicing을 차단하는 방법도 있습니다. 실제 downcast는 객체가 Derived의 base subobject인 경우에만 유효합니다.
+CRTP base는 derived 타입으로 직접 씁니다. base pointer로 소유하는 패턴은 피합니다. 보호된 base 소멸자로 base를 통한 삭제와 slicing을 차단하는 방법도 있습니다. 실제 downcast는 객체가 Derived의 base subobject인 경우에만 유효합니다.
 
 ### 3. 복사 동작이 의도와 어긋남
 ```cpp

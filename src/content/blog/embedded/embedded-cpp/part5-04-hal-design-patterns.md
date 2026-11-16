@@ -44,7 +44,7 @@ hal::Led::set();
 
 ## HAL의 3 계층
 
-HAL은 보통 세 계층으로 쌓입니다. Application은 인터페이스만 보고, 벤더별 구현은 그 아래에 숨어 있습니다.
+이 글의 HAL은 세 계층으로 나눕니다. Application은 인터페이스만 보고, 벤더별 구현은 그 아래에 숨어 있습니다.
 
 ![HAL 3 계층 — App → Interface → Vendor → Hardware](/images/blog/embedded-cpp/diagrams/part5-04-hal-layers.svg)
 
@@ -181,7 +181,7 @@ template 쪽 `blink` 본문이 약간 큰 것은 BSRR 주소를 literal pool에 
 단점은 다음과 같습니다.
 
 - Application도 template이라 header에 정의해야 합니다
-- type이 폭증할 수 있습니다
+- 핀·포트 조합마다 타입이 하나씩 생기고, 그 타입을 받는 함수 템플릿도 조합마다 인스턴스화됩니다([Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost))
 
 ## 패턴 3 — typedef 기반 (가장 단순)
 

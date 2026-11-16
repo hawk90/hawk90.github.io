@@ -119,7 +119,7 @@ GPIOA_BSRR::write(1 << 5);     // Atomic set (HW supported)
 
 ## Bit field — 명명된 비트
 
-32-bit MMIO 레지스터는 보통 여러 비트 필드로 쪼개져 있습니다. 예를 들어 STM32의 USART\_CR1은 다음처럼 enable 비트, mode 비트, parity 비트 등이 한 워드에 모여 있습니다.
+32-bit MMIO 레지스터 하나에 여러 비트 필드가 들어 있는 경우가 STM32F407의 USART\_CR1입니다. 이 레지스터는 다음처럼 enable 비트, mode 비트, parity 비트 등이 한 워드에 모여 있습니다.
 
 아래는 STM32F407xx의 CR1 일부입니다. 다른 STM32 계열에 그대로 적용하지 않습니다.
 

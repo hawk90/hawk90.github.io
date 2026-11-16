@@ -85,7 +85,7 @@ int b = square(read_input());     // 런타임 호출 (compile-time 값 아니�
 
 `constexpr` 함수는 상황에 따라 컴파일 타임 또는 런타임에 호출됩니다. 상수식이 필요한 문맥은 언어 규칙이 평가를 요구하고, 나머지 문맥의 상수 접기는 최적화 선택입니다.
 
-C++11의 비생성자 `constexpr` 함수 본문에는 단일 return 등 엄격한 제약이 있었습니다. C++14부터는 loop, branch, 변수 등 대부분의 statement를 쓸 수 있습니다.
+C++11의 비생성자 `constexpr` 함수 본문에는 단일 return 등 엄격한 제약이 있었습니다. C++14부터는 loop, branch, 지역 변수를 쓸 수 있습니다. C++14에서 남은 금지 항목은 asm 선언, `goto`, try-block, 그리고 literal이 아닌 타입·`static`·`thread_local`·초기화하지 않은 변수의 정의입니다(C++14 [dcl.constexpr]/3).
 
 ```cpp
 // C++14 — full constexpr
@@ -411,7 +411,7 @@ Homebrew Clang 23.1.5와 g++-16, arm64 macOS에서 `clang++ -std=c++17 -Wall -We
 - `constexpr`은 컴파일 타임에 값이 정해지는 변수와 함수에 모두 적용됩니다.
 - LUT와 CRC 테이블을 상수 초기화할 수 있으며 저장 위치는 링커 배치로 확인합니다.
 - `if constexpr`은 버려진 분기를 인스턴스화하지 않는 컴파일 타임 분기입니다. 상수 조건의 일반 `if`도 GCC에서는 같은 크기의 코드가 나왔으므로, 이 키워드의 가치는 코드 크기보다 컴파일 가능성에 있습니다.
-- C++14 이후 대부분의 statement가 `constexpr` 가능하며, C++20에서는 new와 virtual까지 완화됐습니다.
+- C++14부터 loop·branch·지역 변수를 `constexpr` 함수에 쓸 수 있고, C++20에서는 transient `new`와 virtual 호출까지 허용됐습니다.
 - `consteval` (C++20)은 런타임 호출을 차단하고, `constinit`은 static 초기화를 강제합니다.
 
 ## 관련 항목

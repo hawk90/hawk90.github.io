@@ -271,7 +271,7 @@ unique_ptr로 충분하면 unique로 갑니다. shared는 정당화가 필요합
 ```cpp
 std::unique_ptr<FILE, decltype(&fclose)> f(fopen(...), &fclose);
 ```
-함수 포인터 deleter는 별도 상태 저장 공간이 들 수 있습니다. ABI에 따라 크기를 확인하고, 상태가 필요 없다면 빈 functor deleter를 검토합니다.
+함수 포인터 deleter는 포인터를 하나 더 저장합니다. 64비트 호스트에서 8바이트가 16바이트가 됐습니다([Part 2-02](/blog/embedded/embedded-cpp/part2-02-raii-patterns#함수-포인터-deleter--runtime-비용-발생)). 상태가 필요 없다면 빈 functor deleter를 씁니다.
 
 ### 4. weak_ptr 없이 cycle
 ```cpp

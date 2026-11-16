@@ -174,7 +174,7 @@ float compute_area(const Shape& s) {
 장점은 다음과 같습니다.
 
 - vtable과 type info가 모두 0입니다.
-- visitor는 최적화될 수 있지만 std::visit 구현과 후보 수에 따라 dispatch table의 간접 호출이 남을 수 있습니다.
+- dispatch는 variant가 저장한 index로 정해집니다. 이 글에서는 `std::visit`의 생성 코드를 재지 않았습니다(이 글의 ARM 툴체인에는 `<variant>`가 없습니다).
 - value semantics를 가집니다.
 
 단점도 있습니다.

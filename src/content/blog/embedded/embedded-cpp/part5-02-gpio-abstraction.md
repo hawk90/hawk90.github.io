@@ -232,7 +232,7 @@ blink_n_times<LedRed>(5, 500);
 
 ## Alternative function 매핑
 
-대부분의 peripheral pin은 alternative function을 가집니다(STM32 datasheet 참조).
+STM32F4의 GPIO 핀은 AFR 레지스터의 4비트 필드로 AF0~AF15 중 하나를 고르고, 각 번호가 어느 peripheral 기능인지는 품번별 datasheet의 alternate function 표가 정합니다.
 
 ```cpp
 enum class AltFn : uint8_t {
@@ -362,7 +362,7 @@ production에서 pin이 변경되어야 한다면 template 방식으로는 부�
 
 ### 6. 출력 slew 설정 누락
 
-GPIO speed 필드는 보통 출력 드라이버 slew 특성이며 UART baud나 SPI clock 주파수 그 자체가 아닙니다. 부하·전압·EMI·신호 무결성을 고려해 설정하고 보드에서 확인합니다.
+STM32F4의 OSPEEDR 필드는 출력 드라이버의 slew 특성(Low/Medium/High/Very high speed)을 고르며, UART baud나 SPI clock 주파수 그 자체가 아닙니다. 부하·전압·EMI·신호 무결성을 고려해 설정하고 보드에서 확인합니다.
 
 ## 작은 예제 — 설정을 실제 backend에 적용
 

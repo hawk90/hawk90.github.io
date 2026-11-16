@@ -216,7 +216,7 @@ SPI와 CS pin이 하나의 device로 묶입니다. scope 이탈에서 CS를 복�
 
 ## I2C 추상화
 
-I2C의 실패 경로에서도 버스 소유권에 맞게 정리해야 합니다. START에 성공한 뒤 address NACK나 data NACK가 나면 보통 STOP 처리가 필요하지만 arbitration을 잃은 master가 무조건 STOP을 보내면 안 됩니다.
+I2C의 실패 경로에서도 버스 소유권에 맞게 정리해야 합니다. I2C-bus 규격(NXP UM10204)에서 bus를 가진 master는 address NACK나 data NACK를 받으면 STOP(또는 repeated START)으로 전송을 끝냅니다. 반면 arbitration을 잃은 master는 그 순간 bus를 잃은 것이라 STOP을 보내면 안 됩니다.
 
 따라서 adapter에는 START/주소/byte 전송뿐 아니라 현재 bus ownership과 제한 시간, NACK·arbitration lost·bus error 구분이 필요합니다. 아래 실행 예제의 transaction guard는 소유 중일 때만 STOP을 보냅니다. 이는 프로토콜 흐름 검사이며 실제 STM32 I2C ACK/STOP 레지스터 시퀀스를 구현한 것은 아닙니다.
 

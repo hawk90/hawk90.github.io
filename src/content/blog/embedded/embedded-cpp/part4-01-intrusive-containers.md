@@ -227,10 +227,10 @@ using ReadyList = bi::list<Task, bi::base_hook<bi::list_base_hook<bi::tag<ReadyT
 | 할당 | allocator로 node 확보 | container 자체는 node를 할당하지 않음 |
 | Erase | 단일 iterator erase O(1), 검색은 별도 | 연결 node를 아는 경우 O(1) |
 | 다중 list 가입 | 어려움 (T를 복사) | 자연스러움 |
-| Type safety | 강함 | 보통 (template으로 강화) |
+| Type safety | 강함 | C의 `container_of`는 매크로 캐스트, 위 template 구현은 member pointer로 타입 고정 |
 | 표준 | C++98부터 | 비표준 구현/라이브러리 |
 
-고정 주소의 객체를 여러 queue에서 빌려 쓰는 경우 intrusive가 맞을 수 있습니다. 별도 소유권·일반 값 의미·수명 관리가 필요하면 std::list와 allocator 또는 다른 고정 컨테이너가 더 단순할 수 있습니다.
+고정 주소의 객체를 여러 queue에 동시에 넣어야 하면 intrusive가 맞습니다. 위 FreeRTOS TCB처럼 객체 하나가 list item 두 개를 갖고 ready list와 event list에 함께 걸립니다. 반대로 list가 원소를 소유하고 값으로 복사·이동해야 하면, 원소마다 link를 두는 대신 노드를 컨테이너가 관리하는 `std::list`(+ pool allocator)나 고정 용량 컨테이너가 수명 규칙이 더 짧습니다.
 
 ## ETL의 intrusive_list
 

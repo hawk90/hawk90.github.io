@@ -161,7 +161,7 @@ struct TaggedPtr {
 std::atomic<TaggedPtr<Node>> top{TaggedPtr<Node>{nullptr, 0}};   // 16 byte atomic on 64-bit
 ```
 
-32-bit target에서 pointer+tag 묶음은 더 넓은 atomic 연산을 요구할 수 있습니다. 지원 여부는 target/toolchain으로 검사합니다. 아래 16-bit ptr 표현은 일반 Cortex-M의 0x20000000 SRAM 주소를 담지 못하므로 실제 pointer packing으로 쓰면 안 됩니다.
+32-bit target에서 32비트 pointer와 tag를 묶으면 64비트 atomic CAS가 필요하고, ARMv7-M에는 이 명령이 없습니다([Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics#aba-problem)). 아래 16-bit ptr 표현은 일반 Cortex-M의 0x20000000 SRAM 주소를 담지 못하므로 실제 pointer packing으로 쓰면 안 됩니다.
 
 ```cpp
 struct PackedPtr {
