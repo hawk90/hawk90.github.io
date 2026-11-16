@@ -259,11 +259,11 @@ void run_one_tick(void)
 }
 ```
 
-이 코드에는 동시성 보호가 없습니다. 논문도 VAX 구현의 명령 수에서 인터럽트 우선순위를 내리고 올리는 동기화 비용을 뺐는데, 어느 타이머 알고리즘에나 필요하고 비용이 기계마다 다르다는 이유입니다(p. 32). v4.7 `__run_timers`는 slot을 옮기고 타이머를 떼어 내는 동안 인터럽트를 끈 채 `base->lock`을 잡고, 콜백을 부를 때만 풀었다가 다시 잡습니다([v4.7 L1190-L1245](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L1190-L1245)). `run_one_tick`을 SysTick ISR에서 부르면 콜백도 ISR 안에서 돌므로 콜백이 길수록 그 ISR이 길어지고, task에서 부르는 `add_timer`·`del_timer`는 SysTick을 막은 구간 안에서 불러야 리스트가 깨지지 않습니다(이 글의 유도).
+이 코드에는 동시성 보호가 없습니다. 논문도 VAX 구현의 명령 수에서 인터럽트 우선순위를 내리고 올리는 동기화 비용을 뺐는데, 어느 타이머 알고리즘에나 필요하고 비용이 기계마다 다르다는 이유입니다(p. 33). v4.7 `__run_timers`는 slot을 옮기고 타이머를 떼어 내는 동안 인터럽트를 끈 채 `base->lock`을 잡고, 콜백을 부를 때만 풀었다가 다시 잡습니다([v4.7 L1190-L1245](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L1190-L1245)). `run_one_tick`을 SysTick ISR에서 부르면 콜백도 ISR 안에서 돌므로 콜백이 길수록 그 ISR이 길어지고, task에서 부르는 `add_timer`·`del_timer`는 SysTick을 막은 구간 안에서 불러야 리스트가 깨지지 않습니다(이 글의 유도).
 
 ### 경계값 검사
 
-표의 범위가 코드와 맞는지는 배열 경계마다 타이머를 걸어 보면 확인됩니다. 아래 코드를 위 두 블록과 같은 파일 끝에 붙여 호스트에서 `cc -std=c11 -O2`로 컴파일합니다(`timer_ticks`가 `static`이라 같은 파일이어야 합니다). `0x7fffffff` 경우는 2^31 tick을 돌리므로 시간이 걸립니다.
+표의 범위가 코드와 맞는지는 배열 경계마다 타이머를 걸어 보면 확인됩니다. 아래 코드를 위 두 블록과 같은 파일 끝에 붙여 호스트에서 `cc -std=c11 -O2`로 컴파일합니다(`timer_ticks`가 `static`이라 같은 파일이어야 합니다). `0x7fffffff` 경우는 2^31 tick을 돌립니다. Apple clang 21.0.0(`cc -std=c11 -O2 -Wall -Wextra`, 경고 없음)으로 빌드해 Apple Silicon Mac에서 돌렸을 때 전체 실행이 user 4.71초였습니다.
 
 ```c
 #include <stdio.h>
@@ -321,7 +321,7 @@ int main(void)
 }
 ```
 
-통과하면 `all checks passed`를 출력합니다. `FAIL`이 `exact` 반복문 줄에서 나오면 배열이나 칸 선택이 틀려 만료 tick이 어긋나거나 타이머가 사라진 것입니다. `fire_after(512)` 줄에서 나오면 cascade를 tv1 처리보다 늦게 한 것입니다. `exact`의 만료 tick은 모두 256의 배수가 아니라서 이 순서를 가르지 못하므로, 256 경계에서 시작한 512 tick 타이머로 따로 봅니다. `0x80000000u` 줄에서 나오면 과거 판정이 빠져 2^31 이상이 tv5에 들어간 것입니다.
+위 환경에서 실행 결과는 `all checks passed` 한 줄이었습니다. `FAIL`이 `exact` 반복문 줄에서 나오면 배열이나 칸 선택이 틀려 만료 tick이 어긋나거나 타이머가 사라진 것입니다. `fire_after(512)` 줄에서 나오면 cascade를 tv1 처리보다 늦게 한 것입니다. `exact`의 만료 tick은 모두 256의 배수가 아니라서 이 순서를 가르지 못하므로, 256 경계에서 시작한 512 tick 타이머로 따로 봅니다. `0x80000000u` 줄에서 나오면 과거 판정이 빠져 2^31 이상이 tv5에 들어간 것입니다.
 
 ### Hashed wheel과의 비용 비교
 
@@ -329,7 +329,7 @@ tv1의 한 칸에 든 타이머는 모두 그 tick에 만료되므로, hashed wh
 
 이 글의 두 코드에 1 tick = 1 ms, 10초 timeout(10,000 tick)을 넣으면(이 글의 유도) 차이가 구체적으로 보입니다. Hashed wheel(M = 256)에서는 10,000 = 39 × 256 + 16이라 만료 전에 slot을 39번 지나며 비교합니다. Hierarchical 코드에서는 tv2에 들어갔다가 만료 전 256 tick 안에서 한 번 tv1로 옮겨집니다. 만료 전에 취소되는 timeout이라면 hierarchical 쪽은 만료 256 tick 전보다 먼저 취소될 때 옮기는 비용이 0이고, hashed 쪽은 취소 전까지 지난 바퀴 수만큼 이미 비교했습니다.
 
-메모리는 반대입니다. 포인터가 4바이트인 32비트 Arm MCU([AAPCS32 2025Q4, Data Types](https://github.com/ARM-software/abi-aa/blob/2025Q4/aapcs32/aapcs32.rst))에서 이 글의 코드 기준으로 slot 배열은 정렬 리스트가 head 포인터 하나(4 B), hashed wheel이 256 × 4 = 1,024 B, hierarchical이 (256 + 4 × 64) × 4 = 2,048 B입니다. 타이머 노드는 앞 두 코드가 12 B, `pprev`를 더한 hierarchical이 16 B입니다.
+메모리는 반대입니다. 포인터가 4바이트인 32비트 Arm MCU([AAPCS32 2025Q4, Data Types](https://github.com/ARM-software/abi-aa/blob/2025Q4/aapcs32/aapcs32.rst))에서 이 글의 코드 기준으로 slot 배열은 정렬 리스트가 head 포인터 하나(4 B), hashed wheel이 256 × 4 = 1,024 B, hierarchical이 (256 + 4 × 64) × 4 = 2,048 B입니다. 타이머 노드는 앞 두 코드가 12 B, `pprev`를 더한 hierarchical이 16 B입니다. 같은 선언을 `arm-none-eabi-gcc` 16.2.0 `-mcpu=cortex-m4 -O2`로 컴파일해 `sizeof` 값을 `.data`에 넣고 `objdump -s`로 읽으면 12·16·1,024·2,048이 나옵니다.
 
 ## Cascade 없는 Wheel — Linux v4.8
 
