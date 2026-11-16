@@ -19,7 +19,7 @@ topics: ["embedded"]
 
 Linux perf는 커널의 `perf_event_open(2)` 위에 있는 사용자 공간 도구입니다. 카운터를 세는 `perf stat`, 표본을 모으는 `perf record`, 표본을 함수별로 보여 주는 `perf report`가 기본 세 명령입니다. 이 글은 그 세 명령과 `perf annotate`·`perf top`·`perf diff`를 실제로 돌린 출력으로 설명합니다.
 
-**실행 환경.** 이 글의 출력은 모두 Apple M2 Pro 위 QEMU 11.1.3(`-M virt -accel hvf -cpu host`, 8 vCPU) 안의 Debian 13 arm64 guest에서 얻었습니다. 커널은 `6.12.116+deb13-arm64`, perf는 `6.12.117`, 컴파일러는 GCC 14.2.0입니다. 하드웨어 PMU 이벤트가 필요한 절은 같은 이미지를 `-accel tcg -cpu max`로 띄운 두 번째 guest에서 돌렸고, 그 결과가 실제 CPU 사이클이 아니라는 점을 해당 절에 적었습니다. 호스트는 다른 작업과 공유했으므로 시간 측정에는 수 % 수준의 잡음이 섞여 있습니다.
+**실행 환경.** 이 글의 출력은 모두 Apple M2 Pro 위 QEMU 11.1.3(`-M virt -accel hvf -cpu host`, 8 vCPU) 안의 Debian 13 arm64 guest에서 얻었습니다. 커널은 `6.12.116+deb13-arm64`, perf는 `6.12.117`, 컴파일러는 GCC 14.2.0입니다. 하드웨어 PMU 이벤트가 필요한 절은 같은 이미지를 `-accel tcg -cpu max`로 띄운 두 번째 guest에서 돌렸고, 그 결과가 실제 CPU 사이클이 아니라는 점을 해당 절에 적었습니다. 호스트는 다른 작업과 공유했습니다. 같은 실행을 10번 반복한 `perf stat -r 10`의 흩어짐은 ±1.30%였지만, 가끔 2배 가까이 튄 실행(734.2 ms 대신 1499.9 ms, 아래 표의 2589.3 ms·1099.5 ms)도 섞였습니다.
 
 ## 측정 대상 — 열 우선과 행 우선 합산
 
@@ -187,7 +187,7 @@ $ perf stat -e cycles,instructions,cache-references,cache-misses ./prog_v1 1
       12.615047072 seconds time elapsed
 ```
 
-하지만 이 숫자는 CPU 사이클이 아닙니다. QEMU 11.1.0 소스 `target/arm/cpregs-pmu.c`에서 `CPU_CYCLES`(0x011)는 `qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL)`에 `ARM_CPU_FREQ`(`1000000000`, 주석 "FIXME: 1 GHz")를 곱해 만든 값입니다. 경과 12.6초에 12.5×10⁹ "cycles"가 나온 것은 그 때문입니다. `INST_RETIRED`(0x008)는 `icount_enabled() == ICOUNT_PRECISE`일 때만 지원되어 위처럼 `<not supported>`이고, 캐시 이벤트는 표에 없습니다. 에뮬레이터 카운터로는 IPC나 캐시 미스율을 낼 수 없다는 것을 기억해 두면 됩니다.
+하지만 이 숫자는 CPU 사이클이 아닙니다. QEMU 11.1.3 소스 `target/arm/cpregs-pmu.c`에서 `CPU_CYCLES`(0x011)는 `qemu_clock_get_ns(QEMU_CLOCK_VIRTUAL)`에 `ARM_CPU_FREQ`(`1000000000`, 주석 "FIXME: 1 GHz")를 곱해 만든 값입니다. 경과 12.6초에 12.5×10⁹ "cycles"가 나온 것은 그 때문입니다. `INST_RETIRED`(0x008)는 `icount_enabled() == ICOUNT_PRECISE`일 때만 지원되어 위처럼 `<not supported>`이고, 캐시 이벤트는 표에 없습니다. 에뮬레이터 카운터로는 IPC나 캐시 미스율을 낼 수 없다는 것을 기억해 두면 됩니다.
 
 ### 반복 측정
 
@@ -323,7 +323,7 @@ $ perf report -i nofp.data --stdio --no-children --sort sym
  b44:	mov	x29, sp
 ```
 
-이 빌드(Debian GCC 14.2.0, AArch64)에서는 옵션 이름과 실제 결과가 달랐습니다. 그래서 "`-O2`면 체인이 깨진다"를 전제하지 말고, 대상 툴체인의 디스어셈블리에서 `stp x29, x30`이 있는지 먼저 봅니다. 다른 아키텍처나 다른 컴파일러에서는 결과가 다를 수 있으므로 같은 확인을 그 툴체인에서 다시 합니다.
+이 빌드(Debian GCC 14.2.0, AArch64)에서는 옵션 이름과 실제 결과가 달랐습니다. 그래서 "`-O2`면 체인이 깨진다"를 전제하지 말고, 대상 툴체인의 디스어셈블리에서 `stp x29, x30`이 있는지 먼저 봅니다. 다른 아키텍처나 다른 컴파일러라면 같은 확인을 대상 툴체인에서 다시 합니다.
 
 `dwarf`는 표본마다 사용자 스택을 통째로 복사합니다(기본 8192바이트, 같은 문서). 같은 프로그램에서 파일 크기 차이가 분명했습니다.
 
@@ -409,7 +409,7 @@ QEMU 소스가 이유를 그대로 적고 있습니다. `STALL_FRONTEND`(0x023)�
 `strip`한 바이너리를 기록했는데도 처음에는 `hot_function` 이름이 나왔습니다. `strip`이 build-id를 남기고, 앞서 기록한 `prog_v1`이 같은 build-id로 `~/.debug` 캐시에 들어 있었기 때문입니다. 캐시를 빈 디렉터리로 돌리면 진짜 모습이 나옵니다.
 
 ```text
-$ perf --buildid-dir /tmp/emptybid report -i strip2.data --stdio --sort dso,sym
+$ perf --buildid-dir /tmp/emptybid report -i strip.data --stdio --sort dso,sym
 # Overhead  Shared Object      Symbol
     64.98%  prog_strip         [.] 0x0000000000000ae0
 ...
@@ -435,7 +435,7 @@ $ perf --buildid-dir /tmp/emptybid report -i strip2.data --stdio --sort dso,sym
 
 > ⚠️ 가상 머신에서 숫자를 그대로 믿기
 
-hardware 이벤트가 `<not supported>`면 perf는 조용히 `task-clock`으로 바꿔 샘플링합니다(report 머리의 `task-clock:ppp`). 에뮬레이터의 `cycles`는 가상 시계에서 나온 값이고, stall 이벤트는 0으로 고정입니다. 결과를 공유할 때는 report 머리의 이벤트 이름을 같이 붙입니다.
+이 HVF guest에서는 hardware 이벤트가 전부 `<not supported>`였고, perf는 경고 없이 `task-clock`으로 바꿔 샘플링했습니다(report 머리의 `task-clock:ppp`). 에뮬레이터의 `cycles`는 가상 시계에서 나온 값이고, stall 이벤트는 0으로 고정입니다. 결과를 공유할 때는 report 머리의 이벤트 이름을 같이 붙입니다.
 
 > ⚠️ Multiplex된 결과를 정확하다고 믿기
 

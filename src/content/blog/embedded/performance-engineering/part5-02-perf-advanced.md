@@ -95,7 +95,7 @@ $ perf stat -e armv8_pmuv3_0/cpu_cycles/,armv8_pmuv3_0/event=0x11/,r11,r03,r04 .
                  0      r04
 ```
 
-여기서 **`r03`·`r04`가 오류 없이 `0`**으로 나온 것이 함정입니다. v6.12 `include/linux/perf/arm_pmuv3.h`에서 0x0003은 `ARMV8_PMUV3_PERFCTR_L1D_CACHE_REFILL`, 0x0004는 `ARMV8_PMUV3_PERFCTR_L1D_CACHE`이지만, QEMU 11.1.0 `target/arm/cpregs-pmu.c`의 지원 이벤트 표에는 없습니다. TCG guest의 PMU는 모르는 번호를 받아 주고 세지 않았습니다. 반면 HVF guest는 같은 `r03,r04`와 `armv8_pmuv3_0/event=0x17/`을 `<not supported>`로 거부했습니다. 0이 "일어나지 않음"인지 "세지 않음"인지는 `events/` 목록과 코어 TRM의 이벤트 표로 가립니다.
+여기서 **`r03`·`r04`가 오류 없이 `0`**으로 나온 것이 함정입니다. v6.12 `include/linux/perf/arm_pmuv3.h`에서 0x0003은 `ARMV8_PMUV3_PERFCTR_L1D_CACHE_REFILL`, 0x0004는 `ARMV8_PMUV3_PERFCTR_L1D_CACHE`이지만, QEMU 11.1.3 `target/arm/cpregs-pmu.c`의 지원 이벤트 표에는 없습니다. TCG guest의 PMU는 모르는 번호를 받아 주고 세지 않았습니다. 반면 HVF guest는 같은 `r03,r04`와 `armv8_pmuv3_0/event=0x17/`을 `<not supported>`로 거부했습니다. 0이 "일어나지 않음"인지 "세지 않음"인지는 `events/` 목록과 코어 TRM의 이벤트 표로 가립니다.
 
 PMU 이름도 장비가 정합니다. 흔히 예제에 나오는 `armv8_pmuv3/...`는 이 guest에 없는 이름이라 perf가 이렇게 거부했습니다.
 
@@ -142,7 +142,7 @@ $ perf stat -e context-switches,cpu-migrations,page-faults,minor-faults,major-fa
                  0      major-faults
 ```
 
-`page-faults` 595개는 모두 minor였습니다. 64 MiB `malloc` 영역을 처음 건드릴 때 생긴 폴트이고 디스크를 읽지 않았습니다. 페이지 캐시를 비운 뒤 다시 돌리면 major가 하나 생깁니다.
+`page-faults` 595개는 모두 minor였습니다. `perf trace -F min --no-syscalls ./prog_v1 1`로 폴트가 난 함수를 세면 595건 중 543건이 64 MiB `malloc` 영역을 처음 채우는 `fill`이었고, 나머지는 `_dl_start`(6)·`dl_main`(4)·`__libc_early_init`(4) 같은 동적 링커와 libc 초기화였습니다. 모두 디스크를 읽지 않았습니다. 페이지 캐시를 비운 뒤 다시 돌리면 major가 하나 생깁니다.
 
 ```text
 $ sync; echo 3 > /proc/sys/vm/drop_caches; perf stat -e page-faults,minor-faults,major-faults ./prog_v1 1
@@ -386,7 +386,7 @@ Tracepoint 기록 비용은 이벤트 빈도에 비례합니다. 초당 수만 �
 
 > ⚠️ Raw event의 `0`을 "일어나지 않음"으로 읽기
 
-TCG guest의 `r03`·`r04`는 지원하지 않는 번호인데도 오류 없이 `0`이었습니다. `events/` 목록에 없는 번호는 코어 TRM으로 확인하고, 일부러 이벤트를 일으키는 작은 프로그램으로 값이 움직이는지 봅니다.
+TCG의 `r03`·`r04`가 0으로 나왔습니다. 지원 이벤트 표에 없는 번호인데도 오류는 없었습니다. `events/` 목록에 없는 번호는 코어 TRM으로 확인하고, 일부러 이벤트를 일으키는 작은 프로그램으로 값이 움직이는지 봅니다.
 
 > ⚠️ 다른 장비의 PMU 이름 복사
 
@@ -406,7 +406,7 @@ perf stat -e e1,e2,e3,e4,e5,e6,e7,e8 ./app
 
 > ⚠️ `perf sched record`를 길게 돌리기
 
-0.42초 벤치마크에 17.5 MB가 쌓였습니다. 스케줄 이벤트가 많은 시스템에서는 몇 초만 돌려도 수백 MB가 됩니다. 재현 구간을 좁혀 짧게 기록합니다.
+0.423초 벤치마크에 17.530 MB, 초당 약 41 MB가 쌓였습니다. 재현 구간을 좁혀 짧게 기록합니다.
 
 ## 정리
 

@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 커널의 어느 함수에서 시간이 새는지, 파일 하나를 여는 동안 커널 안에서 무슨 일이 일어나는지 같은 질문은 perf의 표본만으로는 답하기 어렵습니다. 표본은 일정 간격으로 찍는 사진이라, 몇 마이크로초짜리 호출은 사진 사이에 빠집니다. ftrace는 사진 대신 **출입 기록부**입니다. 켜 둔 함수를 지나갈 때마다 한 줄씩 적습니다.
 
-[ftrace.rst @v6.12](https://github.com/torvalds/linux/blob/v6.12/Documentation/trace/ftrace.rst)의 "dynamic ftrace" 절은 원리를 이렇게 설명합니다. `-pg`로 빌드한 커널은 함수마다 첫머리에 추적 호출이 들어가는데, `CONFIG_DYNAMIC_FTRACE`가 있으면 부팅 때 이 호출을 nop으로 바꿔 두었다가 켤 때만 되살립니다. 그래서 "function tracing is disabled"일 때는 "virtually no overhead"라고 적습니다. 이 글 끝의 측정에서 확인하겠지만, 켜는 순간의 비용은 켠 함수 수에 따라 크게 달라집니다.
+[ftrace.rst @v6.12](https://github.com/torvalds/linux/blob/v6.12/Documentation/trace/ftrace.rst)의 "dynamic ftrace" 절은 원리를 이렇게 설명합니다. `-pg`로 빌드한 커널은 함수마다 첫머리에 추적 호출이 들어가는데, `CONFIG_DYNAMIC_FTRACE`가 있으면 부팅 때 이 호출을 nop으로 바꿔 두었다가 켤 때만 되살립니다. 이 설명은 문서의 mcount(x86) 기준이고, v6.12 arm64는 `arch/arm64/Makefile`에서 `CONFIG_DYNAMIC_FTRACE_WITH_CALL_OPS`면 `-fpatchable-function-entry=4,2`, `CONFIG_DYNAMIC_FTRACE_WITH_ARGS`면 `-fpatchable-function-entry=2`로 함수 첫머리에 nop 자리를 만듭니다. 이 guest 커널은 두 설정이 모두 `y`였습니다. 그래서 "function tracing is disabled"일 때는 "virtually no overhead"라고 적습니다. 이 글 끝의 측정에서 확인하겠지만, 켜는 순간의 비용은 켠 함수 수에 따라 크게 달라집니다.
 
 이 글의 출력은 모두 Apple M2 Pro 위 QEMU 11.1.3 HVF guest(8 vCPU)의 Debian 13 arm64, 커널 `6.12.116+deb13-arm64`, trace-cmd 3.3.1에서 얻었습니다. 아키텍처가 arm64라 함수 이름과 레지스터 이름이 x86 예제와 다르다는 점도 함께 보입니다.
 
@@ -112,24 +112,24 @@ echo 1 > tracing_on; cat /etc/hostname > /dev/null; echo 0 > tracing_on
 ```
 
 ```text
- 5)               |  do_sys_openat2() {
- 5)               |    getname() {
- 5)   1.792 us    |      getname_flags.part.0();
- 5)   2.291 us    |    }
- 5)               |    get_unused_fd_flags() {
- 5)   0.375 us    |      alloc_fd();
- 5)   0.583 us    |    }
- 5)               |    do_filp_open() {
- 5) + 17.125 us   |      path_openat();
- 5) + 17.417 us   |    }
- 5)   0.125 us    |    fd_install();
- 5)               |    putname() {
- 5)   0.167 us    |      kmem_cache_free();
- 5)   0.375 us    |    }
- 5) + 22.667 us   |  }
+ 3)   cat-15175    |               |  do_sys_openat2() {
+ 3)   cat-15175    |               |    getname() {
+ 3)   cat-15175    |   0.625 us    |      getname_flags.part.0();
+ 3)   cat-15175    |   0.917 us    |    }
+ 3)   cat-15175    |               |    get_unused_fd_flags() {
+ 3)   cat-15175    |   0.167 us    |      alloc_fd();
+ 3)   cat-15175    |   0.333 us    |    }
+ 3)   cat-15175    |               |    do_filp_open() {
+ 3)   cat-15175    |   5.625 us    |      path_openat();
+ 3)   cat-15175    |   5.791 us    |    }
+ 3)   cat-15175    |   0.083 us    |    fd_install();
+ 3)   cat-15175    |               |    putname() {
+ 3)   cat-15175    |   0.125 us    |      kmem_cache_free();
+ 3)   cat-15175    |   0.250 us    |    }
+ 3)   cat-15175    |   8.583 us    |  }
 ```
 
-들여쓰기가 호출 깊이, 왼쪽 숫자가 CPU, 오른쪽이 함수의 전체 실행 시간입니다. 한 번의 열기 22.667 us 중 17.417 us가 경로 탐색(`do_filp_open` → `path_openat`)이었습니다. `cat`은 실행 중 파일을 여러 번 여는데, 같은 기록에서 다음 열기는 8.750 us(`path_openat` 5.709 us)로 더 빨랐습니다. 기호는 ftrace.rst의 "Flags" 표 그대로입니다.
+기본 출력에는 task 이름이 없어서 `echo funcgraph-proc > trace_options`로 `cat-15175` 열을 켰습니다. 들여쓰기가 호출 깊이, 왼쪽 숫자가 CPU, 오른쪽이 함수의 전체 실행 시간입니다. `cat`의 첫 열기 8.583 us 중 5.791 us가 경로 탐색(`do_filp_open` → `path_openat`)이었습니다. 같은 기록에서 `cat`의 `do_sys_openat2` 진입은 31번이었습니다. 기호는 ftrace.rst의 "Flags" 표 그대로입니다.
 
 | 기호 | 의미 |
 |---|---|
@@ -227,7 +227,7 @@ $ echo 1 > tracing_on; cat /etc/hostname > /dev/null; echo 0 > tracing_on
              cat-9884    [004] d....  1699.833088: my_open: (do_sys_openat2+0x0/0x110) dfd=0xffffffffffffff9c filename=(fault)
 ```
 
-`dfd=0x...ff9c`는 -100, 곧 `AT_FDCWD`입니다. 세 번째 줄의 `(fault)`는 probe가 도는 순간 그 사용자 문자열을 읽지 못했다는 표시입니다. kprobetrace.rst는 문자열이 담긴 페이지가 paged out이면 읽기가 실패한다고 적습니다. 레지스터 이름을 몰라도 되게 `$arg2`로 쓰면 아키텍처와 무관한 정의가 됩니다. kprobetrace.rst는 `$argN`이 함수 진입(offset 0)에서만, 레지스터로 넘어온 인자만 지원한다고 적습니다. 이 커널은 받아들였습니다.
+`dfd=0x...ff9c`는 -100, 곧 `AT_FDCWD`입니다. 세 번째 줄의 `(fault)`는 probe가 도는 순간 그 사용자 문자열을 읽지 못했다는 표시입니다. kprobetrace.rst는 커널 공간 `string` 타입이 문자열이 담긴 페이지가 paged out이면 실패한다고 적고, `ustring`은 같은 일을 사용자 공간에서 하는 타입이라고 설명합니다. 이 실행에서는 `ustring`으로도 한 번 `(fault)`가 났습니다. 레지스터 이름을 몰라도 되게 `$arg2`로 쓰면 아키텍처와 무관한 정의가 됩니다. kprobetrace.rst는 `$argN`이 함수 진입(offset 0)에서만, 레지스터로 넘어온 인자만 지원한다고 적습니다. 이 커널은 받아들였습니다.
 
 ```text
 $ echo 'p:my_open2 do_sys_openat2 filename=+0($arg2):ustring' > kprobe_events; cat kprobe_events

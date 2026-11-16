@@ -15,9 +15,9 @@ topics: ["embedded"]
 
 ## 어떤 문제를 푸는가
 
-[5-03](/blog/embedded/performance-engineering/part5-03-ftrace)의 ftrace와 [5-02](/blog/embedded/performance-engineering/part5-02-perf-advanced)의 `perf record`는 이벤트를 하나하나 버퍼에 적은 뒤 사용자 공간에서 후처리합니다. 이 글 뒤쪽의 측정에서 `getppid` 700만 번을 `perf record`로 받아 적었더니 `perf.data`가 1.72 GB였습니다. 통계청이 국민 한 사람 한 사람의 답안지를 트럭으로 실어 나르는 셈입니다.
+[5-03](/blog/embedded/performance-engineering/part5-03-ftrace)의 ftrace와 [5-02](/blog/embedded/performance-engineering/part5-02-perf-advanced)의 `perf record`는 이벤트를 하나하나 버퍼에 적은 뒤 사용자 공간에서 후처리합니다. 이 글 뒤쪽의 측정에서 `getppid` 700만 번을 도는 동안 `perf record -a`로 시스템 전체의 `sys_enter` 이벤트를 받아 적었더니 `perf.data`가 1.72 GB였습니다. 통계청이 국민 한 사람 한 사람의 답안지를 트럭으로 실어 나르는 셈입니다.
 
-eBPF는 집계 코드를 커널의 hook 지점에 직접 붙입니다. 각 동네 사무소가 그 자리에서 집계표를 만들어 숫자만 보내는 방식입니다. 같은 700만 번을 bpftrace로 세었을 때 결과는 comm별 개수 15줄이었습니다.
+eBPF는 집계 코드를 커널의 hook 지점에 직접 붙입니다. 각 동네 사무소가 그 자리에서 집계표를 만들어 숫자만 보내는 방식입니다. 같은 700만 번을 bpftrace로 세었을 때 결과는 comm별 개수 14줄이었습니다.
 
 bpftrace는 awk와 비슷한 한 줄 언어로 eBPF 프로그램을 만드는 도구이고, BCC는 C로 쓴 BPF 프로그램을 Python에서 싣고 결과를 처리하는 도구 모음입니다. 이 글의 출력은 모두 Apple M2 Pro 위 QEMU 11.1.3 HVF guest(8 vCPU)의 Debian 13 arm64, 커널 `6.12.116+deb13-arm64`, bpftrace v0.23.2, BCC(`bpfcc-tools`) 0.31.0에서 얻었습니다.
 
@@ -185,7 +185,7 @@ $ bpftrace -e 'usdt:/usr/bin/python3.13:python:gc__start /pid == cpid/ { @gen[ar
 @gen[2]: 14
 ```
 
-스크립트가 세대 0·1·2를 10번씩 부르므로, 세대 0의 3번과 세대 2의 4번은 인터프리터 시작과 종료 중에 일어난 GC입니다. USDT가 있는지는 배포판 빌드 옵션에 따라 달라지므로, 문서의 probe 이름을 믿기 전에 `bpftrace -l`로 대상 바이너리를 확인합니다.
+스크립트가 세대 0·1·2를 10번씩 부르므로, 세대 0의 3번과 세대 2의 4번은 스크립트가 부르지 않은 GC입니다. 어느 시점에 일어났는지는 이번에 나눠 보지 않았습니다. USDT가 있는지는 배포판 빌드 옵션에 따라 달라지므로, 문서의 probe 이름을 믿기 전에 `bpftrace -l`로 대상 바이너리를 확인합니다.
 
 ## BCC — Python으로 복잡한 분석
 
@@ -210,7 +210,7 @@ PID    COMM               FD ERR PATH
 11840  cat                 4   0 /etc/hostname
 ```
 
-`ERR 2`(`ENOENT`)로 실패한 열기가 성공보다 많습니다. 로캘 파일을 `C.UTF-8`로 먼저 찾고 없으면 `C.utf8`로 다시 찾기 때문입니다. 정작 목표인 `/etc/hostname`은 마지막 한 줄입니다.
+`ERR 2`(`ENOENT`)로 실패한 열기가 14건(성공 17건)입니다. 로캘 파일을 `C.UTF-8`로 먼저 찾고 없으면 `C.utf8`로 다시 찾기 때문입니다. 정작 목표인 `/etc/hostname`은 마지막 한 줄입니다.
 
 `runqlat`은 task가 실행 가능해진 뒤 CPU를 받기까지의 대기 시간 분포입니다. `perf bench sched pipe -l 20000`을 돌리는 3초 동안의 결과입니다.
 
@@ -271,10 +271,10 @@ BCC 0.31.0이 왜 이 바이너리를 풀지 못했는지는 이번에 확인하
 | 수집 방식 | 중앙값 (usecs/op) | baseline 대비 | 남은 데이터 |
 |---|---:|---:|---|
 | 없음 | 0.1146 | 1.0× | — |
-| bpftrace `raw_syscalls:sys_enter` → `count()` map | 0.1573 | 1.4× | comm별 15줄 |
+| bpftrace `raw_syscalls:sys_enter` → `count()` map | 0.1573 | 1.4× | comm별 14줄 |
 | `perf record -a -e raw_syscalls:sys_enter` | 0.2381 | 2.1× | `perf.data` 1,724,131,977 B |
 
-같은 tracepoint를 켜고 bpftrace는 커널 안에서 세기만, perf는 사건마다 기록을 적었습니다. bpftrace는 `syscall-basic` 7000042번을 세고 끝에 표 하나를 내놓았고, perf는 같은 구간을 1.72 GB로 남겼습니다. baseline 위에 더해진 호출당 비용은 bpftrace가 0.043 us, perf가 0.124 us로 약 3분의 1이었습니다. [5-03](/blog/embedded/performance-engineering/part5-03-ftrace)의 표와 비교하면 같은 루프에서 ftrace `raw_syscalls` 이벤트 기록이 1.9×, 필터 없는 function tracer가 3.9×였습니다.
+같은 tracepoint를 켜고 bpftrace는 커널 안에서 세기만, perf는 사건마다 기록을 적었습니다. bpftrace는 `syscall-basic` 7000042번을 세고 끝에 표 하나를 내놓았고, perf는 같은 구간에 시스템 전체(`-a`)의 `sys_enter`를 1.72 GB로 남겼습니다. baseline 위에 더해진 호출당 비용은 bpftrace가 0.043 us, perf가 0.124 us로 약 3분의 1이었습니다. [5-03](/blog/embedded/performance-engineering/part5-03-ftrace)의 표와 비교하면 같은 루프에서 ftrace `raw_syscalls` 이벤트 기록이 1.9×, 필터 없는 function tracer가 3.9×였습니다.
 
 | 도구 | 비용을 좌우하는 조건 | 수집 데이터 |
 |------|--------------------|-------------|
@@ -360,7 +360,7 @@ strip한 바이너리에서는 같은 함수에 붙지 못했습니다(strip 전
 - 상수 bound 루프는 실렸고, bound를 모르는 루프는 `E2BIG`, 512바이트를 넘는 스택은 clang에서 거부되었습니다.
 - bpftrace는 한 줄로 count·`hist`·`lhist`를 만들고, BCC는 `opensnoop`·`runqlat`·`biolatency` 같은 완성 도구를 줍니다.
 - tracepoint와 kprobe 위치는 안정 ABI가 아닙니다(bpf_design_QA.rst). uprobe는 심볼이 없으면 붙지 않고, USDT는 배포판 빌드마다 있는 probe가 다릅니다.
-- 같은 tracepoint에서 bpftrace 집계는 1.4×와 15줄, `perf record` 기록은 2.1×와 1.72 GB였습니다.
+- 같은 tracepoint에서 bpftrace 집계는 1.4×와 14줄, `perf record` 기록은 2.1×와 1.72 GB였습니다.
 - 한 도구의 `[unknown]` 스택은 다른 도구로 교차 확인합니다.
 
 다음 편은 **Flamegraph 분석** — sampling 결과를 한 장의 그림으로.

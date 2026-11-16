@@ -149,7 +149,7 @@ folded 결과는 4줄이었습니다. 각 줄의 사용자 쪽 위치와 값(마
 
 2초 중 1.11초가 백엔드 대기, 0.16초가 `fsync`였습니다. 같은 비율을 on-CPU 그림으로는 전혀 알 수 없습니다. man page는 "this tool only traces off-CPU times that began and ended while tracing"이라고 적으므로, 기록 시작 전에 시작된 대기는 빠집니다.
 
-`perf`의 sched tracepoint로도 off-CPU 그림을 만들 수 있습니다. 저장소의 `stackcollapse-perf-sched.awk`가 그 변환기이고, 머리 주석의 사용법은 `sched:sched_switch`·`sched_stat_sleep`·`sched_stat_blocked`를 `-g`로 기록한 뒤 `perf script -f time,comm,...`을 넘기라고 합니다. 그런데 perf 6.12에서 `-f`는 `--force`라 그대로 치면 "Couldn't find script `time,comm,pid,tid,event,ip,sym,dso,trace'"로 실패합니다. 필드 목록은 `-F`입니다. `-F`로 바꾸고 `kernel.sched_schedstats=1`로 기록했지만 이 guest에서는 folded 결과가 0줄이었고, 원인은 이번에 확인하지 않았습니다. 이 글의 off-CPU 결과는 위 BCC 측정입니다.
+`perf`의 sched tracepoint로도 off-CPU 그림을 만들 수 있습니다. 저장소의 `stackcollapse-perf-sched.awk`가 그 변환기이고, 머리 주석의 사용법은 `sched:sched_switch`·`sched_stat_sleep`·`sched_stat_blocked`를 `-g`로 기록한 뒤 `perf script -f time,comm,...`을 넘기라고 합니다. 그런데 perf 6.12에서 `-f`는 `--force`라 그대로 치면 "Couldn't find script `time,comm,pid,tid,event,ip,sym,dso,trace'"로 실패합니다. 필드 목록은 `-F`입니다. `-F`로 바꾸고 `kernel.sched_schedstats=1`로 기록했지만 이 guest에서는 folded 결과가 0줄이었습니다. 기록에 든 이벤트를 세어 보면 `sched_switch` 601건, `sched_stat_blocked` 2건, `sched_stat_sleep` 0건이었고, 왜 `sched_stat_sleep`이 하나도 없었는지는 이번에 확인하지 않았습니다. 이 글의 off-CPU 결과는 위 BCC 측정입니다.
 
 ## On-CPU와 Off-CPU 함께 보기
 
@@ -208,9 +208,9 @@ prog;...;main;process_batch;checksum 7007007 6006006
 
 | 팔레트 | 막대 색 (소스의 rgb 식) | 배경 |
 |---|---|---|
-| `hot` | 빨강~노랑 (r 205–255, g 0–230, b 0–55) | 노랑 그라데이션 |
-| `mem` | 초록~청록 (r 0, g 190–240, b 0–210) | 초록 |
-| `io` | 파랑~회청 (r=g 80–140, b 190–245) | 파랑 |
+| `hot` | 빨강~노랑 (r 205–254, g 0–229, b 0–54) | 노랑 그라데이션 |
+| `mem` | 초록~청록 (r 0, g 190–239, b 0–209) | 초록 |
+| `io` | 파랑~회청 (r=g 80–139, b 190–244) | 파랑 |
 | `wakeup` | `aqua`로 처리 | 파랑 |
 
 ```bash
@@ -253,7 +253,7 @@ offcputime-bpfcc -df -p <pid> 30 > off.folded
 | 9 | 11, 8, 8, 7, 7 | 90.91%, 87.50%, 87.50%, 85.71%, 85.71% |
 | 999 | 916, 1K, 923, 992, 834 | 82.97%, 82.62%, 82.23%, 82.46%, 81.41% |
 
-표본이 7–11개면 비율이 1/7 단위로 움직여 85.7–90.9% 사이를 오갔고, 999 Hz에서는 81.4–83.0%에 모였습니다. 9 Hz 결과는 전부 999 Hz 범위 밖이었습니다. 그림이 넓다고 다 믿지 말고 표본 수를 같이 봅니다.
+표본이 7–11개면 표본 하나가 9–14%p를 차지해 비율이 85.7–90.9% 사이를 오갔고, 999 Hz에서는 81.4–83.0%에 모였습니다. 9 Hz 결과는 전부 999 Hz 범위 밖이었습니다. 그림이 넓다고 다 믿지 말고 표본 수를 같이 봅니다.
 
 > ⚠️ On-CPU만 보고 I/O 무시
 
