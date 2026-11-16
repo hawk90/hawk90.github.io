@@ -302,7 +302,7 @@ edu_dma 0000:00:03.0: master=0 a_dma=0x0000000104630000 rc=0 b[0]=0x00 b[4095]=0
 edu_dma 0000:00:03.0: master=1 a_dma=0x0000000131bf6000 rc=0 b[0]=0xa5 b[4095]=0xa5 match
 ```
 
-bus master 비트가 꺼진 쪽은 DMA가 "완료"(`rc=0`, 장치의 RUN 비트가 내려감)됐는데도 목적지 버퍼가 0 그대로입니다. QEMU는 bus master 비트가 꺼지면 장치의 DMA 주소 공간 창을 비활성화하므로(`hw/pci/pci.c`의 `bus_master_enable_region`), 장치의 DMA 요청이 메모리에 닿지 않습니다. 에러도 경고도 없이 데이터만 틀린다는 점이 이 실수를 찾기 어렵게 만듭니다.
+bus master 비트가 꺼진 쪽은 DMA가 "완료"(`rc=0`, 장치의 RUN 비트가 내려감)됐는데도 목적지 버퍼가 0 그대로입니다. QEMU는 bus master 비트가 꺼지면 장치의 DMA 주소 공간 창을 비활성화하므로(`hw/pci/pci.c`의 `bus_master_enable_region`), 장치의 DMA 요청이 메모리에 닿지 않습니다. 에러도 경고도 없이 데이터만 틀리기 때문에 이 실수는 찾기 어렵습니다.
 
 ## SoC가 Root Complex일 때
 
