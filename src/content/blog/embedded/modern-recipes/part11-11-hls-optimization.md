@@ -204,6 +204,7 @@ void sobel(hls::stream<uchar_t> &in, hls::stream<uchar_t> &out, int H, int W) {
 
 ```text
 sobel csim: 64x48, 2852 interior outputs checked, 0 mismatches
+INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 3072
 ```
 
 자원 사용량(BRAM 몇 개, LUT 몇 개)과 지연은 합성 결과라 이 글에 없습니다. 지연의 하한은 산술로 잡을 수 있습니다. 1920×1080 프레임을 II=1로 처리하면 화소 수만큼, 즉 2,073,600사이클 이상이 걸립니다.
@@ -286,9 +287,9 @@ UG1399의 HLS Math Library 절과 Fixed-Point Math Functions 절은 `hls_math.h`
 
 ## 재현 절차
 
-- C 시뮬레이션: Homebrew GCC 16.2.0, `HLS_arbitrary_Precision_Types` 커밋 `200a9ae`, `hls_stream.h`는 직접 쓴 대역 헤더(11-10과 같음).
+- C 시뮬레이션: Homebrew GCC 16.2.0, `HLS_arbitrary_Precision_Types` 커밋 `200a9ae`, `hls_stream.h`는 AMD의 [`hls-lib-stream`](https://github.com/Xilinx/hls-lib-stream) 커밋 `e7e04ab`.
   - `g++-16 -std=c++17 -O2 -Wall -Wno-unknown-pragmas fir8.cpp fir8_tb.cpp -o fir8 && ./fir8`
-  - `g++-16 -std=c++17 -O2 -w -I<apt>/include -I<stub> sobel.cpp sobel_tb.cpp -o sobel && ./sobel`
+  - `g++-16 -std=c++17 -O2 -w -I<apt>/include -I<hls-lib-stream> sobel.cpp sobel_tb.cpp -o sobel && ./sobel`
 - RTL: Icarus Verilog 13.0, `iverilog -g2012 -o acc acc.v && vvp -n acc`. 누산기는 `LAT`(덧셈기 단수)와 `WAYS`(부분합 수)를 파라미터로 받습니다.
 - 산술: 1920 × 1080 × 60 = 124,416,000, 1920 × 1080 = 2,073,600, 1024 × 32 = 32,768.
 
