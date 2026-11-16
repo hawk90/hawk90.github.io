@@ -116,7 +116,7 @@ gcc -O2 -Wall -o modes modes.c && ./modes
 | `mmap` + `MADV_SEQUENTIAL` | 0.062~0.076 s | 16,384 |
 | `mmap(MAP_POPULATE)` 호출 + 접근 | 0.027~0.032 s + 0.026~0.032 s | 0 |
 
-같은 VM에서 다른 빌드 작업이 돌던 상태(load average 약 15)라 절대값보다 비교에 의미가 있습니다. 세 가지가 보입니다.
+같은 VM에서 다른 빌드 작업이 돌던 상태(load average 약 15)라 절대값보다 비교에 의미가 있습니다. 네 가지가 보입니다.
 
 - page cache에 이미 있는 파일에서는 `mmap` 직접 접근이 `read`보다 짧았습니다. `read`는 4 KiB마다 system call과 복사를 하기 때문입니다.
 - 1 GiB = 262,144 page인데 minor fault는 16,384번, 즉 fault 한 번에 16 page(64 KiB)씩 붙었습니다. 커널은 파일 매핑의 fault에서 주변 page까지 한 번에 매핑하고, 그 크기가 `fault_around_bytes` 기본값 65536입니다(v6.12 `mm/memory.c:5171-5172`; 이 VM의 debugfs `fault_around_bytes`도 65536).
@@ -132,7 +132,7 @@ MAP_PRIVATE 512 MiB: child wrote every page in 0.191 s
 MAP_SHARED  512 MiB: child wrote every page in 0.059 s
 ```
 
-`MAP_PRIVATE`에서는 자식의 첫 쓰기마다 page를 복사(CoW)하느라 `MAP_SHARED`보다 약 3배 걸렸습니다. 대신 `MAP_SHARED`는 자식의 쓰기가 부모에게도 보이므로, 이 비용을 피하려고 바꾸는 것은 공유가 의도일 때만 맞습니다.
+`MAP_PRIVATE`에서는 자식의 첫 쓰기마다 page를 복사(CoW)하느라 `MAP_SHARED`보다 약 3배 걸렸습니다. 다만 `MAP_SHARED`에서는 자식의 쓰기가 부모에게도 보이므로, CoW 비용을 피하려고 `MAP_SHARED`로 바꾸는 것은 공유가 의도일 때만 맞습니다.
 
 ### Huge Page
 
@@ -342,7 +342,7 @@ SIGBUS
 
 > ⚠️ 매핑을 풀지 않는 장시간 process
 
-`munmap`을 빠뜨리면 process가 끝날 때까지 VMA가 쌓입니다. process당 VMA 수의 상한은 `vm.max_map_count`이고, v6.12 커널의 기본값은 `DEFAULT_MAX_MAP_COUNT`(`USHRT_MAX - MAPCOUNT_ELF_CORE_MARGIN` = 65530, `include/linux/mm.h:204`)인데, 이 Debian 13 VM은 Debian `linux-sysctl-defaults` 패키지가 설치한 `/usr/lib/sysctl.d/50-default.conf`(systemd에서 가져온 파일)가 `vm.max_map_count = 1048576`으로 올려 두었습니다(`cat /proc/sys/vm/max_map_count`로 확인). 임베디드 rootfs에 이런 설정이 없으면 커널 기본값이 적용됩니다.
+`munmap`을 빠뜨리면 process가 끝날 때까지 VMA가 쌓입니다. process당 VMA 수의 상한은 `vm.max_map_count`이고, v6.12 커널의 기본값은 `DEFAULT_MAX_MAP_COUNT`(`USHRT_MAX - MAPCOUNT_ELF_CORE_MARGIN` = 65530, `include/linux/mm.h:204`)입니다. 이 Debian 13 VM에서는 Debian `linux-sysctl-defaults` 패키지가 설치한 `/usr/lib/sysctl.d/50-default.conf`(systemd에서 가져온 파일)가 `vm.max_map_count = 1048576`으로 올려 두었습니다(`cat /proc/sys/vm/max_map_count`로 확인). 임베디드 rootfs에 이런 설정이 없으면 커널 기본값이 적용됩니다.
 
 > ⚠️ Huge page 예약 없이 `MAP_HUGETLB`
 
