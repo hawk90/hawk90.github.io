@@ -68,7 +68,7 @@ topics: ["embedded"]
 | 1-01 | 디지털 신호 기초 | TTL/CMOS·noise margin·signal integrity |
 | 1-02 | 클럭과 타이밍 | PLL·jitter·skew·setup/hold |
 | 1-03 | GPIO 내부 구조 | push-pull·open-drain·pull·drive strength |
-| 1-04 | UART 하드웨어 동작 | framing·baud generator·FIFO·RS-232 levels |
+| 1-04 | UART 하드웨어 동작 | framing·샘플링·허용 오차·BRR·FIFO |
 | 1-05 | SPI 하드웨어 | MOSI/MISO/SCK/CS·mode 0~3·daisy-chain |
 | 1-06 | I2C 하드웨어 | open-drain·addressing·clock stretching |
 | 1-07 | ADC 동작 원리 | sampling·SAR vs Σ-Δ·ENOB |
@@ -334,7 +334,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 
 | 주제 | 이 시리즈 (cookbook) | 깊이 있는 시리즈 (internals) |
 |------|---------------------|----------------------------|
-| RTOS scheduler·sync internals | Part 6 (8편 응용) | [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) |
+| RTOS scheduler·sync internals | Part 6 (12편 응용) | [Practical RTOS Internals](/blog/embedded/rtos/practical-internals/00-preface) |
 | 성능 측정·프로파일링 방법론 | Part 8 (12편 적용) | [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface) |
 | C++ on MCU (template·RAII·constexpr) | 일부 코드 예시 | [Embedded C++ for Real Systems](/blog/embedded/embedded-cpp/00-preface) |
 | 보안 인증·표준 | Part 12 (TF-M·Matter) | (Practical RTOS Part 4-11 + Modern Recipes 12-12) |
@@ -370,7 +370,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 |--------|------|
 | STM32F4·STM32H7·STM32U5 | Cortex-M4/M7/M33 — Part 2~6의 주력 |
 | RP2040 / RP2350 | dual-core·hardware spinlock — 동시성 데모 |
-| NXP i.MX 8M | Cortex-A53 + M4 heterogeneous — Part 7·11 |
+| NXP i.MX 8M Mini | Cortex-A53 ×4 + Cortex-M4 heterogeneous — Part 7·11 |
 | Raspberry Pi 4·5 | Cortex-A 가벼운 server — Part 7~9 |
 | NVIDIA Jetson Orin | edge AI — Part 12 |
 | Xilinx Zynq UltraScale+ | PS+PL·AXI — Part 11 |
@@ -384,8 +384,7 @@ Edge inference·NPU·quantization·TensorRT·TFLite Micro·ONNX·thermal·Jetson
 | `arm-none-eabi-gcc` | 16.2.0 | Cortex-M 코드 빌드·디스어셈블 |
 | QEMU | 11.1.3 | `mps2-an385`(Cortex-M3)·`mps2-an386`(Cortex-M4)·`virt` |
 | Verilator / Icarus Verilog | 5.054 / 13.0 | HDL 시뮬레이션 |
-| CMake / GNU Make | 4.5.0 / 4.4.1 | 빌드 |
-| Debian 13 arm64 (QEMU `virt`) | — | Linux 전용 예제 |
+| CMake / GNU Make (`gmake`) | 4.5.0 / 4.4.1 | 빌드 |
 
 ## 레퍼런스
 

@@ -1,5 +1,5 @@
 ---
-title: "디지털 신호 기초 — Voltage Level·Edge·Setup/Hold 분석"
+title: "디지털 신호 기초 — Voltage Level·Edge·Noise Margin·반사 분석"
 slug: "embedded/modern-recipes/part1-01-digital-signal-basics"
 date: 2026-04-10T09:01:00
 description: "Voltage level·rise/fall time·noise margin·신호 무결성의 기본기."
@@ -27,7 +27,7 @@ topics: ["embedded"]
 
 ### 1) 전압 레벨
 
-전압 레벨은 "TTL이면 몇 V" 같은 계열 공통값이 아니라 부품 데이터시트가 보장하는 값입니다. 아래 표는 TI의 두 데이터시트에서 그대로 옮긴 값입니다. 5 V TTL은 SN7404(SDLS029), 3.3 V·1.8 V CMOS는 SN74LVC04A(SCAS281T, 6.3절 Recommended Operating Conditions와 6.7절 Electrical Characteristics)입니다.
+전압 레벨은 "TTL이면 몇 V" 같은 계열 공통값이 아니라 부품 데이터시트가 보장하는 값입니다. 아래 표는 TI의 두 데이터시트에서 그대로 옮긴 값입니다. 5 V TTL은 SN7404(SDLS029C), 3.3 V·1.8 V CMOS는 SN74LVC04A(SCAS281T, 6.3절 Recommended Operating Conditions와 6.7절 Electrical Characteristics)입니다.
 
 | 부품 · 조건 | V_OH (min) | V_OL (max) | V_IH (min) | V_IL (max) |
 | --- | --- | --- | --- | --- |
@@ -120,13 +120,15 @@ arm-none-eabi-objdump -d --no-show-raw-insn speed.o
 GCC 16.2.0이 만든 루프 부분은 BSRR에 두 번 쓰고 되돌아가는 세 명령입니다.
 
 ```text
-  2e:	str	r1, [r3, #24]
-  30:	str	r2, [r3, #24]
-  32:	b.n	2e <gpio_speed_test+0x2e>
-  34:	.word	0x40020000
+  38:	str	r1, [r3, #24]
+  3a:	str	r2, [r3, #24]
+  3c:	b.n	38 <gpio_speed_test+0x38>
+  3e:	nop
+  40:	.word	0x40023800
+  44:	.word	0x40020000
 ```
 
-`0x40020000`은 GPIOA 베이스, 오프셋 24(0x18)는 BSRR입니다. high 구간은 `str` 하나, low 구간은 `str`과 `b.n`이라 duty가 정확히 50%는 아닙니다. 엣지 모양만 볼 때는 상관없습니다.
+리터럴 `0x40023800`은 RCC 베이스(`AHB1ENR`은 오프셋 0x30), `0x40020000`은 GPIOA 베이스이고, 오프셋 24(0x18)는 BSRR입니다. high 구간은 `str` 하나, low 구간은 `str`과 `b.n`이라 duty가 정확히 50%는 아닙니다. 엣지 모양만 볼 때는 상관없습니다.
 
 보드에서 실행하지는 않았습니다. QEMU의 STM32F405 머신(`netduinoplus2`)에서 같은 레지스터를 써 보면 `RCC_AHB1ENR`은 1로 읽히지만 GPIOA의 `MODER`·`OSPEEDR`·`ODR`은 모두 0으로 읽혀, QEMU 11.1.3이 이 GPIO를 모델링하지 않는다는 것만 확인했습니다. 그래서 설정별 rise time 측정값은 싣지 않습니다.
 
@@ -141,7 +143,7 @@ GCC 16.2.0이 만든 루프 부분은 BSRR에 두 번 쓰고 되돌아가는 세
 
 Rise time과 ringing에는 부품과 무관한 보편 합격선이 없어 비교 기준 칸을 비워 두었습니다. 판단은 다음 단의 V_IH / V_IL과 setup/hold 조건(1-02)으로 합니다.
 
-스코프 자체도 rise time을 갖습니다. *ABCs of Probes*는 사양에 rise time이 없으면 **T_r ≈ 0.35 / BW**로 환산하고, 측정 시스템의 rise time을 **T_r,system² ≈ T_r,probe² + T_r,scope²** 처럼 제곱합으로 합친다고 적습니다. 같은 문서는 측정 시스템이 신호보다 3배 빠르면 rise time 오차가 5% 이내, 5배 빠르면 2%라고 적습니다. 이 식으로 직접 계산해 보면 다음과 같습니다.
+스코프 자체도 rise time을 갖습니다. *ABCs of Probes*는 사양에 rise time이 없으면 **T_r ≈ 0.35 / BW**로 환산하라고 적고, 측정 시스템이 신호보다 3배 빠르면 rise time 오차가 5% 이내, 5배 빠르면 2%라고 적습니다. 같은 문서는 active probe와 스코프의 rise time을 **T_r,system² ≈ T_r,probe² + T_r,scope²** 처럼 제곱합으로 합치되, passive probe에는 이 식을 쓰지 말라고 덧붙입니다. 아래는 같은 제곱합 근사를 신호와 측정 시스템에 적용해 직접 계산한 값이고, 3:1·5:1 결과가 문서의 5%·2%와 맞습니다.
 
 ```text
 signal tr=5 ns, scope BW=100 MHz -> scope tr=3.50 ns, measured 6.10 ns, error 22.1%
