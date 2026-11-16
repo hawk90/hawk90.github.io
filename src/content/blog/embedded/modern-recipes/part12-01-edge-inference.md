@@ -121,11 +121,11 @@ result = cloud_api(image) if online else local_model(image)
 
 ## 하드웨어 등급 — 공개 사양으로 본 범위
 
-아래는 각 제조사가 공개한 값만 옮긴 표이고, 값은 2026-10-11에 아래 출처에서 확인했습니다. 출처에 값이 없는 칸은 `TBD`입니다. Jetson 계열 전체 라인업과 세대 비교는 [12-09 NVIDIA Jetson](/blog/embedded/modern-recipes/part12-09-jetson)에 있고, 여기서는 등급 사이의 거리만 봅니다.
+아래는 각 제조사가 공개한 값만 옮긴 표이고, 값은 2026-10-11에 아래 출처에서 확인했습니다. Jetson 계열 전체 라인업과 세대 비교는 [12-09 NVIDIA Jetson](/blog/embedded/modern-recipes/part12-09-jetson)에 있고, 여기서는 등급 사이의 거리만 봅니다.
 
 | 예시 (등급) | 메모리 | 전력 (공식 표기) |
 |---|---|---|
-| Alif Ensemble E7 (microNPU를 넣은 MCU) | MRAM 최대 5.5 MB, SRAM 최대 13.5 MB | NPU 값 TBD |
+| Alif Ensemble E7 (microNPU를 넣은 MCU) | MRAM 최대 5.5 MB, SRAM 최대 13.5 MB | NPU 전력은 페이지에 없음 |
 | Raspberry Pi 5 (SBC) | 1·2·4·8·16 GB LPDDR4X-4267 | 입력 5 V/5 A |
 | Raspberry Pi AI HAT+ (SBC + 가속기) | 외부 메모리 불필요 (Hailo 표기) | 칩 typical 2.5 W / 1.5 W |
 | Jetson Orin Nano 8GB, Super (edge GPU) | 8 GB 128-bit LPDDR5, 102 GB/s | 7 W - 15 W - 25 W |
@@ -133,7 +133,7 @@ result = cloud_api(image) if online else local_model(image)
 
 - Alif 페이지의 전력값은 STOP 모드 1.7 µA와 고효율 Cortex-M55 동적 전류 27 µA/MHz이고, NPU 값이 아닙니다.
 - Raspberry Pi 5의 값은 USB-C Power Delivery 전원 입력 규격입니다.
-- AI HAT+의 전력은 가속기 칩 값이고(Hailo-8 2.5 W, Hailo-8L 1.5 W), HAT 보드 전체 값은 TBD입니다.
+- AI HAT+의 전력은 가속기 칩 값이고(Hailo-8 2.5 W, Hailo-8L 1.5 W), HAT 보드 전체의 전력은 출처에 없습니다.
 - Ethos-U55는 칩이 아니라 IP라 메모리·전력 행을 두지 않았습니다. E7 행이 그 IP 두 개를 넣은 칩입니다.
 
 | 예시 | 공개된 연산 성능 |
