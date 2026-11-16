@@ -74,7 +74,7 @@ sizeof(struct k_sem)=24 sizeof(struct k_thread)=136 offsetof(base)=0 offsetof(ca
 
 ## sched.c — Config별 Ready Queue
 
-ready queue 자료구조는 Kconfig로 고릅니다. `CONFIG_SCHED_DUMB`는 정렬된 linked list, `CONFIG_SCHED_SCALABLE`은 red-black tree, `CONFIG_SCHED_MULTIQ`는 priority별 list 배열입니다. 위 native_sim 빌드의 `.config`는 `CONFIG_SCHED_DUMB=y`였고, preemptible priority는 `CONFIG_NUM_PREEMPT_PRIORITIES=15`개였습니다. 자료구조 구현은 `include/zephyr/kernel/priority_q.h`에 있습니다.
+ready queue 자료구조는 Kconfig로 고릅니다. `CONFIG_SCHED_DUMB`는 정렬된 linked list, `CONFIG_SCHED_SCALABLE`은 red-black tree, `CONFIG_SCHED_MULTIQ`는 priority별 list 배열입니다. 위 native_sim 빌드의 `.config`는 `CONFIG_SCHED_DUMB=y`였고, preemptible priority는 `CONFIG_NUM_PREEMPT_PRIORITIES=15`개였습니다. 자료구조 구현은 `kernel/include/priority_q.h`에 있습니다.
 
 SMP에서도 run queue는 하나입니다. v3.7.0 SMP 문서는 "The kernel does not keep a per-CPU run queue"라고 적고, CPU mask를 쓰려면 `CONFIG_SCHED_DUMB`여야 한다고 적습니다([SMP 비교](/blog/embedded/rtos/practical-internals/part4-07-smp-rtos)).
 
@@ -227,7 +227,7 @@ user thread에서 `k_sem_take()`를 부르면 표의 마지막 줄처럼 `z_vrfy
 | 항목 | FreeRTOS V11.2.0 | Zephyr v3.7.0 |
 | --- | --- | --- |
 | 저장소 범위 | 커널 + port + heap | 커널 + driver + devicetree + subsys |
-| semaphore lock | queue 객체마다 critical section | 모든 `k_sem`이 `sem.c`의 lock 하나 공유 |
+| semaphore lock | 전역 critical section(`taskENTER_CRITICAL()`) + queue별 `prvLockQueue` | 모든 `k_sem`이 `sem.c`의 lock 하나 공유 |
 | ready queue | priority별 list 배열(고정) | DUMB·SCALABLE·MULTIQ 중 Kconfig로 선택 |
 | stack 크기 단위 | `StackType_t` 원소 수 | byte (4-04) |
 | SMP run queue | 공유 list 하나(4-07) | 공유 queue 하나(4-07) |

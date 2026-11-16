@@ -186,7 +186,7 @@ Xiaomi Vela와 NuttX의 관계, 배포 규모는 이 글에서 원문을 확인�
 
 ## 빌드
 
-nuttx와 nuttx-apps를 같은 태그로 받아 `nuttx/`와 `apps/`를 나란히 둔 뒤, `nuttx/`에서 `./tools/configure.sh -l sim:nsh`, `make -j4`를 했습니다. configure 단계는 Kconfig 도구가 필요합니다. Debian의 `python3-kconfiglib` package에는 `olddefconfig` 같은 명령이 없어 `pip install kconfiglib`로 넣었고, `tools/sethost.sh:164-176`이 부르는 `kconfig-tweak`은 따로 없어 `--enable`·`--disable`만 처리하는 작은 shell script로 대신했습니다. 이 shim은 harness 디렉터리에 남겨 뒀습니다. 그 뒤 configure와 build가 통과했습니다.
+nuttx와 nuttx-apps를 같은 태그로 받아 `nuttx/`와 `apps/`를 나란히 둔 뒤, `nuttx/`에서 `./tools/configure.sh -l sim:nsh`, `make -j4`를 했습니다. configure 단계는 Kconfig 도구가 필요해 `pip install kconfiglib`로 넣었고, `tools/sethost.sh`가 부르는 `kconfig-tweak`은 따로 없어 `--enable`·`--disable`·`--set-val`·`--set-str`만 처리하는 작은 shell script로 대신했습니다. 이 shim은 harness 디렉터리에 남겨 뒀습니다. 그 뒤 configure와 build가 통과했습니다.
 
 ```text
 nsh> uname -a

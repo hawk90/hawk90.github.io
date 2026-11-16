@@ -59,7 +59,7 @@ portDONT_DISCARD PRIVILEGED_DATA TCB_t * volatile pxCurrentTCB = NULL;
 
 SMP 빌드에서는 바로 아래 `:467`의 `pxCurrentTCBs[configNUMBER_OF_CORES]` 배열이 대신 쓰입니다(4-07). 단일 core의 context switch는 결국 이 포인터를 바꾸고, 새 TCB 안의 `pxTopOfStack`을 PSP로 옮기는 일입니다.
 
-TCB는 `tasks.c:374-454`의 `tskTaskControlBlock`입니다. 아래는 주요 필드만 원문 순서대로 고른 발췌이고(affinity·SMP·trace 등 조건부 필드는 생략), 주석은 줄였습니다.
+TCB는 `tasks.c:374-452`의 `tskTaskControlBlock`입니다. 아래는 주요 필드만 원문 순서대로 고른 발췌이고(affinity·SMP·trace 등 조건부 필드는 생략), 주석은 줄였습니다.
 
 ```c
 typedef struct tskTaskControlBlock {
@@ -114,7 +114,7 @@ priority별 ready list를 사용합니다. 같은 priority의 순환 선택과 t
 #define portGET_HIGHEST_PRIORITY( uxTopPriority, uxReadyPriorities )    uxTopPriority = ( 31UL - ( uint32_t ) ucPortCountLeadingZeros( ( uxReadyPriorities ) ) )
 ```
 
-`ucPortCountLeadingZeros()`(`:151`)가 `clz` 명령을 쓰는 inline 함수입니다. 32-bit bitmap이라 이 경로에서는 priority가 32개를 넘을 수 없고, bitmap이 0이면 CLZ가 32를 돌려 결과가 -1이 되므로 idle task가 항상 ready라는 전제 위에서 동작합니다. 이 harness의 config는 이 옵션을 켜지 않아 generic C 선택 경로를 썼습니다.
+`ucPortCountLeadingZeros()`(`:151`)가 `clz` 명령을 쓰는 inline 함수입니다. 32-bit bitmap이라 이 경로에서는 priority가 32개를 넘을 수 없고, bitmap이 0이면 CLZ가 32를 돌려 결과가 -1이 되므로 idle task가 항상 ready라는 전제 위에서 동작합니다. 이 harness의 `FreeRTOSConfig.h`는 이 옵션을 정의하지 않았는데, ARM_CM4F `portmacro.h:144-146`이 정의되지 않은 경우의 기본값을 1로 두므로 이 최적화 경로가 쓰였습니다. 3-09 harness ELF(`isr_s1.elf`)의 `vTaskSwitchContext`에 `clz r4, r4`가 들어 있습니다.
 
 ## xTaskCreate부터 PendSV까지
 
@@ -123,7 +123,7 @@ task 하나가 만들어져 처음 실행되기까지 지나가는 함수들입�
 | 단계 | V11.2.0의 확인 지점 | 빠뜨리면 생기는 오해 |
 |---|---|---|
 | 생성 | `xTaskCreate()`(`tasks.c:1740`) → `prvCreateTask()`(`:1642`) | stack/TCB 할당 실패와 해제 경로 |
-| 초기화 | `prvInitialiseNewTask()`(`:1815`) → `pxPortInitialiseStack()`(`:1974`/`:1978`) | 첫 frame을 만들고 그 주소를 `pxTopOfStack`에 저장 |
+| 초기화 | `prvInitialiseNewTask()`(`:1815`) → `pxPortInitialiseStack()`(`:2007`) | 첫 frame을 만들고 그 주소를 `pxTopOfStack`에 저장 |
 | ready 등록 | `prvAddNewTaskToReadyList()` | scheduler가 이미 돌고 있으면 그 자리에서 선점 |
 | 첫 실행 | xPortStartScheduler → prvPortStartFirstTask → SVC | 첫 task를 반드시 첫 PendSV가 시작한다고 오해 |
 | 이후 switch | xPortPendSVHandler → vTaskSwitchContext | IRQ mask·ABI·FP frame·scheduler suspended 경로 누락 |

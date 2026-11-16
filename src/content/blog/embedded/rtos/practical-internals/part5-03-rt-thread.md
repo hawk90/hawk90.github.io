@@ -79,7 +79,7 @@ arm-none-eabi-size rtthread.elf
 
 ## rt_thread 구조
 
-v5.1.0 `include/rtdef.h:855`의 `struct rt_thread`는 첫 멤버로 **`struct rt_object parent`**를 두고, 그 바로 뒤에 `sp`·`entry`가 옵니다. FreeRTOS TCB가 `pxTopOfStack`을 맨 앞에 두는 것과 달리, RT-Thread는 공통 object header를 맨 앞에 두고 stack pointer를 그 다음에 둡니다. 그래서 context switch 코드는 `sp`의 offset을 고정 상수로 알고 있어야 합니다.
+v5.1.0 `include/rtdef.h:855`의 `struct rt_thread`는 첫 멤버로 **`struct rt_object parent`**를 두고, 그 바로 뒤에 `sp`·`entry`가 옵니다. FreeRTOS TCB가 `pxTopOfStack`을 맨 앞에 두는 것과 달리, RT-Thread는 공통 object header를 맨 앞에 두고 stack pointer를 그 다음에 둡니다. context switch 함수는 `rt_hw_context_switch((rt_ubase_t)&from_thread->sp, (rt_ubase_t)&to_thread->sp)`(`src/scheduler_up.c:276`)처럼 `sp` 필드의 주소를 인자로 받으므로, 어셈블리가 이 offset을 알 필요가 없습니다.
 
 ## Object 시스템 — C로 흉내낸 상속
 
@@ -282,7 +282,7 @@ int main(void)
 | --- | --- | --- | --- |
 | semaphore 보호 | `taskENTER_CRITICAL()` | `sem.c`의 lock 하나 공유 | 객체마다 `spinlock` |
 | priority 방향 | 숫자 클수록 높음 | 숫자 작을수록 높음 | 숫자 작을수록 높음 |
-| 최대 priority 수 | `configMAX_PRIORITIES` | Kconfig (이 빌드 15) | 32 또는 256 (이 BSP 256) |
+| 최대 priority 수 | `configMAX_PRIORITIES` | Kconfig (이 빌드 15) | 8·32·256 중 Kconfig 선택 (이 BSP 256) |
 | 저장소 범위 | 커널 + port | 커널 + driver + devicetree | 커널 + component + BSP |
 
 image 크기 비교는 같은 MCU와 같은 기능으로 빌드해야 의미가 있어서 이 글에서는 하지 않았습니다.

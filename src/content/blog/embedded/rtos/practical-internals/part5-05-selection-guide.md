@@ -35,7 +35,7 @@ RTOS를 고르면 driver 통합, 빌드 인프라, 인증 산출물이 그 RTOS�
 
 core license는 저장소의 license 파일에서 확인했습니다. FreeRTOS V11.2.0 `LICENSE.md`와 Eclipse ThreadX `LICENSE.txt`(master)는 MIT, Zephyr v3.7.0 `LICENSE`와 RT-Thread v5.1.0 `LICENSE`는 Apache License 2.0입니다. 같은 저장소 안의 vendor HAL이나 module은 자기 license 파일을 따로 가질 수 있으므로, 배포할 image에 들어가는 component마다 license 파일을 모읍니다. 이 글은 법적 판단을 하지 않습니다.
 
-Arm Mbed는 이미 끝났습니다. `os.mbed.com` 첫 페이지는 "Mbed was sunsetted in July 2026"이고, Mbed OS source는 공개로 남지만 Arm이 더는 유지·지원하지 않는다고 적습니다(2026-11-16 확인). 기존 Mbed 제품은 source와 offline toolchain을 직접 보관해야 합니다.
+Arm Mbed는 이미 끝났습니다. `os.mbed.com`(현재 `github.com/ArmMbed`로 redirect) 페이지는 "Mbed was sunsetted in July 2026"이고, Mbed OS source는 공개로 남지만 Arm이 더는 유지·지원하지 않는다고 적습니다(2026-11-16 확인). 기존 Mbed 제품은 source와 offline toolchain을 직접 보관해야 합니다.
 
 ## 결정 축
 
@@ -68,7 +68,7 @@ core 이름이 아니라 board가 지원되는지 봅니다. 5-02에서 Zephyr�
 
 ### 5. Ecosystem
 
-이 시리즈의 빌드 경험이 ecosystem 차이를 보여 줍니다. Zephyr는 host gcc만으로 native_sim을 돌릴 수 있었지만, Cortex-M3 board는 CMSIS module 하나가 없어 Kconfig 단계에서 멈췄습니다(`HAS_CMSIS_CORE` 경고, west manifest의 revision으로 module을 받아 해결). RT-Thread는 QEMU BSP가 scons 한 번에 빌드됐지만 Linux simulator BSP는 glibc header 충돌로 빌드되지 않았습니다(5-03). FreeRTOS는 커널만 있어 libc·startup을 직접 채워야 했습니다(5-04). 후보마다 이런 하루짜리 prototype을 만들어 보면 문서로는 안 보이는 비용이 드러납니다.
+이 시리즈의 빌드 경험이 ecosystem 차이를 보여 줍니다. Zephyr는 host gcc만으로 native_sim을 돌릴 수 있었고, Cortex-M3 board는 west manifest가 지정한 revision의 cmsis module을 함께 받아 빌드했습니다. RT-Thread는 QEMU BSP가 scons 한 번에 빌드됐지만 Linux simulator BSP는 glibc header 충돌로 빌드되지 않았습니다(5-03). FreeRTOS는 커널만 있어 libc·startup을 직접 채워야 했습니다(5-04). 후보마다 이런 하루짜리 prototype을 만들어 보면 문서로는 안 보이는 비용이 드러납니다.
 
 ### 6. 실시간 성능 — 같은 조건에서 측정
 
@@ -104,21 +104,20 @@ core 이름이 아니라 board가 지원되는지 봅니다. 5-02에서 Zephyr�
 1. 공급자의 long-term support 기간과 보안 update 정책
 2. 팀이 이미 아는 RTOS인지
 3. Tooling: debugger의 RTOS awareness, trace 도구
-4. 문서의 언어와 버전 일치(5-02의 `CONFIG_PRIORITY_CEILING` 기본값처럼 문서와 코드가 어긋나는 경우도 있습니다)
+4. 문서의 언어와 버전 일치(3-05의 `CONFIG_PRIORITY_CEILING` 기본값처럼 문서와 코드가 어긋나는 경우도 있습니다)
 5. 사내 기존 코드와의 호환성
 
 ## 자주 보는 함정
 
 - 서로 다른 조건의 image 크기를 비교합니다. 위 표의 bss가 16배 차이 나는 것은 대부분 RTOS가 아니라 FreeRTOS 쪽의 64 KiB heap 설정 때문입니다.
 - 문서에서 본 board 이름을 그대로 믿습니다. `nucleo_f407g`처럼 없을 수 있습니다.
-- `west update`나 BSP package 없이 빌드된다고 봅니다. Zephyr M3 board는 CMSIS module 없이는 configure도 안 됐습니다.
 - 끝난 platform(Mbed)의 source와 toolchain을 보관하지 않습니다.
 
 ## 정리
 
 - 같은 compiler(arm-none-eabi-gcc 14.2.1)로 만든 Cortex-M3 hello는 Zephyr text 8596 byte, FreeRTOS(이 harness) 10568 byte였고, 조건 차이를 함께 적어야 비교가 됩니다.
 - core license는 FreeRTOS·ThreadX MIT, Zephyr·RT-Thread Apache-2.0입니다(각 revision의 license 파일).
-- Arm Mbed는 2026년 7월에 끝났습니다(os.mbed.com).
+- Arm Mbed는 2026년 7월에 끝났습니다(github.com/ArmMbed).
 - 하루짜리 prototype 빌드에서 board 이름, module, libc 같은 숨은 비용이 드러났습니다.
 - 인증·latency는 공급자 문서와 같은 board 측정으로 따로 확인합니다.
 
@@ -126,7 +125,7 @@ core 이름이 아니라 board가 지원되는지 봅니다. 5-02에서 Zephyr�
 
 - [FreeRTOS V11.2.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0), [Zephyr v3.7.0](https://github.com/zephyrproject-rtos/zephyr/tree/v3.7.0), [RT-Thread v5.1.0](https://github.com/RT-Thread/rt-thread/tree/v5.1.0).
 - [Eclipse ThreadX license](https://github.com/eclipse-threadx/threadx/blob/master/LICENSE.txt), [NuttX 소개/지원 범위](https://nuttx.apache.org/docs/latest/introduction/about.html).
-- [Arm Mbed](https://os.mbed.com/): sunset 안내(2026-11-16 확인).
+- [Arm Mbed](https://github.com/ArmMbed): sunset 안내(2026-11-16 확인).
 - [PX4 architecture](https://docs.px4.io/v1.15/en/concept/architecture): NuttX와 Linux simulation 경계.
 
 
