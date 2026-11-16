@@ -239,7 +239,7 @@ static inline void gpio_toggle(GPIO_TypeDef *port, uint32_t pin) {
 
 ### QEMU에서 실제로 덤프해 보기
 
-QEMU 11.1.3의 F4 계열 모델(`hw/arm/stm32f405_soc.c`)은 GPIOA~GPIOF를 `create_unimplemented_device`로만 둡니다. 대신 `b-l475e-iot01a`(STM32L475)는 GPIO를 실제로 모델링하고(`hw/gpio/stm32l4x5_gpio.c`), ST의 `stm32l475xx.h`에서 `GPIO_TypeDef`의 처음 열 워드(`MODER`~`AFR[1]`)가 F407과 같은 offset입니다. 그래서 위 `gpio.h`·`gpio.c`를 그대로 두고 L475 헤더로 컴파일해 같은 `gpio_init()` 호출을 돌렸습니다. 다른 점은 두 가지입니다. L4의 GPIO는 `GPIOA_BASE = AHB2PERIPH_BASE` = `0x48000000`에 있고, 포트 클럭은 `RCC->AHB2ENR`의 `RCC_AHB2ENR_GPIOxEN`입니다.
+QEMU 11.1.3의 F4 계열 모델(`hw/arm/stm32f405_soc.c`)은 GPIOA~GPIOI를 `create_unimplemented_device`로만 둡니다. 대신 `b-l475e-iot01a`(STM32L475)는 GPIO를 실제로 모델링하고(`hw/gpio/stm32l4x5_gpio.c`), ST의 `stm32l475xx.h`(cmsis-device-l4 v1.7.4)에서 `GPIO_TypeDef`의 처음 열 워드(`MODER`~`AFR[1]`)가 F407과 같은 offset입니다. 그래서 위 `gpio.h`·`gpio.c`를 그대로 두고 L475 헤더로 컴파일해 같은 `gpio_init()` 호출을 돌렸습니다. 다른 점은 두 가지입니다. L4의 GPIO는 `GPIOA_BASE = AHB2PERIPH_BASE` = `0x48000000`에 있고, 포트 클럭은 `RCC->AHB2ENR`의 `RCC_AHB2ENR_GPIOxEN`입니다.
 
 `main_l4.c`는 사용 예시와 같은 호출에 L4용 RCC enable만 바꿨고, startup은 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 `startup.c`, linker script는 4-01 것에서 크기만 L475(Flash 1 MB, SRAM 96 KB)로 바꾼 것입니다.
 
@@ -291,7 +291,7 @@ qemu-system-arm -M b-l475e-iot01a -nographic -kernel gpio_l4.elf -monitor stdio 
 48000020: 0x00000000 0x00000770
 ```
 
-위 표의 마스크를 적용하면 `MODER & 0x003C0C00` = `0x00280400`, `OSPEEDR` → `0x00280000`, `PUPDR` → `0x00140000`, `OTYPER & 0x620` = 0, `AFR[1] & 0xFF0` = `0x770`으로 다섯 줄 모두 기대값과 같습니다. 마스크 밖의 비트는 L4의 reset 값이라 F407과 다릅니다. QEMU의 `stm32l4x5_soc.c`는 GPIOA의 MODER reset 값을 `0xABFFFFFF`로 두는데, PA5·PA9·PA10 필드만 바뀐 `0xabebf7ff`가 그 결과입니다. 레지스터 전체가 아니라 필드만 비교하는 이유가 여기서도 드러납니다. 같은 덤프에서 GPIOB는 `OTYPER = 0x000000c0`(PB6·PB7 open-drain), `AFR[0] = 0x44000000`(AF4)이고, GPIOC는 `PUPDR = 0x04000000`(PC13 pull-up)에 `IDR = 0x00002000`으로 PC13이 1로 읽혔습니다. 설정이 맞는지까지는 이렇게 확인되지만, 출력단의 전기적 동작은 QEMU가 모델링하지 않으므로 보드에서 봐야 합니다.
+위 표의 마스크를 적용하면 `MODER & 0x003C0C00` = `0x00280400`, `OSPEEDR` → `0x00280000`, `PUPDR` → `0x00140000`, `OTYPER & 0x620` = 0, `AFR[1] & 0xFF0` = `0x770`으로 다섯 줄 모두 기대값과 같습니다. 마스크 밖의 비트는 L4의 reset 값이라 F407과 다릅니다. QEMU의 `stm32l4x5_soc.c`는 GPIOA의 MODER reset 값을 `0xABFFFFFF`로 두는데, PA5·PA9·PA10 필드만 바뀐 `0xabebf7ff`가 그 결과입니다. 레지스터 전체가 아니라 필드만 비교하는 이유가 여기서도 드러납니다. 같은 덤프에서 GPIOB는 `OTYPER = 0x000000c0`(PB6·PB7 open-drain), `AFR[0] = 0x44000000`(AF4)이고, GPIOC는 `PUPDR = 0x04000000`(PC13 pull-up)에 `IDR = 0x00002000`으로 PC13이 1로 읽혔습니다. 설정이 맞는지까지는 이렇게 확인되지만, QEMU는 open-drain·pull을 logic 레벨로만 모델링하고 속도·구동 특성은 모델링하지 않으므로 보드에서 봐야 합니다.
 
 ## 자주 보는 함정
 
