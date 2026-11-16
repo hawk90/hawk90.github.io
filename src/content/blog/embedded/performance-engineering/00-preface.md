@@ -201,7 +201,7 @@ topics: ["embedded"]
 
 ### CPU 사용률만 보지 않는다
 
-병목은 memory, bus, lock, interrupt일 수 있습니다.
+CPU 사용률이 낮아도 memory, bus, lock, interrupt를 기다리는 시간이 병목이 됩니다. 3-02에서는 CPU를 거의 쓰지 않는 thread가 다른 thread의 메모리 traffic 때문에 2.5배 이상 느려졌습니다.
 
 ### 관측 → 가설 → 검증
 

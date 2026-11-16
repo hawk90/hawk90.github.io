@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **Sampling은 표본 기반 추정이고, instrumentation은 실행 경로에 계측 hook을 넣습니다.** overhead와 해석 한계는 도구와 환경에 따라 확인해야 합니다.
+> **Sampling은 표본 기반 추정이고, instrumentation은 실행 경로에 계측 hook을 넣습니다.** 같은 프로그램을 perf, gprof, callgrind로 재면 함수별 비율이 몇 %p씩 다르게 나옵니다(아래 측정).
 
 ## 이 글의 예제
 
