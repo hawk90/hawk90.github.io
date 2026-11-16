@@ -12,9 +12,9 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"PCIe는 PCI의 공유 parallel bus를 point-to-point 직렬 링크로 바꾸고, 소프트웨어가 보는 configuration 모델은 PCI에서 그대로 물려받았습니다."** 토폴로지는 Root Port·Switch Port·Endpoint로 이루어진 트리이고, 장치는 자기 역할을 PCI Express Capability의 4비트 필드로 스스로 밝힙니다. 링크 속도는 2.5 GT/s에서 PCIe 7.0의 128 GT/s까지 올라갔고, 6.0부터는 PAM4와 256바이트 Flit이 들어왔습니다.
+> **"PCIe는 PCI의 공유 parallel bus를 point-to-point 직렬 링크로 바꾸고, 소프트웨어가 보는 configuration 모델은 PCI에서 그대로 물려받았습니다."** 토폴로지는 Root Port·Switch Port·Endpoint로 이루어진 트리이고, 장치는 자기 역할을 PCI Express Capability의 4비트 필드로 스스로 밝힙니다. 링크 속도는 2.5 GT/s에서 PCIe 7.0의 128 GT/s까지 올라갔고, 64 GT/s부터 Linux는 encoding 손실을 빼지 않는 Flit 시대의 계산을 씁니다.
 
-이 시리즈는 PCIe를 소프트웨어 쪽에서 봅니다. PCIe Base Specification 본문은 회원 전용이라 이 시리즈에서 인용하지 않습니다. 대신 PCI-SIG가 공개한 FAQ와 규격 목록, Linux v6.12의 `drivers/pci`와 `include/uapi/linux/pci_regs.h`, QEMU 11.1.3의 PCIe 모델, pciutils 3.13.0 소스를 1차 자료로 씁니다. 레지스터 값은 모두 아래 QEMU 가상 머신에서 직접 읽었습니다.
+이 시리즈는 PCIe를 소프트웨어 쪽에서 봅니다. PCIe Base Specification 본문은 회원 전용이라 이 시리즈에서 인용하지 않습니다. 대신 Linux v6.12의 `drivers/pci`와 `include/uapi/linux/pci_regs.h`, QEMU 11.1.3의 PCIe 모델, pciutils 3.13.0 소스를 1차 자료로 씁니다. 레지스터 값은 모두 아래 QEMU 가상 머신에서 직접 읽었습니다.
 
 ## 실험 환경
 
@@ -45,7 +45,7 @@ root port 다섯 개 아래에 NVMe, e1000e(82574L), igb(82576), 그리고 TI XI
 
 ## PCI에서 PCIe로
 
-[PCI-SIG FAQ](https://web.archive.org/web/20260604022039/https://pcisig.com/faq?page=1)("What prompted the creation of PCI Express architecture?")는 PCIe가 나온 이유를 PCI 같은 "traditional parallel buses"가 대역폭 요구를 따라가지 못했기 때문이라고 적습니다. 같은 FAQ는 PCIe의 특징으로 기존 PCI 소프트웨어 프로그래밍 모델과의 호환을 첫 줄에 둡니다. 물리 계층은 직렬 링크로 바꾸고, 소프트웨어가 보는 bus·device·function 번호와 configuration space는 그대로 두었습니다.
+PCI는 여러 장치가 한 bus를 나눠 쓰는 parallel bus였고, PCIe는 두 포트 사이의 직렬 링크입니다. 그런데 소프트웨어가 보는 bus·device·function 번호와 configuration space는 그대로 남았습니다. Linux v6.12에서 PCI와 PCIe 장치가 같은 `struct pci_dev`로 표현되고, PCIe 여부는 `pci_is_pcie()`(`include/linux/pci.h:2456-2459`)가 PCI Express Capability offset이 있는지로만 판단하는 것이 그 흔적입니다.
 
 그래서 Linux에서 PCIe 장치를 보는 도구는 PCI 시절과 같습니다. 시리즈 VM에서 `lspci -tv`로 본 트리입니다.
 
@@ -67,11 +67,11 @@ root port 다섯 개 아래에 NVMe, e1000e(82574L), igb(82576), 그리고 TI XI
 
 PCIe는 Transaction Layer, Data Link Layer, Physical Layer의 세 층으로 나뉩니다. 규격 본문 없이도 이 구분을 확인할 수 있는 곳이 Linux AER 드라이버입니다. v6.12 `drivers/pci/pcie/aer.c:418-447`은 보고된 오류 비트를 층 이름으로 바꿔 로그에 찍습니다.
 
-| 층 | 단위 | `aer.c`가 이 층으로 분류하는 오류 비트 (`pci_regs.h` 이름) |
-|------|------|------|
-| Physical Layer | Symbol·Block·Flit | `PCI_ERR_COR_RCVR` (Receiver Error) |
-| Data Link Layer | DLLP, TLP에 붙는 sequence number·LCRC | `PCI_ERR_COR_BAD_TLP`, `BAD_DLLP`, `REP_ROLL`(REPLAY_NUM Rollover), `REP_TIMER`(Replay Timer Timeout), 그리고 uncorrectable `PCI_ERR_UNC_DLP` |
-| Transaction Layer | TLP | 나머지 전부 (Poisoned TLP, Completion Timeout, Unsupported Request 등) |
+| 층 | `aer.c`가 이 층으로 분류하는 오류 비트 (`pci_regs.h` 이름) |
+|------|------|
+| Physical Layer | `PCI_ERR_COR_RCVR` (Receiver Error) |
+| Data Link Layer | `PCI_ERR_COR_BAD_TLP`, `BAD_DLLP`, `REP_ROLL`(REPLAY_NUM Rollover), `REP_TIMER`(Replay Timer Timeout), 그리고 uncorrectable `PCI_ERR_UNC_DLP` |
+| Transaction Layer | 나머지 전부 (Poisoned TLP, Completion Timeout, Unsupported Request 등) |
 
 Data Link Layer 칸의 이름만 봐도 이 층이 하는 일이 드러납니다. TLP와 DLLP의 무결성을 검사하고(Bad TLP·Bad DLLP), 잃어버린 TLP를 다시 보내는 replay를 관리합니다(REPLAY_NUM·Replay Timer). 층별 오류가 실제 로그에 어떻게 찍히는지는 [Ch 7](/blog/embedded/hardware/pcie/chapter07-error-handling)에서 QEMU로 오류를 주입해 확인합니다.
 
@@ -117,11 +117,11 @@ Root Complex 자체는 이 표에 없습니다. QEMU virt에서 00:00.0은 class
 	Bus: primary=05, secondary=07, subordinate=07, sec-latency=0
 ```
 
-upstream port는 bus 4에 있고 switch 내부 bus 5를 엽니다. downstream port 둘은 그 내부 bus 5에 앉아 각자 bus 6과 7을 엽니다. 포트마다 class 0x0604 bridge이고 자기 bus 번호 레지스터를 가지므로, switch를 "포트 N개짜리 hub 하나"로 보면 이 bus 번호 배치를 설명할 수 없습니다. [PCI-SIG FAQ의 Section 7.5.3 답변](https://web.archive.org/web/20250115173818/https://pcisig.com/faq?page=2)도 switch의 각 port가 Memory Base/Limit 같은 aperture 레지스터를 가지고, 그 값으로 memory request를 어느 port로 보낼지 정한다고 설명합니다.
+upstream port는 bus 4에 있고 switch 내부 bus 5를 엽니다. downstream port 둘은 그 내부 bus 5에 앉아 각자 bus 6과 7을 엽니다. 포트마다 class 0x0604 bridge이고 자기 bus 번호 레지스터를 가지므로, switch를 "포트 N개짜리 hub 하나"로 보면 이 bus 번호 배치를 설명할 수 없습니다. 각 포트는 Memory Base/Limit 같은 window 레지스터도 따로 가지며, [Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space)에서 root port의 window 값을 바이트 단위로 읽습니다. 시리즈 VM의 `/proc/iomem`에서도 `PCI Bus 0000:04` 안에 `PCI Bus 0000:05`, 그 안에 bus 6·7의 window가 중첩되어 있습니다.
 
 ## Lane과 Link Width
 
-[PCI-SIG FAQ](https://web.archive.org/web/20250115173818/https://pcisig.com/faq?page=2)는 PCIe link가 1, 2, 4, 8, 12, 16, 32 lane으로 구성된다고 적습니다. QEMU 11.1.3 `include/hw/pci/pcie_regs.h:50-56`의 `PCIExpLinkWidth`도 같은 일곱 값(x1·x2·x4·x8·x12·x16·x32)을 정의하고, `pcie-root-port`의 `x-width` 속성이 이 중 하나를 받습니다.
+QEMU 11.1.3 `include/hw/pci/pcie_regs.h:50-56`의 `PCIExpLinkWidth`는 link 폭으로 x1·x2·x4·x8·x12·x16·x32 일곱 값을 정의하고, `pcie-root-port`의 `x-width` 속성이 이 중 하나를 받습니다. Link Capabilities의 Maximum Link Width 필드(`PCI_EXP_LNKCAP_MLW`, `pci_regs.h:542`)는 bit 9:4의 6비트입니다.
 
 Link Capabilities 레지스터는 포트가 지원하는 최대 폭과 속도를, Link Status 레지스터는 지금 동작 중인 값을 담습니다. 시리즈 VM에서 root port와 그 아래 장치를 짝지어 읽은 결과입니다.
 
@@ -139,77 +139,66 @@ Link Capabilities 레지스터는 포트가 지원하는 최대 폭과 속도를
 
 root port는 16 GT/s x16을 지원한다고 광고하지만 NVMe가 2.5 GT/s x1이라서 링크는 2.5 GT/s x1로 잡혔습니다. 실제 하드웨어에서는 양쪽이 link training으로 이 값을 정합니다. QEMU에는 link training이 없고, `hw/pci/pcie.c:1170-1217`의 `pcie_sync_bridge_lnk()`가 아래 장치의 Link Status를 읽어 포트의 Link Capabilities 범위로 자른 값을 포트의 Link Status에 복사합니다. 아래 장치가 없으면 Link Capabilities 값을 그대로 씁니다. 그래서 비어 있는 rp5(00:07.0)는 64 GT/s x16으로 보입니다. 이 VM의 Link Status는 협상 결과가 아니라 QEMU가 계산한 값이므로, 속도·폭을 다루는 장에서도 이 점을 전제로 읽어야 합니다.
 
-## Generation 진화 — Gen 1부터 Gen 7까지
+## Generation 진화 — 2.5 GT/s부터 128 GT/s까지
 
-아래 날짜는 [PCI-SIG 규격 목록](https://web.archive.org/web/20261111024224/https://pcisig.com/specifications)(2026-11-11 보관본)에 Base Specification 각 판이 게시된 날짜입니다. 전송률은 [PCI-SIG FAQ](https://web.archive.org/web/20250115173818/https://pcisig.com/faq?page=2)의 "lane당 방향당" 값과 [6.0·7.0 FAQ](https://web.archive.org/web/20250117201651/https://pcisig.com/faq?page=3)입니다.
+PCI-SIG 웹사이트(pcisig.com)는 이 작업 중 자동 접근을 403으로 막아 열지 못했습니다. 그래서 세대별 발표 날짜는 적지 않고, 속도와 encoding은 열어 본 자료로만 정리합니다.
 
-| 판 | Rate (lane당 방향당) | 목록 게시일 | Encoding |
+| Link speed 인코딩 (`pci_regs.h:535-541`) | Rate | Linux가 쓰는 encoding 효율 (`drivers/pci/pci.h:345-352`) | 세대 이름의 출처 |
 |------|------|------|------|
-| 1.x | 2.5 GT/s | 1.1이 2005-03-08 (1.0 본문은 목록에 없음) | 8b/10b |
-| 2.0 | 5.0 GT/s | 2006-12-20 | 8b/10b |
-| 3.0 | 8.0 GT/s | 2010-11-10 | 128b/130b |
-| 4.0 | 16.0 GT/s | 2017-10-05 | 128b/130b |
-| 5.0 | 32.0 GT/s | 2019-05-28 | 128b/130b |
-| 6.0 | 64 GT/s | 2022-01-11 | PAM4, Flit, FEC |
-| 7.0 | 128 GT/s | 2025-06-11 | PAM4 |
+| 1 | 2.5 GT/s | 8/10 | AMD powerplay `hardwaremanager.h:305` "PCIE 1.0 - Transfer rate of 2.5 GT/s" |
+| 2 | 5.0 GT/s | 8/10 | 같은 파일 306행 "PCIE 2.0" |
+| 3 | 8.0 GT/s | 128/130 | 같은 파일 307행 "PCIE 3.0" |
+| 4 | 16.0 GT/s | 128/130 | DesignWare `pcie-designware.h:214` "16.0 GT/s (Gen 4)" |
+| 5 | 32.0 GT/s | 128/130 | |
+| 6 | 64.0 GT/s | 1/1 | [CXL 4.0 소개 자료](https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf) PDF 8쪽 "PCIe 6.0 at 64.0 GT/s" |
+| 없음 | 128 GT/s | Linux v6.12에 없음 | 같은 자료 PDF 15쪽 "Uses PCIe® 7.0 PHY @ 128 GT/s" |
 
-같은 목록에는 2026-09-17에 게시된 Revision 7.1과 6.5도 있습니다. 표의 날짜는 각 판이 처음 올라온 날이고, 같은 판의 개정본(예: 2.0은 2009-02-27)은 따로 올라와 있습니다.
+32 GT/s를 5.0이라고 부르는 근거는 이번에 연 자료에서 찾지 못해 칸을 비웠습니다. 효율 열은 Linux가 link 대역폭을 계산할 때 쓰는 `PCIE_SPEED2MBS_ENC()` 매크로를 그대로 옮긴 값입니다. 2.5·5 GT/s는 8b/10b, 8~32 GT/s는 128b/130b를 반영하고, 64 GT/s는 1/1로 encoding 손실을 빼지 않습니다.
 
-전송률에서 바이트 대역폭으로 가는 계산은 encoding만 반영하면 됩니다. 아래는 `bw.py`로 계산한 값이고, TLP header·DLLP·Flit 오버헤드는 빼지 않은 상한입니다.
+바이트 대역폭은 `rate × 효율 × lane 수 / 8`입니다. 같은 매크로로 x16 한 방향을 계산한 `bw2.py`의 결과입니다. TLP header·DLLP·Flit 오버헤드는 빼지 않은 상한입니다.
 
 ```text
-gen    GT/s      eff  lane GB/s  x16 raw GB/s  x16 enc GB/s
-1.x     2.5  0.80000     0.2500           5.0         4.000
-2.x     5.0  0.80000     0.5000          10.0         8.000
-3.0     8.0  0.98462     0.9846          16.0        15.754
-4.0    16.0  0.98462     1.9692          32.0        31.508
-5.0    32.0  0.98462     3.9385          64.0        63.015
-6.0    64.0      n/a     8.0000         128.0             -
-7.0   128.0      n/a    16.0000         256.0             -
-128b/130b overhead = 1.538%  8b/10b overhead = 20%
-PCIe 5.0 x32 raw per direction = 128.0 GB/s (FAQ: 128 GB/s)
-PCIe 6.0 x16 raw both directions = 256.0 GB/s (FAQ: 256 GB/s)
-PCIe 7.0 x16 raw both directions = 512.0 GB/s (FAQ: 512 GB/s)
+  GT/s  Mb/s/lane (Linux)  x16 GB/s/dir  x16 raw GB/s/dir
+   2.5               2000         4.000               5.0
+   5.0               4000         8.000              10.0
+   8.0               7876        15.752              16.0
+  16.0              15753        31.506              32.0
+  32.0              31507        63.014              64.0
+  64.0              64000       128.000             128.0
+ 128.0                  -             -             256.0
+8b/10b overhead = 20%  128b/130b overhead = 1.538%
 ```
 
-식은 `rate × 효율 × lane 수 / 8`입니다. Gen 5 x16 한 방향은 32 × 128/130 × 16 / 8 ≈ 63.0 GB/s입니다. PCI-SIG가 6.0을 "x16에서 256 GB/s", 7.0을 "x16에서 양방향 512 GB/s"라고 할 때는 encoding을 빼지 않은 raw 값을 두 방향 합친 숫자입니다. 마지막 세 줄은 이 해석으로 FAQ 숫자가 재현되는지 확인합니다. 6.0·7.0의 Flit 효율은 공개 FAQ에 숫자가 없어서 표를 비웠습니다.
+Mb/s 열은 커널과 같은 정수 나눗셈 결과라서 8000 × 128 / 130이 7876으로 내림됩니다. 32 GT/s x16 한 방향은 약 63.0 GB/s입니다.
 
-FAQ의 1.x~3.0 표도 같은 계산입니다. 1.x는 lane당 약 250 MB/s, x16 양방향 합계 약 8 GB/s로 적혀 있고, 위 표의 0.25 GB/s와 4 GB/s × 2에 해당합니다.
-
-Linux v6.12가 아는 최고 속도는 64 GT/s입니다. `pci_regs.h:535-541`의 Link Capabilities 속도 인코딩은 `PCI_EXP_LNKCAP_SLS_64_0GB`(0x6)에서 끝나고, pciutils 3.13.0의 `link_speed()`(`ls-caps.c:755-773`)도 6까지만 이름을 붙이고 나머지는 `unknown`으로 찍습니다. QEMU 11.1.3의 `x-speed`도 `2_5/5/8/16/32/64`까지만 받습니다. 128 GT/s 장치를 이 조합으로 읽으면 속도 칸이 `unknown`으로 나온다는 뜻입니다.
+Linux v6.12가 아는 최고 속도는 64 GT/s입니다. `pci_regs.h:535-541`의 Link Capabilities 속도 인코딩은 `PCI_EXP_LNKCAP_SLS_64_0GB`(0x6)에서 끝나고, pciutils 3.13.0의 `link_speed()`(`ls-caps.c:755-773`)도 6까지만 이름을 붙이고 나머지는 `unknown`으로 찍습니다. QEMU 11.1.3의 `x-speed`도 `2_5/5/8/16/32/64`까지만 받습니다. 2026-11-16에 kernel.org에서 받은 mainline `pci_regs.h`(Makefile 기준 7.4-rc3)에도 128 GT/s 정의는 없습니다. 128 GT/s 장치를 이 조합으로 읽으면 속도 칸이 `unknown`으로 나온다는 뜻입니다.
 
 ## Encoding 진화 — 8b/10b → 128b/130b → PAM4
 
-| Encoding | 사용 판 | 출처가 밝힌 성질 |
+8b/10b는 8비트를 10비트로, 128b/130b는 128비트를 130비트로 보내므로 오버헤드가 각각 20%와 2/130 ≈ 1.54%입니다. 위 Linux 매크로의 8/10과 128/130이 이 두 encoding입니다. 2.5 GT/s에서 5 GT/s로는 rate가 두 배지만, 5 GT/s에서 8 GT/s로는 1.6배만 올라갑니다. 대신 encoding 손실이 줄어 lane당 실효 대역폭은 4000 Mb/s에서 7876 Mb/s로 거의 두 배가 됩니다.
+
+64 GT/s부터의 신호 방식과 오류 정정은 CXL Consortium 자료로 확인한 범위만 적습니다. [CXL 4.0 소개 자료](https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf) PDF 15쪽은 CXL 4.0이 PCIe 7.0 PHY를 128 GT/s로 쓰고 "PCIe 7.0 FEC and CRC"를 쓴다고 적습니다. PAM4의 레벨 수나 목표 오류율 같은 세부는 이번에 연 자료에 없어 다루지 않습니다.
+
+## FLIT Mode — 64 GT/s 이후의 큰 변화
+
+Flit Mode는 가변 길이 TLP·DLLP를 고정 크기 단위에 담아 보내는 방식입니다. [CXL 4.0 발표문](https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-Specification-Release_FINAL_Website-Copy.pdf)은 CXL 3.x와 4.0이 256B Flit 형식을 쓴다고 적고, PCIe 쪽 Flit의 바이트 배치는 이번에 연 자료에 없습니다.
+
+소프트웨어에 드러나는 흔적은 레지스터 정의입니다.
+
+| 정의 | 위치 | 뜻 |
 |------|------|------|
-| **8b/10b** | 1.x·2.x | 바이트마다 10비트 symbol. DC wander와 최소 edge 밀도를 보장해 AC coupling과 느슨한 clock data recovery를 허용 ([FAQ page 1](https://web.archive.org/web/20260604022039/https://pcisig.com/faq?page=1), "What is 8b/10b encoding?"). 오버헤드 20% (같은 FAQ의 3.0 항목) |
-| **128b/130b** | 3.0·4.0·5.0 | 130비트에 128비트 데이터. 오버헤드 2/130 ≈ 1.54%. 대신 scrambling이 8b/10b보다 DC wander를 키워 수신기가 견디거나 보정해야 함 ([FAQ page 1](https://web.archive.org/web/20260604022039/https://pcisig.com/faq?page=1), "What is scrambling?") |
-| **PAM4** | 6.0·7.0 | 4-level 신호로 같은 시간에 2비트를 보냄 ([FAQ page 3](https://web.archive.org/web/20250117201651/https://pcisig.com/faq?page=3)) |
+| `PCI_EXP_LNKSTA2_FLIT` 0x0400 | Linux v6.12 `pci_regs.h:700` | Link Status 2의 Flit Mode Status |
+| `PCI_EXP_FLAGS_FLIT` 0x8000 | mainline 7.4-rc3 `pci_regs.h:497` | PCI Express Capabilities의 Flit Mode Supported |
+| `PCI_ERR_CAP_TLP_LOG_FLIT` 0x00040000 | mainline 7.4-rc3 `pci_regs.h:819` | AER에 "TLP was logged in Flit Mode" |
+| `PCI_ERR_CAP_TLP_LOG_SIZE` 0x00f80000 | mainline 7.4-rc3 `pci_regs.h:820` | "Logged TLP Size (only in Flit mode)" |
 
-3.0이 5.0 GT/s에서 8.0 GT/s로 1.6배만 올렸는데도 "두 배"라고 부르는 이유도 FAQ에 있습니다. 2.0의 5.0 GT/s는 8b/10b 때문에 실제로 4 Gbps이고, 3.0은 128b/130b로 바꿔 약 8 Gbps가 되므로 10 GT/s를 8b/10b로 보낸 것과 같은 대역폭을 낮은 신호 속도로 얻습니다.
-
-6.0이 PAM4로 간 대가는 오류율입니다. [FAQ page 3](https://web.archive.org/web/20250117201651/https://pcisig.com/faq?page=3)은 PAM4에서 예상하는 BER을 10⁻⁶, 이전 세대 NRZ를 10⁻¹²로 적고, 이를 가벼운 FEC와 강한 CRC로 다룬다고 설명합니다.
-
-## FLIT Mode — Gen 6 이후의 큰 변화
-
-같은 FAQ("What is Flit Mode and why did PCI-SIG move to this unit of data exchange?")가 공개한 내용은 다음과 같습니다.
-
-| 항목 | FAQ 내용 |
-|------|------|
-| 단위 | 256바이트 Flit. 가변 길이 TLP와 DLLP가 그 안에 들어감 |
-| 이유 | PAM4와 FEC로 가면서, FEC가 고정 크기 데이터에서만 동작하기 때문 |
-| 적용 속도 | 64 GT/s PAM4에서는 필수, 그 외 모든 link 속도에서도 지원 |
-| 유지 | link가 Flit Mode로 training되면 LinkUp인 동안 Flit Mode 유지 |
-| 혼합 | Flit Mode link와 non-Flit link 사이는 경계에서 자동 변환 |
-| 소프트웨어 영향 | 새 TLP 형식 때문에 오류 로그 해석이 바뀜. inter-hierarchy routing 추가 |
-
-TLP가 모두 256바이트가 되는 것이 아니라, 여러 TLP와 DLLP를 256바이트 그릇에 담아 보냅니다. Linux v6.12 `pci_regs.h:700`에는 Link Status 2의 `PCI_EXP_LNKSTA2_FLIT`(0x0400, Flit Mode Status)가 정의돼 있지만, v6.12의 `drivers/`와 `include/linux/`에서는 이 이름을 쓰는 곳이 없습니다(`grep -rn LNKSTA2_FLIT` 결과 없음). 이 판의 커널은 Flit Mode 비트를 정의만 하고 동작을 바꾸지 않습니다.
+AER 쪽 두 비트는 Flit Mode에서 Header Log를 읽는 방법이 달라진다는 뜻입니다. [Ch 2](/blog/embedded/hardware/pcie/chapter02-tlp)의 Header Log 해석이 Flit Mode에는 그대로 맞지 않습니다. v6.12에서는 `drivers/`와 `include/linux/`에서 `LNKSTA2_FLIT`를 쓰는 곳이 없습니다(`grep -rn LNKSTA2_FLIT` 결과 없음). 이 판의 커널은 Flit Mode 비트를 정의만 하고 동작을 바꾸지 않습니다. QEMU 11.1.3은 CXL root port·switch port의 `x-256b-flit` 속성(`cxl_root_port.c:216` 등)으로만 이 상태 비트를 켭니다.
 
 ## 인접 표준 — CXL·UCIe
 
 | 표준 | 공개 자료가 밝힌 관계 |
 |------|------|
-| **CXL** | [CXL 4.0 발표문](https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-Specification-Release_FINAL_Website-Copy.pdf)(2025-11-18)은 4.0이 대역폭을 64 GT/s에서 128 GT/s로 두 배로 올렸고 CXL 3.x의 256B Flit 형식을 유지한다고 적습니다. 두 속도는 PCIe 6.0·7.0의 rate와 같습니다 |
+| **CXL** | [CXL 4.0 발표문](https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-Specification-Release_FINAL_Website-Copy.pdf)(2025-11-18)은 4.0이 대역폭을 64 GT/s에서 128 GT/s로 두 배로 올렸고 CXL 3.x의 256B Flit 형식을 유지한다고 적습니다. 소개 자료 PDF 15쪽은 그 128 GT/s가 PCIe 7.0 PHY라고 밝힙니다 |
 | **UCIe** | [UCIe 규격 페이지](https://www.uciexpress.org/specifications)는 UCIe가 die-to-die physical layer와 die-to-die protocol을 정의하고 PCIe·CXL을 활용한다고 설명합니다. 같은 페이지에 1.0·1.1·2.0·3.0 규격이, 홈페이지에 4.0 공개 공지가 있습니다 |
 
 CXL이 PCIe configuration 모델 안에서 어떻게 자기를 드러내는지는 [CXL 4.0 Internals Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position)과 [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)의 DVSEC 덤프에서 볼 수 있습니다.
@@ -218,7 +207,7 @@ CXL이 PCIe configuration 모델 안에서 어떻게 자기를 드러내는지�
 
 ### "PCIe는 공유 버스다"
 
-PCI-SIG FAQ가 PCIe를 만든 이유로 든 것이 바로 PCI 같은 parallel bus의 한계입니다. 공유되는 것은 configuration 모델과 BDF 번호 체계이고, 링크는 두 포트 사이에만 있습니다. `lspci -tv`에서 root port마다 bus가 하나씩 따로 열리는 것이 그 결과입니다.
+공유되는 것은 configuration 모델과 BDF 번호 체계이고, 링크는 두 포트 사이에만 있습니다. `lspci -tv`에서 root port마다 bus가 하나씩 따로 열리는 것이 그 결과입니다.
 
 ### "Switch가 hub와 같다"
 
@@ -226,7 +215,7 @@ PCI-SIG FAQ가 PCIe를 만든 이유로 든 것이 바로 PCI 같은 parallel bu
 
 ### "Gen 6은 단순히 Gen 5의 2배"
 
-rate는 32에서 64 GT/s로 두 배지만, PCI-SIG FAQ가 6.0의 새 요소로 든 것은 PAM4, FEC, Flit 세 가지입니다. FAQ는 Flit 때문에 오류 로그 해석과 routing 규칙이 바뀌었다고도 적습니다. 소프트웨어가 보는 변화가 있다는 뜻입니다.
+rate는 32에서 64 GT/s로 두 배지만, Linux가 대역폭을 계산하는 방식부터 바뀝니다. `PCIE_SPEED2MBS_ENC()`는 64 GT/s에 128b/130b 대신 1/1을 씁니다. mainline `pci_regs.h`에는 Flit Mode에서 Header Log를 다르게 읽으라는 AER 비트도 생겼습니다. 소프트웨어가 보는 변화가 있다는 뜻입니다.
 
 ### "x16 슬롯이면 링크도 x16"
 
@@ -234,7 +223,7 @@ Link Capabilities는 포트가 지원하는 최대값이고, 지금 링크는 Li
 
 ### "PCIe 7.0이 나왔으니 커널과 도구도 128 GT/s를 안다"
 
-PCI-SIG 목록에 7.0은 2025-06-11에 올라왔지만, Linux v6.12 `pci_regs.h`와 pciutils 3.13.0의 속도 이름은 64 GT/s에서 끝납니다. 규격 게시일과 소프트웨어 지원 시점은 따로 확인해야 하는 값입니다.
+CXL 4.0 자료는 PCIe 7.0 PHY 128 GT/s를 전제로 하지만, Linux v6.12·mainline 7.4-rc3의 `pci_regs.h`와 pciutils 3.13.0의 속도 이름은 64 GT/s에서 끝납니다. 규격과 소프트웨어 지원 시점은 따로 확인해야 하는 값입니다.
 
 ## 정리
 
@@ -243,8 +232,8 @@ PCI-SIG 목록에 7.0은 2025-06-11에 올라왔지만, Linux v6.12 `pci_regs.h`
 - 장치 역할은 PCI Express Capability Flags bit 7:4에 있고, QEMU VM에서 Root Port 4·Endpoint 0·Upstream 5·Downstream 6으로 읽혔습니다.
 - switch는 포트마다 별도 PCI-to-PCI bridge입니다.
 - link 폭은 x1·x2·x4·x8·x12·x16·x32이고, LnkCap은 최대값, LnkSta는 현재값입니다. QEMU의 LnkSta는 training 결과가 아니라 복사된 값입니다.
-- rate는 2.5 GT/s에서 128 GT/s까지 올라갔고, 바이트 대역폭은 encoding과 방향을 밝혀 계산합니다.
-- 6.0의 Flit은 256바이트 고정 단위이고, Linux v6.12는 그 상태 비트를 정의만 합니다.
+- rate는 2.5 GT/s에서 128 GT/s까지 올라갔고, 바이트 대역폭은 Linux의 encoding 효율과 방향을 밝혀 계산합니다.
+- Flit Mode는 Linux 레지스터 정의로 드러나고, v6.12는 상태 비트를 정의만 합니다.
 
 ## 다음 편
 
@@ -262,7 +251,7 @@ PCI-SIG 목록에 7.0은 2025-06-11에 올라왔지만, Linux v6.12 `pci_regs.h`
 
 이 시리즈의 1차 자료는 다음과 같습니다.
 
-- **PCI-SIG 공개 페이지**: [FAQ](https://pcisig.com/faq)와 [규격 목록](https://pcisig.com/specifications). pcisig.com이 자동 접근을 막아 Internet Archive 보관본을 링크했고, 각 링크의 URL에 보관 날짜가 들어 있습니다.
+- **CXL Consortium·UCIe Consortium 공개 자료**: 본문에 링크한 PDF와 페이지. PCI-SIG 웹사이트는 이 작업 중 자동 접근이 막혀 열지 못했으므로 인용하지 않습니다.
 - **Linux v6.12 소스**: kernel.org의 `linux-6.12.tar.xz`(sha256sums.asc로 검증). 본문의 `file:line`은 이 판 기준입니다. 실행은 Debian 13의 `6.12.116+deb13-arm64` 커널에서 했습니다.
 - **QEMU 11.1.3 소스**와 같은 판의 실행 바이너리
 - **pciutils 3.13.0 소스**(GitHub 태그 `v3.13.0`)와 Debian 13의 같은 판 `lspci`
