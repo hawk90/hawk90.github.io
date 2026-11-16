@@ -8,45 +8,38 @@
 \begin{tikzpicture}[blog]
 
 % Title
-\node[font=\sffamily\bfseries] at (4, 4.5) {부트 시간 분해 (i.MX8M 기준)};
+\node[font=\sffamily\bfseries] at (4, 4.6) {부트 시간 분해 (QEMU virt TCG 실측, 호스트 시각)};
 
-% Timeline bar
+% Timeline bar: 15.223 s mapped to 8 cm
 \draw[draw=nodebord, line width=1pt] (0, 3) -- (8, 3);
 
-% Segments with different colors
-\fill[absfill] (0, 2.6) rectangle (0.8, 3.4);    % BootROM
-\fill[impfill] (0.8, 2.6) rectangle (2, 3.4);   % SPL
-\fill[clifill] (2, 2.6) rectangle (3.2, 3.4);   % U-Boot
-\fill[hifill] (3.2, 2.6) rectangle (5.5, 3.4);  % Kernel
-\fill[prpfill] (5.5, 2.6) rectangle (8, 3.4);   % Userspace
+\fill[absfill] (0, 2.6) rectangle (0.045, 3.4);      % TF-A 0 - 0.085 s
+\fill[clifill] (0.045, 2.6) rectangle (1.426, 3.4);  % U-Boot 0.085 - 2.713 s
+\fill[hifill] (1.426, 2.6) rectangle (1.897, 3.4);   % Kernel 2.713 - 3.609 s
+\fill[prpfill] (1.897, 2.6) rectangle (8, 3.4);      % Userspace 3.609 - 15.223 s
 
-% Borders
-\draw[draw=nodebord] (0, 2.6) rectangle (0.8, 3.4);
-\draw[draw=nodebord] (0.8, 2.6) rectangle (2, 3.4);
-\draw[draw=nodebord] (2, 2.6) rectangle (3.2, 3.4);
-\draw[draw=nodebord] (3.2, 2.6) rectangle (5.5, 3.4);
-\draw[draw=nodebord] (5.5, 2.6) rectangle (8, 3.4);
+\draw[draw=nodebord] (0, 2.6) rectangle (0.045, 3.4);
+\draw[draw=nodebord] (0.045, 2.6) rectangle (1.426, 3.4);
+\draw[draw=nodebord] (1.426, 2.6) rectangle (1.897, 3.4);
+\draw[draw=nodebord] (1.897, 2.6) rectangle (8, 3.4);
 
 % Labels above
-\node[font=\sffamily\tiny, anchor=south] at (0.4, 3.5) {ROM};
-\node[font=\sffamily\tiny, anchor=south] at (1.4, 3.5) {SPL};
-\node[font=\sffamily\tiny, anchor=south] at (2.6, 3.5) {U-Boot};
-\node[font=\sffamily\tiny, anchor=south] at (4.35, 3.5) {Kernel};
-\node[font=\sffamily\tiny, anchor=south] at (6.75, 3.5) {Userspace};
+\node[font=\sffamily\tiny, anchor=south east] at (0.05, 3.5) {TF-A};
+\node[font=\sffamily\tiny, anchor=south] at (0.74, 3.5) {U-Boot};
+\node[font=\sffamily\tiny, anchor=south west] at (1.45, 3.5) {Kernel};
+\node[font=\sffamily\tiny, anchor=south] at (4.95, 3.5) {Userspace (systemd)};
 
 % Time markers
-\node[font=\sffamily\tiny, text=mutec] at (0, 2.2) {0s};
-\node[font=\sffamily\tiny, text=mutec] at (0.8, 2.2) {0.2s};
-\node[font=\sffamily\tiny, text=mutec] at (2, 2.2) {0.5s};
-\node[font=\sffamily\tiny, text=mutec] at (3.2, 2.2) {1.0s};
-\node[font=\sffamily\tiny, text=mutec] at (5.5, 2.2) {2.5s};
-\node[font=\sffamily\tiny, text=mutec] at (8, 2.2) {5.0s};
+\node[font=\sffamily\tiny, text=mutec, anchor=north] at (0, 2.5) {0 s};
+\node[font=\sffamily\tiny, text=mutec, anchor=north] at (1.426, 2.5) {2.71 s};
+\node[font=\sffamily\tiny, text=mutec, anchor=north west] at (1.897, 2.0) {3.61 s};
+\node[font=\sffamily\tiny, text=mutec, anchor=north] at (8, 2.5) {15.22 s};
 
-% Optimization targets
-\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (0, 1.2) {최적화 대상:};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.6) {• SPL: Falcon Mode로 건너뛰기};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.1) {• Kernel: initcall 병렬화, 불필요 드라이버 제거};
-\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, -0.4) {• Userspace: systemd 최적화, socket activation};
+% Measured hotspots
+\node[font=\sffamily\scriptsize, text=conbord, anchor=west] at (0, 1.1) {가장 큰 구간 (같은 실행):};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.5) {• U-Boot: 수동 입력 + TFTP 38 MB};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, 0.0) {• Kernel: of\_platform\_default\_populate\_init 36 ms};
+\node[font=\sffamily\scriptsize, text=mutec, anchor=west] at (0, -0.5) {• Userspace: dev-vda1.device 6.8 s, udev-trigger 5.8 s};
 
 \end{tikzpicture}
 \end{document}
