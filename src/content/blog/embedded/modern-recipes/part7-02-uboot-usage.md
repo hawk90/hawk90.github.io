@@ -45,7 +45,7 @@ qemu-system-aarch64 -M virt -cpu cortex-a57 -m 1G -nographic \
 | `bootargs` | 커널 명령줄. `booti`가 DTB의 `/chosen`에 씁니다 | — |
 | script (`boot.scr`) | `mkimage -T script`로 감싼 명령 묶음. `source`로 실행 | 아래 실행 |
 
-`qemu_arm64` 기본 환경의 주소 변수는 다음과 같습니다. 이 보드에는 `fdt_addr_r`이 없고, QEMU가 넘긴 DTB를 U-Boot가 쓰는 주소가 `fdtcontroladdr`에 들어 있습니다.
+`qemu_arm64` 기본 환경의 주소 변수는 다음과 같습니다. 이 보드에는 `fdt_addr_r`이 없고, QEMU가 DTB를 둔 주소인 `fdt_addr=0x40000000`이 있습니다(`board/emulation/qemu-arm/qemu-arm.env:10`). U-Boot가 relocate해 쓰는 사본의 주소는 `fdtcontroladdr`이고, 이 글의 `booti`는 그 주소를 넘깁니다.
 
 ```text
 => printenv bootcmd bootdelay kernel_addr_r fdt_addr_r scriptaddr ramdisk_addr_r
@@ -85,7 +85,7 @@ Protected 2 sectors
 OK
 ```
 
-`setenv bootargs`에 따옴표 없이 단어 다섯 개를 줘도 값은 공백으로 이어진 한 문자열이 됐습니다. `setenv`는 이름 뒤의 인자를 모두 공백으로 이어 붙여 값으로 씁니다(`env/common.c`의 `env_do_env_set`, 105-119행). 따옴표가 꼭 필요한 경우는 값에 `;`나 `$`가 들어 있어서, `setenv`가 받기 전에 명령줄 parser가 그 문자를 해석하면 안 될 때입니다. 아래 `bootcmd` 예처럼 명령 여러 개를 한 변수에 담을 때가 그렇습니다.
+`setenv bootargs`에 따옴표 없이 단어 다섯 개를 줘도 값은 공백으로 이어진 한 문자열이 됐습니다. 다만 공백을 여러 칸 연속으로 넣으면 한 칸으로 줄어듭니다. `setenv x a   b`는 `x=a b`가, `setenv y "a   b"`는 `y=a   b`가 됐으므로, 공백 수를 지켜야 할 때도 따옴표가 필요합니다. `setenv`는 이름 뒤의 인자를 모두 공백으로 이어 붙여 값으로 씁니다(`env/common.c`의 `env_do_env_set`, 105-119행). 따옴표가 꼭 필요한 경우는 값에 `;`나 `$`가 들어 있어서, `setenv`가 받기 전에 명령줄 parser가 그 문자를 해석하면 안 될 때입니다. 아래 `bootcmd` 예처럼 명령 여러 개를 한 변수에 담을 때가 그렇습니다.
 
 QEMU를 끄고 같은 `flash1.img`로 다시 켜면 저장한 값이 돌아옵니다. `bootdelay=0`이라 키를 누를 틈 없이 `bootflow scan`이 돌았고, 부팅할 것을 찾지 못해 프롬프트로 떨어진 뒤의 출력입니다.
 
@@ -178,8 +178,11 @@ Bytes transferred = 38246912 (2479a00 hex)
 ...
 Bytes transferred = 1017676 (f874c hex)
 ## Flattened Device Tree blob at 7e578df0
+   Booting using the fdt blob at 0x7e578df0
+Working FDT set to 7e578df0
    Loading Ramdisk to 7d474000, end 7d56c74c ... OK
    Loading Device Tree to 000000007d371000, end 000000007d473fff ... OK
+Working FDT set to 7d371000
 
 Starting kernel ...
 ```
@@ -200,7 +203,7 @@ hello from /init, PID 1
 
 OTA 뒤 새 slot이 부팅에 계속 실패하면 이전 slot으로 돌아가야 합니다. 체육관 출입 카드에 "세 번 연속 실패하면 관리실로 안내"라는 규칙을 두는 것과 같습니다. U-Boot에서는 `CONFIG_BOOTCOUNT_LIMIT`가 이 규칙이고, 부팅할 때마다 `bootcount`를 1씩 올려 `bootlimit`보다 커지면 `bootcmd` 대신 `altbootcmd`를 실행합니다(`doc/api/bootcount.rst`, `common/autoboot.c:455`, `:479-482`).
 
-`qemu_arm64_defconfig`에는 이 기능이 없으므로 다음 세 줄을 더해 다시 빌드했습니다. 셋째 줄의 fastboot는 다음 절에서 씁니다.
+`qemu_arm64_defconfig`에는 이 기능이 없으므로 다음 네 줄을 더해 다시 빌드했습니다. 셋째·넷째 줄의 fastboot는 다음 절에서 씁니다.
 
 ```text
 CONFIG_BOOTCOUNT_LIMIT=y
@@ -209,7 +212,7 @@ CONFIG_UDP_FUNCTION_FASTBOOT=y
 CONFIG_FASTBOOT_BUF_ADDR=0x50000000
 ```
 
-`CONFIG_BOOTCOUNT_ENV`는 count를 environment에 저장하는 backend입니다. 이 backend는 `upgrade_available`이 1일 때만 `bootcount`를 저장하고 읽습니다(`drivers/bootcount/bootcount_env.c:9-27`). OTA 업데이트 도구가 새 이미지를 쓴 뒤 `upgrade_available=1`로 두고, 새 시스템이 정상 부팅하면 사용자 공간에서 `upgrade_available`과 `bootcount`를 0으로 되돌리는 구조입니다(`doc/api/bootcount.rst:52-58`).
+`CONFIG_BOOTCOUNT_ENV`는 count를 environment에 저장하는 backend입니다. 이 backend는 `upgrade_available`이 1일 때만 `bootcount`를 저장하고 읽습니다(`drivers/bootcount/bootcount_env.c:9-27`). 문서는 시스템이 정상 부팅하면 사용자 공간에서 `upgrade_available`과 `bootcount`를 0으로 되돌리라고 적습니다(`doc/api/bootcount.rst:52-58`). 설정하는 부팅에서도 RAM의 `bootcount`가 1이 되는 이유는 `bootcount_inc()`가 저장 여부와 관계없이 `env_set_ulong("bootcount", ...)`을 하기 때문입니다(`include/bootcount.h:126-128`).
 
 slot B가 매번 실패하는 상황을 `bootcmd='echo booting slot B; reset'`으로 흉내 냈습니다.
 
@@ -249,11 +252,11 @@ count 1과 2에서는 `bootcmd`, 3에서 `bootlimit`(2)를 넘어 `altbootcmd`�
 
 위 설정에서 `setenv bootcount 0` 한 줄을 빼면 결과가 달라집니다. 설정을 입력하던 그 부팅에서도 `bootcount_inc()`가 RAM의 `bootcount`를 1로 만들어 두므로(`upgrade_available`이 0이라 저장만 안 했을 뿐입니다), 이어서 `saveenv`를 하면 1이 저장됩니다. 실제로 그렇게 돌렸더니 `printenv bootcount`가 `bootcount=1`을 보였고, `reset` 뒤 slot B를 한 번만 시도하고 바로 `altbootcmd`로 넘어갔습니다.
 
-`altbootcmd`가 이 예처럼 실제 부팅을 하지 않으면, 장치는 다시 reset되지 않고 프롬프트에 머뭅니다. 양산 이미지에서는 `altbootcmd`가 이전 slot을 실제로 부팅하는 명령이어야 합니다. `bootlimit`만 있고 `altbootcmd`가 없으면 U-Boot는 대화형 모드에 머문다고 문서에 적혀 있습니다(`doc/api/bootcount.rst:18-20`).
+`altbootcmd`가 이 예처럼 실제 부팅을 하지 않으면, 장치는 다시 reset되지 않고 프롬프트에 머뭅니다. 이 예의 `altbootcmd`는 `bootcmd`를 바꾸지 않았다는 점도 봐야 합니다. 같은 flash로 다시 켰더니 `upgrade_available=0`이라 count를 저장도 비교도 하지 않았고, `bootcmd`가 그대로 돌아 `booting slot B`와 `resetting ...`이 반복됐습니다. 양산 이미지에서는 `altbootcmd`가 이전 slot을 실제로 부팅하는 명령이어야 합니다. `bootlimit`만 있고 `altbootcmd`가 없으면 U-Boot는 대화형 모드에 머문다고 문서에 적혀 있습니다(`doc/api/bootcount.rst:18-20`).
 
 ### Fastboot
 
-Fastboot는 USB(`fastboot usb <controller>`)나 UDP(`fastboot udp`)로 PC의 `fastboot` 명령을 받습니다(`cmd/fastboot.c`의 help, `doc/android/fastboot.rst`). QEMU `virt`에는 USB gadget이 없으므로 UDP로 돌렸습니다. QEMU에 `hostfwd=udp:127.0.0.1:5554-:5554`를 더하고 U-Boot에서 `fastboot udp`를 실행했습니다.
+Fastboot는 USB(`fastboot usb <controller>`), UDP(`fastboot udp`), TCP(`fastboot tcp`, `CONFIG_TCP_FUNCTION_FASTBOOT`)로 PC의 `fastboot` 명령을 받습니다(`cmd/fastboot.c:163-170`, `doc/android/fastboot.rst`). QEMU `virt`에는 USB gadget이 없으므로 UDP로 돌렸습니다. QEMU에 `hostfwd=udp:127.0.0.1:5554-:5554`를 더하고 U-Boot에서 `fastboot udp`를 실행했습니다.
 
 ```text
 => setenv autoload no
@@ -313,7 +316,7 @@ EFI stub: Using DTB from configuration table
 EFI stub: Exiting boot services...
 ```
 
-이 경로에서는 커널 명령줄과 DTB 선택을 GRUB 설정과 EFI 테이블이 맡으므로, U-Boot의 `bootargs`는 쓰이지 않습니다.
+`bootefi`는 환경 변수 `bootargs`를 load options로 EFI 앱에 넘깁니다(`lib/efi_loader/efi_bootbin.c:189`). 이 실행은 `bootargs`가 없는 기본 env였고, 커널 명령줄(`BOOT_IMAGE=/boot/vmlinuz-6.12.116+deb13-arm64 root=PARTUUID=1f342af3-3c35-4bc7-9e48-59628a9a5f7a ro`)은 GRUB 설정이 정했으며, DTB는 EFI configuration table로 넘어갔습니다.
 
 ### Custom command 추가
 
@@ -345,9 +348,9 @@ health
 
 ## 측정 / 성능 비교
 
-부팅 시간 항목(autoboot 대기, TFTP 전송, 저장 장치 읽기, 콘솔 출력)은 모두 보드의 네트워크·저장 장치·UART 속도로 정해지므로 QEMU에서 잰 숫자로 대신할 수 없습니다. 이 글에서 잰 값은 위에 나온 것뿐입니다. 그중 보드와 관계없이 성립하는 것은 두 가지입니다. `bootdelay` 초만큼은 키 입력을 기다리며 그대로 흘러가고, boot count를 env에 두면 부팅마다 env를 한 번 지우고 씁니다. 위 로그에서 부팅마다 `Erasing Flash... Writing to Flash...`가 찍힌 것이 그 쓰기입니다.
+부팅 시간 항목(autoboot 대기, TFTP 전송, 저장 장치 읽기, 콘솔 출력)은 모두 보드의 네트워크·저장 장치·UART 속도로 정해지므로 QEMU에서 잰 숫자로 대신할 수 없습니다. 이 글에서 잰 값은 위에 나온 것뿐입니다. 그중 보드와 관계없이 성립하는 것은 두 가지입니다. `bootdelay` 초만큼은 키 입력을 기다리며 그대로 흘러가고, boot count를 env에 두면 `upgrade_available=1`인 동안 부팅마다 env를 한 번 지우고 씁니다. 위 로그에서 부팅마다 `Erasing Flash... Writing to Flash...`가 찍힌 것이 그 쓰기입니다.
 
-환경 저장 위치는 defconfig의 `CONFIG_ENV_IS_IN_*`가 정합니다. 이 보드는 NOR flash(`ENV_IS_IN_FLASH`)이고 env 크기는 `CONFIG_ENV_SIZE`(`0x40000`, 256 KiB)입니다. NOR·eMMC에 env를 두 벌 두는 `CONFIG_SYS_REDUNDAND_ENVIRONMENT`가 있지만, 이 글에서는 켜지 않았습니다.
+환경 저장 위치는 defconfig의 `CONFIG_ENV_IS_IN_*`가 정합니다. 이 보드는 NOR flash(`ENV_IS_IN_FLASH`)이고 env 크기는 `CONFIG_ENV_SIZE`(`0x40000`, 256 KiB)입니다. env를 두 벌 두는 `CONFIG_SYS_REDUNDAND_ENVIRONMENT`가 있지만, 이 글에서는 켜지 않았습니다.
 
 ## 자주 보는 함정
 
@@ -378,7 +381,7 @@ second
 
 > ⚠️ `altbootcmd`가 실패하는 경로
 
-`bootcount_error()`는 `bootcount > bootlimit`인 동안 계속 참이므로, `altbootcmd`가 부팅에 실패하고 reset하면 다음 부팅도 다시 `altbootcmd`로 갑니다. `altbootcmd`는 이미 검증된 이전 slot이나 recovery 파티션을 부팅해야 합니다.
+`upgrade_available`이 1로 남아 있으면 `bootcount`가 계속 올라 `bootcount > bootlimit`이 유지되므로, `altbootcmd`가 실패하고 reset하면 다음 부팅도 `altbootcmd`로 갑니다. 반대로 이 글의 `altbootcmd`처럼 `upgrade_available=0`을 저장하면 다음 부팅은 count를 저장하지도 비교하지도 않고(`drivers/bootcount/bootcount_env.c:19-27`) 다시 `bootcmd`(slot B)를 실행합니다. 위에서 본 대로 `booting slot B`와 `resetting ...`이 끝없이 반복됩니다. 그래서 `altbootcmd`는 이미 검증된 이전 slot을 부팅하는 것과 함께 `bootcmd`도 그 slot으로 바꿔 저장해야 합니다.
 
 > ⚠️ Fastboot 파티션 이름 불일치
 
@@ -387,7 +390,7 @@ second
 ## 정리
 
 - U-Boot의 동작은 environment가 정합니다. `setenv`는 RAM만, `saveenv`가 저장소까지 바꿉니다.
-- `setenv`는 인자를 공백으로 이어 붙이므로 공백만 있는 값에는 따옴표가 필요 없고, `;`·`$`가 든 값에는 작은따옴표가 필요합니다.
+- `setenv`는 인자를 공백 한 칸으로 이어 붙입니다. 공백이 한 칸씩인 값에는 따옴표가 필요 없고, 연속 공백이나 `;`가 든 값에는 따옴표가, `$`를 `run` 시점에 풀려면 작은따옴표가 필요합니다.
 - QEMU `-nic user,tftp=`로 TFTP 부팅과 `boot.scr`를 보드 없이 시험할 수 있습니다. bootstd는 `/`와 `/boot/`에서 `boot.scr`를 찾습니다.
 - Boot count는 `bootcount > bootlimit`에서 `altbootcmd`로 갑니다. env backend는 `upgrade_available=1`일 때만 count를 저장합니다.
 - Fastboot는 UDP로도 동작하지만, flash 대상은 v2025.04에서 MMC와 NAND뿐입니다.
