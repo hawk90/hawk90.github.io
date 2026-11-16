@@ -2,7 +2,7 @@
 title: "임베디드 포스트모템 분석 — Core Dump와 Field Crash"
 slug: "embedded/modern-recipes/part10-12-postmortem-analysis"
 date: 2026-04-19T09:11:00
-description: "Linux coredump·gdb 분석부터 MCU 환경의 mini-dump(Memfault)·last-gasp logging·field debug 패턴까지."
+description: "Linux core dump 설정과 gdb 분석의 요점을 정리하고, MCU mini-dump를 QEMU에서 fault → 저장 → reset → 다음 부팅 보고까지 실제로 돌려 addr2line으로 원인 줄을 찾으며, reset 원인 플래그와 crash 묶기를 HAL·데이터시트로 짚습니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 122
 tags: [recipes, debugging, postmortem]
@@ -11,167 +11,137 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Crash는 *현장*에서 일어나지만 *분석*은 사무실에서 합니다."** 그 사이를 잇는 것이 coredump (Linux) 또는 mini-dump (MCU)입니다.
+> **"Crash는 현장에서 일어나지만 분석은 책상에서 합니다."** 그 사이를 잇는 것이 Linux의 core dump와 MCU의 mini-dump입니다.
 
 ## 어떤 상황에서 쓰나
 
-Field에 배포된 device가 가끔 reboot합니다. 사용자는 "그냥 멈췄어요"라고만 합니다. 재현이 안 됩니다. *현장*의 상태를 *사무실*로 가져오는 메커니즘이 필요합니다.
+배포한 장치가 가끔 재부팅되고, 재현은 안 되고, 사용자는 "그냥 멈췄다"고만 합니다. 이때 필요한 것은 crash 순간의 레지스터·메모리·로그를 남겨 두었다가 나중에 꺼내 보는 장치입니다. Linux 기반 장치는 커널의 core dump를, OS가 없는 MCU는 직접 만든 mini-dump를 씁니다. 이 글은 MCU 쪽을 QEMU에서 실제로 끝까지 돌려 보고(fault → dump 저장 → reset → 다음 부팅에서 보고), Linux 쪽은 실제 실행 결과가 있는 [Postmortem Debugging 시리즈](/blog/tools/debugging/postmortem/chapter01-core-generation)로 연결합니다.
 
-Linux 기반 device는 `coredump`, MCU 기반 device는 *mini-dump* 또는 *last-gasp log* 패턴을 씁니다. 둘 다 본질은 같습니다. Crash 순간의 register·memory·log를 압축해 *그대로* 가져오는 것.
+## Linux core dump
 
-## Linux Coredump
+### 켜기
 
-### 활성화
+core는 기본 동작이 core인 시그널을 받은 프로세스에서, `RLIMIT_CORE`와 `/proc/sys/kernel/core_pattern`에 따라 만들어집니다. 파일 경로 패턴이면 `ulimit -c`를 따르고, `|`로 시작하는 파이프 패턴이면 그 프로그램이 core를 받습니다.
 
 ```bash
-# 기본은 비활성. systemd
-sudo systemctl enable systemd-coredump.service
-sudo systemctl start  systemd-coredump.service
-
-# 또는 직접
 ulimit -c unlimited
 echo "/var/crash/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
-
-# 또는 단일 program
-$ ulimit -c unlimited
-$ ./my_program
-Segmentation fault (core dumped)
+./my_program
 ```
 
-`coredumpctl list`로 최근 coredump를 봅니다.
+Debian 13에서는 `systemd-coredump` 패키지를 설치하면 `core_pattern`이 그 처리기로 바뀌고 서비스의 core 한도도 함께 바뀝니다. 그 다음부터는 `coredumpctl list`로 목록을, `coredumpctl debug <PID>`로 gdb 진입을 합니다. Debian 13 VM에서 실제로 확인한 동작과 출력은 [Postmortem 1장](/blog/tools/debugging/postmortem/chapter01-core-generation)에 있습니다.
+
+### gdb로 보기
 
 ```bash
-coredumpctl list
-TIME           PID  UID  GID  SIG     COREFILE  EXE
-Mon 10:23      5234 1000 1000 SIGSEGV present   /usr/bin/my_program
-
-coredumpctl debug 5234
-# → gdb로 진입
-```
-
-### gdb로 coredump 분석
-
-```bash
-gdb /path/to/my_program /var/crash/core.my_program.5234.1700000000
-
+gdb /path/to/my_program /var/crash/core.my_program.<pid>.<time>
 (gdb) bt
-#0  0x00007f1234567890 in process_input (data=0x0) at input.c:42
-#1  0x00007f1234567abc in main (argc=1, argv=...) at main.c:78
-
 (gdb) frame 0
-(gdb) print data
-$1 = (char *) 0x0
-(gdb) list
-40    char *p = data;
-41    while (*p) {        /* NULL deref */
-42        process(*p++);
-43    }
+(gdb) info locals
 ```
 
-NULL pointer dereference가 즉시 보입니다. `print` / `info locals`로 변수 값도.
+`bt`로 crash 지점의 호출 스택을, `frame`·`print`·`info locals`로 그 시점 변수를 봅니다. 실제 core로 돌린 세션은 [Postmortem 3장](/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis)에 있습니다.
 
-### Symbol과 source 매핑
+### 심볼을 따로 보관하기
 
 ```bash
-# release build는 보통 strip됨
-gcc -g -O2 -o my_program main.c     # debug symbol 포함
-
-# strip된 binary는 별도 symbol file 필요
+gcc -g -O2 -o my_program main.c
 objcopy --only-keep-debug my_program my_program.debug
 strip my_program
 gdb -s my_program.debug my_program core
 ```
 
-Production에서는 strip된 binary를 배포하고, 사무실에 *unstripped + debug-info*를 보관.
+배포 이미지는 strip하고, 같은 빌드의 디버그 정보는 따로 보관해 분석 때 `-s`(symbol file)로 붙입니다. build-id로 디버그 정보를 찾아 주는 debuginfod와 자동화는 [Postmortem 4장](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에 있습니다.
 
-## MCU Mini-dump 패턴
+## MCU mini-dump — QEMU에서 끝까지
 
-MCU에는 OS가 없으니 coredump system이 없습니다. 직접 만듭니다.
+MCU에는 core dump를 만들어 주는 OS가 없으므로 HardFault 핸들러가 직접 남깁니다. 핵심은 세 가지입니다. reset을 거쳐도 지워지지 않는 곳에 쓰고, 쓴 뒤 reset하고, 다음 부팅에서 표시(magic)를 보고 꺼냅니다.
 
-### Backup SRAM에 저장
+QEMU 11.1.3의 `mps2-an386`(Cortex-M4)에는 backup SRAM이 없으므로, 링커 스크립트에 `NOLOAD` 섹션 `.noinit`를 두고 startup의 `.bss` 0 채우기 범위 밖에 dump를 놓았습니다. QEMU는 system reset 때 RAM을 지우지 않으므로 이 영역이 살아남습니다. 실제 보드라면 STM32F405/407의 4 KB backup SRAM(기본으로 꺼져 있어 소프트웨어로 켬, DS8626 2.2.18)이 이 자리입니다.
+
+```text
+.noinit (NOLOAD) : { . = ALIGN(4); *(.noinit*) } > RAM
+```
 
 ```c
-#define DUMP_MAGIC 0xC0FFEE00
-
+#define DUMP_MAGIC 0xC0FFEE00u
 typedef struct {
     uint32_t magic;
-    uint32_t reset_reason;     /* RCC->CSR snapshot */
     uint32_t pc, lr, psr;
-    uint32_t cfsr, hfsr, bfar, mmar;
-    uint32_t r0_r3[4];
-    uint32_t r12;
-    uint32_t stack[64];        /* fault 직전 stack top */
-    uint32_t log_tail;         /* log ring tail */
-    uint8_t  log[2048];        /* 최근 log */
-} __attribute__((packed)) mini_dump_t;
+    uint32_t cfsr, hfsr, bfar, mmfar;
+    uint32_t r0_r3[4], r12;
+    uint32_t boots;
+} mini_dump_t;
+__attribute__((section(".noinit"))) mini_dump_t g_dump;   /* not zeroed by startup */
 
+__attribute__((naked)) void HardFault_Handler(void) {
+    __asm volatile("tst lr, #4\n ite eq\n mrseq r0, msp\n mrsne r0, psp\n b hardfault_save_dump\n");
+}
 void hardfault_save_dump(uint32_t *sp) {
-    mini_dump_t *d = (mini_dump_t*)BACKUP_SRAM;
+    mini_dump_t *d = &g_dump;
+    for (int i = 0; i < 4; i++) d->r0_r3[i] = sp[i];
+    d->r12 = sp[4]; d->lr = sp[5]; d->pc = sp[6]; d->psr = sp[7];
+    d->cfsr  = *(volatile uint32_t *)0xE000ED28;
+    d->hfsr  = *(volatile uint32_t *)0xE000ED2C;
+    d->bfar  = *(volatile uint32_t *)0xE000ED38;
+    d->mmfar = *(volatile uint32_t *)0xE000ED34;
     d->magic = DUMP_MAGIC;
-    d->reset_reason = RCC->CSR;
-    d->r0_r3[0] = sp[0];
-    d->r0_r3[1] = sp[1];
-    d->r0_r3[2] = sp[2];
-    d->r0_r3[3] = sp[3];
-    d->r12 = sp[4];
-    d->lr  = sp[5];
-    d->pc  = sp[6];
-    d->psr = sp[7];
-    d->cfsr = *(volatile uint32_t*)0xE000ED28;
-    d->hfsr = *(volatile uint32_t*)0xE000ED2C;
-    d->bfar = *(volatile uint32_t*)0xE000ED38;
-    d->mmar = *(volatile uint32_t*)0xE000ED34;
-    memcpy(d->stack, sp, sizeof(d->stack));
-    memcpy(d->log, g_log_ring, sizeof(d->log));
-    d->log_tail = g_log_tail;
-
-    NVIC_SystemReset();
+    __asm volatile("dsb");
+    *(volatile uint32_t *)0xE000ED0C = 0x05FA0004;   /* AIRCR: VECTKEY | SYSRESETREQ */
+    for (;;) { }
 }
-```
 
-Backup SRAM, RP2040 watchdog scratch, NRF52 GPREGRET 등 *reset에서 살아남는* 영역에 저장.
+struct pkt { uint8_t len; uint8_t *payload; };
+__attribute__((noinline)) uint32_t read_payload(const struct pkt *p) {
+    return *(volatile uint32_t *)p->payload;          /* payload points at an unmapped address */
+}
 
-### 부팅 시 dump 확인 + 전송
-
-```c
-void boot_check_dump(void) {
-    mini_dump_t *d = (mini_dump_t*)BACKUP_SRAM;
-    if (d->magic == DUMP_MAGIC) {
-        printf("Previous crash detected:\n");
-        printf("PC=0x%08lx CFSR=0x%08lx BFAR=0x%08lx\n",
-               d->pc, d->cfsr, d->bfar);
-
-        if (network_available()) {
-            send_dump_to_cloud(d, sizeof(*d));
-        } else {
-            store_dump_to_flash(d);   /* 다음 connect 시 전송 */
-        }
-        d->magic = 0;
+int main(void) {
+    if (g_dump.magic == DUMP_MAGIC) {
+        pr("Previous crash: PC=0x%08x LR=0x%08x CFSR=0x%08x BFAR=0x%08x\n",
+           g_dump.pc, g_dump.lr, g_dump.cfsr, g_dump.bfar);
+        g_dump.magic = 0;
+        return 0;
     }
+    pr("first boot: running\n");
+    struct pkt p = { 4, (uint8_t *)0x60000000u };
+    pr("%u\n", read_payload(&p));
+    return 0;
 }
 ```
 
-WiFi 있는 device는 즉시 cloud로, 없으면 flash에 두고 다음 boot에 전송.
+reset은 AIRCR에 `VECTKEY`(0x05FA)와 `SYSRESETREQ`(bit 2)를 쓰는 것으로 요청합니다(ARMv7-M ARM B3.2.6). 같은 일을 CMSIS `NVIC_SystemReset()`이 합니다.
 
-## Memfault 패턴
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O1 -g -ffreestanding -nostdlib -Wall \
+  -T an386.ld startup.c sh.c dump.c -lgcc -o dump.elf
+qemu-system-arm -M mps2-an386 -nographic -monitor none -serial none \
+  -semihosting-config enable=on,target=native -kernel dump.elf
+```
 
-Memfault SDK는 production에서 사용하는 상용 솔루션입니다. 오픈소스 대안의 base 패턴.
+```text
+first boot: running
+Previous crash: PC=0x000002ee LR=0x0000031d CFSR=0x00008200 BFAR=0x60000000
+```
 
-1. Crash 시 register + stack + thread info를 *coredump format*으로 저장
-2. Reboot 후 chunk 단위로 cloud upload
-3. 서버에서 elf와 결합해 symbolicate
-4. 동일 root cause의 crash를 grouping
-5. 대시보드에서 firmware 버전별 crash rate 추적
+첫 부팅에서 매핑되지 않은 주소를 읽어 BusFault(HardFault로 올라감)가 났고, 핸들러가 dump를 남기고 reset을 요청했습니다. 두 번째 부팅에서 `main()`이 magic을 보고 직전 crash를 출력했습니다. 이 PC와 LR을 같은 ELF로 풀면 crash 지점과 호출한 곳이 나옵니다.
 
-핵심은 *대량의 device*에서 *동일 crash*를 자동 grouping하는 것입니다. Field 100대 중 5대가 같은 PC에서 reboot하면 한 그룹으로 묶입니다.
+```text
+$ arm-none-eabi-addr2line -s -f -e dump.elf 0x2ee 0x31d
+read_payload
+dump.c:34
+main
+dump.c:45
+```
 
-## Last-Gasp Logging
+dumped PC 0x2ee는 `read_payload()`의 34행(`*(volatile uint32_t *)p->payload`)이고, CFSR 0x8200(PRECISERR + BFARVALID)과 BFAR 0x60000000이 잘못된 주소를 알려 줍니다. 비트 해석은 [10-04](/blog/embedded/modern-recipes/part10-04-hardfault-analysis)에 있습니다. 실제 장치라면 여기서 dump를 네트워크나 저장소로 보내고, 보낸 뒤에 magic을 지웁니다.
 
-Crash 직전 *1초의 로그*가 가장 중요합니다. 평소에 RAM ring buffer에 적어두고 crash 시 NVRAM에 dump.
+## Last-gasp 로그
+
+dump에 crash 직전의 이벤트 기록을 함께 넣으면 "어떻게 거기까지 갔는지"도 보입니다. 평소에는 RAM의 작은 ring에 적고, crash 때 ring 전체를 dump에 복사합니다.
 
 ```c
 #define LAST_GASP_N 128
-
 typedef struct {
     uint32_t ts;
     uint16_t code;
@@ -189,147 +159,97 @@ static inline void gasp_log(uint16_t code, uint16_t arg) {
 }
 ```
 
-Hot path에서 호출하고 crash dump에 ring 전체를 포함시킵니다. Host에서 ring을 풀어 보존된 event를 시간 순으로 봅니다. 보존 개수는 ring 크기와 event 크기로 결정합니다.
+ISR과 main이 함께 부른다면 `g_gasp_idx++`는 [10-09](/blog/embedded/modern-recipes/part10-09-timing-race-diag)의 QEMU 실험처럼 경쟁하므로, 칸을 차지하는 한 줄은 IRQ를 막습니다. 남는 기록 수는 ring 크기(여기서 128개 × 8바이트 = 1 KB)로 정해집니다. 기록 비용은 [10-11](/blog/embedded/modern-recipes/part10-11-logging-system)의 측정처럼 record를 필드로 바로 쓰는 방식이 가장 적었습니다.
 
-## RAM watchpoint 패턴 — Stack overflow 잡기
+## Stack 끝 표지
 
 ```c
 extern uint32_t _stack_bottom;
-*(uint32_t*)&_stack_bottom = 0xCAFEDEAD;
+static void stack_guard_init(void) { _stack_bottom = 0xCAFEDEAD; }
 
 void watch_stack(void) {
-    if (*(uint32_t*)&_stack_bottom != 0xCAFEDEAD) {
+    if (_stack_bottom != 0xCAFEDEAD) {
         gasp_log(GASP_STACK_OVERFLOW, 0);
-        hardfault_save_dump(NULL);
+        /* dump를 남기고 reset */
     }
 }
 ```
 
-타이머나 idle에서 주기적으로 호출. Overflow가 *발생하는 순간*은 아니지만 그 직후를 잡습니다.
+주기적으로 확인하므로 넘친 *순간*이 아니라 그 다음 확인 때 잡습니다. 넘치는 순간에 잡으려면 [10-08](/blog/embedded/modern-recipes/part10-08-memory-corruption)의 MPU guard를 씁니다(QEMU에서 첫 쓰기에 MemManage).
 
-## Reset Reason 분석
+## Reset 원인
+
+부팅마다 reset 원인을 읽어 dump와 함께 남깁니다. STM32F4에서는 `RCC->CSR`의 플래그입니다.
 
 ```c
-typedef enum {
-    RESET_POWER   = 1 << 0,
-    RESET_PIN     = 1 << 1,
-    RESET_SW      = 1 << 2,
-    RESET_IWDG    = 1 << 3,
-    RESET_WWDG    = 1 << 4,
-    RESET_LOWPWR  = 1 << 5,
-    RESET_BOR     = 1 << 6,
-} reset_reason_t;
-
-reset_reason_t get_reset_reason(void) {
+uint32_t read_and_clear_reset_flags(void) {
     uint32_t csr = RCC->CSR;
-    reset_reason_t r = 0;
-    if (csr & RCC_CSR_PORRSTF)  r |= RESET_POWER;
-    if (csr & RCC_CSR_PINRSTF)  r |= RESET_PIN;
-    if (csr & RCC_CSR_SFTRSTF)  r |= RESET_SW;
-    if (csr & RCC_CSR_IWDGRSTF) r |= RESET_IWDG;
-    if (csr & RCC_CSR_WWDGRSTF) r |= RESET_WWDG;
-    if (csr & RCC_CSR_LPWRRSTF) r |= RESET_LOWPWR;
-    if (csr & RCC_CSR_BORRSTF)  r |= RESET_BOR;
     RCC->CSR |= RCC_CSR_RMVF;    /* clear */
-    return r;
+    return csr;
 }
 ```
 
-| Reason | 의미 |
-|--------|------|
-| `RESET_POWER` | 정상 부팅 (전원 인가) |
-| `RESET_PIN` | 사용자가 reset 버튼 |
-| `RESET_SW` | 우리가 `NVIC_SystemReset` |
-| `RESET_IWDG` | Independent watchdog → 코드 hang |
-| `RESET_WWDG` | Window watchdog → timing 위반 |
-| `RESET_BOR` | Brown-out → 전압 dip |
-| `RESET_LOWPWR` | Low-power mode escape failure |
+HAL v1.8.6 `stm32f4xx_hal_rcc.h`의 `__HAL_RCC_GET_FLAG()` 설명은 각 플래그를 다음과 같이 적습니다.
 
-Cloud에서 reset reason 분포를 보면 어떤 종류의 reset이 많은지 파악할 수 있습니다. 원인별 우선순위는 실제 fleet 데이터와 측정 신뢰도를 함께 검토합니다.
+| 플래그 | HAL 설명 |
+|--------|----------|
+| `BORRSTF` | POR/PDR or BOR reset |
+| `PINRSTF` | Pin reset |
+| `PORRSTF` | POR/PDR reset |
+| `SFTRSTF` | Software reset |
+| `IWDGRSTF` | Independent Watchdog reset |
+| `WWDGRSTF` | Window Watchdog reset |
+| `LPWRRSTF` | Low Power reset |
 
-## Field Debug — 원격 진단
+`BORRSTF`의 설명이 "POR/PDR or BOR"이므로 전원을 처음 켰을 때도 함께 설 수 있습니다. 그래서 brown-out만 따로 세려면 `PORRSTF`와 같이 섰는지를 봅니다. NRST 핀은 내부 reset이 날 때도 펄스를 내보내므로(DS8626 Table 50의 T_NRST_OUT, 내부 reset 원인), 핀 reset 플래그 해석은 레퍼런스 매뉴얼의 reset 절과 함께 봅니다. 위 QEMU 실행의 두 번째 부팅은 `SYSRESETREQ`에 의한 software reset입니다.
 
-USB 없이 ssh도 없는 device 어떻게 debug할까. 다음 옵션이 있다.
+## Crash 묶기
 
-1. **NB-IoT / LTE-M / WiFi** — 가벼운 telemetry
-2. **BLE** — 1m 거리에서 mobile app으로 dump 받기
-3. **UART/SD card** — 회수 후 분석
-4. **디바이스 자체에 dump-view UI**
-
-크리티컬한 device는 *모든 reset마다* cloud에 reset reason과 mini-dump를 보냅니다. 한 사용자의 device에서만 발생하는 crash도 잡힙니다.
-
-## Crash Grouping
-
-다음 두 crash는 *같은 bug*입니다.
-
-```text
-device-A: PC=0x08001234 CFSR=0x00008200 BFAR=0x00000004
-device-B: PC=0x08001234 CFSR=0x00008200 BFAR=0x00000004
-device-C: PC=0x08001236 CFSR=0x00008200 BFAR=0x00000004    ← PC가 약간 다름
-```
-
-PC가 정확히 일치 안 해도 *같은 source line*이면 같은 bug. `addr2line`으로 normalize한 다음 grouping.
-
-```bash
-addr2line -e firmware.elf 0x08001234 0x08001236
-process_packet at packet.c:78
-process_packet at packet.c:78
-```
-
-같은 line이면 같은 그룹.
+여러 장치에서 올라온 dump는 PC 값 그대로가 아니라 `addr2line`으로 푼 함수와 줄로 묶습니다. 같은 펌웨어 빌드라면 같은 줄의 명령은 몇 바이트 차이로 다른 PC를 가질 수 있기 때문입니다. 위 실행에서도 `read_payload()`는 0x2ec가 33행, 0x2ee가 34행이었습니다. 펌웨어 버전마다 주소가 바뀌므로, dump에는 빌드를 식별할 값(빌드 ID나 버전)을 함께 넣고 그 빌드의 ELF로 풉니다.
 
 ## 자주 보는 함정
 
-> Dump 영역을 normal RAM에 둠
+> dump를 `.bss`에 둠
 
 ```c
-mini_dump_t dump;   /* .bss에 위치 → 부팅 시 0으로 clear */
+mini_dump_t dump;   /* .bss: startup이 0으로 채움 */
 ```
 
-`.bss`는 부팅 직후 0으로 초기화됩니다. *no-init RAM* 또는 backup SRAM에 둡니다.
+startup은 `.bss`를 0으로 채우므로 다음 부팅에서 dump가 지워집니다. 위 예처럼 0 채우기 범위 밖의 `.noinit`나 backup SRAM에 둡니다.
+
+> stack이 깨진 상태의 핸들러
+
+stack이 넘쳐 SP가 쓸 수 없는 곳을 가리키면 예외 진입의 stacking부터 실패합니다(CFSR `STKERR`·`MSTKERR`, 10-04). 이런 경우까지 dump를 남기려면 핸들러 첫머리에서 SP를 별도 영역으로 옮깁니다. 다만 그러면 stacked frame은 원래 SP 쪽에 있으므로 원래 SP를 먼저 r0에 잡아 둡니다.
 
 ```c
-__attribute__((section(".noinit"))) mini_dump_t dump;
-```
-
-> Stack overflow로 dump 자체가 망가짐
-
-Fault 진입 시 NVIC가 stack에 push 못 하면 더블 fault. Dump 코드는 *fault entry 전*에 작은 stack frame으로 동작해야 합니다.
-
-```c
-__attribute__((naked))
-void HardFault_Handler(void) {
+__attribute__((naked)) void HardFault_Handler(void) {
     __asm volatile (
-        "ldr  sp, =_temp_dump_stack \n"   /* fault용 별도 stack */
-        "b    hardfault_save_dump   \n"
-    );
+        "mrs  r0, msp               \n"   /* original frame (if stacking succeeded) */
+        "ldr  r1, =_fault_stack_top \n"
+        "mov  sp, r1                \n"   /* switch to a reserved stack */
+        "b    hardfault_save_dump   \n");
 }
 ```
 
-> Cloud 전송 실패 시 dump 잃음
+> 전송 실패로 dump를 잃음
 
-전송 실패 가능성. Flash에 *재전송 큐*로 두고, 다음 connect 시 다시 시도.
+보내기 전에 magic을 지우면 전송이 실패했을 때 dump가 사라집니다. 전송이 끝난 것을 확인한 뒤 지웁니다.
 
-> Production에서 PII 포함
+> dump에 개인 정보
 
-Coredump에는 RAM 전체가 들어갈 수 있어 사용자 데이터·암호가 노출됩니다. Field에서 *어느 영역만* dump할지 명시. PII 영역은 dump 전에 zero로 wipe.
+RAM을 통째로 담으면 사용자 데이터가 함께 나갑니다. dump에 넣을 영역을 정해 두고, 민감한 영역은 넣지 않습니다.
 
-> Symbol file 분실
+> ELF를 보관하지 않음
 
-Release 빌드의 `.elf`를 잃으면 `0x08001234`가 *영원히* 의미 없는 숫자. 모든 release elf를 *영구 보관*.
+dump의 PC는 그 빌드의 ELF가 있어야 함수와 줄로 풀립니다. 위 Linux 절의 디버그 정보 보관과 같은 이유로, 배포한 모든 펌웨어의 ELF를 보관합니다.
 
 ## 정리
 
-- Linux는 systemd-coredump → gdb로 분석.
-- MCU는 mini-dump를 backup SRAM에 저장 → reboot 후 cloud 전송.
-- Mini-dump = register + stack + 최근 log + reset reason.
-- Last-gasp ring buffer로 crash 직전 event를 살립니다.
-- Reset reason flag (RCC->CSR)로 IWDG/BOR/SW reset을 구분.
-- PC를 source line으로 normalize해서 같은 bug를 grouping.
-- Strip된 binary와 *unstripped + debug symbol*을 같이 보관.
-- Dump 영역은 `.noinit` 또는 backup SRAM. `.bss` 금지.
-
-다음 편은 **FPGA 기초**입니다.
+- Linux는 `core_pattern`·`ulimit`(또는 systemd-coredump)로 core를 받고 gdb로 봅니다. 실제 실행은 Postmortem 시리즈에 있습니다.
+- MCU mini-dump는 0 채우기 밖의 영역에 저장 → reset → 다음 부팅에 보고하는 흐름이고, QEMU에서 PC 0x2ee·CFSR 0x8200·BFAR 0x60000000을 다음 부팅까지 넘기는 것을 확인했습니다.
+- dumped PC는 `addr2line`으로 함수·줄로 풀고, crash는 그 결과로 묶습니다.
+- reset 원인은 `RCC->CSR`로 읽고 `BORRSTF`가 전원 투입에도 선다는 점을 감안합니다.
+- dump는 전송 확인 뒤 지우고, 민감한 영역은 넣지 않으며, ELF를 보관합니다.
 
 ## 관련 항목
 
