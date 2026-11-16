@@ -245,7 +245,7 @@ arm-none-eabi-nm: app-stripped.elf: no symbols
 
 > ⚠️ Weak symbol 대체 확인 누락
 
-startup의 기본 IRQ handler를 weak로 두고 사용자가 같은 이름으로 정의했다면, 위처럼 `.elf`의 `objdump -t`에서 binding이 `g`로 바뀌고 주소가 사용자 정의 쪽인지 확인합니다. 이름을 잘못 쓰면 weak 기본 handler가 그대로 남습니다.
+startup의 기본 IRQ handler를 weak로 두고 사용자가 같은 이름으로 정의했다면, 위처럼 `.elf`의 `objdump -t`에서 binding이 `g`로 바뀌었는지, 주소가 사용자 정의 쪽인지 확인합니다. 이름을 잘못 쓰면 weak 기본 handler가 그대로 남습니다.
 
 ## 정리
 
