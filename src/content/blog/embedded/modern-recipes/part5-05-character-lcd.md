@@ -75,7 +75,7 @@ datasheet는 clock이 바뀌면 시간도 바뀐다며 250 kHz 예로 "37 µs ×
 
 ### 4-bit 초기화 순서
 
-datasheet의 "Initializing by Instruction"(4-bit interface)은 이렇습니다. 이 단계에서는 "BF cannot be checked before this instruction."입니다.
+datasheet의 "Initializing by Instruction"(4-bit interface)은 이렇습니다. 이 단계에서는 busy flag를 읽을 수 없습니다("BF cannot be checked before this instruction.").
 
 1. 전원 후 대기: VCC가 4.5 V에 오른 뒤 15 ms 이상, 2.7 V 기준이면 40 ms 이상
 2. `0011` (Function set, 8-bit) 후 4.1 ms 이상
@@ -359,11 +359,11 @@ HD44780U의 CGROM은 5 × 8 dot 글자 208개와 5 × 10 dot 글자 32개이고,
 
 ## 정리
 
-- MCU 신호는 **RS, E, DB4–DB7의 6개**, R/W는 GND.
-- 초기화는 **`0011` 세 번(15/40 ms, 4.1 ms, 100 µs 대기) → `0010`** 다음부터 4 bit씩 두 번.
-- 명령 실행은 **270 kHz에서 37 µs, Return home 1.52 ms**. 코드는 50 µs와 2 ms를 기다림.
-- 2-line DDRAM은 **0x00·0x40**에서 시작, CGRAM 글자는 **8개**.
-- PCF8574 경로는 주소 **0x20–0x27**, SCL **100 kHz 이하**.
+- MCU 신호는 **RS, E, DB4–DB7의 6개**이고, R/W는 GND에 묶습니다.
+- 초기화는 **`0011` 세 번(15/40 ms, 4.1 ms, 100 µs 대기) → `0010`** 다음부터 4 bit씩 두 번 보냅니다.
+- 명령 실행은 **270 kHz에서 37 µs, Return home 1.52 ms**입니다. 코드는 50 µs와 2 ms를 기다립니다.
+- 2-line DDRAM은 **0x00·0x40**에서 시작하고, CGRAM 글자는 **8개**입니다.
+- PCF8574 경로는 주소가 **0x20–0x27**이고 SCL은 **100 kHz 이하**입니다.
 
 다음 편은 **SPI OLED (SSD1306)**입니다. 128×64 graphic display, framebuffer, page mode를 다룹니다.
 
