@@ -10,132 +10,321 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-`asyncio` 코드를 평소 디버거(`pdb`/`debugpy`)로 멈춰 보면 콜스택이 *이상하게 짧습니다*. `await`를 만난 순간 코루틴 컨텍스트는 이벤트 루프로 돌아가고, 다음 깨어남에서 *새로운 콜스택*으로 시작합니다. 이 장은 비동기 코드만의 함정과 도구를 다룹니다.
+`asyncio` 코드를 디버거로 멈춰 보면 콜스택이 *이상하게 짧을 때가* 있습니다. 분명 `handle()`이 `fetch_user()`를 기다리고 있는데 스택에는 이벤트 루프 함수와 `fetch_user()`만 보입니다. 이 장은 그 이유를 실제 스택으로 확인하고, 디버그 모드와 3.14에 들어온 호출 그래프 도구로 끊어진 연결을 되찾는 방법을 다룹니다.
+
+실행 환경은 1·2장과 같습니다. CPython 3.15.2(uv 빌드)를 Debian 13 arm64 게스트에서 돌렸고, 출력의 표준 라이브러리 경로 `/root/.local/share/uv/python/cpython-3.15.2-linux-aarch64-gnu/lib/python3.15/`는 `LIB/`로, 한 줄이 너무 긴 `repr`의 일부는 `<...>`나 `...`로 줄였습니다. yappi 비교만 macOS에서 3.13.18·3.14.10·3.15.2로 돌렸습니다.
 
 ## 짧은 콜스택 문제
 
-```python
+먼저 "언제" 짧아지는지 정확히 해 둡니다. 코루틴을 `await`로 *직접* 부르면 호출자와 피호출자는 같은 Task 안에서 중첩된 프레임으로 실행됩니다. 반면 `create_task()`로 띄운 코루틴은 별도 Task라서 이벤트 루프가 처음부터 따로 실행합니다. 택배로 비유하면 직접 `await`는 같은 트럭에 실린 상자이고, Task는 다른 트럭에 실어 보낸 상자입니다. 상자를 열어 본 사람은 자기 트럭에 같이 실린 것만 볼 수 있습니다.
+
+```python title="stack.py"
+import asyncio, traceback
+
 async def fetch_user(uid):
-    async with session.get(url) as resp:
-        return await resp.json()    # ← 여기서 멈춤
+    await asyncio.sleep(0)
+    print("--- inside fetch_user, sync stack:")
+    traceback.print_stack(limit=4)
+    return {"uid": uid}
 
-async def handle(req):
-    user = await fetch_user(req.uid)
-    return user
+async def handle_direct(uid):
+    return await fetch_user(uid)
 
-# 호출 트리: handle → fetch_user → session.get
+async def handle_task(uid):
+    return await asyncio.create_task(fetch_user(uid))
+
+async def main():
+    print("== await fetch_user() directly")
+    await handle_direct(1)
+    print("== await create_task(fetch_user())")
+    await handle_task(2)
+
+asyncio.run(main())
 ```
 
-`fetch_user`에서 정지하면 콜스택에 `handle`이 *없을 수 있습니다*. await 지점이 yield point가 되어 호출자의 스택이 잠시 사라졌다가 깨어남에서 복원되기 때문입니다.
+```text
+$ python stack.py
+== await fetch_user() directly
+--- inside fetch_user, sync stack:
+  File "LIB/asyncio/events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+  File "/root/py/ch03/stack.py", line 17, in main
+    await handle_direct(1)
+  File "/root/py/ch03/stack.py", line 10, in handle_direct
+    return await fetch_user(uid)
+  File "/root/py/ch03/stack.py", line 6, in fetch_user
+    traceback.print_stack(limit=4)
+== await create_task(fetch_user())
+--- inside fetch_user, sync stack:
+  File "LIB/asyncio/base_events.py", line 682, in run_forever
+    self._run_once()
+  File "LIB/asyncio/base_events.py", line 2073, in _run_once
+    handle._run()
+  File "LIB/asyncio/events.py", line 94, in _run
+    self._context.run(self._callback, *self._args)
+  File "/root/py/ch03/stack.py", line 6, in fetch_user
+    traceback.print_stack(limit=4)
+```
 
-디버그 모드는 생성 위치와 느린 콜백을 진단하는 보조 수단입니다. 켠다고 모든 태스크의 논리적 await 호출 체인을 일반 스레드 콜스택으로 복원하지는 않습니다.
+`await asyncio.sleep(0)`으로 한 번 양보하고 돌아온 뒤에도 직접 `await`한 경우에는 `main → handle_direct → fetch_user`가 모두 보입니다. 짧아지는 쪽은 Task 경계를 넘을 때입니다. 두 번째 경우 `handle_task`는 스택 어디에도 없습니다.
+
+pdb도 같은 스택을 봅니다. 같은 구조에서 `fetch_user` 안의 `breakpoint()`에 멈춰 `w`를 치면 `asyncio.run`부터 `events.py`의 `_run`까지 루프 프레임이 이어지고 바로 `fetch_user`가 나옵니다. 대신 3.14에서 추가된 `$_asynctask` 변수로 지금 어느 Task 안인지는 알 수 있습니다([pdb 문서의 convenience variables](https://docs.python.org/3.15/library/pdb.html#debugger-commands)).
+
+```text
+(Pdb) p $_asynctask
+<Task pending name='fetch-2' coro=<fetch_user() running at /root/py/ch03/asyncpdb.py:5> cb=[Task.task_wakeup()]>
+```
+
+## 3.14+: 호출 그래프로 연결 되찾기
+
+Task 사이의 "누가 누구를 기다리는가"를 일반 스택은 보여 주지 않습니다. 3.14부터는 asyncio가 이 관계를 직접 기록하고 보여 줍니다. [Call graph introspection 문서](https://docs.python.org/3.15/library/asyncio-graph.html)의 `asyncio.print_call_graph()`는 현재 Task의 스택과 그 Task를 기다리는 쪽(*awaited by*)을 함께 출력합니다.
+
+```python title="graph.py"
+import asyncio
+
+async def fetch_user(uid):
+    await asyncio.sleep(0)
+    asyncio.print_call_graph()
+    return {"uid": uid}
+
+async def handle_task(uid):
+    return await asyncio.create_task(fetch_user(uid), name=f"fetch-{uid}")
+
+asyncio.run(handle_task(2))
+```
+
+```text
+$ python graph.py
+* Task(name='fetch-2', id=0xffff7f7496d0)
+  + Call stack:
+  |   File 'LIB/asyncio/graph.py', line 279, in print_call_graph()
+  |   File '/root/py/ch03/graph.py', line 5, in async fetch_user()
+  + Awaited by:
+    * Task(name='Task-1', id=0xffff7f7498b0)
+      + Call stack:
+      |   File '/root/py/ch03/graph.py', line 9, in async handle_task()
+```
+
+앞에서 사라졌던 `handle_task`가 *Awaited by* 아래에 돌아왔습니다.
+
+코드를 고칠 수 없는 프로세스라면 밖에서 봅니다. [What's New in 3.14의 "Asyncio introspection capabilities"](https://docs.python.org/3.15/whatsnew/3.14.html#asyncio-introspection-capabilities)와 [Command-line introspection tools 문서](https://docs.python.org/3.15/library/asyncio-tools.html)에 따르면 `python -m asyncio ps PID`와 `pstree PID`는 다른 프로세스의 Task 그래프를 *대상 안에서 코드를 실행하지 않고* 읽습니다. 권한 조건은 1장의 원격 attach와 같은 문서를 따릅니다. Task 두 단계를 `TaskGroup`으로 쌓은 `psdemo.py`를 띄워 놓고 읽어 봤습니다.
+
+```python title="psdemo.py"
+import asyncio, os
+
+async def query_db(sql):
+    await asyncio.sleep(3600)
+
+async def fetch_user(uid):
+    return await query_db(f"select {uid}")
+
+async def handle(uid):
+    async with asyncio.TaskGroup() as tg:
+        tg.create_task(fetch_user(uid), name=f"fetch-{uid}")
+
+async def main():
+    print(f"pid={os.getpid()}", flush=True)
+    async with asyncio.TaskGroup() as tg:
+        for uid in (1, 2):
+            tg.create_task(handle(uid), name=f"handle-{uid}")
+
+asyncio.run(main())
+```
+
+```text
+$ python -m asyncio pstree 2957
+└── (T) Task-1
+    └──  main /root/py/ch03/psdemo.py:15
+        └──  TaskGroup.__aexit__ LIB/asyncio/taskgroups.py:75
+            └──  TaskGroup._aexit LIB/asyncio/taskgroups.py:125
+                ├── (T) handle-1
+                │   └──  handle /root/py/ch03/psdemo.py:10
+                │       └──  TaskGroup.__aexit__ LIB/asyncio/taskgroups.py:75
+                │           └──  TaskGroup._aexit LIB/asyncio/taskgroups.py:125
+                │               └── (T) fetch-1
+                │                   └──  fetch_user /root/py/ch03/psdemo.py:7
+                │                       └──  query_db /root/py/ch03/psdemo.py:4
+                │                           └──  sleep LIB/asyncio/tasks.py:725
+                └── (T) handle-2
+                    └── ...
+```
+
+`(T)`가 Task이고, 각 Task 아래에 그 Task의 코루틴 스택이 이어집니다. `fetch-1`이 `query_db`의 `sleep`에서 기다리고 있고, 그것을 `handle-1`이, 다시 `Task-1`의 `main`이 기다린다는 사슬이 한눈에 보입니다. `ps`는 같은 정보를 표로 보여 줍니다.
+
+```text
+$ python -m asyncio ps 2957
+tid        task id              task name            coroutine stack                                    awaiter chain                                      awaiter name    awaiter id
+------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+2957       0xffffa1289a90       Task-1               TaskGroup._aexit -> TaskGroup.__aexit__ -> main                                                                       0x0
+2957       0xffffa12898b0       handle-1             TaskGroup._aexit -> TaskGroup.__aexit__ -> handle  TaskGroup._aexit -> TaskGroup.__aexit__ -> main    Task-1          0xffffa1289a90
+2957       0xffffa12290a0       fetch-1              sleep -> query_db -> fetch_user                    TaskGroup._aexit -> TaskGroup.__aexit__ -> handle  handle-1        0xffffa12898b0
+```
+
+(`handle-2`·`fetch-2` 행은 생략했습니다.)
 
 ## asyncio.run(..., debug=True)
+
+호출 그래프가 "지금 어디서 기다리나"를 보여 준다면, 디버그 모드는 "이 객체가 *어디서 만들어졌나*"와 "누가 루프를 오래 붙잡았나"를 기록합니다. [Developing with asyncio 문서의 Debug Mode 절](https://docs.python.org/3.15/library/asyncio-dev.html#debug-mode)은 켜는 방법으로 `PYTHONASYNCIODEBUG=1`, Python Development Mode(`-X dev`), `asyncio.run(..., debug=True)`, `loop.set_debug()`를 듭니다.
 
 ```python
 asyncio.run(main(), debug=True)
 ```
 
-또는 환경 변수로.
+같은 절이 나열하는 디버그 모드의 효과는 세 가지입니다. 스레드 안전하지 않은 API(`loop.call_soon()` 등)를 다른 스레드에서 부르면 예외를 냅니다. I/O selector가 오래 걸리면 기록합니다. 100 ms보다 오래 걸린 콜백을 기록합니다. 아래 실행에서는 여기에 더해 Task와 코루틴의 생성 위치가 메시지에 붙었습니다.
 
-```bash
-$ PYTHONASYNCIODEBUG=1 python main.py
+끝나지 않은 Task를 남긴 채 루프를 닫는 `pending.py`를 두 모드로 돌렸습니다.
+
+```python title="pending.py"
+import asyncio, gc
+
+async def fetch_user(uid):
+    await asyncio.sleep(3600)
+
+def start(loop):
+    loop.create_task(fetch_user(42))
+
+loop = asyncio.new_event_loop()
+start(loop)
+loop.run_until_complete(asyncio.sleep(0))
+loop.close()
 ```
-
-활성화되면.
-
-1. *코루틴 생성 위치*가 트레이스백에 포함됨.
-2. `await` 안 한 코루틴 경고.
-3. *slow callback* 경고 (100 ms 이상 동기 블록).
-4. 일부 비스레드 안전 API를 잘못된 스레드에서 호출한 경우의 진단.
 
 ```text
+$ python pending.py
 Task was destroyed but it is pending!
-task: <Task pending name='Task-3' coro=<fetch_user() running at app.py:12>>
-created at:
-  File "app.py", line 30, in start
-    asyncio.create_task(fetch_user(42))
+task: <Task pending name='Task-1' coro=<fetch_user() done, defined at /root/py/ch03/pending.py:3> wait_for=<Future pending cb=[Task.task_wakeup()]>>
+$ PYTHONASYNCIODEBUG=1 python pending.py
+Task was destroyed but it is pending!
+source_traceback: Object created at (most recent call last):
+  File "/root/py/ch03/pending.py", line 10, in <module>
+    start(loop)
+  File "/root/py/ch03/pending.py", line 7, in start
+    loop.create_task(fetch_user(42))
+task: <Task pending name='Task-1' coro=<fetch_user() done, defined at /root/py/ch03/pending.py:3> wait_for=<...> created at /root/py/ch03/pending.py:7>
 ```
 
-생성 위치(`File "app.py", line 30`)가 핵심. 디버그 모드 아니면 이 정보가 안 떠 추적이 매우 어려움.
+일반 모드는 코루틴이 *정의된* 줄(3번)만 알려 줍니다. 디버그 모드는 Task를 *만든* 호출 경로(`start` 7번 줄)를 붙입니다. 같은 `fetch_user`를 여러 곳에서 띄우는 서비스라면 범인을 찾는 단서는 이쪽입니다.
 
 ## "coroutine never awaited"
 
-```python
-async def save(data): ...
+`async def` 함수를 `await` 없이 부르면 코루틴 객체만 만들어지고 실행되지 않습니다. 저장했다고 믿었는데 실제로는 아무 일도 없었던 버그가 여기서 나옵니다.
 
-def handler(req):
-    save(req.data)             # ← await 없음! 그냥 함수처럼 호출
+```python title="never.py"
+import asyncio
+
+async def save(data):
+    return data
+
+async def handler(data):
+    save(data)
     return "ok"
+
+asyncio.run(handler({"k": 1}))
 ```
+
+경고는 디버그 모드와 관계없이 뜹니다. 일반 모드에서는 경고가 난 줄만 보이고, 마지막 줄이 tracemalloc을 켜라고 안내합니다.
 
 ```text
-RuntimeWarning: coroutine 'save' was never awaited
+$ python never.py
+/root/py/ch03/never.py:7: RuntimeWarning: coroutine 'save' was never awaited
+  save(data)
+RuntimeWarning: Enable tracemalloc to get the object allocation traceback
 ```
 
-이 경고는 디버그 모드든 아니든 뜨지만, `tracemalloc`을 켜면 *코루틴이 생성된 정확한 위치*까지 보여 줍니다.
+생성 위치를 얻는 방법은 둘입니다. `PYTHONASYNCIODEBUG=1`이면 `Coroutine created at (most recent call last)` 아래 루프 프레임을 거쳐 `never.py`의 7번 줄 `handler`까지 이어진 스택이 붙습니다. [Detect never-awaited coroutines 절](https://docs.python.org/3.15/library/asyncio-dev.html#detect-never-awaited-coroutines)의 예시와 같은 형식입니다. `PYTHONTRACEMALLOC=10`이면 경고 모듈이 객체 할당 위치를 붙입니다.
 
-```bash
-$ PYTHONTRACEMALLOC=10 python main.py
+```text
+$ PYTHONTRACEMALLOC=10 python never.py
+/root/py/ch03/never.py:7: RuntimeWarning: coroutine 'save' was never awaited
+  save(data)
+Object allocated at (most recent call last):
+  File "/root/py/ch03/never.py", lineno 10
+    asyncio.run(handler({"k": 1}))
+  ...
+  File "/root/py/ch03/never.py", lineno 7
+    save(data)
 ```
+
+`10`은 tracemalloc이 보관할 최대 프레임 수입니다. 위 실행에서는 스택 깊이가 8이라 8개 프레임이 모두 찍혔고, 가운데 `asyncio` 내부 프레임 6개를 `...`로 줄였습니다.
 
 ## slow callback 검출
 
-이벤트 루프는 *모든* 동기 블록이 짧다고 가정합니다. CPU 무거운 동기 호출이 끼면 다른 태스크가 모두 멈춥니다.
+이벤트 루프는 한 번에 한 콜백만 실행하는 단일 계산대입니다. 손님 하나가 계산대에서 10분을 끌면 뒤의 모든 손님이 기다립니다. [Running Blocking Code 절](https://docs.python.org/3.15/library/asyncio-dev.html#running-blocking-code)도 1초짜리 CPU 계산을 직접 부르면 모든 Task와 I/O가 1초 늦어진다고 설명합니다. `slow.py`는 0.5초 동안 막는 함수를 직접 부른 경우와 `asyncio.to_thread()`로 넘긴 경우를 차례로 실행합니다.
 
-```python
-async def handle(req):
-    img = compute_thumbnail(req.image)    # ← 500 ms 걸리는 동기 작업
-    return img
+```python title="slow.py"
+import asyncio, time
+
+def compute_thumbnail(n):
+    time.sleep(n)          # stands in for 0.5 s of CPU work
+    return n
+
+async def handle(n):
+    return compute_thumbnail(n)
+
+async def handle_offloaded(n):
+    return await asyncio.to_thread(compute_thumbnail, n)
+
+async def main():
+    await handle(0.5)
+    await handle_offloaded(0.5)
+
+asyncio.run(main())
 ```
-
-디버그 모드에서.
 
 ```text
-Executing <Task ...> took 0.523 seconds
+$ python slow.py
+$ PYTHONASYNCIODEBUG=1 python slow.py
+Executing <Task pending name='Task-1' coro=<main() running at /root/py/ch03/slow.py:15> wait_for=<...> cb=[...] created at LIB/asyncio/runners.py:110> took 0.509 seconds
 ```
 
-해법.
+일반 모드는 아무것도 출력하지 않았습니다. 디버그 모드는 경고를 한 번만 냈고, 그것은 직접 부른 쪽이 루프를 0.509초 막은 구간입니다. `to_thread()`로 넘긴 0.5초는 다른 스레드에서 돌았기 때문에 경고가 없었습니다. 기준값 100 ms는 [`loop.slow_callback_duration`](https://docs.python.org/3.15/library/asyncio-eventloop.html#asyncio.loop.slow_callback_duration)으로 바꿉니다.
 
-- `asyncio.to_thread(compute_thumbnail, req.image)` — 별도 스레드로.
-- `loop.run_in_executor(None, ...)` — 동일.
-- 진짜 CPU 바운드면 `ProcessPoolExecutor`.
+블로킹 코드를 옮기는 방법은 `asyncio.to_thread()`, `loop.run_in_executor()`(스레드·인터프리터·프로세스 풀)입니다. 문서는 CPU 계산을 다른 프로세스로 보내려면 `run_in_executor()`에 `ProcessPoolExecutor`를 넘기라고 안내합니다.
 
 ## 콜스택 보기 — Task.get_stack
 
-현재 루프에서 끝나지 않은 태스크를 all_tasks()로 열거하고 get_stack()을 확인합니다. 중단된 코루틴은 한 스택 프레임만 반환하므로 이를 전체 awaiter 체인으로 간주하지 않습니다. [Task.get_stack](https://docs.python.org/3.15/library/asyncio-task.html#asyncio.Task.get_stack)의 반환 범위를 확인합니다.
+`ps`/`pstree`는 3.14+ 전용입니다. 그 이전 버전이나 프로세스 안에서 직접 보려면 `asyncio.all_tasks()`로 Task를 모아 각자의 스택을 찍습니다. [`Task.get_stack()` 문서](https://docs.python.org/3.15/library/asyncio-task.html#asyncio.Task.get_stack)는 "중단된 코루틴에는 프레임을 하나만 반환한다"고 못 박습니다. 출력은 `Task.print_stack()`에 맡기는 편이 정확합니다. `traceback.print_stack(frame)`을 프레임마다 부르면 각 프레임까지의 스택 전체를 반복해서 찍게 됩니다.
 
-```python
-import asyncio, traceback
+```python title="dumptasks.py"
+import asyncio, os, signal, traceback
 
 async def dump_tasks():
     for t in asyncio.all_tasks():
-        print(f"=== {t.get_name()} ===")
-        for frame in t.get_stack():
-            traceback.print_stack(frame, limit=5)
+        print(f"=== {t.get_name()} frames={len(t.get_stack())}", flush=True)
+        t.print_stack()
+
+async def leaf(n):
+    await asyncio.sleep(3600)
+
+async def middle(n):
+    await leaf(n)
+
+async def main():
+    loop = asyncio.get_running_loop()
+    loop.add_signal_handler(signal.SIGUSR1, lambda: loop.create_task(dump_tasks(), name="dumper"))
+    tasks = [asyncio.create_task(middle(i), name=f"worker-{i}") for i in range(2)]
+    await asyncio.sleep(0.1)
+    os.kill(os.getpid(), signal.SIGUSR1)
+    await asyncio.sleep(0.1)
+    for t in tasks: t.cancel()
+
+asyncio.run(main())
 ```
 
-이 함수를 SIGUSR1 핸들러로 등록하면 *외부에서* 모든 태스크의 콜스택을 덤프할 수 있습니다.
+시그널 핸들러는 `loop.add_signal_handler()`로 등록했습니다. [문서](https://docs.python.org/3.15/library/asyncio-eventloop.html#asyncio.loop.add_signal_handler)에 따르면 이렇게 등록한 콜백은 루프가 다른 콜백과 함께 실행하고, `signal.signal()`로 건 핸들러와 달리 이벤트 루프와 상호작용해도 됩니다. 그래서 핸들러에서 바로 `create_task()`를 부릅니다. 결과 중 `worker-0` 부분입니다.
 
-```python
-import signal
-
-def dump(_sig, _frame):
-    asyncio.get_running_loop().create_task(dump_tasks())
-
-signal.signal(signal.SIGUSR1, dump)
+```text
+=== worker-0 frames=1
+Stack for <Task pending name='worker-0' coro=<middle() running at /root/py/ch03/dumptasks.py:12> wait_for=<Future pending cb=[Task.task_wakeup()]>> (most recent call last):
+  File "/root/py/ch03/dumptasks.py", line 12, in middle
+    await leaf(n)
 ```
 
-```bash
-$ kill -USR1 <pid>
-[stdout에 모든 태스크 콜스택 출력]
-```
-
-이벤트 루프가 콜백을 실행할 수 있을 때의 진단입니다. 루프가 동기 호출에 막혀 있으면 예약한 dump 태스크도 실행되지 않으므로 별도 faulthandler나 외부 스택 덤프와 구분합니다.
+문서대로 프레임이 하나뿐입니다. 실제로 기다리는 곳은 `leaf`의 `asyncio.sleep`인데 `middle`만 보입니다. 같은 실행에서 덤프를 찍는 `dumper` Task 자신은 실행 중이라 `frames=8`로 루프 프레임까지 전부 나왔습니다. 하나 더 조건이 있습니다. 이 방식은 루프가 `dump_tasks`를 실행할 수 있어야 동작합니다. 루프가 동기 호출에 막혀 있으면 덤프 Task도 돌지 못하므로, 그때는 [5장의 faulthandler](/blog/tools/debugging/python/chapter05-faulthandler-tracemalloc)나 [4장의 py-spy](/blog/tools/debugging/python/chapter04-py-spy)처럼 루프에 의존하지 않는 도구를 씁니다.
 
 ## debugpy + asyncio
 
-debugpy에서 비동기 코드를 멈출 수 있지만 모든 중단 태스크의 awaiter 체인을 항상 합성한다고 보장하지 않습니다. 아래는 디버그 모드를 켜는 launch 설정이며 IDE의 태스크 표시 범위는 실제 Python·debugpy·확장 버전에서 확인합니다.
+IDE에서도 같은 원리가 적용됩니다. debugpy가 보여 주는 콜스택은 스레드의 실제 프레임이므로 위의 `stack.py`와 같은 기준으로 짧아집니다. 디버그 모드는 `launch.json`의 `env`로 켭니다.
 
 ```json
 {
@@ -146,112 +335,102 @@ debugpy에서 비동기 코드를 멈출 수 있지만 모든 중단 태스크�
 }
 ```
 
-VSCode 측에서 *Pause* 버튼이 의외로 유용 — 멈춰서 모든 코루틴 상태를 볼 수 있습니다.
+이 글에서는 VSCode 화면에서 asyncio Task가 어떻게 표시되는지 확인하지 않았습니다. 프로세스 밖에서 Task 관계를 봐야 한다면 위의 `python -m asyncio pstree`를 씁니다.
 
 ## 자주 보이는 버그 패턴
 
-### 1. `gather()`의 예외 무시
+### 1. `gather()`의 예외와 나머지 작업
 
-```python
-results = await asyncio.gather(
-    fetch_a(), fetch_b(), fetch_c(),
-    return_exceptions=True
-)
-# results에 Exception 객체가 섞여 있을 수 있음
-for r in results:
-    if isinstance(r, Exception):
-        log.exception("failed", exc_info=r)
+[`asyncio.gather()` 문서](https://docs.python.org/3.15/library/asyncio-task.html#asyncio.gather)는 `return_exceptions=False`(기본)일 때 첫 예외가 곧바로 `gather()`를 기다리는 쪽으로 전파되고 *나머지 awaitable은 취소되지 않고 계속 돈다*고 적습니다. "하나 실패했으니 다 멈췄겠지"라고 생각하면 틀립니다.
+
+```python title="gather.py"
+import asyncio
+
+async def ok(n):
+    await asyncio.sleep(0.05)
+    print(f"ok({n}) finished", flush=True)
+    return n
+
+async def bad():
+    await asyncio.sleep(0.01)
+    raise ValueError("bad")
+
+async def main():
+    tasks = [asyncio.ensure_future(ok(1)), asyncio.ensure_future(bad())]
+    try:
+        await asyncio.gather(*tasks)
+    except ValueError as e:
+        print(f"gather raised {e!r}; ok(1) done={tasks[0].done()}", flush=True)
+    await asyncio.sleep(0.1)
+    print(f"later: ok(1) done={tasks[0].done()} result={tasks[0].result()}")
+    print(await asyncio.gather(ok(2), bad(), return_exceptions=True))
+
+asyncio.run(main())
 ```
 
-`return_exceptions=False`(기본)면 한 코루틴이 죽었을 때 *나머지가 어떻게 됐는지*가 모호. 명시적으로 처리.
-
-### 2. fire-and-forget Task의 예외 사라짐
-
-```python
-asyncio.create_task(do_work())     # ← 결과·예외가 어디로?
+```text
+$ python gather.py
+gather raised ValueError('bad'); ok(1) done=False
+ok(1) finished
+later: ok(1) done=True result=1
+ok(2) finished
+[2, ValueError('bad')]
 ```
 
-예외를 회수하지 않은 태스크는 event loop의 예외 처리 경로로 보고될 수 있습니다. 보고 시점을 GC에 의존하지 않으려면 태스크를 보관하고 결과를 await하거나 완료 콜백에서 확인합니다. 취소된 태스크에는 exception()이 CancelledError를 발생시키므로 따로 처리합니다.
+예외를 받은 시점에 `ok(1)`은 아직 돌고 있었고, 나중에 정상 완료됐습니다. `return_exceptions=True`면 예외가 결과 목록에 값처럼 섞여 돌아오므로 `isinstance(r, Exception)`으로 걸러 처리합니다. 하나가 실패하면 나머지를 함께 취소하고 싶다면 `asyncio.TaskGroup`을 씁니다. [Task Groups 절](https://docs.python.org/3.15/library/asyncio-task.html#task-groups)은 그룹의 Task가 `CancelledError` 이외의 예외로 처음 실패하면 남은 Task를 취소한다고 적습니다.
+
+### 2. fire-and-forget Task의 예외
+
+`create_task()`의 결과를 버리면 그 Task의 예외는 아무도 받지 않습니다.
+
+```python title="fireforget.py"
+import asyncio, gc
+
+async def do_work():
+    raise ValueError("boom")
+
+async def main():
+    asyncio.create_task(do_work())
+    await asyncio.sleep(0.01)
+    print("main finished; nobody awaited the task", flush=True)
+
+asyncio.run(main())
+```
+
+실제로 돌려 보면 예외는 조용히 사라지지 않고 `Task exception was never retrieved`로 로그에 남았습니다. 다만 찍히는 시점과 위치가 원래 코드와 떨어져 있습니다.
+
+```text
+$ python fireforget.py
+Task exception was never retrieved
+future: <Task finished name='Task-2' coro=<do_work() done, defined at /root/py/ch03/fireforget.py:3> exception=ValueError('boom')>
+Traceback (most recent call last):
+  File "/root/py/ch03/fireforget.py", line 4, in do_work
+    raise ValueError("boom")
+ValueError: boom
+main finished; nobody awaited the task
+```
+
+더 큰 문제는 결과를 버린 Task 자체입니다. [`asyncio.create_task()` 문서](https://docs.python.org/3.15/library/asyncio-task.html#asyncio.create_task)의 Important 상자는 이벤트 루프가 Task를 *약한 참조*로만 들고 있어 다른 곳에서 참조하지 않으면 끝나기 전에도 GC될 수 있다고 경고하고, Task를 집합에 보관하라고 안내합니다. 보관하면서 완료 콜백에서 예외를 확인하는 형태입니다. 취소된 Task에 `exception()`을 부르면 `CancelledError`가 나므로 먼저 걸러 냅니다.
 
 ```python
-task = asyncio.create_task(do_work())
+background_tasks = set()
+
 def report_task(t):
+    background_tasks.discard(t)
     if t.cancelled():
         return
     exc = t.exception()
     if exc is not None:
         log.error("task failed", exc_info=(type(exc), exc, exc.__traceback__))
 
+task = asyncio.create_task(do_work())
+background_tasks.add(task)
 task.add_done_callback(report_task)
 ```
 
-또는 `asyncio.gather(*tasks)`로 명시적으로 await.
+### 3. 취소 중 cleanup
 
-### 3. cancellation 중 cleanup 실패
-
-```python
-async def work():
-    conn = await db.connect()
-    try:
-        await use(conn)
-    finally:
-        await conn.close()        # 단일 취소를 finally에서 처리하며 await 가능
-```
-
-취소가 한 번 전달된 뒤 finally 안에서 await하는 것 자체가 즉시 실패하는 것은 아닙니다. 추가 취소가 정리 중에 다시 들어오는 상황과 구분합니다. shield는 내부 작업을 외부 취소로부터 보호하지만 호출자에게 오는 CancelledError까지 없애거나 정리 완료를 자동 대기하는 보장은 아닙니다.
-
-```python
-finally:
-    await asyncio.shield(conn.close())
-```
-
-또는 동기 cleanup을 별도 메서드로.
-
-### 4. event loop 충돌
-
-```python
-asyncio.run(main())                # 새 루프에서 실행하고 닫음
-asyncio.run(main())                # 순차 호출 자체는 허용됨
-```
-
-asyncio.run의 순차 호출은 허용됩니다. 같은 스레드에서 이미 실행 중인 이벤트 루프 안에서 중첩 호출하면 RuntimeError가 납니다. 이전 루프에 종속된 세션·Future·자원을 다음 루프에서 재사용하는 문제도 별개입니다. [Runner 문서](https://docs.python.org/3.15/library/asyncio-runner.html#running-an-asyncio-program)를 기준으로 구분합니다.
-
-```python
-# pytest-asyncio가 알아서 처리
-@pytest.mark.asyncio
-async def test_something():
-    ...
-```
-
-## 직접 확인 — 순차 실행과 중첩 실행
-
-다음 세 파일은 CPython 3.15.0·macOS에서 실행했습니다. 외부 라이브러리를 설치하지 않습니다. 첫 파일은 순차 run 두 번과 실행 중인 루프 안의 중첩 호출을 구분합니다.
-
-```python title="runners.py"
-import asyncio
-
-async def value():
-    return 1
-
-print(f"sequential={asyncio.run(value())},{asyncio.run(value())}")
-
-async def nested():
-    coro = value()
-    try:
-        asyncio.run(coro)
-    except RuntimeError:
-        print("nested=blocked")
-    finally:
-        coro.close()
-
-asyncio.run(nested())
-```
-
-결과는 sequential=1,1과 nested=blocked입니다. 생성해 둔 coro는 중첩 호출에서 소비되지 않으므로 finally에서 닫아 never-awaited 경고를 만들지 않습니다.
-
-## 직접 확인 — 취소 뒤 finally의 await
-
-두 번째 파일은 태스크가 대기에 들어간 뒤 취소를 한 번 전달합니다. 취소가 작업을 중단시켜도 finally의 비동기 정리가 완료되는지 확인합니다.
+취소는 대기 중인 `await` 지점에 `CancelledError`를 던집니다. `finally` 안에서 다시 `await`해 비동기 정리를 할 수 있는지 확인했습니다.
 
 ```python title="cancellation.py"
 import asyncio
@@ -277,11 +456,42 @@ async def main():
 asyncio.run(main())
 ```
 
-출력은 cleanup=True입니다. 반복 취소나 외부 I/O 장애까지 이 한 예제로 해결했다고 판단하지 않습니다.
+출력은 `cleanup=True`입니다. 취소가 한 번 들어온 뒤 `finally`의 `await`는 정상으로 끝났습니다. 정리 도중 *또* 취소가 들어오는 경우는 이 예제가 다루지 않습니다. [`asyncio.shield()` 문서](https://docs.python.org/3.15/library/asyncio-task.html#asyncio.shield)는 shield가 안쪽 작업을 바깥 취소로부터 보호하지만 *호출한 쪽은 여전히 취소되어* `await`에서 `CancelledError`를 받는다고 적습니다. 정리 작업을 끝까지 돌리고 싶을 때 쓰되 호출자의 취소까지 없애 주지는 않습니다.
 
-## 직접 확인 — await 사이의 갱신 유실
+```python
+finally:
+    await asyncio.shield(conn.close())
+```
 
-단일 스레드의 이벤트 루프에서도 읽기와 쓰기 사이에 await가 있으면 다른 태스크가 같은 값을 읽을 수 있습니다. 세 번째 파일은 같은 입력을 잠금 없이, 잠금 안에서 각각 실행합니다.
+### 4. 이벤트 루프 중첩
+
+[`asyncio.run()` 문서](https://docs.python.org/3.15/library/asyncio-runner.html#asyncio.run)는 "같은 스레드에서 다른 이벤트 루프가 실행 중일 때는 호출할 수 없다"고 적습니다. 순차 호출과 중첩 호출을 구분해 확인했습니다.
+
+```python title="runners.py"
+import asyncio
+
+async def value():
+    return 1
+
+print(f"sequential={asyncio.run(value())},{asyncio.run(value())}")
+
+async def nested():
+    coro = value()
+    try:
+        asyncio.run(coro)
+    except RuntimeError:
+        print("nested=blocked")
+    finally:
+        coro.close()
+
+asyncio.run(nested())
+```
+
+결과는 `sequential=1,1`과 `nested=blocked`입니다. 순차 호출은 매번 새 루프를 만들고 닫으므로 문제없고, 실행 중인 루프 안의 중첩 호출만 `RuntimeError`입니다. 중첩 호출에서 소비되지 않은 `coro`는 `finally`에서 닫아 never-awaited 경고를 막았습니다.
+
+### 5. await 사이의 갱신 유실
+
+단일 스레드 이벤트 루프에서도 읽기와 쓰기 사이에 `await`가 있으면 다른 Task가 끼어듭니다. 은행 창구 두 곳이 같은 잔고를 동시에 조회한 뒤 각자 입금 처리하는 상황과 같습니다.
 
 ```python title="race.py"
 import asyncio
@@ -310,36 +520,66 @@ async def main():
 asyncio.run(main(), debug=True)
 ```
 
-`python3 race.py`는 unlocked=1, locked=2를 출력합니다. 두 태스크가 같은 옛 값을 읽는 지점이 문제이며 debug=True가 경쟁 조건을 자동으로 수정해 주지는 않습니다. 보호 범위는 읽기부터 쓰기까지입니다.
+`unlocked=1`, `locked=2`가 출력됐습니다. 두 Task가 같은 옛 값 0을 읽었기 때문입니다. `debug=True`로 돌렸지만 디버그 모드는 이 경쟁에 대해 아무 경고도 내지 않았습니다. 잠금은 읽기부터 쓰기까지를 감싸야 합니다.
 
 ## aiomonitor — 운영 중 콘솔
 
-[aiomonitor](https://github.com/aio-libs/aiomonitor)를 띄우면 동작 중인 이벤트 루프를 *원격 콘솔*로 검사.
+[aiomonitor](https://github.com/aio-libs/aiomonitor)는 앱 안에 텔넷 콘솔 서버를 띄워 실행 중인 루프의 Task를 보고 취소까지 할 수 있게 합니다. 0.7.1에서 `start_monitor(loop)`의 기본 포트는 20101(터미널 UI)이고, `python -m aiomonitor.cli`가 여기에 접속합니다(`aiomonitor/monitor.py`).
 
-```python
-import aiomonitor
+```python title="mon.py"
+import asyncio, aiomonitor
+
+async def query_db(sql):
+    await asyncio.sleep(3600)
 
 async def main():
-    with aiomonitor.start_monitor(loop=asyncio.get_event_loop()):
-        await app()
+    loop = asyncio.get_running_loop()
+    with aiomonitor.start_monitor(loop):
+        t = asyncio.create_task(query_db("select 1"), name="db-query")
+        try:
+            await t
+        except asyncio.CancelledError:
+            print("db-query cancelled", flush=True)
+
+asyncio.run(main())
 ```
 
-```bash
+```text
 $ python -m aiomonitor.cli
-> ps           # 모든 태스크
-> where 42     # 태스크 42의 콜스택
-> cancel 42    # 태스크 취소
+Asyncio Monitor: 2 tasks running
+Type help for available commands
+monitor >>> ps
+2 tasks running
++-------------------------------------------------------------------------+
+| Task ID          State    Name      Coroutine   Created Location  Since |
++-------------------------------------------------------------------------+
+| 281472864025200  PENDING  Task-1    main()      -                 -     |
+| 281472864723472  PENDING  db-query  query_db()  -                 -     |
++-------------------------------------------------------------------------+
+monitor >>> where 281472864723472
+...
+Stack of <Task name=db-query coro=query_db()> (most recent call last)
+  File "/root/py/ch03/mon.py", line 4, in query_db
+    await asyncio.sleep(3600)
+  File "LIB/asyncio/tasks.py", line 725, in sleep
+    return await future
+monitor >>> cancel 281472864723472
 ```
 
-운영 환경에서 *멈춘 듯한* 서비스 진단에 강력합니다.
+`cancel` 뒤 앱은 `db-query cancelled`를 찍고 끝났습니다. 원래 출력의 터미널 제어 코드는 지웠습니다. aiomonitor는 앱 코드에 미리 넣어야 하고 포트가 열린다는 점에서 2장의 debugpy `listen`과 같은 주의가 필요합니다. 코드를 바꿀 수 없다면 `python -m asyncio ps`가 대안입니다.
 
-## yappi / aiomisc — 비동기 프로파일링
+## yappi — 비동기 프로파일링
 
-평소의 `cProfile`은 *동기* 함수 단위 — 비동기 코드의 *대기*는 보이지 않습니다.
+`cProfile`은 함수 호출과 반환을 세는 결정적 프로파일러입니다. 코루틴은 `await`마다 반환했다가 다시 들어오므로 cProfile이 보는 코루틴은 "아주 짧게 여러 번 불린 함수"입니다. [yappi README](https://github.com/sumerc/yappi)는 1.2부터 *coroutine profiling*으로 코루틴의 올바른 wall/CPU 시간과 호출 수를 잰다고 소개합니다. 0.2초 기다리는 `fetch()` 두 개와 0.05초 CPU를 쓰는 `crunch()`로 비교했습니다(macOS, yappi 1.7.6).
 
-```bash
-$ pip install yappi
-```
+| 도구 / Python | `fetch` 호출 수 | `fetch` 시간 | `main` 시간 |
+| --- | ---: | ---: | ---: |
+| cProfile (3.13.18·3.14.10·3.15.2 동일) | 4 | 0.000 s | 0.050 s |
+| yappi `wall`, 3.13.18 | 2 | 0.401 s | 0.251 s |
+| yappi `wall`, 3.14.10 | 2 | 0.402 s | 0.251 s |
+| yappi `wall`, 3.15.2 | 4 | 0.000 s | 0.050 s |
+
+3.13·3.14에서 yappi는 `fetch`를 두 번 호출, 합계 0.4초로 정확히 셌습니다. 그런데 **3.15.2에서는 cProfile과 똑같이** 코루틴의 대기 시간을 놓쳤습니다. yappi 1.7.6의 PyPI 분류자도 3.14까지만 나열합니다. 비동기 대기를 프로파일링하려면 yappi가 지원하는 버전에서 돌리고, 결과가 cProfile과 같다면 먼저 버전을 의심합니다.
 
 ```python
 import yappi
@@ -350,27 +590,26 @@ yappi.stop()
 yappi.get_func_stats().save("profile.out", type="callgrind")
 ```
 
-KCachegrind / qcachegrind로 시각화.
+README에 따르면 결과는 callgrind나 pstat 형식으로 저장할 수 있습니다.
 
 ## 정리
 
-- 짧은 콜스택 문제 — `asyncio.run(debug=True)` 또는 `PYTHONASYNCIODEBUG=1`.
-- `slow callback` 검출은 디버그 모드만 켜면 자동.
-- await 안 한 코루틴은 `tracemalloc=10`으로 생성 위치 추적.
-- 모든 태스크 콜스택은 `Task.get_stack()` + SIGUSR1.
-- Task.get_stack과 IDE 표시가 모든 논리적 awaiter 체인을 복원한다는 가정은 피합니다.
-- fire-and-forget 태스크의 예외는 명시적으로 캡처.
-- 운영 콘솔은 `aiomonitor`.
-- 프로파일링은 `yappi` (wall-clock 모드).
+- 콜스택이 짧아지는 것은 *Task 경계*에서입니다. 직접 `await`한 호출자는 스택에 보입니다.
+- 3.14+에서는 `asyncio.print_call_graph()`로 프로세스 안에서, `python -m asyncio ps/pstree PID`로 밖에서 "누가 누구를 기다리는가"를 봅니다. pdb에서는 `$_asynctask`로 현재 Task를 확인합니다.
+- 디버그 모드(`PYTHONASYNCIODEBUG=1` 등)는 Task·코루틴 *생성 위치*와 100 ms 이상 루프를 막은 콜백을 알려 줍니다. 경쟁 조건은 잡지 않습니다.
+- never-awaited 코루틴의 위치는 디버그 모드나 `PYTHONTRACEMALLOC`로 얻습니다.
+- `Task.get_stack()`은 중단된 Task에 프레임 하나만 줍니다. 출력은 `Task.print_stack()`으로 합니다.
+- `gather()`는 첫 예외 뒤에도 나머지를 취소하지 않습니다. fire-and-forget Task는 집합에 보관합니다.
+- 운영 콘솔은 aiomonitor, 비동기 프로파일링은 yappi `wall`입니다. yappi 1.7.6은 3.15.2에서 코루틴 시간을 재지 못했습니다.
 
 ## 다음 장 예고
 
-Ch 4 — `py-spy` 샘플링 프로파일러. 운영 프로세스의 콜스택을 외부에서 수집하는 도구. 권한과 인터프리터 지원 범위도 확인합니다.
+Ch 4는 `py-spy`입니다. 코드를 고치지 않고 밖에서 콜스택을 덤프하고 샘플링하는 도구를 Linux에서 실제로 붙여 보고, 권한과 지원 버전 문제를 확인합니다.
 
 ## 관련 항목
 
 - [Ch 2: debugpy / IDE](/blog/tools/debugging/python/chapter02-debugpy-ide)
 - [Ch 4: py-spy 샘플링](/blog/tools/debugging/python/chapter04-py-spy)
 - [GDB Ch 6: 멀티스레드 / 멀티프로세스](/blog/tools/debugging/gdb-lldb/chapter06-multithread-multiprocess)
-- [PEP 567 — Context Variables](https://peps.python.org/pep-0567/)
-- [`asyncio` 디버그 모드 문서](https://docs.python.org/3/library/asyncio-dev.html)
+- [`asyncio` 개발 가이드와 디버그 모드 (3.15)](https://docs.python.org/3.15/library/asyncio-dev.html)
+- [Call graph introspection (3.15)](https://docs.python.org/3.15/library/asyncio-graph.html)
