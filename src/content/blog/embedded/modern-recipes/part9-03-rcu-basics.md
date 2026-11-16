@@ -221,13 +221,14 @@ liburcu의 기본 flavor(`urcu.h`를 그대로 include하면 `urcu-memb`)에서�
 #define _LGPL_SOURCE
 #include <urcu.h>
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
 
 struct config { int max_threads; int timeout_ms; };
 static struct config *cfg;
-static volatile int stop;
+static atomic_int stop;
 static pthread_barrier_t start;                 /* updater waits until all readers run */
 
 static void *reader(void *arg)
@@ -236,7 +237,7 @@ static void *reader(void *arg)
     (void)arg;
     rcu_register_thread();
     pthread_barrier_wait(&start);
-    while (!stop) {
+    while (!atomic_load_explicit(&stop, memory_order_relaxed)) {
         rcu_read_lock();
         struct config *c = rcu_dereference(cfg);
         int a = c->max_threads;
@@ -267,7 +268,7 @@ int main(void)
 #endif
         free(old);
     }
-    stop = 1;
+    atomic_store(&stop, 1);
     for (int i = 0; i < 4; i++) pthread_join(t[i], NULL);
     puts("updater: 1998 updates done");
     return 0;
@@ -278,39 +279,39 @@ Debian 13 guest에서 gcc 14.2.0과 liburcu 0.15.2(`apt install liburcu-dev`)로
 
 ```text
 $ gcc -O2 -g -fsanitize=address urcu_cfg.c -o ok -lurcu && ./ok
-reader: 6601 reads, 0 inconsistent
-reader: 5973 reads, 0 inconsistent
-reader: 5042 reads, 0 inconsistent
-reader: 5025 reads, 0 inconsistent
+reader: 2015 reads, 0 inconsistent
+reader: 2020 reads, 0 inconsistent
+reader: 2020 reads, 0 inconsistent
+reader: 2028 reads, 0 inconsistent
 updater: 1998 updates done
 exit=0
 $ gcc -O2 -g -fsanitize=address -DBUG_FREE_EARLY urcu_cfg.c -o bug -lurcu && ./bug
 =================================================================
-==190567==ERROR: AddressSanitizer: heap-use-after-free on address 0x502000000014 at pc 0xaaaabef51b20 bp 0xffff96fde640 sp 0xffff96fde658
-READ of size 4 at 0x502000000014 thread T3
-    #0 0xaaaabef51b1c in reader /root/p9/urcu_cfg.c:25
-    #1 0xffff9b58e2a8 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
-    #2 0xffff9b3c61d4  (/lib/aarch64-linux-gnu/libc.so.6+0x861d4) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
-    #3 0xffff9b42e158  (/lib/aarch64-linux-gnu/libc.so.6+0xee158) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
+==786258==ERROR: AddressSanitizer: heap-use-after-free on address 0x502000000250 at pc 0xaaaaad1b1b20 bp 0xffffb47ee640 sp 0xffffb47ee658
+READ of size 4 at 0x502000000250 thread T2
+    #0 0xaaaaad1b1b1c in reader /root/p9fix/903/urcu_cfg.c:24
+    #1 0xffffb84ae2a8 in asan_thread_start ../../../../src/libsanitizer/asan/asan_interceptors.cpp:234
+    #2 0xffffb82e61d4  (/lib/aarch64-linux-gnu/libc.so.6+0x861d4) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
+    #3 0xffffb834e158  (/lib/aarch64-linux-gnu/libc.so.6+0xee158) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
 
-0x502000000014 is located 4 bytes inside of 8-byte region [0x502000000010,0x502000000018)
+0x502000000250 is located 0 bytes inside of 8-byte region [0x502000000250,0x502000000258)
 freed by thread T0 here:
-    #0 0xffff9b6092b4 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
-    #1 0xaaaabef51448 in main /root/p9/urcu_cfg.c:49
-    #2 0xffff9b362258  (/lib/aarch64-linux-gnu/libc.so.6+0x22258) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
-    #3 0xffff9b362338 in __libc_start_main (/lib/aarch64-linux-gnu/libc.so.6+0x22338) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
-    #4 0xaaaabef515ec in _start (/root/p9/bug+0x15ec) (BuildId: 441f122b8dcf2e748e59533a10c704c3688c09d2)
+    #0 0xffffb85292b4 in free ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:52
+    #1 0xaaaaad1b1448 in main /root/p9fix/903/urcu_cfg.c:50
+    #2 0xffffb8282258  (/lib/aarch64-linux-gnu/libc.so.6+0x22258) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
+    #3 0xffffb8282338 in __libc_start_main (/lib/aarch64-linux-gnu/libc.so.6+0x22338) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
+    #4 0xaaaaad1b15ec in _start (/root/p9fix/903/bug+0x15ec) (BuildId: adfbf933f7d8f405e4c5d299387dafeea00f39e6)
 
 previously allocated by thread T0 here:
-    #0 0xffff9b60a400 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
-    #1 0xaaaabef5131c in main /root/p9/urcu_cfg.c:37
-    #2 0xffff9b362258  (/lib/aarch64-linux-gnu/libc.so.6+0x22258) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
+    #0 0xffffb852a400 in malloc ../../../../src/libsanitizer/asan/asan_malloc_linux.cpp:69
+    #1 0xaaaaad1b13e4 in main /root/p9fix/903/urcu_cfg.c:44
+    #2 0xffffb8282258  (/lib/aarch64-linux-gnu/libc.so.6+0x22258) (BuildId: 5f3926d9963ff284b8173bf3601bbb00c3abad16)
 ...
-SUMMARY: AddressSanitizer: heap-use-after-free /root/p9/urcu_cfg.c:25 in reader
+SUMMARY: AddressSanitizer: heap-use-after-free /root/p9fix/903/urcu_cfg.c:24 in reader
 exit=1
 ```
 
-`synchronize_rcu()`가 있으면 reader 네 개가 각자 5,025~6,601번 읽는 동안 어긋난 값도 ASan 경고도 없었습니다. 빼면 reader가 아직 쓰는 객체를 updater가 해제해, ASan이 reader의 `c` 읽기에서 heap-use-after-free를 잡았습니다. 위 로그는 25행(`c->timeout_ms`)이고, 재현 확인으로 다시 돌렸을 때는 23행(`c->max_threads`)이었습니다. 어느 읽기가 먼저 해제된 객체에 닿는지는 실행마다 다릅니다. "freed by thread T0" 스택은 `main`의 `free(old)`(49행)를 가리킵니다. 두 실행 모두 `pthread_barrier`로 reader 네 개가 읽기를 시작한 뒤에 updater가 돌게 했습니다. 실제 장비에서는 이 버그가 경고 없이 엉뚱한 설정값으로 나타납니다.
+`synchronize_rcu()`가 있으면 reader 네 개가 각자 2,015~2,028번 읽는 동안 어긋난 값도 ASan 경고도 없었습니다. 빼면 reader가 아직 쓰는 객체를 updater가 해제해, ASan이 reader의 `c` 읽기에서 heap-use-after-free를 잡았습니다. 위 로그는 24행(`c->max_threads`) 읽기입니다. "freed by thread T0" 스택은 `main`의 `free(old)`(50행)를, "previously allocated" 스택은 updater 루프의 `malloc`(44행)을 가리킵니다. 두 실행 모두 `pthread_barrier`로 reader 네 개가 읽기를 시작한 뒤에 updater가 돌게 했습니다. 실제 장비에서는 이 버그가 경고 없이 엉뚱한 설정값으로 나타납니다.
 
 ### Reader 수가 늘 때 — rwlock vs URCU
 
@@ -321,6 +322,7 @@ exit=1
 #define _LGPL_SOURCE
 #include <urcu.h>
 #include <pthread.h>
+#include <stdatomic.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -330,7 +332,7 @@ exit=1
 struct config { long a, b; };
 static struct config *cfg;
 static pthread_rwlock_t rw = PTHREAD_RWLOCK_INITIALIZER;
-static volatile int stop;
+static atomic_int stop;
 static int use_rcu;
 
 static void *reader(void *arg)
@@ -338,7 +340,7 @@ static void *reader(void *arg)
     unsigned long n = 0;
     long sum = 0;
     if (use_rcu) rcu_register_thread();
-    while (!stop) {
+    while (!atomic_load_explicit(&stop, memory_order_relaxed)) {
         if (use_rcu) {
             rcu_read_lock();
             struct config *c = rcu_dereference(cfg);
@@ -359,7 +361,7 @@ static void *reader(void *arg)
 static void *writer(void *arg)                   /* one update per millisecond */
 {
     (void)arg;
-    for (long v = 1; !stop; v++) {
+    for (long v = 1; !atomic_load_explicit(&stop, memory_order_relaxed); v++) {
         struct config *new = malloc(sizeof *new);
         new->a = v; new->b = -v;
         if (use_rcu) {
@@ -387,7 +389,7 @@ int main(int argc, char **argv)
     for (int i = 0; i < readers; i++) pthread_create(&t[i], NULL, reader, &cnt[i]);
     pthread_create(&w, NULL, writer, NULL);
     sleep(1);
-    stop = 1;
+    atomic_store(&stop, 1);
     for (int i = 0; i < readers; i++) { pthread_join(t[i], NULL); total += cnt[i]; }
     pthread_join(w, NULL);
     printf("%-6s readers=%d  %6.1f M reads/s\n", argv[1], readers, total / 1e6);
@@ -398,36 +400,37 @@ int main(int argc, char **argv)
 ```text
 host: Debian 13 arm64 guest (QEMU -accel hvf, 6 vCPU) on Apple M2 Pro; kernel 6.12.116+deb13-arm64; gcc 14.2.0; liburcu 0.15.2 (urcu-memb flavor)
 $ gcc -O2 -Wall readscale.c -o readscale -lurcu
+$ for r in 1 2 3; do echo "# round $r"; for n in 1 2 4 5; do ./readscale rwlock $n; ./readscale rcu $n; done; done
 # round 1
-rwlock readers=1   162.4 M reads/s
-rcu    readers=1   731.7 M reads/s
-rwlock readers=2    30.9 M reads/s
-rcu    readers=2  1455.7 M reads/s
-rwlock readers=4    13.1 M reads/s
-rcu    readers=4  2632.7 M reads/s
-rwlock readers=5    16.3 M reads/s
-rcu    readers=5  2691.7 M reads/s
+rwlock readers=1   106.4 M reads/s
+rcu    readers=1   759.5 M reads/s
+rwlock readers=2    40.0 M reads/s
+rcu    readers=2  1507.3 M reads/s
+rwlock readers=4    10.9 M reads/s
+rcu    readers=4  2987.0 M reads/s
+rwlock readers=5    10.1 M reads/s
+rcu    readers=5  3723.6 M reads/s
 # round 2
-rwlock readers=1   129.9 M reads/s
-rcu    readers=1   743.5 M reads/s
-rwlock readers=2    31.0 M reads/s
-rcu    readers=2  1464.4 M reads/s
-rwlock readers=4    11.1 M reads/s
-rcu    readers=4  2937.9 M reads/s
-rwlock readers=5     9.0 M reads/s
-rcu    readers=5  3637.6 M reads/s
-# round 3
-rwlock readers=1   125.2 M reads/s
-rcu    readers=1   746.6 M reads/s
-rwlock readers=2    30.2 M reads/s
-rcu    readers=2  1476.5 M reads/s
+rwlock readers=1   108.0 M reads/s
+rcu    readers=1   753.4 M reads/s
+rwlock readers=2    40.5 M reads/s
+rcu    readers=2  1509.3 M reads/s
 rwlock readers=4    11.0 M reads/s
-rcu    readers=4  2934.9 M reads/s
-rwlock readers=5     9.1 M reads/s
-rcu    readers=5  3552.6 M reads/s
+rcu    readers=4  2968.1 M reads/s
+rwlock readers=5     9.7 M reads/s
+rcu    readers=5  3723.6 M reads/s
+# round 3
+rwlock readers=1   114.7 M reads/s
+rcu    readers=1   747.7 M reads/s
+rwlock readers=2    39.8 M reads/s
+rcu    readers=2  1499.7 M reads/s
+rwlock readers=4    12.1 M reads/s
+rcu    readers=4  2967.4 M reads/s
+rwlock readers=5     9.7 M reads/s
+rcu    readers=5  3720.4 M reads/s
 ```
 
-`pthread_rwlock`은 reader가 하나일 때 초당 125~162M 번이었다가 둘이 되자 30.2~31.0M 번으로 떨어졌고, 다섯이면 9.0~16.3M 번이었습니다. Guest의 glibc 2.41에서 읽기 lock은 `rwlock->__data.__readers`에 `atomic_fetch_add_acquire`를 합니다(`nptl/pthread_rwlock_common.c` 353–355행). Reader가 모두 같은 word에 쓰므로 그 cache line이 코어 사이를 오갑니다. URCU reader는 공유 word에 쓰지 않아 reader 수에 따라 늘었습니다(1개 732~747M, 5개 2692~3638M). 이것은 이 guest의 숫자이고, 측정 루프가 하는 일이 포인터 두 번 읽기뿐이라 lock 비용이 그대로 드러나는 조건입니다.
+`pthread_rwlock`은 reader가 하나일 때 초당 106~115M 번이었다가 둘이 되자 39.8~40.5M 번으로 떨어졌고, 다섯이면 9.7~10.1M 번이었습니다. Guest의 glibc 2.41에서 읽기 lock은 `rwlock->__data.__readers`에 `atomic_fetch_add_acquire`를 합니다(`nptl/pthread_rwlock_common.c` 353–355행). Reader가 모두 같은 word에 쓰므로 그 cache line이 코어 사이를 오갑니다. URCU reader는 공유 word에 쓰지 않아 reader 수에 따라 늘었습니다(1개 748~760M, 5개 3720~3724M). 이것은 이 guest의 숫자이고, 측정 루프가 하는 일이 포인터 두 번 읽기뿐이라 lock 비용이 그대로 드러나는 조건입니다.
 
 ### call_rcu (비동기 free)
 
@@ -549,8 +552,8 @@ MODULE_LICENSE("GPL");
 | `spin_lock` + 읽기 + unlock | 4.62~12.93 ns/반복 | 같음 |
 | `synchronize_rcu()` 1회 | 13.2~44.8 ms (중앙값 16.1~16.5 ms) | `CONFIG_HZ=250` |
 | `call_rcu()` 반환 | 최대 1,000 ns | callback은 14.6~18.5 ms 뒤 |
-| reader 5개 처리량, `pthread_rwlock` | 9.0~16.3M reads/s | liburcu 0.15.2, writer 1 ms 주기 |
-| reader 5개 처리량, URCU | 2692~3638M reads/s | 같음 |
+| reader 5개 처리량, `pthread_rwlock` | 9.7~10.1M reads/s | liburcu 0.15.2, writer 1 ms 주기 |
+| reader 5개 처리량, URCU | 3720~3724M reads/s | 같음 |
 
 환경은 모두 Debian 13 arm64 guest, 커널 `6.12.116+deb13-arm64`(`CONFIG_PREEMPT_VOLUNTARY=y`), gcc 14.2.0입니다. 가상 머신이라 host 부하에 따라 흔들리고, 다른 보드에서는 다시 재야 하는 숫자입니다. 표가 보여 주는 방향은 분명합니다. Reader 쪽은 lock보다 훨씬 싸고 reader 수에 따라 늘어나지만, writer 쪽은 수십 ms를 기다리거나 그만큼 늦게 해제합니다. 쓰기가 잦으면 이 대가가 커지므로 read-mostly일 때 고릅니다.
 
