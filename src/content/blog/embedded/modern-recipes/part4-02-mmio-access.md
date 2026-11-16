@@ -347,7 +347,7 @@ unlocked: isr=75 isr_seen=30 main_seen=60000 (main expect 60000)
 locked  : isr=105 isr_seen=105 main_seen=60000 (main expect 60000)
 ```
 
-ISR은 75번 돌았지만 그중 45번의 갱신이 main의 `str`에 덮여 사라졌습니다. 같은 loop를 `cpsid i`/`cpsie i`로 감싸면 105번 모두 남습니다. 숫자는 계산과 맞습니다. QEMU 문서(`qemu-options.hx`)에 따르면 `-icount shift=0`은 "one instruction every 2^N ns of virtual time", 즉 명령 하나가 1 ns입니다. `hw/arm/mps2.c`의 CPU clock은 25 MHz이고 `SYST_RVR = 99`이므로 SysTick 한 주기는 100 cycle = 4,000 ns = 4,000 명령입니다. 5명령 loop × 60,000번 = 300,000 명령에서 75번, `cpsid`/`cpsie`가 든 7명령 loop에서 105번입니다. `-icount` 없이 돌리면 unlocked는 `isr=0`, locked는 실행마다 5~10번으로 들쭉날쭉했습니다. 같은 문서는 icount가 결정적인 결과를 주지만 "not provide cycle accurate emulation"이라고 적으므로, 손실 횟수 자체가 아니라 손실이 생기는 자리가 `ldr`과 `str` 사이라는 점을 보는 실험입니다.
+ISR은 75번 돌았지만 그중 45번의 갱신이 main의 `str`에 덮여 사라졌습니다. 같은 loop를 `cpsid i`/`cpsie i`로 감싸면 105번 모두 남습니다. 숫자는 계산과 맞습니다. QEMU 문서(`qemu-options.hx`)에 따르면 `-icount shift=0`은 "one instruction every 2^N ns of virtual time", 즉 명령 하나가 1 ns입니다. `hw/arm/mps2.c`의 CPU clock은 25 MHz이고 `SYST_RVR = 99`이므로 SysTick 한 주기는 100 cycle = 4,000 ns = 4,000 명령입니다. 5명령 loop × 60,000번 = 300,000 명령에서 75번, `cpsid`/`cpsie`가 든 7명령 loop에서 105번입니다. `-icount` 없이 돌리면 unlocked는 `isr=0`, locked는 실행마다 5~10번으로 들쭉날쭉했습니다. 같은 문서는 icount가 결정적인 결과를 주지만 "not provide cycle accurate emulation"이라고 적으므로, 이 실험은 손실 횟수 자체가 아니라 손실이 생기는 자리가 `ldr`과 `str` 사이라는 점을 보여 줍니다.
 
 ### 4. Bit-band alias
 
