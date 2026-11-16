@@ -303,9 +303,9 @@ xQueueCreate(...);    /* dynamic */
 
 ## 정리
 
-- RTOS의 값어치는 **blocking API**: 기다림을 상태 변수 대신 호출 한 줄로 씁니다.
+- RTOS의 값어치는 **blocking API**입니다. 기다림을 상태 변수 대신 호출 한 줄로 씁니다.
 - 이 빌드에서 task 4개 + queue 1개의 비용은 **flash 18,200 B(super-loop 1,272 B), heap 5,040 B**였습니다.
-- ISR에서는 **`FromISR` API만**. `configASSERT`가 있으면 Cortex-M3 port가 잘못된 호출을 잡습니다.
+- ISR에서는 **`FromISR` API만** 씁니다. `configASSERT`가 있으면 Cortex-M3 port가 잘못된 호출을 잡습니다.
 - task stack은 **high water mark로 재서** 정하고, 가능하면 **`*Static` 생성**을 씁니다.
 - 동시에 기다리는 흐름이 하나둘이면 super-loop로 시작하고, state machine이 기다림 때문에 불어날 때 RTOS로 옮깁니다.
 
