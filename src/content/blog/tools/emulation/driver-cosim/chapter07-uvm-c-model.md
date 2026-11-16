@@ -16,7 +16,7 @@ topics: ["tools", "tools/emulation"]
 
 ## UVM이란 무엇인가
 
-**UVM**(Universal Verification Methodology)은 SystemVerilog 기반의 *검증 프레임워크*입니다. Accellera가 reference implementation을 배포하고, 표준 번호는 IEEE 1800.2입니다. Accellera 다운로드 페이지의 현재 판은 "UVM v2020.3.2 Library Code for IEEE 1800.2"입니다. UVM testbench의 구성 요소를 Accellera `uvm-core` 저장소(GitHub `accellera-official/uvm-core`, tag 2020.3.1, commit 78c0654)의 base class와 주석으로 정리하면 다음과 같습니다.
+**UVM**(Universal Verification Methodology)은 SystemVerilog 기반의 *검증 프레임워크*입니다. Accellera가 reference implementation을 배포하고, 표준 번호는 IEEE 1800.2입니다. Accellera 다운로드 페이지의 현재 판은 "UVM v2020.3.2 Library Code for IEEE 1800.2"입니다. 아래 file:line 인용은 GitHub `uvm-core` 저장소에서 받을 수 있었던 최신 tag인 2020.3.1 기준입니다. UVM testbench의 구성 요소를 Accellera `uvm-core` 저장소(GitHub `accellera-official/uvm-core`, tag 2020.3.1, commit 78c0654)의 base class와 주석으로 정리하면 다음과 같습니다.
 
 | 컴포넌트 | base class (파일:줄) | 주석이 적은 역할 |
 |----------|------|------|
