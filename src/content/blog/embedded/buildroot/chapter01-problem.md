@@ -65,28 +65,30 @@ $ output/images/start-qemu.sh
 
 ## 빌드 시간이 어디로 가는가
 
-"Buildroot는 빠르다"는 말을 실제로 재 봤습니다. `qemu_aarch64_virt_defconfig`를 아무것도 바꾸지 않고 빈 `dl/`에서 `/usr/bin/time -v make`로 빌드했습니다.
+"Buildroot는 빠르다"는 말을 실제로 재 봤습니다. `qemu_aarch64_virt_defconfig`를 아무것도 바꾸지 않고 `/usr/bin/time -v make`로 빌드했습니다. 이 `dl/`에는 다른 실험(Ch 14)에서 받은 소스가 이미 있어서, 새로 받은 것은 주로 toolchain 소스였습니다.
 
 ```text
-	User time (seconds): 6459.39
-	System time (seconds): 779.84
-	Percent of CPU this job got: 404%
-	Elapsed (wall clock) time (h:mm:ss or m:ss): 29:50.42
-	Maximum resident set size (kbytes): 1345612
+	User time (seconds): 10256.89
+	System time (seconds): 2530.11
+	Percent of CPU this job got: 530%
+	Elapsed (wall clock) time (h:mm:ss or m:ss): 40:08.16
+	Maximum resident set size (kbytes): 1342356
 ```
 
-벽시계 29분 50초가 걸렸고, 이 시간에는 소스 다운로드가 포함됩니다. Buildroot는 단계별 시작·끝 시각을 `output/build/build-time.log`에 남깁니다. 이 파일을 패키지 묶음별로 합산했습니다(최상위 병렬 빌드를 켜지 않았으므로 단계가 순서대로 돌고, 합계 1,707초가 벽시계와 거의 같습니다).
+벽시계 40분 8초가 걸렸습니다. 같은 사양의 VM에서 빈 `dl/`로 먼저 잰 빌드는 29분 50초(CPU 404%)였지만 그 로그는 보관하지 못했습니다. 다운로드가 더 적었는데도 10분 넘게 느렸던 것은 user time 자체가 6,459초에서 10,257초로 늘었기 때문이고, VM을 올린 호스트의 부하가 달랐던 것으로 봅니다. 빌드 시간은 이 정도로 호스트 상태에 흔들리므로, 비교는 같은 시점·같은 호스트에서 한 값끼리만 합니다.
+
+Buildroot는 단계별 시작·끝 시각을 `output/build/build-time.log`에 남깁니다. 이 파일을 패키지 묶음별로 합산했습니다(최상위 병렬 빌드를 켜지 않았으므로 단계가 순서대로 돌고, 합계 2,290초가 벽시계 2,408초와 거의 같습니다).
 
 | 묶음 | 다운로드 | 압축 해제·configure·build·install | 비고 |
 |---|---:|---:|---|
-| toolchain (binutils·gcc 2단계·glibc·linux-headers·gmp·mpfr·mpc) | 399초 | 477초 | glibc는 git 저장소에서 받아 다운로드만 338초 |
-| 그 외 host 도구 (host-qemu·host-cmake·host-python3 등) | 178초 | 522초 | host-cmake 260초, host-qemu 93초 |
-| linux 6.18.7 커널 | 0초 | 89초 | tarball은 linux-headers가 이미 받음 |
-| target 패키지 (busybox·skeleton·initscripts·gcc-final 등 8개) | 30초 | 13초 | busybox build 6초 |
+| toolchain (binutils·gcc 2단계·glibc·linux-headers·gmp·mpfr·mpc) | 496초 | 792초 | glibc는 git 저장소에서 받아 다운로드만 471초 |
+| 그 외 host 도구 44개 (host-qemu·host-cmake·host-python3 등) | 21초 | 796초 | host-cmake 265초, host-qemu 171초 |
+| linux 6.18.7 커널 | 0초 | 163초 | tarball은 linux-headers가 이미 받음 |
+| target 패키지 (busybox·skeleton·initscripts·gcc-final 등 8개) | 1초 | 21초 | busybox build 9초 |
 
-가장 무거운 것은 toolchain입니다. 다운로드를 빼고도 477초이고, 그중 glibc 빌드만 73초, host-gcc-final 빌드가 190초였습니다. 반대로 target 쪽 사용자 공간 패키지는 이 defconfig에서 busybox 정도라 13초에 끝났습니다. 이 defconfig는 QEMU 자체(`BR2_PACKAGE_HOST_QEMU=y`)까지 빌드하므로 host 도구 묶음이 toolchain과 비슷하게 큽니다.
+가장 무거운 것은 toolchain입니다. 다운로드를 빼고도 792초이고, 그중 host-gcc-final 빌드가 322초, host-gcc-initial 빌드가 233초, glibc 빌드가 97초였습니다. 반대로 target 쪽 사용자 공간 패키지는 이 defconfig에서 busybox 정도라 21초에 끝났습니다. 이 defconfig는 QEMU 자체(`BR2_PACKAGE_HOST_QEMU=y`)까지 빌드하므로 host 도구 묶음이 toolchain과 비슷하게 큽니다.
 
-두 번째 `make`는 아무것도 바꾸지 않았을 때 7.41초였습니다. 패키지는 모두 건너뛰고 rootfs 이미지 생성과 post-image 스크립트만 다시 돕니다.
+두 번째 `make`는 아무것도 바꾸지 않았을 때 8.60초였습니다. 패키지는 모두 건너뛰고 rootfs 이미지 생성과 post-image 스크립트만 다시 돕니다.
 
 ```text
 >>>   Finalizing host directory
@@ -96,14 +98,14 @@ $ output/images/start-qemu.sh
 >>>   Generating root filesystems common tables
 >>>   Generating filesystem image rootfs.ext2
 >>>   Executing post-image script board/qemu/post-image.sh
-WALL 7.41 s
+WALL 8.60 s
 ```
 
 Yocto로 같은 시스템을 빌드한 시간은 이 글에서 재지 않았습니다. 두 도구의 시간 비교는 같은 호스트에서 직접 재야 의미가 있고, 그 방법은 Ch 20에 정리했습니다.
 
 ## Yocto의 설계 철학
 
-Yocto는 정반대 방향으로 갑니다. 핵심에 BitBake라는 별도의 빌드 엔진이 있고, *recipe*마다 *task*가 있고, task 입력의 *signature*가 같으면 미리 빌드된 sstate 산출물을 재사용합니다. openembedded-core의 `meta/conf/bitbake.conf`는 그 저장 위치를 `SSTATE_DIR ?= "${TOPDIR}/sstate-cache"`로 정의합니다.
+Yocto는 이 시리즈에서 빌드하지 않았으므로, 이 절의 Yocto 쪽 사실은 Yocto Project 5.0(scarthgap) 문서(`overview-manual/concepts.rst`의 setscene·signature 설명, `sdk-manual/appendix-obtain.rst`)와 openembedded-core scarthgap 트리(commit `fc431686`)에서 확인했습니다. Yocto는 정반대 방향으로 갑니다. 핵심에 BitBake라는 별도의 빌드 엔진이 있고, *recipe*마다 *task*가 있고, task 입력의 *signature*가 같으면 미리 빌드된 sstate 산출물을 재사용합니다. openembedded-core의 `meta/conf/bitbake.conf`는 그 저장 위치를 `SSTATE_DIR ?= "${TOPDIR}/sstate-cache"`로 정의합니다.
 
 ```text
 $ source oe-init-build-env
@@ -131,7 +133,7 @@ $ bitbake core-image-minimal
 | **packaging** | rootfs 이미지 | ipk/rpm/deb feed |
 | **SDK 생성** | `make sdk`로 toolchain + sysroot tarball | `populate_sdk`, eSDK |
 | **외부 트리** | `BR2_EXTERNAL` (덧씌우기 불가) | 레이어 + `.bbappend` |
-| **첫 빌드 (이 VM, QEMU defconfig)** | 29분 50초 | 측정하지 않음 |
+| **첫 빌드 (이 VM, QEMU defconfig)** | 40분 8초 (toolchain 소스 다운로드 포함) | 측정하지 않음 |
 
 패키지 정의 수는 두 저장소에서 `ls -d package/*/ | wc -l`, `find meta -name '*.bb' | wc -l`로 센 값입니다. oe-core는 의도적으로 작은 핵심이고, 나머지 recipe는 meta-openembedded 같은 별도 레이어에 있습니다. 그래서 "Buildroot가 패키지가 더 많다"가 아니라 "Buildroot는 한 저장소에 다 들어 있다"로 읽어야 합니다.
 
@@ -142,7 +144,7 @@ $ bitbake core-image-minimal
 - **단일 보드, 단일 이미지**를 만드는 프로젝트. 한 output 디렉터리가 한 설정이라는 모델과 그대로 맞습니다.
 - **이미지 통째 교체로 갱신**하는 제품. FAQ가 말하는 "complete system upgrades"와 같은 방향입니다.
 - **빌드 시스템 전담 인력이 없는** 팀. 패키지 하나가 `Config.in`과 `.mk` 두 파일이라(Ch 5), 읽고 고칠 대상이 작습니다.
-- **빠른 iteration**이 중요한 단계. 위 측정에서 변경 없는 재빌드는 7초, busybox 한 패키지 재빌드(`make busybox-rebuild`)는 8초였습니다.
+- **빠른 iteration**이 중요한 단계. 위 측정에서 변경 없는 재빌드는 9초, busybox 한 패키지 재빌드(`make busybox-rebuild`)도 9초였습니다.
 
 ## Yocto가 적합한 경우
 
@@ -209,17 +211,17 @@ $ make qemu_aarch64_virt_defconfig
 $ make
 $ ls -l output/images/
 total 21480
--rw-r--r-- 1 br br 13236736 Nov 16 03:06 Image
--rw-r--r-- 1 br br 62914560 Nov 16 03:07 rootfs.ext2
-lrwxrwxrwx 1 br br       11 Nov 16 03:07 rootfs.ext4 -> rootfs.ext2
--rwxr-xr-x 1 br br      819 Nov 16 03:07 start-qemu.sh
+-rw-r--r-- 1 br br 13236736 Nov 16 07:13 Image
+-rw-r--r-- 1 br br 62914560 Nov 16 07:13 rootfs.ext2
+lrwxrwxrwx 1 br br       11 Nov 16 07:13 rootfs.ext4 -> rootfs.ext2
+-rwxr-xr-x 1 br br      819 Nov 16 07:13 start-qemu.sh
 ```
 
-`Image`는 13 MB짜리 커널, `rootfs.ext2`는 Kconfig 기본값(`BR2_TARGET_ROOTFS_EXT2_SIZE="60M"`, `fs/ext2/Config.in`)으로 정해진 60 MiB 크기의 ext4 이미지(`rootfs.ext4`는 그 symlink), `start-qemu.sh`는 QEMU 부팅 스크립트입니다. `rootfs.ext2`가 디스크에서 실제로 차지하는 블록은 `du` 기준 8.6 MB였고, 부팅 뒤 `df -h /`는 51.1M 중 4.1M 사용을 보였습니다. 이 단순한 산출물 구조 자체가 Buildroot의 정체성입니다.
+`Image`는 13 MB짜리 커널, `rootfs.ext2`는 Kconfig 기본값(`BR2_TARGET_ROOTFS_EXT2_SIZE="60M"`, `fs/ext2/Config.in`)으로 정해진 60 MiB 크기의 ext4 이미지(`rootfs.ext4`는 그 symlink), `start-qemu.sh`는 QEMU 부팅 스크립트입니다. `rootfs.ext2`는 빈 블록을 할당하지 않는 sparse 파일이라 디스크에서 실제로 차지하는 블록은 `du` 기준 4.5 MB였고(빌드 직후 복사본), 부팅 뒤 `df -h /`는 51.1M 중 4.1M 사용을 보였습니다. 이 단순한 산출물 구조 자체가 Buildroot의 정체성입니다.
 
 ## 숫자로 보는 규모
 
-같은 빌드의 디스크 사용량입니다(`du -sh`).
+같은 빌드의 디스크 사용량입니다(`du -sh`). `dl/`은 다른 실험의 소스가 섞이지 않도록 빈 디렉터리에 `make source`로 이 defconfig의 소스만 받아 잰 값입니다(430초).
 
 | 항목 | 크기 |
 |---|---:|
@@ -245,8 +247,8 @@ Buildroot를 처음 접하면 흔히 빠지는 오해가 몇 가지 있습니다
 
 - Buildroot는 GNU Make와 Kconfig로 toolchain·커널·부트로더·rootfs를 cross-compile해 묶는 도구이고, binary 패키지를 일부러 만들지 않습니다.
 - Yocto는 BitBake·레이어·sstate·패키지 feed를 갖춘 유연한 도구입니다.
-- 이 VM에서 `qemu_aarch64_virt_defconfig` 첫 빌드는 29분 50초였고, 다운로드를 뺀 시간의 가장 큰 몫은 toolchain(477초)과 host-qemu를 포함한 host 도구(522초)였습니다.
-- 변경 없는 재빌드는 7.41초, busybox 한 패키지 재빌드는 8.03초였습니다.
+- 이 VM에서 `qemu_aarch64_virt_defconfig` 첫 빌드는 40분 8초였고, 다운로드를 뺀 시간의 가장 큰 몫은 toolchain(792초)과 host-qemu를 포함한 host 도구(796초)였습니다. 같은 사양에서 먼저 잰 값(29분 50초)과 10분 넘게 차이가 나, 빌드 시간은 호스트 부하에 크게 흔들렸습니다.
+- 변경 없는 재빌드는 8.60초, busybox 한 패키지 재빌드는 9.31초였습니다.
 - Buildroot는 설정 변경 후 무엇을 다시 빌드할지 추적하지 않고, 그 판단을 사용자에게 맡긴다고 매뉴얼에 적혀 있습니다.
 - Vendor BSP가 어느 쪽 형태로 오는지가 실무에서 결정적 요인이 될 때가 많습니다.
 - 이 시리즈는 QEMU AArch64와 BeagleBone Black을 메인 예시 보드로 씁니다.
