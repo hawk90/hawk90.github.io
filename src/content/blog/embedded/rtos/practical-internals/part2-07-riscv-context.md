@@ -22,7 +22,7 @@ topics: ["embedded", "embedded/rtos"]
 | **S** (Supervisor) | 01 | Linux kernel |
 | **U** (User) | 00 | Application |
 
-M-mode는 필수이며 S/U 지원과 커널 배치는 구현에 따라 다릅니다. FreeRTOS의 일반적인 M-mode 포트를 모든 RTOS의 유일한 실행 모델로 일반화하면 안 됩니다. Linux의 보통 S-mode 배치도 firmware·hypervisor 구성과 구분해서 확인합니다.
+인코딩은 privileged spec "Table 1. RISC-V privilege levels"(0 = U `00`, 1 = S `01`, 3 = M `11`, 2는 reserved)를 따릅니다([priv-intro](https://docs.riscv.org/reference/isa/v20260120/priv/priv-intro.html)). M-mode는 필수이고 S·U는 선택입니다. FreeRTOS V11.2.0 `GCC/RISC-V` 포트는 task와 커널을 모두 M-mode에서 돌립니다(아래 `mret`와 `mstatus` 사용).
 
 ## RISC-V Registers
 
@@ -36,7 +36,7 @@ M-mode는 필수이며 S/U 지원과 커널 배치는 구현에 따라 다릅니
 | x8–x9, x18–x27 | s0–s11, 일반 호출에서 보존 |
 | x10–x17 | a0–a7, 인자·반환값 |
 
-RV32I에는 32개의 정수 레지스터 이름이 있지만 변경 가능한 것은 x1–x31의 31개입니다. RV32E는 레지스터 수가 다르고 RV64는 슬롯 폭이 다릅니다. gp를 모든 태스크에서 불변으로 취급하는 포트도 있으므로 실제 context 크기는 해당 ABI와 포트로 계산해야 합니다.
+RV32I에는 32개의 정수 레지스터 이름이 있지만 변경 가능한 것은 x1–x31의 31개입니다. RV32E는 x0–x15 16개이고 RV64는 슬롯 폭이 8 byte입니다. FreeRTOS RISC-V 포트는 이 차이를 `portContext.h`에서 처리합니다. RV32I/RV64에서는 `portCONTEXT_SIZE`가 31 word, RV32E(`__riscv_32e`)에서는 15 word이고, word 크기 `portWORD_SIZE`는 XLEN에 따라 4 또는 8입니다([`portContext.h` L33-L57](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portContext.h#L33-L57)).
 
 ## Key CSRs (Control and Status Registers)
 
@@ -55,11 +55,11 @@ RV32I에는 32개의 정수 레지스터 이름이 있지만 변경 가능한 �
 
 M-mode로 trap이 전달되는 경우 HW는 mepc에 중단·예외 위치를 기록하고 mcause에 interrupt 여부와 원인 코드를 기록합니다. mstatus에는 이전 privilege와 interrupt-enable 상태를 보존하고 MIE를 내린 뒤 handler로 이동합니다. 범용 레지스터의 메모리 저장은 하지 않습니다.
 
-mtvec가 Direct 모드이면 BASE에서 시작합니다. Vectored 모드에서는 비동기 interrupt가 BASE + 4 × cause로 향하고 동기 예외는 BASE로 향합니다. delegation 설정에 따라 S-mode로 전달되는 trap은 대응하는 supervisor CSR 경로를 사용하므로 모든 trap이 mtvec로 간다고 보면 안 됩니다.
+mtvec가 Direct 모드이면 BASE에서 시작합니다. Vectored 모드에서는 spec 원문대로 "Asynchronous interrupts set pc to BASE+4×cause"이고 동기 예외는 BASE로 갑니다([Machine-Level ISA](https://docs.riscv.org/reference/isa/v20260120/priv/machine.html) mtvec MODE 표). S-mode가 있는 구현에서 `medeleg`/`mideleg`로 위임한 trap은 `stvec`로 갑니다.
 
 ## ISR Save Sequence
 
-다음은 **RTOS 태스크 선택을 구현하지 않는 교육용 trap wrapper**입니다. 진입 시 M-mode의 유효한 16 byte 정렬 스택을 신뢰하고, trap_body는 일반 ILP32 호출 규약을 지키며 MIE를 켜거나 중첩 trap을 유발하지 않아야 합니다. U-mode의 임의 SP를 그대로 쓰는 보안 경계에 적용할 수 없습니다.
+다음은 **RTOS 태스크 선택을 구현하지 않는 교육용 trap wrapper**입니다. 진입 시 M-mode의 유효한 16 byte 정렬 스택을 신뢰하고, trap_body는 일반 ILP32 호출 규약을 지키며 MIE를 켜거나 중첩 trap을 유발하지 않는다고 가정합니다. U-mode에서 들어온 trap의 SP를 그대로 쓰므로 보안 경계에는 쓸 수 없습니다.
 
 31개 정수 슬롯과 mepc·mstatus는 132 byte입니다. 호출 시 정렬을 유지하려고 padding 12 byte를 더해 **144 byte**를 확보합니다. x5를 scratch로 쓰기 전에 원래 값을 먼저 저장하고, 원래 SP는 sp + 144로 계산합니다.
 
@@ -148,23 +148,31 @@ rv32_trap:
 
 기존처럼 128 byte만 확보한 뒤 offset 128·132에 쓰면 프레임 밖을 침범합니다. mscratch로 스택을 교환한 직후 x2를 저장하면 그것은 이미 바뀐 SP이므로 원래 태스크 SP가 되지 않습니다. 이 예제는 별도 ISR 스택 교환을 생략하여 해당 계약을 분리했습니다.
 
-ISA 컴파일과 별개로 정상 레지스터·CSR 복원, 프레임 경계, 정렬을 모델로 확인할 수 있습니다. 실제 trap 진입·mret·중첩·IRQ controller의 실행 검증은 타깃 또는 적합한 에뮬레이터가 필요합니다.
+### QEMU에서 실제 trap으로 돌려 보기
+
+이 wrapper를 QEMU 11.1.3 `qemu-system-riscv32 -M virt -bios none`에서 bare-metal로 실행했습니다. 시험 코드는 mtvec를 Direct 모드로 이 wrapper에 걸고, x1과 x3–x31에 `0x01010101 × 레지스터 번호`를 넣은 뒤 M-mode에서 `ecall`을 실행합니다. `trap_body`는 mcause를 기록하고 frame의 mepc 슬롯(124)을 4 전진시킵니다. `mret` 뒤 31개 레지스터를 모두 원래 값·원래 SP와 비교합니다.
+
+```text
+mcause=0x0000000b mismatched registers after mret=0x00000000
+```
+
+mcause 11은 spec의 exception code 표에서 "Environment call from M-mode"입니다. 불일치 0은 x1·x3–x31이 모두 돌아왔고 x2가 trap 이전 SP와 같았다는 뜻입니다. 링커가 없는 환경이라 시험 파일 하나에 wrapper를 `.include`하고 모든 참조를 같은 section 안의 PC-relative 주소로 만든 뒤 Homebrew clang 23.1.5 `--target=riscv32 -march=rv32im_zicsr -mabi=ilp32`로 어셈블하고 `llvm-objcopy -O binary`로 이미지를 만들었습니다. relocation이 0개인 것을 `llvm-objdump -r`로 확인했습니다.
 
 ## mret — Exception Return
 
 mret는 mepc로 복귀하고 mstatus의 MPP·MPIE 등에 따라 privilege와 interrupt-enable 상태를 전환합니다. 그 전에 소프트웨어가 저장한 범용·확장 상태와 올바른 mepc/mstatus를 복원해야 합니다. mret 한 줄이 메모리 프레임까지 자동 복원하는 것은 아닙니다.
 
-interrupt에서는 중단한 명령 위치로 돌아가므로 mepc를 무조건 증가시키지 않습니다. 처리한 ECALL을 넘겨 계속 실행하려면 handler가 해당 ECALL의 mepc를 4 byte 전진시키는 등의 정책이 필요합니다. fault는 원인과 복구 방식에 따라 재실행·종료 여부가 달라집니다.
+interrupt에서는 중단한 명령 위치로 돌아가므로 mepc를 무조건 증가시키지 않습니다. 처리한 ECALL을 넘겨 계속 실행하려면 handler가 mepc를 4 byte 전진시킵니다. FreeRTOS RISC-V 포트의 trap handler가 정확히 이렇게 나눕니다. mcause의 최상위 bit로 interrupt인지 보고(`bge a0, x0, synchronous_exception`), 동기 예외일 때만 `addi a1, a1, 4`를 한 뒤 frame 0번 슬롯에 저장합니다([`portASM.S` L334-L349](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portASM.S#L334-L349)).
 
 ## ECALL — System Call / OS API
 
-ecall은 현재 privilege에 따른 동기 예외를 발생시킵니다. U-mode ECALL이 M-mode로 갈지 S-mode로 갈지는 지원 모드와 delegation 설정에 달려 있습니다. syscall 번호·인자 전달은 ISA가 아닌 OS ABI의 계약입니다.
+ecall은 현재 privilege에 따라 environment-call-from-U/S/M-mode 예외를 일으킵니다(spec 2.1.3.1). U-mode ECALL이 M-mode로 갈지 S-mode로 갈지는 `medeleg` 위임 설정이 정합니다. syscall 번호·인자 전달은 ISA가 아닌 OS ABI의 계약입니다.
 
 ```asm
     ecall
 ```
 
-RTOS의 yield가 ECALL 경로를 사용할 수 있지만 모든 API가 ECALL을 거치는 것은 아닙니다. 이 장의 wrapper에서는 trap_body가 mcause를 해석하고, 지원하는 서비스에 대해서만 복귀 PC와 상태를 바꾸도록 별도로 구현해야 합니다.
+FreeRTOS RISC-V 포트에서는 `portYIELD()`가 `ecall`이고([`portmacro.h` L94](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portmacro.h#L94)), 다른 API는 일반 함수 호출입니다. 이 장의 wrapper에서는 위 QEMU 시험의 `trap_body`처럼 mcause를 보고 복귀 PC를 정합니다.
 
 ## mscratch — Context Save 트릭
 
@@ -174,33 +182,29 @@ mscratch는 M-mode 소프트웨어가 용도를 정하는 CSR입니다. 예를 �
     csrrw sp, mscratch, sp
 ```
 
-이 한 줄만으로 중첩 trap이 안전해지지는 않습니다. 두 번째 진입에서 다시 교환하면 어떤 스택을 가리키는지, mscratch를 언제 갱신하는지까지 정의해야 합니다. 포트가 다른 scratch 계약을 쓰면 그 계약이 우선입니다.
+이 한 줄만으로 중첩 trap이 안전해지지는 않습니다. 두 번째 진입에서 다시 교환하면 sp에는 첫 번째 trap의 ISR stack이 아니라 task SP가 돌아오기 때문입니다. FreeRTOS RISC-V 포트는 mscratch를 쓰지 않습니다. task stack에 context를 저장한 뒤 전역 변수 `xISRStackTop`에서 ISR stack을 읽어 SP를 바꿉니다(`load_x sp, xISRStackTop`, [`portContext.h` L124](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portContext.h#L124)).
 
 ## FreeRTOS RISC-V Port
 
-실제 FreeRTOS **V11.2.0 GCC/RISC-V**는 portASM.S와 portContext.h, 칩별 freertos_risc_v_chip_specific_extensions.h를 함께 사용합니다. XLEN·RV32E 여부·추가 레지스터·timer와 interrupt controller에 따라 프레임과 경로가 달라집니다.
+실제 FreeRTOS **V11.2.0 GCC/RISC-V**는 portASM.S와 portContext.h, 칩별 `freertos_risc_v_chip_specific_extensions.h`를 함께 사용합니다. 저장 매크로 `portcontextSAVE_CONTEXT_INTERNAL`([`portContext.h` L67-L114](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portContext.h#L67-L114))의 RV32I 프레임은 다음과 같습니다.
 
-첫 태스크 복원도 pxCurrentTCB 변수에서 TCB 포인터를 읽고 그 TCB의 저장 SP를 읽는 단계가 필요합니다. 복원 경로에는 재개 PC와 상태의 일관된 설정이 포함됩니다. 일부 줄을 생략한 코드를 완성된 FreeRTOS start 함수처럼 재구성해서는 안 됩니다.
+| 슬롯 | 내용 |
+| --- | --- |
+| 0 | mepc (동기 예외면 +4) |
+| 1 | x1 (ra) |
+| 2–28 | x5–x31 |
+| 29 | `xCriticalNesting` |
+| 30 | mstatus |
 
-위 144 byte wrapper는 범용 레지스터를 모두 보존하는 학습용 형식이며 **FreeRTOS의 실제 프레임 레이아웃이 아닙니다**. 제품 코드는 링크한 태그의 실제 초기 스택과 save/restore 매크로를 한 쌍으로 사용해야 합니다.
+31 word = 124 byte입니다. 위 교육용 wrapper(144 byte)와 다른 점은 x3(gp)와 x4(tp)를 저장하지 않는다는 것입니다. FreeRTOS는 모든 task가 같은 gp·tp를 쓴다고 보고 넘어갑니다. 칩마다 더 저장할 레지스터는 `portasmSAVE_ADDITIONAL_REGISTERS` 매크로로 추가하고, 그 크기는 `portasmADDITIONAL_CONTEXT_SIZE`로 frame에 더합니다. 마지막으로 `store_x sp, 0 ( t0 )`로 SP를 TCB 첫 필드에 씁니다. 1-02에서 본 "pxTopOfStack은 첫 멤버" 규칙이 RISC-V에서도 같습니다.
 
 ## CLIC vs PLIC
 
-PLIC와 CLIC는 서로 다른 interrupt 전달 모델이며, RISC-V interrupt controller가 반드시 두 종류로만 나뉘는 것은 아닙니다. AIA나 vendor별 구성도 있으므로 제품의 실제 controller와 명세 버전을 확인해야 합니다.
-
-| 항목 | 확인할 질문 |
-| --- | --- |
-| PLIC | source enable·priority·threshold·claim/complete를 어느 context가 처리하는가? |
-| CLIC | 해당 구현의 명세·vectoring·preemption 설정은 무엇인가? |
-| 플랫폼 | timer·local IRQ·외부 controller가 어떤 경로로 hart에 연결되는가? |
-
-고정된 256 또는 1000 IRQ 수나 특정 MCU의 CLIC 채택을 이름만 보고 단정하지 않습니다. controller의 우선순위·중첩 계약은 정수 레지스터 저장과 별도의 검증 대상입니다.
+interrupt controller는 정수 레지스터 저장과 별개의 문제이고, 이 장에서는 PLIC·CLIC 명세를 다루지 않았습니다. FreeRTOS RISC-V 포트가 커널 안에서 직접 처리하는 trap은 두 가지뿐입니다. mcause가 machine timer interrupt(0x80000007)이면 compare 레지스터를 갱신하고 `xTaskIncrementTick()`을 부르며, mcause가 11(M-mode ecall, 즉 `portYIELD()`)이면 `vTaskSwitchContext()`를 부릅니다. 나머지 interrupt와 예외는 응용이 제공하는 `freertos_risc_v_application_interrupt_handler`·`freertos_risc_v_application_exception_handler`로 넘깁니다([`portASM.S` L350-L373](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portASM.S#L350-L373)). 어떤 controller를 쓰든 그 handler 안에서 claim·완료 처리를 합니다.
 
 ## 비트맵·CLZ
 
-RV32I 기본 명령 집합에는 CLZ가 없으며 Zbb 같은 선택 확장 지원을 확인해야 합니다. 그렇더라도 소프트웨어 bitmap 검색이나 generic 우선순위 탐색은 구현할 수 있습니다.
-
-한 CLZ 명령의 존재만으로 전체 스케줄러의 시간 상한을 정할 수 없습니다. 포트의 설정, ready list 접근, 메모리와 interrupt 조건을 포함해 비교해야 합니다. RTOS마다 호출 빈도도 다르므로 “호출이 드물어 차이가 작다”는 보편적 결론은 피합니다.
+RV32I 기본 명령 집합에는 CLZ가 없고, Zbb 확장의 `clz`로 생깁니다. FreeRTOS RISC-V 포트의 `portmacro.h`는 `configUSE_PORT_OPTIMISED_TASK_SELECTION == 1`이면 `portGET_HIGHEST_PRIORITY`를 `31UL - __builtin_clz( uxReadyPriorities )`로 정의합니다([`portmacro.h` L153](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portmacro.h#L153)). 같은 식 `31u - __builtin_clz(b)`를 Homebrew clang 23.1.5 `-O2`로 컴파일하면 `-march=rv32im_zbb`에서는 `clz`·`xori` 두 명령(`ret` 포함 3개)이 되고, `-march=rv32im`에서는 shift·or·popcount 계산으로 펼친 32개 명령(`ret` 포함 33개)이 됐습니다. 같은 C 코드가 Zbb 유무에 따라 명령 수로 16배(2 대 32) 달라집니다.
 
 ## RISC-V vs Cortex-M — 요약
 
@@ -211,17 +215,15 @@ RV32I 기본 명령 집합에는 CLZ가 없으며 Zbb 같은 선택 확장 지�
 | 복귀 | EXC_RETURN과 HW unstack | SW 복원 뒤 mret |
 | 확장 상태 | 포트가 FP 프레임과 S16–S31 처리 | FP·벡터는 예제 범위 밖 |
 
-이는 메커니즘 비교이며 성능 순위가 아닙니다. 구체적인 cycle 수나 interrupt latency는 동일한 시작·종료 범위와 실제 코어·메모리·controller로 측정해야 합니다.
+이는 메커니즘 비교이며 성능 순위가 아닙니다. 저장 word 수로 보면 Cortex-M4F 정수 task 17 word(HW 8 + SW 9), FreeRTOS RISC-V RV32I 31 word(전부 SW)입니다. cycle은 이 장에서 재지 않았습니다.
 
 ## ESP32-C3 / GD32V — MCU 예
 
-같은 RISC-V MCU라도 timer 주소와 IRQ controller, 포트 확장은 다릅니다. 범용 FreeRTOS의 MTIME 예제 주소를 ESP32-C3의 실제 하드웨어 주소처럼 복사해서는 안 됩니다.
-
-ESP32-C3는 해당 ESP-IDF 버전의 SoC 헤더와 FreeRTOS 포트를 사용하고, 다른 MCU도 vendor SDK와 데이터시트에 맞춰야 합니다. 이 장에서는 검증하지 않은 MMIO 상수를 제시하지 않습니다. 링크한 칩별 확장 계약을 기준으로 timer·ISR stack·추가 context를 확인합니다.
+같은 RISC-V MCU라도 timer 주소와 IRQ controller, 포트 확장은 다릅니다. FreeRTOS RISC-V 포트는 machine timer의 주소를 `configMTIME_BASE_ADDRESS`·`configMTIMECMP_BASE_ADDRESS`로 받고, 칩마다 다른 레지스터는 `chip_specific_extensions/` 아래 칩별 헤더로 넣습니다. 이 장에서는 ESP32-C3나 GD32V의 실제 주소를 다루지 않았습니다. ESP32-C3는 [ESP32-C3 Mastering](/blog/embedded/riscv/esp32-c3-mastering/chapter01-overview) 시리즈에서 다룹니다.
 
 ## 자주 하는 실수
 
-- **x0까지 저장하거나 RV32E/RV64에 같은 크기를 적용합니다.** ISA와 ABI를 먼저 고정합니다.
+- **x0까지 저장하거나 RV32E/RV64에 같은 크기를 적용합니다.** FreeRTOS도 RV32E는 15 word, RV64는 word 8 byte로 따로 계산합니다.
 - **scratch 레지스터를 원래 값 저장 전에 덮어씁니다.** 위 예제는 x5를 가장 먼저 저장합니다.
 - **할당 범위 밖에 CSR을 기록합니다.** 최대 offset에 슬롯 폭을 더한 값이 프레임 크기를 넘지 않아야 합니다.
 - **mscratch 교환 후의 SP를 원래 태스크 SP로 저장합니다.** 교환 전후 값의 위치를 추적합니다.
@@ -232,10 +234,11 @@ ESP32-C3는 해당 ESP-IDF 버전의 SoC 헤더와 FreeRTOS 포트를 사용하�
 
 - 기본 trap 진입은 CSR을 갱신하지만 범용 레지스터를 메모리에 push하지 않습니다.
 - RV32I의 x0은 저장할 필요가 없으며 포트별 ABI·확장 상태가 프레임을 정합니다.
-- 교육용 wrapper는 144 byte 안에 정수 상태와 CSR을 저장하고 원래 SP를 마지막에 복원합니다.
+- 교육용 wrapper는 144 byte 안에 정수 상태와 CSR을 저장하고 원래 SP를 마지막에 복원합니다. QEMU `riscv32 virt`에서 `ecall` 뒤 31개 레지스터가 모두 돌아왔습니다(mcause 11).
+- FreeRTOS RISC-V RV32I 프레임은 31 word로 gp·tp를 저장하지 않고, ISR stack은 mscratch가 아닌 `xISRStackTop`으로 바꿉니다.
 - mepc 복원과 ECALL 처리 후 전진 여부는 trap 원인에 맞춰야 합니다.
 - mscratch 스택 교환은 초기화·중첩 정책을 포함하는 소프트웨어 계약입니다.
-- 실제 FreeRTOS 포트의 초기 프레임과 복원 매크로를 교육용 레이아웃과 섞지 않습니다.
+- 실제 FreeRTOS 포트의 초기 프레임과 복원 매크로를 교육용 레이아웃과 섞지 않습니다(슬롯 순서가 다름).
 
 다음 편은 tick과 타이머입니다. SysTick과 generic timer의 주기·단위를 다룹니다.
 

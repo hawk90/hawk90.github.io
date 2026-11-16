@@ -26,7 +26,22 @@ topics: ["embedded", "embedded/rtos"]
 | Undefined (UND) | 11011 | Undef instruction |
 | System (SYS) | 11111 | Privileged user mode |
 
-이 표는 AArch32의 기본 모드 일곱 개입니다. Security/Virtualization 확장에 따른 Monitor/Hyp 모드는 별도로 있으며, 모든 Cortex-A 구현이 같은 확장을 갖는 것은 아닙니다. 예외 진입 시에는 해당 예외 모드로 CPSR.M이 바뀌지만, 임의 모드 전환은 권한과 명령의 제약을 따릅니다.
+이 표는 AArch32의 기본 모드 일곱 개이고, Security·Virtualization 확장이 있는 구현에는 Monitor·Hyp 모드가 더 있습니다. 예외 진입 시에는 해당 예외 모드로 CPSR.M이 바뀌고, privileged 모드에서는 `cps #모드` 명령으로도 바꿀 수 있습니다.
+
+QEMU 11.1.3 `vexpress-a9`(Cortex-A9)에서 bare-metal로 `cps`로 모드를 바꿔 가며 CPSR을 읽어 봤습니다. 하위 5비트가 표의 값과 같습니다. 아래 두 출력 블록은 한 번의 실행 로그에서 해당 줄만 골라 주제별로 묶은 것이라, 실제 출력 순서와는 다릅니다.
+
+```text
+CPSR in IRQ mode : 0x400001d2
+CPSR in SYS mode : 0x400001df
+CPSR in SVC mode : 0x400001d3
+CPSR in FIQ mode : 0x400001d1
+CPSR in ABT mode : 0x400001d7
+CPSR in UND mode : 0x400001db
+CPSR in USR mode : 0x400001d0
+CPSR after cps #0x1f in USR: 0x400001d0
+```
+
+마지막 줄은 User 모드에서 `cps #0x1f`를 실행한 뒤의 CPSR입니다. 모드가 그대로 0x10이므로, User 모드에서는 예외를 거치지 않고는 privileged 모드로 갈 수 없습니다. 출력에는 semihosting을 User 모드에서도 허용하는 `-semihosting-config enable=on,userspace=on`을 썼습니다.
 
 ## Banked Registers
 
@@ -35,19 +50,36 @@ topics: ["embedded", "embedded/rtos"]
 | R0–R7 | 기본 모드 사이에서 공유 |
 | R8–R12 | FIQ만 별도 bank, 나머지는 공유 |
 | R13(SP), R14(LR) | User와 System은 공유하며 IRQ·SVC·FIQ·Abort·Undefined는 각각 별도 bank |
-| SPSR | 예외 모드별 이전 CPSR 보존용, User/System에는 없음 |
+| SPSR | 예외 모드별 이전 CPSR 보존용 |
 
-banked SP가 있다고 모든 태스크마다 HW가 스택을 따로 마련하는 것은 아닙니다. 태스크들이 System 모드에서 실행되는 포트는 같은 SP bank에 현재 태스크의 저장 SP를 번갈아 로드합니다. IRQ bank는 handler 진입에 사용하고 task context는 포트가 정한 태스크 스택에 저장합니다.
+같은 QEMU 프로그램에서 IRQ·SYS·SVC 모드마다 SP와 LR에 다른 값을 넣은 뒤 다시 읽었습니다. SVC 모드에서 `stmia r7, {sp, lr}^`로 *User bank*의 SP/LR을 저장하면, SYS 모드에서 넣은 값이 나옵니다.
+
+```text
+User-bank SP read from SVC (stm ^): 0x5a5a0000
+User-bank LR read from SVC (stm ^): 0x5a5a0001
+SVC SP : 0x5c5c0000
+IRQ SP : 0x1a1a0000
+IRQ LR : 0x1a1a0001
+SYS SP : 0x5a5a0000
+FIQ SP : 0xf0f00000
+ABT SP : 0xabab0000
+UND SP : 0xdede0000
+SYS SP : 0x5a5a0000
+```
+
+SYS에서 쓴 0x5A5A0000이 User bank로 읽혔으므로 User와 System은 SP/LR을 공유합니다. IRQ·FIQ·ABT·UND는 각자 SP에 넣은 값을 다른 모드를 거친 뒤에도 그대로 유지했습니다. 사물함이 모드별로 있지만 User와 System은 같은 사물함을 쓰는 셈입니다. R8–R12 쪽도 확인했습니다. SYS에서 r9에 0x99990000을 넣고 FIQ 모드에서 r9에 0xF1F10000을 쓴 뒤 SYS로 돌아오자 `r9 in SYS after setting FIQ r9=0xf1f10000: 0x99990000`이었습니다. FIQ만 R8–R12를 따로 가집니다.
+
+banked SP가 있다고 모든 태스크마다 HW가 스택을 따로 마련하는 것은 아닙니다. FreeRTOS ARM_CA9 포트는 태스크를 System 모드에서 돌리므로, 위의 공유 SP 하나에 현재 태스크의 저장 SP를 번갈아 로드합니다. IRQ bank는 handler 진입에만 쓰고 task context는 태스크 스택에 저장합니다.
 
 ## Mode 진입 시
 
-User 또는 System에서 IRQ를 받는 경우 HW는 이전 CPSR을 SPSR_irq에 보존하고 LR_irq에 예외 복귀에 필요한 주소를 기록합니다. IRQ 모드가 선택되고 벡터 주소에서 handler가 실행되며, 세부 마스크와 벡터 계산은 아키텍처 설정을 따릅니다.
+User 또는 System에서 IRQ를 받는 경우 HW는 이전 CPSR을 SPSR_irq에 보존하고 LR_irq에 예외 복귀에 필요한 주소를 기록한 뒤 IRQ 모드로 벡터에서 handler를 시작합니다.
 
-일반 레지스터를 메모리에 자동 push하는 Cortex-M식 프레임은 생기지 않습니다. 다만 CPSR/SPSR와 banked LR 같은 HW 예외 진입 동작은 있으므로 “아무 상태도 HW가 보존하지 않는다”고 표현해도 틀립니다. 실제 복귀에서는 IRQ의 LR 보정과 SPSR 복원이 필요합니다.
+일반 레지스터를 메모리에 자동 push하는 Cortex-M식 프레임은 생기지 않습니다. HW가 보존하는 것은 SPSR과 banked LR 두 개뿐이고, 나머지는 모두 handler가 저장합니다. IRQ의 LR_irq는 돌아갈 명령보다 4만큼 앞을 가리키므로, FreeRTOS ARM_CA9의 IRQ handler도 처음에 `SUB lr, lr, #4`로 보정합니다([`portASM.S` L171-L178](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/portASM.S#L171-L178)).
 
 ## Context Switch 흐름
 
-V11.2.0 ARM_CA9의 portASM.S에는 portSAVE_CONTEXT와 portRESTORE_CONTEXT 매크로가 있습니다. 이 포트는 태스크를 System 모드에서 실행하며 다음과 같이 복귀 상태를 **System 스택**에 저장한 뒤 일반 상태를 보존합니다. 아래는 전체 매크로가 아닌 순서 설명용 발췌입니다.
+V11.2.0 ARM_CA9의 portASM.S에는 portSAVE_CONTEXT(L57)와 portRESTORE_CONTEXT(L94) 매크로가 있습니다. 이 포트는 태스크를 System 모드에서 실행하며 다음과 같이 복귀 상태를 **System 스택**에 저장한 뒤 일반 상태를 보존합니다. 아래는 portSAVE_CONTEXT의 첫 세 줄(L61-L63)입니다.
 
 ```asm
     SRSDB sp!, #0x1f
@@ -57,28 +89,59 @@ V11.2.0 ARM_CA9의 portASM.S에는 portSAVE_CONTEXT와 portRESTORE_CONTEXT 매�
 
 SRS는 예외 모드의 복귀 LR과 SPSR을 지정한 모드의 스택에 저장합니다. 단순히 SVC 스택에 범용 레지스터만 push하는 예제와 달리, System 태스크의 스택과 복귀 상태를 일관되게 다룹니다.
 
-| 순서 | 원본 매크로의 작업 |
-| --- | --- |
-| 저장 | SRSDB·System 전환·R0–R12/R14 저장 |
-| 추가 상태 | critical nesting, FP 사용 시 FPSCR·D0–D31, FP 사용 flag 저장 |
-| 스택 교체 | 현재 SP를 TCB에 쓰고 스케줄러 선택 후 새 TCB의 SP 로드 |
-| 복원 | FP flag·필요한 FP 상태·critical nesting 복원, GIC priority mask 반영 |
-| 복귀 | 일반 레지스터 복원 뒤 RFEIA sp!로 PC와 CPSR 복귀 |
+| 순서 | 원본 매크로의 작업 | word |
+| --- | --- | ---: |
+| 저장 | SRSDB(LR·SPSR) | 2 |
+| | System 전환·R0–R12/R14 저장 | 14 |
+| 추가 상태 | critical nesting | 1 |
+| | FP 사용 시 FPSCR·D0–D31 | 1 + 64 |
+| | FP 사용 flag(`ulPortTaskHasFPUContext`) | 1 |
+| 스택 교체 | 현재 SP를 TCB에 쓰고 스케줄러 선택 후 새 TCB의 SP 로드 | |
+| 복원 | FP flag·필요한 FP 상태·critical nesting 복원, GIC priority mask 반영 | |
+| 복귀 | 일반 레지스터 복원 뒤 RFEIA sp!로 PC와 CPSR 복귀 | |
 
-FP 보존은 task flag에 따라 조건부이며 D0–D31을 사용할 수 있는 해당 Cortex-A9 설정을 전제로 합니다. 모든 Cortex-A·VFP 구현에 D32 레지스터 파일을 가정해서는 안 됩니다.
+word 수는 위 매크로의 PUSH·VPUSH 목록에서 센 값입니다. FP를 안 쓰는 task는 18 word(72 byte), 쓰는 task는 83 word(332 byte)입니다. FP 저장은 task flag가 0이 아닐 때만 하며(`VPUSHNE`), `VPUSHNE {D16-D31}`이 있으므로 D32 레지스터 파일이 있는 VFPv3-D32/NEON 구성을 전제로 합니다.
 
-실제 소스를 object까지 확인하는 명령은 다음과 같습니다. ELF 링크·GIC 초기화·실제 예외 진입을 검증하는 명령은 아닙니다.
+실제 소스를 object까지 확인하는 명령은 다음과 같습니다.
 
 ```bash
 clang --target=arm-none-eabi -mcpu=cortex-a9 -mfpu=neon   -mfloat-abi=softfp -marm -c   FreeRTOS-Kernel/portable/GCC/ARM_CA9/portASM.S -o ca9-port.o
 llvm-objdump -d ca9-port.o
 ```
 
-역어셈블에서 FreeRTOS_SWI_Handler·FreeRTOS_IRQ_Handler·vPortRestoreTaskContext와 SRS/RFE를 확인할 수 있습니다. 원본의 IRQ LR 보정·중첩 처리·GIC ACK/EOI까지 읽어야 완전한 handler 흐름이 됩니다.
+arm-none-eabi-gcc 16.2.0으로 같은 파일을 object로 만들고 역어셈블하면 `FreeRTOS_SWI_Handler`의 앞부분이 다음과 같습니다(`objdump -d --no-show-raw-insn`).
+
+```text
+00000000 <FreeRTOS_SWI_Handler>:
+   0:	srsdb	sp!, #31
+   4:	cps	#31
+   8:	push	{r0, r1, r2, r3, r4, r5, r6, r7, r8, r9, sl, fp, ip, lr}
+   c:	ldr	r2, [pc, #700]	@ 2d0 <ulCriticalNestingConst>
+  10:	ldr	r1, [r2]
+  14:	push	{r1}		@ (str r1, [sp, #-4]!)
+  18:	ldr	r2, [pc, #692]	@ 2d4 <ulPortTaskHasFPUContextConst>
+  1c:	ldr	r3, [r2]
+  20:	cmp	r3, #0
+  24:	vmrsne	r1, fpscr
+  28:	pushne	{r1}		@ (strne r1, [sp, #-4]!)
+  2c:	vpushne	{d0-d15}
+  30:	vpushne	{d16-d31}
+  34:	push	{r3}		@ (str r3, [sp, #-4]!)
+  38:	ldr	r0, [pc, #652]	@ 2cc <pxCurrentTCBConst>
+  3c:	ldr	r1, [r0]
+  40:	str	sp, [r1]
+  44:	mov	r2, sp
+  48:	and	r2, r2, #4
+  4c:	sub	sp, sp, r2
+  50:	ldr	r0, [pc, #644]	@ 2dc <vTaskSwitchContextConst>
+  54:	blx	r0
+```
+
+0x40의 `str sp, [r1]`이 TCB 첫 필드에 SP를 쓰는 곳이고, 0x44-0x4c는 `vTaskSwitchContext`를 부르기 전에 SP를 8바이트 정렬로 맞춥니다. AAPCS32는 public interface에서 "SP mod 8 = 0. The stack must be double-word aligned."를 요구합니다(2025Q1 L1085). 이 포트는 QEMU에서 실행하지 않았습니다. GIC 초기화와 tick timer 설정을 갖춘 보드 지원 코드가 필요하기 때문입니다.
 
 ## SVC — 시스템 콜 entry
 
-AArch32의 svc 명령은 Supervisor 예외 경로로 들어갑니다. 그 명령을 어떤 OS API에 연결할지는 커널 ABI가 정합니다. 모든 RTOS API가 SVC를 통과하는 것은 아니며, 이 FreeRTOS 포트에서는 FreeRTOS_SWI_Handler가 context 저장·스케줄러 호출·복원 경로를 수행합니다.
+AArch32의 svc 명령은 Supervisor 예외 경로로 들어갑니다. 그 명령을 어떤 OS API에 연결할지는 커널 ABI가 정합니다. 이 FreeRTOS 포트에서 SVC는 yield 하나에만 쓰입니다. `FreeRTOS_SWI_Handler`(L145)가 portSAVE_CONTEXT → `vTaskSwitchContext` → portRESTORE_CONTEXT를 수행하고, 다른 FreeRTOS API는 System 모드에서 일반 함수로 호출됩니다.
 
 ```asm
     svc #0
@@ -88,7 +151,7 @@ Linux AArch32 시스템 콜도 SVC 예외를 이용하지만 호출 번호와 �
 
 ## MMU·Cache 영향
 
-태스크 전환이 항상 TLB invalidate나 cache flush를 요구하는 것은 아닙니다. 같은 주소 공간의 스레드는 매핑을 공유할 수 있고, 주소 공간을 바꿀 때도 ASID와 커널 정책에 따라 기존 translation을 유지할 수 있습니다. 매핑을 변경할 때 필요한 maintenance 순서는 페이지 테이블·shareability·타깃 아키텍처를 기준으로 정합니다.
+FreeRTOS ARM_CA9 포트의 전환 코드에는 TLB나 cache 유지 명령이 하나도 없습니다(위 역어셈블). 모든 task가 같은 주소 공간을 쓰기 때문입니다. 주소 공간을 바꾸는 OS에서는 페이지 테이블을 고친 뒤에 TLB 유지 명령이 필요하고, 그 순서는 아키텍처가 정합니다.
 
 다음은 **AArch64 EL1의 별도 명령 예제**입니다. 이 장의 ARMv7-A 포트에 붙여 넣을 수 없으며, 매 태스크 전환 코드나 완전한 break-before-make 절차도 아닙니다. 적절한 권한·범위에서 앞선 테이블 쓰기를 완료한 뒤 EL1 stage-1 TLB maintenance를 수행하는 명령 순서만 보입니다.
 
@@ -103,39 +166,32 @@ invalidate_el1_stage1:
     ret
 ```
 
-이 예제를 AArch64로 assemble하고 AArch32로는 거부되는지 확인하면 ISA 혼용을 잡을 수 있습니다. 실제 매핑 변경의 정당성이나 실행 시간을 그 컴파일 결과로 검증할 수는 없습니다.
+이 예제를 clang `--target=aarch64-none-elf`로 assemble하면 통과하고, `--target=arm-none-eabi -mcpu=cortex-a9 -marm`으로는 `error: invalid instruction`(`tlbi vmalle1is`)으로 거부됩니다. 저장소의 `scripts/verify-rtos-context-examples.mjs`가 이 두 경우를 확인합니다.
 
 ## NEON / VFP
 
-원본 ARM_CA9 포트의 FP 경로는 D0–D31의 256 byte에 FPSCR와 FP 사용 flag 등을 추가로 저장합니다. 기본 프레임과 정렬·critical nesting도 별도이므로 256 byte만으로 전체 FP 태스크 context 크기를 정하지 않습니다.
+원본 ARM_CA9 포트의 FP 경로는 D0–D31의 256 byte에 FPSCR 4 byte를 더 저장합니다. 위 표처럼 FP task의 전체 context는 83 word = 332 byte입니다.
 
-FP를 사용하는 태스크를 어떻게 표시하는지는 포트의 등록·설정 계약에 따릅니다. “Lazy save가 항상 좋다”는 기준 대신 사용 기능, ISR의 FP 사용과 중첩 정책, 필요한 최악 지연을 함께 검토해야 합니다.
+어느 task가 FP를 쓰는지는 task가 스스로 `vPortTaskUsesFPU()`를 불러 `ulPortTaskHasFPUContext`를 1로 만들어 알립니다([`ARM_CA9/port.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/port.c)). Cortex-M4F처럼 하드웨어가 EXC_RETURN으로 알려 주는 방식이 아니어서, `configUSE_TASK_FPU_SUPPORT`가 1이거나 정의하지 않았을 때 FP를 쓰면서 이 함수를 부르지 않은 task는 전환 때 FP 레지스터를 잃습니다. 2로 두면 모든 task가 FPU context를 갖고 시작합니다([`ARM_CA9/portmacro.h` L125-L129](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/portmacro.h#L125-L129), [`port.c` L293-L303](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/port.c#L293-L303)).
 
 ## TrustZone — Secure/Non-secure World
 
-Security 확장이 있는 ARMv7-A AArch32에서는 SMC가 Monitor 모드의 처리 경로와 연관됩니다. AArch64의 EL3와 같은 모드 이름이 아니며 trap routing과 허용 여부는 구성에 달려 있습니다.
-
-Secure world 전환은 RTOS의 같은 world 안 태스크 전환과 다른 계약입니다. 어떤 GP·FP·보안 상태를 저장하는지는 monitor/TEE 구현과 호출 규약에 따라 확인해야 합니다. 이 ARM_CA9 scheduler 코드가 OP-TEE world switch까지 검증하거나 구현하는 것은 아닙니다.
+Secure world 전환은 RTOS의 같은 world 안 태스크 전환과 다른 계약이고, 어떤 상태를 저장할지는 monitor 코드가 정합니다. FreeRTOS ARM_CA9 포트의 `portASM.S`·`port.c`에는 SMC 명령이나 Monitor 모드 코드가 없습니다.
 
 ## 비용 — Cortex-M vs Cortex-A
 
-코어 이름과 클록만으로 context switch 시간을 비교할 수 없습니다. IRQ entry만인지, scheduler를 포함하는지, 주소 공간을 바꾸는지, FP·캐시·메모리 조건이 무엇인지가 모두 달라집니다.
-
-측정 시에는 동일한 시작·종료 이벤트를 정하고 코어·커널 태그·설정·메모리 배치·표본 수와 분포를 남깁니다. 이 글의 object 검사는 명령과 ISA의 일치를 확인할 뿐이며 300 cycle이나 수 µs의 실측 근거를 제공하지 않습니다.
+두 포트의 저장량은 소스로 비교할 수 있습니다. 정수 task 기준 Cortex-M4F는 17 word(HW 8 + SW 9, 2-04), Cortex-A9는 18 word를 모두 소프트웨어로 저장합니다. FP task는 각각 51 word와 83 word입니다. 시간은 이 장에서 재지 않았습니다. 코어·클록·cache·메모리 조건이 정해져야 의미가 있기 때문입니다.
 
 ## Zephyr Cortex-A Port
 
-커널마다 AArch32 포트 경로와 handler 명칭이 다릅니다. Cortex-M 전용 PendSV 이름을 Cortex-A port의 실존 심볼처럼 인용해서는 안 됩니다.
-
-이 글은 검증 범위를 명확히 하기 위해 FreeRTOS V11.2.0 ARM_CA9 소스만 추적합니다. 다른 커널로 옮길 때는 그 태그의 exception entry, task stack, interrupt controller와 FP 보존 경로를 별도로 대조해야 합니다.
+PendSV는 Cortex-M에만 있는 예외라서 Cortex-A 포트에는 없습니다. Zephyr v3.7.0의 AArch32 Cortex-A/R 코드는 `arch/arm/core/cortex_a_r/`에 있고, context switch는 `CONFIG_USE_SWITCH`이면 `switch.S`, 아니면 `swap_helper.S`의 `z_arm_do_swap`이 맡습니다(같은 디렉터리 `CMakeLists.txt` L26-L27). 이 장은 FreeRTOS ARM_CA9만 따라갔습니다.
 
 ## 자주 하는 실수
 
 - **User와 System에 서로 다른 SP bank가 있다고 생각합니다.** 두 모드는 SP/LR을 공유하며 권한은 다릅니다.
-- **SVC stack에 push한 값을 User task context로 취급합니다.** task SP와 SPSR/복귀 주소의 저장 계약을 먼저 확인합니다.
+- **SVC stack에 push한 값을 task context로 취급합니다.** FreeRTOS ARM_CA9는 `SRSDB sp!, #SYS_MODE`로 복귀 상태를 *System* stack, 즉 task stack에 씁니다.
 - **AArch32 코드에 AArch64 TLBI를 섞습니다.** ISA와 exception-level 용어를 일관되게 사용합니다.
-- **DMA 뒤에 무조건 invalidate합니다.** 비일관 DMA는 전송 방향에 따라 device 읽기 전 clean, CPU 읽기 전 적절한 invalidate·동기화 등이 필요합니다. coherent 환경까지 같은 절차를 일반화하지 않습니다.
-- **privileged 명령이 언제나 같은 예외를 낸다고 가정합니다.** 명령·모드·확장·trap 설정별 동작을 확인해야 합니다.
+- **FP task에서 `vPortTaskUsesFPU()`를 빠뜨립니다.** `configUSE_TASK_FPU_SUPPORT`가 1(기본)이면 CA9 포트는 이 flag가 있는 task만 D0–D31을 저장합니다.
 
 ## 정리
 
@@ -151,7 +207,8 @@ Secure world 전환은 RTOS의 같은 world 안 태스크 전환과 다른 계�
 
 - [FreeRTOS V11.2.0 ARM_CA9 portASM.S](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/portASM.S): 실제 저장·복원·IRQ 경로.
 - [같은 태그의 ARM_CA9 port.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CA9/port.c): 초기 스택과 FP 설정 계약.
-- [Arm ARMv7-A/R Architecture Reference Manual](https://developer.arm.com/documentation/ddi0406/latest): 모드·banked register·SRS/RFE.
+- [Arm ARMv7-A/R Architecture Reference Manual](https://developer.arm.com/documentation/ddi0406/latest): 모드·banked register·SRS/RFE. 이 장의 모드 값과 bank 공유는 이 문서를 직접 열어 대조하지 못했고, 대신 QEMU `vexpress-a9`에서 CPSR과 User bank를 읽어 확인했습니다.
+- QEMU 실험: `banked.S`, arm-none-eabi-gcc 16.2.0 `-mcpu=cortex-a9 -marm`, QEMU 11.1.3 `vexpress-a9 -semihosting`.
 - [Arm Instruction Set Reference Guide, D2.176 TLBI](https://documentation-service.arm.com/static/6245c734b059dc5ff9a8bdab): 별도 AArch64 maintenance 명령.
 
 ## 관련 항목

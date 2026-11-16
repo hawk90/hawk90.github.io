@@ -2,7 +2,7 @@
 title: "Tickless 모드 구현 — Idle Tick Suppression·Sleep·Wake 보정"
 slug: "embedded/rtos/practical-internals/part2-09-tickless"
 date: 2026-05-05T09:19:00
-description: "Idle 시 SysTick 멈춤 + CPU sleep. 다음 task wake 시점까지 동적 timer 설정. 배터리 IoT 핵심."
+description: "Idle 시 SysTick 멈춤 + CPU sleep. 다음 task wake 시점까지 동적 timer 설정."
 series: "Practical RTOS Internals"
 seriesOrder: 19
 tags: [tickless, low-power, suppress-tick, wfi, sleep]
@@ -16,7 +16,7 @@ Tickless idle은 유휴 구간의 주기 tick interrupt를 줄이고, 실제 경
 
 ## 문제 — 매 ms마다 깨어납니다
 
-주기 interrupt가 있으면 할 일이 없어도 CPU가 깨어날 수 있습니다. 그 추가 전하를 sleep 전류와 함께 계산하면 tick suppression의 이득을 추정할 수 있습니다. 다음은 **측정값이 아닌 가정**이며 같은 부하 조건을 비교하는 계산 예제입니다.
+주기 interrupt가 있으면 할 일이 없어도 CPU가 매 tick 깨어납니다. 아무도 오지 않는 가게의 점원이 1분마다 문을 열어 확인하는 셈입니다. 그 추가 전하를 sleep 전류와 함께 계산하면 tick suppression의 이득을 추정할 수 있습니다. 다음은 **측정값이 아닌 가정**으로 하는 계산입니다.
 
 ```js title="idle-energy.mjs"
 export function idleEnergy(activeUa, sleepUa, activeUs, periodUs) {
@@ -29,7 +29,7 @@ export function idleEnergy(activeUa, sleepUa, activeUs, periodUs) {
 }
 ```
 
-10 mA active를 3 µs, 1 µA sleep을 나머지 997 µs로 가정하면 평균은 30.997 µA이고 연간 약 271.53 mAh입니다. 이는 평균 mA가 아니며 배터리 용량 없이 “일주일도 못 간다”고 결론낼 수 없습니다. tickless 뒤에도 센서·radio·regulator·누설·wake 비용은 남으므로 실제 전류 파형을 비교해야 합니다.
+10 mA active를 3 µs, 1 µA sleep을 나머지 997 µs로 가정하면 평균은 30.997 µA이고 연간 약 271.53 mAh입니다. 같은 wake 비용이 아래 QEMU 실험처럼 671 ms에 한 번으로 줄면 평균 1.045 µA, 연간 9.15 mAh입니다(Node로 같은 함수를 실행한 값). 가정한 숫자 사이의 비교일 뿐이고, 실제 보드에서는 센서·radio·regulator·누설 전류가 이 위에 더해집니다.
 
 ## 동작 원리
 
@@ -40,63 +40,82 @@ export function idleEnergy(activeUa, sleepUa, activeUs, periodUs) {
 5. timer 만료인지 다른 IRQ의 이른 wake인지 구분하고, 완료 tick과 다음 부분 tick을 보정합니다.
 6. 커널 tick을 적절히 전진시키고 정상 tick 및 interrupt 상태로 돌아옵니다.
 
-이 흐름은 “모든 task가 blocked이면 정확히 그 시간만큼 잔다”는 보장이 아닙니다. IRQ와 새 작업이 들어오면 sleep을 취소하거나 일찍 깰 수 있습니다.
+1번의 "유휴 예상 시간"은 idle task의 `prvGetExpectedIdleTime()`이 다음 unblock 시각까지 남은 tick으로 구하고, `configEXPECTED_IDLE_TIME_BEFORE_SLEEP`(기본 2)보다 짧으면 잠들지 않습니다(1-02의 `prvIdleTask`). IRQ가 들어오면 예상보다 일찍 깨고, 5번에서 실제로 지난 tick만큼만 커널 시간을 전진시킵니다.
+
+### QEMU에서 tick interrupt 세기
+
+정말로 tick interrupt가 줄어드는지 QEMU에서 셌습니다. `configUSE_TICK_HOOK`을 켜서 실제 SysTick ISR이 돌 때마다 `vApplicationTickHook()`이 카운터를 올리게 하고, `configPRE_SLEEP_PROCESSING(x)`로 포트가 잠들기 직전의 예상 tick 수를 기록했습니다. task 하나가 `vTaskDelay(500)`과 `vTaskDelay(2000)`을 합니다.
+
+```c title="tickless.h"
+#undef configUSE_TICK_HOOK
+#define configUSE_TICK_HOOK 1
+#undef configUSE_TIMERS
+#define configUSE_TIMERS 0
+#define configUSE_TICKLESS_IDLE TICKLESS
+extern void pre_sleep(unsigned expected);
+#define configPRE_SLEEP_PROCESSING( x ) pre_sleep( ( unsigned ) ( x ) )
+```
+
+FreeRTOS V11.2.0 `ARM_CM3`의 기본 `vPortSuppressTicksAndSleep()`, arm-none-eabi-gcc 16.2.0 `-O2`, QEMU 11.1.3 `mps2-an385 -icount shift=5`(SysTick 입력 25 MHz, 1 kHz tick)입니다. timer task가 깨어나 sleep을 끊지 않도록 `configUSE_TIMERS`는 껐습니다.
+
+```text
+TICKLESS=0 vTaskDelay(500): tick count advanced 500, SysTick ISRs=500, sleeps=0
+TICKLESS=0 vTaskDelay(2000): tick count advanced 2000, SysTick ISRs=2000, sleeps=0
+largest xExpectedIdleTime passed to pre-sleep hook=0; first ones: 0 0 0 0 0 0
+TICKLESS=1 vTaskDelay(500): tick count advanced 500, SysTick ISRs=1, sleeps=1
+TICKLESS=1 vTaskDelay(2000): tick count advanced 2000, SysTick ISRs=3, sleeps=3
+largest xExpectedIdleTime passed to pre-sleep hook=671; first ones: 500 671 671 658 0 0
+```
+
+앞의 세 줄이 `TICKLESS=0` 빌드, 뒤의 세 줄이 `TICKLESS=1` 빌드의 출력입니다. 마지막 줄의 `0 0`은 기록 칸 여섯 개 중 쓰이지 않은 칸입니다.
+
+tickless를 켜자 500 tick 동안 SysTick ISR이 500번에서 1번으로 줄었고, tick count는 똑같이 500 전진했습니다. 2,000 tick은 세 번(671 + 671 + 658 = 2,000) 나눠 잤습니다. 한 번에 671 tick을 넘지 못한 이유가 아래의 24비트 한계입니다.
 
 ## FreeRTOS Tickless 구현
 
-원본 vPortSuppressTicksAndSleep은 단순 WFI wrapper보다 많은 경계 조건을 처리합니다. 이전의 축약 C처럼 변수·분기·계산이 생략된 코드를 완성 구현으로 설치하면 안 됩니다. 실제 코드 기준은 아래 링크한 port.c이며 주요 분기는 다음과 같습니다.
+원본 `vPortSuppressTicksAndSleep()`([`ARM_CM4F/port.c` L589](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c#L589))은 단순 WFI wrapper보다 많은 경계 조건을 처리합니다. weak 함수라서 응용이 같은 이름으로 다시 정의하면 그쪽이 쓰입니다. 주요 분기는 다음과 같습니다.
 
 | 경계 | V11.2.0 ARM_CM4F의 처리 |
 | --- | --- |
 | timer 폭 | 24-bit counter로 표현 가능한 예상 tick 수로 제한 |
-| 진입 race | interrupt 마스크 후 eTaskConfirmSleepModeStatus 재확인, 취소 가능 |
+| 진입 race | interrupt 마스크 후 `eTaskConfirmSleepModeStatus()` 재확인, `eAbortSleep`이면 취소(L608) |
 | CURRENT=0 | 다음 tick까지의 남은 counts 해석을 보정 |
 | 이미 pending인 SysTick | pending을 정리하고 첫 tick 중복을 피하도록 보정 |
-| 자체 WFI가 있는 pre-hook | 수정 가능한 idle 인자를 0으로 만들어 포트의 추가 WFI 생략 |
+| 자체 WFI가 있는 pre-hook | `configPRE_SLEEP_PROCESSING( xModifiableIdleTime )`(L669)에서 인자를 0으로 만들면 포트의 `wfi`(L674) 생략 |
 | SysTick 만료 wake | pending tick 하나가 별도 처리될 것을 고려하여 step 수 결정 |
 | 다른 IRQ로 이른 wake | 실제 완료 tick과 다음 tick의 잔여 interval 계산 |
-| 커널 전진 | vTaskStepTick의 다음 unblock 시점 계약을 지키며 적용 |
+| 커널 전진 | `vTaskStepTick( ulCompleteTickPeriods )`(L798) |
 
-설정은 이 기능을 포함시키는 조건일 뿐 하드웨어 저전력 모드가 자동으로 준비됐다는 뜻이 아닙니다.
+`configPRE_SLEEP_PROCESSING`·`configPOST_SLEEP_PROCESSING`은 기본이 빈 매크로라서([`FreeRTOS.h` L2725-L2730](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/FreeRTOS.h#L2725-L2730)), 켜기만 하면 포트는 `wfi`만 실행합니다. MCU의 더 깊은 저전력 모드로 들어가는 코드는 응용이 이 hook에 넣습니다.
 
 ```c
 #define configUSE_TICKLESS_IDLE 1
 #define configEXPECTED_IDLE_TIME_BEFORE_SLEEP 2
 ```
 
-168 MHz SysTick 입력과 1 kHz tick이면 counts/tick은 168,000입니다. 원본의 보수적인 최대 suppressed tick 계산 floor(0xFFFFFF / 168000)는 **99 tick, 약 99 ms**입니다. 긴 timeout이 있어도 이 기본 포트가 한 번에 59초를 잔다고 할 수 없습니다. 더 긴 interval에는 지원 clock 설정 또는 다른 저전력 timer를 사용하는 별도 포트 구현이 필요합니다.
+원본은 한 번에 잘 수 있는 tick 수를 `xMaximumPossibleSuppressedTicks = portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick`으로 정합니다(L818). 168 MHz SysTick 입력과 1 kHz tick이면 0xFFFFFF / 168,000 = **99 tick**, 위 QEMU의 25 MHz에서는 0xFFFFFF / 25,000 = **671 tick**입니다. 위 실험의 671이 이 값입니다. 168 MHz 보드에서는 1분 timeout도 99 ms마다 한 번씩 깨어납니다. 더 길게 자려면 SysTick 입력을 낮은 clock으로 바꾸거나(`configSYSTICK_CLOCK_HZ`), 저전력 timer로 `vPortSuppressTicksAndSleep()`을 다시 구현합니다.
 
 ## Power Modes — Cortex-M
 
-Sleep·Stop·Standby 이름과 전류·retention·wake latency는 **MCU별 전원 모드**입니다. Cortex-M ISA가 모든 칩에 같은 전류 범위와 동작을 규정하지 않습니다. WFI는 대기 명령이며 SLEEPDEEP와 MCU 전원 제어 설정에 따라 실제 진입 상태가 달라집니다.
+ARMv7-M이 정하는 것은 두 가지뿐입니다. WFI를 실행하면 "it can suspend execution and enter a low-power state"이고, reset이나 (PRIMASK가 0이었다면) 선점할 수 있는 우선순위의 비동기 예외가 오면 깹니다(DDI 0403E.b B1.5.19). SCR의 SLEEPDEEP bit는 "wakeup time from sleep state might be longer"라는 힌트이고, 실제로 무엇이 꺼지는지는 "IMPLEMENTATION DEFINED"입니다(B1.5.17 "Power management", bit 위치는 B3.2.7 SCR의 bit[2]). 그래서 Sleep·Stop·Standby 같은 이름과 전류·retention·wake latency는 MCU 데이터시트가 정합니다.
 
-| 확인 항목 | 필요한 근거 |
-| --- | --- |
-| clock | SysTick·peripheral·저전력 counter 중 무엇이 계속 동작하는가? |
-| retention | SRAM·CPU context·전원 domain이 유지되는가? |
-| wake | 선택 mode에서 어떤 IRQ·pin·alarm이 실제로 가능한가? |
-| 복귀 | 명령 다음으로 재개하는가, reset 경로를 타는가? |
-| 시간 예산 | 진입·복귀 시간과 clock 안정화가 다음 deadline 안에 드는가? |
-
-pre/post hook은 MCU의 실제 전원·clock·driver 계약에 맞춰 구현합니다. hook 안에서 이미 WFI를 실행했다면 **호출자의 수정 가능한 idle 인자**를 0으로 만드는 매크로/참조 계약이 필요합니다. 값을 복사해 받는 함수의 지역 인자만 0으로 만들어서는 원본 포트의 두 번째 WFI를 막을 수 없습니다.
-
-HAL tick이 RTOS와 같은 SysTick을 쓰는지도 확인합니다. HAL_SuspendTick을 무조건 호출하거나 clock이 멈춘 SysTick만 유지한 채 Stop에 들어가면 timeout과 복귀 보정이 어긋날 수 있습니다. 이식 코드는 device·clock·timer를 한 세트로 검증해야 합니다.
+이 장의 QEMU 실험은 SLEEPDEEP를 쓰지 않은 `wfi`였고, SysTick이 계속 돌아 깨어났습니다. hook 안에서 직접 저전력 명령을 실행했다면 `configPRE_SLEEP_PROCESSING( x )`의 인자를 0으로 바꿔 포트의 두 번째 `wfi`를 막습니다. 포트가 넘기는 것이 지역 변수 `xModifiableIdleTime` 자체이므로, 매크로 안에서 `x = 0;`으로 써야 효과가 있습니다. 같은 값을 함수 인자로 복사해 넘기면 원본 변수는 바뀌지 않습니다.
 
 ## Wake Source 보장
 
-wake source는 선택한 sleep mode에서 살아 있어야 하고, 다음 timeout 전에 깨울 수 있어야 합니다. 재설정한 SysTick 자체가 wake source일 수 있으며 더 깊은 mode에서 그 clock이 멈춘다면 RTC·저전력 timer·외부 pin 등 지원 source를 준비합니다. watchdog reset은 context를 보존한 interrupt 복귀와 다릅니다.
+wake source는 선택한 sleep mode에서 살아 있어야 하고, 다음 timeout 전에 깨울 수 있어야 합니다. 기본 포트에서는 늘린 SysTick 자체가 wake source입니다. SysTick의 clock이 멈추는 mode에 들어가면 깨어날 수단이 사라지므로, 그런 MCU는 살아 있는 저전력 timer로 포트 함수를 다시 구현합니다.
 
-예를 들어 1분 간격 센서 작업이 block해도, 기본 ARM_CM4F SysTick 포트는 앞 절의 최대 suppression interval마다 깰 수 있습니다. radio·DMA·다른 task의 timeout과 IRQ도 유휴 시간을 나눕니다. 작업이 0.1초이고 주기가 정확히 60초라는 **가정**이면 해당 작업만의 duty cycle은 약 0.167%지만 시스템 전체 소비 전류나 한 번의 sleep 시간을 뜻하지는 않습니다.
+예를 들어 1분 간격 센서 작업이 block해도, 168 MHz 기본 포트는 99 ms마다 한 번 깹니다. 다른 task의 timeout도 유휴 시간을 나눕니다. 위 QEMU 실험에서 timer task를 끈 이유도 그 task의 timeout이 sleep을 끊지 않게 하려는 것이었습니다. 작업이 0.1초이고 주기가 정확히 60초라는 **가정**이면 그 작업만의 duty cycle은 약 0.167%입니다.
 
 ## RTC alarm 활용
 
-RTC 또는 저전력 counter는 시스템 clock이 멈추는 mode에서 wake와 경과 시간 측정에 사용할 수 있습니다. 실제 주파수·prescaler·subsecond·alarm 해상도·wrap·IRQ pending 정리와 clock domain을 확인해야 합니다.
+RTC나 저전력 counter로 포트를 다시 구현할 때 할 일은 기본 포트와 같습니다. 잠들기 전에 깨어날 alarm을 걸고, 깨어난 뒤 실제로 지난 시간을 그 counter로 읽어 `vTaskStepTick()`에 넘깁니다. 다른 점은 counter의 해상도가 tick과 다르면 남는 부분 tick을 직접 보정해야 한다는 것입니다. 기본 포트에서 이 보정은 L723-L777의 LOAD 재계산이 합니다.
 
-Standby라는 이름만으로 모든 MCU가 같은 reset/retention 동작을 보장하지 않습니다. reset형 mode라면 태스크 스택을 보존한 일반 tickless 복귀와 다른 부팅·상태 복구 설계가 필요합니다. 위 코드에 RTC alarm 한 번을 추가하는 것으로 이 계약을 대신하지 않습니다.
+깨어날 때 reset을 거치는 mode라면 task stack이 남지 않으므로 tickless로 다룰 수 없고, 부팅부터 다시 하는 설계가 됩니다.
 
 ## Zephyr Power Management
 
-Zephyr **3.7.0**의 system PM은 CONFIG_PM과 플랫폼이 정의한 power state, wake source 및 정책에 따라 동작합니다. 아래는 power-state 노드의 **부분 DTS 예시**이며 해당 CPU의 cpu-power-states 참조와 SoC 지원 등이 더 필요합니다.
+Zephyr **3.7.0**의 system PM은 `CONFIG_PM`과 devicetree의 power state로 동작합니다. 아래는 [`dts/bindings/power/zephyr,power-state.yaml`](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/dts/bindings/power/zephyr,power-state.yaml)의 속성(`power-state-name`, `min-residency-us`, `exit-latency-us`)을 쓴 **부분 DTS 예시**이며, 실제로 쓰려면 CPU 노드의 `cpu-power-states`가 이 노드를 가리켜야 합니다.
 
 ```dts
 power-states {
@@ -109,36 +128,31 @@ power-states {
 };
 ```
 
-residency 정책은 예상 유휴 시간이 min-residency와 exit-latency의 합 이상인지 등의 조건을 봅니다. lock이나 device 상태도 선택을 제한할 수 있습니다. 이 구조만으로 모든 보드가 자동 저전력화되거나 FreeRTOS보다 우월하다고 평가하지 않습니다.
+기본 정책 `pm_policy_next_state()`는 가장 깊은 state부터 거꾸로 보면서, lock이 걸린 state와 exit latency가 허용 latency 이상인 state를 건너뛰고, 예상 유휴 시간이 `min_residency + exit_latency` 이상인 첫 state를 고릅니다([`subsys/pm/policy.c` L255-L277](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/subsys/pm/policy.c#L255-L277)). FreeRTOS는 이런 선택 표를 커널에 두지 않고 `configPRE_SLEEP_PROCESSING` hook에 맡긴다는 점이 다릅니다.
 
 ## TI ULP — Ultra Low Power 패턴
 
-저전력 명령과 mode 이름도 MCU 계열별로 다릅니다. MSP430의 LPM 명칭을 Cortex-M 기반 wireless MCU에 그대로 적용해서는 안 됩니다.
-
-반복 작업 뒤 sleep하는 구조에서는 데이터시트가 규정한 mode 진입·IRQ 복귀·clock 유지 조건을 확인합니다. 저전력 내장 함수 이름 하나와 “수 µA”라는 수치만으로 서로 다른 칩의 전류나 RTOS 복귀 동작을 설명할 수는 없습니다.
+저전력 명령과 mode 이름은 MCU 계열마다 다릅니다. 위 Cortex-M의 `wfi` + SLEEPDEEP 조합과 달리 다른 계열은 다른 명령과 레지스터를 쓰므로, 이식할 때는 `configPRE_SLEEP_PROCESSING` hook 안의 코드만 그 계열의 데이터시트대로 바꿉니다. 이 장에서는 특정 MCU의 전류를 재지 않았습니다.
 
 ## 측정 — Current Profiler
 
-Otii Arc·Power Profiler Kit II·Joulescope 같은 도구나 shunt와 oscilloscope를 사용할 때는 **해당 모델·range·샘플링률의 사양**을 확인합니다. 분해능, 정확도, noise floor와 dynamic range는 서로 다른 지표이며 특정 nA 분해능을 모든 range의 정확도로 제시하면 안 됩니다.
-
-전원 경로와 측정기 burden voltage, active peak·짧은 wake·sleep baseline을 포함해 전류를 적분합니다. 배터리 수명 추정에는 실제 가용 용량, 전압·온도·pulse 부하·자가 방전·regulator 효율도 반영합니다. 단일 평균 전류로 수명을 정확히 보장할 수는 없습니다.
+전류 측정은 위 `idleEnergy()` 계산의 입력을 실제 값으로 바꾸는 일입니다. wake 한 번의 peak 전류와 지속 시간, sleep 전류를 각각 재야 하므로, 측정기의 샘플링 간격이 wake 지속 시간(위 가정에서 3 µs)보다 짧아야 합니다. 그보다 길면 peak가 평균에 묻혀 사라집니다. 평균 전류에서 배터리 수명을 구할 때는 배터리의 실제 가용 용량으로 나눕니다.
 
 ## 자주 하는 실수
 
 - **정적 tickless 설정만 켜고 deep sleep을 기대합니다.** 포트 timer와 MCU 전원 모드는 별도 계약입니다.
-- **기본 24-bit SysTick으로 긴 timeout 전체를 한 번에 잡습니다.** 최대 interval을 계산하고 조기 wake·반복 sleep을 검증합니다.
-- **hook과 포트가 WFI를 두 번 실행합니다.** 수정 가능한 idle 인자를 바꾸는 방식까지 확인합니다.
-- **항상 같은 clock으로 복귀한다고 가정합니다.** MCU의 mode별 복귀 clock과 peripheral 재개 절차를 따릅니다.
-- **RTC만 유일한 wake source라고 단정합니다.** mode·SoC가 지원하는 source를 확인합니다.
-- **짧은 유휴 구간에서도 무조건 깊게 잡니다.** 진입·복귀 energy와 latency가 이득을 상쇄할 수 있습니다.
+- **기본 24-bit SysTick으로 긴 timeout 전체를 한 번에 잡는다고 생각합니다.** 25 MHz에서 671 tick, 168 MHz에서 99 tick이 한 번의 상한이고, QEMU에서 2,000 tick은 세 번 나눠 잤습니다.
+- **hook과 포트가 WFI를 두 번 실행합니다.** hook에서 `x = 0;`으로 인자를 바꿉니다.
+- **timer task를 잊습니다.** software timer의 만료도 timeout이라 sleep을 끊습니다(위 실험에서 `configUSE_TIMERS 0`으로 둔 이유).
+- **짧은 유휴 구간에서도 무조건 깊게 잡니다.** Zephyr 정책처럼 `min_residency + exit_latency`보다 짧은 유휴에서는 깊은 state를 고르지 않습니다.
 
 ## 정리
 
 - tickless는 유휴 tick interrupt를 줄이고 경과 시간을 커널에 보정하는 기능입니다.
-- ARM_CM4F 기본 포트는 24-bit timer 한계·pending tick·조기 wake·부분 tick을 함께 처리합니다.
-- 168 MHz/1 kHz 예에서는 원본 계산의 최대 suppression이 99 tick입니다.
-- deep sleep·retention·wake source·clock 복귀는 MCU별로 검증해야 합니다.
-- 평균 전류 계산과 실제 배터리 수명 보장은 구분해야 합니다.
+- QEMU에서 tickless를 켜자 500 tick 동안 SysTick ISR이 500번에서 1번으로 줄었고 tick count는 그대로 500 전진했습니다.
+- 한 번의 최대 suppression은 `0xFFFFFF / (tick당 count)`: 25 MHz 671 tick, 168 MHz 99 tick입니다.
+- 기본 포트의 저전력은 `wfi`까지이고, 더 깊은 mode는 `configPRE_SLEEP_PROCESSING` hook에서 응용이 넣습니다.
+- Zephyr는 `min_residency + exit_latency`로 power state를 고릅니다.
 
 다음 편은 Scheduler Latency 측정입니다. 그 뒤 추적·관찰 도구를 다루는 2-11이 이어집니다.
 
@@ -146,7 +160,9 @@ Otii Arc·Power Profiler Kit II·Joulescope 같은 도구나 shunt와 oscillosco
 
 - [FreeRTOS V11.2.0 ARM_CM4F port.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/port.c): 실제 tickless 분기·최대 suppressed tick·hook 계약.
 - [같은 태그 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): idle·sleep 확인·vTaskStepTick.
-- [Zephyr 3.7.0 System Power Management](https://docs.zephyrproject.org/3.7.0/services/pm/system.html): 정책·wake source·power state 선택.
+- [Zephyr 3.7.0 System Power Management](https://docs.zephyrproject.org/3.7.0/services/pm/system.html), [`subsys/pm/policy.c`](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/subsys/pm/policy.c): 정책·power state 선택.
+- ARM DDI 0403E.b B1.5.17(Power management), B1.5.19(WFI), B3.2.7(SCR.SLEEPDEEP).
+- QEMU 실험: `tickless.c`, FreeRTOS V11.2.0 `ARM_CM3`, arm-none-eabi-gcc 16.2.0, QEMU 11.1.3 `mps2-an385 -icount shift=5`.
 
 ## 관련 항목
 
