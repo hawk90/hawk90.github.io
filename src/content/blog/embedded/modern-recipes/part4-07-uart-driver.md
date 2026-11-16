@@ -16,9 +16,9 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-UART는 임베디드의 lingua franca입니다. printf 디버깅, sensor 통신, GPS 수신, BLE module 제어, console — 거의 모든 보드에 한 두 채널은 살아 있습니다. 같은 peripheral이라도 *언제 어떻게 사용하느냐*에 따라 polling, interrupt, DMA 세 방식을 선택합니다.
+UART는 printf 디버깅, sensor 통신, GPS 수신, BLE module 제어, console에 두루 쓰입니다. 같은 peripheral이라도 어떻게 쓰느냐에 따라 polling, interrupt, DMA 세 방식 중 하나를 고릅니다.
 
-이 글은 STM32 USART를 기준으로 세 방식의 드라이버 코드를 모두 작성하고, 각각의 성능과 CPU 부담을 비교합니다.
+이 글은 STM32F407의 USART1을 기준으로 세 방식의 드라이버를 작성합니다. polling과 interrupt 판은 QEMU 11.1.3 `netduinoplus2`의 USART1 모델에서 실제로 돌리고, DMA 판은 QEMU가 STM32 DMA를 모델링하지 않아 빌드까지만 확인합니다.
 
 ## 핵심 개념
 
@@ -33,34 +33,33 @@ UART는 임베디드의 lingua franca입니다. printf 디버깅, sensor 통신,
 | `SR` | RXNE, TXE, TC, ORE, FE, PE flags |
 | `DR` | data register (read=RX, write=TX) |
 
-STM32F7/H7/G0/G4 등 신규는 register 이름이 약간 다릅니다 (`ISR`, `RDR`, `TDR`, `ICR`).
+이 이름과 bit는 `stm32f407xx.h`의 `USART_TypeDef`와 `USART_SR_*`·`USART_CR1_*` 정의를 따릅니다(예: `USART_SR_ORE_Pos` 3, `USART_SR_TC_Pos` 6, `USART_CR3_DMAT_Pos` 7). [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)에서 쓴 STM32L475의 `stm32l475xx.h`는 USART를 `ISR`·`ICR`·`RDR`·`TDR`로 나눠 정의하므로, 이 코드는 다른 family에 그대로 쓰지 못합니다.
 
 ### Baud rate 계산
 
+USART1은 APB2에 있으므로(`RCC_APB2ENR_USART1EN`) [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup) 설정의 PCLK2 = 84 MHz를 씁니다. 16× oversampling(OVER8 = 0)에서 BRR의 상위 12 bit는 USARTDIV의 정수부(mantissa), 하위 4 bit는 소수부 × 16이므로 BRR 값은 결국 `f_pclk / baud`를 반올림한 정수가 됩니다.
+
 ```text
-USARTDIV = f_pclk / (8 × (2 - OVER8) × baud)
+USARTDIV = f_pclk / (16 × baud)
 
-OVER8 = 0 (16x oversample, default) → USARTDIV = f_pclk / (16 × baud)
-
-예) PCLK1 = 42 MHz, baud = 115200
-    USARTDIV = 42000000 / (16 × 115200) ≈ 22.7864
-    
-    Mantissa = 22 = 0x16
-    Fraction = round(0.7864 × 16) = 13 = 0xD
-    BRR = (0x16 << 4) | 0xD = 0x16D
+PCLK2 = 84 MHz, baud = 115200
+    USARTDIV = 84000000 / (16 × 115200) ≈ 45.573
+    Mantissa = 45 = 0x2D
+    Fraction = round(0.573 × 16) = 9
+    BRR = (0x2D << 4) | 9 = 0x2D9 = 729 = round(84000000 / 115200)
 ```
 
-대부분의 STM32 HAL은 family 규칙에 맞춰 자동 계산해 줍니다. 직접 작성할 때는 oversampling, clock tolerance, frame format과 상대편 수신기 허용 오차를 함께 계산해야 하며, ±2%는 모든 조건에 적용되는 보편적인 보장값이 아닙니다.
+아래 코드의 `(pclk + baud / 2) / baud`가 이 반올림입니다. QEMU에서 실행하면 `USART1->BRR`에 729가 들어갑니다. HAL v1.8.3의 `UART_BRR_SAMPLING16()` 매크로로 같은 값을 계산하면 84 MHz에서는 729로 같고, 42 MHz(USART2처럼 APB1)에서는 HAL이 364(`0x16C`), 위 식이 365(`0x16D`)로 1 다릅니다. HAL은 `PCLK × 25 / (4 × baud)`를 먼저 정수로 자른 뒤 소수부를 반올림하기 때문입니다. 실제 baud 오차가 허용 범위 안인지는 상대편 수신기와 clock 정확도에 달린 문제라 이 글에서 수치로 다루지 않습니다.
 
 ### 세 방식의 trade-off
 
-| 방식 | CPU 사용량 | latency | throughput | 복잡도 |
-|------|-----------|---------|-----------|--------|
-| **Polling** | 매우 높음 (waste) | 매우 빠름 | 낮음 | 단순 |
-| **Interrupt** | 중간 (ISR overhead) | 빠름 | 중간 | 보통 |
-| **DMA** | 가장 낮음 | 약간 느림 (DMA setup) | 가장 높음 | 복잡 |
+| 방식 | CPU가 하는 일 | 구조 |
+|------|-----------|-----------|
+| **Polling** | byte마다 `TXE`/`RXNE`를 기다림 | 가장 단순. 기다리는 동안 다른 일을 못 함 |
+| **Interrupt** | byte마다 ISR 한 번 | ring buffer와 ISR이 필요 |
+| **DMA** | 전송 시작·완료 처리만 | stream·channel 설정과 buffer 소유권 관리가 필요 |
 
-DMA는 *연속 바이트 처리량*에서 압도적이지만, setup overhead 때문에 *짧은 전송*에는 오히려 손해입니다.
+어느 방식이든 선로 위의 시간은 같습니다. 8N1 frame은 start 1 + data 8 + stop 1 = 10 bit이므로 115200 baud에서 1 byte는 86.8 µs, 1 KB는 1024 × 10 / 115200 = 88.9 ms입니다. 방식이 바꾸는 것은 그 88.9 ms 동안 CPU가 무엇을 하느냐입니다.
 
 ## 코드 예제
 
@@ -94,7 +93,7 @@ void uart_puts(const char *s) {
 }
 ```
 
-단순합니다. 단점은 *TX/RX 동안 CPU를 묶는다*는 점. printf 한 줄로 수 ms를 날립니다.
+단순한 대신 TX/RX 동안 CPU를 묶습니다. 115200 baud에서 40자 한 줄을 보내면 위 계산대로 40 × 86.8 µs ≈ 3.5 ms 동안 `uart_putc()` 안에서 기다립니다.
 
 ### 2. Interrupt + ring buffer
 
@@ -163,7 +162,6 @@ int uart_getc_nb(void) {
 
 ```c
 static uint8_t dma_rx_buf[256];
-static uint8_t dma_tx_buf[256];
 
 void uart_init_dma(uint32_t baud, uint32_t pclk) {
     // GPIO + USART1 enable 동일
@@ -173,18 +171,18 @@ void uart_init_dma(uint32_t baud, uint32_t pclk) {
 
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
 
-    // RX DMA — 아래 Stream/Channel은 특정 STM32F4 예시
-    DMA2_Stream2->CR = 0;
-    while (DMA2_Stream2->CR & DMA_SxCR_EN);
-    DMA2_Stream2->PAR  = (uint32_t)&USART1->DR;
-    DMA2_Stream2->M0AR = (uint32_t)dma_rx_buf;
-    DMA2_Stream2->NDTR = sizeof(dma_rx_buf);
-    DMA2_Stream2->CR   = (4u << 25)             // channel 4
+    // RX DMA — USART1_RX = DMA2 Stream5 Channel4 (ST STM32F429I-Discovery 예제)
+    DMA2_Stream5->CR = 0;
+    while (DMA2_Stream5->CR & DMA_SxCR_EN);
+    DMA2_Stream5->PAR  = (uint32_t)&USART1->DR;
+    DMA2_Stream5->M0AR = (uint32_t)dma_rx_buf;
+    DMA2_Stream5->NDTR = sizeof(dma_rx_buf);
+    DMA2_Stream5->CR   = (4u << 25)             // channel 4
                        | DMA_SxCR_CIRC          // circular
                        | DMA_SxCR_MINC          // memory inc
                        | DMA_SxCR_EN;
 
-    // TX DMA — 아래 Stream/Channel은 특정 STM32F4 예시
+    // TX DMA — USART1_TX = DMA2 Stream7 Channel4 (같은 예제)
     DMA2_Stream7->CR = 0;
     while (DMA2_Stream7->CR & DMA_SxCR_EN);
     DMA2_Stream7->PAR  = (uint32_t)&USART1->DR;
@@ -199,71 +197,109 @@ void uart_send_dma(const uint8_t *buf, uint16_t len) {
     while (DMA2_Stream7->CR & DMA_SxCR_EN);   // wait previous
     DMA2_Stream7->NDTR = len;
     DMA2_Stream7->M0AR = (uint32_t)buf;
-    DMA2->HIFCR = 0x3F << 22;                 // clear flags
+    DMA2->HIFCR = DMA_HIFCR_CTCIF7 | DMA_HIFCR_CHTIF7 | DMA_HIFCR_CTEIF7
+                | DMA_HIFCR_CDMEIF7 | DMA_HIFCR_CFEIF7;   // clear stream 7 flags
     DMA2_Stream7->CR |= DMA_SxCR_EN;
 }
 ```
 
-RX는 *circular mode*로 두면 DMA가 알아서 ring buffer처럼 돌립니다. main은 `NDTR`을 폴링해 *얼마나 들어왔는지* 파악합니다.
+stream·channel 번호는 ST의 STM32CubeF4 `Projects/STM32F429I-Discovery/Examples/UART/UART_TwoBoards_ComDMA/Inc/main.h`가 USART1에 쓰는 `USARTx_RX_DMA_STREAM DMA2_Stream5`, `USARTx_TX_DMA_STREAM DMA2_Stream7`, 둘 다 `DMA_CHANNEL_4`를 따랐습니다. F429는 F407과 같은 reference manual(RM0090) 계열이지만, 이 글은 RM0090의 DMA request 표를 열어 보지 못했으므로 F407 보드에서는 그 표로 한 번 더 맞춰 봅니다. `CHSEL`은 bit 27:25(`DMA_SxCR_CHSEL_Pos` 25)라 `4u << 25`가 channel 4이고, stream 7의 flag는 `HIFCR`의 bit 22·24~27입니다.
+
+RX는 circular mode(`DMA_SxCR_CIRC`)로 두면 DMA가 buffer 끝에서 처음으로 돌아가며 계속 씁니다. main은 `NDTR`(남은 개수)을 읽어 `sizeof(dma_rx_buf) - NDTR`로 쓰기 위치를 알아냅니다.
 
 ## 측정 / 동작 확인
 
-오실로스코프 + 로직 애널라이저로 TX 핀을 보면 *byte 사이 gap*이 명확합니다.
+QEMU 11.1.3의 `netduinoplus2`는 USART1을 `hw/char/stm32f2xx_usart.c`로 모델링하고, `-serial stdio`로 host 터미널에 붙습니다. 아래 harness는 위 polling·interrupt 코드 블록을 `poll.inc`·`int.inc`로 그대로 include하고, `gpio.c`·`gpio.h`는 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 드라이버입니다.
 
-```text
-Polling 모드, 115200 baud (8N1, 87 µs per byte):
-TX: byte | gap 0~5 µs | byte | gap 0~5 µs | ...   ← back-to-back
+```c
+/* uart_test.c */
+/* the post's polling and interrupt drivers on QEMU netduinoplus2 USART1 (stdio) */
+#include "gpio.h"
+void __libc_init_array(void) { }
+#if defined(POLL)
+#include "poll.inc"
+#else
+#include "poll.inc"   /* for uart_puts() used in messages */
+#include "int.inc"
+#endif
 
-Interrupt 모드:
-TX: byte | gap 3~10 µs (ISR overhead) | byte | ...
+static void put_dec(uint32_t v) { char b[11]; int i = 10; b[i] = 0; do { b[--i] = '0' + v % 10; v /= 10; } while (v); uart_puts(&b[i]); }
 
-DMA 모드:
-TX: byte | gap < 1 µs | byte | ...   ← 거의 perfect back-to-back
+int main(void) {
+    const uint32_t pclk2 = 84000000u, baud = 115200u;
+    uart_init_polling(baud, pclk2);
+    uart_puts("BRR = (pclk + baud/2)/baud = "); put_dec(USART1->BRR); uart_puts("\n");
+#if defined(POLL)
+    uart_puts("polling: type 5 chars> ");
+    for (int i = 0; i < 5; i++) uart_putc((char)(uart_getc() - 'a' + 'A'));
+    uart_puts("\n");
+#else
+    uart_init_int(baud, pclk2);
+    int dropped = 0;
+    for (int i = 0; i < 300; i++) if (uart_putc_nb((char)('0' + i % 10)) < 0) dropped++;
+    while (tx_tail != tx_head) { }
+    uart_puts("\ninterrupt: queued 300, rejected (buffer full) = "); put_dec(dropped); uart_puts("\n");
+    uart_puts("interrupt: echo 5 chars> ");
+    for (int got = 0; got < 5; ) { int c = uart_getc_nb(); if (c >= 0) { uart_putc_nb((char)(c - 'a' + 'A')); got++; } }
+    while (tx_tail != tx_head) { }
+    uart_puts("\n");
+#endif
+    for (;;) { }
+}
 ```
 
-throughput 측정은 1KB 전송 시간을 비교합니다.
+```bash
+T=cmsis-device-f4/Source/Templates
+for V in POLL INT; do
+  arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -ffreestanding -nostdlib -O2 -Wall \
+      -DSTM32F407xx -D$V -I. -ICMSIS_6/CMSIS/Core/Include -Icmsis-device-f4/Include \
+      -T stm32f411.ld -o uart_$V.elf $T/gcc/startup_stm32f407xx.s $T/system_stm32f4xx.c gpio.c uart_test.c
+done
+(sleep 1; printf 'hello'; sleep 2) | qemu-system-arm -M netduinoplus2 -display none -serial stdio -monitor none -kernel uart_POLL.elf
+```
 
-| Mode | 1 KB @ 115200 | CPU 점유율 |
-|------|---------------|-----------|
-| Polling | 89.0 ms | 100% |
-| Interrupt | 89.5 ms | ~5% |
-| DMA | 89.0 ms | < 1% |
+```text
+== POLL
+BRR = (pclk + baud/2)/baud = 729
+polling: type 5 chars> HELLO
 
-baud rate가 한계를 정하므로 시간은 비슷하지만, *CPU가 자유롭다*는 점에서 DMA가 압도적입니다.
+== INT
+BRR = (pclk + baud/2)/baud = 729
+012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789012345678901234567890123456789
+interrupt: queued 300, rejected (buffer full) = 0
+interrupt: echo 5 chars> HELLO
+
+```
+
+두 판 모두 host에서 보낸 `hello`를 받아 대문자로 돌려보냈고, interrupt 판은 300자를 ring buffer로 보냈습니다. 다만 "rejected = 0"은 QEMU의 특성입니다. 모델 주석이 "I/O being synchronous, TXE is always set"이라고 적듯 QEMU는 `DR`에 쓰는 즉시 전송을 끝내므로, `TXEIE`를 켜는 순간 ISR이 buffer를 바로 비웁니다. 실제 115200 baud에서는 한 byte에 86.8 µs가 걸리므로, 255칸(256칸 중 하나는 full 판정용) buffer에 300자를 연달아 넣으면 일부가 -1로 거절됩니다. 같은 이유로 QEMU에서는 baud rate가 시간에 반영되지 않아 세 방식의 시간·CPU 점유율을 잴 수 없습니다. 그 비교는 보드에서 TX 핀을 logic analyzer로 보면서, 위 88.9 ms(1 KB) 동안 main loop가 몇 번 도는지 세는 방식으로 합니다.
+
+DMA 판은 같은 헤더로 `-Wall` 경고 없이 컴파일되는 것까지만 확인했습니다.
 
 ## 자주 보는 함정
 
-> ⚠️ Baud rate 오차를 고정 한계로 가정
-
-허용 가능한 baud 오차는 oversampling과 frame, 양쪽 clock tolerance에 따라 달라집니다. HSI의 실제 오차와 온도 범위를 확인하고, 정확도가 필요한 경우 외부 clock 또는 보정된 source를 고려합니다.
-
 > ⚠️ ORE (overrun) flag 무시
 
-수신이 처리보다 빠르면 ORE가 set될 수 있습니다. flag clear 순서와 이후 RXNE 동작은 USART family마다 다르므로 reference manual을 따르고, STM32F4의 해당 구성에서는 SR read → DR read 순서를 확인합니다.
+RX byte를 `DR`에서 꺼내기 전에 다음 byte가 들어오면 `SR`의 ORE(bit 3)가 섭니다. STM32F4의 지우는 순서는 HAL v1.8.3 `stm32f4xx_hal_uart.h`의 주석대로 "a read operation to USART_SR register followed by a read operation to USART_DR register"이고, `__HAL_UART_CLEAR_OREFLAG()`도 `SR`을 읽은 뒤 `DR`을 읽는 두 줄입니다. 위 ISR은 매번 `SR`을 먼저 읽고 `RXNE`일 때 `DR`을 읽으므로 이 순서를 따릅니다. 같은 주석은 "RXNE flag can be also cleared by a read to the USART_DR register"라고도 적습니다.
 
-> ⚠️ Ring buffer head/tail이 atomic하지 않음
+> ⚠️ Ring buffer head/tail의 소유권
 
-정렬된 native-width load/store는 일부 Cortex-M에서 atomic이지만, ring buffer의 producer/consumer 설계와 memory ordering까지 자동으로 해결하지는 않습니다. head/tail의 ownership을 분리하고 필요하면 critical section 또는 atomic primitive를 사용합니다.
+위 ring buffer는 한쪽만 쓰는 index로 나뉩니다. RX는 ISR만 `rx_head`를, main만 `rx_tail`을 쓰고, TX는 반대입니다. `uint16_t` index는 정렬돼 있으면 ARMv7-M A3.5.3의 single-copy atomicity로 한 번에 읽히고 쓰이므로, 상대가 쓰는 index를 읽을 때 반쯤 바뀐 값을 볼 일이 없습니다. 다만 같은 index를 두 곳이 쓰게 되면(예: ISR에서도 `tx_head`를 쓰는 구조) 이 보장으로는 부족하고, [4-02](/blog/embedded/modern-recipes/part4-02-mmio-access)의 read-modify-write 경합이 그대로 생깁니다.
 
 > ⚠️ TXE와 TC 혼동
 
-`TXE` = TX buffer empty (다음 데이터 넣어도 됨). `TC` = transmission complete (마지막 bit까지 나간 뒤). half-duplex나 RS-485 enable line 제어에는 *TC*를 봐야 합니다.
+`TXE`는 `DR`이 비어 다음 byte를 넣어도 된다는 뜻이고, HAL 주석대로 "TXE flag is cleared only by a write to the USART_DR register"입니다. `TC`(Transmission Complete)는 shift register까지 비어 마지막 stop bit가 나간 뒤에 섭니다. RS-485 transceiver의 송신 enable을 끄는 시점처럼 선로에서 마지막 bit가 끝났는지가 중요하면 `TXE`가 아니라 `TC`를 기다립니다.
 
 > ⚠️ DMA TX 끝나기 전에 다시 enable
 
-`while (DMA->CR & EN)` 폴링을 빼먹으면 DMA가 *중간에 끊깁니다*. flush 또는 TC interrupt로 동기화합니다.
-
-> ⚠️ Flow control이 없는 상태에서 high-speed
-
-높은 baud에서 flow control 없이 운용할 수 있는지는 receiver service latency, buffer와 protocol에 따라 달라집니다. 손실을 허용하지 못하면 CTS/RTS나 software flow control, 충분한 buffering을 설계합니다.
+`uart_send_dma()`의 첫 줄 `while (DMA2_Stream7->CR & DMA_SxCR_EN);`가 이전 전송이 끝나기를 기다립니다. 이 대기 없이 `NDTR`·`M0AR`을 바꾸면 진행 중인 전송의 설정을 덮어씁니다. 기다리는 대신 `DMA_SxCR_TCIE`로 켠 완료 인터럽트에서 다음 전송을 시작해도 됩니다.
 
 ## 정리
 
-- **Polling**은 단순하고 latency가 낮지만 CPU를 묶습니다. 부트로더·디버그에 적합.
-- **Interrupt + ring buffer**는 일반 용도 표준. RX overflow 처리 필수.
-- **DMA**는 throughput 최고, CPU 부담 최소. circular RX + linear TX가 표준 패턴.
-- **Flag clear 순서**는 USART family/reference manual의 규칙을 따릅니다.
-- baud rate 정확도는 clock tolerance·oversampling·frame 조건을 포함해 검증합니다.
+- **Polling**은 단순하지만 전송 시간(115200 baud에서 byte당 86.8 µs) 내내 CPU를 묶습니다.
+- **Interrupt + ring buffer**는 byte마다 ISR 한 번으로 CPU를 풀어 주고, buffer가 차면 거절(-1)하거나 RX를 버립니다.
+- **DMA**는 시작·완료만 CPU가 처리합니다. RX는 circular, TX는 한 번씩 시작하는 구성으로 썼습니다.
+- STM32F4의 ORE 등 오류 flag는 `SR` 읽기 → `DR` 읽기로 지웁니다.
+- USART1은 APB2이므로 BRR은 PCLK2(84 MHz)로 계산합니다(115200 baud → 729).
 
 다음 편은 **SPI 드라이버**입니다. CPOL/CPHA, multi-slave CS, full-duplex DMA를 다룹니다.
 
