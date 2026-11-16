@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"DAC는 디지털 숫자를 연속 전압으로 펴는 장치입니다."** 출력은 계단 모양이고, reconstruction filter로 매끈하게 만듭니다.
+> **"DAC는 디지털 숫자를 연속 전압으로 바꾸는 장치입니다."** 출력은 계단 모양이고, reconstruction filter로 매끈하게 만듭니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -89,11 +89,11 @@ DC -0.7: first 16 bits 0001000001000000, mean of 4096 = -0.7002
 sine 0.5 FS, OSR 64, boxcar decimation: rms error 0.0132 FS, max 0.0302 FS
 ```
 
-+0.3을 넣으면 1이 0보다 조금 많은 펄스열이 나오고, 4096개 평균이 +0.2998입니다. 입력 크기가 펄스의 밀도로 바뀐 것입니다. 단순 평균은 가장 거친 LPF라 sine에서는 FS의 1.3% rms 오차가 남습니다. 이 오차를 줄이는 것이 고차 modulator와 더 가파른 디지털·아날로그 필터의 몫입니다. 1-bit 출력은 레벨이 둘뿐이라 R-2R처럼 가지 사이의 저항 비가 계단 크기를 정하지 않습니다.
++0.3을 넣으면 1이 0보다 조금 많은 펄스열이 나오고, 4096개 평균이 +0.2998입니다. 입력 크기가 펄스 밀도로 바뀌었습니다. 단순 평균은 가장 거친 LPF라 sine에서는 FS의 1.3% rms 오차가 남습니다. 이 오차를 줄이는 것이 고차 modulator와 더 가파른 디지털·아날로그 필터의 몫입니다. 1-bit 출력은 레벨이 둘뿐이라 R-2R처럼 가지 사이의 저항 비가 계단 크기를 정하지 않습니다.
 
 ### 3) Monotonicity와 DNL
 
-단조성은 입력 코드가 커질 때 출력이 줄어들지 않는 성질입니다. DNL은 이웃 코드 사이 계단이 이상적인 1 LSB에서 벗어난 양이므로 실제 계단은 (1 + DNL) LSB이고, DNL이 −1 LSB보다 크면 계단이 양수라 단조가 보장됩니다. 위 R-2R 계산에서 단조가 깨진 경우가 모두 DNL < −1인 것도 이 때문입니다. 반대로 DNL이 +1을 넘는 것은 단조성과 무관하고 계단이 큰 것입니다.
+단조성은 입력 코드가 커질 때 출력이 줄어들지 않는 성질입니다. DNL은 이웃 코드 사이 계단이 이상적인 1 LSB에서 벗어난 양이므로 실제 계단은 (1 + DNL) LSB이고, DNL이 −1 LSB보다 크면 계단이 양수라 단조가 보장됩니다. 위 R-2R 계산에서 단조가 깨진 경우가 모두 DNL < −1인 것도 이 때문입니다. 반대로 DNL이 +1을 넘으면 계단이 클 뿐 단조성과는 무관합니다.
 
 데이터시트를 읽을 때는 두 값을 함께 봅니다. STM32F405/407 데이터시트(DS8626, DocID022152 Rev 4) Table 74는 내장 DAC의 DNL을 12비트 구성에서 최대 ±2 LSB, 10비트 구성에서 ±0.5 LSB로 적고, 같은 데이터시트의 기능 개요는 "8-bit or 12-bit monotonic output"이라고 적습니다. ±2 LSB라는 DNL 한계만으로는 단조성이 따라 나오지 않으므로, 단조성은 별도로 명시된 특성으로 읽어야 합니다. TI DAC8552(SLAS430A)는 DNL을 "16-bit monotonic" 조건에서 typ ±0.35, max ±1 LSB로 적습니다.
 
@@ -124,7 +124,7 @@ ZOH sinc droop at 24000 Hz (fs 48000): -3.92 dB
 
 STM32F407 내장 DAC1(PA4)로 750 Hz sine을 내는 코드입니다. TIM6의 update 이벤트가 48 kHz마다 DAC를 트리거하고, DMA가 64개짜리 표를 순환하며 `DHR12R1`에 넣으므로 CPU는 시작한 뒤 관여하지 않습니다. 48000 / 64 = 750 Hz입니다.
 
-설정값의 근거는 다음과 같습니다. DAC1의 DMA 요청이 DMA1 Stream5 Channel 7이라는 것은 STM32CubeF4 `STM324xG_EVAL/Examples/DAC/DAC_SignalsGeneration`의 `main.h`(`DACx_DMA_STREAM1`, `DACx_DMA_CHANNEL1`)에서, TIM6 TRGO 트리거가 `TSEL1` = 000이라는 것은 HAL v1.8.6 `stm32f4xx_hal_dac.h` 173행(`DAC_TRIGGER_T6_TRGO`가 `DAC_CR_TEN1`만 켬)에서, update 이벤트를 TRGO로 내는 `MMS` = 010은 `stm32f4xx_hal_tim.h` 868행(`TIM_TRGO_UPDATE` = `TIM_CR2_MMS_1`)에서 가져왔습니다. TIM6 입력 클럭 84 MHz는 DS8626 Table 51의 "AHB/APB1 prescaler distinct from 1, f_TIMxCLK = 84 MHz" 조건(1-02의 APB1 = 42 MHz 설정)입니다. 참고로 `TSEL1` = 101은 TIM4, 100은 TIM2입니다(HAL 170·171행). HAL 173행의 주석은 "software trigger"라고 적혀 있지만 값은 TIM6이고, software trigger는 177행(`TSEL1` = 111)입니다.
+설정값의 근거는 다음과 같습니다. DAC1의 DMA 요청이 DMA1 Stream5 Channel 7이라는 것은 STM32CubeF4 `STM324xG_EVAL/Examples/DAC/DAC_SignalsGeneration`의 `main.h`(`DACx_DMA_STREAM1`, `DACx_DMA_CHANNEL1`)에서, TIM6 TRGO 트리거가 `TSEL1` = 000이라는 것은 HAL v1.8.6 `stm32f4xx_hal_dac.h` 173행(`DAC_TRIGGER_T6_TRGO`가 `DAC_CR_TEN1`만 켬)에서, update 이벤트를 TRGO로 내는 `MMS` = 010은 `stm32f4xx_hal_tim.h` 868행(`TIM_TRGO_UPDATE` = `TIM_CR2_MMS_1`)에서 가져왔습니다. TIM6 입력 클럭 84 MHz는 DS8626 Table 51의 "AHB/APB1 prescaler distinct from 1, f_TIMxCLK = 84 MHz" 조건(1-02의 APB1 = 42 MHz 설정)입니다. 참고로 `TSEL1` = 101은 TIM4, 100은 TIM2입니다(HAL 170·171행). HAL 173행의 주석에는 "software trigger"라고 적혀 있지만 값은 TIM6이고, software trigger는 177행(`TSEL1` = 111)입니다.
 
 ```c
 #include "stm32f407xx.h"
