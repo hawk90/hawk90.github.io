@@ -12,495 +12,336 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"BSP 관점의 U-Boot 포팅은 *시리얼 첫 한 줄*에 도달하기까지의 디버깅 사이클입니다."** — 이후 부분은 *환경 설정과 부트 명령 튜닝*입니다.
+> **"BSP 관점의 U-Boot 포팅은 *시리얼 첫 한 줄*에 도달하기까지의 디버깅 사이클입니다."** 이후 부분은 *환경 설정과 부트 명령 튜닝*입니다.
 
-U-Boot은 여러 Arm SoC와 vendor BSP에서 널리 쓰이는 bootloader입니다. 제품은 U-Boot 외에도 vendor firmware나 다른 boot manager를 사용할 수 있으므로 실제 boot chain은 보드 문서와 소스에서 확인합니다.
+이 장은 U-Boot v2024.04에서 i.MX 8M Plus EVK를 복사해 가상의 `acme/cam` 보드를 실제로 만들고 빌드해 봅니다. 빌드는 Debian 13 arm64 QEMU guest에서 네이티브로 했고, 보드가 없으므로 부팅 후 단계(`dm tree`, 환경 변수, TFTP)는 같은 v2024.04의 `qemu_arm64_defconfig`를 QEMU virt 머신에서 돌려 확인했습니다.
 
 ## U-Boot의 boot phases
 
-U-Boot은 보드 설정에 따라 SPL·TPL·VPL 같은 선택적 초기 단계를 둘 수 있습니다. SPL을 사용한다면 일반적으로 BootROM 또는 앞선 firmware가 이를 불러오고, SPL이 SDRAM 설정과 후속 image 적재를 맡을 수 있습니다.
-
-<!-- TODO: TikZ -->
-```text
-[BootROM (SoC 내부)]  →  [SPL]  →  [U-Boot proper]
-```
+U-Boot은 SPL·TPL·VPL 같은 초기 단계를 둘 수 있습니다. i.MX 8M Plus EVK는 BootROM → SPL → (TF-A BL31) → U-Boot proper 순서이고, 각 단계는 Ch 1의 부트 체인 표에 정리했습니다. 이어달리기에 비유하면 SPL은 짧은 첫 주자입니다. 몸집이 작아야 SoC 내부 메모리에 들어가고, 하는 일은 DRAM을 깨워 다음 주자가 뛸 트랙을 까는 것입니다.
 
 **SPL (Secondary Program Loader)** 단계는 다음 일을 합니다.
 
-- SoC 내부 SRAM에서 동작합니다 (DDR 없음).
-- 크기 제한이 있습니다 (보통 128KB 이내).
-- DDR을 초기화하고 clock·pinmux를 설정합니다.
+- DRAM 밖에서 동작합니다. EVK의 `CONFIG_SPL_TEXT_BASE=0x920000`은 DRAM 시작(0x40000000)보다 아래입니다.
+- 크기 제한이 있습니다. EVK는 `CONFIG_SPL_MAX_SIZE=0x26000`(155,648바이트)이고, 아래에서 빌드한 SPL은 93,438바이트였습니다.
+- DDR을 초기화하고(Ch 5) 콘솔 clock·pinmux를 설정합니다(Ch 4).
 - 다음 단계를 DDR로 적재합니다.
 
-**U-Boot proper** 단계(또는 BL31 → BL33 U-Boot)는 다음을 담당합니다.
+**U-Boot proper** 단계는 다음을 담당합니다.
 
-- DDR에서 동작합니다.
+- DDR에서 동작합니다(EVK `CONFIG_TEXT_BASE=0x40200000`).
 - 시리얼 console과 명령 인터프리터를 제공합니다.
-- 부트 환경을 다룹니다 (uEnv.txt, fw_env).
+- 환경 변수를 읽고 저장합니다.
 - 커널을 적재하고 부팅합니다.
 
-SPL과 U-Boot proper는 *같은 소스 트리에서 다른 .config*로 빌드됩니다. 동일한 driver를 *다르게 컴파일*해 양쪽에 link합니다.
-
-ARMv8 보드는 *SPL 자리에 TF-A BL2*가 오는 경우가 늘고 있습니다. [Ch 7](/blog/embedded/bsp/chapter07-tfa-trustzone)에서 다룹니다.
+SPL과 U-Boot proper는 *같은 소스 트리와 같은 .config*에서 함께 빌드됩니다. `CONFIG_SPL_*` 심볼이 SPL 쪽에 무엇을 넣을지 따로 정하고, 같은 드라이버 소스가 `spl/` 아래에 한 번 더 컴파일됩니다. 빌드 로그의 `CC spl/drivers/crypto/fsl/error.o` 같은 줄이 그 흔적입니다.
 
 ## U-Boot 디렉터리 구조
 
-새 보드를 추가하기 위해 알아야 할 디렉터리입니다.
+새 보드를 추가하기 위해 알아야 할 디렉터리입니다(v2024.04 기준).
 
 ```text
 u-boot/
-├── arch/
-│   ├── arm/
-│   │   ├── cpu/
-│   │   ├── mach-imx/        ← NXP i.MX SoC 공통
-│   │   │   ├── imx8m/
-│   │   │   └── ...
-│   │   ├── mach-rockchip/
-│   │   ├── mach-omap2/      ← TI OMAP/AM335x
-│   │   └── dts/             ← SoC dtsi
-│   └── ...
+├── arch/arm/
+│   ├── mach-imx/imx8m/      ← i.MX 8M SoC 공통 (Kconfig에 보드 TARGET 목록)
+│   ├── mach-omap2/          ← TI OMAP/AM335x
+│   └── dts/                 ← SoC dtsi, 보드 dts, <board>-u-boot.dtsi
 ├── board/
-│   ├── freescale/
-│   │   ├── imx8mp_evk/      ← NXP reference 보드
-│   │   │   ├── Kconfig
-│   │   │   ├── MAINTAINERS
-│   │   │   ├── Makefile
-│   │   │   ├── imx8mp_evk.c
-│   │   │   ├── spl.c
-│   │   │   ├── lpddr4_timing.c
-│   │   │   └── README
-│   │   └── ...
-│   ├── ti/
-│   ├── beagle/
-│   └── <vendor>/
-│       └── <board>/         ← 우리 보드가 여기 들어감
-├── configs/
-│   ├── imx8mp_evk_defconfig
-│   ├── am335x_evm_defconfig
-│   └── <board>_defconfig    ← 우리 defconfig
-├── include/
-│   └── configs/
-│       └── <board>.h        ← 보드별 헤더 (점점 비어 가는 추세)
-├── drivers/
-└── common/
+│   ├── freescale/imx8mp_evk/
+│   │   ├── Kconfig
+│   │   ├── MAINTAINERS
+│   │   ├── Makefile
+│   │   ├── imx8mp_evk.c
+│   │   ├── imximage-8mp-lpddr4.cfg
+│   │   ├── lpddr4_timing.c
+│   │   └── spl.c
+│   └── <vendor>/<board>/    ← 우리 보드
+├── configs/<board>_defconfig
+├── include/configs/<board>.h
+└── drivers/, common/
 ```
 
-새 보드 추가는 다음 *6개 파일*을 만들면 됩니다.
+## 가장 빠른 출발 — reference 보드 복사, 실제로 해 보기
 
-1. `board/<vendor>/<board>/Kconfig` — Kconfig 통합
-2. `board/<vendor>/<board>/Makefile` — build rules
-3. `board/<vendor>/<board>/<board>.c` — board init 코드
-4. `board/<vendor>/<board>/spl.c` — SPL 단계 코드
-5. `configs/<board>_defconfig` — defconfig
-6. `arch/arm/dts/<board>.dts` — device tree
+ACME 카메라 보드의 베이스는 `imx8mp_evk`입니다. 실제로 복사해 보면 "board 디렉터리 + defconfig + dts"만으로는 끝나지 않습니다. 빌드가 통과할 때까지 손댄 곳은 다음과 같습니다.
 
-DDR 코드는 NXP의 경우 `board/<vendor>/<board>/lpddr4_timing.c`로 별도, TI는 `board/ti/<board>/`에 통합되는 식입니다.
+| 파일 | 한 일 |
+|------|-------|
+| `board/acme/cam/` | `board/freescale/imx8mp_evk/` 복사, `imx8mp_evk.c` → `acme_cam.c`, Makefile의 `.o` 이름 수정 |
+| `board/acme/cam/Kconfig` | `if TARGET_ACME_CAM`, `SYS_BOARD "cam"`, `SYS_VENDOR "acme"`, `SYS_CONFIG_NAME "acme_cam"`, `IMX_CONFIG` 경로 |
+| `arch/arm/mach-imx/imx8m/Kconfig` | `config TARGET_ACME_CAM`(EVK와 같은 `select` 목록) 추가, `source "board/acme/cam/Kconfig"` 추가 |
+| `include/configs/acme_cam.h` | `imx8mp_evk.h` 복사 |
+| `arch/arm/dts/acme-cam.dts`, `Makefile` | EVK dts 복사, dtb 목록에 `acme-cam.dtb` 추가 |
+| `arch/arm/dts/acme-cam-u-boot.dtsi` | `imx8mp-evk-u-boot.dtsi` 복사 (아래에서 이유를 봅니다) |
+| `configs/acme_cam_defconfig` | `CONFIG_TARGET_ACME_CAM=y`, `CONFIG_DEFAULT_DEVICE_TREE="acme-cam"` |
 
-## 가장 빠른 출발 — *비슷한* reference 보드 복사
+`make acme_cam_defconfig` 뒤 `.config`에는 `CONFIG_SYS_VENDOR="acme"`, `CONFIG_SYS_BOARD="cam"`, `CONFIG_SYS_CONFIG_NAME="acme_cam"`이 들어갑니다.
 
-대상 SoC와 주변장치 구성이 가까운 reference board를 출발점으로 삼을 수 있습니다. 파일을 통째로 복사하기보다 Kconfig, DTS, 초기화 코드의 실제 의존성과 라이선스를 확인하고 필요한 부분만 이식합니다.
+`-u-boot.dtsi`를 빼먹은 첫 빌드는 SPL과 U-Boot 바이너리까지 만든 뒤 마지막 패키징에서 멈췄습니다.
 
-NXP i.MX 8M Plus 기반 ACME 카메라 보드를 예로 들면 *imx8mp_evk*가 베이스입니다.
-
-```bash
-cd u-boot
-
-# 1. board 디렉터리 복사
-cp -r board/freescale/imx8mp_evk board/acme/cam
-
-# 2. 파일 이름 바꾸기
-cd board/acme/cam
-mv imx8mp_evk.c acme_cam.c
-sed -i 's/imx8mp_evk/acme_cam/g' Kconfig Makefile MAINTAINERS
-
-# 3. defconfig 복사
-cd ../../../
-cp configs/imx8mp_evk_defconfig configs/acme_cam_defconfig
-sed -i 's/imx8mp-evk/acme-cam/g' configs/acme_cam_defconfig
-sed -i 's/imx8mp_evk/acme_cam/g' configs/acme_cam_defconfig
-
-# 4. DT 복사
-cp arch/arm/dts/imx8mp-evk.dts arch/arm/dts/acme-cam.dts
-sed -i 's/imx8mp-evk/acme-cam/g' arch/arm/dts/acme-cam.dts
+```text
+  BINMAN  .binman_stamp
+binman: Device tree 'u-boot.dtb' does not have a 'binman' node
+make: *** [Makefile:1125: .binman_stamp] Error 1
 ```
 
-복사 후 *컴파일 통과*만 확인합니다. 동작은 *그 다음 단계*에서 잡습니다.
+U-Boot 빌드는 `<보드 dts 이름>-u-boot.dtsi`를 자동으로 덧붙입니다. `scripts/Makefile.lib:162-166`이 `<dts 이름>`, `CONFIG_SYS_SOC`, `CONFIG_SYS_CPU`, `CONFIG_SYS_VENDOR` 순으로 `-u-boot.dtsi`를 찾고, `u-boot.dtsi`를 마지막 후보로 둡니다. EVK의 그 파일은 첫 줄에서 `#include "imx8mp-u-boot.dtsi"`로 `flash.bin`을 조립하는 binman 노드를 가져오고, Ch 4에서 본 `bootph-pre-ram` 표시도 담고 있습니다. 파일 이름이 `acme-cam`으로 바뀌면서 이 자동 포함이 끊긴 것입니다. 복사해 넣자 빌드가 끝났고, SPL용 DT에 콘솔 핀 그룹이 들어갔습니다.
 
-```bash
-make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- acme_cam_defconfig
-make ARCH=arm CROSS_COMPILE=aarch64-linux-gnu- -j$(nproc)
+```text
+$ dtc -I dtb -O dts spl/u-boot-spl.dtb | grep -A4 "uart2grp {"
+				uart2grp {
+					fsl,pins = <0x228 0x488 0x5f0 0x00 0x06 0x140 0x22c 0x48c 0x00 0x00 0x00 0x140>;
+					phandle = <0x2a>;
+				};
 ```
+
+SPL DT는 노드 43개, U-Boot proper DT는 333개였습니다. `FDTGREP spl/dts/dt-spl.dtb` 단계가 `bootph-*` 표시가 있는 노드만 남긴 결과입니다.
+
+두 번째 빌드도 경고를 남겼습니다. 외부 blob이 없어서입니다.
+
+```text
+Image 'u-boot-spl-ddr' is missing external blobs and is non-functional: ddr-1d-imem-fw ddr-1d-dmem-fw ddr-2d-imem-fw ddr-2d-dmem-fw
+...
+Image 'itb' is missing external blobs and is non-functional: atf-blob
+
+/binman/itb/fit/images/atf/atf-blob (bl31.bin):
+   See the documentation for your board. You may need to build ARM Trusted
+   Firmware and build with BL31=/path/to/bl31.bin
+
+Some images are invalid
+```
+
+`BINMAN_ALLOW_MISSING=1`을 주었기 때문에 `flash.bin`(1,196,968바이트)은 만들어졌지만 binman 스스로 "non-functional"이라고 적습니다. 보드에 쓰려면 Ch 5의 DDR training firmware 네 개와 Ch 7의 `bl31.bin`을 빌드 디렉터리에 넣어야 합니다.
+
+> **메모** Debian 13의 SWIG 4.3.0에서는 v2024.04의 `scripts/dtc/pylibfdt/libfdt.i`가 `too few arguments to function 'SWIG_Python_AppendOutput'`로 컴파일되지 않았습니다. guest의 복사본에서 이 이름 세 곳을 `SWIG_AppendOutput`으로 바꿔 빌드했습니다.
 
 ## defconfig 핵심 옵션
 
-아래는 i.MX 8M Plus 기반 가상 보드의 defconfig 항목 예시입니다. 주소와 크기는 복사해 쓸 수 있는 검증된 보드 값이 아닙니다. target U-Boot revision, linker map, SoC SRAM map, board DTS로 각각 확인해야 합니다.
+복사한 defconfig는 EVK 것이고, v2024.04의 `configs/imx8mp_evk_defconfig`에서 보드마다 다시 볼 줄은 다음과 같습니다.
 
-```text
-CONFIG_ARM=y
-CONFIG_ARCH_IMX8M=y
-CONFIG_SYS_TEXT_BASE=0x40200000
-CONFIG_TARGET_ACME_CAM=y
-
-# SPL
-CONFIG_SPL=y
-CONFIG_SPL_TEXT_BASE=0x920000
-CONFIG_SPL_MAX_SIZE=0x25000
-CONFIG_SPL_STACK=0x96fff0
-CONFIG_SPL_BSS_START_ADDR=0x95e000
-
-# DT
-CONFIG_DEFAULT_DEVICE_TREE="acme-cam"
-CONFIG_OF_CONTROL=y
-CONFIG_SPL_OF_CONTROL=y
-
-# Console / Debug UART
-CONFIG_DEBUG_UART=y
-CONFIG_DEBUG_UART_BASE=0x30890000
-CONFIG_DEBUG_UART_CLOCK=24000000
-CONFIG_DEBUG_UART_IMX=y
-CONFIG_BAUDRATE=115200
-CONFIG_SYS_CONSOLE_INFO_QUIET=y
-
-# Drivers
-CONFIG_DM=y
-CONFIG_DM_GPIO=y
-CONFIG_DM_I2C=y
-CONFIG_DM_MMC=y
-CONFIG_DM_PMIC=y
-CONFIG_DM_REGULATOR=y
-CONFIG_PHY_IMX8MQ_USB=y
-CONFIG_USB_DWC3=y
-
-# Boot 미디어
-CONFIG_SUPPORT_EMMC_BOOT=y
-CONFIG_MMC=y
-CONFIG_FSL_USDHC=y
-
-# Network
-CONFIG_NET=y
-CONFIG_DM_ETH=y
-CONFIG_FEC_MXC=y
-CONFIG_PHY_REALTEK=y
-
-# Environment
-CONFIG_ENV_IS_IN_MMC=y
-CONFIG_SYS_MMC_ENV_DEV=0
-CONFIG_SYS_MMC_ENV_PART=1
+```ini
+CONFIG_TEXT_BASE=0x40200000
+CONFIG_ENV_SIZE=0x1000
 CONFIG_ENV_OFFSET=0x400000
-CONFIG_ENV_SIZE=0x2000
+CONFIG_DEFAULT_DEVICE_TREE="imx8mp-evk"
+CONFIG_TARGET_IMX8MP_EVK=y
+CONFIG_SPL_TEXT_BASE=0x920000
+CONFIG_SPL_STACK=0x960000
+CONFIG_SPL_MAX_SIZE=0x26000
+CONFIG_SPL_BSS_START_ADDR=0x98fc00
+CONFIG_SPL_BOOTROM_SUPPORT=y
+CONFIG_SYS_MMC_ENV_DEV=1
+CONFIG_MXC_UART=y
 ```
-
-이 중 보드마다 값이 달라지는 네 항목의 의미는 다음과 같습니다.
 
 | 옵션 | 값 | 의미 |
 |---|---|---|
-| `CONFIG_SYS_TEXT_BASE` | `0x40200000` | U-Boot 적재 주소이며 DDR 안이어야 합니다 |
-| `CONFIG_TARGET_ACME_CAM` | `y` | 우리 보드를 타깃으로 선택합니다 |
-| `CONFIG_SPL_TEXT_BASE` | `0x920000` | SPL 적재 주소이며 SoC SRAM 안입니다 |
-| `CONFIG_DEBUG_UART_BASE` | `0x30890000` | UART2 base 주소이며 보드별로 확인해야 합니다 |
+| `CONFIG_TEXT_BASE` | `0x40200000` | U-Boot proper 링크 주소, DDR 안 |
+| `CONFIG_SPL_TEXT_BASE` | `0x920000` | SPL 주소, DRAM 밖 |
+| `CONFIG_SPL_MAX_SIZE` | `0x26000` | SPL이 넘으면 빌드가 실패하는 크기 |
+| `CONFIG_ENV_OFFSET` / `ENV_SIZE` | `0x400000` / `0x1000` | 환경 변수를 저장할 MMC 위치와 크기 |
+| `CONFIG_SYS_MMC_ENV_DEV` | `1` | 환경을 저장할 MMC 장치 번호 |
 
-`CONFIG_DEBUG_UART_*` 옵션과 baud 설정이 초기 출력 경로에 관여합니다. 필요한 옵션과 적용 단계는 U-Boot 버전·드라이버·보드 설정에 따라 달라집니다.
-
-`CONFIG_SYS_TEXT_BASE`는 U-Boot proper가 *DDR의 어느 주소*에서 동작할지입니다. DDR 영역 안이어야 하고, *충분한 공간*이 위·아래로 있어야 합니다.
+예전 자료의 `CONFIG_SYS_TEXT_BASE`는 v2024.04에서 `CONFIG_TEXT_BASE`로 이름이 바뀌어 있습니다(Kconfig에 `SYS_TEXT_BASE`가 없습니다). 초기 디버그 UART를 켤 때의 심볼은 Ch 2에서 본 대로 `DEBUG_UART_MXC`입니다.
 
 ## SPL 단계 — `spl.c`
 
-가장 어려운 코드입니다. *DDR이 아직 없는* SRAM 안에서, *console도 처음 띄우면서*, *DDR을 깨우고*, *다음 단계로 점프*합니다.
-
-i.MX 8M Plus SPL의 *핵심 함수*만 정리하면 다음과 같습니다.
+EVK의 SPL 진입점은 짧습니다. `board/freescale/imx8mp_evk/spl.c:123-146`입니다.
 
 ```c
-/* board/acme/cam/spl.c */
-
-#include <common.h>
-#include <asm/arch/clock.h>
-#include <asm/arch/sys_proto.h>
-#include <asm/mach-imx/iomux-v3.h>
-#include <asm/arch/imx8mp_pins.h>
-
-extern struct dram_timing_info dram_timing;
-
-void spl_dram_init(void)
-{
-    /* NXP DDR Tool 출력을 사용해 DDRC + PHY 설정 */
-    ddr_init(&dram_timing);
-}
-
-static iomux_v3_cfg_t const uart_pads[] = {
-    MX8MP_PAD_UART2_RXD__UART2_DCE_RX | MUX_PAD_CTRL(0x140),
-    MX8MP_PAD_UART2_TXD__UART2_DCE_TX | MUX_PAD_CTRL(0x140),
-};
-
-int board_early_init_f(void)
-{
-    init_uart_clk(1);   /* UART2 clock enable */
-    imx_iomux_v3_setup_multiple_pads(uart_pads, ARRAY_SIZE(uart_pads));
-    return 0;
-}
-
+/* Do not use BSS area in this phase */
 void board_init_f(ulong dummy)
 {
-    int ret;
+	int ret;
 
-    arch_cpu_init();
-    init_uart_clk(1);
-    board_early_init_f();
+	arch_cpu_init();
 
-    timer_init();
+	init_uart_clk(1);
 
-    preloader_console_init();   /* 첫 printf가 동작하는 시점 */
+	ret = spl_early_init();
+	if (ret) {
+		debug("spl_init() failed: %d\n", ret);
+		hang();
+	}
 
-    ret = spl_init();
-    if (ret) {
-        debug("spl_init() failed: %d\n", ret);
-        hang();
-    }
+	preloader_console_init();
 
-    enable_tzc380();    /* TrustZone 메모리 컨트롤러 */
-    power_init_board(); /* PMIC 초기화 */
+	enable_tzc380();
 
-    spl_dram_init();    /* DDR 초기화 */
+	power_init_board();
 
-    board_init_r(NULL, 0);
+	/* DDR initialization */
+	spl_dram_init();
 }
 ```
 
-이 흐름의 *각 단계가 살아 있는지*를 확인하면서 디버깅합니다. *어디서 멈췄는지* 알면 절반은 해결입니다.
+순서가 곧 디버깅 지도입니다. `init_uart_clk(1)`이 UART2 클록을 열고, `spl_early_init()`이 driver model과 SPL DT를 올리며 그 과정에서 pinctrl이 적용되고, `preloader_console_init()`에서 처음으로 `U-Boot SPL 2024.04 (...)` 배너가 나옵니다. 배너 뒤의 `power_init_board()`가 PMIC를 설정하고 `spl_dram_init()`이 Ch 5의 `ddr_init()`을 부릅니다. 같은 파일의 `spl_board_init()`은 `puts("Normal Boot\n")`을 찍습니다.
 
-## 첫 부팅의 디버깅 사이클 — 가장 *길고 외로운* 단계
+## 첫 부팅의 디버깅 사이클
 
-새 보드의 BSP에서 *가장 시간이 많이 드는* 부분이 SPL부터 첫 시리얼까지입니다. 다음 순서로 점검합니다.
+새 보드에서 SPL부터 첫 시리얼까지는 볼 수 있는 출력이 가장 적은 구간입니다. 위 순서를 따라 단계를 나눕니다.
 
 ### 단계 1: 초기 firmware가 *실행 자체* 안 되는가
 
-시리얼이 *아무것도* 안 나오면 SPL이 *실행 시작도 안 한 것*일 수 있습니다. BootROM이 SPL 이미지를 *못 찾았거나* 못 *적재한 것*입니다.
+시리얼에 아무것도 없으면 BootROM이 SPL을 못 찾았을 수 있습니다.
 
-확인할 것:
+- U-Boot v2024.04 `doc/board/nxp/imx8mp_evk.rst:51-55`는 SD에 `flash.bin`을 32 KiB 오프셋으로 씁니다(`dd if=flash.bin of=/dev/sd[x] bs=1K seek=32 conv=notrunc`). 이 값은 i.MX 8M Plus SD 부팅의 값이고 다른 SoC·매체에는 문서를 따로 봅니다.
+- boot switch가 SD를 가리키는지 Ch 2의 SW4 표로 확인합니다(EVK 기본값은 eMMC).
+- 전원과 reset 회로를 확인합니다.
 
-- boot image 이름, boot device와 저장 위치가 해당 SoC boot ROM 문서 및 U-Boot board guide에 맞는가. 예를 들어 U-Boot v2024.01 i.MX8MP EVK 안내는 SD에 `flash.bin`을 32 KiB offset으로 기록합니다. 이는 다른 i.MX 계열·매체에 일반화할 수 없습니다.
-- BOOT_MODE 핀의 strap이 SD를 가리키는가.
-- 보드에 *전원이 정상*인가.
-- 보드의 reset 핀이 안정적인가.
-
-JTAG이 있으면 *SPL의 첫 명령어 주소(0x920000)*에 break하고 *PC가 거기 닿는지* 확인합니다.
+JTAG이 있으면 SPL 시작 주소(0x920000)에 break를 걸어 PC가 닿는지 봅니다.
 
 ### 단계 2: SPL이 실행은 됐는데 *시리얼 출력*이 없는가
 
-`preloader_console_init()` 호출 *전*에 죽었거나, console 설정이 *잘못된* 것입니다.
+배너는 `preloader_console_init()`에서 나오므로, 그 앞의 `init_uart_clk()`과 `spl_early_init()` 사이에서 멈춘 것입니다.
 
-확인할 것:
+- 콘솔 UART 번호와 `init_uart_clk()` 인자가 맞는지 (UART2 = 1)
+- 콘솔 핀 그룹에 `bootph-pre-ram`이 있어 SPL DT에 남았는지 (위의 `uart2grp` 확인 방법)
+- `stdout-path`가 가리키는 UART와 회로도의 디버그 헤더가 같은지
+- USB-TTL 어댑터의 baud rate (`CONFIG_BAUDRATE` 기본값 115200)
 
-- `CONFIG_DEBUG_UART_BASE`가 회로도와 일치
-- UART pad가 *board_early_init_f()*에서 설정됨
-- UART parent clock이 enable됨
-- USB-TTL 어댑터의 baud rate 일치
+더 앞에서 문자를 보고 싶으면 `DEBUG_UART_MXC` 기반 debug UART를 켭니다(Ch 2). driver model 없이 `CONFIG_DEBUG_UART_BASE` 주소에 직접 씁니다.
 
-직접 MMIO를 쓰는 진단 코드는 pinmux, register base/offset, clock, access state를 모두 알아야 하며 잘못된 주소 쓰기는 안전하지 않습니다. 아래 주소 예시는 검증되지 않은 값이므로 실행하지 말고, board DTS 및 SoC 문서로 검증된 vendor API나 디버거를 사용합니다.
+### 단계 3: 배너는 뜨는데 *DDR training 실패*
 
-```c
-/* SPL 초기에 강제로 'A'를 보내기 */
-void board_init_f(ulong dummy) {
-    /* IOMUXC 직접 set */
-    /* 주소와 값은 보드 문서로 확인한 뒤, 해당 SoC의 U-Boot API를 사용 */
-    hang();
-}
-```
-
-검증된 UART 출력이 관찰되면 그 실행 경로에서 TX가 동작했다는 증거입니다. 출력이 없다는 사실만으로 pinmux나 baud 오류라고 단정할 수 없으며, boot stage·전원·reset·console·clock·배선도 분리해 확인합니다.
-
-### 단계 3: 시리얼은 뜨는데 *DDR training 실패*
-
-```text
-U-Boot SPL 2024.04 (...)
-DDRINFO: start DRAM init
-DDR PHY training FAILED at frequency 0
-```
-
-[Ch 5](/blog/embedded/bsp/chapter05-ddr-params)에서 다룬 *DDR 디버깅 사이클*로 들어갑니다. DDR Tool 재실행, training firmware 버전 확인.
+Ch 5에서 본 `drivers/ddr/imx/phy/ddrphy_utils.c:101`의 `Training FAILED`가 이 단계의 신호입니다. DDR 표, training firmware 판, 보드 신호를 봅니다.
 
 ### 단계 4: DDR은 통과, U-Boot proper가 *적재 안 됨*
 
-```text
-DDRINFO: end DRAM init
-Trying to boot from MMC1
-SPL: failed to boot from all boot devices
-```
+EVK의 SPL은 MMC 드라이버로 `u-boot.itb`를 읽지 않습니다. `spl.c:27-30`의 `spl_board_boot_device()`가 `BOOT_DEVICE_BOOTROM`을 돌려주므로 `common/spl/spl_bootrom.c:27`의 `"BOOTROM"` 로더가 선택되고, `arch/arm/mach-imx/spl_imx_romapi.c`가 i.MX ROM API로 이미지를 받아 옵니다. 그래서 정상 로그는 `Trying to boot from BOOTROM`이고, 모든 로더가 실패하면 `common/spl/spl.c:751`의 `SPL: failed to boot from all boot devices (err=%d)`가 찍힙니다.
 
-가능한 원인 중 하나는 SPL이 SD/eMMC에서 설정된 U-Boot image를 찾지 못하는 경우입니다. 먼저 board config에서 기대 파일명과 저장 위치를 확인합니다.
+- `flash.bin` 안에 `u-boot.itb`가 실제로 들어 있는지 (`bl31.bin`이 빠진 "non-functional" 이미지가 아닌지)
+- `CONFIG_SPL_IMX_ROMAPI_LOADADDR=0x48000000` 같은 임시 적재 주소가 DRAM 범위 안인지
 
-- u-boot.itb가 SD의 *기대 오프셋*에 있는가
-- MMC 컨트롤러 핀이 설정됐는가 (SPL의 board_init_f에서)
-- USDHC clock이 enable됐는가
-- vmmc 전원이 PMIC에서 켜졌는가
+### 단계 5: U-Boot proper가 부팅, 명령이 기대와 다름
 
-### 단계 5: U-Boot proper가 부팅, *commands 안 되는*
-
-```text
-U-Boot 2024.04 (...)
-DRAM:  2 GiB
-=>
-=> mmc list
-(아무 응답 없음)
-```
-
-MMC 명령이 동작하지 않는 원인은 driver probe 실패 외에도 명령 비활성화나 장치 미인식이 있습니다. `dm tree`와 `mmc list` 결과를 함께 확인합니다.
+`dm tree`로 장치와 드라이버의 연결을 봅니다. QEMU virt의 `qemu_arm64_defconfig` 출력 일부입니다.
 
 ```text
 => dm tree
  Class     Index  Probed  Driver                Name
 -----------------------------------------------------------
  root          0  [ + ]   root_driver           root_driver
- cpu           0  [   ]   imx8_cpu              cpu@0
  ...
- mmc           0  [   ]   fsl_esdhc_imx         mmc@30b40000   <-- 미probed
+ firmware      0  [   ]   psci                  |-- psci
+ ...
+ qfw           0  [ + ]   qfw_mmio              |-- fw-cfg@9020000
+ ...
+ virtio        0  [ + ]   virtio-mmio           |-- virtio_mmio@a000000
+ ...
+ pci           0  [ + ]   pci_generic_ecam      |-- pcie@10000000
+ ...
+ rtc           0  [   ]   rtc-pl031             |-- pl031@9010000
+ serial        0  [ + ]   serial_pl01x          |-- pl011@9000000
+ mtd           0  [ + ]   cfi_flash             |-- flash@0
+ ...
 ```
 
-probe 실패 원인은 *clock 부재*, *regulator 부재*, *pinctrl 미설정*입니다. `dm tree -v`와 dts를 비교.
+`Probed`가 빈칸(`[   ]`)인 `rtc-pl031`은 실패한 것이 아닙니다. 드라이버는 bind되어 있고, 아직 아무도 RTC를 쓰지 않아 probe하지 않았을 뿐입니다. `doc/develop/driver-model/design.rst`는 bind 직후 "nothing has been activated (except for the root device)"라고 적고, 장치는 uclass 코드가 찾을 때 activate됩니다. 그러니 MMC가 `[   ]`라면 먼저 `mmc list`나 `mmc dev`로 사용해 본 뒤 다시 확인합니다. 명령 자체가 없을 수도 있습니다. 같은 QEMU 빌드에서 `mmc list`는 `Unknown command 'mmc' - try 'help'`였습니다(`CMD_MMC`가 꺼져 있음).
 
 ## U-Boot 환경 설정
 
-부팅 흐름은 *환경 변수*로 정합니다. 보드 헤더에 *기본값*을 정의합니다.
+부팅 흐름은 *환경 변수*로 정합니다. v2024.04에서 기본 환경을 정하는 방법은 두 가지입니다. `doc/usage/environment.rst:24-36, 90-99`에 따르면 `board/<vendor>/<board>/<CONFIG_ENV_SOURCE_FILE>.env` 텍스트 파일이 우선이고, 없으면 예전 방식인 `CFG_EXTRA_ENV_SETTINGS` 매크로를 씁니다(옛 이름 `CONFIG_EXTRA_ENV_SETTINGS`는 `CFG_`로 바뀌었습니다). EVK는 후자입니다. `include/configs/imx8mp_evk.h:29-41`의 일부입니다.
 
 ```c
-/* include/configs/acme_cam.h */
-
-#define CONFIG_EXTRA_ENV_SETTINGS \
-    "image=Image\0" \
-    "fdt_file=acme-cam.dtb\0" \
-    "loadaddr=0x40480000\0" \
-    "fdt_addr=0x43000000\0" \
-    "mmcdev=0\0" \
-    "mmcpart=1\0" \
-    "mmcroot=/dev/mmcblk0p2 rootwait rw\0" \
-    "mmcargs=setenv bootargs console=ttymxc1,115200 root=${mmcroot}\0" \
-    "loadimage=load mmc ${mmcdev}:${mmcpart} ${loadaddr} ${image}\0" \
-    "loadfdt=load mmc ${mmcdev}:${mmcpart} ${fdt_addr} ${fdt_file}\0" \
-    "mmcboot=" \
-        "run loadimage; run loadfdt; run mmcargs; " \
-        "booti ${loadaddr} - ${fdt_addr}\0"
-
-#define CONFIG_BOOTCOMMAND \
-    "mmc dev ${mmcdev}; " \
-    "if mmc rescan; then " \
-        "run mmcboot; " \
-    "fi"
+#define CFG_EXTRA_ENV_SETTINGS		\
+	BOOTENV \
+	"scriptaddr=" __stringify(CONFIG_SYS_LOAD_ADDR) "\0" \
+	"kernel_addr_r=" __stringify(CONFIG_SYS_LOAD_ADDR) "\0" \
+	"image=Image\0" \
+	"console=ttymxc1,115200 earlycon=ec_imx6q,0x30890000,115200\0" \
+	"fdt_addr_r=0x43000000\0"			\
+	"boot_fdt=try\0" \
+	"fdtfile=" CONFIG_DEFAULT_FDT_FILE "\0" \
+	"initrd_addr=0x43800000\0"		\
+	"bootm_size=0x10000000\0" \
+	"mmcpart=1\0" \
+	"mmcroot=/dev/mmcblk1p2 rootwait rw\0" \
 ```
 
-부팅 시 `CONFIG_BOOTCOMMAND`가 실행됩니다. `run mmcboot`가 *Image, dtb, bootargs를 차례로 적재해 booti*로 점프합니다.
+`console=ttymxc1`은 UART2입니다. Linux `imx8mp.dtsi`의 alias가 `serial1 = &uart2;`이고, i.MX UART 드라이버(`drivers/tty/serial/imx.c:165`)의 장치 이름이 `ttymxc`라 alias 번호가 그대로 tty 번호가 됩니다. `earlycon=ec_imx6q,0x30890000`도 Ch 2의 UART2 주소와 같습니다. `BOOTENV`는 `config_distro_bootcmd.h`의 distro boot 스크립트를 펼칩니다.
 
-런타임 환경 변수 변경은 다음과 같습니다.
+QEMU 빌드에서 환경을 바꾸고 저장하면 다음과 같습니다. 이 보드는 환경을 NOR flash에 둡니다.
 
 ```text
-=> setenv bootdelay 3
-=> setenv ipaddr 192.168.1.100
+=> printenv bootcmd
+bootcmd=bootflow scan -lb
+=> setenv foo bar
 => saveenv
-Saving Environment to MMC...
-Writing to MMC(0)... OK
+Saving Environment to Flash... Un-Protected 2 sectors
+Erasing Flash...
+.. done
+Erased 2 sectors
+Writing to Flash... done
+Protected 2 sectors
+OK
 ```
 
-`saveenv`가 변경을 eMMC의 *지정 오프셋*에 영구 기록합니다. `CONFIG_ENV_IS_IN_MMC=y` + `CONFIG_ENV_OFFSET=0x400000` 설정에 따른 위치입니다.
+처음 부팅할 때는 `Loading Environment from Flash... *** Warning - bad CRC, using default environment`가 나왔습니다. 저장된 환경이 없으면 CRC 검사에 실패하고 컴파일된 기본값을 쓴다는 뜻이므로, 새 보드의 첫 부팅에서는 정상입니다. EVK라면 `saveenv`가 `CONFIG_SYS_MMC_ENV_DEV=1` 장치의 `CONFIG_ENV_OFFSET=0x400000`에 씁니다.
 
 ## TFTP로 빠른 dev cycle
 
-개발 중에는 *SD에 매번 굽는 것이 비효율*입니다. TFTP로 *호스트에서 직접* 커널 적재합니다.
+개발 중에 커널을 바꿀 때마다 SD를 다시 굽는 대신 TFTP로 받습니다. QEMU의 user 네트워크는 `-nic user,model=virtio-net-pci,tftp=<디렉터리>`로 내장 TFTP 서버를 띄우므로, 호스트에 서버를 따로 설치하지 않고 흐름을 확인했습니다. 4 MiB 임의 파일을 `Image`로, Ch 3에서 컴파일한 GW74xx DTB를 함께 올렸습니다.
 
 ```text
-=> setenv serverip 192.168.1.10
-=> setenv ipaddr 192.168.1.100
-=> tftp ${loadaddr} Image
-Using FEC ethernet device
-TFTP from server 192.168.1.10; our IP address is 192.168.1.100
-Loading: #################################################  41.6 MiB
-=> tftp ${fdt_addr} acme-cam.dtb
-=> run mmcargs
-=> booti ${loadaddr} - ${fdt_addr}
+=> setenv autoload no
+=> dhcp
+BOOTP broadcast 1
+DHCP client bound to address 10.0.2.15 (1 ms)
+=> tftp 0x40400000 Image
+Using virtio-net#32 device
+TFTP from server 10.0.2.2; our IP address is 10.0.2.15
+Filename 'Image'.
+Load address: 0x40400000
+...
+Bytes transferred = 4194304 (400000 hex)
+=> crc32 0x40400000 ${filesize}
+crc32 for 40400000 ... 407fffff ==> a0965445
+=> tftp 0x43000000 imx8mp-venice-gw74xx.dtb
+Bytes transferred = 74511 (1230f hex)
+=> fdt addr 0x43000000
+Working FDT set to 43000000
+=> fdt print / model
+model = "Gateworks Venice GW74xx i.MX8MP board"
 ```
 
-호스트에 dnsmasq나 tftpd-hpa를 구성하면 build 결과를 네트워크로 시험할 수 있습니다. 실제 준비 시간과 부팅 시간은 target과 개발 환경에서 측정합니다.
-
-## U-Boot의 첫 출력 — 가상 로그 예시
-
-다음은 i.MX 8M Plus 계열 포팅에서 볼 수 있는 항목을 설명하기 위해 만든 가상 로그입니다. 실제 보드 출력이나 검증 결과가 아닙니다.
-
-```text
-U-Boot SPL 2024.04 (May 19 2026 - 14:23:01 +0900)
-DDRINFO: start DRAM init
-DDRINFO: DRAM rate 4000MTS
-DDRINFO:ddrphy calibration done
-DDRINFO: ddrmix config done
-Normal Boot
-Trying to boot from MMC2
-
-U-Boot 2024.04 (May 19 2026 - 14:23:01 +0900)
-
-CPU:   Freescale i.MX8MP[8] rev1.1 1600 MHz (running at 1200 MHz)
-CPU:   Industrial temperature grade (-40C to 105C) at 47C
-Reset cause: POR
-Model: ACME i.MX 8M Plus Camera Board v1
-DRAM:  2 GiB
-Core:  92 devices, 22 uclasses, devicetree: separate
-WDT:   Started watchdog@30280000 with servicing every 1000ms (60s timeout)
-MMC:   FSL_SDHC: 0, FSL_SDHC: 2
-Loading Environment from MMC... OK
-In:    serial@30890000
-Out:   serial@30890000
-Err:   serial@30890000
-Net:   eth0: ethernet@30be0000
-Hit any key to stop autoboot:  0
-=>
-```
-
-이 메시지의 *각 줄*이 살아 있다는 것은 BSP의 *큰 부분*이 완성됐다는 뜻입니다.
-
-- `DDRINFO` — 예시 로그상 DDR 초기화 메시지가 나왔다는 뜻입니다.
-- `CPU:` — CPU 정보 출력이며 clock tree 전체 정상 동작을 증명하지 않습니다.
-- `Model:` — 모델 문자열이 표시됐다는 뜻이며 DT 전체 정확성을 증명하지 않습니다.
-- `MMC:` — MMC 관련 출력이며 저장 매체 동작 전체를 증명하지 않습니다.
-- `Net:` — 네트워크 장치명이 출력됐다는 뜻이며 링크·패킷 동작 검증은 별도입니다.
-
-이 출력은 예시 로그이며 장치 probe나 제품 BSP 완료를 단독으로 입증하지 않습니다. 추가로 각 driver 기능과 오류 경로를 보드 요구사항에 맞게 검증한 뒤 커널 부팅 단계로 넘어갑니다.
+호스트에서 Python `zlib.crc32`로 같은 파일을 계산하면 `0xa0965445`로 U-Boot의 `crc32`와 같습니다. 받은 파일이 깨지지 않았는지 이렇게 확인한 뒤 `booti ${kernel_addr_r} - ${fdt_addr_r}`로 넘어갑니다. 실제 보드에서는 호스트에 dnsmasq나 tftpd-hpa를 띄우고 `serverip`를 그 주소로 둡니다.
 
 ## 자주 하는 실수
 
-### `CONFIG_SYS_TEXT_BASE`를 *SPL 자리*와 헷갈림
+### `CONFIG_TEXT_BASE`를 *SPL 자리*와 헷갈림
 
-`CONFIG_SYS_TEXT_BASE`는 U-Boot proper의 적재 주소(DDR 안). `CONFIG_SPL_TEXT_BASE`가 SPL의 적재 주소(SRAM 안). 둘이 바뀌면 *어디서도 동작 안 함*.
+`CONFIG_TEXT_BASE`는 U-Boot proper의 주소(DDR 안), `CONFIG_SPL_TEXT_BASE`는 SPL의 주소(DRAM 밖)입니다. 옛 문서의 `CONFIG_SYS_TEXT_BASE`를 그대로 defconfig에 쓰면 v2024.04 Kconfig에는 그 심볼이 없어 무시됩니다. defconfig 끝에 `CONFIG_SYS_TEXT_BASE=0x40200000`을 붙여 `make`로 적용해 보면 경고 없이 끝나고, 결과 `.config`에 `SYS_TEXT_BASE`는 0번 나옵니다.
+
+### `<board>-u-boot.dtsi`를 복사하지 않음
+
+위에서 본 대로 binman 노드와 `bootph-pre-ram` 표시가 이 파일에 있습니다. dts 이름을 바꾸면 이 파일 이름도 같이 바꿉니다.
 
 ### SD 이미지의 *오프셋*을 놓침
 
-boot image 기록 위치는 SoC·매체·boot mode에 따라 다릅니다. 대상 SoC의 boot ROM 문서와 같은 버전의 board guide를 확인하고, 쓰기 전 장치 경로·offset을 검증합니다. 예를 들어 U-Boot v2024.01 i.MX8MP EVK 문서는 SD의 `flash.bin` 위치로 32 KiB를 지정합니다.
+i.MX 8M Plus SD 부팅은 32 KiB입니다(`imx8mp_evk.rst:55`). 다른 SoC의 값을 가져오지 않습니다.
 
-### 시리얼 *둘 다* (UART1/UART2) 다른 것 사용
+### 콘솔 UART가 단계마다 다름
 
-DT가 UART2를 console로 쓰는데 `CONFIG_DEBUG_UART_BASE`는 UART1을 가리킬 수 있습니다. 한쪽만 동작하는 *부분 시리얼*이 됩니다. *반드시 같은 UART*.
-
-### `bootargs`에 *DT를 통한 console과 다른* console 명시
-
-`console=ttymxc0`이지만 실제 UART2가 console이면, 커널이 *다른 UART에 메시지를 보냅니다*. 커널 메시지가 안 보이는 이유 1순위.
+SPL의 `init_uart_clk()` 인자, DT의 `stdout-path`, 환경의 `console=ttymxcN`, debug UART 주소가 모두 같은 UART를 가리켜야 합니다. EVK는 넷 다 UART2입니다(`init_uart_clk(1)`, `&uart2`, `ttymxc1`, `0x30890000`).
 
 ### `saveenv`를 안 함
 
-환경 변수를 setenv로 바꾼 후 saveenv 안 하면 *재부팅 시 사라집니다*. 개발 중에 환경을 자주 잃으면 saveenv 누락입니다.
+`setenv`는 RAM의 사본만 바꿉니다. 재부팅하면 저장된 환경(또는 위의 기본값)으로 돌아갑니다.
 
 ### Ethernet PHY MDIO 주소 잘못
 
-DT에서 `phy-handle = <&ethphy0>`로 가리키는 PHY의 *MDIO 주소*(reg)가 실제 보드의 strap과 다르면 link가 안 잡힙니다. `mii info` 명령으로 확인.
-
-```text
-=> mii info
-PHY 0x01: OUI = 0x001CC8, Model = 0x05, Rev = 0x01,  100baseT,  FDX
-```
+DT `ethernet-phy@N`의 `reg`가 보드의 PHY strap 주소와 다르면 link가 안 잡힙니다. U-Boot의 `mii info` 명령(`cmd/mii.c`)으로 MDIO 버스에서 응답하는 주소를 확인합니다. 이 글은 실제 PHY가 있는 보드에서 실행하지 않았으므로 출력은 싣지 않습니다.
 
 ## 정리
 
-- BSP에서의 U-Boot 포팅은 *시리얼 첫 한 줄*에 도달하기까지가 핵심입니다.
-- reference board를 출발점으로 삼을 수 있지만, 필요한 구성요소와 의존성을 확인해 선택적으로 이식합니다. board 파일 구성은 U-Boot 버전과 보드 구조에 따라 다릅니다.
-- defconfig의 초기 UART 출력은 관련 `CONFIG_DEBUG_UART_*` 옵션과 baud 설정, UART clock·pinmux에 좌우됩니다. 필요한 설정과 적용 시점은 U-Boot 버전 및 보드에 따라 확인합니다.
-- SPL은 보통 초기 SDRAM 설정 전 SRAM에서 실행하지만, 해당 보드의 boot phase와 메모리 배치를 문서에서 확인합니다.
-- 첫 부팅 디버깅 사이클은 *5단계*입니다. SPL 실행 → 시리얼 출력 → DDR training → U-Boot proper 적재 → driver probe.
-- 환경 변수는 `CONFIG_EXTRA_ENV_SETTINGS`에 기본을 정의하고, `setenv` + `saveenv`로 영구 변경합니다.
-- 개발 중에는 *TFTP*로 SD 굽는 시간을 절약합니다. dnsmasq 또는 tftpd-hpa로 호스트에 서버 설치.
-- `DDRINFO`, `CPU:`, `Model:`, `MMC:`, `Net:` 로그가 나타나면 해당 부트 단계가 이 항목까지 진행했다는 뜻입니다. peripheral 기능과 안정성은 별도의 시험으로 확인합니다.
+- reference 보드 복사는 board 디렉터리, `include/configs` 헤더, `mach-imx/imx8m/Kconfig`의 TARGET과 `source`, dts와 dts Makefile, `<board>-u-boot.dtsi`, defconfig까지 손대야 빌드가 끝납니다.
+- `-u-boot.dtsi`가 빠지면 binman이 `does not have a 'binman' node`로 멈춥니다.
+- `BINMAN_ALLOW_MISSING=1` 빌드는 DDR firmware와 `bl31.bin`이 빠진 "non-functional" 이미지를 만듭니다.
+- EVK SPL은 `init_uart_clk` → `spl_early_init` → 배너 → PMIC → DDR 순이고, U-Boot proper는 ROM API(`BOOTROM` 로더)로 적재합니다.
+- `dm tree`의 빈 `Probed` 칸은 실패가 아니라 아직 쓰지 않은 장치입니다.
+- v2024.04의 이름은 `CONFIG_TEXT_BASE`, `CFG_EXTRA_ENV_SETTINGS`입니다.
+- TFTP로 받은 파일은 `crc32`로 호스트 값과 대조합니다.
 
 ## 다음 편
 

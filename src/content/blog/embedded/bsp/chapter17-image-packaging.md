@@ -14,20 +14,19 @@ topics: ["embedded"]
 
 **flash image는 *섹터 단위의 layout*입니다. 한 번 양산되면 바꾸기 어렵습니다.** 파티션 layout과 partition table 형식을 처음부터 잘 잡는 것이 핵심입니다.
 
-빌드 시스템이 toolchain, kernel, rootfs를 다 만들어 줘도 그것들이 *어떻게 한 binary로 묶이는가*는 별도 문제입니다. SD 카드의 0번 섹터, eMMC의 boot1 파티션, NAND의 MTD partition table이 다 다릅니다. 잘못 설계하면 OTA를 못 하는 BSP가 만들어집니다.
+빌드 시스템이 toolchain, kernel, rootfs를 다 만들어 줘도 그것들이 *어떻게 한 binary로 묶이는가*는 별도 문제입니다. 이삿짐 트럭에 짐을 싣는 순서처럼, SoC가 맨 먼저 꺼낼 부트 이미지는 정해진 자리에 있어야 하고 나머지 파티션은 그 뒤에 놓여야 합니다.
 
-이번 글은 partition table 종류, A/B 슬롯, GPT 구조, `genimage`로 이미지를 조립하는 방법을 다룹니다.
+이번 글은 partition table, A/B 슬롯, GPT 구조를 다루고, Debian 13 guest에서 genimage 18로 실제 SD 이미지를 조립해 sgdisk, bmaptool, img2simg로 확인합니다. raw NAND와 양산 flashing 도구는 실행하지 않았고 U-Boot 문서로 대조했습니다.
 
 ## Partition Table 종류
 
-| 형식 | 최대 파티션 | 최대 크기 | 적용 |
-|------|-------------|-----------|------|
-| MBR | 4 (primary) | 2TB | 단순한 SD 카드 |
-| GPT | 128 | 9.4ZB | 표준 (UEFI 포함) |
-| BCT / TOC1 | SoC 특정 | SoC 특정 | NVIDIA, Mediatek |
-| MTD partitions | kernel cmdline | N/A | raw NAND/NOR flash |
+| 형식 | 파티션 정보가 있는 곳 | 적용 |
+|------|-------------|------|
+| MBR | 0번 섹터의 4개 primary 항목 | 단순한 SD 카드 |
+| GPT | LBA 1의 header와 그 뒤 entry array | eMMC·SD |
+| MTD partitions | kernel cmdline `mtdparts=` 또는 DT `fixed-partitions` | raw NAND/NOR flash |
 
-eMMC와 SD 카드에서는 GPT를 자주 사용하지만, 부트 ROM·펌웨어 요구사항이나 기존 제품 호환성에 따라 MBR 또는 SoC 전용 레이아웃을 사용할 수도 있습니다. raw NAND는 보통 MTD partition을 씁니다. SoC가 자체 boot header 형식을 요구하는 경우(NVIDIA Tegra, MediaTek)도 있으므로, 새 BSP는 먼저 vendor 부트 레이아웃을 확인해야 합니다.
+GPT의 entry 수는 header에 적힌 값이고, 아래 실행 결과의 sgdisk는 "Partition table holds up to 128 entries"라고 보고했습니다. raw NAND와 NOR에는 블록 장치용 partition table이 없으므로 MTD partition을 씁니다.
 
 ## GPT 구조
 
@@ -45,26 +44,11 @@ LBA -1         : GPT Header (backup)
 
 핵심 특징을 짚습니다.
 
-- **16KB 예약**. LBA 0~33이 partition table용입니다. 0~33 = 34 LBA = 17KB이지만 보통 첫 partition을 *최소 1MB*부터 시작하도록 정렬합니다.
+- **앞쪽 34 LBA**. LBA 0~33(512바이트 섹터로 17 KiB)이 protective MBR, header, entry array입니다. 첫 partition을 어디서 시작할지는 따로 정하고, 아래 genimage 결과처럼 SoC 부트 이미지 뒤로 미룰 수 있습니다.
 - **backup GPT**. 디스크 끝에 동일 정보가 한 번 더 있습니다. primary가 깨져도 복구 가능합니다.
-- **partition UUID**. GPT partition에는 고유한 partition UUID가 있습니다. kernel의 `root=PARTUUID=...`는 장치 이름의 열거 순서가 달라질 때 root partition을 식별하는 한 방법입니다. image format과 rootfs 구성에 따라 다른 식별 방법도 쓸 수 있습니다.
+- **partition UUID**. GPT partition에는 고유한 partition UUID가 있습니다. kernel의 `root=PARTUUID=...`는 장치 이름 열거 순서와 무관하게 root partition을 가리킵니다. 이 시리즈의 Debian guest도 `/proc/cmdline`에 `root=PARTUUID=1f342af3-...`를 씁니다(Ch 10).
 
-`sgdisk`나 `parted`로 확인할 수 있습니다.
-
-```bash
-$ sgdisk -p /dev/mmcblk0
-Disk /dev/mmcblk0: 30543872 sectors, 14.6 GiB
-Logical sector size: 512 bytes
-Disk identifier (GUID): A1B2C3D4-E5F6-7890-ABCD-EF1234567890
-First usable sector is 34, last usable sector is 30543838
-Total free space is 2014 sectors (1007.0 KiB)
-
-Number  Start    End        Size       Code  Name
-   1    2048     67583      32.0 MiB   8300  boot
-   2    67584    2164735    1024.0 MiB 8300  rootfs-a
-   3    2164736  4261887    1024.0 MiB 8300  rootfs-b
-   4    4261888  30543838   12.5 GiB   8300  data
-```
+`sgdisk -p`로 layout을 확인합니다. 출력 예는 아래 genimage 절에 있습니다.
 
 ## A/B Partition Layout
 
@@ -81,7 +65,7 @@ GPT
 ├─ p7: data (remainder)             # 사용자 데이터
 ```
 
-A/B 슬롯의 동작 순서는 다음과 같습니다.
+이 layout은 설계 예입니다. A/B 슬롯의 동작을 설명용 변수 이름으로 적으면 다음과 같습니다. 남은 시도 횟수를 *줄여 가는* 이 방식은 RAUC의 U-Boot 연동(`BOOT_ORDER`, `BOOT_<슬롯>_LEFT`, Bootloader Ch 17)과 같은 설계이고, 아래 U-Boot `bootcount` 예는 횟수를 *올려 가며* `bootlimit`과 비교하는 다른 구현입니다.
 
 1. 부팅 직후: 부트로더가 `BOOT_SLOT` 환경 변수를 읽음. 기본 A.
 2. 슬롯 A의 boot와 rootfs를 mount.
@@ -94,50 +78,39 @@ A/B 슬롯의 동작 순서는 다음과 같습니다.
 U-Boot 환경 변수로 다음과 같이 구현합니다.
 
 ```text
-bootcount=0
 bootlimit=3
 altbootcmd=run boot_alt
 bootcmd=run boot_main
 
 boot_main=if test "$boot_slot" = "B"; then run boot_b; else run boot_a; fi
-boot_a=load mmc 0:2 ${kernel_addr_r} boot/Image; load mmc 0:4 ...; bootm
-boot_b=load mmc 0:3 ${kernel_addr_r} boot/Image; load mmc 0:5 ...; bootm
-boot_alt=if test "$boot_slot" = "B"; then setenv boot_slot A; else setenv boot_slot B; fi; saveenv; reset
+boot_a=load mmc 0:2 ${kernel_addr_r} Image; load mmc 0:2 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
+boot_b=load mmc 0:3 ${kernel_addr_r} Image; load mmc 0:3 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
+boot_alt=if test "$boot_slot" = "B"; then setenv boot_slot A; else setenv boot_slot B; fi; setenv bootcount 0; saveenv; reset
 ```
 
-`bootcount`와 `bootlimit`은 U-Boot가 자동으로 다루는 변수입니다. 부팅 시 +1, application의 `bootcount=0`로 reset. limit 초과 시 `altbootcmd` 실행.
+arm64 `Image`는 `booti`로 부팅합니다(Ch 6의 EVK 환경과 같은 명령). U-Boot v2024.04 `doc/README.bootcount`에 따르면 `CONFIG_BOOTCOUNT_LIMIT`이 켜진 U-Boot는 power-on reset 뒤 `bootcount`를 1로 두고 재부팅마다 1씩 올립니다. 그 값이 `bootlimit`을 넘으면 `bootcmd` 대신 `altbootcmd`를 실행하고(`include/bootcount.h:100-105`, `common/autoboot.c:476`), 성공한 부팅 뒤 `bootcount`를 0으로 돌리는 것은 Linux 쪽 application의 책임입니다. `boot_alt`에서 `bootcount`를 0으로 돌리지 않으면, 저장된 횟수가 계속 `bootlimit`을 넘은 채라 다음 부팅도 `altbootcmd`로 가서 슬롯을 다시 뒤집습니다. 그래서 슬롯을 바꾼 뒤 `setenv bootcount 0`을 함께 저장합니다. bootcount fallback을 QEMU에서 실제로 돌린 기록은 [Bootloader Ch 17](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다.
 
 ## SoC 부트 헤더와 첫 섹터
 
 SoC마다 부트 ROM이 읽는 첫 영역이 다릅니다. GPT가 이 영역을 *침범*하면 부팅이 안 됩니다.
 
-| SoC | 부트 영역 | 위치 |
-|-----|----------|------|
-| i.MX 6/7 | IVT + DCD + bootloader | offset 1024 byte |
-| i.MX 8M | container header | offset 32KB |
-| STM32MP1 | FSBL header | offset 0 (SD/eMMC) |
-| RK3399 | IDB header | sector 64 (32KB) |
-| Tegra | BCT | sector 0 |
-| TI AM335x | MLO | FAT 파티션 또는 raw |
+U-Boot v2024.04 보드 문서의 SD 기록 명령에서 각 SoC의 위치를 읽을 수 있습니다.
 
-GPT partition 1의 시작 위치는 SoC 부트 image가 사용하는 raw 영역 뒤로 정할 수 있습니다. 하지만 GPT metadata 자체는 표준 위치에 남겨야 하며, 실제 offset은 vendor image와 disk layout으로 확인합니다.
+| SoC | 부트 이미지 | 위치 | 근거 |
+|-----|----------|------|------|
+| i.MX 6UL/6ULL | `SPL` 또는 `u-boot-dtb.imx` | 1 KiB 오프셋 (`dd bs=1k seek=1`) | `doc/board/nxp/mx6ul_14x14_evk.rst:26`, `mx6ullevk.rst:29` |
+| i.MX 8M Plus | `flash.bin` | 32 KiB 오프셋 (`dd bs=1K seek=32`) | `doc/board/nxp/imx8mp_evk.rst:55` |
+| Rockchip | `idbloader.img` / `u-boot-rockchip.bin` | 섹터 64 (`dd seek=64`) | `doc/board/rockchip/rockchip.rst:267,341` |
+| STM32MP1 | TF-A BL2 또는 SPL | GPT 파티션 `fsbl1`, `fsbl2` (각 256 KiB 이상) | `doc/board/st/stm32mp1.rst:437-459` |
+| TI AM335x | `MLO` | boot FAT 파티션의 파일 | Buildroot `board/beaglebone/genimage.cfg` (Ch 1) |
 
-i.MX 8M의 예입니다.
+STM32MP1은 오프셋이 아니라 이름 붙은 GPT 파티션에서 부트 이미지를 찾는다는 점이 다릅니다. GPT partition 1의 시작 위치는 raw 부트 이미지 뒤로 미루되, GPT header와 entry array는 표준 위치(LBA 1, 2~33)에 둡니다.
 
-```text
-LBA 0              : Protective MBR
-LBA 1              : Primary GPT header
-LBA 2..33          : Primary GPT partition entries
-byte offset 32 KiB : i.MX8M example flash.bin placement (SoC/medium-specific)
-byte offset 8 MiB  : Example first partition start, leaving room for boot image
-...
-```
-
-GPT header와 primary entry array는 표준 레이아웃에서 LBA 1과 LBA 2부터 시작합니다. 첫 partition의 data 시작 위치는 boot image 영역을 피하도록 조정할 수 있지만, GPT header 자체를 1MB나 8MB로 옮기면 일반 GPT layout과 호환되지 않습니다. boot image가 GPT metadata와 겹치지 않는지, 해당 BootROM과 writer가 요구하는 배치를 함께 검증합니다.
+i.MX 8M Plus라면 LBA 0~33(17 KiB까지)이 GPT, 32 KiB부터 `flash.bin`, 그 뒤가 첫 partition입니다. 32 KiB는 34 LBA 끝(17 KiB)보다 뒤라서 128-entry GPT와 겹치지 않습니다. 아래 genimage 실행이 이 배치를 실제로 만듭니다.
 
 ## genimage로 이미지 조립
 
-Pengutronix의 `genimage`가 Buildroot/Yocto와 무관하게 standalone으로 자주 쓰입니다. 한 cfg 파일로 multi-partition disk image를 만듭니다.
+`genimage`는 cfg 파일 하나로 multi-partition disk image를 만듭니다. Buildroot의 BeagleBone 이미지도 이 도구로 조립합니다(Ch 1). 아래 cfg를 Debian 13의 genimage 18로 실행했습니다. rootfs와 data 크기는 시험용으로 줄였고, `u-boot` 자리에는 Ch 6에서 만든 i.MX 8M Plus `flash.bin`을 넣었습니다.
 
 ```text
 # genimage.cfg
@@ -146,7 +119,6 @@ image boot.vfat {
         files = {
             "Image",
             "mybsp.dtb",
-            "boot.scr",
         }
     }
     size = 32M
@@ -157,7 +129,7 @@ image rootfs.ext4 {
         label = "rootfs"
     }
     mountpoint = "/"
-    size = 1G
+    size = 64M
 }
 
 image sdcard.img {
@@ -167,14 +139,14 @@ image sdcard.img {
 
     partition u-boot {
         in-partition-table = "no"
-        image = "u-boot.bin"
+        image = "flash.bin"
         offset = 32K
-        size = 2M
     }
 
     partition boot-a {
         partition-type-uuid = U
         image = "boot.vfat"
+        offset = 8M
     }
 
     partition boot-b {
@@ -196,25 +168,42 @@ image sdcard.img {
 
     partition data {
         partition-type-uuid = L
-        size = 4G
+        size = 128M
     }
 }
 ```
 
 `in-partition-table = "no"`는 raw 영역(SoC가 읽는 부트 영역)에 쓰지만 GPT에는 표시하지 않는다는 뜻입니다.
 
-빌드:
+실행 결과 중 이미지 조립 부분입니다.
 
-```bash
-$ genimage \
-    --inputpath output/images \
-    --outputpath output/images \
-    --rootpath output/target \
-    --config genimage.cfg
-INFO: vfat(boot.vfat): cmd: "MAKEDOSFS=mkfs.fat ..."
-INFO: ext4(rootfs.ext4): cmd: "mkfs.ext4 ..."
+```text
+$ genimage --inputpath in --outputpath out --rootpath root --tmppath tmp --config genimage.cfg
+INFO: vfat(boot.vfat): cmd: "mkdosfs   '/root/gi/out/boot.vfat'" (stderr):
+INFO: ext4(rootfs.ext4): cmd: "mke2fs -t ext4 -I 256 -E 'root_owner=0:0,lazy_itable_init=0,lazy_journal_init=0' -O '^large_file' -O '^huge_file' -d '/root/gi/tmp/root'  -L 'rootfs'  '/root/gi/out/rootfs.ext4' 65536k" (stderr):
+INFO: hdimage(sdcard.img): adding primary partition 'u-boot' from 'flash.bin' ...
+...
 INFO: hdimage(sdcard.img): writing GPT
+INFO: hdimage(sdcard.img): writing protective MBR
+$ sgdisk -p out/sdcard.img
+Disk out/sdcard.img: 671784 sectors, 328.0 MiB
+Sector size (logical): 512 bytes
+...
+Partition table holds up to 128 entries
+Main partition table begins at sector 2 and ends at sector 33
+First usable sector is 16384, last usable sector is 671750
+...
+Number  Start (sector)    End (sector)  Size       Code  Name
+   1           16384           81919   32.0 MiB    EF00  boot-a
+   2           81920          147455   32.0 MiB    EF00  boot-b
+   3          147456          278527   64.0 MiB    8300  rootfs-a
+   4          278528          409599   64.0 MiB    8300  rootfs-b
+   5          409600          671743   128.0 MiB   8300  data
+$ dd if=out/sdcard.img bs=1K skip=32 count=4 | cmp -n 4096 - in/flash.bin && echo "flash.bin found at 32 KiB"
+flash.bin found at 32 KiB
 ```
+
+세 가지를 확인할 수 있습니다. entry array가 섹터 2~33에 있고, `flash.bin`이 32 KiB에 들어갔고, 첫 partition은 `offset = 8M`대로 섹터 16384에서 시작합니다. sgdisk가 첫 usable 섹터를 16384로 보고하므로, 이 이미지에서 다른 도구로 partition을 더 만들어도 8 MiB 앞쪽은 쓰이지 않습니다. `partition-type-uuid = U`는 EFI System Partition 타입(sgdisk 코드 `EF00`)으로, `L`은 Linux 파일시스템(`8300`)으로 들어갔습니다.
 
 `sdcard.img`를 `dd`나 `bmaptool`로 SD에 굽습니다.
 
@@ -222,32 +211,37 @@ INFO: hdimage(sdcard.img): writing GPT
 $ sudo dd if=sdcard.img of=/dev/sdX bs=4M status=progress conv=fsync
 ```
 
-`bmaptool`은 빈 영역을 건너뛰어 훨씬 빠릅니다.
+`bmaptool`은 데이터가 있는 블록만 씁니다. 위 이미지에서 만든 bmap입니다.
 
-```bash
+```text
 $ bmaptool create -o sdcard.bmap sdcard.img
-$ sudo bmaptool copy sdcard.img /dev/sdX
+$ grep -E "<ImageSize>|<BlockSize>|<BlocksCount>|<MappedBlocksCount>" sdcard.bmap
+    <ImageSize> 343953408 </ImageSize>
+    <BlockSize> 4096 </BlockSize>
+    <BlocksCount> 83973 </BlocksCount>
+    <MappedBlocksCount> 4651  </MappedBlocksCount>
 ```
+
+328 MiB 이미지 중 실제 데이터가 있는 블록은 4,651개(약 18 MiB)뿐입니다. 512 MiB 파일에 `bmaptool copy`로 쓴 뒤 원본과 `cmp`로 비교하면 같았습니다. 실제 SD 카드에서의 시간 단축은 재지 않았습니다.
 
 ## Android Sparse Image
 
-Android는 `.simg` (sparse image) 형식을 씁니다. 0으로 채워진 큰 영역을 메타데이터로만 표시해 전송량을 줄입니다. fastboot로 flash 할 때 사용됩니다.
+Android sparse image(`.simg`)는 빈 블록을 메타데이터로만 적는 형식이고, fastboot가 이 형식을 받습니다. 위의 64 MiB ext4로 해 본 결과입니다.
 
-```bash
-# raw → sparse
+```text
 $ img2simg rootfs.ext4 rootfs.simg
-
-# sparse → raw
-$ simg2img rootfs.simg rootfs.ext4
-
-$ fastboot flash rootfs rootfs.simg
+$ ls -l rootfs.ext4 rootfs.simg
+-rw-r--r-- 1 root root 67108864 Nov 16 08:08 rootfs.ext4
+-rw-r--r-- 1 root root   356604 Nov 16 08:08 rootfs.simg
+$ simg2img rootfs.simg back.ext4 && cmp rootfs.ext4 back.ext4 && echo roundtrip-identical
+roundtrip-identical
 ```
 
-16GB raw image가 1GB sparse로 줄어드는 일이 흔합니다. 양산 line에서 flash 속도에 직접 영향이 있습니다.
+64 MiB가 348 KiB가 됐고 되돌린 결과는 원본과 같았습니다. 줄어드는 비율은 파일시스템이 얼마나 차 있느냐에 달려 있고, 이 rootfs에는 `/etc/hostname` 하나만 있었습니다. fastboot로 실제 flash하는 흐름은 [Bootloader Ch 12](/blog/embedded/bootloader/chapter12-usb-boot)에서 다뤘습니다.
 
 ## Raw NAND/NOR Flash (MTD)
 
-raw flash는 GPT가 없습니다. MTD partition을 kernel cmdline 또는 device tree로 정의합니다.
+raw flash에는 GPT가 없습니다. MTD partition을 kernel cmdline 또는 device tree로 정의합니다. cmdline 문법은 `drivers/mtd/parsers/cmdlinepart.c` 첫 주석에 있고, DT의 `fixed-partitions`는 Ch 12의 binding입니다. 이 절의 명령은 raw flash가 없어 실행하지 않았습니다.
 
 ```text
 mtdparts=spi-nor:512K(u-boot),128K(env),64K(dtb),4M(kernel),-(rootfs)
@@ -288,12 +282,7 @@ mtdparts=spi-nor:512K(u-boot),128K(env),64K(dtb),4M(kernel),-(rootfs)
 };
 ```
 
-NAND rootfs는 `ubinize`로 UBI volume을 만들어 둡니다. UBI는 wear-leveling과 bad block management를 해 줍니다.
-
-```bash
-$ mkfs.ubifs -r rootfs/ -m 2048 -e 124KiB -c 1000 -o rootfs.ubifs
-$ ubinize -o rootfs.ubi -m 2048 -p 128KiB ubinize.cfg
-```
+NAND rootfs는 UBI 위에 UBIFS로 올립니다. `mkfs.ubifs`의 `-m`(최소 I/O 단위), `-e`(LEB 크기), `-c`(최대 LEB 수)와 `ubinize`의 `-p`(물리 erase block)는 NAND 칩의 page·erase block 크기에서 정해지므로 칩 datasheet 값을 넣습니다.
 
 raw 쓰기는 `flash_erase` + `nandwrite`:
 
@@ -304,62 +293,35 @@ $ nandwrite -p /dev/mtd4 rootfs.ubi
 
 ## 양산 라인의 flashing 도구
 
-| 도구 | SoC | 인터페이스 |
-|------|-----|-----------|
-| `uuu` | NXP i.MX | USB |
-| `fastboot` | Qualcomm, MediaTek, Android | USB |
-| `dfu-util` | STM, Allwinner | USB DFU |
-| `STM32CubeProgrammer` | STM32 | USB / UART / JTAG |
-| `RKDevTool` | Rockchip | USB |
-| `sunxi-fel` | Allwinner | USB FEL |
-| `bmaptool` | 일반 | SD card |
+SoC마다 ROM의 다운로드 모드에 맞는 도구가 있습니다. 아래는 U-Boot v2024.04 문서가 이름으로 언급하는 도구들입니다. 이 글은 어느 것도 실행하지 않았습니다.
 
-i.MX의 `uuu` 예입니다.
-
-```bash
-$ cat << 'EOF' > flash.uuu
-uuu_version 1.4.0
-
-SDP: boot -f flash.bin
-SDPU: write -f u-boot.itb -offset 0x57c00
-SDPU: jump
-
-FB: ucmd setenv fastboot_buffer 0x42000000
-FB: flash gpt sdcard.gpt
-FB: flash boot-a boot.vfat
-FB: flash rootfs-a rootfs.ext4
-FB: done
-EOF
-
-$ sudo uuu flash.uuu
-```
-
-양산 line이라면 *PC + USB hub + 보드 8대* 같은 setup에서 동시 flash가 표준입니다. uuu, fastboot 모두 multi-board 모드를 지원합니다.
+| 도구 | SoC | U-Boot 문서 |
+|------|-----|-------------|
+| `uuu` | NXP i.MX 8M | `doc/board/bsh/imx8mn_bsh_smm_s2.rst:56-61` (`uuu -v flash.bin`) |
+| `sunxi-fel` | Allwinner | `doc/board/allwinner/sunxi.rst:272-274` |
+| STM32CubeProgrammer | STM32MP1 | `doc/board/st/stm32mp1.rst:424` |
+| rockusb 계열 도구 | Rockchip | `doc/README.rockusb` |
+| `fastboot` | U-Boot fastboot gadget | [Bootloader Ch 12](/blog/embedded/bootloader/chapter12-usb-boot) |
 
 ## 자주 하는 실수
 
-**GPT와 SoC 부트 영역 배치를 혼동.** GPT primary header는 LBA 1에 있고 entry array는 그 뒤에 놓입니다. 1 MiB는 흔히 첫 partition 시작 경계로 쓰는 값이지 GPT header 시작 위치가 아닙니다. SoC의 부트 image가 차지하는 영역과 GPT entry array의 크기·위치를 실제 layout에서 대조하고, 첫 partition 시작 LBA는 매체와 부트 형식의 제약에 맞춰 정합니다.
+**GPT와 SoC 부트 영역 배치를 혼동.** GPT primary header는 LBA 1, entry array는 LBA 2~33입니다. 첫 partition 시작 위치는 별개의 값이고, 위 실행에서는 8 MiB였습니다. 부트 이미지(예: i.MX 8M Plus의 32 KiB)가 entry array 뒤에 오는지 `sgdisk -p`와 `dd | cmp`로 확인합니다.
 
-**변할 수 있는 장치 이름을 고정.** storage 연결과 열거 순서가 달라질 수 있다면 장치 이름만으로 root partition을 식별하지 않는 편이 안전합니다. `PARTUUID=` 등 선택한 식별자의 생성·전달·복구 경로를 확인합니다.
+**변할 수 있는 장치 이름을 고정.** `root=/dev/mmcblk0p2`는 장치 열거 순서가 바뀌면 다른 파티션을 가리킵니다. genimage cfg에 `partition-uuid`를 고정하고 `root=PARTUUID=`로 씁니다.
 
 **A/B 슬롯에서 환경 변수 동기화 실패.** 두 슬롯이 같은 `bootloader-env` partition을 공유해야 하는데 각 slot의 rootfs에 따로 두면 inconsistent. env는 *별도 partition*.
 
-**`dd` 대신 USB writer GUI 사용.** Windows의 일부 GUI tool이 GPT를 깨뜨립니다. 항상 `dd` + `sync`나 `bmaptool`.
-
-**bmap 없이 raw image 전송.** 16GB image 전체를 보내는 건 낭비입니다. `bmap`은 사용된 영역만 표시합니다.
+**bmap 없이 raw image 전송.** 위 예에서 328 MiB 중 데이터 블록은 18 MiB 남짓이었습니다. `bmap`은 그 블록만 씁니다.
 
 **sparse image 직접 mount 시도.** `.simg`는 그냥 mount 안 됩니다. `simg2img`로 변환 후.
 
 ## 정리
 
-- 첫 섹터의 의미는 SoC마다 다릅니다. SoC vendor 가이드의 layout을 출발점으로 삼아야 합니다.
-- GPT가 표준입니다. MBR은 legacy SD 카드 정도, raw NAND는 MTD partition.
-- A/B 슬롯은 OTA 안전성의 출발점입니다. boot 슬롯과 rootfs 슬롯을 짝지어 두 세트 둡니다.
-- partition UUID로 root를 지정해야 device 이름 변화에 영향을 받지 않습니다.
-- `genimage`는 단일 cfg로 multi-partition disk image를 만드는 표준 도구입니다.
-- `bmaptool`은 빈 영역을 건너뛰어 이미지 기록 시간을 줄일 수 있습니다. 실제 절감 폭은 이미지의 사용 영역과 저장 장치·USB 경로에 따라 달라집니다.
-- Android sparse image는 fastboot 환경에서 큰 image의 전송 시간을 단축합니다.
-- 양산 flashing은 SoC별 전용 도구(uuu, fastboot, RKDevTool, dfu-util)를 PC line에서 multi-board로 운영합니다.
+- 부트 이미지 위치는 SoC마다 다릅니다. i.MX 6UL 1 KiB, i.MX 8M Plus 32 KiB, Rockchip 섹터 64, STM32MP1은 `fsbl1`/`fsbl2` GPT 파티션입니다(U-Boot v2024.04 문서).
+- GPT header와 entry array는 LBA 1~33이고, 첫 partition은 부트 이미지 뒤로 미룹니다.
+- A/B 슬롯은 U-Boot의 `bootcount`/`bootlimit`/`altbootcmd`로 전환하고, 부팅 성공 뒤 `bootcount`를 0으로 돌리는 것은 Linux 쪽 책임입니다.
+- genimage 18은 `offset = 32K`의 raw 이미지와 `offset = 8M`의 첫 partition을 가진 GPT 이미지를 만들었습니다.
+- 그 이미지에서 bmap은 328 MiB 중 4,651블록(4 KiB 단위)만, sparse image는 64 MiB ext4를 348 KiB로 표현했습니다.
 
 ## 다음 편 예고
 

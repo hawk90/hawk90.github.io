@@ -12,9 +12,9 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**Thermal과 watchdog은 *최후의 안전망*입니다.** 부팅 후 software가 정상 동작하지 않거나 칩이 너무 뜨거워졌을 때, 사용자 개입 없이 시스템을 보호하는 마지막 메커니즘입니다. BSP가 이 둘을 빠뜨리면 양산 후 필드에서 "왜 갑자기 보드가 죽었는가"를 영원히 추적하게 됩니다.
+**Thermal과 watchdog은 *최후의 안전망*입니다.** 칩이 너무 뜨거워지거나 software가 멈췄을 때, 사람이 없어도 시스템을 보호합니다. 온도 조절기와 데드맨 스위치(손을 떼면 기차가 멈추는 장치)에 해당합니다.
 
-여름철 차량 내부 70°C, 산업 현장 먼지 속의 fanless 보드, 무인 키오스크의 24시간 운용 — 임베디드는 *사람이 옆에 없는 환경*에서 동작하는 경우가 많습니다. 이 장에서는 thermal 정책과 watchdog 통합 시 확인할 항목을 다룹니다. thermal framework가 발열을 다스리고, watchdog이 hang을 끊습니다.
+이 글의 thermal 부분은 Linux v6.12의 i.MX 8M Plus DT와 드라이버 소스로 설명합니다. QEMU guest에는 thermal zone이 없어 온도 측정은 하지 않았습니다. watchdog 부분은 QEMU의 i6300ESB 가상 watchdog을 붙인 Debian 13 guest에서 실제로 keepalive를 멈춰 시스템이 꺼지는 것까지 확인했습니다.
 
 ## Thermal framework 구조
 
@@ -22,98 +22,72 @@ topics: ["embedded"]
 
 ## DT의 thermal-zones
 
-i.MX8M Mini를 예로 듭니다.
+Linux v6.12 `imx8mp.dtsi:282-311`의 CPU zone입니다. 같은 파일에 `soc-thermal` zone(`&tmu 1`)이 하나 더 있습니다.
 
-```text
+```c
 thermal-zones {
-    cpu-thermal {
-        polling-delay-passive = <250>;
-        polling-delay = <2000>;
-        thermal-sensors = <&tmu>;
+	cpu-thermal {
+		polling-delay-passive = <250>;
+		polling-delay = <2000>;
+		thermal-sensors = <&tmu 0>;
+		trips {
+			cpu_alert0: trip0 {
+				temperature = <85000>;
+				hysteresis = <2000>;
+				type = "passive";
+			};
 
-        trips {
-            cpu_alert0: trip0 {
-                temperature = <85000>;     /* 85 °C */
-                hysteresis = <2000>;
-                type = "passive";
-            };
+			cpu_crit0: trip1 {
+				temperature = <95000>;
+				hysteresis = <2000>;
+				type = "critical";
+			};
+		};
 
-            cpu_alert1: trip1 {
-                temperature = <95000>;     /* 95 °C */
-                hysteresis = <2000>;
-                type = "hot";
-            };
-
-            cpu_crit: trip2 {
-                temperature = <105000>;    /* 105 °C */
-                hysteresis = <2000>;
-                type = "critical";
-            };
-        };
-
-        cooling-maps {
-            map0 {
-                trip = <&cpu_alert0>;
-                cooling-device = <&A53_0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
-                                 <&A53_1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
-                                 <&A53_2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
-                                 <&A53_3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
-            };
-        };
-    };
+		cooling-maps {
+			map0 {
+				trip = <&cpu_alert0>;
+				cooling-device =
+					<&A53_0 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+					<&A53_1 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+					<&A53_2 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>,
+					<&A53_3 THERMAL_NO_LIMIT THERMAL_NO_LIMIT>;
+			};
+		};
+	};
+	...
 };
 ```
+
+85 °C에서 CPU 4개를 cooling device로 써서 주파수를 낮추고(passive), 95 °C에서 시스템을 끕니다(critical). passive가 동작하려면 Ch 13의 OPP table이 있어야 합니다. CPU cooling device는 cpufreq 주파수 단계를 cooling state로 쓰고, 가장 높은 state가 가장 낮은 주파수입니다(`drivers/thermal/cpufreq_cooling.c:29-34`).
+
+trip type 네 가지는 `drivers/thermal/thermal_of.c:28-31`의 문자열 표(`active`, `passive`, `hot`, `critical`)에 있습니다.
 
 | trip type | 동작 |
 |-----------|------|
 | `active` | fan 같은 능동 냉각 가동 |
 | `passive` | CPU throttling (DVFS down) |
-| `hot` | 경고 알림, userspace 통보 |
-| `critical` | 강제 shutdown |
+| `hot` | zone 드라이버의 `hot` 콜백 호출 |
+| `critical` | 시스템 정지 |
 
-critical trip의 필요 여부와 임계값은 SoC 안전 요구사항과 platform thermal design에 따라 정합니다. Linux thermal core의 동작은 kernel 버전과 zone ops에 달려 있으며, 일부 경로는 orderly poweroff/shutdown을 요청하고 실패 시 설정된 emergency action을 수행합니다. `emergency_restart()`가 항상 첫 동작인 것은 아닙니다.
+critical에 도달하면 `thermal_zone_device_halt()`(`drivers/thermal/thermal_core.c:385-400`)가 `"%s: critical temperature reached"`를 찍고 `hw_protection_shutdown("Temperature too high", poweroff_delay_ms)`을 부릅니다. 지연값은 `CONFIG_THERMAL_EMERGENCY_POWEROFF_DELAY_MS`이고, 정상 종료가 그 시간 안에 끝나지 않으면 강제 전원 차단으로 넘어갑니다.
 
-## Cortex-A 등급별 최대 온도
+## 온도 등급과 trip 값
 
-칩 등급에 따라 허용 온도가 다릅니다.
+trip 값을 DT에 고정할지, 칩의 온도 등급에 따라 바꿀지는 드라이버가 정합니다. i.MX 8M Plus의 TMU는 `imx8mm_thermal.c`가 맡고, 이 드라이버는 DT의 85/95 °C를 그대로 씁니다. 반면 i.MX6/7의 `drivers/thermal/imx_thermal.c`는 fuse에서 온도 등급을 읽어 trip을 계산합니다(421~450행).
 
-| 등급 | 동작 범위 (Tj) | critical 권장 |
-|------|----------------|---------------|
-| Commercial | 0 ~ 95°C | 90 °C |
-| Industrial | -40 ~ 105°C | 100 °C |
-| Automotive AEC-Q100 Grade 3 | -40 ~ 125°C | 115 °C |
-| Automotive AEC-Q100 Grade 2 | -40 ~ 105°C | 100 °C |
+| fuse 등급 (`imx_thermal.c`) | `temp_max` | passive (`max - 10 °C`) | critical (`max - 5 °C`) |
+|------|------|------|------|
+| Commercial | 95 °C | 85 °C | 90 °C |
+| Extended Commercial | 105 °C | 95 °C | 100 °C |
+| Industrial | 105 °C | 95 °C | 100 °C |
+| Automotive | 125 °C | 115 °C | 120 °C |
 
-부품 datasheet의 Tj_max를 확인하고, **그 값보다 5~10°C 낮게** critical trip을 둡니다. ambient와 internal의 thermal lag을 감안한 마진입니다.
+이 드라이버는 부팅 때 `"%s CPU temperature grade - max:%dC critical:%dC passive:%dC"`를 찍습니다(696~698행). i.MX 8M Plus 제품을 산업용 등급 칩으로 만든다면, DT의 95 °C critical이 그 칩의 등급에 맞는지 datasheet의 동작 온도와 대조해 보드 dts에서 덮어씁니다. 이 글은 i.MX 8M Plus datasheet의 등급별 온도를 인용하지 않았으므로 값을 제시하지 않습니다.
 
 ## 동작 확인
 
-```bash
-$ ls /sys/class/thermal/
-cooling_device0  cooling_device1  thermal_zone0
-
-$ cat /sys/class/thermal/thermal_zone0/type
-cpu-thermal
-
-$ cat /sys/class/thermal/thermal_zone0/temp
-58234            # 58.234 °C
-
-$ cat /sys/class/thermal/thermal_zone0/trip_point_0_temp
-85000
-
-$ cat /sys/class/thermal/thermal_zone0/trip_point_2_type
-critical
-
-$ cat /sys/class/thermal/cooling_device0/type
-thermal-cpufreq-0
-
-$ cat /sys/class/thermal/cooling_device0/cur_state
-0                # 0 = no throttling
-$ cat /sys/class/thermal/cooling_device0/max_state
-3
-```
-
-cooling device의 `cur_state`는 해당 device가 보고하는 cooling state입니다. CPU frequency가 실제로 낮아지는지는 cooling-map binding과 cpufreq device 동작을 함께 확인해야 합니다.
+sysfs에서는 `/sys/class/thermal/thermal_zoneN/`에 `type`, `temp`(밀리도), `trip_point_M_temp`, `trip_point_M_type`이 있고, `/sys/class/thermal/cooling_deviceN/`에 `type`, `cur_state`, `max_state`가 있습니다. 이 글의 QEMU guest에서는 `/sys/class/thermal/` 아래가 비어 있었습니다(Ch 5). 실제 보드의 값은 싣지 않습니다.
 
 ## Thermal governor
 
@@ -125,31 +99,11 @@ cooling device의 `cur_state`는 해당 device가 보고하는 cooling state입�
 | `user_space` | userspace daemon이 정책 결정 |
 | `power_allocator` | power budget 기반 (PID 제어) |
 
-기본 thermal governor는 kernel configuration에 따라 다릅니다. 사용할 수 있는 policy와 제어 특성을 target kernel에서 확인하고, board thermal model에 맞춰 검증합니다.
-
-```text
-thermal-zones {
-    cpu-thermal {
-        thermal-governor = "power_allocator";
-        sustainable-power = <1500>;
-        /* ... */
-    };
-};
-```
-
-확인:
-
-```bash
-$ cat /sys/class/thermal/thermal_zone0/policy
-step_wise
-$ cat /sys/class/thermal/thermal_zone0/available_policies
-bang_bang fair_share power_allocator step_wise user_space
-$ echo power_allocator > /sys/class/thermal/thermal_zone0/policy
-```
+기본 governor는 Kconfig의 choice로 정하고, 그 기본값은 `THERMAL_DEFAULT_GOV_STEP_WISE`입니다(`drivers/thermal/Kconfig:97`). DT binding(`thermal/thermal-zones.yaml`)에는 governor를 고르는 속성이 없습니다. `power_allocator`가 쓰는 `sustainable-power`만 zone 속성으로 있습니다(118행). 런타임에는 `/sys/class/thermal/thermal_zoneN/policy`에 governor 이름을 써서 바꾸고, 고를 수 있는 목록은 같은 디렉터리의 `available_policies`에 있습니다(`Documentation/driver-api/thermal/sysfs-api.rst:289`).
 
 ## 외부 sensor와 cooling device
 
-칩 내부 sensor만으로 부족하면 외부 thermistor, fan, peltier 등을 추가합니다.
+칩 내부 sensor만으로 부족하면 외부 온도 센서와 fan을 추가합니다. 아래의 `ti,tmp103`은 `drivers/hwmon/tmp103.c:206`의 OF compatible이고, `pwm-fan`의 `cooling-levels`는 `hwmon/pwm-fan.yaml:17`의 속성입니다.
 
 ```text
 /* i2c thermistor */
@@ -195,80 +149,64 @@ thermal-zones {
 
 ## hwmon 통합
 
-thermal sensor가 hwmon으로도 노출됩니다.
-
-```bash
-$ sensors
-imx8mm_thermal-virtual-0
-Adapter: Virtual device
-temp1:        +58.2°C  (high = +85.0°C, crit = +105.0°C)
-
-tmp103-i2c-1-70
-Adapter: i.MX I2C adapter 1
-temp1:        +32.1°C  (low  = -55.0°C, high = +127.0°C)
-```
-
-`lm-sensors` 패키지의 `sensors` 명령이 표준입니다.
+thermal sensor는 hwmon 장치로도 노출되어 `lm-sensors` 패키지의 `sensors` 명령으로 읽힙니다. 이 글에서는 센서가 있는 보드에서 실행하지 않았으므로 출력은 싣지 않습니다.
 
 ## Watchdog — 자기 reset 메커니즘
 
-Watchdog은 *주기적으로 키워주지 않으면* 시스템을 reset하는 timer입니다. software hang 시 마지막 안전망입니다.
+Watchdog은 *주기적으로 신호를 주지 않으면* 시스템을 reset하는 timer입니다. 열어서 timeout을 정하면 카운트다운이 시작되고, 프로그램이 timeout 안에 `WDIOC_KEEPALIVE`를 보낼 때마다 카운트다운이 처음으로 돌아갑니다. 프로그램이 멈춰 신호가 끊기면 timeout이 지나 시스템이 reset됩니다.
 
-동작 흐름은 이렇습니다. watchdog timer를 enable한 뒤 timeout(예: 60초)을 설정하면 timer가 tick을 시작합니다. application은 매 N초마다 `WDIOC_KEEPALIVE` ioctl을 보내 watchdog 카운터를 초기화합니다. 만약 application이 hang되어 KEEPALIVE가 오지 않으면, timeout이 만료되고 시스템이 reset됩니다.
+### /dev/watchdog 사용 — QEMU에서 실제로 해 보기
 
-<!-- TODO: TikZ (_design.tex) — watchdog timer / application KEEPALIVE flow diagram -->
+QEMU에 `-device i6300esb -action watchdog=poweroff`를 주면 guest에 Intel 6300ESB watchdog이 보이고, 그것이 만료되면 QEMU가 전원을 끕니다. Debian 13 guest의 부팅 로그와 sysfs입니다.
 
 ```text
-[watchdog timer]
-   |- enable
-   |- timeout
-   `- tick
-
-[application]
-   `- WDIOC_KEEPALIVE ioctl (every N s)
-        |
-        v
-   watchdog counter reset
+[    0.629647] i6300ESB timer 0000:00:03.0: initialized. heartbeat=30 sec (nowayout=0)
+$ cat /sys/class/watchdog/watchdog0/identity /sys/class/watchdog/watchdog0/timeout /sys/class/watchdog/watchdog0/state
+i6300ESB timer
+30
+inactive
 ```
 
-### /dev/watchdog 사용
+시험 프로그램은 timeout을 정하고, timeout의 절반마다 keepalive를 보내고, 마지막에 magic close(`'V'`)를 쓸지 고릅니다.
 
 ```c
-#include <fcntl.h>
-#include <linux/watchdog.h>
-#include <sys/ioctl.h>
-#include <unistd.h>
-
-int main(void)
-{
-    int fd = open("/dev/watchdog", O_WRONLY);
-    if (fd < 0) {
-        perror("open");
-        return 1;
-    }
-
-    /* timeout 30초 설정 */
-    int timeout = 30;
-    ioctl(fd, WDIOC_SETTIMEOUT, &timeout);
-
-    /* 활성화 */
-    int options = WDIOS_ENABLECARD;
-    ioctl(fd, WDIOC_SETOPTIONS, &options);
-
-    while (1) {
-        sleep(10);
-        /* keepalive */
-        ioctl(fd, WDIOC_KEEPALIVE, NULL);
-    }
-
-    /* close하면 watchdog stop. 'V'를 쓴 후에야 stop 허용 */
-    write(fd, "V", 1);
-    close(fd);
-    return 0;
+int fd = open("/dev/watchdog", O_WRONLY);
+ioctl(fd, WDIOC_SETTIMEOUT, &timeout);
+ioctl(fd, WDIOC_GETTIMEOUT, &timeout);
+for (int i = 0; i < n; i++) {
+	sleep(timeout / 2);
+	ioctl(fd, WDIOC_KEEPALIVE, 0);
 }
+if (magic)
+	write(fd, "V", 1);
+close(fd);
 ```
 
-`WDIOC_KEEPALIVE` 외에 어떤 데이터든 fd에 쓰면 keepalive 효과를 냅니다. 단, *'V'* 문자열을 보낸 후 close하면 *명시적 종료*로 처리되어 watchdog이 멈춥니다.
+먼저 magic close를 쓰고 닫은 경우입니다. watchdog이 `inactive`로 돌아가고 시스템은 그대로입니다.
+
+```text
+$ ./wdt 10 2 1
+timeout now 10 s
+1794816122 keepalive 1
+1794816127 keepalive 2
+1794816127 closed (magic=1)
+$ cat /sys/class/watchdog/watchdog0/state
+inactive
+```
+
+다음은 `'V'` 없이 닫은 경우입니다. 커널은 `watchdog: watchdog0: watchdog did not stop!`을 찍고(`drivers/watchdog/watchdog_dev.c:968`) watchdog을 켠 채로 둡니다.
+
+```text
+$ ./wdt 10 1 0
+timeout now 10 s
+1794816142 keepalive 1
+1794816142 closed (magic=0)
+$ cat /sys/class/watchdog/watchdog0/state
+active
+[  134.523166] watchdog: watchdog0: watchdog did not stop!
+```
+
+guest에서 2초마다 찍던 시각이 1794816152에서 끊겼고, 바로 그때 ssh 연결이 끊기고 QEMU 프로세스가 종료됐습니다. 마지막 keepalive에서 10초, 설정한 timeout과 같습니다. `Documentation/watchdog/watchdog-api.rst:62-66`의 Magic Close 절이 이 동작을 설명합니다. magic close를 지원하는 드라이버는 `'V'`를 받기 전에는 close해도 watchdog을 끄지 않습니다. 감시 프로그램이 죽어서 fd가 닫힌 경우와 정상 종료를 구분하기 위한 장치입니다.
 
 ### systemd watchdog 통합
 
@@ -278,13 +216,16 @@ systemd가 PID 1로서 watchdog을 직접 잡아 줍니다.
 # /etc/systemd/system.conf
 [Manager]
 RuntimeWatchdogSec=30
-ShutdownWatchdogSec=10min
+RebootWatchdogSec=10min
+```
 
+```ini
+# 서비스 unit 파일
 [Service]
 WatchdogSec=10s
 ```
 
-`RuntimeWatchdogSec=30`은 systemd가 `/dev/watchdog`을 잡고 매 ~15초마다 키워줍니다. 서비스 단위의 `WatchdogSec`은 그 서비스가 systemd에 sd_notify로 신호를 보내야 하는 주기입니다.
+Debian 13의 `systemd-system.conf(5)`는 `RuntimeWatchdogSec=`가 0이 아니면 하드웨어 watchdog을 그 timeout으로 설정하고, systemd가 "at least once in half the specified timeout interval" 신호를 보낸다고 적습니다. 위 guest의 기본값은 `systemctl show`로 `RuntimeWatchdogUSec=0`, `RebootWatchdogUSec=10min`이었습니다. 즉 Debian 기본 설정에서는 systemd가 런타임 watchdog을 잡지 않습니다. 서비스 단위의 `WatchdogSec`은 그 서비스가 `sd_notify`로 신호를 보내야 하는 주기입니다.
 
 ```c
 #include <systemd/sd-daemon.h>
@@ -299,90 +240,58 @@ void worker_loop(void)
 }
 ```
 
-서비스가 hang하면 systemd가 그 서비스를 restart하고, systemd 자체가 hang하면 kernel watchdog이 reset.
+서비스가 신호를 끊으면 systemd가 그 서비스를 처리하고(unit의 `Restart=` 설정에 따라), systemd 자체가 멈추면 하드웨어 watchdog이 reset합니다.
 
 ### DT binding
 
-```text
+i.MX 8M Plus EVK의 watchdog 노드입니다(`imx8mp-evk.dts:794-799`). `timeout-sec`은 공통 binding `watchdog/watchdog.yaml:26`의 선택 속성이라 EVK처럼 생략하면 드라이버 기본값을 씁니다.
+
+```c
 &wdog1 {
-    pinctrl-names = "default";
-    pinctrl-0 = <&pinctrl_wdog>;
-    fsl,ext-reset-output;       /* WDOG_B 핀으로 외부 reset 신호 출력 */
-    status = "okay";
-    timeout-sec = <30>;
+	pinctrl-names = "default";
+	pinctrl-0 = <&pinctrl_wdog>;
+	fsl,ext-reset-output;
+	status = "okay";
 };
 ```
 
-`timeout-sec`은 기본 timeout. `fsl,ext-reset-output`이 있으면 internal reset이 아닌 외부 reset 라인을 toggle합니다. PMIC 등을 통해 보드 전체를 reset할 때 필요합니다.
+`fsl,ext-reset-output`(binding `watchdog/fsl-imx-wdt.yaml:51-54`)이 있으면 watchdog이 WDOG_B 신호를 내보내 외부 reset을 겁니다. Ch 7의 TF-A `imx_system_reset()`이 `IMX_WDOG_B_RESET`에 따라 `imx_wdog_restart(true/false)`를 고르던 것과 같은 배선 문제입니다.
 
 ### boot-time watchdog
 
-부팅이 너무 오래 걸리면 reset하는 메커니즘입니다. SPL이 watchdog을 켜고 timeout을 짧게(예: 120초) 둡니다. U-Boot proper, kernel 부팅을 거쳐 systemd가 watchdog을 인계받기 전까지 멈추지 않게 됩니다.
-
-**U-Boot:**
-
-- WDT:   Started watchdog@30280000 with servicing (60s timeout)
-
-U-Boot가 watchdog을 서비싱하면서 부팅을 진행합니다. 부팅 단계 어디서든 hang하면 watchdog이 reset해 재부팅 루프를 만듭니다. 이 루프 자체는 정상 동작입니다 — fail-safe 설계가 의도한 동작입니다.
+부팅 도중의 hang도 watchdog으로 끊을 수 있습니다. U-Boot의 watchdog driver model은 장치를 켜고 U-Boot가 도는 동안 신호를 줍니다(U-Boot v2024.04 `drivers/watchdog/Kconfig:13-19`의 `WATCHDOG_AUTOSTART`, 기본값 y). 커널로 넘어간 뒤에는 커널 드라이버나 systemd가 이어받아야 합니다. 이어받는 쪽이 없으면 위 QEMU 시험처럼 timeout 뒤 reset됩니다. 이 글은 U-Boot에서 watchdog을 켜 보지 않았습니다.
 
 ## 측정과 검증
 
 ### thermal 스트레스 테스트
 
-```bash
-# 부하 발생
-$ stress-ng --cpu $(nproc) --timeout 600s &
-
-# 다른 터미널에서 모니터링
-$ while true; do
-    cat /sys/class/thermal/thermal_zone0/temp
-    cat /sys/devices/system/cpu/cpu0/cpufreq/scaling_cur_freq
-    sleep 1
-  done
-```
-
-passive trip에 도달하면 frequency가 단계적으로 떨어지는지 확인합니다.
+실제 보드에서는 `stress-ng --cpu $(nproc)`로 부하를 걸고 `thermal_zone0/temp`와 `cpufreq/scaling_cur_freq`를 함께 기록해, 85 °C passive trip에서 주파수가 내려가는지 봅니다. 이 글은 thermal zone이 없는 QEMU guest만 써서 이 시험을 하지 않았습니다.
 
 ### watchdog 동작 테스트
 
-```bash
-# watchdog을 잡고 의도적으로 keepalive 멈춤
-echo 1 > /dev/watchdog
-sleep 30   # 또는 timeout 만큼 대기
-# → reset 발생해야 함
-```
+위 QEMU 시험이 그 절차입니다. `'V'` 없이 닫고 timeout만큼 기다리면 reset(QEMU에서는 설정에 따라 poweroff)이 나야 합니다.
 
-부팅 후 dmesg에 reset 원인을 확인:
-
-```bash
-$ cat /proc/reset-reason       # 보드별
-watchdog_reset
-
-$ dmesg | grep -i wdog
-[    0.123456] imx2-wdt 30280000.watchdog: timeout 30 sec (nowayout=0)
-[    0.234567] imx2-wdt 30280000.watchdog: Last reset was caused by watchdog
-```
+재부팅 뒤 원인은 `/sys/class/watchdog/watchdog0/bootstatus`로 봅니다(`Documentation/ABI/testing/sysfs-class-watchdog`). i.MX의 `imx2_wdt` 드라이버는 reset 원인 레지스터(WRSR)의 timeout 비트가 서 있으면 `bootstatus`에 `WDIOF_CARDRESET`을 넣습니다(`drivers/watchdog/imx2_wdt.c:324`).
 
 ## 자주 하는 실수
 
-- **critical trip 누락**: critical 없이는 진짜 위급 상황에서 shutdown이 안 됩니다.
-- **DT의 thermal-zones 누락**: sensor는 동작하지만 throttling이 안 됩니다. dmesg에 `no thermal-zones found` 경고.
-- **cooling device map 누락**: throttle해야 할 cpu를 지정 안 하면 발열만 측정하고 대응 없음.
-- **wdt가 비활성**: `CONFIG_WATCHDOG=y`만 켜고 `CONFIG_<vendor>_WATCHDOG=y`가 없어 드라이버 미사용.
-- **systemd RuntimeWatchdogSec 미설정**: `/dev/watchdog` 존재해도 누가 keepalive 안 함.
-- **wdt timeout이 너무 짧음**: 부팅이 30초인데 timeout이 20초면 영원히 부팅 못 함.
-- **`fsl,ext-reset-output` 없는 PMIC reset 의존**: 내부 reset만 동작해 PMIC가 안 끊기면 잔존 상태로 부팅.
+- **critical trip 누락**: `thermal_zone_device_halt()`가 불릴 조건이 없어집니다.
+- **DT의 thermal-zones 누락**: OF thermal 코드는 `thermal-zones` 노드를 찾아 zone을 만듭니다(`thermal_of.c:144`). 노드가 없으면 zone도 throttling도 없습니다.
+- **cooling device map 누락**: 온도는 읽히지만 passive trip에서 할 일이 없습니다.
+- **watchdog 드라이버 미선택**: `CONFIG_WATCHDOG=y`만으로는 장치가 생기지 않습니다. i.MX는 `CONFIG_IMX2_WDT`가 필요합니다.
+- **systemd RuntimeWatchdogSec 미설정**: Debian 기본값은 0이라 systemd가 watchdog을 잡지 않습니다.
+- **magic close 생략**: 감시 프로그램을 정상 종료할 때 `'V'`를 쓰지 않으면 위 시험처럼 timeout 뒤 reset됩니다.
+- **`fsl,ext-reset-output` 누락**: 이 속성이 없으면 WDOG_B 핀으로 외부 reset이 나가지 않습니다. PMIC까지 reset해야 하는 보드라면 필요합니다.
 
 ## 정리
 
-- Thermal framework는 sensor, zone, trip point, cooling device의 4개 레이어로 구성됩니다.
-- DT의 `thermal-zones`가 zone과 trip을 선언하고, `cooling-maps`가 trip과 cooling device를 연결합니다.
-- trip type과 critical 동작은 해당 SoC thermal binding, kernel version 및 제품 안전 요구사항에서 확인합니다.
-- Cortex-A 등급별 Tj_max를 기준으로 critical을 5~10°C 마진 두고 설정합니다.
-- thermal governor는 step_wise가 기본이며 정밀 제어는 power_allocator를 씁니다.
-- Watchdog은 `/dev/watchdog`을 통해 `WDIOC_KEEPALIVE`로 키워 주는 timer입니다.
-- systemd의 `RuntimeWatchdogSec`이 PID 1 차원에서 watchdog을 자동 운용합니다.
-- 부팅 hang 보호를 위해 SPL/U-Boot부터 watchdog을 켜고 부팅 단계에서 keepalive를 유지합니다.
+- Thermal framework는 sensor, zone, trip point, cooling device의 네 층입니다.
+- i.MX 8M Plus(v6.12)는 CPU zone에 85 °C passive, 95 °C critical을 둡니다.
+- critical은 `hw_protection_shutdown()`으로 이어집니다.
+- i.MX6/7의 `imx_thermal.c`는 fuse 등급의 최대 온도에서 10 °C(passive), 5 °C(critical)를 뺍니다.
+- 기본 governor는 Kconfig 기본값 `step_wise`이고, DT로는 governor를 고르지 않습니다.
+- Watchdog은 `'V'`로 magic close하지 않고 닫으면 켜진 채로 남아, QEMU 시험에서 정확히 timeout 뒤 시스템을 껐습니다.
+- Debian 13의 systemd는 기본으로 런타임 watchdog을 잡지 않습니다(`RuntimeWatchdogUSec=0`).
 
 ## 다음 편 예고
 

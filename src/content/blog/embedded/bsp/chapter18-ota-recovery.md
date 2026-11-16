@@ -12,42 +12,38 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**OTA는 업데이트 원자성, 실패 탐지, 복구 경로를 함께 설계해야 합니다.** A/B 슬롯과 서명 검증은 위험을 줄이는 구성요소지만 전원·저장장치·bootloader 고장까지 포함해 벽돌 상태를 완전히 방지한다고 보장하지 않습니다.
+**OTA는 업데이트 원자성, 실패 탐지, 복구 경로를 함께 설계해야 합니다.** A/B 슬롯과 서명 검증은 위험을 줄이는 구성요소이고, 전원·저장장치·부트로더 고장까지 막아 주지는 않습니다.
 
-OTA가 없는 BSP는 *현장에서 죽은* BSP입니다. 가전, 차량, 산업 IoT 모두 펌웨어를 회수해 다시 굽는 비용을 감당할 수 없습니다. 동시에 OTA가 *잘못* 설계되면 한 번의 실패가 전체 fleet을 벽돌로 만듭니다.
-
-이번 글은 OTA 아키텍처 비교, RAUC/SWUpdate 같은 update agent 통합, U-Boot의 bootcount fallback, 서명과 delta update를 다룹니다.
+이번 글은 슬롯 구성, U-Boot bootcount fallback, update agent, 서명, delta update, 복구 경로를 다룹니다. RAUC 1.13으로 3단 인증서 체인과 bundle을 실제로 만들어 검증했고, 인증서 만료 뒤의 동작, bsdiff와 casync의 delta도 Debian 13 guest에서 돌렸습니다. U-Boot bootcount fallback과 RAUC의 U-Boot 슬롯 스크립트(`BOOT_ORDER`/`BOOT_x_LEFT`)를 QEMU에서 돌린 기록은 [Bootloader Ch 17](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다. `rauc install`과 `mark-good`은 이 시리즈에서 실행하지 않았습니다.
 
 ## OTA 아키텍처 비교
 
-| 방식 | 슬롯 구성 | 디스크 사용 | 롤백 | 적합 |
-|------|----------|-----------|------|------|
-| Single + recovery | rootfs + recovery | rootfs + 100MB | recovery에서 다시 flash | 저용량 |
-| A/B 전체 슬롯 | 2× (boot+rootfs) | 2× | 즉시 (재부팅) | 표준 |
-| A/B with shared data | 2× (boot+rootfs) + data | 2× + data | 즉시, data 유지 | 가전 표준 |
-| Delta + A/B | 2× + delta cache | 2× + 일부 | 즉시 | 대역폭 절약 |
-| Atomic with ostree | content-addressed | 1× + 작은 cache | git처럼 checkout | 컨테이너 워크로드 |
+| 방식 | 슬롯 구성 | 롤백 |
+|------|----------|------|
+| Single + recovery | rootfs + recovery | recovery에서 다시 기록 |
+| A/B 전체 슬롯 | boot+rootfs 두 벌 | 다른 슬롯으로 재부팅 |
+| A/B + 공유 data | boot+rootfs 두 벌 + data 한 벌 | 다른 슬롯으로 재부팅, data 유지 |
+| Delta + A/B | A/B에 변경분만 전송 | 다른 슬롯으로 재부팅 |
 
-가장 안전하고 흔한 패턴은 *A/B with shared data*입니다. boot/rootfs는 2벌, data는 1벌 공유.
+이삿짐에 비유하면 A/B는 새 집을 다 꾸민 뒤 이사하는 방식입니다. 새 집(비활성 슬롯)에 문제가 있으면 옛 집으로 돌아가면 됩니다. Ch 17의 layout(boot-a/b, rootfs-a/b, data)이 세 번째 방식입니다.
 
 ## A/B 슬롯과 bootcount
 
-U-Boot의 `bootcount`와 `bootlimit`은 설정된 backend와 boot flow가 갖춰졌을 때 실패 횟수에 따른 대체 명령을 구성하는 데 사용할 수 있습니다. 증가·초기화 시점, 저장 backend, `altbootcmd` 진입은 설정에 따라 달라지므로 target U-Boot configuration으로 검증해야 합니다.
+U-Boot v2024.04 `doc/README.bootcount`에 따르면 `CONFIG_BOOTCOUNT_LIMIT`이 켜지면 재부팅마다 `bootcount`가 1씩 오르고, `bootlimit`을 넘으면 `bootcmd` 대신 `altbootcmd`가 실행됩니다. 성공한 부팅 뒤 `bootcount`를 0으로 돌리는 것은 Linux 쪽 책임입니다(Ch 17).
 
 ```text
 # U-Boot env
-bootcount=0
 bootlimit=3
 bootcmd=run boot_active
 altbootcmd=run switch_slot
 
 boot_active=if test "$slot" = "B"; then run boot_b; else run boot_a; fi
-boot_a=setenv bootargs root=PARTUUID=$uuid_rootfs_a ...; load mmc 0:2 ...; bootm
-boot_b=setenv bootargs root=PARTUUID=$uuid_rootfs_b ...; load mmc 0:3 ...; bootm
-switch_slot=if test "$slot" = "B"; then setenv slot A; else setenv slot B; fi; saveenv; reset
+boot_a=setenv bootargs root=PARTUUID=${uuid_rootfs_a} rootwait; load mmc 0:2 ${kernel_addr_r} Image; load mmc 0:2 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
+boot_b=setenv bootargs root=PARTUUID=${uuid_rootfs_b} rootwait; load mmc 0:3 ${kernel_addr_r} Image; load mmc 0:3 ${fdt_addr_r} mybsp.dtb; booti ${kernel_addr_r} - ${fdt_addr_r}
+switch_slot=if test "$slot" = "B"; then setenv slot A; else setenv slot B; fi; setenv bootcount 0; saveenv; reset
 ```
 
-아래 C 코드는 제어 흐름을 보여주는 비빌드 pseudocode이며 `check_critical_services_running()` 구현과 안전한 env write 정책을 포함하지 않습니다. 단순히 PID 1이 시작됐다는 이유만으로 update를 성공 처리하지 말고 제품의 health criteria를 정의합니다.
+Linux 쪽에서 bootcount를 0으로 돌리는 서비스는 핵심 서비스가 올라온 뒤에 실행합니다. 아래 C 코드는 흐름만 보이는 예이고 `check_critical_services_running()`은 제품이 정의해야 합니다.
 
 ```c
 // /usr/sbin/bootcount-reset
@@ -55,19 +51,14 @@ switch_slot=if test "$slot" = "B"; then setenv slot A; else setenv slot B; fi; s
 #include <stdlib.h>
 
 int main(void) {
-    // 시스템 준비 검증
-    if (check_critical_services_running() != 0) {
-        return 1;  // bootcount 유지 - U-Boot가 fallback 트리거
-    }
+    if (check_critical_services_running() != 0)
+        return 1;  // bootcount 유지 - 다음 재부팅에서 U-Boot가 판단
 
-    // U-Boot env 변수 reset
     return system("fw_setenv bootcount 0");
 }
 ```
 
-이 binary를 systemd unit으로 등록합니다. 모든 critical service가 올라간 *후* 실행되어야 합니다.
-
-```text
+```ini
 # /etc/systemd/system/bootcount-reset.service
 [Unit]
 Description=Reset bootcount after successful boot
@@ -83,21 +74,20 @@ RemainAfterExit=yes
 WantedBy=multi-user.target
 ```
 
-`fw_setenv`는 설정된 environment backend에 접근합니다. 올바른 redundancy, device offset, locking 및 power-loss 처리 없이 실행하면 부팅 환경을 손상시킬 수 있으므로 target 설정과 U-Boot env configuration을 대조합니다. `/etc/fw_env.config`에 partition 위치를 명시합니다.
+`fw_setenv`는 `/etc/fw_env.config`에 적힌 위치에서 U-Boot 환경을 읽고 씁니다. U-Boot 소스의 예제 `tools/env/fw_env.config`는 "Up to two entries are valid, in this case the redundant environment sector is assumed present"라고 적고, block device 예로 `/dev/mmcblk0 0xc0000 0x20000`을 듭니다. 이 offset과 크기는 U-Boot 쪽 `CONFIG_ENV_OFFSET`, `CONFIG_ENV_SIZE`와 같아야 합니다. i.MX 8M Plus EVK라면 `0x400000`과 `0x1000`입니다(Ch 6).
 
 ```text
-# /etc/fw_env.config
-/dev/mmcblk0p1   0x0000  0x20000   0x20000
-/dev/mmcblk0p1   0x20000 0x20000   0x20000
+# /etc/fw_env.config (EVK 값으로 쓴 예)
+/dev/mmcblk1   0x400000   0x1000
 ```
-
-두 개의 설정 행은 사용하는 U-Boot redundancy 설정과 맞춰야 합니다. 이 구조가 전원 차단 시 무조건 안전하다고 보장하지 않으므로 실제 backend의 write protocol을 확인합니다.
 
 ## RAUC — Robust Auto-Update Controller
 
-RAUC는 Pengutronix가 만든 update agent입니다. *bundle* 단위로 업데이트하며 GPG/x509 서명을 강제합니다.
+RAUC는 *bundle* 단위로 업데이트하고 서명을 검증합니다. 대상 시스템의 설정 예입니다. `bootloader` 값으로는 `barebox`, `grub`, `uboot`, `efi`, `custom`, `noop`이 있습니다(RAUC v1.13 Reference).
 
-```text
+`bootloader=uboot`로 두면 RAUC는 위의 `slot` 변수가 아니라 `BOOT_ORDER`와 `BOOT_<bootname>_LEFT` 환경 변수를 바꿉니다(RAUC 통합 문서, Bootloader Ch 17). 그래서 RAUC를 쓸 때는 위 스크립트 대신 그 변수를 읽는 boot script를 씁니다.
+
+```ini
 # /etc/rauc/system.conf
 [system]
 compatible=mybsp-rev-a
@@ -116,22 +106,11 @@ bootname=A
 device=/dev/disk/by-partlabel/rootfs-b
 type=ext4
 bootname=B
-
-[slot.boot.0]
-device=/dev/disk/by-partlabel/boot-a
-type=vfat
-parent=rootfs.0
-
-[slot.boot.1]
-device=/dev/disk/by-partlabel/boot-b
-type=vfat
-parent=rootfs.1
 ```
 
-bundle 만들기:
+bundle을 만들고 검증해 본 결과입니다. manifest와 명령은 다음과 같습니다.
 
-```bash
-$ cat > manifest.raucm <<EOF
+```ini
 [update]
 compatible=mybsp-rev-a
 version=1.5.0
@@ -141,72 +120,39 @@ format=verity
 
 [image.rootfs]
 filename=rootfs.ext4
-
-[image.boot]
-filename=boot.vfat
-EOF
-
-$ rauc bundle \
-    --cert=cert.pem \
-    --key=key.pem \
-    bundle-input/ \
-    mybsp-1.5.0.raucb
 ```
 
-target 보드에서 install:
-
-```bash
-$ rauc install mybsp-1.5.0.raucb
-installing
-  0% Installing
- 10% Determining slot states
- 20% Checking bundle
- 30% Verifying signature
- 50% Determining target install group
- 60% Updating slots
- 80% Writing slot rootfs.1
- 95% Writing slot boot.1
-100% Installing done.
-
-$ rauc status
-=== System Info ===
-Compatible:  mybsp-rev-a
-Variant:
-Booted from: rootfs.0 (A)
-
-=== Bootloader ===
-Activated: rootfs.1 (B)
-
-=== Slot States ===
-o [rootfs.0] (active, booted)
-        bootname: A
-        boot status: good
-
-x [rootfs.1] (inactive, pending)
-        bootname: B
-        boot status: pending
+```text
+$ rauc bundle --cert=pki/bundle.crt --key=pki/bundle.key --intermediate=pki/int.crt in/ mybsp-1.5.0.raucb
+Creating 'verity' format bundle
+$ ls -l mybsp-1.5.0.raucb
+-rw-r--r-- 1 root root 15550 Nov 16 08:27 mybsp-1.5.0.raucb
+$ rauc info --keyring=pki/keyring.pem mybsp-1.5.0.raucb
+rauc-Message: 08:27:06.226: Verified inline signature by 'CN = MyBSP Bundle Signer'
+Compatible:     'mybsp-rev-a'
+Version:        '1.5.0'
+...
+Bundle Format:  verity
+...
+Certificate Chain:
+ 0 Subject: CN = MyBSP Bundle Signer
+   Issuer: CN = MyBSP Intermediate
+   ...
+   Not After:  Nov 16 08:27:06 2027 GMT
+ 1 Subject: CN = MyBSP Intermediate
+   Issuer: CN = MyBSP Root CA
+   ...
+ 2 Subject: CN = MyBSP Root CA
+   Issuer: CN = MyBSP Root CA
 ```
 
-다음 부팅에서 B를 선택하려면 bootloader integration이 활성 slot을 올바르게 반영해야 합니다. 건강 상태 판정 뒤 system service 또는 product logic이 RAUC의 boot status를 `mark-good`으로 갱신하도록 구성합니다. RAUC가 application의 정상 동작을 자동으로 판단하지는 않습니다.
+이 시험의 ext4에는 버전 파일 하나만 있었고, bundle은 15,550바이트였습니다. 대상 보드에서 `rauc install`로 비활성 슬롯에 쓰고, 다음 부팅이 성공하면 제품 로직이 `rauc status mark-good`을 부릅니다. RAUC는 application이 정상인지 스스로 판단하지 않습니다.
 
 ## SWUpdate
 
-SWUpdate는 SBabic이 만든 대안입니다. 더 *유연*하지만 그만큼 *직접 설정*해야 할 게 많습니다. WebGUI, Hawkbit 통합, suricatta 모드(서버 polling)가 강점입니다.
+SWUpdate는 `.swu`(CPIO) 이미지와 `sw-description` 파일로 동작하는 다른 update agent입니다. 아래 `sw-description`은 같은 rootfs를 두 슬롯 중 하나에 쓰는 구조의 예이고, 이 글에서는 실행하지 않았습니다.
 
 ```text
-# /etc/swupdate.cfg
-globals: {
-    verbose = true;
-    loglevel = 5;
-    syslog = true;
-    public-key-file = "/etc/swupdate/public.pem";
-};
-```
-
-bundle은 `.swu` (CPIO archive)입니다.
-
-```text
-# sw-description
 software = {
     version = "1.5.0";
 
@@ -218,7 +164,7 @@ software = {
                 {
                     filename = "rootfs.ext4";
                     device = "/dev/disk/by-partlabel/rootfs-a";
-                    sha256 = "abc...";
+                    sha256 = "...";
                 }
             );
         };
@@ -227,7 +173,7 @@ software = {
                 {
                     filename = "rootfs.ext4";
                     device = "/dev/disk/by-partlabel/rootfs-b";
-                    sha256 = "abc...";
+                    sha256 = "...";
                 }
             );
         };
@@ -235,159 +181,112 @@ software = {
 };
 ```
 
-```bash
-$ swupdate -i mybsp-1.5.0.swu -k /etc/swupdate/public.pem
-```
-
-`suricatta` 모드는 Hawkbit 서버를 polling 합니다. 서버에 새 release를 올리면 fleet이 자동 다운로드합니다.
-
-## Mender와 ostree
-
-Mender는 *상용 OTA platform* 성격이 강합니다. Cloud 또는 self-hosted server + 클라이언트로 구성됩니다. Yocto 통합이 잘 되어 있고, dashboard에서 fleet 관리가 됩니다.
-
-ostree는 *content-addressed* 모델입니다. 파일별 hash로 저장해 두 슬롯이 공통 파일을 공유합니다. 디스크 사용을 줄이지만 그만큼 BSP 통합 복잡도가 올라갑니다. Automotive Grade Linux와 Fedora Silverblue가 채택했습니다.
-
-| 도구 | 강점 | 약점 |
-|------|------|------|
-| RAUC | 단순, robust, BSP 친화 | 서버 필요 별도 |
-| SWUpdate | 유연, suricatta, GUI | 설정 복잡 |
-| Mender | Dashboard, cloud, fleet 관리 | 상용 의존도 |
-| ostree | 디스크 효율 | 학습 곡선, 복잡 |
-
-소규모 fleet이면 RAUC, 대규모면 Mender, 자유도가 필요하면 SWUpdate가 일반적인 선택입니다.
+Mender와 OSTree도 같은 문제를 푸는 도구입니다. 이 글은 두 도구를 실행하지 않아 비교 표를 싣지 않습니다.
 
 ## 서명과 보안
 
-OTA bundle을 서명하지 않은 BSP는 *언젠가* 침해됩니다. 공격자가 자체 bundle을 보내 임의 코드를 실행시키는 시나리오입니다.
+bundle을 서명하지 않으면 누구든 자기 bundle을 보내 장치에서 코드를 실행할 수 있습니다. 위 bundle에 쓴 3단 인증서 체인은 다음 명령으로 만들었습니다.
 
-키 계층은 다음과 같습니다.
+```bash
+# Root CA (20년)
+openssl req -x509 -newkey rsa:4096 -nodes -keyout root.key -out root.crt -days 7300 -subj "/CN=MyBSP Root CA"
+# Intermediate CA (10년, CA 확장 필요)
+openssl req -newkey rsa:4096 -nodes -keyout int.key -out int.csr -subj "/CN=MyBSP Intermediate"
+printf "basicConstraints=critical,CA:TRUE\nkeyUsage=critical,keyCertSign,cRLSign\n" > ca.ext
+openssl x509 -req -CA root.crt -CAkey root.key -CAcreateserial -in int.csr -out int.crt -days 3650 -extfile ca.ext
+# Bundle 서명용 (1년)
+openssl req -newkey rsa:2048 -nodes -keyout bundle.key -out bundle.csr -subj "/CN=MyBSP Bundle Signer"
+openssl x509 -req -CA int.crt -CAkey int.key -CAcreateserial -in bundle.csr -out bundle.crt -days 365
+# 보드에 들어갈 keyring은 Root CA만
+cat root.crt > keyring.pem
+```
+
+intermediate에 `basicConstraints=CA:TRUE`를 주지 않으면 체인 검증이 실패합니다. 확장 없이 만든 intermediate로 서명한 bundle을 같은 keyring으로 검사하면 `signature verification failed: Verify error: invalid CA certificate`가 나왔습니다. 보드에는 root의 공개 인증서만 두고, 비밀키는 빌드 서버나 HSM에 둡니다.
+
+서명 인증서의 유효기간이 끝나면 무슨 일이 생기는지 `faketime`으로 시계를 2028년으로 돌려 확인했습니다.
 
 ```text
-Root CA (HSM에 보관, off-line)
- └─ Intermediate CA
-     ├─ Signing key (개발용, QA 환경)
-     └─ Signing key (production, HSM)
+$ faketime "2028-01-01 00:00:00" rauc info --keyring=pki/keyring.pem mybsp-1.5.0.raucb
+rauc-Message: 00:00:00.238: Reading bundle: /root/rauc/mybsp-1.5.0.raucb
+rauc-Message: 00:00:00.239: Verifying bundle signature...
+signature verification failed: Verify error: certificate has expired
 ```
 
-target 보드의 `/etc/rauc/keyring.pem`에는 *공개키 chain*만 둡니다. 비밀키는 빌드 서버 또는 HSM에 있습니다.
-
-```bash
-# Root CA 생성 (1회만)
-$ openssl req -newkey rsa:4096 -keyout root.key -x509 -days 7300 -out root.crt
-
-# Intermediate CA (서명 전용)
-$ openssl req -newkey rsa:4096 -keyout intermediate.key -out intermediate.csr
-$ openssl x509 -req -CA root.crt -CAkey root.key -in intermediate.csr \
-    -out intermediate.crt -days 3650
-
-# Bundle 서명용 cert
-$ openssl req -newkey rsa:2048 -keyout bundle.key -out bundle.csr
-$ openssl x509 -req -CA intermediate.crt -CAkey intermediate.key \
-    -in bundle.csr -out bundle.crt -days 365
-
-# 보드에 들어갈 keyring
-$ cat root.crt intermediate.crt > /etc/rauc/keyring.pem
-```
-
-bundle 서명 시:
-
-```bash
-$ rauc bundle \
-    --cert=bundle.crt \
-    --key=bundle.key \
-    --intermediate=intermediate.crt \
-    input/ output.raucb
-```
-
-키 만료가 진짜 문제입니다. cert를 1년으로 발급해 두면 1년 후 모든 fleet이 update 거부합니다. *충분히 길게* (5~10년) 그리고 *교체 절차* 미리 마련.
-
-TLS download 채널도 검증해야 합니다. bundle 서명만으로 충분하다는 의견이 있지만, 중간자 차단을 위해 mutual TLS + bundle 서명의 *이중 방어*가 안전합니다.
+1년짜리 서명 인증서로 만든 bundle은 1년 뒤의 장치에서 거부됩니다. 이미 배포된 bundle을 다시 보낼 때도 같습니다. RAUC Reference는 `[keyring]`의 `use-bundle-signing-time`을 켜면 "the bundle signing time is used instead of the current system time for certificate validation"이라고 적습니다. 어느 쪽을 쓰든 인증서 교체 절차와 만료 감시를 같이 설계합니다.
 
 ## Delta Update
 
-전체 image를 매번 보내면 cellular 환경에서 부담됩니다. delta는 *이전 버전과의 차이*만 전송합니다.
+전체 image를 매번 보내는 대신 이전 버전과의 차이만 보낼 수 있습니다. 두 도구를 32 MiB ext4 두 벌(8 MiB 파일은 같고, 버전 파일과 64 KiB 파일 하나만 다름)로 시험했습니다.
 
-`bsdiff`는 binary diff의 고전입니다. 1.2.0 → 1.3.0 사이의 patch를 만들어 두면 100MB rootfs가 수 MB로 줄어듭니다.
+`casync`는 이미지를 내용 기반 chunk로 나눠 store에 넣고, 같은 chunk는 다시 저장하지 않습니다.
 
-```bash
-$ bsdiff rootfs-1.2.0.ext4 rootfs-1.3.0.ext4 patch.bin
-$ bspatch rootfs-1.2.0.ext4 rootfs-1.3.0-restored.ext4 patch.bin
+```text
+$ casync make --store=store rootfs-1.2.0.caibx rootfs-1.2.0.ext4
+$ du -sk store; find store -name "*.cacnk" | wc -l
+9028	store
+138
+$ casync make --store=store rootfs-1.3.0.caibx rootfs-1.3.0.ext4
+$ du -sk store; find store -name "*.cacnk" | wc -l
+9204	store
+148
+$ casync extract --store=store rootfs-1.3.0.caibx out.ext4 && cmp out.ext4 rootfs-1.3.0.ext4 && echo casync-identical
+casync-identical
 ```
 
-`zchunk`는 chunk별 hash로 *재사용 가능한 diff*를 만듭니다. delta 캐시 hit가 높아지면 transfer가 더 줄어듭니다. Fedora가 RPM repo에 zchunk를 채택했습니다.
+1.3.0을 넣을 때 store에 새로 생긴 chunk는 10개, 176 KiB였습니다. 장치가 1.2.0의 chunk를 갖고 있다면 이 10개만 받으면 됩니다.
 
-`casync`는 Lennart Poettering이 만든 content-defined chunking 도구입니다. ostree와 유사한 철학을 raw image에 적용합니다. RAUC가 casync bundle을 지원합니다.
-
-```bash
-$ casync make rootfs.caibx rootfs.ext4
-$ casync extract --store http://server/casync-store/ rootfs.caibx rootfs.ext4
-```
-
-server는 chunk store를 호스팅합니다. 보드는 변경된 chunk만 다운로드합니다.
+`bsdiff`는 결과가 덜 좋았습니다. 같은 32 MiB 두 벌에 Debian 13의 bsdiff 4.3을 돌리자 7분 29초 뒤 `Segmentation fault`로 끝났습니다. 1 MiB 파일에서 6바이트만 바꾼 경우는 0.147초에 169바이트 patch가 나왔고, `bspatch`로 되돌린 결과가 새 파일과 같았습니다. 큰 이미지 전체에 bsdiff를 쓰려면 메모리와 시간을 대상 크기로 먼저 시험합니다.
 
 ## Recovery 파티션
 
-A/B 슬롯이 둘 다 망가지는 극단 케이스도 가능합니다. NAND bit-flip, 잘못된 partition 쓰기, 파일시스템 corruption 등입니다. recovery 파티션은 *최소 시스템*으로 마지막 방어선입니다.
+A/B 슬롯 둘 다 망가지는 경우를 대비한 최소 시스템이 recovery 파티션입니다. USB나 네트워크에서 이미지를 받아 슬롯을 다시 쓰고, 사용자 data를 보존하는 것이 역할입니다.
 
 ```text
 GPT
 ├─ boot-a, boot-b
 ├─ rootfs-a, rootfs-b
-├─ recovery (32~128MB)   # initramfs + 최소 driver + USB host
+├─ recovery              # initramfs + 최소 driver
 └─ data
 ```
 
-recovery는 다음을 할 수 있어야 합니다.
-
-- USB stick의 update bundle을 읽을 수 있음
-- network로 image를 다운로드할 수 있음
-- A/B 슬롯을 raw로 다시 쓸 수 있음
-- 사용자 data를 보존하면서 system reset
-
-부트로더가 키 입력(예: GPIO button 5초)으로 recovery 모드로 진입하도록 합니다.
+부트로더가 버튼 입력으로 recovery에 들어가게 할 수 있습니다. U-Boot v2024.04의 `gpio input`은 핀 값을 그대로 명령의 반환값으로 씁니다(`cmd/gpio.c:297-302`, 주석은 "Whilst wrong"이라고 적습니다). 반환값 0이 참이므로 아래 `if`는 핀이 0일 때, 즉 active-low 버튼을 눌렀을 때 참이 됩니다.
 
 ```text
-# U-Boot
 => if gpio input recovery_btn; then run recovery_boot; fi
-=> recovery_boot=setenv slot recovery; load mmc 0:N ...; bootm
 ```
 
-## USB recovery (uuu, fastboot, DFU)
+## USB recovery (SoC ROM)
 
-부트 영역까지 망가지면 *SoC ROM의 USB 모드*로 복구합니다. 이 모드는 SoC가 제공하는 *고정* 기능입니다.
+부트 영역까지 망가지면 SoC ROM의 USB 다운로드 모드로 복구합니다. 부트 매체가 비어 있어도 동작하는 모드입니다. U-Boot v2024.04 문서에서 확인한 모드입니다.
 
-| SoC | USB recovery | Trigger |
-|-----|--------------|---------|
-| i.MX | Serial Download (uuu) | BOOT_MODE strap |
-| STM32MP1 | USB DFU | BOOT pin |
-| RK | MaskROM | RECOVERY button |
-| Allwinner | FEL | FEL button |
+| SoC | ROM 모드 | 근거 |
+|-----|---------|------|
+| i.MX | Serial Download Protocol (SDP), `uuu`·`imx_usb_loader` | `doc/imx/misc/sdp.txt`, `doc/board/bsh/imx8mn_bsh_smm_s2.rst:56-61` |
+| STM32MP1 | USB DFU 1.1 (STM32CubeProgrammer) | `doc/board/st/stm32mp1.rst:424-430` |
+| Rockchip | Mask ROM 모드 (`lsusb`에 "in Mask ROM mode") | `doc/board/rockchip/rockchip.rst:295` |
+| Allwinner | FEL | `doc/board/allwinner/sunxi.rst:9,269` |
 
-이 모드는 부트 미디어 자체가 비어 있어도 동작합니다. 양산 line 첫 flash와 현장 복구의 *최후 수단*입니다. BSP는 이 경로를 *반드시* 테스트해 두어야 합니다.
+진입 방법(boot 핀, 버튼)은 보드마다 회로도에 있습니다. 이 글은 실제 보드에서 이 모드들을 실행하지 않았습니다.
 
 ## 자주 하는 실수
 
-**bootcount reset을 너무 일찍.** application이 launch 되자마자 reset 하면 application crash 후에도 fallback이 안 됩니다. critical service 모두 확인 후에 reset.
+**bootcount reset을 너무 일찍.** application이 뜨자마자 0으로 돌리면 그 뒤 application이 죽어도 fallback이 일어나지 않습니다. 핵심 서비스를 확인한 뒤에 돌립니다.
 
-**A/B 슬롯이 같은 file system label.** 양쪽 다 LABEL=rootfs면 mount가 wrong slot으로 갈 수 있습니다. PARTUUID로 구분.
+**A/B 슬롯이 같은 file system label.** 두 rootfs가 같은 `LABEL=`을 가지면 label로 마운트할 때 어느 쪽이 잡힐지 정해지지 않습니다. `PARTUUID`로 구분합니다(Ch 17).
 
-**Update agent 자체를 업데이트.** RAUC 1.0이 RAUC 2.0 bundle을 install 하다가 자기 자신을 덮어쓰면 중간에 죽습니다. agent는 항상 *현재 살아 있는 슬롯*에서 *반대 슬롯*으로 씁니다.
+**intermediate CA 확장 누락.** `basicConstraints=CA:TRUE` 없이 만든 intermediate는 위 시험에서 `invalid CA certificate`로 거부됐습니다.
 
-**키 만료 무시.** 5년 cert를 발급해 둔 fleet이 5년 후 update 못 받음. 키 rotation 절차와 expiry 모니터링 필요.
+**키 만료 무시.** 위 시험처럼 만료된 서명 인증서의 bundle은 `certificate has expired`로 거부됩니다.
 
-**Bundle 서명만 신뢰.** HTTP로 다운로드하면 중간자가 *유효 서명된 옛 bundle*을 재전송할 수 있습니다(downgrade 공격). 서버에 monotonically increasing version + nonce 확인.
-
-**Recovery 미테스트.** 양산 후 한 번도 recovery 경로를 안 타본 BSP는 진짜 recovery가 필요한 순간에 실패합니다. CI에서 매 release마다 recovery test 자동화.
+**Recovery 미테스트.** recovery 경로는 쓸 일이 드물어 깨져도 모르기 쉽습니다. release마다 실제로 한 번 타 봅니다.
 
 ## 정리
 
-- OTA의 두 원칙은 원자성과 롤백입니다. 부팅 실패 시 이전 슬롯으로 자동 복귀해야 합니다.
-- A/B 슬롯 + U-Boot bootcount/bootlimit가 산업 표준 패턴입니다.
-- RAUC는 BSP 친화적이고 단순, SWUpdate는 유연, Mender는 dashboard 강점, ostree는 디스크 효율.
-- bundle 서명은 필수입니다. Root CA + intermediate + signing key의 3단 hierarchy를 사용하고 비밀키는 HSM에 둡니다.
-- delta update(bsdiff, zchunk, casync)는 cellular 환경의 update 비용을 한 자릿수 MB로 줄입니다.
-- recovery 파티션은 마지막 방어선입니다. USB/network로 fleet을 다시 살릴 수 있는 최소 시스템.
-- SoC ROM의 USB recovery (uuu, DFU, FEL)는 *반드시* 테스트하고 양산 line과 field 모두에 준비해 둡니다.
+- A/B 슬롯의 전환은 U-Boot `bootcount`/`bootlimit`/`altbootcmd`이고, 성공한 부팅 뒤 `bootcount`를 0으로 돌리는 것은 Linux 쪽 책임입니다.
+- `fw_env.config`의 위치·크기는 U-Boot의 `CONFIG_ENV_OFFSET`·`CONFIG_ENV_SIZE`와 같아야 합니다.
+- RAUC 1.13으로 3단 체인 서명 bundle을 만들고 `rauc info`로 검증했습니다. 서명 인증서가 만료되면 검증이 실패합니다.
+- casync는 1.2.0 → 1.3.0에서 새 chunk 10개만 store에 더했고, bsdiff는 32 MiB 이미지에서 segfault, 1 MiB 파일에서는 169바이트 patch였습니다.
+- SoC ROM의 USB 복구 모드(i.MX SDP, STM32MP1 DFU, Rockchip Mask ROM, Allwinner FEL)는 U-Boot 문서에 근거가 있고, 보드에서 직접 시험해 둡니다.
 
 ## 다음 편 예고
 
@@ -397,5 +296,5 @@ recovery는 다음을 할 수 있어야 합니다.
 
 - [Ch 17: 이미지 패키징](/blog/embedded/bsp/chapter17-image-packaging) — A/B 파티션 layout
 - [Ch 20: 양산 환경](/blog/embedded/bsp/chapter20-production) — 키 관리와 CI
-- [Bootloader 시리즈 — bootcount](/blog/embedded/bootloader/chapter01-boot-problem) — U-Boot 측 깊이
+- [Bootloader Ch 17 — A/B 부팅 이중화](/blog/embedded/bootloader/chapter17-ab-update) — bootcount와 RAUC 슬롯 스크립트를 QEMU에서 실행
 - [Embedded Security 시리즈](/blog/embedded/embedded-security/chapter01-threat-model) — 서명, HSM, secure boot

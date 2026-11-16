@@ -12,265 +12,217 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**부팅은 여러 firmware·kernel·userspace 단계가 이어지는 과정입니다.** 단계와 로그는 SoC, boot media, image 구성, kernel 및 rootfs에 따라 달라집니다. 이 장은 i.MX8M Mini 계열을 가정한 예시이며 실제 시간 측정 자료가 아닙니다.
+**부팅은 BootROM부터 login 프롬프트까지 여러 단계가 바통을 넘기는 과정이고, 단계마다 시리얼에 남기는 *첫 줄*이 다릅니다.** 어느 줄까지 나왔는지를 알면 어느 단계에서 멈췄는지 압니다.
 
-새 보드의 전원 스위치를 처음 누를 때, BSP 엔지니어는 시리얼 콘솔의 빈 화면을 30초 정도 응시하게 됩니다. 그동안 어떤 문자가 언제 떠야 하는지의 *기대치*가 있어야 디버깅이 가능합니다. 이번 글은 i.MX8M Mini 보드를 기준으로 BootROM부터 systemd login까지의 단계를 시간 순서대로, 각 단계가 남기는 흔적과 함께 정리합니다.
+이 장은 전체 체인을 실제로 한 번 끝까지 돌린 로그로 단계를 따라갑니다. QEMU 11.1.3 virt 머신(`secure=on`, cortex-a57 ×4, 1 GiB, TCG)에서 TF-A v2.15.0(BL1·BL2·BL31) → U-Boot v2024.04(`qemu_arm64_defconfig`, TFTP로 커널 적재) → Linux 6.12(Ch 8의 `defconfig` 빌드) → Debian 13 rootfs(virtio 디스크)로 부팅했습니다. 각 단계 앞의 숫자는 QEMU를 띄운 순간부터 호스트에서 잰 초입니다. TCG 에뮬레이션이라 절대 시간은 실제 보드와 다르지만, 단계의 순서와 각 단계가 찍는 줄은 같습니다.
 
 ## 부팅 단계 — 큰 그림
 
-| 시각 | 단계 |
-|---|---|
-| 0 ms | Power on |
-| ~5 ms | BootROM (mask ROM) |
-| ~50 ms | SPL / U-Boot SPL |
-| ~150 ms | ATF BL31 |
-| ~200 ms | U-Boot proper |
-| ~600 ms | bootcmd 실행, kernel/dtb/initramfs 로드 |
-| ~1.0 s | Kernel decompress |
-| ~1.2 s | `start_kernel()` |
-| ~1.5 s | Driver probe |
-| ~2.0 s | initramfs 또는 root filesystem mount |
-| ~2.5 s | systemd 또는 BusyBox init |
-| ~5.0 s | getty 시작 → login prompt |
+| 호스트 시각 | 단계 | 시리얼에 찍힌 첫 줄 |
+|---:|---|---|
+| 0.052 s | TF-A BL1 | `NOTICE:  Booting Trusted Firmware` |
+| 0.055 s | BL2 | `NOTICE:  BL1: Booting BL2` |
+| 0.070 s | BL31 | `NOTICE:  BL1: Booting BL31` |
+| 0.075 s | BL33로 나감 | `INFO:    BL31: Preparing for EL3 exit to normal world` |
+| 0.085 s | U-Boot proper | `U-Boot 2024.04 (Nov 16 2026 - 07:07:34 +0000)` |
+| 2.097 s | TFTP로 커널 38,246,912바이트 적재 끝 | `Bytes transferred = 38246912 (2479a00 hex)` |
+| 2.713 s | 커널로 점프 | `Starting kernel ...` |
+| 2.742 s | 커널 첫 printk | `Booting Linux on physical CPU 0x0000000000 [0x411fd070]` |
+| 3.609 s | init 실행 | `Run /sbin/init as init process` |
+| 15.223 s | systemd 목표 도달 | `Reached target multi-user.target - Multi-User System.` |
 
-표의 시각은 측정값이나 예측 기준이 아닌 설명용 값입니다. 실제 단계와 순서는 해당 보드의 boot chain 및 계측 결과로 확인합니다.
+U-Boot에서 TFTP 명령을 손으로 넣었으므로 0.085~2.7초 구간에는 입력 시간과 38 MB 전송이 들어 있습니다. 실제 보드의 단계별 시간은 Ch 15에서 다룹니다.
 
 ## 단계 1 — BootROM
 
-전원이 들어오면 SoC 내부의 mask ROM이 실행됩니다. BootROM의 동작은 SoC TRM에 적혀 있으며 수정 불가능합니다.
+전원이 들어오면 SoC 내부의 mask ROM이 실행됩니다. QEMU virt에는 BootROM이 없고, `-bios`로 넘긴 TF-A BL1이 그 자리를 대신합니다(TF-A `docs/plat/qemu.rst`: "BL1 is used as the BootROM"). 실제 SoC의 BootROM은 boot 핀·fuse로 부트 매체를 고르고 첫 이미지를 읽습니다. i.MX 8M Plus EVK의 boot switch 표는 Ch 2, 매체별 이미지 위치는 Ch 17에 있습니다.
 
-- 보안 fuse(eFuse) 확인. 보안 부팅 활성화 여부, secure key, lifecycle state 확인.
-- boot source 선택은 SoC별 strap, fuse 및 ROM 정책에 따릅니다.
-- 1차 부트로더(SPL 또는 FIT 헤더) 로드.
+i.MX의 BootROM은 시리얼에 아무것도 찍지 않으므로, 시리얼이 영영 비어 있다면 다음 단계(SPL)의 첫 줄도 못 나온 것입니다. 이때 보는 곳은 다음과 같습니다.
 
-i.MX 계열은 BootROM이 시리얼에 출력을 *거의 안 남깁니다*. 출력이 있다면 보통 다음 같은 짧은 stamp입니다.
+- boot switch와 매체의 이미지 위치(Ch 2, Ch 17)
+- 전원과 reset 회로
+- 오실레이터(콘솔 UART가 24 MHz OSC를 직접 쓰므로, Ch 4)
 
-```text
-fsbl_log v0.1
-mode: sd
-```
+## 단계 2 — SPL 또는 BL1/BL2
 
-대부분의 SoC는 BootROM 단계에서는 시리얼이 조용합니다. 따라서 *시리얼이 영영 빈 채로 멈춰 있다*면 BootROM 단계 또는 클럭/전원 단계의 문제일 가능성이 높습니다.
-
-### BootROM이 의심될 때
-
-- 전원 시퀀스: PMIC가 정확한 순서로 전압을 올렸는지 오실로스코프 확인.
-- 부팅 모드 핀: SoC 문서에 지정된 boot-mode strap pins가 의도한 값인지 측정.
-- 32 kHz 또는 24 MHz 크리스털: SoC reset 직후 안정적으로 oscillation하는지 확인.
-- eFuse: factory에서 무심코 burn한 보안 옵션이 부팅을 막을 수 있습니다.
-
-## 단계 2 — SPL (Secondary Program Loader, 사용하는 구성에서)
-
-BootROM이 SPL을 SRAM에 올리고 점프합니다. SPL은 *작은* U-Boot입니다(보통 ≤ 256 KB). SRAM은 64~256 KB 정도라서 모든 코드가 들어가지 못해 SPL과 U-Boot proper로 분리합니다.
-
-SPL을 사용하는 구성에서 SPL은 보통 초기 console을 설정하고, 필요한 DRAM 초기화와 후속 image 적재를 맡습니다. 구체적인 단계와 BL31 handoff는 SoC·U-Boot·TF-A·image packaging 버전에 따라 다릅니다.
-
-성공하면 시리얼에 다음과 유사한 첫 라인이 보입니다.
+i.MX 8M Plus EVK라면 이 자리에 U-Boot SPL이 오고 첫 줄은 `U-Boot SPL 2024.04 (...)`입니다(`common/spl/spl.c:836`, Ch 1). DDR training 실패는 이 단계에서 `Training FAILED`로 보입니다(Ch 5). QEMU 체인에서는 TF-A BL1과 BL2가 이 자리를 맡습니다.
 
 ```text
-U-Boot SPL 2023.04 (Sep 12 2025 - 14:23:01 +0000)
-DDR4 dram init done
-Trying to boot from MMC1
-Loading Environment from MMC... OK
-Booting BL31...
+NOTICE:  Booting Trusted Firmware
+NOTICE:  BL1: v2.15.0(debug):
+...
+INFO:    BL1: Loading BL2
+NOTICE:  BL1: Booting BL2
+NOTICE:  BL2: v2.15.0(debug):
+...
+INFO:    BL2: Loading image id 5
+INFO:    Loading image id=5 at address 0x60000000
 ```
 
-이 시점이 **"보드가 살아 있다"의 첫 증거**입니다. 여기까지 못 오면 콘솔 UART pinmux, baud rate, DRAM 초기화 중 하나가 의심됩니다.
+image id 5가 U-Boot(BL33)입니다(Ch 7).
 
-## 단계 3 — ATF BL31 (사용하는 구성에서)
+## 단계 3 — TF-A BL31
 
-Arm Trusted Firmware의 EL3 runtime입니다. 한 번 동작이 시작되면 PSCI, SMC handler, secure monitor로서 시스템 전체 기간 동안 살아 있습니다.
+BL31은 EL3에 상주하며 PSCI를 맡습니다(Ch 7, Ch 9). 이 debug 빌드는 다음 줄들을 남기고 U-Boot로 나갑니다.
 
 ```text
-NOTICE:  BL31: v2.8(release):imx_5.15.71_2.2.0
-NOTICE:  BL31: Built : 14:23:15, Sep 12 2025
+NOTICE:  BL1: Booting BL31
+...
+NOTICE:  BL31: v2.15.0(debug):
+INFO:    ARM GICv2 driver initialized
+INFO:    BL31: Initializing runtime services
+...
+INFO:    BL31: Preparing for EL3 exit to normal world
+INFO:    Entry point address = 0x60000000
+INFO:    SPSR = 0x3c5
 ```
 
-ATF는 보통 한두 줄만 남기고 U-Boot proper로 ERET합니다. 실패 시 panic 메시지를 떨굽니다.
-
-```text
-PANIC at PC : 0x0000000000924118
-```
+release 빌드(`LOG_LEVEL` 기본 20)는 `NOTICE` 줄만 남깁니다(Ch 7). BL31 배너는 나오는데 U-Boot 배너가 없으면 `Entry point address`가 BL33의 링크 주소와 맞는지부터 봅니다.
 
 ## 단계 4 — U-Boot proper
 
-DRAM에서 실행되는 본격적인 U-Boot입니다. 환경설정, 부팅 스크립트, 네트워크, USB 등 전체 기능이 활성화됩니다.
-
 ```text
-U-Boot 2023.04 (Sep 12 2025 - 14:23:01 +0000)
+U-Boot 2024.04 (Nov 16 2026 - 07:07:34 +0000)
 
-CPU:   Freescale i.MX8MMQ rev1.0 1800 MHz (running at 1200 MHz)
-CPU:   Industrial temperature grade (-40C to 105C) at 42C
-Reset cause: POR
-DRAM:  2 GiB
-Core:  167 devices, 17 uclasses, devicetree: separate
-WDT:   Started watchdog@30280000 with servicing (60s timeout)
-MMC:   FSL_SDHC: 0, FSL_SDHC: 1
-Loading Environment from MMC... OK
-In:    serial@30890000
-Out:   serial@30890000
-Err:   serial@30890000
-Net:   eth0: ethernet@30be0000
+DRAM:  1 GiB
+Core:  51 devices, 14 uclasses, devicetree: board
+Flash: 32 MiB
+Loading Environment from Flash... *** Warning - bad CRC, using default environment
 
-Hit any key to stop autoboot:  0
+In:    serial,usbkbd
+...
+Net:   eth0: virtio-net#32
+...
+Hit any key to stop autoboot:  2  0
 ```
 
-`Hit any key to stop autoboot` 카운트다운이 끝나면 `bootcmd`가 실행됩니다. `printenv`로 확인하고 `setenv`로 수정합니다.
+`devicetree: board`는 QEMU가 만든 DT를 그대로 쓴다는 뜻이고, i.MX EVK라면 빌드에 포함한 DT를 씁니다. `bad CRC` 경고는 저장된 환경이 없어 기본값을 썼다는 뜻입니다(Ch 6). autoboot를 멈춘 뒤 TFTP로 커널을 받고 `booti`로 넘겼습니다.
 
 ```text
-=> printenv bootcmd
-bootcmd=fatload mmc 0:1 ${loadaddr} Image; \
-        fatload mmc 0:1 ${fdt_addr_r} imx8mm-myboard.dtb; \
-        booti ${loadaddr} - ${fdt_addr_r}
-
-=> printenv bootargs
-bootargs=console=ttymxc0,115200 root=/dev/mmcblk0p2 rootwait rw
+=> booti ${kernel_addr_r} - ${fdtcontroladdr}
+## Flattened Device Tree blob at 7e693910
+   Booting using the fdt blob at 0x7e693910
+...
+   Loading Device Tree to 000000007d686000, end 000000007d68b462 ... OK
+...
+Starting kernel ...
 ```
 
-`bootargs`는 kernel command line을 전달하는 한 경로입니다. Device Tree의 `/chosen/bootargs`나 다른 boot protocol도 사용할 수 있으며, 실제로 kernel이 받은 인자는 `/proc/cmdline` 등으로 확인합니다.
+`bootargs`는 `console=ttyAMA0 earlycon root=PARTUUID=1f342af3-3c35-4bc7-9e48-59628a9a5f7a rootwait ro`였고, 부팅 뒤 `/proc/cmdline`에 같은 문자열이 있었습니다.
 
-## 단계 5 — Kernel decompress와 첫 printk
+## 단계 5 — 커널 첫 printk
 
-`booti`(arm64) 또는 `bootm`(arm 32)이 호출되면 U-Boot가 커널 entry로 점프합니다. arm64 `Image`는 비압축 kernel image입니다. `Image.gz`를 쓸 때 압축 해제를 수행하는 주체와 포맷 지원은 bootloader 설정 및 kernel build에 따르므로 board guide에서 확인합니다.
-
-이 시점에 *earlycon*이 활성이면 다음 같은 라인이 보입니다.
+`booti`는 arm64 `Image`를 그대로 실행합니다. arm64 커널에는 압축 해제기가 없으므로(`Documentation/arch/arm64/booting.rst:63-65`) 별도의 decompress 단계는 없습니다.
 
 ```text
-[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x410fd042]
-[    0.000000] Linux version 6.6.0 (build@host) (aarch64-linux-gnu-gcc ...) #1 SMP PREEMPT Sat Sep 12 ...
-[    0.000000] Machine model: NXP i.MX8MM EVK
-[    0.000000] earlycon: ec_imx6q0 at MMIO 0x0000000030890000 (options '115200n8')
-[    0.000000] printk: bootconsole [ec_imx6q0] enabled
-[    0.000000] efi: UEFI not found.
-[    0.000000] Memory limited to 2048MB
+[    0.000000] Booting Linux on physical CPU 0x0000000000 [0x411fd070]
+[    0.000000] Linux version 6.12.0 (root@localhost) (gcc (Debian 14.2.0-19) 14.2.0, GNU ld (GNU Binutils for Debian) 2.44) #1 SMP PREEMPT Mon Nov 16 08:10:06 UTC 2026
+...
+[    0.000000] Machine model: linux,dummy-virt
+...
+[    0.000000] earlycon: pl11 at MMIO 0x0000000009000000 (options '')
+[    0.000000] printk: legacy bootconsole [pl11] enabled
 ```
 
-`earlycon`이 활성화되지 않으면 정식 console이 준비될 때까지 로그가 보이지 않을 수 있습니다. earlycon driver와 주소·baud 인자는 SoC UART, kernel config 및 command line syntax에 맞춰 지정해야 합니다.
+`earlycon`에 인자를 주지 않았는데도 PL011 주소를 찾은 것은 DT `chosen/stdout-path`를 따랐기 때문입니다(Ch 3). i.MX 8M Plus EVK의 U-Boot 환경은 `earlycon=ec_imx6q,0x30890000,115200`처럼 주소를 직접 줍니다(Ch 6).
+
+earlycon이 없으면 어떻게 되는지도 돌려 봤습니다. `console=ttyS0`만 주고(QEMU virt의 UART는 `ttyAMA0`) 부팅하면 `Starting kernel ...`(QEMU 시작 후 3.1초) 뒤로, 실행을 끊은 30.4초까지 약 27초 동안 한 글자도 나오지 않았습니다. 커널은 돌고 있어도 보이는 콘솔이 없는 상태입니다.
 
 ## 단계 6 — start_kernel과 driver probe
 
-`start_kernel()`이 호출되면 커널이 자기 자신을 초기화합니다. 이 단계의 로그는 ftrace 없이도 dmesg로 직접 보입니다.
+정식 콘솔이 올라오면 boot console이 꺼지고, 드라이버들이 probe됩니다. 디스크가 보이는 줄입니다.
 
 ```text
-[    0.000123] CPU features: detected: GIC system register CPU interface
-[    0.001234] percpu: Embedded 30 pages/cpu s84120 r8192 d28520 u122880
-[    0.012345] Memory: 1985944K/2097152K available
-[    0.234567] Detected PIPT I-cache on CPU0
-[    0.345678] GICv3: 480 SPIs implemented
-[    0.456789] arch_timer: cp15 timer(s) running at 8.00MHz
-[    0.567890] Console: colour dummy device 80x25
-[    0.678901] printk: console [tty0] enabled
-[    0.789012] printk: bootconsole [ec_imx6q0] disabled
-[    0.890123] Calibrating delay loop (skipped), value calculated using timer frequency.. 16.00 BogoMIPS (lpj=80000)
+[    0.218514] printk: legacy bootconsole [pl11] disabled
+...
+[    0.445550] virtio_blk virtio0: [vda] 16777216 512-byte logical blocks (8.59 GB/8.00 GiB)
+[    0.458936]  vda: vda1 vda15
 ```
 
-`bootconsole disabled`는 boot console이 비활성화된 로그입니다. 정식 console의 인계 여부와 대상은 kernel 설정 및 command line으로 확인합니다.
-
-이후 driver probe 단계에서 다음과 같은 라인이 줄줄이 흐릅니다.
-
-```text
-[    0.912345] mmc0: SDHCI controller on 30b40000.mmc [30b40000.mmc] using ADMA
-[    1.023456] usb 1-1: New USB device found, idVendor=0bda, idProduct=8153
-[    1.234567] sdhci-esdhc-imx 30b40000.mmc: SDHCI controller on 30b40000.mmc
-[    1.345678] mmc0: new HS200 MMC card at address 0001
-[    1.456789] mmcblk0: mmc0:0001 SDW32G 29.7 GiB
-```
+SMP bring-up(이 실행에서 0.048~0.059초)은 이보다 앞, 정식 콘솔로 넘어가기 전에 끝납니다(Ch 9).
 
 ## 단계 7 — Rootfs mount
 
 ```text
-[    1.567890] EXT4-fs (mmcblk0p2): mounted filesystem with ordered data mode.
-[    1.678901] VFS: Mounted root (ext4 filesystem) readonly on device 179:2.
-[    1.789012] devtmpfs: mounted
-[    1.890123] Freeing unused kernel memory: 5184K
-[    1.901234] Run /sbin/init as init process
+[    0.599186] EXT4-fs (vda1): INFO: recovery required on readonly filesystem
+...
+[    0.665036] EXT4-fs (vda1): recovery complete
+[    0.666980] EXT4-fs (vda1): mounted filesystem 6ab127dd-2315-4d4b-9afe-d56a5d309f78 ro with ordered data mode. Quota mode: none.
+[    0.667422] VFS: Mounted root (ext4 filesystem) readonly on device 254:1.
+...
+[    0.755344] Freeing unused kernel memory: 2880K
+[    0.756240] Run /sbin/init as init process
 ```
 
-`Run /sbin/init`이 보이면 커널은 자기 일을 끝낸 셈입니다. 이제 사용자 공간이 시작됩니다.
+journal recovery가 돈 이유는 이 디스크가 Ch 14의 watchdog 시험에서 전원이 강제로 끊긴 guest의 디스크였기 때문입니다. 정상 종료된 디스크라면 `recovery` 줄 없이 바로 `mounted filesystem`이 나옵니다. `Run /sbin/init`이 보이면 커널은 할 일을 끝낸 셈입니다.
 
 ## 단계 8 — init과 systemd
 
-`init`(보통 systemd 또는 BusyBox)이 PID 1로 실행됩니다.
-
 ```text
-[    2.012345] systemd[1]: systemd 252 running in system mode (+PAM +AUDIT ...)
-[    2.123456] systemd[1]: Detected architecture arm64.
-[    2.234567] systemd[1]: Hostname set to <myboard>.
-[    2.345678] systemd[1]: Queued start job for default target Multi-User System.
-[    3.456789] systemd[1]: Started Journal Service.
-[    3.567890] systemd[1]: Mounting Temporary Directory (/tmp)...
-[    4.678901] systemd[1]: Started Network Manager.
-[    4.789012] systemd[1]: Started Login Service.
-[    4.890123] systemd[1]: Reached target Multi-User System.
+[    1.124174] systemd[1]: systemd 257.13-1~deb13u1 running in system mode (+PAM +AUDIT ...)
+[    1.125286] systemd[1]: Detected architecture arm64.
+
+Welcome to Debian GNU/Linux 13 (trixie)!
+
+[    1.139284] systemd[1]: Hostname set to <localhost>.
+...
+[  OK  ] Reached target multi-user.target - Multi-User System.
+...
+Debian GNU/Linux 13 localhost ttyAMA0
+
+localhost login:
 ```
 
-마지막으로 getty가 시리얼 콘솔에 login prompt를 띄웁니다.
-
-```text
-Welcome to MyBoard Linux 1.0!
-
-myboard login:
-```
+시리얼 login 프롬프트는 `serial-getty@ttyAMA0.service`가 띄웁니다. 같은 로그에 `Started serial-getty@ttyAMA0.service - Serial Getty on ttyAMA0.`가 있습니다.
 
 ## 체크포인트별 결정 트리
 
-부팅이 멈추는 위치에 따라 진단이 달라집니다.
+마지막으로 나온 줄로 의심 영역을 좁힙니다. 각 행의 "마지막 줄"은 위 실행 로그의 실제 문자열입니다.
 
-| 멈춘 위치 | 첫 의심 | 두 번째 의심 | 세 번째 의심 |
-|-----------|---------|--------------|--------------|
-| 시리얼 빈 화면, 영영 | 전원/PMIC | 부팅 모드 핀 | UART pinmux, baud rate |
-| `U-Boot SPL`만 나오고 hang | DRAM init | ATF BL31 로드 경로 | SD/eMMC 매체 |
-| `Booting BL31...`에서 멈춤 | ATF 빌드/위치 | 보안 fuse | RVBAR 설정 |
-| U-Boot proper 진입 후 hang | DRAM training 실패 | 클럭/regulator | console UART |
-| `booti` 후 침묵 | earlycon 누락 | 커널 entry 주소 | kernel/DTB load 경로 |
-| `start_kernel` 후 침묵 | console 설정 | DT memory node | 잘못된 ATAGS/DTB |
-| `Run /sbin/init` 후 panic | rootfs 없음 | init binary 없음 | initramfs 손상 |
-| init 후 reboot loop | systemd unit 실패 | watchdog timeout | OOM |
-| login 안 뜸 | getty.service 비활성 | tty 디바이스 부재 | console mux 잘못 |
+| 마지막으로 나온 줄 | 다음 단계 | 먼저 볼 곳 |
+|-----------|---------|--------------|
+| 아무것도 없음 | SPL/BL1 | boot switch, 이미지 위치, 전원·reset, 콘솔 UART 클록(Ch 2, 4, 17) |
+| `U-Boot SPL ...` (i.MX) | DDR, U-Boot 적재 | `Training FAILED`(Ch 5), `Trying to boot from BOOTROM`(Ch 6) |
+| `BL31: Preparing for EL3 exit to normal world` | U-Boot | `Entry point address`와 U-Boot 링크 주소(Ch 7) |
+| `Starting kernel ...` | 커널 콘솔 | `earlycon`, `console=` 이름, DTB 주소 |
+| `psci: probing for conduit method from DT.` | PSCI | DT `method`(Ch 9) |
+| `Run /sbin/init as init process` | userspace | rootfs 안의 init, `init=` (Ch 11) |
+| `Reached target multi-user.target` | getty | `serial-getty@<콘솔>.service` |
 
 ## 실제 측정 — boot time 분석
 
-`systemd-analyze`가 사용자 공간의 단계를 잘게 보여줍니다.
+login 뒤 `systemd-analyze`로 본 같은 부팅입니다.
 
-```bash
+```text
 $ systemd-analyze
-Startup finished in 1.234s (kernel) + 3.456s (userspace) = 4.690s
-multi-user.target reached after 3.401s in userspace.
-
-$ systemd-analyze blame
-   1.234s NetworkManager-wait-online.service
-   0.567s docker.service
-   0.345s systemd-journald.service
-   0.234s systemd-udev-trigger.service
-   ...
-
-$ systemd-analyze critical-chain
-graphical.target @3.401s
-└─multi-user.target @3.401s
-  └─NetworkManager.service @1.234s +234ms
-    └─dbus.service @1.001s
-      ...
+Startup finished in 882ms (kernel) + 11.435s (userspace) = 12.317s
+graphical.target reached after 11.432s in userspace.
+$ systemd-analyze blame --no-pager | head -8
+6.831s dev-vda1.device
+5.779s systemd-udev-trigger.service
+1.588s user@0.service
+1.112s systemd-resolved.service
+ 935ms grub-common.service
+ 855ms ssh.service
+ 854ms systemd-logind.service
+ 809ms dev-hugepages.mount
 ```
 
-커널 단계를 더 분해하려면 `bootargs`에 `initcall_debug printk.time=1`을 넣어 각 init함수 호출 시간을 dmesg에 남깁니다.
+TCG 에뮬레이션에서 userspace가 11초 넘게 걸렸고, 그중 디스크 장치 대기(`dev-vda1.device`)와 udev가 가장 큽니다. 커널 쪽을 더 쪼개는 `initcall_debug`는 Ch 11과 Ch 15에서 씁니다.
 
 ## 흔한 실수
 
-- **`console=ttyS0` 대신 `console=ttymxc0`이 맞는 보드**: i.MX는 `ttymxc`, Rockchip은 `ttyS`, BCM은 `ttyAMA` 또는 `ttyS`로 다릅니다. SoC 매뉴얼을 확인합니다.
-- **`rootwait` 누락**: MMC 디스크가 인식되기 전에 root mount를 시도해 panic.
-- **`bootargs`에 `quiet` 또는 `loglevel=0`**: 양산 펌웨어에서는 적절하지만 BSP 초기에는 *최대 verbose*로 둡니다.
-- **`earlycon`을 빌트인 안 함**: `CONFIG_SERIAL_EARLYCON=y`가 없으면 인자 무시.
-- **`mmcblk0p2` 대신 `mmcblk0p1`**: 파티션 번호 확인. `fdisk -l`로 검증.
+- **`console=` 장치 이름 착오**: QEMU virt의 PL011은 `ttyAMA0`, i.MX UART는 `ttymxcN`(Ch 6)입니다. 위 실험처럼 이름이 틀리고 earlycon도 없으면 `Starting kernel ...` 뒤가 조용합니다.
+- **`rootwait` 누락**: 커널 문서(`kernel-parameters.txt:5907`)의 설명대로 `rootwait`는 root 장치가 나타날 때까지 기다립니다. 비동기로 probe되는 MMC에서 이것이 없으면 장치가 보이기 전에 마운트를 시도합니다.
+- **`root=` 장치 이름 고정**: 이 실행은 `root=PARTUUID=...`를 썼습니다. 장치 이름은 열거 순서에 따라 바뀝니다(Ch 17).
+- **`quiet`·낮은 `loglevel`**: 단계 5~7에서 인용한 줄은 모두 커널 printk입니다. 이 줄들이 없으면 어디서 멈췄는지 알 수 없으므로, 초기 bring-up에서는 끄지 않습니다.
 
 ## 정리
 
-- 부팅은 BootROM → SPL → ATF → U-Boot → kernel → init → systemd의 단계별 진행입니다.
-- 각 단계는 시리얼에 *고유한* 첫 라인을 남기며, 그 라인 유무로 진행 위치를 판별합니다.
-- SPL의 첫 출력은 DRAM 초기화 직후입니다. 이 라인이 없으면 콘솔/전원/모드 문제입니다.
-- `earlycon`과 `console`을 정확히 지정해야 커널 첫 단계가 보입니다.
-- `bootargs`의 `root=`, `console=`, `rootwait`는 BSP의 가장 기본적인 약속입니다.
-- `Run /sbin/init` 이후는 사용자 공간이며 `systemd-analyze`로 분석합니다.
-- 멈춘 위치별로 결정 트리가 다르므로 *어디까지 나왔는지*가 디버깅의 첫 질문입니다.
+- 체인은 BootROM(QEMU에서는 BL1) → SPL/BL2 → BL31 → U-Boot → 커널 → init → systemd이고, 단계마다 고유한 첫 줄이 있습니다.
+- QEMU TCG에서 커널 첫 printk부터 `Run /sbin/init`까지 0.76초, systemd `multi-user.target`까지 호스트 시각으로 약 11.6초가 더 걸렸습니다(`systemd-analyze`의 userspace는 11.435 s).
+- earlycon은 DT `stdout-path`를 따라 인자 없이도 동작했고, 없을 때는 `Starting kernel ...` 뒤가 비었습니다.
+- 마지막 줄이 무엇이냐가 디버깅의 첫 질문입니다.
 
 ## 다음 편 예고
 

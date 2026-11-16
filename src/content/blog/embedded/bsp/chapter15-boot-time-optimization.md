@@ -12,206 +12,130 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**부트 시간 최적화는 추측이 아니라 측정으로 시작합니다.** 각 단계의 시간을 ms 단위로 쪼개 본 다음, 가장 비싼 단계부터 깎아내려 갑니다.
+**부트 시간 최적화는 추측이 아니라 측정으로 시작합니다.** 각 단계의 시간을 쪼개 본 다음, 가장 큰 구간부터 봅니다.
 
-제품마다 부팅 완료의 정의와 시간 예산이 다릅니다. 후방 카메라 영상 표시, 안전 상태 복구, 사용자 인터페이스 준비처럼 완료 조건을 먼저 정하고, 대상 제품의 요구사항과 실제 측정 결과를 비교합니다.
-
-이번 글은 ROM에서 application 첫 줄까지의 전 구간을 *측정 가능한 단계*로 나눕니다. 그리고 각 단계에서 시간을 깎는 실전 기법을 정리합니다.
+제품마다 부팅 완료의 정의가 다릅니다. 후방 카메라 영상 표시, 안전 상태 복구, UI 준비처럼 완료 조건을 먼저 정해야 같은 조건으로 전후를 비교할 수 있습니다. 이 장은 Ch 10에서 끝까지 돌린 QEMU 체인(TF-A v2.15.0 → U-Boot v2024.04 → Linux 6.12 `defconfig` → Debian 13)을 측정 대상으로 씁니다. TCG 에뮬레이션이라 절대값은 실제 보드와 다르고, 이 장에서 실제 보드를 잰 값은 없습니다. 도구가 무엇을 보여 주는지와 가장 큰 구간을 고르는 절차를 실측으로 보여 주는 것이 목적입니다.
 
 ## 단계별 시간 모델
 
-부트는 다음 단계로 나뉩니다. 다음 그림은 각 단계의 시간 비중을 시각화합니다.
+아래 그림은 Ch 10 실행에서 호스트가 잰 시각입니다. U-Boot 구간에는 autoboot를 멈추고 TFTP 명령을 넣은 시간과 38 MB 전송이 들어 있습니다.
 
-![부트 시간 분석 — ROM부터 Application까지 각 단계의 시간 비중](/images/blog/bsp/diagrams/ch15-boot-time-breakdown.svg)
+![부트 시간 분석 — QEMU 체인 실측](/images/blog/bsp/diagrams/ch15-boot-time-breakdown.svg)
 
-| 단계 | 시작 이벤트 | 끝 이벤트 | 기준 측정 | 변경 후 측정 |
-|------|-------------|-----------|------------|---------------|
-| ROM → SPL | 보드 전원/리셋 기준점 | SPL 첫 관측점 | 대상 보드에서 기록 | 같은 조건으로 재측정 |
-| SPL/U-Boot | SPL 진입 | 커널 handoff | 대상 보드에서 기록 | 같은 조건으로 재측정 |
-| Kernel | kernel entry | 정의한 kernel milestone | 대상 보드에서 기록 | 같은 조건으로 재측정 |
-| Userspace | init 시작 | 제품 완료 조건 | 대상 보드에서 기록 | 같은 조건으로 재측정 |
+| 단계 | 시작 줄 | 끝 줄 | 호스트 시각 |
+|------|-------------|-----------|------------|
+| TF-A | `Booting Trusted Firmware` | `EL3 exit to normal world` | 0.052 → 0.075 s |
+| U-Boot | `U-Boot 2024.04` | `Starting kernel ...` | 0.085 → 2.713 s |
+| Kernel | `Booting Linux` | `Run /sbin/init` | 2.742 → 3.609 s |
+| Userspace | systemd 시작 | `Reached target multi-user.target` | 3.609 → 15.223 s |
 
-표는 결과를 기록할 틀입니다. 숫자는 대상 하드웨어와 동일한 완료 조건에서 측정한 뒤 채우며, 다른 보드의 수치를 일반 기준으로 옮기지 않습니다.
+실제 보드에서는 같은 표를 같은 시작·끝 줄로 채웁니다. 시리얼 줄에 호스트 시각을 붙이는 방법은 이 장의 측정처럼 터미널 프로그램의 타임스탬프 기능이나 로그 스크립트를 씁니다.
 
-## 측정 — printk timestamps와 bootchart
+## 측정 — 단계별 도구
 
-커널은 빌드 옵션 하나로 부팅 로그에 시간을 박아 줍니다.
+### U-Boot: `bootstage report`
 
-```text
-CONFIG_PRINTK_TIME=y
-```
-
-또는 부팅 명령줄에 `printk.time=1`을 넣으면 dmesg 출력의 모든 줄에 `[초.마이크로초]` prefix가 붙습니다.
-
-```text
-[    0.000000] Booting Linux on physical CPU 0x0
-[    0.234521] random: get_random_bytes called from start_kernel
-[    0.512344] PCI: bus0: Fast back to back transfers enabled
-[    1.234567] systemd[1]: Detected architecture arm.
-```
-
-여기서 0초는 kernel 시작 시점입니다. 그 앞 단계는 별도로 봐야 합니다. U-Boot에서는 `bootstage report`가 단계별 시간을 보여 줍니다.
+U-Boot에는 단계별 시각을 기록하는 bootstage가 있습니다. `qemu_arm64_defconfig`에는 꺼져 있어 `CONFIG_BOOTSTAGE`, `CONFIG_CMD_BOOTSTAGE`, `CONFIG_BOOTSTAGE_REPORT`를 켜고 빌드해 QEMU virt에서 돌렸습니다.
 
 ```text
 => bootstage report
-Timer summary in microseconds (12 records):
+Timer summary in microseconds (9 records):
        Mark    Elapsed  Stage
           0          0  reset
-    218,453    218,453  board_init_f
-    345,221    126,768  board_init_r
-    421,003     75,782  eth_common_init
-    498,221     77,218  bootm_start
-    523,144     24,923  start_kernel
+      1,252      1,252  board_init_f
+     17,584     16,332  board_init_r
+     84,490     66,906  eth_common_init
+     85,114        624  main_loop
+     86,166      1,052  usb_start
+    297,598    211,432  cli_loop
+
+Accumulated time:
+                 3,704  dm_f
+                 9,856  dm_r
 ```
 
-systemd가 init이면 `systemd-analyze`가 userspace 단계를 분해합니다.
+`board_init_r`에서 `eth_common_init`까지 67 ms가 가장 큽니다. `eth_common_init()`은 첫 줄에서 이 표시를 남기므로(`net/eth_common.c:32-34`), 이 67 ms는 네트워크 초기화가 아니라 그 *앞*의 일, 즉 `common/board_r.c`의 `init_sequence_r`에서 `initr_net` 전에 도는 flash·환경·stdio·콘솔 초기화 시간입니다. 같은 로그에는 `Flash: 64 MiB`, `Loading Environment from Flash...`가 있고 `Net: No ethernet found.`로 NIC는 없었습니다. `cli_loop`까지의 211 ms는 autoboot 카운트다운을 멈추고 명령을 친 시간이 섞인 값입니다. `bootm`이 커널로 넘어가기 직전 `start_kernel` 표시를 남기고 report를 찍으며(`arch/arm/lib/bootm.c:57-62`), `CONFIG_BOOTSTAGE_FDT`(`boot/Kconfig:955`)를 켜면 이 기록을 커널에 넘기는 DT에 넣습니다(`common/bootstage.c:321`).
+
+### Kernel: printk 시각과 `initcall_debug`
+
+`CONFIG_PRINTK_TIME=y`(arm64 `defconfig`의 값, Ch 8)이면 커널 로그마다 커널 시작 기준 시각이 붙습니다. Ch 10에서 `Booting Linux`(0.000000)부터 `Run /sbin/init`(0.756240)까지 0.76초였습니다.
+
+어느 initcall이 시간을 쓰는지는 `initcall_debug ignore_loglevel`로 봅니다(Ch 11). root 없이 같은 커널을 부팅해 `returned ... after N usecs`를 정렬한 상위 10개입니다.
 
 ```bash
+grep -a "initcall .* returned" run4-initcall.log | \
+  sed 's/.*initcall \(.*\) returned \(-*[0-9]*\) after \([0-9]*\) usecs/\3 \1 \2/' | \
+  sort -rn | head -10
+```
+
+```text
+36000 of_platform_default_populate_init+0x0/0x118 0
+33720 jent_mod_init+0x0/0x114 0
+18441 chr_dev_init+0x0/0xa8 0
+17748 gen_pci_driver_init+0x0/0x28 0
+16000 sock_init+0x0/0x100 0
+10966 param_sysfs_builtin_init+0x0/0x1c4 0
+10790 physmap_init+0x0/0x28 0
+10418 loop_init+0x0/0x10c 0
+9040 inet_init+0x0/0x2b0 0
+8388 virtio_net_driver_init+0x0/0xb8 0
+```
+
+첫 줄은 DT 노드를 platform device로 만드는 initcall(`drivers/of/platform.c:503`)이고, 두 번째 `jent_mod_init`은 jitter entropy RNG 초기화(`crypto/jitterentropy-kcapi.c:333`)입니다. 줄인다면 제품에 필요 없는 기능을 빌드에서 빼는 쪽이고(Ch 8), 빼기 전후를 같은 명령으로 다시 잽니다. 예전 자료의 `CONFIG_BOOT_TRACER`는 linux-6.12의 `kernel/trace/Kconfig`에 없습니다.
+
+### Userspace: `systemd-analyze`
+
+Ch 10과 같은 부팅에서 login 뒤 실행했습니다.
+
+```text
 $ systemd-analyze
-Startup finished in 1.234s (kernel) + 2.567s (userspace) = 3.801s
-multi-user.target reached after 2.234s in userspace.
-
-$ systemd-analyze blame
-   1.234s NetworkManager.service
-    876ms ModemManager.service
-    543ms udev-trigger.service
-    321ms my-app.service
+Startup finished in 882ms (kernel) + 11.435s (userspace) = 12.317s
+graphical.target reached after 11.432s in userspace.
+$ systemd-analyze blame --no-pager | head -8
+6.831s dev-vda1.device
+5.779s systemd-udev-trigger.service
+1.588s user@0.service
+1.112s systemd-resolved.service
+ 935ms grub-common.service
+ 855ms ssh.service
+ 854ms systemd-logind.service
+ 809ms dev-hugepages.mount
+$ systemd-analyze critical-chain --no-pager | head -12
+...
+graphical.target @11.432s
+└─multi-user.target @11.431s
+  └─unattended-upgrades.service @11.421s
+    └─systemd-logind.service @10.544s +854ms
+      └─basic.target @10.225s
+        └─sockets.target @10.224s
+          └─uuidd.socket @10.223s
+            └─sysinit.target @10.176s
+              └─systemd-tmpfiles-setup.service @9.586s +565ms
 ```
 
-bootchart는 동일 정보를 *간트 차트*로 그려 줍니다. 의존성과 병렬 실행 여부가 한눈에 보입니다.
-
-```bash
-# Buildroot
-BR2_PACKAGE_BOOTCHART=y
-# 또는 systemd-bootchart 사용
-systemd-bootchart --no-syslog --output=/tmp/bootchart.svg
-```
-
-ftrace의 `boot_tracer`는 커널 내부의 `do_initcall`을 추적합니다.
-
-```text
-CONFIG_BOOT_TRACER=y
-# kernel cmdline: initcall_debug
-```
-
-dmesg에 모든 initcall이 시간과 함께 찍힙니다.
-
-```text
-[    0.512] calling  pci_subsys_init+0x0/0x60 @ 1
-[    0.745] initcall pci_subsys_init+0x0/0x60 returned 0 after 232 msecs
-```
-
-232ms 걸린 `pci_subsys_init`이 PCIe를 쓰지 않는 보드라면 제거 후보입니다.
-
-### 부트 시간 측정 스크립트 예시
-
-아래는 kernel dmesg의 한 milestone과 systemd journal의 별도 milestone을 표시하는 shell 예시입니다. 두 로그의 이벤트가 보장된 것은 아니므로 실제 target에서 확인합니다.
-
-```bash
-#!/bin/bash
-# boot-time-analyze.sh - dmesg에서 부트 단계별 시간 추출
-set -euo pipefail
-
-# 커널 부트 완료 시점
-dmesg | awk '/Freeing unused kernel/ { stamp = $2; sub(/\].*/, "", stamp); print "kernel milestone:", stamp; found = 1; exit } END { if (!found) exit 1 }'
-
-# systemd journal은 dmesg와 별도 출처
-journalctl -b -o short-monotonic | awk '/Reached target Multi-User System/ { print; exit }'
-
-# 가장 느린 initcall 상위 10개
-echo "=== Slowest initcalls ==="
-dmesg | grep "initcall.*returned 0 after" | \
-    sed 's/.*initcall \(.*\) returned 0 after \([0-9]*\) msecs/\2 \1/' | \
-    sort -rn | head -10
-
-```
-
-U-Boot의 bootstage 정보를 환경 변수로 내보내 커널에서 전체 부트 시간을 추적할 수도 있습니다.
-
-```text
-=> bootstage stash 0x83000000 0x1000
-=> setenv bootargs "${bootargs} bootstage.stash=0x83000000,0x1000"
-```
+`blame`은 각 unit이 걸린 시간이고, `critical-chain`은 목표에 이르는 경로입니다. 이 Debian 이미지의 `critical-chain`에는 `unattended-upgrades.service`가, `blame`에는 `grub-common.service`(935 ms)가 있습니다. 둘 다 임베디드 제품에 필요 없는 unit입니다. 그래서 제품용 rootfs는 Buildroot·Yocto로 필요한 unit만 넣어 만듭니다(Ch 16). Buildroot에는 그래프로 보는 `systemd-bootchart` 패키지도 있습니다(`package/systemd-bootchart/Config.in`).
 
 ## SPL과 U-Boot 단계 — Falcon mode
 
-U-Boot가 *대화형 셸*을 제공하는 단계와 장치 초기화가 부트 경로에 포함될 수 있습니다. Falcon mode는 설정된 보드에서 SPL이 커널을 직접 적재하는 경로를 제공합니다. 특수 키 입력이나 실패 때 full U-Boot로 전환되는지는 보드의 SPL 정책이 별도로 구현해야 합니다.
+U-Boot proper를 건너뛰고 SPL이 커널을 직접 적재하는 것이 Falcon mode입니다. Kconfig는 `CONFIG_SPL_OS_BOOT`(`common/spl/Kconfig:1108`)와 MMC/SD용 `CONFIG_SPL_FALCON_BOOT_MMCSD`(1134행)입니다. 예전 자료의 `CONFIG_SPL_FALCON_BOOT_MMC`라는 이름은 v2024.04에 없습니다. Falcon을 실제로 빌드하고 `spl export`로 준비하는 과정은 [Bootloader Ch 5](/blog/embedded/bootloader/chapter05-falcon-mode)에 있습니다. 실패했을 때 full U-Boot로 돌아가는 경로는 보드 코드가 따로 만들어야 합니다.
 
-```text
-CONFIG_SPL_OS_BOOT=y
-CONFIG_SPL_FALCON_BOOT_MMC=y
-```
-
-Falcon용 kernel·DTB의 형식과 저장 위치는 board code 및 U-Boot 버전이 정합니다. 저장 매체를 갱신하는 명령은 대상 장치·offset·복구 경로를 확인한 뒤 해당 보드 문서를 따라야 하므로 범용 쓰기 명령은 제시하지 않습니다.
-
-Falcon mode는 U-Boot의 유연성과 빠른 handoff 사이의 trade-off입니다. 이를 쓸지는 boot failure recovery, security/update 경로와 target board support를 검증한 뒤 정합니다.
-
-DRAM 초기화 조기 종료, console 끄기, 불필요한 드라이버 제외도 누적되면 큽니다. defconfig에서 제거할 후보는 다음과 같습니다.
-
-```ini
-CONFIG_CMD_NET=n           # 네트워크 부팅 안 함
-CONFIG_USB_STORAGE=n       # USB 부팅 안 함
-CONFIG_CMD_USB=n
-CONFIG_CONSOLE_MUX=n
-CONFIG_HUSH_PARSER=n       # 양산이면 셸 자체를 빼도 됨
-```
-
-Ethernet PHY auto-negotiation은 link partner와 설정에 따라 지연될 수 있습니다. 네트워크가 즉시 필요하지 않다면 이를 boot critical path에서 분리할지 측정 결과로 판단합니다.
+U-Boot 자체를 줄일 때는 bootstage에서 큰 구간을 고릅니다. 위 측정에서 가장 큰 구간은 `board_init_r`부터 네트워크 초기화 전까지(flash 탐색, 환경 적재, stdio·video 콘솔)였습니다. 이 구간을 더 쪼개려면 그 사이 함수에 `bootstage_mark()`를 더해 다시 잽니다. 무엇을 뺄지는 그렇게 나눈 결과로 정합니다.
 
 ## Kernel 단계 — 슬림화
 
-압축 해제 비용은 image format, bootloader, CPU 및 storage에 따라 달라집니다. `zImage`는 ARM용 self-decompressing image, `Image.gz`는 gzip-compressed arm64 image, `Image`는 비압축 image입니다. 누가 압축을 푸는지는 boot flow로 확인하고 실제 boot time을 측정합니다.
+arm64의 커널 이미지 형식은 `arch/arm64/boot/Makefile:19-20`의 target 목록(`Image`, `Image.gz`, `Image.lz4`, `Image.zst` 등)에서 고릅니다. 커널에 압축 해제기가 없으므로(`booting.rst:63-65`) 압축 이미지를 푸는 시간은 부트로더 몫이고, 압축하면 저장 매체에서 읽을 바이트가 줄어듭니다. Ch 8 빌드에서 `Image`는 38,246,912바이트, `Image.gz`는 13,874,511바이트였습니다. 어느 쪽이 빠른지는 매체 읽기 속도와 부트로더의 해제 속도에 달려 있으므로 대상 보드에서 둘 다 잽니다. 예전 자료의 `lzImage` target은 arm64 Makefile에 없습니다.
 
-```bash
-# arch/arm/boot/Makefile
-make Image    # 비압축 - 빠른 부팅
-make zImage   # gzip - 균형
-make lzImage  # lz4 - decompress 빠름, 크기 중간
-```
+콘솔 출력에도 시간이 듭니다. 115200 bps, 8N1이면 한 글자에 10비트이므로 80글자 한 줄은 80 × 10 / 115200 ≈ 6.9 ms입니다. 양산 이미지에서 `quiet`나 낮은 `loglevel`을 주는 이유입니다. 단, Ch 11의 진단은 이 출력에 기대므로 bring-up 동안에는 끄지 않습니다.
 
-initcall_debug로 시간 잡아먹는 드라이버를 찾아 모듈로 빼거나 제거합니다.
-
-```bash
-$ dmesg | grep "returned 0 after" | sort -k 11 -n -r | head
-[    1.234] initcall ip_auto_config returned 0 after 700 msecs
-[    0.987] initcall mmc_blk_init returned 0 after 234 msecs
-[    0.745] initcall pci_subsys_init returned 0 after 232 msecs
-```
-
-`ip_auto_config`가 700ms 걸리는 보드는 IP DHCP를 부트 cmdline에서 받고 있을 가능성이 큽니다. rootfs를 NFS가 아니라 eMMC로 바꾸면 사라집니다.
-
-kernel cmdline의 `quiet`와 `loglevel=0`은 console 출력 자체를 줄입니다. 직렬 출력은 의외로 느립니다. 115200bps면 한 줄 80자가 6.9ms입니다. dmesg가 100줄이면 700ms가 console로 빠집니다.
-
-```text
-# 디버깅용
-console=ttyS0,115200 earlycon loglevel=7
-
-# 양산용
-console=null loglevel=0 quiet
-```
-
-`PARTUUID=`는 장치 열거 순서가 바뀌어도 partition 식별자를 유지하는 방법입니다. 이를 지정해도 장치 준비 대기 시간이 자동으로 줄어드는 것은 아니므로 storage 초기화와 mount 시간을 따로 측정합니다.
-
-```text
-root=PARTUUID=12345678-02 rootwait
-```
-
-`rootwait`은 MMC가 준비될 때까지 대기합니다. 없으면 panic으로 빠질 수 있습니다.
+`rootwait`은 root 장치가 나타날 때까지 기다립니다(Ch 8). Ch 10의 커널은 `vda: vda1 vda15`(0.459초)를 본 뒤 0.667초에 root를 마운트했습니다.
 
 ## Initramfs — 최소화 또는 제거
 
-표준 distribution은 initramfs를 거쳐 real rootfs로 switch_root 합니다. 임베디드는 rootfs가 항상 같은 자리에 있으므로 initramfs 자체가 불필요한 경우가 많습니다.
-
-```text
-# kernel config
-CONFIG_INITRAMFS_SOURCE=""   # 비움
-```
-
-initramfs가 필요하다면(예: rootfs를 검증하거나 암호화된 volume을 여는 경우) 포함한 도구와 파일을 기록하고, 이미지 크기와 실행 시간을 대상 구성에서 측정합니다.
+initramfs는 `CONFIG_INITRAMFS_SOURCE`(`usr/Kconfig:6`)나 부트로더가 따로 넘기는 이미지로 들어갑니다. Ch 10의 부팅은 initramfs 없이 커널이 바로 virtio 디스크의 ext4를 root로 마운트했습니다. rootfs 검증이나 암호화 볼륨을 여는 단계가 필요할 때만 initramfs를 넣고, 넣으면 그 크기와 실행 시간을 같은 방식으로 잽니다.
 
 ```bash
 #!/bin/sh
-# /init - initramfs의 진입점
+# /init - initramfs의 진입점 예
 mount -t proc none /proc
 mount -t sysfs none /sys
 mount /dev/mmcblk0p2 /newroot
@@ -221,52 +145,32 @@ exec switch_root /newroot /sbin/init
 
 ## Userspace — systemd 의존성 정리
 
-systemd의 `multi-user.target`은 기본적으로 *많은* 서비스에 의존합니다. 임베디드에서는 대부분 불필요합니다.
+`critical-chain`에 제품과 무관한 unit이 있으면 끕니다. 위 Debian 이미지라면 `unattended-upgrades.service`가 `multi-user.target` 직전에 있었습니다.
 
 ```bash
-$ systemctl disable systemd-resolved.service
-$ systemctl disable ModemManager.service
-$ systemctl disable NetworkManager-wait-online.service
-$ systemctl mask wpa_supplicant.service
+systemctl disable unattended-upgrades.service
+systemctl mask grub-common.service
 ```
 
-`NetworkManager-wait-online.service`가 application 시작을 막는지는 unit dependency와 실제 journal로 확인합니다. 네트워크가 application 시작 후 올라와도 되는 제품에서만 dependency를 조정하고 기능 회귀를 시험합니다.
-
-다른 init 시스템은 기능과 의존성이 다릅니다. systemd를 BusyBox init 등으로 바꾸면 부팅 시간이 얼마나 달라지는지 같은 보드와 완료 조건으로 측정하고, 서비스 관리·로그·업데이트 동작도 함께 검증합니다.
-
-application을 직접 init으로 등록하는 극단도 가능합니다.
-
-```text
-init=/usr/bin/my-app
-```
-
-이 경우 my-app이 필요한 mount, network, log 초기화를 책임져야 합니다. 제품의 완료 조건을 만족하는지와 장애 복구 경로를 함께 검증해야 합니다.
-
-## 실측 사례를 비교하는 방법
-
-다른 보드의 공개 사례를 인용하려면 제조사 문서나 재현 가능한 시험 자료에서 보드 revision, 이미지·커널 버전, 측정 시작점과 완료 조건, 변경 항목을 함께 확인합니다. 이 장에서는 출처와 조건이 확인된 STM32MP1 측정 사례를 제시하지 않으므로 수치를 싣지 않습니다. 자체 결과에는 기준 이미지와 변경 이미지를 같은 장비·전원·저장 매체·완료 조건으로 측정한 기록을 남깁니다.
+끈 뒤 `systemd-analyze`를 다시 돌려 목표 도달 시각을 비교합니다. 이 글에서는 끈 뒤의 재측정을 하지 않았습니다. application을 init으로 직접 등록하는 방법(`init=/usr/bin/my-app`)은 mount, 로그, 재시작을 그 프로그램이 모두 맡아야 하고, init이 없으면 커널이 `Requested init ... failed`로 panic합니다(Ch 11).
 
 ## 자주 하는 실수
 
-**측정 없이 깎기.** console 출력이나 PHY negotiation을 먼저 끄기보다, 실제 부트 경로에서 어느 단계가 지연되는지 확인합니다.
+**측정 없이 깎기.** 위 측정에서 가장 큰 구간은 userspace였고, 그 안에서도 디스크 장치 대기와 udev였습니다. 콘솔이나 PHY부터 끄는 것은 측정이 그쪽을 가리킬 때만 합니다.
 
-**release에서 console 끄기 잊기.** `loglevel=7`이면 매 줄마다 직렬 송신에 시간이 듭니다. 양산에서는 0으로.
+**`initcall_debug`만 주기.** `ignore_loglevel` 없이는 콘솔에 나오지 않습니다(Ch 11).
 
-**Falcon mode 실패 경로 미준비.** Falcon이 실패하면 보드가 벽돌이 됩니다. Fallback을 제공하는지, 실패 시 recovery 진입이 가능한지는 실제 SPL/boot policy에서 확인합니다. Falcon 자체가 자동으로 full U-Boot fallback을 보장하지 않습니다.
+**TCG·에뮬레이터 수치를 보드 수치로 옮기기.** 이 장의 숫자는 QEMU TCG의 값입니다. 절차는 같지만 숫자는 보드에서 다시 잽니다.
 
-**Userspace에서 고정 sleep 사용.** 고정 지연은 실제 의존성을 표현하지 못합니다. systemd unit 사이의 순서·요구 관계를 확인해 적절한 dependency로 표현하고, 서비스가 준비되기 전에 다음 단계가 진행되는 실패 사례도 시험합니다.
-
-**네트워크 초기화를 측정 없이 이동하기.** PHY negotiation 시간과 네트워크 준비 의존성은 PHY, link partner, 설정에 따라 달라집니다. 네트워크가 application 시작 조건인지 확인하고 변경 전후의 시간을 기록합니다.
+**Falcon mode 실패 경로 미준비.** Falcon이 실패했을 때 full U-Boot나 복구로 가는 경로는 자동으로 생기지 않습니다.
 
 ## 정리
 
-- 부트 시간 최적화는 측정으로 시작합니다. `printk.time=1`, `bootstage report`, `systemd-analyze blame`이 기본 도구입니다.
-- 측정에서 가장 큰 지연 구간부터 검토합니다. 변경 후에도 같은 milestone과 workload로 비교합니다.
-- U-Boot Falcon mode는 일부 보드에서 bootloader 작업을 줄일 수 있지만 단축 시간은 platform 설정과 측정에 따릅니다.
-- Kernel은 `Image` 비압축 + initcall_debug로 무거운 driver 제거 + `quiet loglevel=0`이 기본 조합입니다.
-- Initramfs는 보안 검증이 필요하지 않다면 제거하고 PARTUUID로 직접 root mount 합니다.
-- systemd는 무겁습니다. BusyBox init이나 application init으로 대체하는 극단을 검토하세요.
-- 부팅 시간 주장은 특정 제품·완료 기준·측정 조건을 함께 적습니다. 이 장에서는 target board를 사용한 실측을 하지 않았습니다.
+- 부트 시간은 단계별 시작·끝 줄을 정해 같은 조건으로 잽니다.
+- U-Boot는 `bootstage report`, 커널은 printk 시각과 `initcall_debug ignore_loglevel`, userspace는 `systemd-analyze blame`/`critical-chain`으로 쪼갭니다.
+- QEMU 체인에서 가장 큰 구간은 userspace(약 11.6초)였고, 커널은 0.76초, U-Boot bootstage에서는 네트워크 초기화 전까지의 `board_init_r` 구간 67 ms가 가장 컸습니다.
+- 예전 이름 `CONFIG_BOOT_TRACER`, `lzImage`, `CONFIG_SPL_FALCON_BOOT_MMC`는 현재 소스에 없습니다.
+- 변경은 측정이 가리킨 곳부터 하고, 변경 뒤 같은 도구로 다시 잽니다.
 
 ## 다음 편 예고
 
@@ -274,7 +178,8 @@ init=/usr/bin/my-app
 
 ## 관련 항목
 
-- [Ch 14: 디버깅 도구](/blog/embedded/bsp/chapter14-thermal-watchdog) — 측정 도구가 같이 묶입니다
+- [Ch 10: 첫 부팅 추적](/blog/embedded/bsp/chapter10-first-boot) — 이 장이 잰 부팅 로그
+- [Ch 11: 부트로그 디버깅](/blog/embedded/bsp/chapter11-bootlog-debugging) — `initcall_debug`
 - [Ch 17: 이미지 패키징](/blog/embedded/bsp/chapter17-image-packaging) — 파티션 layout이 부트 경로와 맞물립니다
-- [Bootloader 시리즈 — Falcon Mode](/blog/embedded/bootloader/chapter01-boot-problem) — U-Boot 측 깊이 있는 다룸
+- [Bootloader Ch 5 — Falcon Mode](/blog/embedded/bootloader/chapter05-falcon-mode) — Falcon 빌드와 `spl export`
 - [Modern Embedded Recipes — Boot 최적화](/blog/embedded/modern-recipes/00-preface) — recipe 묶음
