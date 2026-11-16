@@ -20,16 +20,17 @@ topics: ["embedded", "embedded/hardware"]
 
 이 표는 각 세대의 기준 문서·발표값입니다. 최신 제품 카탈로그가 아니며, HBM2E·HBM3E 행은 JEDEC revision이 아닌 벤더 제품 발표값입니다.
 
-| 세대 | 기준 (발표일) | per-pin | Stack BW | Stack capacity | I/O | 전압 |
-|------|-----------|---------|----------|----------------|-----|-----|
-| HBM | Samsung 2016 발표의 비교값 | TBD | 128 GB/s | TBD | TBD | TBD |
-| HBM2 | JESD235A (2016-01-12) · JESD235B (2018-12-17) | 2.0 (산술) · 2.4 Gbps | 256 · 307 GB/s | 최대 8 · 24 GB | 1024-bit | TBD |
-| HBM2E | Samsung (2020-02-04) · SK hynix (2020-07-02) | 3.2 · 3.6 Gbps | 410 · 460 GB/s | 16 GB | 1024-bit | TBD |
-| HBM3 | JESD238 (2022-01-27) | 6.4 Gbps | 819 GB/s | 4~64 GB | 1024-bit | 1.1 V, I/O 0.4 V swing |
-| HBM3E | Micron (2024-02-26) · SK hynix (2024-09-26) | 9.2 초과 · 9.6 Gbps | 1.2 TB/s 초과 · 1,228.8 GB/s (산술) | 24 · 36 GB | 1024-bit | TBD |
-| HBM4 | JESD270-4 (2025-04 발표) | 최대 8 Gb/s | 최대 2 TB/s | 최대 64 GB | 2048-bit | VDDC 1.0·1.05 V, VDDQ 0.7~0.9 V |
+| 세대 | 기준 (발표일) | per-pin | Stack BW | Stack capacity | I/O |
+|------|-----------|---------|----------|----------------|-----|
+| HBM2 | JESD235A (2016-01-12) · JESD235B (2018-12-17) | 2.0 (산술) · 2.4 Gbps | 256 · 307 GB/s | 최대 8 · 24 GB | 1024-bit |
+| HBM2E | Samsung (2020-02-04) · SK hynix (2020-07-02) | 3.2 · 3.6 Gbps | 410 · 460 GB/s | 16 GB | 1024-bit |
+| HBM3 | JESD238 (2022-01-27) | 6.4 Gbps | 819 GB/s | 4~64 GB | 1024-bit |
+| HBM3E | Micron (2024-02-26) · SK hynix (2024-09-26) | 9.2 초과 · 9.6 Gbps | 1.2 TB/s 초과 · 1,228.8 GB/s (산술) | 24 · 36 GB | 1024-bit |
+| HBM4 | JESD270-4 (2025-04 발표) | 최대 8 Gb/s | 최대 2 TB/s | 최대 64 GB | 2048-bit |
 
-(산술) 표시는 발표문의 다른 값에서 계산한 칸입니다. HBM 1세대의 128 GB/s는 [Samsung의 2016년 1월 19일 HBM2 발표](https://news.samsung.com/global/samsung-begins-mass-producing-worlds-fastest-dram-based-on-newest-high-bandwidth-memory-hbm-interface)가 *자사 4 GB HBM2의 256 GB/s는 HBM1 패키지의 두 배*라고 쓴 문장에서 나온 값입니다. HBM2의 2.0 Gbps도 [JESD235A 발표](https://www.jedec.org/news/pressreleases/jedec-updates-groundbreaking-high-bandwidth-memory-hbm-standard)의 256 GB/s를 `256 × 8 ÷ 1024`로 환산한 값입니다. HBM2E의 3.2 Gbps 기준을 JEDEC이 어느 revision에서 정했는지는 JEDEC 발표문을 찾지 못해 표에 적지 않았습니다. JEDEC의 [JESD235 문서 페이지](https://www.jedec.org/standards-documents/docs/jesd235a)는 현재 2021년 3월판 JESD235D를 보여 주고, [Synopsys의 2022년 4월 16일 HBM3 설명](https://www.synopsys.com/articles/hbm3-ip-dwtb.html)은 JESD235D를 *HBM2E 표준*으로 부릅니다.
+1세대 HBM은 인용한 자료 중 [Samsung의 2016년 1월 19일 HBM2 발표](https://news.samsung.com/global/samsung-begins-mass-producing-worlds-fastest-dram-based-on-newest-high-bandwidth-memory-hbm-interface)가 *자사 4 GB HBM2의 256 GB/s는 HBM1 패키지의 두 배*라고 쓴 비교 문장(곧 128 GB/s)에만 나와, 다른 칸을 채울 수 없어 표에서 뺐습니다. 전압은 JEDEC 발표 중 HBM3(동작 1.1 V, host 인터페이스 0.4 V low-swing)와 HBM4(VDDC 1.0·1.05 V, VDDQ 0.7·0.75·0.8·0.9 V)에만 나옵니다.
+
+(산술) 표시는 발표문의 다른 값에서 계산한 칸입니다. HBM2의 2.0 Gbps는 [JESD235A 발표](https://www.jedec.org/news/pressreleases/jedec-updates-groundbreaking-high-bandwidth-memory-hbm-standard)의 256 GB/s를 `256 × 8 ÷ 1024`로 환산한 값입니다. HBM2E의 3.2 Gbps 기준을 JEDEC이 어느 revision에서 정했는지는 JEDEC 발표문을 찾지 못해 표에 적지 않았습니다. JEDEC의 [JESD235 문서 페이지](https://www.jedec.org/standards-documents/docs/jesd235a)는 현재 2021년 3월판 JESD235D를 보여 주고, [Synopsys의 2022년 4월 16일 HBM3 설명](https://www.synopsys.com/articles/hbm3-ip-dwtb.html)은 JESD235D를 *HBM2E 표준*으로 부릅니다.
 
 HBM4 행은 [2025년 4월 발표](https://www.storagenewsletter.com/2025/04/17/jedec-and-industry-leaders-collaborate-to-release-jesd270-4-hbm4-standard/)의 범위입니다. JESD235 계열이 아니라 *새 번호 체계*를 쓰며, [JEDEC 문서 페이지](https://www.jedec.org/standards-documents/docs/jesd270-4)에는 2025년 12월판 JESD270-4A(Version 1.1)가 올라와 있습니다.
 
@@ -37,17 +38,7 @@ HBM4 행은 [2025년 4월 발표](https://www.storagenewsletter.com/2025/04/17/j
 
 ## HBM — 시작
 
-1세대 HBM의 수치는 이 글에서 연 1차 자료 중 위 Samsung 발표의 비교 문장 하나에만 나옵니다.
-
-**HBM (1세대):**
-
-| 항목 | 값 | 근거 |
-|------|-----|------|
-| stack BW | 128 GB/s | Samsung 2016 발표 (HBM2 256 GB/s의 절반) |
-| per-pin·bus·channel | TBD | 1세대 JESD235 원문·발표를 열지 못함 |
-| max stack·capacity·VDD | TBD | — |
-
-JESD235A·B 발표의 1024-bit·8 channel은 HBM2 update의 설명이라 1세대 칸에 옮기지 않았습니다. 1024-bit였다고 두면 pin rate는 `128 × 8 ÷ 1024 = 1.0 Gbps`가 됩니다.
+1세대 HBM의 수치는 이 글에서 연 1차 자료 중 위 Samsung 발표의 비교 문장 하나에만 나옵니다. HBM2 package의 256 GB/s가 HBM1 package의 두 배라는 문장이라, 1세대 stack 대역폭은 128 GB/s입니다. 인용한 자료에는 1세대의 bus 폭·channel 구성·적층 수가 없습니다. JESD235A·B 발표의 1024-bit·8 channel은 HBM2 update의 설명이라 1세대에 옮기지 않았습니다. 같은 1024-bit였다고 두면 pin rate는 `128 × 8 ÷ 1024 = 1.0 Gbps`가 됩니다.
 
 같은 Samsung 발표는 비교 대상으로 *4 Gb GDDR5 chip 하나가 9 Gbps에서 36 GB/s*라고 적습니다. HBM2 stack 하나(256 GB/s)는 그 chip의 `256 ÷ 36 ≈ 7.1`배입니다.
 
@@ -64,7 +55,6 @@ JESD235A(2016-01-12)가 256 GB/s를, JESD235B(2018-12-17)가 2.4 Gbps·307 GB/s�
 | channel | 8 × 128-bit | 8 × 128-bit |
 | stack 높이 | 2·4·8-Hi | 2·4·8·12-Hi |
 | capacity | stack당 1~8 GB | stack당 1~24 GB |
-| ECC | TBD | TBD |
 
 **대표 카드** — [Volta 백서](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf)의 V100은 *stack당 die 4장, stack 4개, 16 GB, 900 GB/s*입니다. [Ampere 백서](https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf)의 A100 40GB는 *활성 HBM2 stack 5개, stack당 die 8장, 1215 MHz(DDR), 1555 GB/sec*입니다. 1215 MHz DDR은 `1.215 × 2 = 2.43 Gb/s`이고, `2.43 × 5 × 1024 ÷ 8 = 1,555.2 GB/s`로 백서 값과 맞습니다.
 
@@ -160,10 +150,11 @@ HBM4는 *흐름을 바꿉니다*. pin rate는 HBM3E 제품(9.6 Gbps)보다 낮�
 | 세대 | RAS 기능 (발표문 표현) |
 |------|---------|
 | HBM2 (JESD235A) | DRAM 온도가 신뢰 동작 수준을 넘으면 controller에 알리는 기능 |
+| HBM2E (Synopsys 설명) | DM 신호를 ECC 저장 위치로 바꿔 쓰는 host 측 sideband ECC 옵션(64-bit data + 8-bit ECC) |
 | HBM3 | symbol 기반 on-die ECC, 실시간 오류 보고·투명성 |
 | HBM4 | DRFM으로 row hammer 완화 |
 
-JEDEC은 HBM3의 ECC 도입 이유를 *플랫폼 수준의 높은 RAS에 대한 시장 요구*로 적습니다.
+JEDEC은 HBM3의 ECC 도입 이유를 *플랫폼 수준의 높은 RAS에 대한 시장 요구*로 적습니다. Synopsys 설명에 따르면 HBM3는 DM 신호를 없애고 pseudo channel마다 ECC 신호 2개를 더했으며, 그래서 32 byte보다 작은 write는 read-modify-write가 필요합니다.
 
 ## bandwidth 그래프
 
