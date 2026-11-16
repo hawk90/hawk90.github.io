@@ -96,7 +96,7 @@ GIL: 100.00%, Active: 120.00%, Threads: 3
   0.00% 100.00%   0.000s     4.00s   worker (busy.py)
 ```
 
-`%Own`은 그 함수 자신에서 잡힌 비율, `%Total`은 그 함수 아래 호출까지 포함한 비율입니다. 자고 있어야 할 `<module>`과 `idle`도 10%씩 잡혔습니다. README의 "How do you detect if a thread is idle or not?" 절은 py-spy가 OS의 스레드 상태(Linux는 `/proc/PID/stat`)를 읽은 뒤 스택을 읽기 때문에 그 사이 상태가 바뀌는 경쟁이 있고, 그래서 쉬는 스레드가 활성으로 잡힐 수 있다고 설명합니다.
+`%Own`은 그 함수 자신에서 잡힌 비율, `%Total`은 그 함수 아래 호출까지 포함한 비율입니다. 자고 있어야 할 `<module>`과 `idle`도 10%씩 잡혔습니다. README의 "How do you detect if a thread is idle or not?" 절은 쉬는 스레드가 활성으로 잡히는 원인을 여럿 듭니다. 스레드 상태(Linux는 `/proc/PID/stat`)를 읽은 뒤 스택을 읽는 사이의 경쟁, ptrace attach가 쉬던 스레드를 잠깐 깨우는 경우, 그리고 Linux의 ARM 계열에서는 OS 스레드 상태 조회가 아직 구현되지 않았다는 점입니다. 이 게스트는 aarch64라 어느 원인인지 이 실행만으로 가리지 못했습니다. 아래 `--nonblocking` 기록에서는 이런 샘플이 나오지 않았습니다.
 
 ### record — Flamegraph
 
@@ -147,7 +147,7 @@ Thread 3219 (idle): "idle"
 
 ### 대상은 멈추는가
 
-README의 "How can I avoid pausing the Python program?" 절에 따르면 py-spy는 기본적으로 샘플을 읽는 동안 대상을 *잠깐 멈춥니다*. `--nonblocking`을 주면 멈추지 않고 읽는 대신, 메모리 읽기가 원자적이지 않아 오류나 일부 잘린 스택이 섞일 수 있다고 적습니다. `busy.py` 5초 기록에서는 두 방식 모두 `Errors: 0`이었고 샘플 분포도 거의 같았습니다(`parse_json:6` 467 대 465). 오류가 드러날 만큼 스택이 빠르게 바뀌는 프로그램은 아니었다는 뜻입니다.
+README의 "How can I avoid pausing the Python program?" 절에 따르면 py-spy는 기본적으로 샘플을 읽는 동안 대상을 *잠깐 멈춥니다*. `--nonblocking`을 주면 멈추지 않고 읽는 대신, 메모리 읽기가 원자적이지 않아 오류나 일부 잘린 스택이 섞일 수 있다고 적습니다. `busy.py` 5초 기록에서는 두 방식 모두 `Errors: 0`이었고 `parse_json:6`은 467 대 465로 같았습니다. 다만 `--nonblocking` 기록(499 샘플)에는 기본 기록(511 샘플)에 섞였던 `idle`·`<module>` 샘플 12개가 없었습니다.
 
 ## 실전 — 멈춘 프로세스 진단
 
@@ -225,7 +225,7 @@ if __name__ == "__main__":
 py-spy record -o mp.txt -f raw --subprocesses -- python mp.py
 ```
 
-raw 결과에서 샘플이 가장 많은 스택의 앞부분은 `process 3291:"python mp.py";process 3297:"/root/v315/bin/python -c import sys; from multiprocessing.forkserver import main; ..."`였습니다. 3.15.2의 Linux 기본 시작 방식인 forkserver 프로세스 아래에 워커가 달려 있다는 뜻입니다. 워커 두 개가 각각 약 270 샘플(100 Hz × 3초)을 남겼고, 전체는 677 샘플이었습니다.
+raw 결과에서 샘플이 가장 많은 스택의 앞부분은 `process 3291:"python mp.py";process 3297:"/root/v315/bin/python -c import sys; from multiprocessing.forkserver import main; ..."`였습니다. 3.15.2의 Linux 기본 시작 방식인 forkserver 프로세스 아래에 워커가 달려 있다는 뜻입니다. raw 파일을 프로세스별로 합하면 워커 두 개가 각각 320 샘플(100 Hz × 약 3초)을 남겼고, 전체는 677 샘플이었습니다.
 
 ## ASGI / asyncio
 

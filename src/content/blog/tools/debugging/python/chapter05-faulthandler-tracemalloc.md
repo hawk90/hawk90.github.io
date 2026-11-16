@@ -35,7 +35,7 @@ process([8])
 
 ```text
 $ python crash.py
-run.sh: line 5:  3542 Segmentation fault      python crash.py
+/root/py/ch05/run.sh: line 5:  3542 Segmentation fault      python crash.py
 [exit=139]
 ```
 
@@ -117,12 +117,12 @@ print("main done")
 ```text
 $ python later.py
 Timeout (0:00:01)!
-Thread 0x0000ffffba1f3140 [stuck] (most recent call first):
+Thread 0x0000ffff843c3140 [stuck] (most recent call first):
   File "/root/py/ch05/later.py", line 7 in stuck
   File ".../threading.py", line 1161 in run
   ...
 
-Thread 0x0000ffffbb05c440 [python] (most recent call first):
+Thread 0x0000ffff85230440 [python] (most recent call first):
   File "/root/py/ch05/later.py", line 10 in <module>
 Timeout (0:00:01)!
 ...
@@ -350,12 +350,12 @@ Filename: memprof.py
 
 Line #    Mem usage    Increment  Occurrences   Line Contents
 =============================================================
-     3     34.7 MiB     34.7 MiB           1   @profile
+     3     33.4 MiB     33.4 MiB           1   @profile
      4                                         def load_data():
-     5    111.0 MiB     76.3 MiB           1       a = [0] * 10**7
-     6    149.2 MiB     38.2 MiB           1       b = list(range(10**6))
-     7     72.9 MiB    -76.3 MiB           1       del a
-     8     72.9 MiB      0.0 MiB           1       return b
+     5    109.6 MiB     76.3 MiB           1       a = [0] * 10**7
+     6    147.9 MiB     38.2 MiB           1       b = list(range(10**6))
+     7     71.6 MiB    -76.3 MiB           1       del a
+     8     71.6 MiB      0.0 MiB           1       return b
 ```
 
 5번 줄의 +76.3 MiB는 포인터 10⁷개(8바이트씩 80,000,000바이트)와 맞아떨어집니다. `del a` 뒤에 같은 양이 RSS에서 빠진 것도 보입니다. RSS는 프로세스 전체의 상주 메모리이므로 파이썬 할당기 밖의 메모리도 포함합니다. 반대로 어느 객체가 그 메모리를 쓰는지는 알려 주지 않습니다. 둘을 같이 씁니다.
@@ -404,7 +404,7 @@ print("traceback captured")
 
 ```text
 $ python traceback-check.py
-Current thread 0x0000ffff966d0440 [python] (most recent call first):
+Current thread 0x0000ffff908bd440 [python] (most recent call first):
   File "/root/py/ch05/traceback-check.py", line 4 in capture
   File "/root/py/ch05/traceback-check.py", line 6 in <module>
 traceback captured
@@ -414,12 +414,12 @@ traceback captured
 
 ## GDB py-bt — C 레벨에서 파이썬 스택 읽기
 
-C 확장 안에서 멈췄거나 코어 덤프만 남았다면 GDB로 들어가야 합니다. 그런데 GDB가 보여 주는 것은 `_PyEval_EvalFrameDefault` 같은 인터프리터 C 함수뿐입니다. [Debugging C API extensions and CPython Internals with GDB](https://docs.python.org/3.15/howto/gdb_helpers.html) 문서의 `python-gdb.py` 확장은 그 C 프레임 안의 파이썬 프레임을 꺼내 `py-bt`, `py-list`, `py-locals` 같은 명령으로 보여 줍니다. 문서는 Debian/Ubuntu에서 `gdb`와 `python3-dbg` 패키지를 설치하라고 안내하고, debuginfod가 심볼은 받아 와도 이 확장 자체는 설치하지 않는다고 적습니다.
+C 확장 안에서 멈췄거나 코어 덤프만 남았다면 GDB로 들어가야 합니다. 그런데 GDB 자체는 파이썬 프레임을 모르고 인터프리터의 C 프레임만 압니다. [Debugging C API extensions and CPython Internals with GDB](https://docs.python.org/3.15/howto/gdb_helpers.html) 문서의 `python-gdb.py` 확장은 그 C 프레임 안의 파이썬 프레임을 꺼내 `py-bt`, `py-list`, `py-locals` 같은 명령으로 보여 줍니다. 문서는 Ubuntu 예로 `sudo apt install gdb python3-dbg`를 들고, debuginfod가 심볼은 받아 와도 이 확장 자체는 설치하지 않는다고 적습니다.
 
 Debian 13에서 `python3.13-dbg`를 설치하니 `/usr/share/gdb/auto-load/usr/bin/python3.13-gdb.py`가 생겼고, 같은 패키지의 `/usr/lib/debug/.build-id/9e/7f76...debug`가 strip된 `/usr/bin/python3.13`의 build-id(`9e7f76da...`)와 맞는 디버그 심볼이었습니다. 4장의 교착 상태 `hung.py`를 `/usr/bin/python3.13`으로 띄우고 붙었습니다.
 
 ```text
-$ gdb -p 3586 -batch -ex 'thread apply all py-bt'
+$ DEBUGINFOD_URLS=https://debuginfod.debian.net gdb -p 3586 -batch -ex 'thread apply all py-bt'
 Thread 4 (Thread 0xffffb48b3160 (LWP 3588) "python3.13"):
 Traceback (most recent call first):
   <built-in method __enter__ of _thread.lock object at remote 0xffffb4943410>
@@ -441,7 +441,7 @@ Traceback (most recent call first):
     t1.join()
 ```
 
-py-spy와 같은 결론이 GDB 안에서 나왔고, 맨 위에 C로 구현된 `lock.__enter__`에서 막혀 있다는 정보가 더 붙었습니다. `py-up`으로 파이썬 프레임을 옮긴 뒤 `py-list`와 `py-locals`를 쓰면 소스와 지역 변수가 보입니다.
+`DEBUGINFOD_URLS`를 비우고 debuginfod 없이 실행해도 같은 출력이 나왔으므로 심볼은 `python3.13-dbg`의 디버그 파일에서 온 것입니다. py-spy와 같은 결론이 GDB 안에서 나왔고, 맨 위에 C로 구현된 `lock.__enter__`에서 막혀 있다는 정보가 더 붙었습니다. `py-up`으로 파이썬 프레임을 옮긴 뒤 `py-list`와 `py-locals`를 쓰면 소스와 지역 변수가 보입니다.
 
 ```text
 $ gdb -p 3629 -batch -ex 'thread 3' -ex 'py-up' -ex 'py-list' -ex 'py-locals'

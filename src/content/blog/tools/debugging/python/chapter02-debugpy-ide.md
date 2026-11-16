@@ -109,7 +109,7 @@ CMD ["python", "-m", "debugpy", "--listen", "0.0.0.0:5678", \
 
 ### 이미 도는 프로세스에 주입 (`--pid`)
 
-debugpy를 넣지 않고 띄운 프로세스에도 붙을 수 있습니다. README의 "Attaching to a running process by ID" 절은 `--pid`가 대상에 디버거를 주입해, 명령이 끝나면 처음부터 `-m debugpy`로 띄운 것처럼 서버가 돈다고 설명합니다. debugpy 1.8.22의 `debugpy/server/cli.py`(475~494행)는 `sys.remote_exec`이 있으면(3.14+, [PEP 768](https://peps.python.org/pep-0768/)) 그걸 먼저 쓰고, 실패하면 기존 pydevd 방식으로 다시 시도합니다.
+debugpy를 넣지 않고 띄운 프로세스에도 붙을 수 있습니다. README의 "Attaching to a running process by ID" 절은 `--pid`가 대상에 디버거를 주입해, 명령이 끝나면 처음부터 `-m debugpy`로 띄운 것처럼 서버가 돈다고 설명합니다. debugpy 1.8.22의 `debugpy/server/cli.py`(475~502행)는 `sys.remote_exec`이 있으면(3.14+, [PEP 768](https://peps.python.org/pep-0768/)) 그걸 먼저 쓰고, 실패하면 기존 pydevd 방식으로 다시 시도합니다.
 
 1장의 `loop.py`(0.2초마다 `tick()`)를 그냥 띄운 뒤 주입하고, DAP로 `pause`·`stackTrace`·`evaluate`를 보냈습니다.
 
@@ -194,10 +194,10 @@ if __name__ == "__main__":
 
 | 실행 | DAP 클라이언트가 받은 것 | 프로그램 출력 |
 | --- | --- | --- |
-| `python -m debugpy --listen ... --wait-for-client parent.py` | `debugpyAttach` 이벤트 2개 (`"request": "attach"`, 자식 PID와 접속 주소) | 없음. 클라이언트가 자식에 붙지 않자 15초 동안 진행하지 않음 |
+| `python -m debugpy --listen ... --wait-for-client parent.py` | `debugpyAttach` 이벤트 2개 (`"request": "attach"`, multiprocessing의 forkserver·resource_tracker 프로세스 PID와 접속 주소) | 없음. 클라이언트가 자식에 붙지 않자 15초 동안 진행하지 않음 |
 | 같은 명령 + `--configure-subProcess False` | 자식 관련 이벤트 없음 | `mp child ...`, `popen child ...`, `parent done` |
 
-CLI로 띄우면 서브프로세스 추적이 기본으로 켜져 있었습니다. 자식은 각자 debugpy를 싣고 시작해 클라이언트가 자기에게 attach하기를 기다리고, 부모는 그 자식을 `join()`하며 같이 멈춥니다. IDE가 `debugpyAttach`를 받아 자식 세션을 열어 줘야 진행됩니다. README의 "Ignoring subprocesses" 절에 있는 `--configure-subProcess False`를 주면 자식은 디버거 없이 바로 실행됩니다.
+CLI로 띄우면 서브프로세스 추적이 기본으로 켜져 있었습니다(1.8.22 `cli.py`의 기본 설정 `"subProcess": True`). 두 이벤트의 PID를 `/proc/PID/cmdline`으로 확인하니 3.15.2의 Linux 기본 시작 방식인 forkserver 프로세스와 resource_tracker 프로세스였습니다. 둘 다 debugpy를 싣고 시작해 클라이언트의 attach를 기다렸고, 부모는 `py-spy dump`로 보니 `p.start()`(`parent.py:8`) 안의 `ForkServer.connect_to_new_process`에서 forkserver의 응답을 기다리고 있었습니다. `work`를 실행할 자식은 만들어지지도 않았습니다. IDE가 `debugpyAttach`를 받아 자식 세션을 열어 줘야 진행됩니다. README의 "Ignoring subprocesses" 절에 있는 `--configure-subProcess False`를 주면 자식은 디버거 없이 바로 실행됩니다.
 
 `launch.json`에서는 키가 `subProcess`입니다. VS Code 문서는 이 값의 기본을 `false`라고 적고, attach 설정에서는 클라이언트가 붙기 전에 정해야 하는 속성이라 `--configure-subProcess`로 넘긴다고 설명합니다. 같은 설정 이름이어도 CLI의 기본값(위 실행에서 켜짐)과 VSCode `launch`의 기본값(문서상 꺼짐)이 다르다는 점을 기억해 둡니다.
 
@@ -215,7 +215,7 @@ def user(uid):
     return {"uid": uid, "name": name}
 ```
 
-6번 줄에 브레이크포인트를 걸고 `/user/7`을 요청했습니다. 리로더를 끈 실행은 `user` 함수의 6번 줄에서 멈췄고, `continue` 뒤 `{"name":"user7","uid":7}`가 응답됐습니다. `--debug`(리로더 켬)로 띄운 실행은 `* Restarting with stat` 뒤 `debugpyAttach` 이벤트 2개가 오고, 자식에 붙지 않은 클라이언트 쪽에서는 브레이크포인트도 응답도 없이 HTTP 요청이 10초 만에 시간 초과됐습니다.
+6번 줄에 브레이크포인트를 걸고 `/user/7`을 요청했습니다. 리로더를 끈 실행은 `user` 함수의 6번 줄에서 멈췄고, `continue` 뒤 `{"name":"user7","uid":7}`가 응답됐습니다. `--debug`(리로더 켬)로 띄운 실행은 `* Restarting with stat` 뒤 `debugpyAttach` 이벤트 2개가 왔습니다. 같은 실행을 다시 해 PID의 명령줄을 보니 하나는 리로더가 다시 띄운 `flask ... run --debug` 프로세스, 다른 하나는 multiprocessing의 resource_tracker였습니다. 그리고 자식에 붙지 않은 클라이언트 쪽에서는 브레이크포인트도 응답도 없이 HTTP 요청이 10초 만에 시간 초과됐습니다.
 
 ```text
 $ python -m debugpy --listen 127.0.0.1:5701 --wait-for-client -m flask --app app run --port 6701 --no-debugger --no-reload
