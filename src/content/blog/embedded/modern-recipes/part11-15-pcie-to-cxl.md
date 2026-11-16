@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 [Ch 125 (PCIe BAR)](/blog/embedded/modern-recipes/part11-03-pcie-bar)에서 *PCIe로 device를 enumerate*하고 *MMIO로 register를 read/write*하는 흐름을 봤습니다. CXL은 *같은 PCIe 인프라*를 그대로 쓰면서 *추가 능력*을 얹은 표준입니다.
 
-레이어 구조:
+레이어는 다음과 같이 쌓입니다.
 
 | 레이어 | 역할 |
 |--------|------|
@@ -27,7 +27,7 @@ topics: ["embedded"]
 | CXL.cache | device → host cache |
 | CXL.mem | host → device memory |
 
-*같은 케이블·같은 connector·같은 enumeration*입니다. *디바이스 측이 CXL을 지원*하면 *config space에 CXL DVSEC*이 추가되어 *host가 인식*합니다.
+케이블·connector·enumeration이 모두 같습니다. 디바이스가 CXL을 지원하면 config space에 CXL DVSEC이 추가되고, host는 이것으로 CXL 장치를 알아봅니다.
 
 ## 세 프로토콜의 역할
 
@@ -49,7 +49,7 @@ CXL 디바이스는 *지원 프로토콜 조합*으로 *세 타입*으로 나뉩
 | **Type 2** | CXL.io + CXL.cache + CXL.mem | GPU·NPU·FPGA | 자체 HBM/DRAM |
 | **Type 3** | CXL.io + CXL.mem | memory expander | 자체 DRAM (host에 노출) |
 
-가장 *간단한 게 Type 3*입니다. *DRAM 모듈*을 *PCIe 너머로 노출*하는 디바이스로, *CXL.io는 enumeration용*, *CXL.mem은 host의 load/store용*입니다.
+가장 간단한 것은 Type 3입니다. DRAM 모듈을 PCIe 너머로 노출하는 디바이스로, CXL.io는 enumeration에, CXL.mem은 host의 load/store에 씁니다.
 
 ## Flex Bus — 한 링크에서 시분할
 
@@ -64,11 +64,11 @@ Capabilities: [170 v1] Designated Vendor-Specific: Vendor=1e98 ID=0007 Rev=2 Len
 
 `Cache-`·`IO+`·`Mem+`가 Type 3 장치의 프로토콜 조합(CXL.io + CXL.mem)입니다.
 
-링크의 arbitration과 credit 정책은 구현·구성에 따라 여러 트래픽을 조정합니다. CXL.mem과 CXL.cache의 지연 특성은 링크·장치·큐 상태를 함께 측정해야 하며, 한 프로토콜이 항상 우선된다고 일반화할 수 없습니다.
+세 프로토콜 사이의 arbitration과 credit 정책은 구현과 구성이 정합니다. 그래서 CXL.mem과 CXL.cache 중 어느 쪽이 먼저 처리되는지는 링크·장치·큐 상태를 함께 재야 알 수 있습니다.
 
 ## 호스트 측에서 CXL 디바이스 인식
 
-Linux에서 CXL을 사용하려면 해당 kernel의 CXL 지원과 `CONFIG_CXL_*`, ACPI/firmware 및 플랫폼 지원을 함께 확인해야 합니다. 단순히 kernel 버전 하나만으로 동작 여부를 판단할 수 없습니다.
+Linux에서 CXL을 사용하려면 해당 kernel의 CXL 지원과 `CONFIG_CXL_*`, ACPI/firmware 및 플랫폼 지원을 모두 있어야 합니다.
 
 아래는 QEMU 11.1.3의 Type 3 장치를 붙인 Debian 13 guest(kernel 6.12.116, `cxl` 81)에서 얻은 출력입니다([Ch 150](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)).
 
@@ -102,7 +102,7 @@ $ cxl list -M
 
 Vendor `1e98`은 CXL DVSEC의 vendor ID이고, ID `0000`이 CXL Device DVSEC입니다. 같은 장치에는 Register Locator(ID `0008`), GPF(ID `0005`), Flex Bus Port(ID `0007`) DVSEC도 함께 있었습니다.
 
-*PCI subsystem이 디바이스를 발견*하면 *CXL subsystem이 추가로 등록*해 *별도 sysfs entry*를 만듭니다. *cxl-cli*가 이 정보를 노출합니다.
+PCI subsystem이 디바이스를 찾으면 CXL subsystem이 이를 한 번 더 등록해 별도의 sysfs entry를 만듭니다. *cxl-cli*가 이 정보를 노출합니다.
 
 ## 임베디드에서 CXL을 만나는 자리
 
