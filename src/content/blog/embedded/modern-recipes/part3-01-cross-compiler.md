@@ -21,7 +21,7 @@ topics: ["embedded"]
 - bare-metal과 Linux 두 환경 모두 지원
 - 여러 코어/CPU 변형용 multi-arch 빌드
 
-이 글의 출력은 Debian 13 arm64 guest(QEMU 11.1.3 `virt`, HVF)에 Debian 패키지 `gcc-arm-none-eabi` 14.2.rel1-1(GCC 14.2.1), `libnewlib-arm-none-eabi` 4.5.0, `picolibc-arm-none-eabi` 1.8.10, `gcc-arm-linux-gnueabihf` 14.2.0을 설치해 직접 돌린 결과입니다. host가 arm64라 "x86에서 ARM용"이 아니라 "AArch64 Linux에서 Cortex-M·32-bit ARM용"을 빌드했지만, 크로스 컴파일의 구조는 같습니다.
+이 글의 출력은 Debian 13 arm64 guest(QEMU 11.1.3 `virt`, HVF)에 Debian 패키지 `gcc-arm-none-eabi` 14.2.rel1-1(GCC 14.2.1), `libnewlib-arm-none-eabi` 4.5.0, `picolibc-arm-none-eabi` 1.8.10, `gcc-arm-linux-gnueabihf`(GCC 14.2.0)를 설치해 직접 돌린 결과입니다. host가 arm64라 "x86에서 ARM용"이 아니라 "AArch64 Linux에서 Cortex-M·32-bit ARM용"을 빌드했지만, 크로스 컴파일의 구조는 같습니다.
 
 ## 핵심 개념
 
