@@ -242,7 +242,7 @@ LDFLAGS_RELEASE = -flto -Wl,--gc-sections
 CFLAGS_PROFILE = -O2 -g3
 ```
 
-`work.c`를 `-Os`와 `-Os -g3`로 각각 컴파일해 `.text`만 뽑아 비교하면 두 결과의 md5가 같았습니다(`cbdbc13a…`). `-g3`는 이 코드의 기계어를 바꾸지 않았고, object에는 `.debug_*` section만 늘어 `size -A`의 합계가 281에서 21,894 byte가 됐습니다. 그러므로([3-03](/blog/embedded/modern-recipes/part3-03-elf-format)), release 빌드에도 붙여 두고 flash 이미지는 `objcopy`로 뽑을 수 있습니다.
+`work.c`를 `-Os`와 `-Os -g3`로 각각 컴파일해 `.text`만 뽑아 비교하면 두 결과의 md5가 같았습니다(`cbdbc13a…`). `-g3`는 이 코드의 기계어를 바꾸지 않았고, object에는 `.debug_*` section만 늘어 `size -A`의 합계가 281에서 21,894 byte가 됐습니다. debug section은 flash 이미지에 들어가지 않으므로([3-03](/blog/embedded/modern-recipes/part3-03-elf-format)) release 빌드에도 붙여 두고 flash 이미지는 `objcopy`로 뽑을 수 있습니다.
 
 ## 측정 / 비교
 
