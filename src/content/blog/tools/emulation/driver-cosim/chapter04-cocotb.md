@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-**CocoTB**(Coroutine-based Cosimulation TestBench)는 RTL testbench를 *Python*으로 짜는 프레임워크입니다. SystemVerilog 대신 Python coroutine으로 자극·확인 시퀀스를 표현하고, simulator의 VPI(Verilog)·VHPI(VHDL)·FLI(Questa VHDL) 인터페이스를 통해 DUT(Design Under Test) 신호에 접근합니다.
+**CocoTB**(Coroutine-based Cosimulation TestBench)는 RTL testbench를 *Python*으로 짜는 프레임워크입니다. SystemVerilog 대신 Python coroutine으로 자극·확인 시퀀스를 표현하고, simulator의 VPI·VHPI·FLI 인터페이스를 통해 DUT(Design Under Test) 신호에 접근합니다. 설치한 cocotb 2.0.1 패키지의 `cocotb/libs/`에는 simulator별 `libcocotbvpi_*`(verilator·icarus·vcs·modelsim 등), `libcocotbvhpi_*`(aldec·ius·modelsim·nvc), `libcocotbfli_modelsim.so`가 들어 있습니다.
 
 이 장은 CocoTB의 모델·기본 API·driver-RTL cosim 패턴·pytest 통합까지 다룹니다. 예제는 모두 macOS 27.2.1(Apple M2 Pro)에서 cocotb 2.0.1, cocotbext-axi 0.1.28, cocotb-coverage 2.0, Python 3.13으로 Verilator 5.054와 Icarus Verilog 13.0 위에서 돌렸고, 출력은 그 실행에서 옮겼습니다.
 
@@ -252,7 +252,7 @@ Homebrew clang 23.1.5로 빌드해 미등록 callback, uint32 high bit, 잘못�
 
 ### DPI와 Python scenario의 연결
 
-export DPI task를 선언했다고 cocotb에서 `await dut.some_task()`로 SV task를 호출할 수 있는 것은 아닙니다. cocotb가 HDL에 닿는 경로는 VPI signal handle이기 때문입니다. Python이 start/done signal에 요청을 쓰고 HDL/DPI 쪽이 완료 상태를 돌려주는 mailbox를 RTL에 두는 것이 이 시리즈의 연결 방법입니다. 이 mailbox 구성은 이 장에서 실행하지 않았습니다.
+export DPI task를 선언했다고 cocotb에서 `await dut.some_task()`로 SV task를 호출할 수 있는 것은 아닙니다. cocotb 2.0.1의 `cocotb/handle.py`에 있는 handle 클래스는 hierarchy·값·배열을 다루는 것들(`HierarchyObject`, `LogicObject`, `ArrayObject` 등)이고, 파일 어디에도 `__call__`이 없습니다. Python이 start/done signal에 요청을 쓰고 HDL/DPI 쪽이 완료 상태를 돌려주는 mailbox를 RTL에 두는 것이 이 시리즈의 연결 방법입니다. 이 mailbox 구성은 이 장에서 실행하지 않았습니다.
 
 ## Pytest 통합
 
@@ -349,6 +349,7 @@ def sample(addr, op):
 - [cocotb 2.0 timing model](https://docs.cocotb.org/en/v2.0.0/timing_model.html) — RisingEdge·ReadOnly 시점, ReadOnly의 "no writes"
 - [cocotb 2.0 runner](https://docs.cocotb.org/en/v2.0.0/runner.html), [release notes](https://docs.cocotb.org/en/v2.0.0/release_notes.html) — 1.8.0 runner 도입, 2.0.0 `cocotb_tools.runner` 이동
 - cocotbext-axi 0.1.28 소스(`axil_master.py`), cocotb-coverage 2.0
+- cocotb 2.0.1 설치 패키지 — `cocotb/libs/` 파일 목록, `cocotb/handle.py` 클래스 정의
 
 실행 환경은 macOS 27.2.1, Apple M2 Pro, cocotb 2.0.1(Python 3.13 venv), Verilator 5.054, Icarus Verilog 13.0입니다(2026-11-16). cocotb 2.0.1은 Python 3.15를 거부("only supports a maximum Python version of 3.13")해서 3.13 venv를 따로 만들었습니다. 상용 simulator, DPI mailbox 구성, PCIe·Ethernet 등 다른 cocotbext 라이브러리는 실행하지 않았습니다.
 
