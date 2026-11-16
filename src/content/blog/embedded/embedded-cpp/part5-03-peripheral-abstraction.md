@@ -74,7 +74,7 @@ Uart2::init(115200, 42'000'000);   // 예: APB1이 실제 42MHz인 구성
 Uart2::send(reinterpret_cast<const uint8_t*>("Hello\n"), 6);
 ```
 
-이 UART 스케치는 STM32F407식 SR/DR/CR1, OVER8=0을 가정하며 실제 APB1 PCLK를 전달해야 합니다. baud=0·반올림·오류와 timeout·RCC/AF 핀 설정은 생략했으므로 완전한 드라이버가 아닙니다. Uart2/Uart3는 주소 인자가 다르면 다른 type이지만 자원 독점이나 초기화 완료까지 보장하지 않습니다.
+이 UART 스케치는 STM32F407식 SR/DR/CR1, OVER8=0을 가정하며 실제 APB1 PCLK를 전달해야 합니다. OVER8=0에서 BRR은 USARTDIV를 1/16 단위로 담으므로 `pclk / baud`가 그대로 BRR 값이 되고, 실제 baud는 `pclk / BRR`입니다. 위 예의 42 MHz·115200에서 정수 나눗셈은 BRR 364(0x16C)로 실제 baud 115,384.6(+0.16%), 반올림하면 365(0x16D)로 115,068.5(−0.11%)입니다. 이 예에서는 반올림 쪽 오차가 작습니다. baud=0·오류와 timeout·RCC/AF 핀 설정은 생략했으므로 완전한 드라이버가 아닙니다. Uart2/Uart3는 주소 인자가 다르면 다른 type이지만 자원 독점이나 초기화 완료까지 보장하지 않습니다.
 
 ## Interrupt-driven UART
 
@@ -113,10 +113,10 @@ public:
 
 using LogUart = DmaUart<0x40004400, 4>;   // 예시 요청 channel 값; stream도 별도 선택 필요
 
-LogUart::send_dma(big_buffer, 1024);   // CPU 거의 안 씀
+LogUart::send_dma(big_buffer, 1024);   // 전송 중 CPU는 설정·완료 처리만
 ```
 
-이 코드는 DMA adapter의 인터페이스 스케치이며 `dma_*` 함수·stream 선택·error IRQ·cache 처리·완료 통지는 구현하지 않았습니다. STM32F4는 stream과 channel 조합을 선택하며 USART2 TX의 유효한 연결은 reference manual로 확인합니다. DMA 완료와 UART TC(wire 송신 완료)는 다른 사건이고, 버퍼는 DMA 완료 또는 취소 확인까지 살아 있어야 합니다. 설정·인터럽트·cache 관리 CPU 비용이 0이 되는 것도 아닙니다.
+이 코드는 DMA adapter의 인터페이스 스케치이며 `dma_*` 함수·stream 선택·error IRQ·cache 처리·완료 통지는 구현하지 않았습니다. STM32F4는 stream과 channel 조합을 선택합니다. RM0090의 DMA1 request mapping 표에서 USART2_TX는 Stream 6의 Channel 4이므로, 템플릿 인자에 channel만 두면 stream 선택이 빠집니다. DMA 완료와 UART TC(wire 송신 완료)는 다른 사건이고, 버퍼는 DMA 완료 또는 취소 확인까지 살아 있어야 합니다. 설정·인터럽트·cache 관리 CPU 비용이 0이 되는 것도 아닙니다.
 
 ## Concept으로 UART interface 통일
 
@@ -279,7 +279,7 @@ peripheral register는 volatile pointer로 다룹니다. 자세한 내용은 [Pa
 
 ### 5. peripheral lifetime
 
-static peripheral은 영원히 살아 있습니다. power down이 명시적으로 필요하면 destructor를 활용합니다.
+static peripheral 객체의 소멸자는 `main`이 끝나지 않는 firmware에서는 돌지 않습니다([Part 2-01](/blog/embedded/embedded-cpp/part2-01-raii-basics)). power down이 필요하면 소멸자에 기대지 말고 저전력 진입 경로에서 명시적인 shutdown 함수를 부릅니다.
 
 ### 6. Multi-task에서 같은 peripheral 공유
 
@@ -329,7 +329,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors peripheral-check.cpp -o peripheral-check && ./peripheral-check`로 확인했습니다. 실제 송신 파형·ISR publication·DMA cache·I2C timing은 미검증입니다. 100바이트 8N1/115200 baud의 이상적인 wire 시간은 약 8.68ms이나 드라이버 실행시간 측정값은 아닙니다.
+Homebrew Clang 23.1.5와 g++-16, arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors peripheral-check.cpp -o peripheral-check && ./peripheral-check`가 ASan·UBSan으로 exit 0이었습니다. 실제 송신 파형·ISR publication·DMA cache·I2C timing은 실행하지 않았습니다. 참고로 100바이트를 8N1(바이트당 10비트)·115200 baud로 보내는 이상적인 wire 시간은 1000 / 115200 = 8.68ms이며, 드라이버 실행 시간이 아니라 계산값입니다.
 
 레지스터 정의는 [ST CMSIS STM32F407xx v2.6.10](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.10/Include/stm32f407xx.h), 실제 상태·오류 처리는 [ST HAL UART v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_uart.c) 및 [ST HAL I2C v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_i2c.c)를 기준으로 대상 구현을 확인합니다. 이 글의 fake 검사를 실제 HAL의 성능 비교로 해석하지 않습니다.
 
@@ -339,7 +339,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-error
 - 세 가지 모드를 다룹니다 — Blocking(simple), Interrupt(non-blocking), DMA(설정·완료 처리 필요).
 - Concept은 인터페이스 형태를 검사하며 모드별 완료·수명 계약을 맞춘 adapter가 있어야 교체할 수 있습니다.
 - SPI에 CS pin을 묶는 device wrapper로 더 높은 abstraction을 만듭니다.
-- RAII guard로 clock과 power를 관리합니다.
+- RAII guard로 clock과 power를 관리하려면 adapter가 초기화 성공·종료 함수를 실제로 제공해야 합니다.
 - HAL wrapper와 직접 구현의 크기·시간은 같은 기능·오류 처리 조건으로 비교합니다.
 
 ## 관련 항목
