@@ -2,7 +2,7 @@
 title: "Cortex-M 하드폴트 분석 — Stacked Frame·CFSR 읽기"
 slug: "embedded/modern-recipes/part10-04-hardfault-analysis"
 date: 2026-04-19T09:03:00
-description: "Cortex-M HardFault 핸들러에서 stacked PC·LR·CFSR을 추출해 정확한 fault 위치를 찾는 절차를 정리합니다."
+description: "Cortex-M HardFault 핸들러로 stacked PC·LR과 CFSR·HFSR·BFAR을 읽는 절차를, QEMU mps2-an386에서 일으킨 다섯 가지 fault(NULL 읽기·쓰기, 매핑 안 된 주소, Thumb 비트 누락, 0 나누기)의 실제 출력과 ARMv7-M ARM으로 따라갑니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 114
 tags: [recipes, debugging, hardfault, cortex-m]
@@ -13,29 +13,15 @@ topics: ["embedded"]
 
 > **"HardFault는 *기록을 남기고* 분석해야 합니다."** Stacked frame과 CFSR는 중요한 단서지만, fault 종류·stacking 상태·최적화와 target 구현을 함께 확인해야 합니다.
 
-## 사례 — "그냥 멈춰요"
+## 어떤 상황에서 쓰나
 
-QA에서 "보드가 5초쯤 동작하다 멈춥니다"라는 보고가 옵니다. UART 출력도 없고 LED 토글도 멈춥니다. JTAG로 halt해 보면 PC가 `HardFault_Handler` 안입니다. 여기서부터 시작입니다.
+디버거로 멈춰 보니 PC가 `HardFault_Handler` 안이고 `backtrace`가 handler 위로 이어지지 않는 경우입니다. fault를 일으킨 명령의 주소는 핸들러가 아니라, 예외 진입 때 stack에 저장된 frame 안에 있습니다. 이 글은 그 frame과 fault 상태 레지스터를 읽어 원인 명령까지 가는 순서를 QEMU에서 실제로 fault를 다섯 가지 일으켜 보며 따라갑니다.
 
-```text
-(gdb) backtrace
-#0  HardFault_Handler () at startup.s:142
-#1  <signal handler called>
-#2  0x????????
-
-(gdb) info registers
-r0  0x12345678
-...
-PC  0x08000142  ← HardFault_Handler
-LR  0xfffffff9  ← EXC_RETURN — main stack 리턴
-PSR 0x01000003
-```
-
-`backtrace`는 도움이 안 됩니다. *진짜 fault가 난 PC*는 stack frame 안에 있습니다.
+근거는 ARMv7-M Architecture Reference Manual(DDI 0403E, 이하 ARMv7-M ARM) B1.5와 B3.2, Cortex-M4 TRM(DDI 0439B)입니다. 실행 환경은 QEMU 11.1.3의 `mps2-an386`(Cortex-M4)이고, 보드에서는 실행하지 않았습니다.
 
 ## 핵심 개념 — Stacked Frame
 
-Cortex-M exception model은 기본 frame으로 8 word를 stack에 저장하지만, FPU와 stacking 상태에 따라 추가 frame과 정렬 word가 붙을 수 있습니다.
+예외에 들어갈 때 프로세서는 8 word의 기본 frame을 stack에 저장합니다. FP extension이 있고 FP 상태가 살아 있으면 FP 레지스터까지 담은 extended frame이 되고, stack 정렬을 위해 한 word가 더 들어갈 수 있습니다(ARMv7-M ARM B1.5.6·B1.5.7).
 
 SP가 가리키는 낮은 주소부터 차례로 다음과 같이 쌓입니다.
 
@@ -46,58 +32,44 @@ SP가 가리키는 낮은 주소부터 차례로 다음과 같이 쌓입니다.
 | 3 | R2 | |
 | 4 | R3 | |
 | 5 | R12 | |
-| 6 | LR | fault 직전 함수의 return address |
-| 7 | PC | fault 발생 명령 주소 |
+| 6 | LR | 예외 직전의 LR |
+| 7 | PC | 복귀 주소. precise fault라면 fault를 낸 명령 |
 | 8 | xPSR | |
 
-EXC_RETURN의 LR (`0xFFFFFFF9`, `0xFFFFFFFD` 등)으로 *어느 stack에 push되었는지*를 알 수 있습니다.
+핸들러에 들어온 순간 LR에는 EXC_RETURN 값이 들어 있고, 이 값으로 frame이 어느 stack에 어떤 형태로 쌓였는지 압니다. ARMv7-M ARM Table B1-9(FP extension이 있는 경우)입니다.
 
-```text
-LR 값          Mode              Stack
-0xFFFFFFF1     Handler           MSP
-0xFFFFFFF9     Thread, no FP     MSP
-0xFFFFFFFD     Thread, no FP     PSP
-0xFFFFFFE1/E9  Thread, FP        + FP regs
-```
+| EXC_RETURN | 복귀 모드 | stack | frame |
+| --- | --- | --- | --- |
+| `0xFFFFFFE1` | Handler | Main(MSP) | Extended(FP 포함) |
+| `0xFFFFFFE9` | Thread | Main | Extended |
+| `0xFFFFFFED` | Thread | Process(PSP) | Extended |
+| `0xFFFFFFF1` | Handler | Main | Basic |
+| `0xFFFFFFF9` | Thread | Main | Basic |
+| `0xFFFFFFFD` | Thread | Process | Basic |
+
+bit 2가 0이면 MSP, 1이면 PSP입니다. 아래 핸들러가 `tst lr, #4`로 고르는 것이 이 비트입니다.
 
 ## Step 1 — Handler에서 SP 잡기
 
+핸들러는 어셈블리 몇 줄로 frame 주소를 골라 C 함수에 넘깁니다. 아래는 실제로 QEMU에서 돌린 코드이고, `pr()`은 semihosting으로 출력하는 작은 printf입니다. EXC_RETURN도 함께 넘겨 출력합니다.
+
 ```c
-__attribute__((naked))
-void HardFault_Handler(void) {
+__attribute__((naked)) void HardFault_Handler(void) {
     __asm volatile (
-        "tst   lr, #4           \n"   // bit 2: 0=MSP, 1=PSP
+        "tst   lr, #4           \n"   /* bit 2: 0 = MSP, 1 = PSP */
         "ite   eq               \n"
         "mrseq r0, msp          \n"
         "mrsne r0, psp          \n"
-        "b     hardfault_report \n"
-    );
+        "mov   r1, lr           \n"   /* EXC_RETURN */
+        "b     hardfault_report \n");
 }
 
-void hardfault_report(uint32_t *sp) {
-    uint32_t r0   = sp[0];
-    uint32_t r1   = sp[1];
-    uint32_t r2   = sp[2];
-    uint32_t r3   = sp[3];
-    uint32_t r12  = sp[4];
-    uint32_t lr   = sp[5];
-    uint32_t pc   = sp[6];   // ← fault 명령 주소
-    uint32_t psr  = sp[7];
-
-    uint32_t cfsr = *(volatile uint32_t*)0xE000ED28;
-    uint32_t hfsr = *(volatile uint32_t*)0xE000ED2C;
-    uint32_t mmar = *(volatile uint32_t*)0xE000ED34;
-    uint32_t bfar = *(volatile uint32_t*)0xE000ED38;
-
-    printf("HARDFAULT\n");
-    printf("PC   = 0x%08lx\n", pc);
-    printf("LR   = 0x%08lx\n", lr);
-    printf("CFSR = 0x%08lx\n", cfsr);
-    printf("HFSR = 0x%08lx\n", hfsr);
-    printf("MMAR = 0x%08lx\n", mmar);
-    printf("BFAR = 0x%08lx\n", bfar);
-
-    while (1);
+void hardfault_report(uint32_t *sp, uint32_t exc_return) {
+    pr("HARDFAULT  EXC_RETURN=0x%08x\n", exc_return);
+    pr("PC   = 0x%08x  LR = 0x%08x  xPSR = 0x%08x\n", sp[6], sp[5], sp[7]);
+    pr("CFSR = 0x%08x  HFSR = 0x%08x\n", *(volatile uint32_t *)0xE000ED28, *(volatile uint32_t *)0xE000ED2C);
+    pr("MMFAR= 0x%08x  BFAR = 0x%08x\n", *(volatile uint32_t *)0xE000ED34, *(volatile uint32_t *)0xE000ED38);
+    sh_exit(1);
 }
 ```
 
@@ -120,67 +92,89 @@ CFSR(Configurable Fault Status Register, `0xE000ED28`) 32비트는 세 sub-regis
 | BFSR `[15:8]` | bit 8 | `IBUSERR` | 명령 fetch |
 | BFSR `[15:8]` | bit 9 | `PRECISERR` | precise data bus error (BFAR 유효) |
 | BFSR `[15:8]` | bit 10 | `IMPRECISERR` | imprecise (BFAR 무효, 위치 부정확) |
-| BFSR `[15:8]` | bit 11 | `UNSTKERR` | exception entry stacking |
-| BFSR `[15:8]` | bit 12 | `STKERR` | exception exit unstacking |
+| BFSR `[15:8]` | bit 11 | `UNSTKERR` | 예외 복귀(unstacking) 중 bus fault |
+| BFSR `[15:8]` | bit 12 | `STKERR` | 예외 진입(stacking) 중 bus fault |
 | BFSR `[15:8]` | bit 15 | `BFARVALID` | BFAR에 주소 적힘 |
 | MMFSR `[7:0]` | bit 0 | `IACCVIOL` | 명령 fetch MPU violation |
 | MMFSR `[7:0]` | bit 1 | `DACCVIOL` | data access MPU violation |
 | MMFSR `[7:0]` | bit 7 | `MMARVALID` | MMAR에 주소 적힘 |
 
-현장에서 가장 자주 마주치는 값은 두 개입니다.
+비트 정의는 ARMv7-M ARM B3.2.15입니다. HardFault 상태 레지스터 HFSR(`0xE000ED2C`)의 bit 30 `FORCED`는 우선순위나 비활성 때문에 configurable fault가 HardFault로 올라왔다는 뜻입니다(B3.2.16). MemManage·BusFault·UsageFault 핸들러를 따로 켜지 않으면 셋 다 HardFault로 올라오므로, 아래 실행에서는 모든 경우에 `FORCED`가 섭니다.
 
-| CFSR 값 | 세워진 비트 | 해석 | 흔한 원인 |
-|---------|-------------|------|-----------|
-| `0x00008200` | BFSR bit 9 (`PRECISERR`) + bit 15 (`BFARVALID`) | BFAR 주소에 *유효한 fault 위치*가 있습니다 | null pointer dereference, peripheral 미초기화 |
-| `0x00020000` | UFSR bit 17 (`INVSTATE`) | 함수 포인터 호출 시 LSB가 0입니다 (Thumb 비트 누락) | function pointer 깨짐 |
+### 다섯 가지 fault를 실제로 일으켜 보기
+
+같은 핸들러로, 코드 하나를 `-DCASE=N`으로 다섯 번 빌드해 돌렸습니다. 각 경우의 핵심 코드는 다음과 같습니다.
+
+| CASE | 코드 | 의도 |
+| --- | --- | --- |
+| 1 | `queue_pop()`이 빈 큐에서 `q->head->next`를 읽음 | NULL 읽기 (0x0, 0x4) |
+| 2 | `((struct item *)0)->next = ...` | NULL 쓰기 |
+| 3 | `*(volatile uint32_t *)0x60000000` 읽기 | 매핑되지 않은 주소 |
+| 4 | `write_null_next` 주소의 bit 0을 지운 함수 포인터 호출 | Thumb 비트 누락 |
+| 5 | `CCR.DIV_0_TRP`를 켜고 `1 / 0` | 0으로 나누기 |
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O1 -g -ffreestanding -nostdlib -DCASE=$c \
+  -T an386.ld startup.c sh.c hf.c -lgcc -o hf$c.elf
+qemu-system-arm -M mps2-an386 -nographic -monitor none -serial none \
+  -semihosting-config enable=on,target=native -kernel hf$c.elf
+```
+
+```text
+=== CASE 1
+case 1
+queue_pop(empty) returned 67
+=== CASE 2
+case 2
+=== CASE 3
+case 3
+HARDFAULT  EXC_RETURN=0xfffffff9
+PC   = 0x000002fa  LR = 0x00000325  xPSR = 0x61000000
+CFSR = 0x00008200  HFSR = 0x40000000
+MMFAR= 0x00000000  BFAR = 0x60000000
+=== CASE 4
+case 4
+HARDFAULT  EXC_RETURN=0xfffffff9
+PC   = 0x00000280  LR = 0x00000309  xPSR = 0x60000000
+CFSR = 0x00020000  HFSR = 0x40000000
+MMFAR= 0x00000000  BFAR = 0x00000000
+=== CASE 5
+case 5
+HARDFAULT  EXC_RETURN=0xfffffff9
+PC   = 0x00000310  LR = 0x00000339  xPSR = 0x21000000
+CFSR = 0x02000000  HFSR = 0x40000000
+MMFAR= 0x00000000  BFAR = 0x00000000
+```
+
+결과를 비트로 풀면 다음과 같습니다.
+
+| CASE | CFSR | 세워진 비트 | 의미 |
+| --- | --- | --- | --- |
+| 1 | — | fault 없음 | 0x4를 읽으면 vector table의 reset vector(0x43)가 나옴 |
+| 2 | — | fault 없음 | QEMU에서는 0x0 쓰기도 fault가 나지 않음 |
+| 3 | `0x00008200` | BFSR `PRECISERR`(bit 9) + `BFARVALID`(bit 15) | BFAR = 0x60000000, 정확한 주소 |
+| 4 | `0x00020000` | UFSR `INVSTATE`(bit 17) | stacked PC = 0x280, Thumb 비트가 빠진 분기 대상 |
+| 5 | `0x02000000` | UFSR `DIVBYZERO`(bit 25) | `CCR.DIV_0_TRP`를 켠 경우에만 |
+
+CASE 1이 이 글의 가장 중요한 결과입니다. 빈 큐에서 `NULL->next`를 읽었는데 fault 없이 `queue_pop(empty) returned 67`이 나왔습니다. Cortex-M에서 0번지는 vector table이 놓이는 code 영역이고, 0x4의 내용은 reset vector 0x43(Reset_Handler 0x42 + Thumb 비트)입니다. STM32F405/407도 0x0000_0000~0x000F_FFFF가 BOOT 핀에 따라 Flash·system memory·SRAM의 alias라서(DS8626 memory map) 같은 일이 생깁니다. NULL 포인터 *읽기*는 fault로 잡히지 않고 엉뚱한 값을 돌려주며, 잡으려면 MPU로 0번지 영역을 접근 금지로 만들어야 합니다([10-08: 메모리 오염 진단](/blog/embedded/modern-recipes/part10-08-memory-corruption)).
 
 ## Step 3 — PC를 source line으로
 
-```bash
-arm-none-eabi-addr2line -e firmware.elf -f -C 0x08001234
-process_packet
-src/packet.c:87
-```
-
-또는 GDB에서 직접.
+위 실행의 stacked PC를 `addr2line`에 넣으면 source 줄이 나옵니다.
 
 ```text
-(gdb) list *0x08001234
-0x8001234 is in process_packet (packet.c:87).
-82  if (hdr->len > MAX_LEN) return -1;
-83  uint8_t *dst = buffers[hdr->channel];
-84
-85  // hdr->channel이 음수 (channel = -1) → buffers[-1] dereference
-86  // → BFAR = 0x20001ff8 (buffers 직전 주소)
-87  memcpy(dst, payload, hdr->len);
+$ arm-none-eabi-addr2line -e hf3.elf -f 0x000002fa
+read_unmapped
+hf.c:40
+$ arm-none-eabi-addr2line -e hf4.elf -f 0x00000280
+write_null_next
+hf.c:35
+$ arm-none-eabi-addr2line -e hf5.elf -f 0x00000310
+divide
+hf.c:48
 ```
 
-이 한 줄에서 채널 음수가 들어온 path를 따라가면 원인이 잡힙니다.
-
-## 사례 마무리
-
-처음 보드의 CFSR/BFAR이 다음이었습니다.
-
-```text
-CFSR = 0x00008200    BFAR = 0x00000004
-PC   = 0x08002A18    LR   = 0x0800291C
-```
-
-`0x00000004`는 *null pointer + 4*. 누군가 `NULL->next` 같은 dereference를 했다는 신호입니다.
-
-```bash
-addr2line -e firmware.elf 0x08002A18
-queue_pop
-src/queue.c:42
-```
-
-```c
-// queue.c:42
-QueueItem *item = q->head;
-q->head = item->next;   // ← item이 NULL일 때
-```
-
-`q->head`가 비어 있을 때 `queue_pop`을 호출한 caller가 범인이었습니다. ISR과 main이 같은 queue를 다루며 빈 큐 검사를 ISR이 빠뜨렸습니다. 5초 후 발생은 ISR이 처음 *empty queue*를 만났을 때였습니다.
+세 경우 모두 fault를 낸 함수와 줄을 가리킵니다. CASE 4는 조금 다릅니다. stacked PC 0x280은 fault를 낸 명령이 아니라 *분기 대상*인 `write_null_next`의 시작 주소입니다. bit 0이 0인 주소로 분기하면 실행 상태가 Thumb가 아니게 되어, 그 주소에서 첫 명령을 실행하려는 순간 INVSTATE가 납니다. 그래서 원인은 PC가 아니라 stacked LR(0x309, 분기를 한 `call_even_ptr`)에 있습니다. GDB에서는 `list *0x2fa`, LLDB에서는 `image lookup -a 0x2fa`가 같은 일을 합니다.
 
 ## Imprecise BFSR — 가장 까다로움
 
@@ -189,14 +183,14 @@ CFSR = 0x00000400    BFSR bit 10 IMPRECISERR
 BFAR 무효
 ```
 
-Write buffer 때문에 fault PC가 실제 명령보다 *몇 사이클 늦게* 보고됩니다. 다음을 시도합니다.
+IMPRECISERR는 store가 write buffer를 거쳐 나중에 끝나면서 bus error가 났다는 뜻이라, 그때 stacked PC는 이미 그 store 뒤의 명령을 가리키고 BFAR도 유효하지 않습니다. Cortex-M4 TRM 4.3.1은 ACTLR(`0xE000E008`)의 bit 1 `DISDEFWBUF`가 default memory map 접근에서 write buffer를 끄고, 그러면 모든 bus fault가 precise가 되는 대신 store가 끝날 때까지 다음 명령이 기다려 성능이 떨어진다고 적습니다.
 
 ```c
 // SCB->ACTLR에서 write buffer disable (디버깅 시에만)
 *(volatile uint32_t*)0xE000E008 |= (1 << 1);  // DISDEFWBUF
 ```
 
-이러면 fault가 *정확한 PC*에 떨어집니다. Production에서는 해제합니다.
+디버깅할 때만 켜고, 원인을 찾으면 끕니다. QEMU는 write buffer를 모델링하지 않아 위 CASE 3도 precise로 나왔으므로, imprecise fault는 이 실행으로 재현하지 못했습니다.
 
 ## 사용 권장 패턴 — fault 정보 NVRAM 저장
 
@@ -229,45 +223,37 @@ void boot_check_fault(void) {
 }
 ```
 
-Field 환경에서 boot 후 *이전 reset 원인*을 알 수 있습니다. STM32 RTC backup, RP2040 watchdog scratch, NRF52 GPREGRET 모두 reset에서 살아남는 영역을 제공합니다.
+다음 부팅에서 직전 fault의 PC와 CFSR을 읽을 수 있습니다. `BACKUP_SRAM_BASE`는 reset으로 지워지지 않는 영역이어야 합니다. STM32F405/407에는 4 KB backup SRAM이 있습니다(DS8626 첫 쪽 "192+4KB RAM"). 이 영역에 쓰려면 PWR·backup domain 접근을 먼저 열어야 하는데, 그 절차는 레퍼런스 매뉴얼의 PWR 절에 있습니다. 같은 일을 하는 코드는 [10-12: 포스트모템 분석](/blog/embedded/modern-recipes/part10-12-postmortem-analysis)에 있습니다.
 
-## CFSR 비트별 흔한 원인
+## CFSR 비트에서 다음 행동으로
 
-| CFSR | 의미 | 흔한 원인 |
-|---|---|---|
-| BFSR PRECISERR + BFAR | precise bus error | null pointer, 미초기화 peripheral, RCC clock off |
-| BFSR IMPRECISERR | imprecise | write buffer로 인한 지연 — disable 후 재현 |
-| UFSR UNDEFINSTR | undefined inst | flash 깨짐, JTAG 잘못 flash |
-| UFSR INVSTATE | thumb 비트 0 | function pointer 깨짐, code memory 손상 |
-| UFSR UNALIGNED | unaligned access | `__packed` 구조체 → 정렬 안 된 word load/store |
-| MMFSR DACCVIOL + MMAR | MPU violation | task stack overflow가 guard region 침범 |
+| CFSR | 확인할 것 |
+|---|---|
+| BFSR `PRECISERR` + `BFARVALID` | BFAR 주소가 어느 영역인지 메모리 맵과 대조(위 CASE 3) |
+| BFSR `IMPRECISERR` | `DISDEFWBUF`로 precise하게 만든 뒤 다시 재현 |
+| UFSR `INVSTATE` | stacked LR 쪽의 분기, 함수 포인터 값의 bit 0(위 CASE 4) |
+| UFSR `DIVBYZERO` | `CCR.DIV_0_TRP`가 켜졌는지, 나누는 값의 출처(위 CASE 5) |
+| UFSR `UNALIGNED` | `CCR.UNALIGN_TRP`가 켜졌는지, packed 구조체 접근 |
+| MMFSR `DACCVIOL` + `MMARVALID` | MMFAR 주소가 어느 MPU region인지 |
+| BFSR `STKERR` / MMFSR `MSTKERR` | 예외 진입 때 stacking 실패. stacked frame 자체를 믿지 않는다 |
 
 ## 자주 보는 함정
 
 > Handler에서 printf 호출
 
-UART buffer DMA가 fault로 멈춘 상태일 수 있습니다. `HAL_UART_Transmit` polling 모드로 하거나, ITM/SWO로 출력합니다.
+fault가 UART 드라이버나 그 DMA 버퍼에서 났다면, 같은 드라이버로 출력하는 순간 다시 fault가 납니다. 핸들러에서는 레지스터에 직접 쓰는 polling 출력이나 ITM처럼 드라이버 상태에 기대지 않는 경로를 씁니다. 위 실행은 semihosting으로 출력했습니다.
 
 > Stack pointer가 깨진 채로 handler 진입
 
-```text
-SP = 0xdeadbeef    ← stack 자체가 무효
-sp[6] 읽기 → 또 fault → "lockup"
-```
-
-NVIC가 stacked frame을 못 push해서 무한 fault에 빠집니다. `HFSR.FORCED`가 떨어집니다. Stack overflow가 원인입니다. MPU stack guard로 *먼저* 잡아야 합니다.
+stack이 넘쳐 SP가 유효하지 않은 곳을 가리키면, 예외 진입 때 frame을 쌓는 일부터 실패합니다. ARMv7-M ARM B3.2.15는 이를 BFSR `STKERR`(bus fault) 또는 MMFSR `MSTKERR`(MemManage)로 기록하므로, 이 비트가 서 있으면 `sp[6]`의 PC를 믿지 않습니다. stack 끝에 MPU guard region을 두면 넘치는 순간 MemManage fault가 나서 원인 위치에서 멈춥니다(10-08).
 
 > 잘못된 EXC_RETURN
 
-```c
-__asm volatile ("bx %0" :: "r"(0xFFFFFFF8));   // ← reserved
-```
-
-EXC_RETURN을 인라인 어셈블리로 만들 때 reserved 값을 쓰면 UFSR INVPC가 떨어집니다.
+ARMv7-M ARM B1.5.8은 위 표에 없는 reserved EXC_RETURN을 쓰면 연쇄 UsageFault가 난다고 적습니다(UFSR `INVPC`). 같은 절은 Thread 모드에서 EXC_RETURN 모양의 값을 PC에 넣으면 특별한 값이 아니라 주소로 취급되고, 0xFXXXXXXX 영역은 Execute Never라서 MemManage나 INVSTATE UsageFault가 난다고 적습니다. RTOS의 context switch 코드를 고칠 때 이 두 경우를 구분합니다.
 
 > `-Os` 빌드에서 PC와 source의 미스매치
 
-`addr2line`이 함수 이름은 맞지만 줄이 어긋날 수 있습니다. `-Og`로 빌드하거나, `objdump -dS firmware.elf | less`로 어셈블리·source 인터리브를 봅니다.
+최적화 빌드에서는 줄 번호가 없는 명령이나 여러 줄이 섞인 명령이 생깁니다([10-03](/blog/embedded/modern-recipes/part10-03-gdb-remote-debug)의 `-O2` 예). `addr2line`의 줄이 의심스러우면 `objdump -dS firmware.elf`로 그 주소 주변의 어셈블리와 source를 함께 봅니다.
 
 > CFSR을 *읽고 안 clear*
 
@@ -277,17 +263,17 @@ uint32_t cfsr = *(volatile uint32_t*)0xE000ED28;
 *(volatile uint32_t*)0xE000ED28 = cfsr;
 ```
 
-Reset 없이 fault 재현 디버깅을 할 때 누적된 bit 때문에 헷갈립니다.
+CFSR의 비트는 1을 써야 지워집니다(ARMv7-M ARM B3.2.15의 각 sub-register 설명). 지우지 않으면 다음 fault 때 이전 비트가 남아 있어, reset 없이 fault를 반복 재현할 때 두 fault가 섞여 보입니다.
 
 ## 정리
 
 - HardFault는 stacked frame과 CFSR에 모든 단서를 남깁니다.
 - LR (EXC_RETURN) 비트 2로 MSP/PSP를 골라 stacked frame을 잡습니다.
-- Stacked PC는 fault 경로의 중요한 주소지만 precise/imprecise fault와 instruction semantics에 따라 정확한 faulting instruction과 다를 수 있습니다. `addr2line`과 disassembly를 함께 확인합니다.
-- CFSR을 BFSR/UFSR/MMFSR로 나눠 읽고 BFAR/MMAR을 함께 봅니다.
-- Imprecise BFSR은 write buffer disable로 precise하게 만듭니다.
-- Field에서는 fault record를 NVRAM에 남기고 reset합니다.
-- Stack overflow가 lockup의 가장 흔한 원인. MPU guard로 먼저 잡습니다.
+- precise fault에서 stacked PC는 fault를 낸 명령입니다(CASE 3·5). INVSTATE는 분기 대상이 PC이고 원인은 stacked LR 쪽입니다(CASE 4). imprecise bus fault는 PC가 뒤에 있습니다.
+- CFSR을 BFSR/UFSR/MMFSR로 나눠 읽고 BFAR/MMFAR을 함께 봅니다. 별도 핸들러가 없으면 `HFSR.FORCED`가 섭니다.
+- Cortex-M에서 NULL 읽기는 vector table을 읽을 뿐 fault가 나지 않습니다(CASE 1). MPU로 0번지를 막아야 잡힙니다.
+- Imprecise BFSR은 `ACTLR.DISDEFWBUF`로 precise하게 만듭니다(M4 TRM).
+- `STKERR`·`MSTKERR`가 서 있으면 stacked frame을 믿지 않습니다.
 
 다음 편은 **UART 안 찍힐 때**입니다.
 
