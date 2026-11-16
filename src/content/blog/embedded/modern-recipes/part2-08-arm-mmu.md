@@ -242,9 +242,11 @@ nohandler[1984]: unhandled exception: DABT (lower EL), ESR 0x000000009200004f, l
 kernel: ASID allocator initialised with 256 entries
 # cat /sys/devices/system/cpu/vulnerabilities/meltdown
 Not affected
+# journalctl -k -b | grep -i -E "E0PD|isolation|kpti"
+kernel: CPU features: detected: E0PD
 ```
 
-Meltdown에 해당하지 않는 CPU라 KPTI가 꺼져 있고, "TLB와 ASID"의 계산대로라면 256은 8-bit ASID입니다. 이 guest의 CPU는 Apple Silicon host를 `-cpu host`로 넘긴 것이므로, 실제 Cortex-A 보드의 값은 그 보드에서 다시 봅니다.
+부팅 로그에 KPTI(kernel page table isolation) 줄이 없고 `CPU features: detected: E0PD`가 있어 KPTI가 꺼져 있으므로, "TLB와 ASID"의 계산대로 256은 8-bit ASID입니다. KPTI가 켜졌다면 8-bit는 128, 16-bit는 32768이 나오므로 어느 쪽이든 256이 될 수는 없습니다. 이 guest의 CPU는 Apple Silicon host를 `-cpu host`로 넘긴 것이므로, 실제 Cortex-A 보드의 값은 그 보드에서 다시 봅니다.
 
 ## 자주 보는 함정
 
