@@ -12,13 +12,13 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"DC 모터는 H-bridge + PWM duty + flyback diode가 전부입니다."** Duty가 속도, 방향은 IN1/IN2 swap.
+> **"DC 모터 구동은 H-bridge driver의 진리표를 PWM으로 오가는 일입니다."** 어느 두 상태 사이를 PWM하는지가 방향과 속도를 정합니다.
 
 ## 어떤 상황에서 쓰나
 
-소형 로봇 wheel, fan, pump, conveyor, RC car — 모두 DC motor에 H-bridge driver IC를 붙이는 구성이 흔합니다. STM32 GPIO가 모터 전류를 직접 공급하는 대신 driver IC가 전력 스위칭·보호·전류 경로를 담당합니다. 전류가 수백 mA에서 수 A까지 흐르고 *역기전력 spike*가 발생하므로 전원·접지·보호 소자를 함께 설계해야 합니다.
+작은 로봇 바퀴나 fan, pump의 DC motor는 STM32 GPIO가 직접 구동하지 않고 H-bridge driver IC를 거칩니다. driver가 motor 전류를 스위칭하고, 과전류·과열 보호를 맡습니다.
 
-이 글은 흔히 쓰는 H-bridge driver (L293D, L298, DRV8833, TB6612)와 STM32 PWM 연결, 방향·속도 제어, 그리고 current sensing 패턴까지 다룹니다.
+이 글은 driver IC 네 개(L293D, TB6612FNG, DRV8833, DRV8871)의 datasheet 값을 비교하고, DRV8833과 TB6612FNG에 STM32F407의 TIM2 PWM을 연결하는 코드를 씁니다. 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall` 경고 없이 빌드되는 것을 확인했고, DRV8833 진리표에 코드의 핀 상태를 대입하는 host 시뮬레이션을 돌렸습니다. 모터와 보드로 한 측정은 없습니다.
 
 ## 핵심 개념
 
@@ -38,44 +38,35 @@ H-bridge는 4개 스위치 (Q1·Q3 high-side, Q2·Q4 low-side)와 모터로 구�
 
 ### Driver IC 비교
 
-| IC | 채널 | 전류 (각) | 전압 | 인터페이스 |
-|----|------|---------|------|-----------|
-| L293D | 2 | datasheet/thermal condition dependent | datasheet | IN1, IN2, EN |
-| L298 | 2 | datasheet/thermal condition dependent | datasheet | IN1, IN2, EN |
-| TB6612FNG | 2 | load·board cooling dependent | datasheet | IN1, IN2, PWM, STBY |
-| DRV8833 | 2 | current limit·thermal condition dependent | datasheet | IN1, IN2 |
-| DRV8871 | 1 | current limit·thermal condition dependent | datasheet | IN1, IN2 |
+각 칸은 해당 datasheet의 표지 사양입니다(L293D: TI SLRS008D, TB6612FNG: Toshiba datasheet, DRV8833: TI SLVSAR1E, DRV8871: TI SLVSCY9B).
 
-DRV8833·DRV8871은 *PWM을 IN1 또는 IN2 한쪽에 직접* 입력합니다.
+| IC | H-bridge | 출력 전류 | motor 전원 | 입력 |
+|----|------|---------|------|-----------|
+| L293D | 2 (half-H 4개) | 600 mA/ch, peak 1.2 A | 4.5 ~ 36 V | 1A·2A, 1,2EN 등 |
+| TB6612FNG | 2 | 1.2 A(ave) / 3.2 A(peak) per ch | VM 2.5 ~ 13.5 V (max 15 V) | IN1, IN2, PWM, STBY |
+| DRV8833 | 2 | 1.5 A RMS, 2 A peak per bridge (PWP, VM = 5 V, 25 °C) | 2.7 ~ 10.8 V | xIN1, xIN2 |
+| DRV8871 | 1 | 3.6 A peak | 6.5 ~ 45 V | IN1, IN2 (+ ILIM 저항) |
+
+DRV8833과 DRV8871은 별도 PWM 핀이 없어, 두 입력 중 하나에 PWM을 넣습니다. L293D는 datasheet가 "Output Clamp Diodes for Inductive Transient Suppression (L293D)"라고 적듯 clamp diode를 내장합니다.
 
 ### Control 방식 두 가지
 
-**Sign-magnitude (DIR + PWM)**:
+PWM으로 속도를 바꾸는 방법은 두 가지입니다.
 
-```text
-DIR=0, PWM=duty: IN1=PWM,   IN2=0     → forward, speed=duty
-DIR=1, PWM=duty: IN1=0,     IN2=PWM   → reverse
-```
+- **Sign-magnitude (DIR + PWM)**: 한 입력은 방향을 정하는 고정 level로 두고, 다른 입력에 PWM을 넣습니다. duty가 속도입니다.
+- **Locked anti-phase**: 두 입력에 서로 반대인 PWM을 넣어, duty 50 %에서 정방향·역방향 시간이 같아 평균 0이 되고, 50 %보다 크면 한쪽, 작으면 반대쪽으로 돕니다.
 
-**Locked anti-phase (PWM only)**:
-
-```text
-PWM=50%:  정지 (양방향 동일 시간)
-PWM=75%:  forward 25%
-PWM=25%:  reverse 25%
-```
-
-Sign-magnitude가 효율 좋고 일반적입니다.
+이 글은 sign-magnitude를 씁니다.
 
 ### 역기전력 (Back-EMF)
 
-motor coil이 *전류 차단 순간 역방향 voltage spike*를 만듭니다 (V = L · di/dt). MOSFET를 파괴할 수 있어 *flyback diode*나 *driver IC 내부 protection*이 필요합니다. driver IC 대부분이 내장하지만, *discrete MOSFET H-bridge*를 만들면 Schottky diode를 외부에 추가.
+DRV8833 datasheet 7.3.2절은 "when the drive current is interrupted, the inductive nature of the motor requires that the current must continue to flow"라고 하고, 이 recirculation current를 처리하는 두 상태를 둡니다. fast decay는 H-bridge를 끄고 body diode로 전류를 흘리며, slow decay는 "the motor winding is shorted" 상태입니다. driver IC 없이 MOSFET으로 H-bridge를 만들면 이 전류 경로를 회로에서 직접 마련해야 합니다.
 
 ## 코드 예제
 
 ### 1. DRV8833 — sign-magnitude
 
-DRV8833은 한 채널이 IN1·IN2 두 핀. 한 핀에 PWM, 다른 핀은 GPIO direction.
+DRV8833 datasheet의 Table 1(H-Bridge Logic)은 xIN1/xIN2가 0/0이면 coast, 0/1이면 reverse, 1/0이면 forward, 1/1이면 brake입니다. Table 2는 PWM 방식을 "PWM, 0 = Forward PWM, fast decay", "PWM, 1 = Reverse PWM, slow decay" 등으로 정리합니다. 아래 코드는 AIN1에 PWM, AIN2를 GPIO level로 두어 정방향은 fast decay(PWM/0), 역방향은 slow decay(PWM/1)로 구동합니다.
 
 ```c
 // AIN1 = PA0 (PWM TIM2_CH1, AF1), AIN2 = PA1 (GPIO)
@@ -101,9 +92,9 @@ void motor_set(int16_t speed) {
         GPIOA->BSRR = (1u << (1 + 16));   // AIN2 = 0
         TIM2->CCR1 = (uint32_t)speed * (TIM2->ARR + 1) / 1000;
     } else {
-        GPIOA->BSRR = (1u << 1);          // AIN2 = 1
-        // 이 배선에서는 AIN1 PWM + AIN2 high가 active-brake/freewheel
-        TIM2->CCR1 = (uint32_t)(-speed) * (TIM2->ARR + 1) / 1000;
+        GPIOA->BSRR = (1u << 1);          // AIN2 = 1: AIN1 low = reverse, AIN1 high = brake
+        // reverse time is the LOW part of the PWM, so invert the duty
+        TIM2->CCR1 = (uint32_t)(1000 + speed) * (TIM2->ARR + 1) / 1000;
     }
 }
 
@@ -118,30 +109,99 @@ void motor_coast(void) {
 }
 ```
 
+역방향의 duty를 뒤집는 이유는 Table 1에서 나옵니다. AIN2 = 1인 동안 AIN1이 high면 1/1 = brake, low면 0/1 = reverse이므로, 역방향으로 구동되는 시간은 PWM의 **low** 구간입니다. 이 글의 처음 판은 역방향에서도 `CCR1 = |speed| × (ARR+1) / 1000`을 써서, speed가 −1000이면 AIN1이 늘 high인 brake가 됐습니다. 코드의 핀 상태를 Table 1에 대입해 확인했습니다.
+
+```c
+/* drv8833_sim.c */
+/* Apply DRV8833 Table 1 (H-bridge logic) to the two pin states motor_set() produces
+   and report how much of one PWM period is forward / reverse / brake / coast. */
+#include <stdio.h>
+#include <stdint.h>
+
+static const char *state(int in1, int in2) {
+    if (!in1 && !in2) return "coast";
+    if (!in1 &&  in2) return "reverse";
+    if ( in1 && !in2) return "forward";
+    return "brake";
+}
+
+/* returns IN1 duty (0..ARR+1) and IN2 level, like the post's motor_set() */
+static void post_motor_set(int16_t speed, uint32_t arr1, uint32_t *ccr, int *in2) {
+    if (speed >= 0) { *in2 = 0; *ccr = (uint32_t)speed * arr1 / 1000; }
+    else            { *in2 = 1; *ccr = (uint32_t)(-speed) * arr1 / 1000; }
+}
+static void fixed_motor_set(int16_t speed, uint32_t arr1, uint32_t *ccr, int *in2) {
+    if (speed >= 0) { *in2 = 0; *ccr = (uint32_t)speed * arr1 / 1000; }
+    else            { *in2 = 1; *ccr = (uint32_t)(1000 + speed) * arr1 / 1000; }  /* reverse while IN1 low */
+}
+
+static void report(const char *name, void (*f)(int16_t, uint32_t, uint32_t *, int *)) {
+    const uint32_t arr1 = 4200;
+    int16_t speeds[] = { 1000, 500, 0, -250, -750, -1000 };
+    printf("%s\n", name);
+    for (unsigned k = 0; k < sizeof speeds / sizeof speeds[0]; k++) {
+        uint32_t ccr; int in2;
+        f(speeds[k], arr1, &ccr, &in2);
+        double hi = 100.0 * ccr / arr1;          /* IN1 high for CNT < CCR */
+        printf("  speed %+5d: %5.1f %% %-7s + %5.1f %% %s\n", speeds[k],
+               hi, state(1, in2), 100.0 - hi, state(0, in2));
+    }
+}
+
+int main(void) {
+    report("post motor_set():", post_motor_set);
+    report("fixed motor_set():", fixed_motor_set);
+    return 0;
+}
+```
+
+```bash
+clang -O2 -Wall -o drv8833_sim drv8833_sim.c && ./drv8833_sim
+```
+
+```text
+post motor_set():
+  speed +1000: 100.0 % forward +   0.0 % coast
+  speed  +500:  50.0 % forward +  50.0 % coast
+  speed    +0:   0.0 % forward + 100.0 % coast
+  speed  -250:  25.0 % brake   +  75.0 % reverse
+  speed  -750:  75.0 % brake   +  25.0 % reverse
+  speed -1000: 100.0 % brake   +   0.0 % reverse
+fixed motor_set():
+  speed +1000: 100.0 % forward +   0.0 % coast
+  speed  +500:  50.0 % forward +  50.0 % coast
+  speed    +0:   0.0 % forward + 100.0 % coast
+  speed  -250:  75.0 % brake   +  25.0 % reverse
+  speed  -750:  25.0 % brake   +  75.0 % reverse
+  speed -1000:   0.0 % brake   + 100.0 % reverse
+```
+
+처음 판(post)은 −750에서 역방향이 25 %뿐이고 −1000에서는 0 %(완전 brake)였습니다. 고친 판은 |speed|에 비례합니다.
+
 ### 2. TB6612FNG — separate PWM input
 
 ```c
-// AIN1, AIN2 = GPIO direction, PWMA = TIM PWM, STBY = GPIO enable
+// PWMA = PA0 (TIM2_CH1, motor_init()), AIN1 = PA1, AIN2 = PA4, STBY = PA5 (GPIO outputs)
 void motor_set_tb(int16_t speed) {
+    GPIOA->BSRR = (1u << 5);                       // STBY = H (L = standby)
     if (speed > 0) {
-        GPIOA->BSRR = (1u << 0);    // AIN1=1
-        GPIOA->BSRR = (1u << 17);   // AIN2=0
+        GPIOA->BSRR = (1u << 1) | (1u << (4 + 16)); // AIN1=1, AIN2=0: CW while PWM=H
         TIM2->CCR1 = (uint32_t)speed * 4200 / 1000;
     } else if (speed < 0) {
-        GPIOA->BSRR = (1u << 16);   // AIN1=0
-        GPIOA->BSRR = (1u << 1);    // AIN2=1
+        GPIOA->BSRR = (1u << (1 + 16)) | (1u << 4); // AIN1=0, AIN2=1: CCW while PWM=H
         TIM2->CCR1 = (uint32_t)(-speed) * 4200 / 1000;
     } else {
-        // brake
-        GPIOA->BSRR = (1u << 0) | (1u << 1);
+        GPIOA->BSRR = (1u << 1) | (1u << 4);        // AIN1=AIN2=1: short brake
         TIM2->CCR1 = 0;
     }
 }
 ```
 
+TB6612FNG datasheet의 진리표에서 IN1/IN2 = H/L이면 PWM = H일 때 CW, L일 때 short brake이고, IN1 = IN2 = H면 PWM과 관계없이 short brake, STBY = L이면 standby입니다. 그래서 이 driver는 sign-magnitude에서도 duty를 뒤집을 필요가 없습니다. datasheet는 모드 전환 때 "To prevent penetrating current, dead time t2 and t4 is provided"라고 내부 dead time도 적습니다.
+
 ### 3. Soft-start / ramp
 
-motor를 *급가속*하면 큰 inrush current가 흐르고 power supply가 droop합니다. ramp로 부드럽게.
+목표 속도로 바로 바꾸지 않고 10 ms마다 `RAMP_STEP`만큼 다가가게 하면, 0에서 1000까지 100 tick, 즉 1 s에 걸쳐 duty가 오릅니다. 기동 전류가 전원에 주는 영향은 보드에서 current probe로 재서 `RAMP_STEP`을 정합니다.
 
 ```c
 static int16_t current_speed;
@@ -165,7 +225,7 @@ void motor_ramp_tick(void) {
 
 ### 4. Current sensing
 
-shunt resistor (0.1 Ω 등) + op-amp + ADC. 또는 driver IC 내장 sense (DRV8871 IPROPI 핀).
+shunt 저항에 걸리는 전압을 증폭해 ADC로 읽습니다. 아래는 0.1 Ω과 ×10 증폭으로 1 V/A가 되는 회로를 가정합니다. ADC 초기화(clock, `ADON`, 채널 sampling time)는 생략했습니다. DRV8871은 전류를 읽어 내는 핀 대신 ILIM 핀에 저항을 달아 "current chopping threshold"를 정하는 방식이라, 이런 sense 회로 없이도 driver가 전류를 제한합니다.
 
 ```c
 // PA2 = ADC1_IN2, shunt 0.1Ω → amp ×10 → 1V/A
@@ -196,41 +256,33 @@ void motor_protect_task(void) {
 
 current sensing이 있으면 ADC로 transient를 봅니다.
 
-**Startup inrush:** 부하·모터·전원·driver에 따라 크게 달라지므로 current probe로 측정하고, 그 결과에 맞춰 soft-start와 current limit을 정합니다.
+이 글은 보드에서 파형을 재지 않았습니다. 기동 전류는 current probe로 재서 soft-start와 current limit을 정합니다.
 
 ## 자주 보는 함정
 
 > ⚠️ Direction 핀과 PWM 동시 변경 timing
 
-direction 핀을 바꾸는 timing과 dead-time 요구는 driver IC마다 다릅니다. datasheet의 input timing과 safe state를 따르고, 필요하면 PWM을 먼저 비활성화한 뒤 방향을 바꿉니다.
-
-> ⚠️ Driver IC supply 분리 안 함
-
-driver의 logic supply와 motor supply의 분리·decoupling은 driver와 전원 impedance에 맞춰 설계합니다. 고정된 1000 µF 값보다 startup current와 transient를 측정해 결정합니다.
+DRV8833 datasheet는 tDEAD 450 ns(VM = 5 V)를, TB6612FNG는 내부 dead time을 적습니다. 위 코드는 이 내부 dead time에 기대고, 방향과 duty를 같은 함수 안에서 바꿉니다.
 
 > ⚠️ Flyback diode 누락 (discrete H-bridge)
 
-driver IC 안 쓰고 직접 MOSFET로 만들 때는 MOSFET의 body diode, 외부 다이오드, 스너버 등 회로에 맞는 역기전력 경로를 설계해야 합니다. 외부 Schottky diode 4개가 모든 H-bridge에서 의무인 것은 아니지만, 보호 경로가 없으면 motor를 끄는 순간 소자가 손상될 수 있습니다.
+driver IC 없이 MOSFET으로 만들 때는 위 recirculation current의 경로(body diode, 외부 diode 등)를 회로에서 직접 정합니다. L293D처럼 clamp diode를 내장한 driver는 datasheet에 그 사실을 적습니다.
 
 > ⚠️ PWM 주파수가 너무 낮음
 
-가청 영역에서 *motor가 소리를 낼 수 있습니다*. 청각 소음과 driver 손실·전류 리플의 절충을 보면서 주파수를 정합니다. 20~30 kHz는 한 가지 선택지일 뿐입니다.
+위 코드는 20 kHz(84 MHz / 4200)를 씁니다. 주파수를 바꾸면 ARR, 즉 duty resolution도 함께 바뀝니다([5-01](/blog/embedded/modern-recipes/part5-01-pwm-output)).
 
 > ⚠️ Stalled motor가 무한 current 흘림
 
-motor가 *물리적으로 막히면* coil resistance만 남아 *대전류*가 흐릅니다. driver IC 발열 → thermal shutdown 또는 파괴. current sensing으로 detect + auto cut-off.
-
-> ⚠️ EMI
-
-motor brush noise + PWM switching noise가 *근처 회로에 결합*. shielding, ferrite bead, *motor와 logic supply 분리*가 필수.
+motor가 물리적으로 막히면 회전에 따른 역기전력이 없어 전류가 커집니다. DRV8833은 이때 OCP가 동작합니다. datasheet의 trip level은 2 ~ 3.3 A이고, "all FETs in the H-bridge will be disabled and the nFAULT pin will be driven low"였다가 tOCP(1.35 ms) 뒤 다시 켜집니다. 위 `motor_protect_task()`는 그보다 앞서 소프트웨어로 끊는 장치입니다.
 
 ## 정리
 
 - DC motor = **H-bridge driver + PWM duty + direction**.
-- **Sign-magnitude (DIR + PWM)** 방식이 표준 — 효율 좋고 명확.
-- **DRV8833·TB6612·L298** 등 driver IC가 flyback·dead-time·thermal protection 제공.
+- **Sign-magnitude**에서 PWM과 짝이 되는 입력 level에 따라 duty의 의미가 뒤집힐 수 있습니다(DRV8833 slow decay).
+- DRV8833은 OCP, TB6612FNG는 내부 dead time, L293D는 clamp diode를 datasheet에 적습니다.
 - **Soft-start**로 inrush current 제한, **current sensing**으로 over-current protect.
-- **PWM 20 kHz+**, **motor supply 분리**, **logic decoupling**.
+- 위 코드는 **PWM 20 kHz**(TIM2, ARR 4199)입니다.
 
 다음 편은 **스테퍼 모터**입니다. step 시퀀스, micro-stepping, acceleration ramp를 다룹니다.
 
