@@ -16,7 +16,9 @@ topics: ["embedded", "embedded/hardware"]
 
 [Ch 13](/blog/embedded/hardware/cxl/chapter13-switching-fabric)에서 *Fabric Manager의 control plane*을 봤습니다. 이 장은 *링크와 디바이스의 보안*입니다.
 
-기준 문서는 [CXL 3.1 §11](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)입니다. 이 장은 프로토콜의 역할과 실패 경계를 대조한 설명이며, 실제 인증서 검증·IDE 활성화·TSP 잠금 시험을 수행한 결과가 아닙니다. 보안 세대명이나 capability만으로 현재 연결의 보호 상태를 판단할 수 없으므로, 각 단계에서 필요한 증거를 함께 봅니다.
+기준 문서는 [CXL 3.1 §11](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)입니다. 은행 금고에 비유하면 SPDM은 직원 신분 확인, IDE는 현금 수송차의 잠금, TSP는 금고 안 개인 대여함입니다. 셋은 지키는 대상이 다릅니다.
+
+이 장의 보안 흐름은 실행하지 않았습니다. 이 시리즈의 환경에는 이를 시험할 대상이 없었습니다. QEMU 11.1.3 Type 3 endpoint의 `lspci -vvv`에는 MSI-X, PCIe, Device Serial Number, CXL DVSEC 네 개, DOE, AER만 있고 IDE extended capability가 없습니다. Linux v6.12 `drivers/cxl/` 전체에서 `ide`·`spdm`·`tsp`·`tdisp`를 단어 단위로(`grep -iw`) 찾으면 나오는 것은 `core/trace.h:47-48`의 RAS 오류 이름 `"IDE Tx Error"`·`"IDE Rx Error"` 두 줄뿐입니다. 그래서 아래 내용은 모두 규격 본문의 절·표로 설명합니다.
 
 ## IDE가 막는 위협
 
@@ -80,7 +82,7 @@ PCIe IDE 정의를 따르고, 차이만 spec에 적혀 있습니다(§11.2).
 | Containment | 무결성 검사를 통과한 뒤에만 데이터를 넘김. 여러 flit을 버퍼링해야 해서 지연·대역폭 모두 손해 | 68B 5, 256B 2 |
 | Skid | 검사 전에 데이터를 넘겨 검사 완료 대기를 줄임. 변조 데이터가 먼저 소비될 수 있고 나중에 검사에서 잡힘 | 68B 128, 256B 32 |
 
-Skid 모드를 쓰려면 그 창 안의 공격을 소프트웨어 스택이 견딜 수 있어야 하고, 그렇지 않으면 결과는 정의되지 않습니다. 위 수치는 CXL 3.1 §11.3.5의 모드별 aggregation 설정이며, 특정 제품의 성능 측정값이 아닙니다. 먼저 소비된 데이터의 영향을 나중의 무결성 실패 알림이 자동으로 되돌려 주지는 않습니다.
+§11.3.5는 Skid 모드를 쓰려면 그 짧은 시간 창 안의 공격을 소프트웨어·애플리케이션 스택이 견딜 수 있어야 하고, 그렇지 않으면 결과가 정의되지 않는다고 씁니다. §11.3.4의 각주는 x16·32 GT/s 링크에서 64-bit IV가 한 바퀴 도는 데 1000년이 넘게 걸린다고 적습니다. §11.3.5.1은 모든 장치가 Containment 모드를 지원해야 한다고 정합니다.
 
 자세한 내용은 [Embedded Security Ch 11 PCIe·CXL IDE 분석](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide).
 
@@ -130,20 +132,18 @@ TSP target의 상태(§11.5.4.8, Figure 11-30):
 
 ## 지원 기능과 활성 상태를 구분하기
 
-TDISP는 PCI-SIG의 TEE Device Interface Security Protocol입니다. TSP와 역할이 연결되지만, 한쪽의 지원 여부로 다른 쪽이 활성화됐다고 판정할 수는 없습니다. 이 시리즈에서 실제로 대조한 Linux 소스는 [v6.12의 CXL 드라이버](https://github.com/torvalds/linux/tree/adc218676eef25575469234709c2d87185ca223a/drivers/cxl)이며, 그 소스 검토는 최신 커널의 TDISP·TSP 지원 현황이나 특정 플랫폼의 confidential computing 동작을 입증하지 않습니다.
+TDISP는 PCI-SIG의 TEE Device Interface Security Protocol입니다. §11.5.1은 TSP가 TDISP를 보완한다고 쓰고, 3.1 개정 이력은 TSP가 IDE·TDISP와 함께 쓸 수 있지만 둘 중 어느 것에도 의존하지 않는다고 적습니다. 그래서 한쪽이 켜졌다는 사실로 다른 쪽의 상태를 알 수 없습니다.
 
-다음 표는 장비 검증 시 필요한 관찰을 분리한 것입니다. 아래 실패 사례는 판단 기준이며, 실제 공격 실험의 결과가 아닙니다.
+규격이 단계마다 요구하는 것을 모으면 다음과 같습니다.
 
-| 확인 단계 | 필요한 증거 | 그 증거만으로 부족한 경우 |
+| 단계 | 규격이 정한 것 | 출처 |
 |------|------|------|
-| 디바이스 신원 | 신뢰 anchor와 인증서 체인·challenge 검증 | 유효한 인증서가 있어도 측정값이 허용한 firmware와 다를 수 있음 |
-| 디바이스 측정 | 서명·freshness와 허용 측정값 정책의 대조 | 측정 응답 수신만으로 정책 승인이라고 할 수 없음 |
-| SPDM session | 협상과 key exchange·session 수립 성공 | session 키가 IDE 트래픽 키와 같다는 뜻은 아님 |
-| IDE | 양 끝의 해당 stream 설정·키 갱신·활성 상태와 오류 처리 | capability 비트 또는 키 입력 성공만으로 보호된 트래픽을 확인할 수 없음 |
-| TSP | 올바른 target 범위·메모리 정책·CONFIG_LOCKED 상태 | switch 뒤 디바이스를 3.1의 직접 연결 범위에 포함하거나, 잠금 실패 뒤 접근을 계속하면 안 됨 |
-| 실패 뒤 복구 | 새 TEE 접근 차단과 session·데이터 정리, 재설정 결과 | ERROR 표시가 사라졌다는 이유만으로 기존 TVM 데이터를 재사용하면 안 됨 |
-
-SPDM의 신원·측정·session 역할은 [DMTF DSP0274 v1.2.3 §7](https://www.dmtf.org/sites/default/files/standards/documents/DSP0274_1.2.3.pdf)을 참고하세요. 신원은 출입증, 측정값 정책은 반입 장비 검사에 가깝습니다. 출입증 검사와 실제 링크 보호 상태를 각각 확인해야 전체 경계를 설명할 수 있습니다.
+| 디바이스 신원·측정 | SPDM 메시지 교환(버전 협상부터 측정·session까지). TSP는 SPDM 1.2 이상 | DSP0274 1.2.3 §7, CXL 3.1 §11.5.2 |
+| SPDM session | session은 CXL_IDE_KM 메시지를 보호하고, IDE 키·IV는 그 메시지로 따로 설정 | §11.4 |
+| CXL.cachemem IDE | 무결성 검사가 한 번 실패하면 이후 모든 보안 트래픽을 버림 (68B·256B 공통) | §11.3 |
+| IDE 모드 | 모든 장치가 Containment 모드 지원 | §11.3.5.1 |
+| TSP 잠금 | CONFIG_LOCKED에서만 TEE 트랜잭션 허용, Transport Security 실패·CXL Reset이면 ERROR | §11.5.4.8, Figure 11-30 |
+| TSP 범위 | root port에 직접 연결된 Type 3, HDM-H, 256B flit만 | §11.5.2 |
 
 자세한 내용은 [Embedded Security Ch 13 CXL TEE 확장](/blog/embedded/embedded-security/chapter13-cxl-tee).
 
@@ -175,7 +175,8 @@ TDISP는 PCI-SIG 표준입니다. CXL 쪽 대응물이 TSP이고, 둘은 보완 
 - *CXL.io IDE*는 PCIe IDE를 따르고, *CXL.cachemem IDE*는 flit 단위 AES-GCM 256, PCRC 필수, Containment/Skid 모드.
 - *TSP*(CXL 3.1)는 직접 연결 Type 3 메모리를 TVM 신뢰 경계에 넣습니다. switch·PBR·sharing은 3.1 범위 밖.
 - TSP target 상태는 CONFIG_UNLOCKED → CONFIG_LOCKED → (ERROR).
-- *TDISP*는 PCI-SIG 표준입니다. 실제 보호 여부는 플랫폼·소프트웨어 버전과 해당 연결의 활성 상태로 확인합니다.
+- *TDISP*는 PCI-SIG 표준이고, TSP는 이를 보완하되 의존하지 않습니다.
+- QEMU 11.1.3 Type 3에는 IDE capability가 없고, Linux v6.12 `drivers/cxl/`에는 IDE 관련 코드가 RAS 오류 이름 두 줄뿐이라 이 장의 흐름은 실행하지 않았습니다.
 
 ## 다음 편
 
@@ -190,4 +191,4 @@ TDISP는 PCI-SIG 표준입니다. CXL 쪽 대응물이 TSP이고, 둘은 보완 
 
 ## 시리즈 자료 출처 안내
 
-이 글은 위 CXL 3.1 §11과 DMTF DSP0274 v1.2.3을 대조했습니다. §11.3.5의 모드별 수치, §11.5.2·§11.5.3.2의 SPDM 1.2 이상 조건, §11.5.4.8의 ERROR 후 정리를 각각 확인했습니다. 이 설명을 CXL 4.0의 전체 보안 기능이나 특정 OS의 지원 검증으로 확장하지 않습니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 위 CXL 3.1 §11과 DMTF DSP0274 v1.2.3을 대조했습니다. §11.3.5의 모드별 수치, §11.5.2·§11.5.3.2의 SPDM 1.2 이상 조건, §11.5.4.8의 ERROR 후 정리를 각각 확인했습니다. QEMU 11.1.3 게스트의 `lspci -vvv`와 Linux v6.12 `drivers/cxl/` grep 결과로 실행 환경에 해당 기능이 없음을 확인했습니다. 4.0 백서의 제목에 'Security'가 들어 있지만 본문은 보안 변경을 설명하지 않아, 4.0의 보안 변경은 다루지 않습니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

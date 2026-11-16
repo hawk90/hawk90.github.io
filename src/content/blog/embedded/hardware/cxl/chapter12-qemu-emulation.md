@@ -2,7 +2,7 @@
 title: "Ch 12: QEMU CXL 에뮬레이션 — 모델 구성과 게스트 검증"
 slug: "embedded/hardware/cxl/chapter12-qemu-emulation"
 date: 2026-05-16T09:12:00
-description: "고정한 QEMU 9.2.4의 Type 3 모델을 정지 상태에서 검증하고, guest Linux·cxl_test·물리 링크 검증의 범위를 구분합니다."
+description: "QEMU 11.1.3 arm64 virt에 switch와 Type 3 두 대를 구성해 게스트 Linux에서 CEDT·driver·mailbox·poison을 확인하고, cxl_test·물리 링크 검증의 범위를 구분합니다."
 series: "CXL 4.0 Internals"
 seriesOrder: 12
 tags: [cxl, qemu, emulation, type-3, dev-workflow]
@@ -12,117 +12,126 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **QEMU의 CXL 모델 초기화, 게스트 firmware의 PCI 구성과 Linux CXL driver 실행은 서로 다른 검증 단계입니다. 모델이 만들어졌다는 사실만으로 guest의 region·System RAM이나 물리 CXL 성능을 증명하지는 못합니다.**
+> **QEMU의 CXL 모델 초기화, 게스트 firmware의 PCI 구성과 Linux CXL driver 실행은 서로 다른 검증 단계입니다. QEMU 11.1.3 arm64 게스트에서는 topology·mailbox·poison·event까지 실제로 동작했고, region commit에서 멈췄습니다.**
 
-이 장의 소스 기준은 [QEMU v9.2.4, commit `b2995afed254`](https://gitlab.com/qemu-project/qemu/-/tree/b2995afed254e4804611df52210067a4d5dbdf0b)입니다. [공식 CXL 문서의 해당 판](https://gitlab.com/qemu-project/qemu/-/blob/b2995afed254e4804611df52210067a4d5dbdf0b/docs/system/devices/cxl.rst)과 장치 속성을 대조합니다. 확인하지 않은 2026년 master·11.1 개발판을 실행 환경으로 사용하지 않습니다.
-
-직접 검증한 범위는 macOS arm64 host에서 빌드한 x86_64 system emulator의 **headless·TCG·CPU 정지 상태의 machine/device 초기화와 QMP 조회**입니다. guest image나 kernel은 연결하지 않았습니다. 따라서 아래에서 guest Linux 명령은 후속 실습 절차이며 이 글의 실행 결과와 구분합니다.
+이 장의 실행 환경은 macOS arm64 host의 Homebrew QEMU 11.1.3(`qemu-system-aarch64`, TCG)과 Debian 13 nocloud arm64 이미지(커널 6.12.116)입니다. 소스 인용은 같은 판의 `qemu-11.1.3.tar.xz`에서 했습니다. 실제 CXL 장비가 없을 때 QEMU는 자동차 시뮬레이터와 같습니다. 계기판·핸들·브레이크 배선은 진짜처럼 시험할 수 있지만, 엔진 출력이나 타이어 마찰은 재현하지 못합니다.
 
 ## 이 판의 모델과 지원 범위
 
-| 구성 요소 | 이름·속성 | 확인 범위 |
+QEMU 소스 트리의 CXL 관련 장치 모델과 소스는 다음과 같습니다.
+
+| 구성 요소 | 이름 | 소스 |
 |---|---|---|
-| host bridge | `pxb-cxl` | PCIe root bus에 연결합니다. |
-| root port | `cxl-rp` | host bridge 아래 port를 만듭니다. |
-| switch | `cxl-upstream`, `cxl-downstream` | 단일 virtual hierarchy 모델입니다. 이 장의 실행에는 추가하지 않았습니다. |
-| Type 3 | `cxl-type3` | volatile·persistent backing과 `num-dc-regions` 속성을 제공합니다. |
-| fixed memory window | `cxl-fmw.N.*` | CEDT의 CFMWS 구성에 사용됩니다. |
+| host bridge | `pxb-cxl` | `hw/pci-bridge/pci_expander_bridge.c` |
+| root port | `cxl-rp` | `hw/pci-bridge/cxl_root_port.c` |
+| switch | `cxl-upstream`, `cxl-downstream` | `hw/pci-bridge/cxl_upstream.c`, `cxl_downstream.c` |
+| Type 3 | `cxl-type3` | `hw/mem/cxl_type3.c` |
+| switch mailbox CCI | `cxl-switch-mailbox-cci` | `hw/cxl/switch-mailbox-cci.c` (FM API 명령 처리, 이 시리즈에서는 쓰지 않음) |
+| fixed memory window | `-M cxl-fmw.N.*` | `hw/cxl/cxl-host.c` |
+| CEDT·`_OSC` | ACPI 표 생성 | `hw/acpi/cxl.c` |
 
-9.2.4의 Type 3 모델에는 이 글의 이전 예에 있던 `hdm-db`·`x-256b-flit` 속성이 없습니다. 정지 상태의 QOM property 조회에서도 이를 확인했습니다. 다른 판의 기능을 이 판에서 사용할 수 있다고 섞지 않습니다. `num-dc-regions` 속성의 존재도 실제 DC extent 추가·수락·반납을 시험했다는 뜻은 아닙니다.
+Type 1·Type 2 모델은 없습니다. [QEMU 11.1.3 CXL 문서](https://gitlab.com/qemu-project/qemu/-/blob/v11.1.3/docs/system/devices/cxl.rst)도 "QEMU는 coherency protocol을 에뮬레이션하지 않는다"고 쓰고, 에뮬레이션의 초점을 CXL 2.0 이후로 둡니다. 실행 중인 게스트의 Type 3 장치를 QMP `qom-list`로 조회하면 이 판의 속성에 `hdm-db`, `x-256b-flit`, `num-dc-regions`, `volatile-dc-memdev`, `x-speed`, `x-width`가 있습니다. 이 장에서는 이 가운데 어느 것도 켜지 않았습니다.
 
-QEMU의 CXL 문서는 coherence protocol 자체를 에뮬레이션하는 모델과 topology·register 모델을 구분합니다. 여기서 cache·PHY·LTSSM의 실제 timing을 얻을 수는 없습니다. Type 1·2 가속기 모델을 이 Type 3 구성으로 검증했다고 주장하지 않습니다.
+## 이 시리즈의 구성: switch 아래 Type 3 두 대
 
-## 작은 구성: guest를 실행하지 않고 시작하기
+실제로 부팅한 명령입니다. 경로와 disk·network 옵션은 줄이고 옵션 순서도 정리했습니다.
 
-다음은 실험용 초기화 명령입니다. CXL backing은 256 MiB, 기본 guest RAM은 128 MiB이고 CPU는 `-S`로 정지합니다. guest disk·kernel·network나 물리 장치 passthrough를 추가하지 않습니다. 소스 build를 사용한다면 `QEMU_SOURCE`를 해당 clone 경로로 설정하고, executable 경로도 build에 맞게 지정합니다.
-
-```bash title="qemu-cxl-paused.sh"
-qemu-system-x86_64 \
-  -L "$QEMU_SOURCE/pc-bios" \
-  -accel tcg,thread=single \
-  -machine q35,cxl=on \
-  -m 128M,maxmem=1G,slots=8 -smp 1 \
-  -nodefaults -display none -monitor none -serial none -S \
-  -object memory-backend-ram,id=vmem0,size=256M \
+```bash title="qemu-cxl-switch.sh"
+qemu-system-aarch64 -nographic -M virt,gic-version=3,cxl=on \
+  -m 2g,maxmem=8g,slots=4 -smp 4 -accel tcg -cpu max \
+  -bios /opt/homebrew/share/qemu/edk2-aarch64-code.fd \
+  -qmp tcp:127.0.0.1:4471,server=on,wait=off \
+  -object memory-backend-ram,id=vmem0,share=on,size=256M \
+  -object memory-backend-file,id=pmem1,share=on,mem-path=pmem1.raw,size=256M \
+  -object memory-backend-file,id=lsa1,share=on,mem-path=lsa1.raw,size=1M \
   -device pxb-cxl,bus_nr=12,bus=pcie.0,id=cxl.1 \
-  -device cxl-rp,port=0,bus=cxl.1,id=root_port13,chassis=0,slot=2 \
-  -device cxl-type3,bus=root_port13,volatile-memdev=vmem0,id=cxl-vmem0 \
-  -M cxl-fmw.0.targets.0=cxl.1,cxl-fmw.0.size=256M \
-  -qmp stdio
+  -device cxl-rp,port=0,bus=cxl.1,id=rp0,chassis=0,slot=2 \
+  -device cxl-upstream,bus=rp0,id=us0 \
+  -device cxl-downstream,port=0,bus=us0,id=dsp0,chassis=0,slot=4 \
+  -device cxl-downstream,port=1,bus=us0,id=dsp1,chassis=0,slot=5 \
+  -device cxl-type3,bus=dsp0,volatile-memdev=vmem0,id=cxl-vmem0,sn=0x10 \
+  -device cxl-type3,bus=dsp1,persistent-memdev=pmem1,lsa=lsa1,id=cxl-pmem1,sn=0x11 \
+  -M cxl-fmw.0.targets.0=cxl.1,cxl-fmw.0.size=4G
 ```
 
-이 구성에는 Linux guest boot image가 없습니다. `-S`를 빼고 guest OS가 부팅된 것처럼 해석하지 않습니다.
+`-accel hvf`가 아니라 TCG를 쓴 이유는 이 시리즈 전체가 같은 조건(TCG에서 CXL Type 3 동작)으로 관찰을 맞췄기 때문입니다. 게스트에서 본 PCI 트리입니다.
 
-QMP의 greeting을 받은 뒤 먼저 capabilities를 활성화하고 상태·속성을 조회합니다. 아래 JSON은 줄마다 하나씩 보내며 `cont`는 보내지 않습니다. 마지막 `quit`으로 emulator를 종료합니다.
-
-```json
-{"execute":"qmp_capabilities"}
-{"execute":"query-status"}
-{"execute":"qom-get","arguments":{"path":"/machine/peripheral/cxl-vmem0","property":"realized"}}
-{"execute":"qom-get","arguments":{"path":"/machine/peripheral/cxl-vmem0","property":"volatile-memdev"}}
-{"execute":"qom-list","arguments":{"path":"/machine/peripheral/cxl-vmem0"}}
-{"execute":"quit"}
+```text
+-+-[0000:00]-+-00.0  Red Hat, Inc. QEMU PCIe Host bridge
+ |           +-01.0  Red Hat, Inc. Virtio network device
+ |           +-02.0  Red Hat, Inc. Virtio block device
+ |           \-03.0  Red Hat, Inc. QEMU PCIe Expander bridge
+ \-[0000:0c]---00.0-[0d-10]----00.0-[0e-10]--+-00.0-[0f]----00.0  Intel Corporation Device 0d93
+                                             \-01.0-[10]----00.0  Intel Corporation Device 0d93
 ```
 
-실행에서는 `query-status`의 `running=false`, Type 3의 `realized=true`, backing object 경로 `/objects/vmem0`을 확인했습니다. 이들은 모델 초기화에 관한 관측입니다. firmware를 실행하기 전 `query-pci`에 모든 downstream 장치가 보이는 것은 아니며, guest의 PCI enumeration·driver binding 결과로 대신 사용할 수 없습니다.
-
-재현 검사는 저장소의 `scripts/verify-qemu-cxl-topology.mjs`에 있습니다. `QEMU_ARTICLE_SOURCE`와 `QEMU_ARTICLE_BUILD`로 고정 clone·build 위치를 지정하면 실제 binary를 실행해 QMP 응답과 다음 실패 조건을 검사합니다. 빌드에는 두 compile job을 사용했고 시스템에 설치하지 않았습니다.
+`bus_nr=12`가 그대로 버스 `0c`가 되고, root port `0c:00.0` 아래 switch upstream port `0d:00.0`, downstream port `0e:00.0`·`0e:01.0`, Type 3 `0f:00.0`·`10:00.0`이 이어집니다. `lspci -nn`의 switch port ID는 `19e5:a128`·`19e5:a129`, Type 3는 `8086:0d93`이었습니다. 모델이 정한 ID라서 실제 제품을 뜻하지 않습니다.
 
 ## 잘못된 구성을 실제로 거부하는지 확인하기
 
-| 변경한 조건 | 9.2.4에서 관측한 오류 | 의미 |
+설정 오류는 게스트 부팅 전에 QEMU가 거부합니다. `-S`로 CPU를 멈춘 채 disk 없이 띄워 확인했습니다.
+
+| 변경한 조건 | QEMU 11.1.3의 오류 (종료 코드 1) |
+|---|---|
+| `virt,cxl=off`에 `pxb-cxl` 추가 | `CXL host bridges present, but cxl=off` |
+| FMW size를 257 MiB로 변경 | `Size of a CXL fixed memory window must be a multiple of 256MiB` |
+| host bridge 두 개에 `bus_nr=12` 사용 | `Bus 12 is already in use` |
+| Type 3에 `x-speed=128` | `Parameter 'x-speed' does not accept value '128'` |
+
+마지막 줄은 [Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 본 대로 QEMU의 `PCIELinkSpeed` 열거형이 64 GT/s에서 끝나기 때문입니다(`qapi/common.json:118-119`).
+
+## Guest Linux에서 확인한 것
+
+부팅한 게스트에서 이 시리즈가 실제로 확인한 항목입니다.
+
+| 확인 항목 | 결과 | 장 |
 |---|---|---|
-| `q35,cxl=off`에 `pxb-cxl` 추가 | `CXL host bridges present, but cxl=off` | machine의 CXL 설정과 bridge가 맞지 않습니다. |
-| FMW size를 257 MiB로 변경 | `multiple of 256MiB`를 포함한 오류 | window 크기 정렬 조건이 맞지 않습니다. |
-| host bridge 두 개에 `bus_nr=12` 사용 | `Bus 12 is already in use` | expander bus 번호가 충돌합니다. |
+| CEDT | CHBS 1개(UID 12), CFMWS 1개(`0x10000000000`, 4 GiB) | [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position) |
+| driver binding | `cxl_pci`가 `0f:00.0`·`10:00.0`에 bind, `mem0`·`mem1` 등록 | [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver) |
+| DVSEC·DOE·CDAT | SLD 필수 DVSEC 4개, CDAT 160바이트 | [Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io) |
+| region | decoder 값은 채워지고 commit은 `-ENXIO` | [Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem) |
+| mailbox | Get Health Info는 CEL에 없어 `-ENOTTY` | [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver) |
+| poison·event·RAS | QMP 주입이 `cxl list -L`·`cxl monitor`·AER로 보임 | [Ch 15](/blog/embedded/hardware/cxl/chapter15-ras-performance) |
 
-모두 guest CPU 실행 전에 프로세스가 오류로 종료되는 것을 확인했습니다. 이 결과는 장치의 hardware error·poison이나 Linux recovery를 주입한 시험이 아닙니다. 서로 다른 실패 범위를 같은 “CXL 오류 테스트”로 묶지 않습니다.
-
-## Guest Linux에서 이어서 확인할 것
-
-실제 driver 실습에는 boot 가능한 guest kernel·root filesystem과 필요한 CXL/DAX 설정, cxl-cli·daxctl 등이 필요합니다. Linux v6.12와 ndctl v80을 쓴다면 [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)의 source 기준과 연결할 수 있습니다. QEMU 문서의 오래된 Linux 5.18 설정 문단을 모든 region 기능의 최소 버전처럼 사용하지 않습니다.
-
-Linux guest 안에서 다음 상태를 확인합니다. 이 명령은 이 글의 검증에서 실행하지 않았으며, 장치 이름·BDF·region·node 번호는 실제 guest에서 얻어야 합니다.
-
-```bash
-lspci -n
-ls /sys/bus/cxl/devices/
-cxl list -M -D -T
-cxl list -R
-daxctl list
-numactl --hardware
-```
-
-`volatile-memdev`는 volatile backing이며, 오래된 `memdev` 속성의 persistent 호환 경로와 구분합니다. volatile region 생성과 Device DAX/System RAM 노출도 별도 단계입니다. 먼저 이미 구성된 region을 확인하고, 실제 생성·mode 전환은 guest 안에서 지원 조건과 데이터 수명을 확인한 뒤 수행합니다. 이 글은 region 생성·destroy나 memory online/offline을 실행하지 않습니다.
-
-QEMU 소스 `hw/mem/cxl_type3.c`의 model Vendor/Device ID는 실제 제조사 제품이나 PCI 등록 상태의 증거가 아닙니다. guest에서 같은 ID를 읽더라도 에뮬레이터 모델임을 표시해야 합니다. [Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)의 synthetic dump 검사와도 구분합니다.
+`volatile-memdev`는 volatile backing이고, 문서의 Deprecations 절은 오래된 `memdev` 속성이 persistent로 해석된다고 씁니다. 이 구성의 `mem0`은 `ram_size`, `mem1`은 `pmem_size`로 나왔습니다.
 
 ## CEDT와 firmware 경계
 
-`hw/acpi/cxl.c`는 QEMU의 CEDT 생성을 담당합니다. CHBS는 host bridge 정보를, CFMWS는 fixed window의 base·size·target·interleave 정보를 전달합니다. 이 판의 host bridge UID가 `bus_nr`에서 오는 소스 경로와, guest가 실제 table을 읽어 decoder를 등록한 결과는 다른 증거입니다.
+`hw/acpi/cxl.c`의 `cedt_build_chbs()`(103행)는 CHBS의 UID에 `pxb->bus_nr`를 넣고(118-119행, 주석 "UID - currently equal to bus number"), `cedt_build_cfmws()`(139행)는 window의 base·size·target host bridge 목록을 씁니다. 게스트에서 `acpidump -n CEDT -b`와 `iasl -d`로 푼 결과의 `Associated host bridge : 0000000C`가 그 UID 12입니다. CFMWS의 `Restrictions : 002F`는 Linux에서 root decoder의 `cap_type2`·`cap_type3`·`cap_ram`·`cap_pmem`이 모두 1인 것으로 나타났습니다(`drivers/cxl/acpi.c:118-125`).
 
-Guest가 부팅된 후에는 `acpidump`·`iasl` 등으로 CEDT를 확인하고 kernel log·sysfs와 대응시킬 수 있습니다. 이 장에서는 guest를 부팅하지 않았으므로 CEDT dump를 얻었다고 주장하지 않습니다. QMP object의 존재가 유효한 guest ACPI 소비와 메모리 mapping을 보장하지는 않습니다.
+edk2 펌웨어는 HDM decoder를 프로그래밍하지 않았습니다. 부팅 직후 모든 port의 `decoders_committed`가 0이었습니다. 펌웨어 쪽 흐름은 [Bootloader Ch 35](/blog/embedded/bootloader/chapter35-uefi-cxl-init)에서 다룹니다.
+
+## QMP로 장치 상태 바꾸기
+
+QEMU의 `qapi/cxl.json`은 Type 3 장치에 오류와 이벤트를 넣는 QMP 명령을 정의합니다. 이 시리즈에서 실제로 쓴 명령은 다음과 같습니다.
+
+| QMP 명령 | 게스트에서 본 결과 |
+|---|---|
+| `cxl-inject-poison` | `cxl list -L`의 `media_errors`에 `"source":"Internal"` 항목 |
+| `cxl-inject-general-media-event` | `cxl_general_media` trace event |
+| `cxl-inject-dram-event` | `cxl_dram` trace event |
+| `cxl-inject-correctable-error` | AER mask를 푼 뒤 `CorrIntErr`와 `cxl_aer_correctable_error` |
+| `cxl-inject-uncorrectable-errors` | AER mask를 푼 뒤 frozen → slot reset → resume |
+
+같은 파일에는 `cxl-add-dynamic-capacity`·`cxl-release-dynamic-capacity`도 있지만, 이 구성은 DC region을 만들지 않아 실행하지 않았습니다.
 
 ## cxl_test는 별도의 kernel mock입니다
 
-Linux v6.12의 `tools/testing/cxl/`은 실제 driver의 일부 경로를 mock 함수와 함께 빌드하는 테스트 구성입니다. QEMU가 만든 PCI device를 사용하는 것이 아니며 `test/`의 소스와 Kbuild를 같이 읽어야 합니다. 이 판의 `test/cxl.c`, `mock.c`, `mem.c` 등의 역할을 다른 판의 accelerator mock과 섞지 않습니다.
+Linux v6.12의 `tools/testing/cxl/`에는 `cxl_acpi_test.c`, `cxl_core_test.c`, `mock_acpi.c`와 `test/cxl.c`·`mock.c`·`mem.c` 등이 있습니다. 실제 driver 소스를 mock 함수와 함께 다시 빌드해, QEMU 장치 없이 커널 안에서 가짜 topology를 만드는 테스트입니다. 이 시리즈에서는 빌드하거나 load하지 않았습니다.
 
-cxl_test 실습은 적합한 별도 Linux kernel·module build 환경에서 진행합니다. module 설치·교체는 테스트 대상 kernel에 영향을 주므로 명령 두 줄을 일반 host 설정법처럼 제시하지 않습니다. 이 글에서는 host나 guest에 module을 설치·load/unload하지 않았습니다.
-
-| 확인하려는 것 | 적합한 검증 범위 |
+| 확인하려는 것 | 이 시리즈에서 쓴 검증 범위 |
 |---|---|
-| topology·register·firmware와 guest driver 연결 | QEMU와 boot 가능한 Linux guest |
-| 특정 driver 로직의 mock 오류·반환 | 고정 kernel의 cxl_test 또는 선언된 host 함수 harness |
-| PHY·coherency·실제 지연·대역폭 | 지원 hardware와 적절한 계측 |
+| topology·register·firmware와 guest driver 연결 | QEMU 11.1.3 + Debian 13 arm64 게스트 |
+| 특정 driver 로직의 mock 오류·반환 | 실행하지 않음 (cxl_test 대상) |
+| PHY·coherency·실제 지연·대역폭 | 실행하지 않음 (실제 하드웨어 필요) |
 
 ## 정리
 
-- 고정한 QEMU 판의 모델·속성과 명령을 사용합니다.
-- 이 장에서 확인한 실행은 CPU를 멈춘 상태의 Type 3 초기화와 QMP 속성입니다.
-- 잘못된 window·bus·machine 설정의 거부는 실제 binary로 확인했습니다.
-- guest boot·PCI enumeration·CXL driver·region·NUMA는 후속 검증입니다.
-- QEMU, kernel mock과 물리 링크 계측은 서로 다른 범위를 다룹니다.
-- 모델 초기화와 기능 지원을 실제 CXL 4.0 성능·coherency 결과로 확대하지 않습니다.
+- QEMU 11.1.3의 CXL 장치 모델은 host bridge·root port·switch·switch mailbox CCI·Type 3이고, Type 1·2 모델은 없으며 coherency protocol은 에뮬레이션하지 않습니다.
+- 잘못된 machine·window·bus 설정과 지원하지 않는 링크 속도는 QEMU가 시작 전에 거부합니다.
+- arm64 게스트에서 CEDT·driver binding·DVSEC·CDAT·mailbox·poison·event·AER 복구까지 실제로 관찰했습니다.
+- region commit은 arm64 커널의 cache 무효화 부재로 `-ENXIO`였습니다.
+- QEMU 실행 결과를 실제 CXL 장치의 성능·coherency 결과로 쓰지 않습니다.
 
 다음 [Ch 13: Switching·Fabric Manager](/blog/embedded/hardware/cxl/chapter13-switching-fabric)에서 논리적 자원 배정과 host 메모리 사용의 경계를 살펴봅니다.
 
@@ -130,8 +139,8 @@ cxl_test 실습은 적합한 별도 Linux kernel·module build 환경에서 진�
 
 - [Ch 11: Linux CXL driver](/blog/embedded/hardware/cxl/chapter11-linux-driver)
 - [Modern Embedded Recipes: QEMU CXL Type 3 에뮬레이션](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)
-- [QEMU v9.2.4 CXL 문서](https://gitlab.com/qemu-project/qemu/-/blob/b2995afed254e4804611df52210067a4d5dbdf0b/docs/system/devices/cxl.rst)
+- [QEMU 11.1.3 CXL 문서](https://gitlab.com/qemu-project/qemu/-/blob/v11.1.3/docs/system/devices/cxl.rst)
 
 ## 시리즈 자료 출처 안내
 
-이 글은 QEMU v9.2.4의 문서·model/QAPI 소스, Linux v6.12 `tools/testing/cxl/`와 ndctl v80 자료를 대조했습니다. 실행 범위와 남은 guest·hardware 검증을 위에서 구분합니다. 전체 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 QEMU 11.1.3의 문서·장치 모델·QAPI 소스, Linux v6.12 `tools/testing/cxl/`, Debian 13 arm64 게스트(커널 6.12.116, cxl 81)의 실행 결과를 근거로 합니다. 전체 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

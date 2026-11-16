@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## ARB/MUX의 위치
 
-[CXL 3.1 §5.0, Figure 5-1](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)의 계층 구조입니다. 시리즈 제목은 4.0이지만 이 절의 규범적 설명은 3.1 기준이며 4.0 전체 구현·시험 결과가 아닙니다.
+[CXL 3.1 §5.0, Figure 5-1](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)의 계층 구조입니다. 이 장의 규범 설명은 모두 3.1 기준입니다. 공항 관제탑이 여러 항공사 비행기를 활주로 하나에 번갈아 이착륙시키는 것처럼, ARB/MUX는 두 link 계층의 flit을 물리 링크 하나에 번갈아 태웁니다.
 
 | 계층 | 역할 |
 |-------|------|
@@ -33,7 +33,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## Flit 경계 단위 중재
 
-ARB/MUX는 slot을 채우지 않습니다. slot 구성은 링크 계층 몫이고, ARB/MUX는 flit 경계에서 어느 link protocol을 보낼지 선택합니다. 전부 수신·조립이 끝난 256 B를 반드시 store-and-forward한다는 의미는 아닙니다. 프로토콜 사이 interleave는 68B Flit mode에서 528-bit flit 경계, 256B Flit mode에서 256B flit 경계로 일어납니다(§5.3). 528 bit는 Protocol ID 2 B를 제외한 66 B link-layer flit이므로 68 B 전체와 세는 경계가 다릅니다.
+ARB/MUX는 slot을 채우지 않습니다. slot 구성은 링크 계층 몫이고, ARB/MUX는 flit 경계에서 어느 link protocol을 보낼지 선택합니다. 프로토콜 사이 interleave는 68B Flit mode에서 528-bit flit 경계, 256B Flit mode에서 256B flit 경계로 일어납니다(§5.3). 528 bit는 Protocol ID 2 B를 제외한 66 B link-layer flit이므로 68 B 전체와 세는 경계가 다릅니다.
 
 ## 중재 정책 — 구현 정의 + 가중치 레지스터
 
@@ -46,7 +46,7 @@ spec은 중재 정책을 *구현에 맡깁니다*. 상위 프로토콜의 타이
 | ARB/MUX Arbitration Control Register for CXL.io | 180h | bit 7:4 — CXL.io Weighted Round Robin 가중치 |
 | ARB/MUX Arbitration Control Register for CXL.cache and CXL.mem | 1C0h | bit 7:4 — CXL.cache·CXL.mem Weighted Round Robin 가중치 |
 
-표의 offset은 Component Register Range 전체가 아니라 ARB/MUX register space의 base E000h를 기준으로 합니다. 두 필드 모두 기본값은 0h입니다. 0을 무조건 대역폭 0 또는 특정 공정성 보장으로 해석하지 않습니다. 그러니 "snoop이 1순위, CXL.io가 꼴찌" 같은 고정 우선순위는 spec에 없습니다. 중재는 *CXL.io 대 CXL.cachemem*의 두 갈래 사이에서 일어나고, 그 비율은 이 가중치와 구현이 정합니다.
+표의 offset은 Component Register Range 전체가 아니라 ARB/MUX register space의 base E000h를 기준으로 합니다(Table 8-21: E000h~E3FFh, 1 KB). 두 필드 모두 기본값은 0h입니다. 규격은 가중치 값과 실제 대역폭 비율의 관계를 정하지 않습니다. 그러니 "snoop이 1순위, CXL.io가 꼴찌" 같은 고정 우선순위는 spec에 없습니다. 중재는 *CXL.io 대 CXL.cachemem*의 두 갈래 사이에서 일어나고, 그 비율은 이 가중치와 구현이 정합니다.
 
 ## vLSM — Virtual Link State Machine
 
@@ -80,7 +80,7 @@ ALMP는 ARB/MUX끼리 주고받는 제어 패킷입니다(§5.2).
 | Status Synchronization | 링크 복구 뒤 양 끝 vLSM 상태 맞추기. *68B Flit mode 전용* (§5.1.2.3) |
 | L0p 폭 협상 | 256B Flit mode에서 L0p 링크 폭 협상 (§5.1.2.5) |
 
-256B Flit mode에서는 replay buffer가 Physical Layer에 있어, ALMP도 FEC·CRC 보호를 받고 replay 대상이 됩니다. 이 보호·replay 모델에서 68B와 같은 Status Synchronization을 사용하지 않는다는 설명입니다. fatal link failure나 복구 실패까지 없어졌다는 무조건적 전달 보장은 아닙니다.
+§5.1.2.3은 256B Flit mode에서 retry buffer가 physical layer에 있으므로 모든 ALMP가 오류 없이 상대 ARB/MUX에 전달되고 모든 ALMP가 응답을 받는다고 씁니다. 그래서 양쪽 vLSM이 어긋날 경우가 없고, Status Synchronization Protocol은 68B Flit mode에만 적용됩니다.
 
 참고로 *어떤 프로토콜을 켤지*(CXL.io·cache·mem) 정하는 건 ALMP가 아닙니다. Physical Layer가 링크 트레이닝 중 modified TS1/TS2 Ordered Set으로 하는 *alternate protocol negotiation* 몫입니다(§6.4.1).
 
@@ -90,7 +90,8 @@ CXL 3.1 spec은 *256B Flit mode*에서 PCIe Base Spec의 L0p를 지원합니다(
 
 - CXL.io와 CXL.cachemem 링크 계층이 각자 원하는 폭을 ARB/MUX에 알립니다.
 - ARB/MUX는 이를 모아 물리 링크 폭을 정합니다. 우선 요청(예: thermal throttling)이 아니면 *둘 중 큰 폭 이상*이어야 합니다.
-- 예: 두 계층이 각각 x2를 요청하면, ARB/MUX는 합쳐서 x4를 협상할 수 있습니다. 집계 알고리즘은 구현 정의입니다.
+- 규격이 드는 예는 CXL.io와 CXL.cachemem이 각각 x2를 요청할 때 ARB/MUX가 x4를 요청·협상하는 경우입니다. 집계 알고리즘은 구현 정의입니다.
+- priority 요청이 있으면 집계 폭은 priority로 요청된 폭 가운데 가장 낮은 값입니다.
 
 L0p는 CXL 4.0에서 새로 생긴 것이 아닙니다. CXL 3.1 spec에 이미 있습니다.
 
@@ -106,7 +107,19 @@ L0p는 CXL 4.0에서 새로 생긴 것이 아닙니다. CXL 3.1 spec에 이미 �
 
 ## Linux에서 보이는 것
 
-이 글의 고정 기준인 Linux v6.12 `drivers/cxl/` 검색에서는 ARB/MUX·ALMP·vLSM의 전용 제어·상태 구현을 확인하지 못했습니다. 이를 모든 커널·driver·firmware에 대한 부재 증명으로 확대하지 않습니다. [ndctl v80 `cxl-monitor` 문서](https://github.com/pmem/ndctl/blob/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3/Documentation/cxl/cxl-monitor.txt)는 커널 trace event를 JSON으로 내보내는 기능을 설명하며, 이것이 vLSM 상태를 직접 읽는 API는 아닙니다. ARB/MUX 동작을 보려면 플랫폼·디바이스 벤더 도구나 프로토콜 분석기가 필요합니다.
+소프트웨어가 ARB/MUX를 볼 수 있는 창은 Component Register의 E000h~E3FFh뿐입니다. Linux v6.12 `drivers/cxl/` 전체를 `arb.?mux|almp|vlsm`으로 대소문자 구분 없이 grep하면 0건입니다. 이 커널 판의 CXL driver는 ARB/MUX 레지스터를 읽거나 쓰지 않습니다.
+
+QEMU 게스트에서 endpoint `0f:00.0`의 component register(BAR0, 64 KiB)를 `resource0` mmap으로 직접 읽어 봤습니다.
+
+```text
+0xe000 0xffffffff
+0xe180 0xffffffff
+0xe1c0 0xffffffff
+```
+
+PM Timeout Control(00h)의 기본값은 PMTimeout Enable bit가 1이고 값 필드가 00b이며(§8.2.5.1), 가중치 레지스터(180h·1C0h)의 reserved bit 31:8과 기본값 0h를 생각하면 실제 장치에서 모든 비트가 1일 수는 없습니다. QEMU 11.1.3은 `include/hw/cxl/cxl_component.h:272-277` 주석에 E000h~E3FFh를 ARB/MUX 영역으로 적고 287행에 `MemoryRegion arb_mux`를 선언하지만, `hw/`와 `include/` 어디에서도 이 영역을 초기화하지 않습니다. 매핑되지 않은 MMIO를 읽어 모든 비트가 1로 돌아온 것입니다. vLSM 상태나 ALMP 교환은 이 시리즈의 환경에서 관찰할 수 없고, 실제 장치에서는 벤더 도구나 프로토콜 분석기가 필요합니다.
+
+[ndctl v81 `cxl-monitor` 문서](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-monitor.txt)가 설명하는 것은 커널 CXL trace event를 JSON으로 내보내는 기능이며, ARB/MUX 상태를 읽는 기능은 없습니다.
 
 ## 자주 하는 실수
 
@@ -116,7 +129,7 @@ L0p는 CXL 4.0에서 새로 생긴 것이 아닙니다. CXL 3.1 spec에 이미 �
 
 ### "spec이 프로토콜 우선순위를 정해 둔다"
 
-*아닙니다*. 정책은 구현 정의이고, spec이 요구하는 건 CXL.io 대 CXL.cache+mem 가중치를 설정할 수단입니다(§5.3, §8.2.5.4~5).
+*아닙니다*. 정책은 구현 정의이고, spec이 요구하는 건 CXL.io 대 CXL.cache+mem 가중치를 설정할 수단입니다(§5.3, §8.2.5.4~5). 우선순위가 정해진 것은 L0p 폭 요청의 priority 플래그(§5.1.2.5) 정도입니다.
 
 ### "ARB/MUX Bypass는 협상을 줄이는 고속 모드다"
 
@@ -133,6 +146,7 @@ spec의 vLSM 결정 표는 두 개(vLSM[0]·vLSM[1])를 놓고 설명하고, L0p
 - *vLSM* 상태: Reset·Active·L1.x·DAPM·SLEEP_L2·LinkReset·LinkError·LinkDisable·Retrain.
 - *ALMP*는 vLSM 상태 요청·응답, 68B의 상태 동기화, 256B의 L0p 폭 협상에 씁니다.
 - *L0p*는 CXL 3.1에 이미 있는 256B Flit mode 기능. 폭 협상을 DLLP 대신 ALMP로 합니다.
+- Linux v6.12 `drivers/cxl/`에는 ARB/MUX 코드가 없고, QEMU 11.1.3은 E000h 영역을 구현하지 않아 읽으면 `0xffffffff`가 나옵니다.
 
 ## 다음 편
 
@@ -146,4 +160,4 @@ spec의 vLSM 결정 표는 두 개(vLSM[0]·vLSM[1])를 놓고 설명하고, L0p
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1 spec(§5, §8.2.5), Linux v6.12 `drivers/cxl/` 소스와 ndctl v80 문서를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 §5.0~§5.3(Table 5-1·5-2), §8.2.5, Table 8-21, Linux v6.12 `drivers/cxl/` grep 결과, ndctl v81 문서, QEMU 11.1.3 소스와 게스트의 component register 읽기 결과를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

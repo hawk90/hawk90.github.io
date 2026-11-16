@@ -16,7 +16,7 @@ topics: ["embedded", "embedded/hardware"]
 
 [Ch 14](/blog/embedded/hardware/cxl/chapter14-security)에서 *보안*을 봤습니다. 마지막 장은 *RAS·Performance·Compliance*입니다.
 
-규범과 목표 수치는 [CXL 3.1 §12~14](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf), 구현 예는 Linux v6.12와 ndctl v80을 기준으로 설명합니다. 오류 주입·실장비 지연·복구 시험을 실행한 글은 아닙니다. 오류 기록을 볼 수 있다는 사실, 장애에서 복구했다는 사실, 성능 목표를 만족했다는 사실은 각각 별도의 증거가 필요합니다.
+규범과 목표 수치는 [CXL 3.1 §12~14](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf), 구현은 Linux v6.12와 ndctl v81을 기준으로 설명합니다. RAS 쪽은 QEMU 11.1.3의 QMP 오류 주입으로 Debian 13 arm64 게스트(커널 6.12.116)에서 실제로 돌렸고, 지연·대역폭과 compliance 시험은 하드웨어가 없어 돌리지 않았습니다. 자동차 정비로 치면 이 장은 경고등(event), 부품 결함 기록(poison), 주행 성능 기준(§13), 차량 검사(§14)를 차례로 봅니다.
 
 ## RAS 기능 목록
 
@@ -31,7 +31,7 @@ CXL 3.1 §12는 PCIe RAS에 coherency·메모리 기능을 더해 설명합니�
 | CXL Isolation | 해당 없음 | 선택 (§12.3) |
 | eDPC | 선택 | CXL.io 기능 활용. ERR_FATAL·ERR_NONFATAL로 알려 eDPC를 걸 수 있음 |
 
-Linux 쪽 PCI error handler 흐름은 [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)의 `cxl_error_detected()`에서 봤습니다.
+QEMU 게스트에서 `cxl-inject-uncorrectable-errors`로 CXL.mem 데이터 ECC 오류를 넣었을 때, 기본 AER mask 상태에서는 아무 것도 보고되지 않았고, internal error mask를 `setpci`로 푼 뒤에는 `frozen state error detected, disable CXL.mem` → link reset → `restart CXL.mem after slot reset` → `device recovery successful` 순서로 복구됐습니다. 소스 경로와 로그는 [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)의 `cxl_error_detected()` 절에 있습니다.
 
 ## Event Log
 
@@ -44,7 +44,16 @@ Linux 쪽 PCI error handler 흐름은 [Ch 11](/blog/embedded/hardware/cxl/chapte
 | Failure | `CXL_EVENT_TYPE_FAIL` |
 | Fatal | `CXL_EVENT_TYPE_FATAL` |
 
-Linux v6.12는 레코드를 trace event로 내보냅니다. 이 판의 [`drivers/cxl/core/trace.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/trace.h)에 `cxl_general_media`, `cxl_dram`, `cxl_memory_module`, `cxl_poison`, `cxl_aer_correctable_error`, `cxl_aer_uncorrectable_error` 등이 있습니다. `cxl monitor`가 CXL trace event를 JSON으로 보여 줍니다. 위 심각도 상수의 정의 위치는 `trace.h`가 아니라 `drivers/cxl/cxlmem.h`입니다.
+Linux v6.12는 레코드를 trace event로 내보냅니다. 이 판의 [`drivers/cxl/core/trace.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/core/trace.h)에 `cxl_aer_uncorrectable_error`(51행), `cxl_aer_correctable_error`(99행), `cxl_overflow`, `cxl_generic_event`, `cxl_general_media`(316행), `cxl_dram`(424행), `cxl_memory_module`, `cxl_poison`(682행)이 있습니다. 심각도 상수는 `cxlmem.h:651`부터입니다.
+
+QEMU의 `cxl-inject-general-media-event`(Informational log)와 `cxl-inject-dram-event`(Warning log)로 `mem0`에 이벤트를 넣었더니, Debian `cxl` 패키지가 켜 둔 `cxl-monitor.service`의 journal에 다음 JSON이 남았습니다(필드 일부를 줄였습니다).
+
+```json
+{"system":"cxl","event":"cxl_general_media","memdev":"mem0","host":"0000:0f:00.0","log":0,"hdr_flags":1,"dpa":4096,"descriptor":3,"type":0,"transaction_type":192,"channel":1,"device":5,"hpa":18446744073709551615,"rank":0,"region_name":""}
+{"system":"cxl","event":"cxl_dram","memdev":"mem0","host":"0000:0f:00.0","log":1,"hdr_flags":1,"dpa":8192,"descriptor":1,"type":2,"transaction_type":192,"channel":2,"column":4,"row":3,"rank":1,"bank_group":1,"bank":2,"region_name":""}
+```
+
+`log`는 0이 Informational, 1이 Warning이고, QMP로 넣은 DPA·channel·rank·bank 값이 그대로 돌아왔습니다. `hpa`가 `18446744073709551615`(모든 비트 1)이고 `region_name`이 비어 있는 것은 이 DPA를 HPA로 바꿔 줄 commit된 region이 없기 때문입니다([Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)). [Postmortem Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)의 관찰과 같습니다.
 
 ## Poison
 
@@ -58,7 +67,30 @@ Linux v6.12는 레코드를 trace event로 내보냅니다. 이 판의 [`drivers
 | Source | Unknown, External, Internal, Injected, Vendor Specific |
 | 커널 요청 단위 상한 | v6.12의 한 번 조회에서 최대 1024개 (`CXL_POISON_LIST_MAX`). 디바이스 전체 poison 주소 수의 상한은 아님 |
 
-시험용 poison 주입·삭제 인터페이스도 있지만 이 글에서는 실행하지 않았습니다. 삭제는 진단 기록을 읽는 동작과 다르므로, 사용 중인 메모리의 복구 절차로 그대로 적용하면 안 됩니다.
+poison 목록은 두 경로로 채워 봤습니다. 하나는 QEMU가 장치 내부 오류를 흉내 내는 QMP `cxl-inject-poison`(DPA `0x1000`, 128 B)이고, 다른 하나는 커널 debugfs의 `inject_poison`입니다. 후자는 v6.12 `drivers/cxl/mem.c:86-94`가 `cxl_inject_poison()`(`core/memdev.c:279`)을 불러 장치에 Inject Poison 명령을 보내는 경로입니다.
+
+```bash
+echo 0x2000 > /sys/kernel/debug/cxl/mem0/inject_poison
+cxl list -m mem0 -L -u
+```
+
+출력의 `media_errors` 항목은 줄바꿈만 정리했습니다.
+
+```json
+{
+  "memdev":"mem0",
+  "ram_size":"256.00 MiB (268.44 MB)",
+  "serial":"0x10",
+  "host":"0000:0f:00.0",
+  "firmware_version":"BWFW VERSION 00",
+  "media_errors":[
+    { "offset":"0x2000", "length":64, "source":"Injected" },
+    { "offset":"0x1000", "length":128, "source":"Internal" }
+  ]
+}
+```
+
+같은 동작이 `cxl_poison` trace event로도 남았습니다. `trace_type`은 `core/core.h:99-103`의 enum에서 0이 List, 1이 Inject이고, `source`는 `cxlmem.h:740-744`에서 2가 Internal, 3이 Injected입니다. debugfs 주입 직후에는 `trace_type 1`·DPA 8192 event가, 이어진 목록 조회에서는 `trace_type 0` event 두 개가 기록됐습니다. 주입 기록은 debugfs 쓰기 자체를 남기므로 진단 기록 조회와 구분됩니다.
 
 ### Late Poison
 
@@ -74,15 +106,15 @@ Late Poison은 *링크 계층*의 기능입니다(§4.3.6.3). 데이터 메시�
 | Per Memory Media FRU | 지원 flag가 있는 경우 DIMM 등 memory media FRU마다 카운터 |
 | Per Rank | 지원 flag가 있는 경우 rank마다 카운터 |
 
-CXL 4.0 웨비나는 메모리 RAS 개선으로 *CVME granularity 제어*와 *Patrol Scrub cycle 이벤트 생성*을 꼽습니다. PPR 쪽 변화는 [Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 다뤘습니다.
+[CXL 4.0 백서](https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-White-Paper_FINAL.pdf)는 4.0의 메모리 RAS 개선으로 고급 CVME 보고, patrol scrub 주기의 세분화된 오류 검출과 event 생성을 꼽습니다. PPR 쪽 변화는 [Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 다뤘습니다.
 
-ndctl의 `cxl list -H` 출력에는 `ext_corrected_volatile`(정상·경고 상태)와 `volatile_errors` 같은 health 필드가 있습니다.
+ndctl v81 `cxl-list` 문서의 `--health` 예에는 `ext_corrected_volatile`(예: `"warning"`)과 `volatile_errors` 같은 health 필드가 있습니다.
 
 ## Performance Considerations (spec §13)
 
-spec 13장은 성능 속성과 권고 지연 목표를 둡니다. 3.1 Table 13-1의 x16 수치는 한 방향의 명목 전송률에 해당합니다. 예를 들어 64 GT/s × 16 / 8 = 128 GB/s이며, 양방향 합계나 애플리케이션 payload 처리량이 아닙니다.
+spec 13장은 성능 속성과 권고 지연 목표를 둡니다. 3.1 Table 13-1은 x16 링크의 "Total Bandwidth per link"를 적는데, 값은 `64 GT/s × 16 ÷ 8 = 128 GB/s`처럼 한 방향 raw rate의 산술값과 같습니다.
 
-| 링크 | 한 방향 명목 대역폭 |
+| 링크 | Total Bandwidth per link (Table 13-1) |
 |------|------|
 | 16 GT/s | 32 GB/s |
 | 32 GT/s | 64 GB/s |
@@ -108,9 +140,9 @@ spec은 이와 함께 디바이스가 CDAT로 지연·대역폭을 보고하고,
 
 ## CHMU — Hot-Page Monitoring Unit (CXL 3.2)
 
-CXL 3.2 발표문은 *메모리 tiering을 위한 CXL Hot-Page Monitoring Unit(CHMU)*을 새 기능으로 꼽습니다. 어떤 페이지가 자주 쓰이는지를 디바이스가 세어 OS의 tiering 결정에 쓰게 하는 장치입니다.
+CXL 3.2 발표문은 *메모리 tiering을 위한 CXL Hot-Page Monitoring Unit(CHMU)*을 새 기능으로 꼽습니다.
 
-CHMU capability가 존재하는 것과 OS가 그 정보를 읽어 페이지를 이동하는 것은 별도 단계입니다. 실제 적용에는 디바이스·드라이버의 지원, 집계 단위·기간, OS의 배치 정책을 확인해야 합니다. 이 글은 최신 Linux·QEMU의 구현 유무를 판정하거나 CHMU 기반 tiering을 실행하지 않았습니다. 티어별 배치의 배경은 [HBM Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)을 참고하세요.
+3.2 규격 본문은 열람하지 않았으므로 CHMU의 레지스터 구조는 다루지 않습니다. 이 시리즈의 환경에는 CHMU가 없습니다. Linux v6.12 `drivers/cxl/`과 QEMU 11.1.3의 `hw/`·`include/`에서 `chmu`를 대소문자 구분 없이 grep하면 둘 다 0건입니다. 티어별 배치의 배경은 [HBM Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)을 참고하세요.
 
 ## Compliance Testing (spec §14)
 
@@ -125,11 +157,11 @@ spec 14장의 시험 영역(3.1):
 | §14.7 | Switch |
 | §14.8 | Configuration Register |
 
-시험용 DOE 객체 타입으로 *Compliance*(type 0)가 있습니다([Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)). 시험 결과를 읽을 때는 대상 spec 판·디바이스 모델·firmware·시험 범위를 맞춰 봅니다. 목록 등재만으로 임의의 host·switch 구성에서 상호운용성·장애 복구·성능을 입증할 수는 없습니다.
+시험용 DOE 객체 타입으로 *Compliance*(type 0)가 있습니다([Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)). 이 시리즈의 환경에서는 compliance 시험을 돌리지 않았습니다. QEMU 11.1.3 Type 3 endpoint의 DOE가 처리하는 프로토콜은 Table Access(CDAT) 하나뿐이고(`hw/mem/cxl_type3.c:864-865`), 3.1 Table 8-3은 SLD에 Compliance DOE를 선택으로 둡니다.
 
 ## 실 운용 — ndctl 명령
 
-아래 명령 형식은 [ndctl v80의 `cxl-list`](https://github.com/pmem/ndctl/blob/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3/Documentation/cxl/cxl-list.txt)와 [`cxl-monitor`](https://github.com/pmem/ndctl/blob/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3/Documentation/cxl/cxl-monitor.txt)를 대조했습니다. 이 작업에서 실제 memdev에 실행하지 않았습니다. `mem0`는 해당 환경의 디바이스 이름으로 바꿔야 하며, trace 수집은 커널 설정과 권한이 필요합니다.
+아래 명령은 [ndctl v81의 `cxl-list`](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-list.txt)와 [`cxl-monitor`](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-monitor.txt) 문서에 있는 형식이고, 게스트의 `mem0`에서 모두 실행했습니다.
 
 ```bash
 # health 정보
@@ -142,7 +174,7 @@ cxl list -m mem0 -L
 cxl monitor
 ```
 
-`cxl list -H`의 필드 예시는 ndctl `cxl-list` 문서에 있습니다: `life_used_percent`, `temperature`, `dirty_shutdowns`, `volatile_errors`, `pmem_errors`, `ext_life_used`, `ext_temperature`, `ext_corrected_volatile` 등. `-L`(`--media-errors`)은 libtracefs를 켜고 빌드한 ndctl에서만 됩니다.
+`-L`(`--media-errors`)과 `cxl monitor`는 위에서 본 결과를 냈습니다. `-H`는 health 필드 없이 memdev 기본 정보만 출력했습니다. libcxl debug 로그를 보면 Get Health Info 요청이 커널에서 `-ENOTTY`(-25)로 거부됐는데, QEMU 11.1.3이 이 명령을 구현하지 않아 Command Effects Log에 없기 때문입니다([Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)). 문서의 health 예에 있는 필드는 `life_used_percent`, `temperature`, `dirty_shutdowns`, `volatile_errors`, `pmem_errors`, `ext_life_used`, `ext_temperature`, `ext_corrected_volatile` 등입니다.
 
 ## 오래 지켜볼 지표
 
@@ -154,7 +186,7 @@ cxl monitor
 | `temperature` | `cxl list -H` |
 | CVME 경고 상태·`volatile_errors` | `cxl list -H`, DRAM·General Media event |
 
-필드가 없거나 읽기에 실패한 경우를 오류 0개로 채우면 안 됩니다. 누적 counter는 재부팅·reset 여부와 관찰 기간을 같이 기록하고, 여러 log에서 같은 이벤트를 수집하면 중복을 구분해야 합니다. event log·trace buffer overflow가 있으면 관찰하지 못한 오류도 있으므로, “로그가 비었다”를 정상 판정으로 사용하지 않습니다. 추세를 비교할 때는 같은 디바이스 식별자·firmware·부하와 시간 구간을 유지합니다.
+QEMU 게스트의 `-H`처럼 필드가 아예 없는 경우를 오류 0개로 채우면 안 됩니다. 누적 counter는 재부팅·reset 여부와 관찰 기간을 같이 기록하고, 여러 log에서 같은 이벤트를 수집하면 중복을 구분해야 합니다. event log·trace buffer overflow가 있으면 관찰하지 못한 오류도 있으므로, “로그가 비었다”를 정상 판정으로 사용하지 않습니다. 추세를 비교할 때는 같은 디바이스 식별자·firmware·부하와 시간 구간을 유지합니다.
 
 ## 자주 하는 실수
 
@@ -186,7 +218,7 @@ Table 13-2는 *권고 목표*이고, 측정 조건(idle, 핀 기준, IDE 끔)이
 
 ## 시리즈 마무리 — 15편 회고
 
-본 시리즈는 CXL 3.1의 프로토콜, 4.0의 공개된 변경 사항, Linux v6.12·QEMU 9.2.4의 구현을 15편에서 구분해 살폈습니다. 이 소프트웨어 검토가 CXL 4.0 전체 기능의 실행 검증을 뜻하지는 않습니다.
+본 시리즈는 CXL 3.1의 프로토콜, 4.0의 공개된 변경 사항, Linux v6.12와 QEMU 11.1.3의 구현을 15편에서 구분해 살폈습니다. 실행은 QEMU arm64 게스트까지였고, CXL 4.0 하드웨어는 쓰지 않았습니다.
 
 | Part | Ch | 주제 |
 |------|-----|------|
@@ -194,7 +226,7 @@ Table 13-2는 *권고 목표*이고, 측정 조건(idle, 핀 기준, IDE 끔)이
 | 프로토콜 | 6-10 | CXL.io·CXL.cache·CXL.mem·Flit·ARB/MUX |
 | 구현·운용 | 11-15 | Linux 드라이버·QEMU·Switch·Security·RAS/Performance |
 
-*공개 자료 (CXL Consortium spec·발표문·웨비나, Linux GPL, QEMU GPL, 측정 논문)*를 1차 자료로 사용했습니다.
+*공개 자료 (CXL Consortium spec·발표문·백서·공식 Q&A, Linux GPL 소스, QEMU GPL 소스, 측정 논문)*와 QEMU 게스트 실행 결과를 1차 자료로 사용했습니다.
 
 다음 단계의 *CXL 깊이 학습*은 *기존 다른 시리즈*에 *분산 추가*된 챕터들이 받습니다:
 
@@ -215,7 +247,7 @@ Table 13-2는 *권고 목표*이고, 측정 조건(idle, 핀 기준, IDE 끔)이
 
 ## 시리즈 자료 출처 안내
 
-이 글은 위 CXL 3.1 spec(§4.3.6.3, §8.2.9.9.11.3, §12~14), [CXL 4.0 웨비나](https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf), ndctl v80 문서, Linux v6.12 [`cxlmem.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/cxlmem.h)·위 `trace.h`를 대조했습니다. CHMU의 발표 출처는 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내), 실제 디바이스 논문의 조건은 Ch 8을 참고하세요. 성능 숫자의 단순 산술과 문서·소스 검토를 실제 하드웨어 시험으로 해석하면 안 됩니다.
+이 글은 위 CXL 3.1 spec(§4.3.6.3, §8.2.9.9.11.3, §12~14), CXL 4.0 백서, CXL 3.2 발표문, ndctl v81 문서, Linux v6.12 [`cxlmem.h`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/cxlmem.h)·위 `trace.h`를 대조했습니다. CHMU의 발표 출처는 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내), 실제 디바이스 논문의 조건은 Ch 8을 참고하세요. RAS 출력은 QEMU 11.1.3 게스트(`cxl-monitor.service` journal, `cxl list -L`, dmesg)에서 얻었습니다.
 
 > CXL® and Compute Express Link® are trademarks of the Compute Express Link Consortium, Inc.
 > spec 인용은 Compute Express Link Consortium, Inc.의 저작권을 따릅니다.

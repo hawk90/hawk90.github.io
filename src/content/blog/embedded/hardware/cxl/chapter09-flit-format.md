@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"Flit은 *CXL 링크 위 고정 크기 전송 단위*이며, *세 가지 형식*이 있습니다."** — *68B flit* (CXL 1.1·2.0, 32 GT/s까지), *Standard 256B flit* (3.0+, PCIe Flit mode), *Latency-Optimized 256B flit* (3.0+, 128 B 반쪽마다 CRC). CXL 4.0은 128 GT/s에서도 *3.x의 256B flit 형식과 FEC·CRC를 그대로* 씁니다.
+> **"Flit은 *CXL 링크 위 고정 크기 전송 단위*이며, *세 가지 형식*이 있습니다."** — *68B flit* (CXL 1.1·2.0, 32 GT/s까지), *Standard 256B flit* (3.0+, PCIe Flit mode), *Latency-Optimized 256B flit* (3.0+, 128 B 반쪽마다 CRC). CXL 4.0 백서는 128 GT/s에서도 *CXL 3.0의 FEC·CRC를 가진 flit 구조를 보존*했다고 씁니다.
 
 [Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에서 *CXL.mem 메시지의 의미*를 봤습니다. 이 장은 *그 메시지가 실제로 링크 위를 어떻게 흐르는지* — *flit*입니다.
 
@@ -32,11 +32,11 @@ topics: ["embedded", "embedded/hardware"]
 
 | 형식 | 크기 | 도입 | 비고 |
 |------|------|------|------|
-| 68B flit | 68 B | CXL 1.1 | 32 GT/s까지 |
+| 68B flit | 68 B | CXL 1.0 (1.1 Revision History) | 32 GT/s까지 |
 | Standard 256B flit | 256 B | CXL 3.0 | PCIe Flit mode에서 사용. 8 GT/s 이상 |
 | Latency-Optimized 256B flit | 256 B | CXL 3.0 | 선택 기능. 128 B 반쪽마다 CRC |
 
-[CXL 4.0 공개 소개 자료 p.15](https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf)는 128 GT/s에서도 *PCIe 7.0 FEC·CRC가 CXL 3.0과 같고*, Standard 256B와 Latency-Optimized 256B를 함께 쓴다고 정리합니다. 4.0 발표문은 3.x·2.0·1.1·1.0과의 하위 호환을 유지한다고 밝힙니다.
+[CXL 4.0 백서](https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-White-Paper_FINAL.pdf)는 128 GT/s를 "PAM4 신호와 CXL 3.0의 FEC·CRC를 가진 flit 구조를 보존하면서" 얻었다고 쓰고, [4.0 발표문](https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-Specification-Release_FINAL_Website-Copy.pdf)은 256B Flit format의 3.x 프로토콜 개선을 유지하고 3.x·2.0·1.1·1.0과 하위 호환한다고 씁니다. 4.0 규격 본문은 열람하지 않았으므로 4.0에서 Latency-Optimized 형식이 어떻게 정의됐는지는 이 장에서 다루지 않습니다.
 
 ## 68B Flit
 
@@ -53,7 +53,16 @@ topics: ["embedded", "embedded/hardware"]
 
 ## Standard 256B Flit
 
-CXL 3.0에서 추가된 형식입니다. *PCIe Flit mode가 켜지면 256B flit mode가 함께 정해지고*, 8 GT/s 이상에서 씁니다(§6.4.1.3.1). 64 GT/s 이상은 256B flit만 됩니다.
+CXL 3.0에서 추가된 형식입니다. 별도 협상 비트는 없고, PCIe 링크 트레이닝에서 *PCIe Flit mode가 켜지면 256B flit mode가 함께 정해집니다*(§6.4.1.3.1). §6.2.3의 Table 6-4를 정리하면 다음과 같습니다.
+
+| Data Rate | PCIe Flit Mode | CXL Flit Mode |
+|---|---|---|
+| 2.5·5 GT/s | 무관 | CXL 미지원 |
+| 8·16·32 GT/s | No | 68B |
+| 8·16·32 GT/s | Yes | 256B |
+| 64 GT/s | Yes | 256B |
+
+64 GT/s에는 68B 행이 없습니다. 고속도로에서 시속 60 km 구간은 일반 차선과 버스 전용 차선 중 고를 수 있지만, 고속 구간은 전용 차선만 열려 있는 셈입니다.
 
 CXL.cachemem용 Standard 256B flit(§4.3.2, Figure 4-41):
 
@@ -64,11 +73,11 @@ CXL.cachemem용 Standard 256B flit(§4.3.2, Figure 4-41):
 | Slot 1~14 (G-Slot) | 16 B × 14 | Link Layer |
 | CRD | 2 B | Link Layer — credit 반환 |
 | CRC | 8 B | Physical Layer |
-| FEC | 6 B | Physical Layer — 3-way interleaved ECC (PCIe Base Spec 정의) |
+| FEC | 6 B | Physical Layer — PCIe Base Specification 정의 |
 
-256B 형식에는 CRC·FEC 보호가 포함됩니다. PAM4의 오류율 목표·FEC 설계 조건은 실제 장치의 관측 BER이나 post-FEC 오류율과 구분해야 합니다(§6.4.1.3.3). 256B flit에서 retry buffer는 *Physical Layer*에 있습니다(§5.1.2.3). 68B의 LLR과 다릅니다.
+§4.3.2는 이 가운데 HDR·CRC·FEC 16 B를 Physical Layer가, 나머지를 link layer가 정의한다고 씁니다. §6.2.3.1.1에 따르면 8 B CRC는 Flit Header와 Flit Data를, 6 B FEC는 그 둘과 CRC까지 보호하며, 계산 방식은 PCIe Base Specification을 따릅니다. 256B flit에서 retry buffer는 *Physical Layer*에 있습니다(§5.1.2.3). 68B의 LLR과 다릅니다.
 
-HDR의 Flit Type 2 bit가 flit 종류를 가릅니다: NOP, CXL.io, CXL.cachemem, ALMP(§6.2.3.1.1.1).
+HDR의 Flit Type 2 bit가 flit 종류를 가릅니다(§6.2.3.1.1, Table 6-5). `00b`는 Physical Layer IDLE·NOP 또는 CXL.io NOP, `01b`는 CXL.io payload, `10b`는 CXL.cachemem payload 또는 Empty flit, `11b`는 ALMP입니다.
 
 ## Latency-Optimized 256B Flit
 
@@ -79,7 +88,7 @@ HDR의 Flit Type 2 bit가 flit 종류를 가릅니다: NOP, CXL.io, CXL.cachemem
 | 짝수 반쪽 | Flit Header 2 B + Flit Data 120 B + CRC 6 B |
 | 홀수 반쪽 | Flit Data 116 B + FEC 6 B (256 B 전체 보호) + CRC 6 B |
 
-얻는 것은 *flit accumulation latency* 감소입니다. 짝수 반쪽이 CRC를 통과하면 홀수 반쪽을 기다리지 않고, FEC 디코딩도 건너뛰고 바로 소비합니다. §6.2.3.1.2는 x4·64 GT/s에서 왕복 accumulation latency 8 ns를 설명합니다. 이 항목은 load-to-use 전체 지연이 아니며, 한 방향 256 B의 raw serialization `256 ÷ 32 GB/s = 8 ns`와 같은 수가 나온다는 이유만으로 측정 경계를 같다고 보면 안 됩니다. 표준 CRC 통과와 부분 소비, FEC 처리의 경계를 구분해야 합니다.
+얻는 것은 *flit accumulation latency* 감소입니다. 짝수 반쪽이 CRC를 통과하면 홀수 반쪽을 기다리지 않고, FEC 디코딩도 건너뛰고 바로 소비합니다. §6.2.3.1.2는 이 절감이 링크 폭이 좁을수록 커지고, x4·64 GT/s에서 왕복 flit accumulation latency가 8 ns라고 씁니다. load-to-use 전체 지연이 아니라 flit을 모으는 시간에 대한 수치입니다.
 
 | 상황 | 처리 |
 |------|------|
@@ -97,8 +106,8 @@ Slot 번호에 임의의 요청·응답 이름을 적었다고 유효한 flit이
 
 | 위치·format 예 | 해당 format의 메시지 예 | 추가 확인 |
 |---|---|---|
-| H-slot H4 | M2S Req | H-slot 길이와 필드의 제약 |
-| G-slot G0 | H2D Req + H2D Rsp | host→device CXL.cache 메시지의 조합 |
+| H-slot H4 (encoding 0100b) | M2S Req | H-slot 길이와 필드의 제약 |
+| G-slot G0 (encoding 0000b) | H2D Req + H2D Rsp | host→device CXL.cache 메시지의 조합 |
 | Data slot | 앞선 data header에 대응하는 data | 암시된 길이와 이어지는 slot·flit의 상태 |
 
 기본 host 경로와 peer/fabric 경로의 방향 규칙을 섞지 않습니다. CXL 3.1은 일부 M2S/S2M 형식을 반대 방향에도 허용하는 조건을 정의하므로, 이름만 보고 모든 링크에서의 허용 방향을 단정하지 않습니다. LOpt의 slot 8은 12 B HS-slot이며 Standard의 G-slot과 같은 packing으로 취급할 수 없습니다.
@@ -119,15 +128,9 @@ Latency-Optimized는 CRC가 실패한 경우 전체 flit에 FEC를 적용하는 
 
 ## 세대가 다른 장치끼리
 
-서로 다른 세대의 host·device가 붙으면 *둘 다 지원하는 쪽*으로 맞춥니다.
+서로 다른 세대의 host·device가 붙으면 *둘 다 지원하는 쪽*으로 맞춥니다. flit 형식은 Table 6-4대로 속도와 PCIe Flit mode에서 정해지므로, 한쪽이 PCIe Flit mode를 지원하지 않으면 32 GT/s 이하의 68B flit으로 동작합니다. 4.0 백서도 Bundled Port의 port 가운데 적어도 하나는 하위 호환을 위해 68B flit을 지원해야 한다고 씁니다.
 
-| 공통 지원의 예 | 해석할 상한 |
-|---|---|
-| 양쪽이 4.0의 해당 기능 지원 | 256B·128 GT/s를 사용할 수 있는지 실제 경로·협상을 확인합니다. |
-| 공통 기능이 3.x 범위 | 지원 조합의 최대 속도·mode로 협상합니다. |
-| 공통 기능이 1.1/2.0 범위 | 이전 mode의 제약 안에서 동작합니다. |
-
-세대 이름만으로 실제 negotiated rate나 flit mode를 관측한 것처럼 쓰지 않습니다. 중간 switch·retimer·신호 조건·firmware와 지원 capability 때문에 속도·폭이 낮아질 수 있습니다.
+QEMU 게스트의 endpoint는 Flex Bus Port DVSEC에 `FBCap: ... 68BFlit+ ... 256BFlit-`, `FBSta: ... 68BFlit+ ... 256BFlit-`를 보고했습니다([Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position)). 다만 QEMU에는 실제 트레이닝이 없고, `hw/mem/cxl_type3.c:408-413`이 status를 `x-256b-flit` 속성에 따라 상수로 써 넣습니다. 협상 결과가 어디에 기록되는지를 보여 주는 예로만 읽습니다.
 
 ## Credit-based Flow Control
 
@@ -152,11 +155,11 @@ CXL.io의 credit은 PCIe의 해당 mode 규칙을 따릅니다. 비 flit mode의
 
 ### "FEC가 모든 error를 고친다"
 
-FEC의 정정 능력과 CRC의 검출 능력에는 한계가 있습니다. 검출된 미복구 오류에는 retry 경로가 관여하지만 모든 비트 오류가 반드시 검출·복구된다는 보장은 아닙니다. 256B retry 책임과 fatal link failure·복구 실패도 구분해야 합니다.
+§6.2.3.1.2의 처리 순서가 답입니다. CRC가 실패하면 FEC로 정정한 뒤 CRC를 다시 보고, 그래도 실패하면 flit 전체를 retry합니다. FEC는 retry를 줄이는 1차 방어선이고, retry가 2차 방어선입니다.
 
 ### "68B flit은 CXL 4.0에서 사라졌다"
 
-*아닙니다*. CXL 4.0 발표문은 1.0·1.1·2.0과의 하위 호환을 유지한다고 밝힙니다. 1.1·2.0 디바이스와는 68B flit으로 붙습니다.
+*아닙니다*. CXL 4.0 발표문은 1.0·1.1·2.0과의 하위 호환을 유지한다고 밝히고, 백서는 Bundled Port에서도 적어도 한 port가 68B flit을 지원해야 한다고 씁니다.
 
 ## 정리
 
@@ -180,4 +183,4 @@ FEC의 정정 능력과 CRC의 검출 능력에는 한계가 있습니다. 검�
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1·1.1 spec, CXL 4.0 발표문·웨비나를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 §4.2·§4.3.2·§4.3.5·§5.1.2.3·§6.2.3(Table 6-4·6-5)·§6.2.3.1.2·§6.4.1.3.1, CXL 4.0 발표문·백서, QEMU 11.1.3 소스와 게스트의 `lspci` 출력을 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

@@ -16,11 +16,11 @@ topics: ["embedded", "embedded/hardware"]
 
 [Ch 4 Pooling·GFAM](/blog/embedded/hardware/cxl/chapter04-pooling-gfam)에서 *CXL 2.0·3.x fabric의 개념*을 봤습니다. 이 장은 *그 토폴로지를 움직이는* switch 구조와 Fabric Manager를 봅니다.
 
-구조와 명령은 [CXL 3.1](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf) §7·§9.13.3을 기준으로 설명합니다. 핵심 질문은 “연결 명령이 끝난 뒤 누가 메모리를 사용할 권한을 갖는가”입니다. switch의 binding 완료, host의 디바이스 발견, 애플리케이션의 안전한 메모리 사용은 각각 확인해야 합니다. 이 장에서는 실제 FM 명령이나 용량 회수를 실행하지 않았습니다.
+구조와 명령은 [CXL 3.1](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf) §7·§9.13.3을 기준으로 설명합니다. 핵심 질문은 “연결 명령이 끝난 뒤 누가 메모리를 사용할 권한을 갖는가”입니다. switch의 binding 완료, host의 디바이스 발견, 애플리케이션의 안전한 메모리 사용은 각각 확인해야 합니다. FM 명령과 용량 회수는 실행하지 않았습니다. 이 시리즈의 QEMU 구성에는 FM이 없고, Linux v6.12 `drivers/cxl/`은 host 쪽 driver라서 FM API를 보내지 않기 때문입니다. 대신 switch 자체가 host에 어떻게 보이는지는 QEMU 게스트에서 확인했습니다.
 
 ## 세대별로 더해진 것
 
-spec 개정 이력과 컨소시엄 발표 기준:
+2.0·3.0은 CXL 3.1 §1.4.1과 Revision History, 3.1은 Revision History, 3.2와 4.0은 컨소시엄 발표문(2024-12-03, 2025-11-18) 기준입니다.
 
 | 세대 | Switching·fabric 관련 추가 |
 |------|-----------|
@@ -47,7 +47,18 @@ Multiple VCS의 규칙(§7.1.2) 중 FM과 관련된 것:
 - FM은 선택 사항입니다. 다만 *bind/unbind가 필요하거나 MLD 포트를 지원*하는 Multiple VCS에는 FM이 필요합니다.
 - downstream port는 FM이 조율하는 managed hot-plug 흐름으로 다른 VCS에 재할당될 수 있습니다.
 
-CXL.mem 요청은 VCS의 주소 디코드 레지스터(HDM Decode)가 어느 downstream PPB로 보낼지 정합니다(§7.3.3.1).
+CXL.mem 요청은 VCS의 주소 디코드 레지스터(HDM Decode)가 어느 downstream PPB로 보낼지 정합니다(§7.3.3.1). 우체국 분류기가 주소 범위를 보고 우편물을 어느 배달 구역 상자로 넣을지 정하는 것과 같습니다.
+
+QEMU 게스트의 switch(upstream port `0d:00.0`, downstream port `0e:00.0`·`0e:01.0`)는 Linux에서 `port2`로 보였고, 그 아래에 이 HDM decode 레지스터에 해당하는 switch decoder `decoder2.0`~`decoder2.3` 네 개가 생겼습니다. [Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)에서 region을 만들 때 커널이 `decoder2.0`에 시작 `0x10000000000`, 크기 `0x10000000`을 채웠습니다. target은 부팅 직후부터 `0000:0e:00.0`(`mem0` 쪽 downstream port)이었습니다.
+
+```text
+"port":"port2", "host":"0000:0d:00.0", "depth":2, "nr_dports":2,
+"dports":[ { "dport":"0000:0e:00.0", "id":0 }, { "dport":"0000:0e:01.0", "id":1 } ]
+"decoder":"decoder2.0", "interleave_ways":1, "state":"disabled", "nr_targets":1,
+"targets":[ { "target":"0000:0e:00.0", "position":0, "id":0 } ]
+```
+
+(`cxl list -vvv`의 JSON에서 해당 필드만 모았습니다.) upstream·downstream switch port의 `lspci -vvv`에는 switch port에 필수인 CXL Extensions DVSEC for Ports(ID 0003h, 3.1 Table 8-2)가 있었습니다.
 
 ## Routing — HBR vs PBR
 
@@ -176,4 +187,4 @@ bind는 vPPB를 물리 포트·LD에 연결하는 것이고, host는 이를 hot-
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1 spec(§7, §8.2.9.9.9, §9.13.3)과 개정 이력, [CXL 4.0 웨비나](https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf), 위 DMTF binding을 대조했습니다. 세대별 신기능은 [Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)의 공식 발표 출처를 참고하세요. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 spec(§7, §8.2.9.9.9, §9.13.3)과 개정 이력, CXL 3.2·4.0 발표문, DMTF DSP0234 1.0.0(2021-05-25), QEMU 11.1.3 게스트의 `cxl list`·`lspci` 출력을 대조했습니다. 세대별 신기능은 [Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)의 공식 발표 출처를 참고하세요. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

@@ -12,101 +12,120 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"CXL.io는 PCIe의 enumeration·configuration·MMIO·DMA·오류 보고를 그대로 씁니다."** — 여기서는 CXL DVSEC의 기능 발견과 DOE의 데이터 객체 교환을 다룹니다. DVSEC와 DOE 자체는 PCIe가 정의한 메커니즘이며 CXL 전용 기능은 아닙니다. CXL 1.1부터 정의됐고 *모든 CXL 디바이스에 필수*입니다.
+> **"CXL.io는 PCIe의 enumeration·configuration·MMIO·DMA·오류 보고를 그대로 씁니다."** — 여기서는 CXL DVSEC의 기능 발견과 DOE의 데이터 객체 교환을 다룹니다. DVSEC와 DOE 자체는 PCI-SIG가 정의한 메커니즘이고, CXL은 그 위에 Vendor ID 1E98h로 자기 구조를 얹습니다. CXL.io는 *모든 CXL 디바이스에 필수*입니다(3.1 §1.4.1).
 
-[Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 *CXL 4.0의 새 기능*을 봤습니다. 이 장부터 *프로토콜 별 본격 분해*입니다. *CXL.io는 가장 기본·필수*인 프로토콜로, *전체 CXL 디바이스의 출발점*입니다.
+[Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)에서 *CXL 4.0의 새 기능*을 봤습니다. 이 장부터 *프로토콜 별 본격 분해*입니다. 이 장의 출력은 모두 QEMU 11.1.3 게스트(Debian 13 arm64, 커널 6.12.116, pciutils 3.13.0)에서 에뮬레이션한 Type 3 장치 `0f:00.0`을 읽은 것입니다.
 
 ## CXL.io가 하는 일
 
-CXL.io는 *PCIe 시맨틱*을 그대로 가져와 *디바이스 발견·설정·DMA*를 담당합니다.
+새 장치가 꽂혔을 때 OS가 가장 먼저 해야 하는 일은 "이게 무엇이고 어디 있는가"를 알아내는 것입니다. CXL은 이 일을 새로 만들지 않고 PCIe에 맡깁니다. 이사 온 가게가 새 주소 체계를 만들지 않고 기존 도로명 주소에 등록하는 것과 같습니다.
 
-| 역할 | 의미 |
+| 역할 | 3.1 §1.4.1·§2.3의 표현 |
 |------|------|
-| Discovery·Enumeration | host가 *어떤 디바이스가 어디 있나* 발견 |
-| Configuration | config space 읽기·쓰기, capability 활성화 |
-| Error Reporting | AER (Advanced Error Reporting), poison message |
-| MMIO | host가 device register를 *load/store* |
-| DMA | device가 host RAM에 데이터 전송 |
+| Discovery·Enumeration | CXL.io로 장치 발견·열거 |
+| Error Reporting | CXL.io로 오류 보고 |
+| P2P·HPA lookup | CXL 메모리로의 P2P 접근과 host physical address lookup |
+| 관리 | Type 3는 CXL.io로 discovery·enumeration·error reporting·management (§2.3) |
 
-PCIe 시맨틱을 그대로 쓰므로 *기존 host의 PCIe enumeration 코드가 CXL 디바이스를 PCIe 디바이스로 발견*합니다.
+그래서 기존 host의 PCIe enumeration 코드는 CXL 장치를 PCIe function으로 먼저 발견합니다. 게스트의 `lspci -nn`이 그 모습입니다.
+
+```text
+0f:00.0 CXL [0502]: Intel Corporation Device [8086:0d93] (rev 01)
+10:00.0 CXL [0502]: Intel Corporation Device [8086:0d93] (rev 01)
+```
+
+class code `0502`는 PCI ID 목록의 "CXL" memory class이고, `lspci -vvv`는 `prog-if 10 [CXL Memory Device (CXL 2.x)]`까지 보여 줍니다. Vendor/Device ID `8086:0d93`은 QEMU 모델이 쓰는 값이므로 실제 제품을 뜻하지 않습니다.
 
 ## DVSEC와 DOE: PCIe 기반의 발견·관리 경로
 
-이 장은 DVSEC와 DOE 두 관리 기능에 집중합니다. 이 둘이 CXL.io와 PCIe 사이의 모든 차이라는 뜻은 아닙니다. CXL.io의 reset·전원 관리·ATS·UIO 등에는 별도의 규칙도 있습니다.
-
 | 추가 | 역할 |
 |------|------|
-| **DVSEC** | "*이 디바이스가 CXL 호환이다*" 표지 |
+| **DVSEC** | "*이 function이 어떤 CXL 기능을 갖고 있다*"는 구조. Vendor ID 1E98h + DVSEC ID로 구분 |
 | **DOE** | config space를 통해 *데이터 객체를 주고받는 mailbox* 채널 |
 
-이 장은 이 둘을 중심으로 봅니다.
+이 둘이 CXL.io와 PCIe의 차이 전부는 아닙니다. 이 장은 두 관리 경로에 집중합니다.
 
 ## DVSEC — CXL 호환 표지
 
-*DVSEC (Designated Vendor-Specific Extended Capability)*은 PCIe가 정의한 capability입니다. CXL 규격은 Vendor ID를 *1E98h*로 둔 DVSEC들로 CXL 기능을 알립니다.
+*DVSEC (Designated Vendor-Specific Extended Capability)*은 PCIe가 정의한 capability입니다. CXL 규격은 Vendor ID를 *1E98h*로 둔 DVSEC들로 CXL 기능을 알리고, 3.1 Table 8-2가 DVSEC ID와 어느 component에 필수인지 정합니다. 건물 입구의 층별 안내판처럼, 같은 1E98h 안에서 ID마다 다른 정보를 담습니다.
 
-| 항목 | 의미 |
-|------|------|
-| Location | PCIe Extended Config Space (0x100+) |
-| Vendor ID | 0x1E98 (CXL Consortium) |
-| DVSEC ID | 디바이스 type별 (CXL Device·Port 등) |
-| 정보 | CXL 버전·capability·feature flag |
+| DVSEC ID | 이름 (3.1 Table 8-2) | SLD(D2)에 대한 요구 |
+|------|------|------|
+| 0000h | PCIe DVSEC for CXL Devices (§8.1.3) | 필수 |
+| 0003h | CXL Extensions DVSEC for Ports (§8.1.5) | 금지 (root port·switch port 필수) |
+| 0005h | GPF DVSEC for CXL Devices (§8.1.7) | 필수 |
+| 0007h | PCIe DVSEC for Flex Bus Port (§8.1.8) | 필수 |
+| 0008h | Register Locator DVSEC (§8.1.9) | 필수 |
 
-운영 흐름:
-
-1. Host의 PCIe enumeration이 *config space scan*
-2. *Extended Capability list*에서 *DVSEC 발견*
-3. *Vendor ID = 0x1E98인 DVSEC*을 보면 *CXL 호환 디바이스로 인식*
-4. *CXL subsystem 활성화*, 추가 capability negotiation
-
-pciutils v3.13.0의 [`ls-ecaps.c`](https://github.com/pciutils/pciutils/blob/7c5bf915f87d8e4c62be66275c8e73a5f03fa5ee/ls-ecaps.c)는 Vendor `1e98`인 DVSEC를 CXL로 해석하고 ID `0000`을 PCIe DVSEC for CXL Devices로 표시합니다. 포트·register locator 등의 DVSEC는 별도 ID를 사용합니다.
-
-다음은 **합성 configuration dump**를 실제 pciutils v3.13.0의 dump backend로 읽은 출력 일부입니다. 물리 장치 캡처가 아니며, raw config의 IO/Mem capability bit를 설정하고 enable bit는 끈 fixture입니다. 이를 통해 기능 광고와 실제 enable 상태가 다르다는 것을 확인합니다.
+게스트 endpoint의 `lspci -vvv`에는 정확히 이 필수 네 개가 있었습니다.
 
 ```text
-Capabilities: [100 v1] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=1 Len=56: CXL
-    PCIe DVSEC for CXL Devices
-    CXLCap: Cache- IO+ Mem+ MemHWInit- HDMCount 0 Viral-
-    CXLCtl: Cache- IO- Mem- CacheSFCov 0 CacheSFGran 0 CacheClean- Viral-
+Capabilities: [10c v1] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=3 Len=60: CXL
+	PCIe DVSEC for CXL Devices
+	CXLCap:	Cache- IO+ Mem+ MemHWInit+ HDMCount 1 Viral-
+	CXLCtl:	Cache- IO+ Mem+ CacheSFCov 0 CacheSFGran 0 CacheClean- Viral-
+	Range1: 0000000000000000-000000000fffffff [size=0x10000000]
+Capabilities: [148 v1] Designated Vendor-Specific: Vendor=1e98 ID=0008 Rev=0 Len=36: CXL
+	Register Locator DVSEC
+	Block1: BIR: bar0, ID: component registers, offset: 0000000000000000
+	Block2: BIR: bar2, ID: CXL device registers, offset: 0000000000000000
+Capabilities: [16c v1] Designated Vendor-Specific: Vendor=1e98 ID=0005 Rev=0 Len=16: CXL
+	GPF DVSEC for CXL Devices
+Capabilities: [17c v1] Designated Vendor-Specific: Vendor=1e98 ID=0007 Rev=2 Len=32: CXL
+	PCIe DVSEC for Flex Bus Port
 ```
 
-이 출력의 `Mem+`는 실제 HDM 매핑이나 CXL.mem 트랜잭션 성공을 증명하지 않습니다. 장치 driver binding, link mode와 decoder·OS 상태를 따로 봐야 합니다. Vendor 값만으로 모든 Type의 기능·정상 동작을 판정하지 않습니다.
+(ID 0000의 `CXLSta`·`CXLCtl2`·`CXLSta2`·`CXLCap2`·`CXLCap3`·Range1 세부 줄·Range2, GPF·Flex Bus의 세부 줄은 줄였습니다.) `Rev=3`은 Table 8-2가 ID 0000h에 적은 최고 revision 3과 같습니다. `CXLCap`의 `Cache-`는 이 장치가 Type 3라는 뜻이고, `Range1` 크기 `0x10000000`은 256 MiB HDM입니다. Register Locator는 component register가 BAR0, 메일박스 등 device register가 BAR2에 있다고 알려 줍니다.
+
+같은 게스트에서 switch upstream port `0d:00.0`과 root port `0c:00.0`에는 ID 0003h(CXL Extensions DVSEC for Ports)가 있었고, endpoint에는 없었습니다. Table 8-2의 필수·금지 열과 그대로 맞습니다.
 
 ## DOE — Data Object Exchange mailbox
 
-*DOE (Data Object Exchange)*는 *config space를 통해 데이터 객체를 주고받는* PCIe mailbox입니다.
+*DOE (Data Object Exchange)*는 3.1 §8.1.2의 표현으로 "host가 PCIe function과 데이터 객체를 교환하는 PCI-SIG 정의 메커니즘"입니다. 은행 창구의 번호표 시스템처럼, 요청 서류를 넣고 응답 서류가 준비되면 꺼내 가는 방식입니다.
 
 | 항목 | 의미 |
 |------|------|
 | Location | PCIe Extended Config Space |
-| 동작 | host가 요청 객체를 쓰고, 디바이스가 응답 객체를 준비하면 host가 읽음 |
 | 구분 | 객체 header의 *Vendor ID + Data Object Type*으로 프로토콜을 구분 |
+| CXL 정의 객체 | Vendor ID 1E98h (§8.1.2) |
 
-[CXL 3.1 표 8-3](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)이 정의한 DOE Type은 Vendor ID 1E98h를 씁니다.
+3.1 Table 8-3이 정의한 DOE Type입니다.
 
-| DOE Type | CXL 기능 |
-|----------|---------|
-| 0 | Compliance ([Ch 15](/blog/embedded/hardware/cxl/chapter15-ras-performance)) |
-| 2 | Table Access — CDAT(Coherent Device Attribute Table) 읽기 |
+| DOE Type | CXL 기능 | SLD(D2)에 대한 요구 |
+|----------|---------|------|
+| 0 | Compliance (§14) | 선택 |
+| 2 | Table Access — CDAT(Coherent Device Attribute Table) 읽기 (§8.1.11) | 필수 |
+
+게스트 endpoint의 DOE capability 자체는 상태 레지스터만 보여 줍니다.
+
+```text
+Capabilities: [19c v1] Data Object Exchange
+	DOECap: IntSup+
+		IntMsgNum 0
+	DOECtl: IntEn-
+	DOESta: Busy- IntSta- Error- ObjectReady-
+```
+
+DOE로 실제 무엇을 주고받는지는 커널이 읽어 온 CDAT로 확인할 수 있습니다. Linux v6.12 `drivers/cxl/core/pci.c`는 `pci_find_doe_mailbox(pdev, PCI_VENDOR_ID_CXL, CXL_DOE_PROTOCOL_TABLE_ACCESS)`(607행, Type 2를 475행에서 정의)로 Table Access 메일박스를 찾고, `cxl_cdat_read_table()`(509행)이 entry handle을 바꿔 가며 `0xffff`가 나올 때까지 한 entry씩 요청합니다. §8.1.11도 CDAT를 "한 번에 한 entry씩" 읽는다고 씁니다. 그렇게 읽은 결과가 `endpoint3/CDAT` sysfs 파일에 있습니다.
+
+```bash
+od -A d -t x1 /sys/bus/cxl/devices/endpoint3/CDAT
+```
+
+```text
+0000000 a0 00 00 00 02 0d 00 00 00 00 00 00 00 00 00 00
+0000016 00 00 18 00 00 00 00 00 00 00 00 00 00 00 00 00
+0000032 00 00 00 10 00 00 00 00 01 00 18 00 00 00 01 00
+0000048 10 27 00 00 00 00 00 00 0f 00 00 00 00 00 00 00
+```
+
+160바이트(`0xa0`) 가운데 앞 64바이트입니다. 첫 16바이트가 CDAT header(길이 160, revision 2)이고, offset 16의 type `00`·길이 `0x18`이 DSMAS(DPA 0부터 길이 `0x10000000`), offset 40의 type `01`이 DSLBIS입니다. DSLBIS의 base unit `0x2710`(10000)과 값 `0x0f`(15)는 QEMU `hw/mem/cxl_type3.c:85-92`의 "read latency, 10 ns base, 150 ns"와 같습니다. 같은 소스(98-131행)는 write latency 250 ns, read·write bandwidth 16 GB/s를 넣습니다. 모두 에뮬레이터가 정한 값이지 측정값이 아닙니다.
 
 인증·measurement에 쓰는 SPDM은 DMTF가 정의한 프로토콜이고, CXL.cachemem IDE의 키 관리는 *CXL_IDE_KM* 프로토콜로 합니다([Ch 14 Security](/blog/embedded/hardware/cxl/chapter14-security)).
 
-동일한 합성 dump의 DOE 출력 일부입니다. lspci는 DOE 레지스터 상태를 보여 주며 지원 프로토콜 목록은 DOE discovery로 별도 조회해야 합니다. 아래 정지 상태 비트만으로 SPDM이나 CDAT 교환 성공을 판정하지 않습니다.
-
-```text
-Capabilities: [...] Data Object Exchange
-        DOECap: IntSup-
-        DOECtl: IntEn-
-        DOESta: Busy- IntSta- Error- ObjectReady-
-```
-
-DOE의 필요 여부는 사용하는 기능과 transport에 따릅니다. DOE 기반 CDAT·Compliance 교환과, SPDM을 DOE 또는 MCTP 경로로 운반하는 경우를 구분해야 합니다. 모든 인증 흐름이 반드시 DOE를 쓴다는 뜻은 아닙니다.
-
 ## UIO — Unordered I/O
 
-*UIO (Unordered I/O)*는 PCIe의 기본 ordering 규칙에 묶이지 않는 I/O 요청입니다. CXL 3.x는 UIO를 *peer-to-peer*와 *PBR fabric*에서 씁니다. 예를 들어 PBR fabric에서 UIO 요청을 보낸 쪽은 *Source PBR ID(SPID)*로 구분됩니다.
-
-순서 보장이 필요한 control path는 기본 PCIe ordering을 씁니다. CXL 4.0의 Streamlined Port는 UIO에 최적화돼 있습니다([Ch 5](/blog/embedded/hardware/cxl/chapter05-cxl-4-features)).
+*UIO (Unordered I/O)*는 PCIe의 기본 ordering 규칙에 묶이지 않는 I/O 요청입니다. 3.1 §1.4.1 각주는 CXL.mem 영역으로의 peer-to-peer 흐름을 CXL.io의 UIO 또는 Direct CXL.mem 접근으로 지원한다고 씁니다. CXL 3.0은 UIO로 HDM 메모리에 직접 peer-to-peer 접근하는 기능을 더했습니다(§1.4.1).
 
 ## Direct CXL.mem Access — P2P 메모리 접근
 
@@ -114,57 +133,49 @@ CXL 3.1 규격에는 디바이스끼리 host를 거치지 않고 메모리에 �
 
 | 경로 | 규격 | 내용 |
 |------|------|------|
-| Direct P2P CXL.mem | §3.3.2.1 | *가속기*가 CXL.mem으로 다른 디바이스의 HDM에 직접 접근 |
-| UIO Direct P2P to HDM | §7.7.9 | *UIO*(CXL.io)로 HDM에 직접 접근. PBR fabric에서 지원 |
+| Direct P2P CXL.mem | §3.3.2.1 | 가속기(Type 1·2·3)가 방향을 뒤집은 CXL.mem 채널로 peer Type 3 메모리에 접근. 두 장치 모두 PBR Edge DSP에 직접 연결돼야 함 |
+| UIO Direct P2P to HDM | §7.7.9 | UIO(CXL.io)로 HDM에 접근. PBR switch는 edge-to-edge 라우팅, 기존 소프트웨어는 HDM decoder로 제한적으로 사용 |
 
-HDM-DB 영역이면 일관성은 BISnp로 맞춥니다([Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)). GPU·NPU 간 *모델 weight·KV cache 공유*가 이런 경로의 대표적인 쓰임입니다.
+HDM-DB 영역이면 일관성은 BISnp로 맞춥니다([Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)).
 
 ## Linux 측 — CXL.io 인식 경로
 
-Linux v6.12의 [`drivers/cxl/pci.c`](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/drivers/cxl/pci.c)는 Type 3 메모리 장치를 class/subclass `0502`, programming interface `10`의 match로 probe합니다. PCI function의 Vendor/Device ID와 DVSEC 내부 Vendor ID `1e98`을 혼동하지 않습니다.
+Linux v6.12 `drivers/cxl/pci.c:956`의 match table은 `PCI_DEVICE_CLASS((PCI_CLASS_MEMORY_CXL << 8 | CXL_MEMORY_PROGIF), ~0)`입니다. `PCI_CLASS_MEMORY_CXL`은 `0x0502`(`include/linux/pci_ids.h:54`), `CXL_MEMORY_PROGIF`는 `0x10`(`drivers/cxl/cxlpci.h:8`)입니다. PCI function의 Vendor/Device ID가 아니라 class code로 잡으므로, QEMU의 `8086:0d93`이든 다른 제조사 ID든 `0502`/`10`이면 `cxl_pci`가 probe합니다. 게스트의 dmesg가 그 결과입니다.
 
-실제 대상의 BDF를 확인한 뒤 아래처럼 읽을 수 있습니다. 이 명령의 출력은 물리 장치에서 얻지 않았으므로 가상의 mem0 목록을 캡처처럼 붙이지 않습니다.
-
-```bash
-lspci -n
-lspci -vv -s 0000:01:00.0
-ls /sys/bus/cxl/devices/
+```text
+[   24.355091]  pci0000:0c: host supports CXL
+[   25.056769] cxl_pci 0000:0f:00.0: enabling device (0000 -> 0002)
+[   25.070060] cxl_pci 0000:10:00.0: enabling device (0000 -> 0002)
 ```
 
-이 판의 `cxl_pci_probe()`는 Device DVSEC가 없으면 경고하고 다음 register 설정 절차로 진행합니다. 그 자리에서 항상 probe가 실패하는 것은 아닙니다. management 기능에 쓸 수 있는 경로와 CXL.mem 초기화·주소 매핑 완료를 구분해야 합니다. `cxl_acpi`의 host bridge·window 발견도 별도 경로입니다.
-
-합성 fixture를 사용한 재현에서는 `lspci -F cxl-io-synthetic.dump -n -vv`로 dump만 읽습니다. 이 검증은 host의 PCI 장치에 접근하거나 DOE 요청을 보내지 않습니다. 실제 DOE discovery·응답·오류 검사는 해당 장치의 mailbox 소유권·timeout과 함께 별도 수행해야 합니다. 저장소의 `scripts/verify-cxl-protocol-examples.mjs`는 고정한 pciutils build를 받아 임시 폴더에 해당 합성 dump와 출력 파일을 생성하고 경로를 알립니다. `PCIUTILS_ARTICLE_SOURCE`로 clone 위치를 지정할 수 있습니다.
+`cxl_pci_probe()`(pci.c:810)는 840-844행에서 ID 0000h Device DVSEC를 찾고, 없으면 "Device DVSEC not present, skip CXL.mem init"을 경고한 뒤 다음 단계로 진행합니다. 6.12.116에서는 같은 코드가 838행에 있습니다.
 
 ## 자주 하는 실수
 
 ### "CXL.io = PCIe 그대로면 그냥 PCIe 쓰면 된다"
 
-DVSEC·DOE는 기능 발견·관리에 쓰이는 경로입니다. CXL.cache/mem 사용에는 링크·플랫폼·장치의 공통 지원과 설정이 필요합니다. 특정 Linux 판의 management probe 성공을 전체 CXL.mem 사용 가능 상태와 혼동하지 않습니다.
+DVSEC·DOE는 기능 발견·관리 경로입니다. 게스트의 `CXLCtl`이 `Mem+`였어도 decoder가 commit되지 않아 그 메모리는 OS에 보이지 않았습니다([Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position)).
 
 ### "DOE에 어떤 protocol이든 막 넣어도 된다"
 
-DOE 객체는 *Vendor ID와 Data Object Type*으로 구분됩니다. CXL 규격이 정의한 Type은 Compliance(0)와 Table Access(2)이고, SPDM은 DMTF가 정의합니다. 디바이스는 자기가 지원하는 Type만 처리합니다.
+DOE 객체는 *Vendor ID와 Data Object Type*으로 구분됩니다. CXL 규격이 정의한 Type은 Compliance(0)와 Table Access(2)이고(Table 8-3), SPDM은 DMTF가 정의합니다. 커널도 Vendor 1E98h·Type 2를 지정해 메일박스를 찾습니다.
 
-### "UIO 항상 켜는 게 좋다"
+### "P2P CXL.mem은 아무 switch에서나 된다"
 
-UIO는 ordering을 보장하지 않으므로, *순서가 필요한 path*에는 쓰면 안 됩니다.
+§3.3.2.1은 Direct P2P CXL.mem에 PBR 라우팅이 필요하다고 씁니다. 모든 CXL.mem 메시지에 HBR switch가 host로 갈지 peer로 갈지 판단할 정보가 들어 있지는 않기 때문입니다.
 
-### "P2P CXL.mem은 host overhead 0"
+### "CDAT의 지연·대역폭 값은 측정값이다"
 
-host를 거치지 않을 뿐, switch 통과와 (HDM-DB면) BISnp 일관성 트래픽은 그대로 있습니다.
-
-### "DOE mailbox는 빠르다"
-
-DOE는 *config space 접근*으로 객체를 주고받는 control path입니다. bulk data는 DMA·MMIO로 보냅니다.
+CDAT는 장치가 *스스로 보고하는* 속성표입니다. QEMU 모델의 150 ns·16 GB/s는 소스에 상수로 적힌 값입니다.
 
 ## 정리
 
 - CXL.io는 PCIe의 enumeration·config·MMIO·DMA·오류 보고를 그대로 씁니다.
-- CXL 기능은 *Vendor ID 1E98h DVSEC*으로 알립니다. lspci는 이를 `: CXL`로 해석합니다.
+- CXL 기능은 *Vendor ID 1E98h DVSEC*으로 알리고, SLD에는 ID 0000h·0005h·0007h·0008h가 필수입니다(Table 8-2). QEMU endpoint에도 정확히 이 넷이 있었습니다.
 - *DOE*는 config space mailbox입니다. CXL이 정의한 DOE Type은 Compliance(0)와 Table Access/CDAT(2)입니다.
-- *UIO*는 ordering 없는 I/O 요청으로, P2P와 PBR fabric에서 씁니다.
-- 디바이스 간 직접 접근은 *Direct P2P CXL.mem*과 *UIO Direct P2P to HDM* 두 경로가 있습니다.
-- Linux에서 Type 3는 `cxl_pci`가 class code로 잡고 DVSEC을 읽습니다.
+- 커널은 Table Access DOE로 CDAT를 한 entry씩 읽어 `endpointN/CDAT`에 내놓습니다.
+- 디바이스 간 직접 접근은 *Direct P2P CXL.mem*과 *UIO Direct P2P to HDM* 두 경로가 있습니다. Direct P2P CXL.mem은 PBR switch가 필요하고(§3.3.2.1), UIO 경로는 PBR switch에서 edge-to-edge로 라우팅되며 기존 HDM decoder로는 제한적으로만 됩니다(§7.7.9).
+- Linux에서 Type 3는 `cxl_pci`가 class code `0502`·prog-if `10`으로 잡습니다.
 
 ## 다음 편
 
@@ -179,4 +190,4 @@ DOE는 *config space 접근*으로 객체를 주고받는 control path입니다.
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1·1.1 spec, Linux v6.12 `drivers/cxl/`와 pciutils v3.13.0 소스를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 §1.4.1·§2.3·§3.3.2.1·§7.7.9·§8.1.2~8.1.11(Table 8-2·8-3), Linux v6.12 `drivers/cxl/`, QEMU 11.1.3 소스와 게스트의 `lspci`·CDAT 출력을 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.

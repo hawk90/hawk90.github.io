@@ -36,18 +36,18 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 메시지 채널
 
-[CXL 3.1 §3.3](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf) 기준 CXL.mem은 *방향마다 세 채널*, 모두 6개입니다(§3.3.2). 기본은 방향마다 두 채널이고, HDM-DB를 지원하는 디바이스는 BI* 두 채널(S2M BISnp·M2S BIRsp)을 더 씁니다.
+[CXL 3.1 §3.3](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf) 기준 CXL.mem은 *방향마다 세 채널*, 모두 6개입니다(§3.3.2, Figure 3-18). Direct P2P를 지원하는 장치는 방향을 뒤집은 6개를 더 가집니다. HDM-DB를 지원하는 디바이스는 BI* 두 채널(S2M BISnp·M2S BIRsp)을 반드시 지원하고, HDM-D만 쓰는 Type 2는 BI* 채널이 없을 수 있습니다.
 
 | 방향 | 채널 | 메시지 | 의미 |
 |------|------|--------|------|
 | Host → Device | M2S Req | MemRd·MemRdData·MemInv | host의 *read·invalidate* 요청 |
 | Host → Device | M2S RwD | MemWr·MemWrPtl | host의 *write* 요청 + data |
-| Device → Host | S2M NDR | Cmp·Cmp-S·Cmp-E·Cmp-M 등 | no-data completion·상태 응답. Cmp-M은 host 선택 지원이며 device에서 비활성화 가능해야 합니다. |
+| Device → Host | S2M NDR | Cmp·Cmp-S·Cmp-E·Cmp-M 등 | no-data completion·상태 응답. Cmp-M은 host가 선택적으로 지원하고, device는 이 응답을 끌 수 있어야 함 (§3.3.9) |
 | Device → Host | S2M DRS | MemData | *data response* (read 결과 64 B) |
 | Device → Host | S2M BISnp | BISnp | *Back-Invalidation Snoop* (HDM-DB 영역) |
 | Host → Device | M2S BIRsp | BIRsp | BISnp에 대한 host 응답 (HDM-DB 영역) |
 
-단순한 read data 반환과 write completion 외에도 요청·영역의 coherency 조건에 따라 NDR과 DRS 조합을 봐야 합니다. 모든 read가 data 하나만 받고 완료된다고 일반화하지 않습니다. BISnp는 *HDM-DB* 영역에서 씁니다. HDM-DB는 Type 2와 Type 3 모두 쓸 수 있습니다([Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)).
+Cmp-S·Cmp-E·Cmp-M은 장치의 DCOH가 host에 줄의 상태를 알리는 응답이라(§3.3.9), HDM-D/HDM-DB 영역에서는 read에 DRS 데이터와 NDR 상태 응답이 함께 올 수 있습니다. BISnp는 *HDM-DB* 영역에서 씁니다. §3.3.2는 Type 3가 CXL.io의 peer-to-peer를 위해, MLD와 G-FAM 장치가 multi-host 일관성과 CXL.mem peer-to-peer를 위해 HDM-DB를 쓸 수 있다고 씁니다([Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)).
 
 ## Read 트랜잭션 흐름
 
@@ -63,7 +63,7 @@ topics: ["embedded", "embedded/hardware"]
 | 6 | Device → Host: *S2M DRS* MemData, tag=42, payload 64 B |
 | 7 | CPU 데이터 수령, load 완료 |
 
-*Tag*는 요청을 보낸 쪽(Master)이 트랜잭션 동안 잡아 둔 entry 번호(16 bit)입니다. 디바이스(Subordinate)는 응답에 이 값을 그대로 돌려주고, host는 그것으로 응답을 원래 요청에 연결합니다(CXL 3.1 §3.3). 한 채널 안에는 기본적으로 순서 규칙이 없어서(§3.3.2), 응답이 요청 순서대로 온다고 가정할 수 없습니다.
+*Tag*는 요청을 보낸 쪽(Master)이 붙이는 16 bit 필드입니다(§3.3.5). 디바이스(Subordinate)는 NDR·DRS 응답에 이 값을 그대로 돌려주고(§3.3.9·§3.3.10), host는 그것으로 응답을 원래 요청에 연결합니다. 식당 주문표 번호처럼 음식이 나오는 순서가 아니라 번호로 짝을 맞춥니다. §3.3.2는 한 채널 안에 순서 규칙이 없다고 쓰므로(예외는 §3.3.11), 응답이 요청 순서대로 온다고 가정할 수 없습니다.
 
 ## Write 트랜잭션 흐름
 
@@ -76,9 +76,9 @@ Write는 *RwD 채널*로 *명령과 데이터를 함께* 보냅니다:
 | 3 | Device DRAM write |
 | 4 | Device → Host: *S2M NDR* Cmp, tag=43 (write completion) |
 
-RwD는 write 명령과 데이터를 함께 전달하고 NDR은 해당 트랜잭션을 완료합니다. Cmp를 CPU store의 retire 시점, 다른 agent의 관측 시점이나 영구 저장 완료와 동일하게 취급하지 않습니다.
+RwD는 write 명령과 데이터를 함께 전달하고 NDR의 Cmp가 해당 트랜잭션을 완료합니다(§3.3.9의 Cmp: "writeback·read·invalidate의 완료").
 
-`MemWrPtl` (Partial Write)은 *64 B 미만 쓰기*에 사용. *64-bit Byte Enable*을 함께 보내 *어느 byte를 update할지* 지정합니다.
+`MemWrPtl` (Partial Write)은 64 B 줄의 일부만 쓸 때 씁니다. §3.3.6의 TRP 비트(이전 이름 BEP)가 서면 byte enable이 trailer로 붙고, 256B flit에서 byte enable 필드는 64 bit, 곧 64 B의 byte마다 1 bit입니다(§3.3.6.1, Table 3-43).
 
 ## HDM Decoder — 주소 매핑의 핵심
 
@@ -135,9 +135,18 @@ export function translateTwoWay(hpa, base, size, granularity) {
 
 `base=0x80000000n`, `size=0x80000000n`, `granularity=256n`으로 두면 전체 2 GiB를 target당 1 GiB로 나눕니다. `0x80000100n`은 target 1의 DPA 0, `0x80000200n`은 target 0의 DPA `0x100n`으로 갑니다. 범위 끝은 포함하지 않으며 중간 target의 순서는 예제 입력의 정책입니다.
 
-이 산술에서 특정 granularity를 허용한다고 실제 장치에서 해당 region을 만들 수 있다는 뜻은 아닙니다. Linux v6.12의 `drivers/cxl/cxl.h` 인코딩 함수는 256 B~16 KiB의 2의 거듭제곱을 다루지만, root·경로·장치와 생성하는 region의 제약이 추가됩니다. interleave ways와 granularity가 독립적으로 아무 조합이나 가능한 것도 아닙니다.
+Node.js 24.21.0으로 이 함수를 실행한 결과입니다. 앞의 표와 같은 값이 나오고, 범위 끝(`0x100000000`)은 예외를 던집니다.
 
-큰 granularity가 항상 sequential에 좋고 작은 값이 항상 random에 좋다는 규칙도 없습니다. stride, 동시성, device bandwidth와 queue 분산에 따라 한 target으로 접근이 몰릴 수 있습니다. 실제 workload의 주소와 병목을 측정해야 합니다.
+```text
+80000000 -> target 0 dpa 0x0
+80000100 -> target 1 dpa 0x0
+80000200 -> target 0 dpa 0x100
+80000300 -> target 1 dpa 0x100
+ffffffff -> target 1 dpa 0x3fffffff
+end-exclusive: invalid two-way teaching-map input
+```
+
+함수의 granularity 검사는 Linux v6.12 `drivers/cxl/cxl.h:108-115`의 `granularity_to_eig()`를 따랐습니다. 이 함수는 `CXL_DECODER_MIN_GRANULARITY`(72행, 256)보다 작거나 `SZ_16K`보다 크거나 2의 거듭제곱이 아니면 `-EINVAL`을 돌려주고, 나머지는 `ilog2(granularity) - 8`로 인코딩합니다.
 
 ## BISnp — HDM-DB의 Coherency Maintenance
 
@@ -158,47 +167,66 @@ CXL.mem 메시지는 *flit (flow control unit)*에 packing되어 *PCIe PHY*로 �
 
 *Credit-based flow control*은 *받는 쪽 버퍼가 넘치지 않게* 하는 장치입니다. 받는 쪽이 받을 수 있는 만큼 credit을 주고, 보내는 쪽은 credit이 있을 때만 보냅니다. 받는 쪽이 처리하면 credit이 반환됩니다.
 
-## Linux 측: region의 mode와 노출 상태
+## Linux 측: HDM decoder가 실제로 채워지는 순서
 
-이 절의 기준은 Linux v6.12와 ndctl v80입니다. 아래는 실제 Linux 대상에서 상태를 읽는 명령 예이며 이 글에서 수집한 물리 출력은 아닙니다.
+HDM decoder는 region을 만들 때 커널이 root부터 endpoint까지 차례로 채웁니다. QEMU 게스트(Type 3 `mem0`, 256 MiB volatile)에서 [Linux v6.12 sysfs ABI](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-cxl)의 순서대로 region을 손으로 만들어 봤습니다. `cxl create-region`이 내부에서 하는 일과 같은 단계입니다.
 
 ```bash
-cxl list -DT
-cxl list -R
-daxctl list
-numactl --hardware
+cd /sys/bus/cxl/devices
+R=$(cat decoder0.0/create_ram_region); echo $R > decoder0.0/create_ram_region
+cd decoder0.0/$R
+echo 1 > interleave_ways; echo 256 > interleave_granularity; echo 0x10000000 > size
+echo ram > ../../decoder3.0/mode; echo 0x10000000 > ../../decoder3.0/dpa_size
+echo decoder3.0 > target0
+echo 1 > commit
 ```
 
-[`cxl-create-region` 문서](https://github.com/pmem/ndctl/blob/04815e5f8b87e02a4fb5a61aeebaa5cad25a15c3/Documentation/cxl/cxl-create-region.txt)는 `ram`/`pmem` mode와 target·크기·interleave 조건을 구분합니다. `-m`은 뒤의 target 이름을 memdev로 해석하는 옵션이며 ram mode라는 뜻이 아닙니다. volatile region과 Device DAX/System RAM 노출은 서로 다른 단계입니다.
+`size`를 쓴 직후 `resource`는 `0x10000000000`이 됐습니다. root decoder가 CFMWS window(시작 `0x10000000000`, 4 GiB)에서 256 MiB를 떼어 준 것입니다. `target0`까지 쓰자 경로의 decoder가 모두 같은 HPA 범위로 채워졌습니다.
 
-firmware가 이미 구성한 region도 있으므로 모든 시스템에서 생성 명령부터 실행하지 않습니다. `daxctl reconfigure-device`는 실제 상태를 바꾸는 작업이며 단순 조회가 아닙니다. NUMA node 번호와 CXL region의 관계도 실제 topology·OS 노출 상태로 확인합니다. 이 장에서는 region 생성·destroy·memory online/offline을 실행하지 않습니다.
+| decoder | 위치 | start | size | 기타 |
+|---|---|---|---|---|
+| `decoder1.0` | host bridge | `0x10000000000` | `0x10000000` | |
+| `decoder2.0` | switch upstream port | `0x10000000000` | `0x10000000` | |
+| `decoder3.0` | endpoint (`mem0`) | `0x10000000000` | `0x10000000` | `dpa_resource` `0x0`, mode `ram` |
 
-자세한 driver 경로는 [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver), 실습 구성과 실행 범위는 [Ch 12](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 구분합니다.
+마지막 `commit`은 실패했습니다.
+
+```text
+bash: line 17: echo: write error: No such device or address
+[  135.680487] WARNING: CPU: 3 PID: 899 at drivers/cxl/core/region.c:235 cxl_region_invalidate_memregion.isra.0+0x3c/0x58
+```
+
+`cxl list -R -i -u`는 이 region을 `"decode_state":"reset"`, `"state":"disabled"`로 보여 줬습니다. 소프트웨어 쪽 decoder 값은 채워졌지만 하드웨어 decoder에 commit되지는 않았다는 뜻입니다. v6.12 `core/region.c:353`의 `commit_store()`가 385행에서 decoder commit(390행)보다 먼저 `cxl_region_invalidate_memregion()`을 부르고, 이 함수(226-243행)는 CPU가 메모리 범위 캐시 무효화를 지원하지 않으면 `-ENXIO`를 돌려줍니다. v6.12에서 그 지원(`ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`)을 선언하는 아키텍처는 x86뿐이라, arm64 게스트에서는 여기서 멈춥니다([Perf Eng 3-11](/blog/embedded/performance-engineering/part3-11-cxl-interconnect)과 같은 결과). 그래서 이 장의 HPA→DPA 변환을 실제 load로 따라가는 실험은 하지 못했습니다.
+
+[ndctl v81 `cxl-create-region` 문서](https://github.com/pmem/ndctl/blob/v81/Documentation/cxl/cxl-create-region.txt)에 따르면 `-m`은 뒤의 target 이름을 memdev로 해석하라는 옵션이고, `-t`는 `pmem`/`ram` region type입니다. 같은 명령 `cxl create-region -m -d decoder0.0 -w 1 -t ram mem0`도 게스트에서 `failed to commit decode: No such device or address`로 끝났습니다.
+
+자세한 driver 경로는 [Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver), 실습 구성은 [Ch 12](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 다룹니다.
 
 ## 자주 하는 실수
 
 ### "CPU load마다 CXL.mem 요청 하나가 나간다"
 
-CPU cache에서 처리되는 load가 있고, prefetch·writeback·coherency 등의 traffic도 별도로 있습니다. instruction 수를 그대로 CXL 요청 수로 바꾸지 않습니다. cache miss의 종류와 실제 관측 경계를 함께 봅니다.
+CXL.mem 요청을 내는 쪽은 CPU 명령이 아니라 host의 coherency engine입니다. §3.3.1은 CPU coherency engine을 CXL.mem Master로 부릅니다. CPU 캐시에서 끝나는 load는 링크로 나가지 않고, write-back처럼 명령과 직접 대응하지 않는 요청도 있습니다.
 
 ### "Type 3 디바이스는 BISnp와 무관하다"
 
 *HDM-H* Type 3면 그렇습니다. 하지만 Type 3도 direct P2P나 multi-host 일관성을 위해 *HDM-DB*를 쓸 수 있고, 그때는 BISnp 채널을 지원해야 합니다.
 
-### "Interleave granularity는 작을수록 좋다"
+### "region 객체가 보이면 메모리를 쓸 수 있다"
 
-주소 분산과 병목에 따릅니다. granularity가 작아도 특정 stride가 한 target만 선택할 수 있으므로 접근 패턴과 동시성을 함께 확인합니다.
+QEMU 게스트에서 `region0`은 sysfs에 생겼고 경로의 decoder 값도 채워졌지만, commit이 `-ENXIO`로 실패해 `decode_state`가 `reset`으로 남았습니다. 실제로 쓸 수 있는지는 `commit`과 `decode_state`로 확인합니다.
 
 ### "CXL.mem load는 DDR load와 동일"
 
-*Latency가 다릅니다*. [Sun et al., MICRO 2023 연구](https://tianyin.github.io/pub/cxl-mem.pdf)의 Xeon Gold 6430·Linux 6.2·CXL 장치 3종 구성에서 load 지연이 원격 소켓 DDR5의 1.35배~약 3배로 디바이스마다 갈렸습니다. 이는 해당 측정 구성의 결과이며 모든 CXL 제품의 지연 배수가 아닙니다. 실제 Linux 노드 노출은 플랫폼·region·OS 상태에 따릅니다([Ch 11](/blog/embedded/hardware/cxl/chapter11-linux-driver)).
+*Latency가 다릅니다*. [Sun et al., MICRO '23](https://tianyin.github.io/pub/cxl-mem.pdf)은 Xeon 6430 두 소켓, Linux v6.2(Table 1)에 CXL 장치 3종을 붙여 쟀습니다. §4.1의 관찰 O2에 따르면 CXL-A는 원격 소켓 DDR5(DDR5-R)보다 `ld` 지연이 35% 길었고, CXL-B와 CXL-C는 거의 2배와 3배였습니다. 논문은 지연이 CXL controller 설계에 크게 좌우된다고 결론짓습니다.
 
 ## 정리
 
 - CXL.mem은 *host load/store가 64 B cache line 단위 메시지*로 변환되는 프로토콜입니다.
 - *M2S Req·RwD*가 명령, *S2M NDR·DRS*가 응답. 응답은 *Tag*로 요청과 짝지음.
 - *HDM Decoder*가 *SPA → DPA + target device* 매핑. *interleave* 설정 가능.
-- *Interleave granularity*는 256 B~16 KB 중 선택. *워크로드 access pattern 의존*.
+- Linux v6.12는 interleave granularity를 256 B~16 KiB의 2의 거듭제곱으로 인코딩합니다(`cxl.h:108-115`).
+- QEMU arm64 게스트에서 region의 decoder 값은 채워졌지만 commit은 `region.c:235`의 경고와 함께 `-ENXIO`로 실패했습니다.
 - *BISnp*는 *HDM-DB* 영역에서 씁니다(Type 2·3). HDM-H Type 3는 쓰지 않습니다.
 
 ## 다음 편
@@ -214,4 +242,4 @@ CPU cache에서 처리되는 load가 있고, prefetch·writeback·coherency 등�
 
 ## 시리즈 자료 출처 안내
 
-이 글은 CXL 3.1 spec, Linux v6.12 `drivers/cxl/` 소스, ndctl v80 문서, Sun et al. MICRO 2023를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
+이 글은 CXL 3.1 §3.3.1~§3.3.11, Linux v6.12 `drivers/cxl/` 소스와 ABI 문서, ndctl v81 문서, Sun et al. MICRO '23, QEMU 11.1.3 게스트의 sysfs·dmesg 출력과 Node.js 24.21.0 실행 결과를 근거로 합니다. 시리즈 전체의 자료 정책은 [Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position#시리즈-자료-출처-안내)에 있습니다.
