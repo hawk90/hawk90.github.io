@@ -199,7 +199,7 @@ heap buf words changed by burn(62) = 0x00000005
 lowest SP reached ~ _estack - 62*72 = 0x20000088
 ```
 
-마지막 줄은 SP를 직접 잰 값이 아니라 `_estack − 16 − 62×72`로 계산한 추정치이고(16은 `main`까지의 대략적인 사용량), SP가 heap 영역(0x20000008~0x20000208) 안까지 내려갔다는 뜻입니다.
+마지막 줄은 SP를 직접 잰 값이 아니라 `_estack − 16 − 62×72`로 계산한 추정치이고(16은 계산식에 넣은 여유값), SP가 heap 영역(0x20000008~0x20000208) 안까지 내려갔다는 뜻입니다.
 
 heap의 5 word가 바뀌었지만 fault는 없었고 프로그램은 정상 종료했습니다. MPU를 쓰지 않는 Cortex-M은 이런 침범을 알려 주지 않으므로, [2-07](/blog/embedded/modern-recipes/part2-07-arm-mpu)의 MPU stack guard나 위의 painting으로 감지합니다.
 
