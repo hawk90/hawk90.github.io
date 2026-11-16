@@ -125,6 +125,21 @@ static void w25q_read_id(uint8_t id[3]) {
 | W25Q32JV-IQ/JQ | `0xEF` | `0x40` | `0x16` |
 | W25Q32JV-IM/JM | `0xEF` | `0x70` | `0x16` |
 
+보드에서는 실행하지 않았고, QEMU 11.1.3의 STM32F405 머신(`netduinoplus2`)에서 같은 코드를 돌려 보았습니다. 이 머신에는 SPI 컨트롤러 모델(`hw/ssi/stm32f2xx_spi.c`)이 있고, QEMU의 SPI flash 모델 `m25p80`에는 JEDEC ID `0xef4016`인 `w25q32`가 있습니다(`hw/block/m25p80.c` 355행). `-device w25q32,bus=ssi`로 붙이면 QEMU가 이름이 같은 SSI 버스 중 0x40015400의 컨트롤러를 고르므로, 테스트 파일에서만 `SPI1`을 그 주소로 다시 정의하고 위 코드를 그대로 `#include`했습니다. GPIO는 모델링되지 않아 `cs_low()`·`cs_high()`는 효과가 없고, CS 입력을 연결하지 않은 `m25p80`은 계속 선택된 상태입니다.
+
+```bash
+qemu-system-arm -M netduinoplus2 -nographic -semihosting-config enable=on,target=native \
+  -device w25q32,bus=ssi -trace m25p80_command_decoded -kernel spi.elf
+```
+
+```text
+m25p80_command_decoded new command:0x9f
+m25p80_command_decoded new command:0x0
+JEDEC ID: 16 00 00
+```
+
+flash 모델은 `0x9F`를 Read JEDEC ID로 해석했지만 결과는 `EF 40 16`이 아닙니다. QEMU 11.1의 `stm32f2xx_spi_read()`는 `DR`을 읽을 때도 `stm32f2xx_spi_transfer()`를 불러 바이트를 한 번 더 내보내므로(같은 파일 84~87행), `spi_xfer()` 한 번이 버스에서는 전송 두 번이 되어 응답이 밀립니다. 실제 STM32F407에서는 `DR` 읽기가 전송을 일으키지 않으므로(RM0090 28.3.5의 full-duplex 설명대로 전송은 `DR` 쓰기가 시작), 이 결과는 QEMU 모델의 특성입니다. 이 실행으로 확인한 것은 코드가 빌드되고 `0x9F` 명령이 flash까지 간다는 데까지입니다.
+
 ## 전송 시간 하한
 
 Read Data(03h) 한 번은 명령 1바이트와 주소 3바이트(Instruction Set Table 1) 뒤에 데이터가 이어집니다. 1 KiB를 읽으면 SCK는 (4 + 1024) × 8 = 8224 주기입니다. 아래 값은 그 주기 수를 SCK로 나눈 하한이고, byte 사이에 SCK가 멈춘 시간은 들어 있지 않습니다. MB는 10^6 바이트입니다.
