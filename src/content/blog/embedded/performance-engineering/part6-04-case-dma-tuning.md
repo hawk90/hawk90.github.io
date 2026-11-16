@@ -78,7 +78,7 @@ Linux 쪽 설정은 단위가 다릅니다. [include/linux/dmaengine.h](https://
 | 2,048 B | 35,888 MB/s, 115.6 µs/frame | 42,686 MB/s, 97.2 µs/frame |
 | frame 전체 | 35,944 MB/s, 115.4 µs/frame | 46,195 MB/s, 89.8 µs/frame |
 
-Mac에서는 64 B 호출 64,800번이 frame 전체 한 번보다 약 100 µs 더 걸렸습니다. 호출 하나에 약 1.5 ns가 더 붙은 셈이고, 128 B부터는 그 비용이 거의 보이지 않습니다. 이 숫자는 CPU 함수 호출의 비용이지 AXI 주소 phase나 DMA descriptor의 비용이 아닙니다. 원본과 대상 buffer 합계 약 8.3 MB가 M2 Pro의 16 MiB L2(`sysctl hw.perflevel0.l2cachesize`)에 들어가므로 절대 처리량도 DRAM 대역폭과 무관합니다. 이 실험이 보여 주는 것은 "전송마다 붙는 고정 비용은 전송을 키우면 희석된다"는 모양뿐입니다. 실제 SoC에서 같은 표를 만들려면 그 SoC의 DMA 채널로 burst 설정만 바꿔 가며 재야 합니다.
+Mac에서는 64 B 호출 64,800번이 frame 전체 한 번보다 약 100 µs 더 걸렸습니다. 호출 하나에 약 1.5 ns가 더 붙은 셈이고, 128 B부터는 그 비용이 거의 보이지 않습니다. 이 숫자는 CPU 함수 호출의 비용이지 AXI 주소 phase나 DMA descriptor의 비용이 아닙니다. 원본과 대상 buffer 합계 약 8.3 MB가 M2 Pro의 16 MiB L2(`sysctl hw.perflevel0.l2cachesize`)크기 안이므로, 이 절대값을 DRAM 대역폭으로 읽으면 안 됩니다. 이 실험이 보여 주는 것은 "전송마다 붙는 고정 비용은 전송을 키우면 희석된다"는 모양뿐입니다. 실제 SoC에서 같은 표를 만들려면 그 SoC의 DMA 채널로 burst 설정만 바꿔 가며 재야 합니다.
 
 **가설 2 판정 보류**: 대상 SoC의 bus monitor나 DMA trace 없이는 burst 설정이 원인인지 정할 수 없습니다.
 
@@ -107,11 +107,11 @@ ret = dmaengine_slave_config(chan, &cfg);
 
 `src_maxburst`의 단위는 앞에서 본 대로 `src_addr_width` 단위의 word입니다. 장치 FIFO를 넘치게 하지 않는 범위에서, `dma_slave_caps.max_burst` 이하로 정합니다.
 
-**Step 2: Scatter-gather.** frame buffer가 물리적으로 연속이 아니면 scatterlist로 넘깁니다. client 문서가 정한 순서는 다음과 같습니다.
+**Step 2: Scatter-gather.** frame buffer가 물리적으로 연속이 아니면 scatterlist로 넘깁니다. client 문서가 정한 순서는 다음과 같습니다. 문서 예제의 `dma_map_sg()`는 방향 인자를 빠뜨렸는데, [include/linux/dma-mapping.h](https://elixir.bootlin.com/linux/v6.12/source/include/linux/dma-mapping.h#L466)의 매크로는 `dma_map_sg(d, s, n, r)`로 방향 `r`을 받습니다. 캡처는 장치가 메모리에 쓰므로 `DMA_FROM_DEVICE`입니다.
 
 ```c
 struct device *dma_dev = dmaengine_get_dma_device(chan);
-nr_sg = dma_map_sg(dma_dev, sgl, sg_len);          /* map with the DMA struct device */
+nr_sg = dma_map_sg(dma_dev, sgl, sg_len, DMA_FROM_DEVICE);   /* map with the DMA struct device */
 desc = dmaengine_prep_slave_sg(chan, sgl, nr_sg, direction, flags);
 cookie = dmaengine_submit(desc);                   /* queued, not started */
 dma_async_issue_pending(chan);                     /* start */
@@ -140,7 +140,7 @@ dma_async_issue_pending(chan);                     /* start */
 2. **buffer를 둘로 늘리면 처리 시간이 주기보다 짧은 한 drop이 사라집니다.** 채우기와 처리가 다른 buffer에서 겹치기 때문입니다.
 3. **처리 시간이 주기보다 길면 buffer를 늘려도 drop이 남습니다.** 처리 20 ms에서 buffer 2·3개의 drop률 16.0~16.3%는 소비자가 낼 수 있는 처리율의 한계 1 − 16.667/20 = 16.7%에 가깝습니다. buffer 1개의 50%는 frame 하나를 처리하는 동안 다음 tick이 빈 buffer를 못 찾아 frame을 하나씩 걸러 받은 결과입니다.
 
-같은 Mac에서 다른 작업이 함께 돌았기 때문에 몇몇 실행은 크게 흔들렸습니다. 예를 들어 Mac의 buffer 2개·처리 16 ms 조건은 5회 중 두 번이 25.0%와 41.3%였습니다. 그래서 한 번의 실행이 아니라 중앙값으로 읽습니다.
+몇몇 실행은 크게 흔들렸습니다. 측정 무렵 같은 Mac에서 다른 QEMU guest들도 돌고 있었습니다. 예를 들어 Mac의 buffer 2개·처리 16 ms 조건은 5회 중 두 번이 25.0%와 41.3%였습니다. 그래서 한 번의 실행이 아니라 중앙값으로 읽습니다.
 
 ## 교훈
 

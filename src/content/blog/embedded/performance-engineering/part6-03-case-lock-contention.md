@@ -92,6 +92,7 @@ local_padded threads=8 packets=16000000 sec=0.022 Mpps=728.7
       6573      3.26 s     235.59 ms    496.00 us     spinlock   do_futex+0xe8
       3572      1.97 s     233.33 ms    551.27 us     spinlock   futex_wait_setup+0x80
          1      2.53 ms      2.53 ms      2.53 ms     spinlock   update_process_times+0xb4
+         1       458 ns       458 ns       458 ns     spinlock   sched_balance_update_blocked_averages+0x58
 ```
 
 여기에 `stats_mutex` 같은 사용자 mutex의 이름은 없습니다. 보이는 것은 커널 futex 경로(`do_futex`, `futex_wait_setup`)의 spinlock입니다. 즉 `perf lock`은 user 공간 mutex를 직접 재지 않고, 그 mutex가 잠들고 깨는 과정에서 커널 lock이 얼마나 경합했는지를 보여 줍니다. 이 Debian `perf` 6.12.117은 `-b`(BPF로 수집) 옵션이 "not built-in because no BUILD_BPF_SKEL=1"로 빠져 있어서, 위 결과는 tracepoint 기반 수집입니다.
@@ -100,7 +101,7 @@ local_padded threads=8 packets=16000000 sec=0.022 Mpps=728.7
 
 ## 원인 — Cache Line 소유권 이동
 
-lock을 없애면 해결될까요. `atomic` 모드는 mutex 없이 relaxed atomic add만 합니다. 그런데 결과는 `mutex`보다 나빴습니다.
+lock을 없애면 해결될까요. `atomic` 모드는 mutex 없이 relaxed atomic add만 합니다. 결과는 기계마다 달랐지만, 어느 쪽에서도 확장되지 않았습니다. Mac에서는 `mutex`보다 나빴고(8스레드 17.5 vs 46.0 Mpps), VM에서는 `mutex`보다 높았지만(2스레드 80.0 vs 20.1, 4스레드 32.4 vs 32.3, 8스레드 38.9 vs 24.5 Mpps) 1스레드의 0.13배에 그쳤습니다.
 
 | 스레드 | 1 | 2 | 4 | 8 |
 |---|---|---|---|---|
@@ -109,7 +110,7 @@ lock을 없애면 해결될까요. `atomic` 모드는 mutex 없이 relaxed atomi
 | Mac `local_packed` | 455.2 Mpps | 317.6 (0.70×) | 77.5 (0.17×) | 164.6 (0.36×) |
 | VM `local_packed` | 260.3 Mpps | 95.5 (0.37×) | 76.7 (0.29×) | 75.9 (0.29×) |
 
-Mac에서 `atomic`은 2스레드가 되는 순간 1스레드의 18분의 1로 떨어졌습니다. 잠드는 스레드도 없습니다. VM에서 8스레드 `atomic`의 context switch는 15번뿐이었고, `task-clock`은 4.567 CPUs utilized로 CPU를 꽉 쓰고 있었습니다. **CPU는 바쁜데 일은 하지 못하는** 상태입니다.
+Mac에서 `atomic`은 2스레드가 되는 순간 1스레드의 18분의 1로 떨어졌습니다. 잠드는 스레드도 없습니다. VM에서 8스레드 `atomic`의 context switch는 15번뿐이었고 `task-clock`은 4.567 CPUs utilized였습니다. 같은 조건의 `mutex`는 4.798 CPUs utilized에 context switch 11,646번이었습니다. CPU 사용량은 비슷한데, `atomic`은 잠들지 않고도 일을 거의 하지 못했습니다.
 
 원인은 cache line의 소유권입니다. 한 코어가 line에 쓰려면 그 line을 독점해야 하고, 다른 코어에 있던 사본은 무효가 됩니다. 여러 코어가 같은 line에 번갈아 쓰면 line이 코어 사이를 계속 오갑니다. 공 하나로 여덟 명이 캐치볼을 하면 공을 든 사람만 일할 수 있는 것과 같습니다.
 
@@ -181,8 +182,8 @@ failed: no PMU supports the memory events
 
 ## 교훈
 
-- **lock을 없애는 것과 공유를 없애는 것은 다릅니다.** mutex를 atomic으로 바꾸자 Mac 8스레드에서 46.0 → 17.5 Mpps로 오히려 나빠졌습니다.
-- **잠든 시간과 바쁜 시간을 나눠 봅니다.** `mutex`는 context switch 11,646번으로 잠든 시간이 컸고, `atomic`은 15번뿐이었지만 CPU를 꽉 쓰면서 느렸습니다.
+- **lock을 없애는 것과 공유를 없애는 것은 다릅니다.** mutex를 atomic으로 바꾸자 Mac 8스레드에서는 46.0 → 17.5 Mpps로 나빠졌고, VM에서는 24.5 → 38.9 Mpps로 나아졌지만 1스레드의 0.13배였습니다.
+- **context switch와 CPU 사용량을 함께 봅니다.** VM 8스레드에서 `mutex`와 `atomic`은 CPU 사용량이 4.798과 4.567 CPUs로 비슷했지만, context switch는 11,646번과 15번으로 달랐습니다.
 - **`perf lock`은 커널 lock을 봅니다.** user 공간 mutex 경합은 커널 futex 경로의 spinlock 경합(`do_futex`, `futex_wait_setup`)으로 간접적으로 보입니다.
 - **padding은 대상 CPU의 line 크기로 정합니다.** M2 Pro는 128 B를 보고했고, 24 B 슬롯을 붙여 둔 `local_packed`는 8스레드에서 1스레드의 0.36배(Mac)였습니다.
 - **USL은 잘 맞을 때만 씁니다.** 2스레드에서 처리량이 떨어지는 곡선에는 $[0,1]$ 범위 계수가 맞지 않았습니다.

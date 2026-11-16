@@ -37,11 +37,11 @@ static void naive(const float *A, const float *B, float *C, int N) {
 | CPU | Apple M2 Pro P-core | 같은 M2 Pro (QEMU 11.1.3 HVF, `-cpu host`), `taskset -c 2` |
 | OS | macOS 27.2.1 | Debian 13 arm64, kernel 6.12.116 |
 | 컴파일러 | Apple clang 21.0.0, `-O2` | GCC 14.2.0, `-O2` |
-| 캐시(OS 보고) | L1D 128 KiB, L2 16 MiB(4코어 공유), line 128 B (`sysctl hw.perflevel0.*`) | guest의 `getconf`는 L1D 크기 0, line 64 B 보고 |
+| 캐시(OS 보고) | L1D 128 KiB, L2 16 MiB(4코어 공유), line 128 B (`sysctl hw.perflevel0.l1dcachesize`·`l2cachesize`·`cpusperl2`, `hw.cachelinesize`) | guest의 `getconf`는 L1D 크기 0, line 64 B 보고 |
 
 여기서 이미 중요한 사실 하나가 보입니다. M2 Pro P-core 클러스터의 L2는 16 MiB이므로 **A·B·C 12 MiB가 L2에 다 들어갑니다**. "working set이 L2를 넘는다"는 전제는 L2가 1 MiB인 작은 코어에서는 맞지만, 이 측정 환경에서는 맞지 않습니다.
 
-naive의 중앙값은 Mac 1,414.7 ms(1.52 GFLOP/s), VM 1,244.3 ms(1.73 GFLOP/s)였습니다. 같은 Mac에서 다른 작업이 함께 돌았기 때문에 Mac 쪽 naive 한 번은 6,071 ms까지 튀었습니다. 중앙값을 쓰는 이유입니다.
+naive의 중앙값은 Mac 1,414.7 ms(1.52 GFLOP/s), VM 1,244.3 ms(1.73 GFLOP/s)였습니다. Mac 쪽 naive 한 번은 6,071 ms까지 튀었습니다. 측정 무렵 같은 Mac에서 다른 QEMU guest들도 돌고 있었습니다. 중앙값을 쓰는 이유입니다.
 
 ## 가설 1 — SIMD 미사용
 
@@ -56,7 +56,7 @@ naive의 k 루프(13행)에 대한 답은 두 컴파일러 모두 "안 한다"�
 
 ```text
 13:13: remark: the cost-model indicates that vectorization is not beneficial [-Rpass-missed=loop-vectorize]
-matmul.c:13:64: missed: not vectorized: not suitable for strided load _135 = *_134;
+matmul.c:13:64: missed: not vectorized: not suitable for strided load _140 = *_139;
 ```
 
 GCC는 이유를 `B[k * N + j]`의 strided load로 듭니다. k가 1 늘 때마다 주소가 4,096 B씩 뛰니, 연속된 4개를 한 번에 읽는 벡터 load를 쓸 수 없습니다.
@@ -171,7 +171,7 @@ for (int ii = 0; ii < N; ii += TILE)
                 }
 ```
 
-이 코드는 N이 TILE의 배수라고 가정하며(1024는 32의 배수), C를 0으로 먼저 채웁니다. 안쪽 k 루프가 32번만 돌기 때문에 사슬 길이가 32로 짧아집니다. 사슬이 짧으면 CPU는 다음 j의 사슬을 미리 시작할 수 있습니다. GCC는 이 루프(`matmul.c` 59행)를 "loop vectorized using 16 byte vectors"라고 보고했습니다. 같은 GCC는 누산기 4개짜리 `trans4`(33행)도 벡터화했습니다.
+이 코드는 N이 TILE의 배수라고 가정하며(1024는 32의 배수), C를 0으로 먼저 채웁니다. 안쪽 k 루프가 32번만 돌기 때문에 한 번에 이어지는 덧셈 사슬은 32개로 짧아집니다. 컴파일러마다 처리가 달랐습니다. VM의 GCC는 이 루프(`matmul.c` 59행)를 "loop vectorized using 16 byte vectors"라고 보고했고, Mac의 clang은 tiled의 j 루프(57행)에 "the cost-model indicates that vectorization is not beneficial"을 냈습니다. 두 환경에서 tiled가 trans4와 비슷한 속도를 낸 이유를 CPU 내부 동작 수준에서는 재지 않았습니다. 같은 GCC는 누산기 4개짜리 `trans4`(33행)도 벡터화했습니다.
 
 **Tiling + NEON (AArch64)**: 같은 블록에서 `vfmaq_f32`로 4개 lane에 곱셈-누산을 하고, 블록 끝에서 `vaddvq_f32`로 4개를 더합니다. 4개 lane이 곧 4개의 독립 누산기입니다.
 
@@ -205,9 +205,9 @@ Cachegrind 시뮬레이션(N=512, 기본 캐시 구성)의 D1 miss는 다음과 
 | trans4 | 8,774,292 | 10.0% | 10.0% |
 | tiled | 13,737,921 | 14.4% | 0.7% |
 
-`trans4`의 miss율이 `trans`보다 높은 것은 miss가 늘어서가 아니라 GCC가 load를 벡터로 묶어 전체 참조 수(D refs)가 288,734,227에서 87,407,535로 줄었기 때문입니다. miss 개수는 같습니다. `tiled`는 D1 miss가 trans보다 많지만 LL miss율이 0.7%로 낮습니다. 한 번에 다루는 A·BT 블록이 각 4 KiB라 시뮬레이션의 LL(256 KiB) 안에서 재사용되기 때문입니다. **miss율 하나만 보고 판단하면 틀립니다.** 개수와 실행 시간을 같이 봐야 합니다.
+`trans4`의 miss율이 `trans`보다 높은 것은 miss가 늘어서가 아니라 GCC가 load를 벡터로 묶어 전체 참조 수(D refs)가 288,734,227에서 87,407,535로 줄었기 때문입니다. miss 개수는 같습니다. `tiled`는 D1 miss가 trans보다 많지만 LL miss율이 0.7%로 낮습니다. 고정된 (ii, jj)에서 kk를 도는 동안 쓰는 A·BT 띠는 N=512에서 각 32 × 512 float = 64 KiB, 합 128 KiB로 시뮬레이션의 LL(256 KiB)보다 작습니다. 그래서 띠가 LL 안에서 재사용될 수 있습니다. **miss율 하나만 보고 판단하면 틀립니다.** 개수와 실행 시간을 같이 봐야 합니다.
 
-naive에서 tiled_neon까지 Mac에서 17.4배, VM에서 10.0배 빨라졌습니다. 이 중 tiling 단독의 몫은 trans4 대비 Mac 8%, VM 0%로 작았습니다. 이 크기(12 MiB)는 M2 Pro의 16 MiB L2에 들어가기 때문으로 봅니다. L2가 1 MiB인 코어라면 tiling의 몫이 달라질 것이므로, 대상 보드에서 같은 표를 다시 만들어야 합니다.
+naive에서 tiled_neon까지 Mac에서 17.4배, VM에서 10.0배 빨라졌습니다. 이 중 tiling 단독의 몫은 trans4 대비 Mac 8%, VM 0%로 작았습니다. 이 측정의 A·B·C 12 MiB는 M2 Pro의 16 MiB L2 크기 안입니다. 캐시가 다른 대상 보드에서는 같은 표를 다시 만듭니다.
 
 ## 교훈
 

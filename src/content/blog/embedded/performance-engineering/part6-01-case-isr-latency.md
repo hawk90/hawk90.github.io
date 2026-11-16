@@ -50,11 +50,11 @@ cyclictest -m -p 95 -t 1 -a 0 -i 100 -D 20 -q -h 5000 > $out.hist
 | 다운로드 + IRQ 46 → CPU0 | 38.5 µs | 30 µs | 159 µs | 573.5 µs | 5,606 |
 | 다운로드 + IRQ 46 → CPU3 | 32.5 µs | 28.5 µs | 106 µs | 337 µs | 2,015.5 |
 
-10라운드의 표본을 모두 합치면 100 µs를 넘은 비율은 idle 2.07%, IRQ가 CPU0일 때 5.85%, CPU3일 때 2.30%입니다. 같은 라운드 안에서 비교하면 IRQ를 CPU0에 둔 쪽이 10번 중 9번 더 나빴습니다. 예외인 5라운드는 CPU3 쪽 로그가 VM 재부팅(다른 작업이 일으킨 guest panic)으로 사라져 다른 시간대에 다시 돌린 값이라 짝이 맞지 않습니다.
+10라운드의 표본을 모두 합치면 100 µs를 넘은 비율은 idle 2.07%, IRQ가 CPU0일 때 5.84%, CPU3일 때 2.30%입니다. 같은 라운드 안에서 비교하면 IRQ를 CPU0에 둔 쪽이 10번 중 9번 더 나빴습니다. 예외인 5라운드는 CPU3 쪽 로그가 VM 재부팅(다른 작업이 일으킨 guest panic)으로 사라져 다른 시간대에 다시 돌린 값이라 짝이 맞지 않습니다.
 
 평균만 보면 32 µs와 38.5 µs로, 100 µs 예산 안에서 여유가 있어 보입니다. 하지만 deadline을 넘긴 샘플 수는 두 배 가까이 차이 납니다. **평균은 이 문제를 보여 주지 못합니다.**
 
-> ⚠️ **VM의 꼬리는 host가 만듭니다.** 아무 부하가 없는 idle에서도 최대 지연이 라운드마다 4,075 µs ~ 36,002 µs로 튀었습니다. 측정 직후 확인했을 때 같은 Mac에서 이 guest를 포함해 QEMU 프로세스가 8개 돌고 있었습니다. guest 안에는 부하가 없었으므로, vCPU 스레드 자체가 host에서 밀려난 것으로 봅니다. 그래서 이 글에서는 *최댓값*으로 결론을 내리지 않고, 중앙값과 100 µs 초과 개수를 비교합니다. VM 바깥의 잡음이 없는 실제 보드라면 최댓값도 분석 대상이 됩니다.
+> ⚠️ **VM의 꼬리는 host가 만듭니다.** 아무 부하가 없는 idle에서도 최대 지연이 라운드마다 4,075 µs ~ 36,002 µs로 튀었습니다. 측정 직후 확인했을 때 같은 Mac에서 이 guest를 포함해 QEMU 프로세스가 8개 돌고 있었습니다. guest 안에는 부하가 없었고, 이 꼬리의 원인은 이 글에서 따로 확인하지 않았습니다. 그래서 이 글에서는 *최댓값*으로 결론을 내리지 않고, 중앙값과 100 µs 초과 개수를 비교합니다. VM 바깥의 잡음이 없는 실제 보드라면 최댓값도 분석 대상이 됩니다.
 
 ## 가설 1 — CPU 부하 과다
 
@@ -113,11 +113,11 @@ CONFIG_IRQ_FORCED_THREADING=y
 2. 다운로드 중 CPU0은 초당 약 22,000번 인터럽트를 받고, `NET_RX` 소프트IRQ를 돌리느라 시간의 절반 이상을 썼습니다.
 3. SCHED_FIFO 95로 돌던 `cyclictest`도 IRQ와 소프트IRQ 처리가 끝날 때까지 기다려야 했고, 100 µs 초과가 늘었습니다.
 
-`cyclictest`가 RT 우선순위를 갖고 있어도 이 문제를 피하지 못한 이유가 여기 있습니다. 이 커널은 IRQ handler를 스레드로 돌리지 않으므로(`threadirqs` 미사용), hard IRQ는 스케줄러 우선순위와 상관없이 실행됩니다. IRQ가 끝나는 시점에 바로 도는 소프트IRQ도 마찬가지입니다. [kernel/softirq.c](https://elixir.bootlin.com/linux/v6.12/source/kernel/softirq.c#L541)의 `handle_softirqs()`는 대기 중인 소프트IRQ를 한 바퀴 다 처리한 *뒤에야* `need_resched()`·시간 제한(2 ms)·재시작 횟수(10회)를 검사하고, 남은 일을 `ksoftirqd` 스레드로 넘깁니다. 그 한 바퀴 동안은 깨어난 RT 태스크도 기다립니다.
+`cyclictest`가 RT 우선순위를 갖고 있어도 이 문제를 피하지 못한 이유가 여기 있습니다. 이 커널은 IRQ handler를 스레드로 돌리지 않으므로(`threadirqs` 미사용), hard IRQ는 스케줄러 우선순위와 상관없이 실행됩니다. IRQ가 끝나는 시점에 바로 도는 소프트IRQ도 마찬가지입니다. [kernel/softirq.c](https://elixir.bootlin.com/linux/v6.12/source/kernel/softirq.c#L541)의 `handle_softirqs()`는 대기 중인 소프트IRQ를 한 바퀴 다 처리한 *뒤에야* `need_resched()`·시간 제한(`MAX_SOFTIRQ_TIME`은 `msecs_to_jiffies(2)`라 `HZ=250`인 이 커널에서는 1 jiffy, 곧 4 ms)·재시작 횟수(10회)를 검사하고, 남은 일을 `ksoftirqd` 스레드로 넘깁니다. 그 한 바퀴 동안은 깨어난 RT 태스크도 기다립니다.
 
 ## 해결 — IRQ Affinity와 Threaded IRQ
 
-첫 번째 해결은 앞의 실험에서 이미 쓴 IRQ affinity입니다. [Documentation/core-api/irq/irq-affinity.rst](https://elixir.bootlin.com/linux/v6.12/source/Documentation/core-api/irq/irq-affinity.rst)에 따르면 `/proc/irq/<N>/smp_affinity_list`는 그 IRQ가 갈 수 있는 CPU 목록입니다. 실제로 어느 CPU가 받는지는 `effective_affinity_list`로 확인합니다.
+첫 번째 해결은 앞의 실험에서 이미 쓴 IRQ affinity입니다. [Documentation/core-api/irq/irq-affinity.rst](https://elixir.bootlin.com/linux/v6.12/source/Documentation/core-api/irq/irq-affinity.rst)에 따르면 `/proc/irq/<N>/smp_affinity_list`는 그 IRQ가 갈 수 있는 CPU 목록입니다. 실제로 어느 CPU가 받는지는 읽기 전용 `effective_affinity_list`로 확인합니다([kernel/irq/proc.c](https://elixir.bootlin.com/linux/v6.12/source/kernel/irq/proc.c#L385)).
 
 ```bash
 grep virtio0 /proc/interrupts            # IRQ 번호 확인 (이 guest에서는 46)
@@ -150,7 +150,7 @@ IRQ 스레드는 `irq_thread()`에서 `sched_set_fifo()`로 SCHED_FIFO가 됩니
 | p99 | 159 µs | 106 µs | 139.5 µs |
 | p99.9 | 573.5 µs | 337 µs | 792 µs |
 | 100 µs 초과 / 20초 | 5,606 | 2,015.5 | 2,917 |
-| 100 µs 초과 비율 (전 표본) | 5.85% | 2.30% | 2.07% |
+| 100 µs 초과 비율 (전 표본) | 5.84% | 2.30% | 2.07% |
 | CPU0 `%soft` | 58.5% | 11.3% | 0.0% |
 
 IRQ를 옮긴 뒤의 결과는 idle과 거의 같아졌습니다. 몇몇 지표는 idle보다 좋기까지 한데, 이는 개선 효과가 아니라 잡음입니다. guest에 부하가 없던 idle 2·4·6라운드에서도 100 µs 초과가 4,598~11,775개였습니다. 그래서 **After가 idle 수준까지 돌아왔다**까지만 결론으로 삼습니다.
