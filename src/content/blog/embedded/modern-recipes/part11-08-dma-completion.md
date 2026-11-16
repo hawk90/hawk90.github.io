@@ -108,6 +108,10 @@ insmod mode=irq: 0.10 s elapsed, 0.00 s user, 0.00 s sys
 [   51.553803] edu_cmpl 0000:00:04.0: mode=irq len=4096 done after 100618 us, status reads=0
 insmod mode=poll: 0.10 s elapsed, 0.00 s user, 0.10 s sys
 [   51.701972] edu_cmpl 0000:00:04.0: mode=poll len=4096 done after 101523 us, status reads=86134
+insmod mode=irq: 0.10 s elapsed, 0.00 s user, 0.00 s sys
+[   51.862796] edu_cmpl 0000:00:04.0: mode=irq len=4096 done after 102612 us, status reads=0
+insmod mode=poll: 0.10 s elapsed, 0.00 s user, 0.10 s sys
+[   52.011884] edu_cmpl 0000:00:04.0: mode=poll len=4096 done after 100628 us, status reads=86194
 ```
 
 두 방식 모두 약 100 ms 뒤에 끝났습니다. 이 100 ms는 하드웨어 성능이 아니라 edu 모델이 DMA 시작 뒤 가상 시계로 100 ms 타이머를 거는 구현(`edu.c`의 `dma_rw()`)에서 나온 값입니다. 의미 있는 숫자는 CPU 쪽입니다. IRQ 방식은 기다리는 동안 sys 시간이 0.00 s였고, polling 방식은 같은 100 ms 동안 sys 시간 0.10 s를 쓰며 상태 레지스터를 8만 6천~8만 8천 번 읽었습니다. 기다린 시간 전체가 그대로 CPU 시간이 됐습니다. 읽기 한 번에 걸린 평균 시간(약 1.2 µs)은 QEMU가 MMIO 읽기를 에뮬레이션하는 비용이므로 실제 PCIe 장치의 읽기 지연으로 쓰면 안 됩니다.
@@ -194,15 +198,23 @@ NIC는 IRQ를 몇 µs 또는 몇 프레임마다 한 번으로 묶는 기능을 
 ```text
 + ethtool -C enp0s5 rx-usecs 64
 + ethtool -c enp0s5
++ grep '^rx-usecs:'
 rx-usecs:	64
 + ethtool -C enp0s5 rx-usecs 3
 + ethtool -c enp0s5
++ grep '^rx-usecs:'
 rx-usecs:	3
 + ethtool -C enp0s1 rx-usecs 64 rx-frames 32
 netlink error: Operation not supported
+rc=1
++ echo rc=1
++ ethtool -c enp0s1
++ grep -E '^rx-(usecs|frames):'
+rx-usecs:	0
+rx-frames:	1
 ```
 
-e1000e는 값을 받아들였지만 virtio-net은 거절했습니다. 어떤 knob이 있는지는 장치와 드라이버마다 다르다는 것을 보여 줍니다. e1000e의 기본값 3은 µs가 아니라 모드 번호입니다. 커널 문서 [`e1000e.rst`](https://github.com/torvalds/linux/blob/v6.12/Documentation/networking/device_drivers/ethernet/intel/e1000e.rst)는 `InterruptThrottleRate`의 유효 범위를 0, 1, 3, 4, 100~100000으로, 1과 3을 트래픽에 따라 값을 바꾸는 적응 모드로 설명하고, 드라이버의 `e1000_get_coalesce()`는 설정값이 4 이하면 그대로 `rx-usecs`에 보여 줍니다.
+e1000e는 값을 받아들였지만 virtio-net은 거절했고 값도 `rx-usecs 0`, `rx-frames 1` 그대로였습니다(ethtool 6.14.2). 어떤 knob이 있는지는 장치와 드라이버마다 다르다는 것을 보여 줍니다. e1000e의 기본값 3은 µs가 아니라 모드 번호입니다. 커널 문서 [`e1000e.rst`](https://github.com/torvalds/linux/blob/v6.12/Documentation/networking/device_drivers/ethernet/intel/e1000e.rst)는 `InterruptThrottleRate`의 유효 범위를 0, 1, 3, 4, 100~100000으로, 1과 3을 트래픽에 따라 값을 바꾸는 적응 모드로 설명하고, 드라이버의 `e1000_get_coalesce()`는 설정값이 4 이하면 그대로 `rx-usecs`에 보여 줍니다.
 
 ### 바쁠 때는 poll, 한가할 때는 IRQ
 
@@ -224,7 +236,7 @@ e1000e의 [`e1000e_poll()`](https://github.com/torvalds/linux/blob/v6.12/drivers
 
 `budget`의 기본값은 커널 소스에 있습니다. 드라이버가 NAPI를 등록할 때 쓰는 기본 weight는 `NAPI_POLL_WEIGHT` 64이고([`netdevice.h`](https://github.com/torvalds/linux/blob/v6.12/include/linux/netdevice.h#L2620)), softirq 한 번이 모든 NAPI 인스턴스에서 처리하는 총량은 `net.core.netdev_budget` 300입니다. 게스트에서 `sysctl`로 읽은 값도 `netdev_budget = 300`, `netdev_budget_usecs = 8000`이었습니다.
 
-NAPI는 여기서 한 걸음 더 나간 설정도 둡니다. `napi.rst`의 "Software IRQ coalescing" 절에 따르면 `napi_defer_hard_irqs`는 연속으로 빈 poll을 몇 번 허용한 뒤 하드웨어 IRQ로 돌아갈지, `gro_flush_timeout`은 그동안 다시 poll할 타이머 간격을 정합니다(게스트의 e1000e에서는 둘 다 0, 즉 꺼져 있었습니다). 사용자 공간 쪽에서는 DPDK가 같은 절충을 API로 둡니다. [`rte_ethdev.h`](https://github.com/DPDK/dpdk/blob/v25.11/lib/ethdev/rte_ethdev.h#L4340)는 Rx 큐에 오래 패킷이 없으면 lcore를 재우고 `rte_eth_dev_rx_intr_enable()`로 IRQ를 켰다가, 깨어나면 IRQ를 끄고 polling으로 돌아가라고 설명합니다.
+NAPI는 여기서 한 걸음 더 나간 설정도 둡니다. `napi.rst`의 "Software IRQ coalescing" 절에 따르면 `napi_defer_hard_irqs`는 연속으로 빈 poll을 몇 번 허용한 뒤 하드웨어 IRQ로 돌아갈지, `gro_flush_timeout`은 그동안 다시 poll할 타이머 간격을 정합니다(게스트의 e1000e `enp0s5`에서 `/sys/class/net/enp0s5/`로 읽은 값은 둘 다 0, 즉 꺼져 있었습니다). 사용자 공간 쪽에서는 DPDK가 같은 절충을 API로 둡니다. [`rte_ethdev.h`](https://github.com/DPDK/dpdk/blob/v25.11/lib/ethdev/rte_ethdev.h#L4342)는 Rx 큐에 오래 패킷이 없으면 lcore를 재우고 `rte_eth_dev_rx_intr_enable()`로 IRQ를 켰다가, 깨어나면 IRQ를 끄고 polling으로 돌아가라고 설명합니다.
 
 ### Cortex-M 원형 DMA + half/full IRQ
 
@@ -274,7 +286,7 @@ while (!(readl(regs + STATUS) & DONE))
 
 > IRQ coalescing을 크게 잡고 throughput만 보기
 
-`rx-usecs`를 크게 잡으면 IRQ 수가 줄어 throughput 그래프는 좋아 보이지만, 첫 패킷이 IRQ를 기다리는 시간도 그만큼 늘 수 있습니다. e1000e는 모드 번호(0~4) 말고는 `rx-usecs`로 10~10000 µs 범위만 받습니다(`E1000_MIN_ITR_USECS`·`E1000_MAX_ITR_USECS`, [`e1000.h`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/ethernet/intel/e1000e/e1000.h#L55)). 설정을 바꿨다면 throughput과 지연 분포를 같이 재서 비교합니다.
+`rx-usecs`를 크게 잡으면 IRQ 수가 줄어 throughput 그래프는 좋아 보이지만, 첫 패킷이 IRQ를 기다리는 시간도 그만큼 늘 수 있습니다. e1000e는 모드 번호(0·1·3·4) 말고는 `rx-usecs`로 10~10000 µs 범위만 받습니다(`E1000_MIN_ITR_USECS`·`E1000_MAX_ITR_USECS`, [`e1000.h`](https://github.com/torvalds/linux/blob/v6.12/drivers/net/ethernet/intel/e1000e/e1000.h#L55)). 설정을 바꿨다면 throughput과 지연 분포를 같이 재서 비교합니다.
 
 > Phase·DD 확인 전 payload 읽기
 
@@ -299,7 +311,7 @@ void DMA_IRQHandler(void)
 }
 ```
 
-ISR이 길면 같은 우선순위 이하의 다른 IRQ가 그만큼 기다립니다. ISR에서는 플래그를 지우고 일을 넘기기만 하고, 무거운 처리는 thread·workqueue·NAPI poll로 미룹니다. NAPI가 IRQ에서 하는 일이 `napi_schedule()` 한 번뿐인 것도 같은 이유입니다.
+ISR이 길면 같은 우선순위 이하의 다른 IRQ가 그만큼 기다립니다. ISR에서는 플래그를 지우고 일을 넘기기만 하고, 무거운 처리는 thread·workqueue·NAPI poll로 미룹니다. NAPI 드라이버가 IRQ에서 장치 IRQ를 가리고 `napi_schedule()`로 poll을 예약하는 일만 하는 것도 같은 이유입니다.
 
 > 원형 DMA에서 half나 full 콜백 하나만 처리
 
