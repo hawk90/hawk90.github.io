@@ -149,11 +149,11 @@ PCI-SIG 웹사이트(pcisig.com)는 이 작업 중 자동 접근을 403으로 �
 | 2 | 5.0 GT/s | 8/10 | 같은 파일 306행 "PCIE 2.0" |
 | 3 | 8.0 GT/s | 128/130 | 같은 파일 307행 "PCIE 3.0" |
 | 4 | 16.0 GT/s | 128/130 | DesignWare `pcie-designware.h:214` "16.0 GT/s (Gen 4)" |
-| 5 | 32.0 GT/s | 128/130 | |
+| 5 | 32.0 GT/s | 128/130 | pciutils 3.13.0 `pcilmr.man:89` 표 머리글 "32 GT/s (Gen 5)" (같은 줄에 "16 GT/s (Gen 4)") |
 | 6 | 64.0 GT/s | 1/1 | [CXL 4.0 소개 자료](https://computeexpresslink.org/wp-content/uploads/2025/12/CXL_4.0-Webinar_December-2025_FINAL.pdf) PDF 8쪽 "PCIe 6.0 at 64.0 GT/s" |
 | 없음 | 128 GT/s | Linux v6.12에 없음 | 같은 자료 PDF 15쪽 "Uses PCIe® 7.0 PHY @ 128 GT/s" |
 
-32 GT/s를 5.0이라고 부르는 근거는 이번에 연 자료에서 찾지 못해 칸을 비웠습니다. 효율 열은 Linux가 link 대역폭을 계산할 때 쓰는 `PCIE_SPEED2MBS_ENC()` 매크로를 그대로 옮긴 값입니다. 2.5·5 GT/s는 8b/10b, 8~32 GT/s는 128b/130b를 반영하고, 64 GT/s는 1/1로 encoding 손실을 빼지 않습니다.
+효율 열은 Linux가 link 대역폭을 계산할 때 쓰는 `PCIE_SPEED2MBS_ENC()` 매크로를 그대로 옮긴 값입니다. 2.5·5 GT/s는 8b/10b, 8~32 GT/s는 128b/130b를 반영하고, 64 GT/s는 1/1로 encoding 손실을 빼지 않습니다.
 
 바이트 대역폭은 `rate × 효율 × lane 수 / 8`입니다. 같은 매크로로 x16 한 방향을 계산한 `bw2.py`의 결과입니다. TLP header·DLLP·Flit 오버헤드는 빼지 않은 상한입니다.
 
