@@ -2,7 +2,7 @@
 title: "ABA 문제 회피 — Tagged Pointer·Hazard·Generation Counter"
 slug: "embedded/modern-recipes/part9-08-aba-problem"
 date: 2026-04-18T09:07:00
-description: "ABA 시나리오, tagged pointer (64-bit + tag), version counter, hazard pointer 활용, 실제 사례를 정리합니다."
+description: "ABA 시나리오 재연, tagged pointer(16바이트 CAS·상위 16비트 tag), hazard pointer·RCU와의 관계를 실측과 함께 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 108
 tags: [recipes, concurrency, aba]
@@ -164,7 +164,7 @@ plain   nodes reachable -1 of 64 (cycle: a node appears twice)
 tagged  nodes reachable 64 of 64
 plain   nodes reachable -1 of 64 (cycle: a node appears twice)
 tagged  nodes reachable 64 of 64
-$ clang++ -std=c++17 -O1 -g -fsanitize=thread aba_stress.cpp -o aba_tsan && ./aba_tsan tagged
+$ clang++ -std=c++17 -O1 -g -fsanitize=thread aba_stress.cpp -o aba_tsan && ./aba_tsan tagged; echo exit=$?
 tagged  nodes reachable 64 of 64
 exit=0
 ```
@@ -180,7 +180,7 @@ exit=0
 16바이트 CAS가 없거나 lock-free가 아니면, 8바이트 포인터의 쓰지 않는 상위 비트에 tag를 넣고 8바이트 CAS 하나로 처리하기도 합니다. 그 비트가 정말 비어 있는지는 OS와 하드웨어 설정이 정합니다. AArch64 Linux v6.12 문서 기준으로 정리하면 다음과 같습니다.
 
 - 사용자 공간 주소는 기본적으로 48비트 범위에서 나옵니다. 52비트 VA를 지원하는 커널이라도 사용자 프로그램이 48비트보다 큰 mmap hint를 주어 "opt-in"해야 52비트 주소를 받습니다(`Documentation/arch/arm64/memory.rst` 142–149행). 이 글의 Debian guest 커널도 `CONFIG_ARM64_VA_BITS=52`입니다.
-- 하드웨어는 사용자 주소의 최상위 바이트(63:56)를 주소 변환에서 무시합니다(TBI, `tagged-pointers.rst` 12–15행). 그래도 그 아래 55:48비트는 무시되지 않으므로, tag를 넣은 값은 dereference 전에 반드시 마스크해야 합니다.
+- 하드웨어는 사용자 주소의 최상위 바이트(63:56)를 주소 변환에서 무시합니다(TBI, `tagged-pointers.rst` 13–16행). 그래도 그 아래 55:48비트는 무시되지 않으므로, tag를 넣은 값은 dereference 전에 반드시 마스크해야 합니다.
 - MTE를 쓰면 63:56 중 59:56비트가 메모리 태그 검사에 쓰입니다(`memory-tagging-extension.rst` 14–24행). Pointer Authentication의 PAC는 "55 minus the virtual address size" 비트를 상위에 차지합니다(`pointer-authentication.rst` 52–54행). 이 Debian 커널은 `CONFIG_ARM64_MTE=y`, `CONFIG_ARM64_PTR_AUTH=y`입니다.
 
 그래서 상위 비트 tag는 "MTE·PAC를 쓰지 않는 프로세스, 48비트 주소"라는 조건을 확인한 뒤에 씁니다. 이 Mac에서 정적 객체의 주소는 상위 16비트가 0이었습니다(아래 출력 첫 줄). 다른 운영체제의 주소 배치는 이 글에서 확인하지 않았습니다.
@@ -215,7 +215,7 @@ $ clang++ -std=c++17 -O2 tagwrap.cpp -o tagwrap && ./tagwrap
 after 65536 updates the slow thread's CAS SUCCEEDED (tag wrapped)
 ```
 
-65,536번 갱신 뒤 느린 스레드의 CAS가 성공했습니다. 위 8스레드 실험에서 한 스레드가 200만 번 연산한 것을 보면, 선점된 스레드가 다시 돌기 전에 다른 스레드들이 65,536번 갱신하는 일은 충분히 가능한 규모입니다(실행 수로부터의 추론이고, 선점 시간 자체는 재지 않았습니다). 그래서 상위 비트 tag를 쓰려면 "한 스레드가 멈춰 있는 최대 시간 × 갱신 빈도"가 2^16보다 작다는 근거가 필요하고, 그 근거가 없으면 64비트 tag(16바이트 CAS)나 hazard pointer를 씁니다.
+65,536번 갱신 뒤 느린 스레드의 CAS가 성공했습니다. 위 8스레드 `aba_stress tagged`는 8스레드 × 200만 번 × (pop + push)로 CAS를 3,200만 번 성공시키는데, 이 M2 Pro에서 `time`으로 세 번 재면 3.45~5.85초였습니다. 초당 550만~930만 번 갱신하는 셈이라, 65,536번은 7~12 ms면 지나갑니다. 그래서 상위 비트 tag를 쓰려면 "한 스레드가 멈춰 있는 최대 시간 × 갱신 빈도"가 2^16보다 작다는 근거가 필요하고, 그 근거가 없으면 64비트 tag(16바이트 CAS)나 hazard pointer를 씁니다.
 
 ### Hazard pointer로 회피
 
