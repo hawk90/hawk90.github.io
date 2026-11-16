@@ -144,9 +144,9 @@ void pwm_complementary_init(void) {
     gpio_init(GPIOA, 8,  &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=1});
     gpio_init(GPIOB, 13, &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=1});
 
-    // center-aligned PWM, about 20 kHz
+    // center-aligned PWM, 168 MHz / 8398 = 20.005 kHz
     TIM1->PSC = 0;
-    TIM1->ARR = 4200 - 1;          // one up+down cycle is about 2 x 4200 clocks at 168 MHz
+    TIM1->ARR = 4200 - 1;          // one up+down cycle = 2 x ARR = 8398 clocks at 168 MHz
     TIM1->CR1 = TIM_CR1_CMS_0;     // center-aligned mode 1
 
     // PWM mode 1, complementary
@@ -164,7 +164,7 @@ void pwm_complementary_init(void) {
 
 dead-time은 한쪽 출력이 꺼진 뒤 다른 쪽이 켜지기까지 두 출력이 모두 꺼져 있는 시간입니다. high-side와 low-side가 동시에 켜지면 전원과 GND가 바로 이어지므로 이 간격을 둡니다. `BDTR`의 `DTG` 값과 시간의 관계는 LL 헤더의 `__LL_TIM_CALC_DEADTIME()`가 보여 줍니다. 원하는 시간이 `(DT_DELAY_1 + 1) × tDTS`(`DT_DELAY_1` = 0x7F)보다 짧으면 `DTG = DT / tDTS`이고, `CKD` = 0이면 tDTS는 timer clock 주기입니다. 그래서 168 MHz에서 `DTG` = 42는 42 / 168 MHz = 250 ns입니다. 더 긴 시간은 `DTG`의 상위 bit로 범위(`DT_RANGE_2`~`4`)를 바꿔 냅니다.
 
-center-aligned mode(`TIM_CR1_CMS_0`)는 LL 헤더의 설명대로 "The counter counts up and down alternatively"이므로, 한 주기가 edge-aligned의 두 배 가까운 약 2 × 4200 clock, 즉 168 MHz 기준 약 20 kHz입니다. 끝값을 몇 번 세는지에 따른 정확한 주기는 reference manual RM0090의 center-aligned mode 설명에 있는데, 이 글은 그 문서를 확인하지 못해 "약"으로 둡니다.
+center-aligned mode(`TIM_CR1_CMS_0`)에서 counter는 RM0090 Rev 22(st.com이 응답하지 않아 [stm32.dirba.io](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/)의 본문 판으로 확인) 17.3.2절대로 "counts from 0 to the auto-reload value (content of the TIMx_ARR register) – 1, generates a counter overflow event, then counts from the auto-reload value down to 1"입니다. 올라갈 때 ARR개, 내려갈 때 ARR개를 세므로 한 주기가 2 × ARR = 2 × 4199 = 8,398 clock이고, 168 MHz / 8,398 = 20.005 kHz입니다.
 
 ### 4. DMA-driven duty — waveform 생성
 
