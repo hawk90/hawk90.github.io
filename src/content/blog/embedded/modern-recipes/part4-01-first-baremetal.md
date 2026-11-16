@@ -234,7 +234,7 @@ MODER(offset `0x000`)를 읽고 bit[11:10]을 지운 값, 다시 읽고 `0x400`(
 
 ### delay 주기
 
-`delay()`는 기본 최적화(-O0)에서 반복 한 번에 6개 명령(`nop`, `ldr`, `subs`, `str`, `cmp`, `bne`)으로 컴파일됐습니다(`objdump -d --disassemble=delay`). 이 코드는 clock 설정을 건드리지 않습니다. ST의 `system_stm32f4xx.c` 템플릿은 `SystemCoreClock`의 초기값을 `16000000`으로 두고 `HSI_VALUE`도 16000000으로 정의하는데, 주석은 실제 HSI 값이 "may vary depending on the variations in voltage and temperature"라고 덧붙입니다. 다만 Cortex-M4 TRM 3.3.1절의 cycle 표는 zero wait state를 전제하고, 분기는 "1 + P"(pipeline refill P는 1~3)라서 명령 수만으로 flash에서 도는 loop의 주기를 계산할 수 없습니다. 보드에서 PA5를 scope로 재서 `delay()` 인자를 맞춥니다.
+`delay()`는 기본 최적화(-O0)에서 반복 한 번에 6개 명령(`nop`, `ldr`, `subs`, `str`, `cmp`, `bne`)으로 컴파일됐습니다(`objdump -d --disassemble=delay`). 이 코드는 clock 설정을 건드리지 않습니다. ST의 `system_stm32f4xx.c` 템플릿은 `SystemCoreClock`의 초기값을 `16000000`으로 두고 `HSI_VALUE`도 16000000으로 정의하는데, 주석은 실제 HSI 값이 "may vary depending on the variations in voltage and temperature"라고 덧붙입니다. 다만 Cortex-M4 TRM 3.3.1절의 cycle 표는 zero wait state를 전제하고, 조건 분기는 "1 or 1 + P"(pipeline refill P는 1~3 cycle)라서 명령 수만으로 flash에서 도는 loop의 주기를 계산할 수 없습니다. 보드에서 PA5를 scope로 재서 `delay()` 인자를 맞춥니다.
 
 ![PA5 Output — Square Wave](/images/blog/modern-recipes/diagrams/part4-01-square-wave.svg)
 
