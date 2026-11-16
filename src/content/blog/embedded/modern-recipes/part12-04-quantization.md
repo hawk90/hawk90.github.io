@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Quantization은 float 표현을 낮은 bit-width 정수로 바꿔 메모리·연산량을 줄이는 기법입니다."** 같은 INT8이라도 scale을 tensor 하나에 줄지 channel마다 줄지에 따라 작은 channel의 오차가 수십 배 달라집니다.
+> **"Quantization은 float 표현을 낮은 bit-width 정수로 바꿔 메모리·연산량을 줄이는 기법입니다."** 같은 INT8이라도 scale을 tensor 하나에 줄지 channel마다 줄지에 따라 작은 channel의 오차가 150배 넘게 달라집니다.
 
 ## 어떤 상황에서 쓰나
 
-INT8만 받는 가속기(예: [12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture)의 Ethos-U는 INT8 TFLite 모델을 입력으로 받습니다)에 모델을 올리거나, flash·RAM이 부족해 weight를 줄여야 할 때입니다. LLM은 크기 때문에 더 절실합니다. 8B parameter 모델은 16-bit로 두면 weight만 16 GB 남짓이고, llama.cpp의 Llama 3.1 8B 표에서 F16 파일은 14.96 GiB, Q4_K_M은 4.58 GiB입니다.
+INT8 모델을 받는 가속기([12-03](/blog/embedded/modern-recipes/part12-03-npu-architecture)에서는 INT8 TFLite 모델을 Ethos-U용 Vela에 넣었습니다)에 모델을 올리거나, flash·RAM이 부족해 weight를 줄여야 할 때입니다. LLM은 크기 때문에 더 절실합니다. 8B parameter 모델은 16-bit로 두면 weight만 16 GB 남짓이고, llama.cpp의 Llama 3.1 8B 표에서 F16 파일은 14.96 GiB, Q4_K_M은 4.58 GiB입니다.
 
 이 글의 계산과 ONNX Runtime 실행은 Debian 13 arm64 guest의 Python 3.13.5, numpy, `onnx` 1.23.2, `onnxruntime` 1.32.0에서 돌렸습니다.
 
@@ -27,11 +27,13 @@ LiteRT(TFLite) quantization 명세는 INT8 값과 실수를 다음처럼 잇습�
 real_value = (int8_value - zero_point) × scale
 ```
 
-정의를 뒤집으면 `q = round(x / scale) + zero_point`이고, 표현 범위를 넘는 값은 clip합니다. 같은 명세는 weight를 zero-point 0인 symmetric으로, activation을 zero-point가 범위 안 어디든 올 수 있는 asymmetric으로 둡니다. 0~6 범위의 ReLU6 출력을 uint8 asymmetric으로 표현하면 scale = 6 / 255이고, 아래처럼 왕복합니다.
+정의를 뒤집으면 `q = round(x / scale) + zero_point`이고, 표현 범위를 넘는 값은 clip합니다. 같은 명세는 weight를 zero-point 0인 symmetric으로, activation을 zero-point가 범위 안 어디든 올 수 있는 asymmetric으로 둡니다. 명세의 activation은 int8이고 zero-point는 [-128, 127] 안에 옵니다. 0~6 범위의 ReLU6 출력이라면 scale = 6 / 255, zero-point = -128로 두고 아래처럼 왕복합니다.
 
 ```text
-asym uint8: scale 0.023529 zp 0 q [0, 42, 85, 128, 170, 212, 255] back [0.0, 0.9882, 2.0, 3.0118, 4.0, 4.9882, 6.0]
+asym int8: scale 0.023529 zp -128 q [-128, -86, -43, 0, 42, 84, 127] back [0.0, 0.9882, 2.0, 3.0118, 4.0, 4.9882, 6.0]
 ```
+
+명세는 예전 도구가 per-tensor asymmetric uint8을 썼다고 적습니다. 같은 범위를 uint8로 두면 zero-point만 0이 되고 scale은 같습니다.
 
 적용 시점은 두 가지입니다.
 
@@ -77,13 +79,12 @@ s_t = np.abs(w).max() / 127                                   # one scale
 s_c = np.abs(w).reshape(8, -1).max(axis=1) / 127              # one scale per out channel
 ```
 
-LLM weight에는 channel보다 더 잘게, 연속한 weight 묶음(group)마다 scale을 두는 per-group 방식도 씁니다.
 
 ## 코드 / 실제 사용 예
 
 ### ONNX Runtime static quantization
 
-64 → 256 → 10의 작은 MLP를 `onnx.helper`로 만들고, 200개 calibration 입력으로 `quantize_static`을 돌렸습니다. 이전 판의 코드는 `QuantFormat`·`QuantType`을 import하지 않아 그대로는 실행되지 않았습니다.
+64 → 256 → 10의 작은 MLP를 `onnx.helper`로 만들고, 200개 calibration 입력으로 `quantize_static`을 돌렸습니다. `QuantFormat`·`QuantType`도 `onnxruntime.quantization`에서 import해야 합니다.
 
 ```python
 from onnxruntime.quantization import quantize_static, CalibrationDataReader, QuantFormat, QuantType
@@ -115,11 +116,11 @@ ops in quantized graph {'DequantizeLinear': 7, 'QuantizeLinear': 4, 'MatMul': 2,
 max relative output error: mean 0.0222, worst 0.0739; argmax agreement 98/100
 ```
 
-파일은 77,003 byte에서 22,629 byte로 줄었습니다. QDQ format은 원래 연산(`MatMul`, `Add`)을 그대로 두고 앞뒤에 `QuantizeLinear`·`DequantizeLinear`를 끼워 넣은 그래프입니다. 100개 test 입력에서 FP32 출력 대비 최대 상대 오차의 평균은 2.2%, 최악 7.4%였고, 최댓값 index(분류 결과)는 100개 중 98개가 같았습니다. 실제 모델에서는 이 비교를 정확도 지표로 다시 합니다.
+파일은 77,003 byte에서 22,629 byte로 줄었습니다. QDQ format은 원래 연산(`MatMul`, `Add`) 앞뒤에 `QuantizeLinear`·`DequantizeLinear`를 끼워 넣은 그래프이고, 이 실행에서는 원래 그래프의 `Relu`가 양자화 뒤 그래프에서 사라졌습니다. 100개 test 입력에서 FP32 출력 대비 최대 상대 오차의 평균은 2.2%, 최악 7.4%였고, 최댓값 index(분류 결과)는 100개 중 98개가 같았습니다. 실제 모델에서는 이 비교를 정확도 지표로 다시 합니다.
 
 ### TFLite PTQ INT8
 
-LiteRT 문서의 "Post-training integer quantization" 페이지가 쓰는 API입니다. 이 글의 환경에는 TensorFlow가 없어 실행하지 않았습니다.
+LiteRT 문서의 "Post-training integer quantization" 페이지가 쓰는 API입니다. 문서 예제는 입출력 type을 `tf.uint8`로 두고 calibration 입력을 `tf.data.Dataset.from_tensor_slices(...).batch(1).take(100)`으로 만듭니다. 아래의 `tf.int8` 입출력과 500개 loop는 이 글의 선택입니다. 이 글의 환경에는 TensorFlow가 없어 실행하지 않았습니다.
 
 ```python
 import tensorflow as tf
@@ -160,7 +161,7 @@ llama.cpp의 `tools/quantize/README.md`는 GGUF로 변환한 모델을 `llama-qu
 | Q5_K_M | 5.7036 | 5.33 | 67.23 ±1.08 |
 | Q6_K | 6.5633 | 6.14 | 58.67 ±3.13 |
 | Q8_0 | 8.5008 | 7.95 | 50.93 ±0.08 |
-| F16 | 16.0005 | 14.96 | — |
+| F16 | 16.0005 | 14.96 | 29.17 ±0.04 |
 
 `Q4_K_M`의 bits/weight는 이름의 4가 아니라 4.8944이고, 같은 README의 메모리 표에서 Llama 3.1 8B Q4_K_M 파일은 4.9 GB입니다. README는 정확도 손실을 perplexity나 KL divergence로 잰다고 설명하지만, 이 표에는 그 값이 없어 이 글도 싣지 않았습니다.
 
@@ -205,7 +206,7 @@ INT8 모델의 입력이 int8이면, 전처리에서 위 식으로 변환해 넣
 ## 정리
 
 - INT8 값과 실수는 `real = (q - zero_point) × scale`로 이어지고, weight는 symmetric, activation은 asymmetric이 명세의 기본입니다.
-- 크기가 다른 channel에 scale 하나를 주면 작은 channel의 오차가 수십 배 커집니다(위 실행 59% vs 0.4%).
+- 크기가 다른 channel에 scale 하나를 주면 작은 channel의 오차가 150배 넘게 커집니다(위 실행 58.8% vs 0.38%).
 - ONNX Runtime `quantize_static`은 작은 MLP를 3.4분의 1 크기의 QDQ 모델로 바꿨고 분류 결과는 98% 일치했습니다.
 - LLM 4-bit 양자화의 실제 크기는 README 표의 bits/weight로 봅니다(Q4_K_M 4.89).
 
