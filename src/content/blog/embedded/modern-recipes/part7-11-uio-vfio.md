@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-FPGA에 새로 넣은 레지스터 블록을 빨리 시험해야 할 때, 정식 커널 driver를 쓰기 전에 UIO로 레지스터를 사용자 공간에 열고 C 프로그램으로 동작을 확인할 수 있습니다. 시험 코드가 잘못된 주소를 건드려 죽어도 그 process만 죽습니다. 다만 UIO는 장치의 DMA를 막지 않으므로, 장치가 DMA로 엉뚱한 메모리를 쓰는 것까지 막아 주지는 않습니다.
+FPGA에 새로 넣은 레지스터 블록을 빨리 시험해야 할 때, 정식 커널 driver를 쓰기 전에 UIO로 레지스터를 사용자 공간에 열고 C 프로그램으로 동작을 확인할 수 있습니다. 시험 코드가 잘못된 주소를 건드려 죽어도 그 process만 죽습니다. 다만 장치가 DMA로 엉뚱한 메모리에 쓰는 것은 UIO가 막지 않습니다.
 
 NIC·NVMe처럼 DMA가 핵심인 장치를 사용자 공간에서 다루려면 VFIO가 필요합니다. VFIO는 장치를 IOMMU group 단위로 사용자에게 넘기고, 장치가 DMA로 접근할 수 있는 주소를 IOMMU가 사용자가 등록한 범위로 제한합니다. DPDK·SPDK가 이 경로를 씁니다. 집 열쇠를 맡기면서 들어갈 수 있는 방은 정해 두는 것과 같습니다.
 
@@ -55,7 +55,7 @@ QEMU `virt` DTB를 덤프해([7-03](/blog/embedded/modern-recipes/part7-03-devic
 	};
 ```
 
-커널은 [7-08](/blog/embedded/modern-recipes/part7-08-platform-driver)과 같은 v6.12 arm64 `defconfig`(+`CONFIG_DYNAMIC_DEBUG`) 빌드이고, 이 설정에는 UIO가 꺼져 있어 `drivers/uio/uio.c`와 `uio_pdrv_genirq.c`만 같은 트리에 대해 외부 모듈로 빌드했습니다.
+커널은 [7-08](/blog/embedded/modern-recipes/part7-08-platform-driver)과 같은 v6.12 arm64 `defconfig`(+`CONFIG_DYNAMIC_DEBUG`) 빌드이고, 이 설정에는 UIO가 꺼져 있어 `drivers/uio/uio.c`와 `uio_pdrv_genirq.c`만 같은 트리를 기준으로 외부 모듈로 빌드했습니다.
 
 ```bash
 mkdir uio && cp linux-6.12/drivers/uio/uio.c linux-6.12/drivers/uio/uio_pdrv_genirq.c uio/
@@ -158,7 +158,7 @@ interrupt 1: event count=2
 출력에서 보이는 것은 다음과 같습니다.
 
 - `/sys/class/uio/uio0/maps/map0/`의 `addr`·`size`가 DT의 `reg`와 같고, `mmap`의 offset 0이 map0입니다(N번째 영역은 `N * getpagesize()`, `uio-howto.rst:171-176`). 쓴 값이 그대로 읽혔습니다.
-- interrupt가 없을 때 `poll`은 0이었고, set-pending으로 interrupt를 하나 내자 `read`가 event count 1을 돌려줬습니다. `read`는 4바이트 signed 32비트 count만 받습니다(`uio-howto.rst:516-525`).
+- interrupt가 없을 때 `poll`은 0이었고, set-pending으로 interrupt를 하나 내자 `read`가 event count 1을 돌려줬습니다. `read`는 부호 있는 32비트(4바이트) count만 받습니다(`uio-howto.rst:516-525`).
 - 그 직후 한 번 더 pending을 걸었지만 `poll`은 0이었습니다. `uio_pdrv_genirq`가 첫 interrupt에서 line을 꺼 두었기 때문입니다. `write(fd, &on, 4)`로 다시 켜자 기다리던 interrupt가 바로 들어와 `poll`이 1, count가 2가 됐습니다.
 - `/proc/interrupts`에서 이 line(GIC INTID 132, Level)은 2번 들어왔습니다.
 
@@ -203,7 +203,7 @@ VFIO_GET_API_VERSION = 0 (VFIO_API_VERSION 0)
 CHECK_EXTENSION TYPE1 = 1, TYPE1v2 = 1, NOIOMMU = 0
 ```
 
-API와 type1 IOMMU backend는 지원하지만, 이 VM에는 IOMMU가 없어(QEMU `virt`에 IOMMU를 붙이지 않았음) `/sys/kernel/iommu_groups/`가 비어 있습니다(`0`). VFIO는 IOMMU group이 없는 장치에 대해 no-IOMMU 모드가 아니면 group을 만들지 않으므로(`drivers/vfio/group.c:673-690`의 `-EINVAL`), 이 VM의 장치를 `vfio-pci`에 묶는 단계부터는 실행하지 않았습니다. 이 VM의 PCI 장치는 host bridge를 빼면 SSH가 쓰는 virtio-net과 root 디스크인 virtio-blk뿐이라 떼어 낼 수도 없었습니다. `NOIOMMU = 0`인 것은 이 Debian 커널이 `CONFIG_VFIO_NOIOMMU`를 끈 채 빌드되어(`/boot/config-6.12.116+deb13-arm64`) `enable_unsafe_noiommu_mode` 파라미터 자체가 없기 때문입니다.
+API와 type1 IOMMU backend는 지원하지만, 이 VM에는 IOMMU가 없어(QEMU `virt`에 IOMMU를 붙이지 않았음) `/sys/kernel/iommu_groups/`가 비어 있습니다(`0`). VFIO는 no-IOMMU 모드가 아니면 IOMMU group이 없는 장치의 group을 만들지 않으므로(`drivers/vfio/group.c:673-690`의 `-EINVAL`), 이 VM의 장치를 `vfio-pci`에 묶는 단계부터는 실행하지 않았습니다. 이 VM의 PCI 장치는 host bridge를 빼면 SSH가 쓰는 virtio-net과 root 디스크인 virtio-blk뿐이라 떼어 낼 수도 없었습니다. `NOIOMMU = 0`인 것은 이 Debian 커널이 `CONFIG_VFIO_NOIOMMU`를 끈 채 빌드되어(`/boot/config-6.12.116+deb13-arm64`) `enable_unsafe_noiommu_mode` 파라미터 자체가 없기 때문입니다.
 
 ### VFIO 사용 순서 (커널 문서의 예)
 
@@ -261,7 +261,7 @@ HW_REG_DMA_ADDR = (uint32_t)(uintptr_t)buf;   /* virtual address, not a bus addr
 
 > ⚠️ IOMMU group의 다른 장치를 그대로 둠
 
-커널 문서는 group 안의 장치가 모두 VFIO driver에 묶여야(또는 host driver에서 떼어져야) group에 대한 동작이 허용된다고 적습니다(`vfio.rst:91-96`). 위 순서의 `VFIO_GROUP_FLAGS_VIABLE` 확인이 그 검사입니다. `/sys/kernel/iommu_groups/<번호>/devices/`에서 같은 group의 장치를 먼저 봅니다.
+커널 문서는 group 안의 장치가 모두 VFIO driver에 묶여야(또는 host driver에서 떼어져야) group을 다룰 수 있다고 적습니다(`vfio.rst:91-96`). 위 순서의 `VFIO_GROUP_FLAGS_VIABLE` 확인이 그 검사입니다. `/sys/kernel/iommu_groups/<번호>/devices/`에서 같은 group의 장치를 먼저 봅니다.
 
 > ⚠️ IOMMU 없이 VFIO
 
