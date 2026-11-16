@@ -20,7 +20,7 @@ CXL 메모리 디바이스가 "안 보인다"는 한 증상 뒤에는 여러 층
 
 | 항목 | 값 |
 |------|-----|
-| 에뮬레이터 | QEMU 11.1.3 `virt,cxl=on`, TCG (HVF로는 CXL 구성이 부팅되지 않음) |
+| 에뮬레이터 | QEMU 11.1.3 `virt,cxl=on`, TCG |
 | CXL 구성 | `pxb-cxl` + `cxl-rp` + `cxl-type3`(volatile 256 MiB, LSA 256 MiB, serial 0x5), CFMW 4 GiB |
 | 게스트 | Debian 13.7 arm64, 커널 6.12.116+deb13-arm64 |
 | 도구 | pciutils 3.13.0, ndctl/cxl-cli 81 |
@@ -42,7 +42,7 @@ qemu-system-aarch64 -M virt,gic-version=3,cxl=on -m 4g,maxmem=8g,slots=4 -cpu ma
 
 ## LTSSM — 어디서 멈췄나
 
-LTSSM(Link Training and Status State Machine)은 PCIe 링크를 학습시키는 상태 머신입니다. 링크가 정상 동작 상태(L0)에 이르지 못하면 그 너머의 config space 접근이 되지 않으므로, 호스트 소프트웨어에서는 디바이스가 아예 보이지 않습니다. 상태별 정의는 PCI-SIG의 PCIe Base Specification에 있지만, 이 글을 쓰며 그 문서를 열람하지 못해 상태별 동작 설명은 적지 않습니다.
+LTSSM(Link Training and Status State Machine)은 PCIe 링크를 학습시키는 상태 머신입니다. 상태별 정의는 PCI-SIG의 PCIe Base Specification에 있지만, 이 글을 쓰며 그 문서를 열람하지 못해 상태별 동작 설명은 적지 않습니다.
 
 현재 상태는 *컨트롤러 레지스터*로만 볼 수 있고, 위치와 인코딩은 컨트롤러마다 다릅니다. 예를 들어 Linux의 Synopsys DesignWare PCIe 드라이버(`drivers/pci/controller/dwc/pcie-designware.h`)는 `PCIE_PORT_DEBUG0`(0x728)의 비트 [5:0]에서 LTSSM 상태를 읽고(`PORT_LOGIC_LTSSM_STATE_MASK 0x3f`), 그 값을 `DW_PCIE_LTSSM_DETECT_QUIET = 0x0`, `DW_PCIE_LTSSM_DETECT_ACT = 0x1`, `DW_PCIE_LTSSM_L0 = 0x11`, `DW_PCIE_LTSSM_L2_IDLE = 0x15`로 해석합니다. 다른 컨트롤러라면 그 SoC의 레퍼런스 매뉴얼과 해당 Linux 드라이버에서 같은 정보를 찾아야 합니다.
 
@@ -68,15 +68,17 @@ CXL 메모리 디바이스는 클래스 코드 0x0502로 보이고, `lspci -vvv`
 
 ### 2. 링크 속도·폭
 
-디바이스와 루트 포트의 `LnkCap`/`LnkSta`입니다.
+디바이스와 루트 포트의 `LnkCap`/`LnkSta`입니다(사이의 `LnkCtl` 등은 `...`로 생략).
 
 ```text
 0d:00.0 (type 3 device)
 		LnkCap:	Port #0, Speed 32GT/s, Width x16, ASPM L0s, Exit Latency L0s <64ns
+		...
 		LnkSta:	Speed 32GT/s, Width x16
 			TrErr- Train- SlotClk- DLActive- BWMgmt- ABWMgmt-
 0c:00.0 (cxl-rp root port)
 		LnkCap:	Port #0, Speed 64GT/s, Width x32, ASPM L0s, Exit Latency L0s <64ns
+		...
 		LnkSta:	Speed 32GT/s, Width x16
 ```
 
@@ -84,15 +86,21 @@ CXL 메모리 디바이스는 클래스 코드 0x0502로 보이고, `lspci -vvv`
 
 ### 3. CXL DVSEC
 
+`0d:00.0`의 `lspci -vvv` 출력에서 DVSEC 부분만 골랐습니다(생략한 줄은 `...`).
+
 ```text
 	Capabilities: [10c v1] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=3 Len=60: CXL
 		PCIe DVSEC for CXL Devices
 		CXLCap:	Cache- IO+ Mem+ MemHWInit+ HDMCount 1 Viral-
 		CXLCtl:	Cache- IO+ Mem+ CacheSFCov 0 CacheSFGran 0 CacheClean- Viral-
+		...
 	Capabilities: [148 v1] Designated Vendor-Specific: Vendor=1e98 ID=0008 Rev=0 Len=36: CXL
+		Register Locator DVSEC
+		...
 		Block2: BIR: bar2, ID: CXL device registers, offset: 0000000000000000
 	Capabilities: [16c v1] Designated Vendor-Specific: Vendor=1e98 ID=0005 Rev=0 Len=16: CXL
 		GPF DVSEC for CXL Devices
+		...
 	Kernel driver in use: cxl_pci
 ```
 
@@ -119,7 +127,7 @@ $ dmesg | grep -i cxl
 
 ### 드라이버가 일부만 있으면
 
-"lspci에는 있는데 CXL 토폴로지가 비어 있다"는 상황을 모듈을 빼서 재현했습니다.
+"lspci에는 있는데 CXL 토폴로지가 비어 있다"는 상황을 모듈을 빼서 재현했습니다(`lsmod`·`sleep` 줄과 디렉터리 목록 일부는 생략).
 
 ```text
 + modprobe -r cxl_pmem cxl_mem cxl_pci cxl_acpi
@@ -135,6 +143,14 @@ decoder0.0
 decoder1.0
 ...
 root0
++ cxl list -M -u
+{
+  "memdev":"mem0",
+  "ram_size":"256.00 MiB (268.44 MB)",
+  "serial":"0x5",
+  "host":"0000:0d:00.0",
+  "firmware_version":"BWFW VERSION 00"
+}
 ```
 
 `cxl_pci`만 올리면 `mem0`은 생기지만 `cxl list -M`은 아무것도 출력하지 않았습니다. `cxl_acpi`(CEDT로 루트와 host bridge를 만듦)와 `cxl_mem`(endpoint를 붙임)까지 올라와야 `root0`·`port1`·디코더와 함께 memdev가 목록에 나왔습니다. 그러니 `/sys/bus/cxl/devices/`가 비거나 일부만 있으면 `lsmod | grep cxl`부터 봅니다. 실험 환경에서는 `cxl_pmem`, `cxl_mem`, `cxl_pci`, `cxl_acpi`가 기본으로 올라와 있었습니다.
@@ -175,7 +191,7 @@ $ cxl list -M -D -P -T -u
     ]
 ```
 
-(출력은 공백을 줄이고 일부 키를 `...`로 생략했습니다.) 루트 디코더 `decoder0.0`의 4 GiB는 QEMU 명령줄의 `cxl-fmw.0.size=4G`(CFMWS)이고, 대상이 host bridge `pci0000:0c`입니다. `decoders_committed`가 0인 것은 아직 region을 만들지 않았기 때문입니다. 이 arm64 커널에서 region 생성까지 가는 과정은 [Postmortem Debugging Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)가 다룹니다.
+(출력은 공백을 줄이고 일부 키를 `...`로 생략했습니다.) 루트 디코더 `decoder0.0`의 4 GiB는 QEMU 명령줄의 `cxl-fmw.0.size=4G`(CFMWS)이고, 대상이 host bridge `pci0000:0c`입니다. `decoders_committed`가 0인 것은 아직 region을 만들지 않았기 때문입니다. 이 arm64 커널에서 region 생성을 시도하면 커밋 단계에서 실패하는 과정은 [Postmortem Debugging Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)가 다룹니다.
 
 ## 자주 만나는 함정
 

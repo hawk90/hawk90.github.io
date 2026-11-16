@@ -12,7 +12,7 @@ topics: ["tools", "tools/debugging"]
 
 ## 왜 별도 진단이 필요한가
 
-[Ch 8](/blog/tools/debugging/embedded/chapter08-cxl-link-debug)에서 링크와 등록을 봤습니다. 링크가 정상이어도 디바이스 *내부*에서 문제가 생길 수 있습니다. 메모리 매체의 오류나 손상된 주소는 링크 진단으로는 보이지 않고, CXL이 정의한 *Event Log*와 *poison list*를 통해서만 호스트에 알려집니다.
+[Ch 8](/blog/tools/debugging/embedded/chapter08-cxl-link-debug)에서 링크와 등록을 봤습니다. 링크가 정상이어도 디바이스 *내부*에서 문제가 생길 수 있습니다. 메모리 매체의 오류나 손상된 주소는 링크 진단으로는 보이지 않고, CXL이 정의한 *Event Log*와 *poison list*를 통해 호스트에 알려집니다.
 
 이 장은 Linux 드라이버가 그 정보를 어떻게 가져오는지 소스로 확인하고, QEMU의 CXL type-3 장치에 오류를 *주입*해 실제로 어떤 출력이 나오는지 봅니다.
 
@@ -145,7 +145,7 @@ $ cxl list -m mem0 -L -u
 
 같은 "주입"인데 `source`가 다릅니다. debugfs는 드라이버가 Inject Poison mailbox 명령을 보내는 경로라 `Injected`이고(커널 ABI 문서 `debugfs-cxl`도 "error source is set to Injected"라고 적습니다), QMP는 QEMU가 장치 모델 안에서 직접 레코드를 만들며, v11.1.3 `hw/mem/cxl_type3.c`의 `qmp_cxl_inject_poison()`이 그 레코드의 type을 `CXL_POISON_TYPE_INTERNAL`로 넣기 때문에 `Internal`로 보였습니다. 테스트에서 source로 걸러 낸다면 어떤 경로로 넣었는지에 따라 결과가 달라집니다. `source` 문자열은 커널 `trace.h`의 `__show_poison_source`(Unknown, External, Internal, Injected, Vendor)와 같고, ndctl 문서는 그 정의를 "CXL Specification v3.1 Table 8-140"으로 들고 있습니다. 이 장에서 CXL 명세 원문은 열람하지 못했습니다.
 
-`offset`은 memdev로 조회하면 디바이스 DPA, region으로 조회하면 region 기준입니다(ndctl 문서). `trigger_poison_list`에 1을 쓰면 드라이버가 목록을 가져와 `cxl_poison` trace event로 남깁니다.
+`offset`은 memdev로 조회하면 디바이스 DPA, region으로 조회하면 region 기준입니다(ndctl 문서). `trigger_poison_list`에 1을 쓰면 드라이버가 목록을 가져와, `cxl_poison` 이벤트 tracing이 켜져 있으면 trace event로 남깁니다(ABI 문서).
 
 ```text
             bash-757     [000] .....   222.969116: cxl_poison: memdev=mem0 host=0000:0d:00.0 serial=5 trace_type=List region= region_uuid=00000000-0000-0000-0000-000000000000 hpa=0xffffffffffffffff dpa=0x1000 dpa_length=0x40 source=Internal flags= overflow_time=0
@@ -225,7 +225,7 @@ General Media 이벤트는 serial 5로 잡혔고, `@ce`는 비어 있었습니�
 |------|------|
 | `cxl list -H`에 `health`가 없음 | 장치가 Get Health Info를 지원하지 않음. 오류 없이 키만 빠짐 (QEMU mailbox 명령 표, 이 장의 실행) |
 | `cxl monitor --daemon` 로그에 `tracefs_instance_file_open() err: -1` | 원인 미확인. 포그라운드 실행은 동작 (이 장의 실행) |
-| `source`가 `Injected`가 아님 | 장치 모델이 직접 만든 레코드는 다른 source로 보일 수 있음 (QMP 주입 = `Internal`) |
+| `source`가 `Injected`가 아님 | QEMU QMP `cxl-inject-poison`이 만든 레코드는 `Internal` (`qmp_cxl_inject_poison()`, 이 장의 실행) |
 | `cxl monitor`에 이벤트가 안 나옴 | host bridge `native_cxl_error`가 꺼져 펌웨어가 처리 (`cxl_event_config()`) |
 | dmesg `No interrupt support, disable event processing.` | MSI/MSI-X 벡터를 못 얻어 이벤트 처리 비활성 (`drivers/cxl/pci.c`) |
 | dmesg `FW still in control of Event Logs despite _OSC settings` | _OSC는 OS 제어인데 장치의 interrupt policy가 펌웨어 모드, `-EBUSY` (`drivers/cxl/pci.c`) |
