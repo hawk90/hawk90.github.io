@@ -80,6 +80,8 @@ SPI 분주는 `twc` ≥ 100 ns를 지키는 가장 빠른 값으로 고릅니다
 ```c
 void tft_init(void) {
     spi_init_master(3);               // BR = 3: 84 MHz / 16 = 5.25 MHz (twc >= 100 ns, 18.3.4)
+    gpio_init(GPIOA, 2, &(gpio_config_t){.mode=GPIO_MODE_OUTPUT});  // RESX
+    gpio_init(GPIOA, 3, &(gpio_config_t){.mode=GPIO_MODE_OUTPUT});  // D/CX
 
     // Hardware reset: RESX low >= 10 us, reset cancel up to 120 ms (15.4)
     GPIOA->BSRR = (1u << (2+16));
@@ -253,7 +255,7 @@ void LTDC_IRQHandler(void) {
 | 화면 | 해석 |
 |------|------|
 | 빨강 | 합격. MADCTL BGR 비트가 패널과 맞음 |
-| 파랑 | 실패. R/B가 뒤바뀜. MADCTL을 0x48 → 0x40으로 바꿔 BGR(D3)만 끕니다. 0x08로 바꾸면 열 주소 순서 MX(D6)까지 바뀝니다 |
+| 파랑 | 실패. R/B가 뒤바뀜. MADCTL을 0x48 → 0x40으로 바꿔 BGR(D3)만 끕니다. 0x08로 바꾸면 BGR은 1 그대로라 색은 고쳐지지 않고 MX(D6)만 꺼져 열 주소 순서만 바뀝니다 |
 
 **LTDC 타이밍.** 스코프로 LTDC의 HSYNC·VSYNC 신호를 봅니다.
 
