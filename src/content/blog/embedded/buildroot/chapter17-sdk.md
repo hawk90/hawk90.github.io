@@ -32,15 +32,15 @@ SDK가 이 둘을 분리합니다. 시스템 팀이 *frozen toolchain + sysroot*
 2. `output/host/` 안에서 원래 경로(`$(HOST_DIR)`)를 포함한 *텍스트 파일* 목록을 `share/buildroot/sdk-relocs`에, 원래 경로를 `share/buildroot/sdk-location`에 적습니다.
 3. `sdk`: `tar czf … --owner=0 --group=0 --numeric-owner --transform=…`로 `output/host/`를 묶습니다. 이름 앞부분은 `BR2_SDK_PREFIX ?= $(GNU_TARGET_NAME)_sdk-buildroot`입니다.
 
-`environment-setup`은 기본으로 들어가지 않습니다. 매뉴얼대로 `BR2_PACKAGE_HOST_ENVIRONMENT_SETUP`을 켜야 `output/host/environment-setup`이 생깁니다. 이 옵션을 켜고 `make sdk`를 돌린 결과입니다(이미 빌드된 트리에서 69.53초).
+`environment-setup`은 기본으로 들어가지 않습니다. 매뉴얼대로 `BR2_PACKAGE_HOST_ENVIRONMENT_SETUP`을 켜야 `output/host/environment-setup`이 생깁니다. 이 옵션을 켜고 `make sdk`를 돌린 결과입니다(이미 빌드된 트리에서 41.12초).
 
 ```text
 >>>   Preparing the SDK
 >>>   Generating SDK tarball
 $ ls -l output/images/*sdk*
--rw-r--r-- 1 br br 289781192 Nov 16 04:18 output/images/aarch64-buildroot-linux-gnu_sdk-buildroot.tar.gz
+-rw-r--r-- 1 br br 290255986 Nov 16 07:22 output/images/aarch64-buildroot-linux-gnu_sdk-buildroot.tar.gz
 $ wc -l output/host/share/buildroot/sdk-relocs
-465 output/host/share/buildroot/sdk-relocs
+466 output/host/share/buildroot/sdk-relocs
 $ cat output/host/share/buildroot/sdk-location
 /home/br/buildroot/output/host
 ```
@@ -346,27 +346,27 @@ SDK에는 Buildroot revision을 적은 파일이 따로 들어가지 않습니�
 
 ## Yocto SDK와의 차이
 
-Yocto 생태계에도 SDK가 있고 흐름이 비슷해 보이지만 차이가 있습니다.
+Yocto 생태계에도 SDK가 있고 흐름이 비슷해 보이지만 차이가 있습니다. Yocto SDK는 이 장에서 빌드하지 않았으므로, Yocto 열은 Yocto Project 5.0(scarthgap) 문서의 `sdk-manual/intro.rst`(standard·extensible 비교표), `appendix-obtain.rst`(생성 명령), `using.rst`·`extensible.rst`(설치 스크립트)에서 옮겼습니다.
 
 | 항목 | Buildroot SDK | Yocto SDK (`populate_sdk`) | Yocto eSDK |
 |---|---|---|---|
 | **생성 명령** | `make sdk` | `bitbake -c populate_sdk <image>` | `bitbake -c populate_sdk_ext <image>` |
 | **구성** | host toolchain + target sysroot | host toolchain + target sysroot | 위 모두 + *devtool* + recipe 추가 |
 | **recipe 추가** | 불가 (Buildroot 트리 따로 빌드) | 불가 (다시 populate 필요) | 가능 (`devtool add`) |
-| **인스톨러** | tarball + relocate-sdk.sh | self-extracting `.sh` (설치 디렉터리를 한 번 물음) | self-extracting `.sh` |
-| **크기** | 이 장의 QEMU 설정에서 압축 290 MB / 해제 1.1 GB | 측정하지 않음 | 측정하지 않음 |
-| **재현성** | Buildroot revision으로 확정 | layer revision·hash 매트릭스 | 위와 동일 |
+| **인스톨러** | tarball + relocate-sdk.sh | `*.sh` 설치 스크립트 ("Enter target directory for SDK"를 물음) | `*.sh` 설치 스크립트 |
+| **크기** | 이 장의 QEMU 설정에서 압축 290 MB / 해제 1.1 GB (실측) | 문서: "100+ MBytes" | 문서: "1+ GBytes (or 300+ MBytes for minimal w/toolchain)" |
+| **sysroot 관리** | 고정 (tarball 그대로) | 문서: Managed Sysroot "No" | 문서: "Yes" (`devtool`로 관리) |
 
 Yocto의 *eSDK*는 application 개발자가 *자기 환경에서 새 recipe를 추가*할 수 있게 해 줍니다. *시스템 팀에 가지 않고도* 새 라이브러리를 SDK에 끼워 빌드해 보고, 검증되면 시스템 팀에 PR로 올리는 흐름입니다. Buildroot SDK는 *static*이라 이 흐름이 안 됩니다. 새 라이브러리가 필요하면 시스템 팀이 Buildroot 트리에 추가 후 SDK를 *재발급*해야 합니다.
 
-이 차이는 *팀 구조*에서 의미가 있습니다. application 팀이 빈번하게 새 의존성을 요구하는 환경이라면 Yocto eSDK가 마찰을 줄여 줍니다. 의존성이 비교적 안정적이고 시스템 팀이 통제권을 갖는 환경(임베디드·산업 제품 다수)이라면 Buildroot SDK의 단순함이 더 큰 장점입니다.
+이 차이는 *팀 구조*에서 의미가 있습니다. application 팀이 빈번하게 새 의존성을 요구하는 환경이라면 Yocto eSDK가 마찰을 줄여 줍니다. 의존성이 비교적 안정적이고 시스템 팀이 통제권을 갖는 환경이라면 Buildroot SDK의 단순함이 더 큰 장점입니다.
 
 ## 흔한 실수
 
 다음은 SDK 배포에서 반복적으로 나오는 사고들입니다.
 
 **relocate를 안 한 채 쓴다.**
-`environment-setup`과 `toolchainfile.cmake`는 자기 위치에서 경로를 계산하지만, `sdk-relocs`에 적힌 465개 텍스트 파일(`.pc`, autotools 스크립트 등)은 원래 경로를 담고 있습니다. 매뉴얼은 압축을 푼 뒤 "the user must run the script `relocate-sdk.sh`"라고 적습니다.
+`environment-setup`과 `toolchainfile.cmake`는 자기 위치에서 경로를 계산하지만, `sdk-relocs`에 적힌 466개 텍스트 파일(`.pc`, autotools 스크립트 등)은 원래 경로를 담고 있습니다. 매뉴얼은 압축을 푼 뒤 "the user must run the script `relocate-sdk.sh`"라고 적습니다.
 
 **다른 host architecture에서 사용한다.**
 시스템 팀이 x86_64 Linux로 만든 SDK를 ARM Mac 개발자가 받아 풀면 cross compiler 자체가 *실행 안 됩니다*. host architecture별로 SDK를 따로 발급하거나, 사내 표준 host를 *하나로 통일*해야 합니다.
