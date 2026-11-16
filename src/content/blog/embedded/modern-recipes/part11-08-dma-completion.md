@@ -269,7 +269,7 @@ void HAL_UART_RxCpltCallback(UART_HandleTypeDef *h)
 | IRQ vs polling 대기 | QEMU 11.1 `edu` 장치, Debian 13 arm64 게스트(HVF) | 둘 다 약 100 ms(모델의 고정 지연). IRQ는 sys 0.00 s, polling은 sys 0.10 s에 상태 읽기 약 8.6만~8.8만 번 |
 | phase 확인 뒤 payload 읽기 | Apple M2 Pro, 스레드가 장치 역할 | 2억 건 중 fence 없음 12.8만~14.4만 건 stale, fence 있음 0건 |
 
-이 표의 숫자를 다른 장치에 옮기면 안 됩니다. edu의 100 ms는 모델이 정한 값이고, 상태 읽기 한 번의 비용도 QEMU의 MMIO 에뮬레이션 비용입니다. 실제 보드에서 IRQ 한 번의 비용이나 polling 한 번의 비용은 그 보드에서 재야 하며, 이 글은 그런 측정값을 갖고 있지 않습니다. NVMe나 NIC의 IOPS·지연 비교표도 같은 이유로 싣지 않습니다.
+이 표의 숫자를 다른 장치에 옮기면 안 됩니다. edu의 100 ms는 모델이 정한 값이고, 상태 읽기 한 번의 비용도 QEMU의 MMIO 에뮬레이션 비용입니다. 실제 보드에서 IRQ 한 번의 비용이나 polling 한 번의 비용은 그 보드에서 재야 하며, 이 글에는 그런 측정값이 없습니다. NVMe나 NIC의 IOPS·지연 비교표도 같은 이유로 싣지 않습니다.
 
 재야 할 때는 같은 실험 틀을 그대로 쓸 수 있습니다. 대기 방식별로 `/usr/bin/time`의 sys 시간(또는 `perf stat`의 task-clock)과 완료 지연의 분포(p50·p99)를 함께 기록하면, polling이 줄여 준 지연과 그 대가로 쓴 CPU가 한 표에 나옵니다.
 
@@ -282,7 +282,7 @@ while (!(readl(regs + STATUS) & DONE))
 	cpu_relax();
 ```
 
-커널에서 busy-wait 루프는 `cpu_relax()`를 넣는 것이 관례입니다. 커널 소스에서 이 함수는 arm64에서 `yield` 명령, x86에서 `rep; nop`(PAUSE)이고, x86 쪽 주석은 "REP NOP (PAUSE) is a good thing to insert into busy-wait loops"라고 적습니다([arm64](https://github.com/torvalds/linux/blob/v6.12/arch/arm64/include/asm/vdso/processor.h), [x86](https://github.com/torvalds/linux/blob/v6.12/arch/x86/include/asm/vdso/processor.h)). 이 힌트가 코어를 덜 태우는 것은 아니므로, 기다림이 길다면 polling 자체를 IRQ로 바꿔야 합니다. 위 edu 실험에서 100 ms가 고스란히 sys 시간이 된 것처럼요.
+커널에서 busy-wait 루프는 `cpu_relax()`를 넣는 것이 관례입니다. 커널 소스에서 이 함수는 arm64에서 `yield` 명령, x86에서 `rep; nop`(PAUSE)이고, x86 쪽 주석은 "REP NOP (PAUSE) is a good thing to insert into busy-wait loops"라고 적습니다([arm64](https://github.com/torvalds/linux/blob/v6.12/arch/arm64/include/asm/vdso/processor.h), [x86](https://github.com/torvalds/linux/blob/v6.12/arch/x86/include/asm/vdso/processor.h)). 이 힌트가 코어를 덜 태우는 것은 아니므로, 기다림이 길다면 polling 자체를 IRQ로 바꿔야 합니다. 위 edu 실험에서도 100 ms가 고스란히 sys 시간이 됐습니다.
 
 > IRQ coalescing을 크게 잡고 throughput만 보기
 
