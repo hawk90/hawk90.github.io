@@ -52,7 +52,7 @@ void process_frame() {
 }
 ```
 
-`ZoneScoped`는 RAII 객체라 scope에 들어갈 때와 나갈 때 timestamp를 남깁니다. 매뉴얼 1.7절은 etcpak 압축에 zone 16,777,216개를 단 실험에서 zone 하나(시작·끝 이벤트 둘)의 비용을 2.25 ns로 계산합니다. 이 값을 그대로 믿기 전에 직접 재 봤습니다. `ZoneScopedN`을 단 함수를 200만 번 부르고 호출당 시간을 쟀습니다(서버는 연결하지 않았고, 다섯 번 실행).
+`ZoneScoped`는 RAII 객체라 scope에 들어갈 때와 나갈 때 timestamp를 남깁니다. 매뉴얼 1.7절은 etcpak 압축에 zone 16,777,216개를 단 실험에서 zone 하나(시작·끝 이벤트 둘)의 비용을 2.25 ns로 계산합니다. 다만 이 값은 12개 스레드가 병렬로 압축한 이미지 한 장의 wall-clock 차이(37.7 ms)를 전체 zone 수로 나눈 것이라, 스레드 하나가 zone 하나에 쓰는 시간이 아닙니다. 또 매뉴얼 2.1.10.5절은 가상 머신에서는 timestamp 정밀도가 떨어질 수 있으니 bare metal에서 돌리라고 권합니다. 이 두 점을 염두에 두고 직접 재 봤습니다. `ZoneScopedN`을 단 함수를 200만 번 부르고 호출당 시간을 쟀습니다(서버는 연결하지 않았고, 다섯 번 실행).
 
 | 환경 | `TRACY_ENABLE` 없음 | `TRACY_ENABLE` | zone당 증가분(중앙값) |
 |---|---|---|---|
@@ -67,7 +67,7 @@ VM에서 여섯 배 넘게 비싼 이유는 timer입니다. Tracy v0.15.0의 `Tr
 Tracy의 기능 중 매뉴얼에서 확인한 것은 다음과 같습니다.
 
 - 대상 애플리케이션과 GUI가 네트워크로 분리되어, 임베디드 보드에서 기록하고 PC에서 봅니다.
-- 메모리 할당과 lock 표시(3.6절), 데드락 탐지 창(5.19절)이 있습니다.
+- lock 표시(3.6절 "Marking locks")와 메모리 프로파일링(3.9절), 데드락 탐지 창(5.19절)이 있습니다.
 - GPU zone은 3.10절에 OpenGL·Vulkan·Direct3D·CUDA 등 API별로 나뉘어 있습니다.
 - 한 세션은 1.6일을 넘길 수 없습니다(제약 목록).
 
@@ -88,7 +88,7 @@ README는 backtrace를 얻으려면 "dwarf callgraph mode"를 켜라고 안내�
 
 ## uftrace — 사용자 함수 전체 trace
 
-[uftrace](https://github.com/namhyung/uftrace)는 사용자 공간 함수의 진입과 반환을 ftrace의 function_graph처럼 기록합니다. README(v0.17)에 따르면 계측 방법은 두 가지입니다. `-pg`·`-finstrument-functions`·`-fpatchable-function-entry=N`으로 컴파일한 코드를 쓰거나(aarch64는 `=2`면 충분), `-P.`로 함수를 동적으로 패치합니다. 동적 추적은 x86_64와 AArch64에서 지원합니다.
+[uftrace](https://github.com/namhyung/uftrace)는 사용자 공간 함수의 진입과 반환을 ftrace의 function_graph처럼 기록합니다. README(v0.17)에 따르면 계측 방법은 두 가지입니다. `-pg`·`-finstrument-functions`·`-fpatchable-function-entry=N`으로 컴파일한 코드를 쓰거나(aarch64는 `=2`면 충분), `-P.`로 함수를 동적으로 패치합니다. README는 재컴파일이 필요 없는 동적 추적을 x86_64와 AArch64의 "experimental support"로 적습니다.
 
 예제로 `parse_input()`과 `process()` → `compute()` → `inner_loop()` 두 번을 부르는 작은 프로그램을 `gcc -O2 -pg`로 빌드했습니다.
 
@@ -129,16 +129,16 @@ libc의 0x2225c는 정상 명령인 `bl exit`이고, 바로 앞이 `main`을 부
 
 ### -pg와 uftrace의 비용
 
-같은 프로그램을 20,000회 반복으로 돌려 다섯 번 실행의 중앙값을 비교했습니다(`flock`으로 다른 벤치마크와 겹치지 않게 했습니다).
+같은 프로그램을 1회 반복과 20,000회 반복으로 돌려 다섯 번 실행의 중앙값을 비교했습니다(`flock`으로 다른 벤치마크와 겹치지 않게 했습니다).
 
-| 빌드·실행 | 시간(중앙값) |
-|---|---|
-| `gcc -O2` | 151 ms |
-| `gcc -O2 -pg`, uftrace 없이 실행 | 151 ms |
-| `uftrace record -F parse_input -F process` | 265 ms |
-| `uftrace record -F process -D 1` | 255 ms |
+| 빌드·실행 | 1회 반복 | 20,000회 반복 |
+|---|---|---|
+| `gcc -O2` | 0 ms | 148 ms |
+| `gcc -O2 -pg`, uftrace 없이 실행 | 0 ms | 150 ms |
+| `uftrace record -F parse_input -F process` | 103 ms | 269 ms |
+| `uftrace record -F process -D 1` | 102 ms | 252 ms |
 
-`-pg`로 들어간 `_mcount` 호출 자체는 uftrace 없이 실행하면 차이가 보이지 않았습니다. uftrace를 붙이면 약 1.75배가 됐고, 깊이를 1로 제한(`-D 1`)해도 크게 줄지 않았습니다. 한 반복에 함수가 열 개 안팎 불리는 짧은 함수 위주의 프로그램이라 진입마다 드는 고정 비용이 지배적입니다.
+`-pg`로 들어간 `_mcount` 호출 자체는 uftrace 없이 실행하면 차이가 보이지 않았습니다. uftrace를 붙인 쪽은 1회 반복에서 이미 약 100 ms가 걸렸습니다. 이 값은 기록 준비와 종료 처리에 드는 고정 비용입니다. 20,000회에서 1회 값을 빼면 `-F parse_input -F process`는 166 ms로 계측 없는 실행(148 ms)보다 약 18 ms, 반복 하나에 약 0.9 µs 더 듭니다. 한 반복에 기록되는 함수는 `parse_input`·`malloc`·`memcpy`·`free`·`process`·`compute`·`inner_loop` 두 번으로 여덟 개입니다. `-D 1`로 깊이를 1로 줄이면 늘어난 몫이 약 2 ms로 작아졌습니다. 그러니 짧은 프로그램에서는 고정 비용이, 오래 도는 프로그램에서는 기록하는 함수 수가 비용을 정합니다.
 
 ## Coz — Causal Profiler
 
@@ -185,7 +185,7 @@ xcrun xctrace record --template 'Time Profiler' --output tp.trace --launch -- ./
 |---|---|---|
 | Frame 기반 시스템의 구간 분석 | Tracy | zone당 Mac 약 7.6 ns, Linux arm64 VM 약 47 ns |
 | perf record 결과를 GUI로 | Hotspot | x86_64 AppImage만 배포, dwarf callgraph 권장 |
-| 사용자 함수 전체 호출 trace | uftrace | 이 예제에서 약 1.75배, BTI glibc에서 main 추적 시 SIGILL |
+| 사용자 함수 전체 호출 trace | uftrace | 기록 고정 비용 약 100 ms + 함수 진입당 비용, BTI glibc에서 main 추적 시 SIGILL |
 | 어디를 최적화해야 효과적인지 | Coz | 논문 기준 평균 17% 오버헤드 |
 | GPU와 CPU 통합 (NVIDIA) | Nsight Systems | [5-08](/blog/embedded/performance-engineering/part5-08-nsight) |
 | macOS 전체 | Instruments(`xctrace`) | Time Profiler 1 ms 샘플 |
@@ -232,13 +232,13 @@ Progress point는 "더 자주 일어나기를 바라는 일"의 단위여야 합
 
 > ⚠️ Hotspot에는 frame pointer가 필수라고 생각하기
 
-Hotspot README가 권하는 것은 `--call-graph dwarf`입니다. 이 guest에서 같은 프로그램을 `perf record -e cpu-clock`으로 기록해 보니, gcc 14.2의 `-O2` 기본값이 `-fomit-frame-pointer [enabled]`인데도 `--call-graph fp`로 `main → compute → inner_loop`가 이어졌습니다. 디스어셈블리를 보면 leaf가 아닌 `compute`가 `stp x29, x30`으로 frame record를 그대로 만들었기 때문입니다. 반대로 `--call-graph dwarf`는 같은 체인을 복원했지만 libc 위쪽 두 frame이 `0x2bffffa5e2233b` 같은 값으로 찍혔습니다. 하위 48 bit(`0xffffa5e2233b`)는 libc 주소 범위인데 상위에 `0x2b`가 붙어 있어, PAC로 서명된 반환 주소의 서명 bit가 지워지지 않은 것으로 읽힙니다. arm64에서는 두 방식을 모두 찍어 비교합니다.
+Hotspot README가 권하는 것은 `--call-graph dwarf`입니다. 이 guest에서 같은 프로그램을 `perf record -e cpu-clock`으로 기록해 보니, gcc 14.2의 `-O2` 기본값이 `-fomit-frame-pointer [enabled]`인데도 `--call-graph fp`로 `main → compute → inner_loop`가 이어졌습니다. 디스어셈블리를 보면 leaf가 아닌 `compute`가 `stp x29, x30`으로 frame record를 그대로 만들었습니다. 그런데 커널의 arm64 user unwinder는 x29에서 시작하므로, leaf인 `inner_loop`를 부른 `compute` 자체는 frame record로는 나오지 않습니다. 이 칸을 채운 것은 perf 도구 쪽입니다. Linux v6.12 `tools/perf/arch/arm64/util/machine.c`의 `arch__add_leaf_frame_record_opts()`가 샘플에 LR 레지스터를 함께 기록하게 하고(이 기록의 `sample_regs_user = 0x40000000`이 LR bit입니다), `tools/perf/util/arm64-frame-pointer-unwind-support.c`의 `get_leaf_frame_caller_aarch64()`가 그 LR로 leaf의 호출자를 끼워 넣습니다. 반대로 `--call-graph dwarf`는 같은 체인을 복원했지만 libc 위쪽 두 frame이 `0x2bffffa5e2233b` 같은 값으로 찍혔습니다. 하위 48 bit(`0xffffa5e2233b`)는 libc 주소 범위인데 상위에 `0x2b`가 붙어 있어, PAC로 서명된 반환 주소의 서명 bit가 지워지지 않은 것으로 읽힙니다. arm64에서는 두 방식을 모두 찍어 비교합니다.
 
 ## 정리
 
-- Tracy zone 비용은 timer 경로가 정합니다. Mac(CNTVCT)에서 약 7.6 ns, Linux arm64 VM(`clock_gettime`)에서 약 47 ns였고, 매뉴얼의 2.25 ns는 다른 플랫폼의 값입니다.
+- Tracy zone 비용은 timer 경로가 정합니다. Mac(CNTVCT)에서 약 7.6 ns, Linux arm64 VM(`clock_gettime`)에서 약 47 ns였습니다. 매뉴얼의 2.25 ns는 12개 스레드의 wall-clock 차이를 zone 수로 나눈 값이라 스레드당 비용과 직접 비교할 수 없습니다.
 - Hotspot은 `--call-graph dwarf`로 기록한 `perf.data`를 보여 주며, 배포 AppImage는 x86_64용뿐입니다.
-- uftrace는 `-pg` 또는 동적 패치로 사용자 함수의 진입·반환을 기록하고, 이 예제에서 실행 시간이 약 1.75배가 됐습니다.
+- uftrace는 `-pg` 또는 동적 패치로 사용자 함수의 진입·반환을 기록합니다. 이 예제에서는 기록 고정 비용이 약 100 ms였고, 20,000회 반복에서 늘어난 몫은 반복당 약 0.9 µs였습니다.
 - BTI가 켜진 arm64 glibc에서는 uftrace로 `main`을 추적하면 SIGILL이 납니다.
 - Coz는 virtual speedup으로 "고치면 효과가 있는 줄"을 찾으며, 논문 기준 평균 오버헤드는 17%입니다.
 - Instruments는 `xctrace`로 GUI 없이 기록하고 표로 추출할 수 있습니다.

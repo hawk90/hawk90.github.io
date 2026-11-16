@@ -37,7 +37,7 @@ nsys profile -t cuda,nvtx,osrt -o report ./app  # trace할 API 선택
 
 Timeline에서 가장 먼저 구분할 것은 *CPU 쪽 API 구간*과 *GPU 쪽 실행 구간*입니다. `cudaMemcpyAsync`나 kernel launch 호출이 CPU 행에서 짧게 끝났다고 GPU 작업이 끝난 것이 아닙니다. 호출은 작업을 큐에 넣고 돌아올 뿐이고, 실제 실행은 GPU 행에 따로 그려집니다. 두 행이 어긋나 있으면 그 사이는 큐에서 기다린 시간입니다.
 
-`-t cuda`의 수집 방식도 GPU 세대에 따라 다릅니다. User Guide는 Blackwell부터 지원 GPU에서 `cuda` 옵션이 기본으로 CUDA hardware trace(HES trace)를 쓰고, 짧은 kernel을 많이 띄우는 워크로드에서 기존 software trace보다 대체로 빠르다고 적습니다. MPS·MIG·vGPU·VM 환경 등에서는 `cuda-sw`로 예전 방식을 강제할 수 있고, hardware trace가 안 되면 software trace로 자동 전환한 뒤 Diagnostics Summary에 어떤 방식이었는지 남깁니다.
+`-t cuda`의 수집 방식도 GPU 세대에 따라 다릅니다. User Guide는 Blackwell부터 지원 GPU에서 `cuda` 옵션이 기본으로 CUDA hardware trace(HES trace)를 쓰고, 짧은 kernel을 많이 띄우는 워크로드에서 기존 software trace보다 대체로 빠르다고 적습니다. MPS·MIG·vGPU·VM 환경 등에서는 `cuda-sw`로 예전 방식을 강제할 수 있고, 문서 표현으로는 hardware trace를 수집할 수 없으면 software trace로 "may fall back"하며, 실제로 쓴 방식을 Diagnostics Summary에 남깁니다.
 
 ## NVTX Annotation
 
@@ -135,7 +135,7 @@ kernel<<<grid, block, 0, s2>>>(d_b);     /* 두 번째 독립 batch */
 
 Nsight Systems timeline에서 두 stream은 별도 행으로 나옵니다. 겹치지 않았다면 먼저 아래 두 문서 규칙을 대조합니다.
 
-첫째는 host 메모리 종류입니다. [CUDA Runtime API의 API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html)는 async 복사에 대해 "device memory와 pageable host memory 사이의 전송은 host 기준으로 동기일 수 있다"고 적고, pageable 메모리를 먼저 pinned 메모리로 옮겨야 하면 driver가 stream과 동기화할 수 있다고 덧붙입니다. `h_a`가 `malloc`으로 잡은 메모리라면 `cudaMemcpyAsync`라는 이름과 달리 CPU가 거기서 기다릴 수 있습니다. `cudaMallocHost`로 잡은 pinned 메모리여야 "fully asynchronous" 경우에 해당합니다. Timeline에서는 CPU 행의 `cudaMemcpyAsync` 구간 길이로 이 경우를 짐작합니다. 호출이 GPU 쪽 복사만큼 오래 걸렸다면 CPU가 거기서 기다린 것입니다.
+첫째는 host 메모리 종류입니다. [CUDA Runtime API의 API synchronization behavior](https://docs.nvidia.com/cuda/cuda-runtime-api/api-sync-behavior.html)는 async 복사에 대해 "device memory와 pageable host memory 사이의 전송은 host 기준으로 동기일 수 있다"고 적고, pageable 메모리를 먼저 pinned 메모리로 옮겨야 하면 driver가 stream과 동기화할 수 있다고 덧붙입니다. `h_a`가 `malloc`으로 잡은 메모리라면 `cudaMemcpyAsync`라는 이름과 달리 CPU가 거기서 기다릴 수 있습니다. `cudaMallocHost`로 잡은 pinned 메모리여야 "fully asynchronous" 경우에 해당합니다.
 
 둘째는 default stream 규칙으로, 아래 함정에서 다룹니다.
 
@@ -183,7 +183,7 @@ nsys profile -t cuda,nvtx,cudnn,osrt --sample=process-tree \
 
 1. 프레임 하나를 NVTX range(`preprocess`·`inference`·`postprocess`)로 나눠 어느 단계가 긴지 봅니다.
 2. `inference` 구간 안에서 GPU 행이 비어 있는 곳이 있으면, 같은 시점 CPU 행에서 스레드가 무엇을 하고 있었는지(osrt 호출, CPU 샘플, context switch) 봅니다.
-3. CPU 행의 `cudaMemcpyAsync`가 길게 그려져 있으면 host 버퍼가 pinned인지 코드에서 확인합니다.
+3. `cudaMemcpyAsync`를 쓰는 곳은 host 버퍼가 `cudaMallocHost`로 잡은 pinned 메모리인지 코드에서 확인합니다.
 4. 고친 뒤에는 같은 입력·batch·warmup으로 frame latency 분포를 다시 모아 비교합니다.
 
 ## 자주 보는 함정과 안티패턴
@@ -199,7 +199,7 @@ kernel<<<g, b>>>(d_b);                            /* default stream */
 
 > ⚠️ Pinned memory 없이 Async copy
 
-`malloc`으로 잡은 host 버퍼에 `cudaMemcpyAsync`를 쓰면 위 API synchronization 규칙대로 host 기준 동기일 수 있습니다. Timeline에서 CPU 행의 `cudaMemcpyAsync` 구간이 GPU 복사 구간만큼 길면 이 경우입니다. 버퍼를 `cudaMallocHost`로 바꾸고 다시 봅니다.
+`malloc`으로 잡은 host 버퍼에 `cudaMemcpyAsync`를 쓰면 위 API synchronization 규칙대로 host 기준 동기일 수 있습니다. host 버퍼가 pinned인지 코드에서 확인하고, 아니라면 `cudaMallocHost`로 바꾼 뒤 다시 기록합니다.
 
 > ⚠️ Profile 시간이 너무 김
 

@@ -91,7 +91,7 @@ PTM은 같은 매뉴얼에서 "data trace를 전혀 제공하지 않는다"고 �
 
 Cortex-M 쪽은 trace block이 모두 *선택 사항*입니다. [Lauterbach "Training Cortex-M Tracing"](https://www2.lauterbach.com/pdf/training_cortexm_etm.pdf)(Release 02.2026) 표에 따르면 Cortex-M0와 M1은 "No trace options"이고, M0+는 MTB와 제한된 DWT가 선택 사항입니다. M3/M4는 ITM·DWT·ETMv3, M7은 ITM·DWT·ETMv4가 선택 사항입니다. M23은 ETMv3와 MTB가 상호 배타적이고, M33은 한 칩에 MTB와 ETM을 함께 넣을 수 있습니다. 같은 코어 이름이어도 칩 벤더가 어느 블록을 넣었는지는 그 칩의 reference manual이 정합니다.
 
-MTB(Micro Trace Buffer)는 [CoreSight MTB-M0+ TRM](https://documentation-service.arm.com/static/5e9065e1c8052b160876034f)(ARM DDI 0486B) 1.1절이 "ETM·PTM trace 솔루션과 경쟁하려는 것이 아닌" 단순한 실행 trace라고 소개합니다. MTB SRAM 전체 크기는 칩 구현 시점에 정해지고, 그 SRAM은 trace와 일반 저장에 같이 쓰입니다. Lauterbach Cortex-M training은 trace 영역의 위치와 크기를 소프트웨어로 정하므로 개발 빌드가 끝나면 그 RAM을 되돌려 쓸 수 있다고 설명합니다. 또 MTB 영역은 보통 linker script에서 별도 섹션(`.mtb`)으로 두고, TRACE32가 `Trace.TBADDRESS ADDRESS.OFFSET(sYmbol.SECADDRESS(.mtb))`로 그 주소를 찾게 합니다.
+MTB(Micro Trace Buffer)는 [CoreSight MTB-M0+ TRM](https://documentation-service.arm.com/static/5e9065e1c8052b160876034f)(ARM DDI 0486B) 1.1절이 "ETM·PTM trace 솔루션과 경쟁하려는 것이 아닌" 단순한 실행 trace라고 소개합니다. 같은 문서 1.3절(Features)에 따르면 MTB SRAM 크기는 칩 구현 시점에 정해지고, 그 SRAM은 trace와 일반 저장에 같이 쓰이며, SRAM 안의 trace buffer 위치와 크기는 소프트웨어로 정합니다. Lauterbach Cortex-M training은 trace 영역의 위치와 크기를 소프트웨어로 정하므로 개발 빌드가 끝나면 그 RAM을 되돌려 쓸 수 있다고 설명합니다. 또 MTB 영역은 보통 linker script에서 별도 섹션(`.mtb`)으로 두고, TRACE32가 `Trace.TBADDRESS ADDRESS.OFFSET(sYmbol.SECADDRESS(.mtb))`로 그 주소를 찾게 합니다.
 
 ## RTOS Awareness
 
@@ -136,7 +136,7 @@ Entry/exit breakpoint로 코어를 멈추는 실험은 이 측정과 다릅니�
 
 > ⚠️ Trace port 핀이 출력되지 않은 보드
 
-Off-chip parallel trace는 TPIU 핀이 커넥터까지 배선되어 있어야 합니다. 핀이 없어도 ETB·ETF·ETR 같은 on-chip buffer나 Cortex-M의 MTB로는 trace를 받을 수 있습니다. 대신 on-chip buffer는 크기가 작아 짧은 구간만 담습니다.
+Off-chip parallel trace는 TPIU 핀이 커넥터까지 배선되어 있어야 합니다. 핀이 없어도 ETB·ETF·ETR 같은 on-chip buffer나 Cortex-M의 MTB로는 trace를 받을 수 있습니다. 담을 수 있는 길이는 그 칩이 구현한 buffer 크기가 정하므로 칩 reference manual에서 크기부터 봅니다.
 
 > ⚠️ Trace buffer overflow
 

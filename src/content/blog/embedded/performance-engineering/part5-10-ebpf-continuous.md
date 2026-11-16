@@ -49,7 +49,7 @@ perf record -q -F 19 -a -g -o fleet.data -- sleep 30
 - **권한**: root 또는 `CAP_SYS_ADMIN`이 필요합니다([security 문서](https://www.parca.dev/docs/parca-agent-security)).
 - **수집**: user·kernel stack을 모두 뽑고, 원시 데이터로 pprof 형식 profile을 만듭니다. pprof의 sample은 "stack trace와 그 stack이 관측된 횟수"입니다.
 - **심볼 처리**: 커널 stack은 agent가 `/proc/kallsyms`로 즉시 심볼화합니다. 애플리케이션은 debug symbol을 server에 올리고 server가 읽을 때 심볼화하므로, 장치에 심볼 해석 부담이 없습니다.
-- **빌드 방식**: BPF CO-RE로 BPF 프로그램을 미리 컴파일해 바이너리에 넣었고, 실행 중 Clang/LLVM이 필요 없습니다. 바이너리는 정적 링크입니다.
+- **빌드 방식**: BPF CO-RE로 BPF 프로그램을 미리 컴파일해 바이너리에 넣었고, 실행 중 Clang/LLVM이 필요 없습니다. security 문서는 바이너리가 정적 링크라고 적지만, v0.51.5의 `parca-agent_0.51.5_Linux_aarch64`를 `file`과 `readelf -d`로 보니 interpreter가 `/lib/ld-linux-aarch64.so.1`이고 `libc.so.6`을 NEEDED로 갖는 동적 바이너리였습니다. 같은 릴리스에 `parca-agent-static_0.51.5_Linux_aarch64`가 따로 있으므로, glibc가 없는 rootfs(예: musl)에는 static 쪽을 씁니다. server `parca` v0.30.0은 정적 링크였습니다.
 
 임베디드 장치에 올릴 때는 크기가 먼저 걸립니다. 내려받은 arm64 바이너리는 agent(`parca-agent_0.51.5_Linux_aarch64`)가 107,282,464 byte, server(`parca`, v0.30.0)가 260,881,520 byte였습니다. 둘 다 릴리스의 `checksums.txt`와 SHA-256이 맞았습니다. 수십 MB 단위의 rootfs를 쓰는 보드라면 agent 하나가 rootfs보다 클 수 있다는 뜻입니다. Server README는 기본 HTTP 주소를 `:7070`으로 적고, 그 주소에서 web UI를 띄웁니다.
 
@@ -57,7 +57,7 @@ perf record -q -F 19 -a -g -o fleet.data -- sleep 30
 
 Continuous profiler가 쓸모 있으려면 stack을 끝까지 복원해야 합니다. 방법은 세 가지입니다. frame pointer 체인을 따라가거나, `.eh_frame`의 DWARF CFI를 해석하거나, 더 단순한 SFrame 형식을 씁니다.
 
-[SFrame 명세](https://sourceware.org/binutils/docs/sframe-spec.html)는 SFrame을 `.sframe` 섹션(segment type `PT_GNU_SFRAME`)에 담는 stack trace 정보로 정의하고, 지원 ABI를 AMD64, AAPCS64, s390x로 적습니다. Debian 13의 GNU assembler 2.44로 직접 만들어 봤습니다.
+[SFrame 명세](https://sourceware.org/binutils/docs/sframe-spec.html)는 SFrame을 `.sframe` 섹션(segment type `PT_GNU_SFRAME`)에 담는 stack trace 정보로 정의하고, 지원 ABI를 AMD64, AAPCS64, s390x로 적습니다. 이 링크의 명세는 "Version 3"을 설명하는 초안이고(문서 머리에 DRAFT 표시, `SFRAME_VERSION_3`는 "under development"), 아래에서 binutils가 실제로 만든 것은 Version 2입니다. Debian 13의 GNU assembler 2.44로 직접 만들어 봤습니다.
 
 ```bash
 gcc -O2 -Wa,--gsframe -c app.c -o app_sf.o
@@ -82,7 +82,7 @@ Contents of the SFrame section .sframe:
     0000000000000080  sp+0      u         u
 ```
 
-함수마다 "이 PC 구간에서는 CFA가 sp+32이고, FP와 RA는 CFA-32와 CFA-24에 있다" 같은 표 몇 줄이 전부입니다. DWARF CFI처럼 바이트코드를 해석할 필요가 없어서 커널이나 eBPF에서 다루기 쉽게 만든 형식입니다. 다만 만들 수 있다는 것과 쓰이고 있다는 것은 다릅니다. 같은 guest의 `/lib/aarch64-linux-gnu/libc.so.6`에는 `.sframe` 섹션이 없었습니다. 그리고 Linux v6.12의 arm64 `perf_callchain_user()`는 `arch_stack_walk_user()`를 부르고, 이 함수는 `regs->regs[29]`(x29)에서 시작해 frame record만 따라갑니다(`arch/arm64/kernel/stacktrace.c`). 따라가면서 `ptrauth_strip_user_insn_pac()`로 반환 주소의 PAC bit를 지웁니다. v6.12 트리의 `kernel/`·`arch/`·`tools/perf/`에서 `.sframe`을 읽는 코드는 찾지 못했습니다.
+함수마다 "이 PC 구간에서는 CFA가 sp+32이고, FP와 RA는 CFA-32와 CFA-24에 있다" 같은 표 몇 줄이 전부입니다. 명세는 이 형식의 존재 이유를 "a simple, fast and low-overhead mechanism to generate stack traces"라고 적습니다. 다만 만들 수 있다는 것과 쓰이고 있다는 것은 다릅니다. 같은 guest의 `/lib/aarch64-linux-gnu/libc.so.6`에는 `.sframe` 섹션이 없었습니다. 그리고 Linux v6.12의 arm64 `perf_callchain_user()`는 `arch_stack_walk_user()`를 부르고, 이 함수는 `regs->regs[29]`(x29)에서 시작해 frame record만 따라갑니다(`arch/arm64/kernel/stacktrace.c`). 따라가면서 `ptrauth_strip_user_insn_pac()`로 반환 주소의 PAC bit를 지웁니다. v6.12 트리의 `kernel/`·`arch/`·`tools/perf/`에서 `.sframe`을 읽는 코드는 찾지 못했습니다.
 
 Pyroscope 쪽은 다른 길을 택했습니다. [Pyroscope 클라이언트 설정 문서](https://grafana.com/docs/pyroscope/latest/configure-client/)는 eBPF profiler가 C/C++·Go·Rust·Zig를 지원하며 "Frame pointers are not required"이고 `.eh_frame` 데이터로 unwinding한다고 적습니다.
 
@@ -125,7 +125,7 @@ Tetragon은 같은 eBPF 위에 있지만 목적이 다릅니다. CPU 샘플링�
 |---|---|---|
 | 커널 | 5.3 이상 + BTF | Parca agent README |
 | 권한 | root 또는 `CAP_SYS_ADMIN` | Parca security 문서 |
-| agent 바이너리 | arm64 정적 바이너리 107,282,464 byte | v0.51.5 릴리스 파일 |
+| agent 바이너리 | arm64 동적 링크(glibc 필요) 107,282,464 byte, static 판 107,629,127 byte | v0.51.5 릴리스 파일 |
 | 샘플 주기 | 논리 CPU당 19 Hz | Parca design 문서 |
 | 집계 없는 원시 데이터 | 샘플당 약 188 byte, 8 CPU면 하루 약 2.47 GB | 이 글의 perf 측정 |
 
@@ -135,7 +135,7 @@ Tetragon은 같은 eBPF 위에 있지만 목적이 다릅니다. CPU 샘플링�
 
 [Linux perf security 문서](https://docs.kernel.org/admin-guide/perf-security.html)(v6.12 `Documentation/admin-guide/perf-security.rst`)는 perf_events가 모으는 데이터를 네 범주로 나눕니다. 시스템 구성(CPU 모델, 메모리 양, 커널·perf 버전, perf 명령줄), 모듈 경로·load 주소·프로세스와 스레드 이름·PID, 소프트웨어·하드웨어 counter 값, 그리고 실행 레지스터 값과 *프로세스의 user·kernel 메모리 주소와 데이터*입니다. 문서는 네 번째 범주가 민감한 프로세스 데이터를 담을 수 있다고 경고합니다.
 
-첫 두 범주는 위 19 Hz 기록의 header에서 그대로 보입니다(`perf report --header-only` 일부).
+첫 번째 범주(시스템 구성)는 위 19 Hz 기록의 header에 그대로 보입니다(`perf report --header-only` 일부). 두 번째 범주(모듈 경로, 프로세스 이름, PID)는 header가 아니라 데이터 영역의 MMAP·COMM 레코드에 들어 있고, 같은 기록에 MMAP 44개와 COMM 142개가 있었습니다(`perf report --stats`).
 
 ```text
 # hostname : localhost

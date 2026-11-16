@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"MCU에서 시간을 재는 길은 둘입니다. 핀을 흔들어 바깥에서 보거나, 코어 안의 cycle counter를 읽습니다."** 다만 cycle counter는 아키텍처상 *선택 사항*이고, 에뮬레이터에서는 아예 돌지 않을 수도 있습니다.
+> **"MCU에서 시간을 재는 길은 둘입니다. 핀을 흔들어 바깥에서 보거나, 코어 안의 cycle counter를 읽습니다."** 다만 cycle counter는 아키텍처상 *선택 사항*이고, QEMU 11.1.3 `mps2-an386`에서는 돌지 않았습니다.
 
 ## 어떤 문제를 푸는가
 
@@ -183,12 +183,12 @@ QEMU의 SysTick 값은 cycle 측정으로 쓰면 안 됩니다. 같은 `fw.elf`�
 
 ## ITM — Instrumentation Trace Macrocell
 
-ITM은 펌웨어가 stimulus port 레지스터에 값을 쓰면 그것을 trace packet으로 바꿔 SWO 핀이나 TPIU로 내보내는 블록입니다. 우체통에 엽서를 넣으면 우체부(probe)가 가져가는 구조입니다. ARMv7-M ARM C1.7.1절의 규칙은 다음과 같습니다.
+ITM은 펌웨어가 stimulus port 레지스터에 값을 쓰면 그것을 trace packet으로 바꿔 SWO 핀이나 TPIU로 내보내는 블록입니다. 우체통에 엽서를 넣으면 우체부(probe)가 가져가는 구조입니다. ARMv7-M ARM C1.7.1·C1.7.3절의 규칙은 다음과 같습니다.
 
 - Stimulus port는 최대 256개이고, 실제 개수는 8의 배수로 구현마다 정해집니다. 개수는 `ITM_TPR`에 모두 1을 쓰고 1로 남은 bit를 세면 알 수 있습니다(bit 하나가 port 8개).
-- ITM이 꺼져 있거나 없어도 stimulus port에 쓰기가 BusFault를 내면 안 됩니다. 덕분에 ITM 출력 코드를 출시 펌웨어에 남겨도 멈추지 않습니다.
-- `DEMCR.TRCENA`가 0이면 stimulus port는 읽기 값이 UNKNOWN이고 쓰기는 무시됩니다.
-- Stimulus port를 읽으면 bit 0이 `FIFOREADY`입니다. 0이면 FIFO가 가득 찬 상태입니다.
+- ITM이 꺼져 있거나 없어도 stimulus port에 쓰기가 BusFault를 내면 안 됩니다(C1.7.1). 덕분에 ITM 출력 코드를 출시 펌웨어에 남겨도 BusFault로 멈추지는 않습니다. 다만 아래에서 볼 FIFOREADY 대기 루프는 별개 문제입니다.
+- `DEMCR.TRCENA`가 0이면 stimulus port는 읽기 값이 UNKNOWN이고 쓰기는 무시됩니다(C1.7.3).
+- Stimulus port를 읽으면 bit 0이 `FIFOREADY`입니다. 0이면 FIFO가 가득 찬 상태입니다(C1.7.3).
 
 QEMU `mps2-an386`에서 `ITM_TPR`에 모두 1을 써 봤더니 0이 읽혔습니다. 이 머신에는 ITM이 구현되어 있지 않다는 뜻입니다.
 
@@ -208,7 +208,7 @@ SystemView는 RTOS 이벤트를 타임라인으로 보여 주는 도구입니다
 
 ## ISR 경계의 측정
 
-ISR 안에서 DWT를 읽거나 핀을 올리면, 그 값은 ISR의 *첫 명령*이 실행된 시점입니다. 그 앞에는 하드웨어가 하는 일이 있습니다. ARMv7-M ARM B1.5.6절에 따르면 예외가 들어오면 하드웨어가 xPSR·ReturnAddress·LR·R12·R3·R2·R1·R0 여덟 word를 스택에 쌓은 뒤에야 handler로 갑니다. 그래서 "외부 신호 → 스태킹 → ISR 첫 명령 → ISR 본문 → 복귀"를 따로 정의해야 합니다. 첫 구간은 외부 신호와 GPIO를 같은 스코프에 걸어야 보이고, ISR 본문은 DWT로 잴 수 있습니다. 관찰한 최대값은 시험 조건에서의 표본 최대이지 WCET가 아닙니다.
+ISR 안에서 DWT를 읽거나 핀을 올리면, 그 값은 ISR의 *첫 명령*이 실행된 시점입니다. 그 앞에는 하드웨어가 하는 일이 있습니다. ARMv7-M ARM B1.5.6절에 따르면 예외가 들어오면 하드웨어가 xPSR·ReturnAddress·LR·R12·R3·R2·R1·R0 여덟 word를 스택에 쌓은 뒤에야 handler로 갑니다. 같은 절은 Floating-point extension을 구현한 코어라면 여기에 더해 FP 상태를 스택에 쌓거나 그 공간을 예약할 수 있다고 적습니다. 그래서 "외부 신호 → 스태킹 → ISR 첫 명령 → ISR 본문 → 복귀"를 따로 정의해야 합니다. 첫 구간은 외부 신호와 GPIO를 같은 스코프에 걸어야 보이고, ISR 본문은 DWT로 잴 수 있습니다. 관찰한 최대값은 시험 조건에서의 표본 최대이지 WCET가 아닙니다.
 
 ## 측정 — 정확도 비교
 
