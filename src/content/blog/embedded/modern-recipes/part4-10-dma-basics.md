@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"DMA는 CPU가 각 word를 직접 복사하지 않고 메모리와 peripheral 사이 이동을 수행합니다."** Source, destination, length, trigger 외에도 width, alignment, cache/coherency와 ownership을 설정해야 합니다.
+> **"DMA는 CPU가 word를 하나씩 복사하지 않아도 메모리와 peripheral 사이에서 데이터를 옮깁니다."** Source, destination, length, trigger 외에도 width, alignment, cache/coherency와 ownership을 설정해야 합니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -168,7 +168,7 @@ uint8_t uart_dma_rx_get(void) {
 }
 ```
 
-이 패턴은 IRQ 없이도 RX write position을 폴링할 수 있습니다. CPU가 처리하지 못해 write position이 read position을 추월하면 데이터가 덮어쓰이므로 overrun 정책이 필요합니다.
+이 패턴에서는 IRQ 없이도 RX write position을 폴링할 수 있습니다. CPU가 처리하지 못해 write position이 read position을 추월하면 데이터가 덮어쓰이므로 overrun 정책이 필요합니다.
 
 ### 3. Memory-to-memory (software trigger)
 
@@ -231,8 +231,8 @@ M7 칩으로 옮기면 DMA가 쓴 buffer를 읽기 전에 `SCB_InvalidateDCache_
 
 - DMA 설정은 **source + destination + length + trigger(stream·channel)**이고, stream·channel은 칩의 DMA request 표나 ST 예제로 확인합니다.
 - **Circular + HT/TC 인터럽트**로 buffer 두 절반을 번갈아 처리합니다.
-- ADC·UART·SPI 모두 *peripheral의 DMA enable bit*도 같이 set.
-- Buffer는 **static 또는 global**, **aligned**.
+- ADC·UART·SPI 모두 *peripheral의 DMA enable bit*도 같이 set합니다.
+- Buffer는 **static 또는 global**로 두고 **정렬(aligned)**합니다.
 - Cortex-M7 칩은 **cache clean/invalidate**(32-byte 정렬) 또는 **MPU non-cacheable**이 필요하고, F407에는 해당하지 않습니다.
 
 다음 편은 **저전력 모드**입니다. Sleep/Stop/Standby와 wake-up source, µA 측정을 다룹니다.
