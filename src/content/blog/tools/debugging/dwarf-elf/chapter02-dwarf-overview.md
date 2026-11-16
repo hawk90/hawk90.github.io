@@ -94,7 +94,7 @@ DWARF의 기본 단위는 DIE입니다. 컴파일 유닛·함수·변수·타입
 
 ## llvm-dwarfdump로 보기
 
-위 `main.o`의 `.debug_info` 전체를 `llvm-dwarfdump --debug-info main.o`로 펼친 결과입니다. `DW_AT_decl_file ("/src/main.cpp")` 줄과 컴파일 유닛의 base 속성 일부는 `...`로 줄였습니다.
+위 `main.o`의 `.debug_info` 전체를 `llvm-dwarfdump --debug-info main.o`로 펼친 결과입니다. `DW_AT_decl_file`·`DW_AT_decl_line`·`DW_AT_external` 줄, `main`의 `DW_AT_low_pc`/`DW_AT_high_pc`, 컴파일 유닛의 base 속성(`DW_AT_addr_base` 등)은 생략했습니다.
 
 ```text
 0x00000000: Compile Unit: length = 0x0000006a, format = DWARF32, version = 0x0005, unit_type = DW_UT_compile, abbr_offset = 0x0000, addr_size = 0x08 (next unit at 0x0000006e)
@@ -432,7 +432,7 @@ Table 7.5 "Attribute encodings"에는 vendor 범위와 `Reserved` 칸을 빼고 
 | FORM | 인코딩 |
 |------|--------|
 | `DW_FORM_addr` | 절대 주소 (address_size) |
-| `DW_FORM_addrx` | `.debug_addr` 인덱스 (DWARF 5, split-DWARF용) |
+| `DW_FORM_addrx` | `.debug_addr` 인덱스 (DWARF 5; split이 아닌 `main.o`에도 쓰임) |
 | `DW_FORM_sec_offset` | 다른 섹션 offset |
 
 ### DIE 참조
@@ -561,7 +561,7 @@ pyelftools 0.32로 `main.o`와 아래 `types.o`에 돌리면 `CU: main.cpp` / `f
 | `.debug_aranges` | 생성 (0x30바이트) | 없음 (Debian clang 19.1.7) |
 | `DW_AT_frame_base` | `-O0`·`-O2` 모두 `DW_OP_call_frame_cfa` | `-O0` `DW_OP_reg6 RBP`, `-O2` `DW_OP_reg7 RSP` (macOS clang 23.1.5, x86-64) |
 
-GCC의 `DW_AT_producer`에는 `GNU C17 14.2.0 -mlittle-endian -mabi=lp64 -g -fasynchronous-unwind-tables`처럼 컴파일 옵션까지 들어갑니다. GCC가 frame base를 CFA로 두는 이유는 [DWARF 5 §2.5.1.3](https://dwarfstd.org/doc/DWARF5.pdf) "Stack Operations"의 `DW_OP_call_frame_cfa` 설명에 있습니다. CFA를 레지스터 연산으로 다시 표현하면 함수 안에서 레지스터가 바뀔 때마다 location list가 필요하지만, CFI가 이미 그 변화를 담고 있으니 참조하는 편이 공간을 아낀다는 것입니다. 비교할 때는 `-gdwarf-4`/`-gdwarf-5`를 명시하고 실제 CU 헤더의 버전을 확인합니다.
+GCC의 `DW_AT_producer`에는 `GNU C17 14.2.0 -mlittle-endian -mabi=lp64 -g -fasynchronous-unwind-tables`처럼 컴파일 옵션까지 들어갑니다. [DWARF 5 §2.5.1.3](https://dwarfstd.org/doc/DWARF5.pdf) "Stack Operations"는 `DW_OP_call_frame_cfa`의 근거를 이렇게 설명합니다. CFA를 레지스터 연산으로 다시 표현하면 함수 안에서 레지스터가 바뀔 때마다 location list가 필요하지만, CFI가 이미 그 변화를 담고 있으니 참조하는 편이 공간을 아낀다는 것입니다. 비교할 때는 `-gdwarf-4`/`-gdwarf-5`를 명시하고 실제 CU 헤더의 버전을 확인합니다.
 
 ## DWARF version 협상
 
@@ -580,7 +580,7 @@ Breakpoint 1, sq (v=3) at v.c:1
 Compiled with DWARF 4 debugging format.
 ```
 
-GDB 16.3은 두 CU를 각자의 버전으로 읽고, `info source`가 현재 CU의 버전을 알려 줍니다. 버전이 섞이면 도구가 지원하는 가장 낮은 공통 버전이 아니라 CU 하나하나의 버전이 기준이 됩니다. 오래된 도구가 DWARF 5 CU를 만나면 그 CU에서만 문제가 납니다.
+GDB 16.3은 두 CU를 각자의 버전으로 읽고, `info source`가 현재 CU의 버전을 알려 줍니다. 버전이 섞이면 도구가 지원하는 가장 낮은 공통 버전이 아니라 CU 하나하나의 버전이 기준이 됩니다.
 
 ## 직접 확인 — DIE와 정수 인코딩
 

@@ -58,7 +58,7 @@ $ readelf -SW foo.dwo | grep debug
   [ 5] .debug_str.dwo    PROGBITS        0000000000000000 0001b6 000072 00   E  0   0  1
 ```
 
-`.dwo` 섹션에는 `E`(exclude) 플래그가 붙어 링커가 실행 파일에 넣지 않습니다. 링크는 `foo.o`만 읽고, `foo.dwo`는 컴파일한 자리에 그대로 남습니다. clang도 같은 옵션 `-gsplit-dwarf`를 쓰며, macOS clang 23.1.5로 만든 x86-64 `split.o`/`split.dwo`도 같은 구성이었습니다.
+`.dwo` 섹션에는 `E`(exclude) 플래그가 붙어 링커가 실행 파일에 넣지 않습니다. 링크는 `foo.o`만 읽고, `foo.dwo`는 컴파일한 자리에 그대로 남습니다. clang도 같은 옵션 `-gsplit-dwarf`를 쓰며, macOS clang 23.1.5로 만든 x86-64 `split.o`/`split.dwo`도 모든 `.debug_*.dwo` 섹션에 `E`가 붙었습니다(`.debug_line.dwo` 대신 `.debug_loclists.dwo`·`.debug_rnglists.dwo`가 있었습니다).
 
 ### Skeleton CU
 
@@ -278,7 +278,7 @@ $ gcc -g -O2 foo.c -o z0; gcc -g -O2 -gz=zlib foo.c -o z1; gcc -g -O2 -gz=zstd f
   [27] .debug_info       PROGBITS        0000000000000000 010bc8 00009d 00   C  0   0  8
 ```
 
-압축된 섹션은 `C` 플래그를 달고 `Elf64_Chdr` 압축 헤더로 시작합니다(gABI §3.7 "Compressed Sections"). 이 표현은 ELF 형식의 기능이지 DWARF 5가 정의한 것이 아니며, 섹션 이름을 `.zdebug_*`로 바꾸던 옛 GNU 방식과도 다릅니다. 파일 크기는 71,952(z0), 71,904(z1), 71,920(z2)바이트였습니다. 이 정도로 작은 입력에서는 압축 헤더와 정렬 비용이 이득을 거의 상쇄합니다. 아래 직접 확인 절의 x86-64 오브젝트는 zlib으로 압축하자 오히려 3,544 → 3,600바이트로 커졌습니다. 압축이 이득이 되는 것은 Debian `ls` 디버그 파일처럼 수백 KB 이상일 때로, 그 파일은 압축 상태 366,128바이트, 해제 후 589,560바이트였습니다.
+압축된 섹션은 `C` 플래그를 달고 `Elf64_Chdr` 압축 헤더로 시작합니다(gABI §3.7 "Compressed Sections"). 이 표현은 ELF 형식의 기능이지 DWARF 5가 정의한 것이 아니며, 섹션 이름을 `.zdebug_*`로 바꾸던 옛 GNU 방식과도 다릅니다. 파일 크기는 71,952(z0), 71,904(z1), 71,920(z2)바이트였습니다. 이 정도로 작은 입력에서는 압축 헤더와 정렬 비용이 이득을 거의 상쇄합니다. 아래 직접 확인 절의 x86-64 오브젝트는 zlib으로 압축하자 오히려 3,544 → 3,600바이트로 커졌습니다. Debian `ls` 디버그 파일은 압축 상태 366,128바이트, 해제 후 589,560바이트였습니다.
 
 ## pyelftools — 자체 도구 작성
 
@@ -483,7 +483,7 @@ No errors.
 
 같은 DWARF 데이터를 다른 오브젝트 형식에 담기도 합니다.
 
-- **Mach-O (.dSYM)** — macOS. clang이 `.o`에 `__debug_info` 같은 `__DWARF` 섹션을 만들지만 링크된 실행 파일에는 넣지 않습니다. `tools.c`를 macOS clang 23.1.5로 `-g -c` 후 링크하자 실행 파일의 debug 섹션은 0개였고, `dsymutil`이 `.o`들을 읽어 `tools-macho.dSYM/Contents/Resources/DWARF/tools-macho`에 `__debug_info`(0xac바이트)·`__debug_line` 등을 모았습니다. 컴파일 직후 `.o`를 지우는 한 줄 빌드(`clang -g tools.c`)에서는 `dsymutil`이 `unable to open object file`로 경고하고 디버그 정보를 모으지 못했습니다.
+- **Mach-O (.dSYM)** — macOS. clang이 `.o`에 `__debug_info` 같은 `__DWARF` 섹션을 만들지만 링크된 실행 파일에는 넣지 않습니다. `tools.c`를 macOS clang 23.1.5로 `-g -O2 -c` 후 링크하자 실행 파일의 debug 섹션은 0개였고, `dsymutil`이 `.o`들을 읽어 `tools-macho.dSYM/Contents/Resources/DWARF/tools-macho`에 `__debug_info`(0xac바이트)·`__debug_line` 등을 모았습니다. 컴파일 직후 `.o`를 지우는 한 줄 빌드(`clang -g tools.c`)에서는 `dsymutil`이 `unable to open object file`로 경고하고 디버그 정보를 모으지 못했습니다.
 - **PDB**는 별도의 디버그 형식이며 DWARF를 담는 컨테이너가 아닙니다.
 - **WASM** — `clang --target=wasm32 -g -c`로 만든 오브젝트에 `.debug_info`·`.debug_line` 등이 custom section으로 들어갔습니다(`llvm-objdump -h`).
 

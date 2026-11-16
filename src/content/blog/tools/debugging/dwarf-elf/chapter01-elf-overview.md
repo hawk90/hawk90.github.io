@@ -120,7 +120,7 @@ Linux 실행 파일이라고 OSABI가 3인 것은 아닙니다. 위 `ls`도 0(`U
 | 3 (DYN) | 공유 오브젝트. PIE 실행 파일도 여기에 속합니다 |
 | 4 (CORE) | core dump |
 
-Debian 14.2 GCC는 기본으로 PIE를 만듭니다. 같은 두 파일(`sections.c`, `ext.c`, 아래 직접 확인 절)을 옵션만 바꿔 링크하고 `.so`도 하나 만들어 비교했습니다.
+Debian 13의 GCC 14.2는 기본으로 PIE를 만듭니다. 같은 두 파일(`sections.c`, `ext.c`, 아래 직접 확인 절)을 옵션만 바꿔 링크하고 `.so`도 하나 만들어 비교했습니다.
 
 | 빌드 | `readelf -h` Type | `file` 5.46 |
 |------|-------------------|-------------|
@@ -304,7 +304,7 @@ gABI §3.4 "Section Flags"의 값입니다. `readelf`의 `Flg` 열 문자(W·A·
 | 0x400 (TLS) | thread-local |
 | 0x800 (COMPRESSED) | `Elf64_Chdr` 압축 헤더로 시작하는 압축 섹션. 옛 GNU `.zdebug_*` 이름 방식과 다릅니다 (6장) |
 
-`.debug_*` 섹션은 ALLOC이 없어서 로드되지 않습니다. 앞의 `.debug_str`이 `MS`(MERGE+STRINGS)인 것은 링커가 여러 오브젝트의 같은 문자열을 합치게 하려는 표시입니다.
+`.debug_*` 섹션은 ALLOC이 없어서 로드되지 않습니다. `sections.o`의 `.debug_str`이 `MS`(MERGE+STRINGS)인 것은 링커가 여러 오브젝트의 같은 문자열을 합치게 하려는 표시입니다.
 
 ## Dynamic Linking — .dynamic
 
@@ -375,7 +375,7 @@ puts in section .text of /lib/aarch64-linux-gnu/libc.so.6
 
 호출 전 슬롯은 PLT 시작부(`0x4004d0`, resolver로 가는 공통 스텁)를 가리키고, 첫 호출 뒤에는 libc의 `puts` 주소로 바뀌었습니다. 이것이 lazy binding입니다.
 
-`ls`는 `FLAGS BIND_NOW`, `FLAGS_1 NOW`를 갖고 있어 시작할 때 모든 PLT 재배치를 끝냅니다. 반면 옵션 없이 `gcc lazy.c`로 링크한 게스트의 실행 파일은 `FLAGS_1`에 `PIE`만 있었습니다. 같은 Debian GCC라도 `-Wl,-z,now`를 주고 링크했는지에 따라 이 플래그가 갈립니다. `BIND_NOW`와 RELRO가 함께 있으면 GOT 전체가 읽기 전용이 되고, `checksec`가 이를 Full RELRO라고 부릅니다.
+`ls`는 `FLAGS BIND_NOW`, `FLAGS_1 NOW`를 갖고 있어 시작할 때 모든 PLT 재배치를 끝냅니다. 반면 옵션 없이 `gcc lazy.c`로 링크한 게스트의 실행 파일은 `FLAGS_1`에 `PIE`만 있었습니다. `BIND_NOW`와 RELRO가 함께 있으면 GOT 전체가 읽기 전용이 되고, `checksec`가 이를 Full RELRO라고 부릅니다.
 
 `LD_BIND_NOW=1`은 플래그 없는 실행 파일에서도 시작 시 바인딩을 강제합니다. `LD_DEBUG=statistics`의 `final number of relocations`는 `lazy`를 그냥 실행했을 때 94, `LD_BIND_NOW=1`을 줬을 때 96이었습니다.
 

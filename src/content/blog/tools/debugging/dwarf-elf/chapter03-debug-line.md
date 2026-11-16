@@ -22,7 +22,7 @@ topics: ["tools", "tools/debugging"]
 
 줄 표를 그대로 저장하면 행마다 8바이트 주소와 파일·줄·컬럼·플래그가 붙습니다. 그런데 연속한 행은 대개 주소가 몇 바이트, 줄이 한두 줄만 차이 납니다. 그래서 DWARF는 표 대신 "주소를 7 올리고 줄을 1 올린 뒤 행을 하나 내라" 같은 명령을 저장합니다. 지도 전체를 보내는 대신 "직진 300m, 우회전" 같은 길 안내를 보내는 것과 같습니다.
 
-아래 `square.o`에서는 행 5개(끝 표시 포함)를 내는 프로그램 본체가 0x43~0x5f, 29바이트였습니다. 그중 세 행은 각각 special opcode 1바이트로 나왔습니다. 섹션 전체는 헤더와 파일 테이블이 붙어 0x62(98)바이트입니다. 큰 프로그램에서는 효과가 더 분명합니다. Debian 13의 `/usr/bin/ls` 디버그 정보(debuginfod로 받아 압축 해제)에서 `.debug_line`은 0x1743b(95,291)바이트였고, `llvm-dwarfdump --debug-line`이 풀어낸 행은 20,681개였습니다. 헤더·파일 테이블까지 포함해 행당 약 4.6바이트로, 8바이트 주소 하나보다 작습니다.
+아래 `square.o`에서는 행 5개(끝 표시 포함)를 내는 프로그램 본체가 0x43~0x61, 31바이트였습니다. 그중 세 행은 각각 special opcode 1바이트로 나왔습니다. 섹션 전체는 헤더와 파일 테이블이 붙어 0x62(98)바이트입니다. 큰 프로그램에서는 효과가 더 분명합니다. Debian 13의 `/usr/bin/ls` 디버그 정보(debuginfod로 받아 압축 해제)에서 `.debug_line`은 0x1743b(95,291)바이트였고, `llvm-dwarfdump --debug-line`이 풀어낸 행은 20,681개였습니다. 헤더·파일 테이블까지 포함해 행당 약 4.6바이트로, 8바이트 주소 하나보다 작습니다.
 
 ## 상태 머신 레지스터
 
@@ -521,7 +521,7 @@ GCC `-O2`의 IPA-SRA가 `process_data`를 포인터 대신 `int` 값을 받는 `
 
 crash log 분석처럼 줄 번호만 필요하면 전체 DWARF를 다 둘 필요가 없습니다. clang의 `-gline-tables-only`와 GCC의 `-g1`이 이 용도입니다.
 
-게스트에서 FreeRTOS-Kernel(커밋 `ca75944`, 2026-10-29)의 `tasks.c`를 POSIX 포트 헤더와 `examples/template_configuration`으로 `-O2` 오브젝트로 만들어 비교했습니다. 코드 크기(`size`의 text)는 두 컴파일러 모두 약 12.8 KB입니다.
+게스트에서 FreeRTOS-Kernel(2026-10-29 기준 main)의 `tasks.c`를 POSIX 포트 헤더와 `examples/template_configuration`으로 `-O2` 오브젝트로 만들어 비교했습니다. 코드 크기(`size`의 text)는 두 컴파일러 모두 약 12.8 KB입니다.
 
 | 빌드 | 파일 크기 | `.debug_info` | `.debug_loclists` | `.debug_line` |
 |------|----------|---------------|-------------------|---------------|

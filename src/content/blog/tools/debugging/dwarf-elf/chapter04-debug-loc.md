@@ -42,7 +42,7 @@ clang 23.1.5 `--target=x86_64-unknown-linux-gnu -g -gdwarf-5 -O2`로 컴파일�
       19:      	retq
 ```
 
-`input`은 처음에 `%rdi`에 들어오고, 0x1에서 callee-saved인 `%rbx`로 옮겨진 뒤, 0x18의 `popq %rbx`로 `%rbx`가 호출자 값으로 돌아가면 어느 레지스터에도 남지 않습니다. `tracked`는 `consume`에 넘기는 동안(0x3~0xb)만 `%rdi`에 있고, 그 뒤에는 `2 * input + 3`으로 다시 계산될 뿐 변수로는 존재하지 않습니다. 이런 위치를 표현하려면 단순 주소가 아니라 *PC 구간별 식*이 필요합니다. 실제 출력은 아래 Location List 절에 있습니다.
+`input`은 처음에 `%rdi`에 들어오고, 0x1에서 callee-saved인 `%rbx`로 옮겨진 뒤, 0x18의 `popq %rbx`로 `%rbx`가 호출자 값으로 돌아가면 어느 레지스터에도 남지 않습니다. `tracked`는 `consume`에 넘기는 동안(0x6~0xb)만 `%rdi`에 있고, 그 뒤에는 `2 * input + 3`으로 다시 계산될 뿐 변수로는 존재하지 않습니다. 이런 위치를 표현하려면 단순 주소가 아니라 *PC 구간별 식*이 필요합니다. 실제 출력은 아래 Location List 절에 있습니다.
 
 ## 스택 머신
 
@@ -353,7 +353,7 @@ offsets: [
 
 DIE는 `DW_FORM_loclistx` 인덱스(0, 1)로 offset 표를 거쳐 목록을 찾습니다. `DW_LLE_offset_pair`는 CU base 주소 기준 상대 offset 두 개(ULEB128)라서 작은 함수에서는 한두 바이트로 끝납니다. §1.4는 이 구조가 오브젝트 파일의 재배치 대부분을 없애려는 것이라고 설명합니다. 같은 두 목록이 `.debug_loc`에서는 0x6f바이트, `.debug_loclists`에서는 0x2d바이트였습니다.
 
-| `DW_LLE_*` (Table 7.30) | 값 | 의미 |
+| `DW_LLE_*` (Table 7.10) | 값 | 의미 |
 |------|----|------|
 | `end_of_list` | 0x00 | 목록 끝 |
 | `base_addressx` | 0x01 | 새 base 주소 (`.debug_addr` 인덱스) |
