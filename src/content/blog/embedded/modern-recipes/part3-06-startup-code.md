@@ -300,11 +300,11 @@ qemu-system-arm -M netduinoplus2 -nographic -monitor none -serial none \
 
 > ⚠️ `.data` 복사 누락
 
-전역 변수에 초기값을 줬는데 main에서 0이거나 garbage라면 startup의 .data 복사가 빠졌거나 `_sidata` symbol이 잘못된 위치를 가리키는 것.
+전역 변수에 초기값을 줬는데 main에서 0이거나 garbage라면 startup의 .data 복사가 빠졌거나 `_sidata` symbol이 잘못된 위치를 가리키는 경우입니다.
 
 > ⚠️ `.bss` 클리어 누락
 
-0으로 초기화되는 정적 저장 기간 객체가 random 값을 가짐. C 표준의 초기화 요구를 bare-metal startup/runtime이 충족하도록 `.bss` 등 해당 영역을 클리어해야 합니다.
+0으로 시작해야 할 정적 객체가 임의의 값을 갖습니다. C 표준이 이 0 초기화를 요구하므로, bare-metal에서는 startup이 `.bss`를 직접 0으로 채웁니다.
 
 > ⚠️ FPU enable 없이 하드웨어 부동소수점 명령 실행
 
