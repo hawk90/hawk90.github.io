@@ -27,7 +27,7 @@ mutex 대신 binary semaphore를 쓰면 코드는 거의 같지만 priority inhe
 |------|-------|-------------------|
 | owner 추적 | yes | no |
 | priority inheritance | yes | no |
-| ISR에서 사용 | 불가(`semphr.h`: "Mutex type semaphores cannot be used from within interrupt service routines") | `xSemaphoreGiveFromISR()` |
+| ISR에서 사용 | 불가(`semphr.h` 703행: "Mutex type semaphores cannot be used from within interrupt service routines") | `xSemaphoreGiveFromISR()` |
 | recursive 옵션 | 있음 | 없음 |
 | 용도 | mutual excl. | signal |
 
@@ -136,7 +136,7 @@ void task_low(void *arg) {       /* priority 1 */
 
 void task_med(void *arg) {       /* priority 3 */
     for (;;) {
-        busy_work(100);           /* PI 없으면 Low를 영원히 preempt */
+        busy_work(100);           /* without PI this preempts Low */
         vTaskDelay(pdMS_TO_TICKS(1));
     }
 }
@@ -288,7 +288,7 @@ void IRQ(void) {
 }
 ```
 
-`xSemaphoreTakeFromISR()`·`xSemaphoreGiveFromISR()` 매크로는 있지만, `semphr.h`는 두 매크로 설명에 "Mutex type semaphores cannot be used from within interrupt service routines"라고 적습니다. `queue.c`의 `xQueueGiveFromISR()`은 누가 쥐고 있는 mutex면 `configASSERT`로 멈춥니다. ISR과 task 사이 신호는 semaphore나 notification으로 합니다.
+`xSemaphoreTakeFromISR()`·`xSemaphoreGiveFromISR()` 매크로는 있지만, `semphr.h`는 두 매크로 설명에 "Mutex type semaphores (those created using a call to xSemaphoreCreateMutex()) must not be used with this macro"라고 적고(562–563·655–656행), mutex 생성 함수 설명(703행)에는 "Mutex type semaphores cannot be used from within interrupt service routines"라고 적습니다. `queue.c`의 `xQueueGiveFromISR()`은 누가 쥐고 있는 mutex면 `configASSERT`로 멈춥니다. ISR과 task 사이 신호는 semaphore나 notification으로 합니다.
 
 > Owner가 아닌 task가 give
 
@@ -303,7 +303,7 @@ xSemaphoreGive(spi_mutex);
 
 ```c
 xSemaphoreTake(m, ...);
-printf_to_uart(big);    /* 수십 ms */
+printf_to_uart(big);    /* slow UART output */
 xSemaphoreGive(m);
 ```
 

@@ -32,7 +32,7 @@ scheduler가 다음 task를 다시 고르는 때는 넷입니다.
 |------|------|
 | `configUSE_PREEMPTION` 1 | 더 높은 우선순위가 ready가 되면 그 자리에서 전환 |
 | `configUSE_PREEMPTION` 0 (cooperative) | 지금 task가 block하거나 yield할 때까지 전환하지 않음 |
-| `configUSE_TIME_SLICING` 1 | 같은 우선순위 ready task끼리 tick마다 전환 |
+| `configUSE_TIME_SLICING` 1 | `configUSE_PREEMPTION` 1일 때, 같은 우선순위 ready task끼리 tick마다 전환(`tasks.c` 4861행) |
 
 ## 코드 / 실제 사용 예
 
@@ -122,7 +122,7 @@ worker yields at tick 30
 urgent runs at tick 30 (preemption 0)
 ```
 
-preemptive에서는 tick 5에 바로 돌았고, cooperative에서는 worker가 양보한 tick 30까지 기다렸습니다. cooperative에서 양보하지 않는 loop가 있으면 그보다 낮지 않은 어떤 task도 돌지 못합니다.
+preemptive에서는 tick 5에 바로 돌았고, cooperative에서는 worker가 양보한 tick 30까지 기다렸습니다. cooperative에서 양보하지 않는 loop가 있으면 우선순위와 상관없이 다른 task가 돌지 못합니다.
 
 ### Idle hook과 sleep
 
