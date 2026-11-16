@@ -25,10 +25,9 @@ topics: ["embedded", "embedded/hardware"]
 | stack | 1024-bit | 1024-bit |
 | channel | 8개, 128-bit | 16개, 64-bit |
 | pseudo channel | channel당 2개, 64-bit | channel당 2개 |
-| bank (8H device) | 32 bank (bank group 8 × 4) | TBD |
-| row / column 주소 | RA[13:0] / CA[5:1] | TBD |
+| bank | 8H device 32 bank (bank group 8 × 4) | 16-Hi에서 최대 64 bank (12-Hi보다 16개 많음) |
 
-HBM2 열은 PG276의 *Physical Address Map for 4H and 8H Devices* 표에서 8H(stack당 8 GB) 열입니다. 4H는 bank 16개(bank group 4 × 4)이고, 8H는 늘어난 bank 비트를 *SID* 비트로 씁니다. HBM3의 bank 이하 구성은 [JEDEC의 2022년 HBM3 발표](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard)에 없고 JEDEC 표준 원문은 이 글에서 열지 않아 TBD로 둡니다.
+HBM2 열은 PG276의 *Physical Address Map for 4H and 8H Devices* 표에서 8H(stack당 8 GB) 열입니다. 4H는 bank 16개(bank group 4 × 4)이고, 8H는 늘어난 bank 비트를 *SID* 비트로 씁니다. PG276은 같은 표에 row 주소 RA[13:0], column 주소 CA[5:1]도 적습니다. HBM3의 bank 수는 [JEDEC의 2022년 HBM3 발표](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard)에 없어 [Synopsys의 2022년 4월 16일 HBM3 설명](https://www.synopsys.com/articles/hbm3-ip-dwtb.html)을 따랐습니다. Synopsys는 bank 수를 세는 단위를 밝히지 않으며, 인용한 자료에는 HBM3의 row·column 주소 폭이 없습니다.
 
 PG276은 HBM 동작이 *DDR4와 특히 비슷*하고, bank당 *열린 row는 하나*라고 설명합니다. 같은 bank의 다른 row로 가려면 지금 row를 *precharge*한 뒤 *activate*해야 합니다.
 
@@ -43,7 +42,7 @@ PG276은 HBM 동작이 *DDR4와 특히 비슷*하고, bank당 *열린 row는 하
 | RD / WR | 열린 row의 column 읽기 / 쓰기 |
 | REF | refresh |
 
-명령 사이에는 *최소 간격(timing constraint)*이 있습니다. bank group이 있는 DRAM에서는 *같은 bank group 안*의 연속 column 명령 간격(tCCD_L)이 *다른 bank group으로 넘어갈 때*(tCCD_S)보다 *깁니다*. 예를 들어 [Kingston 8 Gb DDR4 데이터시트 (rev G00, 2023-06)](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5411/8G%20Bits%20DDR4%20SDRAM.pdf)의 IDD 측정 timing 표는 DDR4-3200에서 *tCCD_S 4 nCK, tCCD_L 8 nCK*입니다. HBM에 대해서도 PG276은 *다른 bank group의 bank 사이 접근 시간이 같은 bank group 안보다 짧다*고 적습니다. HBM3의 실제 값은 TBD입니다.
+명령 사이에는 *최소 간격(timing constraint)*이 있습니다. bank group이 있는 DRAM에서는 *같은 bank group 안*의 연속 column 명령 간격(tCCD_L)이 *다른 bank group으로 넘어갈 때*(tCCD_S)보다 *깁니다*. 예를 들어 [Kingston 8 Gb DDR4 데이터시트 (rev G00, 2023-06)](https://mm.digikey.com/Volume0/opasdata/d220001/medias/docus/5411/8G%20Bits%20DDR4%20SDRAM.pdf)의 IDD 측정 timing 표는 DDR4-3200에서 *tCCD_S 4 nCK, tCCD_L 8 nCK*입니다. HBM에 대해서도 PG276은 *다른 bank group의 bank 사이 접근 시간이 같은 bank group 안보다 짧다*고 적습니다. 인용한 자료에는 HBM3의 tCCD 값이 없습니다.
 
 그래서 PG276의 기본 주소 배치는 *Bank Group Interleave*를 켭니다. bank group 번호의 최하위 비트 BG0를 HBM 주소의 최하위 사용자 비트(addr[5])에 둬서, AxLEN 0x1인 AXI 요청 하나가 *Bank Group 0과 Bank Group 1*에 하나씩 명령을 보내게 합니다.
 
@@ -146,7 +145,7 @@ linear 모델에서 1 MiB 미만의 4 KiB stride 주소 256개는 bank mask가 `
 
 ![REFab vs REFpb](/images/blog/hbm/diagrams/ch07-refpb.svg)
 
-따라서 per-bank refresh를 쓰려면 컨트롤러가 *bank별 refresh 순서*를 추적해야 합니다. HBM 세대별 REFpb 지원 여부와 refresh 손실 비율은 TBD입니다. PG276의 HBM 컨트롤러는 대신 *overhead를 줄이는 hidden single row refresh* 옵션을 둡니다.
+따라서 per-bank refresh를 쓰려면 컨트롤러가 *bank별 refresh 순서*를 추적해야 합니다. 인용한 HBM 자료에는 REFpb 정의나 refresh 손실 비율이 없습니다. PG276의 HBM 컨트롤러는 대신 *overhead를 줄이는 hidden single row refresh* 옵션을 둡니다.
 
 ## Read-write turnaround
 
@@ -210,7 +209,7 @@ AXI HBM Controller IP는 *memory-mapped AXI3* 포트(dual-stack에서 32개)를 
 
 ## 정리
 
-- HBM2 8H stack은 PG276 기준 *channel 8 × pseudo channel 2*, pseudo channel마다 *bank 32개(bank group 8 × 4)*, RA[13:0]·CA[5:1]입니다. HBM3의 bank 이하 값은 TBD입니다.
+- HBM2 8H stack은 PG276 기준 *channel 8 × pseudo channel 2*, device에 *bank 32개(bank group 8 × 4)*, RA[13:0]·CA[5:1]입니다. HBM3는 Synopsys 기준 16-Hi에서 최대 64 bank입니다.
 - 컨트롤러는 *page policy, bank 인터리브, address mapping, refresh 처리, RD/WR 묶기*로 실제 대역폭을 끌어올립니다.
 - bank group이 있으면 *다른 group으로 번갈아* 보내야 명령 간격이 짧아집니다(Kingston DDR4-3200의 IDD 측정 timing 표 기준 tCCD_S 4 대 tCCD_L 8 nCK).
 - HBM transaction 하나는 32 byte라, 8-byte write는 25%, 정렬 안 된 read는 50% 이하로 떨어집니다.
