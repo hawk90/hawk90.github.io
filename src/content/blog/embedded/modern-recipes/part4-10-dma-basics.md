@@ -16,9 +16,9 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-UART에서 1 KB를 받거나, ADC로 1024 sample을 모으거나, SPI로 framebuffer를 LCD에 쏟는 작업을 CPU로 처리하면 *수십 ms를 날립니다*. DMA를 쓰면 *CPU는 다른 일을 하면서* peripheral과 메모리 사이 데이터가 흐릅니다. throughput이 늘고 latency는 줄며 power도 줄어듭니다.
+UART에서 1 KB를 받는 일만 해도 115200 baud 8N1에서 88.9 ms가 걸립니다([4-07](/blog/embedded/modern-recipes/part4-07-uart-driver)). 그동안 CPU가 byte마다 `DR`을 옮기는 대신, DMA가 peripheral과 메모리 사이를 옮기고 CPU는 시작과 완료만 처리하게 하는 것이 이 글의 목표입니다.
 
-이 글은 STM32F4의 DMA controller를 기준으로 peripheral-to-memory, memory-to-peripheral, memory-to-memory 세 가지 패턴을 모두 다룹니다.
+이 글은 STM32F407의 DMA controller를 기준으로 peripheral-to-memory, memory-to-peripheral, memory-to-memory 세 패턴을 다룹니다. register 이름과 bit 위치는 `stm32f407xx.h`, 설정 규칙은 ST HAL v1.8.3 `stm32f4xx_hal_dma.c`/`.h`를 기준으로 했습니다. QEMU의 STM32F4·L4 모델은 DMA를 unimplemented device로만 두므로(`stm32f405_soc.c`, `stm32l4x5_soc.c`), 아래 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall` 경고 없이 빌드되는 것까지 확인했고 실행은 하지 않았습니다.
 
 ## 핵심 개념
 
@@ -32,22 +32,22 @@ UART에서 1 KB를 받거나, ADC로 1024 sample을 모으거나, SPI로 framebu
 | SRAM | data buffer 위치 |
 | Peripheral | source 또는 destination |
 
-STM32F4는 *DMA1, DMA2 controller 각 8 stream*, 각 stream은 *8 channel*에서 trigger source를 고릅니다. 어느 peripheral이 어느 stream·channel을 쓰는지는 datasheet의 *DMA request mapping table*을 참조합니다.
+`stm32f407xx.h`는 `DMA1_Stream0`~`DMA1_Stream7`, `DMA2_Stream0`~`DMA2_Stream7`을 정의하고, 각 stream의 `CR`에서 3 bit `CHSEL`(bit 27:25)로 channel 0~7 중 하나를 고릅니다. 어느 peripheral이 어느 stream·channel인지는 reference manual RM0090의 DMA request 표에 있는데, 이 글은 그 표를 열어 보지 못했으므로 아래 예제의 stream·channel은 각각 출처를 단 ST 예제에서 가져왔습니다.
 
 ### Transfer 모드 세 가지
 
 - **Peripheral → Memory**: ADC 결과, UART RX, SPI RX.
 - **Memory → Peripheral**: UART TX, SPI TX, DAC waveform.
-- **Memory → Memory**: memcpy 가속 (peripheral trigger 없이 software가 시작).
+- **Memory → Memory**: peripheral trigger 없이 software가 시작합니다. HAL의 `DMA_MEMORY_TO_MEMORY`는 `DMA_SxCR_DIR_1`이고, 이때는 `PAR`이 source, `M0AR`이 destination입니다(HAL `DMA_SetConfig()`).
 
 ### Circular vs Normal
 
-- **Normal**: 지정한 NDTR만큼 transfer 후 자동 stop.
-- **Circular**: NDTR 도달 시 처음으로 wrap, 무한 반복. ADC sampling, UART RX buffer에 적합.
+- **Normal**: `NDTR`만큼 옮기면 끝납니다.
+- **Circular**(`DMA_SxCR_CIRC`): 끝에 닿으면 buffer 처음으로 돌아가 계속합니다. ADC 연속 변환이나 UART RX처럼 끝이 없는 입력에 씁니다. HAL은 "The circular buffer mode cannot be used if the memory-to-memory data transfer is configured"라고 적습니다.
 
 ### Half/Full complete interrupt
 
-DMA는 *NDTR의 절반과 전체*에 도달했을 때 IRQ를 발생시킬 수 있습니다. circular buffer를 두 영역으로 나눠 *한쪽이 차는 동안 다른 쪽 처리* 패턴(double buffering)이 표준입니다.
+DMA는 전송이 절반 지났을 때(HT, `DMA_SxCR_HTIE`)와 끝났을 때(TC, `DMA_SxCR_TCIE`) 인터럽트를 냅니다. circular buffer를 두 영역으로 나눠, DMA가 한쪽을 채우는 동안 CPU가 다른 쪽을 처리합니다.
 
 | offset | 영역 | trigger event | CPU 동작 |
 | --- | --- | --- | --- |
@@ -57,16 +57,18 @@ DMA는 *NDTR의 절반과 전체*에 도달했을 때 IRQ를 발생시킬 수 �
 
 ### Data width와 burst
 
-```c
-PSIZE / MSIZE = 0 (byte), 1 (halfword), 2 (word)
-PBURST / MBURST = single (0), incr4 (1), incr8 (2), incr16 (3)
+```text
+PSIZE (bit 12:11) / MSIZE (bit 14:13) = 0 (byte), 1 (halfword), 2 (word)
+PBURST (bit 22:21) / MBURST (bit 24:23) = single (0), incr4 (1), incr8 (2), incr16 (3)
 ```
 
-burst는 *bus arbitration overhead를 줄여 throughput을 올립니다*. 단, source/destination 모두 burst-capable이어야 합니다.
+bit 위치는 `DMA_SxCR_PSIZE_Pos` 11, `MSIZE_Pos` 13, `PBURST_Pos` 21, `MBURST_Pos` 23이고, burst 값은 HAL의 `DMA_MBURST_SINGLE`·`INC4`·`INC8`·`INC16` 정의와 같습니다.
+
+HAL은 burst에 대해 "The burst mode is possible only if the address Increment mode is enabled"라는 조건을 답니다. 이 글의 예제는 모두 single transfer를 씁니다.
 
 ### Cache coherency (Cortex-M7)
 
-STM32H7·F7은 *D-cache*를 가집니다. CPU가 cache에 write한 데이터를 DMA가 *SRAM에서 읽으면* stale data 위험이 있습니다. cache clean/invalidate를 명시적으로 호출해야 합니다.
+STM32F407(Cortex-M4)에는 D-cache가 없어 이 절은 해당하지 않습니다. Cortex-M7 칩에서는 CPU가 cache에 쓴 값이 아직 SRAM에 없을 수 있고, DMA는 SRAM을 직접 읽고 쓰므로 방향에 맞춰 cache를 정리합니다. CMSIS_6 `m-profile/armv7m_cachel1.h`는 이 함수들의 `addr`을 "aligned to 32-byte boundary"로 받고, Cortex-M7의 cache line을 `__SCB_DCACHE_LINE_SIZE 32U`로 정의합니다.
 
 ```c
 SCB_CleanDCache_by_Addr(buf, len);   // CPU write → DMA read 전
@@ -85,7 +87,7 @@ void adc_dma_init(void) {
     RCC->AHB1ENR |= RCC_AHB1ENR_DMA2EN;
     RCC->APB2ENR |= RCC_APB2ENR_ADC1EN;
 
-    // DMA2 Stream0, Channel 0 = ADC1
+    // DMA2 Stream0, Channel 0 = ADC1 (ST STM32F4-Discovery ADC_RegularConversion_DMA)
     DMA2_Stream0->CR = 0;
     while (DMA2_Stream0->CR & DMA_SxCR_EN);
 
@@ -126,7 +128,7 @@ void process_adc(void) {
 }
 ```
 
-main은 *DMA가 어느 영역을 채우고 있는지* HT/TC flag로만 알면 됩니다.
+stream·channel은 ST STM32CubeF4의 `Projects/STM32F4-Discovery/Examples/ADC/ADC_RegularConversion_DMA/Inc/main.h`(F407 보드)가 ADC1에 쓰는 `DMA2_Stream0`, `DMA_CHANNEL_0`입니다. HT가 오면 앞 절반, TC가 오면 뒤 절반이 다 찼다는 뜻이므로 main은 두 flag만 보고 처리할 쪽을 고릅니다. `process()`는 응용 함수입니다.
 
 ### 2. UART RX circular buffer
 
@@ -138,10 +140,11 @@ static uint16_t rx_dma_read_pos;
 void uart_dma_rx_init(void) {
     USART1->CR3 |= USART_CR3_DMAR;
 
-    DMA2_Stream2->PAR  = (uint32_t)&USART1->DR;
-    DMA2_Stream2->M0AR = (uint32_t)rx_dma;
-    DMA2_Stream2->NDTR = RX_DMA_LEN;
-    DMA2_Stream2->CR   = (4u << 25)
+    // USART1_RX = DMA2 Stream5 Channel4 (4-07과 같은 ST 예제)
+    DMA2_Stream5->PAR  = (uint32_t)&USART1->DR;
+    DMA2_Stream5->M0AR = (uint32_t)rx_dma;
+    DMA2_Stream5->NDTR = RX_DMA_LEN;
+    DMA2_Stream5->CR   = (4u << 25)
                        | DMA_SxCR_MINC
                        | DMA_SxCR_CIRC
                        | DMA_SxCR_EN;
@@ -149,7 +152,7 @@ void uart_dma_rx_init(void) {
 
 // Polling — DMA가 어디까지 썼는지 NDTR로 계산
 size_t uart_dma_rx_available(void) {
-    uint16_t write_pos = RX_DMA_LEN - (uint16_t)DMA2_Stream2->NDTR;
+    uint16_t write_pos = RX_DMA_LEN - (uint16_t)DMA2_Stream5->NDTR;
     if (write_pos >= rx_dma_read_pos)
         return write_pos - rx_dma_read_pos;
     else
@@ -186,63 +189,47 @@ void dma_memcpy(void *dst, const void *src, size_t n) {
 }
 ```
 
-memory-to-memory DMA가 CPU memcpy보다 빠른지는 bus contention·width·cache·전송 크기에 따라 달라집니다. CPU 부담은 줄일 수 있지만 small copy는 setup overhead 때문에 손해일 수 있습니다.
+word 단위로 옮기므로 `n`은 4의 배수, `src`·`dst`는 4-byte 정렬이어야 합니다. 위 함수는 완료를 polling하므로 CPU가 그동안 다른 일을 하지 못합니다. CPU memcpy와 시간을 비교하려면 보드에서 [4-06](/blog/embedded/modern-recipes/part4-06-systick-timer)의 DWT `CYCCNT`로 두 방식을 같은 크기로 잽니다. 이 글은 그 측정을 하지 않았습니다.
 
 ## 측정 / 동작 확인
 
-DMA 동작 확인은 `NDTR`을 폴링하면 됩니다.
+DMA가 돌고 있는지는 `NDTR`(남은 개수)이 줄어드는지로 봅니다. 디버거로 멈춘 상태에서 두 번 읽어 값이 다르면 stream이 진행 중입니다. ADC 예제는 circular라 `NDTR`이 0에 닿으면 다시 `ADC_BUF_LEN`부터 줄고, 그때마다 HT·TC 인터럽트가 한 번씩 옵니다. `adc_half_ready`·`adc_full_ready`가 번갈아 서는지 보면 됩니다.
 
-```text
-(gdb) p/d DMA2_Stream0->NDTR
-$1 = 178           ← 256 → 178로 줄어들고 있음 (78 bytes 전송됨)
-```
-
-ADC sampling은 oscilloscope로 ADC 트리거 핀(TIM2 ETR 등)을 보고, sample rate 일치 확인:
-
-**TIM2 → ADC EXT trigger:**
-
-- PA0 trigger: 1 µs period (1 MHz)
-- adc_buf 채우는 속도: 256 sample / 256 µs = 1 sample/µs ✓
-
-DMA가 안 도는 가장 흔한 원인은 *peripheral의 DMA enable bit 누락*과 *clock enable 누락*입니다.
+`NDTR`이 처음 값에서 줄지 않으면 이 글의 코드에서 확인할 곳은 셋입니다. DMA clock(`RCC_AHB1ENR_DMA2EN`), stream의 `EN`, 그리고 peripheral 쪽의 DMA 요청 bit(ADC는 `ADC_CR2_DMA`, USART는 `USART_CR3_DMAR`/`DMAT`)입니다.
 
 ## 자주 보는 함정
 
 > ⚠️ Channel 잘못 선택
 
-reference manual의 DMA request mapping은 패밀리마다 다릅니다. F4의 SPI1 RX = DMA2 Stream0/Channel 3, F7도 비슷하지만 다른 SoC는 다릅니다.
+같은 SPI1이라도 ST 예제마다 쓰는 stream이 다릅니다. [4-08](/blog/embedded/modern-recipes/part4-08-spi-driver)에서 인용한 STM32F412ZG-Nucleo 예제는 SPI1 RX에 DMA2 Stream2/Channel 3을 쓰고, STM32F429I-Discovery 예제는 SPI4에 DMA2 Stream0/Channel 4를 씁니다. 칩의 DMA request 표에 없는 stream·channel 조합을 고르면 요청이 오지 않아 `NDTR`이 줄지 않습니다.
 
 > ⚠️ Stream을 두 peripheral이 동시 사용
 
-stream은 *한 시점에 하나의 source*만 처리합니다. 두 peripheral이 같은 stream이면 *둘 중 하나 포기* (다른 stream으로 옮김).
+stream 하나의 `CHSEL`은 한 번에 한 값이므로, 한 stream은 한 시점에 한 channel(= 한 peripheral 요청)만 받습니다. 두 peripheral이 같은 stream을 원하면 둘 중 하나를 그 peripheral이 쓸 수 있는 다른 stream으로 옮깁니다.
 
 > ⚠️ Width 불일치
 
-PSIZE와 MSIZE는 peripheral과 memory의 데이터 표현에 맞춰 설정해야 합니다. 서로 다른 width를 지원하는 DMA도 있으므로 무조건 같은 값으로 가정하지 말고 packing/alignment 규칙을 확인합니다.
+ADC 예제는 `ADC1->DR`(12-bit 결과)을 halfword로 읽어 `uint16_t` buffer에 쓰므로 PSIZE·MSIZE 모두 halfword입니다. buffer 원소 크기와 MSIZE가 다르면 `NDTR` 개수만큼 옮겨도 buffer의 엉뚱한 위치가 채워집니다.
 
 > ⚠️ Buffer가 stack에 있음
 
-local array에 DMA target을 잡으면 *함수 return 후 stale*. 항상 `static` 또는 global.
+함수 안의 자동 변수 배열은 함수가 돌아오면 수명이 끝납니다(C11 6.2.4). DMA는 그 뒤에도 같은 주소에 계속 쓰므로 다른 함수의 stack frame을 덮어씁니다. DMA buffer는 `static`이나 전역으로 둡니다.
 
 > ⚠️ Buffer alignment
 
-width와 controller에 따라 source/destination alignment 제약이 있습니다. `uint32_t` transfer를 사용할 때는 4-byte alignment를 보장하고, cache line alignment 요구도 별도로 확인합니다.
+`dma_memcpy()`처럼 word로 옮길 때는 `src`·`dst`를 `__attribute__((aligned(4)))` 등으로 4-byte 정렬합니다. Cortex-M7에서 cache를 함께 다룰 때는 위 CMSIS 함수가 요구하는 32-byte 정렬도 맞춥니다.
 
 > ⚠️ Cortex-M7 cache coherency
 
-cacheable memory를 사용하는 H7/F7 등에서는 DMA가 쓴 데이터를 CPU가 stale cache에서 읽을 수 있습니다. DMA 방향에 맞춰 clean/invalidate를 하고, 해당 CMSIS 함수의 cache-line alignment 요구를 따르거나 buffer를 non-cacheable 영역에 배치합니다.
-
-> ⚠️ Half-word access가 boundary를 넘김
-
-odd address에 16-bit DMA write → bus fault. address도 width에 맞춰 align.
+M7 칩으로 옮기면 DMA가 쓴 buffer를 읽기 전에 `SCB_InvalidateDCache_by_Addr()`, DMA가 읽을 buffer를 쓴 뒤에 `SCB_CleanDCache_by_Addr()`를 부르거나, buffer를 MPU로 non-cacheable 영역에 둡니다. F407 코드에는 해당하지 않습니다.
 
 ## 정리
 
-- DMA = **source + destination + length + trigger**. setup 4가지로 시작.
-- **Circular + HT/TC IRQ**가 double buffer 패턴의 표준.
+- DMA 설정은 **source + destination + length + trigger(stream·channel)**이고, stream·channel은 칩의 DMA request 표나 ST 예제로 확인합니다.
+- **Circular + HT/TC 인터럽트**로 buffer 두 절반을 번갈아 처리합니다.
 - ADC·UART·SPI 모두 *peripheral의 DMA enable bit*도 같이 set.
 - Buffer는 **static 또는 global**, **aligned**.
-- Cortex-M7은 **cache clean/invalidate** 또는 **MPU non-cacheable**.
+- Cortex-M7 칩은 **cache clean/invalidate**(32-byte 정렬) 또는 **MPU non-cacheable**이 필요하고, F407에는 해당하지 않습니다.
 
 다음 편은 **저전력 모드**입니다. Sleep/Stop/Standby와 wake-up source, µA 측정을 다룹니다.
 
