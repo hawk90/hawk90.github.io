@@ -39,7 +39,7 @@ MCU는 원본 발진기 하나를 PLL로 체배한 뒤 버스마다 나눠 씁�
 | APB1 | 42 MHz | PCLK1 (/4) |
 | APB2 | 84 MHz | PCLK2 (/2) |
 
-같은 `SystemClock_Config()` 주석은 이 설정에서 V_DD = 3.3 V, 레귤레이터 Scale 1, **Flash latency 5 WS**를 함께 적습니다. HAL을 쓰지 않고 레지스터로 같은 일을 하면 다음 순서가 됩니다. wait state를 클럭을 올리기 *전에* 늘리고, prescaler를 정한 뒤 SYSCLK를 PLL로 바꾸고, 전환이 끝났는지 `SWS`로 확인합니다.
+같은 `SystemClock_Config()` 주석은 이 설정에서 V_DD = 3.3 V, 레귤레이터 Scale 1, **Flash latency 5 WS**를 함께 적습니다. HAL을 쓰지 않고 레지스터로 같은 일을 하면 다음 순서가 됩니다. 클럭을 올리기 *전에* wait state부터 늘리고, prescaler를 정한 뒤 SYSCLK를 PLL로 바꾸고, 전환이 끝났는지 `SWS`로 확인합니다.
 
 ```c
 #include "stm32f4xx.h"
@@ -91,7 +91,7 @@ read-back 한 줄은 HAL의 `__HAL_RCC_PWR_CLK_ENABLE()`(`stm32f4xx_hal_rcc.h` 5
 
 이상적 클럭은 정확히 같은 간격으로 떨어집니다. 실제 클럭은 매 cycle 미세하게 떨립니다.
 
-SiTime 앱노트 AN10007(Rev 1.21) 2절은 jitter의 주요 종류로 period·cycle-to-cycle·long-term·phase jitter·TIE를 듭니다. 아래는 그중 시간 영역의 세 가지입니다. period jitter와 cycle-to-cycle jitter의 정의는 JEDEC JESD65B를 따른다고 적습니다.
+SiTime 앱노트 AN10007(Rev 1.21) 2절은 jitter의 주요 종류로 period·cycle-to-cycle·long-term·phase jitter·TIE를 듭니다. 아래는 그중 시간 영역의 세 가지입니다. period jitter와 cycle-to-cycle jitter의 정의는 JEDEC JESD65B를 따른다고 같은 문서가 적습니다.
 
 | 종류 | AN10007의 정의 | 쓰임 (AN10007) |
 | --- | --- | --- |
