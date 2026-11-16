@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Race condition은 *관찰 자체가 race를 사라지게* 만드는 관찰하면 달라지는 버그입니다."** Printf 대신 GPIO pulse·SWO·DWT cycle count로 *간섭 없이* 관찰해야 잡힙니다.
+> **"Race condition은 *관찰하는 행위가 timing을 바꿔* 사라지기도 하는 버그입니다."** Printf 대신 GPIO pulse·SWO·DWT cycle count로 *간섭 없이* 관찰해야 잡힙니다.
 
 ## 어떤 상황에서 쓰나
 
-"가끔 buffer가 깨져요." "ISR과 main이 같은 변수를 만지는데 1000번에 한 번 이상 동작합니다." "printf 한 줄을 추가했더니 문제가 사라졌어요." 마지막 줄이 가장 큰 단서입니다. Race는 *관찰자*가 timing을 바꾸면 사라집니다. Heisenbug라고 부릅니다.
+"가끔 buffer가 깨져요." "ISR과 main이 같은 변수를 만지는데 1000번에 한 번꼴로 이상하게 동작해요." "printf 한 줄을 추가했더니 문제가 사라졌어요." 마지막 줄이 가장 큰 단서입니다. Race는 *관찰자*가 timing을 바꾸면 사라집니다. Heisenbug라고 부릅니다.
 
 ## 첫 번째 원인 후보 — 컴파일러가 다시 읽지 않는 변수
 
@@ -137,7 +137,7 @@ uint8_t ring_pop(void) {
 }
 ```
 
-logic analyzer로 PC0·PC1을 함께 잡으면 ISR이 main 구간 한가운데 들어오는 순간이 보입니다. 각 표시는 BSRR 쓰기 한 번입니다. 펄스가 짧으면 logic analyzer의 샘플 간격보다 짧아 놓칠 수 있으므로, 측정하려는 펄스 폭보다 샘플 간격이 충분히 짧은지 먼저 확인합니다.
+logic analyzer로 PC0·PC1을 함께 잡으면 ISR이 main 구간 한가운데 들어오는 순간이 보입니다. 각 표시는 BSRR 쓰기 한 번입니다. 펄스 폭이 logic analyzer의 샘플 간격보다 짧으면 놓치므로, 샘플 간격이 측정할 펄스 폭보다 충분히 짧은지 먼저 확인합니다.
 
 ## 측정 2 — DWT cycle counter
 
