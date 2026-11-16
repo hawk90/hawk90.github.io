@@ -52,16 +52,16 @@ arm-none-eabi-gdb firmware.elf
 (gdb) continue
 ```
 
-`monitor` 접두사는 OpenOCD 자체 명령(JTAG 제어)이고, 그 외는 일반 gdb 명령입니다. `load`는 elf의 모든 section을 flash에 씁니다.
+`monitor` 접두사는 OpenOCD 자체 명령(JTAG 제어)이고, 그 외는 일반 gdb 명령입니다. `load`는 ELF의 로드 대상 section을 ELF에 적힌 주소에 씁니다(GDB 설명서 *Target Commands*). OpenOCD가 memory map으로 flash 영역을 알려 주면 그 부분은 flash에 기록됩니다(OpenOCD *GDB and OpenOCD*).
 
 ## 핵심 명령 모음
 
-GDB 명령 요약입니다. 오른쪽 열은 같은 일을 하는 LLDB 명령이고, 아래 실행 예에서 실제로 쓴 것입니다.
+GDB 명령 요약입니다. 오른쪽 열은 같은 일을 하는 LLDB 명령입니다.
 
 | GDB | 하는 일 | LLDB |
 | --- | --- | --- |
-| `break main` / `break uart.c:42` | 함수·줄에 breakpoint | `breakpoint set -n main` |
-| `watch g_counter` | 쓰기 watchpoint | `watchpoint set expression -w write -- &g_counter` |
+| `break main` / `break uart.c:42` | 함수·줄에 breakpoint | `breakpoint set -n main` / `breakpoint set -f uart.c -l 42` |
+| `watch g_counter` | 값이 바뀌는 쓰기에서 정지 | `watchpoint set expression -w modify -- &g_counter` |
 | `rwatch` / `awatch` | 읽기 / 읽기·쓰기 watchpoint | `-w read` / `-w read_write` |
 | `step` / `next` / `stepi` / `nexti` | 줄·명령 단위 실행 | `step` / `next` / `si` / `ni` |
 | `print/x g_status` | 16진 출력 | `p/x g_status` |
@@ -98,7 +98,7 @@ int main(void) {
 }
 ```
 
-1-03과 같은 semihosting 하네스로 `-O0` 빌드해 QEMU 11.1.3 `netduinoplus2`에서 그냥 돌리면 `user_count = 1879048197 (0x70000005)`가 찍힙니다. 이번에는 `-S -gdb tcp::3342`로 QEMU를 멈춘 채 띄우고 LLDB(lldb-2103.0.34.407)를 붙여 watchpoint를 걸었습니다.
+semihosting 출력 하네스(1-03에서 쓴 `pr()`·startup)로 `-O0` 빌드해 QEMU 11.1.3 `netduinoplus2`에서 그냥 돌리면 `user_count = 1879048197 (0x70000005)`가 찍힙니다. 이번에는 `-S -gdb tcp::3342`로 QEMU를 멈춘 채 띄우고 LLDB(lldb-2103.0.34.407)를 붙여 watchpoint를 걸었습니다.
 
 ```bash
 qemu-system-arm -M netduinoplus2 -nographic -semihosting-config enable=on,target=native \
@@ -130,9 +130,11 @@ new value: 0x70000005
 (int) i = 11
 ```
 
-세 가지가 보입니다. 첫 정지는 버그가 아니라 startup 코드가 `.data` 초깃값 5를 복사하는 순간입니다. 두 번째부터는 `len=12`로 불린 `process_input`이 i = 8~11에서 카운터 바이트를 하나씩 덮는데, 0x05·0x00·0x00을 쓰는 세 번은 값이 그대로라 old와 new가 같습니다. 값으로 판단하는 대신 *쓰기*에 걸리는 watchpoint라서 이 세 번도 잡힙니다. 마지막 0x70이 들어간 순간 값이 0x70000005가 되고, `bt`는 `main`의 두 번째 호출(wp.c:19)을 가리킵니다. QEMU는 쓰기가 끝난 다음 명령에서 멈추므로 PC는 store 다음 주소입니다.
+세 가지가 보입니다. 첫 정지는 버그가 아니라 startup 코드가 `.data` 초깃값 5를 복사하는 순간입니다. 두 번째부터는 `len=12`로 불린 `process_input`이 i = 8~11에서 카운터 바이트를 하나씩 덮는데, 0x05·0x00·0x00을 쓰는 세 번은 값이 그대로라 old와 new가 같습니다. LLDB의 `-w write`는 값과 상관없이 *쓰기*마다 멈추므로 이 세 번도 잡힙니다. 마지막 0x70이 들어간 순간 값이 0x70000005가 되고, `bt`는 `main`의 두 번째 호출(wp.c:19)을 가리킵니다. 정지 PC 0x08000372는 `strb r2, [r3, #0]`(0x08000370) 바로 다음 명령이므로, QEMU는 쓰기가 끝난 다음 명령에서 멈춥니다.
 
-하드웨어 watchpoint 수는 칩마다 고정되어 있습니다. Cortex-M4 TRM(DDI 0439B) 8장은 debug 옵션으로 breakpoint unit(literal comparator 2개 + instruction comparator 6개, 또는 instruction comparator 2개)과 watchpoint unit(watchpoint 1개 또는 4개)을 둘 수 있다고 적습니다. 그래서 같은 M4라도 칩에 따라 watchpoint가 1개뿐일 수 있고, 다 쓰면 디버거가 새 watchpoint를 거부합니다.
+GDB의 `watch`는 이와 다릅니다. GDB 16.3 설명서는 `watch`가 식에 값이 쓰이고 *그 값이 바뀔 때* 멈춘다고 적습니다. LLDB에서 같은 동작인 `-w modify`로 다시 돌리면 `.data` 초기화 다음 정지가 곧바로 i = 11, `old value: 0x00000005` → `new value: 0x70000005`입니다. 같은 값을 덮어쓰는 세 번은 건너뜁니다. 값이 그대로인 쓰기까지 잡아야 하는지에 따라 둘을 고릅니다.
+
+하드웨어 watchpoint 수는 칩마다 고정되어 있습니다. Cortex-M4 TRM(DDI 0439B) 8장은 debug 옵션으로 breakpoint unit(literal comparator 2개 + instruction comparator 6개, 또는 instruction comparator 2개)과 watchpoint unit(watchpoint 1개 또는 4개)을 둘 수 있다고 적습니다. 그래서 같은 M4라도 칩에 따라 watchpoint가 1개뿐일 수 있습니다. GDB에 이 한도를 알려 주는 설정은 아래 「Hardware breakpoint 부족」에 있습니다.
 
 ## .gdbinit으로 반복 작업 자동화
 
@@ -154,7 +156,7 @@ define connect
 end
 
 define dump_regs
-    printf "PSR  = 0x%08x\n", $xpsr
+    printf "PSR  = 0x%08x\n", $xPSR
     printf "MSP  = 0x%08x\n", $msp
     printf "PSP  = 0x%08x\n", $psp
     printf "PC   = 0x%08x\n", $pc
@@ -162,7 +164,7 @@ define dump_regs
 end
 ```
 
-`connect`는 연결·flash·reset을 한 번에 합니다. `dump_regs`의 0xE000ED28은 CFSR(Configurable Fault Status Register) 주소이고, 해석은 [10-04: 하드폴트 분석](/blog/embedded/modern-recipes/part10-04-hardfault-analysis)에 있습니다. `$msp`·`$psp` 같은 레지스터 이름은 GDB 서버가 보내는 target description에 그 레지스터가 있어야 쓸 수 있습니다.
+`connect`는 연결·flash·reset을 한 번에 합니다. `dump_regs`의 0xE000ED28은 CFSR(Configurable Fault Status Register) 주소이고, 해석은 [10-04: 하드폴트 분석](/blog/embedded/modern-recipes/part10-04-hardfault-analysis)에 있습니다. `$xPSR`·`$msp`·`$psp` 같은 레지스터 이름은 GDB 서버가 보내는 target description에 그 이름으로 있어야 씁니다. OpenOCD v0.12.0은 `src/target/armv7m.c`에서 이 레지스터를 `xPSR`로 부르고, GDB는 이름의 대소문자를 구분합니다.
 
 ## RTOS Awareness
 
@@ -179,6 +181,7 @@ $_TARGETNAME configure -rtos FreeRTOS
 
 ```bash
 pip install pyocd
+pyocd pack install stm32f407vg      # 내장 target이 아니면 CMSIS-Pack 설치
 pyocd gdbserver --target stm32f407vg
 
 # 별도 터미널
@@ -186,9 +189,9 @@ arm-none-eabi-gdb firmware.elf
 (gdb) target extended-remote :3333
 ```
 
-pyOCD는 Python으로 확장하기 쉬워, 자동화·script에 강합니다.
+pyOCD v0.36.0의 내장 target 목록에 STM32F407이 없으므로, 문서 *target_support.md*대로 `pyocd pack install`로 그 부품의 CMSIS-Pack을 먼저 설치합니다. 정확한 target 이름은 `pyocd pack find stm32f407`로 확인합니다. pyOCD는 같은 기능을 Python API로도 제공합니다.
 
-pyOCD v0.36.0 `docs/api_examples.md`의 예를 줄인 것입니다. 원래 글은 `target.flash_binary()`를 썼는데, 이 문서의 예는 flash에 쓰는 데 `FileProgrammer`를 씁니다.
+pyOCD v0.36.0 `docs/api_examples.md`의 예를 줄인 것입니다. flash 쓰기는 `FileProgrammer`가 합니다.
 
 ```python
 from pyocd.core.helpers import ConnectHelper
@@ -204,7 +207,7 @@ with ConnectHelper.session_with_chosen_probe() as session:
 
 ## SWO / RTT viewer 통합
 
-OpenOCD v0.12의 SWO 설정은 `tpiu` 객체로 합니다. 설명서 16.6절의 STM32L152 예를 STM32F4에 맞게 옮기면 다음과 같습니다. `-traceclk`는 필수이고 Cortex-M3/M4에서는 보통 HCLK와 같으며, `-output :port`를 주면 OpenOCD가 그 TCP 포트로 trace를 내보냅니다. ITM stimulus port 0은 target을 만들 때 자동으로 켜집니다(`itm port`).
+OpenOCD v0.12의 SWO 설정은 `tpiu` 객체로 합니다. 설명서 16.6.3절의 STM32L152 예를 STM32F4에 맞게 옮기면 다음과 같습니다. `-traceclk`는 필수이고 Cortex-M3/M4에서는 보통 HCLK와 같으며, `-output :port`를 주면 OpenOCD가 그 TCP 포트로 trace를 내보냅니다. ITM stimulus port 0은 target을 만들 때 자동으로 켜집니다(16.6.4절 `itm port`).
 
 ```bash
 openocd -f interface/stlink.cfg -c "transport select swd" -f target/stm32f4x.cfg \
@@ -213,7 +216,7 @@ openocd -f interface/stlink.cfg -c "transport select swd" -f target/stm32f4x.cfg
   -c "stm32f4x.tpiu enable"
 ```
 
-`-traceclk 168000000`은 1-02의 168 MHz 설정을 가정한 값입니다. 받은 바이트는 ITM 패킷이므로 그대로 텍스트가 아닙니다. 설명서의 예는 `itmdump`로 디코드합니다. SEGGER J-Link를 쓴다면 RTT가 SWO 핀 없이 RAM 버퍼로 같은 일을 하고, `JLinkRTTClient`가 그 출력을 받습니다(SEGGER *J-Link RTT Client* 문서).
+`-traceclk 168000000`은 1-02의 168 MHz 설정을 가정한 값입니다. 받은 바이트는 ITM 패킷이므로 그대로 텍스트가 아닙니다. 설명서의 예는 `itmdump`로 디코드합니다. SEGGER J-Link를 쓴다면 RTT가 SWO 핀 없이 RAM 버퍼로 같은 일을 하고, J-Link RTT Client가 그 출력을 받습니다. SEGGER *J-Link RTT Client* 문서에 따르면 이 클라이언트는 J-Link Commander나 J-Link GDB Server처럼 debug 연결을 열고 있는 도구가 있어야 동작합니다.
 
 ## VS Code 통합
 
@@ -283,11 +286,10 @@ OpenOCD를 백그라운드로 띄우고, GDB batch 모드로 flash와 reset을 �
 > Optimized 코드에 source-level breakpoint
 
 ```c
-// -O2 빌드
 int compute(int x) {
-    int a = x * 2;       // ← bp 안 잡힘
-    int b = a + 1;       // ← inline 됨
-    return b;
+    int a = x * 2;       // 2행: -O2에서도 명령 있음 (lsls)
+    int b = a + 1;       // 3행: -O2·-Og에서 주소 없음
+    return b;            // 4행: 주소 없음
 }
 ```
 
@@ -308,7 +310,7 @@ opt.c:5
    4:	bx	lr
 ```
 
-`-O0`에서는 다섯 줄 모두 명령이 있습니다. `-O2`에서는 2행과 5행에만 명령이 있고, 3·4행에는 주소가 없습니다. `-Og`도 이 함수에서는 `-O2`와 같은 두 줄만 남았습니다. 주소가 없는 줄에 breakpoint를 걸면 디버거는 다음 주소가 있는 줄에 겁니다. 줄과 주소의 대응은 GDB의 `info line`, LLDB의 `image lookup -l`로 확인하고, 모든 줄에서 멈춰야 하면 그 파일만 `-O0`으로 빌드합니다.
+`-O0`에서는 다섯 줄 모두 명령이 있습니다. `-O2`에서는 2행과 5행에만 명령이 있고, 3·4행에는 주소가 없습니다. `-Og`도 이 함수에서는 `-O2`와 같은 두 줄만 남았습니다. LLDB에서 `-O2` 빌드의 3행이나 4행에 breakpoint를 걸면 5행(`compute + 2`)에 걸립니다. 줄과 주소의 대응은 GDB의 `info line`, LLDB의 `image lookup -f opt.c -l 3`으로 확인하고, 모든 줄에서 멈춰야 하면 그 파일만 `-O0`으로 빌드합니다.
 
 > Hardware breakpoint 부족
 
@@ -320,7 +322,7 @@ opt.c:5
 (gdb) watch *(uint32_t*)0x20001234
 ```
 
-stack 변수는 함수가 끝나면 그 주소를 다른 함수의 프레임이 쓰므로, 지역 변수에 건 watchpoint는 함수 밖에서 엉뚱한 쓰기에 걸립니다. 전역·정적 변수나 고정 주소에 겁니다.
+GDB 16.3 설명서는 지역 변수에 건 watchpoint를 그 블록을 벗어날 때 자동으로 지운다고 적습니다. 함수가 끝난 뒤에도 그 메모리를 지켜봐야 하면 `watch -l`로 주소를 지켜보거나 위처럼 주소로 겁니다.
 
 > Stack overflow로 backtrace 망가짐
 
@@ -330,7 +332,7 @@ backtrace는 stack에 저장된 복귀 주소와 프레임 정보를 따라가�
 
 - OpenOCD/pyOCD가 gdbserver, GDB가 client. JTAG/SWD를 통해 통신합니다.
 - `target extended-remote :3333`로 붙고, `monitor`로 OpenOCD 명령을 내립니다.
-- 쓰기 watchpoint는 값이 같아도 쓰기마다 멈춥니다. QEMU + LLDB 실행에서 카운터를 덮은 네 번의 쓰기를 모두 잡았습니다. Cortex-M4의 watchpoint는 칩에 따라 1개 또는 4개입니다.
+- LLDB `-w write`는 값이 같아도 쓰기마다 멈추고(네 번), GDB `watch`와 같은 LLDB `-w modify`는 값이 바뀐 i = 11에서만 멈췄습니다(QEMU 실행). Cortex-M4의 watchpoint는 칩에 따라 1개 또는 4개입니다.
 - 프로젝트 `.gdbinit`은 `auto-load safe-path`에 등록해야 읽힙니다.
 - OpenOCD는 `-rtos`를 줘야 RTOS task를 thread로 보여 줍니다.
 - SVD로 peripheral register를 이름으로 읽습니다(cortex-debug, PyCortexMDebug).
