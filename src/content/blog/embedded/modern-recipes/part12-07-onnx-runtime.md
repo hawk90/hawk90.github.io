@@ -39,7 +39,7 @@ torch.onnx.export(model, dummy, "resnet50.onnx",
                   opset_version=17)
 ```
 
-이전 판의 `pretrained=True`는 지금의 torchvision API인 `weights=`로 바꿨습니다. torch 2.15에서 이 호출은 그대로 돌지만 결과가 예전과 다릅니다.
+이전 판의 `pretrained=True`는 지금의 torchvision API인 `weights=`로 바꿨습니다. 위의 `weights=None` 호출은 torch 2.15에서 그대로 돌지만, 결과물이 예전 exporter와 다릅니다.
 
 ```text
 UserWarning ... 'dynamic_axes' is not recommended when dynamo=True ... Supply the 'dynamic_shapes' argument
