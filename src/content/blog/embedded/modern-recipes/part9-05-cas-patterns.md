@@ -305,7 +305,7 @@ cas      threads=8    67.6 M incs/s  (counter 16000000)
 backoff  threads=8    89.1 M incs/s  (counter 16000000)
 ```
 
-세 라운드의 범위를 보면 스레드 8개에서 `cas`는 62~116, `backoff`는 64~89, `faa`는 43~123 M incs/s였습니다. 라운드마다 순위가 바뀌어 이 Mac에서는 backoff가 일관되게 이긴다고 말할 수 없습니다. 반면 스레드가 하나일 때 backoff 판은 253~449 M로 다른 둘(426~487, 379~490)보다 낮게 나온 라운드도 있었습니다. Backoff의 효과는 코어 수, 경합 정도, `yield`가 그 코어에서 실제로 무엇을 하는지에 달려 있으므로, 넣을지는 자기 시스템에서 재고 정합니다. `objdump -d contend`로 보면 `inc_faa`는 `ldadd x9, x8, [x8]` 한 명령이라 재시도 루프가 없지만, 이 측정에서 CAS loop와의 차이는 라운드 간 흔들림보다 작았습니다.
+세 라운드의 범위를 보면 스레드 8개에서 `cas`는 62~116, `backoff`는 64~89, `faa`는 43~123 M incs/s였습니다. 라운드마다 순위가 바뀌어 이 Mac에서는 backoff가 일관되게 이긴다고 말할 수 없습니다. 스레드가 하나면 CAS가 실패하지 않아 backoff 코드는 한 번도 돌지 않으므로, 1스레드 열에서 backoff 판이 253~449 M로 다른 둘(426~487, 379~490)보다 낮게 나온 라운드는 실행 간 흔들림입니다. Backoff의 효과는 코어 수, 경합 정도, `yield`가 그 코어에서 실제로 무엇을 하는지에 달려 있으므로, 넣을지는 자기 시스템에서 재고 정합니다. `objdump -d contend`로 보면 `inc_faa`는 `ldadd x9, x8, [x8]` 한 명령이라 재시도 루프가 없지만, 이 측정에서 CAS loop와의 차이는 라운드 간 흔들림보다 작았습니다.
 
 ### Tagged pointer로 ABA 회피
 
@@ -340,11 +340,17 @@ int main()
 sizeof(tagged_ptr) = 16, is_always_lock_free = 1, is_lock_free() = 1
 exit=0
 10000054c:     	caspal	x4, x5, x2, x3, [x8]
-### Debian: g++ -std=c++17 -O2 tagged.cpp -o tagged -latomic && ./tagged   (g++ 14.2.0)
+### Debian 13 arm64 (g++ 14.2.0)
+$ g++ -std=c++17 -O2 tagged.cpp -o tagged
+/usr/bin/ld: /tmp/ccE8H5sx.o: in function `bump(tagged_ptr)':
+tagged.cpp:(.text+0x28): undefined reference to `__atomic_compare_exchange_16'
+/usr/bin/ld: /tmp/ccE8H5sx.o: in function `main':
 tagged.cpp:(.text.startup+0x10): undefined reference to `__atomic_is_lock_free'
 collect2: error: ld returned 1 exit status
+$ g++ -std=c++17 -O2 tagged.cpp -o tagged -latomic && ./tagged; echo exit=$?
 sizeof(tagged_ptr) = 16, is_always_lock_free = 0, is_lock_free() = 0
 exit=0
+$ objdump -d --no-show-raw-insn -C tagged | grep -E 'bl.*<(bump|__atomic_compare_exchange_16)'
  7b4:	bl	940 <bump(tagged_ptr)>
  968:	bl	700 <__atomic_compare_exchange_16@plt>
 ```
@@ -379,7 +385,7 @@ Vyukov의 bounded MPMC queue는 CAS로 enqueue 위치를 예약하고, 칸마다
     }
 ```
 
-CAS가 실패했을 때는 `pos`가 이미 최신 값으로 갱신돼 있으므로 바로 다시 시도합니다. 칸의 sequence가 앞서 있으면(`dif > 0`) 다른 생산자가 앞질렀으니 위치를 다시 읽고, 뒤처져 있으면(`dif < 0`) 큐가 가득 찬 것입니다. 원래 이 글의 코드는 CAS가 실패하면 `false`를 돌려줘 "가득 참"과 "경합으로 한 번 졌음"을 구분하지 못했습니다. `intptr_t` 차이 계산과 세 갈래 분기는 1024cores 원문 그대로입니다([2022-11-27 보관본](https://web.archive.org/web/20221127075938/https://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue)).
+CAS가 실패했을 때는 `pos`가 이미 최신 값으로 갱신돼 있으므로 바로 다시 시도합니다. 칸의 sequence가 앞서 있으면(`dif > 0`) 다른 생산자가 앞질렀으니 위치를 다시 읽고, 뒤처져 있으면(`dif < 0`) 큐가 가득 찬 것입니다. CAS가 실패했을 때 `false`를 돌려주면 "가득 참"과 "경합으로 한 번 졌음"을 구분하지 못하므로, 실패는 재시도로 처리합니다. `intptr_t` 차이 계산과 세 갈래 분기는 1024cores 원문 그대로입니다([2022-11-27 보관본](https://web.archive.org/web/20221127075938/https://www.1024cores.net/home/lock-free-algorithms/queues/bounded-mpmc-queue)).
 
 ## 측정 / 성능 비교
 
