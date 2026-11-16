@@ -10,13 +10,40 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-GDB 명령을 *내가 만든다*는 것이 Python API의 두 번째 즐거움입니다. 단순 매크로부터 자동 BP 액션, 정지마다 떨어지는 통계까지 — 모두 같은 패턴 (gdb.Command / gdb.Function / gdb.Breakpoint / 이벤트 hook)으로 가능합니다.
+GDB 명령을 *직접 만든다*는 것이 Python API의 두 번째 재미입니다. 단순한 매크로부터 자동 breakpoint 액션, 정지할 때마다 찍히는 통계까지 모두 네 가지 틀(`gdb.Command`, `gdb.Function`, `gdb.Breakpoint`, 이벤트 hook) 위에서 만들어집니다. 공구함에 비유하면 GDB가 기본 공구 세트를 주고, Python API는 그 손잡이에 끼울 내 비트를 깎게 해 주는 셈입니다.
 
-이 장은 GDB 17.2 Python API를 기준으로 합니다. 명령의 argument/실패, event 연결 수명과 breakpoint callback의 실행 제약을 함께 다룹니다.
+이 장의 코드는 모두 Debian 13 arm64 VM의 GDB 16.3(Debian 16.3-1)에서 실습 프로그램 `server.c`로 돌렸습니다. `main()`이 `malloc(64)`과 `malloc(2 MiB)`를 한 번씩 부르고, `process_request()` → `handle_packet()` → `send_response()`를 세 번 호출한 뒤 공유 라이브러리 `libmylib.so`의 함수를 부릅니다.
+
+```c title="server.c (발췌)"
+int g_counter = 0;
+int counter = 0;
+int state = 0;
+char msg[32] = "héllo, gdb";
+
+int send_response(int id) { g_counter += id; return id * 10; }        /* 13행 */
+int handle_packet(int id) { state = id % 3; return send_response(id); } /* 14행 */
+int process_request(int id) {
+    counter++;
+    return handle_packet(id);
+}
+
+int main(void) {
+    char *small = malloc(64);                 /* 21행 */
+    char *big = malloc(2 * 1024 * 1024);
+    int total = 0;
+    for (int i = 1; i <= 3; i++)
+        total += process_request(i);
+    snprintf(small, 64, "total=%d lib=%d", total, mylib_version());
+    puts(small);
+    ...
+}
+```
 
 ## gdb.Command — 사용자 명령
 
-```python title="hello-command.py"
+`gdb.Command`를 상속하고 `invoke()`를 정의하면 새 명령이 생깁니다. 클래스 docstring이 `help` 문구가 됩니다.
+
+```python title="ext2.py (발췌)"
 import gdb
 
 class HelloCmd(gdb.Command):
@@ -34,86 +61,134 @@ class HelloCmd(gdb.Command):
 HelloCmd()
 ```
 
-`gdb.string_to_argv(arg)`가 *셸 스타일 파싱* — quote·escape 처리.
+`gdb.string_to_argv(arg)`가 따옴표와 escape를 셸처럼 풀어 줍니다. `"Mr. Smith"`가 인자 하나로 들어오는 것을 볼 수 있습니다.
 
 ```text
 (gdb) hello
 hello, world
 (gdb) hello "Mr. Smith"
 hello, Mr. Smith
+(gdb) hello a b
+usage: hello ["NAME"]
 ```
+
+`dont_repeat()`는 빈 줄 Enter로 같은 명령이 반복되지 않게 합니다. `gdb.GdbError`는 traceback 없이 문구만 보여 줍니다.
 
 ### COMMAND_* 카테고리
 
-`help <category>`로 분류 보기.
+두 번째 인자는 `help`에서 명령이 들어갈 분류입니다. GDB 16.3에 있는 이름을 그대로 찍었습니다.
 
 ```text
-COMMAND_NONE        분류 없음
-COMMAND_RUNNING     run, step, continue 류
-COMMAND_DATA        print, x 류
-COMMAND_STACK       bt, frame 류
-COMMAND_FILES       file, load 류
-COMMAND_SUPPORT     set, show 류
-COMMAND_STATUS      info 류
-COMMAND_BREAKPOINTS break, watch 류
-COMMAND_TRACEPOINTS tracepoint
-COMMAND_USER        사용자
-COMMAND_OBSCURE
-COMMAND_MAINTENANCE
+(gdb) python print([c for c in dir(gdb) if c.startswith("COMMAND_")])
+['COMMAND_BREAKPOINTS', 'COMMAND_DATA', 'COMMAND_FILES', 'COMMAND_MAINTENANCE', 'COMMAND_NONE', 'COMMAND_OBSCURE', 'COMMAND_RUNNING', 'COMMAND_STACK', 'COMMAND_STATUS', 'COMMAND_SUPPORT', 'COMMAND_TRACEPOINTS', 'COMMAND_TUI', 'COMMAND_USER']
 ```
 
-내 명령이 *어디 보일지*를 결정. 진단 명령은 `COMMAND_STATUS`, 트리거는 `COMMAND_BREAKPOINTS` 같은 식으로.
+`COMMAND_USER`로 만든 명령은 `help user-defined`에 모입니다. 이 장의 `ext2.py`를 source한 뒤의 목록입니다.
+
+```text
+(gdb) help user-defined
+User-defined commands.
+The commands in this class are those defined by the user.
+Use the "define" command to define a command.
+
+List of commands:
+
+hello -- 간단한 인사 명령.
+my -- my 도구 모음.
+my list -- my 목록 출력.
+my stop -- my 정지.
+svc -- svc start|stop|status
+symcmd -- 심볼 이름 자동 완성 예.
+```
+
+진단 명령은 `COMMAND_STATUS`, breakpoint 관련 도구는 `COMMAND_BREAKPOINTS`처럼 성격에 맞는 분류에 넣으면 `help status`·`help breakpoints`에서 같이 보입니다.
 
 ### Completion
 
-탭 자동 완성을 켜려면.
+세 번째 인자로 `COMPLETE_*` 상수를 주면 GDB 내장 완성기가 붙습니다.
 
-```python
-class MyCmd(gdb.Command):
-    def __init__(self):
-        super().__init__("mycmd", gdb.COMMAND_USER, gdb.COMPLETE_SYMBOL)
+```text
+(gdb) python print([c for c in dir(gdb) if c.startswith("COMPLETE_")])
+['COMPLETE_COMMAND', 'COMPLETE_EXPRESSION', 'COMPLETE_FILENAME', 'COMPLETE_LOCATION', 'COMPLETE_NONE', 'COMPLETE_SYMBOL']
 ```
 
-| 종류 | 설명 |
-|------|------|
-| COMPLETE_NONE | 없음 |
-| COMPLETE_FILENAME | 파일명 |
-| COMPLETE_LOCATION | 위치 (`function`, `file:line`) |
-| COMPLETE_COMMAND | GDB 명령 |
-| COMPLETE_SYMBOL | 심볼 이름 |
-| COMPLETE_EXPRESSION | 표현식 |
+| 상수 | 완성 대상 |
+|------|-----------|
+| `COMPLETE_NONE` | 없음 |
+| `COMPLETE_FILENAME` | 파일명 |
+| `COMPLETE_LOCATION` | 위치 (`function`, `file:line`) |
+| `COMPLETE_COMMAND` | GDB 명령 |
+| `COMPLETE_SYMBOL` | 심볼 이름 |
+| `COMPLETE_EXPRESSION` | 표현식 |
+
+`COMPLETE_SYMBOL`로 만든 `symcmd`에 `complete` 명령을 쓰면 Tab을 누른 것과 같은 결과를 볼 수 있습니다.
+
+```python
+class SymCmd(gdb.Command):
+    """심볼 이름 자동 완성 예."""
+    def __init__(self):
+        super().__init__("symcmd", gdb.COMMAND_USER, gdb.COMPLETE_SYMBOL)
+```
+
+```text
+(gdb) complete symcmd process_
+symcmd process_request
+```
 
 ### Custom completion
 
-```python
-class MyCmd(gdb.Command):
-    def __init__(self):
-        super().__init__("mycmd", gdb.COMMAND_USER, gdb.COMPLETE_NONE)
-    def complete(self, text, word):
-        candidates = ['foo', 'bar', 'baz']
-        return [c for c in candidates if c.startswith(word)]
-    def invoke(self, arg, from_tty):
-        ...
+선택지가 정해진 명령(`svc start | stop | status`)은 `complete(text, word)` 메서드로 후보를 직접 돌려줍니다. 여기서 두 번 넘어졌습니다.
+
+첫째, 생성자에 `completer_class`를 주면 `complete()`는 불리지 않습니다. GDB 16.3 매뉴얼 CLI Commands In Python 절은 `completer_class`가 *주어지지 않았을 때만* `complete` 메서드로 완성한다고 적습니다. `gdb.COMPLETE_NONE`을 같이 넘긴 판에서는 `complete svc st`가 아무것도 내지 않았습니다.
+
+둘째, `word`가 `None`으로 들어오는 호출이 있습니다. 매뉴얼은 두 인자가 모두 문자열이라고 적지만, `gdb/python/py-cmd.c`의 `cmdpy_completer_handle_brkchars`(228행)는 단어 경계를 정하는 단계에서 `word`를 `NULL`로 넘기고, `cmdpy_completer_helper`(191~194행)가 이를 Python `None`으로 바꿉니다. 가드 없이 `c.startswith(word)`를 쓰면 다음처럼 됩니다.
+
+```text
+(gdb) complete svc st
+Python Exception <class 'TypeError'>: startswith first arg must be str or a tuple of str, not NoneType
 ```
 
-도구 안에 *제한된 옵션*이 있을 때 (예: `mycmd start | stop | status`).
+두 가지를 고친 판입니다.
+
+```python
+class SvcCmd(gdb.Command):
+    """svc start|stop|status"""
+    def __init__(self):
+        super().__init__("svc", gdb.COMMAND_USER)      # completer_class 없음
+    def complete(self, text, word):
+        if word is None:        # 단어 경계 계산 단계 (py-cmd.c)
+            return None
+        return [c for c in ['start', 'stop', 'status'] if c.startswith(word)]
+    def invoke(self, arg, from_tty):
+        gdb.write(f"svc: {arg}\n")
+```
+
+```text
+(gdb) complete svc st
+svc start
+svc status
+svc stop
+```
 
 ### Prefix 명령 — 서브 명령 트리
 
+`prefix=True`로 만든 명령 아래에 `"my list"`처럼 이름을 붙이면 서브 명령이 됩니다. 파일 탐색기의 폴더처럼 도구를 한 이름 아래에 정리하는 방법입니다.
+
 ```python
 class MyTop(gdb.Command):
+    """my 도구 모음."""
     def __init__(self):
         super().__init__("my", gdb.COMMAND_USER, prefix=True)
-    def invoke(self, arg, from_tty):
-        gdb.execute("help my")
 
 class MyList(gdb.Command):
+    """my 목록 출력."""
     def __init__(self):
         super().__init__("my list", gdb.COMMAND_USER)
     def invoke(self, arg, from_tty):
         gdb.write("listing...\n")
 
 class MyStop(gdb.Command):
+    """my 정지."""
     def __init__(self):
         super().__init__("my stop", gdb.COMMAND_USER)
     def invoke(self, arg, from_tty):
@@ -122,24 +197,47 @@ class MyStop(gdb.Command):
 MyTop(); MyList(); MyStop()
 ```
 
-`my list`, `my stop` 같은 서브 명령. 큰 도구 묶음을 깔끔하게.
+```text
+(gdb) my list
+listing...
+(gdb) help my
+my 도구 모음.
+
+List of my subcommands:
+
+my list -- my 목록 출력.
+my stop -- my 정지.
+(gdb) my
+"my" must be followed by the name of a subcommand.
+List of my subcommands:
+...
+```
+
+prefix 명령에 `invoke()`를 정의하지 않으면 GDB가 알아서 서브 명령 목록을 보여 줍니다. 따로 `gdb.execute("help my")`를 부를 필요가 없습니다.
 
 ## Parameter — 사용자 설정 가능 옵션
 
-```python title="verbosity-parameter.py"
-import gdb
+도구에 `set`/`show`로 바꿀 수 있는 옵션을 두려면 `gdb.Parameter`를 상속합니다. GDB 16.3의 `PARAM_*` 종류는 다음과 같습니다.
 
+```text
+(gdb) python print([c for c in dir(gdb) if c.startswith("PARAM_")])
+['PARAM_AUTO_BOOLEAN', 'PARAM_BOOLEAN', 'PARAM_ENUM', 'PARAM_FILENAME', 'PARAM_INTEGER', 'PARAM_OPTIONAL_FILENAME', 'PARAM_STRING', 'PARAM_STRING_NOESCAPE', 'PARAM_UINTEGER', 'PARAM_ZINTEGER', 'PARAM_ZUINTEGER', 'PARAM_ZUINTEGER_UNLIMITED']
+```
+
+매뉴얼 Parameters In Python 절에 따르면 `PARAM_INTEGER`·`PARAM_UINTEGER`는 `None`(또는 `unlimited`)이 "무제한"이고 0은 예약된 값입니다. 상세도처럼 0도 평범한 값으로 쓰고 싶다면 `PARAM_ZINTEGER`가 맞습니다.
+
+```python title="ext2.py (발췌)"
 class MyVerbosity(gdb.Parameter):
     """my-verbose: 도구의 출력 상세도."""
+    set_doc = "Set my-verbose."
+    show_doc = "Show my-verbose."
     def __init__(self):
-        super().__init__("my-verbose",
-                         gdb.COMMAND_SUPPORT,
-                         gdb.PARAM_INTEGER)
+        super().__init__("my-verbose", gdb.COMMAND_SUPPORT, gdb.PARAM_ZINTEGER)
         self.value = 1
     def get_set_string(self):
         return f"my-verbose set to {self.value}"
-    def get_show_string(self, value):
-        return f"my-verbose is currently {value}"
+    def get_show_string(self, svalue):
+        return f"my-verbose is currently {svalue}"
 
 MyVerbosity()
 ```
@@ -149,28 +247,24 @@ MyVerbosity()
 my-verbose set to 3
 (gdb) show my-verbose
 my-verbose is currently 3
+(gdb) python print(gdb.parameter("my-verbose"), type(gdb.parameter("my-verbose")))
+3 <class 'int'>
+(gdb) help set my-verbose
+Set my-verbose.
+my-verbose: 도구의 출력 상세도.
 ```
 
-`gdb.PARAM_*` 종류: BOOLEAN, AUTO_BOOLEAN, INTEGER, UINTEGER, STRING, FILENAME, ENUM, ...
-
-도구가 *사용자 옵션*을 가질 때.
-
-```python
-# 다른 곳에서 접근
-v = gdb.parameter("my-verbose")
-if v > 1:
-    gdb.write("verbose info\n")
-```
+`gdb.parameter()`는 Python `int`를 돌려주므로 다른 명령 안에서 `if gdb.parameter("my-verbose") > 1:`처럼 바로 비교합니다. 매뉴얼은 `get_set_string()`이 `gdb.GdbError`를 던지면 `set`이 실패하지만 `value`는 이미 바뀐 채 남는다고 경고합니다. 값을 검증하려면 이전 값을 따로 저장해 두고 되돌려야 합니다.
 
 ## gdb.Function — Convenience function
 
-`$<name>(...)` 형태로 *표현식 안*에서 호출 가능한 함수.
+`gdb.Function`을 상속하면 `$이름(...)` 형태로 *표현식 안*에서 부를 수 있는 함수가 생깁니다. `print`, breakpoint 조건, `x` 명령 어디든 들어갑니다.
 
-```python title="string-length-function.py"
-import gdb
+아래 `$strlen2`는 C의 `strlen`(바이트 수)과 다르게 UTF-8로 풀어 *문자 수*를 셉니다. 길이를 인자로 받아 읽을 범위를 고정하고, 4096바이트를 넘으면 거부합니다.
 
+```python title="ext2.py (발췌)"
 class StrLen(gdb.Function):
-    """UTF-8 decoding한 Python 문자열의 문자 수. C strlen byte 수 아님."""
+    """$strlen2(arr, n): 앞 n바이트를 UTF-8로 풀어 NUL 앞까지의 문자 수."""
     def __init__(self):
         super().__init__("strlen2")
     def invoke(self, str_arg, byte_length):
@@ -183,33 +277,50 @@ class StrLen(gdb.Function):
 StrLen()
 ```
 
+`msg`는 `"héllo, gdb"`입니다. `é`가 UTF-8로 2바이트라서 바이트로는 11, 문자로는 10입니다.
+
 ```text
 (gdb) print $strlen2(msg, sizeof(msg))
-$1 = 12
-
-(gdb) break process if $strlen2(buffer, sizeof(buffer)) > 100
+$1 = 10
+(gdb) print sizeof(msg)
+$2 = 32
+(gdb) print $strlen2(msg, 5000)
+length must be 0..4096 bytes
+(gdb) tbreak handle_packet if $strlen2(msg, sizeof(msg)) > 5
+Temporary breakpoint 2 at 0xaaaaaaaa0938: file server.c, line 14.
+(gdb) info breakpoints
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   0x0000aaaaaaaa098c in process_request at server.c:16
+	breakpoint already hit 1 time
+2       breakpoint     del  y   0x0000aaaaaaaa0938 in handle_packet at server.c:14
+	stop only if $strlen2(msg, sizeof(msg)) > 5
 ```
 
-두 번째 인자 길이는 실제 readable buffer 범위를 넘으면 안 됩니다. 아래 함수는 strlen 대체가 아니라 길이가 알려진 debug array용 UTF-8 문자 수 예입니다. C byte length와 문자 수, 읽기 실패·최대 범위를 구분합니다.
+조건부 breakpoint의 조건 안에 Python 함수를 넣을 수 있다는 점이 핵심입니다. C 표현식으로 쓰기 어려운 판정을 Python으로 짜서 조건으로 씁니다.
 
 ## 이벤트 훅
 
-```python title="session-hooks.py"
+`gdb.events.*`는 GDB 안에서 일이 생길 때 호출될 콜백을 붙이는 게시판입니다. GDB 16.3에 있는 registry 목록입니다.
+
+```text
+['before_prompt', 'breakpoint_created', 'breakpoint_deleted', 'breakpoint_modified', 'clear_objfiles', 'connection_removed', 'cont', 'executable_changed', 'exited', 'free_objfile', 'free_progspace', 'gdb_exiting', 'inferior_call', 'inferior_deleted', 'memory_changed', 'new_inferior', 'new_objfile', 'new_progspace', 'new_thread', 'register_changed', 'stop', 'thread_exited', 'tui_enabled']
+```
+
+아래 `SessionHooks`는 `stop`과 `exited`에 연결하고, 같은 파일을 다시 source하면 이전 연결을 끊습니다. 스크립트를 고쳐 가며 여러 번 source해도 콜백이 쌓이지 않습니다.
+
+```python title="hooks.py"
 import gdb
 
 class SessionHooks:
     def __init__(self):
         self.count = 0
         self.connections = []
-        self.closed = False
         for registry, callback in ((gdb.events.stop, self.on_stop),
                                    (gdb.events.exited, self.on_exited)):
             registry.connect(callback)
             self.connections.append((registry, callback))
 
     def on_stop(self, event):
-        if self.closed:
-            return
         self.count += 1
         if isinstance(event, gdb.SignalEvent):
             reason = f"signal {event.stop_signal}"
@@ -220,16 +331,13 @@ class SessionHooks:
         gdb.write(f"stop {self.count}: {reason}\n")
 
     def on_exited(self, event):
-        # signal로 종료된 경우 등 exit_code가 없을 수 있음.
         code = getattr(event, "exit_code", None)
         gdb.write(f"inferior {event.inferior.num} exited: {code}\n")
 
     def close(self):
-        if not self.closed:
-            self.closed = True
-            for registry, callback in self.connections:
-                registry.disconnect(callback)
-            self.connections.clear()
+        for registry, callback in self.connections:
+            registry.disconnect(callback)
+        self.connections.clear()
 
 old_hooks = globals().get("article_session_hooks")
 if old_hooks is not None:
@@ -237,187 +345,70 @@ if old_hooks is not None:
 article_session_hooks = SessionHooks()
 ```
 
-반복 source 시 이전 연결을 해제합니다. event 종류/속성은 해당 registry와 GDB revision을 따르고, memory/register change event를 모든 inferior write의 기록으로 해석하지 않습니다. all-stop/non-stop의 selected context도 구분합니다.
+`hooks.py`를 두 번 source하고 `handle_packet`에 breakpoint를 걸어 실행했습니다. 정지마다 줄이 하나씩만 찍히므로 첫 번째 연결이 제대로 끊긴 것입니다.
+
+```text
+(gdb) source /root/ext/ch02/hooks.py
+(gdb) source /root/ext/ch02/hooks.py
+(gdb) break handle_packet
+(gdb) run
+Breakpoint 1, handle_packet (id=1) at server.c:14
+stop 1: breakpoints 1
+(gdb) continue
+Breakpoint 1, handle_packet (id=2) at server.c:14
+stop 2: breakpoints 1
+(gdb) delete
+(gdb) continue
+total=60 lib=3
+[Inferior 1 (process 3255) exited normally]
+inferior 1 exited: 0
+```
+
+`exit_code`가 늘 있는 것은 아닙니다. 널 포인터를 따라가다 죽는 `buggy.c`에서 SIGSEGV로 멈춘 뒤 `quit`으로 프로세스를 죽이자 `exit_code` 속성이 없어 `None`이 찍혔습니다. `getattr(..., None)`을 쓴 이유입니다.
+
+```text
+Program received signal SIGSEGV, Segmentation fault.
+0x0000aaaaaaaa07bc in sum (n=0x10) at buggy.c:3
+stop 1: signal SIGSEGV
+(gdb) quit
+...
+inferior 1 exited: None
+```
 
 ### 활용 — 특정 라이브러리 로드 시 자동 셋업
 
-```python
+`new_objfile`은 실행 파일이나 공유 라이브러리가 로드될 때마다 불립니다. 특정 라이브러리가 올라올 때만 그 라이브러리용 도우미 스크립트를 source합니다.
+
+```python title="objhook.py"
+import gdb
+
 def on_new_obj(event):
     name = event.new_objfile.filename
     if name is not None and name.endswith("/libmylib.so"):
-        gdb.execute("source /opt/mylib/gdb-helpers.py")
-        gdb.write(f"loaded mylib helpers\n")
+        gdb.execute("source /root/ext/ch02/mylib-helpers.py")
+        gdb.write(f"loaded mylib helpers for {name}\n")
 
 gdb.events.new_objfile.connect(on_new_obj)
 ```
 
-### 활용 — 매 정지마다 통계
-
-앞 SessionHooks.count처럼 session별로 수집하고 더 이상 쓰지 않을 때 close/disconnect합니다. 다음은 개념 fragment이며 반복 등록하지 않습니다.
-
-```python
-class StopCounter:
-    def __init__(self):
-        self.count = 0
-        gdb.events.stop.connect(self.on_stop)
-    def on_stop(self, event):
-        self.count += 1
-        gdb.write(f"\n--- stopped {self.count} times so far ---\n")
-
-StopCounter()
-```
-
-### 활용 — 무한 루프 진단
-
-GDB API 대부분은 GDB main thread에서만 사용합니다. worker가 필요하면 gdb.post_event로 작은 callback을 예약할 수 있지만 실행 시점·지연 상한은 보장되지 않습니다. 종료 후 이미 queue에 든 callback과 반복 예약 backlog도 처리해야 합니다.
-
-`threading.Thread`를 daemon으로 만들고 1초마다 무제한 post하면 stop 이후에도 callback이 남을 수 있습니다. GDB의 Python thread/signal·event 계약을 확인하고 pending 한 개와 closed flag·disconnect/join 등을 설계합니다. 별도 thread dumper를 곧바로 hang detector로 제시하지 않습니다.
-
-## gdb.Breakpoint — Python 서브클래스
-
-브레이크포인트의 행동을 *Python으로* 정의.
-
-```python
-import gdb
-
-class LogAllocs(gdb.Breakpoint):
-    def __init__(self):
-        super().__init__("malloc")
-    def stop(self):
-        size = int(gdb.parse_and_eval("$rdi"))   # x86-64 System V ABI의 정수/포인터 첫 인자
-        gdb.write(f"malloc({size})\n")
-        return False    # False = 정지하지 않고 continue
-
-LogAllocs()
-```
-
-이 register 예는 x86-64 System V ABI 전용이며 Windows x64·AArch64에 그대로 쓸 수 없습니다. breakpoint hit의 observer overhead와 재귀·여러 thread도 고려합니다.
-
-`stop()` 반환값.
-
-- `True` → 정지 (사용자에게 제어).
-- `False` → 자동 continue.
-
-기본 `commands silent printf`의 효과지만 *Python의 모든 표현력*.
-
-### 조건부 자동 액션
-
-```python
-class BigMalloc(gdb.Breakpoint):
-    def __init__(self):
-        super().__init__("malloc")
-    def stop(self):
-        size = int(gdb.parse_and_eval("$rdi"))
-        if size > 1024 * 1024:
-            gdb.write(f"big malloc: {size} bytes\n")
-            gdb.execute("bt 5")
-            return True   # 정지
-        return False
-
-BigMalloc()
-```
-
-### Watchpoint 서브클래스
-
-```python
-class TrackWrites(gdb.Breakpoint):
-    def __init__(self, expr):
-        self.expr = expr
-        super().__init__(expr, gdb.BP_WATCHPOINT, gdb.WP_WRITE)
-    def stop(self):
-        val = gdb.parse_and_eval(self.expr)
-        gdb.write(f"{self.expr} = {val}\n")
-        return False
-
-TrackWrites("g_counter")
-```
-
-GDB의 `watch g_counter`를 *프로그램 측에서* 설치.
-
-### Internal vs User
-
-```python
-super().__init__("malloc", internal=True)
-```
-
-`internal=True`면 *사용자 BP 목록에 안 보임*. 도구 내부 breakpoint를 일반 목록과 구분할 때 사용합니다. maint info breakpoints 등에서는 보이며 비밀/보안 경계가 아닙니다.
-
-## .gdbinit으로 자동 로드
-
 ```text
-# ~/.gdbinit
-set history save on
-set print pretty on
-
-python
-import sys
-sys.path.insert(0, '/home/me/gdb-helpers')
-import myhelpers
-myhelpers.register_all()
-end
+(gdb) source /root/ext/ch02/objhook.py
+(gdb) run
+Starting program: /root/ext/ch02/server
+mylib-helpers.py: registering...
+loaded mylib helpers for /root/ext/ch02/libmylib.so
+[Thread debugging using libthread_db enabled]
+...
+total=60 lib=3
 ```
 
-프로젝트별 .gdbinit을 자동 실행하려면 **신뢰 설정을 이미 읽히는 user 설정 또는 command-line에** 둡니다. 아직 신뢰되지 않아 읽히지 않는 project .gdbinit이 자기 자신을 허용하는 흐름은 성립하지 않습니다.
+`mylib-helpers.py`는 한 줄을 찍기만 하는 자리표시 스크립트입니다. 같은 일을 GDB의 auto-load(`libmylib.so-gdb.py`)로도 할 수 있으며, 그 방식은 [Ch 3](/blog/tools/debugging/gdb-extension/chapter03-pretty-printers)에서 다룹니다.
 
-```text
-# 신뢰하는 user ~/.gdbinit에서 exact project path만 지정하는 예
-add-auto-load-safe-path /absolute/trusted/project/.gdbinit
-```
+### 활용 — 매 정지마다 표현식 추적 (display의 자동화)
 
-전체 / 또는 현재 디렉터리 전체를 항상 신뢰하도록 넓히기 전에 script의 출처와 적용 범위를 확인합니다. 이 글의 검증은 user 설정을 수정하지 않고 gdb -nx -batch에서 source를 명시합니다.
+`display`처럼 정지할 때마다 표현식 몇 개를 찍되, 실패한 표현식은 `<error>`로 표시하고 계속 갑니다. 필요 없어지면 `close()`로 연결을 끊습니다.
 
-## 자주 쓰는 패턴
-
-### 1. 반환값과 누수 추적의 경계
-
-malloc entry에서 stop=False로 넘긴 뒤 다음 임의 gdb.events.stop의 RAX를 반환값으로 수집하면 다른 함수/스레드의 값을 기록할 수 있습니다. 기존 예는 그 이유로 사용하지 않습니다.
-
-```python title="return-watch.py"
-import gdb
-
-class ReturnWatch(gdb.FinishBreakpoint):
-    """정지된 non-inline newest frame에서 명시적으로 생성하는 반환 관찰."""
-    def __init__(self):
-        super().__init__(gdb.newest_frame(), internal=True)
-    def stop(self):
-        value = self.return_value
-        gdb.write("return unavailable\n" if value is None else f"return: {value}\n")
-        return True
-    def out_of_scope(self):
-        gdb.write("frame left without a captured normal return\n")
-```
-
-이 observer는 complete allocator/leak tracker가 아닙니다. stopped frame에서 ReturnWatch()를 설치한 뒤 사용하고 정상 return·out_of_scope·return_value=None을 구분합니다. Breakpoint.stop 안에서 continue/step·frame 변경·breakpoint 추가/삭제를 하는 방식은 API 제약을 위반할 수 있습니다.
-
-실제 할당 추적에는 thread별 call/return, NULL·realloc·free·주소 재사용·비정상 종료와 tracker 시작 이전 할당을 다뤄야 합니다. 수집 표가 비었다고 no leaks를 증명하지 않습니다.
-
-### 2. 함수 호출 통계
-
-```python
-class CountCalls(gdb.Breakpoint):
-    def __init__(self, fn):
-        super().__init__(fn, internal=True)
-        self.count = 0
-        self.name = fn
-    def stop(self):
-        self.count += 1
-        return False
-
-watchers = []
-for fn in ['process_request', 'handle_packet', 'send_response']:
-    watchers.append(CountCalls(fn))
-
-def report(_evt=None):
-    for w in watchers:
-        gdb.write(f"{w.name}: {w.count} calls\n")
-gdb.events.exited.connect(report)
-```
-
-설치한 symbol/location과 그 이후 관찰한 hit만 셉니다. inline·최적화·lost event·여러 inferior와 instrumentation 비용을 분리합니다. 함수 전체 실제 호출 수의 보편적인 정확성 보증은 아닙니다.
-
-### 3. 표현식 추적 (display의 자동화)
-
-```python
+```python title="bps.py (발췌)"
 class Tracer:
     def __init__(self, exprs):
         self.exprs = exprs
@@ -429,48 +420,347 @@ class Tracer:
                 gdb.write(f"  {e} = {v}\n")
             except gdb.error:
                 gdb.write(f"  {e} = <error>\n")
-
-Tracer(['counter', 'state'])
+    def close(self):
+        gdb.events.stop.disconnect(self.on_stop)
 ```
 
-매 정지의 selected context에서 값만 읽습니다. queue.size() 같은 expression은 실제 inferior 함수 호출이나 부작용을 일으킬 수 있어 observer에 무조건 넣지 않습니다. 연결 해제와 unavailable/error 처리도 필요합니다.
+```text
+(gdb) python tracer = Tracer(['counter', 'state', 'no_such_var'])
+(gdb) break handle_packet
+(gdb) run
+Breakpoint 1, handle_packet (id=1) at server.c:14
+  counter = 1
+  state = 0
+  no_such_var = <error>
+(gdb) continue
+Breakpoint 1, handle_packet (id=2) at server.c:14
+  counter = 2
+  state = 1
+  no_such_var = <error>
+(gdb) python tracer.close()
+(gdb) continue
+Breakpoint 1, handle_packet (id=3) at server.c:14
+```
+
+`state`가 아직 이전 값인 것은 14행의 `state = id % 3;`이 실행되기 전에 멈췄기 때문입니다. 표현식에 `queue.size()` 같은 함수 호출을 넣으면 정지할 때마다 디버기 안에서 그 함수가 실제로 실행되므로, 관찰용 목록에는 부작용 없는 변수만 넣습니다.
+
+### 다른 스레드에서 GDB에 일 맡기기 — post_event
+
+GDB 16.3 매뉴얼 Basic Python 절은 `gdb.post_event()`가 대부분의 GDB Python API와 달리 thread-safe하다고 적습니다. 다른 스레드는 GDB API를 직접 부르지 말고, 할 일을 callable로 만들어 이 큐에 넣습니다. 매뉴얼은 넣은 순서대로 실행되지만 *언제* 실행될지는 알 수 없다고도 적습니다.
+
+```python title="postevent.py"
+import gdb, threading
+
+class Writer:
+    def __init__(self, message):
+        self.message = message
+    def __call__(self):
+        gdb.write(f"[main thread? {threading.current_thread() is threading.main_thread()}] {self.message}\n")
+
+def worker():
+    gdb.post_event(Writer("posted from worker"))
+
+t = threading.Thread(target=worker)
+t.start()
+t.join()
+gdb.write("worker joined\n")
+```
+
+```text
+(gdb) source /root/ext/ch02/postevent.py
+worker joined
+(gdb) [main thread? True] posted from worker
+```
+
+worker 스레드는 이미 끝났는데 callback은 `source`가 끝나고 GDB가 이벤트 루프로 돌아간 뒤에야 메인 스레드에서 실행됐습니다. 식당 주방의 주문표 꽂이와 같습니다. 홀 직원(worker)은 주문표를 꽂고 돌아가고, 요리사(GDB 메인 스레드)는 손이 빌 때 꽂힌 순서대로 처리합니다.
+
+## gdb.Breakpoint — Python 서브클래스
+
+`gdb.Breakpoint`를 상속해 `stop()`을 정의하면 breakpoint에 걸릴 때마다 Python이 실행됩니다. 매뉴얼 Breakpoints In Python 절에 따르면 `True`를 돌려주면 멈추고, 그 밖의 값이면 계속 갑니다.
+
+첫 인자는 ABI가 정한 레지스터로 들어오므로, AArch64에서는 `$x0`을 읽습니다. AAPCS64 General-purpose Registers 절은 r0-r7(64비트로 쓰면 x0-x7)을 인자 전달과 반환값에 쓴다고 정합니다.
+
+```python title="bps.py (발췌)"
+class LogAllocs(gdb.Breakpoint):
+    def __init__(self):
+        super().__init__("malloc")
+    def stop(self):
+        size = int(gdb.parse_and_eval("$x0"))   # AAPCS64 첫 정수/포인터 인자
+        gdb.write(f"malloc({size})\n")
+        return False
+```
+
+`main`에 멈춘 뒤 설치하고 `next`로 두 줄을 넘겼습니다.
+
+```text
+(gdb) python LogAllocs()
+Breakpoint 2 at 0xfffff7e67804: malloc. (46 locations)
+(gdb) next
+malloc(64)
+22	    char *big = malloc(2 * 1024 * 1024);
+(gdb) next
+malloc(2097152)
+23	    int total = 0;
+```
+
+`commands` + `silent` + `printf`로도 같은 로그를 낼 수 있지만, Python이면 조건과 가공을 자유롭게 짤 수 있습니다.
+
+### 조건부 자동 액션 — 그리고 46곳의 함정
+
+1 MiB보다 큰 할당일 때만 멈추고 콜스택을 찍는 판입니다.
+
+```python
+class BigMalloc(gdb.Breakpoint):
+    def __init__(self):
+        super().__init__("malloc")
+    def stop(self):
+        size = int(gdb.parse_and_eval("$x0"))
+        if size > 1024 * 1024:
+            gdb.write(f"big malloc: {size} bytes\n")
+            gdb.execute("bt 2")
+            return True
+        return False
+```
+
+이번에는 프로그램을 처음부터 다시 `run`했더니 엉뚱한 곳에서 멈췄습니다.
+
+```text
+(gdb) python BigMalloc()
+Breakpoint 3 at 0xfffff7e67804: malloc. (46 locations)
+(gdb) run
+big malloc: 281474842453488 bytes
+#0  malloc (size=40) at ../include/rtld-malloc.h:56
+#1  _dl_init_paths (llp=<optimized out>, ...) at ./elf/dl-load.c:700
+
+Breakpoint 3.17, malloc (size=40) at ../include/rtld-malloc.h:56
+```
+
+`(46 locations)`가 단서입니다. `malloc`이라는 이름은 libc의 진입점뿐 아니라 동적 로더(ld.so) 안의 인라인 `malloc` 래퍼에도 붙어 있어서, 46곳 모두에 breakpoint가 걸렸습니다. glibc 2.41 `include/rtld-malloc.h` 53~57행이 그 래퍼로, `__extern_inline`으로 정의돼 ld.so의 `__rtld_malloc` 함수 포인터를 부릅니다. 처음부터 실행하면 ld.so가 `main` 전에 그 래퍼를 지나가고, 인라인된 자리에서는 `$x0`이 인자 값이 아닙니다. `main` 뒤에 설치한 `LogAllocs`가 멀쩡했던 것은 ld.so의 초기화가 이미 끝난 뒤였기 때문입니다.
+
+libc의 진입 함수 `__libc_malloc`에만 걸면 위치가 하나로 줄고 값도 맞습니다. 실행 전에는 libc가 아직 로드되지 않아 pending으로 걸렸다가, 로드되면서 확정됩니다.
+
+```text
+(gdb) python BigLibcMalloc()
+Function "__libc_malloc" not defined.
+Breakpoint 1 (__libc_malloc) pending.
+(gdb) run
+big malloc: 2097152 bytes
+#0  __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
+#1  0x0000aaaaaaaa09d4 in main () at server.c:22
+
+Breakpoint 1, __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
+(gdb) info breakpoints
+1       breakpoint     keep y   0x0000fffff7e67804 in __GI___libc_malloc at ./malloc/malloc.c:3392
+```
+
+`BigLibcMalloc`은 `BigMalloc`에서 spec만 `"__libc_malloc"`으로 바꾼 클래스입니다. 이 이름은 Debian 13 glibc 2.41 기준이고 libc 구현마다 다를 수 있으므로, 다른 환경에서는 `info breakpoints`의 위치 수와 `bt`로 먼저 확인합니다.
+
+### Watchpoint 서브클래스
+
+두 번째 인자로 `gdb.BP_WATCHPOINT`를 주면 `watch` 명령과 같은 watchpoint가 됩니다. `stop()`에서 값을 찍고 `False`를 돌려주면 쓰기 로그만 남깁니다.
+
+```python
+class TrackWrites(gdb.Breakpoint):
+    def __init__(self, expr):
+        self.expr = expr
+        super().__init__(expr, gdb.BP_WATCHPOINT, gdb.WP_WRITE)
+    def stop(self):
+        val = gdb.parse_and_eval(self.expr)
+        gdb.write(f"{self.expr} = {val}\n")
+        return False
+```
+
+```text
+(gdb) python TrackWrites("g_counter")
+Hardware watchpoint 2: g_counter
+(gdb) continue
+Continuing.
+g_counter = 1
+g_counter = 3
+g_counter = 6
+total=60 lib=3
+[Inferior 1 (process 3127) exited normally]
+```
+
+`send_response(1..3)`이 `g_counter`에 1, 2, 3을 더한 누적값이 그대로 찍혔습니다.
+
+### Internal vs User
+
+매뉴얼에 따르면 `internal=True`로 만든 breakpoint는 만들 때 보고되지 않고 `info breakpoints`에도 나오지 않지만, `maint info breakpoints`에는 음수 번호로 나옵니다. 바로 아래 `ReturnWatch`가 internal이라 그 모습을 볼 수 있습니다.
+
+```python
+super().__init__("malloc", internal=True)
+```
+
+## .gdbinit으로 자동 로드
+
+자주 쓰는 도구는 사용자 init 파일에 등록합니다. GDB 16.3 매뉴얼 Initialization Files 절에 따르면 Linux에서는 `$XDG_CONFIG_HOME/gdb/gdbinit`, `~/.config/gdb/gdbinit`, `~/.gdbinit` 순서로 찾아 처음 발견한 파일 하나만 읽습니다. 아래 경고 문구도 `~/.config/gdb/gdbinit`을 가리킵니다.
+
+```text
+# ~/.config/gdb/gdbinit
+set history save on
+set print pretty on
+
+python
+import sys
+sys.path.insert(0, '/home/me/gdb-helpers')
+import myhelpers
+myhelpers.register_all()
+end
+```
+
+프로젝트 디렉터리의 `.gdbinit`은 다릅니다. 매뉴얼 Init File in the Current Directory 절은 현재 디렉터리의 `.gdbinit`을 읽으려면 `auto-load safe-path`가 그 파일을 허용해야 한다고 적습니다. `echo` 한 줄짜리 `.gdbinit`을 둔 디렉터리에서 GDB를 띄워 확인했습니다.
+
+```text
+$ gdb -q -batch -ex "info auto-load local-gdbinit"
+warning: File "/root/ext/ch02/proj/.gdbinit" auto-loading has been declined by your `auto-load safe-path' set to "$debugdir:$datadir/auto-load".
+To enable execution of this file add
+	add-auto-load-safe-path /root/ext/ch02/proj/.gdbinit
+line to your configuration file "/root/.config/gdb/gdbinit".
+...
+Local .gdbinit file "/root/ext/ch02/proj/.gdbinit" has not been loaded.
+
+$ gdb -q -batch -iex "add-auto-load-safe-path /root/ext/ch02/proj/.gdbinit" -ex "info auto-load local-gdbinit"
+project .gdbinit loaded
+Local .gdbinit file "/root/ext/ch02/proj/.gdbinit" has been loaded.
+```
+
+허용은 *이미 신뢰받는 곳*(사용자 init 파일이나 명령줄의 `-iex`)에서 해야 합니다. 프로젝트 `.gdbinit` 자신은 아직 읽히지 않았으므로 스스로를 허용할 수 없습니다. 경고 문구가 함께 안내하는 `set auto-load safe-path /`는 모든 경로를 허용하므로, 받은 저장소의 스크립트가 GDB를 띄우기만 해도 실행됩니다. 위처럼 파일 하나만 지정하는 편이 안전합니다.
+
+## 자주 쓰는 패턴
+
+### 1. 반환값 관찰 — FinishBreakpoint
+
+함수의 반환값은 함수가 *끝날 때* 생깁니다. 매뉴얼 Finish Breakpoints in Python 절의 `gdb.FinishBreakpoint`는 지정한 프레임의 반환 주소에 임시 breakpoint를 걸고, 정상 반환이면 `return_value`에 값을 담습니다. `longjmp`나 C++ 예외로 프레임을 벗어나면 `out_of_scope()`가 불립니다.
+
+```python title="bps.py (발췌)"
+class ReturnWatch(gdb.FinishBreakpoint):
+    def __init__(self):
+        super().__init__(gdb.newest_frame(), internal=True)
+    def stop(self):
+        value = self.return_value
+        gdb.write("return unavailable\n" if value is None else f"return: {value}\n")
+        return True
+    def out_of_scope(self):
+        gdb.write("frame left without a captured normal return\n")
+```
+
+`send_response`에 멈춘 상태에서 설치했습니다.
+
+```text
+Breakpoint 1, send_response (id=1) at server.c:13
+(gdb) python ReturnWatch()
+(gdb) info breakpoints
+Num     Type           Disp Enb Address            What
+1       breakpoint     keep y   0x0000aaaaaaaa08f0 in send_response at server.c:13
+	breakpoint already hit 1 time
+(gdb) maint info breakpoints
+...
+-5      breakpoint     del  y   0x0000aaaaaaaa0978 in handle_packet at server.c:14 inf 1
+	stop only in thread 1
+-5.1                        y   0x0000aaaaaaaa0978 in handle_packet at server.c:14 inf 1
+	stop only in stack frame at 0x0000fffffffffa50
+(gdb) continue
+Continuing.
+return: 10
+
+Breakpoint -5, handle_packet (id=1) at server.c:14
+```
+
+`info breakpoints`에는 없고 `maint info breakpoints`에만 `-5`번으로 있습니다. 호출자 `handle_packet` 안의 반환 지점에 걸렸고, "그 스레드에서만", "그 스택 프레임에서만" 멈추는 조건이 붙어 있습니다. 재귀 호출이 있어도 지정한 프레임의 반환만 잡는 이유입니다.
+
+이 클래스는 `stop()` 바깥, 즉 사용자가 멈춘 상태에서 만들었습니다. 매뉴얼은 `Breakpoint.stop()` 안에서 디버기 실행 상태를 바꾸거나(step, next 등), 현재 프레임을 바꾸거나, breakpoint를 추가·삭제하지 말라고 적습니다. 그래서 `malloc` 진입 breakpoint의 `stop()` 안에서 `FinishBreakpoint`를 만들어 반환값을 모으는 방식은 쓰지 않았습니다. 할당 추적 자체가 목적이라면 [Valgrind Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)나 [ASan/LSan](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)이 맞는 도구입니다.
+
+### 2. 함수 호출 통계
+
+`stop()`에서 숫자만 세고 `False`를 돌려주면 프로그램을 멈추지 않고 호출 횟수를 셉니다. `exited` 이벤트에서 결과를 찍습니다.
+
+```python title="bps.py (발췌)"
+class CountCalls(gdb.Breakpoint):
+    def __init__(self, fn):
+        super().__init__(fn, internal=True)
+        self.count = 0
+        self.name = fn
+    def stop(self):
+        self.count += 1
+        return False
+
+def install_counters():
+    global watchers
+    watchers = [CountCalls(fn) for fn in ['process_request', 'handle_packet', 'send_response']]
+    def report(_evt=None):
+        for w in watchers:
+            gdb.write(f"{w.name}: {w.count} calls\n")
+    gdb.events.exited.connect(report)
+```
+
+```text
+(gdb) python install_counters()
+(gdb) info breakpoints
+No breakpoints, watchpoints, tracepoints, or catchpoints.
+(gdb) run
+total=60 lib=3
+[Inferior 1 (process 3191) exited normally]
+process_request: 3 calls
+handle_packet: 3 calls
+send_response: 3 calls
+```
+
+breakpoint는 함수의 *심볼 위치*에 걸리므로 셀 수 있는 것도 그 위치를 지난 횟수입니다. `-O2`로 빌드해 함수가 호출 지점에 인라인되면 그 호출은 세어지지 않습니다. 이 프로그램은 `-O0`이라 세 번이 정확합니다.
 
 ## 헤드리스 모드 — batch
 
-```bash
-$ gdb -batch -ex 'source script.py' -ex 'run' -ex 'quit' --args ./prog
-```
-
-`-batch`로 *사용자 입력 없이* 스크립트 실행. CI 자동화의 표준.
+`-batch`는 명령을 다 실행하면 끝나는 모드입니다. 매뉴얼 Mode Options 절에 따르면 페이지 나눔을 끄고 `set confirm off`처럼 동작하며, 명령 *파일*(`-x`)에서 오류가 나면 0이 아닌 종료 코드를 냅니다. CI에서 크래시 정보를 모을 때 씁니다.
 
 ```bash
-# segfault된 바이너리를 자동으로 분석
-$ gdb -batch \
-    -ex 'run' \
-    -ex 'bt' \
-    -ex 'info threads' \
-    -ex 'thread apply all bt' \
-    --args ./buggy_prog
+gdb -batch -ex 'source script.py' -ex 'run' -ex 'quit' --args ./prog
 ```
+
+널 포인터를 따라가는 `buggy.c`에 크래시 수집 명령을 붙여 돌렸습니다.
+
+```text
+$ gdb -batch -ex run -ex bt -ex "info threads" -ex "thread apply all bt" --args ./buggy
+
+Program received signal SIGSEGV, Segmentation fault.
+0x0000aaaaaaaa07bc in sum (n=0x10) at buggy.c:3
+3	int sum(struct node *n) { int s = 0; while (n) { s += n->value; n = n->next; } return s; }
+#0  0x0000aaaaaaaa07bc in sum (n=0x10) at buggy.c:3
+#1  0x0000aaaaaaaa0830 in main () at buggy.c:6
+  Id   Target Id                                Frame
+* 1    Thread 0xfffff7ff0020 (LWP 3341) "buggy" 0x0000aaaaaaaa07bc in sum (n=0x10) at buggy.c:3
+
+Thread 1 (Thread 0xfffff7ff0020 (LWP 3341) "buggy"):
+#0  0x0000aaaaaaaa07bc in sum (n=0x10) at buggy.c:3
+#1  0x0000aaaaaaaa0830 in main () at buggy.c:6
+$ echo $?
+0
+```
+
+종료 코드가 0이라는 점에 주의합니다. 디버기가 크래시해도 GDB 명령 자체는 성공했기 때문입니다. CI에서 크래시 여부로 실패를 내려면 정상 종료 때만 값이 생기는 `$_exitcode`(매뉴얼 Convenience Variables 절)나 시그널 정보 `$_siginfo`를 스크립트에서 검사해 직접 판정합니다.
 
 ## 정리
 
-- `gdb.Command` 서브클래스로 새 명령. COMMAND_* 카테고리·completion·prefix.
-- `gdb.Parameter`로 사용자 옵션.
-- `gdb.Function`으로 `$name(...)` convenience function — 조건부 BP에 강력.
-- `gdb.events.*`로 stop / cont / new_objfile / exited 등 hook.
-- `gdb.Breakpoint` 서브클래스 + `stop()` 반환값으로 자동 액션.
-- `internal=True`로 사용자 비가시 BP.
-- `.gdbinit`에 모두 등록.
-- `gdb -batch`로 헤드리스 자동화.
+- `gdb.Command` 서브클래스로 새 명령을 만들고, `COMMAND_*`로 `help` 분류를, `COMPLETE_*`로 자동 완성을 정합니다.
+- 직접 만든 `complete()`는 `completer_class`를 주지 않았을 때만 불리고, `word`가 `None`인 호출도 받습니다.
+- `gdb.Parameter`로 `set`/`show` 옵션을 둡니다. 0을 평범한 값으로 쓰려면 `PARAM_ZINTEGER`입니다.
+- `gdb.Function`의 `$name(...)`은 breakpoint 조건 안에서도 동작합니다.
+- `gdb.events.*` 연결은 다시 source할 때 끊어 줘야 쌓이지 않습니다. 다른 스레드에서는 `gdb.post_event()`만 씁니다.
+- `malloc` 같은 이름은 ld.so 안에도 있어 46곳에 걸렸습니다. `(N locations)`를 확인하고 필요하면 `__libc_malloc`처럼 좁힙니다.
+- `internal=True` breakpoint는 `maint info breakpoints`에서만 보이고, `FinishBreakpoint`는 지정한 스레드·프레임의 반환만 잡습니다.
+- `gdb -batch`는 디버기가 크래시해도 0으로 끝납니다.
 
 ## 다음 장 예고
 
-Ch 3 — Pretty-printer 깊이. `to_string`/`children`/`display_hint`, MI 출력, auto-load.
+[Ch 3](/blog/tools/debugging/gdb-extension/chapter03-pretty-printers) — Pretty-printer 깊이. `to_string`/`children`/`display_hint`, MI 출력, auto-load.
 
 ## 관련 항목
 
 - [Ch 1: Python API 입문](/blog/tools/debugging/gdb-extension/chapter01-python-api-basics)
 - [Ch 3: Pretty-printer 깊이](/blog/tools/debugging/gdb-extension/chapter03-pretty-printers)
-- [GDB Python Commands](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Commands-In-Python.html)
+- [GDB Python Commands](https://sourceware.org/gdb/current/onlinedocs/gdb.html/CLI-Commands-In-Python.html)
 - [GDB Events](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Events-In-Python.html)
+- [GDB and LLDB Ch 5: Breakpoint·Watchpoint](/blog/tools/debugging/gdb-lldb/chapter05-breakpoints-watchpoints) — CLI `commands`·조건부 breakpoint
+
+## 검증 기준
+
+모든 세션은 Debian 13 arm64 VM의 GDB 16.3(Debian 16.3-1)과 GCC 14.2.0으로 `server.c`·`buggy.c`·`libmylib.so`를 `-g -O0`으로 빌드해 돌렸습니다. API 설명은 GDB 16.3 tarball의 `gdb/doc/python.texi`(Basic Python의 `post_event`, CLI Commands In Python, Parameters In Python, Breakpoints In Python, Finish Breakpoints in Python 절), `gdb/doc/gdb.texinfo`(Mode Options의 `-batch`, Init File in the Current Directory 절), `gdb/python/py-cmd.c`, glibc 2.41 `include/rtld-malloc.h`, AAPCS64(ARM-software/abi-aa) General-purpose Registers 절과 대조했습니다.
