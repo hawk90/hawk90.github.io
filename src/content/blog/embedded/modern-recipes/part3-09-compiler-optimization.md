@@ -123,7 +123,7 @@ sum:
 	b	.L2
 ```
 
-`-O0`은 `s`와 `i`를 매번 stack(`[r7, #8]`, `[r7, #12]`)에 저장하고 다시 읽습니다. `-O2`는 둘을 register에 두고 index 대신 post-increment 주소(`ldr r2, [r3, #4]!`)로 바꿨습니다. `-Os`는 `n == 0`을 위한 별도 반환 경로를 두지 않아 명령 수가 줄었습니다. Cortex-M4에는 벡터 명령이 없으므로 `-O3`에서도 이 루프는 벡터화되지 않았습니다(MVE가 있는 Cortex-M55의 경우는 [2-01](/blog/embedded/modern-recipes/part2-01-cortex-m-comparison) 참고).
+`-O0`은 `s`와 `i`를 매번 stack(`[r7, #12]`, `[r7, #8]`)에 저장하고 다시 읽습니다. `-O2`는 둘을 register에 두고 index 대신 post-increment 주소(`ldr r2, [r3, #4]!`)로 바꿨습니다. `-Os`는 `n == 0`을 위한 별도 반환 경로를 두지 않아 명령 수가 줄었습니다. Cortex-M4에는 벡터 명령이 없으므로 `-O3`에서도 이 루프는 벡터화되지 않았습니다(MVE가 있는 Cortex-M55의 경우는 [2-01](/blog/embedded/modern-recipes/part2-01-cortex-m-comparison) 참고).
 
 ### 3) `-Os` — 크기 최적화
 
@@ -199,28 +199,25 @@ $ arm-none-eabi-objdump -d lto.elf
     8002:	4770      	bx	lr
 ```
 
-LTO 없이는 `b.c`가 `a.c`의 `helper`를 볼 수 없어 함수 네 개가 모두 남습니다. LTO를 켜면 `helper(4) + helper(5) = 13 + 16 = 29`를 link 단계에서 계산해 `main`이 상수 29를 반환하는 두 명령만 남았습니다. 그 대가로 link 단계가 컴파일 일을 떠맡아 빌드가 느려집니다.
+LTO 없이는 `b.c`가 `a.c`의 `helper`를 inline할 수 없고, `--gc-sections`도 없어 `unused_helper`까지 함수 네 개가 모두 남습니다. LTO를 켜면 `helper(4) + helper(5) = 13 + 16 = 29`를 link 단계에서 계산해 `main`이 상수 29를 반환하는 두 명령만 남았습니다.
 
 ### 6) PGO (Profile-Guided Optimization)
 
-실행 profile을 모아(`-fprofile-generate`) 다시 컴파일(`-fprofile-use`)하는 기법입니다. profile을 쓰려면 target에서 실행 결과를 파일로 내보낼 수 있어야 하므로, bare-metal에서는 그 경로(semihosting 등)를 먼저 마련해야 합니다. 이 글에서는 실행하지 않았습니다.
+실행 profile을 모아(`-fprofile-generate`) 다시 컴파일(`-fprofile-use`)하는 기법입니다. 이 글에서는 실행하지 않았습니다.
 
 ## 코드 / 실제 사용 예
 
-함수별 최적화 옵션 제어:
+함수별 최적화 제어입니다. 아래 코드는 `arm-none-eabi-gcc -O2 -Wall -c`로 경고 없이 컴파일됐고, `small_helper`는 inline되어 `nm`에 `debug_me`·`never_inline_me`만 남았습니다. GCC 매뉴얼은 `optimize` attribute에 대해 "should be used for debugging purposes only. It is not suitable in production code"라고 적으므로, 속도가 중요한 함수를 `optimize("O3")`로 올리는 대신 그 파일만 다른 옵션으로 빌드합니다.
 
 ```c
-// 이 함수만 -O3로 (속도 critical)
-__attribute__((optimize("O3")))
-void hot_loop(void) {
-    for (int i = 0; i < N; i++) /* ... */;
-}
+#define N 64
+volatile int sink[N];
 
 // 디버깅 중 이 함수만 -O0로
 __attribute__((optimize("O0")))
 void debug_me(void) {
     int x = 5;
-    // breakpoint
+    sink[0] = x;   // breakpoint
 }
 
 // inline 강제 또는 금지
@@ -228,7 +225,7 @@ static inline __attribute__((always_inline))
 int small_helper(int x) { return x + 1; }
 
 __attribute__((noinline))
-void never_inline_me(void) { ... }
+void never_inline_me(void) { for (int i = 0; i < N; i++) sink[i] = small_helper(i); }
 ```
 
 빌드 옵션 예시:
@@ -239,12 +236,13 @@ CFLAGS_DEBUG = -Og -g3 -DDEBUG
 
 # Release
 CFLAGS_RELEASE = -Os -g3 -flto -ffunction-sections -fdata-sections
+LDFLAGS_RELEASE = -flto -Wl,--gc-sections
 
 # Profile/measure
 CFLAGS_PROFILE = -O2 -g3
 ```
 
-`work.c`를 `-Os`와 `-Os -g3`로 각각 컴파일해 `.text`만 뽑아 비교하면 두 결과의 md5가 같았습니다(`cbdbc13a…`). `-g3`는 이 코드의 기계어를 바꾸지 않고 ELF의 debug section만 늘렸으므로([3-03](/blog/embedded/modern-recipes/part3-03-elf-format)), release 빌드에도 붙여 두고 flash 이미지는 `objcopy`로 뽑을 수 있습니다.
+`work.c`를 `-Os`와 `-Os -g3`로 각각 컴파일해 `.text`만 뽑아 비교하면 두 결과의 md5가 같았습니다(`cbdbc13a…`). `-g3`는 이 코드의 기계어를 바꾸지 않았고, object에는 `.debug_*` section만 늘어 `size -A`의 합계가 281에서 21,894 byte가 됐습니다. 그러므로([3-03](/blog/embedded/modern-recipes/part3-03-elf-format)), release 빌드에도 붙여 두고 flash 이미지는 `objcopy`로 뽑을 수 있습니다.
 
 ## 측정 / 비교
 
