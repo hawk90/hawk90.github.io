@@ -82,10 +82,10 @@ br2-acme/
 Buildroot 본체에 `beaglebone_defconfig`가 있습니다. 이걸 펼친 뒤 우리 옵션을 더해 외부 트리에 저장합니다.
 
 ```bash
-make O=$HOME/out-bbb BR2_EXTERNAL=$HOME/bbb/br2-acme beaglebone_defconfig
+make O=$HOME/out-bbb BR2_EXTERNAL=$HOME/in/bbb beaglebone_defconfig
 # (아래 Step 3의 줄을 .config에 추가)
 make O=$HOME/out-bbb olddefconfig
-make O=$HOME/out-bbb savedefconfig BR2_DEFCONFIG=$HOME/bbb/br2-acme/configs/acme_bbb_defconfig
+make O=$HOME/out-bbb savedefconfig BR2_DEFCONFIG=$HOME/in/bbb/configs/acme_bbb_defconfig
 ```
 
 여기서 첫 함정을 만났습니다. 저장된 `acme_bbb_defconfig`의 앞부분입니다.
@@ -152,23 +152,25 @@ cp "${BOARD_DIR}/uEnv.txt" "${BINARIES_DIR}/uEnv.txt"
 #include <unistd.h>
 #include <fcntl.h>
 
-static const char *LED = "/sys/class/leds/beaglebone:green:usr0/brightness";
+static const char *LED = "/sys/class/leds/beaglebone:green:usr2/brightness";
 
 int main(void)
 {
 	int fd = open(LED, O_WRONLY);
 	if (fd < 0) { perror("open"); return 1; }
+	/* writing 0 also clears the default "cpu0" trigger */
+	if (write(fd, "0", 1) != 1) { perror("write"); return 1; }
 	for (;;) {
+		sleep(1);
 		if (write(fd, "1", 1) != 1) { perror("write"); return 1; }
 		sleep(1);
 		if (write(fd, "0", 1) != 1) { perror("write"); return 1; }
-		sleep(1);
 	}
 	return 0;
 }
 ```
 
-LED 경로(`beaglebone:green:usr0`)는 커널 DTS의 LED label에서 정해집니다. 보드에서 `ls /sys/class/leds/`로 실제 이름을 확인한 뒤 씁니다. 이 장에서는 보드에서 확인하지 못했습니다.
+LED 경로는 커널 DTS의 LED label에서 정해집니다. 커널 6.18의 `arch/arm/boot/dts/ti/omap/am335x-bone-common.dtsi`에는 `beaglebone:green:heartbeat`·`mmc0`·`usr2`·`usr3` 네 개가 있고, 각각 `linux,default-trigger`가 걸려 있습니다(`usr2`는 `"cpu0"`). 이 글의 이전 판은 DTS에 없는 `usr0`을 썼습니다. `Documentation/ABI/testing/sysfs-class-led`는 brightness에 "Writing 0 to this file clears active trigger"라고 적으므로, 위 코드는 먼저 0을 써서 cpu0 trigger를 떼고 깜빡입니다. 보드가 없어 실제 점멸은 확인하지 못했습니다.
 
 `src/Makefile`:
 
@@ -207,7 +209,7 @@ endef
 $(eval $(generic-package))
 ```
 
-`SITE_METHOD = local`이면 다운로드와 hash 검사 대신 소스 디렉터리를 *rsync*합니다. 실제 로그도 `>>> acme-led-blink 1.0 Syncing from source dir /home/br/bbb/br2-acme/package/acme-led-blink/src`였고, 빈 hash 파일은 만들지 않았습니다. 결과는 armhf 바이너리였습니다.
+`SITE_METHOD = local`이면 다운로드와 hash 검사 대신 소스 디렉터리를 *rsync*합니다. 실제 로그도 `>>> acme-led-blink 1.0 Syncing from source dir /home/br/in/bbb/package/acme-led-blink/src`였고, 빈 hash 파일은 만들지 않았습니다. 결과는 armhf 바이너리였습니다.
 
 ```text
 target/usr/sbin/led-blink: ELF 32-bit LSB pie executable, ARM, EABI5 version 1 (SYSV), dynamically linked, interpreter /lib/ld-linux-armhf.so.3, for GNU/Linux 3.2.0, stripped
@@ -324,15 +326,15 @@ $ make O=$HOME/out-bbb acme_bbb_defconfig
 $ make O=$HOME/out-bbb
 ```
 
-빌드는 성공했고 벽시계로 53분 22초가 걸렸습니다. 다만 이 시간은 참고값이 아닙니다. `output/build/build-time.log`를 합산하면 다운로드가 1,777초였는데, 그중 외부 toolchain tarball이 963초, `am33x-cm3`(TI의 git 저장소)가 707초였습니다. `git.ti.com`의 `git fetch`가 진행하지 않아 해당 프로세스를 직접 종료했고, 그러자 `dl-wrapper`가 다음 URI인 `BR2_BACKUP_SITE`(기본 `https://sources.buildroot.net`)에서 tarball을 받아 hash를 확인한 뒤 계속했습니다.
+빌드는 성공했고 벽시계로 41분 6초(`/usr/bin/time -v`, CPU 300%)가 걸렸습니다. 다만 이 시간은 참고값이 아닙니다. `output/build/build-time.log`를 합산하면 다운로드가 1,134초였고, 그중 외부 toolchain tarball이 1,057초였습니다.
+
+`am33x-cm3`(TI의 git 저장소)는 본 빌드 전에 `make am33x-cm3-source`로 따로 받았습니다. `git.ti.com`에 대한 `git fetch`가 태그 목록만 받은 채 진행하지 않아 300초 timeout으로 종료됐습니다. 이럴 때 Buildroot는 다음 후보 URI로 넘어갑니다. `package/pkg-download.mk` 63~85행의 `DOWNLOAD_URIS`가 upstream 다음에 `BR2_BACKUP_SITE`(기본 `https://sources.buildroot.net`)를 넣고, `support/download/dl-wrapper` 94행이 그 목록을 차례로 시도합니다. 이 실험에서는 timeout이 make 전체를 끝냈으므로, 같은 백업 사이트 주소의 tarball을 직접 `wget`으로 `dl/am33x-cm3/`에 넣었습니다. 본 빌드는 그 파일을 hash로 검사하고 계속했습니다.
 
 ```text
---2026-11-16 04:22:56--  https://sources.buildroot.net/am33x-cm3/am33x-cm3-fb484c5e54f2e31cf0a338d2927a06a2870bcc2c-git4.tar.gz
-...
 am33x-cm3-fb484c5e54f2e31cf0a338d2927a06a2870bcc2c-git4.tar.gz: OK (sha256: b6020ce5fee52e8df6cf8e045c75064021760dd04e2923ad0e4bdd6e18ebaa49)
 ```
 
-다운로드를 뺀 주요 단계는 커널 build 475초, U-Boot build 11.9초, toolchain 압축 해제 14.5초였습니다. 같은 시간에 VM에서 다른 빌드가 함께 돌고 있었으므로 이 값도 단독 빌드 시간은 아닙니다. 로그의 주요 줄입니다.
+다운로드를 뺀 주요 단계는 커널 build 539초, U-Boot build 15.8초, toolchain 압축 해제 6.6초였습니다. 로그의 주요 줄입니다.
 
 ```text
 >>> toolchain-external-arm-arm 14.2.rel1 Downloading
@@ -344,7 +346,7 @@ am33x-cm3-fb484c5e54f2e31cf0a338d2927a06a2870bcc2c-git4.tar.gz: OK (sha256: b602
 >>> linux 6.18.1 Updating kernel config with fixups
 >>> linux 6.18.1 Building
 ...
->>> acme-led-blink 1.0 Syncing from source dir /home/br/bbb/br2-acme/package/acme-led-blink/src
+>>> acme-led-blink 1.0 Syncing from source dir /home/br/in/bbb/package/acme-led-blink/src
 ...
 >>>   Generating filesystem image rootfs.ext2
 >>>   Generating filesystem image rootfs.squashfs
@@ -356,22 +358,22 @@ INFO: hdimage(sdcard.img): writing MBR
 완료 후 `$HOME/out-bbb/images/`입니다.
 
 ```text
--rw-r--r-- 1 br br    110524 Nov 16 04:36 MLO
--rwxr-xr-x 1 br br     66986 Nov 16 04:45 am335x-bone.dtb
--rwxr-xr-x 1 br br     70173 Nov 16 04:45 am335x-boneblack-wireless.dtb
--rwxr-xr-x 1 br br     70448 Nov 16 04:45 am335x-boneblack.dtb
+-rw-r--r-- 1 br br    110524 Nov 16 07:56 MLO
+-rwxr-xr-x 1 br br     66986 Nov 16 08:06 am335x-bone.dtb
+-rwxr-xr-x 1 br br     70173 Nov 16 08:06 am335x-boneblack-wireless.dtb
+-rwxr-xr-x 1 br br     70448 Nov 16 08:06 am335x-boneblack.dtb
 ...
--rwxr-xr-x 1 br br       273 Nov 16 04:34 boot.scr
--rw-r--r-- 1 br br  16777216 Nov 16 04:45 boot.vfat
--rw-r--r-- 1 br br  67108864 Nov 16 04:45 data.ext4
--rw-r--r-- 1 br br  62914560 Nov 16 04:45 rootfs.ext2
-lrwxrwxrwx 1 br br        11 Nov 16 04:45 rootfs.ext4 -> rootfs.ext2
--rw-r--r-- 1 br br  10219520 Nov 16 04:45 rootfs.squashfs
--rw-r--r-- 1 br br  36864000 Nov 16 04:45 rootfs.tar
--rw-r--r-- 1 br br 218104320 Nov 16 04:45 sdcard.img
--rw-r--r-- 1 br br   1564932 Nov 16 04:36 u-boot.img
--rw-r--r-- 1 br br       438 Nov 16 04:45 uEnv.txt
--rw-r--r-- 1 br br   7633984 Nov 16 04:45 zImage
+-rwxr-xr-x 1 br br       273 Nov 16 07:55 boot.scr
+-rw-r--r-- 1 br br  16777216 Nov 16 08:08 boot.vfat
+-rw-r--r-- 1 br br  67108864 Nov 16 08:08 data.ext4
+-rw-r--r-- 1 br br  62914560 Nov 16 08:08 rootfs.ext2
+lrwxrwxrwx 1 br br        11 Nov 16 08:08 rootfs.ext4 -> rootfs.ext2
+-rw-r--r-- 1 br br  10219520 Nov 16 08:08 rootfs.squashfs
+-rw-r--r-- 1 br br  36864000 Nov 16 08:08 rootfs.tar
+-rw-r--r-- 1 br br 218104320 Nov 16 08:08 sdcard.img
+-rw-r--r-- 1 br br   1564932 Nov 16 07:56 u-boot.img
+-rw-r--r-- 1 br br       438 Nov 16 08:08 uEnv.txt
+-rw-r--r-- 1 br br   7633984 Nov 16 08:06 zImage
 ```
 
 `BR2_LINUX_KERNEL_INTREE_DTS_NAME`에 적힌 9개 DTS가 모두 `.dtb`로 들어왔고(목록 일부 생략), squashfs rootfs는 10.2 MB로 60 MiB ext4 이미지의 1/6이었습니다. `beaglebone_defconfig`가 켜 둔 ext4와 tar도 그대로 만들어졌습니다.
@@ -401,11 +403,11 @@ genimage.cfg대로 FAT 16M(부팅 플래그) + squashfs 128M + data 64M입니다
 $ host/bin/mdir -i images/boot.vfat ::
 Directory for ::/
 
-MLO             110524 2026-11-16   4:45 
-u-boot   img   1564932 2026-11-16   4:45 
-ZIMAGE         7633984 2026-11-16   4:45  zImage
-UENV     TXT       438 2026-11-16   4:45  uEnv.txt
-AM335X~1 DTB     70448 2026-11-16   4:45  am335x-boneblack.dtb
+MLO             110524 2026-11-16   8:08 
+u-boot   img   1564932 2026-11-16   8:08 
+ZIMAGE         7633984 2026-11-16   8:08  zImage
+UENV     TXT       438 2026-11-16   8:08  uEnv.txt
+AM335X~1 DTB     70448 2026-11-16   8:08  am335x-boneblack.dtb
         5 files           9 380 326 bytes
 ```
 
@@ -429,11 +431,11 @@ sudo umount /dev/sdX1
 sudo dd if=output/images/sdcard.img of=/dev/sdX bs=4M conv=fsync status=progress
 ```
 
-**잘못된 장치를 고르면 호스트 디스크가 지워집니다.** `lsblk`의 SIZE와 모델명을 두 번 확인합니다. Buildroot의 `support/scripts/genimage.sh`는 `BR2_PACKAGE_HOST_BMAP_TOOLS=y`면 이미지마다 `.bmap`을 자동으로 만들어 주므로, `bmaptool copy`를 쓰려면 그 옵션을 켭니다.
+`board/beagleboard/beaglebone/readme.txt`도 같은 `dd if=output/images/sdcard.img of=/dev/XXX`를 안내합니다. **잘못된 장치를 고르면 호스트 디스크가 지워집니다.** `lsblk`의 SIZE와 모델명을 두 번 확인합니다. Buildroot의 `support/scripts/genimage.sh` 52~59행은 `BR2_PACKAGE_HOST_BMAP_TOOLS=y`면 genimage.cfg의 이미지마다 `bmaptool create`로 `.bmap`을 만들어 주므로, `bmaptool copy`를 쓰려면 그 옵션을 켭니다.
 
 ## Step 10: 시리얼 콘솔 연결
 
-BeagleBone Black의 6핀 시리얼 헤더(J1)에 3.3V USB-TTL 어댑터의 GND·RX·TX를 연결하고 115200 bps로 엽니다. 핀 번호와 방향은 BeagleBoard의 보드 문서에서 확인합니다. 어댑터의 VCC 핀은 연결하지 않습니다.
+보드의 시리얼 헤더에 USB-TTL 어댑터를 연결하고, 이 장의 `uEnv.txt`가 커널에 넘기는 `console=ttyS0,115200n8`에 맞춰 115200 bps로 엽니다. 헤더 위치와 핀 배치는 이 장에서 확인한 1차 자료가 없으므로 보드 문서를 따릅니다.
 
 ```bash
 picocom -b 115200 /dev/ttyUSB0
@@ -441,24 +443,24 @@ picocom -b 115200 /dev/ttyUSB0
 
 ## Step 11: 첫 부팅에서 확인할 것
 
-eMMC에 부트로더가 있는 보드는 SD보다 eMMC로 먼저 부팅할 수 있습니다. SD로 부팅하는 방법(boot 버튼 등)은 보드 revision의 BeagleBoard 문서를 따릅니다.
-
 부팅 로그는 싣지 않습니다. 대신 콘솔에서 다음을 차례로 확인합니다.
 
 | 확인 | 기대값 (이 장의 이미지 기준) |
 |---|---|
 | U-Boot 버전 줄 | `U-Boot SPL 2026.01`, `U-Boot 2026.01` |
-| `printenv bootargs` 출력 (`uenvcmd`가 찍음) | `console=ttyS0,115200n8 root=/dev/mmcblk0p2 ro rootfstype=squashfs rootwait` (eMMC 보드면 `mmcblk1p2`) |
+| `printenv bootargs` 출력 (`uenvcmd`가 찍음) | `console=ttyS0,115200n8 root=/dev/mmcblk0p2 ro rootfstype=squashfs rootwait` (`uEnv.txt`의 `set_mmc1`은 U-Boot `board_name`이 `A33515BB`이면 `mmcblk1p2`로 바꿈) |
 | 커널 버전 | `Linux version 6.18.1` |
 | rootfs mount | `VFS: Mounted root (squashfs filesystem) readonly` |
 | 로그인 프롬프트 | `acme-bbb login:` |
-| 데몬 | `Starting led-blink` 뒤 USER0 LED 점멸 |
+| 데몬 | `Starting led-blink` 뒤 `usr2` LED 점멸 |
+
+보드에서 보지 못했으므로 기대값은 모두 이 장의 입력 파일과 소스에서 옮겼습니다. 버전은 `beaglebone_defconfig`의 `BR2_LINUX_KERNEL_CUSTOM_VERSION_VALUE="6.18.1"`·`BR2_TARGET_UBOOT_CUSTOM_VERSION_VALUE="2026.01"`, bootargs는 위 `uEnv.txt`의 `set_bootargs`, mount 줄은 커널 `init/do_mounts.c` 173~175행의 형식(`"VFS: Mounted root (%s filesystem)%s on device %u:%u."`, `ro`면 `" readonly"`), 호스트 이름은 overlay의 `etc/hostname`(`acme-bbb`), 데몬 줄은 `S99led-blink`의 `echo`입니다.
 
 ## Troubleshooting
 
 ### 시리얼에 아무것도 안 나온다
 
-어댑터의 TX와 RX를 보드 쪽과 엇갈려 연결했는지, GND를 연결했는지, 115200 bps로 열었는지를 확인합니다. 핀 배치는 BeagleBoard 보드 문서의 J1 설명을 따릅니다.
+115200 bps로 열었는지, 어댑터 배선이 보드 문서의 핀 배치와 맞는지 확인합니다.
 
 ### U-Boot까지는 나오는데 커널을 못 찾는다
 
@@ -482,7 +484,7 @@ Step 2의 toolchain 사례처럼 호스트 아키텍처에 따라 선택 가능�
 - aarch64 호스트에서는 Bootlin toolchain 줄이 조용히 빠지고 Arm ARM 14.2.rel1로 빌드됐습니다. `check-dotconfig.py`가 이 차이를 잡습니다.
 - `SITE_METHOD = local` 패키지는 소스를 rsync하고 hash 검사를 하지 않습니다.
 - `empty = true`인 genimage 이미지로 빈 data 파티션을 만들었습니다.
-- `git.ti.com` 다운로드가 멈추자 `BR2_BACKUP_SITE`(`sources.buildroot.net`)에서 받아 hash를 확인하고 계속했습니다.
+- `git.ti.com` 다운로드가 멈췄고, `BR2_BACKUP_SITE`(`sources.buildroot.net`)의 같은 tarball로 hash를 확인한 뒤 계속했습니다.
 - 보드에 굽고 부팅하는 단계는 실행하지 않았습니다. 굽기 전에 `sfdisk -l`, `mdir`, `unsquashfs -l`로 이미지를 검사할 수 있습니다.
 
 ## 다음 장 예고
