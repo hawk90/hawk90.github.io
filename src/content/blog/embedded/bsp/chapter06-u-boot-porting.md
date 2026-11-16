@@ -222,21 +222,26 @@ EVK의 SPL은 MMC 드라이버로 `u-boot.itb`를 읽지 않습니다. `spl.c:27
  Class     Index  Probed  Driver                Name
 -----------------------------------------------------------
  root          0  [ + ]   root_driver           root_driver
+ ...
  firmware      0  [   ]   psci                  |-- psci
+ ...
  qfw           0  [ + ]   qfw_mmio              |-- fw-cfg@9020000
+ ...
  virtio        0  [ + ]   virtio-mmio           |-- virtio_mmio@a000000
  ...
  pci           0  [ + ]   pci_generic_ecam      |-- pcie@10000000
+ ...
  rtc           0  [   ]   rtc-pl031             |-- pl031@9010000
  serial        0  [ + ]   serial_pl01x          |-- pl011@9000000
  mtd           0  [ + ]   cfi_flash             |-- flash@0
+ ...
 ```
 
 `Probed`가 빈칸(`[   ]`)인 `rtc-pl031`은 실패한 것이 아닙니다. 드라이버는 bind되어 있고, 아직 아무도 RTC를 쓰지 않아 probe하지 않았을 뿐입니다. `doc/develop/driver-model/design.rst`는 bind 직후 "nothing has been activated (except for the root device)"라고 적고, 장치는 uclass 코드가 찾을 때 activate됩니다. 그러니 MMC가 `[   ]`라면 먼저 `mmc list`나 `mmc dev`로 사용해 본 뒤 다시 확인합니다. 명령 자체가 없을 수도 있습니다. 같은 QEMU 빌드에서 `mmc list`는 `Unknown command 'mmc' - try 'help'`였습니다(`CMD_MMC`가 꺼져 있음).
 
 ## U-Boot 환경 설정
 
-부팅 흐름은 *환경 변수*로 정합니다. v2024.04에서 기본 환경을 정하는 방법은 두 가지입니다. `doc/usage/environment.rst:24-36`에 따르면 `board/<vendor>/<board>/<CONFIG_ENV_SOURCE_FILE>.env` 텍스트 파일이 우선이고, 없으면 예전 방식인 `CFG_EXTRA_ENV_SETTINGS` 매크로를 씁니다(옛 이름 `CONFIG_EXTRA_ENV_SETTINGS`는 `CFG_`로 바뀌었습니다). EVK는 후자입니다. `include/configs/imx8mp_evk.h:29-41`의 일부입니다.
+부팅 흐름은 *환경 변수*로 정합니다. v2024.04에서 기본 환경을 정하는 방법은 두 가지입니다. `doc/usage/environment.rst:24-36, 90-99`에 따르면 `board/<vendor>/<board>/<CONFIG_ENV_SOURCE_FILE>.env` 텍스트 파일이 우선이고, 없으면 예전 방식인 `CFG_EXTRA_ENV_SETTINGS` 매크로를 씁니다(옛 이름 `CONFIG_EXTRA_ENV_SETTINGS`는 `CFG_`로 바뀌었습니다). EVK는 후자입니다. `include/configs/imx8mp_evk.h:29-41`의 일부입니다.
 
 ```c
 #define CFG_EXTRA_ENV_SETTINGS		\
@@ -281,6 +286,7 @@ OK
 ```text
 => setenv autoload no
 => dhcp
+BOOTP broadcast 1
 DHCP client bound to address 10.0.2.15 (1 ms)
 => tftp 0x40400000 Image
 Using virtio-net#32 device

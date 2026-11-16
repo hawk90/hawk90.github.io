@@ -116,7 +116,7 @@ BSP 작업은 이 *각 단계의 책임*을 자기 보드에 맞게 채우는 �
 #include "am335x-boneblack-hdmi.dtsi"
 ```
 
-`am33xx.dtsi`에는 `cpu@0`의 `compatible = "arm,cortex-a8"`처럼 SoC가 정한 사실이 있습니다. 반면 DDR 크기는 보드가 정합니다. `am335x-bone-common.dtsi`는 원래 BeagleBone에 맞춰 `memory@80000000`을 `reg = <0x80000000 0x10000000>; /* 256 MB */`로 적고, `am335x-boneblack-common.dtsi`가 같은 노드를 `0x20000000`(512 MB)으로 덮어씁니다. 같은 파일에는 PMIC(`tps@24`, I2C0 주소 0x24)와 Ethernet PHY(`ethernet-phy@0`) 같은 보드 부품도 있습니다. 실제로 dtc로 컴파일해 보면 덮어쓴 값이 남습니다.
+`am33xx.dtsi`에는 `cpu@0`의 `compatible = "arm,cortex-a8"`처럼 SoC가 정한 사실이 있습니다. 반면 DDR 크기는 보드가 정합니다. `am335x-bone-common.dtsi`는 원래 BeagleBone에 맞춰 `memory@80000000`을 `reg = <0x80000000 0x10000000>; /* 256 MB */`로 적고, `am335x-boneblack-common.dtsi`가 같은 노드를 `0x20000000`(512 MB)으로 덮어씁니다. `am335x-bone-common.dtsi`에는 PMIC(`tps@24`, I2C0 주소 0x24)와 Ethernet PHY(`ethernet-phy@0`) 같은 보드 부품도 있습니다. 실제로 dtc로 컴파일해 보면 덮어쓴 값이 남습니다.
 
 ```text
 $ fdtget -t x am335x-boneblack.dtb /memory@80000000 reg
@@ -134,7 +134,7 @@ TI AM335x BeagleBone Black
 **BeagleBone Black**을 고른 이유는 다음과 같습니다.
 
 - AM335x SoC, Cortex-A8 기반 ARMv7입니다. *BL31이 없어* 부트 체인이 단순합니다.
-- 설계 자료가 공개되어 있습니다. BeagleBoard.org 문서의 License Terms는 BeagleBone Black 설계를 Creative Commons Attribution-ShareAlike 4.0으로 배포한다고 적고, 회로도(PDF·OrCAD), PCB Gerber, BOM을 목록으로 듭니다.
+- 설계 자료가 공개되어 있습니다. BeagleBoard.org 문서의 License Terms는 "This work is licensed under a Creative Commons Attribution-ShareAlike 4.0 International License"라고 적고 설계 자료가 BeagleBone Black git 저장소에 있다고 안내합니다. 같은 System Reference Manual의 설계 자료 절은 회로도(PDF·OrCAD), PCB Gerber, BOM을 목록으로 듭니다.
 - Buildroot에 `beaglebone_defconfig`가 있고, U-Boot v2024.04에는 `board/ti/am335x/`와 `am335x_evm_defconfig`가, Linux v6.12에는 `am335x-boneblack.dts`가 있습니다. 세 프로젝트의 메인라인 코드를 나란히 놓고 비교할 수 있습니다.
 - 시리얼 콘솔은 J1 헤더에서 잡습니다. BeagleBoard.org System Reference Manual의 J1 Serial Header 표는 1번 GND, 4번 RX, 5번 TX를 적고, 신호 레벨은 3.3V입니다.
 

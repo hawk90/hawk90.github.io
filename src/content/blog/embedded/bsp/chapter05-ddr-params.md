@@ -24,7 +24,7 @@ SRAM은 주소를 주면 바로 읽히지만 DRAM은 그렇지 않습니다. 행
 
 ## i.MX 8M Plus 보드들은 무엇을 쓰는가
 
-U-Boot v2024.04에는 i.MX 8M Plus 보드 디렉터리가 10개 있고, DDR 설정 파일 이름은 모두 LPDDR4입니다.
+U-Boot v2024.04의 `arch/arm/mach-imx/imx8m/Kconfig`에서 `select IMX8MP`하는 보드 디렉터리는 11개이고, DDR 설정 파일 이름은 모두 LPDDR4입니다.
 
 | 보드 디렉터리 | DDR 파일 |
 |---------------|----------|
@@ -32,6 +32,7 @@ U-Boot v2024.04에는 i.MX 8M Plus 보드 디렉터리가 10개 있고, DDR 설�
 | `dhelectronics/dh_imx8mp` | `lpddr4_timing_2G_32.c`, `lpddr4_timing_4G_32.c` |
 | `advantech/imx8mp_rsb3720a1` | `lpddr4_timing_rsb3720a1_4G.c`, `lpddr4_timing_rsb3720a1_6G.c` |
 | `toradex/verdin-imx8mp` | `lpddr4_timing.c` |
+| `gateworks/venice` | `lpddr4_timing_imx8mp.c` |
 | 나머지 6개 (beacon, data_modul, engicam, msc, phytec, polyhex) | `lpddr4_timing*.c` |
 
 같은 SoC여도 메모리 용량이 다르면 파일이 갈립니다. DH와 Advantech는 용량별로 timing 파일을 따로 둡니다. EVK 자신은 `imx8mp_evk.h`에서 `PHYS_SDRAM_SIZE 0xC0000000 /* 3 GB */`와 `PHYS_SDRAM_2_SIZE 0xC0000000 /* 3 GB */`, 합쳐 6 GB를 선언합니다.
@@ -75,7 +76,7 @@ static struct dram_timing_info *dram_timing_info[8] = {
 };
 ```
 
-strap 값이 표에서 NULL 칸을 가리키면 `"Unsupported DRAM strapping, trying lowest supported. MEMCFG=0x%x"`를 찍고 지원되는 가장 작은 설정을 찾습니다. 수동 SPD를 strap 3비트로 만든 셈입니다.
+strap 값이 표에서 NULL 칸을 가리키면 `"Unsupported DRAM strapping, trying lowest supported. MEMCFG=0x%x"`를 찍고 지원되는 가장 작은 항목을 찾지만, v2024.04 코드는 찾은 인덱스 `i`를 쓰지 않고 `ddr_init(dram_timing_info[memcfg])`에 그대로 NULL을 넘깁니다(132~137행). 메시지만 믿지 말고 코드를 끝까지 읽어야 하는 예입니다. 수동 SPD를 strap 3비트로 만든 셈입니다.
 
 ## 벤더 DDR 도구
 
@@ -169,7 +170,7 @@ firmware는 U-Boot 소스에 없습니다. `doc/board/nxp/imx8mp_evk.rst:26-48`�
 
 ## 잘못된 설정은 어떻게 보이는가
 
-U-Boot 소스가 직접 알려 주는 실패 신호는 두 가지입니다.
+U-Boot 소스가 직접 알려 주는 실패 신호는 세 가지입니다.
 
 | 신호 | 출처 | 의미 |
 |------|------|------|
@@ -271,7 +272,7 @@ training 통과는 `Training FAILED`가 안 찍혔다는 뜻일 뿐입니다. �
 
 ## 정리
 
-- U-Boot v2024.04의 i.MX 8M Plus 보드 10개는 모두 LPDDR4 timing 파일을 쓰고, 용량이 다르면 파일이 갈립니다.
+- U-Boot v2024.04의 i.MX 8M Plus 보드 11개는 모두 LPDDR4 timing 파일을 쓰고, 용량이 다르면 파일이 갈립니다.
 - EVK의 `lpddr4_timing.c`는 `{주소, 값}` 1,884쌍(DDRC 167쌍)과 `fsp_table = { 4000, 400, 100 }`을 담습니다.
 - SPL의 `ddr_init()`이 DDRC 표 → PHY 표 → training → calibration 순으로 쓰고, 실패는 `Training FAILED`로만 보입니다.
 - training firmware 네 개는 NXP `firmware-imx`에서 받아 binman이 SPL 뒤에 붙입니다.

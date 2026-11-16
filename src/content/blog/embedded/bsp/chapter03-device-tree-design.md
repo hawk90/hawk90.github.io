@@ -367,7 +367,7 @@ Failed to apply 'imx219.dtbo': FDT_ERR_BADOFFSET
 base blob does not have a '/__symbols__' node, make sure you have compiled the base blob with '-@' option
 ```
 
-`-@`로 만든 base는 74,511바이트, 없이 만든 base는 57,038바이트였습니다. `fdtput -r`로 `/__symbols__`만 지우면 61,051바이트가 되므로 249개 레이블 경로가 13,460바이트를 차지하고, 나머지는 `-@`가 레이블 붙은 모든 노드에 넣은 `phandle` 속성입니다(144개 → 249개).
+`-@`로 만든 base는 74,511바이트, 없이 만든 base는 57,038바이트였습니다. 차이는 두 가지입니다. 249개 레이블 경로를 담은 `/__symbols__` 노드, 그리고 `-@`가 레이블 붙은 모든 노드에 넣은 `phandle` 속성(144개 → 249개)입니다. `fdtdump`의 헤더로 나눠 보면 내역이 보입니다. `fdtput -r`로 `/__symbols__`만 지운 파일(61,051바이트)은 struct 블록이 0x10f20에서 0xda8c로 13,460바이트 줄지만 strings 블록은 0x13b7 그대로입니다. `fdtput`은 strings 블록을 줄이지 않기 때문입니다. `-@` 없이 만든 파일과 비교하면 strings 블록 차이가 2,333바이트, 남은 struct 블록 차이 1,680바이트가 추가된 `phandle` 속성 105개 몫입니다.
 
 적용 시점은 셋 중 하나입니다.
 

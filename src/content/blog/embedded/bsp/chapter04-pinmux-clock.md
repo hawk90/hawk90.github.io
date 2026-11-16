@@ -180,7 +180,7 @@ $ cat /sys/kernel/debug/clk/clk_summary
 
 - `rate` — 현재 주파수.
 - `enable count` / `prepare count` — 이 clock을 enable·prepare한 사용자 수.
-- `consumer`, `connection id` — 커널 6.12의 출력은 클록마다 쓰는 장치와 DT `clock-names`를 함께 보여 줍니다. PL011이 같은 클록을 이름 없이 한 번, `apb_pclk`로 한 번 잡고 있습니다.
+- `consumer`, `connection id` — 커널 6.12의 출력은 클록마다 쓰는 장치와, 드라이버가 `clk_get()`에 넘긴 이름(`con_id`)을 보여 줍니다(`drivers/clk/clk.c:3326-3331`). PL011 드라이버는 같은 클록을 이름 없이(`devm_clk_get(&dev->dev, NULL)`) 한 번, `apb_pclk`로 한 번 잡습니다. DT의 `clock-names = "uartclk"`가 아니라 `no_connection_id`로 나오는 이유입니다.
 
 UART가 동작하지 않을 때 해당 root의 enable count가 0이면 *peripheral driver가 clock을 enable하지 않은 것*이고, consumer 목록에 장치가 없으면 DT `clocks` 연결부터 봅니다.
 
@@ -228,7 +228,7 @@ TQ의 LVDS 패널 overlay(Linux v6.12 `imx8mp-tqma8mpql-mba8mpxl-lvds-g133han01.
 - [ ] CCGR (clock gate) 비트가 켜져 있는지
 - [ ] U-Boot의 `CONFIG_DEBUG_UART_CLOCK`이 *실제 주파수*와 같은지
 
-SPL 다음 단계도 콘솔을 씁니다. U-Boot 문서의 i.MX 8M Plus 흐름은 TF-A에서 `make PLAT=imx8mp bl31`로 BL31만 빌드하고(`doc/board/nxp/imx8mp_evk.rst:24`), BL31은 `IMX_BOOT_UART_BASE`가 0이면 `imx8m_uart_get_base()`로 콘솔 주소를 찾습니다(TF-A v2.15.0 `plat/imx/imx8m/imx8mp/imx8mp_bl31_setup.c:140-157`). SPL 배너는 나오는데 U-Boot 배너가 안 나오면 BL31 콘솔 설정도 의심합니다.
+SPL 다음 단계도 콘솔을 씁니다. U-Boot 문서의 i.MX 8M Plus 흐름은 NXP의 `imx-atf`(branch `imx_5.4.70_2.3.0`)에서 `make PLAT=imx8mp bl31`로 BL31만 빌드합니다(`doc/board/nxp/imx8mp_evk.rst:16-24`). 업스트림 TF-A v2.15.0에서는 콘솔 주소 `IMX_BOOT_UART_BASE`의 기본값이 `0x30890000`(UART2)이고(`plat/imx/imx8m/imx8mp/platform.mk:174`), `IMX_BOOT_UART_BASE=auto`로 빌드할 때만 0이 되어 BL31이 `imx8m_uart_get_base()`로 콘솔을 찾습니다(`imx8mp_bl31_setup.c:140-157`). SPL 배너는 나오는데 U-Boot 배너가 안 나오면 BL31 콘솔 설정도 의심합니다.
 
 ## JTAG로 *clock 살아 있는지* 확인
 

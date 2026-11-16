@@ -52,13 +52,13 @@ TF-A 문서의 BL 이름은 단계 *역할*의 이름이고, SoC마다 일부만
 | BL32 | secure OS (OP-TEE 등) | 빌드 옵션 | 메인라인 U-Boot binman에는 없음 |
 | BL33 | normal-world 부트로더 | U-Boot (`0x60000000`) | U-Boot (`0x40200000`) |
 
-i.MX 8M Plus 열은 U-Boot v2024.04 `arch/arm/dts/imx8mp-u-boot.dtsi`가 근거입니다. binman이 만드는 `u-boot.itb`의 FIT에는 `uboot`와 `atf` 두 이미지만 있고, `atf`는 `load = <0x970000>; entry = <0x970000>;`입니다. TF-A v2.15.0에는 `plat/imx/imx8m/imx8mp/imx8mp_bl2_setup.c`도 있지만 `platform_def.h`에서 `NEED_BL2`를 정의할 때만 쓰이는 별도 배치이고(그때 `BL31_BASE`는 `0x950000`), 이 시리즈는 U-Boot 문서의 기본 흐름을 따릅니다.
+i.MX 8M Plus 열은 U-Boot v2024.04 `arch/arm/dts/imx8mp-u-boot.dtsi`가 근거입니다. binman이 만드는 `u-boot.itb`의 FIT에는 펌웨어 이미지로 `uboot`와 `atf`, 그리고 보드 DTB(`@fdt-SEQ`)만 있고 BL32 이미지는 없습니다. `atf`는 `load = <0x970000>; entry = <0x970000>;`입니다. TF-A v2.15.0에는 `plat/imx/imx8m/imx8mp/imx8mp_bl2_setup.c`도 있지만 `make NEED_BL2=yes`로 빌드할 때만 쓰이는 별도 배치이고(`platform.mk:56, 101-102`; 그때 `platform_def.h`의 `BL31_BASE`는 `0x950000`), 이 시리즈는 U-Boot 문서의 기본 흐름을 따릅니다.
 
 BL31은 *상주 코드*입니다. Linux로 진입한 뒤에도 `smc`가 실행되면 EL3로 trap되어 BL31이 처리하고 돌아갑니다.
 
 ## QEMU에서 본 실제 단계 전환
 
-TF-A `docs/plat/qemu.rst`의 절차대로 Debian guest에서 `make PLAT=qemu DEBUG=1 LOG_LEVEL=40 BL33=u-boot.bin all fip`으로 빌드하고, `bl1.bin`을 0에, `fip.bin`을 64 × 4 KiB 오프셋에 써서 `flash.bin`을 만들었습니다. 호스트의 QEMU 11.1.3에서 `-machine virt,secure=on -cpu cortex-a57 -smp 4 -m 1024 -bios flash.bin`으로 부팅한 로그입니다(같은 경고가 반복되는 줄은 줄였습니다).
+TF-A `docs/plat/qemu.rst`의 절차대로 Debian guest에서 `make PLAT=qemu DEBUG=1 LOG_LEVEL=40 BL33=u-boot.bin all fip`으로 빌드하고, `bl1.bin`을 0에, `fip.bin`을 64 × 4 KiB 오프셋에 써서 `flash.bin`을 만들었습니다. 호스트의 QEMU 11.1.3에서 `-machine virt,secure=on -cpu cortex-a57 -smp 4 -m 1024 -bios flash.bin`으로 부팅한 로그입니다(빌드 시각, 반복되는 erratum·CVE 줄, `Image id=... loaded` 줄 일부를 생략했습니다).
 
 ```text
 NOTICE:  Booting Trusted Firmware
@@ -93,7 +93,7 @@ U-Boot 2024.04 (Nov 16 2026 - 07:07:34 +0000)
 
 읽을 거리가 많습니다.
 
-- image id 3이 BL31(`0xe090000`), id 5가 BL33인 U-Boot(`0x60000000`)입니다. BL2가 둘을 모두 적재한 뒤 BL31로 넘어갑니다.
+- image id 3이 BL31(`0xe090000`), id 5가 BL33인 U-Boot(`0x60000000`)입니다. BL2가 둘을 적재하고 BL1로 돌아가면, BL1이 BL31로 점프합니다(`BL1: Booting BL31`).
 - `SPSR = 0x3cd`의 하위 4비트 `0b1101`은 EL3h, BL33으로 나갈 때의 `0x3c5`(`0b0101`)는 EL1h입니다. `virtualization=on`을 주지 않아 EL2가 없으므로 U-Boot가 EL1에서 시작했습니다.
 - `WARNING: ... erratum 826974 was missing!`은 이 빌드에서 해당 Cortex-A57 erratum workaround를 켜지 않았다는 debug 빌드의 경고입니다. Ch 2에서 본 errata가 firmware에서는 이렇게 보입니다. 제품 빌드에서는 SoC가 쓰는 코어의 erratum 플래그를 켜고 이 목록을 비웁니다.
 - `LOG_LEVEL=40`은 `include/common/debug.h`의 `LOG_LEVEL_INFO`입니다. 지정하지 않으면 debug 빌드는 40, release 빌드는 20(`NOTICE`)이 기본값입니다(`Makefile:140-145`).
@@ -219,13 +219,15 @@ secure OS를 쓰면 DRAM 일부를 TZASC(TrustZone Address Space Controller)로 
 
 1. TF-A의 `BL32_BASE`/`BL32_SIZE`
 2. OP-TEE 빌드의 TZDRAM 시작·크기
-3. Linux DT의 `reserved-memory`(Linux가 그 범위를 일반 메모리로 쓰지 않도록)
+3. Linux DT의 `reserved-memory` 노드(Linux가 그 범위를 일반 메모리로 쓰지 않도록). EVK DT에도 DSP용 버퍼를 잡는 `reserved-memory` 노드가 있습니다(`imx8mp-evk.dts:237`).
+
+둘째 항목은 기본값이 TF-A와 다릅니다. OP-TEE 4.4.0의 `core/arch/arm/plat-imx/conf.mk`에서 `mx8mpevk` flavor는 `CFG_DDR_SIZE ?= UL(0x180000000)`만 정하고(411~416행) `CFG_TZDRAM_START`는 정하지 않습니다. 그래서 공통 기본식 `CFG_TZDRAM_START ?= ($(CFG_DRAM_BASE) - $(CFG_TZDRAM_SIZE) - $(CFG_SHMEM_SIZE) + $(CFG_DDR_SIZE))`(540행)가 적용되어 TZDRAM이 DRAM 끝쪽에 놓입니다. 크기는 `CFG_TZDRAM_SIZE ?= 0x01e00000`과 `CFG_SHMEM_SIZE ?= 0x00200000`(538~539행)을 합쳐 TF-A의 `BL32_SIZE` 0x2000000과 같지만, 시작 주소는 TF-A 기본값 0x56000000과 다릅니다. 같은 파일의 `mx8mp_rsb3720_6g` flavor는 `CFG_TZDRAM_START ?= 0x56000000`을 명시합니다(421행). 둘 중 한쪽을 다른 쪽에 맞춰 빌드해야 합니다.
 
 이 글은 OP-TEE를 빌드하지 않았고 TZASC 레지스터 설정 코드도 실행하지 않았으므로, 레지스터 값과 접근 위반 시의 동작은 싣지 않습니다.
 
 ## OP-TEE를 BL32로 통합
 
-U-Boot v2024.04의 i.MX 8M Plus binman 설정은 FIT에 `uboot`와 `atf`만 넣습니다. OP-TEE를 더하려면 FIT에 BL32 이미지를 추가하고, TF-A를 `SPD=opteed`로 빌드해 BL31이 BL32를 먼저 기동하게 해야 합니다. TF-A 쪽 옵션은 `docs/plat/qemu.rst`의 OP-TEE 예(`BL32=bl32.bin ... SPD=opteed all fip`)와 같은 이름입니다. 이 글에서는 OP-TEE 통합을 실행하지 않았습니다.
+U-Boot v2024.04의 i.MX 8M Plus binman 설정은 FIT에 펌웨어 이미지로 `uboot`와 `atf`만 넣습니다(나머지는 보드 DTB). OP-TEE를 더하려면 FIT에 BL32 이미지를 추가하고, TF-A를 `SPD=opteed`로 빌드해야 합니다. 그러면 OP-TEE dispatcher가 `bl31_register_bl32_init(&opteed_init)`(`services/spd/opteed/opteed_main.c:243`)로 초기화 함수를 등록하고, `bl31_main()`이 normal world로 나가기 전에 그 함수를 불러 `BL31: Initializing BL32`를 찍습니다(`bl31/bl31_main.c:192-193`). TF-A 쪽 옵션은 `docs/plat/qemu.rst`의 OP-TEE 예(`BL32=bl32.bin ... SPD=opteed all fip`)와 같은 이름입니다. 이 글에서는 OP-TEE 통합을 실행하지 않았습니다.
 
 ## SMC 호출 — Linux에서 BL31로
 
@@ -233,7 +235,7 @@ Linux가 `CPU_ON`을 요청하는 경로를 따라가 봅니다. 함수 ID는 Li
 
 | 단계 | 위치 |
 |------|------|
-| Linux `psci_cpu_on()` → `invoke_psci_fn` | `drivers/firmware/psci/psci.c:231`, `__invoke_psci_fn_smc`(123행) |
+| Linux `psci_0_2_cpu_on()` → `__psci_cpu_on()` → `invoke_psci_fn` | `drivers/firmware/psci/psci.c:229-231, 216-220`, `__invoke_psci_fn_smc`(123행) |
 | `smc #0` → EL3 vector `sync_exception_aarch64` | TF-A `bl31/aarch64/runtime_exceptions.S:230` |
 | `handle_sync_exception` 매크로 → `handler_sync_exception()` | `runtime_exceptions.S:81`, `common/runtime_svc.c:238` |
 | 함수 ID로 서비스 선택 → `std_svc_smc_handler()` | `runtime_svc.c` `sync_handler()`, `services/std_svc/std_svc_setup.c:108` |
@@ -294,7 +296,7 @@ Linux `Documentation/devicetree/bindings/arm/secure.txt`에 따르면 `secure-st
 
 ## 정리
 
-- i.MX 8M Plus 메인라인 흐름은 BootROM → U-Boot SPL(BL2 역할) → TF-A BL31(0x970000) → U-Boot(0x40200000)이고, U-Boot v2024.04 binman의 FIT에는 `atf`와 `uboot`만 들어갑니다.
+- i.MX 8M Plus 메인라인 흐름은 BootROM → U-Boot SPL(BL2 역할) → TF-A BL31(0x970000) → U-Boot(0x40200000)이고, U-Boot v2024.04 binman의 FIT에는 펌웨어로 `atf`와 `uboot`만 들어갑니다.
 - TF-A v2.15.0 `make PLAT=imx8mp bl31`의 release 결과는 38,544바이트였습니다.
 - QEMU virt에서 BL1 → BL2 → BL31 → U-Boot 전환이 `Loading image id`, `Entry point address`, `SPSR` 로그로 보입니다.
 - i.MX 포트 경로는 `plat/imx/imx8m/imx8mp/`, SiP ID는 `plat/imx/common/include/imx_sip_svc.h`입니다.

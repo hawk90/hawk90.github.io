@@ -72,7 +72,7 @@ DDR은 SoC 표가 아니라 보드가 정합니다. EVK의 경우 U-Boot `includ
 
 루트 oscillator에서 시작해 PLL과 divider를 거쳐 peripheral clock으로 연결되는 구조입니다. 수도관에 비유하면 oscillator는 상수도 본관, PLL은 가압 펌프, divider는 감압 밸브, peripheral clock root는 각 집의 수도꼭지입니다.
 
-아래 그림은 Linux v6.12 `drivers/clk/imx/clk-imx8mp.c`에서 뽑은 일부입니다. `sys_pll1_out`에서 `sys_pll1_400m`(1/2), `sys_pll1_200m`(1/4), `sys_pll1_80m`(1/10)이 fixed factor로 갈라지고(484~493행), UART2 root의 mux 입력 목록 `imx8mp_uart2_sels`는 `osc_24m`, `sys_pll1_80m`, `sys_pll2_200m` 순으로 시작합니다(245행). ARM_PLL의 1.8 GHz는 `imx8mp.dtsi`의 A53 OPP 표 최고점 `opp-1800000000`입니다.
+아래 그림은 Linux v6.12 `drivers/clk/imx/clk-imx8mp.c`에서 뽑은 일부입니다. `sys_pll1_out`에서 `sys_pll1_400m`(1/2), `sys_pll1_200m`(1/4), `sys_pll1_80m`(1/10)이 fixed factor로 갈라지고(485~493행), UART2 root의 mux 입력 목록 `imx8mp_uart2_sels`는 `osc_24m`, `sys_pll1_80m`, `sys_pll2_200m` 순으로 시작합니다(245행). ARM_PLL의 1.8 GHz는 `imx8mp.dtsi`의 A53 OPP 표 최고점 `opp-1800000000`입니다.
 
 ![i.MX 8M Plus clock tree](/images/blog/bsp/diagrams/ch02-clock-tree.svg)
 
@@ -167,7 +167,7 @@ Workaround: Program GEN3_RELATED_OFF[GEN3_ZRXDC_NONCOMPL]
 to 0.
 ```
 
-위 erratum은 커널 PCIe host driver가 초기화 콜백 `imx_pcie_host_post_init`에서 이 비트를 0으로 씁니다. 적용 여부는 `IMX_PCIE_FLAG_8GT_ECN_ERR051586` 플래그로 정해지고, 이 플래그는 `[IMX95]` 항목에만 붙어 있습니다.
+위 erratum은 커널 PCIe host driver가 초기화 콜백 `imx_pcie_host_post_init`에서 이 비트를 0으로 씁니다. 적용 여부는 `IMX_PCIE_FLAG_8GT_ECN_ERR051586` 플래그로 정해지고, 이 플래그는 `[IMX95]`와 `[IMX95_EP]` 두 항목에만 붙어 있습니다.
 
 이 코드가 *언제* 들어왔는지가 교훈입니다. kernel.org에서 받은 `pci-imx6.c`를 버전별로 grep하면 v6.15에는 `ERR051586`이 0번, v6.16에는 5번 나옵니다. 그러니 v6.12나 v6.15에서 fork한 i.MX 95 BSP에는 이 workaround가 없습니다. fork 시점 이후에 나온 erratum은 직접 백포트해야 합니다.
 
