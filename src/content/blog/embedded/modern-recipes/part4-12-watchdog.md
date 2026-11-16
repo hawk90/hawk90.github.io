@@ -84,7 +84,7 @@ while (1) {
 }
 ```
 
-순서는 `HAL_IWDG_Init()`과 같습니다. start(0xCCCC) → 쓰기 허용(0x5555) → PR·RLR 쓰기 → `IWDG_SR`의 PVU·RVU가 0이 될 때까지 대기 → reload(0xAAAA). `PR = 4`는 HAL의 `IWDG_PRESCALER_64`(`IWDG_PR_PR_2`)와 같은 값입니다([HAL IWDG header](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Inc/stm32f4xx_hal_iwdg.h#L83)).
+순서는 `HAL_IWDG_Init()`과 같이 start(0xCCCC) → 쓰기 허용(0x5555) → PR·RLR 쓰기 → `IWDG_SR`의 PVU·RVU가 0이 될 때까지 대기 → reload(0xAAAA)입니다. `PR = 4`는 HAL의 `IWDG_PRESCALER_64`(`IWDG_PR_PR_2`)와 같은 값입니다([HAL IWDG header](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Inc/stm32f4xx_hal_iwdg.h#L83)).
 
 첫 줄의 0xCCCC 뒤로는 IWDG를 끌 방법이 없습니다. option byte로 하드웨어 시작을 고른 칩은 이 줄이 없어도 power-on 때 IWDG가 이미 돌고 있고, HAL 주석대로 counter는 "reset value (0xFFF)"부터 줄어듭니다. 그때의 prescaler reset 값은 RM0090에 있어 이 글에서 확인하지 못했으므로 첫 refresh 기한은 보드에서 잽니다. IWDG가 시작된 시점부터 첫 `iwdg_kick()`까지의 경로(부트로더, clock 설정, 긴 초기화)가 그 기한을 넘으면 IWDG reset이 나고, 다음 부팅이 같은 경로를 다시 밟으므로 reset이 반복됩니다. 이 증상의 진단은 [10-06: 부팅 실패 진단](/blog/embedded/modern-recipes/part10-06-boot-failure)의 "Watchdog 활성으로 boot loop" 항목에 있습니다.
 
@@ -202,7 +202,7 @@ reset_cause_t get_reset_cause(void) {
 
 ## 동작 확인
 
-워치독 검증은 일부러 hang을 만듭니다. refresh하는 구간을 가장 긴 timeout, 즉 LSI min(17 kHz)에서의 1.882 s보다 길게 잡아야, refresh가 실제로 reset을 막는다는 것까지 함께 확인됩니다. 공칭 1 s를 기준으로 1.5 s를 잡으면 LSI가 느린 칩에서는 refresh가 없어도 reset이 나지 않아 통과처럼 보입니다. `delay_ms()`는 [4-06: SysTick 타이머](/blog/embedded/modern-recipes/part4-06-systick-timer)의 "2. delay_ms" 절 코드를 쓰고, LED는 PA5에 달려 있다고 둡니다.
+워치독 검증은 일부러 hang을 만듭니다. refresh하는 구간을 가장 긴 timeout, 즉 LSI min(17 kHz)에서의 1.882 s보다 길게 잡아야, refresh가 실제로 reset을 막는다는 것까지 함께 확인됩니다. 공칭 1 s를 기준으로 1.5 s를 잡으면 LSI가 느린 칩에서는 refresh가 없어도 reset이 나지 않아 통과처럼 보입니다. `delay_ms()`는 [4-06: SysTick 타이머](/blog/embedded/modern-recipes/part4-06-systick-timer)의 "2. delay_ms" 절 코드를 쓰고, LED는 PA5에 달려 있다고 가정합니다.
 
 ```c
 RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
@@ -228,9 +228,9 @@ while (1) { }                   // no kick: IWDG must reset
 
 통과 조건은 다음과 같습니다. LED가 2.5 s 동안 켜져 있다가 꺼지고, 0.681 ~ 1.882 s 뒤 IWDG reset이 나면 5 Hz로 깜빡이기 시작합니다. 깜빡임은 `get_reset_cause()`가 `RESET_IWDG`를 돌려준 분기에서만 나오므로 디버거 없이 판정할 수 있습니다. 실패는 세 가지로 구별됩니다.
 
-- LED가 2.5 s가 되기 전에 꺼짐: 500 ms 간격의 refresh가 LSI max에서의 timeout 0.681 s보다 짧은데도 reset이 났으므로 refresh 경로나 PR·RLR 설정이 틀린 것입니다.
-- LED가 꺼진 채 깜빡이지 않음: IWDG가 reset을 내지 않은 것입니다. core는 마지막 `while (1)`에 머물러 있습니다.
-- LED가 다시 2.5 s 동안 켜짐: IWDG가 아닌 원인으로 reset된 것입니다.
+- LED가 2.5 s가 되기 전에 꺼짐: 500 ms 간격의 refresh가 LSI max에서의 timeout 0.681 s보다 짧은데도 reset이 났으므로 refresh 경로나 PR·RLR 설정이 틀렸습니다.
+- LED가 꺼진 채 깜빡이지 않음: IWDG가 reset을 내지 않았습니다. core는 마지막 `while (1)`에 머물러 있습니다.
+- LED가 다시 2.5 s 동안 켜짐: IWDG가 아닌 원인으로 reset됐습니다.
 
 분기 안에서도 `iwdg_kick()`을 부르는 것은 IWDG가 이 분기에서 돌고 있을 때 깜빡임이 reset으로 끊기지 않게 하기 위해서입니다.
 
