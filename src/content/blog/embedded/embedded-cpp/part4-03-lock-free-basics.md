@@ -21,7 +21,7 @@ Mutex는 다음과 같은 비용을 동반합니다.
 - context switch가 발생해 RTOS task가 block됩니다.
 - Priority inversion이 일어납니다. 낮은 priority가 lock을 잡으면 높은 priority가 막힙니다.
 - Deadlock 가능성이 있습니다. 두 개 이상의 mutex를 잘못 잡으면 발생합니다.
-- 대부분의 RTOS에서 ISR은 mutex를 쓸 수 없습니다.
+- ISR에서는 mutex를 쓸 수 없습니다. CMSIS-RTOS2 문서는 mutex 관리 함수 전체를 ISR에서 호출할 수 없다고 적고, FreeRTOS도 mutex에는 ISR용 API를 두지 않습니다.
 
 **Lock-free**는 mutex 없이 동시에 접근하면서 atomic 명령으로 consistency를 보장합니다.
 
@@ -41,7 +41,7 @@ void increment() {
 }
 ```
 
-Cortex-M 코어와 toolchain마다 구현이 다릅니다. M3/M4/M7의 일부 read-modify-write는 exclusive 명령 retry loop로 구현할 수 있고 M0는 runtime helper를 사용할 수 있습니다.
+Cortex-M 코어와 toolchain마다 구현이 다릅니다. 아래 [ARM Cortex-M의 지원 범위](#arm-cortex-m의-지원-범위를-확인하기) 절에서 보듯 같은 `fetch_add`가 M4에서는 `ldrex`/`strex` retry loop가 되고, M0에서는 `__atomic_fetch_add_4` 함수 호출이 됩니다.
 
 ## std::atomic — 기본
 
@@ -63,7 +63,7 @@ bool success = counter.compare_exchange_weak(expected, 10);
 // 아니면 expected = current value + false
 ```
 
-정렬된 단일 load/store와 fetch_add 같은 read-modify-write를 구분합니다. 후자는 M4에서도 여러 명령과 retry가 필요할 수 있습니다. `is_always_lock_free`/`is_lock_free()`와 생성된 오브젝트를 함께 확인합니다.
+정렬된 단일 load/store와 fetch_add 같은 read-modify-write를 구분합니다. arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`에서 relaxed load는 `ldr` 하나였고, `fetch_add`는 `ldrex` → `adds` → `strex` → 실패 시 되돌아가는 6명령 loop였습니다. `is_always_lock_free`/`is_lock_free()`와 생성된 오브젝트를 함께 확인합니다.
 
 ## CAS — Compare-And-Swap
 
@@ -90,7 +90,7 @@ void push(Node* n) {
 3. CAS로 `head == old_head`면 `n`으로 교체합니다.
 4. 다른 thread가 끼어들어 `head`가 변경되었으면 CAS가 실패하므로 retry합니다.
 
-retry loop이 lock-free의 특징이며 deadlock이 없습니다. 다만 contention이 높으면 starvation이 발생할 수 있습니다.
+retry loop이 lock-free의 특징이며 deadlock이 없습니다. lock-free는 "어떤 스레드든 하나는 진행한다"는 보장이라([atomics.lockfree]), 특정 스레드가 계속 CAS에 실패하는 starvation은 막지 않습니다.
 
 ## ABA Problem
 
@@ -111,7 +111,7 @@ top.compare_exchange_weak(old_top, old_top->next);
 - Hazard pointer — 다른 thread가 현재 사용 중인 pointer를 추적합니다.
 - Epoch-based reclamation — gc 비슷한 방식입니다.
 
-임베디드에서는 간단한 경우에만 lock-free를 씁니다. ABA 회피가 복잡해진다면 mutex가 나을 때도 많습니다.
+tagged pointer는 포인터와 카운터를 한 번에 CAS해야 하므로 32비트 Cortex-M에서는 64비트 CAS가 필요하고, M4의 `ldrexd`/`strexd`는 ARMv7-M에 없습니다. 그래서 Cortex-M에서 ABA 회피가 필요한 구조라면 critical section이나 mutex가 더 단순합니다.
 
 ## Memory Order
 
@@ -134,7 +134,16 @@ counter.compare_exchange_weak(expected, new_value,
 | `acq_rel` | acquire + release | RMW |
 | `seq_cst` | 해당 seq_cst 연산들에 단일 total order (기본) | 강한 atomic 순서 보장 |
 
-release를 acquire가 읽어 synchronizes-with가 성립하는 경로를 먼저 증명합니다. acquire/release가 언제나 더 빠른 것은 아니며 target 생성 코드와 workload를 측정합니다.
+release를 acquire가 읽어 synchronizes-with가 성립하는 경로를 먼저 증명합니다. Cortex-M4에서 순서마다 생성되는 명령은 이렇습니다(arm-none-eabi-g++ 16.2.0 `-Os`, 4바이트).
+
+| 연산 | 명령 |
+| --- | --- |
+| relaxed load | `ldr` |
+| acquire load | `ldr` + `dmb ish` |
+| release store | `dmb ish` + `str` |
+| seq_cst store | `dmb ish` + `str` + `dmb ish` |
+
+차이는 `dmb` 배리어 개수입니다. 단일 코어 Cortex-M4에서 `dmb`가 몇 cycle인지는 이 글에서 재지 않았습니다.
 
 ## 임베디드 — ISR-safe Counter
 
@@ -150,7 +159,7 @@ uint32_t get_uptime_ms() {
 }
 ```
 
-이 target에서 해당 atomic 연산이 lock-free이고 runtime helper와 exclusive retry의 ISR 재진입 계약이 맞는지 확인해야 합니다. tick 값은 설정된 SysTick 주기에 따라 증가하며 반드시 1ms인 것은 아닙니다.
+M4에서는 이 `fetch_add`가 `ldrex`/`strex` loop가 됩니다. ISR이 main의 `ldrex`와 `strex` 사이에 끼어들면, Cortex-M4 Devices Generic User Guide의 Synchronization primitives 절대로 예외가 일어날 때 exclusive access tag가 지워지므로 main의 `strex`가 실패하고 loop가 다시 돕니다. 그래서 같은 변수를 ISR과 main이 함께 갱신해도 값이 깨지지 않습니다. M0에서는 같은 코드가 `__atomic_fetch_add_4` 호출이 되고, 이 글의 툴체인 libgcc에는 그 함수가 없어 링크가 실패했습니다(아래 절). tick 값은 설정된 SysTick 주기에 따라 증가하며 반드시 1ms인 것은 아닙니다.
 
 ## 임베디드 — Lock-free SPSC Queue
 
@@ -219,7 +228,7 @@ void main_loop() {
 
 ## MPMC Queue — 복잡
 
-Multi-Producer Multi-Consumer는 훨씬 복잡합니다. Boost.Lockfree, Folly, Concurrent Data Structures 같은 검증된 라이브러리를 활용합니다.
+Multi-Producer Multi-Consumer는 producer끼리 slot을 다투므로 CAS와 ABA 대책이 필요합니다. Boost.Lockfree 같은 검증된 라이브러리를 활용합니다. 이 글에서는 Boost.Lockfree를 빌드하지 않았습니다.
 
 ```cpp
 // 직접 구현 어렵다 — 검증된 라이브러리 사용
@@ -227,7 +236,7 @@ Multi-Producer Multi-Consumer는 훨씬 복잡합니다. Boost.Lockfree, Folly, 
 boost::lockfree::queue<int, boost::lockfree::capacity<128>> q;
 ```
 
-임베디드에서는 task마다 producer와 consumer가 하나씩인 경우가 대부분이라 SPSC로 충분합니다.
+ISR 하나가 채우고 task 하나가 비우는 UART 수신처럼 producer와 consumer가 하나씩으로 정해진 경로라면 SPSC로 충분합니다. producer가 둘 이상이면 각자 SPSC queue를 두고 consumer가 여러 queue를 읽는 구조로 MPMC를 피할 수 있습니다.
 
 ## 자료 정합성 — Critical Section vs Lock-free
 
@@ -265,7 +274,16 @@ extern "C" unsigned increment(unsigned* value) {
 }
 ```
 
-이 파일은 Clang/GCC built-in의 코드 생성 probe이며 std::atomic의 모든 library 구현을 대신하지 않습니다. Clang 23.1.3에서 M4 Thumb 오브젝트에는 ldrex/strex가, M0에는 __atomic_fetch_add_4 미정의 helper 참조가 나타났습니다. M0의 실제 helper 제공·link·ISR 안전성은 실행하지 않았습니다.
+이 파일은 Clang/GCC built-in의 코드 생성 probe이며 std::atomic의 모든 library 구현을 대신하지 않습니다. relaxed·acquire load와 release·seq_cst store 함수를 더해 두 컴파일러로 컴파일한 결과입니다.
+
+| | Cortex-M4 | Cortex-M0 |
+| --- | --- | --- |
+| arm-none-eabi-g++ 16.2.0 `fetch_add` | `ldrex`/`strex` loop | `bl __atomic_fetch_add_4` |
+| arm-none-eabi-g++ 16.2.0 load/store | `ldr`/`str` + `dmb` | `ldr`/`str` + `dmb` (helper 없음) |
+| `__atomic_always_lock_free(4, 0)` (GCC) | true (`static_assert` 통과) | false (`static_assert failed`) |
+| Clang 23.1.5 `--target=arm-none-eabi` | `ldrex`/`strex` | load/store까지 모두 `__atomic_load_4`·`__atomic_store_4`·`__atomic_fetch_add_4` 호출, `warning: ... exceeds the max lock-free size (0 bytes) [-Watomic-alignment]` |
+
+M0 오브젝트를 `-nostdlib -lgcc`로 링크하면 `undefined reference to '__atomic_fetch_add_4'`로 실패했습니다. 이 툴체인의 libgcc가 ARMv6-M용 atomic helper를 제공하지 않기 때문입니다. M0에서 쓰려면 helper를 직접 구현해야 하는데, ARMv6-M에는 exclusive 명령이 없으니 그 구현은 PRIMASK로 인터럽트를 막는 critical section이 됩니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -296,10 +314,10 @@ std::atomic<HugeStruct> obj;   // lock-free와 helper 제공 여부를 확인
 크기만으로 판단하지 말고 지원되는 atomic 타입과 정렬, lock-free property와 runtime 의존을 확인합니다.
 
 ### 5. Cortex-M0에 atomic 가정
-LDREX/STREX가 없으므로 runtime fallback이나 컴파일 에러가 발생합니다. target을 확인합니다.
+LDREX/STREX가 없으므로 read-modify-write는 helper 호출로 컴파일되고, 위 실험처럼 helper가 없으면 링크 단계에서 실패합니다. 컴파일은 통과하므로 링크까지 해 봐야 드러납니다.
 
 ### 6. Lock-free라고 빠르다고 가정
-contention이 높으면 CAS retry loop가 길어져 mutex보다 느릴 수도 있습니다. 반드시 측정합니다.
+CAS retry loop는 경쟁이 있을 때마다 다시 돕니다. 단일 코어 MCU에서 경쟁은 ISR이 끼어든 경우뿐이라 retry가 드물지만, 다중 코어에서 같은 변수를 계속 갱신하면 retry가 늘어납니다. 이 글에서는 retry 횟수나 mutex 대비 시간을 재지 않았습니다.
 
 ## 재현 — acquire/release 게시와 CAS 실패
 
@@ -325,7 +343,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3의 C++17 host에서 실행한 기능 검사입니다. 정상 payload 게시와 CAS 실패 시 expected 갱신을 확인했으며, cycle 수·WCET·hardware ISR의 증거는 아닙니다. 실행 관찰만으로 모든 가능한 interleaving을 증명할 수 없으므로 release/acquire의 읽기 관계도 함께 검토합니다.
+Homebrew Clang 23.1.5(`-fsanitize=thread`, 진단 없음)와 g++-16에서 C++17로 실행해 둘 다 `publication=42 cas-mismatch=7 cas-success=9`를 출력했습니다. cycle 수·WCET·hardware ISR의 증거는 아닙니다. 실행 관찰만으로 모든 가능한 interleaving을 증명할 수 없으므로 release/acquire의 읽기 관계도 함께 검토합니다.
 
 ## 1차 자료
 
@@ -338,7 +356,7 @@ Clang 23.1.3의 C++17 host에서 실행한 기능 검사입니다. 정상 payloa
 - Lock-free는 atomic operation으로 mutex 없이 동시성을 다룹니다.
 - 핵심은 `std::atomic`과 CAS(`compare_exchange`)입니다.
 - Memory order는 relaxed/acquire/release/seq_cst 중 필요한 최소만 선택합니다.
-- SPSC queue가 임베디드 lock-free의 표준이며 ISR과 main 통신에 적합합니다.
+- SPSC queue는 CAS 없이 load/store와 acquire/release만으로 동작해, producer·consumer가 하나씩인 ISR과 main 통신에 맞습니다.
 - 코어의 exclusive 명령 유무와 compiler/runtime atomic API 지원을 구분하고 ISR 안전성을 따로 검증합니다.
 - ABA problem에 주의하고 복잡한 lock-free 자료구조는 전문 라이브러리에 맡깁니다.
 
