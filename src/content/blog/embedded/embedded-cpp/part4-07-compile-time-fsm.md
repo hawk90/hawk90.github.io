@@ -19,8 +19,7 @@ topics: ["embedded"]
 [Part 4-06](/blog/embedded/embedded-cpp/part4-06-state-machine)의 런타임 FSM은 유연하지만 다음과 같은 단점이 있습니다.
 
 - Invalid 전이가 런타임에야 발견됩니다.
-- 전이 table이 메모리에 올라갑니다.
-- 디버깅 시 stack trace가 복잡합니다.
+- 런타임에 조회하는 전이 table은 읽기 전용 데이터로 이미지에 남습니다.
 
 **Compile-time FSM**은 `constexpr`과 template을 활용해 다음을 얻습니다.
 
@@ -36,7 +35,7 @@ constexpr auto bad = transition<State::Idle, Event::Stop>();    // 컴파일 에
 // error: invalid transition
 ```
 
-전체 연산이 상수 평가되고 결과만 사용되는 경우 실행 시 계산을 없앨 수 있습니다. runtime state·event·action이 있는 FSM의 코드와 저장 공간이 0이라는 뜻은 아니며 절감 바이트는 실제 산출물로 측정합니다.
+전체 연산이 상수 평가되고 결과만 사용되면 실행 시 계산이 남지 않습니다. runtime state·event·action이 있는 FSM의 코드와 저장 공간이 0이라는 뜻은 아닙니다. 아래 table 예제에서 그 차이를 잽니다.
 
 ## 기본 — Transition table as data
 
@@ -70,7 +69,7 @@ constexpr State s = next_state(State::Idle, Event::Start);
 static_assert(s == State::Running);
 ```
 
-runtime 경로에서 table을 실제로 사용하면 읽기 전용 데이터로 남을 수 있습니다. 상수 평가로만 사용하는 table은 최적화로 사라질 수 있어 section을 단정하지 않습니다.
+arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`로 컴파일해 보면 쓰는 방식에 따라 결과가 갈립니다. 위처럼 `static_assert`에서만 `next_state`를 쓰면 오브젝트의 `.text`가 0바이트이고 `.rodata`도 없었습니다. 같은 파일에 런타임 인자로 부르는 `State step(State s, Event e) { return next_state(s, e); }`를 더하면 `.text` 36바이트와 `.rodata` 15바이트(전이 5개 × 3바이트)가 생겼습니다.
 
 ## Template-based — invalid 전이 컴파일 에러
 
@@ -111,7 +110,7 @@ constexpr State s1 = transition<State::Idle, Event::Start>();   // OK
 // constexpr State s2 = transition<State::Idle, Event::Stop>();  // 컴파일 에러
 ```
 
-컴파일 타임에 검증되며 invalid 전이는 `static_assert`로 잡힙니다.
+컴파일 타임에 검증되며 invalid 전이는 `static_assert`로 잡힙니다. 아래 재현 절의 `checked_transition<State::Idle, Event::Stop>()`에 g++-16은 `error: static assertion failed: Invalid state transition`을 냈고, 출력 전체가 8줄이었습니다.
 
 ## Type-based state — 각 state가 type
 
@@ -232,6 +231,8 @@ fsm.process_event(Pause{});
 fsm.process_event(Resume{});
 ```
 
+이 글에서는 Boost.SML을 설치·빌드하지 않았습니다. 아래 장단점은 저장소 README의 설명입니다.
+
 장점은 다음과 같습니다.
 
 - DSL syntax가 UML state diagram에 가깝습니다.
@@ -241,10 +242,10 @@ fsm.process_event(Resume{});
 
 단점은 다음과 같습니다.
 
-- heavy template이라 컴파일 시간이 늘어납니다.
+- template 기반이라 컴파일러가 처리할 인스턴스가 많습니다.
 - 학습 곡선이 있습니다.
 
-임베디드에서 큰 FSM에 유용합니다. 작으면 직접 enum이나 variant를 씁니다.
+guard·action·sub-machine이 필요하면 SML 같은 library가 직접 구현할 양을 줄이고, 전이 몇 개짜리라면 위 table이나 enum으로 충분합니다.
 
 ## 임베디드 — Compile-time HSM
 
@@ -265,7 +266,7 @@ template<typename State>
 constexpr bool is_in_state();  // 부모 탐색은 여기서 구현하지 않음
 ```
 
-구현이 복잡하므로 Boost.SML이 대부분을 처리합니다. 실제 HSM은 event 전파·entry/exit·부모 전이 규칙까지 선택한 library와 판에서 검증합니다.
+실제 HSM은 event 전파·entry/exit·부모 전이 규칙까지 구현해야 하므로, Boost.SML의 sub-machine이나 `etl::hsm` 같은 library를 쓰고 선택한 판에서 검증합니다.
 
 ## 재현 — 전이 오류와 cycle을 포함한 도달성 검사
 
@@ -333,10 +334,10 @@ int main() {
 런타임 동적 변경이 필요한 시스템에서는 runtime FSM이 자연스럽습니다. compile-time은 trade-off가 있는 선택입니다.
 
 ### 2. Template error message 폭증
-잘못된 전이 시 에러가 수십 줄로 늘어납니다. `static_assert` 메시지를 명확히 작성합니다.
+`static_assert` 하나가 실패하면 출력은 짧습니다(위 `BAD_TRANSITION`은 g++-16에서 8줄, `BAD_REACHABILITY`는 3줄). 길어지는 것은 `std::visit` 쪽입니다. 아래 `BAD_VISIT_FALLBACK`은 Clang 23.1.5에서 25줄이었고, 활성 state와 무관하게 `step<Idle, Stop>` 같은 조합마다 `static assertion failed due to requirement 'sizeof(Stop) == 0'`이 반복됐습니다. `static_assert` 메시지에 어떤 조합인지 드러나게 적습니다.
 
 ### 3. Compile time 폭증
-큰 FSM의 template instantiation은 컴파일 시간이 수 분에 이를 수도 있습니다. 측정이 필요합니다.
+state × event 조합마다 template이 하나씩 인스턴스화되므로 조합 수에 비례해 컴파일러 작업이 늘어납니다. 이 글에서는 큰 FSM의 컴파일 시간을 재지 않았습니다.
 
 ### 4. Action 누락
 전이마다 side effect(logging, action)가 따라옵니다. table에 함수 포인터나 action class를 함께 둡니다.
@@ -349,7 +350,7 @@ int main() {
 
 ## 검증 범위와 1차 자료
 
-Clang 23.1.3 C++17 host에서 compile-fsm.cpp를 실행했습니다. cycle이 있는 Running↔Paused graph의 도달성, terminal Stopped, 고립 Orphan, runtime event sequence를 확인했습니다. BAD_TRANSITION과 BAD_REACHABILITY는 각각 의도한 static_assert 실패입니다. runtime dispatch·action의 크기와 board cycle 수는 측정하지 않았습니다.
+Homebrew Clang 23.1.5와 g++-16에서 C++17·ASan·UBSan으로 `compile-fsm.cpp`와 `variant-visit.cpp`를 실행했고 둘 다 정상 메시지를 출력했습니다. cycle이 있는 Running↔Paused graph의 도달성, terminal Stopped, 고립 Orphan, runtime event sequence를 확인했습니다. BAD_TRANSITION과 BAD_REACHABILITY는 각각 의도한 static_assert 실패입니다. runtime dispatch·action의 크기와 board cycle 수는 측정하지 않았습니다.
 
 - [C++ draft constexpr](https://eel.is/c++draft/dcl.constexpr) — 상수 평가 가능한 함수와 실제 runtime 호출 구분
 - [variant visitation](https://eel.is/c++draft/variant.visit) — 모든 alternative에 대한 호출 유효성
@@ -362,7 +363,7 @@ Clang 23.1.3 C++17 host에서 compile-fsm.cpp를 실행했습니다. cycle이 �
 - Type-based state(variant)로 각 state의 데이터를 분리합니다.
 - Boost.SML 같은 외부 library는 전이 DSL과 guard/action의 표현을 제공하며 실제 채택 판에서 검증합니다.
 - Unreachable이나 dead state도 컴파일 타임에 검증할 수 있습니다.
-- 작은 FSM은 enum으로, 큰 FSM은 Boost.SML로 다룹니다.
+- guard·action·계층이 없는 FSM은 constexpr table로 충분하고, 그런 기능이 필요할 때 Boost.SML 같은 library를 검토합니다.
 
 ## 관련 항목
 
