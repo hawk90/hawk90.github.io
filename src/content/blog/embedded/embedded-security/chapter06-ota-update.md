@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 OTA는 새 이미지를 인증하는 일과, 설치·부팅 실패에서 복구하는 일을 함께 다룹니다. A/B 슬롯이 있다고 공격자가 가져온 옛 서명 이미지를 거부하는 것은 아니고, anti-rollback이 있다고 전원 차단 뒤 부팅이 항상 복구되는 것도 아닙니다. 두 정책과 그 상태 저장을 따로 설계해야 합니다.
 
-이 장의 이미지 형식·host 도구 기준은 [MCUboot v2.1.0](https://github.com/mcu-tools/mcuboot/tree/9c99326b9756dbcc35b524636d99ed5f3e6cb29b)입니다. 실제 `imgtool`로 합성 payload를 서명·검증하고 변조 거부를 확인합니다. 이는 실행 가능한 firmware나 실제 MCUboot 부팅·swap·counter backend·전원 차단 시험이 아닙니다.
+이 장의 이미지 형식·host 도구 기준은 [MCUboot v2.1.0](https://github.com/mcu-tools/mcuboot/tree/9c99326b9756dbcc35b524636d99ed5f3e6cb29b)입니다. 그 source의 `imgtool`로 합성 payload를 서명·검증하고 변조 거부를 확인했습니다. 실행 가능한 firmware가 아니므로 MCUboot 부팅·swap·전원 차단 시험은 아닙니다.
 
 ## 업데이트 단계와 증거
 
@@ -33,7 +33,7 @@ OTA는 새 이미지를 인증하는 일과, 설치·부팅 실패에서 복구�
 
 ## MCUboot header와 TLV
 
-[v2.1.0 image.h](https://github.com/mcu-tools/mcuboot/blob/9c99326b9756dbcc35b524636d99ed5f3e6cb29b/boot/bootutil/include/bootutil/image.h)를 기준으로 합니다. 다른 판의 TLV header나 새 algorithm 상수를 섞지 않습니다.
+상수는 [v2.1.0 image.h](https://github.com/mcu-tools/mcuboot/blob/9c99326b9756dbcc35b524636d99ed5f3e6cb29b/boot/bootutil/include/bootutil/image.h#L45-L102)에서 옮겼습니다. 다른 판은 TLV 번호가 늘어나 있으니 판을 섞지 않습니다.
 
 | 항목 | v2.1.0의 값·위치 |
 |------|------|
@@ -42,51 +42,83 @@ OTA는 새 이미지를 인증하는 일과, 설치·부팅 실패에서 복구�
 | `ih_protect_tlv_size` | Protected TLV 영역 크기. 일반 `image_header`에 security counter 필드는 없음 |
 | 일반 TLV info magic | 0x6907 |
 | Protected TLV info magic | 0x6908 |
-| SHA256 | 0x10 |
+| Key hash·SHA256 | 0x01·0x10 |
 | RSA2048-PSS·RSA3072-PSS | 0x20·0x23 |
 | ECDSA signature·Ed25519 | 0x22·0x24 |
 | RSA 암호화 key·AES-KW | 0x30·0x31 |
 | Image dependency | 0x40 |
 | Security counter | 0x50, protected TLV |
 
-인증 범위에는 header·image body·protected TLV가 포함됩니다. TLV의 상수만 맞아도 parser의 길이·overflow·중복·unknown 항목 정책이 안전하다고 판정할 수는 없습니다. 이 글의 fixture 검사는 임의의 악성 image 전체를 fuzzing한 결과가 아닙니다.
+SHA256 TLV가 덮는 범위는 header·image body·protected TLV입니다. 아래 실행에서 protected TLV의 counter 1 bit를 바꾸자 `imgtool verify`가 "Image has an invalid hash"를 낸 것이 그 증거입니다. 일반 TLV 영역(0x6907)의 hash·서명 자체는 hash 범위 밖이고 서명으로 보호됩니다. 이 글의 fixture 검사는 악성 image를 fuzzing한 결과가 아닙니다.
 
 ## 실제 imgtool로 host 검증하기
 
-전용 Python 환경과 위 source를 사용하고, 테스트용 ECDSA-P256 키와 1024 B 합성 payload를 준비했습니다. 키는 이번 host 검사에만 사용하며 production key가 아닙니다. 아래 명령은 같은 source·interpreter와 파일을 사용하는 서명 부분입니다. 실제 board layout에 복사해서 쓰는 slot 설정이 아닙니다.
+Python 3.15.2 venv(`cryptography` 50.0.2)에서 v2.1.0 source의 `imgtool.py`(버전 2.1.0)를 실행했습니다. `imgtool keygen -t ecdsa-p256`으로 만든 시험용 키 두 개와 1,024 B 난수 payload를 썼습니다. 키는 이 시험에만 쓴 것이고 slot 크기도 실제 board layout이 아닙니다.
 
 ```bash title="mcuboot-fixture-sign.sh"
-"$IMGTOOL_PYTHON" "$MCUBOOT_SOURCE/scripts/imgtool.py" sign   --key test.pem --align 4 --version 1.2.3   --header-size 0x200 --pad-header --slot-size 0x2000   --security-counter 5 payload.bin signed.bin
+"$IMGTOOL_PYTHON" "$MCUBOOT_SOURCE/scripts/imgtool.py" sign \
+  --key test.pem --align 4 --version 1.2.3 \
+  --header-size 0x200 --pad-header --slot-size 0x2000 \
+  --security-counter 5 payload.bin signed.bin
 ```
 
-이후 `verify --key test.pem signed.bin`을 실행해 지정한 key로 확인합니다. v2.1.0의 verify는 key를 주지 않으면 hash 일치만으로 OK를 반환할 수 있으므로, 서명 확인 결과와 구분해야 합니다. 정상 이미지, payload·protected counter·signature·magic 변조, 다른 key와 낮은 counter의 정상 서명 이미지를 각각 비교했습니다.
+`imgtool dumpinfo signed.bin`이 보여 준 구조는 다음과 같습니다(데이터 byte는 줄였습니다).
 
-| Host 확인 | 해석 |
-|------|------|
-| 정상 서명·지정 key 검증 성공 | 이 합성 이미지의 서명과 format 범위 확인 |
-| Payload·protected counter 변조 거부 | 해당 변경이 인증 범위를 깨뜨림 |
-| Signature·magic 변조·다른 key 거부 | 이 fixture에서 실제 도구의 실패 경로 확인 |
-| Counter 4의 유효 서명도 verify 성공 | Host 서명 검증은 device counter 5와의 anti-rollback 정책을 적용하지 않음 |
+```text
+#### Image header (offset: 0x0) ############################
+magic:              0x96f3b83d
+hdr_size:           0x200
+protected_tlv_size: 0xc
+img_size:           0x400
+version:            1.2.3+0
+#### Protected TLV area (offset: 0x600) ####################
+magic:     0x6908
+area size: 0xc
+        type: SEC_CNT (0x50)
+        len:  0x4
+        data: 0x05 0x00 0x00 0x00
+#### TLV area (offset: 0x60c) ##############################
+magic:     0x6907
+area size: 0x98
+        type: SHA256 (0x10)     len:  0x20
+        type: KEYHASH (0x1)     len:  0x20
+        type: ECDSASIG (0x22)   len:  0x48
+```
 
-따라서 `imgtool verify` 성공을 rollback 방지·boot 성공·전원 차단 복구의 증거로 사용할 수 없습니다. 이 확인은 host 도구의 기능 검사이며 key provisioning이나 MCU BootROM 형식 검증도 아닙니다.
+Protected TLV 영역 12 B는 4 B info header와 4 B TLV header, 4 B counter 값입니다. ECDSA 서명 TLV는 72 B(`0x48`)인데, 첫 byte가 `0x30 0x46`인 DER 인코딩이라 [Ch 2](/blog/embedded/embedded-security/chapter02-secure-boot)에서 잰 P-256 DER 길이 범위(69~72 B) 안에 있습니다.
+
+이어서 변조한 사본과 다른 키로 `imgtool verify`를 돌렸습니다.
+
+| 입력 | `imgtool verify` 출력 | rc |
+|------|------|---:|
+| 정상, `--key test.pem` | Image was correctly validated | 0 |
+| 정상, key 없음 | Image was correctly validated | 0 |
+| 정상, `--key other.pem` | No signature found for the given key | 1 |
+| Payload 1 bit 변조 | Image has an invalid hash | 1 |
+| Protected counter 1 bit 변조 | Image has an invalid hash | 1 |
+| 서명 마지막 byte 변조 | No signature found for the given key | 1 |
+| Magic 1 bit 변조 | Invalid image magic; is this an MCUboot image? | 1 |
+| Counter 4로 새로 서명, `--key test.pem` | Image was correctly validated | 0 |
+
+두 줄을 눈여겨봅니다. 둘째 줄처럼 v2.1.0의 `verify`는 key를 주지 않으면 서명을 보지 않고 hash만 맞으면 "correctly validated"를 냅니다. CI에서 서명 확인용으로 쓴다면 `--key`를 빠뜨리지 않습니다. 마지막 줄의 counter 4 이미지도 통과합니다. Host 도구는 장치의 저장된 counter를 모르기 때문입니다. 따라서 `imgtool verify` 성공은 rollback 방지·boot 성공·전원 차단 복구의 증거가 아닙니다.
 
 ## 슬롯·test·confirm과 counter 갱신
 
-두 슬롯을 둬도 boot 모드에 따라 복구 방법이 달라집니다. Swap·overwrite·direct-XIP는 실제 link address·erase 단위·trailer·scratch와 image validation 설정을 맞춰야 합니다. 사용하지 않는 보편 flash 주소표를 복사하지 않습니다.
+두 슬롯을 둬도 boot 모드마다 복구 방법이 다릅니다. [MCUboot v2.1.0 `design.md`](https://github.com/mcu-tools/mcuboot/blob/9c99326b9756dbcc35b524636d99ed5f3e6cb29b/docs/design.md#L360-L376)는 swap 모드의 "test" swap을 이렇게 설명합니다. 새 이미지로 swap해 부팅한 뒤, 그 이미지가 실행 중에 스스로 "OK"를 기록하면 swap이 permanent가 되고, 기록하지 않으면 다음 부팅 때 "revert" swap으로 옛 이미지를 되돌립니다.
 
 | 모드·기능 | 확인할 조건 |
 |------|------|
 | Swap 방식 | 이미지·trailer와 중간 swap 상태의 전원 차단 복구 |
-| Direct-XIP | slot별 실행 주소와 지원되는 revert 정책 |
-| Overwrite-only | 일반 swap revert가 없으므로 별도 recovery 전략 |
+| Direct-XIP | slot별로 다른 link address로 빌드. revert는 `MCUBOOT_DIRECT_XIP_REVERT`를 켤 때만 |
+| Overwrite-only | revert가 없음. 대신 `MCUBOOT_DOWNGRADE_PREVENTION`(version 비교)은 이 모드에서만 동작 |
 | Test·confirm | 건강 검사 주체, confirm API, 미확정 상태에서 재부팅될 때의 동작 |
 | Watchdog·재시작 | app hang이 실제 재부팅과 bootloader 복구로 이어지는지 |
 
-Confirm이 없으면 언제나 N초 뒤 자동 복구되는 보편 timer는 없습니다. App이 hang한 채 reset되지 않으면 bootloader의 다음 판단도 시작되지 않습니다. Healthcheck가 단순 boot 완료인지 network·data migration까지 확인하는지도 제품 정책으로 정합니다.
+Revert의 계기는 시간이 아니라 *다음 reset*입니다. 위 문서도 "새 이미지가 부팅 직후 crash하면 다음 reset에서 옛 이미지로 되돌린다"고 적습니다. 그러니 새 이미지가 crash하지 않고 hang하면, watchdog이 reset을 걸어 주기 전까지 bootloader는 다시 실행되지 않습니다. 언제 "OK"를 기록할지(부팅 직후, 서버 접속 성공 뒤, data migration 뒤)는 제품이 정합니다.
 
-Security counter는 signed protected TLV와 장치의 신뢰된 counter backend를 비교합니다. MCUboot v2.1.0의 [hardware rollback protection 설계](https://github.com/mcu-tools/mcuboot/blob/9c99326b9756dbcc35b524636d99ed5f3e6cb29b/docs/design.md)는 `MCUBOOT_HW_ROLLBACK_PROT`와 platform interface를 구분합니다. 임의로 만든 OTP API나 일반 header 필드로 대체할 수 없습니다.
+Security counter는 protected TLV의 `SEC_CNT`(0x50)와 장치의 counter를 비교합니다. [MCUboot v2.1.0 `design.md`](https://github.com/mcu-tools/mcuboot/blob/9c99326b9756dbcc35b524636d99ed5f3e6cb29b/docs/design.md#L1290-L1307)의 hardware rollback protection은 `MCUBOOT_HW_ROLLBACK_PROT`로 켜고, platform이 `security_cnt.h`의 `boot_nv_security_counter_get()`·`boot_nv_security_counter_update()`를 구현해야 합니다. Image header(`struct image_header`)에는 counter 필드가 없습니다.
 
-Counter를 너무 일찍 올려 이전 정상 image를 거부하게 되면 A/B 복구 정책과 충돌할 수 있습니다. 확정·counter update·전원 차단·허용된 recovery image를 함께 시험해야 합니다. Image version과 security counter도 같은 숫자로 자동 취급하지 않습니다.
+Counter를 test 부팅 중에 올리면, 새 이미지가 실패해 revert하려 할 때 옛 이미지의 counter가 더 낮아 거부됩니다. Revert로 돌아갈 곳이 사라지는 것입니다. MCUboot는 이 순서를 코드로 지킵니다. v2.1.0 [`loader.c`](https://github.com/mcu-tools/mcuboot/blob/9c99326b9756dbcc35b524636d99ed5f3e6cb29b/boot/bootutil/src/loader.c#L1993-L2003)의 주석대로 TEST swap 뒤에는 바로 올리지 않고, reset 뒤 swap type이 NONE이고 이미지가 `image_ok`를 기록한 경우에만 올리며, 저장된 값보다 클 때만 갱신합니다. Bootloader를 직접 만든다면 같은 순서를 지켜야 합니다. Image version과 security counter는 위 dumpinfo처럼 다른 필드(version 1.2.3, counter 5)입니다.
 
 ## TLS·delta·키 회전
 
