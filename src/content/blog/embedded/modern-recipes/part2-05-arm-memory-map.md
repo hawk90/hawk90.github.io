@@ -136,7 +136,7 @@ alias read of bit 4 = 0x00000000
 
 alias 주소 0x2200000C = 0x22000000 + 0×32 + 3×4이고, 원래 word에는 bit 3만 켜진 0x8이 남았습니다.
 
-Cortex-M7 TRM r1p2 2.3.1 "Binary compatibility with other Cortex processors"는 M3·M4용 코드가 M7과 호환된다고 하면서 "as long as it does not rely on bit-banding"이라는 조건을 붙입니다. 같은 프로그램을 QEMU `mps2-an500`(Cortex-M7)에서 돌리면 위와 똑같은 결과가 나오는데, 이는 QEMU의 MPS2 모델이 bit-band를 에뮬레이션하기 때문입니다. 에뮬레이터에서 통과했다고 M7 실리콘에서 bit-band가 동작한다는 뜻은 아니므로, M7로 옮기는 코드는 `LDREX`/`STREX`나 C11 atomic으로 바꿉니다.
+Cortex-M7 TRM r1p2 2.3.1 "Binary compatibility with other Cortex processors"는 M3·M4용 코드가 M7과 호환된다고 하면서 "as long as it does not rely on bit-banding"이라는 조건을 붙입니다. 같은 프로그램을 QEMU `mps2-an500`(Cortex-M7)에서 돌려도 위와 똑같은 결과가 나옵니다. 즉 이 QEMU 모델은 M7 구성에서도 bit-band alias를 처리합니다. 에뮬레이터에서 통과했다고 M7 실리콘에서 bit-band가 동작한다는 뜻은 아니므로, M7로 옮기는 코드는 `LDREX`/`STREX`나 C11 atomic으로 바꿉니다.
 
 ### 5) MPU로 attribute override
 
