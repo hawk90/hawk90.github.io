@@ -19,7 +19,7 @@ Intel(현 Altera) FPGA에서 OpenCL로 가속기를 만들던 흐름이 Intel FP
 
 이 흐름은 이미 단종됐다는 점부터 짚습니다. docs.altera.com의 *Intel FPGA SDK for OpenCL Pro Edition Version 22.4 Release Notes* 첫 절 "Product Discontinuance Notification"은 Intel이 Intel FPGA SDK for OpenCL 제품을 단종한다고 알리고(Product Discontinuation Notice PDN2219), 대신 SYCL 컴파일러가 든 oneAPI Base Toolkit과 *Migrating OpenCL FPGA Designs to SYCL* 가이드를 권합니다. 같은 릴리스 노트는 22.4에 새 기능이 없다고 적습니다. 이 글이 인용하는 *Programming Guide*(683846)와 *Best Practices Guide*(683521)는 그 직전 판인 22.3(2022.09.26) PDF에서 확인했습니다. 그런데 그 SYCL 쪽도 오픈소스 DPC++ 저장소([intel/llvm](https://github.com/intel/llvm))에서는 2025-12-16 커밋 `e4cbcf5`("Remove fpga features from SYCL RT", #20882)로 `sycl_ext_intel_fpga_device_selector`를 비롯한 FPGA 확장이 제거됐습니다. 그래서 이 글은 OpenCL SDK 22.3 문서를 기준으로 개념과 코드 모양을 설명하고, 지금 새로 시작한다면 무엇을 확인해야 하는지를 덧붙입니다.
 
-> **실행한 것과 하지 않은 것.** `aoc`, Intel FPGA 보드, oneAPI FPGA 툴체인, AMD Vitis/XRT는 이 환경에 없어 실행하지 않았습니다. Intel 전용 확장(`cl_intel_channels`)이 없는 커널은 macOS의 OpenCL(Apple M2 Pro GPU 장치)에서 돌려 **결과가 맞는지만** 확인했습니다. GPU에서 돈 결과는 FPGA에서의 II·자원·처리율에 대해 아무것도 말해 주지 않습니다.
+> **실행한 것과 하지 않은 것.** `aoc`, Intel FPGA 보드, oneAPI FPGA 툴체인, AMD Vitis/XRT는 이 환경에 없어 실행하지 않았습니다. Intel 전용 확장(`cl_intel_channels`)이 없는 커널은 macOS의 OpenCL(Apple M2 Pro GPU 장치)에서 돌려 **결과가 맞는지만** 확인했습니다. GPU에서 돈 결과로는 FPGA의 II·자원·처리율을 전혀 알 수 없습니다.
 
 ## 핵심 개념 — Single Work-Item Kernel
 
@@ -88,7 +88,7 @@ __kernel void consumer(__global float * restrict out, int n) {
 }
 ```
 
-*Programming Guide* 22.3의 channel 절에 따르면 `write_channel_intel`은 FIFO가 차 있으면 자리가 날 때까지 커널을 멈추는 blocking 쓰기이고, `depth` 속성은 FIFO의 버퍼 용량을 늘립니다. 그리고 "한 커널이 같은 channel에 여러 번 쓸 수는 있지만, 여러 커널이 같은 channel에 쓸 수는 없다"(읽기도 같음)는 제약이 있습니다. 세 커널을 동시에 돌리려면 같은 문서 6.1.5절대로 커널마다 별도의 in-order command queue를 만들거나, out-of-order queue 하나에 서로 의존하지 않는 커널을 넣습니다. in-order queue 하나는 앞 작업이 끝나야 다음 작업을 내보내기 때문입니다. 이 코드는 Apple OpenCL에 `cl_intel_channels`가 없어 실행하지 않았습니다.
+*Programming Guide* 22.3의 channel 절에 따르면 `write_channel_intel`은 FIFO가 차 있으면 자리가 날 때까지 커널을 멈추는 blocking 쓰기이고, `depth` 속성은 FIFO의 버퍼 용량을 늘립니다. 그리고 "한 커널이 같은 channel에 여러 번 쓸 수는 있지만, 여러 커널이 같은 channel에 쓸 수는 없다"(읽기도 같음)는 제약이 있습니다. 세 커널을 동시에 돌리려면 같은 문서 6.1.5절에 따라 커널마다 별도의 in-order command queue를 만들거나, out-of-order queue 하나에 서로 의존하지 않는 커널을 넣습니다. in-order queue 하나는 앞 작업이 끝나야 다음 작업을 내보내기 때문입니다. 이 코드는 Apple OpenCL에 `cl_intel_channels`가 없어 실행하지 않았습니다.
 
 AMD Vitis HLS의 `hls::stream`이 같은 역할입니다([11-10 Vitis HLS](/blog/embedded/modern-recipes/part11-10-hls)). SYCL로 옮기면 channel은 pipe API가 맡고, *Migrating OpenCL FPGA Designs to SYCL*의 "Channels/Pipes APIs" 절에 대응표가 있습니다.
 
