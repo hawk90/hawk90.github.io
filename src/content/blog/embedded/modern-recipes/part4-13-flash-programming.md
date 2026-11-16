@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Erase가 1, write가 0. 한 번 쓴 비트는 erase 없이 다시 못 씁니다."** Flash의 핵심 한 줄.
+> **"Erase가 1, write가 0. 한 번 쓴 비트는 erase 없이 다시 못 씁니다."** Flash에서 가장 먼저 기억할 규칙입니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -268,7 +268,7 @@ DS8626 Rev 4 Table 41의 endurance `NEND`는 min 10 kcycles(TA −40 ~ +85 °C �
 
 ## 정리
 
-- Flash는 **erase 1 → write 0**. 한 번 쓴 비트는 erase 없이 못 되돌림.
+- Flash는 **erase하면 1, write하면 0**이 됩니다. 한 번 쓴 비트는 erase 없이 되돌리지 못합니다.
 - **Erase 단위**는 sector(16/64/128 KB)이고, **programming width**는 VDD 범위로 정합니다(3.3 V면 word).
 - **EEPROM emulation**은 append-only log와 compact로 erase 횟수를 줄입니다.
 - **Dual bank**는 F427/429/437/439/469/479 같은 칩에 있고, F407은 sector를 나눠 같은 구조를 만듭니다.
