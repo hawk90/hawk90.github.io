@@ -16,18 +16,19 @@ topics: ["tools", "tools/emulation"]
 
 ## UVM이란 무엇인가
 
-**UVM**(Universal Verification Methodology)은 SystemVerilog 기반의 *검증 프레임워크*입니다. Accellera가 reference implementation을 배포하고, 표준 번호는 IEEE 1800.2입니다. Accellera 다운로드 페이지의 현재 판은 "UVM v2020.3.2 Library Code for IEEE 1800.2"입니다. UVM testbench의 구성 요소는 다음과 같습니다.
+**UVM**(Universal Verification Methodology)은 SystemVerilog 기반의 *검증 프레임워크*입니다. Accellera가 reference implementation을 배포하고, 표준 번호는 IEEE 1800.2입니다. Accellera 다운로드 페이지의 현재 판은 "UVM v2020.3.2 Library Code for IEEE 1800.2"입니다. UVM testbench의 구성 요소를 Accellera `uvm-core` 저장소(GitHub `accellera-official/uvm-core`, tag 2020.3.1, commit 78c0654)의 base class와 주석으로 정리하면 다음과 같습니다.
 
-| 컴포넌트 | 역할 |
-|----------|------|
-| **Sequence** | transaction 흐름의 시나리오 |
-| **Sequencer** | sequence를 driver로 전달 |
-| **Driver** | sequencer로부터 받은 transaction을 RTL의 wire 토글로 변환 |
-| **Monitor** | RTL의 wire에서 transaction을 다시 추출 |
-| **Agent** | sequencer + driver + monitor 묶음 |
-| **Scoreboard** | DUT의 출력과 *기대값*을 비교 |
-| **Reference Model** | "기대값"을 계산하는 알고리즘 |
-| **Env** | 위 모두를 묶는 환경 |
+| 컴포넌트 | base class (파일:줄) | 주석이 적은 역할 |
+|----------|------|------|
+| **Sequence** | `uvm_sequence` (`src/seq/uvm_sequence.svh:47`) | "create streams of sequence items and/or other sequences" (`:41-42`) |
+| **Sequencer** | `uvm_sequencer` (`src/seq/uvm_sequencer.svh:44`) | driver의 pull port가 연결되는 상대 (`uvm_driver.svh:42-44`) |
+| **Driver** | `uvm_driver` (`src/comps/uvm_driver.svh:58`) | "initiate requests for new transactions via a uvm_seq_item_pull_port" (`:42-43`) |
+| **Monitor** | `uvm_monitor` (`src/comps/uvm_monitor.svh:45`) | "the base class for user-defined monitors" (`:36`) |
+| **Agent** | `uvm_agent` (`src/comps/uvm_agent.svh:51`) | "typically contains three subcomponents: a driver, sequencer, and monitor" (`:44-45`) |
+| **Scoreboard** | `uvm_scoreboard` (`src/comps/uvm_scoreboard.svh:47`) | "the base class for user-defined scoreboards" (`:37-38`) |
+| **Env** | `uvm_env` (`src/comps/uvm_env.svh:44`) | "hierarchical containers of other components" (`:37`) |
+
+**Reference model**에 해당하는 base class는 uvm-core에 없습니다. 기대값을 계산하는 부분은 사용자가 scoreboard 안이나 별도 component로 만들고, 이 장은 그 자리에 C 함수를 둡니다.
 
 UVM은 *재사용 가능한 testbench 구조*에 표준을 부여합니다. 그런데 *reference model*을 SV class로 쓰면 driver 팀이 그 코드를 쓸 수 없습니다. driver는 C로 같은 알고리즘을 *다시* 짜야 하고, 두 구현이 어긋나면 어느 쪽이 맞는지 모호해집니다. 비유하면 시험 출제자와 학원 강사가 모범 답안을 따로 쓰는 상황입니다.
 
@@ -87,7 +88,7 @@ scoreboard 쪽에서는 open array로 C reference를 import합니다. 처음에�
 %Error: sb.sv:12:30: DPI output open array argument 'C' may not be passed a dynamic array or queue (IEEE 1800-2023 7.7)
 ```
 
-그래서 `C`를 `inout`으로 바꿨습니다. 아래는 UVM class 없이 module 함수로 쓴 scoreboard 비교 로직입니다. UVM에서는 이 함수를 `uvm_scoreboard`의 메서드로 옮기고 `$display`를 `` `uvm_error ``로 바꿉니다(그 UVM 판은 실행하지 않았습니다).
+그래서 `C`를 `inout`으로 바꿨습니다. 아래는 UVM class 없이 module 함수로 쓴 scoreboard 비교 로직입니다. UVM에서는 이 함수를 `uvm_scoreboard`(`uvm_scoreboard.svh:47`)를 상속한 class의 메서드로 옮기고 `$display`를 `` `uvm_error(ID, MSG) `` 매크로(`src/macros/uvm_message_defines.svh:188`)로 바꿉니다. 그 UVM 판은 실행하지 않았습니다.
 
 ```systemverilog
 import "DPI-C" function int matmul_ref_dpi(
@@ -236,7 +237,7 @@ reference를 *SV class*로 둘 수도 있습니다. 왜 굳이 C인가?
 
 ## 알고리즘 reference의 도메인 예
 
-이 패턴이 가장 명확히 빛나는 도메인.
+이 시리즈가 이 패턴의 적용 후보로 꼽는 도메인입니다. 아래 행은 이 장에서 실행한 matmul을 빼면 설계 제안이며, 해당 분야 제품이 이렇게 한다는 주장이 아닙니다.
 
 | 도메인 | reference 예 | 공유 대상 |
 |--------|---------------|----------|
@@ -246,7 +247,7 @@ reference를 *SV class*로 둘 수도 있습니다. 왜 굳이 C인가?
 | Video codec | DCT, motion estimate | playback driver · encoder TB |
 | Compression | LZ77, Huffman | filesystem driver · TB |
 
-위 모든 경우에서 reference C 한 벌이 *기능적 진실* 역할을 합니다. 이 장에서 실행한 것은 matmul뿐입니다.
+이 패턴을 적용하면 각 후보에서 reference C 한 벌이 *기능적 진실* 역할을 합니다. 이 장에서 실행한 것은 matmul뿐입니다.
 
 ## Coverage feedback — reference로 coverage 채우기
 
@@ -332,6 +333,7 @@ src/
 ## 1차 자료와 실행 환경
 
 - [Accellera UVM 다운로드](https://www.accellera.org/downloads/standards/uvm) — IEEE 1800.2, UVM v2020.3.2
+- [accellera-official/uvm-core](https://github.com/accellera-official/uvm-core) tag 2020.3.1(commit 78c0654) — `src/comps/*.svh`, `src/seq/*.svh`, `src/macros/uvm_message_defines.svh:188`
 - Verilator 5.054가 생성한 `Vsb__Dpi.h`와 오류 메시지(IEEE 1800-2023 7.7 인용)
 
 실행 환경은 macOS 27.2.1, Apple M2 Pro, Homebrew clang 23.1.5, Apple clang 21.0.0(`cc`), Verilator 5.054입니다(2026-11-16). UVM library, 상용 simulator, compiler verifier는 실행하지 않았습니다.
