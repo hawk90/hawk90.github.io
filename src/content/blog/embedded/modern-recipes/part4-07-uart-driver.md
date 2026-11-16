@@ -193,8 +193,18 @@ void uart_init_dma(uint32_t baud, uint32_t pclk) {
     NVIC_EnableIRQ(DMA2_Stream7_IRQn);
 }
 
+static volatile int tx_busy;
+
+void DMA2_Stream7_IRQHandler(void) {
+    if (DMA2->HISR & DMA_HISR_TCIF7) {
+        DMA2->HIFCR = DMA_HIFCR_CTCIF7;
+        tx_busy = 0;                          // previous transfer finished
+    }
+}
+
 void uart_send_dma(const uint8_t *buf, uint16_t len) {
-    while (DMA2_Stream7->CR & DMA_SxCR_EN);   // wait previous
+    while (tx_busy);                          // wait previous
+    tx_busy = 1;
     DMA2_Stream7->NDTR = len;
     DMA2_Stream7->M0AR = (uint32_t)buf;
     DMA2->HIFCR = DMA_HIFCR_CTCIF7 | DMA_HIFCR_CHTIF7 | DMA_HIFCR_CTEIF7
@@ -250,12 +260,13 @@ int main(void) {
 
 ```bash
 T=cmsis-device-f4/Source/Templates
-for V in POLL INT; do
+for V in POLL INT; do      # stm32f411.ld is the linker script from 4-01
   arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -ffreestanding -nostdlib -O2 -Wall \
       -DSTM32F407xx -D$V -I. -ICMSIS_6/CMSIS/Core/Include -Icmsis-device-f4/Include \
       -T stm32f411.ld -o uart_$V.elf $T/gcc/startup_stm32f407xx.s $T/system_stm32f4xx.c gpio.c uart_test.c
+  echo "== $V"
+  (sleep 1; printf 'hello'; sleep 2) | qemu-system-arm -M netduinoplus2 -display none -serial stdio -monitor none -kernel uart_$V.elf
 done
-(sleep 1; printf 'hello'; sleep 2) | qemu-system-arm -M netduinoplus2 -display none -serial stdio -monitor none -kernel uart_POLL.elf
 ```
 
 ```text
@@ -279,7 +290,7 @@ DMA 판은 같은 헤더로 `-Wall` 경고 없이 컴파일되는 것까지만 �
 
 > ⚠️ ORE (overrun) flag 무시
 
-RX byte를 `DR`에서 꺼내기 전에 다음 byte가 들어오면 `SR`의 ORE(bit 3)가 섭니다. STM32F4의 지우는 순서는 HAL v1.8.3 `stm32f4xx_hal_uart.h`의 주석대로 "a read operation to USART_SR register followed by a read operation to USART_DR register"이고, `__HAL_UART_CLEAR_OREFLAG()`도 `SR`을 읽은 뒤 `DR`을 읽는 두 줄입니다. 위 ISR은 매번 `SR`을 먼저 읽고 `RXNE`일 때 `DR`을 읽으므로 이 순서를 따릅니다. 같은 주석은 "RXNE flag can be also cleared by a read to the USART_DR register"라고도 적습니다.
+수신 처리가 늦어 overrun이 나면 `SR`의 ORE(bit 3, HAL 이름 "Overrun error")가 섭니다. STM32F4의 지우는 순서는 HAL v1.8.3 `stm32f4xx_hal_uart.h`의 주석대로 "a read operation to USART_SR register followed by a read operation to USART_DR register"이고, `__HAL_UART_CLEAR_OREFLAG()`도 `SR`을 읽은 뒤 `DR`을 읽는 두 줄입니다. 위 ISR은 매번 `SR`을 먼저 읽고 `RXNE`일 때 `DR`을 읽으므로 이 순서를 따릅니다. 같은 주석은 "RXNE flag can be also cleared by a read to the USART_DR register"라고도 적습니다.
 
 > ⚠️ Ring buffer head/tail의 소유권
 
@@ -287,11 +298,11 @@ RX byte를 `DR`에서 꺼내기 전에 다음 byte가 들어오면 `SR`의 ORE(b
 
 > ⚠️ TXE와 TC 혼동
 
-`TXE`는 `DR`이 비어 다음 byte를 넣어도 된다는 뜻이고, HAL 주석대로 "TXE flag is cleared only by a write to the USART_DR register"입니다. `TC`(Transmission Complete)는 shift register까지 비어 마지막 stop bit가 나간 뒤에 섭니다. RS-485 transceiver의 송신 enable을 끄는 시점처럼 선로에서 마지막 bit가 끝났는지가 중요하면 `TXE`가 아니라 `TC`를 기다립니다.
+`TXE`는 `DR`이 비어 다음 byte를 넣어도 된다는 뜻이고, HAL 주석대로 "TXE flag is cleared only by a write to the USART_DR register"입니다. `TC`(Transmission Complete)는 전송 자체가 끝났다는 flag입니다. Linux v6.12 `drivers/tty/serial/stm32-usart.c`는 `tx_empty()`를 `USART_SR_TC`로 판단하고, RS-485 모드에서는 `TC`가 선 뒤에야 `stm32_usart_rs485_rts_disable()`로 transceiver의 송신 enable을 끕니다. `TXE`만 보고 enable을 끄면 아직 나가는 중인 byte가 잘리기 때문에 이 순서를 씁니다.
 
 > ⚠️ DMA TX 끝나기 전에 다시 enable
 
-`uart_send_dma()`의 첫 줄 `while (DMA2_Stream7->CR & DMA_SxCR_EN);`가 이전 전송이 끝나기를 기다립니다. 이 대기 없이 `NDTR`·`M0AR`을 바꾸면 진행 중인 전송의 설정을 덮어씁니다. 기다리는 대신 `DMA_SxCR_TCIE`로 켠 완료 인터럽트에서 다음 전송을 시작해도 됩니다.
+`uart_send_dma()`는 이전 전송의 완료 인터럽트(`TCIF7`)가 `tx_busy`를 0으로 돌릴 때까지 기다린 뒤 `NDTR`·`M0AR`을 바꿉니다. 이 대기 없이 바꾸면 진행 중인 전송의 설정을 덮어씁니다. `TCIE`를 켰으면 handler도 반드시 둡니다. ST startup의 `DMA2_Stream7_IRQHandler`는 weak alias로 `Default_Handler`의 무한 loop이므로([4-05](/blog/embedded/modern-recipes/part4-05-interrupt-handling)), handler 없이 `NVIC_EnableIRQ(DMA2_Stream7_IRQn)`을 하면 첫 전송이 끝나는 순간 멈춥니다. init의 `CR = 0` 뒤 `EN`이 0이 되기를 기다리는 것은 HAL v1.8.3 `stm32f4xx_hal_dma.c`가 stream을 끈 뒤 하는 확인과 같습니다.
 
 ## 정리
 
