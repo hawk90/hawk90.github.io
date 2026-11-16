@@ -121,7 +121,7 @@ Yosys는 이 배열을 `RAMB36E1` 하나로 추론했습니다. 같은 배열을
       128   RAM256X1S
 ```
 
-BRAM은 읽기도 clock에 동기라서(DS180) 비동기 읽기를 받을 수 없습니다. 그래서 Yosys는 32 Kb를 LUT 기반 distributed RAM(`RAM256X1S` 128개)과 읽기 mux용 `LUT6` 40개, write-enable decode용 `LUT2`·`LUT3` 28개로 풀었습니다. UG474(v1.9)에 따르면 `RAM256X1S` 하나가 LUT 4개를 쓰므로 LUT로만 약 580개입니다. 큰 buffer는 읽기를 레지스터에 거는 것만으로 BRAM 하나와 LUT 수백 개 사이의 차이가 납니다.
+BRAM은 읽기도 clock에 동기라서(DS180) 비동기 읽기를 받을 수 없습니다. 그래서 Yosys는 32 Kb를 LUT 기반 distributed RAM(`RAM256X1S` 128개)과 읽기 mux용 `LUT6` 40개, write-enable decode용 `LUT2`·`LUT3` 28개로 풀었습니다. UG474(v1.9)에 따르면 `RAM256X1S` 하나가 LUT 4개를 쓰므로 LUT로만 약 580개입니다. 큰 buffer에서는 읽기를 레지스터에 거느냐 마느냐가 BRAM 하나와 LUT 수백 개의 차이로 이어집니다.
 
 ## DSP48E1 — multiply-accumulate
 
@@ -146,7 +146,7 @@ endmodule
        40   OBUF
 ```
 
-FF가 하나도 없다는 점이 중요합니다. `acc` 레지스터 40비트가 fabric FF가 아니라 DSP48E1 내부의 P 레지스터로 흡수됐습니다. 곱셈 폭이 25 × 18을 넘으면 DSP 여러 개를 이어 붙여야 하므로, 계수 폭을 정할 때 이 경계를 의식하면 자원이 크게 달라집니다.
+FF가 하나도 없다는 점이 중요합니다. `acc` 레지스터 40비트가 fabric FF가 아니라 DSP48E1 내부의 P 레지스터로 흡수됐습니다. 곱셈 폭이 25 × 18을 넘으면 DSP 여러 개를 이어 붙여야 하므로, 계수 폭을 정할 때 이 경계를 의식하느냐에 따라 자원 사용량이 크게 달라집니다.
 
 처리량 계산은 단순합니다. Zynq Z-7020은 DSP slice가 220개입니다(DS190). 모든 DSP가 매 clock MAC 하나씩을 100 MHz에서 한다면 상한은 220 × 100 M = 22 GMAC/s입니다. 실제로 이 값에 다가가려면 데이터를 매 clock 공급할 BRAM·메모리 대역폭과, 그 clock에서 timing이 닫히는지가 함께 맞아야 합니다.
 
@@ -309,7 +309,7 @@ endmodule
 - Yosys 0.71 `synth_xilinx`: `Warning: found logic loop in module loop_demo`를 8번(비트마다) 낸 뒤, abc9 단계에서 `ERROR: Assert 'no_loops' failed`로 합성이 중단됩니다.
 - Vivado(돌리지 않음): UG906(v2026.1) p.363의 methodology check `TIMING-23: Combinational Loop Found`는 Vivado가 loop 안의 timing arc 하나를 끊어 분석한다고 설명합니다. 즉 거부하지 않고 진행합니다. UG901(v2026.1)의 RTL linter도 `INFER-4`(combinational loop detection) 규칙으로 이를 표시합니다.
 
-결국 "합성기가 막아 주겠지"는 도구에 따라 맞지 않습니다. 의도하지 않은 loop라면 RTL을 고치는 것이 UG906의 권고입니다.
+결국 "합성기가 막아 주겠지"라는 기대는 도구에 따라 빗나갑니다. 의도하지 않은 loop라면 RTL을 고치는 것이 UG906의 권고입니다.
 
 > Timing 위반 무시
 
