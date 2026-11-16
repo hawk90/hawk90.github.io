@@ -103,6 +103,33 @@ dead-time은 tick 수로 고정되어 있으므로, PWM 주파수를 다섯 배 
 - CCR = 2100일 때 CH1 high 폭: 2 × 2100 − 42 = 4158 tick = 24.75 µs.
 - CCR을 21 이하로 내리면 CH1 펄스가, 4179 이상으로 올리면 CH1N 펄스가 사라짐.
 
+보드에서 재지는 않았습니다. 대신 위 정의(center-aligned 카운트, PWM mode 1, OCx·OCxN의 rising edge를 DT tick 늦추는 dead-time)를 그대로 옮긴 Verilog 행동 모델을 Icarus Verilog 13.0으로 돌려, 예상값이 정의에서 실제로 나오는지 확인했습니다. TIM1 회로가 아니라 RM0090 정의의 모델이라는 점이 이 확인의 한계입니다. 핵심 부분은 다음과 같습니다.
+
+```verilog
+always @(posedge clk) begin
+  // center-aligned: 0..ARR-1 up, then ARR..1 down
+  if (up) begin if (cnt == ARR - 1) begin cnt <= ARR; up <= 0; end else cnt <= cnt + 1; end
+  else    begin if (cnt == 1)       begin cnt <= 0;   up <= 1; end else cnt <= cnt - 1; end
+  // PWM mode 1: up -> 1 while CNT < CCR, down -> 0 while CNT > CCR
+  oref <= up ? (cnt < CCR) : !(cnt > CCR);
+  // dead-time: each output rises only after oref has held for DT ticks
+  if (oref) begin dly_n <= 0; ocn <= 0; if (dly_p < DT) dly_p <= dly_p + 1; else oc  <= 1; end
+  else      begin dly_p <= 0; oc  <= 0; if (dly_n < DT) dly_n <= dly_n + 1; else ocn <= 1; end
+end
+```
+
+ARR = 4200, DT = 42에서 CCR을 바꿔 가며 네 주기씩 잰 결과입니다(`iverilog -g2012 -o pwm pwm_tb.v && vvp -n pwm`).
+
+```text
+CCR=2100: OCx pulses in 4 periods=4, OCx high=4158 ticks (24.75 us), OCxN high=4158 ticks, gaps OCxN->OCx=42 OCx->OCxN=42 ticks
+CCR=22: OCx pulses in 4 periods=4, OCx high=2 ticks (0.01 us), OCxN high=8314 ticks, gaps OCxN->OCx=42 OCx->OCxN=42 ticks
+CCR=21: OCx pulses in 4 periods=0, OCx high=0 ticks (0.00 us), OCxN high=8316 ticks, gaps OCxN->OCx=42 OCx->OCxN=25266 ticks
+CCR=4178: OCx pulses in 4 periods=4, OCx high=8314 ticks (49.49 us), OCxN high=2 ticks, gaps OCxN->OCx=42 OCx->OCxN=42 ticks
+CCR=4179: OCx pulses in 4 periods=4, OCx high=8316 ticks (49.50 us), OCxN high=0 ticks, gaps OCxN->OCx=29466 OCx->OCxN=42 ticks
+```
+
+CCR = 2100에서 CH1 high 폭 4158 tick(24.75 µs)과 두 출력 사이 42 tick(250 ns) 간격이 위 예상값과 같습니다. CCR = 22에서는 2 tick짜리 OCx 펄스가 남고 21에서 사라지며, 반대쪽은 4178에서 2 tick이 남고 4179에서 OCxN이 사라집니다. gap 칸의 큰 값은 한쪽 출력이 없어서 이전 에지와의 간격이 잡힌 것입니다.
+
 ## 정리
 
 - 주파수와 duty 단계는 counter clock 하나를 나눠 씁니다. TIM1 168 MHz의 counter-compare PWM으로는 100 kHz·12-bit(409.6 MHz 필요)를 만들지 못합니다.
