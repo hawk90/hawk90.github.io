@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"데이터시트 대역폭은 *peak*입니다. 실제로 쓰는 대역폭은 그보다 낮습니다."** — 이 글에서 직접 잰 Apple M2 Pro는 공칭 200 GB/s에 Triad 153 GB/s였습니다. 이 측정은 차이의 원인을 분리하지 않았지만, 아래에서 DRAM 쪽 손실 요인을 짚습니다. 그리고 batch 1 LLM decode 같은 연산은 *연산보다 메모리를 먼저 다 씁니다*. V100에서 H100까지 연산 성능은 약 8배, HBM 대역폭은 약 3.7배 늘어 그 간격이 벌어졌습니다. 이것이 *memory wall*입니다.
+> **"데이터시트 대역폭은 *peak*입니다. 실제로 쓰는 대역폭은 그보다 낮습니다."** — NVIDIA조차 V100의 HBM2에 대해 *많은 workload에서 95% 넘는 대역폭 효율*이라고 쓰지, 100%라고 쓰지 않습니다. refresh·row activation·bank conflict 같은 DRAM 쪽 손실 요인이 있고, 자기 시스템의 실제 값은 직접 재야 합니다. 그리고 batch 1 LLM decode 같은 연산은 *연산보다 메모리를 먼저 다 씁니다*. V100에서 H100까지 연산 성능은 약 8배, HBM 대역폭은 약 3.7배 늘어 그 간격이 벌어졌습니다. 이것이 *memory wall*입니다.
 
 [Ch 4](/blog/embedded/hardware/hbm/chapter04-gddr)에서 *GDDR signaling의 진화*를 봤습니다. 이번 장은 *대역폭이 실제로 어떻게 쓰이는지*입니다.
 
@@ -31,7 +31,7 @@ topics: ["embedded", "embedded/hardware"]
 
 기준 발표와 속도 등급은 [Ch 3](/blog/embedded/hardware/hbm/chapter03-hbm-generations)을 참조합니다. HBM3 5 stack을 6.4 Gbps로 계산하면 `5 × 819.2 = 4096 GB/s`입니다.
 
-H100의 *3.35 TB/s*는 HBM3를 *정격(6.4 Gbps)보다 낮은 속도*로 돌린 *peak*입니다. stack 5개로 역산하면 pin당 `3,350 × 8 ÷ 5,120 ≈ 5.23 Gb/s`입니다([Ch 1](/blog/embedded/hardware/hbm/chapter01-overview)). 효율 손실을 뺀 값이 아닙니다. NVIDIA도 [Volta 백서](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf)에서 V100의 900 GB/s peak에 대해 *많은 workload에서 최대 95%의 메모리 대역폭 사용률*을 냈다고 적어, peak와 실제 사용량을 구별합니다.
+H100의 *3.35 TB/s*는 HBM3를 *정격(6.4 Gbps)보다 낮은 속도*로 돌린 *peak*입니다. stack 5개로 역산하면 pin당 `3,350 × 8 ÷ 5,120 ≈ 5.23 Gb/s`입니다([Ch 1](/blog/embedded/hardware/hbm/chapter01-overview)). 효율 손실을 뺀 값이 아닙니다. NVIDIA도 [Volta 백서](https://images.nvidia.com/content/volta-architecture/pdf/volta-architecture-whitepaper.pdf)의 *HBM2 Memory Architecture* 절에서 V100의 900 GB/s peak에 대해 *많은 workload에서 95%가 넘는 메모리 대역폭 효율*을 냈다고 적고 Figure 15(*HBM2 Memory Speedup on V100 vs P100*)를 근거로 듭니다. 본문은 어떤 workload인지 밝히지 않으므로, 이 95%는 NVIDIA가 밝힌 HBM2 사례로만 읽습니다.
 
 ## 효율 손실 — 어디로 가는가
 
@@ -64,7 +64,7 @@ HBM3는 stack당 *16 channel*에 channel마다 pseudo channel이 2개라, 독립
 
 실제 BW를 측정하는 가장 간단한 방법은 *STREAM* 방식의 Triad입니다. Triad는 `a[i] = b[i] + scalar × c[i]`이며, 원소당 입력 2회·출력 1회, FP64라면 24 byte를 셉니다.
 
-GPU가 없는 이 글의 환경에서 같은 측정을 Apple M2 Pro(MacBook Pro 16-inch 2023, 32 GB)에 직접 해 봤습니다. [Apple 기술 사양](https://support.apple.com/en-us/111838)은 M2 Pro의 메모리 대역폭을 *200 GB/s*로 적습니다. 배열 3개 × 64 Mi 원소 × 8 byte = 1.5 GiB로 캐시보다 충분히 크게 잡았고, pthread로 원소를 나눠 10회 중 최소 시간을 씁니다.
+아래는 *측정 방법을 보여 주는 예*입니다. 이 글의 환경에는 HBM이 달린 GPU가 없어, Apple M2 Pro(MacBook Pro 16-inch 2023, 32 GB)에서 실행했습니다. 이 Mac의 메모리는 HBM이 아니라 *LPDDR5 unified memory*입니다(`system_profiler SPMemoryDataType`의 `Type: LPDDR5`). [Apple 기술 사양](https://support.apple.com/en-us/111838)과 [2023년 1월 17일 M2 Pro 발표](https://www.apple.com/newsroom/2023/01/apple-unveils-m2-pro-and-m2-max-next-generation-chips-for-next-level-workflows/)는 M2 Pro의 unified memory 대역폭을 *200 GB/s*로 적습니다. 배열 3개 × 64 Mi 원소 × 8 byte = 1.5 GiB로 캐시보다 충분히 크게 잡았고, pthread로 원소를 나눠 10회 중 최소 시간을 씁니다.
 
 ```c title="triad.c"
 // STREAM-style Triad a[i] = b[i] + s*c[i], pthreads, best of R runs.
@@ -120,7 +120,7 @@ n=67108864 threads=8 bytes=1610612736 best=0.010524 s triad=153.0 GB/s check=ok
 n=67108864 threads=12 bytes=1610612736 best=0.010635 s triad=151.4 GB/s check=ok
 ```
 
-8 thread를 세 번 더 실행하면 152.0·152.3·152.4 GB/s였습니다. 가장 높은 153.0 GB/s도 공칭 200 GB/s의 `153.0 ÷ 200 = 76.5%`입니다. thread 1개로는 88.7 GB/s에 그쳐, 메모리 대역폭을 채우려면 동시에 떠 있는 요청이 많아야 한다는 것도 보입니다. 이 수치는 이 Mac의 unified memory 결과이며 HBM의 효율이 아닙니다. 같은 방법을 GPU에 쓰려면 [NVIDIA CUDA Samples](https://github.com/NVIDIA/cuda-samples)의 bandwidth 예제와 [CUDA 12.8.1 가이드](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-c-programming-guide/index.html)가 출발점입니다. 이 글은 GPU 측정을 하지 않았습니다.
+8 thread를 세 번 더 실행하면 152.0·152.3·152.4 GB/s였습니다. 가장 높은 153.0 GB/s는 공칭 200 GB/s의 `153.0 ÷ 200 = 76.5%`입니다. thread 1개로는 88.7 GB/s에 그쳐, 메모리 대역폭을 채우려면 동시에 떠 있는 요청이 많아야 한다는 것도 보입니다. 이 실행은 차이의 원인을 나누지 않았고, LPDDR5 시스템의 값이라 **HBM의 효율에 대해서는 아무것도 말해 주지 않습니다.** 이 예에서 가져갈 것은 숫자가 아니라 절차입니다. working set을 캐시보다 크게 잡고, thread 수를 바꿔 가며, 반복 중 최솟값과 검산 결과를 함께 남깁니다. 같은 방법을 GPU에 쓰려면 [NVIDIA CUDA Samples](https://github.com/NVIDIA/cuda-samples)의 bandwidth 예제와 [CUDA 12.8.1 가이드](https://docs.nvidia.com/cuda/archive/12.8.1/cuda-c-programming-guide/index.html)가 출발점입니다. 이 글은 GPU 측정을 하지 않았습니다.
 
 다음 계산기는 논리적 byte 수·시간·FLOP을 받아 roofline 값으로 환산합니다.
 
@@ -225,7 +225,7 @@ ncu --set full ./inference
 
 ### "spec BW를 그대로 capacity planning에 쓴다"
 
-데이터시트 대역폭은 *peak*입니다. 위 M2 Pro 측정에서 순차 Triad조차 공칭의 76.5%였습니다. planning에는 측정값을 쓰고, 측정 조건(working set 크기, thread 수, 반복 중 최소/중앙값)을 함께 남깁니다.
+데이터시트 대역폭은 *peak*입니다. NVIDIA도 V100 HBM2에 대해 95% 넘는 효율을 말할 뿐 100%를 말하지 않습니다. planning에는 자기 시스템에서 잰 값을 쓰고, 측정 조건(working set 크기, thread 수, 반복 중 최소/중앙값)을 함께 남깁니다.
 
 ### "BW가 부족하니 더 빠른 chip을 쓴다"
 
@@ -246,7 +246,8 @@ MFU만 보면 *compute 사용률*은 알지만 *memory 사용률은 모릅니다
 ## 정리
 
 - *공칭 대역폭*은 `pin rate × bus width ÷ 8`이고, H100의 3.35 TB/s도 *peak*입니다.
-- 실제 대역폭은 *refresh·row activation·bank conflict·명령 overhead*로 깎입니다. M2 Pro 실측 Triad는 공칭 200 GB/s의 76.5%(153.0 GB/s)였습니다.
+- 실제 대역폭은 *refresh·row activation·bank conflict·방향 전환* 같은 DRAM 쪽 요인으로 깎이며, HBM 컨트롤러 문서(AMD PG276)가 이 요인들을 줄이는 기능을 따로 둡니다.
+- 데이터시트 값은 peak이므로 자기 시스템에서 직접 잽니다. 이 글의 Triad 예는 측정 절차를 보이기 위한 LPDDR5 Mac 실행이며 HBM 효율이 아닙니다.
 - *Roofline*에서 H100의 knee는 *약 295 FLOP/Byte*입니다. batch 1 LLM decode는 intensity가 *약 1*이라 강한 memory bound입니다.
 - V100 → H100에서 연산은 *약 7.9배*, 대역폭은 *약 3.7배* 늘어 knee가 *약 2배* 오른쪽으로 갔습니다.
 - 140 GB/3.35 TB/s의 약 42 ms는 가상 경로의 weight 읽기 하한이며, 실제 다중 GPU latency가 아닙니다.
