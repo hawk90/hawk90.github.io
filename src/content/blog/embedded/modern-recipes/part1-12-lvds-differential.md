@@ -121,6 +121,22 @@ IBUFDS #(
 
 Xilinx UNISIM 시뮬레이션 모델 [`OBUFDS.v`](https://github.com/Xilinx/XilinxUnisimLibrary/blob/1c8e05fd1e9a79ceb8b996a0996674122eed086f/verilog/src/unisims/OBUFDS.v)는 `bufif0(O, I, GTS)`와 `notif0(OB, I, GTS)`로, 전역 3-state 신호 `GTS`가 0일 때 `O`에 `I`를, `OB`에 `I`의 반전을 내보냅니다. [`IBUFDS.v`](https://github.com/Xilinx/XilinxUnisimLibrary/blob/1c8e05fd1e9a79ceb8b996a0996674122eed086f/verilog/src/unisims/IBUFDS.v)는 `I` = 1·`IB` = 0이면 `O` = 1, `I` = 0·`IB` = 1이면 `O` = 0을 내고, 두 입력이 모두 z(열림)이면 `O`를 x로 둡니다(`DQS_BIAS` = "TRUE"일 때만 0). 아래 "입력이 열렸을 때의 출력"의 SN65LVDS32처럼 열린 입력에서 HIGH를 내는 동작은 이 시뮬레이션 모델에 없습니다.
 
+위 두 인스턴스를 그 커밋의 `OBUFDS.v`·`IBUFDS.v`·`glbl.v`와 함께 Icarus Verilog 13.0으로 돌려 이 동작을 확인했습니다. `glbl.v`는 `GTS`를 `TOC_WIDTH` = 0 뒤 바로 0으로 내리고, 전역 reset `GSR`은 `ROC_WIDTH` = 100000 시간 단위(테스트벤치 timescale 1 ps에서 100 ns) 동안 잡으므로, 그 뒤인 200 ns에 입력을 바꿨습니다.
+
+```bash
+iverilog -g2012 -s tb -s glbl -o lv tb.v OBUFDS.v IBUFDS.v glbl.v && vvp -n lv
+```
+
+```text
+OBUFDS I=0 -> O=0 OB=1
+OBUFDS I=1 -> O=1 OB=0
+IBUFDS I=1 IB=0 -> O=1
+IBUFDS I=0 IB=1 -> O=0
+IBUFDS I=z IB=z -> O=x
+```
+
+마지막 줄이 열린 입력에서 x가 나오는 경우입니다. 시뮬레이션에서 이 x가 뒤 로직으로 퍼지면, 보드에서는 HIGH로 고정될 수신기 동작을 시뮬레이션이 다르게 보여 준다는 뜻입니다.
+
 같은 라이브러리의 양방향 버퍼 모델 [`IOBUFDS.v`](https://github.com/Xilinx/XilinxUnisimLibrary/blob/1c8e05fd1e9a79ceb8b996a0996674122eed086f/verilog/src/unisims/IOBUFDS.v)는 `IOSTANDARD`가 `LVDS_25`이면 "100 Ω 차동에 최적화된 고정 임피던스 구조이고, turn-around 타이밍 요구가 없는 point-to-point 전송 전용이며, 버스 구조라면 BLVDS를 쓰라"는 DRC 경고를 냅니다. 위 "전류 모드 드라이버와 100 Ω 종단"의 100 Ω 전제가 FPGA 쪽 I/O 표준에도 들어 있습니다.
 
 ## 자주 보는 함정
