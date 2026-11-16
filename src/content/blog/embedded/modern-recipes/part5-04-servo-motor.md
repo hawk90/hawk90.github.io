@@ -217,10 +217,10 @@ STM32 GPIO push-pull 출력의 high는 MCU의 VDD 근처입니다(이 글은 VDD
 ## 정리
 
 - 이 글의 코드는 **50 Hz, 1.5 ms 중앙, 1000 µs당 90°**를 가정하고, 실제 center와 endpoint는 calibration합니다.
-- TIM의 **PSC=83, ARR=19999**로 1 µs resolution, 20 ms period.
-- 한 TIM의 **4 channel로 4 servo**. 12 channel보다 많으면 PCA9685(16 channel) 같은 I2C PWM controller(24 ~ 1526 Hz).
-- **Calibration** (min/center/max) + **smooth interpolation**으로 부드러운 motion.
-- **servo 전원 분리**, **GND 공통**.
+- TIM을 **PSC=83, ARR=19999**로 두면 1 µs resolution, 20 ms period가 됩니다.
+- 한 TIM의 **4 channel로 servo 4개**를 다룹니다. 12 channel보다 많으면 PCA9685(16 channel) 같은 I2C PWM controller(24 ~ 1526 Hz)를 씁니다.
+- **Calibration** (min/center/max)과 **smooth interpolation**으로 motion을 부드럽게 만듭니다.
+- **servo 전원은 분리**하고 **GND는 공통**으로 묶습니다.
 
 다음 편은 **Character LCD (HD44780)**입니다. 4/8-bit 모드, command, custom character를 다룹니다.
 
