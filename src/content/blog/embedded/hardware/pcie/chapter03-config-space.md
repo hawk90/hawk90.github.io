@@ -12,231 +12,294 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"Configuration Space는 PCIe device의 *명함과 다이얼*입니다."** — 처음 *256 byte는 PCI Local Bus*에서 정의된 영역, 다음 *3840 byte는 PCIe Extended*. *Type 0 header (EP)·Type 1 header (Bridge)* 두 형식, *Capability linked list*가 *PCI-PM·MSI·PCIe Cap·Power Budgeting* 같은 기능을 *체인으로* 연결합니다. *ECAM*이 그 4 KB를 *MMIO로 매핑*합니다.
+> **"Configuration Space는 PCIe function마다 붙은 4 KB짜리 신상 명세서이고, 앞 256바이트는 PCI와 같습니다."** 앞 64바이트 header가 Type 0(endpoint)인지 Type 1(bridge)인지로 나머지 해석이 갈리고, 기능 목록은 0x34에서 시작하는 Capability 연결 리스트와 0x100에서 시작하는 Extended Capability 리스트로 이어집니다. ECAM은 이 4 KB를 bus·device·function 번호로 계산한 주소의 MMIO로 보여 줍니다.
 
-[Ch 2 TLP](/blog/embedded/hardware/pcie/chapter02-tlp)에서 *Configuration TLP의 라우팅 방식*을 봤습니다. 이 장은 *Configuration TLP가 읽고 쓰는 4 KB 영역의 layout*을 본격적으로 분해합니다.
+[Ch 2](/blog/embedded/hardware/pcie/chapter02-tlp)에서 Configuration TLP가 Bus·devfn·offset을 실어 나른다는 것을 봤습니다. 이 장은 그 offset이 가리키는 공간을 시리즈 VM(QEMU 11.1.3 virt, Debian 13, 커널 6.12.116)에서 직접 읽습니다.
 
-## Configuration Space 4 KB
+## 256바이트와 4096바이트
 
-| 영역 | 크기 | 비고 |
+Linux v6.12 `pci_regs.h:29-30`은 config space 크기를 두 가지로 정의합니다. `PCI_CFG_SPACE_SIZE`는 256, `PCI_CFG_SPACE_EXP_SIZE`는 4096입니다. 장치마다 어느 쪽인지는 `pci_cfg_space_size()`(`drivers/pci/probe.c:1728-1766`)가 정합니다. PCIe 장치와 host bridge는 offset 0x100을 읽어 보고 오류 응답(0xffffffff)이 아니고 앞쪽과 겹쳐 보이지도 않으면 4096, 그 밖의 장치는 PCI-X 266/533 MHz가 아닌 한 256입니다.
+
+시리즈 VM에서 sysfs `config` 파일 크기가 그 결과입니다.
+
+| 장치 | PCI Express Capability | `config` 크기 |
 |------|------|------|
-| **PCI Configuration** | 256 byte (offset 0x00 ~ 0xFF) | 원본 PCI Local Bus 정의 |
-| **PCIe Extended** | 3840 byte (offset 0x100 ~ 0xFFF) | PCIe가 추가, *Extended Capability* 영역 |
+| 00:00.0 host bridge | 없음 | 256 |
+| 00:01.0·00:02.0 virtio (root bus) | 없음 | 256 |
+| 00:03.0~00:07.0 root port | 있음 | 4096 |
+| 01:00.0·02:00.0·03:00.0 endpoint | 있음 | 4096 |
+| 04:00.0·05:00.0·05:01.0 switch port | 있음 | 4096 |
+| 06:00.0 `edu` | 없음 | 256 |
+| 07:00.0 virtio-net (switch 아래) | 있음 | 4096 |
 
-각 device·function이 *4 KB Configuration Space*를 보유. *Multi-function device*는 *function별로 4 KB*. *Multi-host MR-IOV 같은 경우*는 더 복잡.
+같은 virtio-net이라도 root bus의 00:01.0은 PCI Express Capability가 없어 256바이트, switch 아래의 07:00.0은 4096바이트입니다. 256바이트 장치인 `edu`에서 `setpci -s 06:00.0 100.l`로 0x100을 읽으면 `ffffffff`가 나옵니다.
 
 ## Type 0 vs Type 1 Header
 
-처음 *64 byte (0x00 ~ 0x3F)*가 *header*. 두 가지 형식:
+앞 64바이트(0x00~0x3F)가 header이고, 0x0E의 Header Type 하위 7비트(`PCI_HEADER_TYPE_MASK` 0x7f)가 형식을 정합니다(`pci_regs.h:78-83`). 0은 일반 장치, 1은 PCI-to-PCI bridge, 2는 CardBus bridge이고, bit 7(0x80)은 multi-function 표시입니다.
 
-| Type | 사용 | 식별 |
-|------|------|------|
-| **Type 0** | Endpoint | Bit 0x0E[6:0] = 0x00 |
-| **Type 1** | Bridge·Root Port·Switch Port | Bit 0x0E[6:0] = 0x01 |
+시리즈 VM에서 `setpci`로 읽은 값입니다.
 
-*Switch downstream port·root port*는 *Type 1*. 그 *아래 device로 향하는 routing*에 *primary·secondary·subordinate bus 번호*가 필요해서 *Type 0와 layout 다름*.
+```text
+02:00.0 HEADER_TYPE=00 CAPABILITIES=c8
+00:03.0 HEADER_TYPE=01 CAPABILITIES=54
+```
+
+e1000e(02:00.0)는 Type 0, root port(00:03.0)는 Type 1입니다. root port와 switch port가 Type 1인 이유는 아래 bus로 config 요청을 넘기려면 bus 번호와 주소 window를 담을 레지스터가 필요하기 때문입니다.
 
 ## Type 0 Header (Endpoint)
 
-| Offset | 필드 | 의미 |
-|--------|------|------|
-| 0x00 | Vendor ID | PCI-SIG 부여 |
-| 0x02 | Device ID | Vendor 부여 |
-| 0x04 | Command | enable·bus master·memory 등 control |
-| 0x06 | Status | error·capability 등 |
-| 0x08 | Revision ID·Class Code | device class 분류 |
-| 0x0C | Cache Line Size·Latency Timer·Header Type | header 종류 식별 |
-| 0x10 | BAR0 | Base Address Register |
-| 0x14 | BAR1 | |
-| 0x18 | BAR2 | |
-| 0x1C | BAR3 | |
-| 0x20 | BAR4 | |
-| 0x24 | BAR5 | |
-| 0x28 | Cardbus CIS Pointer | (대부분 unused) |
-| 0x2C | Subsystem Vendor·Subsystem Device | OEM 식별 |
-| 0x30 | Expansion ROM BAR | option ROM |
-| 0x34 | Capabilities Pointer | *capability chain 시작 offset* |
-| 0x3C | Interrupt Line·Pin·Min_Gnt·Max_Lat | legacy 인터럽트 |
+e1000e의 앞 64바이트를 `lspci -xxx`로 덤프했습니다.
+
+```text
+00: 86 80 d3 10 06 04 10 00 00 00 00 02 00 00 00 00
+10: 00 00 24 10 00 00 26 10 01 20 00 00 00 00 28 10
+20: 00 00 00 00 00 00 00 00 00 00 00 00 86 80 00 00
+30: 00 00 fc ff c8 00 00 00 00 00 00 00 ff 01 00 00
+```
+
+Linux `pci_regs.h`의 offset 정의로 읽으면 다음과 같습니다. 값은 little-endian으로 조립했습니다.
+
+| Offset | 필드 (`pci_regs.h` 이름) | 읽은 값 |
+|------|------|------|
+| 0x00 | Vendor ID / Device ID | 0x8086 / 0x10d3 |
+| 0x04 | Command / Status | 0x0406 / 0x0010 (Status bit 4 = Capabilities List 있음) |
+| 0x08 | Revision / Class Code | 0x00 / 0x020000 (Ethernet controller) |
+| 0x0E | Header Type | 0x00 |
+| 0x10~0x24 | BAR0~BAR5 (`PCI_BASE_ADDRESS_0`부터) | 0x10240000, 0x10260000, 0x00002001, 0x10280000, 0, 0 |
+| 0x28 | CardBus CIS Pointer (`PCI_CARDBUS_CIS`) | 0 |
+| 0x2C | Subsystem Vendor / Subsystem ID | 0x8086 / 0x0000 |
+| 0x30 | Expansion ROM (`PCI_ROM_ADDRESS`) | 0xfffc0000 |
+| 0x34 | Capabilities Pointer (`PCI_CAPABILITY_LIST`) | 0xc8 |
+| 0x3C | Interrupt Line / Pin | 0xff / 0x01 |
+
+BAR의 해석은 [Ch 4](/blog/embedded/hardware/pcie/chapter04-bar-mmio)에서 다룹니다.
 
 ## Type 1 Header (Bridge·Root Port)
 
-| Offset | 필드 | 의미 |
-|--------|------|------|
-| 0x00~0x0C | (Type 0와 동일) | identity·control |
-| 0x10 | BAR0 | Bridge 자체 MMIO |
-| 0x14 | BAR1 | |
-| 0x18 | Primary·Secondary·Subordinate Bus·Sec Latency | *bus routing* |
-| 0x1C | I/O Base·Limit·Secondary Status | I/O range |
-| 0x20 | Memory Base·Limit | non-prefetch memory range |
-| 0x24 | Prefetchable Memory Base·Limit | prefetchable range |
-| 0x28~0x2C | Prefetchable Base·Limit Upper 32 | 64-bit prefetchable |
-| 0x30 | I/O Base·Limit Upper 16 | |
-| 0x34 | Capabilities Pointer | |
-| 0x38 | Expansion ROM BAR | |
-| 0x3C | Interrupt·Bridge Control | |
+root port 00:03.0의 앞 64바이트입니다.
 
-*Secondary·Subordinate bus 번호*가 *Type 1의 핵심*. *upstream에서 보낸 Config TLP*가 *어떤 bus로 forward*할지 결정.
+```text
+00: 36 1b 0c 00 07 04 10 00 00 00 04 06 00 00 01 00
+10: 00 10 c4 10 00 00 00 00 00 01 01 00 10 10 00 00
+20: 00 10 10 10 01 00 11 00 80 00 00 00 80 00 00 00
+30: 00 00 00 00 54 00 00 00 00 00 00 00 ff 01 02 00
+```
+
+| Offset | 필드 (`pci_regs.h:131-161`) | 읽은 값 | 뜻 |
+|------|------|------|------|
+| 0x18·0x19·0x1A | Primary·Secondary·Subordinate Bus | 00·01·01 | 이 bridge 아래는 bus 1뿐 |
+| 0x1C·0x1D | I/O Base·Limit | 0x10·0x10 | I/O 0x1000~0x1fff |
+| 0x20·0x22 | Memory Base·Limit | 0x1000·0x1010 | 0x10000000~0x101fffff |
+| 0x24·0x26 | Prefetchable Base·Limit | 0x0001·0x0011 | 하위 4비트 1 = 64-bit window (`PCI_PREF_RANGE_TYPE_64`) |
+| 0x28·0x2C | Prefetchable Base·Limit Upper 32 | 0x80·0x80 | 0x8000000000~0x80001fffff |
+| 0x34 | Capabilities Pointer | 0x54 | |
+| 0x38 | Expansion ROM (`PCI_ROM_ADDRESS1`) | 0 | |
+| 0x3E | Bridge Control | 0x0002 | |
+
+Memory window는 Base·Limit의 상위 12비트가 주소의 [31:20]이므로 1 MiB 단위입니다. 0x1000은 0x10000000, Limit 0x1010은 0x101fffff까지를 뜻합니다. [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)에서 U-Boot이 같은 레지스터에 window를 써 넣는 장면을 볼 수 있습니다.
+
+### lspci의 [32-bit] 표시
+
+같은 root port를 `lspci -vv`로 보면 prefetchable window가 이렇게 나옵니다.
+
+```text
+	Prefetchable memory behind bridge: 8000000000-80001fffff [size=2M] [32-bit]
+```
+
+주소는 4 GiB 위인데 `[32-bit]`라고 찍힙니다. config 바이트 0x24의 하위 4비트는 1(64-bit)이므로 레지스터 값과 다릅니다. pciutils 3.13.0의 `lspci.c:617-623`은 커널이 sysfs `resource`로 준 bridge window가 있으면 그 시작 주소의 하위 비트로 32/64를 고르는데, `lib/sysfs.c:212-213`은 bridge window 줄의 시작 주소에 flag 비트를 섞지 않고 저장합니다. 시작 주소 0x8000000000의 하위 비트는 0이라 32로 판정됩니다. 커널이 넘긴 해당 줄(`0x0000008000000000 0x00000080001fffff 0x0000000000102201`)의 flag에는 64-bit 표시가 있으므로, 이 표기는 lspci 쪽의 해석 결과입니다. window 폭을 판단할 때는 `-xxx`의 0x24 하위 비트를 직접 봅니다.
 
 ## Capabilities Pointer·Capability List
 
-*Capabilities Pointer (offset 0x34)*가 *capability chain의 첫 entry offset*. 각 capability는 *2 byte 공통 헤더*:
+Capability는 offset 0x34에서 시작하는 단방향 연결 리스트입니다. 각 항목의 첫 바이트가 Capability ID, 둘째 바이트가 다음 항목의 offset이고, 0이면 끝입니다. e1000e에서 `setpci`로 한 칸씩 따라갔습니다.
 
-| 필드 | bit | 의미 |
-|------|-----|------|
-| Capability ID | 0~7 | capability 종류 |
-| Next Pointer | 8~15 | 다음 capability offset (0이면 끝) |
-| (Capability별 데이터) | 16~ | capability 본문 |
+```bash
+p=0x$(setpci -s 02:00.0 CAPABILITIES)
+while [ $((p)) -ne 0 ]; do
+  w=$(setpci -s 02:00.0 $(printf %x $p).w)
+  printf "off=0x%02x id=0x%s next=0x%s\n" $p ${w#??} ${w%??}
+  p=0x${w%??}
+done
+```
 
-대표적인 *PCI Capability ID*:
+```text
+off=0xc8 id=0x01 next=0xd0
+off=0xd0 id=0x05 next=0xe0
+off=0xe0 id=0x10 next=0xa0
+off=0xa0 id=0x11 next=0x00
+```
 
-| ID | 의미 |
-|----|------|
-| 0x01 | Power Management |
-| 0x05 | MSI |
-| 0x10 | **PCI Express** (이게 PCIe Cap) |
-| 0x11 | MSI-X |
-| 0x12 | SATA Data·Index Config |
-| 0x13 | Advanced Features |
+ID를 Linux v6.12 `pci_regs.h:211-230`과 맞추면 0x01 Power Management, 0x05 MSI, 0x10 PCI Express, 0x11 MSI-X입니다. 리스트가 0xe0에서 0xa0으로 뒤로 돌아가는 것처럼, 순서는 offset 순서와 무관합니다. 같은 헤더에 정의된 나머지 ID 중 몇 개를 옮겨 둡니다.
+
+| ID | `PCI_CAP_ID_*` | 의미 |
+|------|------|------|
+| 0x01 | `PM` | Power Management |
+| 0x05 | `MSI` | Message Signalled Interrupts |
+| 0x07 | `PCIX` | PCI-X |
+| 0x09 | `VNDR` | Vendor-Specific (virtio가 사용) |
+| 0x0D | `SSVID` | Bridge subsystem vendor/device ID |
+| 0x10 | `EXP` | PCI Express |
+| 0x11 | `MSIX` | MSI-X |
+| 0x12 | `SATA` | SATA Data/Index Conf. |
+| 0x13 | `AF` | PCI Advanced Features |
+| 0x14 | `EA` | PCI Enhanced Allocation |
 
 ## PCIe Capability (ID 0x10)
 
-*PCIe Cap*은 *device·link·slot·root control/status*를 묶음:
-
-| Sub-register | offset | 의미 |
-|--------------|--------|------|
-| PCIe Capabilities | +0x02 | device type·slot·int message # |
-| Device Capabilities | +0x04 | max payload·extended tag 지원 등 |
-| Device Control | +0x08 | max payload·MaxReadReq·extended tag enable·NS·RO |
-| Device Status | +0x0A | correctable·non-fatal·fatal·unsupported error |
-| Link Capabilities | +0x0C | max speed·max width·ASPM 지원 |
-| Link Control | +0x10 | ASPM enable·link disable·retrain |
-| Link Status | +0x12 | current speed·current width·training |
-| Slot Capabilities·Control·Status | +0x14~+0x1A | hot-plug |
-| Root Control·Status | +0x1C~+0x20 | PME·root port specific |
-
-`lspci -vv | grep -A 10 "Express Endpoint"` 출력의 *LnkCap·LnkSta·LnkCtl*이 이 영역들. *PCIe tuning의 핵심*.
+PCI Express Capability 안에는 Device·Link·Slot·Root의 Capabilities/Control/Status 레지스터가 이어집니다. root port 00:03.0은 이 capability가 0x54에 있고, `lspci -vv`의 `DevCap`·`DevCtl`·`LnkCap`·`LnkCtl`·`LnkSta`·`SltCap`·`RootCtl` 줄이 각 레지스터를 해석한 결과입니다. Ch 1에서 본 type 필드와 LnkCap/LnkSta, Ch 2에서 본 Extended Tag·MaxPayload가 모두 이 capability에 있습니다. 비트별 정의는 [Ch 18 Register Maps](/blog/embedded/hardware/pcie/chapter18-register-maps)에 모았습니다.
 
 ## Extended Capability (offset 0x100~)
 
-*4 KB 영역*에는 *Extended Capability*가 줄지어 있습니다. Extended Capability ID는 세대 번호가 아닙니다. 다음 표는 [Linux v6.12 pci_regs.h](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/include/uapi/linux/pci_regs.h)의 정의와 대조했습니다. IDE 0x0030은 이 판의 Linux 헤더에 없으므로 [pciutils v3.13.0의 정의](https://github.com/pciutils/pciutils/blob/v3.13.0/lib/header.h)를 별도로 참고합니다.
+0x100부터는 Extended Capability 리스트입니다. header가 4바이트이고, Linux v6.12 `pci_regs.h:708-710`의 매크로로 나눕니다.
 
-| ID | 명칭 |
-|----|------|
-| 0x0001 | Advanced Error Reporting (AER) |
-| 0x0002 | Virtual Channel |
-| 0x0003 | Device Serial Number |
-| 0x0009 | Virtual Channel (별도 VC ID) |
-| 0x000B | Vendor-Specific (VSEC) |
-| 0x0023 | Designated Vendor-Specific (DVSEC) |
-| 0x000D | Access Control Services (ACS) |
-| 0x0010 | SR-IOV |
-| 0x0011 | MR-IOV |
-| 0x0018 | Latency Tolerance Reporting (LTR) |
-| 0x001D | Downstream Port Containment (DPC) |
-| 0x001E | L1 PM Substates |
-| 0x0015 | Resizable BAR (ReBAR) |
-| 0x000F | Address Translation Services (ATS) |
-| 0x0017 | TPH Requester |
-| 0x001B | Process Address Space ID (PASID) |
-| 0x002E | Data Object Exchange (DOE) |
-| 0x0030 | Integrity & Data Encryption (IDE) |
+| 필드 | 매크로 | 위치 |
+|------|------|------|
+| ID | `PCI_EXT_CAP_ID(h)` | `h & 0xffff` |
+| Version | `PCI_EXT_CAP_VER(h)` | `(h >> 16) & 0xf` |
+| Next | `PCI_EXT_CAP_NEXT(h)` | `(h >> 20) & 0xffc` |
 
-각 Extended Cap는 *4 byte 헤더 (Cap ID + Version + Next Pointer 12-bit)*. 자세한 layout은 PCIe Base Spec § 7.
+igb(03:00.0)에서 따라간 결과입니다.
+
+```text
+off=0x100 hdr=0x15010001 id=0x0001 ver=1 next=0x150
+off=0x150 hdr=0x1601000e id=0x000e ver=1 next=0x160
+off=0x160 hdr=0x00010010 id=0x0010 ver=1 next=0x000
+```
+
+AER(0x01) → ARI(0x0E) → SR-IOV(0x10)입니다. 아래 표는 `pci_regs.h:711-746`의 ID 일부와 pciutils 3.13.0 `lib/header.h:259`의 IDE입니다.
+
+| ID | 이름 | 비고 |
+|------|------|------|
+| 0x0001 | AER | |
+| 0x0002 / 0x0009 | Virtual Channel | 0x09 주석은 "same as _VC" |
+| 0x0003 | Device Serial Number | e1000e에 있음 |
+| 0x000B | Vendor-Specific | |
+| 0x000D | ACS | QEMU root port에 있음 |
+| 0x000E | ARI | |
+| 0x000F | ATS | |
+| 0x0010 | SR-IOV | |
+| 0x0013 | PRI | |
+| 0x0015 | Resizable BAR | |
+| 0x0017 | TPH Requester | |
+| 0x0018 | LTR | |
+| 0x001B | PASID | |
+| 0x001D | DPC | |
+| 0x001E | L1 PM Substates | |
+| 0x0023 | DVSEC | |
+| 0x002E | DOE | v6.12의 `PCI_EXT_CAP_ID_MAX` |
+| 0x0030 | IDE | Linux v6.12 헤더에는 없고 pciutils 3.13.0에 있음 |
 
 ## DVSEC — Vendor 확장
 
-*DVSEC (Designated Vendor-Specific Extended Capability, ID 0x0023)*은 *vendor가 자기 capability를 표준 형식으로 광고*하는 영역. *CXL이 DVSEC로 자기를 식별*합니다:
+DVSEC(ID 0x0023)은 vendor가 자기 구조를 표준 header에 실어 광고하는 Extended Capability입니다. Linux v6.12 `pci_regs.h:1110-1115`가 header 두 개를 정의합니다.
 
-| 필드 | 의미 |
+| 레지스터 | 필드 |
 |------|------|
-| DVSEC Header 1 | Vendor ID [15:0]·Revision [19:16]·Length [31:20] |
-| DVSEC Header 2 | DVSEC ID [15:0] |
-| DVSEC Body | vendor-specific 내용 |
+| Header 1 (offset +4) | Vendor ID [15:0], Revision [19:16], Length [31:20] |
+| Header 2 (offset +8) | DVSEC ID [15:0] |
 
-CXL은 vendor ID 0x1e98과 개별 DVSEC ID·revision·length를 함께 해석합니다. 모든 장치에 같은 entry 집합이 존재한다고 가정하지 않습니다. [CXL Internals Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에서 자세히.
+CXL 장치는 Vendor ID 0x1e98로 DVSEC를 여러 개 둡니다. [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)의 QEMU CXL Type 3 덤프에서 header 1 값 `03c31e98`(vendor 0x1e98, revision 3, length 0x03c)을 실제로 볼 수 있습니다. 시리즈 VM에는 CXL 장치가 없습니다. CXL 쪽 해석은 [CXL Internals Ch 6](/blog/embedded/hardware/cxl/chapter06-cxl-io)에 있습니다.
 
 ## ECAM — Enhanced Configuration Access Mechanism
 
-원본 PCI는 *I/O port (0xCF8·0xCFC)*로 Configuration access. PCIe는 *MMIO mapping*인 *ECAM*을 표준화:
+config 공간을 MMIO로 보여 주는 방식이 ECAM입니다. Linux v6.12 `include/linux/pci-ecam.h:23-34`의 offset 계산은 다음과 같습니다.
 
-| 영역 | 의미 |
-|------|------|
-| ECAM base address | 플랫폼 firmware가 제공. 고정 주소로 가정하지 않음 |
-| 1 device·function | 4 KB |
-| 1 bus | 4 KB × 256 (32 device × 8 function) = 1 MB |
-| 1 PCIe segment (256 bus) | 256 MB |
+```c
+#define PCIE_ECAM_BUS_SHIFT	20 /* Bus number */
+#define PCIE_ECAM_DEVFN_SHIFT	12 /* Device and Function number */
+#define PCIE_ECAM_REG_MASK	0xfff /* Limit offset to a maximum of 4K */
+```
 
-ECAM 주소 계산: `ECAM_BASE + (Bus << 20) + (Dev << 15) + (Func << 12) + Reg`. *segment 단위로 여러 ECAM 영역* 운영도 가능.
+function 하나에 4 KiB(12비트), devfn 8비트로 bus 하나에 1 MiB, bus 256개면 256 MiB입니다. 시리즈 VM은 UEFI가 넘긴 ACPI MCFG에서 이 영역을 받았습니다.
 
-Linux는 *ACPI MCFG 테이블*에서 ECAM 영역을 읽음. `dmesg | grep MCFG`로 확인 가능.
+```text
+ACPI: MCFG table detected, 1 entries
+acpi PNP0A08:00: ECAM area [mem 0x4010000000-0x401fffffff] reserved by PNP0C02:00
+acpi PNP0A08:00: ECAM at [mem 0x4010000000-0x401fffffff] for [bus 00-ff]
+```
+
+0x4010000000부터 256 MiB이고, [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)에서 U-Boot이 device tree로 받은 ECAM 주소와 같습니다. 같은 QEMU 머신이기 때문입니다.
+
+e1000e(bus 2, devfn 0)의 ECAM 주소는 0x4010000000 + (2 << 20) = 0x4010200000입니다. 게스트 커널은 `CONFIG_STRICT_DEVMEM=y`, `CONFIG_IO_STRICT_DEVMEM=y`라서 `/dev/mem`으로 이 영역을 mmap하면 `PermissionError: [Errno 1] Operation not permitted`가 납니다. 그래서 QEMU monitor의 `xp`로 게스트 물리 주소를 읽었습니다.
+
+```text
+(qemu) xp /4wx 0x4010200000
+4010200000: 0x10d38086 0x00100406 0x02000000 0x00000000
+(qemu) xp /4wx 0x4010900000
+4010900000: 0xffffffff 0xffffffff 0xffffffff 0xffffffff
+```
+
+첫 줄은 위 `lspci -xxx`의 `86 80 d3 10 06 04 10 00 00 00 00 02`와 같은 값입니다. 둘째 줄은 장치가 없는 bus 9이고 모두 1이 돌아옵니다.
 
 ## Configuration Access — Type 0 vs Type 1
 
-*Configuration TLP*는 *Bus 번호*에 따라 routing:
+Ch 2의 Altera root port 드라이버는 config 요청을 Type 0으로 보낼지 Type 1로 보낼지를 소프트웨어가 정합니다. `get_tlp_header()`(`pcie-altera.c:319-335`)의 첫 판 IP 분기는 대상 bus가 root bus 번호와 같으면 Type 0, 아니면 Type 1을 고릅니다.
 
-| 시나리오 | 적용 |
-|---------|------|
-| Bus 번호 = *bridge의 secondary* | bridge가 *Type 0로 변환*해 그 bus로 보냄 |
-| Bus 번호 ∈ *bridge의 secondary~subordinate 범위* | bridge가 *Type 1으로 forward* |
-| Bus 번호가 *범위 밖* | bridge가 *unsupported request 반환* |
+```c
+	if (pcie->pcie_data->version == ALTERA_PCIE_V1)
+		cfg = (bus == pcie->root_bus_nr) ? cfg0 : cfg1;
+```
 
-Type 1 → Type 0 변환이 *bridge·switch downstream port*의 *enumeration 핵심 동작*.
+Type 1 요청은 bridge들이 secondary~subordinate 범위를 보고 아래로 넘기다가, 대상 bus를 secondary로 가진 bridge에서 Type 0으로 바뀌어 장치에 닿습니다. 그래서 bridge의 bus 번호 레지스터가 비어 있으면 그 아래 장치는 보이지 않습니다. [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)의 CXL 실험이 그 경우입니다. U-Boot이 root port의 secondary bus를 정하지 않아 bus 13이 0xffffffff만 돌려주다가, 손으로 bus 번호를 쓰자 Type 3 장치가 나타납니다.
 
 ## Latency Tolerance Reporting (LTR)
 
-*LTR*은 *EP가 RC에게 "지금 N ns latency까지 견딜 수 있다"*고 알려주는 메커니즘:
+LTR은 장치가 견딜 수 있는 지연을 snoop·no-snoop 두 값으로 올려 보내는 Extended Capability(ID 0x18)입니다. Linux v6.12 `pci_regs.h:979-985`는 각 값이 10비트 Value와 3비트 Scale로 이루어진다고 정의합니다(`PCI_LTR_VALUE_MASK` 0x3ff, `PCI_LTR_SCALE_MASK` 0x1c00).
 
-| 비트 | 의미 |
-|------|------|
-| Snoop Latency Value·Scale | snoop 가능한 max latency |
-| No-snoop Latency Value·Scale | snoop 안 하는 max latency |
+시리즈 VM에는 LTR Capability를 가진 장치가 없고, ACPI `_OSC` 협상 결과에도 LTR이 빠져 있습니다.
 
-RC는 이 정보로 *deeper power state로 진입 결정*. *모바일·저전력 platform의 핵심*.
+```text
+acpi PNP0A08:00: _OSC: OS supports [ExtendedConfig ASPM ClockPM Segments MSI HPX-Type3]
+acpi PNP0A08:00: _OSC: platform does not support [LTR]
+acpi PNP0A08:00: _OSC: OS now controls [PCIeHotplug SHPCHotplug PME AER PCIeCapability]
+```
+
+LTR을 쓰는 L1 PM Substates는 [Ch 6](/blog/embedded/hardware/pcie/chapter06-power-management)에서 다룹니다.
 
 ## 자주 하는 실수
 
-### "Configuration Space는 256 byte"
+### "PCIe 장치면 config space가 4 KB다"
 
-*PCI는 256 byte, PCIe는 4 KB*. *Extended Cap (AER·SR-IOV·ATS 등)*은 *256 byte 너머*에 있음. 확장 영역을 읽지 못했다면 접근 방식·권한·플랫폼 지원·장치 상태를 각각 확인해야 합니다. 그것만으로 ECAM 비활성 하나로 원인을 확정하지 않습니다.
+Linux는 PCI Express Capability가 있는 function만 4096바이트로 봅니다. 시리즈 VM에서는 PCIe 트리 안에 있는 `edu`와 root bus의 virtio 장치가 256바이트였습니다. 확장 영역을 못 읽었다면 장치가 PCIe Capability를 갖고 있는지부터 봅니다.
 
-### "Vendor ID 0xFFFF면 device 없음"
+### "Vendor ID 0xFFFF면 장치가 없다"
 
-*Vendor ID 0xFFFF는 "device 없음" 표시*. 일부 *broken device*가 *0xFFFF 반환*해서 enumeration이 *device 미존재로 인식*. 데이터시트로 *vendor ID 확인 필수*.
+Linux v6.12 `pci_bus_generic_read_dev_vendor_id()`(`probe.c:2392-2406`)는 Vendor/Device dword가 0xffffffff, 0, 0x0000ffff, 0xffff0000이면 빈 slot으로 봅니다. 주석은 일부 보드가 빈 slot에서 0이나 ~0을 돌려준다고 적습니다. 반대로 Vendor ID가 0x0001(PCI-SIG)이면 장치가 아직 준비 중이라는 Configuration RRS 응답으로 보고, 준비될 때까지 다시 읽습니다(`pci.h:156-159`, `pci_bus_wait_rrs()`). 0xFFFF 하나만 보고 판단하면 이 두 경우를 놓칩니다.
 
-### "PCIe Cap이 곧 PCIe device 인증"
+### "PCIe 트리에 있으면 PCI Express Capability가 있다"
 
-PCIe Capability ID 0x10은 *해당 device가 PCIe임을 명시*. 다만 *없어도 PCIe device가 있음* — 일부 *legacy compatible* device. ECAM은 config 접근 방법이며 물리 slot이나 장치 인증을 입증하지 않습니다. 가상 플랫폼도 ECAM을 제공할 수 있습니다.
+시리즈 VM의 `edu`(06:00.0)는 switch downstream port 아래에 있지만 capability가 MSI 하나뿐입니다. ECAM으로 접근된다는 사실도 장치의 종류를 말해 주지 않습니다. ECAM은 접근 방법일 뿐입니다.
 
-### "Capability chain은 짧다"
+### "Capability chain은 길다"
 
-복잡한 device(NIC·NVMe)는 *Cap 5~10개 + Extended Cap 10~20개*. NIC 같은 경우 *MSI·MSI-X·SR-IOV·ARI·ATS·PASID·PRI·AER·DPC·LTR·DOE·IDE* 모두 가질 수 있음.
+시리즈 VM의 e1000e는 Capability 4개와 Extended Capability 2개(AER, Device Serial Number), igb는 Capability 4개와 Extended Capability 3개(AER, ARI, SR-IOV)입니다. 장치마다 다르므로 개수를 가정하지 않고 리스트를 끝까지 따라갑니다.
 
-### "ECAM이 동작하면 모든 device 보임"
+### "lspci 표시가 레지스터 값이다"
 
-ECAM은 *UEFI·ACPI MCFG에 등록된 영역*만 매핑. 별도 domain·host bridge도 확인해야 합니다. virtio-pci 장치는 PCI config 모델 안에서 열거되므로 virtio라는 이유로 ECAM과 무관한 별도 controller로 분류하지 않습니다. `lspci -D`로 *domain·bus 분리* 확인.
+prefetchable window의 `[32-bit]` 표시처럼, `lspci -vv`는 커널이 sysfs로 준 값과 레지스터를 섞어 해석합니다. 판단의 근거가 되는 값은 `-xxx`나 `setpci`로 원본 바이트를 확인합니다.
 
 ## 정리
 
-- Configuration Space는 *4 KB* — 256 byte PCI + 3840 byte PCIe Extended.
-- *Type 0 (EP)·Type 1 (Bridge)* 두 헤더 형식. *Type 1*에 *bus routing 정보*.
-- *Capabilities Pointer (0x34)*가 *capability linked list* 시작. *PM·MSI·PCIe Cap·MSI-X* 등 chain.
-- *Extended Capability* (0x100~)에 *AER·SR-IOV·DPC·ATS·PASID·DOE·IDE* 등을 식별합니다. ID 자체는 도입 세대가 아닙니다.
-- *DVSEC*은 *vendor 확장 영역* — CXL이 *자기 식별에 사용*.
-- *ECAM*이 *4 KB Configuration*을 *MMIO로 매핑*. UEFI MCFG에 등록.
-- *Type 1 → Type 0 변환*이 *enumeration의 핵심* — bridge가 *secondary/subordinate*로 라우팅.
-- *LTR*이 *EP의 latency tolerance*를 RC에 알림 — power state 결정.
+- config space는 256바이트(PCI)와 4096바이트(PCIe) 두 크기이고, Linux는 PCI Express Capability 유무와 0x100 읽기로 정합니다.
+- Header Type 0은 endpoint, 1은 bridge입니다. Type 1의 bus 번호와 window가 아래로의 전달을 정합니다.
+- Capability는 0x34부터, Extended Capability는 0x100부터 연결 리스트이고, 순서는 offset 순서가 아닙니다.
+- Extended Capability header는 ID 16비트, Version 4비트, Next 12비트입니다.
+- DVSEC은 Vendor ID·Revision·Length와 DVSEC ID로 vendor 구조를 식별합니다.
+- ECAM은 bus를 20비트, devfn을 12비트 밀어 4 KiB 창을 만듭니다. 시리즈 VM에서는 0x4010000000부터 256 MiB였습니다.
+- 빈 slot과 아직 준비 중인 장치는 Vendor ID 값으로 구분합니다.
 
 ## 다음 편
 
-[Ch 4: BAR & MMIO — 자원의 호스트 주소 공간 매핑](/blog/embedded/hardware/pcie/chapter04-bar-mmio)에서 *device 자원을 host address space에 매핑*하는 *BAR의 size 결정·prefetchable·ReBAR* 등을 분해합니다.
+[Ch 4: BAR & MMIO — 자원의 호스트 주소 공간 매핑](/blog/embedded/hardware/pcie/chapter04-bar-mmio)에서 위 덤프의 BAR0~BAR5를 크기 측정·prefetchable·ReBAR·SR-IOV VF BAR로 풀어 봅니다.
 
 ## 관련 항목
 
-- [Ch 2: TLP](/blog/embedded/hardware/pcie/chapter02-tlp) — Configuration TLP의 routing
+- [Ch 2: TLP](/blog/embedded/hardware/pcie/chapter02-tlp) — Configuration TLP header
 - [Ch 4: BAR & MMIO](/blog/embedded/hardware/pcie/chapter04-bar-mmio)
 - [Ch 18: Register Maps](/blog/embedded/hardware/pcie/chapter18-register-maps) — 비트별 reference
+- [Bootloader Ch 34: U-Boot PCIe Enumeration](/blog/embedded/bootloader/chapter34-pcie-enumeration) — 같은 ECAM을 펌웨어에서 읽기
 - [CXL Internals Ch 6: CXL.io·DVSEC](/blog/embedded/hardware/cxl/chapter06-cxl-io)
 
 ## 시리즈 자료 출처 안내
 
-본 글의 1차 자료·정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내) 참고.
+이 글의 소스 인용은 Linux v6.12, QEMU 11.1.3, pciutils 3.13.0 기준이고 실행은 Ch 1의 시리즈 VM에서 했습니다. 자료 정책은 [Ch 1 footer](/blog/embedded/hardware/pcie/chapter01-fundamentals#시리즈-자료-출처-안내)에 있습니다.
