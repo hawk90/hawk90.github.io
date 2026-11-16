@@ -49,7 +49,7 @@ using GpioA_ODR = Register<0x40020014>;
 GpioA_ODR::set(1 << 5);
 ```
 
-주소가 타입의 일부가 되지만 값은 여전히 uint32_t이므로 잘못된 비트 의미까지 검사하지는 못합니다. 인라인과 매크로 대비 명령 수는 실제 대상 컴파일 결과로 확인합니다. 아래의 일반 RMW wrapper는 부작용 없는 read/write 레지스터에만 사용합니다.
+주소가 타입의 일부가 되지만 값은 여전히 uint32_t이므로 잘못된 비트 의미까지 검사하지는 못합니다. 매크로 대비 명령은 아래 [Template 기반 register](#template-기반-register) 절에서 Cortex-M4 컴파일 결과로 비교합니다. 아래의 일반 RMW wrapper는 부작용 없는 read/write 레지스터에만 사용합니다.
 
 ## volatile의 필수
 
@@ -67,7 +67,7 @@ volatile uint32_t* reg = reinterpret_cast<volatile uint32_t*>(0x40020014);
 *reg = 0xFF;   // 두 번 모두 실행 (hardware sequencing 필요)
 ```
 
-이처럼 서로 다른 문장의 volatile 접근을 구현이 관찰 가능한 접근으로 취급하게 합니다. 그러나 volatile은 스레드 간 동기화·atomic RMW·CPU 메모리 배리어를 제공하지 않으며, 일반 RAM 쓰기와 DMA 시작의 순서를 보장하지도 않습니다. 접근 폭·정렬·메모리 속성은 CPU와 주변장치 계약에 따릅니다. [GCC volatile 문서](https://gcc.gnu.org/onlinedocs/gcc/Volatiles.html)는 일반 메모리 접근과의 순서 한계를 설명합니다.
+두 함수를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`로 컴파일하면 volatile 없는 쪽은 `str` 한 번, volatile 쪽은 `str`이 두 번 나왔습니다(포인터를 인자로 받는 함수로 컴파일). 이처럼 volatile 접근은 구현이 관찰 가능한 접근으로 취급해 지우거나 합치지 않습니다([intro.abstract]). 그러나 volatile은 스레드 간 동기화·atomic RMW·CPU 메모리 배리어를 제공하지 않으며, 일반 RAM 쓰기와 DMA 시작의 순서를 보장하지도 않습니다. 접근 폭·정렬·메모리 속성은 CPU와 주변장치 계약에 따릅니다. [GCC volatile 문서](https://gcc.gnu.org/onlinedocs/gcc/Volatiles.html)는 일반 메모리 접근과의 순서 한계를 설명합니다.
 
 ## 단순 wrapper
 
@@ -119,7 +119,7 @@ GPIOA_BSRR::write(1 << 5);     // Atomic set (HW supported)
 
 ## Bit field — 명명된 비트
 
-32-bit MMIO 레지스터는 보통 여러 비트 필드로 쪼개져 있습니다. 예를 들어 STM32의 USART\_CR1은 다음처럼 enable 비트, mode 비트, parity 비트 등이 한 워드에 모여 있습니다.
+32-bit MMIO 레지스터 하나에 여러 비트 필드가 들어 있는 경우가 STM32F407의 USART\_CR1입니다. 이 레지스터는 다음처럼 enable 비트, mode 비트, parity 비트 등이 한 워드에 모여 있습니다.
 
 아래는 STM32F407xx의 CR1 일부입니다. 다른 STM32 계열에 그대로 적용하지 않습니다.
 
@@ -166,7 +166,7 @@ void set_gpio_mode_output(int pin) {
 }
 ```
 
-복잡합니다. 각 field에 enum class를 쓰는 편이 더 깔끔합니다.
+`Field`와 `pin`을 따로 받으므로 둘이 다른 핀을 가리키는 실수를 컴파일러가 잡지 못합니다. 핀 번호 하나만 template 인자로 받고 값은 enum class로 두면 이 중복이 사라집니다.
 
 ```cpp
 enum class GpioMode : uint32_t {
@@ -259,11 +259,11 @@ gpio_a.set_mode(5, GpioMode::Output);
 gpio_a.set_pin(5);
 ```
 
-method 호출이 명확합니다. 디버거에서 step into도 가능합니다.
+method 호출이 명확합니다. 대신 `regs_` 포인터를 객체에 저장하므로 객체마다 4바이트를 쓰고, 핀 범위 검사가 런타임 `if`로 남습니다.
 
 ## Template 기반 register
 
-가장 type-safe하고 zero-cost한 방식입니다.
+주소와 핀을 모두 template 인자로 고정하는 방식입니다.
 
 ```cpp
 template<uintptr_t Address>
@@ -305,17 +305,22 @@ GpioA::set_pin<5>();
 GpioA::clear_pin<5>();
 ```
 
-Address와 Pin이 모두 template parameter로 들어가 완전히 컴파일 타임에 처리됩니다. 다음은 명령 형태 설명용 예시이며 실제 빌드 출력은 아닙니다.
+Address와 Pin이 모두 template parameter로 들어가 shift·mask가 컴파일 타임에 계산됩니다. `GpioA::set_mode<5>(GpioMode::Output); GpioA::set_pin<5>();`를 부르는 함수와, 같은 일을 하는 C 매크로 버전(`GPIOA_MODER = (GPIOA_MODER & ~(3u << 10)) | (1u << 10); GPIOA_BSRR = 1u << 5;`)을 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`로 컴파일하면 명령이 한 줄도 다르지 않았습니다.
 
 ```text
-GpioA::set_pin<5>:
-    ldr     r3, =0x40020018
-    movs    r2, #32     ; 1 << 5
-    str     r2, [r3]
-    bx      lr
+00000000 <_Z7cpp_ledv>:
+   0:	ldr	r2, [pc, #16]	@ (14 <_Z7cpp_ledv+0x14>)
+   2:	ldr	r3, [r2, #0]
+   4:	bic.w	r3, r3, #3072	@ 0xc00
+   8:	orr.w	r3, r3, #1024	@ 0x400
+   c:	str	r3, [r2, #0]
+   e:	movs	r3, #32
+  10:	str	r3, [r2, #24]
+  12:	bx	lr
+  14:	.word	0x40020000
 ```
 
-별도 객체 상태가 필요 없는 구현입니다. 크기·호출 비용은 대상 도구로 확인하고, 실제 MMIO 주소의 유효성은 타입만으로 증명하지 않습니다.
+포트 주소 하나를 literal pool에서 읽고 MODER(offset 0)를 RMW한 뒤 BSRR(offset 24 = 0x18)에 32를 씁니다. 별도 객체 상태도 없습니다. 보드에서는 실행하지 않았으며, 실제 MMIO 주소의 유효성은 타입만으로 증명하지 않습니다.
 
 ## 임베디드 — UART register 추상화
 
@@ -380,10 +385,10 @@ enum class를 활용해 type safety를 확보합니다.
 ### 5. Template parameter overflow
 
 ```cpp
-GpioA::set_mode<32>(/* */);   // Pin 32? — 컴파일 OK but invalid
+GpioA::set_mode<32>(/* */);   // Pin 32? — static_assert가 없으면 잘못된 shift
 ```
 
-`static_assert(Pin < 16, "Invalid pin")`을 추가합니다.
+위 `GpioPort`에는 `static_assert`가 있어 g++-16이 `error: static assertion failed: pin out of range`로 멈췄습니다. 같은 컴파일에서 `error: right operand of shift expression '(3 << 64)' is greater than or equal to the precision 32 of the left operand`도 함께 나왔는데, 이 shift 오류는 메시지 끝의 `[-fpermissive]`가 보여 주듯 옵션으로 경고까지 낮출 수 있는 진단이라, 범위 검사를 맡기기에는 약합니다. 범위를 `static_assert(Pin < 16, "Invalid pin")`로 먼저 막습니다.
 
 ### 6. Wrong alignment
 
@@ -422,17 +427,17 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors register-check.cpp -o register-check && ./register-check`로 확인했습니다. `-DBAD_READ`는 쓰기 전용 타입에 read가 없어 컴파일 실패합니다. W1C/read-to-clear의 실제 하드웨어 부작용은 이 fake의 검증 범위가 아닙니다.
+Homebrew Clang 23.1.5와 g++-16, arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors register-check.cpp -o register-check && ./register-check`가 exit 0이었습니다. `-DBAD_READ`는 쓰기 전용 타입에 read가 없어 컴파일 실패합니다. W1C/read-to-clear의 실제 하드웨어 부작용은 이 fake의 검증 범위가 아닙니다.
 
 [ST CMSIS STM32F407xx v2.6.10 헤더](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.10/Include/stm32f407xx.h)를 주소·구조체·CR1 비트의 기준으로 삼았습니다. 실제 사용에서는 보드 매뉴얼과 reference manual의 접근 속성도 확인해야 합니다.
 
 ## 정리
 
 - Memory-mapped register는 volatile과 typed pointer의 결합으로 표현합니다.
-- 템플릿으로 Address와 Pin을 고정해 직접 접근을 표현할 수 있으며 비용은 생성된 코드로 확인합니다.
-- CMSIS struct를 wrapper class로 감싸는 것이 표준 패턴입니다.
+- 템플릿으로 Address와 Pin을 고정한 버전은 Cortex-M4 `-Os`에서 C 매크로와 같은 명령이 나왔습니다.
+- CMSIS struct는 offset을 `static_assert`로 고정하고, 그 위에 wrapper class나 template을 얹습니다.
 - enum class로 bit value를 type-safe하게 다룹니다.
-- RAII로 peripheral lifecycle을 관리합니다.
+- RAII로 peripheral lifecycle을 관리하려면 획득 성공·독점 소유·전송 완료 계약이 먼저 필요합니다.
 - Bit field struct는 ABI 위험이 있으므로 명시적 마스크를 권장합니다.
 
 ## 관련 항목

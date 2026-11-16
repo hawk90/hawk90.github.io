@@ -21,7 +21,7 @@ C++ 표준 선택은 프로젝트 수명 전체에 영향을 줍니다. 너무 �
 임베디드의 관점은 데스크톱과 다릅니다. 다음을 함께 평가해야 합니다.
 
 - **컴파일러와 라이브러리 판**: 같은 vendor도 제품·release·target에 따라 지원 범위가 다릅니다
-- **표준 라이브러리 크기**: 새 기능이 코드 bloat를 만들 수 있습니다
+- **표준 라이브러리 크기**: 새 라이브러리 타입은 그만큼 코드를 링크합니다. 측정 방법은 [Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)에 있습니다
 - **안전 요구와 도구 근거**: 코딩 지침의 언어 판, 분석기 지원, compiler/tool qualification 범위를 구분합니다
 - **팀 친숙도**: C++20 concepts는 학습 곡선이 있습니다
 
@@ -49,7 +49,7 @@ C++ 표준 선택은 프로젝트 수명 전체에 영향을 줍니다. 너무 �
 | Lambda | 콜백 단순화 |
 | `std::function` | (주의) heap 사용 |
 
-C++03에서 C++11로의 점프가 가장 큽니다. 새 프로젝트는 C++11이 절대 minimum입니다.
+위 표의 기능은 모두 C++11에서 들어왔습니다. 그래서 C++03에서 C++11로 가는 변화가 가장 크고, 새 프로젝트를 C++11 미만으로 시작할 이유는 거의 남지 않습니다.
 
 ### C++14 — 작은 개선
 
@@ -64,7 +64,7 @@ loop를 포함한 constexpr와 generic lambda 등이 추가됩니다. compiler�
 | Variable templates | `pi<double>` 같은 사용 |
 | Deprecated `[[deprecated]]` | API migration |
 
-C++11에서 C++14로의 전환은 대부분 자연스러운 업그레이드입니다. 호환성이 좋습니다.
+C++11에서 C++14로 올릴 때 코드가 바뀌어야 하는 경우도 있습니다. 표준의 호환성 부록은 C++14에서 "constexpr 비정적 멤버 함수가 더 이상 암묵적으로 const 멤버 함수가 아니다"를 C++11과의 차이로 적습니다([diff.cpp11.dcl.dcl]/1). `struct Reg { int v; constexpr int get() { return v; } };`의 `get()`을 `constexpr Reg` 객체에서 부르는 코드는 g++-16 `-std=c++11`에서 통과하고, `-std=c++14`에서는 `error: passing 'const Reg' as 'this' argument discards qualifiers`로 멈춥니다. C++14부터는 `const`를 직접 붙여야 합니다.
 
 ### C++17 — 권장 기본
 
@@ -82,7 +82,7 @@ GCC와 Clang의 공식 C++ status 표는 개별 기능별 지원 판을 제공�
 | Inline variables | 헤더에 변수 정의 |
 | Class template argument deduction | `std::array{1, 2, 3}` |
 | Folding expressions | variadic template 단순화 |
-| Filesystem (조심) | bare-metal 미지원 |
+| Filesystem | OS 파일 시스템 필요. freestanding 헤더 목록에 없음 |
 
 `std::optional`과 `std::variant`만으로도 C++17 채택 가치가 충분합니다. 예외 없는 에러 처리와 closed sum type을 가능하게 합니다.
 
@@ -98,8 +98,8 @@ concepts·modules·coroutines 같은 언어 기능과 span·ranges 같은 라이
 | `consteval` | 컴파일 타임 *강제* |
 | `constinit` | static/thread 저장 기간 변수의 상수 초기화 요구 |
 | Designated initializers | `S{.x=1, .y=2}`. C++은 선언 순서 등 C와 다른 제약이 있음 |
-| Modules | 컴파일 시간 단축 (구현 미흡) |
-| Coroutines (기본) | async (heap 주의) |
+| Modules | 헤더 재파싱 제거. GCC 16.2.0 문서는 아직 실험적이며 `-fmodules`로 켠다고 적음 |
+| Coroutines (기본) | async. 코루틴 상태는 할당 함수(promise 타입에서 먼저 찾고, 없으면 전역 `operator new`)로 얻음([dcl.fct.def.coroutine]/9) |
 | `std::bit_cast` | type-safe bit manipulation |
 | Three-way comparison `<=>` | 비교 연산자 자동 |
 | `std::endian` | 엔디안 컴파일 타임 확인 |
@@ -128,7 +128,7 @@ C++23 mode와 개별 기능 지원을 구분합니다. `<expected>`, `<mdspan>`,
 | Deducing `this` | CRTP 단순화 |
 | `std::byteswap` | 엔디안 변환 |
 
-`std::expected`는 값과 오류를 표현하고, byteswap이나 mdspan도 각각 endian 변환과 다차원 view가 필요한 프로젝트에서 가치가 있습니다. Rust의 `Result<T, E>`에 대응합니다. 자세한 내용은 [Part 3-07](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
+`std::expected`는 값과 오류를 표현하고, byteswap이나 mdspan도 각각 endian 변환과 다차원 view가 필요한 프로젝트에서 가치가 있습니다. `std::expected`는 Rust의 `Result<T, E>`에 대응합니다. 라이브러리 지원은 언어 모드보다 늦게 왔습니다. [cppreference의 C++23 지원 표](https://en.cppreference.com/w/cpp/compiler_support/23)에 따르면 `std::expected`는 libstdc++ 12·libc++ 16부터, `std::print`는 libstdc++ 14부터 들어 있습니다. 자세한 내용은 [Part 3-07](/blog/embedded/embedded-cpp/part3-07-expected)에서 다룹니다.
 
 새 프로젝트에서 C++20을 선택할지는 제품 수명, 인증 도구, 표준 라이브러리와 실제 toolchain 지원을 함께 보고 결정합니다. C++23은 `std::expected` 같은 기능이 필요하고 toolchain이 제공할 때 선택하는 식으로 범위를 좁힐 수 있습니다.
 
@@ -155,11 +155,13 @@ CXXFLAGS += -std=c++17
 # C++20
 CXXFLAGS += -std=c++20
 
-# C++23 (실험적, gnu++ 변형 가능)
-CXXFLAGS += -std=c++23   # 또는 c++2b (오래된 컴파일러)
+# C++23 (GCC 16.2.0 문서 기준 experimental)
+CXXFLAGS += -std=c++23   # 이전 이름 c++2b는 deprecated
 ```
 
-`-std=gnu++17`은 GNU dialect를 선택합니다. `-std=c++17`에서도 GCC/Clang이 예약 표기인 `__attribute__` 같은 확장을 허용할 수 있으므로 확장 하나가 컴파일된다고 dialect가 자동 변경되는 것은 아닙니다. 표준 진단은 `-pedantic-errors`와 함께 확인하되 모든 vendor attribute를 금지하는 옵션으로 해석하지 않습니다.
+`-std`를 빼면 컴파일러 기본값이 적용되고, 기본값은 컴파일러마다 다릅니다. 이 글을 쓴 Mac에서 아무 옵션 없이 `__cplusplus`를 출력해 보면 g++-16과 arm-none-eabi-g++ 16.2.0은 `202002L`(GCC 16 문서: `gnu++20`이 C++ 기본값), Homebrew Clang 23.1.5는 `201703L`, Apple clang 21은 `201402L`이었습니다. 같은 소스가 컴파일러만 바꿔도 다른 표준으로 빌드되므로 `-std`는 항상 명시합니다.
+
+`-std=gnu++17`은 GNU dialect를 선택합니다. `-std=c++17`에서도 GCC/Clang은 예약 표기인 `__attribute__`를 받아들입니다. 아래 probe의 `__attribute__((noinline))`은 `-std=c++17 -pedantic-errors`에서도 Clang 23.1.5와 g++-16 모두 오류 없이 컴파일됐습니다. 그래서 확장 하나가 컴파일된다고 dialect가 바뀐 것은 아니고, `-pedantic-errors`도 이중 밑줄 확장까지 막지는 않습니다.
 
 ## 표준 라이브러리 vs 언어
 
@@ -175,7 +177,7 @@ template<std::integral T>
 T add(T a, T b) { return a + b; }
 ```
 
-GCC 10은 언어를 지원하지만 라이브러리는 늦게 갱신될 수 있습니다. 경고가 나오면 `__cpp_lib_*` feature test macro로 확인합니다.
+`<concepts>` 헤더는 libstdc++에 GCC 10부터 들어왔습니다. 언어 기능과 라이브러리 기능은 따로 들어오므로(위 `std::expected`가 그 예) 코드에서는 `__cpp_lib_*` feature test macro로 확인합니다.
 
 ```cpp
 #include <version>
@@ -191,7 +193,7 @@ GCC 10은 언어를 지원하지만 라이브러리는 늦게 갱신될 수 있�
 
 ## 실행 probe — 언어 모드와 라이브러리 지원
 
-다음 예시는 동일한 compiler와 library 조합에서 span과 expected의 제공 여부를 구분합니다. Apple Silicon의 Clang 23.1.3/libc++ host에서는 아래 C++20·23 경로를 실행했습니다. 이 결과는 ARM bare-metal 표준 라이브러리 제공의 증거가 아닙니다.
+다음 예시는 동일한 compiler와 library 조합에서 span과 expected의 제공 여부를 구분합니다. Apple Silicon에서 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 실행했습니다. 이 결과는 ARM bare-metal 표준 라이브러리 제공의 증거가 아닙니다. 이 글의 arm-none-eabi-g++에는 libstdc++가 없어 같은 probe를 컴파일하지 못했습니다.
 
 ```cpp title="standard-probe.cpp"
 #include <version>
@@ -239,7 +241,17 @@ clang++ -std=c++23 -pedantic-errors -DREQUIRE_EXPECTED standard-probe.cpp -o pro
 clang++ -std=c++17 -DREQUIRE_SPAN standard-probe.cpp -o missing-span
 ```
 
-마지막 C++17 + REQUIRE_SPAN은 의도한 실패 예입니다. 실제 compiler가 그 모드에 해당 확장을 제공하면 실패하지 않을 수 있으므로 출력된 feature macro와 구현 정책을 함께 확인합니다. compiler mode만 비교해서 코드 크기가 항상 감소한다고 결론내리지 않으며, 동일 입력·옵션·linker script에서 실제 산출물을 측정합니다.
+두 컴파일러의 출력은 같았습니다.
+
+```text
+cplusplus=201703
+cplusplus=202002
+span=42
+cplusplus=202302
+expected=42,error=5
+```
+
+세 실행 모두 exit 0이었고, 마지막 C++17 + REQUIRE_SPAN은 의도대로 `#error span support required`로 컴파일이 멈췄습니다. libc++와 libstdc++ 모두 C++17 모드에서는 `__cpp_lib_span`을 정의하지 않는다는 뜻입니다.
 
 ## 표준에 따라 변하는 best practice
 
@@ -293,13 +305,13 @@ template<std::integral T>
 T add(T a, T b);
 ```
 
-C++20이 훨씬 읽기 좋습니다.
+C++20 쪽은 제약이 템플릿 매개변수 자리에 바로 보이고, 위반하면 컴파일러가 어느 concept이 실패했는지 알려 줍니다([Part 2-10](/blog/embedded/embedded-cpp/part2-10-concepts)).
 
 ## 안전 요구와 언어 표준을 구분하기
 
-코딩 지침 준수, 정적 분석기의 기능 지원, compiler/tool qualification은 서로 다른 근거입니다. AUTOSAR C++14나 MISRA C++의 특정 판을 적용한다면 그 지침이 대상으로 삼은 언어와 deviation 정책을 먼저 고정합니다. DO-178C·ISO 26262 등 프로젝트 요구에 맞는 tool confidence/qualification 근거는 안전 계획에서 확인하며, 분석기 제품명이 나열되어 있다는 이유만으로 compiler와 모든 C++ 기능이 인증되었다고 보지 않습니다.
+코딩 지침 준수, 정적 분석기의 기능 지원, compiler/tool qualification은 서로 다른 근거입니다. 지침마다 대상 언어 판이 정해져 있습니다. AUTOSAR C++14 지침은 이름대로 C++14, [MISRA C++:2023](https://misra.org.uk/product/misra-cpp2023/)은 C++17을 대상으로 합니다. 지침을 적용한다면 그 지침이 대상으로 삼은 언어와 deviation 정책을 먼저 고정합니다. DO-178C·ISO 26262 등 프로젝트 요구에 맞는 tool confidence/qualification 근거는 안전 계획에서 확인하며, 분석기 제품명이 나열되어 있다는 이유만으로 compiler와 모든 C++ 기능이 인증되었다고 보지 않습니다.
 
-표준 변경에는 ABI, library, compiler warning, 회귀 시험과 도구 검증 범위의 변경 비용이 있을 수 있습니다. 이를 학습 시간만 드는 무료 변경으로 처리하지 않습니다.
+표준을 바꾸면 위 C++14의 `constexpr` 멤버 함수처럼 컴파일 결과가 달라지는 코드, 새 경고, 회귀 시험과 도구 검증 범위가 함께 바뀝니다. 학습 시간만 드는 무료 변경이 아닙니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -317,15 +329,15 @@ C++20이 훨씬 읽기 좋습니다.
 
 ### 4. feature test macro 미사용
 
-헤더만 include하고 기능 존재를 가정합니다. 컴파일러가 미지원이면 컴파일 에러가 납니다. `__cpp_lib_*`로 확인합니다.
+헤더만 include하고 기능 존재를 가정합니다. 위 probe에서 C++17 모드는 `<span>`을 제공하지 않았습니다. `__cpp_lib_*`로 확인하면 없는 기능을 명시적인 `#error`나 대체 구현으로 처리할 수 있습니다.
 
 ### 5. 표준 라이브러리가 임베디드에서 가능하다고 가정
 
-`<filesystem>`, `<thread>`, `<regex>` 같은 OS 의존 라이브러리는 bare-metal에서 링크 실패합니다. 헤더를 include할 때 주의합니다.
+`<filesystem>`, `<thread>`, `<regex>`는 표준의 freestanding 헤더 목록([compliance] 표 27)에 없습니다. OS 파일 시스템·스레드나 locale이 필요한 라이브러리이므로, bare-metal 라이브러리 구성이 무엇을 제공하는지 문서로 확인한 뒤 씁니다.
 
 ### 6. 팀에 표준을 알리지 않음
 
-`auto`, `constexpr`, `concept`가 익숙하지 않은 팀에 강제로 도입하면 학습 곡선이 생기고 bug가 발생합니다. 점진적으로 도입합니다.
+`auto`, `constexpr`, `concept`가 익숙하지 않은 팀에 한꺼번에 도입하면 리뷰어가 코드를 검증하기 어려워집니다. 기능 단위로 점진적으로 도입합니다.
 
 ## 1차 자료와 확인 범위
 
@@ -333,8 +345,10 @@ C++20이 훨씬 읽기 좋습니다.
 - [Clang C++ status](https://clang.llvm.org/cxx_status.html) — mode와 개별 기능의 구현 상태
 - [GCC language standards](https://gcc.gnu.org/onlinedocs/gcc/Standards.html) — ISO/GNU dialect
 - [C++ draft: span](https://eel.is/c++draft/views.span)와 [expected](https://eel.is/c++draft/expected) — 비소유 view와 값/오류 타입의 계약
+- [C++ draft: C++11과의 호환성](https://eel.is/c++draft/diff.cpp11) — C++14에서 바뀐 constexpr 멤버 함수 규칙
+- [cppreference C++23 compiler support](https://en.cppreference.com/w/cpp/compiler_support/23) — 라이브러리 기능별 지원 버전
 
-2026-10-22 host probe는 compiler mode, 확장 허용, span 범위 정보와 expected의 성공·오류 상태를 확인했습니다. target vendor compiler, bare-metal library 링크, 인증 근거와 코드 크기·시간 변화는 별도 검증 대상입니다.
+2026-11-16 host probe(Clang 23.1.5, g++-16)는 compiler mode, 확장 허용, span 범위 정보와 expected의 성공·오류 상태를 확인했습니다. 기본 `__cplusplus`는 네 컴파일러에서 출력했습니다. target vendor compiler, bare-metal library 링크, 인증 근거와 코드 크기·시간 변화는 확인하지 않았습니다.
 
 ## 정리
 

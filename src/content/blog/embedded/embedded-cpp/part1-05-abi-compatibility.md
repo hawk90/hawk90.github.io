@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 문제를 푸는가
 
-대부분의 임베디드 프로젝트는 C와 C++가 섞여 있습니다. 벤더가 제공하는 HAL은 C이고 애플리케이션은 C++입니다. 또는 legacy C 코드베이스에 C++ 신규 모듈을 얹기도 합니다.
+C++로 쓰는 임베디드 프로젝트에도 C가 섞입니다. 벤더가 제공하는 HAL(STM32Cube HAL 등)은 C이고 애플리케이션은 C++인 경우입니다. 또는 legacy C 코드베이스에 C++ 신규 모듈을 얹기도 합니다.
 
 이 통신 경계에서 세 가지 ABI 문제가 발생합니다.
 
@@ -55,7 +55,7 @@ namespace foo { int bar(int); }      _ZN3foo3barEi
 class C { void m(int); }             _ZN1C1mEi
 ```
 
-`nm`에서 보이는 길고 이상한 이름이 이것입니다. `nm --demangle`로 원래 이름을 복원할 수 있습니다.
+오른쪽 열은 네 함수를 정의해 arm-none-eabi-g++ 16.2.0으로 컴파일한 오브젝트의 `arm-none-eabi-nm` 출력 그대로입니다. 같은 파일의 `extern "C" int add_c(int, int)`는 `add_c`로 나왔습니다. `nm`에서 보이는 길고 이상한 이름이 이것이고, `nm --demangle`로 원래 이름을 복원합니다.
 
 ## C에서 C++ 함수를 부르려면
 
@@ -87,12 +87,12 @@ extern "C" int add(int a, int b) { return a + b; }
 
 ## `extern "C"`가 하는 일
 
-`extern "C"`는 이름과 함수 타입에 C language linkage를 지정합니다. 심볼 표기와 호출 규약의 구체적인 효과는 대상 구현의 C ABI가 정합니다. 오브젝트 형식에 따라 선행 밑줄 같은 장식이 남을 수 있으며, ARM의 hard/soft-float 옵션이나 구조체 packing 불일치를 자동으로 맞춰 주지는 않습니다.
+`extern "C"`는 이름과 함수 타입에 C language linkage를 지정합니다. 심볼 표기와 호출 규약의 구체적인 효과는 대상 구현의 C ABI가 정합니다. 같은 `abi_add`가 ARM ELF에서는 `abi_add`이지만, macOS의 Mach-O에서는 C 심볼에 선행 밑줄이 붙어 링커가 `_abi_add`를 찾습니다(아래 [재현](#재현--cc-링크와-심볼-경계) 절의 링크 에러). `extern "C"`는 ARM의 hard/soft-float 옵션이나 구조체 packing 불일치를 맞춰 주지 않습니다.
 
 `extern "C"`로 감쌀 수 있는 것은 다음과 같습니다.
 
 - 함수 선언 또는 정의
-- 변수 선언(드뭅니다)
+- 변수 선언
 
 감쌀 수 없는 것은 다음과 같습니다.
 
@@ -148,7 +148,7 @@ void driver_close(Driver* d);
 
 C로 컴파일하면 `extern "C" {`/`}` 블록이 사라지고, C++로 컴파일하면 활성화됩니다. 같은 헤더로 양쪽 모두 처리할 수 있습니다.
 
-벤더 HAL 헤더(STM32, NXP)가 모두 이 패턴을 따릅니다. 그대로 따라 쓰면 됩니다.
+STMicroelectronics의 `stm32f4xx_hal.h`도 24번째 줄에서 이 블록을 열고 291번째 줄에서 닫습니다(GitHub `stm32f4xx-hal-driver` master).
 
 ## C++ 클래스를 C에 노출 — Opaque Pointer 패턴
 
@@ -243,7 +243,7 @@ void setup() {
 ```
 
 ```cpp
-// 구현별 호환성 확인 필요: static 멤버 + this 캐시
+// 표준상 C linkage 함수 타입과 다름: static 멤버 + this 캐시
 class EventHandler {
 public:
     static EventHandler* instance;
@@ -265,13 +265,13 @@ void setup() {
 ```
 
 ```cpp
-// 구현별 호환성 확인 필요: capture 없는 lambda
+// 표준상 C linkage 함수 타입과 다름: capture 없는 lambda
 register_callback([](int event) {
     // capture 없는 lambda는 함수 포인터로 변환 가능합니다
 });
 ```
 
-static 멤버와 capture 없는 lambda의 변환 결과는 C++ linkage 함수입니다. GCC/Clang에서 받아들이더라도 엄밀한 C linkage 함수 타입 구분까지 검증한 것은 아닙니다. 이식 가능한 경계에는 첫 예처럼 명시적인 `extern "C"` free function을 둡니다. capture 있는 lambda는 일반 함수 포인터로 변환할 수 없습니다. 그런 경우에는 `user_data` 포인터 인자가 있는 C API를 쓰거나 trampoline 패턴을 사용합니다.
+static 멤버와 capture 없는 lambda의 변환 결과는 C++ linkage 함수입니다. 표준은 "언어 linkage가 다른 두 함수 타입은 다른 점이 없어도 서로 다른 타입"이라고 정합니다([dcl.link]/1). 그런데 `callback_t`를 `extern "C"` 블록 안에 선언한 헤더로 두 호출을 컴파일하면 g++-16과 Clang 23.1.5 모두 `-Wall -Wextra -pedantic`에서 경고 없이 받아들입니다. 두 컴파일러가 이 타입 구분을 구현하지 않기 때문입니다. 이식 가능한 경계에는 첫 예처럼 명시적인 `extern "C"` free function을 둡니다. capture 있는 lambda는 일반 함수 포인터로 변환할 수 없습니다. 그런 경우에는 `user_data` 포인터 인자가 있는 C API를 쓰거나 trampoline 패턴을 사용합니다.
 
 ## Calling Convention — ARM 예시
 
@@ -289,14 +289,12 @@ ARM AAPCS(ARM Architecture Procedure Call Standard)의 규칙은 다음과 같�
 
 FPU 존재와 인자 전달 규약은 별개입니다. `-mfloat-abi=hard`의 AAPCS-VFP에서는 적격 float 인자를 VFP 인자 레지스터로 전달하며, `soft`/`softfp`는 기본 규약을 사용합니다. 가변 인자 함수 등에는 예외가 있으므로 서로 다른 float ABI 오브젝트를 섞지 않습니다.
 
-```cpp
-// C 함수
-int add(int a, int b);
+`int add(int a, int b)`를 arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb -Os`)으로 컴파일한 결과입니다.
 
-// ARM Thumb 어셈블리
-add:
-    adds    r0, r0, r1   // r0(a) += r1(b), 결과 r0
-    bx      lr           // return
+```text
+00000000 <_Z3addii>:
+   0:	add	r0, r1
+   2:	bx	lr
 ```
 
 C++의 멤버 함수는 암묵 `this`를 r0에 받습니다. 실제 인자는 r1부터 들어갑니다.
@@ -304,16 +302,20 @@ C++의 멤버 함수는 암묵 `this`를 r0에 받습니다. 실제 인자는 r1
 ```cpp
 class Counter {
 public:
-    int add(int x) { return value + x; }
+    int add(int x);
 private:
     int value;
 };
+int Counter::add(int x) { return value + x; }
+```
 
-// 어셈블리 (ABI상)
-Counter::add(int):
-    ldr     r2, [r0]      // r0 = this, r2 = this->value
-    add     r0, r2, r1    // r0 = value + x
-    bx      lr
+같은 컴파일러의 결과입니다. `r0`로 받은 `this`에서 `value`를 읽고, `x`는 `r1`에 있습니다.
+
+```text
+00000010 <_ZN7Counter3addEi>:
+  10:	ldr	r0, [r0, #0]
+  12:	add	r0, r1
+  14:	bx	lr
 ```
 
 이 암묵 `this`가 C에서 멤버 함수를 직접 부를 수 없는 이유입니다.
@@ -336,8 +338,8 @@ struct Drawable {
     int x, y;
     virtual void draw() = 0;
 };
-// 예: 32-bit Itanium 계열 대상에서는 vptr 4바이트 + int 2개로 12바이트
-// 64-bit 대상에서는 vptr 크기와 정렬이 달라질 수 있음
+// arm-none-eabi (Cortex-M4): sizeof 12, alignof 4 (vptr 4 + int 2개)
+// aarch64 macOS (g++-16):    sizeof 16, alignof 8 (vptr 8 + int 2개)
 ```
 
 Itanium ABI의 vtable에는 함수 entry 외에도 offset-to-top과 RTTI pointer가 있으며, 객체의 vptr는 표의 address point를 가리킵니다. 표의 시작 주소와 vptr 값이 항상 같다고 가정하면 안 됩니다.
@@ -360,6 +362,8 @@ static_assert(std::is_trivially_copyable_v<Packet>);
 static_assert(sizeof(Packet) == 264);
 ```
 
+이 세 `static_assert`는 호스트 g++-16에서 그대로 통과했습니다. 이 글의 arm-none-eabi-g++ 16.2.0에는 `<type_traits>`가 없어, ARM 쪽에서는 `sizeof(Packet) == 264`와 같은 trait의 컴파일러 builtin(`__is_standard_layout`, `__is_trivially_copyable`)으로 확인했습니다.
+
 `std::is_standard_layout_v`는 C++의 standard-layout 조건을 검사합니다. C 쪽과의 실제 일치는 양쪽의 `sizeof`, `_Alignof`/`alignof`, `offsetof`와 빌드 옵션을 대조해야 합니다.
 `std::is_trivially_copyable_v`는 `memcpy`로 복사 가능한지를 확인합니다.
 
@@ -376,7 +380,7 @@ struct Bad {
     char  c;     // offset 8
     int   d;     // offset 12 (3 bytes padding)
 };
-// total: 16 bytes (6 bytes padding, 위의 int 정렬 가정)
+// total: 16 bytes (6 bytes padding)
 
 struct Good {
     int   b;     // offset 0
@@ -388,9 +392,17 @@ struct Good {
 // total: 12 bytes
 ```
 
-member 순서만 바꿔도 RAM이 절약됩니다. 정렬 요구가 큰 member를 모으면 padding이 줄어들 수 있습니다. 이미 공개된 ABI나 wire format의 member 순서는 크기를 줄이려고 임의로 바꾸지 않습니다.
+두 크기는 Cortex-M4와 aarch64 호스트에서 `static_assert`로 확인했습니다. member 순서만 바꿔 4바이트를 줄였습니다. 정렬 요구가 큰 member를 앞으로 모으면 padding이 줄어듭니다. 이미 공개된 ABI나 wire format의 member 순서는 크기를 줄이려고 임의로 바꾸지 않습니다.
 
-`-Wpadded` GCC 옵션으로 padding 발생 시 경고를 받을 수 있습니다.
+`-Wpadded`를 켜면 GCC가 padding을 넣는 자리마다 경고합니다. 위 두 구조체에 대한 arm-none-eabi-g++ 16.2.0의 경고입니다.
+
+```text
+m.cpp:12:26: warning: padding struct to align 'Bad::b' [-Wpadded]
+m.cpp:12:41: warning: padding struct to align 'Bad::d' [-Wpadded]
+m.cpp:13:8: warning: padding struct size to alignment boundary with 2 bytes [-Wpadded]
+```
+
+`Good`도 끝의 tail padding 2바이트 때문에 경고가 하나 남습니다.
 
 ### `__attribute__((packed))` — 위험
 
@@ -405,7 +417,14 @@ struct __attribute__((packed)) NetworkHeader {
 // total: 7 bytes (no padding)
 ```
 
-위험은 다음과 같습니다. ARM 코어, 명령, 메모리 속성, 정렬 trap 설정에 따라 허용 여부가 다릅니다. 컴파일러가 packed member를 직접 읽을 때와 그 주소를 일반 정렬 포인터로 넘길 때도 다릅니다. packed는 endian 변환이나 MMIO 접근 폭을 보장하지 않습니다.
+`sizeof(NetworkHeader) == 7`은 Cortex-M4와 호스트에서 확인했습니다. 위험은 member 주소를 일반 포인터로 꺼낼 때 생깁니다. 컴파일러는 `h.length`를 직접 읽을 때는 정렬되지 않은 위치임을 알고 코드를 만들지만, `uint16_t*`로 꺼낸 뒤에는 그 정보가 사라집니다. GCC는 이 지점을 경고합니다.
+
+```text
+m.cpp:23:46: warning: taking address of packed member of 'NetworkHeader' may result in an unaligned pointer value [-Waddress-of-packed-member]
+   23 | uint16_t* len_ptr(NetworkHeader& h) { return &h.length; }
+```
+
+packed는 endian 변환이나 MMIO 접근 폭도 정하지 않습니다.
 
 대안은 명시적 byte buffer와 memcpy를 쓰는 것입니다.
 
@@ -448,13 +467,13 @@ add_executable(firmware main.cpp startup.s)
 target_link_libraries(firmware PRIVATE app hal)
 ```
 
-C 소스를 C++로 다시 컴파일하면 C++ linkage 규칙을 따릅니다. 기존 C 오브젝트와의 ABI 경계가 자동으로 사라지는 것은 아닙니다. 그러나 C 코드의 의미가 약간 달라질 수 있어(예: `void*` 암묵 변환) 보통 분리해서 컴파일합니다.
+C 소스를 C++로 다시 컴파일하면 C++ linkage 규칙을 따르므로, 기존 C 오브젝트와의 ABI 경계가 사라지지 않고 오히려 이름이 바뀝니다. C와 C++는 언어 규칙도 다릅니다. `int* p = malloc(4);`는 C에서 맞지만 C++에서는 `void*`의 암묵 변환이 없어 컴파일 오류입니다. 그래서 위 예처럼 C 소스는 C 컴파일러로 따로 컴파일합니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. 헤더에 `extern "C"` 누락
 
-헤더의 조건부 linkage 블록이 빠져 있어도 C는 원래 C linkage로 선언합니다. C++에서 읽으면 기본 C++ linkage를 기대하므로 C로 빌드한 구현과 이름이 달라져 link error가 날 수 있습니다.
+헤더의 조건부 linkage 블록이 빠져 있어도 C는 원래 C linkage로 선언합니다. C++에서 읽으면 기본 C++ linkage를 기대하므로, C로 빌드한 구현의 이름과 달라져 link error가 납니다. 아래 재현 절의 `BAD_LINKAGE` 빌드가 방향만 반대인 같은 실패입니다.
 
 ```c
 // driver.h — wrong
@@ -501,7 +520,7 @@ namespace 안의 C linkage 선언은 표준에 정의되어 있습니다. `foo::
 
 ## 재현 — C/C++ 링크와 심볼 경계
 
-다음 두 파일을 각각 C11, C++17로 컴파일합니다. Apple Silicon의 Clang 23.1.3에서는 host 링크·실행을, ELF 심볼 표기는 `--target=arm-none-eabi -mcpu=cortex-m4 -mthumb` 오브젝트로 확인했습니다. 아래 예시는 보드 실행이나 다른 벤더 ABI 검증을 대신하지 않습니다.
+다음 두 파일을 각각 C11, C++17로 컴파일합니다. Apple Silicon의 Homebrew Clang 23.1.5에서 host 링크·실행을 하고, ELF 심볼 표기는 `--target=arm-none-eabi -mcpu=cortex-m4 -mthumb` 오브젝트로 확인했습니다.
 
 ```c title="abi-caller.c"
 #include <stddef.h>
@@ -530,7 +549,24 @@ clang++ --target=arm-none-eabi -mcpu=cortex-m4 -mthumb -std=c++17 -c abi-library
 llvm-nm arm.o
 ```
 
-정상 프로그램은 exit 0입니다. ARM ELF에는 C linkage의 `abi_add`, `abi_probe`와 C++의 `_Z10overloadedi`, `_Z10overloadedd`가 함께 나타납니다. `BAD_LINKAGE`를 정의해 다시 빌드하면 C caller가 찾는 `abi_add`가 없어 host 링크가 실패합니다. namespace 안의 C linkage 정의도 정상 심볼을 만든다는 반례를 함께 확인할 수 있습니다.
+정상 프로그램은 exit 0으로 끝났습니다. `llvm-nm arm.o`의 출력입니다.
+
+```text
+00000020 T _Z10overloadedd
+00000014 T _Z10overloadedi
+         U __aeabi_d2iz
+00000000 T abi_add
+00000010 T abi_probe
+```
+
+C linkage의 `abi_add`·`abi_probe`와 C++의 `_Z10overloadedi`·`_Z10overloadedd`가 함께 있습니다. `namespace diagnostics` 안에서 정의한 `abi_probe`도 namespace가 없는 C 심볼이 됐습니다. `double`을 `int`로 바꾸는 `static_cast`는 libgcc/compiler-rt의 `__aeabi_d2iz` 호출이 됐습니다. 이 빌드는 float ABI를 지정하지 않아 soft-float이지만, `-mfloat-abi=hard -mfpu=fpv4-sp-d16`을 줘도 같은 호출이 남았습니다. Cortex-M4의 FPU는 단정밀도만 다루기 때문입니다. `-DBAD_LINKAGE`로 라이브러리를 다시 컴파일해 링크하면 macOS 링커가 이렇게 멈춥니다.
+
+```text
+Undefined symbols for architecture arm64:
+  "_abi_add", referenced from:
+      _main in caller.o
+ld: symbol(s) not found for architecture arm64
+```
 
 ## 1차 자료
 
@@ -544,7 +580,7 @@ llvm-nm arm.o
 - 클래스를 C에 노출할 때는 opaque pointer와 생성·해제·실패 계약을 사용합니다.
 - C callback은 user_data와 명시적 C linkage free-function wrapper를 우선 사용합니다.
 - 공유 struct는 C 호환 선언과 target ABI를 맞추고 크기·정렬·offset을 양쪽에서 검사합니다.
-- padding을 의식해 멤버 순서로 RAM을 절약하며, packed는 bus fault에 주의합니다.
+- padding을 의식해 멤버 순서로 RAM을 절약하며(`Bad` 16 → `Good` 12바이트), packed member의 주소는 일반 포인터로 꺼내지 않습니다.
 
 ## 관련 항목
 

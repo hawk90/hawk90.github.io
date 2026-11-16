@@ -18,12 +18,11 @@ topics: ["embedded"]
 
 런타임 다형성(virtual)에는 다음과 같은 비용이 따릅니다.
 
-- 동적 다형성에 필요한 테이블과 객체 레이아웃은 ABI에 따라 달라집니다.
-- 흔한 구현은 객체에 vptr을 두며 폭은 대상 ABI에 따릅니다.
-- 동적 타입을 모르면 간접 호출이 필요할 수 있지만, devirtualization으로 직접 호출·인라인될 수도 있습니다.
-- 가상 함수 코드와 vtable이 코드 크기에 더해집니다.
+- 객체마다 vptr이 들어갑니다. 아래 `Circle`(int 멤버 하나)은 arm-none-eabi-g++ 16.2.0에서 virtual 버전이 8바이트, CRTP 버전이 4바이트였습니다(`static_assert`로 확인).
+- 동적 타입을 모르면 간접 호출이 필요합니다. 컴파일러가 타입을 알면 devirtualization으로 직접 호출·인라인됩니다([Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#4-가상-함수)).
+- 가상 함수 코드와 vtable이 코드 크기에 더해집니다. 쓰지 않는 가상 함수도 vtable이 참조하므로 남습니다([Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost#4-컴파일러가-dead-code를-제거하지-못함)).
 
-실제 부담은 객체 수와 vtable·정렬·제거 결과에 따라 측정해야 합니다. 이때의 대안이 **CRTP**(Curiously Recurring Template Pattern)입니다.
+이 비용을 피하려 할 때의 대안이 **CRTP**(Curiously Recurring Template Pattern)입니다.
 
 ```cpp
 // 전통 — virtual
@@ -129,19 +128,22 @@ UartLogger uart;
 uart.log("hello");      // 컴파일 타임에 UartLogger::log_impl 호출
 ```
 
-다음은 dispatch의 전형적인 명령 형태를 설명한 예시입니다. 실제 빌드 출력이 아니며 인라인과 devirtualization은 생략했습니다.
+위 `Shape` 두 버전에서 `area()`를 부르는 함수를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -mthumb -Os`로 컴파일한 결과입니다. virtual 쪽은 기반 참조(`const VShape&`)로, CRTP 쪽은 `const Circle&`를 받는 함수 템플릿으로 불렀습니다.
 
 ```text
-# 전통 virtual
-ldr     r3, [r0]         ; vptr 로드
-ldr     r3, [r3]         ; vtable에서 함수 주소
-blx     r3               ; 간접 호출 — branch prediction 어려움
+00000000 <v_area(VShape const&)>:
+   0:	ldr	r3, [r0, #0]       ; vptr 로드
+   2:	ldr	r3, [r3, #0]       ; vtable에서 area 주소 (첫 슬롯)
+   4:	bx	r3                 ; 간접 tail call
 
-# CRTP
-bl      UartLogger::log_impl    ; 직접 호출 — 인라인 가능
+00000000 <int c_area<Circle>(Circle const&)>:
+   0:	ldr	r0, [r0, #0]       ; r
+   2:	muls	r0, r0             ; r * r
+   4:	add.w	r0, r0, r0, lsl #1 ; * 3
+   8:	bx	lr
 ```
 
-간접 호출이 제거되고 inline이 가능합니다. 함수가 작으면 완전히 인라인될 수 있습니다.
+측정에 쓴 `VShape`는 가상 소멸자 없이 `area()`만 가진 interface라 `area`가 vtable 첫 슬롯(offset 0)이었습니다. 위 글의 `Shape`처럼 `virtual ~Shape()`를 먼저 선언하면 소멸자 두 진입점이 앞 슬롯을 차지해 두 번째 load가 `ldr r3, [r3, #8]`이 됩니다. 어느 쪽이든 virtual 쪽은 메모리 load 두 번과 간접 분기로 `area`를 찾아가고, 본문은 다른 함수에 있습니다. CRTP 쪽은 `area_impl`이 인라인되어 `3 * r * r` 계산이 호출자 안에 들어왔습니다.
 
 ## CRTP vs virtual — 비교
 
@@ -228,7 +230,59 @@ Uart2 uart;
 uart.send_buffer(data, 100);   // 인라인 가능
 ```
 
-`send_buffer`의 loop 안에서 `send_impl`이 인라인됩니다. 데이터 복사와 UART 쓰기가 작은 loop 하나로 압축됩니다.
+`USART2`를 `SR`·`DR` 두 레지스터만 가진 구조체 포인터(`0x40004400`)로 두고 `uart.send_buffer(data, n)`을 부르는 함수를 같은 옵션으로 컴파일하면, `send_impl`이 루프 안에 인라인되어 함수 전체가 30바이트였습니다.
+
+```text
+  12:	ldrb.w	r2, [r0], #1      ; data[i] 읽고 포인터 증가
+  16:	ldr	r4, [r3, #0]          ; USART2->SR
+  18:	lsls	r4, r4, #24          ; TXE(bit 7)를 부호 비트로
+  1a:	bpl.n	16                   ; TXE가 0이면 대기
+  1c:	str	r2, [r3, #4]          ; USART2->DR = b
+  1e:	b.n	c                    ; 다음 바이트
+```
+
+바이트마다 함수 호출 없이 레지스터 polling과 store만 남았습니다.
+
+위 두 측정(`v_area`·`c_area`와 `send`)에 쓴 파일(`dispatch.cpp`)과 명령입니다.
+
+```cpp
+#include <stdint.h>
+#include <stddef.h>
+struct USART_TypeDef { volatile uint32_t SR, DR; };
+#define USART2 ((USART_TypeDef*)0x40004400u)
+constexpr uint32_t USART_SR_TXE = 1u << 7;
+// virtual (측정용: 가상 소멸자 없음)
+struct VShape { virtual int area() const = 0; };
+struct VCircle : VShape { int r; int area() const override { return 3 * r * r; } };
+int v_area(const VShape& s) { return s.area(); }
+// CRTP
+template<typename Derived> struct Shape { int area() const { return static_cast<const Derived*>(this)->area_impl(); } };
+struct Circle : Shape<Circle> { int r; int area_impl() const { return 3 * r * r; } };
+template <class S> int c_area(const S& s) { return s.area(); }
+template int c_area<Circle>(const Circle&);
+static_assert(sizeof(VCircle) == 8 && sizeof(Circle) == 4);
+template<typename Derived>
+class PeripheralBase {
+public:
+    void send_buffer(const uint8_t* data, size_t len) { for (size_t i = 0; i < len; ++i) derived()->send_impl(data[i]); }
+private:
+    Derived* derived() { return static_cast<Derived*>(this); }
+};
+class Uart2 : public PeripheralBase<Uart2> {
+public:
+    void send_impl(uint8_t b) { while (!(USART2->SR & USART_SR_TXE)); USART2->DR = b; }
+};
+Uart2 uart;
+void send(const uint8_t* data, size_t n) { uart.send_buffer(data, n); }
+```
+
+```bash
+arm-none-eabi-g++ -std=c++20 -mcpu=cortex-m4 -mthumb -Os -ffreestanding -fno-exceptions -fno-rtti -c dispatch.cpp -o d.o
+arm-none-eabi-objdump -d -C --no-show-raw-insn d.o
+arm-none-eabi-nm -S -C d.o
+```
+
+arm-none-eabi-g++ 16.2.0에서 `send`는 30바이트(0x1e), `v_area` 6바이트, `c_area<Circle>` 10바이트였습니다.
 
 ## CRTP로 mixin 패턴
 
@@ -304,7 +358,7 @@ void log_all(LoggerLike auto& logger, ...) {
 
 ### 2. 컴파일 에러 메시지가 복잡함
 
-template error의 전형적인 문제입니다. C++20 concepts가 훨씬 깔끔하게 만들어 줍니다.
+구현이 빠지면 오류가 Base 템플릿 안에서 납니다. 아래 `Driver` 예에서 `init_impl()`이 없는 `Missing`의 `init()`을 부르면 g++-16은 `static_assert` 메시지 다음에 `error: 'struct Missing' has no member named 'init_impl'`을 Base의 `static_cast` 줄에서 냅니다. `static_assert`나 concept을 Base에 두면 메시지가 사용자가 정한 문장으로 시작합니다.
 
 ### 3. 런타임 type 결정이 불가능
 
@@ -326,7 +380,7 @@ public:
 };
 ```
 
-자식이 반드시 구현해야 하는 메서드를 컴파일 타임에 강제합니다.
+자식이 반드시 구현해야 하는 메서드를 컴파일 타임에 강제합니다. C++20의 requires-expression을 쓰므로 `-std=c++20`이 필요합니다. `Driver<Missing>::init()`을 부르면 Clang 23.1.5는 `error: static assertion failed due to requirement 'requires (Missing d) { <<error-expression>>; }': Derived must implement init_impl`을 냈습니다. `init()`을 부르지 않으면 멤버 함수가 인스턴스화되지 않으므로 검사도 돌지 않습니다.
 
 ### 2. Code sharing without runtime cost
 
@@ -355,7 +409,7 @@ public:
 Base<Derived>* ptr = new Derived;
 delete ptr;   // 비virtual base를 통한 다른 동적 타입 삭제: undefined behavior
 ```
-CRTP base는 보통 stack에서 쓰거나 derived로 직접 사용합니다. base pointer로 소유하는 패턴은 피해야 합니다. 보호된 base 소멸자로 base를 통한 삭제와 slicing을 차단하는 방법도 있습니다. 실제 downcast는 객체가 Derived의 base subobject인 경우에만 유효합니다.
+CRTP base는 derived 타입으로 직접 씁니다. base pointer로 소유하는 패턴은 피합니다. 보호된 base 소멸자로 base를 통한 삭제와 slicing을 차단하는 방법도 있습니다. 실제 downcast는 객체가 Derived의 base subobject인 경우에만 유효합니다.
 
 ### 3. 복사 동작이 의도와 어긋남
 ```cpp
@@ -373,7 +427,7 @@ public:
 ```cpp
 class Concrete : public BaseA<Concrete>, public BaseB<Concrete>, public BaseC<Concrete> {};
 ```
-다중 상속에서 diamond 문제나 이름 충돌이 발생할 수 있습니다. 한두 layer 정도로 제한합니다.
+CRTP base는 서로 다른 타입이라 diamond는 생기지 않지만, 두 base가 같은 이름의 멤버를 가지면 아래 [함정 3](#3-multiple-crtp-base-충돌)의 모호성 오류가 납니다. base마다 이름 공간이 겹치지 않게 설계합니다.
 
 ## C++20 concepts + CRTP
 
@@ -395,7 +449,9 @@ protected:
 };
 ```
 
-`<concepts>`가 필요합니다. 잘못된 Derived를 정의하는 것만으로 항상 오류가 나는 것이 아니라, 이 제약 멤버를 호출할 때 거부됩니다. 정의가 완료된 지점의 `static_assert(Logger<Good>)`로 별도 검증할 수도 있습니다.
+`<concepts>`가 필요합니다. 잘못된 Derived를 정의하는 것만으로는 오류가 나지 않고, 이 제약 멤버를 호출할 때 거부됩니다. 정의가 완료된 지점의 `static_assert(Logger<Good>)`로 별도 검증할 수도 있습니다.
+
+반대로 제약을 base 템플릿 자체(`template<Logger Derived> class LoggerBase`)에 걸면, `log_impl`을 올바르게 구현한 `class Good : public LoggerBase<Good>`도 거부됩니다. base를 지정하는 시점에 `Good`이 아직 불완전하기 때문입니다. g++-16은 `error: template constraint failure for 'template<class Derived> requires Logger<Derived> class LoggerBase'`, Clang 23.1.5는 `error: constraints not satisfied for class template 'LoggerBase' [with Derived = Good]`였습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -426,13 +482,13 @@ class C : public A<C>, public B<C> {};
 C c;
 c.foo();   // ERROR — A::foo와 B::foo 충돌
 ```
-`c.A<C>::foo()`처럼 명시적으로 호출합니다.
+g++-16은 `error: request for member 'foo' is ambiguous`, Clang 23.1.5는 `error: member 'foo' found in multiple base classes of different types`를 냅니다. `c.A<C>::foo()`처럼 명시적으로 호출합니다.
 
 ### 4. CRTP 외부 인터페이스 불일치
 서로 다른 CRTP 인스턴스를 같은 함수에서 받기가 어렵습니다. concept이나 type erasure를 사용합니다.
 
 ### 5. Sizeof 증가
-CRTP base가 멤버를 가지면 Concrete가 그만큼 커집니다. Empty Base Optimization 덕분에 보통은 추가 크기가 0으로 처리됩니다.
+CRTP base가 멤버를 가지면 Concrete가 그만큼 커집니다. 멤버가 없는 base는 Empty Base Optimization으로 0바이트를 차지합니다. 위 CRTP `Circle`(빈 `Shape<Circle>` + `int`)이 4바이트였던 것이 그 결과입니다. 데이터 멤버가 없는 standard-layout 클래스의 base subobject는 크기가 0이라고 표준이 정합니다([intro.object]/8).
 
 ## 작은 예제 — 올바른 downcast와 base 소유 차단
 
@@ -467,7 +523,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors crtp-check.cpp -o crtp-check && ./crtp-check`로 확인했습니다. `-DBAD_BASE`와 `-DBAD_DELETE`는 접근 제어 진단으로 거부됩니다. 이 결과는 호스트의 타입·수명 계약 검증이며 Cortex-M 명령 수나 절감 바이트를 측정한 것은 아닙니다.
+Homebrew Clang 23.1.5, arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors crtp-check.cpp -o crtp-check && ./crtp-check`가 exit 0이었습니다. `-DBAD_BASE`는 `error: calling a private constructor of class 'LoggerBase<Counter>'`, `-DBAD_DELETE`는 `error: calling a private destructor of class 'LoggerBase<Counter>'`로 거부됩니다.
 
 [표준의 삭제 규칙](https://eel.is/c++draft/expr.delete)과 [제약 만족도 규칙](https://eel.is/c++draft/temp.constr.atomic)을 참고합니다.
 
@@ -486,7 +542,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-error
 ## 정리
 
 - CRTP는 template 기반 다형성으로, virtual 없이 컴파일 타임에 dispatch합니다.
-- vptr, vtable, 간접 호출이 모두 0이고 인라인도 가능합니다.
+- 이 글의 예에서 vptr(객체 8 → 4바이트), vtable, 간접 호출이 사라지고 구현이 호출자에 인라인됐습니다.
 - 임베디드에서는 peripheral driver, logger, mixin 패턴에 적합합니다.
 - 런타임에 type을 결정할 수는 없고 컴파일 타임에 닫힌 set만 다룹니다.
 - C++20 concepts와 함께 쓰면 interface가 명확해집니다.

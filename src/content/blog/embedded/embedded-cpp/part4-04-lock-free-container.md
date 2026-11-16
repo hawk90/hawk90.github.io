@@ -78,11 +78,11 @@ public:
 
 - Producer는 head만, Consumer는 tail만 수정합니다.
 - 서로의 변수는 `acquire`로 읽고 자기 것은 `release`로 씁니다.
-- target의 destructive-interference 간격이 64바이트 이하인 경우 이 정렬로 두 index를 분리할 수 있습니다. 실제 target 간격과 RAM 비용을 확인합니다.
+- target의 destructive-interference 간격이 64바이트 이하인 경우 이 정렬로 두 index를 분리할 수 있습니다. 대가는 RAM입니다. `SpscQueue<int, 4>`는 데이터 16바이트짜리인데 `sizeof`가 192바이트(g++-16·Clang 23.1.5, 64비트 호스트)였습니다.
 
 ## False Sharing — `alignas(64)`의 의의
 
-Multi-core에서 같은 cache line의 변수를 다른 core가 동시에 수정하면 cache invalidation이 일어나 성능이 폭락합니다.
+Multi-core에서 같은 cache line의 변수를 다른 core가 동시에 수정하면, 그 line의 소유권이 core 사이를 계속 오갑니다. Apple M2 Pro 호스트(`hw.cachelinesize` 128)에서 두 스레드가 각자의 `std::atomic<unsigned long>`에 relaxed `fetch_add`를 5천만 번씩 하게 해 보면(g++-16 `-O2`, 3회), 두 변수가 붙어 있을 때 501·558·507ms, 64바이트 정렬로 떼었을 때 162·140·171ms, 128바이트 정렬일 때 172·122·171ms였습니다. 붙어 있으면 세 배가량 느렸습니다.
 
 ```cpp
 struct Bad {
@@ -96,7 +96,7 @@ struct Good {
 };   // line 크기가 64바이트 이하일 때 분리
 ```
 
-ARM Cortex-A multi-core에서는 중요합니다. Cortex-M single core에서는 core 간 false sharing 방지를 위해 64바이트 정렬을 습관적으로 추가할 이유가 없습니다. 64는 모든 target의 cache line 크기가 아니며 RAM 낭비가 될 수 있습니다. 이 예시는 64바이트 line host의 설명용 설정입니다.
+ARM Cortex-A multi-core에서는 중요합니다. Cortex-M single core에는 다툴 다른 core가 없으므로 이 정렬을 습관적으로 넣을 이유가 없습니다(위 192바이트가 그 비용입니다). 64가 모든 target의 값도 아닙니다. 같은 호스트에서 `std::hardware_destructive_interference_size`는 g++-16(libstdc++)이 256, Clang 23.1.5(libc++)가 128이라고 답했습니다. 이 예시의 64는 설명용 설정입니다.
 
 ## Lock-free Stack (Treiber Stack)
 
@@ -161,7 +161,7 @@ struct TaggedPtr {
 std::atomic<TaggedPtr<Node>> top{TaggedPtr<Node>{nullptr, 0}};   // 16 byte atomic on 64-bit
 ```
 
-32-bit target에서 pointer+tag 묶음은 더 넓은 atomic 연산을 요구할 수 있습니다. 지원 여부는 target/toolchain으로 검사합니다. 아래 16-bit ptr 표현은 일반 Cortex-M의 0x20000000 SRAM 주소를 담지 못하므로 실제 pointer packing으로 쓰면 안 됩니다.
+32-bit target에서 32비트 pointer와 tag를 묶으면 64비트 atomic CAS가 필요하고, ARMv7-M에는 이 명령이 없습니다([Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics#aba-problem)). 아래 16-bit ptr 표현은 일반 Cortex-M의 0x20000000 SRAM 주소를 담지 못하므로 실제 pointer packing으로 쓰면 안 됩니다.
 
 ```cpp
 struct PackedPtr {
@@ -169,7 +169,7 @@ struct PackedPtr {
 };
 ```
 
-구현이 복잡하므로 작은 임베디드에서는 lock-free MPMC를 보통 회피합니다.
+32비트 Cortex-M에서 포인터 32비트와 tag를 함께 CAS하려면 64비트 CAS가 필요한데, ARMv7-M에는 `ldrexd`/`strexd`가 없습니다([Part 4-03](/blog/embedded/embedded-cpp/part4-03-lock-free-basics#aba-problem)). 그래서 Cortex-M에서는 pointer 대신 pool index와 tag를 32비트 하나에 묶지 않는 한 critical section을 씁니다.
 
 ## Lock-free Free List
 
@@ -207,13 +207,11 @@ boost::lockfree::queue<int, boost::lockfree::capacity<128>> mpmc_q;
 boost::lockfree::stack<int, boost::lockfree::capacity<128>> stack;
 ```
 
-Boost는 내부적으로 tagged pointer와 정교한 알고리즘을 쓰므로 직접 구현하는 것보다 안전합니다.
-
-임베디드에서 Boost가 부담스럽다면 일부 헤더만 포함할 수 있습니다.
+Boost.Lockfree 문서는 각 자료구조의 lock-free 조건과 고정 용량 설정을 설명합니다. 이 글을 쓴 Mac에는 Boost가 없어 위 코드는 빌드하지 않았습니다.
 
 ## moodycamel::ConcurrentQueue
 
-Cameron Desrochers의 MPMC queue입니다. 성능 순위는 workload에 따라 달라지며 공식 README의 순서 보장·메모리 할당 정책을 확인해야 합니다.
+Cameron Desrochers의 MPMC queue입니다. 이 글에서는 빌드하지 않았고, 아래 동작은 저장소 README(master)에서 확인했습니다.
 
 ```cpp
 #include <concurrentqueue.h>
@@ -224,7 +222,7 @@ int v;
 q.try_dequeue(v);
 ```
 
-기본 enqueue는 필요하면 메모리를 할당할 수 있습니다. 순서 보장도 모든 producer에 걸친 전역 linearizable FIFO와 동일하지 않으므로 no-heap·엄격한 전역 순서 요구와 대조합니다.
+README는 `enqueue`가 "필요하면 추가 공간을 할당"하고 `try_enqueue`는 "이미 할당된 메모리가 충분할 때만" 넣는다고 적습니다. 암묵적 enqueue는 producer마다 thread-local sub-queue를 자동 할당합니다. README는 또 이 queue가 "linearizable하지 않다"고 적으므로, 모든 producer에 걸친 전역 FIFO를 기대할 수 없습니다. 런타임 할당을 막으려면 `try_enqueue`와 생성 시 미리 할당한 용량, explicit producer token만 씁니다. 초기 할당도 Traits의 malloc을 쓰므로, heap 자체를 금지한 시스템이면 Traits의 malloc/free를 정적 pool로 바꿔야 합니다.
 
 ## 임베디드 — ISR 한 개와 consumer task 한 개
 
@@ -262,7 +260,7 @@ public:
 
 ## 임베디드 — Atomic Counter
 
-가장 단순하면서 가장 흔한 패턴입니다.
+lock-free 패턴 중 가장 단순한 형태입니다.
 
 ```cpp
 std::atomic<uint32_t> packets_sent{0};
@@ -311,7 +309,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 host에서 AddressSanitizer·UBSan을 켜고 실행했습니다. N=4의 실제 capacity 3, full·empty·wrap-around, 100000개의 FIFO 전달을 확인했고 BAD_CAPACITY는 static_assert 실패입니다. host stress는 모든 interleaving의 증명이나 board ISR/WCET 검증이 아닙니다.
+Homebrew Clang 23.1.5(`-fsanitize=thread`, 진단 없음)와 g++-16에서 실행해 둘 다 `spsc N-1/full/wrap/fifo passed count=100000`을 출력했습니다. N=4의 실제 capacity 3, full·empty·wrap-around, 100000개의 FIFO 전달을 확인했고 BAD_CAPACITY는 static_assert 실패입니다. host stress는 모든 interleaving의 증명이나 board ISR/WCET 검증이 아닙니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -332,10 +330,10 @@ pointer를 atomic swap하는 방식으로 우회합니다.
 Treiber stack 같은 복잡한 lock-free에는 tagged pointer를 적용하거나 전문 라이브러리를 사용합니다.
 
 ### 5. Cache line alignment 무시
-false sharing으로 성능이 폭락합니다. `alignas(64)`로 분리합니다.
+multi-core target이라면 위 측정처럼 같은 line의 두 카운터가 세 배가량 느려집니다. target의 line 크기로 `alignas`를 줍니다. single core Cortex-M에서는 해당하지 않습니다.
 
 ### 6. retry loop 무한 반복 가능성
-Contention이 높으면 CAS retry가 무한히 반복될 수 있습니다. exponential backoff나 limit을 둡니다.
+C++ 표준은 lock-free 연산에 시스템 전체의 진행조차 권고(should)로만 두므로([intro.progress]/2), 경쟁이 계속되면 특정 스레드의 CAS retry에는 상한이 없습니다. 시간 상한이 필요한 경로에는 retry 횟수 limit과 실패 처리를 둡니다.
 
 ```cpp
 int retries = 0;
@@ -347,22 +345,29 @@ while (retries++ < 100) {
 
 ## ARM Cortex-M의 LDREX/STREX
 
-`std::atomic`은 내부적으로 LDREX/STREX를 사용합니다.
+Cortex-M4에서 CAS는 LDREX/STREX로 내려갑니다. `__atomic_compare_exchange_n(p, expected, desired, true /*weak*/, __ATOMIC_ACQ_REL, __ATOMIC_ACQUIRE)`를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`로 컴파일한 결과입니다.
 
 ```text
-# atomic compare_exchange (간소화)
-loop:
-    LDREX  r0, [addr]      ; exclusive load
-    CMP    r0, expected
-    BNE    fail
-    STREX  r1, new, [addr] ; exclusive store
-    CMP    r1, #0           ; STREX 성공?
-    BNE    loop             ; 실패시 retry
+00000000 <cas>:
+   0:	push	{r4, lr}
+   2:	ldr	r4, [r1, #0]       ; *expected
+   4:	dmb	ish
+   8:	ldrex	r3, [r0]           ; exclusive load
+   c:	cmp	r3, r4
+   e:	bne.n	18                 ; 값이 다르면 실패
+  10:	strex	ip, r2, [r0]       ; exclusive store
+  14:	cmp.w	ip, #0             ; STREX 성공?
+  18:	dmb	ish
+  1c:	itee	eq
+  1e:	moveq	r0, #1
+  20:	movne	r0, #0
+  22:	strne	r3, [r1, #0]       ; 실패 시 *expected 갱신
+  24:	pop	{r4, pc}
 ```
 
-ARMv7-M의 exclusive monitor가 atomic을 보장합니다. DMA의 쓰기가 exclusive monitor에 반영되는지는 시스템 interconnect와 메모리 속성에 따릅니다. CPU 간 atomic의 가시성 규칙을 DMA cache 일관성·barrier·buffer ownership의 대안으로 쓰면 안 됩니다.
+weak CAS라서 `strex` 실패 시 되돌아가지 않고 false를 반환합니다. retry는 호출자의 loop가 맡습니다. strong CAS(`weak` 인자 false)로 바꾸면 `cmp.w ip, #0` 뒤에 `bne.n 8`이 붙어 `strex` 실패 시 `ldrex`로 되돌아가는 loop가 함수 안에 생겼습니다. DMA의 쓰기가 exclusive monitor에 반영되는지는 시스템 interconnect와 메모리 속성에 따릅니다. CPU 간 atomic의 가시성 규칙을 DMA cache 일관성·barrier·buffer ownership의 대안으로 쓰면 안 됩니다.
 
-**중요**: 일부 peripheral 주소는 exclusive monitor를 지원하지 않으므로 RAM에서만 안전합니다.
+이 글의 atomic 예제는 모두 일반 RAM 변수를 대상으로 했고, peripheral 레지스터에 exclusive 접근을 쓰는 경우는 확인하지 않았습니다.
 
 ## 1차 자료와 적용 한계
 
@@ -374,7 +379,7 @@ SPSC는 정확히 한 producer/consumer라는 제약을 확인할 수 있을 때
 
 ## 정리
 
-- SPSC queue가 임베디드 lock-free의 표준이며, ISR과 task 통신에 적합합니다.
+- SPSC queue는 CAS 없이 동작해, producer·consumer가 하나씩인 ISR과 task 통신에 맞습니다.
 - index별 writer가 하나여서 CAS가 필요 없지만 서로의 index를 읽어 게시와 slot 재사용을 동기화합니다.
 - false sharing 정렬은 target 간격을 확인해 선택하며 64바이트를 모든 CPU의 고정값으로 쓰지 않습니다.
 - MPMC는 복잡하므로 검증된 라이브러리(Boost, moodycamel)를 사용합니다.

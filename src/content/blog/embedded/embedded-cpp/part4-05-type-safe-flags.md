@@ -53,7 +53,7 @@ int speed = 42;
 p |= speed;   // ERROR — type mismatch
 ```
 
-정수와 섞이지 않으며 의도가 명확히 드러납니다.
+정수와 섞이지 않으며 의도가 명확히 드러납니다. `p |= speed` 줄에 g++-16은 `error: no match for 'operator|=' (operand types are 'Permission' and 'int')`, Clang 23.1.5는 `error: invalid operands to binary expression ('Permission' and 'int')`를 냈습니다. 이 예는 `operator|=`도 정의하지 않았지만, 정의해도 인자 타입이 `Permission`이므로 `int`는 받지 않습니다.
 
 ## 기본 패턴
 
@@ -123,7 +123,7 @@ p &= ~Flag::Option1;      // 제거
 p ^= Flag::Option2;       // toggle
 ```
 
-C++ idiomatic한 형태입니다.
+추가·제거·toggle이 `|=`·`&= ~`·`^=` 한 줄씩으로 C 코드와 같은 모양이지만, 인자가 모두 `Flag` 타입이어야 컴파일됩니다.
 
 ## Template으로 자동화
 
@@ -192,7 +192,7 @@ enum class Permission : uint32_t { Read = 1, Write = 2 };
 DEFINE_BIT_FLAGS(Permission)
 ```
 
-매크로는 C++17 이전 환경에 잘 맞고, C++20 이상에서는 template을 선호합니다.
+매크로는 concept이 없는 C++17 이전 환경에서도 쓸 수 있고, 위 trait + concept 버전은 C++20이 필요합니다. 매크로는 enum이 정의된 namespace 안에서 호출해야 ADL로 연산자가 찾아집니다.
 
 ## 임베디드 — Register Bit Flags
 
@@ -249,7 +249,7 @@ void uart_isr() {
 }
 ```
 
-ISR에서 상태 검사가 명확해집니다.
+비트 번호는 ST `cmsis-device-f4`의 `stm32f407xx.h`(RM0090과 같은 정의)에 있는 STM32F407 USART_SR 배치(PE bit 0, FE bit 1, NE bit 2, ORE bit 3, RXNE bit 5)를 따랐습니다. `has_any(status, UartStatus::AnyError)` 한 줄이 네 오류 비트를 함께 검사합니다. 이 스케치는 보드에서 실행하지 않았습니다.
 
 ## To-string과 bounded 출력
 
@@ -296,7 +296,21 @@ public:
 };
 ```
 
-~는 underlying type의 유효하지 않은 enum bit도 켤 수 있습니다. 정해진 domain mask로 제한하거나 기존 flags에서 제거할 bit에만 AND하는 정책을 정합니다. wrapper가 raw enum보다 항상 느리거나 항상 같다고 단정하지 않고 생성 코드를 확인합니다.
+~는 underlying type의 유효하지 않은 enum bit도 켤 수 있습니다. 정해진 domain mask로 제한하거나 기존 flags에서 제거할 bit에만 AND하는 정책을 정합니다.
+
+wrapper의 비용은 생성 코드로 봅니다. 같은 동작(Write 켜기, Read 끄기, Write|Exec 모두 있는지 검사)을 raw `uint32_t`와 `Flags<Perm>`로 쓴 두 함수를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os`로 컴파일하면 같은 6명령이 나왔습니다.
+
+```text
+00000010 <wrapped(Flags<Perm>)>:
+  10:	and.w	r0, r0, #6
+  14:	orr.w	r0, r0, #2
+  18:	subs	r3, r0, #6
+  1a:	negs	r0, r3
+  1c:	adcs	r0, r3
+  1e:	bx	lr
+```
+
+`Flags<Perm>`는 `uint32_t` 하나짜리라 레지스터 하나로 전달되고, 연산자가 모두 인라인됐습니다. 이 툴체인에는 `<type_traits>`가 없어 `is_enum_v`·`underlying_type_t`만 컴파일러 builtin으로 정의한 대체 헤더를 썼습니다.
 
 
 Flags는 하나의 underlying 정수 값을 저장합니다. raw 정수 constructor를 private로 두어 무관한 정수의 암묵 변환을 막고 compound operator를 실제로 제공합니다.
@@ -321,10 +335,10 @@ auto x = Flag::A | Flag::B;   // ERROR — operator| 없음
 
 ### 3. underlying type 명시 안 함
 ```cpp
-enum class Flag { A = 1 << 30 };   // int 가정 — 32-bit 한계
+enum class Flag { A = 1u << 31 };   // underlying type 기본값 int
 ```
 
-항상 `: uint32_t` 같은 underlying type을 명시합니다.
+`enum class`의 기본 underlying type은 `int`라서 bit 31을 담지 못합니다. g++-16은 `error: enumerator value '2147483648' is outside the range of underlying type 'int'`, Clang 23.1.5는 `error: enumerator value evaluates to 2147483648, which cannot be narrowed to type 'int'`를 냈습니다. 32비트 레지스터의 모든 bit를 쓰려면 `: uint32_t` 같은 underlying type을 명시합니다.
 
 ### 4. bit position 실수
 ```cpp
@@ -340,10 +354,10 @@ enum class B { X = 2 };
 A::X | B::X;   // type 다름 — 컴파일 에러 (의도된 안전)
 ```
 
-같은 enum의 flag끼리만 조합합니다.
+g++-16은 `error: no match for 'operator|' (operand types are 'A' and 'B')`를 냅니다. 같은 enum의 flag끼리만 조합합니다.
 
 ### 6. Strongly typed flags의 overhead 가정
-간단한 조합은 최적화할 수 있지만 인라인과 동일한 instruction 수가 언어 보장은 아닙니다. 실제 target·옵션에서 비교합니다.
+위 `Flags<Perm>` 측정은 `-Os`에서 raw 정수와 같은 명령이 나왔지만, 인라인은 언어가 보장하지 않습니다. 최적화를 끈 디버그 빌드에서는 연산자가 함수 호출로 남을 수 있으므로, 디버그 빌드의 ISR 시간은 따로 봅니다.
 
 ## Strong typedef와 tag를 구분하기
 
@@ -384,7 +398,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 C++17 host에서 ASan·UBSan으로 실행했습니다. compound operator·any/all·빈 mask·유효/무효 pin·이웃 field 보존을 확인하고, 다른 enum과 tag를 섞는 경우 각각 컴파일 실패를 확인했습니다. board MMIO와 raw 코드 대비 성능은 실행하지 않았습니다.
+Homebrew Clang 23.1.5와 g++-16에서 C++17·ASan·UBSan으로 실행해 둘 다 `flags compound/any/all/field/tag checks passed`를 출력했습니다. `-DBAD_ENUM_MIX`는 g++-16에서 `error: no match for 'operator|=' (operand types are 'Flags<Permission>' and 'Other')`, `-DBAD_TAG_MIX`는 `error: no match for 'operator=' (operand types are 'Pin' {aka 'ResourceId<PinTag>'} and 'Channel' {aka 'ResourceId<ChannelTag>'})`로 거부됩니다. board MMIO는 실행하지 않았습니다.
 
 ## 1차 자료
 
@@ -397,7 +411,7 @@ Clang 23.1.3 C++17 host에서 ASan·UBSan으로 실행했습니다. compound ope
 - 무관한 정수와 섞이지 않으므로 type safety가 보장됩니다.
 - Template이나 매크로로 operator를 자동 정의합니다.
 - 임베디드의 register flag와 status flag에 적합합니다.
-- 단순 조합의 최적화 결과는 실제 target과 옵션으로 확인합니다.
+- `Flags<E>` wrapper는 Cortex-M4 `-Os`에서 raw 정수와 같은 명령으로 컴파일됐습니다.
 
 ## 관련 항목
 

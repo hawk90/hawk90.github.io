@@ -69,17 +69,19 @@ double c = add<double>(1.0, 2);   // 명시: T = double, 2가 double로 변환
 
 ### 어셈블리 결과
 
-```text
-add<int>:
-    add     r0, r0, r1
-    bx      lr
+`add<int>`와 `add<float>`를 명시적으로 인스턴스화(`template int add<int>(int, int);`)하고 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Os`로 컴파일한 결과입니다.
 
-add<float>:
-    vadd.f32 s0, s0, s1
-    bx      lr
+```text
+00000000 <int add<int>(int, int)>:
+   0:	add	r0, r1
+   2:	bx	lr
+
+00000000 <float add<float>(float, float)>:
+   0:	vadd.f32	s0, s0, s1
+   4:	bx	lr
 ```
 
-위 어셈블리는 직접 산술 명령의 형태를 설명하는 예시입니다. 실제 명령과 인라인 여부는 CPU·ABI·최적화 옵션에 따라 확인하며 이 목록은 실측 출력이 아닙니다.
+두 인스턴스는 각자의 섹션(`.text._Z3addIiET_S0_S0_` 등)에 따로 생기고, 같은 소스가 타입에 맞는 명령 하나가 됐습니다. float 쪽이 FPU 명령인 것은 hard-float 옵션 덕분이며, soft-float였다면 `__aeabi_fadd` 호출이 됩니다([Part 0](/blog/embedded/embedded-cpp/00-preface#컴파일러-플래그-가이드)).
 
 ## 클래스 템플릿
 
@@ -120,7 +122,7 @@ FixedVector<int, 32> b;
 // a와 b는 *다른 타입* — 함께 못 섞음
 ```
 
-크기가 타입의 일부가 되어 컴파일 타임에 확정됩니다. 런타임에 크기를 바꿀 수는 없지만, 그게 곧 zero-cost의 비결입니다.
+크기가 타입의 일부가 되어 컴파일 타임에 확정됩니다. 런타임에 크기를 바꿀 수는 없지만, 그래서 용량을 저장할 멤버도, 용량을 읽는 load도 필요 없습니다. `N`은 명령의 즉치값으로 들어갑니다.
 
 ## 임베디드 — Ring Buffer 템플릿
 
@@ -192,19 +194,20 @@ LedGreen::set();
 if (Button::read()) { /* */ }
 ```
 
-이 스케치는 STM32F4식 BSRR/IDR 오프셋을 가정합니다. 실제 MCU의 레지스터 폭·주소와 clock·pin 설정을 확인해야 하며, 포인터 타입만으로 하드웨어 접근의 유효성을 보장하지 않습니다. 아래 어셈블리는 명령 형태 설명용이며 이 글에서 보드 빌드로 측정한 출력이 아닙니다.
+이 스케치는 STM32F4식 BSRR/IDR 오프셋을 가정합니다. 보드에서는 실행하지 않았습니다. `LedRed::set()`을 명시적으로 인스턴스화해 위와 같은 옵션으로 컴파일한 결과입니다.
 
 ```text
-LedRed::set:
-    ldr     r3, =0x40020018
-    movs    r2, #32      ; 1 << 5
-    str     r2, [r3]
-    bx      lr
+00000000 <Gpio<1073872896u, (unsigned char)5>::set()>:
+   0:	ldr	r3, [pc, #4]	@ (8 <...+0x8>)
+   2:	movs	r2, #32
+   4:	str	r2, [r3, #24]
+   6:	bx	lr
+   8:	.word	0x40020000
 ```
 
-C 매크로 `#define LED_RED_SET()`의 결과와 동일하지만 타입 안전성이 더해집니다.
+포트 주소 `0x40020000`을 literal pool에서 읽고, `Port + 0x18`의 `0x18`(24)은 `str`의 오프셋으로, `1u << 5`는 즉치값 32로 접혔습니다. 같은 동작의 C 매크로 `#define LED_RED_SET() (*(volatile uint32_t*)0x40020018u = 1u << 5)`가 만드는 store와 같은 형태입니다.
 
-`LedRed`와 `Button`은 서로 다른 타입이므로 섞어 쓸 수 없습니다. C 매크로였다면 무심코 섞일 수 있었을 자리입니다.
+`LedRed`와 `Button`은 서로 다른 타입입니다. 이 차이는 핀을 타입으로 받는 함수(`template<class Pin> void blink();`)나 핀 타입을 멤버로 갖는 드라이버에서 쓸모가 있습니다. 정적 함수를 직접 부르는 위 코드에서는 타입이 달라도 막을 실수가 없으며, 직접적인 보호는 핀 범위 `static_assert`입니다.
 
 ## 템플릿 specialization
 
@@ -303,7 +306,7 @@ void log(const char* prefix, const Args&... args) {
 
 정의 순서를 지켜 이름 조회가 가능하게 했습니다. 이 예제의 prefix는 printf 포맷 문자열로 해석하지 않습니다.
 
-`std::format`(C++20)은 표준 라이브러리 구현이 제공할 때 type-safe printf 역할을 합니다. 예를 들어 GCC libstdc++에서는 GCC 13 계열부터 지원이 추가됐지만, 임베디드 toolchain에서는 버전과 라이브러리 조합을 따로 확인해야 합니다. fmt는 header-only 구성과 컴파일된 라이브러리 구성을 모두 제공하며, 어느 구성이 더 작은지는 실제 링크 결과를 비교합니다.
+`std::format`(C++20)은 type-safe printf 역할을 합니다. [cppreference의 C++20 지원 표](https://en.cppreference.com/w/cpp/compiler_support/20)에 따르면 libstdc++에는 GCC 13부터 들어왔습니다. fmt 라이브러리는 header-only 구성과 컴파일된 라이브러리 구성을 모두 제공합니다. 이 글에서는 두 라이브러리의 코드 크기를 재지 않았습니다.
 
 ## 임베디드 — Type-safe Print
 
@@ -339,9 +342,11 @@ void uart_log(Args&&... args) {
 uart_log("counter: ", 42, " freq: ", 168.0f, " MHz\n");
 ```
 
-`%d`, `%f` 같은 포맷 매칭 오류가 일어날 수 없습니다. 타입이 맞아야만 컴파일됩니다.
+`%d`, `%f` 같은 포맷 매칭 오류가 일어날 수 없습니다. 비교를 위해 C의 `printf("value: %d", 1.5f)`를 `-Wall`로 컴파일하면 컴파일러는 경고만 냅니다. g++-16은 `warning: format '%d' expects argument of type 'int', but argument 2 has type 'double' [-Wformat=]`(가변 인자에서 float이 double로 승격되므로 double로 표시), Clang 23.1.5는 `warning: format specifies type 'int' but the argument has type 'float' [-Wformat]`였습니다.
 
-이 UART 변환 스케치에는 `<cstdio>`, `<cstring>`와 보드별 `uart_send` 구현이 필요합니다. 부동소수점 printf 지원과 코드 크기는 C 라이브러리 설정에 따라 다르며, 잘린 변환 결과는 전송하지 않습니다.
+특수화가 없는 타입을 넘기면 어떻게 될까요. `uart_print`의 기본 템플릿은 선언만 있으므로 `uart_log(1.5)`는 컴파일은 되고 링크에서 `uart_print<double>(double)` 미정의 심볼로 멈춥니다(아래 함정 1과 같은 메커니즘). 컴파일 단계에서 막으려면 기본 템플릿을 `= delete`로 선언합니다.
+
+이 UART 변환 스케치에는 `<cstdio>`, `<cstring>`와 보드별 `uart_send` 구현이 필요합니다. `%g`는 newlib-nano에서 `-u _printf_float` 없이 링크하면 부동소수점 변환 코드가 빠지고, newlib README는 이 경우를 미정의 동작이 될 수 있다고 적습니다([Part 1-03](/blog/embedded/embedded-cpp/part1-03-runtime-requirements)). 잘린 변환 결과는 전송하지 않도록 `snprintf` 반환값을 검사합니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -358,10 +363,10 @@ template<typename T>
 void func(T x) { /* */ }   // 정의 — 다른 TU에서 인스턴스 불가
 ```
 
-정의를 header로 옮기거나 explicit instantiation을 사용합니다.
+`func(1)`을 부르는 `main.cpp`와 정의만 있는 `foo.cpp`를 함께 링크하면 g++-16(macOS ld)은 `Undefined symbols for architecture arm64: "void func<int>(int)"`로 멈춥니다. `foo.cpp`에서는 아무도 `func<int>`를 쓰지 않아 인스턴스가 만들어지지 않았기 때문입니다. 정의를 header로 옮기거나 `foo.cpp`에 `template void func<int>(int);` 같은 explicit instantiation을 둡니다.
 
 ### 2. 과도한 인스턴스화로 인한 code bloat
-같은 함수를 수많은 타입으로 인스턴스화하면 각자의 코드가 쌓여 크기가 폭증합니다. 공통 부분을 분리해 해결합니다([Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost)).
+같은 함수를 여러 타입으로 인스턴스화하면 인스턴스마다 코드가 생깁니다. [Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis#워크플로-3--템플릿-bloat-추적)의 `process<T>`는 세 인스턴스가 28·28·74바이트였습니다. 공통 부분을 분리하는 방법은 [Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost)에서 다룹니다.
 
 ### 3. type-safe하지 않은 인자
 ```cpp
@@ -374,17 +379,17 @@ process(arr, 100);   // 100 맞나? 컴파일러 모름
 대안으로 C++20의 `std::span<T>`를 씁니다.
 
 ### 4. template error message 폭증
-중첩 template 오류는 수십 줄짜리 메시지가 됩니다. C++20 concepts로 훨씬 깔끔해집니다.
+`std::list<int>`에 `std::sort`를 부르는 한 줄짜리 실수를 컴파일하면, g++-16은 34줄, Clang 23.1.5는 114줄을 출력했습니다. g++-16의 첫 `error:`는 사용자 코드가 아니라 `bits/stl_algo.h:1914`의 `no match for 'operator-' (operand types are 'std::_List_iterator<int>' ...)`를 가리킵니다. 같은 실수를 C++20의 `std::ranges::sort(l)`로 쓰면 출력은 g++-16 기준 51줄로 오히려 길지만(Clang 23.1.5는 22줄), 첫 오류가 사용자 코드 줄을 가리키고 `required for the satisfaction of 'random_access_range<_Range>'`처럼 어느 concept을 못 맞췄는지 적습니다([Part 2-10](/blog/embedded/embedded-cpp/part2-10-concepts)).
 
 ### 5. forward declaration만으로는 인스턴스화 불가
 ```cpp
 template<typename T> class Foo;   // 선언만
 Foo<int> x;   // ERROR — 인스턴스 불가
 ```
-정의가 필요하거나, 포인터/레퍼런스 형태로만 사용해야 합니다.
+g++-16은 `error: aggregate 'Foo<int> x' has incomplete type and cannot be defined`, Clang 23.1.5는 `error: implicit instantiation of undefined template 'Foo<int>'`를 냅니다. 정의를 보이게 하거나, 포인터/레퍼런스 형태로만 사용합니다.
 
 ### 6. 멤버 함수 override가 template
-virtual 함수는 template이 될 수 없습니다. type erasure나 visitor로 우회합니다.
+멤버 함수 템플릿은 virtual일 수 없습니다([temp.mem]/3). `template <class T> virtual void f(T);`에 g++-16은 `error: templates may not be 'virtual'`, Clang 23.1.5는 `error: 'virtual' cannot be specified on member function templates`를 냅니다. 타입마다 vtable 슬롯이 하나씩 필요한데 인스턴스 수를 링크 전에 알 수 없기 때문입니다. type erasure나 visitor로 우회합니다.
 
 ## 작은 예제 — ring buffer의 실제 용량
 
@@ -422,7 +427,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors ring-check.cpp -o ring-check && ./ring-check`로 empty/full·wraparound·FIFO 순서를 확인했습니다. `-DBAD_CAPACITY`는 컴파일 실패해야 합니다. 실측 소스와 도구가 없던 인스턴스별 바이트 수와 전체 프로젝트 비율은 근거로 사용하지 않습니다.
+Homebrew Clang 23.1.5, arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors ring-check.cpp -o ring-check && ./ring-check`가 exit 0으로 empty/full·wraparound·FIFO 순서를 통과했습니다. `-DBAD_CAPACITY`는 `error: static assertion failed due to requirement '(3UL & (3UL - 1)) == 0': N must be power of two and above one`으로 거부됩니다.
 
 [C++20 N4861 템플릿 인스턴스화 규칙](https://timsong-cpp.github.io/cppwp/n4861/temp.inst)을 참고합니다. 템플릿이라는 이유만으로 코드 크기나 실행 속도의 우열이 정해지지는 않습니다.
 
@@ -431,7 +436,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-error
 - 템플릿은 컴파일 타임 다형성으로, 타입별 전용 코드를 생성합니다.
 - 함수, 클래스, non-type 매개변수를 모두 지원합니다.
 - 임베디드에서는 RingBuffer, GPIO 추상화, type-safe print에 활용합니다.
-- 이 예제는 가상 dispatch를 쓰지 않으며 연산 비용과 코드 크기는 생성된 코드로 확인합니다.
+- 이 글의 `add<T>`와 `Gpio::set()`은 Cortex-M4에서 각각 명령 두 개와 store 하나로 내려갔고 가상 dispatch가 없습니다.
 - 비용은 컴파일 시간과 인스턴스별 코드 크기에서 발생하며 적절히 관리해야 합니다 ([Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost)).
 
 ## 관련 항목

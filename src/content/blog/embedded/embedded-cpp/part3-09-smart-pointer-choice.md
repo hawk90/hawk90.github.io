@@ -19,7 +19,7 @@ topics: ["embedded"]
 C++의 스마트 포인터 세트는 다음과 같습니다.
 
 - **`unique_ptr<T>`**는 단일 소유를 표현하며 RAII로 자동 해제합니다.
-- **`shared_ptr<T>`**는 공유 소유를 표현하며 atomic 카운터를 사용합니다.
+- **`shared_ptr<T>`**는 공유 소유를 표현하며, 참조 계수를 스레드 안전하게 갱신합니다.
 - **`weak_ptr<T>`**는 shared의 non-owning 참조입니다.
 - **raw pointer(`T*`)**는 non-owning이며 소유권을 갖지 않습니다.
 
@@ -39,7 +39,7 @@ auto other = std::move(sensor);   // sensor → other로 소유권 이전
 // sensor는 이제 nullptr
 ```
 
-빈 deleter를 압축하는 일반적인 구현에서는 sizeof(T*)와 같을 수 있습니다. 표준이 모든 ABI의 동일 크기를 보장하는 것은 아니며 상태 있는 deleter·fancy pointer는 크기를 바꿀 수 있습니다.
+기본 deleter는 빈 타입이라 공간을 차지하지 않습니다. 64비트 호스트에서 `sizeof(std::unique_ptr<int>)`는 libstdc++·libc++ 모두 8바이트, 즉 포인터 하나였습니다. 표준이 이 크기를 보장하지는 않으며, 상태 있는 deleter는 그만큼 크기를 늘립니다([Part 2-02](/blog/embedded/embedded-cpp/part2-02-raii-patterns#함수-포인터-deleter--runtime-비용-발생)의 크기 표).
 
 ### 임베디드 활용
 
@@ -91,9 +91,9 @@ auto b = a;   // copy — 카운터 증가 (atomic)
 // a와 b 모두 owner — 마지막이 사라질 때 delete
 ```
 
-일반적인 구현은 객체 포인터와 control block 포인터를 저장하므로 32비트에서 흔히 8바이트, 64비트에서 흔히 16바이트입니다. 정확한 크기는 구현·ABI별로 확인합니다.
+`shared_ptr`은 객체 포인터와 control block 포인터를 저장합니다. 64비트 호스트에서 `sizeof(std::shared_ptr<int>)`와 `sizeof(std::weak_ptr<int>)`는 libstdc++·libc++ 모두 16바이트였습니다. 이 글의 ARM 툴체인에는 libstdc++가 없어 32비트 크기는 재지 못했습니다.
 
-control block은 객체와 수명이 다른 관리 정보이며, make_shared에서는 객체와 한 allocation에 묶일 수 있습니다. 보통 다음 정보를 포함하지만 표준이 고정 레이아웃을 정하지는 않습니다.
+control block은 객체와 수명이 다른 관리 정보입니다. `make_shared`는 객체와 control block을 한 번에 할당하고, `shared_ptr<T>(new T)`는 두 번 할당합니다(호스트 g++-16에서 `operator new` 호출 1회 대 2회, [Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#5-stdshared_ptr로-모든-소유권-표현)). 표준이 고정 레이아웃을 정하지는 않지만 다음 정보가 들어갑니다.
 
 - strong과 weak 두 개의 atomic 카운터
 - deleter
@@ -102,9 +102,9 @@ control block은 객체와 수명이 다른 관리 정보이며, make_shared에�
 
 ### 임베디드에서의 문제
 
-1. atomic 카운터가 multi-core RTOS에서 cache coherence 오버헤드를 만듭니다.
+1. 복사·소멸마다 참조 계수를 갱신합니다. libstdc++는 이 갱신을 `__gnu_cxx::__exchange_and_add_dispatch`로 하며, 스레드가 활성이면 원자 연산을 씁니다([Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#5-stdshared_ptr로-모든-소유권-표현)). 여러 코어가 같은 카운터를 갱신하면 그 캐시 라인을 코어끼리 주고받습니다.
 2. control block이 heap을 사용합니다(`make_shared`는 1번, 별도 `new`는 2번 할당).
-3. cyclic reference에서 `weak_ptr`을 쓰지 않으면 leak이 발생합니다.
+3. cyclic reference에서 `weak_ptr`을 쓰지 않으면 leak이 발생합니다. 아래 함정 4에서 실행해 봅니다.
 
 공유 수명 관리가 필요한지 먼저 확인합니다. control block의 thread safety는 pointee 데이터의 thread safety가 아니며, 같은 shared_ptr 객체의 동시 변경도 별도 동기화가 필요합니다.
 
@@ -152,7 +152,7 @@ struct Child {
 };
 ```
 
-임베디드에서 weak_ptr을 쓰려면 shared_ptr이 전제되어야 하므로 둘 다 권장하지 않습니다.
+weak_ptr은 shared_ptr이 만든 control block을 가리키므로 shared_ptr 없이 쓸 수 없습니다(크기도 포인터 두 개, 16바이트). heap을 피하는 설계라면 둘을 함께 피합니다.
 
 ## Raw pointer — non-owning
 
@@ -188,7 +188,7 @@ C++ Core Guidelines의 `gsl::owner<T*>` 마커로 의도를 명시할 수도 있
 
 ![스마트 포인터 결정 트리 — 소유권 기준으로 unique_ptr, shared_ptr, raw pointer 선택](/images/blog/embedded-cpp/diagrams/part3-09-decision-tree.svg)
 
-임베디드에서는 대부분 unique_ptr 또는 raw 참조로 정리됩니다.
+소유자가 하나로 정해지면 unique_ptr, 소유하지 않는 접근이면 raw 포인터·참조입니다. shared_ptr은 "마지막 사용자가 누구인지 실행 전에 알 수 없다"는 조건이 있을 때만 남습니다.
 
 ## 임베디드 패턴 — Factory + unique_ptr
 
@@ -251,7 +251,7 @@ public:
 };
 ```
 
-`logger_`가 내부에 Logger 객체를 직접 저장하므로 heap을 쓰지 않습니다. 임베디드에서 선호합니다.
+`logger_`가 내부에 Logger 객체를 직접 저장하므로 heap을 쓰지 않습니다. 대신 Logger를 쓰지 않을 때도 `System` 안에 `sizeof(Logger)`와 플래그만큼 공간을 차지합니다. `unique_ptr` 쪽은 포인터 하나만 차지하고 Logger는 heap에 둡니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -271,28 +271,28 @@ unique_ptr로 충분하면 unique로 갑니다. shared는 정당화가 필요합
 ```cpp
 std::unique_ptr<FILE, decltype(&fclose)> f(fopen(...), &fclose);
 ```
-함수 포인터 deleter는 별도 상태 저장 공간이 들 수 있습니다. ABI에 따라 크기를 확인하고, 상태가 필요 없다면 빈 functor deleter를 검토합니다.
+함수 포인터 deleter는 포인터를 하나 더 저장합니다. 64비트 호스트에서 8바이트가 16바이트가 됐습니다([Part 2-02](/blog/embedded/embedded-cpp/part2-02-raii-patterns#함수-포인터-deleter--runtime-비용-발생)). 상태가 필요 없다면 빈 functor deleter를 씁니다.
 
 ### 4. weak_ptr 없이 cycle
 ```cpp
 struct A { shared_ptr<B> b; };
 struct B { shared_ptr<A> a; };   // cycle — 영원히 안 해제
 ```
-한쪽을 weak_ptr로 둡니다.
+생성자·소멸자에서 살아 있는 객체 수를 세는 두 구조체를 `make_shared`로 만들어 서로 가리키게 한 뒤 scope를 벗어나면, g++-16·Clang 23.1.5 모두 살아 있는 객체가 2였습니다. B → A를 `weak_ptr`로 바꾸면 0이었습니다. 한쪽을 weak_ptr로 둡니다.
 
 ### 5. unique_ptr copy 시도
 ```cpp
 auto a = std::make_unique<Foo>();
 auto b = a;   // ERROR — copy 안 됨
 ```
-move를 씁니다(`auto b = std::move(a);`).
+아래 예제의 `-DCOPY_OWNER` 빌드에서 g++-16은 `error: use of deleted function 'std::unique_ptr<_Tp, _Dp>::unique_ptr(const std::unique_ptr<_Tp, _Dp>&)'`, Clang 23.1.5는 `error: call to implicitly-deleted copy constructor of 'std::unique_ptr<Resource, CountDelete>'`를 냈습니다. move를 씁니다(`auto b = std::move(a);`).
 
 ### 6. shared_ptr atomic overhead 무시
-multi-core에서는 카피마다 atomic 연산이 일어나므로 hot path에 부담이 됩니다. raw pointer와 명확한 owner로 대체합니다.
+복사·소멸마다 참조 계수를 갱신합니다. 함수 인자를 `shared_ptr<T>` 값으로 받으면 호출마다 복사가 일어나므로, 소유권을 넘기지 않는 함수는 `T&`나 `T*`로 받습니다(C++ Core Guidelines F.7). 이 글에서는 갱신 비용을 cycle로 재지 않았습니다.
 
 ## 실행 확인 — 해제 횟수와 공유 수명
 
-다음 독립 파일은 custom deleter의 해제 횟수, unique 소유권 이동, weak 관찰의 만료를 검증합니다. 시간·cycle 비교는 수행하지 않았고, 원래 표의 120/15=8배를 10배로 적은 결론도 근거로 사용하지 않습니다.
+다음 독립 파일은 custom deleter의 해제 횟수, unique 소유권 이동, weak 관찰의 만료를 검증합니다. Homebrew Clang 23.1.5와 g++-16 모두 ASan·UBSan으로 exit 0이었습니다. 시간·cycle 비교는 하지 않았습니다.
 
 ```cpp title="smart-pointers.cpp"
 #include <cassert>
@@ -341,7 +341,7 @@ copy는 add_ref, move는 증가 없이 이전, 소멸은 release이며 대입·�
 
 ## 정리
 
-- 임베디드에서는 `unique_ptr`이 기본입니다. 명시적 소유와 RAII를 zero overhead로 제공합니다.
+- 임베디드에서는 `unique_ptr`이 기본입니다. 기본 deleter로는 포인터 하나 크기(측정 8바이트, 64비트 호스트)로 명시적 소유와 RAII를 제공합니다.
 - `shared_ptr`은 회피합니다. atomic 카운터와 heap 위의 control block이 부담입니다.
 - raw pointer는 non-owning에만 쓰고 소유권은 항상 unique나 shared로 표현합니다.
 - Custom deleter(struct나 lambda)로 pool, FD, 비-heap 자원을 관리합니다.
@@ -349,7 +349,7 @@ copy는 add_ref, move는 증가 없이 이전, 소멸은 release이며 대입·�
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `smart-pointers.cpp`, 순환 참조·`sizeof` 시험을 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 macOS arm64 host에서 실행했습니다. 보드 실행·32비트 크기·cycle 측정은 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [shared_ptr의 공유 소유 계약](https://eel.is/c++draft/util.smartptr.shared)
 

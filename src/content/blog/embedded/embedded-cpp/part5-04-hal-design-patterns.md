@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 문제를 푸는가
 
-벤더 HAL(STM32 HAL, NXP MCUXpresso, Nordic SDK)은 벤더에 종속됩니다. 보드 변경은 application 대수정으로 이어집니다.
+벤더 HAL(STM32 HAL, NXP MCUXpresso, Nordic SDK)은 벤더에 종속됩니다. application이 이 함수를 직접 부르면, 보드를 바꿀 때 그 호출부를 모두 고쳐야 합니다.
 
 ```c
 // STM32
@@ -44,7 +44,7 @@ hal::Led::set();
 
 ## HAL의 3 계층
 
-HAL은 보통 세 계층으로 쌓입니다. Application은 인터페이스만 보고, 벤더별 구현은 그 아래에 숨어 있습니다.
+이 글의 HAL은 세 계층으로 나눕니다. Application은 인터페이스만 보고, 벤더별 구현은 그 아래에 숨어 있습니다.
 
 ![HAL 3 계층 — App → Interface → Vendor → Hardware](/images/blog/embedded-cpp/diagrams/part5-04-hal-layers.svg)
 
@@ -110,8 +110,8 @@ blink(led);
 
 단점은 다음과 같습니다.
 
-- Virtual call overhead가 작지만 존재합니다
-- ABI에 따른 vtable·객체 상태가 필요할 수 있습니다. virtual 호출 자체가 RTTI 사용을 요구하는 것은 아니며 `-fno-rtti`로도 이 인터페이스 패턴을 구현할 수 있습니다.
+- 호출마다 vtable을 거칩니다. 아래 [비교](#패턴-2--template-based-hal-정적-dispatch)에서 `blink`의 `set()`·`clear()`가 각각 load 2번과 `blx` 간접 호출이 됐습니다
+- 구현 클래스마다 vtable과 객체 안의 vptr이 필요합니다. 아래 측정은 `set()`·`clear()`만 가진 가상 소멸자 없는 interface로 해 vtable이 16바이트였고, 위 `hal::IGpio`(가상 소멸자 + 네 함수)라면 더 큽니다. virtual 호출 자체가 RTTI를 요구하지는 않으며, 아래 `hal-check.cpp`도 `-fno-rtti`로 빌드했습니다.
 
 ## 패턴 2 — Template-based HAL (정적 dispatch)
 
@@ -161,19 +161,27 @@ void blink(Gpio& led) {
 
 // main
 hal::stm32::StmGpio<0x40020000, 5> led;
-blink(led);   // 컴파일 타임 dispatch, zero cost
+blink(led);   // 컴파일 타임 dispatch
 ```
+
+두 방식의 `blink`를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -mthumb -Os -fno-rtti`로 컴파일해 비교했습니다. `sleep_ms`는 외부 함수로 두고, `StmGpio`는 BSRR에 직접 쓰는 구현을 채웠습니다.
+
+| | `blink` 크기 | `set()`·`clear()` 호출 | 별도 코드·데이터 |
+| --- | ---: | --- | --- |
+| `IGpio&` (패턴 1) | 38 B | vtable load 2번 + `blx r3` 각각 | `VGpio::set`·`clear` 12·16 B, vtable 16 B |
+| `StmGpio<0x40020000, 5>&` (패턴 2) | 40 B | 인라인되어 BSRR `str` 하나씩 | 없음 |
+
+template 쪽 `blink` 본문이 약간 큰 것은 BSRR 주소를 literal pool에 두었기 때문이고, 대신 별도의 `set`/`clear` 함수와 vtable이 없습니다.
 
 장점은 다음과 같습니다.
 
-- 가상 dispatch를 쓰지 않으며 인라인 기회를 제공합니다
+- 가상 dispatch가 없고, 위 측정처럼 구현이 호출자에 인라인됩니다
 - Compile-time 검증이 가능합니다
-- Inline이 가능합니다
 
 단점은 다음과 같습니다.
 
 - Application도 template이라 header에 정의해야 합니다
-- type이 폭증할 수 있습니다
+- 핀·포트 조합마다 타입이 하나씩 생기고, 그 타입을 받는 함수 템플릿도 조합마다 인스턴스화됩니다([Part 2-07](/blog/embedded/embedded-cpp/part2-07-templates-cost))
 
 ## 패턴 3 — typedef 기반 (가장 단순)
 
@@ -207,7 +215,7 @@ void blink() {
 
 단점은 다음과 같습니다.
 
-- 런타임에 보드를 변경할 수 없습니다(보통은 괜찮습니다)
+- 런타임에 보드를 변경할 수 없습니다. 보드마다 다른 firmware 이미지를 빌드하는 경우라면 문제가 되지 않습니다
 
 ## 패턴 4 — Mixed (interface + template)
 
@@ -331,7 +339,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors -fno-rtti hal-check.cpp -o hal-check && ./hal-check`로 세 방식의 동일한 출력 순서를 확인했습니다. `-DBAD_STATIC`은 nonstatic 메서드를 객체 없이 호출해 실패합니다. alias는 원래 메서드를 static으로 바꾸지 않습니다.
+Homebrew Clang 23.1.5와 g++-16, arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors -fno-rtti hal-check.cpp -o hal-check && ./hal-check`가 exit 0으로 세 방식의 동일한 출력 순서를 통과했습니다. `-DBAD_STATIC`은 g++-16에서 `error: cannot call member function 'void StaticPin::set()' without object`로 실패합니다. alias는 원래 메서드를 static으로 바꾸지 않습니다.
 
 ## Application 설계 — Dependency Injection
 
@@ -395,7 +403,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-error
 3. **정적 할당을 우선합니다** — `std::array`, ETL, pool, placement new
 4. **컴파일 타임으로 옮깁니다** — `constexpr`, template, CRTP, concepts
 5. **소유권을 명시합니다** — `unique_ptr`이 기본, `shared_ptr`은 드물게, raw pointer는 non-owning에만 씁니다
-6. **DI가 Singleton보다 낫습니다** — main에서 wiring합니다
+6. **의존성은 주입합니다** — main에서 wiring하고, 진짜 하나뿐인 하드웨어도 interface로 넘깁니다([Part 4-08](/blog/embedded/embedded-cpp/part4-08-singleton-alternatives))
 7. **HAL로 vendor를 격리합니다** — application을 portable하게 만듭니다
 
 ## 다음 시리즈 추천
@@ -410,7 +418,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-error
 
 ### 1. HAL이 너무 두꺼움
 
-모든 추상화에 virtual을 두면 small MCU에 부담이 됩니다. Mix나 template을 활용합니다.
+모든 추상화에 virtual을 두면 구현 클래스마다 vtable과 out-of-line 함수가 생기고 호출마다 간접 분기가 남습니다(위 측정). 교체가 런타임에 필요 없는 driver는 template으로, application 경계만 interface로 두는 패턴 4를 씁니다.
 
 ### 2. Application에 vendor 누출
 
@@ -431,11 +439,11 @@ host에서 application 로직을 테스트할 수 없게 됩니다. Mock HAL을 
 
 ### 5. Vendor switch 시나리오 미고려
 
-처음부터 벤더 종속을 가정하면 나중에 재작성하게 됩니다. HAL interface를 처음부터 설계합니다.
+application이 벤더 호출을 직접 쓰기 시작하면, 벤더를 바꿀 때 그 호출부를 모두 찾아 고쳐야 합니다. 함정 2의 `hal::` 경계를 처음부터 둡니다.
 
 ### 6. Performance 측정 안 함
 
-HAL이 얼마나 비싼지를 모릅니다. 측정 도구를 활용합니다([Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis) 참조).
+HAL의 비용은 위 표처럼 `nm -S`와 디스어셈블리로 바로 보입니다. 설계를 고를 때 같은 표를 프로젝트 코드로 만듭니다([Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)).
 
 ## 정리
 

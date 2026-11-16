@@ -21,7 +21,7 @@ topics: ["embedded"]
 1. **CPU 사이클** — 함수 실행 시간
 2. **메모리** — 코드와 데이터가 차지하는 공간
 
-상수식이 필요한 문맥에서 `constexpr` 함수의 결과를 계산하면 그 계산을 런타임에 반복할 필요가 없습니다. 일반 변수 초기화의 상수 인자 호출은 `constexpr` 여부와 무관하게 최적화될 수도 있습니다. 결과 객체를 저장하거나 읽는 비용은 별도입니다.
+상수식이 필요한 문맥에서 `constexpr` 함수의 결과를 계산하면 그 계산을 런타임에 반복할 필요가 없습니다. 결과 객체를 저장하거나 읽는 비용은 별도입니다. 아래 두 버전을 arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb`)으로 컴파일해 비교합니다.
 
 ```cpp
 // 런타임 계산
@@ -29,8 +29,10 @@ int factorial(int n) {
     return (n <= 1) ? 1 : n * factorial(n - 1);
 }
 
-int x = factorial(10);   // 상수 평가 의무 없음; 최적화로 계산될 수도 있음
+int x = factorial(10);   // 상수 평가 의무 없음
 ```
+
+전역 `x`의 초기화를 컴파일러가 미리 계산하는 것은 허용되지만([basic.start.static]/3) 의무가 아닙니다. 위 코드는 `-O0`과 `-Os` 모두에서 `x`가 `.bss` 4바이트에 놓이고 `.init_array` entry 4바이트가 생겼습니다. 즉 [Part 1-06](/blog/embedded/embedded-cpp/part1-06-startup-code)의 `__libc_init_array`가 부팅 때 `factorial(10)`을 실제로 실행합니다.
 
 ```cpp
 // 컴파일 타임 계산
@@ -41,7 +43,7 @@ constexpr int factorial(int n) {
 constexpr int x = factorial(10);   // 컴파일러가 3628800으로 치환
 ```
 
-어셈블리에서 `x`는 그냥 상수 3628800이 됩니다. 함수 호출도, 계산도 남지 않습니다.
+이번에는 `.init_array`가 없고, `x`는 `.rodata`에 `00 5f 37 00`(리틀 엔디안 0x00375F00 = 3628800)으로 들어갔습니다. 측정 파일에는 `x`의 주소를 쓰는 `const int* px = &x;`를 두었습니다. 주소를 쓰는 곳이 없으면 `-Os`에서는 `x`의 저장 공간 자체가 생기지 않습니다. 함수 호출도, 부팅 때의 계산도 남지 않습니다. 같은 파일에 `int y = factorial(10);`처럼 `constexpr`을 붙이지 않은 변수를 둬도 `y`는 `.data`에 3628800으로 들어갔습니다. 초기화식이 상수식이면 상수 초기화가 의무이기 때문입니다([basic.start.static]/2). 함수에 `constexpr`을 붙인 것만으로 부팅 때의 실행이 사라졌습니다.
 
 ## `constexpr`이 적용되는 두 곳
 
@@ -83,7 +85,7 @@ int b = square(read_input());     // 런타임 호출 (compile-time 값 아니�
 
 `constexpr` 함수는 상황에 따라 컴파일 타임 또는 런타임에 호출됩니다. 상수식이 필요한 문맥은 언어 규칙이 평가를 요구하고, 나머지 문맥의 상수 접기는 최적화 선택입니다.
 
-C++11의 비생성자 `constexpr` 함수 본문에는 단일 return 등 엄격한 제약이 있었습니다. C++14부터는 loop, branch, 변수 등 대부분의 statement를 쓸 수 있습니다.
+C++11의 비생성자 `constexpr` 함수 본문에는 단일 return 등 엄격한 제약이 있었습니다. C++14부터는 loop, branch, 지역 변수를 쓸 수 있습니다. C++14에서 남은 금지 항목은 asm 선언, `goto`, try-block, 그리고 literal이 아닌 타입·`static`·`thread_local`·초기화하지 않은 변수의 정의입니다(C++14 [dcl.constexpr]/3).
 
 ```cpp
 // C++14 — full constexpr
@@ -116,7 +118,55 @@ constexpr std::array<float, 256> generate_sin_table() {
 constexpr auto sin_table = generate_sin_table();   // 상수 초기화; 배치는 링커 설정
 ```
 
-`sizeof(float) == 4`이면 테이블 데이터는 1024바이트입니다. 실제 `.rodata`·Flash 배치와 보존 여부는 링커 스크립트 및 사용 방식에 달리며 `constexpr`만으로 저장 위치가 지정되지는 않습니다.
+아래 CRC 테이블과 함께 `std::array` 대신 같은 모양의 작은 `Array` 구조체로 바꿔(이 글의 ARM 툴체인에 libstdc++가 없어서) `sin_table`을 읽는 `fast_sin(uint8_t)`과 `compute_crc`를 함께 두고 arm-none-eabi-g++ 16.2.0으로 컴파일하면, `sin_table`과 `crc_table`이 각각 1,024바이트 지역 읽기 전용 심볼(`r`)로 `.rodata`에 놓이고 `.data`·`.bss`·`.init_array`는 0입니다. `.rodata`가 Flash로 가는지는 링커 스크립트가 정합니다([Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts)). `constexpr`이 정하는 것은 초기화 시점이지 저장 위치가 아닙니다.
+
+측정에 쓴 파일(`lut-arm.cpp`)과 명령입니다.
+
+```cpp
+#include <stdint.h>
+#include <stddef.h>
+template <class T, size_t N> struct Array {   // std::array 대용 (이 툴체인에 <array> 없음)
+    T v[N];
+    constexpr T& operator[](size_t i) { return v[i]; }
+    constexpr const T& operator[](size_t i) const { return v[i]; }
+};
+constexpr float taylor_sin(float x) {
+    constexpr float pi = 3.14159265358979323846f;
+    while (x > pi) x -= 2 * pi;
+    while (x < -pi) x += 2 * pi;
+    float result = x, term = x;
+    for (int n = 1; n < 7; ++n) { term *= -x * x / ((2 * n) * (2 * n + 1)); result += term; }
+    return result;
+}
+constexpr Array<float, 256> generate_sin_table() {
+    Array<float, 256> table{};
+    for (int i = 0; i < 256; ++i) table[i] = taylor_sin((i * 2.0f * 3.14159f) / 256.0f);
+    return table;
+}
+constexpr auto sin_table = generate_sin_table();
+constexpr Array<uint32_t, 256> generate_crc_table() {
+    Array<uint32_t, 256> table{};
+    for (uint32_t i = 0; i < 256; ++i) {
+        uint32_t crc = i;
+        for (int j = 0; j < 8; ++j) crc = (crc & 1) ? (crc >> 1) ^ 0xEDB88320u : crc >> 1;
+        table[i] = crc;
+    }
+    return table;
+}
+constexpr auto crc_table = generate_crc_table();
+uint32_t compute_crc(const uint8_t* data, size_t len) {
+    uint32_t crc = 0xFFFFFFFF;
+    for (size_t i = 0; i < len; ++i) crc = (crc >> 8) ^ crc_table[(crc ^ data[i]) & 0xFF];
+    return ~crc;
+}
+float fast_sin(uint8_t idx) { return sin_table[idx]; }
+```
+
+```bash
+arm-none-eabi-g++ -std=c++17 -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Os -ffreestanding -fno-exceptions -c lut-arm.cpp -o lut.o
+arm-none-eabi-size -A lut.o
+arm-none-eabi-nm -S -C lut.o
+```
 
 ### Taylor series로 컴파일 타임 sin
 
@@ -135,7 +185,7 @@ constexpr float taylor_sin(float x) {
 }
 ```
 
-C++17/20의 표준 `sin`/`cos`는 상수 평가용 API가 아닙니다. 아래 검증 예제는 범위를 축소한 Taylor 근사를 사용하며 표준 수학 함수와 오차를 비교합니다. 한 번 작성하면 전체 LUT를 자동으로 생성할 수 있습니다.
+C++17/20의 표준 `sin`/`cos`는 `constexpr` 함수가 아닙니다. 그래서 직접 근사 함수를 씁니다. 아래 검증 예제는 범위를 축소한 Taylor 근사를 표준 수학 함수와 256개 각도에서 비교합니다.
 
 ## 임베디드 — 컴파일 타임 CRC
 
@@ -166,7 +216,7 @@ uint32_t compute_crc(const uint8_t* data, size_t len) {
 }
 ```
 
-상수 초기화로 CRC 테이블 생성 루프의 런타임 실행을 피할 수 있습니다. C의 미리 생성한 `const` 테이블도 같은 저장 형태를 가질 수 있습니다. Flash/RAM 차이는 비교 대상과 링커 배치로 확인합니다.
+위에서 본 대로 `crc_table`은 `.rodata` 1,024바이트이고, `compute_crc`는 40바이트였습니다. C에서 스크립트로 미리 생성해 붙인 `const uint32_t crc_table[256] = {...}`도 같은 1,024바이트 `.rodata`가 됩니다. `constexpr`의 이득은 저장 공간이 아니라, 생성 스크립트 없이 다항식 하나만 바꾸면 테이블이 같이 바뀐다는 점입니다.
 
 ## 임베디드 — 컴파일 타임 register 주소
 
@@ -212,7 +262,7 @@ serialize(buf, uint16_t(0x1234));   // 2바이트 분기만 컴파일됨
 
 `sizeof(T)`가 컴파일 타임에 알려지므로 선택되지 않은 분기의 코드가 제거됩니다.
 
-템플릿에서 `if constexpr`의 선택되지 않은 종속 분기는 인스턴스화하지 않습니다. 일반 `if`도 최적화로 제거될 수 있으므로 결과 코드 크기가 반드시 다르지는 않습니다. 이 serializer는 지원하는 unsigned 정수 폭과 버퍼 길이를 별도로 제한해야 합니다.
+템플릿에서 `if constexpr`의 선택되지 않은 종속 분기는 인스턴스화하지 않습니다([stmt.if]/2). 이 예에서는 코드 크기 차이가 없었습니다. `put16`·`put32` 두 인스턴스를 `if constexpr`와 일반 `if`로 각각 컴파일하면 arm-none-eabi-g++ 16.2.0에서 `arm-none-eabi-size`의 text 열(`.ARM.exidx` 포함)이 `-O0` 196바이트, `-Os` 40바이트(`.text*` 섹션만은 164·24바이트)로 네 경우가 모두 같았습니다. GCC는 조건이 상수인 일반 `if`의 죽은 분기도 `-O0`에서 지웠습니다. `if constexpr`가 필요해지는 때는 버려질 분기가 그 타입으로는 컴파일되지 않을 때입니다(예: `T`가 구조체라 `value >> 8`이 성립하지 않는 경우). 이 serializer는 지원하는 unsigned 정수 폭과 버퍼 길이를 별도로 제한해야 합니다.
 
 ## `static_assert` + `constexpr`로 컴파일 타임 검증
 
@@ -232,7 +282,7 @@ constexpr int kSlotSize = kMaxBufferSize / kSlotCount;
 
 C++20의 상수 평가 안에서는 임시 동적 할당을 사용할 수 있지만, 같은 평가 안에서 해제해야 합니다. `new int(42)`를 반환하는 함수 선언 자체가 허용되는 것과, 그 포인터를 `constexpr` 객체에 영구 보존하는 것은 다릅니다. 실제 평가 경로에서 비상수 함수·I/O·`reinterpret_cast` 등을 실행할 수 없으며, `throw` 경로도 C++17/20 상수식이 될 수 없습니다.
 
-컴파일러별 지원률이나 보편적인 LUT 크기 기준은 제시하지 않습니다. 평가 단계 한도와 빌드 시간은 대상 도구에서 측정합니다.
+상수 평가에는 컴파일러별 한도가 있습니다. 아래 [함정 3](#3-큰-constexpr-lut으로-컴파일-시간-폭증)에서 백만 개짜리 테이블이 두 컴파일러에서 각각 어떤 한도에 걸리는지 봅니다.
 
 ## consteval — 컴파일 타임 강제 (C++20)
 
@@ -268,21 +318,35 @@ constinit int x = read_register();
 ### 1. const ≠ constexpr
 ```cpp
 const int n = read();     // OK, but not compile-time
-int arr[n];               // C VLA — 표준 C++ 아님 (gnu++만)
+int arr[n];               // C VLA — 표준 C++ 아님 (GCC·Clang 확장)
 
 constexpr int n = 100;
 int arr[n];               // OK — 컴파일 타임 크기
 ```
 
+VLA는 GCC와 Clang 모두 확장으로 받아들입니다. g++-16은 `-pedantic`을 줘야 `ISO C++ forbids variable length array 'arr' [-Wvla]`를 내고, Clang 23.1.5는 플래그 없이도 `variable length arrays in C++ are a Clang extension [-Wvla-cxx-extension]`을 냈습니다.
+
 ### 2. 상수 평가에서 비상수 함수 호출
 
-함수 선언의 `constexpr`와 개별 호출의 상수식 여부를 구분합니다. C++17/20에서 `constexpr auto x = std::sin(1.0);`을 이식 가능한 코드로 가정하지 않습니다. 지원 확장과 다른 표준 모드는 별도로 확인합니다.
+함수 선언의 `constexpr`와 개별 호출의 상수식 여부를 구분합니다. `constexpr double s = std::sin(1.0);`은 컴파일러에 따라 갈립니다. g++-16은 `-std=c++17 -pedantic`에서도 받아들였고(GCC가 `sin`을 내장 함수로 상수 접기 하는 확장), Clang 23.1.5는 `error: constexpr variable 's' must be initialized by a constant expression`과 `note: non-constexpr function 'sin' cannot be used in a constant expression`으로 거부했습니다. GCC에서 통과했다고 이식 가능한 코드가 아닙니다.
 
 ### 3. 큰 constexpr LUT으로 컴파일 시간 폭증
 ```cpp
-constexpr auto huge = generate_table<1000000>();   // 평가 단계와 메모리 사용량 확인
+constexpr auto huge = generate_table<1000000>();   // 원소 100만 개
 ```
-필요한 해상도·Flash 예산·컴파일러 평가 한도로 크기를 결정합니다.
+
+`int` 100만 개를 루프로 채우는 `generate_table<1000000>()`을 두 컴파일러에 넣으면 둘 다 거부합니다.
+
+```text
+# g++-16 -std=c++17
+error: 'constexpr' loop iteration count exceeds limit of 262144 (use '-fconstexpr-loop-limit=' to increase the limit)
+
+# Clang 23.1.5 -std=c++17
+error: constexpr variable 'huge' must be initialized by a constant expression
+note: constexpr evaluation hit maximum step limit; possible infinite loop?
+```
+
+GCC는 루프 반복 한도(262,144)에서, Clang은 평가 단계 한도에서 멈췄습니다. 한도를 올리면 통과하지만 그만큼 컴파일 시간이 늘어납니다. 필요한 해상도·Flash 예산으로 크기를 먼저 정합니다.
 
 ### 4. 컴파일러가 constexpr을 적용하지 못함
 ```cpp
@@ -293,7 +357,7 @@ int y = f(some_var);   // 상수 평가 의무가 없는 호출
 
 ### 5. mutable과 상수식
 
-C++14부터 비const `constexpr` 멤버 함수가 가능해졌지만, `mutable`을 모든 상수식 제약의 예외로 볼 수는 없습니다. 객체 수명과 읽기·수정 연산이 상수 평가 규칙을 만족해야 합니다.
+C++14부터 `constexpr` 멤버 함수가 암묵적으로 `const`가 아니게 되어 객체를 수정하는 `constexpr` 멤버 함수를 쓸 수 있습니다([Part 1-08](/blog/embedded/embedded-cpp/part1-08-cpp-standard-choice#c14--작은-개선)). 그렇다고 상수 평가 밖에서 만든 객체를 상수 평가 안에서 고칠 수는 없습니다. 상수식은 그 평가 안에서 수명이 시작된 객체만 수정할 수 있습니다([expr.const]).
 
 ## 작은 예제 — CRC 기준값과 sin 오차
 
@@ -338,7 +402,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors constexpr-check.cpp -o constexpr-check && ./constexpr-check`로 확인했습니다. 이는 해당 256개 표본의 오차 한계이며 임의 입력 전체의 수치 보장은 아닙니다.
+Homebrew Clang 23.1.5와 g++-16, arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors constexpr-check.cpp -o constexpr-check && ./constexpr-check`가 경고 없이 exit 0이었습니다. 이는 해당 256개 표본의 오차 한계(1e-8)이며 임의 입력 전체의 수치 보장은 아닙니다.
 
 상수식의 제약은 [C++20 초안 N4861의 expr.const](https://timsong-cpp.github.io/cppwp/n4861/expr.const)를 기준으로 합니다. 보드의 Flash/RAM 사용량과 부팅 시간은 이 호스트 실행으로 확인하지 않았습니다.
 
@@ -346,8 +410,8 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-error
 
 - `constexpr`은 컴파일 타임에 값이 정해지는 변수와 함수에 모두 적용됩니다.
 - LUT와 CRC 테이블을 상수 초기화할 수 있으며 저장 위치는 링커 배치로 확인합니다.
-- `if constexpr`은 컴파일 타임 분기이며 코드 크기를 줄여 줍니다.
-- C++14 이후 대부분의 statement가 `constexpr` 가능하며, C++20에서는 new와 virtual까지 완화됐습니다.
+- `if constexpr`은 버려진 분기를 인스턴스화하지 않는 컴파일 타임 분기입니다. 상수 조건의 일반 `if`도 GCC에서는 같은 크기의 코드가 나왔으므로, 이 키워드의 가치는 코드 크기보다 컴파일 가능성에 있습니다.
+- C++14부터 loop·branch·지역 변수를 `constexpr` 함수에 쓸 수 있고, C++20에서는 transient `new`와 virtual 호출까지 허용됐습니다.
 - `consteval` (C++20)은 런타임 호출을 차단하고, `constinit`은 static 초기화를 강제합니다.
 
 ## 관련 항목

@@ -52,7 +52,7 @@ C++는 C의 superset에 가깝지만 동일하지는 않습니다. C++가 더하
 
 말로는 부족합니다. 어셈블리를 직접 봅니다.
 
-같은 동작을 하는 C와 C++를 Cortex-M4 ELF object로 교차 컴파일합니다. 검증 환경은 Clang 23.1.3, `-O2 -ffreestanding`이며, GCC 13이나 실제 STM32 보드에서 실행한 결과로 제시하지 않습니다.
+같은 동작을 하는 C와 C++를 Cortex-M4 ELF object로 교차 컴파일합니다. 검증 환경은 Homebrew Clang 23.1.5, `-O2 -ffreestanding`이며, GCC 13이나 실제 STM32 보드에서 실행한 결과로 제시하지 않습니다.
 
 ```c title="comparison.c"
 typedef unsigned int u32;
@@ -106,7 +106,7 @@ zero-cost가 아닌 영역도 있습니다. 기능별 필요성과 최악 경로
 
 ### 1. 예외 처리
 
-예외는 unwind table과 런타임 핸들러를 함께 데려옵니다.
+예외는 unwind table과 런타임 핸들러를 함께 데려옵니다. 실제로 무엇이 붙는지 오브젝트 하나로 확인합니다.
 
 ```cpp
 // 예외 사용: <stdexcept> 필요, a / b의 정수 overflow 정책은 별도
@@ -116,17 +116,62 @@ int divide(int a, int b) {
 }
 ```
 
-추가 크기는 이미 링크된 런타임, 라이브러리 구성과 링크 옵션에 따라 달라집니다. 예외를 금지하는 프로젝트라면 throw를 오류 반환으로 바꾸고 애플리케이션과 라이브러리의 실패 경로를 함께 검토합니다. 다음 플래그만 추가하면 위 throw 예제는 컴파일되지 않습니다.
+아래 파일을 arm-none-eabi-g++ 16.2.0, `-mcpu=cortex-m4 -mthumb -Os -fno-rtti -fexceptions`로 컴파일하면 오브젝트가 다음 섹션과 미해결 심볼을 갖습니다. `std::runtime_error` 대신 `int`를 던져 `<stdexcept>` 없이 컴파일되게 했습니다.
+
+```cpp title="exc.cpp"
+struct Guard { ~Guard(); };
+void work();
+int divide_exc(int a, int b) { if (b == 0) throw 1; return a / b; }
+int divide_code(int a, int b, int* out) { if (b == 0) return -1; *out = a / b; return 0; }
+void guarded() { Guard g; work(); }
+```
+
+```text
+section           size
+.text               80
+.ARM.extab          20
+.ARM.exidx          24
+
+U _Z4workv
+U _ZN5GuardD1Ev
+U __aeabi_unwind_cpp_pr0
+U __cxa_allocate_exception
+U __cxa_end_cleanup
+U __cxa_throw
+U __gxx_personality_v0
+U _ZTIi
+```
+
+`__cxa_*`·`__gxx_personality_v0`는 libsupc++(예외 런타임)가, `__aeabi_unwind_cpp_pr0`는 libgcc의 ARM EHABI unwinder가 채웁니다. throw가 없는 `guarded()`만 따로 컴파일해도 차이가 납니다. `-fexceptions`에서는 `.text` 26바이트에 `.ARM.extab` 20·`.ARM.exidx` 8바이트가 붙고, `-fno-exceptions`에서는 `.text` 16바이트뿐입니다. `work()`가 예외를 던질 경우를 대비해 `~Guard()`를 한 번 더 부르고 `__cxa_end_cleanup`으로 넘어가는 landing pad가 생기기 때문입니다. 이 환경(Homebrew arm-none-eabi-gcc)에는 libsupc++·newlib가 들어 있지 않아, 이 런타임이 최종 펌웨어에 더하는 크기는 재지 못했습니다.
+
+예외를 금지하는 프로젝트라면 throw를 오류 반환으로 바꾸고 애플리케이션과 라이브러리의 실패 경로를 함께 검토합니다. 다음 플래그를 추가하면 throw가 있는 코드는 컴파일 단계에서 거부됩니다.
 
 ```makefile
 CXXFLAGS += -fno-exceptions
+```
+
+`exc.cpp`에 이 플래그를 주면 GCC 16.2.0은 이렇게 멈춥니다.
+
+```text
+exc.cpp:3:50: error: exception handling disabled, use '-fexceptions' to enable
 ```
 
 대안으로는 `std::optional`, `std::expected` (C++23), error code 반환이 있습니다. 자세한 내용은 [Part 3-05: No-Exception 설계](/blog/embedded/embedded-cpp/part3-05-no-exception-design)에서 다룹니다.
 
 ### 2. RTTI
 
-런타임 다운캐스트와 다형 객체의 `typeid`는 타입 메타데이터를 사용할 수 있습니다. 반면 단순 업캐스트는 `-fno-rtti`에서도 가능합니다. 크기는 클래스 계층과 ABI에 따라 측정합니다.
+`dynamic_cast`와 다형 객체의 `typeid`는 클래스마다 컴파일러가 만드는 type_info 객체를 씁니다. 단순 업캐스트와 가상 호출은 `-fno-rtti`에서도 됩니다. 추상 기반 `Sensor`와 파생 `Temp`·`Press` 두 개로 이루어진 계층을 같은 컴파일러로 컴파일하면 `.rodata` 차이가 이렇습니다.
+
+```text
+# -frtti                                  # -fno-rtti
+.rodata                 80                .rodata                 40
+.rodata._ZTI6Sensor      8
+.rodata._ZTS6Sensor      8
+_ZTI4Temp  12B  _ZTS4Temp   6B
+_ZTI5Press 12B  _ZTS5Press  7B
+```
+
+`_ZTI*`가 type_info 객체, `_ZTS*`가 타입 이름 문자열입니다. 세 클래스에서 56바이트가 늘었고, 이 비용은 다형 클래스 수와 이름 길이에 비례해 커집니다. `.text`는 두 경우 모두 같았습니다.
 
 ```makefile
 CXXFLAGS += -fno-rtti
@@ -136,19 +181,41 @@ CXXFLAGS += -fno-rtti
 
 ### 3. iostream
 
-`std::cout`은 locale·포맷·초기화 경로를 포함할 수 있습니다. 특정 KB 증가나 `printf`보다 항상 크다는 결론은 동일한 기능과 링크 조건의 비교가 있어야 합니다.
+`std::cout`은 locale·포맷 상태와 정적 초기화 객체(`std::ios_base::Init`)를 함께 끌어옵니다. 이 글의 툴체인에는 libstdc++가 없어 iostream 링크 크기를 재지 못했습니다. 비교할 때는 같은 포맷 요구를 `printf`·`fmt`·UART 출력으로 각각 구현하고 [코드 크기 분석](/blog/embedded/embedded-cpp/part1-04-code-size-analysis)의 map 비교를 씁니다.
 
 대안으로는 `printf`(C 라이브러리), `fmt`(버전·포맷 옵션·빌드 방식별 크기 확인), 직접 UART 출력 등이 있습니다.
 
 ### 4. 가상 함수
 
-동적 호출이 남으면 간접 분기와 vtable 접근이 필요합니다. 정확한 타입을 알면 컴파일러가 devirtualization하여 인라인할 수도 있습니다. ISR·타이밍 제약에서는 최악 지연 시간을 별도로 확인합니다.
+동적 호출이 남으면 vtable을 읽는 load 두 번과 간접 분기가 필요합니다. 반대로 컴파일러가 정확한 타입을 알면 devirtualization으로 호출 자체를 없앱니다. 같은 `read()`를 기반 참조와 `final` 클래스 참조로 부른 결과입니다(arm-none-eabi-g++ 16.2.0 `-Os`).
+
+```text
+00000000 <_Z8via_baseRK6Sensor>:     # const Sensor& s → s.read()
+   0:	ldr	r3, [r0, #0]
+   2:	ldr	r3, [r3, #0]
+   4:	bx	r3
+
+00000006 <_Z9via_finalRK4Temp>:      # struct Temp final, const Temp& t → t.read()
+   6:	movs	r0, #25
+   8:	bx	lr
+```
+
+`final`이 붙은 `Temp`는 더 파생될 수 없으므로 컴파일러가 `Temp::read()`를 직접 부르고, 본문이 `return 25;`라 인라인까지 했습니다.
 
 대안은 CRTP(static polymorphism, [Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism))입니다.
 
 ### 5. `std::function`
 
-type erasure를 사용하며 저장 대상과 구현의 작은 객체 버퍼 조건에 따라 heap 할당 여부가 달라집니다. 캡처가 있다는 이유만으로 항상 할당되는 것은 아닙니다. 비소유 콜백에는 함수 포인터나 `etl::delegate`를 검토하되, 캡처 객체의 수명을 보장합니다. 소유하는 고정 용량 callable과 delegate는 같은 계약이 아닙니다.
+type erasure를 쓰며, heap 할당 여부는 라이브러리의 작은 객체 버퍼 크기가 정합니다. GCC 16.2의 libstdc++(`bits/std_function.h`)는 callable이 `_Nocopy_types` 공용체(객체 포인터·함수 포인터·멤버 함수 포인터) 크기 안에 들어가고 정렬이 맞으며 위치 불변일 때만 내부 버퍼에 저장합니다. 64비트 호스트(aarch64 macOS, g++-16)에서 `operator new` 호출 수를 세면 경계가 그대로 보입니다.
+
+```text
+sizeof(std::function<int()>)=32
+no capture                   sizeof(lambda)= 1  operator new calls=0
+capture 2 x long (16B)       sizeof(lambda)=16  operator new calls=0
+capture Big (24B)            sizeof(lambda)=24  operator new calls=1
+```
+
+멤버 함수 포인터가 두 워드라 32비트 ARM에서는 이 경계가 8바이트입니다. 캡처가 있다고 늘 할당하지는 않지만, 경계를 넘는 순간 할당이 생기고 소스에서는 보이지 않습니다. 비소유 콜백에는 함수 포인터나 `etl::delegate`를 검토하되, 캡처 객체의 수명을 보장합니다. 소유하는 고정 용량 callable과 delegate는 같은 계약이 아닙니다.
 
 ## 코드 크기를 비교할 때 남길 자료
 
@@ -176,11 +243,11 @@ STM32F4의 빈 main·UART·RTOS 등에 일률적인 바이트 수를 붙이려�
 
 ### 5. `std::shared_ptr`로 모든 소유권 표현
 
-`shared_ptr`은 공유 제어 블록과 참조 계수 관리가 필요하며, 보통 atomic 연산을 사용합니다. 할당 횟수는 생성 방식·allocator에 따라 달라집니다. 단독 소유에는 `unique_ptr`, 비소유 접근에는 수명이 보장된 참조·포인터를 사용합니다.
+`shared_ptr`은 공유 제어 블록과 참조 계수가 필요합니다. libstdc++의 복사(`_M_add_ref_copy`)는 `__gnu_cxx::__exchange_and_add_dispatch`를 거치는데, 이 함수는 스레드가 활성일 때 원자 연산을 씁니다. 할당 횟수는 생성 방식이 정합니다. 위 호스트 프로그램에서 `std::shared_ptr<int>(new int(1))`은 `operator new`를 2번(객체와 제어 블록), `std::make_shared<int>(1)`은 1번 불렀습니다. 단독 소유에는 `unique_ptr`, 비소유 접근에는 수명이 보장된 참조·포인터를 사용합니다.
 
 ### 6. C++ 표준 라이브러리 전부 사용 가능하다고 가정
 
-`<filesystem>`, `<thread>`, `<chrono>`의 일부는 OS 의존입니다. bare-metal에서는 링크 실패로 이어집니다. ETL, EASTL 같은 임베디드 친화 라이브러리를 검토합니다.
+표준은 OS 없이도 제공해야 하는 freestanding 헤더를 따로 정합니다. 현재 작업 초안의 [freestanding 헤더 표](https://eel.is/c++draft/compliance)(표 27)에는 `<array>`·`<atomic>`·`<optional>`·`<span>` 등이 있고 `<filesystem>`·`<thread>`·`<chrono>`는 없습니다. 표에 있는 헤더도 일부 항목만 freestanding인 경우가 있어, bare-metal 라이브러리가 무엇을 제공하는지는 그 구현의 문서로 확인합니다. ETL, EASTL 같은 임베디드 친화 라이브러리를 검토합니다.
 
 ## Modern C++가 가져온 변화
 
@@ -218,7 +285,7 @@ C++가 만능은 아닙니다. C가 더 적합한 경우는 다음과 같습니�
 
 ## C와 C++의 공존 전략
 
-대부분의 임베디드 프로젝트는 C와 C++가 섞여 있습니다.
+C++로 쓰는 임베디드 프로젝트도 C와 섞입니다. STM32Cube HAL·FreeRTOS 커널처럼 벤더 HAL과 RTOS가 C로 배포되기 때문입니다.
 
 - **HAL/드라이버**: C(벤더 제공, 검증된 코드)
 - **부트/스타트업**: C 또는 어셈블리
@@ -242,7 +309,7 @@ C++의 강점인 추상화가 부담 없이 가능한지를 프로젝트마다 �
 
 ## 정리
 
-- 작은 클래스·템플릿 예제는 같은 조건의 C 코드와 같은 명령으로 최적화될 수 있습니다. 전체 시스템 비용은 별도로 검증합니다.
+- 이 글의 세 함수는 Clang 23.1.5 `-O2`에서 C와 C++의 `.text`가 바이트 단위로 같았습니다. 전체 시스템 비용은 별도로 검증합니다.
 - 비용이 발생하는 영역은 예외, RTTI, iostream, 동적 할당, `std::function`이며 알고 끄거나 대체합니다.
 - C는 부트 코드, 극소형 MCU, 인증 환경에서 여전히 적합합니다.
 - 결정은 언어 선택이 아니라 사용법 선택입니다. 위 네 가지 핵심 질문으로 매 결정을 평가합니다.

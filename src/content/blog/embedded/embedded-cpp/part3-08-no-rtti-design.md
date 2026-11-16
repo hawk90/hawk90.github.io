@@ -20,13 +20,13 @@ RTTI(Run-Time Type Information)는 typeid와 런타임 타입 검사에 사용�
 
 - `typeid(obj)`로 type 정보를 얻습니다.
 - `dynamic_cast<T*>(p)`로 안전한 down-cast를 수행합니다.
-- GCC의 -fno-rtti에서도 예외 타입 매칭에 필요한 정보는 별도로 생성될 수 있습니다.
+- GCC 16 문서(`-fno-rtti` 항목)는 "예외 처리도 같은 정보를 쓰지만 G++가 필요할 때 생성한다"고 적습니다. `throw`하는 타입의 type_info는 `-fno-rtti`에서도 만들어집니다.
 
 비용은 다음과 같습니다.
 
-- type info 테이블이 클래스당 수십~수백 byte를 차지합니다.
-- vtable에 type info 포인터가 추가됩니다.
-- 총량이 수 KB에 이를 수 있습니다.
+- 가상 함수가 있는 클래스마다 type_info 객체(`_ZTI*`)와 이름 문자열(`_ZTS*`)이 생깁니다. [Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#2-rtti)에서 클래스 세 개짜리 계층을 Cortex-M4로 컴파일하면 type_info 32바이트와 이름 21바이트 등 `.rodata`가 56바이트 늘었습니다.
+- vtable의 type info 슬롯은 `-fno-rtti`에서도 자리가 남고 값만 0이 됩니다([Part 1-04](/blog/embedded/embedded-cpp/part1-04-code-size-analysis#워크플로-4--vtable-크기-추적)의 24바이트 vtable).
+- 총량은 다형 클래스 수와 이름 길이에 비례합니다. 템플릿 클래스는 맹글된 이름이 길어 문자열이 커집니다.
 
 이 글은 RTTI를 끄기로 정한 프로젝트를 대상으로 합니다. 그렇다면 type 정보가 필요한 상황은 어떻게 처리할까요?
 
@@ -73,7 +73,7 @@ if (s->type() == ShapeType::Circle) {
 
 `type_` enum이 type을 식별하는 역할을 합니다. `static_cast`는 안전 검증을 해 주지 않으므로 enum 체크와 짝지어 씁니다.
 
-tag는 인스턴스마다 저장됩니다. enum 크기·padding·기존 virtual 소멸자의 vptr까지 포함해 ABI에서 측정해야 하며 RTTI 메타데이터와 단순히 같은 비용으로 비교할 수 없습니다.
+tag는 인스턴스마다 저장됩니다. arm-none-eabi-g++ 16.2.0에서 vptr만 있는 클래스는 4바이트, `ShapeType`(기본 `int`) tag를 더한 `Shape`는 8바이트였습니다. tag를 `unsigned char` 기반 enum으로 줄여도 정렬 때문에 8바이트 그대로였습니다(`static_assert`로 확인). RTTI의 type_info는 클래스당 한 번, tag는 객체마다 붙는 비용입니다.
 
 ### 헬퍼 매크로
 
@@ -149,7 +149,7 @@ std::visit([](auto&& shape) {
 }, s);
 ```
 
-variant는 대안 객체를 내부에 저장하며 상태와 정렬 패딩도 포함합니다. 정확한 크기는 구현에 따르고 대안 타입이 내부적으로 heap을 쓰는지는 별도입니다.
+variant는 대안 객체를 내부에 저장하며 상태와 정렬 패딩도 포함합니다. 위 세 클래스(float 1개, 1개, 2개)로 만든 `std::variant<Circle, Square, Triangle>`은 libstdc++·libc++ 모두 12바이트(가장 큰 `Triangle` 8 + 인덱스 + padding)였습니다. 대안 타입이 내부적으로 heap을 쓰는지는 별도입니다.
 
 ### 가상 함수의 완전 대체
 
@@ -174,7 +174,7 @@ float compute_area(const Shape& s) {
 장점은 다음과 같습니다.
 
 - vtable과 type info가 모두 0입니다.
-- visitor는 최적화될 수 있지만 std::visit 구현과 후보 수에 따라 dispatch table의 간접 호출이 남을 수 있습니다.
+- dispatch는 variant가 저장한 index로 정해집니다. 이 글에서는 `std::visit`의 생성 코드를 재지 않았습니다(이 글의 ARM 툴체인에는 `<variant>`가 없습니다).
 - value semantics를 가집니다.
 
 단점도 있습니다.
@@ -273,13 +273,13 @@ std::visit([](auto&& obj) {
 }, variant_obj);
 ```
 
-각 패턴이 조금씩 다른 트레이드오프를 가집니다. type set이 닫혀 있고 value semantics를 원한다면 variant가 가장 깔끔합니다.
+enum tag와 type_id는 기존 상속 계층을 유지한 채 downcast만 대체하고, variant는 계층 자체를 값 타입으로 바꿉니다. type set이 닫혀 있고 객체를 값으로 다루고 싶으면 variant, 이미 포인터로 다루는 계층이 있으면 enum tag가 바꿀 코드가 적습니다.
 
 ## std::any — 구현 범위를 구분하기
 
-any_cast가 반드시 typeid를 실행해야 하는 것은 아닙니다. libc++·libstdc++는 RTTI가 꺼진 구성에서도 저장된 타입을 구현 내부 식별자로 비교할 수 있습니다. 반면 any::type() 같은 type_info 관찰 API는 RTTI 없는 구성에서 제공되지 않을 수 있습니다.
+any_cast가 반드시 typeid를 실행해야 하는 것은 아닙니다. 아래 `no-rtti.cpp`는 `-fno-rtti`에서 g++-16(libstdc++)과 Clang 23.1.5(libc++) 모두 `any_cast`의 타입 일치·불일치를 맞게 판정했습니다. 두 라이브러리가 RTTI가 꺼진 구성에서 저장된 타입을 내부 식별자로 비교하기 때문입니다. 반면 type_info를 돌려주는 관찰 API는 `-fno-rtti`에서 아예 없습니다. `std::any::type()`은 g++-16에서 `'class std::any' has no member named 'type'`, Clang에서 `no member named 'type' in 'std::any'`로 컴파일되지 않았습니다.
 
-따라서 any를 전면 사용 불가라고 단정하지 말고 대상 표준 라이브러리의 지원 범위를 확인합니다. 다만 any는 저장 타입과 작은 객체 최적화 조건에 따라 heap을 쓸 수 있으므로 무할당 보장은 별도 문제입니다.
+따라서 any를 전면 사용 불가라고 단정하지 말고 쓰는 멤버가 `-fno-rtti`에서 제공되는지 봅니다. 다만 any는 저장 타입과 작은 객체 최적화 조건에 따라 heap을 쓸 수 있으므로 무할당 보장은 별도 문제입니다.
 
 ## 임베디드 — Event 시스템
 
@@ -314,7 +314,7 @@ void dispatch(const Event& e) {
 }
 ```
 
-variant 기반 경로는 위 가상 상속 인터페이스를 쓰지 않습니다. 두 Event 정의는 대안별 독립 스케치이며 같은 범위에 함께 정의하지 않습니다. 실제 크기 이득은 빌드·링크 결과로 확인해야 합니다.
+variant 기반 경로는 위 가상 상속 인터페이스를 쓰지 않습니다. 두 Event 정의는 대안별 독립 스케치이며 같은 범위에 함께 정의하지 않습니다. 이 글에서는 두 구현의 링크 크기를 재지 않았습니다.
 
 ## Exception 처리도 무관
 
@@ -330,7 +330,7 @@ CXXFLAGS += -fno-exceptions -fno-rtti
 런타임 타입 검사가 필요한 downcast는 -fno-rtti에서 거부됩니다. 단순 upcast 같은 정적으로 해결되는 dynamic_cast까지 모두 불가능한 것은 아닙니다.
 
 ### 2. typeid 사용
-`typeid` 호출도 컴파일 에러로 떨어집니다. 직접 type_id 시스템이나 enum을 씁니다.
+`typeid` 호출도 컴파일 에러로 떨어집니다. 아래 예제의 `-DREQUIRE_RTTI` 빌드에서 Clang 23.1.5는 `error: use of dynamic_cast requires -frtti`와 `error: use of typeid requires -frtti`, g++-16은 `error: 'dynamic_cast' not permitted with '-fno-rtti'`와 `error: cannot use 'typeid' with '-fno-rtti'`를 냈습니다. 직접 type_id 시스템이나 enum을 씁니다.
 
 ### 3. enum tag와 type 일관성 깨짐
 ```cpp
@@ -349,10 +349,10 @@ using Event = std::variant<SmallEvent, HugeEvent>;
 큰 type을 분리하거나 pointer를 사용합니다.
 
 ### 5. std::function의 RTTI 의존
-std::function의 호출은 RTTI 없이도 지원될 수 있습니다. target_type 같은 type_info 관찰 API의 가용성은 구현별로 확인합니다. 무할당 콜백이 필요하면 RTTI 설정과 별도로 저장 크기·할당 계약을 확인합니다.
+`std::function`의 호출은 `-fno-rtti`에서도 됩니다(아래 예제의 `add_one`). `target_type()`은 `std::any::type()`과 마찬가지로 두 라이브러리 모두 `-fno-rtti`에서 멤버가 없어 컴파일되지 않았습니다. 할당 여부는 RTTI와 무관하게 저장 크기가 정합니다([Part 3-01](/blog/embedded/embedded-cpp/part3-01-no-dynamic-alloc#stdfunction-대신)).
 
 ### 6. exception 일부만 끔
-예외와 RTTI는 독립 옵션입니다. 다만 GCC는 -frtti로 빌드한 파생 타입이 -fno-rtti 기반 클래스를 상속하는 구성 등 혼합 빌드에서 문제가 날 수 있다고 경고합니다. 공유 클래스 경계의 빌드 정책을 일관되게 관리합니다.
+예외와 RTTI는 독립 옵션입니다. 다만 GCC 16 문서는 `-frtti`와 `-fno-rtti` 코드를 섞으면 "동작하지 않을 수 있다"고 적고, `-fno-rtti`로 컴파일한 클래스를 `-frtti`로 컴파일한 클래스의 base로 쓰면 링크가 실패할 수 있다는 예를 듭니다. 파생 클래스의 type_info가 base의 type_info를 참조하는데 base 쪽이 그것을 만들지 않았기 때문입니다. 공유 클래스 경계의 빌드 정책을 일관되게 관리합니다.
 
 ## 실행 확인 — any_cast·function·variant
 
@@ -387,7 +387,7 @@ clang++ -std=c++17 -fno-rtti -Wall -Wextra -Werror no-rtti.cpp -o no-rtti
 ./no-rtti
 ```
 
-RTTI on/off의 크기를 비교할 때는 다른 플래그를 고정합니다. 기존 표는 예외 설정도 동시에 바꾸고 재현 소스도 없었으므로 RTTI 단독 효과를 보여 주는 근거로 사용하지 않습니다.
+Homebrew Clang 23.1.5와 g++-16 모두 `-fno-rtti -Wall -Wextra -Werror`로 exit 0이었습니다. RTTI on/off의 크기를 비교할 때는 다른 플래그를 고정합니다. 위 [Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#2-rtti) 측정은 `-fno-exceptions`를 고정하고 RTTI만 바꿨습니다.
 
 ## 정리
 
@@ -399,7 +399,7 @@ RTTI on/off의 크기를 비교할 때는 다른 플래그를 고정합니다. �
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `no-rtti.cpp`와 `any::type()`·`target_type()`·`sizeof` 시험을 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 macOS arm64 host에서 실행했고, tag 크기는 arm-none-eabi-g++ 16.2.0에서 확인했습니다. 보드 실행은 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [libc++ any 구현의 no-RTTI 분기](https://github.com/llvm/llvm-project/blob/main/libcxx/include/any)
 

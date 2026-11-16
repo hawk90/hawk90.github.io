@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 "임베디드에서 C++를 쓰면 안 됩니다."
 
-이런 말을 들어본 적 있으신가요? 아직도 많은 임베디드 팀에서는 C++를 금기시합니다. 이유는 대략 이렇습니다:
+이런 말을 들어본 적 있으신가요? 이 말에는 다음 이유가 따라붙습니다.
 
 - "C++는 무겁다"
 - "예외 처리가 예측 불가능하다"
@@ -24,7 +24,7 @@ topics: ["embedded"]
 
 **일부는 맞고, 일부는 틀립니다.**
 
-Modern C++의 많은 기능은 **zero-cost abstraction**입니다. 동등한 수동 구현보다 추가 비용이 없도록 설계할 수 있다는 뜻이며, 모든 실행·저장 공간 비용이 0이라는 보장은 아닙니다. 이 시리즈는 임베디드에서 C++를 **안전하고 효율적으로** 사용하는 방법을 다룹니다.
+C++의 설계 원칙인 **zero-overhead principle**은 두 문장입니다. [cppreference](https://en.cppreference.com/w/cpp/language/Zero-overhead_principle)의 표현으로는 "쓰지 않는 것에는 비용을 내지 않는다"와 "쓰는 것은 손으로 합리적으로 짤 수 있는 코드만큼 효율적이다"입니다. 같은 페이지는 이 원칙을 따르지 않는 언어 기능으로 **RTTI와 예외** 두 가지를 꼽고, 그래서 대부분의 컴파일러가 이 둘을 끄는 스위치를 둔다고 적습니다. 원칙은 비용이 0이라는 약속이 아니라 *손으로 짠 코드보다 비싸지 않다*는 약속입니다. 이 시리즈는 임베디드에서 C++를 **안전하고 효율적으로** 사용하는 방법을 다룹니다.
 
 ## 대상 독자
 
@@ -201,7 +201,33 @@ CXXFLAGS += -mfpu=fpv4-sp-d16
 CXXFLAGS += -mfloat-abi=hard
 ```
 
-이 플래그는 FPU가 있는 Cortex-M4F와 hard-float ABI 라이브러리를 사용하는 예입니다. FPU 없는 M4·다른 코어에 그대로 적용하지 않습니다. `-flto`는 최종 링크에도 맞춰 전달하고, `-fno-exceptions`·`-fno-rtti`는 프로젝트 정책으로 선택합니다. 모든 대상 환경에서 이 조합을 실행 검증했다는 뜻은 아닙니다. 구체적인 재현 범위는 각 장과 [컴파일러 플래그 가이드](/blog/embedded/embedded-cpp/part1-02-compiler-flags)에 기록합니다.
+이 플래그는 FPU가 있는 Cortex-M4F와 hard-float ABI 라이브러리를 쓰는 예입니다. 마지막 두 줄이 왜 중요한지는 작은 함수 하나로 드러납니다. `float scale(float x, float k) { return x * k + 1.0f; }`를 arm-none-eabi-g++ 16.2.0으로 위 플래그(`-flto` 제외) 그대로 컴파일한 결과와, `-mfloat-abi=soft`로 바꾼 결과입니다.
+
+```text
+# -mfpu=fpv4-sp-d16 -mfloat-abi=hard
+00000000 <_Z5scaleff>:
+   0:	eef7 7a00 	vmov.f32	s15, #112	@ 0x3f800000  1.0
+   4:	eee0 7a20 	vfma.f32	s15, s0, s1
+   8:	eeb0 0a67 	vmov.f32	s0, s15
+   c:	4770      	bx	lr
+
+# -mfloat-abi=soft
+00000000 <_Z5scaleff>:
+   0:	b508      	push	{r3, lr}
+   2:	f7ff fffe 	bl	0 <__aeabi_fmul>
+   6:	f04f 517e 	mov.w	r1, #1065353216	@ 0x3f800000
+   a:	f7ff fffe 	bl	0 <__aeabi_fadd>
+   e:	bd08      	pop	{r3, pc}
+```
+
+hard-float 쪽은 인자를 `s0`·`s1` 레지스터로 받아 FPU 명령 하나(`vfma.f32`)로 끝내고, soft-float 쪽은 인자를 정수 레지스터로 받아 libgcc의 `__aeabi_fmul`·`__aeabi_fadd`를 부릅니다. 호출 규약이 다르므로 두 오브젝트를 섞어 링크하면 링커가 거부합니다.
+
+```text
+arm-none-eabi-ld: error: mix.elf uses VFP register arguments, m_soft.o does not
+arm-none-eabi-ld: failed to merge target specific data of file m_soft.o
+```
+
+그래서 FPU 없는 M4나 다른 코어에는 이 조합을 그대로 쓰지 않고, 벤더 라이브러리·RTOS 포트가 어느 ABI로 빌드됐는지(`arm-none-eabi-readelf -A`의 `Tag_ABI_VFP_args`)부터 맞춥니다. `-flto`는 컴파일과 최종 링크 양쪽에 같이 넘기고, `-fno-exceptions`·`-fno-rtti`는 프로젝트 정책으로 고릅니다. 플래그별 효과는 [컴파일러 플래그 가이드](/blog/embedded/embedded-cpp/part1-02-compiler-flags)에서 측정합니다.
 
 ## 사전 지식
 
@@ -214,20 +240,20 @@ CXXFLAGS += -mfloat-abi=hard
 
 **서적**
 - *Effective Modern C++* - Scott Meyers
-- *C++ Core Guidelines* - Stroustrup & Sutter
 - *Real-Time C++* (4th ed) - Christopher Kormanyos
 - *Large-Scale C++ Volume I* - John Lakos
 
 **온라인**
-- [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/)
+- [C++ Core Guidelines](https://isocpp.github.io/CppCoreGuidelines/) - Bjarne Stroustrup·Herb Sutter 편집
+- [cppreference: Zero-overhead principle](https://en.cppreference.com/w/cpp/language/Zero-overhead_principle)
 - [Embedded Template Library (ETL)](https://www.etlcpp.com/)
 - [Compiler Explorer](https://godbolt.org/)
 - [Embedded Artistry](https://embeddedartistry.com/)
 
 **컨퍼런스**
-- CppCon Embedded Track
-- Meeting C++ Embedded
-- Embedded World
+- [CppCon Embedded Track](https://cppcon.org/embedded/) - 2020년부터 본 프로그램 안의 트랙으로 운영
+- Meeting Embedded - Meeting C++ 전날 베를린에서 열린 1일 단일 트랙 행사(2018·2019년 기록)
+- Embedded World - 뉘른베르크 임베디드 전시회·컨퍼런스
 
 ## 이 시리즈의 목표
 

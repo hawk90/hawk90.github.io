@@ -58,7 +58,7 @@ Logger::instance().log("hello");
 단점은 다음과 같습니다.
 
 - 여전히 전역이라 테스트에서 mock하기 어렵습니다.
-- 동적 초기화에는 guard runtime이 필요할 수 있습니다. 상수 초기화로 끝나면 guard가 사라질 수도 있으며, 옵션을 끄는 것은 size 최적화 이상의 동기화 계약 변경입니다.
+- 생성자가 하는 일에 따라 비용이 갈립니다. arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -Os -fno-exceptions`에서 위 `Logger`(멤버 없음, `= default` 생성자)의 `instance()`는 상수 초기화로 끝나 주소를 돌려주는 2명령(8바이트)이었습니다. 생성자에서 `uart_init()`을 부르는 `Uart0::instance()`는 guard 검사·`dmb ish`·`__cxa_guard_acquire`/`__cxa_guard_release` 호출이 붙어 44바이트였습니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-threadsafe-statics--magic-static-끄기)). guard를 옵션으로 끄는 것은 size 최적화가 아니라 동기화 계약 변경입니다.
 
 ## 대안 2 — Static DI (생성자 주입)
 
@@ -153,7 +153,7 @@ void some_function() {
 
 - 여전히 전역이라 Singleton과 거의 같습니다.
 - register를 누락하면 nullptr이 되는 순서 의존이 있습니다.
-- anti-pattern으로 보는 시각도 있습니다.
+- 사용하는 쪽의 시그니처만 봐서는 어떤 service가 필요한지 알 수 없습니다. 위 `some_function()`이 logger를 쓴다는 사실은 본문을 읽어야 드러납니다.
 
 locator는 global registry라는 의존을 남깁니다. 교체 가능성의 이점과 등록·해제 순서·동시성 비용을 비교하고, 의존성을 드러낼 수 있는 경로는 생성자 주입을 사용합니다.
 
@@ -200,7 +200,16 @@ TEST(SensorTest, ReadDoesNotCrash) {
 
 ## 대안 4 — Template Injection (compile-time)
 
-구체 의존 type이 컴파일 타임에 결정되어 virtual dispatch를 피할 수 있습니다. 참조 저장·실제 호출·생성자 비용까지 사라진다는 뜻은 아닙니다.
+구체 의존 type이 컴파일 타임에 결정되어 virtual dispatch를 피할 수 있습니다. 단 template 인자로 넣은 타입 자체가 virtual 함수를 가지면 그대로 virtual 호출입니다. arm-none-eabi-g++ 16.2.0 `-Os`로 `read()`를 비교하면 이렇습니다.
+
+| 주입 방식 | `read()`의 `log` 호출 |
+| --- | --- |
+| `ILogger&` 생성자 주입 | vtable load 2번 + `bx r3` (간접) |
+| `Sensor<UartLogger>`, `UartLogger`가 `ILogger` 구현 (final 아님) | vtable load 2번 + `bx r3` (간접) |
+| `Sensor<FinalUart>`, `final` 클래스 | `b.w FinalUart::log` (직접) |
+| `Sensor<PlainUart>`, virtual 없는 클래스 | `b.w PlainUart::log` (직접) |
+
+`UartLogger`를 더 파생할 수 있으므로 컴파일러는 `Sensor<UartLogger>` 안에서도 실제 타입을 모릅니다. 직접 호출을 원하면 주입할 타입을 `final`로 두거나 interface 상속 없이 만듭니다.
 
 ```cpp
 template<typename Logger>
@@ -215,13 +224,13 @@ public:
 UartLogger logger;
 Sensor<UartLogger> sensor(logger);
 
-sensor.read();   // logger_.log 직접 호출 — inline 가능
+sensor.read();   // UartLogger가 final이거나 virtual이 없을 때 직접 호출
 ```
 
 장점은 다음과 같습니다.
 
-- compiler가 구체 호출을 인라인할 여지가 있습니다. 실제 연산 비용은 남습니다.
-- virtual 호출이 없습니다.
+- 주입 타입이 final이거나 virtual이 없으면 직접 호출이 되고, 정의가 보이면 인라인될 수 있습니다.
+- 위 표처럼 이 조건을 어기면 virtual 호출이 남습니다.
 
 단점은 다음과 같습니다.
 
@@ -286,7 +295,7 @@ interface를 통한 의존성을 둡니다. 운영 환경에서는 `Uart0::insta
 ## 자주 보는 함정과 안티패턴
 
 ### 1. Singleton 남용
-"전역 접근이 편하다"는 이유로 모든 service를 singleton으로 만들면 테스트가 지옥이 됩니다. DI를 우선합니다.
+"전역 접근이 편하다"는 이유로 모든 service를 singleton으로 만들면, 테스트마다 전역 상태를 되돌려야 하고 fake로 바꿀 방법이 없습니다. DI를 우선합니다.
 
 ### 2. Singleton의 destructor 의존
 전원 차단·reset 또는 종료 없는 loop에서는 정상 종료 소멸자를 기대할 수 없습니다. local scope의 RAII 소멸자는 별도이며, 중요 영속화와 하드웨어 안전 처리는 제품 종료·오류 프로토콜로 설계합니다.
@@ -304,7 +313,7 @@ task가 하나여도 ISR이나 재귀 초기화 진입이 있으면 안전하다
 C++의 정상 종료에서는 완료된 초기화 순서에 따른 파괴 순서 규칙이 있습니다. 이를 단순 unspecified라고 해석하면 안 됩니다. 이미 파괴된 객체를 다른 소멸자가 재사용하는 의존은 위험하며, reset·전원 차단·비정상 종료에는 정상 종료 소멸자 보장이 적용되지 않습니다.
 
 ### 5. Service Locator의 register 순서
-register하지 않은 service를 사용하면 nullptr로 crash가 납니다. 순서를 명시합니다.
+register하지 않은 service를 검사 없이 쓰면 null 포인터 역참조입니다. 위 예처럼 `nullptr`을 검사하거나, main의 wiring 순서에서 register를 사용보다 먼저 둡니다.
 
 ### 6. Mock 못 하는 객체
 모든 의존성이 concrete singleton이면 mock이 불가능합니다. interface를 통해 주입합니다.
@@ -414,7 +423,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 C++17 host에서 ASan·UBSan으로 실행했습니다. concrete Logger를 받던 예제와 다른 Fake를 억지로 섞지 않고, 둘이 같은 ILogger interface를 구현하도록 맞췄습니다. BAD_PHANTOM_TAG는 서로 다른 role type 때문에 컴파일 실패합니다. fake의 std::string 할당은 host 검사 용도이며 no-heap target 구현이라고 주장하지 않습니다.
+Homebrew Clang 23.1.5와 g++-16에서 C++17·ASan·UBSan으로 실행해 둘 다 `fake injection/locator lifetime/phantom tag checks passed`를 출력했습니다. `-DBAD_PHANTOM_TAG`는 g++-16에서 `error: could not convert 'DiagnosticRef{...}' from 'RoleRef<DiagnosticTag,[...]>' to 'RoleRef<LoggingTag,[...]>'`로 거부됩니다. concrete Logger를 받던 예제와 다른 Fake를 억지로 섞지 않고, 둘이 같은 ILogger interface를 구현하도록 맞췄습니다. BAD_PHANTOM_TAG는 서로 다른 role type 때문에 컴파일 실패합니다. fake의 std::string 할당은 host 검사 용도이며 no-heap target 구현이라고 주장하지 않습니다.
 
 ## 1차 자료와 한계
 
@@ -429,9 +438,9 @@ Clang 23.1.3 C++17 host에서 ASan·UBSan으로 실행했습니다. concrete Log
 - 전역 접근·유일성·초기화·소유권을 구분하고 실제 테스트와 수명 비용으로 판단합니다.
 - Construct-On-First-Use는 지연 초기화이며, 생성자 주입·template injection·locator는 의존성 접근 방식을 바꿉니다.
 - Static DI를 권장합니다. main에서 wiring하고 의존성을 명시합니다.
-- Template injection은 구체 type의 직접 호출을 가능하게 하며 최적화 결과는 산출물로 확인합니다.
+- Template injection은 주입 타입이 final이거나 virtual이 없을 때 직접 호출이 됩니다(Cortex-M4 `-Os` 측정).
 - 진짜 hardware singleton도 interface를 거쳐 DI합니다.
-- DI framework는 임베디드에 overkill이므로 manual wiring을 사용합니다.
+- 객체 그래프가 main에서 한 번 만들어지고 바뀌지 않는 firmware에서는 DI framework 없이 main의 manual wiring으로 충분합니다.
 
 ## 관련 항목
 

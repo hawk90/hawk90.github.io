@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Concepts = templates의 type safety."** — 어떤 type을 받는지 함수 시그니처에 명시되며, 에러 메시지가 사람이 읽을 수 있는 형태가 됩니다.
+> **"Concepts = templates의 type safety."** — 어떤 type을 받는지 함수 시그니처에 명시되며, 에러가 템플릿 본문이 아니라 호출 위치에서 어느 조건이 깨졌는지와 함께 보고됩니다.
 
 ## 어떤 문제를 푸는가
 
@@ -30,17 +30,15 @@ add(std::string("a"), std::string("b"));   // OK
 add(MyStruct{}, MyStruct{});               // ERROR — operator+ 없으면 컴파일 에러
 ```
 
-에러 메시지가 수십 줄짜리 내부 detail로 쏟아져 사용자가 이해하기 어렵습니다.
+`add(MyStruct{}, MyStruct{})`를 컴파일하면 오류는 템플릿 본문의 `a + b`에서 납니다. g++-16의 출력입니다(전체 7줄, 소스 인용 줄 생략).
 
 ```text
-error: no match for 'operator+' (operand types are 'MyStruct' and 'MyStruct')
-note: candidates are:
-note:  /usr/include/c++/11/bits/stl_iterator.h:1234:5: note: ...
-note:  /usr/include/c++/11/bits/stl_function.h:567:1: note: ...
-(continue for 30 lines)
+add.cpp: In instantiation of 'T add(T, T) [with T = MyStruct]':
+add.cpp:11:26:   required from here
+add.cpp:10:28: error: no match for 'operator+' (operand types are 'MyStruct' and 'MyStruct')
 ```
 
-C++20의 **concepts**는 제약을 시그니처에 명시하고 명확한 에러 메시지를 제공합니다.
+이 예는 짧습니다. 문제는 템플릿이 깊어질 때입니다. [Part 2-06](/blog/embedded/embedded-cpp/part2-06-templates-basics#4-template-error-message-폭증)의 `std::sort(list)`처럼 오류가 라이브러리 내부 줄을 가리키고, 사용자는 어떤 조건을 어겼는지 거꾸로 추적해야 합니다. C++20의 **concepts**는 제약을 시그니처에 명시해 오류를 호출 위치로 끌어옵니다.
 
 ## Concept 정의
 
@@ -58,14 +56,21 @@ T add(T a, T b) {
 }
 
 add(1, 2);                  // OK
-add(MyStructWithoutPlus{}, MyStructWithoutPlus{});
-// ERROR — but with clear message:
-// error: no matching function for call to 'add'
-// note: candidate template ignored: constraints not satisfied
-// note: because 'MyStructWithoutPlus' does not satisfy 'Addable'
+add(MyStruct{}, MyStruct{});  // ERROR — 호출 위치에서 거부
 ```
 
-에러 메시지가 의미를 가지며, "Addable을 만족하지 않는다"는 사실이 즉시 드러납니다.
+Clang 23.1.5의 출력입니다(note 줄만, 전체 13줄).
+
+```text
+add.cpp:11:23: error: no matching function for call to 'add'
+add.cpp:10:3: note: candidate template ignored: constraints not satisfied [with T = MyStruct]
+add.cpp:6:10: note: because 'MyStruct' does not satisfy 'Addable'
+add.cpp:5:65: note: because 'a + b' would be invalid: invalid operands to binary expression ('MyStruct' and 'MyStruct')
+```
+
+오류 위치가 `add`의 본문(10행)에서 호출(11행)로 옮겨 왔고, "Addable을 만족하지 않는다"와 그 이유가 순서대로 나옵니다. 줄 수는 오히려 늘었습니다. 같은 파일을 g++-16으로 컴파일하면 concept 없는 버전이 7줄, concept 버전이 29줄이었습니다. concept의 이득은 짧은 메시지가 아니라 조건이 이름으로 보인다는 점입니다.
+
+이 `Addable`은 `std::int8_t`도 거부합니다. `int8_t + int8_t`는 정수 승격으로 `int`가 되므로 `-> std::same_as<T>`가 거짓이고, Clang은 `because 'std::same_as<int, signed char>' evaluated to false`라고 알려 줍니다. 임베디드 코드에서 흔한 작은 정수 타입을 받으려면 `-> std::convertible_to<T>`처럼 조건을 고릅니다.
 
 ## Concept syntax 세 가지
 
@@ -96,7 +101,7 @@ auto square(std::integral auto x) {
 }
 ```
 
-가장 짧고, 함수 시그니처 자체가 제약을 표현하므로 권장됩니다.
+가장 짧고, 함수 시그니처 자체가 제약을 표현합니다. 다만 `T`라는 이름이 없으므로 본문에서 타입이 필요하면 `decltype(x)`를 써야 하고, 두 매개변수가 같은 타입이어야 한다는 조건은 시그니처만으로 표현할 수 없고(`std::integral auto a, std::integral auto b`는 서로 다른 타입을 허용합니다), `requires std::same_as<decltype(a), decltype(b)>`를 따로 붙여야 합니다.
 
 ## 표준 concepts (`<concepts>`·`<compare>`·`<ranges>`)
 
@@ -234,6 +239,8 @@ write_field(double(1.5));      // ERROR — double은 8 byte
 write_field(std::string());    // ERROR — not numeric
 ```
 
+`double` 호출에 Clang 23.1.5는 `note: because 'double' does not satisfy 'LightweightNumeric'`과 `note: because 'sizeof(double) <= 4' (8 <= 4) evaluated to false`를 내, 조합된 concept의 어느 항이 깨졌는지까지 보여 줬습니다.
+
 ## CRTP + Concepts — 강력한 결합
 
 [Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism)의 CRTP를 concept으로 명확하게 만듭니다.
@@ -261,8 +268,9 @@ class BadLogger : public LoggerBase<BadLogger> {
 public:
     // 이 선언 자체는 가능; BadLogger{}.log("x") 호출 때 제약 실패
 };
-// error: BadLogger does not satisfy 'LoggerImpl'
 ```
+
+아래 `concept-check.cpp`에서 같은 구조의 `Bad`에 `log()`를 부르면 Clang 23.1.5는 `error: invalid reference to function 'log': constraints not satisfied`, `note: because 'Bad' does not satisfy 'LoggerImpl'`, `note: because 't.log_impl()' would be invalid: no member named 'log_impl' in 'Bad'`를 냅니다.
 
 base를 지정할 때 Derived는 불완전하므로 class template 매개변수에 멤버 검사 concept을 적용하지 않습니다. Derived 정의가 끝난 뒤 멤버 호출의 제약을 평가하며, 정상 구현은 호출되고 누락된 구현의 호출만 거부됩니다.
 
@@ -328,7 +336,7 @@ print(1.5);     // float 버전
 print("str");   // fallback
 ```
 
-이 예제는 integral/floating_point 후보가 fallback보다 우선합니다. 일반적으로 제약의 우선순위는 논리적으로 더 강해 보이는 조건의 개수로 정해지지 않으며, 표준의 atomic constraint 동일성과 subsumption 규칙을 따릅니다. 서로 비교 불가능하면 모호해질 수 있습니다.
+이 예제는 integral/floating_point 후보가 fallback보다 우선합니다. 제약된 템플릿은 제약 없는 템플릿보다 더 제약된 것으로 순서가 정해지기 때문입니다([temp.constr.order]). 두 제약된 후보 사이의 순서는 조건의 개수가 아니라 atomic constraint가 같은 식인지와 subsumption으로 정해지며, 한쪽이 다른 쪽을 포함하지 않으면 호출이 모호해집니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -345,7 +353,7 @@ concept Foo = requires(T t) {
     // ... 20 more
 };
 ```
-작은 concept으로 분해해 조합합니다.
+조건이 많으면 하나가 실패했을 때 진단이 그 많은 조건을 따라가며 길어집니다. 작은 concept으로 분해해 `&&`로 조합하면 위 `LightweightNumeric`처럼 어느 부분 concept이 실패했는지 진단에 이름으로 나옵니다.
 
 ### 2. requires 표현이 의도와 어긋남
 ```cpp
@@ -402,13 +410,13 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors concept-check.cpp -o concept-check && ./concept-check`로 정상 구현을 호출했습니다. `-DBAD_CALL`은 `constraints not satisfied` 진단으로 거부됩니다. 이전처럼 base 자체에 제약을 옮기면 Good의 base 지정 시점에도 멤버 검사가 실패합니다.
+Homebrew Clang 23.1.5, arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors concept-check.cpp -o concept-check && ./concept-check`가 exit 0이었습니다. `-DBAD_CALL`은 위의 `constraints not satisfied` 진단으로, g++-16에서는 `error: no matching function for call to 'Bad::log()'`로 거부됩니다. 제약을 base 템플릿 매개변수로 옮기면 `Good`의 base 지정 시점에 검사가 실패한다는 것은 [Part 2-08](/blog/embedded/embedded-cpp/part2-08-static-polymorphism#c20-concepts--crtp)에서 두 컴파일러로 확인했습니다.
 
-[atomic constraint 규칙](https://eel.is/c++draft/temp.constr.atomic)과 [제약의 부분 순서 규칙](https://eel.is/c++draft/temp.constr.order)을 참고합니다. concept 사용 자체가 더 작은 코드나 더 빠른 컴파일을 보장하지 않으며 진단의 줄 수도 컴파일러에 따라 달라집니다.
+[atomic constraint 규칙](https://eel.is/c++draft/temp.constr.atomic)과 [제약의 부분 순서 규칙](https://eel.is/c++draft/temp.constr.order)을 참고합니다. concept은 오버로드 후보를 고르는 컴파일 타임 장치라 생성 코드를 바꾸지 않습니다.
 
 ## C++20 concepts의 실용 가치
 
-1. **에러 메시지** — 가장 큰 이점입니다. 호출 위치에서 어떤 계약을 만족하지 않는지 드러낼 수 있습니다.
+1. **에러 메시지** — 호출 위치에서 어떤 계약을 만족하지 않는지 드러냅니다. 위 측정처럼 메시지가 짧아지지는 않습니다.
 2. **자체 문서화** — 함수 시그니처가 제약을 명시합니다.
 3. **오버로드 명확화** — 더 specific한 concept이 우선합니다.
 4. **SFINAE 대체** — 짧고 읽기 좋습니다.
@@ -419,7 +427,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-error
 - 표준 concepts는 `<concepts>`와 `<ranges>`에 풍부하게 준비돼 있습니다.
 - 3가지 syntax를 지원합니다 — `requires`, `template<Concept T>`, `auto func(Concept auto x)`.
 - CRTP와 concept을 함께 쓰면 interface가 명확해지고 누락된 멤버는 명확한 에러로 드러납니다.
-- SFINAE를 대체하며 짧고 읽기 좋고 에러 메시지가 훨씬 명확합니다.
+- SFINAE를 대체하며, 진단이 실패한 concept과 그 이유를 이름으로 보여 줍니다.
 - toolchain 버전·언어 모드·최소 예제로 실제 지원을 확인합니다.
 
 ## 관련 항목

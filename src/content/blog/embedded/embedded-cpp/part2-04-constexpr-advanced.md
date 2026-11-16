@@ -23,7 +23,7 @@ topics: ["embedded"]
 - 복잡한 데이터 구조를 Flash에 직접 박습니다.
 - 디자인 결정을 컴파일 타임에 검증합니다.
 
-상수식 문맥에서 완료한 계산에는 런타임 생성 루프가 필요하지 않습니다. 결과 데이터의 저장 위치와 전체 Flash/RAM 증감은 링커 배치와 비교 대상에 따라 확인합니다.
+상수식 문맥에서 완료한 계산에는 런타임 생성 루프가 필요하지 않습니다. 결과 데이터가 `.rodata`에 놓이고 `.init_array`가 생기지 않는다는 것은 [Part 2-03](/blog/embedded/embedded-cpp/part2-03-constexpr-basics)에서 arm-none-eabi-g++ 16.2.0으로 확인했습니다. 이 글의 호스트 실행은 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 했습니다.
 
 ## 컴파일 타임 sort
 
@@ -52,7 +52,7 @@ constexpr std::array<int, 5> make_sorted() {
 constexpr auto sorted = make_sorted();   // {1, 2, 4, 5, 8} at compile time
 ```
 
-`sorted`는 Flash에 정렬된 데이터로 들어가며 런타임 정렬은 사라집니다.
+`sorted`는 정렬이 끝난 데이터로 `.rodata`에 들어가며 런타임 정렬은 사라집니다.
 
 ### C++20 — std::sort 사용
 
@@ -64,7 +64,7 @@ constexpr auto make_sorted() {
 }
 ```
 
-컴파일러 언어 모드뿐 아니라 표준 라이브러리의 `__cpp_lib_constexpr_algorithms` 지원도 필요합니다. 아래 C++20 호스트 예제로 실제 조합을 확인합니다.
+컴파일러 언어 모드뿐 아니라 표준 라이브러리의 `__cpp_lib_constexpr_algorithms` 지원도 필요합니다. 아래 `advanced-check.cpp`를 `-std=c++17`로 컴파일하면 Clang 23.1.5는 `std::sort`보다 앞서 C++17의 `std::array` `operator==`가 `constexpr`이 아니라는 이유로 `error: constexpr function never produces a constant expression`을 냅니다. `-std=c++20`에서는 두 컴파일러 모두 통과합니다.
 
 ## 컴파일 타임 binary search
 
@@ -90,7 +90,7 @@ constexpr int idx = binary_search(sorted, 31);   // = 4, compile time
 static_assert(idx == 4);
 ```
 
-`idx`는 컴파일 타임에 4로 확정되고, 런타임 binary search 코드가 0이 됩니다.
+`idx`는 컴파일 타임에 4로 확정됩니다. `binary_search`를 런타임 인자로 부르는 곳이 없으면 그 함수의 코드는 만들어지지 않습니다.
 
 ## 컴파일 타임 문자열 처리
 
@@ -140,7 +140,7 @@ switch (event_hash) {
 }
 ```
 
-32비트 해시는 충돌할 수 있습니다. 등록한 case 값끼리의 충돌은 컴파일 오류가 될 수 있지만 외부 입력이 같은 해시를 갖는 경우는 별도 원문 비교가 필요합니다. switch가 비교 한 번으로 끝나거나 입력 문자열의 해시 계산 비용까지 없어지는 것은 아닙니다.
+세 상수는 호스트에서 출력해 보면 `0x6e70d7bc`, `0x483521d8`, `0xded16d06`으로 서로 다릅니다. 32비트 해시는 충돌할 수 있지만, 등록한 case 값끼리 충돌하면 같은 값의 `case`가 두 번 나오므로 컴파일 오류가 됩니다([stmt.switch]/2). 외부 입력이 등록된 이름과 같은 해시를 갖는 경우는 컴파일러가 잡지 못하므로 case 안에서 원문을 한 번 더 비교합니다. 입력 문자열의 해시 계산은 여전히 런타임 비용입니다.
 
 ## 컴파일 타임 데이터 변환
 
@@ -165,7 +165,7 @@ constexpr auto fixed_thresholds = make_fixed_point();
 // 컴파일 타임 변환된 fixed-point 값들이 Flash에
 ```
 
-FPU가 없는 MCU에서는 float을 쓰지 않게 됩니다. 컴파일러가 런타임 float→fixed 변환 코드를 생성하지 않기 때문입니다.
+FPU가 없는 MCU에서는 이 변환이 런타임 float 헬퍼 호출을 없앱니다. 같은 코드를 `std::array` 대신 작은 `Array` 구조체로 바꾸고, `sample_q16 >= fixed_thresholds[i]`로 단계를 세는 함수를 더해 Cortex-M0(`-mcpu=cortex-m0 -Os`)로 컴파일하면 오브젝트에 미정의 심볼이 하나도 없었습니다. `__aeabi_f*` 헬퍼가 없다는 뜻입니다. `.rodata`는 Q16.16 표 32바이트뿐이고 첫 값은 `0x000A8000`(10.5 × 65536 = 688128)이었습니다. 런타임에 쓰이지 않는 `raw_thresholds`는 오브젝트에 남지 않았습니다.
 
 ## 컴파일 타임 verification
 
@@ -184,15 +184,17 @@ static_assert(kTotalStackMemory <= kAvailableRamForStacks,
 // 32는 65536 == 65536이므로 통과; 33부터 컴파일 에러
 ```
 
-RAM 부족이 production에서 발견되는 대신 빌드 시점에 차단됩니다.
+`-DTASKS=33`으로 아래 예제를 컴파일하면 Clang 23.1.5는 `error: static assertion failed due to requirement '33 * 2048 <= 64 * 1024': stack budget exceeded`와 `note: expression evaluates to '67584 <= 65536'`을 냅니다. 예약 크기가 넘치는 설정은 빌드 시점에 멈춥니다.
 
 ## 컴파일 타임 register 비트 마스크 생성
 
 여러 비트 필드의 마스크를 함수로 표현합니다.
 
 ```cpp
+void invalid_pin();   // constexpr가 아닌 함수: 상수 평가에서 닿으면 컴파일 오류
+
 constexpr uint32_t pin_mask(int pin) {
-    if (pin < 0 || pin >= 32) throw "invalid pin";
+    if (pin < 0 || pin >= 32) invalid_pin();
     return uint32_t{1} << pin;
 }
 
@@ -207,11 +209,15 @@ constexpr uint32_t kLedMask = pins_mask({13, 14, 15});   // 0xE000
 GPIOA->ODR |= kLedMask;   // 런타임에 그냥 상수 OR
 ```
 
-매크로 `#define LED_MASK ((1<<13)|(1<<14)|(1<<15))` 대신 타입 안전성과 디버깅 가능성을 갖춘 함수형 표현을 씁니다.
+잘못된 핀 번호를 상수 평가에서 쓰면 `invalid_pin()` 호출에 닿아 컴파일이 멈춥니다. arm-none-eabi-g++ 16.2.0은 `pin_mask(40)`에 `error: call to non-'constexpr' function 'void invalid_pin()'`를 냈습니다. 런타임 인자로 부르면 `invalid_pin()`이 실제로 불리므로, 그 함수를 오류 처리기로 정의합니다.
+
+이전 버전은 이 자리에 `throw "invalid pin";`을 썼습니다. 이 시리즈의 기본 플래그인 `-fno-exceptions`에서는 그 함수가 상수 평가로만 쓰여도 컴파일되지 않습니다. arm-none-eabi-g++ 16.2.0은 `error: exception handling disabled, use '-fexceptions' to enable`, Clang 23.1.5는 `error: cannot use 'throw' with exceptions disabled`였습니다. 위 `invalid_pin()` 버전은 `-fno-exceptions -Wall -Wextra -pedantic-errors`에서 g++-16과 Clang 23.1.5 모두 통과했습니다.
+
+매크로 `#define LED_MASK ((1<<13)|(1<<14)|(1<<15))` 대신 범위 검사를 갖춘 함수형 표현을 씁니다.
 
 ## 컴파일 타임 enum-to-string
 
-런타임에 enum 이름을 얻으려면 보통 switch나 array를 씁니다. `constexpr`로도 표현할 수 있습니다.
+런타임에 enum 이름을 얻으려면 switch나 배열을 씁니다. 같은 switch를 `constexpr`로 표현할 수 있습니다.
 
 ```cpp
 enum class State { Idle, Running, Paused, Stopped };
@@ -248,7 +254,7 @@ constexpr int sum_vector() {
 constexpr int sum = sum_vector();   // = 5050
 ```
 
-컴파일 타임에 vector를 생성하고 사용하고 소멸시킵니다. 런타임 heap 사용량은 0입니다.
+컴파일 타임에 vector를 생성하고 사용하고 소멸시킵니다. 런타임 heap 사용량은 0입니다. `static_assert(sum == 5050)`을 붙인 이 코드는 `-std=c++20`에서 g++-16과 Clang 23.1.5 모두 통과했습니다. 라이브러리 쪽 `constexpr std::vector`는 cppreference 지원 표 기준 libstdc++ 12, libc++ 15부터입니다.
 
 함수가 vector를 반환하는 선언 자체는 허용됩니다. 다만 C++20에서 할당을 유지하는 vector를 `constexpr` 변수로 보존할 수는 없습니다. 상수 평가 안에서 결과를 소비하고 할당을 해제하거나 고정 크기 배열로 결과를 반환합니다.
 
@@ -289,30 +295,30 @@ constexpr int find_irq(const char* name) {
 ## 자주 보는 함정과 안티패턴
 
 ### 1. 컴파일 시간 폭증
-큰 LUT나 복잡한 알고리즘은 분 단위 컴파일로 이어집니다. 적정 크기와 단순한 알고리즘을 유지합니다.
+상수 평가에는 컴파일러별 한도가 있습니다. [Part 2-03](/blog/embedded/embedded-cpp/part2-03-constexpr-basics#3-큰-constexpr-lut으로-컴파일-시간-폭증)에서 원소 100만 개짜리 테이블은 GCC의 루프 한도(262,144)와 Clang의 단계 한도에 걸려 컴파일되지 않았습니다. 한도를 올리기 전에 테이블 크기와 알고리즘부터 줄입니다.
 
 ### 2. constexpr 함수가 런타임에만 호출됨
 ```cpp
 constexpr int f(int x) { /* */ }
 int y = f(read_input());   // 런타임 호출 — constexpr 효과 없음
 ```
-컴파일러는 상수 인자만 컴파일 타임으로 처리합니다. `constexpr` 변수에 대입해 강제해야 합니다.
+런타임 인자로는 컴파일 타임 평가가 불가능합니다. 상수 인자라도 결과를 일반 변수로 받으면 평가가 의무는 아닙니다. 컴파일 타임 결과가 필요하면 `constexpr` 변수로 받거나 `consteval`([Part 2-05](/blog/embedded/embedded-cpp/part2-05-consteval-constinit))로 강제합니다.
 
 ### 3. 큰 컴파일 타임 string 처리
-긴 문자열의 컴파일 타임 hash나 정규식은 분 단위가 걸립니다. 작은 set에만 사용합니다.
+문자열 처리도 문자 하나하나가 평가 단계를 씁니다. 긴 문자열의 해시나 파싱은 함정 1의 한도에 같은 방식으로 걸리므로 작은 set에만 사용합니다.
 
 ### 4. 표준 라이브러리 지원 구분
 
-C++17/20에서 `std::sin`은 상수 평가용 표준 API가 아닙니다. 직접 근사를 구현하면 입력 범위와 오차를 별도로 검증합니다([Part 2-03](/blog/embedded/embedded-cpp/part2-03-constexpr-basics)).
+C++17/20에서 `std::sin`은 `constexpr`이 아닙니다. g++-16은 내장 함수 확장으로 받아들이고 Clang 23.1.5는 거부했습니다([Part 2-03](/blog/embedded/embedded-cpp/part2-03-constexpr-basics#2-상수-평가에서-비상수-함수-호출)). 직접 근사를 구현하면 입력 범위와 오차를 별도로 검증합니다.
 
 ### 5. static_assert 메시지 누락
 ```cpp
-static_assert(kSize <= 4096);   // 실패 시 메시지 없음
+static_assert(kSize <= 4096);   // C++17부터 메시지 생략 가능
 ```
-명확한 메시지를 붙입니다. `static_assert(kSize <= 4096, "Size exceeds buffer limit")`.
+`kSize`가 8192일 때 g++-16은 `error: static assertion failed`만, Clang 23.1.5는 `error: static assertion failed due to requirement 'kSize <= 4096'`과 `note: expression evaluates to '8192 <= 4096'`을 냈습니다. 어느 설계 제약을 어겼는지 알려면 메시지를 붙입니다. `static_assert(kSize <= 4096, "Size exceeds buffer limit")`.
 
 ### 6. 컴파일러 버전 차이
-C++17 `constexpr` 기능과 C++20 사이에 차이가 큽니다. toolchain을 확인하고 `__cpp_lib_constexpr_algorithms` 같은 feature macro를 활용합니다.
+C++17과 C++20 사이에 `constexpr` 범위가 크게 다릅니다. 위 `advanced-check.cpp`가 C++17에서 거부된 것처럼, `std::sort`·`std::array`의 비교·`std::vector`가 C++20에서 `constexpr`이 됐습니다. `__cpp_lib_constexpr_algorithms` 같은 feature macro로 분기합니다.
 
 ## constexpr이 못 하는 것
 
@@ -320,7 +326,7 @@ C++17 `constexpr` 기능과 C++20 사이에 차이가 큽니다. toolchain을 �
 - 파일, 콘솔, 네트워크 같은 I/O
 - 진정한 random number generation(deterministic만 가능)
 - time, mutex, thread 같은 시스템 API
-- 대부분의 환경에서 `reinterpret_cast`
+- `reinterpret_cast`(상수식에서 금지, [expr.const])
 
 이런 작업은 런타임에만 가능합니다. `constexpr`이 모든 것을 대체하지는 않습니다.
 
@@ -356,7 +362,7 @@ static_assert(standard_sort());
 int main() {}
 ```
 
-Clang 23.1.3과 설치된 libc++ 조합에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors advanced-check.cpp -o advanced-check`로 확인했습니다. `-DTASKS=33`는 예산 static_assert로 거부됩니다.
+Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++) 모두 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors advanced-check.cpp -o advanced-check`가 경고 없이 통과했습니다. `-DTASKS=33`은 위에서 본 예산 static_assert로 거부됩니다.
 
 [C++20 N4861 sort 요건](https://timsong-cpp.github.io/cppwp/n4861/alg.sort)과 [상수식 요건](https://timsong-cpp.github.io/cppwp/n4861/expr.const)을 참고합니다. STM32의 초기화 시간과 크기는 이 예제로 측정하지 않았으며, 실제 저장 위치는 대상 링커 map으로 확인합니다.
 

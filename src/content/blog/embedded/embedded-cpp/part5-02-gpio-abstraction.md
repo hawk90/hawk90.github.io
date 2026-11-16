@@ -117,15 +117,18 @@ Pin number도 컴파일 타임에 결정됩니다. invalid pin은 `static_assert
 LedRed::set();
 ```
 
+arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -mthumb -Os`로 `LedRed::set()` 한 줄짜리 함수를 컴파일한 결과입니다.
+
 ```text
-LedRed::set():
-    ldr     r3, =0x40020018      ; BSRR address
-    movs    r2, #32              ; 1 << 5
-    str     r2, [r3]
-    bx      lr
+00000000 <_Z7led_setv>:
+   0:	ldr	r3, [pc, #4]	@ (8 <_Z7led_setv+0x8>)
+   2:	movs	r2, #32
+   4:	str	r2, [r3, #24]
+   6:	bx	lr
+   8:	.word	0x40020000
 ```
 
-명령 형태 설명용 예시이며 대상 빌드에서 측정한 출력은 아닙니다. 인라인·코드 크기·실제 GPIO 파형은 실제 toolchain과 보드에서 확인합니다.
+포트 주소를 literal pool에서 읽고, BSRR(offset 24)에 `1 << 5` = 32를 한 번 씁니다. 함수 호출은 남지 않았습니다. 보드의 GPIO 파형은 측정하지 않았습니다.
 
 ## Pin 그룹 — 여러 pin 동시 조작
 
@@ -143,7 +146,7 @@ Leds::set_all();
 Leds::clear_all();
 ```
 
-C++17 fold expression으로 variadic을 처리합니다. 각 호출이 volatile BSRR store를 수행하므로 하나의 store로 합쳐질 것이라 가정하지 않습니다. 같은 port에서 한 번에 변경하려면 아래의 mask API로 한 번의 쓰기를 명시합니다.
+C++17 fold expression으로 variadic을 처리합니다. 각 호출이 volatile BSRR store라서 컴파일러가 합치지 않습니다. 같은 port의 5·6·7번 핀으로 컴파일하면 `GpioGroup::set_all()`은 `str`이 세 번(32, 64, 128), 아래 `GpioMask::set_all()`은 `movs r2, #224` 뒤 `str` 한 번이었습니다. 세 핀이 같은 순간에 바뀌어야 하면 mask API로 한 번의 쓰기를 명시합니다.
 
 ## Pin 출력 직접 조작 (한 번에)
 
@@ -229,7 +232,7 @@ blink_n_times<LedRed>(5, 500);
 
 ## Alternative function 매핑
 
-대부분의 peripheral pin은 alternative function을 가집니다(STM32 datasheet 참조).
+STM32F4의 GPIO 핀은 AFR 레지스터의 4비트 필드로 AF0~AF15 중 하나를 고르고, 각 번호가 어느 peripheral 기능인지는 품번별 datasheet의 alternate function 표가 정합니다.
 
 ```cpp
 enum class AltFn : uint8_t {
@@ -320,7 +323,7 @@ void set_pin(int pin) {   // template parameter 아님
 }
 ```
 
-template으로 컴파일 타임에 결정하면 type safety와 zero-cost를 함께 얻습니다.
+runtime `pin`이면 shift가 명령으로 남고 범위 검사도 runtime `if`가 됩니다. template으로 결정하면 위 `LedRed::set()`처럼 즉치값 store 하나가 되고, 범위 밖 핀은 `static_assert`로 컴파일 단계에서 막힙니다.
 
 ### 2. configure 누락
 
@@ -359,7 +362,7 @@ production에서 pin이 변경되어야 한다면 template 방식으로는 부�
 
 ### 6. 출력 slew 설정 누락
 
-GPIO speed 필드는 보통 출력 드라이버 slew 특성이며 UART baud나 SPI clock 주파수 그 자체가 아닙니다. 부하·전압·EMI·신호 무결성을 고려해 설정하고 보드에서 확인합니다.
+STM32F4의 OSPEEDR 필드는 출력 드라이버의 slew 특성(Low/Medium/High/Very high speed)을 고르며, UART baud나 SPI clock 주파수 그 자체가 아닙니다. 부하·전압·EMI·신호 무결성을 고려해 설정하고 보드에서 확인합니다.
 
 ## 작은 예제 — 설정을 실제 backend에 적용
 
@@ -405,7 +408,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors gpio-check.cpp -o gpio-check && ./gpio-check`로 출력+pull-up·open-drain 허용, 다른 mode 필드 보존, 두 BSRR 명령을 확인했습니다. `-DBAD_PIN`은 컴파일 실패합니다.
+Homebrew Clang 23.1.5와 g++-16, arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-errors gpio-check.cpp -o gpio-check && ./gpio-check`가 exit 0으로 출력+pull-up·open-drain 허용, 다른 mode 필드 보존, 두 BSRR 명령을 통과했습니다. `-DBAD_PIN`은 g++-16에서 `error: static assertion failed: pin must be below 16`으로 거부됩니다.
 
 [ST HAL GPIO v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_gpio.c)는 pin 인자를 비트 mask로 받고 set/reset에 BSRR을 사용합니다. 실제 MCU 주소와 비트 정의는 [STM32F407xx CMSIS v2.6.10](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.10/Include/stm32f407xx.h)을 참고합니다.
 
@@ -415,7 +418,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++20 -Wall -Wextra -pedantic-error
 - Port와 Pin number를 모두 컴파일 타임에 결정하므로 invalid pin은 `static_assert`로 잡힙니다.
 - Concept으로 GPIO interface를 정의하면 generic 함수가 type-safe해집니다.
 - Board-specific type alias 헤더로 다중 보드를 지원합니다.
-- Configuration도 컴파일 타임에 결정하며 `if constexpr`로 분기합니다.
+- Configuration도 C++20 class 타입 NTTP로 컴파일 타임에 고정할 수 있습니다(위 `gpio-check.cpp`).
 
 ## 관련 항목
 

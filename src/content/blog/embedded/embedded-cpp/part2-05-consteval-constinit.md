@@ -30,7 +30,7 @@ int b = square(read_input());        // 런타임 — 의도 아님
 C++20의 **`consteval`**과 **`constinit`**이 이 빈틈을 메웁니다.
 
 - `consteval`은 함수가 컴파일 타임에만 호출되도록 강제합니다. 런타임 호출은 컴파일 에러입니다.
-- `constinit`은 지정한 static/thread 저장 기간 변수의 동적 초기화를 금지합니다. 초기값을 RAM에 복사하는 시작 코드나 이후 읽기·수정 비용까지 제거하지는 않습니다.
+- `constinit`은 지정한 static/thread 저장 기간 변수의 동적 초기화를 금지합니다. 초기값을 RAM에 복사하는 시작 코드나 이후 읽기·수정 비용까지 제거하지는 않습니다. `constinit int counter = 0;`과 `constinit int pi_thousand = 3141;`을 arm-none-eabi-g++ 16.2.0으로 컴파일하면 `counter`는 `.bss`, `pi_thousand`는 `.data`에 놓였고 `.init_array`는 없었습니다. `.data`에 놓인 값은 [Part 1-06](/blog/embedded/embedded-cpp/part1-06-startup-code)의 Reset_Handler가 Flash에서 RAM으로 복사합니다.
 
 ## `consteval` — Immediate Function
 
@@ -57,9 +57,12 @@ struct PinId {
     int pin;
 };
 
+void invalid_port();   // constexpr가 아닌 오류 함수
+void invalid_pin();
+
 consteval PinId make_pin(int port, int pin) {
-    if (port < 0 || port > 7) throw "invalid port";   // 컴파일 에러로 변환
-    if (pin < 0 || pin > 15) throw "invalid pin";
+    if (port < 0 || port > 7) invalid_port();   // 상수 평가에서 닿으면 컴파일 에러
+    if (pin < 0 || pin > 15) invalid_pin();
     return {port, pin};
 }
 
@@ -67,7 +70,7 @@ constexpr PinId kLed = make_pin(0, 5);   // OK
 constexpr PinId kBad = make_pin(9, 5);   // ERROR at compile time
 ```
 
-C++20 상수 평가에서 `throw` 경로를 실행하면 상수식 조건을 만족하지 않아 컴파일 오류가 됩니다. 다만 `-fno-exceptions`는 실행하지 않는 `throw` 문장 자체도 거부할 수 있습니다. 이 설정에서는 아래처럼 비constexpr 오류 함수를 호출하는 방식으로 유효 경로와 잘못된 경로를 나눌 수 있습니다. invalid configuration을 컴파일 시점에 차단합니다.
+상수 평가가 constexpr가 아닌 함수 호출에 닿으면 상수식이 아니므로 컴파일 오류가 됩니다. 오류 경로에 `throw`를 쓰는 예제가 많지만, 이 시리즈의 기본 플래그인 `-fno-exceptions`에서는 실행하지 않는 `throw` 문장도 컴파일 오류입니다. arm-none-eabi-g++ 16.2.0은 `error: exception handling disabled, use '-fexceptions' to enable`, Clang 23.1.5는 `error: cannot use 'throw' with exceptions disabled`로 멈췄습니다([Part 2-04](/blog/embedded/embedded-cpp/part2-04-constexpr-advanced#컴파일-타임-register-비트-마스크-생성)). 그래서 이 글의 예제는 모두 비constexpr 오류 함수를 부릅니다. consteval 함수는 런타임에 불리지 않으므로 이 오류 함수는 선언만 있고 정의가 없어도 링크됩니다.
 
 ### 매크로 vs consteval
 
@@ -79,7 +82,7 @@ C++20 상수 평가에서 `throw` 경로를 실행하면 상수식 조건을 만
 
 // consteval — 타입 안전
 consteval uint32_t pin_mask(int pin) {
-    if (pin < 0 || pin > 31) throw "invalid pin";
+    if (pin < 0 || pin > 31) invalid_pin();
     return 1u << pin;
 }
 
@@ -99,7 +102,7 @@ constexpr uint32_t bad      = pin_mask(35);  // 컴파일 에러
 
 ### 함수 포인터
 
-immediate context 안에서 주소를 일시적으로 사용할 수는 있지만, immediate function의 포인터를 상수식 결과로 밖에 보존해 런타임 dispatch에 쓸 수는 없습니다.
+immediate context 안에서 주소를 일시적으로 사용할 수는 있지만, immediate function의 포인터를 상수식 결과로 밖에 보존해 런타임 dispatch에 쓸 수는 없습니다. 아래 `p2` 줄에 Clang 23.1.5는 `error: cannot take address of consteval function 'f' outside of an immediate invocation`, g++-16은 `error: taking address of an immediate function 'consteval int f(int)'`을 냈습니다.
 
 ```cpp
 consteval int f(int);
@@ -157,6 +160,8 @@ constinit Logger g_logger3 = make_logger(LogLevel::Info);   // 컴파일 타임�
 `constexpr` 클래스 안에서 일부 멤버만 `consteval`로 만들 수 있습니다.
 
 ```cpp
+void invalid_color();   // constexpr가 아닌 오류 함수
+
 class Color {
 public:
     constexpr Color(uint8_t r, uint8_t g, uint8_t b)
@@ -165,7 +170,7 @@ public:
     consteval Color(uint32_t hex)
         : r_((hex >> 16) & 0xFF), g_((hex >> 8) & 0xFF), b_(hex & 0xFF)
     {
-        if (hex > 0xFFFFFF) throw "invalid color";
+        if (hex > 0xFFFFFF) invalid_color();
     }
 
     constexpr uint32_t to_hex() const {
@@ -242,7 +247,7 @@ constinit bool config_validated = validate_config();
 }   // namespace config
 ```
 
-`validate_config()`가 모든 검증을 컴파일 타임에 수행합니다. invalid configuration은 빌드 실패로 이어지고, 런타임 검증 코드는 남지 않습니다.
+`validate_config()`가 모든 검증을 컴파일 타임에 수행합니다. invalid configuration은 빌드 실패로 이어지고, 런타임 검증 코드는 남지 않습니다. 남는 것은 결과를 담은 변수 하나입니다. `max_tasks`·`stack_size_per_task` 검사만 남긴 축소판을 arm-none-eabi-g++ 16.2.0 `-std=c++20 -Os`로 컴파일하면 `config::config_validated`가 `.data`에 1바이트로 놓였습니다. 이 변수가 필요 없으면 `static_assert(config::validate_config());` 한 줄로 바꿔 저장 공간도 없앨 수 있습니다.
 
 ## `consteval` lambda
 
@@ -255,13 +260,13 @@ constexpr int a = times_two(5);    // 10
 int b = times_two(read_input());    // ERROR
 ```
 
-매크로의 대체로 점점 자연스러워지고 있습니다.
+람다도 일반 consteval 함수와 같은 규칙을 따르므로, 지역 범위에서 쓰는 컴파일 타임 전용 헬퍼를 매크로 대신 만들 수 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. constexpr 매개변수로 immediate function 호출
 
-`constexpr int g(int x) { return f(x); }`처럼 일반 비템플릿 함수의 매개변수를 immediate invocation에 바로 넘기는 예를 C++23이면 항상 된다고 가정하지 않습니다. C++23의 `if consteval` 안에서 호출하면 상수 평가 경로와 런타임 경로를 명시적으로 나눌 수 있습니다. immediate function 전파에 대한 결함 수정의 적용 여부도 컴파일러에 따라 확인합니다.
+`constexpr int h(int x) { return f(x); }`처럼 일반 비템플릿 함수의 매개변수를 consteval 함수 `f`에 바로 넘기면 C++23에서도 오류입니다. Clang 23.1.5는 `-std=c++20`·`-std=c++23` 모두 `error: call to consteval function 'f' is not a constant expression`, g++-16도 두 모드 모두 `error: call to consteval function 'f(x)' is not a constant expression`이었습니다. 반면 같은 본문의 함수 템플릿 `template <class T> constexpr T ht(T x) { return f(x); }`는 두 컴파일러, 두 모드 모두 통과했습니다. P2564R3("consteval needs to propagate up")이 템플릿 특수화·람다 같은 immediate-escalating 함수를 스스로 immediate function이 되게 했기 때문입니다. 비템플릿 함수에서 이 호출이 필요하면 C++23의 `if consteval` 안에서 부릅니다.
 
 ### 2. constinit은 mutable
 ```cpp
@@ -280,7 +285,7 @@ C++20부터 같은 상수 평가 안에서 해제하는 transient allocation은 
 벤더 이름만으로 지원 여부를 단정하지 않습니다. 설치한 버전의 C++ 모드와 `__cpp_consteval`, `__cpp_constinit`을 확인하고 최소 예제를 컴파일합니다.
 
 ### 6. constinit 변수의 destructor
-`constinit` 변수도 프로그램 종료 시 destructor가 호출됩니다. 임베디드는 `main`이 끝나지 않으므로 거의 무관하지만, exit 패턴이 있다면 주의해야 합니다.
+`constinit`은 초기화만 제약하고 소멸은 제약하지 않습니다. 소멸자가 있는 타입이면 `main` 반환이나 `exit` 때 소멸자가 돌고, 그 등록(`__aeabi_atexit` 등, [Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-use-cxa-atexit--등록-방식-변경))도 남습니다. `main`이 끝나지 않는 firmware에서는 소멸자가 돌지 않지만 등록 코드와 소멸자 본문은 이미지에 남습니다.
 
 ## 작은 예제 — 정상 설정, 잘못된 핀, 런타임 초기화
 
@@ -316,7 +321,20 @@ static_assert(mask == 32);
 int main(int argc, char**) { ++counter; return twice(argc) == 2 && counter == 1 ? 0 : 1; }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++23 -Wall -Wextra -pedantic-errors -fno-exceptions immediate-check.cpp -o immediate-check && ./immediate-check`를 실행했습니다. `-DBAD_PIN`과 `-DBAD_INIT`은 각각 비상수 호출·정적 초기화 진단으로 거부됩니다. 이 검사는 MCU 시작 코드의 데이터 복사 비용을 측정하지 않습니다.
+Homebrew Clang 23.1.5와 g++-16, arm64 macOS에서 `clang++ -std=c++23 -Wall -Wextra -pedantic-errors -fno-exceptions immediate-check.cpp -o immediate-check && ./immediate-check`가 경고 없이 exit 0이었습니다. 거부 경로의 진단입니다.
+
+```text
+# -DBAD_PIN, Clang 23.1.5
+error: constexpr variable 'mask' must be initialized by a constant expression
+error: call to consteval function 'pin_mask' is not a constant expression
+# -DBAD_PIN, g++-16
+error: call to non-'constexpr' function 'void invalid_pin()'
+# -DBAD_INIT, Clang 23.1.5
+error: variable does not have a constant initializer
+# -DBAD_INIT, g++-16
+error: 'constinit' variable 'bad' does not have a constant initializer
+error: call to non-'constexpr' function 'int read_io()'
+```
 
 [C++20 N4861 상수 평가 규칙](https://timsong-cpp.github.io/cppwp/n4861/expr.const), [constinit 규칙](https://eel.is/c++draft/dcl.constinit), [WG21 P1938R3 if consteval](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2021/p1938r3.html)을 참고합니다.
 

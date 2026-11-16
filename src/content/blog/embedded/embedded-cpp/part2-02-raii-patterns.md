@@ -103,7 +103,7 @@ void increment() {
 }
 ```
 
-이 FreeRTOS 스케치는 mutex 생성·획득 실패를 호출자가 확인하는 구조입니다. mutex의 수명은 guard보다 길어야 하고 ISR에서는 사용할 수 없습니다. `portMAX_DELAY`의 무기한 대기 여부는 FreeRTOS 설정에도 의존합니다.
+이 FreeRTOS 스케치는 mutex 생성·획득 실패를 호출자가 확인하는 구조입니다. mutex의 수명은 guard보다 길어야 하고 ISR에서는 사용할 수 없습니다. FreeRTOS-Kernel `semphr.h`의 `xSemaphoreTake` 주석은 `portMAX_DELAY`가 "`INCLUDE_vTaskSuspend`가 1일 때" 무기한 대기라고 적습니다. 이 설정이 0이면 `portMAX_DELAY`는 가장 긴 유한 대기 시간일 뿐이라 `owns_lock()`이 false로 돌아올 수 있고, 위 사용 예는 그 경우를 처리합니다.
 
 ## 패턴 2 — `std::scoped_lock` (C++17)
 
@@ -119,7 +119,7 @@ void transfer(Account& from, Account& to, int amount) {
 }
 ```
 
-내부적으로는 deadlock 회피 알고리즘(보통 `try_lock` + back-off)을 사용합니다. 두 mutex가 서로 다른 순서로 동시에 호출돼도 안전합니다.
+표준은 `std::lock`과 같은 deadlock 회피 알고리즘을 쓴다고만 정하고 알고리즘은 구현에 맡깁니다([thread.lock.algorithm]). GCC 16.2의 libstdc++ `std::lock`(`<mutex>`)은 C++17 이상에서 mutex 타입이 모두 같으면(위 `m1`·`m2`) `unique_lock` 배열을 만들어 첫 mutex를 blocking `lock`으로 잡고 나머지를 `try_lock`합니다. 하나라도 실패하면 잡은 것을 풀고 실패한 mutex부터 다시 시작합니다. 타입이 서로 다르면 `__detail::__lock_impl`이 같은 일을 하되, 스레드 지원이 있으면 재시도 전에 `__gthread_yield()`로 양보합니다. 그래서 두 스레드가 서로 다른 순서로 호출해도 서로를 영원히 기다리지 않습니다.
 
 ```cpp
 // Thread A
@@ -162,7 +162,7 @@ void set_event() {
 특징은 다음과 같습니다.
 - unlock과 relock을 수동으로 호출할 수 있습니다.
 - 이동이 가능하므로 다른 함수로 lock을 넘길 수 있습니다.
-- 상태 추적 필드 때문에 `lock_guard`보다 약간 무겁습니다.
+- mutex 포인터 외에 소유 여부 `bool`을 갖습니다. 64비트 호스트(g++-16·Clang 23.1.5)에서 `sizeof(std::lock_guard<std::mutex>)`는 8, `sizeof(std::unique_lock<std::mutex>)`는 16이었습니다.
 
 임베디드에서 condition variable을 쓰지 않는다면 `lock_guard`나 `scoped_lock`이면 충분합니다.
 
@@ -218,9 +218,17 @@ using UniqueFile = std::unique_ptr<FILE, decltype(&fclose)>;
 UniqueFile f(fopen("data.bin", "r"), &fclose);
 ```
 
-함수 포인터 deleter는 주소를 저장할 공간이 필요할 수 있습니다. 32비트 ABI의 흔한 구현은 두 포인터 크기지만, 정확한 크기는 ABI와 라이브러리 구현에 달립니다. 빈 deleter는 압축될 수 있으며 `sizeof`로 확인합니다.
+함수 포인터 deleter는 어느 함수를 부를지 런타임 값으로 들고 있어야 합니다. 64비트 호스트(g++-16·Clang 23.1.5 결과 동일)에서 크기를 재면 이렇습니다.
 
-임베디드에서는 empty struct deleter를 권장합니다.
+| 타입 | `sizeof` |
+| --- | ---: |
+| `unique_ptr<FILE>` | 8 |
+| `unique_ptr<FILE, decltype(&fclose)>` | 16 |
+| `unique_ptr<FILE, EmptyClose>` (빈 struct) | 8 |
+| `unique_ptr<FILE, decltype(lambda)>` (캡처 없음) | 8 |
+| `unique_ptr<uint8_t, PoolDeleter>` (`Pool*` 멤버) | 16 |
+
+빈 deleter는 libstdc++·libc++ 모두 공간을 차지하지 않아 포인터 하나 크기였습니다. 함수 포인터와 상태가 있는 deleter는 포인터 하나를 더합니다. 이 글의 ARM 툴체인에는 libstdc++가 없어 32비트 타깃 숫자는 재지 못했습니다. 상태가 필요 없다면 empty struct deleter를 씁니다.
 
 ## 패턴 5 — `ScopeGuard` / Finally 패턴
 
@@ -264,7 +272,7 @@ void process() {
 }
 ```
 
-매크로를 여러 번 쓰려면 서로 다른 줄에 둡니다. `##`에 직접 붙은 `__LINE__`은 먼저 확장되지 않으므로 두 단계 결합이 필요합니다. 정리 함수는 예외를 던지지 않아야 하고 guard가 참조하는 자원의 수명도 유지되어야 합니다. C++ Core Guidelines의 `gsl::finally`도 같은 패턴입니다.
+매크로를 여러 번 쓰려면 서로 다른 줄에 둡니다. `##`의 피연산자가 된 매크로 인자는 먼저 확장되지 않으므로([cpp.concat]) `__LINE__`을 숫자로 바꾸려면 두 단계 결합이 필요합니다. 정리 함수는 예외를 던지지 않아야 하고 guard가 참조하는 자원의 수명도 유지되어야 합니다. C++ Core Guidelines의 `gsl::finally`도 같은 패턴입니다.
 
 ### 임베디드 — peripheral 일시 활성
 
@@ -325,7 +333,7 @@ void use_pins() {
 }
 ```
 
-C++17의 `auto` non-type template parameter를 활용합니다. 호출 대상이 컴파일 타임에 정해져 인라인 기회를 제공합니다. 인라인과 추가 비용의 제거는 최적화 결과로 확인합니다.
+C++17의 `auto` non-type template parameter를 활용합니다. 호출 대상이 컴파일 타임에 정해지므로 함수 포인터를 저장하지 않습니다. `use_pins()` 안에 `work()` 호출을 하나 넣고 arm-none-eabi-g++ 16.2.0으로 컴파일하면, `-Os`에서는 `bl enable_pins` → `bl work` → `b.w disable_pins`의 직접 호출로 남았고, `-O2`에서는 두 함수가 인라인되어 `GPIOA->MODER`를 읽고 `orr`/`bic`로 고쳐 쓰는 명령이 `work()` 호출 앞뒤에 직접 들어갔습니다. 어느 쪽에도 간접 호출은 없습니다.
 
 ## 패턴 7 — Resource Handle with Move
 
@@ -413,7 +421,7 @@ void inner() {
 
 | 패턴 | 자원 | 특징 | 사용 시점 |
 | --- | --- | --- | --- |
-| `lock_guard` | 단일 mutex | 단순, copy-only-delete | 가장 흔한 case |
+| `lock_guard` | 단일 mutex | 단순, 복사·이동 불가 | 단일 mutex 보호 구역 |
 | `scoped_lock` | 여러 mutex | deadlock 회피 | 2개+ mutex |
 | `unique_lock` | 단일 mutex | unlock/relock | cv.wait |
 | `unique_ptr` + custom deleter | generic | heap pointer | 동적 자원 |
@@ -428,13 +436,13 @@ void inner() {
 ```cpp
 std::lock_guard<std::mutex>{m};   // 임시 객체 — 문장 끝에 즉시 unlock
 ```
-임시 객체는 즉시 소멸하므로 lock이 유지되지 않습니다. 반드시 변수에 바인딩해 `std::lock_guard lock(m)` 형태로 씁니다.
+임시 객체는 즉시 소멸하므로 `counter++`가 보호되지 않습니다. GCC 16.2의 libstdc++는 `lock_guard` 생성자에 `[[nodiscard]]`를 붙여 두어 g++-16은 `-Wall`에서 `warning: ignoring return value of 'std::lock_guard<_Mutex>::lock_guard(mutex_type&) ...' declared with attribute 'nodiscard' [-Wunused-result]`를, Clang 23.1.5(libc++)는 `warning: ignoring temporary created by a constructor declared with 'nodiscard' attribute [-Wunused-value]`를 냈습니다. 경고를 오류로 다루면 이 실수가 빌드에서 걸립니다. 반드시 변수에 바인딩해 `std::lock_guard lock(m)` 형태로 씁니다.
 
 ### 2. unique_ptr의 함수 포인터 deleter
 ```cpp
 std::unique_ptr<FILE, decltype(&fclose)> f(fopen(...), &fclose);
 ```
-함수 포인터 상태 때문에 크기가 커질 수 있습니다. 정확한 크기는 대상에서 측정하고 상태가 필요 없다면 빈 struct deleter를 고려합니다.
+위 표처럼 64비트 호스트에서 8바이트가 16바이트가 됐습니다. 상태가 필요 없다면 빈 struct deleter를 씁니다.
 
 ### 3. ScopeGuard 함수 호출 빠짐
 ```cpp
@@ -502,7 +510,7 @@ int main() {
 }
 ```
 
-실행: `clang++ -std=c++17 -Wall -Wextra -pedantic-errors scope-check.cpp -o scope-check && ./scope-check`. Clang 23.1.3 arm64 macOS에서 확인했습니다. 기존의 단일 단계 결합은 같은 scope의 두 선언이 `guard___LINE__`으로 겹쳐 컴파일에 실패합니다.
+실행: `clang++ -std=c++17 -Wall -Wextra -pedantic-errors scope-check.cpp -o scope-check && ./scope-check`. Homebrew Clang 23.1.5, arm64 macOS에서 경고 없이 exit 0이었습니다. `FINALLY`를 단일 단계 결합(`auto guard_##__LINE__`)으로 바꾸면 같은 scope의 두 선언이 같은 이름이 되어 `error: redefinition of 'guard___LINE__'`으로 컴파일이 멈춥니다.
 
 [표준 초안의 전처리 결합 규칙](https://eel.is/c++draft/cpp.concat)과 [Core Guidelines의 finally 권고](https://isocpp.github.io/CppCoreGuidelines/CppCoreGuidelines#e19-use-a-final_action-object-to-express-cleanup-if-no-suitable-resource-handle-is-available)를 참고합니다.
 
@@ -512,7 +520,7 @@ int main() {
 - 임베디드에서는 Scoped enable/disable, Move-only handle, Critical section with preservation 패턴이 추가됩니다.
 - Custom deleter는 struct나 lambda로 작성해 empty class optimization을 받으며, 함수 포인터는 sizeof를 늘립니다.
 - ScopeGuard는 일회성 cleanup의 보편 패턴이며 `gsl::finally`도 같은 역할을 합니다.
-- RAII의 추가 비용과 객체 크기는 ABI·최적화·필요한 상태에 따라 확인합니다.
+- 객체 크기는 deleter·guard가 들고 있는 상태가 정합니다. 빈 deleter는 0바이트, 함수 포인터·`Pool*` deleter와 `unique_lock`의 소유 플래그는 그만큼 더합니다.
 
 ## 관련 항목
 

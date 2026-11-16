@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"객체마다 owner는 한 명이고 나머지는 non-owning 참조입니다."** 책임을 명시적으로 할당하면 메모리 관련 버그의 대부분을 막을 수 있습니다.
+> **"객체마다 owner는 한 명이고 나머지는 non-owning 참조입니다."** 누가 해제하는지를 타입으로 드러내면 복사로 생기는 double free는 컴파일 오류가 되고, raw `new`/`delete` 경로는 clang-tidy `cppcoreguidelines-owning-memory`가 지적합니다. dangling 참조는 여전히 수명 계약으로 지켜야 합니다.
 
 ## 어떤 문제를 푸는가
 
-C++의 메모리 안전 문제는 거의 모두 소유권의 모호함에서 출발합니다.
+아래 네 가지 메모리 버그는 모두 "이 객체를 누가 언제 해제하는가"가 코드에 드러나지 않을 때 생깁니다.
 
 - **Use after free** — 소유자가 사라진 뒤에 누가 사용했는지 분명하지 않습니다.
 - **Double free** — 두 owner가 각자 delete를 호출합니다.
@@ -305,7 +305,7 @@ void setup() {
 }
 ```
 
-lambda를 reference로 capture하면 함수 scope가 끝나는 순간 dangling이 됩니다. value capture로 잡거나 외부 owner를 둡니다. 다만 data가 포인터·span·string_view를 포함하면 복사는 얕은 참조를 남길 수 있으며 callback 등록 해제와 실행 중 호출의 수명도 관리해야 합니다.
+lambda를 reference로 capture하면 함수 scope가 끝나는 순간 dangling이 됩니다. 첫 번째 `setup()`을 `std::function`에 저장하는 `register_callback`과 함께 호스트에서 실행하면 컴파일 경고 없이 빌드되고, AddressSanitizer(`detect_stack_use_after_return=1`, Clang 23.1.5)가 callback 호출 시점에 `ERROR: AddressSanitizer: stack-use-after-return`과 `READ of size 4 ... in LocalData::process(int)`를 보고했습니다. sanitizer 없이 실행하면 이미 다른 용도로 쓰인 stack을 읽고 씁니다. value capture로 잡거나 외부 owner를 둡니다. 다만 data가 포인터·span·string_view를 포함하면 복사는 얕은 참조를 남길 수 있으며 callback 등록 해제와 실행 중 호출의 수명도 관리해야 합니다.
 
 ## C++ Core Guidelines
 
@@ -325,7 +325,14 @@ void observe(int* p);                  // 의도: 관찰만
 void use(int& x);                      // 의도: 빌림
 ```
 
-`gsl::owner`는 static analysis 도구에 힌트를 주며, 임베디드 인증 환경에서 유용합니다.
+`gsl::owner<T*>`는 `T*`의 별칭일 뿐이라 생성 코드는 같습니다. 의미는 정적 분석기가 읽습니다. clang-tidy(Homebrew LLVM 23.1.5)의 `cppcoreguidelines-owning-memory` 검사를 `gsl::owner`를 별칭으로만 정의한 작은 파일에 돌리면 두 줄을 지적했습니다.
+
+```text
+own.cpp:4:15: warning: initializing non-owner 'Resource *' with a newly created 'gsl::owner<>' [cppcoreguidelines-owning-memory]
+own.cpp:6:32: warning: deleting a pointer through a type that is not marked 'gsl::owner<>'; consider using a smart pointer instead [cppcoreguidelines-owning-memory]
+```
+
+4행은 `new`의 결과를 그냥 `Resource*`에 담은 곳, 6행은 owner 표시가 없는 매개변수를 `delete`한 곳입니다. `gsl::owner<Resource*>`로 받아 `delete`한 함수는 지적하지 않았습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -333,7 +340,7 @@ void use(int& x);                      // 의도: 빌림
 ```cpp
 class A { B* b; };   // A가 owner? 그냥 reference?
 ```
-`unique_ptr<B>`로 명시하거나 주석으로 표시합니다.
+`unique_ptr<B>`로 명시합니다. raw 포인터를 유지해야 하면 `gsl::owner<B*>`로 표시해 위 clang-tidy 검사가 확인하게 합니다. 주석은 도구가 읽지 않습니다.
 
 ### 2. Cyclic ownership
 ```cpp
@@ -360,7 +367,7 @@ public:
     // A를 어떻게 copy/move? b_ 못 재바인딩
 };
 ```
-참조 멤버를 가진 타입도 복사·이동 생성될 수 있으며 새 객체의 참조는 같은 대상을 가리킵니다. 반면 암시적 copy/move 대입은 참조를 재바인딩할 수 없어 삭제됩니다. 생성과 대입을 구분하고, 보관 대상의 수명이 두 객체보다 긴지 확인합니다.
+참조 멤버를 가진 타입도 복사·이동 생성될 수 있으며 새 객체의 참조는 같은 대상을 가리킵니다. 반면 암시적 copy/move 대입은 참조를 재바인딩할 수 없어 삭제됩니다([class.copy.assign]). 아래 예제의 `-DASSIGN_OBSERVER` 빌드에서 Clang 23.1.5는 `error: object of type 'Observer' cannot be assigned because its copy assignment operator is implicitly deleted`, g++-16은 `error: use of deleted function 'Observer& Observer::operator=(const Observer&)'`를 냈습니다. 생성과 대입을 구분하고, 보관 대상의 수명이 두 객체보다 긴지 확인합니다.
 
 ### 5. Borrowed 객체 저장
 ```cpp
@@ -424,7 +431,7 @@ int main() {
 }
 ```
 
-명시적 owner만으로 dangling 참조나 race가 사라지지는 않습니다. 실제 RTOS에서는 queue 성공·실패·shutdown·pool 고갈·consumer 중단도 시험하고 callback 해제 뒤 실행 중 호출이 남는지 확인합니다. 버그 감소·코드 크기 수치는 측정하지 않았습니다.
+Homebrew Clang 23.1.5와 g++-16 모두 ASan·UBSan으로 exit 0이었습니다. 명시적 owner만으로 dangling 참조나 race가 사라지지는 않습니다. 실제 RTOS에서는 queue 성공·실패·shutdown·pool 고갈·consumer 중단도 시험하고 callback 해제 뒤 실행 중 호출이 남는지 확인합니다. 버그 감소·코드 크기 수치는 측정하지 않았습니다.
 
 ## 정리
 
@@ -437,7 +444,7 @@ int main() {
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `ownership.cpp`, reference capture 실험(ASan), clang-tidy 검사를 Homebrew Clang 23.1.5·g++-16으로 macOS arm64 host에서 실행했습니다. 실제 FreeRTOS queue와 보드 실행은 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [참조 멤버와 암시적 copy/move 대입](https://eel.is/c++draft/class.copy.assign)
 
