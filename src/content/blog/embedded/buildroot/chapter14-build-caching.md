@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 왜 캐싱이 별도의 장인가
 
-[Ch 4](/blog/embedded/buildroot/chapter04-first-build)의 첫 빌드는 29분 50초였습니다. 변경 없는 `make`는 7초였지만, `make clean` 한 번이면 처음부터 다시 돕니다. CI처럼 매번 빈 output에서 시작하는 환경이라면 그 비용이 빌드마다 붙습니다. 장보기(다운로드), 손질(컴파일), 조리대 분리(sysroot 격리)를 각각 얼마나 아낄 수 있는지 재 봐야 어느 캐시에 투자할지 정할 수 있습니다.
+[Ch 4](/blog/embedded/buildroot/chapter04-first-build)의 첫 빌드는 40분 8초였습니다. 변경 없는 `make`는 9초였지만, `make clean` 한 번이면 처음부터 다시 돕니다. CI처럼 매번 빈 output에서 시작하는 환경이라면 그 비용이 빌드마다 붙습니다. 장보기(다운로드), 손질(컴파일), 조리대 분리(sysroot 격리)를 각각 얼마나 아낄 수 있는지 재 봐야 어느 캐시에 투자할지 정할 수 있습니다.
 
 측정 조건은 다음과 같습니다. **Buildroot 2026.02.3**, `qemu_aarch64_virt_defconfig`에서 toolchain만 외부 toolchain(`BR2_TOOLCHAIN_EXTERNAL=y`, 이 arm64 호스트에서는 "Arm AArch64 14.2.rel1"이 선택됨)으로 바꾸고 host QEMU를 끈 설정입니다. 모든 소스는 먼저 `make source`로 공유 `dl/`에 받아 두어(667초) 다운로드 시간을 빼고 비교했습니다. 호스트는 Ch 1과 같은 사양의 Debian 13 arm64 VM(vCPU 10, RAM 12 GB)이고, 각 수치는 한 번씩 잰 값입니다.
 
@@ -164,7 +164,7 @@ Buildroot 매뉴얼은 sstate를 직접 다루지 않지만, 설정 변경 추�
 /usr/bin/time -v make
 ```
 
-Ch 1의 첫 빌드에서 `Elapsed (wall clock) time`은 29:50.42, `Percent of CPU this job got`은 404%였습니다. vCPU 10개 중 평균 4개 정도만 쓰였다는 뜻이고, 패키지 사이가 순차인 기본 모드의 한계를 보여 줍니다.
+Ch 1의 첫 빌드에서 `Elapsed (wall clock) time`은 40:08.16, `Percent of CPU this job got`은 530%였습니다. vCPU 10개 중 평균 5개 정도만 쓰였다는 뜻이고, 패키지 사이가 순차인 기본 모드의 한계를 보여 줍니다.
 
 ### Per-package 시간
 
@@ -188,10 +188,11 @@ Buildroot는 단계별 시작·끝 시각을 `output/build/build-time.log`에 �
 
 | 시나리오 | 다시 도는 범위 | 근거 |
 |---|---|---|
-| **변경 없음** | target 마무리·rootfs 이미지·post-image | 실측 7.41초(Ch 4), 16.62초(이 장) |
+| **변경 없음** | target 마무리·rootfs 이미지·post-image | 실측 8.60초(Ch 4), 16.62초(이 장) |
 | **overlay·post-build 변경** | 위와 같음 | 매뉴얼: "a simple `make` invocation will take the changes into account" |
-| **패키지 1개 `-rebuild`** | 그 패키지 build·install (이미지는 다음 `make`) | 실측 busybox 8.03초(Ch 4) |
-| **커널 fragment 변경** | 커널 merge·configure·build | 실측 28.16초(Ch 12) |
+| **패키지 1개 `-rebuild`** | 그 패키지 build·install (이미지는 다음 `make`) | 실측 busybox 9.31초(Ch 4) |
+| **커널 fragment 파일 수정** | 커널 merge·configure·build·이미지 | 실측 22.59초(Ch 12) |
+| **fragment 목록에 기존 파일 추가** | 감지하지 않음, `linux-reconfigure` 필요 | 실측(Ch 12) |
 | **패키지 하위 옵션 변경** | 자동으로 다시 빌드하지 않음 | 매뉴얼: "the package is not automatically rebuilt" |
 | **toolchain·아키텍처 변경** | 전체 재빌드 필요 | 매뉴얼: 아키텍처 "a complete rebuild is needed", toolchain "a complete rebuild generally is needed" |
 | **`make clean` 후 (ccache warm)** | 모든 패키지의 압축 해제부터 | 실측 423.88초 |
@@ -216,7 +217,7 @@ CI는 빌드마다 빈 output에서 시작하는 경우가 많습니다. 위 실
   uses: actions/cache@v4
   with:
     path: dl/
-    key: buildroot-dl-${{ hashFiles('configs/imx8mp_defconfig') }}
+    key: buildroot-dl-${{ hashFiles('configs/freescale_imx8mpevk_defconfig') }}
     restore-keys: buildroot-dl-
 
 - name: Cache ccache
@@ -230,13 +231,13 @@ CI는 빌드마다 빈 output에서 시작하는 경우가 많습니다. 위 실
 
 - name: Build
   run: |
-    make imx8mp_defconfig
+    make freescale_imx8mpevk_defconfig
     echo "BR2_CCACHE=y" >> .config
     make olddefconfig
     make
 ```
 
-`restore-keys`의 fallback이 핵심입니다. 정확한 key가 없으면 가장 가까운 캐시를 받아 그 위에서 빌드합니다. 이 예는 형식 예시이며 이 장에서 실제로 돌리지 않았습니다. [Ch 19](/blog/embedded/buildroot/chapter19-cicd)에서 CI 전략을 더 다룹니다.
+`restore-keys`의 fallback이 핵심입니다. actions/cache README는 `restore-keys`를 "used for restoring stale cache if no cache hit occurred for key"로 설명하고, `tips-and-workarounds.md`는 캐시가 "immutable and cannot be updated"라서 매번 새로 저장하려면 run마다 고유한 key와 `restore-keys`를 함께 쓰라고 적습니다. ccache key에 `github.sha`를 넣은 이유가 그것입니다. 이 workflow는 이 장에서 GitHub에서 실행하지 않았고, 형식은 위 두 문서를 따랐습니다. [Ch 19](/blog/embedded/buildroot/chapter19-cicd)에서 CI 전략을 더 다룹니다.
 
 ## 흔한 실수
 
