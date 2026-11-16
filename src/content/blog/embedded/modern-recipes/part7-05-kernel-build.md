@@ -30,10 +30,10 @@ Out-of-tree driver를 개발할 때도 같은 빌드 시스템(Kbuild)을 부릅
 | 단계 | 명령 | 이 글의 결과 |
 | --- | --- | --- |
 | 소스 받기 | `tar xf linux-6.12.tar.xz` | — |
-| 설정 시작 | `make defconfig` | `.config` 11,172줄 |
+| 설정 시작 | `make defconfig` | `.config` 11,170줄 |
 | 설정 조정 | `make menuconfig` 또는 `scripts/config` + `make olddefconfig` | 아래 예 |
 | 빌드 | `make -j6 Image modules dtbs` | real 11분 22초 |
-| 모듈 설치 | `make INSTALL_MOD_PATH=<dir> modules_install` | 모듈 1,309개, 340 MiB |
+| 모듈 설치 | `make INSTALL_MOD_PATH=<dir> modules_install` | 모듈 1,309개, 디렉터리 340 MiB(`du -sh`) |
 | 패키징 | `make bindeb-pkg` | `.deb` 4개 |
 
 산출물과 크기입니다.
@@ -42,7 +42,7 @@ Out-of-tree driver를 개발할 때도 같은 빌드 시스템(Kbuild)을 부릅
 |------|------|------|
 | `arch/arm64/boot/Image` | 압축하지 않은 커널 이미지 | 38,246,912 B |
 | `arch/arm64/boot/Image.gz` | `make Image.gz`. arm64의 기본 `KBUILD_IMAGE` | 13,875,801 B |
-| `arch/arm64/boot/dts/<vendor>/*.dtb` | Device Tree blob | 1,173개 |
+| `arch/arm64/boot/dts/**/*.dtb` | Device Tree blob | 1,191개(`<vendor>/` 바로 아래 1,173개, 한 단계 더 아래 18개) |
 | `*.ko` | loadable module | 1,309개, 합계 349,575,392 B |
 | `System.map` | symbol 주소표 | 7,463,165 B |
 | `vmlinux` | 심볼·디버그 정보를 담은 ELF | 153,683,808 B |
@@ -98,9 +98,9 @@ CONFIG_BMP280_I2C=m
 CONFIG_BMP280_SPI=m
 ```
 
-`olddefconfig`는 새로 생긴 의존 항목(`BMP280_I2C`, `_SPI`)을 묻지 않고 기본값으로 채웁니다(`make help`: "Same as oldconfig but sets new symbols to their default value without prompting"). 바뀐 설정을 남길 때는 `make savedefconfig`로 기본값과 다른 항목만 담은 `defconfig`(이 경우 1,686줄)를 만듭니다.
+`scripts/config`는 `.config` 텍스트만 바꾸므로, `make olddefconfig`로 Kconfig를 다시 계산해야 `BMP280`이 `select`하는 `BMP280_I2C`·`BMP280_SPI`(`drivers/iio/pressure/Kconfig:35-36`)가 채워집니다. `make help`는 `olddefconfig`를 "Same as oldconfig but sets new symbols to their default value without prompting"으로 설명합니다. 바뀐 설정을 남길 때는 `make savedefconfig`로 기본값과 다른 항목만 담은 `defconfig`(이 경우 1,686줄)를 만듭니다.
 
-다만 이 파일을 원래 `arch/arm64/configs/defconfig`와 `diff`하면 `CONFIG_BMP280=m` 한 줄만 다르지 않았습니다. 순서만 바뀐 줄과, 이미 다른 옵션이 `select`해서 기본값이 된 줄(`CONFIG_UNIX=y`, `CONFIG_INET=y` 등)이 함께 사라지거나 옮겨졌습니다. 그래서 변경 이력을 남기려면 savedefconfig 결과끼리, 즉 바꾸기 전과 후를 모두 savedefconfig로 만들어 비교해야 원하는 차이만 보입니다.
+다만 이 파일을 원래 `arch/arm64/configs/defconfig`와 `diff`하면 `CONFIG_BMP280=m` 한 줄만 다르지 않았습니다. 순서만 바뀐 줄과, 다른 옵션이 `imply`해서 기본값이 된 줄(`CONFIG_UNIX=y`, `CONFIG_INET=y` 등. `CONFIG_NET_9P_FD`가 둘을 `imply`합니다, `net/9p/Kconfig:19-22`)이 함께 사라지거나 옮겨졌습니다. 그래서 변경 이력을 남기려면 savedefconfig 결과끼리, 즉 바꾸기 전과 후를 모두 savedefconfig로 만들어 비교해야 원하는 차이만 보입니다.
 
 ### Build
 
@@ -170,7 +170,7 @@ make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- KDIR=/work/linux-6.12
 
 ```bash
 make -j6 bindeb-pkg
-ls -l ../*.deb
+stat -c '%s %n' ../*.deb
 ```
 
 ```text
@@ -180,7 +180,7 @@ ls -l ../*.deb
 1370568 /root/linux-libc-dev_6.12.0-2_arm64.deb
 ```
 
-이미 빌드한 트리에서 real 1분 52초가 걸렸고, `.deb`는 소스 트리의 상위 디렉터리에 생겼습니다. `CONFIG_DEBUG_INFO=y`라서 디버그 심볼만 담은 `-dbg` 패키지가 따로 나왔습니다. 패키지 버전의 `-2`는 `scripts/build-version`이 낸 빌드 번호입니다(`scripts/package/mkdebian:155`). 대상에 설치하는 `dpkg -i`는 이 VM의 부팅 커널을 바꾸게 되어 실행하지 않았습니다.
+이미 빌드한 트리에서 real 1분 52초가 걸렸고, `.deb`는 소스 트리의 상위 디렉터리에 생겼습니다. `CONFIG_DEBUG_INFO=y`라서 디버그 심볼만 담은 `-dbg` 패키지가 따로 나왔습니다(`scripts/package/mkdebian:242`). 패키지 버전의 `-2`는 `scripts/build-version`이 낸 빌드 번호입니다(`scripts/package/mkdebian:155`). 대상에 설치하는 `dpkg -i`는 이 VM의 부팅 커널을 바꾸게 되어 실행하지 않았습니다.
 
 ### rpm 패키지
 
@@ -188,21 +188,23 @@ ls -l ../*.deb
 
 ### 빌드 시간 줄이기
 
-`ccache`는 같은 입력의 컴파일 결과를 캐시합니다. `drivers/iio/` 아래 오브젝트만 지우고 다시 빌드하는 작은 실험을 세 번 했습니다(ccache 4.11.2, `CCACHE_DIR`을 비운 상태에서 시작).
+`ccache`는 같은 입력의 컴파일 결과를 캐시합니다. `drivers/iio/` 아래 오브젝트를 지우고 다시 빌드하는 작은 실험을 했습니다(ccache 4.11.2, 빈 `CCACHE_DIR`에서 시작, 각 실행 전에 `ccache -z`로 통계를 비움). 이미 빌드된 트리에서 아무것도 바뀌지 않았을 때 같은 명령이 걸린 시간(no-op)도 함께 쟀습니다. Kbuild가 트리 전체의 의존성을 확인하는 고정 비용이 이 값입니다.
 
 ```bash
+find drivers/iio -name "*.o" -delete
 make -j6 drivers/iio/                      # plain gcc
-make -j6 CC="ccache gcc" drivers/iio/      # cold cache
-make -j6 CC="ccache gcc" drivers/iio/      # warm cache
+make -j6 CC="ccache gcc" drivers/iio/      # cold cache (after deleting again)
+make -j6 CC="ccache gcc" drivers/iio/      # warm cache (after deleting again)
 ```
 
-| 실행 | real |
-| --- | ---: |
-| `gcc` | 4.656 s |
-| `ccache gcc`, 빈 캐시 | 8.618 s |
-| `ccache gcc`, 채운 캐시 | 0.309 s |
+| 실행 | real | ccache hits / misses |
+| --- | ---: | --- |
+| no-op (변경 없음) | 0.304 s | — |
+| `gcc` | 2.329 s | — |
+| `ccache gcc`, 빈 캐시 | 5.461 s | 24 / 109 |
+| `ccache gcc`, 채운 캐시 | 0.310 s | 63 / 0 |
 
-빈 캐시에서는 ccache가 결과를 저장하는 비용 때문에 오히려 느렸고, 같은 입력을 다시 컴파일할 때만 빨라졌습니다. 전체 빌드에서의 효과는 바뀐 파일의 비율로 정해지므로 이 작은 실험으로 일반화하지 않습니다. 이 오브젝트 삭제는 `.ko`도 지웠으므로, 실험 뒤 `make modules`로 다시 만든 다음에 `modules_install`을 했습니다. `drivers/iio/` 같은 디렉터리 대상은 `.o`까지만 만들고 `.ko`를 링크하지 않기 때문입니다(그 전에 `modules_install`을 했더니 `No rule to make target ... imx8qxp-adc.ko`로 멈췄습니다).
+빈 캐시에서는 결과를 저장하는 비용 때문에 plain `gcc`보다 느렸고, 채운 캐시에서는 모든 호출이 hit이 되어 no-op과 거의 같은 시간이 걸렸습니다. 이 디렉터리에서 다시 만든 오브젝트는 45개였습니다. 지우기 전에는 74개였는데, 차이 29개는 모듈용 오브젝트입니다. 이 실험에서 디렉터리 대상은 built-in 오브젝트만 다시 만들었고 모듈 오브젝트와 `.ko`는 만들지 않았습니다. `.ko` 링크에 필요한 modpost는 `modules`나 `<경로>.ko` 같은 대상에서 돕니다(최상위 `Makefile:1904-1918`). 그래서 실험 뒤 `make modules`로 모듈을 다시 만든 다음에 `modules_install`을 했습니다. 그 전에 `modules_install`을 했더니 `No rule to make target ... imx8qxp-adc.ko`로 멈췄습니다. 전체 빌드에서의 효과는 바뀐 파일의 비율로 정해지므로 이 작은 실험으로 일반화하지 않습니다.
 
 ## 측정 / 성능 비교
 
@@ -212,7 +214,7 @@ make -j6 CC="ccache gcc" drivers/iio/      # warm cache
 
 > ⚠️ `ARCH` 없이 cross 설정
 
-`ARCH`의 기본값은 호스트의 `uname -m`입니다. x86-64 PC에서 `make defconfig`를 하면 x86 설정이 만들어집니다. Cross 환경에서는 `ARCH`와 `CROSS_COMPILE`을 `export`하거나 make 인자로 매번 줍니다.
+`ARCH`의 기본값은 호스트의 `uname -m`에서 유도한 값입니다(`x86_64`→`x86`, `aarch64`→`arm64`, `scripts/subarch.include:7-13`). x86-64 PC에서 `make defconfig`를 하면 x86 설정이 만들어집니다. Cross 환경에서는 `ARCH`와 `CROSS_COMPILE`을 `export`하거나 make 인자로 매번 줍니다.
 
 > ⚠️ 새 커널 소스에 옛 `.config`
 
@@ -244,7 +246,7 @@ insmod: ERROR: could not insert module /root/p7/703/src/demo_v2.ko: Invalid modu
 - 설정 변경은 `scripts/config`/`menuconfig` 뒤 `olddefconfig`로 의존 항목을 채우고, 비교는 savedefconfig끼리 합니다.
 - `modules_install`은 `depmod`까지 하고, `build` 링크는 빌드 호스트 경로를 가리킵니다.
 - `bindeb-pkg`는 이미 빌드한 트리에서 image·headers·libc-dev·dbg 네 패키지를 만들었습니다.
-- ccache는 같은 입력을 다시 컴파일할 때만 빨라졌고, 빈 캐시에서는 더 느렸습니다.
+- ccache는 같은 입력을 다시 컴파일할 때만 빨라졌고(채운 캐시 0.310 s, no-op 0.304 s), 빈 캐시에서는 plain `gcc`보다 느렸습니다.
 - 다른 커널용 모듈은 `Invalid module format`으로 거부됩니다.
 
 다음 편은 **Kernel Module 기초**입니다. init/exit, parameter, KBuild를 정리합니다.
