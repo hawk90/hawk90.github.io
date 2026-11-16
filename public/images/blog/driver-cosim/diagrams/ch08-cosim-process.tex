@@ -18,7 +18,7 @@
 % Driver and RTL side-by-side
 \node[con, minimum width=58mm, minimum height=24mm, align=left, inner sep=6pt] (drv)
   at (-4.5,2.0)
-  {\textbf{Linux driver (.so)}\\\small $\bullet$ probe / init\\\small $\bullet$ ioctl handlers\\\small $\bullet$ ISR\\\small $\bullet$ DMA ring mgmt};
+  {\textbf{driver core (libcosim.so)}\\\small $\bullet$ probe / init\\\small $\bullet$ ioctl handlers\\\small $\bullet$ ISR\\\small $\bullet$ DMA ring mgmt};
 \node[abs, minimum width=58mm, minimum height=24mm, align=left, inner sep=6pt] (rtl)
   at ( 4.5,2.0)
   {\textbf{Varistos1 (RTL)}\\\small Verilator C++ class\\\small + AXI Master BFM\\\small + AXI Slave BFM (RAM)};
@@ -30,7 +30,7 @@
 
 % IRQ thread
 \node[warn, minimum width=120mm, minimum height=12mm, align=center] (irq) at (0,-3.0)
-  {IRQ injection thread (poll RTL irq pin)};
+  {IRQ sampling in tick() (simulator thread)};
 
 % Artifact note
 \node[caption, anchor=west] at (-6.0,-4.4)
@@ -44,7 +44,7 @@
 \draw[arr] (irq.north -| drv.south) -- (drv.south);
 
 \node[panel, fit=(py)(drv)(rtl)(ref)(irq), inner sep=12pt] (proc) {};
-\node[panelTitle] at (proc.north west) {Cosim Process (Linux host)};
+\node[panelTitle] at (proc.north west) {Cosim Process (host)};
 
 \end{tikzpicture}
 \end{document}
