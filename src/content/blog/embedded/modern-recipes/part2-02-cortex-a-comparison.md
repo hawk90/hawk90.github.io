@@ -102,7 +102,7 @@ AArch32 지원은 코어마다 다릅니다. Cortex-A78 TRM과 Neoverse V1 TRM�
 
 ### 5) Neoverse — 인프라용 코어
 
-Neoverse는 Arm의 인프라·서버용 코어 라인입니다. Neoverse V1 TRM은 V1이 Armv8.4-A를 구현하고 Armv8.5-A·8.6-A의 일부 명령(BFloat16, Int8 matrix multiply 등)을 r1p0에서 추가했다고 적습니다. 또 "There can only be one Neoverse V1 core per cluster"라고 해서, 코어당 512KB 또는 1024KB L2를 갖는 구성을 전제로 합니다.
+Neoverse는 Arm의 인프라·서버용 코어 라인입니다. Neoverse V1 TRM은 V1이 Armv8.4-A를 구현하고 Armv8.5-A·8.6-A의 일부 명령(BFloat16, Int8 matrix multiply 등)을 r1p0에서 추가했다고 적습니다. 또 "There can only be one Neoverse V1 core per cluster"라고 적고, L2는 코어별 512KB 또는 1024KB입니다.
 
 ## 코드 / 실제 사용 예
 
@@ -198,7 +198,7 @@ A78·Neoverse V1은 AArch32를 EL0에서만 지원하고, 위 guest처럼 AArch3
 
 > ⚠️ cluster마다 L2가 다르다는 점을 잊음
 
-A7·A53의 L2는 cluster 안에서 공유되지만, A55·A78의 L2는 코어별(per-core) 구성 옵션입니다. 같은 SoC에서도 big과 LITTLE의 L2 크기가 다를 수 있어, 데이터를 공유하는 thread를 서로 다른 종류의 코어에 두면 cache 효율이 달라집니다.
+A7·A53의 L2는 cluster 안에서 공유되지만, A55·A78의 L2는 코어별(per-core) 구성 옵션입니다. 같은 SoC에서도 big과 LITTLE의 L2 크기가 다를 수 있습니다.
 
 > ⚠️ `cpu_capacity`를 보지 않고 CPU 번호로 big을 짐작
 
