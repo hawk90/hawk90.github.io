@@ -128,7 +128,7 @@ managed IRQ에 대해서는 [kernel-parameters 문서](https://github.com/torval
 
 ### 이 VM에서 실제로 확인
 
-위 규칙을 Debian 13 arm64 VM(QEMU `virt`, `-accel hvf`, vCPU 6, 커널 `6.12.116+deb13-arm64`, irqbalance는 설치돼 있지 않음, `dpkg -l irqbalance`에 패키지 없음)에서 확인했습니다. 이 글이 인용한 소스는 v7.3-rc6이고 실행한 커널은 v6.12 계열이라, 아래 결과는 v6.12 커널이 v7.3-rc6 소스에서 읽은 규칙과 같게 동작한다는 확인입니다. 이 VM의 GIC는 GICv3이고, PCIe MSI-X는 `/proc/interrupts`에 `GICv2m-PCI-MSIX`로 나와 GICv2m frame을 거쳐 SPI로 들어옵니다.
+위 규칙을 Debian 13 arm64 VM(QEMU `virt`, `-accel hvf`, vCPU 6, 커널 `6.12.116+deb13-arm64`, irqbalance는 설치돼 있지 않음, `dpkg -l irqbalance`에 패키지 없음)에서 확인했습니다. 이 글이 인용한 소스는 v7.3-rc6이고 실행한 커널은 v6.12 계열이라, 아래 결과로 v6.12 커널도 v7.3-rc6 소스에서 읽은 규칙대로 동작함을 확인했습니다. 이 VM의 GIC는 GICv3이고, PCIe MSI-X는 `/proc/interrupts`에 `GICv2m-PCI-MSIX`로 나와 GICv2m frame을 거쳐 SPI로 들어옵니다.
 
 대상은 세 IRQ입니다. 46은 virtio-net의 legacy INTx(GIC SPI, level), 53은 virtio-blk의 두 번째 queue IRQ(MSI-X, 커널이 queue마다 CPU를 배정한 managed IRQ), 10은 per-CPU인 architected timer입니다.
 
@@ -343,9 +343,9 @@ cat /proc/interrupts > irq-after.txt
 
 - **손으로 쓴 값이 몇 초 뒤 바뀌어 있다.** irqbalance가 그 IRQ를 옮겼습니다. "irqbalance와 공존하기" 절의 `--banirq`를 씁니다.
 - **`IRQBALANCE_BANNED_CPULIST`를 넣었더니 격리 코어에 IRQ가 들어온다.** 변수가 `isolated`·`nohz_full` 자동 제외를 끕니다. 그 절에서 본 대로 격리 코어도 목록에 넣습니다.
-- **`$((1 << n))` 값을 `smp_affinity`에 썼더니 엉뚱한 CPU로 가거나 쓰기가 실패한다.** CPU0~3은 10진·16진 값(1·2·4·8)이 같아 우연히 맞고, CPU4부터 10진 값이 16진으로 읽힙니다. "bitmask 읽는 법" 절.
-- **`isolcpus=`만 두었는데 격리 코어에 IRQ가 온다.** IRQ 격리는 `irqaffinity=`와 `managed_irq` flag가 맡습니다. "부팅 시 기본값 — irqaffinity와 isolcpus" 절.
-- **GIC에서 넓은 mask를 줬는데 한 코어에 몰린다.** SPI는 mask 안의 가장 낮은 번호 online CPU로만 갑니다. "smp_affinity와 effective_affinity" 절.
+- **`$((1 << n))` 값을 `smp_affinity`에 썼더니 엉뚱한 CPU로 가거나 쓰기가 실패한다.** CPU0~3은 10진·16진 값(1·2·4·8)이 같아 우연히 맞고, CPU4부터 10진 값이 16진으로 읽힙니다. "bitmask 읽는 법" 절을 봅니다.
+- **`isolcpus=`만 두었는데 격리 코어에 IRQ가 온다.** IRQ 격리는 `irqaffinity=`와 `managed_irq` flag가 맡습니다. "부팅 시 기본값 — irqaffinity와 isolcpus" 절을 봅니다.
+- **GIC에서 넓은 mask를 줬는데 한 코어에 몰린다.** SPI는 mask 안의 가장 낮은 번호 online CPU로만 갑니다. "smp_affinity와 effective_affinity" 절을 봅니다.
 
 아래 두 경우는 쓴 값이 거부되지 않고 받아들여진 뒤 커널이 바꿔 놓는 경우입니다.
 
@@ -377,7 +377,7 @@ exit 0
 
 - **받는 CPU는 mask가 아니라 controller driver가 정합니다.** GIC SPI는 가장 낮은 번호, ITS는 LPI가 가장 적은 CPU, DWC MSI는 parent IRQ를 받은 CPU가 mask 안이면 그 CPU, 밖이면 mask의 첫 CPU입니다. 결과를 고정하려면 IRQ마다 CPU 하나를 `smp_affinity_list`로 주고, 분산은 mask를 넓히는 대신 IRQ(queue) 수로 합니다.
 - **쓴 값이 반영되지 않는 길은 둘입니다.** 쓰기 자체가 `EPERM`으로 거부되거나(파일 권한이 아니라 반환값으로 판단), 기본 mask(`irqaffinity=`, `default_smp_affinity`)가 이미 시작된 IRQ에 닿지 않는 경우입니다. managed IRQ는 `/proc`로 다룰 수 없어 `isolcpus=managed_irq`로 정합니다. boot CPU는 `irqaffinity=`로는 뺄 수 없으므로 `/proc/irq/default_smp_affinity`와 IRQ별 `smp_affinity_list`로 뺍니다.
-- **받아들여진 값을 바꾸는 writer는 셋입니다.** irqbalance(`--banirq`, 격리 코어를 포함한 `IRQBALANCE_BANNED_CPULIST`), CPU hotplug(udev `online` 규칙), suspend-to-RAM(sleep hook). 각각에 맞는 지점에서 같은 스크립트를 다시 돌립니다.
+- **받아들여진 값을 바꾸는 writer는 셋입니다.** irqbalance(`--banirq`, 격리 코어를 포함한 `IRQBALANCE_BANNED_CPULIST`), CPU hotplug(udev `online` 규칙), suspend-to-RAM(sleep hook)입니다. 각각에 맞는 지점에서 같은 스크립트를 다시 돌립니다.
 - **PREEMPT_RT의 IRQ thread는 IRQ를 따라갑니다.** 위치는 `smp_affinity`로만 정해지고(`taskset`은 `EINVAL`), priority는 `chrt`로 50·49에서 조정합니다.
 
 다음 편은 [루트 파일시스템 구축 — Buildroot 기초·Package·Toolchain](/blog/embedded/modern-recipes/part7-14-rootfs-buildroot)입니다.
