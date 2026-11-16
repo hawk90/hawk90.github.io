@@ -13,7 +13,7 @@ lastVerified: 2026-10-11
 
 ## 한 줄 요약
 
-> **"우선순위 숫자가 예외 경로를 정합니다."** 어떤 IRQ가 실행 중인 handler에 끼어들지는 NVIC의 group priority와 mask register가 정하고, 끼어들지 못한 IRQ는 pending으로 남았다가 tail-chaining으로 이어 받습니다. 같은 숫자라도 칩에 구현된 priority bit 수에 따라 레지스터에 들어가는 값이 달라집니다.
+> **"우선순위 숫자가 예외 경로를 정합니다."** 어떤 IRQ가 실행 중인 handler에 끼어들지는 NVIC의 group priority와 mask register가 정하고, 끼어들지 못한 IRQ는 pending으로 남았다가, 실행 중인 handler가 끝나면 tail-chaining으로 이어서 처리됩니다. 같은 숫자라도 칩에 구현된 priority bit 수에 따라 레지스터에 들어가는 값이 달라집니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -68,7 +68,7 @@ floating-point 연산을 쓰는 중이면 S0~S15·FPSCR 자리를 더한 frame�
 
 handler가 끝날 때 진입 조건을 만족하는 pending 예외가 있으면 stack pop을 건너뛰고 바로 다음 handler로 갑니다(tail-chaining, UG 2.3.7). Cortex-M4 TRM 3.9.1은 메모리에 wait state가 없을 때 진입(IRQ assert → ISR 첫 명령)이 최대 12 cycle이고, 복귀도 마찬가지로 12 cycle, tail-chaining은 zero wait state 메모리에서 6 cycle이라고 적습니다. 복귀한 뒤 다시 진입하는 경로는 이 값으로 최대 24 cycle이고 tail-chaining은 6 cycle이므로, 줄어드는 양은 최대 18 cycle입니다. TRM이 진입을 최댓값으로만 주기 때문에 이 계산에서 고정된 절감량은 나오지 않습니다.
 
-STM32F407의 flash는 HCLK와 전원 전압에 맞춰 wait state(`FLASH_ACR` LATENCY)를 설정하고 읽습니다([stm32f4xx_hal_rcc.c v1.8.5 L605-L607](https://github.com/STMicroelectronics/stm32f4xx_hal_driver/blob/v1.8.5/Src/stm32f4xx_hal_rcc.c#L605-L607)). LATENCY를 0이 아닌 값으로 둔 구성에서 flash의 vector와 handler를 읽으면 위 조건 밖이고, 그때의 cycle 수는 TRM에 없습니다. 그래서 아래 예제 표에는 cycle 수를 적지 않았습니다.
+STM32F407의 flash는 HCLK와 전원 전압에 맞춰 wait state(`FLASH_ACR` LATENCY)를 설정하고 읽습니다([stm32f4xx_hal_rcc.c v1.8.5 L605-L607](https://github.com/STMicroelectronics/stm32f4xx_hal_driver/blob/v1.8.5/Src/stm32f4xx_hal_rcc.c#L605-L607)). LATENCY를 0이 아닌 값으로 두고 flash에서 vector와 handler를 읽는 구성은 TRM의 zero wait state 조건을 벗어나고, 그때의 cycle 수는 TRM에 없습니다. 그래서 아래 예제 표에는 cycle 수를 적지 않았습니다.
 
 먼저 들어온 예외의 stacking 중에 더 높은 우선순위 예외가 오면, 프로세서는 stacking을 그대로 계속하고 vector fetch만 새 예외로 바꿉니다(late-arrival). 저장할 상태가 두 예외에 대해 같기 때문입니다. 원래 예외의 handler 첫 명령이 execute 단계에 들어가기 전까지 late-arrival로 받을 수 있고, 원래 예외는 pending으로 남았다가 tail-chaining 규칙으로 처리됩니다(UG 2.3.7). TRM 3.9.1과 UG 2.3.7 모두 late-arrival 전환의 cycle 수는 적지 않습니다.
 
