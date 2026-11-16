@@ -228,7 +228,7 @@ io_uring_queue_init: Operation not permitted
 kernel.io_uring_disabled = 0
 ```
 
-세 번 모두 `pread`가 가장 빨랐습니다(540~615 ns 대 630~722 ns). 다시 돌린 실행에서도 383 ns 대 482·511 ns로 순서가 같았습니다. 한 번에 요청 하나를 넣고 끝나기를 기다리면 io_uring은 syscall 수를 줄이지 못하고, SQE를 채우고 CQE를 거두는 일만 더해집니다. 등록 buffer(`read_fixed`)도 cache에 있는 4 KiB 읽기에서는 차이가 없었습니다. io_uring의 이점은 요청을 여러 개 쌓아 한 번에 제출하거나, 완료를 기다리는 동안 다른 일을 할 때 생깁니다. 그러니 "io_uring = 빠름"이 아니라 대상 workload의 queue depth로 재 봅니다.
+세 번 모두 `pread`가 가장 빨랐습니다(540~615 ns 대 630~722 ns). 다시 돌린 실행에서도 383 ns 대 482·511 ns로 순서가 같았습니다. 한 번에 요청 하나를 넣고 끝나기를 기다리면 io_uring은 syscall 수를 줄이지 못하고, SQE를 채우고 CQE를 거두는 일만 더해집니다. 등록 buffer(`read_fixed`)도 cache에 있는 4 KiB 읽기에서는 차이가 없었습니다. io_uring의 이점은 요청을 여러 개 쌓아 한 번에 제출하거나, 완료를 기다리는 동안 다른 일을 할 때 생깁니다. 그러니 "io_uring = 빠름"으로 가정하지 말고 대상 workload의 queue depth로 재 봅니다.
 
 두 번째 출력의 가운데 줄이 `sysctl -w kernel.io_uring_disabled=2` 상태에서 실행한 결과입니다. v6.12 `Documentation/admin-guide/sysctl/kernel.rst`의 `io_uring_disabled` 항목대로 "io_uring_setup() always fails with -EPERM"이라 `io_uring_queue_init`이 `Operation not permitted`로 실패했습니다. 보안 정책으로 이 값을 1이나 2로 두는 배포판·컨테이너가 있으면 io_uring 경로는 아예 열리지 않으므로, 실패 시 일반 `read`로 돌아가는 경로를 둡니다.
 
