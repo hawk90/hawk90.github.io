@@ -22,7 +22,7 @@ Zynq처럼 Arm 코어(PS)와 FPGA fabric(PL)이 한 칩에 있으면, 둘이 데
 ### 이 글의 출처와 실행 환경
 
 - Zynq-7000 포트 사양은 AMD **UG585**(Zynq 7000 SoC Technical Reference Manual, v1.15, 2026-02-06 게시)의 "PS–PL AXI Interfaces", "AXI_GP Interfaces", "AXI_HP Interfaces", "AXI_ACP Interface", "ACP Limitations", "PL DMA via …" 절과 System Address Map 표에서 가져왔습니다.
-- **Zynq 보드는 돌리지 않았습니다.** 포트별 throughput 숫자는 이 글에 없습니다. 원래 글의 실측 표는 출처가 없어 지웠습니다.
+- **Zynq 보드는 돌리지 않았습니다.** 포트별 throughput 숫자는 출처를 확인할 수 없어 이 글에 싣지 않았습니다.
 - Linux 쪽 접근 방법(`/dev/mem`, UIO, 인터럽트 대기)은 QEMU 11.1.3 `virt` + Debian 13 arm64 guest(커널 `6.12.116+deb13-arm64`)에서 QEMU 교육용 PCI 장치 edu를 PL 주변장치 대신 써서 돌렸습니다. 주소와 버스는 Zynq와 다르지만 커널 API와 동작은 같습니다. 시간 측정값은 이 VM의 것이고 Zynq의 값이 아닙니다.
 
 ## 인터페이스 종류
@@ -231,7 +231,7 @@ dma_addr_t h = dma_map_single(dev, buf, SIZE, DMA_FROM_DEVICE);
 dma_sync_single_for_cpu(dev, h, SIZE, DMA_FROM_DEVICE);  /* 이제 CPU가 읽어도 됨 */
 ```
 
-`dma_handle`은 장치가 쓸 주소이고, CPU 물리 주소와 같다는 보장은 없습니다(IOMMU가 있으면 다릅니다). 그래서 원래 글의 `virt_to_phys(buf)`를 PL에 넘기는 코드는 user space에서는 컴파일조차 안 되고, 커널에서도 DMA API가 준 주소를 쓰는 것이 맞습니다. ACP로 coherent하게 접근하는 설계라면 이 sync 단계가 필요 없다는 것이 ACP의 장점입니다.
+`dma_handle`은 장치가 쓸 주소이고, CPU 물리 주소와 같다는 보장은 없습니다(IOMMU가 있으면 다릅니다). 그래서 `virt_to_phys(buf)`를 PL에 넘기는 코드는 user space에서는 컴파일조차 안 되고, 커널에서도 DMA API가 준 주소를 쓰는 것이 맞습니다. ACP로 coherent하게 접근하는 설계라면 이 sync 단계가 필요 없고, 이것이 ACP의 장점입니다.
 
 ## 자주 보는 함정
 
