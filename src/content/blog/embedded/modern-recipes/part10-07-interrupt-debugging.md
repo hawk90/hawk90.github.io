@@ -114,7 +114,7 @@ void nvic_dump(int irqn) {
     uint32_t act = NVIC->IABR[irqn / 32] & (1U << (irqn % 32));
     uint32_t pri = NVIC_GetPriority(irqn);
 
-    printf("IRQ %d: en=%lu pen=%lu act=%lu pri=%lu\n",
+    printf("IRQ %d: en=%d pen=%d act=%d pri=%lu\n",
            irqn, !!en, !!pen, !!act, pri);
     printf("BASEPRI=0x%02lx PRIMASK=%lu\n",
            __get_BASEPRI(), __get_PRIMASK());
@@ -196,7 +196,7 @@ edge로 걸리는 EXTI는 플래그를 지우면 다음 edge까지 조용하고,
 HAL_NVIC_SetPriority(EXTI0_IRQn,   3, 0);   // 높은 priority (숫자 작음)
 HAL_NVIC_SetPriority(USART1_IRQn,  5, 0);
 
-// FreeRTOS configMAX_SYSCALL_INTERRUPT_PRIORITY = 5
+// FreeRTOS configMAX_SYSCALL_INTERRUPT_PRIORITY = (5 << (8 - __NVIC_PRIO_BITS)) = 0x50
 // USART1은 RTOS API 호출 가능, EXTI0는 *불가*
 ```
 
@@ -213,11 +213,11 @@ configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
 ```c
 // STM32F4 EXTI 9_5는 EXTI5~9 모두 같은 ISR
 void EXTI9_5_IRQHandler(void) {
-    handle_button();   /* line 6 가정 */
+    handle_line5();    /* line 5만 처리 */
 }
 ```
 
-EXTI5와 EXTI8이 모두 enable되어 있으면 두 line 다 같은 ISR로 들어옵니다. ISR 안에서 *어느 line인지* 확인해야 합니다.
+EXTI5와 EXTI6이 모두 enable되어 있으면 두 line 다 같은 ISR로 들어옵니다. ISR 안에서 *어느 line인지* 확인해야 합니다.
 
 ```c
 void EXTI9_5_IRQHandler(void) {
@@ -249,7 +249,7 @@ STM32F4의 USART1은 RXNE·TXE·TC·오류가 모두 `USART1_IRQn` 하나로 들
 // 잘못된 가정
 if (timer_overflow_count > 5) action();
 
-// → tail-chain으로 count가 한 번에 +2 될 수 있음
+// → pending이 합쳐지면 이벤트 2번에 count는 +1만 오를 수 있음
 ```
 
 ISR 안의 카운터 증가는 그 ISR이 끝날 때까지 같은 ISR에 다시 끊기지 않으므로 한 번에 1씩 오르지만, 같은 시간에 이벤트가 몇 번 났는지는 위 2)처럼 pending이 합쳐지면 셀 수 없습니다. 이벤트 수가 중요하면 하드웨어 카운터(타이머의 외부 클럭 입력 등)로 셉니다.
@@ -326,7 +326,7 @@ HAL_NVIC_EnableIRQ(EXTI0_IRQn);
 
 ```c
 __disable_irq();
-slow_work();   /* 긴 critical section은 낮은 우선순위 IRQ 지연 가능 */
+slow_work();   /* 이 동안 들어온 IRQ는 모두 __enable_irq()까지 기다림 */
 __enable_irq();
 ```
 
@@ -349,7 +349,7 @@ PRIMASK로 막은 동안 들어온 IRQ는 풀 때까지 기다리고, 같은 IRQ
 - TIM_SR은 0을 써서, EXTI_PR은 1을 써서 지웁니다(HAL 매크로).
 - Shared IRQ는 ISR 안에서 *모든 source*를 dispatch해야 합니다.
 - 같은 IRQ가 막혀 있는 동안 두 번 오면 pending이 하나로 합쳐져 ISR은 한 번만 실행됩니다(QEMU에서 확인).
-- `BASEPRI` = 0x50은 우선순위 5 이하를 막고 3은 통과시킵니다(QEMU에서 확인).
+- `BASEPRI` = 0x50은 우선순위 값 5 이상(덜 급한 쪽)을 막고 3은 통과시킵니다(QEMU에서 확인).
 - GPIO toggle + logic analyzer가 ISR 진입 가시화의 최단 경로.
 - `configMAX_SYSCALL_INTERRUPT_PRIORITY` 위에서는 RTOS API 호출 금지.
 
@@ -359,4 +359,4 @@ PRIMASK로 막은 동안 들어온 IRQ는 풀 때까지 기다리고, 같은 IRQ
 
 - [10-04: 하드폴트 분석](/blog/embedded/modern-recipes/part10-04-hardfault-analysis)
 - [10-09: 타이밍/race 진단](/blog/embedded/modern-recipes/part10-09-timing-race-diag)
-- [RTOS 3-04: ISR 디자인](/blog/embedded/rtos/practical-internals/part2-04-context-switch)
+- [RTOS 2-04: Context Switch 원리](/blog/embedded/rtos/practical-internals/part2-04-context-switch)
