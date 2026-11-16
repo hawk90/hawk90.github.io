@@ -90,7 +90,7 @@ int C[2048];
 | 열 방향 | 1024 | 1.869, 2.968, 1.464 ns |
 | 열 방향 | 1025 | 0.494, 0.648, 0.659 ns |
 
-열 방향은 행 방향보다 수십 배 느리고, 그중에서도 stride 4,096 byte는 4,100 byte보다 중앙값 기준 2.9배(실행 조합에 따라 2.2~6배) 느렸습니다. 원소 하나 차이(4 byte)로 같은 데이터, 같은 접근 횟수의 시간이 달라진 것은 4,096 byte 간격의 주소들이 같은 set으로 몰렸기 때문으로 해석할 수 있지만, M2 Pro의 캐시 index 함수는 공개되어 있지 않아 이 측정으로 원인을 확정하지는 않았습니다.
+열 방향은 행 방향보다 12~36배 느리고, 그중에서도 stride 4,096 byte는 4,100 byte보다 중앙값 기준 2.9배(실행 조합에 따라 2.2~6배) 느렸습니다. 원소 하나 차이(4 byte)로 같은 데이터, 같은 접근 횟수의 시간이 달라진 것은 4,096 byte 간격의 주소들이 같은 set으로 몰렸기 때문으로 해석할 수 있지만, M2 Pro의 캐시 index 함수는 공개되어 있지 않아 이 측정으로 원인을 확정하지는 않았습니다.
 
 ## 측정 — PMU 이벤트
 
@@ -165,11 +165,11 @@ M2 Pro에서 두 버전을 `clang -O2`로 돌렸습니다(`bench/c3/mm.c`, 각 3
 
 ### Hardware Prefetcher
 
-Cortex-A53 TRM 6.1은 L1 data 쪽에 prefetch engine이 있다고 적습니다. 어떤 패턴을 감지하는지는 이 절에 나오지 않습니다.
+Cortex-A53 TRM 6.6.2에 따르면 A53의 data cache prefetcher는 코어의 cache miss를 지켜보다가 "a sequence of data cache misses at a fixed stride pattern that lies in four cache lines, plus or minus"를 알아보면 백그라운드로 linefill을 시작하고, 그 사이에 cache hit인 load·store가 끼어도 패턴 인식이 방해받지 않습니다. 같은 TRM 6.6.1은 A53에서 `PLI`가 NOP으로 구현되어 있다고 적습니다.
 
 ### Software Prefetch
 
-GCC·clang의 `__builtin_prefetch(addr, rw, locality)`는 대상에 맞는 prefetch 명령을 냅니다. `clang -O2`(arm64)는 `prfm pldl1strm`, `arm-none-eabi-gcc` 16.2(`-mcpu=cortex-m4`, `cortex-m7`)는 `pld [r0, #64]`를 냈습니다(`bench/c3/pf-asm.log`).
+GCC·clang의 `__builtin_prefetch(addr, rw, locality)`는 대상에 맞는 prefetch 명령을 냅니다. 아래 `pf.c`의 `__builtin_prefetch(p, 0, 0)`(locality 0)에 `clang -O2`(arm64)는 `prfm pldl1strm`을, 별도 파일 `pfm.c`의 `__builtin_prefetch(p+16)`(기본 locality 3)에 `arm-none-eabi-gcc` 16.2(`-mcpu=cortex-m4`, `cortex-m7`)는 `pld [r0, #64]`를 냈습니다(`bench/c3/pf-asm.log`).
 
 ```c
 for (i = 0; i < N; i++) {
@@ -178,7 +178,7 @@ for (i = 0; i < N; i++) {
 }
 ```
 
-M2 Pro에서 256 MiB 표를 무작위 인덱스로 1,600만 번 읽으며 거리 D를 바꿔 보았습니다(`bench/c3/pf.c`, 각 3회).
+M2 Pro에서 256 MiB 표를 무작위 인덱스로 약 1,680만 번(2²⁴) 읽으며 거리 D를 바꿔 보았습니다(`bench/c3/pf.c`, 각 3회).
 
 | D | 원소당 시간 (3회) |
 |---:|---|

@@ -25,7 +25,7 @@ John McCalpin의 STREAM은 네 가지 단순한 루프로 지속 가능한 메�
 | **Add** | `a[i] = b[i] + c[i]` | 24 | 1 |
 | **Triad** | `a[i] = b[i] + q * c[i]` | 24 | 2 |
 
-같은 페이지는 두 가지 규칙을 적습니다. 배열 하나가 실행에 쓰인 last-level cache 합의 4배 이상이거나 100만 원소 이상이어야 하고, byte는 "사용자가 읽고 쓰라고 요청한 byte"만 셉니다. 즉 store miss 때 하드웨어가 line을 먼저 읽어 오는 write-allocate traffic은 세지 않습니다(1-07의 triad OI 0.167 대 0.125가 이 차이입니다).
+같은 페이지는 두 가지 규칙을 적습니다. 배열 하나가 실행에 쓰인 last-level cache 합의 4배와 100만 원소 중 큰 쪽 이상이어야 하고, byte는 "사용자가 읽고 쓰라고 요청한 byte"만 셉니다. 즉 store miss 때 하드웨어가 line을 먼저 읽어 오는 write-allocate traffic은 세지 않습니다(1-07의 triad OI 0.167 대 0.125가 이 차이입니다).
 
 ## 측정 — M2 Pro와 Debian 게스트
 
@@ -57,7 +57,7 @@ DRAM의 이론 최대 대역폭은 데이터율 × 버스 폭 × 채널 수입�
 
 ## Interconnect — Arm CCN과 CMN
 
-Arm 서버·인프라용 SoC의 코어 cluster, 메모리 컨트롤러, I/O를 잇는 interconnect는 Arm CoreLink 계열입니다. Linux 6.12 커널 문서에 따르면 두 계열은 구조가 다릅니다.
+Linux 6.12에는 Arm interconnect 두 계열(CCN, CMN)의 PMU 문서가 있고, 두 문서에 따르면 구조가 다릅니다.
 
 - `Documentation/admin-guide/perf/arm-ccn.rst`: CCN-504(Cache Coherent Network)는 crosspoint(XP) 11개로 된 **ring bus**이고, XP마다 장치 포트가 두 개까지 있습니다.
 - `Documentation/admin-guide/perf/arm-cmn.rst`: CMN-600(Coherent Mesh Network)은 crosspoint를 직사각형 격자로 놓은 **mesh**이고, XP마다 AMBA CHI agent가 붙는 장치 포트가 두 개까지 있습니다. 모든 XP에 local monitor(DTM)를 둔 분산 PMU를 가집니다.

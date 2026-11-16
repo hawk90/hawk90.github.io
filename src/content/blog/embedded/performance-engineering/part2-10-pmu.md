@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"PMU = CPU 내장 프로파일러"**입니다. 측정 overhead가 거의 0에 가깝습니다.
+> **"PMU = CPU 내장 프로파일러"**입니다. 코어가 하드웨어로 이벤트를 셉니다.
 
 ## ARMv8 PMU 구조
 
@@ -136,10 +136,10 @@ perf report --stdio
 
 ## Event Multiplexing
 
-카운터 수보다 많은 이벤트를 한 번에 요청하면 perf는 이벤트를 번갈아 카운터에 올리고, 센 값을 enabled 시간으로 환산해 보여 줍니다(1-03). A53은 event counter가 6개이므로, 아래처럼 7개를 주면 적어도 하나는 측정 시간의 일부만 센 값이 됩니다.
+카운터 수보다 많은 이벤트를 한 번에 요청하면 perf는 이벤트를 번갈아 카운터에 올리고, 센 값을 enabled 시간으로 환산해 보여 줍니다(1-03). A53은 event counter가 6개이므로, 아래처럼 cycle이 아닌 이벤트 7개를 주면 적어도 하나는 측정 시간의 일부만 센 값이 됩니다. `r11`(CPU_CYCLES)은 Linux가 전용 cycle counter에 올리므로(`arm_pmuv3.c` `armv8pmu_get_event_idx()`의 "Always prefer to place a cycle counter into the cycle counter") 6개 계산에 들어가지 않습니다.
 
 ```bash
-perf stat -e r03,r04,r10,r11,r17,r16,r13 ./prog
+perf stat -e r03,r04,r10,r12,r17,r16,r13 ./prog
 ```
 
 이렇게 환산한 값은 측정하지 않은 구간의 동작을 가정한 추정입니다. 비율을 계산할 두 이벤트(예: `r03`과 `r04`)는 `perf stat -e '{r03,r04}'`처럼 group으로 묶어 같은 구간을 세게 합니다.
@@ -148,7 +148,7 @@ perf stat -e r03,r04,r10,r11,r17,r16,r13 ./prog
 
 > ⚠️ 카운터 읽기 순서를 강제하지 않음
 
-arm64에서 Linux는 카운터 레지스터를 읽기 전에 `isb`를 둡니다(1-03의 `CNTVCT_EL0`, 위 PMU 초기화 코드). 그렇지 않으면 측정 구간 안의 명령이 끝나기 전에 카운터가 읽힐 수 있습니다.
+arm64에서 Linux는 카운터 레지스터를 읽기 전에 `isb`를 둡니다(1-03의 `CNTVCT_EL0`). 그렇지 않으면 측정 구간 안의 명령이 끝나기 전에 카운터가 읽힐 수 있습니다.
 
 > ⚠️ Counter overflow
 
@@ -156,7 +156,7 @@ arm64에서 Linux는 카운터 레지스터를 읽기 전에 `isb`를 둡니다(
 
 > ⚠️ `perf_event_paranoid`와 레지스터 직접 접근을 혼동
 
-`/proc/sys/kernel/perf_event_paranoid`는 `perf_event_open()`을 통한 perf 사용 권한을 정합니다. Linux 6.12 `Documentation/admin-guide/sysctl/kernel.rst`에 따르면 기본값은 2이고, 1 이상이면 `CAP_PERFMON` 없는 사용자의 CPU 이벤트 접근을, 2 이상이면 커널 프로파일링을 막습니다. Debian 13 게스트의 값은 문서 표에 없는 3이었습니다. EL0에서 `mrs`로 PMU 레지스터를 직접 읽는 것은 이와 별개로 `kernel.perf_user_access`가 정합니다(1-03).
+`/proc/sys/kernel/perf_event_paranoid`는 `perf_event_open()`을 통한 perf 사용 권한을 정합니다. Linux 6.12 `Documentation/admin-guide/sysctl/kernel.rst`에 따르면 기본값은 2이고, 1 이상이면 `CAP_PERFMON` 없는 사용자의 CPU 이벤트 접근을, 2 이상이면 커널 프로파일링을 막습니다. Debian 13 게스트의 값은 3이었습니다(upstream 표는 >=2까지). EL0에서 `mrs`로 PMU 레지스터를 직접 읽는 것은 이와 별개로 `kernel.perf_user_access`가 정합니다(1-03).
 
 ```bash
 sudo sysctl kernel.perf_event_paranoid=1
@@ -174,7 +174,7 @@ perf stat -e cycles:u,instructions:u ./prog
 
 - Armv8 PMU의 event counter 수는 `PMCR_EL0.N`이 알려 주고, A53은 6개입니다. HVF 게스트에는 cycle counter 하나만 보였습니다.
 - 0x18은 `L2D_CACHE_WB`입니다. 0x23·0x24 stall 이벤트는 A53에 없습니다.
-- Linux perf의 Arm top-down Level 1은 `sbsa.json`에 정의되어 있고 Armv8.4 이후 이벤트가 필요합니다.
+- Linux perf의 Arm top-down Level 1은 `sbsa.json`에 정의되어 있고, A53 표 12-28에 없는 0x3A~0x3F 이벤트가 필요합니다.
 - Cortex-M의 DWT profiling 카운터는 8-bit이고, `FOLDCNT`는 0 cycle 명령 수를 셉니다.
 - RISC-V는 64-bit `mcycle`·`minstret`과 `mhpmcounter3~31`을 정의하지만, 구현이 카운터를 0으로 고정할 수 있습니다.
 

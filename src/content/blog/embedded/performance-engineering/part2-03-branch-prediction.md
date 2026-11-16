@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## Mispredict 비용 — 측정
 
-분기 예측이 틀리면 그 뒤로 미리 가져와 진행하던 명령을 버리고 올바른 주소부터 다시 시작합니다. 이 비용이 얼마인지는 코어마다 다르고, Arm은 Cortex-M·A의 TRM에서 mispredict penalty를 cycle 수로 공개하지 않습니다. 그래서 M2 Pro에서 직접 쟀습니다.
+분기 예측이 틀리면 그 뒤로 미리 가져와 진행하던 명령을 버리고 올바른 주소부터 다시 시작합니다. 이 비용은 코어마다 다르고, 이 시리즈에서 본 Cortex-A53 TRM과 Cortex-A72 SOG에는 mispredict penalty의 cycle 수가 나오지 않습니다. 그래서 M2 Pro에서 직접 쟀습니다.
 
 배열 원소마다 조건 분기 하나를 실행하는 루프입니다. 컴파일러가 분기를 `csel`로 바꾸지 못하게 inline asm `tbz`로 분기를 강제했고, 분기 방향은 원소의 bit 0으로 정했습니다(`bench/br.c`, `clang -O2`, 65,536개 배열을 2,000번, 분기 131,072,000번).
 
@@ -105,7 +105,7 @@ function_a();   // call → 복귀 주소 push
    return;      // 복귀 → pop한 주소로 예측
 ```
 
-A53의 return stack은 8 entry입니다. 호출 깊이가 8을 넘으면 가장 오래된 복귀 주소는 stack에 남아 있지 않습니다.
+A53의 return stack은 8 entry입니다. 깊이가 이를 넘을 때의 동작은 TRM 2.1.1에 나오지 않습니다.
 
 ## Cortex-M4 — 분기 비용
 
@@ -187,7 +187,7 @@ Linux 문서 `Documentation/admin-guide/hw-vuln/spectre.rst`는 Spectre 변형�
 
 > ⚠️ 짧은 if-else로 무조건 branchless
 
-위 측정에서 같은 방향 분기는 2.06 cycle, 4,096 주기로 반복되는 패턴도 2.7 cycle이었습니다. 예측이 맞는 분기는 싸므로, 무작위에 가까운 분기에만 branchless가 이득입니다.
+위 측정에서 같은 방향 분기는 루프 1회당 2.06 cycle, 4,096 주기로 반복되는 패턴도 2.7 cycle이었습니다. 예측이 맞는 분기는 싸므로, 무작위에 가까운 분기에만 branchless가 이득입니다.
 
 > ⚠️ 간접 호출 남발
 

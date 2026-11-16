@@ -65,7 +65,7 @@ double sum4(const double *x) {
 | `sum1` | 2,064,154,252 | 1,224,449,174 | 1.69 | 2.99, 2.98, 2.98 |
 | `sum4` | 934,972,513 | 308,341,990 | 3.03 | 0.75, 0.75, 0.75 |
 
-`sum1`의 루프 본문은 `ldr d1`, `fadd d0, d0, d1`, 카운터 증가, 비교, 분기 다섯 명령이고(objdump로 확인), 원소 하나에 정확히 3 cycle이 걸렸습니다. 앞 `fadd`의 결과가 다음 `fadd`의 입력이라, 이 코어에서 `fadd` 하나의 결과를 기다리는 시간이 그대로 원소당 시간이 된 것입니다. 누산기를 넷으로 나누면 네 사슬이 겹쳐 원소당 0.75 cycle, 정확히 4배가 됩니다.
+`sum1`의 루프 본문은 `ldr d1`, `fadd d0, d0, d1`, 카운터 증가, 비교, 분기 다섯 명령이고(objdump로 확인), 원소 하나에 약 3 cycle(2.98~2.99)이 걸렸습니다. 앞 `fadd`의 결과가 다음 `fadd`의 입력이라, 이 코어에서 `fadd` 하나의 결과를 기다리는 시간이 그대로 원소당 시간이 된 것입니다. 누산기를 넷으로 나누면 네 사슬이 겹쳐 원소당 0.75 cycle, 약 4배가 됩니다.
 
 부동소수점 덧셈은 결합 법칙이 성립하지 않으므로 컴파일러가 `sum1`을 `sum4`로 바꿔 주지 않습니다. 합의 순서가 바뀌면 결과의 마지막 비트가 달라질 수 있다는 것을 받아들일 때만 손으로 나눕니다.
 
@@ -120,12 +120,14 @@ Armv8 PMU에는 공통 이벤트 번호 0x23 `STALL_FRONTEND`, 0x24 `STALL_BACKE
 | 0xE0 | DPU 명령 큐(IQ)가 비었고, 원인이 micro-TLB miss·명령 캐시 miss·pre-decode 오류가 아닌 cycle |
 | 0xE1 | IQ가 비었고 명령 캐시 miss를 처리 중인 cycle |
 | 0xE2 | IQ가 비었고 명령 micro-TLB miss를 처리 중인 cycle |
+| 0xE3 | IQ가 비었고 pre-decode 오류를 처리 중인 cycle |
 | 0xE4 | SIMD·FP 명령도, AGU 주소 계산을 기다리는 load/store도 아닌 원인의 interlock cycle |
 | 0xE5 | load/store가 AGU에서 주소 계산용 데이터를 기다리는 interlock cycle |
 | 0xE6 | SIMD·FP 명령 때문인 interlock cycle |
 | 0xE7 | load miss 때문에 Wr 단계가 멈춘 cycle |
+| 0xE8 | store 때문에 Wr 단계가 멈춘 cycle |
 
-0xE0~0xE2는 앞단(명령 공급), 0xE4~0xE7은 뒷단(의존성과 메모리)입니다. Linux에서는 raw 이벤트로 셉니다.
+0xE0~0xE3은 앞단(명령 공급), 0xE4~0xE8은 뒷단(의존성과 메모리)입니다. Linux에서는 raw 이벤트로 셉니다.
 
 ```bash
 perf stat -e r0e1,r0e5,r0e7,cycles -- ./app

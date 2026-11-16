@@ -69,7 +69,7 @@ Cortex-M4 TRM(DDI 0439B) 표 3-1은 `ADD`, `MUL`을 1 cycle, `LDR Rd, [Rn, <op2>
 ```asm
 ldr r0, [r1]        @ 2 cycle
 ldr r2, [r3]        @ r0을 주소에 쓰지 않음 → 1 cycle 절약, 둘이 합쳐 보통 3 cycle
-ldr r4, [r0]        @ r0을 주소에 씀 → 위 절약 조건에 해당하지 않음
+ldr r4, [r2]        @ 바로 앞 LDR의 결과 r2를 주소에 씀 → 절약 조건에 해당하지 않음
 ```
 
 이 글에서는 보드로 재지 않았습니다. QEMU는 cycle을 모델링하지 않으므로(1-03) 이 숫자는 QEMU로 확인할 수 없습니다.
@@ -105,7 +105,7 @@ $$T_{\text{no pipeline}} = 5N \text{ cycle}, \quad T_{\text{5-stage pipe}} = 5 +
 
 ### 1. Structural Hazard
 
-같은 hardware 자원을 두 명령이 동시에 사용하는 경우입니다. 예를 들어 단일 memory port에 F와 M이 동시 액세스하는 상황입니다. 명령과 데이터의 버스를 나눈 Harvard 구조(Cortex-M4, M7)는 이 충돌을 없앱니다. 2-stage인 Cortex-M0+는 von Neumann 구조입니다(위 표).
+같은 hardware 자원을 두 명령이 동시에 사용하는 경우입니다. 예를 들어 단일 memory port에 F와 M이 동시 액세스하는 상황입니다. Cortex-M4는 flash(Code 영역)에서 실행할 때 fetch(ICode)와 data(DCode)가 서로 다른 버스로 나뉘어 이 충돌을 피합니다. SRAM에서 실행하면 둘 다 System 버스를 쓰므로 다시 다툽니다(M4 TRM 2.2.1, 2-02). 2-stage인 Cortex-M0+는 von Neumann 구조입니다(위 표).
 
 ### 2. Data Hazard
 

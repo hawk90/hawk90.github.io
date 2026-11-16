@@ -22,7 +22,7 @@ AArch64의 Advanced SIMD(NEON)는 128-bit 벡터 레지스터를 씁니다. Arm�
 
 ## Auto-Vectorization — 첫 시도
 
-AArch64 GCC에서는 NEON이 기본으로 켜져 있어 따로 켤 옵션이 없습니다. 예전 글에 흔한 `-mfpu=neon`은 32-bit Arm용 옵션이라, Debian 게스트의 aarch64 GCC 14.2에 주면 `gcc: error: unrecognized command-line option '-mfpu=neon'`이 납니다. vectorizer 보고는 `-fopt-info-vec`로 봅니다.
+AArch64 GCC에서는 NEON(`+simd`)이 기본으로 켜져 있어 따로 켤 필요가 없습니다. 예전 글에 흔한 `-mfpu=neon`은 32-bit Arm용 옵션이라, Debian 게스트의 aarch64 GCC 14.2에 주면 `gcc: error: unrecognized command-line option '-mfpu=neon'`이 납니다. vectorizer 보고는 `-fopt-info-vec`로 봅니다.
 
 ```bash
 gcc -O3 -fopt-info-vec -c vec.c
@@ -106,7 +106,7 @@ M2 Pro에서 L1에 들어가는 4,096원소 배열로 20만 번 돌렸습니다(
 
 | 버전 | 원소당 시간 (3회) |
 |---|---|
-| scalar (`-O2`, 부동소수점이라 벡터화 안 됨) | 0.870, 0.844, 0.883 ns |
+| scalar C (`-O2`; clang은 곱셈만 `fmul.4s`로 벡터화하고 합은 순서대로 scalar `fadd` 사슬로 남김) | 0.870, 0.844, 0.883 ns |
 | NEON, 누산기 1개 (위 코드) | 0.278, 0.278, 0.276 ns |
 | NEON, 누산기 4개 | 0.077, 0.070, 0.070 ns |
 
@@ -157,14 +157,14 @@ void add_sve(float *a, float *b, float *c, int N) {
 
 ## 측정 — IPC와 Throughput
 
-이론적으로 `float` 넷을 한 번에 하면 4배지만, 실제 배수는 데이터가 어디 있느냐에 달려 있습니다. 위 dot product는 데이터가 L1에 있어 연산이 병목이었고, 누산기 넷으로 12배가 나왔습니다. 같은 일을 DRAM에 있는 큰 배열에 하면 2-08의 STREAM처럼 메모리 대역폭이 상한을 정하므로, 벡터화의 이득이 그만큼 나오지 않습니다. 측정은 이 글처럼 `clock_gettime`, Linux에서는 perf, Cortex-M에서는 DWT CYCCNT로 합니다.
+이론적으로 `float` 넷을 한 번에 하면 4배지만, 실제 배수는 데이터가 어디 있느냐에 달려 있습니다. 위 dot product는 데이터가 L1에 있어 연산이 병목이었고, 누산기 넷으로 12배가 나왔습니다. 같은 일을 DRAM에 있는 큰 배열에 하면 Roofline(1-07)으로 볼 때 2-08의 STREAM 대역폭이 상한을 정하게 됩니다. 이 경우는 재지 않았습니다. 측정은 이 글처럼 `clock_gettime`, Linux에서는 perf, Cortex-M에서는 DWT CYCCNT로 합니다.
 
 ## Reduction Pattern
 
 ```c
 // 회피 — RAW chain
 float sum = 0;
-for (i = 0; i < N; i++) sum += a[i];   // 1 add/cycle (RAW)
+for (i = 0; i < N; i++) sum += a[i];   // add마다 앞 add의 latency를 기다림 (M2 Pro 약 3 cycle, 2-02)
 
 // Good — 4-way reduction
 float32x4_t acc0 = vdupq_n_f32(0);
@@ -185,7 +185,7 @@ for (i = 0; i + 16 <= N; i += 16) {
 
 ```c
 __attribute__((aligned(16))) float a[1024];
-float32x4_t v = vld1q_f32(a);   // ← aligned load 빠름
+float32x4_t v = vld1q_f32(a);
 ```
 
 AArch64의 `vld1q_f32`는 정렬되지 않은 주소도 읽습니다. 정렬이 성능에 주는 영향은 이 글에서 재지 않았습니다.

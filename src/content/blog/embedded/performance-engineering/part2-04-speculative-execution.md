@@ -17,10 +17,10 @@ topics: ["embedded"]
 ## In-Order vs Out-of-Order
 
 ```asm
-ldr x0, [x1]        @ load — cache miss면 수십~수백 ns
-add x2, x3, x4      @ x0 무관 — 독립
-sub x5, x6, x7      @ 독립
-mul x8, x0, x9      @ x0 의존 — load 완료까지 대기
+ldr x0, [x1]        // load — DRAM까지 가면 이 글의 측정에서 약 120 ns
+add x2, x3, x4      // x0 무관 — 독립
+sub x5, x6, x7      // 독립
+mul x8, x0, x9      // x0 의존 — load 완료까지 대기
 ```
 
 in-order 코어는 명령을 프로그램 순서대로 발행하므로, `ldr`이 결과를 기다리는 동안 뒤의 독립 명령도 나아가지 못할 수 있습니다. out-of-order 코어는 뒤의 `add`, `sub`처럼 준비된 명령을 먼저 실행하고, `mul`만 `ldr`을 기다립니다. Arm 문서 기준으로 Cortex-A53은 in-order(TRM DDI 0500E 1.3), Cortex-A72는 dispatch 이후 out-of-order(SOG UAN 0016A 2.1)입니다.
@@ -82,8 +82,8 @@ if (ptr != NULL) {
 ## Memory Disambiguation
 
 ```asm
-str x0, [x1]        @ store
-ldr x2, [x3]        @ load — x1 == x3?
+str x0, [x1]        // store
+ldr x2, [x3]        // load — x1 == x3?
 ```
 
 load를 앞선 store보다 먼저 실행하려면 두 주소가 다르다는 것을 알아야 합니다. 같은 주소라면 store할 값을 load로 바로 넘기거나(store-to-load forwarding), store가 끝날 때까지 기다립니다. A72 SOG 3.9절은 store µop가 주소 피연산자만 준비되면 데이터 피연산자를 기다리지 않고 issue될 수 있다고 적습니다. load와 store의 순서를 맞추는 내부 구조는 SOG에 나오지 않습니다.
@@ -109,7 +109,7 @@ IPC가 낮은데 branch-miss 비율도 낮으면, 시간은 분기가 아니라 
 
 ## OoO와 WCET
 
-Wilhelm 외(2008) 5절은 timing anomaly가 있으면 측정 기반 방법이 최악의 초기 상태를 찾기가 매우 어렵다고 적습니다. 안전하려면 모든 초기 상태에서 재야 하지만 그것은 비현실적이므로, 일부 초기 상태만 쓰는 측정 기반 방법은 안전하지 않습니다. 같은 논문 2.1.3절은 강력한 마이크로프로세서 대부분이 timing anomaly를 겪는다고 적고, 그림 2로 추측 실행이 일으키는 anomaly를 예로 듭니다. 실시간·안전 등급 시스템은 코어의 실행 특성만으로 고르지 않고, WCET 분석 가능성과 safety case를 함께 평가합니다.
+Wilhelm 외(2008) 5절은 timing anomaly가 있으면 측정 기반 방법이 최악의 초기 상태를 찾기가 매우 어렵다고 적습니다. 안전하려면 모든 초기 상태에서 재야 하지만 그것은 비현실적이므로, 일부 초기 상태만 쓰는 측정 기반 방법은 안전하지 않습니다. 같은 논문 2.1.3절은 강력한 마이크로프로세서 대부분이 timing anomaly를 겪는다고 적고, 그림 2로 추측 실행이 일으키는 anomaly를 예로 듭니다.
 
 ## 자주 하는 실수
 
@@ -123,11 +123,11 @@ Wilhelm 외(2008) 5절은 timing anomaly가 있으면 측정 기반 방법이 �
 __asm__ volatile("dsb sy; isb" ::: "memory");
 ```
 
-이런 장벽은 앞선 명령이 끝날 때까지 뒤를 막으므로, 위 측정에서 본 겹치기를 없앱니다. Spectre 대책은 커널처럼 공격자가 영향을 줄 수 있는 인덱스·포인터에만 `csdb` 같은 정해진 장치를 씁니다.
+이런 장벽을 루프 안에 넣으면 앞선 명령이 끝날 때까지 뒤를 막으므로, 위 측정에서 본 것 같은 독립 load의 겹치기를 막게 됩니다(이 경우는 재지 않았습니다). Spectre 대책은 커널처럼 공격자가 영향을 줄 수 있는 인덱스·포인터에만 `csdb` 같은 정해진 장치를 씁니다.
 
 > ⚠️ WCET = 관측 최대
 
-관측 최대는 시험한 초기 상태의 최대일 뿐입니다(Wilhelm 5절). 인증이 필요한 시스템은 static 분석 도구(1-05의 aiT, Bound-T)로 상한을 구합니다.
+관측 최대는 시험한 초기 상태의 최대일 뿐입니다(Wilhelm 5절).
 
 ## 정리
 

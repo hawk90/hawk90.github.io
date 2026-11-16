@@ -75,7 +75,7 @@ arr[1];   // 같은 line → hit
 arr[16];  // 다음 line → miss
 ```
 
-Cortex-M4 코어에는 L1 캐시가 없습니다. M4 TRM(DDI 0439B) 2.2.1이 설명하는 코어 인터페이스는 ICode, DCode, System AHB-Lite 버스뿐이고, flash 앞의 가속기·캐시는 MCU 제조사가 SoC에 따로 붙입니다.
+Cortex-M4 코어에는 L1 캐시가 없습니다. M4 TRM(DDI 0439B) 2.2.1이 설명하는 코어 인터페이스는 ICode, DCode, System AHB-Lite 버스뿐입니다.
 
 ## Direct Mapped Cache
 
