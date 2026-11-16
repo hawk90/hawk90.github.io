@@ -34,12 +34,14 @@ DS8626 Rev 4 2.2.19절 "Low-power modes"의 정의와 5.3.6·5.3.7절 표의 typ
 |------|---------------|---------------|--------------------------|---------|
 | **Run** 168 MHz | — | 유지 | — | 40 / 87 mA ¹ (Table 20) |
 | **Sleep** 168 MHz | CPU만 | 유지 | 1 µs | 12 / 59 mA ¹ (Table 22) |
-| **Stop** | V12 domain의 모든 clock, PLL·HSI·HSE | 유지 | 13 / 17 µs ² | 0.45 / 0.31 mA ² (Table 23) |
+| **Stop** | V12 domain의 모든 clock, PLL·HSI·HSE | 유지 | 13 / 17 µs ⁴ | 0.45 / 0.31 mA ² (Table 23) |
 | **Standby** | V12 domain 전원 자체 | backup domain 레지스터와 (선택 시) backup SRAM만 유지 | 375 µs | 3.3 / 2.2 µA ³ (Table 24) |
 
 ¹ peripheral 전부 off / 전부 on.
 
-² main regulator / low-power regulator. 두 값 모두 flash Stop mode(Deep power-down 아님), LSI·HSI·HSE off, IWDG 없음.
+² main regulator in Run mode / main regulator in Low Power mode. 두 값 모두 Table 23의 "Flash in Stop mode"(Deep power down 아님), low-speed·high-speed internal RC와 high-speed oscillator OFF, "no independent watchdog" 조건.
+
+⁴ Table 28의 "regulator in Run mode" / "regulator in low power mode". flash를 Deep power down으로 둔 경우는 별도 행으로 110 µs입니다.
 
 ³ low-speed oscillator·RTC on / RTC off. 두 값 모두 backup SRAM off.
 
@@ -144,7 +146,7 @@ void EXTI0_IRQHandler(void) {
 }
 ```
 
-`PWR->CR`에 쓰기 전에 RCC_APB1ENR의 PWREN(power interface clock)을 켭니다. `PWR_CR_LPDS`를 켜고 `PWR_CR_FPDS`(flash power-down)는 켜지 않았으므로 이 설정은 Table 23의 "low-power regulator, flash in Stop mode" 행(0.31 mA typ, wake 17 µs typ)에 해당합니다.
+`PWR->CR`에 쓰기 전에 RCC_APB1ENR의 PWREN(power interface clock)을 켭니다. `PWR_CR_LPDS`를 켜고 `PWR_CR_FPDS`(flash power-down)는 켜지 않았으므로 이 설정은 Table 23의 regulator Low Power mode·Flash in Stop mode 행(0.31 mA typ)과 Table 28의 "regulator in low power mode" 행(wake 17 µs typ)에 해당합니다.
 
 Stop에서 깨면 HSI(16 MHz 내부 RC)가 system clock으로 선택됩니다([HAL PWR v1.8.3 `HAL_PWR_EnterSTOPMode` 주석](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.3/Src/stm32f4xx_hal_pwr.c), "When exiting Stop mode by issuing an interrupt or a wake-up event, the HSI RC oscillator is selected as system clock"). PLL을 다시 켜지 않으면 16 MHz로 돌고, 168 MHz 기준으로 계산한 UART baud rate와 timer 주기가 어긋납니다. `clock_init_168mhz()`는 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 함수입니다.
 
@@ -153,9 +155,9 @@ Stop에서 깨면 HSI(16 MHz 내부 RC)가 system clock으로 선택됩니다([H
 RTC는 backup domain에 있어 Standby에서도 동작합니다. 아래 코드는 [5-14: RTC 활용](/blog/embedded/modern-recipes/part5-14-rtc-utilization)의 `rtc_init()`으로 LSE(32.768 kHz)를 RTC clock으로 이미 설정했다고 가정합니다. Standby를 건너 남겨야 하는 값은 5-14의 "Backup register" 절처럼 backup register에 둡니다.
 
 ```c
-// seconds: 1..32 (WUTR은 16-bit)
+// seconds: 1..31 (WUTR은 16-bit)
 void standby_with_rtc_wake(uint32_t seconds) {
-    if (seconds == 0 || seconds > 32) return;
+    if (seconds == 0 || seconds > 31) return;
 
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;
     PWR->CR |= PWR_CR_DBP;              // backup domain write protection 해제
@@ -164,11 +166,13 @@ void standby_with_rtc_wake(uint32_t seconds) {
     RTC->CR &= ~(RTC_CR_WUTE | RTC_CR_WUTIE);
     while (!(RTC->ISR & RTC_ISR_WUTWF));
     RTC->CR &= ~RTC_CR_WUCKSEL;         // 000 = RTCCLK/16 = 2048 Hz
-    RTC->WUTR = seconds * 2048 - 1;
+    RTC->WUTR = seconds * 2048;         // ST example: Wakeup Time = Time Base x WakeUpCounter
 
     // WUTF clear (INIT 비트는 현재 값 유지)
     RTC->ISR = ~(RTC_ISR_WUTF | RTC_ISR_INIT) | (RTC->ISR & RTC_ISR_INIT);
     PWR->CR |= PWR_CR_CWUF;             // PWR WUF clear
+    EXTI->IMR  |= EXTI_IMR_MR22;        // RTC wakeup on EXTI line 22, as HAL_RTCEx_SetWakeUpTimer_IT
+    EXTI->RTSR |= EXTI_RTSR_TR22;
     RTC->CR |= RTC_CR_WUTIE | RTC_CR_WUTE;
     RTC->WPR = 0xFF;
 
@@ -182,7 +186,7 @@ void standby_with_rtc_wake(uint32_t seconds) {
 
 순서는 ST의 STM324xG_EVAL(F407 보드) 예제 `PWR/PWR_STANDBY/Src/main.c`의 주석 "Disable all used wakeup sources" → "Clear all related wakeup flags" → "Re-enable all used wakeup sources" → "Enter the Standby mode"를 따랐습니다. 그 예제는 `__HAL_PWR_CLEAR_FLAG(PWR_FLAG_WU)`로 PWR WUF를 지우고, HAL `HAL_RTCEx_SetWakeUpTimer_IT()`도 wakeup timer를 켜기 전에 `RTC_FLAG_WUTF`를 지웁니다.
 
-`seconds`의 상한 32는 다음 계산에서 나옵니다. `RTC_WUTR_WUT` 마스크가 `0xFFFF`이므로 `seconds × 2048 − 1 ≤ 65535`이고, 32 × 2048 − 1 = 65535입니다. 33 s 이상은 WUCKSEL = 100(HAL `RTC_WAKEUPCLOCK_CK_SPRE_16BITS`, ck_spre clock)로 바꿔야 합니다. 5-14의 PREDIV 설정이면 ck_spre는 1 Hz입니다.
+WUTR 값은 ST의 STM324xG_EVAL `PWR/PWR_CurrentConsumption` 예제(`stm32f4xx_lp_modes.c`) 주석의 식 "Wakeup Time = Wakeup Time Base * WakeUpCounter"를 따랐습니다. 그 예제는 RTCCLK/16에서 20 s에 `0xA017`(40983)을 씁니다. `RTC_WUTR_WUT` 마스크가 `0xFFFF`이므로 `seconds × 2048 ≤ 65535`, 즉 31 s까지이고, 더 길게는 WUCKSEL = 100(HAL `RTC_WAKEUPCLOCK_CK_SPRE_16BITS`, ck_spre clock)으로 바꿉니다. 5-14의 PREDIV 설정이면 ck_spre는 1 Hz입니다. EXTI line 22 설정은 HAL `HAL_RTCEx_SetWakeUpTimer_IT()`가 하는 `__HAL_RTC_WAKEUPTIMER_EXTI_ENABLE_IT()`·`_ENABLE_RISING_EDGE()`(`RTC_EXTI_LINE_WAKEUPTIMER_EVENT` = `EXTI_IMR_MR22`)와 같습니다.
 
 깨면 `Reset_Handler`부터 시작합니다. 시작 코드에서 SBF(Standby Flag)로 복귀인지 구분합니다.
 
@@ -208,7 +212,7 @@ GPIOD->MODER = 0xFFFFFFFFu;            // 16핀 모두 MODER = 11 (analog)
 RCC->AHB1ENR &= ~RCC_AHB1ENR_GPIODEN;
 
 // 필요한 clock만 남긴다.
-// CCMDATARAMEN(reset 값 1)과 BKPSRAMEN은 현재 값을 유지한다
+// CCMDATARAMEN과 BKPSRAMEN은 현재 값을 유지한다
 // (CCM RAM·backup SRAM을 쓰는 코드가 있으면 그 clock이 켜져 있어야 한다).
 RCC->AHB1ENR = (RCC->AHB1ENR & (RCC_AHB1ENR_CCMDATARAMEN | RCC_AHB1ENR_BKPSRAMEN))
              | RCC_AHB1ENR_GPIOAEN;
@@ -240,7 +244,7 @@ DS8626 Rev 4 5.3.6절 "I/O system current consumption"은 input으로 설정한 
 
 > ⚠️ Wake-up source 누락
 
-WFI는 interrupt로 깨어나는데, Arm DUI 0553A 2.5.2절은 "the processor wakes up only when it detects an exception with sufficient priority to cause exception entry"라고 적습니다. NVIC에서 enable하지 않은 IRQ는 exception entry가 일어나지 않으므로 EXTI line만 unmask하고 `NVIC_EnableIRQ()`를 빠뜨리면 WFI로 들어간 Stop에서 깨지 않습니다. 위 `exti0_wake_init()`처럼 EXTI(`IMR`·`RTSR`)와 NVIC를 둘 다 켭니다.
+WFI는 interrupt로 깨어나는데, Arm DUI 0553A 2.5.2절은 "Normally, the processor wakes up only when it detects an exception with sufficient priority to cause exception entry"라고 적습니다. NVIC에서 enable하지 않은 IRQ는 exception entry가 일어나지 않으므로 EXTI line만 unmask하고 `NVIC_EnableIRQ()`를 빠뜨리면 WFI로 들어간 Stop에서 깨지 않습니다. 위 `exti0_wake_init()`처럼 EXTI(`IMR`·`RTSR`)와 NVIC를 둘 다 켭니다.
 
 ## 정리
 
