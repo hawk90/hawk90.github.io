@@ -15,17 +15,13 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 어떤 문제를 푸는가
 
-대부분의 RTOS는 *자체 API*를 가집니다. FreeRTOS의 `xQueueSend`, ThreadX의 `tx_queue_send`, Zephyr의 `k_msgq_put`은 모두 비슷한 일을 하지만 시그니처가 다릅니다. 이 비표준성은 *Linux에서 작성한 코드 재활용*과 *교차 RTOS 이식*을 비싼 작업으로 만듭니다.
+이 시리즈의 RTOS들은 각자 API가 있습니다. FreeRTOS의 `xQueueSend()`, Zephyr의 `k_msgq_put()`, RT-Thread의 `rt_mq_send()`는 비슷한 일을 하지만 시그니처가 다릅니다. NuttX는 POSIX(`open`·`read`·`pthread_create`·`socket`)를 기본 API로 삼습니다. 콘센트 모양을 국제 표준으로 맞춘 집과 같아서, Linux에서 쓰던 플러그(코드)가 꽂히는 경우가 많습니다. 다만 전압(timing)과 차단기 용량(resource limit)까지 같지는 않습니다.
 
-NuttX는 다른 길을 택했습니다. *처음부터 POSIX 1003.1을 따라가는 RTOS*입니다. pthread/file/socket 같은 친숙한 API가 있어 이식에 도움이 되지만 Linux extension·resource limit·signal/loader와 timing 의미까지 같지는 않습니다.
-
-이번 편은 두 가지를 봅니다. 첫째, NuttX의 빌드 모드 세 가지(Flat·Protected·Kernel)와 그 의미입니다. 둘째, PX4의 NuttX/host 추상화와 실제 board/config 경계를 봅니다. NASA 채택으로 적었던 출처 불명 인용은 아래에서 바로잡습니다.
-
-저장소는 `github.com/apache/nuttx`, 라이선스는 Apache 2.0입니다.
+이 글은 NuttX와 nuttx-apps를 `nuttx-13.1.0` 태그(각각 commit `2b5c0de5`, `3c772ea3`)로 받아 Debian 13 arm64 guest에서 `sim:nsh` 구성으로 빌드하고 돌렸습니다. simulator는 NuttX를 Linux process로 돌리는 board라, NSH·procfs·VFS는 그대로 동작하지만 interrupt timing은 실제 MCU와 다릅니다. 저장소 `LICENSE`는 Apache License 2.0입니다. 소스 tarball에서 빌드해 git 정보가 없어 version 문자열은 `0.0.0`으로 찍혔습니다.
 
 ## 범위와 근거
 
-NuttX 공식의 memory configuration·task control·procfs 문서와 PX4 v1.15 architecture를 대조합니다. 기능은 선택한 NuttX release와 board config로 다시 확인해야 합니다. 역사·LoC·시장 배포 숫자와 항공기 채택 하나를 검증 수준의 대리 지표로 쓰지 않습니다.
+소스 트리의 `Documentation/`(memory configuration, task control), PX4 v1.15 architecture 문서, 그리고 sim 실행 결과를 대조합니다. 채택 사례와 배포 수량은 다루지 않습니다.
 
 ## 저장소 구조
 
@@ -35,18 +31,18 @@ nuttx/
 ├── fs/                  # VFS·FAT·NFS·SmartFS·ROMFS·BinFS
 ├── net/                 # TCP·UDP·ICMP·IPv6·DHCP·DNS
 ├── drivers/             # 캐릭터·블록·sensor·usbhost·lcd
-├── arch/                # 아키텍처 (ARM·RISC-V·Xtensa·x86)
+├── arch/                # arm arm64 avr risc-v sim x86_64 xtensa ...
 ├── boards/              # 보드 정의
 ├── libs/                # libc·libxx·기타
 ├── include/
 └── ...                  # apps는 sibling의 별도 apache/nuttx-apps 저장소
 ```
 
-kernel과 apps·driver·libc를 어떤 범위로 집계하는지에 따라 크기가 달라집니다. 다른 RTOS의 kernel-only 숫자와 source 전체를 비교하지 않습니다. 필수 기능을 넣은 실제 image·RAM/stack을 확인합니다.
+`apps/`는 같은 태그의 별도 저장소 `nuttx-apps`를 nuttx 옆 디렉터리에 둡니다. NSH도 거기 있습니다. 위 sim 빌드의 `nuttx` 실행 파일은 5.4 MB(5379360 byte)였는데, 이것은 Linux용 host binary라 MCU image 크기와 비교할 수 없습니다.
 
 ## POSIX 호환
 
-필수 API마다 header·feature option·반환값·resource limit를 정합니다. 다음은 file prefix를 읽는 예이며 capacity는 C string terminator를 자동으로 포함하지 않습니다.
+다음은 파일 앞부분을 읽는 함수입니다. POSIX만 쓰므로 Linux와 NuttX에서 같은 소스로 빌드됩니다. capacity에는 C 문자열의 `\0`이 포함되지 않습니다.
 
 ```c title="read-file-prefix.c"
 #include <errno.h>
@@ -79,13 +75,33 @@ int read_file_prefix(const char *path, unsigned char *out,
 }
 ```
 
-함수는 host POSIX에서 정상/empty/truncation/invalid/missing path를 검사한 예이며 NuttX board VFS나 /proc에서 실행한 결과는 아닙니다. target에서는 SSIZE_MAX 범위와 device read의 blocking/short/error 계약·stack·동시성을 확인합니다. 일반 파일과 device·procfs가 모두 같은 EOF/latency를 제공하지 않습니다.
+Linux guest에서 여섯 경우로 돌렸습니다.
+
+```text
+/proc/version          cap= 16 -> ret=0 used=16 "Linux version 6."
+/proc/version          cap=256 -> ret=0 used=198 "Linux version 6.12.1"
+/tmp/empty.txt         cap= 16 -> ret=0 used=0
+/nonexistent           cap= 16 -> ret=-2 used=0
+(null)                 cap= 16 -> ret=-22 used=99
+/proc/version          cap=  0 -> ret=-22 used=99
+```
+
+capacity만큼 잘려 읽히고, 없는 파일은 `-ENOENT`(-2), 잘못된 인자는 `*used`를 건드리기 전에 `-EINVAL`(-22)입니다. 같은 함수를 NuttX에서 `/proc/version`에 쓰면 API는 같아도 내용은 다릅니다. 아래 sim 실행에서 그 파일은 "NuttX version ..."으로 시작합니다. 이 함수를 NuttX 안에서 빌드하지는 않았습니다.
 
 ## Task vs Thread vs Process
 
-NuttX는 task와 pthread의 resource 공유를 구분합니다. task_create와 pthread_create, file loader를 사용하는 posix_spawn 계열, nonstandard task_spawn의 목적과 config를 각각 확인합니다. task_spawn이라는 이름 자체가 독립 process address space를 뜻하지는 않습니다.
+NuttX의 task는 자기 file descriptor 목록을 갖고, 같은 task 안의 pthread는 그 목록을 공유합니다. `Documentation/reference/user/01_task_control.rst:874-890`의 `task_spawn()`은 "an address in memory"인 entry point로 새 child task를 만들고, `file_actions`가 NULL이면 호출한 task의 열린 파일이 child에도 열린 채 남는다고 적습니다. 이름에 spawn이 들어가도 Flat build에서는 같은 주소 공간입니다.
 
-Linux process와 동일한 격리·fork 의미를 API 이름만으로 가정하지 않습니다. 실제 build mode와 architecture support가 memory 보호 범위를 정하며 file descriptor·task group·errno/return convention도 해당 함수 계약을 따릅니다.
+sim에서 `ps`를 쳤습니다.
+
+```text
+  TID   PID  PPID PRI POLICY   TYPE    NPX STATE    EVENT     SIGMASK            STACK COMMAND
+    0     0     0   0 FIFO     Kthread   - Ready              0000000000000000 0069584 Idle_Task
+    4     4     0 100 FIFO     Task      - Waiting  Semaphore 0000000000000000 0067496 init_main
+    9     9     4 100 FIFO     Task      - Running            0000000000000000 0067504 sh
+```
+
+kernel thread(`Kthread`)와 application task(`Task`)가 구분되고, NSH(`sh`)는 `init_main`(PID 4)의 child task(PID 9)입니다.
 
 ## 세 가지 빌드 모드
 
@@ -95,86 +111,122 @@ Linux process와 동일한 격리·fork 의미를 API 이름만으로 가정하�
 | Protected | privileged kernel과 unprivileged application 영역 분리 |
 | Kernel | MMU 기반 kernel/user와 process별 virtual address space 구성 |
 
-Protected가 각 application끼리도 독립 주소 공간이라는 뜻은 아닙니다. Kernel도 모든 Linux process·fork·exec·shared library option이 자동 지원된다는 뜻은 아닙니다. arch/loader/libc·Kconfig와 실제 필요한 API를 확인합니다.
-
-같은 application source를 이식할 수 있더라도 direct MMIO·pointer·syscall·library 의존 때문에 세 모드에서 무수정 동작한다고 보장하지 않습니다.
+`Documentation/implementation/memory_configurations.rst`가 세 모드를 설명합니다. Flat은 "a single blob of code in a flat address space"이고, MMU가 있는 Cortex-A에서도 보통 identity mapping만 씁니다. Protected(`CONFIG_BUILD_PROTECTED`)는 "two blobs, one privileged and one unprivileged"로 빌드되고 application은 call gate를 통한 system call로 RTOS를 부릅니다. 같은 문서는 이 모드가 현재 "available only for the ARM Cortex-M family"이고 MPU가 두 blob을 지킨다고 적습니다(`:74-105`). 그래서 Protected에서 application끼리는 한 blob 안이라 서로 보호되지 않습니다. Kernel(`CONFIG_BUILD_KERNEL`)은 각 application process가 "its own, private address environment"에서 돕니다(`:173-185`). 위 sim 빌드의 `.config`는 `CONFIG_BUILD_FLAT=y`였습니다. 4-10의 FreeRTOS-MPU와 비교하면 Protected가 그 위치에 있습니다.
 
 ## VFS — 표준 파일 시스템
 
-VFS가 file/device backend를 공통 API로 노출합니다. mount된 filesystem·driver config와 실제 path를 확인하고 open/read/write/close·mkdir/opendir의 실패를 처리합니다. /dev/sd0 같은 block device 아래에 file을 바로 붙이는 것은 mount된 경로와 다릅니다.
+VFS가 여러 파일 시스템과 장치를 한 이름 공간에 붙입니다. sim의 `mount`입니다.
+
+```text
+nsh> mount
+  /bin type binfs
+  /data type hostfs
+  /etc type romfs
+  /proc type procfs
+  /tmp type vfat
+```
+
+`/data`의 hostfs는 Linux host의 디렉터리를 그대로 보여 주는 sim 전용 파일 시스템이고, `/etc`는 image에 들어 있는 ROMFS, `/tmp`는 FAT입니다. MCU board라면 이 자리에 SD 카드나 flash 위의 파일 시스템이 mount됩니다. `/dev/mmcsd0` 같은 block device 자체는 파일이 아니므로, 파일을 쓰려면 그 장치를 어딘가에 mount한 경로를 씁니다.
 
 ## /proc 호환 procfs
 
-NuttX procfs는 task/thread·선택한 kernel 상태를 관찰하는 filesystem입니다. kernel config에 따른 mount·entry·출력 형식을 확인해야 합니다. Linux의 /proc/meminfo/version/pid/status와 경로·내용이 모두 동일해 Linux parser를 그대로 쓸 수 있다는 주장은 사용하지 않습니다.
+procfs는 `CONFIG_FS_PROCFS=y`로 켜고, 위 sim은 이 값이 켜진 채 `/proc`에 mount돼 있었습니다. 내용을 보면 이름은 Linux와 비슷해도 형식이 다릅니다.
 
-parser에는 없는 entry·짧은 read·형식 변경과 수명 중 task 종료를 포함한 실패 경로가 필요합니다.
+```text
+nsh> cat /proc/version
+NuttX version 0.0.0 0 Nov 16 2026 11:31:40 sim:nsh
+nsh> cat /proc/1/status
+Name:       sim_loop_wq
+Type:       Kthread
+Group:      0
+State:      Waiting,Semaphore
+Flags:      -
+Priority:   224
+Scheduler:  SCHED_FIFO
+SigMask:    0000000000000000
+```
+
+`/proc/1/status`에 `Type`·`Group`·`Scheduler` 같은 NuttX 고유 필드가 있고, Linux의 `VmRSS` 같은 필드는 없습니다. Linux용 `/proc` parser는 그대로 쓰지 못합니다. `ls /proc`에는 `cpuinfo`·`meminfo`·`uptime`·`version`과 task별 디렉터리, NuttX 고유의 `tcbinfo`·`memdump`가 있었습니다.
 
 ## 네트워크 — POSIX Socket
 
-socket API의 존재와 Linux network stack의 모든 option/semantics는 다릅니다. selected release·driver·protocol feature와 connect/send/recv의 실패·short I/O·timeout·peer closure를 처리합니다. 반환값을 버리는 단일 send 예를 완전한 protocol로 제시하지 않습니다.
+network stack은 `net/`에 있고 BSD socket API로 씁니다. 위 `sim:nsh` 구성은 network를 켜지 않아 이 글에서는 돌리지 않았습니다.
 
 ## NSH — NuttShell
 
-NSH는 선택한 apps/config의 command를 제공합니다. 실제 보드에서 help·ps·mount·procfs·network command 지원과 반환을 확인합니다. 이 글은 만들어 낸 ps/free/ifconfig 값을 실제 실행 결과로 제시하지 않습니다.
+NSH는 nuttx-apps의 `nshlib`가 제공하는 shell입니다. 앞의 `ps`·`mount`·`cat`이 모두 NSH 명령이었고, `free`는 heap 상태를 보여 줍니다.
+
+```text
+nsh> free
+      total       used       free    maxused    maxfree  nused  nfree name
+   67108864    1859680   65249184    1860376   65189344    108      3 Umem
+```
+
+sim 구성은 heap으로 64 MiB를 잡았습니다. 이 값은 sim의 설정이고 MCU board에서는 칩의 RAM에 따라 정해집니다.
 
 ## PX4 — 드론 표준 flight stack
 
-PX4 v1.15 architecture는 flight-control board에서 NuttX를 주 RTOS로 사용하고 Linux/macOS에서는 한 process의 thread로 module을 실행한다고 설명합니다. px4_task_spawn_cmd 같은 추상화가 target 차이를 감쌉니다.
-
-NuttX task의 별도 descriptor list·공유 주소 공간과 host process/thread 조건이 다르므로 simulation 성공이 실제 flight-controller IRQ·timing·driver 검증을 대신하지는 않습니다. 전체 PX4가 항상 1 kHz control loop이거나 특정 상업 기종이 모두 같은 NuttX 구성을 쓴다는 표는 사용하지 않습니다.
+PX4 v1.15 architecture 문서는 "NuttX is the primary RTOS for running PX4 on a flight-control board"라고 적습니다. Linux·macOS에서는 "PX4 runs in a single process, and the modules run in their own threads"이고, 이때는 "there is no distinction between tasks and threads as on NuttX"입니다. `px4_task_spawn_cmd()`가 NuttX에서는 task를, POSIX에서는 thread를 띄우는 추상화입니다. 같은 문서는 NuttX에서 module이 task로 돌며 "they have their own file descriptor lists, but they share a single address space"라고 설명합니다. 위 sim의 `ps`에서 본 task 구조 그대로입니다. 그래서 Linux에서의 SITL simulation이 성공해도, task별 descriptor 목록이나 flight controller의 interrupt timing을 검증한 것은 아닙니다. PX4는 이 글에서 빌드하지 않았습니다.
 
 ## NASA Mars Ingenuity
 
-기존 글은 NASA paper의 서지 없이 NuttX FCU 채택 이유라는 영문 문장을 따옴표로 인용했습니다. 확인 가능한 원문이 없어 **그 인용과 NuttX의 space-grade validation 주장을 철회합니다.** NASA/JPL의 2021-07-08 공식 자료가 확인하는 것은 Ingenuity의 F Prime flight-software framework 사용입니다. framework와 RTOS는 다른 계층입니다.
-
-비행 횟수·무사고·space-grade 같은 표현만으로 어떤 RTOS의 인증이나 모든 환경의 신뢰성을 주장할 수 없습니다. Snapdragon의 core 종류·ROS·FCU OS를 뒤섞은 기존 hardware 표도 이 글의 NuttX 채택 증거로 사용하지 않습니다.
+예전 판은 NASA 자료의 서지 없이 "NuttX를 고른 이유"라는 영문 문장을 따옴표로 인용했습니다. 확인할 원문이 없어 **그 인용과 NuttX의 space-grade validation 주장을 철회합니다.** NASA/JPL의 2021-07-08 기사 "Meet the Open-Source Software Powering NASA's Ingenuity Mars Helicopter"가 확인하는 것은 F Prime이라는 flight software framework 사용이고, 같은 기사에서 Tim Canham은 "an open-source operating system"을 썼다고만 말할 뿐 이름을 밝히지 않습니다. 기사 본문에 NuttX라는 단어는 없습니다. 그래서 이 글은 Ingenuity를 NuttX의 사례로 쓰지 않습니다.
 
 ## micro-ROS 통합
 
-micro-ROS integration은 client library·RMW/transport·agent·board release의 조합을 확인해야 합니다. undefined support 변수를 rcl_node_init에 넘기는 조각은 완전한 예제가 아니므로 사용하지 않습니다. node/allocator/transport 초기화와 error handling은 선택한 공식 example을 build하고 peer까지 확인합니다.
+micro-ROS의 NuttX 지원은 이 글에서 원문을 확인하지 않았고 빌드하지도 않아 설명을 지웠습니다. 예전 판의 `rcl_node_init()` 조각도 선언되지 않은 변수를 쓰고 있어 함께 지웠습니다.
 
 ## Sony Spresense — 멀티코어 NuttX
 
-Sony의 Spresense SDK는 NuttX와 ASMP 등의 middleware를 제공합니다. upstream NuttX board support와 Sony SDK, ASMP와 SMP를 구분합니다.
-
-Sony의 SMP tutorial은 feature/smp를 선택하며 default 2-core와 2~6-core 설정을 설명합니다. 칩에 M4F core가 6개 있다는 사실을 모든 SDK/application이 처음부터 6-core SMP로 동작한다는 의미로 쓰지 않습니다. 실제 SDK revision·preset·driver와 CPU 배치를 확인합니다.
+NuttX 13.1.0 트리에는 Sony Spresense용 board가 `boards/arm/cxd56xx/spresense/`에 있습니다. Sony SDK의 SMP·ASMP 설정은 SDK 문서 사이트(developer.sony.com)를 이 글을 쓰며 열 수 없어 설명을 지웠습니다.
 
 ## Xiaomi Vela — 가장 큰 NuttX 배포
 
-Vela의 NuttX 관계와 release는 해당 프로젝트 source/공식 자료로 확인합니다. 이 글에서 세계 최대·수억 대·모든 배포에서 검증이라는 순위/수량 근거는 조사하지 않았으므로 선택의 증거로 사용하지 않습니다.
+Xiaomi Vela와 NuttX의 관계, 배포 규모는 이 글에서 원문을 확인하지 않아 다루지 않습니다.
 
 ## 빌드
 
-kernel과 apps는 **호환되는 release/tag**로 준비하고 sibling 디렉터리로 둡니다. configure.sh의 board:config, host toolchain·Kconfig frontend와 해당 board README를 따릅니다. make flash는 모든 board의 공통 무조건 동작 명령이 아닙니다.
+nuttx와 nuttx-apps를 같은 태그로 받아 `nuttx/`와 `apps/`를 나란히 둔 뒤, `nuttx/`에서 `./tools/configure.sh -l sim:nsh`, `make -j4`를 했습니다. configure 단계는 Kconfig 도구가 필요합니다. Debian의 `python3-kconfiglib` package에는 `olddefconfig` 같은 명령이 없어 `pip install kconfiglib`로 넣었고, `tools/sethost.sh:164-176`이 부르는 `kconfig-tweak`은 따로 없어 `--enable`·`--disable`만 처리하는 작은 shell script로 대신했습니다. 이 shim은 harness 디렉터리에 남겨 뒀습니다. 그 뒤 configure와 build가 통과했습니다.
 
-공식 quickstart는 sim:nsh 예도 제공하지만 이 작업에서는 NuttX simulator/board image를 build·실행하지 않았습니다. source API 검토와 host POSIX helper 실행을 target 실행 기록으로 바꾸지 않습니다.
+```text
+nsh> uname -a
+NuttX 0.0.0 0 Nov 16 2026 11:31:40 sim sim
+```
 
 ## NuttX vs FreeRTOS vs Zephyr — 한 줄 비교
 
-같은 기능 범위·build mode·libc/driver와 final image로 비교합니다. FreeRTOS도 MPU port가 있으므로 Flat만이라고 단정하지 않습니다. POSIX 거의 완전/partial이라는 한 칸이 실제 필수 option·Linux ABI·application 이식 비용을 대신하지 않습니다.
+| 항목 | FreeRTOS V11.2.0 | Zephyr v3.7.0 | NuttX 13.1.0 |
+| --- | --- | --- | --- |
+| 기본 API | FreeRTOS API | `k_*` API | POSIX |
+| POSIX | 커널 저장소에 없음 | `lib/posix/` 계층 | 기본 |
+| 메모리 보호 | MPU port(4-10) | `CONFIG_USERSPACE` | Protected(Cortex-M MPU)·Kernel(MMU) |
+| host 실행 | POSIX port(4-13, 5-01) | native_sim(5-02) | sim(이 글) |
 
 ## 자주 보는 함정과 안티패턴
 
-- 친숙한 함수 이름만 보고 Linux의 전체 API·procfs format을 가정.
-- Protected build를 task별 독립 process 주소 공간으로 오해.
-- simulator/flight framework/채택 사례를 target timing·안전성 검증으로 확대.
-- API 반환값·short I/O·FD 수명·board mount/driver를 생략.
-- kernel/apps tag·SDK preset과 actual resource limit를 기록하지 않음.
+- `/proc` 파일 이름이 같다고 Linux parser를 그대로 씁니다. 위 `/proc/1/status`처럼 필드가 다릅니다.
+- Protected build를 application마다 독립 주소 공간으로 봅니다. application 쪽 blob은 하나입니다.
+- sim이나 SITL에서 돈 것을 target timing 검증으로 봅니다.
+- nuttx와 apps를 다른 태그로 받습니다. 같은 태그로 맞춥니다.
+- Ingenuity 같은 채택 사례를 출처 없이 인용합니다. 위 NASA 기사에는 NuttX가 없습니다.
 
 ## 정리
 
-NuttX의 POSIX 지향 API는 이식의 출발점이며 실제 build mode와 지원 option·resource를 확인해야 합니다. PX4 target과 host 추상화, Sony SDK의 ASMP/SMP를 구분하고, 출처 불명 NASA 인용을 제품 선택 증거로 사용하지 않습니다.
+- NuttX 13.1.0 `sim:nsh`는 Debian arm64 guest에서 빌드되고 NSH까지 올라왔습니다(kconfig 도구 보충 필요).
+- POSIX 함수는 같은 소스로 돌지만 `/proc` 내용처럼 Linux와 형식이 다른 곳이 있습니다.
+- Flat·Protected·Kernel은 문서대로 주소 공간 하나, blob 둘(Cortex-M MPU), process별 주소 공간입니다.
+- PX4는 NuttX에서 module을 task로, Linux에서 thread로 돌립니다.
+- NASA Ingenuity 기사는 F Prime과 "an open-source operating system"만 말하고 NuttX를 언급하지 않습니다.
 
 ## 근거 자료
 
-- [NuttX 소개](https://nuttx.apache.org/docs/latest/introduction/about.html), [memory configurations](https://nuttx.apache.org/docs/latest/implementation/memory_configurations.html), [task API](https://nuttx.apache.org/docs/latest/reference/user/01_task_control.html), [procfs](https://nuttx.apache.org/docs/latest/os/filesystem/procfs.html), [configuration quickstart](https://nuttx.apache.org/docs/latest/quickstart/configuring.html).
+- [NuttX nuttx-13.1.0](https://github.com/apache/nuttx/tree/nuttx-13.1.0), [nuttx-apps nuttx-13.1.0](https://github.com/apache/nuttx-apps/tree/nuttx-13.1.0): `Documentation/implementation/memory_configurations.rst`, `Documentation/reference/user/01_task_control.rst`.
 - [PX4 v1.15 architecture](https://docs.px4.io/v1.15/en/concept/architecture).
 - [NASA/JPL F Prime 소개](https://www.jpl.nasa.gov/news/meet-the-open-source-software-powering-nasas-ingenuity-mars-helicopter/).
-- [Sony SDK tutorial — SMP](https://developer.sony.com/spresense/development-guides/sdk_tutorials_en), [SDK developer guide — ASMP](https://developer.spresense.sony-semicon.com/development-guides/?lang=en&page=sdk_developer_guide).
 
 
 
-다음 편은 [5-07 PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)에서 2024년 mainline에 합류한 real-time Linux를 RTOS와 비교합니다.
+다음 편은 [5-07 PREEMPT_RT Linux](/blog/embedded/rtos/practical-internals/part5-07-preempt-rt-linux)에서 real-time Linux를 RTOS와 비교합니다.
 
 ## 관련 항목
 
