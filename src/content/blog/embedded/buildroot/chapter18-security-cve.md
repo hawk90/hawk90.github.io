@@ -2,7 +2,7 @@
 title: "Buildroot Security·CVE 추적 — pkg-stats와 Reproducible Builds"
 slug: "embedded/buildroot/chapter18-security-cve"
 date: 2026-05-19T09:18:00
-description: "Buildroot 2024.02의 pkg-stats JSON·CVE triage·legal-info 범위와 재현성·hardening·인증 설정을 확인합니다."
+description: "Buildroot 2026.02.3의 pkg-stats·CVE ignore·legal-info·CycloneDX SBOM과 재현성·hardening 기본값을 실제 빌드에서 확인합니다."
 series: "Buildroot Practical"
 seriesOrder: 18
 tags: [embedded, buildroot, security, cve, sbom, reproducible-builds]
@@ -14,7 +14,7 @@ topics: ["embedded"]
 
 > **"보안은 *출시 직전*에 시작하면 늦습니다."** — Buildroot는 CVE 추적·license 산출·reproducible build·hardening을 빌드 시스템 안에 내장합니다. 양산 직전이 아니라 *시리즈를 시작할 때*부터 켜 두어야 의미가 있습니다.
 
-이 장은 **Buildroot 2024.02, commit `87e979e4572449ecb7d2058b02d642b38cc3b0f8`**의 소스·매뉴얼을 기준으로 합니다. 현재 양산용 릴리스 권고가 아니라 옵션과 출력 계약의 재현 기준입니다. 실제 제품에는 사용하는 지원 브랜치와 패치 수준을 별도로 기록합니다.
+이 장은 시리즈의 다른 장과 같이 **Buildroot 2026.02.3**(commit `679b9ead`)의 소스·매뉴얼을 기준으로 하고, legal-info·SBOM·hardening은 Ch 4의 QEMU 빌드에서, 재현성은 Ch 14와 같은 설정의 반복 빌드에서 실제로 확인했습니다(Debian 13 arm64 VM). `pkg-stats`는 실행하지 않았습니다. 이유는 아래 절에 적었습니다. 건물 안전 점검에 비유하면, CVE 추적은 *자재 리콜 목록 대조*, legal-info는 *자재 영수증 보관*, 재현성은 *같은 설계도로 같은 건물이 나오는지*, hardening은 *방화문 설치*입니다. 하나가 다른 하나를 대신하지 않습니다.
 
 ## 임베디드 보안의 4축
 
@@ -25,7 +25,7 @@ topics: ["embedded"]
 | **CVE 추적** | 빌드에 들어간 패키지의 알려진 취약점 추적 | `make pkg-stats` |
 | **License compliance** | GPL·LGPL·BSD·proprietary 라이선스 의무 이행 | `make legal-info` |
 | **Reproducible build** | 동일성 조건을 고정하고 산출물을 비교 | `BR2_REPRODUCIBLE=y` |
-| **Hardening** | RELRO·SSP·PIE 등 binary 수준의 방어 | `BR2_RELRO_*`, `BR2_SSP_*`, `BR2_PIC_PIE` |
+| **Hardening** | RELRO·SSP·PIE·FORTIFY 등 binary 수준의 방어 | `BR2_RELRO_*`, `BR2_SSP_*`, `BR2_PIC_PIE`, `BR2_FORTIFY_SOURCE_*` |
 
 네 축은 *독립적*입니다. CVE 보고서가 깨끗해도 미발견 취약점과 설정 오류는 남습니다. Hardening은 취약점 악용을 어렵게 하는 방어이며 license 산출물 검토를 대신하지 않습니다. 한 축씩 분리해 익혀 두는 게 양산 단계에서 *전부를 다시 학습*하는 비용보다 쌉니다.
 
@@ -33,64 +33,124 @@ topics: ["embedded"]
 
 ## make pkg-stats — CVE 매칭
 
-`make pkg-stats`는 현재 설정의 패키지 메타데이터와 NVD 데이터를 대조해 보고서를 만듭니다. 빌드 완료나 취약점 악용 가능성을 증명하는 명령은 아닙니다. 호스트 의존성과 데이터 갱신 오류도 CI 실패로 처리해야 합니다.
+`make pkg-stats`는 현재 설정의 패키지 메타데이터와 NVD 데이터를 대조해 보고서를 만듭니다. 최상위 `Makefile` 965~970행이 `support/scripts/pkg-stats -c --json $(O)/pkg-stats.json --html $(O)/pkg-stats.html …`를 부릅니다. 빌드가 끝났는지나 취약점을 실제로 악용할 수 있는지를 증명하는 명령은 아닙니다.
 
-```text
-$ make pkg-stats
+NVD 데이터를 가져오는 방법은 `support/scripts/cve.py`에 있습니다. 31행 `NVD_BASE_URL = "https://github.com/fkie-cad/nvd-json-data-feeds/"`이고, 처음에는 이 저장소를 통째로 `git clone`, 다음부터는 `git pull`합니다(150~165행). 이 장의 VM은 소스 다운로드가 초당 수십~수백 KB까지 떨어지는 환경이라 NVD 전체 이력을 clone하는 이 단계를 실행하지 않았습니다. CI에서는 이 디렉터리를 캐시해 두지 않으면 매번 전체 clone이 일어난다는 점을 염두에 둡니다.
+
+`pkg-stats`의 `check_package_cves()`(662행~)는 패키지에 CPE가 있으면 CPE의 product로, 없으면 패키지 이름으로 후보를 묶은 뒤 NVD를 대조합니다. 결과는 패키지마다 `cves`, `unsure_cves`, `ignored_cves` 목록과 상태로 들어갑니다.
+
+```python
+            if pkg.cves or pkg.unsure_cves:
+                pkg.status['cve'] = ("error", "affected by CVEs")
+            elif pkg.stale_cve_ignores:
+                pkg.status['cve'] = ("warning", "has stale CVE ignores")
+            else:
+                pkg.status['cve'] = ("ok", "not affected by CVEs")
 ```
 
-기준 버전의 Makefile은 `$(O)/pkg-stats.json`, `$(O)/pkg-stats.html`과 `$(DL_DIR)/buildroot-nvd`를 사용합니다. `support/scripts/pkg-stats`의 `dump_json()`에서 최상위 `packages` 아래에 패키지별 정보를 넣습니다. `current_version`, `cves`, `unsure_cves`, `ignored_cves`가 관련 필드이며 CVE 목록 원소는 ID 문자열입니다. `fixed_in`·점수·설명이 담긴 객체 배열이 아닙니다.
+`unsure_cves`도 "affected"로 분류되므로 반드시 사람이 봅니다. `stale_cve_ignores`는 ignore 목록에 있지만 더 이상 해당하지 않는 항목을 따로 경고합니다.
 
-CPE가 있으면 제품 식별에 사용하고, 없으면 패키지 이름으로 후보를 찾습니다. 따라서 CPE 미선언을 곧바로 검사 누락이라고 단정할 수 없지만 이름·버전·제품 범위가 잘못되면 오탐과 누락이 생깁니다. `cves`와 함께 `unsure_cves`도 검토합니다. 이 동작은 [기준 버전 pkg-stats](https://github.com/buildroot/buildroot/blob/87e979e4572449ecb7d2058b02d642b38cc3b0f8/support/scripts/pkg-stats)의 `check_package_cves()`와 `check_package_cve_affects()`에서 확인할 수 있습니다.
+백포트·비해당 판단에는 `<PKG>_IGNORE_CVES`를 씁니다. 매뉴얼 "generic-package reference"는 이 변수를 "typically used when the CVE is fixed by a patch in the package … or when the CVE for some reason does not affect the Buildroot package"로 설명하고 "A Makefile comment must always precede the addition of a CVE to this variable"이라고 요구합니다. 2026.02.3 `package/*/*.mk`에는 `IGNORE_CVES +=` 줄이 174개 있습니다. busybox가 실제 예입니다. `package/busybox/busybox.mk`는 근거가 되는 패치 이름을 주석으로 적고 바로 아래에서 ignore합니다.
 
-백포트·비해당 판단에는 `<PKG>_IGNORE_CVES`가 있습니다. [패키지 변수 매뉴얼](https://github.com/buildroot/buildroot/blob/87e979e4572449ecb7d2058b02d642b38cc3b0f8/docs/manual/adding-packages-generic.adoc)은 패치 또는 비해당 이유를 앞선 주석에 기록하도록 요구합니다. 단순히 경고를 없애기 위해 등록하지 않고 패치 내용·빌드 옵션·도달 가능성·검토자를 함께 추적합니다. ID를 ignore에 넣었다는 사실 자체가 수정 검증은 아닙니다.
+```makefile
+# 0003-libbb-sockaddr2str-ensure-only-printable-characters-.patch
+# 0004-nslookup-sanitize-all-printed-strings-with-printable.patch
+BUSYBOX_IGNORE_CVES += CVE-2022-28391
 
-조직의 triage 기록에는 패키지/버전, CVE ID, 근거 링크, 적용 patch commit, 검토자, 검토일과 재검토 조건을 둡니다. 이는 Buildroot가 자동으로 읽는 YAML schema가 아니라 별도의 운영 기록입니다.
+# 0012-archival-libarchive-sanitize-filenames-on-output.patch
+# 0013-testsuite-tar-tests-fix-test-after-cve-2025-46394.patch
+BUSYBOX_IGNORE_CVES += CVE-2025-46394
+```
+
+반대로 `0008-awk.c-fix-CVE-2023-42366-bug-15874.patch`는 이름에 CVE가 있지만 `BUSYBOX_IGNORE_CVES`에는 없습니다. 패치 파일 이름만으로 "해결됨"을 판단하면 안 되고, ignore 목록과 pkg-stats 결과를 함께 봐야 하는 이유입니다.
+
+조직의 triage 기록에는 패키지/버전, CVE ID, 근거 링크, 적용 패치, 검토자, 검토일과 재검토 조건을 둡니다. 이는 Buildroot가 읽는 형식이 아니라 별도의 운영 기록입니다.
 
 ## make legal-info — license 산출
 
-`make legal-info`는 license 검토에 필요한 자료를 모읍니다. [공식 legal notice](https://github.com/buildroot/buildroot/blob/87e979e4572449ecb7d2058b02d642b38cc3b0f8/docs/manual/legal-notice.adoc)는 누락 경고와 패키지 선언의 정확성까지 검토해야 한다고 설명합니다. 실행 성공만으로 배포 의무가 충족됐다고 결론내리지 않습니다.
+`make legal-info`는 license 검토에 필요한 자료를 모읍니다. Ch 9에서 htop-acme를 넣은 QEMU 빌드로 실제로 돌린 결과입니다.
 
 ```text
 $ make legal-info
+...
+WARNING: the Buildroot source code has not been saved
 $ ls output/legal-info/
-host-manifest.csv     licenses/        sources/
-manifest.csv          README           host-sources/
-buildroot.config      host-licenses/
+README
+buildroot.config
+host-licenses
+host-manifest.csv
+host-sources
+legal-info.sha256
+licenses
+manifest.csv
+sources
+$ wc -l output/legal-info/manifest.csv output/legal-info/host-manifest.csv
+    8 output/legal-info/manifest.csv
+   48 output/legal-info/host-manifest.csv
 ```
-
-각 항목의 의미는 다음과 같습니다.
 
 | 파일·디렉터리 | 내용 |
 |---|---|
-| `manifest.csv` | target 패키지 목록 + 버전 + license + source URL |
-| `host-manifest.csv` | host 도구 패키지의 선언 정보; 배포 여부·license별 검토 |
-| `licenses/` | 각 패키지의 license 텍스트 (`COPYING`, `LICENSE` 등) |
-| `sources/` | 재배포 가능으로 선언된 패키지 source와 적용 patch |
-| `host-sources/` | host 도구의 원본 tarball |
-| `README` | 산출물 사용 안내 |
+| `manifest.csv` | target 패키지 7개 + 헤더 |
+| `host-manifest.csv` | host 도구 47개 + 헤더 |
+| `licenses/`, `host-licenses/` | `<PKG>_LICENSE_FILES`에 적힌 파일 |
+| `sources/`, `host-sources/` | 재배포 가능한 패키지의 tarball, 적용 패치, `series` |
+| `buildroot.config` | 그 빌드의 `.config` |
+| `legal-info.sha256` | 위 파일들의 hash |
+| `README` | 저장하지 못한 자료와 주의 사항 |
 
-`manifest.csv` 한 줄 예시.
+manifest의 헤더는 다음 일곱 열이고, 값은 따옴표로 감싼 CSV입니다.
 
 ```text
-PACKAGE,VERSION,LICENSE,LICENSE FILES,SOURCE ARCHIVE,SOURCE SITE,DEPENDENCIES WITH LICENSES
+"PACKAGE","VERSION","LICENSE","LICENSE FILES","SOURCE ARCHIVE","SOURCE SITE","DEPENDENCIES WITH LICENSES"
+"busybox","1.37.0","GPL-2.0, bzip2-1.0.4","LICENSE archival/libarchive/bz/LICENSE","busybox-1.37.0.tar.bz2","https://www.busybox.net/downloads","gcc-final [GPL-3.0-with-GCC-exception] glibc [GPL-2.0+ (programs), LGPL-2.1+, BSD-3-Clause, MIT (library)] linux-headers [GPL-2.0] skeleton-init-common [unknown] skeleton-init-sysv [unknown]"
 ```
 
-기준 버전의 manifest header는 위 일곱 열입니다. 실제 값은 인용부호가 있는 CSV로 출력되므로 단순 쉼표 split 대신 CSV parser를 사용합니다. `sources/`에는 `_REDISTRIBUTE = NO`인 패키지가 저장되지 않고, 외부 toolchain 일부와 Buildroot 자체 등의 자료도 누락될 수 있습니다. README 경고와 실제 배포 구성·수정 내용을 확인해야 합니다.
+마지막 열에 `skeleton-init-common [unknown]`처럼 라이선스가 `unknown`으로 찍힌 내부 패키지가 섞입니다. 값이 쉼표를 포함하므로 단순 쉼표 split 대신 CSV parser로 읽습니다. `README`는 Buildroot 소스, toolchain, autotools 패키지에 적용된 libtool 패치를 "due to technical limitations" 저장하지 못했다고 적고, `_REDISTRIBUTE = NO` 패키지의 소스도 저장하지 않습니다. 실행 성공이 곧 배포 의무 충족은 아닙니다.
 
-`BR2_LEGAL_INFO_EXTRA`라는 설정은 기준 소스에 없습니다. 자체 application도 올바른 package recipe에 license·license files·source 정보를 선언하고, 별도 반입 binary와 빌드/설치 자료는 제품의 배포 목록과 대조합니다. 특정 license의 의무 충족 판단은 이 장의 범위를 넘습니다.
+`BR2_LEGAL_INFO_EXTRA`라는 설정은 2026.02.3 `Config.in`에도 없습니다. 자체 application은 패키지 recipe에 license·license files·source를 선언해 manifest에 들어가게 합니다.
 
-## SBOM — 입력 자료와 표준 문서를 구분
+## SBOM — show-info와 generate-cyclonedx
 
-기준 버전의 `make show-info`는 패키지 정보를 JSON으로 출력합니다. 이는 표준 SBOM 자체가 아니라 변환에 사용할 수 있는 입력 자료입니다.
+`make show-info`는 패키지 정보를 JSON으로 출력합니다. QEMU 빌드에서는 65개 항목(host 포함)이 나왔습니다. 이 JSON을 표준 SBOM으로 바꾸는 도구가 2026.02.3에는 트리에 있습니다. `utils/generate-cyclonedx` 머리말이 사용법을 적습니다.
 
-```bash
-make show-info > buildroot-show-info.json
+```text
+# This script converts the output of the show-info make target
+# to CycloneDX format.
+#
+# Example usage:
+# $ make show-info | utils/generate-cyclonedx > sbom.json
 ```
 
-기준 Makefile에는 CycloneDX/SPDX 산출 target이 없습니다. 이전 예의 `cyclonedx-buildroot --manifest ...`는 도구·옵션의 근거를 확보하지 못해 실행 절차에서 제외했습니다. 이후 릴리스의 내장 기능은 해당 릴리스에서 다시 확인합니다.
+실제로 돌린 결과입니다.
 
-변환 도구를 도입한다면 버전과 입력 schema를 고정하고 target/host 범위, dependency 관계, license 표현과 실제 배포 파일의 대응을 확인합니다. 파일시스템 scanner는 이와 다른 관측 자료를 제공하지만 package DB가 없는 rootfs에서 식별이 빠질 수 있습니다. 어느 한 산출물을 무조건 정본으로 삼지 않고 빌드 메타데이터·배포 이미지·외부 반입 목록 사이의 차이를 검토합니다.
+```text
+$ make -s show-info > /tmp/si.json
+$ utils/generate-cyclonedx < /tmp/si.json > /tmp/sbom.json
+$ python3 -c 'import json;d=json.load(open("/tmp/sbom.json"));print(d["bomFormat"],d["specVersion"],len(d["components"]))'
+CycloneDX 1.6 57
+```
+
+busybox component의 앞부분입니다.
+
+```json
+{
+ "bom-ref": "busybox",
+ "type": "library",
+ "name": "busybox",
+ "version": "1.37.0",
+ "licenses": [
+  { "license": { "id": "GPL-2.0" } },
+  { "license": { "name": "bzip2-1.0.4" } }
+ ],
+ "cpe": "cpe:2.3:a:busybox:busybox:1.37.0:-:*:*:*:*:*:*",
+ "externalReferences": [
+  {
+   "type": "source-distribution",
+   "url": "https://www.busybox.net/downloads/busybox-1.37.0.tar.bz2",
+```
+
+SPDX 목록에 있는 라이선스는 `id`로, 없는 것(`bzip2-1.0.4`)은 `name`으로 들어갑니다. `cpe`는 패키지 `.mk`의 `CPE_ID_*` 변수에서 옵니다(Ch 5의 `LIBYAML_CPE_ID_VENDOR`). 스크립트 주석은 패치로 해결된 CVE(`IGNORE_CVES`)를 "resolved_with_pedigree"로 표시한다고 적습니다. show-info의 65개 중 SBOM component가 57개인 차이는 변환 과정에서 빠진 항목이 있다는 뜻이므로, 무엇이 빠졌는지(가상 패키지 등) 확인한 뒤 배포 이미지와 대조합니다.
 
 ## Reproducible builds — 조건을 고정한 비교
 
@@ -102,54 +162,83 @@ Buildroot의 진입점은 다음 옵션입니다.
 BR2_REPRODUCIBLE=y
 ```
 
-기준 `Config.in`은 이 기능을 experimental로 표시하고 **동일한 output 경로**라는 제약과 일부 패키지의 비재현성을 명시합니다. 따라서 임의의 서로 다른 빌드 경로가 자동으로 제거된다는 보장이 아닙니다. `SOURCE_DATE_EPOCH`는 timestamp 일관성을 위한 입력이며 모든 프로그램이 이를 따르는 것은 아닙니다. `BR2_REPRODUCIBLE_PATH`는 이 소스에 없습니다.
-
-검증 범위에는 Buildroot/외부 트리 commit, defconfig, toolchain, 다운로드 원본, output 경로, 환경 변수와 비교할 산출물을 기록합니다. 같은 환경의 반복 빌드는 기초 검사이고, 다른 호스트·시간대·사용자 같은 조건을 바꾸는 검사는 그 범위를 넓힙니다. 한 조건에서 같았다는 결과를 모든 환경에 대한 보장으로 확대하지 않습니다.
-
-검증은 `diffoscope`로 합니다.
+`Config.in`의 help는 범위를 분명히 적습니다.
 
 ```text
-$ diffoscope output1/images/rootfs.tar output2/images/rootfs.tar
-$ echo $?
-0    # 0이면 완전 동일
+	  This option will remove all sources of non-reproducibility
+	  from the build process. For a given Buildroot configuration,
+	  this allows to generate exactly identical binaries from one
+	  build to the other, including on different machines.
+
+	  The current implementation is restricted to builds with the
+	  same output directory. Many (absolute) paths are recorded in
+	  intermediary files, and it is very likely that some of these
+	  paths leak into the target rootfs. If you build with the
+	  same O=... path, however, the result is identical.
 ```
 
-`diffoscope`는 tarball·squashfs·ELF binary 내부까지 *재귀적으로* 비교합니다. ELF 안의 build-id, debuglink, `.comment` 섹션까지 잡기 때문에 *눈에 안 보이는 차이*도 드러납니다.
+옵션을 켜면 최상위 `Makefile` 540행이 `SOURCE_DATE_EPOCH`를 Buildroot 버전의 시각으로 정하고, `fs/common.mk` 46~49행의 `ROOTFS_REPRODUCIBLE`이 이미지 생성 직전에 `target/`의 모든 파일 시각을 그 값으로 맞춥니다.
 
-두 독립된 clean 빌드에서 **동일한 output 절대 경로**를 사용하려면 별도의 작업 공간·러너를 사용할 수 있습니다. `build1`과 `build2`처럼 경로까지 바꿨을 때 차이가 나면 기준 옵션의 제약과 패키지별 경로 유출을 함께 분석합니다. 이 장에서는 실제 rootfs 두 벌을 빌드하거나 재현성을 입증하지 않았습니다.
+### 실측 — 같은 경로에서 두 번씩
+
+같은 VM, 같은 output 경로(`O=$HOME/orep`)에서 output을 지우고 두 번씩 빌드했습니다. 설정은 Ch 14와 같은 QEMU defconfig + 외부 toolchain에 `rootfs.tar`를 더한 것이고, 한 쌍은 `BR2_REPRODUCIBLE`을 끄고, 한 쌍은 켰습니다.
+
+| 산출물 | 끔: 1회차 vs 2회차 | 켬: 1회차 vs 2회차 |
+|---|---|---|
+| `rootfs.tar` | 다름 | **같음** (`9a5228f0…`) |
+| `Image` (커널) | 다름 | **같음** (`4dd7041e…`) |
+| `rootfs.ext2` | 다름 | 다름 (`ddc7bc4c…` / `59d3832f…`) |
+
+옵션을 끈 쌍은 `tar tvf` 목록부터 시각이 달랐고(`2026-11-16 06:05` 등 빌드 시각), 풀어서 비교하니 `bin/busybox`부터 내용이 달랐습니다. 옵션을 켠 쌍은 rootfs의 *파일 내용과 메타데이터*(tar)와 커널이 바이트 단위로 같았습니다.
+
+ext4 이미지만 달랐습니다. `fs/ext2/ext2.mk`의 `mkfs.ext4` 옵션에는 UUID나 hash seed를 고정하는 인자가 없어, 이미지마다 새 값이 들어가는 것으로 보입니다. 이 실험에서는 차이 위치를 `dumpe2fs`로 확인하지 않았으므로 원인은 확정하지 않습니다. 재현성을 배포 검증에 쓴다면 *비교할 산출물*을 정해 두고(예: `rootfs.tar`), 파일시스템 이미지는 내용 비교 도구(`diffoscope` 등)로 따로 봅니다.
+
+이 결과는 "같은 output 경로, 같은 호스트, 몇 분 차이"라는 가장 좁은 조건에서의 결과입니다. help가 경고하는 대로 output 경로가 다르면 경로가 새어 들어갈 수 있으므로, 다른 경로·다른 호스트 비교는 따로 돌려 봐야 합니다.
 
 ## Hardening flags
 
-Binary 수준의 방어 옵션들입니다. Buildroot의 toolchain·패키지 빌드에 전달되는 옵션입니다. 각 빌드 시스템이 실제로 반영했는지는 최종 ELF에서 확인해야 합니다.
+Binary 수준의 방어 옵션은 `Config.in`의 "Security Hardening Options"에 있습니다. 2026.02.3에서 QEMU defconfig를 펼쳤을 때 *기본값*은 다음과 같았습니다. 아무것도 켜지 않아도 PIE·SSP strong·full RELRO·FORTIFY 1이 들어갑니다.
 
 ```text
-BR2_RELRO_FULL=y               # Full RELRO (lazy binding 무효화)
-BR2_SSP_STRONG=y               # Stack smashing protector (strong)
-BR2_PIC_PIE=y                  # Position Independent Executable
-BR2_FORTIFY_SOURCE_2=y         # _FORTIFY_SOURCE=2
+BR2_PIC_PIE=y
+BR2_SSP_STRONG=y
+BR2_SSP_OPTION="-fstack-protector-strong"
+BR2_RELRO_FULL=y
+BR2_FORTIFY_SOURCE_1=y
 ```
 
-각 옵션의 효과는 다음 표와 같습니다.
-
-| 옵션 | 기준 소스의 목적 | 확인할 결과 |
+| 옵션 | 목적 | 확인할 결과 |
 |---|---|---|
-| `BR2_RELRO_PARTIAL` | relocation 영역 일부의 쓰기 제한 | ELF program header의 GNU_RELRO |
-| `BR2_RELRO_FULL` | RELRO와 즉시 binding | GNU_RELRO와 NOW flag |
-| `BR2_SSP_REGULAR` | 지정 조건의 함수에 stack protector | 대상 함수의 canary 코드 |
-| `BR2_SSP_STRONG` | local array·frame address 참조 등으로 범위 확장 | 실제 compiler 결과 |
-| `BR2_SSP_ALL` | 모든 함수에 stack protector 요청 | 전체 ELF와 runtime 지원 |
-| `BR2_PIC_PIE` | 위치 독립 실행파일 빌드 요청 | ELF 종류와 대상 ASLR 설정 |
-| `BR2_FORTIFY_SOURCE_2` | libc/compiler의 추가 경계 검사 | 최적화·libc 지원·변환된 호출 |
+| `BR2_RELRO_PARTIAL` / `BR2_RELRO_FULL` | relocation 영역 쓰기 제한 / + 즉시 binding | `GNU_RELRO` program header, `BIND_NOW` |
+| `BR2_SSP_REGULAR` / `_STRONG` / `_ALL` | stack protector 적용 범위 | `__stack_chk_fail` 참조 |
+| `BR2_PIC_PIE` | 위치 독립 실행 파일 | ELF `Type: DYN (Position-Independent Executable file)` |
+| `BR2_FORTIFY_SOURCE_1` / `_2` / `_3` | libc 함수의 경계 검사 | `__*_chk` 심볼 |
 
-위 이름은 [기준 Config.in](https://github.com/buildroot/buildroot/blob/87e979e4572449ecb7d2058b02d642b38cc3b0f8/Config.in)에 존재하지만 architecture/toolchain 의존성을 만족해야 선택됩니다. 비용의 고정 백분율은 근거가 없어 제외했습니다. 실제 binary 크기, 시작 시간과 대표 workload를 비교합니다.
+설정만 보지 말고 결과 ELF를 확인합니다. 빌드된 busybox와 htop(Ch 9)을 Buildroot의 cross `readelf`로 봤습니다.
 
-커널·부트로더·사전 빌드 vendor binary는 사용자 공간 패키지와 빌드 경로가 다릅니다. `BR2_PACKAGE_<NAME>_DOES_NOT_USE_PIC`이라는 공통 override 옵션은 기준 트리에 없습니다. JIT의 W^X 정책과 PIE도 서로 다른 문제이므로 일괄 충돌로 설명하지 않습니다. package recipe, compiler/linker command와 최종 산출물의 차이를 확인해 예외를 기록합니다.
+```text
+$ aarch64-buildroot-linux-gnu-readelf -h output/target/bin/busybox | grep Type
+  Type:                              DYN (Position-Independent Executable file)
+$ aarch64-buildroot-linux-gnu-readelf -lW output/target/bin/busybox | grep GNU_RELRO
+  GNU_RELRO      0x0c4248 0x00000000000c4248 0x00000000000c4248 0x002db8 0x002db8 R   0x1
+$ aarch64-buildroot-linux-gnu-readelf -d output/target/bin/busybox | grep -E "BIND_NOW|FLAGS"
+ 0x0000000000000018 (BIND_NOW)           
+ 0x000000006ffffffb (FLAGS_1)            Flags: NOW PIE
+$ aarch64-buildroot-linux-gnu-readelf -sW --dyn-syms output/target/usr/bin/htop | grep -oE "__[a-z_]+_chk" | sort -u
+__fdelt_chk
+__realpath_chk
+__snprintf_chk
+__stack_chk
+__strncat_chk
+```
+
+두 바이너리 모두 PIE, `GNU_RELRO`, `BIND_NOW`(`FLAGS_1: NOW PIE`)를 가졌고, htop에는 stack protector(`__stack_chk`)와 FORTIFY 변환 함수(`__snprintf_chk` 등)가 보였습니다. 패키지 빌드 시스템이 플래그를 무시하는 경우도 있으므로 이런 확인을 CI에 둡니다. 비용(크기·성능)은 대상 workload로 직접 재야 하며, 이 장에서는 재지 않았습니다.
 
 ## Root password·서비스 비활성
 
-인증 정책은 root password 문자열 하나로 결정되지 않습니다. 기준 [system/Config.in](https://github.com/buildroot/buildroot/blob/87e979e4572449ecb7d2058b02d642b38cc3b0f8/system/Config.in)은 평문과 지정 crypt 해시를 모두 받지만 `.config`·로그 노출을 경고합니다. 해시 안의 `$`는 **`$$`로 이스케이프**해야 make 확장을 피합니다. 중요한 비밀번호를 명령줄 인자로 남기는 예는 사용하지 않습니다.
+인증 정책은 root password 문자열 하나로 결정되지 않습니다. `system/Config.in`의 `BR2_TARGET_GENERIC_ROOT_PASSWD`는 평문과 crypt 해시를 모두 받지만 `.config`·로그 노출을 경고합니다. Ch 3에서 본 것처럼 QEMU defconfig의 기본값은 빈 문자열이고, Ch 4에서 실제로 비밀번호 없이 root로 로그인됐습니다. 해시 안의 `$`는 **`$$`로 이스케이프**해야 make 확장을 피합니다. 중요한 비밀번호를 명령줄 인자로 남기는 예는 사용하지 않습니다.
 
-빈 `BR2_TARGET_GENERIC_ROOT_PASSWD`는 로컬 root 로그인에 비밀번호가 필요 없다는 의미입니다. 이를 일반적인 계정 잠금이나 모든 SSH 서버의 key-only 정책으로 간주하면 안 됩니다. root password 로그인을 막으려는 기준 설정은 다음과 같습니다.
+빈 `BR2_TARGET_GENERIC_ROOT_PASSWD`는 로컬 root 로그인에 비밀번호가 필요 없다는 의미입니다. 이를 일반적인 계정 잠금이나 모든 SSH 서버의 key-only 정책으로 간주하면 안 됩니다. root password 로그인을 막는 설정은 다음과 같습니다.
 
 ```text
 # BR2_TARGET_ENABLE_ROOT_LOGIN is not set
@@ -157,20 +246,20 @@ BR2_FORTIFY_SOURCE_2=y         # _FORTIFY_SOURCE=2
 
 이 설정은 SSH key 배치나 서버별 인증 정책까지 자동 구성하지 않습니다. Dropbear startup은 `/etc/default/dropbear`의 인자를 읽으므로 실제 이미지의 override·PAM·다른 계정·로컬 콘솔·복구 모드를 함께 확인합니다. 생산 환경의 key-only 여부는 허용 key의 접속 성공과 password/빈 password의 거부를 실제 대상에서 검사합니다.
 
-BusyBox에서 사용하지 않는 server applet은 설정 fragment로 끕니다. 예를 들어 아래는 telnet·FTP server를 제외하는 Kconfig 형식입니다.
+BusyBox server applet은 BusyBox 설정에서 켜고 끕니다. Buildroot의 기본 `package/busybox/busybox.config`는 이미 두 줄을 끈 상태입니다(878행, 979행).
 
 ```text
-# CONFIG_TELNETD is not set
 # CONFIG_FTPD is not set
+# CONFIG_TELNETD is not set
 ```
 
-별도 package나 init script가 같은 서비스를 제공할 수 있으므로 applet 설정만으로 포트 차단을 입증할 수 없습니다. 배포 이미지의 서비스 시작 경로와 실제 listen 상태를 확인합니다.
+다만 `package/busybox/busybox.mk` 407~413행은 BusyBox `.config`에 `CONFIG_FEATURE_TELNETD_STANDALONE=y`가 있으면 `S50telnet` init 스크립트를 설치합니다. 자체 BusyBox 설정(`BR2_PACKAGE_BUSYBOX_CONFIG`)으로 telnetd를 켜면 부팅 때 서비스도 함께 올라옵니다. 별도 package나 init script가 같은 서비스를 제공할 수 있으므로 applet 설정만으로 포트 차단을 입증할 수 없습니다. 배포 이미지의 서비스 시작 경로와 실제 listen 상태를 확인합니다.
 
 ## CVE 모니터링 워크플로
 
 CVE는 *오늘 안전*해도 *내일 발견*됩니다. 양산 후의 *모니터링 워크플로*가 빌드 시점의 검증만큼 중요합니다.
 
-`make pkg-stats` 결과를 commit/config/데이터 갱신 시각과 함께 보관하고 이전 보고서와 비교합니다. JSON 전체의 textual diff는 날짜·통계 차이도 포함하므로 새로 보고된 패키지/CVE/확실성 조합을 따로 추출합니다. 다음 도구의 입력은 기준 버전의 **완전한 pkg-stats JSON**이며, 아래 검사는 실제 NVD 접속 대신 synthetic fixture로 수행했습니다.
+`make pkg-stats` 결과를 commit/config/데이터 갱신 시각과 함께 보관하고 이전 보고서와 비교합니다. JSON 전체의 textual diff는 날짜·통계 차이도 포함하므로 새로 보고된 패키지/CVE/확실성 조합을 따로 추출합니다. 다음 도구의 입력은 `pkg-stats`가 만드는 **완전한 JSON**(`dump_json()`의 최상위 `packages`)이며, 아래 검사는 실제 NVD 접속 대신 synthetic fixture로 수행했습니다.
 
 ```js title="cve-diff.mjs"
 import {readFileSync, realpathSync} from 'node:fs';
@@ -225,14 +314,19 @@ node cve-diff.mjs previous-pkg-stats.json current-pkg-stats.json
 
 ## 흔한 실수
 
-- **도구 이름만으로 산출물을 신뢰합니다.** `pkg-stats` schema와 `legal-info/README` 경고, package 선언을 해당 릴리스에서 확인합니다. `BR2_GENERATE_LOCALE`을 켜면 license manifest가 고쳐진다는 근거는 기준 소스에서 확인하지 못해 제거했습니다.
+- **도구 이름만으로 산출물을 신뢰합니다.** `pkg-stats` schema와 `legal-info/README` 경고, package 선언을 해당 릴리스에서 확인합니다. 
 - **재현성 옵션을 보장으로 읽습니다.** 동일 output 경로와 패키지별 제한을 기록하고 실제 비교 결과를 남깁니다.
 - **hardening 설정을 최종 결과로 취급합니다.** compiler/linker 전달과 배포 ELF를 대조합니다.
 - **빈 password를 계정 잠금으로 읽습니다.** 콘솔·SSH·PAM·복구 경로의 인증 결과를 실제 이미지에서 확인합니다.
 
 ## 정리
 
-CVE 보고서는 후보를 찾는 입력이며 `unsure_cves`·백포트·ignore 근거까지 검토합니다. `legal-info`와 `show-info`는 license/SBOM 검토의 자료이고 의무 이행이나 표준 SBOM 완성을 보장하지 않습니다. 재현성·hardening·인증 설정은 고정된 소스 계약과 실제 제품의 동작 검증을 나누어 기록합니다.
+- `make pkg-stats`는 fkie-cad NVD 저장소를 git clone해 대조하고, `cves`·`unsure_cves` 둘 다 "affected"로 분류합니다. `<PKG>_IGNORE_CVES`는 근거 주석과 함께 씁니다(본체에 174줄).
+- `legal-info`는 manifest·license·소스·패치를 모으지만 Buildroot 소스 등은 저장하지 않는다고 README가 밝힙니다.
+- 2026.02.3에는 `utils/generate-cyclonedx`가 있어 `show-info`에서 CycloneDX 1.6 SBOM(이 설정에서 57개 component)을 만들었습니다.
+- PIE·SSP strong·full RELRO·FORTIFY 1이 기본값이고, `readelf`로 busybox·htop에서 확인했습니다.
+- `BR2_REPRODUCIBLE`을 켜고 같은 경로에서 두 번 빌드하자 `rootfs.tar`와 커널은 같았고 ext4 이미지는 달랐습니다. 끄면 셋 다 달랐습니다.
+- 기본 root password는 빈 문자열입니다. 인증 정책은 실제 이미지에서 확인합니다.
 
 ## 다음 장 예고
 
