@@ -41,7 +41,7 @@ uuid:     Build ID: 6520f307f79e69ca0b488ab207bd686c
 none: no-build-id
 ```
 
-같은 명령으로 두 번 빌드한 `r1`, `r2`는 sha1 build-id가 `b358f6d9…`로 같았고, `uuid`로 다시 링크한 파일은 `4b716230…`으로 달라졌습니다. 재현 가능한 빌드를 원하면 해시 스타일을 씁니다.
+같은 명령으로 두 번 빌드한 `r1`, `r2`는 sha1 build-id가 `b358f6d9…`로 같았고, 같은 소스를 `uuid`로 한 번 더 링크한 세 번째 파일은 위의 `6520f307…`과 다른 `4b716230…`이었습니다. 재현 가능한 빌드를 원하면 해시 스타일을 씁니다.
 
 core에서 build-id를 뽑는 방법은 [Ch 2](/blog/tools/debugging/postmortem/chapter02-elf-core-format)에서 봤습니다(`eu-unstrip -n --core`). 기본 `coredump_filter`가 매핑의 첫 페이지를 남기기 때문에 가능하고, 비트 4를 끄면 vDSO만 남습니다.
 
@@ -186,7 +186,7 @@ $ find ~/.cache/debuginfod_client -type f -exec ls -l {} \; | awk '{print $5, $9
 | Fedora | `https://debuginfod.fedoraproject.org/` | Fedora 35+ |
 | CentOS | `https://debuginfod.centos.org/` | CentOS |
 | Ubuntu | `https://debuginfod.ubuntu.com/` | 지원 중인 Ubuntu 릴리스 |
-| Debian | `https://debuginfod.debian.net/` | Debian main, arm64 포함 9개 아키텍처 |
+| Debian | `https://debuginfod.debian.net/` | Debian 주요 배포(main distributions), arm64 포함 9개 아키텍처 |
 | Arch | `https://debuginfod.archlinux.org/` | Arch Linux |
 | elfutils | `https://debuginfod.elfutils.org/` | 선택한 서버들을 federation |
 
@@ -547,7 +547,7 @@ def analyze_core(exe_path, core_path):
                       "signature": sig, "frames": frames}))
 ```
 
-Ch 3의 core 세 개에 돌린 결과입니다.
+Ch 3의 core 세 개(`core.assert`, `core.wild`, `core.uaf`)에 같은 명령을 core 이름만 바꿔 돌린 결과입니다.
 
 ```text
 $ gdb -q -nx -batch -ex "source analyze.py" -ex 'python analyze_core("patterns", "core.assert")'

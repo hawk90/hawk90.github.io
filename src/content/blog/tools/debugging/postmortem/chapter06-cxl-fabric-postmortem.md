@@ -88,7 +88,8 @@ host 쪽 Linux 6.12가 남기는 CXL trace 이벤트는 [`drivers/cxl/core/trace
 
 | 이벤트 | 내용 |
 | --- | --- |
-| `cxl_aer_uncorrectable_error` / `cxl_aer_correctable_error` | CXL RAS capability의 오류 상태(`status`, `first_error`) |
+| `cxl_aer_uncorrectable_error` | CXL RAS capability의 `status`, `first_error`, header log |
+| `cxl_aer_correctable_error` | CXL RAS capability의 `status` |
 | `cxl_overflow` | 장치 이벤트 로그 넘침 |
 | `cxl_generic_event` | 형식을 모르는 이벤트 레코드 |
 | `cxl_general_media` / `cxl_dram` / `cxl_memory_module` | 장치가 보고한 메모리 이벤트 레코드 |

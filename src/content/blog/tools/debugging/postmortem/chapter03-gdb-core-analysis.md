@@ -65,7 +65,7 @@ coredumpctl list
 coredumpctl debug 2951
 ```
 
-스크립트에서는 `--debugger-arguments`로 GDB 옵션을 넘기거나, GDB를 직접 batch 모드로 부릅니다. `-batch`는 명령을 실행하고 끝나며 inferior를 실행하지 않습니다. `-nx`는 `.gdbinit`을 읽지 않게 해서 결과가 사용자 설정에 흔들리지 않게 합니다.
+스크립트에서는 `--debugger-arguments`로 GDB 옵션을 넘기거나, GDB를 직접 batch 모드로 부릅니다. `-batch`는 명령을 처리한 뒤 종료하고, pagination과 확인 질문을 끕니다. `-nx`는 `.gdbinit`을 읽지 않게 해서 결과가 사용자 설정에 흔들리지 않게 합니다.
 
 ```bash title="gdb-core-batch.sh"
 gdb -q -nx -batch \
@@ -469,7 +469,7 @@ $1 = -1
 $2 = 64
 ```
 
-`#3`의 `??`는 debuginfo가 없어 이름이 빠진 glibc 내부 함수입니다([Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에서 debuginfod로 채웁니다). 실패한 조건과 변수 값이 함께 남으므로 SIGSEGV보다 진단이 빠릅니다. 단, 서비스 로그가 stderr를 버리면 조건 문자열은 core에서 찾기 어렵습니다.
+`#3`의 `??`는 debuginfo가 없어 이름이 빠진 glibc 내부 함수이고, [Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에서 debuginfod로 debuginfo를 받자 `__assert_fail_base (…) at ./assert/assert.c:118`로 풀렸습니다. 실패한 조건과 변수 값이 함께 남으므로 SIGSEGV보다 진단이 빠릅니다. 단, 서비스 로그가 stderr를 버리면 조건 문자열은 core에서 찾기 어렵습니다.
 
 ### 패턴 6 — 가상 함수 호출 — vtable 손상
 
@@ -620,7 +620,7 @@ Thread 1 (LWP 7252): ??
 
 - `gdb <exe> <core>` 또는 `coredumpctl debug`로 열고, 자동화에는 `-q -nx -batch`를 씁니다.
 - `bt`에서 라이브러리 프레임 위로 처음 나오는 우리 코드가 출발점입니다. `[PAC]`는 서명을 떼어 낸 복귀 주소입니다.
-- `$_siginfo`의 `si_code`가 하드웨어 fault(양수)와 `abort()`·`kill`(0 이하)을 가릅니다.
+- `$_siginfo`의 `si_code`가 하드웨어 fault(SEGV_MAPERR 같은 작은 양수), 커널 전송(`SI_KERNEL` 128, `gcore`의 SIGSTOP), `abort()`·`kill`(0 이하)을 가릅니다.
 - core에서는 함수를 호출할 수 없습니다(`You can't do that without a process to debug.`). 변수 읽기와 cast만 됩니다.
 - arm64에서 NULL vptr 로드는 `si_addr` 0, 멤버 접근은 그 offset, 덮어쓴 복귀 주소는 SIGBUS `BUS_ADRALN`이었습니다.
 - 데드락은 `thread apply all bt`와 mutex의 `__owner`로 누가 무엇을 쥐고 기다리는지 표를 만들어 찾습니다.

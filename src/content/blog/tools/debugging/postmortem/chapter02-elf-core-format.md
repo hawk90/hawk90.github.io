@@ -292,7 +292,7 @@ $1 = {si_signo = 11, si_errno = 0, si_code = 1, _sifields = {_pad = {-559038737,
 
 | si_code (SIGBUS) | 의미 | 재현 |
 |------------------|------|------|
-| 1 (BUS_ADRALN) | 정렬 위반 | — |
+| 1 (BUS_ADRALN) | 정렬 위반 | 덮어쓴 복귀 주소로 정렬되지 않은 PC에 점프 ([Ch 3](/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis) 패턴 3) |
 | 2 (BUS_ADRERR) | 존재하지 않는 물리 주소 | 4 KiB 파일을 8 KiB로 `mmap`하고 두 번째 페이지 읽기 |
 | 3 (BUS_OBJERR) | 객체별 하드웨어 오류 | — |
 | 4 (BUS_MCEERR_AR) | 메모리 오류, 즉시 조치 필요 | — |
@@ -305,7 +305,7 @@ $1 = {si_signo = 11, si_errno = 0, si_code = 1, _sifields = {_pad = {-559038737,
 | 5 (ILL_PRVOPC) | privileged opcode | — |
 | 6 (ILL_PRVREG) | privileged register | — |
 
-`—`는 이 실험에서 재현하지 않은 값입니다. 정렬 위반(BUS_ADRALN)을 노리고 홀수 주소에 `ldxr`을 실행해 봤지만 이 호스트에서는 시그널 없이 끝났습니다. 정수를 0으로 나누는 코드도 SIGFPE를 내지 않고 `7/0 = 0`을 찍었습니다. A64의 `SDIV`·`UDIV`는 나누는 수가 0이면 결과를 0으로 정의하고 예외를 내지 않기 때문입니다(Arm ARM의 SDIV/UDIV 명령 설명). x86에서 흔한 FPE_INTDIV core는 arm64에서는 나오지 않습니다.
+`—`는 이 실험에서 재현하지 않은 값입니다. 정수를 0으로 나누는 코드도 SIGFPE를 내지 않고 `7/0 = 0`을 찍었습니다. A64의 `SDIV`·`UDIV`는 나누는 수가 0이면 결과를 0으로 정의하고 예외를 내지 않기 때문입니다(Arm ARM의 SDIV/UDIV 명령 설명). x86에서 흔한 FPE_INTDIV core는 arm64에서는 나오지 않습니다.
 
 `si_addr`는 시그널을 일으킨 주소일 뿐입니다. SIGSEGV에서는 접근한 데이터 주소이고, SIGILL에서는 명령 주소입니다. NULL 역참조인지 판단하려면 [Ch 3](/blog/tools/debugging/postmortem/chapter03-gdb-core-analysis)처럼 명령과 레지스터를 같이 봐야 합니다.
 
@@ -476,7 +476,7 @@ warning: core file may not match specified executable file.
 #2  0x0000ffffcb595e90 in ?? ()
 ```
 
-`#1`의 상위 바이트 0x0044는 PAC 서명이 남은 복귀 주소입니다. `NT_ARM_PAC_MASK`의 마스크(0x007f000000000000)가 바로 이 비트 범위입니다. 맞는 실행 파일로 열면 같은 프레임이 `#1  0x0000aaaacd7b09cc in main (argc=2, argv=0xffffcb594d58) at server.c:20`으로 풀립니다. 빌드 ID로 맞는 파일과 debuginfo를 찾는 방법은 [Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에서 다룹니다.
+`#1`의 0x0044aaaacd7b09ac는 실제 복귀 주소가 아닙니다. 맞는 실행 파일로 열면 그 자리가 `#1  0x0000aaaacd7b09cc in main (argc=2, argv=0xffffcb594d58) at server.c:20`으로 풀립니다. 다른 실행 파일의 unwind 정보로 스택의 엉뚱한 칸을 읽었기 때문에, 주소가 맞지 않고 그 뒤 프레임도 무의미합니다. 빌드 ID로 맞는 파일과 debuginfo를 찾는 방법은 [Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에서 다룹니다.
 
 ## 부분 core — gcore
 
@@ -501,7 +501,7 @@ $ eu-readelf -n gc.1041 | grep -E "^  (CORE|LINUX)" | awk '{print $1, $3}' | sor
 
 ## minicore — 핵심만
 
-core가 수십 GB가 되는 프로세스에서는 콜스택과 필요한 변수만 남기고 싶어집니다. Debian 13에는 Linutronix의 [minicoredumper](https://www.linutronix.de/minicoredumper/)가 패키지(`minicoredumper 2.0.7-4`)로 있습니다. `core_pattern`에 파이프로 걸리고, JSON "recept" 파일로 무엇을 담을지 정합니다.
+core가 수십 GB가 되는 프로세스에서는 콜스택과 필요한 변수만 남기고 싶어집니다. Debian 13에는 Linutronix의 [minicoredumper](https://www.linutronix.de/minicoredumper/)가 패키지(`minicoredumper 2.0.7-4`)로 있습니다. 이 패키지는 `core-dump-handler`와 Conflicts 관계라서, 설치하면 apt가 `systemd-coredump`를 제거합니다(실제로 `Removing systemd-coredump (257.13-1~deb13u1)`). `core_pattern`에 파이프로 걸리고, JSON "recept" 파일로 무엇을 담을지 정합니다.
 
 ```text
 $ cat /etc/minicoredumper/sysctl-start.conf
