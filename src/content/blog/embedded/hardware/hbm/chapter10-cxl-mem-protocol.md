@@ -40,7 +40,7 @@ CXL이 local DDR보다 느린 이유는 *링크를 한 번 왕복*하고 *양쪽
 | CXL.mem (direct attached) | host ↔ 디바이스 링크를 한 번 왕복 |
 | CXL.mem (switch 1단) | 왕복 경로에 switch를 양방향으로 한 번씩 더 통과 |
 
-**switch 한 단은 "장비 하나 추가"가 아니라 "왕복 경로에 통과 지점 두 개 추가"입니다.** pooling으로 얻는 유연성의 값이 *지연으로 청구*되는 구조입니다. 위 논문 Table 1의 구성에는 switch가 없으므로, switch 구성의 실제 지연은 TBD입니다.
+**switch 한 단은 "장비 하나 추가"가 아니라 "왕복 경로에 통과 지점 두 개 추가"입니다.** pooling으로 얻는 유연성의 값이 *지연으로 청구*되는 구조입니다. 위 논문 Table 1의 구성에는 switch가 없고, 인용한 다른 자료에도 switch 경유 지연 측정이 없습니다.
 
 ## 왕복 한 번으로 끝나는 것
 
@@ -63,7 +63,7 @@ Type 2 가속기처럼 *디바이스도 자기 메모리를 캐시*하는 경우
 | Host Bias | host가 operand를 쓰는 작업 제출 때, 완료 뒤 결과를 읽을 때 | host 접근은 high throughput. 디바이스 접근은 host를 거쳐야 해서 최적이 아님 |
 | Device Bias | 디바이스가 작업을 실행하는 동안 | 디바이스가 host 일관성 엔진을 거치지 않고 접근. host도 접근할 수 있지만 *compromised performance* |
 
-이 절은 CXL 1.1의 선택적 bias 모델입니다. §2.2.1.3은 별도 bias 관리를 구현하지 않고 전체가 Host Bias로 동작하는 경우도 명시합니다. bias를 구현하는 디바이스는 *page 단위*(규격의 예: 4 KB page당 1 bit)로 Bias Table에 기록하고, *Transition Agent*가 그 page에 속한 line을 host 캐시에서 flush하며 bias를 바꿉니다. 규격이 두 상태를 *작업 제출 → 실행 → 결과 회수* 주기에 맞춰 설명하므로, 이 주기가 긴 작업일수록 page마다 한 번 드는 전환이 적게 반복됩니다. 전환 비용의 구체적인 크기는 TBD입니다.
+이 절은 CXL 1.1의 선택적 bias 모델입니다. §2.2.1.3은 별도 bias 관리를 구현하지 않고 전체가 Host Bias로 동작하는 경우도 명시합니다. bias를 구현하는 디바이스는 *page 단위*(규격의 예: 4 KB page당 1 bit)로 Bias Table에 기록하고, *Transition Agent*가 그 page에 속한 line을 host 캐시에서 flush하며 bias를 바꿉니다. 규격이 두 상태를 *작업 제출 → 실행 → 결과 회수* 주기에 맞춰 설명하므로, 이 주기가 긴 작업일수록 page마다 한 번 드는 전환이 적게 반복됩니다. 인용한 자료에는 전환 비용의 측정값이 없습니다.
 
 > **메모** — bias 전환의 상태 기계와 BISnp 메시지 자체의 동작은 [CXL Ch 8](/blog/embedded/hardware/cxl/chapter08-cxl-mem)과 [CXL Ch 3](/blog/embedded/hardware/cxl/chapter03-coherency-model)에서 다룹니다.
 
