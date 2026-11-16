@@ -2,7 +2,7 @@
 title: "Buildroot Toolchain 선택 — Internal vs External 비교"
 slug: "embedded/buildroot/chapter11-toolchain"
 date: 2026-05-19T09:11:00
-description: "Buildroot toolchain 결정 — internal toolchain의 단순함과 external toolchain(Bootlin·Linaro·vendor SDK)의 속도·호환성 트레이드오프."
+description: "Buildroot toolchain 결정 — internal toolchain의 빌드 비용과 external toolchain(Bootlin·Arm·custom)의 호스트·ABI 제약을 실제 빌드 기록으로 비교합니다."
 series: "Buildroot Practical"
 seriesOrder: 11
 tags: [embedded, buildroot, toolchain, cross-compile, glibc]
@@ -12,309 +12,226 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Toolchain은 *처음 30분*을 결정합니다."** — Buildroot가 직접 toolchain까지 빌드하면 깨끗하지만 느립니다. 외부 toolchain을 가져오면 즉시 시작하지만 호환성을 챙겨야 합니다.
+> **"Toolchain은 *첫 빌드 시간*과 *전체 ABI*를 함께 결정합니다."** — Buildroot가 직접 toolchain까지 빌드하면 모든 결정이 트리 안에 남지만 오래 걸립니다. 외부 toolchain을 가져오면 빨리 시작하지만, 호스트·헤더·libc 조건을 맞춰야 합니다.
 
 ## 왜 toolchain이 별도의 장 한 개를 차지하는가
 
-Buildroot 빌드 시간의 *절반에서 2/3*가 toolchain 단계입니다. binutils → host-gcc stage1 → kernel headers → glibc stage1 → host-gcc stage2 → glibc stage2의 *6단계 부트스트랩*이 끝나야 첫 패키지가 빌드를 시작합니다. 처음 30분 ~ 1시간이 여기서 사라집니다.
+Ch 1의 QEMU 빌드에서 다운로드를 뺀 작업 시간 중 toolchain 묶음이 477초로 가장 큰 덩어리였습니다. 또 toolchain은 *전체 시스템의 ABI*를 정합니다. C 라이브러리, GCC 버전, 커널 헤더 버전이 정해지면 그 위의 모든 패키지가 영향을 받습니다. 집을 지을 때 기초 콘크리트를 고르는 것과 같아서, 나중에 바꾸면 위층을 전부 다시 지어야 합니다. 매뉴얼 "Cross-compilation toolchain" 절도 toolchain 옵션을 바꾸면 "the entire toolchain and system must be rebuilt"라고 적습니다.
 
-또한 toolchain 결정은 *전체 시스템의 ABI*를 정합니다. C 라이브러리(glibc / musl / uClibc-ng) 선택, GCC 버전, kernel headers 버전이 한 번 정해지면 *그 위에 올리는 모든 패키지*가 영향을 받습니다. 잘못 고르면 두 달 뒤 vendor 라이브러리를 받았는데 *링크가 안 되는* 사태가 옵니다.
-
-이 장은 두 결정을 다룹니다. 하나는 *internal vs external toolchain*, 다른 하나는 *external이라면 어떤 distribution*을 쓸지입니다.
+이 장은 두 결정을 다룹니다. 하나는 *internal vs external toolchain*, 다른 하나는 *external이라면 어떤 배포본*을 쓸지입니다. 사실과 수치는 **Buildroot 2026.02.3**의 `toolchain/`·`package/gcc` 소스와, 이 시리즈에서 같은 VM으로 돌린 두 빌드(Ch 1의 QEMU internal toolchain, Ch 10의 BeagleBone external toolchain)의 `build-time.log`에서 가져왔습니다.
 
 ## Internal toolchain — Buildroot가 직접 빌드
 
-기본 선택입니다. `BR2_TOOLCHAIN_BUILDROOT=y`로 켜지며, Buildroot가 처음부터 끝까지 toolchain을 만듭니다.
+기본 선택입니다. `qemu_aarch64_virt_defconfig`를 펼치면 toolchain 줄은 다음과 같았습니다(Ch 3).
 
 ```text
 BR2_TOOLCHAIN_BUILDROOT=y
-BR2_TOOLCHAIN_BUILDROOT_GLIBC=y          # 또는 _MUSL / _UCLIBC
-BR2_GCC_VERSION_13_X=y
-BR2_BINUTILS_VERSION_2_41_X=y
-BR2_KERNEL_HEADERS_6_6=y
+BR2_TOOLCHAIN_BUILDROOT_GLIBC=y
+BR2_BINUTILS_VERSION="2.44"
+BR2_GCC_VERSION="14.3.0"
+BR2_KERNEL_HEADERS_AS_KERNEL=y
 ```
 
-장점이 명확합니다.
+실제 빌드 순서는 *binutils → gcc-initial → 커널 헤더 → glibc → gcc-final*이었습니다(Ch 4). `build-time.log`의 단계별 시간입니다.
 
-- **재현성** — 같은 트리·같은 commit이면 *완전히 같은* toolchain.
-- **외부 의존성 0** — vendor가 내일 망해도 빌드 가능.
-- **kernel header를 임의로 선택** — Linux 6.6과 짝지을지 5.15와 짝지을지 자유.
-- **세 가지 libc 자유 전환** — 같은 트리에서 musl·glibc 전환이 menuconfig 한 토글.
+| 패키지 | 다운로드 | 그 외 단계 합 | 비고 |
+|---|---:|---:|---|
+| host-binutils 2.44 | — | 26.1초 (패키지 전체) | |
+| host-gcc-initial 14.3.0 | — | 136.9초 (패키지 전체) | |
+| linux-headers 6.18.7 | — | 35.6초 (패키지 전체) | 커널 tarball 다운로드 포함 |
+| glibc 2.42-67-g4ebd33dd… | 337.8초 | 89.5초 (build 73.4초) | git 저장소에서 받음 |
+| host-gcc-final 14.3.0 | 0.1초 | 204.6초 (build 189.9초) | |
 
-단점은 *시간*입니다.
+장점은 모든 결정이 이 트리의 `.config`에 있다는 점입니다.
 
-- **첫 빌드 30 ~ 50분** — 빠른 워크스테이션 기준.
-- **트리당 한 번씩** — `BR2_PER_PACKAGE_DIRECTORIES`를 안 켜면 변형 보드마다 다시 빌드.
-- **CI 비용** — 한 PR마다 toolchain까지 다시 만들면 분 단위가 시간 단위로 늘어남.
+- **재현 기준이 트리 안에 있음** — binutils·gcc·libc 버전과 패치가 Buildroot 태그에 고정됩니다.
+- **커널 헤더를 빌드하는 커널에 맞춤** — `BR2_KERNEL_HEADERS_AS_KERNEL=y`로 헤더 버전이 커널(6.18.7)과 같습니다.
+- **libc 전환이 옵션 하나** — `toolchain/toolchain-buildroot/Config.in`의 "C library" choice에 uClibc-ng, glibc, musl이 있고 기본값은 glibc입니다.
+- **ccache가 output 디렉터리를 넘어 공유됨** — `package/gcc/gcc.mk` 334행이 gcc 설정을 hash해 wrapper에 넣고, wrapper가 `CCACHE_COMPILERCHECK=string:<hash>`로 씁니다(Ch 14).
 
-다음 경우에 internal이 정답입니다.
-
-- **프로토타이핑·학습** — 빠른 iteration보다 *이해*가 중요한 단계.
-- **mainline에 가까운 시스템** — vendor SoC 특수성이 없는 경우.
-- **재현성·법무가 중요한 제품** — 모든 source가 트리 안에 있어야 할 때.
-- **musl·uClibc-ng**처럼 *vendor가 안 만들어 주는* libc를 쓸 때.
+단점은 *시간*입니다. 위 표만 더해도 다운로드를 빼고 약 490초, glibc를 git으로 받는 시간까지 더하면 13분을 넘었습니다. `make clean`을 할 때마다 이 시간이 다시 듭니다. 매뉴얼의 internal backend 단점 목록도 "Rebuilding the toolchain is needed when doing `make clean`, which takes time"입니다.
 
 ## External toolchain — pre-built 받아 쓰기
 
-`BR2_TOOLCHAIN_EXTERNAL=y`로 전환합니다. Buildroot가 toolchain *빌드*를 건너뛰고 *받아 설치만* 합니다.
+`BR2_TOOLCHAIN_EXTERNAL=y`로 전환하면 Buildroot는 toolchain을 빌드하지 않고 받아 풀기만 합니다. Ch 10의 BeagleBone 빌드가 그 경우였고, `build-time.log`의 toolchain 줄은 다음과 같았습니다.
 
-```text
-BR2_TOOLCHAIN_EXTERNAL=y
-BR2_TOOLCHAIN_EXTERNAL_DOWNLOAD=y
-BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y         # 또는 LINARO/ARM/CUSTOM
-BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_AARCH64_GLIBC=y
-```
+| 단계 | 시간 |
+|---|---:|
+| download | 963.2초 |
+| extract | 14.5초 |
+| install-staging (sysroot 복사) | 3.6초 |
+| install-target (libc 등 복사) | 0.6초 |
 
-장점은 단순합니다.
+이 빌드의 다운로드는 VM의 느린 네트워크 탓에 오래 걸렸지만, *받은 뒤* 쓸 수 있게 되기까지는 20초가 안 걸렸습니다. internal toolchain의 약 490초와 비교되는 숫자입니다. 한 번 받은 tarball은 `dl/`에 남으므로, `make clean` 뒤나 CI의 다음 빌드에서는 압축 해제 시간만 듭니다.
 
-- **첫 빌드가 5분 ~ 10분** — toolchain은 다운로드만.
-- **CI가 가벼움** — toolchain tarball을 한 번 캐시해 두면 모든 빌드가 즉시 시작.
-- **vendor BSP와 호환** — vendor가 권장 toolchain을 명시한 경우 그대로 사용.
+대신 제약이 생깁니다.
 
-단점도 명확합니다.
-
-- **fixed kernel headers·libc 버전** — toolchain이 *고정한 ABI*를 따라야 함.
-- **외부 의존성** — 배포자가 사라지면 LTS 유지 어려움.
-- **patches 불가능** — 발견된 GCC 버그를 *내가 직접 패치하기* 어려움.
-- **musl·uClibc-ng 선택 제한** — Bootlin은 둘 다 제공하지만 vendor SDK는 보통 glibc 한정.
-
-다음 경우에 external이 정답입니다.
-
-- **CI 시간이 비용** — 매 PR마다 30분 toolchain을 다시 빌드하는 비용이 큰 경우.
-- **vendor SDK 호환 요구** — Xilinx Vitis, NXP Yocto SDK 등 *fixed toolchain*이 spec.
-- **여러 보드 공유** — 같은 architecture의 여러 변형 보드가 한 toolchain 공유.
-- **재현성 < 속도** — prototyping·테스트 환경.
+- **헤더·libc·GCC 버전이 toolchain에 고정** — Buildroot는 그 값을 `.config`에 *선언*해야 하고, 실제 toolchain과 맞는지 빌드 시작 때 검사합니다(아래 "custom" 절).
+- **호스트 아키텍처 제약** — 미리 빌드된 toolchain은 특정 호스트용 실행 파일입니다. Ch 10에서 본 것처럼 Bootlin toolchain은 `depends on BR2_HOSTARCH = "x86_64"`라, aarch64 호스트에서는 선택되지 않고 다른 toolchain으로 바뀌었습니다.
+- **gcc 자체 패치 불가** — `package/gcc/<version>/*.patch` 같은 패치는 internal toolchain에만 적용됩니다.
 
 ## Internal vs external — 한눈에 비교
 
 | 항목 | Internal | External |
 |---|---|---|
-| **첫 빌드 시간** | 30 ~ 50분 | 5 ~ 10분 |
+| **toolchain 단계 시간 (이 시리즈 실측)** | 약 490초 + glibc git 다운로드 338초 | 압축 해제·설치 약 19초 + tarball 다운로드 |
 | **libc 선택** | glibc / musl / uClibc-ng | toolchain이 고정 |
-| **kernel headers** | 자유롭게 선택 | toolchain이 고정 |
-| **GCC patches** | `package/gcc/*.patch`로 가능 | 불가능 |
-| **재현성** | source 전부 트리 안 | 외부 tarball에 의존 |
-| **CI 친화도** | 무거움 | 가벼움 |
-| **vendor SDK 호환** | 별도 작업 필요 | vendor toolchain 그대로 |
-| **장기 유지보수** | 매우 강함 | 배포자 의존 |
+| **kernel headers** | `BR2_KERNEL_HEADERS_AS_KERNEL` 등으로 선택 | toolchain에 포함된 버전 |
+| **gcc 패치** | `package/gcc/…/*.patch` 적용 | 불가능 |
+| **호스트** | Buildroot가 지원하는 Linux 호스트 | toolchain 배포본이 지원하는 호스트만 |
+| **재현 기준** | Buildroot 태그 | Buildroot 태그 + 외부 tarball (hash로 검증) |
 
-실무에서는 *prototyping은 internal, 양산은 external*로 가는 경우가 많습니다. 양산 단계에서 빌드 시간이 *팀 전체*의 비용으로 누적되기 때문입니다.
+## External toolchain — 배포본
 
-## External toolchain — 4가지 distribution
+2026.02.3의 `toolchain/toolchain-external/`에는 다음 디렉터리가 있습니다.
 
-External을 골랐다면 다음 후보 중에서 선택합니다.
+```text
+toolchain-external-arm-aarch64
+toolchain-external-arm-aarch64-be
+toolchain-external-arm-arm
+toolchain-external-bootlin
+toolchain-external-custom
+toolchain-external-synopsys-arc
+```
 
 ### Bootlin toolchain
 
-Buildroot 본가에서 제공하는 *공식 무료* toolchain. `toolchains.bootlin.com`에서 제공.
+`toolchain-external-bootlin/Config.in.options`에 아키텍처·libc·stable/bleeding-edge 조합이 나열됩니다(예: `BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_AARCH64_GLIBC_STABLE`, `…_ARMV7_EABIHF_GLIBC_STABLE`). 본체 `beaglebone_defconfig`가 이 toolchain을 씁니다. 다만 위에서 말한 대로 x86_64 호스트 전용입니다.
 
-```text
-BR2_TOOLCHAIN_EXTERNAL_BOOTLIN=y
-BR2_TOOLCHAIN_EXTERNAL_BOOTLIN_AARCH64_GLIBC_STABLE=y
-```
+### Arm GNU Toolchain
 
-- **장점** — Buildroot 팀이 직접 빌드·테스트. 모든 ABI 조합 (glibc·musl·uClibc-ng × stable·bleeding-edge) 매트릭스 제공.
-- **단점** — vendor 특수 patches 없음. 보드 BSP가 *vendor toolchain만 지원*한다고 명시하면 사용 불가.
-
-처음 외부 toolchain을 시도한다면 *Bootlin부터*가 안전합니다.
+`toolchain-external-arm-aarch64`("Arm AArch64 14.2.rel1")와 `toolchain-external-arm-arm`("Arm ARM 14.2.rel1")입니다. `depends on BR2_HOSTARCH = "x86_64" || BR2_HOSTARCH = "aarch64"`라서 aarch64 호스트에서도 쓸 수 있고, 이 시리즈의 arm64 VM에서 Ch 10 빌드가 실제로 `BR2_TOOLCHAIN_EXTERNAL_ARM_ARM=y`로 진행됐습니다. 32비트 ARM 쪽은 `depends on BR2_ARM_CPU_HAS_NEON`, `depends on BR2_ARM_EABIHF`가 있어 Cortex-A8(AM335x)처럼 NEON이 있는 hard-float 설정에서만 보입니다.
 
 ### Linaro toolchain
 
-ARM 생태계에서 오래 유지된 toolchain.
-
-```text
-BR2_TOOLCHAIN_EXTERNAL_LINARO_AARCH64=y
-```
-
-- **장점** — ARM-specific 최적화가 들어가 있음. embedded ARM 보드에서 *조금 더 빠른* 코드를 생성하는 경우가 있음.
-- **단점** — Linaro의 별도 배포 주기. 최신 GCC가 늦게 들어옴.
-
-대부분의 경우 Bootlin이 더 최신이라 사용 빈도가 줄어드는 추세.
-
-### ARM GNU Toolchain
-
-ARM 공식.
-
-```text
-BR2_TOOLCHAIN_EXTERNAL_ARM_AARCH64=y
-```
-
-- **장점** — ARM이 *직접* 빌드해 vendor와 같은 정렬. AArch64에서 안정적.
-- **단점** — multiarch 변형(big-endian, soft-float)이 제한적.
-
-ARM 보드의 *공식 reference 환경*과 일치시킬 때 선택.
+2026.02.3에는 Linaro 프로필이 없습니다. `Config.in.legacy`에 `BR2_TOOLCHAIN_EXTERNAL_LINARO_AARCH64`가 "Linaro AArch64 2018.05 is no longer maintained and has been removed from Buildroot"로 남아 있을 뿐입니다. 예전 defconfig에 이 줄이 있으면 Legacy 메뉴에 걸립니다(Ch 4).
 
 ### Custom external — 지원되는 toolchain만 가져오기
 
-NXP·TI·Xilinx 등 SoC vendor가 toolchain을 배포하더라도 SDK 전체를 그대로 가져오면 안 됩니다. Buildroot 매뉴얼은 OpenEmbedded/Yocto SDK의 사전 빌드 라이브러리 구성이 Buildroot external toolchain 요건과 맞지 않아 직접 import를 지원하지 않는다고 설명합니다. 순수 cross toolchain만 분리해 사용할 때도 아래 요건을 실제 구성과 함께 확인하세요.
+`BR2_TOOLCHAIN_EXTERNAL_CUSTOM`은 위 목록에 없는 toolchain을 직접 지정합니다. 매뉴얼은 crosstool-NG나 Buildroot 자신이 만든 toolchain은 지원하지만, OpenEmbedded/Yocto SDK는 지원하지 않는다고 분명히 적습니다.
 
 ```text
+We do not support toolchains or SDK generated by OpenEmbedded or
+Yocto, because these toolchains are not pure toolchains (i.e. just the
+compiler, binutils, the C and C++ libraries). Instead these toolchains
+come with a very large set of pre-compiled libraries and
+programs.
+```
+
+custom toolchain의 주요 옵션 이름은 `toolchain-external/Config.in`과 `toolchain-external-custom/Config.in.options`에 있습니다.
+
+```text
+BR2_TOOLCHAIN_EXTERNAL=y
 BR2_TOOLCHAIN_EXTERNAL_CUSTOM=y
-BR2_TOOLCHAIN_EXTERNAL_PATH="/opt/nxp/cross-toolchain"
-BR2_TOOLCHAIN_EXTERNAL_PREFIX="aarch64-linux-gnu"
+BR2_TOOLCHAIN_EXTERNAL_PREINSTALLED=y
+BR2_TOOLCHAIN_EXTERNAL_PATH="/opt/vendor/cross-toolchain"
+BR2_TOOLCHAIN_EXTERNAL_CUSTOM_PREFIX="aarch64-linux-gnu"
 BR2_TOOLCHAIN_EXTERNAL_HEADERS_5_15=y
 BR2_TOOLCHAIN_EXTERNAL_GCC_12=y
-BR2_TOOLCHAIN_EXTERNAL_GLIBC=y
-BR2_TOOLCHAIN_EXTERNAL_INET_RPC=y
+BR2_TOOLCHAIN_EXTERNAL_CUSTOM_GLIBC=y
 BR2_TOOLCHAIN_EXTERNAL_CXX=y
 ```
 
-각 항목의 의미는 다음과 같습니다.
-
 | 옵션 | 의미 |
 |---|---|
-| `EXTERNAL_PATH` | toolchain 설치 디렉터리. 보통 `/opt/...` |
-| `EXTERNAL_PREFIX` | binary prefix. `aarch64-poky-linux-gcc`가 있으면 `aarch64-poky-linux` |
-| `EXTERNAL_HEADERS_*` | kernel headers 버전 (toolchain에 *동봉된* 헤더의 버전) |
-| `EXTERNAL_GCC_*` | GCC 버전 |
-| `EXTERNAL_GLIBC` | glibc/musl/uClibc 어느 것 |
-| `EXTERNAL_INET_RPC` | RPC 헤더 포함 (네트워크 RPC 패키지가 요구) |
-| `EXTERNAL_CXX` | libstdc++ 포함 |
+| `_PREINSTALLED` / `_DOWNLOAD` | 이미 설치된 경로를 쓸지, `BR2_TOOLCHAIN_EXTERNAL_URL`에서 받을지 |
+| `_PATH` | toolchain 설치 디렉터리 |
+| `_CUSTOM_PREFIX` | 실행 파일 이름 앞부분 (`aarch64-linux-gnu-gcc`의 `aarch64-linux-gnu`) |
+| `_HEADERS_*` | toolchain에 *포함된* 커널 헤더 버전 |
+| `_GCC_*` | GCC 버전 |
+| `_CUSTOM_GLIBC` / `_CUSTOM_MUSL` / `_CUSTOM_UCLIBC` | libc 종류 (musl 프롬프트는 "musl (experimental)") |
+| `_INET_RPC`, `_CXX`, `_HAS_SSP` 등 | toolchain이 가진 기능 |
 
-**정확한 메타데이터 작성**이 결정적입니다. headers 버전을 6.6으로 잘못 적으면 *Buildroot가 6.6용 헤더로 패키지를 빌드*하지만 *실제 toolchain은 5.15 헤더*라 syscall이 어긋납니다. 검증은 다음 명령으로.
+이 선언이 실제 toolchain과 다르면 Buildroot가 빌드 시작 때 멈춥니다. 매뉴얼은 "At the beginning of the execution, Buildroot will tell you if the selected options do not match the toolchain configuration"이라고 적고, 검사 코드는 `toolchain/helpers.mk`에 있습니다. 헤더는 `support/scripts/check-kernel-headers.sh`, GCC는 `check_gcc_version`이 확인하며 메시지는 다음 형식입니다(소스의 printf 문자열).
 
-```bash
-$ /opt/nxp/imx-toolchain/aarch64-poky-linux/bin/aarch64-poky-linux-gcc -v
-gcc version 12.3.0 ...
-$ /opt/.../bin/aarch64-poky-linux-gcc -dumpspecs | grep version    # GCC
-$ cat /opt/.../aarch64-poky-linux/include/linux/version.h          # kernel headers
-$ /opt/.../bin/aarch64-poky-linux-gcc --print-multi-os-directory   # libc 위치
+```text
+Incorrect selection of kernel headers: expected %d.%d.x, got %d.%d.x
+Incorrect selection of gcc version: expected %s.x, got %s
 ```
 
-확인된 결과를 *그대로* Kconfig에 옮기는 게 가장 안전합니다.
+그래서 헤더 버전을 잘못 적으면 *조용히 다른 헤더로 빌드*되는 것이 아니라 이 메시지로 멈춥니다. 선언할 값은 toolchain에서 직접 읽습니다.
+
+```bash
+/opt/vendor/cross-toolchain/bin/aarch64-linux-gnu-gcc -dumpversion
+grep LINUX_VERSION_CODE "$(/opt/vendor/cross-toolchain/bin/aarch64-linux-gnu-gcc -print-sysroot)/usr/include/linux/version.h"
+```
 
 ## ABI 호환성 — 무엇이 일치해야 하는가
 
-External toolchain을 쓰면 *ABI 일치*가 책임으로 돌아옵니다. 다음 항목들이 정확히 짝을 이뤄야 합니다.
+External toolchain을 쓰면 ABI 일치가 사용자 책임으로 돌아옵니다.
 
 | 항목 | 일치 의미 |
 |---|---|
-| **architecture / ABI** | aarch64 / armv7-a hf / armv7-a sf 등 |
-| **CPU variant** | cortex-a53 / a72 / a76 등 (적어도 *호환 family*) |
-| **C library** | glibc·musl·uClibc-ng 중 하나가 일관 |
-| **kernel headers** | 빌드 시 헤더 ≤ 실행 시 커널 |
-| **GCC ABI version** | 같은 major (특히 C++ ABI는 깨지기 쉬움) |
-| **endianness** | LE/BE 같음 |
-| **float ABI** | soft / hard / softfp 일치 |
+| **architecture / ABI** | aarch64 / armv7-a hard-float 등 |
+| **CPU variant** | 같은 instruction set family |
+| **C library** | glibc·musl·uClibc-ng 중 하나 |
+| **kernel headers** | 빌드에 쓴 헤더 버전 ≤ 실행할 커널 버전 |
+| **endianness / float ABI** | LE/BE, soft/hard |
 
-이 중 *headers ≤ runtime kernel* 규칙이 가장 자주 사고를 일으킵니다. toolchain이 kernel headers 5.15로 빌드됐는데 보드 커널이 5.10이라면 *런타임에 ENOSYS*가 납니다. 반대 방향(빌드 5.10, 런타임 5.15)은 OK입니다.
+가장 자주 사고를 내는 것이 *헤더 ≤ 실행 커널* 조건입니다. userspace가 헤더에 있는 새 syscall을 쓰는데 실행하는 커널이 더 오래돼 그 syscall이 없으면 `ENOSYS`가 납니다. internal toolchain + `BR2_KERNEL_HEADERS_AS_KERNEL`은 이 조건을 구조적으로 맞춥니다.
 
 ## 흔한 실패 — sysroot mismatch
 
-External toolchain의 sysroot는 *toolchain이 가지고 있는 디렉터리*입니다.
+External toolchain을 쓰면 Buildroot는 toolchain의 sysroot를 staging으로 *복사*하고 그 위에 패키지가 헤더·라이브러리를 더합니다. Ch 10 로그의 `Copying external toolchain sysroot to staging...` 줄이 그 단계입니다. 그래서 toolchain sysroot에 이미 들어 있는 라이브러리를 Buildroot 패키지로 다시 빌드하면, 같은 이름의 헤더·`.so`가 겹칩니다. 매뉴얼이 OE/Yocto SDK를 지원하지 않는 이유가 바로 이것입니다("Buildroot cannot import the 'sysroot' of the toolchain, as it would contain hundreds of megabytes of pre-compiled libraries").
 
-```text
-$ aarch64-poky-linux-gcc --print-sysroot
-/opt/nxp/.../aarch64-poky-linux/aarch64-poky-linux/sysroot/
-```
+## 흔한 실패 — `GLIBC_2.xx not found`
 
-Buildroot는 이 sysroot를 *그대로* 사용하지 *않습니다*. 대신 staging 디렉터리에 *복사한 뒤* 패키지가 설치하는 헤더·`.so`를 추가합니다.
+보드에서 application을 실행할 때 `version 'GLIBC_2.xx' not found`가 나오면, 빌드에 쓴 glibc가 보드의 glibc보다 새롭다는 뜻입니다. 해결은 다음 중 하나입니다.
 
-```text
-output/staging/
-└── usr/
-    ├── include/
-    ├── lib/
-    └── lib/pkgconfig/
-```
-
-각 디렉터리에는 toolchain이 제공한 것과 패키지가 설치한 것이 함께 쌓입니다.
-
-| 경로 | 내용 |
-|---|---|
-| `usr/include/` | toolchain 헤더 + 패키지 헤더 |
-| `usr/lib/` | toolchain lib + 패키지 lib |
-| `usr/lib/pkgconfig/` | pkg-config 정보 |
-
-문제는 *toolchain sysroot 안의 라이브러리*와 *패키지가 설치한 라이브러리*가 *충돌*하는 경우입니다. 가장 흔한 사례:
-
-```text
-package/libfoo: requires openssl >= 3.0
-toolchain sysroot: openssl 1.1.1 (vendor가 같이 배포)
-output/staging:    openssl 3.2 (Buildroot package)
-```
-
-링크 시 어느 것을 찾을지 모호해집니다. 해결은 *vendor toolchain의 sysroot 안 라이브러리를 제거*하거나, *그 패키지를 사용하지 않는 것*. Buildroot는 `BR2_TOOLCHAIN_EXTERNAL_LIBS_CLEANUP` 같은 옵션으로 일부를 자동 정리하지만 *완전 자동화는 불가능*합니다.
-
-## 흔한 실패 — `GLIBC_2.38 not found`
-
-런타임 보드에서 application 실행 시 다음 에러를 자주 봅니다.
-
-```text
-./myapp: /lib/aarch64-linux-gnu/libc.so.6: version `GLIBC_2.38' not found
-```
-
-원인은 *빌드 시 glibc가 2.38인데 보드의 glibc는 2.31*인 경우입니다. 해결은 다음 중 하나.
-
-- 보드의 glibc를 같은 buildroot로 *함께* 업데이트 (가장 깨끗).
-- application 빌드를 *보드의 glibc* 버전에 맞춰 진행 — toolchain 통일.
-- 정적 링크 — `-static` (rootfs 크기 증가).
-
-이 사고는 *toolchain 통일*이 안 됐다는 신호입니다. 같은 트리에서 빌드한 application은 *정확히 같은 buildroot*가 만든 toolchain으로 빌드돼야 한다는 원칙을 유지해야 합니다.
+- 보드의 rootfs를 같은 Buildroot 빌드로 업데이트합니다.
+- application을 그 rootfs를 만든 toolchain(또는 그 SDK, Ch 17)으로 빌드합니다.
+- 정적 링크합니다.
 
 ## 흔한 실패 — multilib 부재
 
-ARM에서 `aarch32` binary를 같이 돌리고 싶을 때, 또는 32-bit ARM 라이브러리에 의존하는 closed-source binary가 있을 때 *multilib*가 필요합니다.
-
-External toolchain은 *대부분 multilib 미지원*입니다. 32-bit + 64-bit 둘 다 필요하면 다음 중 하나.
-
-- **두 trees로 분리** — 32-bit용 buildroot tree + 64-bit용 buildroot tree, 산출물 병합.
-- **vendor SDK** — NXP·TI는 multilib SDK를 제공.
-- **internal toolchain + multilib=y** — Buildroot의 `BR2_TOOLCHAIN_BUILDROOT_MULTILIB` 옵션.
-
-이 결정은 *prototyping 단계에서* 미리 해두는 게 좋습니다. 양산 직전에 발견하면 *전체 빌드 시스템을 다시 짜야* 합니다.
+Buildroot의 한 output 디렉터리는 하나의 ABI를 위한 rootfs를 만듭니다. 32비트 binary를 64비트 rootfs에서 함께 돌려야 한다면, 32비트용 output을 따로 빌드해 산출물을 합치는 방법을 검토합니다. 이 결정은 prototyping 단계에서 미리 해 두는 편이 낫습니다.
 
 ## libc 선택 — glibc / musl / uClibc-ng
 
-internal toolchain이면 자유 선택입니다. 결정 기준은 다음 표로 충분합니다.
+internal toolchain이면 `toolchain/toolchain-buildroot/Config.in`의 "C library" choice에서 고릅니다. 세 libc의 크기와 호환성 비교는 이 장에서 직접 재지 않았습니다. 대신 Buildroot 쪽에서 확인할 수 있는 사실은 다음과 같습니다.
 
-| 항목 | glibc | musl | uClibc-ng |
-|---|---|---|---|
-| **크기 (stripped)** | 8 ~ 12 MB | 0.6 ~ 1 MB | 0.5 ~ 1 MB |
-| **호환성** | 가장 넓음 | 일부 closed-source 호환 안 됨 | 좁음 (legacy) |
-| **표준 준수** | GNU 확장 풍부 | POSIX 엄격 | POSIX |
-| **locale·NLS** | 풍부 | 제한적 | 제한적 |
-| **NSS·iconv** | full | 정적 | 제한적 |
-| **C++ 호환** | full | mostly | 부분적 |
-| **활용처** | desktop·server·일반 embedded | 컨테이너·소형 embedded | 매우 소형·legacy |
+- 기본값은 glibc이고, 각 libc는 `BR2_PACKAGE_<LIBC>_SUPPORTS`(아키텍처 지원)에 의존합니다.
+- 패키지 `Config.in`에는 libc 조건이 자주 나옵니다. Ch 9의 htop처럼 `depends on !BR2_STATIC_LIBS`, `BR2_TOOLCHAIN_USES_GLIBC` 같은 조건으로 musl·uClibc-ng에서 빠지는 패키지가 있습니다.
+- glibc 자체도 커널 헤더 하한이 있습니다(`comment "glibc needs a toolchain w/ kernel headers >= 3.2"` 등).
 
-선택이 어려우면 *glibc*가 default. 작은 시스템(rootfs < 30 MB)이 목표라면 *musl*로 전환. uClibc-ng는 *과거 호환이 필요한 legacy 프로젝트*가 아니면 거의 안 씁니다.
+크기가 목표라면 같은 defconfig를 libc만 바꿔 두 번 빌드하고 `output/target`의 크기를 비교하는 것이 가장 확실합니다.
 
 ## 검증 절차
 
-toolchain 결정 후 다음 절차로 *조용한 ABI 문제*를 미리 잡습니다.
+toolchain을 정한 뒤 빌드된 binary로 ABI를 확인합니다. 아래는 이 시리즈의 빌드에서 확인한 값입니다.
 
-```bash
-# 1) toolchain의 실제 ABI 확인
-$ readelf -h output/host/aarch64-buildroot-linux-gnu/sysroot/lib/libc.so.6 | head
-ELF Header:
-  Class:                             ELF64
-  Machine:                           AArch64
-  OS/ABI:                            UNIX - System V
+Ch 14의 외부 toolchain 빌드(qemu_aarch64_virt + `BR2_TOOLCHAIN_EXTERNAL=y`, 이 arm64 호스트에서 Arm AArch64 14.2.rel1이 선택됨)의 busybox입니다.
 
-# 2) 보드 커널 헤더 버전과 일치 확인
-$ grep -E 'LINUX_VERSION_CODE' output/host/.../include/linux/version.h
-
-# 3) 빌드된 binary 한 개로 sanity check
-$ readelf -d output/target/bin/busybox | grep NEEDED
+```text
+$ aarch64-none-linux-gnu-readelf -d target/bin/busybox | grep NEEDED
+ 0x0000000000000001 (NEEDED)             Shared library: [libresolv.so.2]
  0x0000000000000001 (NEEDED)             Shared library: [libc.so.6]
-$ readelf -V output/target/bin/busybox | grep GLIBC
-  Name: GLIBC_2.34
-  Name: GLIBC_2.17
+ 0x0000000000000001 (NEEDED)             Shared library: [ld-linux-aarch64.so.1]
+$ aarch64-none-linux-gnu-readelf -V target/bin/busybox | grep -oE "GLIBC_[0-9.]+" | sort -uV | tail -3
+GLIBC_2.33
+GLIBC_2.34
+GLIBC_2.38
 ```
 
-마지막의 `GLIBC_2.34` 같은 *highest version*이 *런타임이 요구할 glibc 최저 버전*입니다. 이 값이 *target 보드의 glibc*보다 작거나 같아야 합니다.
+가장 높은 `GLIBC_2.38`이 이 binary가 요구하는 glibc 최저 버전입니다. 보드의 glibc가 이보다 오래되면 앞 절의 `GLIBC_2.xx not found`가 납니다. 같은 toolchain의 헤더 버전은 sysroot의 `linux/version.h`에서 읽습니다.
+
+```text
+#define LINUX_VERSION_CODE 267277
+```
+
+267277 = 4 × 65536 + 20 × 256 + 13, 즉 커널 헤더 4.20.13입니다. 이 toolchain의 Kconfig가 `.config`에 남긴 `BR2_TOOLCHAIN_HEADERS_AT_LEAST="4.20"`과 맞습니다. 빌드한 커널은 6.18.7이므로 "헤더 ≤ 실행 커널" 조건을 만족합니다. 반대로 internal toolchain + `BR2_KERNEL_HEADERS_AS_KERNEL`이면 헤더가 6.18이 됩니다.
+
+`readelf`는 Buildroot가 `output/host/bin/`에 넣어 주는 toolchain의 것을 씁니다(외부 toolchain이면 `aarch64-none-linux-gnu-readelf`, internal이면 `aarch64-buildroot-linux-gnu-readelf`).
 
 ## 정리
 
-- Toolchain 결정이 전체 ABI를 결정하며, 빌드 시간의 절반 ~ 2/3를 차지합니다.
-- *Internal toolchain*은 깨끗하지만 30 ~ 50분 추가. prototyping·학습·musl 사용 시 적합.
-- *External toolchain*은 5 ~ 10분으로 빠르지만 ABI를 toolchain이 고정. CI·vendor 호환·양산에 적합.
-- External 후보는 Bootlin(기본) / Linaro / ARM GNU / Custom(vendor SDK)입니다.
-- ABI 일치 항목은 architecture·CPU·libc·kernel headers·GCC version·endianness·float ABI 7개입니다.
-- Headers ≤ runtime kernel 규칙을 지키지 않으면 ENOSYS·`GLIBC_2.X not found` 같은 런타임 사고가 납니다.
-- libc 기본은 glibc, 소형 시스템은 musl. uClibc-ng는 legacy 전용.
-- 빌드 후 `readelf -V`로 *required GLIBC version*을 검증하는 게 가장 빠른 sanity check입니다.
+- Internal toolchain은 binutils → gcc-initial → 커널 헤더 → glibc → gcc-final로 빌드되고, 이 시리즈의 QEMU 빌드에서 다운로드를 빼고 약 490초가 들었습니다.
+- External toolchain은 받은 뒤 압축 해제·설치가 약 19초였고, 대신 헤더·libc·GCC가 toolchain에 고정됩니다.
+- 미리 빌드된 toolchain은 호스트 아키텍처를 탑니다. Bootlin은 x86_64 전용, Arm GNU는 x86_64·aarch64를 지원합니다.
+- 2026.02.3에는 Linaro 프로필이 없고 Legacy 메뉴에만 남아 있습니다.
+- custom toolchain의 헤더·GCC 선언이 틀리면 빌드 시작 때 "Incorrect selection of …"로 멈춥니다.
+- OE/Yocto SDK는 pure toolchain이 아니라서 매뉴얼이 지원하지 않는다고 밝힙니다.
+- 빌드 후 `readelf`로 interpreter·`NEEDED`·필요 GLIBC 버전을 확인합니다.
 
 ## 다음 장 예고
 
@@ -326,5 +243,6 @@ $ readelf -V output/target/bin/busybox | grep GLIBC
 - [Ch 4: 첫 빌드 — QEMU에서 동작하는 시스템](/blog/embedded/buildroot/chapter04-first-build) — toolchain 단계의 실제 흐름
 - [Ch 12: Linux 커널 customize — defconfig fragment와 DTS](/blog/embedded/buildroot/chapter12-kernel-customize)
 - [Ch 17: SDK 생성·배포 — make sdk와 application 워크플로](/blog/embedded/buildroot/chapter17-sdk) — toolchain을 application 개발자에게 배포
+- [Ch 10: 실전 — BeagleBone Black](/blog/embedded/buildroot/chapter10-real-board) — 호스트 아키텍처 때문에 바뀐 외부 toolchain
 - [BSP Development Ch 7: 크로스 컴파일 toolchain](/blog/embedded/bsp/chapter07-tfa-trustzone) — BSP 관점에서의 toolchain
-- [원문 — Buildroot Manual §3: getting started](https://buildroot.org/downloads/manual/manual.html)
+- [원문 — Buildroot Manual: Cross-compilation toolchain](https://buildroot.org/downloads/manual/manual.html)
