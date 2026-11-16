@@ -111,7 +111,7 @@ private:
 };
 ```
 
-이 구현은 n==1만 받는 단일 객체 실험용입니다. 여러 원소를 연속으로 요구하는 vector·string의 일반 allocator로 쓸 수 없습니다. N은 슬롯 개수이며 노드 크기가 아닙니다. 비타입 매개변수 N을 포함하므로 rebind도 명시했습니다. 복사본은 같은 정적 저장소를 공유하고, 포인터는 해당 저장소에서 얻은 활성 슬롯이어야 합니다.
+이 구현은 n==1만 받는 단일 객체 실험용입니다. 컨테이너가 `allocate`에 넘기는 n을 기록하는 allocator로 재 보면 이유가 보입니다. `push_back`을 20번 하는 동안 `std::vector`는 n = 1, 2, 4, 8, 16, 32를 요청했고, `std::list`는 노드마다 n = 1을 요청했습니다(g++-16의 libstdc++, Clang 23.1.5의 libc++ 결과 동일). 그래서 이 pool은 `std::list<int, PoolAllocator<int, 8>>`에서는 노드 8개까지 들어가고 9번째에서 `bad_alloc`을 던졌지만, `std::vector`에서는 두 번째 `push_back`(n = 2 요청)에서 바로 `bad_alloc`이었습니다. 여러 원소를 연속으로 요구하는 vector·string의 일반 allocator로 쓸 수 없습니다. N은 슬롯 개수이며 노드 크기가 아닙니다. 비타입 매개변수 N을 포함하므로 rebind도 명시했습니다. 복사본은 같은 정적 저장소를 공유하고, 포인터는 해당 저장소에서 얻은 활성 슬롯이어야 합니다.
 
 ## No-exception allocator — abort 사용
 
@@ -228,7 +228,7 @@ std::array<std::byte, 4096> buffer;
 Arena arena(buffer.data(), buffer.size());
 ```
 
-포인터 산술만으로 끝나므로 할당이 매우 빠르고 fragmentation은 0입니다. 단점은 개별 해제가 불가하다는 점입니다. frame allocator나 transient 객체에 적합합니다.
+할당은 정렬 계산(`std::align`)과 포인터 증가뿐이고, 해제가 없으므로 빈 구멍이 생기는 외부 fragmentation도 없습니다. 정렬 맞춤으로 버려지는 내부 padding만 있습니다. 단점은 개별 해제가 불가하다는 점입니다. 한 프레임·한 요청 동안만 사는 transient 객체에 맞습니다.
 
 ## 임베디드 — Static memory pool
 
@@ -319,7 +319,7 @@ clang++ -std=c++11 -Wall -Wextra -Werror allocator.cpp -o allocator
 ./allocator
 ```
 
-한 개만 할당하는 pool은 별도의 ObjectPool 인터페이스로 사용하는 편이 계약을 분명히 드러냅니다. 연속 저장소·컨테이너 수명·상태 전파를 구현하지 않은 allocator를 vector·map·string 모두에 그대로 적용하지 않습니다.
+Homebrew Clang 23.1.5와 g++-16 모두 `-std=c++11`에 ASan·UBSan을 더해 진단 없이 exit 0이었습니다. 한 개만 할당하는 pool은 별도의 ObjectPool 인터페이스로 사용하는 편이 계약을 분명히 드러냅니다. 연속 저장소·컨테이너 수명·상태 전파를 구현하지 않은 allocator를 vector·map·string 모두에 그대로 적용하지 않습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -329,13 +329,13 @@ std::list<int, MyAllocator<int>> l;
 // list 내부에 ListNode<int> 할당 필요
 // rebind로 MyAllocator<ListNode<int>> 만들어야
 ```
-C++11부터 `A<T, 나머지 타입 인자...>` 형태는 traits가 rebind를 유추할 수 있습니다. `PoolAllocator<T, N>`처럼 비타입 인자가 섞이면 명시적인 rebind가 필요합니다.
+C++11부터 `A<T, 나머지 타입 인자...>` 형태는 traits가 rebind를 유추합니다([allocator.traits.types]). `PoolAllocator<T, N>`처럼 비타입 인자가 섞이면 유추할 수 없어 명시적인 rebind가 필요합니다. 위 `PoolAllocator`에서 `rebind`만 지우고 `std::list`에 쓰면 libstdc++는 `error: no type named 'type' in 'struct std::__replace_first_arg<PoolAllocator<int, 8>, int>'`, libc++는 `static assertion failed ...: This allocator has to implement rebind`로 멈춥니다.
 
 ### 2. allocator 비교 잘못
 ```cpp
 bool operator==(const MyAlloc&, const MyAlloc&) { return true; }   // 다른 pool도 같다고?
 ```
-상태 있는 allocator는 상태 자체를 비교해야 합니다. 잘못된 비교는 컨테이너 move/swap을 망칩니다.
+상태 있는 allocator는 상태 자체를 비교해야 합니다. 컨테이너의 move 대입은 allocator를 전파하지 않을 때(`propagate_on_container_move_assignment`가 false) 두 allocator가 같다고 판단되면 원소를 옮기지 않고 저장소를 그대로 가져옵니다. 다른 arena를 같다고 답하면, 가져온 저장소를 나중에 엉뚱한 arena에 반환하게 됩니다([container.reqmts]의 allocator-aware 요구사항).
 
 ### 3. deallocate에서 size 무시
 ```cpp
@@ -346,13 +346,13 @@ void deallocate(T* p, size_t n) {
 해제 정책에 따라 n이 필요할 수 있습니다. 원래 malloc으로 얻은 p를 free하는 구현은 n을 쓰지 않아도 되며, 단순히 n을 무시했다는 이유만으로 배열 해제가 틀린 것은 아닙니다.
 
 ### 4. throw 사용
-Clang/GCC에서 `-fno-exceptions`인 translation unit에 throw를 직접 쓰면 컴파일 오류입니다. 이미 빌드된 라이브러리의 실패 경로는 그 라이브러리 구성에 따라 달라지므로 별도 확인합니다.
+Clang/GCC에서 `-fno-exceptions`인 translation unit에 throw를 직접 쓰면 컴파일 오류입니다([Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#1-예외-처리)). 이미 빌드된 libstdc++의 실패 경로는 hosted 구성에서 라이브러리 안의 throw로 남아 `std::terminate`로 끝납니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#주의--stl-함수가-던지는-예외)).
 
 ### 5. thread safety 가정
 multi-thread에서 같은 pool을 동시에 접근하면 race가 발생합니다. mutex나 thread-local pool을 씁니다.
 
 ### 6. 복잡한 allocator
-간단한 pool로 충분한데 generic allocator를 만드는 경우가 많습니다. 프로젝트 요구에 맞게 단순하게 유지합니다.
+위 `PoolAllocator`가 vector에서 실패한 것처럼, 표준 allocator 인터페이스는 컨테이너마다 요청 형태가 달라 일반화할수록 rebind·동등성·전파를 모두 구현해야 합니다. 객체 하나씩만 필요하면 ObjectPool 인터페이스로 충분합니다.
 
 ## 측정 범위
 
@@ -364,11 +364,11 @@ multi-thread에서 같은 pool을 동시에 접근하면 race가 발생합니다
 - Stateful allocator는 pool/arena 포인터를 보유하므로 컨테이너 간 비교에 의미가 있습니다.
 - Arena allocator는 bump pointer 방식이라 개별 해제는 불가하지만 일괄 reset이 가능해 transient 객체에 적합합니다.
 - `-fno-exceptions` 환경에서는 throw 대신 실패 시 종료할지 오류 반환 API를 쓸지 정책을 정합니다.
-- C++17 `std::pmr`이 훨씬 단순하며 Part 3-04에서 다룹니다.
+- C++17 `std::pmr`은 allocator 타입을 하나(`polymorphic_allocator`)로 고정하고 메모리 출처를 런타임 객체로 넘겨, rebind·타입별 정적 저장소 문제를 없앱니다. Part 3-04에서 다룹니다.
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `allocator.cpp`와 요청 크기 기록 실험을 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET은 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [C++11 이후 초안 N3337의 allocator_traits](https://www.open-std.org/jtc1/sc22/wg21/docs/papers/2012/n3337.pdf)
 - [Allocator 요구사항](https://eel.is/c++draft/allocator.requirements)
