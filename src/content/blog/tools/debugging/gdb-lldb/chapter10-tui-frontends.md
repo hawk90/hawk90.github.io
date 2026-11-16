@@ -15,9 +15,9 @@ topics: ["tools", "tools/debugging"]
 :::
 
 
-GDB는 기본적으로 명령줄입니다. 강력하지만 한 화면에 *지금 어디서 멈췄는지*, *변수가 얼마인지*, *콜스택*, *레지스터*를 동시에 보여 주지 못합니다. 이 장은 TUI(터미널 UI)와 외부 프런트엔드로 그 한계를 메우는 방법입니다.
+GDB는 기본적으로 명령줄입니다. 강력하지만 한 화면에 *지금 어디서 멈췄는지*, *변수가 얼마인지*, *콜스택*, *레지스터*를 동시에 보여 주지는 않습니다. 이 장은 TUI(터미널 UI)와 외부 프런트엔드로 그 빈자리를 메우는 방법을 다룹니다. 계기판 없는 자동차에 속도계와 연료계를 달아 주는 일과 비슷합니다. 엔진(GDB·LLDB)은 그대로이고 보여 주는 방식만 바뀝니다.
 
-내장 TUI에서 출발해 cgdb·gdb-dashboard·gef/pwndbg 같은 *터미널* 확장, VSCode·nvim-dap·Emacs 같은 *IDE 통합*, 마지막으로 모든 IDE가 공유하는 **DAP**(Debug Adapter Protocol)의 정체까지 살펴봅니다.
+이 장에서 직접 돌린 것은 GDB 16.3의 내장 TUI, cgdb 0.8.0, 그리고 DAP(Debug Adapter Protocol)로 lldb-dap 19.1.7과 GDB 16.3의 내장 DAP에 말을 거는 작은 클라이언트입니다. 모두 Debian 13 arm64 VM에서 [Ch 1](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install)의 `hello.c`로 확인했고, 화면은 `tmux capture-pane`으로 떴습니다. gdb-dashboard, gef/pwndbg/peda, VS Code 확장, Cortex-Debug는 실행하지 않았으므로 각 프로젝트의 README와 공식 문서를 근거로 적습니다.
 
 ## GDB 내장 TUI
 
@@ -29,154 +29,132 @@ GDB는 기본적으로 명령줄입니다. 강력하지만 한 화면에 *지금
 (gdb) layout split       # 소스 + 어셈블리 + 명령
 ```
 
-토글 단축키 `Ctrl-x a`. 한 번 켜면 화면이 분할되어 위쪽엔 소스가, 아래쪽엔 명령창이 뜹니다. 화살표/PgUp으로 소스 스크롤, `Ctrl-x o`로 패널 포커스 전환, `Ctrl-l`로 다시 그리기.
+`factorial`에 멈춘 상태에서 `tui enable`을 치면 위쪽 창에 `hello.c`가 뜨고, 현재 줄에 `B+>`(breakpoint가 걸린 현재 위치)가 붙습니다. 아래 상태 줄에는 현재 함수·줄·PC가 나옵니다.
+
+```text
+│B+>     5     if (n <= 1) return 1;
+...
+multi-thre Thread 0xfffff7fef0 (src) In: factorial                                   L5    PC: 0xaaaaaaaa07b4
+```
+
+`layout asm`은 같은 자리를 `B+>0xaaaaaaaa07b4 <factorial+12>   ldr     w0, [sp, #28]`처럼 명령 단위로 보여 주고, `layout regs`는 직전 레이아웃(여기서는 asm) 위에 `Register group: general` 창을 얹었습니다. `layout split` 뒤 `info win`으로 창 구성을 확인했습니다.
+
+```text
+(gdb) info win
+Name       Lines Columns Focus
+src           11     110
+asm           12     110 (has focus)
+status         1     110
+cmd           11     110
+```
 
 ### 동작 원리
 
-TUI는 `ncurses` 위에 구현됐습니다. 정지·재개 이벤트마다 GDB가 현재 PC·소스·레지스터를 다시 받아 화면을 그립니다.
-
-레이아웃은 *고정된 윈도 셋*의 조합.
-
-| 윈도 | 단축 | 내용 |
-|------|------|------|
-| `src` | s | 소스 코드 |
-| `asm` | a | 어셈블리 |
-| `regs` | r | 레지스터 |
-| `cmd` | c | 명령창 (항상 표시) |
+GDB 매뉴얼 TUI 절은 TUI를 `curses` 라이브러리로 소스·어셈블리·레지스터를 텍스트 창에 보여 주는 인터페이스라고 설명합니다. `info win`이 보여 주듯 창은 `src`, `asm`, `regs`, `status`, `cmd` 같은 이름을 갖고, 레이아웃은 이 창들의 조합입니다.
 
 ### 자주 쓰는 단축키
 
+GDB 16.3 매뉴얼 TUI Keys 절의 키입니다.
+
 | 단축키 | 동작 |
 |--------|------|
-| `Ctrl-x a` | TUI on/off 토글 |
-| `Ctrl-x 1` | 한 윈도 |
-| `Ctrl-x 2` | 두 윈도 |
-| `Ctrl-x o` | 다음 패널로 포커스 |
-| `Ctrl-l` | 다시 그리기 |
-| `Ctrl-x s` | TUI SingleKey 모드(`s`=step, `n`=next 등) |
-| `+` / `-` | 활성 윈도 크기 조절 |
-| `<` / `>` | 소스 스크롤 좌우 |
-| PgUp / PgDn | 소스 스크롤 |
+| `C-x a` (`C-x C-a`, `C-x A`) | TUI 모드 켜기/끄기 |
+| `C-x 1` | 창 하나짜리 레이아웃 (source 또는 assembly) |
+| `C-x 2` | 창 둘 이상인 레이아웃, 다시 누르면 다음 두 창 레이아웃 |
+| `C-x o` | 다음 창으로 포커스 이동 |
+| `C-x s` | TUI SingleKey 모드 켜기/끄기 |
+| `PgUp` / `PgDn` | 활성 창 한 페이지 스크롤 |
+| `Up` / `Down` / `Left` / `Right` | 활성 창 한 줄·한 칸 스크롤 |
+| `C-L` | 화면 다시 그리기 |
 
-### 제약
+같은 절은 TUI에서 화살표 키가 활성 창 스크롤에 쓰이므로, 명령 창에 포커스가 없을 때 명령 히스토리는 `C-p`·`C-n` 같은 readline 키로 다뤄야 한다고 적습니다.
 
-- 윈도 깨짐이 자주 일어남(`Ctrl-l` 자주 누르게 됨). 이유는 GDB가 ncurses 화면 위에 그대로 `print` 출력을 던지면서 화면이 망가지기 때문입니다. cgdb는 별도 terminal frontend이며 dashboard는 GDB Python으로 텍스트를 다시 그립니다. 서로 다른 구조이므로 모두 Python·ncurses 통합이라고 설명하면 안 됩니다.
-- 마우스 안 됨.
-- 일부 환경에서 color 안 나옴.
-- 변수·watch 패널 없음.
+### 마우스와 제약
 
-가벼운 디버깅에는 충분. 큰 코드베이스에선 곧 한계를 느낍니다.
+GDB 16.3 매뉴얼은 curses 라이브러리가 지원하면 TUI도 마우스를 지원하고, `set tui mouse-events`가 기본 `on`이라고 적습니다. 마우스 클릭을 터미널의 텍스트 선택에 쓰고 싶으면 이 설정을 끕니다. TUI에는 변수 감시 창이 따로 없어서, 변수는 `cmd` 창에서 `print`·`display`로 봅니다.
 
 ## cgdb — 분할 화면 GDB
 
-[cgdb](https://cgdb.github.io/)는 위에 vi 키 바인딩이 적용된 소스 뷰어, 아래에 GDB 명령창이 있는 *진짜* TUI.
-
-```bash
-$ cgdb ./my_program
-```
-
-- `Esc`로 소스 패널, `i`로 명령 패널.
-- 소스 패널에서 vi 키(`j`/`k`/`/`)로 이동.
-- 마우스 휠 스크롤 가능.
-- 색상·구문 강조가 깔끔.
-
-### 동작 원리
-
-cgdb는 별도 GDB 프로세스와 통신하는 terminal frontend입니다. 통신 인터페이스와 지원 GDB 범위는 선택한 cgdb release 문서로 확인하며, 이 검증에서는 cgdb를 실행하지 않았습니다.
-
-GDB 내장 TUI와 별도 terminal frontend 중 필요한 소스 탐색·키 바인딩·출력 흐름을 비교합니다. 안정성 우열은 이 검증에서 측정하지 않았습니다.
+[cgdb](https://cgdb.github.io/)는 위에 vi 키를 쓰는 소스 창, 아래에 GDB 명령 창을 두는 별도 터미널 프런트엔드입니다. Debian 13의 cgdb 0.8.0으로 `factorial`에 멈춘 화면입니다.
 
 ```text
-~/.cgdb/cgdbrc            # 설정
+ 4│ int factorial(int n) {
+ 5├───> if (n <= 1) return 1;
+ 6│     return n * factorial(n - 1);
+...
+/root/ch10/hello.c
+Reading symbols from ./hello...
+New UI allocated
+(gdb) break factorial
+Breakpoint 1 at 0x7b4: file hello.c, line 5.
+(gdb) run
+...
+Breakpoint 1, factorial (n=5) at hello.c:5
+```
+
+cgdb 매뉴얼(`info cgdb`)에 따르면 소스 창과 GDB 창은 vi처럼 `Esc`와 `i`로 오가고, GDB와의 통신은 cgdb가 함께 만든 gdbwire 라이브러리가 맡습니다. 위 화면의 `New UI allocated`는 GDB 16.3 `gdb/ui.c`(237행)의 `new-ui` 명령 처리기가 찍는 메시지로, cgdb가 GDB에 `new-ui`로 별도 UI를 연 흔적입니다.
+
+### 설정
+
+cgdb는 `~/.cgdb/cgdbrc`(또는 `$CGDB_DIR/cgdbrc`)의 각 줄을 시작할 때 실행합니다. 아래 옵션 이름과 값은 cgdb 매뉴얼에서 확인했습니다. `winsplit`의 값은 `src_full`, `src_big`, `even`, `gdb_big`, `gdb_full` 중 하나입니다.
+
+```text
 set winminheight=3
-set winsplit=top_big
+set winsplit=src_big
 set syntax=on
 set color=on
 map <C-n> :gdb next<CR>
 ```
 
-## gdb-dashboard — 깔끔한 단일 파이썬 스크립트
+## gdb-dashboard — 단일 파이썬 스크립트
 
-[cyrus-and/gdb-dashboard](https://github.com/cyrus-and/gdb-dashboard) — 한 파이썬 스크립트(`~/.gdbinit`에 source)로 콘솔에 멀티 패널을 그립니다.
+이 절은 실행하지 않았습니다. [cyrus-and/gdb-dashboard](https://github.com/cyrus-and/gdb-dashboard) README는 이 도구를 GDB [Python API](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting)로 쓴 독립 `.gdbinit` 파일 하나라고 설명합니다. 홈 디렉터리에 `.gdbinit`을 두면 대상 프로그램이 멈출 때마다 대시보드가 나타나고, README는 GDB 명령을 재정의하지 않으며 모든 기능이 `dashboard` 명령 아래에 있다고 적습니다. 문법 강조는 Pygments를 설치하면 켜집니다.
 
 ```bash
-$ curl -L https://raw.githubusercontent.com/cyrus-and/gdb-dashboard/master/.gdbinit -o /tmp/gdb-dashboard.gdbinit
-# 내용을 검토한 뒤 필요한 설정을 기존 ~/.gdbinit에 source로 추가
-$ gdb ./my_program
+wget -P ~ https://github.com/cyrus-and/gdb-dashboard/raw/master/.gdbinit
+pip install pygments
 ```
 
-기본 패널: source / assembly / stack / registers / variables / breakpoints / expressions / threads / memory / history.
-
-```text
->>> dashboard -layout source assembly stack registers variables
->>> dashboard memory watch 0x7fff0000 64
->>> dashboard expressions watch "i + j"
->>> dashboard source -style compact
->>> dashboard -style syntax_highlighting 'monokai'
-```
-
-### 어떻게 그리는가
-
-`gdb.events.stop`에 훅을 걸어 정지마다 패널 내용을 Python으로 수집해 terminal에 그립니다. ncurses window를 쓰지는 않지만 ANSI escape sequence·다른 확장과의 출력 상호작용은 여전히 확인해야 합니다. 화면 갱신과 스크롤백 동작은 확장 버전과 terminal 설정으로 확인합니다.
-
-장점 — Python 한 파일이라 설정/이식 쉬움. TUI 모드처럼 화면이 깨지지 않고, 매 정지마다 위쪽에 패널이 다시 그려집니다.
-
-커스텀 모듈을 직접 추가할 수 있어 *팀별 디버깅 환경*을 표준화하기 좋습니다.
-
-```python
-# ~/.gdb/my_module.py
-class MyPanel(Dashboard.Module):
-    def label(self):
-        return "my-counters"
-    def lines(self, term_width, term_height, style_changed):
-        cnt = int(gdb.parse_and_eval("g_counter"))
-        return [f"counter = {cnt}"]
-```
+모듈과 레이아웃 설정은 `help dashboard`와 프로젝트 wiki에 있습니다.
 
 ## gef / pwndbg / peda — 보안·exploit 디버깅
 
-세 가지 모두 보안 분석가의 작업을 GDB 위에서 빠르게 하기 위한 Python 확장입니다. 설치하면 정지할 때마다 레지스터·스택·디스어셈블·코드 컨텍스트가 자동으로 한 화면에 뜹니다.
+이 세 도구도 실행하지 않았습니다. 각 README가 밝히는 성격은 다음과 같습니다.
 
-```bash
-# gef
-$ wget -O ~/.gdbinit-gef.py https://gef.blah.cat/py
-$ echo "source ~/.gdbinit-gef.py" >> ~/.gdbinit
+| 도구 | README의 설명 |
+|------|------|
+| [GEF](https://github.com/hugsy/gef) | x86/64, ARM, MIPS, PowerPC, SPARC용 명령 모음. exploit 개발자와 리버스 엔지니어를 돕고, GDB 10.0 이상과 Python 3.10 이상 바인딩이 필요 |
+| [pwndbg](https://github.com/pwndbg/pwndbg) | 리버스 엔지니어링과 exploit 개발용. GDB와 LLDB를 모두 지원하지만 LLDB 구현은 아직 초기 단계라고 명시. qemu-user 에뮬레이션은 GDB에서만 |
+| [PEDA](https://github.com/longld/peda) | Linux/Unix exploit 개발용 Python GDB 스크립트. README의 버전 1.0은 Black Hat USA 2012 공개판이고, 요구 사항이 GDB 7.x와 Python 2.6+ |
 
-# pwndbg
-$ git clone https://github.com/pwndbg/pwndbg
-$ cd pwndbg && ./setup.sh
-```
+설치는 README대로 합니다. GEF는 `bash -c "$(curl -fsSL https://gef.blah.cat/sh)"` 같은 설치 스크립트를, pwndbg는 [설치 문서](https://pwndbg.re/stable/setup)를 안내합니다. 원격 스크립트를 셸로 바로 실행하는 방식이므로, 내용을 먼저 받아 읽어 본 뒤 실행하는 편이 안전합니다.
 
-이 장의 관심사는 *TUI*이므로 여기서는 셋의 성격만 구분해 둡니다. gef는 한 파일짜리라 가볍고 ARM·MIPS·PPC까지 따라오며, pwndbg는 힙 분석이 가장 깊어 CTF·exploit에서 사실상 표준입니다. peda는 x86 중심의 오래된 도구라 지금은 옛 자료를 따라갈 때 씁니다.
-
-셋의 상세 비교와 `context`·`vmmap`·`heap`·`checksec` 같은 공통 명령표는 [GDB Extension and IDE Ch 6: GDB 프런트엔드 비교](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 정리돼 있습니다.
-
-주의할 점은 하나입니다. 이 확장들은 매 정지마다 큰 컨텍스트를 쏟아내기 때문에, 보안 분석이 아닌 일반 애플리케이션 디버깅에서는 화면이 오히려 시끄러워집니다. 그럴 때는 앞의 gdb-dashboard나 cgdb 쪽이 맞습니다.
+상세 비교는 [GDB Extension and IDE Ch 6: GDB 프런트엔드 비교](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 있습니다.
 
 ## VSCode + cppdbg / CodeLLDB
 
-터미널을 벗어나면 VSCode가 가장 많이 쓰는 프런트엔드입니다. GDB 사용자 입장에서 알아 둘 것은 *두 익스텐션이 GDB와 대화하는 방식이 다르다*는 점입니다.
+이 절도 실행하지 않았습니다. GDB 사용자 입장에서 알아 둘 것은 *두 확장이 디버거와 대화하는 방식이 다르다*는 점입니다.
 
-`cppdbg`는 Microsoft가 만든 C/C++ 익스텐션으로, GDB와 *MI 프로토콜*로 통신합니다. GDB의 명령이 그대로 전달되므로 `.gdbinit`의 pretty-printer 설정이 살아 있고, `setupCommands`로 GDB 명령을 직접 밀어 넣을 수도 있습니다. `CodeLLDB`는 자체 DAP adapter와 LLDB backend를 통합합니다. LLVM lldb-dap와 동일 executable이라고 가정하지 않습니다.
+Microsoft C/C++ 확장의 `cppdbg`는 [launch.json 레퍼런스](https://code.visualstudio.com/docs/cpp/launch-json-reference)에 따르면 `MIMode`를 `gdb` 또는 `lldb`로 정해 그 디버거에 붙습니다. `setupCommands`는 "JSON array of commands to execute in order to set up the GDB or LLDB"이므로 `.gdbinit`에 넣던 명령을 여기 넣을 수 있고, 콘솔 입력이 필요한 프로그램은 `externalConsole`, core 파일 분석은 `coreDumpPath`로 지정합니다. 이름 그대로 MI를 쓰므로 [Ch 9](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting)에서 본 pretty-printer의 `displayhint`가 이 경로로 전달됩니다.
 
-MI를 한 겹 거치기 때문에 생기는 어긋남도 있습니다. 조건부 breakpoint의 표현식이 GDB에서 직접 칠 때와 미묘하게 다르게 평가되는 경우가 있고, `fork` 추적은 GDB에서 `set follow-fork-mode`로 다루던 만큼 정교하지 않습니다. 콘솔 입력이 필요한 프로그램은 `"externalConsole": true`가 필요하고, core dump는 `coreDumpPath`를 따로 줘야 합니다.
+[CodeLLDB](https://github.com/vadimcn/codelldb)는 README에 따르면 LLDB 기반 확장으로, C++와 Rust 표준 라이브러리 타입의 시각화기를 내장하고 조건부 breakpoint·logpoint·하드웨어 watchpoint·메모리 뷰·원격 디버깅 등을 지원합니다.
 
-`launch.json` 전체 예시(launch·attach·gdbserver 원격), 단축키표, Logpoint와 Watch 패널 사용법은 [GDB Extension and IDE Ch 6](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 정리돼 있습니다.
+`launch.json` 전체 예시는 [GDB Extension and IDE Ch 6](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 정리돼 있습니다.
 
 ## Neovim — nvim-dap
 
-[nvim-dap](https://github.com/mfussenegger/nvim-dap)이 Debug Adapter Protocol(DAP) 클라이언트, [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)가 UI. VSCode와 *같은* 디버그 어댑터(cppdbg, CodeLLDB)를 그대로 씁니다.
+[nvim-dap](https://github.com/mfussenegger/nvim-dap)은 Neovim용 DAP 클라이언트이고, README대로 언어마다 디버그 어댑터를 따로 설치해 설정합니다. 이 시리즈에서는 Neovim을 실행하지 않았습니다. 아래 설정은 nvim-dap 도움말(`doc/dap.txt`)의 `type = 'executable'` 어댑터 형식에 lldb-dap을 넣은 것입니다. lldb-dap은 아래 DAP 절에서 실제로 돌린 어댑터입니다.
 
 ```lua
 local dap = require('dap')
 
 dap.adapters.lldb = {
   type = 'executable',
-  command = 'lldb-dap', -- 설치 경로/PATH와 선택한 adapter의 지원 버전 확인
+  command = 'lldb-dap-19',   -- Debian 13의 실행 파일 이름
   name = 'lldb',
 }
 
-dap.configurations.cpp = {
+dap.configurations.c = {
   {
     name = 'Launch',
     type = 'lldb',
@@ -186,187 +164,108 @@ dap.configurations.cpp = {
     end,
     cwd = '${workspaceFolder}',
     stopOnEntry = false,
-    args = {},
-  },
-  {
-    name = 'Attach to PID',
-    type = 'lldb',
-    request = 'attach',
-    pid = require('dap.utils').pick_process,
-    args = {},
   },
 }
-
-dap.configurations.c = dap.configurations.cpp
-dap.configurations.rust = dap.configurations.cpp
 ```
 
+nvim-dap은 기본 키 매핑을 정하지 않습니다(`dap.txt`의 MAPPINGS 절). 같은 절이 예로 드는 매핑은 다음과 같습니다.
+
 ```lua
-vim.keymap.set('n', '<F5>', dap.continue)
-vim.keymap.set('n', '<F10>', dap.step_over)
-vim.keymap.set('n', '<F11>', dap.step_into)
-vim.keymap.set('n', '<S-F11>', dap.step_out)
-vim.keymap.set('n', '<F9>', dap.toggle_breakpoint)
-vim.keymap.set('n', '<leader>B', function()
-  dap.set_breakpoint(vim.fn.input('Condition: '))
-end)
-vim.keymap.set('n', '<leader>dl', dap.run_last)
-vim.keymap.set('n', '<leader>dt', dap.terminate)
+vim.keymap.set('n', '<F5>', function() require('dap').continue() end)
+vim.keymap.set('n', '<F10>', function() require('dap').step_over() end)
+vim.keymap.set('n', '<F11>', function() require('dap').step_into() end)
+vim.keymap.set('n', '<F12>', function() require('dap').step_out() end)
+vim.keymap.set('n', '<Leader>b', function() require('dap').toggle_breakpoint() end)
+vim.keymap.set('n', '<Leader>dl', function() require('dap').run_last() end)
 ```
 
-dap-ui가 *VSCode와 거의 같은 패널 레이아웃*을 그립니다.
+창 구성은 [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui)가 맡고, README는 nvim-dap의 이벤트에 `dapui.open()`·`dapui.close()`를 연결하는 예를 듭니다.
 
 ```lua
-local dapui = require('dapui')
+local dap, dapui = require("dap"), require("dapui")
 dapui.setup()
-dap.listeners.after.event_initialized['dapui_config'] = dapui.open
-dap.listeners.before.event_terminated['dapui_config'] = dapui.close
+dap.listeners.before.launch.dapui_config = function() dapui.open() end
+dap.listeners.before.event_terminated.dapui_config = function() dapui.close() end
 ```
-
-Neovim 안에서 디버그 패널 띄우고, REPL로 표현식 평가. Vim 키를 유지하면서 IDE 수준의 경험을 가져갑니다.
 
 ## DAP — 표준 프로토콜의 의미
 
-여러 editor와 debug adapter가 DAP를 사용합니다. 프로토콜을 공유해도 adapter 지원 기능·editor UI·설정 방식은 서로 다르며, `cppdbg`를 모든 editor에서 쓸 수 있는 것은 아닙니다. RSP가 *디버거 ↔ 타깃* 연결에 쓰이는 반면 DAP는 editor와 debug adapter 사이의 통신 규약입니다.
+[Debug Adapter Protocol](https://microsoft.github.io/debug-adapter-protocol/)은 편집기(VS Code, Neovim 등)와 디버그 어댑터 사이의 규약입니다. RSP가 *디버거 ↔ 타깃*이라면 DAP는 *편집기 ↔ 디버거*입니다. 이 장에서 다룬 연결을 층으로 나누면 다음과 같습니다.
 
-```text
-[에디터] ← DAP → [adapter (예: cppdbg)] ← MI → [GDB]
-                                              ↑ RSP
-                                            [gdbserver / OpenOCD]
-```
+| 층 | 프로토콜 | 이 시리즈에서 본 예 |
+|----|----------|--------------------|
+| 편집기 ↔ 어댑터 | DAP | lldb-dap 19.1.7, `gdb -i=dap` (아래) |
+| 어댑터 ↔ 디버거 | GDB/MI 등 | cppdbg의 `MIMode` ([Ch 9](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting)의 MI 세션) |
+| 디버거 ↔ 타깃 | RSP | gdbserver, OpenOCD ([Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)) |
+
+GDB 16.3 매뉴얼은 Python 지원으로 빌드된 GDB가 DAP도 지원하며 `--interpreter=dap`으로 켠다고 적습니다. 즉 GDB 자신이 어댑터가 될 수 있습니다.
 
 ### DAP 메시지
 
-DAP는 자체 request/response/event schema를 가진 프로토콜이며 JSON-RPC 2.0이 아닙니다. UTF-8 JSON body 앞에 Content-Length: <바이트 수>와 CRLF 두 번을 붙이고 stdio 또는 socket stream으로 전달합니다.
+DAP 개요 문서의 Base Protocol 절에 따르면 메시지는 `Content-Length` 헤더(ASCII, 유일한 필수 헤더)와 `\r\n\r\n` 뒤의 JSON 본문(UTF-8)으로 이루어지고, 본문은 request·response·event 셋 중 하나입니다. 이 형식을 그대로 쓰는 40줄짜리 Python 클라이언트(`dap_client.py`)로 lldb-dap 19.1.7에 `initialize` → `launch` → `setBreakpoints` → `configurationDone` → `stackTrace` → `scopes` → `variables`를 보냈습니다. 긴 응답은 줄였습니다.
 
-```json
-// 요청
-{"seq": 1, "type": "request", "command": "initialize",
- "arguments": {"clientID": "vscode", "linesStartAt1": true}}
+```text
+>>> Content-Length: 162
 
-// 응답
-{"seq": 2, "type": "response", "request_seq": 1, "success": true,
- "command": "initialize",
- "body": {"supportsConfigurationDoneRequest": true}}
-
-// 이벤트
-{"seq": 3, "type": "event", "event": "stopped",
- "body": {"reason": "breakpoint", "threadId": 1}}
+{"seq": 1, "type": "request", "command": "initialize", "arguments": {"clientID": "demo", "adapterID": "lldb-dap", "linesStartAt1": true, "columnsStartAt1": true}}
+<<< Content-Length: 1270 {"body": {"__lldb": {"version": "lldb version 19.1.7"}, "completionTriggerCharacters": [".", " ", "\t"], "exceptionBreakpointFilters": [{"default": false, "filter": "cpp_catch", "label": "C++ Catch"}, ...
+<<< Content-Length: 46 {"event": "initialized", "seq": 0, "type": "event"}
+>>> {"seq": 3, "type": "request", "command": "setBreakpoints", "arguments": {"source": {"path": "/root/ch10/hello.c"}, "breakpoints": [{"line": 5}]}}
+<<< {"body": {"breakpoints": [{"column": 8, "id": 1, "instructionReference": "0xAAAAAAAA07B4", "line": 5, "source": {"name": "hello.c", "path": "/root/ch10/hello.c"}, "verified": true}]}, "command": "setBreakpoints", "request_seq": 3, "seq": 0, "success": true, "type": "response"}
+<<< {"body": {"allThreadsStopped": true, "description": "breakpoint 1.1", "hitBreakpointIds": [1], "preserveFocusHint": false, "reason": "breakpoint", "threadCausedFocus": true, "threadId": 2839}, "event": "stopped", "seq": 0, "type": "event"}
+>>> {"seq": 6, "type": "request", "command": "scopes", "arguments": {"frameId": 524288}}
+<<< {"body": {"scopes": [{"expensive": false, "name": "Locals", "namedVariables": 1, "presentationHint": "locals", "variablesReference": 1}, {"expensive": false, "name": "Globals", "namedVariables": 0, "variablesReference": 2}, {"expensive": false, "name": "Registers", ...
+>>> {"seq": 7, "type": "request", "command": "variables", "arguments": {"variablesReference": 1}}
+<<< {"body": {"variables": [{"$__lldb_extensions": {...}, "evaluateName": "n", "id": -1, "name": "n", "type": "int", "value": "5", "variablesReference": 0}]}, "command": "variables", ...
 ```
 
-주요 명령.
+`Content-Length: 162`는 뒤따르는 JSON 본문의 바이트 수입니다. 편집기의 변수 창은 이 흐름 그대로 동작합니다. `scopes`가 `Locals`에 `variablesReference: 1`을 주면, 그 번호로 `variables`를 불러 `n = 5`를 받습니다. 값이 구조체라면 그 변수에 다시 0이 아닌 `variablesReference`가 붙고, 펼칠 때 같은 요청을 한 번 더 보냅니다.
 
-| Command | 동작 |
-|---------|------|
-| `initialize` | 핸드셰이크 |
-| `launch` / `attach` | 시작 / 부착 |
-| `setBreakpoints` | 파일별 BP 일괄 설정 |
-| `setFunctionBreakpoints` | 함수명 BP |
-| `setDataBreakpoints` | watchpoint |
-| `threads` | 스레드 목록 |
-| `stackTrace` | 콜스택 |
-| `scopes` | 한 프레임의 스코프 (Local/Arg/Reg) |
-| `variables` | 한 스코프의 변수들 |
-| `continue` / `next` / `stepIn` / `stepOut` | 진행 |
-| `evaluate` | 표현식 평가 |
+같은 클라이언트를 `gdb -q -i=dap`에 붙여도 `factorial`에서 멈췄습니다. 어댑터마다 세부는 달랐습니다. GDB는 `configurationDone` 전에 `setBreakpoints`를 받자 `"verified": false, "reason": "pending"`으로 답한 뒤, 실행 파일을 읽고 나서 `breakpoint` 이벤트로 `verified: true`를 다시 보냈고, `scopes`의 첫 항목 이름이 `Locals`가 아니라 `Arguments`였습니다.
 
-VSCode의 변수 트리는 *재귀적인 `variables` 호출*입니다. 사용자가 트리 노드를 펼칠 때마다 그 노드의 `variablesReference`를 인자로 다시 호출. 결과적으로 *깊은 객체도 지연 로드*되어 IDE가 빠릅니다.
-
-## Emacs — dap-mode / gud
-
-전통적으로 Emacs는 `M-x gdb`로 GUD(GDB UI mode)를 썼습니다. 요즘은 `dap-mode`로 같은 DAP 어댑터를 공유.
-
-```elisp
-(use-package dap-mode
-  :after lsp-mode
-  :config (dap-auto-configure-mode))
-
-(use-package dap-cpptools)        ; cppdbg
-(use-package dap-lldb)
+```text
+<<< {"request_seq": 3, "type": "response", "command": "setBreakpoints", "success": true, "body": {"breakpoints": [{"id": 1, "verified": false, "reason": "pending"}]}, "seq": 3}
+...
+<<< {"type": "event", "event": "breakpoint", "body": {"reason": "changed", "breakpoint": {"id": 1, "verified": true, "source": {"name": "hello.c", "path": "/root/ch10/hello.c"}, "line": 5, "instructionReference": "0xaaaaaaaa07b4"}}, "seq": 12}
+<<< {"type": "event", "event": "stopped", "body": {"threadId": 1, "allThreadsStopped": true, "hitBreakpointIds": [1], "reason": "breakpoint"}, "seq": 17}
 ```
 
-```elisp
-(dap-register-debug-template
- "C++ Launch"
- (list :type "cppdbg"
-       :request "launch"
-       :name "C++ Launch"
-       :MIMode "gdb"
-       :program "${workspaceFolder}/build/my_program"
-       :cwd "${workspaceFolder}"))
-```
-
-자세한 설정은 dap-mode 문서. Doom Emacs는 `lsp +debugger` 모듈로 한 번에.
+프로토콜은 같아도 편집기가 받는 메시지의 순서와 이름은 어댑터에 따라 다르다는 것을 두 로그가 보여 줍니다.
 
 ## 데이터·메모리 시각화
 
-- **VSCode의 Hex Editor + memoryview** — 메모리 영역을 hex 그리드로.
-- **gef의 `memoryview`** — 메모리 영역을 색칠해 표시.
-- **gdb의 `dashboard memory`** — 직접 watch 영역 지정.
-- **GDB 자체** — `x/100bx 0x...` 또는 Python으로 binary blob 시각화.
-
-큰 버퍼·이미지 디버깅에서는 hex 뷰가 콜스택보다 더 자주 쓰입니다.
-
-### NumPy/이미지 자체 시각화
-
-GDB Python으로 NumPy 배열을 *PNG로 떨어뜨려* 외부 뷰어로 보기.
-
-```python
-class ViewImage(gdb.Command):
-    def __init__(self):
-        super().__init__("view_image", gdb.COMMAND_USER)
-    def invoke(self, arg, from_tty):
-        v = gdb.parse_and_eval(arg)
-        w = int(v['width']); h = int(v['height'])
-        data = v['data']
-        # 메모리를 numpy로
-        import numpy as np
-        buf = gdb.selected_inferior().read_memory(int(data), w*h*3)
-        arr = np.frombuffer(buf, dtype=np.uint8).reshape((h, w, 3))
-        from PIL import Image
-        Image.fromarray(arr).save('/tmp/view.png')
-        import subprocess
-        subprocess.Popen(['xdg-open', '/tmp/view.png'])
-
-ViewImage()
-```
-
-이 예제는 width/height/data를 가진 packed RGB8 구조를 가정합니다. 실제 NumPy ndarray·stride·pixel format을 자동으로 해석하는 코드는 아니며 버퍼 크기·접근 권한을 먼저 확인합니다.
+터미널에서 메모리를 보는 기본 도구는 [Ch 3](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state)의 `x`와 LLDB의 `memory read`입니다. 위 DAP 절의 `scopes` 응답처럼 어댑터는 `Registers` 같은 범위도 함께 넘기므로, 편집기 쪽 레지스터·메모리 창은 이런 요청 위에 그려집니다. 큰 자료구조를 그림으로 보고 싶다면 [Ch 9](/blog/tools/debugging/gdb-lldb/chapter09-python-scripting)의 `viz_tree`처럼 Python으로 DOT 파일을 떨어뜨리는 방법이 있습니다.
 
 ## Cortex-Debug — Cortex-M을 붙일 때
 
-Cortex-M용 VS Code 선택지 중 하나는 [Cortex-Debug](https://marketplace.visualstudio.com/items?itemName=marus25.cortex-debug)입니다. 지원되는 probe·server에 맞는 launch 설정을 제공하며, 실제 시작·연결 절차는 extension 버전과 설정에 따릅니다. [Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)의 원격 연결 흐름을 이해한 뒤 사용합니다.
-
-이 시리즈의 관심사는 GDB 쪽이므로 여기서는 GDB 사용자가 얻는 것만 짚습니다. SVD 파일을 읽어 peripheral 레지스터를 비트 단위로 펼쳐 주고, Segger RTT 출력을 콘솔에 얹어 주며, J-Link에서는 CPU를 세우지 않고도 변수를 갱신합니다.
-
-`launch.json` 전체 예시와 servertype별 차이는 [GDB Extension and IDE Ch 6](/blog/tools/debugging/gdb-extension/chapter06-frontends)에 있습니다.
+이 절은 실행하지 않았습니다. [Cortex-Debug](https://github.com/Marus/cortex-debug) README에 따르면 이 VS Code 확장은 J-Link, OpenOCD GDB Server, ST-LINK GDB server, pyOCD, Black Magic Probe를 지원하고, SVD 기반 Peripheral 뷰, OpenOCD와 J-Link를 통한 SEGGER RTT, GDB 서버가 지원하는 경우의 Live Watch, RTOS 스레드 표시 등을 제공합니다. README는 칩 벤더가 자체 OpenOCD를 배포하면 그것을 쓰라고 권합니다. [Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)의 OpenOCD·J-Link 연결 흐름이 이 확장의 밑바닥입니다.
 
 ## 어느 걸 골라야 하나
 
-| 상황 | 추천 |
-|------|------|
-| 가벼운 한 번 디버깅 | GDB TUI(`Ctrl-x a`) |
-| 일상 — 터미널만 | cgdb 또는 gdb-dashboard |
-| 일상 — IDE 같이 | VSCode + cppdbg/CodeLLDB |
-| Vim 사용자 | nvim-dap + dapui |
-| CTF / exploit | pwndbg 또는 gef |
-| 임베디드 GDB (Cortex-M) | VSCode + Cortex-Debug |
-| 자동화 / 헤드리스 | gdb -batch + Python |
-| 원격 + 콘솔만 | cgdb over SSH |
+이 장에서 확인한 성격을 기준으로 정리하면 다음과 같습니다.
+
+| 상황 | 후보 | 근거 |
+|------|------|------|
+| 가벼운 한 번 디버깅 | GDB TUI(`C-x a`) | 별도 설치 없음, `layout split`으로 소스·어셈블리 동시 표시 |
+| 터미널 + vi 키 | cgdb | vi식 소스 창 + GDB 창 |
+| 정지할 때마다 상태 요약 | gdb-dashboard | 단일 `.gdbinit`, 정지마다 출력 (README) |
+| CTF / exploit | pwndbg 또는 GEF | 해당 용도로 만든 도구 (README) |
+| IDE | VS Code + cppdbg/CodeLLDB, nvim-dap | DAP·MI 위에 동작 |
+| Cortex-M | VS Code + Cortex-Debug | SVD·RTT·Live Watch (README) |
+| 자동화 / 헤드리스 | `gdb -batch` + Python | 이 시리즈의 모든 세션 |
 
 ## 정리
 
-- 내장 TUI(`Ctrl-x a`)는 빠른 시각화, 화면 깨짐만 감수하면 충분.
-- cgdb·gdb-dashboard는 터미널에서 쓸 수 있는 두 가지 선택지입니다. 안정성은 GDB·extension·terminal 조합에서 확인합니다.
-- gef/pwndbg는 보안·CTF 용으로 강력하지만 일반 작업엔 시끄러움.
-- IDE 통합은 VSCode + cppdbg/CodeLLDB 또는 nvim-dap.
-- DAP가 IDE↔디버거 표준 — request/response/event 셋의 자체 JSON 메시지와 Content-Length framing.
-- 변수 트리는 `variables` 재귀 호출로 지연 로드.
-- Cortex-M은 probe·server·launch 구성을 확인하고 Cortex-Debug 같은 extension을 선택합니다. SVD·RTT 기능은 extension과 probe 설정 지원을 확인합니다.
+- GDB 16.3 TUI는 `src`·`asm`·`regs`·`cmd`·`status` 창을 레이아웃으로 묶고, `info win`이 구성을 보여 줍니다. 마우스는 `set tui mouse-events`(기본 on)로 지원됩니다.
+- TUI 키는 매뉴얼 TUI Keys 절의 `C-x a`·`C-x 1`·`C-x 2`·`C-x o`·`C-x s`와 화살표·`C-L`입니다.
+- cgdb 0.8.0은 vi식 소스 창과 GDB 창으로 나뉘고, `winsplit` 값은 `src_full`·`src_big`·`even`·`gdb_big`·`gdb_full`입니다.
+- gdb-dashboard·GEF·pwndbg·PEDA·VS Code 확장·Cortex-Debug는 실행하지 않았고 README와 공식 문서로만 적었습니다.
+- DAP 메시지는 `Content-Length` 헤더 + JSON 본문이고, 변수 창은 `scopes` → `variables`로 `variablesReference`를 따라갑니다.
+- GDB 16.3은 `-i=dap`으로 그 자체가 DAP 어댑터가 됩니다. lldb-dap과는 breakpoint 확정 순서와 scope 이름이 달랐습니다.
 
 ## 다음 장 예고
 
-Ch 11 — 실전 팁. STL pretty-printer, -O2로 빌드된 코드 디버깅, `.gdbinit` 추천 설정, time-travel(rr)으로 마무리.
+[Ch 11: 실전 팁](/blog/tools/debugging/gdb-lldb/chapter11-practical-tips)은 STL 출력 조절, `-O2` 코드의 `<optimized out>`, `.gdbinit` 추천 설정, GDB의 `record full`을 이용한 역실행을 실제로 돌려 봅니다.
 
 ## 관련 항목
 
