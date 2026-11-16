@@ -51,7 +51,7 @@ STM32F407에는 CAN1·CAN2가 나눠 쓰는 filter bank가 있고, `FMR`의 CAN2
 
 ### Error counter와 상태
 
-Bosch CAN 2.0 Part A 7.2절(fault confinement)의 규칙에서 이 글과 관련된 것입니다.
+Bosch CAN 2.0 Part A 7장(Fault Confinement)의 규칙에서 이 글과 관련된 것입니다.
 
 | 규칙 | 내용 |
 |---|---|
@@ -249,7 +249,7 @@ int can_selftest(void) {
 
 ### host에서 bit timing 표 확인
 
-42 MHz에서 500 kbit/s를 내는 모든 (prescaler, tseg1, tseg2)를 host에서 셌습니다. 조건은 한 bit 8~25 TQ(CAN 2.0), tseg1 1~16, tseg2 1~8(bxCAN field 폭)이고, 각 조합의 sample point와 `CAN_BTR()` 값을 찍습니다.
+42 MHz에서 500 kbit/s를 내는 모든 (prescaler, tseg1, tseg2)를 host에서 셌습니다. 조건은 한 bit 8~25 TQ(CAN 2.0), tseg1 1~16, tseg2 1~8(bxCAN field 폭)이고, 각 조합의 sample point와 `CAN_BTR()` 값을 찍습니다. `CAN_BTR()`은 1절의 macro를 그대로 옮겼고, field 위치 상수는 `stm32f407xx.h`의 값입니다.
 
 ```c
 /* can_timing.c */
@@ -276,7 +276,6 @@ int main(void) {
         for (uint32_t ts2 = 1; ts2 <= 8; ts2++) {
             uint32_t ts1 = tq - 1 - ts2;
             if (ts1 < 1 || ts1 > 16) continue;
-            if (ts2 > 2 && ts2 != 3 && (tq - 1 - ts2) * 100 / tq < 70) continue;
             n++;
             printf("brp=%2u tq=%2u ts1=%2u ts2=%u sample=%5.1f%% BTR=0x%08X\n",
                    brp, tq, ts1, ts2, 100.0 * (1 + ts1) / tq,
@@ -293,10 +292,31 @@ clang -O2 -Wall -o can_timing can_timing.c && ./can_timing
 ```
 
 ```text
-LOG_PLACEHOLDER
+brp= 4 tq=21 ts1=16 ts2=4 sample= 81.0% BTR=0x033F0003
+brp= 4 tq=21 ts1=15 ts2=5 sample= 76.2% BTR=0x034E0003
+brp= 4 tq=21 ts1=14 ts2=6 sample= 71.4% BTR=0x035D0003
+brp= 4 tq=21 ts1=13 ts2=7 sample= 66.7% BTR=0x036C0003
+brp= 4 tq=21 ts1=12 ts2=8 sample= 61.9% BTR=0x037B0003
+brp= 6 tq=14 ts1=12 ts2=1 sample= 92.9% BTR=0x000B0005
+brp= 6 tq=14 ts1=11 ts2=2 sample= 85.7% BTR=0x011A0005
+brp= 6 tq=14 ts1=10 ts2=3 sample= 78.6% BTR=0x02290005
+brp= 6 tq=14 ts1= 9 ts2=4 sample= 71.4% BTR=0x03380005
+brp= 6 tq=14 ts1= 8 ts2=5 sample= 64.3% BTR=0x03470005
+brp= 6 tq=14 ts1= 7 ts2=6 sample= 57.1% BTR=0x03560005
+brp= 6 tq=14 ts1= 6 ts2=7 sample= 50.0% BTR=0x03650005
+brp= 6 tq=14 ts1= 5 ts2=8 sample= 42.9% BTR=0x03740005
+brp= 7 tq=12 ts1=10 ts2=1 sample= 91.7% BTR=0x00090006
+brp= 7 tq=12 ts1= 9 ts2=2 sample= 83.3% BTR=0x01180006
+brp= 7 tq=12 ts1= 8 ts2=3 sample= 75.0% BTR=0x02270006
+brp= 7 tq=12 ts1= 7 ts2=4 sample= 66.7% BTR=0x03360006
+brp= 7 tq=12 ts1= 6 ts2=5 sample= 58.3% BTR=0x03450006
+brp= 7 tq=12 ts1= 5 ts2=6 sample= 50.0% BTR=0x03540006
+brp= 7 tq=12 ts1= 4 ts2=7 sample= 41.7% BTR=0x03630006
+brp= 7 tq=12 ts1= 3 ts2=8 sample= 33.3% BTR=0x03720006
+21 combinations; this post: 0x011A0005
 ```
 
-SUMMARY_PLACEHOLDER
+prescaler 4(21 TQ), 6(14 TQ), 7(12 TQ)에서 모두 21개 조합이 나오고, 이 글의 설정은 BTR = 0x011A0005입니다. tseg2 = 1인 줄은 PHASE_SEG2가 CAN 2.0이 정한 Information Processing Time 상한 2 TQ보다 짧아질 수 있는 조합이라, 1-10은 PHASE_SEG2 ≥ 2로 걸러 냅니다. 표의 SJW는 min(tseg2, 4)로 넣었습니다.
 
 ### 보드에서
 
