@@ -2,7 +2,7 @@
 title: "인터럽트 누락·중복 진단 — Priority·Pending·Re-entry 추적"
 slug: "embedded/modern-recipes/part10-07-interrupt-debugging"
 date: 2026-04-19T09:06:00
-description: "NVIC pending·priority·level vs edge·shared IRQ — 인터럽트 동작 이상의 흔한 원인을 잡습니다."
+description: "IRQ가 ISR까지 가는 6단계를 나누고, NVIC pending·enable·PRIMASK 병합·BASEPRI 마스킹을 QEMU에서 실제로 돌려 확인하며, 플래그 지우는 방식과 우선순위 비트를 HAL·CMSIS·FreeRTOS 소스로 짚습니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 117
 tags: [recipes, debugging, interrupt, nvic]
@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-"분명 EXTI enable 했는데 ISR이 안 들어와요." "ADC 변환 완료 IRQ가 가끔 두 번 들어와요." "타이머가 1초마다 떨어져야 하는데 가끔 2초 만에 떨어져요." 이런 류는 거의 모두 *경로 상의 한 단계*가 빠졌거나 *bit clear 순서*가 잘못된 경우입니다.
+"EXTI를 enable했는데 ISR이 안 들어온다", "IRQ가 가끔 두 번 들어온다", "주기 인터럽트가 가끔 한 번 빠진다" 같은 증상을 다룹니다. 이벤트가 ISR까지 가는 경로를 단계로 나누고, NVIC의 동작은 QEMU 11.1.3의 STM32F405 머신(`netduinoplus2`)에서 실제로 확인합니다. NVIC 동작의 근거는 ARMv7-M ARM(DDI 0403E)과 CMSIS, STM32 쪽 플래그 처리는 ST HAL v1.8.6입니다.
 
 ## 핵심 개념 — IRQ 경로 6단계
 
@@ -26,7 +26,7 @@ topics: ["embedded"]
 5. **NVIC priority** — `< BASEPRI`
 6. **CPU PRIMASK / FAULTMASK** — global enable
 
-이 6단계가 모두 통과해야 ISR이 떨어집니다. 하나라도 막히면 *조용히* 사라집니다.
+이 6단계가 모두 통과해야 ISR이 실행됩니다. 하나라도 막히면 오류 없이 아무 일도 일어나지 않습니다.
 
 ## Step 1 — Pending bit 보기
 
@@ -43,6 +43,67 @@ Pending이 *떠 있는데 진입 안 됨* = NVIC enable 또는 priority 문제.
 Pending이 *떠 있지 않음* = source가 trigger 안 되었거나 peripheral mask 막힘.
 
 이 한 줄로 위 6단계의 어느 쪽 문제인지 둘로 나눕니다.
+
+이 나눔이 실제로 성립하는지 QEMU에서 확인했습니다. EXTI0(IRQ 6)와 EXTI1(IRQ 7)을 소프트웨어로 pending시키며 세 가지를 봅니다. ISR은 호출 횟수만 셉니다.
+
+```c
+int main(void) {
+    pr("__NVIC_PRIO_BITS = %d\n", __NVIC_PRIO_BITS);
+
+    pr("1) pending but not enabled\n");
+    NVIC_SetPriority(EXTI0_IRQn, 5);
+    NVIC_SetPendingIRQ(EXTI0_IRQn);
+    dump(EXTI0_IRQn); pr("  n_exti0=%u\n", n_exti0);
+    NVIC_EnableIRQ(EXTI0_IRQn);
+    pr("  after enable: n_exti0=%u\n", n_exti0); dump(EXTI0_IRQn);
+
+    pr("2) two triggers while masked -> one entry\n");
+    __disable_irq();
+    NVIC_SetPendingIRQ(EXTI0_IRQn);
+    NVIC_SetPendingIRQ(EXTI0_IRQn);
+    __enable_irq();
+    pr("  n_exti0=%u (expected +1)\n", n_exti0);
+
+    pr("3) BASEPRI=0x50 masks priority 5, not priority 3\n");
+    NVIC_SetPriority(EXTI1_IRQn, 3);
+    NVIC_EnableIRQ(EXTI1_IRQn);
+    __set_BASEPRI(5 << (8 - __NVIC_PRIO_BITS));
+    NVIC_SetPendingIRQ(EXTI0_IRQn);
+    NVIC_SetPendingIRQ(EXTI1_IRQn);
+    pr("  n_exti0=%u n_exti1=%u\n", n_exti0, n_exti1); dump(EXTI0_IRQn);
+    __set_BASEPRI(0);
+    pr("  BASEPRI=0 -> n_exti0=%u\n", n_exti0);
+
+    return 0;
+}
+```
+
+1-03의 semihosting 하네스(`pr()`)로 빌드해 돌린 결과입니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O1 -g -ffreestanding -nostdlib -DSTM32F407xx \
+  -I cmsis_device_f4/Include -I CMSIS_5/CMSIS/Core/Include -Wall \
+  -T link.ld startup.c sh.c irq.c -lgcc -o irq.elf
+qemu-system-arm -M netduinoplus2 -nographic -monitor none -serial none \
+  -semihosting-config enable=on,target=native -kernel irq.elf
+```
+
+```text
+__NVIC_PRIO_BITS = 4
+1) pending but not enabled
+  IRQ6 en=0 pend=1 active=0 IPR=0x50 prio=5
+  n_exti0=0
+  after enable: n_exti0=1
+  IRQ6 en=1 pend=0 active=0 IPR=0x50 prio=5
+2) two triggers while masked -> one entry
+  n_exti0=2 (expected +1)
+3) BASEPRI=0x50 masks priority 5, not priority 3
+  n_exti0=2 n_exti1=1
+  IRQ6 en=1 pend=1 active=0 IPR=0x50 prio=5
+  BASEPRI=0 -> n_exti0=3
+```
+
+1)은 위 나눔 그대로입니다. pending은 1인데 enable이 0이라 ISR이 한 번도 실행되지 않고, enable하자마자 한 번 실행되며 pending이 0으로 내려갑니다. 2)는 아래 「사례 7」의 근거입니다. PRIMASK로 막아 둔 동안 두 번 pending시켜도 풀었을 때 ISR은 한 번만 실행됩니다. pending은 IRQ마다 비트 하나라서 두 번이 하나로 합쳐집니다. 3)은 「사례 4」의 근거입니다. `BASEPRI` = 0x50이면 우선순위 5(IPR 0x50)인 EXTI0는 pending으로 남고, 우선순위 3인 EXTI1은 실행됩니다. ARMv7-M ARM B1.4.3은 BASEPRI가 예외가 선점하는 데 필요한 우선순위 수준을 바꾸며, 실행 중인 소프트웨어의 우선순위보다 낮은 값일 때만 효과가 있다고 적습니다. 우선순위 값이 BASEPRI(0x50) 이상인 EXTI0는 막히고, 그보다 작은 EXTI1(0x30)은 통과합니다.
 
 ## NVIC 상태 dump 함수
 
@@ -79,7 +140,7 @@ EXTI->IMR  |= (1 << 0);   // ← interrupt mask 해제
 EXTI->RTSR |= (1 << 0);   // rising edge
 ```
 
-CubeMX가 보통 자동으로 넣지만, hand-written 코드에서 잘 빠집니다.
+HAL의 GPIO 초기화(`HAL_GPIO_Init()`에 EXTI 모드를 주는 경우)는 이 두 레지스터를 설정하지만, 레지스터를 직접 다루는 코드는 NVIC만 켜고 이 단계를 빠뜨리기 쉽습니다.
 
 체크리스트.
 
@@ -87,7 +148,7 @@ CubeMX가 보통 자동으로 넣지만, hand-written 코드에서 잘 빠집니
 |---|---|---|
 | EXTI | EXTI_IMR | EXTI_PR (W1C) |
 | USART | USART_CR1.{RXNEIE, TXEIE, TCIE} | USART_SR.{RXNE, TXE, TC} |
-| TIM | TIM_DIER.{UIE, CCxIE} | TIM_SR.{UIF, CCxIF} (W0C) |
+| TIM | TIM_DIER.{UIE, CCxIE} | TIM_SR.{UIF, CCxIF} (0을 써서 지움) |
 | ADC | ADC_CR1.EOCIE | ADC_SR.EOC |
 | I2C | I2C_CR2.{ITEVTEN, ITERREN} | I2C_SR1 |
 | DMA | DMA_CCRx.{TCIE, HTIE, TEIE} | DMA_ISR |
@@ -106,22 +167,17 @@ void TIM2_IRQHandler(void) {
 ```c
 void TIM2_IRQHandler(void) {
     if (TIM2->SR & TIM_SR_UIF) {
-        TIM2->SR &= ~TIM_SR_UIF;   /* W0C — 1 쓰면 안 됨 */
+        TIM2->SR = ~TIM_SR_UIF;    /* 0을 쓴 비트만 지워지고, 1을 쓴 비트는 그대로 */
         HAL_GPIO_TogglePin(GPIOC, GPIO_PIN_13);
     }
 }
 ```
 
-Clear 방식이 *W1C(Write 1 to Clear)*냐 *W0C*냐는 peripheral마다 다릅니다. STM32 TIM_SR은 W0C, EXTI_PR은 W1C입니다. 데이터시트 확인 필수.
+지우는 방식은 레지스터마다 다릅니다. HAL v1.8.6이 그 차이를 보여 줍니다. `__HAL_TIM_CLEAR_FLAG()`는 `Instance->SR = ~(FLAG)`로 지울 비트에만 0을 쓰고(`stm32f4xx_hal_tim.h` 1224행), `__HAL_GPIO_EXTI_CLEAR_IT()`는 `EXTI->PR = (LINE)`으로 지울 비트에 1을 씁니다(`stm32f4xx_hal_gpio.h` 199행). TIM_SR을 `&=`로 지우면 읽고 다시 쓰는 사이에 새로 선 다른 플래그를 0으로 덮을 수 있으므로, HAL처럼 대입 한 번으로 씁니다.
 
 ## 사례 3 — Level vs Edge 혼동
 
-```text
-GPIO interrupt: edge-triggered (rising/falling)
-UART RXNE:      level (RXNE = 1인 동안 IRQ pending)
-```
-
-UART RXNE를 *읽지 않고* ISR을 빠져나가면 RXNE가 그대로 1이라 다시 IRQ가 떨어집니다.
+EXTI는 설정한 edge(`RTSR`·`FTSR`)에서 한 번 플래그를 세웁니다. USART의 RXNE 인터럽트는 RXNE 플래그가 서 있는 동안 계속 요청을 내므로, 데이터 레지스터를 *읽지 않고* ISR을 빠져나가면 RXNE가 그대로 1이라 곧바로 다시 들어옵니다.
 
 ```c
 void USART1_IRQHandler(void) {
@@ -132,7 +188,7 @@ void USART1_IRQHandler(void) {
 }
 ```
 
-Edge-triggered EXTI는 *한 번만* 떨어집니다. Level-triggered peripheral은 *조건이 사라질 때까지* 계속 떨어집니다.
+edge로 걸리는 EXTI는 플래그를 지우면 다음 edge까지 조용하고, 플래그가 서 있는 동안 요청하는 주변장치는 원인 조건이 사라질 때까지 계속 요청합니다.
 
 ## 사례 4 — Priority 역전
 
@@ -144,13 +200,13 @@ HAL_NVIC_SetPriority(USART1_IRQn,  5, 0);
 // USART1은 RTOS API 호출 가능, EXTI0는 *불가*
 ```
 
-EXTI0 ISR에서 `xQueueSendFromISR`을 호출하면 ConfigMAX 위라 *assertion fail* 또는 *조용한 동작 불량*. FreeRTOS configASSERT가 켜져 있어야 잡힙니다.
+EXTI0 ISR에서 `xQueueSendFromISR()`을 부르면 FreeRTOS가 허용하는 범위 밖입니다. FreeRTOS V11.2.0 `portable/GCC/ARM_CM4F/port.c`의 `vPortValidateInterruptPriority()`는 이 경우를 다음 assert로 잡습니다(888행). `configASSERT()`를 정의해 둬야 동작합니다.
 
 ```c
-configASSERT(intpri >= configMAX_SYSCALL_INTERRUPT_PRIORITY);
+configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
 ```
 
-또 다른 함정. ARM은 priority bit가 *상위 비트*에 위치합니다. STM32F4는 4 bit priority이므로 `SetPriority(irq, 5, 0)`은 실제로 `0x50`이 register에 쓰입니다. AIRCR PRIGROUP 설정에 따라 preemption/sub-priority 분할이 바뀝니다.
+우선순위 비트는 레지스터의 상위 비트에 있습니다. STM32F4 CMSIS 헤더의 `__NVIC_PRIO_BITS`는 4이고, CMSIS `NVIC_SetPriority(irq, 5)`는 `5 << (8 - 4)` = 0x50을 IPR에 씁니다. 위 QEMU 실행의 `IPR=0x50 prio=5`가 그 값입니다. AIRCR의 PRIGROUP 설정에 따라 이 4비트가 preemption과 sub-priority로 나뉩니다.
 
 ## 사례 5 — IRQ 중복 — Shared IRQ
 
@@ -177,7 +233,7 @@ void EXTI9_5_IRQHandler(void) {
 }
 ```
 
-USART error/event도 같은 IRQ인 chip이 있습니다. `SR` 전체를 확인하고 *모든 source*를 처리해야 합니다.
+STM32F4의 USART1은 RXNE·TXE·TC·오류가 모두 `USART1_IRQn` 하나로 들어옵니다(CMSIS 헤더의 IRQ 번호 목록에 USART1은 하나뿐). ISR은 `SR`을 읽어 선 플래그를 모두 처리합니다.
 
 ## 사례 6 — Tail-chaining으로 보이는 누락
 
@@ -196,17 +252,11 @@ if (timer_overflow_count > 5) action();
 // → tail-chain으로 count가 한 번에 +2 될 수 있음
 ```
 
-Counter 증가 자체는 atomic이지만, *몇 번 떨어졌는지*를 정확히 잡으려면 hardware로 보내는 게 안전합니다 (예: timer capture/compare).
+ISR 안의 카운터 증가는 그 ISR이 끝날 때까지 같은 ISR에 다시 끊기지 않으므로 한 번에 1씩 오르지만, 같은 시간에 이벤트가 몇 번 났는지는 위 2)처럼 pending이 합쳐지면 셀 수 없습니다. 이벤트 수가 중요하면 하드웨어 카운터(타이머의 외부 클럭 입력 등)로 셉니다.
 
 ## 사례 7 — Interrupt latency로 보이는 누락
 
-```text
-ISR B priority 1, 실행 중인 긴 ISR (지속 시간은 측정)
-ISR A priority 5, B 동안에 두 번 trigger
-→ A는 한 번만 진입 (pending bit는 *1 bit*)
-```
-
-같은 IRQ가 ISR 동안 *두 번* trigger되어도 pending은 1로 합쳐집니다. UART에서 byte 단위 RXNE로 받지 못하고 누락이 발생하는 가장 흔한 원인입니다.
+우선순위 1인 긴 ISR B가 도는 동안 우선순위 5인 A의 이벤트가 두 번 오면, A의 pending 비트는 하나뿐이라 B가 끝난 뒤 A는 한 번만 실행됩니다. 위 QEMU 실행 2)가 PRIMASK로 같은 상황을 만든 것입니다. UART를 바이트마다 인터럽트로 받는데 ISR 진입이 한 문자 시간보다 늦어지면, 다음 바이트가 데이터 레지스터를 덮어 overrun이 됩니다. 115200 baud 8N1이면 한 문자가 86.8 µs이므로([10-05](/blog/embedded/modern-recipes/part10-05-uart-not-printing)), 더 높은 우선순위 ISR이 그보다 오래 붙잡으면 바이트를 잃습니다.
 
 해결.
 
@@ -225,7 +275,7 @@ void EXTI0_IRQHandler(void) {
 }
 ```
 
-GPIO_PIN_0에 logic analyzer를 걸면 *몇 번, 언제, 얼마나 걸리는지* 한 화면에 보입니다. printf보다 부담이 작고 정확합니다.
+GPIO_PIN_0에 logic analyzer를 걸면 ISR이 몇 번, 언제, 얼마나 걸리는지 한 화면에 보입니다. ISR에 더해지는 것은 레지스터 쓰기 두 번뿐입니다.
 
 ## DWT cycle counter로 latency 측정
 
@@ -243,7 +293,7 @@ void TIM2_IRQHandler(void) {
 }
 ```
 
-ISR latency·duration histogram을 만들면 worst-case가 보입니다.
+`max_isr_cyc`는 ISR 안에서 걸린 cycle 수의 최댓값입니다. DWT `CYCCNT`가 무엇을 재는지와 측정 경계의 오차는 [Embedded Performance Engineering](/blog/embedded/performance-engineering/00-preface)의 측정 편에서 다룹니다. QEMU는 cycle을 모델링하지 않으므로 이 값은 보드에서 잽니다.
 
 ## 자주 보는 함정
 
@@ -255,7 +305,7 @@ NVIC_EnableIRQ(USART1_IRQn);
 /* → enable 즉시 IRQ 떨어짐, ISR 아직 setup 미완 */
 ```
 
-순서: peripheral mask → flag clear → NVIC pending clear → NVIC enable.
+enable하는 순간 이미 선 플래그 때문에 ISR이 바로 들어옵니다. 위 QEMU 실행 1)에서 pending이 먼저 서 있던 EXTI0가 enable 직후 실행된 것과 같습니다. 순서는 주변장치 플래그를 지우고, NVIC pending을 지우고, 주변장치 인터럽트를 켜고, NVIC를 켜는 것입니다.
 
 > Spurious IRQ
 
@@ -280,29 +330,30 @@ slow_work();   /* 긴 critical section은 낮은 우선순위 IRQ 지연 가능 
 __enable_irq();
 ```
 
-Critical section은 요구 latency 안에서 짧게 유지합니다. Priority masking(`BASEPRI`)의 범위와 고우선 IRQ 허용 여부는 core·RTOS 설정으로 확인합니다.
+PRIMASK로 막은 동안 들어온 IRQ는 풀 때까지 기다리고, 같은 IRQ가 여러 번 오면 위 2)처럼 하나로 합쳐집니다. 모든 IRQ를 막는 대신 위 3)처럼 `BASEPRI`로 일정 우선순위 이하만 막으면, 더 급한 IRQ는 계속 받습니다.
 
 > RTOS API를 priority 위에서 호출
 
-`configMAX_SYSCALL_INTERRUPT_PRIORITY` 위 priority ISR에서는 `*FromISR` API조차 호출 금지. 잘못 호출하면 ready list가 깨집니다.
+`configMAX_SYSCALL_INTERRUPT_PRIORITY`보다 높은(숫자가 작은) 우선순위의 ISR은 FreeRTOS가 critical section에서도 막지 않으므로, 그 안에서 `*FromISR` API를 부르면 커널 자료구조를 보호 없이 건드립니다. 위 `configASSERT`가 그 호출을 잡습니다. 자세한 근거는 [Practical RTOS Internals 3-09: ISR-safe API](/blog/embedded/rtos/practical-internals/part3-09-isr-safe-api)에 있습니다.
 
 > Edge-triggered EXTI에 noisy 입력
 
-Bouncy 버튼은 한 번 눌러도 수십 번 edge가 떨어집니다. RC debounce 또는 software debounce를 둡니다.
+기계식 버튼은 접점이 붙는 동안 여러 번 열리고 닫히므로, edge로 거는 EXTI는 한 번 누름에 여러 번 들어올 수 있습니다. 횟수는 버튼과 회로에 따라 다르므로 logic analyzer로 그 버튼의 edge를 직접 세고, RC 필터나 소프트웨어 debounce를 둡니다.
 
 ## 정리
 
 - IRQ 경로 6단계 중 어느 하나만 막혀도 누락이 일어납니다.
 - Pending bit가 *떠 있는데 진입 안 됨* = NVIC/priority 문제.
 - Pending이 *떠 있지 않음* = peripheral mask 또는 source 문제.
-- Flag clear 빠뜨리면 무한 IRQ로 CPU 100%.
-- Clear 방식 W1C/W0C는 peripheral마다 다릅니다.
+- 플래그를 지우지 않으면 ISR을 빠져나가자마자 다시 들어옵니다.
+- TIM_SR은 0을 써서, EXTI_PR은 1을 써서 지웁니다(HAL 매크로).
 - Shared IRQ는 ISR 안에서 *모든 source*를 dispatch해야 합니다.
-- 같은 IRQ가 ISR 동안 두 번 trigger되면 pending이 1로 합쳐져 누락이 됩니다.
+- 같은 IRQ가 막혀 있는 동안 두 번 오면 pending이 하나로 합쳐져 ISR은 한 번만 실행됩니다(QEMU에서 확인).
+- `BASEPRI` = 0x50은 우선순위 5 이하를 막고 3은 통과시킵니다(QEMU에서 확인).
 - GPIO toggle + logic analyzer가 ISR 진입 가시화의 최단 경로.
 - `configMAX_SYSCALL_INTERRUPT_PRIORITY` 위에서는 RTOS API 호출 금지.
 
-다음 편은 **메모리 오버플로우/오염**입니다.
+다음 편은 **메모리 오염 진단**입니다.
 
 ## 관련 항목
 
