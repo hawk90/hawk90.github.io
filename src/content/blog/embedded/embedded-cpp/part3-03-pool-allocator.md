@@ -138,7 +138,24 @@ public:
 };
 ```
 
-핵심 아이디어는 `union`을 활용해 같은 메모리를 객체 또는 next pointer로 양분한다는 점입니다. 각 슬롯은 max(sizeof(T), sizeof(Slot*))와 정렬 패딩만큼 차지합니다. free-head와 통계도 별도로 필요합니다. allocate/deallocate는 원시 저장소를, construct/destroy는 객체 수명을 다루며 서로 짝을 맞춥니다. 같은 pool의 활성 포인터만 반환하고 pool보다 객체·wrapper를 먼저 소멸시켜야 합니다.
+핵심 아이디어는 `union`을 활용해 같은 메모리를 객체 또는 next pointer로 양분한다는 점입니다. 각 슬롯은 max(sizeof(T), sizeof(Slot*))와 정렬 패딩만큼 차지합니다.
+
+O(1)이 실제로 어떤 코드인지 보려고, 아래 `Order`(12바이트)로 `ObjectPool<Order, 32>` 전역 하나를 만들고 `allocate`·`deallocate`만 부르는 함수 두 개를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -mthumb -Os`로 컴파일했습니다. 이 툴체인에는 C++ 표준 헤더가 없어 `<new>`·`<type_traits>`·`<utility>`의 해당 부분만 짧은 대체 헤더로 넣었습니다.
+
+```text
+00000000 <get()>:                          ; order_pool.allocate()
+   0:	ldr	r3, [pc, #24]              ; &order_pool
+   2:	ldr.w	r0, [r3, #384]             ; slot = free_head_
+   6:	cbz	r0, 18                     ; 고갈이면 nullptr 반환
+   8:	ldr	r2, [r0, #0]               ; slot->next
+   a:	str.w	r2, [r3, #384]             ; free_head_ = slot->next
+   e:	ldr.w	r2, [r3, #388]
+  12:	adds	r2, #1                     ; ++allocated_
+  14:	str.w	r2, [r3, #388]
+  18:	bx	lr
+```
+
+`deallocate`도 분기 하나에 load·store 몇 개로 같은 구조였습니다. 루프가 없으므로 실행 명령 수가 N과 무관합니다. `.bss`는 32 × 12 + 4 + 4 = 392바이트로, `static_assert(sizeof(order_pool) == 392)`가 통과했습니다. 생성자는 free list를 런타임에 연결하므로 `.init_array` entry와 60바이트 초기화 코드가 함께 생겼습니다([Part 1-06](/blog/embedded/embedded-cpp/part1-06-startup-code)의 `__libc_init_array`가 부팅 때 실행). free-head와 통계도 별도로 필요합니다. allocate/deallocate는 원시 저장소를, construct/destroy는 객체 수명을 다루며 서로 짝을 맞춥니다. 같은 pool의 활성 포인터만 반환하고 pool보다 객체·wrapper를 먼저 소멸시켜야 합니다.
 
 ## 사용 예 — Order Pool
 
@@ -227,7 +244,7 @@ void process() {
 }
 ```
 
-`std::unique_ptr`처럼 예외 안전과 자동 해제를 모두 챙길 수 있습니다.
+`std::unique_ptr`처럼 scope를 벗어나는 모든 경로에서 `destroy`가 불립니다.
 
 ## Thread-safe pool의 경계
 
@@ -302,9 +319,9 @@ public:
 };
 ```
 
-시작 시점에 한 번만 malloc을 호출하고 이후로는 fragmentation이 없습니다. 시스템 init 단계에서 만들어 두면 런타임 malloc이 사라집니다.
+시작 시점에 한 번만 malloc을 호출하고 이후로는 같은 크기 블록만 다루므로 heap fragmentation이 생기지 않습니다. 시스템 init 단계에서 만들어 두면 운용 중 malloc이 사라집니다.
 
-대부분의 임베디드에서는 static pool이 더 안전합니다. heap pool은 시작 시점에야 크기가 결정되는 경우에만 씁니다.
+static pool은 크기가 링크 단계에서 확정되어 RAM 초과가 링크 오류로 드러나고, heap pool의 malloc 실패는 부팅 때 런타임에야 드러납니다. 그래서 heap pool은 시작 시점에야 크기가 결정되는 경우(설정 파일로 슬롯 수를 정하는 경우 등)에만 씁니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -312,9 +329,10 @@ public:
 ```cpp
 auto* p = pool.allocate();
 pool.deallocate(p);
-pool.deallocate(p);   // free list 순환 → 무한 루프 또는 corruption
+pool.deallocate(p);   // free list가 자기 자신을 가리킴
 ```
-RAII로 감싸 직접 호출을 피합니다.
+
+두 번째 `deallocate`는 `p->next = free_head_`(= `p`)를 써서 슬롯이 자기 자신을 가리키게 만듭니다. `ObjectPool<int, 4>`로 실행해 보면(g++-16) 이후 `allocate()` 세 번이 모두 같은 `p`를 돌려줬고, `allocated()`는 0에서 한 번 더 감소해 wrap된 뒤 세 번 증가한 2, `available()`은 2였습니다. 세 소유자가 같은 메모리를 나눠 쓰는데 pool은 정상이라고 보고합니다. RAII로 감싸 직접 호출을 피합니다.
 
 ### 2. Use after free
 ```cpp
@@ -334,10 +352,10 @@ N은 동시 최대 수요·실패 정책·RAM 예산으로 정합니다. peak_al
 single-thread pool을 RTOS task끼리 공유하면 race가 발생합니다. mutex를 두거나 task별로 별도 pool을 씁니다.
 
 ### 5. Pool 종류 너무 많음
-각 타입마다 전용 pool을 두면 메모리도 낭비되고 관리도 복잡해집니다. 비슷한 크기는 공용 pool로 합칩니다.
+타입마다 전용 pool을 두면 각 pool이 자기 최대 수요만큼 슬롯을 따로 잡습니다. 여러 타입의 최대 수요가 동시에 오지 않는다면 그 합만큼 RAM이 비어 있게 됩니다. 비슷한 크기는 공용 pool로 합칩니다.
 
 ### 6. initial free list 잘못
-init 시점에 next pointer가 누락되면 null deref가 발생합니다. 모든 slot을 연결합니다.
+생성자 루프가 마지막 슬롯을 빼먹거나 하나를 건너뛰면, 그 슬롯은 한 번도 할당되지 않아 용량이 조용히 줄어듭니다. `allocated()`가 N이 되기 전에 `allocate()`가 nullptr를 반환하는지로 잡을 수 있습니다. 아래 예제처럼 N개를 할당한 뒤 `full()`이 true인지 검사합니다.
 
 ## Variable-size — Multi-pool
 
@@ -372,7 +390,7 @@ void deallocate(void* p, size_t n) {
 }
 ```
 
-malloc과 비슷한 generic allocator가 됩니다. 각 pool 내부에는 fragmentation이 없지만, pool 간 균형이 안 맞으면 일부 fragmentation이 발생할 수 있습니다.
+malloc과 비슷한 generic allocator가 됩니다. 각 pool 안에서는 외부 fragmentation이 없지만 두 가지 낭비가 생깁니다. 하나는 내부 낭비입니다. 17바이트 요청은 64바이트 Medium 블록을 쓰므로 47바이트가 버려집니다. 다른 하나는 등급 간 불균형입니다. Small 슬롯이 남아 있어도 Medium 8개가 다 차면 Medium 요청은 실패합니다.
 
 ## 실행 확인 — 고갈·재사용·정렬·수명
 
@@ -404,7 +422,7 @@ int main() {
 }
 ```
 
-이 장은 malloc 대비 속도·보드 cycle·동시성 안전성을 측정하지 않았습니다. 크기와 결정성 판단은 타깃의 allocator, 캐시·인터럽트·동기화 조건을 포함해 측정해야 합니다.
+Homebrew Clang 23.1.5에서 `-std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined`로 실행해 진단 없이 exit 0이었습니다. 이 장은 malloc 대비 속도·보드 cycle·동시성 안전성을 측정하지 않았습니다.
 
 ## 정리
 
@@ -413,11 +431,11 @@ int main() {
 - 동시성 보호는 별도 설계하며 atomic head만으로 안전한 lock-free pool이 되지는 않습니다.
 - PoolUniquePtr는 소유권 자동 반환을 돕지만 pool 수명과 nothrow 생성 계약은 별도로 지켜야 합니다.
 - 통계를 추적하면 capacity tuning이 가능합니다.
-- 여러 크기를 다룰 때는 multi-pool로 가며 fragmentation이 일부 발생합니다.
+- 여러 크기를 다룰 때는 multi-pool로 가며, 크기 등급에 따른 내부 낭비와 등급 간 불균형이 생깁니다.
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `pool-check.cpp`를 Homebrew Clang 23.1.5·libc++의 macOS arm64 host에서 ASan·UBSan으로, double free 실험을 g++-16으로 실행했습니다. `allocate`·`deallocate`의 Cortex-M4 디스어셈블리는 arm-none-eabi-g++ 16.2.0 오브젝트에서 얻었고 보드 실행·WCET은 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [객체 수명·저장소 재사용](https://eel.is/c++draft/basic.life)
 - [union 활성 멤버 수명](https://eel.is/c++draft/class.union)
