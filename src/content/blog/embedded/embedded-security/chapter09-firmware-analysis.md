@@ -91,7 +91,7 @@ Decompiler의 C 비슷한 출력은 원본 소스가 아닙니다. 함수 경계
 r2 -A fixture.o
 ```
 
-r2 안에서는 `afl`이 함수 목록, `pdf`가 현재 함수 disassembly, `pdc`가 pseudocode입니다. 위 명령은 실행하지 않았습니다. Debian 13(trixie)에는 `radare2` 패키지가 없어 `apt-get install radare2`가 "has no installation candidate"로 실패했기 때문입니다([sources.debian.org](https://sources.debian.org/src/radare2/)도 sid만 나열합니다). [Cutter](https://cutter.re/)는 **Rizin**을 core로 쓰며 radare2 GUI가 아닙니다.
+r2 안에서는 `afl`이 함수 목록, `pdf`가 현재 함수 disassembly, `pdc`가 pseudocode입니다. 위 명령은 실행하지 않았습니다. Debian 13(trixie)에는 `radare2` 패키지가 없어 `apt-get install radare2`가 "has no installation candidate"로 실패했기 때문입니다([sources.debian.org](https://sources.debian.org/src/radare2/)에도 trixie는 없고 sid와 옛 jessie·wheezy만 있습니다). [Cutter](https://cutter.re/)는 **Rizin**을 core로 쓰며 radare2 GUI가 아닙니다.
 
 ### Strings + grep — 잊지 말기
 
