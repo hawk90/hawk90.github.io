@@ -15,119 +15,174 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 어떤 문제를 푸는가
 
-임베디드 워크로드는 다양합니다. 부팅 시에만 객체를 만드는 시스템도 있고, IoT 게이트웨이처럼 packet과 message 객체가 계속 들고나는 시스템도 있습니다. 한 구현으로 모두 만족시키기는 어렵습니다.
+부팅 때 객체를 다 만들고 끝까지 쓰는 시스템이 있고, packet과 message 객체가 계속 들고나는 시스템도 있습니다. 앞쪽에는 반납이 없는 가장 단순한 allocator가 맞고, 뒤쪽에는 반납과 병합이 필요합니다. 이사할 때 짐을 트럭 앞에서부터 차곡차곡 싣기만 하면 되는 경우와, 짐을 내렸다 실었다 하며 빈 공간을 계속 메워야 하는 경우의 차이입니다.
 
 FreeRTOS는 이 문제를 *컴파일 타임 선택*으로 풉니다. `pvPortMalloc`과 `vPortFree`의 시그니처를 고정해 두고, 그 뒤에 다섯 가지 구현(`heap_1.c` ~ `heap_5.c`) 중 하나를 링크하게 합니다. 사용자 코드는 한 줄도 안 바꿔도 됩니다.
 
-각 구현은 *free 지원 여부*, *coalesce 정책*, *contiguous 가정* 세 축으로 갈라집니다. 이 글은 **FreeRTOS V11.2.0**을 기준으로 각 구현의 핵심 알고리즘과 WCET 특성, 그리고 어느 시스템에 어느 구현을 골라야 하는지 정리합니다.
+각 구현은 *free 지원 여부*, *coalesce 정책*, *contiguous 가정* 세 축으로 갈라집니다. 이 글은 **FreeRTOS V11.2.0**(commit `0adc196d`)의 `portable/MemMang/heap_N.c`를 읽고, heap_1·2·4·5를 같은 테스트 프로그램으로 빌드해 QEMU 11.1.3 `mps2-an385`에서 돌린 결과로 차이를 확인합니다(`ARM_CM3` 포트, `arm-none-eabi-gcc` 16.2.0, `configTOTAL_HEAP_SIZE` 65536). heap_3은 이 툴체인에 C 라이브러리 `malloc()`이 없어 돌리지 않았습니다.
 
 ## Heap_1 — Bump Allocator, free 없음
 
-heap_1은 정렬한 요청을 연속 heap의 다음 위치에 배치하고 index를 전진시킵니다. 정렬 padding·사용하지 못하는 꼬리 등은 남으므로 모든 메모리 낭비가 0인 것은 아닙니다. 요청 크기의 overflow 검사도 실제 구현의 일부입니다.
+heap_1의 `pvPortMalloc()`(`heap_1.c:79`)은 요청을 `portBYTE_ALIGNMENT`(이 포트에서 8)로 올린 뒤 다음 위치를 돌려주고 index를 전진시킵니다. header가 없어서 100 byte 요청은 104 byte, 1 byte 요청은 8 byte만 씁니다. 탐색이 없으니 시간도 요청 크기와 무관합니다.
 
-**V11.2.0 vPortFree는 non-NULL 반환을 지원하지 않고 configASSERT(pv == NULL)를 검사합니다.** assertion이 활성화돼 있으면 잘못된 free 호출이 중단될 수 있으며 silent no-op 계약으로 사용하면 안 됩니다. 할당 후 영구 보유하는 수명 모델에 맞춰 선택합니다.
+**V11.2.0 `vPortFree()`는 non-NULL 포인터를 받지 않습니다.** 본문은 `configASSERT(pv == NULL)` 한 줄입니다(`heap_1.c:151`). 실제로 넘기면 멈춥니다.
+
+```text
+heap_1, configTOTAL_HEAP_SIZE=65536, portBYTE_ALIGNMENT=8
+  pvPortMalloc(100) consumed 104 bytes
+  pvPortMalloc(1) consumed 8 bytes
+  vPortFree(non-NULL) on heap_1:
+ASSERT FAIL pv == NULL at ../src/freertos-V11.2.0/portable/MemMang/heap_1.c:151
+```
+
+assert를 끈 빌드에서는 조용히 아무 일도 하지 않으므로, 반납이 있는 코드에 heap_1을 쓰면 메모리가 새는데도 알아채기 어렵습니다.
 
 ## Heap_2 — Best Fit, Coalesce 없음
 
 heap_2는 free를 지원합니다. 다만 *인접 block과 합치지(coalesce) 않습니다*. free list는 size 오름차순으로 정렬되어 있고, alloc 시 *가장 작게 들어맞는* block을 고릅니다.
 
+탐색 부분은 `heap_2.c:222-231`에 있습니다. free list가 크기순이라 앞에서부터 처음 맞는 block이 곧 best fit입니다.
+
 ```c
-void *pvPortMalloc(size_t xWantedSize) {
-    BlockLink_t *pxBlock, *pxPreviousBlock;
-    /* size 오름차순 free list 순회 */
-    pxPreviousBlock = &xStart;
-    pxBlock = xStart.pxNextFreeBlock;
-    while ((pxBlock->xBlockSize < xWantedSize) && (pxBlock->pxNextFreeBlock)) {
-        pxPreviousBlock = pxBlock;
-        pxBlock = pxBlock->pxNextFreeBlock;
-    }
-    /* 찾은 block을 list에서 떼어내고, 필요하면 split */
-    ...
+/* heap_2.c:222-231 (V11.2.0) */
+/* Blocks are stored in byte order - traverse the list from the start
+ * (smallest) block until one of adequate size is found. */
+pxPreviousBlock = &xStart;
+pxBlock = xStart.pxNextFreeBlock;
+
+while( ( pxBlock->xBlockSize < xWantedSize ) && ( pxBlock->pxNextFreeBlock != NULL ) )
+{
+    pxPreviousBlock = pxBlock;
+    pxBlock = pxBlock->pxNextFreeBlock;
 }
 ```
 
-문제는 *coalesce가 없다는 것*입니다. 같은 크기 객체를 반복 alloc/free 하는 워크로드(예: 고정 크기 packet pool)에서는 잘 동작합니다. 하지만 *다양한 크기*를 다루면 free list에 자잘한 fragment가 누적되고 시간이 갈수록 큰 alloc이 실패합니다.
+반납은 `prvInsertBlockIntoFreeList()` 매크로(`heap_2.c:135`)가 크기순 위치에 끼워 넣을 뿐, 이웃 block과 합치지 않습니다. 파일 머리 주석(`heap_2.c:29-33`)도 "does not combine adjacent free blocks into a single larger block (and so will fragment memory)"라고 적고 같은 일을 병합까지 하는 구현으로 heap_4를 가리킵니다.
 
-heap_2는 현재 소스에도 포함되어 있지만 coalesce가 없는 기존 정책입니다. 공식 문서의 revision 없이 제거 예정·정식 deprecation으로 단정하지 않습니다. 새 프로젝트에서는 heap_2 대신 heap_4를 쓰거나, 워크로드가 정말 고정 크기에 가깝다면 memory pool로 옮기는 편이 낫습니다.
+글 아래쪽의 `check_heap_coalescing()`이 이 차이를 직접 보여 줍니다. 512 byte block으로 heap을 채운 뒤 이웃한 두 block을 반납하고 900 byte를 요청하면, heap_2에서는 실패합니다. heap_2는 현재 소스에 남아 있지만, 크기가 섞이는 workload라면 heap_4가 같은 API에 병합까지 해 줍니다.
 
 ## Heap_3 — Standard libc malloc Wrapper
 
 heap_3은 *thin wrapper*입니다. 실제 alloc은 newlib이나 glibc의 `malloc`이 하고, FreeRTOS는 그 호출 주변을 *scheduler suspend*로 감싸 thread-safe하게 만들 뿐입니다.
 
 ```c
-void *pvPortMalloc(size_t xWantedSize) {
-    void *pvReturn;
+/* heap_3.c:59-96 (V11.2.0) 요약, trace 매크로 생략 */
+void * pvPortMalloc( size_t xWantedSize )
+{
+    void * pvReturn;
     vTaskSuspendAll();
-    pvReturn = malloc(xWantedSize);
-    xTaskResumeAll();
+    {
+        pvReturn = malloc( xWantedSize );
+    }
+    ( void ) xTaskResumeAll();
+    #if ( configUSE_MALLOC_FAILED_HOOK == 1 )
+        if( pvReturn == NULL ) vApplicationMallocFailedHook();
+    #endif
     return pvReturn;
 }
 
-void vPortFree(void *pv) {
-    if (pv) {
+void vPortFree( void * pv )
+{
+    if( pv != NULL )
+    {
         vTaskSuspendAll();
-        free(pv);
-        xTaskResumeAll();
+        free( pv );
+        ( void ) xTaskResumeAll();
     }
 }
 ```
 
-`configTOTAL_HEAP_SIZE`는 *무시됩니다*. 실제 영역과 확장 정책은 toolchain·libc·system call 구현에 달려 있습니다. 고정된 linker symbol 이름을 모든 target에 적용하지 않습니다. 즉, FreeRTOS heap이 아니라 *toolchain heap*을 그대로 빌려옵니다.
+heap_3.c에는 `ucHeap` 배열이 없으므로 `configTOTAL_HEAP_SIZE`는 쓰이지 않습니다. 파일 머리 주석(`heap_3.c:30-34`)은 "linker가 heap 영역을 만들도록 설정된 경우에만" 쓸 수 있다고 적습니다. 즉, FreeRTOS heap이 아니라 *toolchain heap*을 그대로 빌려옵니다.
 
-장점은 standard `malloc`을 그대로 쓰는 것입니다. 단점은 libc의 동작·synchronization과 scheduler suspend 구간을 함께 분석해야 한다는 점입니다. wrapper가 직접 libc를 쓰는 다른 경로나 ISR·SMP까지 모두 직렬화한다고 가정하지 않습니다.
+보호 범위도 코드 그대로입니다. `vTaskSuspendAll()`은 다른 task로의 전환만 막으므로, 이 wrapper를 거치지 않고 libc `malloc()`을 직접 부르는 코드(예: libc 내부의 `printf()`)나 ISR과의 경쟁은 막지 않습니다. 이 툴체인(Homebrew `arm-none-eabi-gcc` 16.2.0)에는 C 라이브러리가 없어 heap_3은 돌리지 않았습니다.
 
 ## Heap_4 — First Fit + Coalesce
 
-heap_4는 주소순 free list에서 first-fit으로 탐색하고 인접 free block을 합칩니다. coalesce가 모든 external fragmentation이나 장기 운영의 실패를 없애지는 않습니다.
+heap_4는 주소순 free list에서 first-fit으로 탐색하고(`heap_4.c:248`) 반납할 때 인접 free block을 합칩니다. 그래도 살아 있는 block이 사이에 끼면 합칠 이웃이 없어서 external fragmentation은 남습니다(아래 실행).
 
-원본은 header의 allocated bit·next pointer 등 유효 조건을 확인하고 heapFREE_BLOCK과 prvInsertBlockIntoFreeList 경로를 사용합니다. 이 검사를 생략하거나 다른 버전의 xBlockAllocatedBit 변수를 복사한 free 함수를 사용하지 않습니다.
+V11.2.0의 allocated 표시는 별도 변수가 아니라 `xBlockSize`의 최상위 bit입니다. `heapALLOCATE_BLOCK`·`heapFREE_BLOCK`·`heapBLOCK_IS_ALLOCATED` 매크로가 그 bit를 다룹니다(`heap_4.c:82-84`). `vPortFree()`는 포인터가 `ucHeap` 안인지, allocated bit가 켜졌는지, next 포인터가 NULL인지 차례로 `configASSERT`한 뒤(`:368-370`) bit를 지우고 `prvInsertBlockIntoFreeList()`(`:504`)로 넘깁니다. 예전 판의 `xBlockAllocatedBit` 변수는 V11.2.0에 없습니다.
 
 `prvInsertBlockIntoFreeList`가 핵심입니다. free list가 *주소 순*으로 정렬되어 있어서, 새 block을 삽입하는 위치만 찾으면 *바로 앞 block과의 인접성*도 같은 순회에서 판단할 수 있습니다. 인접하면 합칩니다. 뒤쪽도 마찬가지로 검사합니다.
 
-alloc은 first-fit입니다. free list 앞에서부터 *충분히 큰 첫 block*을 찾습니다. 평균 시간은 짧지만 worst case는 free list 전체 길이에 비례합니다. 작업 수는 free-list 길이에 의존합니다. 고정된 heap의 최대 block 수로 상한 분석이 가능할 수 있지만, 평균이나 특정 관찰 max를 전체 WCET로 부르지는 않습니다.
+alloc은 first-fit입니다. free list 앞에서부터 *충분히 큰 첫 block*을 찾으므로, 탐색 횟수는 최대 그 순간의 free block 수입니다. 아래 실행에서 free block은 1개에서 54개까지 변했고, 54개 상태에서 실패한 2000 byte 요청은 54개를 모두 훑고 나서 NULL을 돌려줬습니다. heap 크기가 고정이면 free block 수의 최댓값도 정해지므로 상한은 계산할 수 있습니다.
 
-```c
-#define configTOTAL_HEAP_SIZE (32 * 1024)
+1000 byte와 96 byte를 번갈아 heap이 찰 때까지 할당한 뒤 1000 byte 쪽만 반납하고, 이어서 전부 반납했습니다.
+
+```text
+heap_4, configTOTAL_HEAP_SIZE=65536, portBYTE_ALIGNMENT=8
+  pvPortMalloc(100) consumed 112 bytes
+  pvPortMalloc(1) consumed 16 bytes
+  check_heap_coalescing(expect_coalesce=1): passed
+  fresh                      avail=59832 largest=59832 smallest=59832 freeblocks=1 min_ever=32
+  allocated 106 blocks (1000/96 alternating) until NULL
+  heap exhausted             avail=896 largest=896 smallest=896 freeblocks=1 min_ever=32
+  after freeing every 1000   avail=54320 largest=1008 smallest=896 freeblocks=54 min_ever=32
+  pvPortMalloc(2000) -> NULL (fragmented)
+  after freeing all          avail=59832 largest=59832 smallest=59832 freeblocks=1 min_ever=32
 ```
 
-BSP마다 선택 allocator가 다르므로 실제 link map과 build 설정을 확인합니다. 특히 ESP-IDF의 heap-capability allocator를 upstream heap_4와 동일시하지 않습니다.
+100 byte 요청이 112 byte를 쓰는 것은 8 byte header 때문이고, 1 byte가 16 byte인 것은 최소 block 크기 `heapMINIMUM_BLOCK_SIZE = xHeapStructSize << 1`(`heap_4.c:59`) 때문입니다. fresh 상태가 65536이 아니라 59832인 것은 제어 task의 stack과 TCB, timer task가 이미 heap에서 나갔기 때문입니다. 마지막 줄에서 다시 block 하나로 돌아온 것이 coalesce의 증거입니다.
 
 ## Heap_5 — Multi-Region (Non-contiguous)
 
-heap_4를 *여러 비연속 메모리 영역*에 확장한 것이 heap_5입니다. STM32H7 같은 SoC는 내부 SRAM, DTCM, 외부 SDRAM이 *서로 떨어진 주소*에 매핑됩니다. heap_4 하나로는 한 영역밖에 못 다루지만, heap_5는 모두 묶어 한 heap처럼 보이게 합니다.
+heap_4를 *여러 비연속 메모리 영역*에 확장한 것이 heap_5입니다. 내부 SRAM과 외부 SDRAM처럼 주소가 떨어진 RAM이 여럿인 MCU에서, heap_4 하나로는 한 영역밖에 못 다루지만 heap_5는 모두 묶어 한 heap처럼 보이게 합니다. 파일 머리 주석(`heap_5.c:39-40`)대로 `vPortDefineHeapRegions()`를 `pvPortMalloc()`보다 먼저 불러야 합니다.
 
-```c
-HeapRegion_t xHeapRegions[] = {
-    { (uint8_t*)0x20000000, 0x00010000 },   /* internal SRAM 64 KB */
-    { (uint8_t*)0x24000000, 0x00080000 },   /* AXI SRAM 512 KB */
-    { (uint8_t*)0xC0000000, 0x01000000 },   /* external SDRAM 16 MB */
-    { NULL, 0 }                              /* sentinel */
-};
+실험에서는 32 KiB와 16 KiB 두 개, 세 static 배열을 region으로 넘겼습니다. 먼저 linker가 배치한 주소 그대로(내림차순) 넘겨 봤습니다.
 
-int main(void) {
-    vPortDefineHeapRegions(xHeapRegions);
-    /* 이후 pvPortMalloc 사용 가능 */
-    ...
-}
+```text
+region 0 at 0x2000c408 size 16384
+region 1 at 0x20008408 size 16384
+region 2 at 0x20000408 size 32768
+ASSERT FAIL ( size_t ) xAddress > ( size_t ) pxEnd at ../src/freertos-V11.2.0/portable/MemMang/heap_5.c:607
 ```
 
-각 region 내부에서는 heap_4와 같은 first-fit + coalesce가 돕니다. region 사이 *cross-region coalesce는 일어나지 않습니다*. region 경계가 *영구적 경계*인 셈입니다.
+`heap_5.c:607`은 region이 시작 주소 오름차순인지 검사합니다. 배열 선언 순서가 주소 순서라는 보장은 없으므로, 주소로 정렬해서 넘깁니다.
 
-주의할 점은 *어느 region에서 alloc될지 사용자가 못 고른다*는 것입니다. region은 주소순으로 정렬하고 겹치지 않게 정의해야 합니다. 주소순 free list에서 요청을 만족하는 첫 block을 찾는 것이며 한 region을 항상 다 채운다는 뜻은 아닙니다. DMA-capable 영역에서 buffer를 받고 싶다면 *별도의 pool*을 두는 편이 안전합니다.
+```c
+HeapRegion_t regions[] = { { r1, sizeof r1 }, { r2, sizeof r2 }, { r3, sizeof r3 }, { NULL, 0 } };
+/* 시작 주소 오름차순으로 정렬 */
+for (int i = 0; i < 3; i++)
+    for (int j = i + 1; j < 3; j++)
+        if (regions[j].pucStartAddress < regions[i].pucStartAddress) {
+            HeapRegion_t t = regions[i]; regions[i] = regions[j]; regions[j] = t;
+        }
+vPortDefineHeapRegions(regions);
+```
+
+정렬 뒤 heap_4와 같은 시험을 돌린 결과입니다.
+
+```text
+region 0 at 0x20000408 size 32768
+region 1 at 0x20008408 size 16384
+region 2 at 0x2000c408 size 16384
+heap_5, configTOTAL_HEAP_SIZE=65536, portBYTE_ALIGNMENT=8
+  pvPortMalloc(100) consumed 112 bytes
+  pvPortMalloc(1) consumed 16 bytes
+  fresh                      avail=59824 largest=27072 smallest=16376 freeblocks=5 min_ever=59696
+  allocated 106 blocks (1000/96 alternating) until NULL
+  heap exhausted             avail=880 largest=808 smallest=72 freeblocks=4 min_ever=880
+  after freeing every 1000   avail=54304 largest=4032 smallest=72 freeblocks=54 min_ever=880
+  pvPortMalloc(2000) -> ok
+  after freeing all          avail=59824 largest=27072 smallest=16376 freeblocks=4 min_ever=880
+```
+
+세 배열은 실제로 주소가 맞붙어 있는데도, 전부 반납한 뒤 가장 큰 block은 첫 region의 남은 크기 27072에 머뭅니다. 각 region 끝에 크기 0인 연결 block(`pxEnd`, `heap_5.c:629-631`)이 놓이므로 region 사이는 합쳐지지 않습니다. 출력 첫 줄의 `configTOTAL_HEAP_SIZE`는 테스트 프로그램이 찍은 설정값일 뿐 heap_5는 이 값을 쓰지 않습니다. 실제 총량은 region 크기의 합입니다.
+
+어느 region에서 할당될지는 사용자가 고르지 못합니다. 주소순 free list에서 처음 맞는 block이 선택됩니다. DMA가 접근할 수 있는 영역에서만 buffer를 받아야 한다면 그 영역은 heap_5에 넣지 말고 별도 pool로 관리합니다.
 
 ## 다섯 구현 한눈에
 
 | Heap | free | coalesce | alloc 시간 | 적합한 상황 |
 |---|---|---|---|---|
-| heap_1 | 불가 | — | O(1) 상수 | 부팅 시 한 번만 alloc, safety-critical |
-| heap_2 | 가능 | 없음 | O(N) | coalesce 불필요한지 검토 |
-| heap_3 | 가능 | libc 의존 | libc·동기화 의존 | newlib/glibc 환경 |
-| heap_4 | 가능 | 있음 | O(N) | 대부분의 일반 RTOS 시스템 |
-| heap_5 | 가능 | region 내 | O(N) | 비연속 메모리 SoC |
+| heap_1 | 불가 (`configASSERT`) | — | 탐색 없음 | 부팅 때만 할당하고 반납하지 않는 시스템 |
+| heap_2 | 가능 | 없음 | free block 수에 비례 (best fit) | 같은 크기만 반복하는 workload |
+| heap_3 | 가능 | libc에 따름 | libc에 따름 | linker가 heap 영역을 만드는 libc 환경 |
+| heap_4 | 가능 | 있음 | free block 수에 비례 (first fit) | 크기가 섞이는 일반 workload |
+| heap_5 | 가능 | region 안에서만 | free block 수에 비례 (first fit) | 주소가 떨어진 RAM이 여럿인 MCU |
 
 ## Heap 상태 측정
 
-런타임에 heap 상태를 확인할 수 있습니다. 단편화가 진행 중인지, 어느 시점에 worst case에 도달했는지 추적합니다.
+런타임에 heap 상태를 확인합니다. 단편화가 진행 중인지, 어느 시점에 가장 비었었는지 추적합니다. `vPortGetHeapStats()`는 heap_4(`heap_4.c:572`)와 heap_5(`heap_5.c:672`)에만 있습니다.
 
 ```c
 size_t free_now = xPortGetFreeHeapSize();
@@ -142,15 +197,15 @@ printf("alloc total      : %u\n", (unsigned)stats.xNumberOfSuccessfulAllocations
 printf("free total       : %u\n", (unsigned)stats.xNumberOfSuccessfulFrees);
 ```
 
-원하는 요청 크기·header·alignment와 최대 free block을 비교합니다. 비율 절반이라는 수치는 보편적인 심각도 기준이 아닙니다. 큰 alloc 요청이 free 공간 총합으로는 충분해도 실패할 수 있습니다.
+요청이 성공할지는 `xSizeOfLargestFreeBlockInBytes`가 요청 크기 + 8 byte header를 넘는지로 봅니다. 앞의 heap_4 실행처럼 총량이 54320 byte여도 가장 큰 block이 1008 byte면 2000 byte 요청은 실패합니다.
 
 ## Malloc Failure Hook
 
-configUSE_MALLOC_FAILED_HOOK을 켠 heap 구현은 실패 시 hook을 호출할 수 있지만 caller의 NULL 처리도 필요합니다. hook 문맥과 scheduler 상태를 확인하며 로그·다시 할당하는 함수·blocking 처리를 무조건 넣지 않습니다. reset 여부는 제품의 안전 상태와 복구 정책으로 결정합니다.
+`configUSE_MALLOC_FAILED_HOOK 1`이면 heap_4는 할당 실패 시 `vApplicationMallocFailedHook()`을 부릅니다(`heap_4.c:340`). 이 호출은 `xTaskResumeAll()` 뒤라 scheduler는 다시 돌고 있지만, 실패한 `pvPortMalloc()`을 부른 task의 문맥입니다. hook이 돌아오면 caller는 여전히 NULL을 받으므로 caller 쪽 NULL 처리도 필요합니다.
 
 ## Heap_4 기능과 시간 검증
 
-다음은 **heap_2 또는 heap_4 하나를 연결한 호스트 기능 검사**입니다. test heap을 64 KiB로 구성하고 assert를 켭니다. 여러 512-byte block으로 고갈시킨 뒤 인접한 두 block을 반환하고 900-byte 요청이 coalesce 여부에 따라 달라지는지 확인합니다. 실보드 WCET benchmark는 아닙니다.
+다음은 **heap_2 또는 heap_4 하나를 연결한 기능 검사**입니다. test heap을 64 KiB로 구성하고 assert를 켭니다. 512 byte block으로 고갈시킨 뒤 인접한 두 block을 반환하고, 900 byte 요청이 coalesce 여부에 따라 달라지는지 확인합니다.
 
 ```c title="heap-coalesce-check.c"
 #include <assert.h>
@@ -170,35 +225,42 @@ void check_heap_coalescing(int expect_coalesce) {
 }
 ```
 
-실측에는 target·compiler·heap 이력·최대 free-list·lock·trace 조건이 필요합니다. 출처 없는 150/1500/15000 cycle을 실측값으로 사용하지 않습니다.
+heap_2에는 `expect_coalesce=0`, heap_4에는 `1`을 넘겨 QEMU에서 돌렸고, 두 빌드 모두 assert를 통과했습니다.
+
+```text
+  check_heap_coalescing(expect_coalesce=0): passed
+  check_heap_coalescing(expect_coalesce=1): passed
+```
+
+이 글에서는 사이클을 재지 않았습니다. 이 커널을 올린 실보드가 없어, 예전 판의 "150/1500/15000 cycle"은 출처가 없어 지웠습니다.
 
 ## 자주 보는 함정과 안티패턴
 
 > ⚠️ heap_1에서 vPortFree를 free처럼 가정하는 코드
 
-`vPortFree(p)`를 호출해도 메모리는 *돌아오지 않습니다*. heap_1은 부팅 시 객체를 만들고 그대로 끝까지 가는 모델에서만 안전합니다. 동적 생명 주기를 가진 객체가 하나라도 있으면 heap_4로 옮겨야 합니다.
+`vPortFree(p)`는 assert를 켜면 멈추고(위 실행), 끄면 아무 일도 하지 않아 메모리가 돌아오지 않습니다. heap_1은 부팅 시 객체를 만들고 그대로 끝까지 가는 모델에만 맞습니다. 반납되는 객체가 하나라도 있으면 heap_4로 옮깁니다.
 
 > ⚠️ heap_4의 단편화를 무시하는 장기 운영
 
-다양한 크기를 빈번하게 alloc/free 하면 coalesce에도 한계가 있습니다. 며칠 가동 후 큰 alloc이 실패하기 시작합니다. 같은 크기를 반복하는 워크로드는 *memory pool*로 옮기는 것이 정답입니다.
+coalesce는 이웃이 비어 있을 때만 합칩니다. 앞의 실행처럼 오래 사는 작은 block이 사이사이 끼어 있으면 총량이 충분해도 큰 요청이 실패합니다. `xSizeOfLargestFreeBlockInBytes`를 주기적으로 기록해 줄어드는 추세를 봅니다. 같은 크기를 반복하는 객체는 memory pool(4-05)로 옮깁니다.
 
 > ⚠️ heap_5 region 경계 겹침
 
-`HeapRegion_t` 배열의 두 영역이 주소 범위에서 겹치면 heap_5 내부 구조가 깨집니다. 부팅 직후에는 멀쩡해 보여도 *몇 번째 alloc 이후* 갑자기 죽기도 합니다. linker script와 영역 정의를 한 곳에서 관리합니다.
+`heap_5.c:607`의 assert는 새 region의 시작 주소가 앞 region 끝에 둔 marker(`pxEnd`)보다 큰지 봅니다. 순서가 틀리거나 앞 region과 겹치면 시작 주소가 그 marker 이하가 되므로 앞의 실행처럼 걸립니다. assert를 끈 빌드에서는 이 검사가 사라지므로, region은 linker script의 심볼로 정의해 linker가 겹침을 막게 합니다.
 
 > ⚠️ malloc failure hook 비활성화
 
-hook 유무와 별개로 caller는 NULL과 제품의 실패 정책을 처리해야 합니다. 오류가 나타나는 시점과 형태를 고정된 ms·fault로 단정하지 않습니다.
+hook이 꺼져 있으면 실패는 NULL 반환으로만 드러나고, NULL을 검사하지 않은 caller는 그 포인터를 그대로 씁니다. hook을 켜 두면 실패한 바로 그 호출에서 알 수 있습니다.
 
 ## 정리
 
 - FreeRTOS는 동일한 `pvPortMalloc` 시그니처 뒤에 *다섯 가지 구현*을 두어 워크로드별 선택을 가능하게 합니다.
-- heap_1은 free 불가 bump allocator로, *부팅 시 한 번만 alloc*하는 safety-critical 시스템에 적합합니다.
-- heap_2는 free를 지원하지만 coalesce하지 않으므로 큰 연속 요청의 실패 조건을 검토해야 합니다.
-- heap_3은 newlib/glibc `malloc`을 scheduler suspend로 감싼 wrapper로 *standard libc 환경*에 어울립니다.
-- heap_4는 first-fit + coalesce 정책이며 workload와 시간·실패 분석에 맞춰 선택합니다.
-- heap_5는 heap_4를 여러 비연속 region에 확장한 형태로, *복합 메모리 SoC*에서 단일 heap 인터페이스를 제공합니다.
-- WCET가 critical하면 heap_4의 O(N) 특성으로는 부족하며, 다음 편의 TLSF나 4-05의 memory pool로 옮겨야 합니다.
+- heap_1은 반납이 없는 bump allocator이고, non-NULL `vPortFree()`는 `heap_1.c:151`의 assert에 걸립니다.
+- heap_2는 반납은 되지만 병합하지 않아, 이웃한 두 512 byte block을 반납해도 900 byte가 실패합니다.
+- heap_3은 libc `malloc()`을 scheduler suspend로 감싼 wrapper이고 `configTOTAL_HEAP_SIZE`를 쓰지 않습니다.
+- heap_4는 first fit + coalesce이고, 100 byte 요청에 112 byte를 씁니다. 살아 있는 block이 끼면 병합되지 않습니다.
+- heap_5는 region을 오름차순으로 넘겨야 하고, region 사이는 맞붙어 있어도 합치지 않습니다.
+- 탐색 횟수가 free block 수에 묶이는 것이 문제라면, 다음 편의 TLSF나 4-05의 memory pool을 봅니다.
 
 다음 편은 [4-03 TLSF](/blog/embedded/rtos/practical-internals/part4-03-tlsf)에서 O(1) bounded allocator를 다룹니다.
 
@@ -214,4 +276,4 @@ hook 유무와 별개로 caller는 NULL과 제품의 실패 정책을 처리해�
 - [4-05: Memory Pool](/blog/embedded/rtos/practical-internals/part4-05-memory-pool)
 - [4-06: Stack Overflow 탐지](/blog/embedded/rtos/practical-internals/part4-06-stack-overflow)
 
-V11.2.0 heap_5의 vPortGetHeapStats는 중간 region의 zero-size 연결 marker도 xNumberOfFreeBlocks에 셉니다. 이 값만으로 실제 할당 가능한 free extent 수를 추정하지 말고 largest block·total과 소스를 함께 확인합니다.
+V11.2.0 heap_5의 `vPortGetHeapStats()`는 region 사이의 크기 0 연결 marker도 `xNumberOfFreeBlocks`에 셉니다. 소스 주석(`heap_5.c:696-698`)이 이 block을 "not a real block"이라 부르면서도 최솟값 계산에서만 빼고 개수는 셉니다. 앞의 heap_5 실행에서 region 3개짜리 fresh heap이 `freeblocks=5`로 나온 것이 그 결과입니다.
