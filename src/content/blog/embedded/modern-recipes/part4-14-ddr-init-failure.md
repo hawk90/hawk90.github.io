@@ -21,7 +21,7 @@ topics: ["embedded"]
 | 종류 | 출처 | data rate | 전원 |
 |---|---|---|---|
 | DDR3 | JESD79-3F | DDR3-800 ~ DDR3-2133 speed bin | VDD = VDDQ = 1.5 V ± 0.075 V |
-| DDR4 | 8 Gb DDR4 부품 datasheet (D1028AN9CPGRK-U 등) | DDR4-3200 (22-22-22) | "JEDEC standard 1.2V", VDD = 1.2 V ± 0.06 V |
+| DDR4 | 8 Gb DDR4 부품 datasheet (D1028AN9CPGXN-U 등) | DDR4-3200 (22-22-22) | "JEDEC standard 1.2V", VDD = 1.2 V ± 0.06 V |
 | LPDDR4/4X | Micron 오토모티브 MT53E datasheet | 4266 Mb/s(-046 등급) | VDD1/VDD2/VDDQ = 1.80/1.10/1.10 V, LPDDR4X는 VDDQ 0.60 V |
 
 LPDDR의 LP는 low power를 뜻하고, DDR과는 다른 JEDEC 표준 계열(JESD209)입니다.
@@ -88,7 +88,7 @@ JESD79-3F는 DDR3 module이 command·address·control·clock에 fly-by topology�
 
 ## DQS Gate Training
 
-read 때 controller는 DQS가 실제로 오는 구간에만 DQS를 받아들이도록 gate를 엽니다. 그 구간을 찾는 것이 DQS gate training입니다. STM32MP1의 U-Boot driver는 PHY에 초기화와 "Gate Training Evaluation"을 시킨 뒤 `PGSR`을 polling해, 완료(`IDONE`)나 오류 bit(`DTERR`, `DTIERR` 등) 중 하나가 서기를 기다립니다.
+STM32MP1의 U-Boot driver는 PHY에 초기화와 "Gate Training Evaluation"을 시킨 뒤 `PGSR`을 polling해, 완료(`IDONE`)나 오류 bit(`DTERR`, `DTIERR` 등) 중 하나가 서기를 기다립니다.
 
 ```c
 /* U-Boot v2024.04 drivers/ram/stm32mp1/stm32mp1_ddr.c, ddrphy_idone_wait() (발췌) */
@@ -216,9 +216,8 @@ Address bit 19 read back 0xaaaaaaaa
 done
 ```
 
-고친 판만 bit 19를 잡았습니다. 하나 더 확인한 것이 있습니다. 같은 함수를 `volatile` 없이(`uint32_t *base`) `-O2`로 빌드하면 고친 판도 아무것도 찾지 못했습니다. compiler는 `base[0]`과 `base[addr]`(addr ≠ 0)이 다른 객체라고 보고 `base[0] != ref` 비교를 상수로 접어 버립니다. `-O0`으로 빌드하면 다시 잡습니다. 메모리 테스트 코드는 대상 메모리를 반드시 `volatile`로 다룹니다. 같은 프로그램을 별칭 없는 일반 메모리(`calloc`)에 돌리면 세 함수 모두 아무것도 출력하지 않았습니다.
+고친 판만 bit 19를 잡았습니다. 하나 더 확인한 것이 있습니다. 같은 함수를 `volatile` 없이(`uint32_t *base`) `-O2`로 빌드하면 고친 판도 아무것도 찾지 못했습니다. compiler는 `base[0]`과 `base[addr]`(addr ≠ 0)이 다른 객체라고 보고 `base[0] != ref` 비교를 상수로 접어 버립니다. `-O0`으로 빌드하면 다시 잡습니다. 메모리 테스트 코드는 대상 메모리를 반드시 `volatile`로 다룹니다. 같은 `volatile` 함수들을 별칭 없는 일반 메모리(`calloc`)에 돌리면 아무것도 출력하지 않았습니다.
 
-셀 자체의 결함을 찾는 March C- 같은 March 테스트는 모든 주소를 정해진 순서로 읽고 쓰는 별개의 알고리즘입니다.
 
 ## 실측 — 데이터 무결성
 
@@ -244,14 +243,7 @@ void full_dram_test(volatile uint32_t *base, size_t mb, void (*error)(size_t)) {
 
 ## 보드 디자인 — Length Matching
 
-DDR 배선은 신호 group마다 길이를 맞춥니다.
-
-- CLK 차동 pair — pair 안 길이를 맞춤
-- ADDR/CMD — CLK를 기준으로 맞춤 (fly-by)
-- DQ — 같은 byte lane 안에서 맞춤
-- DQS - DQ — 같은 byte lane의 DQS와 맞춤
-
-길이 차이는 신호 사이 skew가 되고, write leveling과 DQS gate training이 보정할 수 있는 범위를 넘으면 training이 실패합니다. 허용 오차는 SoC 벤더의 DDR layout guide에 data rate별로 있으므로 그 문서의 값을 씁니다.
+JESD79-3F 4.8절이 설명하듯 fly-by topology에서는 chip마다 CK와 DQS의 도착 시점이 다르고, write leveling이 그 차이를 잽니다. 보정할 수 있는 범위를 넘는 skew는 training으로 해결되지 않습니다. 허용 오차는 SoC 벤더의 DDR layout guide에 data rate별로 있으므로 그 문서의 값을 씁니다.
 
 ## 종단 — VTT·ODT
 
@@ -270,14 +262,14 @@ mr1.OUTPUT_DRIVE = DRV_34;   // Ron = RZQ/7 = 34 Ω
 | --- | --- | --- |
 | CPU | ↔ AXI | master 요청 |
 | Memory Controller | AXI ↔ PHY | scheduling, refresh, arbiter |
-| DDR PHY | controller ↔ DRAM | analog (PLL, IO buffer, training) |
+| DDR PHY | controller ↔ DRAM | DLL lock, ZQ calibration, DRAM init, DQS training (STM32MP1 `PIR`의 DLLSRST·DLLLOCK·ZCAL·DRAMINIT·QSTRN bit) |
 | DRAM chip | ↔ PHY | 실제 storage |
 
 U-Boot v2024.04에서 i.MX 8M의 DDR 코드(`drivers/ddr/imx/imx8m/ddr_init.c`)는 `ddr_cfg_umctl2()`로 Synopsys uMCTL2 controller register를 쓰고, STM32MP1 driver(`drivers/ram/stm32mp1/stm32mp1_ddr.c`)는 controller와 별도의 PHY(`PIR`, `PGSR` register)를 다룹니다. Linux v6.12의 `drivers/edac/synopsys_edac.c`는 Zynq와 ZynqMP의 DDR controller를 함께 지원합니다. i.MX6의 U-Boot 코드(`arch/arm/mach-imx/mx6/ddr.c`)는 NXP의 MMDC register(`mmdc_p_regs`)를 씁니다.
 
 ## Eye Diagram 측정
 
-data eye는 신호가 안정된 구간을 겹쳐 그린 것이고, 폭이 좁을수록 DQS가 sampling할 여유가 줄어듭니다. 좁으면 data rate를 낮추거나 layout을 고칩니다. 측정 장비 대역폭 같은 조건은 SoC 벤더의 layout·validation guide를 따릅니다.
+eye diagram 측정 조건(probe, 장비 대역폭, 판정 기준)은 SoC 벤더의 layout·validation guide를 따릅니다.
 
 ## 자주 하는 실수
 
@@ -317,5 +309,5 @@ JESD79-3F Table 61은 tREFI를 0 °C ≤ TCASE ≤ 85 °C에서 7.8 µs, 85 °C 
 
 - [5-01: PWM 출력](/blog/embedded/modern-recipes/part5-01-pwm-output)
 - 더 깊이 — [Bootloader Internals: DDR Controller 프로그래밍과 PHY Training](/blog/embedded/bootloader/chapter09-dram-init)
-- 더 깊이 — [Bootloader Internals: DDR Training과 PHY Calibration](/blog/embedded/bootloader/chapter26-ddr-training)
+- 더 깊이 — [Bootloader Internals: DDR training 깊이 — PHY·컨트롤러·보드 파라미터 검증](/blog/embedded/bootloader/chapter26-ddr-training)
 - [BSP Development: DDR 매개변수 결정](/blog/embedded/bsp/chapter05-ddr-params)
