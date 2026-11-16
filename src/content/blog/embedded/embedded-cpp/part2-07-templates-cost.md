@@ -21,7 +21,7 @@ topics: ["embedded"]
 1. **Code bloat** — 같은 함수가 여러 인스턴스로 중복됩니다.
 2. **Compile time** — 인스턴스마다 컴파일러가 추가 작업을 합니다.
 
-이 글의 숫자는 모두 Homebrew arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Os -ffreestanding -fno-exceptions -fno-rtti`)으로 컴파일한 오브젝트와 ELF에서 쟀습니다. 작은 예제라 바이트 수 자체보다 패턴 전후의 방향을 봅니다.
+이 글의 숫자는 모두 Homebrew arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Os -ffreestanding -fno-exceptions -fno-rtti`)으로 컴파일한 오브젝트와 ELF에서 쟀습니다. 작은 예제라 바이트 수 자체보다 패턴 전후의 방향을 봅니다. 측정에 쓴 소스와 명령은 아래 [측정 소스와 명령](#측정-소스와-명령) 절에 모았습니다.
 
 ## bloat의 출처
 
@@ -215,12 +215,12 @@ template class Container<float>;
 
 `Container<int>`, `Container<float>` 코드가 `container.o`에만 들어가고, 다른 `.o` 파일은 extern 선언만 보고 link합니다.
 
-주된 목적은 여러 TU에서의 중복 인스턴스화 작업을 줄이는 것입니다. 최종 바이너리는 작아지지 않습니다. `Container<int>::method`를 쓰는 TU 두 개로 재면 이렇습니다.
+주된 목적은 여러 TU에서의 중복 인스턴스화 작업을 줄이는 것입니다. 최종 바이너리는 작아지지 않습니다. `Container<int>::method`를 쓰는 TU 두 개를 startup 없이 `main`을 진입점으로 링크해 재면 이렇습니다.
 
 | | `a.o` | `b.o` | 명시적 인스턴스화 `inst.o` | 링크한 ELF text |
 | --- | ---: | ---: | ---: | ---: |
-| 암묵적 인스턴스화 | 48 | 48 | — | 282 |
-| `extern template` | 22 | 22 | 32 | 288 |
+| 암묵적 인스턴스화 | 48 | 48 | — | 90 |
+| `extern template` | 22 | 22 | 32 | 96 |
 
 암묵적 인스턴스화에서는 두 오브젝트가 각각 `method`를 COMDAT 섹션으로 들고 있다가 링커가 하나만 남겼습니다. `extern template`은 각 TU의 코드 생성을 없앴지만 ELF는 6바이트 늘었습니다. 클래스 전체를 명시적으로 인스턴스화하면 쓰지 않는 멤버 `get`까지 정의되기 때문입니다([temp.explicit]/9·10). `inst.o`를 빼고 링크하면 `undefined reference to 'Container<int>::method(int)'`로 실패합니다. 클래스 본문 안에서 정의한 멤버는 inline이라 extern 선언이 있어도 인라인에 쓰일 수 있습니다.
 
@@ -377,6 +377,103 @@ include할 때마다 파싱됩니다. PCH나 extern template으로 대응합니�
 ### 6. 디버깅이 어려움
 템플릿 함수의 디버그 정보는 인스턴스마다 생성되어 디버그 정보 크기가 늘어납니다. 디버그 섹션은 할당 섹션이 아니라 Flash 이미지에는 들어가지 않습니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#디버그-정보---g3--gdwarf-4)에서 `-g3`가 ELF를 5,492 → 31,848바이트로 키웠지만 `size`와 binary 이미지는 그대로였습니다).
 
+## 측정 소스와 명령
+
+위 표의 숫자를 만든 파일입니다. 모두 Homebrew arm-none-eabi-g++ 16.2.0으로 오브젝트를 만들어 `arm-none-eabi-nm -S --size-sort -C`와 `arm-none-eabi-size -A`로 읽었습니다.
+
+`bloat.cpp`는 `process<T>` 다섯 인스턴스 표와 공통 부분 분리 표에 썼습니다. `-DSPLIT`이 분리 버전입니다.
+
+```cpp
+#include <stdint.h>
+void log_warning(); void do_cleanup(); void notify_system();
+void write_word(uint32_t); void write_dword(uint64_t);
+struct Sample { int32_t raw; bool operator>(int t) const { return raw > t; } };
+inline void write_to_buffer(int32_t v) { write_word((uint32_t)v); }
+inline void write_to_buffer(int64_t v) { write_dword((uint64_t)v); }
+inline void write_to_buffer(float v) { write_word((uint32_t)(v * 1000.0f)); }
+inline void write_to_buffer(double v) { write_dword((uint64_t)(v * 1000.0)); }
+inline void write_to_buffer(Sample s) { write_word((uint32_t)s.raw); }
+#ifndef SPLIT
+template<typename T>
+__attribute__((noinline)) void process(T value) {
+    if (value > 100) {
+        for (int i = 0; i < 3; ++i) { log_warning(); do_cleanup(); notify_system(); }
+    }
+    write_to_buffer(value);
+}
+#else
+__attribute__((noinline)) void process_common(bool above) {
+    if (above) { for (int i = 0; i < 3; ++i) { log_warning(); do_cleanup(); notify_system(); } }
+}
+template<typename T>
+__attribute__((noinline)) void process(T value) { process_common(value > 100); write_to_buffer(value); }
+#endif
+void run(int32_t a, int64_t b, float c, double d, Sample e) {
+    process(a); process(b); process(c); process(d); process(e);
+}
+```
+
+```bash
+F="-std=c++17 -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Os -ffreestanding -fno-exceptions -fno-rtti"
+arm-none-eabi-g++ $F -c bloat.cpp -o b.o          # 전체 템플릿
+arm-none-eabi-g++ $F -DSPLIT -c bloat.cpp -o b.o  # 공통 부분 분리
+```
+
+`buf.cpp`는 N별 클래스와 공통 base 표에 썼습니다. `-DBASE`가 공통 base 버전입니다.
+
+```cpp
+#include <stddef.h>
+#ifndef BASE
+template<typename T, size_t N>
+class Buffer {
+    T data_[N]; size_t size_ = 0;
+public:
+    __attribute__((noinline)) bool push(const T& v) { if (size_ >= N) return false; data_[size_++] = v; return true; }
+};
+#else
+template<typename T>
+class BufferBase {
+protected:
+    T* data_; size_t capacity_; size_t size_ = 0;
+    BufferBase(T* d, size_t c) : data_(d), capacity_(c) {}
+public:
+    __attribute__((noinline)) bool push(const T& v) { if (size_ >= capacity_) return false; data_[size_++] = v; return true; }
+};
+template<typename T, size_t N>
+class Buffer : public BufferBase<T> {
+    T storage_[N];
+public:
+    Buffer() : BufferBase<T>(storage_, N) {}
+    Buffer(const Buffer&) = delete;
+};
+#endif
+Buffer<int, 16> a; Buffer<int, 32> b; Buffer<int, 64> c;
+int fill(int v) { return a.push(v) + b.push(v) + c.push(v); }
+```
+
+`container.h`와 이를 쓰는 `a.cpp`·`b.cpp`(각각 `Container<int> c; c.method(v); return c.get(1);` 한 함수), 명시적 인스턴스화 `inst.cpp`(`template class Container<int>;`), `main.cpp`(`use_a(1) + use_b(2)` 반환)는 `extern template` 표에 썼습니다.
+
+```cpp
+#pragma once
+template<typename T>
+class Container {
+    T items_[8]; unsigned n_ = 0;
+public:
+    __attribute__((noinline)) void method(T v) { for (unsigned i = 0; i < 8; ++i) items_[i] = v * (T)(i + 1); n_ = 8; }
+    T get(unsigned i) const { return items_[i]; }
+};
+#ifdef USE_EXTERN
+extern template class Container<int>;
+#endif
+```
+
+```bash
+G="-std=c++17 -mcpu=cortex-m4 -mthumb -Os -ffreestanding -fno-exceptions -fno-rtti"
+arm-none-eabi-g++ $G -c buf.cpp -o bf.o            # 또는 -DBASE
+arm-none-eabi-g++ $G [-DUSE_EXTERN] -c a.cpp b.cpp inst.cpp main.cpp
+arm-none-eabi-g++ $G -nostdlib -Wl,-e,main a.o b.o main.o [inst.o] -lgcc -o fw.elf
+```
+
 ## 작은 예제 — extern template의 링크 계약
 
 함수 본문을 따로 두고 명시적 인스턴스화 정의를 한 TU에서 제공합니다. 정상 링크와 그 TU를 빠뜨린 링크 실패를 비교합니다. 이 예제는 컴파일 시간 절감률을 측정하지 않습니다.
@@ -430,7 +527,7 @@ GCC 16.2.0 문서는 C++20 modules 지원을 아직 실험적이라 적고 `-fmo
 - 템플릿 자체의 런타임 dispatch 없이 구현할 수 있지만 연산·컴파일·최종 코드 크기 비용은 확인해야 합니다.
 - 큰 함수의 공통 부분을 helper로 분리하고 같은 조건의 최종 링크 결과를 비교합니다.
 - `std::variant`는 닫힌 type set을 표현하며 visitor별 인스턴스화 비용도 확인합니다.
-- `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드 생성이 한 TU로 모입니다. 최종 크기는 줄지 않고, 쓰지 않는 멤버까지 정의되어 이 예에서는 오히려 늘었습니다(282 → 288바이트).
+- `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드 생성이 한 TU로 모입니다. 최종 크기는 줄지 않고, 쓰지 않는 멤버까지 정의되어 이 예에서는 오히려 늘었습니다(90 → 96바이트).
 - 측정 도구는 `nm`(인스턴스 크기), `bloaty`(PR diff), 의도적 `static_assert` 진단(인스턴스 정보)입니다.
 - 컴파일 시간을 줄이려면 PCH, unity build, modules(C++20)를 활용합니다.
 
