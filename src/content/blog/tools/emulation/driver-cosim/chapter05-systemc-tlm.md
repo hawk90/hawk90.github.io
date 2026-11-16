@@ -70,12 +70,12 @@ stopped at 45 ns
 
 ### 두 가지 timing 추상
 
-| 추상 | 의미 | 용도 |
+| 추상 | API | 이 시리즈에서 |
 |------|------|------|
-| **LT** (Loosely-Timed) | `b_transport` 한 번에 transaction 완료, 지연은 `sc_time` annotation으로 표현 | software 검증, boot |
-| **AT** (Approximately-Timed) | `nb_transport_fw`/`_bw`로 request·response phase를 나누어 latency·contention 모델링 | performance 평가 |
+| **LT** (Loosely-Timed) | `b_transport` 한 번에 transaction 완료, 지연은 `sc_time& delay` annotation | 모든 예제가 사용 |
+| **AT** (Approximately-Timed) | `nb_transport_fw`/`_bw`와 `BEGIN_REQ`~`END_RESP` phase로 request·response를 나눔 | 실행하지 않음 |
 
-LT 모델의 실행 시간이 짧아도 그것이 확인해 주는 것은 기능 계약입니다. 실제 cycle timing이나 성능은 annotation에 넣은 숫자만큼만 맞습니다. AT도 선택한 latency·contention 가정을 표현할 뿐, RTL cycle과 일치한다고 보려면 따로 상관 검증이 필요합니다.
+LT 모델의 실행 시간이 짧아도 그것이 확인해 주는 것은 기능 계약입니다. 실제 cycle timing이나 성능은 annotation에 넣은 숫자만큼만 맞습니다. AT는 이 장에서 실행하지 않았으므로 그 정확도에 대해서는 적지 않습니다.
 
 ### 핵심 어휘
 
@@ -132,17 +132,17 @@ TLM은 두 transport 방식을 제공합니다.
 - **`b_transport`** — blocking. 한 호출이 *완료*될 때까지 반환하지 않습니다. LT에 맞습니다.
 - **`nb_transport_fw`/`nb_transport_bw`** — non-blocking. request·response를 분리하고 `tlm_phase.h:36-39`의 `BEGIN_REQ`·`END_REQ`·`BEGIN_RESP`·`END_RESP` 네 phase로 진행합니다. AT에 맞습니다.
 
-이 시리즈의 driver 검증 예제는 모두 `b_transport`로 짭니다. register 의미와 driver 흐름을 보는 데는 transaction 완료 여부와 annotation이면 되기 때문입니다. bus contention·QoS나 NoC interconnect를 모델링하려면 AT가 필요하며, AT 예제는 이 장에서 실행하지 않았습니다.
+이 시리즈의 driver 검증 예제는 모두 `b_transport`로 짭니다. register 의미와 driver 흐름을 보는 데는 transaction 완료 여부와 annotation이면 되기 때문입니다. AT 예제는 실행하지 않았습니다.
 
 ## Virtual Platform — Linux를 boot시키다
 
-**Virtual Platform**(VP)이란 *CPU + 메모리 + 디바이스*를 모두 소프트웨어 모델로 만든 환경입니다. CPU 모델(ISS, Instruction Set Simulator) 위에서 *진짜 Linux kernel*이 boot됩니다.
+**Virtual Platform**(VP)이란 *CPU + 메모리 + 디바이스*를 모두 소프트웨어 모델로 만든 환경입니다. CPU 모델(ISS, Instruction Set Simulator) 위에서 소프트웨어 stack을 돌립니다.
 
 ![SystemC Virtual Platform](/images/blog/driver-cosim/diagrams/ch05-virtual-platform.svg)
 
-CPU 모델을 어디서 가져오는지는 VP마다 다릅니다. 그림의 구성처럼 QEMU를 CPU로 쓰는 예가 AMD(Xilinx)의 libsystemctlm-soc입니다. README는 이 라이브러리를 "SystemC/TLM-2.0 modules that enable co-simulation of Xilinx QEMU"라고 소개하고, QEMU와는 libremote-port의 "socket based transaction protocol"로 연결한다고 적습니다. Arm Fast Models는 QEMU가 아니라 Arm 자체 CPU 모델이고, Fast Models User Guide 11.28의 5장 "SystemC Export with Multiple Instantiation"이 그 모델을 TLM-2.0 port를 가진 SystemC component로 내보내는 방법을 다룹니다.
+CPU 모델을 어디서 가져오는지는 VP마다 다릅니다. 그림의 구성처럼 QEMU를 CPU로 쓰는 예가 AMD(Xilinx)의 libsystemctlm-soc입니다. README는 이 라이브러리를 "SystemC/TLM-2.0 modules that enable co-simulation of Xilinx QEMU"라고 소개하고, QEMU와는 libremote-port의 "socket based transaction protocol"로 연결한다고 적습니다. Arm Fast Models는 QEMU가 아니라 Arm의 자체 CPU 모델입니다. User Guide 11.28의 1.1절 "What is Fast Models?"는 "Fast Models uses Code Translation (CT) processor models, which translate Arm® instructions into the instruction set of the host dynamically"라고 적고, Fast Models User Guide 11.28의 5장 "SystemC Export with Multiple Instantiation"이 그 모델을 TLM-2.0 port를 가진 SystemC component로 내보내는 방법을 다룹니다.
 
-이런 환경에서는 driver를 진짜 Linux 위에서 `.ko`로 로드하고, `/proc/interrupts`로 IRQ를 확인하고, user-space에서 `ioctl`을 부를 수 있습니다. 이 장에서는 VP 위의 Linux boot를 실행하지 않았습니다.
+Xilinx의 `systemctlm-cosim-demo` README(88-91행)는 SystemC 쪽 demo를 띄운 뒤 다른 터미널에서 "start up a PetaLinux QEMU session and use the Linux kernel to probe the SystemC side"라고 안내합니다. 즉 이 구성에서는 실제 Linux kernel의 driver가 SystemC로 만든 device를 probe합니다. 이 장에서는 VP 위의 Linux boot를 실행하지 않았습니다.
 
 ## `b_transport` 시간 계약
 
@@ -218,7 +218,6 @@ RTL 경로의 write는 요청 1 cycle + busy 3 cycle로 40 ns가 annotation됐�
 | **libsystemctlm-soc** | AMD(Xilinx) | README: Xilinx QEMU와 SystemC/TLM-2.0 co-simulation, RTL은 Verilator 같은 도구로 변환 |
 | **SystemC reference implementation** | Accellera | GitHub `accellera-official/systemc`, 이 장의 3.0.2 |
 
-Imperas의 RISC-V ISS·virtual prototype은 2023년 12월 Synopsys가 인수했다고 보도됐습니다(Design & Reuse). 각 제품의 TLM 지원 범위는 이 장에서 확인하지 않았습니다.
 
 ## NPU pre-RTL driver development
 
@@ -226,7 +225,7 @@ TLM으로 RTL보다 먼저 driver를 시작하는 흐름은 다음과 같습니�
 
 1. **연산 spec 확정** → C reference model 작성.
 2. **TLM device skeleton** → register map 정의, `b_transport`에 reference model wiring.
-3. **VP에 Linux boot** → driver를 *진짜 Linux kernel module*로 빌드, insmod, ioctl 시험.
+3. **VP에서 Linux driver 실행** → VP 위의 Linux kernel이 TLM device를 probe(위 Xilinx demo 구성).
 4. **RTL 도착** → 검증할 register/datapath만 RTL로 교체(위 mixed 예제), 나머지는 TLM 유지.
 5. **End-to-end run** → user-space app까지.
 
@@ -235,7 +234,7 @@ TLM으로 RTL보다 먼저 driver를 시작하는 흐름은 다음과 같습니�
 ## 흔한 함정
 
 - **`b_transport`의 `delay`** — annotation 증가와 kernel `wait`는 다른 시간 모델입니다. 위 BOTH 모드처럼 둘 다 쓰면 10 ns가 20 ns가 됩니다.
-- **DMI(Direct Memory Interface)** — RAM 모델이 initiator에게 포인터를 직접 내주는 빠른 경로입니다. MMIO register처럼 접근 자체에 side effect가 있는 영역은 DMI를 허용하면 안 됩니다. 예제는 `set_dmi_allowed(false)`로 둡니다.
+- **DMI(Direct Memory Interface)** — target이 initiator에게 메모리 포인터와 주소 범위를 내주는 경로입니다(`tlm_dmi.h:58-60`의 `get_dmi_ptr`·`get_start_address`·`get_end_address`). initiator가 그 포인터로 직접 읽고 쓰면 target의 `b_transport`는 불리지 않으므로, 접근할 때 target 코드가 실행돼야 하는 MMIO register 영역에는 DMI를 허용하지 않습니다. 예제는 `set_dmi_allowed(false)`로 둡니다.
 - **endianness** — 예제의 initiator는 `uint32_t` 0x11223344의 주소를 `data_ptr`로 넘겼고, target은 byte 순서 `44 33 22 11`을 받았습니다(arm64 little-endian host). 디바이스의 byte 순서가 다르면 변환을 명시해야 하며, SystemC는 `tlm_helpers.h:40`의 `get_host_endianness()` 같은 helper를 제공합니다.
 
 ## 정리
@@ -255,9 +254,9 @@ TLM으로 RTL보다 먼저 driver를 시작하는 흐름은 다음과 같습니�
 
 - Accellera SystemC 3.0.2 설치판 헤더 — `sysc/kernel/sc_ver.h:65-66`, `tlm_core/tlm_2/tlm_generic_payload/tlm_gp.h:98-100`, `tlm_phase.h:36-39`, `tlm_helpers.h:40`
 - 설치판 `share/doc/systemc/tlm/tlm_README.md:4`
-- [Xilinx/libsystemctlm-soc README](https://github.com/Xilinx/libsystemctlm-soc)
-- [Arm Fast Models User Guide 11.28 (100965_1128_00_en)](https://documentation-service.arm.com/static/67b60876ce2747241fce8b48) 5장
-- [Design & Reuse: Synopsys Acquires RISC-V Processor Simulation Tools Firm](https://design-reuse.com/news/55442/synopsys-imperas-acquisition.html)
+- [Xilinx/libsystemctlm-soc README](https://github.com/Xilinx/libsystemctlm-soc), [Xilinx/systemctlm-cosim-demo README](https://github.com/Xilinx/systemctlm-cosim-demo/blob/master/README) 88-91행
+- SystemC 3.0.2 `tlm_core/tlm_2/tlm_2_interfaces/tlm_dmi.h:58-60`
+- [Arm Fast Models User Guide 11.28 (100965_1128_00_en)](https://documentation-service.arm.com/static/67b60876ce2747241fce8b48) 1.1절, 5장
 
 실행 환경은 macOS 27.2.1, Apple M2 Pro, Homebrew SystemC 3.0.2, Verilator 5.054, Apple clang 21.0.0입니다(2026-11-16). IEEE 1666 본문, AT 모델, VP 위의 Linux boot, 상용 VP 도구는 실행·대조하지 않았습니다.
 
