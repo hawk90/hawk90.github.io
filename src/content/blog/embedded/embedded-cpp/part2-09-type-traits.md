@@ -106,7 +106,7 @@ std::make_signed_t<T>
 std::make_unsigned_t<T>
 ```
 
-`_v`는 C++17의 variable template, `_t`는 C++14의 alias template입니다. 짧고 명확해 사용이 편합니다.
+`_v`는 C++17의 variable template, `_t`는 C++14의 alias template입니다. `std::is_integral<T>::value`·`typename std::remove_const<T>::type`을 짧게 쓴 것입니다.
 
 ## 임베디드 — type-safe register access
 
@@ -125,7 +125,7 @@ write_register<std::string>(...)                   // ERROR — not trivially co
 write_register<uint64_t>(...)                      // ERROR — too large
 ```
 
-잘못된 사용을 컴파일 시점에 차단합니다.
+잘못된 사용을 컴파일 시점에 차단합니다. g++-16에서 `std::string`으로 부르면 `error: static assertion failed: Only trivially copyable types`와 크기 검사 실패가 함께 나오고, 그 뒤에도 `volatile std::string` 대입에 대한 `no match for 'operator='` 오류가 이어졌습니다. `static_assert`가 실패해도 함수 본문의 나머지 인스턴스화는 계속되기 때문입니다. `uint64_t`는 `error: static assertion failed: Register write up to 4 bytes only` 하나로 멈췄습니다.
 
 ## SFINAE — Substitution Failure Is Not An Error
 
@@ -156,7 +156,7 @@ process("str");  // ERROR — 둘 다 안 맞음
 C++17의 `if constexpr`은 함수 본문 안의 구현 선택을 단순하게 만듭니다. 후보 함수 자체를 오버로드 집합에서 제외하는 SFINAE와는 역할이 다릅니다. C++20 concepts도 시그니처의 제약을 표현하는 선택지입니다.
 
 ```cpp
-// if constexpr — 훨씬 깔끔
+// if constexpr — 본문 안에서 선택
 template<typename T>
 void process(T value) {
     if constexpr (std::is_integral_v<T>) {
@@ -202,7 +202,7 @@ void log(T value) {
 }
 ```
 
-C++20의 concepts가 훨씬 단순한 syntax를 제공합니다.
+C++20의 concepts로 쓰면 특수화 두 개와 `void_t` 없이 요구 사항을 한 식으로 적고, 반환 타입 조건(`-> std::convertible_to<std::string>`)까지 함께 표현합니다.
 
 ```cpp
 // C++20
@@ -347,7 +347,7 @@ void process(T value) {
 }
 ```
 
-`if constexpr`보다 약간 복잡하지만, 오버로드가 명확해 문서로서의 가치가 있습니다. 일반적으로는 `if constexpr`을 권장합니다.
+`if constexpr`보다 코드가 길지만, 타입별 구현이 별도 함수라 다른 파일에서 오버로드를 추가할 수 있습니다. `if constexpr`은 분기가 한 함수 본문에 모이므로 새 타입을 지원하려면 그 본문을 고쳐야 합니다. 구현을 한 곳에 닫아 둘 때는 `if constexpr`, 확장 지점을 열어 둘 때는 tag dispatch가 맞습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -358,7 +358,7 @@ void f(T x) {
     if (typeid(T) == typeid(int)) { /* */ }   // runtime, RTTI 필요
 }
 ```
-`if constexpr (std::is_same_v<T, int>)`로 컴파일 타임에 처리합니다.
+이 시리즈의 `-fno-rtti` 빌드에서는 이 코드가 아예 컴파일되지 않습니다. arm-none-eabi-g++ 16.2.0은 이 템플릿을 한 번도 인스턴스화하지 않아도 `error: cannot use 'typeid' with '-fno-rtti' [-Wtemplate-body]`를 냈습니다. `if constexpr (std::is_same_v<T, int>)`로 컴파일 타임에 처리합니다.
 
 ### 2. trait를 잘못 작성
 ```cpp
@@ -367,7 +367,7 @@ struct has_foo {
     static constexpr bool value = /* */ ;
 };
 ```
-조건 누락이나 false negative가 생길 수 있으므로, `static_assert`로 단위 테스트를 작성해 검증합니다.
+조건이 빠지면 trait가 맞는 타입을 거부하거나 틀린 타입을 통과시킵니다. 아래 예제의 `has_ready`처럼, 맞는 타입(`Good`)과 반환 타입만 다른 타입(`Wrong`)을 `static_assert`로 함께 검사하는 단위 테스트를 trait 옆에 둡니다.
 
 ### 3. void_t 패턴 오용
 검출한 식이 반환 타입·const 자격·참조 수식까지 원하는 계약을 나타내는지 확인합니다. 올바른 표준 코드가 컴파일러마다 임의로 다르게 동작하는 것으로 설명하지 않습니다.
@@ -378,6 +378,8 @@ template<typename T>
 void f() { static_assert(std::is_integral_v<T>); }
 // ERROR — <type_traits> 안 include
 ```
+
+아무 헤더도 include하지 않은 파일에서 g++-16은 이 템플릿을 부르지 않아도 `error: 'is_integral_v' is not a member of 'std' [-Wtemplate-body]`를 냅니다. 다른 표준 헤더가 `<type_traits>`를 간접적으로 include해 컴파일되는 경우도 있지만, 그 의존은 라이브러리 버전에 따라 바뀌므로 쓰는 헤더를 직접 include합니다.
 
 ### 5. if constexpr 외 분기에 invalid code
 ```cpp
@@ -393,7 +395,15 @@ void f(T x) {
 `if constexpr`의 false branch는 인스턴스화되지 않으므로 의미상 잘못된 코드도 통과할 수 있지만, syntax 자체는 valid해야 합니다.
 
 ### 6. 사용하지 않는 trait 헤더 include
-`<type_traits>`는 작지만 컴파일 시간을 추가합니다. 쓰지 않으면 제거합니다.
+헤더 하나를 include할 때 컴파일러가 읽는 양을 전처리 결과 줄 수로 보면(`-std=c++17 -E -P`) 이렇습니다.
+
+| include | g++-16 (libstdc++) | Clang 23.1.5 (libc++) |
+| --- | ---: | ---: |
+| `<type_traits>` | 1,948 | 1,389 |
+| `<string>` | 16,663 | 11,263 |
+| `<iostream>` | 24,221 | 21,266 |
+
+`<type_traits>`는 다른 표준 헤더보다 작습니다. 쓰지 않는 헤더는 제거하되, 컴파일 시간을 줄이려면 `<iostream>` 같은 큰 헤더가 먼저입니다.
 
 ## is_pod 대신 필요한 계약 검사
 
@@ -435,7 +445,7 @@ int main() {
 }
 ```
 
-Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors traits-check.cpp -o traits-check && ./traits-check`로 확인했습니다. `-DBAD_BOOL`은 컴파일 실패합니다. unsigned 변환 후 shift하여 음수 signed shift에 의존하지 않으며, 8비트 바이트와 고정 폭 정수 타입을 제공하는 환경을 대상으로 합니다.
+Homebrew Clang 23.1.5, arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-errors traits-check.cpp -o traits-check && ./traits-check`가 exit 0이었습니다. `-DBAD_BOOL`은 `error: static assertion failed due to requirement '!std::is_same_v<bool, bool>': integer except bool`로 거부됩니다. unsigned 변환 후 shift하여 음수 signed shift에 의존하지 않으며, 8비트 바이트와 고정 폭 정수 타입을 제공하는 환경을 대상으로 합니다.
 
 [C++20 N4861 type traits](https://timsong-cpp.github.io/cppwp/n4861/meta.unary.cat)와 [타입 치환 규칙](https://timsong-cpp.github.io/cppwp/n4861/temp.deduct)을 참고합니다. virtual/SFINAE/if constexpr의 보편적인 크기 순위는 이 예제로 측정하지 않았습니다.
 
@@ -445,7 +455,7 @@ Clang 23.1.3 arm64 macOS에서 `clang++ -std=c++17 -Wall -Wextra -pedantic-error
 - 주요 trait는 `is_integral`, `is_pointer`, `is_trivially_copyable`, `is_same`, `decay` 등이 있습니다.
 - SFINAE와 `enable_if`로 조건부 오버로드를 만들며, C++17의 `if constexpr`은 본문 분기를 선택하며 후보 제외와는 구분합니다.
 - 임베디드에서는 type-safe register access, serialization, custom domain traits에 활용합니다.
-- C++20 concepts가 훨씬 깔끔한 syntax이므로 가능하면 concept을 권장합니다.
+- C++20을 쓸 수 있으면 검출 trait는 concept 한 식으로 대체됩니다([Part 2-10](/blog/embedded/embedded-cpp/part2-10-concepts)).
 
 ## 관련 항목
 
