@@ -36,11 +36,11 @@ BR2_KERNEL_HEADERS_AS_KERNEL=y
 
 | 패키지 | 다운로드 | 그 외 단계 합 | 비고 |
 |---|---:|---:|---|
-| host-binutils 2.44 | — | 26.1초 (패키지 전체) | |
-| host-gcc-initial 14.3.0 | — | 136.9초 (패키지 전체) | |
-| linux-headers 6.18.7 | — | 35.6초 (패키지 전체) | 커널 tarball 다운로드 포함 |
-| glibc 2.42-67-g4ebd33dd… | 337.8초 | 89.5초 (build 73.4초) | git 저장소에서 받음 |
-| host-gcc-final 14.3.0 | 0.1초 | 204.6초 (build 189.9초) | |
+| host-binutils 2.44 | 1.8초 | 35.0초 (build 30.0초) | |
+| host-gcc-initial 14.3.0 | 3.0초 | 244.3초 (build 232.5초) | |
+| linux-headers 6.18.7 | 0.2초 | 15.9초 (extract 14.0초) | 커널 tarball은 이미 `dl/`에 있었음 |
+| glibc 2.42-67-g4ebd33dd… | 470.9초 | 125.1초 (build 96.5초) | git 저장소에서 받음 |
+| host-gcc-final 14.3.0 | 2.6초 | 343.3초 (build 321.5초) | |
 
 장점은 모든 결정이 이 트리의 `.config`에 있다는 점입니다.
 
@@ -49,7 +49,7 @@ BR2_KERNEL_HEADERS_AS_KERNEL=y
 - **libc 전환이 옵션 하나** — `toolchain/toolchain-buildroot/Config.in`의 "C library" choice에 uClibc-ng, glibc, musl이 있고 기본값은 glibc입니다.
 - **ccache가 output 디렉터리를 넘어 공유됨** — `package/gcc/gcc.mk` 334행이 gcc 설정을 hash해 wrapper에 넣고, wrapper가 `CCACHE_COMPILERCHECK=string:<hash>`로 씁니다(Ch 14).
 
-단점은 *시간*입니다. 위 표만 더해도 다운로드를 빼고 약 490초, glibc를 git으로 받는 시간까지 더하면 13분을 넘었습니다. `make clean`을 할 때마다 이 시간이 다시 듭니다. 매뉴얼의 internal backend 단점 목록도 "Rebuilding the toolchain is needed when doing `make clean`, which takes time"입니다.
+단점은 *시간*입니다. 위 표만 더해도 다운로드를 빼고 약 760초, glibc를 git으로 받는 시간까지 더하면 20분을 넘었습니다. `make clean`을 할 때마다 이 시간이 다시 듭니다. 매뉴얼의 internal backend 단점 목록도 "Rebuilding the toolchain is needed when doing `make clean`, which takes time"입니다.
 
 ## External toolchain — pre-built 받아 쓰기
 
@@ -57,12 +57,12 @@ BR2_KERNEL_HEADERS_AS_KERNEL=y
 
 | 단계 | 시간 |
 |---|---:|
-| download | 963.2초 |
-| extract | 14.5초 |
-| install-staging (sysroot 복사) | 3.6초 |
-| install-target (libc 등 복사) | 0.6초 |
+| download | 1,057.2초 |
+| extract | 6.6초 |
+| install-staging (sysroot 복사) | 0.8초 |
+| install-target (libc 등 복사) | 0.3초 |
 
-이 빌드의 다운로드는 VM의 느린 네트워크 탓에 오래 걸렸지만, *받은 뒤* 쓸 수 있게 되기까지는 20초가 안 걸렸습니다. internal toolchain의 약 490초와 비교되는 숫자입니다. 한 번 받은 tarball은 `dl/`에 남으므로, `make clean` 뒤나 CI의 다음 빌드에서는 압축 해제 시간만 듭니다.
+이 빌드의 다운로드는 VM의 느린 네트워크 탓에 오래 걸렸지만, *받은 뒤* 쓸 수 있게 되기까지는 10초가 안 걸렸습니다. internal toolchain의 약 760초와 비교되는 숫자입니다. 한 번 받은 tarball은 `dl/`에 남으므로, `make clean` 뒤나 CI의 다음 빌드에서는 압축 해제 시간만 듭니다.
 
 대신 제약이 생깁니다.
 
@@ -74,7 +74,7 @@ BR2_KERNEL_HEADERS_AS_KERNEL=y
 
 | 항목 | Internal | External |
 |---|---|---|
-| **toolchain 단계 시간 (이 시리즈 실측)** | 약 490초 + glibc git 다운로드 338초 | 압축 해제·설치 약 19초 + tarball 다운로드 |
+| **toolchain 단계 시간 (이 시리즈 실측)** | 약 760초 + glibc git 다운로드 471초 | 압축 해제·설치 약 8초 + tarball 다운로드 |
 | **libc 선택** | glibc / musl / uClibc-ng | toolchain이 고정 |
 | **kernel headers** | `BR2_KERNEL_HEADERS_AS_KERNEL` 등으로 선택 | toolchain에 포함된 버전 |
 | **gcc 패치** | `package/gcc/…/*.patch` 적용 | 불가능 |
@@ -225,7 +225,7 @@ GLIBC_2.38
 
 ## 정리
 
-- Internal toolchain은 binutils → gcc-initial → 커널 헤더 → glibc → gcc-final로 빌드되고, 이 시리즈의 QEMU 빌드에서 다운로드를 빼고 약 490초가 들었습니다.
+- Internal toolchain은 binutils → gcc-initial → 커널 헤더 → glibc → gcc-final로 빌드되고, 이 시리즈의 QEMU 빌드에서 다운로드를 빼고 약 760초가 들었습니다.
 - External toolchain은 받은 뒤 압축 해제·설치가 약 19초였고, 대신 헤더·libc·GCC가 toolchain에 고정됩니다.
 - 미리 빌드된 toolchain은 호스트 아키텍처를 탑니다. Bootlin은 x86_64 전용, Arm GNU는 x86_64·aarch64를 지원합니다.
 - 2026.02.3에는 Linaro 프로필이 없고 Legacy 메뉴에만 남아 있습니다.
