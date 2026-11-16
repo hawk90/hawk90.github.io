@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-이 글은 STM32F405/407의 I2C1을 single-master 버스의 polling master로 구동하는 코드를 다룹니다. register·bit 이름은 cmsis-device-f4 v2.6.9의 `stm32f407xx.h`, 각 단계의 순서는 [ST HAL v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_i2c.c)의 `HAL_I2C_Init()`·`HAL_I2C_Master_Transmit()`·`HAL_I2C_Master_Receive()` 구현과 맞춰 봤습니다. 이 순서의 원전인 reference manual RM0090은 이 글을 고치는 동안 st.com에서 내려받지 못해 다시 대조하지 못했으므로, 아래 설명은 HAL 코드와 I2C 규격으로 확인할 수 있는 것만 적습니다. 읽기 함수는 *register 주소 write → repeated START → read*를 한 transaction으로 처리합니다. 버스의 전기적 구조·프레임·풀업 계산은 [1-06: I2C 하드웨어](/blog/embedded/modern-recipes/part1-06-i2c-hardware)에 있습니다.
+이 글은 STM32F405/407의 I2C1을 single-master 버스의 polling master로 구동하는 코드를 다룹니다. register·bit 이름은 cmsis-device-f4 v2.6.9의 `stm32f407xx.h`, 각 단계의 순서는 [ST HAL v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_i2c.c)의 `HAL_I2C_Init()`·`HAL_I2C_Master_Transmit()`·`HAL_I2C_Master_Receive()` 구현과 맞춰 봤습니다. 아래 설명은 HAL 코드, DS8626 Rev 4, I2C 규격 UM10204로 확인한 것만 적습니다. 읽기 함수는 *register 주소 write → repeated START → read*를 한 transaction으로 처리합니다. 버스의 전기적 구조·프레임·풀업 계산은 [1-06: I2C 하드웨어](/blog/embedded/modern-recipes/part1-06-i2c-hardware)에 있습니다.
 
 interrupt·DMA 구동과 multi-master 버스는 다루지 않습니다. 아래 `wait_sr1`은 SR1의 ARLO(bit 9, arbitration lost)와 BERR(bit 8, bus error)를 보지 않으므로, multi-master 버스나 잡음이 많은 버스에서는 이 둘의 검사를 더해야 합니다. STM32H7의 I2C는 CCR·TRISE 대신 TIMINGR로 timing을 잡는 다른 register 세트라([stm32h7xx_ll_i2c.h, v1.9.0](https://github.com/STMicroelectronics/stm32h7xx-hal-driver/blob/v1.9.0/Inc/stm32h7xx_ll_i2c.h)) 아래 코드를 그대로 쓸 수 없습니다.
 
@@ -40,7 +40,7 @@ NACK는 AF(SR1 bit 10)로 보입니다. HAL의 대기 함수(`I2C_WaitOnTXEFlagU
 
 ### Clock stretching과 timeout
 
-UM10204 Rev. 7.0의 표는 clock stretching을 "a feature of some targets"라고 설명합니다. target이 SCL을 low로 잡고 있는 동안에는 다음 flag가 늦게 서고, target이 SCL을 끝내 놓지 않으면 flag는 서지 않습니다. 그래서 이 드라이버의 모든 대기에는 `I2C_TIMEOUT_MS`가 붙습니다. HAL도 모든 대기 함수에 `Timeout`과 `tickstart`를 넘깁니다.
+UM10204 Rev. 7.0의 표는 clock stretching을 "a feature of some targets"라고 설명합니다. target이 SCL을 low로 잡고 있는 동안에는 다음 flag가 늦게 서고, target이 SCL을 끝내 놓지 않으면 flag는 서지 않습니다. 그래서 이 드라이버의 모든 대기에는 `I2C_TIMEOUT_MS`가 붙습니다. HAL의 blocking 대기 함수(`I2C_WaitOn…FlagUntilTimeout()`)도 모두 `Timeout`과 `Tickstart`를 받습니다.
 
 ### Clock 설정
 
@@ -55,7 +55,7 @@ Sm: TRISE = PCLK1[MHz] + 1
 Fm: TRISE = floor(PCLK1[MHz] x 300 / 1000) + 1
 ```
 
-이 글의 기준은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`가 만드는 SYSCLK 168 MHz, PCLK1 = 168 MHz / 4 = 42 MHz입니다. 42 MHz는 STM32F405/407의 fPCLK1 최대값입니다(DS8626 Rev 4 Table 14 "General operating conditions"). Fm, DUTY=0이면 CCR = (42,000,000 − 1) / 1,200,000 + 1 = 35, TRISE = 42 × 300 / 1000 + 1 = 13이고, 식으로 계산한 SCL은 42 MHz / (3 × 35) = 400 kHz입니다. 이 값은 식의 목표값이고, 실제 SCL 주파수는 이 글에서 재지 않았으므로 보드에서 logic analyzer로 확인합니다.
+이 글의 기준은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)의 `clock_init_168mhz()`가 만드는 SYSCLK 168 MHz, PCLK1 = 168 MHz / 4 = 42 MHz입니다. 42 MHz는 STM32F405/407의 fPCLK1 최대값입니다(DS8626 Rev 4 Table 14 "General operating conditions"). Fm, DUTY=0이면 CCR = (42,000,000 − 1) / 1,200,000 + 1 = 35, TRISE = 42 × 300 / 1000 + 1 = 13이고, 식으로 계산한 SCL은 42 MHz / (3 × 35) = 400 kHz입니다. 이 값은 식의 목표값이고, 실제 SCL 주파수는 이 글에서 재지 않았으므로 보드에서 logic analyzer로 확인합니다. DS8626 Rev 4는 다른 값을 줍니다. Table 53 주 2는 fPCLK1이 "a multiple of 10 MHz to reach the 400 kHz maximum I2C fast mode clock"이어야 한다고 적고, Table 54(fPCLK1 = 42 MHz, VDD = 3.3 V, Rp = 4.7 kΩ)는 400 kHz에 `I2C_CCR = 0x8019`(FS = 1, DUTY = 0, CCR = 25)를 제시합니다. 식으로는 42 MHz / (3 × 25) = 560 kHz이지만, 그 표는 외부 부품을 포함한 "achieved speed" 기준이고 tolerance를 ±2 %로 적습니다. 아래 코드는 HAL 식의 35를 그대로 씁니다. 두 값 중 어느 쪽이 실제로 400 kHz에 가까운지는 보드에서 SCL을 재서 정합니다.
 
 ## 코드 예제
 
@@ -103,7 +103,7 @@ static int wait_sr1(uint32_t mask) {
     return 0;
 }
 
-// -3: SDA or SCL held low before START (BUSY never cleared)
+// -3: bus still busy before START (BUSY never cleared)
 static int wait_idle(void) {
     uint32_t start = millis();
     while (I2C1->SR2 & I2C_SR2_BUSY) {
@@ -114,7 +114,7 @@ static int wait_idle(void) {
 
 static int i2c_abort(int err) {
     I2C1->CR1 |= I2C_CR1_STOP;
-    I2C1->SR1 = ~I2C_SR1_AF;     // rc_w0: writing 1 to other bits has no effect
+    I2C1->SR1 = ~I2C_SR1_AF;     // same as __HAL_I2C_CLEAR_FLAG(): SR1 = ~flag
     return err;
 }
 
@@ -144,7 +144,7 @@ int i2c_write(uint8_t addr7, const uint8_t *data, size_t n) {
 }
 ```
 
-START 전에는 SR2의 BUSY(bit 1)가 풀리기를 기다립니다. HAL의 `HAL_I2C_Master_Transmit()`도 첫 단계에서 "Wait until BUSY flag is reset"을 `I2C_TIMEOUT_BUSY_FLAG`까지 기다리고, 넘기면 `HAL_BUSY`를 돌려줍니다. 앞 transaction이 버스를 잡은 채 끝났거나 target이 선을 붙잡고 있으면 아래 코드는 START를 걸기 전에 -3으로 돌아옵니다.
+START 전에는 SR2의 BUSY(bit 1)가 풀리기를 기다립니다. HAL의 `HAL_I2C_Master_Transmit()`도 첫 단계에서 "Wait until BUSY flag is reset"을 `I2C_TIMEOUT_BUSY_FLAG`까지 기다리고, 넘기면 `HAL_BUSY`를 돌려줍니다. UM10204 3.1.4는 버스가 "considered to be busy after the START condition"이고 STOP 뒤에야 다시 free라고 정의하므로, 앞 transaction이 STOP 없이 끝났으면 아래 코드는 START를 걸기 전에 -3으로 돌아옵니다.
 
 `n == 0`이면 BTF를 기다리지 않고 주소만 보낸 뒤 STOP을 겁니다. 보낸 데이터 byte가 없으니 "마지막 byte가 나갔다"는 BTF를 기다릴 대상도 없습니다. [ST HAL v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_i2c.c)의 `HAL_I2C_Master_Transmit()`도 Size = 0이면 ADDR을 지운 뒤 데이터 루프를 건너뛰고 STOP을 겁니다.
 
@@ -168,7 +168,7 @@ static int i2c_rx(uint8_t addr7, uint8_t *buf, size_t n) {
 
     if (n == 1) {
         I2C1->CR1 &= ~I2C_CR1_ACK;            // before ADDR clear
-        (void)I2C1->SR1; (void)I2C1->SR2;     // clear ADDR: SCL released
+        (void)I2C1->SR1; (void)I2C1->SR2;     // clear ADDR (SR1 then SR2 read)
         I2C1->CR1 |= I2C_CR1_STOP;            // after ADDR clear
         if ((e = wait_sr1(I2C_SR1_RXNE))) return e;   // STOP already requested
         buf[0] = I2C1->DR;
@@ -189,10 +189,10 @@ static int i2c_rx(uint8_t addr7, uint8_t *buf, size_t n) {
             if ((e = wait_sr1(I2C_SR1_RXNE))) return i2c_abort(e);
             buf[i] = I2C1->DR;
         }
-        if ((e = wait_sr1(I2C_SR1_BTF))) return i2c_abort(e);  // N-2 in DR, N-1 in shift reg
+        if ((e = wait_sr1(I2C_SR1_BTF))) return i2c_abort(e);  // BTF
         I2C1->CR1 &= ~I2C_CR1_ACK;
         buf[i++] = I2C1->DR;                                    // N-2
-        if ((e = wait_sr1(I2C_SR1_BTF))) return i2c_abort(e);  // N-1 in DR, N in shift reg
+        if ((e = wait_sr1(I2C_SR1_BTF))) return i2c_abort(e);  // BTF: then STOP
         I2C1->CR1 |= I2C_CR1_STOP;
         buf[i++] = I2C1->DR;                                    // N-1
         buf[i]   = I2C1->DR;                                    // N
@@ -273,7 +273,7 @@ int i2c_bus_recover(void) {
 }
 ```
 
-핀을 GPIO 출력으로 바꾸기 전에 BSRR로 ODR8·ODR9를 1로 써 두는 이유는 출력으로 바뀌는 순간 핀이 ODR 값을 내보내기 때문입니다. QEMU의 STM32L475 GPIO 모델([4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)에서 쓴 `b-l475e-iot01a`)로 PB9를 같은 순서로 바꿔 보면 이렇게 됩니다.
+핀을 GPIO 출력으로 바꾸기 전에 BSRR로 ODR8·ODR9를 1로 써 두는 이유는, 출력으로 바뀌는 순간 핀이 ODR 값을 내보내기 때문입니다. 이 동작은 F407 reference manual 대신 QEMU의 STM32L475 GPIO 모델([4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)에서 쓴 `b-l475e-iot01a`)로 PB9를 같은 순서로 바꿔 보면 이렇게 됩니다.
 
 ```c
 /* od_test.c */
@@ -325,7 +325,7 @@ pull-up만 걸린 입력에서 1로 읽히던 선이, ODR을 건드리지 않은
 | 0 | 위 그림처럼 START, byte마다 9번째 clock의 ACK(SDA low), STOP. read는 마지막 byte만 NACK(SDA high) | — |
 | -2 | 주소나 데이터 byte 뒤 9번째 clock에서 SDA high(NACK) | 7-bit 주소(shift 전 값)와 target 전원 확인 |
 | -1 | transaction 도중 SCL이 low에 머묾 | `i2c_bus_recover()`를 부르고 그 반환값대로 |
-| -3 | START 전부터 SDA나 SCL이 low, 또는 앞 transaction이 STOP 없이 끝남 | `i2c_bus_recover()`를 부르고 그 반환값대로 |
+| -3 | 앞 transaction이 STOP 없이 끝나 버스가 busy로 남음 | `i2c_bus_recover()`를 부르고 그 반환값대로 |
 
 `i2c_bus_recover()`의 반환값은 다음과 같습니다.
 
@@ -343,7 +343,7 @@ datasheet의 7-bit 주소(예: `0x76`)는 주소 byte의 bit 7:1에 들어가고
 
 ## 정리
 
-- 모든 flag 대기에 AF 검사와 timeout을 붙이고, START 전에는 BUSY가 풀리기를 기다립니다. clock stretching은 peripheral이 처리합니다.
+- 모든 flag 대기에 AF 검사와 timeout을 붙이고, START 전에는 BUSY가 풀리기를 기다립니다.
 - 수신은 byte 수에 따라 HAL `HAL_I2C_Master_Receive()`와 같은 세 순서를 따르고, 2·3+ byte의 마지막 부분은 BTF를 기다린 뒤 ACK·STOP을 겁니다.
 - CCR·TRISE는 HAL 매크로와 같은 식으로 PCLK1에서 계산하고(42 MHz Fm: CCR 35, TRISE 13), 실제 SCL은 보드에서 잽니다.
 - recovery는 ODR을 먼저 1로 쓰고 SCL이 실제로 올라오는지 확인하며, 풀리지 않으면 HW reset·전원 재투입으로 넘어갑니다.
