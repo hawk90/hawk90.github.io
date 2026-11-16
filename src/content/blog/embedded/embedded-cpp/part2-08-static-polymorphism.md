@@ -243,6 +243,47 @@ uart.send_buffer(data, 100);   // 인라인 가능
 
 바이트마다 함수 호출 없이 레지스터 polling과 store만 남았습니다.
 
+위 두 측정(`v_area`·`c_area`와 `send`)에 쓴 파일(`dispatch.cpp`)과 명령입니다.
+
+```cpp
+#include <stdint.h>
+#include <stddef.h>
+struct USART_TypeDef { volatile uint32_t SR, DR; };
+#define USART2 ((USART_TypeDef*)0x40004400u)
+constexpr uint32_t USART_SR_TXE = 1u << 7;
+// virtual (측정용: 가상 소멸자 없음)
+struct VShape { virtual int area() const = 0; };
+struct VCircle : VShape { int r; int area() const override { return 3 * r * r; } };
+int v_area(const VShape& s) { return s.area(); }
+// CRTP
+template<typename Derived> struct Shape { int area() const { return static_cast<const Derived*>(this)->area_impl(); } };
+struct Circle : Shape<Circle> { int r; int area_impl() const { return 3 * r * r; } };
+template <class S> int c_area(const S& s) { return s.area(); }
+template int c_area<Circle>(const Circle&);
+static_assert(sizeof(VCircle) == 8 && sizeof(Circle) == 4);
+template<typename Derived>
+class PeripheralBase {
+public:
+    void send_buffer(const uint8_t* data, size_t len) { for (size_t i = 0; i < len; ++i) derived()->send_impl(data[i]); }
+private:
+    Derived* derived() { return static_cast<Derived*>(this); }
+};
+class Uart2 : public PeripheralBase<Uart2> {
+public:
+    void send_impl(uint8_t b) { while (!(USART2->SR & USART_SR_TXE)); USART2->DR = b; }
+};
+Uart2 uart;
+void send(const uint8_t* data, size_t n) { uart.send_buffer(data, n); }
+```
+
+```bash
+arm-none-eabi-g++ -std=c++20 -mcpu=cortex-m4 -mthumb -Os -ffreestanding -fno-exceptions -fno-rtti -c dispatch.cpp -o d.o
+arm-none-eabi-objdump -d -C --no-show-raw-insn d.o
+arm-none-eabi-nm -S -C d.o
+```
+
+arm-none-eabi-g++ 16.2.0에서 `send`는 30바이트(0x1e), `v_area` 6바이트, `c_area<Circle>` 10바이트였습니다.
+
 ## CRTP로 mixin 패턴
 
 여러 독립 기능을 조합할 때 virtual base class 대신 각 mixin을 CRTP로 구현합니다.
