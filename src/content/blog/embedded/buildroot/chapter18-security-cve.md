@@ -112,7 +112,7 @@ manifest의 헤더는 다음 일곱 열이고, 값은 따옴표로 감싼 CSV입
 
 ## SBOM — show-info와 generate-cyclonedx
 
-`make show-info`는 패키지 정보를 JSON으로 출력합니다. QEMU 빌드에서는 65개 항목(host 포함)이 나왔습니다. 이 JSON을 표준 SBOM으로 바꾸는 도구가 2026.02.3에는 트리에 있습니다. `utils/generate-cyclonedx` 머리말이 사용법을 적습니다.
+`make show-info`는 패키지 정보를 JSON으로 출력합니다. Ch 9의 htop-acme를 더한 QEMU 빌드에서는 68개 항목(target 15, host 51, rootfs 2)이 나왔습니다. 이 JSON을 표준 SBOM으로 바꾸는 도구가 2026.02.3에는 트리에 있습니다. `utils/generate-cyclonedx` 머리말이 사용법을 적습니다.
 
 ```text
 # This script converts the output of the show-info make target
@@ -128,7 +128,7 @@ manifest의 헤더는 다음 일곱 열이고, 값은 따옴표로 감싼 CSV입
 $ make -s show-info > /tmp/si.json
 $ utils/generate-cyclonedx < /tmp/si.json > /tmp/sbom.json
 $ python3 -c 'import json;d=json.load(open("/tmp/sbom.json"));print(d["bomFormat"],d["specVersion"],len(d["components"]))'
-CycloneDX 1.6 57
+CycloneDX 1.6 60
 ```
 
 busybox component의 앞부분입니다.
@@ -323,7 +323,7 @@ node cve-diff.mjs previous-pkg-stats.json current-pkg-stats.json
 
 - `make pkg-stats`는 fkie-cad NVD 저장소를 git clone해 대조하고, `cves`·`unsure_cves` 둘 다 "affected"로 분류합니다. `<PKG>_IGNORE_CVES`는 근거 주석과 함께 씁니다(본체에 174줄).
 - `legal-info`는 manifest·license·소스·패치를 모으지만 Buildroot 소스 등은 저장하지 않는다고 README가 밝힙니다.
-- 2026.02.3에는 `utils/generate-cyclonedx`가 있어 `show-info`에서 CycloneDX 1.6 SBOM(이 설정에서 57개 component)을 만들었습니다.
+- 2026.02.3에는 `utils/generate-cyclonedx`가 있어 `show-info`에서 CycloneDX 1.6 SBOM(이 설정에서 60개 component)을 만들었습니다.
 - PIE·SSP strong·full RELRO·FORTIFY 1이 기본값이고, `readelf`로 busybox·htop에서 확인했습니다.
 - `BR2_REPRODUCIBLE`을 켜고 같은 경로에서 두 번 빌드하자 `rootfs.tar`와 커널은 같았고 ext4 이미지는 달랐습니다. 끄면 셋 다 달랐습니다.
 - 기본 root password는 빈 문자열입니다. 인증 정책은 실제 이미지에서 확인합니다.
