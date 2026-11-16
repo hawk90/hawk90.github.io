@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-polling으로 처리하던 UART 수신, button press, timer expire, ADC complete, DMA done은 인터럽트로 옮길 수 있습니다. 차이는 CPU가 기다리는 동안 다른 일을 할 수 있느냐입니다. 처음 ISR을 쓰면 동작은 하는데 의도와 다른 일이 벌어지곤 합니다. flag clear를 안 했거나, priority가 잘못됐거나, ISR 이름이 vector table의 weak symbol과 안 맞아 default handler로 빠지는 경우입니다.
+polling으로 처리하던 UART 수신, button press, timer expire, ADC complete, DMA done은 인터럽트로 옮길 수 있습니다. 차이는 CPU가 기다리는 동안 다른 일을 할 수 있느냐입니다. ISR이 동작은 하는데 의도와 다른 결과가 나오는 원인으로 이 글은 세 가지를 실제로 재현합니다. flag clear를 안 한 경우, priority가 잘못된 경우, ISR 이름이 vector table의 weak symbol과 안 맞아 default handler로 빠지는 경우입니다.
 
 이 글은 Cortex-M NVIC 사용법을 STM32F4 기준으로 정리하고, priority·preemption·이름 오타를 QEMU 11.1.3 `netduinoplus2`(STM32F405)에서 직접 돌려 확인합니다.
 
@@ -56,7 +56,7 @@ ST의 GCC startup(cmsis-device-f4 `Source/Templates/gcc/startup_stm32f405xx.s`)�
 | peripheral IRQ → NVIC | enable (`ISER`/`ICER`) | 받을지 결정 |
 | NVIC 내부 | pending (`ISPR`/`ICPR`) | 미처리 IRQ 표시 |
 | NVIC 내부 | active (`IABR`) | 처리 중 표시 |
-| NVIC 내부 | priority (`IP`) | 작을수록 높음 |
+| NVIC 내부 | priority (`IPR`) | 작을수록 높음 |
 | NVIC → CPU | 가장 높은 priority의 pending 선택 | CPU에 인터럽트 신호 |
 
 CMSIS의 핵심 API는 세 개입니다.
@@ -69,7 +69,7 @@ NVIC_SetPriority(USART1_IRQn, 6);       // priority 설정
 
 ### Priority
 
-DDI 0403E.b B1.5.4는 priority 값이 작을수록 높고, 모든 priority field가 8 bit이며, 구현이 256단계보다 적으면 "low-order bits of these fields are RAZ"라고 합니다. 구현 단계 수는 8~256 사이의 2의 거듭제곱입니다(Table B1-6). STM32F4는 ST 헤더의 `__NVIC_PRIO_BITS`가 4이고, QEMU의 F405 모델도 `num-prio-bits`를 4로 둡니다. CMSIS `NVIC_SetPriority()`는 넘긴 값을 이 bit 수만큼 왼쪽으로 밀어 넣으므로 4 bit에서는 0~15를 씁니다.
+DDI 0403E.b B1.5.4는 priority 값이 작을수록 높고, 모든 priority field가 8 bit이며, 구현이 256단계보다 적으면 "low-order bits of these fields are RAZ"라고 합니다. 구현 단계 수는 8~256 사이의 2의 거듭제곱입니다(Table B1-6). STM32F4는 ST 헤더의 `__NVIC_PRIO_BITS`가 4이고, QEMU의 F405 모델도 `num-prio-bits`를 4로 둡니다. CMSIS_6 `core_cm4.h`의 `NVIC_SetPriority()`는 넘긴 값을 `8U - __NVIC_PRIO_BITS`(= 4) bit만큼 왼쪽으로 밀어 상위 bit에 넣으므로, 4 bit 구현에서는 0~15를 씁니다.
 
 ```c
 // priority bit가 4개인 STM32F4
@@ -92,7 +92,7 @@ NVIC_SetPriorityGrouping(0);   // 4-bit 구현에서는 네 bit 모두 pre-empt
 
 ### Tail-Chaining과 Late Arrival
 
-Cortex-M4 TRM(DDI 0439B) 3.9절은 late-arrival과 tail-chaining을 "as defined by the ARMv7-M architecture"로 구현한다고 하고, zero wait state 메모리 기준으로 세 값을 적습니다. 인터럽트 assert부터 ISR 첫 명령까지 최대 12 cycle, 복귀도 12 cycle, tail-chaining은 "6 cycles"이고 이때는 "No stack pushes or pops are performed"입니다. flash wait state가 있으면 이 값보다 늘어납니다.
+Cortex-M4 TRM(DDI 0439B) 3.9절은 late-arrival과 tail-chaining을 "as defined by the ARMv7-M architecture"로 구현한다고 하고, zero wait state 메모리 기준으로 세 값을 적습니다. 인터럽트 assert부터 ISR 첫 명령까지 최대 12 cycle, 복귀도 12 cycle, tail-chaining은 "6 cycles"이고 이때는 "No stack pushes or pops are performed"입니다. 세 값 모두 wait state가 없는 메모리 기준입니다.
 
 ## 코드 예제
 
@@ -110,7 +110,7 @@ void exti_init(void) {
 
     // 2. SYSCFG enable, EXTI13 source = port C
     RCC->APB2ENR |= RCC_APB2ENR_SYSCFGEN;
-    SYSCFG->EXTICR[3] &= ~(0xFu << 4);     // EXTI13 (3번째 word, bits 7:4)
+    SYSCFG->EXTICR[3] &= ~(0xFu << 4);     // EXTI13 (EXTICR4 = EXTICR[3], bits 7:4)
     SYSCFG->EXTICR[3] |=  (2u  << 4);      // 2 = PortC
 
     // 3. EXTI 설정 — falling edge trigger
@@ -314,7 +314,7 @@ __NVIC_PRIO_BITS = 0x00000004
 | `ISPR[1] = 0x00000100` | disable 상태에서 pending만 섰습니다. IRQ 40은 `ISPR[1]`의 bit 8입니다 |
 | `after enable: E` | enable하는 순간 pending이던 IRQ가 바로 처리됐습니다 |
 | prio 4·9 → `[0]` | TIM2(10)보다 값이 작으면 TIM2 ISR 중간에 선점합니다 |
-| prio 10·12 → `[]0` | 같거나 낮으면 TIM2 ISR이 끝난 뒤(tail-chain) 처리됩니다 |
+| prio 10·12 → `[]0` | 같거나 낮으면 TIM2 ISR이 끝난 뒤 처리됩니다(실보드에서는 이 전환이 TRM 3.9.1의 tail-chaining) |
 | PRIGROUP 6, prio 9 → `[]0` | group이 bit[7]뿐이면 9(`0x90`)와 10(`0xA0`)은 같은 group이라 선점하지 못합니다 |
 
 TIM2를 쓴 WFE loop는 `__SEV()`가 있든 없든 세 번 모두 깨어났습니다. QEMU에서 WFE가 실제로 잠드는지는 이 실험으로 알 수 없으므로, `__SEV()`가 필요 없다는 근거는 위의 Event Register 정의입니다. 또 QEMU의 TIM2 모델은 `clock-frequency`를 1 GHz로 받으므로(`stm32f405_soc.c`), `PSC = 83`, `ARR = 999`가 QEMU 안에서 1 kHz가 되지는 않습니다. 주기는 보드에서 확인합니다.
@@ -361,7 +361,7 @@ vector table의 `EXTI15_10_IRQHandler`는 weak(`W`)로 남아 `Default_Handler`�
 
 ```text
 ISPR[1] while disabled = 0x00000100
-R12=00000100 R13=2001ffc8 R14=fffffff9 R15=080001ec
+R12=00000100 R14=fffffff9 R15=080001ec
 XPSR=21000038 --C- T handler
 ```
 
@@ -385,7 +385,7 @@ main과 ISR이 공유하는 변수는 `volatile`로 선언합니다. [4-02](/blo
 
 > ⚠️ Floating-point in ISR (Cortex-M4F/M7)
 
-DDI 0403E.b B1.5.6의 exception entry 의사코드에서 `CONTROL.FPCA == '1'`이면 stack frame이 `0x20`(32 byte) 대신 `0x68`(104 byte)이 되고, `FPCCR.LSPEN`이 1이면 FP register 저장을 미룹니다(lazy stacking). reset 때 `FPCCR.ASPEN`·`LSPEN`은 둘 다 1입니다(B1.5.5 `TakeReset()`). ISR에서 float을 쓰면 그 ISR과 선점되는 task의 stack 크기를 104 byte frame 기준으로 잡습니다.
+DDI 0403E.b B1.5.6의 exception entry 의사코드에서 `CONTROL.FPCA == '1'`이면 stack frame이 `0x20`(32 byte) 대신 `0x68`(104 byte)이 되고, `FPCCR.LSPEN`이 1이면 FP register 저장을 미룹니다(lazy stacking). reset 때 `FPCCR.ASPEN`·`LSPEN`은 둘 다 1입니다(B1.5.5 `TakeReset()`). FPCA는 exception 진입 때 0이 되고(`CONTROL.FPCA = '0'`) FP 명령을 실행하면 1이 되므로, 104 byte frame이 쌓이는지는 **선점당하는 쪽**이 FP를 쓰고 있었는지로 정해집니다. FP를 쓴 task가 선점되면 그 task stack에, float을 쓰는 ISR이 다시 선점되면 MSP에 104 byte frame이 쌓이므로, 해당 stack 크기를 이 기준으로 잡습니다.
 
 ## 정리
 
