@@ -56,7 +56,7 @@ datasheet 8.7절: GDDRAM은 "128 x 64 bits and the RAM is divided into eight pag
 | … | … |
 | 7 | 56–63 |
 
-8 page × 128 column × 1 byte = 1024 byte입니다. pixel (x, y)는 `fb[(y / 8) * 128 + x]`의 bit `y % 8`입니다. 아래 init은 `0xC8`로 COM scan 방향을 뒤집으므로, 모듈을 어느 방향으로 붙였는지에 따라 화면의 위아래가 바뀝니다.
+8 page × 128 column × 1 byte = 1024 byte입니다. pixel (x, y)는 `fb[(y / 8) * 128 + x]`의 bit `y % 8`입니다. 아래 init의 `0xC8`(COM 역순 scan)과 `0xA1`(column 역순)은 패널 배선에 맞춰 고르는 값이라, 모듈에 따라 상하·좌우가 뒤집혀 보이면 `C0h`·`A0h`로 바꿉니다.
 
 ### Memory addressing mode
 
@@ -97,7 +97,7 @@ const uint8_t ssd1306_init[] = {
 };
 ```
 
-각 값은 datasheet 9장 command table의 정의와 RESET 값으로 주석을 달았습니다. `DBh`는 table에 00h·20h·30h 세 값만 있어 20h(reset)를 썼습니다.
+각 값은 datasheet 9장 command table의 정의와 RESET 값으로 주석을 달았습니다. reset 값이 아닌 contrast `0xCF`와 pre-charge `0xF1`은 128×64 모듈 사양서 UG-2864HSWEG01의 charge pump 초기화 예와 같은 값입니다. `DBh`는 table에 00h·20h·30h 세 값만 있어 20h(reset)를 썼습니다.
 
 frame rate는 datasheet 8.3절의 FFRM = FOSC / (D × K × MUX)입니다. K = phase 1 + phase 2 + BANK0 pulse width(50)이므로 위 설정에서 K = 1 + 15 + 50 = 66입니다. FOSC typ 370 kHz(Table 13-1, VDD 2.8 V)로 계산하면 370000 / (1 × 66 × 64) ≈ 87.6 Hz이고, FOSC 범위 333 ~ 407 kHz에 따라 78.8 ~ 96.4 Hz입니다.
 
@@ -233,7 +233,7 @@ void oled_text(int16_t x, int16_t y, const char *s) {
 
 ### 6. DMA flush
 
-5.25 MHz에서 1024 byte는 1560 µs이고, polling `oled_send_data()`는 그동안 CPU를 잡고 있습니다. DMA로 보내면 그 시간 동안 CPU가 다른 일을 합니다.
+5.25 MHz에서 1024 byte의 SCLK 시간만 1560 µs이고, byte마다 RXNE를 기다리는 polling `oled_send_data()`는 그보다 오래 CPU를 잡습니다. DMA로 보내면 그 시간 동안 CPU가 다른 일을 합니다.
 
 ```c
 volatile int oled_dma_busy;
@@ -278,7 +278,7 @@ void DMA2_Stream3_IRQHandler(void) {
 }
 ```
 
-stream·channel 번호는 4-08처럼 ST STM32F412ZG-Nucleo 예제를 따른 것이고, F407의 DMA request 표(RM0090)로 다시 확인해야 합니다. 완료 처리 순서는 HAL v1.8.3 `SPI_DMATransmitCplt()`를 따랐습니다. HAL도 `TXDMAEN`을 끄고 `SPI_EndRxTxTransaction()`으로 BSY를 기다린 뒤, "Clear overrun flag in 2 Lines communication mode because received data is not read" 주석과 함께 OVR을 지웁니다. `oled_dma_busy`가 1인 동안 `fb`를 고치면 전송 중인 화면이 섞이므로, 다음 그리기는 0이 된 뒤 시작합니다.
+stream·channel 번호는 4-08처럼 ST STM32F412ZG-Nucleo 예제를 따른 것입니다. F407의 DMA request 표가 있는 RM0090은 이 글에서 열어 보지 못했으므로, F407에서 이 번호가 맞는지는 이 글의 자료로 확인되지 않았습니다. 완료 처리 순서는 HAL v1.8.3 `SPI_DMATransmitCplt()`를 따랐습니다. HAL도 `TXDMAEN`을 끄고 `SPI_EndRxTxTransaction()`으로 BSY를 기다린 뒤, "Clear overrun flag in 2 Lines communication mode because received data is not read" 주석과 함께 OVR을 지웁니다. `oled_dma_busy`가 1인 동안 `fb`를 고치면 전송 중인 화면이 섞이므로, 다음 그리기는 0이 된 뒤 시작합니다.
 
 ## 측정 / 동작 확인
 
@@ -391,7 +391,7 @@ GDDRAM이 `fb`와 byte 단위로 같고, 선은 (0, 0)에서 (31, 15)까지, "HI
 
 > ⚠️ SPI clock이 10 MHz를 넘음
 
-tcycle 최소 100 ns를 넘기면 byte가 깨집니다. PCLK2 84 MHz에서 /8은 10.5 MHz라 /16을 씁니다.
+SCLK 주기가 tcycle 최소 100 ns보다 짧으면 datasheet가 보증하는 범위 밖입니다. PCLK2 84 MHz에서 /8은 10.5 MHz라 /16을 씁니다.
 
 > ⚠️ D/C# 전환 시점
 
