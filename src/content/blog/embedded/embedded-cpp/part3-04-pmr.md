@@ -24,7 +24,7 @@ std::vector<int, PoolAllocator<int, 32>> v2;     // pool 32 — 다른 타입
 // v1과 v2는 *다른 타입* — 호환 안 됨
 ```
 
-함수 매개변수도 서로 다른 vector 타입이 됩니다. 함수마다 별도로 인스턴스화되어 코드가 부풉니다.
+함수 매개변수도 서로 다른 vector 타입이 됩니다. 두 vector를 받으려면 함수를 템플릿으로 만들어야 하고, allocator 타입마다 별도 인스턴스가 생깁니다.
 
 C++17의 **std::pmr**(Polymorphic Memory Resource)이 이를 해결합니다.
 
@@ -38,7 +38,7 @@ void process(std::pmr::vector<int>& v) {
 }
 ```
 
-런타임 polymorphism으로 컨테이너 타입은 동일하게 유지하면서 코드 인스턴스는 한 번만 만들어집니다.
+메모리 출처를 런타임 객체(`memory_resource*`)로 넘기므로 컨테이너 타입이 하나로 유지되고, `process`도 한 번만 컴파일됩니다. 대가는 할당마다 가상 호출 한 번입니다.
 
 ## 핵심 — memory_resource
 
@@ -93,7 +93,7 @@ std::pmr::vector<int> v(mr);
 v.push_back(1);   // throws std::bad_alloc
 ```
 
-실수 방지용입니다. heap 사용을 원치 않을 때 base resource로 둡니다.
+heap 사용을 원치 않을 때 upstream으로 둡니다. 초기 버퍼가 바닥났을 때 heap으로 조용히 넘어가지 않고 `bad_alloc`으로 드러납니다.
 
 ### 3. `monotonic_buffer_resource` — bump pointer
 
@@ -141,11 +141,11 @@ void reset_pool() {
 }
 ```
 
-매 frame 또는 batch 시작 시점에 release합니다. fragmentation이 없고 빠릅니다.
+매 frame 또는 batch 시작 시점에 release합니다. 해제가 없으므로 구멍(외부 fragmentation)이 생기지 않습니다. 대신 함수 안에서 vector가 커지며 버린 이전 버퍼도 release 전까지 회수되지 않습니다. 아래 계측에서 `push_back` 100번은 총 1,020바이트를 요청했으니, `reserve` 없이 같은 buffer를 쓰면 원소 100개(400바이트)의 두 배 넘게 소비합니다(4바이트 × (1 + 2 + … + 128) = 1,020).
 
 ## 폴백 chain — unsynchronized_pool_resource
 
-C++17은 복잡한 pool도 제공하지만, 임베디드 기준으로는 너무 무거운 경우가 많습니다.
+C++17은 크기 등급별 pool resource도 제공합니다. 다만 이 resource는 chunk를 upstream에서 받아 옵니다.
 
 ```cpp
 std::pmr::pool_options opts{
@@ -157,7 +157,7 @@ std::pmr::unsynchronized_pool_resource pool(opts);
 std::pmr::vector<int> v(&pool);
 ```
 
-unsynchronized_pool_resource는 다중 크기 등급과 chunk 재사용을 제공합니다. 크기·속도·고갈 정책은 실제 라이브러리와 workload로 확인해야 하며, static pool이 항상 더 빠르다는 보장은 없습니다. 위 지정 초기화 문법은 C++20이 필요합니다. C++17에서는 pool_options opts{} 선언 뒤 멤버를 대입합니다.
+unsynchronized_pool_resource는 다중 크기 등급과 chunk 재사용을 제공합니다. upstream을 따로 주지 않으면 default resource(초기값 `new_delete_resource`)를 씁니다. 호출을 세는 resource를 upstream으로 끼우고 `push_back` 한 번만 해 보면, libstdc++(g++-16)는 upstream을 3번(총 1,744바이트), libc++(Clang 23.1.5)는 2번(총 1,336바이트) 불렀습니다. 원소 4바이트 하나에 1KB가 넘는 관리 구조와 chunk를 받아 온 것이고, 그 크기는 라이브러리마다 다릅니다. heap을 금지한 시스템이라면 upstream을 `monotonic_buffer_resource` 같은 정적 버퍼로 둡니다. 위 지정 초기화 문법은 C++20이 필요합니다. C++17에서는 pool_options opts{} 선언 뒤 멤버를 대입합니다.
 
 ## Custom memory_resource — 직접 정의
 
@@ -245,7 +245,7 @@ void process(std::vector<int, Alloc>& v) {   // 매 호출마다 인스턴스화
 }
 ```
 
-`std::vector`는 allocator마다 별도의 instance가 만들어지므로 코드가 부풉니다.
+`std::vector<int, A1>`과 `std::vector<int, A2>`는 다른 타입이므로, 이 함수와 vector의 멤버 함수가 allocator 타입마다 따로 인스턴스화됩니다.
 
 ## 임베디드 패턴 — Frame allocator
 
@@ -291,7 +291,7 @@ std::pmr::unordered_set<T>
 std::pmr::deque<T>
 ```
 
-대부분의 표준 STL 컨테이너에 pmr 버전이 존재합니다.
+목록 외에 `forward_list`, `multimap`, `multiset`, `unordered_multimap`, `unordered_multiset`, `<regex>`의 `match_results`에도 pmr 별칭이 있습니다. allocator를 받는 표준 컨테이너에는 모두 있고, allocator가 없는 `std::array`에는 없습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -322,7 +322,7 @@ std::pmr::vector<int>* make() {
 resource는 vector보다 오래 살아 있어야 합니다.
 
 ### 4. Virtual 호출 비용
-`std::pmr`은 virtual function을 호출하므로 간접 호출 비용이 듭니다. 극히 hot path에서만 측정해 판단하고 대부분 무시할 만합니다.
+`std::pmr`은 할당·해제마다 `do_allocate`·`do_deallocate` 가상 호출을 거칩니다. 호출 횟수는 원소 수가 아니라 할당 횟수입니다. 호출을 세는 resource로 재 보면 `std::pmr::vector<int>`에 `push_back` 100번(reserve 없음)은 `do_allocate`를 8번 불렀습니다(libstdc++·libc++ 동일). 원소마다 노드를 할당하는 `pmr::list`·`pmr::map`은 원소 수만큼 부릅니다. 이 글에서는 호출당 cycle을 재지 않았습니다.
 
 ### 5. RTTI 의존 비교
 do_is_equal은 사용자 구현이 필요한 순수 가상 함수입니다. identity 비교에는 RTTI가 필요하지 않습니다.
@@ -368,7 +368,9 @@ int main() {
 }
 ```
 
-모든 컨테이너가 소멸한 뒤에만 release합니다. 고갈 예외 검사는 RTTI를 켠 기본 빌드에서 실행하고, -fno-rtti -DIDENTITY_ONLY 빌드는 identity 비교·정상 할당·release 후 재할당만 확인합니다. 이 host 구성의 RTTI 비활성 빌드에서는 std::bad_alloc의 타입별 catch가 처리되지 않아 두 검사를 분리했습니다. 예외 비활성 고갈과 다른 toolchain의 catch 동작은 별도로 확인해야 합니다. 코드 크기·cycle 차이는 측정하지 않았습니다.
+모든 컨테이너가 소멸한 뒤에만 release합니다. 기본 빌드(`-std=c++17 -Wall -Wextra -Werror -fsanitize=address,undefined`)는 Homebrew Clang 23.1.5와 g++-16 모두 exit 0이었고, `-fno-rtti -DIDENTITY_ONLY` 빌드도 둘 다 exit 0이었습니다.
+
+`IDENTITY_ONLY` 없이 `-fno-rtti`로 고갈 검사까지 돌리면 결과가 갈렸습니다. g++-16(libstdc++)은 `catch (const std::bad_alloc&)`가 예외를 잡아 exit 0이었고, macOS의 Clang 23.1.5(libc++/libc++abi)는 `libc++abi: terminating due to uncaught exception of type std::bad_alloc: std::bad_alloc`으로 exit 134였습니다. 원인은 이 글에서 추적하지 않았습니다. 그래서 두 검사를 분리했습니다. 코드 크기·cycle 차이는 측정하지 않았습니다.
 
 ## 정리
 
@@ -381,7 +383,7 @@ int main() {
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `pmr-check.cpp`와 호출 계측을 Homebrew Clang 23.1.5(libc++)와 g++-16(libstdc++)으로 macOS arm64 host에서 실행했습니다. 이 글의 ARM 툴체인에는 libstdc++가 없어 `<memory_resource>`를 Cortex-M용으로 빌드하지 못했고, 보드 실행·WCET은 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [memory_resource와 표준 resource 계약](https://eel.is/c++draft/mem.res)
 
