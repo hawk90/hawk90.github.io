@@ -42,7 +42,7 @@ torch.onnx.export(model, dummy, "resnet50.onnx",
 이전 판의 `pretrained=True`는 지금의 torchvision API인 `weights=`로 바꿨습니다. torch 2.15에서 이 호출은 그대로 돌지만 결과가 예전과 다릅니다.
 
 ```text
-DeprecationWarning ... 'dynamic_axes' is not recommended when dynamo=True ... Supply the 'dynamic_shapes' argument
+UserWarning ... 'dynamic_axes' is not recommended when dynamo=True ... Supply the 'dynamic_shapes' argument
 default opset [('ai.onnx', 18)] input dim0 dim_param: "batch"
 ```
 
@@ -260,7 +260,7 @@ so = ort.SessionOptions()
 so.enable_profiling = True
 sess = ort.InferenceSession("resnet50.onnx", so, providers=["CPUExecutionProvider"])
 sess.run(None, {"input": x})
-profile_file = sess.end_profiling()      # JSON, Chrome trace event format
+profile_file = sess.end_profiling()      # JSON file path
 ```
 
 결과 JSON의 node event는 `name`이 `…_kernel_time`으로 끝나고, `args`에 `op_name`, `provider`, `input_type_shape`, `output_type_shape` 등이 있습니다. guest의 첫 실행을 op별로 합치면 `FusedConv`가 91.1%였습니다. 위 CoreML 표의 node 배치도 이 `provider` 필드에서 셌습니다.
