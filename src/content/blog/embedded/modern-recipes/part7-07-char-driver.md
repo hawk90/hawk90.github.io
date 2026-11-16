@@ -457,7 +457,7 @@ static ssize_t big_write(struct file *f, const char __user *ubuf, size_t cnt, lo
 }
 ```
 
-arm64 커널 stack은 KASAN이 없고 page가 16 KiB 이하일 때 `THREAD_SHIFT` 14, 즉 16 KiB입니다(v6.12 `arch/arm64/include/asm/memory.h:115-125`). 이 Debian 커널은 `CONFIG_ARM64_4K_PAGES=y`입니다. Debian 커널은 `CONFIG_FRAME_WARN=2048`이라, 이 함수는 빌드 때 경고가 났습니다.
+arm64 커널 stack은 KASAN이 없고 page가 16 KiB 이하일 때 `THREAD_SHIFT` 14, 즉 16 KiB입니다(v6.12 `arch/arm64/include/asm/memory.h:115-125`). 이 Debian 커널은 `CONFIG_ARM64_4K_PAGES=y`이고 `CONFIG_FRAME_WARN=2048`이라, 이 함수는 빌드 때 경고가 났습니다.
 
 ```text
 /root/p7/707b/bad.c:18:1: warning: the frame size of 8208 bytes is larger than 2048 bytes [-Wframe-larger-than=]
