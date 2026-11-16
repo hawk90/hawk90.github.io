@@ -90,16 +90,16 @@ unlimited
 
 `ulimit`은 그 셸과 자식에게만 적용됩니다. 새 로그인 셸은 PAM이 `/etc/security/limits.conf`와 `limits.d/*.conf`에서 다시 읽은 값으로 시작합니다.
 
-한도를 아주 작게 잡으면 core가 잘립니다. `ulimit -c 4`(4 KiB)로 같은 프로그램을 죽이자 286,720바이트였던 core가 4,128바이트로 남았고, 셸은 그래도 `(core dumped)`를 찍었습니다.
+아래 셸 출력은 이 장의 측정을 모은 스크립트(`/root/c1.sh`)로 돌린 것이라 오류 줄 앞에 스크립트 이름과 줄 번호가 붙습니다. 한도를 아주 작게 잡으면 core가 잘립니다. `ulimit -c 4`(4 KiB)로 같은 프로그램을 죽이자 286,720바이트였던 core가 4,128바이트로 남았고, 셸은 그래도 `(core dumped)`를 찍었습니다.
 
 ```text
 $ bash -c "ulimit -c unlimited; ./segv"
-bash: line 1:  2176 Segmentation fault      (core dumped) bash -c "ulimit -c unlimited; ./segv"
+/root/c1.sh: line 21:  2147 Segmentation fault      (core dumped) bash -c "ulimit -c unlimited; ./segv"
 $ bash -c "ulimit -c 4; ./segv"
-bash: line 1:  2179 Segmentation fault      (core dumped) bash -c "ulimit -c 4; ./segv"
-$ ls -l core.2176 core.2179
--rw------- 1 root root 286720 Nov 16 04:06 core.2176
--rw------- 1 root root   4128 Nov 16 04:06 core.2179
+/root/c1.sh: line 22:  2148 Segmentation fault      (core dumped) bash -c "ulimit -c 4; ./segv"
+$ ls -l core.*
+-rw------- 1 root root 286720 Nov 16 05:46 core.2147
+-rw------- 1 root root   4128 Nov 16 05:46 core.2148
 ```
 
 셸의 `(core dumped)`는 `wait()` 상태의 core 비트(`WCOREDUMP`)를 옮긴 것입니다. 커널이 dump를 시작했다는 뜻일 뿐, 쓸 수 있는 core가 원하는 곳에 저장됐다는 증거는 아닙니다.
@@ -155,7 +155,7 @@ $ cat /proc/sys/kernel/core_uses_pid
 # echo "/var/crash/core.%e.%p.%P.%s.%t.%E.%c.%d.%C" > /proc/sys/kernel/core_pattern
 # bash -c "ulimit -c unlimited; exec ./a_really_long_program_name"
 # ls /var/crash/
-core.a_really_long_p.2220.2220.11.1794802004.!tmp!sig!a_really_long_program_name.18446744073709551615.1.3
+core.a_really_long_p.2154.2154.11.1794807999.!root!c1!a_really_long_program_name.18446744073709551615.1.1
 ```
 
 `%e`는 15글자에서 잘렸고(`a_really_long_p`), `%E`는 `/`를 `!`로 바꾼 전체 경로입니다. `%c`는 unlimited인 `RLIMIT_CORE`를 64비트 최댓값 18446744073709551615로 찍었습니다. 상대 경로는 죽는 프로세스의 현재 디렉터리·mount namespace·root 기준으로 해석됩니다(`core(5)`).
@@ -176,7 +176,7 @@ core.a_really_long_p.2220.2220.11.1794802004.!tmp!sig!a_really_long_program_name
 # echo "|/usr/local/bin/core-handler %p %P %i %I %e %s %c" > /proc/sys/kernel/core_pattern
 # bash -c "ulimit -c 0; exec ./segv"
 # cat /var/crash/handler.log
-argv: 2224 2224 2224 2224 segv 11 0
+argv: 2159 2159 2159 2159 segv 11 0
 uid=0 cwd=/
 bytes=286720
 ```
@@ -206,15 +206,19 @@ bytes=286720
 
 ### 컨테이너 / namespace
 
-PID namespace 안에서 죽은 프로세스는 `%p`와 `%P`가 다릅니다. `unshare -p -f --mount-proc`로 만든 namespace 안에서 같은 프로그램을 죽이자 핸들러가 이렇게 받았습니다.
+PID namespace 안에서 죽은 프로세스는 `%p`와 `%P`가 다릅니다. 이번에는 핸들러가 받은 인자를 덮어쓰지 않고 한 줄씩 덧붙이게(`echo "argv: $* bytes=$(wc -c)" >> /var/crash/handler-ns.log`) 바꾸고, `unshare -p -f --mount-proc`로 만든 namespace 안에서 같은 프로그램을 죽였습니다.
 
 ```text
-argv: 2 2233 2 2233 segv 11 0
+# unshare -p -f --mount-proc bash -c "ulimit -c 0; ./segv; echo inner-exit=\$?"
+bash: line 1:     2 Segmentation fault      (core dumped) ./segv
+inner-exit=139
+# cat /var/crash/handler-ns.log
+argv: 2 2171 2 2171 segv 11 0 bytes=286720
 ```
 
-namespace 안의 PID는 2이고 호스트에서 본 PID는 2233입니다. 핸들러는 초기 namespace에서 실행되므로 `/proc/<pid>`를 찾으려면 `%P`를 써야 합니다. 컨테이너마다 1, 2 같은 작은 PID가 반복되므로 파일 이름에도 `%P`가 겹치지 않습니다.
+namespace 안의 셸은 PID 2를 보고, 핸들러는 `%p` 2와 `%P` 2171을 받았습니다. 명령 끝의 `echo`를 빼면 결과가 달라집니다. 마지막 명령이 된 `./segv`를 bash가 `exec`하고, `unshare`는 자식이 시그널로 죽으면 같은 시그널로 자신도 죽기 때문에 `unshare` 프로세스의 core가 하나 더 핸들러로 들어옵니다. 앞 핸들러처럼 로그를 덮어쓰면 그 두 번째 호출(`%e`가 `unshare`)만 남습니다. 핸들러는 초기 namespace에서 실행되므로 `/proc/<pid>`를 찾으려면 `%P`를 써야 합니다. 컨테이너마다 1, 2 같은 작은 PID가 반복되므로 파일 이름에도 `%P`가 겹치지 않습니다.
 
-`core_pattern`은 커널 전체에 하나뿐이고 namespace별 사본이 없습니다. 호스트 root가 `unshare -p -m -u`로 새 PID·mount·UTS namespace를 만들고 그 안에서 값을 쓰자 호스트의 `core_pattern`이 바뀌었습니다. 반대로 일반 사용자가 `unshare -U -r`로 만든 user namespace의 "root"는 같은 파일에 `Permission denied`를 받았습니다. 컨테이너 안에서 `core_pattern`을 바꿀 수 있다면 그것은 호스트 설정을 바꾸는 것입니다.
+`core_pattern`은 커널 전체에 하나뿐이고 namespace별 사본이 없습니다. 호스트 root가 `unshare -p -m -u -f`로 새 PID·mount·UTS namespace를 만들고 그 안에서 값을 쓰자 호스트의 `core_pattern`이 바뀌었습니다. 반대로 일반 사용자가 `unshare -U -r`로 만든 user namespace의 "root"는 같은 파일에 `Permission denied`를 받았습니다. 컨테이너 안에서 `core_pattern`을 바꿀 수 있다면 그것은 호스트 설정을 바꾸는 것입니다.
 
 ### 파이프 핸들러의 대기 — core_pipe_limit
 
@@ -223,20 +227,20 @@ namespace 안의 PID는 2이고 호스트에서 본 PID는 2233입니다. 핸들
 stdin을 다 읽은 뒤 2초 쉬고 `/proc/<pid>/comm`을 읽는 핸들러로 두 값을 비교했습니다.
 
 ```text
-limit=0 segv-exit-after=0.0s bytes=286720 comm=cat: /proc/2312/comm: No such file or directory
-limit=1 segv-exit-after=2.01s bytes=286720 comm=segv
+limit=0 segv-exit-after=0.00s bytes=286720 comm=cat: /proc/2194/comm: No such file or directory
+limit=1 segv-exit-after=2.00s bytes=286720 comm=segv
 ```
 
-0이면 핸들러가 stdin을 다 읽는 순간 프로세스가 회수되어 `/proc/2312`가 사라집니다. 1이면 커널이 핸들러 종료까지 기다리므로 죽은 프로세스의 종료가 2초 늦어지고 `/proc`이 남아 있습니다.
+0이면 핸들러가 stdin을 다 읽는 순간 프로세스가 회수되어 `/proc/2194`가 사라집니다. 1이면 커널이 핸들러 종료까지 기다리므로 죽은 프로세스의 종료가 2초 늦어지고 `/proc`이 남아 있습니다.
 
 한도를 넘는 경우도 재현했습니다. 3초 동안 stdin을 읽지 않는 핸들러를 걸고 `core_pipe_limit=1`에서 세 프로세스를 동시에 죽이자 하나만 처리되고 둘은 버려졌습니다.
 
 ```text
-[  302.705005] coredump: 2284(segv): over core_pipe_limit, skipping core dump
-[  302.705043] coredump: 2285(segv): over core_pipe_limit, skipping core dump
+[  210.259659] coredump: 2218(segv): over core_pipe_limit, skipping core dump
+[  210.259679] coredump: 2219(segv): over core_pipe_limit, skipping core dump
 ```
 
-이 실험에서 limit=0일 때도 세 프로세스가 모두 3초 뒤에 끝났습니다. 커널이 core를 파이프에 쓰는 동안은 핸들러가 읽어 주기를 기다리기 때문입니다. "기다리지 않는다"는 말은 stdin을 다 쓴 뒤 핸들러의 종료를 기다리지 않는다는 뜻입니다. 핸들러가 stdin을 읽지 않고 멈추면 죽는 프로세스도 그 자리에 묶입니다.
+이 실험에서 limit=0일 때도 세 프로세스가 모두 3.01초 뒤에 끝났습니다(limit=1일 때도 3.01초). 커널이 core를 파이프에 쓰는 동안은 핸들러가 읽어 주기를 기다리기 때문입니다. "기다리지 않는다"는 말은 stdin을 다 쓴 뒤 핸들러의 종료를 기다리지 않는다는 뜻입니다. 핸들러가 stdin을 읽지 않고 멈추면 죽는 프로세스도 그 자리에 묶입니다.
 
 ## systemd-coredump
 
@@ -256,8 +260,8 @@ core는 `/var/lib/systemd/coredump/`에 zstd로 압축되어 저장됩니다. �
 
 ```text
 $ ls -l /var/lib/systemd/coredump/
--rw-r----- 1 root root 16501 Nov 16 04:14 core.server.0.8b125042e29f47708920ccd97b73e1b3.2908.1794802476000000.zst
--rw-r----- 1 root root 16437 Nov 16 04:14 core.server.0.8b125042e29f47708920ccd97b73e1b3.2951.1794802476000000.zst
+-rw-r----- 1 root root 16468 Nov 16 05:52 core.server.0.cae0f96507a64bf391aea4deff2b3dc8.2766.1794808364000000.zst
+-rw-r----- 1 root root 16435 Nov 16 05:52 core.server.0.cae0f96507a64bf391aea4deff2b3dc8.2806.1794808364000000.zst
 ```
 
 286,720바이트짜리 core가 16 KiB로 줄었습니다. 오래된 파일은 `/usr/lib/tmpfiles.d/systemd.conf`의 `d /var/lib/systemd/coredump 0755 root root 2w` 줄에 따라 2주 뒤 `systemd-tmpfiles`가 지웁니다.
@@ -294,11 +298,11 @@ $ ls -l /var/lib/systemd/coredump/
 
 ### `RLIMIT_CORE`=0이면 systemd-coredump도 버린다
 
-파이프 방식이라 커널은 한도를 무시하지만, systemd-coredump는 `%c`로 받은 한도를 따릅니다. `ulimit -c 0` 셸에서 죽은 2904번은 목록에 `none`으로 남았고, journal에 이유가 찍혔습니다.
+파이프 방식이라 커널은 한도를 무시하지만, systemd-coredump는 `%c`로 받은 한도를 따릅니다. `ulimit -c 0` 셸에서 죽은 2762번은 목록에 `none`으로 남았고, journal에 이유가 찍혔습니다.
 
 ```text
-systemd-coredump[2906]: Resource limits disable core dumping for process 2904 (server).
-systemd-coredump[2906]: Process 2904 (server) of user 0 terminated abnormally without generating a coredump.
+systemd-coredump[2764]: Resource limits disable core dumping for process 2762 (server).
+systemd-coredump[2764]: Process 2762 (server) of user 0 terminated abnormally without generating a coredump.
 ```
 
 ### coredumpctl 명령
@@ -307,53 +311,52 @@ systemd-coredump[2906]: Process 2904 (server) of user 0 terminated abnormally wi
 
 ```text
 $ coredumpctl list
-TIME                         PID UID GID SIG     COREFILE EXE                    SIZE
-Mon 2026-11-16 04:14:36 UTC 2904   0   0 SIGSEGV none     /usr/local/bin/server     -
-Mon 2026-11-16 04:14:36 UTC 2908   0   0 SIGSEGV present  /usr/local/bin/server 16.1K
-Mon 2026-11-16 04:14:36 UTC 2951   0   0 SIGSEGV present  /usr/local/bin/server   16K
+TIME                         PID UID GID SIG     COREFILE EXE                   SIZE
+Mon 2026-11-16 05:52:44 UTC 2762   0   0 SIGSEGV none     /usr/local/bin/server    -
+Mon 2026-11-16 05:52:44 UTC 2766   0   0 SIGSEGV present  /usr/local/bin/server  16K
+Mon 2026-11-16 05:52:44 UTC 2806   0   0 SIGSEGV present  /usr/local/bin/server  16K
 ```
 
 `info`는 메타데이터와 함께 systemd-coredump가 저장 시점에 뽑은 스택 트레이스를 보여 줍니다.
 
 ```text
-$ coredumpctl info 2951
-           PID: 2951 (server)
+$ coredumpctl info 2806
+           PID: 2806 (server)
            UID: 0 (root)
            GID: 0 (root)
         Signal: 11 (SEGV)
-     Timestamp: Mon 2026-11-16 04:14:36 UTC (19s ago)
+     Timestamp: Mon 2026-11-16 05:52:44 UTC (3s ago)
   Command Line: /usr/local/bin/server --config=prod.yaml
     Executable: /usr/local/bin/server
  Control Group: /system.slice/server.service
           Unit: server.service
          Slice: system.slice
-       Boot ID: 8b125042e29f47708920ccd97b73e1b3
-    Machine ID: 1f3ad88eff644ed8a5b2ce7f5c990825
+       Boot ID: cae0f96507a64bf391aea4deff2b3dc8
+    Machine ID: d48c9f0766684929b9f173997f262078
       Hostname: localhost
-       Storage: /var/lib/systemd/coredump/core.server.0.8b125042e29f47708920ccd97b73e1b3.2951.1794802476000000.zst (present)
+       Storage: /var/lib/systemd/coredump/core.server.0.cae0f96507a64bf391aea4deff2b3dc8.2806.1794808364000000.zst (present)
   Size on Disk: 16K
-       Message: Process 2951 (server) of user 0 dumped core.
+       Message: Process 2806 (server) of user 0 dumped core.
 
-                Stack trace of thread 2951:
-                #0  0x0000aaaadcdf076c main (/usr/local/bin/server + 0x76c)
-                #1  0x0000ffffa671225c n/a (libc.so.6 + 0x2225c)
-                #2  0x0000ffffa671233c __libc_start_main (libc.so.6 + 0x2233c)
-                #3  0x0000aaaadcdf0670 _start (/usr/local/bin/server + 0x670)
+                Stack trace of thread 2806:
+                #0  0x0000aaaad9c8076c main (/usr/local/bin/server + 0x76c)
+                #1  0x0000ffffadf4225c n/a (libc.so.6 + 0x2225c)
+                #2  0x0000ffffadf4233c __libc_start_main (libc.so.6 + 0x2233c)
+                #3  0x0000aaaad9c80670 _start (/usr/local/bin/server + 0x670)
                 ELF object binary architecture: AARCH64
 ```
 
 `debug`는 저장된 core와 실행 파일로 GDB를 띄웁니다. `--debugger-arguments`로 GDB 옵션을 넘기면 비대화형으로도 쓸 수 있습니다. `dump -o`는 압축을 풀어 일반 ELF core로 꺼냅니다.
 
 ```text
-$ coredumpctl debug 2951 --debugger-arguments="-batch -ex bt"
+$ coredumpctl debug 2806 --debugger-arguments="-batch -ex bt"
 ...
-Core was generated by `/usr/local/bin/server --config=prod.yaml'.
 Program terminated with signal SIGSEGV, Segmentation fault.
-#0  main () at /tmp/sig/segv.c:1
+#0  main () at /root/c1/server.c:1
 1	int main(void) { *(volatile int *)0 = 0; return 0; }
-$ coredumpctl dump 2951 -o /tmp/core.server
-$ file /tmp/core.server
-/tmp/core.server: ELF 64-bit LSB core file, ARM aarch64, version 1 (SYSV), SVR4-style, from '/usr/local/bin/server --config=prod.yaml', ...
+$ coredumpctl dump 2806 -o /root/c1/core.server
+$ file /root/c1/core.server
+/root/c1/core.server: ELF 64-bit LSB core file, ARM aarch64, version 1 (SYSV), SVR4-style, from '/usr/local/bin/server --config=prod.yaml', real uid: 0, effective uid: 0, real gid: 0, effective gid: 0, execfn: '/usr/local/bin/server', platform: 'aarch64'
 ```
 
 `debug`가 debuginfo를 네트워크에서 받는지는 GDB의 debuginfod 설정이 정합니다([Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)).
@@ -364,11 +367,11 @@ $ file /tmp/core.server
 
 | 명령 | 결과 |
 | --- | --- |
-| `coredumpctl list 2908` | 2908 한 줄 |
+| `coredumpctl list 2766` | 2766 한 줄 |
 | `coredumpctl list server` | 세 줄 모두 |
-| `coredumpctl list COREDUMP_PID=2908` | 2908 한 줄 |
-| `coredumpctl list --since=-1h COREDUMP_UNIT=server.service` | 서비스로 죽은 2951 한 줄 |
-| `coredumpctl list PID=2908`, `COMM=server`, `EXE=/usr/local/bin/server` | `No coredumps found.` |
+| `coredumpctl list COREDUMP_PID=2766` | 2766 한 줄 |
+| `coredumpctl list --since=-1h COREDUMP_UNIT=server.service` | 서비스로 죽은 2806 한 줄 |
+| `coredumpctl list PID=2766`, `COMM=server`, `EXE=/usr/local/bin/server` | `No coredumps found.` |
 
 ## PR_SET_DUMPABLE
 
@@ -405,13 +408,13 @@ setuid 프로그램을 실행하면 커널이 dumpable을 `fs.suid_dumpable` 값
 | `suid_dumpable` | `core_pattern` | 결과 |
 | --- | --- | --- |
 | 0 | `core` | core 없음 |
-| 2 | `core` (상대 경로) | core 없음, 커널 로그 "this process can only dump core to a fully qualified path, skipping core dump" |
-| 2 | `/var/crash/core.%e.%p` | `core.suidsegv.2449` 생성, 소유자 root, mode 0600 |
+| 2 | `core` (상대 경로) | core 없음, 커널 로그 "coredump: 2276(suidsegv): this process can only dump core to a fully qualified path, skipping core dump" |
+| 2 | `/var/crash/core.%e.%p` | `core.suidsegv.2288` 생성, 소유자 root(그룹 u1), mode 0600 |
 
 값 2(`suidsafe`)는 "root만 읽는 파일"이 아니라 "절대 경로나 파이프로만 dump 허용"입니다. 결과 파일이 root 소유가 되어 실행한 사용자가 읽지 못하는 것은 그 결과입니다. 상대 경로 패턴이 걸린 상태에서 값을 2로 바꾸면 커널이 먼저 경고합니다.
 
 ```text
-coredump: 2427(bash): Unsafe core_pattern used with fs.suid_dumpable=2: pipe handler or fully qualified core dump path required. Set kernel.core_pattern before fs.suid_dumpable.
+coredump: 2027(bash): Unsafe core_pattern used with fs.suid_dumpable=2: pipe handler or fully qualified core dump path required. Set kernel.core_pattern before fs.suid_dumpable.
 ```
 
 systemd-coredump 패키지는 `suid_dumpable=2`와 파이프 패턴을 같은 sysctl 파일에서 함께 켭니다. 파이프는 값 2의 조건을 만족하므로 setuid 프로그램의 core도 핸들러로 들어갑니다.
@@ -481,9 +484,9 @@ systemd 서비스는 `CoredumpFilter=`로 값을 줍니다(`systemd.exec(5)`). �
 ```text
 $ printf "int main(void) { *(volatile int *)0 = 0; return 0; }\n" > segv.c && gcc -g -o segv segv.c
 $ bash -c "ulimit -c 0; ./segv"
-bash: line 1:  2175 Segmentation fault      bash -c "ulimit -c 0; ./segv"
+/root/c1.sh: line 109:  2387 Segmentation fault      bash -c "ulimit -c 0; ./segv"
 $ bash -c "ulimit -c unlimited; ./segv"
-bash: line 1:  2176 Segmentation fault      (core dumped) bash -c "ulimit -c unlimited; ./segv"
+/root/c1.sh: line 110:  2388 Segmentation fault      (core dumped) bash -c "ulimit -c unlimited; ./segv"
 ```
 
 `(core dumped)`가 붙어도 파일이 원하는 곳에 있다는 보장은 없습니다(앞의 4 KiB 예). 파이프 방식이면 셸은 언제나 `(core dumped)`를 찍고, 실제 저장 여부는 핸들러 쪽에서 봐야 합니다.
@@ -517,13 +520,13 @@ use-after-free 한 줄짜리 프로그램(`gcc -g -fsanitize=address`)을 `ulimi
 | (없음) | 1 | 없음 |
 | `abort_on_error=1` | 134 | 없음 |
 | `abort_on_error=1:disable_coredump=0` | 134 | 48,123,904 B (실제 할당 6,760 KiB) |
-| `abort_on_error=1:disable_coredump=0:use_madv_dontdump=0` | — | 3분 13초 뒤 겉보기 크기 7,138,235,662,336 B에서 강제 종료 |
+| `abort_on_error=1:disable_coredump=0:use_madv_dontdump=0` | — | 120초 뒤에도 쓰는 중, 겉보기 7,138,235,662,336 B·디스크 84 KiB에서 강제 종료 |
 
-core를 얻으려면 두 옵션이 다 필요합니다. libasan은 시작할 때 자기 프로세스의 soft core 한도를 0으로 내립니다. `ulimit -c unlimited` 셸에서 띄운 ASan 프로그램의 `/proc/<pid>/limits`가 `Max core file size 0`이었고, `disable_coredump=0`을 주면 `unlimited`로 남았습니다. 그런데 `disable_coredump=0`만 주면 보고서 뒤 `_exit(1)`로 끝나 시그널이 없으므로 core도 없습니다. `abort_on_error=1`이 SIGABRT를 내야 합니다.
+core를 얻으려면 두 옵션이 다 필요합니다. libasan은 시작할 때 자기 프로세스의 soft core 한도를 0으로 내립니다. `ulimit -c unlimited` 셸에서 띄운 ASan 프로그램이 자기 `/proc/<pid>/limits`를 읽자 `Max core file size 0 unlimited`(soft 0, hard unlimited)였고, `disable_coredump=0`을 주면 `unlimited unlimited`로 남았습니다. 그런데 `disable_coredump=0`만 주면 보고서 뒤 `_exit(1)`로 끝나 시그널이 없으므로 core도 없습니다. `abort_on_error=1`이 SIGABRT를 내야 합니다.
 
 ### ASan shadow 메모리
 
-ASan은 응용 메모리 8바이트마다 shadow 1바이트를 둡니다. 64비트에서는 shadow용 가상 주소를 테라바이트 단위로 예약하고, 기본값 `use_madv_dontdump=1`이 이 영역에 `MADV_DONTDUMP`를 걸어 core에서 뺍니다. 이 옵션을 끄자 커널이 예약 영역 전체를 core에 쓰기 시작했고, 3분이 넘도록 끝나지 않았습니다. 디스크에 실제로 쓰인 것은 84 KiB였지만 파일의 겉보기 크기는 7.1 TB였습니다. `use_madv_dontdump=0`은 shadow를 core에서 꼭 봐야 하는 경우가 아니면 켜지 않습니다.
+ASan은 응용 메모리 8바이트마다 shadow 1바이트를 둡니다. 64비트에서는 shadow용 가상 주소를 테라바이트 단위로 예약하고, 기본값 `use_madv_dontdump=1`이 이 영역에 `MADV_DONTDUMP`를 걸어 core에서 뺍니다. 이 옵션을 끄자 커널이 예약 영역 전체를 core에 쓰기 시작했고, 120초가 지나도 끝나지 않았습니다. 그 시점에 디스크에 실제로 쓰인 것은 84 KiB였지만 파일의 겉보기 크기는 7.1 TB였습니다. `use_madv_dontdump=0`은 shadow를 core에서 꼭 봐야 하는 경우가 아니면 켜지 않습니다.
 
 ## 코어 생성에 시간
 
@@ -531,21 +534,21 @@ core를 쓰는 동안 프로세스는 회수되지 않고, systemd는 서비스�
 
 | 필터 | core 크기 | 실행 전체 시간 |
 | --- | --- | --- |
-| `0x00` | 24,576 B | 0.51 s, 0.32 s |
-| `0x33` | 2,147,770,368 B | 2.37 s, 4.24 s, 1.86 s (세 번 실행) |
+| `0x00` | 24,576 B | 0.23 s, 0.09 s, 0.10 s |
+| `0x33` | 2,147,770,368 B | 5.28 s, 3.59 s, 1.63 s |
 
-시간에는 메모리를 채우는 시간이 들어 있으므로 `0x00` 행이 기준선입니다. 이 VM에서 2 GiB core를 쓰는 데 기준선보다 1.5~3.7초가 더 들었고, 실행마다 차이가 컸습니다. 디스크가 느리거나 파이프 핸들러가 압축까지 하면 더 길어집니다.
+두 필터를 번갈아 세 번씩 실행했습니다. 시간에는 메모리를 채우는 시간이 들어 있으므로 `0x00` 행이 기준선입니다. 이 VM에서 2 GiB core를 쓰는 데 기준선보다 1.5~5.1초가 더 들었고, 실행마다 차이가 컸습니다. 디스크가 느리거나 파이프 핸들러가 압축까지 하면 더 길어집니다.
 
 줄이는 방법은 세 가지입니다.
 
-- **gcore** — 살아 있는 프로세스를 잠깐 멈추고 core를 뜹니다. RSS 1 GiB 프로세스에 `gcore`를 걸자 1.14초 걸렸고, 10 ms마다 깨는 루프가 본 최대 공백은 1.084초였습니다. 다시 실행했을 때는 1.59초, 공백 1.463초였습니다. 그만큼 프로세스가 멈췄습니다.
+- **gcore** — 살아 있는 프로세스를 잠깐 멈추고 core를 뜹니다. RSS 1 GiB 프로세스에 `gcore`를 걸자 2.12초 걸렸고, 10 ms마다 깨는 루프가 본 최대 공백은 1.808초였습니다. 그만큼 프로세스가 멈췄습니다.
 
   ```text
-  $ gcore -o /root/cf/gc $pid
-  Saved corefile /root/cf/gc.2649
-  [Inferior 1 (process 2649) detached]
-  $ ls -l gc.2649
-  -rw-r--r-- 1 root root 1076008496 Nov 16 04:10 gc.2649
+  $ gcore -o /root/c1/gc $pid
+  Saved corefile /root/c1/gc.2456
+  [Inferior 1 (process 2456) detached]
+  $ ls -l gc.2456
+  -rw-r--r-- 1 root root 1076008496 Nov 16 05:49 gc.2456
   ```
 
 - **파이프 핸들러에서 압축** — systemd-coredump가 286,720바이트를 16 KiB로 줄인 것처럼, 디스크에 쓰는 양을 줄입니다.
@@ -575,12 +578,12 @@ int main(void) {
 
 ```text
 $ ./forkcrash
-parent 2770: child 2771 signaled=1 sig=11 core=128
+parent 2640: child 2641 signaled=1 sig=11 core=128
 $ ls core.*
-core.2771
-$ gdb -q -batch -ex bt ./forkcrash core.2771
-#0  main () at forkcrash.c:7
-7	        *(volatile int *)0 = 0;   /* only the child dies */
+core.2641
+$ gdb -q -batch -ex bt ./forkcrash core.2641
+#0  main () at forkcrash.c:8
+8	        *(volatile int *)0 = 0;   /* only the child dies */
 ```
 
 `WCOREDUMP`는 0이 아닌 값(여기서는 128)이면 참입니다. 자식의 core에는 `fork()` 시점에 복사된 부모의 메모리가 들어 있으므로, 콜스택이 부모와 같은 `main`에서 출발합니다.
@@ -594,7 +597,7 @@ $ gdb -q -batch -ex bt ./forkcrash core.2771
 - Debian 13에서 `systemd-coredump` 설치는 core_pattern·core_pipe_limit(16)·suid_dumpable(2)·기본 core 한도를 한꺼번에 바꿉니다.
 - 기본 필터 `0x33`은 파일 매핑을 빼고 heap은 담습니다. heap의 큰 영역은 `MADV_DONTDUMP`로 뺍니다.
 - ASan 프로그램의 core에는 `abort_on_error=1`과 `disable_coredump=0`이 둘 다 필요합니다.
-- 큰 프로세스의 core는 쓰는 시간만큼 재시작을 늦춥니다. `gcore`도 RSS 1 GiB에 약 1초 멈춥니다.
+- 큰 프로세스의 core는 쓰는 시간만큼 재시작을 늦춥니다. `gcore`도 RSS 1 GiB 프로세스를 1.8초 멈췄습니다.
 
 ## 다음 장 예고
 
