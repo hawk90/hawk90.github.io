@@ -43,7 +43,7 @@ Cortex-A TrustZone에서 CPU의 보안 상태는 bus transaction마다 붙는 NS
 
 세계 사이를 오가는 명령은 SMC(Secure Monitor Call)입니다.
 
-SMC의 Function ID는 [SMCCC(DEN0028)](https://developer.arm.com/documentation/den0028/latest)가 bit 단위로 정합니다. TF-A v2.15.0 [`include/lib/smccc.h`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/include/lib/smccc.h#L28-L111)를 보면 bit 31은 fast(1)/yielding(0), bit 30은 SMC64(1)/SMC32(0), bit 29:24는 owner(OEN)입니다. OEN은 0 Arm Architecture, 1 CPU, 2 SiP, 3 OEM, 4 Standard, 48~49 Trusted Application, 50~63 Trusted OS로 나뉩니다. 실제 ID 예는 PSCI입니다. [`psci.h`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/include/lib/psci/psci.h#L43-L57)에서 `PSCI_VERSION`은 `0x84000000`(fast, SMC32, OEN 4), `PSCI_CPU_ON_AARCH64`는 `0xC4000003`, `PSCI_SYSTEM_RESET`은 `0x84000009`입니다.
+SMC의 Function ID는 [SMCCC(DEN0028)](https://developer.arm.com/documentation/den0028/latest)가 bit 단위로 정합니다. TF-A v2.15.0 [`include/lib/smccc.h`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/include/lib/smccc.h#L28-L111)를 보면 bit 31은 fast(1)/yielding(0), bit 30은 SMC64(1)/SMC32(0), bit 29:24는 owner(OEN)입니다. OEN은 0 Arm Architecture, 1 CPU, 2 SiP, 3 OEM, 4 Standard, 5 Standard Hypervisor, 6 Vendor Hypervisor, 7 Vendor EL3, 48~49 Trusted Application, 50~63 Trusted OS로 나뉩니다. 실제 ID 예는 PSCI입니다. [`psci.h`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/include/lib/psci/psci.h#L43-L57)에서 `PSCI_VERSION`은 `0x84000000`(fast, SMC32, OEN 4), `PSCI_CPU_ON_AARCH64`는 `0xC4000003`, `PSCI_SYSTEM_RESET`은 `0x84000009`입니다.
 
 
 SMC를 실행하면 CPU가 EL3로 트랩하고, ARM Trusted Firmware의 BL31이 인자(`x0~x7`)를 보고 *어느 secure service로 라우팅할지* 결정합니다. PSCI(전원 관리), OP-TEE call, 또는 vendor 특화 service 중 하나로 갑니다.
@@ -61,7 +61,7 @@ ARMv8-A에서 NS bit으로 분리되는 자원은 다음과 같습니다.
 | Interrupt | GIC와 보안 설정 | GICv3에서는 Secure Group 0·Secure Group 1·Non-secure Group 1을 구분 |
 | MMU translation | EL·security state의 translation context 관리 | 가상 register 이름을 만들지 않고 실제 register·context save/restore 규칙 확인 |
 
-이 컨트롤러는 누가 언제 설정할까요? TF-A v2.15.0의 Arm 참조 플랫폼에서는 `plat_arm_security_setup()`(TZC-400이면 `arm_tzc400_setup()`)이 설정합니다. 호출 위치는 세 곳입니다. RME가 없으면 BL2의 [`arm_bl2_platform_setup()`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/plat/arm/common/arm_bl2_setup.c#L256-L261), `RESET_TO_BL31` 빌드면 [BL31 setup](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/plat/arm/common/arm_bl31_setup.c#L388-L394), 그리고 system power domain이 깨어날 때의 [`arm_system_pwr_domain_resume()`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/plat/arm/common/arm_pm.c#L172-L183)입니다. 마지막 호출이 있다는 것은 전원이 꺼졌다 켜지면 컨트롤러 설정이 사라져 다시 써야 한다는 뜻입니다. 아래 TrustZone-M 절의 STM32L5 GTZC처럼 lock bit를 따로 두는 컨트롤러도 있습니다.
+이 컨트롤러는 누가 언제 설정할까요? TF-A v2.15.0의 Arm 참조 플랫폼에서는 `plat_arm_security_setup()`(TZC-400이면 `arm_tzc400_setup()`)이 설정합니다. `plat/arm/common`에서 호출하는 곳은 여섯 곳입니다. AArch64 부팅 경로의 대표 위치는 BL2(RME가 없으면 [`arm_bl2_platform_setup()`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/plat/arm/common/arm_bl2_setup.c#L256-L261), 있으면 `arm_bl2_plat_arch_setup()`), `RESET_TO_BL31` 빌드면 [BL31 setup](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/plat/arm/common/arm_bl31_setup.c#L388-L394), 나머지는 BL2U·AArch32 `RESET_TO_SP_MIN` 경로와, system power domain이 깨어날 때의 [`arm_system_pwr_domain_resume()`](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/plat/arm/common/arm_pm.c#L172-L183)입니다. 마지막 호출이 있다는 것은 전원이 꺼졌다 켜지면 컨트롤러 설정이 사라져 다시 써야 한다는 뜻입니다. 아래 TrustZone-M 절의 STM32L5 GTZC처럼 lock bit를 따로 두는 컨트롤러도 있습니다.
 
 ## ARM Trusted Firmware — EL3 코드의 표준
 
@@ -136,7 +136,8 @@ Non-secure caller는 생성된 import library·header를 통해 gateway 함수�
 arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -mcmse -O2 -c cmse-directions.c -o s.o
 arm-none-eabi-gcc -mcpu=cortex-m33 -mthumb -mcmse -nostartfiles -Wl,-T,s.ld \
   -Wl,--section-start=.gnu.sgstubs=0x0C03E000 \
-  -Wl,--cmse-implib -Wl,--out-implib=secure_cmse.o s.o -lgcc -o secure.elf
+  -Wl,--cmse-implib -Wl,--out-implib=secure_cmse.o -Wl,-e,secure_increment \
+  s.o -lgcc -o secure.elf
 ```
 
 ```text
@@ -160,7 +161,7 @@ $ arm-none-eabi-nm secure_cmse.o
 
 세 가지가 보입니다. 첫째, compiler는 entry 함수에 `__acle_se_secure_increment`라는 두 번째 symbol을 붙이고, 반환 직전에 r1~r3·ip와 flag를 `lr` 값으로 덮어 Secure 쪽 값이 register에 남지 않게 한 뒤 `bxns`로 돌아갑니다. 둘째, NSC 영역의 `sg` 명령은 compiler가 아니라 linker가 `.gnu.sgstubs`에 veneer로 만들어 넣습니다. 셋째, import library `secure_cmse.o`에는 `secure_increment`가 veneer 주소 `0x0c03e000`의 절대 symbol로만 들어 있어, Non-secure image는 이 파일을 link해 veneer를 일반 함수처럼 부릅니다.
 
-Callback 쪽 `secure_call_ns()`는 GCC에서 libgcc의 `__gnu_cmse_nonsecure_call`을 부릅니다. 이 helper는 callee-saved register를 target 주소 값으로 덮고 `vlstm`으로 FP 상태를 저장한 뒤 `blxns r4`로 넘어갑니다. Debian clang 19.1.7은 같은 동작을 helper 없이 inline으로 만들었고, `bic r2, r2, #1`로 target 주소의 bit 0을 지워 Non-secure 상태로 가게 했습니다. 이 시험은 link까지이며, 보드에서 SecureFault나 context 유출을 시험하지는 않았습니다.
+Callback 쪽 `secure_call_ns()`는 GCC에서 libgcc의 `__gnu_cmse_nonsecure_call`을 부릅니다. 이 helper는 callee-saved register를 target 주소 값으로 덮고 `vlstm`으로 FP 상태를 저장한 뒤 `blxns r4`로 넘어갑니다. Target 주소의 bit 0은 GCC가 `lsrs r4, r4, #1; lsls r4, r4, #1`로, Debian clang 19.1.7은 helper 없이 inline으로 만든 코드의 `bic r2, r2, #1`로 지웁니다. bit 0이 0이어야 `blxns`가 Non-secure 상태로 넘어갑니다. 이 시험은 link까지이며, 보드에서 SecureFault나 context 유출을 시험하지는 않았습니다.
 
 ## TrustZone-M 의 자원 분리
 

@@ -49,7 +49,7 @@ OTA는 새 이미지를 인증하는 일과, 설치·부팅 실패에서 복구�
 | Image dependency | 0x40 |
 | Security counter | 0x50, protected TLV |
 
-SHA256 TLV가 덮는 범위는 header·image body·protected TLV입니다. 아래 실행에서 protected TLV의 counter 1 bit를 바꾸자 `imgtool verify`가 "Image has an invalid hash"를 낸 것이 그 증거입니다. 일반 TLV 영역(0x6907)의 hash·서명 자체는 hash 범위 밖이고 서명으로 보호됩니다. 이 글의 fixture 검사는 악성 image를 fuzzing한 결과가 아닙니다.
+SHA256 TLV가 덮는 범위는 header·image body·protected TLV입니다. 아래 실행에서 protected TLV의 counter 1 bit를 바꾸자 `imgtool verify`가 "Image has an invalid hash"를 낸 것이 그 증거입니다. 일반 TLV 영역(0x6907)의 hash·서명은 hash 범위 밖이며, 서명은 SHA256 TLV 값을 대상으로 계산됩니다. 이 글의 fixture 검사는 악성 image를 fuzzing한 결과가 아닙니다.
 
 ## 실제 imgtool로 host 검증하기
 

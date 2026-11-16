@@ -129,7 +129,7 @@ HAB v4.1.2부터는 CSF key·IMG key 없이 SRK 하나로 CSF와 이미지를 �
 
 | 항목 | 문서의 값 |
 |---|---|
-| 서명 방식 | RSA-PSS, RSA-3072 (ECDSA는 이 칩의 Secure Boot V2에 없음) |
+| 서명 방식 | RSA-PSS, RSA-3072 (이 문서에는 RSA-PSS만 기술됨) |
 | 최소 칩 revision | ECO3(Rev 3) 이상, `CONFIG_ESP32C3_REV_MIN` ≥ 3 |
 | eFuse에 두는 공개키 digest | 1~3개, 각각 `KEY_REVOKE` bit로 폐기 |
 | Signature block | 4 KB 정렬된 별도 flash sector에서 시작, 1,216 B |
@@ -208,7 +208,7 @@ Trusted Firmware-A(TF-A)는 Arm A-profile 플랫폼용 참조 펌웨어입니다
 
 - **개발 모드와 양산 모드를 혼동합니다.** 개발 키로 서명된 펌웨어가 양산 디바이스에 절대 들어가지 않게 빌드 시스템에서 분리해야 합니다.
 - **OTP 굽기를 너무 일찍 합니다.** 한 번 굽으면 회수 불가입니다. U-Boot HABv4 가이드도 `hab_status`가 "No HAB Events Found!"를 낸 뒤에만 `SEC_CONFIG[1]`를 구우라고 합니다.
-- **anti-rollback 카운터를 모든 빌드마다 올립니다.** OTP 카운터는 bit 수만큼만 올릴 수 있고, 올리고 나면 바로 이전 이미지로도 내려갈 수 없습니다. MCUboot 설계 문서가 카운터를 version과 분리하는 이유가 이것입니다. 보안 수정이 들어간 릴리스에서만 올립니다.
+- **anti-rollback 카운터를 모든 빌드마다 올립니다.** MCUboot 설계 문서는 카운터를 version과 분리해 두면 릴리스마다 올릴 필요가 없고, 카운터 값이 같은 옛 이미지로는 내려갈 수 있다고 설명합니다. 올리는 순간 그보다 낮은 이미지로는 돌아갈 수 없으므로 보안 수정이 들어간 릴리스에서만 올립니다.
 - **서명 검증만 하고 dm-verity는 안 켭니다.** kernel이 검증돼도 rootfs가 검증 안 되면 SD 카드 스왑으로 우회됩니다. 체인은 *application까지* 이어져야 합니다.
 - **검증 실패 시 무엇을 할지 결정하지 않습니다.** 무한 reset, recovery 파티션 부팅, 영구 brick — 모두 정책적 선택입니다. 미리 정해 두지 않으면 양산 후 첫 실패에서 혼란이 옵니다.
 - **TRNG 없이 ECDSA 서명을 생성합니다.** ECDSA는 nonce 재사용 시 즉시 private key가 노출됩니다. 빌드 머신에서도 양질의 entropy를 보장해야 하며, 디바이스에서 서명하는 경우 *deterministic ECDSA* (RFC 6979) 또는 Ed25519를 씁니다.

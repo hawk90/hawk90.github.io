@@ -84,6 +84,8 @@ export function pearson(x, y) {
 
 이 함수를 Node v24.21.0에서 돌렸습니다. S-box는 Mbed TLS 3.6.4 `library/aes.c`의 `FSb[256]`을 그대로 읽었고, key byte `0x2b`로 HW(S-box(p ⊕ key))를 만든 뒤 고정 seed LCG로 만든 균등 잡음을 더해 합성 trace를 만들었습니다. 256개 후보를 절댓값 상관으로 정렬한 결과입니다.
 
+출력 중 일부입니다.
+
 ```text
 node v24.21.0, N=200, key byte 0x2b, noise uniform +-2
 normal: top=0x2b:0.828 0x77:0.290 0x14:-0.277 | 0x2b rank=1
@@ -130,7 +132,7 @@ Boolean masking은 비밀값을 여러 share로 표현하고 각 연산을 share
 
 일반 memcmp의 조기 종료를 비밀 비교에 의존하지 않습니다. 검증된 library의 비교 함수와 전체 호출 경로를 사용합니다. [Ch 3](/blog/embedded/embedded-security/chapter03-mcu-crypto)의 실제 Mbed TLS 3.6.4 `mbedtls_ct_memcmp()` 기능 검사는 입력 동일·차이를 확인한 것이며, MCU에서 timing leak이 없다는 증거는 아닙니다. Homemade C loop도 compiler 변환·주변 코드·target의 영향을 받습니다.
 
-같은 원칙이 *table lookup*에도 적용됩니다. Bernstein의 ["Cache-timing attacks on AES"](https://cr.yp.to/antiforgery/cachetiming-20050414.pdf)(2005)는 850 MHz Pentium III에서 OpenSSL 0.9.7a AES로 packet을 암호화하는 UDP server를 만들고, 다른 컴퓨터에서 보낸 known-plaintext packet의 응답 시간만으로 AES key 전체를 복원했습니다. 800 B packet 2^25개(약 160분)를 보낸 뒤 상관을 계산했고, 400 B packet 2^27개를 더 써서 후보를 좁혔습니다. 원인은 key에 의존하는 T-table index가 cache hit/miss로 시간을 바꾸는 것입니다. Ch 1에서 잰 Mbed TLS 기본 AES도 T-table을 RAM에 만드는 구현이므로, cache가 있는 Cortex-A·Cortex-M7에서는 같은 질문을 던져야 합니다.
+같은 원칙이 *table lookup*에도 적용됩니다. Bernstein의 ["Cache-timing attacks on AES"](https://cr.yp.to/antiforgery/cachetiming-20050414.pdf)(2005)는 850 MHz Pentium III에서 OpenSSL 0.9.7a AES로 packet을 암호화하는 UDP server를 만들었습니다. 이 server는 응답에 CPU cycle counter timestamp를 실어 보냅니다. 같은 기종에서 key를 아는 server로 timing profile을 먼저 모은 뒤, 다른 컴퓨터에서 대상 server에 known-plaintext packet을 보내 그 timing과 상관을 계산해 AES key 전체를 복원했습니다. 800 B packet 2^25개(약 160분), 이어 600 B 2^25개와 400 B 2^27개를 써서 후보를 좁혔습니다. 논문은 timestamp를 빼도 client가 round-trip 시간을 재면 공격이 된다고 주장합니다. 원인은 key에 의존하는 T-table index가 cache hit/miss로 시간을 바꾸는 것입니다. Ch 1에서 잰 Mbed TLS 기본 AES도 T-table을 RAM에 만드는 구현이므로, cache가 있는 Cortex-A·Cortex-M7에서는 같은 질문을 던져야 합니다.
 
 ## Fault Injection — 다른 종류의 공격
 

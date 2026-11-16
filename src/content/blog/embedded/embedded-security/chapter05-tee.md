@@ -47,7 +47,7 @@ CA는 context 초기화, session 열기, command invoke, session close, context 
 | 공유 metadata | 검사 뒤 normal world가 바꿀 수 있으므로 secure copy와 검증·사용 일관성 |
 | Output | short-buffer 길이와 오류 시 비밀값 노출 방지 |
 
-Shared memory mapping은 포인터를 읽을 수 있게 해 주지만 내용의 불변성·권한을 보장하지 않습니다. 또한 TA의 AES-CTR 예에서 `{ /* random */ }`은 실제 random IV가 아니라 0으로 초기화된 배열입니다. 매 호출 같은 counter로 암호화하는 불완전 예제는 쓰지 않습니다. 검증된 AEAD 사용과 nonce 정책은 [Ch 3](/blog/embedded/embedded-security/chapter03-mcu-crypto)에서 다룹니다.
+Shared memory mapping은 포인터를 읽을 수 있게 해 주지만 내용의 불변성·권한을 보장하지 않습니다. 검증된 AEAD 사용과 nonce 정책은 [Ch 3](/blog/embedded/embedded-security/chapter03-mcu-crypto)에서 다룹니다.
 
 ## Persistent object — 실패해도 handle을 닫기
 
@@ -107,7 +107,7 @@ OP-TEE 4.5.0의 저장소 backend는 REE FS와 RPMB 두 가지입니다. [`core/
 | TA별 key 분리 | HUK → SSK → TSK → FEK로 파생. 기본 [`otp_stubs.c`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/core/kernel/otp_stubs.c#L13-L24)의 `tee_otp_get_hw_unique_key()`는 HUK를 전부 0으로 채우는 `__weak` stub이므로 platform이 fuse 값으로 덮어써야 함 |
 | 저장소 복원 | 오래된 snapshot·metadata rollback·counter 동기화와 가용성 정책 검증 |
 
-[4.5.0 secure storage 문서](https://optee.readthedocs.io/en/4.5.0/architecture/secure_storage.html)는 GP의 rollback protection level로 이 차이를 적습니다. `CFG_RPMB_FS=y`면 rollback 보호를 TEE가 제어하며 level 1000, `CFG_RPMB_FS=n`이면 rollback 보호가 없고 level 0입니다. `config.mk`도 REE FS의 rollback 보호(`CFG_REE_FS_INTEGRITY_RPMB`)는 `CFG_RPMB_FS=y`일 때만 동작한다고 주석을 답니다. 따라서 "암호화된 REE 파일이면 이전 버전 복원도 막는다"는 결론은 틀립니다. 기본 빌드에서는 normal world가 `/data/tee`의 옛 파일을 되돌려 놓아도 TA는 정상 read에 성공합니다.
+[4.5.0 secure storage 문서](https://optee.readthedocs.io/en/4.5.0/architecture/secure_storage.html)는 GP의 rollback protection level로 이 차이를 적습니다. `CFG_RPMB_FS=y`면 rollback 보호를 TEE가 제어하며 level 1000, `CFG_RPMB_FS=n`이면 rollback 보호가 없고 level 0입니다. `config.mk`도 REE FS의 rollback 보호(`CFG_REE_FS_INTEGRITY_RPMB`)는 `CFG_RPMB_FS=y`일 때만 동작한다고 주석을 답니다. 따라서 "암호화된 REE 파일이면 이전 버전 복원도 막는다"는 결론은 틀립니다. 단, 객체 파일 하나만 옛 판으로 바꾸면 탐지됩니다. [`core/tee/fs_dirfile.c`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/core/tee/fs_dirfile.c#L22-L28)의 `struct dirfile_entry`가 객체마다 hash를 `dirf.db`에 두기 때문입니다. 탐지할 장치가 없는 것은 `dirf.db`를 포함한 `/data/tee` 전체를 옛 snapshot으로 되돌리는 경우입니다. 이 동작은 source로 읽은 것이며 실행하지 않았습니다.
 
 RPMB 쪽에도 함정이 있습니다. `CFG_RPMB_WRITE_KEY=y`는 RPMB key가 아직 없을 때 TEE가 key를 써 넣게 하는데, `config.mk`는 이 옵션을 product build에서 켜면 "TEE가 RPMB key를 유출할 수 있다"고 경고합니다. 공장 provisioning 전용입니다. `CFG_RPMB_TESTKEY=y`는 HUK에서 파생하는 대신 고정 key를 씁니다.
 
@@ -138,7 +138,7 @@ OP-TEE TA, SGX enclave, TDX·SEV-SNP VM, CCA Realm은 보호 단위와 TCB가 �
 - Persistent object는 실패 경로에서도 획득한 handle을 정확히 닫습니다.
 - API 판에 맞는 `size_t`·호환 signature를 사용합니다.
 - 기본 빌드(`CFG_REE_FS=y`, `CFG_RPMB_FS=n`)의 `TEE_STORAGE_PRIVATE`는 REE FS이고 rollback 보호 level은 0입니다.
-- 기본 HUK stub은 전부 0이므로 platform이 fuse 값을 넣지 않으면 TA별 key 분리가 의미를 잃습니다.
+- 기본 HUK stub은 전부 0이므로, platform이 fuse 값을 넣지 않으면 SSK·TSK·FEK를 장치 밖에서 계산할 수 있어 REE FS 암호화가 의미를 잃습니다.
 - Host mock은 helper의 close 횟수만 확인했고, 실제 TA·저장소 실행은 하지 않았습니다.
 
 다음 편은 **Ch 6: OTA 업데이트 — 안전한 펌웨어 배포**. 지금까지 다진 secure boot·crypto·TEE 기반 위에서, 양산 디바이스에 펌웨어를 *원격으로 안전하게* 갱신하는 메커니즘을 봅니다.

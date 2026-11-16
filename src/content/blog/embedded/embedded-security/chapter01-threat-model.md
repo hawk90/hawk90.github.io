@@ -105,7 +105,7 @@ STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때�
 | **A**ffected users | 영향 받는 사용자 비율 | 1% 미만 | 100% |
 | **D**iscoverability | 발견 난이도 | 내부자만 알 수 있음 | 공개 CVE, Shodan 검색 한 번 |
 
-평균에는 약점이 있습니다. LeBlanc가 든 예를 그대로 계산하면, Damage 1에 나머지 넷이 10인 위협(잘 알려진 성가신 문제)과 Discoverability 1에 나머지 넷이 10인 위협(찾기는 어렵지만 피해가 막대한 문제)이 둘 다 41/5 = 8.2점으로 같아집니다. 그는 대안으로 축마다 high·medium·low 세 단계만 매기고, 피해 축(Damage·Reliability·Affected users)으로 심각도를, 상황에 따라 바뀌는 축(Exploitability·Discoverability)으로 우선순위 가산점을 따로 계산하는 방식을 제안했습니다. 같은 글에 "Microsoft 내부에서도 이 방식을 많이 쓰지 않으며 MSRC 방식도 아니다"라는 단서가 붙어 있습니다. 그래서 아래 표의 점수는 이 장의 설명용 입력값이고, 평균은 정렬 순서를 잡는 데만 씁니다.
+평균에는 약점이 있습니다. LeBlanc가 든 예를 그대로 계산하면, Damage 1에 나머지 넷이 10인 위협(잘 알려진 성가신 문제)과 Discoverability 1에 나머지 넷이 10인 위협(찾기는 어렵지만 피해가 막대한 문제)이 둘 다 41/5 = 8.2점으로 같아집니다. 그는 대안으로 축마다 high·medium·low 세 단계만 매기고, 피해 축(Damage·Reliability·Affected users, LeBlanc 글은 R을 reliability라 부름)으로 심각도를, 상황에 따라 바뀌는 축(Exploitability·Discoverability)으로 우선순위 가산점을 따로 계산하는 방식을 제안했습니다. 같은 글에 "Microsoft 내부에서도 이 방식을 많이 쓰지 않으며 MSRC 방식도 아니다"라는 단서가 붙어 있습니다. 그래서 아래 표의 점수는 이 장의 설명용 입력값이고, 평균은 정렬 순서를 잡는 데만 씁니다.
 
 ## 임베디드 특화 공격 벡터
 
@@ -129,7 +129,7 @@ AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있�
 
 **Cold boot / RAM remanence**
 
-DRAM은 전원이 끊긴 뒤에도 내용이 바로 사라지지 않습니다. Halderman 등의 ["Lest We Remember: Cold Boot Attacks on Encryption Keys"](https://www.usenix.org/legacy/event/sec08/tech/full_papers/halderman/halderman.pdf)(USENIX Security 2008)는 실온에서 시험한 기계들이 데이터를 완전히 잃기까지 빠른 쪽은 약 2.5초, 느린 쪽은 평균 35초 걸렸다고 보고합니다. 압축 공기 스프레이로 칩 표면을 약 −50 °C까지 식히면 전원 없이 10분이 지나도 bit의 1% 미만만 decay했고, 액체 질소에 60분 담근 모듈은 1 MB 시험 영역에서 0.17%만 바뀌었습니다. 대응은 키를 필요한 동안만 RAM에 두고, 쓰고 나면 즉시 0으로 지우는(zeroization) 것입니다.
+DRAM은 전원이 끊긴 뒤에도 내용이 바로 사라지지 않습니다. Halderman 등의 ["Lest We Remember: Cold Boot Attacks on Encryption Keys"](https://www.usenix.org/legacy/event/sec08/tech/full_papers/halderman/halderman.pdf)(USENIX Security 2008)는 정상 동작 온도(기계에 따라 25.5~44.1 °C)에서 시험한 기계들이 데이터를 완전히 잃기까지 빠른 쪽은 약 2.5초, 느린 쪽은 평균 35초 걸렸다고 보고합니다. 압축 공기 스프레이로 칩 표면을 약 −50 °C까지 식히면 전원 없이 10분이 지나도 bit의 1% 미만만 decay했고, 액체 질소에 60분 담근 모듈은 1 MB 시험 영역에서 0.17%만 바뀌었습니다. 대응은 키를 필요한 동안만 RAM에 두고, 쓰고 나면 즉시 0으로 지우는(zeroization) 것입니다.
 
 ## 자원 제약 — MCU에서의 crypto 도전
 
@@ -138,7 +138,8 @@ DRAM은 전원이 끊긴 뒤에도 내용이 바로 사라지지 않습니다. H
 ```bash
 arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -ffunction-sections -fdata-sections \
   -Iinclude -Ilibrary -c library/ecp_curves.c -o ecp_curves.o
-arm-none-eabi-size aes.o gcm.o sha256.o bignum.o ecp.o ecp_curves.o ecdsa.o rsa.o
+arm-none-eabi-size aes.o gcm.o sha256.o bignum.o bignum_core.o ecp.o ecp_curves.o \
+  ecdsa.o rsa.o rsa_alt_helpers.o
 ```
 
 | object | 설정 | `.text` (B) | `.bss` (B) |
@@ -157,7 +158,7 @@ arm-none-eabi-size aes.o gcm.o sha256.o bignum.o ecp.o ecp_curves.o ecdsa.o rsa.
 
 표에서 두 가지가 보입니다. 첫째, 기본 설정의 AES는 S-box·T-table을 실행 중에 만들어 RAM(`.bss`)에 8.7 KB를 씁니다. `MBEDTLS_AES_ROM_TABLES`를 켜면 RAM 사용은 0이 되고 그만큼 flash가 늘어납니다. RAM이 작은 MCU에서는 이 한 줄이 RAM과 flash 중 무엇을 쓸지를 정합니다. 둘째, 곡선을 P-256 하나로 줄이면 `ecp_curves.o`가 34.9 KB에서 2.7 KB로 줄어듭니다. 이 크기는 링크 전 object의 `.text`라서 `--gc-sections` 뒤 최종 image에서는 쓰지 않는 함수만큼 더 줄어듭니다. 실행 시간과 stack 사용량은 이 측정에 들어 있지 않습니다.
 
-이 제약 때문에 임베디드에서는 다음과 같은 *현실적인 타협*이 자주 일어납니다.
+이 제약 때문에 임베디드에서는 다음과 같은 *타협*을 검토합니다.
 
 - RSA 대신 ECC — 크기 차이는 서명과 키에서 납니다. OpenSSL 4.1.0으로 만든 RSA-2048 서명은 256 B, P-256 서명은 DER로 69~72 B(raw r‖s는 64 B)였습니다([Ch 2](/blog/embedded/embedded-security/chapter02-secure-boot)). 반면 위 표에서 코드 크기는 RSA 경로(`rsa`+`rsa_alt_helpers`+`bignum`+`bignum_core` = 22,938 B)와 P-256 ECDSA 경로(`ecdsa`+`ecp`+P-256 `ecp_curves`+`bignum`+`bignum_core` = 25,959 B)가 비슷합니다. ECC로 바꾸면 flash보다 전송·저장하는 바이트가 줄어듭니다.
 - 전송 protocol과 인증 정책을 따로 고릅니다. UDP 위에서는 TLS 대신 DTLS([RFC 9147](https://www.rfc-editor.org/rfc/rfc9147), DTLS 1.3)를 씁니다. PSK를 쓰면 인증서 검증 코드가 빠지는 대신 키 배포·교체를 직접 설계해야 합니다.
@@ -216,11 +217,11 @@ arm-none-eabi-size aes.o gcm.o sha256.o bignum.o ecp.o ecp_curves.o ecdsa.o rsa.
 - 공격자 능력 단계는 이 장의 구분이며, 제품마다 막을 단계와 잔여 위험을 적습니다.
 - STRIDE는 위협의 6가지 종류(Spoofing·Tampering·Repudiation·Info disclosure·DoS·Elevation)를 분류합니다.
 - DREAD는 5축(Damage·Reproducibility·Exploitability·Affected users·Discoverability)에 1~10점을 매겨 평균을 냅니다. 평균은 피해가 큰 위협을 묻을 수 있어서 Damage를 따로 봅니다.
-- 임베디드 특화 공격 벡터는 JTAG·storage 스왑·glitch·side-channel·DRAM 잔류입니다. DRAM은 실온에서 수 초, −50 °C에서 10분 넘게 내용을 유지했습니다(Halderman 2008).
+- 임베디드 특화 공격 벡터는 JTAG·storage 스왑·glitch·side-channel·DRAM 잔류입니다. DRAM은 정상 동작 온도에서 수 초~수십 초, −50 °C에서는 10분 뒤에도 bit의 1% 미만만 decay했습니다(Halderman 2008).
 - Mbed TLS 3.6.4의 Cortex-M4 object 크기로 보면 기본 AES는 RAM 8.7 KB를 쓰고, 곡선을 P-256 하나로 줄이면 `ecp_curves`가 34.9 KB에서 2.7 KB가 됩니다.
 - 위협 모델은 가정·시험 계획·잔여 위험을 적는 문서이며, 새 기능이 들어올 때마다 다시 엽니다.
 
-다음 편은 **Ch 2: Secure Boot — 부트 체인 검증**. 위협 모델 표의 최상위 항목인 "임의 펌웨어 실행"을 어떻게 막는지, ROM부터 application까지 체인을 따라가며 봅니다.
+다음 편은 **Ch 2: Secure Boot — 부트 체인 검증**. 위협 모델 표에서 평균이 가장 높았던 "RoT 공개키 변조"와 "펌웨어 이미지 변조"를 어떻게 막는지, ROM부터 application까지 체인을 따라가며 봅니다.
 
 ## 관련 항목
 
