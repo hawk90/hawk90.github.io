@@ -24,7 +24,7 @@ QEMU는 cycle을 흉내 내지 않으므로, 아래의 Cortex-M 비교는 시간
 
 ## 어떤 상황에서 쓰나
 
-수백 KB RAM의 Cortex-M MCU에서 작은 신경망(키워드 검출, 사람 검출 등)을 OS 없이 돌릴 때입니다. 저장소의 예제가 그 크기를 보여 줍니다. `micro_speech` test의 arena는 28,600 byte, `person_detection`은 136 KB로 잡혀 있습니다.
+수백 KB RAM의 Cortex-M MCU에서 작은 신경망(키워드 검출, 사람 검출 등)을 OS 없이 돌릴 때입니다. 저장소의 예제가 그 크기를 보여 줍니다. `micro_speech` test는 arena를 28,600 byte(소스 주석상 xtensa p6 기준)로, `person_detection`은 136 KB로 잡혀 있습니다.
 
 ## 핵심 개념
 
@@ -72,6 +72,7 @@ unsigned int person_detect_tflite_len = 300568;
 #include "tensorflow/lite/micro/micro_mutable_op_resolver.h"
 #include "tensorflow/lite/micro/system_setup.h"
 #include "tensorflow/lite/micro/models/person_detect_model_data.h"
+#include "tensorflow/lite/micro/examples/person_detection/testdata/person_image_data.h"
 
 constexpr int kArenaSize = 136 * 1024;
 alignas(16) static uint8_t arena[kArenaSize];
@@ -92,7 +93,7 @@ int main() {
   MicroPrintf("arena_used_bytes %u", (unsigned)interp.arena_used_bytes());
 
   TfLiteTensor *in = interp.input(0);                  // int8 [1, 96, 96, 1]
-  for (size_t i = 0; i < in->bytes; i++) in->data.int8[i] = image[i];
+  for (size_t i = 0; i < in->bytes; i++) in->data.int8[i] = (int8_t)g_person_image_data[i];
   if (interp.Invoke() != kTfLiteOk) return 1;
 
   TfLiteTensor *out = interp.output(0);                // int8 [1, 2]: no_person, person
@@ -101,7 +102,7 @@ int main() {
 }
 ```
 
-malloc도, OS 호출도 없습니다. op 다섯 개(`AVERAGE_POOL_2D`, `CONV_2D`, `DEPTHWISE_CONV_2D`, `RESHAPE`, `SOFTMAX`)는 저장소 예제가 이 모델에 등록하는 목록 그대로입니다.
+실제로 돌린 프로그램은 이 구조에 결과 출력용 `printf`를 더한 것이고, Cortex-M 빌드에서는 `MicroPrintf` 출력을 받으려고 `RegisterDebugLogCallback()`으로 출력 함수를 등록했습니다. malloc도, OS 호출도 없습니다. op 다섯 개(`AVERAGE_POOL_2D`, `CONV_2D`, `DEPTHWISE_CONV_2D`, `RESHAPE`, `SOFTMAX`)는 저장소 예제가 이 모델에 등록하는 목록 그대로입니다.
 
 host에서 저장소의 test를 먼저 돌리면 빌드 환경이 맞는지 확인할 수 있습니다.
 
@@ -125,7 +126,7 @@ no person data.  person score: -57, no person score: 57
 | Cortex-M4, reference kernel | 139,264 | 82,292 |
 | Cortex-M4, CMSIS-NN kernel | 139,264 | 82,308 |
 
-같은 모델이라도 target과 kernel에 따라 값이 다르므로, 최종 크기는 target 빌드에서 잽니다. 64 KB arena로 줄이면 `AllocateTensors()`가 실패하고 무엇이 모자란지 출력합니다.
+같은 모델이라도 target과 kernel에 따라 값이 다르므로, 최종 크기는 target 빌드에서 잽니다. Cortex-M4 reference kernel 빌드에서 64 KB arena로 줄이면 `AllocateTensors()`가 실패하고 무엇이 모자란지 출력합니다(host에서는 `available 36032, missing: 19264`).
 
 ```text
 Failed to resize buffer. Requested: 55296, available 38656, missing: 16640
@@ -182,7 +183,7 @@ interp.Invoke();
 prof.LogTicksPerTagCsv();
 ```
 
-host(aarch64) 빌드에서 tick은 `clock()` 값입니다. 절대값은 MCU와 무관하지만 op 사이의 비중은 볼 수 있습니다.
+host(aarch64) 빌드는 Makefile이 `-DTF_LITE_USE_CTIME`을 넣으므로 tick이 `clock()` 값입니다. 절대값은 MCU와 무관하지만 op 사이의 비중은 볼 수 있습니다.
 
 ```text
 "Unique Tag","Total ticks across all events with that tag."
@@ -211,7 +212,7 @@ make -f tensorflow/lite/micro/tools/make/Makefile network_tester_test CO_PROCESS
 
 > ⚠️ Invoke 전에 입력을 다시 채우지 않음
 
-같은 입력으로 Invoke를 두 번 부르는 binary를 돌리자 두 번째 결과가 `[-113, 113]`이 아니라 `[2, -2]`였습니다(reference, CMSIS-NN 모두). arena는 수명이 끝난 tensor 자리를 다시 쓰므로, 입력 tensor의 내용은 Invoke 뒤에 남아 있다고 보장되지 않습니다. 매 Invoke 전에 입력을 다시 씁니다.
+같은 입력으로 Invoke를 두 번 부르는 binary를 돌리자 두 번째 결과가 `[-113, 113]`이 아니라 `[2, -2]`였습니다(reference, CMSIS-NN 모두). host 빌드에서 Invoke 뒤 입력 tensor를 원래 이미지와 비교하자 9,216 byte 중 9,178 byte가 바뀌어 있었습니다(입력은 arena+18432, 출력은 arena+0). arena 안의 입력 자리를 중간 tensor가 다시 쓴 것입니다. 매 Invoke 전에 입력을 다시 씁니다.
 
 > ⚠️ arena를 재지 않고 정함
 
@@ -227,7 +228,7 @@ make -f tensorflow/lite/micro/tools/make/Makefile network_tester_test CO_PROCESS
 
 > ⚠️ 입력 양자화 부호
 
-이 모델의 입력은 int8, scale 0.007843, zero_point -1입니다. 실수 입력 `x`는 `q = round(x / scale) + zero_point`로 바꿉니다. 이전 판처럼 `- zero_point`로 쓰면 zero_point만큼 어긋납니다. 저장소 예제는 uint8 이미지를 넣을 때 128을 빼서 int8로 바꿉니다.
+이 모델의 입력은 int8, scale 0.007843, zero_point -1입니다. 실수 입력 `x`는 [12-04](/blog/embedded/modern-recipes/part12-04-quantization)의 LiteRT 식 `real = (q - zero_point) × scale`을 뒤집은 `q = round(x / scale) + zero_point`로 바꿉니다. 이전 판처럼 `- zero_point`로 쓰면 zero_point만큼 어긋납니다. 저장소 예제는 uint8 이미지를 넣을 때 128을 빼서 int8로 바꿉니다.
 
 ## 정리
 
@@ -235,7 +236,7 @@ make -f tensorflow/lite/micro/tools/make/Makefile network_tester_test CO_PROCESS
 - `MicroMutableOpResolver`에 모델이 쓰는 op만 등록합니다. 하나라도 빠지면 `AllocateTensors()`가 실패합니다.
 - arena 크기는 `arena_used_bytes()`로 target 빌드에서 잽니다. person detection 모델은 Cortex-M4에서 82,292 byte였습니다.
 - Cortex-M4에서 CMSIS-NN kernel은 Invoke 명령어 수를 22.7분의 1로 줄였고 `.text`는 31,992 byte 늘었습니다.
-- arena가 입력 버퍼를 다시 쓰므로 매 Invoke 전에 입력을 채웁니다.
+- 이 모델에서는 Invoke가 arena 안의 입력 자리를 덮어썼으므로 매 Invoke 전에 입력을 채웁니다.
 
 다음 편은 **ONNX Runtime**입니다.
 
