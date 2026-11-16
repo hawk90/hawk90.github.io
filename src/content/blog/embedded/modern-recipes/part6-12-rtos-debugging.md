@@ -1,8 +1,8 @@
 ---
-title: "RTOS 디버깅 기법 — Tracealyzer·SystemView·Stack 추적"
+title: "RTOS 디버깅 기법 — Stack·Heap·Run-time Stats·SystemView"
 slug: "embedded/modern-recipes/part6-12-rtos-debugging"
 date: 2026-04-15T09:11:00
-description: "Stack high-water mark, overflow hook, deadlock 탐지, heap 분석, trace 도구까지 RTOS 디버깅을 한 자리에 정리합니다."
+description: "Stack high-water mark, overflow hook, heap 통계, run-time stats, mutex timeout을 FreeRTOS V11.2.0·QEMU에서 실행해 읽고, SystemView 연결 방법을 SEGGER 문서로 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 74
 tags: [recipes, rtos, debugging]
@@ -25,13 +25,13 @@ topics: ["embedded"]
 
 | 인프라 | 옵션 | 쓰는 API | 근거 |
 | --- | --- | --- | --- |
-| Stack high-water mark | `configUSE_TRACE_FACILITY 1`(`uxTaskGetSystemState`용) | `uxTaskGetSystemState`, `uxTaskGetStackHighWaterMark` | V11.2.0 `tasks.c:4440`, `:6429` |
+| Stack high-water mark | `configUSE_TRACE_FACILITY 1`(`uxTaskGetSystemState`용), `INCLUDE_uxTaskGetStackHighWaterMark 1`(`uxTaskGetStackHighWaterMark`용, 기본값 0) | `uxTaskGetSystemState`, `uxTaskGetStackHighWaterMark` | V11.2.0 `tasks.c:4440`, `:6429` |
 | Overflow hook | `configCHECK_FOR_STACK_OVERFLOW 2` | `vApplicationStackOverflowHook` | `include/stack_macros.h:101-118` |
 | Malloc 실패 hook | `configUSE_MALLOC_FAILED_HOOK 1` | `vApplicationMallocFailedHook` | `portable/MemMang/heap_4.c` |
 | Heap 통계 | (heap_4 기본) | `xPortGetFreeHeapSize`, `xPortGetMinimumEverFreeHeapSize`, `vPortGetHeapStats` | `include/portable.h`의 `HeapStats_t` |
 | Run-time stats | `configGENERATE_RUN_TIME_STATS 1`, `configUSE_STATS_FORMATTING_FUNCTIONS 1` | `vTaskGetRunTimeStatistics` | `tasks.c:7460` |
 
-이 글에서 실제로 빌드한 설정 파일은 아래와 같습니다. 아래쪽 블록이 디버깅용으로 켠 옵션이고, run-time stats의 시계로는 `mps2-an385`의 CMSDK APB TIMER0을 free-running down-counter로 씁니다. QEMU v11.1.0 `hw/arm/mps2.c`는 timer *i*를 `0x40000000 + i * 0x1000`에 두고 25 MHz `SYSCLK_FRQ`를 pclk로 물리며, `hw/timer/cmsdk-apb-timer.c`의 레지스터 offset은 CTRL 0, VALUE 4, RELOAD 8입니다.
+이 글에서 실제로 빌드한 설정 파일은 아래와 같습니다. 아래쪽 블록이 디버깅용으로 켠 옵션이고, run-time stats의 시계로는 `mps2-an385`의 CMSDK APB TIMER0을 free-running down-counter로 씁니다. QEMU v11.1.3 `hw/arm/mps2.c`는 timer *i*를 `0x40000000 + i * 0x1000`에 두고 25 MHz `SYSCLK_FRQ`를 pclk로 물리며, `hw/timer/cmsdk-apb-timer.c`의 레지스터 offset은 CTRL 0, VALUE 4, RELOAD 8입니다.
 
 ```c
 #ifndef FREERTOS_CONFIG_H
@@ -172,7 +172,7 @@ static void waiter(void *a)
 
 ### 일부러 넘치는 task
 
-`recurse`는 frame마다 64바이트 배열을 잡고 `vTaskDelay(1)`로 매번 context switch를 일으킵니다. FreeRTOS의 overflow 검사는 context switch 때만 돌기 때문입니다(`tasks.c:5153`의 `taskCHECK_FOR_STACK_OVERFLOW()`가 `vTaskSwitchContext` 안에 있습니다). `TOUCH_ALL`을 정의하면 frame 전체를 쓰고, 정의하지 않으면 frame마다 한두 바이트만 씁니다.
+`recurse`는 단계마다 64바이트 배열을 쓰고 `vTaskDelay(1)`로 context switch를 일으킵니다. FreeRTOS의 overflow 검사는 context switch 때만 돌기 때문입니다(`tasks.c:5153`의 `taskCHECK_FOR_STACK_OVERFLOW()`가 `vTaskSwitchContext` 안에 있습니다). `TOUCH_ALL`을 정의하면 배열 64바이트를 모두 쓰고, 정의하지 않으면 배열마다 한두 바이트만 씁니다. 다만 `-O2`에서 GCC는 재귀 아홉 단계를 한 함수 안에 펼칩니다. `-fstack-usage`가 보고한 `recurse`의 frame은 592 B이고 `overflow`는 72 B라, 128 word(512 B) stack에서는 첫 `recurse` 호출에서 이미 SP가 stack 시작(`pxStack`) 아래로 내려갑니다.
 
 ```c
 static void recurse(volatile char *p, int depth)
@@ -285,7 +285,7 @@ waiter: hwm=226 words = 904 bytes
 Tmr Svc: hwm=228 words = 912 bytes
 ```
 
-`usStackHighWaterMark`의 단위는 byte가 아니라 word입니다. `uxTaskGetStackHighWaterMark`는 stack 끝에서부터 `tskSTACK_FILL_BYTE`(`0xa5`)가 이어진 byte 수를 센 뒤 `sizeof(StackType_t)`로 나누고(`tasks.c:6364-6377`), ARM_CM3 port의 `StackType_t`는 `uint32_t`입니다(`portmacro.h:55-58`). 그래서 byte로 바꾸려면 4를 곱합니다. 같은 이유로 `xTaskCreate`의 stack 크기 인자도 word 단위입니다. 커널은 `uxStackDepth * sizeof(StackType_t)` byte를 할당하므로(`tasks.c:1674`), Cortex-M에서 `xTaskCreate(t, "t", 8192, ...)`는 32 KiB를 잡습니다.
+`usStackHighWaterMark`의 단위는 byte가 아니라 word입니다. 이 값은 `vTaskGetInfo`가 `prvTaskCheckFreeStackSpace`로 채우고(`tasks.c:6308`), 이 함수는 stack 끝에서부터 `tskSTACK_FILL_BYTE`(`0xa5`)가 이어진 byte 수를 센 뒤 `sizeof(StackType_t)`로 나눕니다(`:6364-6377`). `uxTaskGetStackHighWaterMark`도 같은 함수를 부르고(`:6450`), ARM_CM3 port의 `StackType_t`는 `uint32_t`입니다(`portmacro.h:55-58`). 그래서 byte로 바꾸려면 4를 곱합니다. 같은 이유로 `xTaskCreate`의 stack 크기 인자도 word 단위입니다. 커널은 `uxStackDepth * sizeof(StackType_t)` byte를 할당하므로(`tasks.c:1674`), Cortex-M에서 `xTaskCreate(t, "t", 8192, ...)`는 32 KiB를 잡습니다.
 
 256 word로 만든 task들이 226~246 word를 남겼으니, 이 workload에서는 stack의 대부분이 한 번도 쓰이지 않았습니다. 다만 high-water mark는 *지금까지 지나간 경로*만 반영합니다. 오류 처리 경로처럼 아직 실행되지 않은 경로의 깊이는 이 숫자에 없습니다.
 
@@ -321,7 +321,7 @@ freed the rest: free=56280
 
 heap_4는 블록을 해제할 때 이웃한 빈 블록과 합칩니다(`heap_4.c:30-32`의 "combines (coalescences) adjacent memory blocks"). 그래도 *이웃이 사용 중*이면 합칠 수 없습니다. 이 실행은 100 B를 heap이 빌 때까지 502번 할당한 뒤 하나 건너 하나씩 풀었습니다. 그 결과 빈 공간은 28,168 B로 절반이 남았지만, 가장 큰 빈 블록은 112 B였고 `pvPortMalloc(1024)`는 실패했습니다. 주차장에 빈 칸이 절반 남아 있어도 연속된 빈 칸이 없으면 버스를 세울 수 없는 것과 같습니다.
 
-112 B는 요청 100 B에 heap_4의 블록 헤더 `xHeapStructSize`를 더하고 `portBYTE_ALIGNMENT`(ARM_CM3에서 8)로 올림한 크기입니다(`heap_4.c:158`). 32비트에서 `BlockLink_t`는 포인터 하나와 `size_t` 하나라 8 B이고, 100 + 8 = 108을 8의 배수로 올리면 112입니다. 그래서 `xPortGetFreeHeapSize()` 하나만 보면 "28 KB 남았다"고 안심하게 됩니다. 단편화를 보려면 `vPortGetHeapStats`의 `xSizeOfLargestFreeBlockInBytes`를 같이 찍어야 합니다.
+112 B는 요청 100 B에 heap_4의 블록 헤더 `xHeapStructSize`를 더하고 `portBYTE_ALIGNMENT`(ARM_CM3에서 8)로 올림한 크기입니다(`heap_4.c:158`, `:186-199`). 32비트에서 `BlockLink_t`는 포인터 하나와 `size_t` 하나라 8 B이고, 100 + 8 = 108을 8의 배수로 올리면 112입니다. 그래서 `xPortGetFreeHeapSize()` 하나만 보면 "28 KB 남았다"고 안심하게 됩니다. 단편화를 보려면 `vPortGetHeapStats`의 `xSizeOfLargestFreeBlockInBytes`를 같이 찍어야 합니다.
 
 ### Overflow 감지
 
@@ -331,7 +331,7 @@ heap_4는 블록을 해제할 때 이웃한 빈 블록과 합칩니다(`heap_4.c
 [hook] stack base 0x20003918: a5a5a5a5 a5a5a5a5 a5a5a5a5 a5a5a5a5
 ```
 
-IPSR = 14는 지금 처리 중인 예외 번호이고, 이 글 `startup.c`의 vector table에서 14번 자리는 `xPortPendSVHandler`입니다. 즉 hook은 task 문맥이 아니라 PendSV 핸들러 안에서 불렸습니다. V11.2.0 ARM_CM3 port의 `xPortPendSVHandler`는 BASEPRI를 `configMAX_SYSCALL_INTERRUPT_PRIORITY`로 올린 채 `vTaskSwitchContext`를 부르고(`port.c:472-473`), 그 안에서 overflow 검사가 돕니다. Scheduler 상태 2는 `taskSCHEDULER_RUNNING`입니다(`task.h:281`). 그래서 hook 안에서는 `FromISR`로 끝나지 않는 API를 부르면 안 됩니다. 위에서 본 `vTaskGetInfo`의 assert가 그 예입니다.
+IPSR = 14는 지금 처리 중인 예외 번호이고, 이 글 `startup.c`의 vector table에서 14번 자리는 `xPortPendSVHandler`입니다. 즉 hook은 task 문맥이 아니라 PendSV 핸들러 안에서 불렸습니다. V11.2.0 ARM_CM3 port의 `xPortPendSVHandler`는 BASEPRI를 `configMAX_SYSCALL_INTERRUPT_PRIORITY`로 올린 채 `vTaskSwitchContext`를 부르고(`port.c:472-473`), 그 안에서 overflow 검사가 돕니다. Scheduler 상태 2는 `taskSCHEDULER_RUNNING`입니다(`task.h:281`). 그래서 hook 안에서 critical section을 여는 API를 부르면 `port.c:438`의 assert에 걸립니다. 위에서 본 `vTaskGetInfo`는 `eInvalid`로 부르면 `eTaskGetState`가 critical section을 엽니다(`tasks.c:2530`). 이 hook이 부르는 `xTaskGetSchedulerState`는 단일 코어 빌드에서 critical section 없이 변수만 읽습니다(`tasks.c:6599-6631`).
 
 Stack 시작의 네 word는 모두 `0xa5a5a5a5`로 남아 있었습니다. 이번 감지는 패턴 검사가 아니라 SP 검사에서 나왔다는 뜻입니다. V11.2.0의 method 2는 저장된 SP(`pxTopOfStack`)가 `pxStack` 이하인지 먼저 보고, 그다음 시작 네 word가 `0xa5a5a5a5`인지 봅니다(`stack_macros.h:109-113`).
 
@@ -342,9 +342,9 @@ Stack 시작의 네 word는 모두 `0xa5a5a5a5`로 남아 있었습니다. 이�
 | V11.2.0 | 한두 바이트 | hook 호출 | `a5a5a5a5` ×4 |
 | V11.2.0 | 64바이트 전부 | hook 호출 | `a5a5a5a5` ×4 |
 | V11.1.0 | 한두 바이트 | **HardFault**, hook 없음 | — |
-| V11.1.0 | 64바이트 전부 | hook 호출 | `03030303` ×4 |
+| V11.1.0 | 64바이트 전부 | hook 호출 | `0x03030303` ×4 (`pr`의 `%x`는 앞자리 0을 찍지 않아 `3030303`으로 나옴) |
 
-V11.1.0의 method 2는 패턴 네 word만 비교하고 SP 검사는 하지 않습니다(V11.1.0 `stack_macros.h:89-106`). Frame마다 한두 바이트만 쓰면 recursion이 패턴 영역을 건너뛰어 다른 블록을 덮고, 그 결과 HardFault로 끝났습니다. 소스 주석도 이 검사가 "does not guarantee that an overflowed stack will always be recognised"라고 적습니다(`stack_macros.h:42-43`). 감시 카메라가 출입문 하나만 비춘다면 창문으로 들어온 사람은 찍히지 않는 것과 같습니다. 그래서 MPU로 stack 아래에 guard region을 두는 방법을 함께 검토합니다. Method 1·2와 MPU guard의 차이는 [PRTOS 4-06: Stack Overflow](/blog/embedded/rtos/practical-internals/part4-06-stack-overflow)에서 다룹니다.
+V11.1.0의 method 2는 패턴 네 word만 비교하고 SP 검사는 하지 않습니다(V11.1.0 `stack_macros.h:89-106`). 배열마다 한두 바이트만 쓰면 64 B 간격의 쓰기가 `pxStack`의 16 B 패턴을 건너뛰고, 그 결과 hook 없이 HardFault로 끝났습니다. 소스 주석도 이 검사가 "does not guarantee that an overflowed stack will always be recognised"라고 적습니다(`stack_macros.h:42-43`). 감시 카메라가 출입문 하나만 비춘다면 창문으로 들어온 사람은 찍히지 않는 것과 같습니다. 그래서 MPU로 stack 아래에 guard region을 두는 방법을 함께 검토합니다. Method 1·2와 MPU guard의 차이는 [PRTOS 4-06: Stack Overflow](/blog/embedded/rtos/practical-internals/part4-06-stack-overflow)에서 다룹니다.
 
 ### Trace recorder (SystemView)
 
@@ -355,7 +355,7 @@ Run-time stats는 누적 합계라서 "언제" 튀었는지는 보여 주지 않
 - 연속 기록의 RTT 버퍼 기본값은 1024 B(`SEGGER_SYSVIEW_RTT_BUFFER_SIZE`)이고, 문서는 대부분 1024 B로 충분하며 4096 B까지 늘릴 수 있다고 적습니다. Single-shot과 post-mortem 기록에는 최소 8 KB를 권합니다(4.5.2.1절).
 - 문서가 밝힌 비용은 200 MHz Cortex-M4 기준 이벤트 하나에 1 µs 미만, 초당 10,000 이벤트에서 1% 미만이고, RTT·SystemView 모듈의 ROM은 합쳐 2 KB 미만입니다(1.1.2절).
 
-ISR을 기록하는 형태는 문서의 예를 따르면 다음과 같습니다.
+ISR을 기록하는 형태는 문서의 예(6.1.2.3절)를 따르면 다음과 같습니다.
 
 ```c
 #include "SEGGER_SYSVIEW.h"
@@ -374,7 +374,7 @@ Tracealyzer(Percepio)도 같은 목적의 도구지만, 이 글에서는 그 문
 
 > ⚠️ 디버거에서만 잡으려 함
 
-양산 보드의 간헐적 reset은 디버거가 붙은 책상 위에서는 재현되지 않는 경우가 있습니다. 위 hook들이 찍은 정보(task 이름, IPSR, heap 상태)를 UART 대신 reset 뒤에도 남는 영역(flash, backup RAM 등)에 저장해 두면, 다음 부팅에서 그 기록을 읽을 수 있습니다. 저장 위치와 형식은 보드마다 다르므로 이 글의 예는 UART 출력에서 멈춥니다.
+디버거가 없는 보드에서 reset이 나면, 위 hook들이 찍은 정보(task 이름, IPSR, heap 상태)를 UART 대신 reset 뒤에도 남는 영역(flash, backup RAM 등)에 저장해 두면, 다음 부팅에서 그 기록을 읽을 수 있습니다. 저장 위치와 형식은 보드마다 다르므로 이 글의 예는 UART 출력에서 멈춥니다.
 
 > ⚠️ `xPortGetFreeHeapSize()`만 보고 안심함
 
@@ -398,7 +398,7 @@ Trace recorder는 이벤트마다 코드를 더 실행합니다. SEGGER 문서�
 
 ## 재현 환경
 
-아래 파일과 명령으로 위 출력을 그대로 다시 얻을 수 있습니다. 사용한 도구는 `arm-none-eabi-gcc` 16.2.0(Homebrew, newlib 없음)과 QEMU 11.1.3이고, 커널은 FreeRTOS-Kernel V11.2.0 태그입니다. Newlib이 없으므로 FreeRTOS가 쓰는 `snprintf`·`memset`·`memcpy`·`strlen`·`strcpy`·`memcmp`를 `io.c`에 직접 넣었습니다.
+아래 파일과 명령으로 위 출력을 그대로 다시 얻을 수 있습니다. 사용한 도구는 `arm-none-eabi-gcc` 16.2.0(Homebrew, newlib 없음)과 QEMU 11.1.3이고, 커널은 FreeRTOS-Kernel V11.2.0 태그입니다. Newlib이 없으므로 FreeRTOS가 이 빌드에서 쓰는 `snprintf`·`memset`·`memcpy`·`strlen`·`strcpy`를(`arm-none-eabi-nm -u`로 확인) `io.c`에 직접 넣었습니다.
 
 디렉터리에는 `FreeRTOSConfig.h`, `rtdbg.c`(위 네 블록), `startup.c`, `io.c`, `link.ld`, 그리고 `libc/` 아래 `stdio.h`·`stdlib.h`·`string.h` 세 헤더를 둡니다. `libc/` 헤더는 `io.c`에 넣은 함수의 선언만 담고, `stdlib.h`는 `#pragma once` 한 줄입니다.
 
@@ -415,7 +415,6 @@ void *memset(void *, int, size_t);
 void *memcpy(void *, const void *, size_t);
 size_t strlen(const char *);
 char *strcpy(char *, const char *);
-int memcmp(const void *, const void *, size_t);
 ```
 
 ```c
@@ -536,12 +535,6 @@ void *memset(void *d, int c, size_t n) { unsigned char *p = d; while (n--) *p++ 
 void *memcpy(void *d, const void *s, size_t n) { unsigned char *p = d; const unsigned char *q = s; while (n--) *p++ = *q++; return d; }
 size_t strlen(const char *s) { size_t n = 0; while (s[n]) n++; return n; }
 char *strcpy(char *d, const char *s) { char *r = d; while ((*d++ = *s++)) { } return r; }
-int memcmp(const void *x, const void *y, size_t n)
-{
-    const unsigned char *p = x, *q = y;
-    for (; n--; p++, q++) if (*p != *q) return *p - *q;
-    return 0;
-}
 ```
 
 ```text
@@ -575,7 +568,7 @@ qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel rt
 - `vTaskGetRunTimeStatistics`의 백분율은 정수 나눗셈이라 합이 100이 안 될 수 있고, 시계가 32비트에서 한 바퀴 돌면 값이 틀어집니다.
 - Heap 상태는 free 총량과 가장 큰 블록을 함께 봅니다. 이 실행에서는 28 KB가 남았는데도 1 KiB 할당이 실패했습니다.
 - Mutex를 timeout으로 기다리면 deadlock이 영원한 정지 대신 기록 가능한 실패가 됩니다.
-- Overflow hook은 PendSV 안에서 불립니다. hook 안에서는 ISR-safe API만 씁니다.
+- Overflow hook은 PendSV 안에서 불립니다. hook 안에서 critical section을 여는 API를 부르면 `port.c:438`의 assert에 걸립니다.
 - Method 2도 모든 overflow를 잡지는 않습니다. V11.1.0에서는 패턴을 건너뛴 overflow가 HardFault로 끝났고, V11.2.0은 SP 검사를 더해 같은 경우를 잡았습니다.
 
 다음 편부터 Part 7 **임베디드 Linux 부팅 흐름**으로 넘어갑니다.
