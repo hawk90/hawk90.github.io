@@ -198,7 +198,7 @@ magic을 데이터보다 나중에 쓰므로, 두 write 사이에 전원이 끊�
 
 ### 5. Dual bank — OTA bootloader
 
-Flash가 두 bank인지는 F4 안에서도 칩마다 다릅니다. 두 bank 칩에서 한 bank를 실행하며 다른 bank를 쓰는 read-while-write 동작의 조건은 reference manual RM0090에 있는데, 이 글은 그 문서를 확인하지 못했습니다. HAL v1.8.3 `stm32f4xx_hal_flash_ex.h`는 `FLASH_BANK_2`와 bank별 필드(`SectorsBank2`, `BootConfig`)를 STM32F427/437/429/439/469/479에만 정의하고, F407에는 `FLASH_BANK_1`만 있습니다. F407에서 같은 구조를 만들려면 아래 표의 두 영역을 서로 다른 sector에 두고, 새 image를 쓰는 동안 실행할 코드를 RAM에 둡니다.
+Flash가 두 bank인지는 F4 안에서도 칩마다 다릅니다. RM0090 Rev 22(st.com이 응답하지 않아 [stm32.dirba.io](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/03-embedded-flash-memory-interface/)의 본문 판으로 확인) 3.6.5절은 read-while-write를 "In STM32F42xxx and STM32F43xxx devices, the flash memory is divided into two banks allowing read-while-write operations"라고 F42x/F43x에 한정하고, 3.4절은 dual bank 구성이 "available only on 1 Mbyte and 2 Mbyte devices"라고 적습니다. HAL v1.8.3 `stm32f4xx_hal_flash_ex.h`는 `FLASH_BANK_2`와 bank별 필드(`SectorsBank2`, `BootConfig`)를 STM32F427/437/429/439/469/479에만 정의하고, F407에는 `FLASH_BANK_1`만 있습니다. F407에서 같은 구조를 만들려면 아래 표의 두 영역을 서로 다른 sector에 두고, 새 image를 쓰는 동안 실행할 코드를 RAM에 둡니다.
 
 | 영역 | 역할 |
 |------|------|
@@ -248,7 +248,7 @@ PSIZE는 위 HAL 표처럼 VDD 범위로 정합니다. 예를 들어 VDD가 2.7 
 
 > ⚠️ IRQ가 erase 중 들어옴
 
-ISR과 vector table이 Flash에 있으면 그 시간 동안 같은 Flash를 읽어야 하므로, erase 중 반응해야 하는 ISR은 RAM에 두거나 erase 구간을 그 ISR이 없어도 되는 시점으로 옮깁니다. 정확한 stall 동작은 reference manual RM0090에 있는데, 이 글은 그 문서를 확인하지 못했습니다.
+ISR과 vector table이 Flash에 있으면 그 시간 동안 같은 Flash를 읽어야 하므로, erase 중 반응해야 하는 ISR은 RAM에 두거나 erase 구간을 그 ISR이 없어도 되는 시점으로 옮깁니다. RM0090 3.6절은 "Any attempt to read the flash memory on STM32F4xx while it is being written or erased, causes the bus to stall"이고 "code or data fetches cannot be performed while a write/erase operation is ongoing"이라고 적습니다.
 
 > ⚠️ Linker가 reserved 영역을 안 비움
 
