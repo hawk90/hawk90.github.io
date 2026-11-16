@@ -26,7 +26,7 @@ Rob Pike의 발표 "Concurrency is not parallelism"을 소개한 Go 블로그 �
 
 ## Race Condition — 정의
 
-여러 thread가 순서 보장 없이 공유 자원에 접근하고, 그 결과가 실행 순서에 따라 달라지는 상황을 race condition이라 합니다. 문제가 되는 것은 대부분 read-modify-write입니다. 아래 코드는 load와 store를 각각 atomic으로 했지만, 그 사이에 다른 thread가 끼어들 수 있습니다.
+여러 thread가 순서 보장 없이 공유 자원에 접근하고, 그 결과가 실행 순서에 따라 달라지는 상황을 race condition이라 합니다. 아래 코드는 `counter`를 1 늘리는 read-modify-write를 atomic load와 atomic store 두 번으로 나눴습니다. 두 연산 각각은 atomic이지만, 그 사이에 다른 thread가 끼어들 수 있습니다.
 
 ```c
 #include <stdatomic.h>

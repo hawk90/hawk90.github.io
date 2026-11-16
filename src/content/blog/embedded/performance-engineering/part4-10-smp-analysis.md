@@ -183,7 +183,7 @@ struct sched_param sp = { .sched_priority = 80 };
 sched_setscheduler(0, SCHED_FIFO, &sp);
 ```
 
-RT task는 보통 affinity와 함께 설정해 특정 CPU에 둡니다. 다음 절의 `isolcpus`·cpuset과 짝을 이룹니다.
+RT task를 특정 CPU에 두려면 affinity를 함께 설정합니다. 다음 절의 `isolcpus`·cpuset과 짝을 이룹니다.
 
 ## Cache Topology Awareness
 
