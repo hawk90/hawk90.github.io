@@ -231,7 +231,7 @@ $ du -sh output/build output/host output/images output/target
 21M	output/images
 4.4M	output/target
 $ ls -la output/staging
-lrwxrwxrwx 1 br br 66 Nov 16 03:07 output/staging -> /home/br/buildroot/output/host/aarch64-buildroot-linux-gnu/sysroot
+lrwxrwxrwx 1 br br 66 Nov 16 07:13 output/staging -> /home/br/buildroot/output/host/aarch64-buildroot-linux-gnu/sysroot
 ```
 
 | 경로 | 역할 |
