@@ -10,30 +10,45 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-VSCode·PyCharm·Neovim·Emacs가 모두 *같은 디버거*에 붙는 비결은 두 프로토콜에 있습니다. *MI* (GDB/MI — GDB Machine Interface)가 *GDB 측 표준*, *DAP* (Debug Adapter Protocol)가 *IDE 측 표준*. client와 adapter가 지원하는 capability·대상 runtime·실행 환경이 맞아야 연결할 수 있습니다. DAP adapter가 MI를 사용하는 것은 여러 구현 중 하나입니다.
+VS Code·Neovim·Emacs가 같은 GDB에 붙을 수 있는 것은 두 프로토콜 덕입니다. *MI*(GDB/MI, GDB Machine Interface)는 GDB가 정의한 *기계용 명령·응답 형식*이고, *DAP*(Debug Adapter Protocol)는 Microsoft가 공개한 *편집기 ↔ 디버그 어댑터* 규약입니다. 국제 우편에 비유하면 DAP는 모든 나라가 받아 주는 국제 우편 양식이고, MI는 GDB라는 한 우체국의 내부 양식입니다. 어댑터가 그 사이에서 양식을 옮겨 적습니다.
 
-이 장은 두 프로토콜의 정체와 그 사이 매개의 흐름을 다룹니다.
+이 장은 두 프로토콜을 실제 트래픽으로 봅니다. MI는 `gdb --interpreter=mi3`에, DAP는 GDB 16.3에 내장된 DAP 서버(`gdb -i=dap`)에 직접 메시지를 보내 받은 응답을 그대로 실었습니다. 모두 Debian 13 arm64 VM의 GDB 16.3(Debian 16.3-1)에서 돌렸습니다.
 
 :::tldr
 ![Debug protocol stack — IDE ↔ DAP ↔ Adapter ↔ MI/RSP ↔ GDB/LLDB/debugpy](/images/blog/gdb-extension/diagrams/ch05-protocol-stack.svg)
 
-DAP가 IDE 호환을 만들고, MI(또는 RSP)가 디버거 호환을 만듭니다.
+DAP가 편집기 쪽 호환을 만들고, MI(또는 디버거 고유 API)가 디버거 쪽 호환을 만듭니다. GDB 16.3은 `-i=dap`으로 그 자신이 DAP 어댑터가 됩니다.
 :::
+
+실습 프로그램 `vecprog.cpp`는 `main()`이 `handle(i)`를 세 번(i = 0, 1, 2) 부르고, `handle()`이 `std::vector<int> vec = {1, 2, 3}`을 만들어 `process(vec, i)`를 부릅니다. `process()`의 7행이 `printf`입니다.
+
+```cpp title="vecprog.cpp (발췌)"
+int process(const std::vector<int> &vec, int i) {
+    int x = vec[0] + i;
+    std::printf("x=%d\n", x);       // 7행
+    return x;
+}
+int handle(int i) {
+    std::vector<int> vec = {1, 2, 3};
+    return process(vec, i);           // 12행
+}
+```
 
 ## GDB/MI — Machine Interface
 
-CLI(`(gdb)` 프롬프트의 일반 명령)는 *사람용*. 출력이 자유로워 *기계 파싱이 어려움*. MI는 *기계용*: 구조화된 명령·응답.
+CLI(`(gdb)` 프롬프트의 일반 명령)는 사람용이고, MI는 기계용이라 모든 응답이 정해진 문법(GDB 16.3 매뉴얼 GDB/MI Output Syntax 절)을 따릅니다.
 
 ### 활성화
 
-```bash
-$ gdb --interpreter=mi3 ./my_prog
+GDB 16.3 매뉴얼 Command Interpreters 장에 따르면 `mi`는 가장 새 MI(현재 `mi3`)이고, `mi3`는 GDB 9.1에서, `mi2`는 GDB 6.0에서 도입됐습니다. `gdb -q -nx --interpreter=mi3 ./vecprog`을 띄우면 처음 나오는 줄입니다.
+
+```text
 =thread-group-added,id="i1"
-=cmd-param-changed,param="pagination",value="off"
+~"Reading symbols from ./vecprog...\n"
 (gdb)
 ```
 
-`(gdb)` 프롬프트가 보이지만 내부는 MI 모드. mi/mi2/mi3 interpreter와 버전별 출력 차이는 GDB manual 및 사용하는 adapter 요구에 맞춥니다. GDB17.2에서 MI3를 사용할 수 있다는 사실이 모든 client가 MI3를 요구한다는 뜻은 아닙니다.
+`(gdb)` 프롬프트처럼 보이는 줄은 MI 문법에서 "응답 하나가 끝났다"는 구분자입니다.
 
 ### 명령 형식
 
@@ -41,12 +56,16 @@ $ gdb --interpreter=mi3 ./my_prog
 [token]-command [args]
 ```
 
-- `token` — 옵션. 응답에서 같이 돌아와 *비동기 매핑*에 사용.
-- `command` — MI 명령 (`-exec-run`, `-break-insert` 등).
+`token`은 선택 사항인 숫자입니다. 응답 앞에 같은 숫자가 붙어 돌아오므로, 클라이언트는 여러 명령을 보내 놓고 응답을 짝지을 수 있습니다. 아래 세션의 `1^done`, `2^running`이 그 예입니다.
 
 ```text
+1-break-insert vecprog.cpp:7
+1^done,bkpt={number="1",type="breakpoint",disp="keep",enabled="y",addr="0x0000000000000b54",func="process(std::vector<int, std::allocator<int> > const&, int)",file="vecprog.cpp",fullname="/root/ext/ch05/vecprog.cpp",line="7",thread-groups=["i1"],times="0",original-location="vecprog.cpp:7"}
 (gdb)
 2-exec-run
+=thread-group-started,id="i1",pid="4686"
+=thread-created,id="1",group-id="i1"
+=library-loaded,id="/lib/ld-linux-aarch64.so.1",...
 2^running
 *running,thread-id="all"
 (gdb)
@@ -54,112 +73,92 @@ $ gdb --interpreter=mi3 ./my_prog
 
 ### 응답 종류
 
+매뉴얼 GDB/MI Result Records·Stream Records·Async Records 절의 구분입니다.
+
 | Prefix | 의미 |
 |--------|------|
 | `^done,...` | 명령 성공 + 결과 |
-| `^running` | 명령 시작 (비동기) |
+| `^running` | 매뉴얼상 `^done`과 같음 (실행을 시작한 명령의 응답) |
+| `^connected` | 원격 타깃 연결 |
 | `^error,msg=...` | 오류 |
 | `^exit` | GDB 종료 |
-| `*stopped,...` | async stop event |
-| `*running,...` | async start event |
-| `=...` | 알림 (thread, library 로드 등) |
-| `~"..."` | console 출력 (사용자 메시지) |
-| `@"..."` | target 출력 (디버기 stdout) |
-| `&"..."` | log 출력 |
+| `*stopped,...` / `*running,...` | 실행 상태 비동기 레코드 |
+| `=...` | 알림 비동기 레코드 (스레드, 라이브러리 로드, breakpoint 변경 등) |
+| `~"..."` | console 출력 (CLI가 보여 줄 텍스트) |
+| `@"..."` | target 출력 (디버기 출력) |
+| `&"..."` | log 출력 (GDB 내부 메시지) |
 
-`*stopped`/`*running`/`=...`이 *프로세스 측 이벤트*. IDE가 이를 받아 UI를 갱신.
+`@` 레코드는 매뉴얼에 따르면 GDB의 이벤트 루프가 진짜 비동기일 때, 현재는 원격 타깃일 때만 나옵니다. 위 로컬 세션에서는 디버기의 `x=1` 같은 출력이 `@` 레코드가 아니라 GDB와 같은 stdout으로 그냥 섞여 나왔습니다.
 
 ### 자주 쓰이는 명령
 
-```text
--exec-run                    : run
--exec-continue               : continue
--exec-interrupt              : 정지
--exec-step                   : step
--exec-next                   : next
--exec-finish                 : finish
+아래 명령은 모두 GDB 16.3 매뉴얼에 `The -command Command` 절이 있는 것들입니다.
 
--break-insert main           : break main
--break-insert -t main        : tbreak
--break-delete 1              : delete 1
--break-enable / -disable
--break-condition 1 i > 100
+| 분류 | MI 명령 |
+|------|---------|
+| 실행 | `-exec-run`, `-exec-continue`, `-exec-interrupt`, `-exec-step`, `-exec-next`, `-exec-finish` |
+| breakpoint | `-break-insert main`, `-break-insert -t main`(임시), `-break-delete 1`, `-break-enable`, `-break-disable`, `-break-condition 1 i > 100` |
+| 스택 | `-stack-list-frames`, `-stack-list-arguments`, `-stack-list-variables`, `-stack-select-frame 2` |
+| 스레드 | `-thread-list-ids`, `-thread-select 3`, `-thread-info` |
+| 데이터 | `-data-evaluate-expression "x + 1"`, `-data-read-memory-bytes ADDR N`, `-data-write-memory-bytes ADDR HEX` |
+| 변수 객체 | `-var-create`, `-var-update`, `-var-list-children`, `-var-evaluate-expression`, `-var-delete` |
+| 파일·타깃 | `-file-exec-and-symbols ./prog`, `-target-attach PID`, `-target-detach` |
 
--stack-list-frames          : bt
--stack-list-arguments
--stack-list-variables
--stack-select-frame 2
+전체 명세는 [GDB/MI 문서](https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI.html)에 있습니다.
 
--thread-list-ids
--thread-select 3
--thread-info
+### 응답 예 — 정지와 backtrace
 
--data-evaluate-expression "x + 1"
--data-read-memory-bytes 0x401200 16
--data-write-memory-bytes 0x401200 ff
-
--var-create name * expression : watch 변수 생성
--var-update *                  : 모든 watch 갱신
--var-list-children name
--var-evaluate-expression name
--var-delete name
-
--file-exec-and-symbols ./prog
--target-attach 12345
--target-detach
-```
-
-전체 명세는 [GDB/MI 문서](https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI.html). 이 글의 예는 record 형식 설명이며 실제 target transcript가 아닙니다.
-
-### 응답 예 — backtrace
+`2-exec-run` 뒤 7행 breakpoint에 걸리면 `*stopped` 비동기 레코드가 옵니다. IDE는 이 레코드 하나로 "어디서, 왜, 어느 스레드가 멈췄나"를 압니다.
 
 ```text
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame={addr="0x0000aaaaaaaa0b54",func="process",args=[{name="vec",value="std::vector of length 3, capacity 3 = {...}"},{name="i",value="0"}],file="vecprog.cpp",fullname="/root/ext/ch05/vecprog.cpp",line="7",arch="aarch64"},thread-id="1",stopped-threads="all",core="0"
+(gdb)
 3-stack-list-frames
-3^done,stack=[
-  frame={level="0",addr="0x000055555555581a",func="process",
-         file="main.cpp",fullname="/home/me/main.cpp",line="42"},
-  frame={level="1",addr="0x000055555555591b",func="handle",
-         file="main.cpp",fullname="/home/me/main.cpp",line="60"},
-  frame={level="2",addr="0x0000555555555a12",func="main",
-         file="main.cpp",fullname="/home/me/main.cpp",line="10"}
-]
+3^done,stack=[frame={level="0",addr="0x0000aaaaaaaa0b54",func="process",file="vecprog.cpp",fullname="/root/ext/ch05/vecprog.cpp",line="7",arch="aarch64"},frame={level="1",addr="0x0000aaaaaaaa0bcc",func="handle",file="vecprog.cpp",fullname="/root/ext/ch05/vecprog.cpp",line="12",arch="aarch64"},frame={level="2",addr="0x0000aaaaaaaa0c38",func="main",file="vecprog.cpp",fullname="/root/ext/ch05/vecprog.cpp",line="17",arch="aarch64"}]
 ```
 
-IDE는 이 구조에서 *각 frame*을 추출해 콜스택 패널에 표시.
+IDE는 `stack=[...]`의 각 `frame`을 콜스택 패널의 한 줄로 그립니다.
 
 ### 응답 — 변수 트리
 
+`-enable-pretty-printing`을 먼저 보낸 세션입니다. [Ch 3](/blog/tools/debugging/gdb-extension/chapter03-pretty-printers)에서 본 대로 printer가 붙은 varobj는 `dynamic="1"`이고 자식 수는 `has_more`로만 알립니다.
+
 ```text
 4-var-create v1 * vec
-4^done,name="v1",numchild="3",value="std::vector of size 3",
-       type="std::vector<int, std::allocator<int> >",
-       has_more="0",displayhint="array"
+4^done,name="v1",numchild="0",value="std::vector of length 3, capacity 3",type="const std::vector<int, std::allocator<int> > &",thread-id="1",displayhint="array",dynamic="1",has_more="1"
+5-var-list-children --all-values v1
+5^done,numchild="3",displayhint="array",children=[child={name="v1.[0]",exp="[0]",numchild="0",value="1",type="int",thread-id="1"},child={name="v1.[1]",exp="[1]",numchild="0",value="2",type="int",thread-id="1"},child={name="v1.[2]",exp="[2]",numchild="0",value="3",type="int",thread-id="1"}],has_more="0"
 ```
 
-`displayhint="array"`가 pretty-printer가 알려 준 정보. IDE는 트리 형태로.
+`displayhint="array"`는 libstdc++ printer의 `display_hint()`가 돌려준 값입니다. 사용자가 트리 노드를 펼칠 때 IDE가 `-var-list-children`을 보내므로, 펼치지 않은 노드의 자식은 읽지 않습니다.
 
-사용자가 노드 펼치면.
+### 데이터·조건·오류
+
+같은 세션의 나머지 명령입니다. `x`는 `vec[0] + 0 = 1`입니다.
 
 ```text
-5-var-list-children v1
-5^done,numchild="3",children=[
-  child={name="v1.0",exp="[0]",numchild="0",value="1",type="int"},
-  child={name="v1.1",exp="[1]",numchild="0",value="2",type="int"},
-  child={name="v1.2",exp="[2]",numchild="0",value="3",type="int"}
-]
+6-data-evaluate-expression "x + 1"
+6^done,value="2"
+7-data-read-memory-bytes &x 4
+7^done,memory=[{begin="0x0000fffffffffa0c",offset="0x0000000000000000",end="0x0000fffffffffa10",contents="01000000"}]
+9-break-condition 1 i == 2
+9^done
+10-exec-continue
+10^running
+*running,thread-id="all"
+=breakpoint-modified,bkpt={number="1",...,cond="i == 2",times="2",...}
+*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",frame={...,args=[{name="vec",value="std::vector of length 3, capacity 3 = {...}"},{name="i",value="2"}],...},thread-id="1",stopped-threads="all",core="0"
+11-stack-list-variables --all-values
+11^done,variables=[{name="vec",arg="1",value="std::vector of length 3, capacity 3 = {1, 2, 3}"},{name="i",arg="1",value="2"},{name="x",value="3"}]
+13-data-evaluate-expression nosuchvar
+13^error,msg="No symbol \"nosuchvar\" in current context."
 ```
 
-지연 로드 패턴 — *펼친 노드만* 다시 요청.
+`-data-read-memory-bytes`의 `contents="01000000"`은 리틀 엔디언 `int` 1입니다. 조건을 단 뒤에는 `i == 2`인 세 번째 호출에서만 멈췄습니다. 프로그램이 끝나면 `*stopped,reason="exited-normally"`와 `=thread-group-exited,id="i1",exit-code="0"`이 왔습니다.
 
 ### Asynchronous notifications
 
-```text
-*stopped,reason="breakpoint-hit",disp="keep",bkptno="1",
-   thread-id="1",frame={addr="0x...",func="main",file="main.cpp",line="10"},
-   stopped-threads="all",core="3"
-```
-
-정지 시 IDE에 *상세 정보* 전송. `reason`은 `breakpoint-hit`, `watchpoint-trigger`, `end-stepping-range`, `signal-received`, `exited`, `exited-signalled` 등.
+`*stopped`의 `reason`은 IDE가 "왜 멈췄나"를 표시하는 근거입니다. 이 장에서 본 값은 `breakpoint-hit`와 `exited-normally`이고, 매뉴얼 GDB/MI Async Records 절은 이 밖에 `watchpoint-trigger`, `end-stepping-range`, `signal-received`, `exited-signalled`, `exited` 등을 정의합니다.
 
 ## CLI ↔ MI 매핑
 
@@ -173,19 +172,19 @@ IDE는 이 구조에서 *각 frame*을 추출해 콜스택 패널에 표시.
 | `print x` | `-data-evaluate-expression x` |
 | `next` | `-exec-next` |
 
-표는 대표 대응이며 state/argument/result·async handling은 별도입니다. CLI 출력 parse나 단순 1:1 문자열 치환만으로 올바른 adapter가 되지는 않습니다.
+이름만 바뀐 것이 아닙니다. 같은 breakpoint 정보가 CLI에서는 사람이 읽을 표로, MI에서는 `bkpt={number="1",...}` 튜플로 나옵니다. 어댑터가 CLI 출력을 문자열로 파싱하지 않고 MI를 쓰는 이유입니다.
 
 ## DAP — Debug Adapter Protocol
 
-MI가 *GDB 측*이라면 DAP는 *IDE 측*. Microsoft의 공개 DAP specification이 client/adapter 사이 request·response·event를 정의합니다.
-
-핵심 아이디어: *IDE가 한 프로토콜만 알면 어떤 디버거도 쓸 수 있게*. 어댑터가 DAP ↔ 디버거 프로토콜(MI/RSP/자체)을 매개.
+MI가 GDB 쪽 규약이라면 DAP는 편집기 쪽 규약입니다. [DAP 명세](https://microsoft.github.io/debug-adapter-protocol/)가 클라이언트(편집기)와 어댑터 사이의 request·response·event를 정의하고, 편집기는 이 하나만 구현하면 됩니다. 어댑터가 DAP를 디버거 쪽 프로토콜(MI, LLDB API, 자체 구현)로 옮깁니다.
 
 ![IDE ↔ DAP ↔ Adapter ↔ Debugger ↔ Stub 체인](/images/blog/tools/diagrams/dap-ide-chain.svg)
 
 ### 전송
 
-DAP는 JSON-RPC 2.0 wire format이 아닙니다. seq/type/command 또는 event/request_seq/success 등의 **DAP envelope**를 사용합니다. stdio/TCP 등의 byte stream에서 ASCII Content-Length header와 UTF-8 JSON body를 분리합니다. 길이는 문자 수가 아니라 **body byte 수**입니다.
+DAP 개요 문서의 Base Protocol 절에 따르면 메시지는 ASCII 헤더와 `\r\n\r\n`, 그리고 UTF-8 JSON 본문으로 이뤄지고, 유일한 필수 헤더 `Content-Length`는 본문의 *바이트* 수입니다. JSON-RPC가 아니라 `seq`/`type`(`request`/`response`/`event`)/`command` 등을 가진 DAP 자체 봉투(`ProtocolMessage`)를 씁니다.
+
+아래 `dap-framing.mjs`는 헤더 하나만 허용하는 최소 framer입니다. 헤더·본문 크기에 상한을 두고, 잘못된 입력을 한 번 만나면 그 framer를 폐기합니다.
 
 ```js title="dap-framing.mjs"
 import {TextDecoder} from 'node:util';
@@ -244,329 +243,268 @@ export class DAPFramer {
 }
 ```
 
-이 예는 한 Content-Length header만 허용하는 bounded 기본 형식이며 full DAP schema/state machine은 아닙니다. transport read chunk 크기도 호출자가 제한해야 하며 connection 종료 시 finish로 잘린 body를 확인합니다. 본문에 제시한 119 같은 고정 길이를 임의 JSON에 복사하지 않고 encode 결과로 계산합니다.
+Node.js 24.21.0에서 시험했습니다. 한 바이트씩 쪼개 넣은 경우, 두 메시지를 한 덩어리로 넣은 경우, 잘린 스트림, 잘못된 헤더, 잘못된 UTF-8을 넣었습니다.
+
+```text
+header: "Content-Length: 98\r\n\r\n" total bytes: 120
+UTF-8 body: JSON chars 64 -> header Content-Length: 68
+byte-by-byte: 1 message(s), command = evaluate
+coalesced: [ 1, 2 ]
+truncated: failed/truncated stream
+bad header: unsupported/duplicate header
+after failure: discard failed framer
+invalid utf-8: TypeError The encoded data was not valid for encoding utf-8
+```
+
+둘째 줄이 바이트 수 규칙입니다. `"한글"`이 든 JSON은 문자로 64개지만 한글 두 글자가 UTF-8로 3바이트씩이라 `Content-Length`는 68입니다. 문자열 길이로 헤더를 만들면 비ASCII 출력이 섞이는 순간 스트림이 어긋납니다. DAP 개요 문서의 예제에 나오는 `Content-Length: 119`도 그 예제 본문에만 맞는 값입니다.
 
 ### 메시지 종류
 
-```text
-request   : 클라이언트 → 어댑터, 응답 기대
-response  : 어댑터 → 클라이언트, request에 대한 답
-event     : 어댑터 → 클라이언트, 비동기 알림
-```
+| `type` | 방향 | 뜻 |
+|--------|------|-----|
+| `request` | 클라이언트 → 어댑터 | 응답을 기대하는 요청 |
+| `response` | 어댑터 → 클라이언트 | `request_seq`로 요청과 짝지어지는 답 |
+| `event` | 어댑터 → 클라이언트 | 비동기 알림 |
 
-이하 JSON block은 request/response body의 발췌입니다. comment·ellipsis는 설명용이며 실제 전송 시 seq/type·response correlation과 완전한 JSON을 구성합니다.
+이하의 트래픽은 직접 짠 83줄짜리 Python 클라이언트(`dapc.py`)를 `gdb -q -nx -i=dap`에 붙여 얻었습니다. `>>>`가 보낸 메시지, `<<<`가 받은 메시지이고, 긴 줄은 `...`로 줄였습니다.
 
 ### 초기 핸드셰이크
 
 ```text
-// 1. Initialize
-{"seq": 1, "type": "request", "command": "initialize",
- "arguments": {"clientID": "vscode", "adapterID": "cppdbg",
-               "linesStartAt1": true, "columnsStartAt1": true,
-               "pathFormat": "path"}}
-
-// 어댑터 응답
-{"seq": 2, "type": "response", "request_seq": 1, "success": true,
- "command": "initialize",
- "body": {
-   "supportsConfigurationDoneRequest": true,
-   "supportsFunctionBreakpoints": true,
-   "supportsConditionalBreakpoints": true,
-   "supportsHitConditionalBreakpoints": true,
-   "supportsEvaluateForHovers": true,
-   "exceptionBreakpointFilters": [],
-   "supportsStepBack": false,
-   "supportsSetVariable": true,
-   "supportsRestartFrame": false,
-   "supportsGotoTargetsRequest": false,
-   "supportsStepInTargetsRequest": false,
-   "supportsCompletionsRequest": true,
-   "supportsModulesRequest": true,
-   ...
- }}
-
-// 어댑터가 보내는 첫 이벤트
-{"seq": 3, "type": "event", "event": "initialized"}
+>>> Content-Length: 179 {"seq": 1, "type": "request", "command": "initialize", "arguments": {"clientID": "demo", "adapterID": "gdb", "linesStartAt1": true, "columnsStartAt1": true, "pathFormat": "path"}}
+<<< Content-Length: 1406 {"request_seq": 1, "type": "response", "command": "initialize", "success": true, "body": {"supportsTerminateRequest": true, "supportTerminateDebuggee": true, "supportsCancelRequest": true, "supportsLoadedSourcesRequest": true, "supportsLogPoints": true, "supportsConditionalBreakpoints": true, "supportsHitConditionalBreakpoints": true, "supportsFunctionBreakpoints": true, "supportsInstructionBreakpoints": true, "exceptionBreakpointFilters": [{"filter": "assert", "label": "Ada assertions", ...}, {"filter": "exception", "label": "Ada exceptions", ...}, {"filter": "throw", "label": "C++ exceptions, when thrown", ...}, {"filter": "rethrow", ...}, {"filter": "catch", ...}], "supportsExceptionFilterOptions": true, "supportsModulesRequest": true, "supportsDelayedStackTraceLoading": true, "supportsDisassembleRequest": true, "supportsValueFormattingOptions": true, "supportsEvaluateForHovers": true, "supportsSetExpression": true, "supportsSetVariable": true, "supportsConfigurationDoneRequest": true, "supportsBreakpointLocationsRequest": true, "supportsReadMemoryRequest": true, "supportsWriteMemoryRequest": true, "supportsSingleThreadExecutionRequests": true, "supportsSteppingGranularity": true}, "seq": 1}
+>>> Content-Length: 102 {"seq": 2, "type": "request", "command": "launch", "arguments": {"program": "/root/ext/ch05/vecprog"}}
+<<< Content-Length: 51 {"type": "event", "event": "initialized", "seq": 2}
 ```
 
-`supports*` 응답이 *그 어댑터가 무엇을 지원하는지*. VSCode가 UI를 적응 — 미지원 기능 버튼이 회색.
+`supports*`가 그 어댑터가 할 수 있는 일의 목록입니다. 편집기는 이 응답을 보고 UI를 맞춥니다. GDB 16.3의 목록에는 `supportsDataBreakpoints`가 없습니다. DAP 스키마에는 있는 capability이지만 GDB의 DAP 구현(`gdb/python/lib/gdb/dap/`)에는 그 요청 처리기가 없기 때문입니다. 실제로 `setDataBreakpoints`를 보내면 이렇게 실패합니다.
+
+```text
+>>> {"seq": 6, "type": "request", "command": "setDataBreakpoints", "arguments": {"breakpoints": [{"dataId": "x", "accessType": "write"}]}}
+<<< {"request_seq": 6, "type": "response", "command": "setDataBreakpoints", "success": false, "message": "'setDataBreakpoints'", "seq": 14}
+```
 
 ### Launch / Attach
 
-```text
-{"seq": 4, "type": "request", "command": "launch",
- "arguments": {
-   "program": "/path/to/my_prog",
-   "args": ["arg1", "arg2"],
-   "cwd": "/home/me",
-   "env": {"DEBUG": "1"},
-   "stopOnEntry": false,
-   "MIMode": "gdb",                       // cppdbg 특수
-   "setupCommands": [
-     {"text": "-enable-pretty-printing"}
-   ]
- }}
+`launch`·`attach`의 인자는 DAP 명세가 정하지 않고 어댑터마다 다릅니다. GDB 16.3 매뉴얼 Debugger Adapter Protocol 장이 GDB의 `launch` 인자로 정한 것은 `args`, `cwd`, `env`(객체), `program`, `stopAtBeginningOfMainSubprogram`, `stopOnEntry`이고, `attach`는 `pid`, `program`, `target`(`target remote`에 넘길 문자열)입니다.
 
-// Attach
-{"command": "attach",
- "arguments": {"processId": 12345}}
-```
+같은 이름의 설정도 어댑터마다 다릅니다. VS Code의 `cppdbg`는 [launch.json 레퍼런스](https://code.visualstudio.com/docs/cpp/launch-json-reference)에 따르면 진입점 정지를 `stopAtEntry`로, 환경 변수를 `"environment": [{"name": "config", "value": "Debug"}]` 같은 배열로 받고, `MIMode`(`gdb` 또는 `lldb`)·`setupCommands`·`miDebuggerServerAddress` 같은 고유 키를 씁니다. 편집기 설정을 다른 어댑터로 옮길 때 키 이름부터 맞춰야 하는 이유입니다.
+
+GDB의 `launch`는 응답이 바로 오지 않았습니다. 위 로그에서 `launch`(seq 2)의 응답은 `configurationDone`을 보내고 실행 파일을 읽은 뒤인 `"seq": 20`에 왔습니다.
 
 ### 브레이크포인트 설정
 
-```text
-{"command": "setBreakpoints",
- "arguments": {
-   "source": {"path": "/home/me/main.cpp"},
-   "breakpoints": [
-     {"line": 42, "condition": "i > 100", "hitCondition": ">= 5"},
-     {"line": 60, "logMessage": "x = {x}"}     // logpoint
-   ]
- }}
+7행에 조건과 hit 조건을, 12행에 logpoint를 걸었습니다.
 
-// 응답
-{"command": "setBreakpoints",
- "body": {
-   "breakpoints": [
-     {"verified": true, "line": 42, "id": 1},
-     {"verified": true, "line": 60, "id": 2}
-   ]
- }}
+```text
+>>> Content-Length: 240 {"seq": 3, "type": "request", "command": "setBreakpoints", "arguments": {"source": {"path": "/root/ext/ch05/vecprog.cpp"}, "breakpoints": [{"line": 7, "condition": "i > 0", "hitCondition": "1"}, {"line": 12, "logMessage": "handle i={i}"}]}}
+<<< {"type": "event", "event": "output", "body": {"category": "stdout", "output": "Breakpoint 1 (-source /root/ext/ch05/vecprog.cpp -line 7) pending.\n"}, ...}
+<<< {"request_seq": 3, "type": "response", "command": "setBreakpoints", "success": true, "body": {"breakpoints": [{"id": 1, "verified": false, "reason": "pending"}, {"id": 2, "verified": false, "reason": "pending"}]}, ...}
+...
+<<< {"type": "event", "event": "breakpoint", "body": {"reason": "changed", "breakpoint": {"id": 1, "verified": true, "source": {"name": "vecprog.cpp", "path": "/root/ext/ch05/vecprog.cpp"}, "line": 7, "instructionReference": "0xb54"}}, ...}
 ```
 
-logMessage는 DAP의 logpoint 요청입니다. 지원 capability와 expression escaping·target side effects/로그 비용은 adapter별로 다릅니다. 모든 adapter가 같은 GDB commands/printf로 변환하지 않습니다.
+`launch` 응답보다 먼저 보낸 요청이라 아직 실행 파일이 읽히지 않았고, GDB는 `verified: false, reason: "pending"`으로 답했다가 실행 파일을 읽은 뒤 `breakpoint` 이벤트로 `verified: true`를 보냈습니다. DAP 스키마는 `verified`를 "breakpoint를 설정할 수 있었는가"로 정의하므로, `false`가 곧 영구 실패를 뜻하지는 않습니다.
 
-verified=false는 아직 검증/설정되지 않은 상태일 수 있으며 module load 뒤 breakpoint event로 바뀔 수도 있습니다. 영구 설치 실패와 즉시 동일시하지 않습니다.
+`hitCondition`은 해석이 어댑터에 맡겨져 있습니다. DAP 스키마는 "breakpoint의 hit 중 몇 번을 무시할지 정하는 식이며 어댑터가 알아서 해석한다"고만 적습니다. GDB 16.3의 `dap/breakpoint.py` 186~188행은 이 문자열을 `parse_and_eval`로 계산해 GDB의 *ignore count*에 넣습니다. 그래서 `"1"`은 "조건이 참인 hit를 한 번 건너뛴다"입니다. 실제로 `i > 0`인 i = 1을 건너뛰고 i = 2에서 멈췄습니다. 처음에 `"2"`를 줬을 때는 i = 1, 2를 모두 건너뛰어 한 번도 멈추지 않았습니다. VS Code의 Hit Count 칸에 흔히 쓰는 `>= 5` 같은 식은 GDB에서 문법 오류입니다.
+
+```text
+>>> {"seq": 4, "type": "request", "command": "setBreakpoints", "arguments": {"source": {"path": "/root/ext/ch05/other.cpp"}, "breakpoints": [{"line": 3, "hitCondition": ">= 5"}]}}
+<<< {"request_seq": 4, "type": "response", "command": "setBreakpoints", "success": true, "body": {"breakpoints": [{"verified": false, "reason": "failed", "message": "A syntax error in expression, near `>= 5'."}]}, "seq": 9}
+```
+
+logpoint는 멈추지 않고 출력만 냅니다. GDB는 이를 Python `gdb.Breakpoint` 서브클래스(`dap/breakpoint.py`의 `_PrintBreakpoint`)로 구현하고, `{}` 안의 식을 계산해 `console` 분류 `output` 이벤트로 보냈습니다.
+
+```text
+<<< {"type": "event", "event": "output", "body": {"category": "console", "output": "handle i=0"}, "seq": 35}
+<<< {"type": "event", "event": "output", "body": {"category": "console", "output": "handle i=1"}, "seq": 36}
+<<< {"type": "event", "event": "output", "body": {"category": "console", "output": "handle i=2"}, "seq": 38}
+```
 
 ### Function breakpoint
 
 ```text
-{"command": "setFunctionBreakpoints",
- "arguments": {"breakpoints": [{"name": "main"}, {"name": "process"}]}}
+>>> {"seq": 5, "type": "request", "command": "setFunctionBreakpoints", "arguments": {"breakpoints": [{"name": "main"}]}}
+<<< {"request_seq": 5, "type": "response", "command": "setFunctionBreakpoints", "success": true, "body": {"breakpoints": [{"id": 4, "verified": false, "reason": "pending"}]}, "seq": 11}
+...
+<<< {"type": "event", "event": "stopped", "body": {"threadId": 1, "allThreadsStopped": true, "hitBreakpointIds": [4], "reason": "breakpoint"}, "seq": 33}
 ```
 
 ### Data breakpoint (watchpoint)
 
-```text
-{"command": "setDataBreakpoints",
- "arguments": {"breakpoints": [
-   {"dataId": "x@0x7fffffff", "accessType": "write"}
- ]}}
-```
+DAP의 `setDataBreakpoints`는 위 핸드셰이크 절에서 본 대로 GDB 16.3 DAP에 없습니다. 같은 일을 하려면 `evaluate`의 `repl` 문맥(아래)에서 CLI `watch` 명령을 보내는 방법이 남습니다.
 
 ### Stack trace
 
-```text
-{"command": "stackTrace",
- "arguments": {"threadId": 1, "startFrame": 0, "levels": 20}}
+`continue`로 7행(i = 2)에 멈춘 뒤의 `stackTrace`입니다.
 
-// 응답
-{"body": {
-   "stackFrames": [
-     {"id": 1000, "name": "process(args)", "line": 42,
-      "column": 1, "source": {"path": "/home/me/main.cpp"},
-      "instructionPointerReference": "0x401234"},
-     ...
-   ],
-   "totalFrames": 3
-}}
+```text
+>>> {"seq": 9, "type": "request", "command": "stackTrace", "arguments": {"threadId": 1, "startFrame": 0, "levels": 20}}
+<<< {"request_seq": 9, "type": "response", "command": "stackTrace", "success": true, "body": {"stackFrames": [{"id": 0, "line": 7, "column": 0, "instructionPointerReference": "0xaaaaaaaa0b54", "moduleId": "/root/ext/ch05/vecprog", "source": {"name": "vecprog.cpp", "path": "/root/ext/ch05/vecprog.cpp"}, "name": "process"}, {"id": 1, "line": 12, ..., "name": "handle"}, {"id": 2, "line": 17, ..., "name": "main"}]}, "seq": 41}
 ```
 
 ### Variables — 트리
 
+변수 창은 `scopes` → `variables` → (펼치면) `variables`의 연쇄로 그려집니다. 응답의 `variablesReference`가 0이 아니면 펼칠 수 있는 노드이고, 그 번호로 다시 요청합니다. 탐색기에서 폴더를 열 때마다 그 폴더 내용만 가져오는 것과 같습니다.
+
 ```text
-// 1. 프레임의 스코프
-{"command": "scopes", "arguments": {"frameId": 1000}}
-
-// 응답
-{"body": {"scopes": [
-  {"name": "Locals", "variablesReference": 1001, "expensive": false},
-  {"name": "Arguments", "variablesReference": 1002, "expensive": false},
-  {"name": "Registers", "variablesReference": 1003, "expensive": true}
-]}}
-
-// 2. 스코프 안의 변수
-{"command": "variables", "arguments": {"variablesReference": 1001}}
-
-// 응답
-{"body": {"variables": [
-  {"name": "i", "value": "42", "type": "int", "variablesReference": 0},
-  {"name": "v", "value": "std::vector of size 3", "type": "std::vector<int>",
-   "variablesReference": 2001, "namedVariables": 0, "indexedVariables": 3}
-]}}
-
-// 3. 사용자가 v를 펼치면
-{"command": "variables", "arguments": {"variablesReference": 2001}}
-{"body": {"variables": [
-  {"name": "[0]", "value": "1", "type": "int", "variablesReference": 0},
-  {"name": "[1]", "value": "2", "type": "int", "variablesReference": 0},
-  {"name": "[2]", "value": "3", "type": "int", "variablesReference": 0}
-]}}
+>>> {"seq": 10, "type": "request", "command": "scopes", "arguments": {"frameId": 0}}
+<<< {... "body": {"scopes": [{"variablesReference": 1, "name": "Arguments", "presentationHint": "arguments", "expensive": false, "namedVariables": 2, ...}, {"variablesReference": 2, "name": "Locals", "presentationHint": "locals", "expensive": false, "namedVariables": 1, ...}, {"variablesReference": 3, "name": "Registers", "presentationHint": "registers", "expensive": false, "namedVariables": 263, ...}]}, "seq": 42}
+>>> {"seq": 11, "type": "request", "command": "variables", "arguments": {"variablesReference": 1}}
+<<< {... "body": {"variables": [{"variablesReference": 4, "name": "vec", "value": "std::vector of length 3, capacity 3", "indexedVariables": 3}, {"variablesReference": 0, "name": "i", "value": "2"}]}, "seq": 43}
+>>> {"seq": 12, "type": "request", "command": "variables", "arguments": {"variablesReference": 4}}
+<<< {... "body": {"variables": [{"variablesReference": 0, "name": "[0]", "value": "1"}, {"variablesReference": 0, "name": "[1]", "value": "2"}, {"variablesReference": 0, "name": "[2]", "value": "3"}]}, "seq": 44}
 ```
 
-*재귀적 variables 요청*이 VSCode의 변수 트리를 *지연 로드*로 그리는 메커니즘.
-
-display hint는 모양 힌트입니다. indexedVariables=3이라는 원소 수가 hint 문자열만으로 계산되지는 않습니다. adapter가 실제 child count/varobj와 target 정보를 매개하며 reference 수명·paging도 관리합니다.
+GDB는 인자와 지역 변수를 `Arguments`·`Locals`로 나누고, `Registers`는 263개를 `expensive: false`로 보냈습니다. `vec`의 `value`는 libstdc++ printer의 `to_string()`이고, `indexedVariables: 3`과 자식 `[0]`~`[2]`는 printer의 `children()`에서 나왔습니다. MI의 `displayhint="array"`에 해당하는 정보가 DAP에서는 `indexedVariables`로 표현된 셈입니다.
 
 ### Evaluate
 
-```text
-{"command": "evaluate",
- "arguments": {"expression": "x + 1", "frameId": 1000, "context": "watch"}}
+DAP 스키마의 `context` 값은 `watch`, `repl`, `hover`, `clipboard`, `variables`입니다. 같은 `x + 1`을 세 문맥으로 보냈더니 하나가 달랐습니다.
 
-// 응답
-{"body": {"result": "43", "type": "int", "variablesReference": 0}}
+```text
+>>> {"seq": 13, "type": "request", "command": "evaluate", "arguments": {"expression": "x + 1", "frameId": 0, "context": "watch"}}
+<<< {"request_seq": 13, "type": "response", "command": "evaluate", "success": true, "body": {"variablesReference": 0, "result": "4"}, "seq": 45}
+>>> {"seq": 14, "type": "request", "command": "evaluate", "arguments": {"expression": "x + 1", "frameId": 0, "context": "repl"}}
+<<< {"request_seq": 14, "type": "response", "command": "evaluate", "success": false, "message": "Cannot access memory at address 0x1", "seq": 46}
+>>> {"seq": 15, "type": "request", "command": "evaluate", "arguments": {"expression": "x + 1", "frameId": 0, "context": "hover"}}
+<<< {"request_seq": 15, "type": "response", "command": "evaluate", "success": true, "body": {"variablesReference": 0, "result": "4"}, "seq": 47}
 ```
 
-`context`: `"watch"` (Watch 패널), `"repl"` (Debug Console), `"hover"` (마우스 호버), `"clipboard"`.
+GDB 16.3 매뉴얼 Debugger Adapter Protocol 장은 `repl` 문맥의 식을 *CLI 명령*으로 실행한다고 적습니다. 그래서 `x + 1`은 GDB의 `x`(examine) 명령으로 해석돼 주소 1을 읽으려다 실패했습니다. 대신 `repl`로 `info breakpoints`를 보내면 CLI 출력이 그대로 옵니다.
+
+```text
+>>> {"seq": 16, "type": "request", "command": "evaluate", "arguments": {"expression": "info breakpoints", "frameId": 0, "context": "repl"}}
+<<< {... "body": {"result": "Num     Type           Disp Enb Address            What\n1       breakpoint     keep y   0x0000aaaaaaaa0b54 in process(std::vector<int, std::allocator<int> > const&, int) at vecprog.cpp:7\n\tstop only if i > 0\n\tbreakpoint already hit 2 times\n2       breakpoint     keep y   0x0000aaaaaaaa0bc0 in handle(int) at vecprog.cpp:12\n4       breakpoint     keep y   0x0000aaaaaaaa0c24 in main() at vecprog.cpp:15\n\tbreakpoint already hit 1 time\n", "variablesReference": 0}, "seq": 48}
+```
+
+breakpoint 1이 "2 times" 맞았는데 한 번만 멈춘 것이 ignore count 1의 결과입니다. 편집기의 Debug Console에 식을 쳤는데 엉뚱한 결과가 나온다면 어댑터가 `repl`을 어떻게 해석하는지부터 봅니다.
 
 ### 진행 명령
 
+`next`·`continue`도 `threadId`를 받습니다. GDB는 `continue` 응답에 `allThreadsContinued: true`를 붙였고, `next` 뒤에는 `reason: "step"`인 `stopped` 이벤트가 왔습니다.
+
 ```text
-{"command": "continue", "arguments": {"threadId": 1}}
-{"command": "next", "arguments": {"threadId": 1}}
-{"command": "stepIn", "arguments": {"threadId": 1, "targetId": 0}}
-{"command": "stepOut", "arguments": {"threadId": 1}}
-{"command": "pause", "arguments": {"threadId": 1}}
+>>> {"seq": 17, "type": "request", "command": "next", "arguments": {"threadId": 1}}
+<<< {"request_seq": 17, "type": "response", "command": "next", "success": true, "seq": 49}
+<<< {"type": "event", "event": "stopped", "body": {"threadId": 1, "allThreadsStopped": true, "reason": "step"}, "seq": 50}
+>>> {"seq": 18, "type": "request", "command": "continue", "arguments": {"threadId": 1}}
+<<< {"request_seq": 18, "type": "response", "command": "continue", "success": true, "body": {"allThreadsContinued": true}, "seq": 51}
 ```
 
-threadId와 singleThread 지원·all-stop/non-stop, response/event의 allThreadsContinued 등을 함께 해석합니다. threadId가 있다는 사실만으로 다른 thread가 항상 정지한 채 남는 것은 아닙니다.
+GDB가 `supportsSingleThreadExecutionRequests`를 광고하므로, 스키마상 클라이언트는 `singleThread: true`를 붙여 한 스레드만 움직이라고 요청할 수 있습니다. 이 프로그램은 스레드가 하나라 그 차이를 시험하지 않았습니다.
 
 ### 이벤트
 
+실행을 끝까지 보내면 디버기 출력, 스레드 종료, 프로세스 종료 이벤트가 차례로 옵니다.
+
 ```text
-// 정지
-{"type": "event", "event": "stopped",
- "body": {"reason": "breakpoint", "threadId": 1, "allThreadsStopped": true,
-          "hitBreakpointIds": [1]}}
-
-// 진행
-{"type": "event", "event": "continued",
- "body": {"threadId": 1, "allThreadsContinued": true}}
-
-// 출력
-{"type": "event", "event": "output",
- "body": {"category": "stdout", "output": "Hello\n"}}
-
-// 스레드 변경
-{"type": "event", "event": "thread",
- "body": {"reason": "started", "threadId": 5}}
-
-// 종료
-{"type": "event", "event": "terminated"}
-{"type": "event", "event": "exited", "body": {"exitCode": 0}}
+<<< {"type": "event", "event": "output", "body": {"category": "stdout", "output": "x=1\n"}, "seq": 52}
+<<< {"type": "event", "event": "output", "body": {"category": "stdout", "output": "x=2\n"}, "seq": 53}
+<<< {"type": "event", "event": "output", "body": {"category": "stdout", "output": "x=3\n"}, "seq": 54}
+<<< {"type": "event", "event": "thread", "body": {"reason": "exited", "threadId": 1}, "seq": 55}
+<<< {"type": "event", "event": "exited", "body": {"exitCode": 0}, "seq": 56}
+>>> {"seq": 19, "type": "request", "command": "disconnect", "arguments": {"terminateDebuggee": true}}
+<<< {"type": "event", "event": "terminated", "seq": 57}
 ```
 
-`reason`: `step`, `breakpoint`, `exception`, `pause`, `entry`, `goto`, `function breakpoint`, `data breakpoint`, `instruction breakpoint`.
+DAP 스키마의 `stopped` 이벤트 `reason` 값은 `step`, `breakpoint`, `exception`, `pause`, `entry`, `goto`, `function breakpoint`, `data breakpoint`, `instruction breakpoint`입니다. GDB는 위의 `main` function breakpoint에서도 `"function breakpoint"`가 아니라 `"breakpoint"`를 보냈습니다.
 
 ## Adapter — DAP ↔ MI 매개
 
-VSCode의 *cppdbg* 어댑터가 어떻게 동작하는가.
-
-cppdbg는 DAP request를 MIEngine/GDB 상태에 맞춰 매개할 수 있습니다. launch 초기화·symbol·breakpoint 설정과 실행 순서는 adapter/config별입니다. stackTrace/evaluate를 대응 MI request로 바꿀 때 thread/frame 선택, error와 async stop·request token·reference lifetime도 관리해야 합니다.
+VS Code의 `cppdbg`는 Microsoft의 MIEngine입니다. [MIEngine README](https://github.com/microsoft/MIEngine)에 따르면 MIEngine은 MI를 이해하는 Visual Studio Debug Engine이고, 같은 저장소의 OpenDebugAD7이 DAP와 이 엔진 사이의 변환 계층입니다. 즉 VS Code → (DAP) → OpenDebugAD7 → MIEngine → (MI) → GDB 순서입니다. `cppdbg`의 `launch.json`에서 `MIMode`로 GDB와 LLDB를 고르고 `setupCommands`로 GDB 명령을 먼저 보낼 수 있는 것도 이 구조 때문입니다. 이 장에서는 VS Code를 실행하지 않았습니다.
 
 ### CodeLLDB는 다름
 
-`CodeLLDB` 어댑터는 *직접 LLDB SB API*를 호출. MI를 거치지 않음. 직접 SB API를 쓴다는 구조만으로 속도·안정성 우열을 단정하지 않습니다. target/toolchain·symbol format과 adapter release별로 검증합니다.
-
-```text
-VSCode  ─DAP─>  CodeLLDB adapter  ─SB API─>  lldb
-```
+[CodeLLDB](https://github.com/vadimcn/codelldb)는 MI를 거치지 않고 LLDB를 직접 씁니다. 사용 설명서 MANUAL.md의 Launch Sequence 절은 launch 과정을 `initCommands` 실행 → [`SBTarget`](https://lldb.llvm.org/python_api/lldb.SBTarget.html) 생성 → 설정 적용 순서로 적는데, `SBTarget`은 LLDB의 SB API 객체입니다. README는 C++·Rust 표준 라이브러리 시각화기 내장, 조건부·함수 breakpoint와 logpoint, 하드웨어 watchpoint, 메모리 보기, Python 스크립팅, 원격 디버깅을 기능으로 듭니다.
 
 ### debugpy (Python)
 
-Python의 `debugpy`도 DAP 어댑터 + Python 디버거 내장.
+[debugpy](https://github.com/microsoft/debugpy) README의 첫 줄은 "Python 3용 Debug Adapter Protocol 구현"입니다. 어댑터와 디버거가 한 몸이라 아래에 별도 디버거 프로토콜이 없습니다.
 
-```text
-VSCode  ─DAP─>  debugpy  ─PyFrame inspection─>  사용자 Python 코드
-```
-
-거의 모든 언어가 *자체 DAP 어댑터*를 제공: Go (`delve --dap`), Rust (CodeLLDB 같은 debug adapter; rust-analyzer는 주로 language server), C# (`netcoredbg`), Java (`java-debug`), ...
+다른 언어도 각자 DAP 구현을 갖습니다. Go의 Delve는 `dlv dap` 명령으로 DAP 서버를 띄우고([dlv dap 문서](https://github.com/go-delve/delve/blob/master/Documentation/usage/dlv_dap.md)), Samsung의 netcoredbg는 README에서 .NET Core용 GDB/MI와 VS Code DAP를 함께 지원한다고 밝히며, Microsoft의 java-debug는 DAP 클라이언트가 접속할 포트를 여는 Java 디버그 서버입니다. Rust는 CodeLLDB 같은 LLDB 기반 어댑터를 씁니다. rust-analyzer는 README가 밝히듯 language server입니다.
 
 ## 직접 DAP 사용 — Neovim
 
-`nvim-dap`은 DAP 클라이언트. VSCode 설정과 거의 같은 *configuration*.
+[nvim-dap](https://github.com/mfussenegger/nvim-dap)은 Neovim용 DAP 클라이언트입니다. 도움말 `doc/dap.txt`에 따르면 `dap.adapters.<name>`에 `type = 'executable'`과 `command`를 주면 nvim-dap이 그 프로세스를 띄워 stdio로 대화합니다. 위에서 직접 돌려 본 `gdb -i=dap`을 그대로 쓸 수 있습니다.
 
 ```lua
 local dap = require('dap')
 
-dap.adapters.cppdbg = {
-  id = 'cppdbg',
+dap.adapters.gdb = {
   type = 'executable',
-  command = '/usr/bin/OpenDebugAD7',
+  command = 'gdb',
+  args = { '-q', '-nx', '-i=dap' },
 }
 
 dap.configurations.cpp = {
   {
     name = "Launch",
-    type = "cppdbg",
+    type = "gdb",
     request = "launch",
     program = function()
       return vim.fn.input('Path to executable: ', vim.fn.getcwd() .. '/', 'file')
     end,
     cwd = '${workspaceFolder}',
-    stopAtEntry = false,
-    MIMode = 'gdb',
+    stopAtBeginningOfMainSubprogram = false,
   },
 }
 ```
 
-Lua로 `launch.json` 동치를 정의. 같은 adapter를 재사용해도 client가 구현한 capability/UI·configuration 차이와 extension version을 확인합니다.
+`dap.txt`는 필수 키 `type`·`request`·`name` 밖의 키를 "debug-adapter-specific" 옵션이라고 적습니다. `program`, `cwd`, `stopAtBeginningOfMainSubprogram`은 그 어댑터가 알아듣는 `launch` 인자여야 한다는 뜻입니다. 그래서 어댑터가 GDB면 위 GDB 매뉴얼의 키를, `cppdbg`(OpenDebugAD7)면 `MIMode`·`stopAtEntry` 같은 cpptools 키를 씁니다. 이 장에서 Neovim은 실행하지 않았습니다. 위 설정의 키는 모두 출처가 있습니다. 어댑터의 `type`·`command`·`args`는 `dap.txt`의 `executable` 옵션이고, 구성의 `name`·`type`·`request`는 `dap.txt`의 필수 키입니다. `program`을 함수로 줄 수 있다는 것과 `${workspaceFolder}` 치환도 `dap.txt`에 있고, `program`·`cwd`·`stopAtBeginningOfMainSubprogram`은 GDB 매뉴얼의 `launch` 인자입니다.
 
 ## Emacs — dap-mode
 
+[dap-mode](https://github.com/emacs-lsp/dap-mode) 문서의 Configuration 페이지는 `dap-auto-configure-mode`와 어댑터별 모듈을 설명합니다. 그중 `dap-gdb`는 기본으로 `gdb -i dap`을 띄우는 모듈이고(`dap-gdb-debug-program`으로 경로 변경), `dap-lldb`는 lldb-dap, `dap-cpptools`는 cpptools 어댑터를 씁니다.
+
 ```elisp
-(use-package dap-mode
-  :after lsp-mode
-  :config
-  (dap-auto-configure-mode)
-  (require 'dap-cpptools)
-  (require 'dap-lldb))
+(dap-auto-configure-mode 1)
+(require 'dap-gdb)
+(require 'dap-lldb)
 ```
 
-DAP 클라이언트 + UI. `dap-cpptools`/`dap-lldb` 모듈이 어댑터 등록.
+`(require 'dap-gdb)`·`(require 'dap-lldb)`는 Configuration 문서의 각 모듈 Installation 절에 있는 그대로입니다. 같은 문서는 `dap-gdb`가 GDB 14 이상을 요구하고 디버거 타입 `gdb`·`gdbserver`를 등록하며, 템플릿에 `:program`을 꼭 넣으라고 적습니다. 이 장에서 Emacs는 실행하지 않았습니다.
 
 ## DAP 어댑터 만들기
 
-adapter는 framing뿐 아니라 initialize/capability, launch/attach와 configurationDone 순서, breakpoint lifecycle·request cancellation/errors, stop/continue와 thread/frame/variable reference 수명을 구현해야 합니다. stdio stdout에는 protocol 외 log를 섞지 않고 diagnostics는 별도 채널로 보냅니다.
-
-@vscode/debugadapter 같은 공식 library를 사용할 수 있지만 package/version을 고정해야 합니다. 미정의 startDebugger·ellipsis import가 든 TypeScript 조각은 실행 가능한 adapter로 제시하지 않습니다. 새 adapter를 만들었다고 모든 DAP client가 모든 기능을 즉시 지원하는 것도 아닙니다.
+위 실험에서 본 것만 꼽아도 어댑터가 할 일은 framing보다 훨씬 많습니다. `initialize`에서 capability를 광고하고, `launch` 응답을 `configurationDone` 뒤로 미루고, 실행 파일이 읽히기 전의 breakpoint를 `pending`으로 두었다가 이벤트로 확정하고, `hitCondition`·`logMessage`·`repl`을 자기 디버거의 개념에 맞게 해석해야 합니다. GDB 16.3은 이 모두를 Python으로 `gdb/python/lib/gdb/dap/`의 Python 파일 23개에 구현했습니다. 새 어댑터를 만든다면 이 디렉터리가 가장 가까운 참고서입니다.
 
 ## MI vs DAP 한 표
 
 | | MI | DAP |
 |---|-----|-----|
-| 위치 | GDB 측 | IDE 측 |
-| 형식 | MI record grammar | DAP JSON envelope + byte framing |
-| scope | GDB interpreter version | DAP specification/capability |
-| Async | `*notification` | event |
-| 변수 트리 | `-var-*` 명령 | variables 재귀 |
-| 표준 | GDB가 정의 | MS가 정의 |
-| 구현 디버거 | GDB, LLDB(부분) | GDB(via cppdbg), LLDB(via lldb-dap), debugpy, delve, ... |
+| 위치 | GDB 측 | 편집기 측 |
+| 형식 | MI 레코드 문법 (`^done`, `*stopped`, `=...`) | `Content-Length` 헤더 + JSON 봉투 |
+| 버전 | 인터프리터 이름 (`mi2`, `mi3`) | capability 협상 (`supports*`) |
+| 비동기 | `*`·`=` 레코드 | `event` 메시지 |
+| 변수 트리 | `-var-create` / `-var-list-children` | `scopes` / `variables` + `variablesReference` |
+| 정의 주체 | GDB 매뉴얼 | Microsoft의 DAP 명세 |
+| 이 장에서 본 구현 | GDB 16.3 `--interpreter=mi3` | GDB 16.3 `-i=dap` |
 
 ## 정리
 
-- MI = GDB의 *기계용* 인터페이스. 거의 모든 명령에 `-cmd` 형식.
-- DAP = IDE ↔ 디버거 protocol (DAP envelope).
-- IDE 어댑터가 DAP ↔ MI (또는 SB API, 자체 프로토콜) 매개.
-- 변수 트리는 *재귀적 variables 요청*으로 지연 로드.
-- `displayhint = "array"` 같은 pretty-printer 메타가 IDE 트리 모양 결정.
-- cppdbg = GDB/LLDB via MI. CodeLLDB = LLDB via SB. debugpy = Python 내장.
-- Neovim·Emacs도 *같은 DAP 어댑터*로 동일 경험.
-- 새 언어 디버거는 *자체 DAP 어댑터*로 client capability와 구현에 맞춰 통합.
+- MI는 GDB의 기계용 인터페이스입니다. `token`으로 응답을 짝짓고, `^`·`*`·`=`·`~` 접두사로 레코드 종류를 구분합니다.
+- pretty-printer는 MI에서 `-enable-pretty-printing` 뒤에 `displayhint`와 dynamic varobj로, DAP에서 `value`와 `indexedVariables`로 나타납니다.
+- DAP 메시지의 `Content-Length`는 바이트 수입니다. 한글 두 글자가 든 64자 JSON은 68바이트였습니다.
+- GDB 16.3은 `-i=dap`으로 DAP 어댑터가 되지만, `setDataBreakpoints`는 지원하지 않습니다.
+- GDB DAP의 `hitCondition`은 ignore count이고, `>= 5` 같은 식은 문법 오류입니다.
+- GDB DAP의 `repl` 문맥은 CLI 명령을 실행하므로 `x + 1`이 `x` 명령이 됩니다.
+- `launch` 인자는 어댑터마다 다릅니다. GDB는 `stopAtBeginningOfMainSubprogram`, cppdbg는 `stopAtEntry`·`environment` 배열입니다.
+- cppdbg는 OpenDebugAD7 + MIEngine으로 MI를, CodeLLDB는 LLDB SB API를, debugpy는 자체 구현을 씁니다.
 
 ## 다음 장 예고
 
-Ch 6 (마지막) — 프런트엔드 비교. TUI / cgdb / dashboard / gef / VSCode / nvim-dap / Cortex-Debug.
+[Ch 6](/blog/tools/debugging/gdb-extension/chapter06-frontends)(마지막) — 프런트엔드 비교. TUI / cgdb / dashboard / gef / VS Code / nvim-dap / Cortex-Debug.
 
 ## 관련 항목
 
 - [Ch 4: FrameDecorator / Unwinder](/blog/tools/debugging/gdb-extension/chapter04-frame-unwinder)
 - [Ch 6: 프런트엔드](/blog/tools/debugging/gdb-extension/chapter06-frontends)
+- [GDB and LLDB Ch 10: TUI와 프런트엔드](/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends) — lldb-dap과 GDB DAP 비교
 - [GDB/MI 공식 문서](https://sourceware.org/gdb/current/onlinedocs/gdb.html/GDB_002fMI.html)
 - [Debug Adapter Protocol 명세](https://microsoft.github.io/debug-adapter-protocol/)
 - [DAP overview & implementations](https://microsoft.github.io/debug-adapter-protocol/implementors/adapters/)
 
 ## 검증 기준
 
-GDB17.2 source/manual의 MI record·varobj와 [DAP 공식 overview](https://microsoft.github.io/debug-adapter-protocol/overview)·[protocol schema](https://github.com/microsoft/debug-adapter-protocol/blob/main/debugAdapterProtocol.json)를 대조합니다. framing helper의 split/coalesced·UTF-8·invalid/truncated 검사는 실제 adapter/IDE launch 검증과 구분합니다.
+MI와 DAP 트래픽은 Debian 13 arm64 VM의 GDB 16.3(Debian 16.3-1)에 `vecprog.cpp`(`g++ -g -O0`)를 걸고 `--interpreter=mi3`와 `-i=dap`으로 받은 것입니다. `dap-framing.mjs`는 macOS의 Node.js 24.21.0에서 시험했습니다. GDB 쪽은 GDB 16.3 tarball의 `gdb/doc/gdb.texinfo`(Command Interpreters, GDB/MI Output Syntax·Result/Stream/Async Records·Variable Objects, Debugger Adapter Protocol 장)와 `gdb/python/lib/gdb/dap/`(`breakpoint.py`, `evaluate.py`, `launch.py`)로, DAP 쪽은 [DAP overview](https://microsoft.github.io/debug-adapter-protocol/overview)의 Base Protocol 절과 [protocol schema](https://github.com/microsoft/debug-adapter-protocol/blob/main/debugAdapterProtocol.json)(`SourceBreakpoint`, `Breakpoint.verified`, `EvaluateArguments.context`, `StoppedEvent.reason`)로 대조했습니다. 어댑터 설명은 cpptools launch.json 레퍼런스, MIEngine README, CodeLLDB README·MANUAL, debugpy README, Delve `dlv dap` 문서, netcoredbg·java-debug README, nvim-dap `doc/dap.txt`, dap-mode Configuration 문서에서 확인했습니다.
