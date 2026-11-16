@@ -37,7 +37,7 @@ topics: ["embedded"]
 | `-Og` | "Optimize while keeping in mind debugging experience" | 개발 중 |
 | `-Ofast` | `-O3` + `-ffast-math`, `-fallow-store-data-races` 등 표준 위반 허용 | 측정 후 사용 |
 
-각 레벨은 개별 `-f` 옵션의 묶음입니다. 매뉴얼은 정확한 목록을 `-Q --help=optimizers`로 확인하라고 적고, target과 GCC 구성에 따라 조금씩 다르다고 덧붙입니다. 이전 판은 vectorization을 `-O3`의 특징으로 적었지만, GCC 14 매뉴얼의 `-O2` 목록에 이미 `-ftree-loop-vectorize`가 있습니다.
+각 레벨은 개별 `-f` 옵션의 묶음입니다. 매뉴얼은 정확한 목록을 `-Q --help=optimizers`로 확인하라고 적고, target과 GCC 구성에 따라 조금씩 다르다고 덧붙입니다. vectorization은 `-O3`만의 특징이 아닙니다. GCC 14 매뉴얼의 `-O2` 목록에 이미 `-ftree-loop-vectorize`가 있습니다.
 
 ### 2) 각 레벨의 효과 비교
 
