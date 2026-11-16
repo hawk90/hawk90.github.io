@@ -30,7 +30,7 @@ topics: ["embedded"]
 - **LMA (Load Memory Address)** — 이미지에 저장되는 위치. 보통 Flash입니다.
 - **VMA (Virtual Memory Address)** — 실행 중에 접근하는 위치. RAM 또는 Flash입니다.
 
-`.data`가 대표 예입니다. Flash에 초기값 저장(LMA), boot 시 RAM으로 복사(VMA).
+`.data`가 대표 예입니다. 초기값은 Flash(LMA)에 저장되고, boot 때 RAM(VMA)으로 복사됩니다.
 
 ### 2) RAM에서 실행하는 함수
 
@@ -59,7 +59,7 @@ linker script:
 _siramfunc = LOADADDR(.ramfunc);
 ```
 
-startup code가 `.data`처럼 LMA → VMA로 복사:
+startup code는 `.data`와 같은 방식으로 LMA에서 VMA로 복사합니다.
 
 ```c
 extern uint32_t _sramfunc, _eramfunc, _siramfunc;
@@ -118,7 +118,7 @@ SECTIONS
 ```text
   [ 7] .noinit_buf       NOBITS          20000008 020008 000040 00  WA  0   0  4
 ```
- 부팅 코드가 `.bss`처럼 0으로 지우지도 않으므로, reset을 거쳐도 남아야 하는 값(backup SRAM, reset 원인 기록)에 씁니다.
+`NOLOAD` section은 부팅 코드가 `.bss`처럼 0으로 지우지도 않으므로, reset을 거쳐도 남아야 하는 값(backup SRAM, reset 원인 기록)에 씁니다.
 
 ### 4) Dual-bank A/B 분할
 
@@ -134,7 +134,7 @@ MEMORY
 REGION_ALIAS("APP", APP_A);   /* the slot-B build uses APP_B */
 ```
 
-주소 자리를 비워 둔 것은 일부러입니다. slot 경계는 칩 reference manual의 flash erase 단위(sector) 경계와 맞아야 한쪽 slot을 지울 때 다른 slot이 함께 지워지지 않는데, sector 크기가 칩마다(같은 칩 안에서도 위치마다) 다르기 때문입니다. 이전 판의 주소(slot B 0x08084000)는 이 기준을 확인하지 않은 값이라 지웠습니다.
+주소 자리를 비워 둔 것은 일부러입니다. slot 경계는 칩 reference manual의 flash erase 단위(sector) 경계와 맞아야 한쪽 slot을 지울 때 다른 slot이 함께 지워지지 않는데, sector 크기가 칩마다(같은 칩 안에서도 위치마다) 다르기 때문입니다.
 
 ### 5) Overlay
 
@@ -159,7 +159,7 @@ OVERLAY 0x2001F000 : AT (0x08080000)
 
 ### 6) `gc-sections`와 `KEEP`
 
-빌드 옵션 `-Wl,--gc-sections`는 참조되지 않는 section을 제거합니다. 단, `.isr_vector`처럼 코드가 명시적으로 참조 안 하는 것은 `KEEP`으로 보호.
+빌드 옵션 `-Wl,--gc-sections`는 참조되지 않는 section을 제거합니다. 단, `.isr_vector`처럼 코드가 직접 참조하지 않는 section은 `KEEP`으로 지킵니다.
 
 ```bash
 # 컴파일 옵션 — function/data별 section
@@ -203,7 +203,7 @@ SECTIONS
 }
 ```
 
-Vector table을 RAM으로 옮기기 (dynamic IRQ handler 교체용). 복사하는 entry 수는 Flash vector table의 실제 크기를 넘으면 안 됩니다. 이전 판은 256 entry를 복사했는데, STM32F407의 table은 16 + 82 = 98 word([2-04](/blog/embedded/modern-recipes/part2-04-cortex-m-exceptions))라 그 뒤의 Flash 내용까지 vector로 복사하게 됩니다. RAM table의 정렬은 2-04에서 계산한 대로 STM32F407에서 512 byte입니다.
+다음은 IRQ handler를 실행 중에 바꾸려고 vector table을 RAM으로 옮기는 예입니다. 복사하는 entry 수는 Flash vector table의 실제 크기를 넘으면 안 됩니다. 예를 들어 256 entry를 복사하면, STM32F407의 table은 16 + 82 = 98 word([2-04](/blog/embedded/modern-recipes/part2-04-cortex-m-exceptions))라 그 뒤의 Flash 내용까지 vector로 복사하게 됩니다. RAM table의 정렬은 2-04에서 계산한 대로 STM32F407에서 512 byte입니다.
 
 ```text
 .vector_ram (NOLOAD) :
@@ -266,7 +266,7 @@ CFSR 0x8200은 BusFault의 PRECISERR(bit 9)와 BFARVALID(bit 15)이고, BusFault
 
 > ⚠️ NOLOAD section에 초기값 의도
 
-`(NOLOAD)`는 단순 placement만. 초기값이 필요하면 일반 section + AT >로 LMA 지정.
+`(NOLOAD)`는 주소만 배정합니다. 초기값이 필요하면 일반 section에 `AT >`로 LMA를 지정합니다.
 
 > ⚠️ `--gc-sections`로 vector table 사라짐
 
@@ -274,11 +274,11 @@ vector table은 코드에서 참조하지 않으므로 `KEEP`이 없으면 `--gc
 
 > ⚠️ A/B slot의 절대 주소 가정 코드
 
-slot A 빌드와 B 빌드에서 vector table 주소가 다르면 SCB->VTOR 설정도 달라야 합니다. 빌드 매크로로 분기.
+slot A 빌드와 B 빌드에서 vector table 주소가 다르면 SCB->VTOR 설정도 달라야 합니다. 빌드 매크로로 분기합니다.
 
 > ⚠️ Overlay 전환 중 IRQ 발생
 
-overlay group A → B 복사 도중 IRQ가 들어와 A의 함수를 호출하면 부분 손상된 코드를 실행. 복사 동안 IRQ disable.
+overlay group A → B 복사 도중 IRQ가 들어와 A의 함수를 호출하면 덜 복사된 코드를 실행합니다. 복사하는 동안에는 IRQ를 막습니다.
 
 ## 정리
 
