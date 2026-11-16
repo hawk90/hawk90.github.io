@@ -1,5 +1,5 @@
 ---
-title: "임베디드 클럭과 타이밍 — Skew·Jitter·PLL·MMCM 분석"
+title: "임베디드 클럭과 타이밍 — Skew·Jitter·PLL 분석"
 slug: "embedded/modern-recipes/part1-02-clock-timing"
 date: 2026-04-10T09:02:00
 description: "STM32F4 168 MHz PLL 설정을 레지스터로 짜고, jitter 정의·측정법, 트레이스 skew 계산, setup/hold와 metastability, UART baud 오차 예산을 1차 자료와 계산으로 정리합니다."
@@ -25,7 +25,7 @@ topics: ["embedded"]
 
 ### 1) Clock source 계층
 
-MCU는 원본 발진기 하나를 PLL로 체배한 뒤 버스마다 나눠 씁니다. 아래 표는 ST의 STM32CubeF4(v1.28.3) `Projects/STM32F4-Discovery/Examples/GPIO/GPIO_EXTI/Src/main.c`의 `SystemClock_Config()` 주석에 적힌 설정을 그대로 옮긴 것입니다.
+MCU는 원본 발진기 하나를 PLL로 체배한 뒤 버스마다 나눠 씁니다. 아래 표는 ST의 STM32CubeF4(v1.28.3) `Projects/STM32F4-Discovery/Examples/GPIO/GPIO_EXTI/Src/main.c`의 `SystemClock_Config()` 주석에 적힌 설정값과, 그 값으로 계산한 각 단계 클럭입니다. PLLQ 출력의 용도(OTG FS·SDIO·RNG)는 HAL `stm32f4xx_hal_rcc_ex.h` 63행의 설명을 따랐습니다.
 
 | 단계 | 클럭 | 비고 |
 | --- | --- | --- |
@@ -33,7 +33,7 @@ MCU는 원본 발진기 하나를 PLL로 체배한 뒤 버스마다 나눠 씁�
 | PLL 입력 | 1 MHz | ÷ M (M = 8) |
 | PLL VCO | 336 MHz | × N (N = 336) |
 | PLL 출력 | 168 MHz | ÷ P (P = 2) |
-| USB·SDIO용 | 48 MHz | VCO ÷ Q (Q = 7) |
+| OTG FS·SDIO·RNG용 | 48 MHz | VCO ÷ Q (Q = 7) |
 | 시스템 버스 | 168 MHz | SYSCLK |
 | AHB | 168 MHz | HCLK (/1) |
 | APB1 | 42 MHz | PCLK1 (/4) |
@@ -48,6 +48,7 @@ MCU는 원본 발진기 하나를 PLL로 체배한 뒤 버스마다 나눠 씁�
 void clock_168mhz(void)
 {
     RCC->APB1ENR |= RCC_APB1ENR_PWREN;          /* PWR clock */
+    (void)RCC->APB1ENR;                         /* HAL처럼 enable 뒤 read-back */
     PWR->CR |= PWR_CR_VOS;                      /* regulator Scale 1 */
 
     FLASH->ACR = FLASH_ACR_ICEN | FLASH_ACR_DCEN | FLASH_ACR_PRFTEN
@@ -82,13 +83,15 @@ arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O2 -ffreestanding -DSTM32F407xx \
   -I cmsis_device_f4/Include -I CMSIS_5/CMSIS/Core/Include -Wall -Wextra -c clock168.c
 ```
 
-보드에서는 실행하지 않았습니다. QEMU 11.1.3의 STM32F405 머신(`netduinoplus2`)에서 돌리면 `RCC->CR`이 계속 0으로 읽혀 첫 `HSERDY` 대기에서 멈춥니다. QEMU가 이 RCC를 모델링하지 않기 때문이고, 실제 보드에서 HSE가 발진하지 않을 때도 코드는 같은 자리에서 멈춥니다. 양산 코드라면 이 대기 루프에 timeout을 둡니다.
+read-back 한 줄은 HAL의 `__HAL_RCC_PWR_CLK_ENABLE()`(`stm32f4xx_hal_rcc.h` 510~516행)이 "Delay after an RCC peripheral clock enabling"이라는 주석과 함께 하는 일을 따라 한 것입니다.
+
+보드에서는 실행하지 않았습니다. QEMU 11.1의 STM32F405 머신(`netduinoplus2`)에도 RCC 모델(`hw/misc/stm32_rcc.c`)은 있지만, 파일 첫 주석대로 reset·enable 레지스터만 구현하고 나머지는 쓴 값을 저장만 합니다. `HSERDY` 같은 ready 비트를 세우지 않으므로 코드는 첫 `HSERDY` 대기에서 멈춥니다. 실제 보드에서 HSE가 발진하지 않을 때도 같은 자리에서 멈춥니다. 양산 코드라면 이 대기 루프에 timeout을 둡니다.
 
 ### 2) Jitter — 주기의 흔들림
 
 이상적 클럭은 정확히 같은 간격으로 떨어집니다. 실제 클럭은 매 cycle 미세하게 떨립니다.
 
-SiTime 앱노트 AN10007(Rev 1.21)은 jitter를 세 가지로 나눕니다. period jitter와 cycle-to-cycle jitter의 정의는 JEDEC JESD65B를 따른다고 적습니다.
+SiTime 앱노트 AN10007(Rev 1.21) 2절은 jitter의 주요 종류로 period·cycle-to-cycle·long-term·phase jitter·TIE를 듭니다. 아래는 그중 시간 영역의 세 가지입니다. period jitter와 cycle-to-cycle jitter의 정의는 JEDEC JESD65B를 따른다고 적습니다.
 
 | 종류 | AN10007의 정의 | 쓰임 (AN10007) |
 | --- | --- | --- |
@@ -124,9 +127,22 @@ TI 앱노트 SCZA004A(*Metastability Performance of Clocked FIFOs*)는 이 창�
 
 ## 코드 / 실제 사용 예
 
-클럭이 UART baud에 어떻게 번지는지 계산해 봅니다. STM32F4 USART의 BRR 값은 HAL v1.8.6 `stm32f4xx_hal_uart.h` 860~867행의 `UART_BRR_SAMPLING16()` 매크로가 만듭니다. 이 매크로는 USARTDIV = PCLK / (16 × baud)를 1/100 단위로 구해 정수부를 상위 12비트, 소수부 × 16을 반올림해 하위 4비트에 넣습니다. 그래서 BRR 값 자체가 16 × USARTDIV이고, 실제 baud는 PCLK / BRR입니다. 매크로를 그대로 복사해 호스트에서 돌리는 코드입니다.
+클럭이 UART baud에 어떻게 번지는지 계산해 봅니다. STM32F4 USART의 BRR 값은 HAL v1.8.6 `stm32f4xx_hal_uart.h` 860~868행의 `UART_BRR_SAMPLING16()` 매크로가 만듭니다. 이 매크로는 USARTDIV = PCLK / (16 × baud)를 1/100 단위로 구해 정수부를 상위 12비트, 소수부 × 16을 반올림해 하위 4비트에 넣습니다. 그래서 BRR 값 자체가 16 × USARTDIV이고, 실제 baud는 PCLK / BRR입니다. 매크로를 그대로 복사해 호스트에서 돌리는 코드입니다.
 
 ```c
+#include <stdio.h>
+#include <stdint.h>
+/* stm32f4xx_hal_uart.h (HAL v1.8.6) 860~868행 그대로 */
+#define UART_DIV_SAMPLING16(_PCLK_, _BAUD_)            ((uint32_t)((((uint64_t)(_PCLK_))*25U)/(4U*((uint64_t)(_BAUD_)))))
+#define UART_DIVMANT_SAMPLING16(_PCLK_, _BAUD_)        (UART_DIV_SAMPLING16((_PCLK_), (_BAUD_))/100U)
+#define UART_DIVFRAQ_SAMPLING16(_PCLK_, _BAUD_)        ((((UART_DIV_SAMPLING16((_PCLK_), (_BAUD_)) - (UART_DIVMANT_SAMPLING16((_PCLK_), (_BAUD_)) * 100U)) * 16U)\
+                                                         + 50U) / 100U)
+/* UART BRR = mantissa + overflow + fraction
+            = (UART DIVMANT << 4) + (UART DIVFRAQ & 0xF0) + (UART DIVFRAQ & 0x0FU) */
+#define UART_BRR_SAMPLING16(_PCLK_, _BAUD_)            ((UART_DIVMANT_SAMPLING16((_PCLK_), (_BAUD_)) << 4U) + \
+                                                        (UART_DIVFRAQ_SAMPLING16((_PCLK_), (_BAUD_)) & 0xF0U) + \
+                                                        (UART_DIVFRAQ_SAMPLING16((_PCLK_), (_BAUD_)) & 0x0FU))
+
 int main(void) {
     const uint32_t clks[] = { 8000000, 16000000, 42000000, 84000000 };
     const uint32_t bauds[] = { 9600, 115200 };
@@ -154,7 +170,7 @@ PCLK=84000000 baud=  9600 BRR=0x222e ( 8750) actual=   9600.00 err=+0.000%
 PCLK=84000000 baud=115200 BRR=0x02d9 (  729) actual= 115226.34 err=+0.023%
 ```
 
-16 MHz에서 `16000000 / 9600`을 정수 나눗셈으로 자르면 1666(+0.04%)이지만 HAL은 반올림해 1667(−0.02%)을 씁니다. 위 168 MHz 설정의 APB1 42 MHz·APB2 84 MHz는 9600 baud를 오차 0으로 만듭니다. 8 MHz로 115200을 내면 +0.64%로, 나눗셈 오차만으로도 클럭 소스 하나 분량의 예산을 먹습니다.
+16 MHz에서 `16000000 / 9600`을 정수 나눗셈으로 자르면 1666(+0.04%)이지만 HAL은 반올림해 1667(−0.02%)을 씁니다. 위 168 MHz 설정의 APB1 42 MHz·APB2 84 MHz는 9600 baud를 오차 0으로 만듭니다. 8 MHz로 115200을 내면 +0.64%로, 아래 수신기 권장치 ±2.0%의 약 1/3을 나눗셈 오차만으로 씁니다.
 
 그 예산이 얼마인지는 수신기 구조에서 나옵니다. Microchip ATmega328P 데이터시트(7810D) 19.8.3절은 16× 샘플링 수신기가 받아들일 수 있는 속도 비를 식으로 줍니다. D는 데이터+패리티 비트 수, S = 16, 다수결 샘플 위치 SF = 8, SM = 9입니다.
 
@@ -171,11 +187,11 @@ D=8: Rslow=95.36% Rfast=104.58%  -> tolerable +4.58%/-4.64%
 D=9: Rslow=95.81% Rfast=104.14%  -> tolerable +4.14%/-4.19%
 ```
 
-데이터시트 Table 19-2는 8N1(D = 8)의 최대 총 오차를 +4.58/−4.54%로 적는데, 같은 표의 R_slow 95.36%와 식을 그대로 계산하면 −4.64%라 표 쪽 값이 0.1%p 다릅니다. 같은 표는 송신기와 수신기가 총 오차를 반씩 나눈다는 가정으로 **수신기 권장 최대 오차 ±2.0%**를 적습니다. 이 값은 AVR 수신기 기준이고, STM32 USART의 허용치는 그 레퍼런스 매뉴얼의 표를 봐야 합니다. 1-04에서 STM32 쪽을 다룹니다.
+데이터시트 Table 19-2는 8N1(D = 8)의 최대 총 오차를 +4.58/−4.54%로 적는데, 같은 표의 R_slow 95.36%와 식을 그대로 계산하면 −4.64%라 표 쪽 값이 0.1%p 다릅니다. 같은 표는 송신기와 수신기가 총 오차를 반씩 나눈다는 가정으로 **수신기 권장 최대 오차 ±2.0%**를 적습니다. 이 값은 AVR 수신기 기준이고, STM32 USART의 허용치는 그 레퍼런스 매뉴얼의 표를 봐야 합니다. 1-04에서 STM32H7 USART의 허용 오차를 다룹니다.
 
 ## 측정 / 비교
 
-UART 예산이 정해지면 클럭 소스의 오차를 그 안에 맞춥니다. 위 계산에서 나눗셈 오차는 0~0.64%였으므로, 나머지가 발진기 몫입니다. 발진기 오차는 클럭 소스 종류의 일반값이 아니라 쓰는 부품 데이터시트의 정확도 항목(STM32F4 HSI라면 데이터시트의 HSI oscillator characteristics 표)으로 확인합니다. 이 글에서는 STM32F4 데이터시트를 열어 보지 못해 HSI 수치를 싣지 않았습니다.
+UART 예산이 정해지면 클럭 소스의 오차를 그 안에 맞춥니다. 위 계산에서 나눗셈 오차는 0~0.64%였으므로, 나머지가 발진기 몫입니다. 발진기 오차는 클럭 소스 종류의 일반값이 아니라 쓰는 부품 데이터시트의 정확도 항목(STM32F4 HSI라면 데이터시트의 HSI oscillator characteristics 표)으로 확인합니다. STM32F405/407 데이터시트(DS8626, DocID022152 Rev 4) Table 33은 공장 보정된 HSI 16 MHz의 정확도를 25 °C에서 ±1%, −10~85 °C에서 ±4%, −40~105 °C에서 −8~+4.5%로 적습니다. 25 °C 값만 써도 ±1% + 나눗셈 0.04%로 AVR 기준 수신기 권장 ±2.0% 안이지만, −40~105 °C 범위의 −8%는 총 허용치 −4.64%도 넘습니다. 넓은 온도에서 UART를 쓰려면 HSE가 필요하다는 결론이 숫자로 나옵니다.
 
 jitter는 스코프로 잽니다. SiTime AN10007 3.2.1절의 period jitter 측정법(Method A)은 다음과 같습니다.
 
@@ -196,7 +212,7 @@ STM32F4는 reset 뒤 HSI로 시작합니다. `cmsis_device_f4`의 `system_stm32f
 
 > ⚠️ PLL lock 대기 누락
 
-위 코드는 `PLLRDY`를 기다린 뒤 SW를 바꾸고, 다시 `SWS`가 PLL을 가리킬 때까지 기다립니다. HAL도 같은 순서를 밟습니다. `HAL_RCC_OscConfig()`는 PLL을 켠 뒤 `PLLRDY`가 설 때까지 기다리고, `HAL_RCC_ClockConfig()`는 SW를 바꾼 뒤 `SWS`를 확인합니다. 원래 순서를 지키지 않았을 때 무슨 일이 생기는지는 레퍼런스 매뉴얼에서 확인하지 못해 적지 않습니다.
+위 코드는 `PLLRDY`를 기다린 뒤 SW를 바꾸고, 다시 `SWS`가 PLL을 가리킬 때까지 기다립니다. HAL도 같은 순서를 밟습니다. `HAL_RCC_OscConfig()`는 PLL을 켠 뒤 `PLLRDY`가 설 때까지 기다리고, `HAL_RCC_ClockConfig()`는 SW를 바꾼 뒤 `SWS`를 확인합니다.
 
 > ⚠️ Flash wait state 미설정
 
@@ -217,4 +233,4 @@ STM32CubeF4 예제는 168 MHz·3.3 V에서 Flash latency 5 WS를 씁니다. HAL 
 - [1-01: 디지털 신호 기초](/blog/embedded/modern-recipes/part1-01-digital-signal-basics)
 - [1-03: GPIO 내부 구조](/blog/embedded/modern-recipes/part1-03-gpio-internals)
 - [1-04: UART 하드웨어 동작](/blog/embedded/modern-recipes/part1-04-uart-hardware)
-- 더 깊이 — [Practical RTOS Internals 2-01: SysTick](/blog/embedded/rtos/practical-internals/00-preface)
+- 더 깊이 — [Practical RTOS Internals 2-08: RTOS Tick과 타이머](/blog/embedded/rtos/practical-internals/part2-08-tick-timer)
