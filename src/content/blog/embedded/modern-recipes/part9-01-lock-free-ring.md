@@ -295,7 +295,7 @@ arm-none-eabi-gcc (GCC) 16.2.0
 
 반대 방향도 같은 원리입니다. Consumer가 바이트를 다 읽은 *뒤에* `tail`을 release로 올리고, producer가 그것을 acquire로 읽은 *뒤에* 그 칸을 덮어씁니다. 그래서 `ring_push`의 `tail` 읽기도 acquire입니다. 자기 index를 읽는 두 곳은 자기만 쓰는 값이라 relaxed로 충분합니다.
 
-표준 함수는 `_Atomic` 객체만 받습니다. N1570 7.17.7.2의 원형은 `C atomic_load_explicit(volatile A *object, memory_order order)`이고, 여기서 `A`는 atomic 타입입니다(7.17.1p5). 그래서 `volatile uint16_t`에 `atomic_load_explicit`을 부르면 컴파일되지 않습니다.
+표준 함수는 `_Atomic` 객체만 받습니다. N1570 7.17.7.2의 원형은 `C atomic_load_explicit(volatile A *object, memory_order order)`이고, 여기서 `A`는 atomic 타입입니다(7.17.1p5). Apple clang 21은 `volatile uint16_t`에 `atomic_load_explicit`을 부르면 아래처럼 오류로 거부합니다. 그러나 같은 파일을 arm-none-eabi-gcc 16.2.0(`-std=c11 -Wall -Wextra -ffreestanding -mcpu=cortex-m7 -mthumb -O2`)으로 빌드하면 경고 없이 컴파일되고 `ldrh` 뒤에 `dmb ish`를 붙인 코드가 나옵니다. 7.17.7.2는 원형을 보이는 synopsis라 진단을 요구하지 않으므로, 컴파일러가 막아 준다고 기대할 수 없습니다.
 
 ```c
 // atomic_on_volatile.c
@@ -431,7 +431,7 @@ Producer는 `head`를 쓰고 `tail`을 읽고, consumer는 그 반대입니다. 
 #include <time.h>
 
 #ifndef GAP
-#define GAP 2
+#define GAP 4
 #endif
 #define RING_SIZE 1024u
 #define RING_MASK (RING_SIZE - 1u)
@@ -439,7 +439,7 @@ Producer는 `head`를 쓰고 `tail`을 읽고, consumer는 그 반대입니다. 
 
 static struct {
     _Alignas(256) _Atomic uint32_t head;
-    char pad[GAP - sizeof(uint32_t) > 0 ? GAP - sizeof(uint32_t) : 1];
+    char pad[GAP > sizeof(uint32_t) ? GAP - sizeof(uint32_t) : 1];
     _Atomic uint32_t tail;
     _Alignas(256) uint32_t buf[RING_SIZE];
 } r;
@@ -498,7 +498,7 @@ gap= 64 B  head-tail distance=64  2.43 s  41.2 M items/s  (sum 4999999950000000)
 gap=128 B  head-tail distance=128  3.97 s  25.2 M items/s  (sum 4999999950000000)
 ```
 
-다섯 라운드의 중앙값은 붙였을 때 15.8 M items/s, 64 B일 때 26.1, 128 B일 때 20.2였습니다. 그러나 셋째 라운드는 세 배치가 모두 7~10 M items/s로 떨어졌고 64 B가 가장 느렸습니다. macOS가 두 스레드를 P코어와 E코어 중 어디에 두는지 이 측정에서 통제하지 않았기 때문에, 라운드 사이의 차이가 배치 사이의 차이만큼 큽니다. 이 host에서 말할 수 있는 것은 다섯 라운드 중 네 번은 떼어 놓은 쪽이 빨랐다는 것까지이고, 64 B와 128 B의 순위는 가를 수 없습니다. 그래서 간격은 그 시스템의 cache line 크기로 잡습니다. 64는 고정값이 아니고, 이 Mac에서는 128입니다.
+다섯 라운드의 중앙값은 붙였을 때 15.8 M items/s, 64 B일 때 26.1, 128 B일 때 20.2였습니다. 그러나 셋째 라운드는 세 배치가 모두 7~10 M items/s로 떨어졌고 64 B가 가장 느렸습니다. 이 측정은 macOS가 두 스레드를 어느 코어에 두는지 통제하지 않았고, 라운드 사이의 차이가 배치 사이의 차이만큼 큽니다. 64 B는 다섯 라운드 중 네 번(1·2·4·5), 128 B도 네 번(1·3·4·5) 붙인 배치보다 빨랐고, 둘 다 빨랐던 라운드는 세 번(1·4·5)이었습니다. 이 host에서 말할 수 있는 것은 여기까지이고, 64 B와 128 B의 순위는 가를 수 없습니다. 그래서 간격은 그 시스템의 cache line 크기로 잡습니다. 64는 고정값이 아니고, 이 Mac에서는 128입니다.
 
 C11에서는 `_Alignas(N)`(또는 `<stdalign.h>`의 `alignas`)로 각 index를 line 시작에 놓습니다.
 
@@ -688,7 +688,7 @@ DMA를 circular mode로 두면 DMA가 producer가 되고, ISR 없이 task가 con
 
 ```c
 /* DMA (circular mode) writes rx_buf; the task only reads */
-static uint8_t rx_buf[RING_SIZE];
+static _Alignas(32) uint8_t rx_buf[RING_SIZE];   /* 32 B D-cache line */
 static uint16_t rx_tail;
 
 void uart_dma_task(void *p)
@@ -748,7 +748,7 @@ size_t got = xStreamBufferReceive(sb, buf, sizeof buf, portMAX_DELAY);
 struct { _Atomic uint16_t head, tail; uint8_t buf[RING_SIZE]; } ring;  /* same cache line */
 ```
 
-M2에서는 다섯 라운드 중 네 번 붙인 배치의 처리율이 떨어뜨린 배치보다 낮았습니다. 그 시스템의 cache line 크기로 `_Alignas`를 줍니다.
+M2에서는 다섯 라운드 중 세 번은 64 B와 128 B 배치가 모두 붙인 배치보다 빨랐습니다. 그 시스템의 cache line 크기로 `_Alignas`를 줍니다.
 
 > ⚠️ 생산자가 둘
 
@@ -763,7 +763,7 @@ ring_push(r, b);
 
 - SPSC ring은 **각자 자기 index만 쓰고, 데이터를 쓴 뒤 index를 release로 공개**하는 구조입니다(N1570 5.1.2.4p11).
 - `volatile` 판은 TSan이 data race 두 곳을 보고했고, M2에서 실제로 틀린 바이트를 냈습니다.
-- 표준 `atomic_*` 함수는 `_Atomic` 객체만 받습니다. `volatile uint16_t`에 부르면 컴파일되지 않습니다.
+- 표준 `atomic_*` 함수의 인자는 `_Atomic` 객체입니다. clang은 `volatile uint16_t`를 거부하지만 arm-none-eabi-gcc 16.2.0은 경고 없이 받습니다.
 - 크기가 2의 거듭제곱이면 `%`도 AND가 됩니다. Cortex-M0+에서 `% 100`은 `__aeabi_uidivmod` 호출입니다.
 - Cortex-M에서 `_Atomic` 판의 비용은 `dmb` 두 개이고, QEMU Cortex-M3의 SysTick ISR로 20만 바이트를 순서대로 넘겼습니다.
 - `head`/`tail`은 그 시스템의 cache line 크기만큼 떼어 놓습니다. 이 Mac에서는 128 B이고, 처리율 차이는 측정마다 흔들렸으므로 자기 시스템에서 다시 잽니다.
