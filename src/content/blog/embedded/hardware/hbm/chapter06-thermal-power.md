@@ -45,12 +45,14 @@ HBM은 *interposer 위*에 *GPU/NPU 옆*에 붙어 있어서, cooling이 *GPU di
 
 ![lid가 있는 GPU 패키지의 cooling stack 예 — cold plate에서 BGA까지 단면](/images/blog/hardware/hbm/diagrams/ch06-cooling-stack.svg)
 
-| 제품 | TDP / 전력 | Cooling |
-|------|-----------|---------|
-| NVIDIA A100 (SXM4) | 400 W ([Ampere 백서](https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf)) | TBD |
-| NVIDIA H100 SXM | 최대 700 W ([H100 사양](https://www.nvidia.com/en-us/data-center/h100/)) | TBD |
-| NVIDIA DGX B200 (B200 × 8) | 시스템 최대 약 14.3 kW | 공랭(air-cooled) 구성 |
-| NVIDIA GB200 NVL72 | TBD | rack 단위 liquid cooling (Blackwell GPU 72개) |
+| 제품 | 출처가 밝힌 전력·냉각 |
+|------|-----------|
+| NVIDIA A100 (SXM4) | TDP 400 W ([Ampere 백서](https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf)) |
+| NVIDIA H100 SXM / H100 NVL | SXM 최대 700 W, NVL(PCIe) 350~400 W·*dual-slot air-cooled* ([H100 사양](https://www.nvidia.com/en-us/data-center/h100/)) |
+| NVIDIA DGX B200 (B200 × 8) | 시스템 최대 약 14.3 kW, *air-cooled* |
+| NVIDIA GB200 NVL72 | rack 단위 *liquid-cooled* (Blackwell GPU 72개) |
+
+A100 SXM4와 H100 SXM의 냉각 방식, GB200 NVL72의 rack 전력은 인용한 NVIDIA 자료에 나오지 않아 적지 않았습니다.
 
 B200을 쓴다고 해서 곧바로 liquid cooling이 필요한 것은 아닙니다. [DGX B200 제품 사양](https://www.nvidia.com/en-eu/data-center/dgx-b200/)은 시스템 최대 *~14.3 kW*를 적고, 성능 비교 각주에서 비교 대상을 *DGX B200 air-cooled*로 부릅니다. [GB200 NVL72](https://www.nvidia.com/en-us/data-center/gb200-nvl72/)는 *Grace CPU 36개와 Blackwell GPU 72개를 묶은 rack-scale liquid-cooled 설계*입니다. 같은 Blackwell 세대에서 두 냉각 방식이 모두 나온 사례입니다.
 
