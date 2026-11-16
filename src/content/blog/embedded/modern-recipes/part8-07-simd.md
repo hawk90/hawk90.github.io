@@ -5,7 +5,7 @@ date: 2026-04-17T09:06:00
 description: "Auto-vectorize, intrinsics, OpenMP SIMD pragma 세 갈래를 데이터 layout과 함께 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 95
-tags: [recipes, simd, vectorization, intrinsics, openmp, ispc]
+tags: [recipes, simd, vectorization, intrinsics, openmp]
 topics: ["embedded"]
 ---
 
@@ -233,21 +233,30 @@ wrapping add for comparison:    200 210 220 230 240 250 4 14 24 34 44 54 64 74 8
 | sum NEON, 누산기 1개 | 0.243 ns | 0.229 ns |
 | sum NEON, 누산기 4개 | 0.053 ns | 0.059 ns |
 
-같은 코드 블록을 새 디렉터리에서 다시 빌드해 돌렸을 때 각 값은 최대 16%(누산기 1개 sum, 0.243 → 0.206 ns) 달랐고, 표의 순서와 배수 관계는 같았습니다.
+같은 코드 블록을 새 디렉터리에서 다시 빌드해 돌렸을 때 각 값은 최대 15%(누산기 1개 sum, 0.243 → 0.206 ns) 달랐고, 표의 순서와 배수 관계는 같았습니다.
 
 - **덧셈은 L1에서 4.6배, 메모리에서는 1.9배였습니다.** 데이터가 cache 밖에 있으면 자동 벡터화와 intrinsics가 같은 0.14 ns에 멈췄습니다. 벡터 폭보다 메모리가 먼저 한계입니다.
 - **손으로 쓴 NEON이 자동 벡터화보다 느렸습니다(L1에서 0.094 대 0.059 ns).** clang 보고서는 `add_auto`를 "vectorization width: 4, interleaved count: 4", 즉 벡터 넷을 한 반복에 처리하도록 펼쳤다고 적고, 손으로 쓴 루프는 반복마다 벡터 하나만 처리합니다. intrinsics로 바꾼다고 저절로 빨라지지는 않습니다.
 - **합은 의존 사슬이 문제였습니다.** scalar는 0.9 ns/원소였고, 벡터 누산기 하나로 3.7배, 넷으로 나누자 17배가 됐습니다. 같은 M2 Pro에서 dot product를 잰 [PE 2-09](/blog/embedded/performance-engineering/part2-09-simd-neon)도 누산기 1개 0.28 ns, 4개 0.07 ns로 같은 경향입니다.
 
-`sum_scalar`가 0.9 ns로 느린 이유는 디스어셈블에 보입니다. clang은 이 루프도 "vectorized loop"라고 보고했지만, 실제로는 벡터로 load한 뒤 원소를 순서대로 `fadd s0, s0, ...` 하나씩 더합니다.
+`sum_scalar`가 0.9 ns로 느린 이유는 디스어셈블에 보입니다. clang은 이 루프도 "vectorized loop"라고 보고했지만, 실제로는 벡터로 load한 뒤 `mov sN, vM[k]`로 원소를 하나씩 꺼내 순서대로 `fadd s0, s0, ...`로 더합니다. 아래는 `cc -std=c11 -O2 -S simd.c` 출력의 안쪽 루프 전체입니다.
 
 ```text
-LBB3_3:
-LBB3_4:
-LBB3_6:
 LBB3_7:                                 ; =>This Inner Loop Header: Depth=1
 	ldp	q1, q2, [x10, #-32]
+	mov	s3, v1[3]
+	mov	s4, v1[2]
+	mov	s5, v1[1]
+	mov	s6, v2[3]
+	mov	s7, v2[2]
+	mov	s16, v2[1]
 	ldp	q17, q18, [x10], #64
+	mov	s19, v17[3]
+	mov	s20, v17[2]
+	mov	s21, v17[1]
+	mov	s22, v18[3]
+	mov	s23, v18[2]
+	mov	s24, v18[1]
 	fadd	s0, s0, s1
 	fadd	s0, s0, s5
 	fadd	s0, s0, s4
@@ -264,6 +273,8 @@ LBB3_7:                                 ; =>This Inner Loop Header: Depth=1
 	fadd	s0, s0, s24
 	fadd	s0, s0, s23
 	fadd	s0, s0, s22
+	subs	x11, x11, #16
+	b.ne	LBB3_7
 ```
 
 C의 부동소수점 덧셈은 순서를 바꾸면 결과가 달라질 수 있으므로, 컴파일러는 허락 없이 합의 순서를 바꾸지 않습니다. 누산기를 넷으로 나누는 것은 그 순서를 프로그래머가 바꾸겠다고 정하는 일입니다. 이 실행에서는 세 방식의 합이 같았지만, 값의 크기가 크게 다른 데이터에서는 마지막 자리가 달라질 수 있습니다.

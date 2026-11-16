@@ -2,7 +2,7 @@
 title: "Zero-Copy Pipeline — DMA-BUF·sendfile·io_uring·splice"
 slug: "embedded/modern-recipes/part8-05-zero-copy"
 date: 2026-04-17T09:04:00
-description: "Camera→GPU→Encoder→Network pipeline에서 memcpy를 모두 제거하는 패턴을 모았습니다."
+description: "Linux 6.12에서 read/write·sendfile·splice·io_uring·V4L2 DMA-BUF를 직접 돌려, API마다 어디서 CPU 복사가 사라지는지 잽니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 93
 tags: [recipes, zero-copy, dma-buf, sendfile, io_uring, splice]
@@ -17,7 +17,7 @@ topics: ["embedded"]
 
 4K(3840×2160) 60 fps 카메라를 NV12(픽셀당 1.5 B)로 받으면 3840 × 2160 × 1.5 × 60 = 약 746 MB/s, YUYV(2 B)면 약 995 MB/s입니다. camera driver → user buffer → encoder 입력처럼 경계를 하나 넘을 때마다 CPU가 이만큼을 한 번 더 읽고 씁니다. 이사할 때 짐을 트럭에서 내려 창고에 쌓았다가 다시 다른 트럭에 싣는 대신, 트럭 열쇠만 넘겨주는 것이 zero-copy입니다.
 
-또 하나는 CPU 시간입니다. 아래 측정에서 512 MiB 파일을 socket으로 보낼 때 `read`/`write`는 송신 쪽 sys 시간이 0.130초, `sendfile`은 0.022초였습니다. 같은 일을 하면서 CPU를 6분의 1만 썼습니다(다시 돌린 실행에서는 0.111초 대 0.021초).
+또 하나는 CPU 시간입니다. 아래 측정에서 512 MiB 파일을 socket으로 보낼 때 `read`/`write`는 송신 쪽 sys 시간이 0.130초, `sendfile`은 0.022초였습니다. 같은 일을 하면서 CPU를 6분의 1만 썼습니다(다시 돌린 실행에서는 0.109초 대 0.021초).
 
 ## 핵심 개념
 
@@ -118,7 +118,6 @@ for m in rw sendfile splice; do for i in 1 2 3 4 5; do ./xfer $m big.bin; done; 
 ```
 
 ```text
-6
 rw       512 MiB  wall 0.130 s  sender user 0.000 s sys 0.130 s
 rw       512 MiB  wall 0.128 s  sender user 0.000 s sys 0.128 s
 rw       512 MiB  wall 0.130 s  sender user 0.000 s sys 0.130 s
@@ -144,7 +143,7 @@ splice   512 MiB  wall 0.073 s  sender user 0.000 s sys 0.028 s
 | `sendfile` | 0.070 s | 0.022 s | 0.17 |
 | `splice` (file → pipe → socket) | 0.066 s | 0.024 s | 0.18 |
 
-- **송신 CPU는 5~6분의 1로 줄었습니다.** 같은 블록을 새 디렉터리에서 다시 돌린 실행에서는 중앙값이 `read`/`write` 0.111초, `sendfile` 0.021초, `splice` 0.024초였습니다. `read`/`write`는 page cache → user buffer, user buffer → socket buffer 두 번을 CPU가 옮기고, `sendfile`·`splice`는 user buffer를 거치지 않습니다.
+- **송신 CPU는 5~6분의 1로 줄었습니다.** 같은 블록을 새 디렉터리에서 다시 돌린 실행에서는 중앙값이 `read`/`write` 0.109초, `sendfile` 0.021초, `splice` 0.024초였습니다. `read`/`write`는 page cache → user buffer, user buffer → socket buffer 두 번을 CPU가 옮기고, `sendfile`·`splice`는 user buffer를 거치지 않습니다.
 - **wall time은 1.9배(다시 돌린 실행에서는 2.4배)만 줄었습니다.** 받는 쪽은 세 경우 모두 `read`로 socket에서 user buffer로 복사하므로, 받는 쪽이 병목이 됩니다. zero-copy 효과는 경로의 한쪽 끝만 바꾸면 그 끝에서만 보입니다.
 - `splice`는 `SPLICE_F_MOVE`를 줬지만 결과가 `sendfile`과 거의 같았습니다. `splice(2)`에서 이 flag는 kernel에 대한 힌트이고, 두 호출 모두 user 공간을 거치지 않는다는 점이 같습니다.
 
@@ -219,14 +218,19 @@ int main(int argc, char **argv)
 131072 reads of 4 KiB: pread 615 ns, io_uring read 690 ns, read_fixed 722 ns per read
 131072 reads of 4 KiB: pread 583 ns, io_uring read 707 ns, read_fixed 707 ns per read
 131072 reads of 4 KiB: pread 540 ns, io_uring read 630 ns, read_fixed 651 ns per read
-kernel.io_uring_disabled = 0
+```
+
+다시 돌린 실행에서 `kernel.io_uring_disabled`를 2로 바꿔 같은 프로그램을 돌리고 0으로 되돌린 출력입니다.
+
+```text
+kernel.io_uring_disabled = 2
 io_uring_queue_init: Operation not permitted
 kernel.io_uring_disabled = 0
 ```
 
 세 번 모두 `pread`가 가장 빨랐습니다(540~615 ns 대 630~722 ns). 다시 돌린 실행에서도 383 ns 대 482·511 ns로 순서가 같았습니다. 한 번에 요청 하나를 넣고 끝나기를 기다리면 io_uring은 syscall 수를 줄이지 못하고, SQE를 채우고 CQE를 거두는 일만 더해집니다. 등록 buffer(`read_fixed`)도 cache에 있는 4 KiB 읽기에서는 차이가 없었습니다. io_uring의 이점은 요청을 여러 개 쌓아 한 번에 제출하거나, 완료를 기다리는 동안 다른 일을 할 때 생깁니다. 그러니 "io_uring = 빠름"이 아니라 대상 workload의 queue depth로 재 봅니다.
 
-출력 마지막 두 줄은 `sysctl -w kernel.io_uring_disabled=2`일 때입니다. v6.12 `Documentation/admin-guide/sysctl/kernel.rst`의 `io_uring_disabled` 항목대로 "io_uring_setup() always fails with -EPERM"이라 `io_uring_queue_init`이 `Operation not permitted`로 실패했습니다. 보안 정책으로 이 값을 1이나 2로 두는 배포판·컨테이너가 있으면 io_uring 경로는 아예 열리지 않으므로, 실패 시 일반 `read`로 돌아가는 경로를 둡니다.
+두 번째 출력의 가운데 줄이 `sysctl -w kernel.io_uring_disabled=2` 상태에서 실행한 결과입니다. v6.12 `Documentation/admin-guide/sysctl/kernel.rst`의 `io_uring_disabled` 항목대로 "io_uring_setup() always fails with -EPERM"이라 `io_uring_queue_init`이 `Operation not permitted`로 실패했습니다. 보안 정책으로 이 값을 1이나 2로 두는 배포판·컨테이너가 있으면 io_uring 경로는 아예 열리지 않으므로, 실패 시 일반 `read`로 돌아가는 경로를 둡니다.
 
 ### DMA-BUF로 driver 간 공유 (kernel)
 
@@ -246,7 +250,7 @@ struct dma_buf_attachment *attach = dma_buf_attach(imported, dev);
 struct sg_table *sgt = dma_buf_map_attachment_unlocked(attach, DMA_FROM_DEVICE);
 ```
 
-함수 이름은 v6.12 `include/linux/dma-buf.h`(549–614행)에 있습니다. 같은 버전의 `dma_buf_map_attachment()`는 첫머리에서 `dma_resv_assert_held(attach->dmabuf->resv)`를 부르므로, reservation lock을 잡지 않은 importer는 `dma_buf_map_attachment_unlocked()`를 씁니다(`drivers/dma-buf/dma-buf.c:1188`). 하나의 dma-buf가 importer마다 다른 scatter-gather 목록으로 mapping되므로, 각 device는 [8-04](/blog/embedded/modern-recipes/part8-04-dma-allocator)에서 본 것처럼 자기 DMA 주소를 받습니다.
+함수 이름은 v6.12 `include/linux/dma-buf.h`(549–628행)에 있습니다. 같은 버전의 `dma_buf_map_attachment()`는 첫머리에서 `dma_resv_assert_held(attach->dmabuf->resv)`를 부르므로, reservation lock을 잡지 않은 importer는 `dma_buf_map_attachment_unlocked()`를 씁니다(`drivers/dma-buf/dma-buf.c:1188`). 하나의 dma-buf가 importer마다 다른 scatter-gather 목록으로 mapping되므로, 각 device는 [8-04](/blog/embedded/modern-recipes/part8-04-dma-allocator)에서 본 것처럼 자기 DMA 주소를 받습니다.
 
 ### V4L2 카메라에서 DMA-BUF fd 얻기
 

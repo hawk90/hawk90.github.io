@@ -1,8 +1,8 @@
 ---
-title: "NUMA Memory Topology — numactl·numa_alloc·HBM 적용"
+title: "NUMA Memory Topology — numactl·numa_alloc·first touch"
 slug: "embedded/modern-recipes/part8-06-numa"
 date: 2026-04-17T09:05:00
-description: "NUMA node topology, numactl 운영, libnuma API, HBM/CXL tier, 자동차 ECU의 mini-NUMA까지 정리합니다."
+description: "NUMA node topology와 numactl·libnuma로 페이지가 놓이는 node를 2-node QEMU에서 페이지 단위로 확인하고, memory-only node(HBM·CXL)와 numa_balancing tiering을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 94
 tags: [recipes, numa, memory, hbm, cxl]
@@ -72,7 +72,7 @@ numactl --interleave=all ./prog                   # spread pages over all nodes
 numactl --localalloc ./prog                       # allocate on the node of the faulting CPU
 ```
 
-`--membind`는 할당을 허용 node로 제한하고, `--interleave`는 페이지를 node마다 번갈아 둡니다. 아래 `numastat` 출력은 `numactl --membind=1`로 띄운 Python 프로세스가 200 MiB를 거의 모두 node 1에 둔 결과입니다.
+`--membind`는 할당을 허용 node로 제한하고, `--interleave`는 페이지를 node마다 번갈아 둡니다. 아래는 2-node QEMU guest에서 `numastat -p python3`을 실행한 출력입니다. node 1에 메모리를 둔 python3 프로세스(PID 1746)가 207.42 MB 중 거의 전부를 node 1에 두고 있습니다. 이 프로세스를 띄운 명령은 기록에 남아 있지 않아, 어떤 정책으로 띄웠는지는 이 출력만으로 말하지 않습니다. 정책별 배치는 바로 아래 절의 `numa_demo`가 페이지 단위로 보여 줍니다.
 
 ```text
 Per-node process memory usage (in MBs)
