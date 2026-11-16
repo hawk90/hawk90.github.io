@@ -15,13 +15,13 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-Zynq 같은 SoC FPGA에서 Arm 코어(PS)와 FPGA fabric(PL)을 잇는 표준 인터페이스가 AXI입니다. AMD UG1085(Zynq UltraScale+ TRM, v2.6) Table 18의 PS-PL 인터페이스 9종이 모두 AXI 계열이고, Vitis HLS가 만드는 IP의 포트도 `s_axilite`·`m_axi`·`axis` 셋 중 하나로 합성됩니다(UG1399).
+Zynq 같은 SoC FPGA에서 Arm 코어(PS)와 FPGA fabric(PL)을 잇는 표준 인터페이스가 AXI입니다. AMD UG1085(Zynq UltraScale+ TRM, v2.6) Table 18의 PS-PL 인터페이스(7행, 포트 12개)가 모두 AXI 계열입니다. Vitis HLS도 Vitis kernel flow에서는 포트를 `s_axilite`·`m_axi`·`axis`로만 합성합니다. Vivado IP flow는 `ap_memory`·`ap_fifo`·`ap_none` 같은 비 AXI 인터페이스도 지원합니다(UG1399 p.156 Table 8).
 
 비유하면 AXI4-Lite는 우편함(작은 쪽지를 한 장씩), AXI4는 화물 트럭(주소 하나에 짐을 여러 칸 싣고), AXI-Stream은 컨베이어 벨트(주소 없이 계속 흘려보냄)입니다.
 
 ### 이 글의 출처와 실행 환경
 
-- 프로토콜 규칙: Arm **IHI 0022 Issue L**(2025-08-27). Issue L은 AXI3/AXI4/AXI4-Lite 내용을 빼고 AXI5 계열만 남겼기 때문에, AXI4 burst 길이와 AXI4-Lite 정의는 **IHI 0022C**(AXI3·AXI4·AXI4-Lite를 함께 다루는 판)의 13·14장을 인용합니다.
+- 프로토콜 규칙: Arm **IHI 0022 Issue L**(2025-08-27). AXI3/AXI4/AXI4-Lite 내용이 Issue J부터 빠져 Issue L에도 없기 때문에, AXI4 burst 길이와 AXI4-Lite 정의는 **IHI 0022C**(AXI3·AXI4·AXI4-Lite를 함께 다루는 판)의 13·14장을 인용합니다.
 - Vitis HLS: AMD **UG1399 v2026.2**. Zynq UltraScale+: **UG1085 v2.6**.
 - 실행: Icarus Verilog 13.0, Verilator 5.054, Apple clang 21.0.0. **Vitis HLS는 설치할 수 없어 돌리지 않았습니다.** HLS 코드는 UG1399의 문법과 옵션 이름에 맞췄지만 합성 결과는 없습니다.
 
@@ -31,7 +31,7 @@ Zynq 같은 SoC FPGA에서 Arm 코어(PS)와 FPGA fabric(PL)을 잇는 표준 �
 
 | 변종 | 구조 | 주 용도 | 출처 |
 |------|------|---------|------|
-| AXI4 | 주소 + 5 channel, INCR burst 1~256 beat, ID별 순서 | 메모리·DMA | IHI 0022C 13.1 |
+| AXI4 | 주소 + 5 channel, INCR burst 1~256 beat, ID별 순서 | 메모리·DMA | burst: IHI 0022C 13.1, 순서: IHI 0022 L A5 |
 | AXI4-Lite | 주소 + 5 channel, 모든 transaction이 burst 길이 1, 32/64-bit, exclusive 없음 | control register | IHI 0022C 14.2 |
 | AXI-Stream | 주소 없음, TVALID/TREADY/TLAST 등 | video·packet·DMA data plane | UG1399 (`hls::axis`) |
 
@@ -137,7 +137,7 @@ void accel(int *in, int *out, int n, int mode) {
 }
 ```
 
-`offset=slave`는 포인터 인자의 주소를 AXI4-Lite 레지스터로 받겠다는 뜻이라, `in`·`out`의 주소도 `ctrl` 레지스터 맵에 들어갑니다. UG1399 p.181의 예제 레지스터 맵에 따르면 앞부분은 이렇게 고정입니다.
+`offset=slave`는 포인터 인자의 주소를 AXI4-Lite 레지스터로 받겠다는 뜻입니다. 다만 그 레지스터가 어느 `s_axilite` bundle에 들어가는지는 따로 정해야 합니다. UG1399 p.183~184는 bundle을 지정하지 않은 포트를 기본 이름의 bundle(`s_axi_control`)로 모은다고 설명하고, p.283의 `m_axi` 예제는 포인터 인자에 `#pragma HLS INTERFACE mode=s_axilite port=a bundle=control`을 따로 붙입니다. 위 코드처럼 `in`·`out`에 `s_axilite` pragma가 없으면 주소 레지스터는 `ctrl`이 아닌 다른 bundle에 생길 수 있으므로, 한 bundle에 모으려면 `in`·`out`에도 `mode=s_axilite ... bundle=ctrl`을 적습니다. UG1399 p.181~182의 예제 레지스터 맵에 따르면 앞부분은 이렇게 고정입니다.
 
 | Offset | 레지스터 | 주요 비트 |
 |---|---|---|
@@ -145,7 +145,7 @@ void accel(int *in, int *out, int n, int mode) {
 | 0x04 | Global Interrupt Enable | bit0 |
 | 0x08 | IP Interrupt Enable | bit0 `ap_done`, bit1 `ap_ready` |
 | 0x0C | IP Interrupt Status | bit0 `ap_done`, bit1 `ap_ready` |
-| 0x10~ | 인자 레지스터 | 함수 인자 순서대로 |
+| 0x10~ | 인자 레지스터 | HLS가 자동 배정 (counted auto-restart를 쓰면 0x10은 카운터) |
 
 인자 레지스터의 정확한 오프셋은 함수마다 다르므로 손으로 추측하지 않습니다. UG1399 p.185~187에 따르면 HLS가 함께 만드는 드라이버의 `x<top>_hw.h`가 모든 레지스터 오프셋을 정의하니, 그 파일의 매크로를 씁니다.
 
@@ -153,7 +153,7 @@ void accel(int *in, int *out, int n, int mode) {
 
 AXI4는 주소 하나로 여러 beat를 연속 전송합니다. IHI 0022C 13.1.1에 따르면 AXI3의 burst는 최대 16 beat였고, AXI4는 `AxLEN[7:0]`으로 최대 256 beat까지 늘렸습니다(burst 길이 = AxLEN + 1). 단 16 beat를 넘는 burst는 INCR에서만 되고 WRAP과 FIXED는 16 beat가 상한입니다(13.1.2).
 
-어느 판이든 바뀌지 않은 규칙이 4 KB 경계입니다. Issue L A3.1.2는 "transaction은 4KB 주소 경계를 넘으면 안 된다"고 적고, IHI 0022C는 그 이유를 "burst가 한 slave로만 가도록 보장하기 위해서"라고 설명합니다. DMA IP 대부분은 이를 알아서 쪼개지만, AXI master를 직접 만든다면 손으로 쪼개야 합니다.
+어느 판이든 바뀌지 않은 규칙이 4 KB 경계입니다. Issue L A3.1.2는 "transaction은 4KB 주소 경계를 넘으면 안 된다"고 적고, IHI 0022C는 그 이유를 "burst가 한 slave로만 가도록 보장하기 위해서"라고 설명합니다. AXI master를 직접 만든다면 이 분할을 직접 구현해야 합니다.
 
 ```c
 #include <stdint.h>
@@ -267,7 +267,7 @@ Zynq-7000 TRM(UG585 v1.15)도 같은 이야기를 합니다. PL DMA via AXI_HP �
 
 IHI 0022 Issue L A5.3에 따르면 같은 channel에서 같은 ID·같은 목적지로 간 요청은 순서가 유지되고, 같은 ID의 응답은 요청을 보낸 순서대로 돌아옵니다. 반대로 ID가 다른 transaction 사이에는 순서 보장이 없습니다.
 
-그래서 같은 ID로 빠른 slave A와 느린 slave B에 연달아 읽기를 보내면, A의 응답이 먼저 준비되어도 B의 응답보다 앞서 나올 수 없습니다. 서로 기다릴 필요가 없는 요청이라면 ID를 다르게 주어야 interconnect가 먼저 끝난 응답을 먼저 돌려줄 수 있습니다. 반대로 순서가 필요한 요청은 같은 ID로 묶으면 manager가 따로 순서를 챙기지 않아도 됩니다.
+Issue L A5.6은 같은 ARID로 서로 다른 subordinate에 보낸 읽기의 데이터도 요청 순서대로 manager에 도착하게 하라고 interconnect에 요구합니다. 그래서 같은 ID로 느린 slave B에 먼저, 빠른 slave A에 나중에 읽기를 보내면, A의 응답이 먼저 준비되어도 B의 응답보다 앞서 나올 수 없습니다. 서로 기다릴 필요가 없는 요청이라면 ID를 다르게 주어야 interconnect가 먼저 끝난 응답을 먼저 돌려줄 수 있습니다. 반대로 순서가 필요한 요청은 같은 ID로 묶으면 manager가 따로 순서를 챙기지 않아도 됩니다.
 
 ## QoS 신호
 
@@ -317,7 +317,7 @@ AXI4-Lite는 모든 transaction이 burst 길이 1이라 4 KB에 1,024번의 tran
 
 > HLS에서 burst 256을 주고 256 beat가 나간다고 가정
 
-Zynq UltraScale+ AFI 경로는 burst 16으로 제한됩니다(UG1085 p.1225). 4 KB가 2개 burst가 아니라 32개가 됩니다.
+Zynq UltraScale+ AFI 경로는 burst 16으로 제한됩니다(UG1085 p.1225). 64-bit bus 기준으로 4 KB가 2개 burst가 아니라 32개가 됩니다.
 
 > Stream에 TLAST를 넣지 않음
 
@@ -336,7 +336,7 @@ out.write(pkt);                /* last를 설정하지 않음 */
 - outstanding 수와 burst 길이는 같은 지연을 가리는 두 수단이고, HLS 옵션 이름은 `num_read_outstanding`·`max_read_burst_length`입니다(기본값 16).
 - 같은 ID의 응답은 순서대로 오고, 다른 ID 사이에는 순서 보장이 없습니다.
 - AxQOS의 의미는 칩마다 다르므로 interconnect 문서로 확인합니다.
-- Zynq UltraScale+의 HP·HPC·ACP·ACE 포트는 coherency가 다르고, PS 안에서 burst 16으로 제한됩니다.
+- Zynq UltraScale+의 HP·HPC·ACP·ACE 포트는 coherency가 다릅니다. HP·HPC는 AFI에서 AXI3로 바뀌어 burst 16으로 제한되고(UG1085 p.1225), ACE는 긴 burst를 쪼개 주는 장치가 없어 PL master가 16 이하로 내야 하며(p.1233), ACP는 64-byte·16-byte transaction만 받습니다(p.1235).
 
 다음 편은 **PS-PL 통신**입니다.
 
