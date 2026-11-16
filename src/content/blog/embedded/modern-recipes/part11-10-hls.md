@@ -19,7 +19,7 @@ FPGA로 카메라 프레임을 stream으로 처리하거나, 필터 하나를 �
 
 다만 HLS는 C++ 한 줄을 알아서 빠른 회로로 바꿔 주는 도구가 아닙니다. 공장 조립 라인에 비유하면, pragma는 "라인을 몇 개 둘지, 부품 선반을 몇 칸으로 나눌지"를 적은 작업 지시서입니다. 선반이 한 칸이면 작업자 네 명이 줄을 서서 기다리듯, 배열의 포트가 모자라면 UNROLL을 줘도 접근이 줄을 섭니다. 이 글은 그 감각을 AMD의 *Vitis High-Level Synthesis User Guide*(UG1399, 2025.2 English, 2026-01-22) 원문과 직접 돌린 C 시뮬레이션으로 잡습니다.
 
-> **이 글에서 실행한 것과 하지 않은 것.** Vitis HLS는 설치할 수 없어 합성(C synthesis)과 C/RTL co-simulation은 돌리지 않았습니다. 그래서 II·지연·DSP·LUT 같은 합성 결과 숫자는 이 글에 없습니다. 실행한 것은 C 시뮬레이션입니다. AMD가 공개한 [`ap_int`·`ap_fixed` 헤더](https://github.com/Xilinx/HLS_arbitrary_Precision_Types)(커밋 `200a9ae`)와 g++ 16.2로 커널과 testbench를 빌드해 돌렸습니다. `hls_stream.h`는 공개되어 있지 않아, UG1399가 설명하는 동작(FIFO, 순차 읽기·쓰기, 빈 stream 읽기는 blocking)만 흉내 내는 30줄짜리 대역 헤더를 직접 썼습니다.
+> **이 글에서 실행한 것과 하지 않은 것.** Vitis HLS는 설치할 수 없어 합성(C synthesis)과 C/RTL co-simulation은 돌리지 않았습니다. 그래서 II·지연·DSP·LUT 같은 합성 결과 숫자는 이 글에 없습니다. 실행한 것은 C 시뮬레이션입니다. AMD가 공개한 [`ap_int`·`ap_fixed` 헤더](https://github.com/Xilinx/HLS_arbitrary_Precision_Types)(커밋 `200a9ae`)와 g++ 16.2로 커널과 testbench를 빌드해 돌렸습니다. `hls::stream`은 AMD가 따로 공개한 [`hls-lib-stream`](https://github.com/Xilinx/hls-lib-stream)(Apache-2.0, 커밋 `e7e04ab`)의 `hls_stream.h`를 썼습니다.
 
 ## 핵심 개념
 
@@ -39,13 +39,13 @@ FPGA로 카메라 프레임을 stream으로 처리하거나, 필터 하나를 �
 
 **배열 포트가 II를 정합니다.** "Array Accesses and Performance" 절의 예제는 한 iteration에서 배열을 세 번 읽는 loop를 single-port RAM으로 두면 II=1을 못 맞추고 `Final II: 2`로 물러나는 로그를 보여 주고, dual-port RAM도 한 사이클에 두 번만 접근할 수 있다고 설명합니다. 인터페이스 배열은 따로 지정하지 않으면 single-port RAM이고, dual-port가 II나 지연을 줄일 때만 dual-port가 됩니다("Array Interfaces" 절). 한 사이클에 더 많이 읽어야 한다면 ARRAY_PARTITION으로 배열을 쪼개 포트를 늘립니다.
 
-**DATAFLOW의 채널은 FIFO 또는 PIPO입니다.** "Configuring Dataflow Memory Channels" 절에 따르면 스칼라는 FIFO로, 배열은 사용자가 PIPO(ping-pong)나 FIFO를 고르며, 임의 순서로 접근하는 배열은 원래 크기의 두 배인 PIPO여야 합니다. 그리고 canonical dataflow에서 배열과 stream 채널은 쓰는 프로세스와 읽는 프로세스가 각각 하나여야 하고, 쓰는 쪽이 소스에서 먼저 나와야 합니다("WYSIWYG Coding Style" 절).
+**DATAFLOW의 채널은 FIFO 또는 PIPO입니다.** "Configuring Dataflow Memory Channels" 절에 따르면 스칼라는 FIFO로, 배열은 사용자가 PIPO(ping-pong)나 FIFO를 고르며, 임의 순서로 접근하는 배열은 PIPO여야 합니다(기본 크기는 원래 배열의 두 배). 그리고 canonical dataflow에서 배열과 stream 채널은 쓰는 프로세스와 읽는 프로세스가 각각 하나여야 하고, 쓰는 쪽이 소스에서 먼저 나와야 합니다("WYSIWYG Coding Style" 절).
 
 ## 코드 / 실제 사용 예
 
 ### FIR filter, AXI-Stream 한 샘플씩
 
-입력 한 샘플을 받아 32-tap 결과 한 샘플을 내는 커널입니다. `shift`를 `type=complete`로 나눠 32개 레지스터로 만들었기 때문에 MAC loop가 펼쳐졌을 때 32개 곱셈이 한 배열 포트를 두고 줄을 서지 않습니다.
+입력 한 샘플을 받아 32-tap 결과 한 샘플을 내는 커널입니다. MAC loop가 펼쳐지면 한 호출에서 `shift`와 `coeff`를 각각 32번 읽습니다. 앞에서 본 대로 배열 하나는 사이클당 1~2번만 읽을 수 있으므로, 두 배열을 모두 `type=complete`로 나눠 32개 레지스터로 만들어야 32개 곱셈이 포트를 두고 줄을 서지 않습니다. 인터페이스 배열인 `coeff`도 ARRAY_PARTITION으로 다시 나눌 수 있습니다(UG1399 "Array Interfaces").
 
 ```cpp
 #include <ap_int.h>
@@ -61,6 +61,7 @@ void fir(hls::stream<int16_t> &in,
 #pragma HLS INTERFACE axis      port=out
 #pragma HLS INTERFACE s_axilite port=coeff bundle=ctrl
 #pragma HLS INTERFACE s_axilite port=return bundle=ctrl
+#pragma HLS ARRAY_PARTITION variable=coeff type=complete
 
     static int16_t shift[TAPS] = {0};
 #pragma HLS ARRAY_PARTITION variable=shift type=complete
@@ -102,24 +103,26 @@ for (int n = 0; n < 1024; n++) {
 ```
 
 ```bash
-g++-16 -std=c++17 -O2 -Wall -Wno-unknown-pragmas -Wno-unused-label \
-    -I HLS_arbitrary_Precision_Types/include -I stub fir.cpp fir_tb.cpp -o fir_csim
+g++-16 -std=c++17 -O2 -Wno-unknown-pragmas \
+    -I HLS_arbitrary_Precision_Types/include -I hls-lib-stream fir.cpp fir_tb.cpp -o fir_csim
 ./fir_csim
 ```
 
 ```text
 fir csim: 1024 samples, 0 mismatches -> PASS
+INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 1
 ```
 
-샘플 1024개를 한꺼번에 쓰고 `fir()`를 한 번만 부른 뒤 1024개를 읽는 testbench로 바꾸면 이렇게 됩니다.
+마지막 줄은 `hls_stream.h`가 프로그램 끝에 찍는 정보로, testbench가 stream에 한 번에 최대 1개만 쌓았다는 뜻입니다.
+
+샘플 1024개를 한꺼번에 쓰고 `fir()`를 한 번만 부른 뒤 1024개를 읽는 testbench로 바꾸면 어떻게 될까요. `fir()`는 한 번에 하나만 처리하므로 입력 1023개가 남고 출력은 1개뿐이고, 두 번째 `out.read()`가 빈 stream을 읽게 됩니다. 같은 `hls_stream.h`를 `-DHLS_STREAM_THREAD_SAFE`로 빌드해 돌리면 그 읽기에서 영원히 기다리다 `timeout 10`에 잘렸습니다.
 
 ```text
-hls::stream read on empty stream
-after one call: in.size()=1023 out.size()=1
-exit=134
+$ g++-16 -std=c++17 -O2 -Wno-unknown-pragmas -DHLS_STREAM_THREAD_SAFE ... fir.cpp tb_orig.cpp -o tb_orig -lpthread && timeout 10 ./tb_orig
+exit=124
 ```
 
-입력 1023개가 남고 출력은 1개뿐이라 두 번째 `out.read()`에서 멈춥니다. UG1399는 빈 stream 읽기를 blocking read로 정의하므로, 실제 C 시뮬레이션에서도 이 testbench는 끝까지 갈 수 없습니다. 커널이 "호출당 몇 개를 소비하는지"를 testbench가 그대로 따라야 합니다.
+Vitis HLS의 C 시뮬레이션은 이 상황을 오류로 잡습니다. UG1399 "Tasks and Channels" 절은 2022.2부터 빈 stream 읽기가 C 시뮬레이션에서도 deadlock을 낼 수 있어 오류로 바뀌었다고 하고, `hls::task`를 쓰지 않는 설계에서 나오는 메시지를 `ERROR [HLS SIM]: an hls::stream is read while empty, which may result in RTL simulation hanging.`로 적습니다(`-DHLS_STREAM_READ_EMPTY_RETURNS_GARBAGE`를 주면 경고로 바뀝니다). 어느 쪽이든 testbench는 커널이 "호출당 몇 개를 소비하고 내는지"를 그대로 따라야 합니다.
 
 ### 같은 알고리즘을 m_axi로
 
@@ -133,6 +136,7 @@ void fir_mm(const int16_t *in, int16_t *out, int n,
 #pragma HLS INTERFACE s_axilite port=n      bundle=ctrl
 #pragma HLS INTERFACE s_axilite port=coeff  bundle=ctrl
 #pragma HLS INTERFACE s_axilite port=return bundle=ctrl
+#pragma HLS ARRAY_PARTITION variable=coeff type=complete
     int16_t shift[TAPS] = {0};
 #pragma HLS ARRAY_PARTITION variable=shift type=complete
     for (int k = 0; k < n; k++) {
@@ -177,6 +181,7 @@ void pipe3(hls::stream<int16_t> &in, hls::stream<int16_t> &out, int n) {
 ```text
 fir_mm vs fir (stream): 1024 samples, 0 differences
 pipe3 dataflow: 1024 samples, 0 mismatches
+INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the design is 1024
 ```
 
 C 시뮬레이션은 세 함수를 차례로 실행하므로, 하드웨어에서 세 단계가 동시에 도는지는 이 실행으로 알 수 없습니다. 그것은 합성 뒤 dataflow 보고서와 co-simulation에서 확인하는 항목입니다. C 시뮬레이션이 확인해 주는 것은 단계를 나눠도 결과가 같다는 점입니다.
@@ -200,7 +205,7 @@ for (int i = 0; i < N; i++) {
 float total = (partial[0] + partial[1]) + (partial[2] + partial[3]);
 ```
 
-UG1399 "Floats and Doubles" 절은 Versal이 아닌 디바이스에서 표준 정밀도 부동소수점 누적이 보통 II 3~5로 pipeline된다고 적습니다(Versal에서는 II=1, 정밀도를 낮춘 누적 모드는 모든 디바이스에서 II=1). 또 Vitis HLS는 C 시뮬레이션과 결과를 맞추려고 float·double 연산 순서를 C 코드대로 지킵니다(`config_compile -unsafe_math_optimizations`로 풀 수 있음). 그래서 순서를 바꾸는 4갈래 누적은 도구가 알아서 해 주지 않고 코드로 써야 합니다.
+UG1399 "Floats and Doubles" 절은 Versal이 아닌 디바이스에서 표준 정밀도 부동소수점 누적이 보통 II 3~5로 pipeline된다고 적습니다(Versal에서는 II=1, non-Versal 전용인 저정밀 누적 모드는 II=1). 또 Vitis HLS는 C 시뮬레이션과 결과를 맞추려고 float·double 연산 순서를 C 코드대로 지킵니다(`config_compile -unsafe_math_optimizations`로 풀 수 있음). 그래서 순서를 바꾸는 4갈래 누적은 도구가 알아서 해 주지 않고 코드로 써야 합니다.
 
 순서를 바꾸면 결과도 바뀝니다. `b[i] = 1/(i+1)`을 10만 개 더해 본 결과입니다.
 
@@ -243,7 +248,7 @@ ap_fixed<16,1>: 0.5=0.500000 -1.0=-1.000000 0.99999->0.999969 1.0->-1.000000 lsb
 
 ## 자주 보는 함정
 
-> 포인터가 겹칠 수 있다고 도구가 가정
+> 같은 버퍼를 가리키는 두 `m_axi` 포인터
 
 ```cpp
 void foo(int *a, int *b, int n) {
@@ -254,7 +259,7 @@ void foo(int *a, int *b, int n) {
 }
 ```
 
-UG1399의 `pragma HLS dependence` 절은 의존성 분석이 너무 보수적이어서 거짓 의존성을 걸러내지 못할 때 DEPENDENCE pragma로 의존성을 명시하라고 하고, 실제로는 있는 의존성을 false로 지정하면 잘못된 하드웨어가 나온다고 경고합니다. 포인터 사이 거리가 정해져 있다면 ALIAS pragma로 그 거리를 알려 줄 수 있습니다.
+C 컴파일러라면 `a`와 `b`가 겹칠 수 있다고 보고 조심스럽게 다루지만, HLS는 반대입니다. UG1399의 `pragma HLS alias` 절은 Vitis HLS가 서로 다른 포인터를 독립된 채널로 보고 대체로 의존성 분석을 하지 않는다고 적습니다. 그래서 호스트가 한 버퍼를 잘라 `a`와 `b`로 넘기는데 둘이 겹치면, 도구는 그 사실을 모른 채 하드웨어를 만듭니다. 이때는 ALIAS pragma로 두 포인터 사이 거리(offset)를 알려 줘야 의존성 분석이 유지되고, 이 pragma는 `m_axi`에 매핑된 최상위 함수 인자에만 적용됩니다. 반대로 같은 배열 안에서 도구가 너무 보수적으로 잡은 거짓 의존성은 DEPENDENCE pragma로 풀 수 있지만, 실제로 있는 의존성을 false로 지정하면 잘못된 하드웨어가 나온다고 같은 문서의 `pragma HLS dependence` 절이 경고합니다.
 
 > 동적 메모리, 재귀, 시스템 호출
 
@@ -264,11 +269,11 @@ unsigned fib(unsigned n) { return n < 2 ? 1 : fib(n - 1) + fib(n - 2); }
 printf("%d\n", x);                            /* ignored by synthesis */
 ```
 
-UG1399 "Unsupported C/C++ Constructs" 계열 절은 `malloc()`·`free()` 같은 메모리 할당 호출을 합성 전에 제거해야 하고, 재귀 함수(꼬리 재귀 포함)는 합성되지 않으며, `printf()`·`fprintf(stdout, …)`처럼 값을 출력만 하는 호출은 무시된다고 적습니다. testbench 전용 코드는 `#ifndef __SYNTHESIS__`로 감쌀 수 있습니다.
+UG1399 "Unsupported C/C++ Constructs" 계열 절은 `malloc()`·`free()` 같은 메모리 할당 호출을 합성 전에 제거해야 하고, 재귀 함수(꼬리 재귀 포함)는 합성되지 않으며, `printf()`·`fprintf(stdout, …)`처럼 값을 출력만 하는 호출은 무시된다고 적습니다. 합성 대상 함수 안의 시뮬레이션 전용 코드(파일 출력 등)는 `#ifndef __SYNTHESIS__`로 제외할 수 있고, 같은 절은 이 매크로를 testbench에는 쓰지 말라고 적습니다.
 
 > float을 그대로 쓰고 II=1을 기대
 
-위 누적 예처럼 non-Versal에서 float 누적은 UG1399 기준 II 3~5입니다. 고정소수점으로 충분하다면 `ap_fixed`로 바꾸고, float가 필요하면 부분합을 나누거나 디바이스·연산자 설정(`syn.op`)을 검토합니다.
+위 누적 예처럼 non-Versal에서 표준 정밀도 float 누적은 UG1399 기준 보통 II 3~5입니다. 고정소수점으로 충분하다면 `ap_fixed`로 바꾸고, float가 필요하면 부분합을 나누거나 디바이스·연산자 설정(`syn.op`)을 검토합니다.
 
 > ARRAY_PARTITION 없이 UNROLL만
 
@@ -284,7 +289,7 @@ for (int i = 0; i < 1024; i++) {
 
 > Dataflow 채널 규칙 위반
 
-배열을 dataflow 단계 사이에 넘기는 것 자체는 문제가 아닙니다. 기본이 PIPO이기 때문입니다. 문제가 되는 것은 한 채널을 두 프로세스가 쓰거나 두 프로세스가 읽는 경우, 그리고 dataflow 함수 안에 static 지역 변수를 두는 경우입니다. UG1399 "WYSIWYG Coding Style" 절은 채널마다 writer 하나와 reader 하나를 요구하고(배열 reader 여럿은 `bind_storage`로 지정할 때만), dataflow 영역의 지역 변수는 static이 아니어야 한다고 적습니다.
+배열을 dataflow 단계 사이에 넘기는 것 자체는 문제가 아닙니다. 기본이 PIPO이기 때문입니다. 문제가 되는 것은 배열·stream 채널 하나를 두 프로세스가 쓰거나 두 프로세스가 읽는 경우, 그리고 dataflow 함수 안에 static 지역 변수를 두는 경우입니다. UG1399 "WYSIWYG Coding Style" 절은 채널마다 writer 하나와 reader 하나를 요구하고(배열 reader 여럿은 `bind_storage`로 지정할 때만), dataflow 영역의 지역 변수는 static이 아니어야 한다고 적습니다.
 
 > 읽기만 하는 계수 배열을 일반 RAM으로 둠
 
@@ -295,7 +300,7 @@ UG1399 "Implementing ROMs" 절은 읽기만 하는 배열에 `const`를 붙이�
 - 다섯 pragma(INTERFACE·PIPELINE·UNROLL·ARRAY_PARTITION·DATAFLOW)가 HLS 구조의 대부분을 정합니다.
 - PIPELINE은 아래 loop를 모두 펼칩니다. 안쪽 loop 경계가 변수면 pipelining이 막힙니다.
 - II가 안 나오면 배열 포트(single 1회, dual 2회/사이클)와 loop-carried 의존성을 먼저 봅니다.
-- float 누적은 non-Versal에서 II 3~5이고, 도구는 float 순서를 바꾸지 않으므로 부분합은 코드로 나눕니다. 결과도 바뀝니다.
+- 표준 정밀도 float 누적은 non-Versal에서 보통 II 3~5이고, 도구는 float 순서를 바꾸지 않으므로 부분합은 코드로 나눕니다. 결과도 바뀝니다.
 - `ap_fixed<16,1>`은 Q1.15이고 기본이 버림·wrap이라 1.0이 -1.0이 됩니다.
 - testbench는 커널이 호출당 소비·생산하는 개수를 따라야 합니다.
 - 합성 결과(II·자원)는 보고서로만 알 수 있습니다. 이 글의 실행은 C 시뮬레이션까지입니다.
@@ -304,9 +309,9 @@ UG1399 "Implementing ROMs" 절은 읽기만 하는 배열에 `const`를 붙이�
 
 ## 재현 절차
 
-- 헤더: `git clone https://github.com/Xilinx/HLS_arbitrary_Precision_Types` (커밋 `200a9ae`). `hls_stream.h`는 공개되지 않아 `std::deque` 기반 대역 헤더(`write`, blocking `read`, `empty`, `size`)를 `stub/`에 두었습니다.
+- 헤더: `git clone https://github.com/Xilinx/HLS_arbitrary_Precision_Types` (커밋 `200a9ae`). `hls_stream.h`: `git clone https://github.com/Xilinx/hls-lib-stream` (커밋 `e7e04ab`).
 - 컴파일러: Homebrew GCC 16.2.0(`g++-16`). macOS의 Apple clang 21은 libc++의 `std::complex`와 `ap_int_special.h`의 전방 선언이 충돌해 이 헤더를 빌드하지 못했습니다.
-- FIR: `g++-16 -std=c++17 -O2 -Wall -Wno-unknown-pragmas -Wno-unused-label -I<apt>/include -Istub fir.cpp fir_tb.cpp`.
+- FIR: `g++-16 -std=c++17 -O2 -Wno-unknown-pragmas -I<apt>/include -I<hls-lib-stream> fir.cpp fir_tb.cpp`.
 - m_axi·dataflow: 같은 옵션으로 `fir.cpp fir_mm.cpp pipe3.cpp tb2.cpp`.
 - 타입·누적: `g++-16 -std=c++17 -O2 -w -I<apt>/include types.cpp`, `g++-16 -O2 accum.cpp`.
 
