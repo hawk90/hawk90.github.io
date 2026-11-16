@@ -211,7 +211,7 @@ int main(void) {
 }
 ```
 
-CASE 4 출력은 `808 bytes used`입니다. `recurse(10)`이 지역 배열 64바이트짜리 프레임을 열한 번 쌓은 결과이고, 같은 측정을 보드에서 긴 시간 돌린 뒤 하면 그동안의 최대 사용량이 나옵니다. 패턴이 우연히 같은 값으로 쓰인 word는 사용하지 않은 것으로 보이므로, 이 값은 실제 사용량의 하한입니다. FreeRTOS V11.2.0도 task stack을 `tskSTACK_FILL_BYTE`(0xA5, `tasks.c` 120행)로 채우고, `uxTaskGetStackHighWaterMark()`가 `prvTaskCheckFreeStackSpace()`로 그 값이 남은 바이트를 셉니다([Practical RTOS Internals 4-06: Stack Overflow](/blog/embedded/rtos/practical-internals/part4-06-stack-overflow)).
+CASE 4 출력은 `808 bytes used`입니다. `recurse(10)`이 64바이트 배열을 담은 72바이트 프레임(`push {lr}` + `sub sp, #68`)을 열한 번 쌓은 792바이트에 main 쪽 16바이트가 더해진 결과이고, 같은 측정을 보드에서 긴 시간 돌린 뒤 하면 그동안의 최대 사용량이 나옵니다. 패턴이 우연히 같은 값으로 쓰인 word는 사용하지 않은 것으로 보이므로, 이 값은 실제 사용량의 하한입니다. FreeRTOS V11.2.0도 task stack을 `tskSTACK_FILL_BYTE`(0xA5, `tasks.c` 120행)로 채우고, `uxTaskGetStackHighWaterMark()`가 `prvTaskCheckFreeStackSpace()`로 그 값이 남은 바이트를 센 뒤 `StackType_t` 단위(word)로 나눠 돌려줍니다([Practical RTOS Internals 4-06: Stack Overflow](/blog/embedded/rtos/practical-internals/part4-06-stack-overflow)).
 
 ## 도구 7 — Sentinel 변수
 
