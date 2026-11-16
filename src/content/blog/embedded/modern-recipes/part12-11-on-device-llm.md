@@ -249,7 +249,7 @@ M2 Pro에서 `-ngl 99`(Metal에 전부)와 `-ngl 0`(GPU에 layer 없음)을 비�
 | Q4_K_M | 99 | 4969.75 ± 23.23 | 224.38 ± 2.48 |
 | Q4_K_M | 0 | 1453.85 ± 60.76 | 192.83 ± 10.54 |
 
-prompt 처리(pp)는 GPU offload의 효과가 크고, token 생성(tg)은 Q4_K_M이 F16보다 빨랐습니다. 반대로 GPU에서 pp는 F16이 Q4_K_M보다 빨랐습니다. 어느 쪽이 유리한지는 장치와 측정 항목마다 달라, 대상 장치에서 `llama-bench`로 재야 합니다.
+prompt 처리(pp)는 GPU offload의 효과가 컸습니다. token 생성(tg)은 GPU·CPU 모두 Q4_K_M이 F16보다 빨랐지만, GPU의 pp는 거꾸로 F16이 더 빨랐습니다. 어느 쪽이 유리한지는 장치와 측정 항목마다 달라, 대상 장치에서 `llama-bench`로 재야 합니다.
 
 ### Apple MLX
 
