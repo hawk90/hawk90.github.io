@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"TFLite Micro는 MCU에서 `.tflite` 모델을 돌리는 runtime입니다."** 실행 중 메모리는 미리 잡은 tensor arena 한 덩어리에서만 쓰고, 필요한 op만 resolver에 등록합니다. 같은 person detection 모델이 Cortex-M4에서 CMSIS-NN kernel로 바꾸자 실행 명령어 수가 22분의 1로 줄었습니다.
+> **"TFLite Micro는 MCU에서 `.tflite` 모델을 돌리는 runtime입니다."** 실행 중 메모리는 미리 잡은 tensor arena 한 덩어리에서만 쓰고, 필요한 op만 resolver에 등록합니다. 같은 person detection 모델을 Cortex-M4에서 CMSIS-NN kernel로 돌리자 실행 명령어 수가 22분의 1로 줄었습니다.
 
 ## 이 글의 실행 환경
 
@@ -224,7 +224,7 @@ make -f tensorflow/lite/micro/tools/make/Makefile network_tester_test CO_PROCESS
 
 > ⚠️ CMSIS-NN을 켜지 않음
 
-`OPTIMIZED_KERNEL_DIR` 없이 빌드하면 reference kernel이 들어갑니다. 이 모델에서는 Invoke 명령어 수가 22.7배였습니다.
+`OPTIMIZED_KERNEL_DIR` 없이 빌드하면 reference kernel이 들어갑니다. 이 모델에서 reference kernel의 Invoke 명령어 수는 CMSIS-NN의 22.7배였습니다.
 
 > ⚠️ 입력 양자화 부호
 
