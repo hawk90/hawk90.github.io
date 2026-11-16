@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-ARM Cortex-M의 peripheral은 memory-mapped입니다. STM32F411의 `0x40020014`에 write하면 GPIOA의 ODR이 바뀝니다. 그런데 일반 C 변수처럼 다루면 compiler가 접근을 지우거나, 합치거나, 다른 width로 바꿔서 원하는 동작이 나오지 않습니다.
+ARM Cortex-M의 peripheral은 memory-mapped입니다. STM32F411의 `0x40020014`에 write하면 GPIOA의 ODR이 바뀝니다. 그런데 일반 C 변수처럼 다루면 compiler가 접근을 지우거나 한 번만 읽고 말아서 원하는 동작이 나오지 않습니다. bit-field로 선언하면 접근 폭까지 바뀝니다.
 
 CMSIS 헤더가 이 패턴을 표준화해 주지만, 그 안에서 무슨 일이 벌어지는지 모르면 새 SoC를 다룰 때 매번 막힙니다. 이 글은 각 패턴을 arm-none-eabi-gcc 16.2.0으로 실제로 컴파일해 나온 명령으로 확인합니다.
 
@@ -347,13 +347,13 @@ unlocked: isr=75 isr_seen=30 main_seen=60000 (main expect 60000)
 locked  : isr=105 isr_seen=105 main_seen=60000 (main expect 60000)
 ```
 
-ISR은 75번 돌았지만 그중 45번의 갱신이 main의 `str`에 덮여 사라졌습니다. 같은 loop를 `cpsid i`/`cpsie i`로 감싸면 105번 모두 남습니다. `-icount` 없이 돌리면 QEMU가 interrupt를 명령 블록 경계에서만 넣어 이 tight loop에서는 ISR이 거의 들어오지 않았습니다(`isr=0`). 실제 칩의 timing과 다르다는 점은 감안해야 하지만, 손실이 생기는 자리가 `ldr`과 `str` 사이라는 것은 명령 수준에서 그대로입니다.
+ISR은 75번 돌았지만 그중 45번의 갱신이 main의 `str`에 덮여 사라졌습니다. 같은 loop를 `cpsid i`/`cpsie i`로 감싸면 105번 모두 남습니다. 숫자는 계산과 맞습니다. QEMU 문서(`qemu-options.hx`)에 따르면 `-icount shift=0`은 "one instruction every 2^N ns of virtual time", 즉 명령 하나가 1 ns입니다. `hw/arm/mps2.c`의 CPU clock은 25 MHz이고 `SYST_RVR = 99`이므로 SysTick 한 주기는 100 cycle = 4,000 ns = 4,000 명령입니다. 5명령 loop × 60,000번 = 300,000 명령에서 75번, `cpsid`/`cpsie`가 든 7명령 loop에서 105번입니다. `-icount` 없이 돌리면 unlocked는 `isr=0`, locked는 실행마다 5~10번으로 들쭉날쭉했습니다. 같은 문서는 icount가 결정적인 결과를 주지만 "not provide cycle accurate emulation"이라고 적으므로, 손실 횟수 자체가 아니라 손실이 생기는 자리가 `ldr`과 `str` 사이라는 점을 보는 실험입니다.
 
 ### 4. Bit-band alias
 
 Cortex-M4 TRM 3.7절의 bit-banding은 1 MB 영역의 각 bit를 alias 영역의 word 하나에 대응시키고, alias에 대한 write를 bus 쪽에서 "an atomic read-modify-write operation"으로 바꿉니다. 주소는 `bit_word_addr = bit_band_base + (byte_offset x 32) + (bit_number x 4)`이고, TRM은 bit-banding이 "an optional feature"라고 적습니다. ST 헤더는 `SRAM1_BB_BASE 0x22000000`, `PERIPH_BB_BASE 0x42000000`을 정의하므로 F411의 GPIOA ODR bit 5 alias는 `0x42000000 + 0x20014*32 + 5*4 = 0x42400294`입니다.
 
-QEMU `mps2-an386`은 `hw/arm/mps2.c`에서 `enable-bitband`를 켜 두므로, 앞의 실험에서 main의 `reg += 1`을 alias 쓰기로 바꿔 같은 harness로 돌렸습니다.
+QEMU `mps2-an386`은 `hw/arm/mps2.c`에서 `enable-bitband`를 켜 두므로, 앞의 실험에서 main의 `reg += 1`을 alias 쓰기로 바꿔 같은 harness와 같은 `-icount shift=0` 명령으로 돌렸습니다.
 
 ```c
 /* bitband.c */
@@ -403,7 +403,7 @@ alias 쓰기는 interrupt가 끼어들 `ldr`/`str` 틈이 없으므로 ISR 갱�
 
 ## 측정 / 동작 확인
 
-이 글의 출력은 모두 다음 환경에서 만들었습니다. ST 헤더를 쓰는 예제는 CMSIS_6 v6.1.0 Core 헤더와 cmsis-device-f4(커밋 `9192c7b`)를 include 경로에 넣었습니다.
+이 글의 출력은 모두 다음 환경에서 만들었습니다. ST 헤더를 쓰는 예제는 CMSIS_6 v6.1.0 Core 헤더와 cmsis-device-f4(2026-10 GitHub master)를 include 경로에 넣었습니다.
 
 ```bash
 arm-none-eabi-gcc --version | head -1     # arm-none-eabi-gcc (GCC) 16.2.0
@@ -413,13 +413,13 @@ arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -ffreestanding -O2 -W
     -DSTM32F411xE -ICMSIS_6/CMSIS/Core/Include -Icmsis-device-f4/Include -c ex4.c
 ```
 
-disassembly에서 확인할 것은 세 가지입니다. register마다 기대한 횟수의 `ldr`/`str`이 있는지, 폭이 `ldr`/`str`(word)인지 `ldrb`/`strh` 같은 좁은 접근인지, polling loop가 매 반복 다시 `ldr`하는지입니다. 보드에서 GPIO가 반응하지 않으면 이 확인과 함께 clock enable, pin mux, 배선, 측정 지점을 차례로 봅니다.
+disassembly에서 확인할 것은 세 가지입니다. register마다 기대한 횟수의 `ldr`/`str`이 있는지, 폭이 `ldr`/`str`(word)인지 `ldrb`/`strh` 같은 좁은 접근인지, polling loop가 매 반복 다시 `ldr`하는지입니다.
 
 ## 자주 보는 함정
 
 > ⚠️ Compiler 최적화로 register access가 사라짐
 
-위 `led_blink_plain`은 `-O2`에서 store 하나를 잃었고, `wait_flag_plain`은 SR을 한 번만 읽고 무한 loop가 됐습니다. `-O0`에서 되던 코드가 최적화를 켜면 멈추는 대표적인 원인입니다.
+위 `led_blink_plain`은 `-O2`에서 store 하나를 잃었고, `wait_flag_plain`은 SR을 한 번만 읽고 무한 loop가 됐습니다. 같은 파일을 `-O0`으로 빌드하면 store 두 개와 매 반복의 SR `ldr`이 그대로 남으므로, 이 문제는 최적화를 켜야 드러납니다.
 
 > ⚠️ Cast 후 dereference에 `volatile`을 빼먹음
 
@@ -457,7 +457,7 @@ GCC 16.2는 4 bit만 선언한 volatile bit-field에 byte 접근을 냈고, 같�
 
 - MMIO register는 **반드시 `volatile`**입니다. 없으면 `-O2`에서 store가 지워지고 polling loop가 무한 loop가 됩니다.
 - **CMSIS struct 패턴**은 member에 `__IO`가 붙어 있고, offset은 `_Static_assert(offsetof(...))`로 빌드 때 검증할 수 있습니다.
-- **BSRR**과 **bit-band alias**는 store 한 번이라 ISR과의 read-modify-write 경합이 없습니다. QEMU에서 `ODR ^=` 방식은 ISR 갱신 75번 중 45번을 잃었습니다.
+- **BSRR**과 **bit-band alias**는 store 한 번이라 ISR과의 read-modify-write 경합이 없습니다. QEMU에서 RAM 변수의 `ldr`/`add`/`str` read-modify-write는 ISR 갱신 75번 중 45번을 잃었습니다.
 - **Bit-field는 쓰지 않습니다.** 접근 폭이 컴파일러와 선언 방식에 따라 달라집니다.
 - Device끼리는 순서가 보장되고, Normal과 섞일 때 barrier가 필요합니다(DDI 0403E.b Figure A3-8).
 
