@@ -10,7 +10,7 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-칩이 silicon으로 나오기 전에 그 칩용 driver를 *어떻게 검증하는가*. 이 질문이 이 시리즈의 출발점입니다. NPU·chiplet·SoC 프로젝트에서 driver 팀이 RTL과 병행해 개발해야 하는 시점에는 실행할 silicon이 없을 수 있습니다. 그 사이에 driver를 *어디서* 돌려 보고 *무엇으로* 검증할지가 실전 문제입니다.
+칩이 silicon으로 나오기 전에 그 칩용 driver를 *어떻게 검증하는가*. 이 질문이 이 시리즈의 출발점입니다. NPU·chiplet·SoC 프로젝트에서 driver 팀은 RTL과 같은 시기에 일을 시작하고, 그 시점에는 실행할 silicon이 없습니다. 그 사이에 driver를 *어디서* 돌려 보고 *무엇으로* 검증할지가 실전 문제입니다.
 
 이 글은 그 빈 구간을 메우는 도구인 **co-simulation**(cosim)이 왜 필요한지, 다른 방법(QEMU·FPGA prototype·post-silicon test)과 어떻게 다른지를 정리합니다. 이후 챕터들이 다룰 DPI-C·Verilator·CocoTB·SystemC TLM의 *왜*에 해당하는 부분입니다.
 
@@ -24,19 +24,19 @@ NPU 한 세대를 가정합시다. RTL 팀이 register map과 마이크로아키
 - Linux upstream과 vendor SDK가 보는 sysfs/debugfs 노출
 - power management(`runtime PM`) 훅
 
-driver 코드 자체를 *컴파일*하는 건 쉽습니다. 문제는 *돌려 보는 것*. 보통은 다음 셋 중 하나를 씁니다.
+driver 코드 자체를 *컴파일*하는 건 쉽습니다. 문제는 *돌려 보는 것*입니다. silicon 말고 driver를 실행할 수 있는 자리는 다음 세 가지입니다.
 
-| 단계 | 어디서 돌리나 | 언제 가능한가 | 가성비 |
+| 단계 | 어디서 돌리나 | 언제 가능한가 | 무엇이 보이고 무엇이 안 보이나 |
 |------|----------------|----------------|--------|
-| Post-silicon | 실 chip + 보드 | 사용 가능한 silicon·보드 도착 후 | 수정 경로가 firmware 우회·ECO·재제작 중 무엇인지 확인 |
-| FPGA prototype | Xilinx VCU/U250 등 | RTL 동결 후 합성 가능 시점 | 하드웨어·합성 시간 비쌈, 보드 공유 |
-| Functional model | QEMU·SystemC fast model | RTL과 동시 진행 가능 | transaction·기능 모델로 상위 stack 검증; 모델 범위는 구현에 따름 |
+| Post-silicon | 실 chip + 보드 | silicon·보드 도착 후 | 모든 동작이 진짜지만 내부 signal은 칩이 노출한 debug 경로로만 봅니다 |
+| FPGA prototype | FPGA 보드 | RTL을 FPGA에 합성할 수 있게 된 뒤 | 실제 gate 속도에 가깝게 돌지만 내부 signal은 미리 심어 둔 probe로만 봅니다 |
+| Functional model | QEMU·SystemC TLM model | RTL과 동시에 | register 의미와 상위 stack은 보이지만 cycle 단위 동작은 모델에 없습니다 |
 
 이 세 가지가 채우지 못하는 *cycle-accurate + driver-integrated* 검증 구간이 cosim의 영역입니다.
 
 ## 먼저 검증할 경계와 증거
 
-버그 수정 비용은 제품·계약·수정 가능성에 따라 달라집니다. 출처 없는 1배/1000배 비용표 대신 지금 관찰할 수 있는 실패를 각 모델의 책임에 연결합니다.
+"silicon에서 찾은 버그는 RTL에서 찾은 버그보다 몇 배 비싸다"는 비용표가 자주 돌지만, 이 글은 출처를 확인할 수 없는 배수를 쓰지 않습니다. 대신 지금 관찰할 수 있는 실패를 어느 모델이 책임지는지 표로 연결합니다.
 
 | 경계 | 주입할 실패 | 남길 관찰 | 이 관찰만으로 알 수 없는 것 |
 | --- | --- | --- | --- |
@@ -49,12 +49,12 @@ RTL·software·BFM의 revision과 simulator/compiler 옵션을 함께 고정해�
 
 ## Cosim이란 무엇인가
 
-**Co-simulation**은 하나의 simulation 안에서 *서로 다른 모델*이 함께 동작하는 환경을 가리킵니다. 우리 맥락에서는 보통 두 모델이 결합합니다.
+**Co-simulation**은 하나의 simulation 안에서 *서로 다른 모델*이 함께 동작하는 환경을 가리킵니다. 이 시리즈에서는 두 모델을 결합합니다.
 
 - **RTL** — Verilog/SystemVerilog로 기술된 silicon-bound 디자인. cycle accurate.
 - **Software** — driver C 코드, firmware, 또는 그 둘의 일부. host CPU에서 실행.
 
-둘 사이의 다리는 **DPI-C**(Direct Programming Interface, SystemVerilog LRM 표준)와 **VPI**/VHPI 같은 simulator hook입니다. 공유 가능한 driver 핵심의 MMIO 추상 함수를 BFM transaction으로 바꾸고, RTL의 interrupt 신호를 harness가 ISR callback에 전달하도록 설계할 수 있습니다. Linux kernel module 자체가 host 프로세스에서 그대로 실행되는 것은 아닙니다.
+둘 사이의 다리는 **DPI-C**(Direct Programming Interface, IEEE 1800 SystemVerilog 35장)와 **VPI**/VHPI 같은 simulator hook입니다. Verilator 5.054가 배포하는 `svdpi.h`는 첫머리에 "IEEE 1800-2023 Annex I"에서 가져온 파일이라고 적고 있습니다. 공유 가능한 driver 핵심의 MMIO 추상 함수를 BFM transaction으로 바꾸고, RTL의 interrupt 신호를 harness가 ISR callback에 전달하도록 설계할 수 있습니다. Linux kernel module 자체가 host 프로세스에서 그대로 실행되는 것은 아닙니다.
 
 | 구성 요소 | 역할 |
 |-----------|------|
@@ -64,7 +64,7 @@ RTL·software·BFM의 revision과 simulator/compiler 옵션을 함께 고정해�
 | IRQ injection thread | RTL의 `irq` pin이 driver thread를 깨움 |
 | Test runner (pytest) | scenario·assertion·waveform 수집 |
 
-위 in-process 구성에서는 driver 핵심과 RTL 모델이 한 프로세스에서 연결됩니다. 다른 cosim은 IPC·socket·별도 CPU/OS 모델을 사용할 수도 있으므로 같은 프로세스가 cosim 정의의 필수조건은 아닙니다. 어떤 register write가 어떤 internal signal을 토글했는지가 waveform에 그대로 찍힙니다. 재현 가능한 testbench가 만들어집니다.
+위 in-process 구성에서는 driver 핵심과 RTL 모델이 한 프로세스에서 연결됩니다. IPC·socket으로 별도 CPU/OS 모델과 잇는 cosim도 있으므로, 같은 프로세스는 cosim의 정의가 아니라 이 시리즈가 고른 구성입니다. 이 구성에서는 어떤 register write가 어떤 internal signal을 토글했는지가 waveform에 그대로 찍히고, 같은 입력이면 같은 waveform이 나오는 testbench가 됩니다.
 
 ## 다른 방법과 어떻게 다른가
 
@@ -74,10 +74,12 @@ cosim의 자리가 보이려면 인접 방법들과 비교해 봐야 합니다.
 
 QEMU는 *functional model*입니다. 디바이스 모델은 "이 register write가 도착하면 internal state를 이렇게 바꿔라"라는 의미적 동작을 묘사하지, 그 동작이 어떤 cycle에 어떤 internal signal을 거쳐 일어났는지는 다루지 않습니다.
 
+QEMU 11.1.0 소스의 교육용 PCI 디바이스 `edu`가 이 구조를 그대로 보여 줍니다. MMIO 접근은 `include/system/memory.h:292-303`의 `MemoryRegionOps`에 등록한 `read`/`write` callback 한 번으로 처리됩니다. `hw/misc/edu.c:306`이 `edu_mmio_read`·`edu_mmio_write`를 이 구조체에 넣습니다. DMA는 command register에 쓰는 순간 `edu.c:191`의 `timer_mod(..., qemu_clock_get_ms(QEMU_CLOCK_VIRTUAL) + 100)`로 가상 시간 100 ms 뒤의 timer를 걸고, `edu.c:142`의 `edu_dma_timer`가 그때 `pci_dma_read`/`pci_dma_write`로 buffer 전체를 한 번에 복사한 뒤 IRQ를 올립니다. 전송 길이가 4 byte든 4 KiB든 완료 시점은 같고, bus beat나 handshake는 모델 어디에도 없습니다. driver의 descriptor 처리 순서와 IRQ 처리는 이 모델로 확인되지만, RTL의 handshake·backpressure 버그는 원천적으로 나타나지 않습니다.
+
 | 항목 | QEMU device model | Cosim (RTL + driver) |
 |------|--------------------|----------------------|
 | 정확도 | functional (event 단위) | cycle-accurate |
-| 속도 | CPU/device 모델·workload에 의존 | RTL 크기·trace·compile 옵션·workload에 의존 |
+| 속도 | 이 시리즈에서 측정하지 않음 | 32-bit counter 하나를 Apple M2 Pro에서 trace 없이 16.6~19.6 Mcycle/s, VCD trace 2.8~2.9 Mcycle/s ([3장](/blog/tools/emulation/driver-cosim/chapter03-verilator) 측정) |
 | 검증 대상 | driver API · OS 통합 · 상위 stack | driver-RTL boundary · timing |
 | RTL 필요 | device 기능 모델이면 불필요 | RTL을 검증하는 이 구성에서는 필요; 합성 불가능 testbench도 사용 가능 |
 | 가장 잘 잡는 버그 | API 오용 · 자료구조 · concurrency | register encoding · IRQ timing · DMA race |
@@ -86,23 +88,23 @@ cosim은 QEMU를 *대체*하지 않습니다. *보완*합니다. QEMU로는 OS �
 
 ### FPGA prototype vs Cosim
 
-FPGA prototype은 RTL을 *실제 게이트에 합성*해 보드에서 돌립니다. 속도가 빠르고(MHz 영역) 실 system bandwidth로 test 가능합니다. 그러나 합성 시간이 길고(수십 분~시간), 보드 수가 적어 공유 병목이 생기며, internal signal에 직접 접근하기 어렵습니다.
+FPGA prototype은 RTL을 *FPGA의 logic에 합성*해 보드에서 돌립니다. 소프트웨어 simulation과 달리 clock이 실제 hardware에서 돌기 때문에 긴 workload를 실 system bandwidth로 시험할 수 있습니다. 대신 RTL을 고칠 때마다 합성·배치·배선을 다시 거쳐 bitstream을 만들어야 하고, 보드 대수만큼만 동시에 돌릴 수 있으며, 내부 signal은 합성 전에 심어 둔 probe로만 볼 수 있습니다. 이 시리즈는 FPGA 합성을 실행하지 않았으므로 합성 시간이나 FPGA clock 수치를 적지 않습니다.
 
-RTL simulation 속도는 설계와 옵션에 따라 달라집니다. trace 설정으로 선택한 signal을 waveform에 남길 수 있고, **CI에 그대로 통합**되며, **bitstream 같은 가공 비용 없이** 코드 push마다 돌릴 수 있습니다.
+RTL simulation은 반대 성질을 가집니다. 3장의 counter 예제는 `verilator --build`가 C++ 생성부터 link까지 2.46초(wall)에 끝났고, trace를 켜면 모든 signal이 waveform에 남습니다. hardware가 필요 없으니 **CI에 그대로 통합**되고, **bitstream 같은 가공 단계 없이** 코드 push마다 돌릴 수 있습니다.
 
 | 항목 | FPGA prototype | Cosim |
 |------|-----------------|-------|
-| 속도 | mapping·clock constraint·환경에 의존 | RTL·host·옵션·trace에 의존 |
-| Internal observability | probe·capture 설정 필요 | trace/public 설정·최적화·보호된 IP 범위에 의존 |
-| Iteration time | 수십 분(합성) | 분(컴파일) |
+| 속도 | 이 시리즈에서 측정하지 않음 | 3장 counter 기준 Mcycle/s 단위(위 표) |
+| Internal observability | 합성 전에 심은 probe만 | trace를 켠 모든 signal (`--trace-depth`로 제한 가능) |
+| RTL 수정 후 다시 돌리기까지 | 합성·배치·배선 재실행 (측정하지 않음) | 3장 counter의 `verilator --build` 2.46초 |
 | CI 친화도 | 낮음 | 높음 |
 | 비용 | 보드 + 라이선스 | open-source 가능 |
 
-두 도구는 보완 관계입니다. **cosim에서 빠른 iteration으로 큰 버그를 잡고**, **FPGA에서 long-running stress와 throughput을 본다**는 분담이 일반적입니다.
+두 도구는 보완 관계입니다. 이 시리즈는 **짧은 시나리오의 register·IRQ·DMA 경계 버그는 cosim에서**, **긴 stress와 throughput은 FPGA에서** 보는 것으로 역할을 나눕니다. 위 표에서 counter 하나가 Mcycle/s 단위였으니, 실제 NPU 규모 RTL에서 수 초 분량의 hardware 시간을 cosim으로 돌리는 것은 현실적이지 않습니다.
 
 ### Post-silicon vs Cosim
 
-Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 도착했을 땐 RTL이 *동결*되어 있고, register encoding 같은 근본적 실수는 metal spin 외에 고칠 길이 없습니다. cosim의 목적은 *그 단계에서 발견될 버그를 그 이전으로 끌어오는 것*입니다.
+Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 silicon이 도착했을 땐 RTL이 *동결*되어 있어서, register encoding 실수가 발견되면 firmware·driver에서 우회하거나 ECO·재제작으로 고치는 수밖에 없습니다. cosim의 목적은 *그 단계에서 발견될 버그를 그 이전으로 끌어오는 것*입니다.
 
 ## 도입 판단과 유지 비용
 
@@ -142,8 +144,10 @@ Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 도
 
 - [Verilator 모델 연결](https://verilator.org/guide/latest/connecting.html) — host harness와 RTL model 경계
 - [cocotb 2.0 timing model](https://docs.cocotb.org/en/v2.0.0/timing_model.html) — simulator scheduling과 관찰 시점
+- QEMU 11.1.0 소스(`git clone --depth 1 --branch v11.1.0`) — `include/system/memory.h:292-303`, `hw/misc/edu.c:142`, `:191`, `:306`
+- Verilator 5.054 배포판 `include/vltstd/svdpi.h` 첫머리 주석 — IEEE 1800-2023 Annex I 출처 표기
 
-2026-10-22 확인은 위 문서와 시리즈 예제의 계약 검토입니다. 이 도입 글에서 실제 RTL·Linux·board 실행이나 도입 비용을 측정하지 않았습니다.
+Verilator 수치는 2026-11-16 macOS 27.2(Apple M2 Pro)에서 Homebrew Verilator 5.054로 3장의 counter를 빌드·실행한 결과입니다. FPGA 합성, post-silicon 보드, Linux 통합은 이 글에서 실행하지 않았고 도입 비용도 측정하지 않았습니다.
 
 ## 관련 항목
 
