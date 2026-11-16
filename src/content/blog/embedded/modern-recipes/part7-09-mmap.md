@@ -99,7 +99,7 @@ gcc -O2 -Wall -o modes modes.c && ./modes
 5000-byte mapping: wrote byte 8191 fine (page size 4096)
 ```
 
-- **익명 private**: 돌려받은 주소는 page 경계에 정렬됩니다. glibc `malloc`도 큰 요청은 내부에서 `mmap`을 씁니다. 그 경계(`M_MMAP_THRESHOLD`)의 처음 값은 128 KiB이고, 요즘 glibc는 해제된 블록 크기에 맞춰 이 값을 동적으로 올립니다(`mallopt(3)`, glibc 2.41 man page).
+- **익명 private**: 돌려받은 주소는 page 경계에 정렬됩니다. glibc `malloc`도 큰 요청은 내부에서 `mmap`을 씁니다. 그 경계(`M_MMAP_THRESHOLD`)의 처음 값은 128 KiB이고, 요즘 glibc는 해제된 블록 크기에 맞춰 이 값을 동적으로 올립니다(`mallopt(3)`, Linux man-pages 6.9.1).
 - **익명 shared**: 자식이 쓴 42가 shared 영역에서는 부모에게 보였고, 같은 시점에 private 영역에서는 보이지 않았습니다. `fork` 뒤 private page는 Copy-on-Write라서 자식의 쓰기가 자식의 복사본에만 들어갔기 때문입니다.
 - **파일 private**: 매핑에 쓴 값은 파일에 가지 않았습니다. 실행 파일의 `.data`처럼 "파일에서 읽어 오되 고친 내용은 내 것" 모드입니다.
 - **파일 shared**: 매핑에 쓴 값이 `msync` 뒤 `pread`로 파일에서 그대로 읽혔습니다. 같은 파일을 `MAP_SHARED`로 연 다른 process도 같은 page cache를 봅니다.
@@ -150,7 +150,7 @@ MAP_HUGETLB 32 MiB: ok
 
 arm64의 huge page 크기는 기본 page(granule) 크기에 따라 다릅니다. 4K granule이면 연속 PTE로 64 KiB, PMD로 2 MiB, 연속 PMD로 32 MiB, PUD로 1 GiB이고, 16K·64K granule에서는 다른 조합입니다(v6.12 `Documentation/arch/arm64/hugetlbpage.rst:36-42`).
 
-이 VM은 Transparent Huge Page가 `[always]`라서, 예약 없이도 익명 메모리에 2 MiB page가 붙습니다. 바로 아래 `MAP_LOCKED` 실험에서 64 MiB를 미리 채우는 데 fault가 32번(32 × 2 MiB = 64 MiB)뿐이었던 것이 그 흔적입니다. 4 KiB page였다면 16,384번입니다. TLB miss 수를 비교하려면 PMU 이벤트가 필요한데, 이 VM에서는 재지 않았습니다.
+이 VM은 Transparent Huge Page가 `[always]`라서 커널이 익명 메모리에 2 MiB page를 먼저 시도합니다. 바로 아래 `MAP_LOCKED` 실험에서 64 MiB를 미리 채우는 데 fault가 32번(32 × 2 MiB = 64 MiB)뿐이었던 것이 그 흔적입니다. 다만 `defrag`가 `[madvise]`라 `MADV_HUGEPAGE`를 주지 않은 영역은 compaction을 기다리지 않고 4 KiB page로 물러섭니다(v6.12 `Documentation/admin-guide/mm/transhuge.rst:184-186`). page cache가 메모리를 채운 이 VM에서 독립 검증으로 다시 돌렸을 때는 같은 측정이 32~16,384번 사이로 바뀌었습니다. 4 KiB page였다면 16,384번입니다. TLB miss 수를 비교하려면 PMU 이벤트가 필요한데, 이 VM에서는 재지 않았습니다.
 
 ### `mlock` / `MAP_LOCKED` — 실행 중 page fault 없애기
 
@@ -179,7 +179,7 @@ volatile uint32_t *reg = map0;
 reg[CTRL] = 1;          /* MMIO write */
 ```
 
-UIO에서 N번째 메모리 영역을 매핑하려면 `mmap`의 offset에 `N * getpagesize()`를 줍니다(v6.12 `Documentation/driver-api/uio-howto.rst:172-176`). 물리 메모리 영역은 `uio_mmap_physical()`이 `pgprot_noncached`로 매핑합니다(`drivers/uio/uio.c:759`). 이 조각은 UIO 장치가 없어 실행하지 않았고, UIO는 [7-11](/blog/embedded/modern-recipes/part7-11-uio-vfio)에서 다룹니다.
+UIO에서 N번째 메모리 영역을 매핑하려면 `mmap`의 offset에 `N * getpagesize()`를 줍니다(v6.12 `Documentation/driver-api/uio-howto.rst:171-176`). 물리 메모리 영역은 `uio_mmap_physical()`이 `pgprot_noncached`로 매핑합니다(`drivers/uio/uio.c:759`). 이 조각은 UIO 장치가 없어 실행하지 않았고, UIO는 [7-11](/blog/embedded/modern-recipes/part7-11-uio-vfio)에서 다룹니다.
 
 ## 측정 프로그램
 
@@ -342,7 +342,7 @@ SIGBUS
 
 > ⚠️ 매핑을 풀지 않는 장시간 process
 
-`munmap`을 빠뜨리면 process가 끝날 때까지 VMA가 쌓입니다. process당 VMA 수의 상한은 `vm.max_map_count`이고, v6.12 커널의 기본값은 `DEFAULT_MAX_MAP_COUNT`(`USHRT_MAX - MAPCOUNT_ELF_CORE_MARGIN` = 65530, `include/linux/mm.h:204`)인데, 이 Debian 13 VM은 systemd의 `/usr/lib/sysctl.d/50-default.conf`가 `vm.max_map_count = 1048576`으로 올려 두었습니다(`cat /proc/sys/vm/max_map_count`로 확인). 임베디드 rootfs에 이런 설정이 없으면 커널 기본값이 적용됩니다.
+`munmap`을 빠뜨리면 process가 끝날 때까지 VMA가 쌓입니다. process당 VMA 수의 상한은 `vm.max_map_count`이고, v6.12 커널의 기본값은 `DEFAULT_MAX_MAP_COUNT`(`USHRT_MAX - MAPCOUNT_ELF_CORE_MARGIN` = 65530, `include/linux/mm.h:204`)인데, 이 Debian 13 VM은 Debian `linux-sysctl-defaults` 패키지가 설치한 `/usr/lib/sysctl.d/50-default.conf`(systemd에서 가져온 파일)가 `vm.max_map_count = 1048576`으로 올려 두었습니다(`cat /proc/sys/vm/max_map_count`로 확인). 임베디드 rootfs에 이런 설정이 없으면 커널 기본값이 적용됩니다.
 
 > ⚠️ Huge page 예약 없이 `MAP_HUGETLB`
 
@@ -354,7 +354,7 @@ SIGBUS
 - page cache에 있는 파일은 `mmap` 직접 접근이 `read` 루프보다 짧았고, 파일 fault는 64 KiB(`fault_around_bytes`)씩 붙었습니다.
 - `MAP_POPULATE`·`MAP_LOCKED`는 fault를 `mmap` 시점으로 옮겨 실행 중 fault를 없앱니다.
 - `fork` 뒤 private 매핑 전체에 쓰면 CoW 복사 비용이 납니다. 이 실행에서는 shared보다 약 3배였습니다.
-- `MAP_HUGETLB`는 예약이 있어야 하고, THP는 예약 없이 익명 메모리에 2 MiB page를 붙입니다.
+- `MAP_HUGETLB`는 예약이 있어야 하고, THP는 예약 없이 익명 메모리에 2 MiB page를 시도하다가 빈 2 MiB 블록이 없으면 4 KiB로 물러섭니다.
 - 파일보다 긴 매핑은 끝을 넘는 순간 `SIGBUS`이고, 연산자 우선순위로 오프셋이 틀어지는 실수는 `-Wall`이 잡습니다.
 
 다음 편은 **epoll**입니다.
