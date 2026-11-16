@@ -92,11 +92,11 @@ report_timing_summary -file impl_timing.rpt
 report_utilization -file impl_util.rpt
 ```
 
-hold 위반은 router가 고칩니다. UG904 p.122는 post-route phys_opt의 Hold-Fixing 옵션이 일정 threshold를 넘는 위반만 고치며, 그보다 작은 hold 위반은 router가 고치는 것으로 본다고 설명합니다. setup 위반은 router가 대신 풀어 주지 않으므로 다음 절의 report를 읽어야 합니다.
+UG904 p.122의 `phys_opt_design` directive 설명은 Hold-Fixing이 일정 threshold를 넘는 hold 위반만 고치고, 그보다 작은 위반은 router가 고칠 것으로 본다고 적습니다. route 뒤에도 남은 setup·hold 위반은 다음 절의 report로 확인합니다.
 
 ## Timing Report 읽기
 
-`report_timing_summary`의 Design Timing Summary에서 먼저 보는 값은 네 개입니다. UG906 p.153의 정의를 옮기면 다음과 같습니다.
+`report_timing_summary`의 Design Timing Summary에서 먼저 보는 값은 네 개입니다. UG906 p.153~154의 정의를 옮기면 다음과 같습니다.
 
 | 값 | 뜻 | 통과 조건 |
 |----|----|----|
@@ -107,10 +107,10 @@ hold 위반은 router가 고칩니다. UG904 p.122는 post-route phys_opt의 Hol
 
 WNS가 음수면 실패한 경로를 열어 봅니다. 경로 report에서 UG906 p.88이 설명하는 필드 두 개가 원인을 좁혀 줍니다.
 
-- **Data Path Delay**: 경로의 논리 구간에서 누적된 지연입니다. clock 지연은 포함하지 않습니다.
+- **Data Path Delay**: 경로의 논리 구간에서 누적된 지연입니다. clock을 데이터로 쓰는 경우가 아니면 clock 지연은 포함하지 않습니다.
 - **Logic Levels**: 데이터 경로에 있는 primitive의 종류별 개수입니다. 시작점과 끝점 셀은 빼고 셉니다.
 
-Logic Levels가 크고 그 대부분이 LUT라면 조합 논리가 너무 깊다는 뜻이므로 중간에 레지스터를 넣어 경로를 나눕니다. Logic Levels는 작은데 지연이 크다면 논리보다 배선(net delay)이 원인이므로 배치·fanout 쪽을 봅니다.
+UG906 p.257은 실패 경로를 이렇게 읽으라고 안내합니다. Logic Delay가 전체 경로 지연의 50%를 넘으면 logic depth와 셀 종류를 보고 RTL이나 합성 설정을 바꿉니다. Net Delay가 지배적이면 high fanout net이나 hold fix 우회 배선 같은 물리적 원인을 봅니다. 다만 같은 쪽에 "7 series에서는 LUT 지연이 net delay에 포함된다"는 주석이 있어서, Arty A7 같은 7 series에서는 Net Delay 비율이 원래 높게 나온다는 점을 감안해야 합니다.
 
 ## Bitstream 생성
 
@@ -121,7 +121,7 @@ launch_runs impl_1 -to_step write_bitstream -jobs 8
 wait_on_run impl_1
 ```
 
-결과 `.bit`는 run 디렉터리(`<project>.runs/impl_1/<top>.bit`)에 생깁니다. UG835의 `write_cfgmem` 예제도 `./project_netlist.runs/impl_1/sinegen_demo.bit` 같은 경로를 씁니다.
+앞 절의 `launch_runs impl_1` 대신 이 명령을 쓰면 implementation과 bitstream 생성을 한 번에 진행합니다. UG835는 `-to_step`을 "마지막으로 실행할 단계"로 설명합니다. 결과 `.bit`는 run 디렉터리(`<project>.runs/impl_1/<top>.bit`)에 생깁니다. UG835 p.121의 `boot_hw_device` 예제도 `./project_netlist.runs/impl_1/sinegen_demo.bit` 같은 경로를 `write_cfgmem`에 넘깁니다.
 
 ## Programming — JTAG으로 바로 올리기
 
@@ -148,7 +148,7 @@ write_cfgmem -force -format MCS -interface SPIx4 -size 16 \
 
 UG835 p.1992에 따르면 `-size`는 MB 단위(2의 거듭제곱)입니다. 128 Mbit flash면 16입니다. `-loadbit "up 0x0 <file>"`는 주소 0부터 위쪽으로 bitstream을 채운다는 뜻입니다.
 
-다음으로 hw_cfgmem 객체를 만들어 flash에 씁니다. `create_hw_cfgmem`의 마지막 인자는 문자열이 아니라 `get_cfgmem_parts`가 돌려주는 객체여야 합니다(UG835 p.303). 아래는 UG835 p.1302의 예제를 따른 순서입니다.
+다음으로 hw_cfgmem 객체를 만들어 flash에 씁니다. `create_hw_cfgmem`의 마지막 인자는 문자열이 아니라 `get_cfgmem_parts`가 돌려주는 객체여야 합니다(UG835 p.304). 아래는 UG835 p.1303(`readback_hw_cfgmem`)과 p.1248(`program_hw_cfgmem`)의 예제를 따른 순서입니다.
 
 ```tcl
 create_hw_cfgmem -hw_device [current_hw_device] \
@@ -167,7 +167,7 @@ program_hw_devices [current_hw_device]
 program_hw_cfgmem $cfgMem
 ```
 
-flash 부품 이름은 보드마다 다릅니다. Digilent board file은 Arty A7-35 E.0의 Quad SPI flash를 Micron `N25Q128A13ESF40`으로 적고 있어서 여기서는 `n25q128-3.3v`를 썼습니다. 보드 리비전에 따라 부품이 다를 수 있으니 회로도의 부품 번호를 UG908의 지원 flash 표와 맞춰 고릅니다. `PROGRAM.ADDRESS_RANGE {use_file}`은 파일이 차지하는 주소 범위만 지우고 쓰고 검증한다는 뜻이고, `{entire_device}`는 flash 전체입니다(UG835 p.1246).
+flash 부품 이름은 보드마다 다릅니다. Digilent board file은 Arty A7-35 E.0의 Quad SPI flash를 Micron `N25Q128A13ESF40`으로 적고 있어서 여기서는 `n25q128-3.3v`를 썼습니다. 다른 보드라면 회로도의 flash 부품 번호를 UG908 p.463부터의 Table 61(Supported Flash Memory Devices for Artix 7 SPI)과 맞춰 이름을 고릅니다. `PROGRAM.ADDRESS_RANGE {use_file}`은 파일이 차지하는 주소 범위만 지우고 쓰고 검증한다는 뜻이고, `{entire_device}`는 flash 전체입니다(UG835 p.1247).
 
 ## IP Integrator — Block Design
 
@@ -214,17 +214,17 @@ file copy -force ./build/arty_blink.runs/impl_1/top.bit ./build/top.bit
 vivado -mode batch -source build.tcl
 ```
 
-중간의 `PROGRESS` 검사가 중요합니다. UG835 p.1973은 `wait_on_run`이 run이 *끝났다*는 것만 알려 주고 *성공했는지*는 알려 주지 않는다고 설명하며, 같은 `PROGRESS != "100%"` 검사를 예로 듭니다. 이 검사가 없으면 synthesis가 실패해도 스크립트는 다음 줄로 넘어가고, CI는 빌드 실패를 모른 채 끝납니다.
+중간의 `PROGRESS` 검사가 중요합니다. UG835 p.1973은 `wait_on_run`이 run이 *끝났다*는 것만 알려 주고 *성공했는지*는 알려 주지 않는다고 설명하며, 같은 `PROGRESS != "100%"` 검사를 예로 듭니다. 그래서 run마다 `PROGRESS`로 성공 여부를 따로 확인합니다.
 
 ## Utilization 보기
 
-`report_utilization`은 자원 종류별로 Used, Fixed, Available, Util% 열을 냅니다. UG906 p.100은 Util%를 Used ÷ Available로, Fixed를 LOC 제약으로 고정된 자원 수로 정의합니다. Available 열은 데이터시트 값과 같으므로 앞 편의 자원 표로 미리 가늠할 수 있습니다. 예를 들어 XC7A35T는 LUT 20,800개, FF 41,600개, 36 Kb BRAM 50개, DSP 90개입니다(DS180 Table 3).
+`report_utilization`은 자원 종류별로 사용량(Used)과 가용량(Available), 그 비율(Util%)을 냅니다. UG906 p.103의 Table 8은 디바이스 전체 report에서 Util%를 Used ÷ Available로 계산한다고 적습니다. Available 열은 데이터시트 값과 같으므로 앞 편의 자원 표로 미리 가늠할 수 있습니다. 예를 들어 XC7A35T는 36 Kb BRAM 50개, DSP 90개이고, slice 5,200개 × LUT 4·FF 8로 계산하면 LUT 20,800개, FF 41,600개입니다(DS180 Table 4와 표 주석 1).
 
 LUT 사용률만으로 "몇 %까지 안전하다"는 기준은 AMD 문서에 없습니다. 사용률은 timing report와 함께 보고, WNS가 음수인데 사용률도 높다면 그때 배치 혼잡을 의심합니다.
 
 ## 빌드 시간과 strategy
 
-Vivado는 미리 정의된 strategy로 각 단계의 directive를 한 번에 바꿉니다. UG904 p.235~236의 implementation strategy 표와 UG901 Table 3의 synthesis strategy 표에 있는 이름입니다.
+Vivado는 미리 정의된 strategy로 각 단계의 directive를 한 번에 바꿉니다. UG904 p.234~236의 implementation strategy 표와 UG901 Table 3의 synthesis strategy 표에 있는 이름입니다.
 
 ```tcl
 # 빠른 반복용
@@ -264,7 +264,7 @@ clock이 정의되지 않은 레지스터는 timing 분석에서 빠지므로, W
 
 > CDC 경로를 제약 없이 둠
 
-서로 다른 비동기 clock 사이의 경로를 그대로 두면 slack 계산 자체가 의미가 없습니다. UG903 p.45는 이런 경로에 `set_clock_groups`, `set_false_path`, `set_max_delay -datapath_only` 같은 timing exception을 두고, 동시에 metastability를 막는 CDC 회로를 넣으라고 권고합니다. `report_cdc`(UG906 p.53)로 synchronizer가 없는 crossing을 찾습니다.
+서로 다른 비동기 clock 사이의 경로를 그대로 두면 slack 계산 자체가 의미가 없습니다. UG903 p.45는 이런 경로에 `set_clock_groups`, `set_false_path`, `set_max_delay -datapath_only` 같은 timing exception을 두고, 동시에 metastability를 막는 CDC 회로를 넣으라고 권고합니다. `report_cdc`(UG906 p.207~208)로 synchronizer가 없는 crossing을 찾습니다.
 
 > 스크립트가 실패를 삼킴
 
