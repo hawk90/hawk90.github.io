@@ -28,8 +28,9 @@ Ch 7에서 post-build·post-image의 존재와 기본 동작을 봤습니다. �
 4. `makedevs -d full_devices_table.txt` (device table 적용)
 5. `ROOTFS_PRE_CMD_HOOKS`
 6. **`BR2_ROOTFS_POST_FAKEROOT_SCRIPT`** 실행
-7. `/run`, `/tmp` 내용 삭제, `BR2_REPRODUCIBLE`이면 timestamp 고정, SELinux면 `setfiles`
-8. 포맷별 이미지 생성 명령(`mkfs.ext4 -d …`, `mksquashfs …`)
+7. 포맷별 `ROOTFS_<FMT>_PRE_GEN_HOOKS`
+8. `/run`, `/tmp` 내용 삭제, `BR2_REPRODUCIBLE`이면 timestamp 고정, SELinux면 `setfiles`
+9. 포맷별 이미지 생성 명령(`mkfs.ext4 -d …`, `mksquashfs …`)
 
 그래서 post-fakeroot는 *device table이 적용된 뒤*, *이미지 직전*에 돌고, *포맷마다 한 번씩* 돕니다.
 
@@ -180,9 +181,11 @@ mkdir -p "${TARGET_DIR}/etc/systemd/system/multi-user.target.wants"
 ln -sf /etc/systemd/system/myapp.service \
     "${TARGET_DIR}/etc/systemd/system/multi-user.target.wants/myapp.service"
 
-# 고정 release identifier를 /etc/os-release에 기록
-sed -i "s|^BUILD_ID=.*|BUILD_ID=${RELEASE_ID:?set a fixed release identifier}|" \
-    "${TARGET_DIR}/etc/os-release"
+# 고정 release identifier를 os-release에 추가
+# (/etc/os-release는 ../usr/lib/os-release를 가리키는 symlink이고,
+#  target-finalize가 쓴 파일에는 BUILD_ID 줄이 없음)
+echo "BUILD_ID=${RELEASE_ID:?set a fixed release identifier}" \
+    >> "${TARGET_DIR}/usr/lib/os-release"
 ```
 
 FIT 이미지 생성의 전형적인 post-image 호출은 다음과 같습니다.

@@ -39,7 +39,7 @@ Buildroot는 *같은 트리·같은 toolchain·같은 commit*으로 U-Boot까지
 | `BR2_TARGET_UBOOT_PATCH` | 적용할 patch 파일 / 디렉터리 |
 | `BR2_TARGET_UBOOT_FORMAT_*` | 산출물 형식 (bin, img, kwb, imx 등) |
 | `BR2_TARGET_UBOOT_SPL=y` | SPL을 함께 빌드 |
-| `BR2_TARGET_UBOOT_SPL_NAME` | SPL 산출물 이름 (`MLO`, `u-boot-spl.bin`) |
+| `BR2_TARGET_UBOOT_SPL_NAME` | SPL 산출물 경로 (`MLO`, 기본값 `spl/u-boot-spl.bin`) |
 | `BR2_PACKAGE_HOST_UBOOT_TOOLS=y` | host용 U-Boot tools(`mkimage` 등). 아래 두 옵션은 이 메뉴 안에 있음 |
 | `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT=y` | `boot.scr` 자동 생성 |
 | `BR2_PACKAGE_HOST_UBOOT_TOOLS_BOOT_SCRIPT_SOURCE` | `boot.cmd`의 경로 |
@@ -267,7 +267,7 @@ BR2_PACKAGE_UBOOT_TOOLS_FWPRINTENV=y      # U-Boot 소스의 fw_printenv/fw_sete
 #/boot/uboot.env	0x0000          0x4000
 ```
 
-같은 파일 머리말은 "Up to two entries are valid, in this case the redundant environment sector is assumed present", "Device offset must be prefixed with 0x"라고 적습니다. BeagleBone 빌드처럼 `CONFIG_ENV_IS_IN_FAT`라면 FAT 파티션을 mount한 경로의 파일을 장치 자리에 적고, 크기는 `CONFIG_ENV_SIZE`에 맞춥니다.
+같은 파일 머리말은 "Up to two entries are valid, in this case the redundant environment sector is assumed present", "Device offset must be prefixed with 0x to be parsed as a hexadecimal value"라고 적습니다. BeagleBone 빌드처럼 `CONFIG_ENV_IS_IN_FAT`라면 FAT 파티션을 mount한 경로의 파일을 장치 자리에 적고, 크기는 `CONFIG_ENV_SIZE`에 맞춥니다.
 
 ```text
 # /etc/fw_env.config (FAT boot partition mounted on /boot)
@@ -305,7 +305,7 @@ Buildroot로 SPL을 함께 빌드하려면 다음 두 옵션이 필요합니다.
 
 ```text
 BR2_TARGET_UBOOT_SPL=y
-BR2_TARGET_UBOOT_SPL_NAME="MLO u-boot-spl.bin"
+BR2_TARGET_UBOOT_SPL_NAME="MLO spl/u-boot-spl.bin"
 ```
 
 `BR2_TARGET_UBOOT_SPL_NAME`은 U-Boot 빌드 디렉터리에서 `output/images/`로 복사할 SPL/TPL 파일 이름(공백 구분)입니다. 기본값은 `spl/u-boot-spl.bin`이고, help가 예로 드는 것은 OMAP의 `MLO`와 i.MX6의 `SPL`입니다. 다른 SoC는 U-Boot 문서 `doc/board/<vendor>/`의 보드 설명에서 확인합니다.
@@ -316,7 +316,7 @@ U-Boot 통합에서 가장 자주 만나는 문제 다섯 가지입니다.
 
 **env 위치·크기 불일치.** `fw_env.config`가 U-Boot의 `CONFIG_ENV_*`와 다르면 `fw_printenv`는 CRC가 맞지 않아 env를 읽지 못하고, `fw_setenv`는 엉뚱한 위치에 씁니다. U-Boot 설정을 바꾸면 `fw_env.config`도 같은 커밋에서 바꿉니다. BeagleBone 빌드처럼 env가 FAT 파일이면, 그 파티션이 Linux에서 mount돼 있어야 합니다.
 
-**FIT signature 불일치.** secure boot 환경에서 FIT image (`u-boot.itb` 또는 `fitImage`)는 U-Boot의 *embedded public key*로 검증됩니다. 빌드 시 사용한 `keys/` 디렉터리와 U-Boot DTB에 embed된 key가 다르면 *"signature missing"* 또는 *"hash error"*로 부팅 실패합니다.
+**FIT signature 불일치.** secure boot 환경에서 FIT image (`u-boot.itb` 또는 `fitImage`)는 U-Boot의 *embedded public key*로 검증됩니다. 빌드 시 사용한 key와 U-Boot DTB에 embed된 공개키가 다르면 검증이 실패해 부팅하지 않습니다. 이 장에서는 FIT 서명을 실행하지 않았으므로 오류 문구는 싣지 않습니다.
 
 **DTB가 잘못 임베디드.** U-Boot의 `u-boot.dtb`와 kernel DTB는 다른 파일입니다. 같다고 가정하면 *U-Boot가 보드 인식 못 함* 또는 *kernel이 peripheral을 못 찾는* 사고가 납니다. 두 개를 분리해서 관리하는 게 안전합니다.
 

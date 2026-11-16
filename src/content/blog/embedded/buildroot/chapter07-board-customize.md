@@ -327,6 +327,7 @@ image boot.vfat {
 			"u-boot.img",
 			"zImage",
 			"uEnv.txt",
+			...
 			"am335x-boneblack.dtb",
 			...
 			"extlinux"

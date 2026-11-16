@@ -164,7 +164,7 @@ $ cd ~/myapp
 $ ./configure \
     --host=aarch64-buildroot-linux-gnu \
     --prefix=/usr \
-    --with-sysroot="${SYSROOT}"
+    --with-sysroot="${STAGING_DIR}"
 $ make -j$(nproc)
 $ make DESTDIR=$PWD/install install
 ```
@@ -297,8 +297,8 @@ CLion은 *toolchain*과 *CMake profile*을 따로 정의합니다. Settings → 
 | **CMake** | system default |
 | **Make** | system default |
 | **C Compiler** | `/opt/sdk/.../bin/aarch64-buildroot-linux-gnu-gcc` |
-| **C++ Compiler** | `/opt/sdk/.../bin/aarch64-buildroot-linux-gnu-g++` |
-| **Debugger** | `/opt/sdk/.../bin/aarch64-buildroot-linux-gnu-gdb` (또는 host gdb-multiarch) |
+| **C++ Compiler** | `/opt/sdk/.../bin/aarch64-buildroot-linux-gnu-g++` (C++ toolchain을 켠 SDK만. 이 장의 SDK는 `CXX=no`) |
+| **Debugger** | `BR2_PACKAGE_HOST_GDB`를 켠 SDK의 `…-gdb` 또는 host `gdb-multiarch` |
 
 그 다음 Settings → Build → CMake에 profile을 추가하고 *CMake options*에 toolchain file을 지정합니다.
 
@@ -351,9 +351,9 @@ Yocto 생태계에도 SDK가 있고 흐름이 비슷해 보이지만 차이가 �
 | 항목 | Buildroot SDK | Yocto SDK (`populate_sdk`) | Yocto eSDK |
 |---|---|---|---|
 | **생성 명령** | `make sdk` | `bitbake -c populate_sdk <image>` | `bitbake -c populate_sdk_ext <image>` |
-| **구성** | host toolchain + target sysroot | host toolchain + target sysroot + *meta-toolchain* | 위 모두 + *devtool* + recipe 추가 |
+| **구성** | host toolchain + target sysroot | host toolchain + target sysroot | 위 모두 + *devtool* + recipe 추가 |
 | **recipe 추가** | 불가 (Buildroot 트리 따로 빌드) | 불가 (다시 populate 필요) | 가능 (`devtool add`) |
-| **인스톨러** | tarball + relocate-sdk.sh | self-extracting `.sh` (메뉴 대화형) | self-extracting `.sh` |
+| **인스톨러** | tarball + relocate-sdk.sh | self-extracting `.sh` (설치 디렉터리를 한 번 물음) | self-extracting `.sh` |
 | **크기** | 이 장의 QEMU 설정에서 압축 290 MB / 해제 1.1 GB | 측정하지 않음 | 측정하지 않음 |
 | **재현성** | Buildroot revision으로 확정 | layer revision·hash 매트릭스 | 위와 동일 |
 
@@ -391,7 +391,7 @@ v1.4.2 SDK로 application을 빌드해 v1.3.0 보드에 올리면 *glibc·라이
 - `environment-setup`은 `BR2_PACKAGE_HOST_ENVIRONMENT_SETUP`을 켜야 생기고, `CC`·`CFLAGS`·`CONFIGURE_FLAGS`와 `configure`·`cmake` alias를 줍니다. pkg-config sysroot는 export하지 않고 wrapper가 처리합니다.
 - 외부 application은 autotools(`--host=`), cmake(`-DCMAKE_TOOLCHAIN_FILE=`), meson(`--cross-file`), make(환경변수)의 4가지 패턴 중 하나로 cross 빌드합니다.
 - VS Code는 `c_cpp_properties.json`, CLion은 Toolchains + CMake profile로 SDK를 인지시킵니다.
-- 배포는 *제품·버전 명시 + SHA256 체크섬 + artifact repo*가 표준입니다. SDK의 `version` 파일에 Buildroot revision을 기록합니다.
+- 배포는 *제품·버전 명시 + SHA256 체크섬 + artifact repo*가 표준입니다. SDK에는 revision 파일이 없으므로 `git describe` 값을 `BR2_SDK_PREFIX`나 별도 파일로 남깁니다.
 - Yocto SDK는 메타 정보까지 묶고 eSDK는 recipe 추가가 가능합니다. Buildroot SDK는 *static*이라 의존성 변경 시 시스템 팀의 재발급이 필요합니다.
 - 흔한 사고는 relocate 누락, host architecture mismatch, sysroot 수동 수정, SDK·image 버전 어긋남입니다.
 

@@ -248,7 +248,7 @@ BR2_LINUX_KERNEL_INTREE_DTS_NAME="freescale/imx8mm-myboard"
 `board/myboard/dts/freescale/imx8mm-myboard.dts`가 커널의 `arch/arm64/boot/dts/freescale/` 옆에 복사되므로, `#include`는 같은 디렉터리의 mainline DTS를 그대로 찾습니다. 사내 DTS는 mainline DTS를 base로 포함하는 패턴이 자연스럽습니다.
 
 ```text
-// board/myboard/imx8mm-myboard.dts
+// board/myboard/dts/freescale/imx8mm-myboard.dts
 /dts-v1/;
 #include "imx8mm-evk.dts"
 
@@ -287,7 +287,7 @@ $(eval $(generic-package))
 
 매뉴얼은 두 번째 줄이 꼭 필요하다고 적습니다. "Using the `kernel-module` infrastructure on its own is not sufficient; another package infrastructure *must* be used." 또 "The dependency on `linux` is automatically added"라서 `MYWIFI_DEPENDENCIES`에 `linux`를 적지 않습니다.
 
-`package/pkg-kernel-module.mk`가 하는 일은 두 hook입니다. post-build hook에서 `$(MAKE) -C $(LINUX_DIR) $(LINUX_MAKE_FLAGS) … M=$(@D)/<subdir> modules`를, post-install-target hook에서 같은 명령의 `modules_install`을 부릅니다. `depmod`는 모듈 패키지가 아니라 `linux/linux.mk` 603~610행의 `LINUX_RUN_DEPMOD`가 target-finalize 단계에서 한 번 돌립니다. 주석이 이유를 밝힙니다("to encompass modules installed by packages"). 또한 같은 파일은 `CONFIG_TRIM_UNUSED_KSYMS`를 커널 설정에서 끕니다. 커널이 쓰지 않는 심볼을 잘라 내면 외부 모듈이 링크할 심볼이 없어지기 때문입니다.
+`package/pkg-kernel-module.mk`가 하는 일은 두 hook입니다. post-build hook에서 `$(MAKE) -C $(LINUX_DIR) $(LINUX_MAKE_FLAGS) … M=$(@D)/<subdir> modules`를, post-install-target hook에서 같은 명령의 `modules_install`을 부릅니다. `depmod`는 모듈 패키지가 아니라 `linux/linux.mk` 603~610행의 `LINUX_RUN_DEPMOD`가 target-finalize 단계에서 한 번 돌립니다. 주석이 이유를 밝힙니다("to encompass modules installed by packages"). 또한 `package/pkg-kernel-module.mk` 66행은 kernel-module 패키지가 있을 때 `CONFIG_TRIM_UNUSED_KSYMS`를 커널 설정에서 끕니다. 커널이 쓰지 않는 심볼을 잘라 내면 외부 모듈이 링크할 심볼이 없어지기 때문입니다.
 
 `Config.in`은 본체의 `package/batman-adv/Config.in`과 같은 모양이 됩니다.
 
@@ -306,7 +306,7 @@ config BR2_PACKAGE_MYWIFI
 
 ## rootfs 통합 — `lib/modules/<ver>/`
 
-커널 설정에 `CONFIG_MODULES=y`가 있으면 커널 설치 단계가 `modules_install`을 하고, target-finalize가 `depmod`를 돌립니다. QEMU defconfig는 `=m`인 옵션이 4개뿐이지만 디렉터리 구조는 그대로 생겼습니다.
+커널 설정에 `CONFIG_MODULES=y`가 있으면 커널 설치 단계가 `modules_install`을 하고, target-finalize가 `depmod`를 돌립니다. QEMU defconfig의 최종 커널 `.config`(`output/build/linux-6.18.7/.config`)에는 `=m`인 옵션이 4개뿐이지만 디렉터리 구조는 그대로 생겼습니다.
 
 ```text
 $ ls output/target/lib/modules/
@@ -393,7 +393,7 @@ Ch 11에서 다룬 ABI 문제의 *커널 쪽* 사례입니다. userspace가 보�
 - 커널 customize는 *source · defconfig · DTS · modules* 네 축의 조합입니다.
 - Source는 mainline LTS / custom version / custom git / custom tarball 중 선택하며, vendor fork는 `CUSTOM_GIT` + full commit hash가 표준입니다.
 - defconfig는 in-tree 이름 / custom config 파일 / menuconfig 중 시작점을 고르고, 그 위에 *fragment*로 기능별 옵션을 점진 추가합니다.
-- DTS는 in-tree 이름으로 골라도 되고, out-of-tree `.dts`를 `CUSTOM_DTS_PATH`로 가져와도 됩니다. mainline DTS를 `#include`로 깔고 사내 변경분만 얹는 패턴이 안전합니다.
+- DTS는 in-tree 이름으로 골라도 되고, out-of-tree `.dts`를 `CUSTOM_DTS_DIR`로 가져와도 됩니다. mainline DTS를 `#include`로 깔고 사내 변경분만 얹는 패턴이 안전합니다.
 - out-of-tree 모듈은 `kernel-module` 인프라로 감싸면 자동으로 `lib/modules/<ver>/`에 들어갑니다.
 - fragment나 config 파일을 고치면 `.stamp_dotconfig`의 파일 의존성 때문에 `make`만으로 merge·configure·build가 다시 돕니다(실측 28.16초). `linux-menuconfig`도 stamp를 지웁니다.
 - `linux-rebuild`는 빌드와 *설치*를 다시 하지만 rootfs 이미지는 만들지 않습니다. 마지막에 `make`를 칩니다.

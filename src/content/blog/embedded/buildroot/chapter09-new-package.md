@@ -180,6 +180,7 @@ CMake 기반 패키지를 추가하는 흐름입니다. 예시로 가상의 `acm
 config BR2_PACKAGE_ACME_SENSORLIB
     bool "acme-sensorlib"
     depends on BR2_INSTALL_LIBSTDCPP    # C++ 사용
+    depends on BR2_TOOLCHAIN_GCC_AT_LEAST_4_9 # json-for-modern-cpp
     select BR2_PACKAGE_JSON_FOR_MODERN_CPP
     help
       ACME sensor abstraction library.
@@ -267,7 +268,7 @@ Python 패키지는 별도 infrastructure를 씁니다. 빌드 backend는 자동
 config BR2_PACKAGE_PYTHON_ACME_TOOLS
     bool "python-acme-tools"
     depends on BR2_PACKAGE_PYTHON3
-    select BR2_PACKAGE_PYTHON_PYSERIAL
+    select BR2_PACKAGE_PYTHON_SERIAL
     help
       ACME device management CLI for Python 3.
       https://pypi.org/project/acme-tools
@@ -290,12 +291,12 @@ PYTHON_ACME_TOOLS_SITE = https://files.pythonhosted.org/packages/source/a/acme_t
 PYTHON_ACME_TOOLS_LICENSE = MIT
 PYTHON_ACME_TOOLS_LICENSE_FILES = LICENSE.txt
 PYTHON_ACME_TOOLS_SETUP_TYPE = setuptools
-PYTHON_ACME_TOOLS_DEPENDENCIES = python-pyserial
+PYTHON_ACME_TOOLS_DEPENDENCIES = python-serial
 
 $(eval $(python-package))
 ```
 
-핵심은 `PYTHON_ACME_TOOLS_SETUP_TYPE`입니다. 허용 값은 `pkg-python.mk` 314행이 강제하는 8개이고, 본체 `package/python-*/*.mk`의 target 패키지가 실제로 쓰는 분포는 다음과 같습니다.
+핵심은 `PYTHON_ACME_TOOLS_SETUP_TYPE`입니다. 허용 값은 `pkg-python.mk` 314행이 강제하는 8개이고, 본체 `package/python-*/*.mk`의 `PYTHON_*_SETUP_TYPE` 줄(host 전용 패키지 포함)을 세면 다음과 같습니다.
 
 | 값 | 본체 사용 수 | 비고 |
 |----|---:|------|
@@ -306,7 +307,7 @@ $(eval $(python-package))
 | `pep517` | 16 | 범용 PEP 517 backend |
 | `maturin` | 5 | Rust 확장 |
 | `setuptools-rust` | 4 | Rust 확장 |
-| `flit-bootstrap` | 4 | flit-core 자체 같은 부트스트랩용 |
+| `flit-bootstrap` | 4 | host 전용(`pkg-python.mk` 317~319행이 target에서 거부). flit-core 자체 같은 부트스트랩용 |
 
 `distutils`는 허용 값이 아닙니다. 넣으면 `"Invalid $(2)_SETUP_TYPE. Valid options are 'maturin', 'setuptools', 'setuptools-rust', 'pep517', 'flit', 'hatch' or 'poetry'."` 오류가 납니다.
 
@@ -453,8 +454,8 @@ output/target/usr/bin/htop: ELF 64-bit LSB pie executable, ARM aarch64, version 
 configure 단계에서 실패하면 autotools가 남긴 `config.log`를 봅니다.
 
 ```bash
-ls output/build/htop-acme-3.3.0/config.log
-less output/build/htop-acme-3.3.0/config.log
+ls output/build/htop-acme-3.4.1/config.log
+less output/build/htop-acme-3.4.1/config.log
 ```
 
 `.mk`를 다시 수정한 뒤 configure만 다시 돌립니다.
@@ -514,7 +515,7 @@ series
 "htop-acme","3.4.1","GPL-2.0+","COPYING","htop-3.4.1.tar.xz","https://github.com/htop-dev/htop/releases/download/3.4.1","gcc-final [GPL-3.0-with-GCC-exception] glibc [GPL-2.0+ (programs), LGPL-2.1+, BSD-3-Clause, MIT (library)] linux-headers [GPL-2.0] ncurses [MIT with advertising clause] skeleton-init-common [unknown] skeleton-init-sysv [unknown]"
 ```
 
-`sources/`에는 원본 tarball과 *적용한 패치*, 적용 순서를 적은 `series`가 함께 들어갑니다. 마지막 열은 이 패키지가 링크하는 의존성의 라이선스까지 보여 줍니다. 다만 그대로 컴플라이언스 문서가 되지는 않습니다. 같은 디렉터리의 `README`가 Buildroot 소스 자체와 toolchain, autotools 패키지에 적용된 libtool 패치는 "due to technical limitations" 저장하지 못했다고 밝히고, 위 경고도 그 뜻입니다. `skeleton-init-*`처럼 `[unknown]`으로 찍히는 항목도 사람이 검토해야 합니다(Ch 18).
+`sources/`에는 원본 tarball과 *적용한 패치*, 적용 순서를 적은 `series`가 함께 들어갑니다. 마지막 열은 이 패키지가 링크하는 의존성의 라이선스까지 보여 줍니다. 다만 그대로 컴플라이언스 문서가 되지는 않습니다. 같은 디렉터리의 `README`가 Buildroot 소스 자체와 autotools 패키지에 적용된 libtool 패치는 "due to technical limitations" 저장하지 않았고 toolchain은 "may have not been saved"라고 밝히고, 위 경고도 그 뜻입니다. `skeleton-init-*`처럼 `[unknown]`으로 찍히는 항목도 사람이 검토해야 합니다(Ch 18).
 
 ## Troubleshooting
 

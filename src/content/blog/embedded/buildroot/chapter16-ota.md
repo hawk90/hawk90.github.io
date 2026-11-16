@@ -242,7 +242,7 @@ software =
 };
 ```
 
-`bootenv:` 절이 *U-Boot 환경 변수를 직접 갱신*합니다. swupdate의 강점 중 하나로, RAUC가 별도 handler에서 처리해야 하는 일을 *manifest 한 줄*로 끝냅니다.
+`bootenv:` 절이 bundle 설치 때 U-Boot 환경 변수를 갱신합니다(swupdate 문서의 `sw-description` 형식).
 
 bundle 패키징은 CPIO `newc` 포맷.
 
@@ -250,7 +250,9 @@ bundle 패키징은 CPIO `newc` 포맷.
 #!/bin/sh
 set -e
 STAGE="${BINARIES_DIR}/swupdate-stage"
-KEY="${BR2_EXTERNAL_MYBOARD_PATH}/keys/swupdate-priv.pem"
+BOARD_DIR="$(dirname "$0")"
+KEY="${SWUPDATE_KEY:?set SWUPDATE_KEY}"
+CERT="${SWUPDATE_CERT:?set SWUPDATE_CERT}"
 
 rm -rf "${STAGE}"; mkdir -p "${STAGE}"
 cp "${BINARIES_DIR}/rootfs.ext4.gz"       "${STAGE}/"
@@ -259,7 +261,7 @@ cp "${BOARD_DIR}/swupdate/sw-description" "${STAGE}/"
 
 openssl cms -sign -in "${STAGE}/sw-description" \
     -out "${STAGE}/sw-description.sig" \
-    -signer "${KEY}" -nocerts -noattr -binary -outform DER
+    -signer "${CERT}" -inkey "${KEY}" -nocerts -noattr -binary -outform DER
 
 # CPIO newc — sw-description이 첫 번째여야 함
 ( cd "${STAGE}" && \
@@ -383,7 +385,7 @@ WantedBy=multi-user.target
 
 `health-check.sh`는 *제품별 정의*입니다. 다음 5가지가 통과해야 *good*으로 마킹합니다. 네트워크 reachability (백엔드 ping), 핵심 service status (`systemctl is-active`), 센서·주변기기 enumeration, 디스크 mount 상태, 정해진 N분의 안정성 관찰입니다.
 
-BusyBox에는 `watchdog` applet이 있고(Ch 7의 rootfs 목록에 `./sbin/watchdog`), `package/busybox/S15watchdog` init 스크립트가 함께 있습니다. health check 서비스가 watchdog을 주기적으로 갱신하게 두면, 갱신이 멈췄을 때 하드웨어 reset → bootcount 증가 → passive rollback으로 이어집니다.
+Buildroot의 기본 BusyBox 설정은 `watchdog` applet을 켜고(`package/busybox/busybox.config`의 `CONFIG_WATCHDOG=y`), `busybox.mk`가 `S15watchdog` init 스크립트를 설치합니다. health check 서비스가 watchdog을 주기적으로 갱신하게 두면, 갱신이 멈췄을 때 하드웨어 reset → bootcount 증가 → passive rollback으로 이어집니다.
 
 ## 흔한 실패
 
@@ -404,7 +406,7 @@ signature verification failed: Verify error: unable to get local issuer certific
 ## 정리
 
 - OTA는 패키지 한 개가 아니라 *7개 영역의 정렬* — partition, bootloader, bundle, 서명, rollback, delivery, 상태 머신.
-- 결정 차원은 *슬롯 모델 (A/B vs delta vs container)*, *서명 정책 (단일 vs CA chain)*, *rollback 방식 (passive vs active)*의 3개입니다.
+- 결정 차원은 *슬롯 모델 (A/B / 단일 슬롯 + recovery / delta)*, *서명 정책 (단일 vs CA chain)*, *rollback 방식 (passive vs active)*의 3개입니다.
 - RAUC·swupdate·Mender의 차이는 *bundle 포맷·생태계·서버*입니다. firmware 위주면 RAUC, handler 자유도 우선이면 swupdate, server까지 통합 패키지를 원하면 Mender.
 - Buildroot에는 RAUC `system.conf` 경로 옵션이 없어 overlay로 넣고, bundle은 post-image에서 `rauc bundle`로 만듭니다.
 - swupdate 통합의 핵심은 *sw-description + CPIO newc 컨테이너 + sw-description이 첫 파일*. embedded webserver를 같이 켜면 별도 서버 없이 현장 업로드가 됩니다.
