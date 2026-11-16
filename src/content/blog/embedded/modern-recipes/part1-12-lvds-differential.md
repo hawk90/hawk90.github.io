@@ -95,7 +95,7 @@ Eye diagram은 여러 비트 구간을 겹쳐 rise/fall time, overshoot, ringing
 
 캡처 시간도 판정에 들어갑니다. PRBS31의 최악 run은 패턴 한 주기(약 2³¹비트)에 한 번 나옵니다. 매뉴얼의 예는 3.125 Gbps에서 0.687 s이고(56쪽), 이 조합의 최대 권장 속도 100 Mbps(비트 10 ns)에서는 10 ns × 2³¹ ≈ 21.5 s입니다. 이보다 짧게 쌓은 eye는 최악 구간을 담았다는 보장이 없으므로 판정에 쓰지 않습니다.
 
-eye가 문턱 안으로 닫히면 송신단 pre-emphasis·de-emphasis를 검토하는데, SN65LVDS31·SN65LVDS32 데이터시트에는 이 기능 항목이 없습니다. Owner's Manual 표 7-9(65쪽)에 따르면 pre-emphasis는 edge마다 overshoot를 더하고 수신 eye 열림은 PE가 없을 때와 같으며 전력이 늘고, de-emphasis는 정착 진폭을 DE 비율만큼 줄입니다. VOD 247 mV 드라이버에 표의 대표값 −3 dB de-emphasis를 걸면 정착 진폭은 247 × 10^(−3/20) ≈ 175 mV이고, 손실 없는 선로에서 남는 예산은 147 mV에서 75 mV로 줄어듭니다.
+eye가 문턱 안으로 닫히면 송신단 pre-emphasis·de-emphasis를 검토하는데, SN65LVDS31·SN65LVDS32 데이터시트에는 이 기능 항목이 없습니다. Owner's Manual 65쪽 본문과 표 7-9에 따르면 pre-emphasis는 edge마다 overshoot를 더하고 수신 eye 열림은 PE가 없을 때와 같으며 전력이 늘고, de-emphasis는 정착 진폭을 DE 비율만큼 줄입니다. VOD 247 mV 드라이버에 표의 대표값 −3 dB de-emphasis를 걸면 정착 진폭은 247 × 10^(−3/20) ≈ 175 mV이고, 손실 없는 선로에서 남는 예산은 147 mV에서 75 mV로 줄어듭니다.
 
 ## 코드 / 실제 사용 예
 
@@ -147,7 +147,7 @@ Owner's Manual(9쪽)은 일부 업체 데이터시트가 LVDS(또는 pseudo-LVDS
 
 > ⚠️ 입력이 열렸을 때의 출력
 
-SN65LVDS32의 fail-safe는 open-circuit만 다룹니다(SLLS262R 1절, 10.3.2절). 드라이버가 high-impedance가 되거나 케이블이 빠져 입력 전류가 거의 없으면, 각 선을 300 kΩ으로 VCC에 끌어올리고 약 2.3 V 문턱의 AND 게이트가 이를 감지해 출력을 HIGH로 둡니다. 데이터시트는 종단 Rt를 그림 10처럼 A–B 사이에 달면 이 기능에 영향이 없지만, 접지로 DC 전류를 흘리는 다른 종단 회로는 pull-up 전류를 이겨 fail-safe를 무력화할 수 있다고 씁니다(16쪽). 외부 bias로 idle 상태를 정하는 방식은 [1-11](/blog/embedded/modern-recipes/part1-11-rs485-rs422)의 fail-safe biasing을 봅니다.
+SN65LVDS32의 fail-safe는 데이터시트가 "Open-Circuit Fail-Safe"라고 부르는 기능입니다(SLLS262R 1절, 10.3.2절). 드라이버가 high-impedance가 되거나 케이블이 빠져 입력 전류가 거의 없으면, 각 선을 300 kΩ으로 VCC에 끌어올리고 약 2.3 V 문턱의 AND 게이트가 이를 감지해 출력을 HIGH로 둡니다. 데이터시트는 종단 Rt를 그림 10처럼 A–B 사이에 달면 이 기능에 영향이 없지만, 접지로 DC 전류를 흘리는 다른 종단 회로는 pull-up 전류를 이겨 fail-safe를 무력화할 수 있다고 씁니다(16쪽). 외부 bias로 idle 상태를 정하는 방식은 [1-11](/blog/embedded/modern-recipes/part1-11-rs485-rs422)의 fail-safe biasing을 봅니다.
 
 ## 정리
 
