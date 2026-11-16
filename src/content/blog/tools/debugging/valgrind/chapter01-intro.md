@@ -16,7 +16,7 @@ Valgrind를 한 줄로 요약하면 *바이너리를 가상 CPU 위에서 다시
 
 일반 실행에서는 프로그램의 기계어가 CPU에서 바로 돕니다. Valgrind 아래에서는 [매뉴얼 2.1절](https://valgrind.org/docs/manual/manual-core.html#manual-core.whatdoes)이 설명하듯 Valgrind 코어가 *프로그램이 시작되기 전에* 제어권을 가져가고, 코드가 처음 실행될 때마다 그 블록을 도구에 넘깁니다. 블록은 VEX라는 IR로 옮겨지고(헤더 `libvex_ir.h`의 표현으로 "architecture-neutral intermediate representation"), 도구가 여기에 검사 코드를 끼워 넣은 뒤 다시 기계어로 번역해 실행합니다. 메모리·동기화를 관찰하는 지점이 바로 이 계측 코드입니다.
 
-핵심은 *재컴파일이 필요 없다*는 것입니다. 2.1절은 "재컴파일·재링크·수정 없이 기존 실행 파일에 바로 동작한다"고 적고, 같은 이유로 C 라이브러리를 비롯한 동적 라이브러리 코드까지 모두 검사 대상이 된다고 덧붙입니다. 반대로 이미 실행 중인 프로세스에 붙일 수는 없습니다. [FAQ 5.4](https://valgrind.org/docs/manual/faq.html#faq.attach)는 메모리 배치부터 다른 환경을 만들어야 해서 "처음부터 완전한 제어권이 필요하다"고 답합니다.
+핵심은 *재컴파일이 필요 없다*는 것입니다. 2.1절은 "재컴파일·재링크·수정 없이 기존 실행 파일에 바로 동작한다"고 적고, 같은 이유로 C 라이브러리를 비롯한 동적 라이브러리 코드까지 모두 검사 대상이 된다고 덧붙입니다. 반대로 이미 실행 중인 프로세스에 붙일 수는 없습니다. [FAQ](https://valgrind.org/docs/manual/faq.html#faq.attach)(3.24.0 기준 5.4)는 메모리 배치부터 다른 환경을 만들어야 해서 "처음부터 완전한 제어권이 필요하다"고 답합니다.
 
 ```bash
 $ ./myapp                       # 정상 실행
@@ -47,7 +47,7 @@ $ valgrind --tool=helgrind ./myapp   # 다른 도구
 | 검사 준비 | `-fsanitize=...`로 다시 빌드해야 합니다. | 기존 실행 파일을 그대로 `valgrind` 아래에서 실행합니다(매뉴얼 2.1). |
 | 초기화되지 않은 값 | MSan은 Clang 전용입니다. GCC 14.2.0에 `-fsanitize=memory`를 주면 `unrecognized argument`로 거부됩니다. | Memcheck가 기본으로 검사합니다. GCC 빌드에서도 동작합니다. |
 | 외부 라이브러리 | 계측하지 않은 라이브러리 안쪽은 보지 못합니다. | libc를 포함한 모든 동적 라이브러리 코드를 같은 방식으로 검사합니다(매뉴얼 2.1). |
-| 스택·전역 배열 경계 | ASan이 `stack-buffer-overflow`로 잡습니다(Ch 2의 실행). | Memcheck는 검사하지 않습니다([FAQ 4.6](https://valgrind.org/docs/manual/faq.html#faq.overruns)). |
+| 스택·전역 배열 경계 | ASan이 `stack-buffer-overflow`로 잡습니다(Ch 2의 실행). | Memcheck는 검사하지 않습니다([FAQ](https://valgrind.org/docs/manual/faq.html#faq.overruns), 3.24.0 기준 4.6). |
 | 비용 | 이 시리즈에서는 측정하지 않았습니다. | 아래 "도구별 비용" 절의 측정을 봅니다. |
 
 그래서 Valgrind를 꺼내는 자리는 분명합니다. 소스 없이 받은 SDK의 `.so`, 다시 빌드하기 어려운 의존성, GCC로만 빌드되는 코드에서 미초기화 값을 봐야 할 때입니다. 시스템 호출에 넘기는 버퍼 검사도 Memcheck의 고유 항목입니다. Ch 2에서 `fwrite`로 미초기화 버퍼를 쓰면 `Syscall param write(buf) points to uninitialised byte(s)`가 glibc 내부 스택과 함께 보고되는 것을 확인합니다.
@@ -120,24 +120,24 @@ DRD도 happens-before 기반 레이스 탐지기입니다([DRD 매뉴얼 8.1.4�
 
 "Valgrind는 느리다"는 말은 맞지만 도구마다 배율이 다릅니다. 매뉴얼은 Memcheck를 "네이티브보다 10~50배 느림", 계측이 전혀 없는 Nulgrind(`--tool=none`)를 "약 4배"로 적습니다([2.1절](https://valgrind.org/docs/manual/manual-core.html#manual-core.whatdoes)). [QuickStart](https://valgrind.org/docs/manual/quick-start.html)는 Memcheck를 "20~30배"로 적습니다.
 
-같은 환경에서 직접 재 봤습니다. `work.c`는 `unsigned` 200만 개를 `qsort`로 정렬하고 20번 훑은 뒤, 32바이트 문자열 1만 개를 할당·해제하는 단일 스레드 프로그램입니다(`gcc -g -O1`). 각 도구마다 네이티브 실행과 도구 실행을 바로 이어서 7번 돌리고, 쌍마다 구한 배율의 중앙값을 적었습니다.
+같은 환경에서 직접 재 봤습니다. `work.c`는 `unsigned` 200만 개를 `qsort`로 정렬하고 20번 훑은 뒤, 32바이트 문자열 1만 개를 할당·해제하는 단일 스레드 프로그램입니다(`gcc -g -O1`). 각 도구마다 네이티브 실행과 도구 실행을 바로 이어서 7번 돌리고, 쌍마다 구한 배율의 중앙값을 적었습니다. 같은 절차를 두 번(1차, 2차) 돌렸습니다. 1차 측정의 원시 로그는 작업 디렉터리 정리 중에 사라져서, 같은 절차로 다시 돌린 2차 측정의 범위를 함께 적었습니다.
 
-| 도구 (옵션) | 실행 시간 배율 (중앙값) | 7회 범위 | 최대 RSS 배율 |
-| --- | ---: | ---: | ---: |
-| Nulgrind (`--tool=none`) | 3.7× | 3.0–4.0× | 3.0× |
-| Massif | 4.5× | 3.5–7.0× | 3.1× |
-| Memcheck | 13.1× | 12.0–16.6× | 4.7× |
-| DRD | 16.8× | 13.1–37.7× | 3.6× |
-| Cachegrind (`--cache-sim=yes`) | 19.8× | 17.9–22.7× | 3.0× |
-| Helgrind | 19.8× | 10.2–24.3× | 6.3× |
-| Memcheck `--track-origins=yes` | 20.8× | 18.9–32.7× | 11.1× |
-| Callgrind | 32.3× | 31.7–49.4× | 7.0× |
+| 도구 (옵션) | 1차 측정 중앙값 | 2차 측정 중앙값 | 2차 7회 범위 | 최대 RSS 배율 |
+| --- | ---: | ---: | ---: | ---: |
+| Nulgrind (`--tool=none`) | 3.7× | 4.3× | 2.5–7.1× | 3.0× |
+| Massif | 4.5× | 4.5× | 2.3–9.9× | 3.1× |
+| Memcheck | 13.1× | 12.6× | 4.9–20.6× | 4.7× |
+| DRD | 16.8× | 23.1× | 12.7–64.3× | 3.6× |
+| Helgrind | 19.8× | 24.6× | 17.8–44.1× | 6.3–6.4× |
+| Cachegrind (`--cache-sim=yes`) | 19.8× | 27.4× | 12.7–36.8× | 3.0× |
+| Memcheck `--track-origins=yes` | 20.8× | 30.6× | 16.1–33.2× | 11.1× |
+| Callgrind | 32.3× | 36.8× | 19.2–73.8× | 7.0× |
 
-여기서 두 가지를 읽을 수 있습니다. 첫째, 배율은 도구 선택에 크게 좌우됩니다. Massif는 Nulgrind와 비슷한 수준이고, Callgrind는 Memcheck보다도 2.5배쯤 무겁습니다. 둘째, `--track-origins=yes`는 Memcheck를 더 느리게 만들고 메모리를 크게 늘립니다. 매뉴얼은 이 옵션이 "Memcheck 속도를 절반으로 줄이고 메모리를 최소 100MB 늘린다"고 적습니다([4.3절](https://valgrind.org/docs/manual/mc-manual.html#opt.track-origins)). 이 측정에서는 속도가 1.6배 느려졌고, 최대 RSS는 77,628 KB에서 181,460 KB로 약 101 MiB 늘었습니다.
+여기서 두 가지를 읽을 수 있습니다. 첫째, 배율은 도구 선택에 크게 좌우됩니다. 두 측정 모두 Massif는 Nulgrind와 비슷한 수준이었고, Callgrind는 Memcheck보다 2.5~2.9배 무거웠습니다. 둘째, `--track-origins=yes`는 Memcheck를 더 느리게 만들고 메모리를 크게 늘립니다. 매뉴얼은 이 옵션이 "Memcheck 속도를 절반으로 줄이고 메모리를 최소 100MB 늘린다"고 적습니다([4.3절](https://valgrind.org/docs/manual/mc-manual.html#opt.track-origins)). 이 측정에서는 Memcheck 대비 속도가 1차 1.6배, 2차 2.4배 느려졌고, 최대 RSS는 두 번 모두 77,628 KB에서 181,460 KB로 약 101 MiB 늘었습니다.
 
-Nulgrind 3.7×는 매뉴얼의 "약 4배"와, Memcheck 13.1×는 "10~50배"와 맞습니다. 네이티브 프로그램 자체의 RSS가 16 MB 남짓으로 작아서 RSS 배율은 Valgrind 자체의 고정 비용이 크게 섞인 값입니다.
+Nulgrind 3.7~4.3×는 매뉴얼의 "약 4배"와, Memcheck 12.6~13.1×는 "10~50배"와 맞습니다. 시간 배율은 두 측정 사이에도 최대 1.5배 차이가 났지만 RSS는 거의 같았습니다. 네이티브 프로그램 자체의 RSS가 16 MB 남짓으로 작아서 RSS 배율은 Valgrind 자체의 고정 비용이 크게 섞인 값입니다.
 
-> ⚠️ 측정 조건: 게스트는 QEMU HVF 가속이라 명령이 하드웨어에서 직접 돌지만, 측정 시각에 호스트 M2 Pro(12코어)에서 다른 빌드 작업이 돌고 있었습니다(측정 전후 load average 18~74). 그래서 절대 초 대신 쌍별 배율만 적었고, 범위 칸처럼 반복마다 흔들림이 있습니다. 표의 값은 `work.c` 한 프로그램에서 나온 것입니다.
+> ⚠️ 측정 조건: 게스트는 QEMU HVF 가속이라 명령이 하드웨어에서 직접 돌지만, 측정 시각에 호스트 M2 Pro(12코어)에서 다른 빌드 작업이 돌고 있었습니다(측정 전후 load average 16~74). 그래서 절대 초 대신 쌍별 배율만 적었고, 범위 칸처럼 반복마다 흔들림이 있습니다. 표의 값은 `work.c` 한 프로그램에서 나온 것입니다.
 
 ---
 
@@ -164,15 +164,17 @@ Nulgrind 3.7×는 매뉴얼의 "약 4배"와, Memcheck 13.1×는 "10~50배"와 �
 
 ```text
 $ valgrind --tool=cachegrind --cache-sim=yes ./matrix        # i-j-k
---3264-- Warning: Cannot auto-detect cache config, using defaults.
+--1286-- Warning: Cannot auto-detect cache config, using defaults.
 ...
-==3264== D refs:        269,261,894  (268,461,836 rd   + 800,058 wr)
-==3264== D1  misses:    134,873,938  (134,545,829 rd   + 328,109 wr)
-==3264== D1  miss rate:        50.1% (       50.1%     +    41.0%  )
+==1286== D refs:        269,261,875  (268,461,817 rd   + 800,058 wr)
+==1286== D1  misses:    134,873,938  (134,545,830 rd   + 328,108 wr)
+==1286== D1  miss rate:        50.1% (       50.1%     +    41.0%  )
+...
 $ valgrind --tool=cachegrind --cache-sim=yes ./matrix x      # i-k-j
-==3265== D refs:          403,479,623  (268,723,981 rd   + 134,755,642 wr)
-==3265== D1  misses:       16,910,167  ( 16,844,197 rd   +      65,970 wr)
-==3265== D1  miss rate:           4.2% (        6.3%     +         0.0%  )
+...
+==1287== D refs:          403,479,595  (268,723,953 rd   + 134,755,642 wr)
+==1287== D1  misses:       16,910,167  ( 16,844,198 rd   +      65,969 wr)
+==1287== D1  miss rate:           4.2% (        6.3%     +         0.0%  )
 ```
 
 루프 순서만 바꿔 D1 미스가 1억 3,487만 건에서 1,691만 건으로 줄었습니다. 첫 경고는 arm64 게스트에서 캐시 구성을 자동으로 읽지 못했다는 뜻입니다. `-v`로 보면 I1·D1 16 KiB 4-way, LL 256 KiB 8-way라는 기본값으로 시뮬레이션했으므로, 실제 M2 Pro 캐시 크기와는 다릅니다. 절대값보다 두 버전의 비교로 읽어야 합니다.
@@ -200,7 +202,7 @@ glibc 2.41의 `qsort`가 내부에서 병합 정렬(`msort_with_tmp`)을 쓰고,
 $ valgrind --tool=massif --massif-out-file=ms.out ./heap
 $ ms_print ms.out
 ...
- 64        208,572        2,099,208        2,097,152         2,056            0
+ 64        208,388        2,099,208        2,097,152         2,056            0
 99.90% (2,097,152B) (heap allocation functions) malloc/new/new[], --alloc-fns, etc.
 ->49.95% (1,048,576B) 0x10887F: make_cache (heap.c:4)
 | ->49.95% (1,048,576B) 0x1088DF: main (heap.c:8)
@@ -270,7 +272,7 @@ $ echo $?
 1. **`==749==`** 접두사는 Valgrind의 프로세스 ID입니다. 프로그램 자신의 출력과 섞여도 구분할 수 있습니다.
 2. **`HEAP SUMMARY`**는 종료 시 살아 있는 할당의 요약입니다.
 3. **`definitely lost`**는 어디서도 가리키지 않는 블록, 곧 *진짜 누수*입니다.
-4. **스택 트레이스**는 `malloc`을 부른 `main (leak.c:7)`, 곧 `char* buf = malloc(40);` 줄을 정확히 가리킵니다. `-g`를 빼면 `main (in /root/src/leak)`처럼 파일 이름만 남습니다(Ch 2).
+4. **스택 트레이스**는 `malloc`을 부른 `main (leak.c:7)`, 곧 `char* buf = malloc(40);` 줄을 정확히 가리킵니다. `-g`를 빼면 줄 번호가 빠지고 `main (in /root/src/offby1_nog)`처럼 함수 이름과 실행 파일 경로만 남습니다(Ch 2).
 5. **`LEAK SUMMARY`**는 누수를 네 종류로 분류합니다(Ch 3).
 6. **종료 코드 0**에 주의합니다. 누수를 찾아도 Valgrind는 기본으로 프로그램의 종료 코드를 그대로 돌려줍니다. CI에서 실패로 만들려면 `--error-exitcode`가 필요합니다(Ch 2).
 
@@ -298,6 +300,8 @@ valgrind:  whose name matches the pattern:      strlen
 valgrind:  in an object with soname matching:   ld-linux-aarch64.so.1
 ...
 valgrind:    On Debian, Ubuntu:                 libc6-dbg
+...
+valgrind:  Cannot continue -- exiting now.  Sorry.
 ```
 
 Ch 2의 `fileops.c:1182`처럼 glibc 내부 프레임에 소스 줄까지 보이는 것도 이 패키지 덕분입니다.
@@ -339,10 +343,10 @@ valgrind --version
 ## 정리
 
 - **Valgrind**는 프로그램이 시작되기 전에 제어권을 잡고 코드를 VEX IR로 번역·계측하므로 재컴파일 없이 libc까지 검사합니다.
-- 실행 중인 프로세스에는 붙일 수 없습니다(FAQ 5.4).
+- 실행 중인 프로세스에는 붙일 수 없습니다(FAQ, 3.24.0 기준 5.4).
 - *Sanitizer와 보완 관계*입니다. 소스 없는 `.so`, GCC 빌드의 미초기화 값, 시스템 호출 버퍼는 Valgrind 쪽이고, 스택·전역 배열 경계는 ASan 쪽입니다.
 - 세 핵심 도구는 **Memcheck**(메모리 + 초기화), **Helgrind**(pthread 오용 + 잠금 순서 + race), **DRD**(race + 락 경합)입니다.
-- 비용은 도구마다 다릅니다. 이 글의 측정에서는 Callgrind가 가장 무거웠고 Massif가 가장 가벼웠습니다.
+- 비용은 도구마다 다릅니다. 이 글의 두 측정 모두 Callgrind가 가장 무거웠고, 계측 없는 Nulgrind를 빼면 Massif가 가장 가벼웠습니다.
 - 공식 지원 플랫폼에 Apple Silicon macOS와 Windows는 없습니다. Linux VM에서 돌립니다.
 - 권장 운영: 일상 = Sanitizer, *릴리스 전 점검* = Valgrind Memcheck.
 

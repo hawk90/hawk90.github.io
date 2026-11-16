@@ -219,7 +219,7 @@ Valgrind는 빌드할 때 감지한 OS·라이브러리에 맞는 *기본 suppre
 --4368-- Reading suppressions file: /usr/libexec/valgrind/default.supp
 ```
 
-이 파일에는 항목 171개가 있고, 종류별로 세면 `drd:ConflictingAccess` 45개, `Helgrind:Race` 37개, `Memcheck:Param` 25개, `Memcheck:Cond` 24개, `Memcheck:Addr4` 22개 순입니다. 그래서 glibc 동적 로더나 libc 내부에서 나는 알려진 보고는 프로젝트 파일에 따로 적지 않아도 이미 숨겨집니다. 이 시리즈의 C 예제들이 libc 안의 보고 없이 깨끗했던 것도 같은 이유이고, Ch 4의 `ERROR SUMMARY`에 찍힌 `suppressed: 10 from 10` 같은 숫자가 이 파일의 몫입니다. 기본 파일에 없는 시스템 라이브러리 보고가 나올 때만 프로젝트 파일에 추가합니다.
+이 파일에는 항목 171개가 있고, 종류별로 세면 `drd:ConflictingAccess` 45개, `Helgrind:Race` 37개, `Memcheck:Param` 25개, `Memcheck:Cond` 24개, `Memcheck:Addr4` 22개 순입니다. 그래서 glibc 동적 로더나 libc 내부에서 나는 알려진 보고는 프로젝트 파일에 따로 적지 않아도 이미 숨겨집니다. 이 시리즈의 Memcheck 예제는 모두 `suppressed: 0 from 0`이라 이 파일이 숨긴 것이 없었지만, Ch 4의 `ERROR SUMMARY`에 찍힌 `suppressed: 10 from 10` 같은 숫자가 이 파일의 몫입니다. 기본 파일에 없는 시스템 라이브러리 보고가 나올 때만 프로젝트 파일에 추가합니다.
 
 ### 예 4: pthread 자체의 race
 
@@ -419,7 +419,7 @@ Debian은 `/usr/lib/valgrind/debian.supp`라는 배포판 전용 파일도 설�
 | 자리 | 도구 |
 |------|------|
 | 일상 메모리 오류 | Sanitizer (ASan) |
-| 스택·전역 배열 경계 | Sanitizer (ASan). Memcheck는 검사하지 않음 (FAQ 4.6) |
+| 스택·전역 배열 경계 | Sanitizer (ASan). Memcheck는 검사하지 않음 (FAQ, 3.24.0 기준 4.6) |
 | 미초기화 값 (GCC) | Valgrind (Memcheck). MSan은 Clang 전용 |
 | 깊은 누수 분석 (loss record) | Valgrind (Memcheck) |
 | 시스템 호출 인자 버퍼의 주소·정의 상태 | Valgrind (Memcheck) |
@@ -500,7 +500,7 @@ jobs:
 - **`--xml`** — 결과를 *기계 판독 가능*하게 남깁니다. 3.24.0의 XML은 `<protocolversion>4</protocolversion>`이고 에러마다 `<kind>`가 붙습니다(Ch 2).
 - **`upload-artifact`** — 실패 시 *분석을 위해* XML을 저장합니다.
 
-이 YAML은 이 시리즈에서 GitHub Actions로 돌려 보지는 않았습니다. 그 안의 `valgrind` 명령줄은 Debian 13 VM에서 같은 옵션으로 실행해 확인했습니다.
+이 YAML은 이 시리즈에서 GitHub Actions로 돌려 보지는 않았습니다. 그 안의 `valgrind` 명령줄은 Debian 13 VM에서 같은 옵션으로 실행해 확인했습니다. 한 가지 차이는 버전입니다. `ubuntu-22.04`의 패키지는 `1:3.18.1-1ubuntu2`, `ubuntu-24.04`는 `1:3.22.0-0ubuntu3`입니다([packages.ubuntu.com](https://packages.ubuntu.com/jammy/valgrind)). 이 시리즈의 출력은 3.24.0이라 메시지가 다를 수 있습니다. 예를 들어 Ch 2의 `Mismatched new/delete size value` 검사는 3.22.0에서 들어왔습니다(Valgrind NEWS). 시리즈와 같은 버전으로 맞추려면 Debian 13 컨테이너 이미지를 씁니다.
 
 ### GitLab CI
 
@@ -525,7 +525,7 @@ valgrind:nightly:
                ./build/test_runner
 ```
 
-`rules`의 `CI_PIPELINE_SOURCE` 비교로 예약 파이프라인에서만 실행합니다. [GitLab CI 문서](https://docs.gitlab.com/ci/yaml/#stages)에 따르면 `stages`를 따로 선언하지 않았을 때의 기본 stage는 `.pre`, `build`, `test`, `deploy`, `.post`이므로 `stage: test`는 선언 없이 쓸 수 있고, `nightly` 같은 사용자 정의 stage를 쓰려면 `stages`에 선언해야 합니다.
+`rules`의 `CI_PIPELINE_SOURCE` 비교로 예약 파이프라인에서만 실행합니다. [GitLab CI 문서](https://docs.gitlab.com/ci/yaml/#stages)에 따르면 `stages`를 따로 선언하지 않았을 때의 기본 stage는 `.pre`, `build`, `test`, `deploy`, `.post`이므로 `stage: test`는 `stages` 선언 없이 쓸 수 있습니다.
 
 ### CTest MemCheck
 
@@ -550,14 +550,14 @@ $ ctest -T memcheck
 ...
 1/2 MemCheck: #1: leak_case ........................   Defects: 1
 MemCheck log files can be found here: (<#> corresponds to test number)
-/root/ct/build/Testing/Temporary/MemoryChecker.<#>.log
+/root/ct/b3/Testing/Temporary/MemoryChecker.<#>.log
 Memory checking results:
 Memory Leak - 1
 $ echo $?
 16
 ```
 
-`LastDynamicAnalysis_*.log`에 남은 실제 명령은 `"/usr/bin/valgrind" "--log-file=.../MemoryChecker.1.log" "--leak-check=full" "--error-exitcode=97" "--suppressions=/root/ct/fixture.supp" ".../suppression-case"`였습니다. `Defects: 1`은 suppression이 16바이트 누수를 숨기고 32바이트 누수만 남았다는 뜻입니다.
+`LastDynamicAnalysis_*.log`에 남은 실제 명령은 `"/usr/bin/valgrind" "--log-file=.../MemoryChecker.1.log" "--leak-check=full" "--error-exitcode=97" "--suppressions=/root/ct/p3/fixture.supp" ".../suppression-case"`였습니다. `Defects: 1`은 suppression이 16바이트 누수를 숨기고 32바이트 누수만 남았다는 뜻입니다.
 
 한 가지 함정이 있었습니다. `MEMORYCHECK_SUPPRESSIONS_FILE`을 `CACHE FILEPATH ""` 없이 일반 `set()`으로 두면 생성된 `DartConfiguration.tcl`의 `MemoryCheckSuppressionFile:`이 비어 있었고, `--suppressions` 없이 실행돼 `Defects: 2`가 나왔습니다. CMake 3.31의 `Modules/CTest.cmake` 181번 줄이 같은 이름을 `set(... CACHE FILEPATH ...)`로 정의하는데, `cmake_minimum_required(VERSION 3.20)`에서는 정책 CMP0126이 OLD라서 이 `set(CACHE)`가 같은 이름의 일반 변수를 지웁니다(`cmake --help-policy CMP0126`). `VERSION 3.21`로 올리면 일반 `set()`도 `MemoryCheckSuppressionFile: /root/ct/p2/fixture.supp`로 전달됐습니다.
 

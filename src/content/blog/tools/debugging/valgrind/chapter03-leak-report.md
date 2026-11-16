@@ -226,7 +226,7 @@ int main() {
 }
 ```
 
-`stdstring` 휴리스틱은 4.2.10절 설명대로 길이·용량·참조 카운트를 블록 앞에 두고 *그 뒤*를 가리키는 옛 `std::string` 구현을 위한 것입니다. GCC 14의 libstdc++(C++11 ABI, `std::__cxx11::basic_string`)에서는 문자열 포인터가 힙 블록 *시작*을 가리키므로 휴리스틱 없이도 still reachable입니다.
+`stdstring` 휴리스틱은 4.2.10절 설명대로 길이·용량·참조 카운트를 블록 앞에 두고 *그 뒤*를 가리키는 일부 컴파일러의 `std::string` 구현을 위한 것입니다. GCC 14의 libstdc++(C++11 ABI, `std::__cxx11::basic_string`)에서는 문자열 포인터가 힙 블록 *시작*을 가리키므로 휴리스틱 없이도 still reachable입니다.
 
 ```text
 ==3730== 101 bytes in 1 blocks are still reachable in loss record 2 of 2
@@ -236,7 +236,7 @@ int main() {
 ==3730==    still reachable: 133 bytes in 2 blocks
 ```
 
-101바이트는 문자 100개와 종료 문자이고, 나머지 32바이트는 `new std::string` 객체 자체입니다. 요약에 `of which reachable via heuristic` 줄이 없다는 점이 휴리스틱을 쓰지 않았다는 증거입니다. 전역 `g_long`의 버퍼도 같은 101바이트일 텐데 레코드가 하나뿐인 이유는, 전역 객체 소멸자가 종료 처리 중에 그 버퍼를 해제했기 때문입니다.
+101바이트는 문자 100개와 종료 문자이고, 나머지 32바이트는 `new std::string` 객체 자체입니다. 요약에 `of which reachable via heuristic` 줄이 없다는 점이 휴리스틱을 쓰지 않았다는 증거입니다. 전역 `g_long`의 버퍼도 101바이트입니다(`total heap usage: 4 allocs, 2 frees, 73,962 bytes allocated` = 32 + 101 + 101 + libstdc++ 초기화 블록 73,728). 그런데 레코드가 하나뿐인 이유는, 전역 객체 소멸자가 종료 처리 중에 그 버퍼를 해제했기 때문입니다.
 
 3. **메모리 풀**
 
@@ -441,7 +441,7 @@ $ valgrind --leak-check=full ./recur
 ==3780==    by 0x1087DB: recursive (recur.c:6)
 ==3780==    by 0x1087FB: main (recur.c:9)
 ...
-==3799== ERROR SUMMARY: 10 errors from 10 contexts (suppressed: 0 from 0)
+==3780== ERROR SUMMARY: 10 errors from 10 contexts (suppressed: 0 from 0)
 ```
 
 세 가지 해상도의 레코드 수를 비교했습니다.

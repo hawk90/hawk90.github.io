@@ -535,7 +535,7 @@ helgrind:
                  ./build/concurrent_test
 ```
 
-`--error-exitcode`는 Helgrind·DRD에서도 동작합니다. 아래 "실행 입력" 절에서 레이스가 있는 빌드는 두 도구 모두 지정한 종료 코드로 끝났습니다. Suppression 파일로 *알려진 오탐*(앞의 `scoped_lock`, 아래 `std::cout`)을 좁게 걸러 냅니다.
+`ubuntu-22.04`의 Valgrind 패키지는 3.18.1이라 이 글의 3.24.0 출력과 메시지가 다를 수 있습니다(Ch 5). `--error-exitcode`는 Helgrind·DRD에서도 동작합니다. 아래 "실행 입력" 절에서 레이스가 있는 빌드는 두 도구 모두 지정한 종료 코드로 끝났습니다. Suppression 파일로 *알려진 오탐*(앞의 `scoped_lock`, 아래 `std::cout`)을 좁게 걸러 냅니다.
 
 ### TSan과의 분담
 

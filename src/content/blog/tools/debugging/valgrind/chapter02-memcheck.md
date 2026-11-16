@@ -58,7 +58,7 @@ valgrind --leak-check=yes ./myapp      # full과 같음
 valgrind --leak-check=full ./myapp     # 개별 누수의 할당 스택
 ```
 
-[Ch 1](/blog/tools/debugging/valgrind/chapter01-intro)의 `leak.c`(40바이트 누수 하나)를 세 수준으로 돌리면 차이가 분명합니다. 빈 `==pid==` 줄은 지웠습니다.
+[Ch 1](/blog/tools/debugging/valgrind/chapter01-intro)의 `leak.c`(40바이트 누수 하나)를 세 수준으로 돌리면 차이가 분명합니다. 빈 `==pid==` 줄과 `rerun with: -s` 안내 줄은 지웠고, 그 밖에 줄인 곳은 `...`로 표시했습니다.
 
 ```text
 $ valgrind --leak-check=no ./leak
@@ -134,7 +134,7 @@ $ valgrind --track-origins=yes ./test
 
 기원 줄이 가리키는 곳은 `int x;`가 있는 3번 줄이 아니라 `int main(void) {`가 있는 2번 줄입니다. [4.3절](https://valgrind.org/docs/manual/mc-manual.html#opt.track-origins)이 설명하듯 스택에서 생긴 값은 "그 값을 할당한 *함수*까지만" 알려 주고, 위치는 보통 함수를 여는 중괄호입니다. 그래서 스택 기원이 나오면 그 함수의 지역 변수를 모두 확인합니다. 힙에서 생긴 값이면 해당 블록의 `malloc` 위치가 나옵니다(아래 `fwrite` 예).
 
-**비용**: [Ch 1](/blog/tools/debugging/valgrind/chapter01-intro)의 측정에서 같은 프로그램이 Memcheck 13.1×에서 `--track-origins=yes` 20.8×로 느려졌고, 최대 RSS는 약 101 MiB 늘었습니다. 매뉴얼도 "속도 절반, 메모리 최소 100MB 추가"라고 적습니다. 그래서 기본 실행에서 미초기화 경고가 나온 뒤에 켜는 편이 실용적입니다.
+**비용**: [Ch 1](/blog/tools/debugging/valgrind/chapter01-intro)의 측정에서 같은 프로그램이 Memcheck 12.6~13.1×에서 `--track-origins=yes` 20.8~30.6×로 느려졌고(두 번 측정), 최대 RSS는 약 101 MiB 늘었습니다. 매뉴얼도 "속도 절반, 메모리 최소 100MB 추가"라고 적습니다. 그래서 기본 실행에서 미초기화 경고가 나온 뒤에 켜는 편이 실용적입니다.
 
 ### `--errors-for-leak-kinds` — 누수를 *에러로 취급*
 
@@ -257,15 +257,15 @@ gdb ./myapp
 `offby1`로 돌렸을 때 Valgrind 쪽은 연결 방법을 안내하고, 에러를 보고한 뒤 멈춥니다.
 
 ```text
-==3627== TO DEBUG THIS PROCESS USING GDB: start GDB like this
-==3627==   /path/to/gdb ./offby1
-==3627== and then give GDB the following command
-==3627==   target remote | /usr/bin/vgdb --pid=3627
+==1349== TO DEBUG THIS PROCESS USING GDB: start GDB like this
+==1349==   /path/to/gdb ./offby1
+==1349== and then give GDB the following command
+==1349==   target remote | /usr/bin/vgdb --pid=1349
 ...
-==3627== Invalid write of size 1
-==3627==    at 0x108808: main (offby1.c:4)
+==1349== Invalid write of size 1
+==1349==    at 0x108808: main (offby1.c:4)
 ...
-==3627== (action on error) vgdb me ...
+==1349== (action on error) vgdb me ...
 ```
 
 GDB 16.3에서 붙으면 에러를 낸 바로 그 명령에 서 있고, `monitor` 명령으로 Memcheck에 직접 질문할 수 있습니다. 아래는 같은 명령들을 `-batch`로 넘겨 돌린 출력입니다.
@@ -279,9 +279,9 @@ $ gdb -q -batch -ex "target remote | vgdb" -ex "bt" -ex "info locals" -ex "print
 #0  0x0000000000108808 in main () at offby1.c:4
 p = 0x4a7f040 ""
 $1 = 0x4a7f040 ""
-==3627== Searching for pointers to 0x4a7f040
-==3627== *0x1fff0009e8 points at 0x4a7f040
- Address 0x1fff0009e8 is on thread 1's stack
+==1349== Searching for pointers to 0x4a7f040
+==1349== *0x1fff0009f8 points at 0x4a7f040
+ Address 0x1fff0009f8 is on thread 1's stack
  in frame #0, created by main (offby1.c:2)
 ```
 
@@ -302,7 +302,7 @@ valgrind \
   ./myapp
 ```
 
-가장 *풍부한 정보*를 출력합니다. 대신 Ch 1의 측정에서 이 조합의 핵심 비용인 `--track-origins=yes`만으로 Memcheck 대비 1.6배 느려졌습니다.
+가장 *풍부한 정보*를 출력합니다. 대신 Ch 1의 측정에서 이 조합의 핵심 비용인 `--track-origins=yes`만으로 Memcheck 대비 1.6~2.4배 느려졌습니다.
 
 ### CI 통합
 
@@ -535,7 +535,7 @@ Memcheck는 실행되는 모든 명령에 검사 코드를 붙입니다. [4.5절
 
 비유하자면 모든 상자에 "내용물 확인됨" 스티커(V 비트)와 "열어도 됨" 스티커(A 비트)를 붙여 두고, 상자를 옮길 때마다 스티커도 같이 옮겨 붙이는 창고입니다. 상자 하나 옮기는 일에 스티커 작업이 몇 배로 붙습니다.
 
-[Ch 1](/blog/tools/debugging/valgrind/chapter01-intro)의 측정에서 Memcheck는 계측 없는 Nulgrind(3.7×)보다 약 3.5배 더 느린 13.1×였고, `--track-origins=yes`는 20.8×였습니다. 느릴 때는 먼저 재현 입력을 줄이고, 줄인 입력에서도 같은 오류가 나는지 확인합니다.
+[Ch 1](/blog/tools/debugging/valgrind/chapter01-intro)의 측정에서 Memcheck는 계측 없는 Nulgrind(3.7~4.3×)보다 약 3배 더 느린 12.6~13.1×였고, `--track-origins=yes`는 20.8~30.6×였습니다. 느릴 때는 먼저 재현 입력을 줄이고, 줄인 입력에서도 같은 오류가 나는지 확인합니다.
 
 ---
 
@@ -562,13 +562,13 @@ $ valgrind ./stackovf
 hello world guard
 ==3459== ERROR SUMMARY: 0 errors from 0 contexts (suppressed: 0 from 0)
 $ gcc -g -O0 -fsanitize=address stackovf.c -o stackovf_asan && ./stackovf_asan
-==3495==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xffffb340002a ...
-WRITE of size 12 at 0xffffb340002a thread T0
-    #0 0xffffb5815f68 in strcpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563
-    #1 0xaaaabdd00cbc in copy /root/src/stackovf.c:6
+==1340==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xffffb820002a ...
+WRITE of size 12 at 0xffffb820002a thread T0
+    #0 0xffffba6b5f68 in strcpy ../../../../src/libsanitizer/asan/asan_interceptors.cpp:563
+    #1 0xaaaadf230cbc in copy /root/src/stackovf.c:6
 ```
 
-Memcheck는 0 errors, ASan은 `stack-buffer-overflow`입니다. 넘친 바이트가 같은 프레임의 다른 변수 자리에 떨어지면 그 주소는 여전히 "접근 가능"이기 때문입니다. [FAQ 4.6](https://valgrind.org/docs/manual/faq.html#faq.overruns)은 "Memcheck는 전역·스택 배열의 경계를 검사하지 않는다"고 명시합니다. 스택·전역 배열 오버플로는 ASan으로 잡습니다.
+Memcheck는 0 errors, ASan은 `stack-buffer-overflow`입니다. 넘친 바이트가 같은 프레임의 다른 변수 자리에 떨어지면 그 주소는 여전히 "접근 가능"이기 때문입니다. [FAQ](https://valgrind.org/docs/manual/faq.html#faq.overruns)(3.24.0 기준 4.6)는 "Memcheck는 전역·스택 배열의 경계를 검사하지 않는다"고 명시합니다. 스택·전역 배열 오버플로는 ASan으로 잡습니다.
 
 ### 사라진 스택 프레임 가리키기
 
@@ -648,7 +648,7 @@ exit=0
 
 - Memcheck의 보고 종류는 매뉴얼 4.2절의 열 가지이고, 실무에서 가장 자주 보는 것은 invalid read/write, 미초기화 값, syscall 인자, 짝 불일치, 누수입니다.
 - 기본 `--leak-check=summary`는 누수를 *에러로 세지 않습니다*. 누수를 CI에서 잡으려면 `--leak-check=full`이 필요합니다.
-- `--track-origins=yes`의 스택 기원은 변수가 아니라 *함수*를 가리킵니다. 측정한 비용은 Memcheck 대비 1.6배 느림, RSS 약 +101 MiB였습니다.
+- `--track-origins=yes`의 스택 기원은 변수가 아니라 *함수*를 가리킵니다. 측정한 비용은 Memcheck 대비 1.6~2.4배 느림, RSS 약 +101 MiB였습니다.
 - 황금 옵션: `--leak-check=full --show-leak-kinds=all --track-origins=yes`.
 - CI 옵션: `--error-exitcode=1 --errors-for-leak-kinds=definite,indirect`. `--error-exitcode`의 기본값은 0입니다.
 - `--num-callers` 기본 12는 깊은 호출에서 `main`까지 닿지 않을 수 있으니 늘립니다.
@@ -664,7 +664,7 @@ exit=0
 - [Memcheck User Manual](https://valgrind.org/docs/manual/mc-manual.html) — 4.2 에러 메시지, 4.3 옵션, 4.5 V·A 비트
 - [Valgrind Core Options](https://valgrind.org/docs/manual/manual-core.html#manual-core.options) — 2.7절
 - [Memcheck Command-line Options](https://valgrind.org/docs/manual/mc-manual.html#mc-manual.options)
-- [Valgrind FAQ 4.6](https://valgrind.org/docs/manual/faq.html#faq.overruns) — 스택·전역 배열 경계
+- [Valgrind FAQ](https://valgrind.org/docs/manual/faq.html#faq.overruns) — 스택·전역 배열 경계 (3.24.0 기준 4.6)
 
 ## 관련 항목
 
