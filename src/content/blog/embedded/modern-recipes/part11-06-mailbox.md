@@ -17,11 +17,11 @@ topics: ["embedded"]
 
 FPGA 가속기, NPU, 보조 코어처럼 "짧은 명령을 주고 결과를 받는" 상대와 이야기할 때 mailbox를 씁니다. 인자를 레지스터에 적고, doorbell로 "확인하라"고 알리고, 상대가 끝나면 인터럽트로 돌아오는 구조입니다. 우체국 사서함에 편지를 넣고 벨을 누르면, 상대가 편지를 꺼내 읽고 답장을 넣은 뒤 벨을 눌러 주는 것과 같습니다.
 
-Linux에서도 이 패턴은 곳곳에 있습니다. 예를 들어 Linux 6.12의 Zynq UltraScale+ R5 remoteproc 드라이버(`drivers/remoteproc/xlnx_r5_remoteproc.c`)는 `mbox_request_channel_byname()`으로 "tx"·"rx" mailbox 채널을 잡고, virtqueue에 새 메시지가 있다고 상대 코어에 알릴 때(`zynqmp_r5_rproc_kick()`) `mbox_send_message()`를 부릅니다. RPMsg처럼 큰 프레임워크도 상대를 깨우는 마지막 한 걸음은 mailbox doorbell입니다.
+Linux에서도 이 패턴은 곳곳에 있습니다. 예를 들어 Linux 6.12의 Zynq UltraScale+ R5 remoteproc 드라이버(`drivers/remoteproc/xlnx_r5_remoteproc.c`)는 `mbox_request_channel_byname()`으로 "tx"·"rx" mailbox 채널을 잡고, virtqueue에 새 메시지가 있다고 상대 코어에 알릴 때(`zynqmp_r5_rproc_kick()`) `mbox_send_message()`를 부릅니다. 이 드라이버에서 RPMsg가 상대 코어를 깨우는 마지막 한 걸음은 mailbox doorbell입니다.
 
 ### 이 글의 실행 환경
 
-- 실습 장치는 QEMU 교육용 PCI 장치 **edu**입니다. QEMU `docs/specs/edu.rst`에 따르면 0x60(interrupt raise)에 값을 쓰면 그 값이 0x24(interrupt status)에 bitwise OR로 들어가며 인터럽트가 올라가고, 0x64(interrupt acknowledge)에 쓴 비트가 status에서 지워져야 인터럽트가 내려갑니다. host가 doorbell을 치면 device가 즉시 응답 인터럽트를 보내는 "에코 mailbox"로 쓸 수 있습니다.
+- 실습 장치는 QEMU 교육용 PCI 장치 **edu**입니다. QEMU `docs/specs/edu.rst`에 따르면 0x60(interrupt raise)에 값을 쓰면 그 값이 0x24(interrupt status)에 bitwise OR로 들어가며 인터럽트가 올라가고, 0x64(interrupt acknowledge)에 쓴 비트가 status에서 지워지고, status가 0이 되면 INTx가 내려갑니다(`hw/misc/edu.c`). host가 doorbell을 치면 device가 즉시 응답 인터럽트를 보내는 "에코 mailbox"로 쓸 수 있습니다.
 - 환경: QEMU 11.1.3 `-M virt`(HVF 가속, vCPU 4개), Debian 13 arm64, 커널 `6.12.116+deb13-arm64`, gcc 14.2.0. user space 검사 프로그램은 macOS의 Apple clang 21.0.0으로 빌드했습니다.
 - 시간 측정값은 모두 이 VM의 것입니다. 실제 Zynq나 FPGA의 doorbell 지연이 아닙니다.
 
@@ -95,11 +95,11 @@ static void mbox_send(void __iomem *r, u32 op, const u32 *args, int nargs)
 }
 ```
 
-반대로 `__raw_writel()`이나 `writel_relaxed()`처럼 순서 보장이 약한 함수를 쓰거나, 포인터로 직접 쓰면 이 보장이 사라집니다. 그때는 doorbell 앞에 barrier를 직접 넣어야 합니다.
+`writel_relaxed()`는 같은 장치에 대한 MMIO끼리의 순서는 지키지만, 앞선 일반 메모리 쓰기가 끝난 뒤에 나간다는 보장은 없습니다(같은 절의 relaxed 설명). 인자를 공유 메모리(DMA 버퍼)에 두고 doorbell만 `writel_relaxed()`로 친다면 그 앞에 `wmb()`를 넣어야 합니다.
 
 ## 응답 ISR과 W1C ack
 
-device가 응답을 쓰고 인터럽트를 올리면, host의 ISR은 원인을 읽고, **장치 쪽 원인 비트를 지우고**, 기다리는 쪽을 깨웁니다. 원인 비트 지우기를 W1C(Write 1 to Clear)로 하면 "읽은 값을 그대로 다시 쓰면 그 비트만 지워진다"는 장점이 있습니다. ISR이 원인을 읽은 뒤에 새로 생긴 비트는 지워지지 않기 때문입니다. edu의 0x64도 쓴 비트만 status에서 지우므로 같은 방식입니다.
+device가 응답을 쓰고 인터럽트를 올리면, host의 ISR은 원인을 읽고, **장치 쪽 원인 비트를 지우고**, 기다리는 쪽을 깨웁니다. 원인 비트 지우기를 W1C(Write 1 to Clear)로 하면 "읽은 값을 그대로 다시 쓰면 그 비트만 지워진다"는 장점이 있습니다. ISR이 원인을 읽은 뒤에 새로 생긴 비트는 지워지지 않기 때문입니다. edu는 status(0x24, 읽기 전용)와 ack(0x64, 쓰기 전용)의 주소가 다르지만, 0x64에 쓴 비트만 status에서 지우므로 의미는 W1C와 같습니다.
 
 edu로 이 구조를 실제로 만든 커널 모듈의 핵심 부분입니다. `mode` 파라미터로 세 실험을 고릅니다.
 
@@ -143,9 +143,9 @@ edu_mbox 0000:00:03.0: noack: isr ran 200000 times in first 318932 us (ack only 
 
 세 가지를 읽을 수 있습니다.
 
-- **IRQ 왕복은 같은 VM에서도 실행마다 크게 달랐습니다.** 첫 번째 실행은 평균 약 20 µs, 바로 다음 실행은 약 5.6 µs였습니다. 인터럽트 경로에는 스케줄러 깨우기가 끼므로 한 번의 평균으로 결론 내리면 안 되고, 분포를 봐야 합니다.
+- **IRQ 왕복은 같은 VM에서도 실행마다 크게 달랐습니다.** 첫 번째 실행은 평균 약 20 µs, 바로 다음 실행은 약 5.6 µs였습니다. 실행마다 이만큼 달랐으므로 한 번의 평균으로 결론 내리지 않고 여러 번 재서 분포를 봅니다.
 - **같은 VM에서 polling 왕복(약 2.5 µs)이 IRQ 왕복보다 짧았습니다.** 대신 polling은 그동안 CPU를 붙잡습니다. 어느 쪽이 나은지는 응답 지연 요구와 CPU 여유로 정합니다.
-- **ack를 빼먹으면 IRQ storm이 됩니다.** edu의 INTx는 level 인터럽트라 원인이 남아 있는 동안 계속 다시 들어옵니다. ISR이 `IRQ_HANDLED`를 돌려줘도 원인을 지우지 않았으므로, 10 ms를 기다리려던 `mdelay(10)`이 ISR 20만 번에 밀려 약 319 ms 걸렸습니다. 실제 장치에서는 이 상태가 끝나지 않고 CPU 하나가 계속 묶입니다.
+- **ack를 빼먹으면 IRQ storm이 됩니다.** edu의 INTx는 level 인터럽트라 원인이 남아 있는 동안 계속 다시 들어옵니다. ISR이 `IRQ_HANDLED`를 돌려줘도 원인을 지우지 않았으므로, 10 ms를 기다리려던 `mdelay(10)`이 ISR 20만 번에 밀려 약 319 ms 걸렸습니다. 이 실험은 200,000번째 호출에서 ack해 끝냈을 뿐, ack가 없으면 VM이든 실제 장치든 끝나지 않습니다. ISR이 `IRQ_HANDLED`를 돌려주므로 커널의 stuck-IRQ 검출(`kernel/irq/spurious.c`, `IRQ_NONE`만 셈)도 라인을 끄지 않습니다.
 
 ## Linux mailbox framework
 
