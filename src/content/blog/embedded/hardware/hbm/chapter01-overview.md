@@ -53,17 +53,17 @@ HBM은 *반대 방향*입니다. *pin rate는 낮게 두고*, 대신 *bus width*
 
 핵심 지표 하나를 짚고 가야 합니다. *pin 1개당 데이터 전송률*입니다.
 
-| 메모리 | 기준 (발표일) | per-pin | signaling |
-|--------|------|---------|-----------|
-| HBM2 | [JESD235B](https://www.jedec.org/news/pressreleases/jedec-updates-groundbreaking-high-bandwidth-memory-hbm-standard-0) (2018-12-17) | 2.4 Gbps | TBD |
-| HBM2E | [Samsung Flashbolt](https://news.samsung.com/global/samsung-to-advance-high-performance-computing-systems-with-launch-of-industrys-first-3rd-generation-16gb-hbm2e) (2020-02-04) / [SK hynix](https://news.skhynix.com/sk-hynix-starts-mass-production-of-high-speed-dram-hbm2e/) (2020-07-02) | 3.2 / 3.6 Gbps | TBD |
-| HBM3 | [JESD238](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard) (2022-01-27) | 6.4 Gbps | TBD |
-| HBM3E | [SK hynix 12-Hi](https://news.skhynix.com/en/sk-hynix-begins-volume-production-of-the-world-first-12-layer-hbm3e/) (2024-09-26) | 9.6 Gbps | TBD |
-| GDDR6 | [Micron GDDR6 flyer](https://www.micron.com/content/dam/micron/global/public/products/product-flyer/gddr6-product-flyer.pdf) | 최대 16 Gbps | NRZ (JEDEC이 GDDR7을 첫 PAM DRAM으로 부름) |
-| GDDR6X | Ada 백서 (RTX 4090) / Micron 제품 페이지 | 21 / 최대 24 Gbps | PAM4 |
-| GDDR7 | [JESD239](https://www.jedec.org/news/pressreleases/jedec-publishes-gddr7-graphics-memory-standard) (2024-03-05) | 192 GB/s ÷ 32 DQ × 8 = 48 Gbps | PAM3 |
+| 메모리 | 기준 (발표일) | per-pin |
+|--------|------|---------|
+| HBM2 | [JESD235B](https://www.jedec.org/news/pressreleases/jedec-updates-groundbreaking-high-bandwidth-memory-hbm-standard-0) (2018-12-17) | 2.4 Gbps |
+| HBM2E | [Samsung Flashbolt](https://news.samsung.com/global/samsung-to-advance-high-performance-computing-systems-with-launch-of-industrys-first-3rd-generation-16gb-hbm2e) (2020-02-04) / [SK hynix](https://news.skhynix.com/sk-hynix-starts-mass-production-of-high-speed-dram-hbm2e/) (2020-07-02) | 3.2 / 3.6 Gbps |
+| HBM3 | [JESD238](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard) (2022-01-27) | 6.4 Gbps |
+| HBM3E | [SK hynix 12-Hi](https://news.skhynix.com/en/sk-hynix-begins-volume-production-of-the-world-first-12-layer-hbm3e/) (2024-09-26) | 9.6 Gbps |
+| GDDR6 | [Micron GDDR6 flyer](https://www.micron.com/content/dam/micron/global/public/products/product-flyer/gddr6-product-flyer.pdf) | 최대 16 Gbps |
+| GDDR6X | Ada 백서 (RTX 4090) / Micron 제품 페이지 | 21 / 최대 24 Gbps |
+| GDDR7 | [JESD239](https://www.jedec.org/news/pressreleases/jedec-publishes-gddr7-graphics-memory-standard) (2024-03-05) | 192 GB/s ÷ 32 DQ × 8 = 48 Gbps |
 
-HBM2E 행은 JEDEC 발표문을 찾지 못해 두 벤더의 제품 발표값을 적었습니다. GDDR7의 48 Gbps는 JEDEC이 밝힌 *device당 192 GB/s*를 x32 device로 나눈 산술값이며, 발표문 자체는 pin rate를 적지 않습니다. signaling 칸의 TBD는 이 글에서 연 발표문에 신호 방식이 나오지 않은 곳입니다.
+HBM2E 행은 JEDEC 발표문을 찾지 못해 두 벤더의 제품 발표값을 적었습니다. GDDR7의 48 Gbps는 JEDEC이 밝힌 *device당 192 GB/s*를 x32 device로 나눈 산술값이며, 발표문 자체는 pin rate를 적지 않습니다. GDDR 쪽 신호 방식은 앞의 *분기의 본질* 표에 있습니다. HBM 발표문들은 신호 방식을 적지 않아 이 표에는 신호 방식 열을 두지 않았습니다.
 
 GDDR은 NRZ에서 PAM4, 다시 PAM3으로 *signaling 자체를 바꿔* 가며 pin rate를 올렸습니다. HBM은 HBM2(2.4 Gbps)에서 HBM3E(9.6 Gbps)까지 `9.6 ÷ 2.4 = 4배` 늘었습니다. 대신 bus가 1024-bit라 HBM3 stack 하나(819 GB/s)가 GDDR6X chip(84 GB/s)의 `819 ÷ 84 ≈ 9.75`, *약 10개 분량*입니다.
 
