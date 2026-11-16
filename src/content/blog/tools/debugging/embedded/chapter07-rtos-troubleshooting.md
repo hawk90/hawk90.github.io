@@ -290,7 +290,7 @@ void vApplicationStackOverflowHook(TaskHandle_t xTask, char *pcTaskName) {
 
 FreeRTOS `include/stack_macros.h`의 주석이 동작을 정확히 적고 있습니다. 1이면 task를 *전환해 내보낼 때* 현재 스택 포인터가 한계를 넘었는지만 보고, 2 이상이면 스택 맨 끝의 초기화 패턴(0xa5a5a5a5 네 워드)이 덮였는지도 봅니다. 그리고 주석 자체가 "이 두 번째 검사도 오버플로를 항상 잡는다고 보장하지 않는다"고 적습니다.
 
-MODE 1은 128워드(512바이트) 스택의 task가 재귀 함수 `deep()`을 부릅니다. `objdump`로 보면 `deep()`은 `push {lr}`와 `sub sp, #68`로 호출당 72바이트를 씁니다. 깊이를 바꿔 가며 돌린 결과입니다.
+MODE 1은 128워드(512바이트) 스택의 task가 재귀 함수 `deep()`을 부릅니다. `objdump`로 보면 `deep()`은 `push {lr}`와 `sub sp, #68`로 호출당 72바이트를 씁니다. 같은 소스에서 `-DDEPTH=4`~`8`, `20`으로 한 번에 빌드해 돌린 결과입니다. 여섯 빌드 모두 `pxCurrentTCB`(0x20000368)와 `ucHeap`(0x20000390) 주소가 같았습니다.
 
 | 재귀 깊이 | 결과 |
 |-----------|------|
