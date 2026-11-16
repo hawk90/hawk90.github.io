@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-ADC 변환 완료나 무선 패킷 수신을 ISR에서 task로 넘기는 코드, 그리고 DMA channel 4개처럼 개수가 정해진 자원을 여러 task가 나눠 쓰는 코드를 FreeRTOS로 짤 때의 글입니다. 이 글이 답하는 질문은 셋입니다. Binary·counting semaphore·task notification 중 무엇을 고르는가, 각각 어디서 event를 잃는가, ISR 쪽 실수가 어떻게 드러나는가입니다.
+ADC 변환 완료나 무선 패킷 수신을 ISR에서 task로 넘기는 코드, 그리고 DMA channel 4개처럼 개수가 정해진 자원을 여러 task가 나눠 쓰는 코드를 FreeRTOS로 짤 때 읽는 글입니다. 이 글이 답하는 질문은 셋입니다. Binary·counting semaphore·task notification 중 무엇을 고르는가, 각각 어디서 event를 잃는가, ISR 쪽 실수가 어떻게 드러나는가입니다.
 
 Task와 scheduler의 동작은 [6-03: RTOS Scheduler 동작 분석](/blog/embedded/modern-recipes/part6-03-scheduler-internals)을, ISR에서 부를 수 있는 API의 일반 규칙은 [6-09: ISR-Safe API 설계](/blog/embedded/modern-recipes/part6-09-isr-api)를 전제로 합니다. 코드는 STM32F407(CMSIS device header)과 FreeRTOS-Kernel V11.2.0의 GCC `ARM_CM4F` port를 기준으로 하고, API 이름과 동작은 V11.2.0의 [`semphr.h`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/include/semphr.h)와 [`tasks.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c)를 따릅니다. `process_sample()`·`pending_packets()`처럼 정의를 보이지 않은 함수는 애플리케이션 쪽 함수입니다.
 
