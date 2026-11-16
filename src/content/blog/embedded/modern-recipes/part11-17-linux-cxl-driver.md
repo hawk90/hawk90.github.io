@@ -53,7 +53,7 @@ CXL 디바이스는 *DVSEC*(Designated Vendor-Specific Extended Capability)로 �
 
 ## 2층 — 모듈 체인이 다 올라왔는가
 
-CXL 모듈은 기능별 의존성이 있으며, 필요한 모듈과 펌웨어·ACPI 정보를 모두 사용할 수 있어야 probe가 진행됩니다. 모듈을 수동으로 특정 순서에 맞춰 올리는 것보다 kernel의 module dependency와 플랫폼 상태를 확인하는 편이 안전합니다.
+CXL 모듈은 서로 의존하고, 펌웨어·ACPI 정보까지 갖춰져야 probe가 끝까지 갑니다. 모듈을 손으로 순서대로 올리기보다 module dependency와 플랫폼 상태를 먼저 봅니다.
 
 ```bash
 $ lsmod | grep -E '^cxl' | awk '{print $1}'
@@ -65,7 +65,7 @@ cxl_pmem
 
 `cxl_core`와 `cxl_port`가 목록에 없다고 빠진 것은 아닙니다. Debian 6.12 커널은 `CONFIG_CXL_BUS=y`, `CONFIG_CXL_PORT=y`로 둘을 built-in으로 넣어 `lsmod`에 나오지 않습니다. 커널 설정(`/boot/config-*`)으로 확인합니다.
 
-`drivers/cxl/Makefile`이 built-in 순서를 이렇게 적습니다. `core`가 먼저, 다음 `port`(CXL root port를 바로 enable하려고 `acpi`보다 앞), `acpi`, `pmem`·`mem`(endpoint 드라이버보다 앞), 마지막이 `pci`(하드웨어 열거 계층과 같은 순서)입니다. `cxl_core`는 공통 기능을 제공하고 나머지 드라이버가 이를 사용합니다. 정상적인 시스템에서는 CEDT와 필요한 장치가 있으면 `modprobe cxl_acpi` 또는 udev/module autoload로 의존성이 처리됩니다. `cxl_mem not found`가 나오면 모듈 순서뿐 아니라 kernel config, 장치 타입, firmware table도 함께 확인해야 합니다.
+`drivers/cxl/Makefile`이 built-in 순서를 이렇게 적습니다. `core`가 먼저, 다음 `port`(CXL root port를 바로 enable하려고 `acpi`보다 앞), `acpi`, `pmem`·`mem`(endpoint 드라이버보다 앞), 마지막이 `pci`(하드웨어 열거 계층과 같은 순서)입니다. `cxl_core`는 공통 기능을 제공하고 나머지 드라이버가 이를 사용합니다. 정상적인 시스템에서는 CEDT와 필요한 장치가 있으면 `modprobe cxl_acpi` 또는 udev/module autoload로 의존성이 처리됩니다. `cxl_mem not found`가 나오면 모듈 순서보다 kernel config, 장치 타입, firmware table을 먼저 봅니다.
 
 `cxl_acpi`가 안 올라온다면 펌웨어 쪽을 봅니다. CEDT 테이블이 없으면 root port를 등록할 근거가 없습니다.
 
