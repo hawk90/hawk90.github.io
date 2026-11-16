@@ -43,7 +43,7 @@ H-bridge는 4개 스위치 (Q1·Q3 high-side, Q2·Q4 low-side)와 모터로 구�
 | IC | H-bridge | 출력 전류 | motor 전원 | 입력 |
 |----|------|---------|------|-----------|
 | L293D | 2 (half-H 4개) | 600 mA/ch, peak 1.2 A | 4.5 ~ 36 V | 1A·2A, 1,2EN 등 |
-| TB6612FNG | 2 | 1.2 A(ave) / 3.2 A(peak) per ch | VM 2.5 ~ 13.5 V (max 15 V) | IN1, IN2, PWM, STBY |
+| TB6612FNG | 2 | 1.2 A(ave) / 3.2 A(peak) per ch | VM 4.5 ~ 13.5 V (operating range), abs max 15 V | IN1, IN2, PWM, STBY |
 | DRV8833 | 2 | 1.5 A RMS, 2 A peak per bridge (PWP, VM = 5 V, 25 °C) | 2.7 ~ 10.8 V | xIN1, xIN2 |
 | DRV8871 | 1 | 3.6 A peak | 6.5 ~ 45 V | IN1, IN2 (+ ILIM 저항) |
 
@@ -66,15 +66,18 @@ DRV8833 datasheet 7.3.2절은 "when the drive current is interrupted, the induct
 
 ### 1. DRV8833 — sign-magnitude
 
-DRV8833 datasheet의 Table 1(H-Bridge Logic)은 xIN1/xIN2가 0/0이면 coast, 0/1이면 reverse, 1/0이면 forward, 1/1이면 brake입니다. Table 2는 PWM 방식을 "PWM, 0 = Forward PWM, fast decay", "PWM, 1 = Reverse PWM, slow decay" 등으로 정리합니다. 아래 코드는 AIN1에 PWM, AIN2를 GPIO level로 두어 정방향은 fast decay(PWM/0), 역방향은 slow decay(PWM/1)로 구동합니다.
+DRV8833 datasheet의 Table 1(H-Bridge Logic)은 xIN1/xIN2가 0/0이면 coast, 0/1이면 reverse, 1/0이면 forward, 1/1이면 brake입니다. Table 2는 PWM 방식을 정리합니다. xIN1 = PWM, xIN2 = 0이면 "Forward PWM, fast decay", xIN1 = PWM, xIN2 = 1이면 "Reverse PWM, slow decay"입니다. 아래 코드는 AIN1에 PWM, AIN2를 GPIO level로 두어 정방향은 fast decay(PWM/0), 역방향은 slow decay(PWM/1)로 구동합니다.
 
 ```c
-// AIN1 = PA0 (PWM TIM2_CH1, AF1), AIN2 = PA1 (GPIO)
+// AIN1 = PA0 (PWM TIM2_CH1, AF1), AIN2 = PA1 (GPIO), nSLEEP = PA4 (GPIO)
 void motor_init(void) {
     RCC->APB1ENR |= RCC_APB1ENR_TIM2EN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN;
 
     gpio_init(GPIOA, 0, &(gpio_config_t){.mode=GPIO_MODE_AF, .af=1});
     gpio_init(GPIOA, 1, &(gpio_config_t){.mode=GPIO_MODE_OUTPUT});
+    gpio_init(GPIOA, 4, &(gpio_config_t){.mode=GPIO_MODE_OUTPUT});
+    GPIOA->BSRR = (1u << 4);       // nSLEEP = 1 (internal pulldown keeps the chip asleep)
 
     // 20 kHz PWM
     TIM2->PSC = 0;
@@ -250,9 +253,9 @@ void motor_protect_task(void) {
 
 ## 측정 / 동작 확인
 
-스코프로 motor 양단 voltage를 봅니다.
+아래 그림은 측정이 아니라, 50 % duty에서 motor 양단 전압을 이상적으로 그린 것입니다. 평균이 VM × duty가 되는 것은 off 구간에 양단이 0 V인 slow decay의 경우이고, fast decay(위 정방향 코드)의 off 구간에는 전류가 body diode로 흘러 양단 전압이 0 V가 아닙니다(DRV8833 7.3.2절).
 
-![H-bridge 50% duty @ 20 kHz — 평균 6 V](/images/blog/modern-recipes/diagrams/part5-02-hbridge-pwm.svg)
+![이상적 H-bridge 출력, 50% duty @ 20 kHz — 평균 VM/2](/images/blog/modern-recipes/diagrams/part5-02-hbridge-pwm.svg)
 
 current sensing이 있으면 ADC로 transient를 봅니다.
 
@@ -274,12 +277,12 @@ driver IC 없이 MOSFET으로 만들 때는 위 recirculation current의 경로(
 
 > ⚠️ Stalled motor가 무한 current 흘림
 
-motor가 물리적으로 막히면 회전에 따른 역기전력이 없어 전류가 커집니다. DRV8833은 이때 OCP가 동작합니다. datasheet의 trip level은 2 ~ 3.3 A이고, "all FETs in the H-bridge will be disabled and the nFAULT pin will be driven low"였다가 tOCP(1.35 ms) 뒤 다시 켜집니다. 위 `motor_protect_task()`는 그보다 앞서 소프트웨어로 끊는 장치입니다.
+motor가 물리적으로 막히면 회전에 따른 역기전력이 없어 전류가 커집니다. stall 전류가 IOCP를 넘으면 DRV8833의 OCP가 동작합니다. datasheet의 IOCP는 최소 2 A, typ 3.3 A이고, "all FETs in the H-bridge will be disabled and the nFAULT pin will be driven low"였다가 tOCP(1.35 ms) 뒤 다시 켜집니다. 위 `motor_protect_task()`는 OCP와 별개로 소프트웨어에서 끊는 장치입니다.
 
 ## 정리
 
 - DC motor = **H-bridge driver + PWM duty + direction**.
-- **Sign-magnitude**에서 PWM과 짝이 되는 입력 level에 따라 duty의 의미가 뒤집힐 수 있습니다(DRV8833 slow decay).
+- **Sign-magnitude**에서 짝이 되는 입력이 high(slow decay)면 duty의 의미가 뒤집힙니다(DRV8833).
 - DRV8833은 OCP, TB6612FNG는 내부 dead time, L293D는 clamp diode를 datasheet에 적습니다.
 - **Soft-start**로 inrush current 제한, **current sensing**으로 over-current protect.
 - 위 코드는 **PWM 20 kHz**(TIM2, ARR 4199)입니다.

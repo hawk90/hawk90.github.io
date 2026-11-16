@@ -26,12 +26,12 @@
 }
 
 % Voltage scale
-\node[sublbl, anchor=east] at (-0.35, 1.5) {12 V};
+\node[sublbl, anchor=east] at (-0.35, 1.5) {VM};
 \node[sublbl, anchor=east] at (-0.35, 0.5) {0 V};
 
 % Average line at 6V (midway)
 \draw[avg] (0, 1.0) -- (3*\T, 1.0);
-\node[sublbl, text=focusc, anchor=west] at (3*\T + 0.15, 1.0) {평균 $\approx$ 6 V};
+\node[sublbl, text=focusc, anchor=west] at (3*\T + 0.15, 1.0) {평균 $\approx$ VM/2 (이상적)};
 
 % Duty annotation
 \draw[<->, draw=mutec, line width=0.3pt] (0, 1.85) -- (\dC, 1.85);
