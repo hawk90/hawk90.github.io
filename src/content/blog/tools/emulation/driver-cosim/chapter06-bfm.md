@@ -28,7 +28,7 @@ writel(0xDEADBEEF, dev->regs + REG_CTRL);
 2. `WVALID=1`, `WDATA=0xDEADBEEF`, `WSTRB=0xF`를 올리고 `WREADY=1`을 기다림
 3. `BVALID=1`을 기다리고 `BREADY=1`로 응답을 받음
 
-AXI4-Lite의 AW와 W는 별도 채널입니다. 주소와 data handshake는 서로 다른 cycle에 끝날 수 있으므로 BFM은 두 완료 상태를 각각 기억해야 합니다. 응답을 받기 전까지 BFM이 이 상태를 보존하면 driver 호출 한 건으로 캡슐화할 수 있습니다.
+AXI4-Lite의 AW와 W는 별도 채널입니다. AMBA AXI 명세(ARM IHI 0022C) 3.2절은 "the write data can appear at an interface before the write address that relates to it"라고 적고, 3.3절의 Note는 "a master must not wait for AWREADY to be asserted before driving WVALID"라고 못박습니다. 그래서 BFM은 AW와 W를 함께 올리고 두 handshake 완료를 각각 기억해야 합니다. 응답을 받기 전까지 BFM이 이 상태를 보존하면 driver 호출 한 건으로 캡슐화할 수 있습니다.
 
 ```c
 axi_master_bfm_write(0x1000, 0xDEADBEEF);
@@ -177,7 +177,7 @@ extern void bfm_write(unsigned int addr, unsigned int data, int timeout_cycles);
 %Error-UNSUPPORTED: bfm_export.sv:48:5: Unsupported: Timing controls inside DPI-exported tasks
 ```
 
-그래서 Verilator 기반 구성에서는 C가 BFM task를 직접 부르지 않습니다. C driver는 요청을 queue에 넣고 0-time으로 반환하며, SV 쪽 BFM process가 queue를 비우면서 handshake를 수행한 뒤 완료를 C에 알립니다. 시간 제어가 있는 export task를 지원하는 상용 simulator에서 C가 직접 부르는 구성은 이 글에서 실행하지 않았습니다.
+그래서 Verilator 기반 구성에서는 C가 BFM task를 직접 부르지 않습니다. C driver는 요청을 queue에 넣고 0-time으로 반환하며, SV 쪽 BFM process가 queue를 비우면서 handshake를 수행한 뒤 완료를 C에 알립니다. 상용 simulator는 실행하지 않았고, 그쪽에서 이 export가 되는지를 확인한 1차 문서도 없어서 적지 않습니다.
 
 ## Slave BFM — 응답을 누가 하나
 
@@ -229,7 +229,7 @@ slave RAM: strobe, bounds, single-outstanding, WLAST checks passed
 
 Monitor BFM은 DUT를 *바꾸지 않고* 관찰만 합니다. 역할은 두 가지입니다.
 
-- **Protocol assertion** — VALID가 떴는데 READY 없이 주소가 바뀌면 위반입니다.
+- **Protocol assertion** — IHI 0022C 3.1절은 "Once VALID is asserted it must remain asserted until the handshake occurs"라고 적습니다. 아래 property는 이 규칙과 함께, handshake 전에 주소가 바뀌는 것도 위반으로 봅니다.
 - **Transaction logging** — 모든 transaction을 stdout/file로 dump합니다.
 
 ```systemverilog title="axi_monitor.sv"
@@ -349,6 +349,7 @@ SV BFM과 Python BFM이 같은 handshake 규칙으로 서로 맞물렸고, 32-bi
 
 ## 1차 자료와 실행 환경
 
+- [AMBA AXI Protocol Specification, ARM IHI 0022C](https://documentation-service.arm.com/static/64256e84314e245d086bc88f) — 3.1 handshake, 3.2 channel relationship, 3.3 dependency note
 - cocotbext-axi 0.1.28 소스 — `axil_ram.py:45` `AxiLiteRam`, `memory.py:38` `read`
 - PyPI JSON API(2026-11-16) — cocotbext-pcie/-eth/-uart 버전. `verilator-axi-bfm`은 PyPI 404, GitHub 저장소 이름 검색 0건이라 표에서 뺐습니다
 - Verilator 5.054 `src/V3Timing.cpp:954`
