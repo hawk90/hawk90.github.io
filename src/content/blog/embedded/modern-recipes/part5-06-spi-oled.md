@@ -47,7 +47,7 @@ datasheet Table 13-4의 4-wire serial timing(VDD 1.65 ~ 3.3 V)에서 clock cycle
 
 ### GDDRAM layout
 
-datasheet 8.7절: GDDRAM은 "128 x 64 bits and the RAM is divided into eight pages, from PAGE0 to PAGE7"이고, byte 하나를 쓰면 현재 column의 세로 8 row가 채워집니다. "Data bit D0 is written into the top row, while data bit D7 is written into bottom row"입니다(row·column remap이 없을 때).
+datasheet 8.7절에 따르면 GDDRAM은 "128 x 64 bits and the RAM is divided into eight pages, from PAGE0 to PAGE7"이고, byte 하나를 쓰면 현재 column의 세로 8 row가 채워집니다. "Data bit D0 is written into the top row, while data bit D7 is written into bottom row"입니다(row·column remap이 없을 때).
 
 | Page | row |
 |---|---|
@@ -411,11 +411,11 @@ horizontal mode라도 `21h`·`22h` 범위를 다시 잡지 않으면, 이전 전
 
 ## 정리
 
-- GDDRAM은 **8 page × 128 column × 1 byte = 1024 byte**, D0가 위쪽 row.
-- SCLK는 **tcycle 100 ns → 10 MHz 이하**. 84 MHz PCLK2에서 /16(5.25 MHz), 1024 byte에 1560 µs.
-- charge pump 모듈은 **RES# low 3 µs 이상 → `8Dh 14h` → `AFh`**, 100 ms 뒤 표시.
-- horizontal mode + `21h`·`22h` 범위로 **framebuffer를 한 번에 전송**.
-- DMA flush는 **TXDMAEN 해제 → BSY 대기 → OVR 정리 → CS# high** 순서.
+- GDDRAM은 **8 page × 128 column × 1 byte = 1024 byte**이고, D0가 위쪽 row입니다.
+- SCLK는 **tcycle 100 ns 때문에 10 MHz 이하**입니다. 84 MHz PCLK2에서 /16(5.25 MHz)을 쓰면 1024 byte에 1560 µs가 걸립니다.
+- charge pump 모듈은 **RES# low 3 µs 이상 → `8Dh 14h` → `AFh`** 순서로 켜고, 100 ms 뒤 화면이 나옵니다.
+- horizontal mode + `21h`·`22h` 범위로 **framebuffer를 한 번에 전송**합니다.
+- DMA flush는 **TXDMAEN 해제 → BSY 대기 → OVR 정리 → CS# high** 순서로 끝냅니다.
 
 다음 편은 **TFT display**입니다. parallel RGB, LTDC, framebuffer, double buffering을 다룹니다.
 
