@@ -125,7 +125,7 @@ void tick(void)
 
 두 번째 확장(Scheme 7)은 시계처럼 단위가 다른 배열 여러 개를 둡니다. 논문의 예는 일(100칸)·시(24칸)·분(60칸)·초(60칸) 배열 244칸으로 100일까지의 타이머를 표현합니다. 먼 타이머는 높은 단위 배열에 들어갔다가, 그 칸에 도달하면 나머지 시간만큼 낮은 배열로 옮겨집니다. 이 이동을 Linux는 cascade라고 부릅니다.
 
-Linux v4.7의 `timer_list`가 이 구조입니다(`CONFIG_BASE_SMALL`이 아닐 때, [`timer.c` v4.7 L64-L94](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L64-L94)). 첫 배열 tv1은 `TVR_BITS = 8`로 256칸, 나머지 tv2~tv5는 `TVN_BITS = 6`으로 64칸입니다. 단위와 범위는 이 비트 수에서 나오며, 아래 ms 값은 HZ = 1000(1 jiffy = 1 ms)일 때의 환산입니다.
+Linux v4.7의 `timer_list`가 이 구조입니다(`CONFIG_BASE_SMALL`이 아닐 때, [`timer.c` v4.7 L64-L95](https://github.com/torvalds/linux/blob/v4.7/kernel/time/timer.c#L64-L95)). 첫 배열 tv1은 `TVR_BITS = 8`로 256칸, 나머지 tv2~tv5는 `TVN_BITS = 6`으로 64칸입니다. 단위와 범위는 이 비트 수에서 나오며, 아래 ms 값은 HZ = 1000(1 jiffy = 1 ms)일 때의 환산입니다.
 
 | 배열 | 칸 수 | 한 칸의 단위 | 들어가는 남은 시간 (jiffy, 32비트 counter) | HZ = 1000 환산 |
 | --- | ---: | --- | --- | --- |
@@ -356,7 +356,7 @@ Cascade가 없으므로 tick에는 level마다 현재 bucket 하나만 꺼냅니
 
 Tickless idle로 다음 만료까지 tick을 멈추려면, 타이머 모듈이 가장 이른 만료 시각을 바로 답해야 합니다. 정렬 리스트는 맨 앞 원소가 답입니다. FreeRTOS V11.1.0 timer daemon은 현재 리스트 맨 앞의 만료 값을 읽고([`prvGetNextExpireTime`, `timers.c` L844-L868](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.1.0/timers.c#L844-L868)) 그 시각까지 command queue에서 block합니다([L820](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.1.0/timers.c#L820)). `configUSE_TICKLESS_IDLE`을 켜면 커널은 block된 task 중 가장 빨리 깨어날 시각에서 잠들 수 있는 tick 수를 구합니다([`prvGetExpectedIdleTime`, `tasks.c` L3894-L3951](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.1.0/tasks.c#L3894-L3951)).
 
-Wheel에는 그런 원소가 없습니다. 이 글의 hierarchical 코드로 답하려면 tv1부터 비어 있지 않은 slot을 찾아야 하고, 상위 배열의 칸은 한 칸이 여러 tick을 덮으므로 그 칸 리스트의 `expires`까지 훑어야 합니다. Linux v6.6은 bucket마다 비트 하나인 `pending_map`을 두고, 더 이른 bucket에 타이머가 들어오면 캐시한 `next_expiry`를 바로 고칩니다([`enqueue_timer`, L596-L625](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L596-L625)). bucket의 마지막 타이머가 빠질 때만 다시 계산하라고 표시하고([L885-L896](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L885-L896)), 그 계산은 level마다 `find_next_bit`로 비트맵을 찾습니다([`__next_timer_interrupt`, L1789-L1877](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L1789-L1877)). Cascade 없는 wheel은 bucket의 만료 시각(`bucket_expiry`)이 곧 답이라 bucket 안을 훑지 않습니다. 이 글의 코드에 비트맵을 더하면 slot 512개에 512비트(64 B)가 들고, 상위 배열은 칸 안을 훑는 대신 그 칸이 cascade되는 tick을 깨어날 시각으로 쓸 수 있습니다(이 글의 유도). 칸 안의 타이머는 모두 그 tick 이후에 만료되므로 일찍 깰 수는 있어도 늦게 깨지는 않습니다.
+Wheel에는 그런 원소가 없습니다. 이 글의 hierarchical 코드로 답하려면 tv1부터 비어 있지 않은 slot을 찾아야 하고, 상위 배열의 칸은 한 칸이 여러 tick을 덮으므로 그 칸 리스트의 `expires`까지 훑어야 합니다. Linux v6.6은 bucket마다 비트 하나인 `pending_map`을 두고, 더 이른 bucket에 타이머가 들어오면 캐시한 `next_expiry`를 바로 고칩니다([`enqueue_timer`, L596-L626](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L596-L626)). bucket의 마지막 타이머가 빠질 때만 다시 계산하라고 표시하고([L885-L896](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L885-L896)), 그 계산은 level마다 `find_next_bit`로 비트맵을 찾습니다([`next_pending_bucket`·`__next_timer_interrupt`, L1789-L1877](https://github.com/torvalds/linux/blob/v6.6/kernel/time/timer.c#L1789-L1877)). Cascade 없는 wheel은 bucket의 만료 시각(`bucket_expiry`)이 곧 답이라 bucket 안을 훑지 않습니다. 이 글의 코드에 비트맵을 더하면 slot 512개에 512비트(64 B)가 들고, 상위 배열은 칸 안을 훑는 대신 그 칸이 cascade되는 tick을 깨어날 시각으로 쓸 수 있습니다(이 글의 유도). 칸 안의 타이머는 모두 그 tick 이후에 만료되므로 일찍 깰 수는 있어도 늦게 깨지는 않습니다.
 
 ## 자주 하는 실수
 
