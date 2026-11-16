@@ -13,13 +13,13 @@
 ]
 
 \node[src] (clk) at (0, 1) {Clock Out};
-\node[dst] (a) at (6, 2) {Chip A\\\tiny 1.5 ns 지연};
-\node[dst] (b) at (6, 0) {Chip B\\\tiny 0.75 ns 지연};
+\node[dst] (a) at (6, 2) {Chip A\\[2pt]\tiny 0.67 ns 지연};
+\node[dst] (b) at (6, 0) {Chip B\\[2pt]\tiny 0.33 ns 지연};
 
 \draw[arr] (clk.east) -- node[font=\scriptsize, above, sloped] {10 cm} (a.west);
 \draw[arr] (clk.east) -- node[font=\scriptsize, below, sloped] {5 cm} (b.west);
 
-\node[font=\scriptsize, text=warnbord, anchor=west] at (8, 1) {skew = 0.75 ns};
+\node[font=\scriptsize, text=warnbord, anchor=west] at (8, 1) {skew = 0.33 ns ($\varepsilon_\mathrm{eff}=4$ 가정)};
 
 \end{tikzpicture}
 \end{document}
