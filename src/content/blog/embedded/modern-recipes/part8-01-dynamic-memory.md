@@ -325,7 +325,7 @@ tlsf  : 400 small holes in front -> malloc(200) ok, 240 insn
 | --- | ---: | --- |
 | slab(free list) | 5 | — |
 | arena(할당만) | 8 | — |
-| pool(16칸 선형 탐색 + critical section) | 59 | — |
+| pool(첫 칸에서 찾음 + critical section 진입·해제) | 59 | — |
 | heap_4 | 238 | 120 → 720 → 1,360 → 2,560 → 4,920 |
 | TLSF | 388 | 240 → 240 → 240 → 280 → 240 |
 
