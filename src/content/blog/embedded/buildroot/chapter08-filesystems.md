@@ -102,15 +102,16 @@ BR2_TARGET_ROOTFS_INITRAMFS=y
 
 `BR2_TARGET_ROOTFS_CPIO`만 켜고 initramfs는 끄면 `rootfs.cpio`(+압축본)가 *독립 파일*로 나옵니다. 부트로더가 커널과 함께 RAM에 올려 initrd로 넘기는 용도입니다. 위 실험에서 `_CPIO_GZIP`을 켜면 `rootfs.cpio`와 `rootfs.cpio.gz`가 둘 다 생겼습니다.
 
-U-Boot에서 넘길 때는 압축하지 않은 raw initrd라면 `booti`에 `주소:크기` 형식으로 줍니다. U-Boot 문서의 `booti` 설명이 이 형식을 정의합니다.
+U-Boot의 `booti`로 넘길 때는 `주소:크기` 형식을 씁니다. U-Boot 2026.01 `doc/usage/cmd/booti.rst`는 크기를 "This parameter must be specified for raw initial RAM disks"라고 적습니다. 여기서 raw는 `mkimage`의 U-Boot 헤더로 감싸지 않은 파일이라는 뜻이고, gzip으로 압축한 cpio는 커널이 직접 풉니다(커널 `Documentation/filesystems/ramfs-rootfs-initramfs.rst`의 "gzipped cpio"). 같은 문서의 예를 이 장의 파일 이름으로 옮기면 다음과 같습니다.
 
 ```text
-=> tftp ${kernel_addr_r} Image
-=> tftp ${ramdisk_addr_r} rootfs.cpio.gz
+=> load mmc 0:1 ${fdt_addr_r} board.dtb
+=> load mmc 0:1 ${kernel_addr_r} Image
+=> load mmc 0:1 ${ramdisk_addr_r} rootfs.cpio.gz
 => booti ${kernel_addr_r} ${ramdisk_addr_r}:${filesize} ${fdt_addr_r}
 ```
 
-`${filesize}`는 직전 `tftp`가 설정한 값이므로 ramdisk를 마지막에 받아야 합니다. 이 명령열은 이 장에서 실제 보드로 실행하지 않았습니다. 쓰려는 보드의 U-Boot 환경 변수 이름(`kernel_addr_r` 등)을 확인한 뒤 씁니다.
+`doc/usage/cmd/load.rst`가 적는 대로 `load`는 읽은 바이트 수를 `filesize`에 저장하므로 ramdisk를 마지막에 읽습니다. 이 명령열은 이 장에서 보드로 실행하지 않았습니다. 주소 변수 이름(`kernel_addr_r`·`fdt_addr_r`·`ramdisk_addr_r`)은 `doc/usage/environment.rst`의 표에 있는 이름이고, 실제 값은 보드 설정마다 다릅니다.
 
 ## squashfs — 읽기 전용 압축
 
@@ -128,7 +129,7 @@ BR2_TARGET_ROOTFS_SQUASHFS4_ZSTD=y
 squashfs 이미지를 만들었다고 바로 부팅되지는 않습니다. 커널에 squashfs 지원이 있어야 합니다. QEMU defconfig의 커널 설정(`board/qemu/aarch64-virt/linux.config`)에는 `CONFIG_EXT4_FS=y`와 `CONFIG_OVERLAY_FS=y`는 있지만 `CONFIG_SQUASHFS`가 없습니다. 이 커널로 `root=/dev/vda rootfstype=squashfs ro`를 주고 부팅하면 다음에서 멈췄습니다.
 
 ```text
-virtio_blk virtio0: [vda] 3680 512-byte logical blocks (1.88 MB/1.80 MiB)
+virtio_blk virtio0: [vda] 4304 512-byte logical blocks (2.20 MB/2.10 MiB)
 ...
 VFS: Cannot open root device "/dev/vda" or unknown-block(254,0): error -19
 ...
