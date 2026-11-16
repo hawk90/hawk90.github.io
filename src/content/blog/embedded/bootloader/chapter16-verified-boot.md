@@ -10,222 +10,194 @@ draft: false
 topics: ["embedded"]
 ---
 
-부트 체인은 매 단계에서 다음에 실행할 이미지를 검증하도록 구성할 수 있습니다. ROM/SPL의 형식과 검증 주체는 SoC와 보드에 따라 다르며, U-Boot의 FIT 검증도 필요한 옵션과 trusted-key 정책이 활성화되어야 합니다. 검증 실패 시 recovery/halt 동작 역시 제품 구현이 정합니다.
-
 ## 한 줄 요약
 
-**U-Boot FIT 검증은 trusted public key와 required-signature 정책을 사용해 선택된 이미지 구성을 검사합니다.** 이것은 앞 단계에서 U-Boot 자체를 검증하는 일과는 별도의 chain-of-trust 구성입니다.
+> FIT 서명은 **U-Boot의 control DTB에 들어 있는 공개키 중 `required`로 표시된 것만** 검사합니다. `required`가 없으면 서명이 없거나 남의 키로 서명된 FIT도 아무 경고 없이 부팅됩니다. 그리고 서명은 이미지 데이터가 아니라 이미지의 hash 값을 덮으므로, 데이터 위조는 서명이 아니라 그다음 hash 검사에서 잡힙니다.
 
-## 신뢰 체인이 닫히는 지점
+[15장](/blog/embedded/bootloader/chapter15-fit-image)에서 hash만으로는 "누가 만든 이미지인가"를 보증할 수 없다는 것을 봤습니다. 이 글은 같은 QEMU 환경에서 키를 만들고, FIT에 서명하고, 공개키를 U-Boot에 넣은 뒤, 정상·무서명·변조·다른 키 네 가지 FIT을 실제로 부팅시켜 결과를 비교합니다. U-Boot는 **v2024.04** `qemu_arm64_defconfig`(이미 `CONFIG_FIT_SIGNATURE=y`, `CONFIG_RSA=y`), QEMU 11.1.3 `virt`, kernel은 Debian 13.7 arm64입니다.
 
-신뢰 체인은 제품이 보호하는 초기 신뢰점에서 출발합니다. ROM, SPL, U-Boot 및 OS 이미지의 각 단계는 SoC의 secure-boot 구현과 board configuration에 따라 달라집니다. 이 장에서는 U-Boot FIT 검증만 다룹니다.
+이 검증은 신뢰 사슬의 한 고리일 뿐입니다. U-Boot 자체와 그 안의 공개키를 앞 단계(ROM·SPL)가 검증하지 않으면, 공격자는 U-Boot를 통째로 바꿔 이 검사를 건너뜁니다. 그 앞쪽은 [23장](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp)과 [27장](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 다룹니다.
 
-```text
-[제품별 초기 신뢰점] -> [선택적으로 검증된 firmware 단계들]
-                              -> [U-Boot FIT required-key 검증]
-                              -> [제품별 boot 또는 recovery 정책]
-```
+## 키 만들기
 
-ROM 단계는 SoC별로 다릅니다. U-Boot의 FIT signature 지원은 문서화되어 있지만, 실제 부팅 경로와 검증 강제 여부는 선택한 build, control FDT, boot command 및 제품 정책에 달려 있습니다.
-
-## RSA 키 쌍 만들기
-
-가장 먼저 할 일은 빌드 서버에 보관할 private key를 만드는 것입니다. 양산 시스템에서는 HSM에 넣지만, 개발 단계에서는 파일 한 쌍으로도 충분합니다.
+서명용 개인키와 인증서를 만듭니다. 비교 실험을 위해 같은 이름(`dev`)의 다른 키도 하나 더 만들었습니다.
 
 ```bash
-# 2048비트 RSA 키 생성
 mkdir -p keys
-openssl genpkey -algorithm RSA -out keys/dev.key \
-    -pkeyopt rsa_keygen_bits:2048
-openssl req -batch -new -x509 -key keys/dev.key \
-    -out keys/dev.crt
+openssl genpkey -algorithm RSA -out keys/dev.key -pkeyopt rsa_keygen_bits:2048
+openssl req -batch -new -x509 -key keys/dev.key -out keys/dev.crt -subj /CN=dev
 ```
 
-`dev.key`가 *FIT 서명*에, `dev.crt`가 *public key 추출*에 쓰입니다. 양산에서는 키 이름에 키 ID와 사용 환경을 넣어 두는 편이 안전합니다. `prod-2026.key` 같은 식으로 두면 키 회전 시점에 혼동이 줄어듭니다.
+`mkimage`는 `-k` 디렉터리에서 `<key-name-hint>.key`·`.crt`를 찾으므로 파일 이름이 ITS의 `key-name-hint`와 맞아야 합니다.
 
-## FIT 이미지 구조와 signature 노드
+## 서명할 ITS
 
-FIT은 ITS(Image Tree Source) 파일로 기술하고 `mkimage`로 컴파일합니다. signature 노드는 *어떤 키로* *어떤 해시 알고리즘*으로 서명할지를 적습니다.
+15장의 ITS에서 configuration에 `signature-1`을 더한 것입니다.
+
+```dts
+	configurations {
+		default = "conf-1";
+		conf-1 {
+			kernel = "kernel-1"; fdt = "fdt-1"; ramdisk = "ramdisk-1";
+			signature-1 {
+				algo = "sha256,rsa2048";
+				key-name-hint = "dev";
+				sign-images = "kernel", "fdt", "ramdisk";
+			};
+		};
+	};
+```
+
+서명을 image 노드가 아니라 configuration에 두는 이유는 조합을 묶기 위해서입니다. image마다 따로 서명하면, 각각은 정상 서명이지만 서로 다른 버전에서 가져온 kernel과 DTB를 섞는 공격(mix-and-match)을 막을 수 없습니다.
+
+## 공개키는 "U-Boot가 실제로 읽는 DTB"에 넣는다
+
+```bash
+mkimage -f signed.its -k keys -K <control.dtb> -r signed.itb
+```
 
 ```text
-/dts-v1/;
+Signature written to 'signed.itb', node '/configurations/conf-1/signature-1'
+Public key written to 'qemu-key.dtb', node '/signature/key-dev'
+```
 
-/ {
-    description = "Signed FIT for boardX";
-    #address-cells = <1>;
+여기서 처음 걸린 것이 `-K`에 줄 파일입니다. 보통은 `u-boot.dtb`를 주지만, QEMU 빌드는 `CONFIG_OF_BOARD=y`라 U-Boot가 자기 DTB가 아니라 **QEMU가 RAM 시작에 넣어 주는 DTB를 control DTB로 씁니다**(`board/emulation/qemu-arm/qemu-arm.c`의 `board_fdt_blob_setup()`). `u-boot.dtb`에 키를 넣어 봐야 읽히지 않습니다. v2024.04 `doc/develop/devicetree/dt_qemu.rst`대로 `-machine virt,dumpdtb=qemu.dtb`로 QEMU의 DTB를 뽑아 그 파일에 키를 넣고, QEMU를 `-dtb qemu-key.dtb`로 실행했습니다. 실제 보드라면 `CONFIG_OF_SEPARATE`일 때 키를 넣은 DTB로 다시 묶어야 하며, v2024.04 `Makefile`의 `EXT_DTB` 변수(`make EXT_DTB=<dtb>`, `doc/usage/fit/beaglebone_vboot.rst`의 예)가 그 방법입니다.
 
-    images {
-        kernel-1 {
-            description = "Linux 6.6";
-            data = /incbin/("./Image");
-            type = "kernel";
-            arch = "arm64";
-            os = "linux";
-            compression = "none";
-            load = <0x40080000>;
-            entry = <0x40080000>;
-            hash-1 { algo = "sha256"; };
-        };
+U-Boot에서 키가 들어갔는지 확인합니다.
 
-        fdt-1 {
-            description = "board DT";
-            data = /incbin/("./board.dtb");
-            type = "flat_dt";
-            arch = "arm64";
-            compression = "none";
-            hash-1 { algo = "sha256"; };
-        };
-
-        ramdisk-1 {
-            description = "initramfs";
-            data = /incbin/("./initramfs.cpio.gz");
-            type = "ramdisk";
-            arch = "arm64";
-            os = "linux";
-            compression = "gzip";
-            hash-1 { algo = "sha256"; };
-        };
-    };
-
-    configurations {
-        default = "conf-1";
-        conf-1 {
-            description = "boardX boot";
-            kernel = "kernel-1";
-            fdt = "fdt-1";
-            ramdisk = "ramdisk-1";
-            signature-1 {
-                algo = "sha256,rsa2048";
-                key-name-hint = "dev";
-                sign-images = "kernel", "fdt", "ramdisk";
-            };
-        };
-    };
+```text
+=> fdt addr ${fdtcontroladdr}
+=> fdt list /signature/key-dev
+key-dev {
+	required = "conf";
+	algo = "sha256,rsa2048";
+	rsa,r-squared = <...>;
+	rsa,modulus = <...>;
+	rsa,exponent = <0x00000000 0x00010001>;
+	rsa,n0-inverse = <0x88751b0d>;
+	rsa,num-bits = <0x00000800>;
+	key-name-hint = "dev";
 };
 ```
 
-`signature`가 configuration에 있는 경우 선택된 configuration 및 서명 범위의 image 참조를 함께 인증할 수 있습니다. 서명 범위는 `sign-images`와 required-key 정책을 포함한 ITS/control FDT 설정으로 결정되므로 산출물에서 확인해야 합니다.
+`required = "conf"`가 `-r` 옵션의 결과이고, 공개키는 PEM이 아니라 U-Boot가 바로 계산에 쓰는 형태(modulus, exponent `0x10001`, 2048 bit)로 들어갑니다.
 
-## mkimage로 서명 굽기
+## 네 가지 FIT으로 시험
 
-`mkimage -k`는 private key로 FIT을 서명하고, `-K u-boot.dtb`는 *동시에 U-Boot의 control DT에 public key를 박습니다*.
+같은 키 DTB로 부팅한 뒤 네 FIT을 차례로 `bootm`했습니다.
 
-```bash
-mkimage -f boot.its \
-        -k keys \
-        -K u-boot.dtb \
-        -r \
-        boot.itb
-```
-
-옵션 의미는 이렇습니다.
-
-- `-k keys` — `keys/dev.key`·`keys/dev.crt`를 찾을 디렉터리
-- `-K u-boot.dtb` — public key를 박을 control DT 파일
-- `-r` — FIT signature 문서의 required-key 방식 설정. `-K`에 반영된 control FDT 결과를 확인해야 함
-
-`-K`가 갱신하는 control DT를 U-Boot 빌드 산출물에 포함하는 방법은 `OF_CONTROL` 및 board build 구성에 맞춰야 합니다. 일반적인 바이너리 결합 절차를 임의로 실행하지 말고 선택한 tag의 build instructions를 따릅니다.
-
-## U-Boot 측 설정
-
-defconfig에 검증 기능을 켜야 합니다.
+**① 서명 없는 FIT** (`signature-1`을 뺀 ITS로 만듦)
 
 ```text
-CONFIG_FIT=y
-CONFIG_FIT_SIGNATURE=y
-CONFIG_RSA=y
-CONFIG_OF_CONTROL=y
-CONFIG_OF_SEPARATE=y
-CONFIG_SHA256=y
+## Loading kernel from FIT Image at 50000000 ...
+   Using 'conf-1' configuration
+   Verifying Hash Integrity ...  error!
+No 'signature' subnode found for '<NULL>' hash node in 'conf-1' config node
+Failed to verify required signature 'key-dev'
+Bad Data Hash
+ERROR -2: can't get kernel image!
 ```
 
-`CONFIG_FIT_SIGNATURE`는 서명 기능을 활성화하지만, 그 자체로 모든 unsigned FIT를 거부하지는 않습니다. required key 정책 및 legacy-image 설정을 함께 확인합니다. 아래 로그는 형식 예시이며 실행 캡처가 아닙니다.
+**② 다른 키로 서명한 FIT** (이름은 같은 `dev`, 키는 다름)
 
 ```text
-## Loading kernel from FIT Image at 40000000 ...
+   Using 'conf-1' configuration
+   Verifying Hash Integrity ... sha256,rsa2048:dev-  error!
+Verification failed for '<NULL>' hash node in 'conf-1' config node
+Failed to verify required signature 'key-dev'
+```
+
+키 이름 힌트가 같아도 RSA 검증에서 `dev-`로 실패합니다. 이름은 키를 찾는 데만 쓰입니다.
+
+**③ 정상 서명 FIT의 kernel 데이터 1 byte를 바꾼 것**
+
+```text
    Using 'conf-1' configuration
    Verifying Hash Integrity ... sha256,rsa2048:dev+ OK
    Trying 'kernel-1' kernel subimage
-     Verifying Hash Integrity ... sha256+ OK
+   Verifying Hash Integrity ... sha256 error!
+Bad hash value for 'hash-1' hash node in 'kernel-1' image node
+Bad Data Hash
 ```
 
-`+ OK`가 핵심입니다. `- Bad`가 나오면 부팅이 중단됩니다.
-
-## 부팅 명령 흐름
-
-FIT는 `bootm` 경로로 읽고 검증합니다. `booti`와 `bootefi`는 다른 이미지/실행 경로이므로 FIT 서명 경로와 혼동하지 않습니다.
+**서명은 통과했습니다.** 그리고 바로 다음의 kernel hash에서 막혔습니다. 이것이 FIT 서명의 구조입니다. 서명된 노드 목록(`hashed-nodes`)을 FIT에서 꺼내 보면 다음과 같습니다.
 
 ```text
-=> tftp 0x40000000 boot.itb
-=> bootm 0x40000000
-## Loading kernel from FIT Image at 40000000 ...
+$ fdtget signed.itb /configurations/conf-1/signature-1 hashed-nodes
+/ /configurations/conf-1 /images/kernel-1 /images/kernel-1/hash-1
+/images/fdt-1 /images/fdt-1/hash-1 /images/ramdisk-1 /images/ramdisk-1/hash-1
+```
+
+`doc/usage/fit/signature.rst`는 이 노드들의 속성을 서명에 넣되 **이름이 `data`인 속성은 빼다고** 적고 있습니다. 즉 서명은 "kernel hash 값이 `9c37…`이다"를 보증하고, kernel 데이터가 그 hash와 맞는지는 이미지 hash 검사가 봅니다. 37 MB kernel 전체를 RSA로 서명하지 않아도 되는 이유이고, 동시에 이미지마다 `hash-1` 노드를 빼면 안 되는 이유입니다.
+
+**④ 정상 서명 FIT**
+
+```text
+=> bootm 0x50000000
+## Loading kernel from FIT Image at 50000000 ...
+   Using 'conf-1' configuration
    Verifying Hash Integrity ... sha256,rsa2048:dev+ OK
-   Loading kernel from 0x40000100 to 0x40080000
+   Trying 'kernel-1' kernel subimage
+   Verifying Hash Integrity ... sha256+ OK
+## Loading ramdisk from FIT Image at 50000000 ...
+   Using 'conf-1' configuration
+   Verifying Hash Integrity ... sha256,rsa2048:dev+ OK
    ...
+## Loading fdt from FIT Image at 50000000 ...
+   Using 'conf-1' configuration
+   Verifying Hash Integrity ... sha256,rsa2048:dev+ OK
+   ...
+Starting kernel ...
+
+[    0.000000] Linux version 6.12.107+deb13-arm64 ...
 ```
 
-required-signature 정책이 선택된 configuration과 실행 경로에 적용될 때 검증 실패가 부팅을 막는지 확인해야 합니다. 성공/부정 사례는 target 또는 sandbox에서 구성별로 시험해야 합니다; `CONFIG_FIT_SIGNATURE`만 켜도 unsigned FIT rejection이 보장되는 것은 아닙니다.
+configuration 서명(`sha256,rsa2048:dev+`)은 kernel·ramdisk·fdt를 꺼낼 때마다 한 번씩, 이미지 hash(`sha256+`)는 각 이미지에서 한 번씩 확인합니다.
 
-## anti-rollback은 별도 제품 기능
+## `-r`을 빼면 아무것도 막지 않는다
 
-FIT signature 검증만으로 이전에 서명된 버전의 재사용을 막지는 않습니다. U-Boot의 일반 FIT format check가 제품의 OTP/RPMB counter와 버전을 자동 비교한다고 가정하면 안 됩니다. Anti-rollback에는 target-specific monotonic storage, signed version metadata, comparison policy, 그리고 update-success 이후의 irreversible counter commit 절차가 필요합니다. 이 보드별 구현은 여기서 검증하지 않았습니다.
-
-## dm-verity와의 다리
-
-FIT은 *부팅 시점*만 보호합니다. 부팅 후 rootfs가 바뀌면 모릅니다. 이 빈틈은 dm-verity가 막습니다. dm-verity는 rootfs 블록마다 Merkle tree hash를 계산해 두고, 커널이 블록을 읽을 때마다 hash를 검증합니다.
-
-연결 지점은 *커널 cmdline*입니다.
+같은 공개키를 `-r` 없이 넣은 DTB(`required` 속성 없음)로 바꿔 ①과 ②를 다시 실행했습니다.
 
 ```text
-root=/dev/dm-0 rootflags=ro \
-    dm-mod.create="root,,,ro,0 1234567 verity 1 \
-        /dev/mmcblk0p2 /dev/mmcblk0p3 4096 4096 \
-        152340 1 sha256 <root-hash> <salt>"
+=> fdt get value r /signature/key-dev required
+libfdt fdt_getprop(): FDT_ERR_NOTFOUND
+=> load virtio 0:1 0x50000000 /boot/unsigned.itb
+=> bootm start 0x50000000
+## Loading kernel from FIT Image at 50000000 ...
+   Using 'conf-1' configuration
+   Verifying Hash Integrity ... OK
+   Trying 'kernel-1' kernel subimage
+   Verifying Hash Integrity ... sha256+ OK
+...
+=> load virtio 0:1 0x50000000 /boot/evil.itb
+=> bootm start 0x50000000
+   Using 'conf-1' configuration
+   Verifying Hash Integrity ... OK
 ```
 
-이 연결은 root hash와 관련 boot arguments가 검증된 image/configuration에서 왔다는 것을 보드가 보장할 때만 성립합니다. U-Boot environment의 별도 `bootargs`는 FIT 서명에 자동으로 포함되지 않으며, dm-verity 설정과 kernel policy도 제품에서 확인해야 합니다.
+서명 없는 FIT도, 남의 키로 서명한 FIT도 통과했습니다. 서명 검사 줄(`sha256,rsa2048:dev`)조차 나오지 않습니다. 공개키가 아예 없는 원래 QEMU DTB에서도 결과는 같았습니다. `boot/image-fit-sig.c`의 `fit_config_verify_required_keys()`는 `/signature` 아래 키를 돌면서 `required`가 `"conf"`가 아닌 키는 `continue`로 건너뜁니다. **`CONFIG_FIT_SIGNATURE=y`와 공개키만으로는 검증이 강제되지 않고, `required`가 있어야 합니다.**
 
-## FIT image examples and verification boundary
+`required` 키가 여러 개면 기본은 모두 통과해야 하고(`all`), `/signature`에 `required-mode = "any"`를 두면 하나만 통과해도 됩니다(`signature.rst`, `fdtput -t s control.dtb /signature required-mode any`). 키를 교체하는 기간에 옛 키와 새 키를 함께 받는 용도입니다.
 
-FIT/ITS 문법, `mkimage`, configuration 선택과 overlay 예시는 [15장](/blog/embedded/bootloader/chapter15-fit-image)에서 다룹니다. 여기서는 반복된 FIT 구조 walkthrough와 합성 로그를 제거하고 보안 경계만 유지합니다.
+## 서명이 막지 못하는 것
 
-U-Boot 공식 문서는 FIT가 FDT container이며, 선택된 configuration과 trusted control-FDT public keys를 사용해 검증할 수 있다고 설명합니다. `required = "conf"`는 selected configuration을, `required = "image"`는 image verification을 요구합니다. 지원 알고리즘과 구체적인 signing scope는 해당 U-Boot tag의 FIT signature documentation으로 확인합니다.
+- **옛 버전으로 되돌리기(rollback).** 예전에 정상 서명된 FIT은 지금도 정상 서명입니다. 취약점이 있던 이전 kernel을 다시 넣어도 위 ④처럼 통과합니다. 막으려면 서명된 버전 정보와, 되돌릴 수 없는 저장소(OTP·RPMB 등)의 counter를 비교하는 제품별 장치가 따로 필요합니다.
+- **FIT 밖에서 오는 값.** 환경의 `bootargs`는 서명 범위 밖입니다. [15장](/blog/embedded/bootloader/chapter15-fit-image)에서 본 것처럼 환경에 `bootargs`가 있으면 서명된 DTB의 `chosen/bootargs`를 덮어쓰므로, 제품에서는 환경을 고정하거나 kernel command line을 서명된 DTB에서만 받게 구성합니다.
+- **환경 변수 `verify`.** v2024.04에서 `verify=n`이면 `bootm`이 `required` 키가 있어도 configuration 서명 검사를 건너뜁니다(`boot/bootm.c:262`, `fit_image_load()`). 이 장의 공격자 키 FIT가 그 상태에서 부팅되는 것을 [29장](/blog/embedded/bootloader/chapter29-distro-boot)에서 재현했습니다. 환경은 서명되지 않으므로 제품에서는 이 변수를 바꿀 수 없게 막아야 합니다.
+- **공개키를 담은 DTB 자체.** 이 장의 QEMU 구성에서 공개키는 `-dtb qemu-key.dtb`로 들어가는 런타임 DTB에 있습니다. 그 DTB를 공격자 키가 든 것으로 바꾸면 U-Boot는 공격자가 서명한 FIT를 `+ OK`로 받아들입니다. 앞 단계(TF-A Trusted Board Boot)가 `u-boot.bin`을 검증해도 이 DTB는 그 범위 밖입니다. [27장](/blog/embedded/bootloader/chapter27-chain-of-trust)에서 이 장면을 실제로 재현하고, 키를 검증 범위 안으로 옮기는 방법을 정리했습니다.
+- **부팅 이후의 rootfs.** FIT은 kernel·DTB·initramfs까지만 보호합니다. 그 뒤 rootfs의 무결성은 kernel의 dm-verity 같은 기능이 이어받고, dm-verity의 root hash가 서명된 이미지(예: 서명된 initramfs나 DTB)에서 와야 사슬이 이어집니다.
 
-Positive 및 negative verification은 서명된 image, unsigned configuration, 변조된 image payload, 잘못된 key를 각각 준비한 뒤 sandbox test 또는 대상 보드에서 관찰해야 합니다. 이 작업에서는 U-Boot test/build를 실행하지 않았습니다.
+## 키 관리
 
-## 자주 하는 실수
-
-서명 워크플로에서 자주 빠지는 함정 몇 가지를 모았습니다.
-
-- **private key를 git에 커밋한다.** 양산 키는 HSM 또는 격리된 빌드 서버에만 둡니다. dev key라 하더라도 별도 `keys/` 디렉터리를 `.gitignore`로 막아야 합니다.
-- **control DT에 public key를 박는 것과 `u-boot.bin`에 박는 것을 혼동한다.** `OF_EMBED=y`면 DTB가 바이너리에 합쳐지지만, `OF_SEPARATE=y`면 `u-boot-dtb.bin`처럼 합치는 단계를 거쳐야 합니다.
-- **`-r` 플래그를 빼서** required 표시가 없는 키만 박는다. U-Boot은 *required* 키가 없으면 검증을 강제하지 않습니다. 결과는 "서명이 있어도 안 검증"입니다.
-- **configuration 단위가 아닌 image 단위 서명**으로 mix-and-match 가능 상태가 된다.
-- **FIT verification memory limit을 임의로 조정합니다.** 해당 option의 tag별 의미와 failure mode는 board config에서 검증해야 합니다.
-- **hash 알고리즘이 mismatch.** .its는 `sha1`인데 U-Boot config는 `CONFIG_SHA256=y`만 켜져 있으면 `Verifying Hash Integrity ... unsupported`로 죽습니다. 새 시스템은 처음부터 sha256 이상으로 통일합니다.
-- **private key 파일 permission이 group/other에 열려 있어** OpenSSL이 `unable to load Private Key`로 거부합니다. `chmod 600 keys/*.key`가 빌드 서버의 기본 위생입니다.
-
-실패가 잡히는 *증상*과 *원인*을 한 표로 모았습니다.
-
-| 증상 (콘솔 로그) | 가능한 원인 | 첫 점검 |
-|------------------|-------------|---------|
-| `No FIT image format` | 잘못된 주소·non-FIT 이미지 | `iminfo`로 magic 확인 |
-| `Verification failed for required key` | control DTB에 키가 없거나 `required`가 빠짐 | `fdtdump u-boot-dtb.dtb \| grep -A20 signature` |
-| `Verifying Hash Integrity ... error!` (RSA verify 단계) | 서명 후 image 수정·잘못된 키 페어 | mkimage 재실행, public/private 일치 확인 |
-| `Verifying Hash Integrity ... bad` (image hash 단계) | image 본문 손상 또는 storage 오류 | image 다시 굽기, eMMC bad block 점검 |
-| `unsupported hash algorithm` | .its `algo`와 U-Boot config 불일치 | `CONFIG_SHA256=y` 등 활성화 |
-| `Failed to verify required signature` | sign-images에 빠진 image 존재 | .its의 `sign-images` 목록 점검 |
-| `unable to load Private Key` (mkimage 실행 중) | 키 파일 permission 또는 잘못된 PEM | `chmod 600`, OpenSSL로 키 형식 확인 |
+개인키는 저장소에 넣지 않습니다. 개발 키라도 `keys/`를 `.gitignore`로 막고, 양산 키는 빌드 서버나 HSM에 둡니다. 이 실험의 결과가 보여 주듯, 키 이름(`key-name-hint`)은 같아도 키가 다르면 검증에 실패하므로 키를 바꿀 때는 새 공개키가 든 U-Boot를 먼저 배포하고(필요하면 `required-mode any`로 두 키를 함께 둔 뒤) 그다음 새 키로 서명한 FIT을 배포합니다.
 
 ## 정리
 
-- 제품별 신뢰 체인의 각 firmware handoff는 해당 SoC와 board documentation으로 확인합니다.
-- RSA 키 쌍의 private key는 빌드 서버, public key는 U-Boot control DT에 박힙니다.
-- `mkimage -k keys -K u-boot.dtb -r`는 문서화된 signing 흐름의 일부이며, 결과 FIT과 U-Boot control FDT를 확인합니다.
-- signature 노드는 *configuration 단위*로 둬야 mix-and-match 공격을 막을 수 있습니다.
-- required-key 설정과 FIT verification path를 함께 확인합니다; `CONFIG_FIT_SIGNATURE` 단독은 universal reject policy가 아닙니다.
-- FIT signature만으로 유효한 이전 버전의 replay를 막지 못하므로 제품별 monotonic version policy가 필요합니다.
-- 부팅 이후의 rootfs 무결성은 dm-verity가 받아 신뢰 체인을 이어 갑니다.
+- 공개키는 U-Boot가 **실제로 읽는** control DTB에 넣습니다. QEMU(`CONFIG_OF_BOARD`)는 `dumpdtb`로 뽑은 DTB에 넣고 `-dtb`로 넘겼고, 실제 보드는 `EXT_DTB` 등으로 다시 묶습니다.
+- 정상 서명은 `sha256,rsa2048:dev+ OK`, 무서명·다른 키는 `Failed to verify required signature 'key-dev'`로 막혔습니다.
+- 서명은 `hashed-nodes`의 `data` 외 속성, 곧 이미지 hash 값을 덮습니다. 데이터 1 byte 변조는 서명을 통과한 뒤 이미지 hash에서 막혔습니다.
+- `-r`(`required = "conf"`)이 없으면 서명 없는 FIT과 남의 키로 서명한 FIT이 모두 부팅됩니다.
+- 서명은 rollback, 환경의 `bootargs`, 부팅 이후 rootfs를 막지 않습니다.
 
 ## 다음 장 예고
 
@@ -239,4 +211,5 @@ Positive 및 negative verification은 서명된 image, unsigned configuration, �
 - [Ch 25: TF-A로 BL 단계별 서명](/blog/embedded/bootloader/chapter25-tfa-optee) — BL1·BL2·BL31까지의 서명 흐름
 - [Ch 27: 전체 chain of trust 정리](/blog/embedded/bootloader/chapter27-chain-of-trust) — eFuse→BL→kernel까지의 큰 그림
 - [Embedded Security Ch 2: Secure Boot](/blog/embedded/embedded-security/chapter02-secure-boot) — ROM·SPL 측 시점에서 본 같은 체인
-- [원문 — U-Boot doc/uImage.FIT/signature.txt](https://docs.u-boot.org/en/v2025.01/usage/fit/signature.html)
+- [U-Boot v2024.04 `doc/usage/fit/signature.rst`](https://github.com/u-boot/u-boot/blob/v2024.04/doc/usage/fit/signature.rst) · [`boot/image-fit-sig.c`](https://github.com/u-boot/u-boot/blob/v2024.04/boot/image-fit-sig.c)
+- [U-Boot v2024.04 `doc/develop/devicetree/dt_qemu.rst`](https://github.com/u-boot/u-boot/blob/v2024.04/doc/develop/devicetree/dt_qemu.rst)

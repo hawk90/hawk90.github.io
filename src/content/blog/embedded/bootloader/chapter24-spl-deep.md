@@ -2,7 +2,7 @@
 title: "SPL·TPL 내부 해부 — 가장 작은 부트 단계의 동작 추적"
 slug: "embedded/bootloader/chapter24-spl-deep"
 date: 2026-05-19T09:24:00
-description: "U-Boot의 선택적 TPL·VPL·SPL 단계와, 보드 설정에 따라 달라지는 초기화·다음 단계 적재를 살펴봅니다."
+description: "i.MX8M Mini SPL을 U-Boot v2024.04로 직접 빌드해 TCM·OCRAM·DDR 배치, SPL_MAX_SIZE 링커 검사, fdtgrep으로 줄어든 DTB, FIT에서 BL31로 넘어가는 경로를 실측과 소스로 따라갑니다."
 series: "Bootloader Internals"
 seriesOrder: 24
 tags: [embedded, bootloader, spl, tpl, u-boot]
@@ -10,71 +10,209 @@ draft: false
 topics: ["embedded"]
 ---
 
-U-Boot의 SPL은 작은 2차 프로그램 로더이며, 보통 SDRAM을 준비하고 U-Boot proper 또는 다른 firmware를 적재합니다. TPL과 VPL은 필요한 보드에서 사용하는 선택적 단계입니다. 실제 실행 위치, 사용 가능한 메모리, 어떤 장치를 초기화하고 다음 이미지를 어디에서 읽는지는 SoC, ROM, 보드 설계와 U-Boot 설정에 따라 달라집니다.
+[Ch 23](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp)에서 i.MX8M Mini(이하 i.MX8MM) BootROM은 SD 카드 33 KiB 지점의 IVT를 읽고, entry `0x7E1000`으로 점프했습니다. 그 주소에서 시작하는 프로그램이 **SPL**입니다. SPL은 DDR이 없는 상태에서 칩 안 메모리 몇백 KiB만으로 DDR을 깨우고, 다음 단계 이미지를 읽어 넘겨야 합니다. 그래서 U-Boot 전체에서 공간 제약이 가장 빡빡한 단계입니다.
+
+이 장도 i.MX8MM 하나를 끝까지 따라갑니다. U-Boot v2024.04 `imx8mm_evk_defconfig`를 macOS의 `aarch64-elf-gcc` 16.2.0으로 직접 빌드했고, 크기·주소·노드 수는 모두 그 빌드에서 읽은 값입니다. DDR training 펌웨어와 TF-A `bl31.bin`이 없어서(`BINMAN_ALLOW_MISSING=1`) 실제 보드에서 부팅되는 이미지는 아닙니다. SPL 자체는 그 blob과 무관하게 정상적으로 링크됩니다.
 
 ## 한 줄 요약
 
-SPL·TPL·VPL은 선택적으로 구성되는 U-Boot boot phase입니다. 단계 수, SRAM/SDRAM 배치, 이미지 포맷과 다음 단계는 보드의 U-Boot 문서와 빌드 결과로 확인해야 합니다.
+i.MX8MM SPL은 TCM(`0x7E1000`)에서 실행되고, BSS와 스택은 OCRAM, 큰 malloc은 DDR 초기화 뒤 DDR에 둡니다. 코드가 `CONFIG_SPL_MAX_SIZE`를 넘으면 링커가 빌드를 멈추고, SPL용 DTB는 `bootph-*` 표시가 있는 노드만 남겨 241개에서 42개로 줄어듭니다. 마지막으로 FIT의 loadable인 BL31로 점프합니다.
 
-## U-Boot의 xPL 단계
+## xPL 단계 — 어느 보드가 무엇을 쓰나
 
-U-Boot 문서는 TPL(초기 단계), VPL(선택적 검증 단계), SPL(2차 로더), U-Boot proper를 설명합니다. 모든 제품이 세 단계를 사용하는 것은 아닙니다. VPL의 현재 동작과 기능 범위도 문서화된 U-Boot 버전에서 확인해야 합니다. 따라서 `BootROM → TPL → SPL → U-Boot proper`는 가능한 흐름 중 하나이지, 모든 보드의 표준 체인은 아닙니다.
+부트 단계가 여러 개인 이유는 로켓의 다단 분리와 같습니다. 첫 단은 작고 단순해야 발사대(ROM이 허락한 SRAM)에 올라가고, 그다음 단이 더 큰 짐을 나릅니다. U-Boot는 이 단계를 `doc/develop/spl.rst`에서 이렇게 정의합니다.
 
-SPL은 SDRAM 초기화와 다음 단계 적재를 맡을 수 있지만, 항상 U-Boot proper만 적재하는 것은 아닙니다. 공식 문서는 SPL이 ARM Trusted Firmware BL31, EDK II, Linux 또는 RISC-V OpenSBI 등으로 이어지는 경우도 설명합니다. 실제 선택은 보드의 boot flow와 이미지 패키징에서 확인하세요.
+| 단계 | v2024.04 문서의 정의 |
+|------|------------------|
+| TPL | "Very early init, as tiny as possible. This loads SPL (or VPL if enabled)." |
+| VPL | A/B verified boot일 때 SPL 바이너리를 고르는 단계. "Implementation of the VPL logic is work-in-progress. For now it just boots into SPL." |
+| SPL | "Sets up SDRAM and loads U-Boot proper. It may also load other firmware components." |
+| U-Boot | 명령줄과 부트 로직을 가진 U-Boot proper |
 
-![Boot ROM에서 선택적 TPL·VPL을 거쳐 SPL로 이어지고 SPL이 U-Boot proper, TF-A BL31, EDK II, Linux kernel, RISC-V OpenSBI 중 하나를 적재하는 흐름과, Kconfig·phase별 device tree·linker script가 SPL 빌드 산출물을 만들고 이를 보드 자료와 대조하는 구조도](/images/blog/bootloader/diagrams/ch24-spl-sram-layout.svg)
+문서는 "TPL, VPL, SPL are optional"이고 "While many boards use SPL, less use TPL"이라고 적습니다. i.MX8MM EVK 빌드의 `.config`에는 `CONFIG_TPL`과 `CONFIG_VPL`이 없고, `CONFIG_SPL_FRAMEWORK=y`만 있습니다. 즉 이 보드의 체인은 ROM → SPL → TF-A BL31 → U-Boot proper입니다. 같은 문서가 SPL의 다음 단계로 "BL31 of ARM Trusted Firmware which invokes main U-Boot as BL33", EDK II, Linux, RISC-V OpenSBI를 나열하는데, i.MX8MM은 그중 BL31 경로를 씁니다.
 
-그림의 위쪽은 U-Boot 문서가 설명하는 phase 흐름이고, 아래쪽은 이 글에서 다루는 실행 위치와 크기를 고정 주소 대신 빌드 입력과 산출물로 확인하는 순서입니다.
+![위쪽은 U-Boot boot phase 흐름(Boot ROM, 선택적 TPL·VPL, SPL, SPL이 적재하는 다섯 가지 다음 단계), 아래쪽은 i.MX8MM SPL 빌드에서 측정한 TCM·OCRAM·DDR 메모리 배치](/images/blog/bootloader/diagrams/ch24-spl-sram-layout.svg)
 
-## 메모리와 코드 크기
+## SPL이 사는 곳 — TCM, OCRAM, DDR
 
-초기 프로그램이 SRAM에서 실행되는지, 어느 시점에 SDRAM이 준비되는지, 각 이미지와 stack/BSS가 차지하는 공간은 보드별 메모리 맵과 linker map에 달려 있습니다. 모든 SPL이 “DDR 없는 SRAM”에서만 실행한다거나, 특정 SRAM 용량 범위에 들어간다고 단정하지 않습니다. 정확한 시작 주소·최대 크기·예약 영역이 필요하면 보드 defconfig, linker script, ROM 요구 사항과 해당 빌드의 map 파일을 함께 확인합니다.
+SPL의 메모리 사정은 이사 첫날과 비슷합니다. 큰 집(DDR)은 아직 열쇠가 없어서, 짐은 현관(TCM)에 두고 잠은 작은 방(OCRAM)에서 잡니다. 큰 집 문을 여는 것(DDR training)이 SPL의 첫 번째 큰일입니다.
 
-SPL의 기능과 크기는 Kconfig 선택, device tree, 컴파일 대상 및 드라이버 구성의 영향을 받습니다. `CONFIG_SPL_*`라는 이름만 보고 모든 버전에 같은 옵션이 있다고 가정하지 말고, 사용 중인 U-Boot tag의 Kconfig와 최종 `.config`를 확인합니다. 빌드 성공만으로 ROM 적재 주소나 실제 보드 메모리 배치가 검증되는 것도 아닙니다.
+그림 아래쪽이 빌드에서 읽은 실제 배치입니다. 각 값의 출처를 표로 정리합니다.
 
-## 장치 트리와 드라이버
+| 영역 | 주소 | 크기 | 출처 |
+|------|------|------|------|
+| SPL 코드·데이터 | `0x7E1000`~`0x804410` | 144,400 B | `CONFIG_SPL_TEXT_BASE`, `nm`의 `_image_binary_end` |
+| SPL DTB | `0x804410`~ | 8,199 B | `spl/u-boot-spl.dtb` |
+| BSS | `0x910000`~`0x9101C8` | 456 B | `CONFIG_SPL_BSS_START_ADDR`, `__bss_start`/`__bss_end` |
+| 초기 스택 꼭대기 | `0x920000` | — | `CONFIG_SPL_STACK`, `_main`의 `ldr x0` 리터럴 |
+| early malloc | `0x930000`~ | 64 KiB | `CFG_MALLOC_F_ADDR`(`include/configs/imx8mm_evk.h:27`), `CONFIG_SPL_SYS_MALLOC_F_LEN=0x10000` |
+| 전체 malloc | `0x42200000`~ | 512 KiB | `CONFIG_SPL_CUSTOM_SYS_MALLOC_ADDR`, `CONFIG_SPL_SYS_MALLOC_SIZE=0x80000` |
 
-SPL용 device tree는 전체 트리와 다를 수 있습니다. U-Boot 문서는 phase별로 필요한 노드를 남기기 위한 `bootph-*` 속성과 `fdtgrep` 처리 흐름을 설명합니다. 속성 이름과 동작은 U-Boot 버전에 맞춰야 하며, 오래된 `u-boot,dm-*` 태그를 새 설정과 섞지 마세요. `CONFIG_SPL_OF_PLATDATA`를 쓰는지 여부도 해당 버전의 문서와 빌드 산출물에서 확인해야 합니다.
+`0x7E1000`은 U-Boot i.MX8M MMU 맵(`arch/arm/mach-imx/imx8m/soc.c:135`)의 `TCM` 영역(0x7C0000부터 0x80000바이트) 안이고, `0x900000`부터는 같은 맵의 `OCRAM`입니다. U-Boot는 OCRAM 앞쪽 64 KiB를 ROM 몫으로 봅니다. `soc.c:1590`의 SError 처리 코드는 스택 포인터가 `0x900000`~`0x910000` 사이면 "stack is still in ROM reserved OCRAM"으로 판단합니다. SPL BSS는 그 바로 뒤인 `0x910000`에서 시작합니다.
 
-장치 탐색이 실패하면 먼저 다음 자료를 맞춰 봅니다.
+초기 스택은 디스어셈블로 확인했습니다. `arch/arm/lib/crt0_64.S`의 `_main`이 첫 명령에서 스택 주소를 리터럴로 읽습니다.
 
-- SPL이 실제로 사용하는 device tree와 phase 속성
-- 최종 설정에서 포함된 uclass와 구체 드라이버
-- 해당 부팅 매체와 다음 단계 이미지가 패키징된 방식
-- SPL console/log 설정과 초기화 로그
-- 빌드 시 생성된 map, symbol, image metadata
+```text
+00000000007f8b10 <_main>:
+  7f8b10:	58000300 	ldr	x0, 7f8b70 <clear_loop+0x18>
+  7f8b14:	927cec1f 	and	sp, x0, #0xfffffffffffffff0
+  7f8b18:	910003e0 	mov	x0, sp
+  7f8b1c:	97ffa74d 	bl	7e2850 <board_init_f_alloc_reserve>
+```
 
-다른 보드의 Kconfig 조각이나 driver 이름을 복사해서 해결했다고 판단하지 마세요. `sandbox`와 U-Boot 테스트 도구는 일부 소프트웨어 경로를 확인하는 데 유용하지만, 특정 SoC의 ROM·DDR 초기화·전기적 동작을 대신 검증하지 않습니다.
+`0x7f8b70`의 8바이트는 `00009200 00000000`, 즉 `0x920000`입니다. 그 아래로 `board_init_f_alloc_reserve()`(`common/init/board_init.c:78`)가 `global_data`(SPL 빌드의 `spl/include/generated/generic-asm-offsets.h`에서 `GD_SIZE` 424바이트, 디스어셈블에서도 `sub x0, x0, #0x1a8`)를 잡고, 스택은 그 밑으로 자랍니다. 이 함수는 `CFG_MALLOC_F_ADDR`가 정의돼 있으면 early malloc을 스택 쪽에 잡지 않습니다(81행 `#ifndef`). 대신 `spl_common_init()`(`common/spl/spl.c:457`)의 464행이 `gd->malloc_base = CFG_MALLOC_F_ADDR`로 `0x930000`을 씁니다.
 
-## 다음 단계 적재와 메모리 배치
+> ⚠️ 이 숫자를 얻기까지 한 번 틀렸습니다. 처음에 `make imx8mm_evk_defconfig`를 `CROSS_COMPILE` 없이 실행했더니 macOS의 clang 전처리기가 defconfig의 `# CONFIG_SPL_SHARES_INIT_SP_ADDR is not set` 줄 앞에 공백을 넣었습니다. Kconfig는 `unexpected data` 경고만 내고 그 줄을 무시했고, 스택이 DDR 주소인 `0x401FFE50`으로 잡혔습니다. DDR 초기화 전에 쓰는 스택이 DDR에 있으면 부팅이 되지 않습니다. defconfig 단계에서도 `CROSS_COMPILE`을 주고 다시 빌드하자 `CONFIG_SPL_STACK=0x920000`이 살아났습니다. SPL 메모리 배치를 볼 때는 빌드 로그의 Kconfig 경고부터 확인하세요.
 
-다음 단계는 raw media, 파일시스템, FIT 또는 플랫폼별 패키징으로 읽을 수 있습니다. 어떤 선택지가 가능한지와 인증 여부는 SPL의 해당 버전·보드 구현 및 ROM 요구 사항에 따라 다릅니다. FIT에 이미지가 들어 있다는 사실만으로 인증된다는 보장은 없습니다. 인증 설정, 키 자료와 실패 경로를 별도로 확인해야 합니다.
+## board_init_f — DDR을 깨우는 순서
 
-링커 스크립트와 초기 진입 코드는 `.text`, `.data`, `.bss`, stack 및 image entry의 배치를 함께 결정합니다. `.bss`를 언제 초기화하는지, 이미지가 ROM에 의해 어느 주소로 적재되는지는 architecture startup code와 보드 설정에 달렸습니다. 따라서 일반 코드 조각이나 가상의 주소를 기준으로 BSS 경계·stack 충돌을 진단하지 말고, 해당 빌드 ELF/map과 ROM/board 문서를 사용합니다.
+i.MX8MM EVK의 SPL 진입 함수는 보드 파일에 있습니다. `board/freescale/imx8mm_evk/spl.c:106`의 `board_init_f()`가 하는 일을 순서대로 보면, SPL이 왜 이 순서여야 하는지가 드러납니다.
 
-## 디버깅과 시험 범위
+```c
+void board_init_f(ulong dummy)
+{
+	arch_cpu_init();
+	init_uart_clk(1);
+	timer_init();
+	/* Clear the BSS. */
+	memset(__bss_start, 0, __bss_end - __bss_start);
+	ret = spl_early_init();
+	...
+	preloader_console_init();
+	enable_tzc380();
+	power_init_board();
+	/* DDR initialization */
+	spl_dram_init();
+	board_init_r(NULL, 0);
+}
+```
 
-U-Boot 문서는 debug UART, log level, JTAG/GDB와 sandbox를 초기 단계 문제의 조사 방법으로 안내합니다. 각 수단은 설정·하드웨어가 있어야 하며 로그가 없다는 사실만으로 특정 초기화 함수의 실패를 확정할 수는 없습니다. bootstage 기록도 대상 버전과 설정이 갖춰진 경우에만 사용할 수 있습니다.
+BSS를 직접 `memset`으로 지우는 줄이 눈에 띕니다. `crt0_64.S`에도 `board_init_f()`가 돌아온 뒤 BSS를 지우는 `clear_loop`가 있습니다(SPL에서는 143~168행 경로). 그런데 이 보드의 `board_init_f()`는 마지막 줄에서 `board_init_r()`을 직접 부르고 돌아오지 않으므로 그 루프까지 가지 않습니다. 그래서 보드 파일이 C 코드 초반에 BSS를 지웁니다. `spl_early_init()`이 driver model을 띄우고, `preloader_console_init()`이 콘솔을 엽니다. 이 함수(`common/spl/spl.c:826`)의 836행이 찍는 첫 줄이 `U-Boot SPL 2024.04 (날짜 - 시각)` 형식의 배너입니다. 그다음 `power_init_board()`가 PMIC(PCA9450) 전압을 고친 뒤 `spl_dram_init()`이 `ddr_init(&dram_timing)`을 부르도록 짜여 있습니다. DDR 전원 설정이 training보다 먼저라는 의도입니다. 그런데 v2024.04 코드를 그대로 읽으면 이 단계는 실제로 아무것도 쓰지 않습니다. `power_init_board()`(`board/freescale/imx8mm_evk/spl.c:77`)는 `pmic_get("pca9450@25", &dev)`로 장치를 이름으로 찾는데, DT의 PMIC 노드 이름은 `pmic@4b`입니다(`arch/arm/dts/imx8mm-evk.dtsi:186`, 빌드한 SPL DTB에서도 같음). 이름이 맞지 않으면 `-ENODEV`가 되고, 함수는 `No pmic`을 찍고 0을 돌려줍니다. 실제 보드에서 이 줄이 찍히는지는 확인하지 않았지만, 소스 기준으로는 PMIC 레지스터 쓰기 없이 DDR 초기화로 넘어갑니다. 함수 이름과 순서만 보고 "PMIC를 설정했다"고 판단하면 안 되는 예입니다.
 
-SPL을 검증할 때는 먼저 재현 가능한 보드·빌드 조합을 고정하고, ROM 단계에서 SPL 진입, SDRAM 준비, 다음 이미지 검증과 handoff를 구분해 기록합니다. 실제 보드가 없는 상태에서는 빌드·정적 검사 결과와 하드웨어 실행 결과를 분리해서 보고해야 합니다. 이 글의 수정 과정에서는 U-Boot 빌드, QEMU, ROM 또는 실기 부팅을 실행하지 않았습니다.
+`board_init_r()`로 넘어간 뒤에는 `common/spl/spl.c:685`에서 `mem_malloc_init()`으로 DDR의 `0x42200000`에 전체 malloc을 열고 `GD_FLG_FULL_MALLOC_INIT`을 세웁니다. 그림의 "DDR 초기화 뒤 전환"이 이 지점입니다.
+
+## 크기 제한은 링커가 지킨다
+
+SRAM이 작으니 SPL이 조금만 커져도 넘칩니다. 다행히 넘치면 빌드가 실패합니다. `arch/arm/cpu/armv8/u-boot-spl.lds`는 메모리 영역을 이렇게 선언합니다.
+
+```text
+MEMORY { .sram : ORIGIN = IMAGE_TEXT_BASE,
+		LENGTH = IMAGE_MAX_SIZE }
+MEMORY { .sdram : ORIGIN = CONFIG_SPL_BSS_START_ADDR,
+		LENGTH = CONFIG_SPL_BSS_MAX_SIZE }
+```
+
+`IMAGE_MAX_SIZE`는 `scripts/Makefile.spl:199`가 `CONFIG_SPL_MAX_SIZE`(이 보드에서 `0x27000`)로 넘깁니다. `.text`부터 `__u_boot_list`까지는 `.sram`에, BSS는 `.sdram`이라는 이름의 영역에 들어갑니다. 이름은 sdram이지만 이 보드에서는 OCRAM `0x910000`입니다.
+
+실제로 넘치면 어떻게 되는지 보려고 `CONFIG_SPL_MAX_SIZE`만 `0x20000`으로 줄여 다시 링크했습니다.
+
+```text
+aarch64-elf-ld: u-boot-spl section `.data' will not fit in region `.sram'
+aarch64-elf-ld: region `.sram' overflowed by 13328 bytes
+collect2: error: ld returned 1 exit status
+```
+
+13,328은 SPL 코드·데이터 144,400바이트에서 `0x20000`(131,072)을 뺀 값과 정확히 같습니다. 원래 설정 `0x27000`(159,744)과 비교하면 코드·데이터에 15,344바이트가 남아 있습니다. 다만 이 검사는 링커가 보는 ELF 섹션만 셉니다. 빌드 끝에 붙는 DTB 8,199바이트는 `.sram` 영역 밖이라 이 검사에 들어가지 않고, 최종 바이너리 크기를 보는 `CONFIG_SPL_SIZE_LIMIT`은 이 보드에서 `0x0`(검사 안 함)입니다. 드라이버를 추가해 DTB가 커질 때는 링커가 경고하지 않으므로 `spl/u-boot-spl.bin` 크기를 직접 봐야 합니다.
+
+어디가 큰지는 `nm -S --size-sort`를 코드·데이터 심볼(타입 `T/t/D/d/R/r`)로 좁혀 봅니다. 그냥 정렬하면 `ehci_hcd.c.d8603c20` 같은 `.debug_info` 쪽 숨은 심볼이 위로 올라오는데, 이것은 디버그 정보 크기라 SPL 바이너리와 무관합니다. 실제 상위 항목은 `board_init_f` 0x1704 B, `ddrphy_trained_csr` 0x1678 B, `ddr_phy_pie` 0x1280 B, `imx8mm_clk_probe` 0xcf4 B, `composite_setup` 0x9b0 B, `ehci_usb_probe` 0x944 B였습니다. `board_init_f`가 큰 것은 LTO가 보드 초기화 함수들을 안으로 합쳤기 때문이고, `ddrphy_trained_csr`와 `ddr_phy_pie`는 [Ch 26](/blog/embedded/bootloader/chapter26-ddr-training)에서 볼 DDR 표입니다. `composite_setup`과 `ehci_usb_probe`는 USB SDP(Serial Download Protocol, `CONFIG_SPL_USB_SDP_SUPPORT=y`) 복구 경로의 코드라서, SPL이 넘칠 때 *부팅 경로 하나를 위한* 기능부터 검토하는 근거가 됩니다.
+
+## SPL용 DTB — 241개 노드에서 42개로
+
+SPL에 전체 device tree를 넣으면 크기도 문제지만, driver model이 노드마다 드라이버를 bind하느라 시간과 malloc을 씁니다. 여행 가방을 쌀 때 옷장 전체가 아니라 첫날 입을 옷만 넣는 것처럼, SPL에는 부팅에 필요한 노드만 넣습니다.
+
+`doc/develop/spl.rst`는 빌드 중 fdtgrep이 `spl/u-boot-spl.dtb`를 만들 때 필수 노드(`/aliases`, `/chosen`, `/config`)와 `bootph-all` 또는 `bootph-pre-ram` 속성이 있는 노드만 남긴다고 설명합니다. 그리고 `CONFIG_OF_SPL_REMOVE_PROPS`의 속성(이 빌드에서 `"interrupt-parent interrupts"`)과 `bootph-*` 속성 자체도 지웁니다. 같은 문서는 2023년에 `u-boot,dm-*` 태그가 `bootph-*`로 바뀌었다고 적습니다.
+
+i.MX8MM EVK에서 이 표시는 U-Boot 전용 `.dtsi`에 있습니다. `arch/arm/dts/imx8mm-evk-u-boot.dtsi`의 일부입니다.
+
+```text
+&aips4 {
+	bootph-pre-ram;
+};
+
+&pinctrl_uart2 {
+	bootph-pre-ram;
+};
+
+&pinctrl_usdhc2 {
+	bootph-pre-ram;
+};
+```
+
+빌드 결과를 in-tree `dtc`로 디컴파일해 `{`로 끝나는 줄(노드 수)을 세면 다음과 같습니다.
+
+| 파일 | 크기 | 노드 수 |
+|------|------|--------|
+| `arch/arm/dts/imx8mm-evk.dtb` (U-Boot proper용) | 41,168 B | 241 |
+| `spl/u-boot-spl.dtb` | 8,199 B | 42 |
+
+남은 42개 노드는 SPL이 하는 일과 정확히 겹칩니다. GPIO 컨트롤러 5개, watchdog, pinctrl과 그룹(`uart2grp`, `usdhc2grp`, `i2c1grp`, ...), 클록 컨트롤러, `serial@30890000`(UART2 콘솔), CAAM(`crypto@30900000`과 job ring 3개), `i2c@30a20000` 아래의 `pmic@4b`, `mmc@30b40000`~`mmc@30b60000`, USB입니다. 디스플레이, 오디오, PCIe 노드는 없습니다. 실제로 링크된 드라이버도 40개(`_u_boot_list_2_driver_2_*` 심볼 수)로, `fsl_esdhc`, `i2c_mxc`, `pmic_pca9450`, `serial_mxc`, `imx8mm_clk`, `caam_jr` 같은 이름이 DTB 노드와 짝을 이룹니다.
+
+새 장치를 SPL에서 써야 하는데 `uclass_get_device`가 `-ENODEV`를 돌려준다면, 먼저 `spl/u-boot-spl.dtb`에 그 노드가 있는지 확인합니다. 노드가 없으면 `-u-boot.dtsi`에 `bootph-pre-ram`을 붙일 차례이고, 노드는 있는데 드라이버가 없으면 `CONFIG_SPL_*` 옵션 쪽 문제입니다. 위 `board_init_f()`가 `clock-controller@30380000`을 이름으로 찾다가 실패하면 "Failed to find clock node. Check device tree"를 찍고 멈추는 것도 같은 맥락입니다.
+
+## 다음 단계 적재 — FIT에서 BL31로
+
+DDR이 살아나면 SPL은 다음 이미지를 찾습니다. 보드의 `spl_board_boot_device()`(`board/freescale/imx8mm_evk/spl.c:34`)가 ROM이 알려 준 부팅 장치를 SPL 장치 번호로 바꿉니다. `SD2_BOOT`/`MMC2_BOOT`는 `BOOT_DEVICE_MMC1`, `SD3_BOOT`/`MMC3_BOOT`는 `BOOT_DEVICE_MMC2`, `USB_BOOT`는 `BOOT_DEVICE_BOARD`가 됩니다. `boot_from_devices()`는 장치마다 `Trying to boot from %s`를 찍고(`common/spl/spl.c:627`), MMC raw 모드에서 섹터 `0x300`(`CONFIG_SYS_MMCSD_RAW_MODE_U_BOOT_SECTOR`)을 읽습니다.
+
+거기 있는 `u-boot.itb`를 빌드 디렉터리의 `mkimage -l`로 열면 FIT 구조가 보입니다(`Created`·`Compression` 줄과 Image 2 `fip`, Image 3 `fdt-1`은 생략).
+
+```text
+FIT description: Configuration to load ATF before U-Boot
+ Image 0 (uboot)
+  Description:  U-Boot (64-bit)
+  Type:         Standalone Program
+  Data Size:    672720 Bytes = 656.95 KiB = 0.64 MiB
+  Architecture: AArch64
+  Load Address: 0x40200000
+  Entry Point:  unavailable
+ Image 1 (atf)
+  Description:  ARM Trusted Firmware
+  Type:         Firmware
+  Data Size:    0 Bytes = 0.00 KiB = 0.00 MiB
+  Architecture: AArch64
+  OS:           Unknown OS
+  Load Address: 0x00920000
+```
+
+`atf`의 `Data Size`가 0인 것은 `bl31.bin` 없이 빌드했기 때문입니다. 여기서 볼 것은 `uboot` 이미지의 `Entry Point: unavailable`입니다. `arch/arm/dts/imx8mm-u-boot.dtsi`는 configuration을 `firmware = "uboot"`, `loadables = "atf"`로 정하고, `uboot` 노드에는 `load`만 주고 `entry`는 주지 않습니다. `atf` 노드에는 `entry = <0x920000>`이 있습니다.
+
+그러면 SPL은 어디로 점프할까요? `common/spl/spl_fit.c:823-828`이 답입니다.
+
+```c
+		/*
+		 * If the "firmware" image did not provide an entry point,
+		 * use the first valid entry point from the loadables.
+		 */
+		if (spl_image->entry_point == FDT_ERROR &&
+		    image_info.entry_point != FDT_ERROR)
+			spl_image->entry_point = image_info.entry_point;
+```
+
+firmware인 U-Boot에 entry가 없으니 첫 loadable인 BL31의 `0x920000`이 점프 주소가 됩니다. 점프 자체는 `common/spl/spl.c:384`의 weak 함수 `jump_to_image_no_args()`가 `spl_image->entry_point`를 그대로 호출하는 것입니다. `arch/arm/mach-imx/spl.c:279`에도 같은 이름의 함수가 있지만 `#if defined(CONFIG_IMX_HAB)`(246행) 안에 있어서, HAB를 끈 이 빌드에서는 쓰이지 않습니다. TF-A 쪽도 같은 주소를 씁니다. upstream TF-A v2.15.0 태그의 `plat/imx/imx8m/imx8mm/include/platform_def.h`는 BL2를 쓰지 않는 구성에서 `BL31_BASE`를 `0x920000`, 비보안 U-Boot 주소 `PLAT_NS_IMAGE_OFFSET`을 `0x40200000`으로 정합니다. 그래서 BL31은 OCRAM `0x920000`에서 시작하고, 일을 마치면 BL33인 U-Boot proper(`0x40200000`)로 넘어갑니다. U-Boot 보드 문서가 안내하는 것은 NXP의 `imx-atf` 브랜치이므로, 실제 제품에서는 그 트리의 값을 확인합니다. 앞의 메모리 표에서 BL31 적재 주소가 SPL 초기 스택 꼭대기와 같은 `0x920000`인 것도 이 흐름 때문에 가능합니다. 스택은 `0x920000` 아래로 자라고, BL31은 위로 놓이며, SPL이 BL31로 점프하는 순간 SPL 스택은 더 필요 없습니다.
+
+`CONFIG_SPL_ATF`가 꺼져 있는데도 BL31로 가는 점이 흥미롭습니다. `board_init_r()`의 분기(`spl.c:761-763`)는 `spl_image.os`로 갈리는데, 이 값은 loadable이 아니라 *firmware* 이미지(`uboot`)에서 옵니다(`spl_fit.c:771-774`). `uboot`에는 `os`가 없으므로 `IH_OS_U_BOOT`가 되고, `IH_OS_ARM_TRUSTED_FIRMWARE` 분기는 애초에 `CONFIG_IS_ENABLED(ATF)`가 꺼져 있어 쓰이지 않습니다. 그래서 SPL은 "U-Boot로 점프한다"는 분기를 타면서, 실제로는 entry 주소 규칙 때문에 BL31에 도착합니다. 같은 "SPL → BL31" 그림이라도 실제 코드 경로는 FIT 내용에 따라 갈리므로, `mkimage -l`과 `spl_fit.c`를 함께 봅니다.
+
+## 실기 없이 확인한 것과 못 한 것
+
+이 장의 숫자는 빌드 산출물(`.config`, ELF, `nm`, `objdump`, `mkimage -l`, binman map, 디컴파일한 DTB)과 링커 실패 재현에서 나왔습니다. 실제 i.MX8MM 보드에서 SPL을 실행하지 않았으므로 콘솔 출력은 소스의 문자열 형식으로만 인용했고, DDR training 결과나 부팅 시간은 다루지 않았습니다. QEMU에는 i.MX8MM 머신이 없어서 이전 장처럼 에뮬레이터로 대신 돌릴 수도 없습니다.
 
 ## 정리
 
-- TPL·VPL·SPL은 보드에 따라 선택적으로 구성됩니다.
-- SPL의 실행 메모리, 기능, 다음 단계와 이미지 형식은 SoC·ROM·U-Boot 설정에 종속됩니다.
-- Kconfig, phase별 device tree, ELF/map과 패키징 산출물을 같은 U-Boot tag 기준으로 확인합니다.
-- FIT 사용만으로 인증을 가정하지 않으며, linker/BSS/stack 동작은 실제 빌드 결과와 startup code로 확인합니다.
-- sandbox나 정적 검사 결과는 ROM·DDR·보드의 실기 검증과 구분합니다.
+- v2024.04 문서에서 TPL·VPL·SPL은 모두 선택이고, i.MX8MM EVK는 SPL만 쓰며 ROM → SPL → BL31 → U-Boot proper로 이어집니다.
+- SPL 코드는 TCM `0x7E1000`, BSS(456 B)는 OCRAM `0x910000`, 초기 스택은 `0x920000`, early malloc은 `0x930000`, 전체 malloc은 DDR `0x42200000`에 있습니다.
+- `CONFIG_SPL_MAX_SIZE`는 링커 `MEMORY` 영역으로 강제되어, `0x20000`으로 줄이면 "overflowed by 13328 bytes"로 실패합니다. 뒤에 붙는 DTB는 이 검사에 들어가지 않습니다.
+- fdtgrep은 `bootph-pre-ram`/`bootph-all` 노드만 남겨 DTB를 241개 노드·41,168 B에서 42개 노드·8,199 B로 줄입니다.
+- `board_init_f()`는 BSS 클리어 → driver model → 콘솔 → PMIC → DDR 순서로 짜여 있지만, v2024.04의 PMIC 조회 이름(`pca9450@25`)은 DT 노드(`pmic@4b`)와 맞지 않아 PMIC 쓰기는 건너뜁니다.
+- FIT의 U-Boot 이미지에 entry가 없으면 첫 loadable(BL31)의 entry가 점프 주소가 됩니다(`spl_fit.c:826`).
+- defconfig를 cross 전처리기 없이 처리하면 `# ... is not set` 줄이 무시될 수 있으니 Kconfig 경고를 확인합니다.
 
 ## 다음 장 예고
 
-다음 편은 **Ch 25: ARM TF-A 통합**입니다. 보드별 펌웨어 패키징에서 TF-A와 U-Boot 단계가 어떻게 연결되는지 살펴봅니다.
+다음 편은 **Ch 25: ARM TF-A 통합**입니다. 이 장의 끝에서 SPL이 점프한 `0x920000`의 BL31이 무엇을 하고, 어떻게 U-Boot proper를 BL33으로 불러내는지 TF-A 소스로 이어서 봅니다.
 
 ## 관련 항목
 
-- [Ch 4: 부트 단계](/blog/embedded/bootloader/chapter04-boot-stages)
-- [Ch 5: Falcon Mode](/blog/embedded/bootloader/chapter05-falcon-mode)
-- [Ch 23: BootROM·eFuse·OTP](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp)
-- [Ch 25: ARM TF-A 통합](/blog/embedded/bootloader/chapter25-tfa-optee)
-- [U-Boot v2025.01: Generic xPL framework](https://docs.u-boot.org/en/v2025.01/develop/spl.html)
-- [U-Boot: Debugging driver model](https://docs.u-boot.org/en/latest/develop/driver-model/debugging.html)
+- [Ch 4: 부트 단계](/blog/embedded/bootloader/chapter04-boot-stages) — 단계 분리의 전체 그림
+- [Ch 5: Falcon Mode](/blog/embedded/bootloader/chapter05-falcon-mode) — SPL이 U-Boot proper를 건너뛰고 커널로 가는 경로
+- [Ch 23: BootROM·eFuse·OTP](/blog/embedded/bootloader/chapter23-bootrom-efuse-otp) — SPL을 올려 주는 ROM 단계와 IVT
+- [Ch 25: ARM TF-A 통합](/blog/embedded/bootloader/chapter25-tfa-optee) — SPL 다음의 BL31
+- [U-Boot v2024.04 — doc/develop/spl.rst](https://github.com/u-boot/u-boot/blob/v2024.04/doc/develop/spl.rst) — xPL 단계와 fdtgrep 설명 원문

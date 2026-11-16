@@ -10,90 +10,155 @@ draft: false
 topics: ["embedded"]
 ---
 
-부트로더에서 Linux로 넘어갈 때는 아키텍처별 boot protocol이 정한 상태를 지켜야 합니다. 같은 CPU 계열이라도 직접 Image로 진입하는 경우와 EFI stub을 통하는 경우는 경로가 다릅니다. 이 장은 Linux v6.12의 공개 boot documentation을 기준으로 요구사항의 핵심만 비교하며, 실제 보드의 모든 CPU/system-register 설정을 대신하지 않습니다.
-
 ## 한 줄 요약
 
-**커널 진입 규약은 아키텍처와 boot path에 따라 다릅니다.** AArch64의 x0=DTB 같은 레지스터 값만 맞추는 것으로 끝나지 않으며, 이미지 배치, cache/MMU, interrupt, firmware handoff도 해당 protocol에 맞아야 합니다.
+> 부트로더가 kernel에 넘기는 것은 결국 **"어디에 kernel을 놓았는가, CPU 레지스터에 무엇을 담았는가, CPU가 어떤 상태인가"** 세 가지입니다. AArch64에서는 kernel 파일 맨 앞 64 byte의 헤더가 배치 규칙을 알려 주고, 진입하는 순간 `x0`에는 DTB 주소, `x1`~`x3`에는 0이 들어 있어야 합니다. 이 글은 그 순간을 디버거로 멈춰 직접 확인합니다.
 
-## AArch64 direct boot
+기준은 Linux **v6.12**의 boot 문서(`Documentation/arch/*/boot*.rst`)와 U-Boot **v2024.04**입니다. AArch64는 실제로 실행했습니다. QEMU 11.1.3 `virt`(`-cpu cortex-a57 -m 1G`)에서 U-Boot `qemu_arm64_defconfig`로 Debian 13.7 arm64 kernel(Linux 6.12.107)을 `booti`하고, QEMU gdbstub에 `aarch64-elf-gdb` 18.1을 붙여 kernel 첫 명령어에서 멈췄습니다. ARM32·RISC-V·x86은 같은 버전의 문서로 요약합니다.
 
-[Linux v6.12 AArch64 booting 문서](https://docs.kernel.org/6.12/arch/arm64/booting.html)는 Image 위치, DTB, CPU mode와 cache 상태를 구체적으로 정의합니다.
+## AArch64 Image 헤더 — kernel이 알려 주는 배치 규칙
 
-- Image는 usable RAM의 2 MiB-aligned base로부터 `text_offset`만큼 떨어진 곳에 둡니다. `image_size`가 0이 아니면 그 크기만큼 kernel이 사용할 수 있어야 합니다.
-- DTB는 8-byte aligned이고 2 MiB를 넘지 않아야 합니다. 512 MiB 범위 제약은 v4.2 이전 kernel에 대한 주석이며 현재 일반 규칙으로 쓰면 안 됩니다.
-- direct boot에서 x0은 RAM의 DTB physical address이고 x1–x3은 0입니다. CPU는 non-secure EL1 또는 권장되는 EL2에서 진입할 수 있습니다.
-- MMU는 꺼져 있어야 하고 모든 DAIF interrupt를 mask합니다. D-cache가 단순히 꺼져 있어야 한다고 쓰지 않습니다. Image range는 PoC까지 clean하고 I-cache의 stale entry가 없어야 합니다.
-- initrd를 전달하면 kernel Image를 포함하는 최대 32 GiB의 1-GiB-aligned physical window 안에 완전히 있어야 합니다.
+arm64 kernel `Image`의 첫 64 byte는 `Documentation/arch/arm64/booting.rst`가 정한 헤더입니다. Debian kernel 파일에서 직접 읽었습니다.
 
-EFI 경로는 EFI application/boot protocol을 통해 stub이 초기화를 수행하므로 위 direct-entry 요약을 그대로 EFI 진입에 적용하지 않습니다. 자세한 CPU feature register 조건은 같은 버전의 kernel 문서와 platform firmware specification을 확인해야 합니다.
+| 필드 | 값 | 의미 |
+| --- | --- | --- |
+| `code0` | `0xfa405a4d` | 첫 명령어. 앞 2 byte가 `MZ`(PE 파일 표식) |
+| `text_offset` | `0x0` | 2 MiB 정렬 주소로부터 kernel을 놓을 거리 |
+| `image_size` | `0x24f0000` (36.94 MiB) | kernel이 실제로 차지할 메모리 크기 |
+| `flags` | `0xa` | bit0=0 little endian, bit1-2=1 4K page, bit3=1 물리 배치 자유 |
+| `magic` | `0x644d5241` (`ARM\x64`) | arm64 Image 표식 |
+| `res5` | `0x40` | PE/COFF 헤더 위치(EFI 실행용) |
 
-## ARM32 direct boot
+`image_size`(36.94 MiB)가 파일 크기(35.9 MiB, 37,660,608 byte)보다 큽니다. 파일에 담기지 않는 BSS 같은 영역까지 포함한 "실제로 차지할 크기"이기 때문이고, 부트로더는 이 크기만큼 비워 두어야 합니다. `flags`의 bit 3은 문서에서 "Kernel physical placement"입니다. 1이면 2 MiB 정렬 주소가 48-bit 물리 주소 범위 안 어디에 있어도 되고, 0이면 DRAM 시작에 최대한 가깝게 놓아야 합니다.
 
-[Linux v6.12 ARM booting 문서](https://docs.kernel.org/6.12/arch/arm/booting.html)는 boot data를 r2로 전달하도록 정의합니다. DT-only platform은 r1 machine type을 `~0`으로 둘 수 있습니다.
+`code0`이 재미있습니다. 이 4 byte는 PE 파일 표식 `MZ`로 시작하면서, 동시에 AArch64 명령어로 실행해도 아무 일도 하지 않게 만들어져 있습니다. 아래에서 gdb가 보여 주듯 `ccmp x18, #0x0, #0xd, pl`로 해석되고, 다음 명령어 `code1`이 실제 시작 코드로 점프합니다. 같은 파일이 [18장](/blog/embedded/bootloader/chapter18-efi-in-uboot)에서는 EFI 프로그램으로, 이 글에서는 직접 실행되는 이유입니다.
 
-- r0 = 0, r1 = machine type 또는 DT-only platform의 `~0`, r2 = ATAGS 또는 DTB physical address.
-- DTB는 64-bit aligned이며 kernel decompressor가 덮어쓰지 않는 범위에 둡니다. 문서가 제시하는 safe placement는 RAM 시작 뒤 128 MiB 경계보다 위쪽입니다.
-- DT와 ATAGS는 서로 다른 boot-data format이며 실제 kernel/platform이 기대하는 형식을 따라야 합니다.
+## U-Boot `booti`가 하는 배치
 
-이 요약은 ARM32의 전체 entry condition이나 오래된 board별 machine type 목록을 대체하지 않습니다.
+`arch/arm/lib/image.c`의 `booti_setup()`은 헤더를 읽어 kernel을 둘 주소를 정합니다.
 
-## RISC-V direct boot
+```c
+/* arch/arm/lib/image.c (v2024.04), booti_setup() 일부 */
+if (!force_reloc && (le64_to_cpu(ih->flags) & BIT(3)))
+	dst = image - text_offset;
+else
+	dst = gd->bd->bi_dram[0].start;
 
-[Linux v6.12 RISC-V boot requirements](https://docs.kernel.org/6.12/arch/riscv/boot.html)에 따르면 a0에는 현재 hart ID, a1에는 DT 주소를 전달하며 `satp=0`이어야 합니다. Kernel image alignment와 resident firmware memory reservation도 함께 지켜야 합니다.
-
-Linux가 항상 OpenSBI를 거친다고 일반화할 수 없습니다. firmware mode, SBI implementation 및 hart release 방식은 platform configuration에 따라 다릅니다. boot firmware는 resident memory를 DT 또는 EFI memory map에 올바르게 표시해야 합니다.
-
-## x86 64-bit boot protocol
-
-x86은 별도 setup/boot_params protocol을 사용합니다. [Linux v6.12 x86 boot protocol](https://docs.kernel.org/6.12/arch/x86/boot.html)의 64-bit entry 조건에는 `struct boot_params`를 가리키는 RSI, 64-bit mode와 paging, 정해진 segment/GDT 상태 및 interrupts disabled가 포함됩니다. Identity mapping은 임의로 “첫 4 GiB”라고 요약하지 않고 해당 protocol의 `init_size`와 memory range 조건을 따라야 합니다.
-
-32-bit protected-mode와 real-mode entry는 서로 다른 protocol 단계와 fields를 사용합니다. `EBX/EBP/EDI/ESI`의 한 묶음을 모든 32-bit entry에 보편 레지스터 ABI로 제시하지 않습니다.
-
-## U-Boot command와 Linux protocol 구분
-
-U-Boot command는 이미지 형식별 boot path를 선택하며, 구체적인 가용성은 configuration에 달려 있습니다.
-
-| 명령 | U-Boot v2025.01 문서의 용도 | 적용 시 확인할 점 |
-|------|------------------------------|------------------|
-| `bootm` | legacy image 또는 FIT OS boot | FIT configuration/subimage, initrd 및 FDT 인자 |
-| `booti` | flat 또는 설정된 compressed `Image` 형식 | `CONFIG_CMD_BOOTI`, compression options와 address layout |
-| `bootz` | Linux `zImage` 형식 | `CONFIG_CMD_BOOTZ`, initrd/FDT 주소 |
-| `bootefi` | EFI application 및 EFI boot manager path | EFI protocol/build/board configuration; Linux direct-entry 레지스터와 혼동 금지 |
-
-명령 이름만으로 cache/MMU 동작과 모든 ABI condition을 추정하지 않습니다. [bootm](https://docs.u-boot.org/en/v2025.01/usage/cmd/bootm.html), [booti](https://docs.u-boot.org/en/v2025.01/usage/cmd/booti.html), [bootz](https://docs.u-boot.org/en/v2025.01/usage/cmd/bootz.html) 문서의 syntax와 target build를 대조합니다.
-
-## DTB, initrd와 command line
-
-DTB/initrd의 위치 조건은 architecture별 protocol을 따릅니다. `fdt_high`나 `initrd_high`에 특정 값을 넣으면 항상 안전하다는 일반 규칙은 없습니다. 실제 memory map, relocation behavior, reserved regions와 image size를 확인해야 합니다.
-
-U-Boot environment의 `bootargs`는 U-Boot boot path가 FDT를 준비하는 과정에서 사용될 수 있지만, 기존 `/chosen` properties와 board fixups를 포함한 결과를 target configuration에서 확인해야 합니다. 다음은 argument shape만 보이는 예이며 실행 기록이 아닙니다.
-
-```text
-=> booti <kernel-address> <initrd-address>:<initrd-size> <fdt-address>
+*relocated_addr = ALIGN(dst, SZ_2M) + text_offset;
 ```
 
-DT의 `linux,initrd-start`/`linux,initrd-end` 인코딩과 `#address-cells`는 DT/platform에 따라 달라지므로 고정 32-bit/64-bit cell example을 보편값으로 사용하지 않습니다.
+bit 3이 1이면 올린 주소를 2 MiB 단위로 **올림**하고, 0이면 DRAM 시작으로 보냅니다. `image_size`가 0인 옛 kernel이면 "Image lacks image_size field, assuming 16MiB"를 출력하고 `text_offset`을 `0x80000`으로 가정합니다. 2 MiB 경계가 아닌 `0x40480000`에 kernel을 올려 `booti`했습니다.
 
-## 첫 출력이 없을 때
+```text
+=> load virtio 0:1 0x40480000 /boot/vmlinuz
+37660608 bytes read in 295 ms (121.7 MiB/s)
+=> echo fdtcontroladdr=${fdtcontroladdr}
+fdtcontroladdr=7e593d90
+=> booti 0x40480000 - ${fdtcontroladdr}
+Moving Image from 0x40480000 to 0x40600000, end=42af0000
+## Flattened Device Tree blob at 7e593d90
+   Booting using the fdt blob at 0x7e593d90
+Working FDT set to 7e593d90
+   Loading Device Tree to 000000007d485000, end 000000007d587fff ... OK
+Working FDT set to 7d485000
 
-조용한 화면만으로 원인을 ABI 위반 하나로 좁힐 수 없습니다. UART/pinmux, kernel console arguments, image type/load address, DTB, cache maintenance와 early firmware handoff를 분리해 확인합니다. “90%” 같은 근거 없는 성공률 수치 대신, 재현 가능한 board log와 build/tag 정보를 함께 남깁니다.
+Starting kernel ...
+```
+
+`0x40480000`을 2 MiB로 올림하면 `0x40600000`이고, 끝 주소 `0x42af0000`은 `0x40600000 + image_size`입니다. `cmd/booti.c`는 이때 `image_size`만큼 `memmove`합니다. 파일보다 큰 범위를 옮기므로, kernel을 올린 주소 바로 뒤에 다른 이미지(initrd 등)를 붙여 두면 이 이동에 덮일 수 있습니다. 처음부터 2 MiB 정렬 주소(예: QEMU의 `kernel_addr_r=0x40400000`)에 올리면 이동이 일어나지 않습니다.
+
+DTB도 옮겨졌습니다. U-Boot는 DTB를 RAM 위쪽 `0x7d485000`으로 복사한 뒤 그 주소를 kernel에 넘깁니다. 문서는 DTB가 8 byte 경계에 있고 2 MB를 넘지 않을 것을 요구하는데, 이 DTB는 4 KiB 정렬에 약 1 MiB(`0x7d485000`~`0x7d587fff`)입니다.
+
+## 진입 순간의 레지스터
+
+gdb를 QEMU에 붙여 kernel 첫 명령어 주소 `0x40600000`에 hardware breakpoint를 걸고 위의 `booti`를 실행했습니다.
+
+```text
+Breakpoint 1, 0x0000000040600000 in ?? ()
+x0             0x7d485000          2101891072
+x1             0x0                 0
+x2             0x0                 0
+x3             0x0                 0
+pc             0x40600000          0x40600000
+cpsr           0x600002c5          [ SP EL=1 F I D BTYPE=0 C Z ]
+=> 0x40600000:	ccmp	x18, #0x0, #0xd, pl	// pl = nfrst
+   0x40600004:	b	0x423120f0
+```
+
+문서의 "Primary CPU general-purpose register settings"와 하나씩 맞춰 봅니다.
+
+- `x0 = 0x7d485000`: 바로 위 로그의 "Loading Device Tree to 7d485000"과 같은 주소입니다. 원래 위치(`fdtcontroladdr`)가 아니라 **옮긴 뒤의 주소**가 넘어갑니다.
+- `x1`~`x3 = 0`: 문서가 "reserved for future use"로 0을 요구하는 값입니다. U-Boot는 `arch/arm/lib/bootm.c`에서 `armv8_switch_to_el2((u64)images->ft_addr, 0, 0, 0, …)`로 이 네 값을 넘깁니다.
+- `cpsr = 0x600002c5`: 하위 4 bit `0x5`는 EL1h, 곧 EL1입니다.
+
+### 인터럽트 마스크 — 문서와 다른 한 비트
+
+문서의 CPU mode 절은 "All forms of interrupts must be masked in PSTATE.DAIF (Debug, SError, IRQ and FIQ)"라고 네 가지를 모두 요구합니다. 위 `cpsr`의 DAIF는 D(bit 9)·I(bit 7)·F(bit 6)가 1이지만 **A(SError, bit 8)는 0**입니다.
+
+소스를 따라가면 이유가 보입니다. `arch/arm/cpu/armv8/start.S`는 U-Boot 자신을 위해 `msr daifclr, #0x4`("Unmask SError interrupts")로 SError를 풉니다. kernel로 넘어가기 전 `cleanup_before_linux()`가 부르는 `disable_interrupts()`는 AArch64용 구현(`arch/arm/lib/interrupts_64.c`)이 아무것도 하지 않고 0을 돌려주는 함수입니다. 그리고 이미 EL1이면 `armv8_switch_to_el2`는 상태를 바꾸지 않고 kernel로 점프합니다. 그래서 reset 때부터 마스크되어 있던 D·I·F는 그대로이고, U-Boot가 푼 A만 풀린 채로 kernel에 들어갑니다. 이 QEMU 환경에서는 kernel이 정상 부팅했지만, 진입 직후 SError가 나는 보드라면 kernel이 예외 벡터를 준비하기 전에 받게 되는 조건입니다. ABI를 검증할 때는 레지스터 값뿐 아니라 이런 상태 비트까지 실제로 봐야 하는 이유입니다.
+
+## EL1과 EL2
+
+문서는 진입 EL로 EL2를 권장하고 EL1도 허용합니다. QEMU에 `-machine virt,virtualization=on`을 주면 U-Boot가 EL2에서 실행되고, 같은 절차의 결과가 달라집니다.
+
+| | 기본 (`virt`) | `virt,virtualization=on` |
+| --- | --- | --- |
+| 진입 `cpsr` | `0x600002c5` (EL1h) | `0x600002c9` (EL2h) |
+| `x0` / `x1`~`x3` | `0x7d485000` / 0 | `0x7d485000` / 0 |
+| kernel 로그 | `CPU: All CPU(s) started at EL1`, `kvm [1]: HYP mode not available` | `CPU: All CPU(s) started at EL2`, `kvm [1]: IPA Size Limit: 44 bits` |
+
+EL1로 들어오면 kernel은 hypervisor 모드를 쓸 수 없어 KVM이 꺼집니다. 문서가 EL2를 "RECOMMENDED in order to have access to the virtualisation extensions"라고 쓴 이유가 이 한 줄입니다. 가상화를 쓰는 제품이라면 TF-A나 U-Boot가 kernel을 EL2로 넘기도록 구성되어 있는지 이 로그로 확인합니다.
+
+## initrd와 cache·MMU 조건
+
+같은 문서의 나머지 AArch64 조건 중 부트로더 쪽에서 자주 걸리는 것들입니다.
+
+- initrd를 넘긴다면 kernel Image를 포함하는 1 GB 정렬, 최대 32 GB 크기의 물리 주소 창 안에 완전히 들어 있어야 합니다.
+- MMU는 꺼져 있어야 하고, kernel이 놓인 범위는 PoC까지 clean되어 있어야 합니다. U-Boot는 `cleanup_before_linux()`에서 I-cache와 D-cache를 끄고 무효화합니다(AArch64에서 `dcache_disable()`은 MMU도 함께 끕니다).
+- DTB는 8 byte 경계, 2 MB 이하이며, 특정 속성으로 매핑되어야 하는 2 MB 영역 안에 두면 안 됩니다.
+
+## 다른 아키텍처는 무엇이 다른가
+
+같은 v6.12 문서들의 진입 조건을 나란히 놓으면 다음과 같습니다.
+
+| 아키텍처 | 문서 | DTB/부트 정보 | 그 밖의 레지스터·상태 |
+| --- | --- | --- | --- |
+| AArch64 | `arm64/booting.rst` | `x0` = DTB 물리 주소 | `x1`~`x3` = 0, MMU off, DAIF 마스크, EL2 권장 |
+| ARM32 | `arm/booting.rst` | `r2` = ATAGS 또는 DTB 물리 주소 | `r0` = 0, `r1` = machine type, IRQ·FIQ 비활성 |
+| RISC-V | `riscv/boot.rst` | `a1` = DT 주소 | `a0` = 현재 hart ID, `satp` = 0 (MMU off) |
+| x86-64 | `x86/boot.rst` (64-bit Boot Protocol) | `rsi` = `struct boot_params` 주소 | 64-bit mode·paging 켜진 상태, 진입점 = 적재 주소 + `0x200`, 인터럽트 비활성 |
+
+ARM32 문서는 kernel decompressor가 DTB를 덮지 않으면서 low-memory mapping 안에 들도록, RAM 시작에서 128 MiB 경계 바로 위를 안전한 DTB 위치로 제시합니다(initramfs는 그 DTB 바로 위). RISC-V는 UEFI로 부팅할 때 EFI stub이 boot hart ID를 펌웨어에서 얻어야 하므로, 문서가 그 방법을 따로 정합니다. `RISCV_EFI_BOOT_PROTOCOL`이 권장 방법이고, devicetree의 `boot-hartid` 노드는 deprecated이며 새 펌웨어는 프로토콜을 구현해야 합니다. x86은 레지스터 몇 개가 아니라 `boot_params`("zero page")라는 구조체를 채워 넘기는 방식이라 성격이 가장 다릅니다.
+
+## U-Boot 명령과 경로
+
+| 명령 | 다루는 형식 | 이 시리즈에서 본 곳 |
+| --- | --- | --- |
+| `booti` | AArch64 `Image` (위 헤더) | 이 글, [14장](/blog/embedded/bootloader/chapter14-bootflow-bootmeth) extlinux |
+| `bootm` | FIT·legacy image | [15장](/blog/embedded/bootloader/chapter15-fit-image), [16장](/blog/embedded/bootloader/chapter16-verified-boot) |
+| `bootz` | ARM32 `zImage` | — |
+| `bootefi` | EFI 프로그램 (kernel의 EFI stub 포함) | [18장](/blog/embedded/bootloader/chapter18-efi-in-uboot) |
+
+`bootefi` 경로에서는 위의 레지스터 규약을 U-Boot가 아니라 kernel의 EFI stub이 맞춥니다. 18장 로그의 `EFI stub: Exiting boot services...` 다음이 이 글의 진입 지점에 해당합니다.
 
 ## 정리
 
-- AArch64 direct entry는 x0–x3뿐 아니라 image/DTB/initrd placement, EL, interrupts 및 cache/MMU 상태가 함께 맞아야 합니다.
-- ARM32, RISC-V, x86은 서로 다른 Linux boot protocol을 사용합니다.
-- U-Boot `bootm`/`booti`/`bootz`/`bootefi`는 이미지 및 boot path 선택을 설명하며 모든 ABI 검증을 자동 보장하는 것은 아닙니다.
-- version-pinned kernel docs, U-Boot config/source, DT/memory map과 실제 target output을 함께 확인해야 합니다.
+- arm64 Image 헤더(Debian 6.12): `text_offset` 0, `image_size` 36.94 MiB(파일보다 큼), `flags` 0xa(LE, 4K, 배치 자유).
+- `booti`는 bit 3이 1이면 적재 주소를 2 MiB로 올림해 옮깁니다. `0x40480000` → `0x40600000`으로 `image_size`만큼 이동했습니다.
+- 진입 순간 `x0`는 U-Boot가 **옮긴 뒤의** DTB 주소(`0x7d485000`), `x1`~`x3`는 0이었습니다.
+- v2024.04의 이 경로에서는 DAIF 중 SError(A)가 풀린 채로 진입했습니다. `start.S`가 풀고, AArch64 `disable_interrupts()`는 아무것도 하지 않습니다.
+- EL1 진입이면 KVM이 꺼지고(`HYP mode not available`), EL2 진입이면 켜집니다.
+- ARM32는 `r2`, RISC-V는 `a1`(hart ID는 `a0`), x86-64는 `rsi`의 `boot_params`로 부트 정보를 넘깁니다.
 
 ## 다음 장 예고
 
-다음 장에서는 RAUC와 SWUpdate의 bundle/manifest와 bootloader integration을 비교합니다. 이 프레임워크가 slot policy를 자동으로 정한다고 가정하지 않고, target의 bootchooser contract를 구분해 살펴봅니다.
+다음 장에서는 RAUC와 SWUpdate가 업데이트 번들을 어떻게 만들고 설치하는지, 그리고 [17장](/blog/embedded/bootloader/chapter17-ab-update)에서 본 U-Boot 쪽 슬롯 변수(`BOOT_ORDER`, `BOOT_<이름>_LEFT`)와 어떻게 이어지는지 비교합니다.
 
 ## 관련 항목
 
 - [Ch 18: EFI in U-Boot](/blog/embedded/bootloader/chapter18-efi-in-uboot) — Linux EFI stub 이전의 EFI handoff
 - [Ch 20: RAUC / SWUpdate](/blog/embedded/bootloader/chapter20-rauc-swupdate) — update framework와 bootchooser contract
+- [U-Boot v2024.04 `arch/arm/lib/image.c`](https://github.com/u-boot/u-boot/blob/v2024.04/arch/arm/lib/image.c) · [`arch/arm/lib/bootm.c`](https://github.com/u-boot/u-boot/blob/v2024.04/arch/arm/lib/bootm.c)
 - [Linux ARM64 boot protocol v6.12](https://docs.kernel.org/6.12/arch/arm64/booting.html)
 - [Linux ARM boot protocol v6.12](https://docs.kernel.org/6.12/arch/arm/booting.html)
 - [Linux RISC-V boot requirements v6.12](https://docs.kernel.org/6.12/arch/riscv/boot.html)

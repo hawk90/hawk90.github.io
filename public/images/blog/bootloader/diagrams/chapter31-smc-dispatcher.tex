@@ -20,14 +20,14 @@
 % Step boxes — center column
 \node[el1]   (k)   at (0,  6.0) {Linux kernel (EL1)\\[2pt]\footnotesize \texttt{arm\_smccc\_smc(\#0)}};
 \node[vec]   (v)   at (0,  3.0) {vbar\_el3 + 0x400\\[2pt]\footnotesize sync\_exception\_aarch64};
-\node[asmb]  (e)   at (0,  0.0) {handle\_sync\_exception\\[2pt]\footnotesize ESR\_EL3.EC == SMC64?};
-\node[disp]  (d)   at (0, -3.0) {handle\_runtime\_svc\\[2pt]\footnotesize OEN $\rightarrow$ rt\_svc\_descs\_indices[]};
-\node[svc]   (s)   at (0, -6.0) {std\_svc\_smc\_handler\\[2pt]\footnotesize PSCI / SDEI / RAS};
+\node[asmb]  (e)   at (0,  0.0) {handler\_sync\_exception()\\[2pt]\footnotesize ESR\_EL3.EC == SMC64?};
+\node[disp]  (d)   at (0, -3.0) {sync\_handler()\\[2pt]\footnotesize OEN $\rightarrow$ rt\_svc\_descs\_indices[]};
+\node[svc]   (s)   at (0, -6.0) {std\_svc\_smc\_handler\\[2pt]\footnotesize PSCI 등 (빌드 구성에 따라)};
 
 % Left tags — EL / file
 \node[ltag] at (-4.2,  6.0) {EL1};
-\node[ltag] at (-4.2,  3.0) {EL3 vector};
-\node[ltag] at (-4.2,  0.0) {runtime\_exceptions.S};
+\node[ltag] at (-4.2,  3.0) {runtime\_exceptions.S};
+\node[ltag] at (-4.2,  0.0) {runtime\_svc.c};
 \node[ltag] at (-4.2, -3.0) {runtime\_svc.c};
 \node[ltag] at (-4.2, -6.0) {service handler};
 

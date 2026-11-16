@@ -242,3 +242,33 @@
   correction: 'H100 PCIe(HBM2e)와 H100 NVL(HBM3)은 별개 제품'
   source: 'NVIDIA H100 product page / Hopper whitepaper'
   fixed_in: 9ad745f7
+
+- id: uboot-imx8mm-spl-gd-size-448
+  pattern: 'GD_SIZE` 448'
+  correction: 'i.MX8MM SPL의 sizeof(struct global_data)는 424. 448은 U-Boot proper 값'
+  source: 'U-Boot v2024.04 imx8mm_evk build: spl/include/generated/generic-asm-offsets.h'
+  fixed_in: 9fa3cece
+
+- id: uboot-imx8m-lpddr4-cdd-dramtmg9
+  pattern: 'DRAMTMG2`·`DRAMTMG9'
+  correction: 'LPDDR4 CDD 보정은 DRAMTMG2·RANKCTL만. DRAMTMG9는 DDR4 분기'
+  source: 'U-Boot v2024.04 drivers/ddr/imx/imx8m/ddr_init.c:228-290'
+  fixed_in: 9fa3cece
+
+- id: uboot-imx8mm-pmic-configured
+  pattern: 'power_init_board\(\)`가 PMIC\(PCA9450\)를 I2C로 설정'
+  correction: 'v2024.04 power_init_board는 "pca9450@25"를 찾지만 DT 노드는 pmic@4b라 -ENODEV로 쓰기를 건너뜀'
+  source: 'U-Boot v2024.04 board/freescale/imx8mm_evk/spl.c:77, arch/arm/dts/imx8mm-evk.dtsi:186'
+  fixed_in: 9fa3cece
+
+- id: linux-cache-invalidate-memregion-mm-kconfig
+  pattern: 'mm/Kconfig[^\n]{0,20}ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION'
+  correction: 'v6.12에서 ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION은 lib/Kconfig에 정의되고 arch/x86/Kconfig가 select한다'
+  source: 'Linux v6.12 lib/Kconfig:680, arch/x86/Kconfig:76'
+  fixed_in: f3b70730
+
+- id: linux-cxl-qemu-hb-decoder-hdm
+  pattern: 'decoder1\.0 \| port1\(host bridge\)의 HDM decoder'
+  correction: 'QEMU pxb-cxl 단일 dport에서 port1의 decoder1.0은 cxl_switch_port_probe의 passthrough decoder ("Fallback to passthrough decoder")'
+  source: 'Linux v6.12 drivers/cxl/port.c cxl_switch_port_probe; guest dyndbg log'
+  fixed_in: f3b70730

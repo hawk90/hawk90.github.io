@@ -12,281 +12,177 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"U-Boot, TF-A, EDK II, LinuxBoot은 서로 다른 펌웨어 역할을 맡을 수 있습니다."** — 다만 역할과 조합은 아키텍처, SoC, 플랫폼 구성에 따라 달라집니다.
+U-Boot, TF-A, EDK II, OpenSBI는 경쟁 제품이 아니라 부트 체인의 서로 다른 자리에 들어가는 부품입니다. U-Boot v2024.04로 `imx8mm_evk`를 빌드하면 최종 이미지 `flash.bin` 하나에 U-Boot SPL, NXP DDR PHY 펌웨어, TF-A BL31, U-Boot Proper가 binman으로 묶입니다. 서로 다른 세 출처의 바이너리입니다. 같은 자리를 다른 아키텍처에서는 다른 프로젝트가 맡습니다. RISC-V QEMU를 켜면 TF-A 대신 OpenSBI v1.8.1이 M-mode에서 먼저 올라옵니다.
 
-"임베디드 부트로더 = U-Boot"이라는 인식이 있지만 일부 ARMv8-A 시스템은 여러 펌웨어를 조합합니다. 흔한 구성 한 가지에서는 TF-A가 BL31 runtime firmware를 제공하고, U-Boot이 BL33으로 동작하며, 선택적으로 OP-TEE가 BL32 payload가 됩니다. BL1·BL2의 사용 여부와 각 단계의 담당 프로젝트는 플랫폼 구성에 따라 달라집니다. 각 컴포넌트의 역할을 알아야 실제 보드의 부트 체인을 읽을 수 있습니다.
+## 네 프로젝트의 자리
 
-## 네 가지 부트로더의 자리
+| 프로젝트 | 자리 | 이 시리즈에서 실행한 것 |
+|---------|------|------------|
+| U-Boot | SPL(초기 단계), U-Boot Proper(부트 정책, Armv8에서는 BL33) | v2024.04 `qemu_arm64`, `imx8mm_evk` 빌드 |
+| TF-A | BL1·BL2(trusted boot), BL31(EL3 상주 firmware), BL32 자리 제공 | v2.15.0 `PLAT=qemu` |
+| EDK II | UEFI firmware | QEMU 포함 `edk2-stable202408`, Debian `AAVMF` |
+| OpenSBI | RISC-V M-mode firmware (SBI 제공) | QEMU 포함 v1.8.1 |
 
-다음 네 가지가 *서로 다른 자리*에 들어가는 부트로더입니다.
+TF-A v2.15.0 release 빌드(`PLAT=qemu`)의 크기는 BL1 22,832바이트, BL2 25,072바이트, BL31 49,255바이트입니다. `qemu_arm64` U-Boot는 1,047,344바이트입니다. Debian의 EDK II 빌드 `QEMU_EFI.fd`는 파일 크기가 3 MiB입니다. QEMU의 pflash용 `edk2-aarch64-code.fd`는 64 MiB로 패딩돼 있어 실제 코드 크기를 보여 주지 않습니다.
 
-| 컴포넌트 | 정식 명칭 | 자리 | 대표 사용처 |
-|---------|---------|------|------------|
-| U-Boot | Das U-Boot | 부트 정책, BL33 | 임베디드 ARM/RISC-V |
-| TF-A | Trusted Firmware-A | BL1·BL2·BL31 등 trusted firmware 단계 | Arm 플랫폼용 trusted firmware |
-| EDK II | EFI Development Kit II | UEFI firmware | ARM 서버, x86 워크스테이션 |
-| LinuxBoot | Linux-based firmware | 플랫폼에 따라 firmware의 OS 적재 역할 | 서버 펌웨어 구성 사례 |
+## U-Boot
 
-같은 보드에 *여러 개가 동시에* 들어갑니다. NXP i.MX 8M Plus 양산 보드의 부트 체인은 다음과 같습니다.
+U-Boot v2024.04의 README는 프로젝트의 출발을 이렇게 적습니다. 8xxrom 소스에서 시작해 PPCBoot 프로젝트를 만들고, ARMBoot로 ARM을 더한 뒤 U-Boot 프로젝트가 됐습니다. 공식 이름은 "Das U-Boot"이고, 글에서는 "U-Boot"로 씁니다.
 
-![i.MX 8M Plus 부트 체인 — BootROM → SPL → BL31 → U-Boot Proper → Kernel](/images/blog/bootloader/diagrams/chapter02-imx-boot-chain.svg)
+U-Boot가 맡는 일은 부트 미디어 드라이버, 파일 시스템, 네트워크 부팅, 환경 변수와 bootstd 부트 정책, FIT 이미지와 서명 검증, DT fixup입니다. 시리즈의 [Ch 10](/blog/embedded/bootloader/chapter10-storage-boot)–[Ch 16](/blog/embedded/bootloader/chapter16-verified-boot)이 이 영역입니다.
 
-SPL과 U-Boot Proper는 모두 *U-Boot 소스 트리*에서 빌드되지만 *완전히 다른 바이너리*입니다. BL31은 *TF-A 소스 트리*에서 빌드됩니다. 두 프로젝트가 *서로의 결과물을 link*해서 최종 부트 이미지를 만듭니다.
+U-Boot도 UEFI 인터페이스를 구현합니다. 다만 목표 범위가 정해져 있습니다. v2024.04 `doc/develop/uefi/uefi.rst`는 구현이 "Embedded Base Boot Requirements (EBBR) Specification - Release v2.1.0"의 요구사항을 목표로 한다고 하고, "A full blown UEFI implementation would contradict the U-Boot design principle "keep it small""이라고 적습니다. 그래서 U-Boot 위에서도 GRUB이나 Linux EFI stub을 실행할 수 있습니다([Ch 18](/blog/embedded/bootloader/chapter18-efi-in-uboot)).
 
-## Das U-Boot — 임베디드의 사실상 표준
+## SPL은 U-Boot의 빌드 산출물
 
-Wolfgang Denx가 1999년에 시작한 PowerPC 부트로더 PPCBoot에서 출발했습니다. 2002년 ARM 지원 추가 후 *Das U-Boot*으로 개명. 현재는 ARM, RISC-V, MIPS, x86, NIOS 등 *대부분의 임베디드 아키텍처*를 지원합니다.
+SPL은 별도 프로젝트가 아니라 같은 U-Boot 트리에서 `CONFIG_SPL=y`로 함께 나오는 바이너리입니다. `imx8mm_evk` 빌드 디렉터리에는 두 단계가 따로 있습니다.
 
-### U-Boot이 잘하는 일
+| 파일 | 크기 (바이트) | 단계 |
+| --- | --- | --- |
+| `spl/u-boot-spl.bin` | 152,599 | SPL (SRAM에서 실행, DDR 초기화) |
+| `u-boot.bin` | 713,888 | U-Boot Proper (DTB 포함) |
 
-- 부트 미디어 추상화 (SD, eMMC, NAND, SPI, USB, ethernet)
-- 환경 변수와 bootcmd
-- FIT image, verified boot
-- Device Tree fixup
-- TFTP, NFS, DHCP를 통한 네트워크 부팅
-- 다양한 파일 시스템 (FAT, ext4, UBIFS, btrfs read-only)
+SPL 쪽 옵션은 `CONFIG_SPL_*`로 따로 켜고 끕니다. SPL이 쓰는 SRAM 위치와 크기 한계는 [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 이 빌드의 링커 맵으로 봅니다.
 
-### U-Boot이 안 하는 일
+## 한 이미지 안의 세 출처 — imx8mm_evk의 flash.bin
 
-- 보통의 BL33 구성에서 EL3 runtime·secure-world service 제공 (플랫폼이 별도 firmware로 구성)
-- 전체 UEFI 규격 구현 (U-Boot의 목표는 EBBR 요구사항 범위이며, UEFI 기능은 설정에 따름)
-- 모든 SoC의 secondary CPU 전원·해제 절차 구현 (플랫폼 firmware와 OS의 인터페이스에 따름)
-- 범용 OS나 hypervisor 역할
-
-다음은 U-Boot prompt에서 사용할 수 있는 보드별 부트 명령의 형태입니다. 실행 주소, 장치 번호, 파일 이름은 보드의 환경 변수와 메모리 배치에 맞게 바꿔야 합니다. 실제 보드에서 실행하지 않았으므로 transcript가 아닙니다.
+U-Boot v2024.04의 `imx8mm_evk`는 NXP의 별도 도구 `imx-mkimage` 대신 U-Boot 안의 binman으로 부트 이미지를 조립합니다. 빌드가 남긴 binman 맵 세 개를 합치면 구조가 보입니다.
 
 ```text
-=> mmc list
-=> load mmc 0:1 ${kernel_addr_r} Image
-=> load mmc 0:1 ${fdt_addr_r} board.dtb
-=> booti ${kernel_addr_r} - ${fdt_addr_r}
+ImagePos    Offset      Size  Name
+00000000  00000000  001090a0  imx-boot
+00000000   00000000  00027600  spl
+00057c00   00057c00  000b14a0  uboot
 ```
-
-U-Boot은 임베디드 Linux 시스템에서 널리 쓰이는 부트로더 중 하나입니다. 제품별 채택 비율을 단정하지 않고, 보드의 firmware 구성을 확인합니다.
-
-## ARM Trusted Firmware-A — secure world의 표준
-
-Arm이 공개하는 Trusted Firmware 프로젝트로, Armv7-A와 Armv8-A 플랫폼에서 EL3 runtime firmware 및 trusted boot 기능을 구현합니다. TF-A를 사용하는 구성이라도 모든 단계가 반드시 TF-A 안에 들어가는 것은 아니며, trusted boot 구성과 이미지 흐름은 플랫폼별로 확인해야 합니다.
-
-### TF-A가 책임지는 단계
-
-- **BL1** — boot ROM 직후의 첫 trusted code
-  - EL3 진입점
-  - BL2 무결성 검증 + 적재
-  - secure ROM 안에서 동작 가능
-- **BL2** — trusted boot firmware
-  - 다음 단계들(BL31, BL32, BL33)의 무결성 검증
-  - DDR 초기화는 대개 *여기서* (또는 SPL이 대신)
-  - BL31에 control 넘김
-- **BL31** — EL3 runtime firmware (secure monitor)
-  - 부트 끝나도 *계속 살아있음*
-  - PSCI 호출 (CPU on/off, suspend)
-  - SMC(secure monitor call) 핸들러
-  - normal world ↔ secure world 전환
-- **BL32** — secure-EL1 payload (선택)
-  - OP-TEE 같은 secure OS
-  - TA(Trusted Application) 실행 환경
-- **BL33** — non-trusted firmware
-  - U-Boot Proper 또는 EDK II
-  - normal world의 모든 부트 작업
-
-BL31은 *runtime* firmware입니다. 부팅이 끝나도 메모리에 *계속 살아 있고*, 커널이 *PSCI 호출(예: 다른 코어 깨우기)*을 할 때마다 *깨어나서 응답*합니다.
-
-이 단계는 특정 C 함수 호출 순서로 고정되지 않습니다. TF-A의 선택된 버전과 플랫폼 포트에서 이미지 로딩·entry point 준비 코드를 확인하세요. 일반적인 AArch64 구성에서는 BL2가 BL31 및 선택적 BL32와 BL33의 로드 정보를 준비하고, BL31 초기화 뒤 normal-world BL33으로 제어가 넘어갑니다.
-
-U-Boot과 Linux를 TF-A 없이 구성할 수 있는지는 플랫폼이 제공하는 초기화·EL3 runtime·CPU 전원 관리 firmware에 달려 있습니다. Linux의 secondary CPU 기동에는 PSCI 외에 플랫폼별 방법도 있으므로, “TF-A가 없으면 SMP를 쓸 수 없다”고 일반화할 수 없습니다. TF-A를 선택했다면 BL31이 PSCI를 제공하도록 설정됐는지와 OS가 그 인터페이스를 발견하는지를 해당 플랫폼의 DT/ACPI 및 firmware 설정에서 확인합니다.
-
-> 더 깊이 — ARM 아키 관점에서의 같은 주제
-
-## EDK II — UEFI 표준 준수
-
-Intel에서 시작해 TianoCore가 관리하는 오픈소스 firmware 개발 환경입니다. UEFI/PI 규격을 구현하는 플랫폼을 만들 수 있지만, 실제 제공 인터페이스와 규격 지원 범위는 플랫폼 빌드와 통합 결과에 따라 확인해야 합니다.
-
-### EDK II가 들어가는 자리
-
-- ARM server (Ampere Altra, NXP Layerscape 서버 SKU)
-- 일부 ARM laptop (Windows on ARM)
-- x86 워크스테이션 (BIOS 대체)
-- ARM 가상화 (QEMU + UEFI)
-
-### EDK II vs U-Boot
-
-| 항목 | EDK II | U-Boot |
-|------|--------|--------|
-| 표준·인터페이스 | UEFI/PI 규격 구현 환경; 플랫폼별 확인 필요 | 선택한 UEFI 기능을 구현; 플랫폼별 설정 필요 |
-| 크기 | 수 MB | 수백 KB |
-| 부트 인터페이스 | EFI 응용프로그램, BDS | 명령 인터프리터 |
-| Linux 부팅 | GRUB → vmlinuz.efi | bootcmd → booti |
-| 임베디드 친화 | 작은 RAM에서 부담 | 작은 시스템에 적합 |
-| Windows 부팅 | 가능 | 불가능 |
-
-Arm 서버는 일반적으로 OS와 펌웨어 사이에 UEFI 인터페이스를 제공하며, EDK II는 이를 구현하는 선택지 중 하나입니다. 어떤 EL3 runtime firmware를 함께 쓰는지는 플랫폼이 정하므로 TF-A가 항상 필수라고 단정하지 않습니다. 임베디드 보드도 요구사항에 따라 UEFI를 사용할 수 있고, U-Boot의 명령 기반 부트 흐름을 선택할 수도 있습니다.
-
-| 시스템 | 부트 체인 |
-|--------|----------|
-| 예시 ARM server 구성 | EL3 runtime firmware → UEFI firmware (예: EDK II) → UEFI OS loader → Linux kernel |
-| 예시 임베디드 구성 | BL31 (예: TF-A) → U-Boot (BL33) → Linux kernel |
-
-U-Boot도 *부분적으로 UEFI를 지원*하긴 합니다. `CONFIG_EFI_LOADER=y`로 빌드하면 EFI binary를 실행할 수 있어 *GRUB 같은 EFI bootloader를 통한 부트*가 가능합니다. [Ch 18: EFI in U-Boot](/blog/embedded/bootloader/chapter18-efi-in-uboot)에서 다룹니다.
-
-## LinuxBoot — Linux를 firmware로
-
-Google, Facebook 같은 *hyperscale 서버 운영사*가 주도하는 프로젝트입니다. 아이디어는 *firmware 단계를 짧게 줄이고 가능한 빨리 Linux kernel을 띄워, Linux를 firmware처럼 사용하자*는 것입니다.
 
 ```text
-일반 서버 부트:
-EL3 runtime firmware → UEFI firmware → OS loader → Linux
-
-LinuxBoot:
-firmware → Linux-based boot environment → kexec → product Linux
+ImagePos    Offset      Size  Name
+00000000  00000000  00025418  u-boot-spl-ddr
+00000000   00000000  00025417  u-boot-spl
+00000000    00000000  00023410  u-boot-spl-nodtb
+00023410    00023410  00002007  u-boot-spl-dtb
+00025418   00025418  00000000  ddr-1d-imem-fw
+00025418   00025418  00000000  ddr-1d-dmem-fw
+00025418   00025418  00000000  ddr-2d-imem-fw
+00025418   00025418  00000000  ddr-2d-dmem-fw
 ```
-
-LinuxBoot 구성에서는 작은 Linux 커널과 init 환경(예: `u-root`)을 firmware 단계에서 사용하고, 이후 `kexec`로 제품용 커널을 시작할 수 있습니다. 실제 이미지 순서와 BL 단계는 해당 플랫폼 설계에서 확인해야 합니다.
-
-### LinuxBoot의 장점
-
-- 부트 시간 단축 (driver 재초기화 없음)
-- *익숙한 도구*(linux command, go)로 부트 정책 작성
-- 부트 정책에 Linux 도구와 사용자 공간 프로그램을 활용할 수 있음
-
-### LinuxBoot의 한계
-
-- *작은 임베디드*에서는 mini Linux도 부담
-- secure boot 체인 통합이 까다로움
-- 제품별 보드 지원과 부트 체인 통합을 별도로 검증해야 함
-
-임베디드 boot loader 시리즈 본문에서는 LinuxBoot을 자세히 다루지 않습니다. U-Boot과 TF-A의 조합은 여러 Arm 플랫폼에서 쓰이는 선택지지만, 모든 제품의 표준 구성으로 일반화하지 않습니다.
-
-## 한 보드의 실제 분업
-
-NXP i.MX 8M Plus EVK의 부트 이미지가 어떻게 조립되는지 봅니다.
 
 ```text
-flash.bin
-├── IVT (Image Vector Table) — BootROM이 파싱
-├── HAB header — code-signing 정보
-├── SPL (u-boot-spl.bin)              ← U-Boot 소스에서
-│   - DDR training + U-Boot Proper 적재
-├── DDR firmware (lpddr4_*.bin)        ← NXP 제공 binary
-├── ATF (bl31.bin)                     ← TF-A 소스에서
-├── OPTEE (tee.bin) — 선택              ← OP-TEE 소스에서
-└── U-Boot Proper (u-boot.bin)         ← U-Boot 소스에서
+ImagePos    Offset      Size  Name
+00000000  00000000  000b14a0  itb
+00000000   00000000  000b14a0  fit
+00003000    00003000  000a43d0  uboot
+000a73d0    000a73d0  00000000  atf
+000a73d0    000a73d0  00000000  fip
 ```
 
-`mkimage` 또는 `imx-mkimage` 같은 도구가 이 *조각들을 하나의 flash.bin*으로 묶습니다.
+(`imx-boot.map`, `u-boot-spl-ddr.map`, `itb.map`. `itb.map`의 `uboot-blob`·`atf-blob` 줄 생략)
 
-```bash
-# NXP의 flash.bin 빌드 예시
-cd imx-mkimage
-make SOC=iMX8MP flash_evk
+| 조각 | 출처 | 이 빌드의 크기 |
+| --- | --- | --- |
+| U-Boot SPL (+ SPL용 DTB) | U-Boot 트리 | 0x23410 + 0x2007 |
+| `lpddr4_pmu_train_{1d,2d}_{imem,dmem}.bin` | NXP DDR PHY 펌웨어 (별도 배포) | 0 (없음) |
+| U-Boot Proper | U-Boot 트리 | 0xa43d0 |
+| `bl31.bin` | TF-A 트리 | 0 (없음) |
 
-# 결과:
-# iMX8M/flash.bin (수 MB)
-```
-
-이 flash.bin 하나를 *eMMC의 boot partition*에 굽고 boot mode strap을 그쪽으로 설정하면 *위에서 본 부트 체인*이 동작합니다.
-
-## SPL은 U-Boot의 일부
-
-용어 혼동을 정리합니다. SPL(Secondary Program Loader)은 *U-Boot의 빌드 산출물*입니다. U-Boot 소스 트리에서 *CONFIG_SPL=y*로 빌드하면 다음 두 바이너리가 나옵니다.
+DDR 펌웨어와 BL31의 크기가 0인 것은 이 빌드에 그 파일들을 넣지 않았기 때문입니다. binman이 그대로 알려 줍니다.
 
 ```text
-u-boot.bin        ← U-Boot Proper (BL33)
-u-boot-spl.bin    ← SPL (BL2 자리 또는 BL1+BL2 자리)
+Image 'u-boot-spl-ddr' is missing external blobs and is non-functional: ddr-1d-imem-fw ddr-1d-dmem-fw ddr-2d-imem-fw ddr-2d-dmem-fw
+Image 'itb' is missing external blobs and is non-functional: atf-blob
 ```
 
-U-Boot build system은 설정한 SPL 기능을 바탕으로 별도 SPL 산출물을 만들 수 있습니다. SPL과 U-Boot Proper의 옵션은 `CONFIG_SPL_*` 등을 통해 단계별로 달라지지만, 이를 서로 다른 `.config` 파일 두 개로 항상 빌드한다고 단정하지 않습니다. SPL이 사용하는 초기 메모리 영역과 크기 한계는 보드별 linker script와 BootROM 요구사항에서 확인해야 합니다.
+`BINMAN_ALLOW_MISSING=1`로 빌드를 끝까지 진행시켜 배치만 확인한 것입니다. 이 `flash.bin`(1,085,600바이트)은 보드에서 부팅되지 않습니다. 실제 이미지를 만들려면 TF-A에서 `PLAT=imx8mm`로 만든 `bl31.bin`과 NXP 펌웨어 파일을 빌드 디렉터리에 둬야 합니다. 이 결과가 이 장의 핵심입니다. 한 보드의 부팅 가능한 이미지 하나가 세 출처의 바이너리를 요구합니다.
 
-ARMv8-A 보드 중에는 SPL 자리를 *TF-A BL2*가 대신하는 경우도 있습니다.
+![i.MX 8M 계열 부트 체인 — BootROM → SPL → BL31 → U-Boot Proper → Kernel](/images/blog/bootloader/diagrams/chapter02-imx-boot-chain.svg)
+
+## TF-A
+
+Trusted Firmware-A는 Arm A-profile용 trusted firmware의 참조 구현입니다. 단계 이름은 BL(Boot Loader) 번호로 붙습니다.
+
+| 단계 | 역할 | QEMU에서 본 것 ([Ch 1](/blog/embedded/bootloader/chapter01-boot-problem)) |
+| --- | --- | --- |
+| BL1 | reset 직후 첫 trusted 코드, BL2 적재 | 주소 0, EL3 |
+| BL2 | trusted boot, 다음 이미지들 적재·검증 | 0xe05b000, S-EL1 |
+| BL31 | EL3 상주 runtime (PSCI, SMC 분배) | 0xe090000, EL3 |
+| BL32 | secure-EL1 payload (OP-TEE 등, 선택) | 이 빌드에는 없음 |
+| BL33 | normal world firmware (U-Boot, EDK II) | 0x60000000, EL1 |
+
+i.MX 8M Mini는 BL1·BL2를 쓰지 않습니다. BootROM 다음을 U-Boot SPL이 맡고, SPL이 BL31을 올립니다. 위 binman 맵에 BL1·BL2가 없는 이유입니다. QEMU 구성은 TF-A가 BL1부터 맡는 반대 사례입니다.
+
+BL31은 부팅이 끝나도 메모리에 남아 커널의 SMC 호출에 답합니다. [Ch 31](/blog/embedded/bootloader/chapter31-tfa-bl31-runtime)에서 BL31이 링크한 서비스를 읽고, [Ch 32](/blog/embedded/bootloader/chapter32-psci-smccc)에서 U-Boot로 PSCI `CPU_ON`을 직접 보냅니다. secondary CPU를 깨우는 방법이 PSCI만은 아닙니다. [Ch 33](/blog/embedded/bootloader/chapter33-smp-secondary-cpu-bringup)에서 spin-table을 다룹니다.
+
+## EDK II
+
+EDK II는 TianoCore가 관리하는 UEFI/PI firmware 개발 환경입니다. Arm 서버, x86 PC, 그리고 QEMU 가상 머신의 기본 UEFI firmware로 쓰입니다. 이 시리즈에서는 두 빌드를 실행했습니다. QEMU에 포함된 `edk2-stable202408`은 Secure Boot가 없는 빌드였고, Debian 13 `qemu-efi-aarch64`의 `AAVMF_CODE.secboot.fd`는 Secure Boot를 강제했습니다([Ch 37](/blog/embedded/bootloader/chapter37-secureboot-cert-rollover)). 같은 프로젝트라도 빌드 옵션에 따라 제공 기능이 다르다는 예입니다.
+
+| 구성 | 실행한 부트 체인 |
+| --- | --- |
+| QEMU virt + TF-A + U-Boot | BL1 → BL2 → BL31 → U-Boot(BL33) → `booti` → Linux |
+| QEMU virt + EDK II | UEFI firmware → shim(`EFI/BOOT/BOOTAA64.EFI`, 로그 출력 없음) → grub → Linux EFI stub |
+
+두 번째 구성에서 커널은 하드웨어 정보를 ACPI로 받습니다. EFI stub이 "Generating empty DTB"를 남겼습니다([Ch 1](/blog/embedded/bootloader/chapter01-boot-problem)).
+
+## OpenSBI — RISC-V의 M-mode firmware
+
+RISC-V에서 TF-A BL31에 해당하는 자리는 OpenSBI입니다. M-mode에서 상주하며 S-mode의 커널이나 U-Boot에 SBI 호출을 제공합니다. QEMU의 `-M virt`는 `-bios`를 주지 않으면 포함된 OpenSBI `fw_dynamic`을 씁니다.
 
 ```text
-[SPL을 사용하는 흐름]
-BootROM → SPL → BL31 → U-Boot Proper → Linux
-
-[BL2를 사용하는 흐름]
-BootROM → BL1 → BL2 (DDR init) → BL31 → U-Boot Proper → Linux
+OpenSBI v1.8.1
+...
+Platform Name               : riscv-virtio,qemu
+Platform HART Count         : 1
+Firmware Base               : 0x80000000
+Firmware Size               : 321 KB
+Runtime SBI Version         : 3.0
+Standard SBI Extensions     : time,rfnc,ipi,base,hsm,srst,pmu,dbcn,fwft,legacy,dbtr,sse
+Domain0 Next Address        : 0x0000000000000000
+Domain0 Next Arg1           : 0x000000009fe00000
+Domain0 Next Mode           : S-mode
 ```
 
-일부 i.MX·Rockchip 보드는 U-Boot SPL을 사용하고, 다른 플랫폼은 TF-A BL2를 사용하거나 별도 firmware 단계를 둡니다. 같은 SoC 계열에서도 보드와 보안 구성에 따라 달라질 수 있으므로 실제 부트 흐름을 먼저 확인합니다.
+(ASCII 로고와 PMP·HART 상세 줄 생략. `qemu-system-riscv64 -M virt -nographic -m 512`)
 
-## RISC-V의 분업 — OpenSBI
+OpenSBI는 RAM 시작 0x80000000에 321 KB로 자리 잡고, 다음 단계를 S-mode로 넘기려고 준비합니다. `Next Arg1` 0x9fe00000은 다음 단계에 넘길 DTB 주소입니다. 이 실행에는 커널도 U-Boot도 주지 않았으므로 `Next Address`가 0이고 그 뒤로 진행하지 않았습니다. 표준 확장 목록의 `hsm`(Hart State Management)이 Armv8 PSCI의 `CPU_ON`·`CPU_OFF`에 해당하는 역할을 합니다.
 
-RISC-V는 ARMv8-A의 TF-A에 대응하는 *OpenSBI(Supervisor Binary Interface)*가 있습니다. M-mode에서 동작하며 S-mode(커널·U-Boot)에 SBI call 인터페이스를 제공합니다.
+U-Boot v2024.04 `doc/board/emulation/qemu-riscv.rst`는 U-Boot SPL과 함께 쓰는 구성을 이렇게 설명합니다. SPL이 M-mode에서 시작해 U-Boot Proper와 OpenSBI `FW_DYNAMIC`을 FIT 이미지에서 올리고, OpenSBI가 U-Boot Proper를 S-mode로 시작합니다. i.MX 8M Mini에서 SPL이 BL31과 U-Boot Proper를 FIT에서 꺼내는 구조와 같은 모양입니다.
 
-```text
-RISC-V boot:
-BootROM → OpenSBI (M-mode) → U-Boot (S-mode) → Linux (S-mode)
-```
+## 자리를 정하는 기준
 
-OpenSBI는 *FW_PAYLOAD* 모드로 빌드하면 *내부에 U-Boot binary를 포함*하는 단일 이미지가 됩니다. 또는 *FW_JUMP* 모드로 *별도 U-Boot binary로 점프*합니다.
+| 플랫폼 | 이 시리즈에서 본 구성 | 무엇이 결정하나 |
+| --- | --- | --- |
+| Arm 임베디드 SoC | BootROM → U-Boot SPL → TF-A BL31 → U-Boot Proper | SoC 벤더 BSP가 지원하는 조합, SRAM 크기 |
+| Arm 가상 머신 | TF-A BL1부터, 또는 U-Boot 단독, 또는 EDK II | 에뮬레이터가 구현한 EL, 게스트 OS의 기대 (DT vs ACPI) |
+| RISC-V | OpenSBI (M) → U-Boot 또는 커널 (S) | SBI 구현 |
 
-```bash
-# OpenSBI를 FW_PAYLOAD로 빌드
-cd opensbi
-make PLATFORM=generic FW_PAYLOAD_PATH=../u-boot/u-boot.bin
-
-# 결과: build/platform/generic/firmware/fw_payload.bin
-```
-
-아래 명령은 OpenSBI generic FW_PAYLOAD와 QEMU가 준비된 시스템에서 실행하는 예입니다. 이 작업 환경에는 QEMU, RISC-V cross-compiler, OpenSBI/U-Boot checkout이 없어 실행하지 않았으며, 부팅 출력을 검증된 transcript로 제시하지 않습니다.
-
-```bash
-qemu-system-riscv64 -M virt -nographic \
-    -bios opensbi/build/platform/generic/firmware/fw_payload.bin
-```
-
-## 부트로더 선택 기준
-
-새 프로젝트에서 어느 부트로더를 쓸지 결정하는 기준입니다.
-
-<!-- TODO: TikZ flowchart (_design.tex) -->
-
-- **ARM 임베디드** — U-Boot으로 시작합니다.
-  - ARMv8-A라면 TF-A를 추가합니다.
-    - secure OS가 필요하면 OP-TEE(BL32)까지 추가합니다.
-  - ARMv8-A가 아니면 SPL + U-Boot Proper만으로 충분합니다.
-- **ARM server** — 플랫폼이 제공하는 UEFI firmware를 사용합니다. EDK II와 EL3 runtime firmware 선택은 보드 설계에 따라 확인합니다.
-- **x86** — coreboot 또는 EDK II를 씁니다.
-- **RISC-V** — OpenSBI + U-Boot 조합입니다.
-
-산업용 임베디드에서 U-Boot과 TF-A를 함께 쓰는 구성은 흔한 선택지입니다. 실제 구성은 SoC vendor BSP와 보드 문서에서 확인하고, 검증된 구성을 바탕으로 수정합니다.
+실제 제품은 SoC 벤더 BSP가 검증한 조합에서 출발하는 것이 보통입니다. i.MX 8M Mini의 경우 U-Boot 업스트림 `imx8mm_evk`가 요구하는 외부 파일 목록이 binman 경고로 그대로 나왔습니다.
 
 ## 자주 하는 오해
 
-### "U-Boot이 TF-A를 대체한다"
-
-대체 관계가 아닙니다. *각자 다른 자리*에 들어갑니다. U-Boot은 BL33(부트 정책), TF-A는 BL31(secure monitor). 둘이 *동시에* 동작합니다.
-
-### "UEFI = EDK II"
-
-UEFI는 *표준*이고, EDK II는 *그 표준의 reference 구현*입니다. U-Boot도 *부분적으로* UEFI를 구현합니다.
-
-### "SPL은 별도 프로젝트다"
-
-U-Boot 소스 트리에서 *같이* 빌드됩니다. `CONFIG_SPL=y` 옵션으로 활성화하면 두 binary가 나옵니다.
-
-### "임베디드에 EDK II를 써도 된다"
-
-가능하지만 *오버스펙*입니다. EDK II는 *수 MB*고, 임베디드 SPL은 *50KB*입니다. SoC 내부 SRAM에 안 들어갑니다.
-
-### "OpenSBI는 RISC-V에만 있다"
-
-맞습니다. ARM의 TF-A에 대응하는 *RISC-V 전용* 표준입니다.
+- **"U-Boot이 TF-A를 대체한다"** — 자리가 다릅니다. QEMU TF-A 구성에서 BL31은 EL3에, U-Boot는 non-secure EL1에 동시에 있었습니다.
+- **"UEFI = EDK II"** — UEFI는 규격이고 EDK II는 그 구현 중 하나입니다. U-Boot도 EBBR 범위의 UEFI를 구현합니다.
+- **"SPL은 별도 프로젝트다"** — 같은 트리에서 `spl/u-boot-spl.bin`으로 함께 나옵니다.
+- **"부트 이미지는 U-Boot만 빌드하면 된다"** — `imx8mm_evk`는 TF-A BL31과 NXP DDR 펌웨어 없이는 "non-functional" 이미지가 됩니다.
 
 ## 정리
 
-- U-Boot, TF-A, EDK II, LinuxBoot은 각기 다른 firmware 기능을 제공하며 한 플랫폼에서의 역할은 보드 구성에 따라 달라집니다.
-- 한 보드에 *함께 쓰이는* 경우가 흔합니다. 라이벌이 아니라 *분업*입니다.
-- 한 가지 ARMv8-A 임베디드 구성은 *SPL(U-Boot) + BL31(TF-A) + BL33(U-Boot Proper)*입니다. 단계 구성은 보드별로 확인합니다.
-- SPL은 *U-Boot 소스 트리의 일부*입니다. `CONFIG_SPL=y`로 빌드합니다.
-- TF-A를 사용하는 플랫폼에서는 BL31이 runtime firmware 역할을 맡고 PSCI 서비스를 제공할 수 있습니다. 지원 기능은 플랫폼 빌드와 firmware 설정에 따릅니다.
-- EDK II는 서버·워크스테이션·임베디드 등 여러 플랫폼에서 UEFI firmware를 만들 때 선택할 수 있습니다. 크기와 기능은 플랫폼 구성에 따라 달라집니다.
-- RISC-V는 *OpenSBI*가 TF-A의 자리를 차지합니다. U-Boot은 S-mode payload로 들어갑니다.
-- `imx-mkimage` 같은 도구가 SPL·BL31·OPTEE·U-Boot Proper 조각을 *flash.bin 하나*로 묶습니다.
+- U-Boot은 SPL과 Proper 두 단계로 부트 미디어·정책·이미지 검증을 맡고, UEFI는 EBBR 범위만 구현합니다.
+- TF-A는 BL1·BL2·BL31 단계를 제공합니다. i.MX 8M Mini는 BL31만 쓰고, QEMU 구성은 BL1부터 씁니다.
+- `imx8mm_evk`의 `flash.bin`은 binman이 U-Boot SPL, NXP DDR 펌웨어, TF-A BL31, U-Boot Proper를 묶은 이미지입니다.
+- EDK II는 같은 프로젝트라도 빌드에 따라 Secure Boot 같은 기능이 다릅니다.
+- RISC-V에서는 OpenSBI가 M-mode에 상주하며 SBI(`hsm` 등)를 제공합니다.
 
 ## 다음 편
 
-[Ch 3: 빌드 시스템 — Kconfig, Makefile, defconfig](/blog/embedded/bootloader/chapter03-build-system)에서는 U-Boot 소스 트리의 빌드 시스템을 다룹니다. `make qemu_arm64_defconfig`로 시작해서, `menuconfig`로 옵션을 바꾸고, *defconfig 파일*이 어떻게 동작하는지 봅니다.
+[Ch 3: 빌드 시스템 — Kconfig, Makefile, defconfig](/blog/embedded/bootloader/chapter03-build-system)에서는 U-Boot 소스 트리의 빌드 시스템을 다룹니다. `make qemu_arm64_defconfig`로 시작해 옵션을 바꾸고, defconfig 파일이 어떻게 동작하는지 봅니다.
+
+## 근거 자료
+
+- U-Boot v2024.04: `README`(Where we come from, Names and Spelling), `doc/develop/uefi/uefi.rst`(EBBR 목표), `doc/board/emulation/qemu-riscv.rst`(SPL + OpenSBI FW_DYNAMIC).
+- 이 시리즈의 빌드 산출물: `imx8mm_evk` binman 맵(`imx-boot.map`, `u-boot-spl-ddr.map`, `itb.map`)과 빌드 로그, TF-A v2.15.0 `PLAT=qemu` release 바이너리.
+- QEMU 11.1.3 `qemu-system-riscv64 -M virt` 부팅 로그(OpenSBI v1.8.1).
+- [Trusted Firmware-A: Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.15.0/design/firmware-design.html): BL 단계.
+- [OpenSBI](https://github.com/riscv-software-src/opensbi), [TianoCore EDK II](https://www.tianocore.org/).
 
 ## 관련 항목
 
@@ -296,10 +192,3 @@ U-Boot 소스 트리에서 *같이* 빌드됩니다. `CONFIG_SPL=y` 옵션으로
 - [Ch 18: EFI in U-Boot](/blog/embedded/bootloader/chapter18-efi-in-uboot)
 - [BSP Ch 7: TF-A와 TrustZone 통합](/blog/embedded/bsp/chapter07-tfa-trustzone)
 - [Embedded Security Ch 2: Secure Boot 체인](/blog/embedded/embedded-security/chapter02-secure-boot)
-- [원문 — Trusted Firmware-A](https://www.trustedfirmware.org/projects/tf-a/)
-- [원문 — EDK II / TianoCore](https://www.tianocore.org/)
-- [원문 — OpenSBI](https://github.com/riscv-software-src/opensbi)
-- [원문 — LinuxBoot](https://www.linuxboot.org/)
-- [Trusted Firmware-A: Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.10/design/firmware-design.html)
-- [U-Boot v2024.04: UEFI](https://docs.u-boot.org/en/v2024.04/develop/uefi/uefi.html)
-- [TianoCore EDK II](https://www.tianocore.org/tianocore-wiki.github.io/reference/external-resources/edk_ii.html)
