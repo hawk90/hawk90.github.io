@@ -152,7 +152,7 @@ void delay_ms(uint32_t ms) {
 
 이 delay의 해상도는 1 tick입니다. `start`를 읽는 순간은 tick 사이 어디쯤이므로 첫 증가는 0 ms 초과 1 ms 이하 뒤에 옵니다. 조건을 마지막으로 검사한 직후, `__WFI()`를 실행하기 전에 n번째 증가가 오면 WFI는 다음 인터럽트까지 잠듭니다. DUI 0553A 3.12.12절 "WFI"에 따르면 WFI는 인터럽트가 와서 처리되거나, PRIMASK로 막힌 인터럽트가 pending되거나, 디버그 진입 요청이 있을 때까지 실행을 멈춥니다. 다른 인터럽트가 없으면 다음 tick까지 1 ms를 더 잡니다. 따라서 `delay_ms(n)`은 n − 1 ms 초과 n + 1 ms 이하를 기다리고(ISR 지연 제외), `delay_ms(0)`은 조건이 처음부터 거짓이라 바로 반환하며, `delay_ms(1)`은 0 ms 초과 2 ms 이하를 기다립니다. 최소 n ms를 보장해야 하면 `delay_ms(n + 1)`을 부릅니다.
 
-`g_jiffies`가 `volatile`이어야 하는 이유는 C11 6.7.3p7입니다. volatile 객체를 가리키는 식은 추상 기계 규칙대로 평가해야 하므로 루프를 돌 때마다 메모리에서 다시 읽습니다. `volatile`이 없으면 컴파일러는 ISR이 값을 바꾼다는 것을 모르므로 읽기를 루프 밖으로 옮길 수 있고, 그러면 루프가 끝나지 않습니다.
+`g_jiffies`가 `volatile`이어야 하는 이유는 C11 6.7.3p7입니다. volatile 객체를 가리키는 식은 추상 기계 규칙대로 평가해야 하므로 매 반복 메모리에서 다시 읽습니다. `volatile`을 빼고 GCC 16.2 `-O2`로 빌드해 보면, 몸체가 빈 `while ((g_jiffies - start) < ms) { }`는 `g_jiffies`를 한 번만 읽고 `b.n` 자기 자신으로 도는 무한 loop가 됩니다. 위 `delay_ms()`는 같은 조건에서도 `wfi` 뒤마다 `ldr`로 다시 읽었는데, CMSIS의 `__WFI()`가 `"memory"` clobber를 가진 asm이라 compiler가 메모리 값이 바뀔 수 있다고 보기 때문입니다. 이것은 우연한 보호이므로, 측정 절의 `millis()` polling처럼 barrier가 없는 loop까지 생각하면 `volatile`이 필요합니다.
 
 ### 3. Timeout 패턴
 
@@ -187,7 +187,7 @@ int wait_sensor(void) {
 
 ### 4. Microsecond delay — DWT cycle counter
 
-`delay_ms`의 해상도가 1 tick이므로 µs 단위는 DWT의 clock cycle counter `CYCCNT`로 셉니다. `dwt_init()`(DEMCR `TRCENA` → `CYCCNT = 0` → `CYCCNTENA`)은 [Bare-metal 프로파일링](/blog/embedded/performance-engineering/part5-07-baremetal-profiling)의 "DWT Cycle Counter — Cortex-M3 이상" 절 코드를 그대로 씁니다.
+`delay_ms`의 해상도가 1 tick이므로 µs 단위는 DWT의 clock cycle counter `CYCCNT`로 셉니다. `dwt_init()`(DEMCR `TRCENA` → `CYCCNT = 0` → `CYCCNTENA`)은 [Bare-metal 프로파일링](/blog/embedded/performance-engineering/part5-07-baremetal-profiling)의 "DWT Cycle Counter — 구현 확인" 절 코드를 그대로 씁니다.
 
 ```c
 void delay_us_dwt(uint32_t us, uint32_t cpu_hz) {
