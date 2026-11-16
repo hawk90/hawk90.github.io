@@ -1,0 +1,27 @@
+\documentclass[border=10pt,tikz]{standalone}
+\usepackage{fontspec}
+\setmainfont{Apple SD Gothic Neo}
+\setsansfont{Apple SD Gothic Neo}
+\usepackage{tikz}
+\usetikzlibrary{positioning,arrows.meta,shapes,fit,backgrounds,calc}
+\begin{document}
+\input{../../_design.tex}
+\begin{tikzpicture}[blog,
+  blk/.style={draw=inkc, thick, fill=white, rounded corners=2pt, align=center,
+              font=\sffamily\scriptsize, minimum height=13mm, minimum width=24mm, inner sep=3pt},
+  arr/.style={-{Stealth[length=2mm]}, draw=inkc, thick},
+  lbl/.style={font=\sffamily\tiny, text=mutec, align=center}]
+
+\node[blk] (in)  at (0,0)    {입력 코드\\[2pt]N bit, $f_s$};
+\node[blk] (os)  at (4.2,0)  {Oversampling\\[2pt]보간 필터\\[2pt]$\times$OSR};
+\node[blk] (mod) at (8.4,0)  {$\Sigma\Delta$ modulator\\[2pt]1-bit 출력};
+\node[blk] (lpf) at (12.6,0) {아날로그 LPF};
+\node[blk] (out) at (16.0,0) {연속 전압};
+
+\draw[arr] (in)  -- (os);
+\draw[arr] (os)  -- node[lbl, above=6pt] {N bit\\[3pt]$\mathrm{OSR}\cdot f_s$} (mod);
+\draw[arr] (mod) -- node[lbl, above=6pt] {1-bit stream\\[3pt]$\mathrm{OSR}\cdot f_s$} (lpf);
+\draw[arr] (lpf) -- (out);
+
+\end{tikzpicture}
+\end{document}
