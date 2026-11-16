@@ -2,7 +2,7 @@
 title: "통신 프로토콜 분석 — Logic Analyzer와 Protocol Decoder"
 slug: "embedded/modern-recipes/part10-10-protocol-analyzer"
 date: 2026-04-19T09:09:00
-description: "Saleae·DSLogic·oscilloscope·protocol decoder로 UART/SPI/I2C/CAN 신호를 캡처·디코딩하는 실전 패턴."
+description: "logic analyzer 캡처를 protocol decoder로 풀 때 설정이 결과를 어떻게 바꾸는지 Icarus로 만든 UART·SPI 파형과 Python decoder로 직접 보이고, SPI flash BUSY·I2C NACK·CAN·오실로스코프 판단 기준을 데이터시트로 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 120
 tags: [recipes, debugging, logic-analyzer]
@@ -15,205 +15,117 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-UART RX가 가끔 깨진 byte를 받습니다. SPI flash가 가끔 잘못된 데이터를 돌려줍니다. I2C 센서가 NACK을 줍니다. CAN bus에 가끔 ack 없는 frame이 보입니다. 이런 류는 *어느 쪽이 거짓말하는지* 먼저 정해야 합니다. Logic analyzer는 그 *진실의 기준선*입니다.
+UART RX가 가끔 깨진 바이트를 받거나, SPI flash가 이상한 값을 돌려주거나, I2C 센서가 NACK을 줄 때입니다. 이때 먼저 정할 것은 선 위의 신호가 맞는데 코드가 잘못 읽는지, 선 위의 신호부터 틀렸는지입니다. logic analyzer는 선 위의 0과 1을 시간과 함께 기록하고, protocol analyzer(decoder)가 그 기록을 설정한 규칙대로 바이트로 풉니다. 그래서 decoder 결과는 *설정이 맞을 때만* 의미가 있습니다. 이 글은 그 점을 실제 파형 파일로 보여 줍니다.
 
-## 도구 비교
+## 캡처를 설정할 때 정하는 것
 
-| 도구 | 가격대 | sample rate | 채널 | decode |
-|---|---|---|---|---|
-| Saleae Logic Pro 8 | 판매 시점 확인 | 제품 사양 확인 | 8 | 지원 protocol 확인 |
-| Saleae Logic 8 | 판매 시점 확인 | 제품 사양 확인 | 8 | 지원 protocol 확인 |
-| DSLogic Pro | 판매 시점 확인 | 제품 사양 확인 | 16 | 지원 protocol 확인 |
-| Sigrok-supported probe | 장치별 확인 | 장치별 확인 | 장치별 확인 | decoder 범위 확인 |
-| Oscilloscope (DSO) | 모델별 확인 | 모델별 확인 | 모델별 확인 | protocol decode 옵션 확인 |
+1. probe의 GND를 측정하려는 신호 가까운 보드 GND에 연결합니다.
+2. 신호선에 probe를 겁니다.
+3. sample rate를 정합니다. 측정하려는 가장 짧은 펄스나 비트보다 샘플 간격이 충분히 짧아야 합니다. 115200 baud UART의 비트는 8.68 µs, 10 MHz SPI의 SCK 반주기는 50 ns입니다.
+4. trigger와 pre-trigger 길이를 정합니다(아래 Trigger 절).
+5. protocol analyzer를 붙이고 baud·비트 수·패리티(UART), CPOL/CPHA·비트 순서(SPI), 주소 길이(I2C)를 대상과 똑같이 맞춥니다.
 
-필요한 sample rate는 edge rate·protocol·허용 timing 오차로 정합니다. nominal clock의 배수만으로 충분성을 보장하지 말고 대상 신호를 검증합니다.
+장비별 sample rate·채널 수·입력 임계값은 제조사 사양서로 고르고, 이 글에서는 특정 제품의 수치를 싣지 않습니다.
 
-## Setup — Saleae Logic 2 예
+## Decoder 설정이 틀리면 무엇이 보이나
 
-1. Probe ground를 보드 GND에 연결
-2. 신호선에 probe clip
-3. Capture 설정:
-   - sample rate: 신호와 edge/timing 요구사항에 맞춰 설정
-   - duration: trigger 후 몇 ms 캡쳐
-   - trigger: 특정 line의 falling edge
-4. Capture
-5. Analyzer 추가 (Async Serial / SPI / I2C / CAN)
-6. 결과 표 확인
+보드 대신 Icarus Verilog 13.0으로 파형을 만들었습니다. 한 테스트벤치가 115200 baud 8N1로 `Hello\r\n`을 보내고, 이어서 SPI mode 0(10 MHz)으로 W25Q32JV의 JEDEC ID 읽기(MOSI `9F 00 00 00`, MISO `-- EF 40 16`, [1-05](/blog/embedded/modern-recipes/part1-05-spi-hardware))를 흉내 낸 뒤, 모든 신호를 VCD 파일로 남깁니다. 그 파일을 50여 줄짜리 Python decoder로 풀었습니다. UART decoder는 falling edge를 start bit로 보고 1.5비트 뒤부터 비트 가운데를 읽으며, SPI decoder는 CS가 low인 동안 CPHA에 맞는 SCK edge에서 데이터를 읽습니다.
+
+```python
+def uart(ev, baud):
+    s = series(ev, 'tx'); bit = 1e12 / baud; out = []   # VCD time unit is 1 ps
+    falls = [t for (t, v), (pt, pv) in zip(s[1:], s) if pv == 1 and v == 0]
+    t_end = -1
+    for f in falls:
+        if f < t_end: continue
+        b = 0
+        for k in range(8):
+            b |= level_at(s, f + bit * (1.5 + k)) << k
+        stop = level_at(s, f + bit * 9.5)
+        out.append((b, stop)); t_end = f + bit * 9.5
+    return out
+
+def spi(ev, cpha, sig):
+    sck, d, cs = series(ev, 'sck'), series(ev, sig), series(ev, 'cs_n')
+    edges = [t for (t, v), (pt, pv) in zip(sck[1:], sck) if pv != v and v == (1 if cpha == 0 else 0)]
+    bits = [level_at(d, t) for t in edges if level_at(cs, t) == 0]
+    return [sum(b << (7 - i) for i, b in enumerate(bits[j:j + 8])) for j in range(0, len(bits) - 7, 8)]
+```
+
+같은 캡처를 맞는 설정과 틀린 설정으로 풀었습니다.
+
+```bash
+iverilog -g2012 -o tb tb.v && vvp -n tb && python3 decode.py cap.vcd
+```
+
+```text
+UART @115200: 48 65 6C 6C 6F 0D 0A  framing errors: 0
+UART @57600: 82 C6 47 F3  framing errors: 3
+SPI CPHA=0: MOSI 9F 00 00 00 | MISO 00 EF 40 16
+SPI CPHA=1: MOSI 3E 00 00 00 | MISO 01 DE 80 2C
+```
+
+UART를 실제 baud(115200)로 풀면 `48 65 6C 6C 6F 0D 0A`, 즉 `Hello\r\n`이 나오고 framing error가 없습니다. 절반인 57600으로 풀면 바이트 수부터 다르고 stop bit 자리가 0이라 framing error가 세 번 납니다. SPI는 CPHA = 0(mode 0)으로 풀면 MISO에서 `EF 40 16`이 나오지만, CPHA = 1로 풀면 같은 선에서 `DE 80 2C`가 나옵니다. 한 비트씩 밀린 값입니다(0xEF를 한 칸 왼쪽으로 밀고 다음 바이트의 첫 비트가 들어오면 0xDE). 파형은 그대로인데 decoder 설정만 틀려도 이렇게 그럴듯한 다른 바이트가 나오므로, 이상한 값을 보면 코드나 배선보다 먼저 decoder 설정을 대상의 설정과 대조합니다.
 
 ## UART decode
 
-```text
-신호 1개 (TX 또는 RX) + GND
-설정: baud, data bits, parity, stop bits
-
-캡쳐 후:
-  bytes:  0x48 0x65 0x6C 0x6C 0x6F 0x0D 0x0A
-  ascii:  H    e    l    l    o   \r   \n
-```
-
-Decode가 *원래 의도한 메시지*면 *코드 측 parsing*이 잘못된 것입니다. 깨진 byte가 나오면 *전기적 문제*입니다.
+신호 한 개(TX 또는 RX)와 GND를 잡고, baud·데이터 비트·패리티·stop 비트를 대상과 맞춥니다. 위 실행처럼 설정이 맞으면 보낸 바이트가 그대로 나옵니다. framing error가 섞이면 baud부터 대조하고, baud가 맞는데도 드물게 깨지면 [10-05](/blog/embedded/modern-recipes/part10-05-uart-not-printing)의 오차 예산과 전기적 상태(아래 오실로스코프 절)를 봅니다.
 
 ## SPI decode
 
 ![SPI capture decoded by protocol analyzer](/images/blog/modern-recipes/diagrams/part10-10-spi-capture.svg)
 
-CPOL/CPHA가 둘 다 일치해야 합니다. Decode가 garbled면 CPOL/CPHA mismatch입니다.
+SCK·MOSI·MISO·CS 네 선을 잡고 CPOL·CPHA·비트 순서를 대상과 맞춥니다. W25Q32JV는 mode 0과 3을 지원하고 MSB first입니다(1-05). 위 실행처럼 CPHA만 틀려도 바이트가 한 비트씩 밀린 값으로 나옵니다.
+
+### SPI flash가 busy에서 안 빠질 때
+
+flash에 erase를 보낸 뒤 Read Status Register-1(05h)을 반복해 읽는 캡처에서 BUSY 비트(S0)가 계속 1이면, 먼저 그 명령에 걸리는 시간이 얼마인지 봅니다. W25Q32JV 데이터시트(Revision G)는 BUSY가 Sector Erase 등 명령 실행 중에 1이고 그동안 다른 명령을 무시한다고 적고, AC 특성 표에서 4 KB Sector Erase 시간 t_SE를 typ 45 ms, max 400 ms로 적습니다. 코드의 timeout이 400 ms보다 짧으면, 칩이 정상이어도 timeout이 납니다.
 
 ## I2C decode
 
-```text
-신호 2개: SDA, SCL
-
-설정: 7-bit / 10-bit address
-
-캡쳐 결과:
-  Start
-  Write addr 0x68 ACK
-    Write 0x6B (PWR_MGMT_1)  ACK
-    Write 0x00                ACK
-  Stop
-
-  Start
-  Write addr 0x68 ACK
-    Write 0x3B (ACCEL_XOUT_H) ACK
-  Re-Start
-  Read  addr 0x68 ACK
-    Read  0x12 ACK
-    Read  0x34 NACK
-  Stop
-```
-
-NACK이 의도되지 않은 자리에 보이면 slave가 *준비 안 되었거나* address가 잘못된 것입니다.
+SDA와 SCL 두 선을 잡고 주소 길이(7비트·10비트)를 맞춥니다. decoder는 START, 주소와 R/W, ACK/NACK, 데이터, repeated START, STOP을 차례로 보여 줍니다. 주소 바이트에서 NACK이 나오면 그 주소에 응답하는 디바이스가 없다는 뜻이고, 데이터 바이트의 NACK은 수신 측이 받지 않았거나 master-receiver가 마지막 바이트를 표시한 것입니다(UM10204 3.1.6, [1-06](/blog/embedded/modern-recipes/part1-06-i2c-hardware)). 주소 NACK이면 데이터시트의 7비트 주소와 주소 선택 핀의 연결을 대조합니다. MPU-6050의 경우 Linux 드라이버의 DT 예제가 0x68을 씁니다(1-06).
 
 ## CAN decode
 
-신호는 CAN_H 하나, 또는 transceiver 후단의 logic-level CAN_TX 하나면 충분합니다. 설정에서는 250 kbps, 500 kbps, 1 Mbps 가운데 하나를 고르고 standard/extended를 지정합니다. 캡쳐 결과는 이렇게 나옵니다.
-
-```text
-ID 0x123, DLC 8, data 11 22 33 44 55 66 77 88, ACK
-ID 0x123, DLC 8, data 11 22 33 44 55 66 77 88, NO ACK
-```
-
-두 번째 프레임의 NO ACK은 버스에 응답할 다른 노드가 하나도 없다는 뜻입니다. 이렇게 *수신 노드가 없으면* sender가 NO ACK 상태로 영원히 재전송합니다. CAN_H/CAN_L 사이의 차동 전압을 oscilloscope로 보면 *전기적 문제*도 잡힙니다.
-
-## 사례 — UART 깨진 byte
-
-캡쳐를 보면 idle 구간에서 1 bit가 가끔 0으로 떨어집니다. 수신기는 이 순간을 start bit로 잘못 인식하고, 그 뒤 1 byte가 통째로 깨집니다. 원인은 TX/RX 핀 옆을 지나는 GPIO toggle 신호의 *crosstalk*였습니다. GND 라인을 강화하고 와이어 길이를 줄여 해결했습니다.
-
-신호선과 GND가 *나란히* 가지 않으면 noise pickup이 흔합니다. Twisted pair나 shielded cable 사용.
-
-## 사례 — SPI flash WIP 못 빠짐
-
-```text
-캡쳐:
-  CMD 0x06 (WREN) — 잘 보냄
-  CMD 0x20 (Sector Erase), addr — 잘 보냄
-  CMD 0x05 (Read Status)
-    response: 0x03                 ← WIP=1, WEL=1
-  CMD 0x05 (Read Status)
-    response: 0x03                 ← 여전히 1
-  반복 100ms 후 timeout
-```
-
-Sector erase는 *수십~수백 ms*가 정상. 코드의 timeout이 너무 짧았습니다. 데이터시트 typical/max 모두 확인.
-
-## 사례 — I2C NACK
-
-캡쳐는 다음과 같습니다.
-
-```text
-Start
-Write addr 0x69 NACK
-Stop
-```
-
-주소를 보내자마자 NACK이 떨어졌으니 slave가 응답하지 않은 것입니다. 확인은 세 단계로 진행했습니다.
-
-1. `0x69`가 맞는 주소인지 데이터시트를 봤더니 `0x68`이었습니다.
-2. SDO 핀 pull-up이 `0xAA`를 만들면서 LSB가 1이 되어 `0x69`로 나가고 있었습니다.
-3. SDO를 GND로 내리자 `0x68`로 정상 응답했습니다.
-
-I2C address는 데이터시트의 *7 bit address*에서 SDO/SDA1 핀 상태로 LSB가 바뀌는 경우가 있습니다.
-
-## 사례 — CAN bit timing
-
-```text
-캡쳐 (logic-level on transceiver TXD):
-  bit time 측정: 1.5 µs (예상은 2 µs @ 500 kbps)
-
-원인: BTR (Baud Time Register) 계산 오류.
-     APB1 = 42 MHz, PRESCALER=6, TQ count=14 → 1.5 µs.
-     올바른 설정: PRESCALER=6, TQ count=14 → 2 µs가 맞음. 계산식 확인.
-```
-
-CAN은 *bit 1 sample point*까지 ±1% 안에 들어야 합니다. CAN bus calculator로 검증.
+transceiver 앞단의 logic-level 신호(CAN_TX나 CAN_RX) 하나를 잡고 bitrate를 맞춥니다. ACK 슬롯이 recessive로 남은 프레임은 그 프레임을 받은 다른 노드가 없다는 뜻입니다. 비트 시간이 예상과 다르면 BTR 설정을 다시 계산합니다. 42 MHz bxCAN의 1 Mbit/s 분할과 그 BTR 값은 [1-10](/blog/embedded/modern-recipes/part1-10-can-electrical)에 계산과 빌드 확인이 있습니다. CAN_H·CAN_L의 차동 전압 같은 전기적 상태는 logic analyzer가 아니라 오실로스코프로 봅니다.
 
 ## Trigger — 가끔 일어나는 사건 잡기
 
-**Setup → Trigger:**
+간헐적인 문제는 trigger 조건을 사건 자체로 겁니다. 예를 들면 SPI MOSI의 특정 명령 바이트, UART의 특정 패턴, I2C NACK, CAN의 특정 ID입니다. protocol trigger를 지원하는지는 장비마다 다르므로 장비 설명서로 확인합니다. pre-trigger를 함께 두면 trigger *전*의 파형도 남으므로, 깨진 바이트 직전에 무슨 일이 있었는지를 볼 수 있습니다.
 
-- "SPI MOSI 0x9F" (RDID command가 떨어지는 순간)
-- "UART 0xFF 0xFE 0x01" (sync pattern)
-- "I2C NACK"
-- "CAN ID 0x100"
+## 오실로스코프 — 전기적 분석
 
-Trigger pre-capture로 *trigger 전*의 1ms도 함께 잡습니다. 깨진 byte가 보내진 *직전*에 무슨 일이 있었는지 보입니다.
+logic analyzer는 임계값을 기준으로 0과 1만 기록하므로, 그 사이의 전압 모양은 남지 않습니다. 다음은 오실로스코프로 봅니다.
 
-## Oscilloscope — 전기적 분석
-
-Logic analyzer가 잡지 못하는 것.
-
-- 신호 ringing
-- Slew rate
-- Voltage level (3.3V vs 1.8V mismatch)
-- Ground bounce
-- Crosstalk
-
-| 관측되는 파형 | 유력한 원인 |
-|---------------|-------------|
-| 신호 ringing: rising edge 후 oscillation | 임피던스 mismatch. 종단저항이 필요합니다 |
-| Slow slew rate: rising에 100 ns가 걸림 | driver strength 부족, 또는 line capacitance가 큼 |
-| Voltage level: high가 2.8V (3.3V 기대) | driver는 3.3V인데 receiver가 1.8V로 잡아당기는 level mismatch |
-
-Oscilloscope는 *Y축이 전압*입니다. Digital decode는 logic analyzer가 빠르지만, 전기적 문제는 DSO 없이는 못 봅니다.
+- 엣지 뒤 ringing과 overshoot: 반사·종단 문제([1-01](/blog/embedded/modern-recipes/part1-01-digital-signal-basics)의 반사 계산)
+- 느린 상승: 드라이버 강도와 선로·probe 용량([1-03](/blog/embedded/modern-recipes/part1-03-gpio-internals)의 rise time 계산)
+- high·low 레벨이 상대 칩의 V_IH·V_IL 안에 드는지(1-01의 레벨 표)
 
 ## 자주 보는 함정
 
-> Probe ground 멀리
+> probe GND를 멀리 잡기
 
-GND probe를 보드의 *반대편*에 걸면 ground loop으로 ringing이 측정에 끼어듭니다. 신호 핀 옆 GND에 짧게.
+Tektronix *ABCs of Probes*(60W-6053-11)는 probe ground lead가 회로에 인덕턴스를 더하고, 길수록 빠른 펄스에서 ringing이 보일 가능성이 커진다고 적습니다(1-01). 측정에 보이는 ringing이 회로의 것인지 probe의 것인지 가리려면 GND를 신호 가까이 짧게 잡고 다시 봅니다.
 
-> Sample rate 부족
+> 입력 레벨 확인 없이 연결
 
-SPI capture의 timing 정확도는 sample rate뿐 아니라 edge rate·threshold·probe bandwidth로 결정됩니다. analyzer 사양과 대상 timing margin을 함께 확인합니다.
+analyzer 입력의 허용 전압과 임계값은 장비마다 다릅니다. 5 V 신호를 잴 때는 장비 사양에서 입력 최대 전압을 먼저 확인합니다.
 
-> Logic level mismatch
+> probe가 회로를 바꿈
 
-3.3V 신호를 1.8V logic analyzer로 잡으면 정상. 1.8V 신호를 3.3V analyzer로 잡으면 threshold(보통 1.4V) 위라 OK. 반대로 5V 신호를 3.3V analyzer로 직접 잡으면 *probe 또는 보드 damage*. Level shifter 필요.
+probe를 연결하면 그 입력 용량과 저항이 신호선에 더해집니다(*ABCs of Probes*의 probe loading). 빠른 신호에서 probe를 걸었을 때와 뗐을 때 동작이 다르면 probe 영향부터 의심합니다.
 
-> Probe capacitance가 회로에 영향
+> decoder 설정 오류
 
-DSO probe 10pF, logic analyzer probe 수십 pF. 빠른 SPI에서 *probe만 연결해도 동작이 바뀝니다*. Active probe 또는 짧은 lead.
-
-> Trigger pre-capture 안 설정
-
-Trigger가 떨어진 *순간*만 보면 *원인*은 못 봅니다. Pre-trigger를 capture 길이의 절반쯤 잡습니다.
-
-> SPI/I2C decoder 설정 잘못
-
-CPOL/CPHA mismatch면 decode가 *완전히 다른 byte*로 나옵니다. Capture는 정상인데 *decoder 설정*이 잘못된 경우가 많습니다.
+위 실행처럼 CPHA 하나, baud 하나가 틀려도 그럴듯한 다른 바이트가 나옵니다.
 
 ## 정리
 
-- Logic analyzer는 *전선 위*의 진실. 코드 측 추정 대신 측정.
-- UART/SPI/I2C/CAN 모두 protocol decoder가 있어 byte 단위로 보입니다.
-- Sample rate는 신호의 10배 이상.
-- Trigger pre-capture로 *원인 직전*을 함께 잡습니다.
-- 전기적 문제(ringing, level mismatch)는 oscilloscope.
-- GND probe는 가까이.
-- CPOL/CPHA, I2C address LSB, CAN bit timing — decoder 설정과 *맞춰야* 결과가 의미 있습니다.
-- 깨진 byte는 *전기*, 의도 다른 byte는 *코드*.
+- decoder 결과는 설정이 맞을 때만 의미가 있습니다. 같은 VCD를 CPHA = 1로 풀면 `EF 40 16`이 `DE 80 2C`로, 57600으로 풀면 `Hello`가 깨진 바이트와 framing error로 바뀝니다(실행 결과).
+- sample 간격은 가장 짧은 비트·펄스보다 충분히 짧게 잡습니다.
+- 간헐적인 사건은 그 사건을 trigger로 걸고 pre-trigger로 직전을 남깁니다.
+- 전압 모양(ringing, 레벨)은 오실로스코프로 봅니다.
+- SPI flash의 BUSY는 데이터시트의 erase 시간(W25Q32JV 4 KB: max 400 ms)과 비교합니다.
 
 다음 편은 **로깅 시스템 설계**입니다.
 
