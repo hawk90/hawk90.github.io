@@ -59,7 +59,7 @@ GPIOC->OSPEEDR |=  (0b11 << (5 * 2));   // 0b11 = very high speed
 | 0b10 | `GPIO_SPEED_FREQ_HIGH` | 25~100 MHz |
 | 0b11 | `GPIO_SPEED_FREQ_VERY_HIGH` | 50~200 MHz |
 
-상수 값과 주석은 ST의 `stm32f4xx-hal-driver`(v1.8.6) `Inc/stm32f4xx_hal_gpio.h` 141~144행에서 옮겼습니다. 같은 주석이 정확한 값은 제품 데이터시트를 보라고 적습니다. 핀별 rise/fall time은 데이터시트의 I/O AC characteristics 표에 부하 용량·V_DD 조건과 함께 나오며, 이 글에서는 그 표를 열어 보지 못해 숫자를 싣지 않았습니다.
+상수 값과 주석은 ST의 `stm32f4xx-hal-driver`(v1.8.6) `Inc/stm32f4xx_hal_gpio.h` 141~144행에서 옮겼습니다. 같은 주석이 정확한 값은 제품 데이터시트를 보라고 적습니다. STM32F405/407 데이터시트(DS8626, DocID022152 Rev 4) Table 49 *I/O AC characteristics*는 설정별 최대 출력 주파수를 부하 조건과 함께 적지만(예: `11`은 C_L = 30 pF에서 100 MHz, 10 pF에서 200 MHz), 이 판은 rise/fall time 칸을 정하지 않은 값으로 비워 두었습니다. 그래서 여기서는 시간 대신 주파수만 쓰고, 설정별 f_max 전체 표는 [1-03](/blog/embedded/modern-recipes/part1-03-gpio-internals)에 있습니다.
 
 ### 3) Noise margin과 신호 무결성
 
