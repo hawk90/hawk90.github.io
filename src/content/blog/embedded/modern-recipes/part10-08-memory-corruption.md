@@ -11,11 +11,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"메모리 오염은 *누가 망가뜨렸는지*를 잡는 게 본질입니다."** Canary·MPU guard·data watchpoint·desktop ASan을 조합하면 *현장에서* 범인을 잡습니다.
+> **"메모리 오염 진단은 *누가 망가뜨렸는지* 잡는 일입니다."** Canary·MPU guard·data watchpoint·desktop ASan을 조합하면 *현장에서* 범인을 잡습니다.
 
 ## 어떤 상황에서 쓰나
 
-"평소엔 잘 도는데 1시간쯤 지나면 다른 변수 값이 이상하게 바뀌어요." "함수가 끝나고 caller로 못 돌아와요 (Hardfault PC가 이상한 영역)." 이런 류는 거의 다 메모리 오염입니다.
+"평소엔 잘 도는데 1시간쯤 지나면 다른 변수 값이 이상하게 바뀌어요." "함수가 끝나고 caller로 못 돌아와요 (Hardfault PC가 이상한 영역)." 이런 증상은 메모리 오염을 먼저 의심합니다.
 
 오염은 *현장*에서 일어나지만 *증상*은 다른 코드에서 나타나므로, 디버깅이 까다롭습니다. 도구로 *현장*에서 잡아야 합니다.
 
@@ -159,7 +159,7 @@ void DebugMon_Handler(void) {
 }
 ```
 
-ARMv7-M ARM Table C1-14에서 `FUNCTION` = 0b0110이 "쓰기 전용 data 주소 비교, watchpoint debug event"이고, 0b0101은 *읽기* 전용입니다(원래 글은 5를 쓰기로 적었습니다). `MATCHED` 비트는 `DWT_FUNCTION`을 읽으면 0으로 지워집니다(C1.8.17). `MASK`는 비교에서 무시할 하위 주소 비트 수입니다. halting debug가 꺼진 상태에서 이 event는 `DEMCR.MON_EN`이 켜져 있으면 DebugMonitor 예외가 됩니다. 이 코드는 `cmsis_device_f4` 헤더로 경고 없이 빌드되지만, QEMU는 DWT comparator를 모델링하지 않아 실행으로 확인하지는 못했습니다. comparator 수는 Cortex-M4에서 1개 또는 4개입니다(10-03, Cortex-M4 TRM).
+ARMv7-M ARM Table C1-14에서 `FUNCTION` = 0b0110이 "쓰기 전용 data 주소 비교, watchpoint debug event"이고, 0b0101은 *읽기* 전용입니다. `MATCHED` 비트는 `DWT_FUNCTION`을 읽으면 0으로 지워집니다(C1.8.17). `MASK`는 비교에서 무시할 하위 주소 비트 수입니다. halting debug가 꺼진 상태에서 이 event는 `DEMCR.MON_EN`이 켜져 있으면 DebugMonitor 예외가 됩니다. 이 코드는 `cmsis_device_f4` 헤더로 경고 없이 빌드되지만, QEMU는 DWT comparator를 모델링하지 않아 실행으로 확인하지는 못했습니다. comparator 수는 Cortex-M4에서 1개 또는 4개입니다(10-03, Cortex-M4 TRM).
 
 ## 도구 5 — Desktop 빌드 + ASan
 
