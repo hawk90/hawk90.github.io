@@ -185,7 +185,7 @@ after depth(40): used=3000
 HardFault: CFSR= MMFAR= stack_used=
 ```
 
-`depth()`는 재귀 한 단계마다 72 B를 썼습니다(아래 `-fstack-usage` 보고의 `depth 72 static`). 10단계마다 사용량이 정확히 720 B씩 늘어난 것이 high-water mark가 실제 깊이를 따라간다는 확인입니다. `depth(1000)`은 72 KB가 필요해 4 KiB stack을 지나 `.bss`를 덮고 RAM 아래로 내려갔고, HardFault가 났지만 handler가 숫자를 찍지 못했습니다. handler도 같은 망가진 stack을 쓰기 때문입니다. 보호 장치 없이 넘친 stack은 원인을 남기지 못합니다.
+`depth()`는 재귀 한 단계마다 72 B를 썼습니다(아래 `-fstack-usage` 보고의 `depth 72 static`). 10단계마다 사용량이 정확히 720 B씩 늘어난 것이 high-water mark가 실제 깊이를 따라간다는 확인입니다. `depth(1000)`은 72 KB가 필요해 4 KiB stack을 지나 `.data`(4 B, `.bss`는 0 B)를 덮고 RAM 아래, QEMU가 `RESERVED`로 둔 영역(`0x01010000`~`0x1fffffff`, 쓰기는 버려지고 읽으면 0)으로 내려갔습니다. 거기서 읽어 온 return 주소가 0이라 Thumb 비트가 없는 주소로 돌아가려다 INVSTATE UsageFault가 났고, 이것이 HardFault로 올라갔습니다(`-d int` 로그). HardFault handler도 같은 영역에 지역 buffer를 두므로 숫자가 빈 문자열로 찍혔습니다. 보호 장치 없이 넘친 stack은 원인을 남기지 못합니다.
 
 ### Compiler canary
 
@@ -221,15 +221,15 @@ HardFault: CFSR=0x00000092 MMFAR=0x200010c0 stack_used=3972
 
 - **guard는 넘침을 정확한 주소에서 잡았습니다.** MMFAR `0x200010c0`은 guard(`0x20001000`~`0x200010ff`) 안이고, CFSR `0x92`는 MMARVALID(bit 7)·MSTKERR(bit 4)·DACCVIOL(bit 1)입니다(DDI 0403E.b B3.2.15).
 - **하지만 실행된 것은 MemManage가 아니라 HardFault handler였습니다.** MSTKERR는 "A derived MemManage fault occurred on exception entry", 즉 fault를 처리하려고 exception frame을 push하다 다시 guard에 걸렸다는 뜻입니다. handler가 넘친 stack과 같은 stack을 쓰니 handler로 들어가지 못하고 HardFault로 올라갔습니다.
-- **HardFault handler의 frame은 guard 안에 써졌습니다.** `stack_used`가 3,840(guard 위까지)이 아니라 3,972였습니다. `MPU_CTRL.HFNMIENA`가 0이면 priority가 0보다 낮은 handler(HardFault, NMI)는 "MPU disabled"로 실행되기 때문입니다(B3.5.6 `MPU_CTRL`).
+- **HardFault handler의 frame은 guard 안에 써졌습니다.** `stack_used`가 3,840(guard 위까지)이 아니라 3,972였습니다. `MPU_CTRL.HFNMIENA`가 0이면 priority 값이 0보다 작은(-1·-2) handler(HardFault, NMI)는 "MPU disabled"로 실행되기 때문입니다(B3.5.6 `MPU_CTRL`).
 
 그래서 MPU guard는 handler가 쓰는 stack(MSP)과 넘칠 수 있는 stack을 나눠야 제대로 동작합니다. FreeRTOS 같은 RTOS는 task를 PSP에서, handler를 MSP에서 돌리므로, task stack 바닥에 guard를 두면 handler는 멀쩡한 MSP에서 fault 정보를 남길 수 있습니다. 이 글은 PSP 분리를 실행하지 않았습니다.
 
 ### 함수별 stack usage
 
 ```text
-bm.h:19:37:putx	16	static
-bm.h:25:37:exit_	0	static
+bm.h:20:37:putx	16	static
+bm.h:26:37:exit_	0	static
 stk.c:9:29:Reset_Handler	0	static
 stk.c:40:13:report	24	static
 stk.c:47:6:HardFault_Handler	8	static
@@ -242,7 +242,7 @@ stk.c:86:5:main	40	static
 stk.c:23:6:c_start	8	static
 ```
 
-GCC `-fstack-usage`는 함수마다 `파일:줄:열:함수 크기 종류`를 씁니다. 링크까지 한 번에 하면 파일 이름이 `stk.elf-stk.su`가 됩니다. 종류 `static`은 크기가 고정이라는 뜻이고, `dynamic`은 VLA나 `alloca`로 실행 중 늘어난다는 뜻이며, `dynamic,bounded`는 늘어나되 상한을 컴파일러가 안다는 뜻입니다. 이 값은 함수 하나의 frame이고, 실제 최대 사용량은 호출 사슬을 따라 더해야 합니다. `depth`처럼 재귀하면 사슬 길이가 입력에 달려 있어 이 보고만으로는 상한이 나오지 않습니다.
+GCC `-fstack-usage`는 함수마다 `파일:줄:열:함수 크기 종류`를 씁니다. 링크까지 한 번에 하면 파일 이름이 `stk.elf-stk.su`가 됩니다. 종류 `static`은 크기가 고정이라는 뜻이고, `dynamic`은 함수 본문에서 stack을 더 조정한다(예: 호출 앞뒤로 인자를 push/pop)는 뜻입니다. `bounded`가 함께 붙으면 그 조정량이 컴파일 때 정해져 숫자가 전체 상한이고, 없으면 숫자는 정해진 부분만이라 VLA·`alloca`처럼 실행 중 늘어나는 양은 빠집니다. 이 값은 함수 하나의 frame이고, 실제 최대 사용량은 호출 사슬을 따라 더해야 합니다. `depth`처럼 재귀하면 사슬 길이가 입력에 달려 있어 이 보고만으로는 상한이 나오지 않습니다.
 
 ### FreeRTOS task별 high-water와 hook
 
@@ -268,7 +268,7 @@ FreeRTOS에서는 `uxTaskGetStackHighWaterMark()`와 `uxTaskGetSystemState()`가
 xTaskCreate(t, "t", 128, NULL, 2, NULL);   /* 128 words = 512 B, never measured */
 ```
 
-위 실행의 `depth()`는 7단계만 들어가도 512 B를 넘습니다. high-water mark를 오류 처리 경로까지 돌린 뒤 재서 정합니다.
+위 실행의 `depth()`는 8단계(8 × 72 = 576 B)만 들어가도 512 B를 넘습니다. high-water mark를 오류 처리 경로까지 돌린 뒤 재서 정합니다.
 
 > ⚠️ 입력이 재귀 깊이를 정함
 
