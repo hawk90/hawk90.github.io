@@ -236,7 +236,7 @@ CPUID(`0xE000ED00`)는 `0x410fc240`, 즉 Arm(0x41) Cortex-M4(PARTNO 0xC24) r0p0�
 | [1] | C_HALT | 1을 쓰면 halt 요청 |
 | [0] | C_DEBUGEN | halting debug 활성화 |
 
-CMSIS는 DBGKEY를 [31:16]의 쓰기 필드로 정의하고, 같은 자리의 S_ 상태 비트는 읽을 때 나옵니다. 쓰기 키 값은 이 장에서 1차 문서로 확인하지 못해 적지 않았습니다.
+CMSIS는 DBGKEY를 [31:16]의 쓰기 필드로 정의하고, 같은 자리의 S_ 상태 비트는 읽을 때 나옵니다. ARMv7-M ARM(DDI 0403E.b) C1.6.2는 디버거가 bits[15:0]에 쓰려면 이 필드에 0xA05F를 함께 써야 한다고 정합니다.
 
 실제 칩에서 `break`가 동작하는 흐름은 다음과 같습니다.
 
