@@ -16,7 +16,7 @@ lastVerified: 2026-10-11
 
 ## 어떤 상황에서 쓰나
 
-IRQ affinity를 만지는 이유는 보통 두 가지입니다.
+IRQ affinity를 만지는 이유는 두 가지입니다.
 
 - **격리.** RT 제어 루프를 돌리는 코어에 다른 장치의 IRQ가 들어오지 않게 합니다.
 - **분산.** multi-queue NIC의 queue별 IRQ를 여러 코어에 나눠 한 코어가 RX 처리를 독점하지 않게 합니다.
@@ -25,7 +25,7 @@ IRQ affinity를 만지는 이유는 보통 두 가지입니다.
 
 대상 독자는 GICv2/v3를 쓰는 ARM SoC에서 RT 루프를 돌리는 임베디드 Linux 개발자입니다. `/proc/interrupts`를 읽을 줄 안다고 가정합니다. 순서는 이렇습니다. "핵심 개념"에서 허용 집합과 실제 전달 CPU가 왜 다른지를 GIC·PCIe MSI 경로별로 보고, "코드 / 실제 사용 예"에서 쓰기가 거부되는 조건, irqbalance와의 공존, 부팅 파라미터, NIC queue 분배, PREEMPT_RT의 IRQ thread를 차례로 다룹니다. "자주 보는 함정"은 본문 절로 가는 증상 목록과, 받아들여진 값을 CPU hotplug와 suspend가 바꿔 놓는 두 경우로 이뤄집니다.
 
-아래 내용은 2026-10-11에 Linux v7.3-rc6 태그의 소스·문서와 irqbalance v1.9.5 태그의 소스를 열어 대조했습니다. 커널 소스와 커널 문서 링크는 v7.3-rc6, irqbalance 링크는 v1.9.5 태그를 가리키고, 그 밖의 사용자 공간 도구(ethtool·rt-tests·systemd)는 링크마다 대조한 버전을 적었습니다. 측정 결과는 싣지 않습니다. 동작은 모두 소스와 문서에서 읽은 것입니다.
+아래 내용은 2026-10-11에 Linux v7.3-rc6 태그의 소스·문서와 irqbalance v1.9.5 태그의 소스를 열어 대조했습니다. 커널 소스와 커널 문서 링크는 v7.3-rc6, irqbalance 링크는 v1.9.5 태그를 가리키고, 그 밖의 사용자 공간 도구(ethtool·rt-tests·systemd)는 링크마다 대조한 버전을 적었습니다. SPI·managed·per-CPU IRQ의 affinity 규칙은 Debian 13 arm64 VM에서 직접 확인했고("이 VM에서 실제로 확인" 절), 그 밖의 동작은 소스와 문서에서 읽은 것입니다. 지연 측정 결과는 싣지 않습니다.
 
 ## 핵심 개념
 
@@ -74,7 +74,7 @@ PCIe NIC의 queue별 MSI-X IRQ를 누가 받는지는 SoC의 MSI 경로에 달�
 
 **GICv2m.** GICv2에는 ITS가 없습니다. GICv2m frame을 쓰는 SoC에서 MSI는 GIC의 SPI 하나로 들어옵니다. [`irq-gic-v2m.c`](https://github.com/torvalds/linux/blob/v7.3-rc6/drivers/irqchip/irq-gic-v2m.c)의 `gicv2m_irq_chip`은 `irq_set_affinity`로 `irq_chip_set_affinity_parent`를 걸어 두므로, affinity는 parent인 GIC의 `gic_set_affinity()`가 처리합니다. 결과는 "smp_affinity와 effective_affinity" 절의 SPI 규칙과 같아서 mask 안의 가장 낮은 번호 online CPU입니다.
 
-**DesignWare PCIe 내장 MSI controller.** [`pcie-designware-host.c`](https://github.com/torvalds/linux/blob/v7.3-rc6/drivers/pci/controller/dwc/pcie-designware-host.c)는 SMP 커널에서 MSI IRQ의 `irq_set_affinity`를 [`kernel/irq/chip.c`](https://github.com/torvalds/linux/blob/v7.3-rc6/kernel/irq/chip.c)의 `irq_chip_redirect_set_affinity()`로 둡니다. 이 IRQ들은 controller의 parent IRQ 하나로 모여 들어오고, 그 handler가 `generic_handle_demux_domain_irq()`로 개별 MSI를 나눠 부릅니다. affinity를 쓰면 이 함수는 mask(online CPU와 교집합을 낸 값)의 첫 CPU를 redirect 대상으로 저장하고, mask 전체를 effective affinity로 기록합니다. 그래서 이 경로에서만 `effective_affinity_list`에 CPU가 여러 개 나올 수 있습니다. handler가 도는 CPU는 [`kernel/irq/irqdesc.c`](https://github.com/torvalds/linux/blob/v7.3-rc6/kernel/irq/irqdesc.c)의 `demux_redirect_remote()`가 정합니다. parent IRQ를 받은 CPU가 이 집합 안에 있으면 그 CPU에서 바로 돌고, 집합 밖이면 `irq_work_queue_on()`으로 저장해 둔 redirect 대상, 즉 mask의 첫 CPU에서 돕니다.
+**DesignWare PCIe 내장 MSI controller.** [`pcie-designware-host.c`](https://github.com/torvalds/linux/blob/v7.3-rc6/drivers/pci/controller/dwc/pcie-designware-host.c)는 SMP 커널에서 MSI IRQ의 `irq_set_affinity`를 [`kernel/irq/chip.c`](https://github.com/torvalds/linux/blob/v7.3-rc6/kernel/irq/chip.c)의 `irq_chip_redirect_set_affinity()`로 둡니다. 이 IRQ들은 controller의 parent IRQ 하나로 모여 들어오고, 그 handler가 `generic_handle_demux_domain_irq()`로 개별 MSI를 나눠 부릅니다. affinity를 쓰면 이 함수는 mask(online CPU와 교집합을 낸 값)의 첫 CPU를 redirect 대상으로 저장하고, mask 전체를 effective affinity로 기록합니다. 그래서 세 경로 중 이 경로에서만 `effective_affinity_list`에 CPU가 여러 개 나올 수 있습니다. handler가 도는 CPU는 [`kernel/irq/irqdesc.c`](https://github.com/torvalds/linux/blob/v7.3-rc6/kernel/irq/irqdesc.c)의 `demux_redirect_remote()`가 정합니다. parent IRQ를 받은 CPU가 이 집합 안에 있으면 그 CPU에서 바로 돌고, 집합 밖이면 `irq_work_queue_on()`으로 저장해 둔 redirect 대상, 즉 mask의 첫 CPU에서 돕니다.
 
 세 경로 모두 queue IRQ마다 CPU를 하나만 넣으면 후보가 하나뿐이므로 결과가 정해집니다. 아래 NIC 스크립트가 CPU 번호 하나씩을 쓰는 이유입니다.
 
@@ -128,7 +128,7 @@ managed IRQ에 대해서는 [kernel-parameters 문서](https://github.com/torval
 
 ### 이 VM에서 실제로 확인
 
-위 규칙을 Debian 13 arm64 VM(QEMU `virt`, `-accel hvf`, vCPU 6, 커널 `6.12.116+deb13-arm64`, irqbalance는 `systemctl is-active`가 `inactive`)에서 확인했습니다. 이 글이 인용한 소스는 v7.3-rc6이고 실행한 커널은 v6.12 계열이라, 아래 결과는 두 버전에서 이 경로의 동작이 같다는 확인이기도 합니다. 이 VM의 GIC는 GICv3이고, PCIe MSI-X는 `/proc/interrupts`에 `GICv2m-PCI-MSIX`로 나와 GICv2m frame을 거쳐 SPI로 들어옵니다.
+위 규칙을 Debian 13 arm64 VM(QEMU `virt`, `-accel hvf`, vCPU 6, 커널 `6.12.116+deb13-arm64`, irqbalance는 설치돼 있지 않음, `dpkg -l irqbalance`에 패키지 없음)에서 확인했습니다. 이 글이 인용한 소스는 v7.3-rc6이고 실행한 커널은 v6.12 계열이라, 아래 결과는 v6.12 커널이 v7.3-rc6 소스에서 읽은 규칙과 같게 동작한다는 확인입니다. 이 VM의 GIC는 GICv3이고, PCIe MSI-X는 `/proc/interrupts`에 `GICv2m-PCI-MSIX`로 나와 GICv2m frame을 거쳐 SPI로 들어옵니다.
 
 대상은 세 IRQ입니다. 46은 virtio-net의 legacy INTx(GIC SPI, level), 53은 virtio-blk의 두 번째 queue IRQ(MSI-X, 커널이 queue마다 CPU를 배정한 managed IRQ), 10은 per-CPU인 architected timer입니다.
 
@@ -141,37 +141,33 @@ echo 1-3 > /proc/irq/46/smp_affinity_list; show 46
 echo 3f > /proc/irq/46/smp_affinity        # restore
 show 53; echo 1 > /proc/irq/53/smp_affinity; echo "write rc=$?"
 cat /proc/irq/10/smp_affinity_list; echo 1 > /proc/irq/10/smp_affinity; echo "write rc=$?"
+grep -E '^ *(46|53):' /proc/interrupts
 ```
 
 ```text
-## IRQ 46 (virtio0, GIC SPI, level)
 46/smp_affinity: 3f
 46/smp_affinity_list: 0-5
 46/effective_affinity: 01
 46/effective_affinity_list: 0
-after: echo c > /proc/irq/46/smp_affinity
 46/smp_affinity: 0c
 46/smp_affinity_list: 2-3
 46/effective_affinity: 04
 46/effective_affinity_list: 2
-after: echo 1-3 > smp_affinity_list
 46/smp_affinity: 0e
 46/smp_affinity_list: 1-3
 46/effective_affinity: 02
 46/effective_affinity_list: 1
-## IRQ 53 (virtio1-req.1, MSI via ITS, managed)
 53/smp_affinity: 02
 53/smp_affinity_list: 1
 53/effective_affinity: 02
 53/effective_affinity_list: 1
-bash: line 1: echo: write error: Operation not permitted
+/root/p7/713.sh: line 7: echo: write error: Operation not permitted
 write rc=1
-## IRQ 10 (arch_timer, per-CPU)
 0-5
+/root/p7/713.sh: line 8: echo: write error: Operation not permitted
 write rc=1
-bash: line 1: echo: write error: Operation not permitted
- 46:     129613          4          5          0          0          0     GICv3  36 Level     virtio0
- 53:          0      62283          0          0          0          0  GICv2m-PCI-MSIX-0000:00:02.0   2 Edge      virti
+ 46:     138757         12         13          0          0          0     GICv3  36 Level     virtio0
+ 53:          0      64936          0          0          0          0  GICv2m-PCI-MSIX-0000:00:02.0   2 Edge      virtio1-req.1
 ```
 
 - SPI 46에 `c`(CPU2·3)를 쓰자 `effective_affinity_list`는 2, `1-3`을 쓰자 1이었습니다. mask 안의 가장 낮은 번호 online CPU라는 위 `gic_set_affinity()` 규칙 그대로입니다. 마지막 줄의 `/proc/interrupts`에서 CPU0~2 열에 횟수가 붙은 것이 바꾼 순서의 흔적입니다.
@@ -380,7 +376,7 @@ exit 0
 ## 정리
 
 - **받는 CPU는 mask가 아니라 controller driver가 정합니다.** GIC SPI는 가장 낮은 번호, ITS는 LPI가 가장 적은 CPU, DWC MSI는 parent IRQ를 받은 CPU가 mask 안이면 그 CPU, 밖이면 mask의 첫 CPU입니다. 결과를 고정하려면 IRQ마다 CPU 하나를 `smp_affinity_list`로 주고, 분산은 mask를 넓히는 대신 IRQ(queue) 수로 합니다.
-- **쓴 값이 반영되지 않는 길은 둘입니다.** 쓰기 자체가 `EPERM`으로 거부되거나(파일 권한이 아니라 반환값으로 판단), 기본 mask(`irqaffinity=`, `default_smp_affinity`)가 이미 시작된 IRQ에 닿지 않는 경우입니다. managed IRQ와 boot CPU는 `/proc`로 다룰 수 없어 `isolcpus=managed_irq`처럼 부팅 파라미터로 정합니다.
+- **쓴 값이 반영되지 않는 길은 둘입니다.** 쓰기 자체가 `EPERM`으로 거부되거나(파일 권한이 아니라 반환값으로 판단), 기본 mask(`irqaffinity=`, `default_smp_affinity`)가 이미 시작된 IRQ에 닿지 않는 경우입니다. managed IRQ는 `/proc`로 다룰 수 없어 `isolcpus=managed_irq`로 정합니다. boot CPU는 `irqaffinity=`로는 뺄 수 없으므로 `/proc/irq/default_smp_affinity`와 IRQ별 `smp_affinity_list`로 뺍니다.
 - **받아들여진 값을 바꾸는 writer는 셋입니다.** irqbalance(`--banirq`, 격리 코어를 포함한 `IRQBALANCE_BANNED_CPULIST`), CPU hotplug(udev `online` 규칙), suspend-to-RAM(sleep hook). 각각에 맞는 지점에서 같은 스크립트를 다시 돌립니다.
 - **PREEMPT_RT의 IRQ thread는 IRQ를 따라갑니다.** 위치는 `smp_affinity`로만 정해지고(`taskset`은 `EINVAL`), priority는 `chrt`로 50·49에서 조정합니다.
 
