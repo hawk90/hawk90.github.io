@@ -25,7 +25,7 @@ U-Boot v2024.04 `doc/develop/spl.rst`는 자기 단계를 TPL → VPL → SPL �
 | 단계 | 크기 근거 | 실행 위치 | 주 역할 |
 | --- | --- | --- | --- |
 | 1. BootROM | 칩 mask ROM, 변경 불가 | on-chip | 부트 매체 선택, 다음 단계 헤더 확인·로드 |
-| 2. SPL | `CONFIG_SPL_MAX_SIZE` 기본값: i.MX8MM `0x27000`, Allwinner(SRAM 0x10000/0x20000) `0x7fa0`, i.MX6(OCRAM 256 KB 아님) `0x10000` | on-chip SRAM | DRAM 초기화, U-Boot proper(또는 TF-A) 로드 |
+| 2. SPL | `CONFIG_SPL_MAX_SIZE` 기본값: i.MX8MM `0x27000`, Allwinner(`SUNXI_SRAM_ADDRESS` 0x10000/0x20000, H616 제외) `0x7fa0`, i.MX6(OCRAM 256 KB 아님) `0x10000` | on-chip SRAM | DRAM 초기화, U-Boot proper(또는 TF-A) 로드 |
 | 3. U-Boot proper | `qemu_arm64` 빌드의 `u-boot.bin` 1,047,344 byte | DRAM | env·script·shell, kernel·DTB·initrd 로드 후 점프 |
 | 4. Linux kernel | — | DRAM | DTB 파싱, driver init, init 시작 |
 | 5. systemd / busybox init | — | rootfs mount 후 | 응용 시작 |
@@ -47,7 +47,7 @@ secure boot가 켜져 있으면 BootROM은 로드한 이미지의 서명도 확�
 
 ## SPL (Secondary Program Loader)
 
-`doc/develop/spl.rst`는 SPL을 "Sets up SDRAM and loads U-Boot proper"라고 정의합니다. 실제 보드 코드를 보면 그 순서가 그대로 보입니다. 아래는 v2024.04 `board/freescale/imx8mm_evk/spl.c`의 `board_init_f()`에서 오류 처리를 빼고 줄였습니다.
+`doc/develop/spl.rst`는 SPL을 "Sets up SDRAM and loads U-Boot proper"라고 정의합니다. 실제 보드 코드를 보면 그 순서가 그대로 보입니다. 아래는 v2024.04 `board/freescale/imx8mm_evk/spl.c`의 `board_init_f()`에서 오류 처리와 clock 장치 조회(`uclass_get_device_by_name(UCLASS_CLK, ...)`)를 빼고 줄였습니다.
 
 ```c
 void board_init_f(ulong dummy)
@@ -65,7 +65,7 @@ void board_init_f(ulong dummy)
 }
 ```
 
-다음 단계 로드는 공통 코드인 `common/spl/spl.c`의 `board_init_r()`가 합니다. `board_boot_order()`로 부트 장치 목록을 받아 `boot_from_devices()`로 차례로 시도하고, 모두 실패하면 `failed to boot from all boot devices`를 찍고 멈춥니다. 성공하면 이미지 종류(`IH_OS_U_BOOT`, `IH_OS_ARM_TRUSTED_FIRMWARE`, `IH_OS_TEE`, `IH_OS_LINUX` 등)에 따라 점프 함수를 고릅니다. 앞 표의 `SPL_MAX_SIZE`가 이 코드 전체가 SRAM에 들어가야 하는 한도입니다.
+다음 단계 로드는 공통 코드인 `common/spl/spl.c`의 `board_init_r()`가 합니다. `board_boot_order()`로 부트 장치 목록을 받아 `boot_from_devices()`로 차례로 시도하고, 모두 실패하면 `failed to boot from all boot devices`를 찍고 멈춥니다. 성공하면 이미지 종류(`IH_OS_U_BOOT`, `IH_OS_ARM_TRUSTED_FIRMWARE`, `IH_OS_TEE`, `IH_OS_LINUX` 등)에 따라 점프 함수를 고릅니다. 앞 표의 `SPL_MAX_SIZE`는 Kconfig help대로 BSS를 뺀 SPL 이미지(text, data, rodata, linker list)가 넘지 말아야 하는 한도이고, 링커가 검사합니다.
 
 ## U-Boot Proper
 
@@ -184,22 +184,38 @@ AArch32에서는 BL31이 없고 BL32가 EL3 Runtime Software 역할을 맡는 �
 
 ## A/B Boot — 안전 업데이트
 
-A/B 업데이트는 kernel·rootfs를 두 벌(`boot_a`/`boot_b`, `root_a`/`root_b`) 두고, 현재 슬롯과 부팅 시도 횟수를 환경 변수에 기록합니다. 횟수 세기는 U-Boot의 `CONFIG_BOOTCOUNT_LIMIT`가 맡습니다. `doc/README.bootcount`의 규칙은 이렇습니다.
+A/B 업데이트는 kernel·rootfs를 두 벌(`boot_a`/`boot_b`, `root_a`/`root_b`) 두고, 현재 슬롯을 환경 변수에 기록합니다. 부팅 시도 횟수는 U-Boot의 `CONFIG_BOOTCOUNT_LIMIT`가 세는데, 어디에 저장하는지는 backend가 정합니다. `drivers/bootcount/Kconfig`의 기본값 `BOOTCOUNT_GENERIC`은 `SYS_BOOTCOUNT_ADDR` 메모리에, `BOOTCOUNT_ENV`는 환경 변수에 둡니다. `doc/README.bootcount`와 소스의 규칙은 이렇습니다.
 
-- 부팅할 때마다 `bootcount`가 1씩 늘고, 그 값이 `bootlimit`을 넘으면 `bootcmd` 대신 `altbootcmd`를 실행합니다.
+- 부팅할 때마다 `bootcount`가 1씩 늘고, `include/bootcount.h`의 `bootcount_error()`는 `bootlimit && bootcount > bootlimit`이면 `bootcmd` 대신 `altbootcmd`를 실행합니다.
 - `bootlimit`이 없으면 이 기능은 꺼집니다. `altbootcmd`가 없으면 U-Boot는 shell에 머뭅니다.
 - 부팅이 성공하면 `bootcount`를 0으로 되돌리는 것은 "some application code (typically a Linux application)"의 책임입니다.
-- `upgrade_available`이 0이면 `bootcount`를 저장하지 않습니다.
+- 환경 backend(`bootcount_env.c`)는 `upgrade_available`이 1일 때만 `bootcount`를 읽고 저장합니다. 0이면 횟수가 쌓이지 않으므로, 업데이트 직후에만 1로 켜 둡니다.
 
-그래서 슬롯 전환 자체는 직접 짜야 합니다.
+슬롯 전환 자체는 직접 짜야 합니다. `qemu_arm64_defconfig`에 `CONFIG_BOOTCOUNT_LIMIT=y`, `CONFIG_BOOTCOUNT_ENV=y`를 더해 빌드하고, 환경이 저장되는 두 번째 flash를 `-drive if=pflash,unit=1,format=raw,file=env.img`(64 MiB 빈 파일)로 붙여 돌렸습니다. kernel 대신 `echo`로 슬롯만 표시합니다.
 
 ```bash
-=> setenv bootlimit 3
+=> setenv slot a
+=> setenv boot_a 'echo booting slot A'
+=> setenv boot_b 'echo booting slot B'
 => setenv bootcmd 'if test ${slot} = a; then run boot_a; else run boot_b; fi'
-=> setenv altbootcmd 'if test ${slot} = a; then setenv slot b; else setenv slot a; fi; setenv bootcount 0; saveenv; run bootcmd'
+=> setenv altbootcmd 'if test ${slot} = a; then setenv slot b; else setenv slot a; fi; setenv bootcount 0; setenv upgrade_available 0; saveenv; run bootcmd'
+=> setenv bootlimit 3
+=> setenv upgrade_available 1
+=> saveenv
+=> reset
 ```
 
-비교가 `bootcount > bootlimit`이라 `bootlimit=3`이면 네 번째 부팅에서 `altbootcmd`로 넘어갑니다. A/B 파티션만으로는 rollback이 되지 않고, 성공 표시와 환경 저장까지 갖춰야 합니다. 환경 backend별 동작과 QEMU에서 실패를 일부러 일으켜 본 결과는 [Bootloader 17장](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다.
+`echo`는 Linux까지 가지 못한 부팅이므로 아무도 `bootcount`를 0으로 돌려놓지 않습니다. `reset`을 반복한 로그에서 해당 줄만 뽑았습니다.
+
+```text
+booting slot A
+booting slot A
+Warning: Bootlimit (3) exceeded. Using altbootcmd.
+Saving Environment to Flash... Un-Protected 2 sectors
+booting slot B
+```
+
+`saveenv`를 한 부팅이 이미 `bootcount=1`이었으므로 그 뒤 두 번(2, 3)은 슬롯 A로 갔고, 세 번째 `reset`에서 4가 되어 `altbootcmd`로 넘어갔습니다. `altbootcmd`가 `upgrade_available=0`을 저장했기 때문에 그다음 부팅부터는 횟수가 쌓이지 않고 슬롯 B로만 갑니다. A/B 파티션만으로는 rollback이 되지 않고, OS 쪽의 성공 표시까지 갖춰야 합니다. RAUC 같은 도구와의 연동은 [Bootloader 17장](/blog/embedded/bootloader/chapter17-ab-update)에 있습니다.
 
 ## STM32MP1 부팅 예
 
@@ -214,7 +230,7 @@ U-Boot `doc/board/st/stm32mp1.rst`의 "Boot Sequences" 절은 두 체인을 적�
 
 ## i.MX8QXP 부팅
 
-i.MX8QXP의 `flash.bin`에는 Cortex-A용 코드만 들어가지 않습니다. `doc/board/nxp/imx8qxp_mek.rst`의 Quick Start는 BL31 빌드, `scfw_tcm.bin`과 `ahab-container.img` 받기, U-Boot 빌드 순서이고, 두 파일은 NXP 배포본의 `imx-sc-firmware-1.2.7.1/mx8qx-mek-scfw-tcm.bin`(System Controller Firmware)과 `imx-seco-2.3.1/firmware/seco/mx8qx-ahab-container.img`입니다. AHAB 가이드(`doc/imx/ahab/guides/mx8_mx8x_encrypted_boot.txt`)는 "AHAB is able to decrypt image containers by calling SECO authentication"이라고 적어, 이미지 인증을 SECO가 맡는다는 것을 보여 줍니다. 같은 i.MX8 계열이라도 `imx8mm_evk.rst`의 Quick Start에는 이 두 파일이 없고 BL31과 DDR firmware만 있습니다.
+i.MX8QXP의 `flash.bin`에는 Cortex-A용 코드만 들어가지 않습니다. `doc/board/nxp/imx8qxp_mek.rst`의 Quick Start는 BL31 빌드, `scfw_tcm.bin`과 `ahab-container.img` 받기, U-Boot 빌드 순서이고, 두 파일은 NXP 배포본의 `imx-sc-firmware-1.2.7.1/mx8qx-mek-scfw-tcm.bin`(System Controller Firmware)과 `imx-seco-2.3.1/firmware/seco/mx8qx-ahab-container.img`입니다. AHAB 가이드(`doc/imx/ahab/guides/mx8_mx8x_encrypted_boot.txt`)는 "AHAB is able to decrypt image containers by calling SECO authentication"이라고 적어, container 복호화에 SECO의 인증 함수를 쓴다는 것을 보여 줍니다. 같은 i.MX8 계열이라도 `imx8mm_evk.rst`의 Quick Start에는 이 두 파일이 없고 BL31과 DDR firmware만 있습니다.
 
 ## 부팅 디버깅
 
@@ -252,11 +268,11 @@ dd if=flash.bin of=/dev/sdX bs=1k seek=8    # Allwinner 위치. i.MX8MM이면 Bo
 setenv bootargs "console=ttyS0,115200 root=/dev/vda2"   # QEMU virt의 UART는 PL011
 ```
 
-QEMU `virt`의 DTB에서 `fdt print /chosen`을 하면 `stdout-path = "/pl011@9000000"`이 나옵니다. Linux v6.12의 PL011 driver(`drivers/tty/serial/amba-pl011.c`)는 장치 이름을 `.dev_name = "ttyAMA"`로 등록하므로 이 보드의 console은 `ttyAMA0`입니다. `console=`에 없는 장치를 적으면 kernel 로그가 그 UART로 나오지 않습니다.
+QEMU `virt`의 DTB에서 `fdt print /chosen`을 하면 `stdout-path = "/pl011@9000000"`이 나옵니다. Linux v6.12의 PL011 driver(`drivers/tty/serial/amba-pl011.c`)는 장치 이름을 `.dev_name = "ttyAMA"`로 등록하므로 이 보드의 console은 `ttyAMA0`입니다.
 
 > ⚠️ Secure boot key를 잘못 구움
 
-앞의 HAB 가이드가 경고하듯 SRK hash를 틀리게 구우면 그 칩은 부팅하지 않고, fuse는 되돌릴 수 없습니다. 개발 중에는 test key로 서명해 칩을 닫지 않은 상태에서 HAB event를 확인하고, 양산 키와 `SEC_CONFIG` 닫기는 마지막에 합니다.
+앞의 HAB 가이드가 경고하듯 SRK hash를 틀리게 구우면 그 칩은 부팅하지 않습니다. 가이드 1.6·1.7절의 순서대로, 서명한 이미지가 `hab_status`에서 HAB event 없이 부팅하는 것을 확인한 뒤 마지막에 `SEC_CONFIG[1]`을 굽습니다.
 
 ## 정리
 
@@ -264,7 +280,7 @@ QEMU `virt`의 DTB에서 `fdt print /chosen`을 하면 `stdout-path = "/pl011@90
 - SPL은 DRAM 초기화와 다음 단계 로드를 맡고, 크기 한도는 칩 SRAM에 맞춘 `CONFIG_SPL_MAX_SIZE`입니다.
 - BootROM이 이미지를 찾는 위치는 칩마다 다르고, U-Boot 보드 문서의 `dd` 명령이 정답입니다.
 - **FIT image**의 서명은 configuration에 두고, 공개키를 control DTB에 `required`로 넣어야 검증이 강제됩니다.
-- **A/B boot**는 `bootcount`/`bootlimit`/`altbootcmd`와 OS 쪽의 성공 표시가 함께 있어야 rollback이 됩니다.
+- **A/B boot**는 `bootcount`/`bootlimit`/`altbootcmd`(환경 backend면 `upgrade_available`까지)와 OS 쪽의 성공 표시가 함께 있어야 rollback이 됩니다.
 - TF-A는 AArch64에서 BL1·BL2·BL31·(BL32)·BL33의 다섯 단계를 정의합니다.
 
 다음 편부터 Part 4로 넘어가 **첫 bare-metal 프로그램**을 Linker script와 startup 코드부터 만듭니다.
