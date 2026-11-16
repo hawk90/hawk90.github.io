@@ -51,7 +51,7 @@ huart1.Init.HwFlowCtl = UART_HWCONTROL_NONE;
 
 ## Step 4: 핀의 Alternate Function
 
-STM32 GPIO는 리셋 뒤 입력 모드이고, USART 신호를 핀으로 내려면 그 핀을 alternate function으로 바꾸고 AF 번호를 골라야 합니다. STM32F407에서 USART1_TX는 PA9의 AF7입니다(DS8626 alternate function 표, HAL `GPIO_AF7_USART1` = 0x07).
+USART 신호를 핀으로 내려면 그 핀을 alternate function으로 바꾸고 AF 번호를 골라야 합니다. STM32F407에서 USART1_TX는 PA9의 AF7입니다(DS8626 alternate function 표, HAL `GPIO_AF7_USART1` = 0x07).
 
 ```c
 GPIO_InitTypeDef gpio = {0};
@@ -125,7 +125,7 @@ sent
 serial: 00000000: 4865 6c6c 6f0d 0a                        Hello..
 ```
 
-`TE`를 빼면 `TXE`는 서 있어서 `TDR`에 쓰기는 되지만, 한 바이트도 나가지 않고 전송 완료 플래그 `TC`(bit 6)도 서지 않아 코드가 멈춥니다. 반대로 RCC enable을 빼도 QEMU에서는 그대로 출력됩니다. QEMU의 이 USART 모델은 RCC 클럭 게이팅을 흉내 내지 않으므로, 클럭 enable 누락은 QEMU로 재현되지 않습니다. 실제 칩에서는 HAL 주석의 첫 단계를 빠뜨린 것이므로 보드에서 따로 확인합니다.
+`TE`를 빼면 `TXE`는 서 있어서 `TDR`에 쓰기는 되지만 한 바이트도 나가지 않습니다. 출력의 ISR 0x...c0에서 `TC`(bit 6)가 서 있는 것은 첫 `TDR` 쓰기 전에 읽은 값이고, 쓴 뒤에는 `TC`가 다시 서지 않아 코드가 멈춥니다. 반대로 RCC enable을 빼도 QEMU에서는 그대로 출력됩니다. QEMU의 이 USART 모델은 RCC 클럭 게이팅을 흉내 내지 않으므로, 클럭 enable 누락은 QEMU로 재현되지 않습니다. 실제 칩에서는 HAL 주석의 첫 단계를 빠뜨린 것이므로 보드에서 따로 확인합니다.
 
 ## Step 6: Baud 계산 검증
 
@@ -218,7 +218,7 @@ Taking exception 7 [Breakpoint] on CPU 0
 
 > ⚠️ `\n`만 보내기
 
-터미널 프로그램은 대개 LF(`\n`)를 받으면 줄만 내리고 커서를 왼쪽 끝으로 돌리지 않습니다. 줄 머리를 맞추려면 `\r\n`을 보내거나 터미널 쪽에서 LF를 CRLF로 바꾸는 옵션을 켭니다. 위 QEMU 실행의 출력 `48 65 6c 6c 6f 0d 0a`가 `Hello\r\n`입니다.
+LF(`\n`)는 줄 바꿈, CR(`\r`)은 커서를 줄 머리로 돌리는 문자입니다. 터미널이 LF만 받고 줄 머리로 돌아가지 않으면 `\r\n`을 보내거나 터미널 쪽에서 LF를 CRLF로 바꾸는 옵션을 켭니다. 위 QEMU 실행의 출력 `48 65 6c 6c 6f 0d 0a`가 `Hello\r\n`입니다.
 
 > ⚠️ 출력 직후 reset
 
@@ -254,4 +254,3 @@ interrupt·DMA 방식이면 `printf`가 돌아온 시점에 바이트가 아직 
 - [UART 하드웨어 동작 분석 — Baud Rate·Framing·FIFO](/blog/embedded/modern-recipes/part1-04-uart-hardware) — 체크리스트 3·6번의 근거: STM32H743 USART의 프레임 형식별 수신 허용 오차와 BRR 반올림 오차
 - [UART 드라이버 구현 — polling·interrupt·DMA 3가지 방식 비교](/blog/embedded/modern-recipes/part4-07-uart-driver) — 9번 "polling으로 우선 검증" 다음 단계
 - [10-06: 부팅 안 될 때](/blog/embedded/modern-recipes/part10-06-boot-failure)
-- Embedded Serial Ch 1: UART
