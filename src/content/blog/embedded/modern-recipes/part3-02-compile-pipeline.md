@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"`gcc main.c`는 사실 여러 도구를 차례로 부른 것입니다."** preprocess → compile → assemble → link. `-v`를 붙이면 driver가 `cc1`과 `as`를 실제로 어떤 인자로 부르는지 보이고, 각 단계를 분리해 보면 문제가 어느 단계에서 생겼는지 바로 좁혀집니다.
+> **"`gcc main.c` 한 번이 여러 도구를 차례로 부릅니다."** preprocess → compile → assemble → link. `-v`를 붙이면 driver가 `cc1`과 `as`를 실제로 어떤 인자로 부르는지 보이고, 각 단계를 분리해 보면 문제가 어느 단계에서 생겼는지 바로 좁혀집니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -249,7 +249,7 @@ object만 필요하면 `-c`로 각각 컴파일하고, link는 linker script와 
 - `.i`로 매크로와 타입, `.s`로 최적화, `.o`의 `nm`으로 symbol, `.elf`의 `objdump -h`로 VMA·LMA 배치를 확인합니다.
 - `size`의 세 묶음은 section 단위 분석을 대신하지 못합니다.
 
-다음 편에서는 **ELF 파일 구조**를 다룹니다. `.elf`의 내부를 dissect 합니다.
+다음 편에서는 **ELF 파일 구조**를 다룹니다. `.elf`의 내부를 뜯어봅니다.
 
 ## 관련 항목
 
