@@ -226,7 +226,7 @@ MODULE_DEVICE_TABLE(of, my_of_match);
 
 `of_property_read_u32`는 property가 없으면 `-EINVAL`, 값이 4바이트보다 짧으면 `-EOVERFLOW`를 돌려줍니다. DTB에서 펼친 트리는 값 없이 이름만 있는 property도 value 포인터를 채우므로(`populate_properties`, [drivers/of/fdt.c](https://github.com/torvalds/linux/blob/v6.12/drivers/of/fdt.c)) 빈 property는 길이 0으로 `-EOVERFLOW`가 됩니다. `of_property_read_string`은 property가 없으면 `-EINVAL`, 길이가 0이면 `-ENODATA`, 문자열이 property 길이 안에서 NUL로 끝나지 않으면 `-EILSEQ`를 돌려줍니다. 둘 다 성공했을 때만 출력 변수를 바꿉니다([of.h](https://github.com/torvalds/linux/blob/v6.12/include/linux/of.h), [drivers/of/property.c](https://github.com/torvalds/linux/blob/v6.12/drivers/of/property.c)).
 
-그래서 위 probe는 선택 property `vendor,sample-rate`를 기본값으로 초기화한 뒤 `-EINVAL`(없음)일 때만 기본값을 쓰고, 있는데 형식이 틀린 경우는 probe를 실패시킵니다. 필수 property `vendor,mode`는 어떤 에러든 probe를 실패시킵니다.
+그래서 위 probe는 선택 property `vendor,sample-rate`의 값을 받을 `d->rate`를 기본값으로 초기화해 두고, `-EINVAL`(없음)일 때만 그 기본값을 쓰며, 있는데 형식이 틀린 경우는 probe를 실패시킵니다. 필수 property `vendor,mode`는 어떤 에러든 probe를 실패시킵니다.
 
 ### 로드 후 확인
 
@@ -256,7 +256,7 @@ dd.c는 compatible이 맞아 driver의 probe까지 가면 `bus: 'platform': real
 
 ### QEMU에서 다섯 행 확인
 
-위 표를 QEMU `virt` 보드에서 직접 확인했습니다. 커널은 Linux v6.12 arm64 `defconfig`에 `CONFIG_DYNAMIC_DEBUG=y`만 더해 빌드했고(Debian 13 arm64 VM, gcc 14.2.0), 위 세 블록을 이은 `foo.c`를 그 트리에 대해 `obj-m += foo.o` Makefile로 빌드했습니다. QEMU 11.1.3 `virt`의 DTB를 덤프해(`-M virt,dumpdtb=virt.dtb`, [7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)) 루트 끝에 아래 노드들을 더했습니다.
+위 표를 QEMU `virt` 보드에서 직접 확인했습니다. 커널은 Linux v6.12 arm64 `defconfig`에 `CONFIG_DYNAMIC_DEBUG=y`만 더해 빌드했고(Debian 13 arm64 VM, gcc 14.2.0), 위 세 블록을 이은 `foo.c`를 그 트리를 기준으로 `obj-m += foo.o` Makefile로 빌드했습니다. QEMU 11.1.3 `virt`의 DTB를 덤프해(`-M virt,dumpdtb=virt.dtb`, [7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)) 루트 끝에 아래 노드들을 더했습니다.
 
 ```dts
 	reserved-memory {
