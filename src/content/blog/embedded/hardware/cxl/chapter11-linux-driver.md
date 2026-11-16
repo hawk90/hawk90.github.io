@@ -68,7 +68,7 @@ topics: ["embedded", "embedded/hardware"]
 | Committed bit | 대기 성공 |
 | 제한 안에 미완료 | `-ETIMEDOUT` |
 
-`cxld_await_commit()`(606-625행)은 `COMMIT_TIMEOUT_MS`(20)번 레지스터를 검사하고, 사이마다 `fsleep(1000)`으로 1 ms씩 쉽니다.
+`cxld_await_commit()`(607-625행)은 `COMMIT_TIMEOUT_MS`(20)번 레지스터를 검사하고, 사이마다 `fsleep(1000)`으로 1 ms씩 쉽니다.
 
 ## Region 상태와 메모리 노출
 
@@ -146,11 +146,10 @@ QEMU의 QMP 명령 `cxl-inject-correctable-error`와 `cxl-inject-uncorrectable-e
 ```text
 UESta:	... UncorrIntErr+ ...
 UEMsk:	... UncorrIntErr+ ...
-CESta:	... CorrIntErr+ ...
 CEMsk:	... AdvNonFatalErr+ CorrIntErr+ HeaderOF+
 ```
 
-CXL RAS 오류는 PCIe AER의 *internal error*로 올라오는데, 상태 비트는 섰지만 mask가 걸려 있어 root port로 메시지가 가지 않았습니다(`aerdrv` 인터럽트 0). v6.12에서 internal error를 unmask하는 `pci_aer_unmask_internal_errors()`는 `drivers/pci/pcie/aer.c:1066-1072`의 `cxl_rch_enable_rcec()`, 곧 CXL 1.1 방식(RCH) RCEC에서만 호출됩니다. `cxl_pci_ras_unmask()`(`pci.c:525`)는 CXL RAS capability의 mask만 풀고 PCIe AER mask는 건드리지 않습니다. 이 VH 토폴로지에서는 internal error가 기본 mask 상태로 남습니다.
+CXL RAS 오류는 PCIe AER의 *internal error*로 올라오는데, 상태 비트는 섰지만 mask가 걸려 있어 root port로 메시지가 가지 않았습니다(`aerdrv` 인터럽트 0). v6.12에서 internal error를 unmask하는 `pci_aer_unmask_internal_errors()`는 `drivers/pci/pcie/aer.c:1066-1073`의 `cxl_rch_enable_rcec()`, 곧 CXL 1.1 방식(RCH) RCEC에서만 호출됩니다. `cxl_pci_ras_unmask()`(`pci.c:525`)는 CXL RAS capability의 mask만 풀고 PCIe AER mask는 건드리지 않습니다. 이 VH 토폴로지에서는 internal error가 기본 mask 상태로 남습니다.
 
 시험을 위해 `setpci`로 `10:00.0`의 AER Uncorrectable Mask bit 22와 Correctable Mask bit 14를 직접 풀고 다시 넣었습니다. 아래 두 로그는 타임스탬프와 일부 줄(`error status/mask`, 오류 유형 줄)을 줄였습니다. correctable 오류는 이렇게 보고됐습니다.
 

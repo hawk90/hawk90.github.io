@@ -20,7 +20,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 세대별로 더해진 것
 
-2.0~3.1은 CXL 3.1 Revision History, 3.2와 4.0은 컨소시엄 발표문(2024-12-03, 2025-11-18) 기준입니다.
+2.0·3.0은 CXL 3.1 §1.4.1과 Revision History, 3.1은 Revision History, 3.2와 4.0은 컨소시엄 발표문(2024-12-03, 2025-11-18) 기준입니다.
 
 | 세대 | Switching·fabric 관련 추가 |
 |------|-----------|

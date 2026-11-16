@@ -74,6 +74,8 @@ echo 0x2000 > /sys/kernel/debug/cxl/mem0/inject_poison
 cxl list -m mem0 -L -u
 ```
 
+출력의 `media_errors` 항목은 줄바꿈만 정리했습니다.
+
 ```json
 {
   "memdev":"mem0",
@@ -112,7 +114,7 @@ ndctl v81 `cxl-list` 문서의 `--health` 예에는 `ext_corrected_volatile`(예
 
 spec 13장은 성능 속성과 권고 지연 목표를 둡니다. 3.1 Table 13-1은 x16 링크의 "Total Bandwidth per link"를 적는데, 값은 `64 GT/s × 16 ÷ 8 = 128 GB/s`처럼 한 방향 raw rate의 산술값과 같습니다.
 
-| 링크 | 한 방향 명목 대역폭 |
+| 링크 | Total Bandwidth per link (Table 13-1) |
 |------|------|
 | 16 GT/s | 32 GB/s |
 | 32 GT/s | 64 GB/s |
@@ -138,7 +140,7 @@ spec은 이와 함께 디바이스가 CDAT로 지연·대역폭을 보고하고,
 
 ## CHMU — Hot-Page Monitoring Unit (CXL 3.2)
 
-CXL 3.2 발표문은 *메모리 tiering을 위한 CXL Hot-Page Monitoring Unit(CHMU)*을 새 기능으로 꼽습니다. 어떤 페이지가 자주 쓰이는지를 디바이스가 세어 OS의 tiering 결정에 쓰게 하는 장치입니다.
+CXL 3.2 발표문은 *메모리 tiering을 위한 CXL Hot-Page Monitoring Unit(CHMU)*을 새 기능으로 꼽습니다.
 
 3.2 규격 본문은 열람하지 않았으므로 CHMU의 레지스터 구조는 다루지 않습니다. 이 시리즈의 환경에는 CHMU가 없습니다. Linux v6.12 `drivers/cxl/`과 QEMU 11.1.3의 `hw/`·`include/`에서 `chmu`를 대소문자 구분 없이 grep하면 둘 다 0건입니다. 티어별 배치의 배경은 [HBM Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)을 참고하세요.
 

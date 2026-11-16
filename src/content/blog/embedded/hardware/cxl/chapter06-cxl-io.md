@@ -75,7 +75,7 @@ Capabilities: [17c v1] Designated Vendor-Specific: Vendor=1e98 ID=0007 Rev=2 Len
 	PCIe DVSEC for Flex Bus Port
 ```
 
-(ID 0000의 `CXLSta`·`CXLCtl2`·Range1 세부 줄·Range2, GPF·Flex Bus의 세부 줄은 줄였습니다.) `Rev=3`은 Table 8-2가 ID 0000h에 적은 최고 revision 3과 같습니다. `CXLCap`의 `Cache-`는 이 장치가 Type 3라는 뜻이고, `Range1` 크기 `0x10000000`은 256 MiB HDM입니다. Register Locator는 component register가 BAR0, 메일박스 등 device register가 BAR2에 있다고 알려 줍니다.
+(ID 0000의 `CXLSta`·`CXLCtl2`·`CXLSta2`·`CXLCap2`·`CXLCap3`·Range1 세부 줄·Range2, GPF·Flex Bus의 세부 줄은 줄였습니다.) `Rev=3`은 Table 8-2가 ID 0000h에 적은 최고 revision 3과 같습니다. `CXLCap`의 `Cache-`는 이 장치가 Type 3라는 뜻이고, `Range1` 크기 `0x10000000`은 256 MiB HDM입니다. Register Locator는 component register가 BAR0, 메일박스 등 device register가 BAR2에 있다고 알려 줍니다.
 
 같은 게스트에서 switch upstream port `0d:00.0`과 root port `0c:00.0`에는 ID 0003h(CXL Extensions DVSEC for Ports)가 있었고, endpoint에는 없었습니다. Table 8-2의 필수·금지 열과 그대로 맞습니다.
 

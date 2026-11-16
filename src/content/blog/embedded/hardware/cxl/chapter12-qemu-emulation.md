@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 이 판의 모델과 지원 범위
 
-QEMU 소스 트리에서 CXL 관련 장치 모델은 다음 파일들이 전부입니다.
+QEMU 소스 트리의 CXL 관련 장치 모델과 소스는 다음과 같습니다.
 
 | 구성 요소 | 이름 | 소스 |
 |---|---|---|
@@ -26,6 +26,7 @@ QEMU 소스 트리에서 CXL 관련 장치 모델은 다음 파일들이 전부�
 | root port | `cxl-rp` | `hw/pci-bridge/cxl_root_port.c` |
 | switch | `cxl-upstream`, `cxl-downstream` | `hw/pci-bridge/cxl_upstream.c`, `cxl_downstream.c` |
 | Type 3 | `cxl-type3` | `hw/mem/cxl_type3.c` |
+| switch mailbox CCI | `cxl-switch-mailbox-cci` | `hw/cxl/switch-mailbox-cci.c` (FM API 명령 처리, 이 시리즈에서는 쓰지 않음) |
 | fixed memory window | `-M cxl-fmw.N.*` | `hw/cxl/cxl-host.c` |
 | CEDT·`_OSC` | ACPI 표 생성 | `hw/acpi/cxl.c` |
 
@@ -33,7 +34,7 @@ Type 1·Type 2 모델은 없습니다. [QEMU 11.1.3 CXL 문서](https://gitlab.c
 
 ## 이 시리즈의 구성: switch 아래 Type 3 두 대
 
-실제로 부팅한 명령입니다. 경로와 disk·network 옵션은 줄였습니다.
+실제로 부팅한 명령입니다. 경로와 disk·network 옵션은 줄이고 옵션 순서도 정리했습니다.
 
 ```bash title="qemu-cxl-switch.sh"
 qemu-system-aarch64 -nographic -M virt,gic-version=3,cxl=on \
@@ -96,7 +97,7 @@ qemu-system-aarch64 -nographic -M virt,gic-version=3,cxl=on \
 
 ## CEDT와 firmware 경계
 
-`hw/acpi/cxl.c`의 `cedt_build_chbs()`(103행)는 CHBS의 UID에 `pxb->bus_nr`를 넣고(118-119행, 주석 "UID - currently equal to bus number"), `cedt_build_cfmws()`(139행)는 window의 base·size·target host bridge 목록을 씁니다. 게스트에서 `acpidump -n CEDT -b`와 `iasl -d`로 푼 결과의 `Associated host bridge : 0000000C`가 그 UID 12입니다. CFMWS의 `Restrictions : 002F`는 Linux에서 root decoder의 `cap_type2`·`cap_type3`·`cap_ram`·`cap_pmem`이 모두 1인 것으로 나타났습니다(`drivers/cxl/acpi.c:118-126`).
+`hw/acpi/cxl.c`의 `cedt_build_chbs()`(103행)는 CHBS의 UID에 `pxb->bus_nr`를 넣고(118-119행, 주석 "UID - currently equal to bus number"), `cedt_build_cfmws()`(139행)는 window의 base·size·target host bridge 목록을 씁니다. 게스트에서 `acpidump -n CEDT -b`와 `iasl -d`로 푼 결과의 `Associated host bridge : 0000000C`가 그 UID 12입니다. CFMWS의 `Restrictions : 002F`는 Linux에서 root decoder의 `cap_type2`·`cap_type3`·`cap_ram`·`cap_pmem`이 모두 1인 것으로 나타났습니다(`drivers/cxl/acpi.c:118-125`).
 
 edk2 펌웨어는 HDM decoder를 프로그래밍하지 않았습니다. 부팅 직후 모든 port의 `decoders_committed`가 0이었습니다. 펌웨어 쪽 흐름은 [Bootloader Ch 35](/blog/embedded/bootloader/chapter35-uefi-cxl-init)에서 다룹니다.
 
@@ -126,7 +127,7 @@ Linux v6.12의 `tools/testing/cxl/`에는 `cxl_acpi_test.c`, `cxl_core_test.c`, 
 
 ## 정리
 
-- QEMU 11.1.3의 CXL 장치 모델은 host bridge·root port·switch·Type 3뿐이고, coherency protocol은 에뮬레이션하지 않습니다.
+- QEMU 11.1.3의 CXL 장치 모델은 host bridge·root port·switch·switch mailbox CCI·Type 3이고, Type 1·2 모델은 없으며 coherency protocol은 에뮬레이션하지 않습니다.
 - 잘못된 machine·window·bus 설정과 지원하지 않는 링크 속도는 QEMU가 시작 전에 거부합니다.
 - arm64 게스트에서 CEDT·driver binding·DVSEC·CDAT·mailbox·poison·event·AER 복구까지 실제로 관찰했습니다.
 - region commit은 arm64 커널의 cache 무효화 부재로 `-ENXIO`였습니다.

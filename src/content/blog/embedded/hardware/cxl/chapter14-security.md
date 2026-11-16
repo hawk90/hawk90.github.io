@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 기준 문서는 [CXL 3.1 §11](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)입니다. 은행 금고에 비유하면 SPDM은 직원 신분 확인, IDE는 현금 수송차의 잠금, TSP는 금고 안 개인 대여함입니다. 셋은 지키는 대상이 다릅니다.
 
-이 장의 보안 흐름은 실행하지 않았습니다. 이 시리즈의 환경에는 이를 시험할 대상이 없었습니다. QEMU 11.1.3 Type 3 endpoint의 `lspci -vvv`에는 MSI-X, PCIe, Device Serial Number, CXL DVSEC 네 개, DOE, AER만 있고 IDE extended capability가 없습니다. Linux v6.12 `drivers/cxl/` 전체에서 `ide`·`spdm`·`tsp`·`tdisp`를 grep하면 나오는 것은 `core/trace.h:47-48`의 RAS 오류 이름 `"IDE Tx Error"`·`"IDE Rx Error"` 두 줄뿐입니다. 그래서 아래 내용은 모두 규격 본문의 절·표로 설명합니다.
+이 장의 보안 흐름은 실행하지 않았습니다. 이 시리즈의 환경에는 이를 시험할 대상이 없었습니다. QEMU 11.1.3 Type 3 endpoint의 `lspci -vvv`에는 MSI-X, PCIe, Device Serial Number, CXL DVSEC 네 개, DOE, AER만 있고 IDE extended capability가 없습니다. Linux v6.12 `drivers/cxl/` 전체에서 `ide`·`spdm`·`tsp`·`tdisp`를 단어 단위로(`grep -iw`) 찾으면 나오는 것은 `core/trace.h:47-48`의 RAS 오류 이름 `"IDE Tx Error"`·`"IDE Rx Error"` 두 줄뿐입니다. 그래서 아래 내용은 모두 규격 본문의 절·표로 설명합니다.
 
 ## IDE가 막는 위협
 
@@ -82,7 +82,7 @@ PCIe IDE 정의를 따르고, 차이만 spec에 적혀 있습니다(§11.2).
 | Containment | 무결성 검사를 통과한 뒤에만 데이터를 넘김. 여러 flit을 버퍼링해야 해서 지연·대역폭 모두 손해 | 68B 5, 256B 2 |
 | Skid | 검사 전에 데이터를 넘겨 검사 완료 대기를 줄임. 변조 데이터가 먼저 소비될 수 있고 나중에 검사에서 잡힘 | 68B 128, 256B 32 |
 
-§11.3.5는 Skid 모드를 쓰려면 그 짧은 시간 창 안의 공격을 소프트웨어·애플리케이션 스택이 견딜 수 있어야 하고, 그렇지 않으면 결과가 정의되지 않는다고 씁니다. 같은 절의 각주는 x16·32 GT/s 링크에서 64-bit IV가 한 바퀴 도는 데 1000년이 넘게 걸린다고 적습니다. §11.3.5.1은 모든 장치가 Containment 모드를 지원해야 한다고 정합니다.
+§11.3.5는 Skid 모드를 쓰려면 그 짧은 시간 창 안의 공격을 소프트웨어·애플리케이션 스택이 견딜 수 있어야 하고, 그렇지 않으면 결과가 정의되지 않는다고 씁니다. §11.3.4의 각주는 x16·32 GT/s 링크에서 64-bit IV가 한 바퀴 도는 데 1000년이 넘게 걸린다고 적습니다. §11.3.5.1은 모든 장치가 Containment 모드를 지원해야 한다고 정합니다.
 
 자세한 내용은 [Embedded Security Ch 11 PCIe·CXL IDE 분석](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide).
 
@@ -140,7 +140,7 @@ TDISP는 PCI-SIG의 TEE Device Interface Security Protocol입니다. §11.5.1은
 |------|------|------|
 | 디바이스 신원·측정 | SPDM 메시지 교환(버전 협상부터 측정·session까지). TSP는 SPDM 1.2 이상 | DSP0274 1.2.3 §7, CXL 3.1 §11.5.2 |
 | SPDM session | session은 CXL_IDE_KM 메시지를 보호하고, IDE 키·IV는 그 메시지로 따로 설정 | §11.4 |
-| CXL.cachemem IDE | 256B Flit mode에서 무결성 검사가 한 번 실패하면 이후 모든 보안 트래픽을 버림 | §11.3 |
+| CXL.cachemem IDE | 무결성 검사가 한 번 실패하면 이후 모든 보안 트래픽을 버림 (68B·256B 공통) | §11.3 |
 | IDE 모드 | 모든 장치가 Containment 모드 지원 | §11.3.5.1 |
 | TSP 잠금 | CONFIG_LOCKED에서만 TEE 트랜잭션 허용, Transport Security 실패·CXL Reset이면 ERROR | §11.5.4.8, Figure 11-30 |
 | TSP 범위 | root port에 직접 연결된 Type 3, HDM-H, 256B flit만 | §11.5.2 |

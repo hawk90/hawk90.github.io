@@ -32,7 +32,7 @@ topics: ["embedded", "embedded/hardware"]
 
 | 형식 | 크기 | 도입 | 비고 |
 |------|------|------|------|
-| 68B flit | 68 B | CXL 1.1 | 32 GT/s까지 |
+| 68B flit | 68 B | CXL 1.0 (1.1 Revision History) | 32 GT/s까지 |
 | Standard 256B flit | 256 B | CXL 3.0 | PCIe Flit mode에서 사용. 8 GT/s 이상 |
 | Latency-Optimized 256B flit | 256 B | CXL 3.0 | 선택 기능. 128 B 반쪽마다 CRC |
 
