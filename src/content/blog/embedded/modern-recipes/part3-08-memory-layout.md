@@ -71,22 +71,9 @@ void *malloc_simple(size_t size) {
 
 ### 4) Stack 크기 결정
 
-bare-metal에서는 linker script에서 minimum stack을 지정합니다.
+bare-metal에서는 linker script에서 stack 크기를 정합니다. 이 글에서 실제로 링크한 형태는 아래 "코드 / 실제 사용 예"의 `.stack (NOLOAD)` 영역이고(`_Min_Stack_Size = 0x1000`, 4 KB), [3-04](/blog/embedded/modern-recipes/part3-04-linker-script-basics)의 ST식 script는 heap과 stack을 `._user_heap_stack` 하나로 예약합니다. 이 영역은 link 때 RAM이 모자라지 않는지 확인하는 예약입니다. 실행 중 stack이 그 안에 머무는지는 따로 확인해야 하고(아래 5절, MPU guard), 넘쳐도 hardware는 알려 주지 않습니다(아래 함정 절의 실행 결과).
 
-```text
-_Min_Stack_Size = 0x1000;       /* 4 KB */
-
-._user_stack :
-{
-    . = ALIGN(8);
-    . = . + _Min_Stack_Size;
-    . = ALIGN(8);
-} > RAM
-```
-
-이 영역은 link 때 RAM이 모자라지 않는지 확인하는 예약입니다. 실행 중 stack이 그 안에 머무는지는 따로 확인해야 하고(아래 5절, MPU guard), 넘쳐도 hardware는 알려 주지 않습니다(아래 함정 절의 실행 결과).
-
-RTOS의 경우 task마다 별도 stack이 있습니다. main thread의 stack은 `_estack`, task stack은 RTOS가 heap이나 static buffer에서 잡습니다.
+RTOS의 경우 task마다 별도 stack이 있습니다. FreeRTOS를 예로 들면 `xTaskCreate()`는 task stack을 RTOS heap에서, `xTaskCreateStatic()`은 호출자가 넘긴 static buffer를 씁니다.
 
 ### 5) Stack 사용량 측정
 
@@ -126,8 +113,7 @@ burn(10)과 burn(40)의 차이 0x870(2160)은 정확히 30 frame × 72 byte입�
 | 사용 안 함 (static only) | deterministic | flexibility 부족 |
 | 단순 sbrk (1방향) | 단순, 빠름 | free 안 됨 |
 | newlib malloc | 표준 | fragmentation |
-| FreeRTOS heap_4 | 임베디드 최적화 | 별도 영역 |
-| TLSF | 빠른 best-fit | 구현 복잡 |
+| FreeRTOS heap_4 | free 때 인접 block을 합쳐 fragmentation을 줄임 | `configTOTAL_HEAP_SIZE` 크기의 `ucHeap` 배열 안에서만 할당 |
 
 작은 시스템에서는 heap을 안 쓰는 것도 흔합니다. 모든 buffer를 static으로.
 
@@ -182,24 +168,19 @@ ld: RAM overflow
 ld: region `RAM' overflowed by 520 bytes
 ```
 
-stack overflow 감지 with MPU(앞 part2-07 참조):
-
-```c
-// Stack의 하단 32 byte를 No Access region으로
-mpu_set_region(0, (uint32_t)&_sstack, 32, MPU_AP_NONE);
-```
+stack overflow를 fault로 잡으려면 stack 바닥에 MPU no-access region을 둡니다. 실제 레지스터 설정과 QEMU 실행 결과는 [2-07](/blog/embedded/modern-recipes/part2-07-arm-mpu)에 있습니다. ARMv7-M MPU region은 크기의 배수 주소에서 시작해야 하므로, 위 script의 `_sstack`(0x20000208)은 그대로 쓸 수 없고 `.stack`을 guard 크기(예: 32 byte)에 맞춰 정렬해야 합니다.
 
 ## 측정 / 비교
 
 | 변수 종류 | 위치 | 크기 추적 도구 |
 | --- | --- | --- |
-| 전역 (init) | .data | `nm -S \| grep D` |
-| 전역 (zero) | .bss | `nm -S \| grep B` |
+| 전역 (init) | .data | `nm -S \| grep -i ' d '` |
+| 전역 (zero) | .bss | `nm -S \| grep -i ' b '` |
 | Local | stack | `-Wstack-usage` |
 | malloc | heap | runtime 측정 |
-| `const` | .rodata | `nm -S \| grep R` |
+| `const` | .rodata | `nm -S \| grep -i ' r '` |
 
-위 표의 `nm -S`는 symbol마다 크기를 함께 보여 줍니다. 이 글의 이미지에서는 다음과 같았습니다.
+위 표의 `nm -S`는 symbol마다 크기를 함께 보여 줍니다. `static` 변수는 소문자(`d`, `b`)로 나오므로 `grep -i`로 찾습니다. 이 글의 이미지에서는 다음과 같았습니다.
 
 ```text
 20000000 00000004 d heap_ptr
@@ -210,7 +191,7 @@ mpu_set_region(0, (uint32_t)&_sstack, 32, MPU_AP_NONE);
 
 > ⚠️ Stack overflow를 감지 못 함
 
-위 4 KB stack에서 `burn(62)`(62 × 72 = 4,464 byte)를 부르면 SP가 `.stack` 아래로 내려가 heap 영역을 지나갑니다. 미리 0x11111111로 채운 heap buffer를 호출 전후로 비교했습니다.
+위 4 KB stack에서 `burn(62)`(62 × 72 = 4,464 byte)를 부르면 SP가 `.stack` 아래 heap 영역 안까지 내려갑니다. 미리 0x11111111로 채운 heap buffer를 호출 전후로 비교했습니다.
 
 ```text
 heap buf[63] before deep call = 0x11111111
@@ -218,7 +199,7 @@ heap buf words changed by burn(62) = 0x00000005
 lowest SP reached ~ _estack - 62*72 = 0x20000088
 ```
 
-마지막 줄은 SP를 직접 잰 값이 아니라 `_estack`에서 frame 크기로 계산한 추정치입니다.
+마지막 줄은 SP를 직접 잰 값이 아니라 `_estack − 16 − 62×72`로 계산한 추정치이고(16은 `main`까지의 대략적인 사용량), SP가 heap 영역(0x20000008~0x20000208) 안까지 내려갔다는 뜻입니다.
 
 heap의 5 word가 바뀌었지만 fault는 없었고 프로그램은 정상 종료했습니다. MPU를 쓰지 않는 Cortex-M은 이런 침범을 알려 주지 않으므로, [2-07](/blog/embedded/modern-recipes/part2-07-arm-mpu)의 MPU stack guard나 위의 painting으로 감지합니다.
 
