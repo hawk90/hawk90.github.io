@@ -102,7 +102,11 @@ dtc -I dtb -O dts -o virt.dts virt.dtb
 reg = <0x00 0x9000000 0x00 0x1000>;   /* address 0x0_0900_0000, size 0x1000 */
 ```
 
-`fdtget`으로 같은 값을 읽으면 cell 네 개가 그대로 나옵니다(아래 demo 노드).
+`fdtget -t x`로 같은 값을 16진수로 읽으면 cell 네 개가 그대로 나옵니다(아래 demo 노드).
+
+```bash
+fdtget -t x virt-demo.dtb /demo@9100000 reg
+```
 
 ```text
 0 9100000 0 1000
@@ -142,7 +146,7 @@ reg = <0x00 0x9000000 0x00 0x1000>;   /* address 0x0_0900_0000, size 0x1000 */
 
 ## Interrupt 정의
 
-GIC v3의 `#interrupt-cells`는 3입니다. 바인딩 문서는 첫 cell을 interrupt 종류(0 = SPI, 1 = PPI), 둘째를 그 종류 안의 번호로 정의합니다(Linux v6.12 `Documentation/devicetree/bindings/interrupt-controller/arm,gic-v3.yaml` 46-53행). 셋째는 trigger flag이고, `dt-bindings/interrupt-controller/irq.h`에서 `IRQ_TYPE_LEVEL_HIGH`는 4입니다.
+GIC v3의 `#interrupt-cells`는 3이고, PPI affinity를 기술할 때만 4입니다. 바인딩 문서는 첫 cell을 interrupt 종류(0 = SPI, 1 = PPI, 2·3 = Extended SPI·PPI), 둘째를 그 종류 안의 번호로 정의합니다(Linux v6.12 `Documentation/devicetree/bindings/interrupt-controller/arm,gic-v3.yaml` 38-67행). 셋째는 trigger flag이고, `dt-bindings/interrupt-controller/irq.h`에서 `IRQ_TYPE_LEVEL_HIGH`는 4입니다.
 
 ```dts
 /dts-v1/;
@@ -201,7 +205,7 @@ uart0: serial@10000000 {
 };
 ```
 
-`pins`·`function`·`bias-disable`은 generic pinctrl 바인딩의 속성 이름이고, 실제로 받는 값과 노드 모양은 SoC마다 pinctrl driver 바인딩이 정합니다. 장치 쪽의 `pinctrl-names = "default"`는 driver core가 처리합니다. Linux v6.12의 `really_probe()`는 probe 전에 `pinctrl_bind_pins()`를 부르고(`drivers/base/dd.c:636`), 이 함수가 `default` 상태를 찾아 적용합니다(`drivers/base/pinctrl.c:18-40`). 그래서 driver가 pinctrl API를 직접 부르지 않아도, 그 SoC의 pinctrl driver가 먼저 probe되어 있으면 mux가 설정됩니다.
+`pins`·`function`·`bias-disable`은 generic pinctrl 바인딩의 속성 이름이고, 실제로 받는 값과 노드 모양은 SoC마다 pinctrl driver 바인딩이 정합니다. 장치 쪽의 `pinctrl-names = "default"`는 driver core가 처리합니다. Linux v6.12의 `really_probe()`는 probe 전에 `pinctrl_bind_pins()`를 부르고(`drivers/base/dd.c:636`), 이 함수가 `default` 상태를 찾아 적용합니다(`drivers/base/pinctrl.c:21-57`, `init` 상태가 있으면 그것을 먼저 적용). 그래서 driver가 pinctrl API를 직접 부르지 않아도, 그 SoC의 pinctrl driver가 먼저 probe되어 있으면 mux가 설정됩니다.
 
 ## I²C·SPI Device 등록
 
@@ -233,7 +237,7 @@ uart0: serial@10000000 {
 };
 ```
 
-`&i2c1`은 다른 파일(보통 SoC `.dtsi`)에서 label로 정의한 노드에 속성과 자식을 덧붙입니다. 자식의 `reg`는 I²C에서는 7비트 주소, SPI에서는 chip select 번호입니다.
+`&i2c1`은 다른 파일(예: v6.12 `arch/arm64/boot/dts/freescale/imx8mm.dtsi:957`의 `i2c1: i2c@30a20000`)에서 label로 정의한 노드에 속성과 자식을 덧붙입니다. 자식의 `reg`는 I²C에서는 슬레이브 주소(10비트 장치는 `I2C_TEN_BIT_ADDRESS`를 OR, `include/dt-bindings/i2c/i2c.h:14`), SPI에서는 chip select 번호입니다.
 
 `compatible` 문자열은 driver의 match table에 있는 값이어야 합니다. v6.12에서 `atmel,24c256`은 at24 EEPROM driver(`drivers/misc/eeprom/at24.c:274`), DS3231 RTC는 `maxim,ds3231`(`drivers/rtc/rtc-ds1307.c:1111`)입니다. SPI NOR는 `jedec,spi-nor`가 마지막에 와야 바인딩 검사를 통과합니다(`Documentation/devicetree/bindings/mtd/jedec,spi-nor.yaml:20-33`). `spi-max-frequency`는 컨트롤러와 flash, 보드 배선이 모두 만족하는 값으로 정합니다.
 
@@ -244,7 +248,7 @@ uart0: serial@10000000 {
 &i2c3 { status = "okay"; };
 ```
 
-커널은 `status`가 없거나 `"okay"` 또는 `"ok"`인 노드만 사용 가능으로 봅니다(`drivers/of/base.c:459-461`의 `__of_device_is_available`). 뒤의 demo 노드로 확인한 결과는 다음과 같습니다. `"disabled"`면 platform device가 아예 만들어지지 않았고, `"ok"`도 `"okay"`와 똑같이 받아들여졌습니다.
+커널은 `status`가 없거나 `"okay"` 또는 `"ok"`인 노드만 사용 가능으로 봅니다(`drivers/of/base.c:459-468`의 `__of_device_is_available`). 뒤의 demo 노드로 확인한 결과는 다음과 같습니다. `"disabled"`면 platform device가 아예 만들어지지 않았고, `"ok"`도 `"okay"`와 똑같이 받아들여졌습니다.
 
 ```text
 status: disabled 
@@ -259,9 +263,9 @@ status: ok
 compatible = "ti,am3352-uart", "ti,omap3-uart";
 ```
 
-위 줄은 Linux v6.12 `arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi` 203행의 AM335x UART입니다. 목록은 가장 구체적인 것부터 일반적인 것 순으로 적습니다. 같은 driver의 match table 안에서는 앞쪽 문자열에 맞는 항목이 높은 점수를 받아 선택됩니다(`drivers/of/base.c:295-356`의 `__of_device_is_compatible`, `:996-1015`의 `__of_match_node`).
+위 줄은 Linux v6.12 `arch/arm/boot/dts/ti/omap/am33xx-l4.dtsi` 203행의 AM335x UART입니다. 목록은 가장 구체적인 것부터 일반적인 것 순으로 적습니다. 같은 driver의 match table 안에서는 앞쪽 문자열에 맞는 항목이 높은 점수를 받아 선택됩니다(`drivers/of/base.c:291-357`의 `__of_device_is_compatible`, `:996-1015`의 `__of_match_node`).
 
-다만 이 점수는 **driver 하나의 table 안에서만** 비교됩니다. 서로 다른 두 driver가 각각 일반 문자열과 구체 문자열에 맞으면, 먼저 등록된 driver가 장치를 가져갑니다. 장치가 이미 bind되어 있으면 나중에 온 더 구체적인 driver는 그 장치를 보지 않습니다. 직접 확인한 결과는 아래 [demo](#reading-property-from-driver)에 있습니다.
+다만 이 점수는 **driver 하나의 table 안에서만** 비교됩니다. 서로 다른 두 driver가 각각 일반 문자열과 구체 문자열에 맞으면, 먼저 등록된 driver가 장치를 가져갑니다. 장치가 이미 bind되어 있으면 나중에 온 더 구체적인 driver는 match는 되어도 probe되지 않습니다(`drivers/base/dd.c:785-786`의 `if (dev->driver) return -EBUSY;`). 직접 확인한 결과는 아래 [demo](#reading-property-from-driver)에 있습니다.
 
 ### Driver 측
 
@@ -427,7 +431,7 @@ myco,demo
     };
 ```
 
-Overlay의 `&i2c1` 같은 참조는 적용할 때 base의 `__symbols__`에서 경로를 찾아 풉니다. 그래서 overlay를 받을 base DTB는 `-@`로 빌드해야 합니다. 커널 빌드 시스템은 overlay와 합칠 base로 등록된 DTB에만 `-@`를 붙입니다(Linux v6.12 `scripts/Makefile.dtbs:113-114`).
+Overlay의 `&i2c1` 같은 참조는 적용할 때 base의 `__symbols__`에서 경로를 찾아 풉니다. 그래서 overlay를 받을 base DTB는 `-@`로 빌드해야 합니다. 커널 빌드 시스템은 overlay와 합칠 base로 등록된 DTB(Linux v6.12 `scripts/Makefile.dtbs:113-114`)와, vendor Makefile이 `DTC_FLAGS_<보드> := -@`로 지정한 DTB(예: `arch/arm/boot/dts/broadcom/Makefile:3`의 `DTC_FLAGS_bcm2835-rpi-b := -@`)에 `-@`를 붙입니다.
 
 ## 자주 하는 실수
 
