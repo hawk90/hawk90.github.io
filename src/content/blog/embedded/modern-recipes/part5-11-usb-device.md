@@ -24,7 +24,7 @@ topics: ["embedded"]
 
 ### STM32F407 OTG_FS
 
-STM32F407 datasheet(DS8626 Rev 4) 2.2.30절과 Table 58에서 이 글에 필요한 것입니다.
+STM32F407 datasheet(DS8626 Rev 4) 2.2.30절과 Table 58에서 이 글에 필요한 값만 옮겼습니다.
 
 | 항목 | 값 |
 |---|---|
@@ -199,7 +199,7 @@ int main(void) {
 }
 ```
 
-`clock_init_168mhz()`는 [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup), `gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 것입니다. `OTG_FS_IRQHandler`의 이름은 CMSIS `startup_stm32f407xx.s`의 vector table 이름과 같아야 합니다. TinyUSB의 STM32F4 board 코드(`hw/bsp/stm32f4/family.c`)도 같은 handler에서 `tusb_int_handler(0, true)`를 부릅니다.
+`clock_init_168mhz()`는 [4-04](/blog/embedded/modern-recipes/part4-04-clock-setup), `gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)에서 가져옵니다. `OTG_FS_IRQHandler`의 이름은 CMSIS `startup_stm32f407xx.s`의 vector table 이름과 같아야 합니다. TinyUSB의 STM32F4 board 코드(`hw/bsp/stm32f4/family.c`)도 같은 handler에서 `tusb_int_handler(0, true)`를 부릅니다.
 
 VBUS 핀(PA9)은 쓰지 않았습니다. TinyUSB `dcd_dwc2.c`는 초기화에서 `GOTGCTL`에 BVALOEN·BVALOVAL을 세워 "force B Valid"로 두므로, VBUS를 감지하지 않아도 device로 동작합니다. 대신 케이블을 뽑아도 core가 그것을 VBUS로 알아차리지 못합니다.
 
@@ -292,7 +292,7 @@ device descriptor의 `EF 02 01`, configuration의 `4B 00`(75), `80 32`, IAD(type
 
 ### 보드에서
 
-보드를 꽂은 뒤 Linux에서 `lsusb`에 `cafe:4001`이 보이고 `dmesg`에 `cdc_acm` 줄이 나오면 enumeration이 끝난 것입니다. `lsusb -v -d cafe:4001`의 출력은 위 dump와 같은 값을 사람이 읽기 좋게 푼 것입니다. 이 글은 보드로 이 단계를 실행하지 않았습니다.
+보드를 꽂은 뒤 Linux에서 `lsusb`에 `cafe:4001`이 보이고, `cdc_acm` driver(Linux v6.12 `drivers/usb/class/cdc-acm.c`)가 붙으면 `dmesg`에 "ttyACM%d: USB ACM device" 형식의 줄이 나옵니다. `lsusb -v -d cafe:4001`은 위 dump의 값을 field 이름과 함께 풀어 보여 줍니다. 이 글은 보드로 이 단계를 실행하지 않았습니다.
 
 장치가 아예 안 보이면 48 MHz clock(PLLQ)과 PA11/PA12 AF10 설정, `OTG_FS_IRQHandler` 이름을 봅니다. 보이는데 descriptor 오류가 나면 위 dump로 wTotalLength와 실제 길이가 같은지 봅니다.
 
@@ -300,7 +300,7 @@ device descriptor의 `EF 02 01`, configuration의 `4B 00`(75), `80 32`, IAD(type
 
 > ⚠️ 48 MHz가 아님
 
-OTG_FS는 PLL의 Q 출력에서 전용 48 MHz를 받습니다. SYSCLK을 바꾸면서 Q를 그대로 두면 48 MHz가 깨집니다. HAL `stm32f4xx_hal_rcc_ex.h`도 "you have to set the PLLQ parameter correctly to have 48 MHz clock for the USB"라고 적습니다.
+OTG_FS는 PLL의 Q 출력에서 전용 48 MHz를 받습니다. SYSCLK을 바꾸면서 Q를 그대로 두면 48 MHz가 깨집니다. 4-04가 인용한 HAL `stm32f4xx_hal_rcc_ex.h` 주석도 USB OTG FS를 쓰면 48 MHz가 되도록 PLLQ를 맞추라고 적습니다.
 
 > ⚠️ wTotalLength와 실제 길이 불일치
 
