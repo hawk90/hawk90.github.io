@@ -128,6 +128,14 @@ float adc_to_volt(uint16_t code, float vref) {
 - ADON 뒤 첫 변환 전에 power-up time t_STAB(Table 67 최대 3 µs)을 기다립니다. 반복 한 번이 HCLK 한 cycle 이상 걸리므로 360회 반복은 120 MHz에서 3 µs 이상입니다.
 - 1 LSB = V_REF+/2^n는 DS8626 Figure 49의 정의입니다. 그래서 4095가 아니라 4096으로 나눕니다.
 
+위 코드는 `cmsis_device_f4` 헤더로 다음과 같이 경고 없이 빌드됩니다(`arm-none-eabi-gcc` 16.2.0). 보드에서는 실행하지 않았습니다. QEMU 11.1의 STM32F405 ADC 모델(`hw/adc/stm32f2xx_adc.c`)은 `DR`을 읽을 때마다 이전 값에 7을 더한 가짜 값을 돌려주고 `EOC`를 세우지 않으므로, `adc_read()`의 `EOC` 대기 루프가 끝나지 않아 QEMU 실행으로는 확인할 것이 없습니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -O2 \
+  -ffreestanding -DSTM32F407xx -I cmsis_device_f4/Include \
+  -I CMSIS_5/CMSIS/Core/Include -Wall -Wextra -c adc.c
+```
+
 연속 변환을 DMA로 메모리에 쌓는 코드는 [4-10: 임베디드 DMA 기초](/blog/embedded/modern-recipes/part4-10-dma-basics)의 "ADC → memory" 절에 있습니다.
 
 ## 자주 보는 함정
