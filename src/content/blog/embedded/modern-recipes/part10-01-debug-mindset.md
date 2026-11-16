@@ -63,11 +63,11 @@ git bisect reset
 판정을 스크립트로 만들 수 있으면 `git bisect run`이 반복을 대신합니다. `git help bisect`에 따르면 스크립트가 0으로 끝나면 good, 1~127(125 제외)이면 bad이고, 125는 그 commit을 건너뜁니다. 50개 commit 중 37번째에서 설정값이 바뀌는 장난감 저장소를 만들어 돌려 봤습니다(git 2.54.0).
 
 ```bash
-cat test.sh
+cat ../test.sh
 #!/bin/sh
 grep -q "TIMEOUT_MS 10" config.h      # 0 = good, 1 = bad
 
-git bisect start HEAD v1.2.0 && git bisect run ./test.sh
+git bisect start HEAD v1.2.0 && git bisect run ../test.sh
 ```
 
 ```text
@@ -102,7 +102,7 @@ void process(uint8_t *buf, size_t n) {
 
 ## Changelog 우선 확인
 
-"어제는 됐다"가 출발점이면 가장 먼저 `git log --since=yesterday`와 `git diff HEAD@{1.day} HEAD`를 봅니다.
+"어제는 됐다"가 출발점이면 가장 먼저 최근 며칠의 log와 diff를 봅니다.
 
 ```bash
 git log --since="2 days ago" --oneline
@@ -121,7 +121,7 @@ git diff HEAD@{2.days} -- src/
 
 ## Rubber Duck Debugging
 
-문제를 *소리 내어* 다른 사람에게 설명하면 절반은 설명 도중에 답이 나옵니다. 들어 줄 사람이 없으면 노란 고무 오리에게 말합니다.
+문제를 *소리 내어* 다른 사람에게 설명하면 설명하는 도중에 답이 나오곤 합니다. 들어 줄 사람이 없으면 노란 고무 오리에게 말합니다.
 
 > "이 ISR이 안 들어와요. NVIC enable 했고, IRQn 번호 맞고, priority도 5로 줬고, GPIO interrupt mask 풀었고... 잠깐, EXTI line mask 풀었나? 안 풀었네."
 
@@ -137,7 +137,7 @@ git diff HEAD@{2.days} -- src/
 - [ ] 보드 reset 후에도 재현?
 - [ ] 동일 시퀀스를 자동화 가능?
 
-자동화된 재현 스크립트가 만들어지면 디버깅의 절반은 끝난 것입니다. 1시간에 한 번 발생하던 race를 1분에 한 번으로 줄이면 측정 한 번이 60배 싸집니다.
+1시간에 한 번 발생하던 race를 1분에 한 번으로 줄이면 측정 한 번이 60배 싸집니다.
 
 반복 횟수도 계산합니다. 1회 실행에서 실패할 확률이 p일 때 n번 돌려 한 번이라도 실패를 볼 확률은 1 − (1 − p)^n입니다. 1000번에 3번 실패하는 버그(p = 0.003)를 95% 확률로 한 번 이상 보려면 998번이 필요합니다. 반대로 고친 뒤 n번 연속 통과했다면, 남은 실패 확률의 95% 상한은 대략 3/n입니다("rule of three").
 
@@ -237,7 +237,7 @@ GPIO 토글이 안 보이면 위 LED 예처럼 핀 배정부터 확인합니다.
 - 디버깅 노트에는 가설마다 검증 방법과 기각 조건을 남깁니다.
 - "수정으로 사라졌다"는 *왜 사라졌는지*를 설명할 수 있어야 진짜 수정입니다.
 
-다음 편은 **하드폴트 분석**입니다.
+다음 편은 **JTAG·SWD가 안 붙을 때**입니다.
 
 ## 관련 항목
 
