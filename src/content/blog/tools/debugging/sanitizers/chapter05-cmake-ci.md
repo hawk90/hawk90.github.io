@@ -67,7 +67,7 @@ cmake -B build-tsan -DENABLE_TSAN=ON
 cmake --build build-tsan
 ```
 
-이 기본 조각은 컴파일러·런타임 지원을 사전에 확인한 작은 프로젝트용입니다. 완성된 검증 예제는 아래 함수형 구성을 사용합니다. ASan/TSan/UBSan을 *옵션 한 줄로* 켜고 끌 수 있고, 둘 동시 활성화를 방지합니다.
+ASan/TSan/UBSan을 *옵션 한 줄로* 켜고 끌 수 있고, 둘을 동시에 켜면 구성 단계에서 멈춥니다. 이 조각은 지원하지 않는 컴파일러에서도 플래그를 그대로 넘기므로, 컴파일러 검사와 링크 probe까지 넣은 아래 함수형 구성을 완성본으로 씁니다. 이 장의 CMake 실행 결과는 모두 그 함수형 구성을 파일로 옮겨 돌린 것입니다.
 
 ---
 
@@ -168,7 +168,19 @@ int main() {
 }
 ```
 
-옵션을 요청했는데 지원하지 않으면 조용히 끄지 않고 구성 실패로 알립니다. compile/link probe는 런타임 기동이나 종속 라이브러리 전체의 MSan 계측까지 검증하지 않습니다. 정적 라이브러리는 자체 링크 단계가 없으므로 필요한 런타임 링크 옵션을 소비자에게 전달합니다.
+옵션을 요청했는데 지원하지 않으면 조용히 끄지 않고 구성 실패로 알립니다. 위 네 파일을 CMake 4.5.0·Ninja 1.13.2로 macOS(Homebrew LLVM 23.1.5, Apple clang 21)와 Debian 13(clang 19.1.7, GCC 14.2.0, CMake는 apt 패키지)에서 구성·빌드·`ctest`까지 돌린 결과입니다.
+
+| 요청 | Homebrew LLVM 23 | Apple clang 21 | Debian clang 19 | Debian GCC 14 |
+|------|------|------|------|------|
+| `release` | 빌드 통과 | 빌드 통과 | 빌드 통과 | 빌드 통과 |
+| `asan` (ASan+UBSan) | 통과 | **테스트 실패** (아래) | 통과 | 통과 |
+| `tsan` (TSan+UBSan) | 통과 | 통과 | 통과 | 통과 |
+| `-DENABLE_MSAN=ON` | `This MSan example requires Linux` | — | 통과 | `MSan requires upstream Clang` |
+| `-DENABLE_ASAN=ON -DENABLE_TSAN=ON` | `ASan + TSan cannot coexist` | — | — | — |
+
+`release`는 test preset이 없어 구성·빌드까지만 했습니다. `SAN_address_undefined`, `SAN_thread_undefined`, `SAN_memory`라는 이름으로 `check_cxx_source_compiles` probe가 돌고 `Success`가 찍혔습니다. probe는 컴파일과 링크만 확인하므로, 런타임 기동이나 종속 라이브러리 전체의 MSan 계측까지 검증하지 않습니다.
+
+정적 라이브러리는 자체 링크 단계가 없어서, 필요한 런타임 링크 옵션을 `INTERFACE`로 소비자에게 넘깁니다. 이 부분을 `PRIVATE`로 바꾸고 `core`만 `enable_sanitizers()`한 소비자를 만들자 Homebrew LLVM에서 `Undefined symbols for architecture arm64: "___asan_init"`으로 링크가 실패했습니다. `INTERFACE`로 되돌리면 소비자 실행 파일이 `libclang_rt.asan_osx_dynamic.dylib`에 링크되고 `answer=42`를 출력했습니다.
 
 ### CMakePresets로 더 깔끔하게
 
@@ -207,6 +219,14 @@ int main() {
       }
     },
     {
+      "name": "asan-macos",
+      "inherits": "asan",
+      "displayName": "ASan + UBSan Build (Apple clang, no LSan)",
+      "environment": {
+        "ASAN_OPTIONS": "halt_on_error=1:abort_on_error=1:symbolize=1"
+      }
+    },
+    {
       "name": "release",
       "binaryDir": "${sourceDir}/build/${presetName}",
       "generator": "Ninja",
@@ -218,6 +238,7 @@ int main() {
   "buildPresets": [
     { "name": "asan", "configurePreset": "asan" },
     { "name": "tsan", "configurePreset": "tsan" },
+    { "name": "asan-macos", "configurePreset": "asan-macos" },
     { "name": "release", "configurePreset": "release" }
   ],
   "testPresets": [
@@ -229,6 +250,11 @@ int main() {
     {
       "name": "tsan",
       "configurePreset": "tsan",
+      "output": { "outputOnFailure": true }
+    },
+    {
+      "name": "asan-macos",
+      "configurePreset": "asan-macos",
       "output": { "outputOnFailure": true }
     }
   ]
@@ -242,13 +268,17 @@ cmake --build --preset asan
 ctest --preset asan
 ```
 
-`environment` 섹션에 *sanitizer 환경 변수까지 박아 두기* 때문에, 매번 export할 필요가 없습니다. build/test preset의 configurePreset 환경 상속을 통해 이 명령 경로에서 공유합니다. 직접 바이너리를 실행하는 셸의 환경이나 모든 개발 도구 설정까지 강제하지는 않습니다.
+`environment` 섹션에 *sanitizer 환경 변수까지 박아 두기* 때문에, 매번 export할 필요가 없습니다. 이 동작에는 두 가지 결과가 따릅니다.
+
+첫째, preset 값이 셸 값을 덮습니다. [cmake-presets(7)](https://cmake.org/cmake/help/latest/manual/cmake-presets.7.html)은 각 변수가 "set regardless of whether or not a value was given to it by the process's environment"라고 적습니다. 실제로 Apple clang 21로 `asan` preset을 돌리자 `ctest --preset asan`이 `==66762==AddressSanitizer: detect_leaks is not supported on this platform.`과 함께 `Subprocess aborted`로 실패했고, `ASAN_OPTIONS=detect_leaks=0 ctest --preset asan`처럼 셸에서 덮어써도 같은 오류가 났습니다. 그래서 위 파일에 `asan`을 상속하고 `ASAN_OPTIONS`만 바꾼 `asan-macos`를 두었고, 이 preset은 Apple clang에서 통과했습니다.
+
+둘째, preset을 거치지 않고 `./build/asan/test_runner`를 직접 실행하면 이 환경 변수는 붙지 않습니다. 같은 바이너리를 직접 돌리자 `answer=42`와 종료 코드 0이 나왔습니다.
 
 ---
 
 ## GitHub Actions — 실전 워크플로
 
-가장 기본적인 패턴부터 보겠습니다.
+가장 기본적인 패턴부터 보겠습니다. 이 절과 다음 GitLab 절의 YAML은 GitHub·GitLab 러너에서 실행하지 않았습니다. 각 job이 부르는 `cmake --preset`·`ctest --preset` 명령만 위 표처럼 로컬과 Debian 게스트에서 돌렸습니다.
 
 ```yaml
 # .github/workflows/sanitizers.yml
@@ -310,10 +340,10 @@ jobs:
 
 핵심 포인트:
 
-1. **두 job 병렬 실행** — ASan과 TSan은 별도 워크플로 job. 호환되지 않아 한 빌드에 못 합침.
-2. **환경 변수 명시** — `halt_on_error=1`로 첫 에러에서 종료, *반드시 비-0 종료 코드*로 CI 실패 트리거.
-3. **심볼라이저 경로** — Ubuntu의 `/usr/bin/llvm-symbolizer`. 없으면 주소만 보임.
-4. **`llvm` 패키지** 설치 — `llvm-symbolizer`가 여기 들어 있음.
+1. **두 job 병렬 실행** — ASan과 TSan은 별도 워크플로 job입니다. 드라이버가 한 빌드에 둘을 거부합니다(1장).
+2. **환경 변수는 preset이 이깁니다** — Test 단계의 `env:`에 적은 `ASAN_OPTIONS`·`UBSAN_OPTIONS`·`TSAN_OPTIONS`는 `ctest --preset`이 preset의 `environment`로 덮어씁니다. 위 실험처럼 셸 값은 무시되므로, 값을 바꾸려면 preset을 고칩니다. 반대로 `ASAN_SYMBOLIZER_PATH`처럼 preset에 없는 변수는 job 환경이 그대로 전달됩니다.
+3. **종료 코드** — 보고가 나면 ASan은 1(`abort_on_error=1`이면 SIGABRT), UBSan은 `halt_on_error=1`일 때만 1, TSan은 66으로 끝나 CI가 실패합니다(2·4장).
+4. **심볼라이저** — Debian 13에서는 `llvm` 패키지가 `/usr/bin/llvm-symbolizer`를, `llvm-19`가 실제 파일 `/usr/lib/llvm-19/bin/llvm-symbolizer`를 제공했습니다(`dpkg -S`). Ubuntu 24.04 러너의 패키지 구성은 확인하지 않았습니다. GCC의 libasan은 외부 도구 없이 libbacktrace로 줄 번호를 냈으므로, 이 변수는 clang 빌드에서 의미가 있습니다.
 
 ### 추가 최적화 — 캐시
 
@@ -327,7 +357,7 @@ jobs:
       ${{ runner.os }}-asan-
 ```
 
-캐시의 실제 이득은 측정합니다. 이 예시는 캐시 형식 설명용이며 컴파일러·버전·플래그·의존성·생성기까지 키에 포함할지 검토합니다. CMakeLists.txt가 같다는 이유만으로 환경 호환성이 보장되지는 않습니다.
+이 키는 `CMakeLists.txt`만 해시하므로, 러너 이미지가 바뀌어 컴파일러 버전이 달라져도 같은 캐시가 복원됩니다. CMake는 첫 구성 때 찾은 컴파일러 경로를 `CMakeCache.txt`에 고정하니, 키에 컴파일러 버전(`$CXX --version` 출력의 해시 등)과 `CMakePresets.json`도 넣습니다. 캐시로 얼마나 빨라지는지는 실제 러너에서 재지 않았습니다.
 
 ### TSan 반복 실행
 
@@ -344,7 +374,7 @@ jobs:
     done
 ```
 
-10번 중 한 번이라도 실패하면 CI 전체가 실패. 실행 경로와 스케줄의 표본을 늘리지만 모든 레이스를 찾았다는 증명은 아닙니다.
+10번 중 한 번이라도 실패하면 CI 전체가 실패합니다. 4장의 `counter.cpp`처럼 두 접근이 매번 실행되는 레이스는 첫 반복에서 잡히고(Debian에서 10번 모두 종료 코드 66), 반복이 보태는 것은 스케줄에 따라 실행 경로가 바뀌는 테스트의 표본입니다.
 
 ---
 
@@ -396,7 +426,7 @@ YAML 앵커(`&template`, `<<: *template`)로 *공통 설정*을 한 자리에 �
 
 ## Compiler / OS 매트릭스
 
-지원되는 OS·컴파일러 조합을 명시적으로 선택합니다. macOS의 gcc 명령이 GNU GCC라는 보장은 없으므로 명령 이름만 바꾼 곱집합을 만들지 않습니다. 아래는 GitHub 호스팅 러너용 구성 예시이며 원격 CI 실행을 검증한 기록은 아닙니다.
+지원되는 OS·컴파일러 조합을 명시적으로 선택합니다. 이 Mac에서 `gcc --version`은 `Apple clang version 21.0.0`을 출력했습니다. macOS의 `gcc`는 Apple clang이므로 명령 이름만 바꾼 곱집합을 만들지 않습니다. 아래 구성도 GitHub 러너에서는 실행하지 않았습니다.
 
 ```yaml
 asan-ubsan:
@@ -418,18 +448,18 @@ asan-ubsan:
         cmake --version
         ninja --version
         "$CXX" --version
-    - run: cmake --preset asan
-    - run: cmake --build --preset asan
-    - run: ctest --preset asan
+    - run: cmake --preset ${{ runner.os == 'macOS' && 'asan-macos' || 'asan' }}
+    - run: cmake --build --preset ${{ runner.os == 'macOS' && 'asan-macos' || 'asan' }}
+    - run: ctest --preset ${{ runner.os == 'macOS' && 'asan-macos' || 'asan' }}
 ```
 
-선택한 러너에 필요한 도구를 설치하고 런타임을 먼저 확인합니다. fail-fast: false는 한 조합 실패 뒤에도 나머지 결과를 수집하는 설정입니다. leak 검사는 특히 배포 런타임의 지원 여부를 확인합니다.
+macOS 행의 `clang`은 Apple clang이라, `asan` preset을 그대로 쓰면 앞에서 본 `detect_leaks is not supported on this platform.`으로 테스트가 실패합니다. 그래서 macOS에서만 `asan-macos` preset을 고르게 했습니다. `fail-fast: false`는 한 조합이 실패해도 나머지 조합의 결과를 끝까지 모으는 설정입니다.
 
 ---
 
 ## 실패 진단 — *Sanitizer가 깼을 때*
 
-CI에서 sanitizer가 깨지면 보통 다음 단계로 진단합니다.
+CI에서 sanitizer가 깨지면 다음 순서로 진단합니다.
 
 1. **출력 확인** — CI 로그의 sanitizer 보고서. `SUMMARY:` 줄과 스택 트레이스.
 2. **로컬 재현** — 같은 프리셋으로 로컬에서 동일 빌드.
@@ -448,7 +478,26 @@ CI에서 sanitizer가 깨지면 보통 다음 단계로 진단합니다.
    (gdb) bt
    ```
 
-`abort_on_error=1`이 *디버거에서 잡기 핵심*입니다. 디버거에서 SIGABRT에 중단하도록 설정할 수 있습니다. exit 경로도 breakpoint 등으로 조사할 수 있으므로 디버거가 잡지 못한다고 단정하지 않습니다.
+`abort_on_error=1`이 *디버거에서 잡기 핵심*입니다. 2장의 `bounds.cpp`(`bounds bad`)를 Debian 13의 GDB 16.3으로 돌린 결과입니다.
+
+```text
+$ ASAN_OPTIONS=abort_on_error=1 gdb -q -batch -ex run -ex bt --args ./bounds bad
+...
+Program received signal SIGABRT, Aborted.
+...
+#3  0x0000aaaaaab9e4b0 [PAC] in __sanitizer::Abort() ()
+#4  0x0000aaaaaab9c1a0 [PAC] in __sanitizer::Die() ()
+#5  0x0000aaaaaab7c5f8 [PAC] in __asan::ScopedInErrorReport::~ScopedInErrorReport() ()
+#6  0x0000aaaaaab7fa38 [PAC] in __asan::ReportGenericError(unsigned long, unsigned long, unsigned long, unsigned long, bool, unsigned long, unsigned int, bool) ()
+#7  0x0000aaaaaab80e80 [PAC] in __asan_report_store4 ()
+#8  0x0000aaaaaabb8e80 [PAC] in main (argc=2) at bounds.cpp:5
+```
+
+Linux 기본값인 `abort_on_error=0`으로 같은 명령을 돌리면 `[Inferior 1 (process 920) exited with code 01]`만 남고 `bt`할 프레임이 없었습니다. 옵션을 바꾸지 않고 멈추려면 보고 함수에 중단점을 겁니다. `break __asan::ReportGenericError`를 주자 `Breakpoint 1, … in __asan::ReportGenericError(…)`에서 멈췄고, `bt`의 #2가 `main (argc=2) at bounds.cpp:5`였습니다.
+
+macOS의 LLDB(lldb-2103.0.34.407)는 따로 설정하지 않아도 `AddressSanitizer report breakpoint hit.`을 찍고 `stop reason = Heap buffer overflow`로 멈춰 `bounds.cpp:5:19`의 소스 줄을 보여 줬습니다. `abort_on_error=0`을 줘도 같은 자리에서 멈췄습니다.
+
+TSan 바이너리를 GDB로 볼 때는 [TSan 문서](https://clang.llvm.org/docs/ThreadSanitizer.html#limitations)의 경고를 기억합니다. GDB는 기본으로 ASLR을 끄는데, Linux에서 ASLR이 꺼지면 TSan이 shadow 메모리를 못 잡고 `FATAL: ThreadSanitizer can not mmap the shadow memory`로 멈출 수 있습니다. 문서가 권하는 실행은 `gdb -ex 'set disable-randomization off' --args ./a.out`입니다.
 
 ---
 
@@ -457,13 +506,12 @@ CI에서 sanitizer가 깨지면 보통 다음 단계로 진단합니다.
 ### "Sanitizer가 동작하는데 줄 번호가 안 나옴"
 
 ```text
-#0 0x4012a3 in main
-#1 0x401aef in __libc_start_main
+    #0 0x0001044ec5d8 in process_data+0x48 (/…/withg:arm64+0x1000005d8)
 ```
 
-**원인**: `llvm-symbolizer` 또는 `addr2line`이 PATH에 없음.
+**원인**: 이 줄은 macOS에서 `ASAN_SYMBOLIZER_PATH`를 없는 경로로 줬을 때 나왔습니다. 런타임이 `WARNING: invalid path to external symbolizer!`를 먼저 찍었으므로 로그 위쪽의 `WARNING:` 줄부터 봅니다. `-g` 없이 빌드해도 같은 `함수+오프셋` 형태가 됩니다(2장). Debian 13에서는 `PATH`를 비워도 GCC 빌드(libbacktrace)와 clang 19 빌드 모두 줄 번호가 나왔으므로, Linux에서 이 증상을 보면 `-g`와 `ASAN_SYMBOLIZER_PATH` 값을 먼저 의심합니다.
 
-**해결**: 패키지 설치 + 환경 변수.
+**해결**: 심볼라이저 설치 + 올바른 경로.
 ```yaml
 - name: Install symbolizer
   run: sudo apt-get install -y llvm
@@ -474,10 +522,10 @@ env:
 
 ### "ASan + UBSan 빌드가 너무 느려"
 
-**확인**: 컴파일·링크·테스트 시간을 나누어 측정하고 병목을 확인합니다. 고정된 배율을 가정하지 않습니다.
+**확인**: 컴파일·링크·테스트 시간을 나누어 잽니다. ASan 문서의 "typical slowdown"은 2x이지만, 2장에서 정렬 작업 하나를 잰 값은 거의 1배였습니다. 작업마다 배율이 다르니 어느 단계가 늘었는지부터 봅니다.
 
 **해결**:
-1. **생성기·병렬도 확인** — 해당 프로젝트에서 Ninja와 Make의 실제 소요 시간을 비교합니다.
+1. **생성기·병렬도 확인** — 프로젝트에서 Ninja와 Make의 실제 소요 시간을 비교합니다.
 2. **빌드 캐시** — `actions/cache`로 incremental.
 3. **테스트 범위 축소** — `ctest -L unit`으로 단위 테스트만 빠르게.
 
@@ -486,47 +534,41 @@ env:
 **원인**: 외부 라이브러리 / 사용자 모드 동기화 / lock-free 알고리즘.
 
 **해결**:
-1. *Suppression 파일* 작성 — 외부 라이브러리 무시.
-2. *TSan annotation* — `__tsan_acquire()`, `__tsan_release()`로 직접 happens-before 알려 주기.
+1. *Suppression 파일* 작성 — 외부 라이브러리 무시. `race:` 대신 `race_top:`이나 함수 이름처럼 좁은 규칙을 씁니다. 4장에서 `race:libstdc++.so` 한 줄이 진짜 레이스를 지웠습니다.
+2. *TSan annotation* — `sanitizer/tsan_interface.h`의 `__tsan_acquire(void *addr)`/`__tsan_release(void *addr)`로, 이미 존재하는 사용자 정의 동기화를 TSan에 알려 줍니다.
 3. *PR 빌드 제외* — TSan은 야간 빌드로 이동.
 
 ### "macOS에서 detect_leaks가 안 됨"
 
-**확인**: detect_leaks 설정뿐 아니라 선택한 컴파일러의 compiler-rt가 해당 타깃에서 LSan을 지원하는지 확인합니다. Apple Clang과 Homebrew LLVM을 구분합니다.
+**원인**: 3장의 실행 결과로 정리됩니다. Apple clang 21의 ASan 런타임은 `detect_leaks=1`을 받으면 `detect_leaks is not supported on this platform.`으로 abort하고, `-fsanitize=leak`은 컴파일 단계에서 거부합니다. Homebrew LLVM 23.1.5는 `detect_leaks` 기본값이 `false`라 켜야 보고합니다.
 
-**설정 예**: 지원 런타임에서 환경 변수를 명시합니다.
-```yaml
-env:
-  ASAN_OPTIONS: detect_leaks=1:halt_on_error=1
-```
+**설정 예**: macOS에서 누수를 봐야 하면 Homebrew LLVM으로 빌드하는 job을 따로 두고, 그 job의 preset 환경에 `detect_leaks=1`을 넣습니다. preset이 셸 환경을 덮으므로 job의 `env:`가 아니라 preset 쪽에 적습니다. Apple clang job은 위 `asan-macos`처럼 `detect_leaks`를 빼고 돌립니다.
 
 ---
 
 ## 권장 운영 모델
 
-규모별 권장 설정.
+규모별 권장 설정입니다. 기준은 코드 줄 수가 아니라 *sanitizer 빌드로 전체 테스트를 돌리는 데 걸리는 시간*입니다. 그 시간이 PR 대기 시간 안에 들어오는지에 따라 단계를 고릅니다.
 
-### 소규모 프로젝트 (소스 < 50KLoC)
+### 전체 테스트가 PR 시간 안에 끝나는 프로젝트
 
 - PR 빌드: **ASan + UBSan** 한 작업.
 - 메인 브랜치: **TSan** 한 번 더 (멀티스레드면).
-- 매트릭스: **GCC + Clang** × **Ubuntu** 한 OS.
-- CI 시간은 실제 테스트 데이터와 러너에서 측정합니다.
+- 매트릭스: **GCC + Clang** × **Linux** 한 OS.
 
-### 중규모 (50~500KLoC)
+### PR에는 일부만 돌릴 수 있는 프로젝트
 
 - PR 빌드: **ASan + UBSan** + 빠른 단위 테스트만.
 - 메인 브랜치: **ASan + UBSan** 전체 + **TSan** 작은 시나리오.
-- 야간: **TSan** 전체 + **MSan** (Clang 가능 시).
-- 매트릭스: **GCC + Clang** × **Ubuntu + macOS**.
-- PR·야간의 실행 예산은 실제 측정에 맞춰 정합니다.
+- 야간: **TSan** 전체 + **MSan** (Linux clang, 종속 라이브러리까지 MSan으로 빌드할 수 있을 때).
+- 매트릭스: **GCC + Clang** × **Linux + macOS**. macOS job은 `asan-macos`처럼 LSan을 뺀 preset을 씁니다.
 
-### 대규모 (500KLoC+)
+### 야간에도 전체를 돌리기 어려운 프로젝트
 
 - PR 빌드: **ASan + UBSan** 작은 변경분 영향 테스트만.
 - 메인 브랜치: 일부 추출된 *대표 테스트*.
 - 야간: 전체 매트릭스 (ASan / TSan / MSan / 다양한 컴파일러).
-- 별도 *fuzzer + sanitizer* 워크플로 — *OSS-Fuzz* 같은 외부 서비스.
+- 별도 *fuzzer + sanitizer* 워크플로 — [OSS-Fuzz](https://google.github.io/oss-fuzz/) 같은 외부 서비스. [OSS-Fuzz 프로젝트 가이드](https://google.github.io/oss-fuzz/getting-started/new-project-guide/)에 따르면 `project.yaml`의 `sanitizers` 값은 `address`·`memory`·`undefined` 중에서 고르고, 기본값은 `address`와 `undefined`입니다. `memory`는 계측하지 않은 시스템 의존성 때문에 오탐이 잦아 기본에서 빠져 있습니다.
 
 큰 프로젝트일수록 *sanitizer를 빌드 인프라의 일부로* 다루게 됩니다. 단순한 옵션이 아니라 *별도 빌드 파이프라인*.
 
@@ -534,16 +576,28 @@ env:
 
 ## 직접 확인한 범위
 
-위 명명된 파일을 추출해 CMake 4.4.4·Ninja·macOS·Homebrew Clang 23.1.3에서 release, ASan+UBSan, TSan+UBSan 구성·빌드·CTest를 각각 확인합니다. ASan+TSan 동시 요청과 이 예제의 macOS MSan 요청은 구성 실패를 기대합니다. 정적 라이브러리만 계측한 별도 소비자 링크도 확인합니다. 실제 GitHub/GitLab job, Linux MSan 종속 환경, 여러 러너의 결과는 로컬 빌드로 대체하지 않습니다.
+이 장에서 직접 돌린 것과 돌리지 않은 것을 나눠 적습니다.
+
+| 항목 | 결과 |
+|------|------|
+| `cmake/Sanitizers.cmake`·`CMakeLists.txt`·`core.cpp`·`main.cpp`·`CMakePresets.json` 추출 후 release/asan/tsan preset | Homebrew LLVM 23.1.5, Debian clang 19.1.7, Debian GCC 14.2.0에서 모두 통과. Apple clang 21은 `asan`만 `detect_leaks` 때문에 실패, `asan-macos`로 통과 |
+| `-DENABLE_MSAN=ON` | Debian clang 19 통과, GCC 14·macOS는 의도한 `FATAL_ERROR` |
+| `-DENABLE_ASAN=ON -DENABLE_TSAN=ON` | `ASan + TSan cannot coexist`로 구성 실패 |
+| 정적 라이브러리만 계측한 소비자 | `INTERFACE`일 때 링크·실행 성공, `PRIVATE`로 바꾸면 `___asan_init` 미정의 |
+| preset 환경 vs 셸 환경 | preset이 이김 (셸 `ASAN_OPTIONS=detect_leaks=0` 무시) |
+| GDB 16.3 / LLDB에서 ASan 중단 | 위 출력대로 |
+| GitHub Actions·GitLab CI job, Ubuntu 24.04·macos-14 러너, 캐시 효과 | 실행하지 않음 |
+
+로컬 CMake는 4.5.0(macOS), Ninja는 1.13.2였습니다. MSan은 이 예제의 `core`·`main` 두 파일만 계측했고, 계측한 libc++까지 갖춘 실제 MSan 환경은 만들지 않았습니다.
 
 ## 정리
 
 - CMake 통합: `option()`으로 sanitizer 빌드 모드, 함수로 추상화.
 - `CMakePresets.json`으로 *설정·환경 변수까지* 외부화.
 - GitHub Actions / GitLab CI 모두 *별도 job*으로 ASan과 TSan 분리.
-- 환경 변수: `halt_on_error=1`, `abort_on_error=1`, `SYMBOLIZER_PATH` 명시.
+- 환경 변수는 preset의 `environment`가 셸·job 환경을 덮습니다. Apple clang에서는 `detect_leaks=1`이 든 preset이 테스트를 abort시키므로 macOS용 preset을 따로 둡니다.
 - 매트릭스 (OS × 컴파일러) + `fail-fast: false`로 *어디서 깨지는지* 한눈에.
-- 진단 — CI 출력 → 로컬 재현 → 단일 테스트 → 디버거.
+- 진단 — CI 출력 → 로컬 재현 → 단일 테스트 → 디버거. GDB에서는 `abort_on_error=1`이나 `__asan::ReportGenericError` 중단점으로 멈추고, LLDB는 ASan 보고에서 스스로 멈춥니다.
 - 운영 모델은 *프로젝트 규모에 맞춰* 단순 → 복잡으로 진화.
 
 ## 시리즈 마무리
@@ -558,7 +612,7 @@ Sanitizer 시리즈 다섯 챕터를 마칩니다.
 | Ch 4 | TSan과 데이터 레이스 |
 | Ch 5 | CMake / CI 통합 |
 
-Sanitizer는 *컴파일러 한 옵션*으로 *수많은 런타임 버그를 잡는* 강력한 도구입니다. 한 옵션으로 시작할 수 있어도 종속 라이브러리·플랫폼·테스트 비용을 확인해야 합니다. 탐지 범위는 선택한 검사와 실제 실행한 경로에 의존합니다.
+Sanitizer는 *컴파일러 한 옵션*으로 *수많은 런타임 버그를 잡는* 강력한 도구입니다. 시리즈에서 돌린 결과가 그 한계도 보여 줬습니다. Apple clang에는 LSan·MSan이 없었고, `-O1`은 상수 `strcpy` 오버플로와 초기화 안 된 지역 변수 검사를 지웠으며, libstdc++의 vector 검사는 매크로를 줘야 켜졌습니다. 어떤 검사가 *어느 컴파일러·어느 빌드에서* 실제로 도는지를 한 번씩 재현해 두는 것이 도입의 첫 단계입니다.
 
 도입 순서:
 1. **로컬 개발 빌드에 ASan + UBSan** — 오늘 추가.
