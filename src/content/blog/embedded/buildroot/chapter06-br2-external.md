@@ -151,6 +151,10 @@ export BR2_EXTERNAL_ACME_VERSION =
 같은 단계에서 menuconfig용 파일 `.br2-external.in.menus`도 생깁니다.
 
 ```text
+#
+# Automatically generated file; DO NOT EDIT.
+#
+
 menu "External options"
 
 comment "ACME corporation Buildroot tree (in <scratch>/ext6/br2-acme)"
@@ -183,6 +187,7 @@ Built-in configs:
   ...
   asus_tinker-s_rk3288_defconfig      - Build for asus_tinker-s_rk3288
   ...
+
 External configs in "ACME corporation Buildroot tree":
   acme_edge_defconfig                 - Build for acme_edge
 ```
@@ -246,7 +251,7 @@ sha256  <LICENSE의 sha256>  LICENSE
 source "$BR2_EXTERNAL_ACME_PATH/package/acme-firmware/Config.in"
 ```
 
-이제 `make menuconfig`에서 `External options → ACME packages → acme-firmware`로 활성화할 수 있습니다.
+이제 `make menuconfig`의 `External options` 아래에서 `acme-firmware`를 활성화할 수 있습니다. 앞의 `Config.in` 예처럼 `menu "ACME packages"`로 감쌌다면 그 하위 메뉴 안에 나옵니다.
 
 ## 여러 외부 트리 stacking
 
@@ -257,7 +262,7 @@ $ make BR2_EXTERNAL="$HOME/work/br2-acme $HOME/work/br2-project-x" \
     qemu_aarch64_virt_defconfig
 ```
 
-각 트리의 `external.desc`에 적힌 `name`이 변수 이름이 됩니다. 두 트리를 넘겼을 때 `.br2-external.mk`에는 두 묶음이 순서대로 기록됐습니다.
+각 트리의 `external.desc`에 적힌 `name`이 변수 이름이 됩니다. 두 트리를 넘겼을 때 `.br2-external.mk`에는 트리마다 `NAMES`·`DIRS`·`MKS`·`_PATH`·`_DESC`·`_VERSION` 묶음이 넘긴 순서대로 기록됐습니다. 그중 이름과 경로 줄만 추리면 다음과 같습니다.
 
 ```text
 BR2_EXTERNAL_NAMES += ACME
@@ -269,6 +274,10 @@ export BR2_EXTERNAL_PROJECT_X_PATH = <scratch>/ext6/br2-project-x
 트리가 둘 이상이면 `.br2-external.in.menus`가 트리마다 하위 메뉴를 만듭니다. 메뉴 제목은 `desc`입니다.
 
 ```text
+#
+# Automatically generated file; DO NOT EDIT.
+#
+
 menu "External options"
 
 menu "ACME corporation Buildroot tree"
@@ -359,10 +368,10 @@ ACME_FIRMWARE_VERSION=1.2.3
 
 ### 두 외부 트리에서 같은 패키지 이름이 충돌
 
-`br2-project-x/package/acme-firmware/`에 버전만 2.0.0으로 바꾼 같은 이름의 패키지를 두고 두 트리를 함께 넘긴 뒤 패키지를 켰습니다. 뒤 트리가 덮어쓰는 일은 없었고, make가 파싱 단계에서 멈췄습니다.
+`br2-project-x/package/acme-firmware/`에 버전만 2.0.0으로 바꾼 같은 이름의 패키지를 두고 두 트리를 함께 넘겼습니다. 뒤 트리가 덮어쓰는 일은 없었고, `printvars`처럼 패키지 `.mk`를 읽는 make 호출이 파싱 단계에서 멈췄습니다. `BR2_PACKAGE_ACME_FIRMWARE`를 켜기 전에도, 켠 뒤에도 같은 오류였습니다. 줄 번호 23은 두 번째 `.mk`의 `$(eval $(generic-package))` 줄입니다.
 
 ```text
-<scratch>/ext6/br2-project-x/package/acme-firmware/acme-firmware.mk:6: *** Package 'acme-firmware' defined a second time in '<scratch>/ext6/br2-project-x/package/acme-firmware'; previous definition was in '<scratch>/ext6/br2-acme/package/acme-firmware'.  Stop.
+<scratch>/ext6/br2-project-x/package/acme-firmware/acme-firmware.mk:23: *** Package 'acme-firmware' defined a second time in '<scratch>/ext6/br2-project-x/package/acme-firmware'; previous definition was in '<scratch>/ext6/br2-acme/package/acme-firmware'.  Stop.
 ```
 
 이 검사는 `package/pkg-generic.mk` 464~468행에 있고, 주석이 의도를 그대로 밝힙니다.
