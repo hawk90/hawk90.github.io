@@ -37,7 +37,7 @@ Preprocess와 postprocess를 CPU에 두는 구성에서는 inference만 빨라�
 
 ## 코드 / 실제 사용 예
 
-이 절의 프로그램에서 stage는 `nanosleep`으로 10·30·5 ms를 쉬는 대역(stand-in)입니다. 실제 모델과 카메라로 바꿔 끼울 자리를 보여 주는 측정 틀이고, 글에는 실행 출력을 싣지 않습니다. 숫자가 필요한 곳은 코드의 설계값(10·30·5 ms)으로 셈합니다. [POSIX `nanosleep`](https://pubs.opengroup.org/onlinepubs/9799919799/functions/nanosleep.html)은 sleep 해상도로 올림하거나 다른 작업의 scheduling 때문에 요청보다 길게 쉴 수 있지만, signal로 깨는 경우가 아니면 요청보다 짧게 쉬지 않는다고 정합니다. 그래서 실행에서 찍히는 stage 시간은 설계값 이상이고, 프로그램이 같은 실행 안에서 stage 시간을 따로 재는 이유가 여기에 있습니다.
+이 절의 프로그램에서 stage는 `nanosleep`으로 10·30·5 ms를 쉬는 대역(stand-in)입니다. 실제 모델과 카메라로 바꿔 끼울 자리를 보여 주는 측정 틀입니다. 아래 실행 출력은 이 대역 stage로 잰 값이라 보드 성능이 아니고, 셈은 코드의 설계값(10·30·5 ms)으로 합니다. [POSIX `nanosleep`](https://pubs.opengroup.org/onlinepubs/9799919799/functions/nanosleep.html)은 sleep 해상도로 올림하거나 다른 작업의 scheduling 때문에 요청보다 길게 쉴 수 있지만, signal로 깨는 경우가 아니면 요청보다 짧게 쉬지 않는다고 정합니다. 그래서 실행에서 찍히는 stage 시간은 설계값 이상이고, 프로그램이 같은 실행 안에서 stage 시간을 따로 재는 이유가 여기에 있습니다.
 
 ### Stage별·end-to-end latency 측정
 
@@ -107,7 +107,7 @@ action   avg    0.000 ms
 e2e      avg   50.104 ms, worst   56.681 ms (200 frames, 10 warm-up dropped)
 ```
 
-stage 평균의 합 11.5 + 32.9 + 5.7 = 50.1 ms가 e2e 평균과 같고, 각 stage가 설계값(10·30·5 ms)보다 0.7~2.9 ms 길게 찍힌 것은 앞의 `nanosleep` 설명의 그 차이입니다. 이 프로그램이 내는 것은 stage별 평균, end-to-end 평균과 최악값입니다. 읽는 순서는 두 가지입니다.
+stage 평균의 합 11.5 + 32.9 + 5.7 = 50.1 ms가 e2e 평균과 같고, 각 stage가 설계값(10·30·5 ms)보다 0.7~2.9 ms 길게 찍힌 것은 앞에서 본 대로 `nanosleep`이 요청보다 길게 쉬기 때문입니다. 이 프로그램이 내는 것은 stage별 평균, end-to-end 평균과 최악값입니다. 읽는 순서는 두 가지입니다.
 
 - 가장 긴 stage의 평균을 frame 간격과 비교합니다. 직렬 구조에서는 stage 합이 곧 결과 간격이라, 설계값으로는 10 + 30 + 5 = 45 ms입니다. 30 fps 간격 33.3 ms를 넘으므로 이 구성은 직렬로는 30 fps 처리량 예산에 실패합니다.
 - 제어 시스템의 예산과 비교할 값은 평균이 아니라 최악값입니다. 최악값은 한 번의 실행으로 정하지 않고, 같은 보드에서 여러 번 돌린 최댓값을 남깁니다. 앞 10 frame(`WARMUP`)은 시작 직후의 값이 평균과 최악값에 섞이지 않도록 버립니다.
