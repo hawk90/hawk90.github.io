@@ -83,7 +83,7 @@ flash에 erase를 보낸 뒤 Read Status Register-1(05h)을 반복해 읽는 캡
 
 ## I2C decode
 
-SDA와 SCL 두 선을 잡고 주소 길이(7비트·10비트)를 맞춥니다. decoder는 START, 주소와 R/W, ACK/NACK, 데이터, repeated START, STOP을 차례로 보여 줍니다. 주소 바이트에서 NACK이 나오면 그 주소에 응답하는 디바이스가 없다는 뜻이고, 데이터 바이트의 NACK은 수신 측이 받지 않았거나 master-receiver가 마지막 바이트를 표시한 것입니다(UM10204 3.1.6, [1-06](/blog/embedded/modern-recipes/part1-06-i2c-hardware)). 주소 NACK이면 데이터시트의 7비트 주소와 주소 선택 핀의 연결을 대조합니다. MPU-6050의 경우 Linux 드라이버의 DT 예제가 0x68을 씁니다(1-06).
+SDA와 SCL 두 선을 잡고 주소 길이(7비트·10비트)를 맞춥니다. decoder는 START, 주소와 R/W, ACK/NACK, 데이터, repeated START, STOP을 차례로 보여 줍니다. 주소 바이트에서 NACK이 나오면 그 주소에 응답하는 디바이스가 없다는 뜻이고, 데이터 바이트의 NACK은 수신 측이 받지 않았거나 controller-receiver(master)가 마지막 바이트를 표시한 것입니다(UM10204 3.1.6, [1-06](/blog/embedded/modern-recipes/part1-06-i2c-hardware)). 주소 NACK이면 데이터시트의 7비트 주소와 주소 선택 핀의 연결을 대조합니다. MPU-6050의 경우 Linux 드라이버의 DT 예제가 0x68을 씁니다(1-06).
 
 ## CAN decode
 
@@ -133,4 +133,3 @@ probe를 연결하면 그 입력 용량과 저항이 신호선에 더해집니�
 
 - [10-05: UART 안 찍힐 때](/blog/embedded/modern-recipes/part10-05-uart-not-printing)
 - [10-09: 타이밍/race 진단](/blog/embedded/modern-recipes/part10-09-timing-race-diag)
-- Embedded Serial Ch 1: UART
