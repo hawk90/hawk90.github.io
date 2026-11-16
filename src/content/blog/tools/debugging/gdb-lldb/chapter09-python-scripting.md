@@ -216,16 +216,24 @@ gdb.events.stop.connect(on_stop)
 ```text
 (gdb) python TraceMalloc("malloc", internal=True)
 (gdb) continue
+Continuing.
+
 Breakpoint -5.1, __GI___libc_malloc (bytes=64) at ./malloc/malloc.c:3392
+warning: 3392	./malloc/malloc.c: No such file or directory
 (gdb) continue
+Continuing.
 malloc(64) -> 0xaaaaaaac1300
 
 Breakpoint -5.1, __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
+3392	in ./malloc/malloc.c
 (gdb) continue
+Continuing.
 malloc(2097152) -> 0xfffff7bef010
 
 Breakpoint -5.1, __GI___libc_malloc (bytes=bytes@entry=1024) at ./malloc/malloc.c:3392
+3392	in ./malloc/malloc.c
 (gdb) continue
+Continuing.
 malloc(1024) -> 0xaaaaaaac1350
 3 3 3 13 0xaaaaaaac1300 0xfffff7bef010
 [Inferior 1 (process 747) exited with code 02]
