@@ -40,11 +40,15 @@ topics: ["embedded", "embedded/hardware"]
 	Capabilities: [c8] Power Management version 2
 		Flags: PMEClk- DSI+ D1- D2- AuxCurrent=0mA PME(D0-,D1-,D2-,D3hot-,D3cold-)
 		Status: D0 NoSoftRst- PME-Enable- DSel=0 DScale=0 PME-
+== 03:00.0
+	Capabilities: [40] Power Management version 2
+		Flags: PMEClk- DSI+ D1- D2- AuxCurrent=0mA PME(D0-,D1-,D2-,D3hot-,D3cold-)
+		Status: D0 NoSoftRst- PME-Enable- DSel=0 DScale=0 PME-
 ```
 
 세 장치 모두 D1·D2를 지원하지 않고, 어느 상태에서도 PME를 내지 않는다고 광고합니다. `NoSoftRst`는 Linux `pci_regs.h:256`의 `PCI_PM_CTRL_NO_SOFT_RESET`, "No reset for D3hot->D0"입니다. NVMe는 D3hot에서 D0로 돌아와도 내부 상태를 유지한다고 하고, e1000e는 아니라고 합니다.
 
-링크 쪽은 L0(정상 전송), L0s·L1(ASPM 절전), L1 substates, L2·L3(전원 제거 문맥)으로 나뉩니다. 이 VM의 QEMU 장치는 L0s만 광고합니다(`LnkCap: ... ASPM L0s`). L1·L1 substates는 아래에서 Linux 소스로만 다룹니다.
+링크 상태 이름은 [Ch 9](/blog/embedded/hardware/pcie/chapter09-physical-layer)의 LTSSM 표에 L0·L0s·L1·L2로 나오고, Linux `CONFIG_PCIEASPM` 도움말(`drivers/pci/pcie/Kconfig:76-88`)은 ASPM이 L0/L0s/L1을 다룬다고 적습니다. L1 substates는 아래 L1SS Capability에서 다룹니다. 이 VM의 QEMU 장치는 L0s만 광고합니다(`LnkCap: ... ASPM L0s`). L1·L1 substates는 아래에서 Linux 소스로만 다룹니다.
 
 ## D3hot을 직접 만들어 보기
 
@@ -105,7 +109,7 @@ aspm policy: [default] performance powersave powersupersave
 
 ## ASPM과 CLKREQ#
 
-ASPM은 장치가 D0일 때도 idle link를 L0s·L1로 내리는 기능입니다. Linux v6.12 `policy_to_aspm_state()`(`aspm.c:269-285`)의 정책별 요청은 다음과 같습니다.
+ASPM(Active State Power Management)은 Kconfig 도움말대로 firmware가 처음 설정하고, Linux는 문제가 알려진 하드웨어에서 끄거나 안전하다고 알려진 경우 켤 수 있습니다. Linux v6.12 `policy_to_aspm_state()`(`aspm.c:269-285`)의 정책별 요청은 다음과 같습니다.
 
 | 정책 | 요청하는 상태 |
 |------|------|
@@ -138,7 +142,7 @@ CLKREQ#를 이용한 Clock PM도 같은 구조입니다. `pcie_clkpm_cap_init()`
 
 ## L1 PM Substates와 LTR
 
-L1 substates(Extended Capability 0x1E)는 L1보다 깊은 L1.1·L1.2를 정의합니다. Linux v6.12 `pci_regs.h:1087-1104`에는 PCI-PM L1.2·ASPM L1.2 지원 비트와 L1.2 진입 기준인 `LTR_L1.2_THRESHOLD` Value·Scale 필드가 있습니다. L1.2 진입 판단이 장치가 보고한 LTR 값과 이 threshold를 비교한다는 점에서 [Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space)의 LTR이 여기와 연결됩니다.
+L1 substates(Extended Capability 0x1E)는 L1보다 깊은 L1.1·L1.2를 정의합니다. Linux v6.12 `pci_regs.h:1087-1104`에는 PCI-PM L1.2·ASPM L1.2 지원 비트와 L1.2 진입 기준인 `LTR_L1.2_THRESHOLD` Value·Scale 필드가 있습니다. threshold가 LTR과 같은 Value·Scale 형식이라는 점에서 [Ch 3](/blog/embedded/hardware/pcie/chapter03-config-space)의 LTR과 연결되지만, 두 값을 어떻게 비교하는지는 이번에 연 자료에 없습니다.
 
 시리즈 VM에는 L1SS·LTR Capability를 가진 장치가 없고, ACPI `_OSC`도 `platform does not support [LTR]`이었습니다. 실제 보드에서 L1 관련 erratum이 어떻게 드러나는지는 [BSP Ch 2](/blog/embedded/bsp/chapter02-datasheet)에 i.MX 사례가 있습니다.
 

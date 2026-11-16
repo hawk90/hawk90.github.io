@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 이 VM의 인터럽트 컨트롤러
 
-arm64 virt 머신에서 PCIe MSI를 받는 곳은 GICv2m frame입니다. 부팅 로그입니다.
+QEMU 11.1.3 `finalize_msi_controller()`(`hw/arm/virt.c:2765-2777`)는 GICv2·WHPX·in-kernel irqchip을 쓰는 HVF일 때 GICv2m을, 그 밖의 GICv3 구성에서는 ITS를 MSI 컨트롤러로 고릅니다. 이 VM은 `-accel hvf`라서 GICv2m frame이 MSI를 받습니다. 부팅 로그입니다.
 
 ```text
 GICv2m: ACPI overriding V2M MSI_TYPER (base:80, num:64)
@@ -37,7 +37,7 @@ PCI는 장치마다 INTA~INTD 핀을 두고 여러 장치가 한 선을 나눠 �
 	Interrupt: pin A routed to IRQ 50
 ```
 
-(`/proc/interrupts`와 `lspci -s 00:01.0 -vv` 발췌.) `Level`은 level-triggered라는 뜻이고, `DisINTx-`는 Command 레지스터의 INTx Disable 비트가 꺼져 INTx를 내보낼 수 있다는 뜻입니다. 같은 IRQ 50으로 라우팅된 장치는 `lspci -vv`에서 셋이었습니다(00:01.0, 00:05.0, 03:00.0). 한 선을 여러 장치가 나눠 쓰는 공유 인터럽트입니다. 공유 선에서는 인터럽트가 왔을 때 handler가 자기 장치의 상태를 읽어 자기 것인지 확인해야 합니다. 아파트 공동 현관 초인종처럼 누가 눌렀는지는 각 집이 인터폰 화면을 봐야 아는 구조입니다.
+(`/proc/interrupts`와 `lspci -s 00:01.0 -vv` 발췌.) `Level`은 level-triggered라는 뜻이고, `DisINTx-`는 Command 레지스터의 INTx Disable 비트가 꺼져 INTx를 내보낼 수 있다는 뜻입니다. `lspci -vv`에서 INTx가 IRQ 50으로 라우팅된 function은 셋입니다(00:01.0, 00:05.0, 03:00.0). 다만 00:05.0과 03:00.0은 MSI-X를 쓰므로, 지금 이 선에 handler를 단 것은 `virtio0` 하나입니다. 여러 function이 INTx를 실제로 쓰면 한 선을 나눠 쓰게 되고, 그때는 인터럽트가 왔을 때 handler가 자기 장치의 상태를 읽어 자기 것인지 확인해야 합니다. 아파트 공동 현관 초인종처럼 누가 눌렀는지는 각 집이 인터폰 화면을 봐야 아는 구조입니다.
 
 ## MSI — Message Signaled Interrupt
 
@@ -115,9 +115,8 @@ Data 0x5f~0x63(95~99)은 GICv2m의 SPI 범위 80~143 안의 번호입니다. Lin
 |------|------|
 | 1 | NVMe가 completion을 쓰고 entry의 주소 0xfffff040에 data 0x61을 메모리 쓰기 |
 | 2 | SMMUv3가 IOVA 0xfffff000 page를 GICv2m frame 0x08020000으로 변환 |
-| 3 | GICv2m이 `MSI_SETSPI_NS`에 쓰인 값으로 SPI를 올림 |
-| 4 | GICv3가 그 SPI를 affinity에 맞는 CPU로 전달 |
-| 5 | Linux가 hwirq를 Linux IRQ 번호(70~74)로 바꿔 등록된 handler 호출 |
+| 3 | 쓰인 data는 `gicv2m_compose_msi_msg()`가 넣은 hwirq(SPI 번호)이고, 주소는 `V2M_MSI_SETSPI_NS` 레지스터 |
+| 4 | Linux가 hwirq를 Linux IRQ 번호(70~74)로 바꿔 등록된 handler를 affinity에 맞는 CPU에서 호출 (`/proc/interrupts` 카운트) |
 
 ## Linux PCI IRQ API
 
@@ -167,15 +166,17 @@ taskset -c 2 dd if=/dev/nvme0n1 of=/dev/null bs=4k count=2000 iflag=direct
 
 ## Interrupt Remapping — IOMMU
 
-위 MSI-X table의 0xfffff040이 이 VM의 interrupt remapping에 해당합니다. 장치가 쓰는 doorbell 주소는 IOMMU가 매핑해 준 IOVA이고, 그 page는 `IOMMU_WRITE | IOMMU_NOEXEC | IOMMU_MMIO`로 매핑됩니다. 장치는 인터럽트 컨트롤러의 물리 주소를 직접 알지 못합니다.
+위 MSI-X table의 0xfffff040은 doorbell page를 IOMMU에 매핑한 결과이지 interrupt remapping은 아닙니다. 그 page는 `IOMMU_WRITE | IOMMU_NOEXEC | IOMMU_MMIO`로 매핑되고, [Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)의 QEMU SMMU trace에서 igb의 MSI 쓰기가 IOVA 0xfffff040에서 0x8020040으로 바뀌는 기록을 볼 수 있습니다. 하지만 장치가 같은 doorbell에 다른 SPI 번호를 써도 이 매핑은 막지 못합니다.
 
-x86에서는 Intel VT-d와 AMD IOMMU가 별도 interrupt remapping table을 둡니다. 이 VM에서는 실행하지 않았고, Linux v6.12 문서로 확인한 범위만 적습니다. `kernel-parameters.txt:2291-2299`의 `intremap=`는 Intel IOMMU에서 기본값 `on`이고, `off`는 remapping을, `nosid`는 Source ID 검사를 끕니다. Source ID 검사는 인터럽트 메시지를 보낸 장치의 Requester ID를 확인하는 기능입니다.
+Linux v6.12 `msi_device_has_isolated_msi()`(`kernel/irq/msi.c:1697-1713`) 주석은 isolated MSI를 "장치에서 CPU까지의 경로에 있는 하드웨어가 MSI가 지정한 인터럽트 번호를 그 장치가 낼 권한이 있는지 검사하는 것"으로 정의하고, VFIO에서 일반 DMA 쓰기로 만든 가짜 MSI가 다른 보안 영역에 인터럽트를 거는 것을 막는 데 필요하다고 적습니다. 이 성질을 뜻하는 `IRQ_DOMAIN_FLAG_ISOLATED_MSI`는 Intel interrupt remapping(`drivers/iommu/intel/irq_remapping.c:572`), AMD IOMMU(`amd/iommu.c:3790`), GICv3 ITS(`irq-gic-v3-its.c:5392`)가 세우고, GICv2m 드라이버에는 없습니다. 그래서 이 VM에서는 [Ch 12](/blog/embedded/hardware/pcie/chapter12-virtualization-1)의 VFIO가 "No interrupt remapping support"로 장치 할당을 거절합니다.
+
+x86에서는 위 flag를 세우는 Intel·AMD IOMMU 드라이버가 interrupt remapping을 맡습니다. 이 VM에서는 실행하지 않았고, Linux v6.12 문서로 확인한 범위만 적습니다. `kernel-parameters.txt:2291-2299`의 `intremap=`는 Intel IOMMU에서 기본값 `on`이고, `off`는 remapping을, `nosid`는 "Source ID checking"을 끕니다.
 
 ## 자주 하는 실수
 
 ### "PCIe에는 INTx가 없다"
 
-시리즈 VM의 root bus virtio-net은 MSI-X가 없어 INTx(`GICv3 36 Level`)로 동작하고, IRQ 50을 다른 두 function과 나눠 씁니다. 새 드라이버가 MSI-X를 먼저 고르는 것은 맞지만, INTx는 `pci_alloc_irq_vectors()`의 마지막 fallback으로 남아 있습니다.
+시리즈 VM의 root bus virtio-net은 MSI-X가 없어 INTx(`GICv3 36 Level`)로 동작합니다. 새 드라이버가 MSI-X를 먼저 고르는 것은 맞지만, INTx는 `pci_alloc_irq_vectors()`의 마지막 fallback으로 남아 있습니다.
 
 ### "MSI-X Count만큼 vector를 받는다"
 
@@ -189,13 +190,13 @@ MSI의 per-vector mask는 `PCI_MSI_FLAGS_MASKBIT`가 있는 장치만 가집니�
 
 IOMMU domain이 붙은 장치라면 MSI 주소는 IOVA입니다. 시리즈 VM의 NVMe table에는 GICv2m 물리 주소 0x08020040이 아니라 0xfffff040이 들어 있었습니다. 인터럽트가 오지 않을 때 table을 읽어 물리 주소와 비교하면 잘못된 결론을 냅니다. IOMMU 매핑까지 같이 봐야 합니다.
 
-### "interrupt remapping은 가상화 전용"
+### "IOMMU가 있으면 MSI도 격리된다"
 
-`intremap=nosid` 설명처럼 remapping에는 보낸 장치를 검사하는 기능이 들어 있습니다. 가상 머신이 없는 시스템에서도 장치가 아무 vector나 쏘지 못하게 막는 역할을 합니다.
+시리즈 VM은 SMMUv3가 MSI doorbell을 IOVA로 매핑했지만 GICv2m에는 isolated MSI가 없습니다. Linux 주석이 말하는 격리는 인터럽트 번호를 검사하는 하드웨어가 있어야 성립하고, VFIO는 이 차이 때문에 장치 할당을 거절했습니다.
 
 ## 정리
 
-- INTx는 level-triggered 공유 선을 흉내 내고, 시리즈 VM에서 IRQ 50 하나를 세 function이 공유했습니다.
+- INTx는 level-triggered 선을 흉내 내고, 시리즈 VM에서는 root bus virtio-net이 IRQ 50으로 INTx를 썼습니다.
 - MSI는 최대 32개를 2의 거듭제곱으로 연속 할당하고, per-vector mask는 선택입니다.
 - MSI-X는 BAR 안 table로 최대 2048개, entry 16바이트에 주소·데이터·mask가 있습니다.
 - NVMe MSI-X entry의 데이터는 GICv2m SPI 번호, 주소는 IOMMU가 바꾼 IOVA였습니다.

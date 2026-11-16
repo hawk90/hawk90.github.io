@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## Error 3-Tier 분류
 
-Linux v6.12 `aer.c:437-441`의 severity 문자열이 세 등급입니다.
+Linux v6.12 `aer.c:438-442`의 severity 문자열이 세 등급입니다.
 
 | 등급 | Linux 표기 | 기본 처리 (`drivers/pci/pcie/err.c`) |
 |------|------|------|
@@ -52,7 +52,7 @@ virtio-pci 0000:07:00.0:    [12] Timeout
 
 ## AER — Advanced Error Reporting
 
-AER(Extended Capability 0x0001)의 레지스터는 Linux v6.12 `pci_regs.h:753-800`에 있습니다.
+AER(Extended Capability 0x0001)의 레지스터는 Linux v6.12 `pci_regs.h:753-807`에 있습니다.
 
 | 레지스터 | offset | 위 로그에서의 값 |
 |------|------|------|
@@ -87,12 +87,12 @@ OK id: igb0 root bus: 0000:00, bus: 3 devfn: 0.0
 ```
 
 ```text
+		DevCtl:	CorrErr- NonFatalErr- FatalErr- UnsupReq-
 		DevSta:	CorrErr- NonFatalErr+ FatalErr+ UnsupReq- AuxPwr- TransPend-
 		UESta:	DLP- SDES- TLP- FCP- CmpltTO- CmpltAbrt+ UnxCmplt- RxOF- MalfTLP+
-		DevCtl:	CorrErr- NonFatalErr- FatalErr- UnsupReq-
 ```
 
-(`lspci -s 03:00.0 -vv` 발췌.) 장치는 오류를 기록했습니다(`MalfTLP+`, `FatalErr+`). 하지만 DevCtl의 reporting enable이 모두 `-`라서 메시지가 나가지 않았습니다. 원인은 두 장치가 다릅니다.
+(주입 뒤 `lspci -s 03:00.0 -vv | grep -E "DevCtl:|DevSta:|UESta:"`로 다시 읽은 결과.) 장치는 오류를 기록했습니다(`MalfTLP+`, `FatalErr+`). 하지만 DevCtl의 reporting enable이 모두 `-`라서 메시지가 나가지 않았습니다. 원인은 두 장치가 다릅니다.
 
 | 장치 | AER Cap | DevCtl enable | 이유 |
 |------|------|------|------|
@@ -112,7 +112,7 @@ Linux v6.12 `drivers/pci/pcie/dpc.c`에서 확인한 동작은 이렇습니다. 
 
 ## Linux 복구 흐름 — 세 가지 결과
 
-Linux v6.12 `pcie_do_recovery()`(`drivers/pci/pcie/err.c:193-270`)는 오류를 낸 장치가 bridge가 아니면 그 위 bridge를 기준으로 삼고, 아래 장치들의 드라이버에 차례로 알립니다. Fatal이면 먼저 `reset_subordinates()`로 bridge 아래 link를 reset합니다. 이 함수의 결과가 드라이버 callback 유무에 따라 어떻게 갈리는지 세 경우를 주입했습니다.
+Linux v6.12 `pcie_do_recovery()`(`drivers/pci/pcie/err.c:191-278`)는 오류를 낸 장치가 bridge가 아니면 그 위 bridge를 기준으로 삼고, 아래 장치들의 드라이버에 차례로 알립니다. Fatal이면 드라이버에 frozen 상태로 알린 뒤(`report_frozen_detected`) `reset_subordinates()`로 bridge 아래 link를 reset합니다(`err.c:220-225`). 이 함수의 결과가 드라이버 callback 유무에 따라 어떻게 갈리는지 세 경우를 주입했습니다.
 
 **1. 장치에 드라이버가 없거나 callback이 없다.** virtio-net에 Fatal Malformed TLP를 넣었습니다.
 
@@ -212,7 +212,7 @@ Data Link Layer의 replay 관련 오류는 AER Correctable status의 두 비트�
 
 ## EEH — Enhanced Error Handling (POWER)
 
-IBM POWER 계열에는 EEH라는 별도 오류 처리 하드웨어가 있습니다. Linux v6.12 `Documentation/arch/powerpc/eeh-pci-error-recovery.rst`는 EEH가 PCI bus 오류를 감지해 해당 카드만 "재부팅"하고 운영체제는 계속 돌게 하는 기능이라고 설명합니다. 같은 `pci_error_handlers` 인터페이스를 쓰므로, 드라이버가 callback을 구현하면 AER과 EEH 양쪽에서 복구에 참여합니다. 이 VM에서는 실행하지 않았습니다.
+IBM POWER 계열에는 EEH라는 별도 오류 처리 하드웨어가 있습니다. Linux v6.12 `Documentation/arch/powerpc/eeh-pci-error-recovery.rst`는 EEH가 PCI bus 오류를 감지해 해당 카드만 "재부팅"하고 운영체제는 계속 돌게 하는 기능이라고 설명합니다. `Documentation/PCI/pci-error-recovery.rst`(13-26행)는 PCI-E chipset과 IBM Power4·5·6 pSeries의 host bridge 같은 오류 감지 하드웨어에 대해 장치 드라이버에 알리고 복구하는 하나의 generic API를 설명합니다. 이 장에서 본 `pci_error_handlers`가 그 API입니다. 이 VM에서는 실행하지 않았습니다.
 
 ## 자주 하는 실수
 

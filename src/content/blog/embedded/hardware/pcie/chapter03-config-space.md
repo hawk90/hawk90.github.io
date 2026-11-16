@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 256바이트와 4096바이트
 
-Linux v6.12 `pci_regs.h:29-30`은 config space 크기를 두 가지로 정의합니다. `PCI_CFG_SPACE_SIZE`는 256, `PCI_CFG_SPACE_EXP_SIZE`는 4096입니다. 장치마다 어느 쪽인지는 `pci_cfg_space_size()`(`drivers/pci/probe.c:1728-1766`)가 정합니다. PCIe 장치와 host bridge는 offset 0x100을 읽어 보고 오류 응답(0xffffffff)이 아니고 앞쪽과 겹쳐 보이지도 않으면 4096, 그 밖의 장치는 PCI-X 266/533 MHz가 아닌 한 256입니다.
+Linux v6.12 `pci_regs.h:29-30`은 config space 크기를 두 가지로 정의합니다. `PCI_CFG_SPACE_SIZE`는 256, `PCI_CFG_SPACE_EXP_SIZE`는 4096입니다. 장치마다 어느 쪽인지는 `pci_cfg_space_size()`(`drivers/pci/probe.c:1728-1768`)가 정합니다. PCIe 장치와 host bridge는 offset 0x100을 읽어 보고 오류 응답(0xffffffff)이 아니고 앞쪽과 겹쳐 보이지도 않으면 4096, 그 밖의 장치는 PCI-X 266/533 MHz가 아닌 한 256입니다.
 
 시리즈 VM에서 sysfs `config` 파일 크기가 그 결과입니다.
 
@@ -166,7 +166,7 @@ off=0x150 hdr=0x1601000e id=0x000e ver=1 next=0x160
 off=0x160 hdr=0x00010010 id=0x0010 ver=1 next=0x000
 ```
 
-AER(0x01) → ARI(0x0E) → SR-IOV(0x10)입니다. 아래 표는 `pci_regs.h:711-746`의 ID 일부와 pciutils 3.13.0 `lib/header.h:259`의 IDE입니다.
+AER(0x01) → ARI(0x0E) → SR-IOV(0x10)입니다. 아래 표는 `pci_regs.h:712-748`의 ID 일부와 pciutils 3.13.0 `lib/header.h:259`의 IDE입니다.
 
 | ID | 이름 | 비고 |
 |------|------|------|
@@ -240,7 +240,7 @@ Ch 2의 Altera root port 드라이버는 config 요청을 Type 0으로 보낼지
 		cfg = (bus == pcie->root_bus_nr) ? cfg0 : cfg1;
 ```
 
-Type 1 요청은 bridge들이 secondary~subordinate 범위를 보고 아래로 넘기다가, 대상 bus를 secondary로 가진 bridge에서 Type 0으로 바뀌어 장치에 닿습니다. 그래서 bridge의 bus 번호 레지스터가 비어 있으면 그 아래 장치는 보이지 않습니다. [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)의 CXL 실험이 그 경우입니다. U-Boot이 root port의 secondary bus를 정하지 않아 bus 13이 0xffffffff만 돌려주다가, 손으로 bus 번호를 쓰자 Type 3 장치가 나타납니다.
+bridge 아래 bus로 가는 config 요청은 그 bridge의 secondary·subordinate bus 번호에 기대어 전달됩니다. 그래서 bridge의 bus 번호 레지스터가 비어 있으면 그 아래 장치는 보이지 않습니다. bridge 안에서 Type 1이 Type 0으로 바뀌는 세부 규칙은 Base Specification 영역이라 이번에 연 자료에는 없습니다. [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)의 CXL 실험이 그 경우입니다. U-Boot이 root port의 secondary bus를 정하지 않아 bus 13이 0xffffffff만 돌려주다가, 손으로 bus 번호를 쓰자 Type 3 장치가 나타납니다.
 
 ## Latency Tolerance Reporting (LTR)
 
@@ -260,7 +260,7 @@ LTR을 쓰는 L1 PM Substates는 [Ch 6](/blog/embedded/hardware/pcie/chapter06-p
 
 ### "PCIe 장치면 config space가 4 KB다"
 
-Linux는 PCI Express Capability가 있는 function만 4096바이트로 봅니다. 시리즈 VM에서는 PCIe 트리 안에 있는 `edu`와 root bus의 virtio 장치가 256바이트였습니다. 확장 영역을 못 읽었다면 장치가 PCIe Capability를 갖고 있는지부터 봅니다.
+Linux는 PCI Express Capability가 있는 function(그리고 host bridge, PCI-X 266/533 장치, VF)만 4096바이트 후보로 보고 0x100을 읽어 확인합니다. 시리즈 VM에서는 PCIe 트리 안에 있는 `edu`와 root bus의 virtio 장치가 256바이트였습니다. 확장 영역을 못 읽었다면 장치가 PCIe Capability를 갖고 있는지부터 봅니다.
 
 ### "Vendor ID 0xFFFF면 장치가 없다"
 

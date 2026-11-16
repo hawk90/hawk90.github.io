@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## TLP를 손으로 만드는 드라이버
 
-대부분의 root port는 CPU의 config 접근을 하드웨어가 TLP로 바꿉니다. 그래서 TLP 형식이 소프트웨어에 드러나지 않습니다. 예외가 Linux v6.12의 `drivers/pci/controller/pcie-altera.c`입니다. 이 드라이버는 Altera FPGA root port에 Configuration Request TLP의 header를 DW 단위로 직접 써 넣습니다. 우편물로 치면 봉투 겉면을 기계가 아니라 사람이 손으로 쓰는 경우라서, 무엇을 어디에 쓰는지가 코드에 그대로 남아 있습니다.
+TLP 형식이 소프트웨어에 드러나는 드문 예가 Linux v6.12의 `drivers/pci/controller/pcie-altera.c`입니다. 이 드라이버는 Altera FPGA root port에 Configuration Request TLP의 header를 DW 단위로 직접 써 넣습니다. 우편물로 치면 봉투 겉면을 기계가 아니라 사람이 손으로 쓰는 경우라서, 무엇을 어디에 쓰는지가 코드에 그대로 남아 있습니다.
 
 ```c
 /* TLP configuration type 0 and 1 */
@@ -64,7 +64,7 @@ Fmt·Type 바이트를 비트로 펴면 규칙이 보입니다. 상위 3비트�
 | 0x05 | 000 00101 | 000 | 00101 | Config Read Type 1 |
 | 0x45 | 010 00101 | 010 | 00101 | Config Write Type 1 |
 
-Read와 Write는 Type이 같고 Fmt의 가운데 비트만 다릅니다. 이 비트가 data payload가 붙는지를 나타냅니다. Type 4·5는 DesignWare PCIe 컨트롤러 드라이버의 outbound ATU 설정값(`pcie-designware.h:164-168`)에서도 같은 값으로 나옵니다.
+Read와 Write는 Type이 같고 Fmt의 가운데 비트만 다릅니다. 매크로로 확인되는 것은 config read와 write가 이 한 비트로 구분된다는 사실까지입니다. Type 4·5는 DesignWare PCIe 컨트롤러 드라이버의 outbound ATU 설정값(`pcie-designware.h:164-168`)에서도 같은 값으로 나옵니다.
 
 | `PCIE_ATU_TYPE_*` | 값 | TLP 종류 |
 |------|------|------|
@@ -119,7 +119,7 @@ Linux v6.12의 `pci_configure_extended_tags()`(`drivers/pci/probe.c:2143-2187`)�
 			MaxPayload 128 bytes, MaxReadReq 128 bytes
 ```
 
-DevCap는 `ExtTag+`인데 DevCtl은 `ExtTag-`입니다. 원인은 QEMU 쪽에 있습니다. QEMU 11.1.3 `hw/pci/pcie.c:369-371`은 PCIe Capability의 Device Control에서 오류 보고 enable 네 비트(`CERE`·`NFERE`·`FERE`·`URRE`)만 쓰기 가능으로 열어 둡니다. 나머지 비트에 쓴 값은 버려지고, 커널은 쓴 뒤에 다시 읽어 확인하지 않습니다. 같은 이유로 이 VM의 `RlxdOrd`·`NoSnoop`·MaxPayload도 바뀌지 않습니다. 로그 한 줄이 레지스터 상태를 보증하지 않는다는 점은 실제 하드웨어에서도 같아서, 설정을 확인할 때는 `lspci -vv`로 다시 읽습니다.
+DevCap는 `ExtTag+`인데 DevCtl은 `ExtTag-`입니다. 원인은 QEMU 쪽에 있습니다. QEMU 11.1.3에서 PCIe Capability의 Device Control 중 쓰기 가능한 비트는 `pcie_cap_deverr_init()`(`hw/pci/pcie.c:369-371`)이 여는 오류 보고 enable 네 비트(`CERE`·`NFERE`·`FERE`·`URRE`)와, FLR을 지원하는 장치에서 `pcie_cap_flr_init()`(955-956행)이 여는 FLR 비트뿐입니다. 나머지 비트에 쓴 값은 버려지고, 커널은 쓴 뒤에 다시 읽어 확인하지 않습니다. `RlxdOrd`·`NoSnoop` 비트도 같은 이유로 이 VM에서는 써도 반영되지 않습니다. 로그 한 줄이 레지스터 상태를 보증하지 않는다는 점은 실제 하드웨어에서도 같아서, 설정을 확인할 때는 `lspci -vv`로 다시 읽습니다.
 
 ## Payload 크기 — Max_Payload_Size와 Max_Read_Request_Size
 
@@ -130,7 +130,7 @@ TLP 하나가 실을 수 있는 data 크기는 Device Control의 두 필드가 �
 | Max_Payload_Size (`PCI_EXP_DEVCTL_PAYLOAD`) | 7:5 | 128·256·512·1024·2048·4096 바이트 |
 | Max_Read_Request_Size (`PCI_EXP_DEVCTL_READRQ`) | 14:12 | 128·256·512·1024·2048·4096 바이트 |
 
-두 필드 모두 상한이 4096바이트입니다. MPS는 TLP 하나에 실을 data, MRRS는 Memory Read 하나로 요청할 수 있는 양입니다. 시리즈 VM의 장치는 모두 `MaxPayload 128 bytes, MaxReadReq 128 bytes`로 보이는데, 위에서 본 대로 QEMU가 이 필드를 쓰기 가능으로 열지 않았기 때문입니다. Debian 커널의 MPS 정책은 `CONFIG_PCIE_BUS_DEFAULT=y`입니다(`/boot/config-6.12.116+deb13-arm64`).
+두 필드 모두 상한이 4096바이트입니다. MPS는 TLP 하나에 실을 data, MRRS는 Memory Read 하나로 요청할 수 있는 양입니다. 시리즈 VM의 장치는 모두 DevCap이 `MaxPayload 128 bytes`라서, 지원하는 MPS 상한 자체가 128바이트입니다. DevCtl도 `MaxPayload 128 bytes, MaxReadReq 128 bytes`로 보입니다. Debian 커널의 MPS 정책은 `CONFIG_PCIE_BUS_DEFAULT=y`입니다(`/boot/config-6.12.116+deb13-arm64`).
 
 ## AER Header Log — 오류가 난 TLP를 보는 창구
 
@@ -223,7 +223,7 @@ Altera 드라이버는 4바이트 config 접근에 Length 1을 씁니다. Length
 - Configuration Request header는 3 DW이고, Requester ID·Tag·Byte Enable·대상 BDF·offset 위치가 Linux `pcie-altera.c` 매크로에 그대로 있습니다.
 - Type 값 Memory 0, I/O 2, CFG0 4, CFG1 5, Message 0x10은 DesignWare ATU 정의와 일치합니다.
 - Tag는 8비트(Extended)와 10비트 기능이 있고, 실제 범위는 구현마다 다릅니다.
-- MPS·MRRS는 128~4096바이트 인코딩이고, QEMU VM에서는 쓰기가 막혀 128바이트로 고정입니다.
+- MPS·MRRS는 128~4096바이트 인코딩이고, 시리즈 VM 장치는 DevCap의 MPS 상한이 128바이트입니다.
 - AER Header Log로 오류 TLP를 보고, QEMU에서는 바이트 순서가 뒤집혀 보입니다.
 - posted write의 도착은 같은 장치 read-back으로 확인합니다.
 - RO는 root port quirk로 꺼질 수 있고, ECRC는 커널 빌드 옵션에 묶여 있습니다.

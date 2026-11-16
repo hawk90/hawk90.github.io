@@ -18,7 +18,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## BAR의 비트 — 4가지 종류
 
-BAR 하위 비트는 종류를 나타내고, 나머지는 주소입니다. Linux v6.12 `pci_regs.h:102-112`의 정의입니다.
+BAR 하위 비트는 종류를 나타내고, 나머지는 주소입니다. Linux v6.12 `pci_regs.h:102-113`의 정의입니다.
 
 | 비트 | 정의 | 값 |
 |------|------|------|
@@ -43,7 +43,7 @@ BAR 하위 비트는 종류를 나타내고, 나머지는 주소입니다. Linux
 
 BAR 크기를 알아내는 방법은 간단합니다. 원래 값을 저장하고, 모두 1을 쓰고, 다시 읽고, 원래 값을 되돌립니다. 장치는 크기보다 작은 주소 비트를 0으로 고정해 두었으므로, 되읽은 값에서 종류 비트를 지우고 비트를 뒤집어 1을 더하면 크기가 나옵니다. 우편함에 "이 칸 아래로는 못 씁니다"라는 칸막이가 미리 붙어 있어서, 전부 채워 보면 칸막이 위치로 크기를 아는 것과 같습니다.
 
-Linux v6.12 `__pci_read_base()`(`drivers/pci/probe.c:176-275`)가 그 순서를 그대로 따르고, 그 앞뒤로 decode를 끕니다.
+Linux v6.12 `__pci_read_base()`(`drivers/pci/probe.c:176-319`)가 그 순서를 그대로 따르고, 그 앞뒤로 decode를 끕니다.
 
 ```c
 	if (!dev->mmio_always_on) {
@@ -132,7 +132,7 @@ ReBAR는 장치가 지원하는 여러 크기 중 하나로 BAR를 바꾸게 해
 
 [Linux v6.12 sysfs ABI 문서](https://github.com/torvalds/linux/blob/adc218676eef25575469234709c2d87185ca223a/Documentation/ABI/testing/sysfs-bus-pci)(471-501행)의 `resourceN_resize`가 사용자 인터페이스입니다. 읽으면 지원 크기 bitmap이 나오고 bit 0이 1 MB, bit 1이 2 MB입니다. 문서의 예 `00000000000001c0`은 64·128·256 MB를 지원한다는 뜻이고, `echo 7`은 2^(7+20) = 128 MB로 바꾸라는 요청입니다. `pci.h:728-731`의 `pci_rebar_size_to_bytes()`가 같은 식입니다.
 
-바꾸는 과정에는 조건이 많습니다. `__resource_resize_store()`(`pci-sysfs.c:1409-1460`)는 드라이버가 붙어 있으면 `-EBUSY`로 거절하고, memory decode를 끄고, 같은 종류의 BAR를 풀어 놓은 뒤 `pci_resize_resource()`를 부릅니다. 그 함수(`setup-res.c:430-`)는 firmware 배치를 보존해야 하는 host bridge(`preserve_config`), 아직 할당이 풀리지 않은 resource, decode가 켜진 장치에서 각각 실패하고, 지원하지 않는 크기는 `-EINVAL`입니다. 새 크기로 bridge window를 다시 잡지 못하면 실패를 돌려줍니다. ABI 문서도 같은 bridge 아래 다른 장치를 soft remove해야 할 수 있고 성공이 보장되지 않는다고 적습니다.
+바꾸는 과정에는 조건이 많습니다. `__resource_resize_store()`(`pci-sysfs.c:1409-1463`)는 드라이버가 붙어 있으면 `-EBUSY`로 거절하고, memory decode를 끄고, 같은 종류의 BAR를 풀어 놓은 뒤 `pci_resize_resource()`를 부릅니다. 그 함수(`setup-res.c:430-`)는 firmware 배치를 보존해야 하는 host bridge(`preserve_config`), 아직 할당이 풀리지 않은 resource, decode가 켜진 장치에서 각각 실패하고, 지원하지 않는 크기는 `-EINVAL`입니다. 새 크기로 bridge window를 다시 잡지 못하면 실패를 돌려줍니다. ABI 문서도 같은 bridge 아래 다른 장치를 soft remove해야 할 수 있고 성공이 보장되지 않는다고 적습니다.
 
 ## SR-IOV VF BAR
 
@@ -167,7 +167,7 @@ echo 2 > /sys/bus/pci/devices/0000:03:00.0/sriov_numvfs
 | Routing ID (First VF Offset·Stride) | offset 128, stride 2 | `pci_iov_virtfn_devfn()`(`iov.c:27-33`): PF devfn 0 + 128 + 2 × n → devfn 0x80(10.0), 0x82(10.2) |
 | VF BAR 주소 | VF BAR 크기 16 KiB | VF0 BAR0 0x8000400000, VF1 BAR0 0x8000404000 |
 
-Stride 2는 BDF 번호의 간격이고, MMIO 주소 간격은 VF BAR 하나의 크기(0x4000)입니다. `lspci`의 `[virtual]`은 VF의 BAR가 VF 자신의 config가 아니라 PF의 SR-IOV capability에서 계산된 값이라는 표시입니다. VF는 Linux에 Type 0 PCIe Endpoint로 등록되고(`pci 0000:03:10.0: [8086:10ca] type 00 class 0x020000 PCIe Endpoint`) igbvf 드라이버가 붙었습니다. 실험 뒤에는 `sriov_numvfs`에 0을 써서 VF를 지웠습니다.
+Stride 2는 BDF 번호의 간격이고, MMIO 주소 간격은 VF BAR 하나의 크기(0x4000)입니다. `lspci`의 `[virtual]`은 OS가 sysfs로 주소를 보고하지만 장치의 BAR 레지스터는 비어 있다는 표시입니다(pciutils 3.13.0 `lspci.c:425`의 주석 "Detect virtual regions, which are reported by the OS, but unassigned in the device"). VF BAR가 그렇게 보이는 것은 VF 주소가 PF의 SR-IOV capability에서 계산되기 때문입니다. VF는 Linux에 Type 0 PCIe Endpoint로 등록되고(`pci 0000:03:10.0: [8086:10ca] type 00 class 0x020000 PCIe Endpoint`) igbvf 드라이버가 붙었습니다. 실험 뒤에는 `sriov_numvfs`에 0을 써서 VF를 지웠습니다.
 
 ## 자주 하는 실수
 

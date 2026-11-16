@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"PCIe는 PCI의 공유 parallel bus를 point-to-point 직렬 링크로 바꾸고, 소프트웨어가 보는 configuration 모델은 PCI에서 그대로 물려받았습니다."** 토폴로지는 Root Port·Switch Port·Endpoint로 이루어진 트리이고, 장치는 자기 역할을 PCI Express Capability의 4비트 필드로 스스로 밝힙니다. 링크 속도는 2.5 GT/s에서 PCIe 7.0의 128 GT/s까지 올라갔고, 64 GT/s부터 Linux는 encoding 손실을 빼지 않는 Flit 시대의 계산을 씁니다.
+> **"PCIe는 PCI의 공유 parallel bus를 point-to-point 직렬 링크로 바꾸고, 소프트웨어가 보는 configuration 모델은 PCI에서 그대로 물려받았습니다."** 토폴로지는 Root Port·Switch Port·Endpoint로 이루어진 트리이고, 장치는 자기 역할을 PCI Express Capability의 4비트 필드로 스스로 밝힙니다. 링크 속도는 2.5 GT/s에서 PCIe 7.0의 128 GT/s까지 올라갔고, 64 GT/s부터 Linux의 대역폭 계산은 encoding 손실을 빼지 않습니다.
 
 이 시리즈는 PCIe를 소프트웨어 쪽에서 봅니다. PCIe Base Specification 본문은 회원 전용이라 이 시리즈에서 인용하지 않습니다. 대신 Linux v6.12의 `drivers/pci`와 `include/uapi/linux/pci_regs.h`, QEMU 11.1.3의 PCIe 모델, pciutils 3.13.0 소스를 1차 자료로 씁니다. 레지스터 값은 모두 아래 QEMU 가상 머신에서 직접 읽었습니다.
 
@@ -106,14 +106,14 @@ Root Complex 자체는 이 표에 없습니다. QEMU virt에서 00:00.0은 class
 
 ## Switch는 bridge의 묶음
 
-`lspci`로 switch 부분만 보면 upstream port 하나와 downstream port 둘이 각각 독립된 PCI-to-PCI bridge입니다.
+`lspci -nn -vv -s <BDF>`로 switch 부분만 보고 첫 줄과 `Bus:` 줄을 골랐습니다. upstream port 하나와 downstream port 둘이 각각 독립된 PCI-to-PCI bridge입니다.
 
 ```text
-04:00.0 PCI bridge [0604]: Texas Instruments XIO3130 PCI Express Switch (Upstream) [104c:8232] (rev 02)
+04:00.0 PCI bridge [0604]: Texas Instruments XIO3130 PCI Express Switch (Upstream) [104c:8232] (rev 02) (prog-if 00 [Normal decode])
 	Bus: primary=04, secondary=05, subordinate=07, sec-latency=0
-05:00.0 PCI bridge [0604]: Texas Instruments XIO3130 PCI Express Switch (Downstream) [104c:8233] (rev 01)
+05:00.0 PCI bridge [0604]: Texas Instruments XIO3130 PCI Express Switch (Downstream) [104c:8233] (rev 01) (prog-if 00 [Normal decode])
 	Bus: primary=05, secondary=06, subordinate=06, sec-latency=0
-05:01.0 PCI bridge [0604]: Texas Instruments XIO3130 PCI Express Switch (Downstream) [104c:8233] (rev 01)
+05:01.0 PCI bridge [0604]: Texas Instruments XIO3130 PCI Express Switch (Downstream) [104c:8233] (rev 01) (prog-if 00 [Normal decode])
 	Bus: primary=05, secondary=07, subordinate=07, sec-latency=0
 ```
 
@@ -192,14 +192,14 @@ Flit Mode는 가변 길이 TLP·DLLP를 고정 크기 단위에 담아 보내는
 | `PCI_ERR_CAP_TLP_LOG_FLIT` 0x00040000 | mainline 7.4-rc3 `pci_regs.h:819` | AER에 "TLP was logged in Flit Mode" |
 | `PCI_ERR_CAP_TLP_LOG_SIZE` 0x00f80000 | mainline 7.4-rc3 `pci_regs.h:820` | "Logged TLP Size (only in Flit mode)" |
 
-AER 쪽 두 비트는 Flit Mode에서 Header Log를 읽는 방법이 달라진다는 뜻입니다. [Ch 2](/blog/embedded/hardware/pcie/chapter02-tlp)의 Header Log 해석이 Flit Mode에는 그대로 맞지 않습니다. v6.12에서는 `drivers/`와 `include/linux/`에서 `LNKSTA2_FLIT`를 쓰는 곳이 없습니다(`grep -rn LNKSTA2_FLIT` 결과 없음). 이 판의 커널은 Flit Mode 비트를 정의만 하고 동작을 바꾸지 않습니다. QEMU 11.1.3은 CXL root port·switch port의 `x-256b-flit` 속성(`cxl_root_port.c:216` 등)으로만 이 상태 비트를 켭니다.
+AER 쪽 두 비트는 Flit Mode에서 Header Log를 읽는 방법이 달라진다는 뜻입니다. [Ch 2](/blog/embedded/hardware/pcie/chapter02-tlp)의 Header Log 해석이 Flit Mode에는 그대로 맞지 않습니다. v6.12에서 `LNKSTA2_FLIT`를 읽는 곳은 CXL 드라이버뿐입니다. `cxl_pci_flit_256()`(`drivers/cxl/cxlpci.h:116-121`)이 이 비트를 읽고, `cxl_flit_size()`(`drivers/cxl/core/pci.c:971-1003`)가 그 결과로 flit 크기를 256B나 68B로 정해 link latency 계산에 씁니다. PCI core는 이 비트로 동작을 바꾸지 않습니다. QEMU 11.1.3은 CXL root port·switch port·Type 3 장치의 `x-256b-flit` 속성(`cxl_root_port.c:216`, `cxl_type3.c:1371` 등)으로만 이 상태 비트를 켭니다.
 
 ## 인접 표준 — CXL·UCIe
 
 | 표준 | 공개 자료가 밝힌 관계 |
 |------|------|
 | **CXL** | [CXL 4.0 발표문](https://computeexpresslink.org/wp-content/uploads/2025/11/CXL_4.0-Specification-Release_FINAL_Website-Copy.pdf)(2025-11-18)은 4.0이 대역폭을 64 GT/s에서 128 GT/s로 두 배로 올렸고 CXL 3.x의 256B Flit 형식을 유지한다고 적습니다. 소개 자료 PDF 15쪽은 그 128 GT/s가 PCIe 7.0 PHY라고 밝힙니다 |
-| **UCIe** | [UCIe 규격 페이지](https://www.uciexpress.org/specifications)는 UCIe가 die-to-die physical layer와 die-to-die protocol을 정의하고 PCIe·CXL을 활용한다고 설명합니다. 같은 페이지에 1.0·1.1·2.0·3.0 규격이, 홈페이지에 4.0 공개 공지가 있습니다 |
+| **UCIe** | [UCIe 규격 페이지](https://www.uciexpress.org/specifications)는 UCIe가 die-to-die physical layer와 die-to-die protocol을 정의하고 PCIe·CXL을 활용한다고 설명합니다. 같은 페이지에 1.0·1.1·2.0·3.0·4.0 규격이 있습니다 |
 
 CXL이 PCIe configuration 모델 안에서 어떻게 자기를 드러내는지는 [CXL 4.0 Internals Ch 1](/blog/embedded/hardware/cxl/chapter01-cxl-position)과 [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)의 DVSEC 덤프에서 볼 수 있습니다.
 
@@ -233,7 +233,7 @@ CXL 4.0 자료는 PCIe 7.0 PHY 128 GT/s를 전제로 하지만, Linux v6.12·mai
 - switch는 포트마다 별도 PCI-to-PCI bridge입니다.
 - link 폭은 x1·x2·x4·x8·x12·x16·x32이고, LnkCap은 최대값, LnkSta는 현재값입니다. QEMU의 LnkSta는 training 결과가 아니라 복사된 값입니다.
 - rate는 2.5 GT/s에서 128 GT/s까지 올라갔고, 바이트 대역폭은 Linux의 encoding 효율과 방향을 밝혀 계산합니다.
-- Flit Mode는 Linux 레지스터 정의로 드러나고, v6.12는 상태 비트를 정의만 합니다.
+- Flit Mode는 Linux 레지스터 정의로 드러나고, v6.12에서 그 상태 비트를 읽는 곳은 CXL 드라이버뿐입니다.
 
 ## 다음 편
 
