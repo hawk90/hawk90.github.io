@@ -84,7 +84,7 @@ for (int i = 0; i < N; i++) {
 |---|---|---|
 | `complete` (기본값) | 원소 하나하나로 쪼갬. 1차원 배열이면 개별 레지스터 | `coef` 8개를 레지스터 8개로 |
 | `cyclic factor=k` | 원소를 k개 배열에 돌아가며 하나씩 넣음 | `buf[(i+j)&31]`의 연속 8개가 서로 다른 8개 조각으로 감 |
-| `block factor=k` | 연속된 덩어리 k개로 나눔 | 연속 8개가 같은 덩어리에 몰려 포트가 모자람 |
+| `block factor=k` | 연속된 덩어리 k개로 나눔 | 4개짜리 덩어리 8개라 연속 8개가 2~3개 덩어리에 최대 4개씩 몰려 포트가 모자람 |
 
 `dim`은 몇 번째 차원을 나눌지 정하고 기본값은 1, `dim=0`이면 모든 차원을 나눕니다. 위 loop는 iteration마다 연속된 원소 8개를 읽으므로 `cyclic factor=8`이 맞습니다. `cyclic factor=4`로 두면 조각 하나에 두 번씩 접근이 몰립니다. 조각마다 dual-port라면 버틸 수 있지만, 그것은 도구가 조각을 dual-port로 구현했을 때의 이야기이므로 합성 보고서로 확인할 항목입니다.
 
@@ -151,10 +151,11 @@ five partial sums: sum=2080 cycles=68
 
 부분합이 하나면 5사이클마다 한 입력(64 × 5 = 320사이클)밖에 못 받습니다. 부분합을 4개로 나누면 83사이클로 줄지만, 되먹임 경로가 5사이클이라 4갈래로는 다섯 사이클에 한 번씩 막힙니다. 부분합 수가 되먹임 지연 이상인 5개가 되자 매 사이클 입력을 받아 64 + 4사이클 만에 끝났습니다. **나눌 갈래 수는 "되먹임 경로의 사이클 수" 이상이어야 II=1이 됩니다.** 실제 float 덧셈기의 지연은 디바이스·클록·연산자 설정마다 다르므로, HLS 보고서의 덧셈기 지연을 보고 갈래 수를 정합니다.
 
-C++로는 이렇게 씁니다. float에서는 이 변환이 덧셈 순서를 바꾸므로 결과가 달라질 수 있고, 도구는 기본 설정에서 이 변환을 대신 해 주지 않습니다(`config_compile -unsafe_math_optimizations`로 허용하기 전까지).
+C++로는 이렇게 씁니다. float에서는 이 변환이 덧셈 순서를 바꾸므로 결과가 달라질 수 있습니다. UG1399는 기본 설정에서 float 연산 순서를 C 코드대로 지키고, 이 제약은 `config_compile -unsafe_math_optimizations`로 풀 수 있다고 적습니다. 아래 코드가 실제로 II=1이 되는지(`acc`가 레지스터로 나뉘었는지, carried dependence 경고가 없는지)는 합성 보고서로 확인할 항목입니다.
 
 ```cpp
 float acc[8] = {0};              /* lanes >= adder feedback latency */
+#pragma HLS ARRAY_PARTITION variable=acc type=complete
 for (int i = 0; i < N; i++) {
 #pragma HLS PIPELINE II=1
     acc[i & 7] += arr[i];
@@ -197,7 +198,7 @@ void sobel(hls::stream<uchar_t> &in, hls::stream<uchar_t> &out, int H, int W) {
 }
 ```
 
-함수 맨 위에 `#pragma HLS PIPELINE II=1`을 하나 더 달면 앞 절의 규칙대로 그 pragma가 y·x loop까지 펼치려 하고, `H`·`W`가 변수라 펼칠 수 없으니 pipelining이 막힙니다. 그래서 PIPELINE은 화소 loop 안쪽에만 둡니다. `line`은 `dim=1`로 두 줄을 따로 나눠, 한 사이클에 `line[0][x]`와 `line[1][x]`를 동시에 읽고 쓸 수 있게 했습니다.
+함수 맨 위에 `#pragma HLS PIPELINE II=1`을 하나 더 달면 앞 절의 규칙대로 그 pragma가 y·x loop까지 펼치려 하고, `H`·`W`가 변수라 펼칠 수 없으니 pipelining이 막힙니다. 그래서 PIPELINE은 화소 loop 안쪽에만 둡니다. `line`은 `dim=1`로 두 줄을 따로 나눠, 한 사이클에 `line[0][x]`와 `line[1][x]`를 동시에 다룰 수 있게 했습니다. 다만 나눈 뒤에도 각 줄은 iteration마다 읽기 1번·쓰기 1번이 필요하므로, 조각마다 읽기·쓰기 포트를 따로 가진 RAM으로 구현됐는지는 합성 보고서로 확인할 항목입니다.
 
 이 커널을 64×48 무작위 영상으로 돌려, 윈도가 영상 안에 완전히 들어가는 출력을 2차원 배열로 직접 계산한 Sobel과 비교했습니다. 출력 (y, x)의 중심 화소는 (y−1, x−1)입니다.
 
@@ -205,7 +206,7 @@ void sobel(hls::stream<uchar_t> &in, hls::stream<uchar_t> &out, int H, int W) {
 sobel csim: 64x48, 2852 interior outputs checked, 0 mismatches
 ```
 
-자원 사용량(BRAM 몇 개, LUT 몇 개)과 지연은 합성 결과라 이 글에 없습니다. 지연의 하한은 산술로 잡을 수 있습니다. 1080×768 프레임을 II=1로 처리하면 화소 수만큼, 즉 829,440사이클 이상이 걸립니다.
+자원 사용량(BRAM 몇 개, LUT 몇 개)과 지연은 합성 결과라 이 글에 없습니다. 지연의 하한은 산술로 잡을 수 있습니다. 1920×1080 프레임을 II=1로 처리하면 화소 수만큼, 즉 2,073,600사이클 이상이 걸립니다.
 
 ## Dataflow — 단계 사이 FIFO 깊이
 
@@ -217,11 +218,11 @@ void pipeline(hls::stream<rgb_t> &in, hls::stream<uchar_t> &out, int H, int W) {
 #pragma HLS STREAM variable=s2 depth=1024
     rgb_to_gray(in, s1, H * W);
     blur(s1, s2, H, W);
-    edge(s2, out, H, W);           /* blur, edge: line-buffer kernels like sobel() */
+    edge(s2, out, H, W);           /* blur, edge: 3x3 line-buffer kernels */
 }
 ```
 
-`rgb_to_gray`의 `(r*77 + g*150 + b*29) >> 8`은 계수 합이 256이라 흰색(255, 255, 255)이 255로 유지되는 정수 근사입니다. UG1399의 data-driven 모델 설명은 `hls::stream`의 기본 깊이를 2로 적고, "Configuring Dataflow Memory Channels" 절은 FIFO 크기를 직접 지정하면 도구가 계산한 기본값을 덮어쓰며, 어느 단계가 그보다 많이 몰아서 만들거나 소비하면 FIFO가 비거나 차서 멈추고 deadlock이 될 수 있다고 적습니다. `blur`가 두 줄을 채운 뒤에야 출력을 시작하는 것처럼 단계마다 출력 시작 시점이 다르면, 그 차이만큼 FIFO가 버텨야 합니다.
+UG1399의 data-driven 모델 설명은 `hls::stream`의 기본 깊이를 2로 적고, "Configuring Dataflow Memory Channels" 절은 FIFO 크기를 직접 지정하면 도구가 계산한 기본값을 덮어쓰며, 어느 단계가 그보다 많이 몰아서 만들거나 소비하면 FIFO가 비거나 차서 멈추고 deadlock이 될 수 있다고 적습니다. `blur`가 테두리 출력을 생략해 두 줄을 받은 뒤에야 출력을 시작하는 식으로 단계마다 출력 시작 시점이 다르면, 그 차이만큼 FIFO가 버텨야 합니다.
 
 ## 자주 보는 함정
 
@@ -257,7 +258,7 @@ void top() {
 }
 ```
 
-`f1`이 쓰고 `f2`가 읽는 배열 하나는 문제가 없습니다. 배열 채널은 기본이 PIPO이기 때문입니다(UG1399 "Specifying Arrays as PIPOs or FIFOs"). 문제는 reader가 둘 이상이거나 writer가 둘 이상인 경우입니다. "WYSIWYG Coding Style" 절은 배열·stream 채널에 writer 하나와 reader 하나를 요구하고, 배열에 reader를 여럿 두려면 `bind_storage`로 지정하라고 적습니다.
+`f1`이 쓰고 `f2`가 읽는 배열 하나는 문제가 없습니다. 배열 채널은 기본이 PIPO이기 때문입니다(UG1399 "Specifying Arrays as PIPOs or FIFOs"). 문제는 reader가 둘 이상이거나 writer가 둘 이상인 경우입니다. "WYSIWYG Coding Style" 절은 배열·stream 채널에 writer 하나와 reader 하나를 요구하고, 배열에 reader를 여럿 두려면 `bind_storage`(`type=ram_1wnr`)로 지정하라고 적습니다.
 
 > Stream depth를 최소로 두기
 
@@ -269,7 +270,7 @@ hls::stream<int, 2> s;
 
 > `std::sin` 그대로 쓰기
 
-UG1399의 HLS Math Library 절은 `hls_math.h`가 `cmath` 함수를 C 시뮬레이션과 합성 모두에서 쓸 수 있게 제공하고(`hls` namespace), float·double·half와 대부분 함수의 고정소수점 버전을 지원한다고 적습니다. 고정소수점 버전은 `ap_fixed<W,I>`에서 I ≤ 33, W−I ≤ 32 같은 비트폭 조건이 있습니다. 비용이 얼마인지는 합성 보고서에서 확인합니다.
+UG1399의 HLS Math Library 절과 Fixed-Point Math Functions 절은 `hls_math.h`가 `cmath` 함수를 C 시뮬레이션과 합성 모두에서 쓸 수 있게 제공하고(`hls` namespace), float·double·half와 대부분 함수의 고정소수점 버전을 지원한다고 적습니다. 고정소수점 버전은 `ap_fixed<W,I>`에서 I ≤ 33, W−I ≤ 32 같은 비트폭 조건이 있습니다. 비용이 얼마인지는 합성 보고서에서 확인합니다.
 
 ## 정리
 
@@ -289,7 +290,7 @@ UG1399의 HLS Math Library 절은 `hls_math.h`가 `cmath` 함수를 C 시뮬레�
   - `g++-16 -std=c++17 -O2 -Wall -Wno-unknown-pragmas fir8.cpp fir8_tb.cpp -o fir8 && ./fir8`
   - `g++-16 -std=c++17 -O2 -w -I<apt>/include -I<stub> sobel.cpp sobel_tb.cpp -o sobel && ./sobel`
 - RTL: Icarus Verilog 13.0, `iverilog -g2012 -o acc acc.v && vvp -n acc`. 누산기는 `LAT`(덧셈기 단수)와 `WAYS`(부분합 수)를 파라미터로 받습니다.
-- 산술: 1920 × 1080 × 60 = 124,416,000, 1080 × 768 = 829,440, 1024 × 32 = 32,768.
+- 산술: 1920 × 1080 × 60 = 124,416,000, 1920 × 1080 = 2,073,600, 1024 × 32 = 32,768.
 
 ## 관련 항목
 
