@@ -150,9 +150,9 @@ BR2_TARGET_ROOTFS_EXT2_4=y
 # BR2_TARGET_ROOTFS_TAR is not set
 ```
 
-Toolchain 관련 줄이 하나도 없는 것은 기본값(Buildroot toolchain, glibc)을 그대로 썼기 때문입니다. savedefconfig는 기본값과 다른 항목만 적습니다. 이 파일을 다른 output 디렉터리에서 `make O=/root/brtest myboard_defconfig`로 풀어 `.config`를 비교했더니 `BR2_DEFCONFIG` 경로 한 줄만 달랐습니다. 이 파일을 commit해 두면 다른 사람이 `make myboard_defconfig && make`로 같은 설정을 얻습니다.
+Toolchain 메뉴에서 온 줄은 kernel headers 버전(`BR2_PACKAGE_HOST_LINUX_HEADERS_CUSTOM_6_18`) 하나뿐입니다. toolchain 종류와 C library는 기본값(Buildroot toolchain, glibc)을 그대로 써서 적히지 않았습니다. savedefconfig는 기본값과 다른 항목만 적습니다. 이 파일을 다른 output 디렉터리에서 `make O=/root/brtest myboard_defconfig`로 풀어 `.config`를 비교했더니 `BR2_DEFCONFIG` 경로 한 줄만 달랐습니다. 이 파일을 commit해 두면 다른 사람이 `make myboard_defconfig && make`로 같은 설정을 얻습니다.
 
-빈 output에서 `time make`를 돌린 결과입니다(소스 download 포함).
+빈 output에서 `time make`를 돌린 결과입니다(소스 download 포함, `>>>` 줄만 발췌).
 
 ```text
 $ time make
@@ -160,10 +160,13 @@ $ time make
 ...
 >>>   Copying overlay board/vendor/myboard/overlay
 >>>   Executing post-build script board/vendor/myboard/post-build.sh
+...
 >>>   Generating root filesystems common tables
+...
 >>>   Generating filesystem image rootfs.ext2
+...
 >>>   Executing post-image script board/qemu/post-image.sh
-
+...
 real	27m54.999s
 user	76m27.831s
 sys	5m51.190s
@@ -178,7 +181,7 @@ Buildroot가 남기는 `output/build/build-time.log`를 단계별로 더하면 b
 
 ### QEMU로 부팅해 확인
 
-`board/qemu/aarch64-virt/readme.txt`의 명령에서 경로만 바꿔 Mac에서 띄웠습니다.
+`board/qemu/aarch64-virt/readme.txt`의 명령에서 경로와 image 이름(`rootfs.ext4` 대신 symlink 대상 `rootfs.ext2`)만 바꿔 Mac에서 띄웠습니다.
 
 ```bash
 qemu-system-aarch64 -M virt -cpu cortex-a53 -nographic -smp 1 -kernel Image \
@@ -216,18 +219,20 @@ Mem:            112          10          98           0           4          98
 Swap:             0           0           0
 ```
 
-세 가지가 모두 들어갔습니다. package가 설치한 `/usr/bin/myapp`이 있고, overlay의 `S99myapp`은 BusyBox init의 `rcS`가 부팅 끝에 실행해 `myapp`의 출력과 post-build가 만든 `/etc/board_info`를 찍었습니다. 60 MiB ext4 image 중 사용량은 4.3 MB였습니다. 커널 버전 문자열의 `-dirty`는 Buildroot git 트리에 `package/myapp`과 `board/vendor`를 commit하지 않고 빌드했기 때문입니다.
+세 가지가 모두 들어갔습니다. package가 설치한 `/usr/bin/myapp`이 있고, overlay의 `S99myapp`은 BusyBox init의 `rcS`가 부팅 끝에 실행해 `myapp`의 출력과 post-build가 만든 `/etc/board_info`를 찍었습니다. 60 MiB ext4 image 중 사용량은 4.3 MB였습니다. 커널 버전 문자열의 `-dirty`는 Buildroot git 트리에서 추적되는 파일 `package/Config.in`에 `source` 줄을 넣고 commit하지 않았기 때문입니다. `support/scripts/setlocalversion`은 `git diff-index`로 추적 파일의 변경만 보므로(41–43행), 새로 만든 `package/myapp`과 `board/vendor`는 `-dirty`에 영향을 주지 않습니다.
 
 ### 한 package만 다시 빌드
 
-`myapp.c`를 고친 뒤에는 그 package만 다시 빌드합니다. 매뉴얼은 `<package>-rebuild`가 root filesystem image를 다시 만들지 않는다("do not trigger re-creating the root filesystem image")고 하고, image가 필요하면 `make`를 한 번 더 돌리라고 적습니다(`docs/manual/rebuilding-packages.adoc` 121–125행).
+`myapp.c`를 고친 뒤에는 그 package만 다시 빌드합니다. 아래는 `touch /root/myapp-src/myapp.c`로 소스를 바꾼 것으로 만든 뒤 잰 결과입니다(`>>>`·컴파일 줄과 시간만 발췌). 매뉴얼은 `<package>-rebuild`가 root filesystem image를 다시 만들지 않는다("do not trigger re-creating the root filesystem image")고 하고, image가 필요하면 `make`를 한 번 더 돌리라고 적습니다(`docs/manual/rebuilding-packages.adoc` 121–125행).
 
 ```text
 $ time make myapp-rebuild
 >>> myapp 1.0 Syncing from source dir /root/myapp-src
 >>> myapp 1.0 Building
+/usr/bin/make -j7 CC="/root/br/output/host/bin/aarch64-buildroot-linux-gnu-gcc" -C /root/br/output/build/myapp-1.0
+/root/br/output/host/bin/aarch64-buildroot-linux-gnu-gcc  -o myapp myapp.c
 >>> myapp 1.0 Installing to target
-real	0m6.383s
+real	0m6.557s
 $ time make
 >>>   Finalizing host directory
 >>>   Finalizing target directory
@@ -238,10 +243,10 @@ $ time make
 >>>   Generating root filesystems common tables
 >>>   Generating filesystem image rootfs.ext2
 >>>   Executing post-image script board/qemu/post-image.sh
-real	0m7.245s
+real	0m6.817s
 ```
 
-두 번째 `make`는 package를 다시 빌드하지 않고 overlay 복사부터 image 생성까지만 다시 했습니다. overlay와 post-build는 image를 만들 때마다 다시 돕니다.
+두 번째 `make`는 package를 다시 빌드하지 않고 target 디렉터리 마무리(finalize)부터 image 생성까지만 다시 했습니다. overlay 복사와 post-build는 `make`를 돌릴 때마다 한 번씩 다시 돕니다.
 
 ### Toolchain과 C library
 
@@ -252,11 +257,11 @@ menuconfig의 Toolchain → Toolchain type은 두 가지입니다(`toolchain/Con
 | Buildroot toolchain | binutils·gcc·C library를 소스부터 빌드합니다. 위 빌드가 이것이고, gcc 15.3.0과 glibc로 만들어졌습니다 |
 | External toolchain | "Buildroot can either download automatically a toolchain, or use an already installed toolchain"(같은 파일의 help) |
 
-Buildroot toolchain에서 고를 수 있는 C library는 uClibc-ng, glibc, musl 세 가지입니다(`toolchain/toolchain-buildroot/Config.in`). 위 빌드 시간 중 host-gcc-initial·host-gcc-final·glibc가 합해 583초였으므로, external toolchain을 쓰면 이 부분이 빠집니다. 다만 external toolchain으로 같은 설정을 빌드해 재지는 않았습니다. 두 방식의 차이는 [Buildroot Toolchain 선택](/blog/embedded/buildroot/chapter11-toolchain)에서 다룹니다.
+Buildroot toolchain에서 고를 수 있는 C library는 uClibc-ng, glibc, musl 세 가지입니다(`toolchain/toolchain-buildroot/Config.in`). 위 빌드 시간 중 host-gcc-initial·host-gcc-final·glibc가 합해 582초였으므로, external toolchain을 쓰면 이 부분이 빠집니다. 다만 external toolchain으로 같은 설정을 빌드해 재지는 않았습니다. 두 방식의 차이는 [Buildroot Toolchain 선택](/blog/embedded/buildroot/chapter11-toolchain)에서 다룹니다.
 
 ### Init 시스템
 
-System configuration → Init system의 선택지는 BusyBox, systemV, OpenRC, systemd, catatonit, tini, tiny init, Custom (none) 여덟 가지이고 기본값은 BusyBox입니다(`system/Config.in` 85–184행). 위 부팅의 `/proc/1/comm`이 `init`이고 `/etc/init.d/rcS`가 `S??*` script를 번호 순서로 실행한 것이 BusyBox init 구성입니다. systemd와 BusyBox init의 크기나 부팅 시간은 이 글에서 재지 않았습니다.
+System configuration → Init system의 선택지는 BusyBox, systemV, OpenRC, systemd, catatonit, tini, tiny init, Custom (none) 여덟 가지이고 기본값은 BusyBox입니다(`system/Config.in` 86–194행). 위 부팅의 `/proc/1/comm`이 `init`이고 `/etc/init.d/rcS`가 `S??*` script를 번호 순서로 실행한 것이 BusyBox init 구성입니다. systemd와 BusyBox init의 크기나 부팅 시간은 이 글에서 재지 않았습니다.
 
 ### Reproducible build
 
@@ -270,8 +275,8 @@ System configuration → Init system의 선택지는 BusyBox, systemV, OpenRC, s
 |------|------|
 | 빈 output에서 첫 `make` (download 포함) | 27분 55초 (user 76분 28초) |
 | 그중 download 단계 합 | 581초 |
-| `make myapp-rebuild` | 6.4초 |
-| 이어서 image 다시 만들기(`make`) | 7.2초 |
+| `make myapp-rebuild` (소스 `touch` 뒤) | 6.6초 |
+| 이어서 image 다시 만들기(`make`) | 6.8초 |
 | `output/host` | 607 MB |
 | `output/build` | 11 GB |
 | `dl/` | 1.1 GB |
@@ -302,11 +307,12 @@ overlay는 `system/system.mk`의 `SYSTEM_RSYNC`로 복사되고, 그 옵션은 `
 ```text
 $ chmod 644 s/a; chmod 755 s/b
 $ rsync -a --ignore-times --chmod=u=rwX,go=rX s/ d/; ls -l d
+total 8
 -rw-r--r-- 1 root root 1 Nov 16 15:23 a
 -rwxr-xr-x 1 root root 1 Nov 16 15:23 b
 ```
 
-그래서 overlay에 mode 644로 둔 `S99myapp`은 그대로 복사됐다면 실행되지 않았을 것이고, 위 빌드에서는 post-build의 `chmod 755`가 이를 755로 바꿨습니다. git은 실행 비트를 기록합니다(이 트리의 `board/qemu/post-image.sh`는 `git ls-files -s`로 mode `100755`). 실행 비트가 빠지는 것은 파일을 만들 때 `chmod +x`를 하지 않았거나, `core.fileMode=false`인 checkout처럼 mode를 잃는 경로를 거쳤을 때입니다. 쓰기 권한 같은 다른 mode는 overlay로 보존되지 않으므로 device table로 정합니다. 그 실험은 [Buildroot post-build·post-image 심화](/blog/embedded/buildroot/chapter15-post-build-deep)에 있습니다.
+그래서 overlay에 mode 644로 둔 `S99myapp`은 그대로 복사됐다면 실행되지 않았을 것이고, 위 빌드에서는 post-build의 `chmod 755`가 이를 755로 바꿨습니다. git은 실행 비트를 기록합니다(이 트리의 `board/qemu/post-image.sh`는 `git ls-files -s`로 mode `100755`). 실행 비트가 빠지는 것은 파일을 만들 때 `chmod +x`를 하지 않았거나, 실행 비트를 보존하지 못하는 filesystem에서 파일을 만들어 commit했을 때입니다. 쓰기 권한 같은 다른 mode는 overlay로 보존되지 않으므로 device table로 정합니다. 그 실험은 [Buildroot 보드 Customize](/blog/embedded/buildroot/chapter07-board-customize)에 있습니다.
 
 > ⚠️ toolchain 설정을 바꾼 뒤 부분 rebuild
 
@@ -324,7 +330,7 @@ $ rsync -a --ignore-times --chmod=u=rwX,go=rX s/ d/; ls -l d
 
 - Buildroot 2026.08 `qemu_aarch64_virt_defconfig`에 package 하나, overlay, post-build를 더한 빌드는 이 VM에서 28분, `rootfs.ext2` 안의 사용량은 4.3 MB였습니다.
 - custom package는 `Config.in`과 `<이름>.mk` 두 파일이고, `package/Config.in`에 `source` 줄을 넣어야 menuconfig에 보입니다.
-- post-build script의 첫 인자가 target 디렉터리입니다. overlay 복사와 post-build는 image를 만들 때마다 다시 돕니다.
+- post-build script의 첫 인자가 target 디렉터리입니다. overlay 복사와 post-build는 `make`를 돌릴 때마다 다시 돕니다.
 - overlay는 원본 파일의 실행 비트를 따르므로, 실행할 파일은 원본에서 `+x`를 주거나 post-build에서 `chmod`합니다.
 - `savedefconfig`로 남긴 파일 하나에서 같은 `.config`가 다시 나왔습니다. 이 파일을 commit합니다.
 - `<package>-rebuild`는 image를 다시 만들지 않습니다. toolchain 설정을 바꿨으면 전체를 다시 빌드합니다.
