@@ -50,7 +50,7 @@ GPIOA->AFR[PIN >> 3] |=  (7u   << ((PIN & 7u) * 4));  /* AF7: USART1_TX on PA9 *
 
 ### 리셋 상태
 
-HAL은 리셋 직후 상태를 "input floating mode (except JTAG pins)"라고 적습니다([`stm32f4xx_hal_gpio.c` 머리 주석](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.3/Src/stm32f4xx_hal_gpio.c)). STM32F407V(E-G)Tx 핀 데이터에서 PA13은 `SYS_JTMS-SWDIO`, PA14는 `SYS_JTCK-SWCLK`, PA15는 `SYS_JTDI`이므로 포트 A에는 이 예외 핀이 있습니다. 아래 확인 절에서 레지스터 전체가 아니라 *설정한 핀의 필드만* 비교하는 이유입니다.
+HAL은 리셋 직후 상태를 "input floating mode (except JTAG pins)"라고 적습니다([`stm32f4xx_hal_gpio.c` 머리 주석](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.3/Src/stm32f4xx_hal_gpio.c)). STM32F407V(E-G)Tx 핀 데이터에서 PA13은 `SYS_JTMS-SWDIO`, PA14는 `SYS_JTCK-SWCLK`, PA15는 `SYS_JTDI`이므로 포트 A에는 이 예외 핀이 있습니다. 아래 확인 절에서 레지스터 전체가 아니라 *설정한 핀의 필드만* 비교하는 이유가 이것입니다.
 
 ### Output type — I2C는 open-drain
 
@@ -241,7 +241,7 @@ static inline void gpio_toggle(GPIO_TypeDef *port, uint32_t pin) {
 
 QEMU 11.1.3의 F4 계열 모델(`hw/arm/stm32f405_soc.c`)은 GPIOA~GPIOI를 `create_unimplemented_device`로만 둡니다. 대신 `b-l475e-iot01a`(STM32L475)는 GPIO를 실제로 모델링하고(`hw/gpio/stm32l4x5_gpio.c`), ST의 `stm32l475xx.h`(cmsis-device-l4 v1.7.4)에서 `GPIO_TypeDef`의 처음 열 워드(`MODER`~`AFR[1]`)가 F407과 같은 offset입니다. 그래서 위 `gpio.h`·`gpio.c`를 그대로 두고 L475 헤더로 컴파일해 같은 `gpio_init()` 호출을 돌렸습니다. 다른 점은 두 가지입니다. L4의 GPIO는 `GPIOA_BASE = AHB2PERIPH_BASE` = `0x48000000`에 있고, 포트 클럭은 `RCC->AHB2ENR`의 `RCC_AHB2ENR_GPIOxEN`입니다.
 
-`main_l4.c`는 사용 예시와 같은 호출에 L4용 RCC enable만 바꿨고, startup은 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 `startup.c`, linker script는 4-01 것에서 크기만 L475(Flash 1 MB, SRAM 96 KB)로 바꾼 것입니다.
+`main_l4.c`는 사용 예시와 같은 호출에 L4용 RCC enable만 바꿨고, startup은 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 `startup.c`, linker script는 4-01 것에서 크기만 L475(Flash 1 MB, SRAM 96 KB)로 바꿨습니다.
 
 ```c
 /* main_l4.c */
