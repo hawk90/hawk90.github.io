@@ -56,20 +56,20 @@ HAL은 리셋 직후 상태를 "input floating mode (except JTAG pins)"라고 �
 
 `OTYPER`는 output·AF 모드에서 출력단을 push-pull(0)과 open-drain(1) 중 하나로 고릅니다. 두 구조의 트랜지스터 동작은 [1-03: GPIO 내부 구조](/blog/embedded/modern-recipes/part1-03-gpio-internals)에서 다룹니다.
 
-I2C 핀은 open-drain에 외부 pull-up으로 둡니다. 여러 디바이스가 한 라인을 공유해도 high를 강제로 내보내는 쪽이 없어 버스 충돌이 short로 번지지 않기 때문입니다([TI SLVA704 *Understanding the I2C Bus* (2015-06)](https://www.ti.com/lit/an/slva704/slva704.pdf) 1.1절).
+I2C 핀은 open-drain에 외부 pull-up으로 둡니다. 여러 디바이스가 한 라인을 공유해도 high를 강제로 내보내는 쪽이 없어 버스 충돌이 short로 번지지 않기 때문입니다([TI SLVA704A *Understanding the I2C Bus* (2015-06, 2026-10 개정)](https://www.ti.com/lit/an/slva704/slva704.pdf) 1.1절: "Since no device may force a high on a line, this means that the bus will never run into a communication issue where one device may try to transmit a high, and another transmits a low, causing a short").
 
 ### Output speed
 
-`OSPEEDR`는 2비트로 네 단계를 고릅니다. HAL 주석의 단계별 값(low "IO works at 2 MHz"부터 very high "range 50 MHz to 200 MHz"까지)은 F4 family 전체가 함께 쓰는 HAL 헤더의 주석이고, 줄마다 "please refer to the product datasheet"가 붙습니다. F407 값은 [DS8626 Rev 12](https://www.st.com/resource/en/datasheet/stm32f407vg.pdf) Table 50(I/O AC characteristics)에 부하 용량별로 있습니다. 아래는 VDD > 2.70 V 조건의 최대 출력 주파수입니다.
+`OSPEEDR`는 2비트로 네 단계를 고릅니다. HAL v1.8.3 주석의 단계별 값(low "IO works at 2 MHz"부터 very high "range 50 MHz to 200 MHz"까지)은 F4 family 전체가 함께 쓰는 HAL 헤더의 주석이고, 줄마다 "please refer to the product datasheet"가 붙습니다. F407 값은 datasheet DS8626의 I/O AC characteristics 표에 부하 용량별로 있습니다. 아래는 이 글에서 직접 열어 본 DS8626 **Rev 4**(DocID022152, 2013-06) Table 49의 VDD > 2.70 V 최대 출력 주파수입니다.
 
 | `OSPEEDR` | 큰 부하 | 10 pF |
 | --- | --- | --- |
-| 0 (low) | 4 MHz (50 pF) | 8 MHz |
+| 0 (low) | 2 MHz (50 pF) | TBD |
 | 1 (medium) | 25 MHz (50 pF) | 50 MHz |
 | 2 (high) | 50 MHz (40 pF) | 100 MHz |
-| 3 (very high) | 100 MHz (30 pF) | 180 MHz |
+| 3 (very high) | 100 MHz (30 pF) | 200 MHz |
 
-같은 표의 주석에 따르면 이 값은 characterization으로 평가했고 양산 시험은 하지 않으며, 50 MHz를 넘는 주파수에서는 compensation cell을 써야 합니다. 이 글의 예제는 정적 신호인 LED에 low, USART에 high를 씁니다.
+10 pF low 칸의 TBD는 Rev 4 표 자체가 "to be defined"로 비워 둔 값입니다. 같은 표의 주석은 이 값이 "Based on characterization data, not tested in production"이고, "For maximum frequencies above 50 MHz, the compensation cell should be used"라고 적습니다. st.com의 최신 revision은 이 작업 환경에서 내려받지 못해 대조하지 못했습니다. 이 글의 예제는 정적 신호인 LED에 low, USART에 high를 씁니다.
 
 ## 코드 예제
 
@@ -236,6 +236,62 @@ static inline void gpio_toggle(GPIO_TypeDef *port, uint32_t pin) {
 | `AFR[1]` | `0x00000FF0` | `0x00000770` | PA9 bit 7:4 = 7, PA10 bit 11:8 = 7 |
 
 예를 들어 PA5만 확인하려면 `(MODER >> 10) & 3`을 계산합니다. 1이면 output이고 통과입니다. 0이면 리셋 상태(input, `MODE_INPUT` = 0) 그대로이므로 `gpio_init()`이 이 핀에 반영되지 않은 것이고 실패입니다. 이때는 아래 함정의 포트 클럭부터 봅니다. 2나 3이면 다른 mode를 넘긴 것이고 실패입니다. 표 전체로는 각 마스크 값이 기대값과 같으면 통과, 하나라도 다르면 실패입니다.
+
+### QEMU에서 실제로 덤프해 보기
+
+QEMU 11.1.3의 F4 계열 모델(`hw/arm/stm32f405_soc.c`)은 GPIOA~GPIOF를 `create_unimplemented_device`로만 둡니다. 대신 `b-l475e-iot01a`(STM32L475)는 GPIO를 실제로 모델링하고(`hw/gpio/stm32l4x5_gpio.c`), ST의 `stm32l475xx.h`에서 `GPIO_TypeDef`의 처음 열 워드(`MODER`~`AFR[1]`)가 F407과 같은 offset입니다. 그래서 위 `gpio.h`·`gpio.c`를 그대로 두고 L475 헤더로 컴파일해 같은 `gpio_init()` 호출을 돌렸습니다. 다른 점은 두 가지입니다. L4의 GPIO는 `GPIOA_BASE = AHB2PERIPH_BASE` = `0x48000000`에 있고, 포트 클럭은 `RCC->AHB2ENR`의 `RCC_AHB2ENR_GPIOxEN`입니다.
+
+`main_l4.c`는 사용 예시와 같은 호출에 L4용 RCC enable만 바꿨고, startup은 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 `startup.c`, linker script는 4-01 것에서 크기만 L475(Flash 1 MB, SRAM 96 KB)로 바꾼 것입니다.
+
+```c
+/* main_l4.c */
+/* Same gpio_init() calls as the post's usage example, on STM32L475 (QEMU b-l475e-iot01a).
+   Only RCC differs: L4 GPIO clocks are in AHB2ENR. */
+#include "gpio.h"
+int main(void) {
+    RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOBEN | RCC_AHB2ENR_GPIOCEN;
+    (void)RCC->AHB2ENR;
+    gpio_init(GPIOA, 5, &(gpio_config_t){ .mode = GPIO_MODE_OUTPUT, .otype = GPIO_OTYPE_PP, .speed = GPIO_SPEED_LOW, .pull = GPIO_PULL_NONE });
+    gpio_init(GPIOC, 13, &(gpio_config_t){ .mode = GPIO_MODE_INPUT, .pull = GPIO_PULL_UP });
+    gpio_init(GPIOA, 9,  &(gpio_config_t){ .mode = GPIO_MODE_AF, .otype = GPIO_OTYPE_PP, .speed = GPIO_SPEED_HIGH, .pull = GPIO_PULL_UP, .af = 7 });
+    gpio_init(GPIOA, 10, &(gpio_config_t){ .mode = GPIO_MODE_AF, .otype = GPIO_OTYPE_PP, .speed = GPIO_SPEED_HIGH, .pull = GPIO_PULL_UP, .af = 7 });
+    gpio_init(GPIOB, 6, &(gpio_config_t){ .mode = GPIO_MODE_AF, .otype = GPIO_OTYPE_OD, .speed = GPIO_SPEED_MED, .pull = GPIO_PULL_NONE, .af = 4 });
+    gpio_init(GPIOB, 7, &(gpio_config_t){ .mode = GPIO_MODE_AF, .otype = GPIO_OTYPE_OD, .speed = GPIO_SPEED_MED, .pull = GPIO_PULL_NONE, .af = 4 });
+    gpio_write(GPIOA, 5, 1);
+    for (;;) { }
+}
+```
+
+```text
+/* l475.ld */
+MEMORY { FLASH (rx) : ORIGIN = 0x08000000, LENGTH = 1024K
+         RAM  (rwx) : ORIGIN = 0x20000000, LENGTH = 96K }
+_estack = ORIGIN(RAM) + LENGTH(RAM);
+SECTIONS {
+  .isr_vector : { KEEP(*(.isr_vector)) } > FLASH
+  .text : { *(.text*) *(.rodata*) } > FLASH
+  _sidata = LOADADDR(.data);
+  .data : { _sdata = .; *(.data*) _edata = .; } > RAM AT > FLASH
+  .bss : { _sbss = .; *(.bss*) *(COMMON) _ebss = .; } > RAM
+}
+```
+
+```bash
+mkdir -p l4inc && echo '#include "stm32l475xx.h"' > l4inc/stm32f407xx.h   # gpio.h의 include를 L475 헤더로 돌리는 shim
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -ffreestanding -nostdlib -O2 -Wall -DSTM32L475xx \
+    -Il4inc -Icmsis-device-l4/Include -ICMSIS_6/CMSIS/Core/Include \
+    -T l475.ld -o gpio_l4.elf startup.c gpio.c main_l4.c
+qemu-system-arm -M b-l475e-iot01a -nographic -kernel gpio_l4.elf -monitor stdio -serial null
+(qemu) xp /10wx 0x48000000
+```
+
+```text
+48000000: 0xabebf7ff 0x00000000 0x0c280000 0x64140000
+48000010: 0x0000a620 0x00000020 0x00000000 0x00000000
+48000020: 0x00000000 0x00000770
+```
+
+위 표의 마스크를 적용하면 `MODER & 0x003C0C00` = `0x00280400`, `OSPEEDR` → `0x00280000`, `PUPDR` → `0x00140000`, `OTYPER & 0x620` = 0, `AFR[1] & 0xFF0` = `0x770`으로 다섯 줄 모두 기대값과 같습니다. 마스크 밖의 비트는 L4의 reset 값이라 F407과 다릅니다. QEMU의 `stm32l4x5_soc.c`는 GPIOA의 MODER reset 값을 `0xABFFFFFF`로 두는데, PA5·PA9·PA10 필드만 바뀐 `0xabebf7ff`가 그 결과입니다. 레지스터 전체가 아니라 필드만 비교하는 이유가 여기서도 드러납니다. 같은 덤프에서 GPIOB는 `OTYPER = 0x000000c0`(PB6·PB7 open-drain), `AFR[0] = 0x44000000`(AF4)이고, GPIOC는 `PUPDR = 0x04000000`(PC13 pull-up)에 `IDR = 0x00002000`으로 PC13이 1로 읽혔습니다. 설정이 맞는지까지는 이렇게 확인되지만, 출력단의 전기적 동작은 QEMU가 모델링하지 않으므로 보드에서 봐야 합니다.
 
 ## 자주 보는 함정
 
