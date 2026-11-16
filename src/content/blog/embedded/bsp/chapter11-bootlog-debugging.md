@@ -12,344 +12,187 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**부팅 문제는 시리얼 깨짐, hang, panic, userspace 지연 같은 증상으로 분류해 조사할 수 있습니다.** 하나의 증상만으로 원인을 확정하지 말고 마지막 로그, boot stage, board 측정값을 함께 확인합니다.
+**부팅 실패는 마지막 줄로 분류합니다.** 시리얼이 깨지는가, 특정 줄에서 멈추는가, panic 메시지가 나오는가, userspace에서 멈추는가에 따라 볼 곳이 다릅니다.
 
-[Ch 10](/blog/embedded/bsp/chapter10-first-boot)에서 정상 부팅의 단계를 따라갔다면, 이번 글은 *비정상*의 카탈로그입니다. 각 패턴을 진단 명령과 함께 정리합니다. 보드 50개를 부팅하는 BSP 엔지니어는 결국 이 카탈로그를 머릿속에 갖게 됩니다.
+[Ch 10](/blog/embedded/bsp/chapter10-first-boot)이 정상 부팅을 따라갔다면, 이 장은 실패를 일부러 만들어 봅니다. 같은 QEMU 체인(TF-A v2.15.0 → U-Boot v2024.04 → Linux 6.12 `defconfig` → Debian 13 rootfs)에서 커널 인자와 DT를 하나씩 틀리게 바꿔, 각 실패가 시리얼에 무엇을 남기는지 기록했습니다. 시리얼 깨짐처럼 QEMU에서 재현할 수 없는 경우는 그렇다고 적었습니다.
 
 ## 모드 1 — 시리얼 garbage
 
-시리얼에 *알 수 없는 깨진 문자*가 나옵니다. `U�4☐2*▒` 같은 형태입니다.
+시리얼에 깨진 문자가 나오는 경우입니다. QEMU의 가상 UART는 baud rate를 흉내 내지 않으므로 이 글에서는 재현하지 않았습니다. 그래서 "어떤 garbage면 어떤 baud"라는 대응표는 싣지 않습니다.
 
-```text
-U�4☐2*▒~������
-```
+원인 후보는 이 시리즈의 앞 장에서 소스로 확인한 것들입니다.
 
-baud rate 불일치는 한 가지 가능성입니다. UART clock·전압·배선·line configuration·노이즈도 함께 확인합니다. 아래 host baud 조합은 진단을 위한 후보이며 garbage 패턴만으로 실제 baud를 역산할 수 없습니다.
-
-```bash
-# host side에서 다른 속도로 다시 시도
-picocom -b 115200 /dev/ttyUSB0
-picocom -b 921600 /dev/ttyUSB0
-picocom -b 38400 /dev/ttyUSB0
-```
-
-자주 보이는 짝:
-
-| host에서 본 garbage | 실제 보드 baud | 추정 host 설정 |
-|---------------------|----------------|----------------|
-| `U�4☐2` | 115200 | 38400 또는 9600 |
-| `XXXXXX` 반복 | 보통 다른 속도 | 4배 차이 |
-| 짧은 글자 + `~` | 115200 | 230400 |
-
-baud rate가 맞는데도 garbage라면 **UART pinmux** 잘못입니다.
-
-```text
-=> md.l <board-verified-mux-or-pad-address> 1
-```
-
-이 주소는 회로도, SoC reference manual, board DTS에서 해당 UART pad를 확인해 정합니다. 임의의 base+offset을 그대로 읽지 않습니다.
-
-DT의 `pinctrl-0`이 가리키는 핀이 실제 UART 핀이 맞는지, voltage(1.8V vs 3.3V)가 맞는지 확인합니다.
-
-세 번째 가능성은 **클럭 부정확**입니다. 24 MHz 크리스털이 실제로 23.6 MHz라면 baud rate 계산이 어긋납니다. 오실로스코프로 측정합니다.
+- **baud rate**: U-Boot 기본값은 `CONFIG_BAUDRATE` 115200(Ch 4)이고, 커널은 `console=ttymxc1,115200`처럼 인자로 받습니다(Ch 6).
+- **UART 클록**: i.MX 8M Plus 콘솔은 24 MHz 오실레이터를 직접 받고, U-Boot의 `imx_get_uartclk()`는 `24000000U`를 상수로 돌려줍니다(Ch 4). 보드 crystal이 다르면 모든 baud가 같은 비율로 어긋납니다.
+- **pinmux**: UART pad의 mux 레지스터를 U-Boot `md.l`로 읽어 mux mode를 봅니다. i.MX 8M Plus UART2_RXD는 `0x30330228`입니다(Ch 4).
 
 ## 모드 2 — hang (정지)
 
-특정 라인까지 나오고 *영영* 멈춥니다. 가장 빈번한 패턴이며, 멈춘 *마지막 라인*이 진단의 핵심 단서입니다.
+특정 줄까지 나오고 멈추는 경우입니다. 멈춘 *마지막 줄*이 가장 큰 단서입니다.
 
-### 패턴 2a — SPL 후 hang
+### 패턴 2a — SPL 다음에 멈춤
 
-```text
-U-Boot SPL 2023.04 (Sep 12 2025 - 14:23:01 +0000)
-DDR4 dram init done
-Trying to boot from MMC1
-<침묵>
-```
+i.MX 8M Plus EVK의 SPL은 DDR 초기화 뒤 `Trying to boot from BOOTROM`으로 ROM API를 통해 U-Boot를 받습니다(Ch 6). 여기서 멈추면 `flash.bin` 안의 `u-boot.itb`와 `bl31.bin`이 실제로 들어 있는지(binman의 "non-functional" 경고, Ch 6), BL31 적재 주소 `0x970000`이 TF-A `BL31_BASE`와 같은지(Ch 7)를 봅니다.
 
-ATF BL31 또는 U-Boot proper가 DRAM의 어떤 주소로 로드되지 못했거나, 그 주소로의 점프가 실패한 경우입니다. 흔한 원인:
+### 패턴 2b — `Starting kernel ...` 다음에 침묵
 
-- ATF BL31의 entry address가 DRAM 범위 밖.
-- FIT image의 hash 불일치 (보안 부팅 활성 시).
-- U-Boot proper가 SPL과 *다른 DDR 구역*에 빌드되어 충돌.
-
-부트로더의 `imx_load_image.cfg`(NXP) 또는 `boot.cfg`(Rockchip) 같은 image manifest의 주소가 메모리 맵과 일치하는지 확인합니다.
-
-### 패턴 2b — U-Boot proper 진입 직후 hang
+`console=ttyS0`만 주고(이 머신의 UART는 `ttyAMA0`) earlycon 없이 부팅한 결과입니다.
 
 ```text
-U-Boot 2023.04 (Sep 12 2025 - ...)
-
-CPU:   Freescale i.MX8MMQ rev1.0 1800 MHz (running at 1200 MHz)
-<침묵>
-```
-
-대체로 **DRAM training은 통과했지만 동작이 불안정**합니다. CPU 코어가 DRAM에 두 번째 접근에서 실패합니다. SPD/calibration값을 다시 측정해 `lpddr4_timing.c`(또는 `ddr3l_timing.c`)를 조정합니다.
-
-### 패턴 2c — Kernel decompress 후 hang
-
-```text
-=> booti ${loadaddr} - ${fdt_addr_r}
-## Flattened Device Tree blob at 43000000
-   Booting using the fdt blob at 0x43000000
-   Loading Device Tree to 00000000bfff7000, end 00000000bffffae8 ... OK
-
 Starting kernel ...
 
-<침묵>
+
+[chain-run] stop-pattern NOT matched after 30.4s wall
 ```
 
-**`earlycon`이 설정되지 않음**이 1번 의심입니다. `bootargs`에 다음을 추가합니다.
+30초 동안 한 글자도 없었습니다. 커널은 돌고 있지만 출력할 콘솔이 없는 상태입니다. 첫 의심은 earlycon입니다. 인자 없이 `earlycon`만 주면 DT의 `stdout-path`를 따르고(`kernel-parameters.txt:1256`), Ch 10의 실행에서는 `earlycon: pl11 at MMIO 0x0000000009000000`이 찍혔습니다. 주소를 직접 줄 때의 이름은 UART 드라이버가 정합니다. PL011은 `pl011,<addr>`(1283행), i.MX는 `ec_imx6q,<addr>`(1359행, `drivers/tty/serial/imx_earlycon.c:45`)입니다.
 
 ```text
-earlycon=ec_imx6q0,0x30890000,115200n8
+earlycon=ec_imx6q,0x30890000,115200
 ```
 
-UART base address는 SoC TRM에 적힌 값을 정확히 써야 합니다. `console=ttymxc0,115200`만 있어서는 `console`이 활성화되는 시점까지 침묵합니다.
+i.MX 8M Plus EVK의 U-Boot 환경에 들어 있는 값이 바로 이것입니다(Ch 6).
 
-두 번째 의심은 **잘못된 DTB 또는 load address overlap**입니다. U-Boot가 다른 보드의 DTB를 전달했거나, memory description이 실제 RAM과 맞지 않는지 bootloader 전달 DT 및 memory map으로 확인합니다.
+### 패턴 2c — PSCI에서 멈춤
 
-### 패턴 2d — driver probe에서 hang
+DT의 PSCI `method`가 firmware와 다르면 커널은 첫 PSCI 호출에서 죽습니다. 실제 출력은 Ch 9에 있습니다. 마지막 정상 줄은 `psci: probing for conduit method from DT.`입니다.
+
+### 패턴 2d — driver probe에서 멈춤
+
+특정 장치의 probe가 끝나지 않으면 그 다음 줄이 나오지 않습니다. 어느 initcall에서 멈췄는지는 `initcall_debug`로 봅니다. 이 출력은 debug 레벨이라 `ignore_loglevel`도 함께 줘야 콘솔에 나옵니다. `initcall_debug`만 줬을 때는 `calling` 줄이 1개였고, `ignore_loglevel`을 더하니 1,801개가 됐습니다.
 
 ```text
-[    1.234567] mmc0: registering SD-class host controller
-<침묵>
+[    0.283749] calling  of_platform_default_populate_init+0x0/0x118 @ 1
+[    0.329547] initcall of_platform_default_populate_init+0x0/0x118 returned 0 after 36000 usecs
 ```
 
-특정 디바이스 probe에서 멈춥니다. MMC, I2C, SPI 드라이버가 응답하지 않는 디바이스를 폴링하면 timeout 처리 안 한 코드에서 hang합니다.
-
-```text
-# bootargs에 추가해 어디서 멈췄는지 정확히 본다
-initcall_debug printk.time=1 ignore_loglevel
-```
-
-이렇게 하면 dmesg에 다음 형태가 나옵니다.
-
-```text
-[    1.234567] calling  sdhci_drv_init+0x0/0x40 @ 1
-[    1.245678] initcall sdhci_drv_init+0x0/0x40 returned 0 after 11000 usecs
-[    1.246789] calling  sdhci_pltfm_init+0x0/0x60 @ 1
-<멈춤 — 이 함수가 범인>
-```
+멈췄다면 마지막 `calling` 줄 뒤에 짝이 되는 `returned` 줄이 없습니다. 그 함수가 범인입니다.
 
 ## 모드 3 — Kernel panic
 
-```text
-[    1.234567] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
-[    1.345678] CPU: 0 PID: 1 Comm: swapper/0 Not tainted 6.6.0 #1
-[    1.456789] Call trace:
-[    1.567890]  dump_backtrace+0xe0/0xf0
-[    1.678901]  show_stack+0x18/0x24
-[    1.789012]  dump_stack_lvl+0x60/0x84
-[    1.890123]  panic+0x148/0x350
-[    1.901234]  mount_block_root+0x180/0x270
-```
-
-panic message와 call trace는 단서지만, 증상이 근본 원인과 일치한다고 보장하지 않습니다. 같은 로그가 여러 원인에서 나올 수 있어 관련 설정과 초기 로그를 같이 봅니다.
+panic은 메시지가 원인을 직접 말해 주는 편입니다. 실제로 일으킨 두 가지입니다.
 
 ### "Unable to mount root fs"
 
-`bootargs`의 `root=`이 가리키는 디바이스가 없거나 인식 안 됨.
-
-```bash
-# 진단
-# 1) MMC 드라이버가 빌트인인지 확인
-zcat /proc/config.gz | grep -E "MMC|MMC_SDHCI"
-# CONFIG_MMC=y, CONFIG_MMC_SDHCI=y 여야 함
-
-# 2) 부팅 시 인식된 디바이스 확인
-[    1.234567] mmc0: new HS200 MMC card at address 0001
-[    1.345678] mmcblk0: mmc0:0001 SDW32G 29.7 GiB
-[    1.456789]  mmcblk0: p1 p2 p3
-
-# 3) bootargs와 일치하는지 확인
-root=/dev/mmcblk0p2   # mmcblk0의 p2 — 위 로그와 일치
-```
-
-`rootwait`도 잊지 말아야 합니다. 저장장치 probe가 비동기인 환경에서는 `rootwait`이 필요할 수 있습니다. 실제 `root=` device와 initramfs 여부를 함께 확인합니다.
-
-### "No init found"
-
-rootfs는 마운트됐지만 `/sbin/init`가 없음.
-
-```bash
-# 다른 init 시도
-rdinit=/bin/sh           # initramfs 단계
-init=/bin/sh             # rootfs 단계
-
-# 마운트 후 콘솔 진입해 검증
-mount /dev/mmcblk0p2 /mnt
-ls -l /mnt/sbin/init /mnt/lib/systemd/systemd
-```
-
-### NULL pointer dereference
-
-드라이버 버그. Call trace의 PC와 LR로 어느 함수인지 식별.
-
-```bash
-# 호스트에서 심볼 매칭
-aarch64-linux-gnu-addr2line -e vmlinux -f 0xffffffc008abcdef
-# 또는
-gdb-multiarch vmlinux
-```
+`root=`를 주지 않고 부팅했습니다.
 
 ```text
-(gdb) l *0xffffffc008abcdef
+[    0.603386] VFS: Cannot open root device "" or unknown-block(0,0): error -6
+[    0.604370] Kernel panic - not syncing: VFS: Unable to mount root fs on unknown-block(0,0)
+[    0.604734] CPU: 2 UID: 0 PID: 1 Comm: swapper/0 Not tainted 6.12.0 #1
+[    0.604894] Hardware name: linux,dummy-virt (DT)
+[    0.605068] Call trace:
+...
+[    0.606016]  mount_root_generic+0x1f8/0x2b0
+[    0.606090]  mount_root+0x208/0x248
+[    0.606150]  prepare_namespace+0x1d8/0x240
+[    0.606214]  kernel_init_freeable+0x254/0x278
 ```
 
-`vmlinux`(non-stripped)가 빌드 시 보존되어 있어야 합니다.
+두 줄은 `init/do_mounts.c`의 220행(`VFS: Cannot open root device ...`)과 236행(`VFS: Unable to mount root fs on %s`)에서 나옵니다. `""`는 `root=`가 비었다는 뜻이고 `error -6`은 `-ENXIO`입니다. 이 메시지가 보이면 세 가지를 확인합니다.
 
-## 모드 4 — late hang (init 단계 정지)
+1. `root=`가 실제 장치를 가리키는가. Ch 10의 성공한 부팅은 `root=PARTUUID=1f342af3-...`였고, 커널은 `vda: vda1 vda15`로 그 디스크를 찾았습니다.
+2. 그 장치의 드라이버와 파일시스템이 빌트인인가. Ch 8의 `defconfig`에는 `CONFIG_VIRTIO_BLK=y`, `CONFIG_EXT4_FS=y`, i.MX용 `CONFIG_MMC_SDHCI_ESDHC_IMX=y`가 있습니다.
+3. 장치가 늦게 나타나는 경우를 위해 `rootwait`가 있는가.
 
-커널은 정상이고 init까지 진입했는데 *userspace에서* 멈춥니다.
+### "Requested init failed"
+
+rootfs는 마운트됐지만 init이 없는 경우입니다. `init=/sbin/nonexistent`를 줬습니다.
 
 ```text
-[    4.890123] systemd[1]: Reached target Multi-User System.
-<침묵>
+[    0.694862] VFS: Mounted root (ext4 filesystem) readonly on device 254:1.
+[    0.783406] Run /sbin/nonexistent as init process
+[    0.786976] Kernel panic - not syncing: Requested init /sbin/nonexistent failed (error -2).
 ```
 
-원인 후보:
+`init=`를 명시하면 `init/main.c:1512`의 이 panic이 나고, 명시하지 않았는데 기본 후보가 모두 없으면 1531행의 `No working init found.  Try passing init= option to kernel.`가 납니다. `error -2`는 `-ENOENT`입니다.
 
-- **getty가 시리얼 콘솔에 못 attach**: `/etc/systemd/system/getty.target.wants/serial-getty@ttymxc0.service` 존재하는지.
-- **OOM**: 메모리 부족으로 init/systemd 또는 자식이 죽음. 다음 boot 시 dmesg에 `Out of memory: Killed process ...`.
-- **udev rule 무한 대기**: `udevadm settle`이 timeout까지 기다림. `journalctl -b` 에서 확인.
+### Oops — PC를 소스 줄로
 
-콘솔이 막혀 진단 어려우면 다음 boot에서 `bootargs`에 `systemd.log_level=debug systemd.log_target=console` 추가.
+Oops의 `pc :`와 `lr :` 줄은 `함수+오프셋/크기` 형식입니다. 빌드할 때 남긴 `vmlinux`(Ch 8)와 커널 트리의 `scripts/faddr2line`으로 소스 줄을 찾습니다. Ch 9의 PSCI `method` 오류 Oops로 해 본 결과입니다.
+
+```text
+$ ./scripts/faddr2line vmlinux __arm_smccc_hvc+0x4/0x30 __invoke_psci_fn_hvc+0x40/0x70
+__arm_smccc_hvc+0x4/0x30:
+__arm_smccc_hvc at arch/arm64/kernel/smccc-call.S:43
+
+__invoke_psci_fn_hvc+0x40/0x70:
+__invoke_psci_fn_hvc at drivers/firmware/psci/psci.c:120
+```
+
+KASLR가 켜져 있어도(Ch 10 로그의 `KASLR enabled`) `함수+오프셋` 형식은 그대로 쓸 수 있습니다. 실행 주소가 아니라 심볼 기준이기 때문입니다.
+
+## 모드 4 — late hang (userspace 단계)
+
+커널은 `Run /sbin/init`까지 왔는데 login이 안 나오는 경우입니다. Ch 10의 정상 로그에서 시리얼 login은 `serial-getty@ttyAMA0.service`가 띄웠습니다. 그 unit이 콘솔 이름(`ttyAMA0`, i.MX라면 `ttymxc1`)과 맞는지가 첫 확인입니다. userspace가 어디서 시간을 쓰는지는 `systemd-analyze blame`과 `critical-chain`으로 봅니다(Ch 10, Ch 15).
 
 ## 진단 도구들
 
 ### dmesg와 /proc
 
 ```bash
-dmesg                          # 모든 커널 메시지
-dmesg -T                       # 사람 시간으로
-dmesg -l err,warn              # 오류만
-cat /proc/cmdline              # 부팅 시 커널 인자
-cat /proc/version              # 커널 버전, 빌드 정보
-cat /proc/interrupts           # 인터럽트 카운트
-cat /proc/iomem                # I/O 메모리 맵
-cat /proc/device-tree/...      # DT 라이브 뷰
+dmesg                          # 커널 메시지
+dmesg -l err,warn              # 오류·경고만
+cat /proc/cmdline              # 실제로 받은 커널 인자
+cat /proc/device-tree/...      # 커널이 받은 DT (Ch 3)
 ```
+
+Ch 10에서 `/proc/cmdline`은 U-Boot `bootargs`와 같은 문자열이었습니다. 다르면 부트로더가 인자를 덮어쓰거나 DT `chosen/bootargs`가 쓰인 것입니다.
 
 ### debugfs
 
-```bash
-mount -t debugfs none /sys/kernel/debug
+이 시리즈에서 실제로 읽은 debugfs 파일은 `clk/clk_summary`(Ch 4), `regulator/regulator_summary`(Ch 12), `devices_deferred`(Ch 12), `wakeup_sources`(Ch 13), `pinctrl/`(Ch 4)입니다. 모두 `CONFIG_DEBUG_FS=y`가 필요하고, Ch 8의 arm64 `defconfig`에는 켜져 있습니다.
 
-ls /sys/kernel/debug/
-# clk/        — clock tree
-# regmap/     — register cache 들
-# pinctrl/    — pin 설정
-# regulator/  — 전원 도메인
-# gpio        — gpio 상태
-# tracing/    — ftrace
+### earlyprintk와 earlycon
 
-cat /sys/kernel/debug/clk/clk_summary
-cat /sys/kernel/debug/pinctrl/<dev>/pinmux-functions
-cat /sys/kernel/debug/regulator/regulator_summary
-```
+arm64에서 초기 콘솔은 `earlycon`입니다. 위 패턴 2b의 형식을 씁니다.
 
-debugfs를 쓰려면 kernel의 debugfs 지원과 mount가 필요합니다. 실제 파일은 driver·config·해당 kernel 버전에 따라 달라집니다.
+### ftrace
 
-### earlyprintk vs earlycon
-
-이름이 비슷한 두 메커니즘이 자주 헷갈립니다.
-
-| 옵션 | 의미 | 활성 시기 |
-|------|------|-----------|
-| `earlyprintk` | 보드별 *fixed* early console. legacy. | 일부 보드만 지원 |
-| `earlycon` | 초기 kernel console; DT 또는 명시 설정 | target architecture·driver 지원 확인 |
-
-`earlycon`과 legacy `earlyprintk` 지원은 architecture·driver·kernel 버전에 따릅니다. 새로운 통합에서는 target kernel documentation과 UART driver를 확인합니다.
-
-```text
-# 명시적 주소
-earlycon=uart8250,mmio32,0xfe215040,115200n8
-
-# DT의 stdout-path 사용
-earlycon
-```
-
-### ftrace — 커널 함수 트레이스
-
-```bash
-cd /sys/kernel/debug/tracing
-echo function > current_tracer
-echo 1 > tracing_on
-sleep 1
-echo 0 > tracing_on
-cat trace | head -50
-```
-
-probe 단계의 hang을 좁히는 데 효과적입니다. 부팅 단계에서 ftrace를 켜려면 `bootargs`에 `ftrace=function trace_event=irq:* trace_buf_size=4M`.
+`kernel-parameters.txt`에 부팅 시점부터 tracing을 켜는 인자가 있습니다. `ftrace=[tracer]`(1575행), `trace_event=[event-list]`(6811행), `trace_buf_size=nn[KMG]`(6786행)입니다. 이 글에서는 부팅 ftrace를 실행하지 않았습니다.
 
 ### kgdb와 JTAG
 
-심각한 hang에서는 동적 추적이 한계입니다. JTAG로 정지된 CPU의 PC, LR, SP를 직접 봅니다.
-
-```bash
-# OpenOCD
-openocd -f interface/jlink.cfg -f target/imx8mm.cfg
-```
-
-```bash
-gdb-multiarch vmlinux
-```
+JTAG 없이도 시리얼 위에서 kgdb를 쓸 수 있습니다. `kgdboc=`(2589행)로 콘솔을 지정하고 `kgdbwait`(2614행)를 주면 커널이 초기에 멈춰 호스트 gdb를 기다립니다.
 
 ```text
-(gdb) target remote :3333
-(gdb) info registers
-(gdb) bt
+kgdboc=ttymxc1,115200 kgdbwait
 ```
 
-JTAG가 없어도 `kgdb`를 시리얼 위에서 쓸 수 있습니다.
-
-```text
-# bootargs
-kgdboc=ttymxc0,115200 kgdbwait
-```
-
-부팅 중 `kgdbwait`에서 멈추고 호스트의 gdb가 attach될 때까지 기다립니다.
+이 글에서는 kgdb 세션과 JTAG을 실행하지 않았습니다.
 
 ### console muxing
 
-여러 콘솔을 동시에 쓸 수 있습니다.
+`console=`를 여러 번 주면 모든 콘솔에 출력하고, `/dev/console`은 마지막 `console=`이 가리키는 장치가 됩니다(`Documentation/admin-guide/serial-console.rst:39`).
 
 ```text
-console=ttymxc0,115200 console=tty0
+console=tty0 console=ttymxc1,115200
 ```
-
-여러 `console=` 인자는 여러 console로 출력할 수 있지만 `/dev/console` 지정은 등록 순서와 console driver에 영향을 받습니다. 대상 kernel의 serial-console 문서에서 순서 규칙을 확인합니다.
 
 ## 부팅 실패 진단 체크리스트
 
-- [ ] 시리얼 어디까지 나왔나? (마지막 5줄 캡처)
-- [ ] baud rate가 맞나? (다른 속도 2~3개 시도)
-- [ ] BootROM / SPL / ATF / U-Boot / kernel 중 어디서 멈췄나?
-- [ ] `earlycon`이 인자에 있나?
-- [ ] `bootargs`의 `root=`, `console=`가 보드와 일치하나?
-- [ ] `dmesg -l err`에 의심 라인 있나?
-- [ ] `/proc/cmdline`이 부팅 인자와 일치하나?
-- [ ] driver probe가 실패한 디바이스 있나?
-- [ ] OOM 또는 watchdog reboot loop인가?
+- [ ] 시리얼 마지막 줄이 무엇인가 (Ch 10의 결정 트리)
+- [ ] `earlycon`이 인자에 있고 이름(`pl011`, `ec_imx6q`)과 주소가 맞는가
+- [ ] `console=` 장치 이름이 보드의 UART와 맞는가
+- [ ] `root=`가 실제 장치를 가리키고, 그 드라이버가 빌트인인가
+- [ ] `initcall_debug ignore_loglevel`로 멈춘 initcall을 찾았는가
+- [ ] Oops라면 `faddr2line`으로 PC를 소스 줄로 바꿨는가
 
 ## 흔한 실수
 
-- **시리얼 케이블의 TX/RX 교차**: 보드 TX → host RX, 보드 RX → host TX. 한쪽만 들려도 디버그는 가능합니다.
-- **UART voltage 불일치**: 보드 1.8 V UART에 3.3 V USB-Serial을 연결하면 입력은 보이지만 host → 보드 키 입력이 안 됩니다. level shifter 필요.
-- **`bootargs`를 SPL에서 설정한 줄로 착각**: SPL은 보통 bootargs를 안 만집니다. U-Boot proper의 `bootcmd`에서 `setenv bootargs ...`로 설정합니다.
-- **`CONFIG_PRINTK_TIME` 비활성**: dmesg에 timestamp가 없어 *어느 함수가 느린지* 분석 불가.
-- **양산 펌웨어에서 `quiet`**: 필드에서 부팅 문제가 생기면 정보가 거의 없습니다. 양산이라도 시리얼 콘솔에는 verbose를 유지하는 편이 안전.
+- **시리얼 케이블의 TX/RX 교차**: 보드 TX → 호스트 RX, 보드 RX → 호스트 TX. BeagleBone Black J1 헤더는 4번 RX, 5번 TX입니다(Ch 1).
+- **UART 전압 불일치**: BeagleBone Black J1 신호는 3.3 V입니다(Ch 1). 어댑터 전압을 보드 문서와 맞춥니다.
+- **`initcall_debug`만 주기**: 위에서 본 것처럼 `ignore_loglevel` 없이는 1줄만 나왔습니다.
+- **`vmlinux`를 버림**: 같은 빌드의 `vmlinux` 없이는 `faddr2line`이 쓸 수 없습니다. 이미지와 함께 보관합니다.
+- **earlycon 이름 착오**: i.MX의 이름은 `ec_imx6q`입니다. `drivers/tty/serial/earlycon.c:196-207`은 이름 뒤 글자가 `,`나 문자열 끝이 아니면 그 항목을 건너뛰므로, `ec_imx6q0`처럼 숫자를 붙이면 일치하는 earlycon이 없습니다.
 
 ## 정리
 
-- 부팅 실패는 garbage, hang, panic, late hang의 4가지 모드로 분류됩니다.
-- 시리얼 garbage는 baud rate, pinmux, 클럭 중 하나입니다.
-- Hang은 *마지막 라인*이 핵심 단서이며, SPL·U-Boot proper·kernel decompress·driver probe 단계에 따라 의심 영역이 다릅니다.
-- Kernel panic은 메시지와 call trace가 조사 단서를 제공하므로 `Unable to mount root fs`, `No init found`, NULL deref 패턴을 익혀 둡니다.
-- Late hang은 systemd unit 실패, OOM, getty miss-attach가 흔합니다.
-- `earlycon`은 초기 로그를 확인할 때 유용하지만 주소·driver·console 설정을 target kernel과 맞춰야 합니다.
-- ftrace, kgdb, JTAG로 깊은 진단이 가능하지만 먼저 `dmesg`와 `/proc/cmdline`을 확인합니다.
-- `CONFIG_DEBUG_FS`, `CONFIG_PRINTK_TIME`, `CONFIG_MAGIC_SYSRQ`는 디버깅 친화 옵션입니다.
+- 시리얼 깨짐은 QEMU에서 재현할 수 없어 대응표 대신 Ch 4의 클록·pinmux 확인 절차를 씁니다.
+- `Starting kernel ...` 뒤 침묵은 콘솔 문제입니다. `earlycon`(DT `stdout-path`)으로 바로 보였습니다.
+- `VFS: Unable to mount root fs`(`do_mounts.c:236`)와 `Requested init ... failed`(`main.c:1512`)를 실제로 일으켜 원인과 메시지를 짝지었습니다.
+- `initcall_debug`는 `ignore_loglevel`과 함께 써야 콘솔에 나옵니다.
+- Oops의 `pc`는 `scripts/faddr2line vmlinux 함수+오프셋/크기`로 소스 줄이 됩니다.
 
 ## 다음 편 예고
 
