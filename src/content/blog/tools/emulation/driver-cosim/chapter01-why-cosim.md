@@ -28,8 +28,8 @@ driver 코드 자체를 *컴파일*하는 건 쉽습니다. 문제는 *돌려 �
 
 | 단계 | 어디서 돌리나 | 언제 가능한가 | 무엇이 보이고 무엇이 안 보이나 |
 |------|----------------|----------------|--------|
-| Post-silicon | 실 chip + 보드 | silicon·보드 도착 후 | 모든 동작이 진짜지만 내부 signal은 칩이 노출한 debug 경로로만 봅니다 |
-| FPGA prototype | FPGA 보드 | RTL을 FPGA에 합성할 수 있게 된 뒤 | 실제 gate 속도에 가깝게 돌지만 내부 signal은 미리 심어 둔 probe로만 봅니다 |
+| Post-silicon | 실 chip + 보드 | silicon·보드 도착 후 | 모든 동작이 진짜입니다. 이 시리즈에서는 다루지 않습니다 |
+| FPGA prototype | FPGA 보드 | RTL을 FPGA에 합성할 수 있게 된 뒤 | clock이 실제 hardware에서 돌지만, 내부 signal은 디버그용으로 고른 net만 봅니다(AMD UG908) |
 | Functional model | QEMU·SystemC TLM model | RTL과 동시에 | register 의미와 상위 stack은 보이지만 cycle 단위 동작은 모델에 없습니다 |
 
 이 세 가지가 채우지 못하는 *cycle-accurate + driver-integrated* 검증 구간이 cosim의 영역입니다.
@@ -54,7 +54,7 @@ RTL·software·BFM의 revision과 simulator/compiler 옵션을 함께 고정해�
 - **RTL** — Verilog/SystemVerilog로 기술된 silicon-bound 디자인. cycle accurate.
 - **Software** — driver C 코드, firmware, 또는 그 둘의 일부. host CPU에서 실행.
 
-둘 사이의 다리는 **DPI-C**(Direct Programming Interface, IEEE 1800 SystemVerilog 35장)와 **VPI**/VHPI 같은 simulator hook입니다. Verilator 5.054가 배포하는 `svdpi.h`는 첫머리에 "IEEE 1800-2023 Annex I"에서 가져온 파일이라고 적고 있습니다. 공유 가능한 driver 핵심의 MMIO 추상 함수를 BFM transaction으로 바꾸고, RTL의 interrupt 신호를 harness가 ISR callback에 전달하도록 설계할 수 있습니다. Linux kernel module 자체가 host 프로세스에서 그대로 실행되는 것은 아닙니다.
+둘 사이의 다리는 **DPI-C**(Direct Programming Interface, IEEE 1800 SystemVerilog의 일부)와 **VPI**/VHPI 같은 simulator hook입니다. Verilator 5.054가 배포하는 `svdpi.h`는 첫머리에 "IEEE 1800-2023 Annex I"에서 가져온 파일이라고 적고 있습니다. 공유 가능한 driver 핵심의 MMIO 추상 함수를 BFM transaction으로 바꾸고, RTL의 interrupt 신호를 harness가 ISR callback에 전달하도록 설계할 수 있습니다. Linux kernel module 자체가 host 프로세스에서 그대로 실행되는 것은 아닙니다.
 
 | 구성 요소 | 역할 |
 |-----------|------|
@@ -88,23 +88,22 @@ cosim은 QEMU를 *대체*하지 않습니다. *보완*합니다. QEMU로는 OS �
 
 ### FPGA prototype vs Cosim
 
-FPGA prototype은 RTL을 *FPGA의 logic에 합성*해 보드에서 돌립니다. 소프트웨어 simulation과 달리 clock이 실제 hardware에서 돌기 때문에 긴 workload를 실 system bandwidth로 시험할 수 있습니다. 대신 RTL을 고칠 때마다 합성·배치·배선을 다시 거쳐 bitstream을 만들어야 하고, 보드 대수만큼만 동시에 돌릴 수 있으며, 내부 signal은 합성 전에 심어 둔 probe로만 볼 수 있습니다. 이 시리즈는 FPGA 합성을 실행하지 않았으므로 합성 시간이나 FPGA clock 수치를 적지 않습니다.
+FPGA prototype은 RTL을 *FPGA의 logic에 합성*해 보드에서 돌립니다. 소프트웨어 simulation과 달리 clock이 실제 hardware에서 돌기 때문에 긴 workload를 실 system bandwidth로 시험할 수 있습니다. 대신 내부 signal은 미리 고른 net에만 보입니다. AMD Vivado의 디버그 문서 UG908은 ILA(Integrated Logic Analyzer) core를 "the selected set of nets to debug"에 맞춰 만든다고 설명하고(Netlist Insertion Debug Probing Flow 절), probe를 바꾸는 것도 "applied to a placed and routed design by re-implementing the design"이라고 적습니다(Incremental Compile with Debug Core (ILA) Modifications 절). 보드 대수만큼만 동시에 돌릴 수 있다는 점도 다릅니다. 이 시리즈는 FPGA 합성을 실행하지 않았으므로 합성 시간이나 FPGA clock 수치를 적지 않습니다.
 
 RTL simulation은 반대 성질을 가집니다. 3장의 counter 예제는 `verilator --build`가 C++ 생성부터 link까지 2.46초(wall)에 끝났고, trace를 켜면 모든 signal이 waveform에 남습니다. hardware가 필요 없으니 **CI에 그대로 통합**되고, **bitstream 같은 가공 단계 없이** 코드 push마다 돌릴 수 있습니다.
 
 | 항목 | FPGA prototype | Cosim |
 |------|-----------------|-------|
 | 속도 | 이 시리즈에서 측정하지 않음 | 3장 counter 기준 Mcycle/s 단위(위 표) |
-| Internal observability | 합성 전에 심은 probe만 | trace를 켠 모든 signal (`--trace-depth`로 제한 가능) |
-| RTL 수정 후 다시 돌리기까지 | 합성·배치·배선 재실행 (측정하지 않음) | 3장 counter의 `verilator --build` 2.46초 |
-| CI 친화도 | 낮음 | 높음 |
-| 비용 | 보드 + 라이선스 | open-source 가능 |
+| Internal observability | ILA로 고른 net만 (UG908) | trace를 켠 모든 signal (`--trace-depth`로 제한 가능) |
+| 관찰 신호를 바꿔 다시 돌리기까지 | probe만 바꿔도 배치·배선된 설계를 다시 implement (UG908, 시간은 측정하지 않음) | 3장 counter의 `verilator --build` 2.46초 |
+| CI runner에서 실행 | FPGA 보드가 연결된 runner 필요 | hardware 없이 가능 |
 
 두 도구는 보완 관계입니다. 이 시리즈는 **짧은 시나리오의 register·IRQ·DMA 경계 버그는 cosim에서**, **긴 stress와 throughput은 FPGA에서** 보는 것으로 역할을 나눕니다. 위 표에서 counter 하나가 Mcycle/s 단위였으니, 실제 NPU 규모 RTL에서 수 초 분량의 hardware 시간을 cosim으로 돌리는 것은 현실적이지 않습니다.
 
 ### Post-silicon vs Cosim
 
-Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 silicon이 도착했을 땐 RTL이 *동결*되어 있어서, register encoding 실수가 발견되면 firmware·driver에서 우회하거나 ECO·재제작으로 고치는 수밖에 없습니다. cosim의 목적은 *그 단계에서 발견될 버그를 그 이전으로 끌어오는 것*입니다.
+Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 silicon은 이미 제조된 RTL로 만들어졌으므로, 그때 발견한 register encoding 실수는 RTL 수정만으로는 그 silicon에서 고쳐지지 않습니다. cosim의 목적은 *그 단계에서 발견될 버그를 그 이전으로 끌어오는 것*입니다.
 
 ## 도입 판단과 유지 비용
 
@@ -146,6 +145,7 @@ Post-silicon은 진짜입니다. 모든 변수가 정확합니다. 그러나 sil
 - [cocotb 2.0 timing model](https://docs.cocotb.org/en/v2.0.0/timing_model.html) — simulator scheduling과 관찰 시점
 - QEMU 11.1.0 소스(`git clone --depth 1 --branch v11.1.0`) — `include/system/memory.h:292-303`, `hw/misc/edu.c:142`, `:168-173`, `:191`, `:306-308`
 - Verilator 5.054 배포판 `include/vltstd/svdpi.h` 첫머리 주석 — IEEE 1800-2023 Annex I 출처 표기
+- [AMD UG908: Using the Netlist Insertion Debug Probing Flow](https://docs.amd.com/r/en-US/ug908-vivado-programming-debugging/Using-the-Netlist-Insertion-Debug-Probing-Flow), [UG908 2023.2: Incremental Compile with Debug Core (ILA) Modifications](https://docs.amd.com/r/2023.2-English/ug908-vivado-programming-debugging/Incremental-Compile-with-Debug-Core-ILA-Modifications)
 
 Verilator 수치는 2026-11-16 macOS 27.2.1(Apple M2 Pro)에서 Homebrew Verilator 5.054로 3장의 counter를 빌드·실행한 결과입니다. FPGA 합성, post-silicon 보드, Linux 통합은 이 글에서 실행하지 않았고 도입 비용도 측정하지 않았습니다.
 
