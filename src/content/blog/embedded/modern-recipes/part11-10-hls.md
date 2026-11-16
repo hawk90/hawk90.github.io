@@ -84,7 +84,7 @@ void fir(hls::stream<int16_t> &in,
 }
 ```
 
-계수는 Q15(정수 값 ÷ 32768)로 보고 마지막에 `>> 15`로 되돌립니다. 이 커널이 실제로 DSP 몇 개, LUT 몇 개가 되는지는 합성해야 알 수 있고, 이 글은 그 숫자를 갖고 있지 않습니다.
+계수는 Q15(정수 값 ÷ 32768)로 보고 마지막에 `>> 15`로 되돌립니다. 이 커널이 실제로 DSP 몇 개, LUT 몇 개가 되는지는 합성해야 알 수 있고, 이 글에는 그 숫자가 없습니다.
 
 ### Testbench는 호출 한 번에 한 샘플
 
@@ -115,7 +115,7 @@ INFO [HLS SIM]: The maximum depth reached by any hls::stream() instance in the d
 
 마지막 줄은 `hls_stream.h`가 프로그램 끝에 찍는 정보로, testbench가 stream에 한 번에 최대 1개만 쌓았다는 뜻입니다.
 
-샘플 1024개를 한꺼번에 쓰고 `fir()`를 한 번만 부른 뒤 1024개를 읽는 testbench로 바꾸면 어떻게 될까요. `fir()`는 한 번에 하나만 처리하므로 입력 1023개가 남고 출력은 1개뿐이고, 두 번째 `out.read()`가 빈 stream을 읽게 됩니다. 같은 `hls_stream.h`를 `-DHLS_STREAM_THREAD_SAFE`로 빌드해 돌리면 그 읽기에서 영원히 기다리다 `timeout 10`에 잘렸습니다.
+샘플 1024개를 한꺼번에 쓰고 `fir()`를 한 번만 부른 뒤 1024개를 읽는 testbench로 바꾸면 어떻게 될까요? `fir()`는 한 번에 하나만 처리하므로 입력 1023개가 남고 출력은 1개뿐이고, 두 번째 `out.read()`가 빈 stream을 읽게 됩니다. 같은 `hls_stream.h`를 `-DHLS_STREAM_THREAD_SAFE`로 빌드해 돌리면 그 읽기에서 영원히 기다리다 `timeout 10`에 잘렸습니다.
 
 ```text
 $ g++-16 -std=c++17 -O2 -Wno-unknown-pragmas -DHLS_STREAM_THREAD_SAFE ... fir.cpp tb_orig.cpp -o tb_orig -lpthread && timeout 10 ./tb_orig
