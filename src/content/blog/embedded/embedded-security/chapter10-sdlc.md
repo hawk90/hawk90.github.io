@@ -20,7 +20,7 @@ topics: ["embedded"]
 
 ## 보안 SDLC의 7단계
 
-다음은 이 글에서 산출물을 정리하기 위한 일곱 단계입니다. [Microsoft SDL practices](https://www.microsoft.com/en-us/securityengineering/sdl/practices)의 고정 12개 항목을 공식적으로 재분류한 표가 아닙니다. 공식 페이지의 확인 시점은 2026-10-24입니다.
+다음은 이 글에서 산출물을 정리하기 위한 일곱 단계입니다. [Microsoft SDL practices](https://www.microsoft.com/en-us/securityengineering/sdl/practices)의 10개 practice(2026-11-16 확인)를 그대로 옮긴 것이 아니라, 이 장의 설명을 위해 산출물 기준으로 나눈 것입니다.
 
 | 단계 | 산출물 | 다음 단계에 넘길 조건 |
 |------|------|------|
@@ -75,15 +75,11 @@ topics: ["embedded"]
 
 제품 언어·규격·실제 결함 유형에 맞춰 규칙과 분석기를 선택합니다.
 
-| 도구 | 영역 |
+| 종류 | 예 |
 |------|------|
-| MISRA C / MISRA C++ | 자동차·기능 안전 (코딩 규칙) |
-| CERT C / CERT C++ | 보안 중심 (Carnegie Mellon) |
-| Clang-Tidy + Clang Static Analyzer | 일상 CI 통합 |
-| cppcheck | 가벼운 정적 분석 |
-| Coverity / CodeSonar / Klocwork | 상용, 깊이 있는 분석 |
-| Polyspace | abstract interpretation, 자동차 표준 |
-| semgrep | 패턴 기반, 빠르고 자동화 좋음 |
+| 코딩 규칙 | MISRA C / MISRA C++, CERT C / CERT C++ |
+| 오픈소스 정적 분석 | Clang-Tidy, Clang Static Analyzer, cppcheck, semgrep |
+| 상용 정적 분석 | Coverity, CodeSonar, Klocwork, Polyspace |
 
 검사기 수를 늘리기보다 차단할 규칙·예외 승인·오탐 처리와 새 결함의 추적을 정의합니다.
 
@@ -118,7 +114,7 @@ gcc -O2 -fno-stack-protector -U_FORTIFY_SOURCE -no-pie -Wl,-z,norelro h.c -o sof
 | libc import | `memcpy`, `strcpy` | `__memcpy_chk`, `__strcpy_chk`, `__stack_chk_fail`, `__stack_chk_guard` |
 | GNU property note | 없음 | `AArch64 feature: BTI, PAC` |
 
-24 B 인자를 넣으면 `hard`는 두 경로 모두 `*** buffer overflow detected ***: terminated`를 찍고 SIGABRT(exit 134)로 멈췄습니다. 같은 입력에 `soft`는 아무 메시지 없이 exit 0으로 끝났습니다. Stack을 덮어쓰고도 정상 종료한 것입니다. 이 program에서 overflow를 잡은 것은 stack protector가 아니라 `_FORTIFY_SOURCE`입니다. Compiler가 `small`의 크기 8을 알기 때문에 `memcpy`·`strcpy`를 크기 검사가 붙은 `__*_chk`로 바꿨습니다. 크기를 compile 시점에 모르는 pointer에는 이 검사가 붙지 않습니다([glibc fortification](https://sourceware.org/glibc/manual/latest/html_node/Source-Fortification.html)). 같은 VM에서 `gcc -fcf-protection`은 `'-fcf-protection=full' is not supported for this target`로 실패했습니다. x86 CET 옵션이고, AArch64에서 대응하는 것은 위 property note에 찍힌 `-mbranch-protection`입니다.
+24 B 인자를 넣으면 `hard`는 두 경로 모두 `*** buffer overflow detected ***: terminated`를 찍고 SIGABRT(exit 134)로 멈췄습니다. 같은 입력으로 `soft f`(`memcpy` 경로)를 돌리면 오류 없이 exit 0으로 끝났습니다. Stack을 덮어쓰고도 정상 종료한 것입니다. 이 program에서 overflow를 잡은 것은 stack protector가 아니라 `_FORTIFY_SOURCE`입니다. Compiler가 `small`의 크기 8을 알기 때문에 `memcpy`·`strcpy`를 크기 검사가 붙은 `__*_chk`로 바꿨습니다. 크기를 compile 시점에 모르는 pointer에는 이 검사가 붙지 않습니다([glibc fortification](https://sourceware.org/glibc/manual/latest/html_node/Source-Fortification.html)). 같은 VM에서 `gcc -fcf-protection`은 `‘-fcf-protection=full’ is not supported for this target`로 실패했습니다. x86 CET 옵션이고, AArch64에서 대응하는 것은 위 property note에 찍힌 `-mbranch-protection`입니다.
 
 ### Buffer 계약을 함수 경계에 표현
 
@@ -198,7 +194,7 @@ VEX가 CRA 보고 대상 판단을 자동으로 대신하거나 법적 의무를
 | Build L2 | hosted build platform이 생성한 서명된 provenance | build 뒤의 변조 |
 | Build L3 | 강화된(hardened) build platform | build 중의 변조 |
 
-Artifact 서명만으로 provenance의 정확성·builder 격리·해당 SLSA 수준이 증명되지 않습니다. Sigstore keyless 서명은 서명자의 OIDC identity로 발급한 인증서를 씁니다. 그래서 [cosign 검증 문서](https://docs.sigstore.dev/cosign/verifying/verify/)의 keyless 예는 `--certificate-identity`와 `--certificate-oidc-issuer`를 함께 주어, 누가 어느 issuer로 서명했는지까지 맞아야 통과하게 합니다. 이 둘을 빼고 "서명이 있다"만 확인하면 아무 identity의 서명이나 통과합니다. 여기서는 cosign 실행이나 SLSA 평가를 수행하지 않았습니다.
+Artifact 서명만으로 provenance의 정확성·builder 격리·해당 SLSA 수준이 증명되지 않습니다. Sigstore keyless 서명은 서명자의 OIDC identity로 발급한 인증서를 씁니다. 그래서 [cosign 검증 문서](https://docs.sigstore.dev/cosign/verifying/verify/)의 keyless 예는 `--certificate-identity`와 `--certificate-oidc-issuer`를 함께 주어, 누가 어느 issuer로 서명했는지까지 맞아야 통과하게 합니다. 여기서는 cosign 실행이나 SLSA 평가를 수행하지 않았습니다.
 
 ## 7. Response — 운영 단계의 보안
 

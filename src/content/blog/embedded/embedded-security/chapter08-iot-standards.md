@@ -14,7 +14,7 @@ topics: ["embedded"]
 
 > 표준의 기술 요구, 시장별 법적 의무, 제품 인증의 평가 범위를 구분해야 합니다. 같은 TLS·OTA 기능을 써도 적용 법규와 제출 증거가 같아지지는 않습니다.
 
-이 장은 소비자·산업 IoT 제품의 적용 범위를 정리합니다. 법규 일정은 **2026-10-24 확인 기준**이며, 원래 글의 2025년 8월 CRA 시행·2027년 11월 완전 시행 표기는 잘못된 것입니다. EU CRA는 Regulation (EU) 2024/2847이고, RED의 무선기기 보안 요구와 별도입니다.
+이 장은 소비자·산업 IoT 제품의 적용 범위를 정리합니다. 법규 일정은 **2026-11-16에 공식 페이지로 다시 확인**한 값입니다. EU CRA는 Regulation (EU) 2024/2847이고, RED의 무선기기 보안 요구와 별도입니다.
 
 ## 표준의 지형도
 
@@ -38,7 +38,7 @@ B2B라는 이름이나 사용한 암호 library만으로 어느 제도의 적용
 
 | # | Provision | 핵심 |
 |---|-----------|------|
-| 5.1 | No universal default passwords | 공장 출하 시 기기별 고유 패스워드 또는 사용자 설정 강제 |
+| 5.1 | No universal default passwords | 공장 기본 상태 밖에서는 기기별 고유 또는 사용자 설정 password |
 | 5.2 | Implement a means to manage reports of vulnerabilities | 보안 연락처 공개 + 처리 정책 |
 | 5.3 | Keep software updated | 업데이트 가능 + 지원 기간 공개 |
 | 5.4 | Securely store sensitive security parameters | 민감한 보안 parameter의 안전한 저장 |
@@ -47,7 +47,7 @@ B2B라는 이름이나 사용한 암호 library만으로 어느 제도의 적용
 | 5.7 | Ensure software integrity | secure boot, signed update |
 | 5.8 | Ensure that personal data is secure | 전송 중 민감한 개인정보 보호 |
 | 5.9 | Make systems resilient to outages | 네트워크·전력 단절 시 안전 동작 |
-| 5.10 | Examine system telemetry data | 이상징후 탐지, 감사로그 |
+| 5.10 | Examine system telemetry data | telemetry에서 보안 이상징후 검토 |
 | 5.11 | Make it easy for users to delete user data | 공장 초기화 |
 | 5.12 | Make installation and maintenance of devices easy | 보안 관련 사용자 안내 |
 | 5.13 | Validate input data | 외부 입력 검증 |
@@ -68,7 +68,7 @@ SoC(Statement of Compliance)의 필드는 [2023 Regulations Schedule 4](https://
 
 ## IEC 62443 — 산업 자동화 보안
 
-산업 자동화·제어 시스템(IACS)의 보안을 다루는 표준 계열입니다. 법이 아니라 자발적 표준이며, 고객 계약이나 조달 조건으로 요구될 때 의무가 됩니다. 다음 판의 IEC webstore 페이지를 대조했습니다.
+산업 자동화·제어 시스템(IACS)의 보안을 다루는 표준 계열입니다. 다음 판의 IEC webstore 페이지를 대조했습니다.
 
 | 문서 | 대상 | 평가 질문 |
 |------|------|------|
@@ -93,7 +93,7 @@ IEC webstore의 62443-3-3:2013 설명은 이 표준이 IEC 62443-1-1의 일곱 f
 | Software Update | 업데이트 주체·인증·실패 복구 |
 | Cybersecurity State Awareness | 상태의 관찰·보고 대상과 접근 제어 |
 
-[IR 8425](https://csrc.nist.gov/pubs/ir/8425/final)(2022-09, "Profile of the IoT Core Baseline for Consumer IoT Products")는 그 결과가 "IoT 제품 전체(entire IoT product)"에 적용된다고 적습니다. 기기만이 아니라 함께 동작하는 app·backend도 대상입니다. NIST 문서는 지침이며 그 자체로 법적 의무는 아닙니다.
+[IR 8425](https://csrc.nist.gov/pubs/ir/8425/final)(2022-09, "Profile of the IoT Core Baseline for Consumer IoT Products")는 그 결과가 "IoT 제품 전체(entire IoT product)"에 적용된다고 적습니다. NIST 문서는 지침이며 그 자체로 법적 의무는 아닙니다.
 
 ## EU Cyber Resilience Act (CRA) — 가장 광범위
 
@@ -102,7 +102,7 @@ IEC webstore의 62443-3-3:2013 설명은 이 표준이 IEC 62443-1-1의 일곱 f
 | 사건 | 날짜 |
 |------|------|
 | Regulation (EU) 2024/2847 발효 | 2024-12-10 |
-| 적합성평가기관 통지 관련 Chapter IV 적용 | 2026-06-11 |
+| 적합성평가기관(CAB) 통지 규정 적용 | 2026-06-11 |
 | Article 14 보고 의무 적용 | 2026-09-11 |
 | 주요 제품 요구 적용 | 2027-12-11 |
 
@@ -116,7 +116,7 @@ IEC webstore의 62443-3-3:2013 설명은 이 표준이 IEC 62443-1-1의 일곱 f
 
 | 분류 | 적합성평가 |
 |------|------|
-| 일반 제품 | 제조사 자체 평가 |
+| 일반 제품 | 자체 평가 가능(제3자 평가·인증 scheme도 선택 가능) |
 | Important Class I | 조화표준을 적용했으면 자체 평가, 아니면 notified body의 제3자 평가 |
 | Important Class II | 제3자 평가 |
 | Critical (Annex IV) | 제3자 평가 |
@@ -135,11 +135,11 @@ IEC webstore의 62443-3-3:2013 설명은 이 표준이 IEC 62443-1-1의 일곱 f
 
 ## UNECE WP.29 R155/R156 — 자동차
 
-[UNECE R156](https://unece.org/transport/documents/2021/03/standards/un-regulation-no-156-software-update-and-software-update)은 소프트웨어 업데이트와 그 관리체계(SUMS), R155는 차량 cybersecurity와 관리체계(CSMS)를 다룹니다. 둘 다 2020년 6월 WP.29에서 채택됐고, [UN 조약 기록](https://treaties.un.org/doc/Publication/MTDSG/Volume%20I/Chapter%20XI/XI-B-16-156.en.xml)상 R156은 2021-01-22에 발효했습니다. 형식승인 규정이므로 의무를 지는 주체는 차량 형식승인을 받는 제조사입니다. OTA 서명 기능 하나는 R156의 일부 요구일 뿐 관리체계 전체가 아닙니다.
+[UNECE R156](https://unece.org/transport/documents/2021/03/standards/un-regulation-no-156-software-update-and-software-update)은 소프트웨어 업데이트와 그 관리체계(SUMS), R155는 차량 cybersecurity와 관리체계(CSMS)를 다룹니다. UN 조약 기록상 [R155](https://treaties.un.org/doc/Publication/MTDSG/Volume%20I/Chapter%20XI/XI-B-16-155.en.xml)와 [R156](https://treaties.un.org/doc/Publication/MTDSG/Volume%20I/Chapter%20XI/XI-B-16-156.en.xml)은 둘 다 2021-01-22에 발효했습니다. 형식승인 규정이므로 의무를 지는 주체는 차량 형식승인을 받는 제조사입니다. OTA 서명 기능 하나는 R156의 일부 요구일 뿐 관리체계 전체가 아닙니다.
 
 ## 한국 — 제품 인증 범위를 먼저 확인
 
-[KISA IoT 보안인증 안내](https://www.kisa.or.kr/1050608)의 제품 인증은 조직 단위 관리체계 인증인 ISMS·ISMS-P와 별개입니다. 해외 표준과의 상호 인정 근거는 찾지 못했으므로, ETSI에 맞췄다는 이유로 국내 시험이 면제된다고 보지 않습니다.
+[KISA IoT 보안인증 안내](https://www.kisa.or.kr/1050608)에 따르면 인증 대상은 "IoT 제품 및 제품과 연동되는 모바일 앱"이고, 보안위험 기반의 Lite·Basic·Standard 세 등급으로 나뉩니다. 시험은 KTC·TTA·KTR이 대행하고 인증은 KISA가 합니다. 해외 표준과의 상호 인정 근거는 찾지 못했으므로, ETSI에 맞췄다는 이유로 국내 시험이 면제된다고 보지 않습니다.
 
 
 
@@ -170,7 +170,7 @@ ETSI의 구현 적합성 선언 서식, 시험 정보(IXIT), 실제 평가 speci
 
 ## 자주 하는 실수
 
-CRA는 소비자 제품만이 아니라 B2B 제품도 대상이고, 분류는 제품 종류(Annex III·IV)로 정해집니다. 지원 기간은 5년이 기본이지만 예상 사용 기간이 더 짧으면 그 기간으로, 더 길면 더 길게 정합니다. MAC 주소 같은 공개 식별자에서 유도한 password는 ETSI 5.1이 막으려는 바로 그 경우입니다.
+CRA의 분류는 소비자용인지가 아니라 제품 종류(Annex III·IV)로 정해집니다. 지원 기간은 5년이 기본이지만 예상 사용 기간이 더 짧으면 그 기간으로, 더 길면 더 길게 정합니다. MAC 주소 같은 공개 식별자에서 유도한 password는 ETSI 5.1이 막으려는 바로 그 경우입니다.
 
 SBOM은 release와 일치해야 하며 단순 생성 성공이 누락 없는 inventory를 보장하지 않습니다. 표준 번호·판·제품 범위·시험 결과가 없으면 인증명이나 보안 chip만으로 적합성을 판단하지 않습니다.
 

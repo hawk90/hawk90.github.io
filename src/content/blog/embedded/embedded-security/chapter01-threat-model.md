@@ -113,7 +113,7 @@ STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때�
 
 **디버그 인터페이스 — JTAG / SWD / UART**
 
-STM32L5 계열은 디버그·flash 읽기 보호를 option byte의 RDP(Read-out Protection) 값으로 정합니다. ST의 [stm32l5xx-hal-driver v1.0.7](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Inc/stm32l5xx_hal_flash.h#L278-L283) `stm32l5xx_hal_flash.h`는 Level 0 = `0xAA`, 0.5 = `0x55`, 1 = `0xBB`, 2 = `0xCC`로 정의하고, Level 2에 "활성화하면 Level 1이나 0으로 돌아갈 수 없다"는 경고를 붙여 둡니다. 되돌릴 수 없으므로 Level 2는 양산 라인의 마지막 단계에서 겁니다.
+STM32L5 계열은 디버그·flash 읽기 보호를 option byte의 RDP(Read-out Protection) 값으로 정합니다. HAL 주석은 RDP Level 1에서도 JTAG·SWD debug가 연결돼 있으면 flash를 program·erase할 수 없다고 적습니다([`stm32l5xx_hal_flash_ex.c`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Src/stm32l5xx_hal_flash_ex.c#L846-L849)). ST의 [stm32l5xx-hal-driver v1.0.7](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Inc/stm32l5xx_hal_flash.h#L278-L283) `stm32l5xx_hal_flash.h`는 Level 0 = `0xAA`, 0.5 = `0x55`, 1 = `0xBB`, 2 = `0xCC`로 정의하고, Level 2에 "활성화하면 Level 1이나 0으로 돌아갈 수 없다"는 경고를 붙여 둡니다. 되돌릴 수 없으므로 Level 2는 양산 라인의 마지막 단계에서 겁니다.
 
 **외부 storage — SD / eMMC / SPI flash 스왑**
 

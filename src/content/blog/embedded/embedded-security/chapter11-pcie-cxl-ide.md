@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 [Ch 4](/blog/embedded/embedded-security/chapter04-trustzone)·[Ch 5](/blog/embedded/embedded-security/chapter05-tee)의 격리는 CPU·실행 환경의 경계이고, IDE는 port 사이 전송 데이터의 경계입니다. Link encryption이 필요한지는 실제 데이터 경로·물리 접근·신뢰 끝점·device 내부 보호를 포함한 threat model로 정합니다.
 
-이 장은 **pciutils 3.13.0의 실제 decoder**와 [**CXL 3.1**](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)(Revision 3.1, Version 1.0, 2023-08-07) §11.1~11.4를 기준으로 합니다. PCIe Base Specification 원문은 대조하지 않았고, 실제 IDE link를 수립하지도 않았습니다. PCI-SIG의 [2020 IDE 공개 webinar](https://pcisig.com/sites/default/files/files/PCIe%20Security%20Webinar_Aug%202020_PDF.pdf)는 stream 개념의 배경으로만 사용하며, 당시 개발 중인 ECN 자료를 최신 normative spec으로 쓰지 않습니다.
+이 장은 **pciutils 3.13.0의 실제 decoder**와 [**CXL 3.1**](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)(Revision 3.1, Version 1.0, 2023-08-07) §11.1~11.4를 기준으로 합니다. PCIe Base Specification 원문은 대조하지 않았고, 실제 IDE link를 수립하지도 않았습니다.
 
 ## 위협 모델
 
@@ -28,17 +28,17 @@ topics: ["embedded"]
 | Active tampering | TLP·flit 수정·재전송 | AES-GCM 인증값과 protocol 규칙으로 변조 검출 |
 | Replay attack | 과거 패킷 다시 보냄 | 규격의 counter·IV·수신 상태 관리로 replay 검출 |
 
-CXL 3.1 §11.1의 security model은 lab 장비·전용 interposer·악성 extension device로 link를 들여다보고, 바꾸고, 재전송·재정렬·삭제·삽입하는 물리 공격을 위협으로 듭니다. 신뢰하던 device를 untrusted device로 바꿔 끼우는 공격도 포함합니다. 반대로 "부적절한 device 구현"으로 생기는 노출과 denial of service는 범위 밖이라고 명시합니다. Interposer를 꽂는 것 자체는 막지 못하고, 꽂힌 interposer가 traffic을 읽거나 바꾸지 못하게 할 뿐입니다.
+CXL 3.1 §11.1의 security model은 lab 장비·전용 interposer·악성 extension device로 link를 들여다보고, 바꾸고, 재전송·재정렬·삭제·삽입하는 물리 공격을 위협으로 듭니다. 신뢰하던 device를 untrusted device로 바꿔 끼우는 공격도 포함합니다. 반대로 "부적절한 device 구현"으로 생기는 노출과 denial of service는 범위 밖이라고 명시합니다. Interposer를 꽂는 것 자체는 막지 못하고, 꽂힌 interposer가 traffic을 읽지 못하게 하고, 바꾸면 검출되게 할 뿐입니다.
 
 링크 끝점 자체(host CPU, 디바이스 controller)의 *키 보호*는 *IDE의 책임 밖*입니다. 같은 절은 "host와 device 내부에서 이 key를 보호하는 메커니즘은 정의하지 않는다"고 적습니다.
 
 ## IDE의 두 모드 — Selective vs Link
 
-PCIe IDE의 두 stream은 다음과 같습니다. 보호 범위 설명은 CXL 3.1 Table 11-1과 pciutils의 register 정의(Link block은 TC별, Selective block은 RID·주소 association register를 가짐)에서 옮겼습니다.
+PCIe IDE의 두 stream은 다음과 같습니다. 구분은 CXL 3.1 Table 11-1과 pciutils의 register 정의(Link block은 TC별, Selective block은 RID·주소 association register를 가짐)에서 옮겼습니다.
 
 | Stream | 보호 범위 | 비고 |
 |------|----------|---------|
-| **Link IDE** | 인접한 두 포트 사이 링크의 TLP | traffic class(TC)별 stream |
+| **Link IDE** | 링크의 TLP. CXL.cachemem IDE에서는 물리적으로 연결된 두 CXL port 사이(§11.1) | traffic class(TC)별 stream |
 | **Selective IDE** | RID·주소 범위에 연결된 TLP | switch를 flow-through로 지나 endpoint까지 갈 수 있음 |
 
 CXL에서는 두 종류를 나눠 씁니다(CXL 3.1 §11.2, Table 11-1). *CXL.io*는 PCIe IDE를 따라 Link·Selective IDE stream을 모두 지원하고, Selective IDE stream은 CXL.io에만 적용됩니다. *CXL.cachemem IDE*는 Link IDE stream에 묶인 키만 쓰고, CXL switch는 Link IDE stream을 지원해야 합니다.
@@ -157,7 +157,7 @@ IDE는 *링크만* 보호합니다. *디바이스 안의 메모리·캐시·레�
 ## 정리
 
 - IDE는 정의된 port 사이 traffic의 기밀성·무결성·replay 보호를 구성합니다. 모든 field·device 내부가 같은 보호 범위는 아닙니다.
-- PCIe IDE는 *Link IDE*(인접 포트 사이)와 *Selective IDE*(RID·주소 범위) stream을 둡니다. CXL.cachemem IDE는 Link IDE stream의 키만 씁니다.
+- PCIe IDE는 *Link IDE*(TC별 stream)와 *Selective IDE*(RID·주소 범위) stream을 둡니다. CXL.cachemem IDE는 Link IDE stream의 키만 씁니다.
 - Capability·enable·secure 표시와 실제 경로의 인증·키·실패 처리를 구분합니다.
 - CXL.cachemem IDE 키는 *SPDM session으로 보호된 CXL_IDE_KM* 메시지로 설정됩니다. key refresh는 데이터 손실 없이 지원해야 합니다.
 - *Containment*와 *Skid* 모드가 무결성 검사와 데이터 전달 시점의 trade-off를 정합니다.

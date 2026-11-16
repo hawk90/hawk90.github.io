@@ -24,7 +24,7 @@ Confidential Computing은 *클라우드에서 호스트(hypervisor 포함) 자�
 
 | 구성 요소 | 정의 주체 | 역할 |
 |------|----|----|
-| **TDISP** | PCI-SIG (PCIe Base Specification) | PCIe device interface의 보안 상태(LOCKED·RUN·ERROR 등)를 관리. Linux v7.0에서는 VFIO/IOMMUFD가 TSM bind를 시작 |
+| **TDISP** | PCI-SIG (TDISP ECR, CXL 3.1 §11.5.1) | PCIe device interface의 보안 상태(LOCKED·RUN·ERROR 등)를 관리. Linux v7.0에서는 VFIO/IOMMUFD가 TSM bind를 시작 |
 | **TSP** | CXL Consortium (CXL 3.1 §11.5) | 직접 연결된 Type 3 메모리를 confidential computing의 신뢰 경계에 포함. IDE·TDISP와 함께 쓸 수 있으나 의존하지 않음 |
 | **SPDM** | DMTF DSP0274 | 디바이스 인증·측정·secure session ([Ch 12](/blog/embedded/embedded-security/chapter12-spdm-cma)) |
 | **IDE** | PCI-SIG, CXL | 링크 트래픽 보호 ([Ch 11](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)) |
@@ -33,7 +33,7 @@ CXL 3.1의 용어표는 TDISP를 "PCI-SIG가 정의한 TEE Device Interface Secu
 
 ## TDISP 상태
 
-TDISP의 상태 정의는 PCIe Base Specification에 있고, 이 글에서는 그 원문을 대조하지 않았습니다. 대신 [Linux v7.0 PCI sysfs ABI](https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci)의 `tsm/bound` 항목이 TDISP 상태 이름을 씁니다. ABI는 LOCKED·RUN·ERROR를 "TDISP operational state"로, UNLOCKED를 그 밖의 상태로 구분합니다.
+TDISP 원문(CXL 3.1 §11.5.1이 "PCI-SIG TEE Device Interface Security Protocol (TDISP) ECR"로 부르는 문서)은 이 글에서 대조하지 않았습니다. 대신 [Linux v7.0 PCI sysfs ABI](https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci)의 `tsm/bound` 항목이 TDISP 상태 이름을 씁니다. ABI는 LOCKED·RUN·ERROR를 "TDISP operational state"로, UNLOCKED를 그 밖의 상태로 구분합니다.
 
 | 상태 | v7.0 ABI에서의 의미 |
 |------|------|
@@ -107,7 +107,7 @@ CXL 3.1 §11.5.4.8은 ERROR 상태의 target이 모든 TVM data를 계속 보호
 
 ## TSP의 위협 모델
 
-CXL 3.1 §11.5.3.3(Table 11-19)이 꼽는 위협과 대응 중 일부입니다. 표에는 이 밖에 다른 host의 TEE 자원 접근, 한 port의 target이 다른 port로 요청을 보내는 경우도 있습니다.
+CXL 3.1 §11.5.3.3(Table 11-19)이 꼽는 위협과 대응 중 일부입니다. 표에는 이 밖에 TEE가 허가되지 않은 non-TEE data를 읽고 쓰는 경우, 다른 host의 TEE 자원 접근, 한 port의 target이 다른 port로 요청을 보내는 경우도 있습니다.
 
 | 위협 | 대응 |
 |---|------|

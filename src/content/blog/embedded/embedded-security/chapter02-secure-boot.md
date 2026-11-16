@@ -95,7 +95,7 @@ Digest를 여러 개 둘 수 있으면 키를 폐기하고 다음 키로 넘어�
 
 STM32L5 HAL([stm32l5xx-hal-driver v1.0.7 `stm32l5xx_hal_flash.h`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Inc/stm32l5xx_hal_flash.h#L278-L283))은 option byte 값을 Level 0 = `0xAA`, 0.5 = `0x55`, 1 = `0xBB`, 2 = `0xCC`로 두고, Level 2에는 Level 1·0으로 돌아갈 수 없다는 경고를 붙입니다.
 
-RDP는 debug·flash 읽기 보호이고 image 서명 검증이 아닙니다. RDP Level 2로 잠근 STM32도 flash에 들어 있는 코드가 무엇이든 그대로 실행합니다. 실행할 이미지를 검증하려면 그 위에 MCUboot 같은 서명 검증 부트로더를 따로 올려야 합니다. 이 글에서는 option byte를 바꾸지 않았습니다.
+RDP는 debug·flash 보호이고(Level 1이면 debug 연결 중 flash program·erase 불가, [`stm32l5xx_hal_flash_ex.c`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Src/stm32l5xx_hal_flash_ex.c#L846-L849)) image 서명 검증이 아닙니다. RDP Level 2로 잠근 STM32도 flash에 들어 있는 코드가 무엇이든 그대로 실행합니다. 실행할 이미지를 검증하려면 그 위에 MCUboot 같은 서명 검증 부트로더를 따로 올려야 합니다. 이 글에서는 option byte를 바꾸지 않았습니다.
 
 ## NXP HABv4 — i.MX의 산업 표준 secure boot
 

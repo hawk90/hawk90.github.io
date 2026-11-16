@@ -77,7 +77,7 @@ lspci -n -vv -s 0000:5e:00.0
 ls /sys/bus/pci/devices/0000:5e:00.0/doe_features/
 ```
 
-명령과 BDF는 조사 예이며 실제 장치에서 실행하지 않았습니다. [Ch 11](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)의 pciutils 3.13.0 fixture에서 본 것처럼 `lspci`는 DOE register(`DOECap`·`DOECtl`·`DOESta`)만 decode하고, mailbox가 어떤 protocol을 지원하는지는 보여 주지 않습니다. 지원 목록은 kernel이 DOE discovery로 얻어 `doe_features`에 적은 값으로 봅니다. 0001의 vendor ID는 PCI-SIG이지만 그 위에서 오가는 SPDM message는 DMTF 사양입니다.
+명령과 BDF는 조사 예이며 실제 장치에서 실행하지 않았습니다. [Ch 11](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)의 pciutils 3.13.0 fixture에서 본 것처럼 `lspci`는 DOE register(`DOECap`·`DOECtl`·`DOESta`)만 decode하고, mailbox가 어떤 protocol을 지원하는지는 보여 주지 않습니다. 지원 목록은 kernel이 DOE discovery로 얻어 `doe_features`에 적은 값으로 봅니다. vendor ID `0001`은 PCI-SIG입니다(Linux v7.0 `include/linux/pci_ids.h:161`의 `PCI_VENDOR_ID_PCI_SIG`). 하지만 그 위에서 오가는 SPDM message는 DMTF 사양입니다.
 
 ## CMA — Component Measurement and Authentication
 
@@ -104,7 +104,7 @@ DMTF measurement format의 block은 `DMTFSpecMeasurementValueType`의 bit 6:0으
 | 0x6 | Mutable firmware version number. 형식은 사양이 정하지 않음 |
 | 0x7 | Mutable firmware security version number. 8-byte unsigned integer 권장 |
 
-DSP0274 1.2.3 Table 38·39에 따르면 Param1 bit 0(`SignatureRequested`)을 켜면 요청에 32 B Nonce와 SlotIDParam이 붙고, Responder는 measurement log 전체에 대한 서명을 보내야 합니다. 이 bit는 Responder가 CAPABILITIES에서 `MEAS_CAP = 10b`(서명 가능)를 알렸을 때만 켤 수 있고, `01b`(서명 불가)인 장치에는 항상 0으로 보냅니다. Bit를 0으로 두면 Responder는 서명하지 말아야 하고 Nonce도 빠집니다. 이 경우 응답의 freshness와 무결성은 secure session이 대신 보장해야 합니다. SlotIDParam이 `0xF`면 인증서 chain 대신 미리 provisioning한 공개키로 서명을 확인한다는 뜻입니다.
+DSP0274 1.2.3 Table 38·39에 따르면 Param1 bit 0(`SignatureRequested`)을 켜면 요청에 32 B Nonce와 SlotIDParam이 붙고, Responder는 measurement log 전체에 대한 서명을 보내야 합니다. 이 bit는 Responder가 CAPABILITIES에서 `MEAS_CAP = 10b`(서명 가능)를 알렸을 때만 켤 수 있고, `01b`(서명 불가)인 장치에는 항상 0으로 보냅니다. Bit를 0으로 두면 Responder는 서명하지 말아야 하고 Nonce도 빠집니다. SlotIDParam이 `0xF`면 인증서 chain 대신 미리 provisioning한 공개키로 서명을 확인한다는 뜻입니다.
 
 ## DICE — Device Identifier Composition Engine
 

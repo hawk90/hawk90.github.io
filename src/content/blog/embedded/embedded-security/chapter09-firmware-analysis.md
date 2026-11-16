@@ -38,7 +38,7 @@ topics: ["embedded"]
 
 UART는 pinout·I/O 전압·ground·console 정책을 먼저 확인합니다. TX/RX/GND 이름만 보고 임의 전압의 adapter를 연결하지 않습니다. Boot log는 partition·version의 단서일 수 있지만 실제 메모리 내용이나 root 권한의 증거는 아닙니다.
 
-JTAG/SWD에 연결됐다고 flash 전체를 읽을 수 있는 것은 아닙니다. 예를 들어 STM32L5의 RDP Level 2는 debug 접근 자체를 영구히 막습니다([Ch 1](/blog/embedded/embedded-security/chapter01-threat-model)). 반대로 RDP를 낮추는 regression이나 mass erase 명령은 flash를 지우므로, 읽기 목적의 세션에서 unlock·erase 명령을 섞지 않습니다.
+JTAG/SWD에 연결됐다고 flash 전체를 읽을 수 있는 것은 아닙니다. STM32L5 HAL은 RDP Level 1에서도 JTAG·SWD debug가 연결돼 있으면 flash를 program·erase할 수 없다고 적고([`stm32l5xx_hal_flash_ex.c`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Src/stm32l5xx_hal_flash_ex.c#L846-L849)), Level 2는 Level 1·0으로 돌아갈 수 없다고 경고합니다([Ch 1](/blog/embedded/embedded-security/chapter01-threat-model)). 읽기 목적의 세션에는 unlock·erase 명령을 섞지 않습니다.
 
 ### SPI flash / eMMC / NAND
 
@@ -71,7 +71,7 @@ DECIMAL       HEXADECIMAL     ENTROPY
 
 Signature scan은 심은 gzip과 squashfs를 정확한 offset에서 찾았습니다. 두 난수 구간에는 signature가 없고 entropy 검사에서만 0.98 근처의 "rising edge"로 나타납니다. 이 구간이 암호문인지, 압축된 코드인지, 난수인지는 이 출력으로 구분되지 않습니다. 실제 제품이라면 offset과 길이를 partition table이나 boot log와 맞춰 봐야 합니다.
 
-추출(`-e`)은 root로 실행하자 거부됐습니다. v2.4.3은 "추출은 안전하지 않을 수 있는 third-party utility를 많이 쓴다"며 `--run-as=root`를 명시하라고 요구합니다. 명시하면 `_firmware.bin.extracted/squashfs-root/etc/passwd`까지 풀립니다. 신뢰할 수 없는 이미지의 추출은 이렇게 root가 아닌 사용자로, 격리된 VM 안에서 합니다.
+추출(`-e`)은 root로 실행하자 거부됐습니다. v2.4.3은 "추출은 안전하지 않을 수 있는 third-party utility를 많이 쓴다"며 `--run-as=root`를 명시하라고 요구합니다. 명시하면 `_firmware.bin.extracted/squashfs-root/etc/passwd`까지 풀립니다. 이 실행은 격리된 VM 안에서 root로 했습니다. binwalk의 메시지대로, 신뢰할 수 없는 이미지는 root가 아닌 사용자로 추출합니다.
 
 ### 추출된 rootfs의 후보 검색
 
@@ -79,7 +79,7 @@ firmwalker 같은 규칙 검색은 파일 경로와 문자열 후보를 찾는 �
 
 ### Ghidra
 
-[Ghidra 공식 repository](https://github.com/NationalSecurityAgency/ghidra)는 disassembly·decompilation·scripting을 지원합니다. ELF처럼 header가 있는 파일은 import 때 ISA와 load address를 header에서 읽습니다. Raw flash dump에는 그런 정보가 없으므로 ISA·endianness·load address를 사람이 정합니다. Cortex-M이라면 vector table이 단서입니다. [Cortex-M33 TRM](https://developer.arm.com/documentation/100230/latest)(Issue 08)은 vector table의 모든 유효 entry가 bit 0을 1로 가져야 한다고 적습니다(Thumb 상태 표시). 그래서 dump 앞부분에 홀수 주소가 좁은 범위로 몰려 있으면 vector table일 가능성이 높고, 그 주소 범위가 load address의 후보가 됩니다.
+[Ghidra 공식 repository](https://github.com/NationalSecurityAgency/ghidra)는 disassembly·decompilation·scripting을 지원합니다. ELF처럼 header가 있는 파일은 import 때 ISA와 load address를 header에서 읽습니다. Raw flash dump에는 그런 정보가 없으므로 ISA·endianness·load address를 사람이 정합니다. Cortex-M이라면 vector table이 단서입니다. [Cortex-M33 TRM](https://developer.arm.com/documentation/100230/latest)(Issue 08)은 vector table의 모든 유효 entry가 bit 0을 1로 가져야 한다고 적습니다(Thumb 상태 표시). Entry 0은 초기 SP 값이라 이 규칙의 대상이 아닙니다. Dump 앞부분에서 entry 0 다음부터 bit 0이 1인 주소가 좁은 범위로 이어지면 vector table 후보이고, 그 주소 범위가 load address의 후보가 됩니다.
 
 Decompiler의 C 비슷한 출력은 원본 소스가 아닙니다. 함수 경계·type·calling convention이 틀리면 해석도 틀릴 수 있습니다. 문자열 참조에서 비교 함수로 이어지는 call path와 실제 인증 결정을 함께 확인합니다. 문자열 `admin` 하나나 추정한 `strcmp`만으로 인증 우회를 선언하지 않습니다. 이 작업에서는 Ghidra를 실행하지 않았습니다.
 
@@ -91,7 +91,7 @@ Decompiler의 C 비슷한 출력은 원본 소스가 아닙니다. 함수 경계
 r2 -A fixture.o
 ```
 
-r2 안에서는 `afl`이 함수 목록, `pdf`가 현재 함수 disassembly, `pdc`가 pseudocode입니다. 위 명령은 실행하지 않았습니다. Debian 13(trixie)에는 `radare2` 패키지가 없어 `apt-get install radare2`가 "has no installation candidate"로 실패했기 때문입니다. [Cutter](https://cutter.re/)는 **Rizin**을 core로 쓰며 radare2 GUI가 아닙니다.
+r2 안에서는 `afl`이 함수 목록, `pdf`가 현재 함수 disassembly, `pdc`가 pseudocode입니다. 위 명령은 실행하지 않았습니다. Debian 13(trixie)에는 `radare2` 패키지가 없어 `apt-get install radare2`가 "has no installation candidate"로 실패했기 때문입니다([sources.debian.org](https://sources.debian.org/src/radare2/)도 sid만 나열합니다). [Cutter](https://cutter.re/)는 **Rizin**을 core로 쓰며 radare2 GUI가 아닙니다.
 
 ### Strings + grep — 잊지 말기
 
@@ -118,8 +118,7 @@ tokenization is not a credential
 $ file fixture.o
 fixture.o: ELF 32-bit LSB relocatable, ARM, EABI5 version 1 (SYSV), not stripped
 $ strings -a -n 8 clean.o | grep -iE "password|secret|token"
-$ echo $?
-1
+rc=1
 ```
 
 두 문구가 모두 걸렸습니다. `tokenization`은 `token` 규칙의 오탐입니다. `-O2 -g0 -DNDEBUG`로 빌드해도 전역 `const char[]`인 `diagnostic` 문구는 그대로 남습니다. `const int clean_value = 42;`만 넣은 `clean.o`에서는 grep이 아무것도 찾지 못해 exit 1이었습니다. 이 결과가 credential scanner의 탐지율이나 실제 firmware에 비밀이 없음을 증명하지는 않습니다.
@@ -156,7 +155,7 @@ Crash는 재현 입력, build·sanitizer·stack과 영향 범위를 조사할 �
 
 `NDEBUG`는 표준 `assert` 제어에 쓰이며 일반 `printf`를 자동으로 지우지 않습니다. `-g0`·strip도 코드의 문자열이나 credential을 자동 제거하지 않습니다. Release artifact 자체에서 값과 동작을 확인해야 합니다.
 
-Flash 암호화도 mode를 확인해야 합니다. 같은 [ESP32-C3 문서](https://docs.espressif.com/projects/esp-idf/en/v5.1.6/esp32c3/security/flash-encryption.html)는 Development mode에서는 평문 firmware를 새로 써 넣으면 bootloader가 하드웨어 key로 대신 암호화해 주므로 "간접적으로 flash의 평문을 읽어 낼 수 있다"고 경고하고, 이 mode를 개발 중에만 쓰라고 합니다. 양산 장치는 Release mode여야 합니다. 실행 중에는 MMU flash cache가 매핑된 영역을 투명하게 복호화합니다. 그래서 문서의 bootloader는 flash 암호화를 켤 때 Development mode에서도 `DIS_PAD_JTAG`·`DIS_USB_JTAG` eFuse를 기본으로 함께 굽고, Release mode에서는 `DIS_DOWNLOAD_MANUAL_ENCRYPT`까지 더합니다. 암호화와 debug 잠금이 한 묶음입니다.
+Flash 암호화도 mode를 확인해야 합니다. 같은 [ESP32-C3 문서](https://docs.espressif.com/projects/esp-idf/en/v5.1.6/esp32c3/security/flash-encryption.html)는 Development mode에서는 평문 firmware를 새로 써 넣으면 bootloader가 하드웨어 key로 대신 암호화해 주므로 "간접적으로 flash의 평문을 읽어 낼 수 있다"고 경고하고, 이 mode를 개발 중에만 쓰라고 합니다. 양산 장치는 Release mode여야 합니다. 실행 중에는 MMU flash cache가 매핑된 영역을 투명하게 복호화합니다. 그래서 문서의 bootloader는 flash 암호화를 켤 때 Development mode에서도 `DIS_PAD_JTAG`·`DIS_USB_JTAG` eFuse를 기본으로 함께 굽고, Release mode에서는 `DIS_DOWNLOAD_MANUAL_ENCRYPT`까지 더합니다. 기본값으로는 암호화와 debug 잠금이 함께 걸립니다.
 
 ## 정리
 
