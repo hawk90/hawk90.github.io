@@ -20,7 +20,7 @@ topics: ["embedded"]
 
 QEMU는 그 문턱을 없애 줍니다. Linux guest 입장에서는 `lspci`에도 잡히고 `/sys/bus/cxl/devices/`에도 등록되는 CXL 디바이스가 생깁니다. 대여한 장비를 반납할 걱정 없이 커널 모듈을 몇 번이고 다시 올렸다 내렸다 할 수 있는 셈입니다.
 
-이 글의 명령은 macOS(Apple M2 Pro)의 QEMU 11.1.3에서 Debian 13 `generic-amd64` guest(kernel 6.12.116, `cxl` 81)로 끝까지 돌렸습니다. macOS에는 KVM이 없어 `-enable-kvm` 대신 TCG를 썼고, 부팅에 30초 남짓 걸렸습니다. arm64 guest(`-M virt,cxl=on`)로도 시험한 결과는 아래 함정 절에 적었습니다.
+이 글의 명령은 macOS(Apple M2 Pro)의 QEMU 11.1.3에서 Debian 13 `generic-amd64` guest(kernel 6.12.116, `cxl` 81)로 끝까지 돌렸습니다. macOS에는 KVM이 없어 `-enable-kvm` 대신 TCG를 썼고, guest uptime 기준 27초쯤에 cloud-init까지 끝났습니다. arm64 guest(`-M virt,cxl=on`)로도 시험한 결과는 아래 함정 절에 적었습니다.
 
 이 글은 *환경을 세우는 레시피*입니다. QEMU의 CXL 지원 범위와 내부 동작, CEDT 테이블 구조, 4.0 기능의 구현 현황은 [CXL 4.0 Internals Ch 12](/blog/embedded/hardware/cxl/chapter12-qemu-emulation)에서 다룹니다.
 
@@ -155,7 +155,7 @@ region을 만들자 커널이 dax device를 이미 `system-ram`으로 online해 
 
 `Size of a CXL fixed memory window must be a multiple of 256MiB`와 `CXL host bridges present, but cxl=off`는 QEMU 11.1.3에서 직접 재현한 문구입니다.
 
-arm64에서도 시험했습니다. QEMU 문서의 arm/virt 예(`-M virt,gic-version=3,cxl=on` + `pxb-cxl` + `cxl-rp` + `cxl-type3`)는 TCG(`-cpu max`)에서 Debian arm64 guest가 부팅해 `mem0`까지 등록됐지만, macOS의 HVF(`-accel hvf`)에서는 firmware 출력조차 없이 멈췄습니다. region commit은 arm64 6.12 guest에서도 같은 `Failed to synchronize CPU cache state`로 실패했습니다. 그 커널 설정에는 `ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`이 없고, Linux 7.4-rc3의 `arch/arm64/Kconfig`는 이를 select합니다.
+arm64에서도 시험했습니다. QEMU 문서의 arm/virt 예(`-M virt,gic-version=3,cxl=on` + `pxb-cxl` + `cxl-rp` + `cxl-type3`)는 TCG(`-cpu max`)에서 Debian arm64 guest가 부팅해 `mem0`까지 등록됐지만, macOS의 HVF(`-accel hvf`)에서는 150초 동안 serial에 firmware 출력이 한 줄도 없었습니다(같은 image를 CXL 없이 HVF로 띄우면 16초 만에 login까지 갔습니다). region commit은 arm64 6.12 guest에서도 같은 `Failed to synchronize CPU cache state`로 실패했습니다. 그 커널 설정에는 `ARCH_HAS_CPU_CACHE_INVALIDATE_MEMREGION`이 없고, Linux 7.4-rc3의 `arch/arm64/Kconfig`는 이를 select합니다. 위의 x86 `cpu_cache_has_invalidate_memregion()` 본문도 7.4-rc3 소스에서 옮긴 것이고, 6.12 guest의 동작(hypervisor bit가 있으면 실패, 숨기면 성공)과 맞았습니다.
 
 ## 커널 모듈을 고쳐 가며 쓰기
 
