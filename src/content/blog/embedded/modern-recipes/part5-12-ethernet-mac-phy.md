@@ -37,7 +37,7 @@ ST의 STM32F417 GPIO 표(STM32CubeMX `STM32F417_gpio_v1_0.xml`)에서 Ethernet �
 
 | 신호 | 방향(MAC 기준) | 핀 |
 |---|---|---|
-| REF_CLK (50 MHz) | 입력 | PA1 |
+| REF_CLK | 입력 | PA1 |
 | CRS_DV | 입력 | PA7 |
 | RXD0, RXD1 | 입력 | PC4, PC5 |
 | TX_EN | 출력 | PB11 또는 PG11 |
@@ -71,7 +71,7 @@ lwIP는 `NO_SYS = 1`로 RTOS 없이 돌 수 있고, 그때는 raw API(callback)�
 ### 1. MDIO와 PHY 설정
 
 ```c
-#define PHY_ADDR  0u                                // LAN8742 SMR address
+#define PHY_ADDR  0u                                // board strap; ST LAN8742_Init() scans 0-31 via SMR[4:0]
 #define MDC_CR    ETH_MACMIIAR_CR_Div102            // HCLK 150-168 MHz
 
 static uint16_t mdio_read(uint8_t reg) {
@@ -90,17 +90,19 @@ static void mdio_write(uint8_t reg, uint16_t val) {
 
 void phy_init(void) {
     mdio_write(0, 0x8000);                          // BCR.SOFT_RESET
-    while (mdio_read(0) & 0x8000) { }               // self-clearing
+    while (mdio_read(0) & 0x8000) { }               // wait until SOFT_RESET reads 0
     mdio_write(0, 0x1000 | 0x0200);                 // AUTONEGO_EN | RESTART_AUTONEGO
 }
 
 int phy_link_up(void) {
-    (void)mdio_read(1);                             // first read: latched value
+    (void)mdio_read(1);                             // ST LAN8742_GetLinkState() reads BSR twice
     return (mdio_read(1) & 0x0004) != 0;            // BSR.LINK_STATUS
 }
 
 int phy_get_speed_duplex(int *speed_mbps, int *full_duplex) {
-    switch (mdio_read(31) & 0x001C) {               // PHYSCSR speed indication
+    uint16_t v = mdio_read(31);                     // PHYSCSR
+    if ((v & 0x1000) == 0) return -1;               // AUTONEGO_DONE not set yet
+    switch (v & 0x001C) {                           // speed indication
     case 0x0004: *speed_mbps = 10;  *full_duplex = 0; return 0;
     case 0x0014: *speed_mbps = 10;  *full_duplex = 1; return 0;
     case 0x0008: *speed_mbps = 100; *full_duplex = 0; return 0;
@@ -114,7 +116,7 @@ int phy_get_speed_duplex(int *speed_mbps, int *full_duplex) {
 
 ### 2. MAC과 DMA
 
-MAC 설정, descriptor ring, 송수신 buffer는 길어서 직접 쓰지 않고 STM32CubeF4 HAL의 `stm32f4xx_hal_eth.c`(`HAL_ETH_Init()`, `HAL_ETH_Start()`)를 씁니다. HAL v1.8.3의 `HAL_ETH_Init()`은 RMII 선택(`SYSCFG->PMC`), `DMABMR`의 software reset, `ETH_MACDMAConfig()`로 MAC·DMA 기본 설정을 차례로 합니다. MDC 분주는 별도 함수 `HAL_ETH_SetMDIOClockRange()`가 `HAL_RCC_GetHCLKFreq()`에 따라 `ETH_MACMIIAR_CR_Div16`~`Div102` 중 하나를 고르고, 위 1절의 `MDC_CR`은 이 함수가 168 MHz에서 고르는 값과 같습니다. lwIP와의 연결은 lwIP 저장소의 `contrib/examples/ethernetif/ethernetif.c` 틀을 채워 `low_level_output()`에서 HAL 송신을, `ethernetif_input()`에서 HAL 수신을 부르는 방식입니다.
+MAC 설정, descriptor ring, 송수신 buffer는 길어서 직접 쓰지 않고 STM32CubeF4 HAL의 `stm32f4xx_hal_eth.c`(`HAL_ETH_Init()`, `HAL_ETH_Start()`)를 씁니다. HAL v1.8.3의 `HAL_ETH_Init()`은 RMII 선택(`SYSCFG->PMC`), `DMABMR`의 software reset, `ETH_MACDMAConfig()`로 MAC·DMA 기본 설정을 차례로 합니다. MDC 분주는 별도 함수 `HAL_ETH_SetMDIOClockRange()`가 `HAL_RCC_GetHCLKFreq()`에 따라 `ETH_MACMIIAR_CR_Div16`~`Div102` 중 하나를 고르고, 위 1절의 `MDC_CR`은 이 함수가 168 MHz에서 고르는 값과 같습니다. lwIP와의 연결은 lwIP 저장소의 `contrib/examples/ethernetif/ethernetif.c` 틀을 채워 `low_level_output()`에서 HAL 송신을, `low_level_input()`에서 HAL 수신을 부르고, 틀에서 `static`인 `ethernetif_input()`을 밖으로 내어 main loop에서 부르는 방식입니다.
 
 ### 3. lwIP raw API — UDP echo
 
@@ -131,12 +133,13 @@ static void udp_echo_recv(void *arg, struct udp_pcb *upcb,
 
 void udp_echo_init(u16_t port) {
     struct udp_pcb *pcb = udp_new();
+    if (pcb == NULL) return;
     udp_bind(pcb, IP_ADDR_ANY, port);
     udp_recv(pcb, udp_echo_recv, NULL);
 }
 ```
 
-보드에서는 `lwip_init()` 뒤 `netif_add(&gnetif, ..., ethernetif_init, netif_input)`로 Ethernet netif를 붙이고, main loop에서 `ethernetif_input()`과 `sys_check_timeouts()`를 부른 다음 `udp_echo_init(5000)`을 부릅니다. echo 자체는 netif 종류와 상관없으므로 아래 host 실행에서 그대로 씁니다.
+보드에서는 `lwip_init()` 뒤 `netif_add(&gnetif, ..., ethernetif_init, netif_input)`로 Ethernet netif를 붙이고, `udp_echo_init(5000)`을 한 번 부르고, main loop에서는 `ethernetif_input()`과 `sys_check_timeouts()`를 부릅니다. echo 자체는 netif 종류와 상관없으므로 아래 host 실행에서 그대로 씁니다.
 
 ### 4. Link 감시
 
@@ -151,7 +154,7 @@ void net_poll_link(struct netif *nif) {
 }
 ```
 
-link가 올라오면 `phy_get_speed_duplex()`의 결과대로 MAC의 속도·duplex 설정(`MACCR`의 FES·DM)을 맞춰야 합니다. HAL v1.8.3에서는 `HAL_ETH_SetMACConfig()`로 바꿉니다.
+link가 올라오면 `phy_get_speed_duplex()`의 결과대로 MAC의 속도·duplex 설정(`MACCR`의 FES·DM)을 맞춰야 합니다. HAL v1.8.3의 `HAL_ETH_SetMACConfig()`는 `gState`가 READY일 때만 적용되고 `HAL_ETH_Start()` 뒤에는 STARTED라 `HAL_ERROR`를 돌려주므로, `HAL_ETH_Stop()` → `HAL_ETH_GetMACConfig()`로 읽어 Speed·DuplexMode 수정 → `HAL_ETH_SetMACConfig()` → `HAL_ETH_Start()` 순서로 바꿉니다.
 
 ## 측정 / 동작 확인
 
@@ -273,11 +276,11 @@ ST LAN8742 driver의 `LAN8742_GetLinkState()`는 BSR을 "Read Status register", 
 
 > ⚠️ PHY 속도와 MAC 설정 불일치
 
-auto-negotiation 결과가 100 Mbit/s full duplex인데 MAC이 10 Mbit/s half로 남아 있으면 frame이 깨집니다. link가 오를 때마다 PHYSCSR을 읽어 MAC을 다시 설정합니다.
+auto-negotiation 결과와 MAC의 `MACCR` FES·DM이 다르면 PHY와 MAC이 서로 다른 속도·duplex로 동작합니다. link가 오를 때마다 PHYSCSR을 읽어 MAC을 다시 설정합니다.
 
 > ⚠️ 보드마다 같은 MAC 주소
 
-같은 망에 같은 MAC 주소가 둘 있으면 ARP가 엉킵니다. 보드마다 다른 주소를 씁니다.
+보드마다 다른 MAC 주소를 씁니다.
 
 > ⚠️ recv callback에서 pbuf를 안 풂
 
