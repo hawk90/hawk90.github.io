@@ -178,7 +178,9 @@ Breakpoint 2.1, __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
 
 ### malloc 반환값을 추적하려면
 
-반환값은 함수가 *끝날 때* 생깁니다. [GDB 매뉴얼 Finish Breakpoints in Python](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Finish-Breakpoints-in-Python.html)의 `gdb.FinishBreakpoint`는 지정한 프레임이 반환하는 자리에 임시 breakpoint를 걸고 `return_value`로 반환값을 줍니다. `malloc` 진입에서 하나씩 만들었습니다.
+반환값은 함수가 *끝날 때* 생깁니다. [GDB 매뉴얼 Finish Breakpoints in Python](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Finish-Breakpoints-in-Python.html)의 `gdb.FinishBreakpoint`는 지정한 프레임이 반환하는 자리에 임시 breakpoint를 걸고 `return_value`로 반환값을 줍니다.
+
+이것을 `malloc` 진입 breakpoint의 `stop()` 안에서 만들면 안 됩니다. GDB 16.3 매뉴얼 Breakpoints In Python 절은 `stop()` 안에서 실행 상태를 바꾸거나(step, next 등), 현재 프레임을 바꾸거나, breakpoint를 "alter, add or delete"하지 말라고 적습니다. 그래서 `stop()`은 `True`를 돌려 멈추기만 하고, `FinishBreakpoint`는 정지가 끝난 뒤 불리는 `gdb.events.stop` 처리기에서 만들었습니다.
 
 ```python
 class MallocReturn(gdb.FinishBreakpoint):
@@ -196,15 +198,40 @@ class MallocReturn(gdb.FinishBreakpoint):
 
 class TraceMalloc(gdb.Breakpoint):
     def stop(self):
-        MallocReturn(int(gdb.parse_and_eval("$x0")))
-        return False
+        return True                  # 여기서는 멈추기만 한다
+
+
+def on_stop(event):
+    if not isinstance(event, gdb.BreakpointEvent):
+        return
+    if not any(isinstance(bp, TraceMalloc) for bp in event.breakpoints):
+        return
+    MallocReturn(int(gdb.parse_and_eval("$x0")))     # stop() 밖에서 생성
+
+gdb.events.stop.connect(on_stop)
 ```
 
-위 세션에서 `big`의 `malloc`에 멈춘 뒤 `TraceMalloc("malloc")`을 걸고 계속하자, 그 뒤에 일어난 할당 하나가 잡혔습니다. `printf`가 stdout 버퍼로 잡은 4096바이트입니다.
+`MallocReturn.stop()`은 값을 찍고 `False`를 돌려줄 뿐 breakpoint를 만들지 않으므로 매뉴얼의 제약에 걸리지 않습니다. 32행(`small = malloc(64)`)에 멈춘 뒤 `TraceMalloc("malloc", internal=True)`를 걸고 `continue`를 네 번 쳤습니다. `malloc` 진입마다 한 번 멈추고, 다음 `continue`에서 반환값이 찍힙니다.
 
 ```text
-malloc(4096) -> 0xaaaaaaac1350
+(gdb) python TraceMalloc("malloc", internal=True)
+(gdb) continue
+Breakpoint -5.1, __GI___libc_malloc (bytes=64) at ./malloc/malloc.c:3392
+(gdb) continue
+malloc(64) -> 0xaaaaaaac1300
+
+Breakpoint -5.1, __GI___libc_malloc (bytes=2097152) at ./malloc/malloc.c:3392
+(gdb) continue
+malloc(2097152) -> 0xfffff7bef010
+
+Breakpoint -5.1, __GI___libc_malloc (bytes=bytes@entry=1024) at ./malloc/malloc.c:3392
+(gdb) continue
+malloc(1024) -> 0xaaaaaaac1350
+3 3 3 13 0xaaaaaaac1300 0xfffff7bef010
+[Inferior 1 (process 747) exited with code 02]
 ```
+
+`small`과 `big`의 반환 주소가 프로그램이 마지막에 찍은 두 포인터와 같습니다. 세 번째 1024바이트는 `printf`가 stdout 버퍼로 잡은 할당입니다. `-5.1`이라는 음수 번호는 `internal=True`라 `info breakpoints`에는 나오지 않는 breakpoint라는 뜻입니다. 이 방식은 `malloc` 진입마다 실제로 멈추므로, 위처럼 `continue`를 직접 쳐야 다음으로 넘어갑니다.
 
 이 코드는 `malloc` 하나만 보고, `realloc`·`calloc`이나 스레드가 여럿인 경우는 다루지 않습니다. 누수 검출이 목적이라면 [Memcheck](/blog/tools/debugging/valgrind/chapter02-memcheck)나 [ASan/LSan](/blog/tools/debugging/sanitizers/chapter02-asan-ubsan)을 씁니다.
 
