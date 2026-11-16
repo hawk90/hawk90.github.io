@@ -231,7 +231,7 @@ interrupt·DMA 방식이면 `printf`가 돌아온 시점에 바이트가 아직 
 
 > ⚠️ `%f`가 빈칸
 
-위 printf 절대로 newlib-nano에서는 `-u _printf_float`를 링크 옵션에 넣습니다.
+위 printf 리다이렉트 절에서 본 대로 newlib-nano에서는 `-u _printf_float`를 링크 옵션에 넣습니다.
 
 ## 정리
 
