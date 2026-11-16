@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 이 시리즈의 첫 장에서 두 시스템의 *철학적 트레이드오프*를 다뤘습니다. 마지막 장에서는 그 트레이드오프가 *실무에서 어떤 신호로 드러나는지*, 그리고 *옮길 결심이 섰을 때 어떤 순서로 진행하는지*를 정리합니다. 이사에 비유하면, 원룸(Buildroot)에서 짐이 늘어 투룸(Yocto)으로 옮길지 고민하는 시점입니다. 짐의 양보다 *같이 사는 사람 수*가 결정을 더 크게 좌우합니다.
 
-Buildroot 쪽 사실은 **Buildroot 2026.02.3** 소스, Yocto 쪽 사실은 **openembedded-core `scarthgap` 브랜치**(commit `fc431686`, 2026-11-10)의 `meta/` 디렉터리에서 확인했습니다. 이 글은 Yocto 빌드를 직접 돌리지 않았으므로, Yocto의 빌드 시간을 숫자로 적지 않습니다.
+Buildroot 쪽 사실은 **Buildroot 2026.02.3** 소스, Yocto 쪽 사실은 **openembedded-core `scarthgap` 브랜치**(commit `fc431686`, 2026-11-10)의 `meta/` 디렉터리와 **yocto-docs `scarthgap` 브랜치**(Yocto Project 5.0 문서, commit `7a4ccf2`)의 `ref-manual`·`dev-manual`·`sdk-manual`에서 확인했습니다. 이 글은 Yocto 빌드를 직접 돌리지 않았으므로, Yocto의 빌드 시간을 숫자로 적지 않습니다.
 
 ## 언제 Buildroot의 한계가 보이는가
 
@@ -32,7 +32,7 @@ Buildroot 쪽 사실은 **Buildroot 2026.02.3** 소스, Yocto 쪽 사실은 **op
 
 **신호 3 — vendor BSP가 Yocto-only로 발표됨**
 
-NXP·TI·Xilinx 같은 SoC vendor는 BSP를 `meta-imx`·`meta-ti`·`meta-xilinx` 같은 Yocto 레이어로 배포합니다. Buildroot 본체에도 `freescale_imx8mpevk_defconfig`, `beagleplay_defconfig` 같은 보드 설정이 있지만(2026.02.3의 `configs/`는 308개), vendor가 새 chip의 커널·부트로더 fork를 레이어로만 내면 그 패치를 Buildroot 쪽으로 옮기는 일이 릴리스마다 반복됩니다.
+SoC 계열별 BSP 레이어가 OpenEmbedded Layer Index에 올라 있습니다. API로 조회하면 `meta-ti`(git.yoctoproject.org/meta-ti), `meta-xilinx`(git.yoctoproject.org/meta-xilinx), `meta-freescale`(github.com/Freescale/meta-freescale)가 나옵니다. Buildroot 본체에도 `freescale_imx8mpevk_defconfig`, `beagleplay_defconfig` 같은 보드 설정이 있지만(2026.02.3의 `configs/`는 308개), 새 chip의 커널·부트로더 fork가 레이어로만 제공되면 그 패치를 Buildroot 쪽으로 옮기는 일이 릴리스마다 반복됩니다.
 
 **신호 4 — SDK를 외부 개발자에게 배포해야 함**
 
@@ -149,7 +149,7 @@ OE는 설치된 파일을 `${PN}`, `${PN}-dev`, `${PN}-dbg` 같은 여러 패키
 
 ## defconfig → MACHINE conf
 
-Buildroot의 보드 정의는 한 줄짜리 `configs/<board>_defconfig` 파일에 *모든 옵션*이 들어 있습니다. OE의 동등물은 `meta-<layer>/conf/machine/<machine>.conf` 한 파일에 *MACHINE 특성*만 정의됩니다.
+Buildroot의 보드 정의는 `configs/<board>_defconfig` 한 파일에 *모든 옵션*이 들어 있습니다. OE의 동등물은 `meta-<layer>/conf/machine/<machine>.conf` 한 파일에 *MACHINE 특성*만 정의됩니다.
 
 ```bitbake
 # meta-myproject/conf/machine/mxc8mp.conf
@@ -157,7 +157,6 @@ Buildroot의 보드 정의는 한 줄짜리 `configs/<board>_defconfig` 파일�
 #@NAME: NXP i.MX 8M Plus EVK
 #@DESCRIPTION: Custom board based on i.MX 8M Plus
 
-require conf/machine/include/imx-base.inc
 
 DEFAULTTUNE ?= "cortexa53-crypto"
 require conf/machine/include/arm/armv8a/tune-cortexa53.inc
@@ -166,7 +165,7 @@ MACHINE_FEATURES += "pci wifi bluetooth"
 
 KERNEL_DEVICETREE = "freescale/imx8mp-mxc8mp.dtb"
 UBOOT_CONFIG ??= "sd"
-UBOOT_CONFIG[sd] = "imx8mp_mxc8mp_defconfig,sdcard"
+UBOOT_CONFIG[sd] = "imx8mp_mxc8mp_defconfig"
 
 SERIAL_CONSOLES = "115200;ttymxc1"
 
@@ -188,13 +187,12 @@ IMAGE_INSTALL += " \
     openssh \
     curl \
     python3 \
-    ${MACHINE_EXTRA_INSTALL} \
 "
 
 IMAGE_FEATURES += "ssh-server-openssh"
 ```
 
-여기에 보드별로만 다른 패키지가 있다면 `MACHINE_EXTRA_INSTALL`을 보드 conf 안에서 다르게 정의하면 됩니다. *분기*가 *recipe 본문*이 아닌 *MACHINE 변수*로 격리됩니다.
+보드별로만 다른 패키지는 MACHINE conf의 `MACHINE_EXTRA_RDEPENDS`(필수)·`MACHINE_EXTRA_RRECOMMENDS`(선택)에 적습니다. 다만 `ref-manual/variables.rst`는 이 변수가 `packagegroup-base` 기반 이미지에만 적용되고 `core-image-minimal`에는 적용되지 않는다고 적습니다. 그런 이미지라면 보드별 image recipe를 따로 두거나 `IMAGE_INSTALL:append:<machine>` 같은 override로 나눕니다. 어느 쪽이든 *분기*가 *패키지 recipe 본문*이 아니라 MACHINE·image 쪽에 모입니다.
 
 ## 빌드 시간 비교
 
@@ -252,7 +250,7 @@ Yocto와 비교하려면 같은 호스트에서 같은 패키지 집합으로 �
 
 이 시리즈를 졸업한 독자가 다음에 자연스럽게 향할 곳이 있습니다.
 
-- **Yocto/OpenEmbedded 학습** — 가장 직접적인 후속. 시작점은 *Yocto Mega-Manual*과 *OpenEmbedded Reference Manual*입니다.
+- **Yocto/OpenEmbedded 학습** — 가장 직접적인 후속. 시작점은 *Yocto Mega-Manual*과 *Yocto Project Reference Manual*입니다.
 - **Linux from Scratch (LFS)** — 빌드 시스템에 *의존하지 않고* 같은 시스템을 *손으로* 조립해 보는 경험. Buildroot가 *무엇을 자동화하는지* 가장 깊게 이해할 수 있습니다.
 - **BSP Development 시리즈** — 빌드 시스템 *아래*의 BSP 계층. U-Boot, device tree, kernel BSP를 다룹니다.
 - **Embedded C++ for Real Systems** — userland 쪽으로 시선을 옮길 때.
@@ -278,5 +276,5 @@ Yocto와 비교하려면 같은 호스트에서 같은 패키지 집합으로 �
 - [Ch 14: Caching — ccache·per-package directories·dl 공유](/blog/embedded/buildroot/chapter14-build-caching) — Buildroot의 caching과 Yocto sstate의 구조적 차이
 - [BSP Development Ch 16: Buildroot/Yocto와 BSP — rootfs 통합](/blog/embedded/bsp/chapter16-rootfs) — BSP 관점에서 빌드 시스템 선택
 - [원문 — Yocto Mega-Manual](https://docs.yoctoproject.org/singleindex.html)
-- [원문 — OpenEmbedded Reference Manual](https://docs.openembedded.org/docs/ref-manual/index.html)
+- [원문 — Yocto Project 5.0 Reference Manual](https://docs.yoctoproject.org/5.0/ref-manual/index.html)
 - [원문 — Buildroot Manual](https://buildroot.org/downloads/manual/manual.html)
