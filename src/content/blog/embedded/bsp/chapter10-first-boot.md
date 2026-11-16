@@ -126,7 +126,7 @@ Starting kernel ...
 
 `earlycon`에 인자를 주지 않았는데도 PL011 주소를 찾은 것은 DT `chosen/stdout-path`를 따랐기 때문입니다(Ch 3). i.MX 8M Plus EVK의 U-Boot 환경은 `earlycon=ec_imx6q,0x30890000,115200`처럼 주소를 직접 줍니다(Ch 6).
 
-earlycon이 없으면 어떻게 되는지도 돌려 봤습니다. `console=ttyS0`만 주고(QEMU virt의 UART는 `ttyAMA0`) 부팅하면 `Starting kernel ...` 뒤로 30초 동안 한 글자도 나오지 않았습니다. 커널은 돌고 있어도 보이는 콘솔이 없는 상태입니다.
+earlycon이 없으면 어떻게 되는지도 돌려 봤습니다. `console=ttyS0`만 주고(QEMU virt의 UART는 `ttyAMA0`) 부팅하면 `Starting kernel ...`(QEMU 시작 후 3.1초) 뒤로, 실행을 끊은 30.4초까지 약 27초 동안 한 글자도 나오지 않았습니다. 커널은 돌고 있어도 보이는 콘솔이 없는 상태입니다.
 
 ## 단계 6 — start_kernel과 driver probe
 
@@ -139,7 +139,7 @@ earlycon이 없으면 어떻게 되는지도 돌려 봤습니다. `console=ttyS0
 [    0.458936]  vda: vda1 vda15
 ```
 
-SMP bring-up(0.051~0.088초)은 이 사이에 있습니다(Ch 9).
+SMP bring-up(이 실행에서 0.048~0.059초)은 이보다 앞, 정식 콘솔로 넘어가기 전에 끝납니다(Ch 9).
 
 ## 단계 7 — Rootfs mount
 
@@ -220,7 +220,7 @@ TCG 에뮬레이션에서 userspace가 11초 넘게 걸렸고, 그중 디스크 
 ## 정리
 
 - 체인은 BootROM(QEMU에서는 BL1) → SPL/BL2 → BL31 → U-Boot → 커널 → init → systemd이고, 단계마다 고유한 첫 줄이 있습니다.
-- QEMU TCG에서 커널 첫 printk부터 `Run /sbin/init`까지 0.76초, systemd `multi-user.target`까지 커널 시각 기준 약 11초가 더 걸렸습니다.
+- QEMU TCG에서 커널 첫 printk부터 `Run /sbin/init`까지 0.76초, systemd `multi-user.target`까지 호스트 시각으로 약 11.6초가 더 걸렸습니다(`systemd-analyze`의 userspace는 11.435 s).
 - earlycon은 DT `stdout-path`를 따라 인자 없이도 동작했고, 없을 때는 `Starting kernel ...` 뒤가 비었습니다.
 - 마지막 줄이 무엇이냐가 디버깅의 첫 질문입니다.
 

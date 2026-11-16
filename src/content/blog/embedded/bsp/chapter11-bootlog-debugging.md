@@ -45,7 +45,7 @@ Starting kernel ...
 [chain-run] stop-pattern NOT matched after 30.4s wall
 ```
 
-30초 동안 한 글자도 없었습니다. 커널은 돌고 있지만 출력할 콘솔이 없는 상태입니다. 첫 의심은 earlycon입니다. 인자 없이 `earlycon`만 주면 DT의 `stdout-path`를 따르고(`kernel-parameters.txt:1256`), Ch 10의 실행에서는 `earlycon: pl11 at MMIO 0x0000000009000000`이 찍혔습니다. 주소를 직접 줄 때의 이름은 UART 드라이버가 정합니다. PL011은 `pl011,<addr>`(1283행), i.MX는 `ec_imx6q,<addr>`(1359행, `drivers/tty/serial/imx_earlycon.c:45`)입니다.
+`Starting kernel ...`(QEMU 시작 후 3.1초) 뒤로 약 27초 동안 한 글자도 없었습니다. 커널은 돌고 있지만 출력할 콘솔이 없는 상태입니다. 첫 의심은 earlycon입니다. 인자 없이 `earlycon`만 주면 DT의 `stdout-path`를 따르고(`kernel-parameters.txt:1256`), Ch 10의 실행에서는 `earlycon: pl11 at MMIO 0x0000000009000000`이 찍혔습니다. 주소를 직접 줄 때의 이름은 UART 드라이버가 정합니다. PL011은 `pl011,<addr>`(1283행), i.MX는 `ec_imx6q,<addr>`(1359행, `drivers/tty/serial/imx_earlycon.c:45`)입니다.
 
 ```text
 earlycon=ec_imx6q,0x30890000,115200
@@ -59,7 +59,7 @@ DT의 PSCI `method`가 firmware와 다르면 커널은 첫 PSCI 호출에서 죽
 
 ### 패턴 2d — driver probe에서 멈춤
 
-특정 장치의 probe가 끝나지 않으면 그 다음 줄이 나오지 않습니다. 어느 initcall에서 멈췄는지는 `initcall_debug`로 봅니다. 이 출력은 debug 레벨이라 `ignore_loglevel`도 함께 줘야 콘솔에 나옵니다. `initcall_debug`만 줬을 때는 `calling` 줄이 1개였고, `ignore_loglevel`을 더하니 1,801개가 됐습니다.
+특정 장치의 probe가 끝나지 않으면 그 다음 줄이 나오지 않습니다. 어느 initcall에서 멈췄는지는 `initcall_debug`로 봅니다. 이 출력은 debug 레벨이라 `ignore_loglevel`도 함께 줘야 콘솔에 나옵니다. 같은 커널을 `initcall_debug`만 주고 부팅했을 때 콘솔의 `calling` 줄은 1개였고, `ignore_loglevel`을 더하니 1,801개가 됐습니다. initcall 로그가 `printk(KERN_DEBUG "calling  %pS @ %i\n", ...)`로 찍히기 때문입니다(`init/main.c:1215`, `:1225`).
 
 ```text
 [    0.283749] calling  of_platform_default_populate_init+0x0/0x118 @ 1

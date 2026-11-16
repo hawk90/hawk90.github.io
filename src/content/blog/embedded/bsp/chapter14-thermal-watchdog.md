@@ -225,7 +225,7 @@ RebootWatchdogSec=10min
 WatchdogSec=10s
 ```
 
-Debian 13의 `systemd-system.conf(5)`는 `RuntimeWatchdogSec=`가 0이 아니면 하드웨어 watchdog을 그 timeout으로 설정하고, systemd가 "at least once in half the specified timeout interval" 신호를 보낸다고 적습니다. 옛 이름 `ShutdownWatchdogSec=`는 같은 man page에서 `RebootWatchdogSec=`로 나옵니다. 위 guest의 기본값은 `systemctl show`로 `RuntimeWatchdogUSec=0`, `RebootWatchdogUSec=10min`이었습니다. 즉 Debian 기본 설정에서는 systemd가 런타임 watchdog을 잡지 않습니다. 서비스 단위의 `WatchdogSec`은 그 서비스가 `sd_notify`로 신호를 보내야 하는 주기입니다.
+Debian 13의 `systemd-system.conf(5)`는 `RuntimeWatchdogSec=`가 0이 아니면 하드웨어 watchdog을 그 timeout으로 설정하고, systemd가 "at least once in half the specified timeout interval" 신호를 보낸다고 적습니다. 위 guest의 기본값은 `systemctl show`로 `RuntimeWatchdogUSec=0`, `RebootWatchdogUSec=10min`이었습니다. 즉 Debian 기본 설정에서는 systemd가 런타임 watchdog을 잡지 않습니다. 서비스 단위의 `WatchdogSec`은 그 서비스가 `sd_notify`로 신호를 보내야 하는 주기입니다.
 
 ```c
 #include <systemd/sd-daemon.h>
@@ -255,7 +255,7 @@ i.MX 8M Plus EVK의 watchdog 노드입니다(`imx8mp-evk.dts:794-799`). `timeout
 };
 ```
 
-`fsl,ext-reset-output`(binding `watchdog/fsl-imx-wdt.yaml:51-54`)이 있으면 watchdog이 WDOG_B 신호를 내보내 외부 reset을 겁니다. EVK는 이 신호로 PMIC를 거쳐 보드 전체를 reset합니다. Ch 7의 TF-A `imx_system_reset()`이 `IMX_WDOG_B_RESET`에 따라 `imx_wdog_restart(true/false)`를 고르던 것과 같은 배선 문제입니다.
+`fsl,ext-reset-output`(binding `watchdog/fsl-imx-wdt.yaml:51-54`)이 있으면 watchdog이 WDOG_B 신호를 내보내 외부 reset을 겁니다. Ch 7의 TF-A `imx_system_reset()`이 `IMX_WDOG_B_RESET`에 따라 `imx_wdog_restart(true/false)`를 고르던 것과 같은 배선 문제입니다.
 
 ### boot-time watchdog
 

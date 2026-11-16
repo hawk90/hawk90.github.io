@@ -311,7 +311,7 @@ module_platform_driver(mychip_driver);
 `remove` 콜백이 없습니다. `devm_clk_get_enabled()`가 클록을 켠 채로 돌려주고 장치가 떨어질 때 자동으로 끄므로, 예전 골격처럼 `remove`에서 `clk_disable_unprepare()`를 부를 일이 없어졌습니다. 예전 골격의 `static int mychip_remove(...)`을 그대로 6.12에 넣으면 컴파일이 실패합니다. 6.12의 `struct platform_driver`에서 `remove`는 `void (*remove)(struct platform_device *);`이기 때문입니다(`include/linux/platform_device.h:245`). Debian 13 guest에서 커널 헤더로 두 판을 빌드한 결과입니다.
 
 ```text
-/root/mychip/mychip_old.c:55:19: error: initialization of 'void (*)(struct platform_device *)' from incompatible pointer type 'int (*)(struct platform_device *)' [-Wincompatible-pointer-types]
+/root/mychip/mychip_old.c:55:19: error: initialization of ‘void (*)(struct platform_device *)’ from incompatible pointer type ‘int (*)(struct platform_device *)’ [-Wincompatible-pointer-types]
    55 |         .remove = mychip_remove,
       |                   ^~~~~~~~~~~~~
 ```

@@ -131,7 +131,7 @@ pm_runtime_get(dev);         /* usage count 증가, resume은 비동기 요청 (
 readl(base + DATA_REG);
 
 /* 사용 끝 */
-pm_runtime_put(dev);         /* idle 카운트 감소 */
+pm_runtime_put(dev);         /* usage count 감소, 0이면 idle 확인을 비동기 요청 */
 /* 또는 */
 pm_runtime_put_autosuspend(dev);  /* delay 후 suspend */
 ```
@@ -148,12 +148,15 @@ static int mychip_probe(struct platform_device *pdev)
     return 0;
 }
 
+/* 앞의 DEFINE_SIMPLE_DEV_PM_OPS 대신 이 정의를 씁니다 */
 static const struct dev_pm_ops mychip_pm_ops = {
-    SET_SYSTEM_SLEEP_PM_OPS(mychip_suspend, mychip_resume)
-    SET_RUNTIME_PM_OPS(mychip_runtime_suspend,
-                        mychip_runtime_resume, NULL)
+    SYSTEM_SLEEP_PM_OPS(mychip_suspend, mychip_resume)
+    RUNTIME_PM_OPS(mychip_runtime_suspend, mychip_runtime_resume, NULL)
 };
+/* .pm = pm_ptr(&mychip_pm_ops) */
 ```
+
+system sleep과 runtime PM을 함께 쓸 때는 `SYSTEM_SLEEP_PM_OPS`(`include/linux/pm.h:312`)와 `RUNTIME_PM_OPS`(336행)로 한 `dev_pm_ops`를 만들고, `.pm`에는 `pm_ptr()`(475행)를 씁니다.
 
 확인:
 
@@ -297,7 +300,7 @@ PM 동작이 실제로 절감으로 이어지는지는 보드 입력 전류로�
 
 ## 흔한 실수
 
-- **regulator-always-on 남발**: binding의 정의는 "regulator should never be disabled"입니다(`regulator.yaml:37-38`). EVK도 BUCK1·BUCK2에만 씁니다.
+- **regulator-always-on 남발**: binding의 정의는 "regulator should never be disabled"입니다(`regulator.yaml:37-38`). EVK는 BUCK1·2·4·5·6과 LDO1·3·5에 씁니다(`imx8mp-evk.dts:465-525`). 꺼도 되는 레일까지 붙이지 않았는지 회로도와 대조합니다.
 - **runtime PM 미사용**: 드라이버가 `pm_runtime_*`를 부르지 않으면 장치가 runtime suspend에 들어가지 않습니다.
 - **wakeup source 미설정**: `power/wakeup`이 `disabled`인 장치는 시스템을 깨우지 못합니다.
 - **OPP table 누락**: guest처럼 `cpufreq` 디렉터리 자체가 생기지 않습니다.
