@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-self-balancing robot, 짐벌, 기울기 센서처럼 자세(roll·pitch)를 알아야 하는 곳입니다. IMU는 가속도와 각속도를 내고, MCU는 이를 일정한 주기로 읽어 자세로 바꿉니다.
+self-balancing robot, 짐벌, 기울기 센서처럼 자세(roll·pitch)를 알아야 하는 곳에 씁니다. IMU는 가속도와 각속도를 내고, MCU는 이를 일정한 주기로 읽어 자세로 바꿉니다.
 
 이 글은 InvenSense MPU-6050(3축 accel + 3축 gyro, I2C)을 STM32F407의 I2C1로 읽고, Data Ready 인터럽트로 주기를 맞추고, complementary filter로 roll·pitch를 만듭니다. register 값은 MPU-6000/MPU-6050 Register Map RM-MPU-6000A-00 Revision 4.0과 Product Specification PS-MPU-6000A-00 Revision 3.1에서 가져왔습니다. MCU 쪽 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall -Wextra` 경고 없이 빌드되고, filter는 host에서 합성 신호로 돌려 결과를 확인했습니다. 센서로 한 측정은 없습니다.
 
@@ -63,7 +63,7 @@ Gyroscope Output Rate는 "8kHz when the DLPF is disabled (DLPF_CFG = 0 or 7), an
 | 3 | 44 | 4.9 | 42 | 4.8 | 1 kHz |
 | 5 | 10 | 13.8 | 10 | 13.4 | 1 kHz |
 
-이 글은 DLPF_CFG = 3, SMPLRT_DIV = 9로 1 kHz / (1 + 9) = 100 Hz입니다. 대역을 낮추면 진동 성분이 줄지만 표의 delay만큼 값이 늦게 나옵니다.
+이 글은 DLPF_CFG = 3, SMPLRT_DIV = 9로 sample rate를 1 kHz / (1 + 9) = 100 Hz에 맞춥니다. 대역을 낮추면 진동 성분이 줄지만 표의 delay만큼 값이 늦게 나옵니다.
 
 ### Complementary filter의 시정수
 
@@ -327,8 +327,8 @@ gyro만 적분하면 bias가 시간에 비례해 쌓입니다. host 실행에서
 ## 정리
 
 - MPU-6050은 **reset 후 SLEEP**(PWR_MGMT_1 = 0x40), 0x01로 깨우고 gyro PLL clock을 고릅니다.
-- **DLPF_CFG = 3, SMPLRT_DIV = 9 → 100 Hz**, ±4 g는 8192 LSB/g, ±500 °/s는 65.5 LSB/(°/s).
-- **0x3B부터 14 byte burst**, 400 kHz에서 382.5 µs.
+- **DLPF_CFG = 3, SMPLRT_DIV = 9 → 100 Hz**이고, ±4 g는 8192 LSB/g, ±500 °/s는 65.5 LSB/(°/s)입니다.
+- **0x3B부터 14 byte를 burst**로 읽고, 400 kHz에서 382.5 µs가 걸립니다.
 - Data Ready는 **INT_PIN_CFG = 0x30**(latch + clear on any read)으로 EXTI에 맞춥니다.
 - complementary filter의 **τ = α·dt/(1 − α)**, gyro bias b는 b·τ의 정상 상태 오차로 남습니다.
 
