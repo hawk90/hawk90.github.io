@@ -30,7 +30,7 @@ UART에서 1 KB를 받는 일만 해도 115200 baud 8N1에서 88.9 ms가 걸립�
 | SRAM | data buffer 위치 |
 | Peripheral | source 또는 destination |
 
-`stm32f407xx.h`는 `DMA1_Stream0`~`DMA1_Stream7`, `DMA2_Stream0`~`DMA2_Stream7`을 정의하고, 각 stream의 `CR`에서 3 bit `CHSEL`(bit 27:25)로 channel 0~7 중 하나를 고릅니다. 어느 peripheral이 어느 stream·channel인지는 reference manual RM0090의 DMA request 표에 있는데, 이 글은 그 표를 열어 보지 못했으므로 아래 예제의 stream·channel은 각각 출처를 단 ST 예제에서 가져왔습니다.
+`stm32f407xx.h`는 `DMA1_Stream0`~`DMA1_Stream7`, `DMA2_Stream0`~`DMA2_Stream7`을 정의하고, 각 stream의 `CR`에서 3 bit `CHSEL`(bit 27:25)로 channel 0~7 중 하나를 고릅니다. 어느 peripheral이 어느 stream·channel인지는 RM0090 Rev 22(st.com이 응답하지 않아 [stm32.dirba.io](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/)의 본문 판으로 확인) Table 43(DMA1)·Table 44(DMA2) request mapping에 있습니다. 아래 예제의 stream·channel은 출처를 단 ST 예제에서 가져왔고, Table 44와 맞습니다(USART1_RX = DMA2 channel 4의 stream 2·5).
 
 ### Transfer 모드 세 가지
 
