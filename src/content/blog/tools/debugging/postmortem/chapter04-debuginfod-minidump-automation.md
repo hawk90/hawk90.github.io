@@ -155,7 +155,7 @@ Download failed: Invalid argument.  Continuing without source file ./nptl/./nptl
 
 Ch 3의 패턴 5에서 `??`였던 프레임이 `__assert_fail_base`이고, `#0`은 `__pthread_kill_implementation`이었습니다. 소스 파일 요청은 `debuginfod.debian.net`에서 `Invalid argument`로 실패했고, 줄 번호까지만 나왔습니다.
 
-첫 실행은 6개 모듈(vDSO, ld.so, libm, libc, libgcc_s, libstdc++)의 debuginfo 17 MB를 받느라 63초 걸렸고, 같은 명령을 다시 돌리자 1.3초에 끝났습니다. 첫 실행 시간은 네트워크 상태를 따르므로, 다른 날 같은 명령은 144초가 걸리기도 했습니다. GDB 매뉴얼의 [Debuginfod Settings](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debuginfod-Settings.html)에 따르면 대화형 기본값은 `ask`입니다. `.gdbinit`에 `set debuginfod enabled on`을 넣는 방법도 있지만, `-nx`로 부르는 자동화에서는 `-iex`가 확실합니다.
+첫 실행은 6개 모듈(vDSO, ld.so, libm, libc, libgcc_s, libstdc++)의 debuginfo 17 MB를 받느라 63초 걸렸고, 같은 명령을 다시 돌리자 1.3초에 끝났습니다. 첫 실행 시간은 내려받는 양과 네트워크 상태를 따릅니다. GDB 매뉴얼의 [Debuginfod Settings](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Debuginfod-Settings.html)에 따르면 대화형 기본값은 `ask`입니다. `.gdbinit`에 `set debuginfod enabled on`을 넣는 방법도 있지만, `-nx`로 부르는 자동화에서는 `-iex`가 확실합니다.
 
 ### 캐시
 
@@ -508,7 +508,7 @@ GitHub Actions의 Linux runner는 비밀번호 없는 `sudo`를 씁니다([GitHu
     done
 ```
 
-GitHub 문서는 `always()` 대신 `!cancelled()`를 권장합니다. 테스트가 실패해도 분석 step은 돌고, workflow는 앞 step의 실패로 실패 상태가 됩니다. 두 step의 `run:` 내용을 VM에서 step마다 별도 `bash -e`로 같은 순서로 돌려 확인했습니다. `test_runner`는 Ch 3 패턴 1의 `handle_null(nullptr)`만 부르는 작은 프로그램이고, VM에는 `sudo`가 없어 root 셸에서 `sudo`를 그대로 넘기는 함수로 대신했습니다. minicoredumper 파이프가 걸려 있던 VM에서도 패턴을 바꾼 뒤 `core.test_runner.13839`가 작업 디렉터리에 생겼습니다. 첫 step은 종료 코드 139로 실패했고, 분석 step은 `#0 handle_null (req=0x0) at /root/c4/test_runner.cpp:8`을 찍고 0으로 끝났습니다.
+GitHub 문서는 `always()` 대신 `!cancelled()`를 권장합니다. 테스트가 실패해도 분석 step은 돌고, workflow는 앞 step의 실패로 실패 상태가 됩니다. 두 step의 `run:` 내용을 VM에서 step마다 별도 `bash -e`로 같은 순서로 돌려 확인했습니다. `test_runner`는 Ch 3 패턴 1의 `handle_null(nullptr)`만 부르는 작은 프로그램이고, VM에는 `sudo`가 없어 root 셸에서 `sudo`를 그대로 넘기는 함수로 대신했습니다. minicoredumper 파이프가 걸려 있던 VM에서도 패턴을 바꾼 뒤 `core.test_runner.13839`가 작업 디렉터리에 생겼습니다. 첫 step은 종료 코드 139로 실패했고, 분석 step은 `#0  0x0000aaaac6cc0778 in handle_null (req=0x0) at /root/c4/test_runner.cpp:8`을 찍고 0으로 끝났습니다.
 
 ### Production
 
