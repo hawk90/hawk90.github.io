@@ -191,7 +191,7 @@ void main() {
 }
 ```
 
-`OES_EGL_image_external` 명세는 "If the source image is stored in YUV (or some other basis) then the YUV values will be transformed to RGB values"라고 적고, 변환 parameter(color matrix 등)는 EGLImage에서 가져오며 변환 시점은 구현이 정한다고 합니다. 그래서 YUV→RGB 변환을 shader에 직접 쓸 필요가 없습니다. 반대로 NV12 EGLImage를 `GL_TEXTURE_2D`·`sampler2D`로 쓰는 것은 이 경로가 아닙니다.
+`OES_EGL_image_external` 명세는 "If the source image is stored in YUV (or some other basis) then the YUV values will be transformed to RGB values"라고 적고, 변환 parameter(color matrix 등)는 EGLImage에서 가져오며 변환 시점은 구현이 정한다고 합니다. 그래서 YUV→RGB 변환을 shader에 직접 쓸 필요가 없습니다. NV12 EGLImage를 `GL_TEXTURE_2D`·`sampler2D`로 받으면 이 자동 변환을 쓸 수 없습니다.
 
 ### CUDA — Jetson의 EGLImage 등록
 
