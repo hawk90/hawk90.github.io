@@ -225,6 +225,17 @@ static const uint32_t can_btr_1m =
     | ((CAN_SJW   - 1u) << CAN_BTR_SJW_Pos);   /* = 0x011A0002 */
 ```
 
+상수가 실제로 0x011A0002가 되는지는 `cmsis_device_f4` 헤더로 빌드해 확인했습니다. 상수를 돌려주는 함수 하나를 붙여 `arm-none-eabi-gcc` 16.2.0 `-O2`로 컴파일하면 literal pool에 그 값이 그대로 들어갑니다.
+
+```text
+00000000 <get_btr>:
+   0:	4800      	ldr	r0, [pc, #0]	@ (4 <get_btr+0x4>)
+   2:	4770      	bx	lr
+   4:	011a0002 	.word	0x011a0002
+```
+
+위 「42 MHz에서 가능한 비트 구성」 표도 같은 조건(PHASE_SEG2 ≥ 2, tseg1 ≤ 16, SJW = min(4, PHASE_SEG1), Hartwich 4절의 df 두 조건, 고정 지연 500 ns)으로 모든 분할을 나열하는 Python 스크립트로 다시 만들어 여섯 행이 그대로 나오는 것을 확인했습니다. 스크립트는 PROP_SEG가 같은 714 ns에서 df가 더 작은 2×21 · 15+1+4(±0.186%)도 함께 내놓는데, 같은 시간에 df가 큰 3×14 · 10+1+2에 밀리므로 표에서는 뺐습니다.
+
 이 설정의 sample point는 6/7 ≈ 85.7%(857 ns)이고 PROP_SEG 선은 643 ns입니다. 40 m를 대 보면 기준선 max 왕복 900 ns와 LOOP1 max 870 ns는 sample point 선부터 넘습니다. 컨트롤러 지연을 한 번 센 LOOP1 max 795 ns와 typ 왕복 720 ns(LOOP1 typ 700 ns)는 sample point 선은 통과하지만 PROP_SEG 선을 넘습니다. 판정은 실패입니다. 이 값을 init mode에서 `CAN1->BTR`에 쓰는 순서와 filter·송신 코드는 [5-10: CAN 통신 구현](/blog/embedded/modern-recipes/part5-10-can-communication)에 있습니다.
 
 ## 보드에서 확인하는 순서
