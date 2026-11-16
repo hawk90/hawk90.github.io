@@ -297,11 +297,11 @@ xEventGroupWaitBits(eg, BIT, pdFALSE, ...);   /* clear 안 함 */
 
 ```c
 xEventGroupSetBits(eg, B);
-/* another task may clear it here */
+/* a task that is not waiting yet misses B */
 xEventGroupClearBits(eg, B);
 ```
 
-set과 clear가 서로 다른 task에서 일어나면, 기다리던 task가 깨어나기 전에 bit가 지워져 event를 놓칠 수 있습니다. 한 bit를 지우는 쪽은 한 곳으로 정합니다.
+이미 `xEventGroupWaitBits()`에서 막혀 있던 task는 놓치지 않습니다. `xEventGroupSetBits()`가 그 순간의 bit를 기다리던 task의 event list item에 적어 깨우고(`event_groups.c` 626행 `vTaskRemoveFromUnorderedEventList( pxListItem, pxEventBits->uxEventBits | eventUNBLOCKED_DUE_TO_BIT_SET )`), 깨어난 task는 그 값을 읽기 때문입니다(265–267행). 놓치는 쪽은 set과 clear 사이에 아직 wait를 부르지 않은 task입니다. 그래서 한 bit를 지우는 쪽은 한 곳으로 정합니다.
 
 > ISR에서 직접 `SetBits` 사용
 

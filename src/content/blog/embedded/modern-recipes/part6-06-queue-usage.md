@@ -235,7 +235,7 @@ item  64 B: heap  4184 B for 64 slots, 20000 send+receive pairs took 442 ticks
 item 256 B: heap 16472 B for 64 slots, 20000 send+receive pairs took 1426 ticks
 ```
 
-heap은 64 × item 크기에 queue 구조체와 heap_4 header를 더한 값입니다(4 B: 256 + 88 = 344). 시간은 QEMU icount의 명령 수 기반 가상 시간이라 보드의 시간이 아니고, 이 harness의 `memcpy`는 한 byte씩 복사하므로 word 단위로 복사하는 C 라이브러리보다 크기에 따른 증가가 가파릅니다. 그래도 item 크기가 커질수록 send+receive 비용이 복사량에 따라 늘어나는 모양은 그대로이고, 4 B와 256 B 사이가 약 10.7배였습니다.
+heap은 64 × item 크기에 queue 구조체와 heap_4 header를 더한 값입니다(4 B: 256 + 88 = 344). 시간은 QEMU icount의 명령 수 기반 가상 시간이라 보드의 시간이 아니고, 이 harness의 `memcpy`는 한 byte씩 복사하므로, 여기서 본 크기에 따른 증가율은 이 `memcpy`의 것이고 C 라이브러리의 `memcpy`로는 다시 재야 합니다. 그래도 item 크기가 커질수록 send+receive 비용이 복사량에 따라 늘어나는 모양은 그대로이고, 4 B와 256 B 사이가 약 10.7배였습니다.
 
 ### create와 send의 크기가 다를 때
 
@@ -271,8 +271,9 @@ queue는 만들 때 정한 `uxItemSize`(4 B)만 복사하므로 12 B 구조체�
 ```c
 void send_msg(void) {
     char buf[64];               /* stack */
+    char *p = buf;
     sprintf(buf, "hello");
-    xQueueSend(q, &buf, 0);     /* receiver가 받기 전에 buf 소멸 */
+    xQueueSend(q, &p, 0);       /* receiver가 받기 전에 buf 소멸 */
 }
 ```
 
@@ -307,7 +308,7 @@ consumer가 멈추면 producer도 queue가 찬 시점에 영원히 멈춥니다.
 
 ## 정리
 
-- Queue는 send·receive 때 **item 크기만큼 memcpy**합니다. 위 측정에서 4 B → 256 B로 비용이 약 10.7배, heap이 344 → 16,472 B가 되었습니다.
+- Queue는 send·receive 때 **item 크기만큼 memcpy**합니다. 위 측정(byte 단위 memcpy harness)에서 4 B → 256 B로 비용이 약 10.7배, heap이 344 → 16,472 B가 되었습니다.
 - 큰 record는 by-pointer와 pool로 보냅니다. 이때 buffer의 수명과 pool 고갈을 코드가 지켜야 합니다.
 - ISR은 `xQueueSendFromISR`과 `portYIELD_FROM_ISR`을 함께 씁니다.
 - Backpressure 정책(block, drop, replace)을 코드 단위로 명시합니다.
@@ -321,5 +322,5 @@ consumer가 멈추면 producer도 queue가 찬 시점에 영원히 멈춥니다.
 - [PRTOS 1-09: Queues](/blog/embedded/rtos/practical-internals/part1-09-queues)
 - [PRTOS 3-07: Queue Implementation](/blog/embedded/rtos/practical-internals/part3-07-queue-impl)
 - [PRTOS 3-11: Stream/Message Buffer](/blog/embedded/rtos/practical-internals/part3-11-stream-message-buffer)
-- [2-02: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
+- [9-01: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)
 - [6-07: Event Group](/blog/embedded/modern-recipes/part6-07-event-group)

@@ -255,7 +255,7 @@ void cb(TimerHandle_t t) {
 
 ```c
 void cb(TimerHandle_t t) {
-    flash_write(buf, 4096);   /* 수십 ms — 다음 callback 늦어짐 */
+    flash_write(buf, 4096);   /* 다음 callback 늦어짐 */
 }
 ```
 
