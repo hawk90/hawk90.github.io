@@ -135,7 +135,7 @@ CXL.cache와 CXL.mem은 *credit 기반 흐름 제어*를 씁니다. CXL 1.1 규�
 | 필요량 근처 | 링크가 포화합니다. 여기가 무릎입니다 |
 | 필요량 초과 | 대역폭은 더 안 늘고, 요청이 큐에서 기다리는 시간만 붙어 *지연이 오릅니다* |
 
-스레드를 늘릴수록 좋아지다가 어느 지점부터 *더 늘려도 대역폭은 그대로*인 그래프를 만나면 무릎을 지난 것입니다. [Ch 5](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)의 M2 Pro Triad 실측이 같은 모양이었습니다. thread 1개 88.7 GB/s, 2개 144.4 GB/s 뒤로는 8개 153.0 GB/s, 12개 151.4 GB/s로 거의 늘지 않았습니다.
+스레드를 늘릴수록 좋아지다가 어느 지점부터 *더 늘려도 대역폭은 그대로*인 그래프를 만나면 무릎을 지난 것입니다. [Ch 5](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)의 Triad 예(HBM·CXL이 아닌 LPDDR5 Mac에서 측정)도 같은 모양이었습니다. thread 1개 88.7 GB/s, 2개 144.4 GB/s 뒤로는 8개 153.0 GB/s, 12개 151.4 GB/s로 거의 늘지 않았습니다.
 
 ## Interleave granularity — 접근 패턴이 유불리를 가른다
 
@@ -188,7 +188,7 @@ granularity는 `cxl create-region -g`로 *region을 만들 때* 정합니다. �
 
 ### "큐를 깊게 하면 대역폭이 계속 늘어난다"
 
-*무릎까지만*입니다. 그 지점을 넘으면 요청이 큐에서 대기하고, 대기 시간이 왕복 지연에 더해집니다. 스레드 수를 올리며 대역폭을 기록하면 무릎이 보입니다(Ch 5의 M2 Pro에서는 thread 2~8개 사이).
+*무릎까지만*입니다. 그 지점을 넘으면 요청이 큐에서 대기하고, 대기 시간이 왕복 지연에 더해집니다. 스레드 수를 올리며 대역폭을 기록하면 무릎이 보입니다(Ch 5의 LPDDR5 Mac 예에서는 thread 2~8개 사이).
 
 ### "write가 read보다 비싸다"
 
