@@ -12,7 +12,7 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"데이터시트 대역폭은 *peak*입니다. 실제로 쓰는 대역폭은 그보다 낮습니다."** — 이 글에서 직접 잰 Apple M2 Pro는 공칭 200 GB/s에 Triad 153 GB/s였습니다. refresh·row activation·bank conflict·명령 overhead가 그 차이를 만듭니다. 그리고 batch 1 LLM decode 같은 연산은 *연산보다 메모리를 먼저 다 씁니다*. V100에서 H100까지 연산 성능은 약 8배, HBM 대역폭은 약 3.7배 늘어 그 간격이 벌어졌습니다. 이것이 *memory wall*입니다.
+> **"데이터시트 대역폭은 *peak*입니다. 실제로 쓰는 대역폭은 그보다 낮습니다."** — 이 글에서 직접 잰 Apple M2 Pro는 공칭 200 GB/s에 Triad 153 GB/s였습니다. 이 측정은 차이의 원인을 분리하지 않았지만, 아래에서 DRAM 쪽 손실 요인을 짚습니다. 그리고 batch 1 LLM decode 같은 연산은 *연산보다 메모리를 먼저 다 씁니다*. V100에서 H100까지 연산 성능은 약 8배, HBM 대역폭은 약 3.7배 늘어 그 간격이 벌어졌습니다. 이것이 *memory wall*입니다.
 
 [Ch 4](/blog/embedded/hardware/hbm/chapter04-gddr)에서 *GDDR signaling의 진화*를 봤습니다. 이번 장은 *대역폭이 실제로 어떻게 쓰이는지*입니다.
 
@@ -37,10 +37,10 @@ H100의 *3.35 TB/s*는 HBM3를 *정격(6.4 Gbps)보다 낮은 속도*로 돌린 
 
 peak에서 *실제로 쓰는 대역폭*까지의 갭은 다음 요인에서 옵니다.
 
-- **refresh** — refresh 중인 bank는 read·write를 받지 못합니다.
-- **row activation** — 다른 row를 읽으려면 지금 row를 닫고(PRE) 새 row를 열어야(ACT) 합니다.
-- **bank conflict** — 여러 요청이 *같은 bank의 다른 row*를 노리면 직렬화됩니다.
-- **command/address overhead** — precharge·activate 같은 명령도 command bus를 차지합니다.
+- **refresh** — HBM 컨트롤러 문서 [AMD PG276](https://docs.amd.com/r/en-US/pg276-axi-hbm/Features)이 refresh *overhead를 줄이는* hidden single row refresh 옵션을 따로 둡니다.
+- **row activation** — PG276: bank의 열린 row는 하나이고, 다른 row로 가려면 지금 row를 *precharge한 뒤 activate*해야 합니다.
+- **bank conflict** — 같은 이유로 여러 요청이 *같은 bank의 다른 row*를 노리면 그 순서대로 PRE·ACT를 거칩니다.
+- **방향 전환** — PG276: HBM stack은 전기적 인터페이스가 하나라 write 뒤 read 사이에 *bus turnaround* 시간이 듭니다.
 
 각 요인이 몇 %를 깎는지를 세대별로 공개한 1차 자료는 찾지 못했습니다. 대신 컨트롤러가 이 요인들을 직접 겨냥한다는 것은 공개 문서에 나옵니다. [AMD PG276](https://docs.amd.com/r/en-US/pg276-axi-hbm/Features)의 HBM 컨트롤러 기능 목록에는 *temperature controlled refresh rate*, *overhead를 줄이는 hidden single row refresh*, *page opening activation overhead 최소화*, *Read/Write grouping*, *access reordering*이 들어 있습니다.
 
@@ -62,7 +62,7 @@ HBM3는 stack당 *16 channel*에 channel마다 pseudo channel이 2개라, 독립
 
 ## Achievable BW의 측정
 
-실제 BW를 측정하는 가장 간단한 방법은 *STREAM* 방식의 Triad입니다. Triad는 `a[i] = b[i] + scalar × c[i]`이며, 원소당 입력 2회·출력 1회, FP64라면 24 byte를 셉니다. 쓰기 대상 `a`를 캐시로 먼저 읽어 오는 트래픽은 이 24 byte에 들어가지 않으므로, 실제 DRAM 트래픽은 이보다 클 수 있습니다.
+실제 BW를 측정하는 가장 간단한 방법은 *STREAM* 방식의 Triad입니다. Triad는 `a[i] = b[i] + scalar × c[i]`이며, 원소당 입력 2회·출력 1회, FP64라면 24 byte를 셉니다.
 
 GPU가 없는 이 글의 환경에서 같은 측정을 Apple M2 Pro(MacBook Pro 16-inch 2023, 32 GB)에 직접 해 봤습니다. [Apple 기술 사양](https://support.apple.com/en-us/111838)은 M2 Pro의 메모리 대역폭을 *200 GB/s*로 적습니다. 배열 3개 × 64 Mi 원소 × 8 byte = 1.5 GiB로 캐시보다 충분히 크게 잡았고, pthread로 원소를 나눠 10회 중 최소 시간을 씁니다.
 
@@ -172,7 +172,7 @@ knee = peak_compute / peak_BW입니다. [NVIDIA H100 제품 사양](https://www.
 | GEMV, batch 1 (FP16 weight) | 2 FLOP / 2 B per weight | 약 1 | memory bound |
 | GEMM N×N×N (FP16, 이상적 재사용) | 2N³ / (3N² × 2 B) = N/3 | N=1024: 341, N=16384: 5,461 | knee 위 |
 
-LLM decode의 batch 1 연산은 GEMV에 가까워 *intensity가 1 근처*입니다. knee(295)보다 한참 아래라 *memory bound*입니다. batch를 B로 키우면 같은 weight로 B개 토큰을 계산하므로 intensity가 *대략 B배* 됩니다.
+LLM decode의 batch 1 연산은 GEMV에 가까워 *intensity가 1 근처*입니다. knee(295)보다 한참 아래라 *memory bound*입니다. batch를 B로 키우면 같은 weight로 B개 토큰을 계산하므로, 읽는 byte가 weight로 거의 정해지는 동안은 intensity가 B배가 됩니다. KV cache 읽기가 커지면 그만큼 덜 오릅니다([Ch 8](/blog/embedded/hardware/hbm/chapter08-npu-gpu-usage)).
 
 ## Memory wall
 
@@ -198,7 +198,7 @@ knee가 *오른쪽으로 이동*하면 같은 workload라도 *memory bound* 쪽�
 
 LLM 추론에서는 *Memory Bandwidth Utilization(MBU)*을 함께 봅니다. 추론은 두 단계로 나뉩니다.
 
-1. **Prefill (prompt encoding)** — prompt 토큰을 한꺼번에 처리하므로 weight 재사용이 커 compute bound에 가깝습니다.
+1. **Prefill (prompt encoding)** — prompt 토큰을 한꺼번에 처리하므로 weight 하나를 여러 토큰이 재사용합니다. 위 batch와 같은 논리로 prompt 길이만큼 intensity가 오릅니다.
 2. **Decode (token by token)** — 매 토큰마다 weight를 다시 읽고, sequence 길이에 비례해 KV cache를 추가로 읽습니다. memory bound입니다.
 
 MBU를 논리적 byte 수/시간/공칭 BW로 정의했다면, 하드웨어 DRAM 활성 비율과 구별해 보고해야 합니다. MFU도 실행 FLOP 산정·정밀도·sparsity·시간 구간을 명시해야 합니다.
@@ -218,7 +218,7 @@ ncu --version
 ncu --set full ./inference
 ```
 
-Memory Workload Analysis에서 DRAM 전송과 L2 hit를 workload 구간별로 봅니다. 이 환경에서는 GPU profiling을 실행하지 않았으므로 관측 수치는 제시하지 않습니다.
+이 환경에는 NVIDIA GPU가 없어 profiling을 실행하지 않았고, 관측 수치는 제시하지 않습니다.
 
 
 ## 자주 하는 실수

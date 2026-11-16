@@ -59,7 +59,7 @@ HBM은 *반대 방향*입니다. *pin rate는 낮게 두고*, 대신 *bus width*
 | HBM2E | [Samsung Flashbolt](https://news.samsung.com/global/samsung-to-advance-high-performance-computing-systems-with-launch-of-industrys-first-3rd-generation-16gb-hbm2e) (2020-02-04) / [SK hynix](https://news.skhynix.com/sk-hynix-starts-mass-production-of-high-speed-dram-hbm2e/) (2020-07-02) | 3.2 / 3.6 Gbps | TBD |
 | HBM3 | [JESD238](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard) (2022-01-27) | 6.4 Gbps | TBD |
 | HBM3E | [SK hynix 12-Hi](https://news.skhynix.com/en/sk-hynix-begins-volume-production-of-the-world-first-12-layer-hbm3e/) (2024-09-26) | 9.6 Gbps | TBD |
-| GDDR6 | [Micron GDDR6 flyer](https://www.micron.com/content/dam/micron/global/public/products/product-flyer/gddr6-product-flyer.pdf) | 최대 16 Gbps | TBD |
+| GDDR6 | [Micron GDDR6 flyer](https://www.micron.com/content/dam/micron/global/public/products/product-flyer/gddr6-product-flyer.pdf) | 최대 16 Gbps | NRZ (JEDEC이 GDDR7을 첫 PAM DRAM으로 부름) |
 | GDDR6X | Ada 백서 (RTX 4090) / Micron 제품 페이지 | 21 / 최대 24 Gbps | PAM4 |
 | GDDR7 | [JESD239](https://www.jedec.org/news/pressreleases/jedec-publishes-gddr7-graphics-memory-standard) (2024-03-05) | 192 GB/s ÷ 32 DQ × 8 = 48 Gbps | PAM3 |
 

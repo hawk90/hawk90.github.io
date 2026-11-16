@@ -14,18 +14,18 @@ topics: ["embedded", "embedded/hardware"]
 
 > **"메모리 컨트롤러가 *bank parallelism을 얼마나 짜내느냐*가 실제 대역폭을 좌우합니다."** — bank·row·column 계층, command scheduling, address mapping, refresh 처리가 모두 *컨트롤러의 책임*입니다. AMD의 HBM 컨트롤러 문서는 8-byte write 하나가 32-byte burst와 같은 시간을 써서 *이론 peak의 25%*로 떨어진다고 적습니다. 같은 HBM stack이라도 컨트롤러가 요청을 어떻게 흩고 묶느냐에 따라 실제로 쓰는 대역폭이 달라집니다.
 
-[Ch 6](/blog/embedded/hardware/hbm/chapter06-thermal-power)에서 *HBM의 전력과 열*을 봤습니다. 이번 장은 *컨트롤러가 HBM을 어떻게 보는지*입니다. 공개 문서 중 HBM 컨트롤러의 주소 배치와 효율 조건을 가장 구체적으로 적은 것이 [AMD PG276 (AXI High Bandwidth Memory Controller, 2025-12-17판)](https://docs.amd.com/r/en-US/pg276-axi-hbm/Features)이라, 이 장의 HBM2 수치는 대부분 그 문서에서 가져옵니다.
+[Ch 6](/blog/embedded/hardware/hbm/chapter06-thermal-power)에서 *HBM의 전력과 열*을 봤습니다. 이번 장은 *컨트롤러가 HBM을 어떻게 보는지*입니다. 이 장의 HBM2 수치는 HBM 컨트롤러의 주소 배치와 효율 조건을 적은 [AMD PG276 (AXI High Bandwidth Memory Controller, 2025-12-17판)](https://docs.amd.com/r/en-US/pg276-axi-hbm/Features)을 기준으로 합니다.
 
 ## 컨트롤러가 보는 HBM
 
 컨트롤러 입장에서 HBM stack 1개는 계층으로 나뉜 *주소 공간*입니다.
 
-| 계층 | HBM2 (PG276, 8H stack) | HBM3 (JEDEC 2022 발표) |
+| 계층 | HBM2 (PG276, 8H stack) | HBM3 (JEDEC 2022 발표·JESD238B.01 페이지) |
 |------|------|------|
 | stack | 1024-bit | 1024-bit |
 | channel | 8개, 128-bit | 16개, 64-bit |
 | pseudo channel | channel당 2개, 64-bit | channel당 2개 |
-| bank | pseudo channel당 32 bank (bank group 8 × 4) | TBD |
+| bank (8H device) | 32 bank (bank group 8 × 4) | TBD |
 | row / column 주소 | RA[13:0] / CA[5:1] | TBD |
 
 HBM2 열은 PG276의 *Physical Address Map for 4H and 8H Devices* 표에서 8H(stack당 8 GB) 열입니다. 4H는 bank 16개(bank group 4 × 4)이고, 8H는 늘어난 bank 비트를 *SID* 비트로 씁니다. HBM3의 bank 이하 구성은 [JEDEC의 2022년 HBM3 발표](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard)에 없고 JEDEC 표준 원문은 이 글에서 열지 않아 TBD로 둡니다.
@@ -80,7 +80,7 @@ PG276도 *row를 연 뒤 그 row 안에서 column 접근을 여러 번 하라*�
 
 ## Address mapping — XOR hash
 
-주소의 *특정 비트 구간을 그대로 bank 번호*로 쓰면, 그 구간이 바뀌지 않는 access는 *한 bank*에 몰립니다. 해결책 중 하나가 *XOR hash mapping*으로, 여러 비트 구간을 XOR해 bank 번호를 만듭니다. PG276의 컨트롤러도 *AXI에서 물리 HBM으로의 유연한 address mapping*을 기능으로 둡니다.
+주소의 *특정 비트 구간을 그대로 bank 번호*로 쓰면, 그 구간이 바뀌지 않는 access는 *한 bank*에 몰립니다. PG276의 컨트롤러는 *AXI에서 물리 HBM으로의 유연한 address mapping*을 기능으로 두고, 기본값으로 bank group interleave를 켭니다. 아래 학습용 모델은 여러 비트 구간을 XOR해 bank 번호를 만드는 방식을 linear 방식과 비교합니다.
 
 다음 C 코드는 **가상의 주소 매핑 두 개**를 비교하는 학습용 모델입니다. `toy_mapping`은 XOR, `linear_bank`는 `(addr >> 20) & 15`입니다. HBM 규격·상용 컨트롤러의 register나 실제 주소 decoder를 구현한 것이 아닙니다.
 
@@ -166,7 +166,7 @@ PG276의 *AXI Considerations*는 HBM 인터페이스의 transaction 하나가 *b
 | 32-byte 경계에 맞지 않는 read | HBM에서 read 2번, *50% 이하* |
 | 정렬 안 된 write, ECC 켬 | data mask를 못 써서 *read-modify-write 2번* |
 
-8 ÷ 32 = 0.25이므로 25%는 전송 바이트 비율 그대로입니다. 그래서 IP는 *AxSIZE 0x5(32 byte) 고정*을 요구하고, 선형 접근에는 *AxLEN 0x1 이상*을 권합니다.
+8 ÷ 32 = 0.25이므로 25%는 전송 바이트 비율 그대로입니다. PG276은 같은 절 첫머리에서 IP가 *AxSIZE 0x5(32 byte) 고정*을 요구하고, 선형 접근에는 *AxLEN 0x1 이상*을 권한다고 적습니다.
 
 ## ECC
 
@@ -212,7 +212,7 @@ AXI HBM Controller IP는 *memory-mapped AXI3* 포트(dual-stack에서 32개)를 
 
 - HBM2 8H stack은 PG276 기준 *channel 8 × pseudo channel 2*, pseudo channel마다 *bank 32개(bank group 8 × 4)*, RA[13:0]·CA[5:1]입니다. HBM3의 bank 이하 값은 TBD입니다.
 - 컨트롤러는 *page policy, bank 인터리브, address mapping, refresh 처리, RD/WR 묶기*로 실제 대역폭을 끌어올립니다.
-- bank group이 있으면 *다른 group으로 번갈아* 보내야 명령 간격이 짧아집니다(DDR4-3200 tCCD_S 4 대 tCCD_L 8 nCK).
+- bank group이 있으면 *다른 group으로 번갈아* 보내야 명령 간격이 짧아집니다(Kingston DDR4-3200의 IDD 측정 timing 표 기준 tCCD_S 4 대 tCCD_L 8 nCK).
 - HBM transaction 하나는 32 byte라, 8-byte write는 25%, 정렬 안 된 read는 50% 이하로 떨어집니다.
 - Rixner의 memory access scheduling은 first-ready 재배치로 40%, 공격적 재배치로 93%의 대역폭 향상을 보고했습니다.
 - Xilinx HBM IP는 *256-bit memory-mapped AXI3 포트 32개*와 crossbar로 HBM2 pseudo channel 32개에 접근합니다.

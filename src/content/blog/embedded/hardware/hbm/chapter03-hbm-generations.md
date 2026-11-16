@@ -22,14 +22,14 @@ topics: ["embedded", "embedded/hardware"]
 
 | 세대 | 기준 (발표일) | per-pin | Stack BW | Stack capacity | I/O | 전압 |
 |------|-----------|---------|----------|----------------|-----|-----|
-| HBM | Samsung 2016 발표의 비교값 | 1.0 Gbps (산술) | 128 GB/s | TBD | 1024-bit | TBD |
+| HBM | Samsung 2016 발표의 비교값 | TBD | 128 GB/s | TBD | TBD | TBD |
 | HBM2 | JESD235A (2016-01-12) · JESD235B (2018-12-17) | 2.0 (산술) · 2.4 Gbps | 256 · 307 GB/s | 최대 8 · 24 GB | 1024-bit | TBD |
 | HBM2E | Samsung (2020-02-04) · SK hynix (2020-07-02) | 3.2 · 3.6 Gbps | 410 · 460 GB/s | 16 GB | 1024-bit | TBD |
 | HBM3 | JESD238 (2022-01-27) | 6.4 Gbps | 819 GB/s | 4~64 GB | 1024-bit | 1.1 V, I/O 0.4 V swing |
 | HBM3E | Micron (2024-02-26) · SK hynix (2024-09-26) | 9.2 초과 · 9.6 Gbps | 1.2 TB/s 초과 · 1,228.8 GB/s (산술) | 24 · 36 GB | 1024-bit | TBD |
 | HBM4 | JESD270-4 (2025-04 발표) | 최대 8 Gb/s | 최대 2 TB/s | 최대 64 GB | 2048-bit | VDDC 1.0·1.05 V, VDDQ 0.7~0.9 V |
 
-(산술) 표시는 발표문의 다른 값에서 계산한 칸입니다. HBM 1세대의 128 GB/s는 [Samsung의 2016년 1월 19일 HBM2 발표](https://news.samsung.com/global/samsung-begins-mass-producing-worlds-fastest-dram-based-on-newest-high-bandwidth-memory-hbm-interface)가 *자사 4 GB HBM2의 256 GB/s는 HBM1 패키지의 두 배*라고 쓴 문장에서 나온 값이고, 1.0 Gbps는 `128 × 8 ÷ 1024`입니다. HBM2의 2.0 Gbps도 [JESD235A 발표](https://www.jedec.org/news/pressreleases/jedec-updates-groundbreaking-high-bandwidth-memory-hbm-standard)의 256 GB/s를 `256 × 8 ÷ 1024`로 환산한 값입니다. HBM2E의 3.2 Gbps 기준을 JEDEC이 어느 revision에서 정했는지는 JEDEC 발표문을 찾지 못해 표에 적지 않았습니다. JEDEC의 [JESD235 문서 페이지](https://www.jedec.org/standards-documents/docs/jesd235a)는 현재 2021년 3월판 JESD235D를 보여 주고, [Synopsys의 2022년 4월 16일 HBM3 설명](https://www.synopsys.com/articles/hbm3-ip-dwtb.html)은 JESD235D를 *HBM2E 표준*으로 부릅니다.
+(산술) 표시는 발표문의 다른 값에서 계산한 칸입니다. HBM 1세대의 128 GB/s는 [Samsung의 2016년 1월 19일 HBM2 발표](https://news.samsung.com/global/samsung-begins-mass-producing-worlds-fastest-dram-based-on-newest-high-bandwidth-memory-hbm-interface)가 *자사 4 GB HBM2의 256 GB/s는 HBM1 패키지의 두 배*라고 쓴 문장에서 나온 값입니다. HBM2의 2.0 Gbps도 [JESD235A 발표](https://www.jedec.org/news/pressreleases/jedec-updates-groundbreaking-high-bandwidth-memory-hbm-standard)의 256 GB/s를 `256 × 8 ÷ 1024`로 환산한 값입니다. HBM2E의 3.2 Gbps 기준을 JEDEC이 어느 revision에서 정했는지는 JEDEC 발표문을 찾지 못해 표에 적지 않았습니다. JEDEC의 [JESD235 문서 페이지](https://www.jedec.org/standards-documents/docs/jesd235a)는 현재 2021년 3월판 JESD235D를 보여 주고, [Synopsys의 2022년 4월 16일 HBM3 설명](https://www.synopsys.com/articles/hbm3-ip-dwtb.html)은 JESD235D를 *HBM2E 표준*으로 부릅니다.
 
 HBM4 행은 [2025년 4월 발표](https://www.storagenewsletter.com/2025/04/17/jedec-and-industry-leaders-collaborate-to-release-jesd270-4-hbm4-standard/)의 범위입니다. JESD235 계열이 아니라 *새 번호 체계*를 쓰며, [JEDEC 문서 페이지](https://www.jedec.org/standards-documents/docs/jesd270-4)에는 2025년 12월판 JESD270-4A(Version 1.1)가 올라와 있습니다.
 
@@ -44,10 +44,10 @@ HBM4 행은 [2025년 4월 발표](https://www.storagenewsletter.com/2025/04/17/j
 | 항목 | 값 | 근거 |
 |------|-----|------|
 | stack BW | 128 GB/s | Samsung 2016 발표 (HBM2 256 GB/s의 절반) |
-| per-pin | 1.0 Gbps | `128 × 8 ÷ 1024` |
-| bus | 1024-bit | JESD235 계열 공통 |
-| channel | 128-bit | [JESD235D 문서 페이지](https://www.jedec.org/standards-documents/docs/jesd235a) |
+| per-pin·bus·channel | TBD | 1세대 JESD235 원문·발표를 열지 못함 |
 | max stack·capacity·VDD | TBD | — |
+
+JESD235A·B 발표의 1024-bit·8 channel은 HBM2 update의 설명이라 1세대 칸에 옮기지 않았습니다. 1024-bit였다고 두면 pin rate는 `128 × 8 ÷ 1024 = 1.0 Gbps`가 됩니다.
 
 같은 Samsung 발표는 비교 대상으로 *4 Gb GDDR5 chip 하나가 9 Gbps에서 36 GB/s*라고 적습니다. HBM2 stack 하나(256 GB/s)는 그 chip의 `256 ÷ 36 ≈ 7.1`배입니다.
 
@@ -207,7 +207,7 @@ HBM4는 *bus width 자체가 2배*입니다. JEDEC은 하나의 controller가 *H
 
 - HBM은 1세대 128 GB/s에서 9.6 Gbps HBM3E의 1,228.8 GB/s까지 stack BW가 `1,228.8 ÷ 128 = 9.6`배로 늘었습니다.
 - 세대 간 *변곡점*은 HBM2(PC 도입), HBM3(channel 16개·1.1 V·on-die ECC), HBM4(2048-bit bus)입니다.
-- *per-pin rate*는 *1.0 → 9.6 Gbps*까지 올라갔습니다.
+- *per-pin rate*는 HBM2의 *2.0 Gbps*(JESD235A 산술)에서 HBM3E의 *9.6 Gbps*까지 올라갔습니다.
 - *DRAM die 밀도*는 Samsung HBM2 *8 Gb*, HBM2E *16 Gb*, SK hynix HBM3E *24 Gb*로 늘어 *stack capacity*를 *36 GB*까지 끌어올렸습니다.
 - HBM3에서 *on-die ECC*가 표준에 들어갔습니다.
 - HBM4는 pin rate 대신 *bus width(2048-bit)*를 늘려 대역폭을 올렸습니다.

@@ -12,13 +12,13 @@ topics: ["embedded", "embedded/hardware"]
 
 ## 한 줄 요약
 
-> **"HBM은 *작은 면적에 die를 여러 장 쌓은* 메모리라 열 관리가 설계 항목이 됩니다."** — HBM 컨트롤러는 *온도에 따라 refresh 빈도를 바꾸고*, NVIDIA GPU는 메모리 온도가 최대 동작 온도를 넘지 않도록 *clock을 낮춥니다*. 그래서 HBM 시스템에서는 *cooling이 곧 대역폭 관리*입니다. GPU 72개를 rack 하나에 묶은 GB200 NVL72는 *liquid-cooled* 설계입니다.
+> **"HBM은 *작은 면적에 die를 여러 장 쌓은* 메모리라 열 관리가 설계 항목이 됩니다."** — HBM 컨트롤러는 *온도에 따라 refresh 빈도를 바꾸고*, NVIDIA GPU는 메모리 온도가 최대 동작 온도를 넘지 않도록 *clock을 낮춥니다*. GPU 72개를 rack 하나에 묶은 GB200 NVL72는 *liquid-cooled* 설계입니다.
 
 [Ch 5](/blog/embedded/hardware/hbm/chapter05-bandwidth-bottleneck)에서 *bandwidth가 어디서 깎이는지*를 봤습니다. 이번 장에서는 *그 bandwidth를 유지하는 데 드는 전력*과 *그 전력이 만드는 열*을 봅니다.
 
 ## 전압부터
 
-JEDEC HBM3(JESD238)는 core 전압을 *1.1 V*로 낮추고, I/O는 *0.4 V low-swing* 신호를 씁니다. HBM4(JESD270-4)는 core 전압(VDDC)이 *1.0 V 또는 1.05 V*, I/O 전압(VDDQ)은 *0.7·0.75·0.8·0.9 V* 중 벤더가 고릅니다. 수치는 [JEDEC의 2022년 1월 27일 HBM3 발표](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard)와 [2025년 4월 HBM4 발표](https://www.storagenewsletter.com/2025/04/17/jedec-and-industry-leaders-collaborate-to-release-jesd270-4-hbm4-standard/)의 범위입니다. 0.4 V 신호 진폭과 VDDQ 전원 전압을 같은 항목으로 비교하면 안 됩니다. 두 발표 모두 전압을 낮춘 목적을 *에너지 효율 개선*과 *전력 소비 감소*로 적습니다. stack 하나의 세부 전력 분해는 이 글에서 연 발표문에 나오지 않습니다.
+JEDEC HBM3(JESD238)는 동작 전압(operating voltage)을 *1.1 V*로 낮추고, I/O는 *0.4 V low-swing* 신호를 씁니다. HBM4(JESD270-4)는 core 전압(VDDC)이 *1.0 V 또는 1.05 V*, I/O 전압(VDDQ)은 *0.7·0.75·0.8·0.9 V* 중 벤더가 고릅니다. 수치는 [JEDEC의 2022년 1월 27일 HBM3 발표](https://www.jedec.org/news/pressreleases/jedec-publishes-hbm3-update-high-bandwidth-memory-hbm-standard)와 [2025년 4월 HBM4 발표](https://www.storagenewsletter.com/2025/04/17/jedec-and-industry-leaders-collaborate-to-release-jesd270-4-hbm4-standard/)의 범위입니다. 0.4 V 신호 진폭과 VDDQ 전원 전압을 같은 항목으로 비교하면 안 됩니다. HBM3 발표는 이 전압들의 목적을 *에너지 효율 개선*으로, HBM4 발표는 *전력 소비 감소와 에너지 효율 개선*으로 적습니다. stack 하나의 세부 전력 분해는 이 글에서 연 발표문에 나오지 않습니다.
 
 ## stack의 열 구조
 
@@ -56,7 +56,7 @@ B200을 쓴다고 해서 곧바로 liquid cooling이 필요한 것은 아닙니�
 
 ## Thermal throttling
 
-GPU는 메모리 온도가 최대 동작 온도를 넘지 않도록 *clock을 낮춥니다*. [nvidia-smi 문서](https://docs.nvidia.com/deploy/nvidia-smi/index.html)는 *Memory Current Temp*를 *지원하는 장치에서만* 제공한다고 적고, *Memory Max Operating T.Limit Temp*를 *GPU SW가 열 조건에 맞춰 메모리 clock을 최적화하기 시작하는 온도*로 정의합니다. 같은 문서의 `-d` 옵션으로 온도와 clock 제한 사유(*Clocks Event Reasons*)를 함께 볼 수 있습니다. 이 글은 NVIDIA GPU가 없는 환경이라 아래 명령의 출력을 싣지 않습니다.
+GPU는 메모리 온도가 최대 동작 온도를 넘지 않도록 *clock을 낮춥니다*. [nvidia-smi 문서](https://docs.nvidia.com/deploy/nvidia-smi/index.html)는 *Memory Current Temp*를 *지원하는 장치에서만* 제공한다고 적고, *Memory Max Operating T.Limit Temp*를 *GPU SW가 열 조건에 맞춰 메모리 clock을 최적화하기 시작하는 온도*로 정의합니다. 같은 문서는 `-q`의 `-d` 표시 항목으로 TEMPERATURE와 PERFORMANCE를 두고, clock을 낮추는 이유를 *Clocks Event Reasons* 항목으로 설명합니다. 이 글은 NVIDIA GPU가 없는 환경이라 아래 명령의 출력을 싣지 않습니다.
 
 ```bash
 nvidia-smi -q -d TEMPERATURE,PERFORMANCE
@@ -117,8 +117,8 @@ RTX 4090의 GDDR6X는 32-bit 컨트롤러 12개에 붙는 *PCB 위 개별 칩*�
 
 ## 정리
 
-- HBM3는 core 1.1 V·I/O 0.4 V low-swing, HBM4는 VDDC 1.0·1.05 V로 전압을 낮춰 왔습니다.
-- die를 쌓은 구조라 *아래 die의 열이 위 die를 지나* cold plate로 갑니다.
+- HBM3는 동작 전압 1.1 V·host 인터페이스 0.4 V low-swing, HBM4는 VDDC 1.0·1.05 V로 전압을 낮춰 왔습니다.
+- 위쪽 cold plate만 둔 단순화 모델에서는 *아래 die의 열이 위 die를 지나* cold plate로 갑니다.
 - HBM 컨트롤러는 *온도에 따라 refresh 빈도를 바꾸고*(AMD PG276), JESD235A는 DRAM 과열을 controller에 알리는 기능을 정의했습니다.
 - 같은 Blackwell 세대에서 DGX B200은 air-cooled, GPU 72개를 묶은 GB200 NVL72는 liquid-cooled입니다.
 - NVML의 `SwThermalSlowdown`(0x20)은 GPU 또는 메모리 열 제한이며 HBM 원인 단정에 충분하지 않습니다.
