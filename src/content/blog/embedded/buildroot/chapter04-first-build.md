@@ -121,7 +121,7 @@ make 2>&1 | tee build.log
 5. 커널 (`linux 6.18.7 Building`)
 6. rootfs 이미지와 post-image (`Generating filesystem image rootfs.ext2`, `Executing post-image script board/qemu/post-image.sh`)
 
-부트로더 단계는 없습니다. QEMU가 `-kernel`로 커널을 직접 올리기 때문입니다. 단계별 소요 시간은 `output/build/build-time.log`에 남고, 이 빌드의 합계는 Ch 1에 정리했습니다. 벽시계로 29분 50초였고 그중 소스 다운로드가 607초(합산)였습니다.
+부트로더 단계는 없습니다. QEMU가 `-kernel`로 커널을 직접 올리기 때문입니다. 단계별 소요 시간은 `output/build/build-time.log`에 남고, 이 빌드의 합계는 Ch 1에 정리했습니다. 벽시계로 40분 8초였고 그중 소스 다운로드가 518초(합산, 대부분 glibc git 저장소)였습니다.
 
 ## 산출물 확인
 
@@ -130,10 +130,10 @@ make 2>&1 | tee build.log
 ```text
 $ ls -l output/images/
 total 21480
--rw-r--r-- 1 br br 13236736 Nov 16 03:06 Image
--rw-r--r-- 1 br br 62914560 Nov 16 03:07 rootfs.ext2
-lrwxrwxrwx 1 br br       11 Nov 16 03:07 rootfs.ext4 -> rootfs.ext2
--rwxr-xr-x 1 br br      819 Nov 16 03:07 start-qemu.sh
+-rw-r--r-- 1 br br 13236736 Nov 16 07:13 Image
+-rw-r--r-- 1 br br 62914560 Nov 16 07:13 rootfs.ext2
+lrwxrwxrwx 1 br br       11 Nov 16 07:13 rootfs.ext4 -> rootfs.ext2
+-rwxr-xr-x 1 br br      819 Nov 16 07:13 start-qemu.sh
 ```
 
 | 파일 | 의미 |
@@ -211,7 +211,7 @@ busybox에는 staging stamp가 없고(라이브러리가 아님), 대신 kconfig
 | `.stamp_images_installed` | `images/` 설치 (커널·부트로더) |
 | `.stamp_installed` | 위 설치 단계 전체 완료 |
 
-`<pkg>-rebuild`, `<pkg>-reconfigure`는 이 stamp를 지우는 타깃입니다. `package/pkg-generic.mk` 1053~1073행을 보면 `clean-for-reinstall`이 설치 stamp를, `clean-for-rebuild`가 거기에 `.stamp_built`를, `clean-for-reconfigure`가 다시 `.stamp_configured`를 지웁니다. 그래서 `rebuild`는 다시 빌드한 뒤 *설치까지* 다시 합니다. 실제로 `make busybox-rebuild`를 돌리니 다음 두 줄만 나왔고 8.03초가 걸렸습니다.
+`<pkg>-rebuild`, `<pkg>-reconfigure`는 이 stamp를 지우는 타깃입니다. `package/pkg-generic.mk` 1053~1073행을 보면 `clean-for-reinstall`이 설치 stamp를, `clean-for-rebuild`가 거기에 `.stamp_built`를, `clean-for-reconfigure`가 다시 `.stamp_configured`를 지웁니다. 그래서 `rebuild`는 다시 빌드한 뒤 *설치까지* 다시 합니다. 실제로 `make busybox-rebuild`를 돌리니 다음 두 줄만 나왔고 9.31초가 걸렸습니다.
 
 ```text
 >>> busybox 1.37.0 Building
@@ -226,13 +226,13 @@ busybox에는 staging stamp가 없고(라이브러리가 아님), 대신 kconfig
 
 ```text
 Booting Linux on physical CPU 0x0000000000 [0x410fd034]
-Linux version 6.18.7 (br@brvm) (aarch64-buildroot-linux-gnu-gcc.br_real (Buildroot 2026.02.3) 14.3.0, GNU ld (GNU Binutils) 2.44) #1 SMP Mon Nov 16 03:06:55 UTC 2026
+Linux version 6.18.7 (br@brvm) (aarch64-buildroot-linux-gnu-gcc.br_real (Buildroot 2026.02.3) 14.3.0, GNU ld (GNU Binutils) 2.44) #1 SMP Mon Nov 16 07:13:15 UTC 2026
 ...
 Kernel command line: rootwait root=/dev/vda console=ttyAMA0
 ...
 virtio_blk virtio0: [vda] 122880 512-byte logical blocks (62.9 MB/60.0 MiB)
 ...
-EXT4-fs (vda): mounted filesystem 97c90481-9a59-437c-8a53-559a289bbf3c ro with ordered data mode. Quota mode: disabled.
+EXT4-fs (vda): mounted filesystem 1ebdf154-4a3a-4eef-b836-533633b5a72a ro with ordered data mode. Quota mode: disabled.
 VFS: Mounted root (ext4 filesystem) readonly on device 254:0.
 ...
 Run /sbin/init as init process
@@ -250,7 +250,7 @@ buildroot login:
 ```text
 buildroot login: root
 # uname -a
-Linux buildroot 6.18.7 #1 SMP Mon Nov 16 03:06:55 UTC 2026 aarch64 GNU/Linux
+Linux buildroot 6.18.7 #1 SMP Mon Nov 16 07:13:15 UTC 2026 aarch64 GNU/Linux
 # cat /etc/os-release
 NAME=Buildroot
 VERSION=2026.02.3
@@ -272,7 +272,7 @@ Filesystem                Size      Used Available Use% Mounted on
 
 ## dl/ — 캐시의 역할
 
-빌드 후 `dl/`에는 소스가 패키지별 디렉터리로 모여 있습니다.
+빌드 후 `dl/`에는 소스가 패키지별 디렉터리로 모여 있습니다. 아래는 빈 디렉터리에 `make source`로 이 defconfig의 소스만 받은 값입니다.
 
 ```text
 $ du -sh dl
@@ -289,7 +289,7 @@ export BR2_DL_DIR=/mnt/cache/buildroot-dl
 
 ## 두 번째 빌드 — 증분 동작
 
-같은 트리에서 아무것도 바꾸지 않고 `make`를 다시 돌리면 7.41초가 걸렸고, 출력은 다음이 전부였습니다.
+같은 트리에서 아무것도 바꾸지 않고 `make`를 다시 돌리면 8.60초가 걸렸고, 출력은 다음이 전부였습니다.
 
 ```text
 >>>   Finalizing host directory
@@ -299,7 +299,7 @@ export BR2_DL_DIR=/mnt/cache/buildroot-dl
 >>>   Generating root filesystems common tables
 >>>   Generating filesystem image rootfs.ext2
 >>>   Executing post-image script board/qemu/post-image.sh
-WALL 7.41 s
+WALL 8.60 s
 ```
 
 패키지 단계는 stamp 덕에 모두 건너뛰고, target 마무리·rootfs 이미지·post-image는 *매번* 다시 돕니다. 패키지 하나만 다시 다룰 때 쓰는 타깃은 다음과 같습니다(매뉴얼 "Package-specific make targets").
@@ -336,15 +336,15 @@ make linux-rebuild           # 커널 빌드 + 설치 재실행
 - `make graph-depends`로 의존성 그래프 그리기(호스트에 graphviz 필요).
 - `make graph-size`로 rootfs의 파일별 크기 통계 만들기.
 
-busybox 한 패키지 재빌드가 8초, 변경 없는 재빌드가 7초였으니 이런 실험은 대부분 커널이나 toolchain을 건드리지 않는 한 짧게 끝납니다.
+busybox 한 패키지 재빌드가 9.31초, 변경 없는 재빌드가 8.60초였으니 이런 실험은 대부분 커널이나 toolchain을 건드리지 않는 한 짧게 끝납니다.
 
 ## 정리
 
-- `git clone`(2026.02.3 태그) → `make qemu_aarch64_virt_defconfig` → `make` → `start-qemu.sh` 네 단계로 첫 시스템이 완성됐습니다. 빌드는 29분 50초였습니다.
+- `git clone`(2026.02.3 태그) → `make qemu_aarch64_virt_defconfig` → `make` → `start-qemu.sh` 네 단계로 첫 시스템이 완성됐습니다. 빌드는 40분 8초였습니다.
 - toolchain은 binutils → gcc-initial → 커널 헤더 → glibc → gcc-final 다섯 단계로 부트스트랩됩니다.
 - 산출물은 `Image`(13 MB), `rootfs.ext2`(60 MiB, `rootfs.ext4` symlink), `start-qemu.sh`이고, QEMU 128 MiB 메모리에서 부팅해 rootfs 4.1 MB, 메모리 10 MB를 썼습니다.
 - stamp 파일이 증분 빌드의 근거이고, `<pkg>-rebuild`는 빌드와 설치 stamp를 지워 둘 다 다시 합니다. 이미지는 다음 `make`가 만듭니다.
-- 변경 없는 `make`는 7.41초였고, rootfs 이미지와 post-image는 매번 다시 생성됩니다.
+- 변경 없는 `make`는 8.60초였고, rootfs 이미지와 post-image는 매번 다시 생성됩니다.
 - 첫 빌드 실패는 호스트 도구 검사(`dependencies.sh`), 디스크, Legacy 옵션, 사내 망 다운로드에서 자주 납니다.
 
 다음 편은 **Ch 5: 패키지 시스템 — .mk와 Config.in**. Buildroot 패키지 한 개가 어떻게 구성되는지 해부합니다.
