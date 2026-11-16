@@ -185,7 +185,7 @@ devres는 driver detach 때, 그리고 probe가 실패했을 때 등록의 역�
 
 reset은 put만 자동이라 assert를 `devm_add_action_or_reset`으로 따로 등록했습니다. DT에 `resets`가 없으면 optional getter는 NULL을 돌려주고, `reset_control_deassert(NULL)`·`reset_control_assert(NULL)`은 0을 돌려주는 no-op입니다([reset.h](https://github.com/torvalds/linux/blob/v6.12/include/linux/reset.h), [drivers/reset/core.c](https://github.com/torvalds/linux/blob/v6.12/drivers/reset/core.c)). `devm_regulator_get_enable(dev, "vdd")`는 DT의 `vdd-supply`를 찾습니다([of_regulator.c](https://github.com/torvalds/linux/blob/v6.12/drivers/regulator/of_regulator.c)).
 
-pinctrl은 `CONFIG_PINCTRL`이 켜져 있으면 probe에서 따로 고르지 않아도 됩니다. driver core가 probe 직전에 `pinctrl_bind_pins`를 부릅니다. DT에 `default` 상태가 있을 때만 동작해, `init` 상태가 있으면 그것을, 없으면 `default` 상태를 선택합니다. `default` 상태가 없으면 아무 상태도 고르지 않습니다. DT가 가리키는 pin controller가 아직 등록되지 않았으면 `pinctrl_bind_pins`가 `-EPROBE_DEFER`를 돌려주고 driver의 probe는 불리지 않습니다(`dt_to_map_one_config`, [drivers/pinctrl/devicetree.c](https://github.com/torvalds/linux/blob/v6.12/drivers/pinctrl/devicetree.c), [drivers/base/dd.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/dd.c)의 `really_probe`, [drivers/base/pinctrl.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/pinctrl.c), [Makefile](https://github.com/torvalds/linux/blob/v6.12/drivers/base/Makefile)).
+pinctrl은 `CONFIG_PINCTRL`이 켜져 있으면 probe에서 따로 고르지 않아도 됩니다. driver core가 probe 직전에 `pinctrl_bind_pins`를 부릅니다. DT에 `default` 상태가 있을 때만 동작해, `init` 상태가 있으면 그것을, 없으면 `default` 상태를 선택합니다. `default` 상태가 없으면 아무 상태도 고르지 않습니다. DT가 가리키는 pin controller가 아직 등록되지 않았으면, `CONFIG_MODULES`가 켜져 있고 pin 설정 노드에 `pinctrl-use-default`가 없을 때(`drivers/pinctrl/devicetree.c:130-136`) `pinctrl_bind_pins`가 `-EPROBE_DEFER`를 돌려주고 driver의 probe는 불리지 않습니다(`dt_to_map_one_config`, [drivers/pinctrl/devicetree.c](https://github.com/torvalds/linux/blob/v6.12/drivers/pinctrl/devicetree.c), [drivers/base/dd.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/dd.c)의 `really_probe`, [drivers/base/pinctrl.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/pinctrl.c), [Makefile](https://github.com/torvalds/linux/blob/v6.12/drivers/base/Makefile)).
 
 ### remove가 필요한 경우
 
@@ -294,7 +294,7 @@ dd.c는 compatible이 맞아 driver의 probe까지 가면 `bus: 'platform': real
 	};
 ```
 
-`reg`를 RAM 끝의 `no-map` 예약 영역(0x7f000000)에 둔 것은 probe의 `writel`이 실제로 쓰이는 메모리가 필요해서입니다. 처음에는 장치가 없는 0x9100000에 두었는데, `writel`에서 커널이 멈췄습니다(아래 함정). clock은 `fixed-clock`, `vdd-supply`는 `regulator-fixed`이고 `resets`는 없으므로 reset getter는 NULL을 받습니다. interrupt `<0x0 0x64 0x4>`는 GIC SPI 100, level-high입니다.
+`reg`를 RAM 끝의 `no-map` 예약 영역(0x7f000000)에 둔 것은 probe의 `writel`이 실제로 쓰이는 메모리가 필요해서입니다. 처음에는 장치가 없는 0x9100000에 두었는데, `writel`에서 커널이 Oops를 냈습니다(아래 함정). clock은 `fixed-clock`, `vdd-supply`는 `regulator-fixed`이고 `resets`는 없으므로 reset getter는 NULL을 받습니다. interrupt `<0x0 0x64 0x4>`는 GIC SPI 100, level-high입니다.
 
 initramfs의 `/init`은 dd.c의 dynamic debug를 켜고 모듈을 올린 뒤 결과를 찍습니다.
 
@@ -411,7 +411,7 @@ if (IS_ERR(d->clk))
     return -EIO;    /* -EPROBE_DEFER becomes -EIO: no retry */
 ```
 
-`-EPROBE_DEFER`를 그대로 돌려주면 device가 pending 목록에 들어가고, 다른 driver의 probe가 성공할 때마다 workqueue가 다시 시도합니다(dd.c 머리 주석 "Deferred Probe infrastructure", [v6.12](https://github.com/torvalds/linux/blob/v6.12/drivers/base/dd.c)). pending 목록에 넣는 것은 `-EPROBE_DEFER`를 받았을 때뿐이라(`driver_probe_device`) 다른 에러로 바꾸면 자동 재시도 대상에서 빠집니다.
+`-EPROBE_DEFER`를 그대로 돌려주면 device가 pending 목록에 들어가고, 다른 driver의 probe가 성공할 때마다 workqueue가 다시 시도합니다(dd.c 머리 주석 "Deferred Probe infrastructure", [v6.12](https://github.com/torvalds/linux/blob/v6.12/drivers/base/dd.c)). probe 결과로 pending 목록에 넣는 것은 `driver_probe_device`가 `-EPROBE_DEFER`를 받았을 때뿐이라(`driver_probe_device`) 다른 에러로 바꾸면 자동 재시도 대상에서 빠집니다.
 
 `-EPROBE_DEFER`는 driver의 probe 안에서만 생기지 않습니다. `really_probe`는 probe를 부르기 전에 device link로 이어진 supplier가 준비되지 않았으면 `device_links_check_suppliers`에서, pin controller가 아직 없으면 `pinctrl_bind_pins`에서 defer를 돌려줍니다. platform bus의 `platform_probe`도 driver의 probe 전에 `of_clk_set_defaults`(DT의 `assigned-clocks`·`assigned-clock-parents`가 가리키는 clock provider가 아직 없을 때)와 `dev_pm_domain_attach`(power domain provider가 없을 때)에서 defer를 돌려줍니다. 다만 power domain 경로는 `driver_deferred_probe_check_state`를 거치므로, initcall이 끝나고 deferred probe timeout이 지난 뒤에는 defer 대신 `-ETIMEDOUT`을 돌려주고 "deferred probe timeout, ignoring dependency" 경고를 남깁니다. 그래서 timeout이 지난 뒤 `insmod`로 올린 driver는 power domain provider가 없으면 기다리지 않고 `-110`으로 probe에 실패합니다(`driver_deferred_probe_check_state`, [drivers/base/dd.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/dd.c), [drivers/base/platform.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/platform.c), [drivers/clk/clk-conf.c](https://github.com/torvalds/linux/blob/v6.12/drivers/clk/clk-conf.c), [drivers/pmdomain/core.c](https://github.com/torvalds/linux/blob/v6.12/drivers/pmdomain/core.c)의 `__genpd_dev_pm_attach`). 이 네 경우 가운데 `devices_deferred`에 이유를 남기는 것은 `dev_err_probe`를 부르는 `device_links_check_suppliers`뿐입니다([drivers/base/core.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/core.c)). 그래서 `devices_deferred`에 device 이름만 있고 이유가 비어 있으면 driver의 probe가 아니라 이 앞 단계를 먼저 봅니다. 위 코드처럼 덮어쓰는 실수는 probe 안에서 clock·regulator·reset getter가 provider를 찾지 못해 `-EPROBE_DEFER`를 돌려줄 때 생깁니다.
 
@@ -430,14 +430,17 @@ remove가 devres 해제보다 먼저 불리므로(위 'remove가 필요한 경�
 
 > 레지스터 주소가 실제 장치가 없는 곳
 
-위 실험을 처음에 `reg = <0x0 0x09100000 0x0 0x1000>`로 돌렸습니다. QEMU `virt`에서 그 주소에는 아무 장치도 없고, `devm_platform_ioremap_resource`는 성공했지만 probe의 첫 `writel`에서 커널이 멈췄습니다.
+위 실험을 처음에 `reg = <0x0 0x09100000 0x0 0x1000>`로 돌렸습니다. QEMU `virt`에서 그 주소에는 아무 장치도 없고, `devm_platform_ioremap_resource`는 성공했지만 probe의 첫 `writel`에서 synchronous external abort Oops가 나고 `insmod` 프로세스가 `Segmentation fault`로 죽었습니다.
 
 ```text
 [    0.869376] Internal error: synchronous external abort: 0000000096000050 [#1] PREEMPT SMP
 [    0.872278] pc : my_probe+0x17c/0x2c8 [foo]
+...
+[    0.882552] ---[ end trace 0000000000000000 ]---
+Segmentation fault
 ```
 
-이 실행에서 `devm_platform_ioremap_resource`는 장치가 없는 주소도 그대로 매핑해 성공을 돌려줬고, 잘못은 첫 레지스터 접근에서야 드러났습니다. 그래서 DT의 `reg`가 틀린 경우는 probe가 성공을 돌려주기 전, 첫 `readl`·`writel`에서 멈추는 모습으로 보입니다.
+이 실행에서 `devm_platform_ioremap_resource`는 장치가 없는 주소도 그대로 매핑해 성공을 돌려줬고, 잘못은 첫 레지스터 접근에서야 Oops로 드러났습니다. 그 뒤에도 driver 디렉터리에는 `9100000.foo` symlink가 남았고(`really_probe`가 probe를 부르기 전에 sysfs 링크를 만들기 때문입니다), `rmmod foo`는 `Device or resource busy`로 실패했습니다. 그래서 probe 도중 Oops가 난 경우에는 symlink가 남아 있어도 성공이 아닙니다.
 
 ## 정리
 
@@ -448,7 +451,7 @@ remove가 devres 해제보다 먼저 불리므로(위 'remove가 필요한 경�
 
 Runtime PM(`pm_runtime_enable`과 get/put 경로)은 [BSP Power Management](/blog/embedded/bsp/chapter13-power-management)의 'Runtime PM — 디바이스별 dynamic suspend' 절에서 다룹니다.
 
-다음 편은 **mmap 4가지 모드**입니다. 이 글의 driver는 레지스터를 커널 안에서만 매핑했는데, 다음 편은 user space 쪽 mmap 모드를 다루고 'UIO·V4L2에서 DMA 영역 mmap' 절에서 장치 영역을 user space에 매핑하는 경우를 봅니다.
+다음 편은 **mmap 4가지 모드**입니다. 이 글의 driver는 레지스터를 커널 안에서만 매핑했는데, 다음 편은 user space 쪽 mmap 모드를 다루고 'UIO에서 장치 영역 mmap' 절에서 장치 영역을 user space에 매핑하는 경우를 봅니다.
 
 ## 관련 항목
 
