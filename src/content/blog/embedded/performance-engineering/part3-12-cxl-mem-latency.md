@@ -29,9 +29,9 @@ CXL.mem 배치 형태는 크게 세 가지입니다. 각 구성이 명세의 어
 |----------|------|----------|
 | 1. Direct Attach | Host CPU → CXL link → Type 3 memory device | 2.3절 (Type 3 Device) |
 | 2. Single Switch | Host CPU → CXL Switch → 여러 memory device | 1.4.1절 (CXL 2.0의 single-level switching, fan-out) |
-| 3. Multi-Host Pool | 여러 Host → Switch → Multi-Logical Device(MLD). 각 Host에 Logical Device를 하나씩 배정 | 2.4절 (MLD는 최대 16개 LD로 분할), 2.4.3절 (Pooled Memory and Shared FAM) |
+| 3. Multi-Host Pool | 여러 Host → Switch → Multi-Logical Device(MLD). 각 LD를 Host의 Virtual Hierarchy에 바인딩 | 2.4절 (MLD는 host 바인딩용 LD를 최대 16개까지 가짐), 2.4.3절 (Pooled Memory and Shared FAM) |
 
-switch를 지나면 요청 경로에 장치가 하나 더 끼므로 지연이 늘어날 수 있습니다. 다만 이 글이 확인한 공개 실측(아래 Sun et al.)은 direct attach만 다뤄, switch·pool 구성의 지연 숫자는 TBD로 둡니다.
+명세에도 지연 숫자가 하나 있습니다. CXL 3.1 13.1절 Table 13-2는 DRAM을 쓰는 Type 3 장치의 `M2S Req MemRd` → `S2M DRS MemData` 권장 지연 목표를 80 ns로 적습니다. 측정 조건은 64 GT/s x16, IDE off, 장치 핀에서 잰 idle 평균입니다. 표의 주석은 이 목표가 단순하고 작은 장치를 전제로 하며, "complex, multi-ported, or pooled-memory Devices"는 대상이 아니라고 적습니다. 이 글이 확인한 공개 실측(아래 Sun et al.)도 direct attach만 다뤄, switch·pool 구성의 지연 숫자는 TBD로 둡니다.
 
 ## 공개된 실측 — 실제 CXL 디바이스 3종
 
@@ -78,7 +78,7 @@ OMP_NUM_THREADS=8 numactl --cpunodebind=0 --membind=0 ./stream
 | Add | 126,792 | 110,466~141,289 |
 | Triad | 120,830 | 97,626~124,595 |
 
-같은 커널의 Best Rate가 실행마다 크게는 28%(Triad 97,626 → 124,595) 차이 났고, 같은 실행 안에서 Avg time이 Min time의 두 배를 넘는 줄도 있었습니다. 다른 VM이 같은 호스트를 쓰는 중이었기 때문입니다. CXL tier를 이 방법으로 비교할 때는 local과 CXL을 같은 조건에서 번갈아 여러 번 돌려야, 이 정도 잡음보다 큰 차이만 결론으로 삼을 수 있습니다.
+같은 커널의 Best Rate가 실행마다 크게는 28%(Triad 97,626 → 124,595) 차이 났고, 같은 실행 안에서 Avg time이 Min time의 두 배를 넘는 줄도 있었습니다. 측정 VM은 같은 호스트에서 다른 VM과 함께 돌고 있었습니다. CXL tier를 이 방법으로 비교할 때는 local과 CXL을 같은 조건에서 번갈아 여러 번 돌려야, 이 정도 잡음보다 큰 차이만 결론으로 삼을 수 있습니다.
 
 CXL 노드가 없는 시스템에서 `--membind`에 없는 노드를 주면 실행 자체가 거부됩니다.
 

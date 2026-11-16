@@ -2,7 +2,7 @@
 title: "설계 시나리오 — CXL.mem과 LLM inference KV cache"
 slug: "embedded/performance-engineering/part6-05-case-cxl-llm-kv-cache"
 date: 2026-06-16T09:03:00
-description: "H100과 CXL 메모리를 결합하는 LLM KV cache 설계 시나리오를 살펴봅니다. 구성·성능 수치는 재현되거나 검증된 실측 사례가 아닙니다."
+description: "H100 80GB에 OPT-13B를 올리는 LLM KV cache 설계 시나리오입니다. PagedAttention 논문과 NVIDIA·vLLM 문서의 숫자로 용량과 전송 시간을 계산하며, GPU·CXL 실측은 하지 않았습니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 56
 tags: [cxl, llm-inference, kv-cache, hbm, tiered-memory, case-study]
@@ -58,13 +58,13 @@ H100 80 GB에서 OPT-13B 파라미터 26 GB(Table 1)를 빼면 54 GB가 남습�
 
 ### 2. 옮기는 데 얼마나 걸리는가
 
-GPU와 호스트 메모리 사이의 경로는 PCIe입니다. NVIDIA 문서는 HGX H100 8-GPU baseboard에 "Eight Gen5 x16 links"가 있다고 적습니다. 이 링크를 lane당 32 GT/s(CXL 3.1 명세 1.5절이 PCIe 전기 규격 위에서 정한 PAM4 이전 신호 속도와 같은 값)로 두고 x16을 계산하면 원시 전송률이 한 방향 64 GB/s이고, 요청 하나의 KV(800 KiB × 2048 = 1.5625 GiB)를 옮기는 데 26.2 ms가 걸립니다. 프로토콜 오버헤드를 빼지 않은 *하한*입니다.
+GPU와 호스트 메모리 사이의 경로는 PCIe입니다. NVIDIA HGX 문서는 8-GPU baseboard에 "Eight Gen5 x16 links"가 있다고 적고, [H100 제품 페이지](https://www.nvidia.com/en-us/data-center/h100/)는 H100 SXM의 interconnect를 "PCIe Gen5: 128GB/s"로 적습니다. 페이지는 이 값이 한 방향인지 양방향 합인지 밝히지 않습니다. 128 GB/s를 한 방향에 모두 쓴다고 쳐도 요청 하나의 KV(800 KiB × 2048 = 1.5625 GiB)를 옮기는 데 13.1 ms가 걸리고, 이것이 오버헤드를 빼지 않은 *하한*입니다.
 
 PagedAttention 7.3절(Figure 19)은 실제로 재 봤습니다. block이 작으면 CPU와 GPU 사이에 작은 전송이 많아져 "limits the effective PCIe bandwidth"하고, 그래서 swapping의 오버헤드가 커진다고 적습니다. 반면 recomputation의 오버헤드는 block 크기와 무관하고, "recomputation overhead is never higher than 20% of swapping's latency"였습니다. block 크기 16~64에서는 두 방식의 end-to-end 성능이 비슷했습니다. vLLM의 기본 block 크기는 16입니다(7.2절).
 
 ### 3. Roofline 비교에 필요한 사양
 
-[2-08(메모리 대역폭 분석)](/blog/embedded/performance-engineering/part2-08-memory-bandwidth)의 Roofline으로 보면 두 경로의 차이가 큽니다. HBM은 GPU당 3.35 TB/s이고, PCIe x16 원시 전송률은 64 GB/s입니다. 약 52배 차이입니다. GPU가 KV cache를 직접 CXL 메모리에서 읽게 하는 설계는 이 비율 때문에 성립하기 어렵습니다. CXL 메모리는 GPU 옆의 *작업대*가 아니라 뒤편의 *창고*로 써야 합니다.
+[2-08(메모리 대역폭 분석)](/blog/embedded/performance-engineering/part2-08-memory-bandwidth)의 Roofline으로 보면 두 경로의 차이가 큽니다. HBM은 GPU당 3.35 TB/s이고, PCIe Gen5는 128 GB/s입니다. 가장 유리하게 잡아도 약 26배 차이입니다. GPU가 KV cache를 직접 CXL 메모리에서 읽게 하는 설계는 이 비율 때문에 성립하기 어렵습니다. CXL 메모리는 GPU 옆의 *작업대*가 아니라 뒤편의 *창고*로 써야 합니다.
 
 ## 원인
 
@@ -94,7 +94,7 @@ PagedAttention 4.5절의 swapping 설계에는 중요한 성질이 있습니다.
 |---|---|---|
 | baseline vs CXL CPU tier | 요청률별 normalized latency | 논문 6절 평가에서 쓴 지표 |
 | swapping vs recomputation | block 크기별 오버헤드 | 논문 7.3절, Figure 19 |
-| CPU tier 위치 | 호스트 DRAM 노드 vs CXL 노드의 swap-in 시간 | 이 글의 계산(26.2 ms 하한)과 비교 |
+| CPU tier 위치 | 호스트 DRAM 노드 vs CXL 노드의 swap-in 시간 | 이 글의 계산(13.1 ms 하한)과 비교 |
 
 ## DAMON로 본 access 분포
 
@@ -110,7 +110,7 @@ CPU tier에 내려간 KV block은 sequence가 다시 스케줄되기 전까지 �
 
 > ⚠️ GPU가 CXL 메모리를 직접 읽게 하기
 
-HBM 3.35 TB/s와 PCIe x16 원시 64 GB/s는 약 52배 차이입니다. CXL 메모리는 KV cache를 *보관*하는 곳이지, attention 계산 중에 읽는 곳이 아닙니다.
+HBM 3.35 TB/s와 PCIe Gen5 128 GB/s는 약 26배 차이입니다. CXL 메모리는 KV cache를 *보관*하는 곳이지, attention 계산 중에 읽는 곳이 아닙니다.
 
 > ⚠️ "CXL.mem 추가 = throughput 향상"
 
@@ -122,13 +122,13 @@ PagedAttention 7.3절에서 recomputation 오버헤드는 swapping 지연의 20%
 
 > ⚠️ 작은 block으로 swap
 
-같은 절은 작은 block이 PCIe 실효 대역폭을 떨어뜨린다고 적습니다. 800 KiB/token 모델에서 block 16개 token은 12,800 KiB입니다. 전송 단위가 이보다 작아지는 설정은 피합니다.
+같은 절(Figure 19)은 block이 작으면 CPU와 GPU 사이에 작은 전송이 많아져 swapping 오버헤드가 커지고, block 크기 16~64에서는 swapping과 recomputation의 end-to-end 성능이 비슷했다고 적습니다. swapping을 쓴다면 vLLM 기본값인 16보다 block을 줄이지 않습니다.
 
 ## 정리
 
 - OPT-13B의 KV cache는 800 KB/token, 최대 길이 요청 하나에 1.6 GB입니다(PagedAttention 3절).
 - H100 80 GB 한 장에서 파라미터 26 GB를 빼면, 최대 길이 요청 약 34개에서 KV 공간이 찹니다(계산값).
-- 그 KV를 PCIe x16 원시 64 GB/s로 옮기면 요청당 26.2 ms가 하한입니다. HBM과의 대역폭 차이는 약 52배입니다.
+- 그 KV를 PCIe Gen5 128 GB/s(NVIDIA 표기)로 옮기면 요청당 13.1 ms가 하한입니다. HBM과의 대역폭 차이는 약 26배입니다.
 - vLLM의 offload에서 GPU와 직접 주고받는 것은 CPU primary tier뿐이므로, CXL 메모리의 자리는 그 tier 안(NUMA 정책)입니다. 이 설정은 돌려 보지 않았습니다.
 - swapping의 대안인 recomputation은 논문에서 swapping 지연의 20% 이하였습니다.
 

@@ -117,7 +117,7 @@ CXL에서 읽은 샘플을 따로 표시할 수 있는지도 PMU에 달려 있�
 
 ## numastat — NUMA 노드별 통계
 
-CXL 메모리가 System RAM으로 올라와 별도 노드가 되면, numastat으로 노드별 할당을 볼 수 있습니다. 카운터의 뜻은 v6.12 `Documentation/admin-guide/numastat.rst`가 정합니다.
+CXL 메모리가 System RAM으로 올라와 별도 노드가 되면, numastat으로 노드별 할당을 볼 수 있습니다. 카운터의 뜻은 v6.12 `Documentation/admin-guide/numastat.rst`가 정하고, 단위는 page입니다("All units are pages").
 
 | 카운터 | 정의 (numastat.rst) |
 |---|---|
@@ -208,7 +208,7 @@ design.rst의 region 기반 샘플링에서는 region마다 page 하나만 봅�
 
 > ⚠️ numastat 카운터로 이동량 추정
 
-numastat.rst의 카운터는 *할당 횟수*입니다. 어느 노드에서 어디로 몇 byte가 옮겨졌는지는 이 값으로 복원할 수 없습니다.
+numastat.rst는 "All units are pages"라고 적고, `mm/page_alloc.c`는 할당마다 page 수(`nr_account`)만큼 카운터를 올립니다. 할당된 page 수의 누적일 뿐이라, 어느 노드에서 어디로 몇 byte가 *옮겨졌는지*는 이 값으로 복원할 수 없습니다.
 
 ## 정리
 

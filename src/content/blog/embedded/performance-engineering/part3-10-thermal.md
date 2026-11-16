@@ -71,7 +71,7 @@ Linux에서 온도와 냉각 장치는 `/sys/class/thermal/` 아래에 `thermal_
 | `cooling_deviceX/cur_state` | 현재 냉각 단계. 0이면 냉각 없음, `max_state`면 최대 냉각 |
 | `cooling_deviceX/stats/time_in_state_ms` | 단계별 머문 시간 |
 
-`trip_point_Y_temp`가 millidegree라서 `75000`은 75°C입니다. 커널 문서 `Documentation/driver-api/thermal/sysfs-api.rst`에는 ACPI thermal zone 예시가 실려 있습니다. 문서의 값을 그대로 옮기면 다음과 같습니다.
+`trip_point_Y_temp`가 millidegree라서 `75000`은 75°C입니다. 커널 문서 `Documentation/driver-api/thermal/sysfs-api.rst`에는 ACPI thermal zone 예시가 실려 있습니다. 문서 예시에서 일부 줄(`mode`, `available_policies`, `cdev*` 등)을 빼고 옮기면 다음과 같습니다.
 
 ```text
 |thermal_zone1:
@@ -213,7 +213,7 @@ $$
 
 > ⚠️ RθJA로 실제 보드의 junction 온도 계산
 
-$T_J = T_A + R_{\theta JA} \times P$는 흔히 쓰이지만, SPRA953D 1.1절은 이것을 *misapplication*이라고 적습니다. RθJA는 JEDEC JESD51 표준 시험 보드에서 잰 값이라 패키지끼리 비교하는 용도입니다. 같은 절은 still-air RθJA 측정에서 칩 전력의 70~95%가 패키지 표면이 아니라 시험 보드로 빠져나간다고 적습니다. 실제 보드는 그 시험 보드와 다르니, 이 식으로 낸 T_J는 크게 틀릴 수 있습니다. 설계 검증은 실보드에서 패키지 윗면 온도를 재고 Ψ_JT로 환산합니다.
+$T_J = T_A + R_{\theta JA} \times P$는 흔히 쓰이지만, SPRA953D 1.1절은 이것을 *misapplication*이라고 적습니다. RθJA는 JEDEC JESD51 표준 시험 보드에서 잰 값이라 패키지끼리 비교하는 용도입니다. 같은 절은 still-air RθJA 측정에서 칩 전력의 70~95%가 패키지 표면이 아니라 시험 보드로 빠져나간다고 적습니다. 실제 보드는 그 시험 보드와 다르고, 같은 절은 이 식을 쓰면 "extremely erroneous values"가 나온다고 적습니다. 설계 검증은 실보드에서 패키지 윗면 온도를 재고 Ψ_JT로 환산합니다.
 
 > ⚠️ Throttling 무시한 RT design
 

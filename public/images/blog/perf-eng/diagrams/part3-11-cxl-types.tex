@@ -29,7 +29,7 @@
 \node[devbox, minimum height=20mm] (t1) at (-5.5, -0.5) {};
 \node[devacc] at (-5.5, 0.3) {NIC / Accel};
 \node[devcache] at (-5.5, -0.5) {Device Cache};
-\node[font=\sffamily\tiny, text=mutec] at (-5.5, -1.3) {(no local memory)};
+\node[font=\sffamily\tiny, text=mutec] at (-5.5, -1.3) {(device memory optional)};
 
 \draw[arr, draw=focusc, line width=0.6pt] (cpu.south west) .. controls (-2.5, 2.8) and (-5.5, 2) .. (t1.north);
 \node[cxllbl] at (-3.5, 2.2) {CXL.cache};
@@ -58,9 +58,9 @@
 
 % --- Bottom comparison ---
 \node[font=\sffamily\scriptsize, text=mutec, align=left, anchor=north west, text width=130mm] at (-6.5, -2.5) {%
-\textbf{Type 1}: accelerator without memory — host DRAM을 coherent하게 cache\\[1pt]
-\textbf{Type 2}: accelerator with memory — 양방향 coherent, unified memory\\[1pt]
-\textbf{Type 3}: memory expander — TB 단위 확장, NUMA node로 인식};
+\textbf{Type 1}: device with cache — host memory를 coherent하게 cache (§2.1)\\[1pt]
+\textbf{Type 2}: cache + HDM-D/HDM-DB device memory (§2.2)\\[1pt]
+\textbf{Type 3}: HDM-H memory expander, CXL.cache 요청 없음 (§2.3)};
 
 \end{tikzpicture}
 \end{document}

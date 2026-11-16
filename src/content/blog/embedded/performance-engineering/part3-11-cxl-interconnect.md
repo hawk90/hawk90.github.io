@@ -82,7 +82,7 @@ coherency는 HN-F의 snoop filter가 추적합니다(4-09편 참고). CXL 2.0 �
 
 ## 코드 — Type 3 expander를 Linux에서 보기
 
-Type 3 장치를 Linux에서 보는 첫 단계는 `/sys/bus/cxl/devices/`와 ndctl의 `cxl list`입니다. 실보드가 없어 QEMU 11.1.3의 `cxl-type3` 장치(volatile 256 MiB)를 `-M virt,cxl=on`에 붙이고 Debian 13 arm64(커널 6.12.116+deb13-arm64, ndctl 81)를 부팅했습니다. 같은 설정을 HVF 가속으로 돌리면 펌웨어 단계에서 `unhandled exception ec=0x20`이 반복되며 부팅하지 못해, 이 측정은 TCG(`-accel tcg -cpu max`)로 했습니다.
+Type 3 장치를 Linux에서 보는 첫 단계는 `/sys/bus/cxl/devices/`와 ndctl의 `cxl list`입니다. 실보드가 없어 QEMU 11.1.3의 `cxl-type3` 장치(volatile 256 MiB)를 `-M virt,cxl=on`에 붙이고 Debian 13 arm64(커널 6.12.116+deb13-arm64, ndctl 81)를 부팅했습니다. 같은 설정을 HVF 가속으로 돌리면 UEFI 펌웨어 출력이 하나도 나오기 전부터 `0x0: unhandled exception ec=0x20`(PC 0x0)이 반복되며 부팅하지 못해, 이 측정은 TCG(`-accel tcg -cpu max`)로 했습니다.
 
 ```bash
 qemu-system-aarch64 -M virt,gic-version=3,cxl=on,cxl-fmw.0.targets.0=cxl.1,cxl-fmw.0.size=4G \
@@ -142,7 +142,8 @@ for (size_t i = 0; i < n; i++) p = *p;         /* warm-up pass */
 uint64_t t0 = now_ns();                        /* clock_gettime(CLOCK_MONOTONIC) */
 for (long i = 0; i < iters; i++) p = *p;
 uint64_t t1 = now_ns();
-printf("%.2f ns/load\n", (double)(t1 - t0) / iters);
+printf("size=%zu KiB  %.2f ns/load  (end=%p)\n", size >> 10,
+       (double)(t1 - t0) / iters, (void *)p);
 ```
 
 CXL 장치가 없으니 같은 코드로 *계층에 따라 지연이 어떻게 갈리는지*를 Apple M2 Pro(macOS 27.2.1, Apple clang 21.0.0 `-O2`)에서 쟀습니다. `sysctl` 기준 P 코어 L1d는 128 KiB, P 클러스터 L2는 16 MiB입니다. 크기마다 5회 돌린 중앙값이고, 다른 작업이 함께 돌던 호스트라(load average 약 8~13) 큰 버퍼일수록 편차가 컸습니다.
@@ -175,13 +176,13 @@ CXL.cache는 MESI 상태를 디바이스와 호스트 사이로 넓힙니다. �
 
 | 단계 | 메시지 | 명세 |
 |------|------|------|
-| 1 | Device → host D2H 요청. `RdShared`(Shared로 캐시) 또는 `RdOwn`(쓰기 가능 상태로 캐시) | 3.2.4.2.7, 3.2.4.2.8 |
+| 1 | Device → host D2H 요청. `RdShared`(Shared로 캐시) 또는 `RdOwn`(쓰기 가능 상태로 캐시) | 3.2.4.2.8, 3.2.4.2.7 |
 | 2 | 호스트가 다른 캐시의 상태를 확인하고 필요하면 snoop | 3.2.4.4 |
 | 3 | Host → device `GO` 응답. RspType에 MESI 상태(GO-S, GO-E, GO-M 등) | 3.2.4.5.2 |
 | 4 | 호스트 쪽 쓰기가 생기면 host → device H2D `SnpInv` | 3.2.4.4.2 |
 | 5 | 디바이스는 모든 사본을 무효화하고, dirty면 데이터를 돌려줌 | 3.2.4.4.2 |
 
-3.2.4.4.2절은 `SnpInv`를 "typically triggered by write requests"라고 적고, 받은 디바이스가 "must invalidate all cachelines"라고 정합니다. 별도의 "Invalidate" opcode는 없습니다. 호스트와 디바이스가 같은 line을 번갈아 쓰면 `RdOwn`과 `SnpInv`가 링크를 오가는 ping-pong이 생깁니다.
+3.2.4.4.2절은 `SnpInv`를 "typically triggered by write requests"라고 적고, 받은 디바이스가 "must invalidate all cachelines"라고 정합니다. CXL.cache의 H2D 요청은 `SnpData`, `SnpInv`, `SnpCur` 세 가지이고(Table 3-26), 그중 무효화를 맡는 것이 `SnpInv`입니다. 이름에 Inv가 들어간 `MemInv`·`MemInvNT`는 CXL.mem 쪽 명령입니다. 호스트와 디바이스가 같은 line을 번갈아 쓰면 `RdOwn`과 `SnpInv`가 링크를 오가는 ping-pong이 생깁니다.
 
 ## 자주 보는 함정과 안티패턴
 
