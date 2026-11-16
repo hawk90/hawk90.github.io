@@ -16,9 +16,7 @@ topics: ["tools", "tools/emulation"]
 
 ## 어떤 문제를 푸는가
 
-상용 simulator(VCS·Questa·Xcelium)는 라이선스가 있어야 돌고, CI에 넣으면 runner마다 라이선스 서버에 닿아야 합니다. 학생·open-source 기여자·startup의 첫 prototype 단계에서는 이 진입장벽 자체가 문제입니다.
-
-Verilator는 이 문제를 다음 셋으로 풉니다.
+cosim을 매 push마다 돌리려면 simulator를 개인 PC와 CI runner 어디에나 설치할 수 있어야 합니다. 이 시리즈는 상용 simulator(VCS·Questa·Xcelium)를 쓰지 않았고, 그 라이선스 조건도 다루지 않습니다. Verilator가 이 자리에 맞는 이유는 다음 셋입니다.
 
 - **Open source** — 저장소 README의 SPDX 표기가 `LGPL-3.0-only OR Artistic-2.0`입니다. Homebrew formula도 같은 라이선스를 표시합니다.
 - **컴파일된 모델** — RTL을 C++로 변환해 host compiler로 최적화합니다. 아래 측정에서 32-bit counter 하나가 trace 없이 초당 1,600만 cycle 넘게 돌았습니다.
@@ -314,7 +312,12 @@ jobs:
           path: '*.fst'
 ```
 
-이 workflow는 실행하지 않았습니다. Ubuntu 패키지의 Verilator 판은 이 장의 5.054와 다를 수 있으므로, 빌드 첫 단계에서 `verilator --version`을 로그에 남깁니다. FST가 lz4를 요구하는지도 그 판과 패키지 구성에서 확인합니다.
+이 workflow는 실행하지 않았고, 각 줄은 다음 1차 자료와 대조했습니다.
+
+- `runs-on: ubuntu-latest` — actions/runner-images README의 표가 `ubuntu-latest`를 Ubuntu 24.04로 적습니다.
+- `apt-get install verilator gtkwave` — packages.ubuntu.com의 noble(24.04) 판은 `verilator (5.020-1)`, `gtkwave (3.3.116-1build2)`입니다. 이 장에서 쓴 5.054보다 오래된 판이므로, 이 장의 출력이 그대로 나온다고 보지 않습니다.
+- `actions/checkout@v4`, `actions/upload-artifact@v4` — 두 저장소에 `v4` tag가 있습니다(GitHub API `git/refs/tags/v4`).
+- `if: failure()` — GitHub의 workflow syntax 문서는 `if: ${{ failure() }}`가 붙은 step이 "only runs when the previous step of a job fails"라고 설명합니다.
 
 ## 정리
 
@@ -335,6 +338,7 @@ jobs:
 - [Connecting to Verilated Models](https://verilator.org/guide/latest/connecting.html) — eval·time·DPI 경계
 - [Verilator repository](https://github.com/verilator/verilator) v5.054 — README SPDX 라이선스, `docs/guide/install.rst` 플랫폼 목록
 - Verilator 5.054 설치판 `include/verilated_types.h:255`, `:268`
+- [actions/runner-images README](https://github.com/actions/runner-images), [packages.ubuntu.com noble/verilator](https://packages.ubuntu.com/noble/verilator), [noble/gtkwave](https://packages.ubuntu.com/noble/gtkwave), [GitHub Docs: Workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
 
 실행 환경은 macOS 27.2.1, Apple M2 Pro, Homebrew Verilator 5.054, Apple clang 21.0.0입니다(2026-11-16). GitHub Actions workflow와 Linux에서의 빌드는 실행하지 않았습니다.
 
