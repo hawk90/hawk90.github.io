@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Polling은 단순, interrupt는 균형, DMA는 throughput."** UART 드라이버 세 변종은 각각 다른 trade-off를 다룹니다.
+> **"Polling은 단순하고, interrupt는 균형이 좋고, DMA는 throughput이 높습니다."** UART 드라이버 세 변종은 각각 다른 trade-off를 다룹니다.
 
 ## 어떤 상황에서 쓰나
 
