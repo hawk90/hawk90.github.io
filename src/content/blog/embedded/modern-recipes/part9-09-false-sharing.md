@@ -1,8 +1,8 @@
 ---
-title: "False Sharing 해결 — Cache Line Padding·SoA 적용"
+title: "False Sharing 해결 — Cache Line Padding·Per-CPU·thread_local"
 slug: "embedded/modern-recipes/part9-09-false-sharing"
 date: 2026-04-18T09:08:00
-description: "False sharing의 원리와 영향, perf c2c 감지, alignas(64) padding, per-CPU 변수, thread-local까지 해결 전략을 정리합니다."
+description: "False sharing의 원리, 8/64/128 B 간격 실측, hardware_destructive_interference_size, per-CPU·thread_local 배치, perf c2c의 요구 조건을 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 109
 tags: [recipes, concurrency, cache, false-sharing]
@@ -91,11 +91,11 @@ threads=8  8 B apart    32.5   64 B apart  1180.1   128 B apart  1935.3   M incs
 | 4 | 61~68 | 798~1,418 | 1,987~2,013 |
 | 8 | 27~32 | 1,060~1,180 | 1,935~3,680 |
 
-8 B 간격(카운터들이 한두 line에 몰림)은 스레드를 늘릴수록 *총* 처리량이 줄었습니다. 64 B 간격은 두 카운터가 한 128 B line을 나눠 쓰므로 여전히 간섭해서, 8스레드에서도 2스레드 근처에 머물렀습니다. 128 B 간격에서야 스레드 수에 따라 처리량이 늘었습니다. 이 Mac에서 "alignas(64)로 띄운다"는 처방은 절반만 맞습니다.
+8 B 간격(카운터들이 한두 line에 몰림)은 스레드를 늘릴수록 *총* 처리량이 줄었습니다. 64 B 간격은 두 카운터가 한 128 B line을 나눠 쓰므로 여전히 간섭해서, 8스레드에서 1,060~1,180으로 128 B 간격(1,935~3,680)의 3분의 1에서 절반 남짓에 그쳤습니다. 128 B 간격에서야 스레드 수에 따라 처리량이 늘었습니다. 이 Mac에서 "alignas(64)로 띄운다"는 처방은 절반만 맞습니다.
 
 ### C++17 `hardware_destructive_interference_size`
 
-C++ working draft [hardware.interference]p1은 이 값을 "the minimum recommended offset between two concurrently-accessed objects to avoid additional performance degradation due to contention"이라고 정의하고, 값은 구현이 정합니다. 이 글의 두 툴체인에서 실제 값과 스택 정렬, `thread_local` 배치를 함께 확인했습니다.
+C++ working draft [hardware.interference]p1은 이 값을 "the minimum recommended offset between two concurrently-accessed objects to avoid additional performance degradation due to contention introduced by the implementation"이라고 정의하고, 값은 구현이 정합니다. 이 글의 두 툴체인에서 실제 값과 스택 정렬, `thread_local` 배치를 함께 확인했습니다.
 
 ```cpp
 // probe.cpp — what the toolchain and OS say about line size and alignment
@@ -218,7 +218,7 @@ perf c2c record -o c2c.data -- ./mybin
 perf c2c report -i c2c.data
 ```
 
-위 `probe.log`의 마지막 줄 "failed: no PMU supports the memory events"가 이 guest의 결과입니다. SPE가 있는 실제 Arm 보드나 Intel·AMD 머신에서 다시 해 보아야 하고, 이 글에서는 c2c 보고서 자체를 보지 못했습니다.
+위 출력의 마지막 줄 "failed: no PMU supports the memory events"가 이 guest의 결과입니다. SPE가 있는 실제 Arm 보드나 Intel·AMD 머신에서 다시 해 보아야 하고, 이 글에서는 c2c 보고서 자체를 보지 못했습니다.
 
 ## 측정 / 성능 비교
 
