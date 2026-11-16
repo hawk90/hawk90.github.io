@@ -41,7 +41,7 @@ void process() {
 }
 ```
 
-경로마다 정리 코드를 반복해야 하고, 새 경로를 추가할 때 빠뜨리기 쉽습니다. 예외가 도는 환경에서는 거의 불가능에 가깝습니다.
+경로마다 정리 코드를 반복해야 하고, 새 경로를 추가할 때 빠뜨리기 쉽습니다. 예외가 도는 환경이라면 `read_data` 안에서 던진 예외가 이 함수를 지나가는 경로마다 따로 정리 코드가 필요해집니다.
 
 **RAII** (Resource Acquisition Is Initialization)는 이 문제를 언어 차원에서 해결합니다.
 
@@ -71,7 +71,7 @@ C++ 표준이 다음 시점에 소멸자 호출을 보장합니다.
 - 함수가 return하면 모든 local 객체의 소멸자가 호출됩니다.
 - 처리할 예외로 stack unwinding이 진행되면 생성이 완료된 자동 객체를 역순으로 소멸시킵니다. 생성에 실패한 객체 자체의 소멸자는 호출되지 않습니다. 처리되지 않은 예외와 `terminate` 경로에는 같은 정리 보장을 적용하지 않습니다.
 - 객체가 delete되면 소멸자가 호출됩니다.
-- 프로그램 종료 시 static 객체의 소멸자가 호출됩니다(임베디드에서는 보통 호출되지 않습니다).
+- `main`이 반환하거나 `exit`가 불리면 static 객체의 소멸자가 호출됩니다([basic.start.term]/1). `main`이 끝나지 않는 무한 루프 firmware에서는 이 시점이 오지 않습니다.
 
 ## 임베디드의 RAII — 5가지 자원
 
@@ -210,7 +210,24 @@ void shared() {
 }
 ```
 
-핵심은 이전 상태를 보존하는 데 있습니다. 이미 disabled 상태에서 진입했다면 다시 enable하지 않으므로, nested critical section에서도 안전합니다.
+핵심은 이전 상태를 보존하는 데 있습니다. 이미 disabled 상태에서 진입했다면 다시 enable하지 않으므로, 중첩된 critical section에서도 바깥 구역이 끝나기 전에 인터럽트가 켜지지 않습니다.
+
+이 클래스가 손으로 쓴 코드보다 비싼지는 컴파일 결과로 볼 수 있습니다. CMSIS의 `__get_PRIMASK`·`__set_PRIMASK`·`__disable_irq`를 같은 동작의 인라인 어셈블리(`mrs`·`msr`·`cpsid i`)로 정의하고, 이전 상태를 손으로 저장·복원하는 `shared_manual()`과 위 `shared_raii()`(`counter`는 `volatile uint32_t`)를 arm-none-eabi-g++ 16.2.0 `-mcpu=cortex-m4 -mthumb -Os`로 컴파일했습니다. 두 함수는 같은 28바이트, 같은 명령열이 나왔습니다.
+
+```text
+0000001c <_Z11shared_raiiv>:
+  1c:	mrs	r1, PRIMASK
+  20:	cpsid	i
+  22:	ldr	r3, [pc, #16]
+  24:	ldr	r2, [r3, #0]
+  26:	adds	r2, #1
+  28:	str	r2, [r3, #0]
+  2a:	ldr	r3, [r3, #0]
+  2c:	msr	PRIMASK, r1
+  30:	bx	lr
+```
+
+`if (counter > MAX) return;`의 두 경로가 모두 PRIMASK 복원으로 끝나므로 컴파일러가 분기를 없애고 `volatile` 읽기(`ldr r3, [r3, #0]`)만 남겼습니다. 소멸자 호출은 `msr PRIMASK, r1` 한 명령이 됐습니다.
 
 ## RAII 패턴 4 — Pool Allocator Handle
 
@@ -285,7 +302,7 @@ public:
 
 **Rule of Five (C++11)**: 위 셋에 이동 생성자와 이동 대입을 더해 다섯을 모두 정의합니다.
 
-**Rule of Zero**: 직접 자원을 관리하지 않고 표준 RAII 클래스(`std::unique_ptr` 등)에 위임합니다. 가장 권장되는 방식입니다.
+**Rule of Zero**: 직접 자원을 관리하지 않고 표준 RAII 클래스(`std::unique_ptr` 등)에 위임합니다. C++ Core Guidelines C.20 "기본 연산을 정의하지 않을 수 있다면 정의하지 마라"가 이 규칙입니다.
 
 ## RAII vs `defer` — 다른 언어와의 비교
 
@@ -309,14 +326,14 @@ try (var f = new FileInputStream("data.bin")) {
 ```
 
 ```cpp
-// C++ RAII — 가장 깔끔
+// C++ RAII
 void process() {
     std::ifstream f("data.bin");
     // 자동 close — 별도 표시 불필요
 }
 ```
 
-C++ RAII는 추가 키워드가 필요 없습니다. 객체 scope 자체가 자원 lifetime이며, 가장 통합된 접근입니다.
+C++ RAII는 사용하는 쪽에 추가 키워드가 필요 없습니다. Go의 `defer`와 Java의 try-with-resources는 호출하는 쪽이 매번 정리를 적어야 하지만, RAII는 정리를 타입이 한 번 정의합니다.
 
 ## 임베디드 특화 — Move semantics 주의
 
@@ -349,12 +366,19 @@ Buffer create_buffer() {
 }
 ```
 
-Move 생성자는 `noexcept`로 표시하는 것이 강력히 권장됩니다. `std::vector` 등의 재할당은 복사가 가능하고 이동이 예외를 던질 수 있을 때 복사를 선택할 수 있습니다. 복사 금지 타입에는 이 fallback이 없으며, 이동 실패 시 보장도 달라집니다.
+Move 생성자는 `noexcept`로 표시합니다(C++ Core Guidelines C.66). `std::vector`는 재할당할 때 `std::move_if_noexcept`로 원소를 옮기므로, 복사가 가능하고 이동이 `noexcept`가 아니면 복사를 고릅니다. 복사·이동 횟수를 세는 원소 타입을 `emplace_back`으로 다섯 번 넣어 보면(g++-16, libstdc++) 차이가 그대로 보입니다.
+
+```text
+move noexcept              copies=0 moves=7
+move not noexcept          copies=7 moves=0
+```
+
+재할당이 세 번(용량 1→2→4→8) 일어나며 기존 원소 1+2+4 = 7개를 옮겼는데, `noexcept`가 없는 쪽은 7번 모두 복사했습니다. 복사 금지 타입에는 이 fallback이 없어 이동을 쓰고, 그 이동이 예외를 던지면 `vector`의 강한 예외 보장이 사라집니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. 소멸자에서 예외
-소멸자에서 예외를 던지면 stack unwinding 중 terminate됩니다. 예외를 허용하지 않는 설계에서는 해제 API도 예외를 던지지 않도록 계약을 정합니다. `-fno-exceptions`에서는 소스의 `throw`나 `try/catch`가 컴파일되지 않을 수 있습니다.
+C++11부터 소멸자는 따로 적지 않으면 `noexcept`입니다. 그래서 소멸자에서 던진 예외는 바깥 `catch`에 닿지 못하고 `std::terminate`로 끝납니다. `~Closer() { throw 1; }`를 `try { Closer c; } catch (int) {}` 안에서 쓰면 g++-16은 컴파일 때 `warning: 'throw' will always call 'terminate' [-Wterminate]`를 내고, 실행하면 `terminate called after throwing an instance of 'int'`와 함께 exit 134(SIGABRT)로 끝납니다. 해제 API도 예외를 던지지 않도록 계약을 정합니다. `-fno-exceptions`에서는 소스의 `throw`가 컴파일 오류입니다([Part 1-01](/blog/embedded/embedded-cpp/part1-01-cpp-vs-c#1-예외-처리)).
 
 ```cpp
 ~Resource() noexcept {
@@ -368,7 +392,7 @@ class MutexLock {
 public:
     MutexLock(osMutexId_t m) : mutex_(m) { osMutexAcquire(mutex_, osWaitForever); }
     ~MutexLock() { osMutexRelease(mutex_); }
-    // copy 정의 안 함 → 컴파일러 자동 생성 → double-release crash
+    // copy 정의 안 함 → 컴파일러 자동 생성 → release 두 번
 };
 
 void shared() {
@@ -376,13 +400,13 @@ void shared() {
     MutexLock l2 = l;   // copy → 둘 다 release → double release
 }
 ```
-복사 연산자는 `= delete`로 명시적으로 막아야 합니다.
+복사본 `l2`는 mutex를 획득하지 않았는데 소멸자에서 release합니다. CMSIS-RTOS2 문서에 따르면 소유하지 않은 mutex의 `osMutexRelease`는 `osErrorResource`를 반환합니다. 이 클래스는 반환값을 보지 않으므로 오류가 조용히 버려지고, 소유자인 쪽이 먼저 소멸하면 보호 구역이 의도보다 일찍 풀립니다. 복사 연산자는 `= delete`로 명시적으로 막아야 합니다.
 
 ### 3. 전역 RAII로 long-lived 자원
 ```cpp
 static MutexLock g_lock(some_mutex);   // 영원히 lock
 ```
-RAII는 지역 객체에 어울립니다. 전역에 쓰면 해제 시점이 프로그램 종료(임베디드에서는 거의 일어나지 않음)가 되어 의도가 모호해집니다.
+RAII는 지역 객체에 어울립니다. 전역에 쓰면 해제 시점이 `main` 반환이나 `exit`가 되는데, 무한 루프 firmware에는 그 시점이 없습니다. 게다가 이 생성자는 `__libc_init_array` 안에서 돌기 때문에 RTOS 커널이 시작되기 전에 mutex를 획득하려고 합니다.
 
 ### 4. Constructor에서 실패
 ```cpp
@@ -446,7 +470,7 @@ int main() {
 }
 ```
 
-실행: `clang++ -std=c++17 -Wall -Wextra -pedantic-errors raii-check.cpp -o raii-check && ./raii-check`. Clang 23.1.3, arm64 macOS에서 확인했습니다. 크기와 명령 수가 수동 코드와 같은지는 대상 빌드의 디스어셈블리로 별도 비교해야 하며, 인라인이나 비용 0을 언어가 보장하지 않습니다.
+실행: `clang++ -std=c++17 -Wall -Wextra -pedantic-errors raii-check.cpp -o raii-check && ./raii-check`. Homebrew Clang 23.1.5, arm64 macOS에서 경고 없이 exit 0이었습니다. 언어는 소멸자의 인라인을 보장하지 않으므로, 비용은 위 `InterruptGuard`처럼 대상 빌드의 디스어셈블리로 비교합니다.
 
 [표준 초안의 scope 이탈 규칙](https://eel.is/c++draft/stmt.dcl)과 [CMSIS-RTOS2 mutex 계약](https://arm-software.github.io/CMSIS_6/latest/RTOS2/group__CMSIS__RTOS__MutexMgmt.html)을 기준으로 정리 보장의 범위와 획득 성공 조건을 구분했습니다.
 
@@ -456,7 +480,7 @@ int main() {
 - 임베디드의 5가지 RAII 자원은 Mutex, Peripheral, Interrupt, Memory, DMA입니다.
 - Rule of Three/Five/Zero로 자원 관리를 명시하며, 복사 금지와 이동 허용을 택하거나 표준 클래스에 위임합니다.
 - 정리 소멸자는 예외를 밖으로 던지지 않는 계약을 두고 실패 보고는 별도 경로로 설계합니다.
-- RAII의 추가 비용은 최적화 결과와 상태 보존 요구에 따라 확인합니다.
+- `InterruptGuard`는 `-Os` Cortex-M4에서 손으로 쓴 저장·복원과 같은 명령열이 됐습니다. 추가 비용은 이런 디스어셈블리 비교로 확인합니다.
 
 ## 관련 항목
 
