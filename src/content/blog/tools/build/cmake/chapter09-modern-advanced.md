@@ -22,7 +22,7 @@ topics: ["tools", "tools/build"]
 
 이 장은 *순차적 학습*이 아니라 *참조용*에 가깝습니다. 필요한 자리만 찾아 읽으면 됩니다.
 
-실행 기준은 CMake 4.4.4·Ninja 1.13.2·macOS·AppleClang 21입니다. 마지막 예제는 정상 빌드, 변경 없는 재빌드, 입력 변경 후 재생성, 개인 프리셋 상속을 실제로 비교합니다. JSON 스키마 version 6과 최소 정책 기준은 CMake 3.25를 사용합니다.
+실행 기준은 CMake 4.5.0·Ninja 1.13.2·macOS 27.2·AppleClang 21이고, 이 글의 출력과 측정값은 모두 이 환경에서 나왔습니다. 마지막 예제는 정상 빌드, 변경 없는 재빌드, 입력 변경 후 재생성, 개인 프리셋 상속을 실제로 비교합니다. JSON 스키마 version 6과 최소 정책 기준은 CMake 3.25를 사용합니다.
 
 ---
 
@@ -130,7 +130,7 @@ add_custom_command(TARGET myapp POST_BUILD
 )
 ```
 
-`myapp` 빌드가 끝난 *직후*에 자동으로 strip을 실행합니다. CI에서 산물 후처리(코드 사이닝, 압축, 카피)를 자동화할 때 자주 등장합니다.
+`myapp` 빌드가 끝난 *직후*에 자동으로 strip을 실행합니다. 코드 사이닝, 압축, 복사 같은 산물 후처리도 같은 자리에 둡니다. `POST_BUILD` 명령은 `myapp`이 다시 링크될 때만 실행되므로, 변경 없는 재빌드에서는 돌지 않습니다.
 
 ---
 
@@ -148,7 +148,7 @@ target_sources(mylib PRIVATE
 )
 ```
 
-`add_library()`나 `add_executable()` 시점에 *모든 소스를 다 알 필요 없이*, *나중에 추가*할 수 있습니다. 큰 프로젝트에서 모듈별 `add_subdirectory`가 *공통 라이브러리에 자기 소스를 더하는* 패턴이 자주 등장합니다.
+`add_library()`나 `add_executable()` 시점에 *모든 소스를 다 알 필요 없이*, *나중에 추가*할 수 있습니다. 그래서 모듈별 `add_subdirectory`가 *공통 라이브러리에 자기 소스를 더하는* 구성이 가능합니다.
 
 ```cmake
 # 최상위
@@ -161,7 +161,7 @@ target_sources(mylib PRIVATE sin.cpp cos.cpp)
 target_sources(mylib PRIVATE format.cpp)
 ```
 
-CMake 3.23+부터 *공개 헤더*도 `target_sources`로 등록할 수 있습니다.
+CMake 3.23부터 *공개 헤더*도 `target_sources`의 `FILE_SET`으로 등록할 수 있습니다(3.23 릴리스 노트에 `target_sources`의 `FILE_SET` 모드와 `install(TARGETS)`의 `FILE_SET` 인자가 함께 나옵니다).
 
 ```cmake
 target_sources(mylib
@@ -171,10 +171,18 @@ target_sources(mylib
 )
 ```
 
-설치에도 포함하려면 아래처럼 FILE_SET 설치 규칙을 명시합니다. BASE_DIRS 아래의 상대 구조가 보존됩니다. 헤더 목록을 등록하는 것만으로 설치되는 것은 아닙니다.
+설치에도 포함하려면 아래처럼 FILE_SET 설치 규칙을 명시합니다. 헤더 목록을 등록하는 것만으로 설치되는 것은 아닙니다.
 
 ```cmake
 install(TARGETS mylib FILE_SET HEADERS DESTINATION include)
+```
+
+정적 라이브러리 `st`에 `BASE_DIRS include`, `FILES include/mylib/api.hpp`를 등록하고 위 규칙으로 설치한 4.5.0 출력입니다. `BASE_DIRS` 아래의 상대 구조 `mylib/api.hpp`가 그대로 보존됐습니다.
+
+```text
+-- Install configuration: "Release"
+-- Installing: <src>/st/lib/libst.a
+-- Installing: <src>/st/include/mylib/api.hpp
 ```
 
 ### `target_link_options()` — 링커 옵션 (libraries와 다름)
@@ -184,7 +192,7 @@ target_link_libraries(myapp PRIVATE pthread)   # 라이브러리 (-lpthread)
 target_link_options(myapp PRIVATE -Wl,--as-needed)   # 링커 플래그
 ```
 
-`target_link_libraries`는 *링크할 라이브러리*, `target_link_options`는 *링커에게 줄 옵션*. 자주 헷갈리는 자리입니다. `-flto`, `-static`, `-fuse-ld=lld`, `-Wl,-rpath,...` 같은 옵션은 *`target_link_options`*에 속합니다.
+`target_link_libraries`는 *링크할 라이브러리*, `target_link_options`는 *링커에게 줄 옵션*을 받습니다. `-flto`, `-static`, `-fuse-ld=lld`, `-Wl,-rpath,...` 같은 옵션은 *`target_link_options`*에 속합니다. 4.5.0·macOS에서 위 두 줄을 빌드하면 링크 명령은 `... -Wl,--as-needed CMakeFiles/myapp.dir/m.cpp.o -o myapp  -lpthread`였습니다. 옵션은 오브젝트 앞, 라이브러리는 뒤에 놓입니다. 다만 `--as-needed`는 GNU ld·lld의 옵션이라 Apple `ld`는 `ld: unknown options: --as-needed`로 거부했습니다. 링커 옵션은 플랫폼별로 `$<$<PLATFORM_ID:Linux>:...>`처럼 감쌉니다.
 
 ### `target_precompile_headers()` — PCH (3.16+)
 
@@ -197,9 +205,9 @@ target_precompile_headers(myapp PRIVATE
 )
 ```
 
-PCH는 자주 쓰는 헤더의 전처리·파싱 결과를 재사용하는 기능입니다. PUBLIC은 소비자에게 PCH용 헤더 목록을 전파하는 것이며, 이미 컴파일된 같은 PCH 산출물을 공유하는 뜻은 아닙니다. 산출물 재사용은 `target_precompile_headers(consumer REUSE_FROM producer)`라는 별도 형식입니다. 두 타겟의 컴파일 옵션·정의 등이 맞아야 합니다. [PCH 문서](https://cmake.org/cmake/help/v4.4/command/target_precompile_headers.html)의 전파와 재사용을 구분합니다.
+PCH는 자주 쓰는 헤더의 전처리·파싱 결과를 재사용하는 기능입니다(3.16 릴리스 노트에 추가). PUBLIC은 소비자에게 PCH용 헤더 목록을 전파하는 것이며, 이미 컴파일된 같은 PCH 산출물을 공유하는 뜻은 아닙니다. 산출물 재사용은 `target_precompile_headers(consumer REUSE_FROM producer)`라는 별도 형식입니다. [PCH 문서](https://cmake.org/cmake/help/v4.4/command/target_precompile_headers.html)는 이 형식이 두 타겟에 같은 컴파일러 옵션·플래그·정의를 요구하고, GCC 같은 컴파일러는 PCH를 쓸 수 없으면 `-Winvalid-pch` 경고를 낼 수 있다고 적습니다.
 
-성능 효과는 빌드 환경과 헤더 구성에 따라 측정합니다. 이 글은 PCH 시간 단축 수치나 REUSE_FROM 실행 결과를 제공하지 않습니다.
+효과는 헤더 구성에 따라 크게 다르므로 한 가지 경우를 재 봤습니다. `<vector>`·`<string>`·`<unordered_map>`·`<map>`·`<iostream>`·`<regex>`·`<algorithm>`·`<functional>`·`<memory>`를 포함하고 `std::regex`를 쓰는 소스 40개와 `main.cpp`를 Debug, `-j1`로 새로 빌드하면, 세 번 잰 시간이 PCH 없이 22.5~23.3초, 위 아홉 헤더를 `target_precompile_headers(... PRIVATE ...)`로 지정하면 14.9~15.3초였습니다(AppleClang 21). `REUSE_FROM`은 producer 하나와 그것을 재사용하는 타겟 둘로 확인했는데, 빌드 디렉터리에 생긴 `.pch`는 `producer.dir/cmake_pch.hxx.pch` 하나뿐이었습니다.
 
 ### `set_target_properties()` — 일반화된 속성 설정
 
@@ -215,11 +223,11 @@ set_target_properties(mylib PROPERTIES
 `target_*` 명령 카테고리에 *맞는 게 없는* 속성을 설정합니다. 대표적인 자리:
 
 - `VERSION` / `SOVERSION` — 동적 라이브러리 ABI 버전.
-- `POSITION_INDEPENDENT_CODE ON` — 해당 toolchain의 위치 독립 코드 생성 설정을 요청합니다. 모든 플랫폼에서 문자 그대로 -fPIC를 붙인다는 뜻은 아닙니다.
-- `INTERPROCEDURAL_OPTIMIZATION TRUE` — LTO 켜기.
+- `POSITION_INDEPENDENT_CODE ON` — 해당 toolchain의 위치 독립 코드 생성 설정을 요청합니다. 이 속성을 준 정적 라이브러리의 컴파일 명령에 AppleClang 기준 `-fPIC`가 붙었습니다.
+- `INTERPROCEDURAL_OPTIMIZATION TRUE` — LTO 켜기. AppleClang 21에서는 컴파일·링크 명령에 `-flto=thin`이 들어갔습니다.
 - `EXPORT_NAME` — export한 타겟의 이름 부분을 지정합니다. ALIAS 타겟을 만드는 명령과는 다릅니다.
 
-`target_*` 명령으로 못하는 게 있으면 `set_target_properties`가 거의 답입니다.
+위 속성으로 공유 라이브러리를 빌드하면 macOS에서는 `libmylib.1.0.0.dylib`와 두 심볼릭 링크 `libmylib.1.dylib`·`libmylib.dylib`가 생기고, 링크 명령에 `-compatibility_version 1.0.0 -current_version 1.0.0 ... -install_name @rpath/libmylib.1.dylib`가 들어갔습니다. 전용 `target_*` 명령이 없는 속성은 이렇게 `set_target_properties`로 설정합니다.
 
 ### `target_compile_features` vs `set(CMAKE_CXX_STANDARD)`
 
@@ -319,7 +327,6 @@ ctest --preset default
 장점들:
 
 - *VCS로 공유 가능*. 팀 전체가 같은 설정을 쓰게 됨.
-- *IDE 1급 지원*. CLion·VS Code·Visual Studio 모두 프리셋을 자동 인식.
 - *상속*. `inherits`로 공통 설정을 빼고 차이만 정의.
 - *CI 일관성*. CI에서도 같은 프리셋을 호출.
 
@@ -356,12 +363,12 @@ add_custom_command(...
 |------|------|
 | `copy` / `copy_if_different` / `copy_directory` | 파일 복사 |
 | `make_directory` | `mkdir -p` |
-| `remove` / `remove_directory` | 삭제 |
+| `rm [-rRf]` | 삭제 (`remove`·`remove_directory`는 4.5.0 도움말에 deprecated로 표시) |
 | `rename` | 이름 변경 |
 | `chdir <dir> <cmd>` | 디렉터리 이동 후 실행 |
 | `env [vars] <cmd>` | 환경 변수와 함께 실행 |
 | `compare_files` | 두 파일 비교 |
-| `create_symlink` | 심볼릭 링크 |
+| `create_symlink` / `create_hardlink` | 심볼릭·하드 링크 |
 | `tar` | tar 압축/해제 |
 | `time` | 명령 실행 시간 측정 |
 
@@ -448,9 +455,37 @@ cmake --build --preset personal
 ./build/personal/app
 ```
 
-첫 빌드에서 `Generating version.hpp`가 나타나고 프로그램은 `version=1.0.0`을 출력합니다. 변경 없는 두 번째 빌드는 다시 생성하지 않습니다. 두 번 호출한 ping은 각각 PING을 출력합니다. 입력의 버전을 2.0.0으로 바꾸고 다시 빌드하면 생성·컴파일이 다시 실행되고 프로그램도 `version=2.0.0`을 출력합니다.
+4.5.0에서 실행한 결과입니다(경로는 줄임).
 
-개인 프리셋의 이름을 personal 대신 debug로 바꾸면 `cmake --list-presets`에서 Duplicate preset 오류가 나야 합니다. 이는 덮어쓰기가 아니라 중복 정의이므로, 개인 프리셋 이름을 원복하고 상속으로 차이를 표현합니다.
+```text
+$ cmake --list-presets
+Available configure presets:
+
+  "personal"
+  "debug"
+$ cmake --build --preset debug
+[1/3] Generating version.hpp
+[2/3] Building CXX object CMakeFiles/app.dir/main.cpp.o
+[3/3] Linking CXX executable app
+$ ./build/debug/app
+version=1.0.0
+$ cmake --build --preset debug
+ninja: no work to do.
+$ cmake --build build/debug --target ping
+[1/1] cd .../build/debug && /opt/homebrew/bin/cmake -E echo PING
+PING
+```
+
+`ping`은 두 번째 호출에서도 같은 두 줄을 출력했습니다. OUTPUT이 없는 커스텀 타겟이라 매번 실행됩니다. `personal` 프리셋은 `debug`에서 물려받은 `binaryDir`의 `${presetName}`이 `personal`로 풀려 `build/personal/`에 구성됐고, 캐시는 `CMAKE_BUILD_TYPE:STRING=Release`였습니다. `version.hpp.in`의 버전을 2.0.0으로 바꾸고 `cmake --build --preset debug`를 다시 돌리자 `[1/3] Generating version.hpp`부터 세 단계가 다시 실행됐고 프로그램은 `version=2.0.0`을 출력했습니다.
+
+개인 프리셋의 이름을 `personal` 대신 `debug`로 바꾸면 `cmake --list-presets`부터 실패합니다.
+
+```text
+CMake Error: Could not read presets from <src>:
+Duplicate preset: "debug"
+```
+
+이는 덮어쓰기가 아니라 중복 정의이므로, 개인 프리셋은 새 이름을 쓰고 상속으로 차이를 표현합니다.
 
 ## 정리
 
@@ -474,15 +509,15 @@ CMake 시리즈는 여기서 마칩니다. Ch 1의 세 줄짜리 CMakeLists.txt�
 
 다음 단계로 권장:
 
-- *큰 오픈소스 프로젝트의 CMakeLists.txt 읽기*. LLVM, Qt, KDE, Krita는 좋은 학습 대상.
-- *FetchContent로 의존성 묶어 보기*. 한 번 해 보면 시스템 의존성 관리가 한결 단순해짐.
+- *큰 오픈소스 프로젝트의 CMakeLists.txt 읽기*. LLVM(`llvm/CMakeLists.txt`), Qt(`qtbase`), Krita는 모두 CMake로 빌드합니다.
+- *FetchContent로 의존성 묶어 보기*. [Ch 5](/blog/tools/build/cmake/chapter05-find-package)에서 본 것처럼 `FIND_PACKAGE_ARGS`에는 버전 조건을 같이 적습니다.
 - *CMakePresets.json을 팀에 도입*. 처음 한 번 설정해 두면 그 뒤로 모두가 같은 빌드를 함.
 
 ## 참고 자료
 
 - [CMake target_* commands reference](https://cmake.org/cmake/help/v4.4/manual/cmake-commands.7.html)
 - [CMake Presets](https://cmake.org/cmake/help/v4.4/manual/cmake-presets.7.html)
-- [Modern CMake — Henry Schreiner](https://cliutils.gitlab.io/modern-cmake/) — 가장 권장하는 자료
+- [Modern CMake — Henry Schreiner](https://cliutils.gitlab.io/modern-cmake/) — 무료 온라인 책
 - [Professional CMake — Craig Scott](https://crascit.com/professional-cmake/) — 책
 
 ## 관련 항목
