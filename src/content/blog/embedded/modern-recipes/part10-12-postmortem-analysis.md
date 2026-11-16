@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-배포한 장치가 가끔 재부팅되고, 재현은 안 되고, 사용자는 "그냥 멈췄다"고만 합니다. 이때 필요한 것은 crash 순간의 레지스터·메모리·로그를 남겨 두었다가 나중에 꺼내 보는 장치입니다. Linux 기반 장치는 커널의 core dump를, OS가 없는 MCU는 직접 만든 mini-dump를 씁니다. 이 글은 MCU 쪽을 QEMU에서 실제로 끝까지 돌려 보고(fault → dump 저장 → reset → 다음 부팅에서 보고), Linux 쪽은 실제 실행 결과가 있는 [Postmortem Debugging 시리즈](/blog/tools/debugging/postmortem/chapter01-core-generation)로 연결합니다.
+배포한 장치가 가끔 재부팅되고, 재현은 안 되고, 사용자는 "그냥 멈췄다"고만 합니다. 이때 필요한 것은 crash 순간의 레지스터·메모리·로그를 남겨 두었다가 나중에 꺼내 보는 방법입니다. Linux 기반 장치는 커널의 core dump를, OS가 없는 MCU는 직접 만든 mini-dump를 씁니다. 이 글은 MCU 쪽을 QEMU에서 실제로 끝까지 돌려 보고(fault → dump 저장 → reset → 다음 부팅에서 보고), Linux 쪽은 실제 실행 결과가 있는 [Postmortem Debugging 시리즈](/blog/tools/debugging/postmortem/chapter01-core-generation)로 연결합니다.
 
 ## Linux core dump
 
@@ -29,7 +29,7 @@ echo "/var/crash/core.%e.%p.%t" | sudo tee /proc/sys/kernel/core_pattern
 ./my_program
 ```
 
-Debian 13에서는 `systemd-coredump` 패키지를 설치하면 `core_pattern`이 그 처리기로 바뀌고 서비스의 core 한도도 함께 바뀝니다. 그 다음부터는 `coredumpctl list`로 목록을, `coredumpctl debug <PID>`로 gdb 진입을 합니다. Debian 13 VM에서 실제로 확인한 동작과 출력은 [Postmortem 1장](/blog/tools/debugging/postmortem/chapter01-core-generation)에 있습니다.
+Debian 13에서는 `systemd-coredump` 패키지를 설치하면 `core_pattern`이 그 처리기로 바뀌고 서비스의 core 한도도 함께 바뀝니다. 그 다음부터는 `coredumpctl list`로 목록을, `coredumpctl debug <PID>`로 gdb에 들어갑니다. Debian 13 VM에서 실제로 확인한 동작과 출력은 [Postmortem 1장](/blog/tools/debugging/postmortem/chapter01-core-generation)에 있습니다.
 
 ### gdb로 보기
 
@@ -110,7 +110,7 @@ int main(void) {
 }
 ```
 
-reset은 AIRCR에 `VECTKEY`(0x05FA)와 `SYSRESETREQ`(bit 2)를 쓰는 것으로 요청합니다(ARMv7-M ARM B3.2.6). 같은 일을 CMSIS `NVIC_SystemReset()`이 합니다.
+reset은 AIRCR에 `VECTKEY`(0x05FA)와 `SYSRESETREQ`(bit 2)를 써서 요청합니다(ARMv7-M ARM B3.2.6). 같은 일을 CMSIS `NVIC_SystemReset()`이 합니다.
 
 ```bash
 arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -O1 -g -ffreestanding -nostdlib -Wall \
