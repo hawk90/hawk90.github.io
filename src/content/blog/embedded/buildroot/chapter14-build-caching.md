@@ -193,7 +193,7 @@ Buildroot는 단계별 시작·끝 시각을 `output/build/build-time.log`에 �
 | **패키지 1개 `-rebuild`** | 그 패키지 build·install (이미지는 다음 `make`) | 실측 busybox 8.03초(Ch 4) |
 | **커널 fragment 변경** | 커널 merge·configure·build | 실측 28.16초(Ch 12) |
 | **패키지 하위 옵션 변경** | 자동으로 다시 빌드하지 않음 | 매뉴얼: "the package is not automatically rebuilt" |
-| **toolchain·아키텍처 변경** | 전체 재빌드 필요 | 매뉴얼: "a complete rebuild is needed" |
+| **toolchain·아키텍처 변경** | 전체 재빌드 필요 | 매뉴얼: 아키텍처 "a complete rebuild is needed", toolchain "a complete rebuild generally is needed" |
 | **`make clean` 후 (ccache warm)** | 모든 패키지의 압축 해제부터 | 실측 423.88초 |
 
 패키지 옵션을 바꿨을 때 무엇을 다시 빌드할지는 Buildroot가 추적하지 않습니다. 영향이 불명확하면 해당 패키지를 `-dirclean`하거나 `make clean all`을 합니다.

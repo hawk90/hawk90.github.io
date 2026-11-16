@@ -33,7 +33,7 @@ topics: ["embedded"]
 
 ## make pkg-stats — CVE 매칭
 
-`make pkg-stats`는 현재 설정의 패키지 메타데이터와 NVD 데이터를 대조해 보고서를 만듭니다. 최상위 `Makefile` 965~970행이 `support/scripts/pkg-stats -c --json $(O)/pkg-stats.json --html $(O)/pkg-stats.html …`를 부릅니다. 빌드가 끝났는지나 취약점을 실제로 악용할 수 있는지를 증명하는 명령은 아닙니다.
+`make pkg-stats`는 현재 설정의 패키지 메타데이터와 NVD 데이터를 대조해 보고서를 만듭니다. 최상위 `Makefile` 965~971행이 `support/scripts/pkg-stats -c --json $(O)/pkg-stats.json --html $(O)/pkg-stats.html …`를 부릅니다. 빌드가 끝났는지나 취약점을 실제로 악용할 수 있는지를 증명하는 명령은 아닙니다.
 
 NVD 데이터를 가져오는 방법은 `support/scripts/cve.py`에 있습니다. 31행 `NVD_BASE_URL = "https://github.com/fkie-cad/nvd-json-data-feeds/"`이고, 처음에는 이 저장소를 통째로 `git clone`, 다음부터는 `git pull`합니다(150~165행). 이 장의 VM은 소스 다운로드가 초당 수십~수백 KB까지 떨어지는 환경이라 NVD 전체 이력을 clone하는 이 단계를 실행하지 않았습니다. CI에서는 이 디렉터리를 캐시해 두지 않으면 매번 전체 clone이 일어난다는 점을 염두에 둡니다.
 

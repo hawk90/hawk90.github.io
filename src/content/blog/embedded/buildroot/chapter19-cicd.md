@@ -324,7 +324,7 @@ ccache 공유의 흔한 함정 세 가지.
 
 - **권한** — root로 만든 ccache를 non-root user로 읽으면 hit가 안 됩니다. CI에서 `--user 1000:1000`으로 고정합니다.
 - **target 차이** — ccache는 컴파일러와 인자를 hash에 넣으므로 aarch64와 armv7 결과가 섞여 잘못 쓰이지는 않습니다. 다만 한 디렉터리를 나눠 쓰면 서로의 항목이 용량 한도 안에서 경쟁해 밀려나므로, CI cache 단위(키)를 보드별로 나누는 편이 hit율 관리에 유리합니다. Buildroot internal toolchain은 wrapper가 `CCACHE_COMPILERCHECK=string:<gcc 설정 hash>`를 설정해(`toolchain/toolchain-wrapper.c` 512행, hash는 `package/gcc/gcc.mk` 334행에서 계산) output 디렉터리가 달라도 같은 gcc 설정이면 같은 컴파일러로 봅니다.
-- **크기 한계** — ccache의 기본 한도는 ccache 자체 설정을 따릅니다. Buildroot에서는 `BR2_CCACHE_INITIAL_SETUP`에 `--max-size` 같은 옵션을 적어 빌드 시작 때 적용하거나(`Config.in` help), `make CCACHE_OPTIONS="--max-size=5G" ccache-options`로 바꿉니다(매뉴얼 "Using ccache in Buildroot"). Ch 14의 QEMU 실측에서 캐시 디렉터리 크기는 그 장의 표에 있습니다.
+- **크기 한계** — ccache의 기본 한도는 ccache 자체 설정을 따릅니다. Buildroot에서는 `BR2_CCACHE_INITIAL_SETUP`에 `--max-size` 같은 옵션을 적어 빌드 시작 때 적용하거나(`Config.in` help), `make CCACHE_OPTIONS="--max-size=5G" ccache-options`로 바꿉니다(매뉴얼 "Using ccache in Buildroot"). Ch 14의 QEMU 실측에서 캐시 디렉터리는 114 MB(기본 상한 5.0 GiB의 2.18%)였습니다.
 
 ccache 매체 결정은 dl과 다릅니다. ccache는 *수십만 개 작은 파일*입니다. S3에 raw로 올리면 *호출 수가 폭발*합니다. tarball로 묶어서 올립니다.
 
