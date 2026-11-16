@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 이 글은 STM32F405/407의 두 워치독, IWDG와 WWDG를 레지스터로 설정하고 어느 쪽을 어떤 조건에서 쓸지 정합니다. WWDG 시간 계산은 PCLK1 = 42 MHz를 전제로 하며, 이 값을 만드는 분주 설정은 [4-04: 클럭 설정](/blog/embedded/modern-recipes/part4-04-clock-setup)에 있습니다.
 
-출처는 다음 판을 씁니다. 동작과 타이밍은 [RM0090 Rev 22](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf), LSI 주파수 범위는 [DS8626 Rev 12](https://www.st.com/resource/en/datasheet/stm32f407vg.pdf), 레지스터 이름과 비트 위치는 [CMSIS `stm32f407xx.h` v2.6.9](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h), HAL과의 비교는 [STM32F4 HAL driver v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/tree/v1.8.5)입니다. ST 링크는 판이 고정되지 않은 최신본 주소이고, 본문 수치는 위에 적은 판에서 읽었습니다.
+출처는 다음 판을 씁니다. 동작과 타이밍은 [STM32F4 HAL driver v1.8.5](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/tree/v1.8.5)의 `stm32f4xx_hal_iwdg.c`·`stm32f4xx_hal_wwdg.c` 머리 주석과 코드, LSI 주파수 범위는 [DS8626](https://www.st.com/resource/en/datasheet/stm32f407vg.pdf) Rev 4(DocID022152), 레지스터 이름과 비트 위치는 [CMSIS `stm32f407xx.h` v2.6.9](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h)입니다. reference manual RM0090은 이 글을 고치는 동안 내려받지 못해, 그 문서에만 있는 설명은 넣지 않았습니다.
 
 ## 핵심 개념
 
@@ -22,13 +22,12 @@ topics: ["embedded"]
 |------|------|------|
 | Clock | LSI, 17 / 32 / 47 kHz (min / typ / max) | PCLK1 / 4096 / 2^WDGTB |
 | Reset 조건 | counter가 0x000에 도달 | counter가 0x40 → 0x3F로 내려감, *또는* counter > W일 때 refresh |
-| 시작 | `KR = 0xCCCC`, 또는 option bit `WDG_SW` = 0이면 power-on에 하드웨어가 시작 | `WDGA` = 1. reset 뒤에는 항상 꺼져 있음 |
+| 시작 | `KR = 0xCCCC`, 또는 option byte 설정으로 하드웨어가 시작(`FLASH_OPTCR_WDG_SW`) | `WDGA` = 1 |
 | 켠 뒤 끄기 | 불가 (LSI도 강제로 켜진 채 유지) | 불가 (system reset 전까지) |
-| Stop / Standby | 동작 (VDD domain), IWDG reset으로 Standby 탈출 | 정지 |
+| Stop / Standby | 동작 (VDD domain), IWDG reset으로 Standby 탈출 | clock 원인 PCLK1이 Stop에서 멈춤 |
 | reset 전 경고 | 없음 | EWI interrupt (counter = 0x40) |
-| RM0090이 권하는 용도 | main 동작과 독립된 안전망, 낮은 timing 정확도 요구 | 정확한 timing window 안의 반응 |
 
-LSI 값은 DS8626 Table 35(VDD = 3 V, TA = −40 ~ 105 °C, characterization 값, 양산 시험 아님)입니다. IWDG 열은 RM0090 21.1~21.3절과 Table 16(`WDG_SW`: 0 = hardware, 1 = software watchdog), "끄기 불가"는 [HAL IWDG 주석](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_iwdg.c#L33-L36)에서 옮겼습니다. WWDG 열은 RM0090 22.2~22.6절입니다. WWDG의 Stop/Standby 행은 RM0090의 세 문장을 이어 얻은 결론입니다. 1.2 V domain에는 core·memory·digital peripheral이 있고(5.1.3절), Stop에서는 이 domain의 clock이 모두 멈추며(5.3.4절), Standby에서는 이 domain의 전원이 꺼집니다(5.3절).
+LSI 값은 DS8626 Rev 4 Table 34("VDD = 3 V, TA = –40 to 105 °C", fLSI는 "Based on characterization, not tested in production")입니다. IWDG 열은 [HAL IWDG 주석](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_iwdg.c#L24-L57)에서 옮겼습니다. "The IWDG can be started by either software or hardware (configurable through option byte)", "Once the IWDG is started, the LSI is forced ON and both cannot be disabled", "The IWDG is implemented in the VDD voltage domain that is still functional in STOP and STANDBY mode (IWDG reset can wake up the CPU from STANDBY)"입니다. WWDG 열은 [HAL WWDG 주석](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_wwdg.c#L23-L57)에서 옮겼고("Once enabled the WWDG cannot be disabled except by a system reset", "WWDG clock (Hz) = PCLK1 / (4096 * Prescaler)"), Stop 행은 DS8626 2.2.19절의 "All clocks in the V12 domain are stopped, the PLL, the HSI RC and the HSE crystal oscillators are disabled"에서 PCLK1이 멈춘다는 데서 나옵니다.
 
 ### IWDG timeout과 LSI 편차
 
@@ -38,7 +37,7 @@ Timeout = (RLR + 1) x prescaler / f_LSI
   RLR       = 0 ... 4095                   (12-bit)
 ```
 
-RM0090 Table 107은 이 식을 f_LSI = 32 kHz에 넣은 최소·최대값(/4·RLR = 0에서 0.125 ms, /256·RLR = 0xFFF에서 32768 ms)을 주고, 각주에서 실제 LSI가 데이터시트 범위 안에서 달라진다고 적습니다. 그래서 timeout은 f_LSI 하나가 아니라 17 ~ 47 kHz 범위로 계산합니다. 아래 코드 예제의 설정(PR = /64, RLR = 499)은 LSI 500 × 64 = 32000 주기를 셉니다.
+HAL IWDG 주석은 이 식의 범위를 "Min-max timeout value @32KHz (LSI): ~125us / ~32.7s"로 적고(/4·RLR = 0에서 4 / 32 kHz = 0.125 ms, /256·RLR = 0xFFF에서 4096 × 256 / 32 kHz = 32.77 s), 바로 다음 줄에 "The IWDG timeout may vary due to LSI clock frequency dispersion"이라고 덧붙입니다. 그래서 timeout은 f_LSI 하나가 아니라 17 ~ 47 kHz 범위로 계산합니다. 아래 코드 예제의 설정(PR = /64, RLR = 499)은 LSI 500 × 64 = 32000 주기를 셉니다.
 
 | f_LSI | timeout |
 | --- | --- |
@@ -50,7 +49,7 @@ refresh 간격의 상한은 가장 짧은 값인 0.681 s입니다. 그보다 촘
 
 ### WWDG window
 
-WWDG는 7-bit counter `T[6:0]`이 0x40에서 0x3F로 내려가는 순간 reset을 냅니다. counter가 window 값 `W`보다 클 때 refresh해도 reset입니다(RM0090 22.3절). 같은 절의 다른 문장은 counter가 W보다 *작을 때* reload하라고 적어, counter = W인 순간은 두 문장이 다르게 읽힙니다. 아래 표와 시간 계산은 첫 문장을 따르며, 경계를 피하려면 counter가 W − 1 이하일 때 refresh합니다. 아래 코드 예제처럼 counter = 0x7F, W = 0x60이면 다음과 같습니다.
+HAL WWDG 주석에 따르면 "a reset is generated when the counter value rolls down from 0x40 to 0x3F"이고, "An MCU reset is also generated if the counter value is refreshed before the counter has reached the refresh window value"입니다. 같은 주석의 사용법 절은 refresh가 "only when the counter is lower than the refresh window value"여야 한다고 적어, counter = W인 순간은 두 문장이 다르게 읽힙니다. 경계를 피하려면 counter가 W − 1 이하일 때 refresh합니다. 아래 코드 예제처럼 counter = 0x7F, W = 0x60이면 다음과 같습니다.
 
 | Counter 값 | 이때 refresh하면 |
 | --- | --- |
@@ -86,7 +85,7 @@ while (1) {
 
 순서는 `HAL_IWDG_Init()`과 같습니다. start(0xCCCC) → 쓰기 허용(0x5555) → PR·RLR 쓰기 → `IWDG_SR`의 PVU·RVU가 0이 될 때까지 대기 → reload(0xAAAA). `PR = 4`는 HAL의 `IWDG_PRESCALER_64`(`IWDG_PR_PR_2`)와 같은 값입니다([HAL IWDG header](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Inc/stm32f4xx_hal_iwdg.h#L83)).
 
-첫 줄의 0xCCCC 뒤로는 IWDG를 끌 방법이 없습니다. `WDG_SW` = 0으로 programming된 칩은 이 줄이 없어도 power-on 때 IWDG가 이미 돌고 있고(RM0090 21.3.1절), 그때 설정은 reset 값인 PR = /4, counter 0xFFF(21.3절, 21.4.2절)입니다. 이 경우 4096 × 4 = 16384 LSI 주기, 즉 LSI max에서 0.349 s 안에 첫 refresh가 와야 합니다. IWDG가 시작된 시점부터 첫 `iwdg_kick()`까지의 경로(부트로더, clock 설정, 긴 초기화)가 이 시간을 넘으면 IWDG reset이 나고, 다음 부팅이 같은 경로를 다시 밟으므로 reset이 반복됩니다. 이 증상의 진단은 [10-06: 부팅 실패 진단](/blog/embedded/modern-recipes/part10-06-boot-failure)의 "Watchdog 활성으로 boot loop" 항목에 있습니다.
+첫 줄의 0xCCCC 뒤로는 IWDG를 끌 방법이 없습니다. option byte로 하드웨어 시작을 고른 칩은 이 줄이 없어도 power-on 때 IWDG가 이미 돌고 있고, HAL 주석대로 counter는 "reset value (0xFFF)"부터 줄어듭니다. 그때의 prescaler reset 값은 RM0090에 있어 이 글에서 확인하지 못했으므로 첫 refresh 기한은 보드에서 잽니다. IWDG가 시작된 시점부터 첫 `iwdg_kick()`까지의 경로(부트로더, clock 설정, 긴 초기화)가 그 기한을 넘으면 IWDG reset이 나고, 다음 부팅이 같은 경로를 다시 밟으므로 reset이 반복됩니다. 이 증상의 진단은 [10-06: 부팅 실패 진단](/blog/embedded/modern-recipes/part10-06-boot-failure)의 "Watchdog 활성으로 boot loop" 항목에 있습니다.
 
 ### Multi-task check-in 패턴
 
@@ -128,9 +127,9 @@ void wwdg_init(void) {
     RCC->APB1ENR |= RCC_APB1ENR_WWDGEN;
 
     // PCLK1 = 42 MHz, /4096, WDGTB = /8 -> 1 step = 0.780 ms
-    // first step after a CR write: 0 ~ 1 step (prescaler state unknown)
-    // counter reaches W = 0x60 after 31 steps: (23.41, 24.19] ms
-    // counter rolls 0x40 -> 0x3F after 64 steps: (49.15, 49.93] ms -> reset
+    // refresh allowed from (0x7F - 0x60) = 31 steps = 24.19 ms
+    //                 to (0x7F - 0x40) = 63 steps = 49.15 ms
+    // no refresh: reset after 64 steps = 49.93 ms (HAL: T[5:0] + 1)
     WWDG->CFR = (3u << WWDG_CFR_WDGTB_Pos)   // WDGTB = 0b11 -> /8, EWI (bit 9) off
               | 0x60u;                       // W = 0x60
     WWDG->CR = WWDG_CR_WDGA | 0x7Fu;         // enable, counter = 0x7F
@@ -141,31 +140,31 @@ static inline void wwdg_kick(void) {
 }
 ```
 
-`WDGTB`는 `WWDG_CFR` bit 8:7, `EWI`는 bit 9입니다([CMSIS header](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h#L12697-L12707)). counter는 PCLK1 4096 × 2^WDGTB 주기마다 1씩 줄어듭니다(RM0090 22.6.1절). 한 step은 `t_PCLK1 × 4096 × 2^WDGTB`(22.4절)이고, 42 MHz·/8에서 4096 × 8 / 42 MHz = 0.780 ms입니다. RM0090 22.3절은 `WWDG_CR`에 쓰는 순간 prescaler 상태를 알 수 없어 시간이 최소값과 최대값 사이에서 달라진다고 적습니다. 즉 쓰기 직후 첫 step은 0 ms 초과 0.780 ms 이하에서 끝나고, 모든 시점에 1 step의 불확실성이 붙습니다. counter가 W = 0x60에 닿아 window가 열리는 시점은 마지막 refresh 뒤 23.41 ms 초과 24.19 ms 이하이고, refresh가 없으면 64 step째인 49.15 ms 초과 49.93 ms 이하에서 reset이 납니다. window 안에 머무는 시간은 counter 0x60 ~ 0x40의 33 step, 25.75 ms로 일정합니다. [HAL WWDG 주석](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_wwdg.c#L53-L57)은 같은 설정(42 MHz, /8, T[5:0] = 0x3F)의 timeout을 "approximately 49.93ms"로 적는데, 이 값은 위 범위의 최대값입니다.
+`WDGTB`는 `WWDG_CFR` bit 8:7, `EWI`는 bit 9입니다([CMSIS header](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Include/stm32f407xx.h#L12697-L12707)). 시간 계산은 HAL WWDG 주석의 식을 그대로 씁니다. WWDG clock = PCLK1 / (4096 × 2^WDGTB) = 42 MHz / 32768이므로 한 step은 0.780 ms이고, "WWDG timeout (mS) = 1000 * (T[5;0] + 1) / WWDG clock"에 T[5:0] = 0x3F를 넣으면 64 step = 49.93 ms입니다. refresh 가능 구간은 "min time (mS) = 1000 * (Counter - Window) / WWDG clock" = 31 step = 24.19 ms부터 "max time (mS) = 1000 * (Counter - 0x40) / WWDG clock" = 63 step = 49.15 ms까지입니다. HAL은 같은 설정(42 MHz, /8, T[5:0] = 0x3F)의 timeout을 "approximately 49.93ms"로 적습니다. `WWDG_CR`에 쓴 순간과 첫 step 사이의 정확한 관계는 RM0090에 있어 이 글은 다루지 않으므로, 위 값들은 step 하나만큼의 오차를 두고 씁니다.
 
-`HAL_WWDG_Init()`은 `CR`(WDGA·counter)을 먼저 쓰고 `CFR`을 나중에 씁니다([hal_wwdg.c](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_wwdg.c#L209-L213)). 위 코드는 순서를 바꿔, `WDGA`로 워치독이 켜지는 순간 이미 W와 prescaler가 들어가 있게 했습니다. `wwdg_kick()`이 `WDGA`까지 함께 쓰는 것은 RM0090 22.3절이 `WWDG_CR`에 쓰는 값을 0xC0 ~ 0xFF로 정하기 때문입니다.
+`HAL_WWDG_Init()`은 `CR`(WDGA·counter)을 먼저 쓰고 `CFR`을 나중에 씁니다([hal_wwdg.c](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Src/stm32f4xx_hal_wwdg.c#L209-L213)). 위 코드는 순서를 바꿔, `WDGA`로 워치독이 켜지는 순간 이미 W와 prescaler가 들어가 있게 했습니다. `wwdg_kick()`은 `WDGA`와 함께 counter를 0x7F로 씁니다. HAL 사용법 주석은 "Care must be taken to provide a counter value greater than 0x40 to prevent generation of immediate reset"이라고 적습니다.
 
-reset 전에 원인을 남기려면 `CFR`의 `EWI`를 켜고 NVIC에서 `WWDG_IRQn`을 enable합니다. counter가 0x40이 되면 interrupt가 오고, 그 다음 한 step 뒤에 reset이 나므로 위 설정에서 ISR이 기록에 쓸 수 있는 시간은 0.780 ms 이하입니다. `EWI`는 한번 켜면 reset 전에는 끌 수 없고, 더 높은 우선순위 코드가 막고 있어 ISR이 돌지 못해도 reset은 그대로 납니다(RM0090 22.3절, 22.6.2절). NVIC 설정은 [4-05: 인터럽트 핸들링](/blog/embedded/modern-recipes/part4-05-interrupt-handling)을 참고합니다.
+reset 전에 원인을 남기려면 `CFR`의 `EWI`를 켜고 NVIC에서 `WWDG_IRQn`을 enable합니다. HAL 주석대로 "When the downcounter reaches 0x40, interrupt occurs. This mechanism requires WWDG interrupt line to be enabled in NVIC. Once enabled, EWI interrupt cannot be disabled except by a system reset." counter가 0x40에서 0x3F로 내려가면 reset이므로 위 설정에서 ISR이 기록에 쓸 수 있는 시간은 한 step(0.780 ms) 안입니다. NVIC 설정은 [4-05: 인터럽트 핸들링](/blog/embedded/modern-recipes/part4-05-interrupt-handling)을 참고합니다.
 
 ```c
 void WWDG_IRQHandler(void) {
-    WWDG->SR = 0;   // clear EWIF: write 0 (writing 1 has no effect)
+    WWDG->SR = ~WWDG_SR_EWIF;   // clear EWIF, same as __HAL_WWDG_CLEAR_FLAG()
     // record the cause here (backup register, etc.); reset follows in <= 1 step
 }
 ```
 
-`EWIF`는 `WWDG_SR` bit 0이고, 소프트웨어가 0을 써서 지웁니다(RM0090 22.3절, 22.6.3절). RM0090 22.3절은 다른 쓰임도 적습니다. ISR에서 counter를 다시 load하면 reset 없이 시스템 점검이나 단계적 기능 축소를 할 수 있습니다. 이때 ISR은 counter가 0x40인 동안, 즉 window 안에서 `wwdg_kick()`과 같은 값을 씁니다.
+`EWIF`는 `WWDG_SR` bit 0이고, HAL의 `__HAL_WWDG_CLEAR_FLAG()`는 `((__HANDLE__)->Instance->SR = ~(__FLAG__))`로 지웁니다. 위 handler도 같은 값을 씁니다.
 
 ### Debug freeze
 
-디버거로 core를 halt하면 IWDG·WWDG counter는 `DBGMCU_APB1_FZ`의 `DBG_IWDG_STOP`·`DBG_WWDG_STOP` 비트에 따라 계속 돌거나 멈춥니다(RM0090 21.3.3절, 22.5절, 38.16.4절). 비트가 0이면 breakpoint에 멈춰 있는 동안 timeout이 지나 reset이 납니다.
+디버거로 core를 halt하면 IWDG counter는 HAL IWDG 주석대로 "either continues to work normally or stops, depending on DBG_IWDG_STOP configuration bit in DBG module"입니다. WWDG도 `DBGMCU_APB1_FZ`에 `DBG_WWDG_STOP` 비트가 있습니다. 비트가 0이면 breakpoint에 멈춰 있는 동안 counter가 계속 줄어 timeout이 지나면 reset이 납니다.
 
 ```c
 DBGMCU->APB1FZ |= DBGMCU_APB1_FZ_DBG_IWDG_STOP
                 | DBGMCU_APB1_FZ_DBG_WWDG_STOP;
 ```
 
-HAL의 `__HAL_DBGMCU_FREEZE_IWDG()`·`__HAL_DBGMCU_FREEZE_WWDG()`가 같은 비트를 씁니다([`stm32f4xx_hal.h`](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Inc/stm32f4xx_hal.h#L81-L82)). 비트는 core가 halt된 동안에만 counter clock을 멈춥니다. 이 레지스터는 POR에서만 지워지고 system reset으로는 지워지지 않으므로(RM0090 38.16.4절), 한 번 set한 비트는 다른 이미지를 올리고 reset해도 전원을 끄기 전까지 남습니다. 디버거를 붙인 채 breakpoint에서 워치독 reset을 일부러 보려면 `__HAL_DBGMCU_UNFREEZE_IWDG()`처럼 비트를 직접 지웁니다.
+HAL의 `__HAL_DBGMCU_FREEZE_IWDG()`·`__HAL_DBGMCU_FREEZE_WWDG()`가 같은 비트를 씁니다([`stm32f4xx_hal.h`](https://github.com/STMicroelectronics/stm32f4xx-hal-driver/blob/v1.8.5/Inc/stm32f4xx_hal.h#L81-L82)). 디버거를 붙인 채 breakpoint에서 워치독 reset을 일부러 보려면 `__HAL_DBGMCU_UNFREEZE_IWDG()`처럼 비트를 직접 지웁니다.
 
 ### Reset 원인 확인
 
@@ -198,7 +197,7 @@ reset_cause_t get_reset_cause(void) {
 }
 ```
 
-검사 순서는 RM0090 7.3.21절에서 나옵니다. `RCC_CSR`의 reset 값은 0x0E00 0000, 즉 POR 뒤에는 `PORRSTF`·`PINRSTF`·`BORRSTF` 세 개가 함께 set됩니다. `BORRSTF`는 "POR/PDR or BOR"에서 set되므로, `PORRSTF`를 먼저 보지 않으면 모든 전원 투입이 brown-out이나 pin reset으로 분류됩니다. flag는 `RMVF`로 지우기 전까지 남으므로 읽은 직후 지웁니다. 부트로더가 먼저 `RMVF`를 썼다면 application에서는 flag가 모두 0이고, 이 경우를 POR로 보고하지 않도록 `RESET_UNKNOWN`을 따로 둡니다. main 첫 줄에서 호출해 cause를 backup register나 Flash에 기록하면 field에서 IWDG reset 빈도를 셀 수 있습니다.
+검사 순서의 근거는 HAL v1.8.5 `stm32f4xx_hal_rcc.h`의 flag 설명입니다. `RCC_FLAG_BORRST`는 "POR/PDR or BOR reset", `RCC_FLAG_PORRST`는 "POR/PDR reset"이므로 전원 투입은 `BORRSTF`도 함께 세웁니다. 그래서 `PORRSTF`를 먼저 보지 않으면 모든 전원 투입이 brown-out으로 분류됩니다. flag는 `RMVF`로 지우기 전까지 남으므로(HAL `__HAL_RCC_CLEAR_RESET_FLAGS()`가 `RMVF`를 씀) 읽은 직후 지웁니다. 부트로더가 먼저 `RMVF`를 썼다면 application에서는 flag가 모두 0이고, 이 경우를 POR로 보고하지 않도록 `RESET_UNKNOWN`을 따로 둡니다. main 첫 줄에서 호출해 cause를 backup register나 Flash에 기록하면 field에서 IWDG reset 빈도를 셀 수 있습니다.
 
 ## 동작 확인
 
@@ -238,17 +237,17 @@ while (1) { }                   // no kick: IWDG must reset
 
 > ⚠️ IWDG를 켠 채 Stop/Standby 진입
 
-IWDG는 Stop·Standby에서도 돌기 때문에(RM0090 21.3절 Note), wake-up 주기가 0.681 s보다 길면 잠든 사이에 reset이 납니다. Standby에서는 이 reset이 wake-up 원인이 됩니다. RTC wake-up 주기를 0.681 s보다 짧게 두고 깰 때마다 refresh합니다. wake-up 원인 목록은 [4-11: 저전력 모드](/blog/embedded/modern-recipes/part4-11-low-power-modes)에 있습니다.
+IWDG는 Stop·Standby에서도 돌기 때문에(HAL 주석 "still functional in STOP and STANDBY mode"), wake-up 주기가 0.681 s보다 길면 잠든 사이에 reset이 납니다. Standby에서는 이 reset이 wake-up 원인이 됩니다. RTC wake-up 주기를 0.681 s보다 짧게 두고 깰 때마다 refresh합니다. wake-up 원인 목록은 [4-11: 저전력 모드](/blog/embedded/modern-recipes/part4-11-low-power-modes)에 있습니다.
 
 > ⚠️ window를 넓히려고 W를 내림
 
-window를 넓히려면 W를 *올립니다*. 위 설정(counter 0x7F, /8, PCLK1 42 MHz)에서 window 폭은 counter W ~ 0x40, 즉 (W − 0x3F) step입니다. W = 0x60이면 33 step = 25.75 ms이고, W = 0x70이면 window가 15 step(10.92 ~ 11.70 ms)에 열려 폭이 49 step = 38.23 ms로 넓어집니다. W를 0x50으로 내리면 47 step(35.89 ~ 36.67 ms)에야 열려 폭이 17 step = 13.26 ms로 좁아집니다. refresh 시점의 jitter가 window 폭보다 크면 정상 동작 중에도 reset이 납니다.
+window를 넓히려면 W를 *올립니다*. HAL 식대로 refresh 가능 구간은 마지막 refresh 뒤 (0x7F − W) step부터 (0x7F − 0x40) = 63 step까지입니다. 위 설정(counter 0x7F, /8, PCLK1 42 MHz, 1 step 0.780 ms)에서 W = 0x60이면 31 step(24.19 ms)부터, W = 0x70이면 15 step(11.70 ms)부터, W = 0x50이면 47 step(36.67 ms)부터 refresh할 수 있고, 끝은 모두 63 step(49.15 ms)입니다. W를 내리면 window가 늦게 열려 좁아지므로, refresh 시점의 jitter가 그 폭보다 크면 정상 동작 중에도 reset이 납니다.
 
 ## 정리
 
 - 독립 안전망은 IWDG, refresh가 너무 이른 것까지 잡아야 하면 WWDG입니다. 두 워치독 모두 켜면 끌 수 없습니다.
 - IWDG timeout은 공칭 32 kHz가 아니라 LSI max(47 kHz)로 계산합니다. 이 글의 설정에서 refresh 간격과 sleep 길이의 상한은 0.681 s입니다.
-- breakpoint를 쓰는 debug 빌드는 freeze 비트를 set합니다. 이 비트는 POR에서만 지워집니다.
+- breakpoint를 쓰는 debug 빌드는 freeze 비트를 set합니다.
 - reset 원인은 IWDG·WWDG·SW·LPWR → POR → PIN → BOR 순으로 보고, flag가 없으면 `RESET_UNKNOWN`으로 남깁니다.
 
 다음 편은 **Flash 프로그래밍**입니다. erase·program, dual bank, EEPROM emulation을 다룹니다.
