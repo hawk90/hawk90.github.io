@@ -18,9 +18,9 @@ topics: ["embedded"]
 
 ELF 파일은 섹션의 집합입니다. `.text`, `.rodata`, `.data`, `.bss`, `.init_array` 등은 자동으로 어딘가에 배치되지 않습니다. 링커 스크립트가 어느 메모리의 어느 주소에 두는지 결정합니다.
 
-벤더(STM32, NXP)가 기본 링커 스크립트를 제공하지만, C++가 추가하는 섹션(`.init_array`, `.fini_array`, `.gnu.linkonce.*`)이나 프로젝트 특화 영역(외부 SDRAM, CCM RAM, DMA buffer)을 다루려면 직접 이해해야 합니다.
+벤더(STM32, NXP)가 기본 링커 스크립트를 제공하지만, C++가 추가하는 섹션(`.init_array`, `.fini_array`, 템플릿 인스턴스의 COMDAT 섹션)이나 프로젝트 특화 영역(외부 SDRAM, CCM RAM, DMA buffer)을 다루려면 직접 이해해야 합니다.
 
-아래 예시는 STM32F407VG의 1MiB Flash, 128KiB 일반 SRAM과 별도 64KiB CCM을 구분합니다. 총 192KiB를 0x20000000의 연속 SRAM으로 선언하면 안 됩니다. 같은 STM32F4 계열이라도 SKU별 크기는 제품 자료에서 확인합니다.
+아래 예시는 STM32F407VG의 1MiB Flash, 128KiB 일반 SRAM과 별도 64KiB CCM을 구분합니다. 총 192KiB를 0x20000000의 연속 SRAM으로 선언하면 안 됩니다. 아래 [memory.ld](#링커-스크립트-예시--sram과-ccm을-분리하기)는 Homebrew arm-none-eabi-g++ 16.2.0과 GNU ld(binutils)로 실제로 링크해 본 결과를 함께 적었습니다. 보드에서는 실행하지 않았습니다.
 
 ![STM32F4 메모리 맵 — Flash/RAM/CCM 배치](/images/blog/embedded-cpp/diagrams/part1-07-memory-map.svg)
 
@@ -131,11 +131,22 @@ C 코드 빌드와 다른 C++ 특유의 섹션들입니다.
 } >FLASH
 ```
 
-`__libc_fini_array`가 호출합니다. main 이후 종료 경로가 있는지 startup에서 확인해야 합니다. 전역 C++ 객체의 소멸자 등록은 .fini_array와 별개로 __cxa_atexit/atexit를 사용할 수 있습니다. `-fno-use-cxa-atexit`는 등록 방식을 바꾸며 소멸자를 없애지 않습니다.
+`__libc_fini_array`가 끝에서부터 역순으로 호출합니다. newlib crt0에서는 `exit` 안에서 돕니다([Part 1-03](/blog/embedded/embedded-cpp/part1-03-runtime-requirements#부트-시퀀스--무엇이-언제-실행되는가)). 전역 C++ 객체의 소멸자는 arm-none-eabi-g++ 16.2.0 기본 설정에서 `.fini_array`가 아니라 `__aeabi_atexit`로 등록됐고, `-fno-use-cxa-atexit`를 주면 `.fini_array` entry가 됐습니다([Part 1-02](/blog/embedded/embedded-cpp/part1-02-compiler-flags#-fno-use-cxa-atexit--등록-방식-변경)). 어느 쪽이든 소멸자는 남습니다.
 
-### `.gnu.linkonce.*` 또는 `.text.*` — 템플릿 인스턴스
+### COMDAT 그룹 `.text._Z...` — 템플릿 인스턴스
 
-같은 템플릿이 여러 TU에서 인스턴스화되면 링커가 중복을 제거합니다. COMDAT/weak 등의 오브젝트·링커 규칙에 따른 동작이며 C++17에 처음 도입된 기능이 아닙니다.
+같은 템플릿이 여러 TU에서 인스턴스화되면 링커가 하나만 남깁니다. `.gnu.linkonce.*`는 COMDAT 그룹 이전의 GNU 방식 이름이고, arm-none-eabi-g++ 16.2.0은 COMDAT 그룹을 만듭니다. `template <class T> T twice(T)`를 쓰는 두 파일 중 하나의 오브젝트입니다.
+
+```text
+COMDAT group section [    1] `.group' [_Z5twiceIiET_S0_] contains 4 sections:
+   [Index]    Name
+   [    9]   .text._Z5twiceIiET_S0_
+   [   10]   .ARM.extab.text._Z5twiceIiET_S0_
+   [   11]   .ARM.exidx.text._Z5twiceIiET_S0_
+   [   12]   .rel.ARM.exidx.text._Z5twiceIiET_S0_
+```
+
+두 오브젝트를 링크한 ELF에는 `twice<int>(int)`가 weak 심볼(`W`) 하나로 남았습니다. 링커 스크립트의 `*(.text .text.*)` 패턴이 이 섹션을 받으므로 별도 규칙은 필요 없습니다.
 
 ### `.eh_frame` — 예외 unwind table
 
@@ -147,11 +158,11 @@ C 코드 빌드와 다른 C++ 특유의 섹션들입니다.
 }
 ```
 
-예외를 끈 C++이라도 unwind 정보는 디버깅·stack unwinding 등 다른 소비자가 사용할 수 있습니다. ARM EHABI는 .ARM.exidx/.ARM.extab를 사용하므로 .eh_frame만으로 판단하지 않습니다. 위 DISCARD 조각을 무조건 적용하지 말고 toolchain과 runtime 계약을 확인합니다.
+ARM EHABI는 예외 unwind에 `.eh_frame`이 아니라 `.ARM.exidx`/`.ARM.extab`를 씁니다. 그래서 `.eh_frame`만 지우는 규칙은 ARM에서 예외 테이블을 지우지 못합니다. 아래 `memory.ld`에 이 `/DISCARD/` 조각을 넣고 `-fno-exceptions` 오브젝트를 링크하면 경고 없이 링크됩니다. 예외를 쓰는 코드라면 throw 시점에 unwinder가 해당 함수의 테이블을 찾지 못합니다. GCC 16 libsupc++의 `__cxa_throw`(`eh_throw.cc`)는 `_Unwind_RaiseException`이 돌아오면 "some sort of unwinding error"로 보고 `std::terminate()`를 부릅니다. 예외를 끄지 않은 빌드에는 이 조각을 넣지 않습니다. 디버거·크래시 덤프 도구가 `.ARM.exidx`로 스택을 풀기도 합니다.
 
 ## 링커 스크립트 예시 — SRAM과 CCM을 분리하기
 
-다음은 GNU ld 문법으로 작성한 교육용 Cortex-M 메모리 배치입니다. vector·copy/zero symbol·array 경계를 정의하지만 vendor startup, newlib, 실제 board 설정을 포함한 완성 firmware는 아닙니다. main SRAM의 heap·stack 최소 여유는 ASSERT로 검사하며 런타임의 실제 stack 최대 사용량까지 보장하지는 않습니다.
+다음은 GNU ld 문법으로 작성한 Cortex-M 메모리 배치입니다. vector·copy/zero symbol·array 경계를 정의하지만 vendor startup, newlib, 실제 board 설정을 포함한 완성 firmware는 아닙니다. main SRAM의 heap·stack 최소 여유는 ASSERT로 검사하며, 이 ASSERT는 링크 시점의 예약 크기만 봅니다. 런타임의 실제 stack 최대 사용량은 검사하지 않습니다.
 
 ```ld title="memory.ld"
 ENTRY(Reset_Handler)
@@ -215,9 +226,9 @@ __attribute__((section(".rodata.const_lut")))
 const uint8_t lookup_table[256] = { /* ... */ };
 ```
 
-링커 스크립트가 `.ccmram` 섹션을 CCM RAM에 배치합니다. 컴파일러는 해당 변수를 그 섹션에 넣습니다.
+컴파일러는 해당 변수를 지정한 입력 섹션에 넣고, 링커 스크립트가 그 섹션을 메모리 영역에 배치합니다. 위 `memory.ld`에서는 `.dma`가 일반 SRAM(`>RAM`), `.ccmram`이 CCM(`>CCM`)으로 갑니다. `.rodata.const_lut`는 `*(.rodata .rodata.*)` 패턴에 걸려 `.text`와 함께 Flash로 갑니다.
 
-STM32F407의 CCM은 CPU 데이터 경로에 연결되며 DMA가 접근할 수 없습니다. CPU 전용 scratch만 CCM에 두고 DMA buffer는 일반 SRAM에 둡니다. DMA 오류·전송 실패의 구체적 증상은 DMA와 bus 설정에 따라 달라지므로 항상 CPU bus fault가 난다고 단정하지 않습니다.
+STM32F407의 CCM은 CPU 데이터 버스에만 연결되며 DMA가 접근할 수 없습니다(RM0090). CPU 전용 scratch만 CCM에 두고 DMA buffer는 일반 SRAM에 둡니다. 이 글에서는 DMA 전송을 실행하지 않았으므로 CCM 주소를 DMA에 줬을 때의 증상은 적지 않습니다.
 
 ## C++ 객체의 지정된 위치 배치
 
@@ -233,7 +244,7 @@ __attribute__((section(".ccmram")))
 alignas(8) uint8_t packet_pool[8192];
 ```
 
-읽기 전용 상수는 보통 .rodata 계열에 놓이지만 최적화로 없어지거나 relocation이 있는 다른 입력 section에 놓일 수도 있습니다. ELF와 map을 확인합니다. Itanium 계열 vtable도 읽기 전용 데이터와 relocation을 포함할 수 있으며, 이름은 llvm-nm --demangle에서 `vtable for`로 찾습니다. C++ 객체의 mutable 필드와 vptr은 객체 자체의 .data/.bss/RAM 위치에 있으므로 vtable 표와 객체 저장 공간을 구분합니다.
+vtable 표와 객체 저장 공간은 따로 배치됩니다. 아래 재현 절의 `placement.cpp`를 링크한 ELF에서 `vtable for Sensor`는 `0x08000074`(Flash, `.rodata`가 `.text`에 합쳐져 `T`로 표시)에 있고, vptr을 담은 객체 `sensor`는 `0x20000004`(RAM의 `.data`)에 있었습니다. `sensor`가 `.bss`가 아니라 `.data`에 간 것은 vptr이 0이 아닌 초기값이기 때문입니다.
 
 ## Symbol 정의 — Reset_Handler가 사용
 
@@ -271,7 +282,17 @@ void copy_data() {
 arm-none-eabi-g++ ... -Wl,-Map=firmware.map -o firmware.elf
 ```
 
-map 형식과 주소는 실제 입력 파일에 따라 달라집니다. .isr_vector가 Flash 시작을 차지하면 Reset_Handler가 같은 주소에서 시작한다고 가정하면 안 됩니다. `llvm-readelf -lW firmware.elf`로 load segment의 실행 주소와 load 주소를 함께 확인하고, map에서는 각 입력 section의 기여를 추적합니다.
+`.isr_vector`가 Flash 시작을 차지하므로 Reset_Handler는 그 뒤에서 시작합니다. load segment의 실행 주소(VirtAddr)와 load 주소(PhysAddr)는 `readelf -lW`가 함께 보여 줍니다. 아래 재현에서 링크한 ELF의 결과입니다.
+
+```text
+Program Headers:
+  Type           Offset   VirtAddr   PhysAddr   FileSiz MemSiz  Flg Align
+  LOAD           0x001000 0x08000000 0x08000000 0x00080 0x00080 R E 0x1000
+  LOAD           0x002000 0x20000000 0x08000080 0x00008 0x01008 RW  0x1000
+  LOAD           0x001000 0x10000000 0x10000000 0x00000 0x01000 RW  0x1000
+```
+
+두 번째 segment가 `.data`입니다. 실행 주소는 RAM(`0x20000000`), load 주소는 Flash(`0x08000080`)이고 파일에는 8바이트만 있으며, 메모리 크기 `0x1008`은 뒤따르는 NOLOAD `.bss`·`.dma`까지 포함합니다. 세 번째 segment는 `.ccmram`이며 파일 크기가 0입니다.
 
 ### 재현 — custom section과 vtable 입력 확인
 
@@ -295,33 +316,53 @@ llvm-readelf -r placement.o
 llvm-nm --demangle placement.o
 ```
 
-Clang 23.1.3에서 .dma와 .ccmram 입력 section의 크기는 각각 4096바이트이며, 정렬은 각각 4·8입니다. vtable 심볼과 sensor의 vtable relocation도 확인했습니다. 아직 링크 전이므로 이 관찰만으로 Flash/RAM 주소나 NOLOAD 결과, DMA의 실제 동작이 검증된 것은 아닙니다. 제품에서는 vendor startup과 함께 `-T memory.ld`로 링크하고 region overflow·load segment·copy/zero 경계를 확인한 뒤 board에서 검증합니다.
+Clang 23.1.5에서 .dma와 .ccmram 입력 section의 크기는 각각 4096바이트이며, 정렬은 각각 4·8입니다. 링크까지 확인하려고 `.data` 복사·`.bss` 정리·`.init_array` 순회를 하는 작은 `start.cpp`(vector 두 개와 Reset_Handler)를 더해 arm-none-eabi-g++ 16.2.0으로 `-T memory.ld` 링크했습니다.
+
+```bash
+arm-none-eabi-g++ -mcpu=cortex-m4 -mthumb -Os -ffreestanding -fno-exceptions -fno-rtti -nostdlib \
+  -T memory.ld -Wl,-Map=fw.map,--print-memory-usage start.cpp placement.cpp -lgcc -o fw.elf
+```
+
+```text
+Memory region         Used Size  Region Size  %age Used
+           FLASH:         136 B         1 MB      0.01%
+             RAM:        4104 B       128 KB      3.13%
+             CCM:          4 KB        64 KB      6.25%
+```
+
+`dma_buffer`는 `0x20000008`(RAM), `cpu_scratch`는 `0x10000000`(CCM)에 놓였습니다. RAM 4,104바이트는 `.data` 8바이트(`counter`와 `sensor`)와 `.dma` 4,096바이트입니다. 이 ELF는 보드나 에뮬레이터에서 실행하지 않았습니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. `.init_array`에 `KEEP` 없음
 
-필요한 초기화 entry가 linker 도달성 규칙에 따라 제거될 수 있습니다. KEEP으로 의도를 명시하고 최종 map에서 확인합니다.
+`--gc-sections`가 `.init_array`를 지웁니다. [Part 1-06](/blog/embedded/embedded-cpp/part1-06-startup-code#init_array-섹션이-flash에-있는지)의 QEMU 실험에서 `KEEP`만 지웠더니 링크는 경고 없이 성공했고 생성자가 하나도 돌지 않았습니다.
 
 ### 2. `AT >FLASH` 누락
 
-ROM에 저장해야 할 초기값의 LMA가 의도대로 잡히지 않을 수 있습니다. GNU ld의 LMA 추론 규칙이 있으므로 무조건 같은 실패가 나는 것은 아닙니다. 최종 load 주소와 startup copy source를 대조합니다.
+위 `memory.ld`에서 `.data`의 `AT >FLASH`만 지우고 링크하면 오류 없이 링크되지만, `.data` segment의 PhysAddr가 `0x20000000`이 되고 `_sidata`도 `0x20000000`이 됩니다. 초기값이 Flash에 없으니 startup의 복사는 RAM에서 RAM으로 자기 자신을 복사합니다. `objcopy -O binary`로 만든 이미지는 Flash 시작부터 RAM 끝까지를 채워 402,653,192바이트가 됐습니다(정상 빌드는 136바이트). GNU ld는 LMA 영역을 지정하지 않은 섹션에 [LMA 추론 규칙](https://sourceware.org/binutils/docs/ld/Output-Section-LMA.html)을 적용하는데, 이 스크립트에서는 그 결과가 VMA와 같은 RAM 주소였습니다.
 
 ### 3. Stack pointer 미정의
 
-vector table의 첫 entry가 invalid가 됩니다. CPU가 random 주소를 SP로 사용해 즉시 crash가 납니다. `_estack = ORIGIN(RAM) + LENGTH(RAM)`이 필수입니다.
+vector table의 첫 entry가 `_estack`을 참조하므로, 이 정의가 없으면 링크가 먼저 실패합니다. `memory.ld`에서 `_estack = ...` 줄만 지웠을 때의 GNU ld 메시지입니다.
+
+```text
+arm-none-eabi-ld:noestack.ld:42: undefined symbol `_estack' referenced in expression
+```
+
+반면 정의는 있는데 값이 틀린 경우(존재하지 않는 RAM 끝 주소 등)는 링크가 통과하므로, `_estack`은 `ORIGIN(RAM) + LENGTH(RAM)`처럼 MEMORY 정의에서 계산합니다.
 
 ### 4. Heap과 Stack 영역 충돌
 
-Heap은 위로 자라고 Stack은 아래로 자랍니다. 만나면 조용히 데이터 corruption이 발생합니다. `_Min_Heap_Size`와 `_Min_Stack_Size`를 명시합니다.
+Heap은 위로 자라고 Stack은 아래로 자랍니다. 만나면 둘 중 하나가 다른 쪽 데이터를 덮어씁니다. Cortex-M4에는 이를 막는 하드웨어 stack limit 레지스터가 없고(ARMv8-M의 `MSPLIM`·`PSPLIM`부터 생김), MPU 영역으로 guard를 두지 않으면 오류 없이 진행됩니다. `_Min_Heap_Size`와 `_Min_Stack_Size`를 명시하면 링크 시 예약 공간 부족은 잡을 수 있습니다.
 
 ### 5. DMA buffer를 CCM에 두기
 
-STM32F407 CCM에 DMA를 연결할 수 없습니다. DMA controller가 접근 가능한 일반 SRAM 영역을 사용하고 transfer error 상태를 확인합니다.
+STM32F407 CCM에는 DMA 경로가 없습니다(RM0090). DMA buffer는 DMA controller가 접근하는 일반 SRAM 영역(`.dma`)에 둡니다.
 
 ### 6. 예외 사용하면서 `.eh_frame`을 /DISCARD/
 
-`-fexceptions`와 DISCARD를 함께 쓰면 런타임에 예외 정보가 없어 unwind가 실패하고 crash가 납니다. 둘 중 하나로 통일합니다.
+`-fexceptions`와 DISCARD를 함께 쓰면 링크는 되지만, 첫 throw에서 unwinder가 테이블을 찾지 못해 `__cxa_throw`가 `std::terminate()`로 끝납니다(GCC 16 `eh_throw.cc`). 둘 중 하나로 통일합니다.
 
 ### 7. 외부 SDRAM 미설정으로 access
 
@@ -335,14 +376,14 @@ arm-none-eabi-readelf -lW firmware.elf
 arm-none-eabi-nm --demangle firmware.elf
 ```
 
-이 명령은 제품 빌드의 템플릿이며 이 글에서 실행한 완성 firmware 명령이 아닙니다. CPU 전용 scratch 4096바이트를 일반 SRAM에서 CCM으로 옮기면 그 저장 공간의 영역 분포가 바뀌지만, DMA buffer까지 옮겨도 된다는 뜻은 아닙니다. 실제 절감량은 정렬·section GC·초기 이미지·예약 영역을 포함해 비교하고 측정 파일과 toolchain 버전을 함께 저장합니다.
+위 재현 절의 링크가 이 명령의 축소판입니다. 그 출력에서 CPU 전용 scratch 4,096바이트는 CCM 쪽 사용량(4 KB)에 잡혔고 RAM 쪽에는 없습니다. CCM으로 옮긴 만큼 일반 SRAM이 비지만, DMA buffer까지 옮겨도 된다는 뜻은 아닙니다.
 
 ## 1차 자료와 한계
 
 - [GNU ld MEMORY](https://sourceware.org/binutils/docs/ld/MEMORY.html), [LMA](https://sourceware.org/binutils/docs/ld/Output-Section-LMA.html), [KEEP](https://sourceware.org/binutils/docs/ld/Input-Section-Keep.html), [NOLOAD](https://sourceware.org/binutils/docs/ld/Output-Section-Type.html) — 메모리 배치 문법
 - [ST STM32F407VG 제품 자료](https://www.st.com/en/microcontrollers-microprocessors/stm32f407vg.html)와 [RM0090](https://www.st.com/resource/en/reference_manual/rm0090-stm32f405415-stm32f407417-stm32f427437-and-stm32f429439-advanced-armbased-32bit-mcus-stmicroelectronics.pdf) — 일반 SRAM·CCM과 DMA 경로
 
-2026-10-22 검증 범위는 Clang 23.1.3의 ARM ELF 입력 오브젝트입니다. 최종 GNU ld 링크, startup copy/zero와 실제 DMA 전송은 미검증입니다.
+2026-11-16 검증 범위는 Clang 23.1.5의 ARM ELF 입력 오브젝트와, arm-none-eabi-g++ 16.2.0·GNU ld로 `memory.ld`를 링크한 ELF(`--print-memory-usage`, `readelf -lW`, `AT >FLASH`·`_estack` 제거 실험)입니다. 이 ELF의 실행과 실제 DMA 전송은 하지 않았습니다.
 
 ## 정리
 
