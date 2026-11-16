@@ -167,6 +167,9 @@ int main(void) {
 # build.sh = arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -O2 -ffreestanding -nostdlib
 #            + tasks.c queue.c list.c timers.c event_groups.c port.c heap_4.c
 ./build.sh rtos4.c && qemu-system-arm -M mps2-an385 -nographic -semihosting -icount shift=5 -kernel rtos4.elf
+# superloop.elf links no kernel; stubs.c = empty SVC/PendSV/SysTick handlers for the vector table
+arm-none-eabi-gcc -mcpu=cortex-m3 -mthumb -O2 -ffreestanding -nostdlib -fno-builtin -T link.ld \
+    -o superloop.elf startup.c io.c superloop.c stubs.c -lgcc
 arm-none-eabi-size rtos4.elf superloop.elf
 ```
 
@@ -181,7 +184,7 @@ heap total 65536, free now 60496, min ever free 60496
 |------|-----------:|--------------------:|
 | text (flash) | 1,272 B | 18,200 B |
 | heap에서 실제로 쓴 양 | 0 | 65,536 − 60,496 = 5,040 B |
-| heap 밖 kernel 정적 변수(bss − heap) | — | 65,960 − 65,536 = 424 B |
+| heap 밖 정적 변수(bss − heap, 대부분 kernel) | 12 B | 65,960 − 65,536 = 424 B |
 
 5,040 B에는 사용자 task 넷과 queue 외에 scheduler가 만드는 idle task와 timer service task(이 설정에서 stack 256 word씩), timer queue가 들어 있습니다. `configTOTAL_HEAP_SIZE`(64 KiB)는 정적 배열로 bss에 잡히므로, RAM 예산은 bss 전체가 아니라 실제 heap 사용량에 여유를 더해 heap 크기를 정한 값으로 봅니다. flash 18,200 B에는 이 빌드가 넣은 `timers.c`·`event_groups.c`와 `configUSE_TRACE_FACILITY` 같은 설정이 포함돼 있어, 설정을 바꾸면 이 숫자도 바뀝니다.
 
@@ -271,7 +274,7 @@ xTaskCreate(blink_red,   ...);
 xTaskCreate(blink_green, ...);
 ```
 
-위 측정에서 task 넷과 queue 하나가 heap 5,040 B와 flash 약 17 KB를 더했습니다. 동시에 기다려야 할 일이 실제로 몇 개인지 먼저 셉니다.
+위 측정에서 task 넷과 queue 하나가 heap 5,040 B와 flash 16,928 B를 더했습니다. 동시에 기다려야 할 일이 실제로 몇 개인지 먼저 셉니다.
 
 > ⚠️ Task stack을 재지 않고 정함
 

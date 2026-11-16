@@ -39,7 +39,7 @@ Priority는 마감이 짧을수록 높게 줍니다. 주기가 짧을수록 우�
 | event-driven UI | 2 |
 | background log | 1 (가장 낮음) |
 
-FreeRTOS에서 같은 우선순위의 ready task들은 `configUSE_TIME_SLICING`이 1이면 tick마다 번갈아 돕니다. 아래 측정처럼 그만큼 각 task의 일이 늘어지므로, 마감이 다른 task에는 다른 우선순위를 줍니다.
+FreeRTOS에서 같은 우선순위의 ready task들은 `configUSE_PREEMPTION`과 `configUSE_TIME_SLICING`이 모두 1이면 tick마다 번갈아 돕니다. 아래 측정처럼 그만큼 각 task의 일이 늘어지므로, 마감이 다른 task에는 다른 우선순위를 줍니다.
 
 아래 코드 중 `pid_step()`, `update_screen()`, `radio_*()` 같은 함수는 애플리케이션 함수이고, 구조를 보이는 발췌입니다. 실행한 코드는 "측정" 절에 있습니다. 실행 환경은 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)과 같습니다(FreeRTOS V11.2.0 `ARM_CM3`, QEMU `mps2-an385` `-icount shift=5`, `configTICK_RATE_HZ` 1000).
 
@@ -301,7 +301,7 @@ time slicing으로 tick마다 번갈아 돌아, 위 측정에서는 일의 길�
 while (!sensor_ready());     /* CPU 100% 잡아먹음 */
 ```
 
-이 loop가 도는 동안 같거나 낮은 우선순위 task는 CPU를 받지 못합니다. ISR이 주는 semaphore를 `xSemaphoreTake()`로 기다리게 바꿉니다.
+이 loop가 도는 동안 낮은 우선순위 task는 CPU를 받지 못하고, 같은 우선순위 task와는 tick마다 CPU를 나눕니다. ISR이 주는 semaphore를 `xSemaphoreTake()`로 기다리게 바꿉니다.
 
 ## 정리
 
