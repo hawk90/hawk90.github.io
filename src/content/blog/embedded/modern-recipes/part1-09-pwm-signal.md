@@ -101,7 +101,7 @@ dead-time은 tick 수로 고정되어 있으므로, PWM 주파수를 다섯 배 
 - 주기: 8400 tick = 50 µs (20 kHz).
 - CH1이 내려간 뒤 CH1N이 올라가기까지, CH1N이 내려간 뒤 CH1이 올라가기까지의 간격: 각각 250 ns.
 - CCR = 2100일 때 CH1 high 폭: 2 × 2100 − 42 = 4158 tick = 24.75 µs.
-- CCR을 21 이하로 내리면 CH1 펄스가, 4179 이상으로 올리면 CH1N 펄스가 사라짐.
+- CCR을 21 이하로 내리면 CH1 펄스가, 4179 이상으로 올리면 CH1N 펄스가 사라집니다.
 
 보드에서 재지는 않았습니다. 대신 위 정의(center-aligned 카운트, PWM mode 1, OCx·OCxN의 rising edge를 DT tick 늦추는 dead-time)를 그대로 옮긴 Verilog 행동 모델을 Icarus Verilog 13.0으로 돌려, 예상값이 정의에서 실제로 나오는지 확인했습니다. TIM1 회로가 아니라 RM0090 정의의 모델이라는 점이 이 확인의 한계입니다. 핵심 부분은 다음과 같습니다.
 
