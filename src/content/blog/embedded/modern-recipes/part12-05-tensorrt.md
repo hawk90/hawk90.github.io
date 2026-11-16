@@ -29,7 +29,7 @@ Jetson 보드나 데이터센터 GPU에서 ONNX 모델을 미리 최적화한 en
 
 ## 핵심 개념
 
-흐름은 ONNX → builder → serialized engine(plan) → runtime에서 deserialize → 실행입니다. builder가 layer 조합과 kernel을 미리 고르므로, 실행 시점에는 그 결과만 씁니다. engine은 빌드한 TensorRT version과 GPU에 묶이므로 target 장치(또는 같은 구성) 위에서 빌드합니다.
+흐름은 ONNX → builder → serialized engine(plan) → runtime에서 deserialize → 실행입니다. builder가 layer 조합과 kernel을 미리 고르므로, 실행 시점에는 그 결과만 씁니다. 기본 설정으로 빌드한 engine은 빌드한 TensorRT version과 GPU에 맞춰져 있으므로 target 장치(또는 같은 구성) 위에서 빌드합니다. 11.4.0 header에는 이 제약을 완화하는 `BuilderFlag::kVERSION_COMPATIBLE`과 `IBuilderConfig::setHardwareCompatibilityLevel`이 있습니다.
 
 TensorRT 11.0 release notes에서 이 글과 직접 관련된 변화는 셋입니다.
 
@@ -170,15 +170,15 @@ strongly typed network에서는 FP16·INT8이 모델 안의 type과 Q/DQ node로
 
 > ⚠️ engine을 다른 장치·버전으로 옮김
 
-engine은 빌드한 TensorRT version과 GPU에 묶입니다. 장치 위에서 빌드하거나, 같은 구성의 장치에서 빌드한 engine만 배포합니다.
+기본 설정의 engine은 빌드한 TensorRT version과 GPU에 맞춰져 있습니다. 장치 위에서 빌드하거나 같은 구성의 장치에서 빌드한 engine만 배포하고, 그렇게 할 수 없으면 위의 version·hardware 호환 옵션을 검토합니다.
 
 > ⚠️ DLA가 없는 장치에서 DLA 설정
 
-Orin Nano처럼 DLA가 없는 Jetson에서는 `setDLACore`가 쓸 core가 없습니다. 장치 사양을 먼저 확인합니다.
+Orin Nano에는 DLA가 없으니 DLA 설정을 넣기 전에 장치 사양을 먼저 확인합니다.
 
 ## 정리
 
-- TensorRT는 ONNX를 미리 engine으로 굽는 inference compiler이고, engine은 version과 GPU에 묶입니다.
+- TensorRT는 ONNX를 미리 engine으로 굽는 inference compiler이고, 기본 설정의 engine은 version과 GPU에 맞춰져 있습니다.
 - TensorRT 11은 strongly typed가 기본이라 precision을 모델의 type·Q/DQ가 정하고, `kFP16`·`kINT8` flag와 INT8 calibrator API는 제거됐습니다.
 - engine 실행은 `deserializeCudaEngine` → `setTensorAddress` → `enqueueV3` 순서입니다.
 - 이 글은 GPU가 없어 실행하지 않았고, API는 11.4.0 header와 11.0 release notes로 대조했습니다.
