@@ -80,7 +80,7 @@ Breakpoint 1, main (argc=3, argv=0xfffffffffbd8) at basics.cpp:25
 $2 = 0xfffffffffe46 "input.txt"
 ```
 
-`continue N`의 숫자는 *지금 멈춰 있는 breakpoint를 N-1번 더 무시하라*는 뜻입니다([GDB 매뉴얼 Continuing and Stepping](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Continuing-and-Stepping.html)). `Parser::parse`에 멈춘 상태에서 `continue 2`를 주면 두 번째 호출(`"warn"`)을 건너뛰고 세 번째 호출(`"ERROR"`)에서 멈춥니다. 매뉴얼은 이 숫자가 breakpoint 때문에 멈췄을 때만 의미가 있다고 적고 있고, 멈춘 자리의 breakpoint를 지운 뒤 `continue 2`를 주자 숫자가 버려졌습니다.
+`continue N`의 숫자는 *지금 멈춰 있는 breakpoint를 더 무시할 횟수*입니다([GDB 매뉴얼 Continuing and Stepping](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Continuing-and-Stepping.html)의 "a further number of times to ignore"). `continue 2`에 GDB가 `Will ignore next crossing of breakpoint 1.`이라고 답하듯 실제로 무시되는 것은 N-1번입니다. `Parser::parse`에 멈춘 상태에서 `continue 2`를 주면 두 번째 호출(`"warn"`)을 건너뛰고 세 번째 호출(`"ERROR"`)에서 멈춥니다. 매뉴얼은 이 숫자가 breakpoint 때문에 멈췄을 때만 의미가 있다고 적고 있고, 멈춘 자리의 breakpoint를 지운 뒤 `continue 2`를 주자 숫자가 버려졌습니다.
 
 ```text
 (gdb) continue 2
@@ -520,6 +520,17 @@ GDB의 `list`는 기준 줄을 *가운데* 두고 10줄을 보여 주고, 다시
 16	    return a + b;
 17	}
 (gdb) list
+18
+19	int Parser::parse(const char* buf) {
+...
+27	    int z = add(x, y);
+(gdb) list 35
+30	    Point* pp = &p;
+...
+39	    return 0;
+(gdb) list
+40	}
+(gdb) list
 End of the file was already reached, use "list ." to list the current location again
 ```
 
@@ -650,7 +661,7 @@ define hookpost-run
 end
 ```
 
-이 파일을 arm64 GDB에 `-x`로 읽혀 보면 3번째 줄에서 멈춥니다. Debian의 arm64 `gdb`에는 `disassembly-flavor` 설정이 없어 `set disassembly-flavor`가 변수 대입식으로 해석되고, 오류가 난 뒤의 줄(`hookpost-run` 정의)은 실행되지 않습니다.
+주석과 빈 줄을 뺀 같은 내용(`post.gdbinit`, `set disassembly-flavor intel`이 3번째 줄)을 arm64 GDB에 `-x`로 읽혀 보면 그 줄에서 멈춥니다. Debian의 arm64 `gdb`에는 `disassembly-flavor` 설정이 없어 `set disassembly-flavor`가 변수 대입식으로 해석되고, 오류가 난 뒤의 줄(`hookpost-run` 정의)은 실행되지 않습니다.
 
 ```text
 post.gdbinit:3: Error in sourced command file:

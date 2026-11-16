@@ -61,7 +61,7 @@ ptrace(PTRACE_ATTACH, pid, NULL, NULL);
 ptrace(PTRACE_DETACH, pid, NULL, NULL);
 ```
 
-GDB와 LLDB 모두 Linux에서는 `ptrace`로 대상 프로세스를 다룹니다. attach·wait·메모리 접근·재개를 여러 번 조합하므로 한 세션에 `ptrace` 호출이 수없이 오갑니다. [ptrace(2)](https://man7.org/linux/man-pages/man2/ptrace.2.html)가 제공하는 일은 다음과 같습니다.
+GDB와 LLDB 모두 Linux에서는 `ptrace`로 대상 프로세스를 다룹니다. [ptrace(2)](https://man7.org/linux/man-pages/man2/ptrace.2.html)가 제공하는 일은 다음과 같습니다.
 
 - 다른 프로세스의 *레지스터 읽기/쓰기* (`PTRACE_GETREGSET`·`PTRACE_SETREGSET`)
 - *메모리 읽기/쓰기* (`PTRACE_PEEKDATA`·`PTRACE_POKEDATA`, 디버거가 변수를 보거나 바꿀 때)
@@ -92,7 +92,7 @@ $ ps -axo pid,ppid,comm | grep -E 'debugserver|lldb|hello'
 97339 97058 /Applications/Xcode.app/Contents/SharedFrameworks/LLDB.framework/Resources/debugserver
 ```
 
-`hello`의 부모(PPID 97339)는 `lldb`가 아니라 `debugserver`입니다. `hello` 경로는 `...`로 줄였습니다. 같은 세션에 `log enable -f gdbremote.log gdb-remote packets`를 켜 두면 LLDB가 `debugserver`와 주고받는 패킷이 남는데, 첫 줄부터 `$QStartNoAckMode#b0` 같은 GDB Remote Serial Protocol 패킷입니다. 로컬 디버깅도 내부적으로는 [Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)의 원격 디버깅과 같은 구조로 돕니다.
+`hello`의 부모(PPID 97339)는 `lldb`가 아니라 `debugserver`입니다. `hello` 경로는 `...`로 줄였습니다. 같은 세션에 `log enable -f gdbremote.log gdb-remote packets`를 켜 두면 LLDB가 `debugserver`와 주고받는 패킷이 남는데, 앞부분에 `$QStartNoAckMode#b0` 같은 GDB Remote Serial Protocol 패킷입니다. 로컬 디버깅도 내부적으로는 [Ch 8](/blog/tools/debugging/gdb-lldb/chapter08-remote-debugging)의 원격 디버깅과 같은 구조로 돕니다.
 
 ### Windows
 
@@ -179,7 +179,7 @@ You will need to codesign the binary. For instructions, see:
   https://sourceware.org/gdb/wiki/PermissionsDarwin
 ```
 
-서명보다 먼저 막히는 문제가 있습니다. GDB 소스의 `gdb/configure.nat`에서 Darwin 호스트의 네이티브 디버깅 파일은 `gdb_host_cpu`가 `i386`(x86 계열)일 때만 붙습니다. GDB 16.3과 18.1 소스 모두 같은 구조이고, CPU별 Darwin 네이티브 파일은 `i386-darwin-nat.c` 하나뿐입니다.
+서명보다 먼저 막히는 문제가 있습니다. GDB 소스의 `gdb/configure.nat`은 모든 Darwin 호스트에 공통 파일(`darwin-nat.o darwin-nat-info.o`)을 붙이지만, CPU별 네이티브 파일(`i386-darwin-nat.o` 등)은 `gdb_host_cpu`가 `i386`(x86 계열)일 때만 붙고 aarch64용 항목은 없습니다. GDB 16.3과 18.1 소스 모두 같은 구조입니다.
 
 ```text
     darwin)

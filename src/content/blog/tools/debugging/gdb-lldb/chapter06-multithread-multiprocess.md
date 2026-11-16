@@ -59,7 +59,7 @@ GDB의 `Thread 0x...`는 glibc의 `pthread_t` 값과 같고, `LWP 7593`은 `gett
 
 ## 정지의 의미
 
-GDB의 기본은 *all-stop* 모드입니다. 한 스레드가 breakpoint에 닿으면 나머지 스레드도 멈추고, 그 상태에서 모든 스레드의 위치를 볼 수 있습니다. 운동회 사진처럼 셔터를 누른 순간의 장면입니다. 다만 GDB 매뉴얼 All-Stop Mode 절은 다른 스레드가 문장 경계가 아니라 "in the middle of a statement"에서 멈춘다고 적고 있습니다. 아래 `info threads`에서 worker-1의 프레임에만 `0x0000aaaaaaaa0cc4 in`처럼 주소가 붙은 것이 줄 중간에 멈췄다는 표시입니다. 같은 절은 `step`·`next` 한 번 동안 다른 스레드가 여러 문장을 실행할 수 있다고도 적고 있습니다.
+GDB의 기본은 *all-stop* 모드입니다. 한 스레드가 breakpoint에 닿으면 나머지 스레드도 멈추고, 그 상태에서 모든 스레드의 위치를 볼 수 있습니다. 운동회 사진처럼 셔터를 누른 순간의 장면입니다. 다만 GDB 매뉴얼 All-Stop Mode 절은 다른 스레드가 문장 경계가 아니라 "in the middle of a statement"에서 멈춘다고 적고 있습니다. 같은 절은 `step`·`next` 한 번 동안 다른 스레드가 여러 문장을 실행할 수 있다고도 적고 있습니다.
 
 `set non-stop on`이면 멈춘 스레드만 멈추고 나머지는 계속 달립니다. `mt.c`를 non-stop으로 실행해 53행에 멈추면 메인 스레드만 서 있고 나머지는 `(running)`입니다.
 
@@ -321,7 +321,7 @@ replay == scheduler locked in replay mode and unlocked during normal execution.
 Mode for locking scheduler during execution is "off".
 ```
 
-효과를 카운터로 확인했습니다. `mt.c`의 두 worker는 각자 `counter[0]`과 `counter[1]`을 쉬지 않고 올립니다. `on`으로 두고 worker-0에서 `next`를 세 번 하면 `counter[0]`만 2 늘고 `counter[1]`은 그대로입니다. `off`로 돌려 메인 스레드에서 `next` 한 번을 하면 두 카운터가 모두 수십만씩 늘어납니다.
+효과를 카운터로 확인했습니다. `mt.c`의 두 worker는 각자 `counter[0]`과 `counter[1]`을 쉬지 않고 올립니다. `on`으로 두고 worker-0에서 `next`를 세 번 하면 `counter[0]`만 2 늘고 `counter[1]`은 그대로입니다. `off`로 돌려 메인 스레드에서 `next` 한 번을 하면 두 카운터가 각각 129,041과 227,923 늘었습니다.
 
 ```text
 (gdb) print counter
@@ -394,7 +394,7 @@ Catchpoint 1 (forked process 7653), arch_fork (ctid=0xfffff7fef0f0) at ../sysdep
 Thread 2.1 "fork" hit Breakpoint 3, child_work (x=21) at fork.c:6
 ```
 
-부모와 자식을 *둘 다* 잡아 두려면 `set detach-on-fork off`를 씁니다. 이때 함정이 하나 있습니다. GDB는 새로 생긴 쪽(이 경우 자식)을 멈춘 채로 두는데, `fork.c`의 부모는 `waitpid`로 자식을 기다리므로, breakpoint 없이 `run`만 하면 프로그램이 영영 진행하지 않았습니다. `catch fork`로 멈춘 뒤 `inferior 2`로 전환해 자식을 직접 진행시켜야 합니다.
+부모와 자식을 *둘 다* 잡아 두려면 `set detach-on-fork off`를 씁니다. 이때 함정이 하나 있습니다. GDB는 새로 생긴 쪽(이 경우 자식)을 멈춘 채로 두는데, `fork.c`의 부모는 `waitpid`로 자식을 기다리므로, `catch fork` 없이 `run`하면 자식이 멈춘 채라 프로그램이 진행하지 않았습니다. `catch fork`로 멈춘 뒤 `inferior 2`로 전환해 자식을 직접 진행시켜야 합니다.
 
 ```text
 (gdb) set detach-on-fork off
@@ -412,6 +412,8 @@ Catchpoint 1 (forked process 7747), arch_fork (ctid=0xfffff7fef0f0) at ../sysdep
 [Switching to inferior 2 [process 7747] (/root/ch06/fork)]
 (gdb) continue
 Thread 2.1 "fork" hit Breakpoint 2.2, child_work (x=21) at fork.c:6
+...
+(gdb) inferior 1
 (gdb) info threads
   Id   Target Id                               Frame
 * 1.1  Thread 0xfffff7fef020 (LWP 7745) "fork" arch_fork (ctid=0xfffff7fef0f0) at ../sysdeps/unix/sysv/linux/arch-fork.h:54

@@ -212,7 +212,6 @@ cpsr           0x60001000          [ EL=0 BTYPE=0 SSBS C Z ]
 
 | 레지스터 | AAPCS64 역할 |
 |----------|--------------|
-| `pc` | 다음에 실행할 명령 주소 |
 | `sp` | The Stack Pointer |
 | `x30` (`lr`) | The Link Register, 함수가 돌아갈 주소 |
 | `x29` (`fp`) | The Frame Pointer |
@@ -352,7 +351,7 @@ LLDB는 formatter를 *LLDB 안에* 내장하고 있어 별도 Python 스크립�
 }
 ```
 
-같은 소스를 macOS에서 Apple clang 21 + libc++로 빌드해 Xcode의 lldb-2103으로 보면 `std::span`이 `size=3 { [0] = 1 ... }`으로 펼쳐지고, `unique_ptr`은 `my_unique_ptr = 42 { pointer = 0x00000001006412d0 }`처럼 가리키는 값까지 요약에 넣습니다. LLDB formatter의 완성도가 표준 라이브러리 구현(libc++·libstdc++)에 따라 다르다는 것을 두 출력이 직접 보여 줍니다. 위 Linux 실행에서는 lldb 19.1.7이 `DW_TAG_member '_M_local_buf' refers to type 0x000000000000f8fb which extends beyond the bounds of 0x0000312b`라는 DWARF 경고도 한 줄 냈는데, 출력된 값에는 영향이 없었습니다.
+같은 소스를 macOS에서 Apple clang 21 + libc++로 빌드해 Xcode의 lldb-2103으로 보면 `std::span`이 `size=3 { [0] = 1 ... }`으로 펼쳐지고, `unique_ptr`은 `my_unique_ptr = 42 { pointer = 0x00000001006412d0 }`처럼 가리키는 값까지 요약에 넣습니다. LLDB formatter의 완성도가 표준 라이브러리 구현(libc++·libstdc++)에 따라 다르다는 것을 두 출력이 직접 보여 줍니다. 위 Linux 실행에서는 lldb 19.1.7이 `error: inspect 0x00003135: DW_TAG_member '_M_local_buf' refers to type 0x000000000000f8fb which extends beyond the bounds of 0x0000312b`라는 `error:`로 시작하는 DWARF 메시지도 한 줄 냈는데, 출력된 값에는 영향이 없었습니다.
 
 ---
 

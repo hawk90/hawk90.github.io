@@ -107,7 +107,7 @@ $ echo '/var/crash/core.%e.%p' | sudo tee /proc/sys/kernel/core_pattern
 | `%c` | 죽는 프로세스의 core 크기 soft limit |
 | `%u` / `%g` | 실제 UID / GID |
 | `%d` | dump mode (prctl `PR_GET_DUMPABLE` 값) |
-| `%F` | 덤프되는 프로세스의 PIDFD (Linux 6.16부터) |
+| `%F` | 덤프되는 프로세스의 PIDFD (core(5)는 Linux 6.16부터라고 적지만, 이 VM의 Debian 6.12.116 커널도 core_pattern에 `%F`를 씁니다) |
 
 컨테이너 안 프로세스가 죽으면 `%p`는 컨테이너 안의 PID, `%P`는 호스트의 PID입니다. systemd-coredump가 `%P`를 받는 이유입니다. `%c`가 넘어가기 때문에 위에서 본 것처럼 systemd-coredump가 `RLIMIT_CORE`를 스스로 확인할 수 있습니다.
 
@@ -163,13 +163,13 @@ $ readelf -n maperr.core
 
 | Note | 이 core에서 본 내용 |
 |------|------|
-| `NT_PRSTATUS` | 스레드별 레지스터·시그널·PID. 스레드가 여럿이면 스레드 수만큼 나옵니다 |
+| `NT_PRSTATUS` | 레지스터·시그널·PID (이 단일 스레드 core에서는 1개) |
 | `NT_PRPSINFO` | 프로세스 이름·UID·GID 등 |
 | `NT_SIGINFO` | 죽음을 일으킨 `siginfo_t` (아래 `$_siginfo`의 출처) |
 | `NT_AUXV` | auxiliary vector (아래 `info auxv`의 출처) |
 | `NT_FILE` | 매핑된 파일과 주소 범위 |
 | `NT_FPREGSET` | 부동소수점·SIMD 레지스터 |
-| `NT_ARM_*` | arm64 전용 상태 (TLS, hardware breakpoint/watchpoint, PAC 키 등) |
+| `NT_ARM_*` | arm64 전용 상태 (TLS, hardware breakpoint/watchpoint, PAC 마스크 등) |
 
 `NT_FILE`에는 실행 파일과 공유 라이브러리의 경로가 주소 범위와 함께 들어 있습니다. core를 다른 머신으로 옮겨 분석할 때 어떤 파일을 함께 가져가야 하는지 알려 주는 목록입니다.
 
@@ -238,7 +238,7 @@ Program terminated with signal SIGSEGV, Segmentation fault.
 #EnterNamespace=no
 ```
 
-coredump.conf(5)(systemd 257)에 따르면 `MaxUse=`의 기본값은 디스크의 10%(최대 4GiB), `KeepFree=`는 15%입니다. 오래된 core는 이 한도를 넘으면 지워집니다.
+coredump.conf(5)(systemd 257)에 따르면 `MaxUse=`의 기본값은 디스크의 10%(최대 4GiB), `KeepFree=`는 15%(최대 4GiB)입니다. 오래된 core는 이 한도를 넘으면 지워집니다.
 
 ## gdb로 core 열기
 
