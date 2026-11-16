@@ -13,7 +13,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"SPI는 master가 만든 SCK에 맞춰 MOSI와 MISO로 한 비트씩 동시에 주고받는 동기식 직렬 버스입니다."** STM32F407 SPI1과 W25Q32JV를 3.3 V로 붙이면 두 부품의 fSCK 사양은 42 MHz를 허용하지만, 읽기 경로의 MISO 타이밍 예산이 42 MHz에서 모자라 먼저 걸립니다.
+> **"SPI는 master가 만든 SCK에 맞춰 MOSI와 MISO로 한 비트씩 동시에 주고받는 동기식 직렬 버스입니다."** STM32F407 SPI1과 W25Q32JV를 3.3 V로 붙이면 두 부품의 fSCK 사양은 42 MHz를 허용하지만, 읽기 경로의 MISO 타이밍 예산이 42 MHz에서 모자라, 실제 상한은 이쪽이 정합니다.
 
 이 글은 STM32F407의 SPI1에 Winbond W25Q32JV SPI flash를 붙일 때 어떤 모드를 쓰고, 명령을 CS로 어떻게 묶고, SCK를 어디까지 올릴 수 있는지를 두 부품의 데이터시트 수치로 판정합니다. 레지스터 맵을 읽을 줄 알고 [1-04: UART 하드웨어 동작 분석](/blog/embedded/modern-recipes/part1-04-uart-hardware)의 비동기 직렬 개념을 아는 독자를 가정합니다.
 
@@ -38,7 +38,7 @@ SCK·MOSI·MISO·CS#는 W25Q32JV에서 각각 CLK·DI·DO·/CS입니다(W25Q32JV
 
 ![SPI Mode 0 — SCK idle low, sample at rising edge](/images/blog/modern-recipes/diagrams/part1-05-spi-mode0.svg)
 
-Linux 문서는 많은 디바이스가 mode 0과 3을 함께 지원하는 이유를 "they don't care about polarity, and always clock data in/out on rising clock edges"라고 적습니다. W25Q32JV는 이 설명과 입력 쪽만 맞습니다. DI는 CLK rising edge에서 받지만 DO는 falling edge에서 내보냅니다(4.2절, 6.1절). master는 rising edge에서 MISO를 sample하므로, flash가 falling edge에서 바꾼 DO는 SCK low 구간 반주기 안에 master 입력에 자리 잡아야 합니다. 이 반주기가 아래 "SCK 상한" 절의 MISO 예산입니다.
+Linux 문서는 많은 디바이스가 mode 0과 3을 함께 지원하는 이유를 "they don't care about polarity, and always clock data in/out on rising clock edges"라고 적습니다. W25Q32JV는 이 설명 중 입력 쪽만 맞습니다. DI는 CLK rising edge에서 받지만 DO는 falling edge에서 내보냅니다(4.2절, 6.1절). master는 rising edge에서 MISO를 sample하므로, flash가 falling edge에서 바꾼 DO는 SCK low 구간 반주기 안에 master 입력에 자리 잡아야 합니다. 이 반주기가 아래 "SCK 상한" 절의 MISO 예산입니다.
 
 비트 순서와 프레임 길이도 맞춥니다. W25Q32JV는 명령·주소·데이터를 MSB first로 주고받고(8절), STM32F407 `SPI_CR1`은 `LSBFIRST` = 0이 MSB first, `DFF` = 0이 8비트 프레임입니다(RM0090 28.5.1, reset 값 `0x0000`).
 
