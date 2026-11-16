@@ -180,7 +180,7 @@ uint16_t ee_read(uint16_t key) {
 int ee_write(uint16_t key, uint16_t val) {
     ee_entry_t *p = (ee_entry_t *)EE_BASE;
     while ((uint32_t)p < EE_END) {
-        uint32_t data = *(volatile uint32_t *)&p->key;
+        uint32_t data = *(volatile uint32_t *)(uint32_t)p;   // key+value word
         if (p->magic == 0xFFFFFFFFu && data == 0xFFFFFFFFu) {
             // empty slot: data word first, magic last
             if (flash_write_word((uint32_t)&p->key, ((uint32_t)val << 16) | key) != 0)
