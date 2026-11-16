@@ -33,7 +33,7 @@ $$
 - **잠든 동안의 전류(I_sleep)를 줄임** — 더 깊은 저전력 모드, 쓰지 않는 peripheral의 clock 차단, 떠 있는 GPIO 정리.
 - **깨어 있는 동안의 전류(I_active)를 줄임** — clock 주파수와 전압을 함께 낮춤(DVFS).
 
-동적 전력은 대략 C·V²·f에 비례하므로 주파수만 낮추면 같은 일을 더 오래 하게 되어 이득이 작고, 전압을 함께 낮춰야 효과가 큽니다. 이 비례식은 누설 전류를 빼 단순화한 것이라, 실제 이득은 대상 보드에서 재야 합니다.
+동적 전력은 α·C·V²·f(α: switching activity)이므로 주파수만 낮추면 같은 일을 더 오래 하게 되어 이득이 작고, 전압을 함께 낮춰야 효과가 큽니다. 이 비례식은 누설 전류를 빼 단순화한 것이라, 실제 이득은 대상 보드에서 재야 합니다.
 
 ## 코드 / 실제 사용 예
 
@@ -149,7 +149,7 @@ configUSE_TICKLESS_IDLE=1: kernel ticks 10000, SysTick interrupts 20, idle sleep
 
 - **kernel 시간은 둘 다 정확히 10,000 tick이었습니다.** tickless에서도 `xTaskGetTickCount()`는 같은 값을 가리킵니다.
 - **SysTick interrupt는 10,000번에서 20번으로 줄었습니다.** core가 깨어난 횟수가 500분의 1이 된 것입니다.
-- **1초 delay 한 번에 두 번씩 잠들었습니다(20 = 10 × 2).** SysTick은 24-bit counter라, port는 한 번에 잘 수 있는 최대 tick을 `portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick`으로 정합니다(`port.c:749`). 이 VM의 25 MHz clock과 1 kHz tick에서는 0xFFFFFF / 25,000 = 671 tick이므로, 1,000 tick을 자려면 671 + 329로 두 번 나눠 잡니다. 더 길게 자려면 SysTick 대신 저전력 timer(RTC·LPTIM)로 `vPortSuppressTicksAndSleep()`을 직접 구현합니다.
+- **1초 delay 한 번에 두 번씩 잠들었습니다(20 = 10 × 2).** SysTick은 24-bit counter라, port는 한 번에 잘 수 있는 최대 tick을 `portMAX_24_BIT_NUMBER / ulTimerCountsForOneTick`으로 정합니다(`port.c:749`). 이 설정(`configCPU_CLOCK_HZ` 25 MHz)과 1 kHz tick에서는 0xFFFFFF / 25,000 = 671 tick이므로, 1,000 tick을 자려면 671 + 329로 두 번 나눠 잡니다. 더 길게 자려면 SysTick 대신 저전력 timer(RTC·LPTIM)로 `vPortSuppressTicksAndSleep()`을 직접 구현합니다.
 
 QEMU는 전류를 모델링하지 않으므로 이 결과는 깨어난 횟수이지 전력이 아닙니다. 전류는 아래처럼 보드에서 잽니다.
 
@@ -198,7 +198,7 @@ void enter_standby(void)
     PWR->CR1 = (PWR->CR1 & ~PWR_CR1_LPMS_Msk) | PWR_CR1_LPMS_STANDBY;
     PWR->SCR = PWR_SCR_CWUF;                                          /* clear wake-up flags */
     SCB->SCR |= SCB_SCR_SLEEPDEEP_Msk;
-    __WFI();                                                         /* SRAM content is not kept */
+    __WFI();                                                         /* SRAM2 is kept only if PWR_CR3_RRS is set */
 }
 
 void gate_unused_clocks(void)
@@ -229,7 +229,7 @@ orig.c:2:44: error: 'USART_TypeDef' has no member named 'DR'; did you mean 'RDR'
 
 - **ADC clock은 L4에서 `AHB2ENR_ADCEN`입니다.** `RCC_APB2ENR_ADC1EN`은 이 헤더에 없습니다.
 
-Stop·Standby 모드에서 무엇이 유지되고 얼마의 전류가 흐르는지, 깨어난 뒤 어떤 clock이 기본값으로 돌아오는지는 STM32L4 reference manual과 datasheet가 정합니다. 이 글은 그 문서를 열지 못해(ST 사이트 다운로드가 시간 초과) 그 값을 싣지 않습니다. 코드에는 깨어난 직후 system clock을 다시 설정하라는 자리만 표시했습니다.
+Stop·Standby 모드에서 무엇이 유지되고 얼마의 전류가 흐르는지, 깨어난 뒤 어떤 clock이 기본값으로 돌아오는지는 STM32L4 reference manual과 datasheet가 정합니다. 이 글은 그 문서를 열지 못해 그 값을 싣지 않습니다. 코드에는 깨어난 직후 system clock을 다시 설정하라는 자리만 표시했습니다.
 
 ### 전류 측정
 
