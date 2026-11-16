@@ -25,7 +25,7 @@ topics: ["embedded"]
 
 ### 1) Open-drain wired-AND
 
-I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 연결되고, 외부 풀업 저항으로 idle 시 1을 유지합니다.
+I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 연결되고, 버스가 쉴 때는 외부 풀업 저항이 1을 유지합니다.
 
 ![I2C 버스 — SDA·SCL 두 선과 풀업 저항](/images/blog/modern-recipes/diagrams/part1-06-i2c-circuit.svg)
 
@@ -36,7 +36,7 @@ I2C는 SDA와 SCL 두 선만 씁니다. 모든 디바이스가 open-drain으로 
 | Master ↔ SDA/SCL | open-drain | wired-AND 출력 |
 | Slave  ↔ SDA/SCL | open-drain | wired-AND 출력 |
 
-누구든 한 디바이스가 0을 출력하면 line은 0이 됩니다. 모두가 high-Z(release)일 때만 풀업이 1로 끌어올립니다. 이 wired-AND 특성이 multi-master arbitration의 기반입니다.
+어느 디바이스든 0을 출력하면 line은 0이 됩니다. 모두가 high-Z(release)일 때만 풀업이 1로 끌어올립니다. 이 wired-AND 특성이 multi-master arbitration의 기반입니다.
 
 UM10204 3.1.8절에 따르면 arbitration은 master가 둘 이상일 때만 필요하고 slave는 관여하지 않습니다. 두 master가 거의 동시에 START를 내면, 각 master는 매 비트 SCL이 high인 동안 SDA가 자기가 보낸 값과 같은지 봅니다. 1을 보냈는데 SDA가 0이면 진 것이므로 SDA 출력을 끄고, 이긴 쪽은 아무 정보도 잃지 않고 전송을 이어 갑니다. 진 master는 그 바이트가 끝날 때까지 클럭을 낼 수 있고, 버스가 비면 다시 시작해야 합니다. 주소 0x50과 0x48로 동시에 쓰기를 시작한 두 master를 wired-AND로 비트마다 계산해 본 결과입니다(`python3 arb.py`).
 
@@ -103,7 +103,7 @@ C_b는 보드마다 재야 하는 값입니다. UM10204가 주는 상한은 디�
 
 ### 5) Clock stretching
 
-슬레이브가 느릴 때 SCL을 0으로 잡아 master를 기다리게 합니다. master는 SCL을 release한 후 line이 1이 되는지 확인합니다. 0으로 머물러 있으면 slave가 stretch 중이라는 뜻입니다.
+slave가 느릴 때 SCL을 0으로 잡아 master를 기다리게 합니다. master는 SCL을 release한 후 line이 1이 되는지 확인합니다. 0으로 머물러 있으면 slave가 stretch 중이라는 뜻입니다.
 
 ```c
 // Master에서의 stretch 인식 — SCL idle 후 1 대기
@@ -219,7 +219,7 @@ UM10204 3.1.4절은 START 뒤 버스가 busy가 되고, STOP 대신 repeated STA
 - I2C는 두 선(SDA, SCL) open-drain wired-AND 버스입니다.
 - 풀업 저항은 UM10204 7.1절 식으로 C_b와 V_DD에서 범위를 구합니다. 100 pF·3.3 V면 Sm 0.97~11.8 kΩ, Fm 0.97~3.54 kΩ입니다.
 - NACK는 수신 측이 바이트를 받지 않았다는 신호이고, 주소 단계의 NACK는 그 주소의 디바이스가 응답하지 않았다는 뜻입니다(UM10204 3.1.6).
-- Clock stretching으로 슬레이브가 master를 기다리게 할 수 있습니다.
+- Clock stretching으로 slave가 master를 기다리게 할 수 있습니다.
 - SDA가 low에 묶이면 클럭 9개를 보내고(UM10204 3.1.16), 그래도 안 되면 리셋이나 전원 재투입입니다.
 
 다음 편에서는 **ADC 동작 원리**를 다룹니다. 아날로그 → 디지털 변환의 내부입니다.
