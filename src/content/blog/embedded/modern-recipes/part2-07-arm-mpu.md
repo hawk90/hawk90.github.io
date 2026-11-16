@@ -158,7 +158,7 @@ void mpu_guard_selftest(void) {
 }
 ```
 
-`mpu_setup()` 뒤, stack에 여유가 있는 시점에 `mpu_guard_selftest()`를 부르고 handler의 무한 루프에서 디버거로 두 변수를 읽습니다. 아래 기대값은 Table 4-25(MMFSR)의 정의에서 끌어낸 것이며, 측정값이 아닙니다.
+`mpu_setup()` 뒤, stack에 여유가 있는 시점에 `mpu_guard_selftest()`를 부르고 handler의 무한 루프에서 디버거로 두 변수를 읽습니다. 아래 기대값은 Table 4-25(MMFSR)의 정의에서 끌어냈고, 뒤의 QEMU 실행 결과와 대조합니다.
 
 | 항목 | 기대값 | 근거 (Table 4-25) |
 | --- | --- | --- |
@@ -239,7 +239,7 @@ MemManage CFSR = 0x00000092
   MMFAR = 0x1FFFFFE8
 ```
 
-위 블록은 두 실행에서 판단에 필요한 줄만 뽑은 것입니다. region 밖 쓰기는 정확히 그 주소에서, stack overflow는 region 1 아래(0x1FFFFFE8)에서 fault가 났습니다. 앞 절의 "region 경계 자체가 guard"가 그대로 보입니다.
+위 블록은 두 실행에서 판단에 필요한 줄만 뽑은 것입니다. region 밖 쓰기는 정확히 그 주소에서, stack overflow는 region 1 아래(0x1FFFFFE8)에서 fault가 났습니다. 앞에서 말한 대로 region 경계가 보호선 역할을 합니다.
 
 이 실험을 처음 짤 때 한 번 틀렸습니다. `main()` 안에서 `__set_PSP()`·`CONTROL.SPSEL`로 stack을 바꾸고 같은 함수에서 계속 실행하면, 컴파일러가 잡아 둔 지역 변수의 `[sp, #4]` 같은 offset이 새 stack 기준이 됩니다. PSP를 region 1 꼭대기(0x20001000)에 두었더니 지역 변수 store가 0x20001004로 가서 MemManage가 났습니다. stack을 바꾼 뒤에는 새 함수로 들어가거나, 새 SP 위에 여유를 둡니다.
 
@@ -262,7 +262,7 @@ Handler가 enable되지 않은 fault는 HardFault로 escalate됩니다(2.4.2절)
 ## 정리
 
 - Privileged 접근까지 막아야 하는 guard는 가장 큰 번호(region 7)에 두고, task마다 바뀌는 region은 한 자리(region 1)로 정해 그것만 context switch에서 다시 씁니다.
-- Privileged thread의 stack guard는 그 stack을 PSP로 써야 handler가 MSP에서 돌 수 있고, guard 크기는 그 stack의 가장 큰 함수 frame보다 커야 합니다.
+- Privileged thread의 stack guard는 그 stack을 PSP로 써야 MemManage handler가 guard와 무관한 MSP stack에서 돌고, guard 크기는 그 stack의 가장 큰 함수 frame보다 커야 합니다.
 - Unprivileged task는 stack을 자기 region 바닥에 두면 region 경계가 guard 역할을 합니다.
 - 설정을 마치면 guard 첫 word에 써서 `DACCVIOL = 1`이고 `MMFAR`가 guard 주소인지 확인합니다.
 
