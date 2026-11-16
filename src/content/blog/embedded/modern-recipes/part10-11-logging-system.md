@@ -47,7 +47,7 @@ extern log_lvl_t g_log_level;
 #define LOG_DBG(fmt, ...)  LOG(3, fmt, ##__VA_ARGS__)
 ```
 
-Release build에서 `g_log_level = LOG_ERR`로 두면 LOG_DBG는 조건 검사만 남습니다. 아래 측정에서 이 경우는 호출당 명령 3개였습니다. 더 줄이고 싶으면 컴파일 time으로 제거:
+Release build에서 `g_log_level = LOG_ERR`로 두면 LOG_DBG는 조건 검사만 남습니다. 아래 측정에서 이 경우는 호출당 명령 3개였습니다. 더 줄이려면 컴파일 시점에 제거합니다.
 
 ```c
 #if !defined(LOG_LEVEL) || LOG_LEVEL < 3
@@ -170,7 +170,7 @@ SEGGER_RTT_Write(0, &rec, sizeof(rec));
 
 ## Layer 5 — Deferred 출력
 
-ISR에서 호출된 로그는 RAM에만 적고, 출력은 idle task가 처리:
+ISR에서 호출된 로그는 RAM에만 적고, 출력은 idle task가 처리합니다.
 
 ```c
 void idle_task(void) {
@@ -257,7 +257,7 @@ IRQ를 막은 동안 UART를 인터럽트·DMA로 보내는 드라이버는 진�
 
 > Floating point 로그
 
-newlib-nano는 `_printf_float`를 기본으로 링크하지 않으므로 `%f`를 쓰려면 `-u _printf_float`로 링크해야 하고, 링크하지 않으면 newlib README는 정의되지 않은 동작이라고 적습니다([10-05](/blog/embedded/modern-recipes/part10-05-uart-not-printing)). binary 로그라면 float의 비트를 그대로 넘기고 host에서 다시 float로 해석합니다. 비트를 꺼낼 때 `*(uint32_t*)&x`는 C의 aliasing 규칙에 어긋나므로([10-08](/blog/embedded/modern-recipes/part10-08-memory-corruption)) `memcpy`를 씁니다.
+newlib-nano는 `_printf_float`를 기본으로 링크하지 않으므로 `%f`를 쓰려면 `-u _printf_float`로 링크해야 하고, newlib README는 링크하지 않은 채 쓰면 정의되지 않은 동작이라고 적습니다([10-05](/blog/embedded/modern-recipes/part10-05-uart-not-printing)). binary 로그라면 float의 비트를 그대로 넘기고 host에서 다시 float로 해석합니다. 비트를 꺼낼 때 `*(uint32_t*)&x`는 C의 aliasing 규칙에 어긋나므로([10-08](/blog/embedded/modern-recipes/part10-08-memory-corruption)) `memcpy`를 씁니다.
 
 ```c
 float x = read_temp();   /* 4-byte float */
@@ -290,8 +290,8 @@ SWO와 RTT는 디버그 프로브가 연결되어 있어야 읽힙니다. 프로
 - SEGGER RTT 문서의 최대 전송 속도는 약 3.5 MB/s이고, 프로브가 연결되어 있어야 읽힙니다.
 - Idle task가 출력을 batch로 처리합니다.
 - Crash dump를 backup SRAM에 두면 reset 후에도 이전 로그를 볼 수 있습니다.
-- Tag/subsystem 마스크로 runtime에서 필터링.
-- Critical section 안에서는 ring buffer write만.
+- Tag/subsystem 마스크로 실행 중에 걸러냅니다.
+- Critical section 안에서는 ring buffer에 기록만 합니다.
 
 다음 편은 **포스트모템 분석**입니다.
 
