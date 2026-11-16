@@ -49,7 +49,7 @@ HBM은 *interposer 위*에 *GPU/NPU 옆*에 붙어 있어서, cooling이 *GPU di
 |------|-----------|
 | NVIDIA A100 (SXM4) | TDP 400 W ([Ampere 백서](https://images.nvidia.com/aem-dam/en-zz/Solutions/data-center/nvidia-ampere-architecture-whitepaper.pdf)) |
 | NVIDIA H100 SXM / H100 NVL | SXM 최대 700 W, NVL(PCIe) 350~400 W·*dual-slot air-cooled* ([H100 사양](https://www.nvidia.com/en-us/data-center/h100/)) |
-| NVIDIA DGX B200 (B200 × 8) | 시스템 최대 약 14.3 kW, *air-cooled* |
+| NVIDIA DGX B200 (B200 × 8) | 시스템 최대 약 14.3 kW(사양 표), *air-cooled*(같은 페이지 성능 각주) |
 | NVIDIA GB200 NVL72 | rack 단위 *liquid-cooled* (Blackwell GPU 72개) |
 
 A100 SXM4와 H100 SXM의 냉각 방식, GB200 NVL72의 rack 전력은 인용한 NVIDIA 자료에 나오지 않아 적지 않았습니다.
