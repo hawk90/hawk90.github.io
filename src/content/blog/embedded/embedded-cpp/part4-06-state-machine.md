@@ -99,12 +99,12 @@ void on_stop() {
 
 - 작은 전이 집합을 직접 분기로 표현하기 쉽습니다.
 - 디버깅이 쉽습니다.
-- Cortex-M0+에서도 동작합니다.
+- 언어 기능만 쓰므로 어느 코어에서도 컴파일됩니다. `Buffering`을 더한 축소판을 `-mcpu=cortex-m0plus -Os`로 컴파일하면 20바이트였고, 미정의 심볼은 전이 action 함수 하나뿐이었습니다.
 
 단점은 다음과 같습니다.
 
 - 전이 로직이 여러 함수에 흩어집니다.
-- 새 state를 추가할 때 관련 분기와 누락 event 정책을 점검해야 합니다.
+- 새 state를 추가할 때 관련 분기와 누락 event 정책을 점검해야 합니다. `default` 없는 `switch`라면 `-Wall`이 도와줍니다. 위 `State`에 `Buffering`을 추가하고 `on_play`의 switch를 그대로 두면 g++-16과 Clang 23.1.5 모두 `warning: enumeration value 'Buffering' not handled in switch [-Wswitch]`를 냈습니다. `default:`를 두면 이 경고가 사라지므로 enum switch에는 `default`를 두지 않습니다.
 - invariant 강제가 어렵습니다.
 
 ## 단계 2 — std::variant + std::visit
@@ -196,7 +196,7 @@ TcpState handle_ack(TcpState s, const Packet& p) {
 }
 ```
 
-variant는 가장 큰 alternative의 저장 공간과 discriminator·정렬을 포함합니다. 모든 state 데이터를 따로 보관하는 설계보다 줄일 수 있지만 항상 절감된다고 보장하지는 않습니다.
+variant는 가장 큰 alternative의 저장 공간과 discriminator·정렬을 포함합니다. 위 미디어 플레이어 `State`(`Stopped` 빈 struct, `Playing`·`Paused` 각 `uint32_t`)는 libstdc++·libc++ 모두 8바이트(position 4 + index + padding)였습니다. Playing과 Paused의 position을 따로 두는 enum + 멤버 설계와 비교하면, alternative가 비슷한 크기일 때는 이 차이가 작습니다.
 
 ## 단계 3 — etl::fsm
 
@@ -268,7 +268,7 @@ ETL 20.49.0에서 세 상태를 모두 정의하고 상태 ID와 배열 순서�
 
 ![HSM 계층 — Operating 하위에 Idle, Working(Reading/Writing), Error](/images/blog/embedded-cpp/diagrams/part4-06-hsm-hierarchy.svg)
 
-`etl::hsm`이나 Boost.SML을 사용합니다. 대부분의 임베디드는 flat FSM으로 충분합니다.
+`etl::hsm`이나 Boost.SML을 사용합니다. 이 글에서는 둘 다 빌드하지 않았습니다. 여러 상태가 같은 이벤트를 같은 방식으로 처리할 때(위 그림의 Error 전이처럼) 계층이 중복을 줄이고, 그런 공유 전이가 없으면 flat FSM으로 충분합니다.
 
 ## 임베디드 — Compile-time FSM
 
@@ -319,7 +319,7 @@ void transition(FsmType& fsm, StateId from, StateId to, const char* event) {
 }
 ```
 
-production debugging에서 상태 흐름을 추적할 때 매우 유용합니다.
+모든 전이가 이 함수를 지나므로, 로그만으로 현장에서 어떤 이벤트 순서로 어느 상태에 도달했는지 재구성할 수 있습니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -352,7 +352,7 @@ switch (state) {
 }
 ```
 
-default + assert를 추가하거나 exhaustive check를 강제합니다.
+enum class switch라면 `default` 없이 `-Wswitch`(`-Wall`에 포함)를 `-Werror`로 켜서 누락을 컴파일 오류로 만듭니다. 처리하지 않는 상태가 의도적이면 `case`를 적고 빈 `break`를 둡니다.
 
 ### 4. State에 너무 많은 데이터
 모든 state가 모든 데이터를 들고 있으면 RAM이 낭비됩니다. `std::variant`로 state별 데이터를 분리합니다.
@@ -365,7 +365,7 @@ ISR과 main이 동시에 receive하면 race가 발생합니다. mutex나 queue�
 
 ## 검증 범위와 1차 자료
 
-Clang 23.1.3 host의 C++17에서 media-table.cpp와 ETL 20.49.0의 etl-media.cpp를 실행했습니다. Play/Pause/Resume/Stop 정상 전이와 잘못된 event의 상태 유지를 확인했습니다. 실제 playback action·하드웨어·board code size는 측정하지 않았습니다. state 수별 임의의 B/KB 비교표는 채택 기준으로 쓰지 않습니다.
+`media-table.cpp`는 Homebrew Clang 23.1.5와 g++-16에서 C++17·ASan·UBSan으로 실행해 둘 다 `table media sequence and unknown transition passed`를 출력했습니다. `etl-media.cpp`는 이번 수정에서 ETL 20.49.0 release 헤더로 Clang 23.1.5 컴파일까지 확인했고 실행하지 않았습니다. 실제 playback action·하드웨어·board code size는 측정하지 않았습니다.
 
 - [C++ draft: variant visitation](https://eel.is/c++draft/variant.visit) — visit가 모든 alternative에 대해 유효해야 하는 계약
 - [ETL 20.49.0 fsm.h](https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/fsm.h) — state array·ID·unknown event·재진입 검사
@@ -377,7 +377,7 @@ Clang 23.1.3 host의 C++17에서 media-table.cpp와 ETL 20.49.0의 etl-media.cpp
 - State invariant는 variant나 single enum으로 강제합니다.
 - 전이를 한 곳에 모아 중앙화합니다.
 - 상태별 데이터 표현에는 variant를 검토하고 실제 크기·이동·예외 조건을 확인합니다.
-- Logging을 통합하면 production debugging이 가능합니다.
+- 전이를 한 함수로 모으면 그 함수에 로그를 넣어 현장의 상태 흐름을 재구성할 수 있습니다.
 - Compile-time FSM은 검증과 안전을 함께 얻습니다.
 
 ## 관련 항목
