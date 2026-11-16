@@ -254,6 +254,145 @@ dd.c는 compatible이 맞아 driver의 probe까지 가면 `bus: 'platform': real
 
 부팅 중에는 late_initcall이 `deferred_probe_timeout`(`CONFIG_MODULES`에서 기본 10초) 뒤로 작업 하나를 예약합니다. 그 작업이 아직 대기 중일 때 driver가 등록되면(`driver_register` → `deferred_probe_extend_timeout`) 작업이 취소되고 그 시점에서 같은 시간 뒤로 다시 예약됩니다. 그래서 작업은 late_initcall에서 10초 뒤가 아니라, 대기 중에 등록된 마지막 driver(모듈로 넣은 driver 포함)에서 `deferred_probe_timeout`이 지난 뒤에 돕니다. 작업이 돌면 그때까지 pending 목록에 남은 device마다 `deferred probe pending: <이유>`가 `dev_warn`으로 한 번 찍히고, 이유가 기록되지 않은 device는 `(reason unknown)`으로 찍힙니다(`deferred_probe_timeout_work_func`, [drivers/base/dd.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/dd.c), [drivers/base/driver.c](https://github.com/torvalds/linux/blob/v6.12/drivers/base/driver.c)).
 
+### QEMU에서 다섯 행 확인
+
+위 표를 QEMU `virt` 보드에서 직접 확인했습니다. 커널은 Linux v6.12 arm64 `defconfig`에 `CONFIG_DYNAMIC_DEBUG=y`만 더해 빌드했고(Debian 13 arm64 VM, gcc 14.2.0), 위 세 블록을 이은 `foo.c`를 그 트리에 대해 `obj-m += foo.o` Makefile로 빌드했습니다. QEMU 11.1.3 `virt`의 DTB를 덤프해(`-M virt,dumpdtb=virt.dtb`, [7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)) 루트 끝에 아래 노드들을 더했습니다.
+
+```dts
+	reserved-memory {
+		#address-cells = <2>;
+		#size-cells = <2>;
+		ranges;
+
+		foo_regs: foo-regs@7f000000 {
+			reg = <0x0 0x7f000000 0x0 0x1000>;
+			no-map;
+		};
+	};
+
+	foo_clk: foo-clk {
+		compatible = "fixed-clock";
+		#clock-cells = <0>;
+		clock-frequency = <24000000>;
+	};
+
+	reg_foo: regulator-foo {
+		compatible = "regulator-fixed";
+		regulator-name = "foo-vdd";
+		regulator-min-microvolt = <1800000>;
+		regulator-max-microvolt = <1800000>;
+		status = "okay";
+	};
+
+	foo@7f000000 {
+		compatible = "vendor,foo-v1";
+		reg = <0x0 0x7f000000 0x0 0x1000>;
+		interrupts = <0x0 0x64 0x4>;
+		clocks = <&foo_clk>;
+		vdd-supply = <&reg_foo>;
+		vendor,mode = "fast";
+	};
+```
+
+`reg`를 RAM 끝의 `no-map` 예약 영역(0x7f000000)에 둔 것은 probe의 `writel`이 실제로 쓰이는 메모리가 필요해서입니다. 처음에는 장치가 없는 0x9100000에 두었는데, `writel`에서 커널이 멈췄습니다(아래 함정). clock은 `fixed-clock`, `vdd-supply`는 `regulator-fixed`이고 `resets`는 없으므로 reset getter는 NULL을 받습니다. interrupt `<0x0 0x64 0x4>`는 GIC SPI 100, level-high입니다.
+
+initramfs의 `/init`은 dd.c의 dynamic debug를 켜고 모듈을 올린 뒤 결과를 찍습니다.
+
+```bash
+#!/bin/busybox sh
+B=/bin/busybox
+$B mount -t proc proc /proc
+$B mount -t sysfs sysfs /sys
+$B mount -t debugfs debugfs /sys/kernel/debug
+echo 'file drivers/base/dd.c +p' > /proc/dynamic_debug/control
+$B insmod /foo.ko
+echo "--- ls /sys/bus/platform/drivers/foo/"
+$B ls /sys/bus/platform/drivers/foo/
+echo "--- dmesg"
+$B dmesg | $B grep -E "foo|7f000000"
+echo "--- devices_deferred"
+$B cat /sys/kernel/debug/devices_deferred
+echo "--- rmmod"
+$B rmmod foo && echo "rmmod ok"
+$B poweroff -f
+```
+
+```bash
+qemu-system-aarch64 -M virt -cpu cortex-a57 -m 1G -nographic -no-reboot \
+  -kernel Image -dtb foo-ok.dtb -initrd ird.cpio.gz -append "console=ttyAMA0 quiet"
+```
+
+DT를 다섯 가지로 바꿔 돌렸습니다. 각 출력에서 커널의 예약 메모리 안내 두 줄은 뺐습니다.
+
+**성공** (위 DT 그대로):
+
+```text
+--- ls /sys/bus/platform/drivers/foo/
+7f000000.foo  bind          module        uevent        unbind
+--- dmesg
+[    0.877316] foo: loading out-of-tree module taints kernel.
+[    0.880950] platform 7f000000.foo: bus: 'platform': __driver_probe_device: matched device with driver foo
+[    0.881045] platform 7f000000.foo: bus: 'platform': really_probe: probing driver foo with device
+[    0.882905] foo 7f000000.foo: driver: 'foo': driver_bound: bound to device
+[    0.883205] foo 7f000000.foo: bus: 'platform': really_probe: bound device to driver foo
+--- devices_deferred
+```
+
+**다른 에러 반환** (`vendor,mode` 삭제 → `of_property_read_string`이 `-EINVAL`):
+
+```text
+--- ls /sys/bus/platform/drivers/foo/
+bind    module  uevent  unbind
+--- dmesg
+[    0.854538] foo: loading out-of-tree module taints kernel.
+[    0.857898] platform 7f000000.foo: bus: 'platform': __driver_probe_device: matched device with driver foo
+[    0.857984] platform 7f000000.foo: bus: 'platform': really_probe: probing driver foo with device
+[    0.858176] foo 7f000000.foo: error -EINVAL: vendor,mode missing or invalid
+[    0.858985] foo 7f000000.foo: probe with driver foo failed with error -22
+--- devices_deferred
+```
+
+**`-ENXIO` 반환** (`interrupts` 삭제 → `platform_get_irq`가 `-ENXIO`):
+
+```text
+--- ls /sys/bus/platform/drivers/foo/
+bind    module  uevent  unbind
+--- dmesg
+[    0.908969] foo: loading out-of-tree module taints kernel.
+[    0.912430] platform 7f000000.foo: bus: 'platform': __driver_probe_device: matched device with driver foo
+[    0.912510] platform 7f000000.foo: bus: 'platform': really_probe: probing driver foo with device
+[    0.913915] foo 7f000000.foo: error -ENXIO: IRQ index 0 not found
+[    0.915426] foo 7f000000.foo: probe with driver foo rejects match -6
+--- devices_deferred
+```
+
+**`-EPROBE_DEFER` 반환** (`regulator-foo`를 `status = "disabled"` → regulator가 등록되지 않음):
+
+```text
+--- ls /sys/bus/platform/drivers/foo/
+bind    module  uevent  unbind
+--- dmesg
+[    0.923072] foo: loading out-of-tree module taints kernel.
+[    0.926922] platform 7f000000.foo: bus: 'platform': __driver_probe_device: matched device with driver foo
+[    0.927010] platform 7f000000.foo: bus: 'platform': really_probe: probing driver foo with device
+[    0.927622] foo 7f000000.foo: Driver foo requests probe deferral
+[    0.927736] platform 7f000000.foo: Added to deferred list
+--- devices_deferred
+7f000000.foo	foo: vdd
+```
+
+**compatible 불일치** (`vendor,fooo-v1`):
+
+```text
+--- ls /sys/bus/platform/drivers/foo/
+bind    module  uevent  unbind
+--- dmesg
+[    1.020380] foo: loading out-of-tree module taints kernel.
+--- devices_deferred
+```
+
+표의 다섯 행이 그대로 나왔습니다. `devices_deferred`의 이유 `foo: vdd`는 probe가 `dev_err_probe(dev, ret, "vdd\n")`에 넘긴 문자열입니다. `-ENXIO`와 `-EINVAL` 경우의 `error -...:` 줄은 각각 `platform_get_irq`와 이 driver의 `dev_err_probe`가 찍은 것입니다. 성공한 경우에는 `rmmod foo`가 `my_remove`를 거쳐 정상으로 끝났습니다.
+
 ## 자주 보는 함정
 
 > compatible string 오타
@@ -288,6 +427,17 @@ static void my_remove(struct platform_device *pdev)
 ```
 
 remove가 devres 해제보다 먼저 불리므로(위 'remove가 필요한 경우' 참고) clock이 꺼진 뒤에도 handler가 등록되어 있습니다. 그 사이에 인터럽트가 들어오면 handler가 clock 없는 IP의 레지스터를 읽게 됩니다. clock을 `devm_clk_get_enabled`로 받아 IRQ보다 먼저 등록하면 해제 순서가 IRQ → clock으로 맞춰집니다.
+
+> 레지스터 주소가 실제 장치가 없는 곳
+
+위 실험을 처음에 `reg = <0x0 0x09100000 0x0 0x1000>`로 돌렸습니다. QEMU `virt`에서 그 주소에는 아무 장치도 없고, `devm_platform_ioremap_resource`는 성공했지만 probe의 첫 `writel`에서 커널이 멈췄습니다.
+
+```text
+[    0.869376] Internal error: synchronous external abort: 0000000096000050 [#1] PREEMPT SMP
+[    0.872278] pc : my_probe+0x17c/0x2c8 [foo]
+```
+
+이 실행에서 `devm_platform_ioremap_resource`는 장치가 없는 주소도 그대로 매핑해 성공을 돌려줬고, 잘못은 첫 레지스터 접근에서야 드러났습니다. 그래서 DT의 `reg`가 틀린 경우는 probe가 성공을 돌려주기 전, 첫 `readl`·`writel`에서 멈추는 모습으로 보입니다.
 
 ## 정리
 
