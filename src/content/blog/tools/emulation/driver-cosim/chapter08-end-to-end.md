@@ -98,7 +98,7 @@ void aristos1_isr(unsigned vector) {
 }
 ```
 
-이 shim은 주소 폭과 오류 전달을 보여 주는 host용입니다. 실제 Linux `readl`은 kernel address-space와 ordering 계약을 가지므로, 이 shim으로 빌드한 코드가 kernel module과 동등하다고 볼 수 없습니다. 이 장에서 같은 소스를 `.ko`로 빌드하지는 않았습니다.
+이 shim은 주소 폭과 오류 전달을 보여 주는 host용입니다. 실제 Linux `readl`/`writel`의 계약은 kernel 문서 *Bus-Independent Device Accesses*(docs.kernel.org/driver-api/device-io)에 있습니다. 그 문서는 MMIO 주소가 `__iomem` pointer이고 "in portable code, it must only be passed from and to functions that explicitly operated on an `__iomem` token"이라고 적고, read/write 함수는 "defined to be ordered"이며 ioremap 경로의 write는 "On many platforms and buses (e.g. PCI), writes issued through ioremap() mappings are posted"라고 설명합니다. 이 shim은 `__iomem`도, posted write도 모델링하지 않으므로 이 shim으로 빌드한 코드가 kernel module과 동등하다고 볼 수 없습니다. 이 장에서 같은 소스를 `.ko`로 빌드하지는 않았습니다.
 
 ## Step 3 — IRQ sampling과 재진입
 
@@ -249,7 +249,14 @@ jobs:
         run: pytest -v test_aristos1.py -m slow
 ```
 
-cron은 UTC 기준이라 `0 18 * * *`이 한국 시간 03:00입니다. larger runner는 이름이 정해져 있지 않습니다. 조직이 만든 runner의 이름이 기본 label이 되며, GitHub changelog(2023-02-14)는 "Users will continue to be able to target their runners using the runner name as the default label"이라고 적습니다. 이전 판의 `ubuntu-latest-4-cores`는 그런 이름이 있다는 전제였으므로 예시 이름 `cosim-large`로 바꿨습니다. `build_cosim.sh`는 Linux에서는 위 macOS 전용 `-Wl,-U` 옵션 대신 그 platform의 link 방식을 써야 하며, 이 장에서 Linux 빌드는 하지 않았습니다.
+이 workflow는 실행하지 않았으므로 각 줄을 1차 문서와 대조했습니다.
+
+- `schedule` — GitHub Docs *Events that trigger workflows*: "By default, scheduled workflows run in UTC." 그래서 `0 18 * * *`이 한국 시간 03:00입니다.
+- `timeout-minutes` — *Workflow syntax*: "The maximum number of minutes to let a job run before GitHub automatically cancels it. Default: 360".
+- `if: github.event_name == 'schedule'` — *Workflow syntax*의 `jobs.<job_id>.if`는 "prevent a job from running unless a condition is met"입니다.
+- `runs-on: ubuntu-latest` — actions/runner-images README가 Ubuntu 24.04로 적습니다. 그 판의 Ubuntu 패키지는 `verilator (5.020-1)`(packages.ubuntu.com noble)이라 이 장의 5.054와 다릅니다.
+- larger runner — GitHub Docs *Use larger runners*: "Larger runners are automatically assigned a workflow label that matches the runner name." 이름은 조직이 runner를 만들 때 정하므로 `cosim-large`는 예시 이름입니다. 이전 판의 `ubuntu-latest-4-cores`는 그런 label이 미리 있다는 전제였습니다.
+- link 옵션 — 위 `-Wl,-U,...`는 Verilator `include/verilated.mk:130-131`이 `ifeq ($(UNAME_S),Darwin)` 안에서만 붙이는 옵션입니다. Linux의 `build_cosim.sh`에는 넣지 않습니다. 이 장에서 Linux 빌드는 하지 않았습니다.
 
 ## Performance — cycle-accurate cosim의 속도
 
@@ -304,12 +311,15 @@ cosim의 근본 제약은 RTL이 cycle 단위로 계산된다는 점입니다. �
 시리즈 마무리입니다. 더 깊이 들어가고 싶다면 다음 자료가 다음 단계입니다.
 
 - Verilator 공식 manual의 multithreading·DPI scoping(`--threads-dpi`, `svSetScope`)
-- lowRISC Ibex 저장소의 `dv/cosim/` — `cosim_dpi.cc`·`spike_cosim.cc`로 RTL core를 Spike ISS와 DPI로 비교하는 실제 예
-- lowRISC OpenTitan 저장소의 `hw/dv/dpi/` — `uartdpi`·`jtagdpi`·`spidpi` 등 DPI로 붙인 host 측 device model
+- lowRISC Ibex 저장소의 `dv/cosim/` — `cosim.h:68-69`의 `step()` 주석이 "Step the co-simulator, checking register write and PC of executed instruction match the supplied values"라고 적고, `spike_cosim.h:23`의 `SpikeCosim`이 그 interface를 Spike로 구현합니다(master 3d524f1)
+- lowRISC OpenTitan 저장소의 `hw/dv/dpi/` — `uartdpi`·`jtagdpi`·`spidpi` 등. 예를 들어 `uartdpi/uartdpi.sv:24-37`은 `uartdpi_create`·`uartdpi_read`·`uartdpi_write`를 `import "DPI-C"`로 선언합니다(master 4ced702)
 
 ## 1차 자료와 실행 환경
 
-- [GitHub changelog 2023-02-14: removal of additional label option for larger runners](https://github.blog/changelog/2023-02-14-github-actions-removal-of-additional-label-option-for-github-hosted-larger-runners/)
+- [GitHub Docs: Use larger runners](https://docs.github.com/en/actions/how-tos/manage-runners/larger-runners/use-larger-runners), [Events that trigger workflows](https://docs.github.com/en/actions/reference/workflows-and-actions/events-that-trigger-workflows), [Workflow syntax](https://docs.github.com/en/actions/reference/workflows-and-actions/workflow-syntax)
+- [Linux kernel: Bus-Independent Device Accesses](https://docs.kernel.org/driver-api/device-io.html)
+- [actions/runner-images README](https://github.com/actions/runner-images), [packages.ubuntu.com noble/verilator](https://packages.ubuntu.com/noble/verilator)
+- Verilator 5.054 `include/verilated.mk:128-131`
 - GitHub contents API(2026-11-16) — `lowRISC/ibex` `dv/cosim/`, `lowRISC/opentitan` `hw/dv/dpi/` 파일 목록
 
 실행 환경은 macOS 27.2.1, Apple M2 Pro, Verilator 5.054, Apple clang 21.0.0, Python 3.13 venv, pytest 9.2.0입니다(2026-11-16). GitHub Actions workflow, Linux 빌드, `.ko` 빌드, DMA·matmul RTL, 30분 stress, 상용 simulator는 실행하지 않았습니다.
