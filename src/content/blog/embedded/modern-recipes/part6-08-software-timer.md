@@ -11,17 +11,19 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Software timer는 timer task가 tick마다 list를 훑어 callback을 부르는 구조입니다."** µs 정밀도가 필요하면 HW timer, ms 단위 알람이 많으면 SW timer입니다.
+> **"Software timer는 timer service task가 다음 만료 시각까지 잠들었다가 깨어나 callback을 부르는 구조입니다."** 해상도는 RTOS tick이고, callback 하나가 막히면 다른 모든 timer가 함께 늦어집니다.
 
 ## 어떤 상황에서 쓰나
 
-LED를 250 ms마다 깜빡이게 하고, 사용자가 30초 동안 입력이 없으면 화면을 꺼야 하며, watchdog ping을 1초 주기로 보내야 하는 펌웨어가 흔합니다. 모두 hardware timer 한 개로는 처리할 수 없을 만큼 알람의 종류가 많습니다. Software timer는 한 hardware tick 위에 N개의 가상 timer를 얹어줍니다.
+LED를 250 ms마다 깜빡이고, 30초 동안 입력이 없으면 화면을 끄고, watchdog ping을 1초마다 보내는 펌웨어처럼 ms 단위 알람이 여럿일 때 씁니다. hardware timer를 알람마다 하나씩 쓰지 않고, RTOS tick 위에 필요한 만큼 software timer를 만듭니다.
 
-반대로 motor PWM 50 µs cycle처럼 정밀하고 ISR latency가 결정적이어야 하는 작업은 hardware timer로 직접 처리해야 합니다.
+tick보다 짧은 주기(예: 50 µs)나 tick에 묶이지 않는 시각이 필요한 작업은 hardware timer와 그 ISR로 처리합니다.
+
+실행 환경은 [6-01](/blog/embedded/modern-recipes/part6-01-rtos-decision)과 같습니다(FreeRTOS V11.2.0 `ARM_CM3`, `configTIMER_TASK_PRIORITY` 7, `configTIMER_QUEUE_LENGTH` 8, QEMU 11.1.3 `mps2-an385` `-icount shift=5`). 아래 코드 중 `screen_off()`, `led_set()` 같은 함수는 애플리케이션 함수이고, 실행한 코드는 "측정" 절에 있습니다.
 
 ## 핵심 개념
 
-Hardware timer와 software timer는 개수와 정밀도에서 정반대입니다.
+두 timer는 개수와 해상도가 다릅니다.
 
 | 종류 | 특성 |
 |------|------|
@@ -35,9 +37,9 @@ FreeRTOS software timer 구조입니다.
 | `xTimerCreate` | callback, period, auto-reload 옵션 |
 | `xTimerStart` | timer command queue로 명령 전달 |
 | `xTimerStop` / `xTimerDelete` | 같은 queue로 전달 |
-| timer task | 매 tick마다 만료 timer를 골라 callback 호출 |
+| timer service task | 다음 만료 시각까지 command queue에서 잠들었다가, 만료된 timer의 callback 호출 |
 
-Callback은 timer task의 context에서 실행됩니다. 따라서 callback에서 block하거나 무거운 일을 하면 다른 timer가 지연됩니다.
+timer service task는 tick마다 깨어나지 않습니다. `timers.c`의 `prvProcessTimerOrBlockTask()`는 가장 가까운 만료 시각까지 남은 tick을 `vQueueWaitForMessageRestricted( xTimerQueue, ( xNextExpireTime - xTimeNow ), … )`에 넘겨 command queue에서 기다립니다. callback은 이 task 안에서 차례로 실행되므로, callback이 막히거나 오래 걸리면 다른 timer의 callback이 모두 그만큼 늦어집니다(아래 측정).
 
 ## 코드 / 실제 사용 예
 
@@ -65,7 +67,7 @@ void init(void) {
 }
 ```
 
-`pdFALSE`가 one-shot입니다. callback이 한 번 실행되고 timer는 dormant 상태로 들어갑니다.
+`pdFALSE`가 one-shot입니다. callback이 한 번 실행되고 timer는 dormant 상태가 됩니다. `xTimerReset()`은 dormant인 timer도 다시 시작하므로 입력이 올 때마다 30초를 새로 셉니다.
 
 ### Auto-reload timer
 
@@ -89,7 +91,7 @@ void init(void) {
 }
 ```
 
-`pdTRUE`가 auto-reload입니다. callback이 끝나면 자동으로 다시 시작합니다.
+`pdTRUE`가 auto-reload입니다. 다음 만료 시각은 이전 만료 시각에 period를 더한 값이라, callback이 늦게 불려도 주기가 밀리지 않습니다(아래 측정의 B).
 
 ### Timer ID로 instance 구분
 
@@ -110,7 +112,7 @@ void init(void) {
 }
 ```
 
-같은 callback을 N개의 timer가 공유할 때 timer ID로 구분합니다. RAM이 callback 코드 한 벌만 듭니다.
+timer 넷이 callback 하나를 나눠 쓰고, `pvTimerGetTimerID()`로 어느 timer인지 구분합니다.
 
 ### Static timer
 
@@ -126,7 +128,7 @@ void init(void) {
 }
 ```
 
-양산에서는 static 변종을 검토할 수 있습니다. 동적 할당을 줄이지만 전체 heap 사용은 다른 객체와 함께 확인해야 합니다.
+`xTimerCreateStatic()`은 heap 대신 호출자가 넘긴 `StaticTimer_t`에 timer를 만듭니다.
 
 ### ISR에서 reset
 
@@ -138,25 +140,25 @@ void EXTI_IRQHandler(void) {
 }
 ```
 
-ISR에서 직접 callback을 부를 수는 없고, `*FromISR` 변종이 timer task에 명령을 전달합니다.
+`xTimerResetFromISR()`은 timer service task의 command queue에 명령을 넣습니다. 실제 reset은 그 task가 돌 때 일어납니다.
 
 ### HW timer가 필요한 경우
 
 ```c
-/* 정밀 50 µs PWM — HW timer가 답 */
+/* 50 us period: below the 1 ms tick, so a hardware timer ISR */
 void TIM2_IRQHandler(void) {
-    pwm_update();           /* ISR에서 직접 — SW timer로는 불가능 */
+    pwm_update();
 }
 ```
 
-µs 단위 정밀이나 결정적인 ISR latency가 필요하면 HW timer를 검토합니다. SW timer의 latency와 jitter는 tick, timer task priority, callback 실행시간과 부하로 측정합니다.
+tick(여기서 1 ms)보다 짧은 주기는 software timer로 만들 수 없습니다. software timer callback은 timer service task의 우선순위와 앞선 callback의 실행 시간만큼 늦어집니다.
 
 ### Timer 종료 시 race 처리
 
 ```c
 void shutdown_module(void) {
     xTimerStop(t, pdMS_TO_TICKS(100));
-    /* 이 시점 callback이 이미 실행 중일 수 있음 */
+    /* the stop command may not have been processed yet */
     if (xTimerDelete(t, pdMS_TO_TICKS(100)) != pdPASS) {
         log_err("timer delete failed");
     }
@@ -164,28 +166,78 @@ void shutdown_module(void) {
 }
 ```
 
-`xTimerStop`은 명령을 queue에 넣을 뿐, 이미 실행 중인 callback을 멈추지 않습니다. callback이 module의 자원을 쓰고 있다면 reference count로 안전하게 정리합니다.
+`xTimerStop()`·`xTimerDelete()`는 command queue에 명령을 넣을 뿐입니다. 이 함수를 부른 task가 timer service task보다 우선순위가 높으면, 명령이 처리되기 전에 돌아오므로 callback이 그 뒤에 한 번 더 불릴 수 있습니다. callback이 쓰는 자원은 명령이 처리된 것을 확인한 뒤 정리합니다.
 
-## 측정 / 성능 비교
+## 측정
 
-| 연산 | 시간 (Cortex-M4 72 MHz) |
-|------|--------------------------|
-| `xTimerStart` | 측정 필요 (queue 명령 전달) |
-| SW timer callback latency | tick·priority·부하에 따라 측정 |
-| HW timer ISR | MCU·ISR에 따라 측정 |
-| timer task per-tick overhead | active timer·port에 따라 측정 |
+### callback이 막히면
 
-SW timer는 tick 정밀입니다. 1 ms tick에서는 callback이 0~1 ms 늦게 호출될 수 있습니다.
+one-shot A(tick 15)와 auto-reload B(10 tick)를 만들고, A의 callback 안에서 `vTaskDelay(25)`로 막히게 한 빌드와 막히지 않는 빌드를 비교했습니다.
 
-RAM 사용량:
+```c
+/* swtimer.c: timer service behaviour on FreeRTOS V11.2.0.
+   -DBLOCKING makes timer A's callback block for 25 ticks. */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
+extern void pr(const char *, ...); extern void hosted_exit(int);
 
-| 종류 | 크기 |
-|------|------|
-| SW timer 1개 | config·port에 따라 측정 |
-| HW timer | peripheral 사용 및 driver 비용 확인 |
-| timer task stack | config·callback에 따라 측정 |
+static TimerHandle_t ta, tb;
+static int nb;
 
-Timer task와 timer object의 RAM 비용은 RTOS 설정과 callback에 따라 산정합니다.
+static void cb_a(TimerHandle_t t) {               /* one-shot at tick 15 */
+    (void)t;
+    pr("A fires at %u\n", (unsigned)xTaskGetTickCount());
+#ifdef BLOCKING
+    vTaskDelay(25);                               /* blocks the timer task */
+#endif
+}
+
+static void cb_b(TimerHandle_t t) {               /* auto-reload every 10 ticks */
+    (void)t;
+    pr("  B fires at %u\n", (unsigned)xTaskGetTickCount());
+    if (++nb == 6) hosted_exit(0);
+}
+
+int main(void) {
+    ta = xTimerCreate("A", 15, pdFALSE, NULL, cb_a);
+    tb = xTimerCreate("B", 10, pdTRUE, NULL, cb_b);
+    xTimerStart(ta, 0);
+    xTimerStart(tb, 0);
+    vTaskStartScheduler();
+    return 0;
+}
+```
+
+| 막히지 않음 | A callback이 25 tick 막힘 |
+|---|---|
+| `B fires at 10` | `B fires at 10` |
+| `A fires at 15` | `A fires at 15` |
+| `B fires at 20` | `B fires at 40` |
+| `B fires at 30` | `B fires at 40` |
+| `B fires at 40` | `B fires at 40` |
+| `B fires at 50` | `B fires at 50` |
+| `B fires at 60` | `B fires at 60` |
+
+A의 callback이 timer service task를 tick 15부터 40까지 막는 동안, tick 20과 30에 만료된 B의 callback은 불리지 못하고 tick 40에 세 번 연달아 불렸습니다. 그 뒤 50, 60은 원래 주기대로입니다. auto-reload의 다음 만료가 이전 만료 시각 + period라서 밀린 만큼 한꺼번에 따라잡은 것입니다.
+
+### period 0
+
+```c
+/* period0.c: a software timer with period 0 */
+#include "FreeRTOS.h"
+#include "task.h"
+#include "timers.h"
+extern void hosted_exit(int);
+static void cb(TimerHandle_t t) { (void)t; }
+int main(void) { xTimerCreate("x", 0, pdTRUE, NULL, cb); hosted_exit(0); return 0; }
+```
+
+```text
+ASSERT failed: timers.c line 425
+```
+
+`xTimerCreate()`는 `timers.c` 425행 `configASSERT( ( xTimerPeriodInTicks > 0 ) )`로 period 0을 거부합니다.
 
 ## 자주 보는 함정
 
@@ -197,7 +249,7 @@ void cb(TimerHandle_t t) {
 }
 ```
 
-Timer task가 막히면 다른 모든 timer가 동시에 멈춥니다. callback에서는 block을 절대 하지 않습니다.
+위 측정처럼 timer service task가 막힌 동안 다른 timer의 callback이 모두 밀립니다. callback에서는 기다리는 API를 부르지 않습니다(timeout 0으로만).
 
 > Callback에서 무거운 작업
 
@@ -207,7 +259,7 @@ void cb(TimerHandle_t t) {
 }
 ```
 
-긴 작업은 worker task로 넘깁니다. callback은 신호 한 줄만 보내고 worker가 처리합니다.
+막히는 것과 같은 효과입니다. callback은 worker task에 notification이나 queue로 신호만 보내고, 긴 일은 worker가 합니다.
 
 > Timer command queue full
 
@@ -215,15 +267,15 @@ void cb(TimerHandle_t t) {
 xTimerStart(t, 0);   /* timer queue 가득 차면 fail */
 ```
 
-timer command queue 길이는 설정값에 따릅니다. 짧은 시간에 많은 timer 명령이 발생하면 `configTIMER_QUEUE_LENGTH`와 실패 처리를 함께 검토합니다.
+command queue 길이는 `configTIMER_QUEUE_LENGTH`(이 설정에서 8)입니다. timer service task가 돌기 전에 명령이 그보다 많이 쌓이면 block time 0인 `xTimerStart()`는 `pdFAIL`을 돌려줍니다. 반환값을 확인합니다.
 
 > Period를 0으로
 
 ```c
-xTimerCreate("x", 0, pdTRUE, NULL, cb);   /* assert fail */
+xTimerCreate("x", 0, pdTRUE, NULL, cb);   /* configASSERT, timers.c 425 */
 ```
 
-Period는 최소 1 tick이어야 합니다. 1 ms tick에서 1 ms 미만 timer는 SW timer로는 불가능합니다.
+period는 1 tick 이상이어야 합니다(위 측정). 1 ms tick에서 1 ms보다 짧은 주기는 software timer로 만들 수 없습니다.
 
 > Delete 후 자원 즉시 free
 
@@ -232,22 +284,22 @@ xTimerDelete(t, 0);
 free(my_buf);   /* 마지막 callback이 my_buf 사용 중이면 use-after-free */
 ```
 
-Delete 명령은 queue에 들어갈 뿐, 이미 실행된 callback의 종료를 보장하지 않습니다. Reference count나 명시적 sync로 안전하게 처리합니다.
+delete 명령은 queue에 들어갈 뿐이라, `xTimerDelete()`가 돌아온 시점에 timer service task가 그 명령을 처리했다는 보장이 없습니다. callback이 쓰는 자원은 명령 처리 뒤에 해제합니다.
 
 ## 정리
 
-- SW timer는 tick 정밀(보통 1 ms), HW timer는 µs 정밀입니다.
+- SW timer의 해상도는 **RTOS tick**(이 설정에서 1 ms)이고, 더 짧은 주기는 HW timer ISR로 만듭니다.
 - One-shot은 `pdFALSE`, auto-reload는 `pdTRUE`입니다.
-- Callback은 timer task context이므로 block과 long work를 금지합니다.
+- Callback은 **timer service task 안에서** 차례로 돕니다. 하나가 25 tick 막히자 B의 두 주기가 tick 40으로 밀렸습니다.
 - 명령은 timer command queue로 전달됩니다. queue 길이와 ISR 빈도를 확인합니다.
-- Delete는 callback 완료를 보장하지 않으니 race를 의식해 reference count로 정리합니다.
-- 양산은 static timer를 표준으로 사용합니다.
+- Stop·delete는 명령을 넣을 뿐이므로, callback 자원은 명령이 처리된 뒤 정리합니다.
 
-다음 편부터 6-09~6-11은 별도로 다루고, 본 시리즈에서 마지막은 **RTOS 디버깅**입니다.
+다음 편은 **ISR-Safe API 설계**입니다.
 
 ## 관련 항목
 
 - [PRTOS 2-08: Tick Timer](/blog/embedded/rtos/practical-internals/part2-08-tick-timer)
 - [PRTOS 2-09: Tickless](/blog/embedded/rtos/practical-internals/part2-09-tickless)
 - [6-07: Event Group](/blog/embedded/modern-recipes/part6-07-event-group)
+- [6-09: ISR-Safe API 설계](/blog/embedded/modern-recipes/part6-09-isr-api)
 - [6-12: RTOS 디버깅](/blog/embedded/modern-recipes/part6-12-rtos-debugging)
