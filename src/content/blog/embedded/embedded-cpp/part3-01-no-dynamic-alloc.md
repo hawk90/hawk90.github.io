@@ -19,8 +19,8 @@ topics: ["embedded"]
 임베디드에서 동적 할당은 세 가지 위험을 안고 갑니다.
 
 1. **Heap fragmentation** — 짧고 긴 alloc이 반복되면 큰 블록을 얻지 못합니다.
-2. **비결정성** — `malloc`의 시간이 예측 불가합니다. real-time 보장이 깨집니다.
-3. **메모리 부족** — 언제 부족해질지 알 수 없고 graceful fail이 어렵습니다.
+2. **비결정성** — `malloc`의 실행 시간은 free list의 상태에 따라 달라져, 호출 하나의 상한을 정하기 어렵습니다.
+3. **메모리 부족** — 실패 시점이 실행 이력에 따라 달라집니다. 같은 입력으로 테스트에서 통과해도 장시간 운용 뒤 fragmentation으로 실패할 수 있습니다.
 
 ```cpp
 // 위험
@@ -60,7 +60,7 @@ std::fill(buffer.begin(), buffer.end(), 0);
 std::sort(sin_table.begin(), sin_table.end());
 ```
 
-`std::array`는 컴파일 타임 크기를 갖고 런타임에 크기를 바꿀 수 없습니다. 이것이 zero-cost의 비결입니다.
+`std::array`는 컴파일 타임 크기를 갖고 런타임에 크기를 바꿀 수 없습니다. 그래서 크기를 저장하는 멤버가 없고, `sizeof(std::array<int, 16>)`는 libstdc++·libc++ 모두 원소 저장소 64바이트 그대로였습니다(`static_assert`로 확인).
 
 ## ETL — heap 없는 STL 대체
 
@@ -90,7 +90,7 @@ orders.insert({1, Order{}});
 - internal storage가 stack 또는 .bss에 자리잡습니다.
 - `<algorithm>`, `<iterator>`와 모두 호환됩니다.
 
-ETL은 MIT license에 header-only이며, 임베디드 표준 라이브러리에 가깝게 쓰입니다.
+ETL은 MIT license의 header-only 라이브러리입니다. 이 글의 환경에는 ETL을 설치하지 않아 위 코드는 실행하지 않았습니다. 용량 초과 시 동작과 버전별 계약은 [Part 4-02](/blog/embedded/embedded-cpp/part4-02-etl-library)에서 다룹니다.
 
 ## std::pmr (C++17) — polymorphic allocator
 
@@ -114,11 +114,13 @@ for (int i = 0; i < 100; ++i) v.push_back(i);
 
 ## Stack vs static vs heap
 
-| 위치 | 수명 | 크기 | 임베디드 적합 |
+| 위치 | 수명 | 크기를 정하는 곳 | 임베디드 적합 |
 | --- | --- | --- | --- |
-| **Stack** | 함수 scope | 작음 (KB) | 단명 객체 |
-| **Static (.bss/.data)** | 프로그램 전체 | 큼 (수십 KB) | 영구 객체 |
-| **Heap** | 동적 | 매우 큼 | 회피 |
+| **Stack** | 함수 scope | 링커 스크립트의 stack 예약, RTOS 태스크별 stack 크기 | 단명 객체 |
+| **Static (.bss/.data)** | 프로그램 전체 | 컴파일 시 확정, 링크 시 RAM 영역 초과 검사 | 영구 객체 |
+| **Heap** | 동적 | 링커 스크립트의 heap 영역, 실패는 런타임에 발견 | 회피 |
+
+Static은 링크 단계에서 넘치는지 알 수 있고([Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts)의 `--print-memory-usage`), stack과 heap은 런타임에 넘칩니다.
 
 ```cpp
 void func() {
@@ -287,7 +289,7 @@ std::array<char, 32> s = {'h', 'e', 'l', 'l', 'o', '\0'};
 ```cpp
 // BAD — heap 가능
 std::function<void(int)> callback;
-callback = [data](int x) { /* */ };   // capture가 크면 heap
+callback = [data](int x) { /* */ };   // capture가 버퍼보다 크면 heap
 
 // GOOD — etl::delegate (fixed-size)
 etl::delegate<void(int)> cb;
@@ -297,15 +299,15 @@ cb = etl::delegate<void(int)>::create<&MyClass::method>(my_obj);
 void (*cb)(int) = my_function;
 
 // GOOD — std::function with capture-less lambda
-std::function<void(int)> cb = [](int x) { /* */ };   // 구현의 SBO 조건을 확인해야 함
+std::function<void(int)> cb = [](int x) { /* */ };   // 구현의 내부 버퍼에 저장
 ```
 
-캡처 없는 람다는 함수 포인터로 변환할 수 있습니다. `std::function`에 람다 객체를 직접 넣는 경우에는 구현의 작은 객체 최적화 조건을 확인합니다. 확실히 표준의 비할당 보장을 쓰려면 `std::function<void(int)> cb = +[](int) {};`처럼 함수 포인터를 저장합니다. ETL의 용량 초과·delegate 계약과 버전 검증은 [Part 4-02](/blog/embedded/embedded-cpp/part4-02-etl-library)에서 다룹니다.
+호스트에서 `operator new` 호출 수를 세면 g++-16(libstdc++)과 Clang 23.1.5(libc++) 모두 같았습니다. 캡처 없는 람다 0회, `+[](int){}`(함수 포인터) 0회, `long` 세 개(24바이트)를 캡처한 람다 1회였습니다. 캡처 없는 람다가 할당하지 않는 것은 두 라이브러리의 내부 버퍼 구현 덕분이고, 표준이 보장하는 것은 함수 포인터 쪽입니다. [func.wrap.func.con]은 `F`가 함수 포인터나 `reference_wrapper`이면 생성자가 예외를 던지지 않는다고 정하므로, `bad_alloc`을 낼 수 있는 할당 경로를 둘 수 없습니다. 그래서 확실히 하려면 `std::function<void(int)> cb = +[](int) {};`처럼 함수 포인터를 저장합니다. ETL의 용량 초과·delegate 계약과 버전 검증은 [Part 4-02](/blog/embedded/embedded-cpp/part4-02-etl-library)에서 다룹니다.
 
 ## 자주 보는 함정과 안티패턴
 
 ### 1. std::vector 무심코 사용
-표준 라이브러리의 대부분의 컨테이너는 heap을 사용합니다. 명시적으로 검사한 뒤에 써야 합니다.
+`std::array`를 제외한 표준 시퀀스·연관 컨테이너(`vector`, `deque`, `list`, `map`, `unordered_map` 등)는 기본 allocator `std::allocator`로 heap을 씁니다. pmr 버전이나 고정 용량 대체 컨테이너로 바꿉니다.
 
 ### 2. std::string concatenation
 ```cpp
@@ -318,7 +320,7 @@ s += "b";   // heap reallocate 가능
 ```cpp
 static std::array<HugeStruct, 1000> arr;   // 큰 .bss
 ```
-.bss 크기가 폭증하고 RAM이 부족해집니다.
+`sizeof(HugeStruct) * 1000`바이트가 그대로 `.bss`에 잡힙니다. 링크는 RAM 영역을 넘을 때만 실패하므로, `--print-memory-usage`로 영역별 사용률을 CI에 남깁니다.
 
 ### 4. Pool 고갈
 ```cpp
@@ -340,7 +342,7 @@ struct Node {
     std::array<Node, 4> children;   // 무한 재귀 — 컴파일 에러
 };
 ```
-pointer나 index를 활용해 풉니다.
+g++-16은 `error: 'std::array<_Tp, _Nm>::_M_elems' has incomplete type`, Clang 23.1.5(libc++)는 `error: incomplete type 'Node' used in type trait expression`으로 멈춥니다. 정의가 끝나지 않은 `Node`는 불완전 타입이라 값으로 담을 수 없기 때문입니다. 자식을 별도 pool의 index나 포인터로 가리켜 풉니다.
 
 ## 측정 — heap 사용 추적
 
@@ -366,7 +368,13 @@ extern "C" {
 }
 ```
 
-위 GNU ld 예제에는 `__real_malloc`·`__real_free` 선언이 추가로 필요합니다. `-Wl,--wrap=malloc,--wrap=free`는 링크 시 미해결 참조를 치환합니다. 이미 라이브러리 내부에서 결합된 호출·다른 allocation API까지 모두 잡는 것은 아니며 Apple ld에서는 같은 옵션을 사용할 수 없습니다.
+위 GNU ld 예제에는 `__real_malloc`·`__real_free` 선언이 추가로 필요합니다. `-Wl,--wrap=malloc,--wrap=free`는 링크 시 다른 오브젝트의 미해결 참조 `malloc`을 `__wrap_malloc`으로 바꿉니다. 이 선언을 더하고, 256바이트 arena를 쓰는 작은 `malloc`/`free`를 `heap.o`에 두어 Cortex-M4 ELF로 링크한 뒤 QEMU `mps2-an386`에서 실행했습니다. `main`이 `malloc(10)`·`malloc(20)`·`free` 두 번을 부르고, `heap.o` 안의 `lib_internal_alloc(30)`이 같은 오브젝트의 `malloc`을 부릅니다.
+
+```text
+alloc_count=2 total_alloc=30 free_count=2
+```
+
+`main`의 두 호출은 잡혔지만 `lib_internal_alloc`의 30바이트는 빠졌습니다. 같은 오브젝트 안에서 이미 결합된 참조는 미해결 참조가 아니라서 치환 대상이 아니기 때문입니다. 정적 라이브러리 안에서 서로 부르는 allocation도 이렇게 빠질 수 있으므로 카운터는 하한으로 읽습니다. macOS의 Apple ld는 이 옵션이 없어 `ld: unknown options: --wrap=malloc`으로 멈췄습니다.
 
 ## 실행 확인 — 고정 저장소와 객체 수명
 
@@ -403,7 +411,7 @@ clang++ -std=c++17 -Wall -Wextra -Werror fixed-storage.cpp -o fixed-storage
 ./fixed-storage
 ```
 
-보드별 코드 크기·실행 시간은 이 예제로 측정하지 않았습니다. 같은 입력과 관찰 가능한 출력으로 각 구현을 빌드한 다음 linker map과 allocation 추적 범위를 함께 남겨야 합니다.
+Homebrew Clang 23.1.5에서 `-fsanitize=address,undefined`를 더해 실행해도 진단 없이 exit 0이었습니다. 보드별 코드 크기·실행 시간은 이 예제로 측정하지 않았습니다.
 
 ## 정리
 
@@ -416,7 +424,7 @@ clang++ -std=c++17 -Wall -Wextra -Werror fixed-storage.cpp -o fixed-storage
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `fixed-storage.cpp`를 Homebrew Clang 23.1.5·libc++의 macOS arm64 host에서 ASan·UBSan으로 실행했고, `--wrap` 실험은 arm-none-eabi-g++ 16.2.0과 QEMU `mps2-an386`에서 했습니다. 보드 실행·WCET·ETL 빌드는 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [고정 저장소와 배열 계약](https://eel.is/c++draft/array)
 - [std::function의 함수 포인터 생성 계약](https://eel.is/c++draft/func.wrap.func.con)
