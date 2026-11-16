@@ -64,7 +64,7 @@ RM0433 48.5.8(p.2035~2036)은 송신기 오차 DTRA(송신 측 발진기 포함)
 
 ## BRR: 버림이 아니라 반올림
 
-`OVER8` = 0이면 baud = `usart_ker_ck_pres` / USARTDIV이고(48.5.7, p.2034) BRR에는 USARTDIV를 그대로 씁니다. USARTDIV는 16 이상이어야 합니다(p.2035). 정수 나눗셈은 나머지를 버리므로 BRR이 작아지고, 실제 baud는 항상 목표보다 높은 쪽으로 어긋납니다.
+`OVER8` = 0이면 baud = `usart_ker_ck_pres` / USARTDIV이고(48.5.7, p.2034) BRR에는 USARTDIV를 그대로 씁니다. USARTDIV는 16 이상이어야 합니다(p.2035). 정수 나눗셈은 나머지를 버리므로 BRR이 작아지고, 실제 baud는 나누어떨어지지 않는 한 목표보다 높은 쪽으로 어긋납니다.
 
 ```c
 /* usart_ker_ck_pres = 64 MHz, OVER8 = 0, target 115200 baud */
