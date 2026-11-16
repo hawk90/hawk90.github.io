@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"커널 빌드 = `make defconfig` → (설정 조정) → `make -jN` 세 단계."** 그 위에 cross-compile 변수, out-of-tree module, packaging이 얹힙니다. 이 글의 숫자는 모두 Linux v6.12 arm64 `defconfig`를 실제로 빌드해서 얻은 값입니다.
+> **"커널 빌드는 `make defconfig` → (설정 조정) → `make -jN` 세 단계입니다."** 그 위에 cross-compile 변수, out-of-tree module, packaging이 얹힙니다. 이 글의 숫자는 모두 Linux v6.12 arm64 `defconfig`를 실제로 빌드해서 얻은 값입니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -100,7 +100,7 @@ CONFIG_BMP280_SPI=m
 
 `scripts/config`는 `.config` 텍스트만 바꾸므로, `make olddefconfig`로 Kconfig를 다시 계산해야 `BMP280`이 `select`하는 `BMP280_I2C`·`BMP280_SPI`(`drivers/iio/pressure/Kconfig:35-36`)가 채워집니다. `make help`는 `olddefconfig`를 "Same as oldconfig but sets new symbols to their default value without prompting"으로 설명합니다. 바뀐 설정을 남길 때는 `make savedefconfig`로 기본값과 다른 항목만 담은 `defconfig`(이 경우 1,686줄)를 만듭니다.
 
-다만 이 파일을 원래 `arch/arm64/configs/defconfig`와 `diff`하면 `CONFIG_BMP280=m` 한 줄만 다르지 않았습니다. 순서만 바뀐 줄과, 다른 옵션이 `imply`해서 기본값이 된 줄(`CONFIG_UNIX=y`, `CONFIG_INET=y` 등. `CONFIG_NET_9P_FD`가 둘을 `imply`합니다, `net/9p/Kconfig:19-22`)이 함께 사라지거나 옮겨졌습니다. 그래서 변경 이력을 남기려면 savedefconfig 결과끼리, 즉 바꾸기 전과 후를 모두 savedefconfig로 만들어 비교해야 원하는 차이만 보입니다.
+다만 이 파일을 원래 `arch/arm64/configs/defconfig`와 `diff`하면 `CONFIG_BMP280=m` 말고도 다른 줄이 여럿 나왔습니다. 순서만 바뀐 줄과, 다른 옵션이 `imply`해서 기본값이 된 줄이 함께 사라지거나 옮겨졌습니다. `CONFIG_UNIX=y`·`CONFIG_INET=y`가 그 예로, `CONFIG_NET_9P_FD`가 둘을 `imply`합니다(`net/9p/Kconfig:19-22`). 그래서 변경 이력을 남기려면 바꾸기 전과 후를 모두 savedefconfig로 만들어 비교해야 원하는 차이만 보입니다.
 
 ### Build
 
