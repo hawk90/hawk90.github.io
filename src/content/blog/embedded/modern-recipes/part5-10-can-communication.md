@@ -104,7 +104,7 @@ int can_init_500k(int loopback) {
 }
 ```
 
-HAL `HAL_CAN_Start()`도 INRQ를 지운 뒤 INAK가 0이 되기를 timeout과 함께 기다립니다. 위 코드도 끝없이 기다리지 않고 횟수로 끊어 -1을 돌려줍니다.
+RM0090 32.4.2절에 따라 INRQ를 지운 bxCAN은 CANRX에서 "a sequence of 11 consecutive recessive bits (Bus Idle state)"를 본 뒤에 INAK를 지웁니다. RX 핀이 recessive로 올라오지 않는 배선이면 이 기다림이 끝나지 않으므로, HAL `HAL_CAN_Start()`처럼 timeout을 두어 -1을 돌려줍니다.
 
 ### 2. Acceptance filter
 
@@ -227,7 +227,7 @@ IDE를 보고 standard·extended ID를 가르는 방식은 Zephyr `can_stm32_rx_
 
 ### 5. Loopback 시험
 
-`can_init_500k(1)`은 LBKM과 SILM을 함께 켭니다. Linux driver는 `CAN_CTRLMODE_LOOPBACK`에서 LBKM, `CAN_CTRLMODE_LISTENONLY`에서 SILM을 세우고, 그 위에 "loopback + silent mode put the controller in test mode, useful for hot self-test"라고 적습니다. 이 mode에서 ACK와 CANRX 핀이 어떻게 다뤄지는지는 RM0090의 bxCAN test mode 절에 있고, 이 글은 그 문서를 열어 보지 못해 확인하지 않았습니다.
+`can_init_500k(1)`은 LBKM과 SILM을 함께 켭니다. Linux driver는 `CAN_CTRLMODE_LOOPBACK`에서 LBKM, `CAN_CTRLMODE_LISTENONLY`에서 SILM을 세우고, 그 위에 "loopback + silent mode put the controller in test mode, useful for hot self-test"라고 적습니다. RM0090 Rev 22(st.com이 응답하지 않아 [stm32.dirba.io](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/)의 본문 판으로 확인) 32.5.2절은 loopback에서 bxCAN이 "ignores acknowledge errors"하고 "The actual value of the CANRX input pin is disregarded"라고 적고, 32.5.3절은 loopback과 silent를 함께 켜면 "the CANRX pin is disconnected from the bxCAN and the CANTX pin is held recessive"라 동작 중인 bus에 영향을 주지 않는 "Hot Selftest"라고 적습니다. 그래서 transceiver나 다른 node 없이도 이 시험이 돕니다.
 
 ```c
 int can_selftest(void) {
