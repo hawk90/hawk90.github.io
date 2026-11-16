@@ -101,7 +101,7 @@ bool cas_strong(std::atomic<int> &a, int &expected, int desired)
   3c:	ret
 ```
 
-ARMv8.0에서 weak는 `ldxr`/`stxr`을 한 번만 시도하고, `stxr`이 실패하면 그대로 `false`를 돌려줍니다(spurious failure). Strong은 `cbnz w5, 2c`로 `stxr` 실패 시 스스로 다시 돌므로 루프가 하나 더 있습니다. 바깥에 이미 loop가 있다면 이 안쪽 루프는 중복입니다. ARMv8.1에서는 둘 다 `cas` 한 명령이라 차이가 없습니다. LSE를 쓰도록 컴파일한 코드에서는 weak와 strong이 같은 명령이 되고, LL/SC로 컴파일한 코드에서만 차이가 생깁니다. 이 글의 macOS 바이너리는 LSE로 컴파일됩니다(아래 `contend`의 `fetch_add`가 `ldadd`).
+ARMv8.0에서 weak는 `ldxr`/`stxr`을 한 번만 시도하고, `stxr`이 실패하면 그대로 `false`를 돌려줍니다(spurious failure). Strong은 `cbnz w5, 2c`로 `stxr` 실패 시 스스로 다시 돌므로 루프가 하나 더 있습니다. 바깥에 이미 loop가 있다면 이 안쪽 루프는 중복입니다. ARMv8.1에서는 둘 다 `cas` 한 명령이라 차이가 없습니다. 차이는 LL/SC로 컴파일한 코드에서만 생깁니다. 이 글의 macOS 바이너리는 LSE로 컴파일됩니다(아래 `contend`의 `fetch_add`가 `ldadd`).
 
 ## 코드 / 실제 사용 예
 
