@@ -221,7 +221,7 @@ inspector 결과에서 CPU로 떨어진 연산이 그래프 중간에 있으면 
 
 > 입력 크기를 정하지 않은 모델
 
-PyTorch inspector에는 구체적인 shape의 입력 텐서를 넘기고(TF2 inspector는 문서에 "concrete input shapes"를 요구한다고 적혀 있습니다), xmodel 내보내기는 batch size 1로 합니다. 동적 shape 모델은 고정 shape으로 만든 뒤 quantize합니다.
+PyTorch inspector에는 구체적인 shape의 입력 텐서를 넘기고(문서는 TF2 inspector에도 "concrete input shapes"가 필요하다고 적습니다), xmodel 내보내기는 batch size 1로 합니다. 동적 shape 모델은 고정 shape으로 만든 뒤 quantize합니다.
 
 > 메모리 대역
 
