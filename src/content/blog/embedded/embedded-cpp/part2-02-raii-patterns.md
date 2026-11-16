@@ -119,7 +119,7 @@ void transfer(Account& from, Account& to, int amount) {
 }
 ```
 
-표준은 `std::lock`과 같은 deadlock 회피 알고리즘을 쓴다고만 정하고 알고리즘은 구현에 맡깁니다([thread.lock.algorithm]). GCC 16.2의 libstdc++(`<mutex>`의 `__detail::__lock_impl`)는 첫 mutex를 blocking `lock`으로 잡고 나머지를 `try_lock`합니다. 하나라도 실패하면 잡은 것을 모두 풀고, 스레드 지원이 있으면 `__gthread_yield()`로 양보한 뒤, 실패한 mutex가 맨 앞에 오도록 순서를 돌려 다시 시도합니다. 그래서 두 스레드가 서로 다른 순서로 호출해도 서로를 영원히 기다리지 않습니다.
+표준은 `std::lock`과 같은 deadlock 회피 알고리즘을 쓴다고만 정하고 알고리즘은 구현에 맡깁니다([thread.lock.algorithm]). GCC 16.2의 libstdc++ `std::lock`(`<mutex>`)은 C++17 이상에서 mutex 타입이 모두 같으면(위 `m1`·`m2`) `unique_lock` 배열을 만들어 첫 mutex를 blocking `lock`으로 잡고 나머지를 `try_lock`합니다. 하나라도 실패하면 잡은 것을 풀고 실패한 mutex부터 다시 시작합니다. 타입이 서로 다르면 `__detail::__lock_impl`이 같은 일을 하되, 스레드 지원이 있으면 재시도 전에 `__gthread_yield()`로 양보합니다. 그래서 두 스레드가 서로 다른 순서로 호출해도 서로를 영원히 기다리지 않습니다.
 
 ```cpp
 // Thread A

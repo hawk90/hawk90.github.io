@@ -21,7 +21,7 @@ topics: ["embedded"]
 1. **Code bloat** — 같은 함수가 여러 인스턴스로 중복됩니다.
 2. **Compile time** — 인스턴스마다 컴파일러가 추가 작업을 합니다.
 
-이 글의 숫자는 모두 Homebrew arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb -Os -ffreestanding -fno-exceptions -fno-rtti`)으로 컴파일한 오브젝트와 ELF에서 쟀습니다. 작은 예제라 바이트 수 자체보다 패턴 전후의 방향을 봅니다.
+이 글의 숫자는 모두 Homebrew arm-none-eabi-g++ 16.2.0(`-mcpu=cortex-m4 -mthumb -mfloat-abi=hard -mfpu=fpv4-sp-d16 -Os -ffreestanding -fno-exceptions -fno-rtti`)으로 컴파일한 오브젝트와 ELF에서 쟀습니다. 작은 예제라 바이트 수 자체보다 패턴 전후의 방향을 봅니다.
 
 ## bloat의 출처
 
@@ -96,7 +96,7 @@ void process(T value) {
 | 전체 템플릿 | 268 | — | 334 |
 | 공통 부분 분리 | 214 | 24 | 304 |
 
-인스턴스마다 반복되던 세 번의 호출 루프가 `process_common` 24바이트 하나로 모였고, `.text`가 30바이트 줄었습니다. 공통 함수를 `noinline`으로 두지 않으면 컴파일러가 다시 인라인해 이 차이가 사라질 수 있으므로, 분리한 뒤에는 같은 플래그로 다시 잽니다.
+인스턴스마다 반복되던 세 번의 호출 루프가 `process_common` 24바이트 하나로 모였고, `.text`가 30바이트 줄었습니다. 분리한 뒤에는 같은 플래그로 다시 잽니다.
 
 ## 패턴 2 — 닫힌 타입 집합의 `std::variant`
 
@@ -369,7 +369,7 @@ class Container {
 include할 때마다 파싱됩니다. PCH나 extern template으로 대응합니다.
 
 ### 4. 컴파일러가 dead code를 제거하지 못함
-클래스 템플릿의 일반 멤버 함수는 쓰일 때만 인스턴스화됩니다([temp.inst]/4). 가상 멤버 함수는 다릅니다. `Holder<int>`의 `used()`만 부르는 파일에서 쓰지 않은 일반 멤버 `unused_plain()`은 오브젝트에 없었지만, 쓰지 않은 `virtual unused_virtual()`은 vtable이 가리켜야 하므로 정의가 생겼습니다(표준은 이 경우를 구현에 맡깁니다, [temp.inst]/12). 이런 멤버는 vtable이 참조하므로 `--gc-sections`로도 지워지지 않습니다.
+클래스 템플릿의 일반 멤버 함수는 쓰일 때만 인스턴스화됩니다([temp.inst]/4). 가상 멤버 함수는 다릅니다. `Holder<int>`의 `used()`만 부르는 파일에서 쓰지 않은 일반 멤버 `unused_plain()`은 오브젝트에 없었지만, 쓰지 않은 `virtual unused_virtual()`은 vtable이 가리켜야 하므로 정의가 생겼습니다(표준은 이 경우를 구현에 맡깁니다, [temp.inst]/12). 이 확인은 오브젝트 단계까지이며 링크 결과는 재지 않았습니다.
 
 ### 5. macro와 template 혼동
 매크로는 텍스트 치환이고 템플릿은 컴파일러 평가입니다. 비슷해 보여도 동작이 다르며, 새 코드에서는 템플릿을 우선합니다.
@@ -430,7 +430,7 @@ GCC 16.2.0 문서는 C++20 modules 지원을 아직 실험적이라 적고 `-fmo
 - 템플릿 자체의 런타임 dispatch 없이 구현할 수 있지만 연산·컴파일·최종 코드 크기 비용은 확인해야 합니다.
 - 큰 함수의 공통 부분을 helper로 분리하고 같은 조건의 최종 링크 결과를 비교합니다.
 - `std::variant`는 닫힌 type set을 표현하며 visitor별 인스턴스화 비용도 확인합니다.
-- `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드 생성이 한 TU로 모입니다. 최종 크기는 줄지 않고, 쓰지 않는 멤버까지 정의되어 오히려 늘 수 있습니다.
+- `extern template`과 `template class`로 명시적 인스턴스화를 하면 코드 생성이 한 TU로 모입니다. 최종 크기는 줄지 않고, 쓰지 않는 멤버까지 정의되어 이 예에서는 오히려 늘었습니다(282 → 288바이트).
 - 측정 도구는 `nm`(인스턴스 크기), `bloaty`(PR diff), 의도적 `static_assert` 진단(인스턴스 정보)입니다.
 - 컴파일 시간을 줄이려면 PCH, unity build, modules(C++20)를 활용합니다.
 

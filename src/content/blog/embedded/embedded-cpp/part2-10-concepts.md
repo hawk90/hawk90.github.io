@@ -101,7 +101,7 @@ auto square(std::integral auto x) {
 }
 ```
 
-가장 짧고, 함수 시그니처 자체가 제약을 표현합니다. 다만 `T`라는 이름이 없으므로 본문에서 타입이 필요하면 `decltype(x)`를 써야 하고, 두 매개변수가 같은 타입이어야 한다는 조건은 표현할 수 없습니다(`std::integral auto a, std::integral auto b`는 서로 다른 타입을 허용합니다).
+가장 짧고, 함수 시그니처 자체가 제약을 표현합니다. 다만 `T`라는 이름이 없으므로 본문에서 타입이 필요하면 `decltype(x)`를 써야 하고, 두 매개변수가 같은 타입이어야 한다는 조건은 시그니처만으로 표현할 수 없고(`std::integral auto a, std::integral auto b`는 서로 다른 타입을 허용합니다), `requires std::same_as<decltype(a), decltype(b)>`를 따로 붙여야 합니다.
 
 ## 표준 concepts (`<concepts>`·`<compare>`·`<ranges>`)
 

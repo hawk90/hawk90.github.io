@@ -400,7 +400,7 @@ void shared() {
     MutexLock l2 = l;   // copy → 둘 다 release → double release
 }
 ```
-복사본 `l2`는 mutex를 획득하지 않았는데 소멸자에서 release합니다. CMSIS-RTOS2 문서에 따르면 소유하지 않은 mutex의 `osMutexRelease`는 `osErrorResource`를 반환합니다. 이 클래스는 반환값을 보지 않으므로 오류가 조용히 버려지고, 소유자인 쪽이 먼저 소멸하면 보호 구역이 의도보다 일찍 풀립니다. 복사 연산자는 `= delete`로 명시적으로 막아야 합니다.
+CMSIS-RTOS2 mutex의 소유자는 객체가 아니라 스레드입니다. 소멸 순서상 `l2`의 release가 먼저 성공해 mutex를 풀고, 이어서 `l`의 소멸자가 부르는 두 번째 `osMutexRelease`는 소유하지 않은 mutex 해제가 되어 CMSIS-RTOS2 문서대로 `osErrorResource`를 반환합니다. 이 클래스는 반환값을 보지 않으므로 오류가 조용히 버려집니다. 복사본이 원본보다 먼저 소멸하는 구조(안쪽 scope, 값 전달)라면 보호 구역도 의도보다 일찍 풀립니다. 복사 연산자는 `= delete`로 명시적으로 막아야 합니다.
 
 ### 3. 전역 RAII로 long-lived 자원
 ```cpp

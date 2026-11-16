@@ -43,7 +43,7 @@ constexpr int factorial(int n) {
 constexpr int x = factorial(10);   // 컴파일러가 3628800으로 치환
 ```
 
-이번에는 `.init_array`가 없고, `x`는 `.rodata`에 `00 5f 37 00`(리틀 엔디안 0x00375F00 = 3628800)으로 들어갔습니다. 함수 호출도, 부팅 때의 계산도 남지 않습니다. 같은 파일에 `int y = factorial(10);`처럼 `constexpr`을 붙이지 않은 변수를 둬도 `y`는 `.data`에 3628800으로 들어갔습니다. 초기화식이 상수식이면 상수 초기화가 의무이기 때문입니다([basic.start.static]/2). 함수에 `constexpr`을 붙인 것만으로 부팅 때의 실행이 사라졌습니다.
+이번에는 `.init_array`가 없고, `x`는 `.rodata`에 `00 5f 37 00`(리틀 엔디안 0x00375F00 = 3628800)으로 들어갔습니다. 측정 파일에는 `x`의 주소를 쓰는 `const int* px = &x;`를 두었습니다. 주소를 쓰는 곳이 없으면 `-Os`에서는 `x`의 저장 공간 자체가 생기지 않습니다. 함수 호출도, 부팅 때의 계산도 남지 않습니다. 같은 파일에 `int y = factorial(10);`처럼 `constexpr`을 붙이지 않은 변수를 둬도 `y`는 `.data`에 3628800으로 들어갔습니다. 초기화식이 상수식이면 상수 초기화가 의무이기 때문입니다([basic.start.static]/2). 함수에 `constexpr`을 붙인 것만으로 부팅 때의 실행이 사라졌습니다.
 
 ## `constexpr`이 적용되는 두 곳
 
@@ -118,7 +118,7 @@ constexpr std::array<float, 256> generate_sin_table() {
 constexpr auto sin_table = generate_sin_table();   // 상수 초기화; 배치는 링커 설정
 ```
 
-아래 CRC 테이블과 함께 `std::array` 대신 같은 모양의 작은 `Array` 구조체로 바꿔(이 글의 ARM 툴체인에 libstdc++가 없어서) arm-none-eabi-g++ 16.2.0 `-Os`로 컴파일하면, `sin_table`과 `crc_table`이 각각 1,024바이트 지역 읽기 전용 심볼(`r`)로 `.rodata`에 놓이고 `.data`·`.bss`·`.init_array`는 0입니다. `.rodata`가 Flash로 가는지는 링커 스크립트가 정합니다([Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts)). `constexpr`이 정하는 것은 초기화 시점이지 저장 위치가 아닙니다.
+아래 CRC 테이블과 함께 `std::array` 대신 같은 모양의 작은 `Array` 구조체로 바꿔(이 글의 ARM 툴체인에 libstdc++가 없어서) `sin_table`을 읽는 `fast_sin(uint8_t)`과 `compute_crc`를 함께 두고 arm-none-eabi-g++ 16.2.0 `-Os`로 컴파일하면, `sin_table`과 `crc_table`이 각각 1,024바이트 지역 읽기 전용 심볼(`r`)로 `.rodata`에 놓이고 `.data`·`.bss`·`.init_array`는 0입니다. `.rodata`가 Flash로 가는지는 링커 스크립트가 정합니다([Part 1-07](/blog/embedded/embedded-cpp/part1-07-linker-scripts)). `constexpr`이 정하는 것은 초기화 시점이지 저장 위치가 아닙니다.
 
 ### Taylor series로 컴파일 타임 sin
 
@@ -214,7 +214,7 @@ serialize(buf, uint16_t(0x1234));   // 2바이트 분기만 컴파일됨
 
 `sizeof(T)`가 컴파일 타임에 알려지므로 선택되지 않은 분기의 코드가 제거됩니다.
 
-템플릿에서 `if constexpr`의 선택되지 않은 종속 분기는 인스턴스화하지 않습니다([stmt.if]/2). 다만 코드 크기 차이는 없을 수 있습니다. `put16`·`put32` 두 인스턴스를 `if constexpr`와 일반 `if`로 각각 컴파일하면 arm-none-eabi-g++ 16.2.0에서 `.text`가 `-O0` 196바이트, `-Os` 40바이트로 네 경우가 모두 같았습니다. GCC는 조건이 상수인 일반 `if`의 죽은 분기도 `-O0`에서 지웠습니다. `if constexpr`가 필요해지는 때는 버려질 분기가 그 타입으로는 컴파일되지 않을 때입니다(예: `T`가 구조체라 `value >> 8`이 성립하지 않는 경우). 이 serializer는 지원하는 unsigned 정수 폭과 버퍼 길이를 별도로 제한해야 합니다.
+템플릿에서 `if constexpr`의 선택되지 않은 종속 분기는 인스턴스화하지 않습니다([stmt.if]/2). 이 예에서는 코드 크기 차이가 없었습니다. `put16`·`put32` 두 인스턴스를 `if constexpr`와 일반 `if`로 각각 컴파일하면 arm-none-eabi-g++ 16.2.0에서 `arm-none-eabi-size`의 text 열(`.ARM.exidx` 포함)이 `-O0` 196바이트, `-Os` 40바이트(`.text*` 섹션만은 164·24바이트)로 네 경우가 모두 같았습니다. GCC는 조건이 상수인 일반 `if`의 죽은 분기도 `-O0`에서 지웠습니다. `if constexpr`가 필요해지는 때는 버려질 분기가 그 타입으로는 컴파일되지 않을 때입니다(예: `T`가 구조체라 `value >> 8`이 성립하지 않는 경우). 이 serializer는 지원하는 unsigned 정수 폭과 버퍼 길이를 별도로 제한해야 합니다.
 
 ## `static_assert` + `constexpr`로 컴파일 타임 검증
 
@@ -276,7 +276,7 @@ constexpr int n = 100;
 int arr[n];               // OK — 컴파일 타임 크기
 ```
 
-VLA는 GCC와 Clang 모두 확장으로 받아들이고, `-pedantic`을 줘야 경고합니다. g++-16은 `ISO C++ forbids variable length array 'arr' [-Wvla]`, Clang 23.1.5는 `variable length arrays in C++ are a Clang extension [-Wvla-cxx-extension]`이었습니다.
+VLA는 GCC와 Clang 모두 확장으로 받아들입니다. g++-16은 `-pedantic`을 줘야 `ISO C++ forbids variable length array 'arr' [-Wvla]`를 내고, Clang 23.1.5는 플래그 없이도 `variable length arrays in C++ are a Clang extension [-Wvla-cxx-extension]`을 냈습니다.
 
 ### 2. 상수 평가에서 비상수 함수 호출
 

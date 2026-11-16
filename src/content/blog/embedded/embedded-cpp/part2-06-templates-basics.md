@@ -346,7 +346,7 @@ uart_log("counter: ", 42, " freq: ", 168.0f, " MHz\n");
 
 특수화가 없는 타입을 넘기면 어떻게 될까요. `uart_print`의 기본 템플릿은 선언만 있으므로 `uart_log(1.5)`는 컴파일은 되고 링크에서 `uart_print<double>(double)` 미정의 심볼로 멈춥니다(아래 함정 1과 같은 메커니즘). 컴파일 단계에서 막으려면 기본 템플릿을 `= delete`로 선언합니다.
 
-이 UART 변환 스케치에는 `<cstdio>`, `<cstring>`와 보드별 `uart_send` 구현이 필요합니다. `%g`는 newlib-nano에서 `-u _printf_float` 없이는 링크되지 않으므로([Part 1-03](/blog/embedded/embedded-cpp/part1-03-runtime-requirements)), 잘린 변환 결과는 전송하지 않도록 길이를 검사합니다.
+이 UART 변환 스케치에는 `<cstdio>`, `<cstring>`와 보드별 `uart_send` 구현이 필요합니다. `%g`는 newlib-nano에서 `-u _printf_float` 없이 링크하면 부동소수점 변환 코드가 빠지고, newlib README는 이 경우를 미정의 동작이 될 수 있다고 적습니다([Part 1-03](/blog/embedded/embedded-cpp/part1-03-runtime-requirements)). 잘린 변환 결과는 전송하지 않도록 `snprintf` 반환값을 검사합니다.
 
 ## 자주 보는 함정과 안티패턴
 
@@ -379,7 +379,7 @@ process(arr, 100);   // 100 맞나? 컴파일러 모름
 대안으로 C++20의 `std::span<T>`를 씁니다.
 
 ### 4. template error message 폭증
-`std::list<int>`에 `std::sort`를 부르는 한 줄짜리 실수를 컴파일하면, g++-16은 34줄, Clang 23.1.5는 114줄을 출력했습니다. g++-16의 첫 `error:`는 사용자 코드가 아니라 `bits/stl_algo.h:1914`의 `no match for 'operator-' (operand types are 'std::_List_iterator<int>' ...)`를 가리킵니다. 같은 실수를 C++20의 `std::ranges::sort(l)`로 쓰면 출력은 51줄로 오히려 길지만, 첫 오류가 사용자 코드 줄을 가리키고 `required for the satisfaction of 'random_access_range<_Range>'`처럼 어느 concept을 못 맞췄는지 적습니다([Part 2-10](/blog/embedded/embedded-cpp/part2-10-concepts)).
+`std::list<int>`에 `std::sort`를 부르는 한 줄짜리 실수를 컴파일하면, g++-16은 34줄, Clang 23.1.5는 114줄을 출력했습니다. g++-16의 첫 `error:`는 사용자 코드가 아니라 `bits/stl_algo.h:1914`의 `no match for 'operator-' (operand types are 'std::_List_iterator<int>' ...)`를 가리킵니다. 같은 실수를 C++20의 `std::ranges::sort(l)`로 쓰면 출력은 g++-16 기준 51줄로 오히려 길지만(Clang 23.1.5는 22줄), 첫 오류가 사용자 코드 줄을 가리키고 `required for the satisfaction of 'random_access_range<_Range>'`처럼 어느 concept을 못 맞췄는지 적습니다([Part 2-10](/blog/embedded/embedded-cpp/part2-10-concepts)).
 
 ### 5. forward declaration만으로는 인스턴스화 불가
 ```cpp
@@ -389,7 +389,7 @@ Foo<int> x;   // ERROR — 인스턴스 불가
 g++-16은 `error: aggregate 'Foo<int> x' has incomplete type and cannot be defined`, Clang 23.1.5는 `error: implicit instantiation of undefined template 'Foo<int>'`를 냅니다. 정의를 보이게 하거나, 포인터/레퍼런스 형태로만 사용합니다.
 
 ### 6. 멤버 함수 override가 template
-멤버 함수 템플릿은 virtual일 수 없습니다([temp.mem]/4). `template <class T> virtual void f(T);`에 g++-16은 `error: templates may not be 'virtual'`, Clang 23.1.5는 `error: 'virtual' cannot be specified on member function templates`를 냅니다. 타입마다 vtable 슬롯이 하나씩 필요한데 인스턴스 수를 링크 전에 알 수 없기 때문입니다. type erasure나 visitor로 우회합니다.
+멤버 함수 템플릿은 virtual일 수 없습니다([temp.mem]/3). `template <class T> virtual void f(T);`에 g++-16은 `error: templates may not be 'virtual'`, Clang 23.1.5는 `error: 'virtual' cannot be specified on member function templates`를 냅니다. 타입마다 vtable 슬롯이 하나씩 필요한데 인스턴스 수를 링크 전에 알 수 없기 때문입니다. type erasure나 visitor로 우회합니다.
 
 ## 작은 예제 — ring buffer의 실제 용량
 

@@ -447,7 +447,7 @@ g++-16은 `error: request for member 'foo' is ambiguous`, Clang 23.1.5는 `error
 서로 다른 CRTP 인스턴스를 같은 함수에서 받기가 어렵습니다. concept이나 type erasure를 사용합니다.
 
 ### 5. Sizeof 증가
-CRTP base가 멤버를 가지면 Concrete가 그만큼 커집니다. 멤버가 없는 base는 Empty Base Optimization으로 0바이트를 차지합니다. 위 CRTP `Circle`(빈 `Shape<Circle>` + `int`)이 4바이트였던 것이 그 결과입니다. 표준은 빈 base 같은 potentially-overlapping subobject가 크기 0일 수 있다고 허용하고([intro.object]), GCC·Clang 모두 이를 적용합니다.
+CRTP base가 멤버를 가지면 Concrete가 그만큼 커집니다. 멤버가 없는 base는 Empty Base Optimization으로 0바이트를 차지합니다. 위 CRTP `Circle`(빈 `Shape<Circle>` + `int`)이 4바이트였던 것이 그 결과입니다. 데이터 멤버가 없는 standard-layout 클래스의 base subobject는 크기가 0이라고 표준이 정합니다([intro.object]/8).
 
 ## 작은 예제 — 올바른 downcast와 base 소유 차단
 
