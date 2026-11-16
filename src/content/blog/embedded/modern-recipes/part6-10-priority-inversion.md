@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 ## 시나리오
 
-![Priority inversion timeline — High이 Low의 mutex를 기다리는 동안 Medium에 차단됨](/images/blog/modern-recipes/diagrams/part2-03-priority-inversion.svg)
+![Priority inversion timeline — High가 Low의 mutex를 기다리는 동안 Medium에 막힘](/images/blog/modern-recipes/diagrams/part2-03-priority-inversion.svg)
 
 | 시점 | 일어나는 일 |
 |---|---|
@@ -175,7 +175,7 @@ H는 이 요청이 끝날 때까지 기다립니다. 데이터는 lock 밖에서
 void ISR(void) { xSemaphoreTakeFromISR(mtx, &hp); }   /* mtx is a mutex */
 ```
 
-위 "ISR과 mutex" 절대로, ISR에서는 semaphore나 notification을 씁니다.
+위 "ISR과 mutex" 절에서 본 대로, ISR에서는 semaphore나 notification을 씁니다.
 
 > ⚠️ 마감이 다른 task에 같은 우선순위
 
@@ -188,7 +188,7 @@ void ISR(void) { xSemaphoreTakeFromISR(mtx, &hp); }   /* mtx is a mutex */
 ## 정리
 
 - Priority inversion은 **Low가 쥔 lock을 High가 기다리는 동안 Medium이 Low를 밀어내는** 구조입니다.
-- FreeRTOS mutex는 **holder를 기다리는 task의 우선순위로 올렸다가**, give할 때 되돌립니다. 위 실행에서 L이 1 → 5 → 1.
+- FreeRTOS mutex는 **holder를 기다리는 task의 우선순위로 올렸다가**, give할 때 되돌립니다. 위 실행에서 L의 우선순위는 1 → 5 → 1로 바뀌었습니다.
 - `traceTASK_PRIORITY_INHERIT()` hook으로 **상속이 일어난 시점을 기록**할 수 있습니다.
 - ceiling 계열(PCP, `PTHREAD_PRIO_PROTECT`)은 lock을 잡는 순간 ceiling으로 올립니다. FreeRTOS mutex에는 없습니다.
 - 예방은 **mutex 사용, lock 안에서 기다리지 않기, 짧은 보호 구간, 일정한 lock 순서**입니다.
