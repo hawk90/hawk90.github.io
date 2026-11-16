@@ -44,7 +44,7 @@ int compute2(int x) {
 
 task가 `compute()`의 두 줄 사이에서 끊기고 ISR이 같은 함수를 부르면, task가 돌아와 읽는 `last_value`는 ISR이 쓴 값입니다. 인자와 지역 변수만 쓰는 함수는 호출마다 자기 stack을 쓰므로 이런 일이 없습니다.
 
-C 표준 라이브러리의 `strtok()`, `rand()`는 호출 사이의 상태를 숨은 static에 두므로 같은 문제가 있습니다. POSIX의 `strtok_r()`, `rand_r()`은 그 상태를 호출자가 넘깁니다.
+C 표준 라이브러리의 `strtok()`, `rand()`는 호출 사이의 상태를 숨은 static에 두므로 같은 문제가 있습니다. POSIX의 `strtok_r()`은 그 상태를 호출자가 넘깁니다.
 
 ## 한 번의 접근으로 끝나는 것
 
@@ -126,7 +126,7 @@ int main(void) { xTaskCreate(t, "t", 256, NULL, 1, NULL); vTaskStartScheduler();
 ```
 
 - task의 `counter++` 1,000,000번과 ISR의 21,839번 가운데 13,102번이 사라졌습니다. task가 load와 store 사이에서 끊기면, ISR이 올린 값을 task의 store가 덮습니다.
-- 64-bit 값을 GCC `-O2`가 만든 `ldrd` 한 명령으로 읽으면 QEMU에서는 torn read가 0이었습니다. QEMU는 명령 사이에서만 인터럽트를 받기 때문이고, 아키텍처는 위 인용처럼 두 word 사이의 원자성을 보장하지 않습니다. word 두 개를 따로 읽게 하면(`-DSPLIT_READ`) 1,000,000번 중 4,362번이 두 값을 섞은 값이었습니다.
+- 64-bit 값을 GCC `-O2`가 만든 `ldrd` 한 명령으로 읽으면 QEMU에서는 torn read가 0이었습니다. 같은 A3.5.3절은 이런 sequence 도중 예외가 들어오면 명령이 "abandoned"되고 "On exception return, the instruction that generated the sequence of accesses is re-executed"라고 적으므로, 같은 코어의 ISR에 대해서는 `ldrd` 한 명령이 섞이지 않습니다. 문제는 C가 64-bit 읽기를 `ldrd` 하나로 만든다고 보장하지 않는다는 점입니다. word 두 개를 따로 읽게 하면(`-DSPLIT_READ`) 1,000,000번 중 4,362번이 두 값을 섞은 값이었습니다.
 
 그래서 task 쪽의 read-modify-write나 64-bit 값은 아래 critical section 안에서 다룹니다.
 
@@ -154,7 +154,7 @@ int rb_get(uint8_t *out) {                /* task side */
 }
 ```
 
-`head`는 ISR만, `tail`은 task만 씁니다. 각자 상대의 index는 읽기만 하고, 자기 index는 정렬된 word 하나를 store해 올리므로 lock이 필요 없습니다. 단일 코어 Cortex-M에서 ISR과 task 사이에는 이것으로 충분하고, 멀티코어나 cache가 낀 경우의 memory order는 [9-01: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)가 다룹니다.
+`head`는 ISR만, `tail`은 task만 씁니다. 각자 상대의 index는 읽기만 하고, 자기 index는 정렬된 word 하나를 store해 올리므로 lock이 필요 없습니다. 단일 코어 Cortex-M에서 ISR과 task 사이에는 이것으로 충분하고, 멀티코어(SMP)의 memory order는 [9-01: Lock-Free Ring Buffer](/blog/embedded/modern-recipes/part9-01-lock-free-ring)가 다룹니다.
 
 ## FromISR 변종
 
@@ -213,7 +213,7 @@ uint64_t ts = shared_stamp;
 irq_restore(m);
 ```
 
-이전 PRIMASK를 되돌리므로, 이미 인터럽트가 막힌 상태에서 불려도 나갈 때 잘못 풀지 않습니다. FreeRTOS를 쓰면 task에서는 `taskENTER_CRITICAL()`/`taskEXIT_CRITICAL()`을, ISR에서는 `taskENTER_CRITICAL_FROM_ISR()`/`taskEXIT_CRITICAL_FROM_ISR()`을 씁니다. Cortex-M3 port에서 이들은 PRIMASK가 아니라 BASEPRI를 `configMAX_SYSCALL_INTERRUPT_PRIORITY`로 올리므로, 그보다 우선순위가 높은(숫자가 작은) 인터럽트는 막히지 않습니다. 그런 인터럽트에서는 FreeRTOS API를 부르지 않습니다.
+이전 PRIMASK를 되돌리므로, 이미 인터럽트가 막힌 상태에서 불려도 나갈 때 잘못 풀지 않습니다. FreeRTOS를 쓰면 task에서는 `taskENTER_CRITICAL()`/`taskEXIT_CRITICAL()`을, ISR에서는 `x = taskENTER_CRITICAL_FROM_ISR()`/`taskEXIT_CRITICAL_FROM_ISR(x)`를 씁니다. Cortex-M3 port에서 이들은 PRIMASK가 아니라 BASEPRI를 `configMAX_SYSCALL_INTERRUPT_PRIORITY`로 올리므로, 그보다 우선순위가 높은(숫자가 작은) 인터럽트는 막히지 않습니다. 그런 인터럽트에서는 FreeRTOS API를 부르지 않습니다.
 
 `configMAX_SYSCALL_INTERRUPT_PRIORITY`는 이미 NVIC priority register의 상위 bit에 맞춰 shift한 값입니다(이 설정에서 `5<<5`). BASEPRI에 직접 쓸 때 다시 shift하지 않습니다.
 
@@ -225,7 +225,7 @@ void ISR(void) {
 }
 ```
 
-printf는 서식 처리와 출력이 끝날 때까지 ISR을 붙잡고, C 라이브러리 구현에 따라 lock이나 heap을 씁니다. ISR에서는 값을 ring에 넣고 출력은 task에서 합니다.
+printf는 서식 처리와 출력이 끝날 때까지 ISR을 붙잡습니다. ISR에서는 값을 ring에 넣고 출력은 task에서 합니다.
 
 ## 자주 하는 실수
 
@@ -267,7 +267,7 @@ uint64_t t = timestamp;               /* task: two word reads may straddle an up
 ## 정리
 
 - ISR에서 부르는 함수는 **막히지 않고, 짧고, 재진입 안전**해야 합니다.
-- **정렬된 32-bit load·store 하나**만 한 번에 끝납니다(DDI 0403E.b A3.5.3). `++`와 64-bit 접근은 위 측정처럼 깨집니다.
+- **byte, 정렬된 halfword·word의 load·store 하나**만 한 번에 끝납니다(DDI 0403E.b A3.5.3). `++`와 64-bit 접근은 위 측정처럼 깨집니다.
 - RTOS API는 **`FromISR` 변종**과 `portYIELD_FROM_ISR()`을 씁니다.
 - ISR은 **ring에 넣고 task를 깨우기만** 하고, 처리는 task에서 합니다.
 - task 쪽 공유 데이터 접근은 **PRIMASK 저장·복원 critical section**이나 FreeRTOS critical section으로 감쌉니다.

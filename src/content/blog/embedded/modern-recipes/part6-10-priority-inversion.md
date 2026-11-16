@@ -33,7 +33,7 @@ Mars Pathfinder(1997)의 반복 reset도 이 구조였습니다. PRTOS 1-03이 R
 
 ## 해결 1: Priority inheritance
 
-FreeRTOS에서 `configUSE_MUTEXES`가 1이면 `xSemaphoreCreateMutex()`로 만든 mutex에 priority inheritance가 걸립니다. H가 block하는 순간 `tasks.c`의 `xTaskPriorityInherit()`이 holder의 우선순위를 H의 우선순위로 올리고, holder가 mutex를 놓을 때 `xTaskPriorityDisinherit()`이 원래 값으로 되돌립니다. 두 함수에는 `traceTASK_PRIORITY_INHERIT()`·`traceTASK_PRIORITY_DISINHERIT()` hook이 있어 이 순간을 기록할 수 있습니다.
+FreeRTOS에서 `configUSE_MUTEXES`가 1이면 `xSemaphoreCreateMutex()`로 만든 mutex에 priority inheritance가 걸립니다. H가 block하는 순간 `tasks.c`의 `xTaskPriorityInherit()`이 holder의 우선순위를 H의 우선순위로 올리고, holder가 mutex를 놓아 쥔 mutex가 하나도 남지 않을 때 `xTaskPriorityDisinherit()`이 원래 값으로 되돌립니다(`tasks.c`의 "Only disinherit if no other mutexes are held"). 두 함수에는 `traceTASK_PRIORITY_INHERIT()`·`traceTASK_PRIORITY_DISINHERIT()` hook이 있어 이 순간을 기록할 수 있습니다.
 
 ### 측정 — 상속이 일어나는 순간 보기
 
@@ -111,13 +111,13 @@ pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_INHERIT);
 pthread_mutex_init(&mtx, &attr);
 ```
 
-POSIX의 `pthread_mutexattr_setprotocol()` 정의는 `PTHREAD_PRIO_INHERIT`에서 mutex를 쥔 thread가 그 mutex를 기다리는 thread 중 가장 높은 우선순위로 실행된다고 정합니다.
+POSIX의 `pthread_mutexattr_setprotocol()` 정의는 `PTHREAD_PRIO_INHERIT`에서 mutex를 쥔 thread가 자기 우선순위와 자기가 쥔 이 protocol의 mutex 중 어느 것이든 기다리는 thread의 가장 높은 우선순위 중 높은 쪽으로 실행된다고 정합니다.
 
 ## 해결 2: Priority ceiling
 
 각 mutex에 "그 mutex를 쓸 수 있는 task 중 가장 높은 우선순위"를 ceiling으로 미리 정하고, 그 ceiling을 기준으로 lock을 다룹니다. Sha·Rajkumar·Lehoczky(1990)의 PCP는 ceiling 규칙으로 deadlock과 chained blocking을 막는다는 것을 증명했고, 그 정의와 PI와의 비교는 PRTOS 3-04에 있습니다. FreeRTOS V11.2.0 mutex에는 ceiling protocol이 없습니다.
 
-POSIX에서는 `PTHREAD_PRIO_PROTECT`가 이 계열입니다. POSIX 정의는 이 protocol의 mutex를 하나 이상 쥔 thread가 "shall execute at the higher of its priority or the highest of the priority ceilings of all the mutexes owned by this thread"라고 정합니다. 기다리는 thread가 있든 없든 lock을 잡는 순간 ceiling으로 올라갑니다.
+POSIX에서는 `PTHREAD_PRIO_PROTECT`가 이 계열입니다. POSIX 정의는 이 protocol의 mutex를 하나 이상 쥔 thread가 "shall execute at the higher of its priority or the highest of the priority ceilings of all the non-robust mutexes owned by this thread and initialized with this attribute, regardless of whether other threads are blocked on any of these non-robust mutexes or not"라고 정합니다(robust mutex에도 같은 문장이 있습니다). 기다리는 thread가 있든 없든 lock을 잡는 순간 ceiling으로 올라갑니다.
 
 ```c
 pthread_mutexattr_setprotocol(&attr, PTHREAD_PRIO_PROTECT);
@@ -188,7 +188,7 @@ void ISR(void) { xSemaphoreTakeFromISR(mtx, &hp); }   /* mtx is a mutex */
 ## 정리
 
 - Priority inversion은 **Low가 쥔 lock을 High가 기다리는 동안 Medium이 Low를 밀어내는** 구조입니다.
-- FreeRTOS mutex는 **holder를 기다리는 task의 우선순위로 올렸다가**, give할 때 되돌립니다. 위 실행에서 L의 우선순위는 1 → 5 → 1로 바뀌었습니다.
+- FreeRTOS mutex는 **holder를 기다리는 task의 우선순위로 올렸다가**, 쥔 mutex가 하나도 남지 않게 give할 때 되돌립니다. 위 실행에서 L의 우선순위는 1 → 5 → 1로 바뀌었습니다.
 - `traceTASK_PRIORITY_INHERIT()` hook으로 **상속이 일어난 시점을 기록**할 수 있습니다.
 - ceiling 계열(PCP, `PTHREAD_PRIO_PROTECT`)은 lock을 잡는 순간 ceiling으로 올립니다. FreeRTOS mutex에는 없습니다.
 - 예방은 **mutex 사용, lock 안에서 기다리지 않기, 짧은 보호 구간, 일정한 lock 순서**입니다.
