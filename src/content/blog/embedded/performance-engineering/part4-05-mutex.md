@@ -44,7 +44,7 @@ printf("%-22s ns_per_pair=%.1f\n", name, (ns_now() - t0) / n);
 | `PTHREAD_PRIO_INHERIT` | 9.6 ns | 6.7 ns |
 | `os_unfair_lock` | — | 4.9 ns |
 
-네이티브 첫 번째 실행은 모든 값이 높게 나와(기본 8.7 ns, errorcheck 37.2 ns) 나머지 4회와 차이가 컸습니다. 중앙값은 이 영향을 받지 않습니다.
+네이티브 첫 번째 실행은 `os_unfair_lock`(4.9 ns)을 뺀 모든 값이 높게 나와(기본 8.7 ns, errorcheck 37.2 ns) 나머지 4회와 차이가 컸습니다. 중앙값은 이 영향을 받지 않습니다.
 
 경쟁이 생기면 비용의 단위가 바뀝니다. `ctxsw.c`로 두 thread가 futex로 토큰을 주고받게 하면, 같은 CPU에서 한 번 넘기는 데 650 ns가 걸렸습니다(10만 왕복에 context switch 200,001번). 경쟁 없는 lock보다 두 자릿수 이상 큽니다. 그래서 mutex 성능의 핵심은 "얼마나 자주 slow path로 가는가"입니다.
 
@@ -106,7 +106,7 @@ spin 한도는 고정값이 아닙니다. mutex마다 지난번에 얼마나 spi
 | 기본 | 2.818 | 619,057 |
 | `ADAPTIVE_NP` | 3.277 | 417,913 |
 
-adaptive mutex는 futex 시스템 콜을 32% 줄였고 throughput은 16% 높았습니다. 임계구역이 짧아서 잠깐 기다리면 풀리는 경우가 많았다는 뜻입니다. 반대로 hold time이 길면 spin은 낭비만 되므로, 이 결과를 긴 임계구역에 그대로 적용하지 않습니다.
+adaptive mutex는 futex 시스템 콜을 32% 줄였고 throughput은 16% 높았습니다. 임계구역이 짧아서 잠깐 기다리면 풀리는 경우가 많았다는 뜻입니다. 이 측정은 hold 약 0.1 µs 한 조건뿐이며, 긴 임계구역에서 adaptive mutex를 재지는 않았습니다.
 
 Linux 커널 mutex의 optimistic spinning은 기준이 다릅니다. v6.12 `Documentation/locking/mutex-design.rst`는 *lock owner가 실행 중이고 더 높은 우선순위 task가 기다리지 않는 동안* spin한다고 설명합니다. 횟수가 아니라 owner의 상태를 봅니다.
 
@@ -114,7 +114,7 @@ Linux 커널 mutex의 optimistic spinning은 기준이 다릅니다. v6.12 `Docu
 
 Real-time 시스템에서 low priority task가 mutex를 쥔 채 medium priority task에게 선점되면, 그 mutex를 기다리는 high priority task는 medium이 끝날 때까지 기다립니다. medium은 mutex와 아무 관계가 없는데도 말입니다. 이것이 priority inversion입니다.
 
-유명한 사례가 Mars Pathfinder입니다. Microsoft Research의 Mike Jones가 정리한 [What really happened on Mars Rover Pathfinder](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html)(1997년 12월)에 따르면, 1997년 7월 4일 착륙 며칠 뒤부터 우주선이 전체 시스템 리셋을 반복했습니다. 저우선순위 기상(meteorological) task가 쥔 mutex를 고우선순위 data bus task가 기다리는 동안 중간 우선순위 task들이 실행되었고, data bus task가 한동안 실행되지 않은 것을 본 watchdog이 전체 리셋을 걸었습니다. VxWorks mutex는 생성 시 priority inheritance 여부를 정하는 boolean 인자를 받는데, 문제의 mutex는 이 인자가 꺼진 채 만들어졌습니다. 엔지니어들은 VxWorks의 C 인터프리터로 실행할 짧은 프로그램을 우주선에 올려, 이 인자를 담은 전역 변수를 FALSE에서 TRUE로 바꿨습니다.
+유명한 사례가 Mars Pathfinder입니다. Microsoft의 Mike Jones가 정리한 [What really happened on Mars Rover Pathfinder](https://www.cs.cornell.edu/courses/cs614/1999sp/papers/pathfinder.html)(1997년 12월)에 따르면, 1997년 7월 4일 착륙 며칠 뒤부터 우주선이 전체 시스템 리셋을 반복했습니다. 저우선순위 기상(meteorological) task가 쥔 mutex를 고우선순위 information bus task가 기다리는 동안 중간 우선순위의 통신 task가 실행되었고, bus task가 한동안 실행되지 않은 것을 본 watchdog이 전체 리셋을 걸었습니다. VxWorks mutex는 생성 시 priority inheritance 여부를 정하는 boolean 인자를 받는데, 문제의 mutex는 이 인자가 꺼진 채 만들어졌습니다. 엔지니어들은 VxWorks의 C 인터프리터로 실행할 짧은 프로그램을 우주선에 올려, 문제의 mutex와 같은 문제를 일으킬 수 있던 다른 두 mutex, 모두 세 개의 인자를 담은 전역 변수를 FALSE에서 TRUE로 바꿨습니다.
 
 Linux에서 같은 상황을 재현했습니다. `pidemo.c`는 세 thread를 모두 CPU 3에 고정하고 `SCHED_FIFO`로 돌립니다.
 
@@ -210,7 +210,7 @@ Mutex는 자원 보호용이라 take한 task가 give해야 합니다(699~701행)
 주기 task에서 mutex를 무한정 기다리면 주기 자체를 놓칩니다. 아래 패턴은 timeout을 주기보다 짧게 두고, 실패하면 이전 값을 씁니다.
 
 ```c
-/* Brake task: 1 ms 주기, mutex는 1 tick까지만 대기 */
+/* Brake task: 1 ms 주기, configTICK_RATE_HZ = 1000 가정 (pdMS_TO_TICKS(1) == 1 tick) */
 if (xSemaphoreTake(brake_data_mtx, pdMS_TO_TICKS(1)) == pdTRUE) {
     read_data();
     xSemaphoreGive(brake_data_mtx);
@@ -219,7 +219,7 @@ if (xSemaphoreTake(brake_data_mtx, pdMS_TO_TICKS(1)) == pdTRUE) {
 }
 ```
 
-`xSemaphoreTake()`는 timeout 안에 얻지 못하면 `pdFALSE`를 돌려줍니다(앞 절의 `traceQUEUE_RECEIVE_FAILED` 경로). 이전 값을 써도 되는지, 몇 주기까지 허용하는지는 기능 안전 분석이 정할 몫이고, 코드는 그 결정을 실패 분기로 명시해 둡니다.
+`pdMS_TO_TICKS()`는 `projdefs.h` 42행에서 `ms × configTICK_RATE_HZ / 1000`으로 정의되므로, tick rate가 1 kHz보다 낮으면 1 ms가 0 tick이 되어 대기 없이 바로 실패합니다. `xSemaphoreTake()`는 timeout 안에 얻지 못하면 `pdFALSE`를 돌려줍니다(앞 절의 `traceQUEUE_RECEIVE_FAILED` 경로). 이전 값을 써도 되는지, 몇 주기까지 허용하는지는 기능 안전 분석이 정할 몫이고, 코드는 그 결정을 실패 분기로 명시해 둡니다.
 
 ## Apple os_unfair_lock
 

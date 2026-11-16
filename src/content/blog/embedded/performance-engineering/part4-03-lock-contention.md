@@ -50,7 +50,7 @@ for (long i = 0; i < OPS; i++) {
 
 ## perf lock — kernel lock과 userspace mutex 구분
 
-`perf lock`이 무엇을 보는지부터 확인해야 합니다. [Linux 6.12 perf-lock 문서](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-lock.txt)의 `record`/`report`/`contention`은 커널의 lock tracepoint를 읽습니다. pthread mutex는 경쟁이 없으면 커널에 들어가지 않습니다. 1 thread로 2만 번 lock/unlock한 `lockbench`를 `perf stat -e syscalls:sys_enter_futex`로 세면 futex 시스템 콜은 1번뿐이었습니다. 그래서 `perf lock`에도 직접 보이지 않습니다. 실제로 8 thread가 mutex 하나를 다투는 `lockbench`를 기록해 봤습니다.
+`perf lock`이 무엇을 보는지부터 확인해야 합니다. [Linux 6.12 perf-lock 문서](https://github.com/torvalds/linux/blob/v6.12/tools/perf/Documentation/perf-lock.txt)는 `perf lock`을 "lock events" 분석 도구라고만 설명하고, 어떤 이벤트인지는 `tools/perf/builtin-lock.c`의 tracepoint 표(1493~1501행)에 있습니다. `lock:lock_acquire` 계열(lockdep 필요)과 `lock:contention_begin`/`lock:contention_end`입니다. 즉 커널의 lock tracepoint를 읽습니다. pthread mutex는 경쟁이 없으면 커널에 들어가지 않습니다. 1 thread로 2만 번 lock/unlock한 `lockbench`를 `perf stat -e syscalls:sys_enter_futex`로 세면 futex 시스템 콜은 1번뿐이었습니다. 그래서 `perf lock`에도 직접 보이지 않습니다. 실제로 8 thread가 mutex 하나를 다투는 `lockbench`를 기록해 봤습니다.
 
 ```bash
 perf lock record -o /tmp/pl.data -- ./lockbench mutex 8 1 1000 9000 20000
@@ -67,7 +67,7 @@ perf lock contention -i /tmp/pl.data
 
 이 실행에서 userspace mutex는 160,000번 획득됐지만, `perf lock`이 본 것은 futex 구현 안의 *커널* spinlock 경합 270번입니다. 같은 실행을 `perf stat -e syscalls:sys_enter_futex,context-switches`로 세면 futex 시스템 콜 184,907번, context switch 72,670번이었습니다. 즉 `perf lock`은 "어느 pthread mutex가 뜨거운가"가 아니라 "futex 경로가 커널 안에서 얼마나 부딪혔는가"를 알려 줍니다. 어느 userspace lock인지는 `lockbench`처럼 직접 계측하거나 uprobe로 붙여야 합니다.
 
-Debian의 perf 6.12.117은 BPF skeleton 없이 빌드되어 있어서 `perf lock contention -b`는 `switch 'b' is not available because no BUILD_BPF_SKEL=1`로 거부됐습니다. 위 출력은 tracepoint 기록(`record`) 방식입니다.
+Debian의 perf 6.12.117은 BPF skeleton 없이 빌드되어 있어서 `perf lock contention -b`는 ``switch `b' is not available because no BUILD_BPF_SKEL=1``로 거부됐습니다. 위 출력은 tracepoint 기록(`record`) 방식입니다.
 
 ## ftrace — 이름·상태 전이·누락을 확인
 
@@ -116,7 +116,7 @@ Amdahl 식은 lock 자체의 비용을 0으로 봅니다. 실제로는 얼마나
 | 4 | 0.076 | 1.58 | 3.08 | 14.1 µs | 247 µs |
 | 8 | 0.117 | 2.44 | 4.71 | 31.8 µs | 410 µs |
 
-측정값은 모든 T에서 Amdahl 예측보다 낮았고, 8 thread에서는 예측의 절반 수준이었습니다. 차이는 Amdahl이 빼 놓은 비용에서 옵니다. 앞 절의 `perf stat`이 보여 준 futex 시스템 콜 18만 번과 context switch 7만 번이 그 비용입니다. T=2의 5회 범위가 0.024~0.089 Mops/s로 넓었다는 점도 적어 둡니다. 게스트 vCPU가 host에서 다른 작업과 CPU를 나눠 쓰기 때문입니다.
+측정값은 모든 T에서 Amdahl 예측보다 낮았고, 8 thread에서는 예측의 절반 수준이었습니다. Amdahl 식에는 lock 자체의 비용 항이 없습니다. 같은 T=8 조건을 `perf stat`으로 잰 실행에서는 futex 시스템 콜 184,907번, context switch 72,670번이 있었고, CPU 시간은 user 3.77초, sys 1.09초(wall 0.96초)였습니다. 이 글에서는 이 비용과 speedup 차이의 인과를 분리해 재지 않았습니다. T=2의 5회 범위가 0.024~0.089 Mops/s로 넓었다는 점도 적어 둡니다. 게스트 vCPU가 host에서 다른 작업과 CPU를 나눠 쓰기 때문입니다.
 
 Gunther의 Universal Scalability Law처럼 contention·coherency 항을 더한 모델도 있지만, 이 글에서는 fit하지 않았습니다. 대신 [6-03 Lock Contention 사례](/blog/embedded/performance-engineering/part6-03-case-lock-contention)에서 다룹니다.
 
@@ -188,7 +188,7 @@ void access(unsigned key) {
 | 1 | 0.152 | 37.3 µs | 376 µs |
 | 16 | 0.605 | 5.5 µs | 131 µs |
 
-stripe를 16개로 나누자 throughput이 3.98배가 됐습니다. 16배가 되지 않는 것은 thread가 8개뿐이고, 무작위 키가 같은 stripe에 몰리는 경우가 있기 때문입니다. `slot_t`에 padding을 넣어 stripe끼리 다른 cache line에 두었다는 점도 중요합니다. lock 배열이 한 line에 붙어 있으면 [4-02](/blog/embedded/performance-engineering/part4-02-false-sharing)의 false sharing이 다시 생깁니다.
+stripe를 16개로 나누자 throughput이 3.98배가 됐습니다. 16배가 되지 않는 것은 thread가 8개뿐이고, 무작위 키가 같은 stripe에 몰리는 경우가 있기 때문입니다. lock 배열의 배치도 결과에 영향을 줍니다. `slot_t`는 mutex 48바이트에 카운터와 64바이트 padding을 더해 144바이트입니다(게스트에서 `sizeof`로 확인). 그래서 64바이트 line 기준으로는 stripe마다 자주 쓰는 field가 다른 line에 놓이지만, M2에서 측정된 128바이트 단위로는 일부 이웃 stripe가 line을 공유합니다. 위 숫자는 그 배치 그대로 잰 것이며, 128바이트로 padding한 재측정은 하지 않았습니다. 이웃 stripe가 line을 공유하면 [4-02](/blog/embedded/performance-engineering/part4-02-false-sharing)의 false sharing이 더해집니다.
 
 ## RW-Lock으로 read 분산
 
@@ -257,7 +257,7 @@ mutex_give(&db_lock);
 
 > ⚠️ 측정 없이 추정
 
-"lock contention이 의심된다"고만 하고 재지 않으면 엉뚱한 lock을 고치기 쉽습니다. 특히 `perf lock` 결과를 pthread mutex 통계로 읽는 실수가 흔합니다. 위 실행처럼 `perf lock`에 나온 것은 `do_futex`의 커널 spinlock이었습니다.
+"lock contention이 의심된다"고만 하고 재지 않으면 엉뚱한 lock을 고치기 쉽습니다. `perf lock` 결과를 pthread mutex 통계로 읽으면 안 됩니다. 위 실행에서 `perf lock`에 나온 것은 `do_futex`의 커널 spinlock이었습니다.
 
 > ⚠️ 모든 read에 lock
 
@@ -282,14 +282,14 @@ mutex_take(&mtx);   /* 다른 lock이라 서로를 배제하지 못함 */
 
 ## 측정 계획과 한계
 
-이 글의 측정은 모두 한 게스트, 한 lock 구현(glibc 2.41 기본 mutex와 직접 만든 ticket lock)에서 나왔습니다. 게스트 vCPU는 host의 스케줄링을 받으므로 lock owner가 host에서 선점되면 대기가 길어집니다. `perf lock`의 `max wait 3.06 ms` 같은 값에는 이 영향이 섞여 있을 수 있습니다. 실제 타깃에서 같은 판단을 하려면 같은 lock identity의 요청·획득·해제 시각을 직접 남기고, 평균과 p99를 함께 보고, CPU migration·preemption 여부를 같이 기록합니다.
+이 글의 측정은 모두 한 게스트, 한 lock 구현(glibc 2.41 기본 mutex와 직접 만든 ticket lock)에서 나왔습니다. 게스트 vCPU는 host의 스케줄링을 받으므로 lock owner가 host에서 선점되면 대기가 길어집니다. 실제 타깃에서 같은 판단을 하려면 같은 lock identity의 요청·획득·해제 시각을 직접 남기고, 평균과 p99를 함께 보고, CPU migration·preemption 여부를 같이 기록합니다.
 
 ## 정리
 
 - 경쟁 없는 mutex 대기는 22 ns였지만, 8 thread가 하나를 다투자 평균 31.8 µs, p99 410 µs가 됐습니다.
 - `perf lock`은 커널 lock tracepoint를 읽습니다. pthread mutex 경합은 `do_futex`의 커널 spinlock 경합으로만 보였습니다.
 - 배포 커널(lockdep 없음)에서 쓸 수 있는 lock tracepoint는 `contention_begin`/`contention_end`뿐입니다.
-- s = 0.1에서 측정 speedup은 Amdahl 예측보다 낮았습니다(8 thread 2.44배 대 4.71배). futex 비용이 차이를 만듭니다.
+- s = 0.1에서 측정 speedup은 Amdahl 예측보다 낮았습니다(8 thread 2.44배 대 4.71배). 같은 조건에서 futex 시스템 콜 18만 번, context switch 7만 번이 있었습니다.
 - glibc mutex는 직전 소유자가 다시 잡는 경우가 많았고(handoff 0.318), 일을 전부 lock 안에 두면 8 thread가 1 thread보다 느렸습니다.
 - stripe 16개로 throughput 3.98배, hold time을 10%로 줄여 3.25배를 얻었습니다.
 

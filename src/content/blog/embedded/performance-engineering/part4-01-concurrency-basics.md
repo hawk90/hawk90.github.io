@@ -14,13 +14,13 @@ topics: ["embedded"]
 
 > **"Concurrency는 처리할 일들의 조직이고, Parallelism은 동시 실행"** 이라는 Rob Pike의 정의가 출발점입니다.
 
-이 글의 숫자는 모두 직접 돌린 결과입니다. 측정 환경은 두 가지입니다. 하나는 Apple M2 Pro(macOS 27.2, Apple clang 21.0.0) 네이티브이고, 다른 하나는 같은 Mac 위의 Debian 13 arm64 게스트(QEMU 11.1.3 HVF, 8 vCPU, 커널 6.12.116, GCC 14.2.0)입니다. 프로그램마다 5회씩 돌렸고, 본문에는 중앙값을 적습니다.
+이 글의 숫자는 모두 직접 돌린 결과입니다. 측정 환경은 두 가지입니다. 하나는 Apple M2 Pro(macOS 27.2.1, Apple clang 21.0.0) 네이티브이고, 다른 하나는 같은 Mac 위의 Debian 13 arm64 게스트(QEMU 11.1.3 HVF, 8 vCPU, 커널 6.12.116, GCC 14.2.0)입니다. 프로그램마다 5회씩 돌렸고, 본문에는 중앙값을 적습니다.
 
 ## Concurrency vs Parallelism
 
 ![Concurrency vs Parallelism — single core time-slicing과 multi-core 동시 실행 비교](/images/blog/perf-eng/diagrams/part4-01-concurrency.svg)
 
-Rob Pike는 [Concurrency is not parallelism](https://go.dev/blog/waza-talk) 발표에서 둘을 이렇게 나눕니다. concurrency는 "독립적으로 실행되는 프로세스들의 구성(composition)"이고, parallelism은 "(서로 관련이 있을 수도 있는) 계산들의 동시 실행"입니다. 같은 글의 요약은 더 짧습니다. concurrency는 많은 일을 한꺼번에 *다루는* 것이고, parallelism은 많은 일을 한꺼번에 *하는* 것입니다.
+Rob Pike의 발표 "Concurrency is not parallelism"을 소개한 Go 블로그 글([Andrew Gerrand, go.dev/blog/waza-talk](https://go.dev/blog/waza-talk))은 둘을 이렇게 나눕니다. concurrency는 "독립적으로 실행되는 프로세스들의 구성(composition)"이고, parallelism은 "(서로 관련이 있을 수도 있는) 계산들의 동시 실행"입니다. 같은 글의 요약은 더 짧습니다. concurrency는 많은 일을 한꺼번에 *다루는* 것이고, parallelism은 많은 일을 한꺼번에 *하는* 것입니다.
 
 식당 주방으로 비유하면 이해가 쉽습니다. 요리사 한 명이 국을 올려 두고 그 사이에 채소를 써는 것은 concurrency입니다. 요리사 두 명이 각자 다른 접시를 동시에 만드는 것은 parallelism입니다. 단일 코어 RTOS는 앞의 것만 제공하고, SMP Linux는 둘 다 제공합니다.
 
@@ -246,13 +246,13 @@ C++ working draft [atomics.order](https://eel.is/c++draft/atomics.order) 4항은
 - Apple clang은 M2 target에서 acquire load를 `ldapr`로 냈습니다. `objdump -d litmus-acqrel`에서 `stlr w11, [x13]` 바로 뒤에 `ldapr w1, [x14]`가 있고, 100만 번 중 중앙값 20,115번 0/0이 나왔습니다. Arm의 Kyrylo Tkachov가 쓴 [Enabling the LDAPR instructions for C/C++ compilers](https://developer.arm.com/community/arm-community-blogs/b/tools-software-ides-blog/posts/enabling-rcpc-in-gcc-and-llvm)(2023)는 LDAPR가 구현하는 RCpc 모델이, 주소 의존이 없는 한 메모리 접근을 앞선 STLR 너머로 재정렬할 자유를 하드웨어에 준다고 설명합니다. 관찰된 0/0이 바로 그 재정렬입니다.
 - seq_cst load는 두 컴파일러 모두 `ldar`였고, 0/0은 한 번도 없었습니다. 같은 글은 C++11 acquire load의 기존 매핑이 LDAR였다고 적습니다.
 
-같은 C 소스, 같은 CPU에서 컴파일러가 고른 명령 하나 때문에 결과가 달라진 사례입니다. "x86에서 잘 되던 코드가 ARM에서 깨졌다"는 이야기의 대부분이 이렇게 표준이 허용하는 결과에 의존한 코드에서 나옵니다.
+같은 C 소스, 같은 CPU에서 컴파일러가 고른 명령 하나 때문에 결과가 달라진 사례입니다.
 
 ## ARM·POWER에서 SC 비용
 
 AArch64에서 seq_cst store·load는 위 codegen 표대로 release/acquire와 같은 `stlr`/`ldar`로 컴파일되므로, 명령 수준에서 추가 비용이 없습니다. 차이가 드러나는 곳은 `atomic_thread_fence(memory_order_seq_cst)`(`dmb ish`)와, RCpc를 쓸 수 있는데도 seq_cst load 때문에 `ldar`를 써야 하는 경우입니다. 반면 ARMv7-M에서는 seq_cst store 하나가 `dmb sy`를 앞뒤로 두 개 붙입니다. POWER는 이 글에서 컴파일하거나 실행하지 않았습니다.
 
-Linux kernel의 `smp_mb()`·`READ_ONCE()` 같은 API는 C11 memory order와 별개의 계약입니다. 커널 코드에서는 `Documentation/memory-barriers.txt`와 LKMM을 기준으로 합니다([4-08 Memory Ordering](/blog/embedded/performance-engineering/part4-08-memory-ordering)에서 다룹니다).
+Linux kernel의 `smp_mb()`·`READ_ONCE()` 같은 API는 C11 memory order와 별개의 계약입니다. 커널 코드에서는 `Documentation/memory-barriers.txt`를 기준으로 합니다. arm64에서 이 API들이 어떤 barrier 명령이 되는지는 [4-08 Memory Ordering](/blog/embedded/performance-engineering/part4-08-memory-ordering)에서 다룹니다.
 
 ## DMB·DSB·ISB
 
@@ -356,7 +356,7 @@ atomic_load(&flag);        // 기본값 seq_cst
 
 - **Concurrency는 구성(다루기)이고, Parallelism은 동시 실행(하기)**입니다.
 - 비원자적 read-modify-write는 경합 조건에서 증가의 절반 가까이를 잃었고, `atomic_fetch_add`만 정확했습니다.
-- ARMv7-M/v6-M 아키텍처는 weak ordering을 허용하고, M2 Pro에서는 relaxed SB 테스트의 20% 가까이가 재정렬된 결과였습니다.
+- ARMv7-M/v6-M 아키텍처는 weak ordering을 허용하고, M2 Pro에서는 relaxed SB 테스트 100만 번 중 중앙값 204,154번(약 20%)이 재정렬된 결과였습니다.
 - x86-TSO에서 보이는 재정렬은 store buffer에 의한 Store→Load 하나입니다.
 - 같은 C11 order도 target마다 다른 명령이 됩니다. AArch64는 seq_cst store/load가 release/acquire와 같은 명령일 수 있고, x86과 ARMv7-M에서는 차이가 큽니다.
 - release/acquire는 SB의 0/0을 허용하며, M2 Pro에서 clang이 낸 `ldapr`로 실제로 관찰됐습니다.

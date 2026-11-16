@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> 서로 다른 변수를 다루어도 같은 coherence 단위(cache line)에 있고 적어도 한쪽이 쓰면, 그 line이 코어 사이를 오가며 느려집니다. Apple M2 Pro에서 4 thread가 8바이트 간격 atomic 카운터를 증가시키자 256바이트 간격보다 약 10배 느렸습니다.
+> 서로 다른 변수를 다루어도 같은 coherence 단위(cache line)에 있고 적어도 한쪽이 쓰면, 그 line이 코어 사이를 오가며 느려집니다. Apple M2 Pro에서 4 thread가 8바이트 간격 atomic 카운터를 증가시키자 256바이트 간격보다 약 10배 느렸습니다(5회 중앙값 2.434초 대 0.237초).
 
 ## 메커니즘
 
@@ -22,7 +22,7 @@ topics: ["embedded"]
 
 ![64-byte coherence line을 가정한 두 코어의 다른 변수 접근과 ownership 이동](/images/blog/perf-eng/diagrams/part4-02-false-sharing.svg)
 
-그림은 64바이트 line을 가정했습니다. 아래 측정에서 보듯 M2 Pro에서는 64바이트 간격으로 떼어 놓아도 아직 느렸고, 128바이트부터 차이가 사라졌습니다. line 크기는 CPU마다 다르므로 대상에서 직접 확인합니다.
+그림은 64바이트 line을 가정했습니다. 아래 측정에서 보듯 M2 Pro에서는 64바이트 간격으로 떼어 놓아도 아직 느렸고, 네이티브 실행에서는 128바이트부터 차이가 사라졌습니다. line 크기는 CPU마다 다르므로 대상에서 직접 확인합니다.
 
 ## 배치부터 확인 — 배열 시작 정렬과 원소 stride
 
@@ -35,7 +35,7 @@ padding을 넣기 전에 "line이 몇 바이트인가"를 먼저 물어봐야 �
 | `std::hardware_destructive_interference_size` | 256 (Apple clang 21.0.0) | 256 (g++ 14.2.0) |
 | `std::hardware_constructive_interference_size` | 64 | 64 |
 
-게스트의 `/sys/devices/system/cpu/cpu0/cache/index0/`에는 `level`·`type`·`shared_cpu_list`만 있고 `coherency_line_size` 파일이 없었습니다. C++ 상수는 C++ working draft [hardware.interference](https://eel.is/c++draft/hardware.interference)가 "구현이 도입하는 경합으로 인한 추가 성능 저하를 피하기 위한, 동시에 접근되는 두 object 사이의 *최소 권장* 간격"이라고 정의한 implementation-defined 값입니다. 실행 중인 CPU를 잰 값이 아니라 컴파일러가 정한 상수라는 점이 중요합니다.
+게스트의 `/sys/devices/system/cpu/cpu0/cache/index0/`에는 `level`·`type`·`shared_cpu_list`·`shared_cpu_map`·`uevent`만 있고 `coherency_line_size` 파일이 없었습니다. C++ 상수는 C++ working draft [hardware.interference](https://eel.is/c++draft/hardware.interference)가 "구현이 도입하는 경합으로 인한 추가 성능 저하를 피하기 위한, 동시에 접근되는 두 object 사이의 *최소 권장* 간격"이라고 정의한 implementation-defined 값입니다. 실행 중인 CPU를 잰 값이 아니라 컴파일러가 정한 상수라는 점이 중요합니다.
 
 결국 직접 재 보는 것이 가장 확실합니다. `fs.c`는 4096바이트로 정렬한 버퍼 하나에 thread마다 카운터를 두고, thread `i`의 카운터를 `i * STRIDE` 바이트 위치에 놓습니다. STRIDE를 8, 64, 128, 256으로 바꾸며 각 thread가 자기 카운터를 1억 번 증가시키는 시간을 잽니다.
 
@@ -71,8 +71,8 @@ static void *worker(void *arg) {
 
 표에서 읽을 수 있는 것은 다음과 같습니다.
 
-- **64바이트 간격으로는 부족했습니다.** 두 환경, 두 모드 모두 64 B가 128 B보다 느렸습니다(네이티브 atomic 4T에서 0.511초 대 0.267초, 게스트 plain 2T에서 0.092초 대 0.032초). 게스트의 `getconf`가 64를 보고했지만 측정은 128바이트 단위로 움직였습니다.
-- **느려지는 배수는 접근 방식에 따라 크게 달랐습니다.** 네이티브 atomic 4T는 8 B가 256 B의 10.3배였지만, 네이티브 plain 2T는 1.13배에 그쳤습니다. 같은 하드웨어에서 같은 배치라도 load/store냐 원자 RMW냐에 따라 결과가 다릅니다. Apple은 이 차이를 설명하는 coherence 구현을 공개하지 않으므로, 여기서는 원인을 단정하지 않고 측정값만 적습니다.
+- **64바이트 간격으로는 부족했습니다.** 두 환경, 두 모드 모두 64 B가 128 B보다 느렸습니다(네이티브 atomic 4T에서 0.511초 대 0.267초, 게스트 atomic 2T에서 0.453초 대 0.215초). 게스트의 `getconf`가 64를 보고했지만 atomic 측정은 128바이트 단위로 움직였습니다. 다만 게스트 plain 2T의 64 B는 5회 값이 0.031·0.035·0.092·0.102·0.103초로 두 무리로 갈려, 중앙값(0.092초)만으로 배수를 말하기 어렵습니다.
+- **느려지는 배수는 접근 방식에 따라 크게 달랐습니다.** 네이티브 atomic 4T는 8 B가 256 B의 10.3배였지만(8 B 5회 범위 2.306~2.711초, 256 B 0.232~0.276초), 네이티브 plain 2T는 1.13배에 그쳤습니다. 네이티브 atomic 2T의 64 B도 0.279~0.607초로 흔들렸습니다. 같은 하드웨어에서 같은 배치라도 load/store냐 원자 RMW냐에 따라 결과가 다릅니다. Apple은 이 차이를 설명하는 coherence 구현을 공개하지 않으므로, 여기서는 원인을 단정하지 않고 측정값만 적습니다.
 - **분산이 큰 칸이 있습니다.** 게스트 atomic 4T의 8 B는 5회 중 최소 1.612초, 최대 6.858초였습니다. 게스트 vCPU는 macOS 스케줄러가 배치하는 host thread이고, 측정 중 같은 Mac에서 다른 작업도 돌고 있었습니다. 게스트 atomic 4T에서 128 B(0.707초)가 256 B(0.283초)보다 느린 점도 이 환경에서만 보였습니다.
 - **두 환경의 절대 시간은 비교하지 않습니다.** 네이티브 plain 루프는 1억 번에 약 0.21초, 게스트는 약 0.03초였습니다. 컴파일러가 다르고(clang과 GCC) 실행 환경도 달라서, 비교는 같은 행 안에서만 합니다.
 
@@ -130,7 +130,7 @@ static counter_slot slots[8];
 
 > ⚠️ 64바이트를 상수로 가정
 
-M2 Pro에서는 64바이트 간격이 128바이트보다 최대 2.9배(게스트 plain 2T) 느렸습니다. 대상 CPU를 모를 때는 `std::hardware_destructive_interference_size`를 쓸 수 있지만, 이 값도 컴파일러가 정한 권장값(Apple clang과 GCC 14.2 모두 256)이지 측정값이 아닙니다.
+M2 Pro에서는 64바이트 간격이 128바이트보다 느렸습니다. 중앙값 기준으로 네이티브 atomic 4T에서 1.9배, 게스트 atomic 2T에서 2.1배였습니다. 대상 CPU를 모를 때는 `std::hardware_destructive_interference_size`를 쓸 수 있지만, 이 값도 컴파일러가 정한 권장값(Apple clang과 GCC 14.2 모두 256)이지 측정값이 아닙니다.
 
 > ⚠️ padding만 하면 끝
 
@@ -139,7 +139,7 @@ Linux 문서의 마지막 경고처럼, 심한 false sharing을 고쳐도 hotspo
 ## 정리
 
 - false sharing의 조건은 같은 line, 동시 접근, 적어도 하나의 쓰기입니다(Linux 6.12 문서).
-- M2 Pro에서는 64바이트가 아니라 128바이트 간격부터 차이가 사라졌습니다. `getconf`, `sysctl`, C++ 상수가 서로 다른 값을 보고했습니다.
+- M2 Pro 네이티브에서는 64바이트가 아니라 128바이트 간격부터 차이가 사라졌습니다(게스트 atomic 4T는 256바이트에서 가장 빨랐습니다). `getconf`, `sysctl`, C++ 상수가 서로 다른 값을 보고했습니다.
 - 느려지는 배수는 접근 방식에 따라 1.1배(plain load/store)부터 10배 이상(atomic RMW 4 thread)까지 달랐습니다.
 - `perf c2c`는 Intel·AMD IBS·PowerPC·Arm SPE 같은 메모리 샘플링 하드웨어가 필요하고, SPE가 없는 HVF 게스트에서는 `no PMU supports the memory events`로 실패했습니다.
 - PMU가 없으면 STRIDE를 바꿔 가며 시간을 재는 실험이 직접적인 증거가 됩니다.
