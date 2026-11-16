@@ -44,7 +44,7 @@ UART나 BLE로 받은 byte stream을 struct 포인터로 캐스팅해 읽으려 
 | unaligned `LDRD` | 명령 없음(ARMv6-M) | HardFault (CFSR.UNALIGNED) | 확인 안 함 |
 | byte 단위로 조립(`LDRB`, byte 루프 `memcpy`) | 읽힘 | 읽힘 | 확인 안 함 |
 
-`CCR.UNALIGN_TRP` 열은 첫 단계에서 멈췄으므로 그 뒤 두 줄은 실행되지 않았습니다.
+`CCR.UNALIGN_TRP` 열은 첫 단계에서 멈췄으므로 그 뒤 두 줄은 실행되지 않았습니다. Cortex-M3 열은 ARMv7-M Architecture Reference Manual(DDI 0403E.b) A3.2.1 "Alignment behavior"와 같습니다. 이 절은 "Non word-aligned LDRD, LDMIA, LDMDB, POP ..."는 항상 alignment fault를 내고, "Non word-aligned LDR{T} and STR{T}"는 unaligned를 지원하되 `CCR.UNALIGN_TRP`가 1일 때만 fault를 낸다고 적습니다. Cortex-M0(ARMv6-M) 열은 이 글이 그 아키텍처 문서를 열지 않았으므로 QEMU에서 관찰한 결과로만 적습니다.
 
 ## 코드 / 실제 사용 예
 
