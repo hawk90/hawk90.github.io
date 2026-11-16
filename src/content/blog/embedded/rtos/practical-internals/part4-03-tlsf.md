@@ -11,13 +11,13 @@ topics: ["embedded", "embedded/rtos"]
 
 ## 한 줄 요약
 
-TLSF는 두 단계 크기 분류와 bitmap으로 가변 크기 block을 찾고 반환합니다. **일정한 알고리즘 작업 수와 전체 시스템의 일정한 실행 시간은 다릅니다.** 이 글의 구현 기준은 mattconte/tlsf commit **deff9ab509341f264addbd3c8ada533678591905**입니다.
+TLSF는 두 단계 크기 분류와 bitmap으로 가변 크기 block을 찾고 반환합니다. 탐색이 free block 수와 무관하게 bitmap 두 번으로 끝나지만, **그것이 전체 시스템의 일정한 실행 시간을 뜻하지는 않습니다.** 이 글의 구현 기준은 mattconte/tlsf commit **deff9ab509341f264addbd3c8ada533678591905**(2020-03-29)입니다. 이 소스를 `arm-none-eabi-gcc` 16.2.0(`-mcpu=cortex-m3 -O1`)으로 빌드해 QEMU 11.1.3 `mps2-an385`에서 돌린 결과를 함께 봅니다.
 
 ## 어떤 문제를 푸는가
 
-주소순 free-list를 순회하는 allocator는 free block 수에 따라 탐색 작업이 달라집니다. TLSF는 크기 구간별 목록과 bitmap으로 이 탐색을 제한합니다. 지원 size 범위·원소 폭·compiler·동기화·memory 시스템은 여전히 시간 분석의 조건입니다.
+4-02의 heap_4는 주소순 free list를 앞에서부터 훑으므로, free block이 54개면 최대 54번을 봅니다. TLSF는 신발 가게의 치수별 선반과 비슷합니다. 손님이 오면 매장 전체를 뒤지지 않고 "260mm 선반에 재고가 있나"를 표시등(bitmap)으로 보고 바로 그 선반에서 꺼냅니다. 그 선반이 비었으면 표시등으로 다음 치수 선반을 찾습니다.
 
-특정 ECU·micro-ROS 기본 allocator·VxWorks 내부·게임 프로젝트가 모두 TLSF를 사용한다고 추정하지 않습니다. 프로젝트 채택과 알고리즘 특성은 다른 증거가 필요한 주장입니다.
+README(`README.md:4`)는 BSD license라고 적고, 이 구현이 TLSF 1.4 사양과 문서를 바탕으로 했다고 밝힙니다(`README.md:20-26`). 어떤 제품이 이 구현을 쓰는지는 이 글에서 다루지 않습니다.
 
 ## 두 단계 Segregation의 산술
 
@@ -36,39 +36,71 @@ export function subdivision(fl, sl, bits = 4) {
 }
 ```
 
-기존 그림도 이 **16등분 설명 모델**을 나타냅니다. 고정한 mattconte 구현은 SL_INDEX_COUNT_LOG2=5, 즉 32개 SL과 작은 block의 별도 mapping을 사용하므로 그림의 FL 번호를 실제 array index로 그대로 대입하지 않습니다.
+Node.js v24.21.0에서 돌린 결과입니다. 16등분 모델의 첫 구간은 [64, 68), 마지막은 [124, 128)이고, 32등분(`bits = 5`)이면 [1024, 2048)이 32 byte 폭으로 나뉩니다.
+
+```text
+subdivision(6,0,4) = [64, 68)
+subdivision(6,1,4) = [68, 72)
+subdivision(6,15,4) = [124, 128)
+subdivision(10,0,5) = [1024, 1056)
+subdivision(10,31,5) = [2016, 2048)
+subdivision(3,0,4) -> RangeError: bucket
+```
+
+그림은 이 **16등분 설명 모델**을 나타냅니다. 고정한 mattconte 구현은 `SL_INDEX_COUNT_LOG2 = 5`(`tlsf.c:211`), 즉 32개 SL을 쓰고, `SMALL_BLOCK_SIZE`(32-bit에서 128 byte) 미만은 FL 0 하나에 4 byte 간격으로 몰아넣습니다(`tlsf.c:226-233` 주석, `mapping_insert()` `:513-521`). 그래서 그림의 FL 번호를 실제 array index로 그대로 대입하지 않습니다.
 
 ![16등분 설명 모델의 TLSF 두 단계 bucket과 bitmap](/images/blog/rtos/diagrams/part4-03-tlsf-buckets.svg)
 
 ## Allocate 경로
 
-고정 소스의 주요 흐름은 다음과 같습니다. application이 internal mapping 함수를 복사해 별도 allocator를 만드는 예제가 아닙니다.
+고정 소스의 주요 흐름은 다음과 같습니다.
 
 | 함수·단계 | 역할 |
 | --- | --- |
-| adjust_request_size | alignment·최소/최대 요청 조건 |
-| mapping_search | 적합한 bucket 탐색을 위한 반올림 |
-| mapping_insert | 크기를 FL/SL로 분류, 작은 block 별도 처리 |
-| search_suitable_block | 비어 있지 않은 bucket 탐색 |
-| block_trim_free | 나머지가 유효하면 split·재등록 |
+| `adjust_request_size` (`tlsf.c:492`) | alignment·최소/최대 요청 조건 |
+| `mapping_search` (`:533`) | 요청 크기를 다음 SL 경계로 올림 |
+| `mapping_insert` (`:513`) | 크기를 FL/SL로 분류, 작은 block 별도 처리 |
+| `search_suitable_block` (`:543`) | SL bitmap, 비었으면 FL bitmap을 한 번씩 보고 list 머리 반환 |
+| `block_trim_free` | 나머지가 유효하면 split·재등록 |
 
-C builtin은 인자 폭과 0 입력, shift 범위를 확인해야 합니다. __builtin_clz(size_t)를 폭 확인 없이 쓰거나 작은 size에서 음수 shift하는 축약 코드로 원본을 대체하지 않습니다. CLZ·CTZ가 모두 같은 한 명령·한 cycle이라는 보장도 없습니다.
+`mapping_search()`가 올림을 하는 이유는 실행 결과에서 보입니다. 1000 byte block은 FL 3·SL 30 list에 들어가지만, 1000 byte 요청은 SL 31부터 찾습니다. SL 30 list에는 1000보다 작은 block도 섞여 있을 수 있으므로, 한 칸 위 list에서 꺼내면 어떤 block이든 크기 검사 없이 바로 쓸 수 있습니다. 대가는 SL 30에 딱 맞는 block이 있어도 못 쓴다는 것입니다.
+
+```text
+  size   12: insert fl=0 sl= 3 | search fl=0 sl= 3
+  size  100: insert fl=0 sl=25 | search fl=0 sl=25
+  size  128: insert fl=1 sl= 0 | search fl=1 sl= 0
+  size 1000: insert fl=3 sl=30 | search fl=3 sl=31
+  size 1023: insert fl=3 sl=31 | search fl=4 sl= 0
+  size 1024: insert fl=4 sl= 0 | search fl=4 sl= 0
+  size 1100: insert fl=4 sl= 2 | search fl=4 sl= 3
+  size 4000: insert fl=5 sl=30 | search fl=5 sl=31
+```
+
+bitmap 검색은 `tlsf_ffs()`·`tlsf_fls()`가 합니다. GCC에서는 각각 `__builtin_ffs()`와 `__builtin_clz()`입니다(`tlsf.c:62-73`). Cortex-M3용 objdump에서 `fls`는 `clz` 한 명령, `ffs`는 `rbit` + `clz` 두 명령으로 나왔고 libgcc 호출은 없었습니다. 같은 소스를 `-mcpu=cortex-m0`으로 컴파일하면 `clz`는 한 번도 나오지 않고, 대신 libgcc의 `__clzsi2`와 `__ffssi2`를 부르는 call이 각각 두 번 생깁니다. "ffs/fls는 한 명령"이라는 가정은 target마다 objdump로 확인합니다.
 
 ## Free와 Coalesce
 
-원본 block_merge_prev·block_merge_next는 실제 이웃 block과 free 상태를 확인하고 free list에서 제거한 뒤 합칩니다. boundary tag·물리 이웃과 free-list 이웃은 다른 관계입니다. block_next의 header/size 계약을 생략한 pointer 산술은 잘못된 주소를 만들 수 있습니다.
+`block_merge_prev()`(`tlsf.c:679`)·`block_merge_next()`는 물리적으로 바로 앞·뒤 block이 free인지 header bit로 확인하고, free면 그 block을 free list에서 떼어 합칩니다. 앞 block은 header에 저장된 `prev_phys_block` 포인터로 찾습니다. 물리 이웃(메모리상 옆)과 free list 이웃(같은 크기 class)은 다른 관계입니다.
 
-doubly-linked free list를 사용하면 알려진 free node를 전체 목록 순회 없이 제거할 수 있습니다. 이것이 header·bitmap·split/merge 작업이 없어지거나 cache miss·lock wait까지 0이라는 뜻은 아닙니다.
+free list가 doubly-linked라서, 합칠 이웃을 list에서 떼는 일(`remove_free_block()`)도 list를 훑지 않고 앞뒤 포인터만 고칩니다. 그래서 free도 free block 수와 무관한 작업 횟수로 끝납니다.
 
 ## 단편화와 시간 상한
 
-bucket 간격의 상대 오차를 allocator 전체의 internal/external fragmentation 상한으로 바로 해석하지 않습니다. header·alignment·최소 block·live object 배치·pool 분리와 workload가 사용 가능 capacity에 영향을 줍니다. 출처 없는 6.25%·전체 overhead 25%를 보편적인 수학적 보장으로 제시하지 않습니다.
+TLSF는 탐색을 빠르게 할 뿐 단편화를 없애지 않습니다. 4-01·4-02에서 heap_4로 돌린 1000/96 교대 할당을 64 KiB TLSF pool에 똑같이 돌렸습니다.
 
-malloc/free의 관리 작업이 상수 횟수인 설계여도 realloc의 payload copy, 외부 lock, interrupt·memory 간섭은 별도입니다. 관찰된 최대값과 worst-case 보장도 구분합니다.
+```text
+allocated 112 blocks (1000/96 alternating) until NULL
+after freeing every 1000: tlsf_malloc(2000) -> NULL, tlsf_check=0
+after freeing all: tlsf_malloc(2000) -> ok, tlsf_check=0
+```
+
+1000 byte block을 모두 반납해도 사이에 96 byte block이 살아 있으면 합칠 이웃이 없어 2000 byte 요청은 heap_4와 똑같이 실패합니다. 예전 판의 "6.25%"·"전체 overhead 25%"는 출처가 없어 지웠습니다. 실제 낭비는 `mapping_search()`의 올림, block header(`tlsf_alloc_overhead()` = 4 byte), 최소 block(12 byte)에서 나옵니다.
+
+관리 작업이 상수 횟수여도 `tlsf_realloc()`이 새 block으로 옮길 때의 payload copy는 크기에 비례합니다. 외부 lock 대기, cache miss도 별도입니다. 이 글에서는 시간을 재지 않았습니다.
 
 ## API 사용 — mattconte TLSF
 
-이 저장소는 **BSD license**이며 tlsf_t는 opaque handle입니다. pool과 control storage를 담는 memory의 정렬·크기와 수명을 먼저 확인합니다. 다음 예제는 한 번 초기화한 단일 인스턴스를 외부에서 직렬화해서 사용하는 경우입니다.
+이 저장소는 **BSD license**이며 `tlsf_t`는 opaque handle입니다. 다음 예제는 64 KiB static 배열 하나에 control 구조와 pool을 함께 만들고, 외부에서 직렬화해서 쓰는 단일 인스턴스입니다.
 
 ```c title="tlsf-usage.c"
 #include <stdbool.h>
@@ -93,31 +125,49 @@ void memory_free(void *p) {
 }
 ```
 
-추가 pool은 tlsf_add_pool의 정렬·최소/최대 크기·비중첩 조건을 지켜 등록합니다. remove는 해당 pool의 live allocation이 없는 상태여야 합니다. 이를 DMA 특성이나 NUMA 배치 policy를 자동 제공하는 API로 해석하지 않습니다.
+이 코드를 그대로 Cortex-M3 빌드에 넣어 돌렸습니다. 32-bit target의 크기 상수는 다음과 같습니다.
+
+```text
+sizeof(size_t)=4 SL_INDEX_COUNT=32 FL_INDEX_COUNT=24 SMALL_BLOCK_SIZE=128
+tlsf_size()=3188 tlsf_align_size()=4 tlsf_block_size_min()=12 tlsf_block_size_max()=1073741824 tlsf_pool_overhead()=8 tlsf_alloc_overhead()=4
+memory_init() -> 1
+```
+
+control 구조(`tlsf_size()`)가 3188 byte입니다. FL 24개 × SL 32개의 list 머리 포인터 배열이 대부분이라, 64 KiB pool이면 약 5%를 관리 구조에 씁니다. 작은 MCU에서는 `SL_INDEX_COUNT_LOG2`를 4로 줄이면 이 배열이 FL 25 × SL 16으로 약 절반이 됩니다(`tlsf.c:207-211` 주석이 4나 5를 전형적인 값으로 듭니다). 정렬은 4 byte이고(`ALIGN_SIZE_LOG2 = 2`, `:222`), 한 block의 최대 크기는 2^30 byte입니다.
+
+경계 입력도 확인했습니다.
+
+```text
+tlsf_malloc(0) -> NULL
+tlsf_malloc(1 MiB) from 64 KiB pool -> NULL
+tlsf_realloc(8 -> 3000) preserved first 8 bytes: 1
+```
+
+추가 pool은 `tlsf_add_pool()`로 붙이고, `tlsf_remove_pool()`은 그 pool에 살아 있는 할당이 없을 때만 씁니다. pool 단위로 메모리 종류를 나눠 주는 기능은 없으므로, DMA용 메모리는 별도 TLSF 인스턴스로 만듭니다.
 
 ## Thread Safety와 대상 선택
 
-원 구현은 thread-safe가 아니며 사용자가 동기화를 제공해야 한다고 명시합니다. ISR에서 task mutex를 기다리거나 SMP의 전역 lock 비용을 무시하면 알고리즘의 관리 비용과 다른 문제가 생깁니다. per-core pool은 contention을 줄일 수 있지만 다른 core에서 반환하는 ownership protocol이 더 필요합니다.
+README의 Caveats(`README.md:17-18`)는 "Not designed to be thread safe; the user must provide this"라고 적습니다. FreeRTOS에서 쓴다면 heap_4처럼 `vTaskSuspendAll()`/`xTaskResumeAll()`로 감싸 task 사이를 직렬화하고, ISR에서는 부르지 않습니다. ISR에서도 써야 한다면 critical section으로 감싸야 하는데, 그러면 할당 시간만큼 interrupt가 막힙니다. 같은 Caveats는 4 byte 정렬 접근이 가능한 architecture를 가정한다고도 적습니다.
 
-작은 heap·고정 크기 workload·hardware 명령 유무만으로 allocator를 결정하지 않습니다. 실제 관리 구조 크기는 tlsf_size 등의 API로 확인하고 코드·남는 capacity·실패 처리와 lock/IRQ 제한을 함께 비교합니다. O(1)이므로 모든 target에서 더 빠르다는 결론은 성립하지 않습니다.
+선택 기준은 탐색 횟수의 상한이 필요한가입니다. heap_4의 free block 수가 작게 유지되는 시스템이라면 3188 byte의 control 구조를 따로 쓸 이유가 약하고, free block이 수십 개로 늘어나는 시스템에서 할당 시간의 상한이 필요하면 TLSF가 맞습니다.
 
 ## 검증할 항목
 
-host에서는 0·작은 요청·정렬 경계·oversize/OOM·free 후 재사용·realloc 내용 보존과 tlsf_check/tlsf_check_pool 결과를 검사할 수 있습니다. 이 기능 검사는 firmware WCET benchmark가 아닙니다. CPU·clock·compiler·cache·동시성·workload 원시 로그가 없는 µs 표는 실측으로 제시하지 않습니다.
+위 실행이 다룬 것은 0 byte 요청, pool보다 큰 요청, 단편화 상태의 실패와 전부 반납 후 회복, realloc 내용 보존, 그리고 각 단계의 `tlsf_check()` 결과(0 = 정상)입니다. 시간은 재지 않았습니다. 예전 판에도 원시 로그가 있는 µs 표는 없었습니다.
 
 ## 정리
 
-- 실제 구현의 크기 범위·mapping·header 계약을 고정 commit으로 확인합니다.
-- 설명용 16등분 모델과 고정 구현의 32개 SL·작은 block mapping을 구분합니다.
-- CLZ/CTZ·관리 작업 수·wall time은 서로 다른 지표입니다.
-- BSD license와 외부 동기화·pool 수명 조건을 지킵니다.
-- 기능·단편화·시간 상한을 각각 검증해야 합니다.
+- 고정 구현은 32개 SL, 128 byte 미만은 FL 0 하나에 4 byte 간격으로 둡니다.
+- 할당은 요청을 다음 SL로 올려서 찾고, 그래서 1000 byte 요청은 SL 30이 아니라 31부터 봅니다.
+- Cortex-M3에서 `fls`는 `clz` 한 명령, `ffs`는 `rbit`+`clz` 두 명령으로 컴파일됐습니다.
+- 32-bit 빌드의 control 구조는 3188 byte이고, TLSF도 1000/96 교대 할당의 단편화는 heap_4와 똑같이 겪습니다.
+- thread safety는 사용자가 제공해야 합니다.
 
 다음 [4-04 Static Allocation](/blog/embedded/rtos/practical-internals/part4-04-static-allocation)에서 RTOS 객체의 storage·초기화·linker 경계를 살펴봅니다.
 
 ## 근거 자료
 
-- [mattconte/tlsf 고정 소스](https://github.com/mattconte/tlsf/tree/deff9ab509341f264addbd3c8ada533678591905): tlsf.c·tlsf.h·라이선스·thread safety.
+- [mattconte/tlsf 고정 소스](https://github.com/mattconte/tlsf/tree/deff9ab509341f264addbd3c8ada533678591905): tlsf.c·tlsf.h·README(라이선스·thread safety). 본문 줄 번호는 이 commit 기준입니다.
 
 ## 관련 항목
 
