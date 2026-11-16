@@ -199,14 +199,20 @@ deploy:
 | 등급 | 용도 | 보관 |
 |------|------|------|
 | Dev | 개발자 PC, daily build | 평문 파일 (git ignore) |
-| QA | CI staging, internal release | CI secret store (Vault, GitLab CI variables) |
-| Production | 출시 binary 서명 | YubiHSM, AWS CloudHSM 또는 PKCS#11을 제공하는 관리형 HSM 등 |
+| QA | CI staging, internal release | protected CI 변수 또는 외부 secret 관리자 |
+| Production | 출시 binary 서명 | 개인키를 평문으로 꺼낼 수 없는 HSM |
 
 같은 키로 모두 서명하면 dev 환경이 뚫렸을 때 production 서명도 같이 뚫립니다. 등급마다 다른 CA 체인을 둡니다. RAUC로 만든 3단 체인과 만료 시험은 Ch 18에 있습니다.
 
 ## HSM 사용 패턴
 
-HSM은 비밀키를 내보내지 않고 서명 연산만 해 주는 장치입니다. 빌드 서버는 PKCS#11 같은 표준 인터페이스로 서명을 요청합니다. HSM 제품별 명령은 이 글에서 실행하지 않아 싣지 않습니다.
+AWS CloudHSM User Guide의 "What is AWS CloudHSM?"는 HSM을 암호 연산을 처리하고 키를 안전하게 보관하는 장치로 정의합니다. 빌드 서버는 키를 받아 오지 않고, PKCS#11 인터페이스로 HSM에 서명을 요청합니다.
+
+이 글에서는 HSM을 실행하지 않았습니다. 아래 내용은 모두 벤더 문서와 OASIS 사양에서 확인한 것입니다.
+
+- **PKCS#11.** OASIS PKCS #11 Specification Version 3.1의 §4.9 "Private key objects"에 따르면 `CKA_SENSITIVE`가 `CK_TRUE`이거나 `CKA_EXTRACTABLE`이 `CK_FALSE`인 개인키는 일부 속성을 토큰 밖에 평문으로 드러낼 수 없습니다. 같은 표는 `CKA_EXTRACTABLE`을 "키를 꺼낼 수 있고 wrap할 수 있으면 `CK_TRUE`"로 정의합니다. production 서명 키는 이 두 속성으로 추출을 막아 둡니다.
+- **YubiHSM 2.** YubiHSM 2 User Guide의 Core Concepts 장에 따르면 Opaque, Public Wrap Key, Template 객체를 뺀 나머지 객체는 평문으로 꺼낼 수 없고 암호화된 형태로만 export됩니다. export 대상이 되려면 객체에 `exportable-under-wrap` capability가 있어야 합니다. PKCS#11 모듈은 같은 가이드의 SDK Tools and Libraries 장 PKCS#11 절에 나옵니다. 설정 파일 기본 이름은 `yubihsm_pkcs11.conf`이고, user PIN 앞에 Authentication Key ID를 16비트 16진수로 붙입니다. 기본 키(ID 1, 암호 `password`)라면 PIN은 `0001password`입니다.
+- **AWS CloudHSM.** 같은 User Guide는 HSM이 single-tenant이고, FIPS 모드 클러스터에서는 FIPS 140-2 또는 FIPS 140-3 level 3 검증을 받았다고 적습니다. "PKCS #11 library for AWS CloudHSM Client SDK 5" 페이지에 따르면 PKCS #11 version 2.40 호환 라이브러리가 제공됩니다. `C_Login`의 PIN은 `<CU_user_name>:<password>` 형식입니다(같은 가이드의 "Authenticate to the PKCS #11 library for AWS CloudHSM Client SDK 5").
 
 ## 부트로더 서명 (secure boot)
 
@@ -323,7 +329,7 @@ release마다 함께 보관할 자료의 예입니다.
 
 **Toolchain pin 없이 CI.** Ubuntu LTS upgrade가 다음 빌드를 깨뜨립니다. 컨테이너로 pin.
 
-**HSM credential을 CI secret으로.** AWS IAM, GitLab masked variable, Vault token 같은 layer를 거치도록 합니다. HSM PIN을 GitLab CI variable에 *평문*으로 두면 안 됨.
+**HSM PIN을 masked 변수 하나로만 보호.** GitLab의 CI/CD variables 문서에 따르면 masking은 job 로그에서 값을 `[MASKED]`로 가리는 기능입니다. 문서는 masking이 악의적인 사용자의 접근을 막는다는 보장이 없고, 악성 코드는 masked 변수와 protected 변수를 모두 빼낼 수 있다고 적습니다. PIN은 protected 변수로 두어 보호 브랜치·태그 파이프라인에만 넘기거나, GitLab이 지원하는 외부 secret 관리자(GitLab 문서 "Use external secrets in CI/CD": HashiCorp Vault, AWS Secrets Manager 등)에서 받아 옵니다. 서명 job을 바꾸는 `.gitlab-ci.yml` 변경은 리뷰를 마친 뒤에만 실행합니다.
 
 **라이선스 자료 미생성.** release마다 `make legal-info`나 Yocto SPDX 결과를 함께 보관합니다.
 
@@ -333,7 +339,7 @@ release마다 함께 보관할 자료의 예입니다.
 
 - gcc 14.2 시험에서 `SOURCE_DATE_EPOCH`만으로는 바이너리가 달랐고, `-ffile-prefix-map`까지 더해야 같아졌습니다. 재현성은 두 번 빌드해 비교해야 확인됩니다.
 - CI/CD 파이프라인은 lint → build → smoke → stress → package → sign → deploy 단계로 분리합니다.
-- 키는 dev / QA / production 3등급으로 나누고 production은 HSM에 보관합니다. PKCS#11 API로 접근.
+- 키는 dev / QA / production 3등급으로 나눕니다. production 키는 HSM에 두고 PKCS#11 속성(`CKA_SENSITIVE`, `CKA_EXTRACTABLE`)으로 추출을 막습니다. YubiHSM 2와 AWS CloudHSM은 벤더가 PKCS#11 라이브러리를 제공합니다. 이 글에서는 실행하지 않았고 문서로만 확인했습니다.
 - 부트로더 서명은 i.MX HABv4(CST, U-Boot `doc/imx/habv4/`)와 TF-A Trusted Board Boot(`cert_create`)로 따로 있고, OTA bundle 서명은 Ch 18의 RAUC입니다.
 - 보드가 연결된 runner에만 hardware test를 보내도록 GitLab runner label을 씁니다.
 - 양산 line은 바코드 → flash → boot → self-test → provisioning → MES 송신을 자동화합니다.
