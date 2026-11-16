@@ -29,7 +29,7 @@ topics: ["embedded"]
 | 층 | 구성 |
 |----|------|
 | Application | Data Model: Endpoint·Cluster·Attribute·Command |
-| Security | PASE(setup code 기반 commissioning session), CASE(operational certificate 기반 session) |
+| Security | PASE(commissioning 첫 단계의 session), CASE(commissioning 끝과 운영 중의 session) |
 | Transport | IPv6. Thread·Wi-Fi·Ethernet |
 
 장치 하나가 여러 fabric(생태계별 관리 영역)에 들어갈 수 있고, fabric마다 별도의 NOC(Node Operational Certificate)를 받습니다. Operational Credentials cluster의 data model XML은 `SupportedFabrics` attribute를 `min="5" max="254"`로 정의하고, connectedhomeip SDK의 기본값은 `CHIP_CONFIG_MAX_FABRICS 16`입니다.
@@ -83,7 +83,7 @@ node 3: mode - / pollperiod 5000 / dataset set active <hex> / ifconfig up / thre
      |   R  | 0xe000 |   1 |      -20 |       -20 |     3 |1|1|1| 12d308569ae7ff58 |       5 |
 ```
 
-node 3은 leader(RLOC16 `0x3c00`)의 child `0x3c02`가 됐고, child table의 `R` 열이 0(수신기 꺼짐)입니다. node 2는 router `0xe000`입니다. router가 되는 데 걸린 2.6 s는 `routerselectionjitter 1`로 jitter를 1초로 줄였기 때문입니다. CLI README의 예시 출력에서 이 값은 120입니다.
+node 3은 leader(RLOC16 `0x3c00`)의 child `0x3c02`가 됐고, child table의 `R` 열이 0(수신기 꺼짐)입니다. node 2는 router `0xe000`입니다. script는 `routerselectionjitter 1`로 jitter를 줄였습니다(CLI README의 예시 출력에서 이 값은 120). router가 되기까지의 시간은 실행마다 달라, 다시 돌렸을 때는 20.9 s가 걸렸습니다.
 
 ### Sleepy child까지의 지연
 
@@ -142,7 +142,7 @@ void main_loop(otInstance *ot) {
 }
 ```
 
-이전 판은 network key 외에 PAN ID·network name 같은 항목을 두지 않은 dataset이었습니다. 위 simulation은 `dataset init new`가 나머지 항목을 채운 뒤 일부만 바꿨습니다. 실제 장치에서는 commissioning으로 받은 dataset 전체를 씁니다.
+위 simulation은 `dataset init new`가 나머지 항목을 채운 뒤 일부만 바꿨습니다. 실제 장치에서는 commissioning으로 받은 dataset 전체를 씁니다.
 
 ### Matter SDK 빌드 (Linux example)
 
@@ -207,7 +207,7 @@ connectedhomeip controller의 `CommissioningDelegate.h`에 있는 commissioning 
 | `kFindOperationalForCommissioningComplete` | operational discovery와 CASE session |
 | `kSendComplete` | CommissioningComplete |
 
-PASE로 시작해 DAC chain으로 장치를 확인하고, NOC를 설치한 뒤 운영 network에 붙이고, CASE로 다시 접속해 끝냅니다. DAC가 없거나 검증에 실패하면 attestation 단계에서 멈춥니다.
+PASE로 시작해 DAC chain으로 장치를 확인하고, NOC를 설치한 뒤 운영 network에 붙이고, CASE로 다시 접속해 끝냅니다.
 
 ### OTA
 
@@ -233,7 +233,7 @@ sleepy child로 가는 응답은 최대 poll period만큼 늦습니다. 위 실�
 
 > ⚠️ poll period를 너무 짧게
 
-1 s로 줄이면 지연이 1 s 안으로 들어오지만 그만큼 radio를 자주 켭니다. 지연 요구와 배터리 계산을 같이 보고 정합니다.
+1 s로 줄이면 지연 상한이 poll period인 1 s 근처로 내려오지만(이 실험 최대 1012 ms) 그만큼 radio를 자주 켭니다. 지연 요구와 배터리 계산을 같이 보고 정합니다.
 
 > ⚠️ OpenThread submodule을 재귀로 받지 않음
 
@@ -245,7 +245,7 @@ sleepy child로 가는 응답은 최대 poll period만큼 늦습니다. 위 실�
 
 > ⚠️ DAC 없이 출하
 
-commissioning의 attestation 단계(`kSendDACCertificateRequest`~`kAttestationVerification`)에서 실패합니다. 장치마다 공장에서 DAC chain을 넣고, private key는 보호된 저장소에 둡니다.
+commissioning에는 DAC chain을 요청하고 검증하는 단계(`kSendDACCertificateRequest`~`kAttestationVerification`)가 있습니다. 장치마다 공장에서 DAC chain을 넣고, private key는 보호된 저장소에 둡니다.
 
 > ⚠️ OTA를 받아도 되돌릴 수 없음
 
