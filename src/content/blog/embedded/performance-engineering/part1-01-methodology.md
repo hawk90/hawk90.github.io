@@ -40,7 +40,7 @@ RED는 Tom Wilkie가 2015년에 소개한 서비스 모니터링 방법입니다
 | --- | --- |
 | **R**ate | 초당 요청 수 |
 | **E**rrors | 그 요청 가운데 실패한 수 |
-| **D**uration | 요청이 걸린 시간(글은 "some distribution of latency"라고 적습니다) |
+| **D**uration | 그 요청들이 걸린 시간 |
 
 임베디드에 옮기면 요청 대신 task나 ISR 한 번의 실행이 단위가 됩니다. task마다 실행 빈도, 실패 횟수, 실행 시간 분포를 기록합니다. 분포를 어떻게 요약할지는 1-04에서 다룹니다.
 
@@ -128,7 +128,7 @@ M2 Pro에서 16 KiB 배열을 더하는 함수 하나를 10만 번 재 보았습
 
 ### 3. Observer Effect
 
-측정 코드도 실행 시간을 씁니다. 위 표의 값에도 `clock_gettime_nsec_np` 호출 두 번의 비용이 들어 있습니다. 반복 안에서 `printf`를 부르면 그 비용이 측정 대상보다 커지기 쉬우므로, 값은 메모리 배열에 모아 두고 측정이 끝난 뒤 출력합니다. Cortex-M에서는 `CYCCNT`를 읽는 것이 레지스터 load 한 번이라 이 비용이 가장 작습니다.
+측정 코드도 실행 시간을 씁니다. 위 표의 값에도 `clock_gettime_nsec_np` 호출 두 번의 비용이 들어 있습니다. 반복 안에서 `printf`를 부르면 그 비용이 측정 대상보다 커지기 쉬우므로, 값은 메모리 배열에 모아 두고 측정이 끝난 뒤 출력합니다. Cortex-M에서는 `CYCCNT` 읽기가 메모리 맵 레지스터 load 한 번입니다(그 비용은 이 시리즈에서 보드로 재지 않았습니다).
 
 ### 4. Single Run
 
@@ -204,4 +204,4 @@ Knuth의 원문(1974, p.268)은 "We should forget about small efficiencies, say 
 - [Grafana, The RED Method: How to instrument your services](https://grafana.com/blog/the-red-method-how-to-instrument-your-services/)
 - Donald E. Knuth, "Structured Programming with go to Statements," *Computing Surveys* 6(4), 1974, pp.261-301
 - ARMv7-M Architecture Reference Manual (DDI 0403E), C1.6.5 DEMCR, C1.8.3 CYCCNT
-- Linux v6.12 [`drivers/perf/arm_pmuv3.c`](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/drivers/perf/arm_pmuv3.c?h=v6.12.58)
+- Linux v6.12 [`drivers/perf/arm_pmuv3.c`](https://git.kernel.org/pub/scm/linux/kernel/git/stable/linux.git/tree/drivers/perf/arm_pmuv3.c?h=v6.12.116)

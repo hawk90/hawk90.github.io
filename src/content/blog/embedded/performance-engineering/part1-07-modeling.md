@@ -26,7 +26,7 @@ $$\text{Speedup} = \frac{1}{(1 - P) + \frac{P}{S}}$$
 
 전체 100 ms 코드 중:
 - 90 ms는 *병렬화가 가능합니다* (P = 0.9)
-- 10 ms는 *serial입니다* (P = 0.1)
+- 10 ms는 *serial입니다* (1 − P = 0.1)
 
 병렬화로 *90ms → 0ms* ($S = \infty$)가 되어도 다음과 같습니다.
 
@@ -46,7 +46,7 @@ Amdahl은 *고정 문제 크기*를 가정합니다. Gustafson은 같은 글에�
 
 $$\text{Scaled speedup} = s' + p' N = N + (1 - N)\, s'$$
 
-입니다. 이 식은 N에 대한 직선이라 Amdahl 곡선보다 훨씬 완만합니다.
+입니다. 이 식은 s′에 대한 직선(기울기 1 − N)이고, Gustafson은 s = 0 근처에서 가파른 Amdahl 곡선보다 훨씬 완만하다고 적습니다. N에 대해서는 포화하지 않고 계속 커집니다.
 
 > **정정**: 이 절의 이전 판은 $S - P(S-1) = 1 + P(S-1)$로 적었는데, 두 식은 일반적으로 같지 않습니다. 위가 Gustafson 원문의 식입니다.
 
@@ -62,7 +62,7 @@ Williams, Waterman, Patterson의 Roofline 논문(Berkeley 기술 보고서 UCB/E
 
 $$\text{Attainable GFlops/s} = \min(\text{Peak FP Performance},\ \text{Peak Memory BW} \times \text{OI})$$
 
-논문은 두 선이 코어마다 한 번 정해지는 것이지 kernel마다 정해지는 것이 아니라고 덧붙이고, peak memory bandwidth는 STREAM 벤치마크로 잽니다.
+논문은 두 선이 코어마다 한 번 정해지는 것이지 kernel마다 정해지는 것이 아니라고 덧붙이고, peak memory bandwidth는 STREAM으로도 잴 수 있지만 이 논문은 직접 만든 단계별 최적화 microbenchmark로 지속 가능한 DRAM 대역폭을 쟀다고 적습니다.
 
 ### Roofline 그래프
 

@@ -107,7 +107,7 @@ Linux man-pages 6.9.1의 `clock_gettime(2)`가 정의하는 clock은 다음과 �
 
 ## arm64 — CNTVCT_EL0 직접 읽기
 
-x86의 RDTSC에 해당하는 것이 arm64에서는 generic timer의 가상 카운터 `CNTVCT_EL0`입니다. Linux는 사용자 공간에서 이 레지스터를 읽게 해 주고, vDSO의 `clock_gettime()`도 이것을 읽습니다. Linux 6.12의 `arch/arm64/include/asm/vdso/gettimeofday.h` 69~95행 `__arch_get_hw_counter()`는 읽기 앞에 `isb`를 두고, 주석에 그 이유를 "the isb is required to prevent that the counter value is speculated"라고 적습니다. FEAT_ECV가 있는 코어에서는 자체 동기화되는 `CNTVCTSS_EL0`를 대신 읽습니다. 커널 쪽 `arch/arm64/include/asm/arch_timer.h` 200~210행 `__arch_counter_get_cntvct()`도 같은 구성입니다.
+x86의 RDTSC에 해당하는 것이 arm64에서는 generic timer의 가상 카운터 `CNTVCT_EL0`입니다. Linux는 사용자 공간에서 이 레지스터를 읽게 해 주고, vDSO의 `clock_gettime()`도 이것을 읽습니다. Linux 6.12의 `arch/arm64/include/asm/vdso/gettimeofday.h` 69~100행 `__arch_get_hw_counter()`는 읽기 앞에 `isb`를 두고, 주석에 그 이유를 "the isb is required to prevent that the counter value is speculated"라고 적습니다. FEAT_ECV가 있는 코어에서는 자체 동기화되는 `CNTVCTSS_EL0`를 대신 읽습니다. 커널 쪽 `arch/arm64/include/asm/arch_timer.h` 200~210행 `__arch_counter_get_cntvct()`도 같은 구성입니다.
 
 ```c
 static inline uint64_t cntvct(void) {
@@ -131,13 +131,13 @@ Armv8-A 코어의 *Performance Monitors Unit*은 cycle 외에도 cache refill, �
 | `CPU_CYCLES` | 0x11 |
 | `L2D_CACHE_REFILL` | 0x17 |
 
-cycle counter는 `PMCCNTR_EL0`입니다. Linux에서 사용자 공간이 PMU 레지스터를 직접 읽는 정식 경로는 `Documentation/arch/arm64/perf.rst` 116~132행에 있습니다. `kernel.perf_user_access`를 1로 켜고, `perf_event_open()`을 `config1`의 bit 1을 세워 연 뒤 mmap한 페이지에서 카운터 번호를 받아 `mrs`로 읽습니다. 보통은 그냥 perf를 씁니다.
+cycle counter는 `PMCCNTR_EL0`입니다. Linux에서 사용자 공간이 PMU 레지스터를 직접 읽는 정식 경로는 `Documentation/arch/arm64/perf.rst` 116~132행에 있습니다. `kernel.perf_user_access`를 1로 켜고, `perf_event_open()`을 `config1`의 bit 1을 세워 연 뒤 mmap한 페이지에서 카운터 번호를 받아 `mrs`로 읽습니다. 이 시리즈에서는 perf를 씁니다.
 
 ```bash
 perf stat -e cycles,instructions -- ./app
 ```
 
-카운터보다 이벤트가 많으면 perf는 이벤트를 번갈아 카운터에 올립니다(multiplexing). perf-stat man page는 이때 출력되는 백분율을 "the event's running time/enabling time"으로 설명합니다. 100%가 아닌 값은 측정한 일부 구간에서 전체를 추정한 것입니다.
+카운터보다 이벤트가 많으면 perf는 이벤트를 번갈아 카운터에 올립니다(multiplexing). perf-stat man page는 hybrid 이벤트 예제에서 이 백분율을 "the event's running time/enabling time"으로 설명합니다. 100%가 아니면 perf는 enabled 시간 동안 센 것으로 환산한(scaled) 값을 보여 줍니다.
 
 이 시리즈의 HVF 게스트는 범용 카운터가 0개여서 `perf stat -e cycles`가 `<not supported>`를 돌려줍니다(1-01). 그런데 같은 게스트에서 `kernel.perf_user_access = 0`인 채로 EL0에서 `mrs pmccntr_el0`를 실행하면 trap 없이 값이 읽혔고, 1억 번 루프 동안 9.7~9.8×10⁷ 증가했습니다(`bench/pmccntr2.c`, 3회). 같은 구간의 `CNTVCT_EL0`로 잰 시간이 32 ms였으니 약 3.1 GHz로 증가한 셈입니다. 이것은 문서화된 경로가 아니고 HVF가 그렇게 처리한 결과일 뿐이므로, 이 값에 기대지 않습니다.
 
@@ -219,16 +219,18 @@ SEGGER_SYSVIEW_RecordExitISR();
 
 ## Hardware Trace (ETM·ITM)
 
-Cortex-M4 TRM(DDI 0439B) 2.1은 명령어 trace용 ETM을 *선택 사항*으로 적습니다. 칩에 ETM이 있어도 trace 포트가 핀으로 나와 있어야 외부 장비로 받을 수 있습니다.
+Cortex-M4 TRM(DDI 0439B) 2.1은 명령어 trace용 ETM을 *선택 사항*으로 적습니다.
 
 **ITM (Instrumentation Trace Macrocell)**은 소프트웨어가 stimulus port 레지스터에 쓰면 그 값을 trace 패킷으로 내보냅니다. ARMv7-M ARM C1.7.1은 stimulus port를 최대 256개까지, 8의 배수로 허용하고, Cortex-M4 TRM 표 10-1은 M4에 ITM_STIM0~31, 즉 32개가 있다고 적습니다.
 
 ```c
-while (ITM->PORT[0].u32 == 0) { }   /* 출력 버퍼가 비기를 기다림 */
-ITM->PORT[0].u8 = 'A';
+if ((ITM->TCR & ITM_TCR_ITMENA_Msk) && (ITM->TER & 1u)) {
+    while (ITM->PORT[0].u32 == 0) { }   /* 출력 버퍼가 비기를 기다림 */
+    ITM->PORT[0].u8 = 'A';
+}
 ```
 
-CMSIS `core_cm4.h`의 `ITM_SendChar()`도 같은 순서입니다. C1.7.1에 따르면 ITM의 출력 버퍼 크기는 구현 정의이고, 버퍼가 차 있으면 이 대기 루프가 길어집니다. 즉 ITM 쓰기의 비용은 trace 출력 속도에 묶여 있습니다.
+CMSIS `core_cm4.h`의 `ITM_SendChar()`도 ITM과 port 0이 켜졌는지 먼저 보고 같은 순서로 씁니다. 확인을 빼면 안 됩니다. C1.7.1에 따르면 ITM이나 그 port가 꺼진 상태에서 stimulus port를 읽으면 "버퍼가 가득 참"을 뜻하는 값이 돌아오므로, 디버거가 ITM을 켜지 않은 보드에서는 대기 루프가 끝나지 않습니다. C1.7.1에 따르면 ITM의 출력 버퍼 크기는 구현 정의이고, 버퍼가 차 있으면 이 대기 루프가 길어집니다. 즉 ITM 쓰기의 비용은 trace 출력 속도에 묶여 있습니다.
 
 ## PGO
 
@@ -240,9 +242,9 @@ Profile-Guided Optimization은 측정 도구가 아니라 측정 결과를 컴�
 
 위 게스트 측정에서 CPU를 나눠 쓰자 wall-clock은 0.70 s, thread CPU 시간은 0.35 s였습니다. 코드의 비용을 보려면 CPU 시간이나 cycle을, 응답성을 보려면 wall-clock을 씁니다.
 
-> ⚠️ DWT_CYCCNT가 0만 돌려준다
+> ⚠️ DWT_CYCCNT가 움직이지 않는다
 
-ARMv7-M ARM C1.3.1에 따르면 DBGEN, HALTED, NIDEN이 모두 0이면 프로세서는 `DEMCR.TRCENA`가 0인 것처럼 동작해야 하고, 이때 DWT는 꺼지며 카운터가 세지 않습니다. 디버그 인증을 끈 양산 보드에서 CYCCNT가 멈춰 있는 이유가 이것일 수 있습니다. QEMU에서는 DWT 자체가 동작하지 않습니다.
+ARMv7-M ARM C1.3.1에 따르면 DBGEN, HALTED, NIDEN이 모두 0이면 프로세서는 `DEMCR.TRCENA`가 0인 것처럼 동작해야 하고, 같은 절은 이때 DWT가 꺼지고 카운터가 세지 않는다고 적습니다. 양산 보드에서 DBGEN·NIDEN을 끄면 이 조건에 걸립니다. QEMU에서는 DWT 자체가 동작하지 않습니다.
 
 > ⚠️ 카운터 읽기 순서를 강제하지 않음
 

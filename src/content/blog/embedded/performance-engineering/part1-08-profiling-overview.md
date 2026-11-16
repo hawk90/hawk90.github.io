@@ -69,7 +69,7 @@ GCC 14.2 매뉴얼에 따르면 `-finstrument-functions`는 함수 진입 직후
 | `bar` | 45,000 |
 | `baz` | 5 |
 
-이 예제는 호출이 1초에 4만 5천 번뿐이라, 계측한 빌드와 안 한 빌드의 실행 시간이 다섯 번 모두 1.05~1.17 s 범위로 구분되지 않았습니다. 계측 비용은 호출 횟수에 비례하므로, 작은 함수를 수천만 번 부르는 코드에서는 결과가 크게 달라집니다.
+이 예제는 호출이 1초에 4만 5천 번뿐이라, 계측한 빌드와 안 한 빌드의 실행 시간이 다섯 번 모두 1.05~1.17 s 범위로 구분되지 않았습니다. hook 비용은 호출마다 들기 때문에 호출 횟수가 많은 코드일수록 커집니다. 이 글에서는 호출이 많은 경우를 따로 재지 않았습니다.
 
 `-pg`는 이것과 다른 옵션입니다. GNU gprof 매뉴얼의 "Implementation of Profiling"에 따르면 `-pg`는 모든 함수가 `mcount`를 부르게 컴파일해 호출 그래프를 기록하고, 따로 PC를 대략 초당 100번 샘플링해 히스토그램을 만듭니다.
 
@@ -177,7 +177,7 @@ cat trace
              cat-3795    [002] .....  2992.766973: __arm64_sys_openat <-invoke_syscall
 ```
 
-ftrace는 커널 함수만 추적합니다. 5-03에서 자세히 다룹니다.
+function tracer는 커널 함수만 추적합니다. 사용자 공간은 uprobe 이벤트(`/sys/kernel/tracing/uprobe_events`)로 봅니다. 5-03에서 자세히 다룹니다.
 
 ## 임베디드 — RTOS Tracer
 
@@ -265,7 +265,7 @@ gprof flat profile의 `cumulative seconds`는 표의 위쪽 행들을 더한 누
 
 > ⚠️ PGO profile이 실제로 쓰였는지 확인 안 함
 
-학습 빌드와 최종 빌드의 출력 이름이 다르면 GCC 14는 경고만 내고 PGO 없이 빌드합니다. `-Wmissing-profile` 경고를 오류로 다루거나, `.gcda` 파일 이름을 확인합니다.
+학습 빌드와 최종 빌드의 출력 이름이 다르면 GCC 14는 경고만 내고 profile 없이 `-funroll-loops` 같은 `-fprofile-use`의 플래그만 켠 채 빌드합니다(.text가 2,146 B에서 2,426 B로 커졌지만 profile은 쓰이지 않음). `-Wmissing-profile` 경고를 오류로 다루거나, `.gcda` 파일 이름을 확인합니다.
 
 ## 정리 — Part 1 마무리
 

@@ -81,7 +81,7 @@ for (;;) {
 }
 ```
 
-이 예제는 예정 시각 기준의 phase error를 기록합니다. 보드에서 실행하지 않았습니다. `expected_cycles`는 tick 단위로 누적하므로, 코어 클럭이 DVFS로 바뀌면 `CYCLES_PER_TICK`도 바뀌어 기준이 어긋납니다. 32비트 cycle 차이는 한 번의 wrap까지만 올바르므로 기록 주기는 wrap 주기(168 MHz에서 약 25.6초)보다 짧아야 합니다.
+이 예제는 예정 시각 기준의 phase error를 기록합니다. 보드에서 실행하지 않았습니다. `expected_cycles`는 tick 단위로 누적하므로, 코어 클럭이 DVFS로 바뀌면 `CYCLES_PER_TICK`도 바뀌어 기준이 어긋납니다. `expected_cycles`는 2³²를 법으로 누적되므로 카운터의 wrap 자체는 문제가 아니고, `(int32_t)` phase error가 ±2³¹ cycle(168 MHz에서 약 12.8초) 안에 있는 한 올바릅니다.
 
 Jitter의 원인 후보는 1-04의 "Long Tail 원인 찾기" 표와 같습니다. 여기에 더 높은 우선순위 task의 선점과, tick이 꺼진 상태에서 깨어나는 지연이 더해집니다.
 
@@ -186,9 +186,9 @@ $$R_i = C_i + B_i + \sum_{j \in hp(i)} \left\lceil \frac{R_i}{T_j} \right\rceil 
 
 ## Release Jitter
 
-Task가 *정확히 release되어야 할 시점*과 *실제 시작 시점*의 차이를 의미합니다.
+Task가 *도착한 시점*과 *실제로 release된(실행 가능 큐에 들어간) 시점*의 차이를 의미합니다.
 
-Audsley 외(1993)는 이것을 $J_i$로 두고 "task가 도착한 뒤 release되기를 기다릴 수 있는 최악의 시간"으로 정의하며, 위 분석이 0이 아닌 release jitter로 쉽게 확장된다고 적습니다. cyclictest가 재는 wake-up 지연이 바로 이 값의 표본입니다. 위 표의 부하 없음 1회 측정에서는 최악 13.5 ms였습니다.
+Audsley 외(1993)는 이것을 $J_i$로 두고 "task가 도착한 뒤 release되기를 기다릴 수 있는 최악의 시간"으로 정의하며, 위 분석이 0이 아닌 release jitter로 쉽게 확장된다고 적습니다. cyclictest의 wake-up 지연은 release jitter에 dispatch까지의 지연이 더해진 값의 표본입니다. 위 표의 부하 없음 1회 측정에서는 최악 13.5 ms였습니다.
 
 tick 기반 RTOS에서는 release 시각이 tick 경계로 양자화됩니다. 1 kHz tick이면 이벤트가 tick 직후에 도착한 task는 다음 tick까지 최대 1 ms를 기다립니다.
 
@@ -218,7 +218,7 @@ Wilhelm 4절의 말대로, 최악 입력을 알면 실행 한 번으로 충분�
 
 > ⚠️ Lab 환경 = production
 
-위 cyclictest 표에서 CPU 부하 하나를 더하자 Max가 13.5~34 ms에서 50~126 ms가 됐습니다. 실제 제품의 DMA, 인터럽트, 다른 task를 켠 상태에서 다시 잽니다.
+위 cyclictest 표에서 `stress-ng --cpu 4`로 부하를 걸자 Max가 13.5~34 ms에서 50~126 ms가 됐습니다. 실제 제품의 DMA, 인터럽트, 다른 task를 켠 상태에서 다시 잽니다.
 
 > ⚠️ Linux mainline = real-time
 
