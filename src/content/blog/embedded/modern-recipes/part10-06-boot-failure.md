@@ -60,7 +60,6 @@ Cortex-M은 reset 때 vector table의 첫 word를 초기 SP로, 둘째 word를 R
 정상 이미지라면 다음과 같아야 합니다. 1-02의 168 MHz 예제를 빌드한 ELF의 vector table과 심볼입니다.
 
 ```text
-
 Contents of section .isr_vector:
  8000000 00000220 43000008 41000008 41000008  ... C...A...A...
 20020000 B _estack
@@ -89,7 +88,7 @@ DS8626 2.2.13절에 따르면 STM32F405/407은 시작할 때 boot 핀으로 user
 
 - [ ] BOOT0가 의도한 레벨로 고정되어 있는가(떠 있지 않은가)
 
-BOOT0가 떠 있으면 전원을 켤 때마다 읽히는 값이 달라 user Flash와 system memory 중 어디로 부팅할지 정해지지 않습니다. 이 핀의 정확한 조합표는 레퍼런스 매뉴얼에 있고, 여기서는 확인하지 못했습니다.
+BOOT0가 떠 있으면 전원을 켤 때마다 읽히는 값이 달라 user Flash와 system memory 중 어디로 부팅할지 정해지지 않습니다.
 
 option byte의 RDP 레벨 2는 HAL v1.8.6 주석대로 되돌릴 수 없습니다(10-02).
 
@@ -135,7 +134,7 @@ int main(void) {
 }
 ```
 
-LED가 깜빡이면 main 루프까지 왔습니다. 켜지지도 않으면 `SystemClock_Config()` 이전에서, 켜지기만 하고 깜빡이지 않으면 `HAL_Delay()`가 쓰는 SysTick 인터럽트가 돌지 않는 경우를 의심합니다.
+LED가 깜빡이면 main 루프까지 왔습니다. 켜지지도 않으면 `SystemClock_Config()` 이전에서, 켜지기만 하고 깜빡이지 않으면 `HAL_Delay()`가 쓰는 SysTick 인터럽트가 돌지 않는 경우를 의심합니다. HAL v1.8.6 `stm32f4xx_hal.c`는 SysTick을 `HAL_Delay()`의 time base로 쓰고 1 ms마다 인터럽트를 내도록 설정한다고 적습니다.
 
 ## Bootloader로 다시 쓰기
 
