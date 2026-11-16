@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"RCU = reader 경로를 가볍게 하고 writer가 reclamation 비용을 부담하는 read-mostly 동기화."** 핵심은 *grace period*입니다. 갱신 전에 시작한 reader가 모두 끝난 뒤에야 옛 객체를 free할 수 있습니다. 이 글은 커널 모듈과 liburcu로 그 비용을 직접 재고, grace period를 건너뛰면 무슨 일이 나는지 AddressSanitizer로 봅니다.
+> **"RCU는 reader 경로를 가볍게 하고 writer가 reclamation 비용을 부담하는 read-mostly 동기화입니다."** 핵심은 *grace period*입니다. 갱신 전에 시작한 reader가 모두 끝난 뒤에야 옛 객체를 free할 수 있습니다. 이 글은 커널 모듈과 liburcu로 그 비용을 직접 재고, grace period를 건너뛰면 무슨 일이 나는지 AddressSanitizer로 봅니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -39,7 +39,7 @@ Linux 커널 문서는 v4.20부터 한 커널에 RCU flavor가 하나만 있고,
 
 이 순서 덕분에 갱신 전부터 옛 객체를 들고 있던 reader가 끝나기 전에는 그 객체가 해제되지 않습니다. 대가는 세 가지입니다. Writer가 grace period만큼 기다리거나 callback이 그만큼 늦게 돕니다. 그동안 옛 객체와 새 객체가 함께 메모리에 있습니다. 그리고 writer끼리는 여전히 별도 lock이 필요합니다.
 
-Grace period가 끝났는지는 quiescent state로 압니다. Read-side 구간 안에서는 block할 수 없으므로, 어떤 CPU가 context switch를 했다면 그 CPU는 그 전에 시작한 read-side 구간을 모두 마친 것이고, 모든 CPU가 context switch를 한 번씩 하면 그 전의 read-side 구간은 모두 끝난 것입니다(`whatisRCU.rst` 762–766행). Tree RCU 문서는 CPU가 context switch를 하면 `rcu_note_context_switch()`가, user mode에서 scheduler-clock 인터럽트를 받으면 `rcu_sched_clock_irq()`가 quiescent state를 기록한다고 적습니다(`Documentation/RCU/Design/Memory-Ordering/Tree-RCU-Memory-Ordering.rst` 449–452행). 모든 CPU가 grace period 시작 뒤 quiescent state를 한 번씩 지나면 그 grace period가 끝납니다.
+Grace period가 끝났는지는 quiescent state로 압니다. Read-side 구간 안에서는 block할 수 없으므로, 어떤 CPU가 context switch를 했다면 그 CPU는 그 전에 시작한 read-side 구간을 모두 마쳤고, 모든 CPU가 context switch를 한 번씩 하면 그 전의 read-side 구간은 모두 끝납니다(`whatisRCU.rst` 762–766행). Tree RCU 문서는 CPU가 context switch를 하면 `rcu_note_context_switch()`가, user mode에서 scheduler-clock 인터럽트를 받으면 `rcu_sched_clock_irq()`가 quiescent state를 기록한다고 적습니다(`Documentation/RCU/Design/Memory-Ordering/Tree-RCU-Memory-Ordering.rst` 449–452행). 모든 CPU가 grace period 시작 뒤 quiescent state를 한 번씩 지나면 그 grace period가 끝납니다.
 
 ## 코드 / 실제 사용 예
 
@@ -212,9 +212,9 @@ $ dmesg
 
 ### URCU (User-space RCU)
 
-liburcu의 기본 flavor(`urcu.h`를 그대로 include하면 `urcu-memb`)에서는 read-side 구간이 있는 스레드가 `rcu_register_thread()`로 등록해야 합니다(liburcu 0.15.2 `urcu/urcu-memb.h` 40행 "Each thread containing read-side critical sections must be registered"). `rcu_init()`은 같은 헤더에서 "library constructors" 안의 이른 사용을 위한 명시적 초기화로 설명되므로, 일반 `main()`에서는 부르지 않아도 됩니다.
+liburcu의 기본 flavor(`urcu.h`를 그대로 include하면 `urcu-memb`)에서는 read-side 구간이 있는 스레드가 `rcu_register_thread()`로 등록해야 합니다(liburcu 0.15.2 `urcu/urcu-memb.h` 40행 "Each thread containing read-side critical sections must be registered"). 같은 헤더는 `rcu_init()`을 "library constructors" 안에서 RCU를 일찍 쓸 때를 위한 명시적 초기화로 설명하므로, 일반 `main()`에서는 부르지 않아도 됩니다.
 
-아래 프로그램은 reader 4개가 설정 객체를 잡고 10 µs 동안 쓰는 사이, updater가 객체를 1,998번 갈아 끼웁니다. `-DBUG_FREE_EARLY`로 빌드하면 `synchronize_rcu()`를 빼고 바로 `free()`합니다.
+아래 프로그램에서는 reader 4개가 설정 객체를 잡고 10 µs 동안 쓰는 사이 updater가 객체를 1,998번 갈아 끼웁니다. `-DBUG_FREE_EARLY`로 빌드하면 `synchronize_rcu()`를 빼고 바로 `free()`합니다.
 
 ```c
 // urcu_cfg.c — readers use a config object while an updater replaces it
@@ -315,7 +315,7 @@ exit=1
 
 ### Reader 수가 늘 때 — rwlock vs URCU
 
-같은 guest에서 설정 객체 하나를 reader 1~5개가 1초 동안 읽고, writer 하나가 1 ms마다 갱신하는 동안 읽은 횟수를 셌습니다.
+같은 guest에서 설정 객체 하나를 reader 1·2·4·5개가 1초 동안 읽고, writer 하나가 1 ms마다 갱신하는 동안 읽은 횟수를 셌습니다.
 
 ```c
 // readscale.c — read throughput of one shared config under rwlock vs URCU
@@ -434,7 +434,7 @@ rcu    readers=5  3720.4 M reads/s
 
 ### call_rcu (비동기 free)
 
-`synchronize_rcu()`는 sleep하므로 sleep할 수 없는 문맥에서는 쓸 수 없습니다. `call_rcu()`는 "Instead of blocking, it registers a function and argument which are invoked after all ongoing RCU read-side critical sections have completed"이고, block이 금지된 곳이나 update 쪽 성능이 중요한 곳에 쓰라고 문서가 적습니다(`whatisRCU.rst` 232–238행). 위 `rcu_bench.c`의 `config_free_cb()`가 그 형태입니다. 객체 안에 `struct rcu_head`를 두고, callback에서 `container_of()`로 바깥 객체를 찾아 해제합니다. 모듈을 내리기 전에는 `rcu_barrier()`로 남은 callback이 모두 돌았는지 기다려야, callback 코드가 사라진 뒤에 불리는 일이 없습니다.
+`synchronize_rcu()`는 sleep하므로 sleep할 수 없는 문맥에서는 쓸 수 없습니다. 문서는 `call_rcu()`를 "Instead of blocking, it registers a function and argument which are invoked after all ongoing RCU read-side critical sections have completed"라고 설명하고, block이 금지된 곳이나 update 쪽 성능이 중요한 곳에 쓰라고 적습니다(`whatisRCU.rst` 232–238행). 위 `rcu_bench.c`의 `config_free_cb()`가 그 형태입니다. 객체 안에 `struct rcu_head`를 두고, callback에서 `container_of()`로 바깥 객체를 찾아 해제합니다. 모듈을 내리기 전에는 `rcu_barrier()`로 남은 callback이 모두 돌 때까지 기다려야 합니다. 그래야 callback 코드가 사라진 뒤에 불리는 일이 없습니다.
 
 ### List 변경 (rculist.h)
 
