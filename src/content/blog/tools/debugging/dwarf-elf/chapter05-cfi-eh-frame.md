@@ -246,7 +246,46 @@ PC 진행 (`DW_CFA_advance_loc*`)와 *register/CFA 변경*이 섞임.
 | `DW_CFA_remember_state` | 현재 CFI 상태를 스택에 push |
 | `DW_CFA_restore_state` | pop해서 상태 복원 |
 
-§6.4.2.4 "Row State Instructions"의 두 명령은 함수 중간에 에필로그가 있을 때 쓰입니다. 에필로그 앞에서 상태를 저장하고, 에필로그의 규칙 변경을 적은 뒤, 다음 코드 앞에서 저장한 상태로 돌아가는 방식입니다. 컴파일러가 반드시 이 방식을 쓰는 것은 아닙니다. 반환 경로가 둘인 `twoexit.c`를 clang 23.1.5 `-O2`로 컴파일하자 첫 `retq`(0x16) 뒤 0x17에서 `DW_CFA_def_cfa_offset: +16`을 다시 적어 상태를 되돌렸고, remember/restore는 쓰지 않았습니다.
+§6.4.2.4 "Row State Instructions"의 두 명령은 함수 중간에 에필로그가 있을 때 쓰입니다. 에필로그 앞에서 상태를 저장하고, 에필로그의 규칙 변경을 적은 뒤, 다음 코드 앞에서 저장한 상태로 돌아가는 방식입니다. 컴파일러가 반드시 이 방식을 쓰는 것은 아닙니다. 반환 경로가 둘인 `twoexit.c`를 clang 23.1.5 x86-64 `-O2`로 컴파일했습니다.
+
+```c title="twoexit.c"
+int work(int);
+int twoexit(int x) {
+    if (x < 0)
+        return work(-x) + 1;
+    return work(x) * 3;
+}
+```
+
+```text
+$ llvm-objdump -d --no-show-raw-insn twoexit.o
+0000000000000000 <twoexit>:
+       0:      	pushq	%rax
+       1:      	testl	%edi, %edi
+       3:      	js	0xf <twoexit+0xf>
+       5:      	callq	0xa <twoexit+0xa>
+       a:      	leal	(%rax,%rax,2), %eax
+       d:      	popq	%rcx
+       e:      	retq
+       f:      	negl	%edi
+      11:      	callq	0x16 <twoexit+0x16>
+      16:      	incl	%eax
+      18:      	popq	%rcx
+      19:      	retq
+$ llvm-dwarfdump --eh-frame twoexit.o
+...
+  DW_CFA_advance_loc: 1 to 0x1
+  DW_CFA_def_cfa_offset: +16
+  DW_CFA_advance_loc: 13 to 0xe
+  DW_CFA_def_cfa_offset: +8
+  DW_CFA_advance_loc: 1 to 0xf
+  DW_CFA_def_cfa_offset: +16
+  DW_CFA_advance_loc: 10 to 0x19
+  DW_CFA_def_cfa_offset: +8
+...
+```
+
+첫 경로의 `popq %rcx` 뒤(0xe)에서 CFA를 `rsp+8`로 내린 다음, 둘째 경로가 시작하는 0xf에서 `DW_CFA_def_cfa_offset: +16`을 다시 적어 본문 상태로 되돌렸습니다. 바뀐 규칙이 CFA offset 하나뿐이라 그 값만 다시 적은 것이고, remember/restore는 쓰지 않았습니다.
 
 ## CFI 인코딩 — 압축의 트릭
 
@@ -417,7 +456,30 @@ CFI는 컴파일러가 만든 코드에 대해서만 자동으로 생깁니다. 
 | `popq %rbp` | CFA를 `rsp+8`로 되돌림 |
 | `retq` | 함수 끝 |
 
-반대로 frame pointer 없이 `rsp` 기준으로 CFA를 잡는 함수는 `push`·`pop` 하나마다 offset이 바뀝니다. clang 23.1.5 `-O2`의 `early.c`(`push` 셋, `pop` 둘)에서는 `DW_CFA_def_cfa_offset`이 +16, +24, +32로 올라갔다가 에필로그에서 +24, +16, +8로 내려와 행이 7개였습니다.
+반대로 frame pointer 없이 `rsp` 기준으로 CFA를 잡는 함수는 `push`·`pop` 하나마다 offset이 바뀝니다. callee-saved 레지스터 셋을 쓰는 `early.c`를 clang 23.1.5 x86-64 `-O2`로 컴파일했습니다.
+
+```c title="early.c"
+long step(long);
+long early(long a, long b, long c) {
+    long x = step(a);
+    long y = step(b + x);
+    return step(c + y) + x + y;
+}
+```
+
+```text
+$ llvm-dwarfdump --eh-frame early.o
+...
+  0x0: CFA=RSP+8: RIP=[CFA-8]
+  0x2: CFA=RSP+16: RIP=[CFA-8]
+  0x4: CFA=RSP+24: RIP=[CFA-8]
+  0x5: CFA=RSP+32: RBX=[CFA-32], R14=[CFA-24], R15=[CFA-16], RIP=[CFA-8]
+  0x33: CFA=RSP+24: RBX=[CFA-32], R14=[CFA-24], R15=[CFA-16], RIP=[CFA-8]
+  0x35: CFA=RSP+16: RBX=[CFA-32], R14=[CFA-24], R15=[CFA-16], RIP=[CFA-8]
+  0x37: CFA=RSP+8: RBX=[CFA-32], R14=[CFA-24], R15=[CFA-16], RIP=[CFA-8]
+```
+
+`pushq %r15`·`%r14`·`%rbx`(0x0·0x2·0x4) 뒤마다 CFA offset이 +16, +24, +32로 올라가고, 에필로그의 `popq` 셋(0x32·0x33·0x35) 뒤마다 +24, +16, +8로 내려와 행이 7개입니다. 레지스터 저장 위치는 세 번째 `push` 뒤에 한꺼번에 적혔고, `pop` 뒤에도 `DW_CFA_restore` 없이 남았습니다.
 
 ## 자동 도구
 
@@ -466,7 +528,16 @@ JIT은 런타임에 코드를 만들므로 그 코드의 CFI도 런타임에 알
 
 시그널 핸들러는 일반 호출로 들어오지 않습니다. 커널이 사용자 스택에 시그널 프레임(레지스터 저장 영역)을 쌓고, 핸들러가 반환하면 sigreturn 트램펄린으로 돌아가 그 프레임을 복원합니다. unwinder는 이 트램펄린을 알아보고 일반 CFI 대신 저장된 레지스터에서 이전 프레임을 복원해야 합니다.
 
-게스트에서 `raise(SIGUSR1)`로 핸들러에 들어간 뒤 GDB 16.3의 `bt`입니다.
+게스트에서 `raise(SIGUSR1)`로 핸들러에 들어간 뒤 GDB 16.3의 `bt`입니다. `sig.c`는 옵션 없이 `gcc -g`로 빌드했습니다.
+
+```c title="sig.c"
+#include <signal.h>
+#include <stdio.h>
+volatile int hits;
+void handler(int sig) { hits += sig; }
+void work(void) { raise(SIGUSR1); }
+int main(void) { signal(SIGUSR1, handler); work(); return hits != 10; }
+```
 
 ```text
 $ gdb -q -batch -ex 'handle SIGUSR1 nostop noprint pass' -ex 'break handler' -ex run -ex bt ./sig
@@ -475,8 +546,8 @@ $ gdb -q -batch -ex 'handle SIGUSR1 nostop noprint pass' -ex 'break handler' -ex
 #1  <signal handler called>
 #2  0x0000fffff7e78020 in ?? () from /lib/aarch64-linux-gnu/libc.so.6
 #3  0x0000fffff7e26880 [PAC] in raise () from /lib/aarch64-linux-gnu/libc.so.6
-#4  0x0000aaaaaaaa0890 [PAC] in work () at sig.c:5
-#5  0x0000aaaaaaaa06fc in main () at sig.c:6
+#4  0x0000aaaaaaaa082c [PAC] in work () at sig.c:5
+#5  0x0000aaaaaaaa0854 in main () at sig.c:6
 ```
 
 `#1 <signal handler called>`가 시그널 프레임이고, 그 위로 시그널이 난 시점의 libc 내부·`raise`·`work`·`main`이 이어집니다. 3장의 `crash` 예제에서 glibc `backtrace()`도 vdso의 `__kernel_rt_sigreturn`을 한 프레임으로 내놓은 뒤 시그널이 난 코드로 넘어갔습니다.
@@ -506,7 +577,7 @@ $ readelf --debug-dump=frames pac.o
   DW_CFA_AARCH64_negate_ra_state
 ```
 
-`paciasp` 뒤와 `autiasp` 뒤에 한 번씩 상태가 뒤집힙니다. 어셈블리의 `.cfi_window_save`가 AArch64에서 이 opcode로 인코딩된 것입니다. 앞의 시그널 예제에서 GDB가 프레임 옆에 `[PAC]`를 붙인 것도 이 정보로 서명된 반환 주소를 알아본 결과입니다.
+`paciasp` 뒤와 `autiasp` 뒤에 한 번씩 상태가 뒤집힙니다. 어셈블리의 `.cfi_window_save`가 AArch64에서 이 opcode로 인코딩된 것입니다. 앞의 시그널 예제에서 GDB가 `#3`·`#4` 옆에 `[PAC]`를 붙인 것도 서명된 반환 주소를 풀었다는 표시입니다. `#4`의 PC는 libc의 `raise`가 스택에 저장한 반환 주소에서 온 값입니다. `work`는 `-mbranch-protection` 없이 컴파일되어 디스어셈블에 `paciasp`가 없었고, `work`가 저장한 `main`의 반환 주소(`#5`)에는 표시가 붙지 않았습니다.
 
 BTI(Branch Target Identification)는 간접 분기가 도착할 수 있는 명령을 제한하는 기능이라 CFI와는 관계가 없습니다. 대신 ELF에 흔적이 남습니다. 같은 `pac.o`의 `.note.gnu.property`가 `AArch64 feature: BTI, PAC`였고, 1장의 `/usr/bin/ls`도 같은 노트를 갖고 있었습니다.
 
