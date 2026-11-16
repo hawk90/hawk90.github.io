@@ -24,7 +24,7 @@ topics: ["embedded"]
 - 커널 클럭: HSI 64 MHz를 USART1 커널 클럭으로 고르고(RCC `USART16SEL` = 011 `hsi_ker_ck`, RM0433 p.417) USART 프리스케일러는 분주하지 않는다고 둡니다. 아래 계산의 `usart_ker_ck_pres`는 모두 64 MHz입니다.
 - 쪽수·표 번호는 2026-10-11에 위 판과 대조했습니다.
 
-## 프레임: 형식이 허용 오차 표의 행을 정한다
+## 프레임 형식과 허용 오차 표의 행
 
 ![UART 8N1 frame — start + 8 data + stop](/images/blog/modern-recipes/diagrams/part1-04-uart-frame-8n1.svg)
 
@@ -137,7 +137,7 @@ arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -O2 -ffreestanding -DSTM32H743xx \
 
 - 허용 오차는 프레임 형식으로 행을 고릅니다. parity를 붙인 8E1·8O1은 M = 01이라 8N1보다 작습니다.
 - BRR은 반올림해서 구합니다. 그래도 상대편이 정확한 baud로 보내면 양자화 오차가 남고, baud가 높을수록 커집니다(3 Mbaud에서 +1.59%).
-- HSI를 쓸지는 내부 RC(HSI)로 통신해도 되나 절의 판정 표에서 온도 범위와 프레임 형식으로 고릅니다.
+- HSI를 쓸지는 「내부 RC(HSI)로 통신해도 되나」 절의 판정 표에서 온도 범위와 프레임 형식으로 고릅니다.
 - FIFO 임계값으로 인터럽트를 줄이면, 임계값에 못 미치는 버스트 꼬리는 receiver timeout으로 읽습니다.
 
 ## 수정 이력
