@@ -62,7 +62,7 @@ Cloud 경로는 이 합에 업로드, 서버까지의 왕복, 서버 대기열�
 | West US | 130 ms | 3.9배 |
 | East US | 185 ms | 5.6배 |
 
-이 값은 Azure backbone 위 region 사이의 왕복이고, device에서 첫 region까지 가는 접속망 구간은 들어 있지 않습니다. 표가 보여 주는 것은 region 사이 거리만으로 쓰는 시간이고, West US·East US 행은 그 시간만으로 30 fps 간격을 네 배·여섯 배 가까이 넘습니다. 첫 질문의 경계로 보면 이 두 region은 업로드와 서버 처리를 0으로 쳐도 30 fps 제어에 실패하고, Korea South·Japan East는 남은 시간(25.3 ms·3.3 ms) 안에 업로드와 서버 처리가 들어가야 통과합니다.
+이 값은 Azure backbone 위 region 사이의 왕복이고, device에서 첫 region까지 가는 접속망 구간은 들어 있지 않습니다. 표의 값은 region 사이 거리에만 드는 시간이고, West US·East US 행은 그 시간만으로 30 fps 간격을 네 배·여섯 배 가까이 넘습니다. 첫 질문의 경계로 보면 이 두 region은 업로드와 서버 처리를 0으로 쳐도 30 fps 제어에 실패하고, Korea South·Japan East는 남은 시간(25.3 ms·3.3 ms) 안에 업로드와 서버 처리가 들어가야 통과합니다.
 
 업로드 시간은 산술로 나옵니다. 아래 대역폭 표의 1080p NV12 frame 하나는 3,110,400 B = 24,883,200 bit라, uplink 속도별 전송 시간은 다음과 같습니다(속도는 계산용 가정값입니다).
 
@@ -165,7 +165,7 @@ Alif E7 페이지는 두 NPU의 GOPS를 공개하고, NPU clock은 적지 않습
 
 페이지의 core clock을 그대로 넣으면 2 × 256 × 400 MHz = 204.8 GOPS, 2 × 128 × 160 MHz = 40.96 GOPS입니다.
 
-256 MAC NPU의 공개값은 400 MHz에서 모든 MAC이 매 cycle 일하는 값과 맞습니다. 128 MAC NPU의 46 GOPS는 페이지에 적힌 어느 core clock으로도 이 식에서 나오지 않고, 페이지만으로는 그 NPU의 clock이 얼마인지 알 수 없습니다. 확실한 것은 MAC 수 차이가 2배인데 공개 성능 차이는 204 ÷ 46 ≈ 4.4배라는 것입니다. 같은 IP를 MAC 수만 보고 비교하면 이 차이를 놓칩니다.
+256 MAC NPU의 공개값은 400 MHz에서 모든 MAC이 매 cycle 일하는 값과 맞습니다. 128 MAC NPU의 46 GOPS는 페이지에 적힌 어느 core clock으로도 이 식에서 나오지 않고, 페이지만으로는 그 NPU의 clock이 얼마인지 알 수 없습니다. 확실한 점은 MAC 수 차이가 2배인데 공개 성능 차이는 204 ÷ 46 ≈ 4.4배라는 점입니다. 같은 IP를 MAC 수만 보고 비교하면 이 차이를 놓칩니다.
 
 같은 단위로 놓으면 204 GOPS = 0.204 TOPS입니다. Alif 페이지에는 sparse·dense 표기가 없습니다. 이 글은 204가 위 식으로 400 MHz에서 모든 MAC이 매 cycle 일하는 값과 맞는다는 점에서 dense 값으로 *추정*하고 비교합니다. 그 추정으로 Orin Nano 8GB(Super)의 GPU dense INT8 33 TOPS와 견주면 33 ÷ 0.204 ≈ 162배입니다. MCU 등급은 "더 느린 Jetson"이 아니라, 모델 크기와 입력 크기를 그 범위에 맞춰 줄여야 하는 다른 등급입니다.
 
@@ -395,7 +395,7 @@ AGX Orin의 275 TOPS는 sparse이고 GPU·DLA 합이며, dense GPU 칸은 85 TOP
 ## 정리
 
 - 추론을 어디서 할지는 *추론 하나 단위*로, frame 간격·데이터 크기·privacy·오프라인 네 질문으로 정합니다. 출입 카운터는 검출을 edge에, 집계를 cloud에 둡니다. 그다음 데이터량(비압축 카메라 1대 하루 약 16.1 TB 대 결과 약 2.07 MB), 전력, 모델 갱신 경로를 봅니다.
-- 첫 두 질문은 숫자로 가릅니다. 30 fps는 33.3 ms, 60 fps는 16.7 ms가 처리량 예산이고, Azure 공개값으로 Korea Central에서 West US region까지 P50 왕복만 130 ms라 이 거리 하나가 30 fps 간격 약 3.9개입니다. 1080p60 NV12 카메라 1대는 비압축으로 약 1.49 Gbit/s, 8대는 약 1.49 GB/s이고, 비압축 1080p frame 한 장은 1 Gbit/s uplink에서도 약 24.9 ms가 걸립니다.
+- 첫 두 질문은 숫자로 가릅니다. 30 fps는 33.3 ms, 60 fps는 16.7 ms가 처리량 예산이고, Azure 공개값으로 Korea Central에서 West US region까지 P50 왕복만 130 ms라 이 거리만으로 30 fps 간격의 약 3.9배입니다. 1080p60 NV12 카메라 1대는 비압축으로 약 1.49 Gbit/s, 8대는 약 1.49 GB/s이고, 비압축 1080p frame 한 장은 1 Gbit/s uplink에서도 약 24.9 ms가 걸립니다.
 - 끊긴 동안의 결과는 store-and-forward로 쌓고, 버퍼가 차면 버리지 말고 합쳐서 합계를 지킵니다.
 - GDPR 데이터 최소화(제5조 1항 (c))와 기본값에 의한 보호(제25조 2항)는 원본을 밖으로 내보내지 않는 edge 구조와 맞닿아 있습니다. 코드에서는 결과 구조체에 픽셀 필드를 두지 않고, frame dump를 `FRAME_DUMP` 빌드에만 넣고, 출하 산출물에 `frame_dump` symbol이 없는지를 검사합니다.
 - 공개 성능은 sparse·dense와 MAC × clock을 맞춰 읽습니다. Alif E7의 256 MAC Ethos-U55 204 GOPS는 400 MHz에서 모든 MAC이 일하는 값과 맞아서, 이 글은 dense 값으로 추정했습니다(Alif는 sparse·dense를 표기하지 않음). 그 추정으로 Orin Nano 8GB의 dense GPU 33 TOPS와 약 162배 차이입니다. 128 MAC NPU의 46 GOPS는 페이지에 적힌 core clock으로는 같은 식에서 나오지 않습니다.
