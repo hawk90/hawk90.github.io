@@ -34,7 +34,7 @@ VFIO의 격리는 IOMMU가 있어야 성립합니다. IOMMU 없이 VFIO를 쓰�
 
 커널 쪽 driver를 새로 쓰지 않고 v6.12의 `uio_pdrv_genirq`를 썼습니다. 이 driver는 DT 노드의 메모리 영역과 interrupt를 UIO로 열어 주고, interrupt가 오면 `disable_irq_nosync()`로 line을 끈 뒤 사용자 공간이 `/dev/uioX`에 1을 쓰면 다시 켭니다(`Documentation/driver-api/uio-howto.rst:399-404`, `drivers/uio/uio_pdrv_genirq.c:71`, `:77-96`). DT에서 쓰려면 모듈 파라미터 `of_id`에 노드의 `compatible`을 줍니다(같은 문서 411-413행).
 
-QEMU `virt` DTB를 덤프해([7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)) 루트 끝에 아래 노드를 더했습니다. 레지스터 대신 RAM 끝의 `no-map` 예약 영역 4 KiB를 장치 메모리로 쓰고, interrupt는 GIC SPI 100입니다.
+QEMU `virt` DTB를 덤프해([7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)) 루트 끝에 아래 노드를 더했습니다. 레지스터 대신 RAM(0x40000000–0x7fffffff) 마지막 16 MiB 구간 시작인 0x7f000000의 `no-map` 예약 영역 4 KiB를 장치 메모리로 쓰고, interrupt는 GIC SPI 100입니다.
 
 ```dts
 	reserved-memory {
@@ -162,7 +162,7 @@ interrupt 1: event count=2
 - 그 직후 한 번 더 pending을 걸었지만 `poll`은 0이었습니다. `uio_pdrv_genirq`가 첫 interrupt에서 line을 꺼 두었기 때문입니다. `write(fd, &on, 4)`로 다시 켜자 기다리던 interrupt가 바로 들어와 `poll`이 1, count가 2가 됐습니다.
 - `/proc/interrupts`에서 이 line(GIC INTID 132, Level)은 2번 들어왔습니다.
 
-장치 이름은 `uio-demo@7f000000`로 unit address까지 붙었습니다. uio-howto는 기본 이름이 "node's name (without the unit address)"라고 적지만(같은 문서 413-415행), v6.12 `uio_pdrv_genirq.c:133-134`는 `%pfwP`로 이름을 만들고, 그 형식은 unit address를 포함한 노드 이름입니다(`Documentation/core-api/printk-formats.rst:516`의 예 `endpoint@0`). 이름을 정하려면 노드에 `linux,uio-name`을 줍니다(`uio_pdrv_genirq.c:130-131`).
+장치 이름은 `uio-demo@7f000000`로 unit address까지 붙었습니다. uio-howto는 기본 이름이 "node's name (without the unit address)"라고 적지만(같은 문서 413-415행), v6.12 `uio_pdrv_genirq.c:133-134`는 `%pfwP`로 이름을 만들고, 그 형식은 unit address를 포함한 노드 이름입니다(`Documentation/core-api/printk-formats.rst:511`: "the name of the node including an address (if there is one)"). 이름을 정하려면 노드에 `linux,uio-name`을 줍니다(`uio_pdrv_genirq.c:130-131`).
 
 ### 직접 UIO driver를 쓸 때의 interrupt handler
 
@@ -203,7 +203,7 @@ VFIO_GET_API_VERSION = 0 (VFIO_API_VERSION 0)
 CHECK_EXTENSION TYPE1 = 1, TYPE1v2 = 1, NOIOMMU = 0
 ```
 
-API와 type1 IOMMU backend는 지원하지만, 이 VM에는 IOMMU가 없어(QEMU `virt`에 IOMMU를 붙이지 않았음) `/sys/kernel/iommu_groups/`가 비어 있습니다(`0`). VFIO는 IOMMU group이 없는 장치에 대해 no-IOMMU 모드가 아니면 group을 만들지 않으므로(`drivers/vfio/group.c:673-690`의 `-EINVAL`), 이 VM의 장치를 `vfio-pci`에 묶는 단계부터는 실행하지 않았습니다. 이 VM의 PCI 장치는 SSH가 쓰는 virtio-net과 root 디스크인 virtio-blk뿐이라 떼어 낼 수도 없었습니다.
+API와 type1 IOMMU backend는 지원하지만, 이 VM에는 IOMMU가 없어(QEMU `virt`에 IOMMU를 붙이지 않았음) `/sys/kernel/iommu_groups/`가 비어 있습니다(`0`). VFIO는 IOMMU group이 없는 장치에 대해 no-IOMMU 모드가 아니면 group을 만들지 않으므로(`drivers/vfio/group.c:673-690`의 `-EINVAL`), 이 VM의 장치를 `vfio-pci`에 묶는 단계부터는 실행하지 않았습니다. 이 VM의 PCI 장치는 host bridge를 빼면 SSH가 쓰는 virtio-net과 root 디스크인 virtio-blk뿐이라 떼어 낼 수도 없었습니다. `NOIOMMU = 0`인 것은 이 Debian 커널이 `CONFIG_VFIO_NOIOMMU`를 끈 채 빌드되어(`/boot/config-6.12.116+deb13-arm64`) `enable_unsafe_noiommu_mode` 파라미터 자체가 없기 때문입니다.
 
 ### VFIO 사용 순서 (커널 문서의 예)
 
@@ -265,7 +265,7 @@ HW_REG_DMA_ADDR = (uint32_t)(uintptr_t)buf;   /* virtual address, not a bus addr
 
 > ⚠️ IOMMU 없이 VFIO
 
-위 VM처럼 IOMMU group이 하나도 없으면 VFIO는 장치를 받을 수 없습니다. `enable_unsafe_noiommu_mode`(`drivers/vfio/vfio_main.c:58-60`)로 강제하면 격리 없이 동작하고 커널에 taint가 남습니다. Arm SoC라면 SMMU가 DT에 기술되고 그 driver가 켜져 있어야 IOMMU group이 생깁니다.
+위 VM처럼 IOMMU group이 하나도 없으면 VFIO는 장치를 받을 수 없습니다. `CONFIG_VFIO_NOIOMMU=y` 커널에서 `enable_unsafe_noiommu_mode`(`drivers/vfio/vfio_main.c:58-60`)로 강제하면 격리 없이 동작하고 커널에 taint가 남습니다. Arm SoC라면 SMMU가 DT에 기술되고 그 driver가 켜져 있어야 IOMMU group이 생깁니다.
 
 > ⚠️ `uio_pdrv_genirq`에서 interrupt를 다시 켜지 않음
 
