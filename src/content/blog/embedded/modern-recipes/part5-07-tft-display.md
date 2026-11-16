@@ -59,7 +59,7 @@ topics: ["embedded"]
 
 RAM 크기는 CMSIS 템플릿 링커 파일의 RAM 영역에서 읽었습니다.
 
-- **STM32F407**: RAM 영역 0x20000000~0x2001FFFF(131,072 B)와 CCMRAM 영역 0x10000000~0x1000FFFF(65,536 B) ([`stm32f407xx_flash.icf`](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Source/Templates/iar/linker/stm32f407xx_flash.icf#L9-L12)). 240×320 한 장(153,600 B)도 어느 영역에 들어가지 않습니다. 이 MCU로 ILI9341을 쓰는 것은 화면을 패널 GRAM에 두기 때문입니다.
+- **STM32F407**: RAM 영역 0x20000000~0x2001FFFF(131,072 B)와 CCMRAM 영역 0x10000000~0x1000FFFF(65,536 B) ([`stm32f407xx_flash.icf`](https://github.com/STMicroelectronics/cmsis-device-f4/blob/v2.6.9/Source/Templates/iar/linker/stm32f407xx_flash.icf#L9-L12)). 240×320 한 장(153,600 B)도 두 영역 어디에도 들어가지 않습니다. 이 MCU로 ILI9341을 쓰는 것은 화면을 패널 GRAM에 두기 때문입니다.
 - **STM32F746**: RAM 영역 0x20000000~0x2004FFFF, 327,680 B (DTCM 64 KiB + SRAM1 240 KiB + SRAM2 16 KiB, [`stm32f746xx_flash.icf`](https://github.com/STMicroelectronics/cmsis-device-f7/blob/v1.2.10/Source/Templates/iar/linker/stm32f746xx_flash.icf#L9-L10), [base 주석](https://github.com/STMicroelectronics/cmsis-device-f7/blob/v1.2.10/Include/stm32f746xx.h#L1131-L1138)). 480×272 두 장(522,240 B)은 이 합보다 크므로 이중 버퍼는 외부 SDRAM에 둡니다. BSP는 framebuffer를 SDRAM 시작 주소 0xC0000000에 두고, SDRAM 크기를 0x800000 B(8 MiB)로 적습니다([`stm32746g_discovery_lcd.h`](https://github.com/STMicroelectronics/32f746gdiscovery-bsp/blob/v2.1.1/stm32746g_discovery_lcd.h#L99), [`stm32746g_discovery_sdram.h`](https://github.com/STMicroelectronics/32f746gdiscovery-bsp/blob/v2.1.1/stm32746g_discovery_sdram.h#L56-L57)).
 
 ### Tearing과 이중 버퍼
@@ -141,7 +141,7 @@ void tft_fill(uint16_t color) { tft_fill_rect(0, 0, 239, 319, color); }
 
 `tft_pixel()`은 픽셀 2 B마다 창 11 B를 다시 보내므로 n 픽셀에 13n B, `tft_fill_rect()`는 11 + 2n B입니다. 바이트 비는 13n / (11 + 2n)으로 넓을수록 13/2 = 6.5에 다가가고 넘지 않습니다(100×20 영역 6.48배, 화면 전체 6.4995배). 점 몇 개가 아니면 창을 한 번 열고 이어 보내야 합니다. 반대로 영역을 좁히는 비용은 창마다 11 B뿐이라, SPI 패널에서는 바뀐 사각형만 `tft_fill_rect()`처럼 창으로 보내는 것이 갱신 시간을 줄이는 방법입니다. 표의 값은 SCL 비트 시간만 센 하한이고, `spi_xfer8()`가 바이트마다 하는 RXNE 대기와 명령마다 CS를 올리고 내리는 시간이 더해집니다. [4-10 DMA](/blog/embedded/modern-recipes/part4-10-dma-basics)로 옮겨도 SCL 비트 시간은 그대로이므로 하한은 줄지 않습니다.
 
-`twc` 100 ns가 허용하는 10 MHz에서도 화면 전체의 픽셀 데이터만 1,228,800 bit / 10 MHz = 122.88 ms입니다. 4-08의 분주로는 이 SCL을 낼 수 없고, 데이터시트 경계일 뿐입니다.
+`twc` 100 ns가 허용하는 10 MHz에서도 화면 전체의 픽셀 데이터만 1,228,800 bit / 10 MHz = 122.88 ms입니다. 4-08의 분주로는 이 SCL을 낼 수 없으므로, 이 값은 데이터시트가 정한 경계일 뿐입니다.
 
 ### 2. LTDC — STM32F746G-DISCO, RK043FN48H
 
