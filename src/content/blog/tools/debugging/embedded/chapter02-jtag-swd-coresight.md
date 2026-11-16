@@ -10,314 +10,301 @@ draft: false
 topics: ["tools", "tools/debugging"]
 ---
 
-RSP는 *위쪽 프로토콜*. 아래에서는 실제로 *전선 다섯 가닥*(JTAG) 또는 *두 가닥*(SWD)이 칩 안의 디버그 회로를 두드립니다. 이 장은 그 전기·논리 계층을 다룹니다 — TAP 상태 머신, SWD 패킷 형식, 그리고 *칩 안에 무엇이 들어 있나*의 표준인 ARM **CoreSight**.
+RSP는 *위쪽 프로토콜*입니다. 그 아래에서는 실제로 전선 네다섯 가닥(JTAG) 또는 두 가닥(SWD)이 칩 안의 디버그 회로를 두드립니다. 이 장은 그 논리 계층을 다룹니다. TAP 상태 머신, SWD 패킷 형식, 그리고 칩 안에 무엇이 들어 있는지를 정한 ARM **CoreSight** 블록입니다.
 
-한 번 이걸 이해하고 나면 `(gdb) break main`이 어떤 비트 시퀀스로 풀려 칩의 어떤 레지스터를 건드리는지 *전부* 추적할 수 있습니다.
+이걸 이해하고 나면 1장에서 본 `Z1,8000128,2` 한 줄이 어떤 레지스터 쓰기로 바뀌는지 따라갈 수 있습니다.
+
+## 이 장의 근거
+
+이 장은 하드웨어 프로브와 보드 없이 썼습니다. 그래서 수치와 비트 배치는 모두 1차 문서에서 가져왔고, 직접 돌린 것은 QEMU에서 읽은 레지스터 값과 작은 디코딩 검사뿐입니다.
+
+| 근거 | 쓴 곳 |
+|------|-------|
+| Arm IHI 0031G, *Arm Debug Interface Architecture Specification ADIv5.0 to ADIv5.2* | JTAG-DP·SW-DP·DP 레지스터·MEM-AP·SWJ 전환 |
+| Arm DDI 0439B, *Cortex-M4 Technical Reference Manual* (r0p0) | FPB·DWT 비교기 수, ROM table 주소 |
+| CMSIS 5.9.0 `core_cm4.h` | 레지스터 주소와 비트 위치 |
+| OpenOCD 소스(2026-11 main)와 `doc/openocd.texi` | 로그 형식·명령 문법 |
+| QEMU 11.1.3 `netduinoplus2` + GDB 16.3 | 에뮬레이터가 무엇을 흉내 내지 *않는지* |
 
 ## 왜 알아야 하나
 
-- 프로브가 안 붙을 때(`init mode failed`, `target voltage 0.000V`) 어디가 끊겼는지 추적.
-- 새 칩이 어떤 디버그 자원을 가졌는지(BP 개수, watchpoint 개수, ETM 유무) 파악.
-- 자체 보드 설계 시 SWD/JTAG 핀 배치 결정.
-- *칩 회사*의 디버그 매뉴얼을 읽을 수 있게 됩니다.
+- 프로브가 붙지 않을 때 어느 계층에서 끊겼는지 나눌 수 있습니다. IDCODE가 안 읽히는지, DP는 되는데 AP 접근이 실패하는지, 코어 halt만 안 되는지가 서로 다른 문제입니다.
+- 새 칩이 어떤 디버그 자원(BP·watchpoint 개수, ETM 유무)을 가졌는지 레지스터로 직접 확인할 수 있습니다.
+- 칩 벤더의 디버그 장(章)과 Arm 명세를 읽을 수 있게 됩니다.
 
 ## JTAG — IEEE 1149.1
 
-1990년 표준화. *원래* 목적은 PCB 제조 후 핀 솔더링 검증을 위한 *boundary scan* — 칩의 입력 핀에 패턴을 넣고 출력에서 받는 식. 디버그·플래시 프로그래밍은 *나중에* 흡수된 부가 기능.
+JTAG는 원래 *boundary scan*, 즉 PCB 조립 뒤 칩 핀의 연결을 검사하려고 만든 IEEE 1149.1 표준입니다. Arm은 같은 TAP 구조를 디버그 포트(JTAG-DP)로도 씁니다.
 
 ### 핀
+
+ADIv5 B3.2(Table B3-1)가 정한 JTAG-DP 신호입니다.
 
 | 핀 | 방향 | 의미 |
 |---|------|------|
 | TCK | 입력 | 테스트 클럭 (디버거가 공급) |
-| TMS | 입력 | 모드 선택 — TAP 상태 천이 결정 |
-| TDI | 입력 | 데이터 입력 (시프트인) |
-| TDO | 출력 | 데이터 출력 (시프트아웃) |
-| TRST | 입력 | 비동기 리셋 (옵션) |
+| TMS | 입력 | 모드 선택, TAP 상태 천이 결정 |
+| TDI | 입력 | 데이터 입력 |
+| TDO | 출력 | 데이터 출력 |
+| TRST | 입력, *Optional* | TAP 비동기 리셋 |
 
-5핀 중 TRST는 옵션. 그래서 표 헤더에서는 종종 *4핀*이라고도 합니다 (TRST 생략 시 TAP-Reset state는 TMS=1을 5클럭 연속으로 두면 진입).
+TRST가 없어도 리셋은 됩니다. ADIv5 B3.2.3은 *TMS를 HIGH로 둔 채 TCK 다섯 사이클*이면 어느 상태에서든 Test-Logic-Reset으로 간다고 정합니다. 그래서 TRST 없는 4선 JTAG가 흔합니다.
 
 ### TAP — Test Access Port
 
-핵심은 16-상태 유한 상태 머신. TMS 값에 따라 천이.
+TAP의 핵심은 TMS 값으로 천이하는 상태 머신입니다.
 
 ![JTAG TAP 상태 머신](/images/blog/tools/diagrams/jtag-tap-state-machine.svg)
 
-이 상태 머신에서 *명령 레지스터(IR)*와 *데이터 레지스터(DR)*를 *시프트*해서 칩의 디버그 자원을 조작합니다.
-
-흐름 한 예 — IR에 `EXTEST` 명령(0x00)을 넣기.
+이 상태 머신에서 *명령 레지스터(IR)*와 *데이터 레지스터(DR)*를 시프트해 디버그 자원을 조작합니다. 아래 그림은 리셋 후 4비트 IR에 값을 시프트하는 TMS 순서입니다. 예시 값 0b0000은 ADIv5 Table B3-4가 boundary scan TAP의 EXTEST로 권장하는 인코딩입니다.
 
 ![JTAG TAP TMS 시퀀스: TMS=1 다섯 번으로 Reset, Run-Test/Idle에서 Select-DR-Scan·Select-IR-Scan·Capture-IR를 거쳐 Shift-IR에서 TDI 4비트를 시프트하고 Exit1-IR·Update-IR 뒤 Run-Test/Idle로 복귀](/images/blog/debugging/embedded/diagrams/ch02-jtag-tap-sequence.svg)
 
-복잡해 보이지만 *디버거 펌웨어*가 알아서 합니다. 사용자는 신경 안 써도 됩니다 — 다만 *왜 5핀이 필요하고 어떤 신호가 어떤 역할인지*를 아는 것이 트러블슈팅에 결정적.
+이 순서는 프로브 펌웨어가 만들어 냅니다. 다만 어느 핀이 어느 역할인지 알아야 오실로스코프 파형이나 로그를 읽을 수 있습니다.
 
-### IR 명령
+### IR 명령 — Arm JTAG-DP
 
-| IR 코드 (예) | 명령 | 의미 |
-|-------------|------|------|
-| `0x00` | `EXTEST` | boundary scan: 외부 핀 제어 |
-| `0x01` | `SAMPLE/PRELOAD` | 핀 상태 캡처 |
-| `0x02` | `INTEST` | 내부 로직 테스트 |
-| `0x0e` | `IDCODE` | 32-bit 칩 식별자 |
-| `0x0f` | `BYPASS` | 1-bit 통과 (체인 우회) |
-| 칩별 | `DEBUG` | 디버그 자원 접근 (ARM의 SCAN_N+INTEST 등) |
+Arm JTAG-DP의 IR 명령은 ADIv5 Table B3-3에 있습니다. 디버그는 *DPACC/APACC* 두 명령으로 DP와 AP 레지스터에 접근하는 방식입니다.
 
-`IDCODE`가 매우 유용. 디버거가 *어떤 칩인지* 처음으로 알아내는 명령.
+| 4비트 IR | 명령 | DR 길이 | 용도 |
+|---------|------|--------|------|
+| `0b1000` | ABORT | 35 | 진행 중인 AP 트랜잭션 중단 |
+| `0b1010` | DPACC | 35 | DP 레지스터 접근 |
+| `0b1011` | APACC | 35 | AP 레지스터 접근 |
+| `0b1110` | IDCODE | 32 | TAP 식별 |
+| `0b1111` | BYPASS | 1 | 체인 우회 |
+| `0b0xxx` | IMPLEMENTATION DEFINED | — | boundary scan 등 (Table B3-4) |
 
-```text
-JTAG ID code (32-bit):
-[31:28] Version
-[27:12] Part Number
-[11:1]  Manufacturer ID (JEDEC)
-[0]     Always 1
+구현하지 않은 IR 값은 BYPASS를 선택합니다. Test-Logic-Reset 상태에서는 IDCODE가 현재 명령이 되므로, 디버거는 리셋 직후 DR을 시프트하는 것만으로 IDCODE를 읽을 수 있습니다(B3.4.4).
 
-예: 0x4ba00477 = ARM Cortex-M4 (다양한 베리언트)
-    0x06433041 = STM32F4 series
-```
+IDCODE 형식도 B3.4.4가 정합니다.
 
-```bash
-$ openocd -f openocd.cfg
-Info : JTAG tap: stm32f4x.cpu tap/device found: 0x4ba00477
-       (mfg: 0x23b (ARM Ltd), part: 0xba00, ver: 0x4)
-```
+| 비트 | 필드 | 의미 |
+|------|------|------|
+| [31:28] | VERSION | 구현 정의 |
+| [27:12] | PARTNO | DP TAP 부품 번호 |
+| [11:1] | DESIGNER | JEP106 제조사 코드, Arm은 0x23B |
+| [0] | — | 항상 1 |
 
-`mfg: 0x23b`이 ARM, `part: 0xba00`이 Cortex-M의 표준 ID. 다른 IDCODE면 *prober가 다른 칩에 연결*된 것.
+OpenOCD는 스캔한 IDCODE를 이 필드로 쪼개 찍습니다. `src/jtag/core.c`의 형식 문자열은 `"JTAG tap: %s %16.16s: 0x%08x (mfg: 0x%3.3x (%s), part: 0x%4.4x, ver: 0x%1.1x)"`입니다. OpenOCD의 `tcl/target/stm32f4x.cfg`는 STM32F4의 JTAG 모드 CPU TAP 기대값으로 `0x4ba00477`(SWD 모드는 `0x2ba01477`)을 적고, 주석으로 "RM0090 38.6.3, Cortex-M4 r0p1"을 출처로 남겼습니다. 0x4ba00477을 위 표로 나누면 VERSION 0x4, PARTNO 0xBA00, DESIGNER 0x23B입니다. 이 값은 *Arm JTAG-DP*의 ID이지 STM32 칩 자체의 ID가 아닙니다. 그래서 같은 cfg는 JTAG 모드에서 boundary scan TAP(`bs`, `-irlen 5`)을 따로 선언합니다.
 
 ### Daisy chain
 
-여러 칩을 한 JTAG 체인에 묶을 수 있습니다.
-
-```text
-TDI → [Chip A] → [Chip B] → [Chip C] → TDO
-```
-
-A와 C가 BYPASS면 A·C는 1-bit, B가 실제 명령. 디버거가 IR 명령 시퀀스를 *체인 전체 길이*로 보내야 하고, *내가 조작하는 칩이 몇 번째인지* 알아야 합니다.
+여러 TAP을 한 체인에 묶으면 TDI에서 TDO까지 IR이 이어 붙습니다. 디버거는 체인 전체의 IR 길이 합을 알아야 원하는 TAP에 명령을 넣을 수 있고, 나머지 TAP은 BYPASS(1비트)로 둡니다. OpenOCD에서는 TAP마다 IR 길이를 선언합니다.
 
 ```tcl
-(openocd)
-jtag newtap stm32f4x cpu -irlen 4 -expected-id 0x4ba00477
+swj_newdap $_CHIPNAME cpu -irlen 4 -ircapture 0x1 -irmask 0xf -expected-id $_CPUTAPID
+jtag newtap $_CHIPNAME bs -irlen 5
 ```
 
-`-irlen 4`가 그 칩의 IR 길이. 잘못 적으면 시프트가 어긋나 모든 명령이 깨집니다.
-
-체인 디버깅에서 자주 만나는 `Invalid ACK` 오류는 보통 *IR 길이가 틀린* 경우.
+위 두 줄은 `stm32f4x.cfg`에서 그대로 옮긴 것입니다. `-irlen`이 실제와 다르면 IR 시프트가 어긋납니다. OpenOCD JTAG-DP 코드(`src/target/adi_v5_jtag.c`)에는 이럴 때 볼 수 있는 `Invalid ACK (%1x) in DAP response` 오류가 있지만, 이 메시지는 DAP 응답의 ACK가 기대값이 아니라는 뜻일 뿐 원인을 IR 길이로 특정하지는 않습니다.
 
 ## SWD — Serial Wire Debug
 
-ARM이 핀 수를 줄이기 위해 만든 *2핀* 대체. JTAG 5핀 → SWD 2핀(SWCLK/SWDIO) + 옵션 1핀(SWO).
+SWD는 Arm이 정의한 2선 디버그 프로토콜입니다. SWCLK와 양방향 SWDIO를 쓰고, trace용 SWO는 별도 핀입니다. SWJ-DP는 JTAG와 SWD 핀을 공유하며(TMS↔SWDIO, TCK↔SWCLK), ADIv5는 SWD 동작 중 TDI·TDO·nTRST 핀을 다른 용도로 쓸 수 있다고 적고 있습니다.
 
-| 핀 | 의미 |
-|---|------|
-| SWCLK | 클럭 (디버거 공급) |
-| SWDIO | 양방향 데이터 (반이중) |
-| SWO | (옵션) 1핀 trace 출력 |
+### JTAG → SWD 전환
 
-같은 핀(SWCLK/SWDIO)이 *JTAG mode/SWD mode*로 양립합니다 — STM32 같은 칩은 처음에 JTAG 모드로 시작했다가 *어떤 패턴*을 받으면 SWD로 전환.
+ADIv5 B5.2.2가 정한 전환 순서는 세 단계입니다.
 
-**JTAG → SWD 전환 시퀀스 (16-bit on SWDIO):**
+1. SWDIOTMS를 HIGH로 두고 SWCLKTCK를 50사이클 이상 보냅니다(JTAG를 Test-Logic-Reset으로).
+2. 16비트 JTAG-to-SWD 선택 시퀀스를 보냅니다.
+3. 다시 HIGH로 50사이클 이상 보냅니다(SWD line reset).
 
-- 시간 순서를 MSB-first 문자열로 적으면 0x79E7, LSB-first로 보내는 16비트 값은 0xE79E입니다. CMSIS-DAP의 SWJ sequence는 LSB부터 보냅니다. line reset과 전환 순서도 함께 따라야 합니다.
-
-SWD → JTAG도 비슷한 매직 시퀀스 존재.
+선택 시퀀스는 MSB-first로 `0b0111 1001 1110 0111`이고, 명세는 이를 *MSB first로 보내는 0x79E7* 또는 *LSB first로 보내는 0xE79E*로 표기할 수 있다고 적습니다. [CMSIS-DAP의 DAP_SWJ_Sequence](https://arm-software.github.io/CMSIS-DAP/latest/group__DAP__SWJ__Sequence.html) 명령은 문서에 "LSB is transmitted first"라고 적혀 있으므로 0xE79E 표기를 씁니다.
 
 ### SWD 패킷 형식
 
-JTAG의 상태 머신과 달리 *패킷 기반*.
+SWD는 JTAG의 상태 머신 대신 *패킷*을 씁니다.
 
 ![SWD 패킷 구조](/images/blog/tools/diagrams/swd-packet-format.svg)
 
-- `APnDP` — Access Port(1)인가 Debug Port(0)인가?
-- `RnW` — read(1) or write(0)?
-- `A2..A3` — 4바이트 정렬 주소 비트.
-- `Parity` — request의 APnDP+RnW+A2+A3 패리티.
+- `Start` — 항상 1.
+- `APnDP` — AP 접근(1)인지 DP 접근(0)인지.
+- `RnW` — 읽기(1) 또는 쓰기(0).
+- `A[2:3]` — 레지스터 주소 비트 2·3.
+- `Parity` — APnDP·RnW·A[2:3]의 패리티.
+- `Stop`(0), `Park`(1) 뒤 turnaround를 거쳐 타깃이 3비트 ACK를 보냅니다.
+
+ACK는 OK `0b001`, WAIT `0b010`, FAULT `0b100`입니다. 명세는 OK 응답이 와이어 위에서 *1, 0, 0 순서*로 나타난다고 적습니다(B4.1.5 Bit order). 그림의 표기는 비트 값 순서이고, 실제 전송은 LSB부터라는 점을 같이 봐야 로직 분석기 캡처와 맞습니다.
 
 ### DP — Debug Port 레지스터
 
-**주소 A[3:2] (ADIv5 DP bank0 예):**
+DPv1의 주소 맵은 ADIv5 B2.1(Table B2-4)에 있습니다.
 
-- 00  IDCODE (read) / ABORT (write)
-- 01  CTRL/STAT  (control + status)
-- 10  SELECT     (어느 AP의 어느 뱅크?)
-- 11  RDBUFF (read) / 미사용 (write)
+| A[3:2] | 읽기 | 쓰기 |
+|--------|------|------|
+| `0x0` | DPIDR | ABORT (SW-DP) |
+| `0x4` | CTRL/STAT (DPBANKSEL=0) | CTRL/STAT |
+| `0x8` | RESEND (SW-DP) | SELECT |
+| `0xC` | RDBUFF | — |
 
-ADIv5의 SELECT는 APSEL과 APBANKSEL 등을 지정합니다. APBANKSEL은 A[7:4], request의 A[3:2]는 뱅크 안 네 개의 32비트 레지스터를 고르므로 뱅크 하나는16바이트입니다. ADIv6의 AP 주소 모델까지 이 규칙으로 일반화하지 않습니다.
+SELECT는 어느 AP의 어느 뱅크를 볼지 정합니다. ADIv5 B2.2.9 기준으로 APSEL이 [31:24], APBANKSEL이 [7:4]입니다. SWD 요청의 A[3:2]는 뱅크 안 네 개의 32비트 레지스터 중 하나를 고르므로, 뱅크 하나는 16바이트입니다. ADIv6는 AP 주소 모델이 다르므로 이 규칙을 그대로 적용하지 않습니다.
 
-### AP — Access Port 레지스터
+### AP — Access Port
 
-AP 종류:
-
-- **MEM-AP**(AHB-AP, AXI-AP, APB-AP) — 칩 내부 메모리 버스 접근. CPU와 같은 주소 공간으로 메모리·MMIO를 읽고 씁니다.
-- **JTAG-AP** — JTAG 명령을 SWD로 터널링 (드물게 사용).
-
-MEM-AP의 주요 레지스터:
+AP 가운데 디버그에서 가장 많이 쓰는 것은 **MEM-AP**입니다. MEM-AP는 칩 내부 버스에 마스터로 붙어, CPU와 같은 주소 공간의 메모리와 MMIO를 읽고 씁니다. Cortex-M4 TRM 8.2가 다루는 AHB-AP가 그 예입니다.
 
 | 오프셋 | 이름 | 역할 |
 |--------|------|------|
-| 0x00 | CSW (Control/Status Word) | 접근 크기, 자동 증분 |
-| 0x04 | TAR (Transfer Address) | 다음 접근 주소 |
-| 0x0c | DRW (Data R/W) | 데이터 |
-| 0xfc | IDR | AP 식별자 |
+| 0x00 | CSW | 접근 크기, 자동 증가 |
+| 0x04 | TAR | 접근할 주소 |
+| 0x0C | DRW | 데이터 |
+| 0xFC | IDR | AP 식별자 |
 
-SWD 패킷 한 단위로 *32비트만* 전송. 그러므로 *임의 주소의 한 워드*를 읽으려면:
+임의 주소의 한 워드를 읽는 순서는 다음과 같습니다.
 
-1. DP-SELECT로 *AP*와 *뱅크* 선택.
-2. AP-CSW로 *32-bit access* 설정 (보통 디버거가 이미 해 둠).
-3. AP-TAR에 주소 쓰기.
-4. AP-DRW 읽기를 요청합니다. ADIv5의 AP 읽기는 posted이므로 유효한 결과는 다음 AP 읽기 응답 또는 DP RDBUFF에서 회수해야 합니다.
+1. DP SELECT로 AP와 뱅크를 고릅니다.
+2. CSW로 32비트 접근을 설정합니다.
+3. TAR에 주소를 씁니다.
+4. DRW를 읽습니다.
 
-한 SWD 전송은 request8비트·turnaround·ACK3비트·데이터32비트·parity 등을 포함합니다. 최소 네 번의 전송 전체를 30~40클럭으로 볼 수 없으며 WAIT/FAULT·idle·posted read를 포함한 지연은 실제 캡처로 확인합니다.
+여기서 함정이 하나 있습니다. ADIv5는 SW-DP에서 *AP 읽기가 posted*라서 결과가 *다음 전송*에서 돌아온다고 정합니다(B4.2). 그래서 마지막 DRW 값은 다음 AP 읽기 응답이나 DP RDBUFF 읽기로 회수합니다. 이 왕복 하나하나가 request 8비트, turnaround, ACK 3비트, 데이터 32비트와 패리티로 이뤄지므로, 디버거의 메모리 읽기가 왜 버스 속도보다 훨씬 느린지가 여기서 보입니다.
 
-연속 읽기는 CSW의 *AddrInc* 비트로 가속 — TAR을 한 번 쓰고 DRW를 연속 읽기, AP가 자동으로 주소 증분.
+연속 주소를 읽을 때는 CSW의 AddrInc를 켜서 TAR를 한 번만 쓰고 DRW를 반복해 읽습니다.
 
 ## SWO — Trace 출력
 
-SWD의 3핀 (옵션). MCU에서 *UART처럼* trace 패킷을 송출. 디버거가 받아 PC로 전달.
+SWO는 칩이 trace 패킷을 UART나 Manchester 방식으로 내보내는 한 선짜리 출력입니다. Cortex-M4에서는 TPIU가 이 출력을 맡습니다. TPIU의 ACPR 레지스터는 PRESCALER[12:0] 필드를 갖고, TRM은 "TRACECLKIN의 분주비는 Prescaler + 1"이라고 적습니다. 따라서 SWO 비트율은 TRACECLKIN을 (PRESCALER + 1)로 나눈 값이고, 받는 쪽이 이 비트율을 맞추려면 TRACECLKIN 주파수를 알아야 합니다.
 
-baud는 *코어 클럭 / divider*. 일반적으로 2 MBaud. 디버거 펌웨어가 *코어 클럭*을 알아야 정확한 디코딩 가능 — 그래서 `tpiu config <core_clock_hz> <swo_baud>` 같은 명령으로 코어 클럭을 통보합니다.
+OpenOCD 0.12 이후에는 `tpiu create`·`<이름> configure`·`<이름> enable`이 정식 명령이고, 예전 `tpiu config`는 `DEPRECATED 'tpiu config' command:` 메시지를 남기며 새 명령으로 변환됩니다(`src/target/arm_tpiu_swo.c`). OpenOCD 매뉴얼의 STM32L152 예는 다음과 같습니다.
 
 ```bash
-(openocd telnet) tpiu config internal /tmp/swo.log uart off 168000000 2000000
+openocd -f interface/stlink.cfg \
+-c "transport select swd" \
+-f target/stm32l1.cfg \
+-c "stm32l1.tpiu configure -protocol uart" \
+-c "stm32l1.tpiu configure -traceclk 24000000 -pin-freq 12000000" \
+-c "stm32l1.tpiu enable"
 ```
 
-코어 클럭이 *실제와 다르면* trace가 garbled. 흔한 함정.
+매뉴얼은 `-traceclk`가 필수이며 Cortex-M3/M4 내장 TPIU에서는 보통 HCLK와 같다고 설명하고, `-pin-freq`를 생략하면 어댑터 드라이버가 지원하는 최대 속도를 고른다고 적습니다. `-traceclk`가 실제 클럭과 다르면 수신 쪽 비트율이 어긋나 trace가 깨집니다.
 
 ## ARM CoreSight — 디버그 IP 묶음
 
-JTAG/SWD가 *물리 인터페이스*라면 그 위에서 실제로 일하는 게 칩 안의 **CoreSight**입니다. ARM이 표준화한 디버그·trace IP 블록 카탈로그.
+JTAG/SWD가 *물리 인터페이스*라면, 그 위에서 실제로 일하는 것이 칩 안의 CoreSight 컴포넌트입니다.
 
 ![ARM CoreSight 블록 구조](/images/blog/tools/diagrams/coresight-block.svg)
 
-| 블록 | 메모리 위치 (Cortex-M) | 역할 |
+Cortex-M4에서 각 블록의 주소는 다음과 같습니다. 주소는 CMSIS `core_cm4.h`의 `*_BASE` 정의와 Cortex-M4 TRM Table 8-2(ROM table)에서 가져왔습니다.
+
+| 블록 | 주소 (Cortex-M4) | 역할 |
 |------|--------|------|
-| DAP | (전용 SWD/JTAG 인터페이스) | 외부 ↔ 내부 버스 게이트웨이 |
-| **SCB** | `0xE000ED00` | System Control Block; DHCSR은 별도의 CoreDebug/DCB `0xE000EDF0` |
-| **DWT** | `0xE0001000` | Data Watchpoint and Trace — 4 워치포인트, 사이클 카운터 |
-| **FPB** | `0xE0002000` | Flash Patch and Breakpoint — 6 hardware BP |
-| **ITM** | `0xE0000000` | Instrumentation Trace Macrocell — software trace |
-| **TPIU** | `0xE0040000` | Trace Port Interface Unit — SWO 출력 |
-| **ETM** | `0xE0041000` | Embedded Trace Macrocell — 명령 trace (옵션) |
+| SCB | `0xE000ED00` | System Control Block |
+| CoreDebug (DHCSR 등) | `0xE000EDF0` | halt·step·레지스터 접근 |
+| DWT | `0xE0001000` | watchpoint 비교기, 사이클 카운터 |
+| FPB | `0xE0002000` | 하드웨어 BP 비교기 |
+| ITM | `0xE0000000` | 소프트웨어 trace (stimulus port) |
+| TPIU | `0xE0040000` | SWO / trace port 출력 |
+| ETM | `0xE0041000` | 명령 trace (구현 선택) |
 
-모두 *메모리 매핑*. 즉 CPU도 이 레지스터를 *직접 쓸 수 있고*, 디버거도 SWD를 통해 같은 주소를 두드릴 수 있습니다. 디버거 ↔ CPU의 *경쟁* 가능 — 보통은 디버거가 CPU를 halt시킨 뒤 접근.
+TRM은 ROM table 항목이 구현에 따라 달라진다고 적습니다. 예를 들어 TPIU가 없으면 해당 항목이 `0xFFF41002`, ETM이 없으면 `0xFFF42002`로 읽혀 "없음"을 알립니다. 디버거는 이 ROM table을 따라가며 무엇이 있는지 확인합니다.
 
-## SCB / DHCSR — halt 메커니즘
+모두 메모리 매핑 레지스터이므로 CPU 자신도, 디버거도(MEM-AP를 통해) 같은 주소를 읽고 씁니다.
 
-`break main`이 어떻게 일어나나? 답은 DHCSR(Debug Halting Control and Status Register, 주소 `0xE000EDF0`).
+### QEMU는 이 회로를 흉내 내지 않는다
 
-**DHCSR:**
+QEMU `netduinoplus2`(Cortex-M4)를 `-s -S`로 띄워 GDB로 이 주소들을 읽어 보면 결과가 분명합니다.
 
-- [31:16] DBGKEY (= 0xA05F to write)
-- [25]    S_RESET_ST  (reset since last read)
-- [24]    S_RETIRE_ST (instruction retired)
-- [19]    S_LOCKUP
-- [18]    S_SLEEP
-- [17]    S_HALT     ← 1이면 정지
-- [16]    S_REGRDY
-- [5] C_SNAPSTALL, [4] reserved
-- [3]     C_MASKINTS (debug stepping 중 configurable interrupt 마스크 제어)
-- [2]     C_STEP
-- [1]     C_HALT     ← 1로 쓰면 정지
-- [0]     C_DEBUGEN  ← 1이면 디버그 가능
-
-`break main`의 흐름.
-
-1. 디버거가 FPB에 `main`의 주소를 기록 + 활성화.
-2. CPU가 fetch 시 PC가 FPB와 일치 → core가 *debug state*로 천이.
-3. 디버거가 DHCSR.S_HALT를 폴링하다 1이 되면 GDB에 stop 패킷 전송.
-4. GDB가 `bt`/`print` 요청 → 디버거가 DCRSR(register select)로 레지스터를 한 개씩 끌어옴.
-5. `continue` → DHCSR.C_HALT = 0 → CPU 재개.
-
-`monitor halt`는 *외부에서* DHCSR.C_HALT = 1을 강제로 써서 CPU를 멈추는 것.
-
-DHCSR을 직접 들여다보면 *왜 CPU가 안 멈추는지*를 디버깅할 수 있습니다.
-
-```bash
-(openocd) mdw 0xe000edf0
-0xe000edf0: 00030003   ← S_HALT(bit17)=1, S_REGRDY(bit16)=1, C_DEBUGEN=1, C_HALT=1
+```text
+0xe000ed00:	0x410fc240
+0xe000edf0:	0x00000000
+0xe0001000:	0x00000000
+0xe0002000:	0x00000000
+0xe0000e80:	0x00000000
+0xe00ff000:	0x00000000
 ```
+
+CPUID(`0xE000ED00`)는 `0x410fc240`, 즉 Arm(0x41) Cortex-M4(PARTNO 0xC24) r0p0으로 정상입니다. 그런데 GDB가 코어를 멈춰 둔 상태인데도 DHCSR이 0입니다. QEMU의 gdbstub은 에뮬레이터 바깥에서 실행을 멈추므로 CoreSight halt 상태가 생기지 않고, DWT·FPB·ITM·ROM table도 0으로 읽혔습니다. 1장에서 `Z1`이 통했던 것도 FPB가 아니라 QEMU 내부 기능 덕분입니다. 이 장의 레지스터 동작을 실제로 보려면 실물 보드와 프로브가 필요합니다.
+
+## DHCSR — halt 메커니즘
+
+`break main`이 실제 칩에서 어떻게 멈추는지의 중심에 DHCSR(Debug Halting Control and Status Register, `0xE000EDF0`)이 있습니다. 비트 위치는 CMSIS `core_cm4.h`의 `CoreDebug_DHCSR_*_Pos` 정의 그대로입니다.
+
+| 비트 | 이름 | 의미 |
+|------|------|------|
+| [31:16] (쓰기) | DBGKEY | 쓰기 키 |
+| [25] | S_RESET_ST | 마지막 읽기 이후 리셋이 있었음 |
+| [24] | S_RETIRE_ST | 명령이 완료됨 |
+| [19] | S_LOCKUP | lockup 상태 |
+| [18] | S_SLEEP | sleep 상태 |
+| [17] | S_HALT | 코어가 halt 상태 |
+| [16] | S_REGRDY | DCRSR 레지스터 전송 완료 |
+| [5] | C_SNAPSTALL | 정지된 버스 접근 끊기 |
+| [3] | C_MASKINTS | step 중 인터럽트 마스크 |
+| [2] | C_STEP | single step |
+| [1] | C_HALT | 1을 쓰면 halt 요청 |
+| [0] | C_DEBUGEN | halting debug 활성화 |
+
+DBGKEY 필드의 위치는 CMSIS가 [31:16]으로 정의하며, 쓰기 때 넣어야 하는 키 값은 ARMv7-M Architecture Reference Manual의 DHCSR 정의를 따릅니다. 읽을 때 같은 [31:16] 자리에는 S_ 상태 비트가 나옵니다.
+
+실제 칩에서 `break`가 동작하는 흐름은 다음과 같습니다.
+
+1. 스텁(OpenOCD 등)이 FPB 비교기에 주소를 쓰고 켭니다.
+2. CPU가 그 주소의 명령을 가져오면 FPB가 BKPT를 돌려주고, 코어가 debug state로 들어갑니다.
+3. 스텁이 DHCSR.S_HALT를 폴링하다 1이 되면 GDB에 stop reply를 보냅니다.
+4. GDB가 레지스터를 요청하면 스텁이 DCRSR/DCRDR로 하나씩 읽습니다.
+5. `continue`면 스텁이 DHCSR.C_HALT를 0으로 씁니다.
 
 ### DCRSR / DCRDR — 레지스터 읽기
 
-```text
-DCRSR (0xE000EDF4):
-  [16]    REGWnR — 1=write, 0=read
-  [6:0]   REGSEL — 어느 레지스터 (0=R0, ..., 15=PC, 16=xPSR, ...)
+DCRSR(`0xE000EDF4`)은 REGWnR이 비트 16, REGSEL이 [4:0]입니다(CMSIS `CoreDebug_DCRSR_REGSEL_Msk`가 `0x1F`). DCRDR(`0xE000EDF8`)이 데이터 레지스터입니다. R0 하나를 읽는 순서는 다음과 같습니다.
 
-DCRDR (0xE000EDF8): 데이터 워드
-```
+1. DCRSR에 REGWnR=0, REGSEL=0을 씁니다.
+2. DHCSR.S_REGRDY가 1이 될 때까지 폴링합니다.
+3. DCRDR을 읽습니다.
 
-디버거가 R0 읽기:
-
-1. DCRSR에 `0x00000000` (REGWnR=0, REGSEL=0) 쓰기.
-2. DHCSR.S_REGRDY 폴링 (작업 완료).
-3. DCRDR 읽기 → R0 값.
-
-레지스터마다 DCRSR 쓰기·S_REGRDY 확인·DCRDR 읽기가 필요하고 MEM-AP 접근 자체도 여러 SWD 전송으로 구성됩니다. 16개 읽기를 고정17패킷이나1ms로 단정하지 않습니다.
+레지스터마다 이 세 단계가 필요하고, 각 단계가 다시 앞의 MEM-AP 접근 여러 번으로 이뤄집니다. 1장에서 GDB가 정지할 때마다 `g` 한 번을 보낸 것이 실제 칩에서는 이 왕복 수십 번이 됩니다.
 
 ## FPB — 브레이크포인트
 
-Flash Patch and Breakpoint Unit. 6개의 *주소 비교기*(comparator) + 2개의 *literal*. 비교기에 주소를 넣고 활성화하면 CPU fetch가 그 주소에 도달했을 때 halt.
+Cortex-M4 TRM 8.3은 FPB를 두 구성으로 정의합니다.
 
-**FP_COMP0 (0xE0002008):**
+- **Full FPB** — literal 비교기 2개 + 명령 비교기 6개. 명령 비교기는 매치 시 BKPT를 돌려주도록 설정해 하드웨어 BP로 씁니다.
+- **Reduced FPB** — 명령 비교기 2개. flash patch는 지원하지 않습니다.
 
-- [31:30] REPLACE — FPB revision1의 breakpoint 비교에서 lower/upper halfword 선택(01/10/11); remap 모드는 별도 계약
-- [28:2]  COMP — 비교 주소 (4바이트 정렬, 비트 0 무시)
-- [0]     ENABLE
+즉 Cortex-M4의 하드웨어 BP는 *구현에 따라 6개 또는 2개*입니다. Cortex-M7 TRM(DDI 0489D) 9.3은 FPB를 *4개 또는 8개* 명령 비교기로 구성할 수 있고 flash patch를 지원하지 않는다고 적습니다. 코어 이름만으로 개수를 단정하지 말고, 붙은 칩에서 FP_CTRL의 NUM_CODE 필드를 읽어 확인해야 합니다. OpenOCD도 examine 단계에서 이 값을 읽어 비교기 수를 정하고, 다 쓰면 1장에서 본 `Can not find free FPB Comparator!` 오류를 냅니다.
 
-GDB의 `break main` → 디버거가 FPB에 `&main`을 기록 + ENABLE.
-
-```bash
-(openocd) mdw 0xe0002000 8
-0xe0002000: 00000020 ...     ← FP_CTRL: NUM_CODE=2, NUM_LIT=0 (revision1 예)
-0xe0002008: 48000125 ...     ← FPB revision1 lower-halfword BP at 0x08000124, ENABLE=1
-```
-
-코어·구현·FPB revision별 비교기 수와 기능을 FP_CTRL 및 대상 매뉴얼로 확인합니다. 위6개 예를 모든 M3/M4/M7에 보장된 수로 해석하지 않습니다.
+FPB 레지스터는 FP_CTRL(`0xE0002000`), FP_REMAP(`0xE0002004`), FP_COMP0(`0xE0002008`)부터 이어지는 비교기 레지스터입니다(TRM Table 8-7). TRM은 구현하지 않은 레지스터는 0으로 읽힌다고 적습니다.
 
 ### Software vs Hardware BP
 
-`Z0` (sw): 타깃 명령어를 breakpoint opcode로 (Thumb: 0xBExx)로 갈아 끼우고 원래 명령은 별도 저장. 개수는 구현·저장 공간에 영향을 받으며 일반 RAM 패치와 flash 재프로그래밍은 다릅니다. Thumb BKPT는16비트입니다.
+`Z0`(소프트웨어 BP)은 명령을 BKPT로 바꿔 씁니다. GDB 16.3 `arm-tdep.c`의 Thumb BP 바이트는 `{0xbe,0xbe}`이고, 1장 로그처럼 원래 명령을 미리 읽어 두었다가 정지하면 되돌립니다. RAM에서는 일반 메모리 쓰기로 충분하지만 flash에서는 그렇게 쓸 수 없습니다.
 
-`Z1` (hw): FPB 비교기 1개 소모. *flash·ROM에서 동작*하지만 *유한*.
+`Z1`(하드웨어 BP)은 FPB 비교기 하나를 씁니다. flash·ROM에서도 동작하지만 개수가 위처럼 제한됩니다.
 
-GDB는 보통 `Z0`을 먼저 시도하고, *flash 영역*이면 `Z1`로 폴백.
-
-J-Link의 *Unlimited Flash Breakpoints*는 7번째 BP부터 *flash 페이지 패치*로 흉내냅니다.
+GDB는 어느 쪽을 쓸지 memory map으로 정합니다. GDB 매뉴얼 [Setting Breakpoints](https://sourceware.org/gdb/current/onlinedocs/gdb.html/Set-Breaks.html)는 `set breakpoint auto-hw on`이 기본이며, 이때 GDB가 *타깃 memory map을 보고* 소프트웨어·하드웨어 BP를 고른다고 적습니다. 스텁이 memory map에서 flash를 알려 주면 그 영역의 `break`는 하드웨어 BP가 됩니다. `hbreak`는 항상 하드웨어 BP입니다.
 
 ## DWT — 워치포인트와 카운터
 
-```text
-DWT_CTRL (0xE0001000):
-  [31:28] NUMCOMP — 비교기 개수 (보통 4)
-  [24]    CYCEVTENA
-  ...
-  [0]     CYCCNTENA  ← 사이클 카운터 활성화
+Cortex-M4 TRM은 watchpoint 유닛을 *1개 또는 4개* 비교기로 구성한다고 적습니다(8.1). 개수는 DWT_CTRL의 NUMCOMP[31:28]에 있습니다. CMSIS `core_cm4.h` 기준 주요 비트는 다음과 같습니다.
 
-DWT_CYCCNT (0xE0001004): 32-bit 사이클 카운터
-DWT_COMP0 (0xE0001020): 비교 주소
-DWT_MASK0 (0xE0001024): 비트 마스크
-DWT_FUNCTION0 (0xE0001028): 동작 (read/write/access)
-```
+| 레지스터 / 비트 | 의미 |
+|------|------|
+| `DWT_CTRL` [31:28] NUMCOMP | 비교기 수 |
+| `DWT_CTRL` [22] CYCEVTENA | 사이클 카운터 이벤트 |
+| `DWT_CTRL` [0] CYCCNTENA | 사이클 카운터 켜기 |
+| `DWT_CYCCNT` (`0xE0001004`) | 32비트 사이클 카운터 |
+| `DWT_COMP0` / `MASK0` / `FUNCTION0` (`0xE0001020`~) | 비교 주소·마스크·동작 |
 
-GDB의 `watch *my_var` → DWT 비교기 한 개 소모. 4개 한도.
+GDB의 `watch` 하나가 비교기 하나를 씁니다. 1장 QEMU 세션의 `Z2,20000000,4`가 실제 칩이라면 이 비교기 설정이 됩니다.
 
-사이클 카운터는 µs 측정에 매우 유용.
+사이클 카운터로 구간 시간을 재는 코드는 다음과 같습니다. `DEMCR.TRCENA`(비트 24)를 먼저 켜야 DWT가 동작합니다.
 
 ```c
 CoreDebug->DEMCR |= CoreDebug_DEMCR_TRCENA_Msk;
 DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
 uint32_t start = DWT->CYCCNT;
 do_work();
-uint32_t cycles = DWT->CYCCNT - start;
-// us = cycles / (CoreClock_MHz)
+uint32_t cycles = DWT->CYCCNT - start;   // 32비트 랩어라운드도 뺄셈으로 처리됨
+// us = cycles / (코어 클럭 MHz)
 ```
 
-168 MHz 코어에서 168 cycles = 1 µs.
-
-DWT는 *exception trace*도 지원 — 어떤 ISR이 언제 들어오고 나갔는지 SWO로 송출. OS-aware 디버깅의 핵심.
+예를 들어 168 MHz 코어라면 168 사이클이 1 µs입니다.
 
 ## ITM — Software Trace
 
-ITM은 32개의 *stim port*. 워드를 쓰면 SWO/TRACE 핀으로 trace 패킷 송출.
+ITM은 stimulus port 레지스터에 쓴 값을 trace 패킷으로 내보냅니다. 포트 레지스터를 읽으면 비트 0이 FIFO가 받을 준비가 됐는지(FIFOREADY)를 알려 줍니다. 아래 코드는 포트 0으로 한 글자를 보내는 최소 구현입니다.
 
 ```c
 #define ITM_PORT_U32(n)  (*((volatile uint32_t *)(0xE0000000 + 4*(n))))
@@ -326,91 +313,59 @@ ITM은 32개의 *stim port*. 워드를 쓰면 SWO/TRACE 핀으로 trace 패킷 �
 #define ITM_TCR          (*((volatile uint32_t *)(0xE0000E80)))   // Trace Control
 
 void itm_putchar(char c) {
-    if (!(ITM_TCR & 1)) return;        // ITM disabled
-    if (!(ITM_TER & 1)) return;        // port 0 disabled
-    while ((ITM_PORT_U32(0) & 1) == 0); // wait FIFO
+    if (!(ITM_TCR & 1)) return;        // ITMENA 꺼짐
+    if (!(ITM_TER & 1)) return;        // port 0 꺼짐
+    while ((ITM_PORT_U32(0) & 1) == 0); // FIFOREADY 대기
     ITM_PORT_U8(0) = c;
 }
 ```
 
-OpenOCD/J-Link가 SWO trace를 받아 *stim port 0*을 stdout처럼 디코딩.
+OpenOCD 매뉴얼의 예도 같은 패턴으로, 데이터 손실을 막으려면 `ITM_STIM_FIFOREADY`를 기다리라고 적습니다. 출력 경로는 위 SWO 절의 TPIU 설정입니다.
 
-```bash
-(openocd) tpiu config internal /tmp/swo.log uart off 168000000 2000000
-(openocd) itm port 0 on
-```
-
-168 MHz 코어 / 2 MBaud SWO. 코어 클럭이 안 맞으면 깨진 글자.
+ITM은 Armv7-M과 Armv8-M Mainline의 구성 요소입니다. CMSIS 5.9.0 `core_cm0.h`·`core_cm0plus.h`에는 `ITM_Type` 정의 자체가 없는데, Cortex-M0/M0+(Armv6-M)에서 ITM을 쓸 수 없다는 뜻입니다.
 
 ## ETM — 명령 단위 Trace
 
-ETM(Embedded Trace Macrocell)이 있으면 CPU의 *모든 명령어 실행*이 trace됩니다. 일반 4-5 핀 *parallel TRACE* 인터페이스 또는 *ETB*(Embedded Trace Buffer, 칩 안 RAM에 저장).
+ETM(Embedded Trace Macrocell)이 있으면 실행한 명령 흐름을 trace로 내보낼 수 있습니다. Cortex-M4에서 ETM은 구현 선택이며(TRM 1.1의 구성 목록에 ITM·DWT·ETM 조합이 나옵니다), 자세한 내용은 별도의 ETM-M4 TRM(DDI 0440)이 다룹니다. TRM의 TPIU 블록 그림은 출력 핀으로 `TRACECLK`와 `TRACEDATA[3:0]`를 보여 줍니다. 이 병렬 trace port를 받으려면 전용 캡처 장비가 필요합니다.
 
-SEGGER J-Trace, Lauterbach TRACE32 같은 고가 도구가 받습니다.
+ETM 버전·trace sink·timestamp·핀 노출은 코어와 SoC 구현마다 다릅니다. Cortex-M7·M33의 trace 구성은 각 코어 TRM에서 따로 확인해야 하고, 이 장의 M4 설명을 그대로 옮기지 않습니다.
 
-쓰임:
+## 연결이 안 될 때 — 계층별로 나누기
 
-- 비결정적 버그의 *완전한 이전 시퀀스* 재구성 (rr의 베어메탈 버전).
-- 인터럽트 latency 측정.
-- 캐시 hit/miss 통계.
+실물 보드에서 프로브가 붙지 않으면, 위에서 본 계층을 아래에서부터 하나씩 확인하는 것이 빠릅니다. 이 절의 명령과 메시지는 OpenOCD 소스·매뉴얼에서 확인한 것이고, 보드 실측값은 없습니다.
 
-ETM 버전·trace sink·timestamp 및 핀 노출은 코어와 SoC 구현별로 다릅니다. Cortex-M7·M33을 모두 ETM-M4라고 부르거나 ETM에서 cache hit/miss를 직접 전부 얻는 것으로 설명하지 않습니다. 이 장의 Cortex-M 예와 Cortex-A CoreSight 구성은 별도로 확인합니다.
+### 전원과 Vref
 
-## CTI — Cross Trigger Interface
+프로브는 타깃 전압을 감지하는 핀을 갖습니다. ST-Link 드라이버는 이 값을 `Target voltage: %f`로 찍고(`src/jtag/drivers/stlink_usb.c`), J-Link 드라이버는 전압이 낮으면 `Target voltage too low. Check target power`를 출력합니다(`src/jtag/drivers/jlink.c`). 여기서 0에 가까운 값이 나오면 디버그 프로토콜 이전에 전원·Vref 배선·GND 공통을 먼저 봐야 합니다.
 
-멀티 코어 칩(예: Cortex-A + Cortex-M)에서 한 코어의 halt를 *다른 코어에 신호*로 전달. *동기 멈춤*에 사용. 자체 보드 디버깅 시 직접 만질 일은 거의 없지만 SoC 디버깅에서 가끔 등장.
+### 클럭 속도
 
-## 신호 무결성 — 실전
+OpenOCD 매뉴얼의 `adapter speed` 설명은 "칩 데이터시트가 최대 디버그 클럭을 정하며, 외부 어댑터라면 PCB 배선이나 결선 때문에 더 낮아질 수 있다"고 적습니다. 지정한 값은 상한이며 실제 속도가 그보다 빠르지 않습니다. 속도를 낮췄을 때 IDCODE가 읽히기 시작하면 신호 무결성 쪽을 의심할 근거가 됩니다.
 
-이론과 별개로 *전기적 문제*가 디버깅을 망치는 일이 잦습니다.
+### 리셋
 
-### 길이
-
-SWD/JTAG 케이블이 *너무 길면* (>15cm) capacitance가 증가해 고속 SWCLK가 망가집니다. `adapter speed 4000` (4 MHz)이 잘 안 되면 `1000` (1 MHz)부터 시도.
-
-### 풀업
-
-대부분의 칩은 SWDIO에 *내부 풀업*이 있지만 일부는 외부 풀업(~10kΩ)이 필요. 이게 없으면 reset 직후 floating.
-
-### Vref
-
-JTAG 커넥터에 *Vref* 핀이 있어 디버거가 *타깃 전압*을 감지합니다. 1.65V~3.3V 자동 적응. Vref가 *0V*면 (`Target voltage: 0.000V`) 다음 중 하나:
-
-- 타깃 전원 안 들어옴.
-- Vref 핀 미연결.
-- 타깃 ↔ 디버거 GND 미연결.
-
-### RESET
-
-JTAG 커넥터의 nRESET (SRST)이 *적극적*으로 토글되어야 *원치 않게 펌웨어가 디버거 통신을 무력화한 경우*에도 정상 진입 가능. OpenOCD의 `reset_config srst_only srst_nogate`가 자주 도움.
+펌웨어가 SWD 핀을 다른 기능으로 바꾸거나 곧바로 저전력 모드로 들어가면, 평소 방식으로는 붙을 틈이 없습니다. OpenOCD의 `reset_config`에서 `connect_assert_srst`는 *연결 전에 SRST를 걸어 둔 채* 붙는 옵션입니다. 매뉴얼은 이 옵션에 `srst_nogate`가 필요하며, 일부 타깃(STM32, STR9 예시)만 지원하고, 잘못된 option byte나 비정상 실행 때문에 연결이 안 될 때 쓸모 있다고 적습니다.
 
 ```tcl
-(openocd config)
 reset_config srst_only srst_nogate connect_assert_srst
 ```
 
-### 디커플링
-
-칩 가까이 100nF 디커플링 캡이 없으면 디버그 자체 트랜잭션이 일으키는 *순간 전류*가 칩에 노이즈를 줘 SWD가 자꾸 끊깁니다. 회로도·전원망·MCU 하드웨어 가이드의 정격·배치 조건을 확인하고 파형으로 판단합니다. 한 조합의 capacitor 값을 모든 보드에 보장하지 않습니다.
-
 ## 프로브 종류
 
-| 프로브 | 인터페이스 | 가격 | 비고 |
-|--------|------------|------|------|
-| ST-Link/V2 | SWD/JTAG | 매우 저렴 (보드 내장) | STM32에 묶임 |
-| ST-Link/V3 | SWD/JTAG, VCOM, MSC | 저렴 | 더 빠름, VCP 유용 |
-| CMSIS-DAP / DAPLink | SWD/JTAG (CMSIS-DAP) | 저렴 | ARM 표준 |
-| J-Link EDU mini | SWD/JTAG | 저렴 (비상업용) | 가성비 |
-| J-Link BASE/PLUS | SWD/JTAG | 비쌈 | 상용·산업 |
-| J-Trace | SWD/JTAG + ETM | 매우 비쌈 | 명령 trace |
-| Black Magic Probe | SWD/JTAG | 중간 | 내장 gdbserver (호스트 OS 없이 직접) |
-| FT2232 + breakout | SWD/JTAG | 매우 저렴 | 범용 |
+프로브마다 지원 인터페이스와 부가 기능이 다릅니다. 이 표는 각 제품군의 성격만 정리했고, 속도·가격은 비교하지 않았습니다.
 
-CMSIS-DAP가 *표준* — 같은 펌웨어가 거의 모든 보드의 디버그 인터페이스에 호환. 새 칩 → CMSIS-DAP 검증 → 그 다음 다른 프로브 시도.
+| 프로브 | 인터페이스 | 비고 |
+|--------|------------|------|
+| ST-LINK | SWD/JTAG | ST 보드에 내장되는 경우가 많음. OpenOCD는 HLA와 native 드라이버를 모두 가짐 |
+| CMSIS-DAP / DAPLink | SWD/JTAG | Arm이 정의한 USB 프로토콜([CMSIS-DAP](https://arm-software.github.io/CMSIS-DAP/latest/)) |
+| J-Link | SWD/JTAG | SEGGER 프로브, 4장에서 다룸 |
+| J-Trace | SWD/JTAG + trace port | 병렬 trace 캡처 |
+| Black Magic Probe | SWD/JTAG | 프로브 안에 GDB 서버를 내장([black-magic.org](https://black-magic.org/)) |
+| FT2232 계열 + 회로 | SWD/JTAG | OpenOCD의 MPSSE 드라이버로 구동 |
 
 ## 작은 예제 — DHCSR 덤프 해독
 
-보드에서 읽은 값과 설명의 일치를 먼저 확인하는 오프라인 검사입니다. SWD 파형이나 실제 halt는 수행하지 않습니다.
+보드에서 읽은 값이 위 표와 맞는지 먼저 확인하는 오프라인 검사입니다. SWD 파형이나 실제 halt는 수행하지 않습니다.
 
 ```js title="dhcsr-check.mjs"
 import assert from 'node:assert/strict';
@@ -432,30 +387,30 @@ assert.equal(bits,'0111100111100111');
 console.log('PASS DHCSR, AP bank/address, SWJ LSB-first vector');
 ```
 
-Node24.21.0에서 `node dhcsr-check.mjs`를 확인했습니다. [CMSIS5.9.0 core_cm4.h](https://github.com/ARM-software/CMSIS_5/blob/5.9.0/CMSIS/Core/Include/core_cm4.h)의 DHCSR mask와 [CMSIS-DAP transfer의 APnDP](https://arm-software.github.io/CMSIS-DAP/latest/group__DAP__Transfer.html), [Arm debug description의 SWJ 전환](https://arm-software.github.io/CMSIS_5/5.7.0/Pack/html/debug_description.html)을 대조했습니다. 보드별 comparator 수와 trace 지원은 이 입력 검사로 검증되지 않습니다.
+Node 24.21.0에서 `node dhcsr-check.mjs`를 실행하면 `PASS DHCSR, AP bank/address, SWJ LSB-first vector`가 출력됩니다. 마지막 검사는 0xE79E를 LSB부터 늘어놓으면 ADIv5가 적은 `0111100111100111`이 된다는 것을 확인합니다. 0x00030003은 S_HALT·S_REGRDY·C_HALT·C_DEBUGEN이 모두 켜진 *가정한* 값이며, 이 장에서 실물 보드로 읽은 값은 아닙니다.
 
 ## 정리
 
-- JTAG = 5핀 + TAP 16-상태 FSM. boundary scan에서 디버그까지.
-- SWD = 2핀 패킷 기반 (ARM 전용).
-- DP·AP·MEM-AP가 SWD/JTAG → 내부 버스 게이트웨이.
-- CoreSight = DAP + FPB(BP) + DWT(WP/cycle) + ITM(printf trace) + ETM(명령 trace) + TPIU(출력).
-- DHCSR이 halt 메커니즘의 핵심 레지스터.
-- FPB가 hardware BP를 제공 (M3/M4=6, M0=4).
-- DWT가 watchpoint + cycle counter.
-- ITM/SWO가 가벼운 trace, ETM이 완전 trace.
-- 신호 무결성과 전원·reset은 관찰한 전압·파형·실패 단계로 확인합니다.
+- JTAG는 TCK·TMS·TDI·TDO에 선택 신호 TRST를 더한 TAP 구조이고, TMS HIGH 다섯 클럭으로 리셋됩니다.
+- Arm JTAG-DP는 DPACC·APACC IR 명령으로 DP·AP 레지스터에 접근합니다.
+- SWD는 2선 패킷 프로토콜이며, JTAG에서 전환하려면 50사이클 HIGH, 0xE79E(LSB first), 다시 50사이클이 필요합니다.
+- SW-DP의 AP 읽기는 posted라 결과가 다음 전송이나 RDBUFF에서 돌아옵니다.
+- DHCSR이 halt의 중심이고, 레지스터는 DCRSR/DCRDR로 하나씩 읽습니다.
+- Cortex-M4 FPB는 명령 비교기 6개(full) 또는 2개(reduced), DWT는 비교기 1개 또는 4개입니다. 칩에서 FP_CTRL·DWT_CTRL을 읽어 확인합니다.
+- ITM은 Cortex-M0/M0+에 없습니다.
+- QEMU는 CoreSight 디버그 회로를 흉내 내지 않으므로, 이 장의 레지스터 동작은 실물 보드에서만 관찰됩니다.
 
 ## 다음 장 예고
 
-Ch 3 — OpenOCD 깊이. TCL 인터프리터, flash driver, target 정의 파일, custom 명령 작성.
+Ch 3 — OpenOCD 깊이. Tcl 인터프리터, flash driver, target 정의 파일, custom 명령 작성.
 
 ## 관련 항목
 
 - [Ch 1: RSP 프로토콜](/blog/tools/debugging/embedded/chapter01-rsp-protocol) — 위쪽 계층
 - [Ch 3: OpenOCD 깊이](/blog/tools/debugging/embedded/chapter03-openocd)
 - [Performance Engineering: ARM DS·Lauterbach](/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach) — ETM trace를 Streamline·TRACE32 프로파일링에 쓰는 법
-- [ARMv7-M Architecture Reference Manual](https://developer.arm.com/documentation/ddi0403/latest/) — CoreSight 정의
-- [ARM Debug Interface Architecture v5](https://developer.arm.com/documentation/ihi0031/latest/) — DAP 명세
-- [CMSIS-DAP](https://arm-software.github.io/CMSIS_5/DAP/html/index.html)
-- [Black Magic Probe](https://black-magic.org/)
+- [Arm Debug Interface Architecture Specification ADIv5.0 to ADIv5.2 (IHI 0031G)](https://documentation-service.arm.com/static/622222b2e6f58973271ebc21) — DAP 명세
+- [Cortex-M4 Technical Reference Manual (DDI 0439B)](https://documentation-service.arm.com/static/5f19da2a20b7cf4bc524d99a) — FPB·DWT·ROM table
+- [ARMv7-M Architecture Reference Manual](https://developer.arm.com/documentation/ddi0403/latest/) — 디버그 레지스터 정의
+- [CMSIS 5.9.0 core_cm4.h](https://github.com/ARM-software/CMSIS_5/blob/5.9.0/CMSIS/Core/Include/core_cm4.h) — 레지스터 주소·비트
+- [CMSIS-DAP](https://arm-software.github.io/CMSIS-DAP/latest/)
