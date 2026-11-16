@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"clock tree를 모르면 peripheral은 죽어 있습니다."** HSE → PLL → SYSCLK → AHB → APB → peripheral은 STM32에서 흔한 흐름이지만, 세부 clock tree와 한계는 family별로 다릅니다.
+> **"clock tree를 모르면 peripheral은 죽어 있습니다."** STM32F407에서는 HSE → PLL → SYSCLK → AHB → APB → peripheral 순서로 clock이 나뉩니다.
 
 ## 어떤 상황에서 쓰나
 
-STM32F407 datasheet(DS8626) 2.2.12절은 "On reset the 16 MHz internal RC oscillator is selected as the default CPU clock"이라고 적습니다. 같은 칩의 최대 AHB clock은 168 MHz이므로 reset 상태 그대로면 10분의 1 남짓한 속도로 돕니다. UART baud rate나 SPI clock은 모두 이 clock에서 나눠 만들기 때문에, clock 설정이 기대와 다르면 peripheral 설정값도 함께 틀어집니다.
+STM32F407 datasheet(DS8626) 2.2.12절은 "On reset the 16 MHz internal RC oscillator is selected as the default CPU clock"이라고 적습니다. 같은 칩의 최대 AHB clock은 168 MHz이므로 reset 상태 그대로면 약 10분의 1(16/168 MHz) 속도로 돕니다. UART baud rate나 SPI clock은 모두 이 clock에서 나눠 만들기 때문에, clock 설정이 기대와 다르면 peripheral 설정값도 함께 틀어집니다.
 
 이 글은 reset부터 PLL 활성화, AHB/APB prescaler, peripheral clock enable까지의 순서를 STM32F407 기준으로 정리합니다. 숫자는 DS8626 Rev 4(DocID022152, 2013-06)와 ST의 CMSIS 헤더(cmsis-device-f4), HAL v1.8.3 소스에서 가져왔습니다.
 
@@ -26,7 +26,7 @@ STM32F407 datasheet(DS8626) 2.2.12절은 "On reset the 16 MHz internal RC oscill
 
 | 단계 | 입력 | 출력 | 근거 |
 | --- | --- | --- | --- |
-| Source | HSI 16 MHz / HSE 4–26 MHz crystal / LSI / LSE 32.768 kHz | — | DS8626 2.2.12, Table 31·33·34 |
+| Source | HSI 16 MHz / HSE 4–26 MHz crystal / LSI / LSE 32.768 kHz | — | DS8626 2.2.12, Table 31–34 |
 | SYSCLK MUX | HSI, HSE, PLL 중 하나 | SYSCLK | `RCC_CFGR_SW` |
 | AHB prescaler | SYSCLK | HCLK (max 168 MHz) | DS8626 Table 14 (VOS = 1) |
 | APB1 prescaler | HCLK | PCLK1 (max 42 MHz) | DS8626 2.2.12, Table 14 |
@@ -83,7 +83,7 @@ VCO 입력 1 MHz는 HAL 주석의 권장값(2 MHz)이 아니라 datasheet 범위
 | ≤ 150 MHz | 4 WS |
 | ≤ 168 MHz | 5 WS |
 
-DS8626 Table 15는 전압이 낮으면 더 많은 wait state를 요구합니다(2.4–2.7 V에서 168 MHz에 6 WS, 2.1–2.4 V와 1.8–2.1 V에서 7 WS).
+DS8626 Table 15는 전압이 낮으면 더 많은 wait state를 요구합니다(2.4–2.7 V에서 168 MHz에 6 WS, 2.1–2.4 V에서 168 MHz에 7 WS, 1.8–2.1 V에서는 최대 160 MHz에 7 WS).
 
 ### AHB / APB1 / APB2
 
@@ -160,13 +160,13 @@ _Static_assert(FLASH_ACR_LATENCY_5WS == 5u, "5WS");
 
 ### 2. QEMU에서 보는 HSE 대기 hang
 
-위 함수를 arm-none-eabi-gcc 16.2.0으로 빌드해 QEMU 11.1.3 `netduinoplus2`(STM32F405)에서 돌렸습니다. QEMU의 F4 RCC 모델(`hw/misc/stm32_rcc.c`)은 "The RCC peripheral only supports enable and reset in QEMU"라는 로그를 남기고 나머지 register는 값만 저장하므로, `HSERDY`가 1이 되는 일이 없습니다. 1초 뒤 monitor로 본 상태입니다.
+위 함수를 arm-none-eabi-gcc 16.2.0으로 빌드해 QEMU 11.1.3 `netduinoplus2`(STM32F405)에서 돌렸습니다. QEMU의 F4 RCC 모델(`hw/misc/stm32_rcc.c`)은 `-d unimp`로 실행하면 "The RCC peripheral only supports enable and reset in QEMU"라는 로그를 남기고 나머지 register는 값만 저장하므로, `HSERDY`가 1이 되는 일이 없습니다. 1초 뒤 monitor로 본 상태입니다.
 
 ```bash
 arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=soft -ffreestanding -nostdlib -O2 -Wall \
     -DSTM32F407xx -ICMSIS_6/CMSIS/Core/Include -Icmsis-device-f4/Include \
     -T stm32f411.ld -o clock.elf startup.c clock.c main.c
-qemu-system-arm -M netduinoplus2 -nographic -kernel clock.elf -monitor stdio -serial null
+qemu-system-arm -M netduinoplus2 -nographic -kernel clock.elf -monitor stdio -serial null -d unimp
 (qemu) info registers
 (qemu) xp /1wx 0x40023800
 ```
@@ -176,7 +176,7 @@ R12=00000000 R13=2001fff0 R14=080000e7 R15=0800007a
 40023800: 0x00010000
 ```
 
-`RCC->CR`은 `HSEON`(bit 16)만 켜진 `0x00010000`이고, PC `0x0800007a`는 disassembly의 `ldr r3, [r2, #0]` → `lsls r1, r3, #14` → `bpl.n 800007a`, 즉 `HSERDY`(bit 17) 대기 loop입니다. crystal이 없거나 납땜이 잘못된 보드에서도 같은 자리에서 멈춥니다. `main.c`는 `clock_init_168mhz()`를 부르고 `for (;;)`로 도는 두 줄이고, startup과 linker script는 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 것입니다.
+`RCC->CR`은 `HSEON`(bit 16)만 켜진 `0x00010000`이고, PC `0x0800007a`는 disassembly의 `ldr r3, [r2, #0]` → `lsls r1, r3, #14` → `bpl.n 800007a`, 즉 `HSERDY`(bit 17) 대기 loop입니다. `main.c`는 `clock_init_168mhz()`를 부르고 `for (;;)`로 도는 두 줄이고, startup과 linker script는 [4-01](/blog/embedded/modern-recipes/part4-01-first-baremetal)의 것입니다.
 
 HAL은 이 대기에 시간 제한을 둡니다. `HAL_RCC_OscConfig()`는 `HSE_TIMEOUT_VALUE`(= `HSE_STARTUP_TIMEOUT`)를 넘기면 `HAL_TIMEOUT`을 돌려줍니다. bare-metal에서도 같은 일을 하도록 고친 버전입니다. 시간 대신 loop 횟수로 제한했습니다.
 
@@ -242,7 +242,7 @@ qemu-system-arm -M netduinoplus2 -nographic -semihosting -kernel clock_safe.elf 
 HSE timeout: SYSCLK stays on HSI
 ```
 
-QEMU에서는 HSE가 뜨지 않으므로 timeout 경로만 확인됩니다. 168 MHz 경로는 실제 보드의 MCO 출력으로 확인합니다(아래 측정 절).
+QEMU에서는 HSE가 뜨지 않으므로 timeout 경로만 확인됩니다. 168 MHz 경로는 이 글에서 실행하지 않았습니다. 보드에서는 아래 MCO 출력으로 확인합니다.
 
 ### 3. Peripheral clock enable 순서
 
@@ -269,7 +269,7 @@ ST HAL의 `__HAL_RCC_xxx_CLK_ENABLE()`은 bit를 set한 뒤 같은 bit를 다시
 
 ### 4. Timer clock ×2 규칙
 
-DS8626 Rev 4의 clock tree 주석은 "The timers connected to APB2 are clocked from TIMxCLK up to 168 MHz, while the timers connected to APB1 are clocked from TIMxCLK either up to 84 MHz or 168 MHz, depending on TIMPRE bit configuration in the RCC_DCKCFGR register"라고 적습니다. Linux v6.12 `drivers/clk/clk-stm32f4.c`는 이 규칙을 `clk_apb_mul`로 구현하는데, 주석이 "if *not* running in 1:1 mode, they also tap out the one of the low order state bits to run the timers"이고, `RCC_CFGR`의 bit 12(APB1)·bit 15(APB2), 즉 PPRE 필드의 최상위 bit가 1이면 `parent_rate * 2`를 돌려줍니다.
+DS8626 Rev 4의 clock tree 주석은 "The timers connected to APB2 are clocked from TIMxCLK up to 168 MHz, while the timers connected to APB1 are clocked from TIMxCLK either up to 84 MHz or 168 MHz, depending on TIMPRE bit configuration in the RCC_DCKCFGR register"라고 적습니다. 다만 ST의 `stm32f407xx.h`에는 `DCKCFGR`도 `TIMPRE`도 정의돼 있지 않고(`RCC_TypeDef`의 마지막 register가 `PLLI2SCFGR`), 같은 저장소의 `stm32f429xx.h`에는 있습니다. 이 글은 RM0090으로 확인하지 못했으므로 F407에서는 TIMPRE가 없는 경우, 즉 아래 ×2 규칙만 씁니다. Linux v6.12 `drivers/clk/clk-stm32f4.c`는 이 규칙을 `clk_apb_mul`로 구현하는데, 주석이 "if *not* running in 1:1 mode, they also tap out the one of the low order state bits to run the timers"이고, `RCC_CFGR`의 bit 12(APB1)·bit 15(APB2), 즉 PPRE 필드의 최상위 bit가 1이면 `parent_rate * 2`를 돌려줍니다.
 
 ```c
 // SYSCLK 168, APB1 = /4 = 42 MHz → TIM2~7 clock = 84 MHz
@@ -278,7 +278,7 @@ DS8626 Rev 4의 clock tree 주석은 "The timers connected to APB2 are clocked f
 
 ## 측정 / 동작 확인
 
-보드에서 가장 쉬운 확인은 **MCO (Master Clock Output)**입니다. ST open_pin_data의 STM32F407 GPIO 표에서 `RCC_MCO_1`은 PA8, `RCC_MCO_2`는 PC9이고 둘 다 AF0입니다. HAL `HAL_RCC_MCOConfig()`는 MCO2를 `MODIFY_REG(RCC->CFGR, (RCC_CFGR_MCO2 | RCC_CFGR_MCO2PRE), (RCC_MCOSource | (RCC_MCODiv << 3U)))`로 설정하고, `RCC_MCO2SOURCE_SYSCLK`는 0, `RCC_MCODIV_4`는 `RCC_CFGR_MCO1PRE_1 | RCC_CFGR_MCO1PRE_2`입니다. 3 bit 올리면 MCO2PRE 필드(bit 29:27) 값 `0b110` = 6이 됩니다.
+보드에서는 **MCO (Master Clock Output)**로 확인합니다. ST open_pin_data의 STM32F407 GPIO 표에서 `RCC_MCO_1`은 PA8, `RCC_MCO_2`는 PC9이고 둘 다 AF0입니다. HAL `HAL_RCC_MCOConfig()`는 MCO2를 `MODIFY_REG(RCC->CFGR, (RCC_CFGR_MCO2 | RCC_CFGR_MCO2PRE), (RCC_MCOSource | (RCC_MCODiv << 3U)))`로 설정하고, `RCC_MCO2SOURCE_SYSCLK`는 0, `RCC_MCODIV_4`는 `RCC_CFGR_MCO1PRE_1 | RCC_CFGR_MCO1PRE_2`입니다. 3 bit 올리면 MCO2PRE 필드(bit 29:27) 값 `0b110` = 6이 됩니다.
 
 ```c
 // MCO2(PC9)에 SYSCLK / 4 출력
@@ -292,9 +292,9 @@ gpio_init(GPIOC, 9, &(gpio_config_t){
 });
 ```
 
-PC9에 168/4 = 42 MHz가 나오면 SYSCLK 설정이 맞습니다. DS8626 Rev 4 Table 49는 very high speed의 최대 출력을 30 pF에서 100 MHz로 적으므로 42 MHz는 그 안입니다. `gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 드라이버입니다.
+PC9에 168/4 = 42 MHz가 나오면 SYSCLK 설정이 맞습니다. DS8626 Rev 4 Table 15는 VDD 2.7–3.0 V에서 I/O 핀의 clock 출력을 48 MHz까지(3.0–3.6 V에서 60 MHz)로 적으므로 42 MHz는 그 안입니다. `gpio_init()`은 [4-03](/blog/embedded/modern-recipes/part4-03-gpio-driver)의 드라이버입니다.
 
-scope가 없다면 같은 delay loop의 LED 주기를 reset 직후(HSI)와 PLL 전환 후에 비교합니다. 다만 flash wait state와 ART accelerator 설정이 함께 바뀌므로 주기 비율이 clock 비율과 같지는 않습니다.
+scope가 없다면 같은 delay loop의 LED 주기를 reset 직후(HSI)와 PLL 전환 후에 비교합니다.
 
 ## 자주 보는 함정
 
