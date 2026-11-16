@@ -229,7 +229,7 @@ Sensor::~Sensor                             Sensor::~Sensor
 | `--specs=nosys.specs` | system call을 실패 반환 stub으로 채움 |
 | `--specs=rdimon.specs` | semihosting 기반 system call (Debian 패키지에 포함) |
 | `-u _printf_float` | nano에서 float printf 활성 |
-| `-Wl,--wrap=malloc` | `malloc` 호출을 `__wrap_malloc`으로 돌림 (디버깅용) |
+| `-Wl,--wrap=malloc` | `malloc` 호출을 `__wrap_malloc`으로 돌리고, 원래 함수는 `__real_malloc`으로 부름 (GNU ld 매뉴얼 Options `--wrap=symbol`) |
 
 ## 자주 보는 함정
 
@@ -251,7 +251,7 @@ GCC 매뉴얼대로 priority는 101~65535이고 작을수록 먼저입니다. pr
 
 > ⚠️ 직접 만든 startup에서 destructor가 사라짐
 
-newlib crt0는 `atexit(__libc_fini_array)`를 등록하지만, vendor startup이나 직접 만든 `Reset_Handler`는 보통 그러지 않습니다. 위 실행에서 `__attribute__((destructor))` 함수가 불리지 않은 이유입니다. bare-metal에서 종료 처리가 필요하면 startup에서 이를 등록하거나, `main`에서 돌아오지 않는 구조로 정리합니다.
+newlib crt0는 `atexit(__libc_fini_array)`를 등록하지만, [3-06](/blog/embedded/modern-recipes/part3-06-startup-code)의 ST startup과 이 글의 `Reset_Handler`는 그러지 않습니다. 위 실행에서 `__attribute__((destructor))` 함수가 불리지 않은 이유입니다. bare-metal에서 종료 처리가 필요하면 startup에서 이를 등록하거나, `main`에서 돌아오지 않는 구조로 정리합니다.
 
 ## 정리
 
