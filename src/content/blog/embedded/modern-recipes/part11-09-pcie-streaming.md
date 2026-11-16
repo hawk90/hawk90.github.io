@@ -47,8 +47,10 @@ QEMU NVMe 컨트롤러의 출력에서 streaming과 관련된 줄만 남겼습�
 	Capabilities: [40] MSI-X: Enable+ Count=65 Masked-
 		Vector table: BAR=0 offset=00002000
 		PBA: BAR=0 offset=00003000
+	Capabilities: [80] Express (v2) Root Complex Integrated Endpoint, IntMsgNum 0
 		DevCtl:	CorrErr- NonFatalErr- FatalErr- UnsupReq-
 			RlxdOrd- ExtTag- PhantFunc- AuxPwr- NoSnoop- FLReset-
+			MaxPayload 128 bytes, MaxReadReq 128 bytes
 	Kernel driver in use: nvme
 ```
 
@@ -74,10 +76,9 @@ probe에서 할 일은 장치 켜기 → BAR 요청·매핑 → DMA 마스크 �
 rc = pcim_enable_device(pdev);            /* managed: undone on unbind */
 if (rc)
 	return rc;
-rc = pcim_iomap_regions(pdev, BIT(0), DRV_NAME);
-if (rc)
-	return rc;
-bar0 = pcim_iomap_table(pdev)[0];
+bar0 = pcim_iomap_region(pdev, 0, DRV_NAME);   /* request + map BAR0 */
+if (IS_ERR(bar0))
+	return PTR_ERR(bar0);
 rc = dma_set_mask_and_coherent(&pdev->dev, DMA_BIT_MASK(64));
 if (rc)
 	return rc;
@@ -96,14 +97,14 @@ for (i = 0; i < nvec; i++) {
 ```
 
 ```text
-[  644.864978] stream_probe 0000:00:04.0: id=010000ed nvec=1 msix=0 msi=1 irq0=64
+[  953.351290] stream_probe 0000:00:04.0: id=010000ed nvec=1 msix=0 msi=1 irq0=64
 	Control: I/O- Mem+ BusMaster+ SpecCycle- MemWINV- VGASnoop- ParErr- Stepping- SERR- FastB2B- DisINTx+
 	Capabilities: [40] MSI: Enable+ Count=1/1 Maskable- 64bit+
 ```
 
-edu는 MSI-X가 없고 MSI vector 1개만 광고합니다(`edu.c`의 `msi_init(pdev, 0, 1, ...)`). 그래서 `pci_alloc_irq_vectors(1, 32, MSIX | MSI)`가 MSI-X를 건너뛰고 MSI 1개(`nvec=1 msi=1`)로 내려왔습니다. 최소값 1과 최대값을 함께 넘겨야 이런 fallback이 됩니다. `pci_set_master()` 뒤 `Control`에 `BusMaster+`가 켜졌고, MSI를 쓰니 legacy INTx는 `DisINTx+`로 꺼졌습니다. `pcim_*`와 `devm_*`를 썼기 때문에 unbind 때 IRQ, vector, BAR 매핑이 거꾸로 풀립니다.
+edu는 MSI-X가 없고 MSI vector 1개만 광고합니다(`edu.c`의 `msi_init(pdev, 0, 1, ...)`). 그래서 `pci_alloc_irq_vectors(1, 32, MSIX | MSI)`가 MSI-X를 건너뛰고 MSI 1개(`nvec=1 msi=1`)로 내려왔습니다. 최소값 1과 최대값을 함께 넘겨야 이런 fallback이 됩니다. `pci_set_master()` 뒤 `Control`에 `BusMaster+`가 켜졌고, MSI를 쓰니 legacy INTx는 `DisINTx+`로 꺼졌습니다. `pcim_*`와 `devm_*`를 썼기 때문에 unbind 때 IRQ, vector, BAR 매핑이 거꾸로 풀립니다. BAR 매핑을 `pcim_iomap_regions()`와 `pcim_iomap_table()`로 하지 않은 이유는 6.12의 [`devres.c`](https://github.com/torvalds/linux/blob/v6.12/drivers/pci/devres.c)가 두 함수를 DEPRECATED로 표시하고(L548, L797) `pcim_iomap_region()`을 쓰라고 적기 때문입니다.
 
-원래 글에 있던 `irq_set_affinity_hint()`는 6.12의 [`interrupt.h`](https://github.com/torvalds/linux/blob/v6.12/include/linux/interrupt.h#L353)에서 "Deprecated"로 표시돼 있습니다. 큐별 CPU 분산이 목적이라면 위처럼 `PCI_IRQ_AFFINITY`를 주고 PCI 코어에 맡기는 것이 NVMe 드라이버가 쓰는 방법입니다.
+예전에 흔히 쓰던 `irq_set_affinity_hint()`는 6.12의 [`interrupt.h`](https://github.com/torvalds/linux/blob/v6.12/include/linux/interrupt.h#L353)에서 "Deprecated"로 표시돼 있습니다. 큐별 CPU 분산이 목적이라면 위처럼 `PCI_IRQ_AFFINITY`를 주고 PCI 코어에 맡기는 것이 NVMe 드라이버가 쓰는 방법입니다.
 
 ### Doorbell 주소 계산 (NVMe)
 
@@ -154,7 +155,7 @@ vector마다 `data`로 자기 큐를 넘기면 ISR이 다른 큐를 건드릴 �
 
 ### Doorbell 쓰기의 순서
 
-링에 명령을 쓰고 doorbell을 두드릴 때 doorbell이 명령보다 먼저 장치에 보이면 안 됩니다. Linux에서 이 순서는 `writel()`이 지켜 줍니다. [`memory-barriers.txt`](https://github.com/torvalds/linux/blob/v6.12/Documentation/memory-barriers.txt#L2578-L2582)의 "KERNEL I/O BARRIER EFFECTS" 3번 항목은 `writeX()`가 같은 스레드의 앞선 메모리 쓰기가 모두 끝나기를 기다린 뒤 나간다고, 그래서 `dma_alloc_coherent()` 버퍼에 쓴 내용이 MMIO 제어 레지스터 쓰기보다 먼저 DMA 엔진에 보인다고 적습니다.
+링에 명령을 쓰고 doorbell을 두드릴 때 doorbell이 명령보다 먼저 장치에 보이면 안 됩니다. Linux에서 이 순서는 `writel()`이 지켜 줍니다. [`memory-barriers.txt`](https://github.com/torvalds/linux/blob/v6.12/Documentation/memory-barriers.txt#L2578-L2583)의 "KERNEL I/O BARRIER EFFECTS" 3번 항목은 `writeX()`가 같은 스레드의 앞선 메모리 쓰기가 모두 끝나기를 기다린 뒤 나간다고, 그래서 `dma_alloc_coherent()` 버퍼에 쓴 내용이 MMIO 제어 레지스터 쓰기보다 먼저 DMA 엔진에 보인다고 적습니다.
 
 ```c
 sq[tail] = cmd;                     /* coherent DMA memory */
@@ -219,11 +220,11 @@ while (outstanding)
 	spdk_nvme_qpair_process_completions(g_qpair, 0);   /* non-blocking */
 ```
 
-헤더 주석에 따르면 `spdk_nvme_qpair_process_completions()`는 호출 시점에 준비된 완료만 처리하고 기다리지 않으며, queue pair는 한 번에 한 스레드만 써야 합니다(상호 배제는 사용자 책임). 커널 block layer를 거치지 않는 대신 cgroup·multipath처럼 커널이 해 주던 일은 SPDK 쪽에서 해결해야 합니다.
+헤더 주석에 따르면 `spdk_nvme_qpair_process_completions()`는 호출 시점에 준비된 완료만 처리하고 기다리지 않으며, queue pair는 한 번에 한 스레드만 써야 합니다(상호 배제는 사용자 책임).
 
 ## 측정 / 성능 비교
 
-원래 이 절에 있던 NVMe 스택별 IOPS·p99 표와 "Linux 2-3 Mpps / DPDK 14.8 Mpps" 수치는 출처도 측정 환경도 없어 지웠습니다. 이 글은 실제 PCIe 장치에서 잰 값을 갖고 있지 않습니다. 대신 계산으로 정할 수 있는 상한과, 재는 방법을 남깁니다.
+이 글은 실제 PCIe 장치에서 잰 값을 갖고 있지 않습니다. 대신 계산으로 정할 수 있는 상한과, 재는 방법을 남깁니다.
 
 PCI-SIG의 FAQ는 PCIe 3.0이 8 GT/s에 128b/130b 인코딩을 쓴다고 적습니다. 그러면 x16 링크 한 방향의 상한은 8 × 128/130 × 16 ÷ 8 ≈ 15.75 GB/s입니다. TLP 헤더와 DLLP 오버헤드가 더 빠지므로 실제 payload 대역은 이보다 작고, 얼마나 작은지는 MaxPayload(위 QEMU 장치는 128 bytes)와 MaxReadReq에 달려 있습니다.
 
