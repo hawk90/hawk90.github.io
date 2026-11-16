@@ -10,13 +10,13 @@ draft: false
 topics: ["tools", "tools/emulation"]
 ---
 
-cosim에서 driver의 C 함수와 RTL의 SystemVerilog 사이를 이어 주는 표준 인터페이스가 **DPI-C**(Direct Programming Interface for C)입니다. SystemVerilog 표준(IEEE 1800)의 35장이 DPI를 정의하고, C 쪽 헤더 `svdpi.h`는 같은 표준의 Annex I에 실려 있습니다. 다만 "표준에 있다"와 "내 simulator가 지원한다"는 다른 문제입니다. 이 장에서 돌려 본 Icarus Verilog 13.0은 `import "DPI-C"` 줄을 syntax error로 거부했고, Verilator 5.054는 시간을 소모하는 export task를 거부했습니다.
+cosim에서 driver의 C 함수와 RTL의 SystemVerilog 사이를 이어 주는 표준 인터페이스가 **DPI-C**(Direct Programming Interface for C)입니다. SystemVerilog 표준 IEEE 1800의 일부이며, Verilator가 배포하는 C 쪽 헤더 `svdpi.h`는 첫머리에 "IEEE 1800-2023 Annex I"에서 가져왔다고 적습니다. 다만 "표준에 있다"와 "내 simulator가 지원한다"는 다른 문제입니다. 이 장에서 돌려 본 Icarus Verilog 13.0은 `import "DPI-C"` 줄을 syntax error로 거부했고, Verilator 5.054는 시간을 소모하는 export task를 거부했습니다.
 
 이 장에서는 DPI-C를 *언어 차원*에서 보고, 각 규칙을 Verilator 5.054에서 직접 돌린 결과로 확인합니다. `import`/`export`의 의미, data type이 SV ↔ C에서 어떻게 매핑되는지, `context` 선언이 왜 필요한지, simulator별 차이를 차례로 다룹니다.
 
 ## DPI-C는 무엇이고 왜 표준에 들어갔나
 
-DPI 이전에 SV/Verilog 코드가 C를 부르는 표준 경로는 **VPI**(Verilog Procedural Interface)였습니다. VPI는 C 쪽이 handle로 simulator의 object model을 탐색하는 API라서, 값 하나를 넘기는 데에도 handle 조회와 `vpi_get_value` 같은 호출을 거쳐야 합니다.
+C가 simulator에 닿는 또 하나의 표준 경로는 **VPI**(Verilog Procedural Interface)입니다. Verilator가 배포하는 `vpi_user.h`(첫머리에 "IEEE 1800-2023 Annex K"에서 왔다고 적음)를 보면, C 쪽은 `vpi_handle_by_name`(`:889`)·`vpi_handle`(`:896`)로 simulator object의 handle을 얻은 뒤 `vpi_get_value`(`:924`)로 값을 읽습니다. 값 하나를 넘기는 데에도 handle 조회와 값 조회를 거치는 구조입니다.
 
 DPI-C는 그보다 *훨씬 좁은* foreign interface를 정의해 다음 셋만 다룹니다.
 
@@ -82,7 +82,7 @@ C가 받은 `$time`은 module 시간 단위(1 ns)로 15이고, SV의 `%0t`는 pr
 | 형태 | 시간 소모 | 이 장에서 확인한 것 |
 |------|----------|-------------------|
 | `function` | 없음 (0-time) | 위 실행에서 C 호출 전후의 SV 시각이 같음 |
-| `task` | imported task 안에서 exported SV task를 불러 시간을 진행할 수 있음 | Verilator 5.054는 시간 제어가 있는 export task를 컴파일하지 않음(아래) |
+| `task` | Verilator 5.054에서는 시간 제어가 있는 export task가 컴파일되지 않아 확인 못 함 | 아래 `%Error-UNSUPPORTED` 출력 |
 
 이 시리즈는 driver의 `writel`을 `function`으로 둡니다. register write를 0-time event로 모델링하기 때문입니다. C 계산에 host 시간이 오래 걸린다고 task가 필요한 것은 아닙니다. host의 `sleep`이나 별도 thread는 simulation clock을 한 tick도 진행시키지 않습니다.
 
@@ -106,7 +106,7 @@ $ verilator --cc --exe --build -j 0 --timing top.sv harness.c main.cpp
 %Error: Exiting due to 1 error(s)
 ```
 
-이 메시지는 Verilator 소스 `src/V3Timing.cpp:954`에 있습니다. 그래서 Verilator 기반 cosim에서는 C가 시간을 진행시키지 않고, C++ main loop가 clock을 돌리면서 C에 "다음 일"을 묻는 구조로 뒤집어야 합니다. 3장과 8장이 이 구조를 씁니다. 시간 제어가 있는 export task를 지원하는 상용 simulator(VCS·Questa·Xcelium)는 이 글에서 실행하지 않았습니다.
+이 메시지는 Verilator 소스 `src/V3Timing.cpp:954`에 있습니다. 그래서 Verilator 기반 cosim에서는 C가 시간을 진행시키지 않고, C++ main loop가 clock을 돌리면서 C에 "다음 일"을 묻는 구조로 뒤집어야 합니다. 3장과 8장이 이 구조를 씁니다. 상용 simulator(VCS·Questa·Xcelium)는 실행하지 않았고, 그쪽 지원 여부를 확인한 1차 문서도 없어서 적지 않습니다.
 
 시간을 쓰지 않는 export **function**은 Verilator에서도 동작합니다. 아래는 SV의 cycle counter를 C에 보여 주는 export와, 그것을 부르는 C 함수입니다.
 
@@ -150,9 +150,7 @@ C++ `main()`에서 `svSetScope` 없이 `sv_cycle()`을 바로 불러도 같은 �
 |------|------------|------------|
 | `context` | 가능 | 위 실행에서 `cycle=102` 반환 |
 | 표시 없음 | scope가 없어 Verilator가 중단 | 위 `%Error` 출력 |
-| `pure` | 결과가 인자에만 의존한다는 약속. Verilator는 `--threads` 빌드에서 pure import를 thread-safe로 간주(`--threads-dpi pure`가 기본) | Verilator manual `--threads-dpi` 항목 |
-
-`pure`가 simulator 최적화(호출 생략 등)에 어떤 자유를 주는지는 IEEE 1800 35.5 본문이 정합니다. 표준 본문은 IEEE 계정이 필요해 이 글에서 직접 대조하지 못했으므로, 그 내용은 적지 않습니다.
+| `pure` | Verilator는 `--threads` 빌드에서 pure import를 thread-safe로 간주(`--threads-dpi pure`가 기본) | Verilator manual `--threads-dpi` 항목 |
 
 ## Data type 매핑
 
@@ -286,7 +284,7 @@ endtask
 | --- | --- |
 | Verilator 5.054 | import/export function, `context`, packed·open array 모두 빌드·실행. 시간 제어 있는 export task는 `%Error-UNSUPPORTED`. `shortreal`은 `double`로 승격 |
 | Icarus Verilog 13.0 | `iverilog -g2012 -o top.vvp top.sv`가 DPI `import`/`export` 선언 줄마다 `syntax error` / `error: Invalid module item.`을 내고 rc=12로 끝남. DPI-C를 쓰는 cosim에는 쓸 수 없음 |
-| VCS/Questa/Xcelium | 이 글에서 실행하지 않음. DPI header 생성과 shared library load 방법은 각 vendor manual을 따름 |
+| VCS/Questa/Xcelium | 실행하지 않았고 vendor 문서도 대조하지 않아 적지 않음 |
 
 Verilator로 DPI가 있는 RTL을 빌드하면 `obj_dir/`에 다음 파일이 생깁니다.
 
@@ -316,7 +314,7 @@ DPI-C를 처음 쓰면 자주 막히는 지점들입니다.
 
 ## 정리
 
-- **DPI-C는 IEEE 1800 35장의 표준**이지만 지원 범위는 simulator마다 다릅니다. Icarus 13.0은 문법부터 거부하고, Verilator 5.054는 시간 제어 있는 export task를 거부합니다.
+- **DPI-C는 IEEE 1800 표준**이지만 지원 범위는 simulator마다 다릅니다. Icarus 13.0은 문법부터 거부하고, Verilator 5.054는 시간 제어 있는 export task를 거부합니다.
 - import function은 0-time입니다. 실행 예제에서 C 호출 전후의 SV 시각이 같았습니다.
 - export를 부르는 C 함수는 `context`로 import해야 합니다. 빼면 Verilator가 scope 오류로 중단합니다.
 - Data type 매핑은 생성된 `Vtop__Dpi.h`가 정답지입니다. packed vector는 `svBitVecVal`/`svLogicVecVal` word 배열이고 `words[0]`이 최하위 32 bit입니다.
@@ -330,10 +328,11 @@ DPI-C를 처음 쓰면 자주 막히는 지점들입니다.
 
 - [Verilator Connecting/DPI](https://verilator.org/guide/latest/connecting.html) — export scope(`svSetScope`)·context import
 - Verilator 5.054 `docs/guide/exe_verilator.rst`의 `--threads-dpi` 항목, `src/V3Timing.cpp:954`
+- Verilator 5.054 `include/vltstd/vpi_user.h` — IEEE 1800-2023 Annex K 헤더. `:889`, `:896`, `:924`
 - Verilator 5.054 `include/vltstd/svdpi.h` — IEEE 1800-2023 Annex I 헤더. `:80-103` 타입, `:161`·`:165` bit helper, `:296-300` `svGetScope`
 - [AMD UG900: open arrays](https://docs.amd.com/r/en-US/ug900-vivado-logic-simulation/Open-Arrays-in-DPI) — raw pointer와 open-array handle 구분
 
-실행 환경은 macOS 27.2.1(Apple M2 Pro), Homebrew Verilator 5.054, Icarus Verilog 13.0, helper 검사용 Homebrew clang 23.1.5입니다(2026-11-16). 위 출력은 모두 이 환경에서 나온 것입니다. IEEE 1800 본문과 상용 simulator는 대조·실행하지 않았습니다.
+실행 환경은 macOS 27.2.1(Apple M2 Pro), Homebrew Verilator 5.054, Icarus Verilog 13.0, helper 검사용 Homebrew clang 23.1.5입니다(2026-11-16). 위 출력은 모두 이 환경에서 나온 것입니다. IEEE 1800 본문은 이 작업 환경에서 열 수 없어(IEEE GET Program 접근 불가) 표준 쪽은 Verilator가 배포하는 Annex I·K 헤더(`svdpi.h`·`vpi_user.h`)만 대조했습니다. 상용 simulator는 실행하지 않았습니다.
 
 ## 관련 항목
 
