@@ -24,7 +24,7 @@ topics: ["embedded"]
 
 ### H-bridge 토폴로지
 
-H-bridge는 4개 스위치 (Q1·Q3 high-side, Q2·Q4 low-side)와 모터로 구성됩니다. VBAT — Q1·Q3 — Motor — Q2·Q4 — GND.
+H-bridge는 4개 스위치 (Q1·Q3 high-side, Q2·Q4 low-side)와 모터로 구성됩니다. 전류 경로는 VBAT에서 Q1·Q3, motor, Q2·Q4를 거쳐 GND로 이어집니다.
 
 | 동작 | ON 스위치 | 결과 |
 | --- | --- | --- |
@@ -34,7 +34,7 @@ H-bridge는 4개 스위치 (Q1·Q3 high-side, Q2·Q4 low-side)와 모터로 구�
 | Coast | 모두 off | 자유 회전 |
 | Shoot-through (금지) | Q1+Q2 또는 Q3+Q4 | 전원 short, IC 파손 |
 
-대각선 두 스위치가 켜지면 한 방향, 반대 대각선이면 반대 방향. Q1+Q2 또는 Q3+Q4 동시 ON은 *shoot-through* (short-circuit) — 절대 금지.
+대각선 두 스위치가 켜지면 한 방향으로, 반대 대각선이 켜지면 반대 방향으로 돕니다. Q1+Q2나 Q3+Q4가 동시에 켜지면 *shoot-through*(short-circuit)가 나므로 절대 그렇게 두지 않습니다.
 
 ### Driver IC 비교
 
@@ -284,7 +284,7 @@ motor가 물리적으로 막히면 회전에 따른 역기전력이 없어 전�
 - DC motor = **H-bridge driver + PWM duty + direction**.
 - **Sign-magnitude**에서 짝이 되는 입력이 high(slow decay)면 duty의 의미가 뒤집힙니다(DRV8833).
 - DRV8833은 OCP, TB6612FNG는 내부 dead time, L293D는 clamp diode를 datasheet에 적습니다.
-- **Soft-start**로 inrush current 제한, **current sensing**으로 over-current protect.
+- **Soft-start**로 inrush current를 제한하고, **current sensing**으로 over-current를 막습니다.
 - 위 코드는 **PWM 20 kHz**(TIM2, ARR 4199)입니다.
 
 다음 편은 **스테퍼 모터**입니다. step 시퀀스, micro-stepping, acceleration ramp를 다룹니다.
