@@ -11,28 +11,30 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"perf로 부족한 곳에는 Tracy의 ns marker, Hotspot의 GUI, uftrace의 함수 trace, Coz의 causal 분석이 차례로 답을 줍니다."**
+> **"perf로 부족한 곳에는 Tracy의 ns marker, Hotspot의 GUI, uftrace의 함수 trace, Coz의 causal 분석이 각자 다른 질문에 답합니다."** 다만 비용과 함정은 플랫폼마다 다릅니다. 같은 Tracy zone이 Mac에서는 약 7.6 ns, Linux arm64 VM에서는 약 47 ns였습니다.
 
 ## 어떤 문제를 푸는가
 
-perf와 ftrace는 강력하지만 GUI가 빈약하고, 사용자 코드에 직접 marker를 심기에는 비용이 듭니다. 게임이나 실시간 시스템처럼 ns 단위 분석이 필요하면 sampling은 한계가 분명합니다.
+perf와 ftrace는 강력하지만 결과를 텍스트로 훑어야 하고, sampling은 "자주 걸리는 곳"만 보여 줍니다. 몇 초에 한 번 튀는 프레임이나, 한 번만 불리지만 오래 걸리는 함수는 sampling 통계에 묻힙니다. 그리고 "가장 오래 걸리는 함수"가 "고치면 가장 빨라지는 함수"라는 보장도 없습니다.
 
-이 글에서 다루는 도구들은 perf와 ftrace의 약점을 다른 각도에서 보완합니다. Tracy는 게임 엔진 수준의 ns marker, Hotspot은 perf의 modern Qt GUI, uftrace는 사용자 함수 진입/이탈 전체 trace, Coz는 "이 함수를 N% 빠르게 하면 전체가 얼마나 빨라지나"를 답해 주는 causal profiler입니다.
+이 글의 도구들은 이 빈틈을 하나씩 맡습니다. 비유하면 Tracy는 경기 영상에 선수마다 붙인 스톱워치, Hotspot은 perf가 찍은 사진을 보기 좋게 붙인 앨범, uftrace는 모든 출입문에 단 출입 기록부, Coz는 "이 선수가 10% 빨라지면 팀 기록이 얼마나 줄까"를 실험해 보는 코치입니다.
 
-각 도구의 설치, 출력, 적합한 시나리오를 살펴보고 마지막에 비교 표로 정리합니다.
+> **실행 환경** Tracy·uftrace·perf는 Debian 13 arm64 QEMU guest(kernel 6.12.116, `-accel hvf -cpu host`, host Apple M2 Pro, gcc 14.2.0)에서, Tracy와 Instruments는 같은 Mac(Apple clang 21.0.0)에서 직접 돌렸습니다. Hotspot은 Debian arm64 패키지와 arm64 AppImage가 없어 실행하지 못했고, Coz는 이 작업 환경에서 빌드가 허용되지 않아 실행하지 않았습니다. 두 도구는 README와 논문으로만 설명합니다.
 
 ## Tracy — ns 단위 instrumentation
 
-Tracy는 Bartosz Taudul이 만든 frame profiler입니다. 게임 엔진의 frame profiling에서 출발해 임베디드와 일반 application에도 확산되고 있습니다.
+[Tracy](https://github.com/wolfpld/tracy)는 Bartosz Taudul이 만든 프로파일러입니다. [Tracy 매뉴얼](https://github.com/wolfpld/tracy/releases/download/v0.15.0/tracy.pdf)(v0.15.0)은 자신을 "real-time, nanosecond resolution hybrid frame and sampling profiler"로 소개하고, 게임 같은 실시간 애플리케이션의 frame 시간 분석에 초점이 있지만 frame 개념이 없는 프로그램에도 쓸 수 있다고 적습니다. 프로파일링 대상은 CPU, GPU(OpenGL·Vulkan·Direct3D 11/12·Metal·OpenCL·CUDA·WebGPU), 메모리 할당, lock, context switch입니다.
+
+매뉴얼 2.3절의 GUI(서버) 빌드 명령은 다음과 같습니다.
 
 ```bash
 git clone https://github.com/wolfpld/tracy
 cd tracy
-cmake -B build/profiler tracy/profiler
-cmake --build build/profiler
+cmake -B profiler/build -S profiler -DCMAKE_BUILD_TYPE=Release
+cmake --build profiler/build --config Release --parallel
 ```
 
-코드에 marker를 심는 방식은 매우 단순합니다.
+애플리케이션 쪽은 `public/TracyClient.cpp` 하나를 같이 빌드하고 `TRACY_ENABLE`을 정의한 뒤 marker를 심습니다.
 
 ```cpp
 #include <tracy/Tracy.hpp>
@@ -50,116 +52,101 @@ void process_frame() {
 }
 ```
 
-`ZoneScoped`은 RAII로 진입과 이탈을 기록합니다. 비용은 compiler, build mode, zone 빈도, capture 설정에 따라 달라지므로 대상 build에서 측정해야 합니다. Tracy는 timestamp resolution 정보를 보존하지만 resolution이 곧 측정 정확도를 보장하지는 않습니다.
+`ZoneScoped`는 RAII 객체라 scope에 들어갈 때와 나갈 때 timestamp를 남깁니다. 매뉴얼 1.7절은 etcpak 압축에 zone 16,777,216개를 단 실험에서 zone 하나(시작·끝 이벤트 둘)의 비용을 2.25 ns로 계산합니다. 이 값을 그대로 믿기 전에 직접 재 봤습니다. `ZoneScopedN`을 단 함수를 200만 번 부르고 호출당 시간을 쟀습니다(서버는 연결하지 않았고, 다섯 번 실행).
 
-Tracy의 강점은 다음과 같습니다.
+| 환경 | `TRACY_ENABLE` 없음 | `TRACY_ENABLE` | zone당 증가분(중앙값) |
+|---|---|---|---|
+| Mac (M2 Pro, clang 21) | 2.03 ns | 9.63 ns | 약 7.6 ns |
+| Debian 13 arm64 VM (gcc 14.2) | 2.06 ns | 49.34 ns | 약 47.3 ns |
+| 같은 VM, `TRACY_ON_DEMAND` | — | 2.17 ns | 서버 미연결 시 약 0.1 ns |
 
-```text
-- Marker 비용은 대상 build에서 측정
-- 실시간 네트워크 송신 (target과 GUI 분리)
-- Memory allocation tracking, lock tracking
-- GPU(OpenGL, Vulkan, DirectX, CUDA) annotation 지원
-- Frame statistics (95th, 99th percentile, max)
-```
+VM에서 여섯 배 넘게 비싼 이유는 timer입니다. Tracy v0.15.0의 `TracyProfiler.hpp`는 hardware timer(`TRACY_HAS_CNTVCT`)를 Apple ARM64와 Windows ARM64에만 켜고, Linux aarch64에서는 `clock_gettime(CLOCK_MONOTONIC_RAW)`로 떨어집니다. 같은 VM에서 이 호출 하나가 17.48 ns(중앙값)였고 zone 하나에 두 번 부르므로 증가분의 대부분이 설명됩니다. Mac 빌드는 `CNTVCT_EL0` 레지스터를 직접 읽습니다. 그러니 "Tracy zone은 몇 ns"라는 숫자는 timer 경로까지 같은 플랫폼에서만 옮겨 쓸 수 있습니다.
 
-게임이 아니어도 frame이라는 개념이 있는 시스템(video pipeline, motion control loop, 센서 fusion cycle)에 잘 맞습니다.
+`TRACY_ON_DEMAND`는 서버가 연결됐을 때만 기록하는 옵션입니다. 매뉴얼은 이 옵션이 꺼진 기본 상태에서는 서버가 연결될 때까지 이벤트를 메모리에 쌓고, 그 양이 "a couple of gigabytes"까지 늘 수 있다고 경고합니다. 위 표의 `TRACY_ENABLE` 행이 바로 그 상태(서버 없음, 계속 쌓음)에서 잰 값입니다.
+
+Tracy의 기능 중 매뉴얼에서 확인한 것은 다음과 같습니다.
+
+- 대상 애플리케이션과 GUI가 네트워크로 분리되어, 임베디드 보드에서 기록하고 PC에서 봅니다.
+- 메모리 할당과 lock 표시(3.6절), 데드락 탐지 창(5.19절)이 있습니다.
+- GPU zone은 3.10절에 OpenGL·Vulkan·Direct3D·CUDA 등 API별로 나뉘어 있습니다.
+- 한 세션은 1.6일을 넘길 수 없습니다(제약 목록).
+
+frame이라는 반복 단위가 있는 시스템(영상 파이프라인, 모터 제어 루프, 센서 fusion 주기)이면 `FrameMark`로 frame마다 시간을 나눠 볼 수 있습니다.
 
 ## Hotspot — perf의 Qt GUI
 
-Hotspot은 KDAB가 만든 perf 결과 viewer입니다. `perf report`의 텍스트 UI를 Qt GUI로 재구성한 형태이며 무료 오픈 소스입니다.
+[Hotspot](https://github.com/KDAB/hotspot)은 KDAB의 R&D 프로젝트로, `perf record`가 만든 `perf.data`를 Qt GUI로 보여 줍니다. README가 보여 주는 화면은 Summary, Bottom-Up, Top-Down, Flame Graph, Caller/Callee, 디스어셈블리, 시간·스레드로 거르는 timeline입니다.
 
 ```bash
-# Ubuntu
-apt install hotspot
-
-# AppImage
-wget https://github.com/KDAB/hotspot/releases/download/v1.5.0/hotspot-v1.5.0-x86_64.AppImage
-chmod +x hotspot-*.AppImage
-```
-
-기본 사용은 매우 단순합니다.
-
-```bash
-perf record -g ./app
+perf record --call-graph dwarf ./app
 hotspot perf.data
 ```
 
-GUI는 다음 view를 한 화면에 띄웁니다.
+README는 backtrace를 얻으려면 "dwarf callgraph mode"를 켜라고 안내합니다. Off-CPU 분석은 `-e sched:sched_switch --switch-events`를 함께 기록해야 하고, Hotspot의 record 페이지에도 off-CPU 체크박스가 있습니다. 임베디드 보드에서 기록하고 다른 아키텍처의 host에서 분석하는 절차도 README에 있습니다. 보드에서 `perf record --call-graph dwarf`를 돌리고 `/proc/kallsyms`를 일반 파일로 복사해 `perf.data`와 함께 host로 가져갑니다.
 
-| View | 내용 |
-|------|------|
-| Summary | 전체 통계, 시스템 정보 |
-| Bottom-Up | leaf 함수 순위 |
-| Top-Down | root부터 호출 트리 |
-| Flamegraph | 내장 flamegraph (수집 없이 즉시) |
-| Caller/Callee | 특정 함수의 호출 관계 |
-| Off-CPU | sched switch가 같이 수집되면 표시 |
-
-Flamegraph를 별도 스크립트 없이 GUI에서 바로 그릴 수 있고, 클릭으로 source line까지 navigate됩니다. perf 결과를 자주 본다면 작업 효율이 크게 올라갑니다.
+설치에는 제약이 있습니다. README는 Hotspot이 "not yet packaged on all Linux distributions"이라 AppImage를 권하는데, 최신 릴리스 v1.6.0의 AppImage는 `hotspot-v1.6.0-x86_64.AppImage` 하나뿐입니다. 이 글의 Debian 13 arm64 guest에서 `apt-cache policy hotspot`은 후보를 내지 않았습니다. 그래서 arm64 보드에서 기록하고 x86_64 PC에서 여는 위 절차가 실제 경로가 됩니다.
 
 ## uftrace — 사용자 함수 전체 trace
 
-uftrace의 replay 출력에서 duration은 함수 실행시간이며, 진입 행에는 아직 duration이 없고 return 행에 기록됩니다([공식 replay 문서](https://github.com/namhyung/uftrace/blob/master/doc/uftrace-replay.md)).
+[uftrace](https://github.com/namhyung/uftrace)는 사용자 공간 함수의 진입과 반환을 ftrace의 function_graph처럼 기록합니다. README(v0.17)에 따르면 계측 방법은 두 가지입니다. `-pg`·`-finstrument-functions`·`-fpatchable-function-entry=N`으로 컴파일한 코드를 쓰거나(aarch64는 `=2`면 충분), `-P.`로 함수를 동적으로 패치합니다. 동적 추적은 x86_64와 AArch64에서 지원합니다.
 
-uftrace는 Linux 사용자 공간 함수 진입/이탈을 ftrace 스타일로 기록하는 도구입니다. ftrace가 커널을 대상으로 했다면 uftrace는 사용자 application이 대상입니다.
+예제로 `parse_input()`과 `process()` → `compute()` → `inner_loop()` 두 번을 부르는 작은 프로그램을 `gcc -O2 -pg`로 빌드했습니다.
 
 ```bash
-apt install uftrace
-
-# 컴파일 시 -pg 추가
-gcc -pg -o app app.c
-
-# 기록
-uftrace record ./app
-
-# 출력
+gcc -O2 -pg -o app_pg app.c
+uftrace record -F parse_input -F process ./app_pg 1
 uftrace replay
-uftrace report
-uftrace graph
 ```
 
 ```text
-# uftrace replay
-   DURATION    TID     FUNCTION
-            [ 1234] | main() {
-            [ 1234] |   parse_input() {
-    1.234 us [ 1234] |     malloc();
-    2.345 us [ 1234] |     memcpy();
-   12.000 us [ 1234] |   } /* parse_input */
-            [ 1234] |   process() {
-            [ 1234] |     compute() {
-   30.000 us [ 1234] |       inner_loop();
-   30.500 us [ 1234] |     } /* compute */
-   45.000 us [ 1234] |   } /* process */
+# DURATION     TID      FUNCTION
+            [   4159] | parse_input() {
+   0.375 us [   4159] |   malloc();
+   0.500 us [   4159] |   memcpy();
+   0.334 us [   4159] |   free();
+   2.708 us [   4159] | } /* parse_input */
+            [   4159] | process() {
+            [   4159] |   compute() {
+   3.500 us [   4159] |     inner_loop();
+   3.459 us [   4159] |     inner_loop();
+   7.167 us [   4159] |   } /* compute */
+   7.250 us [   4159] | } /* process */
 ```
 
-ftrace의 function_graph와 거의 같은 출력을 사용자 코드에서 봅니다. Sampling profiler가 빠뜨리는 짧은 함수 호출도 모두 보입니다.
+Duration은 함수가 반환하는 행에 찍히고, 진입 행은 비어 있습니다([replay 문서](https://github.com/namhyung/uftrace/blob/master/doc/uftrace-replay.md)). `process()` 안의 `memcpy(dst, src, 4096)`은 크기가 고정이라 컴파일러가 인라인 복사로 바꿔 `bl memcpy`가 남지 않았고, 그래서 trace에도 없습니다. `-F`는 해당 함수와 그 아래만 기록하고, `-N`은 해당 함수를 빼는 필터입니다.
 
-Filter로 특정 함수만 trace할 수 있습니다.
+### arm64 Debian에서 main을 추적하면 SIGILL
 
-```bash
-uftrace record -F 'parse_*' -F 'compute' ./app
-uftrace record -N 'malloc' -N 'free' ./app    # 제외
+`-F` 없이 `uftrace record ./app_pg 1`을 돌리면 이 guest에서는 `WARN: child terminated by signal: 4: Illegal instruction`으로 죽었습니다. `-F main`도 같았고, `-F process`나 `-F parse_input`은 정상이었습니다. `debug.exception-trace`를 켜고 다시 돌린 커널 로그가 원인을 보여 줍니다.
+
+```text
+app_pg[4079]: unhandled exception: undefined instruction in libc.so.6[2225c,ffffbd5d0000+19c000]
+pstate: 40001400 (nZcv daif -PAN -UAO -TCO -DIT +SSBS BTYPE=jc)
+pc : 0000ffffbd5f225c
 ```
 
-ChromeBook 개발팀과 일부 Linux 배포판에서 디버깅 도구로 사용합니다.
+libc의 0x2225c는 정상 명령인 `bl exit`이고, 바로 앞이 `main`을 부르는 `blr x3`입니다. 즉 `main`이 돌아갈 자리입니다. 이 Debian의 glibc 2.41은 `readelf -n`에 "AArch64 feature: BTI, PAC"가 표시되는 BTI 빌드입니다. uftrace v0.17의 `arch/aarch64/mcount.S`에서 반환 trampoline(`mcount_return`)은 원래 반환 주소로 `br x16`을 씁니다. `ret`이 아닌 간접 분기가 BTI landing pad가 아닌 곳에 떨어졌고, `pstate`의 `BTYPE=jc`가 그 흔적입니다. Linux v6.12의 `do_el0_bti()`는 이 예외를 `SIGILL`로 보내고, `force_signal_inject()`가 SIGILL을 "undefined instruction"으로 찍습니다. 실무에서는 `-F`로 `main` 아래 함수만 골라 기록하면 피해 갈 수 있었습니다.
+
+### -pg와 uftrace의 비용
+
+같은 프로그램을 20,000회 반복으로 돌려 다섯 번 실행의 중앙값을 비교했습니다(`flock`으로 다른 벤치마크와 겹치지 않게 했습니다).
+
+| 빌드·실행 | 시간(중앙값) |
+|---|---|
+| `gcc -O2` | 151 ms |
+| `gcc -O2 -pg`, uftrace 없이 실행 | 151 ms |
+| `uftrace record -F parse_input -F process` | 265 ms |
+| `uftrace record -F process -D 1` | 255 ms |
+
+`-pg`로 들어간 `_mcount` 호출 자체는 uftrace 없이 실행하면 차이가 보이지 않았습니다. uftrace를 붙이면 약 1.75배가 됐고, 깊이를 1로 제한(`-D 1`)해도 크게 줄지 않았습니다. 한 반복에 함수가 열 개 안팎 불리는 짧은 함수 위주의 프로그램이라 진입마다 드는 고정 비용이 지배적입니다.
 
 ## Coz — Causal Profiler
 
-UMass의 Curtsinger와 Berger가 발표한 도구로, "이 함수를 N% 빠르게 하면 전체 throughput이 얼마나 향상되나"를 답합니다.
+Coz는 Charlie Curtsinger와 Emery D. Berger의 SOSP'15 논문 ["COZ: Finding Code that Counts with Causal Profiling"](https://arxiv.org/abs/1608.03676)에서 나온 도구입니다. 질문이 다릅니다. 기존 profiler는 "이 함수가 시간의 30%를 쓴다"를 알려 주지만, 그 함수를 없애도 전체가 30% 빨라진다는 보장은 없습니다. 다른 스레드가 그 결과를 기다리지 않는다면 효과가 없기 때문입니다.
 
-기존 profiler는 "이 함수가 30% 시간을 쓴다"를 알려 줍니다. 그러나 30% 시간을 쓰는 함수를 0%로 줄여도 전체가 30% 빨라진다는 보장이 없습니다. 다른 thread가 그 함수의 결과를 기다리지 않으면 의미가 없기 때문입니다.
+논문의 핵심 기법은 *virtual speedup*입니다. 선택한 코드 줄이 실행될 때마다 *다른* 스레드들을 잠깐 멈춰서, 그 줄이 상대적으로 빨라진 효과를 흉내 냅니다. 초록은 이 방법으로 Memcached를 9%, SQLite를 25%, PARSEC 응용 여섯 개를 최대 68% 빠르게 했고 대부분 10줄 미만의 수정이었다고 적습니다. 실행 오버헤드는 평균 17%(최소 0.1%, 최대 65%)로, gprof의 최대 6배보다 작다고 보고합니다.
 
-Coz는 가상으로 다른 모든 코드를 느리게 만들어, 대상 함수가 상대적으로 빨라진 효과를 시뮬레이션합니다.
-
-```bash
-git clone https://github.com/plasma-umass/coz
-cd coz
-make
-sudo make install
-```
-
-코드에 progress point를 심습니다.
+[README](https://github.com/plasma-umass/coz)의 사용법은 다음과 같습니다. 먼저 "더 자주 실행되기를 바라는 줄"에 progress point를 답니다.
 
 ```c
 #include <coz.h>
@@ -170,55 +157,51 @@ void process_request(Request* r) {
 }
 ```
 
-실행은 다음과 같습니다.
+README는 `libdl`을 링크(`-ldl`)하고 debug 정보와 함께 빌드한 뒤 다음처럼 실행하라고 합니다. `COZ_PROGRESS_NAMED("이름")`을 쓰면 여러 위치를 같은 progress point로 묶을 수 있습니다.
 
 ```bash
 coz run --- ./app
-plot profile.coz
+coz plot                 # 브라우저에서 profile.coz 보기
+coz plot --text          # 터미널 출력
 ```
 
-결과는 함수별 가상 속도 향상과 전체 throughput 향상의 관계 그래프입니다.
-
-```text
-function: parse_json
-  10% faster  → 1% throughput gain   (병목 아님)
-
-function: db_query
-  10% faster  → 9% throughput gain   (진짜 병목)
-```
-
-병렬 시스템에서 "어느 함수를 최적화해야 가장 효과가 큰가"를 직접 답해 줍니다.
+결과는 줄마다 "이 줄을 x% 빠르게 하면 progress point 처리율이 y% 오른다"는 곡선입니다. 곡선이 평평한 줄은 아무리 최적화해도 전체에 효과가 없는 줄입니다.
 
 ## Apple Instruments — 비교 참고
 
-macOS와 iOS에는 Instruments가 표준 도구입니다. Time Profiler, System Trace, Allocations, Leaks 등 여러 instrument를 한 timeline에서 결합합니다. Tracy와 사고 방식이 유사하며 GPU(Metal) trace도 통합되어 있습니다.
+macOS에는 Xcode의 Instruments가 있고, CLI인 `xctrace`로도 쓸 수 있습니다. 이 Mac(xctrace 27.2)에서 `xcrun xctrace list templates`는 Time Profiler, System Trace, CPU Counters, Processor Trace, Metal System Trace, Allocations, Leaks, Power Profiler 등을 보여 줬습니다.
 
-오픈 소스 도구를 쓸 수 없는 환경에서 Mac을 갖고 있다면 Instruments는 매우 강력한 대안입니다.
+위 uftrace 예제를 Mac에서 빌드해 Time Profiler로 기록했습니다.
+
+```bash
+xcrun xctrace record --template 'Time Profiler' --output tp.trace --launch -- ./app_mac 20000
+```
+
+`xctrace export`로 꺼낸 `time-profile` 표는 샘플마다 weight가 1.00 ms였고, 50개 샘플 중 46개의 최상위 frame이 `inner_loop`였습니다. GUI 없이도 기록과 추출이 되므로 CI에서 쓸 수 있습니다.
 
 ## 언제 어떤 도구를 쓰나
 
-| 시나리오 | 추천 도구 |
-|---|---|
-| Frame 기반 시스템의 ns 단위 분석 | Tracy |
-| perf record 결과를 보기 좋게 | Hotspot |
-| 사용자 함수 전체 호출 trace | uftrace |
-| 어디를 최적화해야 효과적인지 | Coz |
-| GPU와 CPU 통합 (NVIDIA) | Nsight Systems |
-| GPU와 CPU 통합 (Apple) | Instruments |
-| 시스템 전체 sampling | perf record |
-| 커널 내부 흐름 | ftrace, eBPF |
+| 시나리오 | 추천 도구 | 이 글에서 확인한 비용·제약 |
+|---|---|---|
+| Frame 기반 시스템의 구간 분석 | Tracy | zone당 Mac 약 7.6 ns, Linux arm64 VM 약 47 ns |
+| perf record 결과를 GUI로 | Hotspot | x86_64 AppImage만 배포, dwarf callgraph 권장 |
+| 사용자 함수 전체 호출 trace | uftrace | 이 예제에서 약 1.75배, BTI glibc에서 main 추적 시 SIGILL |
+| 어디를 최적화해야 효과적인지 | Coz | 논문 기준 평균 17% 오버헤드 |
+| GPU와 CPU 통합 (NVIDIA) | Nsight Systems | [5-08](/blog/embedded/performance-engineering/part5-08-nsight) |
+| macOS 전체 | Instruments(`xctrace`) | Time Profiler 1 ms 샘플 |
+| 시스템 전체 sampling | perf record | [5-01](/blog/embedded/performance-engineering/part5-01-perf-basics) |
 
-이 글에서 다룬 도구들은 perf의 대체가 아닙니다. perf로 큰 그림을 보고, Tracy로 ns 단위 phase를 확인하고, Coz로 어디부터 손대야 할지 정한 뒤, uftrace로 함수 흐름을 거꾸로 따라가는 식의 조합이 효과적입니다.
+이 도구들은 perf를 대체하지 않습니다. perf로 큰 그림을 보고, Coz로 손댈 곳을 고르고, Tracy로 그 구간을 frame 단위로 쪼개고, uftrace로 호출 흐름을 따라가는 식으로 조합합니다.
 
 ## 시나리오 — 미디어 처리 pipeline 튜닝
 
-1. **`perf record`로 hot 함수 식별** — decoder, filter, encoder가 골고루 hot하게 나옵니다.
-2. **Coz로 어디가 진짜 병목인지 확인** — encoder를 10% 빠르게 하면 전체가 8% 향상되지만, decoder를 10% 빠르게 해도 전체는 1%만 향상됩니다.
-3. **encoder에 Tracy `ZoneScoped` 심기** — 어느 phase가 ns 단위로 오래 걸리는지 확인합니다.
-4. **발견한 phase를 uftrace로 호출 흐름 추적** — 의외의 `memcpy`가 보입니다.
-5. **`memcpy` 제거 후 다시 1번부터 측정합니다.**
+decoder → filter → encoder 파이프라인의 처리율이 목표에 못 미친다고 해 봅시다. 아래는 위 도구들의 역할을 순서로 엮은 절차이며, 실제 파이프라인에서 돌린 결과는 아닙니다.
 
-이 흐름이 일반적인 모던 profiling cycle입니다.
+1. **`perf record --call-graph dwarf`로 hot 함수를 찾습니다.** 세 단계가 비슷하게 나오면 sampling만으로는 어디를 먼저 고칠지 정할 수 없습니다.
+2. **Coz로 단계별 효과를 비교합니다.** progress point를 encoder 출력(프레임 하나 완료)에 두고, 어느 단계의 줄이 가파른 곡선을 보이는지 봅니다.
+3. **그 단계에 Tracy `ZoneScopedN`을 심습니다.** 프레임마다 어느 하위 구간이 길어지는지 봅니다. 측정 대상 플랫폼에서 zone 비용을 먼저 재 둡니다.
+4. **uftrace로 그 구간의 호출 흐름을 따라갑니다.** `-F`로 범위를 좁혀야 비용이 줄고, arm64 BTI 환경에서는 `main`을 피합니다.
+5. **고친 뒤 1번부터 다시 측정합니다.**
 
 ## 자주 보는 함정과 안티패턴
 
@@ -228,15 +211,11 @@ macOS와 iOS에는 Instruments가 표준 도구입니다. Time Profiler, System 
 #define TRACY_ENABLE             // production 빌드에 켜져 있음
 ```
 
-Tracy marker는 가볍지만 0은 아닙니다. 평가용 build에만 enable하거나 macro로 빠르게 끌 수 있도록 분리합니다.
+매뉴얼은 `TRACY_ENABLE`이 없으면 계측이 컴파일에서 빠진다고 적습니다. 위 측정에서도 `TRACY_ENABLE`이 없는 빌드는 marker가 없는 빌드와 같은 2.0 ns대였습니다. 켜 둔 채 서버를 연결하지 않으면 이벤트가 메모리에 계속 쌓이므로, 출시 빌드에 남겨야 한다면 최소한 `TRACY_ON_DEMAND`를 씁니다.
 
-> ⚠️ uftrace -pg overhead 무시
+> ⚠️ uftrace로 main까지 기록하기 (arm64 BTI)
 
-```bash
-gcc -pg ./app                    # 모든 함수에 hook 삽입
-```
-
-`-pg`는 계측 지점을 추가하므로 함수 호출 빈도와 workload에 따라 비용이 커질 수 있습니다. 배포용 성능을 평가할 때는 계측 build와 실제 build를 구분하고 영향을 대상 환경에서 측정합니다.
+BTI가 켜진 glibc 위에서는 `main`의 반환이 uftrace trampoline의 `br x16`을 거치면서 SIGILL이 났습니다. `-F`로 `main` 아래 함수만 고릅니다.
 
 > ⚠️ Coz의 progress point 위치를 잘못 선택
 
@@ -249,20 +228,20 @@ void main() {
 }
 ```
 
-Progress가 의미하는 단위(요청 한 개, frame 한 개, 처리 한 단위)를 정확히 정해야 결과가 의미 있습니다. 너무 자잘하면 noise, 너무 큰 단위면 통계가 부족합니다.
+Progress point는 "더 자주 일어나기를 바라는 일"의 단위여야 합니다. 요청 처리량이 목표면 요청 하나가 끝나는 줄에, frame rate가 목표면 frame 하나가 끝나는 줄에 둡니다.
 
-> ⚠️ Hotspot에서 frame pointer 없는 perf.data
+> ⚠️ Hotspot에는 frame pointer가 필수라고 생각하기
 
-Hotspot도 perf와 같은 데이터를 보므로 frame pointer가 없으면 callchain이 깨집니다. 컴파일 단계에서 `-fno-omit-frame-pointer`가 필수입니다.
+Hotspot README가 권하는 것은 `--call-graph dwarf`입니다. 이 guest에서 같은 프로그램을 `perf record -e cpu-clock`으로 기록해 보니, gcc 14.2의 `-O2` 기본값이 `-fomit-frame-pointer [enabled]`인데도 `--call-graph fp`로 `main → compute → inner_loop`가 이어졌습니다. 디스어셈블리를 보면 leaf가 아닌 `compute`가 `stp x29, x30`으로 frame record를 그대로 만들었기 때문입니다. 반대로 `--call-graph dwarf`는 같은 체인을 복원했지만 libc 위쪽 두 frame이 `0x2bffffa5e2233b` 같은 값으로 찍혔습니다. 하위 48 bit(`0xffffa5e2233b`)는 libc 주소 범위인데 상위에 `0x2b`가 붙어 있어, PAC로 서명된 반환 주소의 서명 bit가 지워지지 않은 것으로 읽힙니다. arm64에서는 두 방식을 모두 찍어 비교합니다.
 
 ## 정리
 
-- Tracy는 instrumented zone의 timestamp와 duration을 보여주며, marker 비용은 대상 build에서 확인합니다.
-- Hotspot은 perf.data를 Qt GUI로 보여 주며 flamegraph를 GUI 안에서 생성합니다.
-- uftrace는 ftrace 스타일로 사용자 함수 전체 호출 trace를 제공합니다.
-- Coz는 causal profiler로 가상의 속도 향상이 전체 throughput에 미치는 효과를 측정합니다.
-- 도구들은 perf의 대체가 아니라 보완이며, 함께 조합해 사용합니다.
-- Apple Instruments는 macOS/iOS의 통합 대안이며 Metal GPU trace를 포함합니다.
+- Tracy zone 비용은 timer 경로가 정합니다. Mac(CNTVCT)에서 약 7.6 ns, Linux arm64 VM(`clock_gettime`)에서 약 47 ns였고, 매뉴얼의 2.25 ns는 다른 플랫폼의 값입니다.
+- Hotspot은 `--call-graph dwarf`로 기록한 `perf.data`를 보여 주며, 배포 AppImage는 x86_64용뿐입니다.
+- uftrace는 `-pg` 또는 동적 패치로 사용자 함수의 진입·반환을 기록하고, 이 예제에서 실행 시간이 약 1.75배가 됐습니다.
+- BTI가 켜진 arm64 glibc에서는 uftrace로 `main`을 추적하면 SIGILL이 납니다.
+- Coz는 virtual speedup으로 "고치면 효과가 있는 줄"을 찾으며, 논문 기준 평균 오버헤드는 17%입니다.
+- Instruments는 `xctrace`로 GUI 없이 기록하고 표로 추출할 수 있습니다.
 
 다음 편은 **Continuous Profiling** — profile을 시간에 따라 저장하고 비교하는 방법.
 
