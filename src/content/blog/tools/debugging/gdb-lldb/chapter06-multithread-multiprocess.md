@@ -15,154 +15,193 @@ topics: ["tools", "tools/debugging"]
 :::
 
 
-싱글 스레드 버그는 호출 흐름만 따라가면 됩니다. 멀티 스레드 버그는 *순서*가 망가집니다. 어떤 스레드가 먼저 락을 잡았는지, 어떤 스레드가 데이터를 덮어썼는지, 어떤 스레드가 안 깨어났는지를 봐야 합니다. 디버거가 정지하는 순간 모든 스레드의 콜스택이 한 시점의 사진처럼 박제됩니다. 이 사진을 잘 읽는 법이 이 장의 주제입니다.
+싱글 스레드 버그는 호출 흐름만 따라가면 됩니다. 멀티 스레드 버그는 *순서*가 망가집니다. 어떤 스레드가 먼저 락을 잡았는지, 어떤 스레드가 데이터를 덮어썼는지, 어떤 스레드가 안 깨어났는지를 봐야 합니다. 디버거가 정지하면 모든 스레드의 콜스택을 한 번에 볼 수 있고, 이 장은 그 사진을 읽는 법을 다룹니다.
 
-이 장에서는 *Linux 스레드의 정체*에서 출발해 GDB의 스레드 모델, scheduler-locking의 한계, fork/vfork/clone의 차이, 그리고 비결정적 race 디버깅의 표준 무기인 rr까지 다룹니다.
+*Linux 스레드의 정체*에서 출발해 GDB의 스레드 모델, scheduler-locking, fork/vfork/clone의 차이, 그리고 record-and-replay 도구 rr까지 다룹니다. 출력은 Debian 13 arm64(glibc 2.41, 커널 6.12.116)의 GDB 16.3과 lldb 19.1.7에서 얻었습니다.
 
 ## Linux의 스레드 — 실은 프로세스
 
-Linux 커널에서 *스레드*는 별도 개념이 아닙니다. `clone(2)` 시스템 콜의 옵션 비트로 만들어진 *프로세스*가 다른 프로세스와 *어떤 자원을 공유하는지*에 따라 의미가 갈립니다.
+Linux 커널에서 *스레드*는 별도 개념이 아닙니다. 새 태스크를 만들 때 무엇을 부모와 공유할지 플래그로 고르고, 전부 공유하면 스레드, 거의 아무것도 공유하지 않으면 프로세스가 됩니다. 한 집에 사는 가족(주소 공간·파일·시그널 처리를 공유)과 분가한 가족(사본만 들고 나감)의 차이와 비슷합니다.
 
-```c
-// pthread_create의 안쪽 (단순화)
-clone(child_func, child_stack,
-      CLONE_VM      |    // 주소 공간 공유
-      CLONE_FS      |    // 파일시스템 정보 공유
-      CLONE_FILES   |    // FD 테이블 공유
-      CLONE_SIGHAND |    // 시그널 핸들러 공유
-      CLONE_THREAD  |    // 같은 thread group (같은 PID)
-      CLONE_SYSVSEM |
-      CLONE_SETTLS  |
-      CLONE_PARENT_SETTID | CLONE_CHILD_CLEARTID,
-      arg, &parent_tid, tls, &child_tid);
+말로 하기보다 `strace`로 직접 보는 편이 정확합니다. 이 장의 실습 프로그램 `mt.c`(스레드 4개)와 `fork.c`(`fork` 한 번, `vfork` 한 번)를 `strace -f`로 돌리면 glibc 2.41이 실제로 부르는 시스템 콜이 나옵니다.
+
+```text
+$ strace -f -e trace=clone3 ./mt
+clone3({flags=CLONE_VM|CLONE_FS|CLONE_FILES|CLONE_SIGHAND|CLONE_THREAD|CLONE_SYSVSEM|CLONE_SETTLS|CLONE_PARENT_SETTID|CLONE_CHILD_CLEARTID, child_tid=0xffffb40af250, parent_tid=0xffffb40af250, exit_signal=0, stack=0xffffb38a0000, stack_size=0x80ea60, tls=0xffffb40af8a0}
+
+$ strace -f -e trace=clone,clone3,execve ./fork
+clone(child_stack=NULL, flags=CLONE_CHILD_CLEARTID|CLONE_CHILD_SETTID|SIGCHLD, child_tidptr=0xffffb25370f0) = 7673
+[pid  7673] execve("/bin/echo", ["echo", "from exec"], 0xfffff2e34488 /* 17 vars */) = 0
+clone(child_stack=0xfffff2e342e0, flags=CLONE_VM|CLONE_VFORK|SIGCHLD) = 7674
 ```
 
-이 모든 플래그를 함께 켜면 *POSIX 스레드*. 일부만 켜면 *부모-자식 프로세스*. vfork의 부모 정지는 CLONE_VM만으로 설명되지 않고 CLONE_VFORK 등의 의미도 확인해야 합니다.
+`pthread_create`는 `clone3`에 공유 플래그를 모두 켜고 `CLONE_THREAD`로 같은 스레드 그룹(같은 PID)에 넣습니다. `fork()`는 공유 플래그 없이 `SIGCHLD`만 주고, `vfork()`는 `CLONE_VM`(주소 공간 공유)에 `CLONE_VFORK`(자식이 `exec`하거나 끝날 때까지 부모 정지)를 더합니다. 플래그 하나하나의 의미는 `man 2 clone`에 있습니다.
 
-**LWP**(Light Weight Process)가 *커널의* 스레드 ID. `top -H`에서 보이는 그 ID입니다. `pthread_self()`가 반환하는 사용자 공간 pthread_t와는 다른 개념 — pthread_t는 POSIX가 정수·포인터 중 하나로 고정하지 않는 불투명 타입입니다. glibc 내부 표현과 Linux tid를 혼동하지 않습니다.
+**LWP**(Light Weight Process) 번호가 커널의 스레드 ID(tid)이고, `pthread_self()`가 돌려주는 `pthread_t`는 그와 다른 값입니다. POSIX는 `pthread_t`의 표현을 정하지 않고, glibc는 스레드 descriptor의 주소를 씁니다. `mt.c`의 `main`이 출력한 두 값과 GDB에서 본 값이 그 관계를 보여 줍니다.
 
 ```c
 #include <sys/syscall.h>
 pid_t my_lwp = syscall(SYS_gettid);   // LWP id (= tid)
-pthread_t my_pth = pthread_self();    // glibc pthread descriptor
+pthread_t my_pth = pthread_self();    // glibc: thread descriptor 주소
 ```
 
-`info threads`의 `Target Id` 형식은 OS와 target backend에 따릅니다. Linux native target에서는 LWP 항목에 커널 TID가 표시될 수 있지만, 주소처럼 보이는 thread id를 `pthread_t`라고 단정하면 안 됩니다. `pthread_t`의 표현은 POSIX가 고정하지 않는 불투명 타입입니다.
+```text
+main tid=7593 pthread_self=0xfffff7fef020
+...
+(gdb) info threads
+  Id   Target Id                                   Frame
+* 1    Thread 0xfffff7fef020 (LWP 7593) "mt"       main () at mt.c:53
+(gdb) print/x pthread_self()
+$1 = 0xfffff7fef020
+```
+
+GDB의 `Thread 0x...`는 glibc의 `pthread_t` 값과 같고, `LWP 7593`은 `gettid()`와 같습니다. 이 대응은 glibc + Linux native target에서 확인한 것이고, `pthread_t`를 정수 tid로 취급해도 된다는 뜻은 아닙니다.
 
 ## 정지의 의미
 
-기본적으로 GDB가 한 스레드를 멈추면 *모든* 스레드가 같이 멈춥니다 (`set non-stop off`, 기본값). 즉 브레이크포인트에 한 스레드가 도착하면 나머지 스레드도 그 자리에서 동결됩니다. 이때 콜스택을 찍으면 모든 스레드의 현재 위치가 동시에 보입니다 — 실시간이 아니라 정지 직후의 한 컷.
+GDB의 기본은 *all-stop* 모드입니다. 한 스레드가 breakpoint에 닿으면 나머지 스레드도 멈추고, 그 상태에서 모든 스레드의 위치를 볼 수 있습니다. 운동회 사진처럼 셔터를 누른 순간의 장면입니다. 다만 GDB 매뉴얼 All-Stop Mode 절은 다른 스레드가 문장 경계가 아니라 "in the middle of a statement"에서 멈춘다고 적고 있습니다. 아래 `info threads`에서 worker-1의 프레임에만 `0x0000aaaaaaaa0cc4 in`처럼 주소가 붙은 것이 줄 중간에 멈췄다는 표시입니다. 같은 절은 `step`·`next` 한 번 동안 다른 스레드가 여러 문장을 실행할 수 있다고도 적고 있습니다.
 
-운영체제와 target backend는 실행 중인 다른 스레드를 정지시킬 수 있습니다. 전체가 멈추기까지 일부 스레드가 진행할 수 있으므로 all-stop의 관측값도 원자적인 동시 스냅샷이라고 보장되지는 않습니다. non-stop은 선택한 스레드를 제어하는 방식이며 전체 스냅샷을 강화하는 기능은 아닙니다.
-
-`set non-stop on`이면 멈춘 스레드만 멈추고 나머지는 계속 달립니다. 디버깅 중에도 일부 스레드가 진행돼야 할 때 (예: heartbeat 송신 스레드) 쓰지만 보통은 off로 둡니다.
+`set non-stop on`이면 멈춘 스레드만 멈추고 나머지는 계속 달립니다. `mt.c`를 non-stop으로 실행해 53행에 멈추면 메인 스레드만 서 있고 나머지는 `(running)`입니다.
 
 ```text
 (gdb) set non-stop on
-(gdb) attach 12345
+(gdb) break 53
+(gdb) run
+Thread 1 "mt" hit Breakpoint 1, main () at mt.c:53
 (gdb) info threads
-* 1  ...    [running]
-  2  ...    [stopped at SIGTRAP]
-  3  ...    [running]
+  Id   Target Id                                   Frame
+* 1    Thread 0xfffff7fef020 (LWP 7636) "mt"       main () at mt.c:53
+  2    Thread 0xfffff7def180 (LWP 7638) "worker-0" (running)
+  3    Thread 0xfffff75df180 (LWP 7639) "worker-1" (running)
+  4    Thread 0xfffff6dcf180 (LWP 7640) "waiter"   (running)
+  5    Thread 0xfffff65bf180 (LWP 7641) "io"       (running)
+(gdb) thread 2
+(gdb) interrupt
+Thread 2 "worker-0" stopped.
+0x0000aaaaaaaa0cd8 in worker (arg=0x0) at mt.c:22
+(gdb) print counter
+$1 = {401381230, 405674151}
+(gdb) print counter
+$2 = {401381230, 405864792}
 ```
 
-non-stop 모드는 *모든 명령*이 스레드별로 독립적입니다. `continue` 시 현재 스레드만 진행. 디버깅 사고가 더 많아질 수 있어 평소엔 all-stop이 안전.
+`interrupt`로 worker-0만 세우자 `counter[0]`은 고정되고, 아직 달리는 worker-1의 `counter[1]`은 두 번의 `print` 사이에도 계속 늘었습니다. heartbeat를 보내는 스레드처럼 디버깅 중에도 멈추면 안 되는 스레드가 있을 때 non-stop을 씁니다. 명령이 스레드별로 따로 놀기 때문에, 그런 이유가 없다면 all-stop이 다루기 쉽습니다.
 
 ## 스레드 목록 보기
 
+all-stop으로 같은 프로그램을 53행에 세운 결과입니다. 스레드 이름은 각 스레드가 `pthread_setname_np`로 붙인 것입니다.
+
 ```text
 (gdb) info threads
-  Id   Target Id                                  Frame
-* 1    Thread 0x7ffff7d8b740 (LWP 12345) "main"   __pthread_cond_wait at futex-internal.h:174
-  2    Thread 0x7ffff75c4640 (LWP 12346) "worker" std::__atomic_base<int>::fetch_add at queue.cpp:42
-  3    Thread 0x7ffff6dc3640 (LWP 12347) "worker" pthread_cond_wait at queue.cpp:88
-  4    Thread 0x7ffff65c2640 (LWP 12348) "io"     read at io.cpp:23
+  Id   Target Id                                   Frame
+* 1    Thread 0xfffff7fef020 (LWP 7593) "mt"       main () at mt.c:53
+  2    Thread 0xfffff7def180 (LWP 7595) "worker-0" worker (arg=0x0) at mt.c:21
+  3    Thread 0xfffff75df180 (LWP 7596) "worker-1" 0x0000aaaaaaaa0cc4 in worker (arg=0x1) at mt.c:22
+  4    Thread 0xfffff6dcf180 (LWP 7597) "waiter"   __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/aarch64/syscall_cancel.S:50
+  5    Thread 0xfffff65bf180 (LWP 7598) "io"       __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/aarch64/syscall_cancel.S:50
 ```
 
-별표(`*`)는 *현재 스레드*. `Id`는 GDB가 부여한 짧은 번호입니다. Linux native target의 `LWP`(Light Weight Process)는 커널 thread ID를 가리킵니다. 다른 OS와 backend는 별도 thread-id 형식을 사용합니다.
+별표(`*`)는 *현재 스레드*이고, `Id`는 GDB가 붙인 번호입니다. 조건 변수를 기다리는 `waiter`와 `read`에서 막힌 `io`는 맨 위 프레임만으로는 구분되지 않습니다. 둘 다 glibc의 시스템 콜 진입점에 있기 때문이고, 무엇을 기다리는지는 아래 backtrace로 봅니다.
 
-위 `info threads` 출력은 필드 모양을 설명하는 예시이며, 주소·PID·소스 위치는 실제 한 세션에서 수집한 값이 아닙니다.
+이름은 NUL을 포함해 16바이트까지입니다(`man 3 pthread_setname_np`). `mt.c`가 23글자 이름을 붙이려 하자 `pthread_setname_np`가 `ERANGE`를 돌려줬습니다.
 
-스레드 이름 (`"main"`, `"worker"`)은 `pthread_setname_np` 또는 `prctl(PR_SET_NAME)`로 설정한 것. 디버깅을 쉽게 하려면 워커마다 의미 있는 이름을 박는 게 좋습니다.
-
-```c
-pthread_setname_np(pthread_self(), "worker-3");
+```text
+setname 23 chars: Numerical result out of range
 ```
 
-이름은 최대 15바이트(NUL 포함 16). 의외로 짧으므로 `db-conn-7` 같은 짧은 패턴이 적합.
-
-LLDB도 거의 같습니다.
+LLDB의 `thread list`도 같은 정보를 보여 줍니다. LLDB는 tid와 이름을 같은 줄에 적습니다.
 
 ```text
 (lldb) thread list
-Process 12345 stopped
-* thread #1: tid = 12345, 0x... main`__pthread_cond_wait, queue 'com.apple.main-thread', stop reason = breakpoint 1.1
-  thread #2: tid = 12346, 0x... main`worker_loop + 0x42, name = 'worker'
-  thread #3: tid = 12347, 0x... main`worker_loop + 0x88, name = 'worker'
-  thread #4: tid = 12348, 0x... main`io_loop + 0x23, name = 'io'
+Process 7934 stopped
+* thread #1: tid = 7934, 0x0000aaaaaaaa0e80 mt`main at mt.c:53:5, name = 'mt', stop reason = breakpoint 1.1
+  thread #2: tid = 7941, 0x0000aaaaaaaa0cc4 mt`worker(arg=0x0000000000000000) at mt.c:22:25, name = 'worker-0'
+  thread #3: tid = 7942, 0x0000aaaaaaaa0cbc mt`worker(arg=0x0000000000000001) at mt.c:22:25, name = 'worker-1'
+  thread #4: tid = 7943, 0x0000fffff7e7f228 libc.so.6`__syscall_cancel_arch at syscall_cancel.S:50, name = 'waiter'
+  thread #5: tid = 7944, 0x0000fffff7e7f228 libc.so.6`__syscall_cancel_arch at syscall_cancel.S:50, name = 'io'
 ```
 
-macOS는 *디스패치 큐* 정보도 함께 — `queue 'com.apple.main-thread'`처럼. GCD/libdispatch를 쓰는 macOS 앱 디버깅에서 유용.
+macOS의 LLDB는 여기에 libdispatch 큐 이름을 더합니다. [Ch 1](/blog/tools/debugging/gdb-lldb/chapter01-intro-and-install)의 macOS 세션에서 메인 스레드가 `queue = 'com.apple.main-thread'`로 표시된 것이 그 예입니다.
 
 ## 스레드 전환
 
+`thread N`으로 전환하면 이후의 `bt`·`print`·`info locals`가 그 스레드 기준으로 동작합니다.
+
 ```text
-(gdb) thread 3
-[Switching to thread 3 (Thread 0x7ffff6dc3640 (LWP 12347))]
+(gdb) thread 2
+[Switching to thread 2 (Thread 0xfffff7def180 (LWP 7595))]
+#0  0x0000aaaaaaaa0c90 in worker (arg=0x0) at mt.c:21
+21	        counter[id]++;                 /* line 21 */
 (gdb) bt
+#0  0x0000aaaaaaaa0c90 in worker (arg=0x0) at mt.c:21
+#1  0x0000fffff7e761d8 in start_thread (arg=0xfffff7def180) at ./nptl/pthread_create.c:448
+#2  0x0000fffff7ede15c [PAC] in thread_start () at ../sysdeps/unix/sysv/linux/aarch64/clone3.S:79
 ```
 
-`thread N`으로 전환하면 그 스레드의 콜스택과 레지스터·로컬 변수에 접근됩니다. 디버거의 *현재 컨텍스트*가 바뀐다고 생각하면 됩니다.
+LLDB는 `thread select N`입니다. `thread backtrace`는 선택한 스레드의 스택을 보여 주고, `bt 1`의 숫자는 *프레임 개수*이지 스레드 번호가 아닙니다.
 
-LLDB는 `thread select N`. 사실 LLDB에서는 `thread backtrace 3`으로 스레드 인덱스를 지정할 수 있지만 bt 3은 기본 alias에서 프레임 수 제한이므로 구분해야 합니다., 여러 작업을 그 스레드 컨텍스트에서 하려면 select가 편합니다.
+```text
+(lldb) thread select 2
+(lldb) bt 1
+* thread #2, name = 'worker-0'
+    frame #0: 0x0000aaaaaaaa0cc4 mt`worker(arg=0x0000000000000000) at mt.c:22:25
+```
 
 ## 모든 스레드에 명령 적용
 
-가장 자주 쓰는 한 줄.
+`thread apply all bt`는 모든 스레드의 콜스택을 한 번에 보여 줍니다. 특정 스레드만 보려면 번호를 나열하고, 뒤에 붙는 명령에는 옵션을 그대로 줄 수 있습니다.
 
 ```text
-(gdb) thread apply all bt
+(gdb) thread apply 2 3 bt 2
+
+Thread 2 (Thread 0xfffff7def180 (LWP 7595) "worker-0"):
+#0  0x0000aaaaaaaa0c90 in worker (arg=0x0) at mt.c:21
+#1  0x0000fffff7e761d8 in start_thread (arg=0xfffff7def180) at ./nptl/pthread_create.c:448
+(More stack frames follow...)
+
+Thread 3 (Thread 0xfffff75df180 (LWP 7596) "worker-1"):
+#0  worker (arg=0x1) at mt.c:22
+#1  0x0000fffff7e761d8 in start_thread (arg=0xfffff75df180) at ./nptl/pthread_create.c:448
+(More stack frames follow...)
 ```
 
-모든 스레드의 콜스택을 한 번에. 데드락 의심 시 가장 먼저 칩니다. 어느 스레드가 `pthread_mutex_lock`에서 멈춰 있고 어느 스레드가 그 락을 들고 있는지 한눈에 보입니다.
-
-특정 스레드만 추리고 싶으면 ID 나열.
+`waiter`의 전체 스택을 보면 조건 변수 대기임이 드러납니다.
 
 ```text
-(gdb) thread apply 2 3 4 bt full
+Thread 4 (Thread 0xfffff6dcf180 (LWP 7597) "waiter"):
+#0  __syscall_cancel_arch () at ../sysdeps/unix/sysv/linux/aarch64/syscall_cancel.S:50
+...
+#5  0x0000fffff7e7564c [PAC] in __pthread_cond_wait_common (cond=0xaaaaaaac00e8 <qcond>, mutex=0xaaaaaaac00b8 <qlock>, clockid=0, abstime=0x0) at ./nptl/pthread_cond_wait.c:426
+#6  ___pthread_cond_wait (cond=0xaaaaaaac00e8 <qcond>, mutex=0xaaaaaaac00b8 <qlock>) at ./nptl/pthread_cond_wait.c:458
+#7  0x0000aaaaaaaa0d2c [PAC] in waiter (arg=0x0) at mt.c:30
 ```
 
-LLDB는
-
-```text
-(lldb) thread backtrace all
-(lldb) bt all
-```
+LLDB는 `bt all`이고, 풀 명령은 `thread backtrace all`입니다.
 
 ### 출력이 너무 많을 때
 
-스레드가 많은 환경에서는 출력이 커집니다. 다음 세 가지로 범위를 좁힙니다.
+스레드가 수백 개면 출력이 금방 수천 줄이 됩니다. 범위를 좁히는 방법은 세 가지입니다.
 
-1. **압축 — frame filter**
+1. **프레임 수 제한** — `thread apply all -- bt 1`은 스레드마다 맨 위 프레임만 보여 줍니다. `--`는 `thread apply`의 옵션과 뒤 명령을 구분하고, `-q`를 주면 `Thread N (...)` 머리줄까지 뺍니다.
 
-   ```text
-   (gdb) thread apply all -- bt 5
-   ```
-
-   각 스레드 상위 5프레임만.
-
-2. **외부로 — set logging**
+2. **파일로** — GDB 16.3에서는 `set logging on`이 deprecated입니다. 쳐 보면 대체 명령을 알려 줍니다.
 
    ```text
-   (gdb) set logging file /tmp/threads.log
+   (gdb) set logging file /root/ch06/threads.log
    (gdb) set logging on
+   Warning: 'set logging on', an alias for the command 'set logging enabled', is deprecated.
+   Use 'set logging enabled on'.
+
+   Copying output to /root/ch06/threads.log.
    (gdb) thread apply all bt
-   (gdb) set logging off
+   ...
+   (gdb) set logging enabled off
+   Done logging to /root/ch06/threads.log.
+   (gdb) shell wc -l /root/ch06/threads.log
+   34 /root/ch06/threads.log
    ```
 
-   디스크에 떨어진 로그를 다른 창에서 grep으로 추립니다.
-
-3. **요약 — Python으로**
+3. **요약 — Python으로** — 맨 위 프레임 이름으로 스레드를 묶어 세면, 같은 자리에 멈춘 스레드가 몇 개인지 한눈에 보입니다. Java thread dump의 "같은 스택 N개" 요약과 같은 발상입니다.
 
    ```python
    (gdb) python
@@ -177,266 +216,340 @@ LLDB는
    end
    ```
 
-   비슷한 콜스택을 하나로 묶어 *유사 스레드 N개*로 봅니다. Java thread dump의 "same stack trace x42"와 같은 패턴.
+   `mt.c`에서 실행한 결과입니다.
+
+   ```text
+      2 __syscall_cancel_arch
+      2 worker
+      1 main
+   ```
 
 ## futex — 락 대기의 정체
 
-Linux의 pthread mutex/condition variable은 내부적으로 *futex*(Fast Userspace muTEX)를 씁니다. 락이 자유로우면 사용자 공간 atomic만으로 끝나고, 경합이 일어나야만 커널로 진입.
+Linux의 pthread mutex와 조건 변수는 *futex*(fast user-space mutex) 위에 서 있습니다. `man 7 futex`의 설명대로, 경합이 없으면 사용자 공간의 원자 연산만으로 끝나고 경합이 있을 때만 `futex` 시스템 콜로 커널에서 잠듭니다. 화장실 문고리를 돌려 보고 열리면 그냥 들어가고, 잠겨 있을 때만 줄을 서는 셈입니다.
 
-```c
-// pthread_mutex_lock의 간략 흐름
-int pthread_mutex_lock(mutex *m) {
-    if (atomic_cas(&m->lock, 0, 1)) return 0;       // fast path
-    while (atomic_cas(&m->lock, 0, 2) != 0)
-        syscall(SYS_futex, &m->lock, FUTEX_WAIT, 2, ...);
-    return 0;
-}
-```
-
-GDB로 보면 락 대기 중인 스레드는 `__lll_lock_wait` → `futex_wait` 식으로 콜스택이 마무리됩니다. 이 깊이는 거의 *항상 같음*. 콜스택 마지막이 `__lll_lock_wait`면 *어떤 락*을 기다리는지가 다음 질문.
+그래서 락을 기다리는 스레드의 스택 맨 위는 glibc 2.41에서 늘 같은 모양입니다. [Ch 4](/blog/tools/debugging/gdb-lldb/chapter04-backtrace-frames)의 `dead.c`에서 본 스택이 그 예입니다.
 
 ```text
-(gdb) thread 2
-(gdb) frame 3
-#3  pthread_mutex_lock (mutex=0x55555576a2c0) at ...
-(gdb) print *mutex
-$1 = {__data = {__lock = 2, __count = 0, __owner = 12347, ...}}
+#0  futex_wait (futex_word=0xaaaac98f0090 <m2>, expected=2, private=0) at ../sysdeps/nptl/futex-internal.h:146
+#1  __GI___lll_lock_wait (futex=futex@entry=0xaaaac98f0090 <m2>, private=private@entry=0) at ./nptl/lowlevellock.c:49
+#2  0x0000ffff93549750 [PAC] in lll_mutex_lock_optimized (mutex=0xaaaac98f0090 <m2>) at ./nptl/pthread_mutex_lock.c:48
+#3  ___pthread_mutex_lock (mutex=0xaaaac98f0090 <m2>) at ./nptl/pthread_mutex_lock.c:93
 ```
 
-이 축약 예시에서는 `__owner` 값이 Linux LWP 12347을 가리킨다고 가정합니다. 해당 TID가 실제로 이 mutex를 소유하는지 다른 스레드의 stack·mutex 주소와 함께 확인해야 합니다. glibc 내부 구조와 필드 의미는 버전에 따라 달라질 수 있습니다.
+`expected=2`는 glibc `sysdeps/nptl/lowlevellock.h` 주석의 세 상태(0 = 풀림, 1 = 잠김·대기자 없음, >1 = 잠김·대기자 있을 수 있음) 중 마지막 상태이고, 그 mutex를 *누가* 잡고 있는지는 glibc `pthread_mutex_t`의 `__owner` 필드(소유자의 LWP)에 있습니다. 이 필드는 glibc 내부 구조라서 다른 libc에서는 이름이 다릅니다.
 
 ## 데드락 사례
 
-다음 콜스택을 봅니다.
+`Cache::Update`는 Cache 락을 잡은 채 `Logger::Write`를 부르고, `Flush`는 Logger 락을 잡은 채 `Cache::Touch`를 부르는 `cache.cpp`를 실행해 두고 GDB로 붙었습니다. 두 스레드가 락을 반대 순서로 잡는 전형적인 순서 역전입니다.
 
-```text
-Thread 2:
-#0  __lll_lock_wait at lowlevellock.c:52
-#1  pthread_mutex_lock
-#2  std::mutex::lock at mutex:104
-#3  Cache::Update(string const&) at cache.cpp:88
-#4  Worker::Run() at worker.cpp:23
+```cpp title="cache.cpp (발췌)"
+void Update(const std::string& key) {
+    std::lock_guard<std::mutex> g(cache_mutex_);          // 18: Cache lock
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    data_[key]++;
+    log_.Write(key);                                      // 21: then Logger lock
+}
+void Touch() { std::lock_guard<std::mutex> g(cache_mutex_); }   // 23
 
-Thread 3:
-#0  __lll_lock_wait at lowlevellock.c:52
-#1  pthread_mutex_lock
-#2  std::mutex::lock at mutex:104
-#3  Logger::Write(string const&) at logger.cpp:42
-#4  Cache::Update(string const&) at cache.cpp:91
-#5  Worker::Run() at worker.cpp:23
+void Logger::Write(const std::string& msg) {
+    std::lock_guard<std::mutex> g(log_mutex_);                // 33: Logger lock
+}
+void Flush(Logger& log) {
+    std::lock_guard<std::mutex> g(log.log_mutex_);            // 38: Logger lock
+    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+    g_cache->Touch();                                         // 40: then Cache lock
+}
 ```
 
-T2는 Cache 락을 들고 Logger 락을 기다리고, T3는 Logger 락을 들고 Cache 락을 기다린다면 전형적 락 순서 역전(데드락)입니다. 락 객체 주소를 찍어 두 스레드가 같은 락을 다투는지 확인합니다.
+```text
+(gdb) thread apply 2 3 -- bt 9
+
+Thread 2 (Thread 0xffffb521f160 (LWP 7855) "cache"):
+#0  futex_wait (futex_word=0xfffff24de6c8, expected=2, private=0) at ../sysdeps/nptl/futex-internal.h:146
+...
+#5  0x0000aaaadbac2538 in std::mutex::lock (this=0xfffff24de6c8) at /usr/include/c++/14/bits/std_mutex.h:113
+#6  0x0000aaaadbac299c in std::lock_guard<std::mutex>::lock_guard (this=0xffffb521e788, __m=...) at /usr/include/c++/14/bits/std_mutex.h:250
+#7  0x0000aaaadbac2828 in Cache::Touch (this=0xfffff24de6c8) at cache.cpp:23
+#8  0x0000aaaadbac1a24 in Flush (log=...) at cache.cpp:40
+
+Thread 3 (Thread 0xffffb5a2f160 (LWP 7854) "cache"):
+#0  futex_wait (futex_word=0xfffff24de730, expected=2, private=0) at ../sysdeps/nptl/futex-internal.h:146
+...
+#7  0x0000aaaadbac19cc in Logger::Write (this=0xfffff24de730, msg="k") at cache.cpp:33
+#8  0x0000aaaadbac27e4 in Cache::Update (this=0xfffff24de6c8, key="k") at cache.cpp:21
+```
+
+스택만으로는 "두 스레드가 각자 무엇을 기다린다"까지만 압니다. 사이클을 확인하려면 각 mutex의 소유자를 찍습니다. `std::mutex`의 내부 `_M_mutex`가 glibc의 `pthread_mutex_t`입니다.
 
 ```text
 (gdb) thread 2
-(gdb) frame 3
+(gdb) frame 7
+#7  0x0000aaaadbac2828 in Cache::Touch (this=0xfffff24de6c8) at cache.cpp:23
 (gdb) print &this->cache_mutex_
-$1 = (std::mutex *) 0x55555576a2c0
+$1 = (std::mutex *) 0xfffff24de6c8
+(gdb) print this->cache_mutex_._M_mutex.__data.__owner
+$2 = 7854
+(gdb) thread 3
+(gdb) frame 7
+#7  0x0000aaaadbac19cc in Logger::Write (this=0xfffff24de730, msg="k") at cache.cpp:33
+(gdb) print &this->log_mutex_
+$3 = (std::mutex *) 0xfffff24de730
+(gdb) print this->log_mutex_._M_mutex.__data.__owner
+$4 = 7855
 ```
 
-같은 mutex 주소는 경합 대상을 확인할 뿐입니다. T2가 소유한 A를 T3가 기다리고 T3가 소유한 B를 T2가 기다리는 사이클과 진행 불가 조건까지 확인해야 데드락의 근거가 됩니다.
+스레드 2(LWP 7855)가 기다리는 Cache 락(`0x...6c8`)의 주인은 LWP 7854이고, 스레드 3(LWP 7854)이 기다리는 Logger 락(`0x...730`)의 주인은 LWP 7855입니다. 서로가 서로의 락을 쥐고 기다리는 사이클이 확인됐으므로 이제야 데드락이라고 말할 수 있습니다.
 
-데드락 검출 자동화 — 모든 스레드의 *대기 중인 락 ↔ 보유 중인 락* 관계를 그래프로 그리고 사이클을 찾는 도구. deadcode 검사는 lock-order 검사와 다릅니다. 동적 lock-order 검사인 [Helgrind](/blog/tools/debugging/valgrind/chapter04-helgrind-drd)가 정적/동적으로 시도합니다.
+이 확인을 매번 손으로 하는 대신, 실행 중 락 순서를 기록해 역전을 경고하는 도구가 [Helgrind](/blog/tools/debugging/valgrind/chapter04-helgrind-drd)와 [TSan](/blog/tools/debugging/sanitizers/chapter04-tsan)입니다. 둘은 데드락이 실제로 일어나지 않은 실행에서도 순서 역전을 찾아냅니다.
 
 ## scheduler-locking
 
-한 스레드만 골라 디버깅하고 싶을 때.
+한 스레드만 골라 한 줄씩 진행하고 싶을 때 씁니다. GDB 16.3의 `help set scheduler-locking`이 네 값을 설명합니다.
 
 ```text
+(gdb) help set scheduler-locking
+Set mode for locking scheduler during execution.
+off    == no locking (threads may preempt at any time)
+on     == full locking (no thread except the current thread may run)
+	  This applies to both normal execution and replay mode.
+step   == scheduler locked during stepping commands (step, next, stepi, nexti).
+	  In this mode, other threads may run during other commands.
+	  This applies to both normal execution and replay mode.
+replay == scheduler locked in replay mode and unlocked during normal execution.
+(gdb) show scheduler-locking
+Mode for locking scheduler during execution is "off".
+```
+
+효과를 카운터로 확인했습니다. `mt.c`의 두 worker는 각자 `counter[0]`과 `counter[1]`을 쉬지 않고 올립니다. `on`으로 두고 worker-0에서 `next`를 세 번 하면 `counter[0]`만 2 늘고 `counter[1]`은 그대로입니다. `off`로 돌려 메인 스레드에서 `next` 한 번을 하면 두 카운터가 모두 수십만씩 늘어납니다.
+
+```text
+(gdb) print counter
+$3 = {386699670, 384079235}
 (gdb) set scheduler-locking on
 (gdb) thread 2
 (gdb) next
+22	        if (counter[id] % 100000000 == 0) usleep(1);
+(gdb) next
+21	        counter[id]++;                 /* line 21 */
+(gdb) next
+22	        if (counter[id] % 100000000 == 0) usleep(1);
+(gdb) print counter
+$5 = {386699672, 384079235}
+(gdb) set scheduler-locking off
+(gdb) thread 1
+(gdb) next
+ready
+54	    pthread_join(t[3], NULL);
+(gdb) print counter
+$6 = {386828713, 384307158}
 ```
 
-`on`이면 `next`/`step` 등 *진행* 명령이 현재 스레드만 움직입니다. 다른 스레드는 정지 상태. 경합 조건을 단계별로 재현할 때 유용합니다.
+LLDB에서는 진행 명령마다 `--run-mode this-thread`를 줍니다. worker-0에서 `thread step-over --run-mode this-thread`를 두 번 하자 `counter[0]`만 1 늘었습니다.
 
-- `on` — 현재 스레드만 진행.
-- `step` — `step` 시에만 단일 스레드, `continue` 시에는 모두.
-- `off` (기본) — 모두 같이 진행.
-- replay — 지원되는 replay target에서 재생 중 scheduler locking을 적용합니다. rr 전용 설정은 아닙니다.
-
-정확한 정지·재개 동작은 OS와 target backend에 따릅니다. 모든 플랫폼에서 같은 ptrace 요청과 signal 조합을 쓴다고 일반화하지 않습니다.
-
-LLDB는 `settings set target.process.thread.step-avoid-libraries`와 `thread step-out`/`step-in --run-mode this-thread` 조합으로 비슷한 효과를 냅니다. GDB만큼 깔끔하지는 않습니다.
+```text
+(lldb) frame variable counter
+(volatile volatile long[2]) counter = ([0] = 366424646, [1] = 351663059)
+(lldb) thread step-over --run-mode this-thread
+(lldb) thread step-over --run-mode this-thread
+(lldb) frame variable counter
+(volatile volatile long[2]) counter = ([0] = 366424647, [1] = 351663059)
+```
 
 :::warning
-`scheduler-locking on` 상태로 `continue`하면 정지 상태인 다른 스레드 때문에 데드락에 빠질 수 있습니다. 또한 *현재 스레드가 다른 스레드를 기다리고 있다면* 디버깅이 영원히 진행 안 됩니다. 디버깅 끝나면 `off`로 되돌립니다.
+`scheduler-locking on`에서 현재 스레드가 다른 스레드가 쥔 락을 기다리면, 그 스레드는 영원히 풀려나지 못합니다. 다른 스레드는 실행되지 않기 때문입니다. 단계 진행이 끝나면 `off`로 되돌립니다.
 :::
 
 ### scheduler-locking이 부족할 때
 
-디버거의 정지·단계 진행은 스케줄링과 타이밍을 바꾸므로 race를 숨기거나 드러낼 수 있습니다. 지연은 target·transport·환경에 따라 달라지며 이 글에서는 측정하지 않았습니다.
-
-해법: **rr**(Ch 끝부분) 또는 **TSan**(Sanitizer Ch 4)로 보강.
+디버거로 멈추고 한 줄씩 진행하는 것 자체가 스레드 사이의 타이밍을 바꿉니다. race가 디버거 아래에서만 사라지거나, 반대로 디버거 아래에서만 드러나는 이유입니다. 이때는 실행을 기록해 두고 다시 보는 rr이나, 실행하면서 happens-before 관계를 검사하는 TSan을 함께 씁니다.
 
 ## fork — 자식 따라가기 / 부모 따라가기
 
-`fork(2)`가 호출되면 GDB는 기본적으로 *부모*를 따라가고 자식은 자유 실행합니다. 자식에서 버그가 생기는 경우(예: `exec` 직후 환경 변수 처리) 따라가는 대상을 바꿉니다.
+`fork(2)`가 호출되면 GDB는 기본적으로 *부모*를 따라가고 자식은 놓아줍니다. GDB 16.3의 기본값은 다음과 같습니다.
+
+```text
+(gdb) show follow-fork-mode
+Debugger response to a program call of fork or vfork is "parent".
+(gdb) show detach-on-fork
+Whether gdb will detach the child of a fork is on.
+(gdb) show follow-exec-mode
+Follow exec mode is "same".
+```
+
+자식에서 문제가 생긴다면 따라가는 쪽을 바꿉니다. `fork.c`에서 `set follow-fork-mode child`로 실행하면 GDB가 자식에 붙고 부모를 놓아준 뒤, 자식만 부르는 `child_work`에서 멈춥니다.
 
 ```text
 (gdb) set follow-fork-mode child
 (gdb) catch fork
+(gdb) break child_work
 (gdb) run
+Catchpoint 1 (forked process 7653), arch_fork (ctid=0xfffff7fef0f0) at ../sysdeps/unix/sysv/linux/arch-fork.h:41
+(gdb) continue
+[Attaching after Thread 0xfffff7fef020 (LWP 7651) fork to child process 7653]
+[New inferior 2 (process 7653)]
+[Detaching after fork from parent process 7651]
+[Inferior 1 (process 7651) detached]
+
+Thread 2.1 "fork" hit Breakpoint 3, child_work (x=21) at fork.c:6
 ```
 
-`child`로 두면 fork 직후 GDB가 자식 프로세스를 디버깅하고 부모는 분리됩니다.
+부모와 자식을 *둘 다* 잡아 두려면 `set detach-on-fork off`를 씁니다. 이때 함정이 하나 있습니다. GDB는 새로 생긴 쪽(이 경우 자식)을 멈춘 채로 두는데, `fork.c`의 부모는 `waitpid`로 자식을 기다리므로, breakpoint 없이 `run`만 하면 프로그램이 영영 진행하지 않았습니다. `catch fork`로 멈춘 뒤 `inferior 2`로 전환해 자식을 직접 진행시켜야 합니다.
 
 ```text
 (gdb) set detach-on-fork off
-```
-
-fork 후 부모/자식 *둘 다* 추적. `info inferiors`로 인페리어(프로세스) 목록을 보고 `inferior N`으로 전환.
-
-```text
+(gdb) catch fork
+(gdb) break child_work
+(gdb) run
+Catchpoint 1 (forked process 7747), arch_fork (ctid=0xfffff7fef0f0) at ../sysdeps/unix/sysv/linux/arch-fork.h:41
+(gdb) next
+[New inferior 2 (process 7747)]
 (gdb) info inferiors
   Num  Description       Connection           Executable
-* 1    process 12345     1 (native)           /usr/local/bin/server
-  2    process 12346     1 (native)           /usr/local/bin/server
+* 1    process 7745      1 (native)           /root/ch06/fork
+  2    process 7747      1 (native)           /root/ch06/fork
+(gdb) inferior 2
+[Switching to inferior 2 [process 7747] (/root/ch06/fork)]
+(gdb) continue
+Thread 2.1 "fork" hit Breakpoint 2.2, child_work (x=21) at fork.c:6
+(gdb) info threads
+  Id   Target Id                               Frame
+* 1.1  Thread 0xfffff7fef020 (LWP 7745) "fork" arch_fork (ctid=0xfffff7fef0f0) at ../sysdeps/unix/sysv/linux/arch-fork.h:54
+  2.1  Thread 0xfffff7fef020 (LWP 7747) "fork" child_work (x=21) at fork.c:6
 ```
 
-부모/자식이 같은 바이너리이므로 둘 다 보면서 분기를 추적할 수 있습니다.
+스레드 번호가 `inferior.thread`(`1.1`, `2.1`)로 바뀌고, breakpoint도 inferior마다 위치가 따로 생겨 `Breakpoint 2.2`로 표시됩니다. 두 프로세스의 `pthread_t`(`0xfffff7fef020`)가 같은 것은 `fork`가 주소 공간을 그대로 복사했기 때문입니다.
 
 ### fork / vfork / clone — 무엇이 다른가
 
-| | `fork()` | `vfork()` | `clone()` |
+위 `strace` 출력과 `man 2 clone`을 표로 정리하면 다음과 같습니다.
+
+| | `fork()` | `vfork()` | `pthread_create()` |
 |---|----------|-----------|-----------|
-| 주소 공간 | COW 사본 | 부모와 공유 | 플래그로 결정 |
-| 부모 정지 | 즉시 반환 | 자식 exec/exit까지 정지 | 플래그로 결정 |
-| 시그널 핸들러 | 사본 | 공유 | 플래그 |
-| 시스템 콜 | `clone(CLONE_CHILD_CLEARTID, ...)` | `clone(CLONE_VFORK\|CLONE_VM, ...)` | 직접 |
+| glibc 2.41 arm64가 부른 시스템 콜 | `clone(CLONE_CHILD_CLEARTID\|CLONE_CHILD_SETTID\|SIGCHLD)` | `clone(CLONE_VM\|CLONE_VFORK\|SIGCHLD)` | `clone3(CLONE_VM\|...\|CLONE_THREAD\|...)` |
+| 주소 공간 | 복사(copy-on-write) | 부모와 공유 | 공유 |
+| 부모 | 바로 반환 | 자식이 `exec`·`_exit`할 때까지 정지 | 바로 반환 |
+| GDB에서 보이는 모습 | 새 inferior | 새 inferior | 같은 inferior의 새 스레드 |
 
-GDB에 영향:
-- `set follow-fork-mode`는 fork·vfork 모두에 적용.
-- `vfork`는 부모가 정지되어 있어 *자식 추적이 더 안정적*.
-- `clone`은 어떤 플래그냐에 따라 *스레드*로 보이기도 *프로세스*로 보이기도. GDB가 자동으로 판별합니다 (CLONE_THREAD 비트).
-
+`follow-fork-mode`는 `fork`와 `vfork`에 모두 적용됩니다(`show follow-fork-mode`의 문구가 "fork or vfork"입니다).
 ### exec 추적
 
-`fork → exec`로 바이너리가 바뀌는 경우 (셸 → ls), catch exec는 지원 target에서 exec 사건을 포착하며 새 executable 전환 뒤의 상태를 조사합니다.
+`fork` 뒤 자식이 `exec`하면 프로그램 이미지가 통째로 바뀝니다. `follow-fork-mode child`와 `catch exec`를 함께 쓰면 그 순간에 멈춥니다. 기본값 `same`에서는 같은 inferior 번호가 새 실행 파일을 가리키게 됩니다.
 
 ```text
-(gdb) catch exec
-(gdb) set follow-exec-mode same
-(gdb) run
+(gdb) continue
+child 42
+process 7653 is executing new program: /usr/bin/echo
+Error in re-setting breakpoint 3: Function "child_work" not defined.
+
+Thread 2.1 "echo" hit Catchpoint 2 (exec'd /usr/bin/echo), _start () at ../sysdeps/aarch64/dl-start.S:23
+(gdb) info inferiors
+  Num  Description       Connection           Executable
+  1    <null>                                 /root/ch06/fork
+* 2    process 7653      1 (native)           /usr/bin/echo
 ```
 
-same이 기본이며 exec 전후에 같은 inferior를 유지합니다. new는 새 inferior를 만들고 이전 executable을 다시 실행할 수 있도록 원래 inferior와 분리합니다.
+`exec` 직후 GDB는 기존 breakpoint를 새 실행 파일에 다시 맞춰 보고, 새 파일에 없는 함수는 `Error in re-setting breakpoint 3`으로 알려 줍니다. `set follow-exec-mode new`로 두면 GDB 매뉴얼 Forks 절의 설명대로 새 inferior를 만들어, 원래 프로그램을 나중에 다시 실행할 수 있게 남겨 둡니다.
 
-`exec` 직후엔 *주소 공간·매핑·심볼*이 모두 새로 로드됩니다. GDB가 기존 BP를 새 바이너리에 다시 *해석*하지만, 주소가 달라져 BP가 사라질 수 있습니다. `info breakpoints`로 확인.
+LLDB도 `target.process.follow-fork-mode` 설정이 있고 기본값은 `parent`입니다. `child`로 바꾸고 `fork.c`를 실행하자 자식만 부르는 `child_work`에서 멈췄습니다. 이때 breakpoint는 프롤로그 앞(`fork.c:6:23`)에 걸려 `x=0`으로 보였고, `process status`에는 launch 때의 pid가 그대로 나왔습니다.
+
+```text
+(lldb) settings show target.process.follow-fork-mode
+target.process.follow-fork-mode (enum) = parent
+(lldb) settings set target.process.follow-fork-mode child
+(lldb) run
+* thread #2, name = 'fork', stop reason = breakpoint 1.1
+    frame #0: 0x0000aaaaaaaa0968 fork`child_work(x=0) at fork.c:6:23
+```
 
 ## 비결정적 버그 — rr
 
-스레드 버그의 악몽: *재현이 안 됨*. 한 번 잡아도 다음 실행에서 안 나옴. 해답은 *기록 후 재생*.
+스레드 버그의 악몽은 *재현이 안 된다*는 것입니다. 한 번 잡아도 다음 실행에서는 나오지 않습니다. 해법은 블랙박스처럼 *기록해 두고 다시 재생*하는 것입니다.
 
-[rr](https://rr-project.org/)은 Mozilla가 만든 record-and-replay 디버거입니다. 한 번 기록하면 같은 명령어 시퀀스가 정확히 재생됩니다 — 같은 스레드 스케줄, 같은 시스템 콜 응답, 같은 메모리 레이아웃. GDB가 그 재생 위에서 동작합니다.
+[rr](https://rr-project.org/)은 실행을 기록한 뒤 GDB 아래에서 같은 실행을 몇 번이고 재생하는 도구입니다. rr 5.9.0 README에 따르면 Mozilla에서 시작됐고 지금은 Pernosco가 개발을 후원합니다.
 
-### 동작 원리
+### 동작 원리와 제약
 
-rr은 *단일 코어*로 디버기를 실행합니다. 비결정성의 원인 셋을 통제.
+rr 프로젝트 페이지의 limitations 절은 다음을 밝힙니다.
 
-1. **컨텍스트 스위치** — 단일 코어 + 커스텀 스케줄 → 결정적.
-2. **시스템 콜 결과** — 모든 syscall 결과를 기록 → 재생 시 그대로 주입.
-3. **시그널** — 도달 시점을 기록.
+- rr은 *단일 코어 머신을 흉내* 냅니다. 병렬 프로그램은 한 코어에서 돌리는 만큼 느려지고, 이것은 설계상 특성입니다.
+- 기록 트리 밖의 프로세스와 메모리를 공유하는 프로세스는 기록할 수 없습니다.
+- 기록되는 프로세스가 쓰는 모든 시스템 콜을 rr이 알아야 합니다. 지원하지 않는 시스템 콜을 만나면 이슈로 보고하라고 적고 있습니다.
+- 비교적 최신 x86 CPU 또는 특정 ARM CPU(Apple M1 이상)가 필요합니다.
 
-기록 비용은 workload·CPU·커널에 따라 달라지며 여기서 slowdown을 측정하지 않았습니다. 그래도 race·heisenbug를 한 번이라도 잡았다면 *몇 번이고 재생*할 수 있다는 것이 결정적 가치.
+README의 시스템 요구 사항은 더 구체적입니다. AArch64에서는 "ARM Neoverse N1 or the Apple Silicon M-series" 같은 특정 마이크로아키텍처만 지원하고, VM 안에서는 하드웨어 성능 카운터를 가상화해 주는 경우에만 동작합니다(VMware·KVM은 동작, Xen은 미동작).
+
+이 시리즈의 VM에서는 rr이 시작조차 하지 않았습니다. 호스트는 Apple M2 Pro지만, QEMU HVF 게스트가 CPU를 implementer `0x61`(Apple), part `0x0`으로 보여 줘서 rr이 마이크로아키텍처를 알아보지 못했습니다.
+
+```text
+# rr --version
+rr version 5.9.0
+# rr record ./fork
+[FATAL ./src/PerfCounters_aarch64.h:109:compute_cpu_microarch()] Unknown aarch64 CPU type implementer: 0x61, variant: 0x0 part: 0x0
+```
+
+그래서 아래 워크플로는 이 시리즈에서 실행하지 않았습니다. 명령은 rr 프로젝트 페이지의 "the rr debugging experience" 절(`rr record /your/application --args ...` 뒤 `rr replay`를 하면 GDB 프롬프트가 뜸)과 GDB 16.3 매뉴얼 Reverse Execution 절의 `reverse-continue`·`reverse-step`·`reverse-next`를 옮긴 것입니다.
 
 ```bash
 # 1. 기록 (한 번)
 $ rr record ./my_program arg1 arg2
-[...버그 발생...]
 
 # 2. 재생 (몇 번이고)
 $ rr replay
-(rr) continue
-(rr) reverse-continue          # ← 시간 역행
-(rr) reverse-step
-(rr) reverse-next
+(gdb) continue
+(gdb) reverse-continue          # ← 시간 역행
+(gdb) reverse-step
+(gdb) reverse-next
 ```
 
-`reverse-*`가 핵심입니다. 변수가 잘못된 값으로 바뀐 시점을 찾으려면 watchpoint + `reverse-continue`로 *마지막 쓰기*를 거꾸로 찾아갑니다.
+rr 프로젝트 페이지는 재생 중에 "Set breakpoints and data watchpoints and quickly reverse-execute to where they were hit"라고 설명합니다. 값이 잘못 바뀐 시점을 찾으려면 그 변수에 `watch -l`을 걸고 `reverse-continue`로 *마지막 쓰기*까지 거꾸로 갑니다. GDB 자체의 `record full` 기반 역실행은 [Ch 11](/blog/tools/debugging/gdb-lldb/chapter11-practical-tips)에서 실제로 돌려 봅니다.
 
-```text
-(rr) watch -l my_var
-(rr) reverse-continue
-[정지: my_var = 42로 바뀐 직전]
-```
+### Pernosco
 
-### rr 디버깅 워크플로
+[Pernosco](https://pernos.co/)는 rr로 기록한 x86-64 Linux 실행을 업로드하면 웹에서 쓰는 디버거를 돌려주는 상용 서비스입니다. 회사 소개에 따르면 프로그램 상태를 모든 시점에서 조회하고, 제어 흐름과 데이터 흐름의 이력을 시각화하며, 기록과 디버깅 상태를 다른 개발자와 공유할 수 있습니다. 이 시리즈에서는 사용해 보지 않았습니다.
 
-1. 버그 재현이 잘 안 되면 *루프*로 기록.
-   ```bash
-   for attempt in $(seq 1 20); do
-       rr record ./my_test
-       status=$?
-       if [ "$status" -ne 0 ]; then break; fi
-   done
-   ```
-   테스트가 성공이면 0, 찾는 실패면 비0을 반환한다는 계약 아래 최대 20회만 실행합니다. 비0은 rr 자체의 실행 오류일 수도 있으므로 trace와 종료 사유를 확인합니다. 이 환경에서는 rr을 설치하거나 실행하지 않았습니다.
-2. trace 디렉터리 백업 (`~/.local/share/rr/latest-trace/`).
-3. `rr replay`로 재생. 같은 결과가 반복적으로 나옴.
-4. 원인 추적은 `reverse-continue` + `watch`.
-5. trace를 동료에게 공유 — 그쪽 머신에서도 정확히 같은 실행.
-
-### 제약
-
-- Linux와 지원되는 CPU·커널·PMU가 필요합니다. x86 전용으로 고정하지 말고 [선택한 rr release의 문서](https://github.com/rr-debugger/rr)를 확인합니다.
-- 일부 CPU 이벤트(RDTSC, 일부 SIMD) 기록 안 됨.
-- 멀티 코어 동시성은 단일 코어 시뮬로만 — 진짜 메모리 모델 race(예: 다른 코어 캐시 사이의 reorder)는 재현 불가.
-- 비결정적 입력 출력(sound, GPU)은 어색.
-
-rr은 기록 중 실제로 재현된 실패를 반복 조사하는 방법입니다. 기록 자체가 스케줄을 바꾸어 실패를 숨길 수도 있습니다.
-
-이 장은 macOS LLDB에서 rr과 동등한 replay를 검증하지 않았습니다. Microsoft의 [TTD](https://docs.microsoft.com/en-us/windows-hardware/drivers/debugger/time-travel-debugging-overview)가 Windows 쪽 대안.
-
-### Pernosco — rr의 클라우드 후속
-
-rr의 trace를 업로드하면 *모든 메모리 변화를 일종의 인덱스*로 만들어 웹 UI로 보여 주는 상용 서비스. "이 변수가 마지막으로 X 값을 가진 시점" 같은 쿼리가 즉답. trace 분석을 *팀이 공유*할 수 있어 큰 codebase에서 매우 유용합니다.
+macOS의 LLDB에서 rr과 같은 기록·재생은 이 장에서 다루지 않았습니다. Windows에는 Microsoft의 [Time Travel Debugging](https://learn.microsoft.com/en-us/windows-hardware/drivers/debuggercmds/time-travel-debugging-overview)이 있습니다.
 
 ## TSan / Helgrind와의 관계
 
-GDB로 데드락·경합을 찾는 건 *증상 확인* 단계. 사후에 어디가 진짜 race인지 보려면 [ThreadSanitizer](/blog/tools/debugging/sanitizers/chapter04-tsan)나 Helgrind/DRD가 필요합니다. GDB는 "지금 멈춘 이 상태"만 보지만, TSan은 "두 스레드의 happens-before가 어디서 깨졌는지"를 알려 줍니다. 같은 버그라도 도구 역할이 다릅니다.
+GDB로 데드락을 확인하는 것은 *지금 멈춘 상태*를 보는 일입니다. 위 `cache.cpp`처럼 이미 멈춰 버린 프로그램에는 GDB가 가장 빠릅니다. 반면 한 번도 멈추지 않은 실행에서 잠재된 race나 순서 역전을 찾는 것은 실행을 계측하는 도구의 몫입니다.
 
-세 도구의 분담.
-
-| 도구 | 잘 잡는 것 | 못 잡는 것 |
-|------|------------|-----------|
-| **GDB** | 현재 멈춘 데드락의 락 보유 관계 | 과거의 race |
-| **TSan** | 데이터 race + lock-order 위반 | 단일 스레드 메모리 버그 |
-| **Helgrind/DRD** | 비슷, BFE + 락 그래프 분석 | 매우 느림 |
-| **rr** | 재현 불가 버그의 *증거 보존* | 멀티 코어 메모리 모델 |
-
-운영 디버깅에서는 GDB → TSan(CI) → rr(불가지의 버그) 순으로 단계적 적용.
+| 도구 | 보는 것 | 이 블로그의 해당 글 |
+|------|---------|--------------------|
+| **GDB** | 지금 멈춘 스레드의 스택과 락 소유자 | 이 장 |
+| **TSan** | 컴파일러 계측으로 data race와 lock-order 역전 | [Sanitizers Ch 4](/blog/tools/debugging/sanitizers/chapter04-tsan) |
+| **Helgrind/DRD** | Valgrind 위에서 race와 락 순서 | [Valgrind Ch 4](/blog/tools/debugging/valgrind/chapter04-helgrind-drd) |
+| **rr** | 실패한 실행 한 번의 기록과 역방향 재생 | 이 장 (이 VM에서는 실행 불가) |
 
 ## LLDB 차이 요약
+
+아래 LLDB 열은 모두 lldb 19.1.7에서 실행해 확인했습니다.
 
 | 작업 | GDB | LLDB |
 |------|-----|------|
 | 스레드 목록 | `info threads` | `thread list` |
 | 전환 | `thread N` | `thread select N` |
 | 모든 스레드 bt | `thread apply all bt` | `bt all` |
-| scheduler-locking | `set scheduler-locking on` | (간접) `--run-mode this-thread` |
+| 현재 스레드만 진행 | `set scheduler-locking on` | `thread step-over --run-mode this-thread` |
 | follow-fork | `set follow-fork-mode child` | `settings set target.process.follow-fork-mode child` |
-| 인페리어 | `info inferiors` / `inferior N` | `target list` / `target select N` |
+| 디버깅 대상 목록 | `info inferiors` / `inferior N` | `target list` |
 
-LLDB의 fork 추적 지원은 플랫폼/backend에 따라 확인합니다. target 목록이 GDB inferior와 모든 면에서 일대일 대응하는 것은 아닙니다.
+LLDB의 `target list`는 실행 파일 단위의 target을 보여 주며, GDB inferior처럼 fork된 자식이 별도 항목으로 늘어나지는 않았습니다.
 
 ## 정리
 
-- Linux 스레드는 *clone() 옵션의 결합*. POSIX 스레드 = 모든 공유 플래그 + CLONE_THREAD.
-- 정지 시 모든 스레드가 같이 멈춘다 — `info threads`로 사진 보기.
-- 데드락 의심 → `thread apply all bt`가 첫 명령.
-- futex 대기 콜스택 → `print *mutex`로 `__owner` 확인.
-- 한 스레드만 단계별 진행 → `scheduler-locking on`.
-- fork 직후 자식 추적 → `set follow-fork-mode child`.
-- 자식·부모 둘 다 → `set detach-on-fork off` + `info inferiors`.
-- 재현 불가 race → rr로 기록 후 `reverse-continue`.
-- rr → Pernosco로 trace 공유·인덱싱.
-- 진짜 race 위치는 TSan/Helgrind와 병행.
+- Linux 스레드는 `clone3`의 공유 플래그 + `CLONE_THREAD`입니다. glibc 2.41 arm64에서 `fork`는 `clone(SIGCHLD|...)`, `vfork`는 `clone(CLONE_VM|CLONE_VFORK|...)`이었습니다.
+- GDB의 `Thread 0x...`는 glibc `pthread_t`, `LWP`는 커널 tid입니다. 스레드 이름은 NUL 포함 16바이트까지입니다.
+- non-stop에서는 멈춘 스레드만 멈추고, 나머지 카운터는 계속 올라갔습니다.
+- 데드락은 `thread apply all bt`로 대기 위치를, mutex의 `__owner`로 소유자를 찍어 사이클을 확인합니다.
+- `scheduler-locking on`(LLDB는 `--run-mode this-thread`)이면 현재 스레드의 카운터만 움직였습니다.
+- `follow-fork-mode child`로 자식을, `detach-on-fork off` + `inferior N`으로 둘 다를 잡습니다. 후자에서 부모가 `waitpid`로 기다리면 직접 자식을 진행시켜야 합니다.
+- rr 5.9.0은 이 QEMU HVF 게스트에서 CPU를 인식하지 못해 실행되지 않았습니다. 지원 조건은 README의 System requirements를 봅니다.
+- 지금 멈춘 상태는 GDB, 잠재된 race는 TSan·Helgrind로 봅니다.
 
 ## 다음 장 예고
 
-Ch 7 — core dump 분석. 프로세스가 이미 죽었을 때 시신을 부검하는 법: `ulimit -c`, `core_pattern`, `gdb exe core`, systemd-coredump, macOS `.crash` 파일.
+[Ch 7: core dump 분석](/blog/tools/debugging/gdb-lldb/chapter07-core-dump)은 프로세스가 이미 죽었을 때 남은 core를 읽는 법을 다룹니다. `ulimit -c`, `core_pattern`, `gdb exe core`, systemd-coredump를 실제로 돌려 봅니다.
 
 ## 관련 항목
 
