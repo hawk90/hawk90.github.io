@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Flash가 모자라면 `-Os` + section gc + LTO가 1차 답입니다."** FreeRTOS 기반 예제 하나가 `-O2`의 23,004 B에서 세 옵션으로 8,368 B가 됐습니다. 그다음은 C 라이브러리입니다. `printf` 한 줄짜리 프로그램이 newlib에서 27 KB, newlib-nano에서 7 KB였고, nano에서 `%f`를 켜자 20 KB가 됐습니다.
+> **"Flash가 모자라면 `-Os` + section gc + LTO가 1차 답입니다."** FreeRTOS 기반 예제 하나가 `-O2`의 22,368 B에서 세 옵션으로 7,732 B가 됐습니다. 그다음은 C 라이브러리입니다. `printf` 한 줄짜리 프로그램이 newlib에서 27 KB, newlib-nano에서 7 KB였고, nano에서 `%f`를 켜자 20 KB가 됐습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -23,9 +23,9 @@ secure boot처럼 서명할 image의 최대 크기가 정해진 환경에서도 
 
 | 단계 | 하는 일 | 이 글의 측정 |
 | --- | --- | --- |
-| `-Os` | 크기를 늘리는 `-O2` 최적화를 빼고 크기 기준으로 조정 | 23,004 → 19,148 B |
-| `-ffunction-sections -fdata-sections` + `-Wl,--gc-sections` | 함수·변수마다 section을 나누고, 도달하지 않는 section을 링커가 버림 | → 10,220 B |
-| `-flto` | 링크 때 모든 object를 한 번에 최적화 | → 8,368 B |
+| `-Os` | 크기를 늘리는 `-O2` 최적화를 빼고 크기 기준으로 조정 | 22,368 → 18,512 B |
+| `-ffunction-sections -fdata-sections` + `-Wl,--gc-sections` | 함수·변수마다 section을 나누고, 도달하지 않는 section을 링커가 버림 | → 9,588 B |
+| `-flto` | 링크 때 모든 object를 한 번에 최적화 | → 7,732 B |
 | `--specs=nano.specs` | newlib 대신 newlib-nano | `printf` 프로그램 27,068 → 7,057 B |
 | `printf`의 `%f` 지원 | nano는 `-u _printf_float`를 줘야 링크 | 7,981 → 20,021 B |
 | `strip` | ELF 파일의 symbol·debug 정보 제거 | flash image는 그대로 |
@@ -59,16 +59,16 @@ build Os+gc+lto    -Os -ffunction-sections -fdata-sections -Wl,--gc-sections -fl
 
 ```text
 arm-none-eabi-gcc (GCC) 16.2.0
-O2                                 text  23004 data    4 bss 211996  (build 0.97s)
-O3                                 text  29960 data    4 bss 211996  (build 1.22s)
-Os                                 text  19148 data    4 bss 211996  (build 0.82s)
-Os+gc                              text  10220 data    4 bss 211996  (build 0.82s)
-Os+gc+lto                          text   8368 data    4 bss 211992  (build 0.71s)
+O2                                 text  22368 data    4 bss 211996  (build 1.18s)
+O3                                 text  29324 data    4 bss 211996  (build 1.37s)
+Os                                 text  18512 data    4 bss 211996  (build 1.02s)
+Os+gc                              text   9588 data    4 bss 211996  (build 0.96s)
+Os+gc+lto                          text   7732 data    4 bss 211992  (build 0.76s)
 ```
 
-- **section gc가 가장 크게 줄였습니다(19,148 → 10,220 B).** `-Os` 빌드와 `-Os` + gc 빌드의 `nm` 출력을 비교하면 코드 symbol 116개가 사라졌습니다. `eTaskGetState`, `pcTaskGetName`, `pcTimerGetName`처럼 예제가 부르지 않는 FreeRTOS API와 `arena_reset`, TLSF의 `default_walker`·`integrity_walker` 같은 함수입니다. 함수마다 section이 나뉘자 링커가 도달하지 않는 것을 버렸습니다. 두 옵션은 짝입니다. `-ffunction-sections`만 주면 section이 나뉘기만 하고 버려지지 않습니다.
-- **LTO는 그 위에서 1,852 B를 더 줄였습니다.** 파일 경계를 넘어 inline하고 쓰이지 않는 코드를 지웁니다. 이 예제에서는 빌드 시간도 늘지 않았지만(0.82 → 0.71초), 큰 프로젝트에서는 링크 단계가 무거워집니다.
-- **`bss`(211,996 B)는 옵션과 무관했습니다.** FreeRTOS heap 64 KiB, TLSF pool 64 KiB, 벤치마크 배열이 정적으로 잡혀 있기 때문입니다. flash와 RAM은 따로 봐야 합니다.
+- **section gc가 가장 크게 줄였습니다(18,512 → 9,588 B).** `-Os` 빌드와 `-Os` + gc 빌드의 `nm` 출력을 비교하면 코드 symbol 116개가 사라졌습니다. `eTaskGetState`, `pcTaskGetName`, `pcTimerGetName`처럼 예제가 부르지 않는 FreeRTOS API와 `arena_reset`, TLSF의 `default_walker`·`integrity_walker` 같은 함수입니다. 함수마다 section이 나뉘자 링커가 도달하지 않는 것을 버렸습니다. 두 옵션은 짝입니다. `-ffunction-sections`만 주면 section이 나뉘기만 하고 버려지지 않습니다.
+- **LTO는 그 위에서 1,856 B를 더 줄였습니다.** 파일 경계를 넘어 inline하고 쓰이지 않는 코드를 지웁니다. 이 예제에서는 빌드 시간도 늘지 않았지만(0.96 → 0.76초), 큰 프로젝트에서는 링크 단계가 무거워집니다.
+- **`bss`(211,996 B)는 LTO에서 4 B 준 것 말고는 옵션과 무관했습니다.** FreeRTOS heap 64 KiB, TLSF pool 64 KiB, 벤치마크 배열이 정적으로 잡혀 있기 때문입니다. flash와 RAM은 따로 봐야 합니다.
 
 ### 무엇이 큰지 찾기
 
@@ -86,10 +86,10 @@ arm-none-eabi-nm --size-sort -S fw.elf | grep -i " [tT] " | tail -8
 ```
 
 ```text
-fw-stripped.bin        8372 bytes
-fw-stripped.elf       16784 bytes
-fw.bin                 8372 bytes
-fw.elf               122040 bytes
+fw-stripped.bin        7736 bytes
+fw-stripped.elf       12688 bytes
+fw.bin                 7736 bytes
+fw.elf               115540 bytes
 flash image identical
 -- 8 largest symbols (Os+gc+lto)
 00000538 000000fc t prvAddNewTaskToReadyList
@@ -106,7 +106,7 @@ flash image identical
 
 ### `strip`은 flash를 줄이지 않는다
 
-같은 출력의 위쪽이 그 확인입니다. `strip --strip-all`로 ELF 파일은 122,040 B에서 16,784 B로 줄었지만, `objcopy -O binary`로 뽑은 flash image는 두 경우 모두 8,372 B로 byte 단위까지 같았습니다(`cmp`). `strip`이 지우는 symbol table과 debug section은 flash에 올라가지 않습니다. 줄어드는 것은 전송·보관하는 ELF 파일 크기이고, 대신 그 ELF로는 symbol 단위 디버깅을 할 수 없습니다.
+같은 출력의 위쪽이 그 확인입니다. `strip --strip-all`로 ELF 파일은 115,540 B에서 12,688 B로 줄었지만, `objcopy -O binary`로 뽑은 flash image는 두 경우 모두 7,736 B로 byte 단위까지 같았습니다(`cmp`). `strip`이 지우는 symbol table과 debug section은 flash에 올라가지 않습니다. 줄어드는 것은 전송·보관하는 ELF 파일 크기이고, 대신 그 ELF로는 symbol 단위 디버깅을 할 수 없습니다.
 
 ### C 라이브러리: newlib vs newlib-nano
 
@@ -192,10 +192,10 @@ arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb \
     -ffunction-sections -fdata-sections \
     --specs=nano.specs \
     -Wl,--gc-sections -Wl,--print-memory-usage \
-    -o firmware.elf $(SRCS)
+    -o firmware.elf $SRCS
 ```
 
-`-Wl,--print-memory-usage`는 링크가 끝날 때 region마다 사용량과 비율을 찍습니다. GCC 14.2 매뉴얼에 따르면 `-fno-common`은 GCC 10부터 이미 기본값("The default is -fno-common")이라 따로 줄 필요가 없습니다. `-fno-unwind-tables`·`-fno-asynchronous-unwind-tables`는 unwind 정보를 빼지만, C++ 예외나 backtrace를 쓰는 빌드에서는 그 기능이 함께 사라지므로 이 글에서는 넣지 않았습니다.
+`-Wl,--print-memory-usage`는 링크가 끝날 때 region마다 사용량과 비율을 찍습니다. `-fno-common`은 GCC 14.2 매뉴얼이 기본값이라고 적고("The default is -fno-common"), GCC 10 변경 사항에 "GCC now defaults to -fno-common"이 있어 따로 줄 필요가 없습니다. `-fno-unwind-tables`·`-fno-asynchronous-unwind-tables`는 unwind 정보를 빼지만, C++ 예외나 backtrace를 쓰는 빌드에서는 그 기능이 함께 사라지므로 이 글에서는 넣지 않았습니다.
 
 ### Inline 정책
 
@@ -211,11 +211,11 @@ __attribute__((noinline)) void log_line(const char *s);            /* large, col
 
 | 빌드 (FreeRTOS + heap_4 + TLSF 예제, Cortex-M3) | text | `-O2` 대비 |
 | --- | ---: | ---: |
-| `-O2` | 23,004 B | 100% |
-| `-O3` | 29,960 B | 130% |
-| `-Os` | 19,148 B | 83% |
-| `-Os` + section gc | 10,220 B | 44% |
-| `-Os` + section gc + LTO | 8,368 B | 36% |
+| `-O2` | 22,368 B | 100% |
+| `-O3` | 29,324 B | 131% |
+| `-Os` | 18,512 B | 83% |
+| `-Os` + section gc | 9,588 B | 43% |
+| `-Os` + section gc + LTO | 7,732 B | 35% |
 
 | `printf` 프로그램 (Cortex-M3, `-Os` + gc) | text |
 | --- | ---: |
@@ -238,19 +238,19 @@ arm-none-eabi-gcc -O0 -g ...      # debug build
 
 > ⚠️ `-ffunction-sections`만 주고 `--gc-sections`를 빠뜨림
 
-section만 나뉘고 아무것도 버려지지 않습니다. 위 표의 19,148 → 10,220 B는 두 옵션을 함께 줬을 때의 값입니다.
+section만 나뉘고 아무것도 버려지지 않습니다. 위 표의 18,512 → 9,588 B는 두 옵션을 함께 줬을 때의 값입니다.
 
 > ⚠️ gc가 필요한 코드를 지움
 
-vector table처럼 코드에서 직접 참조하지 않지만 하드웨어가 쓰는 데이터는, 링커 스크립트에서 `KEEP(*(.vectors))`로 묶거나 `__attribute__((used))`를 붙이지 않으면 `--gc-sections`가 지울 수 있습니다. 이 글의 하네스(8-01·6-12)가 vector table에 `used`와 `KEEP`을 둘 다 두는 이유입니다.
+vector table처럼 코드에서 직접 참조하지 않지만 하드웨어가 쓰는 데이터는 `--gc-sections`가 지울 수 있습니다. vector table 하나짜리 파일을 `arm-none-eabi-gcc` 16.2로 링크해 보면, `__attribute__((used))`만 붙인 경우는 `--gc-sections`에 지워졌고, 링커 스크립트의 `KEEP(*(.vectors))`만 둔 경우는 LTO 없이는 남았지만 `-flto`를 켜자 지워졌습니다. 둘 다 둔 경우만 LTO 유무와 상관없이 남았습니다. 이 글의 하네스(8-01·6-12)가 vector table에 `used`와 `KEEP`을 둘 다 두는 이유입니다.
 
 > ⚠️ nano에서 `%f`가 조용히 비어 나옴
 
-위 실행처럼 경고 없이 빈 문자열이 나옵니다. 실수를 찍어야 하면 `-u _printf_float`를 주고 약 13 KB(7,981 → 20,021 B)를 감수하거나, 정수로 바꿔 찍습니다(`printf("%d.%02d", v / 100, v % 100)`).
+위 실행처럼 경고 없이 빈 문자열이 나옵니다. 실수를 찍어야 하면 `-u _printf_float`를 주고 약 12 KB(7,981 → 20,021 B)를 감수하거나, 정수로 바꿔 찍습니다(`printf("%d.%02d", v / 100, v % 100)`).
 
 > ⚠️ 큰 함수를 `inline`으로
 
-호출 위치마다 복제되어 크기가 늘어납니다. `-O3`가 이 글의 예제를 30% 키운 주된 이유도 공격적인 inline과 펼침입니다.
+호출 위치마다 복제되어 크기가 늘어납니다. `-O3`는 이 글의 예제를 31% 키웠습니다.
 
 ## 재현 환경
 
@@ -259,12 +259,12 @@ vector table처럼 코드에서 직접 참조하지 않지만 하드웨어가 �
 
 ## 정리
 
-- `-Os`, section gc, LTO 세 단계로 이 예제의 text가 23,004 B에서 8,368 B(36%)가 됐고, 가장 큰 몫은 section gc였습니다.
-- `-O3`는 `-O2`보다 30% 컸습니다.
-- `strip`은 ELF 파일(122,040 → 16,784 B)만 줄이고 flash image(8,372 B)는 바꾸지 않았습니다.
+- `-Os`, section gc, LTO 세 단계로 이 예제의 text가 22,368 B에서 7,732 B(35%)가 됐고, 가장 큰 몫은 section gc였습니다.
+- `-O3`는 `-O2`보다 31% 컸습니다.
+- `strip`은 ELF 파일(115,540 → 12,688 B)만 줄이고 flash image(7,736 B)는 바꾸지 않았습니다.
 - newlib-nano는 `printf` 프로그램을 27 KB에서 7 KB로 줄였지만, `%f`를 켜면(`-u _printf_float`) 20 KB가 됩니다.
 - nano에서 `-u _printf_float` 없이 `%f`를 쓰면 경고 없이 빈 문자열이 나왔습니다.
-- `--gc-sections`를 쓸 때는 vector table처럼 하드웨어만 참조하는 것을 `KEEP`·`used`로 지킵니다.
+- `--gc-sections`를 쓸 때는 vector table처럼 하드웨어만 참조하는 것을 `KEEP`과 `used` 둘 다로 지킵니다.
 
 다음 편은 **전력 최적화**입니다. Sleep, peripheral clock gating, DVFS를 다룹니다.
 
