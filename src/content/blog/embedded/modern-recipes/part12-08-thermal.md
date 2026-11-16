@@ -69,7 +69,7 @@ Jetson Orin 문서는 thermal 동작을 이렇게 나눕니다.
 | software shutdown | Linux `thermal_core.c` |
 | hardware shutdown | BPMP firmware, `lm90.c` |
 
-governor `step_wise`의 동작은 `gov_step_wise.c`에 있습니다(같은 Jetson 문서는 passive throttling에 BSP의 PID controller를 쓴다고도 적지만, 위 DT 예의 governor는 `step_wise`입니다). 온도가 trip보다 높고 상승 중이면 cooling state를 한 단계 올리고, 내려가는 중이면 한 단계 낮추되 최소값 이상으로 둡니다.
+governor `step_wise`의 동작은 `gov_step_wise.c`에 있습니다(같은 Jetson 문서는 passive throttling에 BSP의 PID controller를 쓴다고도 적지만, 위 DT 예의 governor는 `step_wise`입니다). 온도가 trip보다 높고 상승 중이면 cooling state를 한 단계 올리고, 내려가는 중이면 한 단계 낮추되 trip 위에 있는 동안은 최소 state보다 한 단계 위에 둡니다. trip 아래로 내려가 계속 떨어지면 그 trip의 cooling 요청을 거둡니다.
 
 ## 코드 / 실제 사용 예
 
