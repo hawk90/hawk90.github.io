@@ -247,7 +247,21 @@ nm release.o
 nm debug.o
 ```
 
-출하 빌드(`release.o`)의 symbol 목록에 `frame_dump`나 `fopen`·`fwrite`가 있으면 frame dump 코드가 들어간 것입니다. 이 차이를 사람이 매번 보지 않도록, 출하 산출물에 대고 도는 검사를 하나 둡니다.
+Debian 13 arm64 guest의 clang 19.1.7로 위 코드를 `result.c`로 저장해 두 빌드를 만든 결과입니다.
+
+```text
+$ nm release.o
+0000000000000000 T on_frame
+$ nm debug.o
+                 U fclose
+                 U fopen
+0000000000000000 T frame_dump
+                 U fwrite
+0000000000000080 T on_frame
+                 U snprintf
+```
+
+출하 빌드(`release.o`)의 symbol 목록에 `frame_dump`나 `fopen`·`fwrite`가 있으면 frame dump 코드가 들어간 것입니다. 같은 guest에서 `offsetof`·`sizeof`로 앞 문단의 셈도 확인했습니다. `t_ns`의 offset은 8, 구조체 크기는 24이고, `uint16_t` 하나를 더해도 24, `uint8_t thumb[16]`을 더하면 40이었습니다. 이 차이를 사람이 매번 보지 않도록, 출하 산출물에 대고 도는 검사를 하나 둡니다.
 
 ```sh
 #!/bin/sh
@@ -258,7 +272,16 @@ fi
 echo "OK: no frame dump in $1"
 ```
 
-이 검사는 `frame_dump` symbol이나 `.nv12` 파일 이름 문자열이 있으면 exit 1로 실패하고, 없으면 exit 0으로 통과합니다. 출하 빌드의 CI 단계에 넣으면, frame dump 옵션이 켜진 채 출하되는 경우 빌드가 실패합니다. 표의 나머지 두 줄(수집 경로 승인, 원격 뷰어 제거)은 코드보다 운영 절차에 속하므로 여기서 다루지 않습니다.
+이 검사는 `frame_dump` symbol이나 `.nv12` 파일 이름 문자열이 있으면 exit 1로 실패하고, 없으면 exit 0으로 통과합니다. 위 두 object에 돌린 결과입니다.
+
+```text
+$ sh check.sh release.o; echo rc=$?
+OK: no frame dump in release.o
+rc=0
+$ sh check.sh debug.o; echo rc=$?
+FAIL: frame dump code in debug.o
+rc=1
+``` 출하 빌드의 CI 단계에 넣으면, frame dump 옵션이 켜진 채 출하되는 경우 빌드가 실패합니다. 표의 나머지 두 줄(수집 경로 승인, 원격 뷰어 제거)은 코드보다 운영 절차에 속하므로 여기서 다루지 않습니다.
 
 ### 끊긴 동안의 결과 — store-and-forward
 
@@ -333,7 +356,26 @@ int main(void) {
 }
 ```
 
-`main`의 마지막 줄은 만든 인원수(`produced`), 보낸 인원수(`sent`), 합친 횟수(`folded`)를 찍습니다. `folded`가 0보다 크면서 `produced`와 `sent`의 두 합계가 같으면, 버퍼가 넘쳐도 인원수를 잃지 않았다는 뜻입니다. 받는 쪽은 seq가 건너뛴 것을 보고, 건너뛴 뒤의 첫 항목이 그 구간의 합이라는 것을 압니다. 한계는 두 가지입니다.
+같은 guest에서 `clang -std=c11 -O2 -Wall -Wextra sf.c -o sf && ./sf`로 돌린 출력입니다.
+
+```text
+  send seq  1  in  2 out  1
+  send seq  2  in  3 out  1
+  offline, queued 1
+  offline, queued 2
+  offline, queued 3
+  offline, queued 4
+  offline, queued 4
+  offline, queued 4
+  send seq  6  in  7 out  4
+  send seq  7  in  2 out  1
+  send seq  8  in  3 out  1
+  send seq  9  in  1 out  1
+  send seq 10  in  2 out  1
+produced in 20 out 10 / sent in 20 out 10 / folded 3
+```
+
+`main`의 마지막 줄은 만든 인원수(`produced`), 보낸 인원수(`sent`), 합친 횟수(`folded`)를 찍습니다. 끊긴 동안(seq 3~8) 버퍼가 4칸에서 세 번 넘쳤고, seq 3·4·5의 값은 seq 6에 합쳐져 `in 7 out 4`로 나갔습니다. `folded`가 0보다 크면서 `produced`와 `sent`의 두 합계가 같으면, 버퍼가 넘쳐도 인원수를 잃지 않았다는 뜻입니다. 받는 쪽은 seq가 건너뛴 것을 보고, 건너뛴 뒤의 첫 항목이 그 구간의 합이라는 것을 압니다. 한계는 두 가지입니다.
 
 - 이 고리 버퍼는 RAM에 있어서, 끊긴 동안 전원이 꺼지면 쌓인 결과가 사라집니다. 전원 차단까지 견뎌야 하면 비휘발성 저장소에 둡니다.
 - 합친 값이 `uint16_t`를 넘으면 `add_sat`가 65,535에서 멈추므로, 그 뒤로는 합계도 정확하지 않습니다. 오래 끊길 수 있는 설치 환경이면 필드 폭과 버퍼 크기를 그 기간에 맞춰 정합니다.

@@ -98,7 +98,7 @@ top_tb_orig.v:5:        : Padding 1 high bits of the port.
 
 ## Lint
 
-같은 RTL을 Verilator 5.054의 `--lint-only -Wall`로 검사하면 선언 초기값에 대한 경고가 나옵니다.
+같은 RTL을 Verilator 5.054의 `--lint-only -Wall`로 검사하면 선언 초기값에 대한 경고가 나옵니다. 아래는 출력의 일부이고, 실제 출력은 source 발췌와 도움말 줄, 마지막의 `%Error: Exiting due to 2 warning(s)`을 더 담고 있습니다.
 
 ```text
 %Warning-PROCASSINIT: top.v:3:29: Procedural assignment to declaration with initial value: 'led'
