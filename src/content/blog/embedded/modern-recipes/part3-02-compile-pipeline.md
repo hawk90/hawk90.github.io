@@ -30,7 +30,7 @@ topics: ["embedded"]
 | 단계 | 도구 | 입력 | 출력 |
 | --- | --- | --- | --- |
 | Preprocess | `cc1 -E` (`cpp`) | `.c` + 헤더 | `.i` (전개된 C 소스) |
-| Compile | `cc1` | `.i` | `.s` (assembly) |
+| Compile | `cc1` | `.c`/`.i` | `.s` (assembly) |
 | Assemble | `as` | `.s` | `.o` (object) |
 | Link | `collect2` → `ld` | `.o` + library | `.elf` (실행) |
 
@@ -82,7 +82,7 @@ int main(void) {
 }
 ```
 
-같은 파일 안의 `uint32_t` 정의는 `typedef long unsigned int uint32_t;`였습니다. 32-bit ARM에서 `long`도 32-bit라 크기는 같지만, `unsigned int`와는 다른 타입이라 `printf`의 `%u`가 경고를 내는 이유가 여기 있습니다. 매크로가 어떻게 펼쳐졌는지는 `.i`를 보는 것이 가장 빠릅니다.
+같은 파일 안의 `uint32_t` 정의는 `typedef long unsigned int uint32_t;`였습니다. 32-bit ARM에서 `long`도 32-bit라 크기는 같지만, `unsigned int`와는 다른 타입이라, `-Wall`(`-Wformat`)을 켜면 `uint32_t`를 `%u`로 찍는 줄에서 "format '%u' expects argument of type 'unsigned int', but argument 2 has type 'uint32_t' {aka 'long unsigned int'}" 경고가 납니다. 매크로가 어떻게 펼쳐졌는지는 `.i`를 보는 것이 가장 빠릅니다.
 
 ### 4) Compile — `.s`
 
@@ -211,7 +211,7 @@ m.o
 
 > ⚠️ `-S` 출력에서 함수 사라짐
 
-`-O2` 이상에서 inline된 `static` 함수는 별도 label이 남지 않습니다. 그 함수가 inline된 호출자 코드를 보거나, `-fdump-tree-einline`으로 inline 결정을 확인합니다.
+`-O2`에서 모든 호출이 inline되고 주소가 쓰이지 않은 `static` 함수는 별도 label이 남지 않습니다. `static int sq(int x)`를 `g()`에서 한 번 부르는 파일을 `-S`로 컴파일하면 label은 `f:`와 `g:`뿐이었습니다. 그 함수가 inline된 호출자 코드를 보거나, `-fdump-tree-einline`으로 inline 결정을 확인합니다.
 
 > ⚠️ `size` 결과만 보고 크기 분석
 
