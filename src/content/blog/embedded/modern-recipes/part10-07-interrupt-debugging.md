@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"인터럽트는 *enable 했다고 떨어지지* 않습니다."** 소스 → peripheral mask → NVIC → priority → CPU mask → ISR 진입의 6단계 중 한 곳만 막혀도 누락이 일어납니다.
+> **"인터럽트는 *enable했다고 해서 들어오지는* 않습니다."** 소스 → peripheral mask → NVIC → priority → CPU mask → ISR 진입의 6단계 중 한 곳만 막혀도 누락이 일어납니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -26,7 +26,7 @@ topics: ["embedded"]
 5. **NVIC priority** — `< BASEPRI`
 6. **CPU PRIMASK / FAULTMASK** — global enable
 
-이 6단계가 모두 통과해야 ISR이 실행됩니다. 하나라도 막히면 오류 없이 아무 일도 일어나지 않습니다.
+이 6단계를 모두 통과해야 ISR이 실행됩니다. 하나라도 막히면 오류 없이 아무 일도 일어나지 않습니다.
 
 ## Step 1 — Pending bit 보기
 
@@ -39,8 +39,8 @@ if (pending) {
 }
 ```
 
-Pending이 *떠 있는데 진입 안 됨* = NVIC enable 또는 priority 문제.
-Pending이 *떠 있지 않음* = source가 trigger 안 되었거나 peripheral mask 막힘.
+Pending이 *떠 있는데 진입하지 않으면* NVIC enable이나 priority 문제입니다.
+Pending이 *떠 있지 않으면* source가 trigger되지 않았거나 peripheral mask에서 막힌 것입니다.
 
 이 한 줄로 위 6단계의 어느 쪽 문제인지 둘로 나눕니다.
 
@@ -121,7 +121,7 @@ void nvic_dump(int irqn) {
 }
 ```
 
-ISER(enable), ISPR(pending), IABR(active), priority 한 줄에 다 보입니다. 디버깅 시 첫 호출.
+ISER(enable), ISPR(pending), IABR(active), priority 한 줄에 다 보입니다. 디버깅을 시작할 때 가장 먼저 부릅니다.
 
 ## 사례 1 — Peripheral 측 mask 누락
 
@@ -142,7 +142,7 @@ EXTI->RTSR |= (1 << 0);   // rising edge
 
 HAL의 GPIO 초기화(`HAL_GPIO_Init()`에 EXTI 모드를 주는 경우)는 이 두 레지스터를 설정하지만, 레지스터를 직접 다루는 코드는 NVIC만 켜고 이 단계를 빠뜨리기 쉽습니다.
 
-체크리스트.
+확인할 것은 다음과 같습니다.
 
 | Peripheral | Mask Register | Event Flag |
 |---|---|---|
@@ -208,7 +208,7 @@ configASSERT( ucCurrentPriority >= ucMaxSysCallPriority );
 
 우선순위 비트는 레지스터의 상위 비트에 있습니다. STM32F4 CMSIS 헤더의 `__NVIC_PRIO_BITS`는 4이고, CMSIS `NVIC_SetPriority(irq, 5)`는 `5 << (8 - 4)` = 0x50을 IPR에 씁니다. 위 QEMU 실행의 `IPR=0x50 prio=5`가 그 값입니다. AIRCR의 PRIGROUP 설정에 따라 이 4비트가 preemption과 sub-priority로 나뉩니다.
 
-## 사례 5 — IRQ 중복 — Shared IRQ
+## 사례 5 — Shared IRQ로 인한 중복
 
 ```c
 // STM32F4 EXTI 9_5는 EXTI5~9 모두 같은 ISR
@@ -258,7 +258,7 @@ ISR 안의 카운터 증가는 그 ISR이 끝날 때까지 같은 ISR에 다시 
 
 우선순위 1인 긴 ISR B가 도는 동안 우선순위 5인 A의 이벤트가 두 번 오면, A의 pending 비트는 하나뿐이라 B가 끝난 뒤 A는 한 번만 실행됩니다. 위 QEMU 실행 2)가 PRIMASK로 같은 상황을 만든 것입니다. UART를 바이트마다 인터럽트로 받는데 ISR 진입이 한 문자 시간보다 늦어지면, 다음 바이트가 데이터 레지스터를 덮어 overrun이 됩니다. 115200 baud 8N1이면 한 문자가 86.8 µs이므로([10-05](/blog/embedded/modern-recipes/part10-05-uart-not-printing)), 더 높은 우선순위 ISR이 그보다 오래 붙잡으면 바이트를 잃습니다.
 
-해결.
+해결 방법은 다음과 같습니다.
 
 - DMA + circular buffer로 옮김
 - FIFO가 있는 UART는 FIFO threshold 활용
@@ -314,7 +314,7 @@ HAL_NVIC_EnableIRQ(EXTI0_IRQn);   /* EXTI_PR.0 이미 1 */
 /* → 즉시 ISR 진입 */
 ```
 
-Enable 직전에 pending clear.
+Enable 직전에 pending을 지웁니다.
 
 ```c
 NVIC_ClearPendingIRQ(EXTI0_IRQn);
@@ -350,8 +350,8 @@ PRIMASK로 막은 동안 들어온 IRQ는 풀 때까지 기다리고, 같은 IRQ
 - Shared IRQ는 ISR 안에서 *모든 source*를 dispatch해야 합니다.
 - 같은 IRQ가 막혀 있는 동안 두 번 오면 pending이 하나로 합쳐져 ISR은 한 번만 실행됩니다(QEMU에서 확인).
 - `BASEPRI` = 0x50은 우선순위 값 5 이상(덜 급한 쪽)을 막고 3은 통과시킵니다(QEMU에서 확인).
-- GPIO toggle + logic analyzer가 ISR 진입 가시화의 최단 경로.
-- `configMAX_SYSCALL_INTERRUPT_PRIORITY` 위에서는 RTOS API 호출 금지.
+- ISR 진입은 GPIO toggle + logic analyzer로 가장 빨리 볼 수 있습니다.
+- `configMAX_SYSCALL_INTERRUPT_PRIORITY`보다 높은 우선순위에서는 RTOS API를 부르지 않습니다.
 
 다음 편은 **메모리 오염 진단**입니다.
 
