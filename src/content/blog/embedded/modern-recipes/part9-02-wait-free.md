@@ -12,7 +12,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Wait-free는 *각* 스레드가 남의 속도와 상관없이 유한한 단계 안에 끝난다는 보장"**입니다. Lock-free보다 강하고, 그래서 deadline을 따질 때 의미가 있습니다. 이 글은 flag, seqlock, double/triple buffer, ISR 카운터를 실제로 돌려 어느 쪽이 그 보장을 지키고 어느 쪽이 못 지키는지 숫자로 봅니다.
+> **"Wait-free는 *각* 스레드가 남의 속도와 상관없이 유한한 단계 안에 끝난다는 보장"**입니다. Lock-free보다 강하고, 그래서 최악 실행 단계를 따질 때 의미가 있습니다. 이 글은 flag, seqlock, double/triple buffer, ISR 카운터를 실제로 돌려 어느 쪽이 그 보장을 지키고 어느 쪽이 못 지키는지 숫자로 봅니다.
 
 ## Progress Property 복습
 
@@ -24,7 +24,7 @@ topics: ["embedded"]
 | Lock-free | "ensures only that some thread always makes progress" | Herlihy·Luchangco·Moir, *Obstruction-Free Synchronization: Double-Ended Queues as an Example*, 1절 |
 | Obstruction-free | "guarantees progress for any thread that eventually executes in isolation" | 같은 논문 1절 |
 
-식당으로 비유하면 wait-free는 손님마다 "주문 후 10분 안에 음식이 나온다"는 약속이고, lock-free는 "주방 전체로는 계속 음식이 나간다"는 약속입니다. 후자에서는 한 손님의 주문이 계속 밀릴 수 있습니다. Obstruction-free는 "다른 손님이 없으면 나온다"는 더 약한 약속입니다. Hard real-time에서 필요한 것은 앞의 것입니다. 한 task의 최악 시간을 다른 task의 행동과 무관하게 셀 수 있어야 하기 때문입니다.
+식당으로 비유하면 wait-free는 손님마다 "다른 손님이 아무리 몰려도 내 주문은 정해진 수의 조리 단계를 거치면 나온다"는 약속이고, lock-free는 "주방 전체로는 계속 음식이 나간다"는 약속입니다. 후자에서는 한 손님의 주문이 계속 밀릴 수 있습니다. Obstruction-free는 "다른 손님이 없으면 나온다"는 더 약한 약속입니다. Hard real-time에서 필요한 것은 앞의 것입니다. 한 task의 최악 단계 수를 다른 task의 행동과 무관하게 셀 수 있어야 하기 때문입니다. 단계 수의 보장이지 시간의 보장은 아니어서, 선점·인터럽트로 미뤄지는 시간은 따로 셉니다.
 
 아래 실행은 모두 Apple M2 Pro(macOS 27.2.1)에서 Apple clang 21.0.0으로 했고, 각 블록의 첫 줄이 빌드 명령입니다.
 
@@ -346,7 +346,7 @@ reads 2000000, torn 0, went backwards 0, new samples seen 140767
 
 다중 생산자·다중 소비자 큐를 wait-free로 만든 대표적인 설계가 Kogan과 Petrank의 *Wait-Free Queues With Multiple Enqueuers and Dequeuers*(PPoPP '11)입니다. 논문은 Michael-Scott lock-free 큐를 확장하고, 연산마다 phase 번호를 받아 그보다 작은 phase의 다른 스레드 연산을 먼저 도와주는 helping 방식으로 wait-freedom을 얻습니다(초록, 3.1절). 구현과 평가는 Java로 했고, garbage collector가 메모리 회수를 맡는다는 점을 설계에 이용합니다(3절). 평가 결과에 대해서는 "the wait-free algorithm is typically slower than the lock-free implementation, but the slowdown depends on the operating system configuration"이라고 적습니다(1절).
 
-즉 wait-free 큐는 존재하지만, GC 없는 MCU에서 그대로 쓸 수 있는 형태는 아니고 평균 성능도 lock-free 큐보다 낮습니다. 이 글의 범위에서는 위의 triple buffer나 [9-01](/blog/embedded/modern-recipes/part9-01-lock-free-ring)의 SPSC ring처럼 생산자·소비자 수를 제한해 루프를 없애는 쪽이 현실적입니다. SPSC ring의 `push`·`pop`도 루프가 없어 각 호출은 wait-free입니다. 다만 가득 차거나 비었을 때 기다리는 것은 호출자의 몫입니다.
+즉 wait-free 큐는 존재하지만, GC 없는 MCU에서 그대로 쓸 수 있는 형태는 아닙니다. 성능은 논문의 Java 측정에서 대체로 lock-free 큐보다 느렸고, 일부 설정에서는 더 빨랐습니다("even faster than the lock-free one, in some realistic cases", 1절). 이 글의 범위에서는 위의 triple buffer나 [9-01](/blog/embedded/modern-recipes/part9-01-lock-free-ring)의 SPSC ring처럼 생산자·소비자 수를 제한해 루프를 없애는 쪽이 현실적입니다. SPSC ring의 `push`·`pop`도 루프가 없어 각 호출은 wait-free입니다. 다만 가득 차거나 비었을 때 기다리는 것은 호출자의 몫입니다.
 
 ## Cortex-M Single-Word Atomic
 
@@ -440,12 +440,12 @@ undefined:
          U __atomic_load_8
 ```
 
-정리하면 다음과 같습니다.
+정리하면 다음과 같습니다. AArch64 두 줄의 64비트 읽기 칸은 위 두 `clang --target=aarch64-linux-gnu` 빌드에서 `read_ts`와 `read_c64`를 디스어셈블한 결과로, 두 `-march` 모두 `adrp` 뒤 `ldr x0, [x8]` 한 번이었습니다.
 
 | 대상 | `atomic_fetch_add` (32비트) | `volatile uint64_t` 읽기 | `_Atomic uint64_t` 읽기 |
 | --- | --- | --- | --- |
-| AArch64 ARMv8.0 (`-mno-outline-atomics`) | `ldxr`/`stxr` 루프 | (이 글에서 보지 않음) | (이 글에서 보지 않음) |
-| AArch64 ARMv8.1 | `ldadd` 한 명령 | (이 글에서 보지 않음) | (이 글에서 보지 않음) |
+| AArch64 ARMv8.0 (`-mno-outline-atomics`) | `ldxr`/`stxr` 루프 | `ldr x0` 한 번 | `ldr x0` 한 번 |
+| AArch64 ARMv8.1 | `ldadd` 한 명령 | `ldr x0` 한 번 | `ldr x0` 한 번 |
 | Cortex-M0+ (ARMv6-M) | `__atomic_fetch_add_4` 호출 | `ldr` 두 번 | `__atomic_load_8` 호출 |
 | Cortex-M3 (ARMv7-M) | `ldrex`/`strex` 루프 | `ldrd` 한 번 | `__atomic_load_8` 호출 |
 
