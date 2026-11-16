@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-실내 공기 monitor, 기상 기록기, 냉장 logger처럼 온도·습도·기압을 읽어야 하는 곳입니다. Bosch BME280은 한 chip에서 셋을 재고 I2C와 SPI를 모두 지원합니다. Sensirion SHT3x-DIS는 온도·습도를 재고 I2C로만 통신합니다.
+실내 공기 monitor, 기상 기록기, 냉장 logger처럼 온도·습도·기압을 읽어야 하는 곳에 씁니다. Bosch BME280은 한 chip에서 셋을 재고 I2C와 SPI를 모두 지원합니다. Sensirion SHT3x-DIS는 온도·습도를 재고 I2C로만 통신합니다.
 
 이 글은 STM32F407에서 BME280을 SPI로, SHT3x를 I2C로 읽는 driver를 씁니다. 수치는 Bosch BME280 datasheet BST-BME280-DS001-10 Rev 1.1(May 2015)과 Sensirion SHT3x-DIS datasheet Version 7(December 2022)에서 가져왔습니다. ARM 쪽 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall -Wextra` 경고 없이 빌드되고, calibration 해석·온도 보상식·CRC는 host에서 돌려 확인했습니다. 센서로 한 측정은 없습니다.
 
@@ -360,7 +360,7 @@ BME280의 raw 값은 chip마다 다른 calibration word를 거쳐야 단위가 �
 
 > ⚠️ normal mode에서 config를 바꿈
 
-"Writes to the 'config' register in normal mode may be ignored." config를 바꾸려면 ctrl_meas로 sleep mode(mode = 00)에 넣고 쓴 뒤 다시 normal로 돌립니다.
+datasheet는 "Writes to the 'config' register in normal mode may be ignored."라고 적습니다. config를 바꾸려면 ctrl_meas로 sleep mode(mode = 00)에 넣고 쓴 뒤 다시 normal로 돌립니다.
 
 > ⚠️ ctrl_hum만 쓰고 끝냄
 
@@ -376,11 +376,11 @@ CRC가 틀린 값은 버리고 다시 읽습니다. 위 host 실행에서 bit �
 
 ## 정리
 
-- BME280: chip_id **0x60**, SPI는 bit 7이 RW, calibration은 **0x88–0xA1·0xE1–0xE7**(Table 16).
-- 설정 순서는 **sleep에서 config → ctrl_hum → ctrl_meas(normal)**.
-- 온도 보상은 4.2.3절 정수 식, **`t_fine`을 먼저** 만들고 기압·습도는 datasheet 식이나 Bosch SensorAPI.
-- SHT3x: **0x2400** single shot, **tMEAS,h max 15 ms**, CRC-8 **0x31/0xFF**.
-- host에서 **CRC 예제값, calibration 해석, 정수·double 온도 식 일치**를 확인.
+- BME280은 chip_id가 **0x60**이고, SPI는 bit 7이 RW이며, calibration은 **0x88–0xA1·0xE1–0xE7**(Table 16)에 있습니다.
+- 설정 순서는 **sleep에서 config → ctrl_hum → ctrl_meas(normal)**입니다.
+- 온도 보상은 4.2.3절 정수 식으로 **`t_fine`을 먼저** 만들고, 기압·습도는 datasheet 식이나 Bosch SensorAPI로 계산합니다.
+- SHT3x는 **0x2400** single shot, **tMEAS,h max 15 ms**, CRC-8 **0x31/0xFF**를 씁니다.
+- host에서 **CRC 예제값, calibration 해석, 정수·double 온도 식 일치**를 확인했습니다.
 
 다음 편은 **IMU 센서**입니다. MPU-6050 초기화·14 byte burst read·Data Ready 인터럽트와 complementary filter를 다룹니다.
 
