@@ -468,7 +468,7 @@ int main()
 - line 크기는 Cortex-M7 32 B, Linux arm64 매크로 64 B, M2 Pro `hw.cachelinesize` 128 B로 서로 달랐고, 같은 Mac의 Linux 게스트는 64를 보고했습니다.
 - struct 머리의 `alignas(64)`는 멤버 사이 간격을 바꾸지 않습니다. 멤버마다 `alignas`를 붙이면 수동 padding은 필요 없습니다.
 - M2 Pro에서 같은 line의 두 카운터는 128 B 간격보다 5.5배, 64 B 간격도 2.3배 느렸습니다.
-- 128 B 간격의 per-thread counter는 thread 8개까지 시간이 그대로였고, 8 B 간격은 4개에서 1개일 때의 약 28배가 걸렸고, 8개에서는 실행마다 25~78배로 흔들렸습니다.
+- 128 B 간격의 per-thread counter는 thread 8개까지 시간이 그대로였습니다. 8 B 간격은 4개에서 1개일 때의 약 28배가 걸렸고, 8개에서는 실행마다 25~78배로 흔들렸습니다.
 - SoA는 이 루프에서 AoS보다 4.3배 빨랐습니다(가져오는 byte 수와 vectorize된 코드의 차이가 함께 들어 있습니다).
 - DMA buffer는 시작과 크기를 line 단위로 맞춥니다. CMSIS의 invalidate는 32 B line 단위로 동작합니다.
 - Linux는 `____cacheline_aligned`(`SMP_CACHE_BYTES` 정렬)를 v6.12에서 332곳에 씁니다.
