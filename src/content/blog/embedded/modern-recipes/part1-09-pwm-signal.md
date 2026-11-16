@@ -20,7 +20,7 @@ RM0090 §7.2(216쪽)에 따르면 STM32F405/407의 AHB 최대 주파수는 168 M
 
 PWM은 고정 주기의 사각파이고, 한 주기 중 high 구간의 비율이 duty입니다. 출력이 0과 `V_H` 사이를 오가면 한 주기 평균은 duty × `V_H`입니다. 타이머가 정하는 것은 이 duty를 몇 단계로 나눌 수 있는가이고, 아래 절들이 그 단계 수를 계산합니다.
 
-![PWM duty 50% vs 75% — duty 비율이 평균 전압](/images/blog/modern-recipes/diagrams/part1-09-pwm-duty.svg)
+![PWM duty 50% vs 75% — duty 비율이 평균 전압을 정함](/images/blog/modern-recipes/diagrams/part1-09-pwm-duty.svg)
 
 ## Edge-aligned와 center-aligned — 주기와 duty 단계
 
