@@ -2,7 +2,7 @@
 title: "Cache Line 최적화 — Alignment·Prefetch·False Sharing 처리"
 slug: "embedded/performance-engineering/part2-07-cache-line"
 date: 2026-04-24T09:06:00
-description: "64-byte line alignment, software prefetch, false sharing 회피, SoA·AoS 선택."
+description: "코어별 cache line 크기를 확인하고, M2 Pro에서 false sharing 거리·SoA/AoS를 측정하며, prefetch·non-temporal·DMA maintenance를 TRM과 CMSIS로 정리합니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 15
 tags: [cache, line, alignment, prefetch, false-sharing]
@@ -16,260 +16,206 @@ topics: ["embedded"]
 
 ## Cache Line 크기
 
-| 대상 | line size 확인 방법 |
-|---|---|
-| Cortex-M7 | 해당 revision TRM 및 MCU cache 구성 확인 |
-| Cortex-A / x86 / Apple / IBM POWER | 코어 세대와 cache level별 공식 자료 또는 런타임 조회 확인; 하나의 값으로 일반화하지 않음 |
+line 크기는 코어마다 다르므로 하나의 상수로 고정하지 않습니다.
 
-매크로:
+| 대상 | line 크기 | 출처 |
+|---|---|---|
+| Cortex-M7 L1 I·D | 32 byte | M7 TRM(DDI 0489D) 3.3.4 CCSIDR `LineSize` |
+| Cortex-A53 L1 I·D, L2 | 64 byte | A53 TRM(DDI 0500E) 6.1, 2.1.7 |
+| Apple M2 Pro | 128 byte | `sysctl hw.cachelinesize` |
+
+C++17의 `std::hardware_destructive_interference_size`는 이 표와 다를 수 있습니다. Apple clang 21(libc++)과 Debian GCC 14.2 모두 256을 돌려주었습니다(2-06). 런타임에 정확한 값이 필요하면 Arm에서는 CCSIDR·CTR 같은 시스템 레지스터나 OS가 주는 값(macOS의 `hw.cachelinesize`, Linux의 `/sys/devices/system/cpu/cpu0/cache/`)을 읽습니다.
+
+## 측정 — False Sharing
+
+두 thread가 각자 자기 카운터를 1억 번 `atomic_fetch_add`(relaxed) 합니다. 두 카운터 사이의 거리만 바꿨습니다(`bench/cl/fs.c`, `clang -O2`, M2 Pro, 각 3회).
+
+| 두 카운터의 거리 | 시간 (3회) |
+|---:|---|
+| 8 byte | 1.160, 1.192, 1.179 s |
+| 64 byte | 0.431, 0.313, 0.562 s |
+| 128 byte | 0.205, 0.207, 0.208 s |
+| 256 byte | 0.206, 0.209, 0.209 s |
+
+두 thread는 서로의 값을 한 번도 읽지 않지만, 같은 line에 있으면 한 쪽이 쓸 때마다 다른 쪽 코어의 그 line이 무효화되어 5.7배 느려집니다. 64 byte 떨어뜨려도 아직 느리고 128 byte에서 멈춥니다. M2 Pro의 line이 128 byte이기 때문이고, 64 byte line을 가정한 `alignas(64)` padding은 이 코어에서 부족합니다.
 
 ```c
-#define CACHE_LINE_SIZE 64
-
-#if defined(__cpp_lib_hardware_interference_size)
-#include <new>
-constexpr size_t CACHE_LINE = std::hardware_destructive_interference_size;
-#endif
+struct counters {
+    _Alignas(128) atomic_long producer_count;   /* line 크기 이상 떨어뜨림 */
+    _Alignas(128) atomic_long consumer_count;
+};
 ```
+
+![64-byte cache line의 세 가지 배치 — 섞임/분리/false sharing](/images/blog/perf-eng/diagrams/part2-07-cache-line-layout.svg)
+
+그림은 64 byte line 기준입니다. line 크기가 다른 코어에서는 위 표의 값으로 바꿔 읽습니다.
 
 ## Alignment
 
 ```c
-__attribute__((aligned(64))) struct hot_data {
+struct __attribute__((aligned(64))) hot_data {
     uint32_t counter;
     uint32_t flag;
 };
 
-// 또는 C11
-alignas(64) uint32_t buffer[256];
-
-// 또는 C++11
-alignas(64) struct Foo { ... };
+alignas(64) uint32_t buffer[256];   /* C11 <stdalign.h>, C++11 */
 ```
 
-배열 정렬:
-
-```c
-__attribute__((aligned(64))) static int matrix[1024][1024];
-```
-
-DMA descriptor/buffer alignment는 주변장치·DMA·cache maintenance 규칙을 따릅니다. SIMD load는 ISA가 허용하는 정렬을 확인합니다. misaligned access의 penalty 또는 fault 여부는 target core와 memory region에 따라 다릅니다.
-
-64-byte line 안의 데이터 배치가 성능을 결정합니다. 같은 line에 무엇이 들어 있느냐에 따라 좋은/나쁜 패턴이 갈립니다.
-
-![64-byte cache line의 세 가지 배치 — 섞임/분리/false sharing](/images/blog/perf-eng/diagrams/part2-07-cache-line-layout.svg)
-
-## False Sharing 방지
-
-```c
-// 회피 — 두 atomic이 같은 line
-struct counters {
-    atomic_int producer_count;
-    atomic_int consumer_count;
-};
-
-// Good — line 분리
-struct counters {
-    alignas(64) atomic_int producer_count;
-    alignas(64) atomic_int consumer_count;
-};
-```
-
-false sharing의 비용은 coherence protocol, access rate, thread placement와 workload에 따라 달라집니다. 원인을 확인하려면 대상 PMU/coherence event 또는 대조 실험을 사용합니다.
+DMA buffer라면 정렬 단위를 cache maintenance 단위에 맞춥니다. Cortex-M7의 `SCB_InvalidateDCache_by_Addr()`는 32 byte로 정렬된 주소부터 32 byte 단위로 동작하므로(CMSIS `cachel1_armv7.h` 주석), buffer의 시작 주소와 크기를 32 byte 배수로 둡니다.
 
 ## Hot-Cold Splitting
 
 ```c
-// 회피 — 자주 / 드물게 쓰는 field 섞임
-struct guest {
+struct guest {                /* sizeof = 396 */
     int id;
     int active;
-    char address[256];        // 드물게 사용
-    char email[128];          // 드물게
-    int last_login;           // hot
+    char address[256];        /* 드물게 사용 */
+    char email[128];          /* 드물게 */
+    int last_login;           /* hot */
 };
 
-// Good — hot/cold 분리
-struct guest_hot {
+struct guest_hot {            /* sizeof = 12 */
     int id;
     int active;
     int last_login;
 };
-
-struct guest_cold {
-    char address[256];
-    char email[128];
-};
 ```
 
-hot loop이 guest_hot만 순회하므로 cache 효율이 올라갑니다.
+M2 Pro clang에서 `struct guest`는 396 byte, `struct guest_hot`은 12 byte였습니다(`bench/cl/sz.c`). hot 필드 셋만 도는 루프는 `guest` 배열에서 원소마다 line 하나 이상을 가져오지만, `guest_hot` 배열에서는 128 byte line 하나에 10개 남짓이 들어갑니다.
 
 ## SoA vs AoS
 
 ```c
-// AoS — Array of Structures
+/* AoS — Array of Structures */
 struct particle { float x, y, z, vx, vy, vz, mass; } parts[N];
-for (i = 0; i < N; i++) {
-    parts[i].x += parts[i].vx * dt;   // x, vx만 사용, y/z/mass도 fetch됨
-}
+for (i = 0; i < N; i++) parts[i].x += parts[i].vx * dt;
 
-// SoA — Structure of Arrays
-struct {
-    float x[N], y[N], z[N];
-    float vx[N], vy[N], vz[N];
-    float mass[N];
-} parts_soa;
-for (i = 0; i < N; i++) {
-    parts_soa.x[i] += parts_soa.vx[i] * dt;   // x, vx만 fetch
-}
+/* SoA — Structure of Arrays */
+float x[N], vx[N];
+for (i = 0; i < N; i++) x[i] += vx[i] * dt;
 ```
 
-SIMD에 최적입니다. 연속된 x 4개를 NEON 벡터로 load할 수 있습니다. 게임 엔진과 물리 시뮬에서는 표준 패턴입니다.
+M2 Pro에서 입자 400만 개를 20번 갱신했습니다(`bench/cl/soa.c`, `clang -O2`, 각 3회).
+
+| 배치 | 입자당 시간 (3회) |
+|---|---|
+| AoS (`sizeof` 28 byte) | 0.61, 0.60, 0.60 ns |
+| SoA | 0.14, 0.15, 0.14 ns |
+
+AoS는 `x`와 `vx` 8 byte를 쓰려고 입자마다 28 byte를 끌어오고, SoA는 쓰는 8 byte만 가져옵니다. SoA에서는 연속한 `x` 네 개를 128비트 벡터 하나로 읽을 수 있어 벡터화도 쉬워집니다(2-09). 반대로 한 입자의 여러 필드를 함께 쓰거나 무작위로 한 입자씩 접근한다면, 필드가 한 line에 모인 AoS가 line을 덜 가져옵니다.
 
 ## Software Prefetch
 
 ```c
 for (i = 0; i < N; i++) {
-    __builtin_prefetch(&data[i + 8], 0 /* read */, 0 /* no temp */);
+    __builtin_prefetch(&data[i + 8], 0 /* read */, 0 /* no temporal locality */);
     process(data[i]);
 }
 ```
 
-매개변수는 다음과 같습니다.
+GCC 14.2 매뉴얼의 정의입니다.
 
 | 인자 | 의미 |
 |---|---|
-| addr | prefetch 주소 |
-| rw | 0 = read, 1 = write (write intent) |
-| locality | 0 = NTA (non-temporal), 1-3 = temporal hint (3=highest) |
+| addr | prefetch할 주소 |
+| rw | 0 = 읽기(기본값), 1 = 쓰기 준비 |
+| locality | 0~3의 컴파일 타임 상수. 0 = temporal locality 없음, 3 = 높음(기본값) |
 
-ARM 명령은 다음과 같습니다.
+같은 매뉴얼은 대상이 data prefetch를 지원하지 않으면 주소 식의 부작용만 평가하고 다른 코드는 만들지 않으며 경고도 내지 않는다고 적습니다. Armv7-M에는 `PLD`와 `PLI`가 있고(ARMv7-M ARM A7.7.93~A7.7.97), `arm-none-eabi-gcc` 16.2는 Cortex-M4·M7 모두에 `pld [r0, #64]`를 냈습니다(2-06). 거리는 2-06에서처럼 바꿔 가며 재서 정합니다. 그 측정에서 무작위 gather의 이득은 최대 7%였습니다.
 
-```asm
-pld [r0, #64]    ; preload data
-pldw [r0, #64]   ; preload data for write
-pli [r0, #64]    ; preload instruction
-```
+## Hardware Prefetcher와 예측기 제어
 
-거리는 *latency / cycle per iter*로 잡습니다. L1 miss가 12 cycle이고 iter가 3 cycle이면 4 element 앞을 prefetch합니다.
+Cortex-M7의 `CCR.BP`(bit 18)는 ARMv7-M ARM B3.2.8에 따르면 branch prediction(program flow prediction) 활성화 비트이고 data prefetch와는 무관합니다. M7은 ACTLR(TRM 3.3.1)의 `DISBTACREAD`로 BTAC를 끄고 static 예측만 쓰게 할 수도 있습니다. Cortex-A53의 L1 data prefetch engine(TRM 6.1)을 조정하는 비트는 CPUACTLR_EL1(TRM 4.3.78)에 있습니다.
 
-## Hardware Prefetcher 활성화
+## Streaming Access — Non-Temporal
 
-Hardware prefetcher의 존재·제어 방법은 코어 구현별입니다. Cortex-M7의 `CCR.BP`는 branch prediction 관련 비트이지 일반 data prefetch 제어 레지스터가 아닙니다. 해당 MCU TRM을 확인합니다.
+한 번 쓰고 다시 읽지 않는 큰 buffer는 캐시에 남겨 둘 이유가 없습니다. AArch64에는 non-temporal 힌트가 붙은 pair load/store `LDNP`·`STNP`가 있습니다. Cortex-A53 TRM 6.6.3에 따르면 A53에서 `LDNP`의 cache 요청은 L2에만 할당되고, 다른 line보다 일찍 교체되기 쉬운 정책을 받습니다. 같은 TRM의 CPUACTLR_EL1 `DTAH` 비트를 1로 두면 `LDNP`·`STNP`가 일반 `LDP`·`STP`와 똑같이 동작합니다.
 
-## Streaming Access — Non-Temporal Stores
-
-```c
-for (i = 0; i < N; i++) {
-    arr[i] = compute(i);   // 한 번 쓰고 안 읽음 — cache 입력 의미 없음
-}
-```
-
-AArch64 `STNP`는 non-temporal hint가 붙은 pair store입니다. 이것만으로 모든 구현에서 cache bypass를 보장한다고 해석하지 않습니다. x86에서는 `MOVNT`에 해당합니다.
-
-```c
-__builtin_nontemporal_store(value, &arr[i]);
-```
-
-큰 buffer 초기화나 copy에서 효과를 보며 cache pollution을 방지합니다.
+clang에는 `__builtin_nontemporal_store()`가 있지만, `float` 하나를 저장하는 함수에 쓰자 `clang -O2`(arm64)는 평범한 `str s0, [x0, x1, lsl #2]`를 냈습니다(`bench/cl/nt.c`). 힌트가 실제 명령으로 바뀌는지는 생성된 코드에서 확인합니다.
 
 ## Cache Line Pad — Producer/Consumer Queue
 
 ```c
+#define LINE 128   /* M2 Pro. Cortex-A53은 64 */
+
 struct spsc_queue {
-    alignas(64) atomic_size_t head;   // producer만 쓰는 line
-    char pad1[64 - sizeof(atomic_size_t)];
-    
-    alignas(64) atomic_size_t tail;   // consumer만 쓰는 line
-    char pad2[64 - sizeof(atomic_size_t)];
-    
-    alignas(64) T data[CAPACITY];
+    _Alignas(LINE) atomic_size_t head;   /* producer만 씀 */
+    _Alignas(LINE) atomic_size_t tail;   /* consumer만 씀 */
+    _Alignas(LINE) uint32_t data[CAPACITY];
 };
 ```
 
-Producer와 consumer가 서로 다른 CPU core에 있을 때 false sharing을 회피할 수 있습니다.
+`_Alignas(LINE)`만으로 다음 멤버가 다음 line에서 시작하므로 별도의 `pad[]` 배열은 필요 없습니다. 위 false sharing 측정처럼 producer와 consumer가 다른 코어에서 돌 때 의미가 있습니다.
 
 ## Cache Maintenance — DMA·Coherence
 
 ```c
 /* Cortex-M7 + DMA receive */
-uint8_t dma_buf[256] __attribute__((aligned(32)));
+__attribute__((aligned(32))) uint8_t dma_buf[256];
 
 HAL_UART_Receive_DMA(&huart, dma_buf, 256);
-/* DMA wrote to memory, CPU cache는 stale */
-
-SCB_InvalidateDCache_by_Addr((uint32_t*)dma_buf, 256);
-/* 이제 CPU read시 fresh data */
-
+/* ... DMA 완료 후: DMA는 memory에 썼고 CPU cache에는 옛 값이 있을 수 있음 */
+SCB_InvalidateDCache_by_Addr((uint32_t *)dma_buf, 256);
 process(dma_buf);
 ```
 
 ```c
-/* DMA transmit — CPU writes to buf */
+/* DMA transmit: CPU가 쓴 내용을 memory로 내보낸 뒤 DMA 시작 */
 fill_data(dma_buf);
-SCB_CleanDCache_by_Addr((uint32_t*)dma_buf, 256);   // flush cache → memory
+SCB_CleanDCache_by_Addr((uint32_t *)dma_buf, 256);
 HAL_UART_Transmit_DMA(&huart, dma_buf, 256);
 ```
 
-| 함수 | 동작 |
+| 함수 (CMSIS) | 동작 |
 |---|---|
-| `Clean` | cache → memory (write-back) |
-| `Invalidate` | cache line 폐기 |
-| `CleanInvalidate` | flush + 폐기 |
+| `SCB_CleanDCache_by_Addr` | dirty line을 memory에 씀 |
+| `SCB_InvalidateDCache_by_Addr` | line을 버림 |
+| `SCB_CleanInvalidateDCache_by_Addr` | 쓰고 버림 |
+
+이 코드는 보드에서 실행하지 않았습니다. 함수 이름과 32 byte 단위 동작은 CMSIS_5 `cachel1_armv7.h`에서 확인했습니다.
 
 ## Hot Path 정렬
 
 ```c
-__attribute__((hot)) void critical_function(void) { ... }
-__attribute__((cold)) void error_handler(void) { ... }
+__attribute__((hot))  void critical_function(void) { /* ... */ }
+__attribute__((cold)) void error_handler(void)     { /* ... */ }
 ```
 
-GCC가 hot 함수를 연속 배치해 I-cache locality를 향상시킵니다.
-
-`-fprofile-use`로 PGO(Profile-Guided Optimization)를 적용하면 실제 실행 분포에 따라 배치합니다.
+GCC 14.2 매뉴얼에 따르면 `hot` 함수는 더 적극적으로 최적화되고, 많은 대상에서 text section의 별도 subsection에 모여 locality가 좋아집니다. `cold` 함수는 속도 대신 크기로 최적화되고 따로 모입니다. 손으로 표시하는 대신 PGO(1-08)를 쓰면 실제 실행 분포로 같은 결정을 합니다.
 
 ## 자주 하는 실수
 
-> ⚠️ Misaligned struct
+> ⚠️ 구조체 padding을 짐작
 
 ```c
-struct {
-    char flag;       // 1 byte
-    int value;       // 4 byte — offset 1? 또는 4 (padding)?
+struct thing {
+    char flag;
+    int value;
     char name[3];
-} thing;             // → 12 byte? sizeof 확인
+};
 ```
 
-Unaligned access의 지원과 예외 동작은 instruction, memory type, core와 configuration에 따라 다릅니다. Target TRM과 memory attributes를 확인합니다.
+M2 Pro clang에서 이 구조체의 `sizeof`는 12였습니다(`bench/cl/sz.c`). `value`를 4 byte 경계에 맞추느라 `flag` 뒤에 3 byte, 끝에 1 byte가 들어갑니다. 필드를 큰 것부터 나열하면 줄어듭니다. 실제 배치는 `sizeof`·`offsetof`나 컴파일러의 `-Wpadded` 경고로 확인합니다.
 
-> ⚠️ Prefetch 거리 잘못
+> ⚠️ 64 byte line을 가정한 padding
 
-```c
-__builtin_prefetch(&arr[i + 1]);   // 너무 가까움 — 효과 없음
-__builtin_prefetch(&arr[i + 1000]); // 너무 멈 — evict 가능
-```
+위 측정에서 64 byte padding은 M2 Pro의 false sharing을 다 없애지 못했습니다. padding 크기는 대상 코어의 line 크기로 정합니다.
 
-벤치마크 측정으로 최적 거리를 찾습니다.
+> ⚠️ `volatile` + cache line padding
 
-> ⚠️ Volatile + cache line padding
-
-```c
-volatile struct { alignas(64) int a; alignas(64) int b; } v;
-```
-
-`volatile`은 컴파일러의 캐싱을 차단합니다. False sharing은 hardware 차원의 문제로 두 개념은 별개입니다.
+`volatile`은 컴파일러가 접근을 지우거나 합치지 못하게 할 뿐이고, false sharing은 하드웨어 coherence 문제입니다. 서로 다른 문제입니다.
 
 > ⚠️ SoA를 모든 경우에 사용
 
-Random access나 한 객체의 여러 field를 동시에 사용하는 패턴에서는 AoS가 유리합니다. 적용 전에 반드시 접근 패턴을 분석해야 합니다.
+한 객체의 여러 필드를 함께 쓰거나 무작위 접근이 많으면 AoS가 line을 덜 가져옵니다. 접근 패턴을 보고 고릅니다.
 
 ## 정리
 
-- Cache line 크기는 target별로 확인하고 필요한 alignment를 `alignas` 등으로 지정합니다.
-- **False sharing**은 multi-CPU 변수를 line 단위로 분리해 회피합니다.
-- **SoA**는 SIMD와 streaming에 유리합니다.
-- **Software prefetch**는 적절한 거리에서만 효과가 있습니다.
-- data cache가 활성화된 Cortex-M7 MCU에서 non-coherent DMA buffer를 공유할 때는 DMA 방향·ownership 전환·cache line 정렬에 맞춰 clean/invalidate를 수행합니다. MCU reference manual과 vendor HAL 요구사항을 따릅니다.
+- line 크기는 Cortex-M7 32 B, Cortex-A53 64 B, M2 Pro 128 B입니다. `hardware_destructive_interference_size`는 두 toolchain 모두 256이었습니다.
+- M2 Pro에서 같은 line의 두 카운터는 5.7배 느렸고, 64 byte 간격으로는 부족했으며 128 byte에서 멈췄습니다.
+- SoA는 AoS보다 4배 빨랐습니다(0.14 대 0.60 ns/입자). 쓰는 필드만 가져오기 때문입니다.
+- A53의 `LDNP`는 L2에만 할당됩니다. clang의 non-temporal builtin이 실제로 `stnp`가 되는지는 코드를 보고 확인합니다.
+- Cortex-M7 DMA buffer는 32 byte 정렬·32 byte 배수 크기로 두고 clean·invalidate합니다.
 
 다음 편은 **Memory Bandwidth**입니다.
 
@@ -277,3 +223,11 @@ Random access나 한 객체의 여러 field를 동시에 사용하는 패턴에�
 
 - [2-06: Cache Miss](/blog/embedded/performance-engineering/part2-06-cache-miss)
 - [2-08: Memory Bandwidth](/blog/embedded/performance-engineering/part2-08-memory-bandwidth)
+
+## 참고 자료
+
+- Cortex-M7 Technical Reference Manual (DDI 0489D) 3.3.1, 3.3.4
+- Cortex-A53 MPCore Technical Reference Manual (DDI 0500E) 2.1.7, 4.3.78, 6.1, 6.6.3
+- ARMv7-M Architecture Reference Manual (DDI 0403E) A7.7.93~A7.7.97, B3.2.8
+- [GCC 14.2 Other Builtins](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Other-Builtins.html), [Common Function Attributes](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Common-Function-Attributes.html)
+- [CMSIS_5 `cachel1_armv7.h`](https://github.com/ARM-software/CMSIS_5/blob/develop/CMSIS/Core/Include/cachel1_armv7.h)

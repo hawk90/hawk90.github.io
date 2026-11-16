@@ -12,7 +12,7 @@
 ]
 
 % Title
-\node[font=\sffamily\bfseries\small, text=inkc] at (2.0, 3.5) {ARM CCN — Coherent Mesh Network};
+\node[font=\sffamily\bfseries\small, text=inkc] at (2.0, 3.5) {Arm CMN — Coherent Mesh Network};
 
 % Cluster 0
 \node[meshnode] (c0) at (0, 2) {Cluster 0};
@@ -27,7 +27,7 @@
 \node[meshnode, draw=clibord, fill=clifill] (io) at (3.5, 0) {I/O};
 
 % DDR
-\node[meshnode, draw=hibord, fill=hifill] (ddr) at (0, -2) {DDR3/4/5};
+\node[meshnode, draw=hibord, fill=hifill] (ddr) at (0, -2) {DRAM};
 
 % Connections (mesh)
 \draw[edge, line width=0.6pt] (c0.east) -- (c1.west);

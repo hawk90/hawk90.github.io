@@ -2,7 +2,7 @@
 title: "CPU 파이프라인 분석 — 5-stage·Cortex-M·Cortex-A 비교"
 slug: "embedded/performance-engineering/part2-01-pipeline"
 date: 2026-04-24T09:00:00
-description: "Fetch·Decode·Execute·Memory·Writeback의 5-stage 파이프라인을 봅니다. Cortex-M3/M4는 3-stage, Cortex-A는 8~15-stage입니다."
+description: "Fetch·Decode·Execute·Memory·Writeback의 5-stage 파이프라인과 Arm 문서에 적힌 Cortex-M·Cortex-A 파이프라인을 비교하고, M2 Pro에서 의존 사슬이 IPC를 정하는 것을 측정합니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 9
 tags: [cpu, pipeline, cortex-m, cortex-a]
@@ -14,7 +14,9 @@ topics: ["embedded"]
 
 > **Pipeline은 명령어 병렬화입니다.** 한 사이클당 한 명령어 *완료*가 목표입니다.
 
-## 5-Stage Classic Pipeline (MIPS R3000)
+## 5-Stage Classic Pipeline
+
+교과서의 고전적 RISC 파이프라인은 명령 하나를 다섯 단계로 나눕니다.
 
 | Stage | 작업 |
 |---|---|
@@ -24,202 +26,137 @@ topics: ["embedded"]
 | **M** (Memory) | load/store 시 메모리에 액세스합니다 |
 | **W** (Writeback) | register file에 결과를 씁니다 |
 
-```text
-Time:    1    2    3    4    5    6    7    8
-Inst1:  [F] [D] [E] [M] [W]
-Inst2:       [F] [D] [E] [M] [W]
-Inst3:            [F] [D] [E] [M] [W]
-Inst4:                 [F] [D] [E] [M] [W]
-```
+단계마다 다른 명령이 들어 있으므로, cycle마다 각 단계를 차지한 명령은 다음과 같습니다.
 
-이상적으로는 *매 cycle마다 1 명령이 완료*됩니다 (IPC = 1.0).
+| cycle | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|
+| Inst1 | F | D | E | M | W | | | |
+| Inst2 | | F | D | E | M | W | | |
+| Inst3 | | | F | D | E | M | W | |
+| Inst4 | | | | F | D | E | M | W |
+
+5 cycle째부터는 매 cycle 명령 하나가 W를 마칩니다(IPC = 1.0). 명령 하나의 latency는 여전히 5 cycle입니다.
 
 실제로는 데이터 의존성 때문에 stall이 발생합니다. 다음은 RAW(Read-After-Write) hazard 하나로 뒤따르는 명령들이 한 cycle씩 밀리는 모습입니다.
 
 ![5-stage pipeline에 RAW hazard 하나가 들어왔을 때의 stall 전파](/images/blog/perf-eng/diagrams/part2-01-pipeline-stages.svg)
 
-## Cortex-M0 / M0+ — 3-Stage / 2-Stage
+## Cortex-M과 Cortex-A의 파이프라인
 
-```text
-Cortex-M0: [Fetch] → [Decode] → [Execute]
-Cortex-M0+: [Fetch+Decode] → [Execute]
+Arm이 공개한 문서에서 확인한 범위만 적습니다. 단계 이름과 세부 구조는 Arm이 공개하지 않은 것이 많아 싣지 않습니다.
+
+| 코어 | 문서에 적힌 파이프라인 | 출처 |
+|---|---|---|
+| Cortex-M0 | 3-stage | Arm Cortex-M0 Processor Datasheet |
+| Cortex-M0+ | 2-stage, von Neumann | Cortex-M0+ Devices Generic User Guide(DUI 0662B) 1.1 |
+| Cortex-M4 | 3-stage, Harvard | Cortex-M4 Devices Generic User Guide(DUI 0553A) 1.1 |
+| Cortex-M7 | 6-stage, Harvard, in-order superscalar. 많은 명령을 dual-issue하며 load/load, load/store 쌍도 포함 | Cortex-M7 Devices Generic User Guide(DUI 0646B) 1.1, Cortex-M7 TRM(DDI 0489D) 1.1 |
+| Cortex-A53 | in-order, 대부분의 명령을 대칭 dual-issue | Cortex-A53 TRM(DDI 0500E) 1.3 |
+| Cortex-A72 | fetch → decode·rename·dispatch까지 in-order, 이후 8개 실행 파이프라인으로 out-of-order issue. dispatch는 cycle당 최대 3 µop | Cortex-A72 Software Optimization Guide(UAN 0016A) 2.1, 4.1 |
+
+M7 TRM 1.2.1은 dual-issue를 위해 정수 레지스터 파일에 읽기 포트 6개, 쓰기 포트 4개를 두고, interlock을 줄이는 forwarding 로직과 ALU 두 개(하나는 SIMD 가능)를 갖췄다고 적습니다. A72 SOG 2.1의 그림은 실행 파이프라인을 Branch, Integer 0/1, Integer Multi-Cycle, FP/ASIMD 0/1, Load, Store의 여덟 개로 나누고, 각 파이프라인이 cycle마다 µop 하나를 받아 끝낼 수 있다고 적습니다.
+
+Raspberry Pi 문서에 따르면 초기 Raspberry Pi 3 Model B와 Compute Module 3의 BCM2837은 Cortex-A53 네 개로 된 클러스터입니다.
+
+## Cortex-M4의 load와 의존성
+
+Cortex-M4 TRM(DDI 0439B) 표 3-1은 `ADD`, `MUL`을 1 cycle, `LDR Rd, [Rn, <op2>]`를 2 cycle로 적고, 각주 b에서 "이웃한 load/store 단일 명령은 address와 data 단계를 pipeline할 수 있다"고 덧붙입니다. 3.3.2절 "Load/store timings"는 이것을 구체적으로 설명합니다.
+
+- 다음 명령이 LDR이나 STR이고, 앞 LDR의 목적 레지스터가 다음 명령의 *주소 계산*에 쓰이지 않으면 다음 명령의 비용에서 1 cycle이 빠집니다.
+- 그래서 `LDR R0,[R1]; LDR R1,[R2]`는 보통 합쳐 3 cycle, `LDR R0,[R1,R5]; LDR R1,[R2]; LDR R2,[R3,#4]`는 보통 4 cycle입니다.
+- `LDR PC,[any]`는 load 2 cycle에 pipeline reload 3 cycle이 붙어 최소 5 cycle입니다.
+
+```asm
+ldr r0, [r1]        @ 2 cycle
+ldr r2, [r3]        @ r0을 주소에 쓰지 않음 → 1 cycle 절약, 둘이 합쳐 보통 3 cycle
+ldr r4, [r2]        @ 바로 앞 LDR의 결과 r2를 주소에 씀 → 절약 조건에 해당하지 않음
 ```
 
-매우 단순한 구조라서 작은 die와 낮은 전력이 특징입니다. M0+는 M0보다 짧은 pipeline으로 non-sequential fetch를 한 stage 덜 거칠 수 있습니다. 구체적인 branch timing은 processor revision과 memory system을 확인합니다.
+이 글에서는 보드로 재지 않았습니다. QEMU는 cycle을 모델링하지 않으므로(1-03) 이 숫자는 QEMU로 확인할 수 없습니다.
 
-## Cortex-M3/M4 — 3-Stage
+## 측정 — 의존 사슬이 IPC를 정한다
 
-```text
-[Fetch] → [Decode] → [Execute (E+M+W 통합)]
-```
+out-of-order superscalar 코어가 독립 명령을 얼마나 동시에 처리하는지는 M2 Pro에서 직접 볼 수 있습니다. 루프 한 번에 `add` 여덟 개를 넣되, 하나의 레지스터에 사슬로 걸거나(`dep`), 레지스터 4개(`ind4`) 또는 8개(`ind8`)에 나눠 독립 사슬로 만들었습니다. 컴파일러가 바꾸지 못하게 inline asm으로 썼습니다(`bench/chain.c`, `clang -O2`, 루프 10⁸회).
 
 ```c
-ldr r0, [r1]   ; F D E
-add r2, r0, r3 ; F D E   ← r0 사용
+/* dep: 8 adds on one register */
+__asm__ volatile("add %0,%0,#1\n add %0,%0,#1\n ... (8개)" : "+r"(a));
+/* ind4: same 8 adds over a, b, c, d */
+__asm__ volatile("add %0,%0,#1\n add %1,%1,#1\n add %2,%2,#1\n add %3,%3,#1\n ..." : "+r"(a), "+r"(b), "+r"(c), "+r"(d));
 ```
 
-`r0` 의존성이 있습니다. 실제 load-use stall 여부와 cycle 수는 명령 조합, 구현 및 memory latency에 따라 달라집니다. Cortex-M4 전체에 같은-cycle forwarding을 일반화하지 않습니다.
+`/usr/bin/time -l`의 instructions retired와 cycles elapsed로 IPC를 냈습니다(각 3회).
 
-## Cortex-M7 — 6-Stage Dual-Issue
+| 변형 | instructions retired | cycles elapsed | IPC (3회) | 루프 1회당 cycle |
+|---|---:|---:|---|---:|
+| `dep` | 1,011,819,364 | 816,327,905 | 1.24, 1.24, 1.24 | 8.2 |
+| `ind4` | 1,011,390,361 | 251,141,242 | 4.03, 4.05, 4.02 | 2.5 |
+| `ind8` | 1,011,440,812 | 190,638,786 | 5.31, 5.32, 5.33 | 1.9 |
 
-```text
-F1 → F2 → D → I → E1 → E2
-```
-
-- *F1·F2*는 분리된 fetch입니다 (캐시 line 단위).
-- *D·I*는 Decode와 Issue를 합칩니다 (2 instruction 동시).
-- *E1·E2*는 ALU와 2nd ALU 또는 Load Store입니다.
-
-Dual-issue로 IPC > 1이 가능합니다 (이론적으로 2.0).
-
-## Cortex-A53 — 8-Stage In-Order
-
-```text
-F1 F2 F3 D1 D2 I E1 E2
-```
-
-In-order 발행에 dual-issue를 더한 구조입니다. 적당한 성능과 낮은 전력이 특징이며, Raspberry Pi 3B의 BCM2837에 들어 있습니다.
-
-## Cortex-A72 — Out-of-Order
-
-```text
-F1 F2 F3 F4 F5 D1 D2 D3 Dispatch [Issue Queue]
-                              ↓
-                       [Multiple Execution Units]
-                              ↓
-                          [Reorder Buffer]
-                              ↓
-                            Commit
-```
-
-- *5-stage fetch*로 깊은 branch prediction을 지원합니다.
-- *Out-of-order issue*로 의존성이 없는 명령을 먼저 실행합니다.
-- Superscalar execution으로 독립 명령을 병렬 처리할 수 있습니다. Issue width와 sustained IPC는 stage, instruction mix와 resource constraints에 따라 달라집니다.
-
-성능이 높지만 전력 소모도 그만큼 큽니다.
-
-## Pipeline 길이 Trade-off
-
-| 길이 | 장점 | 단점 |
-|---|---|---|
-| 짧음 (3) | Branch miss penalty가 작습니다 | 클럭 속도 한계가 있습니다 |
-| 중간 (8) | 균형이 잡힙니다 | — |
-| 김 (target별) | 높은 clock 목표에 활용할 수 있음 | Mispredict 비용은 구현별 |
-
-Pentium 4는 31 stage였습니다. mispredict 시 *31 cycle을 손실*했고, 결국 실패한 디자인이 되었습니다.
+명령어 수는 세 변형이 같습니다. `dep`은 루프 한 번에 8.2 cycle, 즉 의존하는 `add` 하나에 1 cycle씩 걸렸습니다. 이것이 `add`의 latency입니다. IPC가 1보다 조금 큰 것은 루프 카운터와 분기 명령이 사슬과 독립이라 같은 cycle에 함께 끝나기 때문입니다. 같은 여덟 개를 독립 사슬로 나누면 같은 코어가 cycle당 `add`를 3.2개(`ind4`), 4.2개(`ind8`) 처리합니다. 파이프라인과 다중 실행 유닛이 성능을 내려면 *독립 명령이 있어야* 합니다.
 
 ## Throughput vs Latency
 
-$$T_{\text{no pipeline}} = 5N \text{ cycle}, \quad T_{\text{5-stage pipe}} = 5 + (N-1) = N + 4 \text{ cycle} \ (N \gg 1)$$
+$$T_{\text{no pipeline}} = 5N \text{ cycle}, \quad T_{\text{5-stage pipe}} = 5 + (N-1) = N + 4 \text{ cycle}$$
 
-*N=1000*이면 이상적인 수식은 no-pipeline 5,000 cycle, 5-stage pipeline 1,004 cycle이며 비율은 약 4.98배입니다. 이는 stage latency가 같고 stall이 없다는 단순 모델의 throughput 비교입니다. 한 명령의 latency는 5 cycle로 동일합니다.
+*N = 1000*이면 이상적인 수식은 no-pipeline 5,000 cycle, 5-stage pipeline 1,004 cycle이며 비율은 약 4.98배입니다. 이는 stage latency가 같고 stall이 없다는 단순 모델의 throughput 비교입니다. 한 명령의 latency는 5 cycle로 동일합니다. 위 M2 Pro 측정의 `dep`이 latency 쪽, `ind8`이 throughput 쪽입니다.
 
 ## Pipeline Hazard 3종
 
 ### 1. Structural Hazard
 
-같은 hardware 자원을 두 명령이 동시에 사용하는 경우입니다. 예를 들어 단일 memory port에 F와 M이 동시 액세스하는 상황입니다.
-
-해결책은 *Harvard architecture*입니다 (I-cache와 D-cache 분리).
+같은 hardware 자원을 두 명령이 동시에 사용하는 경우입니다. 예를 들어 단일 memory port에 F와 M이 동시 액세스하는 상황입니다. Cortex-M4는 flash(Code 영역)에서 실행할 때 fetch(ICode)와 data(DCode)가 서로 다른 버스로 나뉘어 이 충돌을 피합니다. SRAM에서 실행하면 둘 다 System 버스를 쓰므로 다시 다툽니다(M4 TRM 2.2.1, 2-02). 2-stage인 Cortex-M0+는 von Neumann 구조입니다(위 표).
 
 ### 2. Data Hazard
 
-```c
-add r0, r1, r2  ; r0 = r1 + r2
-sub r3, r0, r4  ; r0 사용 — 앞 명령 결과 필요
+```asm
+add r0, r1, r2      @ r0 = r1 + r2
+sub r3, r0, r4      @ r0 사용 — 앞 명령 결과 필요
 ```
 
-`add`의 W 단계가 끝나기 전에 `sub`이 r0를 읽으려 합니다. *forwarding*이나 *stall*로 해결합니다.
+고전적 5단에서 `add`의 W가 끝나기 전에 `sub`이 D에서 r0를 읽으려 합니다. 결과를 E 출력에서 바로 넘기는 *forwarding*이나 *stall*로 해결합니다. Cortex-M7 TRM 1.2.1이 말하는 "extensive forwarding logic"이 이것입니다.
 
 ### 3. Control Hazard
 
-```c
-beq r0, r1, label  ; 분기 — 어디로 갈지 D 단계 후에야 알 수 있음
-add r2, r3, r4     ; ← 미리 fetch했지만 분기 시 무효
+```asm
+cmp r0, r1
+beq label           @ 분기 — 어디로 갈지는 비교 결과가 나온 뒤에야 확정
+add r2, r3, r4      @ 미리 fetch했지만 분기하면 버려짐
 ```
 
-*branch prediction*으로 해결합니다 (다음 편에서 다룹니다).
-
-## ARM Forwarding (Cortex-M4)
-
-```c
-ldr r0, [r1]   ; F D E   M  W (load 완료 = W)
-mul r2, r0, r3 ; F D D' E   M  W   ← stall 1 cycle (load-use)
-```
-
-이 예는 load-use 간격을 보여 주지만, 고정된 stall 수를 모든 메모리와 명령 조합에 일반화할 수 없습니다. 대상 Cortex-M4 TRM과 생성된 기계어를 확인하고 측정합니다.
-
-```c
-ldr r0, [r1]   ; F D E   M  W
-nop            ; bubble 채움 (또는 독립 명령)
-mul r2, r0, r3
-```
-
-## 측정 — Cortex-M7 IPC
-
-```c
-DWT->CTRL |= DWT_CTRL_CYCCNTENA_Msk;
-uint32_t start = DWT->CYCCNT;
-loop_kernel();
-uint32_t cycles = DWT->CYCCNT - start;
-
-uint32_t insts = count_instructions_in_loop();
-float ipc = (float)insts / cycles;
-```
-
-목표 IPC는 다음과 같습니다.
-- target별 instruction mix와 memory system에서 측정하며, architecture 고정 IPC 목표값은 제시하지 않습니다.
-
-## SuperH vs ARM Pipeline 차이
-
-| ARM | SuperH SH-2/4 |
-|---|---|
-| Load delay slot이 묵시적입니다 | Delay slot이 명시적입니다 (branch 후 명령 항상 실행) |
-| Conditional execution (Thumb-2)이 있습니다 | 없습니다 |
-| 32 register | 16 register |
-
-옛 자동차 ECU의 SH-4는 *delay slot이 명시적*이라 컴파일러가 명시적으로 처리해야 했습니다.
+Cortex-M4 표 3-1에서 조건 분기는 "1 or 1 + P" cycle이고, 각주 c는 분기하지 않으면 1 cycle에 끝난다고 적습니다. P는 pipeline refill에 드는 1~3 cycle입니다. 분기 예측은 다음 편에서 다룹니다.
 
 ## 자주 하는 실수
 
 > ⚠️ Pipeline 깊이가 성능과 같지는 않음
 
-Cortex-M7 6-stage가 Cortex-M3 3-stage보다 클럭당 *더 빠른 건 아닙니다*. Dual-issue를 활용했을 때만 그렇습니다.
+Cortex-M7의 6-stage 자체가 아니라 dual-issue와 forwarding이 클럭당 성능을 올립니다. 위 M2 Pro 측정처럼 명령이 모두 한 사슬에 걸려 있으면 다중 발행 코어도 cycle당 하나씩만 끝냅니다.
 
 > ⚠️ NOP으로 stall 해결 시도
 
-```c
+```asm
 ldr r0, [r1]
 nop
 nop
 add r2, r0, r3
 ```
 
-컴파일러가 *이미 더 잘 최적화*합니다. 직접 NOP을 삽입하는 것은 보통 *비최적*입니다.
+NOP도 fetch·decode를 거치는 명령입니다. 빈칸을 채우려면 의존성이 없는 *쓸모 있는* 명령을 그 자리에 두어야 하고, 이것은 컴파일러의 명령 스케줄링이 하는 일입니다. 손으로 NOP을 넣으면 코드만 길어집니다.
 
-> ⚠️ 짧은 함수가 빠르다고 가정
+> ⚠️ 분기와 함수 호출의 비용을 0으로 가정
 
-함수 호출은 *pipeline flush 가능성*이 있습니다. 인라인이 *더 빠릅니다*. `inline`이나 LTO로 컴파일러를 도와줍니다.
+Cortex-M4 표 3-1에서 `BL`과 같은 분기는 1 + P cycle이고, P는 1~3 cycle입니다. 아주 짧은 함수를 루프 안에서 부르면 이 비용이 본문보다 커질 수 있으므로, inline이나 LTO(1-08)로 호출을 없앱니다.
 
-> ⚠️ Cycle 측정 오류
+> ⚠️ Cycle 측정 경계
 
-CYCCNT 측정 경계는 코어·컴파일러·대상 메모리와 측정하려는 작업에 맞춰 설계해야 합니다. DSB/ISB는 항상 필요한 고정 recipe가 아니므로, 해당 플랫폼의 TRM과 측정 코드 생성 결과를 확인합니다.
-
-```c
-__DSB();
-uint32_t start = DWT->CYCCNT;
-/* code */
-__DSB();
-uint32_t end = DWT->CYCCNT;
-```
+CYCCNT 읽기도 명령이라 앞뒤 명령과 함께 파이프라인에 들어갑니다. 측정 구간을 아주 짧게 잡으면 경계의 몇 cycle이 결과를 좌우하므로, 빈 구간을 먼저 재서 빼거나 구간 안의 반복을 늘립니다.
 
 ## 정리
 
 - Pipeline은 **명령어 단계별 병렬화**입니다 (F·D·E·M·W).
-- Cortex-M0는 3-stage, Cortex-M0+는 2-stage입니다. M3/M4는 **3-stage**, M7은 6-stage dual-issue pipeline입니다.
-- Cortex-A는 8~15+ stage의 *out-of-order superscalar*입니다.
-- 3 hazard (structural·data·control)는 forwarding과 branch prediction으로 회피합니다.
-- Pipeline 깊이는 trade-off가 있습니다. *길수록 클럭이 높아지지만 mispredict 비용도 커집니다*.
+- Arm 문서 기준 Cortex-M0는 3-stage, M0+는 2-stage, M4는 3-stage, M7은 6-stage dual-issue입니다. A53은 in-order dual-issue, A72는 dispatch 이후 out-of-order입니다.
+- Cortex-M4에서 이웃한 LDR은 조건이 맞으면 1 cycle을 아낍니다(TRM 3.3.2).
+- M2 Pro에서 같은 `add` 8개가 한 사슬이면 IPC 1.24, 8개 독립 사슬이면 5.3이었습니다. 다중 발행은 독립 명령이 있을 때만 효과가 있습니다.
 
 다음 편은 **Pipeline Stall**입니다. Data dependency를 자세히 다룹니다.
 
@@ -227,3 +164,11 @@ uint32_t end = DWT->CYCCNT;
 
 - [2-02: Pipeline Stall](/blog/embedded/performance-engineering/part2-02-pipeline-stall)
 - [2-03: Branch Prediction](/blog/embedded/performance-engineering/part2-03-branch-prediction)
+
+## 참고 자료
+
+- [Arm Cortex-M0 Processor Datasheet](https://arm.com/-/media/Arm%20Developer%20Community/PDF/Processor%20Datasheets/Arm_Cortex-M0_Processor_Datasheet.pdf)
+- Cortex-M0+ Devices Generic User Guide (DUI 0662B), Cortex-M4 Devices Generic User Guide (DUI 0553A), Cortex-M7 Devices Generic User Guide (DUI 0646B)
+- Cortex-M4 Technical Reference Manual (DDI 0439B) 표 3-1, 3.3.2; Cortex-M7 Technical Reference Manual (DDI 0489D) 1.1, 1.2.1
+- Cortex-A53 MPCore Technical Reference Manual (DDI 0500E) 1.3; Cortex-A72 Software Optimization Guide (UAN 0016A) 2.1, 4.1
+- [Raspberry Pi processors](https://www.raspberrypi.com/documentation/computers/processors.html)

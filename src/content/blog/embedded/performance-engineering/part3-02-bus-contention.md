@@ -2,7 +2,7 @@
 title: "Bus Contention 진단 — Arbitration·QoS·Starvation 측정"
 slug: "embedded/performance-engineering/part3-02-bus-contention"
 date: 2026-04-25T09:01:00
-description: "Round-robin·priority·QoS arbitration. Master 다수 시 starvation. AXI QoS·BUSY counter."
+description: "M2 Pro에서 다른 thread의 memcpy가 피해자 load latency를 얼마나 늘리는지 재고, 중재 정책·AXI QoS·Cortex-M7 AHBS 중재를 사양서로 정리합니다."
 series: "Embedded Performance Engineering"
 seriesOrder: 20
 tags: [bus, contention, arbitration, qos, starvation]
@@ -14,234 +14,113 @@ topics: ["embedded"]
 
 > **"Contention = 여러 master가 한 slave에 동시에 접근하는 상황"**입니다. arbiter는 공평과 빠름 사이에서 trade-off를 선택합니다.
 
+## 측정 — 다른 master가 버스를 쓰면 내 load가 얼마나 늦어지나
+
+contention이 실제로 얼마나 큰지는 "피해자" 하나와 "가해자" 여럿을 같은 메모리에 붙여 보면 보입니다. M2 Pro에서 피해자 thread는 256 MiB 무작위 순환 리스트를 한 번에 한 load씩 따라가고(load latency를 그대로 드러냄), 가해자 K개는 각자 128 MiB를 반복해서 `memcpy`합니다(`bench/bus/contend.c`, `clang -O2`, K마다 2회). 측정 동안 호스트의 load average는 10 안팎이었습니다.
+
+| 가해자 K | 피해자 load당 시간 (2회) | 가해자 합계 (2회) |
+|---:|---|---|
+| 0 | 121.0, 122.3 ns | — |
+| 1 | 165.6, 167.7 ns | 85.6, 80.7 GB/s |
+| 2 | 190.5, 224.0 ns | 110.6, 93.9 GB/s |
+| 4 | 264.0, 476.5 ns | 116.8, 73.2 GB/s |
+| 6 | 299.7, 558.9 ns | 136.8, 86.3 GB/s |
+
+가해자가 하나만 있어도 피해자의 load가 37% 늦어지고, 여섯이면 2.5~4.6배가 됩니다. 피해자는 대역폭을 거의 쓰지 않는데도 느려졌으므로, 같은 메모리 경로에서 가해자의 요청 뒤에 줄을 섰다고 해석할 수 있습니다. 가해자 합계는 K = 2부터 73~137 GB/s 사이에서 흔들릴 뿐 크게 늘지 않았고(2-08의 STREAM에서도 thread 넷에서 포화), 그 사이 피해자의 지연은 계속 커졌습니다.
+
+처음 이 프로그램을 돌렸을 때는 가해자의 `memcpy` 결과를 아무도 읽지 않아 컴파일러가 복사를 지웠고, 가해자 수를 늘려도 피해자가 느려지지 않았습니다(`contend-mac-broken.log`). 1-06과 같은 함정이라 buffer를 asm memory clobber로 붙잡아 다시 쟀습니다.
+
 ## Arbitration 정책
 
-### Round-Robin (Fair)
+slave 하나를 여러 master가 원하면 arbiter가 cycle마다 하나를 고릅니다. 정책 차이를 보려고 가장 단순한 경우를 시뮬레이션했습니다. master A는 매 cycle 요청하고(DMA처럼), master B는 10 cycle마다 한 번 요청해 받을 때까지 기다립니다(`bench/bus/arb.py`, 10만 cycle).
 
-```text
-Master:  A B C D
-Token:   ↑ ──→
-Cycle 1: A (token=A)
-Cycle 2: B (token=B)
-Cycle 3: C
-Cycle 4: D
-Cycle 5: A
-```
+| 정책 | A가 받은 cycle | B가 받은 횟수 | B의 최대 대기 |
+|---|---:|---:|---:|
+| 고정 우선순위 (A > B) | 100.0% | 0 | 끝까지 받지 못함 |
+| Round-robin | 90.0% | 10,000 | 1 cycle |
 
-장점은 공평하고 굶주림이 없다는 점입니다. 단점은 우선순위를 지정할 수 없다는 점입니다.
-
-### Priority
-
-```text
-Master:  A (P0) B (P1) C (P2) D (P3)
-                                ↑ highest
-```
-
-A·B·C·D가 동시에 요청하면 우선순위가 가장 높은 D가 먼저 처리됩니다. 장점은 critical master를 보장한다는 점입니다. 단점은 low priority master가 starvation에 빠질 수 있다는 점입니다.
-
-### Weighted Round-Robin
-
-```text
-Master A weight=3, B weight=1, C weight=1
-순환: A A A B C A A A B C ...
-```
-
-대역폭을 정해진 비율로 분배하는 방식입니다.
+고정 우선순위에서는 A가 쉬지 않는 한 B는 영원히 기다립니다. 이것이 starvation입니다. round-robin은 B가 요청하면 그 cycle 안에 받게 해 주는 대신(시뮬레이션 초기 상태 때문에 처음 한 번만 1 cycle) A의 몫을 10% 덜어 냅니다. 가중 round-robin은 master마다 몫을 다르게 정하는 방식이고, QoS 기반 중재는 요청마다 붙은 값으로 고릅니다.
 
 ### QoS-Based (AXI)
 
 ![QoS-based arbitration — ARQOS 4-bit priority로 master 선택](/images/blog/perf-eng/diagrams/part3-02-arbitration.svg)
 
-ARM CCI-400과 CMN의 표준 방식이며, Cortex-A SoC에서 흔히 사용합니다.
+AXI(IHI 0022 Issue L) A4.8.1에 따르면 AxQOS는 4 bit이고, 프로토콜은 쓰임을 정하지 않지만 값이 클수록 높은 우선순위로 쓰기를 권합니다. 같은 절의 기본 시스템 동작은 "고를 수 있는 transaction이 둘 이상인 구성 요소가 QoS 값이 높은 요청을 먼저 처리하는 것"이고, 이 선택은 다른 AXI 순서 규칙이 없을 때만 일어나며 AXI 순서 규칙이 QoS보다 앞섭니다. 또 interconnect가 연결된 Manager마다 QoS 값을 덮어쓰는 프로그래머블 레지스터를 둘 것으로 예상한다고 적습니다.
 
 ## Cortex-A SoC — CCI-400 사례
 
-```text
-[Cluster 0 (4 × A72)]  AXI ─→ [CCI-400] ─→ DDR Controller
-[Cluster 1 (4 × A53)]  AXI ─→
-[GPU]                  AXI ─→
-[DPU (display)]        AXI ─→
-[VPU (video)]          AXI ─→
-```
+Arm 블로그 "Extended System Coherency - Part 2"의 표에 따르면 CoreLink CCI-400은 slave 인터페이스로 ACE fully-coherent 2개(최대 8 코어)와 ACE-Lite IO-coherent 3개(GPU, 가속기 등)를, master 인터페이스로 메모리용 ACE-Lite 2개(인터리빙 옵션)와 시스템용 ACE-Lite 1개를 두고, QoS로 "Integrated bandwidth and latency regulators, QoS Virtual Networks"를 제공합니다. 레지스터 이름과 설정 방법은 CCI-400 TRM과 SoC 문서에 있고, 이 글에서는 다루지 않습니다.
 
-CCI-400은 최대 2개의 ACE fully-coherent processor interface와 3개의 ACE-Lite I/O-coherent interface를 지원합니다. interface 종류와 연결은 설계 구성에 따라 달라집니다([Arm CCI-400 overview](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/extended-system-coherency---part-2---implementation-big-little-gpu-compute-and-enterprise)).
+## Cortex-M7 — TCM을 두고 CPU와 DMA가 다툴 때
 
-```c
-/* 의사코드: 실제 CCI-400 레지스터 이름·필드·QoS 설정은 해당 SoC TRM에서 확인 */
-set_platform_qos(cluster0, MEDIUM_HIGH);
-set_platform_qos(dpu, HIGH);
-set_platform_qos(gpu, MEDIUM);
-```
+Cortex-M7 TRM(DDI 0489D) 1.1에 따르면 M7은 TCM을 전용 TCM 인터페이스로 접근하고, DMA 같은 외부 master는 AHB-Lite slave 포트(AHBS)를 통해 TCM에 들어옵니다. 그래서 CPU가 TCM을 쓰는 동안 같은 TCM에 DMA가 들어오면 둘 사이의 중재가 필요하고, M7은 이것을 `CM7_AHBSCR`(TRM 3.3.12 표 3-15)로 정합니다.
 
-## STM32H7 — AXI Bus Matrix
+| 필드 | 표 3-15의 설명 |
+|---|---|
+| `CTL` [1:0] | 0b00 AHBS 접근 우선순위 낮춤(리셋값), 0b01 소프트웨어 접근 우선순위 낮춤, 0b10 소프트웨어 실행 우선순위가 `TPRI` 이상이면 AHBS를 fairness counter로 낮추고 그 아래면 round-robin |
+| `TPRI` [10:2] | AHBS traffic을 낮출 실행 우선순위 문턱(NVIC 인코딩) |
+| `INITCOUNT` [15:11] | fairness counter 초기값(리셋값 0b01). round-robin은 1(`0b01`). 0으로 두면 낮춘 쪽이 항상 이겨 livelock이 날 수 있음 |
 
-STM32H743은 D1 AXI와 D2/D3 AHB bus matrix 및 bus bridge로 구성됩니다. RM0433은 전체 연결을 19개 bus master와 18개 bus slave의 interconnect 표로 정리하며, 실제 접근 가능 경로는 master/slave 조합마다 다릅니다. arbitration 정책은 matrix와 domain에 따라 확인해야 합니다([ST RM0433](https://www.st.com/resource/en/reference_manual/rm0433-stm32h743-753-and-stm32h750-value-line-advanced-arm-based-32-bit-mcus-stmicroelectronics.pdf)).
+리셋값은 `CTL` = 0b00, `INITCOUNT` = 0b01이고, 표 3-15의 주석대로 이 조합은 round-robin입니다(TRM 5.6.3은 fairness counter로 승자를 정하는 다섯 가지 중재 모드를 설명합니다). `INITCOUNT`를 키우면 낮춘 쪽(리셋값에서는 AHBS, 즉 DMA)의 몫이 줄어듭니다. DMA가 TCM에 쓰는 시간이 중요하다면 `CTL`과 `TPRI`로, "높은 우선순위 ISR이 돌 때만 CPU를 먼저 보내고 평소에는 번갈아" 같은 정책을 고를 수 있습니다. 이 글에서는 보드에서 실행하지 않았습니다.
 
-RM0433은 bus matrix 별 arbitration을 설명하지만, 이 글에서는 STM32H743용 임의 QoS 설정 API를 제시하지 않습니다. 우선순위 설정이 필요한 경우 해당 MCU reference manual이 명시한 설정 항목과 영향을 확인합니다.
+## 측정 — PMU
 
-## Starvation 시나리오
-
-다음과 같은 상황에서 starvation이 발생합니다.
-
-```text
-Master A: 매 cycle DMA burst 요청 (high priority)
-Master B: 가끔 read 요청 (low priority)
-
-Arbiter — A 우선 → B *수 ms 대기*
-B의 latency-sensitive 작업 (LCD refresh) → frame drop
-```
-
-### 해결 1: Bandwidth Limit on A
-
-```c
-/* 의사코드: bus bandwidth limiter가 구현된 SoC에서만 사용 */
-set_master_bandwidth_limit(master_a, 50_percent);
-```
-
-A의 throughput을 일부 손실하는 대신 B의 latency를 개선할 수 있습니다.
-
-### 해결 2: Latency-based QoS
-
-```c
-/* 의사코드: 실제 ARQOS 신호 생성과 중재 정책은 SoC별로 다름 */
-set_master_qos(master, LATENCY_CRITICAL);
-```
-
-QoS 값의 중재 효과는 interconnect 구현과 설정에 따릅니다. 대기 시간에 따라 priority가 자동 상승한다고 일반화하지 않습니다.
-
-## 측정 — AXI Monitor
-
-ARM CoreSight와 DSU PMU를 함께 활용합니다.
-
-- 일부 PMU에는 load/store bus access나 bus-cycle 이벤트가 있지만, 이름과 의미는 core·SoC별로 다릅니다. 아래 이름을 보편적인 ARM PMU 이벤트로 가정하지 말고 해당 PMU 문서를 확인해야 합니다.
-
-$$\text{access/cycle 비} = \frac{\text{BUS\_ACCESS}}{\text{BUS\_CYCLES}}$$
+Cortex-A53 TRM 12.9 표 12-28에는 0x19 `BUS_ACCESS`, 0x1D `BUS_CYCLES`, 0x60 `BUS_ACCESS_LD`, 0x61 `BUS_ACCESS_ST`가 있습니다.
 
 ```bash
-perf stat -e r19,r1d ./prog
-# 예시 값에서 access/cycle 비는 0.1입니다. 이것은 bus utilization이 아닙니다.
-# bus-active-cycle counter가 제공될 때만 active_cycles / total_cycles로 점유율을 계산합니다.
+perf stat -e r19,r1d,r60,r61 ./prog
 ```
 
-## VTune Memory Bandwidth Analysis
+`BUS_ACCESS / BUS_CYCLES`는 cycle당 접근 수이지 버스 점유율이 아닙니다. 점유율을 계산하려면 버스가 바빴던 cycle을 세는 카운터가 있어야 하는데, A53 표 12-28에는 그런 이벤트가 없습니다. SoC의 interconnect PMU(CMN이라면 Linux `arm-cmn.rst`의 분산 PMU)가 그 정보를 줍니다. 이 시리즈의 게스트에는 PMU 카운터가 없어 실행하지 못했습니다(1-01). 위 M2 Pro 실험처럼 피해자의 latency를 직접 재는 것이 카운터 없이도 할 수 있는 측정입니다.
 
-VTune의 time-series chart는 다음과 같이 표시됩니다.
+## 충돌을 줄이는 방법
 
-**Time-series chart:**
-
-- CPU: ────░░░░░░░░░░░──── (10%)
-- GPU: ──────░░░░░░██████  (60%)
-- DMA: ░░░░░░░░░░░░░░░░██  (5%)
-- Total: ░░░░░░░░██████░░  (saturation)
-
-색칠된 부분이 active 상태입니다. 총합이 100%에 가까워지면 saturation입니다.
-
-## DMA·CPU 충돌 해결
-
-### TCM (Cortex-M·R) 활용
+### 전용 경로 — TCM
 
 ```c
 __attribute__((section(".dtcm"))) uint8_t fast_buf[8192];
 
 void critical_isr(void) {
-    /* DTCM은 *별도 bus* — DMA·main RAM과 충돌 없음 */
-    process(fast_buf);
+    process(fast_buf);   /* AXIM을 거치지 않는 TCM 인터페이스 */
 }
 ```
 
-DTCM과 ITCM은 CPU 전용 bus라서 bus matrix를 우회합니다.
+CPU의 TCM 접근은 AXIM과 그 뒤의 bus matrix를 거치지 않으므로, DRAM이나 SRAM을 두고 다투는 다른 master의 영향을 받지 않습니다. 다만 위 절처럼 DMA가 AHBS로 같은 TCM에 들어오면 `CM7_AHBSCR`의 중재를 받습니다.
 
-### Cache Locking
+### 서로 다른 메모리로 나누기
 
-```c
-/* Cortex-A53 — way locking */
-write_l2_lockdown(WAY_0, 1);   // way 0 lock
-/* 특정 line이 evict 안 됨 — predictable latency */
-```
+위 M2 Pro 측정에서 피해자가 느려진 것은 모두가 같은 DRAM을 썼기 때문입니다. CPU가 자주 쓰는 데이터와 DMA buffer를 서로 다른 메모리(예: TCM과 SRAM, 또는 독립된 SRAM 뱅크)에 두면 같은 큐에서 기다리지 않습니다. 어떤 경로가 독립인지는 MCU reference manual의 bus matrix 표에 있습니다.
 
-WCET 보장이 critical한 경우에 사용합니다.
-
-### Master 분리 SoC 디자인
-
-```text
-CPU ─→ DDR0
-GPU ─→ DDR1   (분리된 channel)
-DMA ─→ DDR2
-```
-
-서로 다른 DDR channel로 access하면 contention이 0이 됩니다. 다만 BGA 핀 수가 늘어나 고가 SoC에서만 가능합니다.
-
-## Cortex-M Bus Matrix — STM32 사례
-
-RM0433의 STM32H743 연결 표는 AXI/AHB/TCM bus master와 memory/peripheral slave별 허용 경로를 구분합니다. CPU와 DMA가 동시에 접근할 수 있는지 여부는 각 경로와 대상 메모리의 조합으로 확인해야 합니다.
-
-독립 경로가 병렬 동작할 수는 있지만, 같은 buffer를 피하는 것만으로 처리량이 4배가 된다고 보장되지는 않습니다.
-
-## QoS 동적 조정 — 자동차 사례
+### 바쁜 대기 대신 sleep
 
 ```c
-/* 의사코드: CCI-400 register name은 platform-specific */
-void on_brake_event(void) {
-    /* 브레이크 신호 — critical */
-    set_platform_qos(BRAKE_ECU, MAX_PRIORITY);
-    /* 다른 master → 낮춤 */
-    set_platform_qos(INFOTAINMENT, LOW);
-}
+HAL_DMA_Start(&hdma, src, dst, len);
+while (!dma_done) { }    /* CPU가 플래그를 계속 읽음 */
 ```
 
-차량 상태에 따라 priority를 동적으로 조정합니다. 다만 ASIL-D ECU에서는 정적으로 worst case를 보장하는 쪽을 우선합니다.
-
-## Bandwidth Regulator
-
-```c
-/* CCI-400 — per master */
-set_platform_bandwidth_policy(GPU, TOKEN_BUCKET(
-    .max_burst = 64,         // 64 transfer
-    .replenish_rate = 100    // 100 transfer/µs
-));
-```
-
-Token bucket 방식은 peak는 허용하면서 평균을 제한합니다. GPU와 DPU에 흔히 사용하며, frame drop을 막으면서도 CPU 대역폭을 함께 보장합니다.
+이 루프는 `dma_done`이 캐시나 TCM에 있으면 버스를 거의 쓰지 않지만, 주변장치 레지스터를 polling한다면 그때마다 버스 transaction이 생깁니다. 완료를 인터럽트로 받고 그동안 `__WFI()`로 재우면 CPU 쪽 접근 자체가 없어집니다.
 
 ## 자주 하는 실수
 
-> ⚠️ 같은 master ID로 multi-thread
+> ⚠️ 모든 master의 QoS를 최대로
 
-Cortex-A core 4개가 모두 ID=0으로 transaction을 발사하면 AXI가 *같은 ID FIFO 순서*를 강제해 OoO를 못 합니다.
+AXI A4.8.1의 기본 동작은 QoS 값이 *높은* 요청을 먼저 고르는 것이므로, 모두가 같은 값이면 QoS로는 구별이 생기지 않습니다. 그때 무엇을 먼저 처리할지는 interconnect의 나머지 중재 규칙이 정합니다.
 
-Cluster와 Core별로 unique ID를 부여해야 합니다. Cortex-A72의 ARID는 `cluster|core|thread`로 encoding되어 있습니다.
+> ⚠️ 독립 요청에 같은 ID 사용
 
-> ⚠️ QoS 모든 master 최대
+AXI A5.6에 따르면 같은 ARID로 서로 다른 Subordinate에 보낸 read는 interconnect가 요청 순서대로 돌려줘야 합니다(3-01). 서로 무관한 요청에 같은 ID를 쓰면 빠른 쪽 응답이 느린 쪽을 기다립니다.
 
-```c
-set_platform_qos(cpu, MAX_PRIORITY);
-set_platform_qos(gpu, MAX_PRIORITY);
-set_platform_qos(dma, MAX_PRIORITY);
-```
+> ⚠️ contention을 측정하지 않고 CPU 탓
 
-모두 max로 설정하면 의미가 없어집니다. 결과적으로 모두 동등해져 round-robin으로 fallback됩니다.
-
-> ⚠️ Bus contention 측정 안 함
-
-이렇게 두면 성능 문제가 CPU 부족 때문인지 bus saturation 때문인지 구분이 안 됩니다. PMU의 `BUS_ACCESS`와 `STALL_BACKEND_MEM`을 비교해야 합니다.
-
-> ⚠️ DMA가 CPU 깨움 패턴
-
-```c
-HAL_DMA_Start(...);
-while (!dma_done) { CPU 대기 }   // CPU도 bus 점유 — 의미 없음
-```
-
-CPU를 sleep(WFI) 상태로 두거나 다른 일을 시켜서 bus를 양보해야 합니다.
+위 측정에서 피해자 코드는 한 줄도 바뀌지 않았는데 다른 thread 때문에 load가 2.5배 이상 느려졌습니다. 혼자 돌릴 때와 실제 부하를 함께 걸었을 때의 latency를 둘 다 잽니다.
 
 ## 정리
 
-- Arbitration 방식은 **round-robin, priority, weighted, QoS**가 있습니다.
-- AXI는 **ARQOS** 4-bit으로 master별 우선순위를 표현합니다.
-- **Starvation** 방지를 위해 bandwidth regulator와 latency-based QoS를 활용합니다.
-- STM32H743의 bus master/slave 접근 가능 조합은 RM0433 interconnect 표에서 확인합니다.
-- 자동차 시스템에서는 상황에 따라 QoS를 동적으로 조정합니다.
-- 점유율은 해당 SoC가 제공하는 bus-active-cycle counter 정의를 확인해 계산합니다. access 수를 cycle 수로 나눈 값을 utilization으로 부르지 않습니다.
+- M2 Pro에서 `memcpy` thread를 0개에서 6개로 늘리자, 대역폭을 거의 쓰지 않는 피해자 thread의 load가 121 ns에서 300~559 ns가 됐습니다.
+- 고정 우선순위는 쉬지 않는 master가 있으면 다른 master를 굶깁니다. round-robin은 최대 대기를 1 cycle로 묶습니다(시뮬레이션).
+- AXI QoS는 4 bit이고, 기본 동작은 높은 값을 먼저 고르는 것이며, AXI 순서 규칙이 QoS보다 앞섭니다.
+- Cortex-M7은 TCM을 두고 CPU와 AHBS(DMA)가 다툴 때의 정책을 `CM7_AHBSCR`로 정합니다.
+- `BUS_ACCESS / BUS_CYCLES`는 점유율이 아닙니다. 피해자 latency를 직접 재는 것이 가장 분명한 측정입니다.
 
 다음 편에서는 **DMA Performance**를 다룹니다.
 
@@ -249,3 +128,10 @@ CPU를 sleep(WFI) 상태로 두거나 다른 일을 시켜서 bus를 양보해�
 
 - [3-01: Bus Architecture](/blog/embedded/performance-engineering/part3-01-bus-architecture)
 - [3-03: DMA Performance](/blog/embedded/performance-engineering/part3-03-dma-performance)
+
+## 참고 자료
+
+- AMBA AXI Protocol Specification (ARM IHI 0022, Issue L) A4.8.1, A5.6
+- Cortex-M7 Technical Reference Manual (DDI 0489D) 1.1, 3.3.12 표 3-15
+- Cortex-A53 MPCore Technical Reference Manual (DDI 0500E) 12.9 표 12-28
+- [Arm, Extended System Coherency - Part 2](https://developer.arm.com/community/arm-community-blogs/b/architectures-and-processors-blog/posts/extended-system-coherency---part-2---implementation-big-little-gpu-compute-and-enterprise)
