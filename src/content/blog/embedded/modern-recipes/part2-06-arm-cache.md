@@ -123,11 +123,11 @@ Reset 직후 CCR 값은 0x00040200으로 DC(bit 16)와 IC(bit 17)가 0, 즉 두 
 
 ### QEMU에서 빌드·실행해 보기
 
-위 수신 코드(`rx_start`·`rx_complete`)와 아래 MPU region 코드를 CMSIS 5.9.0 `core_cm7.h`로 묶어 arm-none-eabi-gcc 16.2.0으로 빌드하고, QEMU 11.1.3 `mps2-an500`(Cortex-M7)에서 실행했습니다. `dma_rx_start`는 이 모델에 DMA가 없어 빈 stub입니다. 빌드가 된다는 것은 이 글의 CMSIS 함수 이름과 필드 이름이 5.9.0 헤더와 맞는다는 뜻입니다.
+위 수신 코드(`rx_start`·`rx_complete`)와 아래 MPU region 코드를 CMSIS 5.9.0 `core_cm7.h`로 묶어 arm-none-eabi-gcc 16.2.0으로 빌드하고, QEMU 11.1.3 `mps2-an500`(Cortex-M7)에서 실행했습니다. `dma_rx_start`는 이 모델에 DMA가 없어 빈 stub입니다. 하네스는 [2-03](/blog/embedded/modern-recipes/part2-03-arm-registers)의 "QEMU에서 직접 돌려 보기"와 같고, device header `an500.h`만 `__CM7_REV`·`__ICACHE_PRESENT 1U`·`__DCACHE_PRESENT 1U`를 정의하고 `core_cm7.h`를 include하도록 바꿨습니다. `__DCACHE_PRESENT`가 1이 아니면 CMSIS의 cache 함수는 빈 함수로 컴파일됩니다. 빌드가 된다는 것은 이 글의 CMSIS 함수 이름과 필드 이름이 5.9.0 헤더와 맞는다는 뜻입니다.
 
 ```bash
 arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -mfloat-abi=hard -ffreestanding -O1 -g \
-  -Iharness -ICMSIS_5/CMSIS/Core/Include -nostdlib -T harness/link.ld \
+  -I. -Iharness -ICMSIS_5/CMSIS/Core/Include -nostdlib -T harness/link.ld \
   harness/startup.c harness/semi.c cache.c -o cache.elf
 qemu-system-arm -M mps2-an500 -nographic -monitor none -serial none \
   -semihosting-config enable=on,target=native,userspace=on -kernel cache.elf

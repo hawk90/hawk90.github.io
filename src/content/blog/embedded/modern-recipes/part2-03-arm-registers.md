@@ -192,6 +192,36 @@ HW가 자동 stacking 하는 8개 register(R0 ~ R3, R12, LR, PC, xPSR)와 SW가 
 - 타깃: QEMU 11.1.3 `qemu-system-arm -M mps2-an386`, 출력은 semihosting(`SYS_WRITE0`)
 - 하네스: vector table과 `.data`/`.bss` 초기화만 하는 `startup.c`, FLASH `0x00000000`·RAM `0x20000000`의 `link.ld`
 
+하네스에서 CMSIS 쪽에 필요한 것은 최소 device header 하나입니다. QEMU `mps2-an386`용으로 쓴 `an386.h`는 다음과 같고, 이 시리즈의 다른 QEMU 실행도 이 하네스를 씁니다.
+
+```c
+/* minimal device header for QEMU mps2-an386 (Cortex-M4) to use CMSIS core_cm4.h */
+#pragma once
+typedef enum IRQn {
+  NonMaskableInt_IRQn = -14, HardFault_IRQn = -13, MemoryManagement_IRQn = -12,
+  BusFault_IRQn = -11, UsageFault_IRQn = -10, SVCall_IRQn = -5, DebugMonitor_IRQn = -4,
+  PendSV_IRQn = -2, SysTick_IRQn = -1, UART0RX_IRQn = 0
+} IRQn_Type;
+#define __CM4_REV              0x0001U
+#define __MPU_PRESENT          1U
+#define __FPU_PRESENT          1U
+#define __NVIC_PRIO_BITS       3U
+#define __Vendor_SysTickConfig 0U
+#include "core_cm4.h"
+```
+
+출력은 ARM semihosting의 `SYS_WRITE0`(0x04)로 냅니다. Arm semihosting 명세(ARM-software/abi-aa `semihosting`)의 trap instruction 표는 M-profile용으로 `BKPT #0xAB`를 정하고, `SYS_WRITE0`은 parameter register가 가리키는 null-terminated 문자열을 debug channel로 씁니다. `r0`에 연산 번호, `r1`에 문자열 주소를 넣고 `bkpt 0xab`를 실행하면 QEMU가 host 터미널로 문자열을 씁니다.
+
+```c
+static inline int semi(int op, const void *arg) {
+    register int r0 __asm__("r0") = op; register const void *r1 __asm__("r1") = arg;
+    __asm__ volatile("bkpt 0xab" : "+r"(r0) : "r"(r1) : "memory"); return r0;
+}
+void puts_(const char *s) { semi(0x04, s); }
+```
+
+unprivileged 코드에서도 출력하려고 QEMU에 `-semihosting-config ... userspace=on`을 줍니다(QEMU 11.1.3의 `-semihosting-config help`가 이 옵션을 나열합니다). 이 옵션 없이 unprivileged 상태에서 `bkpt 0xab`를 실행했을 때는 출력 대신 HardFault(HFSR FORCED)로 끝났습니다.
+
 ```bash
 arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -ffreestanding -O1 -g \
   -Iharness -ICMSIS_6/CMSIS/Core/Include -nostdlib -T harness/link.ld \
