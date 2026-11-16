@@ -11,7 +11,7 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Character driver = `file_operations` 한 구조체."** open, read, write, ioctl 함수 포인터를 채우고 `cdev_add`로 등록하면 `/dev/foo`가 살아납니다. 이 글의 driver는 한 파일로 cdev와 misc device를 함께 등록하고, Debian 13 arm64(커널 `6.12.116+deb13-arm64`)에서 빌드·로드해 사용자 공간 프로그램으로 모든 경로를 시험했습니다.
+> **"Character driver = `file_operations` 한 구조체."** open, read, write, ioctl 함수 포인터를 채우고 `cdev_add`로 등록하면 `/dev/foo`가 살아납니다. 이 글의 driver는 한 파일로 cdev와 misc device를 함께 등록하고, Debian 13 arm64(커널 `6.12.116+deb13-arm64`)에서 빌드·로드해 사용자 공간 프로그램으로 read·write·poll·ioctl 경로를 시험했습니다.
 
 ## 어떤 상황에서 쓰나
 
@@ -26,7 +26,7 @@ topics: ["embedded"]
 | major / minor | `/dev` 노드를 driver에 연결하는 번호 | `mychar` 235:0, `mymisc` 10:261 |
 | `cdev` | 커널 내부의 char device 객체 | `sizeof(struct cdev)` = 104 B |
 | `file_operations` | system call과 driver 함수의 대응표 | 아래 코드 |
-| class / device | `/sys/class/<이름>/`과 udev가 만드는 `/dev/<이름>` | `/sys/class/mychar/mychar` |
+| class / device | `/sys/class/<이름>/`과 devtmpfs가 만드는 `/dev/<이름>` | `/sys/class/mychar/mychar` |
 | misc device | major 10을 공유하고 minor 하나를 받는 단축 경로 | `sizeof(struct miscdevice)` = 80 B |
 
 구조체 크기는 이 driver가 로드될 때 `sizeof`로 찍은 값이고, 커널 설정과 아키텍처에 따라 다릅니다.
@@ -147,7 +147,7 @@ static long my_ioctl(struct file *f, unsigned int cmd, unsigned long arg)
 }
 ```
 
-같은 `fops`를 cdev와 misc device가 함께 씁니다. `.owner = THIS_MODULE`은 이 장치가 열려 있는 동안 모듈이 내려가지 않게 합니다. cdev의 `open`은 `cdev_get()`에서 `try_module_get(owner)`로 모듈 참조를 잡습니다(v6.12 `fs/char_dev.c:348-353`, `:398-408`).
+같은 `fops`를 cdev와 misc device가 함께 씁니다. `.owner = THIS_MODULE`은 이 장치가 열려 있는 동안 모듈이 내려가지 않게 합니다. cdev 노드를 열면 `chrdev_open`이 `cdev_get()`으로 `mycdev.owner`의 모듈 참조를, `fops_get()`으로 `fops.owner`의 참조를 잡습니다(v6.12 `fs/char_dev.c:348-353`, `:408`). misc 노드는 `misc_open`의 `fops_get()`이 `fops.owner`만 잡습니다(`drivers/char/misc.c:135`). 독립 검증에서 `/dev/mychar`를 연 채로는 모듈 refcount가 2, `/dev/mymisc`는 1이었고, 두 경우 모두 `rmmod`가 `Module mychar is in use`로 거부됐습니다.
 
 ```c
 static const struct file_operations fops = {
@@ -387,8 +387,9 @@ static int my_open(struct inode *ino, struct file *f)
 | --- | ---: |
 | `ioctl(MYDEV_GET_VAL)` (mutex + 4 B `copy_to_user`) | 156 ns/call |
 | `read` on `O_NONBLOCK`, 빈 상태 (`-EAGAIN`으로 바로 반환) | 143 ns/call |
+| `syscall(SYS_getppid)` (driver 없는 system call, 같은 VM에서 따로 잼) | 117~126 ns/call |
 
-두 값의 차이가 13 ns뿐이므로, 이 VM에서 호출당 시간의 대부분은 system call 진입·복귀 비용입니다. 작은 값을 자주 주고받는 driver라면 호출 횟수를 줄이는 설계(한 번에 여러 값을 넘기기)가 driver 안의 최적화보다 효과가 큽니다. 큰 데이터를 주고받는 경우의 `mmap`은 [7-09](/blog/embedded/modern-recipes/part7-09-mmap)에서 다룹니다.
+driver 안의 일(mutex + 4 B `copy_to_user`)은 두 값의 차이인 13 ns 정도였습니다. 같은 VM에서 driver를 거치지 않는 `getppid`를 같은 방법으로 100만 번 부르면 호출당 117~126 ns였으므로, 이 VM에서 호출당 시간의 대부분은 system call 진입·복귀 비용입니다(`getppid` 측정 프로그램은 위 시험 프로그램과 같은 `clock_gettime` 루프). 작은 값을 자주 주고받는 driver라면 호출 횟수를 줄이는 설계(한 번에 여러 값을 넘기기)가 driver 안의 최적화보다 효과가 큽니다. 큰 데이터를 주고받는 경우의 `mmap`은 [7-09](/blog/embedded/modern-recipes/part7-09-mmap)에서 다룹니다.
 
 ## 자주 보는 함정
 
@@ -441,7 +442,7 @@ expected=6000000
 plain=4733924 atomic=6000000
 ```
 
-`g_counter++`는 읽기·더하기·쓰기 세 단계라서, 두 CPU가 같은 값을 읽고 각각 1을 더해 쓰면 한 번이 사라집니다. 이 실행에서는 약 22%가 사라졌고, `atomic_inc`는 한 번도 잃지 않았습니다. 여러 값을 함께 바꿔야 하면 위 driver처럼 mutex로 묶습니다.
+`g_counter++`는 읽기·더하기·쓰기 세 단계라서, 두 CPU가 같은 값을 읽고 각각 1을 더해 쓰면 한 번이 사라집니다. 이 두 실행에서는 21~22%가 사라졌고(같은 조건으로 다시 돌린 독립 검증에서는 10~17%), `atomic_inc`는 한 번도 잃지 않았습니다. 여러 값을 함께 바꿔야 하면 위 driver처럼 mutex로 묶습니다.
 
 > ⚠️ 커널 stack에 큰 지역 변수
 
@@ -456,7 +457,7 @@ static ssize_t big_write(struct file *f, const char __user *ubuf, size_t cnt, lo
 }
 ```
 
-arm64 커널 stack은 KASAN이 없을 때 `MIN_THREAD_SHIFT` 14, 즉 16 KiB입니다(v6.12 `arch/arm64/include/asm/memory.h:115-124`). Debian 커널은 `CONFIG_FRAME_WARN=2048`이라, 이 함수는 빌드 때 경고가 났습니다.
+arm64 커널 stack은 KASAN이 없고 page가 16 KiB 이하일 때 `THREAD_SHIFT` 14, 즉 16 KiB입니다(v6.12 `arch/arm64/include/asm/memory.h:115-125`). 이 Debian 커널은 `CONFIG_ARM64_4K_PAGES=y`입니다. Debian 커널은 `CONFIG_FRAME_WARN=2048`이라, 이 함수는 빌드 때 경고가 났습니다.
 
 ```text
 /root/p7/707b/bad.c:18:1: warning: the frame size of 8208 bytes is larger than 2048 bytes [-Wframe-larger-than=]
@@ -479,7 +480,7 @@ register_chrdev(123, "foo", &fops);   /* fixed major */
 - `ioctl` 번호는 `_IOR`·`_IOW`가 방향·크기·magic·번호를 담아 만들고, 모르는 명령에는 `-ENOTTY`를 돌려줍니다.
 - Blocking read는 wait queue + `wake_up`, `poll`은 `poll_wait` + 준비 상태 반환으로 구현합니다.
 - 작은 driver는 misc device 등록 한 번으로 cdev·class·device 생성을 대신합니다.
-- 공유 상태는 mutex나 atomic으로 보호합니다. 보호하지 않은 `++`는 이 실행에서 22%를 잃었습니다.
+- 공유 상태는 mutex나 atomic으로 보호합니다. 보호하지 않은 `++`는 이 실행에서 21~22%를 잃었습니다.
 - 등록 실패 경로는 goto 라벨로 역순 해제합니다.
 
 다음 편은 **Platform 드라이버**입니다. DT match와 probe/remove 흐름을 다룹니다.
