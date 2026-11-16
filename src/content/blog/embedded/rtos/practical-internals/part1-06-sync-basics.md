@@ -29,15 +29,15 @@ void task_b(void *arg) {
 }
 ```
 
-`counter++`이 single instruction 같지만, 어셈블리로 보면:
+`counter++`이 한 줄이지만, arm-none-eabi-gcc 16.2.0 `-mcpu=cortex-m3 -O2`로 컴파일하면 세 명령입니다([1-05](/blog/embedded/rtos/practical-internals/part1-05-interrupts-rtos)에서 objdump로 확인).
 
-```asm
-LDR  r0, [counter]    ; (1) read
-ADD  r0, r0, #1       ; (2) increment
-STR  r0, [counter]    ; (3) write
+```text
+ldr	r3, [r2, #0]     ; (1) read
+adds	r3, #1           ; (2) increment
+str	r3, [r2, #0]     ; (3) write
 ```
 
-**3 단계 사이에 preempt 되면** 다른 task가 같은 값을 read 하면서 증가분 하나를 잃습니다.
+**3 단계 사이에 preempt 되면** 다른 task가 같은 값을 read 하면서 증가분을 잃습니다. 공용 화이트보드의 숫자를 두 사람이 번갈아 고치는 상황과 같습니다. A가 "5"를 읽고 계산하는 사이 B가 "5"를 읽어 "6"을 쓰고, A도 "6"을 쓰면 하나가 사라집니다.
 
 ```text
 시점 →
@@ -46,16 +46,45 @@ Task B: . . . . . . read=5 . . . increment=6, write=6 . . . . . .
 결과: counter = 6 (7이 맞음)
 ```
 
+### QEMU에서 실제로 잃어 보기
+
+말로만 보면 드문 일 같아서 실제로 돌려 봤습니다. 같은 우선순위 2의 task 둘이 각각 `counter++`를 200,000번 하고, time slicing이 tick마다 둘을 번갈아 돌립니다. `PROTECT=1`이면 증가를 `taskENTER_CRITICAL()`로 감쌉니다.
+
+```c title="race.c (발췌)"
+#define N 200000u
+static volatile uint32_t counter;
+static void worker(void*a){ (void)a;
+  for(uint32_t i=0;i<N;i++){
+#if PROTECT
+    taskENTER_CRITICAL(); counter++; taskEXIT_CRITICAL();
+#else
+    counter++;
+#endif
+  }
+  /* ... 둘 다 끝나면 출력 ... */ }
+```
+
+FreeRTOS V11.2.0 `ARM_CM3`, arm-none-eabi-gcc 16.2.0 `-O2`, QEMU 11.1.3 `mps2-an385 -icount shift=5`의 결과입니다.
+
+```text
+PROTECT=0 expected=400000 counter=249799 lost=150201 ticks=64
+PROTECT=1 expected=400000 counter=400000 lost=0 ticks=410
+```
+
+보호하지 않으면 40만 번 중 15만 번이 사라졌습니다. 한 번 끼어들 때 하나만 잃는 것이 아닙니다. A가 `ldr`와 `str` 사이에서 선점되면 B가 1 tick 동안 수천 번 올린 값을, 다시 돌아온 A가 옛 값 + 1로 덮어씁니다. 64 tick 동안 이런 전환이 수십 번 일어나면 손실이 이만큼 커집니다. `volatile`을 붙였는데도 그렇습니다.
+
+보호하면 손실은 0이지만 같은 일에 410 tick이 걸렸습니다. icount 모드에서 tick은 실행한 명령 수에 비례하므로, 이 차이는 critical section 진입·탈출(BASEPRI 쓰기, nesting 카운터, barrier)이 반복마다 더한 명령 수를 보여 줍니다. 실제 보드의 시간 비율은 아닙니다.
+
 ## Critical Section — 보호 구간
 
 "이 코드 블록은 원자적으로 실행한다"는 목표를 달성하기 위한 3가지 도구를 살펴봅니다.
 
 ### 1. Interrupt Disable
 
-해당 코어의 선택된 IRQ를 막는 도구입니다. 마스크 종류와 포트에 따라 범위가 다르며 NMI·다른 코어·DMA까지 일괄 차단하지 않습니다. 길이는 제품의 latency 예산에서 정합니다.
+해당 코어의 IRQ를 막는 도구입니다. PRIMASK는 NMI와 HardFault를 뺀 모든 설정 가능 예외를, BASEPRI는 지정한 값 이상의 우선순위만 막습니다(1-04의 디스어셈블). 어느 쪽이든 다른 코어와 DMA는 막지 못합니다.
 
 ```c
-// CMSIS Cortex-M, 비특권/TrustZone 등의 사용 조건은 별도 확인
+// CMSIS Cortex-M. unprivileged에서 PRIMASK 쓰기는 무시됨 (DDI 0403E.b B5.2.3 MSR)
 uint32_t old_mask = __get_PRIMASK();
 __disable_irq();
 counter++;
@@ -71,8 +100,8 @@ taskEXIT_CRITICAL();
 
 - ✓ 마스킹 범위에 속하는 ISR과의 접근을 해당 코어에서 분리할 수 있습니다
 - ✓ Spin·context switch가 없습니다
-- ✗ ISR latency가 늘어 실시간성이 떨어집니다
-- ✗ Long work는 금지입니다
+- ✗ 막힌 시간만큼 그 IRQ들의 응답이 늦어집니다(1-05의 latency 상한에 그대로 더해짐)
+- ✗ 위 실험에서 반복마다 감싸자 명령 수가 64 → 410 tick 분량으로 늘었습니다
 
 ### 2. Spinlock (SMP)
 
@@ -86,10 +115,9 @@ spin_unlock(&lock);
 
 #### 장단점
 
-- ✓ 짧은 critical section에 효율적입니다
-- ✓ blocking context switch 없이 기다리지만 경쟁·선점에 따른 최대 대기는 별도로 분석합니다
-- ✗ 단일 코어에서 lock 보유자를 선점한 실행자가 spin하면 진행 불가할 수 있습니다. IRQ·선점 정책이 필요합니다
-- ✗ Hold time이 길어지면 다른 코어가 spin 합니다
+- ✓ context switch 없이 기다립니다
+- ✗ 단일 코어에서는 lock을 쥔 task를 선점한 쪽이 spin하면 보유자가 다시 돌 수 없어 영원히 돕니다. 그래서 spinlock을 쥐는 동안 그 코어의 선점과 IRQ를 함께 막습니다
+- ✗ 보유 시간 동안 다른 코어는 일하지 못하고 spin 합니다(SMP는 [4-08](/blog/embedded/rtos/practical-internals/part4-08-spinlock-smp))
 
 ### 3. Mutex (Task 간)
 
@@ -104,25 +132,25 @@ if (xSemaphoreTake(mutex, portMAX_DELAY) == pdTRUE) {
 
 #### 장단점
 
-- ✓ task 대기를 허용하는 자원에 사용하되 긴 hold와 lock 중 blocking의 최악 시간을 제한합니다
-- ✓ Priority inheritance를 지원합니다 (Mars Pathfinder 해결)
-- ✗ Context switch overhead가 있습니다
-- ✗ ISR에서는 사용할 수 없습니다
+- ✓ 기다리는 task는 Blocked가 되어 CPU를 다른 task에 넘깁니다
+- ✓ FreeRTOS mutex는 priority inheritance를 합니다(Mars Pathfinder의 수정이 VxWorks mutex의 이 옵션을 켠 것, [1-03](/blog/embedded/rtos/practical-internals/part1-03-scheduling-algorithms))
+- ✗ 경합하면 context switch가 두 번 일어납니다
+- ✗ ISR에서는 사용할 수 없습니다(`semphr.h` L703)
 
 ## 선택 기준
 
-| 상황 | 확인할 조건과 도구 |
-| --- | --- |
-| ISR과 task 공유 | IRQ 마스크 범위·ISR 허용 priority·최대 지연에 맞는 critical section/atomic 게시 |
-| task 간 자원 보호 | owner·실패·hold 시간·lock 순서·PI를 검토한 mutex |
-| SMP 공유 상태 | 다른 코어와의 배제·메모리 순서·IRQ/선점 규칙을 포함한 spinlock |
-| 개별 값 갱신·게시 | target의 lock-free 여부와 수명·memory order를 검증한 atomic |
+| 상황 | 도구 | 이유 |
+| --- | --- | --- |
+| ISR과 task 공유 | critical section(task 쪽) + `..._FROM_ISR`(ISR 쪽) | mutex는 ISR에서 못 씀 |
+| task 간 자원 보호, 보유 중 대기 가능 | mutex | 기다리는 task가 CPU를 넘김, PI |
+| SMP 공유 상태 | spinlock + 그 코어의 IRQ/선점 차단 | 다른 코어는 IRQ mask로 못 막음 |
+| 정수 하나 갱신·게시 | C11 atomic | 아래처럼 LDREX/STREX 한 루프 |
 
-10 µs/100 µs 같은 보편적 문턱만으로 도구를 고르지 않습니다.
+어느 쪽이 "짧다"고 볼지는 그 구간 동안 늦어지는 IRQ·task의 마감이 정합니다.
 
 ## Atomic Operations
 
-C11 atomic API는 언어 수준의 원자성과 순서 계약입니다. 단일 명령·lock-free·고정 시간을 모두 보장하지 않으며, 타깃에 따라 runtime helper나 재시도 루프를 사용합니다.
+C11 atomic API는 언어 수준의 원자성과 순서 계약입니다. 어떤 명령으로 바뀔지는 타깃이 정합니다.
 
 ```c
 #include <stdatomic.h>
@@ -131,22 +159,40 @@ atomic_int counter = 0;
 atomic_fetch_add(&counter, 1);   // counter++ atomic
 ```
 
-Cortex-M3/M4 같은 일부 코어에서 atomic RMW가 다음 형태의 exclusive 재시도로 내려갈 수 있습니다. 모든 ARMv7+ 코어와 모든 폭의 공통 출력은 아닙니다.
+위 코드를 arm-none-eabi-gcc 16.2.0 `-O2 -std=c11`로 두 코어용으로 컴파일했습니다. Cortex-M3에서는 exclusive 재시도 루프가 됩니다.
 
-```asm
-loop:
-    LDREX  r0, [counter]
-    ADD    r0, r0, #1
-    STREX  r1, r0, [counter]
-    CMP    r1, #0           ; STREX 성공?
-    BNE    loop             ; 실패 시 재시도
+```text
+00000000 <bump>:
+   0:	dmb	ish
+   4:	ldr	r3, [pc, #20]	@ (1c <bump+0x1c>)
+   6:	ldrex	r1, [r3]
+   a:	adds	r1, #1
+   c:	strex	r2, r1, [r3]
+  10:	cmp	r2, #0
+  12:	bne.n	6 <bump+0x6>
+  14:	dmb	ish
+  18:	bx	lr
 ```
+
+`strex`가 실패(r2 ≠ 0)하면 `ldrex`부터 다시 합니다. 기본 순서가 `memory_order_seq_cst`이므로 앞뒤에 `dmb`가 붙었습니다. LDREX/STREX가 없는 ARMv6-M(Cortex-M0)에서는 같은 코드가 라이브러리 호출이 됩니다.
+
+```text
+00000000 <bump>:
+   0:	push	{r4, lr}
+   2:	movs	r2, #5
+   4:	movs	r1, #1
+   6:	ldr	r0, [pc, #8]	@ (10 <bump+0x10>)
+   8:	bl	0 <__atomic_fetch_add_4>
+   c:	pop	{r4, pc}
+```
+
+`nm`이 `U __atomic_fetch_add_4`를 보여 주듯 이 심볼은 링크 시 누군가 제공해야 합니다(`r2 = 5`는 `__ATOMIC_SEQ_CST`). [GCC 문서](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html)는 크기상 lock-free 명령을 쓸 수 없으면 "an external call is left to be resolved at run time"이라고 적습니다. 같은 C 코드라도 Cortex-M0에서는 시간과 ISR 안전성이 그 라이브러리 구현에 달려 있다는 뜻입니다.
 
 CAS 등의 원자 연산은 lock-free 알고리즘의 재료이지만, 연산 하나가 lock-free라고 전체 알고리즘이 wait-free이거나 ISR 안전한 것은 아닙니다.
 
 ## Memory Ordering — Reordering 함정
 
-CPU의 메모리 모델뿐 아니라 C 언어의 data race 규칙을 지켜야 합니다. 서로 다른 C thread가 일반 변수 `ready`를 동기화 없이 읽고 쓰면 undefined behavior일 수 있으며, producer 쪽에 barrier 하나를 추가해도 그 data race를 없애지 못합니다.
+CPU의 메모리 모델뿐 아니라 C 언어의 data race 규칙을 지켜야 합니다. 서로 다른 C thread가 일반 변수 `ready`를 동기화 없이 읽고 쓰면 data race이고 N1570 5.1.2.4p25에 따라 undefined behavior입니다. 그래서 producer 쪽에 barrier 하나를 추가해도 그 data race를 없애지 못합니다.
 
 다음은 one-shot 게시를 보여주는 완전한 호스트 예제입니다. producer가 `data`를 쓴 뒤 atomic `ready`에 release로 게시하고, consumer가 acquire로 관찰한 뒤 읽습니다. 게시 후 `data`를 다시 수정하지 않으며 모든 thread가 끝날 때까지 저장 공간을 유지합니다.
 
@@ -184,7 +230,7 @@ clang -std=c11 -Wall -Wextra -Werror -pthread publication.c -o publication
 ./publication
 ```
 
-이것은 호스트 C11 thread의 게시 검사입니다. 보드 ISR·DMA cache coherency·MMIO 순서를 증명한 코드가 아닙니다. DMA에는 device 및 cache-maintenance 계약이 추가로 필요합니다.
+Apple clang 21.0.0(macOS)에서 `PASS one-shot release/acquire publication`을 출력했습니다. 이 프로그램이 보여 주는 것은 호스트 thread 사이의 게시 규칙입니다. DMA가 쓴 버퍼를 CPU가 읽을 때는 이 규칙 말고도 cache clean/invalidate가 필요합니다.
 
 ## False Sharing — Cache 함정
 
@@ -192,10 +238,10 @@ clang -std=c11 -Wall -Wextra -Werror -pthread publication.c -o publication
 struct {
     int counter_a;        // CPU 0이 자주 쓰기
     int counter_b;        // CPU 1이 자주 쓰기
-} shared;                  // 같은cache line에배치됐다는가정,실제line크기는타깃별확인
+} shared;                  // 두 int가 같은 cache line에 들어감
 ```
 
-CPU 0이 `counter_a`에 write 하면 cache line 전체가 CPU 0의 cache로 들어옵니다. CPU 1이 `counter_b`에 write 하면 line이 CPU 1로 이동합니다. 코어 간 ping-pong이 발생합니다. 관련 변수의 배치·정렬을 분리하면 줄일 수 있으나 target의 coherence와 line 크기를 확인하고 효과를 측정해야 합니다. 아래 64는 그 크기를 가정한 설명용 정렬값입니다. C11에서는 `_Alignas(64)` 또는 `<stdalign.h>`의 `alignas`를 사용합니다.
+CPU 0이 `counter_a`에 write 하면 cache line 전체가 CPU 0의 cache로 들어옵니다. CPU 1이 `counter_b`에 write 하면 line이 CPU 1로 이동합니다. 두 사람이 한 권의 공책 다른 페이지에 쓰려고 공책을 계속 주고받는 꼴입니다. 줄이려면 두 변수를 다른 line에 둡니다. line 크기는 코어마다 다르며 CCSIDR의 LineSize 필드로 읽습니다. 예를 들어 Cortex-M7의 L1 cache line은 32바이트입니다(ARM DDI 0489D 3.3.4 "Cache Size ID Register", LineSize 0x1 = 32 bytes). 단일 코어이고 cache가 없는 Cortex-M3·M4에서는 이 문제가 생기지 않습니다. 아래 64는 line이 64바이트인 SMP 코어를 가정한 값입니다. C11에서는 `_Alignas(64)` 또는 `<stdalign.h>`의 `alignas`를 사용합니다.
 
 ```c
 struct {
@@ -206,7 +252,7 @@ struct {
 
 ## Critical Section 길이 — 예산에서 정하기
 
-보편적인 50 ns/1 µs/50 µs 안전 한계는 없습니다. 보호 대상 데이터의 크기, 버스/메모리, 예외 urgency와 deadline을 명시하고 최악 비선점 구간을 latency 예산에 포함합니다. I/O 대기·print·다른 lock 취득은 특히 점검합니다. 긴 구간의 이벤트 누락 여부는 주변 장치의 FIFO·pending 보존·발생률에도 의존합니다.
+critical section의 길이는 그대로 그 구간에 막힌 IRQ의 최악 지연에 더해집니다. 1-05의 Cortex-M4 하드웨어 진입 상한 12 cycle은 critical section이 없을 때의 값입니다. 주변 장치가 그 사이 데이터를 몇 개까지 버퍼에 쥐고 있을 수 있는지(FIFO 깊이)가 구간 길이의 또 다른 상한입니다. print나 다른 lock 취득처럼 길이가 정해지지 않은 일은 이 구간에 넣지 않습니다.
 
 ## Volatile — 동기화 ≠
 
@@ -217,18 +263,18 @@ volatile int counter = 0;
 counter++;  // 여전히 3-instruction → race condition
 ```
 
-MMIO에는 toolchain/device 접근 규약을 따라 사용합니다. interrupt와 공유하는 single-byte flag라도 이벤트 누적·수명·원자성·동기화 계약을 별도로 확인해야 합니다.
+위 `race.c`의 `counter`도 `volatile`이었지만 15만 번을 잃었습니다. `volatile`은 MMIO 레지스터처럼 "읽고 쓰는 것 자체가 의미 있는" 접근에 씁니다. ISR과 공유하는 1바이트 flag는 byte 접근이 single-copy atomic이라(DDI 0403E.b A3.5.3) 찢어지지는 않지만, 두 번 세워도 한 번으로 보이는 점은 그대로입니다.
 
 ## FreeRTOS API 요약
 
 | API | 효과 |
 | --- | --- |
-| `taskENTER_CRITICAL()` | ARM_CM4F: BASEPRI·nesting, scheduler suspend API와 별개 |
-| `taskEXIT_CRITICAL()` | 복원 |
-| `taskENTER_CRITICAL_FROM_ISR()` | ISR 내 critical section |
-| `vTaskSuspendAll()` | Scheduler 정지 (IRQ는 활성) |
-| `xTaskResumeAll()` | 복원 |
-| `portDISABLE_INTERRUPTS()` | ARM_CM4F: syscall 경계까지 BASEPRI mask, 모든 IRQ 차단 아님 |
+| `taskENTER_CRITICAL()` | Cortex-M: BASEPRI ← `configMAX_SYSCALL_INTERRUPT_PRIORITY`, nesting +1 |
+| `taskEXIT_CRITICAL()` | nesting −1, 0이 되면 BASEPRI ← 0 |
+| `taskENTER_CRITICAL_FROM_ISR()` | 이전 BASEPRI를 반환하고 올림(1-04 objdump) |
+| `vTaskSuspendAll()` | `uxSchedulerSuspended`를 올려 전환만 막음. IRQ는 그대로 들어옴([`tasks.c` L3837](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L3837)) |
+| `xTaskResumeAll()` | 0이 되면 그동안 밀린 tick과 ready task를 처리 |
+| `portDISABLE_INTERRUPTS()` | Cortex-M: `vPortRaiseBASEPRI()`, nesting 없음 |
 
 ## 자주 하는 실수
 
@@ -242,18 +288,18 @@ MMIO에는 toolchain/device 접근 규약을 따라 사용합니다. interrupt�
 
 > ⚠️ Memory barrier 누락
 
-ARM·RISC-V relaxed model에서는 write order가 보장되지 않습니다. CPU thread 공유는 언어 atomic/lock을 사용하고, DMA/MMIO는 cache clean/invalidate와 device barrier 등 플랫폼 규약을 추가로 검토합니다. 단일 barrier만으로 모든 공유 문제를 해결하지 않습니다.
+ARMv7의 Normal 메모리는 접근 순서가 프로그램 순서와 다르게 관찰될 수 있습니다(DDI 0403E.b A3.7 "Memory access order"). 그래서 위 Cortex-M3 atomic 코드에 `dmb`가 붙었습니다. CPU thread끼리는 언어 atomic이나 lock을 쓰고, DMA와 MMIO는 cache 유지 연산과 barrier를 따로 넣습니다.
 
 > ⚠️ Mutex를 ISR에서
 
-ISR에서 mutex를 취득·해제하면 FreeRTOS 계약 위반입니다. 허용 priority에서 binary/counting의 FromISR take/give와 queue/notification 등 각 API의 조건을 확인합니다.
+FreeRTOS `semphr.h`는 mutex 생성 함수마다 "Mutex type semaphores cannot be used from within interrupt service routines"라고 적습니다. ISR 쪽은 binary/counting semaphore의 `xSemaphoreGiveFromISR()`나 task notification을 씁니다(1-05).
 
 ## 정리
 
-- Race condition은 공유 데이터, 동시 접근, 동기화 없음이 합쳐질 때 발생합니다.
+- Race condition은 공유 데이터, 동시 접근, 동기화 없음이 합쳐질 때 발생합니다. QEMU 실험에서 보호 없는 `counter++` 40만 번 중 15만 번이 사라졌습니다.
 - 보호 도구 3종은 **IRQ disable**, **Spinlock(SMP)**, **Mutex**입니다.
 - 짧은 작업은 IRQ disable, 긴 작업은 mutex가 적합합니다.
-- **Atomic API**가 lock-free의 토대입니다.
+- **Atomic API**는 Cortex-M3에서 LDREX/STREX 루프, Cortex-M0에서는 `__atomic_fetch_add_4` 호출이 됩니다.
 - `volatile`, atomic, memory barrier는 셋 다 별개의 개념입니다.
 
 다음 편에서는 **Semaphore 개념**으로 Counting과 Binary, 사용 패턴을 다룹니다.
@@ -263,8 +309,9 @@ ISR에서 mutex를 취득·해제하면 FreeRTOS 계약 위반입니다. 허용 
 - [C11 N1570](https://www.open-std.org/jtc1/sc22/wg14/www/docs/n1570.pdf) §5.1.2.4·§7.17: data race와 atomic 순서
 - [GCC atomic builtins](https://gcc.gnu.org/onlinedocs/gcc/_005f_005fatomic-Builtins.html): target의 lock-free 여부와 helper 조건
 - [FreeRTOS V11.2.0 ARM_CM4F portmacro.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM4F/portmacro.h): mask 범위
+- ARM DDI 0403E.b A3.5.3(single-copy atomicity), A3.7(memory access order); ARM DDI 0489D(Cortex-M7 TRM) 3.3.4
 
-호스트 게시 프로그램의 성공을 보드 ISR·최악 시간·DMA 검증으로 환산하지 않습니다. 설명용 asm·spinlock 조각은 완성된 RTOS 구현이 아닙니다.
+race·atomic 결과는 FreeRTOS V11.2.0 `ARM_CM3`, arm-none-eabi-gcc 16.2.0, QEMU 11.1.3 `mps2-an385`에서 얻었고, tick 수는 icount 가상 시간입니다. spinlock 조각은 개념 코드입니다.
 
 ## 관련 항목
 
