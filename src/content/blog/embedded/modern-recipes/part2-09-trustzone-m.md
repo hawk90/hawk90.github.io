@@ -84,7 +84,7 @@ int secure_compute(int x) {
 
 ### 5) Banked register와 IRQ
 
-Armv8-M ARM은 SP를 Secure·Non-secure 두 벌(`MSP_S`/`MSP_NS`, `PSP_S`/`PSP_NS`)로 두고, SCB·SysTick·NVIC·MPU 같은 System Control Space도 Non-secure 사본을 따로 가집니다. CMSIS 5.9.0 `core_cm33.h`는 Secure 코드가 Non-secure 사본에 접근하도록 `SCS_BASE_NS`(0xE002E000) 아래에 `SCB_NS`·`NVIC_NS`·`MPU_NS`를 정의합니다. 아래 예제의 `SCB_NS->VTOR`, `__TZ_set_MSP_NS()`가 그 경로입니다.
+Armv8-M ARM은 SP를 Secure·Non-secure 두 벌(`MSP_S`/`MSP_NS`, `PSP_S`/`PSP_NS`)로 둡니다. System Control Space 쪽은 CMSIS 5.9.0 `core_cm33.h`가 Secure 코드에서 Non-secure 사본에 접근하도록 `SCS_BASE_NS`(0xE002E000) 아래에 `SCB_NS`·`NVIC_NS`·`MPU_NS`를 정의합니다. 아래 예제의 `SCB_NS->VTOR`, `__TZ_set_MSP_NS()`가 그 경로입니다.
 
 우선순위는 AIRCR.PRIS(bit 14)로 조정합니다. Armv8-M ARM의 정의는 0이면 "Priority ranges of Secure and Non-secure exceptions are identical", 1이면 "Non-secure exceptions are de-prioritized"이고, 이 bit는 Non-secure 상태에서 RAZ/WI입니다.
 
@@ -116,6 +116,7 @@ AN505의 두 SSRAM을 반으로 나눠 Secure와 Non-secure에 줬습니다. 주
    off and len must be multiples of 32 blocks. A full-word BLK_LUT access auto-increments BLK_IDX. */
 static void mpc_set_ns(uint32_t mpc, uint32_t off, uint32_t len) {
     uint32_t blk = 1u << ((REG(mpc, 0x14) & 0xF) + 5);          /* BLK_CFG */
+    REG(mpc, 0x00) |= 1u << 8;                                    /* CTRL.AUTOINC (TRM reset value 0) */
     REG(mpc, 0x18) = off / blk / 32;                              /* BLK_IDX */
     for (uint32_t w = 0; w < len / blk / 32; w++)
         REG(mpc, 0x1C) = 0xFFFFFFFFu;                             /* BLK_LUT, then IDX++ */
@@ -148,7 +149,7 @@ int main(void) {
 
 Non-secure reset handler 주소는 vector table의 *두 번째 word에 든 값*(`ns_vec[1]`)입니다. 주소 `0x00100000 + 4`를 그대로 함수 포인터로 쓰면 vector table 데이터를 코드로 실행합니다. 그 전에 `SCB_NS->VTOR`와 `MSP_NS`를 설정하고, `cmse_nsfptr_create()`로 bit 0을 지운 포인터를 `cmse_nonsecure_call`로 부르면 컴파일러가 `BLXNS`로 Non-secure에 들어갑니다. SAU 경계 주소는 32 byte 단위라 RLAR에는 마지막 32 byte 블록의 시작 주소를 씁니다.
 
-`MPC_SSRAM1`의 block 크기는 이 모델에서 1 KB(`BLK_CFG` 읽은 값)였습니다. SSE-200 TRM은 BLK_LUT를 word 단위로 읽거나 쓰면 BLK_IDX가 자동으로 1 증가한다고 적습니다. 처음에는 block마다 LUT를 읽고 bit를 더해 다시 쓰다가, 읽기에서 index가 넘어가 엉뚱한 word에 써서 Non-secure 영역이 열리지 않았습니다. 그 빌드에서는 `NS vec[0]`·`NS vec[1]`이 모두 0으로 읽혔고, 0번지로 점프한 Non-secure 진입이 SFSR 0x49(INVEP·AUVIOL·SFARVALID)로 끝났습니다.
+`MPC_SSRAM1`의 block 크기는 이 모델에서 1 KB(`BLK_CFG` 읽은 값)였습니다. SSE-200 TRM Table 3-23은 MPC CTRL의 bit 8을 auto-increment로 정의하고, 그 bit가 켜져 있으면 BLK_LUT를 word 단위로 읽거나 쓸 때 BLK_IDX가 1 증가합니다. TRM의 CTRL reset 값은 0이고 LUT 예제도 "Set the autoincrement enable bit, CTRL[8], to 0b1"로 시작하므로 위 코드는 이 bit를 직접 켭니다. 이 QEMU 모델은 CTRL이 처음부터 0x100(auto-increment on)으로 읽혀, 실제 칩과 reset 상태가 다릅니다. 처음에는 block마다 LUT를 읽고 bit를 더해 다시 쓰다가, auto-increment가 켜진 QEMU 모델에서 읽기에 index가 넘어가 엉뚱한 word에 써서 Non-secure 영역이 열리지 않았습니다. TRM의 read-modify-write 예제는 반대로 CTRL[8]을 0으로 두고 시작합니다. 그 빌드에서는 `NS vec[0]`·`NS vec[1]`이 모두 0으로 읽혔고, 0번지로 점프한 Non-secure 진입이 SFSR 0x49(INVEP·AUVIOL·SFARVALID)로 끝났습니다.
 
 ### Non-secure 쪽: Secure 함수 호출
 
@@ -190,6 +191,7 @@ qemu-system-arm -M mps2-an505 -nographic -monitor none -serial none \
 SAU_TYPE.SREGION = 0x00000008
 MPU_TYPE (S).DREGION = 0x00000008
 MPU_TYPE (NS).DREGION = 0x00000008
+SSRAM1 MPC CTRL at reset = 0x00000100
 SSRAM1 MPC block size = 0x00000400
 cmse_TT(secure_compute).S = 0x00000001
 NS vec[0] (MSP_NS) = 0x28200000
@@ -219,7 +221,7 @@ SG 진입·`BXNS` 복귀의 cycle 수는 QEMU로 잴 수 없고, 이번에 연 M
 
 > ⚠️ Non-secure에서 Secure 주소 직접 접근
 
-위 실행처럼 SecureFault(SFSR.AUVIOL)가 납니다. BusFault가 아닙니다. `SHCSR.SECUREFAULTENA`를 켜지 않으면 HardFault로 올라가고, vector table의 SecureFault 자리(7번)가 비어 있으면 handler를 찾지 못합니다. 처음 실행에서 하네스의 7번 entry가 0이라 SecureFault 뒤에 INVSTATE UsageFault와 HardFault가 이어졌습니다.
+위 실행처럼 SecureFault(SFSR.AUVIOL)가 납니다. BusFault가 아닙니다. Armv8-M ARM의 SHCSR.SECUREFAULTENA 정의는 이 bit가 0이면 "exceptions that target SecureFault escalate to Secure state HardFault"라고 적고, vector table의 SecureFault 자리(7번)가 비어 있으면 handler를 찾지 못합니다. 처음 실행에서 하네스의 7번 entry가 0이라 SecureFault 뒤에 INVSTATE UsageFault와 HardFault가 이어졌습니다.
 
 > ⚠️ SAU와 IDAU, 그리고 MPC를 따로 봄
 
@@ -235,7 +237,11 @@ SecureFault SFSR = 0x00000001
   SFAR = 0x00000000
 ```
 
-SFSR.INVEP(bit 0)입니다. Secure 진입점은 NSC 영역의 `SG` 명령뿐입니다. 진입 함수를 `cmse_nonsecure_entry` 없이 만들거나 `-mcmse` 없이 컴파일하면 veneer가 생기지 않아 Non-secure에서 부를 길이 없습니다.
+SFSR.INVEP(bit 0)입니다. Secure 진입점은 NSC 영역의 `SG` 명령뿐입니다. 진입 함수를 `cmse_nonsecure_entry` 없이 만들면 veneer가 생기지 않습니다. `-mcmse` 없이 컴파일해도 마찬가지입니다. GCC 16.2.0은 경고 한 줄만 내고 일반 함수(`bx lr`)로 만듭니다.
+
+```text
+nomcmse.c:2:1: warning: 'cmse_nonsecure_entry' attribute ignored without '-mcmse' option [-Wattributes]
+```
 
 > ⚠️ 반환 레지스터에 Secure 값이 남음
 
@@ -243,7 +249,7 @@ SFSR.INVEP(bit 0)입니다. Secure 진입점은 NSC 영역의 `SG` 명령뿐입�
 
 > ⚠️ AIRCR.PRIS를 확인하지 않음
 
-PRIS = 0이면 Secure와 Non-secure 예외가 같은 우선순위 범위를 씁니다. Non-secure 예외가 Secure 예외를 선점하지 못하게 하려면 PRIS = 1로 Non-secure 예외의 우선순위를 낮춥니다. 이 bit는 Secure 상태에서만 쓸 수 있습니다.
+PRIS = 0이면 Secure와 Non-secure 예외가 같은 우선순위 범위를 씁니다. PRIS = 1이면 Armv8-M ARM의 표현대로 Non-secure 예외가 "de-prioritized"되어, 같은 숫자를 준 Non-secure 예외가 Secure 예외보다 낮은 우선순위로 취급됩니다. 이 bit는 Non-secure 상태에서 RAZ/WI이고, 쓰기 가능 여부 자체는 구현 정의입니다.
 
 ## 정리
 
