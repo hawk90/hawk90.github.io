@@ -317,7 +317,7 @@ vfs_read
 debian/build/build_arm64_none_arm64/fs/read_write.c:557
 ```
 
-경로 앞의 `debian/build/build_arm64_none_arm64/`는 Debian 빌드 디렉터리입니다. 소스 트리에서는 `fs/read_write.c`로 읽으면 됩니다. KASLR이 켜진 커널이라면 런타임 주소에서 오프셋을 빼야 합니다. 이 게스트는 부팅 로그에 `KASLR disabled due to lack of seed`(`arch/arm64/kernel/kaslr.c:30`)가 찍혀 있었습니다. QEMU의 UEFI 펌웨어가 KASLR seed를 주지 않았기 때문이고, 그래서 `/proc/kallsyms`와 `nm` 주소가 같아 그대로 넣을 수 있었습니다. 모듈 주소는 `.ko`가 relocatable이라 이 방법이 통하지 않고, Ch 7의 `faddr2line`이나 `decode_stacktrace.sh`를 씁니다.
+경로 앞의 `debian/build/build_arm64_none_arm64/`는 Debian 빌드 디렉터리입니다. 소스 트리에서는 `fs/read_write.c`로 읽으면 됩니다. KASLR이 켜진 커널이라면 런타임 주소에서 오프셋을 빼야 합니다. 이 게스트는 부팅 로그에 `KASLR disabled due to lack of seed`(`arch/arm64/kernel/kaslr.c:30`)가 찍혀 있었습니다. 같은 부팅의 EFI stub이 `EFI_RNG_PROTOCOL unavailable`을 찍었으니 펌웨어가 seed를 줄 난수원을 제공하지 않은 것이고, 그래서 `/proc/kallsyms`와 `nm` 주소가 같아 그대로 넣을 수 있었습니다. 모듈 주소는 `.ko`가 relocatable이라 이 방법이 통하지 않고, Ch 7의 `faddr2line`이나 `decode_stacktrace.sh`를 씁니다.
 
 ## kpatch / livepatch
 

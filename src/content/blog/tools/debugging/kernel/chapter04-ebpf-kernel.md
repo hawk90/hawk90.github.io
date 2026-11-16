@@ -109,7 +109,7 @@ tracepoint:syscalls:sys_enter_openat
 | `software:` | `software:page-faults:100` | 동작 |
 | `hardware:` | `hardware:cpu-cycles:1000000` | **실패** (`perf_event_open failed`) |
 
-`hardware:` 실패는 이 VM에 PMU가 노출되지 않았기 때문입니다. 실기기나 PMU를 넘겨주는 하이퍼바이저에서는 다를 수 있으니 먼저 한 번 붙여 봅니다. `profile:hz:99`를 3초 걸면 CPU마다 정확히 같은 수가 나왔습니다.
+부팅 로그에는 `hw perfevents: enabled with armv8_pmuv3_0 PMU driver, 1 (0,80000000) counters available`이 찍혀 PMU 드라이버는 있었지만, `hardware:cpu-cycles`는 `perf_event_open failed: No such file or directory`로 붙지 않았습니다. 원인은 이 실행에서 조사하지 않았습니다. 다른 환경에서도 먼저 한 번 붙여 보고 씁니다. `profile:hz:99`를 3초 걸면 CPU마다 정확히 같은 수가 나왔습니다.
 
 ```text
 @[0]: 290
@@ -266,7 +266,7 @@ argdist-bpfcc bashreadline-bpfcc bindsnoop-bpfcc biolatency-bpfcc biolatpcts-bpf
 `opensnoop`은 앞의 원-라이너를 도구로 만든 것입니다.
 
 ```text
-# timeout -s INT 5 opensnoop-bpfcc -n cat
+# timeout -s INT 5 stdbuf -oL opensnoop-bpfcc -n cat
 85305  cat                 3   0 PID    COMM               FD ERR PATH
 /etc/ld.so.cache
 85305  cat                 3   0 /lib/aarch64-linux-gnu/libc.so.6
@@ -409,7 +409,7 @@ bpftrace -e '
 |------|-------------|
 | `ERROR: bpftrace currently only supports running as the root user.` | root로 실행. 커널도 `unprivileged_bpf_disabled=2` |
 | `Loading BPF object(s) failed.` | verifier 거부. `-v`로 커널 로그를 보고 원인 줄을 찾음 |
-| `perf_event_open failed` (`hardware:`) | PMU가 없음 (이 VM) |
+| `perf_event_open failed` (`hardware:`) | `No such file or directory` (이 VM, 원인 미조사) |
 | `kprobe:__kmalloc` 같은 이름이 없음 | 이름 변경 (`__kmalloc_noprof`). `bpftrace -l 'kprobe:*kmalloc*'`로 검색 |
 | 이벤트 손실 경고 | bpftrace(8)의 `perf_rb_pages`(기본 64, CPU당 ring buffer 페이지 수)를 키움. `-B`는 stdout 버퍼링 모드라 무관 |
 | BCC 도구가 컴파일 오류 | 커널 헤더 없음. libbpf-tools판을 씀 |
@@ -420,7 +420,7 @@ bpftrace -e '
 - bpftrace는 `probe /filter/ { action }`입니다. tracepoint 인자는 `-lv`로, 함수 이름은 `-l`로 실행 중인 커널에서 확인합니다.
 - `count()`·`sum()`·`hist()`·`lhist()`로 그 자리에서 집계하고, `@[kstack]`으로 호출 경로를 셉니다.
 - BCC는 Python에서 가공할 때, libbpf-tools는 헤더·컴파일러 없이 배포할 때 씁니다. 둘 다 Debian 13에 패키지로 있습니다.
-- `hardware:` probe는 PMU가 있어야 하고, 부하는 probe 빈도에 비례하므로 workload에서 따로 잽니다.
+- `hardware:` probe는 이 VM에서 붙지 않았습니다. 부하는 probe 빈도에 비례하므로 workload에서 따로 잽니다.
 
 ## 다음 장 예고
 

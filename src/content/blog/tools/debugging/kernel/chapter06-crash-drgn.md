@@ -127,7 +127,7 @@ crash: seek error: kernel virtual address: ffff00007f9ab090  type: "IRQ stack po
 crash: seek error: kernel virtual address: ffff00007fa38880  type: "memory section root table"
 ```
 
-[Postmortem Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)에서도 crash 8.0.6은 같은 종류의 QEMU 덤프를 열지 못했습니다. 이번에는 원인을 좁혀 봤습니다. VMCOREINFO 노트에는 `NUMBER(VA_BITS)=52`와 `NUMBER(TCR_EL1_T1SZ)=0x10`(실제로는 64−16=48비트)이 함께 들어 있었고, 커널 로그도 `48-bit VAs`였습니다. 즉 52비트로 빌드한 커널이 이 CPU에서는 48비트로 돌고 있었습니다. crash에 실제 VA 비트 수와 물리 메모리 시작 주소(`readelf -lW`의 PT_LOAD가 `0x40000000`)를 직접 주자 열렸습니다.
+[Postmortem Ch 5](/blog/tools/debugging/postmortem/chapter05-cxl-device-postmortem)에서도 crash 8.0.6은 같은 종류의 QEMU 덤프를 열지 못했습니다. 이번에는 원인을 좁혀 봤습니다. VMCOREINFO 노트에는 `NUMBER(VA_BITS)=52`와 `NUMBER(TCR_EL1_T1SZ)=0x10`(실제로는 64−16=48비트)이 함께 들어 있었고, oops의 `user pgtable: 4k pages, 48-bit VAs` 줄도 48비트였습니다. 즉 52비트로 빌드한 커널이 이 CPU에서는 48비트로 돌고 있었습니다. crash에 실제 VA 비트 수와 물리 메모리 시작 주소(`readelf -lW`의 PT_LOAD가 `0x40000000`)를 직접 주자 열렸습니다.
 
 ```text
 # crash -s --machdep vabits_actual=48 --machdep phys_offset=0x40000000 \
@@ -220,7 +220,7 @@ ffff000000212500
 _drgn.FaultError: recursive address translation; page table may be missing from core dump: 0xffff800081d27800
 ```
 
-`python3-dev`·`libdw-dev`·`libelf-dev`·`libkdumpfile-dev` 등을 설치한 뒤 pip로 빌드한 0.3.0은 같은 파일을 옵션 없이 열었습니다.
+빌드 의존성을 설치한 뒤 pip로 빌드한 0.3.0은 같은 파일을 옵션 없이 열었습니다.
 
 ```text
 $ /root/venv/bin/drgn --version

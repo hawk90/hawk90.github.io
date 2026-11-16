@@ -92,7 +92,7 @@ $ dmesg -T | tail -2
 
 ring buffer 크기는 `CONFIG_LOG_BUF_SHIFT`로 정해지며, 이 커널은 17, 즉 128 KiB입니다. 부팅 인자 `log_buf_len=n[KMG]`(`kernel-parameters.txt:3182`)로 키울 수 있습니다. 크기를 읽는 debugfs 파일은 없습니다(`/sys/kernel/debug/log_buf_len`은 이 커널에 존재하지 않았습니다).
 
-128 KiB가 얼마나 금방 차는지는 Ch 1에서 봤습니다. SysRq `t` 한 번이 task 106개의 스택을 쏟아냈고, 그 뒤 `dmesg --level=err,warn`의 마지막 줄은 scheduler 디버그 표의 꼬리였습니다. 부팅 초기 로그가 필요하면 덮이기 전에 journald가 디스크에 저장한 것을 봅니다(아래 journalctl 절).
+128 KiB가 얼마나 금방 차는지는 Ch 1에서 봤습니다. SysRq `t` 한 번이 task 106개의 스택을 쏟아냈고, 그 뒤 `dmesg --level=err,warn`의 마지막 몇 줄은 SysRq `t`가 남긴 scheduler 디버그 표였습니다. 부팅 초기 로그가 필요하면 덮이기 전에 journald가 디스크에 저장한 것을 봅니다(아래 journalctl 절).
 
 ## 콘솔 loglevel 변경
 
@@ -200,7 +200,8 @@ drivers/cxl/core/region.c:2904 [cxl_core]cxl_is_hpa_in_chunk =_ "Addr trans fail
 
 ```text
 # insmod /root/mod/kdbg_demo.ko dyndbg=+p
-# dmesg | tail -2
+# dmesg | grep kdbg_demo | tail -3
+[  304.224940]  trigger_write+0x190/0x230 [kdbg_demo]
 [  881.112110] kdbg_demo: loaded
 [  881.112258] kdbg_demo: debug message from init
 # grep kdbg_demo /proc/dynamic_debug/control
@@ -259,12 +260,14 @@ for (i = 0; i < 20; i++)
 	pr_warn_ratelimited("global-ratelimited message %d\n", i);
 ```
 
-`rl`을 한 번 쓰고 6초 뒤 한 번 더 쓴 결과입니다.
+아래는 `rl`을 세 번째와 네 번째(6초 간격)로 쓴 결과입니다. 앞서 두 번 실행했기 때문에, 첫 두 `suppressed` 줄은 그 이전 창에서 버린 개수를 보고한 것입니다.
 
 ```text
+[  899.750833] kdbg_ratelimit: 17 callbacks suppressed
 [  899.750837] kdbg_demo: burst message 0
 [  899.751152] kdbg_demo: burst message 1
 [  899.751278] kdbg_demo: burst message 2
+[  899.751403] kdbg_ratelimit: 10 callbacks suppressed
 [  899.751404] kdbg_demo: global-ratelimited message 0
 ...
 [  899.753047] kdbg_demo: global-ratelimited message 9
@@ -323,7 +326,7 @@ Nov 16 09:37:04 localhost kernel: Linux version 6.12.116+deb13-arm64 (debian-ker
 Nov 16 09:37:04 localhost kernel: KASLR disabled due to lack of seed
 ```
 
-Ch 1의 `KASLR disabled` 줄은 SysRq 덤프 뒤 `dmesg`에서는 이미 사라졌지만 `journalctl -k`에는 있었습니다. 옵션은 `-k`(커널만), `-b`(이번 부팅), `-b -1`(직전 부팅), `-p warning`(warning 이상), `-f`(follow)를 주로 씁니다. `journald.conf(5)`에 따르면 `Storage=auto`는 `/var/log/journal`이 없을 때 `/run/log/journal`(메모리)에만 쓰므로, 직전 부팅을 볼 수 있는지는 이 디렉터리가 있는지로 갈립니다.
+Ch 1의 `KASLR disabled` 줄도 `journalctl -k -b`로 찾았습니다. 옵션은 `-k`(커널만), `-b`(이번 부팅), `-b -1`(직전 부팅), `-p warning`(warning 이상), `-f`(follow)를 주로 씁니다. `journald.conf(5)`에 따르면 `Storage=auto`는 `/var/log/journal`이 없을 때 `/run/log/journal`(메모리)에만 쓰므로, 직전 부팅을 볼 수 있는지는 이 디렉터리가 있는지로 갈립니다.
 
 ## printk 함정
 

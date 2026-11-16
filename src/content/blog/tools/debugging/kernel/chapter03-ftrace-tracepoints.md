@@ -180,7 +180,7 @@ do_filp_open
  3) + 16.708 us   |  }
 ```
 
-`open` 한 번의 16.7 µs 중 13.5 µs가 경로 탐색(`path_openat`)이었습니다. 시간 앞의 `+`는 10 µs를 넘었다는 표시입니다(ftrace.rst 1073행). 이 값은 빌드가 돌던 VM에서 한 번 잰 것이라 절대값보다 비율로 읽습니다. 확인이 끝나면 `echo 0 > max_graph_depth; echo > set_graph_function; echo nop > current_tracer`로 되돌립니다.
+`open` 한 번의 16.7 µs 중 13.5 µs가 경로 탐색(`path_openat`)이었습니다. 시간 앞의 `+`는 10 µs를 넘었다는 표시입니다(ftrace.rst 2688행). 이 값은 빌드가 돌던 VM에서 한 번 잰 것이라 절대값보다 비율로 읽습니다. 확인이 끝나면 `echo 0 > max_graph_depth; echo > set_graph_function; echo nop > current_tracer`로 되돌립니다.
 
 ## Filtering
 
@@ -300,7 +300,7 @@ obj-m += kdbg_tp.o
 CFLAGS_kdbg_tp.o := -I$(src)
 ```
 
-v6.12에서 `__assign_str()`는 인자가 하나입니다(`include/trace/stages/stage6_event_callback.h:34`, 예제는 `samples/trace_events/trace-events-sample.h:139`). 소스 값은 `__string(name, name)`의 둘째 인자에서 가져옵니다. 인터넷의 예제는 대부분 `__assign_str(name, name)`처럼 두 인자를 쓰는데, 6.10 이전 형식이라 6.12에서는 컴파일되지 않습니다.
+v6.12에서 `__assign_str()`는 인자가 하나입니다(`include/trace/stages/stage6_event_callback.h:34`, 예제는 `samples/trace_events/trace-events-sample.h:139`). 소스 값은 `__string(name, name)`의 둘째 인자에서 가져옵니다. 인터넷의 예제는 대부분 `__assign_str(name, name)`처럼 두 인자를 쓰는데, 이것은 v6.9까지의 형식입니다. 같은 헤더 34행이 v6.9 태그에서는 `#define __assign_str(dst, src)`, v6.10 태그에서는 `#define __assign_str(dst)`였습니다(git.kernel.org에서 두 태그의 파일을 받아 확인). 그래서 6.12에서는 컴파일되지 않습니다.
 
 ```text
 # insmod /root/tpmod/kdbg_tp.ko
@@ -378,7 +378,7 @@ cpus=4
            sleep-66868 [000] dN...  1146.173819: sched_wakeup:         migration/0:20 [0] CPU:000
            sleep-66868 [000] d....  1146.173821: sched_switch:         trace-cmd:66868 [120] R ==> migration/0:20 [0]
      migration/0-20    [000] d....  1146.173830: sched_switch:         migration/0:20 [0] S ==> cc1:66781 [120]
-# trace-cmd report --stat | sed -n 6,14p
+# trace-cmd report --stat | sed -n 7,15p
 CPU: 0
 entries: 400
 overrun: 0
