@@ -59,7 +59,7 @@ JetPack은 Jetson Linux(BSP)와 그 위의 AI stack을 묶은 SDK입니다. 버�
 | Linux | Jetson Linux 36.4.3, kernel 5.15, Ubuntu 22.04 | kernel 6.8, Ubuntu 24.04 LTS |
 | AI stack | CUDA 12.6, TensorRT 10.3, cuDNN 9.3, VPI 3.2, DLA 3.1 | Thor는 CUDA 13.0(SBSA installer) |
 
-JetPack 7 페이지는 7.2를 최신으로 적고, "Jetson Thor is based on the SBSA stack. Please use the SBSA installer"라고 안내합니다. 컨테이너·TensorRT engine·라이브러리는 이 버전 조합에 맞춰야 하므로, 배포할 때는 장치의 JetPack 버전을 먼저 고정합니다.
+JetPack 7 페이지는 7.2부터의 기능(Yocto Project 공식 지원, NemoClaw)을 소개하고, "Jetson Thor is based on the SBSA stack. Please use the SBSA installer"라고 안내합니다. 컨테이너·TensorRT engine·라이브러리는 이 버전 조합에 맞춰야 하므로, 배포할 때는 장치의 JetPack 버전을 먼저 고정합니다.
 
 ### GPU 밖의 가속기
 
@@ -93,7 +93,7 @@ config->setDLACore(0);                                   // 1 for the second DLA
 config->setFlag(nvinfer1::BuilderFlag::kGPU_FALLBACK);  // layers DLA can't run go to the GPU
 ```
 
-DLA core 번호를 0, 1로 바꿔 engine을 따로 빌드하면 DLA가 2개인 모듈에서 두 DLA에 각각 engine을 둘 수 있습니다. precision 설정은 TensorRT 버전에 따라 다릅니다. JetPack 6.2의 TensorRT 10.3에는 `BuilderFlag::kINT8`이 있지만, TensorRT 11 header에서는 precision flag가 제거됐습니다([12-05](/blog/embedded/modern-recipes/part12-05-tensorrt)).
+DLA core 번호를 0, 1로 바꿔 engine을 따로 빌드하면 DLA가 2개인 모듈에서 두 DLA에 각각 engine을 둘 수 있습니다. precision 설정은 TensorRT 버전에 따라 다르고, TensorRT 11 header에서는 `kINT8` 같은 precision flag가 제거됐습니다([12-05](/blog/embedded/modern-recipes/part12-05-tensorrt)). JetPack 6.2의 TensorRT는 10.3이므로 그 버전의 header를 기준으로 씁니다.
 
 ### CPU·GPU 공유 메모리
 
@@ -103,7 +103,7 @@ CUDA for Tegra Application Note는 "In Tegra, device memory, host memory, and un
 |------------|-----|------|
 | Device memory (`cudaMalloc`) | 직접 접근 불가 | Cached |
 | Pinned host memory (`cudaMallocHost`, `cudaHostAlloc`) | Compute Capability 7.2 이상이면 Cached, 미만이면 Uncached | Uncached |
-| Unified memory (`cudaMallocManaged`) | Cached | `concurrentManagedAccess`가 1이면 UVM driver가 결정 |
+| Unified memory (`cudaMallocManaged`) | Cached | `concurrentManagedAccess`가 1이면 UVM driver가 결정, 0이고 iGPU가 1개면 Cached |
 
 ```cpp
 float *host, *dev;
@@ -111,7 +111,7 @@ cudaHostAlloc(&host, sz, cudaHostAllocMapped);   // pinned, mapped into the GPU 
 cudaHostGetDevicePointer(&dev, host, 0);         // GPU-side pointer to the same DRAM
 ```
 
-pinned host memory는 GPU 쪽에서 uncached이므로, GPU kernel이 같은 위치를 여러 번 읽는 접근 패턴에서는 device memory로 복사해 쓰는 쪽이 빠를 수 있습니다. 어느 쪽이 나은지는 장치에서 재서 고릅니다. 같은 문서는 Xavier부터 I/O coherency(GPU가 CPU cache의 최신 값을 읽는 one-way coherency)를 지원하고, pinned memory의 CPU cache는 I/O coherent 플랫폼에서만 켜진다고 적습니다.
+pinned host memory는 iGPU 쪽에서 uncached이므로, zero-copy와 device memory로의 복사 중 어느 쪽이 나은지는 장치에서 재서 고릅니다. 같은 문서는 Xavier부터 I/O coherency(GPU가 CPU cache의 최신 값을 읽는 one-way coherency)를 지원하고, pinned memory의 CPU cache는 I/O coherent 플랫폼에서만 켜진다고 적습니다.
 
 ### VPI
 
@@ -168,7 +168,7 @@ JetPack 6.2는 Ubuntu 22.04·CUDA 12.6·TensorRT 10.3, JetPack 7은 Ubuntu 24.04
 
 > ⚠️ DLA build에 fallback 없음
 
-DLA가 실행하지 못하는 layer가 있으면 `kGPU_FALLBACK` 없이는 build가 실패합니다. 어떤 layer가 GPU로 갔는지는 TensorRT verbose log로 봅니다.
+DLA가 실행하지 못하는 layer를 GPU에서 돌리려면 `kGPU_FALLBACK`이 필요합니다. TensorRT header의 주석은 "Enable layers marked to execute on GPU if layer cannot execute on DLA"입니다.
 
 > ⚠️ `nvinfer` 앞에 `nvstreammux`를 빼먹음
 
@@ -176,7 +176,7 @@ DLA가 실행하지 못하는 layer가 있으면 `kGPU_FALLBACK` 없이는 build
 
 > ⚠️ 공유 DRAM이면 무조건 zero-copy가 빠르다고 가정
 
-pinned host memory는 iGPU에서 uncached입니다. 접근 패턴에 따라 명시적 복사가 더 빠를 수 있으므로 둘 다 잽니다.
+pinned host memory는 iGPU에서 uncached입니다. zero-copy와 명시적 복사를 둘 다 재서 고릅니다.
 
 ## 정리
 
