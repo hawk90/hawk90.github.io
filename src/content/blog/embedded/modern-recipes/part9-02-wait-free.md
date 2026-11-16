@@ -24,7 +24,7 @@ topics: ["embedded"]
 | Lock-free | "ensures only that some thread always makes progress" | Herlihy·Luchangco·Moir, *Obstruction-Free Synchronization: Double-Ended Queues as an Example*, 1절 |
 | Obstruction-free | "guarantees progress for any thread that eventually executes in isolation" | 같은 논문 1절 |
 
-식당으로 비유하면 wait-free는 손님마다 "다른 손님이 아무리 몰려도 내 주문은 정해진 수의 조리 단계를 거치면 나온다"는 약속이고, lock-free는 "주방 전체로는 계속 음식이 나간다"는 약속입니다. 후자에서는 한 손님의 주문이 계속 밀릴 수 있습니다. Obstruction-free는 "다른 손님이 없으면 나온다"는 더 약한 약속입니다. Hard real-time에서 필요한 것은 앞의 것입니다. 한 task의 최악 단계 수를 다른 task의 행동과 무관하게 셀 수 있어야 하기 때문입니다. 단계 수의 보장이지 시간의 보장은 아니어서, 선점·인터럽트로 미뤄지는 시간은 따로 셉니다.
+식당으로 비유하면 wait-free는 손님마다 "다른 손님이 아무리 몰려도 내 주문은 정해진 수의 조리 단계를 거치면 나온다"는 약속이고, lock-free는 "주방 전체로는 계속 음식이 나간다"는 약속입니다. 후자에서는 한 손님의 주문이 계속 밀릴 수 있습니다. Obstruction-free는 "다른 손님이 없으면 나온다"는 더 약한 약속입니다. Hard real-time에서 필요한 것은 wait-free입니다. 한 task의 최악 단계 수를 다른 task의 행동과 무관하게 셀 수 있어야 하기 때문입니다. 단계 수의 보장이지 시간의 보장은 아니어서, 선점·인터럽트로 미뤄지는 시간은 따로 셉니다.
 
 아래 실행은 모두 Apple M2 Pro(macOS 27.2.1)에서 Apple clang 21.0.0으로 했고, 각 블록의 첫 줄이 빌드 명령입니다.
 
