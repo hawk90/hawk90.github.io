@@ -278,7 +278,7 @@ void DMA2_Stream3_IRQHandler(void) {
 }
 ```
 
-stream·channel 번호는 4-08처럼 ST STM32F412ZG-Nucleo 예제를 따른 것입니다. F407의 DMA request 표가 있는 RM0090은 이 글에서 열어 보지 못했으므로, F407에서 이 번호가 맞는지는 이 글의 자료로 확인되지 않았습니다. 완료 처리 순서는 HAL v1.8.3 `SPI_DMATransmitCplt()`를 따랐습니다. HAL도 `TXDMAEN`을 끄고 `SPI_EndRxTxTransaction()`으로 BSY를 기다린 뒤, "Clear overrun flag in 2 Lines communication mode because received data is not read" 주석과 함께 OVR을 지웁니다. `oled_dma_busy`가 1인 동안 `fb`를 고치면 전송 중인 화면이 섞이므로, 다음 그리기는 0이 된 뒤 시작합니다.
+stream·channel 번호는 4-08처럼 ST STM32F412ZG-Nucleo 예제를 따랐고, F407의 RM0090 Rev 22(st.com이 응답하지 않아 [stm32.dirba.io](https://stm32.dirba.io/rm0090-stm32f405-415-407-417-427-437-429-439/)의 본문 판으로 확인) Table 44(DMA2 request mapping)도 SPI1_TX를 channel 3의 stream 3·5로 둡니다. 완료 처리 순서는 HAL v1.8.3 `SPI_DMATransmitCplt()`를 따랐습니다. HAL도 `TXDMAEN`을 끄고 `SPI_EndRxTxTransaction()`으로 BSY를 기다린 뒤, "Clear overrun flag in 2 Lines communication mode because received data is not read" 주석과 함께 OVR을 지웁니다. `oled_dma_busy`가 1인 동안 `fb`를 고치면 전송 중인 화면이 섞이므로, 다음 그리기는 0이 된 뒤 시작합니다.
 
 ## 측정 / 동작 확인
 
