@@ -111,7 +111,7 @@ set(CMAKE_FIND_ROOT_PATH_MODE_PACKAGE ONLY)
 
 ### 3) Sysroot와 find root
 
-find root 네 줄은 root가 있어야 의미가 있습니다. CMake 소스는 `CMAKE_SYSROOT`·`CMAKE_SYSROOT_COMPILE`·`CMAKE_SYSROOT_LINK`·`CMAKE_FIND_ROOT_PATH`가 모두 비어 있으면 검색 경로를 다시 root하지 않고 그대로 돌려줍니다([cmFindCommon.cxx, v3.31.0](https://github.com/Kitware/CMake/blob/v3.31.0/Source/cmFindCommon.cxx#L229-L240)). 위 toolchain file만으로는 `ONLY`를 적어도 `find_*`가 host 경로를 찾습니다.
+find root 네 줄은 root가 있어야 의미가 있습니다. CMake 소스는 `CMAKE_SYSROOT`·`CMAKE_SYSROOT_COMPILE`·`CMAKE_SYSROOT_LINK`·`CMAKE_FIND_ROOT_PATH`가 모두 비어 있으면 검색 경로 앞에 root를 붙이지 않고 그대로 돌려줍니다([cmFindCommon.cxx, v3.31.0](https://github.com/Kitware/CMake/blob/v3.31.0/Source/cmFindCommon.cxx#L229-L240)). 위 toolchain file만으로는 `ONLY`를 적어도 `find_*`가 host 경로를 찾습니다.
 
 target용 라이브러리를 `find_*`로 찾는 경우를 예로 듭니다. vendor SDK를 프로젝트의 `sdk/` 아래에 두고 그 안에 `lib/libfoo.a`와 `include/foo.h`가 있다고 하면, toolchain file에 root 한 줄을 더합니다.
 
@@ -128,7 +128,7 @@ find_path(FOO_INCLUDE_DIR foo.h REQUIRED)
 
 `Generic` 플랫폼 파일은 시스템 검색 경로를 `/lib`·`/include`로 정하고([Generic.cmake, v3.31.0](https://github.com/Kitware/CMake/blob/v3.31.0/Modules/Platform/Generic.cmake)), `CMAKE_FIND_ROOT_PATH`는 모든 검색 경로 앞에 붙어 검색 전체를 그 아래로 다시 root합니다([find_library](https://cmake.org/cmake/help/v3.31/command/find_library.html)). 그래서 `find_library`는 `sdk/lib/libfoo.a`를, `find_path`는 `sdk/include`를 돌려줍니다. 모드가 `ONLY`이므로 host의 `/usr/lib`에 같은 이름의 라이브러리가 있어도 후보가 되지 않고, `sdk/`에 없으면 `REQUIRED`가 configure를 멈춥니다(3.18에서 추가).
 
-`CMAKE_SYSROOT`도 `find_*` root로 쓰이지만 compiler에 `--sysroot`로 함께 전달되고, toolchain file에서만 설정할 수 있습니다([CMAKE_SYSROOT](https://cmake.org/cmake/help/v3.31/variable/CMAKE_SYSROOT.html)). GCC는 `--sysroot=dir`을 받으면 헤더와 라이브러리를 찾는 논리 root를 `dir`로 바꿉니다([GCC 14.2 Directory Options](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Directory-Options.html)). compiler의 검색은 그대로 두고 `find_*`만 SDK로 돌리려면 `CMAKE_FIND_ROOT_PATH`를 씁니다. [cmake-toolchains(7)](https://cmake.org/cmake/help/v3.31/manual/cmake-toolchains.7.html#cross-compiling-for-linux)의 Linux 예처럼 target rootfs 전체가 있을 때가 `CMAKE_SYSROOT` 쪽입니다.
+`CMAKE_SYSROOT`도 `find_*` root로 쓰이지만 compiler에 `--sysroot`로 함께 전달되고, toolchain file에서만 설정할 수 있습니다([CMAKE_SYSROOT](https://cmake.org/cmake/help/v3.31/variable/CMAKE_SYSROOT.html)). GCC는 `--sysroot=dir`을 받으면 헤더와 라이브러리를 찾는 논리 root를 `dir`로 바꿉니다([GCC 14.2 Directory Options](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Directory-Options.html)). compiler의 검색은 그대로 두고 `find_*`만 SDK로 돌리려면 `CMAKE_FIND_ROOT_PATH`를 씁니다. [cmake-toolchains(7)](https://cmake.org/cmake/help/v3.31/manual/cmake-toolchains.7.html#cross-compiling-for-linux)의 Linux 예처럼 target rootfs 전체가 있을 때는 `CMAKE_SYSROOT`를 씁니다.
 
 ### 4) CMakeLists.txt 작성
 
@@ -355,7 +355,7 @@ CMake가 compiler 검사에 실패하면 `The C compiler ... is not able to comp
 
 > ⚠️ `-mcpu`·`-mfpu`·`-mfloat-abi`가 CFLAGS에만 있고 LDFLAGS에 없음
 
-GCC 문서는 hard-float ABI와 soft-float ABI가 링크 호환이 아니며, 프로그램 전체를 같은 ABI로 컴파일하고 호환되는 라이브러리와 링크해야 한다고 적습니다([GCC 14.2 ARM Options, `-mfloat-abi`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/ARM-Options.html)). gcc 드라이버는 명령줄의 다른 옵션으로 multilib을 고르고([`-print-multi-directory`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Developer-Options.html)), GCC의 `rmprofile` multilib 구성은 `march=armv7e-m+fp/mfloat-abi=hard`와 `march=armv7e-m+fp.dp/mfloat-abi=hard` 라이브러리를 soft-float 판과 따로 빌드합니다([t-rmprofile, GCC 14.2.0](https://github.com/gcc-mirror/gcc/blob/releases/gcc-14.2.0/gcc/config/arm/t-rmprofile)). 링크 명령에 FPU·ABI 옵션이 없으면 드라이버는 hard-float 판을 고를 근거가 없습니다. 이때 부동소수점을 쓰는 두 오브젝트의 `Tag_ABI_VFP_args` 속성이 다르면 GNU ld는 `error: X uses VFP register arguments, Y does not`를 내고 링크를 실패시킵니다([bfd/elf32-arm.c, binutils 2.43](https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=bfd/elf32-arm.c;hb=refs/tags/binutils-2_43)). Makefile 절이 `LDFLAGS`에 `CFLAGS`를 다시 넣고, CMakeLists.txt 작성 절이 `MCU_FLAGS`를 `add_link_options()`에도 넣은 이유입니다. 위 Makefile을 `make LDFLAGS="-T linker.ld -Wl,--gc-sections --specs=nano.specs"`로 CPU·FPU 옵션 없이 링크하면 그 오류가 그대로 납니다.
+GCC 문서는 hard-float ABI와 soft-float ABI가 링크 호환이 아니며, 프로그램 전체를 같은 ABI로 컴파일하고 호환되는 라이브러리와 링크해야 한다고 적습니다([GCC 14.2 ARM Options, `-mfloat-abi`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/ARM-Options.html)). gcc 드라이버는 명령줄의 다른 옵션으로 multilib을 고르고([`-print-multi-directory`](https://gcc.gnu.org/onlinedocs/gcc-14.2.0/gcc/Developer-Options.html)), GCC의 `rmprofile` multilib 구성은 `march=armv7e-m+fp/mfloat-abi=hard`와 `march=armv7e-m+fp.dp/mfloat-abi=hard` 라이브러리를 soft-float 판과 따로 빌드합니다([t-rmprofile, GCC 14.2.0](https://github.com/gcc-mirror/gcc/blob/releases/gcc-14.2.0/gcc/config/arm/t-rmprofile)). 링크 명령에 FPU·ABI 옵션이 없으면 드라이버는 hard-float 판을 고를 근거가 없습니다. 이때 부동소수점을 쓰는 두 오브젝트의 `Tag_ABI_VFP_args` 속성이 다르면 GNU ld는 `error: X uses VFP register arguments, Y does not`를 내며 링크가 실패합니다([bfd/elf32-arm.c, binutils 2.43](https://sourceware.org/git/?p=binutils-gdb.git;a=blob;f=bfd/elf32-arm.c;hb=refs/tags/binutils-2_43)). Makefile 절이 `LDFLAGS`에 `CFLAGS`를 다시 넣고, CMakeLists.txt 작성 절이 `MCU_FLAGS`를 `add_link_options()`에도 넣은 이유입니다. 위 Makefile을 `make LDFLAGS="-T linker.ld -Wl,--gc-sections --specs=nano.specs"`로 CPU·FPU 옵션 없이 링크하면 그 오류가 그대로 납니다.
 
 ```text
 ld: error: build/src/main.o uses VFP register arguments, app.elf does not
