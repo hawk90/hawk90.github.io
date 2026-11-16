@@ -374,13 +374,13 @@ return sysfs_emit(buf, "%08x", v);   /* no trailing newline */
 
 ## 정리
 
-- sysfs attribute는 텍스트 파일 하나, 값 하나, show는 `sysfs_emit`입니다.
+- sysfs attribute는 파일 하나에 텍스트 값 하나를 담고, show는 `sysfs_emit`으로 채웁니다.
 - 정적인 attribute는 `.driver.dev_groups`로 넘기면 bind·unbind 때 driver core가 만들고 지웁니다.
 - store가 돌려준 에러는 `write`의 errno로 사용자에게 그대로 보입니다.
 - `sysfs_notify`를 부르면 사용자 공간은 `POLLPRI`·`POLLERR`로 그 파일을 기다릴 수 있습니다.
 - 초기값은 udev rule의 `ATTR{}`로 줄 수 있습니다.
 - configfs는 사용자가 `mkdir`로 커널 객체를 만드는 인터페이스이고, USB gadget을 그렇게 조립합니다.
-- sysfs 읽기는 fd를 열어 둬도 300 ns 안팎, 매번 열면 1.4 µs 안팎이라 제어용입니다.
+- sysfs 읽기는 fd를 열어 둬도 300 ns 안팎, 매번 열면 1.4 µs 안팎이라 제어용에 맞습니다.
 
 다음 편은 **IRQ Affinity**입니다.
 
