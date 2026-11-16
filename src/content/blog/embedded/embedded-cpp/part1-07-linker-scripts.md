@@ -318,6 +318,25 @@ llvm-nm --demangle placement.o
 
 Clang 23.1.5에서 .dma와 .ccmram 입력 section의 크기는 각각 4096바이트이며, 정렬은 각각 4·8입니다. 링크까지 확인하려고 `.data` 복사·`.bss` 정리·`.init_array` 순회를 하는 작은 `start.cpp`(vector 두 개와 Reset_Handler)를 더해 arm-none-eabi-g++ 16.2.0으로 `-T memory.ld` 링크했습니다.
 
+```cpp title="start.cpp"
+#include <stdint.h>
+extern "C" {
+extern uint32_t _sidata, _sdata, _edata, _sbss, _ebss, _estack;
+extern void (*__init_array_start[])(void);
+extern void (*__init_array_end[])(void);
+int read_sensor();
+int counter = 42;
+void Reset_Handler(void) {
+  for (uint32_t *s = &_sidata, *d = &_sdata; d < &_edata;) *d++ = *s++;
+  for (uint32_t *d = &_sbss; d < &_ebss;) *d++ = 0;
+  for (auto* f = __init_array_start; f < __init_array_end; ++f) (*f)();
+  counter += read_sensor();
+  for (;;) {}
+}
+__attribute__((section(".isr_vector"), used)) const void* const vectors[2] = {&_estack, (const void*)Reset_Handler};
+}
+```
+
 ```bash
 arm-none-eabi-g++ -mcpu=cortex-m4 -mthumb -Os -ffreestanding -fno-exceptions -fno-rtti -nostdlib \
   -T memory.ld -Wl,-Map=fw.map,--print-memory-usage start.cpp placement.cpp -lgcc -o fw.elf
