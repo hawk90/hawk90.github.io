@@ -248,7 +248,7 @@ arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wa
 arm-none-eabi-gcc   -Os -DNDEBUG -mcpu=cortex-m4 -mthumb -mfpu=fpv4-sp-d16 -mfloat-abi=hard -Wall -Wextra -ffunction-sections -fdata-sections -MD -MT ... -c /root/p311/proj/src/main.c
 ```
 
-처음 시도에서는 macOS에서 만든 tar로 소스를 옮겼다가 `src/._main.c`(AppleDouble 메타데이터 파일)가 함께 풀렸습니다. Makefile의 `$(wildcard src/*.c)`는 점으로 시작하는 이 파일을 잡지 않았지만, CMake의 `file(GLOB SRCS src/*.c)`는 잡아서 컴파일하다 "stray '\233' in program"으로 멈췄습니다. GLOB을 쓴다면 이런 숨은 파일이 소스 트리에 섞이지 않게 합니다.
+처음 시도에서는 macOS에서 만든 tar로 소스를 옮겼다가 `src/._main.c`(AppleDouble 메타데이터 파일)가 함께 풀렸습니다. Makefile의 `$(wildcard src/*.c)`는 점으로 시작하는 이 파일을 잡지 않았지만, CMake의 `file(GLOB SRCS src/*.c)`는 잡아서 컴파일하다 "stray ... in program"(AppleDouble 파일의 바이너리 header가 소스로 읽힌 것)으로 멈췄습니다. GLOB을 쓴다면 이런 숨은 파일이 소스 트리에 섞이지 않게 합니다.
 
 ## 코드 / 실제 사용 예
 
