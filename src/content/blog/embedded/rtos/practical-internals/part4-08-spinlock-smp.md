@@ -29,7 +29,7 @@ nolock 4 threads x 2000000 iters: counter=3143792 (expected 8000000)
 
 ## LDREX/STREX — ARM Exclusive Monitor
 
-다음은 ARMv7-A A32의 lock 획득 예입니다. 같은 파일을 `arm-none-eabi-as` 16.2.0(binutils 동봉)으로 세 target에 넣어 봤습니다. `-march=armv7-a`와 `-mcpu=cortex-m3 -mthumb`는 통과했고, `-mcpu=cortex-m0 -mthumb`는 "selected processor does not support `ldrex r1,[r0]' in Thumb mode"로 거절했습니다. Cortex-M0/M0+에서는 이 방식의 lock을 쓸 수 없습니다.
+다음은 ARMv7-A A32의 lock 획득 예입니다. 같은 파일을 `arm-none-eabi-as`(GNU Binutils 2.47)로 세 target에 넣어 봤습니다. `-march=armv7-a`와 `-mcpu=cortex-m3 -mthumb`는 통과했고, `-mcpu=cortex-m0 -mthumb`는 "selected processor does not support `ldrex r1,[r0]' in Thumb mode"로 거절했습니다. Cortex-M0/M0+에서는 이 방식의 lock을 쓸 수 없습니다.
 
 ```asm title="armv7-lock.s"
 .syntax unified
@@ -167,7 +167,7 @@ ttas   1 s contended: per-thread acquisitions 3336160 846432 816997 621838 (max/
 ttas   1 s contended: per-thread acquisitions 679765 611025 471259 542843 (max/min 1.44)
 ```
 
-가장 많이 얻은 thread가 가장 적게 얻은 thread의 1.4~5.4배를 가져갔습니다. 방금 풀어 준 thread가 그 line을 cache에 가진 채 바로 다시 잡는 일이 반복되면 이렇게 기웁니다.
+가장 많이 얻은 thread가 가장 적게 얻은 thread의 1.4~5.4배를 가져갔습니다. TTAS에는 순서가 없으니 풀리는 순간 누가 이길지 정해져 있지 않습니다. 이 기울기의 원인을 cache 동작까지 따로 측정하지는 않았습니다.
 
 ## WFE / SEV — 저전력 Spin
 
@@ -199,7 +199,7 @@ mcs    1 s contended: per-thread acquisitions 1226849 1223051 1222945 1223670 (m
 mcs    1 s contended: per-thread acquisitions 1138426 1141310 1136777 1139376 (max/min 1.00)
 ```
 
-네 번 중 세 번은 1.01 이하였고 한 번은 1.49였습니다. FIFO 순서라도 줄에 선 thread의 vCPU가 host에서 밀리면 그 뒤가 모두 늦어지는데, VM에서는 이런 일이 실제 SoC보다 자주 일어납니다. 실제 core의 cache line 분리 효과를 보려면 node를 cache line 크기로 정렬하고 실보드에서 재야 합니다.
+네 번 중 세 번은 1.01 이하였고 한 번은 1.49였습니다. FIFO 순서라도 줄에 선 thread가 CPU를 잃으면 그 뒤가 모두 늦어집니다. 1.49가 나온 실행의 원인은 측정하지 않았습니다. 실제 core의 cache line 분리 효과를 보려면 node를 cache line 크기로 정렬하고 실보드에서 재야 합니다.
 
 ## ESP-IDF `portMUX_TYPE` — RTOS 통합 예
 

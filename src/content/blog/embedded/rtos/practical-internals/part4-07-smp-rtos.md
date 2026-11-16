@@ -109,7 +109,7 @@ BaseType_t create_cpu0_task(TaskFunction_t fn, TaskHandle_t *out)
 
 Zephyr v3.7.0의 SMP 문서(`doc/kernel/services/smp/smp.rst:98-121`)는 "The kernel does not keep a per-CPU run queue"라고 적습니다. Zephyr도 FreeRTOS처럼 하나의 run queue를 모든 CPU가 봅니다. 같은 문서는 CPU mask(`CONFIG_SCHED_CPU_MASK`)를 켜면 scheduler가 mask를 검사하느라 list를 끝까지 훑어야 해서, `CONFIG_SCHED_DUMB` backend에서만 쓸 수 있다고 적습니다.
 
-같은 절은 `k_thread_cpu_mask_*` API가 runnable thread에 대해서는 불법이고 "-EINVAL"을 돌려준다고 적습니다. `k_thread_cpu_pin()`의 doc comment(`include/zephyr/kernel.h:932-946`)도 "The thread must not be currently runnable"입니다. 그래서 `K_FOREVER` delay로 만들어 시작을 보류한 thread에 `k_thread_cpu_pin(thread, 0)`을 호출하고, 반환값을 확인한 뒤 `k_thread_start()`로 시작합니다. 이 순서는 문서에서 확인했고 실행하지는 않았습니다.
+같은 절은 `k_thread_cpu_mask_*` API가 runnable thread에 대해서는 불법이고 "-EINVAL"을 돌려준다고 적습니다. `k_thread_cpu_mask_*` 함수들의 doc comment(`include/zephyr/kernel.h:891`, `:918`, `:932`)도 "The thread must not be currently runnable"이고, `k_thread_cpu_pin()`(`:944-953`)은 mask를 지운 뒤 그 CPU 하나만 켜는 함수입니다. 그래서 `K_FOREVER` delay로 만들어 시작을 보류한 thread에 `k_thread_cpu_pin(thread, 0)`을 호출하고, 반환값을 확인한 뒤 `k_thread_start()`로 시작합니다. 이 순서는 문서에서 확인했고 실행하지는 않았습니다.
 
 ## IPI — Cross-Core 동기화의 기본
 
@@ -156,7 +156,7 @@ cache가 있는 SMP에서는 두 core가 같은 cache line을 번갈아 쓰면 l
 
 ## Affinity 결정 — RT에는 좁게, Best-Effort에는 넓게
 
-affinity는 task가 돌 수 있는 core 집합을 줄입니다. RT task를 한 core에 묶으면 그 task가 어느 core에서 돌지 정해지므로, 그 core에 묶인 task들만 놓고 응답 시간을 따질 수 있습니다. 대신 그 core에 일이 몰려도 다른 core가 도와주지 못합니다. 넓은 affinity의 best-effort task는 빈 core를 쓸 수 있지만, FreeRTOS V11.2.0처럼 global list를 쓰는 커널에서는 그 task가 어느 core에서 돌지 매번 달라집니다.
+affinity는 task가 돌 수 있는 core 집합을 줄입니다. RT task를 한 core에 묶으면 그 task가 어느 core에서 돌지 정해집니다. 다만 응답 시간은 그 core에서 돌 수 있는 모든 task, 즉 affinity에 그 core가 포함된 task 전부를 놓고 따져야 합니다. affinity를 넓게 준 task도 그 core를 차지할 수 있기 때문입니다(`tasks.c:1089`). 대신 그 core에 일이 몰려도 다른 core가 도와주지 못합니다. 넓은 affinity의 best-effort task는 빈 core를 쓸 수 있지만, FreeRTOS V11.2.0처럼 global list를 쓰는 커널에서는 그 task가 어느 core에서 돌지 고정되지 않습니다.
 
 ## Load Balancing의 기본 패턴
 

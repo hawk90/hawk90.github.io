@@ -135,7 +135,7 @@ create_once(period 3) -> 1
 
 one-shot은 만료 뒤 dormant가 되고, 다시 start/reset할 수 있습니다. auto-reload는 다음 만기를 "지난 만기 + period"로 잡습니다. 그 다음 만기도 이미 지났다면 `prvReloadTimer()`가 loop를 돌며 지난 만기만큼 callback을 연달아 부릅니다(`timers.c` `prvReloadTimer()` 본문). 주석도 "If the next expiry time has already passed, advance the expiry time, call the callback function, and try again"이라고 적습니다.
 
-period 10의 auto-reload A의 첫 callback이 `vTaskDelay(35)`로 block하게 하고, period 5의 B를 함께 돌렸습니다. 이 출력은 네 번 돌려 네 번 같았습니다.
+period 10의 auto-reload A의 첫 callback이 `vTaskDelay(35)`로 block하게 하고, period 5의 B를 함께 돌렸습니다. 이 출력은 다섯 번 돌려 다섯 번 같았습니다.
 
 ```text
 auto-reload period 10 whose first callback blocks 35 ticks; plus timer B period 5:
@@ -183,7 +183,7 @@ queue 길이 10만큼 받고 나머지 4번은 거절됐습니다. 받아들여�
 
 ## 정확도 한계
 
-만기 tick은 command를 보낸 tick + period입니다(앞의 `timers.h:507-508` 매크로). 그래서 tick 중간에 시작하면 실제 남은 시간은 period보다 그 tick의 남은 부분만큼 짧아집니다. period 5 one-shot을 tick 경계 뒤 0.1·0.5·0.9 tick 지점에서 시작하고, SysTick 현재값으로 1/100 tick 단위까지 재 봤습니다.
+만기 tick은 command를 보낸 tick + period입니다(앞의 `timers.h:507-508` 매크로). 그래서 tick 중간에 시작하면 실제 남은 시간은 period보다 그 tick에서 이미 지난 부분만큼 짧아집니다(+0.1 tick에서 시작하면 이론상 4.9 tick). period 5 one-shot을 tick 경계 뒤 0.1·0.5·0.9 tick 지점에서 시작하고, SysTick 현재값으로 1/100 tick 단위까지 재 봤습니다.
 
 ```text
   start at +0.10 tick -> callback after 5.35 ticks
@@ -191,7 +191,7 @@ queue 길이 10만큼 받고 나머지 4번은 거절됐습니다. 받아들여�
   start at +0.90 tick -> callback after 4.24 ticks
 ```
 
-네 번 돌린 값은 4.24~5.36 tick 사이에 흩어졌습니다(`logs/tmr-3runs.log`). QEMU의 SysTick은 host 시간에 묶여 있어 1/100 tick 값 자체는 실리콘과 다르고, 이 측정이 보여 줄 수 있는 것은 "period 5 timer의 실제 간격이 1 tick 넘게 흔들린다"는 데까지입니다. 예전 판의 "50.0 ms best / 51–52 ms worst" 같은 값은 출처가 없어 지웠습니다. tick보다 정밀한 시각이 필요하면 hardware timer compare를 씁니다.
+같은 바이너리를 네 번 더 돌린 값까지 다섯 번의 결과는 4.24~5.54 tick 사이에 흩어졌고, +0.1 tick 시작이 4.9보다 오히려 길게 나온 실행도 있었습니다. QEMU의 SysTick은 host 시간에 묶여 있어 1/100 tick 값 자체는 실리콘과 다르고, 이 측정이 보여 줄 수 있는 것은 "period 5 timer의 실제 간격이 1 tick 넘게 흔들린다"는 데까지입니다. 예전 판의 "50.0 ms best / 51–52 ms worst" 같은 값은 출처가 없어 지웠습니다. tick보다 정밀한 시각이 필요하면 hardware timer compare를 씁니다.
 
 ## Tickless Idle — Battery 시스템
 
@@ -201,7 +201,7 @@ tickless idle은 지원 port가 다음 unblock 시점과 sleep 허용 상태를 
 
 ## 자주 보는 함정과 안티패턴
 
-- callback에서 block해 daemon을 멈춥니다. 위 실행에서 35 tick block 한 번에 B의 callback 7번이 몰렸습니다.
+- callback에서 block해 daemon을 멈춥니다. 위 실행에서 35 tick block 한 번에 t=45로 B의 callback 8번(그중 7번은 10~40 만기분)이 몰렸습니다.
 - `pdPASS`를 command 완료로 봅니다. 받아들여졌을 뿐 처리는 daemon이 돌 때입니다.
 - command queue 길이를 동시에 몰릴 수 있는 command 수보다 작게 잡습니다. ISR 한 번에 14개를 넣자 4개가 거절됐습니다.
 - daemon priority를 가장 높게 두고 callback을 길게 씁니다. 그러면 callback 시간만큼 다른 모든 task가 밀립니다.

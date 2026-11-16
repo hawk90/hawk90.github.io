@@ -68,16 +68,8 @@ handler는 먼저 hardware가 쌓은 frame이 MSP와 PSP 중 어디에 있는지
 
 ```c
 __attribute__((naked)) void SVC_Handler(void) {
-    __asm volatile("tst lr, #4
- ite eq
- mrseq r0, msp
- mrsne r0, psp
-"
-                   "mov r1, lr
- push {lr}
- bl svc_c
- pop {pc}
-");
+    __asm volatile("tst lr, #4\n ite eq\n mrseq r0, msp\n mrsne r0, psp\n"
+                   "mov r1, lr\n push {lr}\n bl svc_c\n pop {pc}\n");
 }
 ```
 
@@ -90,13 +82,13 @@ SVC handler: EXC_RETURN=0xfffffffd (PSP), imm=1, r0=2 r1=0x20000200 r2=3, stacke
 call_demo_write from unprivileged thread (PSP): returned 3
 ```
 
-EXC_RETURN이 `0xfffffff9`이면 MSP, `0xfffffffd`이면 PSP였고, 두 경우 모두 handler가 쓴 stacked R0가 호출자의 반환값이 됐습니다. PSP만 가정하고 `PSP[6]`을 읽는 handler는 첫 번째 호출에서 엉뚱한 주소를 읽었을 것입니다. FP를 쓰는 core(Cortex-M4F 등)에서는 frame이 더 길어지는데, 이 M3 실행에서는 확인하지 않았습니다. 두 번째 호출의 `r1`이 달라진 것은 stack을 바꾼 뒤 컴파일러가 `msg` 주소를 새 SP 기준으로 다시 계산했기 때문이고, 실제 OS라면 task는 처음부터 자기 PSP에서 시작합니다.
+EXC_RETURN이 `0xfffffff9`이면 MSP, `0xfffffffd`이면 PSP였고, 두 경우 모두 handler가 쓴 stacked R0가 호출자의 반환값이 됐습니다. PSP만 가정하고 `PSP[6]`을 읽는 handler는 첫 번째 호출에서 엉뚱한 주소를 읽었을 것입니다. FP를 쓰는 core(Cortex-M4F 등)에서는 frame이 더 길어지는데, 이 M3 실행에서는 확인하지 않았습니다. 두 번째 호출의 `r1`이 달라진 것은 stack을 바꾼 뒤 컴파일러가 `msg` 주소를 새 SP 기준으로 다시 계산했기 때문입니다. objdump를 보면 `msr CONTROL` 뒤 `mov r1, sp`가 나와 `r1`은 `msg`가 아니라 `pstack` 끝을 가리켰고, handler가 buf 내용을 읽지 않아 결과에는 드러나지 않았습니다. 실제 OS라면 task는 처음부터 자기 PSP에서 시작합니다.
 
 ## ECALL — RISC-V의 Syscall Trap
 
 RISC-V privileged ISA(v20260120, Machine-Level ISA)의 `mcause` 표에서 ECALL은 호출한 mode마다 다른 code를 받습니다. U-mode는 8, S-mode는 9, M-mode는 11입니다. trap은 기본적으로 M-mode로 가고, `medeleg`의 해당 bit를 세우면 S-mode나 U-mode에서 난 그 trap을 S-mode handler로 넘깁니다. 그래서 U-mode의 ECALL이 S-mode로 갈지 M-mode로 갈지는 `medeleg` 설정이 정합니다.
 
-같은 문서는 `mepc`에 "the instruction that was interrupted or that encountered the exception"의 주소가 쓰인다고 적습니다. ECALL의 경우 ECALL 자신의 주소이므로, 돌아갈 때 다음 명령으로 가려면 handler가 `mepc`를 올려야 합니다. FreeRTOS V11.2.0 RISC-V port는 이 일을 `portASM.S:344-345`에서 합니다. 그런데 이 port는 synchronous exception 전체에 똑같이 `addi a1, a1, 4`를 합니다. ECALL 말고 다른 synchronous exception(예: 잘못된 load)이 나도 다음 명령으로 넘어가는 셈이라, 이 port에서 ECALL 이외의 exception은 복구가 아니라 진단 대상으로 봐야 합니다. syscall 번호를 a7에, 인자를 a0부터 두는 것은 OS가 정하는 ABI이지 ECALL 명령의 규칙이 아닙니다. 이 RISC-V 내용은 실행하지 않았습니다.
+같은 문서는 `mepc`에 "the instruction that was interrupted or that encountered the exception"의 주소가 쓰인다고 적습니다. ECALL의 경우 ECALL 자신의 주소이므로, 돌아갈 때 다음 명령으로 가려면 handler가 `mepc`를 올려야 합니다. FreeRTOS V11.2.0 RISC-V port는 synchronous exception이면 `mepc`에 4를 더해 저장합니다(`portASM.S:344-345`). 이 port는 M-mode에서 돌며 mcause 11(M-mode ECALL)을 yield 용도로만 씁니다(`:371-376`, ECALL이면 `vTaskSwitchContext()`). 다른 synchronous exception은 `freertos_risc_v_application_exception_handler`(`:378-380`)로 가고, 기본(weak) 구현은 `j .`로 그 자리에서 멈춥니다(`:283-287`). application이 이 handler를 바꿔 돌아오게 하면 +4된 `mepc`로, 즉 문제의 명령 다음으로 돌아갑니다. syscall 번호를 a7에, 인자를 a0부터 두는 것은 OS가 정하는 ABI이지 ECALL 명령의 규칙이 아닙니다. 이 RISC-V 내용은 실행하지 않았습니다.
 
 ## FreeRTOS-MPU
 
@@ -131,7 +123,7 @@ user task: CONTROL=0x3 (nPRIV=1)
 MemManage CFSR=0x00000082 MMFAR=0x20020400
 ```
 
-user task는 queue에 닿기도 전에 `MMFAR=0x20020400`에서 멈췄습니다. 그 주소가 `.bss`의 전역 `q`입니다. unprivileged task에게 열린 것은 flash(읽기)와 자기 stack뿐이고, 평범한 전역 변수도 `xRegions`로 따로 열어 주지 않으면 읽을 수 없습니다. 그래서 handle을 `pvParameters`로 넘기고, 이어서 `PRIVILEGED_DATA` 변수에 쓰게 한 변형을 돌렸습니다.
+user task는 queue에 닿기도 전에 `MMFAR=0x20020400`에서 멈췄습니다. 그 주소가 `.bss`의 전역 `q`입니다. unprivileged task에게 열린 것은 flash(읽기, privileged_functions 영역 제외), 일반 주변장치 영역 `0x40000000`-`0x5FFFFFFF`(읽기·쓰기, 실행 금지, `ARM_CM3_MPU/port.c:84-85`, `:1153-1160`), 자기 stack이고, 평범한 전역 변수도 `xRegions`로 따로 열어 주지 않으면 읽을 수 없습니다. 그래서 handle을 `pvParameters`로 넘기고, 이어서 `PRIVILEGED_DATA` 변수에 쓰게 한 변형을 돌렸습니다.
 
 ```text
 user task: CONTROL=0x3 (nPRIV=1)
@@ -193,7 +185,7 @@ ARMv8-M의 TrustZone은 privileged/unprivileged와 별개로 secure/non-secure�
 
 ## 근거 자료
 
-- [FreeRTOS V11.2.0 ARM_CM4_MPU](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0/portable/GCC/ARM_CM4_MPU), [mpu_wrappers_v2.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/Common/mpu_wrappers_v2.c).
+- [FreeRTOS V11.2.0 ARM_CM3_MPU](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0/portable/GCC/ARM_CM3_MPU), [mpu_wrappers_v2.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/Common/mpu_wrappers_v2.c).
 - [Zephyr 3.7.0 kernel objects](https://docs.zephyrproject.org/3.7.0/kernel/usermode/kernelobjects.html).
 - [RISC-V privileged ISA v20260120, Machine-Level ISA](https://docs.riscv.org/reference/isa/v20260120/priv/machine.html): `mcause` code, `medeleg`, `mepc`.
 - [FreeRTOS V11.2.0 RISC-V portASM.S](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portASM.S).

@@ -124,7 +124,7 @@ AES-GCM은 nonce 재사용에 약합니다. NIST SP 800-38D §8은 같은 key와
 
 ## Initial Attestation — Device 신원 증명
 
-attestation은 장치가 "나는 이 firmware를 돌리는 진짜 장치"임을 서명된 token으로 증명하는 일입니다. verifier가 보낸 challenge를 token에 넣어 서명하므로 재전송된 옛 token을 걸러 낼 수 있습니다. token에 무엇이 들어가는지는 TF-M의 attestation partition과 platform 설정이 정하고, 이 글에서는 token을 만들어 보지 않았습니다.
+attestation은 장치가 "나는 이 firmware를 돌리는 진짜 장치"임을 서명된 token으로 증명하는 일입니다. token에 무엇이 들어가는지는 TF-M의 attestation partition과 platform 설정이 정하고, 이 글에서는 token을 만들어 보지 않았습니다.
 
 ## Secure Boot Chain
 

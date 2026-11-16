@@ -5,7 +5,7 @@ date: 2026-05-07T09:44:00
 description: "Cortex-A와 Cortex-M이 한 칩 위에서 별도의 OS를 돌리는 AMP 구조를 정리합니다. OpenAMP framework(libmetal/RPMsg/remoteproc), virtio-vring 기반 shared memory IPC, mailbox 인터럽트, RP2350의 Arm/RISC-V core 구성 조건까지 다룹니다."
 series: "Practical RTOS Internals"
 seriesOrder: 44
-tags: [amp, openamp, heterogeneous, rpmsg, remoteproc, imx, stm32mp]
+tags: [amp, openamp, heterogeneous, rpmsg, remoteproc]
 topics: ["embedded", "embedded/rtos"]
 ---
 
@@ -25,7 +25,7 @@ topics: ["embedded", "embedded/rtos"]
 
 ## Heterogeneous SoC — 누가 누구를 데리고 있나
 
-Linux의 remoteproc framework는 Linux가 다른 core의 firmware를 load하고 전원을 켜고 끄는 구조입니다(Linux v6.12 `Documentation/staging/remoteproc.rst:18`, `rproc_boot()` `:37-39`). 이렇게 Linux가 host가 되어 Cortex-M 쪽 firmware를 시작하고, 둘이 RPMsg로 대화합니다. 반대로 bootloader가 M core를 먼저 띄우고 Linux가 나중에 붙는(attach) 구성도 있습니다. 어느 쪽인지는 board의 device tree와 remoteproc driver가 정합니다.
+Linux의 remoteproc framework는 Linux가 다른 core의 firmware를 load하고 전원을 켜고 끄는 구조입니다(Linux v6.12 `Documentation/staging/remoteproc.rst:18`, `rproc_boot()` `:37-39`). 이렇게 Linux가 host가 되어 Cortex-M 쪽 firmware를 시작하고, 둘이 RPMsg로 대화합니다. 반대로 bootloader가 M core를 먼저 띄우고 Linux가 나중에 붙는(attach) 구성도 있습니다. `include/linux/remoteproc.h`의 `@attach`("attach to a device that his already powered up", `:366`)와 `RPROC_DETACHED` 상태(`:418`)가 그 경로입니다. 어느 쪽인지는 board의 device tree와 remoteproc driver가 정합니다.
 
 core 수를 셀 때는 datasheet를 봅니다. 예를 들어 RP2350은 M33과 RISC-V core가 모두 있지만, 동시에 4개가 도는 칩이 아닙니다. 뒤의 RP2350 절에서 datasheet 문장으로 확인합니다.
 
@@ -101,7 +101,7 @@ RPMsg는 *channel과 endpoint*를 통해 메시지를 주고받는 protocol입�
 
 RPMsg는 TCP의 stream/reconnect/reliable session과 동일한 추상화가 아닙니다. service 이름과 src/dst endpoint 주소로 메시지를 전달합니다.
 
-**`rpmsg_send()`는 TX buffer를 기다리고 `rpmsg_trysend()`는 기다리지 않습니다.** open-amp `lib/include/openamp/rpmsg.h`의 주석이 그 차이를 그대로 적습니다. `rpmsg_send()`(`:198`)는 TX buffer가 없으면 "block until one becomes available, or a timeout of 15 seconds elapses"이고(`:188-190`), `rpmsg_trysend()`(`:275`)는 "immediately return -ENOMEM without waiting"입니다(`:266-267`). 15초는 `lib/rpmsg/rpmsg_virtio.c`의 `RPMSG_TICK_COUNT 15000000`을 `RPMSG_TICKS_PER_INTERVAL 1000`으로 나눈 만큼 `metal_sleep_usec(1000)`을 반복하는 데서 나옵니다(`:23`, `:26`, `:377-395`). Linux v6.12 `Documentation/staging/rpmsg.rst:80-83`도 커널 쪽 `rpmsg_send()`에 같은 15초를 적습니다. 그래서 receive callback 안에서 `rpmsg_send()`를 부르면 TX가 막힌 동안 최대 15초 동안 RX 처리도 멈춥니다. 위 echo가 `trysend`를 쓰는 이유입니다.
+**`rpmsg_send()`는 TX buffer를 기다리고 `rpmsg_trysend()`는 기다리지 않습니다.** open-amp `lib/include/openamp/rpmsg.h`의 주석이 그 차이를 그대로 적습니다. `rpmsg_send()`(`:198`)는 TX buffer가 없으면 "block until one becomes available, or a timeout of 15 seconds elapses"이고(`:188-190`), `rpmsg_trysend()`(`:275`)는 "immediately return -ENOMEM without waiting"입니다(`:266-267`). 15초는 `lib/rpmsg/rpmsg_virtio.c`의 `RPMSG_TICK_COUNT 15000000`을 `RPMSG_TICKS_PER_INTERVAL 1000`으로 나눈 만큼 `metal_sleep_usec(1000)`을 반복하는 데서 나옵니다(`:23`, `:26`, `:377-396`). 다만 이 1 ms sleep과 카운트다운은 platform이 `notify_wait_cb`를 등록하지 않았을 때(`:352-353`이 `RPMSG_EOPNOTSUPP`를 돌려줄 때)만 일어나고(`:393-396`), callback을 등록한 port에서는 그 callback의 기다림이 대신합니다. Linux v6.12 `Documentation/staging/rpmsg.rst:80-83`도 커널 쪽 `rpmsg_send()`에 같은 15초를 적습니다. 그래서 receive callback 안에서 `rpmsg_send()`를 부르면 TX가 막힌 동안 RX 처리도 멈춥니다(`notify_wait_cb`가 없는 기본 경로에서 최대 15초). 위 echo가 `trysend`를 쓰는 이유입니다.
 
 ## virtio-vring — Shared Memory의 큐 구조
 
@@ -138,7 +138,7 @@ mailbox는 초인종입니다. 우편함(vring)에 편지를 넣은 다음에 �
 
 M core의 C struct를 그대로 보내면 A core의 컴파일러가 같은 padding·alignment로 읽는다는 보장이 없습니다. 그래서 byte 배치를 직접 정합니다. 예를 들어 timestamp 8 byte와 signed 16-bit sample 6개를 little-endian으로 이어 붙인 20 byte로 정하고, 수신 쪽은 길이가 정확히 20인지, sequence가 건너뛰었는지 확인합니다.
 
-Linux user space에서는 rpmsg_char driver가 만드는 `/dev/rpmsg_ctrlN`에서 endpoint를 만들고 `/dev/rpmsgN`을 읽고 씁니다. 번호는 장치가 생긴 순서대로 붙으므로 고정 이름으로 열지 않습니다. 이 user space 경로도 실행하지 않았습니다.
+Linux user space에서는 rpmsg_char driver가 만드는 `/dev/rpmsg_ctrlN`에서 endpoint를 만들고 `/dev/rpmsgN`을 읽고 씁니다. 번호는 `ida_alloc()`이 비어 있는 가장 작은 값을 주므로(`drivers/rpmsg/rpmsg_ctrl.c:164-168`, `rpmsg_char.c:449-453`) 생성·삭제 순서에 따라 바뀝니다. 그래서 고정 이름으로 열지 않습니다. 이 user space 경로도 실행하지 않았습니다.
 
 ## 격리와 AMP의 관계
 
@@ -148,7 +148,7 @@ core를 나눠도 DDR bus, DMA, 공용 peripheral은 함께 씁니다. Linux 쪽
 
 RP2350 datasheet(3.9 "Arm/RISC-V architecture switching")는 칩에 processor socket이 둘(core 0, core 1)이고, 각 socket을 Cortex-M33이나 Hazard3(RV32IMAC) 중 하나가 차지한다고 설명합니다. reset이 풀릴 때 OTP의 `ARCHSEL` register를 보고 어느 쪽을 연결할지 정하며, 쓰지 않는 processor는 "held in reset indefinitely, with its clock inputs gated" 상태입니다. 그러니 동시에 도는 core는 둘입니다. 기본은 Arm이고, secure boot를 켜면 bootrom이 RISC-V용 secure boot를 구현하지 않아 RISC-V core가 비활성화됩니다. 3.9.2 "Mixed architecture combinations"가 두 socket에 서로 다른 architecture를 넣는 경우를 따로 다룹니다.
 
-같은 이유로 RP2040·RP2350의 두 core 사이 통신은 cache coherency 문제가 아니라 동기화 문제입니다(4-07). RP2350에서 OpenAMP를 쓰는 SDK integration은 이 글에서 확인하지 않았습니다.
+RP2350 datasheet 4.4.1도 XIP cache가 "only involved in accesses to the QSPI memory interface, so software does not have to consider cache coherence"라고 적습니다. 그래서 RP2040(4-07)처럼 RP2350도 두 core 사이 SRAM 통신은 cache coherency가 아니라 동기화 문제입니다. RP2350에서 OpenAMP를 쓰는 SDK integration은 이 글에서 확인하지 않았습니다.
 
 ## Inter-Core Message Latency 측정
 
@@ -158,23 +158,23 @@ RP2350 datasheet(3.9 "Arm/RISC-V architecture switching")는 칩에 processor so
 
 - Linux RAM, remote carveout, vring, buffer pool을 주소 map 없이 정해 서로 겹칩니다.
 - available/used ring의 주인을 payload 방향으로 정합니다. 사양상 available은 driver만, used는 device만 씁니다.
-- receive callback에서 `rpmsg_send()`를 불러 최대 15초 동안 RX를 막습니다.
+- receive callback에서 `rpmsg_send()`를 불러 TX가 막힌 동안(기본 경로에서 최대 15초) RX를 막습니다.
 - vring을 갱신하기 전에 mailbox를 울립니다.
 - `firmware`에 이름을 쓴 것을 load 완료로, send 성공을 상대가 처리한 것으로 봅니다.
 
 ## 정리
 
 - AMP는 core마다 따로 OS(또는 bare-metal)를 돌리고 shared memory와 mailbox로 통신합니다.
-- open-amp v2024.10.0의 `rpmsg_send()`는 TX buffer가 없으면 최대 15초 기다리고, `rpmsg_trysend()`는 바로 `-ENOMEM`을 돌려줍니다.
+- open-amp v2024.10.0의 `rpmsg_send()`는 TX buffer가 없으면 기다리고(기본 경로에서 최대 15초), `rpmsg_trysend()`는 바로 `-ENOMEM`을 돌려줍니다.
 - virtio 1.2에서 available ring은 driver만, used ring은 device만 씁니다.
 - remoteproc의 `firmware`는 이름 지정, 시작은 `state`에 `start`입니다.
-- RP2350은 socket 2개에 M33이나 Hazard3를 고르는 칩이라 동시에 도는 core는 둘입니다.
+- RP2350은 socket 2개에 M33이나 Hazard3를 고르는 칩이라 동시에 도는 core는 둘이고, cache는 XIP 전용입니다.
 
 ## 근거 자료
 
 - [OpenAMP v2024.10.0](https://github.com/OpenAMP/open-amp/tree/v2024.10.0), [rpmsg.h](https://github.com/OpenAMP/open-amp/blob/v2024.10.0/lib/include/openamp/rpmsg.h), [libmetal v2024.10.0](https://github.com/OpenAMP/libmetal/tree/v2024.10.0).
 - [Virtio 1.2 split queue](https://docs.oasis-open.org/virtio/virtio/v1.2/virtio-v1.2.html), [Linux RPMsg](https://docs.kernel.org/staging/rpmsg.html), [remoteproc](https://docs.kernel.org/staging/remoteproc.html), [sysfs ABI](https://www.kernel.org/doc/Documentation/ABI/testing/sysfs-class-remoteproc).
-- [RP2350 datasheet](https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf) 3.9: Arm/RISC-V architecture switching.
+- [RP2350 datasheet](https://datasheets.raspberrypi.com/rp2350/rp2350-datasheet.pdf) 3.9: Arm/RISC-V architecture switching, 4.4.1: XIP cache.
 
 
 
