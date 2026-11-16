@@ -215,7 +215,7 @@ set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
 | `libnewlib-arm-none-eabi` | 4.5.0.20241231-1 | 415,958 KB |
 | `picolibc-arm-none-eabi` | 1.8.10-2 | 414,966 KB |
 
-`libnewlib-arm-none-eabi`에는 `libc.a`가 39개 들어 있어, 4절의 multilib 39가지 변형마다 하나씩입니다. 펌웨어 크기 쪽 비교는 3절의 표가 이 글의 측정값입니다.
+`libnewlib-arm-none-eabi`에는 `libc.a`가 39개 들어 있어, 4절의 multilib 39가지 변형마다 하나씩입니다. 펌웨어 크기는 3절의 표에서 비교했습니다.
 
 ## 자주 보는 함정
 
@@ -247,7 +247,7 @@ GCC의 C++ 기본 언어 모드는 버전마다 다릅니다. GCC "C++ Standards
 ## 정리
 
 - 크로스 컴파일러는 triplet으로 식별하고, `-dumpmachine`이 그 triplet을 알려 줍니다.
-- 컴파일러·binutils·C library는 별도 구성 요소이고, 배포판에 따라 libc가 빠져 있을 수 있습니다.
+- 컴파일러·binutils·C library는 별도 구성 요소이고, Homebrew 패키지처럼 libc가 빠진 배포본도 있습니다.
 - 같은 hello world가 newlib 28,944 byte, newlib-nano 7,532 byte, picolibc 7,236 byte(text)였고, newlib-nano의 float `printf`는 `-u _printf_float`로 켜야 합니다.
 - multilib는 옵션에 맞는 라이브러리 디렉터리를 고르며, `--print-multi-directory`로 확인합니다.
 - Linux 크로스 빌드는 sysroot를, bare-metal 빌드는 specs와 linker script를 맞춥니다.
