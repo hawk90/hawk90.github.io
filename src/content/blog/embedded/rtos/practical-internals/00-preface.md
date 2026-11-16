@@ -17,9 +17,9 @@ topics: ["embedded", "embedded/rtos"]
 xTaskCreate(vTaskFunction, "Task", 128, NULL, 1, NULL);
 ```
 
-FreeRTOS 튜토리얼은 대부분 여기서 시작합니다. Task를 만들고, Queue를 쓰고, Semaphore를 사용하는 법을 배웁니다. 그리고 대부분 여기서 끝납니다.
+FreeRTOS를 처음 배울 때 만나는 첫 줄입니다. Task를 만들고, Queue를 쓰고, Semaphore를 사용하는 법까지 배우면 제품 코드는 돌아갑니다. 그런데 API 사용법만으로는 아래 질문에 답할 수 없습니다.
 
-하지만 실무에서는 다른 질문들이 생깁니다:
+실무에서 생기는 질문은 이런 것들입니다.
 
 - "context switch가 정확히 어떻게 일어나지?"
 - "이 task가 왜 이렇게 늦게 깨어나지?"
@@ -80,7 +80,7 @@ RTOS의 심장인 스케줄러와 컨텍스트 스위치를 깊이 분석합니�
 | 2-03 | Scheduler 알고리즘 구현 | 다음 task 선택 로직 |
 | 2-04 | Context Switch 원리 | 레지스터 저장/복원, 스택 프레임 |
 | 2-05 | ARM Cortex-M Context Switch | PendSV, 어셈블리 분석 |
-| 2-06 | ARM Cortex-A Context Switch | SVC, 모드 전환 |
+| 2-06 | ARMv7-A Context Switch | AArch32 모드, SVC, banked register |
 | 2-07 | RISC-V Context Switch | ECALL, mret, CSR |
 | 2-08 | Tick과 타이머 | SysTick, 하드웨어 타이머 연동 |
 | 2-09 | Tickless 모드 구현 | 저전력, 타이머 보상 알고리즘 |
@@ -142,7 +142,7 @@ RTOS의 심장인 스케줄러와 컨텍스트 스위치를 깊이 분석합니�
 | 5-03 | RT-Thread 분석 | 경량 RTOS 구조 |
 | 5-04 | RTOS 포팅 가이드 | 새 아키텍처 포팅 절차 |
 | 5-05 | RTOS 선택 가이드 | 프로젝트별 선택 기준 |
-| 5-06 | Apache NuttX 분석 | POSIX RTOS, PX4·NASA Ingenuity |
+| 5-06 | Apache NuttX 분석 | POSIX 지향 API, PX4, 빌드 모드 |
 | 5-07 | PREEMPT_RT Linux 비교 | Mainline RT (6.12), Xenomai 4 |
 
 ---
@@ -151,16 +151,16 @@ RTOS의 심장인 스케줄러와 컨텍스트 스위치를 깊이 분석합니�
 
 | RTOS | 버전 | 특징 |
 |------|-----|------|
-| FreeRTOS | [V11.2.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0) | 단일/SMP 구성·포트별 조건을 구분 |
-| Zephyr | [3.7.0 LTS](https://docs.zephyrproject.org/latest/releases/release-notes-3.7.html) | 4.0을 LTS로 간주하지 않음. 장별 분석 revision을 별도 확인 |
-| RT-Thread | 5.x | 경량 RTOS, 중국 생태계, 다양한 컴포넌트 |
-| Eclipse ThreadX | 장별 tag 확인 | 구 Azure RTOS. 소스·릴리스의 실제 라이선스와 인증 범위를 확인 |
-| Apache NuttX | 12.x | POSIX-compliant, PX4·NASA Ingenuity |
-| Linux (PREEMPT_RT) | 6.12 계열부터 mainline 지원 | 아키텍처·설정·드라이버별 preemption 제약 확인 |
+| RTOS | 기준 tag | 비고 |
+|------|-----|------|
+| FreeRTOS | [V11.2.0](https://github.com/FreeRTOS/FreeRTOS-Kernel/tree/V11.2.0) | `tskKERNEL_VERSION_NUMBER "V11.2.0"`(`include/task.h` L56). 단일 코어와 SMP(`configNUMBER_OF_CORES > 1`) 경로가 같은 `tasks.c`에 있음 |
+| Zephyr | [v3.7.0](https://github.com/zephyrproject-rtos/zephyr/tree/v3.7.0) | release notes가 "마지막 non-maintenance 3.x release이자 다음 LTS"라고 명시 |
+| RT-Thread | [v5.1.0](https://github.com/RT-Thread/rt-thread/tree/v5.1.0) | 5-03에서 소스 인용 |
+| Linux (PREEMPT_RT) | v6.12 | v6.12에서 x86·arm64·riscv가 `ARCH_SUPPORTS_RT`를 선택해 mainline에서 `CONFIG_PREEMPT_RT`를 켤 수 있게 됨(5-07) |
 
-이 표는 모든 RTOS를 해당 버전에서 실행 검증했다는 뜻이 아닙니다. 내부 구현을 따라갈 때 장별 tag·포트·설정을 고정하고, 라이브러리/API 소개와 실제 측정을 구분합니다. RT-Thread/NuttX의 `x` 표기는 계열이므로 특정 함수의 근거로 쓰려면 정확한 tag가 추가로 필요합니다.
+Eclipse ThreadX와 Apache NuttX는 비교 장(5-05, 5-06)에서 다룹니다. 이 표의 tag는 장에서 소스를 file:line으로 인용할 때의 기준입니다.
 
-> **참고**: Arm은 Mbed의 2026년 7월 서비스 종료와 지원 중단을 공지했습니다. 기존 소스는 공개되어 있으며, Mbed CE는 별도 커뮤니티 프로젝트입니다. [ArmMbed 공식 안내](https://github.com/ARMmbed)를 확인합니다.
+> **참고**: [ARMmbed GitHub 조직 안내문](https://github.com/ARMmbed)에 따르면 Mbed는 2026년 7월에 서비스가 종료되었고 Arm은 Mbed OS를 더 이상 유지·지원하지 않습니다. 소스는 Apache 2.0으로 계속 공개되어 있고, 커뮤니티 fork인 Mbed CE가 개발을 이어 갑니다.
 
 ## 학습 로드맵
 
@@ -203,8 +203,8 @@ RTOS 소스는 처음 보면 함수 호출이 얽혀 있어 막막합니다. 이
 
 **서적**
 - *Operating System Concepts* (10th ed) - Silberschatz
-- *Real-Time Systems* - Jane W. S. Liu
-- *Hard Real-Time Computing Systems* (3rd ed) - Buttazzo
+- *Real-Time Systems* (Prentice Hall, 2000) - Jane W. S. Liu
+- *Hard Real-Time Computing Systems* (Springer, 2011) - Buttazzo
 - *MicroC/OS-III: The Real-Time Kernel* - Jean Labrosse
 
 **소스 코드**
@@ -213,9 +213,9 @@ RTOS 소스는 처음 보면 함수 호출이 얽혀 있어 막막합니다. 이
 - [RT-Thread](https://github.com/RT-Thread/rt-thread)
 
 **문서**
-- [FreeRTOS Kernel Developer Docs](https://www.freertos.org/Documentation/)
+- [FreeRTOS Documentation](https://www.freertos.org/Documentation/00-Overview)
 - [Zephyr Documentation](https://docs.zephyrproject.org/)
-- [AOSA Book - FreeRTOS Chapter](https://aosabook.org/en/v1/freertos.html)
+- [AOSA Book Vol. 2 - FreeRTOS Chapter](https://aosabook.org/en/v2/freertos.html)
 
 ## 이 시리즈의 목표
 
