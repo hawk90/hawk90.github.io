@@ -74,16 +74,16 @@ $ readelf -lW core
 Program Headers:
   Type           Offset   VirtAddr           PhysAddr           FileSiz  MemSiz   Flg Align
   NOTE           0x000548 0x0000000000000000 0x0000000000000000 0x001a38 0x000000     0x4
-  LOAD           0x002000 0x0000aaaacd7b0000 0x0000000000000000 0x001000 0x001000 R E 0x1000
-  LOAD           0x003000 0x0000aaaacd7cf000 0x0000000000000000 0x001000 0x001000 R   0x1000
-  LOAD           0x004000 0x0000aaaacd7d0000 0x0000000000000000 0x001000 0x001000 RW  0x1000
-  LOAD           0x005000 0x0000aaaaf1375000 0x0000000000000000 0x021000 0x021000 RW  0x1000
-  LOAD           0x026000 0x0000ffff9e940000 0x0000000000000000 0x000000 0x010000     0x1000
-  LOAD           0x026000 0x0000ffff9e950000 0x0000000000000000 0x800000 0x800000 RW  0x1000
+  LOAD           0x002000 0x0000aaaabd420000 0x0000000000000000 0x001000 0x001000 R E 0x1000
+  LOAD           0x003000 0x0000aaaabd43f000 0x0000000000000000 0x001000 0x001000 R   0x1000
+  LOAD           0x004000 0x0000aaaabd440000 0x0000000000000000 0x001000 0x001000 RW  0x1000
+  LOAD           0x005000 0x0000aaaad36d0000 0x0000000000000000 0x021000 0x021000 RW  0x1000
+  LOAD           0x026000 0x0000ffffa9880000 0x0000000000000000 0x000000 0x010000     0x1000
+  LOAD           0x026000 0x0000ffffa9890000 0x0000000000000000 0x800000 0x800000 RW  0x1000
   ...
-  LOAD           0x1026000 0x0000ffff9f960000 0x0000000000000000 0x001000 0x19c000 R E 0x1000
+  LOAD           0x1026000 0x0000ffffaa8a0000 0x0000000000000000 0x001000 0x19c000 R E 0x1000
   ...
-  LOAD           0x1046000 0x0000ffffcb575000 0x0000000000000000 0x021000 0x021000 RW  0x1000
+  LOAD           0x1046000 0x0000ffffdd836000 0x0000000000000000 0x021000 0x021000 RW  0x1000
 (LOAD 22개 중 9개 표시)
 ```
 
@@ -215,12 +215,12 @@ $ eu-readelf -n core
     info.si_signo: 11, info.si_code: 0, info.si_errno: 0, cursig: 11
     sigpend: <>
     sighold: <>
-    pid: 6512, ppid: 6504, pgrp: 6504, sid: 6504
-    utime: 0.000000, stime: 0.000000, cutime: 0.000000, cstime: 0.000000
-    pc: 0x0000aaaacd7b091c, pstate: 0x0000000020001000, fpvalid: 1
-    x0:            3735928559  x1:       281473361251168
+    pid: 6636, ppid: 6621, pgrp: 6268, sid: 6268
+    utime: 0.000000, stime: 0.004000, cutime: 0.000000, cstime: 0.000000
+    pc: 0x0000aaaabd42091c, pstate: 0x0000000020001000, fpvalid: 1
+    x0:            3735928559  x1:       281473545046880
     ...
-    x30:      187650568554956  sp:    0x0000ffffcb594b60
+    x30:      187650296383948  sp:    0x0000ffffdd856270
 (x1–x29 생략)
 ```
 
@@ -254,7 +254,7 @@ struct elf_prpsinfo
 ```text
   CORE                 136  PRPSINFO
     state: 0, sname: R, zomb: 0, nice: 0, flag: 0x0000000000400600
-    uid: 0, gid: 0, pid: 6512, ppid: 6504, pgrp: 6504, sid: 6504
+    uid: 0, gid: 0, pid: 6636, ppid: 6621, pgrp: 6268, sid: 6268
     fname: server, psargs: ./server --config=prod.yaml
 ```
 
@@ -299,7 +299,7 @@ $1 = {si_signo = 11, si_errno = 0, si_code = 1, _sifields = {_pad = {-559038737,
 
 | si_code (SIGILL) | 의미 | 재현 |
 |------------------|------|------|
-| 1 (ILL_ILLOPC) | illegal opcode | `udf #0` (`si_addr`가 `<main+236>`) |
+| 1 (ILL_ILLOPC) | illegal opcode | `udf #0` (`si_addr`가 `<main+228>`) |
 | 2 (ILL_ILLOPN) | illegal operand | — |
 | 3 (ILL_ILLADR) | illegal addressing mode | — |
 | 5 (ILL_PRVOPC) | privileged opcode | — |
@@ -331,16 +331,16 @@ struct {
 ```text
   CORE                 599  FILE
     10 files:
-      aaaacd7b0000-aaaacd7b1000 00000000 4096        /root/c2/server
-      aaaacd7cf000-aaaacd7d0000 0000f000 4096        /root/c2/server
-      aaaacd7d0000-aaaacd7d1000 00010000 4096        /root/c2/server
-      ffff9f960000-ffff9fafc000 00000000 1687552     /usr/lib/aarch64-linux-gnu/libc.so.6
-      ffff9fafc000-ffff9fb0d000 0019c000 69632       /usr/lib/aarch64-linux-gnu/libc.so.6
-      ffff9fb0d000-ffff9fb10000 0019d000 12288       /usr/lib/aarch64-linux-gnu/libc.so.6
-      ffff9fb10000-ffff9fb12000 001a0000 8192        /usr/lib/aarch64-linux-gnu/libc.so.6
-      ffff9fb21000-ffff9fb49000 00000000 163840      /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
-      ffff9fb5f000-ffff9fb61000 0002e000 8192        /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
-      ffff9fb61000-ffff9fb62000 00030000 4096        /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+      aaaabd420000-aaaabd421000 00000000 4096        /root/c2/server
+      aaaabd43f000-aaaabd440000 0000f000 4096        /root/c2/server
+      aaaabd440000-aaaabd441000 00010000 4096        /root/c2/server
+      ffffaa8a0000-ffffaaa3c000 00000000 1687552     /usr/lib/aarch64-linux-gnu/libc.so.6
+      ffffaaa3c000-ffffaaa4d000 0019c000 69632       /usr/lib/aarch64-linux-gnu/libc.so.6
+      ffffaaa4d000-ffffaaa50000 0019d000 12288       /usr/lib/aarch64-linux-gnu/libc.so.6
+      ffffaaa50000-ffffaaa52000 001a0000 8192        /usr/lib/aarch64-linux-gnu/libc.so.6
+      ffffaaa69000-ffffaaa91000 00000000 163840      /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+      ffffaaaa7000-ffffaaaa9000 0002e000 8192        /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
+      ffffaaaa9000-ffffaaaaa000 00030000 4096        /usr/lib/aarch64-linux-gnu/ld-linux-aarch64.so.1
 ```
 
 목록은 파일에 연결된 매핑만 담습니다. heap, 스레드 스택, vDSO 같은 익명 매핑은 PT_LOAD에는 있지만 NT_FILE에는 없습니다. 경로는 core를 쓴 시점의 이름이라, 분석하는 머신에 같은 경로의 같은 파일이 있어야 디버거가 그 내용을 채울 수 있습니다.
@@ -351,31 +351,31 @@ struct {
 
 ```text
 (gdb) info auxv
-33   AT_SYSINFO_EHDR      System-supplied DSO's ELF header 0xffff9fb5d000
+33   AT_SYSINFO_EHDR      System-supplied DSO's ELF header 0xffffaaaa5000
 51   AT_MINSIGSTKSZ       Minimum stack size for signal delivery 0x1270
 16   AT_HWCAP             Machine-dependent CPU capability hints 0xefb3ffff
 6    AT_PAGESZ            System page size               4096
 17   AT_CLKTCK            Frequency of times()           100
-3    AT_PHDR              Program headers for program    0xaaaacd7b0040
+3    AT_PHDR              Program headers for program    0xaaaabd420040
 4    AT_PHENT             Size of program header entry   56
 5    AT_PHNUM             Number of program headers      10
-7    AT_BASE              Base address of interpreter    0xffff9fb21000
+7    AT_BASE              Base address of interpreter    0xffffaaa69000
 8    AT_FLAGS             Flags                          0x0
-9    AT_ENTRY             Entry point of program         0xaaaacd7b07c0
+9    AT_ENTRY             Entry point of program         0xaaaabd4207c0
 11   AT_UID               Real user ID                   0
 ...
 23   AT_SECURE            Boolean, was exec setuid-like? 0
-25   AT_RANDOM            Address of 16 random bytes     0xffffcb594f78
+25   AT_RANDOM            Address of 16 random bytes     0xffffdd856688
 26   AT_HWCAP2            Extension of AT_HWCAP          0x26181
-31   AT_EXECFN            File name of executable        0xffffcb595fef "./server"
-15   AT_PLATFORM          String identifying platform    0xffffcb594f88 "aarch64"
+31   AT_EXECFN            File name of executable        0xffffdd856fef "./server"
+15   AT_PLATFORM          String identifying platform    0xffffdd856698 "aarch64"
 27   AT_RSEQ_FEATURE_SIZE rseq supported feature size    28
 28   AT_RSEQ_ALIGN        rseq allocation alignment      32
 0    AT_NULL              End of vector                  0x0
 (AT_EUID·AT_GID·AT_EGID 생략)
 ```
 
-`AT_BASE`는 동적 링커(`ld-linux-aarch64.so.1`)가 올라간 주소로 NT_FILE의 0xffff9fb21000과 같습니다. `AT_SYSINFO_EHDR`는 vDSO의 위치입니다. `AT_HWCAP`·`AT_HWCAP2`는 CPU 기능 비트라서, 다른 CPU에서 돌던 프로세스의 core인지 확인할 때 씁니다. `AT_EXECFN`과 `AT_PLATFORM`은 문자열 주소이므로 GDB가 core의 스택 메모리에서 문자열을 읽어 붙였습니다. elfutils 0.192의 `eu-readelf`는 `AT_MINSIGSTKSZ`(51)와 `AT_RSEQ_*`(27, 28)를 이름 없이 번호로만 찍었습니다.
+`AT_BASE`는 동적 링커(`ld-linux-aarch64.so.1`)가 올라간 주소로 NT_FILE의 0xffffaaa69000과 같습니다. `AT_SYSINFO_EHDR`는 vDSO의 위치입니다. `AT_HWCAP`·`AT_HWCAP2`는 CPU 기능 비트라서, 다른 CPU에서 돌던 프로세스의 core인지 확인할 때 씁니다. `AT_EXECFN`과 `AT_PLATFORM`은 문자열 주소이므로 GDB가 core의 스택 메모리에서 문자열을 읽어 붙였습니다. elfutils 0.192의 `eu-readelf`는 `AT_MINSIGSTKSZ`(51)와 `AT_RSEQ_*`(27, 28)를 이름 없이 번호로만 찍었습니다.
 
 ## PT_LOAD — 메모리 내용
 
@@ -392,11 +392,11 @@ PT_LOAD 하나가 매핑 하나입니다. 어떤 매핑의 내용을 담을지�
 `FileSiz`와 `MemSiz`를 비교하면 세 종류가 보입니다. 이 core의 PT_LOAD 22개에서 고른 대표 행입니다.
 
 ```text
-  LOAD           0x002000 0x0000aaaacd7b0000 0x0000000000000000 0x001000 0x001000 R E 0x1000
-  LOAD           0x026000 0x0000ffff9e940000 0x0000000000000000 0x000000 0x010000     0x1000
-  LOAD           0x026000 0x0000ffff9e950000 0x0000000000000000 0x800000 0x800000 RW  0x1000
-  LOAD           0x1026000 0x0000ffff9f960000 0x0000000000000000 0x001000 0x19c000 R E 0x1000
-  LOAD           0x1027000 0x0000ffff9fafc000 0x0000000000000000 0x000000 0x011000     0x1000
+  LOAD           0x002000 0x0000aaaabd420000 0x0000000000000000 0x001000 0x001000 R E 0x1000
+  LOAD           0x026000 0x0000ffffa9880000 0x0000000000000000 0x000000 0x010000     0x1000
+  LOAD           0x026000 0x0000ffffa9890000 0x0000000000000000 0x800000 0x800000 RW  0x1000
+  LOAD           0x1026000 0x0000ffffaa8a0000 0x0000000000000000 0x001000 0x19c000 R E 0x1000
+  LOAD           0x1027000 0x0000ffffaaa3c000 0x0000000000000000 0x000000 0x011000     0x1000
 ```
 
 | 행 | 매핑 | FileSiz / MemSiz | 이유 |
@@ -417,24 +417,24 @@ GDB는 BFD 라이브러리로 core를 엽니다. BFD는 노트와 PT_LOAD를 가
 (gdb) maint info sections
 Core file: `/root/c2/core', file type elf64-littleaarch64.
  [0]      0x00000000->0x00001a38 at 0x00000548: note0 READONLY HAS_CONTENTS
- [1]      0x00000000->0x00000110 at 0x000005cc: .reg/6512 HAS_CONTENTS
- [3]      0x00000000->0x00000080 at 0x00000794: .note.linuxcore.siginfo/6512 HAS_CONTENTS
+ [1]      0x00000000->0x00000110 at 0x000005cc: .reg/6636 HAS_CONTENTS
+ [3]      0x00000000->0x00000080 at 0x00000794: .note.linuxcore.siginfo/6636 HAS_CONTENTS
  [5]      0x00000000->0x00000170 at 0x00000828: .auxv HAS_CONTENTS
- [6]      0x00000000->0x00000257 at 0x000009ac: .note.linuxcore.file/6512 HAS_CONTENTS
- [8]      0x00000000->0x00000210 at 0x00000c18: .reg2/6512 HAS_CONTENTS
- [16]     0x00000000->0x00000010 at 0x000010b0: .reg-aarch-pauth/6512 HAS_CONTENTS
- [20]     0x00000000->0x00000110 at 0x000011f4: .reg/6514 HAS_CONTENTS
- [27]     0x00000000->0x00000110 at 0x000018fc: .reg/6513 HAS_CONTENTS
- [34]     0xaaaacd7b0000->0xaaaacd7b1000 at 0x00002000: load1 ALLOC LOAD READONLY CODE HAS_CONTENTS
- [38]     0xffff9e940000->0xffff9e950000 at 0x00026000: load5 ALLOC READONLY
- [42]     0xffff9f960000->0xffff9f961000 at 0x01026000: load9a ALLOC LOAD READONLY CODE HAS_CONTENTS
- [43]     0xffff9f961000->0xffff9fafc000 at 0x01027000: load9b ALLOC READONLY CODE
+ [6]      0x00000000->0x00000257 at 0x000009ac: .note.linuxcore.file/6636 HAS_CONTENTS
+ [8]      0x00000000->0x00000210 at 0x00000c18: .reg2/6636 HAS_CONTENTS
+ [16]     0x00000000->0x00000010 at 0x000010b0: .reg-aarch-pauth/6636 HAS_CONTENTS
+ [20]     0x00000000->0x00000110 at 0x000011f4: .reg/6637 HAS_CONTENTS
+ [27]     0x00000000->0x00000110 at 0x000018fc: .reg/6638 HAS_CONTENTS
+ [34]     0xaaaabd420000->0xaaaabd421000 at 0x00002000: load1 ALLOC LOAD READONLY CODE HAS_CONTENTS
+ [38]     0xffffa9880000->0xffffa9890000 at 0x00026000: load5 ALLOC READONLY
+ [42]     0xffffaa8a0000->0xffffaa8a1000 at 0x01026000: load9a ALLOC LOAD READONLY CODE HAS_CONTENTS
+ [43]     0xffffaa8a1000->0xffffaaa3c000 at 0x01027000: load9b ALLOC READONLY CODE
 (Exec file 섹션 31개와 core 섹션 58개 중 일부만 표시)
 ```
 
 읽는 순서를 섹션 이름으로 따라가면 이렇습니다.
 
-1. `.reg/<lwp>`마다 스레드를 하나 만듭니다. 0x110(272)바이트는 PRSTATUS 안의 `pr_reg`만 잘라 낸 것입니다. 그래서 GDB가 `[New LWP 6512]`, `[New LWP 6514]`, `[New LWP 6513]`을 찍습니다.
+1. `.reg/<lwp>`마다 스레드를 하나 만듭니다. 0x110(272)바이트는 PRSTATUS 안의 `pr_reg`만 잘라 낸 것입니다. 그래서 GDB가 `[New LWP 6636]`, `[New LWP 6637]`, `[New LWP 6638]`을 찍습니다.
 2. `.reg2`(FPREGSET), `.reg-aarch-pauth`(PAC_MASK) 같은 섹션으로 나머지 레지스터를 채웁니다.
 3. `.auxv`와 `.note.linuxcore.file`로 동적 링커 위치와 라이브러리 목록을 얻어 공유 라이브러리 심볼을 읽습니다.
 4. `loadN`처럼 `HAS_CONTENTS`가 있는 섹션은 core에서 메모리를 읽고, `load9b`처럼 없는 섹션은 같은 주소에 매핑된 파일(여기서는 `libc.so.6`)에서 읽습니다. BFD는 `FileSiz < MemSiz`인 PT_LOAD를 내용 있는 `load9a`와 없는 `load9b` 둘로 쪼갭니다.
@@ -455,28 +455,28 @@ GNU build ID는 실행 파일의 `.note.gnu.build-id`에 있습니다. 이 섹�
 
 ```text
 $ eu-unstrip -n --core core
-0xaaaacd7b0000+0x21000 ce3c12e1cf437cb46c6dbbb5b556746f6b5c7462@0xaaaacd7b0280 . . /root/c2/server
-0xffff9fb5d000+0x1000 cc00a9dd32953bb934aac887a0cbec5fdccf3165@0xffff9fb5d2b0 . - linux-vdso.so.1
-0xffff9fb21000+0x41640 d7be73c7b2bf2531fb3e11318f0949141af7063a@0xffff9fb21268 /lib/ld-linux-aarch64.so.1 - ld-linux-aarch64.so.1
-0xffff9f960000+0x1be010 5f3926d9963ff284b8173bf3601bbb00c3abad16@0xffff9f960348 /lib/aarch64-linux-gnu/libc.so.6 - libc.so.6
+0xaaaabd420000+0x21000 ce3c12e1cf437cb46c6dbbb5b556746f6b5c7462@0xaaaabd420280 . . /root/c2/server
+0xffffaaaa5000+0x1000 cc00a9dd32953bb934aac887a0cbec5fdccf3165@0xffffaaaa52b0 . - linux-vdso.so.1
+0xffffaaa69000+0x41640 d7be73c7b2bf2531fb3e11318f0949141af7063a@0xffffaaa69268 /lib/ld-linux-aarch64.so.1 - ld-linux-aarch64.so.1
+0xffffaa8a0000+0x1be010 5f3926d9963ff284b8173bf3601bbb00c3abad16@0xffffaa8a0348 /lib/aarch64-linux-gnu/libc.so.6 - libc.so.6
 $ readelf -n server | grep "Build ID"
     Build ID: ce3c12e1cf437cb46c6dbbb5b556746f6b5c7462
 ```
 
 필터에서 비트 4를 끄고(`0x23`) 같은 프로그램을 죽이면 `eu-unstrip -n --core`에 vDSO 한 줄만 남습니다. 커널이 메모리에서 그대로 복사하는 vDSO를 빼면 build ID를 찾을 근거가 사라집니다.
 
-소스를 한 줄 바꾸고 `-O2`로 다시 빌드한 실행 파일(build ID `694c62ba…`)로 같은 core를 열자 GDB가 경고하고 함수 이름을 잃었습니다.
+`sleep(1)`을 `sleep(2)`로 한 줄 바꾸고 `-O2`로 다시 빌드한 실행 파일(build ID `84485053…`)로 같은 core를 열자 GDB가 경고하고 함수 이름을 잃었습니다.
 
 ```text
 $ gdb -batch -ex bt ./server2 core
 warning: core file may not match specified executable file.
 ...
-#0  0x0000aaaacd7b091c in ?? ()
-#1  0x0044aaaacd7b09ac in ?? ()
-#2  0x0000ffffcb595e90 in ?? ()
+#0  0x0000aaaabd42091c in ?? ()
+#1  0x006eaaaabd4209ac in ?? ()
+#2  0x0000ffffdd856e90 in ?? ()
 ```
 
-`#1`의 0x0044aaaacd7b09ac는 실제 복귀 주소가 아닙니다. 맞는 실행 파일로 열면 그 자리가 `#1  0x0000aaaacd7b09cc in main (argc=2, argv=0xffffcb594d58) at server.c:20`으로 풀립니다. 다른 실행 파일의 unwind 정보로 스택의 엉뚱한 칸을 읽었기 때문에, 주소가 맞지 않고 그 뒤 프레임도 무의미합니다. 빌드 ID로 맞는 파일과 debuginfo를 찾는 방법은 [Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에서 다룹니다.
+`#1`의 0x006eaaaabd4209ac는 실제 복귀 주소가 아닙니다. 맞는 실행 파일로 열면 그 자리가 `#1  0x0000aaaabd4209cc in main (argc=2, argv=0xffffdd856468) at server.c:20`으로 풀립니다. 다른 실행 파일의 unwind 정보로 스택의 엉뚱한 칸을 읽었기 때문에, 주소가 맞지 않고 그 뒤 프레임도 무의미합니다. 빌드 ID로 맞는 파일과 debuginfo를 찾는 방법은 [Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에서 다룹니다.
 
 ## 부분 core — gcore
 
@@ -484,9 +484,9 @@ warning: core file may not match specified executable file.
 
 ```text
 $ gcore -o /root/c2/gc $(pgrep -x sshd | head -1)
-Saved corefile /root/c2/gc.1041
-[Inferior 1 (process 1041) detached]
-$ eu-readelf -n gc.1041 | grep -E "^  (CORE|LINUX)" | awk '{print $1, $3}' | sort | uniq -c
+Saved corefile /root/c2/gc.1054
+[Inferior 1 (process 1054) detached]
+$ eu-readelf -n gc.1054 | grep -E "^  (CORE|LINUX)" | awk '{print $1, $3}' | sort | uniq -c
       1 CORE AUXV
       1 CORE FILE
       1 CORE FPREGSET
@@ -497,7 +497,7 @@ $ eu-readelf -n gc.1041 | grep -E "^  (CORE|LINUX)" | awk '{print $1, $3}' | sor
       1 LINUX ARM_PAC_MASK
 ```
 
-커널 core에 있던 HW_BREAK, HW_WATCH, SYSTEM_CALL, PAC 키 노트가 없습니다. 디버깅에 필요한 노트는 남지만, 커널이 쓰는 core와 바이트 단위로 같지는 않습니다. 정지 시간은 Ch 1에서 RSS 1 GiB 프로세스 기준 약 1.1초로 쟀습니다.
+커널 core에 있던 HW_BREAK, HW_WATCH, SYSTEM_CALL, PAC 키 노트가 없습니다. 디버깅에 필요한 노트는 남지만, 커널이 쓰는 core와 바이트 단위로 같지는 않습니다. 정지 시간은 Ch 1에서 RSS 1 GiB 프로세스 기준 1.8초로 쟀습니다.
 
 ## minicore — 핵심만
 
@@ -514,9 +514,9 @@ kernel.core_pipe_limit=0x7fffffff
 | 방식 | 결과 |
 | --- | --- |
 | 커널 core (`core_pattern` 파일) | 268,861,440 B |
-| minicoredumper | `core.tar.gz` 4,672 B. 풀면 겉보기 268,862,044 B, 실제 할당 52 KiB |
+| minicoredumper | `core.tar.gz` 4,719 B. 풀면 겉보기 268,862,044 B, 실제 할당 56 KiB |
 
-minicoredumper의 core도 GDB로 열려서 `bt`는 `main () at big2.c:7`을 정확히 보여 줬습니다. 대신 heap은 담지 않으므로 `p cache`의 포인터가 가리키는 내용은 0으로 읽혔습니다. 콜스택만으로 원인을 못 찾는 버그라면 recept에 그 변수나 영역을 추가해야 합니다.
+minicoredumper의 core도 GDB로 열려서 `bt`는 `main () at big2.c:6`(NULL에 쓰는 줄)을 정확히 보여 줬습니다. 대신 heap은 담지 않으므로 `p cache`의 포인터가 가리키는 내용은 0으로 읽혔습니다. 콜스택만으로 원인을 못 찾는 버그라면 recept에 그 변수나 영역을 추가해야 합니다.
 
 ## Mach-O core (macOS)
 
@@ -526,16 +526,16 @@ macOS의 core는 ELF가 아니라 Mach-O 포맷입니다. 이 장을 쓴 Mac(mac
 
 ```text
 $ lldb -b --core core server -o bt -o "register read pc sp x0"
-Core file '.../c2/core' (aarch64) was loaded.
+Core file '.../c2mac/core' (aarch64) was loaded.
 (lldb) bt
 * thread #1, name = 'server', stop reason = SIGSEGV: address not mapped to object (fault address=0xdeadbeef)
-   * frame #0: 0x0000aaaacd7b091c server`parse_port(s="--config=prod.yaml") at server.c:13:12
-     frame #1: 0x0000aaaacd7b09cc server`main(argc=2, argv=0x0000ffffcb594d58) at server.c:20:5
-     frame #2: 0x0000ffff9f98225c
-     frame #3: 0x0000ffff9f98233c
+   * frame #0: 0x0000aaaabd42091c server`parse_port(s="--config=prod.yaml") at server.c:13:12
+     frame #1: 0x0000aaaabd4209cc server`main(argc=2, argv=0x0000ffffdd856468) at server.c:20:5
+     frame #2: 0x0000ffffaa8c225c
+     frame #3: 0x0000ffffaa8c233c
 (lldb) register read pc sp x0
-      pc = 0x0000aaaacd7b091c  server`parse_port + 32 at server.c:13:12
-      sp = 0x0000ffffcb594b60
+      pc = 0x0000aaaabd42091c  server`parse_port + 32 at server.c:13:12
+      sp = 0x0000ffffdd856270
       x0 = 0x00000000deadbeef
 ```
 
@@ -543,13 +543,7 @@ Core file '.../c2/core' (aarch64) was loaded.
 
 ## .ips / .crash — Apple
 
-macOS에서 core 대신 늘 남는 것은 Crash Reporter의 `.ips` 보고서입니다. 위 Mac에서 같은 0xdeadbeef 역참조 프로그램을 실행하자 `~/Library/Logs/DiagnosticReports/pmcrash-2026-11-16-132703.ips`(8,058바이트)가 생겼습니다. 첫 줄이 JSON 헤더이고, 둘째 줄부터 본문 JSON입니다.
-
-```json
-{"app_name":"pmcrash","timestamp":"2026-11-16 13:27:03.00 +0900","app_version":"","slice_uuid":"3a9900a4-658f-309e-a452-939524d51219","build_version":"","platform":1,"share_with_app_devs":0,"is_first_party":1,"bug_type":"309","os_version":"macOS 27.2.1 (26B131)","roots_installed":0,"incident_id":"93246A13-5454-4326-82D2-A75C5EDDA96E","name":"pmcrash"}
-```
-
-본문에서 core의 노트에 해당하는 필드를 뽑았습니다.
+macOS에서 core 대신 늘 남는 것은 Crash Reporter의 `.ips` 보고서입니다. 위 Mac에서 같은 0xdeadbeef 역참조 프로그램(`pmcrash`)을 한 번 실행하자 `~/Library/Logs/DiagnosticReports/`에 8,058바이트짜리 `.ips`가 생겼습니다. 첫 줄이 JSON 헤더(`app_name`, `timestamp`, `slice_uuid`, `bug_type`, `os_version` 등)이고, 둘째 줄부터 본문 JSON이었습니다. 이 관찰은 한 번 실행한 결과이고, 보고서 파일과 그 출력은 보존하지 않았습니다. 아래 표는 그때 본문에서 확인한 필드입니다.
 
 | 필드 | 값 | ELF core의 대응 |
 | --- | --- | --- |
@@ -564,7 +558,7 @@ macOS에서 core 대신 늘 남는 것은 Crash Reporter의 `.ips` 보고서입�
 
 minidump는 Microsoft가 정의한 포맷이고, Breakpad가 이를 Linux·macOS로 넓혔습니다. 디렉터리 하나와 스트림 여러 개로 이루어지며 ELF core와는 별개의 포맷입니다. Debian 13에는 Breakpad 패키지가 없어서 [upstream](https://chromium.googlesource.com/breakpad/breakpad/)(커밋 `94c818ea`, 2026-10-15)을 VM에서 직접 빌드했습니다.
 
-`ExceptionHandler`를 건 프로그램이 0xdeadbeef를 역참조하자 14,712바이트짜리 `.dmp`가 생겼습니다. `minidump_dump`로 스트림 목록을 봤습니다.
+`ExceptionHandler`를 건 프로그램([Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)의 `app.cc`)이 0xdeadbeef를 역참조하자 14,760바이트짜리 `.dmp`가 생겼습니다. `minidump_dump`로 스트림 목록을 봤습니다.
 
 | 스트림 | 크기 (B) | ELF core의 대응 |
 | --- | --- | --- |
@@ -574,9 +568,9 @@ minidump는 Microsoft가 정의한 포맷이고, Breakpad가 이를 Linux·macOS
 | `MD_EXCEPTION_STREAM` | 168 | NT_SIGINFO |
 | `MD_SYSTEM_INFO_STREAM` | 56 | — |
 | `MD_LINUX_CPU_INFO` | 1,356 | — (`/proc/cpuinfo`) |
-| `MD_LINUX_PROC_STATUS` | 1,119 | — (`/proc/<pid>/status`) |
+| `MD_LINUX_PROC_STATUS` | 1,128 | — (`/proc/<pid>/status`) |
 | `MD_LINUX_CMD_LINE` | 25 | NT_PRPSINFO의 `psargs` |
-| `MD_LINUX_ENVIRON` | 348 | — (환경 변수) |
+| `MD_LINUX_ENVIRON` | 388 | — (환경 변수) |
 | `MD_LINUX_AUXV` | 368 | NT_AUXV |
 | `MD_LINUX_MAPS` | 3,153 | — (`/proc/<pid>/maps`) |
 | `MD_LINUX_DSO_DEBUG` | 488 | — |
@@ -586,23 +580,27 @@ minidump는 Microsoft가 정의한 포맷이고, Breakpad가 이를 Linux·macOS
 `dump_syms`로 만든 심볼 파일과 함께 `minidump_stackwalk`에 넣으면 콜스택이 나옵니다.
 
 ```text
-$ minidump_stackwalk dumps/4fe7a110-9c56-4e0b-a2c67f98-150e3628.dmp symbols
+$ minidump_stackwalk dumps/85cf9437-8eaf-4e1c-5236109a-b8770b1f.dmp symbols
 Operating system: Linux
                   0.0.0 Linux 6.12.116+deb13-arm64 #1 SMP Debian 6.12.116-1 (2026-11-07) aarch64
 CPU: arm64
      4 CPUs
 
+GPU: UNKNOWN
+
 Crash reason:  SIGSEGV /SEGV_MAPERR
 Crash address: 0xdeadbeef
+Process uptime: not available
 
 Thread 0 (crashed)
- 0  app!parse_port [app.cc : 11 + 0x4]
+ 0  app!parse_port [app.cc : 9 + 0x4]
      x0 = 0x00000000deadbeef    x1 = 0x0000000000000001
      ...
     Found by: given as instruction pointer in context
- 1  app!main [app.cc : 17 + 0x0]
+ 1  app!main [app.cc : 14 + 0x0]
+    ...
     Found by: call frame info
-(레지스터 덤프 생략)
+(레지스터 덤프와 libc 프레임 생략)
 ```
 
 심볼 파일 이름, 모듈 ID, stackwalk 전체 흐름은 [Ch 4](/blog/tools/debugging/postmortem/chapter04-debuginfod-minidump-automation)에서 이어 봅니다. 같은 크래시의 ELF core가 얼마나 큰지와 비교하면 차이가 분명합니다. 이 장의 `server` core는 17 MB였고, minidump는 메모리를 스택 4 KiB와 PC 주변 256바이트만 담아 15 KB였습니다.
