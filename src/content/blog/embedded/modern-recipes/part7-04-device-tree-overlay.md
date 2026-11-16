@@ -84,7 +84,7 @@ fdtdump bme280.dtbo
 
 ### Base DT의 symbol 활성화
 
-v6.12 `make dtbs`가 만든 `imx8mm-evk.dtb`에는 `__symbols__`가 없습니다. 커널 빌드 시스템이 `-@`를 붙이는 경우는 세 가지입니다. 첫째는 Makefile에 `<이름>-dtbs := base.dtb overlay.dtbo` 형태로 overlay와 합칠 base로 등록된 DTB이고(`scripts/Makefile.dtbs:11`, `:113-114`, 예: `arch/arm64/boot/dts/freescale/Makefile:61`), 둘째는 `DTC_FLAGS_<보드> := -@`를 지정한 DTB이고(`scripts/Makefile.dtbs:111`), 셋째는 디렉터리 Makefile이 `DTC_FLAGS := -@`로 그 디렉터리 전체에 붙이는 경우입니다(예: `arch/arm64/boot/dts/broadcom/Makefile:4`).
+v6.12 `make dtbs`가 만든 `imx8mm-evk.dtb`에는 `__symbols__`가 없습니다. 커널 빌드 시스템이 `-@`를 붙이는 경우는 세 가지입니다. 첫째는 Makefile에 `<이름>-dtbs := base.dtb overlay.dtbo` 형태로 overlay와 합칠 base로 등록된 DTB입니다(`scripts/Makefile.dtbs:11`, `:113-114`, 예: `arch/arm64/boot/dts/freescale/Makefile:61`). 둘째는 `DTC_FLAGS_<보드> := -@`를 지정한 DTB입니다(`scripts/Makefile.dtbs:111`). 셋째는 디렉터리 Makefile이 `DTC_FLAGS := -@`로 그 디렉터리 전체에 붙이는 경우입니다(예: `arch/arm64/boot/dts/broadcom/Makefile:4`).
 
 보드 하나에만 `-@`를 붙이려면 그 변수를 명령줄로 줍니다. `V=1`로 본 `dtc` 명령에 기존 warning 옵션이 남은 채 `-@`가 더해졌고, DTB는 41,122 B에서 53,965 B로 커졌습니다.
 
@@ -149,7 +149,7 @@ base fdt does not have a /__symbols__ node
 make sure you've compiled with -@
 ```
 
-`fdt resize`는 overlay가 들어갈 여유를 base에 만드는 단계로, U-Boot 문서의 절차에도 들어 있습니다(`doc/usage/fdt_overlays.rst`). 실패한 apply 뒤의 DTB는 쓰지 않고, QEMU를 새로 띄워 같은 순서(`dhcp`, `setenv fdtovaddr 0x48000000`, `fdt addr`, `fdt resize 8192`, `tftp`)로 경로로 대상을 가리키는 overlay를 적용했습니다. [7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)의 demo 노드를 루트에 더하는 overlay입니다.
+`fdt resize`는 overlay가 들어갈 여유를 base에 만드는 단계로, U-Boot 문서의 절차에도 들어 있습니다(`doc/usage/fdt_overlays.rst`). 실패한 apply 뒤의 DTB는 쓰지 않고, QEMU를 새로 띄워 같은 순서(`dhcp`, `setenv fdtovaddr 0x48000000`, `fdt addr`, `fdt resize 8192`, `tftp`)를 밟아, 대상을 경로로 가리키는 overlay를 적용했습니다. [7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)의 demo 노드를 루트에 더하는 overlay입니다.
 
 ```dts
 /dts-v1/;
@@ -273,7 +273,7 @@ RPi overlay는 `__overrides__` 노드로 `dtoverlay=` 줄의 파라미터를 받
 
 ## 측정 / 성능 비교
 
-이 글에서 잰 값은 크기뿐입니다. `imx8mm-evk.dtb`는 `-@` 없이 41,122 B, `-@`로 53,965 B였고, 차이 12,843 B가 `__symbols__`(와 phandle) 몫입니다. BME280 overlay `.dtbo`는 449 B였습니다. Overlay는 base DTB를 다시 빌드하지 않으므로, 옵션 하나를 바꿀 때 바뀌는 파일이 이 449 B짜리 하나라는 점이 배포 단위로서의 장점입니다.
+이 글에서 잰 값은 크기뿐입니다. `imx8mm-evk.dtb`는 `-@` 없이 41,122 B, `-@`로 53,965 B였고, 차이 12,843 B가 `__symbols__`(와 phandle) 몫입니다. BME280 overlay `.dtbo`는 449 B였습니다. Overlay는 base DTB를 다시 빌드하지 않으므로, 옵션 하나를 바꿀 때 449 B짜리 파일 하나만 바꾸면 되므로 배포 단위로 다루기 좋습니다.
 
 ## 자주 보는 함정
 
