@@ -82,7 +82,7 @@ DS8626 Rev 4 Table 49는 설정마다 최대 출력 주파수를 부하 조건�
 | 10 | 50 MHz (C_L = 40 pF) | 100 MHz |
 | 11 | 100 MHz (C_L = 30 pF) | 200 MHz |
 
-이 판의 Table 49는 00 설정의 10 pF 조건 f_max와 모든 rise/fall time 칸을 아직 정하지 않은 값으로 비워 두었으므로(표 주석 3), 그 칸은 옮기지 않았습니다. 같은 표의 주석 5는 50 MHz가 넘는 주파수에서 compensation cell을 쓰라고 적습니다. 또 데이터시트 본문은 PC13~PC15를 출력으로 쓸 때 30 pF 부하에서 2 MHz를 넘지 말라고 합니다.
+이 판의 Table 49는 00 설정의 10 pF 조건 f_max와 모든 rise/fall time 칸을 아직 값 없이 비워 두었으므로(표 주석 3), 그 칸은 옮기지 않았습니다. 같은 표의 주석 5는 50 MHz가 넘는 주파수에서 compensation cell을 쓰라고 적습니다. 또 데이터시트 본문은 PC13~PC15를 출력으로 쓸 때 30 pF 부하에서 2 MHz를 넘지 말라고 합니다.
 
 ### 4) Schmitt trigger 입력
 
@@ -194,7 +194,7 @@ internal pull-up 50 kohm, Cb=50 pF -> tr(0.3->0.7 VDD) = 2118 ns
 
 > ⚠️ 입력으로 두고 플로팅
 
-풀이 없는 입력은 레벨이 정해지지 않습니다. 그 핀에 EXTI를 걸어 두면 떠 있는 레벨이 임계값을 넘나들 때마다 인터럽트가 들어옵니다. 쓰지 않는 핀은 풀업·풀다운으로 레벨을 정해 둡니다. TI SN74LVC04A 데이터시트도 쓰지 않는 입력을 V_CC나 GND에 묶으라고 적고, 그 이유를 앱노트 SCBA004 *Implications of Slow or Floating CMOS Inputs*로 안내합니다.
+풀업·풀다운이 없는 입력은 레벨이 정해지지 않습니다. 그 핀에 EXTI를 걸어 두면 떠 있는 레벨이 임계값을 넘나들 때마다 인터럽트가 들어옵니다. 쓰지 않는 핀은 풀업·풀다운으로 레벨을 정해 둡니다. TI SN74LVC04A 데이터시트도 쓰지 않는 입력을 V_CC나 GND에 묶으라고 적고, 그 이유를 앱노트 SCBA004 *Implications of Slow or Floating CMOS Inputs*로 안내합니다.
 
 > ⚠️ 5V 입력을 3.3V FT 아닌 핀에 직결
 
