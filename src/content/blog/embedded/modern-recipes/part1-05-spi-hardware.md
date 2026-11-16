@@ -63,7 +63,7 @@ SCK 상한 후보는 controller 분주기, controller의 fSCK 사양, slave의 f
 
 SPI1 SCK는 fPCLK2를 `BR[2:0]`로 나눈 값, 즉 fPCLK2 / 2^(BR+1)입니다(RM0090 28.5.1). DS8626 Table 55의 값은 `OSPEEDR` = `10`, 부하 30 pF, 0.5 VDD 측정점 조건이고 "characterization - not tested in production"입니다. W25Q32JV 9.6절 값은 9.5절의 부하 30 pF, 출력 기준 0.5 VCC 조건입니다.
 
-표만 보면 42 MHz가 통과합니다. 읽기 경로를 보면 결과가 다릅니다. Mode 0·3에서 flash는 SCK falling edge 뒤 tCLQV 안에 DO를 내고, master는 다음 rising edge보다 tsu(MI) 먼저 MISO가 안정되어 있어야 합니다(DS8626 Figure 41). 둘을 SCK low 구간에서 빼면 SCK가 flash까지 가는 지연과 DO가 MCU로 돌아오는 지연의 합에 남는 시간이 나옵니다.
+표만 보면 42 MHz가 통과합니다. 읽기 경로를 보면 결과가 다릅니다. Mode 0·3에서 flash는 SCK falling edge 뒤 tCLQV 안에 DO를 내고, master는 다음 rising edge보다 tsu(MI) 먼저 MISO가 안정되어 있어야 합니다(DS8626의 SPI master mode 타이밍 그림). 둘을 SCK low 구간에서 빼면 SCK가 flash까지 가는 지연과 DO가 MCU로 돌아오는 지연의 합에 남는 시간이 나옵니다.
 
 | 항목 | `BR` = `000` (42 MHz) | `BR` = `001` (21 MHz) | 출처 |
 | --- | --- | --- | --- |
@@ -125,7 +125,7 @@ static void w25q_read_id(uint8_t id[3]) {
 | W25Q32JV-IQ/JQ | `0xEF` | `0x40` | `0x16` |
 | W25Q32JV-IM/JM | `0xEF` | `0x70` | `0x16` |
 
-보드에서는 실행하지 않았고, QEMU 11.1.3의 STM32F405 머신(`netduinoplus2`)에서 같은 코드를 돌려 보았습니다. 이 머신에는 SPI 컨트롤러 모델(`hw/ssi/stm32f2xx_spi.c`)이 있고, QEMU의 SPI flash 모델 `m25p80`에는 JEDEC ID `0xef4016`인 `w25q32`가 있습니다(`hw/block/m25p80.c` 355행). `-device w25q32,bus=ssi`로 붙이면 QEMU가 이름이 같은 SSI 버스 중 0x40015400의 컨트롤러를 고르므로, 테스트 파일에서만 `SPI1`을 그 주소로 다시 정의하고 위 코드를 그대로 `#include`했습니다. GPIO는 모델링되지 않아 `cs_low()`·`cs_high()`는 효과가 없고, CS 입력을 연결하지 않은 `m25p80`은 계속 선택된 상태입니다.
+보드에서는 실행하지 않았고, QEMU 11.1.3의 STM32F405 머신(`netduinoplus2`)에서 같은 코드를 돌려 보았습니다. 이 머신에는 SPI 컨트롤러 모델(`hw/ssi/stm32f2xx_spi.c`, 아래 행 번호는 v11.1.0 소스 기준)이 있고, QEMU의 SPI flash 모델 `m25p80`에는 JEDEC ID `0xef4016`인 `w25q32`가 있습니다(`hw/block/m25p80.c` 355행). `-device w25q32,bus=ssi`로 붙이면 QEMU가 이름이 같은 SSI 버스 중 0x40015400의 컨트롤러를 고르므로, 테스트 파일에서만 `SPI1`을 그 주소로 다시 정의하고 위 코드를 그대로 `#include`했습니다. GPIO는 모델링되지 않아 `cs_low()`·`cs_high()`는 효과가 없고, CS 입력을 연결하지 않은 `m25p80`은 계속 선택된 상태입니다.
 
 ```bash
 qemu-system-arm -M netduinoplus2 -nographic -semihosting-config enable=on,target=native \
