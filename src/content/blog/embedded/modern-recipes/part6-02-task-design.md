@@ -306,7 +306,7 @@ while (!sensor_ready());     /* CPU 100% 잡아먹음 */
 ## 정리
 
 - Task는 마감과 입력 형태로 자릅니다. 하드웨어 기준이 아닙니다.
-- Periodic은 **`vTaskDelayUntil()`**: 위 측정에서 `vTaskDelay()`는 8주기 만에 9 tick 밀렸습니다.
+- Periodic task는 **`vTaskDelayUntil()`**로 씁니다. 위 측정에서 `vTaskDelay()`는 8주기 만에 9 tick 밀렸습니다.
 - Event-driven은 queue나 semaphore에서 막혀 기다리고, 단계가 긴 흐름은 event queue 하나를 받는 state machine task로 씁니다.
 - Priority는 Rate Monotonic으로 시작하고, 마감이 다른 task에는 다른 값을 줍니다. 같은 값이면 time slicing으로 일이 늘어집니다(3 → 6 tick).
 - 받기만 하는 task와 처리하는 task를 우선순위로 나눕니다.
