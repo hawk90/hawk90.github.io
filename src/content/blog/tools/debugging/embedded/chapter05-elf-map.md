@@ -167,7 +167,7 @@ void Reset_Handler(void) {
 
 리틀 엔디언으로 읽으면 0x20002408(`_estack`), 0x08000045(`Reset_Handler` | 1), 0x08000041(`Default_Handler` | 1), 0x08000041(`HardFault_Handler`, 같은 함수의 alias)입니다. 1장에서 GDB가 리셋 직후 받은 SP 0x20002408과 PC 0x08000044가 바로 이 값입니다.
 
-이 시퀀스는 링커 스크립트가 정의한 심볼과 정확히 맞물려야 합니다. 복사 범위가 틀리면 `.data`가 엉뚱한 값으로 시작하거나 `.bss`가 0이 아닌 채로 `main`에 들어갑니다. newlib을 쓰는 실제 프로젝트라면 여기에 `SystemInit()`이나 C++ 생성자를 부르는 `__libc_init_array()`가 더 들어갑니다. 이 예제는 `-nostdlib`이라 그 단계가 없습니다.
+이 시퀀스는 링커 스크립트가 정의한 심볼과 정확히 맞물려야 합니다. 복사 범위가 틀리면 `.data`가 엉뚱한 값으로 시작하거나 `.bss`가 0이 아닌 채로 `main`에 들어갑니다. 이 예제는 `-nostdlib`이라 C 런타임 초기화 단계가 없습니다. newlib을 링크하는 펌웨어라면 C++ 정적 생성자 같은 `.init_array` 항목을 newlib의 `__libc_init_array()`가 호출하므로, startup에서 `main` 전에 이 함수를 부릅니다.
 
 ## 링커 스크립트
 
@@ -403,11 +403,11 @@ SECTIONS {
 __attribute__((section(".ccram"))) static int g_hot_data[1024];
 ```
 
-어느 버스 마스터(DMA 등)가 그 영역에 접근할 수 있는지는 칩마다 다르므로, 버퍼를 옮기기 전에 레퍼런스 매뉴얼의 버스 구조를 확인합니다. 외부 SDRAM처럼 컨트롤러 초기화가 필요한 영역은 startup에서 `.data`·`.bss` 처리보다 *먼저* 초기화해야 합니다.
+`.data`나 `.bss`를 외부 SDRAM처럼 컨트롤러 초기화가 필요한 영역에 둔다면, 그 초기화가 startup의 `.data` 복사·`.bss` 0 채우기보다 *먼저* 끝나야 합니다. 그 전에는 그 주소에 쓸 수 없기 때문입니다.
 
 ## .ARM.exidx — 스택 unwind 정보
 
-Arm EHABI 타깃에서 C++ 예외나 `-funwind-tables`를 쓰면 `.ARM.exidx`(인덱스)와 `.ARM.extab`(테이블) 섹션이 생깁니다. 링커 스크립트가 이 섹션을 받는 자리를 마련해야 합니다.
+`main.c`를 `-funwind-tables`로 다시 컴파일하자, 평소에는 없던 `.ARM.extab`(0xc바이트)과 `.ARM.exidx`(0x10바이트, 타입 `ARM_EXIDX`) 섹션이 생겼습니다. C++ 예외를 쓸 때도 같은 섹션이 필요하므로, 링커 스크립트가 이 섹션을 받는 자리를 마련해야 합니다.
 
 ```ld
 .ARM.extab : { *(.ARM.extab* .gnu.linkonce.armextab.*) } > FLASH
@@ -418,7 +418,7 @@ Arm EHABI 타깃에서 C++ 예외나 `-funwind-tables`를 쓰면 `.ARM.exidx`(�
 } > FLASH
 ```
 
-이 장의 C 예제는 둘 다 생기지 않았습니다. C++에서 예외를 쓰지 않는다면 `-fno-exceptions`로 끕니다.
+기본 옵션의 이 장 C 예제에는 둘 다 생기지 않았습니다.
 
 ## TLS — Thread-Local Storage
 

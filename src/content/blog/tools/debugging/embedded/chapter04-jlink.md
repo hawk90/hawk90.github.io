@@ -225,7 +225,7 @@ grep "BOOT OK" boot.log && echo PASS || echo FAIL
 
 ## J-Trace — 명령 trace
 
-J-Trace는 ETM 병렬 trace port를 받는 SEGGER 프로브입니다. trace 설정은 대상 MCU의 trace port와 Ozone 같은 호환 도구에서 합니다. 이 장에서는 J-Trace를 다루지 않았고, ITM/SWO와 ETM 병렬 trace의 차이는 2장과 6장에 정리했습니다.
+[J-Trace 제품 페이지](https://www.segger.com/products/debug-probes/j-trace/)는 J-Trace를 *streaming trace probe*로 소개하고, 지원 trace encoder로 Cortex-M·A·R ETM Trace를, 기능으로 live code coverage와 live code profiling을 듭니다. 이 장에서는 J-Trace를 다루지 않았고, ITM/SWO와 ETM의 차이는 2장과 6장에 정리했습니다.
 
 ## Ozone — GUI 디버거
 
@@ -233,11 +233,11 @@ Ozone은 SEGGER의 GUI 디버거입니다. Ozone 페이지는 상업적 사용�
 
 ## Adaptive Clocking
 
-RTCK를 제공하는 JTAG 타깃에서는 반환 클럭에 맞추는 adaptive clocking을 쓸 수 있습니다. GDB Server의 `-speed`가 `adaptive` 값을 받는 이유가 이것입니다. 문서는 고정 속도나, 타깃이 지원하면 adaptive 속도를 쓰라고 권합니다. 이 기능은 SWD 신호 잡음을 감지해 속도를 낮추는 기능이 아닙니다. OpenOCD도 하드웨어 조합이 지원하면 RTCK 기반 adaptive clocking을 씁니다([OpenOCD FAQ](https://openocd.org/doc/html/FAQ.html)).
+RTCK를 제공하는 JTAG 타깃에서는 반환 클럭에 맞추는 adaptive clocking을 쓸 수 있습니다(OpenOCD 매뉴얼은 RTCK를 "adaptive clocking"이라고도 부른다고 적습니다). GDB Server의 `-speed`도 `adaptive` 값을 받습니다. 문서는 고정 속도나, 타깃이 지원하면 adaptive 속도를 쓰라고 권합니다. 이 기능은 SWD 신호 잡음을 감지해 속도를 낮추는 기능이 아닙니다. OpenOCD 매뉴얼도 시스템이 RTCK를 지원하는 경우의 adaptive clocking 설정을 따로 설명합니다.
 
 ## 보안 — 잠긴 칩
 
-칩의 읽기 보호를 푸는 방법은 칩마다 다릅니다. 3장에서 본 OpenOCD의 `nrf52_recover`처럼 벤더별 접근 포트를 써야 하는 경우도 있습니다. J-Link 쪽 unlock 절차는 SEGGER가 장치별로 따로 안내하므로, 이 장에서는 명령을 적지 않았습니다. 잠금 해제는 대개 flash 전체 지우기를 동반하니 칩 레퍼런스 매뉴얼을 먼저 확인합니다.
+칩의 읽기 보호를 푸는 방법은 칩마다 다릅니다. 3장에서 본 OpenOCD의 `nrf52_recover`는 nRF52의 CTRL-AP로 ERASEALL을 걸어 잠금을 풉니다. 이 장에서 확인한 SEGGER 문서에는 장치 공통의 unlock 명령이 없어 J-Link 쪽 명령은 적지 않았습니다.
 
 ## CI에서 BIN과 ELF 검증을 구분
 

@@ -32,7 +32,7 @@ QEMU는 ITM·TPIU·ETM을 흉내 내지 않습니다(2장에서 ITM TCR이 0으�
 | **Semihosting** | 0 (`BKPT #0xAB`) | 호출마다 디버거가 처리할 때까지 정지 | 필수. 없으면 HardFault (아래 실험) | Arm Semihosting 명세 |
 | **ITM/SWO** | 1 (SWO) | stimulus port FIFO가 빌 때까지 대기 | 수신기 필요 | Cortex-M4 TRM, CMSIS |
 | **RTT** | 0 (메모리만) | 버퍼에 쓰고 진행(모드에 따라 대기) | 없어도 동작, 읽으려면 필요 | SEGGER RTT 소스 |
-| **ETM** | trace port 또는 trace buffer | 영향 없음(하드웨어가 생성) | 전용 캡처 장비 | Cortex-M4 TRM |
+| **ETM** | trace port | 영향 없음 (SEGGER: "non-intrusively") | 전용 캡처 장비 | Cortex-M4 TRM, SEGGER J-Trace 페이지 |
 | **UART** | 1 (TX) | 구현에 따라(폴링이면 대기) | 불필요 | — |
 
 속도는 표에 넣지 않았습니다. 프로브·인터페이스 속도·버퍼 크기에 따라 달라지고, 이 장에는 실측 자료가 없기 때문입니다.
@@ -302,14 +302,15 @@ ETM은 CPU가 실행한 *명령 흐름*을 trace로 내보내는 CoreSight 블�
 ### 하드웨어
 
 - 칩이 ETM을 구현했는지, trace port 핀이 패키지에 나와 있는지 먼저 확인합니다.
-- 병렬 trace port를 받으려면 J-Trace, Lauterbach TRACE32 같은 전용 캡처 장비가 필요합니다.
-- 칩에 따라 trace를 칩 안의 버퍼(ETB 등)에 저장했다가 디버그 포트로 읽는 구성도 있습니다.
+- trace port를 받으려면 전용 캡처 장비가 필요합니다. 예를 들어 SEGGER [J-Trace 페이지](https://www.segger.com/products/debug-probes/j-trace/)는 지원 trace encoder로 Cortex-M ETM Trace를 듭니다.
 
 ### 쓰임
 
-- 어떤 코드가 *실제로 실행됐는지*(code coverage).
-- 함수별 실행 시간 분포(profile).
-- 재현이 어려운 버그 직전의 명령 흐름.
+J-Trace 페이지가 드는 용도는 다음과 같습니다.
+
+- 어떤 코드가 *실제로 실행됐는지*(live code coverage).
+- 함수별 실행 시간 분포(live code profiling).
+- 실행한 명령 흐름 전체의 기록(complete instruction trace).
 
 이 장에서는 ETM 캡처를 하지 않았습니다. 장비·설정은 [Performance Engineering 시리즈의 ARM DS·Lauterbach 글](/blog/embedded/performance-engineering/part5-06-arm-ds-lauterbach)이 다룹니다.
 

@@ -34,7 +34,7 @@ RSP는 *위쪽 프로토콜*입니다. 그 아래에서는 실제로 전선 네�
 
 ## JTAG — IEEE 1149.1
 
-JTAG는 원래 *boundary scan*, 즉 PCB 조립 뒤 칩 핀의 연결을 검사하려고 만든 IEEE 1149.1 표준입니다. Arm은 같은 TAP 구조를 디버그 포트(JTAG-DP)로도 씁니다.
+JTAG의 표준 이름은 IEEE 1149.1 *Standard Test Access Port and Boundary Scan Architecture*입니다(ADIv5 참고 문헌 목록의 표기). 이름 그대로 boundary scan을 위한 TAP 구조이고, ADIv5 B3장은 Arm JTAG-DP가 이 IEEE 1149.1 TAP을 바탕으로 한다고 적습니다.
 
 ### 핀
 
@@ -236,7 +236,7 @@ CPUID(`0xE000ED00`)는 `0x410fc240`, 즉 Arm(0x41) Cortex-M4(PARTNO 0xC24) r0p0�
 | [1] | C_HALT | 1을 쓰면 halt 요청 |
 | [0] | C_DEBUGEN | halting debug 활성화 |
 
-DBGKEY 필드의 위치는 CMSIS가 [31:16]으로 정의하며, 쓰기 때 넣어야 하는 키 값은 ARMv7-M Architecture Reference Manual의 DHCSR 정의를 따릅니다. 읽을 때 같은 [31:16] 자리에는 S_ 상태 비트가 나옵니다.
+CMSIS는 DBGKEY를 [31:16]의 쓰기 필드로 정의하고, 같은 자리의 S_ 상태 비트는 읽을 때 나옵니다. 쓰기 키 값은 이 장에서 1차 문서로 확인하지 못해 적지 않았습니다.
 
 실제 칩에서 `break`가 동작하는 흐름은 다음과 같습니다.
 
@@ -356,11 +356,11 @@ reset_config srst_only srst_nogate connect_assert_srst
 
 | 프로브 | 인터페이스 | 비고 |
 |--------|------------|------|
-| ST-LINK | SWD/JTAG | ST 보드에 내장되는 경우가 많음. OpenOCD는 HLA와 native 드라이버를 모두 가짐 |
-| CMSIS-DAP / DAPLink | SWD/JTAG | Arm이 정의한 USB 프로토콜([CMSIS-DAP](https://arm-software.github.io/CMSIS-DAP/latest/)) |
+| ST-LINK | SWD/JTAG | OpenOCD에 HLA용 `interface/stlink.cfg`와 DAP용 `interface/stlink-dap.cfg`가 모두 있음 |
+| CMSIS-DAP / DAPLink | SWD/JTAG | Arm의 프로토콜 명세, 디버거와는 USB로 통신([CMSIS-DAP](https://arm-software.github.io/CMSIS-DAP/latest/)) |
 | J-Link | SWD/JTAG | SEGGER 프로브, 4장에서 다룸 |
-| J-Trace | SWD/JTAG + trace port | 병렬 trace 캡처 |
-| Black Magic Probe | SWD/JTAG | 프로브 안에 GDB 서버를 내장([black-magic.org](https://black-magic.org/)) |
+| J-Trace | SWD/JTAG + trace | SEGGER 페이지 기준 Cortex-M ETM trace를 streaming으로 받음([J-Trace](https://www.segger.com/products/debug-probes/j-trace/)) |
+| Black Magic Probe | SWD/JTAG | 펌웨어가 GDB 서버를 구현하고 제어는 GDB monitor 명령으로 함([black-magic.org](https://black-magic.org/)) |
 | FT2232 계열 + 회로 | SWD/JTAG | OpenOCD의 MPSSE 드라이버로 구동 |
 
 ## 작은 예제 — DHCSR 덤프 해독
