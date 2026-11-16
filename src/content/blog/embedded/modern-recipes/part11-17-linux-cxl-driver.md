@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 CXL 디바이스가 안 올라올 때 가장 곤란한 점은 *에러가 안 난다*는 것입니다. `lspci`에는 보이는데 `/sys/bus/cxl/devices/`가 비어 있거나, memdev는 있는데 `numactl --hardware`에 노드가 안 생기거나, region은 만들어졌는데 commit이 거부됩니다. 각 경우가 서로 다른 층에서 끊긴 것인데 증상만 보면 구분이 안 갑니다.
 
-이 글은 그 층을 아래에서 위로 하나씩 짚어 *어디서 끊겼는지* 좁히는 절차입니다. 각 층의 커널 코드가 실제로 무엇을 하는지는 [CXL 4.0 Internals Ch 11: Linux drivers/cxl/ 분석](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서 `cxl_pci_probe`부터 `cxl_region_attach`까지 따라갑니다.
+이 글은 그 층을 아래에서 위로 하나씩 짚어 *어디서 끊겼는지* 좁히는 절차입니다. 아래 출력은 [Ch 150](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)의 QEMU 11.1.3 Type 3 장치를 붙인 Debian 13 x86_64 guest(kernel 6.12.116, `cxl` 81)에서 얻었습니다. 각 층의 커널 코드가 실제로 무엇을 하는지는 [CXL 4.0 Internals Ch 11: Linux drivers/cxl/ 분석](/blog/embedded/hardware/cxl/chapter11-linux-driver)에서 `cxl_pci_probe`부터 `cxl_region_attach`까지 따라갑니다.
 
 ## 층 구분
 
@@ -40,8 +40,14 @@ CXL 디바이스가 안 올라올 때 가장 곤란한 점은 *에러가 안 난
 
 ```bash
 $ lspci -nn | grep -i cxl
-$ lspci -vv -s 0c:00.0 | grep -A4 "Designated Vendor-Specific"
+0d:00.0 CXL [0502]: Intel Corporation Device [8086:0d93] (rev 01)
+$ lspci -vvv -s 0d:00.0 | grep -A3 "Designated Vendor-Specific"
+	Capabilities: [100 v1] Designated Vendor-Specific: Vendor=1e98 ID=0000 Rev=3 Len=60: CXL
+		PCIe DVSEC for CXL Devices
+		CXLCap:	Cache- IO+ Mem+ MemHWInit+ HDMCount 1 Viral-
 ```
+
+`-s`에는 CXL 장치 자신의 주소를 줍니다. 이 구성에서 `0c:00.0`은 그 위의 CXL root port(`8086:7075`)이고, memory device는 `0d:00.0`입니다.
 
 CXL 디바이스는 *DVSEC*(Designated Vendor-Specific Extended Capability)로 자신이 CXL임을 알립니다. `cxl_pci`는 CXL memory class code(0502)로 디바이스에 붙고, probe 중 CXL Device DVSEC을 찾습니다. DVSEC이 없으면 `Device DVSEC not present, skip CXL.mem init` 경고만 남기고 probe는 계속합니다(`drivers/cxl/pci.c`). 이 경고가 dmesg에 있으면 CXL.mem 초기화가 빠졌습니다.
 
@@ -50,8 +56,14 @@ CXL 디바이스는 *DVSEC*(Designated Vendor-Specific Extended Capability)로 �
 CXL 모듈은 기능별 의존성이 있으며, 필요한 모듈과 펌웨어·ACPI 정보를 모두 사용할 수 있어야 probe가 진행됩니다. 모듈을 수동으로 특정 순서에 맞춰 올리는 것보다 kernel의 module dependency와 플랫폼 상태를 확인하는 편이 안전합니다.
 
 ```bash
-$ lsmod | grep cxl
+$ lsmod | grep -E '^cxl' | awk '{print $1}'
+cxl_acpi
+cxl_mem
+cxl_pci
+cxl_pmem
 ```
+
+`cxl_core`와 `cxl_port`가 목록에 없다고 빠진 것은 아닙니다. Debian 6.12 커널은 `CONFIG_CXL_BUS=y`, `CONFIG_CXL_PORT=y`로 둘을 built-in으로 넣어 `lsmod`에 나오지 않습니다. 커널 설정(`/boot/config-*`)으로 확인합니다.
 
 `drivers/cxl/Makefile`이 built-in 순서를 이렇게 적습니다. `core`가 먼저, 다음 `port`(CXL root port를 바로 enable하려고 `acpi`보다 앞), `acpi`, `pmem`·`mem`(endpoint 드라이버보다 앞), 마지막이 `pci`(하드웨어 열거 계층과 같은 순서)입니다. `cxl_core`는 공통 기능을 제공하고 나머지 드라이버가 이를 사용합니다. 정상적인 시스템에서는 CEDT와 필요한 장치가 있으면 `modprobe cxl_acpi` 또는 udev/module autoload로 의존성이 처리됩니다. `cxl_mem not found`가 나오면 모듈 순서뿐 아니라 kernel config, 장치 타입, firmware table도 함께 확인해야 합니다.
 
@@ -67,12 +79,19 @@ $ ls /sys/firmware/acpi/tables/CEDT
 
 ```bash
 $ ls /sys/bus/cxl/devices/
-mem0/  decoder0.0/  port0/  root0/
+decoder0.0  decoder1.0  decoder2.0  decoder2.1  decoder2.2  decoder2.3  endpoint2  mem0  nvdimm-bridge0  port1  root0
 
 $ dmesg | grep -i cxl | tail -20
 ```
 
-`mem0`은 있는데 decoder가 없는 식으로 *일부만* 등록될 수 있습니다. probe가 어느 단계에서 멈췄는지는 ftrace로 잡습니다.
+`mem0`은 있는데 decoder가 없는 식으로 *일부만* 등록될 수 있습니다. 실제로 region을 commit한 뒤 guest만 warm reboot하자 `endpoint2`와 `decoder2.*`가 사라졌고, dmesg에는 다음이 남았습니다.
+
+```text
+cxl_pci 0000:0d:00.0: Range register decodes outside platform defined CXL ranges.
+cxl_mem mem0: endpoint2 failed probe
+```
+
+장치(QEMU 모델)가 이전 boot의 range register 값을 그대로 들고 있었기 때문으로, QEMU를 완전히 내렸다 다시 띄우자 정상으로 돌아왔습니다. probe가 어느 단계에서 멈췄는지는 ftrace로 잡습니다.
 
 ```bash
 $ echo 'cxl_*' > /sys/kernel/debug/tracing/set_ftrace_filter
@@ -102,17 +121,36 @@ $ cat /sys/bus/cxl/devices/decoder0.0/create_ram_region
 region0
 $ echo region0 > /sys/bus/cxl/devices/decoder0.0/create_ram_region
 
-# interleave 설정 → size → target(endpoint decoder 이름) → commit
-$ echo 1    > /sys/bus/cxl/devices/region0/interleave_ways
-$ echo 256  > /sys/bus/cxl/devices/region0/interleave_granularity
-$ echo 256M > /sys/bus/cxl/devices/region0/size
+# endpoint decoder에 DPA를 먼저 잡음
+$ echo ram        > /sys/bus/cxl/devices/decoder2.0/mode
+$ echo 0x10000000 > /sys/bus/cxl/devices/decoder2.0/dpa_size
+
+# interleave 설정 → size → target(endpoint decoder 이름) → commit → driver bind
+$ echo 1          > /sys/bus/cxl/devices/region0/interleave_ways
+$ echo 256        > /sys/bus/cxl/devices/region0/interleave_granularity
+$ echo 0x10000000 > /sys/bus/cxl/devices/region0/size
 $ echo decoder2.0 > /sys/bus/cxl/devices/region0/target0
-$ echo 1    > /sys/bus/cxl/devices/region0/commit
+$ echo 1          > /sys/bus/cxl/devices/region0/commit
+$ echo region0    > /sys/bus/cxl/drivers/cxl_region/bind
 ```
 
-`targetN`에는 memdev 이름이 아니라 *endpoint decoder* 이름을 씁니다. 그 endpoint decoder에는 미리 DPA 공간이 잡혀 있어야 하고, `cxl create-region`은 이 과정까지 대신 합니다. size는 interleave 설정 뒤에 써야 합니다.
+각 write를 하나씩 해 본 결과입니다.
+
+| write | 결과 |
+|-------|------|
+| interleave 설정 전에 `size` | `No such device or address` |
+| `echo 256M > size` | `Invalid argument` |
+| `echo 0x10000000 > size`(interleave 뒤) | 성공 |
+| `echo mem0 > target0` | `Invalid argument` |
+| `echo decoder2.0 > target0` | 성공 |
+| `commit` 1 → 0 → 1 | `commit`이 1, 0, 1로 바뀜 |
+| `cxl_region` bind | `dax0.0`이 생기고 node 1(256 MB)이 나타남 |
+
+`size`와 `dpa_size`는 `kstrtou64`·`kstrtoull`로 읽으므로(`drivers/cxl/core/region.c`, `port.c`) `256M` 같은 접미사를 받지 않습니다. 이전 판의 `echo 256M > size`는 이 때문에 실패합니다. `targetN`에는 memdev 이름이 아니라 *endpoint decoder* 이름을 쓰고, 그 decoder에는 위처럼 DPA를 먼저 잡아야 합니다. commit만 해서는 메모리가 생기지 않고, region을 `cxl_region` driver에 bind해야 dax device가 만들어집니다. `cxl create-region`은 이 모든 단계를 대신 합니다.
 
 **commit은 되돌릴 수 있습니다.** `commit`에 0을 쓰면 decoder reset이 예약되고 region이 내려갑니다. 플랫폼이 잠근(locked) region만 `-EPERM`으로 거부합니다(`drivers/cxl/core/region.c`의 `commit_store`).
+
+가상 machine guest에서는 commit이 `No such device or address`(`-ENXIO`)로 거부될 수 있습니다. dmesg의 `Failed to synchronize CPU cache state`가 그 표시이고, guest가 CPU cache를 무효화할 수 없을 때 `cxl_region_invalidate_memregion()`이 돌려주는 값입니다(x86은 hypervisor CPUID bit가 있으면 불가). 해결은 [Ch 150](/blog/embedded/modern-recipes/part11-16-qemu-cxl-emulation)에 있습니다.
 
 commit이 `-EBUSY`로 거부되면 decoder를 spec이 정한 순서(마지막으로 commit된 decoder id + 1)대로 commit하지 않았거나, 그 memdev에서 sanitize가 진행 중입니다(`drivers/cxl/core/hdm.c`의 `cxl_decoder_commit`). 이미 enable된 decoder는 `-EBUSY`가 아니라 그대로 성공 처리됩니다.
 
@@ -128,9 +166,11 @@ $ numactl --hardware
 
 `devdax` 모드는 `/dev/dax0.0` 문자 디바이스로만 보이고 일반 메모리로는 안 잡힙니다. `system-ram`으로 바꿔야 커널이 hot-add해 NUMA 노드가 생깁니다.
 
+반대로 커널이 이미 online해 둔 경우도 있습니다. 위 guest는 `auto_online_blocks`가 `online`(`CONFIG_MHP_DEFAULT_ONLINE_TYPE_ONLINE_AUTO=y`)이라 region을 만들자마자 `dax0.0`이 `"mode":"system-ram"`, `"movable":false`로 올라왔고, `daxctl reconfigure-device`는 `kernel policy will auto-online memory, aborting`으로 거부됐습니다. `daxctl list`의 `mode`를 먼저 봅니다.
+
 ## mailbox가 응답하지 않을 때
 
-디바이스 상태를 물어보는 명령(`cxl list -H`의 health 정보, poison list 조회 등)이 멈춘다면 mailbox 층입니다.
+디바이스 상태를 물어보는 명령(`cxl list -H`의 health 정보, poison list 조회 등)이 멈춘다면 mailbox 층입니다. 이 글의 QEMU 장치에서 `cxl list -H -m mem0`은 멈추지 않았지만 health 항목도 없이 `memdev`·`ram_size`·`serial`·`host`·`firmware_version`만 돌려줬습니다.
 
 `cxl_pci`의 mailbox 전송은 doorbell을 `CXL_MAILBOX_TIMEOUT_MS`(2 × HZ, 약 2초)까지 polling합니다(`drivers/cxl/pci.c`). 오래 걸리는 background 명령은 별도 경로로 완료를 기다립니다. dmesg에 mailbox timeout이 찍히면 이 층에서 막혔습니다.
 
@@ -152,13 +192,24 @@ $ cxl disable-region region0
 $ cxl destroy-region region0
 ```
 
+위의 auto-online guest에서는 이 순서가 통하지 않았습니다. 메모리가 `movable:false`로 online돼 있어 `cxl disable-region`이 dax device를 offline하지 못했습니다.
+
+```text
+libdaxctl: offline_one_memblock: dax0.0: Failed to offline /sys/devices/system/node/node1/memory338/state: Device or resource busy
+cxl region: cmd_disable_region: disabled 0 regions
+cxl region: destroy_region: region0 active. Disable it or use --force
+```
+
+나중에 내릴 메모리라면 처음부터 movable로 online되도록 커널의 기본 online 정책을 정해 둡니다. 이 실행에서는 non-movable로 올라간 메모리를 내리지 못했습니다.
+
 ## 정리
 
 - 층을 나눠 좁힙니다. PCI 열거 → 모듈 체인 → CXL 등록 → region → NUMA 순서로, 실패 지점의 *한 층 아래*를 의심합니다.
 - `lspci`에 보여도 CXL Device DVSEC이 없으면 `cxl_pci`가 경고를 남기고 CXL.mem 초기화를 건너뜁니다.
-- `cxl_core`가 베이스이고, built-in 순서는 core → port → acpi → pmem/mem → pci입니다.
-- region commit은 되돌릴 수 있습니다(`commit`에 0). `-EBUSY`는 순서가 어긋난 commit이나 진행 중인 sanitize입니다.
-- region이 있는데 NUMA 노드가 없으면 `daxctl reconfigure-device -m system-ram`이 빠진 것입니다.
+- `cxl_core`가 베이스이고, built-in 순서는 core → port → acpi → pmem/mem → pci입니다. built-in인 것은 `lsmod`에 나오지 않습니다.
+- region commit은 되돌릴 수 있습니다(`commit`에 0, 실행으로 확인). `size`·`dpa_size`에는 `0x10000000` 같은 숫자를 쓰고, commit 뒤 `cxl_region` bind까지 해야 메모리가 생깁니다.
+- `-EBUSY`는 순서가 어긋난 commit이나 진행 중인 sanitize, VM guest의 `-ENXIO`는 CPU cache 무효화 불가입니다.
+- region이 있는데 NUMA 노드가 없으면 `daxctl reconfigure-device -m system-ram`이 빠진 것입니다. auto-online 커널에서는 이미 올라와 있고, 이 실행에서 non-movable로 올라간 메모리는 offline되지 않았습니다.
 - mailbox doorbell은 약 2초까지 polling합니다. health 정보는 `cxl list -H`로 봅니다.
 - RAS 이벤트는 trace event로 남고 `cxl monitor`로 봅니다.
 
