@@ -66,7 +66,7 @@ LR은 두 가지 의미를 갖습니다. 일반 함수 호출에서는 return �
 | `0xFFFFFFFD` | thread mode, PSP | 없음 |
 | `0xFFFFFFE1` / `0xFFFFFFE9` / `0xFFFFFFED` | 위와 같은 순서 | stack에 FP 영역 있음 (bit 4 = 0) |
 
-표는 ARMv7-M Architecture Reference Manual(DDI 0403E.e) Table B1-9 "EXC_RETURN definition of exception return behavior, with FP extension"을 옮긴 것입니다.
+표는 ARMv7-M Architecture Reference Manual(DDI 0403E.e) Table B1-9 "EXC_RETURN definition of exception return behavior, with FP extension"에서 옮겼습니다.
 
 아래 context switch 코드의 `tst r14, #0x10`이 이 bit 4를 봅니다. QEMU `mps2-an386`(Cortex-M4 + FPU)에서 SVC handler 진입 시 LR을 읽어 보면 상황마다 값이 바뀌는 것이 그대로 보입니다(재현 방법은 아래 "QEMU에서 직접 돌려 보기").
 
@@ -240,7 +240,7 @@ task B s16 bits = 0x40200000
 done
 ```
 
-`0x3FA00000`은 1.25f, `0x40200000`은 2.5f의 비트 패턴입니다. 각 task가 양보하고 돌아온 뒤에도 자기 `s16` 값을 그대로 갖고 있으므로, `vstmdbeq`/`vldmiaeq`가 callee-saved FP 레지스터를 제대로 저장·복원한 것입니다. QEMU는 기능 모델이라 이 실행은 순서와 값의 정확성을 확인할 뿐 cycle 수는 재지 않습니다.
+`0x3FA00000`은 1.25f, `0x40200000`은 2.5f의 비트 패턴입니다. 각 task가 양보하고 돌아온 뒤에도 자기 `s16` 값을 그대로 갖고 있으므로, `vstmdbeq`/`vldmiaeq`가 callee-saved FP 레지스터를 제대로 저장·복원했다는 뜻입니다. QEMU는 기능 모델이라 이 실행은 순서와 값의 정확성을 확인할 뿐 cycle 수는 재지 않습니다.
 
 ## 측정 / 비교
 
@@ -284,11 +284,11 @@ M4F에서 하드웨어는 S0 ~ S15와 FPSCR만 자동으로 쌓습니다. S16 ~ 
 
 > ⚠️ BASEPRI를 priority bit 정렬 안 하고 설정
 
-BASEPRI는 priority bit이 MSB 쪽에 정렬돼 있습니다. NVIC priority 5를 BASEPRI=5로 쓰면 안 됩니다. `5 << (8 - NVIC_PRIO_BITS)`로 변환.
+BASEPRI는 priority bit이 MSB 쪽에 정렬돼 있습니다. NVIC priority 5를 BASEPRI=5로 쓰면 안 됩니다. `5 << (8 - NVIC_PRIO_BITS)`로 변환해서 씁니다.
 
 > ⚠️ xPSR Thumb bit 클리어
 
-새 task의 초기 stack frame을 만들 때 xPSR의 T bit(bit 24)를 빠뜨리면, exception return으로 그 task에 들어가는 순간 UsageFault(INVSTATE)가 납니다. QEMU 하네스에서 xPSR=`0x00000000`인 frame으로 복귀시켜 보면, UsageFault를 켰을 때와 끈 때가 다르게 보입니다.
+새 task의 초기 stack frame을 만들 때 xPSR의 T bit(bit 24)를 빠뜨리면, exception return으로 그 task에 들어가는 순간 UsageFault(INVSTATE)가 납니다. QEMU 하네스에서 xPSR=`0x00000000`인 frame으로 복귀시켜 보면, UsageFault를 켰을 때와 껐을 때 결과가 다릅니다.
 
 ```text
 # SHCSR.USGFAULTENA = 1
@@ -305,7 +305,7 @@ UsageFault를 끄면 같은 INVSTATE(CFSR bit 17)가 HardFault로 올라가고 H
 
 - Cortex-M은 R0 ~ R15와 special register(CONTROL, PRIMASK, BASEPRI, FAULTMASK, xPSR)로 구성됩니다. A-profile의 CPSR·SPSR·모드별 banked register는 없고, ARMv7-M 기준으로 banked인 것은 SP(MSP·PSP)뿐입니다.
 - IPSR은 IRQ 번호가 아니라 exception 번호입니다(외부 IRQ = IRQn + 16).
-- SP는 MSP / PSP로 나뉩니다. RTOS는 task에 PSP를 줘 stack 격리를 합니다.
+- SP는 MSP / PSP로 나뉩니다. RTOS는 task마다 PSP를 따로 줘 stack을 격리합니다.
 - IRQ entry 시 HW가 8 register(FP 사용 시 S0~S15·FPSCR 추가)를 자동 push하고, context switch 코드가 R4 ~ R11(FP 사용 시 S16 ~ S31까지)을 추가로 저장합니다.
 - BASEPRI는 부분 IRQ 차단에 씁니다. FreeRTOS critical section의 기반입니다.
 - Privilege level, FPU context, T bit 같은 작은 실수가 fault를 부릅니다.
