@@ -34,12 +34,13 @@ topics: ["embedded"]
 
 ### Register map
 
-datasheet Table 18(memory map)에서 이 글이 쓰는 것만 옮겼습니다.
+datasheet Table 18(memory map)과 5.4절 register 설명에서 이 글이 쓰는 것만 옮겼습니다.
 
 | Address | 이름 | 내용 |
 |---------|------|------|
-| 0xD0 | id | chip_id, "Read value is 0x60" |
+| 0xD0 | id | chip_id, "which is 0x60" (5.4.1) |
 | 0xE0 | reset | 0xB6을 쓰면 power-on-reset 절차로 reset |
+| 0xF3 | status | im_update[0]: calibration을 NVM에서 image register로 복사하는 중이면 1 |
 | 0xF2 | ctrl_hum | osrs_h[2:0]. "only become effective after a write operation to 'ctrl_meas'" |
 | 0xF4 | ctrl_meas | osrs_t[2:0] (bit 7:5), osrs_p[2:0] (bit 4:2), mode[1:0] (11 = normal) |
 | 0xF5 | config | t_sb[2:0] (bit 7:5), filter[2:0] (bit 4:2). "Writes to the 'config' register in normal mode may be ignored." |
@@ -47,7 +48,7 @@ datasheet Table 18(memory map)에서 이 글이 쓰는 것만 옮겼습니다.
 | 0x88–0xA1 | calib00..25 | dig_T1..T3, dig_P1..P9, dig_H1 |
 | 0xE1–0xE7 | calib26.. | dig_H2..H6 |
 
-config는 normal mode에서 쓴 값이 무시될 수 있으므로, 아래 코드는 sleep mode(전원 직후 ctrl_meas = 0x00)일 때 config를 먼저 쓰고 마지막에 ctrl_meas로 normal mode에 들어갑니다. data는 datasheet 4.1절 "Data register shadowing"대로 0xF7부터 한 번의 burst read로 읽어야 한 측정의 값끼리 섞이지 않습니다.
+config는 normal mode에서 쓴 값이 무시될 수 있습니다. sleep mode는 power on reset 뒤 기본값이지만, MCU만 reset되면 센서는 이전 mode를 그대로 유지하므로, 아래 코드는 Bosch SensorAPI의 `bme280_init()`처럼 먼저 0xB6으로 soft reset해 sleep으로 돌리고, start-up time(tstartup 2 ms)과 im_update가 0이 되기를 기다린 뒤 config를 쓰고 마지막에 ctrl_meas로 normal mode에 들어갑니다. data는 datasheet 4.1절 "Data register shadowing"대로 0xF7부터 한 번의 burst read로 읽어야 한 측정의 값끼리 섞이지 않습니다.
 
 ### Calibration word
 
@@ -62,8 +63,8 @@ datasheet Table 16은 calibration word의 위치와 type을 정합니다.
 | dig_H1 | 0xA1 | unsigned char |
 | dig_H2 | 0xE1 / 0xE2 | signed short |
 | dig_H3 | 0xE3 | unsigned char |
-| dig_H4 | 0xE4 [11:4] / 0xE5 [3:0] | signed short |
-| dig_H5 | 0xE5 [7:4] / 0xE6 [11:4] | signed short |
+| dig_H4 | 0xE4 → [11:4], 0xE5[3:0] → [3:0] | signed short |
+| dig_H5 | 0xE5[7:4] → [3:0], 0xE6 → [11:4] | signed short |
 | dig_H6 | 0xE7 | signed char |
 
 모두 little-endian(낮은 주소가 [7:0])이고, dig_H4·dig_H5만 12 bit가 0xE5를 나눠 씁니다.
@@ -173,12 +174,16 @@ static bme_calib_t cal;
 int bme_init(void) {
     if (bme_read(0xD0) != 0x60) return -1;           // chip_id
 
+    bme_write(0xE0, 0xB6);                           // soft reset -> sleep mode
+    delay_ms(3);                                     // > 2 ms (tstartup, delay_ms per 4-06)
+    while (bme_read(0xF3) & 0x01) { }                // im_update: NVM copy in progress
+
     uint8_t a[26], h[7];
     bme_read_n(0x88, a, sizeof a);
     bme_read_n(0xE1, h, sizeof h);
     bme_parse_calib(a, h, &cal);
 
-    // still in sleep mode: config is not ignored here
+    // sleep mode after the soft reset: config is not ignored here
     bme_write(0xF5, (5u << 5) | (0u << 2));          // t_sb = 1000 ms, filter off
     bme_write(0xF2, 0x01);                           // osrs_h = x1
     bme_write(0xF4, (1u << 5) | (1u << 2) | 3u);     // osrs_t = x1, osrs_p = x1, normal
@@ -238,7 +243,7 @@ int sht3x_read(int32_t *t_centi, int32_t *rh_centi) {
     const uint8_t cmd[2] = {0x24, 0x00}; // single shot, high repeatability, no stretching
     if (i2c_write(SHT3X_ADDR, cmd, 2) != 0) return -1;
 
-    delay_ms(16);                        // tMEAS,h max 15 ms (15.5 ms below 2.4 V)
+    delay_ms(17);                        // > 16 ms (4-06): covers tMEAS,h max 15.5 ms
 
     uint8_t b[6];
     if (i2c_read(SHT3X_ADDR, b, 6) != 0) return -1;   // NACK if not ready
@@ -337,7 +342,7 @@ T int vs double, 401 points: max |diff| = 0.0052 C
 adc_T=500000 -> int 1612, double 16.1186 C
 ```
 
-CRC 예제값 0x92가 나오고, 0x6666(26214)은 −45 + 175 × 26214 / 65535 = 25.0003 °C, 0x8000은 50.0008 %RH로 잘려 25.00·50.00이 됩니다. bit 하나를 뒤집으면 -1입니다. calibration은 음수 dig_H4·H5까지 같은 word로 돌아오고, 정수 온도 식은 401개 입력에서 double 식과 최대 0.0052 °C 차이로 0.01 °C 단위 반올림 안에 있습니다. 이 calibration 값은 실제 chip 값이 아니므로 16.12 °C라는 결과 자체에는 의미가 없습니다.
+CRC 예제값 0x92가 나오고, 0x6666(26214)은 65535의 정확히 0.4이므로 T = 25.0000 °C이고, 0x8000은 50.0008 %RH로 잘려 50.00이 됩니다. bit 하나를 뒤집으면 -1입니다. calibration은 음수 dig_H4·H5까지 같은 word로 돌아오고, 정수 온도 식은 401개 입력에서 double 식과 최대 0.0052 °C 차이로 출력 1 LSB(0.01 °C)보다 작습니다. 이 calibration 값은 실제 chip 값이 아니므로 16.12 °C라는 결과 자체에는 의미가 없습니다.
 
 ### 보드에서
 
@@ -377,7 +382,7 @@ CRC가 틀린 값은 버리고 다시 읽습니다. 위 host 실행에서 bit �
 - SHT3x: **0x2400** single shot, **tMEAS,h max 15 ms**, CRC-8 **0x31/0xFF**.
 - host에서 **CRC 예제값, calibration 해석, 정수·double 온도 식 일치**를 확인.
 
-다음 편은 **IMU (가속도·자이로·지자기)**입니다. MPU6050, BMI270 driver와 sensor fusion 입력 단계를 다룹니다.
+다음 편은 **IMU 센서**입니다. MPU-6050 초기화·14 byte burst read·Data Ready 인터럽트와 complementary filter를 다룹니다.
 
 ## 관련 항목
 
