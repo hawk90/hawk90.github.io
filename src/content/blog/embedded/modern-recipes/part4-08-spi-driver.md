@@ -241,7 +241,7 @@ logic analyzer로 SCK·MOSI·MISO·CS 4채널을 함께 잡으면 transaction �
 
 확인할 것은 CS의 rising edge가 마지막 SCK edge 뒤에 오는지, CPOL에 맞는 idle level에서 SCK가 시작하는지입니다.
 
-오실로스코프로 SCK clock 주기를 보면 divider 검증이 됩니다 (`PCLK / 2^(BR+1)`).
+오실로스코프로 SCK clock 주기를 보면 divider를 검증할 수 있습니다(`PCLK / 2^(BR+1)`).
 
 ## 자주 보는 함정
 
