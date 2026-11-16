@@ -12,11 +12,11 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"Period와 duty 두 숫자로 모든 PWM이 만들어집니다."** ARR가 period, CCR가 duty. duty / ARR이 비율.
+> **"Period와 duty 두 숫자로 모든 PWM이 만들어집니다."** ARR가 period, CCR가 duty. `CCR / (ARR+1)`이 비율입니다.
 
 ## 어떤 상황에서 쓰나
 
-LED 밝기, DC motor 속도, servo 위치처럼 "켜져 있는 시간의 비율"로 조절하는 출력에 PWM을 씁니다. STM32F407에서 complementary output과 dead-time을 내는 것은 advanced timer인 TIM1·TIM8이고(`stm32f407xx.h`에서 `BDTR` register와 `TIM_CCER_CC1NE`를 쓰는 timer), 이 글의 나머지 예제는 general purpose timer TIM3을 씁니다.
+LED 밝기, DC motor 속도, servo 위치처럼 "켜져 있는 시간의 비율"로 조절하는 출력에 PWM을 씁니다. STM32F407에서 complementary output과 dead-time을 내는 것은 advanced timer인 TIM1·TIM8이고(`stm32f407xx.h`의 `IS_TIM_CCXN_INSTANCE`·`IS_TIM_BREAK_INSTANCE`가 TIM1·TIM8만 받습니다), 이 글의 나머지 예제는 general purpose timer TIM3을 씁니다.
 
 이 글은 단일 PWM, 다중 채널 PWM, complementary PWM, DMA로 duty를 바꾸는 PWM 네 가지를 작성합니다. register·bit 이름은 `stm32f407xx.h`, PWM mode와 dead-time의 정의는 ST HAL v1.8.3의 LL 헤더 `stm32f4xx_ll_tim.h`, 핀의 AF 번호는 ST open_pin_data에서 확인했습니다. QEMU의 F4 TIM 모델은 출력 핀을 모델링하지 않으므로, 코드는 arm-none-eabi-gcc 16.2.0으로 `-Wall` 경고 없이 빌드되는 것까지 확인했습니다.
 
@@ -27,7 +27,7 @@ LED 밝기, DC motor 속도, servo 위치처럼 "켜져 있는 시간의 비율"
 up-counter는 0부터 `ARR`까지 센 뒤 0으로 돌아가고, 돌아가는 순간 update event(UEV)가 납니다. PWM mode 1에서는 counter가 `CCR`보다 작은 동안 출력이 active이므로, 한 주기 안에서 active 구간의 길이가 `CCR`에 비례합니다.
 
 - `ARR` (Auto-Reload Register): counter top. period = (ARR+1) × (PSC+1) / TIM_clk.
-- `CCR` (Capture/Compare Register): duty 값. 0~ARR.
+- `CCR` (Capture/Compare Register): duty 값. 0~ARR+1 (ARR+1이면 100%).
 - `PSC` (Prescaler): clock을 나눔.
 
 ### PWM frequency 계산
@@ -72,7 +72,7 @@ void pwm_led_init(void) {
         .mode=GPIO_MODE_AF, .speed=GPIO_SPEED_HIGH, .af=2,
     });
 
-    // 20 kHz PWM, 8-bit (256 step)
+    // ~20.5 kHz PWM, 8-bit (256 step)
     TIM3->PSC = 16 - 1;            // 84 MHz / 16 = 5.25 MHz
     TIM3->ARR = 256 - 1;           // 5.25 MHz / 256 = ~20.5 kHz
 
@@ -103,6 +103,7 @@ while (1) {
 ```c
 void rgb_init(void) {
     RCC->APB1ENR |= RCC_APB1ENR_TIM3EN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN;
 
     // PA6 R, PA7 G, PB0 B (TIM3 CH1/2/3, AF2)
     gpio_init(GPIOA, 6, &(gpio_config_t){.mode=GPIO_MODE_AF, .af=2});
@@ -137,14 +138,15 @@ H-bridge나 3-phase inverter의 high-side·low-side 한 쌍에는 서로 반대�
 ```c
 void pwm_complementary_init(void) {
     RCC->APB2ENR |= RCC_APB2ENR_TIM1EN;
+    RCC->AHB1ENR |= RCC_AHB1ENR_GPIOAEN | RCC_AHB1ENR_GPIOBEN;
 
     // PA8 = TIM1_CH1 (high-side), PB13 = TIM1_CH1N (low-side, AF1)
     gpio_init(GPIOA, 8,  &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=1});
     gpio_init(GPIOB, 13, &(gpio_config_t){.mode=GPIO_MODE_AF, .speed=GPIO_SPEED_VH, .af=1});
 
-    // 20 kHz center-aligned PWM
+    // center-aligned PWM, about 20 kHz
     TIM1->PSC = 0;
-    TIM1->ARR = 4200 - 1;          // 168 MHz / 4200 = 40 kHz, center-aligned → 20 kHz
+    TIM1->ARR = 4200 - 1;          // one up+down cycle is about 2 x 4200 clocks at 168 MHz
     TIM1->CR1 = TIM_CR1_CMS_0;     // center-aligned mode 1
 
     // PWM mode 1, complementary
@@ -162,7 +164,7 @@ void pwm_complementary_init(void) {
 
 dead-time은 한쪽 출력이 꺼진 뒤 다른 쪽이 켜지기까지 두 출력이 모두 꺼져 있는 시간입니다. high-side와 low-side가 동시에 켜지면 전원과 GND가 바로 이어지므로 이 간격을 둡니다. `BDTR`의 `DTG` 값과 시간의 관계는 LL 헤더의 `__LL_TIM_CALC_DEADTIME()`가 보여 줍니다. 원하는 시간이 `(DT_DELAY_1 + 1) × tDTS`(`DT_DELAY_1` = 0x7F)보다 짧으면 `DTG = DT / tDTS`이고, `CKD` = 0이면 tDTS는 timer clock 주기입니다. 그래서 168 MHz에서 `DTG` = 42는 42 / 168 MHz = 250 ns입니다. 더 긴 시간은 `DTG`의 상위 bit로 범위(`DT_RANGE_2`~`4`)를 바꿔 냅니다.
 
-center-aligned mode(`TIM_CR1_CMS_0`)에서는 counter가 0 → ARR → 0을 오가므로 한 주기가 2 × (ARR + 1) clock입니다. 168 MHz / (2 × 4200) = 20 kHz입니다.
+center-aligned mode(`TIM_CR1_CMS_0`)는 LL 헤더의 설명대로 "The counter counts up and down alternatively"이므로, 한 주기가 edge-aligned의 두 배 가까운 약 2 × 4200 clock, 즉 168 MHz 기준 약 20 kHz입니다. 끝값을 몇 번 세는지에 따른 정확한 주기는 reference manual RM0090의 center-aligned mode 설명에 있는데, 이 글은 그 문서를 확인하지 못해 "약"으로 둡니다.
 
 ### 4. DMA-driven duty — waveform 생성
 
@@ -219,11 +221,11 @@ scope에서 확인할 것은 두 가지입니다. 주기가 `(PSC+1)(ARR+1) / TI
 
 > ⚠️ Preload (OCxPE) 안 set
 
-`OCxPE`가 0이면 `CCR`에 쓴 값이 바로 비교에 쓰입니다. 주기 중간에 바뀌면 그 주기의 high 구간이 옛 값과 새 값 어느 쪽과도 맞지 않을 수 있습니다. `OCxPE`를 켜면 새 값은 다음 update event에서 적용됩니다.
+LL 헤더는 `OCxPE`를 "Enable compare register (TIMx_CCRx) preload"라고 설명합니다. preload가 언제 비교 register로 옮겨지는지의 정확한 규칙은 RM0090에 있어 이 글은 다루지 않고, 위 코드는 HAL처럼 `OCxPE`를 켜 둡니다.
 
 > ⚠️ UG event 안 트리거
 
-preload를 켠 상태에서는 `PSC`·`ARR`·`CCR`의 새 값이 update event 때 옮겨지므로, 처음 한 번은 `EGR = UG`로 update를 강제해 첫 주기부터 새 값으로 돌게 합니다. HAL의 `TIM_Base_SetConfig()`도 마지막에 `TIMx->EGR = TIM_EGR_UG`를 씁니다.
+LL 헤더의 `LL_TIM_SetPrescaler()` 설명대로 `PSC`는 "The new prescaler ratio is taken into account at the next update event"이므로, 처음 한 번은 `EGR = UG`로 update를 강제해 첫 주기부터 새 값으로 돌게 합니다. HAL의 `TIM_Base_SetConfig()`도 마지막에 `TIMx->EGR = TIM_EGR_UG`를 씁니다.
 
 > ⚠️ Complementary PWM에 MOE 안 set
 
