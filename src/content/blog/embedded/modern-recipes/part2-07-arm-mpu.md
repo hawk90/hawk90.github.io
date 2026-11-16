@@ -170,7 +170,47 @@ void mpu_guard_selftest(void) {
 
 Handler에 오지 않으면 MPU의 ENABLE과 region 7의 ENABLE·주소·AP를 다시 봅니다. HardFault로 가면 아래 "자주 보는 함정"의 `MEMFAULTENA` 항목에 해당합니다.
 
+**QEMU에서 돌린 결과.** 위 `mpu_setup()`·handler·selftest를 그대로 QEMU 11.1.3 `mps2-an386`(Cortex-M4, MPU region 8개)에서 돌렸습니다. 이 모델은 코드 메모리가 0x00000000에 있어 region 0의 base만 0x08000000 대신 0x00000000으로 바꿨고, 나머지 region과 guard 주소는 그대로입니다. 툴체인은 arm-none-eabi-gcc 16.2.0과 CMSIS 5.9.0 `core_cm4.h`, handler는 디버거 대신 semihosting으로 값을 찍습니다.
+
+```bash
+arm-none-eabi-gcc -DTEST=1 -mcpu=cortex-m4 -mthumb -mfloat-abi=hard -ffreestanding -O1 -g \
+  -Iharness -ICMSIS_5/CMSIS/Core/Include -nostdlib -T harness/link.ld \
+  harness/startup.c harness/semi.c mpu.c -o mpu1.elf
+qemu-system-arm -M mps2-an386 -nographic -monitor none -serial none \
+  -semihosting-config enable=on,target=native,userspace=on -kernel mpu1.elf
+```
+
+```text
+MPU_TYPE.DREGION = 0x00000008
+RASR = 0x06020027
+RASR = 0x10000009
+test 1: write guard word from privileged thread on PSP
+MemManage CFSR = 0x00000082
+  DACCVIOL = 0x00000001
+  MSTKERR = 0x00000000
+  MMARVALID = 0x00000001
+  MMFAR = 0x20018000
+  PSP = 0x2001FFE0
+  stacked PC = 0x000003AA
+```
+
+region 0의 RASR 0x06020027은 AP=110·C·SIZE=19·ENABLE, region 7의 0x10000009는 XN·AP=000·SIZE=4·ENABLE입니다. 표의 기대값이 모두 맞았고, `arm-none-eabi-addr2line -e mpu1.elf 0x3AA`는 stacked PC가 `mpu_guard_selftest`의 store(`str r2, [r3, #0]`)임을 보여 줍니다.
+
 실제 overflow는 이 시험과 다릅니다. Fault 순간 PSP가 guard 바로 위에 있으므로, guard 위 끝(0x20018020)과 PSP 사이가 stack frame보다 좁으면 진입 stacking도 guard에 씁니다. Frame은 8워드이고, 부동소수점 상태까지 쌓으면 S0~S15와 FPSCR이 더해집니다(2.3.7절, Figure 2-3). Stacking이 guard에 닿은 경우가 `MSTKERR`의 정의이고, 이때 stack의 context 값은 틀릴 수 있으므로(Table 4-25) stacked PC로 원인 함수를 찾지 않습니다.
+
+같은 하네스에서 이 stack으로 끝없는 재귀를 돌리면 바로 그 경우가 나옵니다. 재귀 함수의 store가 guard에 닿고(DACCVIOL), 이어지는 진입 stacking도 guard에 씁니다(MSTKERR).
+
+```text
+test 2: unbounded recursion on the guarded PSP stack
+MemManage CFSR = 0x00000092
+  DACCVIOL = 0x00000001
+  MSTKERR = 0x00000001
+  MMARVALID = 0x00000001
+  MMFAR = 0x20018008
+  PSP = 0x20017FE8
+```
+
+PSP 0x20017FE8은 이미 guard 아래로 내려간 값이라, 이 상태의 stack frame은 믿을 수 없습니다.
 
 ### Task 격리와 context switch
 
@@ -183,6 +223,25 @@ void drop_to_unprivileged(void) {
     __ISB();
 }
 ```
+
+같은 하네스에서 task A 역할의 코드를 region 1 안의 PSP(0x20000F00)에 두고 `drop_to_unprivileged()`를 부른 뒤, region 1 안(0x20000800)을 읽고 바로 위(0x20001000)에 썼습니다. 이어서 stack을 region 1 바닥 근처(0x20000100)로 옮겨 재귀로 넘치게 했습니다.
+
+```text
+test 3: unprivileged, CONTROL = 0x00000003
+  read 0x20000800 (region 1): ok
+MemManage CFSR = 0x00000082
+  DACCVIOL = 0x00000001
+  MMFAR = 0x20001000
+test 4: unprivileged task A overflows its stack at the bottom of region 1
+MemManage CFSR = 0x00000092
+  DACCVIOL = 0x00000001
+  MSTKERR = 0x00000001
+  MMFAR = 0x1FFFFFE8
+```
+
+region 밖 쓰기는 정확히 그 주소에서, stack overflow는 region 1 아래(0x1FFFFFE8)에서 fault가 났습니다. 앞 절의 "region 경계 자체가 guard"가 그대로 보입니다.
+
+이 실험을 처음 짤 때 한 번 틀렸습니다. `main()` 안에서 `__set_PSP()`·`CONTROL.SPSEL`로 stack을 바꾸고 같은 함수에서 계속 실행하면, 컴파일러가 잡아 둔 지역 변수의 `[sp, #4]` 같은 offset이 새 stack 기준이 됩니다. PSP를 region 1 꼭대기(0x20001000)에 두었더니 지역 변수 store가 0x20001004로 가서 MemManage가 났습니다. stack을 바꾼 뒤에는 새 함수로 들어가거나, 새 SP 위에 여유를 둡니다.
 
 DUI 0553A 2.1.3절은 OS 환경에서 thread는 PSP, kernel과 handler는 MSP를 쓰도록 권장하고, 4.5절은 OS kernel이 실행할 process에 맞춰 MPU region 설정을 동적으로 바꿀 수 있다고 적습니다. 위 배치에서 그 자리는 region 1입니다. Context switch handler에서 `mpu_write_region(1, …)`으로 다음 task의 RAM을 열 때, 4.5.8절은 MPU 설정을 바꾼 뒤 `DSB`가 필요하고 예외로 진입한 설정 코드에는 `ISB`가 필요 없다고 적습니다. Region 0과 7은 그대로 둡니다. FreeRTOS-MPU의 구조는 [RTOS System Call — SVC·ECALL·User/Kernel 분리·FreeRTOS-MPU](/blog/embedded/rtos/practical-internals/part4-10-syscall)에서 다룹니다.
 
