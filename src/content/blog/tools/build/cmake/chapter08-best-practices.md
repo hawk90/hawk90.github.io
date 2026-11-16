@@ -31,14 +31,14 @@ add_executable(myapp ${SRCS})
 target_link_libraries(myapp foo bar)
 ```
 
-CMake 4.x는 최소 정책 버전 3.5 미만의 호환성을 제거했으므로 위 예제는 그대로 구성되지 않습니다. 정책 버전을 올리는 것과 설정의 영향을 줄이는 작업은 별개입니다. 아래에서는 네 가지 설계 문제를 구분합니다.
+CMake 4.x는 최소 정책 버전 3.5 미만의 호환성을 제거했으므로 위 예제는 그대로 구성되지 않습니다. 4.5.0에서는 첫 명령에서 `Compatibility with CMake < 3.5 has been removed from CMake.`로 멈춥니다. 그런데 `VERSION`만 3.25로 올리면 구성은 되지만 아래 네 문제는 그대로 남습니다. 이 글의 실행 결과는 모두 CMake 4.5.0·Ninja 1.13.2·macOS 27.2·AppleClang 21에서 나왔습니다.
 
 1. **전역 오염**. `include_directories()`·`add_definitions()`가 *그 디렉터리의 모든 타겟*에 영향을 줍니다. 라이브러리 A와 B가 같은 매크로를 강제로 받습니다.
-2. **플래그 문자열 조작**. `CMAKE_CXX_FLAGS`를 직접 합치면, 다른 자리에서 같은 변수에 추가한 플래그와 *순서·중복 충돌*이 납니다. 디버깅이 어렵습니다.
+2. **플래그 문자열 조작**. `CMAKE_CXX_FLAGS`를 직접 합치면 CMake가 따로 붙이는 플래그와 섞입니다. 위처럼 `-std=c++11`을 넣은 뒤 타겟에 `cxx_std_17`을 요구하면, 컴파일 명령은 `/usr/bin/c++ -Wall -std=c++11 -std=gnu++17 ...`이 되어 뒤의 옵션이 이깁니다. 같은 `-std=c++11`은 링크 명령에도 들어갔습니다. 어느 줄이 어떤 플래그를 넣었는지 명령만 봐서는 알 수 없습니다.
 3. **암묵 의존성**. `link_directories()`로 경로만 알려 주고 어떤 라이브러리를 쓰는지 *명시 안 합니다*. 의존성 그래프가 보이지 않습니다.
 4. **`file(GLOB)`의 함정**. 새 소스 파일을 추가해도 CMake가 *알아채지 못합니다*. 재구성을 강제로 하지 않으면 빌드에 빠집니다.
 
-Modern CMake(3.0+, 특히 3.15+)는 이 모두를 *타겟 중심* 모델로 해결합니다. 이 챕터는 그 모델을 *완전한 형태*로 정리합니다 — 새 프로젝트를 시작할 때 그대로 채택해도 좋은 템플릿이 됩니다.
+Modern CMake는 이 모두를 *타겟 중심* 모델로 해결합니다. 이 챕터는 그 모델을 새 프로젝트의 템플릿으로 쓸 수 있는 형태로 정리합니다.
 
 | Old CMake (전역 중심) | Modern CMake (타겟 중심) |
 |---|---|
@@ -122,7 +122,13 @@ target_link_libraries(myapp PRIVATE myheaders mywarnings)
 
 ### 전역 설정
 
-전역 명령은 이후 모든 타겟에 영향을 미칩니다. 서브프로젝트를 포함할 때 예상치 못한 충돌이 발생합니다.
+전역 명령은 같은 디렉터리와 그 뒤에 추가한 하위 디렉터리의 모든 타겟에 영향을 미칩니다. 최상위에 `include_directories(${CMAKE_SOURCE_DIR}/include)`·`add_definitions(-DUSE_FOO)`·`add_compile_options(-Werror)`를 두고 `add_subdirectory(third_party/zlibish)`로 서드파티 라이브러리를 넣으면, 그 라이브러리의 컴파일 명령이 이렇게 됩니다.
+
+```text
+/usr/bin/c++ -DUSE_FOO -I<src>/include -arch arm64 -Werror ... -c <src>/third_party/zlibish/z.cpp
+```
+
+서드파티 코드가 내 매크로를 받고, 내 프로젝트의 경고 정책 때문에 남의 코드가 빌드 실패할 수 있는 상태가 됩니다.
 
 ```cmake
 # ❌ Bad — 전역 오염
@@ -157,7 +163,7 @@ add_executable(myapp
 
 1. `cmake -B build`로 구성 — 그때의 `*.cpp` 목록이 잠깁니다.
 2. 개발자가 `new_module.cpp`를 추가.
-3. `cmake --build build`로 빌드 — *새 파일을 모름*. 빌드 산물에 누락됩니다.
+3. `cmake --build build`로 빌드 — *새 파일을 모름*. 4.5.0·Ninja에서 이 단계의 출력은 `ninja: no work to do.` 한 줄이었습니다.
 4. 알아채려면 `cmake -B build`를 다시 돌려 *재구성*해야 함.
 
 명시적 목록을 수정하면 CMakeLists.txt 변경으로 재구성됩니다. 새 파일을 목록에 추가하는 것을 잊을 가능성까지 없애 주는 것은 아닙니다. 대신 코드 리뷰에서 빌드 입력의 추가·삭제를 함께 확인할 수 있습니다.
@@ -168,15 +174,26 @@ add_executable(myapp
 file(GLOB SRCS CONFIGURE_DEPENDS src/*.cpp)
 ```
 
-이 옵션을 켜면 CMake가 *매 빌드마다 디렉터리를 다시 검사*하고, 변경이 있으면 *자동으로 재구성*합니다. 일견 완벽해 보입니다.
+이 옵션을 켜면 CMake가 *매 빌드마다 디렉터리를 다시 검사*하고, 변경이 있으면 *자동으로 재구성*합니다. 같은 실험을 `CONFIGURE_DEPENDS`로 반복하면 3단계의 출력이 바뀝니다.
 
-함정은 *성능*입니다.
+```text
+[0/2] Re-checking globbed directories...
+-- GLOB mismatch!
+The following files were added:
+  +<S>/glob-cd/src/new_module.cpp
+[1/2] Re-running CMake...
+...
+[1/5] Building CXX object CMakeFiles/myapp.dir/src/new_module.cpp.o
+[2/5] Linking CXX executable myapp
+```
 
-- 매 빌드마다 *디렉터리 stat*을 합니다. 작은 프로젝트에서는 무시할 만하지만, 모듈이 수십·수백 개면 누적이 됩니다.
-- 공식 문서는 모든 생성기에서의 신뢰성을 보장하지 않으며 디렉터리 재검사 비용을 설명합니다. 특정 생성기의 미지원 여부는 해당 버전의 실행 근거로 판단합니다.
-- 빌드 입력을 리뷰할 때 파일 목록 변경이 CMakeLists.txt diff로 나타나지 않습니다.
+대가는 세 가지입니다.
 
-[file(GLOB) 공식 문서](https://cmake.org/cmake/help/v4.4/command/file.html#glob)는 소스 목록을 GLOB으로 수집하는 방식을 권장하지 않습니다. 자산 수집에 사용하더라도 같은 생성기·파일 시스템에서 추가/삭제가 반영되는지 확인합니다. 프로젝트 크기만으로 사용 가능 여부를 정하지 않습니다.
+- **매 빌드의 재검사 비용**. 200개 디렉터리에 50개씩, 파일 10,000개를 `file(GLOB_RECURSE ... CONFIGURE_DEPENDS)`로 모은 프로젝트에서 아무것도 바뀌지 않은 `cmake --build`를 10번 재 보니 중앙값이 9ms에서 70ms로 늘었습니다(같은 Mac, APFS). 컴파일이 없는 빌드에서도 매번 이만큼 듭니다.
+- **생성기 의존**. [file(GLOB) 공식 문서](https://cmake.org/cmake/help/v4.4/command/file.html#glob)는 이 플래그가 모든 생성기에서 신뢰성 있게 동작하지 않을 수 있고, 나중에 추가될 생성기가 지원하지 못할 수도 있다고 적습니다. 이 글은 Ninja에서만 확인했습니다.
+- **리뷰 가시성**. 빌드 입력을 리뷰할 때 파일 목록 변경이 CMakeLists.txt diff로 나타나지 않습니다.
+
+같은 문서는 소스 파일 목록을 GLOB으로 모으는 방식 자체를 권장하지 않는다고 적습니다.
 
 ```cmake
 # 가능한 사용 예 — 자산 파일 자동 인식
@@ -287,7 +304,7 @@ if(PROJECT_SOURCE_DIR STREQUAL PROJECT_BINARY_DIR)
     )
 endif()
 
-# === 옵션 (프로젝트 접두사 필수) ===
+# === 옵션 (프로젝트 접두사 필수, BUILD_SHARED_LIBS는 CMake 표준 변수라 예외) ===
 option(BUILD_SHARED_LIBS "Build shared libraries" OFF)
 option(MYPROJECT_BUILD_TESTS "Build tests" ON)
 option(MYPROJECT_BUILD_DOCS "Build documentation" OFF)
@@ -361,7 +378,7 @@ endif()
 
 ### 별칭 타겟 제공
 
-항상 네임스페이스가 붙은 별칭을 제공합니다. 사용측에서 일관된 문법을 쓸 수 있고, 존재하지 않는 타겟을 링크하면 즉시 에러가 발생합니다.
+항상 네임스페이스가 붙은 별칭을 제공합니다. 사용측에서 일관된 문법을 쓸 수 있고, 존재하지 않는 타겟을 링크하면 빌드 전에 생성 단계에서 에러가 납니다.
 
 ```cmake
 add_library(mylib src/mylib.cpp)
@@ -371,13 +388,15 @@ add_library(MyProject::mylib ALIAS mylib)
 target_link_libraries(app PRIVATE MyProject::mylib)
 ```
 
-별칭 없이 `mylib`만 쓰면 타이포가 있어도 에러 없이 통과할 수 있습니다.
+별칭 없이 `mylib`만 쓰면 타이포가 구성·생성 단계를 통과합니다.
 
 ```cmake
 target_link_libraries(app PRIVATE mylob)  # 타이포!
-# 일반 이름은 라이브러리 검색 이름으로 처리되어 링크 시 실패할 수 있음
-# 별칭 있으면: MyProject::mylob을 찾을 수 없다고 즉시 에러
+# 일반 이름은 링커 옵션 -lmylob으로 넘어가 링크 단계에서 실패
+# 별칭이면: 생성 단계에서 Target "app" links to: MyProject::mylob ... not found
 ```
+
+두 경우의 4.5.0 실제 출력은 [Ch 3](/blog/tools/build/cmake/chapter03-targets#별칭-없이-사용)에 있습니다.
 
 ### 헤더 전용 라이브러리
 
@@ -462,6 +481,8 @@ if(NOT HAS_STD_FILESYSTEM)
 endif()
 ```
 
+4.5.0·AppleClang 21에서 이 검사는 `-- Performing Test HAS_STD_FILESYSTEM - Success`였습니다. 같은 파일에서 `CMAKE_CXX_STANDARD`만 11로 바꾸자 `- Failed`가 되고 `FATAL_ERROR`에서 멈췄습니다. 검사용 컴파일이 `CMAKE_CXX_STANDARD`를 따르기 때문인데, 이 동작은 3.8의 정책 `CMP0067`이 정합니다. 그래서 검사 전에 표준을 설정합니다.
+
 ---
 
 ## 의존성 관리 전략
@@ -492,9 +513,11 @@ find_or_fetch(spdlog https://github.com/gabime/spdlog.git v1.15.0)
 target_link_libraries(myapp PRIVATE fmt::fmt spdlog::spdlog)
 ```
 
+Homebrew로 fmt 12.2.1과 spdlog 1.17.0이 설치된 Mac에서 4.5.0으로 구성하면 `-- Found fmt on system`, `-- Found spdlog on system`이 찍혔고, 버전을 찍는 프로그램은 `fmt 120201 spdlog 1.17.0`을 출력했습니다. 매크로에 적은 `11.0.2`·`v1.15.0`은 쓰이지 않았습니다. `find_package(${PKG} QUIET)`에 버전 조건이 없기 때문이고, [Ch 5](/blog/tools/build/cmake/chapter05-find-package#시스템-우선-fetchcontent-폴백)의 `FIND_PACKAGE_ARGS`와 같은 함정입니다. 고정한 버전을 지키려면 `find_package(${PKG} ${VERSION} QUIET)`처럼 버전을 함께 넘깁니다.
+
 ### 서브프로젝트 옵션 격리
 
-`CACHE ... FORCE`는 공용 캐시 값을 강제로 바꾸므로 옵션 격리 수단이 아닙니다. 서브프로젝트가 CMP0077 NEW를 따를 때 일반 변수로 의도한 값을 먼저 전달할 수 있습니다. 소비자에게 옵션 선택권을 제공할지, 상위 프로젝트가 고정할지도 구분합니다.
+`CACHE ... FORCE`는 공용 캐시 값을 강제로 바꾸므로 옵션 격리 수단이 아닙니다. 서브프로젝트가 CMP0077 NEW를 따를 때 일반 변수로 의도한 값을 먼저 전달할 수 있습니다. fmt 11.0.2는 `cmake_minimum_required(VERSION 3.8...3.28)`, spdlog v1.15.0은 `3.10...3.21`이라 둘 다 CMP0077(3.13)이 NEW이고, `FMT_INSTALL`·`SPDLOG_FMT_EXTERNAL`은 각 프로젝트 최상위 CMakeLists.txt의 `option()`입니다.
 
 ```cmake
 # FetchContent 전에 옵션 설정
@@ -504,11 +527,21 @@ set(SPDLOG_FMT_EXTERNAL ON)
 FetchContent_MakeAvailable(fmt spdlog)
 ```
 
+fmt 11.0.2를 FetchContent로 넣고 세 방식을 4.5.0에서 비교했습니다. "설치 파일 수"는 `cmake --install`이 찍은 `Installing:` 줄 수입니다.
+
+| 상위 프로젝트 코드 | `-DFMT_INSTALL=ON` 없이 | `-DFMT_INSTALL=ON` 줌 |
+|------|------|------|
+| `set(FMT_INSTALL OFF)` | 캐시 항목 없음, 설치 0개 | 캐시에 `UNINITIALIZED=ON`이 남지만 무시, 설치 0개 |
+| `set(FMT_INSTALL OFF CACHE BOOL "" FORCE)` | 캐시 `BOOL=OFF`, 설치 0개 | 사용자 값을 `OFF`로 덮어씀, 설치 0개 |
+| `if(NOT DEFINED FMT_INSTALL)` 안에서 `set(FMT_INSTALL OFF)` | 설치 0개 | 설치 20개 |
+
+앞의 두 줄은 상위 프로젝트가 값을 고정하고, 세 번째는 기본값만 바꾸고 소비자의 `-D`를 존중합니다. `FORCE`는 사용자가 넣은 캐시 값까지 지운다는 점이 다릅니다.
+
 ---
 
 ## 실전 예시 — 단독 빌드와 서브프로젝트 빌드 비교
 
-같은 소스를 단독 프로젝트와 서브프로젝트로 빌드해 테스트 기본값과 경고 옵션의 범위를 확인합니다. 실행 환경은 CMake 4.4.4·Ninja 1.13.2·macOS·AppleClang 21입니다. 다음 두 파일을 저장합니다.
+같은 소스를 단독 프로젝트와 서브프로젝트로 빌드해 테스트 기본값과 경고 옵션의 범위를 확인합니다. 실행 환경은 CMake 4.5.0·Ninja 1.13.2·macOS·AppleClang 21입니다. 다음 두 파일을 저장합니다.
 
 ```cmake title="CMakeLists.txt"
 cmake_minimum_required(VERSION 3.25)
@@ -544,7 +577,7 @@ cmake --build build --verbose
 ctest --test-dir build --output-on-failure
 ```
 
-단독 빌드는 `top=ON; tests=ON`을 출력하고 ChecklistRuns가 통과합니다. 다음 파일은 `parent/CMakeLists.txt`로 저장합니다. 상위 프로젝트에서 빌드 루트의 테스트 탐색을 활성화하고 같은 소스를 하위 디렉터리로 포함합니다.
+4.5.0에서 단독 빌드는 `-- top=ON; tests=ON`을 출력했고, `ctest`는 `100% tests passed out of 1`이었습니다. 다음 파일은 `parent/CMakeLists.txt`로 저장합니다. 상위 프로젝트에서 빌드 루트의 테스트 탐색을 활성화하고 같은 소스를 하위 디렉터리로 포함합니다.
 
 ```cmake title="parent/CMakeLists.txt"
 cmake_minimum_required(VERSION 3.25)
@@ -561,7 +594,7 @@ cmake --build parent-build --verbose
 ctest --test-dir parent-build -N
 ```
 
-이때 하위 프로젝트는 `top=OFF; tests=OFF`를 출력하고 테스트는 등록되지 않습니다. 사용자가 `-DCHECKLIST_BUILD_TESTS=ON`으로 명시하면 서브프로젝트에서도 테스트를 켤 수 있습니다. 캐시에 이전 값이 있으면 option 기본값보다 우선하므로 독립된 빌드 디렉터리로 비교합니다. 실제 경고 옵션은 빌드 로그에서 확인합니다.
+이때 하위 프로젝트는 `-- top=OFF; tests=OFF`를 출력했고 `ctest -N`은 `Total Tests: 0`이었습니다. 또 다른 새 빌드 디렉터리에서 `-DCHECKLIST_BUILD_TESTS=ON`을 주면 `-- top=OFF; tests=ON`이 되고 테스트 하나가 통과했습니다. 캐시에 이전 값이 있으면 option 기본값보다 우선하므로 비교할 때마다 새 빌드 디렉터리를 씁니다. 경고 옵션은 두 경우 모두 `checklist_app` 컴파일 명령에 `-Wall -Wextra -Wpedantic`로 들어갔습니다. INTERFACE 타겟으로 묶은 경고는 그 타겟을 링크한 타겟에만 붙으므로, 상위 프로젝트의 다른 타겟은 영향을 받지 않습니다.
 
 ## 다음 단계 — Modern Advanced
 
@@ -616,7 +649,7 @@ target_include_directories(mylib include)  # ❌ 키워드 누락
 target_include_directories(mylib PUBLIC include)  # ✓ PUBLIC 명시
 ```
 
-키워드가 없으면 CMake 버전에 따라 경고 또는 에러가 발생합니다.
+4.5.0에서 키워드 없는 호출은 `target_include_directories called with invalid arguments` 오류로 구성이 멈췄습니다. `target_link_libraries`와 달리 `target_include_directories`에는 키워드 없는 서명이 없습니다.
 
 ### 빌드 트리와 설치 트리 혼동
 
@@ -624,7 +657,18 @@ target_include_directories(mylib PUBLIC include)  # ✓ PUBLIC 명시
 target_include_directories(mylib PUBLIC include)  # ❌ 설치 후 경로 깨짐
 ```
 
-빌드 시와 설치 후 경로가 다르므로 제너레이터 표현식으로 분리합니다.
+이 타겟을 `install(EXPORT ...)`로 내보내면 4.5.0은 생성 단계에서 멈춥니다.
+
+```text
+CMake Error in CMakeLists.txt:
+  Target "mylib" INTERFACE_INCLUDE_DIRECTORIES property contains path:
+
+    "<src>/include"
+
+  which is prefixed in the source directory.
+```
+
+설치된 패키지가 소스 트리 경로를 가리키게 되는 것을 CMake가 막는 것입니다. 빌드 시와 설치 후 경로가 다르므로 제너레이터 표현식으로 분리합니다.
 
 ```cmake
 target_include_directories(mylib PUBLIC
@@ -636,12 +680,12 @@ target_include_directories(mylib PUBLIC
 ### Multi-config에서 if(CMAKE_BUILD_TYPE) 사용
 
 ```cmake
-if(CMAKE_BUILD_TYPE STREQUAL "Debug")  # ❌ Multi-config에서 항상 빈 문자열
+if(CMAKE_BUILD_TYPE STREQUAL "Debug")  # ❌ Multi-config에서는 -D로 주지 않으면 빈 문자열
     target_compile_options(myapp PRIVATE -O0 -g)
 endif()
 ```
 
-Visual Studio나 Ninja Multi-Config는 `CMAKE_BUILD_TYPE`으로 실제 구성을 선택하지 않습니다. 값이 있더라도 위 if는 Debug만의 설정을 표현하지 못합니다. 아래는 컴파일러에 독립적인 구성 매크로 예입니다.
+Visual Studio나 Ninja Multi-Config는 `CMAKE_BUILD_TYPE`으로 실제 구성을 선택하지 않습니다. 값을 `-DCMAKE_BUILD_TYPE=Debug`로 넣으면 위 if가 참이 되지만, 그 옵션은 Release 빌드에도 붙습니다([Ch 2](/blog/tools/build/cmake/chapter02-language#왜-if로는-안-되는가)에서 Ninja Multi-Config로 확인). 아래는 컴파일러에 독립적인 구성 매크로 예입니다.
 
 ```cmake
 target_compile_definitions(myapp PRIVATE
@@ -660,7 +704,7 @@ target_link_libraries(myapp PRIVATE ${Boost_LIBRARIES})
 target_link_libraries(myapp PRIVATE Boost::filesystem)  # ✓ Modern style
 ```
 
-Modern find 모듈은 imported 타겟을 제공합니다. 타겟을 링크하면 include 경로와 컴파일 정의가 자동으로 전파됩니다.
+Boost 1.70 이상은 `BoostConfig.cmake`로 `Boost::filesystem` 같은 imported 타겟을 제공하고, CMake 3.30부터는 내장 `FindBoost` 대신 이 Config 파일을 찾습니다(정책 `CMP0167`, [Ch 5](/blog/tools/build/cmake/chapter05-find-package#boost) 참고). 타겟을 링크하면 include 경로와 컴파일 정의가 자동으로 전파됩니다.
 
 ---
 
@@ -673,7 +717,7 @@ Modern find 모듈은 imported 타겟을 제공합니다. 타겟을 링크하면
 ## 참고 자료
 
 - [Modern CMake](https://cliutils.gitlab.io/modern-cmake/) — 현대적 CMake 가이드
-- [Effective CMake (Daniel Pfeifer)](https://www.youtube.com/watch?v=bsXLMQ6WgIk) — CppCon 발표
+- [Effective CMake (Daniel Pfeifer)](https://www.youtube.com/watch?v=bsXLMQ6WgIk) — C++Now 2017 발표
 - [It's Time To Do CMake Right](https://pabloariasal.github.io/2018/02/19/its-time-to-do-cmake-right/)
 - [CMake Buildsystem](https://cmake.org/cmake/help/v4.4/manual/cmake-buildsystem.7.html) — 공식 문서
 - [Professional CMake (Book)](https://crascit.com/professional-cmake/) — 심화 학습용 책
