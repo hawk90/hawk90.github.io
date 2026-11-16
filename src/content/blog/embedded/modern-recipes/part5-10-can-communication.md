@@ -28,7 +28,7 @@ Standard data frame은 SOF, 11-bit identifier, RTR, IDE, r0, DLC(4 bit), data 0~
 
 ### Bit timing
 
-Bosch CAN 2.0 8장은 한 bit를 SYNC_SEG(1 TQ), PROP_SEG(1~8 TQ), PHASE_SEG1(1~8 TQ), PHASE_SEG2로 나누고, 한 bit의 TQ 수를 "at least from 8 to 25"로 프로그램할 수 있어야 한다고 합니다. sample point는 PHASE_SEG1의 끝입니다.
+Bosch CAN 2.0 Part A 8장은 한 bit를 SYNC_SEG(1 TQ), PROP_SEG(1~8 TQ), PHASE_SEG1(1~8 TQ), PHASE_SEG2로 나누고, 한 bit의 TQ 수를 "at least from 8 to 25"로 프로그램할 수 있어야 한다고 합니다. sample point는 PHASE_SEG1의 끝입니다.
 
 bxCAN은 PROP_SEG와 PHASE_SEG1을 합친 TS1 하나를 받습니다. Linux bxcan driver는 TS1 field에 `phase_seg1 + prop_seg - 1`을 쓰고, 범위를 `tseg1_max = 16`, `sjw_max = 4`, `brp_max = 1024`로 둡니다. HAL의 `IS_CAN_PRESCALER`도 1~1024입니다.
 
@@ -95,16 +95,16 @@ int can_init_500k(int loopback) {
     CAN1->MCR &= ~(CAN_MCR_NART | CAN_MCR_ABOM);   // auto retransmit, sw bus-off recovery
 
     // 42 MHz / 6 = 7 MHz TQ; 1 + 11 + 2 = 14 TQ -> 500 kbit/s, sample 85.7 %
-    CAN1->BTR = CAN_BTR(6, 11, 2, 2) | (loopback ? CAN_BTR_LBKM : 0u);
+    CAN1->BTR = CAN_BTR(6, 11, 2, 2) | (loopback ? (CAN_BTR_LBKM | CAN_BTR_SILM) : 0u);
 
     CAN1->MCR &= ~CAN_MCR_INRQ;     // leave init mode
     for (uint32_t t = 0; CAN1->MSR & CAN_MSR_INAK; t++)
-        if (t > 1000000u) return -1;   // no 11 recessive bits seen
+        if (t > 1000000u) return -1;   // INAK never cleared
     return 0;
 }
 ```
 
-HAL `HAL_CAN_Start()`도 INRQ를 지운 뒤 INAK가 0이 되기를 timeout과 함께 기다립니다. 그대로 기다리기만 하면 RX 핀이 recessive로 올라오지 않는 배선에서 멈추므로 위 코드도 횟수로 끊습니다.
+HAL `HAL_CAN_Start()`도 INRQ를 지운 뒤 INAK가 0이 되기를 timeout과 함께 기다립니다. 위 코드도 끝없이 기다리지 않고 횟수로 끊어 -1을 돌려줍니다.
 
 ### 2. Acceptance filter
 
@@ -207,6 +207,7 @@ void CAN1_RX0_IRQHandler(void) {
         uint32_t head = rx_head;
         if (head - rx_tail < RX_Q) {    // drop when full
             rx_q[head % RX_Q] = f;
+            __DMB();                    // slot written before the index moves
             rx_head = head + 1;
         }
     }
@@ -216,16 +217,17 @@ int can_recv(can_rx_t *f) {
     uint32_t tail = rx_tail;
     if (tail == rx_head) return -1;
     *f = rx_q[tail % RX_Q];
+    __DMB();                            // slot read before the index frees it
     rx_tail = tail + 1;
     return 0;
 }
 ```
 
-IDE를 보고 standard·extended ID를 가르는 방식은 Zephyr `can_stm32_rx_fifo_pop()`과 같고, data를 읽은 뒤 `RF0R`에 RFOM0을 세워 FIFO를 비우는 것은 Linux `bxcan_handle_fifo()`와 같습니다.
+IDE를 보고 standard·extended ID를 가르는 방식은 Zephyr `can_stm32_rx_fifo_pop()`과 같고, data를 읽은 뒤 `RF0R`에 RFOM0을 세워 FIFO를 비우는 것은 Linux `bxcan_mailbox_read()`와 같습니다. `rx_q`는 volatile이 아니어서 compiler가 slot 복사와 index 갱신의 순서를 바꿀 수 있으므로, 그 사이에 CMSIS `__DMB()`를 둡니다(이 함수는 memory clobber가 있는 inline asm이라 compiler barrier도 겸합니다). barrier가 없을 때 GCC 16.2 `-O2`는 `can_recv()`에서 `rx_tail` store를 slot 복사보다 앞에 냈습니다.
 
 ### 5. Loopback 시험
 
-transceiver나 다른 node 없이 송수신 경로를 확인할 때 `can_init_500k(1)`로 LBKM을 켭니다. Linux driver도 `CAN_CTRLMODE_LOOPBACK`에서 LBKM을 세우고, 주석에 "loopback + silent mode put the controller in test mode, useful for hot self-test"라고 적습니다.
+`can_init_500k(1)`은 LBKM과 SILM을 함께 켭니다. Linux driver는 `CAN_CTRLMODE_LOOPBACK`에서 LBKM, `CAN_CTRLMODE_LISTENONLY`에서 SILM을 세우고, 그 위에 "loopback + silent mode put the controller in test mode, useful for hot self-test"라고 적습니다. 이 mode에서 ACK와 CANRX 핀이 어떻게 다뤄지는지는 RM0090의 bxCAN test mode 절에 있고, 이 글은 그 문서를 열어 보지 못해 확인하지 않았습니다.
 
 ```c
 int can_selftest(void) {
@@ -316,17 +318,17 @@ brp= 7 tq=12 ts1= 3 ts2=8 sample= 33.3% BTR=0x03720006
 21 combinations; this post: 0x011A0005
 ```
 
-prescaler 4(21 TQ), 6(14 TQ), 7(12 TQ)에서 모두 21개 조합이 나오고, 이 글의 설정은 BTR = 0x011A0005입니다. tseg2 = 1인 줄은 PHASE_SEG2가 CAN 2.0이 정한 Information Processing Time 상한 2 TQ보다 짧아질 수 있는 조합이라, 1-10은 PHASE_SEG2 ≥ 2로 걸러 냅니다. 표의 SJW는 min(tseg2, 4)로 넣었습니다.
+prescaler 4(21 TQ), 6(14 TQ), 7(12 TQ)에서 모두 21개 조합이 나오고, 이 글의 설정은 BTR = 0x011A0005입니다. tseg2 = 1인 줄은 PHASE_SEG2(1 TQ)가 CAN 2.0이 Information Processing Time 상한으로 둔 2 TQ보다 짧으므로, 1-10은 PHASE_SEG2 ≥ 2로 걸러 냅니다. 표의 SJW는 min(tseg2, 4)로 넣었습니다.
 
 ### 보드에서
 
-`can_selftest()`가 0을 돌려주면 BTR·filter·mailbox·FIFO 경로가 모두 동작합니다. `can_init_500k()`가 -1이면 init mode를 못 빠져나왔으므로, RX 핀(PA11)의 배선과 transceiver 전원을 봅니다. 두 보드를 transceiver로 이어 시험할 때 송신 쪽 `ESR`의 TEC가 계속 오르면, 위 fault confinement 표대로 송신마다 error가 나고 있는 것이고 ACK를 줄 다른 node가 bus에 없는지부터 봅니다. 전기적인 확인 순서는 1-10을 따릅니다.
+`can_selftest()`가 0을 돌려주면 BTR·filter·mailbox·FIFO 경로가 모두 동작합니다. `can_init_500k()`가 -1이면 init mode를 못 빠져나왔으므로, RX 핀(PA11)의 배선과 transceiver 전원을 봅니다. 두 보드를 transceiver로 이어 시험할 때 송신 쪽 `ESR`의 TEC가 128 근처에서 멈춰 있으면 ACK를 줄 다른 node가 bus에 없는지부터 봅니다. CAN 2.0 Part A 7장 rule 3 Exception 1에 따라 error passive 송신 node는 ACK error로는 TEC를 올리지 않으므로, ACK error만으로는 bus-off까지 가지 않고 error passive에 머뭅니다. 전기적인 확인 순서는 1-10을 따릅니다.
 
 ## 자주 보는 함정
 
 > ⚠️ node 하나로 시험
 
-CAN frame의 ACK slot은 다른 node가 채웁니다. node가 하나뿐이면 송신마다 ACK error가 나고 TEC가 오릅니다. 혼자 시험할 때는 loopback mode(LBKM)를 씁니다.
+CAN frame의 ACK slot은 다른 node가 채웁니다. node가 하나뿐이면 송신마다 ACK error가 나고, TEC는 error passive(128)까지 오른 뒤 멈춥니다. 혼자 시험할 때는 5절의 loopback·silent mode를 씁니다.
 
 > ⚠️ node마다 bit timing이 다름
 
