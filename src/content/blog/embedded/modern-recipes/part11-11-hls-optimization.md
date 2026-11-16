@@ -165,7 +165,7 @@ for (int k = 0; k < 8; k++)
     sum += acc[k];
 ```
 
-10만 개를 더해 보면 실제로 순서에 따라 결과가 다릅니다(11-10의 실행: serial 12.0908508, 4-way 12.0901299). 정수 누적은 결과가 같으니 이 걱정이 없고, UG1399는 정밀도를 낮춘 float 누적 모드도 II=1로 pipeline된다고 적습니다.
+10만 개를 더해 보면 실제로 순서에 따라 결과가 다릅니다(11-10의 실행: serial 12.0908508, 4-way 12.0901299). 정수 누적은 결과가 같으니 이 걱정이 없습니다. UG1399는 정밀도를 낮춘 float 누적 모드도 II=1로 pipeline된다고 적습니다.
 
 ## Image Processing 예 — Sobel과 line buffer
 
@@ -236,7 +236,7 @@ for (int i = 0; i < 8; i++)
     sum += arr[i];
 ```
 
-Partition은 동시에 읽을 수 있는 길을 만들 뿐입니다. loop를 펼치거나(UNROLL, 또는 바깥 loop의 PIPELINE) 해서 실제로 여러 원소를 같은 사이클에 읽어야 효과가 납니다. 이 loop는 정수 누적이라 펼쳐도 결과가 같습니다.
+Partition은 동시에 읽을 수 있는 길을 만들 뿐입니다. loop를 펼쳐서(UNROLL, 또는 바깥 loop의 PIPELINE) 실제로 여러 원소를 같은 사이클에 읽어야 효과가 납니다. 이 loop는 정수 누적이라 펼쳐도 결과가 같습니다.
 
 > 큰 배열을 `complete`로
 
