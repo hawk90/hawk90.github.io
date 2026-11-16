@@ -288,10 +288,10 @@ callback이 pbuf를 받았으면 해제도 callback 몫입니다. 위 echo처럼
 
 ## 정리
 
-- MAC은 F407 안, PHY는 바깥. **RMII data 7개(AF11) + MDC/MDIO**.
-- MDIO는 **`MACMIIAR`(PA·MR·CR·MW·MB) + `MACMIIDR`**, 168 MHz에서 **CR = Div102**.
-- LAN8742는 **BCR reset → auto-negotiation**, link는 **BSR을 두 번 읽어** 판단, 속도는 **PHYSCSR 4:2**.
-- MAC·DMA는 **HAL `HAL_ETH_Init()`**, lwIP 연결은 **`ethernetif.c` 틀**.
+- MAC은 F407 안에, PHY는 바깥에 있고, 둘을 **RMII data 7개(AF11) + MDC/MDIO**로 잇습니다.
+- MDIO는 **`MACMIIAR`(PA·MR·CR·MW·MB) + `MACMIIDR`**로 다루고, 168 MHz에서는 **CR = Div102**를 씁니다.
+- LAN8742는 **BCR reset → auto-negotiation** 순서로 설정하고, link는 **BSR을 두 번 읽어** 판단하며, 속도는 **PHYSCSR 4:2**에서 읽습니다.
+- MAC·DMA는 **HAL `HAL_ETH_Init()`**에 맡기고, lwIP는 **`ethernetif.c` 틀**을 채워 연결합니다.
 - lwIP raw UDP echo는 **host에서 packet을 넣어** 응답을 확인했습니다.
 
 다음 편은 **SD 카드 SPI 모드 + FatFs**입니다. SPI 모드 초기화와 FatFs disk I/O 연결을 다룹니다.
