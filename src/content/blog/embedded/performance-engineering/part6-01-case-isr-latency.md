@@ -11,186 +11,160 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **"평균 지연이 짧아도 deadline miss가 발생할 수 있습니다. IRQ 비활성 구간과 end-to-end 지연을 따로 측정합니다."**
+> **"평균 지연이 짧아도 deadline miss는 납니다. 꼬리 분포를 재고, 그 꼬리를 만드는 IRQ가 *어느 CPU에서* 처리되는지 확인합니다."**
 
-## 증상 — 보고된 문제
+## 증상 — 재현한 문제
 
-산업용 진동 센서 보드에서 사용 현장에서 산발적인 데이터 드롭이 보고됐습니다.
+산업용 진동 센서 보드처럼 10 kHz로 샘플을 받는 시스템을 생각해 봅니다. 샘플 하나당 처리 예산은 100 µs입니다. 이 사례는 그런 보드에서 "평균은 여유 있는데 가끔 샘플이 빠진다"는 보고가 들어온 상황에서 출발합니다. 다만 이 글은 남의 보드 로그를 옮기지 않고, 같은 모양의 문제를 직접 만들어 측정했습니다.
 
-이 절의 장치 사양·latency·trace·Before/After 숫자는 원시 로그나 보드 정보가 없어 재현된 사례로 확인하지 않았습니다. 아래는 진단 절차를 설명하는 시나리오입니다.
+재현 환경은 다음과 같습니다. 진짜 센서 대신 `cyclictest`가 100 µs 주기로 깨어나며, 예정 시각보다 얼마나 늦게 깨어났는지를 기록합니다. 이 값이 "샘플이 user 공간에 도착하기까지의 지연"을 대신합니다. 샘플을 제때 받는 일을 정시 출발 버스에 빗대면, `cyclictest`는 버스가 정류장에 몇 분 늦게 왔는지를 매번 적는 사람입니다.
 
 | 항목 | 값 |
 |------|-----|
-| HW | Cortex-A53 quad-core, Linux 5.10, PREEMPT |
-| 센서 | vibration sensor, 10 kHz sampling |
-| 요구 | sample → user buffer 전달 deadline 100 µs |
-| SLA | 99.99% 만족 |
+| Host | Apple M2 Pro, macOS, QEMU 11.1.3 `-M virt -accel hvf -cpu host` (8 vCPU, 8 GiB) |
+| Guest | Debian 13 arm64, kernel `6.12.116+deb13-arm64` (`CONFIG_PREEMPT_VOLUNTARY=y`, `CONFIG_HZ=250`) |
+| "센서" | `cyclictest` V 2.60, SCHED_FIFO 95, CPU0 고정, 100 µs 주기, 20초(약 200,000 표본) |
+| Deadline | 100 µs 초과 = miss |
+| 방해 부하 | host의 HTTP 서버에서 1 GiB 파일을 반복 다운로드(`curl`, CPU5 고정). 수신 IRQ는 virtio-net(`virtio0`, IRQ 46) |
+| 반복 | idle / IRQ를 CPU0에 / IRQ를 CPU3에, 세 조건을 한 라운드로 묶어 10라운드 |
 
-현장 보고 내용은 다음과 같았습니다.
+측정 스크립트는 다음과 같습니다. 조건마다 IRQ 46의 affinity를 바꾸고, 다운로드를 CPU5에서 돌리면서 CPU0의 `cyclictest` 히스토그램을 받습니다.
 
-- 평균 latency는 25 µs로 여유가 충분했습니다.
-- 그런데도 시간당 수십 회 deadline miss가 발생했습니다.
-- 미스가 나면 latency가 200~500 µs까지 spike했습니다.
-- 재현 시점이 일정하지 않았습니다.
+```bash
+# isr-exp.sh <idle|load-cpu0|load-cpu3> <round> (발췌, $out = 결과 파일 접두어)
+case $sc in
+  load-cpu0) echo 0 > /proc/irq/46/smp_affinity_list ;;
+  load-cpu3) echo 3 > /proc/irq/46/smp_affinity_list ;;
+esac
+cat /proc/irq/46/effective_affinity_list > $out.eff
+[ $sc != idle ] && { ( while :; do taskset -c 5 curl -s -o /dev/null http://10.0.2.2:8766/big; done ) & }
+mpstat -P 0,3 -u -I SUM 5 1 > $out.mpstat &
+cyclictest -m -p 95 -t 1 -a 0 -i 100 -D 20 -q -h 5000 > $out.hist
+```
 
-평균은 한참 여유였지만 worst case가 spec을 깨고 있었습니다. 평균 metric만 보면 절대 발견할 수 없는 형태의 문제입니다.
+부하는 CPU5에서만 돌고 `cyclictest`는 CPU0에 있습니다. 그런데도 IRQ 46이 CPU0으로 가 있으면 결과가 크게 나빠졌습니다. 10라운드의 중앙값은 다음과 같습니다.
+
+| 조건 | 평균 | p50 | p99 | p99.9 | 100 µs 초과(20초당) |
+|---|---|---|---|---|---|
+| idle | 32 µs | 25 µs | 139.5 µs | 792 µs | 2,917 |
+| 다운로드 + IRQ 46 → CPU0 | 38.5 µs | 30 µs | 159 µs | 573.5 µs | 5,606 |
+| 다운로드 + IRQ 46 → CPU3 | 32.5 µs | 28.5 µs | 106 µs | 337 µs | 2,015.5 |
+
+10라운드의 표본을 모두 합치면 100 µs를 넘은 비율은 idle 2.07%, IRQ가 CPU0일 때 5.85%, CPU3일 때 2.30%입니다. 같은 라운드 안에서 비교하면 IRQ를 CPU0에 둔 쪽이 10번 중 9번 더 나빴습니다. 예외인 5라운드는 CPU3 쪽 로그가 VM 재부팅(다른 작업이 일으킨 guest panic)으로 사라져 다른 시간대에 다시 돌린 값이라 짝이 맞지 않습니다.
+
+평균만 보면 32 µs와 38.5 µs로, 100 µs 예산 안에서 여유가 있어 보입니다. 하지만 deadline을 넘긴 샘플 수는 두 배 가까이 차이 납니다. **평균은 이 문제를 보여 주지 못합니다.**
+
+> ⚠️ **VM의 꼬리는 host가 만듭니다.** 아무 부하가 없는 idle에서도 최대 지연이 라운드마다 4,075 µs ~ 36,002 µs로 튀었습니다. 측정 직후 확인했을 때 같은 Mac에서 이 guest를 포함해 QEMU 프로세스가 8개 돌고 있었습니다. guest 안에는 부하가 없었으므로, vCPU 스레드 자체가 host에서 밀려난 것으로 봅니다. 그래서 이 글에서는 *최댓값*으로 결론을 내리지 않고, 중앙값과 100 µs 초과 개수를 비교합니다. VM 바깥의 잡음이 없는 실제 보드라면 최댓값도 분석 대상이 됩니다.
 
 ## 가설 1 — CPU 부하 과다
 
-처음 의심한 것은 시스템 CPU 부하였습니다. 다른 프로세스가 CPU를 점유해 ISR이 늦게 처리되는 그림입니다.
-
-```bash
-mpstat -P ALL 1
-
-# 12:30:01  CPU   %usr   %nice   %sys  %iowait  %irq  %soft  %idle
-# 12:30:02  all   18.5    0.0    7.2     0.5    0.3   1.1   72.4
-# 12:30:02    0   22.0    0.0    8.0     0.0    0.5   2.1   67.4
-# 12:30:02    1   17.2    0.0    7.0     1.0    0.2   0.8   73.8
-# 12:30:02    2   18.0    0.0    7.5     0.5    0.3   0.9   72.8
-# 12:30:02    3   17.0    0.0    6.5     0.3    0.2   0.6   75.4
-```
-
-전 코어 평균 idle 70% 이상. CPU는 충분히 여유가 있었습니다.
-
-`top`에서도 CPU 사용량이 높은 프로세스는 보이지 않았고, 우리 사용자 데몬과 시스템 서비스 모두 5% 이하였습니다.
-
-**가설 1만으로는 설명되지 않음**: 짧은 mpstat 표본은 순간 CPU 평균을 보여 줄 뿐, deadline miss의 원인을 배제하지 않습니다.
-
-## 가설 2 — 다른 IRQ가 CPU를 점유
-
-다음으로 살펴볼 것은 IRQ 비활성 구간입니다. Linux에서 hard IRQ가 실행된다는 사실만으로 같은 코어의 모든 IRQ가 계속 막히는 것은 아닙니다. `irqsoff`는 IRQ가 비활성화된 구간의 길이를 추적하며, 이 값은 센서 IRQ의 end-to-end 지연과 같은 측정치가 아닙니다. (출처: [Linux ftrace 문서](https://docs.kernel.org/trace/ftrace.html))
-
-이 가설은 `irqsoff` tracer로 직접 측정할 수 있습니다.
-
-```bash
-# IRQ disabled 구간을 길이 순으로 추적
-echo 0 > /sys/kernel/debug/tracing/tracing_max_latency
-echo irqsoff > /sys/kernel/debug/tracing/current_tracer
-echo 1 > /sys/kernel/debug/tracing/tracing_on
-
-# 10분 가동 후
-cat /sys/kernel/debug/tracing/tracing_max_latency
-# 312
-```
-
-아래 값은 설명을 위한 예시이며, 해당 보드에서 수집한 로그가 아닙니다. 실제 `irqsoff` 최댓값은 관찰 구간에서 IRQ가 비활성화되어 있던 최장 시간입니다. 이 값만으로 센서 샘플에서 user buffer까지의 deadline 만족 여부나 다른 IRQ handler의 실행 시간을 판정할 수는 없습니다.
-
-`trace` 파일을 열어 어느 함수가 IRQ를 그렇게 오래 막았는지 확인합니다.
+처음 의심할 것은 CPU 부하입니다. 다른 프로세스가 CPU를 점유해 처리가 늦어진다는 그림입니다. 다운로드 중 `mpstat`(sysstat 12.7.5)의 5초 표본을 보면 이 가설이 왜 헷갈리는지 알 수 있습니다.
 
 ```text
-# tracer: irqsoff
-# irqsoff latency trace v1.x on <kernel-version>
-# latency: <measured-us> us, #<entries>/<entries>, CPU#<cpu>
-# => started at: <function with local IRQs disabled>
-# => ended at:   <function restoring local IRQ state>
-# <trace rows depend on kernel, configuration, and enabled options>
+09:40:53     CPU    %usr   %nice    %sys %iowait    %irq   %soft  %steal  %guest  %gnice   %idle
+09:40:58       0    1.00    0.00    1.34    0.00    0.00   62.37    0.00    0.00    0.00   35.28
+09:40:58       3    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00    0.00  100.00
+
+09:40:53     CPU    intr/s
+09:40:58       0  22424.15
+09:40:58       3     13.97
 ```
 
-실제 추적에서 시작·종료 함수가 SD 카드 경로와 겹친다면 후속 조사 단서로 삼을 수 있습니다. 이 예시에는 원본 trace, 커널 버전, 동시 센서 지연 표본이 없으므로 SD 카드가 원인이었다거나 로그 flush와 deadline miss가 일치했다고 결론 내릴 수 없습니다.
+CPU0의 `%usr`는 1%입니다. 이 CPU에서 사용자 프로세스는 거의 돌지 않습니다. 대신 `%soft`가 62%이고, 모든 인터럽트를 합쳐 초당 22,424번을 받고 있습니다. 10라운드의 CPU0 `%soft` 중앙값은 IRQ가 CPU0일 때 58.5%, CPU3일 때 11.3%였습니다.
 
-**판정 보류**: IRQ 비활성 구간은 측정 대상이지만, 이 예시 자료만으로 실제 원인을 확정할 수 없습니다.
+8개 CPU 전체 평균만 보면 CPU0의 62%는 8분의 1로 희석되어 7.8%포인트밖에 되지 않습니다. 비유하면 사무실 전체 출근율은 정상인데 한 사람 책상에만 전화가 몰리는 상황입니다. **CPU별로, 그리고 `%usr`와 `%soft`를 나눠서 봐야 합니다.**
 
-## 원인 후보 — 진단에 필요한 증거
+어떤 소프트IRQ인지는 같은 다운로드를 따로 돌리며 `/proc/softirqs`의 5초 차이로 확인했습니다(`cyclictest` 없이). 수신 처리(`NET_RX`)가 IRQ를 받은 CPU에서 그대로 돕니다.
 
-원인을 확정하려면 대상 커널의 SDHCI 구현과 trace를 함께 확인해야 합니다. 아래 코드는 처리 시간이 측정된 실제 Linux 구현이 아니라 흐름을 단순화한 예시입니다.
-
-```c
-/* 간략화한 흐름 */
-irqreturn_t sdhci_irq_handler(int irq, void *dev)
-{
-    spin_lock(&host->lock);
-
-    if (intmask & SDHCI_INT_DATA_END) {
-        sdhci_data_irq(host);            /* ~50 µs */
-        sdhci_finish_data(host);         /* ~130 µs */
-        sdhci_request_done(host);        /* ~100 µs */
-    }
-
-    spin_unlock(&host->lock);
-    return IRQ_HANDLED;
-}
+```text
+== IRQ46 -> CPU0
+NET_RX:    cpu0=58506 cpu3=0 cpu5=0
+== IRQ46 -> CPU3
+NET_RX:    cpu0=0 cpu3=47215 cpu5=0
 ```
 
-`irqsoff` trace가 이 코드의 handler duration이나 모든 IRQ의 차단 시간을 뜻하지는 않습니다. IRQ masking·nesting·controller 동작은 아키텍처와 드라이버에 따라 달라집니다.
+이 guest는 RPS가 꺼져 있었습니다(`rps_cpus`가 `00`). [Documentation/networking/scaling.rst](https://elixir.bootlin.com/linux/v6.12/source/Documentation/networking/scaling.rst)는 `rps_cpus`가 0(기본값)이면 패킷을 인터럽트를 받은 CPU에서 처리한다고 적습니다. 같은 문서가 RSS·RPS로 이 처리를 여러 CPU에 나누는 방법을 다루고, CPU별 부하는 `mpstat`로 보라고 권합니다. 다만 IRQ를 CPU3으로 옮긴 뒤에도 CPU0의 `%soft`가 11.3% 남은 이유는 이 글에서 확인하지 못했습니다. 그 조건에서 CPU0의 `NET_RX`는 0회였습니다.
 
-IRQ 비활성 구간과 센서 지연의 연관성을 확인한 뒤 다음 두 조치를 비교할 수 있습니다.
+**가설 1 기각**: 전체 CPU 사용률은 낮았지만, 지연을 만든 것은 CPU0 한 곳의 IRQ·소프트IRQ 처리였습니다.
 
-1. SD 카드 IRQ를 다른 코어로 격리
-2. SD 카드 핸들러를 threaded IRQ로 전환해 짧게 만들기
+## 가설 2 — IRQ 비활성 구간
 
-두 가지는 후보 조치이며, 보드에서 적용·측정하지 않았습니다. affinity 변경도 실제 IRQ 배치와 제약을 확인한 뒤 평가해야 합니다.
+다음 후보는 "누군가 IRQ를 오래 꺼 둔다"는 가설입니다. 이 가설을 재는 도구는 ftrace의 `irqsoff` tracer입니다. [ftrace 문서](https://elixir.bootlin.com/linux/v6.12/source/Documentation/trace/ftrace.rst)는 이 tracer가 인터럽트가 꺼져 있던 시간을 추적하고, 최대값이 갱신될 때 그 직전의 trace를 저장한다고 설명합니다. 즉 `irqsoff`가 재는 것은 *IRQ가 꺼져 있던 구간*이지, 샘플이 user 공간에 도착하기까지의 end-to-end 지연이 아닙니다.
+
+그런데 이 guest에서는 `irqsoff`를 쓸 수 없었습니다.
+
+```text
+$ cat /sys/kernel/tracing/available_tracers
+blk function_graph function nop
+$ grep -E 'CONFIG_IRQSOFF_TRACER|CONFIG_IRQ_FORCED_THREADING' /boot/config-6.12.116+deb13-arm64
+CONFIG_IRQ_FORCED_THREADING=y
+# CONFIG_IRQSOFF_TRACER is not set
+```
+
+`IRQSOFF_TRACER`는 [kernel/trace/Kconfig](https://elixir.bootlin.com/linux/v6.12/source/kernel/trace/Kconfig#L346)에서 `default n`이고, Debian 배포판 커널은 이 옵션을 켜지 않았습니다. 양산 보드에서 이 tracer로 진단하려면 먼저 그 커널의 설정에 이 옵션이 있는지 확인하고, 없으면 켠 커널을 따로 빌드합니다. 이 글에서는 커널을 다시 빌드하지 않았으므로 IRQ 비활성 구간은 측정하지 않았습니다.
+
+대신 앞의 실험이 질문을 더 직접 답합니다. 방해 부하를 그대로 두고 IRQ의 CPU만 바꿨을 때 100 µs 초과가 5,606에서 2,015.5로 줄었습니다. 원인 후보가 "CPU0이 받는 IRQ와 그 뒤의 소프트IRQ"로 좁혀집니다.
+
+## 원인 — IRQ와 소프트IRQ가 측정 대상 CPU에 몰림
+
+정리하면 다음과 같습니다.
+
+1. virtio-net의 IRQ 46은 아무것도 바꾸지 않은 첫 idle 라운드에서 `effective_affinity_list`가 `0`이었습니다. 실제로 CPU0 한 곳만 이 IRQ를 받았습니다. 이 guest에는 `irqbalance`도 돌지 않았습니다.
+2. 다운로드 중 CPU0은 초당 약 22,000번 인터럽트를 받고, `NET_RX` 소프트IRQ를 돌리느라 시간의 절반 이상을 썼습니다.
+3. SCHED_FIFO 95로 돌던 `cyclictest`도 IRQ와 소프트IRQ 처리가 끝날 때까지 기다려야 했고, 100 µs 초과가 늘었습니다.
+
+`cyclictest`가 RT 우선순위를 갖고 있어도 이 문제를 피하지 못한 이유가 여기 있습니다. 이 커널은 IRQ handler를 스레드로 돌리지 않으므로(`threadirqs` 미사용), hard IRQ는 스케줄러 우선순위와 상관없이 실행됩니다. IRQ가 끝나는 시점에 바로 도는 소프트IRQ도 마찬가지입니다. [kernel/softirq.c](https://elixir.bootlin.com/linux/v6.12/source/kernel/softirq.c#L541)의 `handle_softirqs()`는 대기 중인 소프트IRQ를 한 바퀴 다 처리한 *뒤에야* `need_resched()`·시간 제한(2 ms)·재시작 횟수(10회)를 검사하고, 남은 일을 `ksoftirqd` 스레드로 넘깁니다. 그 한 바퀴 동안은 깨어난 RT 태스크도 기다립니다.
 
 ## 해결 — IRQ Affinity와 Threaded IRQ
 
-다음은 센서와 SD 카드 IRQ를 다른 코어에 배치하는 명령 예시입니다. 실제 IRQ 번호·허용 CPU·effective affinity와 irqbalance의 영향을 먼저 확인합니다.
+첫 번째 해결은 앞의 실험에서 이미 쓴 IRQ affinity입니다. [Documentation/core-api/irq/irq-affinity.rst](https://elixir.bootlin.com/linux/v6.12/source/Documentation/core-api/irq/irq-affinity.rst)에 따르면 `/proc/irq/<N>/smp_affinity_list`는 그 IRQ가 갈 수 있는 CPU 목록입니다. 실제로 어느 CPU가 받는지는 `effective_affinity_list`로 확인합니다.
 
 ```bash
-# 센서 IRQ 번호 확인
-grep sensor /proc/interrupts
-# 142:  ...  vibration_sensor
-
-# SD 카드 IRQ 번호 확인
-grep mmc /proc/interrupts
-# 89:   ...  mmc0
-
-# 센서는 코어 0, SD는 코어 3으로 고정
-echo 1 > /proc/irq/142/smp_affinity
-echo 8 > /proc/irq/89/smp_affinity
+grep virtio0 /proc/interrupts            # IRQ 번호 확인 (이 guest에서는 46)
+echo 3 > /proc/irq/46/smp_affinity_list  # 측정 대상 CPU0에서 떼어 냄
+cat /proc/irq/46/effective_affinity_list # 3
 ```
 
-다음은 검토할 수 있는 threaded IRQ 구성 예시입니다. 이 보드에서 옵션을 활성화하거나 성능을 측정하지 않았습니다.
+모든 IRQ를 이렇게 옮길 수 있지는 않습니다. 같은 guest의 virtio-blk 큐 IRQ(`virtio1-req.0`, IRQ 52)는 쓰기 자체가 거부됐습니다.
 
-```bash
-# 커널 부팅 파라미터 예시
-threadirqs
+```text
+$ ls -l /proc/irq/52/smp_affinity
+-r--r--r-- 1 root root 0 Nov 16 10:01 /proc/irq/52/smp_affinity
+$ echo 3 > /proc/irq/52/smp_affinity_list
+bash: line 1: echo: write error: Operation not permitted
 ```
 
-```c
-/* 드라이버 구현 예시 */
-request_threaded_irq(irq, sdhci_irq, sdhci_thread_irq,
-                     IRQF_SHARED, "mmc0", host);
-```
+이 큐 IRQ는 커널이 CPU별로 배치를 관리하는 *managed interrupt*입니다. `kernel/irq/manage.c`의 [`irq_can_set_affinity_usr()`](https://elixir.bootlin.com/linux/v6.12/source/kernel/irq/manage.c#L173)가 managed IRQ에 false를 돌려주고, [`kernel/irq/proc.c`](https://elixir.bootlin.com/linux/v6.12/source/kernel/irq/proc.c#L142)는 그 경우 `-EPERM`을 반환합니다. 파일 권한에 쓰기 비트가 없는 것도 같은 함수 때문입니다. 이런 IRQ를 측정 대상 CPU에서 떼어 내려면 부팅 파라미터 `isolcpus=managed_irq,<cpu>`를 씁니다. [kernel-parameters.txt](https://elixir.bootlin.com/linux/v6.12/source/Documentation/admin-guide/kernel-parameters.txt)는 이 격리가 best effort라고 적습니다. 큐의 affinity mask에 housekeeping CPU가 함께 있을 때만 효과가 있습니다. 같은 문서는 `isolcpus` 자체에 "Deprecated - use cpusets instead"를 달아 두었으므로, 스케줄링 격리는 cpuset으로 하고 managed IRQ 격리에만 이 플래그를 쓰는 편이 문서의 권고와 맞습니다.
 
-드라이버는 장치별 acknowledge/mask 요구사항에 맞춰 primary handler를 구현해야 합니다. `request_threaded_irq()`의 primary handler가 `IRQ_WAKE_THREAD`를 반환하면 `thread_fn`이 실행되는 형태입니다. thread 전환만으로 센서 지연이 줄거나 우선순위가 보장되는 것은 아닙니다. (출처: [Linux generic IRQ 문서](https://docs.kernel.org/core-api/genericirq.html))
+두 번째 후보는 threaded IRQ입니다. 드라이버가 [`request_threaded_irq()`](https://elixir.bootlin.com/linux/v6.12/source/kernel/irq/manage.c#L2105)로 handler를 둘로 나누면, hard IRQ 문맥의 primary handler는 장치 인터럽트를 확인하고 끈 뒤 `IRQ_WAKE_THREAD`를 반환합니다. 나머지 일은 `thread_fn`이 커널 스레드에서 합니다. 드라이버를 고치지 않고 전체에 적용하려면 부팅 파라미터 `threadirqs`를 씁니다. 이 파라미터는 `IRQF_NO_THREAD`가 없는 모든 handler를 강제로 스레드화합니다. 이 guest의 커널은 `CONFIG_IRQ_FORCED_THREADING=y`라 이 옵션을 받을 수 있습니다.
 
-아래 histogram은 IRQ entry 횟수를 세는 예시일 뿐 latency를 측정하지 않습니다. latency 분석에는 tracer의 정의에 맞는 별도 측정과 end-to-end timestamp가 필요합니다.
-
-```bash
-echo 'hist:keys=common_pid:vals=hitcount:sort=hitcount' \
-    > /sys/kernel/debug/tracing/events/irq/irq_handler_entry/trigger
-```
+IRQ 스레드는 `irq_thread()`에서 `sched_set_fifo()`로 SCHED_FIFO가 됩니다([kernel/irq/manage.c](https://elixir.bootlin.com/linux/v6.12/source/kernel/irq/manage.c#L1310)). 일반 스레드처럼 `chrt`로 우선순위를 바꿀 수 있으니 측정 대상 태스크보다 낮게 둘 수도 있습니다. 다만 이 글에서는 `threadirqs`를 켠 실험을 하지 않았습니다. 공유 VM을 다시 부팅해야 했기 때문입니다. 효과가 있는지, 처리량을 얼마나 잃는지는 위 표와 같은 방식으로 다시 재야 합니다.
 
 ## 검증 — Before / After
 
-다음 값은 형식 예시이며, 실측 결과가 아닙니다. max latency가 100 µs 미만인 표본 전체에서 miss rate가 0보다 크다고 표기하면 모순이므로, 실제 보고서에는 같은 표본·같은 latency 정의의 원시 분포를 기록해야 합니다.
+앞의 표에서 "Before"는 IRQ 46이 CPU0에 있는 조건, "After"는 CPU3으로 옮긴 조건입니다. 방해 부하와 측정 방법은 같습니다.
 
-| 지표 | Before | After |
-|---|---|---|
-| Avg latency | 25 µs | 22 µs |
-| P99 latency | 85 µs | 41 µs |
-| P999 latency | 240 µs | 58 µs |
-| Max latency | 512 µs | 78 µs |
-| Deadline miss rate (>100 µs) | 0.12% | 0% |
-| SLA 99.99% | 미달 | 표본에서 충족* |
+| 지표 (10라운드 중앙값) | Before (IRQ → CPU0) | After (IRQ → CPU3) | 참고: idle |
+|---|---|---|---|
+| p50 | 30 µs | 28.5 µs | 25 µs |
+| p99 | 159 µs | 106 µs | 139.5 µs |
+| p99.9 | 573.5 µs | 337 µs | 792 µs |
+| 100 µs 초과 / 20초 | 5,606 | 2,015.5 | 2,917 |
+| 100 µs 초과 비율 (전 표본) | 5.85% | 2.30% | 2.07% |
+| CPU0 `%soft` | 58.5% | 11.3% | 0.0% |
 
-\* 예시의 표본 범위에서만 성립하며, 장기 보장이나 실제 보드 결과를 뜻하지 않습니다.
+IRQ를 옮긴 뒤의 결과는 idle과 거의 같아졌습니다. 몇몇 지표는 idle보다 좋기까지 한데, 이는 개선 효과가 아니라 잡음입니다. guest에 부하가 없던 idle 2·4·6라운드에서도 100 µs 초과가 4,598~11,775개였습니다. 그래서 **After가 idle 수준까지 돌아왔다**까지만 결론으로 삼습니다.
 
-이 예시 표에서는 max와 miss-rate 정의가 일치합니다. 실제 적용 시에는 표본 수, 측정 경계, 계측 오버헤드, 실행 커널을 함께 공개해야 합니다.
-
-원문에 적힌 SD 카드 throughput 약 5% 감소도 측정 조건과 원시 기록이 없어 확인할 수 없습니다.
+같은 결과를 SLA로 읽으면 다음과 같습니다. 99.99% 만족이 목표라면 이 VM은 idle에서도 목표를 지키지 못합니다(2.07%가 100 µs 초과). VM에서 할 수 있는 것은 원인을 좁히고 개선 방향을 확인하는 데까지입니다. 최종 SLA 판정은 실제 보드와 실제 커널에서 다시 해야 합니다.
 
 ## 교훈
 
-이번 사례에서 배운 것을 정리합니다.
-
-- **평균과 꼬리 지연을 함께 봅니다**. 평균은 전체 경향에, percentile과 관측 최댓값은 deadline 초과를 조사하는 데 유용합니다. 관측 최댓값은 모든 실행의 최악 시간 상한을 증명하지 않습니다.
-- **IRQ 비활성 구간은 IRQ 응답에 영향을 줄 수 있습니다**. 장치 handler의 실행 시간과 local IRQ disable 구간을 구분해 관찰합니다.
-- **`irqsoff`는 IRQ 비활성 시간을 보여 줍니다**. IRQ handler 실행 시간이나 end-to-end latency를 대신 측정하지 않으므로 질문에 맞는 tracer를 선택합니다.
-- **IRQ affinity를 비교 실험합니다**. 지원되는 IRQ에 한해 CPU 배치를 바꿔 지연과 처리량을 함께 확인합니다.
-- **Threaded IRQ는 실행 맥락을 바꿉니다**. 장치별 인터럽트 처리 계약을 지키고 실제 지연·처리량을 다시 측정해야 합니다.
-- **가설을 별도 증거로 검증합니다**. CPU 평균 부하만으로 순간 지연의 원인을 기각하지 않고 동시 trace와 timestamp를 비교합니다.
-
-가장 중요한 교훈은 "평균이 OK라도 안심하면 안 된다"입니다. hard deadline과 percentile SLO를 구분하고, 측정 경계·표본 수·관측 기간을 요구사항에 맞춰 정해야 합니다.
+- **평균과 꼬리를 따로 봅니다.** 평균 32 µs와 38.5 µs는 비슷해 보이지만, deadline 초과는 두 배 가까이 차이 났습니다.
+- **CPU 사용률은 CPU별로, 종류별로 봅니다.** 8개 CPU 평균으로는 소프트IRQ 부하가 희석됐습니다. CPU0의 `%soft` 62%가 원인이었습니다.
+- **`irqsoff`는 커널 설정부터 확인합니다.** Debian 6.12 커널에는 이 tracer가 없었습니다. 또 이 tracer는 IRQ가 꺼진 구간을 잴 뿐, end-to-end 지연을 재지 않습니다.
+- **IRQ affinity는 바꿀 수 있는 IRQ에만 통합니다.** managed IRQ는 `/proc/irq`로 옮길 수 없고(`EPERM`), `isolcpus=managed_irq`가 필요합니다.
+- **변수 하나만 바꿔 비교합니다.** 부하와 측정은 그대로 두고 IRQ의 CPU만 바꿨기 때문에 원인을 그 하나로 좁힐 수 있었습니다.
+- **VM 측정의 한계를 적습니다.** host가 바쁘면 idle에서도 ms 단위 지연이 생깁니다. 이럴 때는 최댓값 대신 반복 측정의 중앙값과 짝지은 비교를 씁니다.
 
 다음 사례에서는 [행렬 곱의 메모리 접근 패턴](/blog/embedded/performance-engineering/part6-02-case-cache-thrashing)을 조사합니다.
 
