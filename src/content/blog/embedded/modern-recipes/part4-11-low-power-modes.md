@@ -16,7 +16,7 @@ topics: ["embedded"]
 
 ## 어떤 상황에서 쓰나
 
-배터리로 동작하는 sensor 노드는 깨어 있는 시간보다 자는 시간이 훨씬 길게 설계됩니다. 이 글은 세 가지를 답합니다.
+배터리로 동작하는 sensor 노드는 깨어 있는 시간보다 자는 시간이 훨씬 길게 설계됩니다. 이 글은 세 가지 질문에 답합니다.
 
 - 세 모드는 각각 무엇을 끄고 무엇을 남기며, 데이터시트 기준 전류와 wake 시간은 얼마인가
 - 각 모드에서 무엇으로 깨울 수 있는가
@@ -39,11 +39,11 @@ DS8626 Rev 4 2.2.19절 "Low-power modes"의 정의와 5.3.6·5.3.7절 표의 typ
 
 ¹ peripheral 전부 off / 전부 on.
 
-² main regulator in Run mode / main regulator in Low Power mode. 두 값 모두 Table 23의 "Flash in Stop mode"(Deep power down 아님), low-speed·high-speed internal RC와 high-speed oscillator OFF, "no independent watchdog" 조건.
+² main regulator in Run mode / main regulator in Low Power mode. 두 값 모두 Table 23의 "Flash in Stop mode"(Deep power down 아님), low-speed·high-speed internal RC와 high-speed oscillator OFF, "no independent watchdog" 조건입니다.
 
 ⁴ Table 28의 "regulator in Run mode" / "regulator in low power mode". flash를 Deep power down으로 둔 경우는 별도 행으로 110 µs입니다.
 
-³ low-speed oscillator·RTC on / RTC off. 두 값 모두 backup SRAM off.
+³ low-speed oscillator·RTC on / RTC off. 두 값 모두 backup SRAM off 조건입니다.
 
 Table 28의 wake 시간은 "measured from the wakeup event to the point in which the application code reads the first instruction"입니다(Table 28 주 2). Standby는 reset으로 다시 시작하므로 그 뒤의 clock 설정과 C runtime 초기화는 이 375 µs에 들어 있지 않습니다.
 
@@ -77,7 +77,7 @@ Standby 복귀는 reset과 같아서, 시작 코드가 복귀인지 구분해야
 
 평균 전류 = (active 전류 × active 시간 + sleep 전류 × sleep 시간) / 주기.
 
-예 — 1 s 주기로 168 MHz Run 10 ms + 저전력 990 ms. Run은 Table 20의 peripheral 전부 off 값 40 mA를 씁니다.
+예를 들어 1 s 주기에서 168 MHz Run 10 ms, 저전력 990 ms로 동작한다고 해 봅니다. Run은 Table 20의 peripheral 전부 off 값 40 mA를 씁니다.
 
 | 저전력 구간 | sleep 전류 | 평균 전류 | 평균에서 sleep 항의 비중 |
 |-------------|-----------|-----------|--------------------------|
@@ -249,8 +249,8 @@ WFI는 interrupt로 깨어나는데, Arm DUI 0553A 2.5.2절은 "Normally, the pr
 ## 정리
 
 - **Sleep은 CPU 몫만 줄입니다** — 남은 전류 중 peripheral clock gating으로 줄일 수 있는 범위는 "세 가지 저전력 모드" 절의 Sleep 항목에 있습니다.
-- **Stop에서 깨면 HSI 16 MHz** — PLL을 다시 설정해야 168 MHz로 돌아옵니다.
-- **Standby는 reset과 같음** — backup domain 레지스터와 선택한 backup SRAM만 남고, SBF로 복귀를 구분합니다.
+- **Stop에서 깨면 HSI 16 MHz로 돕니다.** PLL을 다시 설정해야 168 MHz로 돌아옵니다.
+- **Standby 복귀는 reset과 같습니다.** backup domain 레지스터와 선택한 backup SRAM만 남고, SBF로 복귀를 구분합니다.
 - **1 s 주기·10 ms active에서는 Standby의 평균이 더 낮습니다** — 계산과 가정은 "Duty-cycling 전략" 절에 있습니다.
 
 다음 편은 **워치독**입니다. IWDG/WWDG, multi-task refresh, debug freeze를 다룹니다.
