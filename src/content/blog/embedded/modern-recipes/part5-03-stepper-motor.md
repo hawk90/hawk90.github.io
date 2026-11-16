@@ -279,7 +279,7 @@ nENBL을 high로 올리면 datasheet대로 "disable device outputs and indexer o
 
 ## 정리
 
-- Stepper = **STEP pulse 카운트로 명령 위치**. 실제 step angle과 load에 따라 오차·step loss를 검증합니다.
+- Stepper는 **STEP pulse 카운트로 명령 위치**를 정합니다. 실제 step angle과 load에 따라 오차·step loss를 검증합니다.
 - DRV8825는 **STEP/DIR/nENBL + MODE0~2**이고, STEP high/low 1.9 µs, DIR setup 650 ns를 지킵니다.
 - **가속 ramp**는 가속·감속 모두 v² = v₀² + 2ad로 계산하고, 속도를 정수로 자르지 않습니다.
 - **Micro-step**은 MODE 핀으로 1/2 ~ 1/32를 고르고, full step은 71 % 전류로 구동됩니다.
