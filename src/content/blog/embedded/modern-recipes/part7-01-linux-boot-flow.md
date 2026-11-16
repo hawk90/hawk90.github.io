@@ -101,6 +101,75 @@ U-Boot가 root 장치에 대해 하는 일은 `root=/dev/mmcblk1p2 rootwait rw`�
 
 이 줄은 끝이 아닙니다. `/init`이 있다는 이유로 `prepare_namespace()`는 이미 건너뛰었으므로 `root=`를 줬어도 진짜 root는 mount되지 않고, 커널은 PID 1 순서(`init=`, `CONFIG_DEFAULT_INIT`, `/sbin/init` …)로 initramfs 안에서 다시 찾습니다. 파일이 있는데 실행되지 않으면 `Starting init: /sbin/init exists but couldn't execute it (error -8)` 같은 줄이 더 찍히고, 모두 실패하면 `No working init found.` 패닉으로 끝납니다. `init=`를 줬다면 그것이 실패하는 순간 `Requested init ... failed` 패닉입니다. initramfs 안에 실행되는 `/sbin/init`이 있으면 그것이 진짜 root 없이 PID 1이 됩니다([init/main.c L1393-1405](https://github.com/torvalds/linux/blob/v6.12/init/main.c#L1393-L1405)·[L1494-1531](https://github.com/torvalds/linux/blob/v6.12/init/main.c#L1494-L1531)).
 
+## QEMU virt에서 커널 쪽 줄 재현하기
+
+위 표의 커널 쪽 줄은 보드 없이도 볼 수 있습니다. i.MX8M Mini가 아니라 QEMU `virt` 보드라서 콘솔은 `ttyAMA0`이고 root 장치는 `/dev/vda`지만, `kernel_init_freeable()`부터의 경로는 같은 v6.12 소스입니다. 아래는 Debian 13 arm64 VM에서 v6.12 tarball(kernel.org, `sha256sums.asc`로 확인)을 `make defconfig; make -j6 Image modules dtbs`로 빌드한 `Image`(gcc 14.2.0)를 QEMU 11.1.3에 넣어 돌린 결과입니다.
+
+initramfs는 두 개를 만들었습니다. 하나는 `/init` 자리에 x86-64 ELF를 넣은 것이고, 다른 하나는 arm64 정적 busybox와 셸 스크립트 `/init`을 넣은 것입니다.
+
+```bash
+# x86-64 ELF를 /init으로 (Debian clang 19 + lld)
+printf 'void _start(void) { for (;;) { } }\n' > init.c
+mkdir -p bad
+clang --target=x86_64-linux-gnu -nostdlib -static -fuse-ld=lld -O2 -o bad/init init.c
+(cd bad && find . | cpio -o -H newc) | gzip > initramfs-x86.cpio.gz
+
+# arm64 busybox + 셸 스크립트 /init (busybox-static 1.37.0)
+mkdir -p good/bin && cp /bin/busybox good/bin/
+printf '#!/bin/busybox sh\n/bin/busybox echo "hello from /init, PID $$"\n/bin/busybox poweroff -f\n' > good/init
+chmod +x good/init
+(cd good && find . | cpio -o -H newc) | gzip > initramfs-good.cpio.gz
+
+Q="qemu-system-aarch64 -M virt -cpu cortex-a57 -m 1G -nographic -no-reboot -kernel Image"
+$Q -initrd initramfs-x86.cpio.gz  -append "console=ttyAMA0 root=/dev/vda"
+$Q -initrd initramfs-good.cpio.gz -append "console=ttyAMA0"
+$Q -append "console=ttyAMA0 root=/dev/vda2 rootwait"
+truncate -s 16m blank.img
+$Q -drive if=none,id=d0,file=blank.img,format=raw -device virtio-blk-pci,drive=d0 \
+   -append "console=ttyAMA0 root=/dev/vda"
+```
+
+첫 번째 실행은 x86-64 `/init`입니다. `root=/dev/vda`를 줬지만 `/init`이 있으므로 `prepare_namespace()`를 건너뛰고, `/init`이 `ENOEXEC`로 실패한 뒤 initramfs 안에서 `/sbin/init`부터 `/bin/sh`까지 찾다가 패닉합니다. 네 경로 모두 파일이 없어서(`-ENOENT`) `Starting init: ... exists but couldn't execute it` 줄은 찍히지 않았습니다.
+
+```text
+[    0.286556] Unpacking initramfs...
+[    0.614906] Run /init as init process
+[    0.624580] Failed to execute /init (error -8)
+[    0.624800] Run /sbin/init as init process
+[    0.625024] Run /etc/init as init process
+[    0.625190] Run /bin/init as init process
+[    0.625352] Run /bin/sh as init process
+[    0.625652] Kernel panic - not syncing: No working init found.  Try passing init= option to kernel. See Linux Documentation/admin-guide/init.rst for guidance.
+```
+
+두 번째 실행은 arm64 `/init`입니다. 스크립트가 PID 1로 돌았습니다.
+
+```text
+[    0.619974] Run /init as init process
+hello from /init, PID 1
+```
+
+세 번째는 initramfs도 디스크도 없이 `root=/dev/vda2 rootwait`만 준 경우입니다. 60초 동안 다음 줄 뒤로 아무것도 찍히지 않았고, `timeout`으로 QEMU를 끝냈습니다.
+
+```text
+[    0.668809] Waiting for root device /dev/vda2...
+```
+
+네 번째는 파일시스템이 없는 16 MiB 빈 디스크를 `root=/dev/vda`로 준 경우입니다. 장치는 찾았지만(`virtio_blk`) 커널에 들어 있는 파일시스템이 모두 mount에 실패했습니다.
+
+```text
+[    0.586750] List of all partitions:
+[    0.587022] fe00           16384 vda 
+[    0.587058]  driver: virtio_blk
+[    0.587300] 1f00          131072 mtdblock0 
+[    0.587310]  (driver?)
+[    0.587542] No filesystem could mount root, tried: 
+[    0.587554]  ext3
+[    0.587712]  ext2
+[    0.587778]  ext4
+[    0.588238] Kernel panic - not syncing: VFS: Unable to mount root fs on "/dev/vda" or unknown-block(254,0)
+```
+
 ## 정리
 
 - initramfs를 넣을지는 `root=` 값 하나로 root를 가리킬 수 있는지, 그 장치와 파일시스템 드라이버가 커널에 들어 있는지 두 가지로 정합니다.
@@ -109,7 +178,7 @@ U-Boot가 root 장치에 대해 하는 일은 `root=/dev/mmcblk1p2 rootwait rw`�
 
 ## 다음 장 예고
 
-다음 편은 **U-Boot 활용**입니다. `printenv`·`setenv`로 환경 변수를 다루는 법, `boot.scr` 스크립트와 TFTP 부팅을 정리합니다. 그 글의 예는 32비트 ARM `zImage`와 `bootz` 기준이므로, 이 보드의 arm64 `Image`에서는 `booti`로 바꿔 읽습니다.
+다음 편은 **U-Boot 활용**입니다. `printenv`·`setenv`로 환경 변수를 다루는 법, `boot.scr` 스크립트와 TFTP 부팅을 정리합니다. 그 글의 예는 QEMU `virt` 보드에서 U-Boot v2025.04 `qemu_arm64_defconfig`로 직접 돌린 것이고, 커널도 이 글과 같은 arm64 `Image`와 `booti`를 씁니다.
 
 ## 관련 항목
 
