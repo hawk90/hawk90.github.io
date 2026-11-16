@@ -1,11 +1,11 @@
 ---
-title: "커널 모듈 기초 — init/exit·Parameter·KBuild·DKMS"
+title: "커널 모듈 기초 — init/exit·Parameter·KBuild·modprobe"
 slug: "embedded/modern-recipes/part7-06-kernel-module"
 date: 2026-04-16T09:05:00
-description: "Linux kernel module의 진입점, 모듈 파라미터, KBuild Makefile, insmod 흐름, DKMS 배포까지 한 번에 정리합니다."
+description: "Linux kernel module의 진입점, 모듈 파라미터, KBuild Makefile, insmod·modprobe 흐름을 Debian 13 arm64에서 직접 빌드·로드하며 정리합니다."
 series: "Modern Embedded Recipes"
 seriesOrder: 80
-tags: [recipes, kernel-module, ko, kbuild, dkms]
+tags: [recipes, kernel-module, ko, kbuild]
 topics: ["embedded"]
 ---
 
@@ -60,7 +60,7 @@ MODULE_DESCRIPTION("Minimal kernel module");
 MODULE_VERSION("1.0");
 ```
 
-`__init`이 붙은 함수는 별도 섹션에 들어갑니다. 모듈은 init이 성공하면 그 섹션을 작업 큐에서 해제하고(v6.12 `kernel/module/main.c:79-80`, `:2479`의 `do_free_init`), built-in으로 빌드하면 부팅이 끝날 때 커널이 init 영역을 한꺼번에 해제합니다. [7-01](/blog/embedded/modern-recipes/part7-01-linux-boot-flow)의 QEMU 부팅 로그에 찍힌 `Freeing unused kernel memory: 2880K`가 그 줄입니다.
+`__init`이 붙은 함수는 별도 섹션에 들어갑니다. 모듈은 init이 성공하면 그 섹션을 작업 큐에서 해제하고(v6.12 `kernel/module/main.c:79-80`, `:2479`의 `do_free_init`), built-in으로 빌드하면 부팅이 끝날 때 커널이 init 영역을 한꺼번에 해제합니다. 7-01과 같은 QEMU v6.12 부팅에서는 `Run /init` 바로 앞에 `Freeing unused kernel memory: 2880K`가 찍혔습니다(arm64 `free_initmem()`, v6.12 `arch/arm64/mm/init.c:424`).
 
 ### Kbuild Makefile
 
@@ -179,13 +179,13 @@ bash: line 37: /sys/module/sample/parameters/device_name: Permission denied
 
 ### insmod·modprobe·rmmod
 
-`insmod`는 파일 경로 하나를 그대로 올리고, `modprobe`는 `/lib/modules/$(uname -r)/` 아래의 `modules.dep`로 의존 모듈을 먼저 올린 뒤 이름으로 찾습니다. 모듈을 그 디렉터리에 넣은 뒤에는 `depmod -a`로 색인을 다시 만들어야 `modprobe`가 찾습니다.
+`insmod`는 파일 경로 하나를 그대로 올리고, `modprobe`는 이름으로 `/lib/modules/$(uname -r)/modules.dep`를 찾아, 거기 적힌 의존 모듈을 먼저 올린 뒤 대상 모듈을 올립니다. 모듈을 그 디렉터리에 넣은 뒤에는 `depmod -a`로 색인을 다시 만들어야 `modprobe`가 찾습니다.
 
 ```bash
 mkdir -p /lib/modules/$(uname -r)/extra
 cp sample.ko /lib/modules/$(uname -r)/extra/
 depmod -a
-grep sample /lib/modules/$(uname -r)/modules.dep
+grep '^extra/sample' /lib/modules/$(uname -r)/modules.dep
 echo "options sample sample_rate=22050" > /etc/modprobe.d/sample.conf
 modprobe sample
 cat /sys/module/sample/parameters/sample_rate
@@ -200,13 +200,13 @@ extra/sample.ko:
 
 ### printk loglevel과 dynamic debug
 
-`pr_*` 매크로는 `KERN_*` 접두사를 붙인 `printk`입니다. v6.12 `include/linux/kern_levels.h`의 값은 `KERN_EMERG` 0, `KERN_ALERT` 1, `KERN_CRIT` 2, `KERN_ERR` 3, `KERN_WARNING` 4, `KERN_NOTICE` 5, `KERN_INFO` 6, `KERN_DEBUG` 7입니다. 콘솔에는 *console_loglevel*보다 숫자가 작은 메시지만 나가고, 현재 값은 `/proc/sys/kernel/printk`로 보고 바꿉니다(`Documentation/core-api/printk-basics.rst:57-72`).
+`pr_debug`를 뺀 `pr_*` 매크로는 `KERN_*` 접두사를 붙인 `printk`입니다. v6.12 `include/linux/kern_levels.h`의 값은 `KERN_EMERG` 0, `KERN_ALERT` 1, `KERN_CRIT` 2, `KERN_ERR` 3, `KERN_WARNING` 4, `KERN_NOTICE` 5, `KERN_INFO` 6, `KERN_DEBUG` 7입니다. 콘솔에는 *console_loglevel*보다 숫자가 작은 메시지만 나가고, 현재 값은 `/proc/sys/kernel/printk`로 보고 바꿉니다(`Documentation/core-api/printk-basics.rst:57-72`).
 
-`pr_debug`는 `DEBUG`를 정의하지 않으면 dynamic debug에 등록만 되고 꺼진 상태로 시작합니다. 위 `sample`의 `pr_debug`는 처음 로드 때 찍히지 않았습니다. 켜는 방법은 두 가지이고, 둘 다 해 봤습니다.
+`CONFIG_DYNAMIC_DEBUG=y`인 이 커널에서 `pr_debug`는 `DEBUG`를 정의하지 않으면 dynamic debug에 등록만 되고 꺼진 상태로 시작합니다(v6.12 `include/linux/printk.h:597-619`). 위 `sample`의 `pr_debug`는 처음 로드 때 찍히지 않았습니다. 켜는 방법은 두 가지이고, 둘 다 해 봤습니다.
 
 ```bash
 echo "module sample +p" > /proc/dynamic_debug/control
-grep sample /proc/dynamic_debug/control
+grep '\[sample\]' /proc/dynamic_debug/control
 modprobe -r sample
 modprobe sample dyndbg=+p
 dmesg
@@ -237,7 +237,7 @@ blacklist nouveau
 
 ## 측정 / 성능 비교
 
-모듈 로드 시간은 이 글에서 재지 않았습니다. 위 `dmesg`의 시각으로 보면 `sample`의 `rate=` 줄과 `debug message` 줄은 같은 init 안에서 0.26 ms 차이로 찍혔지만, 이것은 로드 전체 시간이 아닙니다. 로드 시간을 비교하려면 `insmod`를 `perf stat`이나 `time`으로 여러 번 돌려 분포를 봐야 하고, 그 값은 모듈 크기·심볼 해석·firmware 로드에 따라 다릅니다.
+모듈 로드 시간은 이 글에서 재지 않았습니다. 위 `dmesg`의 시각으로 보면 `sample`의 `rate=` 줄과 `debug message` 줄은 같은 init 안에서 0.26 ms 차이로 찍혔지만, 이것은 로드 전체 시간이 아닙니다. 로드 시간을 비교하려면 `insmod`를 `perf stat`이나 `time`으로 여러 번 돌려 분포를 봐야 하고.
 
 ## 자주 보는 함정
 
@@ -278,6 +278,8 @@ insmod: ERROR: could not insert module /root/p7/703/src/demo_v2.ko: Invalid modu
 ```c
 static irqreturn_t isr(int irq, void *d) {
     void *p = kmalloc(64, GFP_KERNEL);   /* may sleep */
+    ...
+    return IRQ_HANDLED;
 }
 ```
 
@@ -300,7 +302,7 @@ static void __exit l_exit(void)
 [ 3671.541266] kobject: kobject_add_internal failed for leak_demo with -EEXIST, don't try to register things with the same name in the same directory.
 ```
 
-`rmmod` 뒤에도 `/sys/kernel/leak_demo`가 남아 있었고, 두 번째 `insmod`는 `Cannot allocate memory`로 실패했습니다(init이 `NULL`을 받아 `-ENOMEM`을 돌려준 결과). 이 모듈은 로드한 커널에서 다시 지울 방법이 없어, 재부팅해야 같은 이름을 다시 쓸 수 있습니다. 장치에 묶인 자원이라면 `devm_*` API가 driver detach 때 자동으로 풉니다([7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)).
+`rmmod` 뒤에도 `/sys/kernel/leak_demo`가 남아 있었고, 두 번째 `insmod`는 `Cannot allocate memory`로 실패했습니다(init이 `NULL`을 받아 `-ENOMEM`을 돌려준 결과). `rmmod`로는 이 항목이 지워지지 않아, 이 실험에서는 재부팅하기 전까지 같은 이름을 다시 쓸 수 없었습니다. 장치에 묶인 자원이라면 `devm_*` API가 driver detach 때 자동으로 풉니다([7-03](/blog/embedded/modern-recipes/part7-03-device-tree-basics)).
 
 ## 정리
 
