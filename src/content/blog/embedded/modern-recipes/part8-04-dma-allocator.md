@@ -25,9 +25,9 @@ DMA buffer가 만족해야 할 조건은 다섯 가지입니다.
 
 1. **device가 접근할 수 있는 mapping** — 연속 물리 메모리가 필요할 수도 있고, scatter-gather나 IOMMU가 대신할 수도 있습니다.
 2. **cache 일관성** — 하드웨어가 보장하거나(coherent), 소프트웨어가 정해진 시점에 clean·invalidate합니다.
-3. **정렬** — DMA 엔진의 burst 조건, 그리고 cache line을 다른 데이터와 나누지 않을 것.
-4. **주소 범위** — device가 낼 수 있는 주소 폭(32비트 등) 안에 있을 것.
-5. **할당 비용** — 자주 할당·해제한다면 미리 잡아 둔 pool.
+3. **정렬** — DMA 엔진의 burst 조건을 맞추고, cache line을 다른 데이터와 나누지 않아야 합니다.
+4. **주소 범위** — device가 낼 수 있는 주소 폭(32비트 등) 안에 있어야 합니다.
+5. **할당 비용** — 자주 할당·해제한다면 미리 잡아 둔 pool을 씁니다.
 
 Linux `dma-api-howto.rst`(v6.12)는 mapping을 두 종류로 나눕니다. **Consistent(coherent)** mapping은 "usually mapped at driver initialization"이고, device와 CPU가 "explicit software flushing" 없이 서로의 갱신을 봅니다. 문서가 드는 예는 network card DMA ring descriptor입니다. **Streaming** mapping은 "usually mapped for one DMA transfer"이고, 예는 device가 보내고 받는 networking buffer입니다. 같은 문서는 cache가 DMA-coherent가 아닌 시스템에서 buffer가 다른 데이터와 cache line을 나누지 않아야 한다고 덧붙입니다.
 
