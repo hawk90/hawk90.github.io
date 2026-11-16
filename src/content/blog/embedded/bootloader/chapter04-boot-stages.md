@@ -12,203 +12,183 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-> **부트 흐름은 여러 firmware stage가 초기화와 이미지 인계를 나눌 수 있습니다.** 각 단계의 검증·수명·인계 방식은 platform configuration에 달려 있습니다.
+부트 단계가 여러 개로 나뉘는 이유는 세 가지 제약입니다. reset 직후 쓸 수 있는 메모리가 작고, mask ROM은 고칠 수 없고, EL3 같은 높은 권한 코드는 작고 오래 상주해야 합니다. 이 장은 두 실제 배치를 나란히 봅니다. QEMU에서 TF-A가 BL1부터 맡는 배치와, i.MX 8M Mini에서 U-Boot SPL이 BootROM 다음을 맡는 배치입니다. TF-A의 `platform_def.h`로 계산한 주소가 부팅 로그의 진입 주소와 바이트 단위로 맞고, imx8mm의 FIT 이미지를 `dumpimage`로 열면 SPL이 BL31과 U-Boot를 어디에 두는지 보입니다.
 
-부트로더가 항상 단일 binary인 것은 아닙니다. Arm Trusted Firmware-A(TF-A)의 대표적인 AArch64 부트 흐름은 BootROM → BL1 → BL2 → BL31 → BL33으로 설명할 수 있습니다. 실제 단계와 BL1의 존재 여부는 SoC와 플랫폼 설계에 따라 달라집니다. 각 단계가 *왜 따로 있어야* 하는지, *어떤 권한 수준*에서 동작하는지, *메모리는 어디*에서 동작하는지를 정리합니다.
+## 단계가 나뉘는 이유
 
-## 왜 한 binary로 못 하나
+| 제약 | 결과 | 이 시리즈의 예 |
+| --- | --- | --- |
+| reset 직후 메모리가 작다 | DRAM을 켜는 작은 단계가 먼저 돈다 | imx8mm SPL 한계 0x27000바이트, QEMU TF-A secure SRAM 1 MiB |
+| mask ROM은 고칠 수 없다 | 고칠 수 있는 코드를 그다음 단계에 둔다 | BootROM → SPL / BL1 |
+| 권한이 다르다 | EL3 상주 코드는 따로 작게 만든다 | BL31 49,255바이트(release) |
 
-가장 단순한 질문에서 시작합니다. "BootROM이 *바로 커널을 적재*하면 안 되나?"
+TF-A QEMU에서는 BL1·BL2·BL31이 모두 secure SRAM 1 MiB 안에 있습니다. imx8mm에서는 SPL이 TCM에서 돌고, BL31은 OCRAM, U-Boot Proper는 DRAM으로 갑니다. 같은 "다단 부트"라도 무엇이 어디에 있는지는 플랫폼이 정합니다.
 
-이유와 단계 수는 SoC의 ROM 기능, 보안 모델, 초기화 요구에 따라 달라집니다.
+## 배치 A — QEMU, TF-A가 BL1부터
 
-### 1. BootROM은 너무 작다
+TF-A v2.15.0 `plat/qemu/qemu/include/platform_def.h`의 정의입니다.
 
-Mask ROM의 기능과 용량은 SoC마다 다릅니다. ROM은 고정 기능을 수행하고, 이후 단계에서 추가 이미지 적재와 초기화를 이어가는 설계가 흔합니다.
+```c
+#define SEC_ROM_BASE			0x00000000
+#define SEC_ROM_SIZE			0x00020000
+#define SEC_SRAM_BASE			0x0e000000
+#define SEC_SRAM_SIZE			0x00100000
+#define SHARED_RAM_BASE			SEC_SRAM_BASE
+#define SHARED_RAM_SIZE			0x00001000
+#define BL_RAM_BASE			(SHARED_RAM_BASE + SHARED_RAM_SIZE)
+#define BL_RAM_SIZE			(SEC_SRAM_SIZE - SHARED_RAM_SIZE)
+#define BL1_RO_BASE			SEC_ROM_BASE
+#define BL1_RW_BASE			(BL1_RW_LIMIT - 0x12000)
+#define BL1_RW_LIMIT			(BL_RAM_BASE + BL_RAM_SIZE)
+#define BL2_BASE			(BL31_BASE - 0x35000)
+#define BL31_BASE			(BL31_LIMIT - 0x70000)
+#define BL31_LIMIT			(BL_RAM_BASE + BL_RAM_SIZE - FW_HANDOFF_SIZE)
+#define NS_IMAGE_OFFSET			(NS_DRAM0_BASE + 0x20000000)
+```
 
-### 2. BootROM은 *수정 불가*다
+(관련 줄만 발췌. `NS_DRAM0_BASE`는 0x40000000)
 
-Mask ROM은 출고 뒤 변경할 수 없는 코드이므로, 제품의 후속 boot flow에서 업데이트 가능한 firmware를 둘 수 있습니다.
+`FW_HANDOFF_SIZE`는 `TRANSFER_LIST`를 켜지 않은 이 빌드에서 0입니다. 그러면 SRAM 끝 0x0e100000에서 거꾸로 계산이 됩니다.
 
-### 3. 권한 수준이 다르다
+| 이미지 | 계산 | 결과 | 부팅 로그 |
+| --- | --- | --- | --- |
+| BL1 코드 | `SEC_ROM_BASE` | 0x0 (ROM) | reset PC 0x0 |
+| BL1 데이터 | 0x0e100000 − 0x12000 | 0x0e0ee000 | `BL1: RAM 0xe0ee000 - 0xe0f6000` |
+| BL31 | 0x0e100000 − 0x70000 | 0x0e090000 | `Entry point address = 0xe090000` |
+| BL2 | 0x0e090000 − 0x35000 | 0x0e05b000 | `Entry point address = 0xe05b000` |
+| BL33 (U-Boot) | 0x40000000 + 0x20000000 | 0x60000000 | `Entry point address = 0x60000000` |
 
-TF-A의 한 구성에서는 BL1·BL31이 EL3, BL2가 보통 Secure EL1에서 실행되고 BL33은 비보안 상태에서 가장 높은 구현 EL로 진입합니다. 이는 모든 Armv8-A 부트 체인의 고정 배치가 아닙니다.
+계산과 로그가 모두 맞습니다. BL2는 BL31 바로 아래에 붙어 있습니다. BL1의 데이터 영역(0x0e0ee000부터 SRAM 끝까지)은 숫자상 BL31의 범위(0x0e090000–0x0e100000) 안에 겹칩니다. 실제 BL31 이미지는 로그대로 0x0e090000–0x0e09f89b만 차지해서 BL1 데이터까지 닿지 않습니다. BL2는 BL31과 BL33을 올린 뒤 제어를 BL1에 돌려주고, BL1이 BL31로 점프합니다. 로그의 "BL1: Booting BL31"이 그 순서입니다.
 
-이러한 요구를 만족하기 위해 여러 boot stage를 사용하는 구현이 많습니다.
+## 배치 B — i.MX 8M Mini, SPL이 BootROM 다음
 
-## TF-A의 대표 AArch64 단계
+`imx8mm_evk` v2024.04 빌드의 SPL 설정입니다.
 
-TF-A v2.10의 Firmware Design 문서에서 설명하는 대표 이미지 역할은 다음과 같습니다. 플랫폼에 따라 BL1·BL2의 배치와 optional payload가 달라질 수 있습니다.
+```text
+CONFIG_SPL_TEXT_BASE=0x7E1000
+CONFIG_SPL_MAX_SIZE=0x27000
+CONFIG_SPL_BSS_START_ADDR=0x910000
+CONFIG_SPL_BSS_MAX_SIZE=0x2000
+CONFIG_SPL_STACK=0x920000
+```
 
-![ARMv8-A 부트 단계 — BL1 → BL2 → BL31 → BL33 → Linux와 EL 권한](/images/blog/bootloader/diagrams/chapter04-armv8-boot-stages.svg)
+SPL 코드는 TCM 0x7E1000에, BSS와 스택은 OCRAM(0x910000, 0x920000 아래)에 있습니다. SPL이 DRAM을 켠 뒤 다음 단계를 가져오는 FIT 이미지는 `flash.bin`의 0x57c00 위치에 있습니다. 그 구간을 잘라 `dumpimage -l`로 읽었습니다.
 
-이미지 명칭은 TF-A firmware design의 역할을 가리킵니다. 실제 패키징, 프로젝트 경계와 결합 방식은 SoC·제품 통합에 따라 다릅니다.
+```text
+FIT description: Configuration to load ATF before U-Boot
+ Image 0 (uboot)
+  Description:  U-Boot (64-bit)
+  Type:         Standalone Program
+  Data Size:    672720 Bytes = 656.95 KiB = 0.64 MiB
+  Load Address: 0x40200000
+  Entry Point:  unavailable
+ Image 1 (atf)
+  Description:  ARM Trusted Firmware
+  Type:         Firmware
+  Data Size:    0 Bytes = 0.00 KiB = 0.00 MiB
+  Load Address: 0x00920000
+ Image 3 (fdt-1)
+  Description:  imx8mm-evk
+  Type:         Flat Device Tree
+  Data Size:    41168 Bytes = 40.20 KiB = 0.04 MiB
+ Default Configuration: 'config-1'
+ Configuration 0 (config-1)
+  Description:  imx8mm-evk
+  Kernel:       unavailable
+  Firmware:     uboot
+  FDT:          fdt-1
+  Loadables:    atf
+```
 
-| 단계 | TF-A에서의 대표 역할 | 적용 범위 |
-|------|------------------|------------|
-| BL1 | TF-A 첫 부트 단계 (플랫폼 선택에 따름) | 크기는 플랫폼과 빌드 설정에 따라 다름 |
-| BL2 | TF-A의 로딩 단계(구성에 따라 생략·대체 가능) | 크기는 플랫폼과 빌드 설정에 따라 다름 |
-| BL31 | TF-A의 EL3 runtime firmware | 크기는 플랫폼과 빌드 설정에 따라 다름 |
-| BL32 | 선택적 Secure-EL1 payload (예: OP-TEE) | 구성에 따라 달라짐 |
-| BL33 | Non-secure payload (예: U-Boot) | 구성에 따라 달라짐 |
+(`Created`·`Compression`·`Architecture` 줄과 `Image 2 (fip)` 생략)
 
-## U-Boot의 SPL/TPL 모델
+`atf`의 크기가 0인 것은 `bl31.bin` 없이 빌드했기 때문입니다([Ch 2](/blog/embedded/bootloader/chapter02-u-boot-position)). 읽을 것은 주소입니다. BL31은 OCRAM 0x920000, 즉 SPL 스택 꼭대기 바로 위에 놓이고, U-Boot Proper는 DRAM 0x40200000에 놓입니다. firmware인 `uboot`에 entry가 없어서 첫 loadable `atf`의 entry가 점프 주소가 됩니다. SPL은 "U-Boot로 간다"는 분기를 타면서 실제로는 BL31에 도착합니다. 이 경로는 [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep)에서 `common/spl/spl.c`와 `spl_fit.c`로 따라갑니다.
 
-U-Boot은 *자체 다단 모델*인 SPL/TPL을 가집니다. TF-A를 안 쓰는 ARMv7-A에서는 *이 모델 단독*으로 동작합니다.
+| 단계 | 위치 | 크기 |
+| --- | --- | --- |
+| BootROM | mask ROM | — |
+| SPL | TCM 0x7E1000 (BSS·스택은 OCRAM) | 152,599바이트 |
+| BL31 | OCRAM 0x920000 | (TF-A `PLAT=imx8mm` 빌드) |
+| U-Boot Proper | DRAM 0x40200000 | 672,720바이트 (DTB 제외) |
+
+## TPL
+
+U-Boot에는 SPL 앞에 한 단계를 더 두는 TPL이 있습니다. v2024.04 `configs/`에서 `CONFIG_TPL=y`인 defconfig는 39개이고, 그중 28개가 Rockchip 보드입니다. 나머지는 대부분 Freescale P1010·P1020·P2020 계열 NAND 부팅 보드와 sandbox입니다. U-Boot v2024.04의 Rockchip 문서(`doc/board/rockchip/rockchip.rst`)는 TPL을 DRAM 초기화 자리로 다룹니다. U-Boot 소스에 DRAM 초기화가 없는 SoC는 Rockchip rkbin의 DDR 바이너리를 `ROCKCHIP_TPL`로 넣어 TPL/SPL 이미지를 만들라고 안내합니다. 이 시리즈의 두 배치는 TPL을 쓰지 않습니다.
 
 ![U-Boot SPL/TPL 모델 — BootROM → TPL(작은 SRAM, 옵션) → SPL(DDR init + U-Boot Proper 적재) → U-Boot Proper(DDR) → Linux Kernel](/images/blog/bootloader/diagrams/ch04-uboot-spl-tpl.svg)
 
-일부 보드는 TPL을 선택해 더 작은 초기 코드 단계 뒤에 SPL을 적재합니다. TPL 사용 여부와 SRAM 제약은 SoC/board configuration을 확인해야 합니다.
+## Exception level의 변화
 
-TPL의 필요성은 보드의 ROM 요구, 메모리 제약과 U-Boot configuration에 따라 다릅니다.
+![ARMv8-A 부트 단계 — BL1 → BL2 → BL31 → BL33 → Linux와 EL 권한](/images/blog/bootloader/diagrams/chapter04-armv8-boot-stages.svg)
 
-## SPL과 BL2의 역할 관계
+TF-A 디버그 로그는 다음 단계로 넘어갈 때마다 SPSR을 남깁니다. SPSR의 M[3:0]이 그 단계가 실행될 EL입니다.
 
-일부 보드에서 U-Boot SPL은 TF-A BL2가 맡는 초기 적재 역할의 일부를 수행하거나, TF-A와 연동합니다. 두 단계가 항상 서로 대체되는 것은 아니며 DDR 초기화와 이미지 인계 책임은 보드 구현을 확인해야 합니다.
+| 단계 | SPSR | EL | world |
+| --- | --- | --- | --- |
+| BL1 | — (reset) | EL3 | secure |
+| BL2 | 0x3c5 | EL1h | secure (S-EL1) |
+| BL31 | 0x3cd | EL3h | secure |
+| BL33 = U-Boot | 0x3c5 | EL1h | non-secure |
 
-| 모델 | 흐름 | DDR init 담당 |
-|------|------|---------------|
-| 예시 A | BootROM → SPL → BL31/BL33 등 | 보드의 SPL 구현 |
-| 예시 B (TF-A) | BootROM → BL1 → BL2 → BL31 → BL33 등 | TF-A 및 플랫폼 설정 |
-
-위의 행은 역할을 설명하는 개념 예시이며 특정 SoC에 적용된다고 판정하지 않습니다. 해당 제품의 ROM 요구, board configuration, TF-A/U-Boot 통합 소스로 확인해야 합니다.
-
-## 권한 수준(Exception Level)의 변화
-
-ARMv8-A는 *네 개의 권한 수준*을 가집니다.
-
-```text
-EL3 — secure monitor (가장 높음)
-EL2 — hypervisor
-EL1 — kernel
-EL0 — user space (가장 낮음)
-```
-
-추가로 *secure / non-secure* 구분이 EL0/EL1/EL2에 *직교*로 존재합니다.
+BL2와 U-Boot의 SPSR은 같은 0x3c5입니다. 둘의 차이는 SPSR이 아니라 SCR_EL3.NS 비트로 정하는 world입니다. 이 QEMU 구성은 EL2가 없어서 U-Boot가 EL1에 있습니다. `virtualization=on`이면 BL33은 EL2로 들어갑니다([Ch 1](/blog/embedded/bootloader/chapter01-boot-problem)).
 
 ![TrustZone EL3 splits secure and non-secure worlds](/images/blog/bootloader/diagrams/ch04-trustzone-el-split.svg)
 
-아래는 TF-A v2.10 문서에서 설명하는 대표 실행 상태입니다. 플랫폼은 다른 허용된 entry level과 payload를 사용할 수 있습니다.
+## RISC-V의 대응
 
-| 단계 | EL | World |
-|------|-----|-------|
-| BL1 (TF-A 예시) | EL3 | Secure |
-| BL2 (TF-A 기본 흐름) | S-EL1; 특수 RESET_TO_BL2 구성은 EL3 | Secure |
-| BL31 (TF-A 예시) | EL3 | Secure runtime |
-| BL32 (OP-TEE) | EL1-S | Secure |
-| BL33 (U-Boot 예시) | Non-secure에서 구현 가능한 상위 EL | Non-secure |
-| Linux Kernel | 보통 EL2 또는 EL1에서 진입 | Non-secure |
+U-Boot v2024.04 `doc/board/emulation/qemu-riscv.rst`가 설명하는 SPL 구성에서는 SPL이 M-mode에서 시작합니다. SPL은 U-Boot Proper와 OpenSBI `FW_DYNAMIC`을 FIT에서 올리고, OpenSBI가 U-Boot Proper를 S-mode로 시작합니다. 위 imx8mm의 "SPL → BL31 → U-Boot Proper"와 모양이 같고, BL31 자리에 OpenSBI가 들어갑니다. QEMU에서 OpenSBI가 다음 단계를 S-mode로 넘기려는 로그는 [Ch 2](/blog/embedded/bootloader/chapter02-u-boot-position)에 있습니다.
 
-TF-A BL31은 선택된 non-secure payload의 entry point와 실행 상태로 전환합니다. 최종 예외 수준은 플랫폼이 설정한 BL33 entry point에 따릅니다.
+| 단계 | Armv8 (imx8mm) | RISC-V (U-Boot SPL 구성) |
+| --- | --- | --- |
+| 첫 프로그램 | SPL (EL3) | SPL (M-mode) |
+| 상주 firmware | BL31 (EL3) | OpenSBI (M-mode) |
+| 부트 정책 | U-Boot Proper (EL2/EL1) | U-Boot Proper (S-mode) |
 
-## 각 단계의 메모리 모델
+RISC-V의 privilege mode와 Arm의 Exception level은 다른 개념입니다. SBI 호출과 SMC도 같은 ABI가 아니라 각 ISA의 firmware 인터페이스입니다.
 
-부트 단계별 주소와 실행 상태는 board-specific configuration으로 확인해야 합니다.
+## 단계 사이에 넘기는 것
 
-단계별 실행 주소, 메모리 속성, 다음 이미지의 load address는 SoC와 firmware platform 설정에서 정합니다. TF-A의 일반 역할만으로 secure SRAM/DDR 주소나 MMU/cache 상태를 확정할 수 없습니다. 실제 board의 memory map, TF-A platform port, U-Boot linker/configuration 및 image description을 함께 확인하세요. 확인되지 않은 i.MX 주소 예시는 제거했습니다.
+| 인계 | 넘기는 것 | 확인한 곳 |
+| --- | --- | --- |
+| BL2 → BL1 → BL31 | 다음 이미지들의 entry point·SPSR (`entry_point_info`) | TF-A 디버그 로그 |
+| BL31 → BL33 | entry 0x60000000, SPSR 0x3c5 | TF-A 디버그 로그 |
+| SPL → BL31 (imx8mm) | FIT `atf` 노드의 entry 0x920000 | `dumpimage -l`, [Ch 24](/blog/embedded/bootloader/chapter24-spl-deep) |
+| U-Boot → Linux | `x0` = DTB 물리 주소, `x1`–`x3` = 0 | gdb로 확인, [Ch 19](/blog/embedded/bootloader/chapter19-kernel-handoff) |
 
-## SPL의 적재 흐름
+`x0`에 DTB를 넣는 규약은 Linux AArch64 커널 진입에만 해당합니다. 앞선 firmware 단계 사이의 인계는 각 프로젝트가 정합니다.
 
-U-Boot SPL은 선택된 boot device/image loader를 통해 다음 이미지를 준비하고, 구성에 맞춰 U-Boot proper 또는 다른 firmware로 인계할 수 있습니다. 정확한 C 함수와 호출 순서는 고정된 U-Boot tag, board port, Kconfig에 따라 달라집니다. 이 문서는 이를 실행한 것으로 주장하지 않습니다.
+## 로그로 단계 찾기
 
+어느 단계가 멈췄는지는 시리얼에 마지막으로 찍힌 줄의 접두어로 압니다. 각 접두어는 소스에서 이렇게 나옵니다.
 
-## FIT image — 한 파일에 모두
+| 접두어 | 출력하는 곳 |
+| --- | --- |
+| `U-Boot SPL 2024.04 (...)` | `common/spl/spl.c`의 `preloader_console_init()`, `CONFIG_SPL_BANNER_PRINT=y`일 때 (imx8mm에서 켜짐) |
+| `SPL: ...` 오류 | `include/spl.h`의 `SPL_TPL_PROMPT` ("SPL: ") |
+| `NOTICE:  BL1:` / `BL2:` / `BL31:` | TF-A 각 단계 (`NOTICE` 이상은 release 빌드에서도 출력) |
+| `U-Boot 2024.04 (...)` | U-Boot Proper |
 
-일부 boot flow는 FIT image를 사용해 여러 firmware payload와 DTB를 패키징할 수 있습니다. FIT image는 [Ch 15](/blog/embedded/bootloader/chapter15-fit-image)에서 다룹니다.
-
-```text
-# FIT payload 관계를 보여주는 개념 예시; 보드별 구성·실행 출력이 아님
-u-boot.itb (FIT image)
-├── images
-│   ├── atf-1     ← BL31
-│   ├── uboot     ← BL33 (U-Boot Proper)
-│   └── fdt-1     ← DTB
-└── configurations
-    └── conf-1 (default)
-        - firmware: atf-1
-        - loadables: uboot
-        - fdt: fdt-1
-```
-
-이미지 선택과 적재는 FIT configuration 및 SPL 지원에 달려 있습니다.
-
-ITS가 지정하는 payload, configuration과 load/entry 정보는 target boot flow와 함께 검토해야 합니다. 실행하지 않은 build output은 이 글에서 제시하지 않습니다.
-
-## RISC-V의 다단 부트
-
-RISC-V 플랫폼의 firmware chain은 SoC·board 설정에 따라 다르며, OpenSBI와 U-Boot의 조합은 그중 하나입니다. 단계별 실행 특권과 entry convention은 보드 지원 자료 및 OpenSBI 플랫폼 설정에서 확인해야 합니다.
-
-<!-- TODO: TikZ (RISC-V 다단 부트 flow) -->
-
-| 단계 | 모드 | 역할 |
-|------|------|------|
-| BootROM | M-mode | 최초 진입 |
-| U-Boot SPL | M-mode | DDR init, OpenSBI 적재 |
-| OpenSBI | M-mode firmware | SBI firmware 서비스와 next-stage handoff (플랫폼별) |
-| U-Boot Proper | S-mode | 부트 정책 |
-| Linux Kernel | S-mode | 커널 실행 |
-
-RISC-V privilege modes와 Arm exception levels는 서로 다른 architecture 개념입니다. SBI와 SMC는 각 ISA의 firmware interface이며 직접 대응하는 같은 ABI가 아닙니다.
-
-## 단계 간 인계 — 어떻게 정보를 넘기나
-
-각 단계 사이에 *주소, DTB, 부트 인자*를 넘겨야 합니다. 각 단계의 인자 규약은 해당 firmware와 플랫폼의 문서를 따라야 합니다. Linux AArch64 진입 규약은 아래에서 별도로 다룹니다.
-
-```text
-TF-A BL2 → BL31 (개념): 실행 이미지 목록과 플랫폼별 인계 데이터
-BL31 → BL33: 플랫폼별 entry point와 실행 상태
-Linux AArch64 진입: x0 = DTB physical address, x1–x3 = 0
-Linux 진입 시 MMU = off; I-cache 상태, cache maintenance와 나머지 CPU 조건은 Linux boot protocol을 따름
-```
-
-x0에 DTB를 전달하는 규약은 Linux AArch64 커널 진입 시점의 규약입니다. 앞선 firmware 단계 간 인자와 혼동하면 안 됩니다.
-
-## 부트 로그로 보는 단계
-
-부트 로그는 SoC, 빌드 옵션, 보드 지원 코드에 따라 달라집니다. 아래의 접두어는 흔히 보이는 식별 단서일 뿐, 정확한 출력 순서나 문구를 보장하지 않습니다. 실제 장치의 UART 로그와 사용 중인 이미지 빌드를 함께 기록해 단계 진행을 확인하세요.
-
-- `U-Boot SPL` 또는 `SPL`: 해당 빌드에서 SPL 코드가 출력한 메시지
-- `NOTICE: BL31`: TF-A BL31이 출력한 메시지일 수 있음
-- `U-Boot ...`: U-Boot proper의 배너일 수 있음
-
-로그 일부만으로 이미지 load address, 전달된 인자, 실패 원인을 단정할 수 없습니다.
-
-## 자주 하는 실수
-
-### *어느 단계가* 부팅하는지 헷갈림
-
-"U-Boot이 부팅 안 된다"고 할 때 *SPL인지, U-Boot Proper인지, BL31인지* 분리해서 봐야 합니다. 시리얼에 *어디까지 출력*됐는지로 판단합니다.
-
-### ### firmware image address가 맞지 않음
-
-이미지 설명의 load/entry address나 플랫폼 메모리 보호 설정이 실제 메모리 맵과 맞지 않으면 이미지 적재·실행이 실패할 수 있습니다. 주소를 추정하지 말고 해당 보드의 ITS, TF-A 플랫폼 설정과 메모리 맵을 함께 확인하세요.
-
-### `CONFIG_SPL_TEXT_BASE`와 *실제 SRAM 주소* 불일치
-
-SPL의 링크·실행 주소와 BootROM이 이미지를 적재하는 주소 관계는 SoC와 부트 매체 구현에 따라 다릅니다. 해당 보드의 Kconfig, linker script, ROM 문서를 확인하세요.
-
-### Linux AArch64에 잘못된 DTB 주소를 전달
-
-Linux AArch64 진입 시 x0는 DTB의 물리 주소이며 MMU와 D-cache는 꺼져 있어야 합니다. I-cache 상태와 기타 CPU 조건은 커널 boot protocol을 따릅니다. 실제 handoff를 준비하는 구성요소는 플랫폼별 흐름에서 확인하세요.
-
-### SPL의 *console init 누락*
-
-SPL이 `preloader_console_init()`을 호출하기 전에 *어딘가에서 hang*하면 *시리얼에 아무것도 안 나옵니다*. 보드 코드 첫 줄에 *DEBUG_UART로 'A'를 강제 송출*해 path를 검증합니다.
+`preloader_console_init()`이 불리기 전, 즉 SPL이 시리얼을 초기화하기 전에 멈추면 아무것도 출력되지 않습니다. 그 구간은 `CONFIG_DEBUG_UART`로 초기 UART를 직접 쓰거나 JTAG으로 봅니다([Ch 22](/blog/embedded/bootloader/chapter22-debugging)).
 
 ## 정리
 
-- 부트는 *작은 단계가 큰 다음 단계를 RAM에 적재*하는 *수직 인계*의 연쇄입니다.
-- TF-A의 대표적인 AArch64 구성은 BootROM → BL1 → BL2 → BL31 → BL33이며 플랫폼에 따라 단계와 payload가 다릅니다.
-- TF-A와 U-Boot은 각각 firmware 구성요소를 제공하지만, 단계별 이미지·빌드 결합 방식은 보드 설정에 따라 다릅니다.
-- TF-A BL1/BL31의 EL3, 기본 BL2의 S-EL1, BL33과 Linux의 실행 상태는 대표 배치일 뿐이며 플랫폼 설정이 결정합니다.
-- BL31은 *runtime firmware*입니다. 부팅 후에도 *메모리에 살아 있고* PSCI/SMC 호출에 응답합니다.
-- Linux AArch64 진입 시 x0는 DTB 물리 주소이고 x1–x3는 0입니다. 앞선 단계의 인계 ABI는 별도로 확인합니다.
-- FIT은 구성에 따라 여러 이미지와 설정을 한 이미지 형식으로 패키징할 수 있습니다. SPL의 지원·적재 동작은 빌드 설정과 보드 구현에 달려 있습니다.
-- 부트 로그의 *prefix*(`U-Boot SPL`, `NOTICE: BL31`, `U-Boot`)로 *어느 단계가 출력 중*인지 식별합니다.
+- 단계는 메모리 크기, ROM의 불변성, 권한 분리 때문에 나뉩니다.
+- QEMU TF-A는 secure SRAM 1 MiB 끝에서부터 BL31, BL2, BL1 데이터를 배치하고, `platform_def.h` 계산이 로그 주소와 그대로 맞습니다.
+- imx8mm은 SPL이 TCM에서 돌며 FIT에서 BL31을 OCRAM 0x920000에, U-Boot를 DRAM 0x40200000에 올립니다.
+- TPL은 v2024.04에서 39개 defconfig만 쓰고, 그중 28개가 Rockchip입니다.
+- BL2와 BL33은 SPSR이 같아도 world가 다릅니다. world는 SCR_EL3.NS로 정합니다.
+- 시리얼의 마지막 접두어로 멈춘 단계를 찾습니다. SPL 배너 전의 멈춤은 debug UART나 JTAG으로 봅니다.
 
 ## 다음 편
 
-[Ch 5: Falcon Mode — SPL이 커널을 직접 부팅](/blog/embedded/bootloader/chapter05-falcon-mode)에서는 *U-Boot Proper를 건너뛰는* 양산 옵션을 다룹니다. SPL이 kernel을 직접 시작하는 구성과 보드별 Falcon 설정을 봅니다.
+[Ch 5: Falcon Mode — SPL이 커널을 직접 부팅](/blog/embedded/bootloader/chapter05-falcon-mode)에서는 U-Boot Proper를 건너뛰는 구성을 다룹니다.
+
+## 근거 자료
+
+- TF-A v2.15.0 `plat/qemu/qemu/include/platform_def.h`, QEMU 디버그 빌드 부팅 로그.
+- U-Boot v2024.04: `imx8mm_evk` `.config`, `flash.bin`에서 잘라낸 FIT의 `dumpimage -l`, `arch/arm/dts/imx8mm-u-boot.dtsi`, `common/spl/spl.c`(`preloader_console_init`), `include/spl.h`(`SPL_TPL_NAME`, `SPL_TPL_PROMPT`), `configs/*`(`CONFIG_TPL=y`), `doc/board/rockchip/rockchip.rst`(TPL), `doc/board/emulation/qemu-riscv.rst`.
+- [TF-A Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.10/design/firmware-design.html): BL 단계의 역할.
+- [Linux AArch64 boot protocol](https://docs.kernel.org/6.12/arch/arm64/booting.html).
 
 ## 관련 항목
 
@@ -217,9 +197,6 @@ SPL이 `preloader_console_init()`을 호출하기 전에 *어딘가에서 hang*�
 - [Ch 5: Falcon Mode](/blog/embedded/bootloader/chapter05-falcon-mode)
 - [Ch 8: board_init_f vs board_init_r](/blog/embedded/bootloader/chapter08-board-init)
 - [Ch 15: FIT Image](/blog/embedded/bootloader/chapter15-fit-image)
-- [BSP Ch 6: U-Boot 보드 포팅](/blog/embedded/bsp/chapter06-u-boot-porting)
+- [Ch 24: SPL 심화](/blog/embedded/bootloader/chapter24-spl-deep)
 - [BSP Ch 7: TF-A와 TrustZone 통합](/blog/embedded/bsp/chapter07-tfa-trustzone)
 - [Embedded Security Ch 2: Secure Boot 체인](/blog/embedded/embedded-security/chapter02-secure-boot)
-- [TF-A v2.10 Firmware Design](https://trustedfirmware-a.readthedocs.io/en/v2.10/design/firmware-design.html)
-- [Linux AArch64 boot protocol](https://docs.kernel.org/6.18/arch/arm64/booting.html)
-- [OpenSBI firmware types](https://github.com/riscv-software-src/opensbi/blob/master/docs/firmware/fw.md)
