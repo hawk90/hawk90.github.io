@@ -66,7 +66,7 @@ arm-none-eabi-gcc $M -nostartfiles -nostdlib -T linker.ld startup.o app.o ext.o 
 
 | 구분 | 용도 | 누가 읽음 |
 | --- | --- | --- |
-| Program Header | 실행 시 메모리에 올릴 segment | loader, flasher, `objcopy -O binary` |
+| Program Header | 실행 시 메모리에 올릴 segment | loader, flasher |
 | Section Header | link·debug용 section 목록 | linker, objdump, gdb |
 
 Program header는 "이 바이트들을 어디에 올려라", section header는 "이 바이트들이 무엇인가"를 말합니다. 같은 파일을 두 시각으로 보는 셈이고, `readelf -l`의 "Section to Segment mapping"이 둘을 이어 줍니다(아래 출력).
@@ -79,7 +79,7 @@ Program header는 "이 바이트들을 어디에 올려라", section header는 "
 | `.rodata` | 상수, string literal | `PROGBITS`, flags `A` | Flash |
 | `.data` | 초기값 있는 RAM 변수 | `PROGBITS`, flags `WA` | RAM (초기값은 Flash에서 복사) |
 | `.bss` | 0으로 시작하는 RAM 변수 | `NOBITS`, flags `WA` | RAM |
-| `.debug_*` | DWARF 디버그 정보 | `PROGBITS`, flags 없음 | 올라가지 않음 |
+| `.debug_*` | DWARF 디버그 정보 | `PROGBITS`, `A` flag 없음 (`.debug_str`는 `MS`) | 올라가지 않음 |
 | `.symtab` / `.strtab` | symbol 표 / 이름 문자열 | `SYMTAB` / `STRTAB` | 올라가지 않음 |
 
 gABI는 `SHT_NOBITS` section이 "may have a non-zero size, but it occupies no space in the file"이라고 정의합니다. `.bss`가 크기는 있어도 파일에는 0 byte를 차지하는 이유입니다. `.heap`·`.stack`은 표준 section이 아니라 linker script가 관례적으로 만드는 이름입니다.
@@ -111,7 +111,7 @@ $ arm-none-eabi-nm app-O0.o
 
 ### 5) Relocation
 
-`.o` 파일은 다른 파일의 symbol이나 자기 section 주소를 아직 모르므로, 그 자리를 relocation entry로 남깁니다. ARM ELF는 addend를 명령·데이터 자리에 넣어 두는 REL 형식을 쓰므로 section 이름이 `.rel.text`입니다(aaelf32의 "REL type relocations").
+`.o` 파일은 다른 파일의 symbol이나 자기 section 주소를 아직 모르므로, 그 자리를 relocation entry로 남깁니다. 이 toolchain(GNU as)은 addend를 명령·데이터 자리에 넣어 두는 REL 형식으로 내보내므로 section 이름이 `.rel.text`입니다. aaelf32는 "A binary file may use REL or RELA relocations or a mixture of the two"라고 해 둘 다 허용합니다.
 
 ```text
 $ arm-none-eabi-readelf -r app.o
@@ -122,7 +122,7 @@ Relocation section '.rel.text' at offset 0x780 contains 3 entries:
 0000001c  00000402 R_ARM_ABS32       00000000   .bss
 ```
 
-`ext_func` 호출은 Thumb `BL`이라 `R_ARM_THM_CALL`(aaelf32 표에서 type 10)이고, 32-bit 주소 상수 두 개는 `R_ARM_ABS32`(type 2)입니다. `my_global_var`·`file_local` 같은 symbol 이름 대신 `.data`·`.bss` section symbol이 나온 것은 assembler가 같은 파일 안 symbol의 참조를 section 기준 offset으로 바꿔 두었기 때문입니다. `-g`로 빌드하면 `.rel.debug_info` 같은 debug section용 relocation도 생기고, 이 파일에서는 35개였습니다. linker가 이 entry를 모두 풀어 최종 주소를 써 넣습니다.
+`ext_func` 호출은 Thumb `BL`이라 `R_ARM_THM_CALL`(aaelf32 표에서 type 10)이고, 32-bit 주소 상수 두 개는 `R_ARM_ABS32`(type 2)입니다. `my_global_var`·`big_buf` 같은 symbol 이름 대신 `.data`·`.bss` section symbol이 나왔습니다. assembler가 같은 파일에 정의된 symbol의 참조를 section symbol + offset으로 남긴 것입니다. `-g`로 빌드하면 `.rel.debug_info`(35개)·`.rel.debug_aranges`·`.rel.debug_line`·`.rel.debug_frame` 같은 debug section용 relocation도 생기고, 이 파일에서는 모두 43개였습니다. linker가 이 entry를 모두 풀어 최종 주소를 써 넣습니다.
 
 ## 코드 / 실제 사용 예
 
@@ -185,7 +185,7 @@ main
 /root/p303/app.c:9
 ```
 
-Flash에 올릴 이미지는 `objcopy`로 뽑습니다. `-O binary`는 `LOAD` segment의 내용을 PhysAddr 순서로 이어 붙입니다.
+Flash에 올릴 이미지는 `objcopy`로 뽑습니다. binutils 매뉴얼은 `-O binary` 출력을 "a memory dump of the contents of the input object file"이고 "will start at the load address of the lowest section"이라고 설명합니다. 곧 load address(LMA) 순서의 메모리 이미지이고, 이 예제에서는 `.rodata` 끝(0x0800004F)이 `.data`의 LMA와 붙어 있어 빈 곳이 없었습니다.
 
 ```bash
 arm-none-eabi-objcopy -O binary app.elf app.bin
@@ -224,7 +224,7 @@ section           size        addr
 
 > ⚠️ ELF를 그대로 flash에 쓰기
 
-위 표처럼 ELF는 header·section 표·정렬 공백·debug 정보까지 담고 있어, 87 byte짜리 이미지가 13만 byte 파일이 됩니다. raw flash에는 `objcopy -O binary`나 `-O ihex`로 변환한 결과를 씁니다. ELF를 직접 받는 도구(gdb `load`, OpenOCD `program`)는 program header를 읽어 필요한 부분만 씁니다.
+위 표처럼 ELF는 header·section 표·정렬 공백·debug 정보까지 담고 있어, 87 byte짜리 이미지가 13만 byte 파일이 됩니다. raw flash에는 `objcopy -O binary`나 `-O ihex`로 변환한 결과를 씁니다. ELF를 그대로 받는 도구(gdb `load`, OpenOCD `program`)도 있습니다.
 
 > ⚠️ Stripped binary로 디버깅
 
@@ -252,7 +252,7 @@ startup의 기본 IRQ handler를 weak로 두고 사용자가 같은 이름으로
 - ELF는 program header(무엇을 어디에 올릴지)와 section header(무엇이 들었는지) 두 표로 같은 내용을 설명합니다.
 - `.bss`는 `NOBITS`라 파일 공간을 차지하지 않고, `.data`는 VirtAddr(RAM)와 PhysAddr(Flash)가 다른 `LOAD` segment로 들어갑니다.
 - `.o`의 `.rel.text`가 `R_ARM_THM_CALL`·`R_ARM_ABS32` 같은 relocation을 남기고 linker가 이를 풉니다.
-- Flash 이미지는 `objcopy`로 뽑고, ELF 파일 크기의 대부분은 정렬 공백과 debug 정보입니다.
+- Flash 이미지는 `objcopy`로 뽑고, 이 예제의 ELF 파일 크기 대부분은 `LOAD` 정렬 공백이었습니다.
 
 다음 편에서는 **링커 스크립트 기초**를 다룹니다. MEMORY와 SECTIONS의 기본 사용법입니다.
 
