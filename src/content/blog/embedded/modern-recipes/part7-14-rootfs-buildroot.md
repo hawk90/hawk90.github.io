@@ -150,7 +150,7 @@ BR2_TARGET_ROOTFS_EXT2_4=y
 # BR2_TARGET_ROOTFS_TAR is not set
 ```
 
-Toolchain 관련 줄이 하나도 없는 것은 기본값(Buildroot toolchain, glibc)을 그대로 썼기 때문입니다. savedefconfig는 기본값과 다른 항목만 적습니다. 이 파일을 다른 output 디렉터리에서 `make O=/root/brtest myboard_defconfig`로 풀어 `.config`를 비교하면 `BR2_DEFCONFIG` 경로 한 줄만 달랐습니다. 이 파일을 commit해 두면 다른 사람이 `make myboard_defconfig && make`로 같은 설정을 얻습니다.
+Toolchain 관련 줄이 하나도 없는 것은 기본값(Buildroot toolchain, glibc)을 그대로 썼기 때문입니다. savedefconfig는 기본값과 다른 항목만 적습니다. 이 파일을 다른 output 디렉터리에서 `make O=/root/brtest myboard_defconfig`로 풀어 `.config`를 비교했더니 `BR2_DEFCONFIG` 경로 한 줄만 달랐습니다. 이 파일을 commit해 두면 다른 사람이 `make myboard_defconfig && make`로 같은 설정을 얻습니다.
 
 빈 output에서 `time make`를 돌린 결과입니다(소스 download 포함).
 
@@ -220,7 +220,7 @@ Swap:             0           0           0
 
 ### 한 package만 다시 빌드
 
-`myapp.c`를 고친 뒤에는 그 package만 다시 빌드합니다. 매뉴얼은 `<package>-rebuild`가 "do not trigger re-creating the root filesystem image"이므로 image가 필요하면 `make`를 한 번 더 돌리라고 적습니다(`docs/manual/rebuilding-packages.adoc` 121–125행).
+`myapp.c`를 고친 뒤에는 그 package만 다시 빌드합니다. 매뉴얼은 `<package>-rebuild`가 root filesystem image를 다시 만들지 않는다("do not trigger re-creating the root filesystem image")고 하고, image가 필요하면 `make`를 한 번 더 돌리라고 적습니다(`docs/manual/rebuilding-packages.adoc` 121–125행).
 
 ```text
 $ time make myapp-rebuild
@@ -260,7 +260,7 @@ System configuration → Init system의 선택지는 BusyBox, systemV, OpenRC, s
 
 ### Reproducible build
 
-`BR2_REPRODUCIBLE`의 menuconfig 항목 이름은 "Make the build reproducible (experimental)"입니다. help는 같은 설정에서 "exactly identical binaries"를 만드는 것이 목표지만 지금 구현은 "restricted to builds with the same output directory"이고, "not all packages behave properly to ensure reproducibility"라서 experimental이라고 적습니다(`Config.in` 770–787행). 같은 결과가 나오는지는 같은 `O=` 경로에서 두 번 빌드해 image를 비교해야 알 수 있고, 이 글은 그 비교를 하지 않았습니다.
+`BR2_REPRODUCIBLE`의 menuconfig 항목 이름은 "Make the build reproducible (experimental)"입니다. help는 같은 설정에서 "exactly identical binaries"를 만드는 것이 목표라고 적습니다. 다만 지금 구현은 "restricted to builds with the same output directory"이고, "not all packages behave properly to ensure reproducibility"여서 experimental로 둔다고 덧붙입니다(`Config.in` 770–787행). 같은 결과가 나오는지는 같은 `O=` 경로에서 두 번 빌드해 image를 비교해야 알 수 있고, 이 글은 그 비교를 하지 않았습니다.
 
 ## 측정 / 성능 비교
 
@@ -279,7 +279,7 @@ System configuration → Init system의 선택지는 BusyBox, systemV, OpenRC, s
 | kernel `Image` | 13,302,272 B |
 | 부팅 직후 `free -m` (`-m` 지정 없음) | total 112, used 10 |
 
-`output/build` 11 GB 중 큰 것은 `linux-6.18.7` 2.0 GB, `linux-headers-6.18.7` 1.7 GB, `host-gcc-initial`과 `host-gcc-final` 각 1.5 GB였습니다. 빌드 머신의 디스크는 이 디렉터리 크기로 잡습니다.
+`output/build` 11 GB 중 큰 것은 `linux-6.18.7` 2.0 GB, `linux-headers-6.18.7` 1.7 GB, `host-gcc-initial`과 `host-gcc-final` 각 1.5 GB였습니다. 빌드 머신의 디스크 용량은 이 디렉터리 크기를 기준으로 잡습니다.
 
 ## 자주 보는 함정
 
@@ -314,7 +314,7 @@ $ rsync -a --ignore-times --chmod=u=rwX,go=rX s/ d/; ls -l d
 
 > ⚠️ 나중에 켠 library를 기존 package가 쓰지 않음
 
-같은 문서는 package를 새로 켜면 그 package는 빌드하지만, 그 library를 선택적으로 쓸 수 있는 이미 빌드된 package는 다시 빌드하지 않는다고 적고 `ctorrent`와 `openssl`을 예로 듭니다(30–44행). 해당 package를 `-rebuild`(설정이 바뀌어야 하면 `-reconfigure`)하거나 전체를 다시 빌드합니다.
+같은 문서는 library package를 새로 켜면 그 package는 빌드하지만, 그 library를 선택적으로 쓸 수 있는 이미 빌드된 package는 다시 빌드하지 않는다고 적고 `ctorrent`와 `openssl`을 예로 듭니다(30–44행). 해당 package를 `-rebuild`(설정이 바뀌어야 하면 `-reconfigure`)하거나 전체를 다시 빌드합니다.
 
 > ⚠️ download 경로
 
