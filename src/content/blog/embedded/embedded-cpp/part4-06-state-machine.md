@@ -365,7 +365,7 @@ ISR과 main이 동시에 receive하면 race가 발생합니다. mutex나 queue�
 
 ## 검증 범위와 1차 자료
 
-`media-table.cpp`는 Homebrew Clang 23.1.5와 g++-16에서 C++17·ASan·UBSan으로 실행해 둘 다 `table media sequence and unknown transition passed`를 출력했습니다. `etl-media.cpp`는 이번 수정에서 ETL 20.49.0 release 헤더로 Clang 23.1.5 컴파일까지 확인했고 실행하지 않았습니다. 실제 playback action·하드웨어·board code size는 측정하지 않았습니다.
+`media-table.cpp`는 Homebrew Clang 23.1.5와 g++-16에서 C++17·ASan·UBSan으로 실행해 둘 다 `table media sequence and unknown transition passed`를 출력했습니다. `etl-media.cpp`는 ETL 20.49.0 release 헤더로 저장소 검증 스크립트 `scripts/verify-embedded-cpp-part4-examples.mjs 06`에서 Clang 23.1.5·ASan·UBSan으로 실행해 `etl media play/pause/resume/stop and ignored events passed`를 출력했습니다. 실제 playback action·하드웨어·board code size는 측정하지 않았습니다.
 
 - [C++ draft: variant visitation](https://eel.is/c++draft/variant.visit) — visit가 모든 alternative에 대해 유효해야 하는 계약
 - [ETL 20.49.0 fsm.h](https://github.com/ETLCPP/etl/blob/20.49.0/include/etl/fsm.h) — state array·ID·unknown event·재진입 검사

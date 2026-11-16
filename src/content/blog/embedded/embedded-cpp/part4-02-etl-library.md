@@ -314,7 +314,7 @@ clang++ -std=c++17 -I /path/to/etl-20.49.0/include etl-fsm-check.cpp -o etl-fsm-
 ./etl-fsm-check
 ```
 
-이번 수정에서는 ETL 20.49.0 release tarball의 `include/`로 두 파일이 Homebrew Clang 23.1.5(`-std=c++17`)에서 컴파일되는 것까지 확인했고, 실행은 하지 않았습니다. no-exception 제품에서는 ETL_LOG_ERRORS, ETL_USE_ASSERT_FUNCTION, ETL_NO_CHECKS 및 NDEBUG 등 error_handler.h의 분기를 검토하고 반환 여부를 포함한 실패 정책을 정해야 합니다. logging callback이 돌아온 뒤에도 모든 API가 안전하게 작업을 중단한다고 가정하지 않습니다. 정상 경로에서는 full()/empty()를 먼저 검사합니다.
+두 파일은 ETL 20.49.0 release tarball의 `include/`를 `ETL_INCLUDE`로 준 저장소 검증 스크립트 `scripts/verify-embedded-cpp-part4-examples.mjs 02`로 Homebrew Clang 23.1.5·ASan·UBSan에서 실행했고, 각각 `etl=20.49.0 full=detected string=truncated delegate=42`와 `etl fsm start/unknown/stop passed`를 출력했습니다. no-exception 제품에서는 ETL_LOG_ERRORS, ETL_USE_ASSERT_FUNCTION, ETL_NO_CHECKS 및 NDEBUG 등 error_handler.h의 분기를 검토하고 반환 여부를 포함한 실패 정책을 정해야 합니다. logging callback이 돌아온 뒤에도 모든 API가 안전하게 작업을 중단한다고 가정하지 않습니다. 정상 경로에서는 full()/empty()를 먼저 검사합니다.
 
 ETL_ASSERT를 애플리케이션에서 임의로 재정의하는 대신 이 판의 공식 설정과 handler API를 사용합니다. capacity N의 RAM은 저장 기간에 따라 stack·static 영역 등에 놓이며 항상 .bss인 것은 아닙니다. .text·RAM·worst-case 동작은 실제 target 산출물과 workload로 비교해야 하며 이 host 검증은 STM32 코드 크기 개선 측정이 아닙니다.
 
