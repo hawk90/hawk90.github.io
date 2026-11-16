@@ -340,15 +340,17 @@ Memory region         Used Size  Region Size  %age Used
 
 ### 2. `AT >FLASH` 누락
 
-위 `memory.ld`에서 `.data`의 `AT >FLASH`만 지우고 링크하면 오류 없이 링크되지만, `.data` segment의 PhysAddr가 `0x20000000`이 되고 `_sidata`도 `0x20000000`이 됩니다. 초기값이 Flash에 없으니 startup의 복사는 RAM에서 RAM으로 자기 자신을 복사합니다. `objcopy -O binary`로 만든 이미지는 Flash 시작부터 RAM 끝까지를 채워 402,653,192바이트가 됐습니다(정상 빌드는 136바이트). GNU ld는 LMA 영역을 지정하지 않은 섹션에 [LMA 추론 규칙](https://sourceware.org/binutils/docs/ld/Output-Section-LMA.html)을 적용하는데, 이 스크립트에서는 그 결과가 VMA와 같은 RAM 주소였습니다.
+위 `memory.ld`에서 `.data`의 `AT >FLASH`만 지우고 링크하면 오류 없이 링크되지만, `.data` segment의 PhysAddr가 `0x20000000`이 되고 `_sidata`도 `0x20000000`이 됩니다. 초기값이 Flash에 없으니 startup의 복사는 RAM에서 RAM으로 자기 자신을 복사합니다. `objcopy -O binary`로 만든 이미지는 Flash 시작(0x08000000)부터 `.data` 끝(0x20000008)까지를 채워 402,653,192바이트가 됐습니다(정상 빌드는 136바이트). GNU ld는 LMA 영역을 지정하지 않은 섹션에 [LMA 추론 규칙](https://sourceware.org/binutils/docs/ld/Output-Section-LMA.html)을 적용하는데, 이 스크립트에서는 그 결과가 VMA와 같은 RAM 주소였습니다.
 
 ### 3. Stack pointer 미정의
 
-vector table의 첫 entry가 `_estack`을 참조하므로, 이 정의가 없으면 링크가 먼저 실패합니다. `memory.ld`에서 `_estack = ...` 줄만 지웠을 때의 GNU ld 메시지입니다.
+`_estack`의 정의가 없으면 링크가 실패합니다. `memory.ld`에서 `_estack = ...` 줄만 지우면, 끝의 ASSERT 식이 `_estack`을 쓰므로 링커 스크립트를 평가하는 단계에서 먼저 멈춥니다(메시지의 42번째 줄이 ASSERT입니다).
 
 ```text
 arm-none-eabi-ld:noestack.ld:42: undefined symbol `_estack' referenced in expression
 ```
+
+ASSERT까지 지우면 이번에는 vector table의 첫 entry 때문에 `(.isr_vector+0x0): undefined reference to '_estack'`으로 실패합니다.
 
 반면 정의는 있는데 값이 틀린 경우(존재하지 않는 RAM 끝 주소 등)는 링크가 통과하므로, `_estack`은 `ORIGIN(RAM) + LENGTH(RAM)`처럼 MEMORY 정의에서 계산합니다.
 
@@ -362,7 +364,7 @@ STM32F407 CCM에는 DMA 경로가 없습니다(RM0090). DMA buffer는 DMA contro
 
 ### 6. 예외 사용하면서 `.eh_frame`을 /DISCARD/
 
-`-fexceptions`와 DISCARD를 함께 쓰면 링크는 되지만, 첫 throw에서 unwinder가 테이블을 찾지 못해 `__cxa_throw`가 `std::terminate()`로 끝납니다(GCC 16 `eh_throw.cc`). 둘 중 하나로 통일합니다.
+`-fexceptions`와 DISCARD를 함께 쓴 빌드는 이 글의 툴체인(libsupc++ 없음)에서 링크까지 확인하지 못했습니다. GCC 16 `eh_throw.cc`를 보면, unwinder가 테이블을 찾지 못해 `_Unwind_RaiseException`이 돌아오면 `__cxa_throw`가 `std::terminate()`를 부릅니다. 둘 중 하나로 통일합니다.
 
 ### 7. 외부 SDRAM 미설정으로 access
 

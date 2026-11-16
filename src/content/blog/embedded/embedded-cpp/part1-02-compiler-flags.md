@@ -217,7 +217,7 @@ Logger global_logger;
 
 작은 모듈 하나(비트 단위 CRC32, 64바이트 링 버퍼, `switch` 명령 파서, 16비트 fill 루프)를 레벨별로 컴파일한 `.text` 크기입니다(arm-none-eabi-g++ 16.2.0, `-mcpu=cortex-m4 -mthumb -fno-exceptions -fno-rtti -ffreestanding`).
 
-| 레벨 | `.text` (바이트) |
+| 레벨 | `.text*` 합계 (바이트) |
 | --- | ---: |
 | `-O0` | 506 |
 | `-O1` | 236 |
@@ -226,7 +226,7 @@ Logger global_logger;
 | `-Os` | 204 |
 | `-Oz` | 204 |
 
-`-O3`의 증가분은 대부분 CRC32에서 나왔습니다. 안쪽 8회 루프를 펼쳐 함수가 48바이트(`-Os`)에서 116바이트(`-O3`)가 됐습니다. `-Oz`는 GCC 12에서 들어온 레벨이며, 이 모듈에서는 `-Os`와 결과가 같았습니다. 모듈 하나의 숫자이므로 프로젝트 전체의 비율로 옮기지 않습니다.
+`-O0`에서는 `Ring`의 인라인 멤버 함수 두 개가 별도 COMDAT 섹션(`.text._ZN4Ring4pushEh` 66, `.text._ZN4Ring3popERh` 64)에 놓여 `.text` 376바이트와 합쳤고, 나머지 레벨은 `.text` 하나입니다. `-O3`의 증가분은 대부분 CRC32에서 나왔습니다. 안쪽 8회 루프를 펼쳐 함수가 48바이트(`-Os`)에서 116바이트(`-O3`)가 됐습니다. `-Oz`는 GCC 12에서 들어온 레벨이며, 이 모듈에서는 `-Os`와 결과가 같았습니다. 모듈 하나의 숫자이므로 프로젝트 전체의 비율로 옮기지 않습니다.
 
 GCC는 함수별로 최적화 레벨을 바꾸는 `optimize` attribute를 제공합니다. [GCC 문서](https://gcc.gnu.org/onlinedocs/gcc/Common-Attributes.html)는 "디버깅 목적으로만 쓰고 프로덕션 코드에는 맞지 않는다"고 적습니다. Clang 23.1.5는 이 attribute를 `warning: unknown attribute 'optimize' ignored`로 무시합니다.
 

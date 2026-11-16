@@ -161,7 +161,7 @@ libsupc++의 일부 심볼(`__cxa_pure_virtual` 등)은 직접 정의해 기본 
 
 ## newlib vs newlib-nano
 
-newlib-nano는 newlib을 두 configure 옵션으로 다시 빌드한 구성입니다. newlib `README`에 따르면 `--enable-newlib-nano-formatted-io`는 formatted I/O를 C89 범위로 줄이고 부동소수점 지원을 분리하며, `--enable-newlib-nano-malloc`은 `mallocr.c` 대신 "메모리가 아주 적은 시스템용" `nano-mallocr.c`를 씁니다. `nano.specs`는 이렇게 빌드한 라이브러리로 링크하게 만드는 specs 파일입니다.
+newlib-nano 빌드는 다음 두 configure 옵션을 켭니다. newlib `README`에 따르면 `--enable-newlib-nano-formatted-io`는 formatted I/O를 C89 범위로 줄이고 부동소수점 지원을 분리하며, `--enable-newlib-nano-malloc`은 `mallocr.c` 대신 "메모리가 아주 적은 시스템용" `nano-mallocr.c`를 씁니다. `nano.specs`는 이렇게 빌드한 라이브러리로 링크하게 만드는 specs 파일입니다.
 
 ```makefile
 LDFLAGS += --specs=nano.specs

@@ -387,7 +387,7 @@ nm에 없는 함수는 인라인됐거나, 미사용으로 제거됐거나, 처�
 
 ### 4. .o 파일 크기 합계는 ELF 크기와 다름
 
-링커가 gc-sections와 LTO로 크기를 줄이고, 반대로 아카이브에서 libgcc 같은 멤버를 끌어와 늘리기도 합니다. `fw.elf`의 text 1,396바이트 중 966바이트가 `.o` 파일 어디에도 없던 libgcc 코드였습니다.
+링커가 gc-sections와 LTO로 크기를 줄이고, 반대로 아카이브에서 libgcc 같은 멤버를 끌어와 늘리기도 합니다. `fw.elf`의 text 1,396바이트 중 980바이트(map 기준 libgcc `.text` 0xa0 + 0x328 + 0x4 = 972바이트와 `_udivmoddi4.o`의 `.ARM.exidx` 8바이트)가 `.o` 파일 어디에도 없던 libgcc 코드였습니다.
 
 ### 5. RAM 부족인데 Flash만 분석
 

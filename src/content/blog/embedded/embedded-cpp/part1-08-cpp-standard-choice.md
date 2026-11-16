@@ -99,7 +99,7 @@ concepts·modules·coroutines 같은 언어 기능과 span·ranges 같은 라이
 | `constinit` | static/thread 저장 기간 변수의 상수 초기화 요구 |
 | Designated initializers | `S{.x=1, .y=2}`. C++은 선언 순서 등 C와 다른 제약이 있음 |
 | Modules | 헤더 재파싱 제거. GCC 16.2.0 문서는 아직 실험적이며 `-fmodules`로 켠다고 적음 |
-| Coroutines (기본) | async. 코루틴 상태는 할당 함수(`operator new`)로 할당하며 컴파일러가 이 할당을 생략할 수 있음([dcl.fct.def.coroutine]) |
+| Coroutines (기본) | async. 코루틴 상태는 할당 함수(promise 타입에서 먼저 찾고, 없으면 전역 `operator new`)로 얻음([dcl.fct.def.coroutine]/9) |
 | `std::bit_cast` | type-safe bit manipulation |
 | Three-way comparison `<=>` | 비교 연산자 자동 |
 | `std::endian` | 엔디안 컴파일 타임 확인 |

@@ -132,6 +132,8 @@ section           size
 .ARM.extab          20
 .ARM.exidx          24
 
+U _Z4workv
+U _ZN5GuardD1Ev
 U __aeabi_unwind_cpp_pr0
 U __cxa_allocate_exception
 U __cxa_end_cleanup
