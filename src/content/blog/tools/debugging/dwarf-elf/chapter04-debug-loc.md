@@ -12,30 +12,46 @@ topics: ["tools", "tools/debugging"]
 
 `print x`라고 했을 때 GDB는 `x`가 *지금 어디 있는지* 어떻게 알까요. DW_AT_location은 DIE에 직접 넣은 표현식이나 .debug_loc (DWARF 4)/.debug_loclists (DWARF 5)의 목록을 가리킬 수 있습니다. 표현식은 레지스터 위치·메모리 주소·값·조각을 기술합니다.
 
-이 장은 그 VM의 정체를 다룹니다. 왜 변수 위치가 *식*이어야 하는지, 주요 `DW_OP_*` opcode의 의미, location list로 *PC 구간별* 다른 위치를 표현하는 법, 그리고 DWARF 5의 `DW_OP_entry_value`가 어떻게 "optimized out" 문제를 줄였는지.
+이 장은 그 VM을 다룹니다. 왜 변수 위치가 *식*이어야 하는지, 주요 `DW_OP_*` opcode의 의미, location list로 *PC 구간별* 다른 위치를 표현하는 법, 그리고 DWARF 5의 `DW_OP_entry_value`가 "optimized out"을 어떻게 줄이는지입니다. 예제는 macOS의 Homebrew LLVM 23.1.5로 만든 x86-64·ARM ELF 오브젝트와 Debian 13 arm64 게스트의 GCC 14.2·GDB 16.3에서 실행했고, 규칙은 [DWARF 5 §2.5](https://dwarfstd.org/doc/DWARF5.pdf) "DWARF Expressions"와 §2.6 "Location Descriptions"를 따릅니다.
 
 ## 왜 표현식인가
 
-단순히 *주소만* 저장하면 안 될까? 안 됩니다. 같은 변수가 *코드 위치에 따라* 다른 곳에 있을 수 있기 때문.
+단순히 *주소만* 저장하면 안 될까요? 안 됩니다. 최적화된 코드에서는 같은 변수가 PC 위치에 따라 다른 곳에 있기 때문입니다. 이사를 자주 다니는 사람의 주소록에 "3월까지는 A, 6월까지는 B, 그 뒤로는 연락처 없음"이라고 적어 두는 것과 같습니다.
 
-```c
-int main(int argc, char *argv[]) {
-    int x = argc + 1;   // x는 어디? rax 레지스터일 수도, 스택일 수도
-    printf("%d\n", x);  // x는 또 어디? rsi에 들어갔다가 함수 호출 후 사라짐
-    x++;                // 다시 rax? 또는 스택? 또는 *사라짐*?
-    return x;
+```c title="locals.c"
+int global = 7;
+extern int consume(int);
+int sample(int input) {
+    int tracked = input + 3;
+    consume(tracked);
+    return tracked + input + global;
 }
 ```
 
-컴파일러가 `-O2`로 최적화하면 변수가 *PC 위치별로 다른 곳*에 있거나, *어디에도 없거나*, *여러 조각으로 쪼개져* 있을 수 있습니다. 이를 표현하려면 단순 주소가 아닌 *식*이 필요.
+clang 23.1.5 `--target=x86_64-unknown-linux-gnu -g -gdwarf-5 -O2`로 컴파일하면 `sample`은 이렇게 됩니다.
+
+```text
+0000000000000000 <sample>:
+       0:      	pushq	%rbx
+       1:      	movl	%edi, %ebx
+       3:      	leal	0x3(%rbx), %edi
+       6:      	callq	0xb <sample+0xb>
+       b:      	leal	0x3(,%rbx,2), %eax
+      12:      	addl	(%rip), %eax            # 0x18 <sample+0x18>
+      18:      	popq	%rbx
+      19:      	retq
+```
+
+`input`은 처음에 `%rdi`에 들어오고, 0x1에서 callee-saved인 `%rbx`로 옮겨진 뒤, 0x18의 `popq %rbx`로 `%rbx`가 호출자 값으로 돌아가면 어느 레지스터에도 남지 않습니다. `tracked`는 `consume`에 넘기는 동안(0x6~0xb)만 `%rdi`에 있고, 그 뒤에는 `2 * input + 3`으로 다시 계산될 뿐 변수로는 존재하지 않습니다. 이런 위치를 표현하려면 단순 주소가 아니라 *PC 구간별 식*이 필요합니다. 실제 출력은 아래 Location List 절에 있습니다.
 
 ## 스택 머신
 
 DWARF expression은 *스택 머신*의 명령어 시퀀스.
 
-- 명령이 *스택*을 조작 (push, pop, 산술 등).
-- 마지막에 스택 top이 *결과* — 그 변수의 *주소* (또는 *값* 자체).
-- 평가 끝에 스택이 비어 있을 수도 있음 (특수 opcode).
+- 명령이 *스택*을 조작합니다 (push, pop, 산술 등).
+- 기본은 마지막 스택 top이 그 변수의 *메모리 주소*입니다(memory location description, §2.6.1.1.2).
+- `DW_OP_stack_value`가 붙으면 스택 top이 *값 자체*입니다(implicit location description, §2.6.1.1.4).
+- `DW_OP_reg*`는 스택을 쓰지 않고 "값이 이 레지스터에 있다"는 별도 종류입니다(register location description, §2.6.1.1.3).
 
 ![DWARF expression 스택 머신 — 각 opcode 후의 스택 상태](/images/blog/tools/diagrams/dwarf-expr-vm.svg)
 
@@ -48,11 +64,11 @@ DWARF expression은 *스택 머신*의 명령어 시퀀스.
 | `DW_OP_constu 42 DW_OP_stack_value` | 값이 42 (메모리 어디에도 없음) |
 | `DW_OP_reg3 DW_OP_piece 4 DW_OP_reg5 DW_OP_piece 4` | low 4바이트는 `r3`, high 4바이트는 `r5` |
 
-각 줄이 한 변수의 위치 표현. 단순한 경우는 1-2 opcode, 복잡한 경우 10+.
+각 줄이 한 변수의 위치 표현입니다. 위의 `DW_OP_reg5`가 x86-64에서 어느 레지스터인지는 DWARF가 아니라 psABI의 DWARF 레지스터 번호 표가 정하며, x86-64에서 5는 `%rdi`, 3은 `%rbx`, 6은 `%rbp`, 7은 `%rsp`입니다. `llvm-dwarfdump`가 `DW_OP_reg5 RDI`처럼 이름을 붙여 주는 것도 이 표를 따른 것입니다.
 
 ## Opcode 카탈로그
 
-100+ opcode가 있지만 자주 보이는 것 정리.
+[DWARF 5 Table 7.9](https://dwarfstd.org/doc/DWARF5.pdf) "DWARF operation encodings"는 `lit0~31`·`reg0~31`·`breg0~31`을 각각 32개로 세면 164개 연산을 정의합니다. 자주 보이는 것만 추립니다.
 
 ### Literal — 상수 push
 
@@ -137,138 +153,242 @@ DWARF expression은 *스택 머신*의 명령어 시퀀스.
 
 ## 실제 예 — 단순한 케이스
 
-```text
-DW_AT_location = DW_OP_fbreg -16
-```
-
-frame base (보통 CFA) - 16 주소에 변수. 스택 변수의 가장 일반적 표현.
+2장의 `main.o`(clang `-O0`)에서 지역 변수 `obj`의 위치는 frame base 기준입니다.
 
 ```text
-DW_AT_location = DW_OP_reg5
+0x00000032:     DW_TAG_variable
+                  DW_AT_location        (DW_OP_fbreg -12)
+                  DW_AT_name    ("obj")
 ```
 
-값이 r5 레지스터. *주소가 아니라 값 자체*. 함수 인자에 흔함.
+같은 함수의 `DW_AT_frame_base`가 `DW_OP_reg6 RBP`였으므로 `obj`는 `%rbp - 12`에 있습니다. `-O0` 스택 변수의 전형적인 모양입니다.
+
+`-O2`에서 `sample`의 `input`은 처음 6바이트 동안 이렇게 표현됩니다.
 
 ```text
-DW_AT_location = DW_OP_addr 0x600100
+[0x0000000000000000, 0x0000000000000006): DW_OP_reg5 RDI
 ```
 
-`.data` 또는 `.bss`에 있는 전역 변수.
+주소가 아니라 "값이 `%rdi`에 있다"는 뜻입니다. 레지스터로 들어온 인자가 이 모양을 갖습니다.
+
+전역 변수는 고정 주소입니다. DWARF 5 오브젝트에서는 주소를 `.debug_addr` 표에 두고 `DW_OP_addrx`로 인덱스만 적고(`locals.o`의 `global`은 `DW_OP_addrx 0x2`), DWARF 4에서는 `DW_OP_addr`가 주소를 직접 담습니다.
 
 ```text
 DW_AT_location = DW_OP_breg6 -8
 ```
 
-DWARF register 6의 값에서 8을 뺀 주소입니다. 레지스터 번호의 의미는 psABI를 따르며 x86-64에서는 rbp입니다. frame pointer로 쓰이는지와 별개로 계산할 수 있습니다.
+DWARF register 6의 값에서 8을 뺀 주소입니다. x86-64에서는 `%rbp`이고, frame pointer로 쓰이는지와 상관없이 계산식은 같습니다.
 
 ## 복잡한 예 — 조각난 변수
 
-little-endian ARM 32-bit를 예로 들면 64-bit `long long`은 *두 레지스터*에 쪼개질 수 있음.
+32-bit ARM에서 64-bit `long long`은 레지스터 두 개에 나뉘어 들어갑니다. `piece.c`를 clang 23.1.5 `--target=armv7a-linux-gnueabihf -g -O2`로 컴파일했습니다.
 
-```text
-DW_AT_location = DW_OP_reg0 DW_OP_piece 4 DW_OP_reg1 DW_OP_piece 4
+```c title="piece.c"
+extern long long produce(void);
+extern void consume64(long long);
+void pass(void) {
+    long long my_ll = produce();
+    consume64(my_ll);
+    consume64(my_ll + 1);
+}
 ```
 
-- 저 4바이트: r0.
-- 위 4바이트: r1.
+```text
+0x00000032:     DW_TAG_variable
+                  DW_AT_location	(indexed (0x0) loclist = 0x00000010:
+                     [0x0000000c, 0x00000010): DW_OP_reg4 R4, DW_OP_piece 0x4
+                     [0x00000010, 0x00000020): DW_OP_reg4 R4, DW_OP_piece 0x4, DW_OP_reg5 R5, DW_OP_piece 0x4)
+                  DW_AT_name	("my_ll")
+```
 
-GDB가 `print my_ll`하면 두 레지스터를 읽어 8바이트로 조합.
+0x10부터 하위 4바이트는 `r4`, 상위 4바이트는 `r5`에 있습니다. §2.6.1.2 "Composite Location Descriptions"대로 조각은 메모리 주소 순서, 곧 little-endian에서 하위 바이트부터 나열됩니다. 0xc~0x10 구간의 식에는 `r4` 조각 하나만 있어 상위 4바이트의 위치가 기술되어 있지 않습니다.
 
 ## 더 복잡 — implicit value
 
-값이 *컴파일 시 결정*되어 메모리/레지스터 어디에도 없음.
+값이 컴파일 시 정해져 메모리·레지스터 어디에도 없을 때는 식이 값 자체를 만듭니다(§2.6.1.1.4).
 
 ```text
 DW_AT_location = DW_OP_constu 42 DW_OP_stack_value
 ```
 
-`x = 42`로 *상수 폴딩*된 경우. GDB는 `print x`에 `42`로 답.
-
-또는 *block of bytes* (DWARF 4).
+또 하나는 값의 바이트를 그대로 담는 `DW_OP_implicit_value`입니다. 첫 인자가 ULEB128 길이, 다음이 그 길이만큼의 바이트입니다.
 
 ```text
 DW_AT_location = DW_OP_implicit_value 8 0x01 0x02 0x03 0x04 0x05 0x06 0x07 0x08
 ```
 
-8바이트 값 `0x0807060504030201` (little-endian). 큰 `struct`나 SIMD vector가 *컴파일 시 알려진* 경우.
+little-endian 대상에서 8바이트 값 `0x0807060504030201`입니다. DWARF 4에서 추가된 연산입니다.
 
-## DW_OP_entry_value — DWARF 5의 게임 체인저
+상수가 변수 전체 수명 동안 같으면 컴파일러는 위치 대신 `DW_AT_const_value` 속성을 씁니다. 아래 `cexpr.cpp`를 clang 23.1.5 `-O2`로 컴파일하자 지역 변수 `x`가 `DW_AT_const_value (10)`로 나왔습니다.
 
-함수 진입 시 인자가 r0에 있지만, 본문 중간에 r0이 *다른 용도*로 재사용되면 *원래 인자값*이 사라집니다. 이전 DWARF는 그 시점부터 "optimized out".
+## DW_OP_entry_value — 함수 진입 시점의 값
 
-DWARF 5의 entry_value는 함수 진입 시 표현식의 값을 기술합니다. 실행 중 이력을 자동 저장하는 기능은 아닙니다:
+인자가 들어온 레지스터가 본문 중간에 다른 용도로 쓰이면, 그 뒤부터는 원래 인자값을 가리킬 곳이 없습니다. DWARF 5의 `DW_OP_entry_value`는 "함수에 들어올 때 이 레지스터에 있던 값"을 뜻하는 연산입니다(§2.5.1.7 "Special Operations"). 실행 중 값을 저장해 두는 기능이 아니라, 디버거가 호출자 쪽 정보로 그 값을 되찾으라는 표시입니다.
 
-```text
-DW_AT_location = DW_OP_entry_value <block: DW_OP_reg0> DW_OP_stack_value
-```
-
-"이 변수의 값은 *함수 진입 시 r0의 값*". 디버거는 호출자와 call-site의 DW_AT_call_value 등 사용 가능한 정보를 이용해 복원을 시도합니다. CFI만으로 임의의 과거 인자값을 알아낼 수는 없습니다.
+`sample`의 `input` 위치 목록 마지막 구간이 이것입니다.
 
 ```text
-(gdb) print arg
-$1 = 42
+[0x0000000000000019, 0x000000000000001a): DW_OP_entry_value(DW_OP_reg5 RDI), DW_OP_stack_value
 ```
 
-복원에 필요한 호출 정보가 없으면 여전히 optimized out일 수 있습니다. 컴파일러·최적화·소비자의 지원을 실제 출력으로 확인하며 발생률 감소를 측정 없이 수치화하지 않습니다.
+`popq %rbx` 뒤의 `retq` 한 명령 동안 `input`은 "진입 시 `%rdi`의 값"입니다. 디버거는 호출자의 `DW_TAG_call_site_parameter`에서 그 값을 다시 계산합니다. 같은 오브젝트의 `sample` 안에는 `consume` 호출에 대한 이런 항목도 있습니다.
+
+```text
+0x00000048:     DW_TAG_call_site
+                  DW_AT_call_origin	(0x00000056 "consume")
+                  DW_AT_call_return_pc	(0x000000000000000b)
+0x0000004e:       DW_TAG_call_site_parameter
+                    DW_AT_location	(DW_OP_reg5 RDI)
+                    DW_AT_call_value	(DW_OP_breg3 RBX+3)
+```
+
+"`consume`을 부를 때 `%rdi`에 넣은 값은 `%rbx + 3`"이라는 뜻입니다. `consume` 안에서 `v`의 진입값을 물으면 디버거는 한 프레임 위로 올라가 이 식을 계산합니다.
+
+게스트에서 GCC 14.2 `-g -O2`로 비슷한 `ev.c`를 빌드하고 GDB 16.3으로 `consume`에 breakpoint를 걸었습니다.
+
+```c title="ev.c"
+#include <stdio.h>
+__attribute__((noinline)) void consume(int v) { __asm__ volatile("" :: "r"(v) : "memory"); }
+__attribute__((noinline)) int sample(int input) {
+    int tracked = input + 3;
+    consume(tracked);
+    consume(tracked * 2);
+    return tracked + input;
+}
+int main(int argc, char **argv) { (void)argv; return sample(argc + 41) & 1; }
+```
+
+```text
+Breakpoint 1, consume (v=v@entry=45) at ev.c:2
+#0  consume (v=v@entry=45) at ev.c:2
+#1  0x0000aaaaaaaa07dc in sample (input=42) at ev.c:5
+#2  0x0000aaaaaaaa0650 in main (argc=<optimized out>, argv=<optimized out>) at ev.c:9
+...
+#0  consume (v=v@entry=90) at ev.c:2
+#1  0x0000aaaaaaaa07e4 in sample (input=42) at ev.c:6
+```
+
+`v=v@entry=45`는 현재 값과 진입값이 같다는 GDB 표기입니다. 반면 `main`의 `argc`·`argv`는 `<optimized out>`이었습니다. `objdump --dwarf=loc ev`에서 `DW_OP_entry_value`가 나온 구간은 둘뿐이었고, 둘 다 `main`(0x640부터)의 인자였습니다.
+
+```text
+$ objdump --dwarf=loc ev | grep -B3 entry_value
+    00000020 v000000000000000 v000000000000000 views at 0000000e for:
+             0000000000000648 000000000000064f (DW_OP_breg0 (x0): -41; DW_OP_stack_value)
+    00000027 v000000000000000 v000000000000000 views at 00000010 for:
+             000000000000064f 000000000000065c (DW_OP_entry_value: (DW_OP_reg0 (x0)); DW_OP_stack_value)
+--
+    0000003d v000000000000000 v000000000000000 views at 00000030 for:
+             0000000000000640 000000000000064f (DW_OP_reg1 (x1))
+    00000042 v000000000000000 v000000000000000 views at 00000032 for:
+             000000000000064f 000000000000065c (DW_OP_entry_value: (DW_OP_reg1 (x1)); DW_OP_stack_value)
+```
+
+`argc`의 위치 목록은 0x648~0x64f에서 `x0 - 41`, 0x64f~0x65c에서 "진입 때의 `x0`"입니다. 식은 있지만 `main`을 부르는 libc 쪽에 call site 정보가 없어서 GDB가 진입값을 계산하지 못했습니다. 진입값 복원은 호출자가 call site 정보를 남겼을 때만 됩니다.
 
 ## DW_OP_implicit_pointer — 포인터가 사라짐
 
-```c
-void f() {
+```c title="ip.c"
+extern void use(int);
+void f(void) {
     int x = 10;
-    int *p = &x;       // p는 &x를 가리키지만 컴파일러가 *p를 인라인해 p 변수 자체를 제거
+    int *p = &x;
     use(*p);
 }
 ```
 
-`p`는 *변수로 존재하지 않지만* GDB로 `print p` 또는 `print *p`를 의미 있게 답하고 싶을 때.
+최적화하면 `x`는 상수 10이 되고 `p`가 가리킬 메모리도 없습니다. 그래도 `print *p`에 답하려면 "p는 `x`를 가리키는 포인터였다"는 정보가 필요합니다. `DW_OP_implicit_pointer`가 그 표현으로, 인자는 가리키는 대상 DIE의 참조와 offset입니다(§2.6.1.1.4).
+
+게스트의 GCC 14.2 `-g -O2` 출력에서 `x`는 `DW_AT_const_value : 10`, `p`의 위치 목록은 이렇습니다.
 
 ```text
-DW_AT_location = DW_OP_implicit_pointer ref(x_DIE) 0
+$ objdump --dwarf=loc ip.o
+...
+             0000000000000000 0000000000000008 (DW_OP_implicit_pointer: <0x63> 0)
 ```
 
-"p는 x의 DIE를 가리키는 포인터, offset 0". GDB는 `*p`에 `x`의 위치에서 값을 가져옵니다.
+`<0x63>`은 `x`의 DIE offset입니다. `f`는 `mov w0, #0xa` 뒤 `b use`로 끝나는 두 명령뿐이고, 위치 목록이 그 8바이트를 덮습니다. `use`와 `main`을 정의한 `ipm.c`를 붙여 링크하고 GDB 16.3으로 `break f` 뒤 물었습니다.
+
+```c title="ipm.c"
+#include <stdio.h>
+void f(void);
+void use(int v) { printf("%d\n", v); }
+int main(void) { f(); return 0; }
+```
+
+```text
+$ gdb -q -batch -ex 'break f' -ex run -ex 'print p' -ex 'print *p' ./ip
+Breakpoint 1 at 0x800: file ip.c, line 5.
+...
+Breakpoint 1, f () at ip.c:5
+5	    use(*p);
+$1 = (int *) <synthetic pointer>
+$2 = 10
+```
+
+같은 소스를 clang 23.1.5 `-O2`로 컴파일하면 `p`의 DIE에 `DW_AT_location`이 아예 없었습니다. 이 연산을 쓸지는 컴파일러가 정합니다.
 
 ## DW_OP_call_frame_cfa
 
 ```text
-DW_AT_location = DW_OP_call_frame_cfa DW_OP_consts -16 DW_OP_plus
+DW_AT_frame_base = DW_OP_call_frame_cfa
 ```
 
-"CFA - 16". CFA(Canonical Frame Address) = 현재 프레임의 *호출자 측 SP*. DW_AT_frame_base에 자주 사용.
+CFI(5장)가 계산한 CFA를 스택에 올리는 연산입니다. CFA(Canonical Frame Address)는 현재 함수를 부른 call 명령 직전 호출자의 SP 값입니다. 게스트의 GCC 14.2는 `-O0`·`-O2` 모두 `DW_AT_frame_base`를 이 1바이트(`0x9c`)로 냈습니다. §2.5.1.3은 이유로 공간을 듭니다. CFA를 레지스터 연산으로 직접 쓰면 함수 안에서 레지스터가 바뀔 때마다 location list가 필요한데, CFI가 이미 그 변화를 담고 있다는 것입니다.
 
 ## Location List
 
-PC 위치별로 *다른 위치*를 가지는 변수.
+PC 구간마다 다른 위치를 갖는 변수는 location list로 표현합니다. 같은 `locals.c`를 `-gdwarf-4`로 만든 `.debug_loc`입니다.
 
-**.debug_loc (DWARF 4):**
+```text
+$ llvm-dwarfdump --debug-loc locals4.o
+.debug_loc contents:
+0x00000000:
+            (0x0000000000000000, 0x0000000000000006): DW_OP_reg5 RDI
+            (0x0000000000000006, 0x0000000000000019): DW_OP_reg3 RBX
+            (0x0000000000000019, 0x000000000000001a): DW_OP_GNU_entry_value(DW_OP_reg5 RDI), DW_OP_stack_value
 
-- [0x401120, 0x40112f): DW_OP_reg0      ← r0에
-- [0x40112f, 0x401140): DW_OP_fbreg -16  ← 스택으로 spill
-- [0x401140, 0x401160): (empty)          ← 사라짐
-- [0x401160, 0x401180): DW_OP_reg5      ← r5로 다시
+0x0000004c:
+            (0x0000000000000006, 0x000000000000000b): DW_OP_reg5 RDI
+```
 
-`DW_AT_location`이 *list*면 `.debug_loc`로의 offset (DW_FORM_sec_offset). GDB가 PC를 보고 적절한 entry 선택.
+첫 목록이 `input`, 둘째가 `tracked`입니다. DWARF 4 모드에서도 clang은 진입값 연산을 GNU 확장 이름(`DW_OP_GNU_entry_value`)으로 냈습니다. `DW_AT_location`이 `DW_FORM_sec_offset`이면 이 섹션의 offset이고, 디버거는 현재 PC가 든 구간의 식을 씁니다.
 
-빈 entry `(empty)` 구간이 *optimized out*. `-O2` + 변수 추적이 어려운 경우 흔함.
+어느 구간에도 PC가 없으면 그 시점의 변수는 optimized out입니다. `tracked`는 0x6~0xb 밖에서는 위치가 없으므로, 0xb 이후에 `print tracked`를 하면 `<optimized out>`이 나옵니다.
 
 ### DWARF 5 — .debug_loclists
 
-DWARF 4의 `.debug_loc`은 *모든 location list*를 한 섹션에 둠. DWARF 5는 *CU별 인덱스*로 분리 + 더 압축된 형식.
+DWARF 5의 `.debug_loclists`는 CU마다 헤더와 offset 표를 두고, 항목 종류(`DW_LLE_*`)를 골라 쓸 수 있게 했습니다(§2.6.2 "Location Lists"). `locals.o`의 목록입니다.
 
-**.debug_loclists:**
+```text
+$ llvm-dwarfdump --debug-loclists locals.o
+.debug_loclists contents:
+locations list header: length = 0x00000029, format = DWARF32, version = 0x0005, addr_size = 0x08, seg_size = 0x00, offset_entry_count = 0x00000002
+offsets: [
+0x00000008
+0x0000001b
+]
+0x00000014:
+            DW_LLE_offset_pair     (0x0000000000000000, 0x0000000000000006): DW_OP_reg5 RDI
+            DW_LLE_offset_pair     (0x0000000000000006, 0x0000000000000019): DW_OP_reg3 RBX
+            DW_LLE_offset_pair     (0x0000000000000019, 0x000000000000001a): DW_OP_entry_value(DW_OP_reg5 RDI), DW_OP_stack_value
 
-- CU offset → list 시작
+0x00000027:
+            DW_LLE_offset_pair     (0x0000000000000006, 0x000000000000000b): DW_OP_reg5 RDI
+```
 
-**각 entry:**
+DIE는 `DW_FORM_loclistx` 인덱스(0, 1)로 offset 표를 거쳐 목록을 찾습니다. `DW_LLE_offset_pair`는 CU base 주소 기준 상대 offset 두 개(ULEB128)라서 작은 함수에서는 한두 바이트로 끝납니다. §1.4는 이 구조가 오브젝트 파일의 재배치 대부분을 없애려는 것이라고 설명합니다. 같은 두 목록이 `.debug_loc`에서는 0x6f바이트, `.debug_loclists`에서는 0x2d바이트였습니다.
 
-- DW_LLE_offset_pair: low_pc, high_pc (CU base 기준)
-- DW_LLE_base_address: 새 base 설정
-- DW_LLE_start_end: 절대 주소
-- DW_LLE_default_location: PC와 무관, default
-- DW_LLE_end_of_list: 끝
-
-base address 트릭이 핵심 — *대부분의 PC는 가까이*에 있으므로 *상대 offset*만 저장. 같은 범위라도 선택한 entry 인코딩과 base에 따라 크기가 달라지므로 실제 결과를 비교합니다.
+| `DW_LLE_*` (Table 7.10) | 값 | 의미 |
+|------|----|------|
+| `end_of_list` | 0x00 | 목록 끝 |
+| `base_addressx` | 0x01 | 새 base 주소 (`.debug_addr` 인덱스) |
+| `startx_endx` | 0x02 | 시작·끝 모두 `.debug_addr` 인덱스 |
+| `startx_length` | 0x03 | 시작 인덱스 + 길이 |
+| `offset_pair` | 0x04 | base 기준 시작·끝 offset |
+| `default_location` | 0x05 | 다른 구간에 없는 PC의 기본 위치 |
+| `base_address` | 0x06 | 새 base 주소 (주소 직접) |
+| `start_end` | 0x07 | 절대 시작·끝 주소 |
+| `start_length` | 0x08 | 절대 시작 + 길이 |
 
 ## DW_AT_location 평가 흐름
 
@@ -302,7 +422,7 @@ Value run_expr_vm(Bytes expr) {
 
 ## Type-aware 표현 (DWARF 5)
 
-기본 generic 타입의 폭은 address_size에 관련되며 항상 64-bit인 것은 아닙니다. DWARF 5는 *typed* opcode:
+§2.5.1은 스택 값의 기본 타입을 대상 주소 크기의 정수인 generic type으로 정합니다. 32-bit 대상이면 32비트입니다. DWARF 5는 다른 타입의 값을 다루는 *typed* opcode를 추가했습니다(§2.5.1.6 "Type Conversions" 등).
 
 ```text
 DW_OP_const_type    <type_die>, <byte_size>, <bytes>
@@ -312,33 +432,38 @@ DW_OP_convert       <type_die>
 DW_OP_reinterpret   <type_die>
 ```
 
-float, int8, int16 등 *정확한 타입*으로 산술 가능 → 더 정확한 표현. 잘 안 쓰이지만 일부 컴파일러는 활용.
+`<type_die>`는 `DW_TAG_base_type` DIE의 CU 안 offset(ULEB128)입니다. 이 연산들로 float나 주소 크기와 다른 정수를 그 타입 그대로 계산합니다.
 
 ## frame_base 표현
 
-함수의 `DW_AT_frame_base`도 expression.
+함수의 `DW_AT_frame_base`도 expression입니다. 이 시리즈의 실제 출력에서 나온 세 가지입니다.
 
-```text
-DW_AT_frame_base = DW_OP_reg6     ← rbp 그대로
-DW_AT_frame_base = DW_OP_call_frame_cfa   ← CFI의 CFA
-DW_AT_frame_base = DW_OP_breg7 16  ← rsp + 16
-```
+| 컴파일러·옵션 | `DW_AT_frame_base` | 의미 |
+|------|------|------|
+| clang 23.1.5 x86-64 `-O0` (`main.o`) | `DW_OP_reg6 RBP` | `%rbp` 값 그대로 |
+| clang 23.1.5 x86-64 `-O2` (`locals.o`) | `DW_OP_reg7 RSP` | `%rsp` 값 그대로 |
+| GCC 14.2 aarch64 `-O0`·`-O2` | `DW_OP_call_frame_cfa` | CFI의 CFA |
 
-`DW_OP_fbreg`가 이걸 평가한 결과를 base로 사용.
+`DW_OP_fbreg N`은 이 식의 결과에 N을 더한 주소입니다.
 
 ## DW_OP_GNU_* — 벤더 확장
 
-DWARF 5에 들어오기 전 GCC가 먼저 도입한 opcode들.
+DWARF 5 이전에 GNU 확장으로 먼저 쓰인 연산들입니다. 이름과 값은 LLVM의 `Dwarf.def`와 binutils 2.44 `readelf`가 아는 이름으로 확인했습니다.
 
-| GNU opcode | DWARF 5 표준 |
-|-----------|---------------|
-| `DW_OP_GNU_entry_value` | `DW_OP_entry_value` |
-| `DW_OP_GNU_implicit_pointer` | `DW_OP_implicit_pointer` |
-| `DW_OP_GNU_parameter_ref` | (없음) |
-| `DW_OP_GNU_const_type` | `DW_OP_const_type` |
-| `DW_OP_GNU_addr_index` | `DW_OP_addrx` |
+| GNU opcode | 값 | DWARF 5 표준 |
+|-----------|----|---------------|
+| `DW_OP_GNU_implicit_pointer` | 0xf2 | `DW_OP_implicit_pointer` (0xa0) |
+| `DW_OP_GNU_entry_value` | 0xf3 | `DW_OP_entry_value` (0xa3) |
+| `DW_OP_GNU_const_type` | — | `DW_OP_const_type` (0xa4) |
+| `DW_OP_GNU_regval_type` | — | `DW_OP_regval_type` (0xa5) |
+| `DW_OP_GNU_deref_type` | — | `DW_OP_deref_type` (0xa6) |
+| `DW_OP_GNU_convert` | — | `DW_OP_convert` (0xa8) |
+| `DW_OP_GNU_addr_index` | 0xfb | `DW_OP_addrx` (0xa1) |
+| `DW_OP_GNU_parameter_ref` | — | 대응하는 표준 연산 없음 |
 
-오래된 GDB는 GNU만 알고, 최신은 둘 다. 호환성을 위해 컴파일러가 한쪽을 출력.
+GNU 쪽 값은 LLVM 23 `Dwarf.def`에 있는 것만 적었고, `—`는 binutils `readelf`의 이름 목록에서 이름만 확인한 항목입니다. 표준 쪽 값은 DWARF 5 Table 7.9입니다.
+
+앞의 `locals4.o`처럼 clang은 `-gdwarf-4`에서 `DW_OP_GNU_entry_value`를, `-gdwarf-5`에서 `DW_OP_entry_value`를 냈습니다. 두 연산의 의미는 같고 opcode 값만 다릅니다.
 
 ## 디코딩 도구
 
@@ -354,11 +479,9 @@ $ llvm-dwarfdump --debug-loc my_prog | head -50      # DWARF 4
 $ readelf --debug-dump=info my_prog | grep -A 2 DW_AT_location
 ```
 
-pyelftools.
-
 아래 직접 확인의 locations.py가 파일 열기와 DWARF 객체 생성을 포함한 pyelftools 0.32 예제입니다. 목록을 파싱하는 것과 대상 프로세스 레지스터·메모리에서 실제 값을 평가하는 것은 별개입니다.
 
-자체 도구로 *변수가 어디 살아 있는지* 코드 영역별 통계를 낼 수 있습니다 — *최적화로 인한 가시성 분석*.
+변수 위치가 함수 범위를 얼마나 덮는지는 `llvm-dwarfdump --statistics`가 JSON으로 셉니다. `locals.o`에서는 지역 변수 위치가 덮는 바이트 합이 5, 인자는 26이었고, 그중 `DW_OP_entry_value`로 덮인 바이트가 1이었습니다.
 
 ## 진단 — "optimized out"
 
@@ -367,54 +490,56 @@ pyelftools.
 $1 = <optimized out>
 ```
 
-원인 셋.
+이 장의 예제에서 나온 원인은 셋입니다.
 
-1. *현재 PC*에 해당하는 location list entry가 비어 있음.
-2. 변수가 *spill됐는데* DWARF가 그 시점을 안 표시.
-3. 컴파일러가 *완전히 제거*해 location 자체가 없음.
+1. *현재 PC*가 location list의 어느 구간에도 없습니다 (`tracked`의 0xb 이후).
+2. 변수 DIE에 위치 속성이 아예 없습니다 (clang `-O2`의 `ip.c` `p`).
+3. 진입값을 되찾을 call site 정보가 호출자에 없습니다 (`ev`의 `main` `argc`).
 
 해법.
 
-- `-Og` 빌드 → 더 많은 PC에 location 표시.
-- g3의 매크로 정보가 최적화로 사라진 값을 되살리는 것은 아닙니다. 필요한 경우 최적화 수준과 변수 추적 지원을 별도로 확인합니다.
-- DWARF 5의 `DW_OP_entry_value`로 함수 진입값 보존.
-- 정 안되면 *어셈블리 보고 레지스터 직접* (GDB Ch 11).
+- 최적화 수준을 낮춥니다. 아래 표는 FreeRTOS-Kernel `tasks.c`를 게스트의 GCC 14.2로 `-O2`와 `-Og`로 빌드해 위치 커버리지를 잰 것입니다.
 
-## DWARF 5의 implicit value 활용
+| 옵션 | 소스 변수 | 위치 있음 | 부모 범위 바이트 중 위치로 덮인 비율 | 위치 0%인 변수 |
+|------|----------|----------|------------------|---------------|
+| `-O2 -g` | 422 | 322 | 37,262 / 51,464 = 72.4% | 64 |
+| `-Og -g` | 294 | 294 | 42,380 / 56,436 = 75.1% | 0 |
 
-```c
+`-Og`에서는 위치가 전혀 없는 변수가 사라졌고 덮인 비율도 올랐습니다. 두 빌드는 DIE로 나온 변수 개수 자체가 달라서, 절대 개수보다 비율을 비교했습니다. 수치는 Debian LLVM 19.1.7의 `llvm-dwarfdump --statistics` 항목 `sum_all_variables(#bytes in parent scope covered by DW_AT_location)`와 `sum_all_variables(#bytes in parent scope)`에서 계산했습니다.
+
+- `-g3`은 매크로 정보를 더할 뿐 최적화로 사라진 값을 되살리지 않습니다.
+- 호출자 쪽 call site 정보와 `DW_OP_entry_value`가 있으면 인자의 진입값은 복원됩니다.
+- 그래도 안 되면 어셈블리를 보고 레지스터를 직접 읽습니다 ([GDB and LLDB Ch 3](/blog/tools/debugging/gdb-lldb/chapter03-inspecting-state)).
+
+## 상수 — DW_AT_const_value
+
+```cpp title="cexpr.cpp"
+extern void use(int);
 constexpr int kMax = 100;
+void f() {
+    int x = 10;
+    int *p = &x;
+    use(*p);
+    use(kMax);
+}
 ```
 
-`constexpr`은 *컴파일 시 결정*. 컴파일러는 *변수 자체를 안 만들고* 사용 위치에 *상수*로 인라인. 상수 값은 DW_AT_const_value나 값 표현식으로 남을 수 있습니다. DW_OP_implicit_value는 DWARF 4부터 있으며 아래 두 예제가 모두 그 opcode인 것은 아닙니다.
+`constexpr` 변수는 메모리에 자리가 없어도 DIE로 남습니다. clang 23.1.5 `-O2` 출력입니다.
 
 ```text
-DW_TAG_variable [kMax]
-  DW_AT_name = "kMax"
-  DW_AT_const_value = 100
+0x00000069:   DW_TAG_variable
+                DW_AT_name	("kMax")
+                DW_AT_type	(0x00000072 "const int")
+                DW_AT_decl_file	("/src/cexpr.cpp")
+                DW_AT_decl_line	(2)
+                DW_AT_const_value	(100)
 ```
 
-또는
-
-```text
-  DW_AT_location = DW_OP_constu 100 DW_OP_stack_value
-```
-
-`print kMax`가 100을 답.
+위치 식 없이 값이 속성에 바로 들어 있어 `print kMax`가 100을 답합니다. 같은 파일의 `use(kMax)` 호출은 `DW_TAG_call_site_parameter`에 `DW_AT_call_value (DW_OP_constu 0x64)`로 남았습니다. 이 호출은 `DW_AT_call_tail_call (true)`도 달고 있는데, 함수의 마지막 호출이 tail call로 바뀌었다는 표시입니다.
 
 ## 직접 확인 — 위치 목록과 typed 인자 파싱
 
-locals.c를 DWARF 4/5와 O0/O2로 만들어 전역 변수의 단일 표현식과 지역 변수의 위치 표현을 비교합니다. O2의 위치 목록은 컴파일러 출력에 따라 달라지며 특정 레지스터 배치를 고정하지 않습니다.
-
-```c title="locals.c"
-int global = 7;
-extern int consume(int);
-int sample(int input) {
-    int tracked = input + 3;
-    consume(tracked);
-    return tracked + input + global;
-}
-```
+앞에서 쓴 `locals.c`를 pyelftools 0.32로 파싱합니다. 전역 변수는 단일 식, 지역 변수는 위치 목록으로 나오는지가 확인 대상입니다. 레지스터 배치는 이 장 앞부분의 clang 23.1.5 출력 기준입니다.
 
 ```python title="locations.py"
 import sys
@@ -456,19 +581,26 @@ python3 locations.py locals.o
 python3 expr-bytes.py
 ```
 
-typed 예제는 크기 1바이트와 unsigned LEB128 offset 64를 읽고 다음 opcode까지 정확히 이동하는지 검사합니다. 타입 DIE가 실제로 있는 대상에서 메모리를 dereference한 실행은 아닙니다.
+```text
+$ python3 locations.py locals.o
+tracked list
+global LocationExpr
+$ python3 expr-bytes.py
+typed size=4 type_offset=64
+```
+
+`tracked`는 위치 목록(파이썬 `list`), `global`은 단일 식(`LocationExpr`)으로 나왔습니다. 스크립트가 `DW_TAG_variable`만 보므로 인자 `input`은 출력에 없습니다. `expr-bytes.py`는 `DW_OP_deref_type`(0xa6)의 두 인자, 곧 1바이트 크기 값 4와 ULEB128 타입 DIE offset 64를 읽고 다음 opcode(`DW_OP_stack_value`, 0x9f)로 정확히 넘어가는지 검사합니다(§2.5.1.3). 바이트열만 파싱한 것이라 offset 64에 실제 타입 DIE가 있는 파일은 아닙니다.
 
 ## 정리
 
-- DWARF expression이 *스택 머신* 바이트코드.
-- `DW_OP_reg*`/`DW_OP_breg*`/`DW_OP_fbreg`/`DW_OP_addr`이 가장 흔함.
-- `DW_OP_stack_value`로 *값 자체* 표현.
-- `DW_OP_piece`로 *조각난 변수* (32-bit 환경의 64-bit 등).
-- `DW_OP_implicit_value`로 컴파일 시 결정된 상수.
-- `DW_OP_entry_value` (DWARF 5)가 *함수 진입값* 보존 → `optimized out` 감소.
-- Location list로 PC 구간별 다른 위치.
-- DWARF 5의 `.debug_loclists`가 더 압축된 형식.
-- pyelftools로 자체 가시성 분석.
+- DWARF expression은 *스택 머신* 바이트코드이고, 결과는 메모리 주소·레지스터·값·조각 중 하나입니다.
+- `DW_OP_reg*`/`DW_OP_breg*`/`DW_OP_fbreg`/`DW_OP_addr(x)`가 이 장의 출력에서 가장 많이 나왔습니다.
+- `DW_OP_stack_value`는 *값 자체*, `DW_OP_piece`는 *조각*(ARM의 `long long`이 `r4`+`r5`)을 표현합니다.
+- 상수는 `DW_AT_const_value`, 사라진 포인터는 `DW_OP_implicit_pointer`(GCC)로 남습니다.
+- `DW_OP_entry_value`는 진입값을 가리키고, 호출자의 `DW_TAG_call_site_parameter`가 있을 때만 복원됩니다.
+- Location list는 PC 구간별 위치이고, 어느 구간에도 없으면 optimized out입니다.
+- DWARF 5의 `.debug_loclists`는 같은 목록을 `.debug_loc`의 0x6f바이트에서 0x2d바이트로 줄였습니다.
+- `llvm-dwarfdump --statistics`로 위치 커버리지를 수치로 봅니다.
 
 ## 다음 장 예고
 
