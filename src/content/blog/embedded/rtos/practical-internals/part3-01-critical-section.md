@@ -113,7 +113,7 @@ void update_from_isr(void) {
 
 ## SMP Spinlock
 
-로컬 IRQ mask는 다른 코어의 접근을 막지 않습니다. FreeRTOS V11.2.0 SMP 커널은 포트가 제공하는 두 lock `portGET_TASK_LOCK()`·`portGET_ISR_LOCK()`과 IRQ mask를 함께 써서 critical section을 만듭니다(`tasks.c` L874-L875, 2-03). `portSPINLOCK_ENTER` 같은 이름은 V11.2.0 커널에 없습니다.
+로컬 IRQ mask는 다른 코어의 접근을 막지 않습니다. FreeRTOS V11.2.0 SMP 커널은 포트가 제공하는 두 lock `portGET_TASK_LOCK()`·`portGET_ISR_LOCK()`과 IRQ mask를 함께 써서 critical section을 만듭니다([`tasks.c` L7035-L7036](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L7035-L7036)의 `vTaskEnterCritical()`, 2-03). `portSPINLOCK_ENTER` 같은 이름은 V11.2.0 커널에 없습니다.
 
 아래는 C11 atomic_flag를 사용하는 **try-lock 원리 예제**입니다. 한 번 시도하고 결과를 반환합니다. 단일 코어에서 holder를 선점한 task가 이 함수를 반복해서 돌면 holder가 다시 돌 수 없어 영원히 실패합니다(1-06).
 
@@ -132,7 +132,7 @@ void release_guard(void) {
 성공한 owner만 release해야 하며 재귀·공정성·priority inheritance는 제공하지 않습니다. 어떤 명령이 나오는지는 target이 정합니다. 같은 파일을 컴파일하면 arm-none-eabi-gcc 16.2.0 `-mcpu=cortex-m3`에서는 `ldrexb`/`strexb` 재시도 루프 뒤에 `dmb ish`가 붙고, Homebrew clang 23.1.5 `--target=aarch64-none-elf -march=armv8-a`에서는 `ldaxrb`/`stxrb` 루프, `-march=armv8.1-a`에서는 LSE 명령 `swpab` 한 개가 됩니다.
 
 ```text
-0000000000000000 <try_guard>:            // -march=armv8.1-a
+0000000000000000 <try_guard>:
        0:      	mov	w8, #0x1                // =1
        4:      	adrp	x9, 0x0 <try_guard>
        8:      	add	x9, x9, #0x0
@@ -141,7 +141,7 @@ void release_guard(void) {
       14:      	ret
 ```
 
-test-and-set이라 compare가 필요 없으므로 ARMv8.1에서도 CASAL이 아니라 SWP 계열이 나왔습니다.
+위 출력은 `-march=armv8.1-a` 빌드입니다. test-and-set이라 compare가 필요 없으므로 ARMv8.1에서도 CASAL이 아니라 SWP 계열이 나왔습니다.
 
 ## Hold Time과 계측
 

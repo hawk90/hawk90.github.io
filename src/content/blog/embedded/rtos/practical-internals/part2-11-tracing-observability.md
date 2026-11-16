@@ -84,7 +84,7 @@ bool itm_try_putc(uint8_t byte) {
 }
 ```
 
-CMSIS 6.1.0의 `ITM_SendChar()`는 port 0이 준비될 때까지 `while (ITM->PORT[0U].u32 == 0UL) { __NOP(); }`로 기다립니다([`core_cm4.h` L2172-L2184](https://github.com/ARM-software/CMSIS_6/blob/v6.1.0/CMSIS/Core/Include/core_cm4.h#L2172-L2184)). 기한 없는 대기라서 SWO를 읽는 쪽이 없으면 관측 대상의 진행을 멈춥니다. 위 함수가 기다리지 않고 false를 돌려주는 이유입니다.
+CMSIS 6.1.0의 `ITM_SendChar()`는 port 0이 준비될 때까지 `while (ITM->PORT[0U].u32 == 0UL) { __NOP(); }`로 기다립니다([`core_cm4.h` L2172-L2184](https://github.com/ARM-software/CMSIS_6/blob/v6.1.0/CMSIS/Core/Include/core_cm4.h#L2172-L2184)). 같은 파일의 주석은 "Is blocking when a debugger is connected, but the previous character sent has not been transmitted."라고 적습니다(L2167). ITM과 port 0이 켜져 있으면 이전 문자가 나갈 때까지 기한 없이 기다리므로, 그동안 호출한 코드는 진행하지 못합니다. 위 함수가 기다리지 않고 false를 돌려주는 이유입니다.
 
 PC sampling·exception trace는 DWT가 만들어 ITM 경로에 싣는 packet이고, ITM print와는 정보원이 다릅니다. PC sample로 함수별 실행 비율을 보려면 호스트가 ELF 심볼로 주소를 함수에 대응시킵니다.
 
@@ -148,7 +148,7 @@ HOOK=0 10000 yields between two tasks: 1032314 SysTick counts (103 per switch)
 HOOK=1 10000 yields between two tasks: 1532314 SysTick counts (153 per switch)
 ```
 
-timestamp 하나를 기록하자 전환 하나가 103에서 153 count로 약 49% 늘었습니다. 이 hook은 tick 수와 SysTick 값을 일관되게 읽으려고 `rt_now()` 안에서 tick count를 두 번 읽습니다. 실제 recorder는 이벤트마다 이보다 많은 필드를 쓰므로 그 비용도 같은 방법으로 잽니다. count는 QEMU icount 가상 시간입니다.
+per switch 값은 측정 창 전체를 10,000으로 나눈 것이라 그 사이의 tick ISR 등도 조금 들어 있습니다. timestamp 하나를 기록하자 전환 하나가 103에서 153 count로 약 48% 늘었습니다. 이 hook은 tick 수와 SysTick 값을 일관되게 읽으려고 `rt_now()` 안에서 tick count를 두 번 읽습니다. 실제 recorder는 이벤트마다 이보다 많은 필드를 쓰므로 그 비용도 같은 방법으로 잽니다. count는 QEMU icount 가상 시간입니다.
 
 ring buffer가 가득 차면 위 hook은 옛 기록을 덮어씁니다. 기다리는 정책(위 `TRC_START_AWAIT_HOST`나 CMSIS `ITM_SendChar`처럼)은 기록을 지키는 대신 타깃을 멈출 수 있습니다. 어느 쪽인지와 잃은 개수를 함께 남겨야 기록을 해석할 수 있습니다.
 
@@ -169,13 +169,13 @@ trace에서 이 순서가 확인되면 우선순위 정책에 의한 지연이�
 
 - **buffer 크기를 감으로 정합니다.** 필요한 크기는 "보고 싶은 시간 window × 초당 이벤트 수 × 이벤트 크기"입니다. 위 ping-pong처럼 전환이 1 tick에 수백 번 일어나면 256칸 ring buffer는 1 tick도 담지 못합니다.
 - **hook에서 RTOS API를 부릅니다.** `traceTASK_SWITCHED_IN()`은 `vTaskSwitchContext()` 안, 즉 PendSV와 critical section 안에서 불립니다(2-03). 여기서 queue나 semaphore API를 부르면 커널을 다시 들어가게 됩니다. 위 hook처럼 메모리에 쓰기만 합니다.
-- **trace가 버그를 바꾸지 않는다고 생각합니다.** 위 측정에서 hook 하나가 전환 비용을 49% 늘렸습니다. timing 버그는 trace를 켜면 사라질 수 있습니다.
+- **trace가 버그를 바꾸지 않는다고 생각합니다.** 위 측정에서 hook 하나가 전환 비용을 48% 늘렸습니다. timing 버그는 trace를 켜면 사라질 수 있습니다.
 - **SystemView 라이선스를 J-Link 유무로 판단합니다.** user guide의 조건은 용도(비상업/상업)입니다.
 
 ## 정리
 
 - RTOS trace는 FreeRTOS trace macro 위에 recorder를 얹는 구조이고, 2-03의 `traceTASK_SWITCHED_IN()` 기록이 그 가장 작은 형태입니다.
-- QEMU에서 timestamp 하나를 기록하는 hook이 전환 비용을 103 → 153 count(약 49%)로 늘렸습니다.
+- QEMU에서 timestamp 하나를 기록하는 hook이 전환 비용을 103 → 153 count(약 48%)로 늘렸습니다.
 - Percepio recorder는 RTOS 호출 전에 초기화하고, `TRC_START_AWAIT_HOST`는 타깃을 멈춥니다.
 - SystemView는 비상업 용도 무료·상업 용도 유료이고, 저장한 기록은 probe 없이 분석할 수 있습니다.
 - CMSIS `ITM_SendChar()`는 기한 없이 기다립니다.

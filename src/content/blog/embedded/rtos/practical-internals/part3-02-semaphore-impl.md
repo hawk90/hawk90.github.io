@@ -49,13 +49,13 @@ critical section을 나온 뒤 block 등록까지 사이에 ISR이 give하면 �
 
 give는 count를 증가시키고 `xTasksWaitingToReceive`의 head task를 ready로 옮깁니다. event list는 `vListInsert()`로 priority 순 정렬되고, 같은 priority끼리는 먼저 온 순입니다(2-01). ready가 된 task는 아직 token을 가진 것이 아니라, 실행될 때 위 반복문에서 count를 다시 검사해 가져갑니다.
 
-QEMU에서 우선순위가 다른 task 다섯을 L1(1)·M1(2)·H(3)·M2(2)·L2(1) 순으로 하나씩 block시킨 뒤, 우선순위 4의 감독 task가 token 다섯 개를 연달아 give했습니다.
+QEMU에서 우선순위가 다른 task 다섯을 L1(1)·M1(2)·H(3)·M2(2)·L2(1) 순으로 하나씩 block시킨 뒤, 우선순위 4의 감독 task가 token을 하나씩 give하고 1 tick씩 쉬었습니다. 다섯 개를 한꺼번에 주면 모두 ready가 되어 순서를 ready list가 정하므로, event list의 정렬만 보려고 하나씩 주었습니다.
 
 ```text
 blocked in order L1 M1 H M2 L2 (prio 1 2 3 2 1); acquired in order: H M1 M2 L1 L2 
 ```
 
-priority가 높은 H가 먼저, 같은 priority인 M1·M2와 L1·L2는 block한 순서대로 가져갔습니다. 감독 task가 give하는 동안 block하지 않았기 때문에 깨어난 순서와 획득 순서가 같았습니다. give하는 task가 중간에 양보한다면 먼저 깨어난 task보다 더 높은 task가 새로 와서 token을 가져갈 수도 있습니다.
+priority가 높은 H가 먼저, 같은 priority인 M1·M2와 L1·L2는 block한 순서대로 가져갔습니다. give 하나가 깨우는 task는 event list의 head 하나뿐이고, 그 task가 바로 돌아 token을 가져갔습니다.
 
 ## 작은 예제 — 초기값·포화·Timeout
 

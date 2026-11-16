@@ -151,7 +151,7 @@ cyclictest는 주기 timer wake의 예정 시각과 실제 실행의 차를 관�
 sudo cyclictest -p 80 -t 4 -i 1000 -l 100000 -m
 ```
 
-`-p 80`은 첫 thread의 우선순위이고 다음 thread는 하나씩 낮아집니다. `-t 4`는 thread 4개, `-i 1000`은 1,000 µs 주기, `-l 100000`은 10만 번, `-m`은 "Lock current and future memory allocations to prevent being paged out"입니다(cyclictest.8 L131-L153). 이 명령은 macOS에서 쓴 이 글에서는 실행하지 않았습니다.
+`-p 80`은 첫 thread의 우선순위이고 다음 thread는 하나씩 낮아집니다. `-t 4`는 thread 4개, `-i 1000`은 첫 thread의 주기 1,000 µs이고 나머지 thread는 `-d` 기본값 500 µs씩 길어져 1,500·2,000·2,500 µs가 되며, `-l 100000`은 10만 번, `-m`은 "Lock current and future memory allocations to prevent being paged out"입니다(cyclictest.8 L98, L112-L116, L131-L153). 이 명령은 macOS에서 쓴 이 글에서는 실행하지 않았습니다.
 
 출력의 Max는 해당 실행에서 관찰한 최대 지연입니다. 위 QEMU 실험에서 LOAD를 켜기 전과 후의 최대가 126과 192로 달랐듯, Max는 그 실행의 부하가 정합니다. deadline을 넘는 표본은 반례가 되지만, 넘지 않았다는 사실만으로 다른 부하의 상한이 증명되지는 않습니다.
 

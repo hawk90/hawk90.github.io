@@ -47,7 +47,7 @@ t=2 H blocks on the resource (L prio=1)
 mutex (PI)      : M had not run yet, L (prio 3 at give) gave at t=10, H got it at t=10 -> H waited 8 ticks for a 10-tick section
 ```
 
-binary semaphore에서는 M이 3부터 53까지 50 tick을 다 쓴 뒤에야 L이 남은 8 tick을 끝냈고, H는 58 tick을 기다렸습니다. 10 tick짜리 보호 구간 때문에 H와 무관한 M의 50 tick까지 기다린 것이 unbounded inversion입니다. mutex에서는 H가 기다리는 순간 L이 3으로 올라가(`prio 3 at give`) M보다 먼저 돌았고, H는 L의 남은 8 tick만 기다렸습니다. 이것이 bounded blocking이고, M은 H가 끝날 때까지 시작조차 못 했습니다.
+binary semaphore에서는 M이 3부터 53까지 50 tick을 다 쓴 뒤에야 L이 남은 7 tick을 끝냈고(L이 M 이전에 2 tick, 이후에 7 tick을 돌았고 H는 그 사이 58 tick을 기다림), H는 58 tick을 기다렸습니다. 10 tick짜리 보호 구간 때문에 H와 무관한 M의 50 tick까지 기다린 것이 unbounded inversion입니다. mutex에서는 H가 기다리는 순간 L이 3으로 올라가(`prio 3 at give`) M보다 먼저 돌았고, H는 L의 남은 8 tick만 기다렸습니다. 이것이 bounded blocking이고, M은 H가 끝날 때까지 시작조차 못 했습니다.
 
 ## Mars Pathfinder 1997
 

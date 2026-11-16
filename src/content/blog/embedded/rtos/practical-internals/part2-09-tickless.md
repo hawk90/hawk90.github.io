@@ -61,10 +61,13 @@ FreeRTOS V11.2.0 `ARM_CM3`의 기본 `vPortSuppressTicksAndSleep()`, arm-none-ea
 ```text
 TICKLESS=0 vTaskDelay(500): tick count advanced 500, SysTick ISRs=500, sleeps=0
 TICKLESS=0 vTaskDelay(2000): tick count advanced 2000, SysTick ISRs=2000, sleeps=0
+largest xExpectedIdleTime passed to pre-sleep hook=0; first ones: 0 0 0 0 0 0
 TICKLESS=1 vTaskDelay(500): tick count advanced 500, SysTick ISRs=1, sleeps=1
 TICKLESS=1 vTaskDelay(2000): tick count advanced 2000, SysTick ISRs=3, sleeps=3
-largest xExpectedIdleTime passed to pre-sleep hook=671; first ones: 500 671 671 658
+largest xExpectedIdleTime passed to pre-sleep hook=671; first ones: 500 671 671 658 0 0
 ```
+
+앞의 세 줄이 `TICKLESS=0` 빌드, 뒤의 세 줄이 `TICKLESS=1` 빌드의 출력입니다. 마지막 줄의 `0 0`은 기록 칸 여섯 개 중 쓰이지 않은 칸입니다.
 
 tickless를 켜자 500 tick 동안 SysTick ISR이 500번에서 1번으로 줄었고, tick count는 똑같이 500 전진했습니다. 2,000 tick은 세 번(671 + 671 + 658 = 2,000) 나눠 잤습니다. 한 번에 671 tick을 넘지 못한 이유가 아래의 24비트 한계입니다.
 

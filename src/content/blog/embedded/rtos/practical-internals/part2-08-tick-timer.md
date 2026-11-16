@@ -81,7 +81,7 @@ SYST_RVR=24999
 
 ## Cortex-A Generic Timer
 
-AArch64 Generic Timer에서 CNTFRQ_EL0는 counter frequency, CNTPCT_EL0는 physical counter 값, CNTP_CVAL_EL0는 compare 값입니다. QEMU 11.1.3 `qemu-system-aarch64 -M virt -cpu cortex-a53`에서 EL1 bare-metal로 읽으면 `CNTFRQ_EL0=0x0000000003b9aca0`(62,500,000 Hz)와 `CurrentEL=0x1`이 나왔고, 짧은 loop 전후의 CNTPCT_EL0 차이는 실행마다 달랐습니다(icount 없이 돌림). CNTFRQ_EL0 값은 보드마다 firmware가 정해 쓰는 값이므로 62.5 MHz는 QEMU `virt`의 값입니다. Cortex-A9의 AArch32 포트(2-06)는 이 레지스터 이름을 쓰지 않습니다.
+AArch64 Generic Timer에서 CNTFRQ_EL0는 counter frequency, CNTPCT_EL0는 physical counter 값, CNTP_CVAL_EL0는 compare 값입니다. QEMU 11.1.3 `qemu-system-aarch64 -M virt -cpu cortex-a53`에서 EL1 bare-metal로 읽으면 `CNTFRQ_EL0=0x0000000003b9aca0`(62,500,000 Hz)와 `CurrentEL=0x1`(레지스터의 EL 필드, 즉 값을 2 bit 오른쪽으로 민 값으로 EL1)이 나왔고, 짧은 loop 전후의 CNTPCT_EL0 차이는 실행마다 달랐습니다(icount 없이 돌림). CNTFRQ_EL0 값은 보드마다 firmware가 정해 쓰는 값이므로 62.5 MHz는 QEMU `virt`의 값입니다. Cortex-A9의 AArch32 포트(2-06)는 이 레지스터 이름을 쓰지 않습니다.
 
 ```c
 /* Conceptual API: board/privilege-specific accessors are required. */

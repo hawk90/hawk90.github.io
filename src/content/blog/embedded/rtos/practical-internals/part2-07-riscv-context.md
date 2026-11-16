@@ -204,7 +204,7 @@ interrupt controller는 정수 레지스터 저장과 별개의 문제이고, �
 
 ## 비트맵·CLZ
 
-RV32I 기본 명령 집합에는 CLZ가 없고, Zbb 확장의 `clz`로 생깁니다. FreeRTOS RISC-V 포트의 `portmacro.h`는 `configUSE_PORT_OPTIMISED_TASK_SELECTION == 1`이면 `portGET_HIGHEST_PRIORITY`를 `31UL - __builtin_clz( uxReadyPriorities )`로 정의합니다([`portmacro.h` L153](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portmacro.h#L153)). 같은 식 `31u - __builtin_clz(b)`를 Homebrew clang 23.1.5 `-O2`로 컴파일하면 `-march=rv32im_zbb`에서는 `clz` 한 명령이 되고, `-march=rv32im`에서는 shift·or·popcount 계산으로 펼친 32개 명령(`ret` 포함 33개)이 됐습니다. 같은 C 코드가 Zbb 유무에 따라 명령 수가 수십 배 달라지는 셈입니다.
+RV32I 기본 명령 집합에는 CLZ가 없고, Zbb 확장의 `clz`로 생깁니다. FreeRTOS RISC-V 포트의 `portmacro.h`는 `configUSE_PORT_OPTIMISED_TASK_SELECTION == 1`이면 `portGET_HIGHEST_PRIORITY`를 `31UL - __builtin_clz( uxReadyPriorities )`로 정의합니다([`portmacro.h` L153](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/RISC-V/portmacro.h#L153)). 같은 식 `31u - __builtin_clz(b)`를 Homebrew clang 23.1.5 `-O2`로 컴파일하면 `-march=rv32im_zbb`에서는 `clz`·`xori` 두 명령(`ret` 포함 3개)이 되고, `-march=rv32im`에서는 shift·or·popcount 계산으로 펼친 32개 명령(`ret` 포함 33개)이 됐습니다. 같은 C 코드가 Zbb 유무에 따라 명령 수로 16배(2 대 32) 달라집니다.
 
 ## RISC-V vs Cortex-M — 요약
 

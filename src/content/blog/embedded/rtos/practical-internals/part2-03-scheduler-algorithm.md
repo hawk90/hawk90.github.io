@@ -130,7 +130,7 @@ V11.2.0의 SMP 구성(`configNUMBER_OF_CORES > 1`)은 코어별 current task 배
 TCB_t *pxCurrentTCBs[configNUMBER_OF_CORES];
 ```
 
-코어마다 `prvSelectHighestPriorityTask(xCoreID)`로 next-task를 정하고(1-03), 공유 자료구조는 포트가 제공하는 두 lock(`portGET_TASK_LOCK`, `portGET_ISR_LOCK`)으로 보호합니다([`tasks.c` L874-L875](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L874-L875)). `configUSE_CORE_AFFINITY == 1`이면 `vTaskCoreAffinitySet()`(L3010)으로 특정 코어에서만 실행되게 묶을 수 있습니다.
+코어마다 `prvSelectHighestPriorityTask(xCoreID)`로 next-task를 정하고(1-03), 공유 자료구조는 포트가 제공하는 두 lock(`portGET_TASK_LOCK`, `portGET_ISR_LOCK`)으로 보호합니다(`vTaskEnterCritical()`, [`tasks.c` L7035-L7036](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L7035-L7036)). `configUSE_CORE_AFFINITY == 1`이면 `vTaskCoreAffinitySet()`(L3010)으로 특정 코어에서만 실행되게 묶을 수 있습니다.
 
 ```c
 vTaskCoreAffinitySet(taskHandle, 0x01);  // Core 0만
@@ -243,7 +243,7 @@ int main(void) {
 
 ## 1차 자료와 확인 범위
 
-- [FreeRTOS V11.2.0 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): `vTaskSwitchContext`(L5109), generic 선택(L194-L208), SMP lock(L874), `vTaskCoreAffinitySet`(L3010)
+- [FreeRTOS V11.2.0 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): `vTaskSwitchContext`(L5109), generic 선택(L194-L208), SMP critical section lock(L7035), `vTaskCoreAffinitySet`(L3010)
 - [ARM_CM3 port.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM3/port.c)·[portmacro.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM3/portmacro.h): `vPortExitCritical`(L443), `portGET_HIGHEST_PRIORITY`(L168)
 
 전환 순서 기록은 QEMU에서 실행한 결과이고, SMP·affinity 경로는 소스만 읽었습니다.
