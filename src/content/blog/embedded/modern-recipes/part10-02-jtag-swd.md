@@ -21,7 +21,7 @@ topics: ["embedded"]
 | 항목 | JTAG | SWD |
 |---|---|---|
 | 신호 | TCK·TMS·TDI·TDO, 선택적으로 nTRST·RTCK | SWCLK·SWDIO, trace용 SWO는 별도 |
-| 여러 칩 연결 | TDI→TDO 직렬 체인 | 한 프로브에 한 DP |
+| 여러 칩 연결 | TDI→TDO 직렬 체인 | SW-DP v1은 프로브 하나에 DP 하나, SW-DP v2·SWJ-DP v2는 multi-drop으로 여러 DP (OpenOCD 설명서 *Debug Adapter Configuration*) |
 | 근거 | IEEE 1149.1 / Arm JTAG-DP | Arm ADIv5 SW-DP |
 
 STM32F405/407은 두 방식을 한 포트에서 고를 수 있는 SWJ-DP를 넣었습니다. DS8626 2.2.38절은 JTAG의 TMS·TCK 핀이 SWDIO·SWCLK와 공유되고, TMS 핀에 특정 시퀀스를 보내 JTAG-DP와 SW-DP를 전환하며, SWD는 JTAG의 5핀 대신 2핀만 쓴다고 적습니다. 남는 JTAG 핀(PA15 JTDI, PB3 JTDO/TRACESWO, PB4 NJTRST)은 다른 기능으로 쓸 수 있습니다(DS8626 핀 정의 표).
@@ -53,7 +53,7 @@ Arm *Cortex-M Debug Connectors* 문서의 배치입니다. 이 문서는 새 설
 | 핀 | 신호 | 핀 | 신호 |
 | --- | --- | --- | --- |
 | 1 | VCC | 2 | SWDIO / TMS |
-| 3 | GND | 4 | SWCLK / TCK |
+| 3 | GND | 4 | SWDCLK / TCK |
 | 5 | GND | 6 | SWO / TDO |
 | 7 | KEY | 8 | NC / TDI |
 | 9 | GNDDetect | 10 | nRESET |
@@ -70,11 +70,23 @@ SEGGER UM08001은 VTref를 target 기준 전압이라고 정의합니다. J-Link
 
 OpenOCD 설명서 8.4절 *JTAG Speed*는 속도 설정을 이렇게 설명합니다. `adapter speed`의 단위는 kHz이고(3000 = 3 MHz), 프로브는 지정값보다 빠르지 않은 속도 중 지원하는 값을 씁니다. 칩 데이터시트가 최고 디버그 클럭을 주며, PCB 배선이나 외부 어댑터 배선 때문에 더 낮춰야 할 수 있습니다. ARM7·ARM9·ARM11은 JTAG 클럭을 CPU 클럭의 1/6 이하로 받지만, ADIv5 이후의 디버그 회로는 스스로 클럭을 받으므로 CPU 클럭보다 빨라도 됩니다.
 
-```bash
-# OpenOCD: 처음에는 낮게, CPU 클럭을 올린 뒤 높인다 (설명서 8.4절의 순서)
-adapter speed 1000                                   # 1 MHz
-$_TARGET.cpu configure -event reset-init { adapter speed 4000 }
+OpenOCD v0.12.0의 `target/stm32f4x.cfg`가 이 순서를 그대로 구현합니다. 리셋 직후 CPU는 16 MHz HSI로 돌아오므로 `reset-start`에서 2 MHz로 낮추고, `reset-init`에서 PLL로 64 MHz를 만든 뒤 8 MHz로 올립니다.
+
+```text
+$_TARGETNAME configure -event reset-init {
+	# Configure PLL to boost clock to HSI x 4 (64 MHz)
+	...
+	# Boost JTAG frequency
+	adapter speed 8000
+}
+
+$_TARGETNAME configure -event reset-start {
+	# Reduce speed since CPU speed will slow down to 16MHz with the reset
+	adapter speed 2000
+}
 ```
+
+보드 설정에서 같은 이벤트에 핸들러를 다시 정의하면 OpenOCD는 기존 핸들러를 바꿔 끼우므로, cfg의 PLL 설정까지 사라집니다. 속도만 바꾸려면 핸들러 전체를 옮겨 와 고칩니다.
 
 같은 절은 리셋 직후에는 느리게, CPU 클럭을 설정한 뒤 빠르게 바꾸는 순서를 권하고, RTCK(adaptive clocking)를 지원하는 시스템이면 그것이 가장 튼튼한 방법이라고 적습니다. `adapter speed 0`이 RTCK를 고릅니다.
 
@@ -83,13 +95,13 @@ $_TARGET.cpu configure -event reset-init { adapter speed 4000 }
 OpenOCD는 보드가 리셋 신호를 어떻게 연결했는지 `reset_config`로 알려 줘야 그 신호를 씁니다(설명서 *Reset Configuration*). 값은 `none`(기본), `trst_only`, `srst_only`, `trst_and_srst`이고, `srst_pulls_trst`는 시스템 리셋이 test logic까지 리셋하는 보드를 뜻합니다.
 
 ```bash
-adapter reset_config srst_only                         # nRESET만 연결된 SWD 보드
-adapter reset_config srst_only connect_assert_srst     # 연결하는 동안 nRESET을 잡고 있기
+reset_config srst_only                                      # nRESET만 연결된 SWD 보드
+reset_config srst_only srst_nogate connect_assert_srst      # 연결하는 동안 nRESET을 잡고 있기
 ```
 
-`connect_assert_srst`는 target에 연결하기 전에 SRST를 assert합니다. 설명서는 STM32를 지원 예로 들고, 옵션 바이트가 잘못되었거나 프로그램이 이상하게 실행되어 연결할 수 없을 때 쓸모 있다고 적습니다. 아래 「SWD 핀을 GPIO로 바꾼 펌웨어」가 그 경우입니다.
+`connect_assert_srst`는 target에 연결하기 전에 SRST를 assert합니다. 설명서는 이 옵션을 쓰려면 SRST 중에도 JTAG/SWD 통신이 되는 `srst_nogate`가 필요하다고 적고, `stm32f4x.cfg`도 76행에서 `reset_config srst_nogate`를 둡니다. 설명서는 STM32를 지원 예로 들고, 옵션 바이트가 잘못되었거나 프로그램이 이상하게 실행되어 연결할 수 없을 때 쓸모 있다고 적습니다. 아래 「SWD 핀을 GPIO로 바꾼 펌웨어」가 그 경우입니다.
 
-리셋 핀 자체의 조건은 데이터시트에 있습니다. DS8626 Table 50에 따르면 STM32F405/407의 NRST는 내부 pull-up 30~50 kΩ, 100 ns 이하 펄스는 걸러지고 300 ns 이상은 통과합니다. Figure 38은 NRST에 0.1 µF를 권장 보호 회로로 그리고, 주석에서 NRST 레벨이 V_IL(NRST) 아래로 내려가지 않으면 리셋이 인식되지 않는다고 적습니다. 커패시터가 크면 리셋을 놓은 뒤 다시 올라오는 시간도 길어집니다. 내부 pull-up만으로 0 V에서 0.7 V_DD까지 오르는 시간을 계산하면 다음과 같습니다.
+리셋 핀 자체의 조건은 데이터시트에 있습니다. DS8626 Table 50에 따르면 STM32F405/407의 NRST는 내부 pull-up 30~50 kΩ, 100 ns 이하 펄스는 걸러지고 300 ns 이상은 통과합니다(V_DD > 2.7 V). Figure 38은 NRST에 0.1 µF를 권장 보호 회로로 그리고, 주석에서 NRST 레벨이 V_IL(NRST) 아래로 내려가지 않으면 리셋이 인식되지 않는다고 적습니다. 커패시터가 크면 리셋을 놓은 뒤 다시 올라오는 시간도 길어집니다. 내부 pull-up만으로 0 V에서 0.7 V_DD까지 오르는 시간을 계산하면 다음과 같습니다.
 
 ```text
 NRST rise with Rpu 30k, C 0.1uF: tau=3.0 ms, 0->0.7VDD =3.6 ms
@@ -110,15 +122,15 @@ STM32F4의 읽기 보호(RDP)는 옵션 바이트로 정합니다. HAL v1.8.6 `s
 | 1 | `0x55` | Read protection of the memory |
 | 2 | `0xCC` | Full chip protection. "it's no more possible to go back to level 1 or 0" |
 
-같은 파일의 주석은 RDP 레벨 1에서 Cortex-M4 디버그 기능이 연결되어 있으면 flash sector를 프로그램하거나 지울 수 없다고 적습니다. 그래서 레벨 1인 칩에 프로브를 붙이면 연결은 되어도 flash 내용이 보이지 않거나 쓰기가 실패합니다. 레벨 2는 HAL 주석대로 되돌릴 수 없으므로, 양산 스크립트에서 RDP 값을 쓰는 단계는 개발 보드에서 돌리지 않도록 분리해 둡니다.
+같은 HAL의 `stm32f4xx_hal_flash_ex.c` write protection 함수 주석은 RDP 레벨 1에서 Cortex-M4 디버그 기능이 연결되어 있으면 flash sector를 프로그램하거나 지울 수 없다고 적습니다. 그래서 레벨 1인 칩에 프로브를 붙이면 연결은 되어도 flash 쓰기가 실패합니다. 레벨 2는 HAL 주석대로 되돌릴 수 없으므로, 양산 스크립트에서 RDP 값을 쓰는 단계는 개발 보드에서 돌리지 않도록 분리해 둡니다.
 
 ## Step 6: 저전력 모드
 
-Sleep·Stop에서 코어 클럭이 멈추면 디버거가 연결을 잃을 수 있습니다. STM32F4는 `DBGMCU_CR`의 `DBG_SLEEP`·`DBG_STOP` 비트로 저전력 모드에서도 디버그를 유지합니다. HAL의 `HAL_DBGMCU_EnableDBGSleepMode()`·`HAL_DBGMCU_EnableDBGStopMode()`(`stm32f4xx_hal.c` 469·487행)가 하는 일도 이 비트를 켜는 것입니다.
+STM32F4는 `DBGMCU_CR`의 `DBG_SLEEP`·`DBG_STOP` 비트로 저전력 모드에서도 디버그를 유지합니다. HAL의 `HAL_DBGMCU_EnableDBGSleepMode()`·`HAL_DBGMCU_EnableDBGStopMode()`(`stm32f4xx_hal.c` 469·487행)는 "Enable the Debug Module during SLEEP/STOP mode"라는 설명과 함께 이 비트를 켭니다.
 
 ## Step 7: 펌웨어가 디버그 핀을 가져감
 
-DS8626 핀 정의 표는 PA13을 `(JTMS-SWDIO)`, PA14를 `(JTCK-SWCLK)`로 적어 리셋 직후 이 핀들이 디버그 기능이라는 것을 보여 줍니다. 펌웨어가 이 핀의 `MODER`를 바꾸면 그 순간부터 SWD가 끊깁니다. 아래 두 함수는 디버그 유지 설정과, 피해야 할 핀 재설정입니다.
+DS8626 Table 7은 PA13을 `(JTMS-SWDIO)`, PA14를 `(JTCK/SWCLK)`로 적어 리셋 직후 이 핀들이 디버그 기능이라는 것을 보여 줍니다. 펌웨어가 이 핀의 `MODER`를 바꾸면 그 순간부터 SWD가 끊깁니다. 아래 두 함수는 디버그 유지 설정과, 피해야 할 핀 재설정입니다.
 
 ```c
 #include "stm32f407xx.h"
