@@ -124,6 +124,13 @@ USART1->CR1 |= USART_CR1_RTOIE;
 USART1->CR1 |= USART_CR1_UE;
 ```
 
+이 절의 BRR 두 줄과 위 FIFO 설정은 한 함수로 묶어 `cmsis-device-h7` v1.9.0 헤더로 경고 없이 빌드했습니다(`arm-none-eabi-gcc` 16.2.0). 비트 이름이 모두 이 헤더에 있다는 확인이고, 보드에서 실행하지는 않았습니다.
+
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m7 -mthumb -O2 -ffreestanding -DSTM32H743xx \
+  -I cmsis-device-h7/Include -I CMSIS_5/CMSIS/Core/Include -Wall -Wextra -c fifo.c
+```
+
 921600 baud에서 문자 하나는 10.85 µs마다 들어옵니다. FIFO 없이 문자마다 인터럽트를 받으면 그 간격이 10.85 µs이고, 임계값을 1/2(8개)로 두면 연속 수신 중에는 인터럽트 한 번에 8개를 읽으므로 간격이 86.8 µs로 늘어납니다. 버스트가 끝나면 마지막 stop bit 뒤 20비트 시간, 즉 21.7 µs 뒤에 `RTOF` 인터럽트에서 남은 문자를 읽습니다. FIFO 모드에서도 RXFIFO가 가득 찬 상태로 시프트 레지스터의 다음 문자가 옮겨 갈 차례가 되면 overrun(`ORE`)이 납니다(p.2030). 인터럽트·DMA 수신 드라이버 구조는 [4-07: UART 드라이버 구현](/blog/embedded/modern-recipes/part4-07-uart-driver)에서 다룹니다(STM32F4 USART 기준).
 
 ## 정리
