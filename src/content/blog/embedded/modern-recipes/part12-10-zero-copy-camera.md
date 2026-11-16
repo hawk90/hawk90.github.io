@@ -268,7 +268,7 @@ caps의 `(memory:NVMM)`은 NVIDIA buffer 경로입니다. DeepStream 문서대�
 |---|---|
 | fps | application timestamp |
 | CPU 사용률 | `top`, Jetson은 `tegrastats` |
-| 메모리 대역폭 | SoC의 memory controller counter(Jetson은 `tegrastats`의 EMC 항목) |
+| 메모리 대역폭 | SoC의 memory controller counter |
 | end-to-end latency | capture timestamp(V4L2 `buf.timestamp`) → display |
 
 ## 자주 보는 함정
