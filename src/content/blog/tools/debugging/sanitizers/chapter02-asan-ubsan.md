@@ -76,9 +76,9 @@ target_link_options(myapp PRIVATE
 
 ### `-fno-omit-frame-pointer` — 스택 트레이스 정확도
 
-Sanitizer가 에러를 보고할 때, *어디서 발생했는지*를 알려면 스택 트레이스가 필요합니다. ASan은 `malloc`/`free` 때마다 할당 위치의 스택을 기록하는데, 이때 frame pointer를 따라가는 빠른 unwinder를 씁니다. macOS 런타임의 `ASAN_OPTIONS=help=1`에서 `fast_unwind_on_malloc`은 `true`("use the fast frame-pointer-based unwinder on malloc/free")였습니다. 컴파일러가 frame pointer를 생략하면 그 사슬이 끊겨 "allocated by thread T0 here" 아래 프레임이 빠집니다.
+Sanitizer가 에러를 보고할 때, *어디서 발생했는지*를 알려면 스택 트레이스가 필요합니다. ASan은 `malloc`/`free` 때마다 할당 위치의 스택을 기록하는데, 이때 frame pointer를 따라가는 빠른 unwinder를 씁니다. macOS 런타임의 `ASAN_OPTIONS=help=1`에서 `fast_unwind_on_malloc`은 `true`("use the fast frame-pointer-based unwinder on malloc/free")였습니다.
 
-기본값은 컴파일러와 타깃마다 달랐습니다. Debian 13 arm64의 GCC 14는 `gcc -O1 -Q --help=optimizers`에서 `-fomit-frame-pointer [enabled]`를 보였고 `-O0`에서도 같았습니다. clang 19는 `-O1 -###`에서 `-mframe-pointer=non-leaf`, 즉 잎 함수가 아니면 frame pointer를 유지하는 쪽이었습니다. 컴파일러 기본값에 기대지 않으려면 `-fno-omit-frame-pointer`를 명시합니다. [ASan 문서](https://clang.llvm.org/docs/AddressSanitizer.html#usage)는 인라인과 tail call이 남아 있으면 그래도 프레임이 빠질 수 있다며, 완전한 트레이스가 필요하면 `-fno-optimize-sibling-calls`를 더하라고 적습니다.
+기본값은 컴파일러와 타깃마다 달랐습니다. Debian 13 arm64의 GCC 14는 `gcc -O1 -Q --help=optimizers`에서 `-fomit-frame-pointer [enabled]`를 보였고 `-O0`에서도 같았습니다. clang 19는 `-O1 -###`에서 `-mframe-pointer=non-leaf`, 즉 잎 함수가 아니면 frame pointer를 유지하는 쪽이었습니다. 다만 GCC 14의 `[enabled]` 표시와 달리, `-O1`로 만든 비잎 함수의 어셈블리에는 `stp x29, x30, [sp, -16]!`와 `mov x29, sp`가 남아 있었습니다. 세 함수를 거쳐 할당한 블록을 해제 뒤 쓰는 예제는 `-fno-omit-frame-pointer` 없이도 `previously allocated by thread T0 here:` 아래 `alloc3`·`alloc2`·`alloc1`·`main` 네 프레임이 모두 나왔습니다. 이번 환경에서는 플래그가 결과를 바꾸지 않았지만, 다른 타깃·최적화 수준의 기본값에 기대지 않으려고 `-fno-omit-frame-pointer`를 명시합니다. [ASan 문서](https://clang.llvm.org/docs/AddressSanitizer.html#usage)는 인라인과 tail call이 남아 있으면 그래도 프레임이 빠질 수 있다며, 완전한 트레이스가 필요하면 `-fno-optimize-sibling-calls`를 더하라고 적습니다.
 
 세 함수를 거쳐 힙 경계를 넘는 `pipe.c`를 `-O1 -fno-omit-frame-pointer -g`로 빌드하면 세 프레임이 모두 남습니다(Apple clang 21).
 
@@ -289,7 +289,7 @@ int compute_b() { return 41; }
 int b_value = compute_b();
 ```
 
-Debian 13에서 옵션 없이 실행하면 clang 19 빌드는 `a.v=42`, GCC 14 빌드는 `a.v=1`을 찍었습니다. 링크 순서와 컴파일러에 따라 `b_value`가 0인 채로 읽힐 수도, 이미 초기화된 뒤 읽힐 수도 있다는 뜻입니다. `ASAN_OPTIONS=check_initialization_order=1`을 주자 두 컴파일러, 두 링크 순서 모두 다음과 같이 멈췄습니다. `a.v=42`가 나온 clang 빌드에서도 잡혔다는 점이 중요합니다.
+Debian 13에서 옵션 없이 실행하면 clang 19 빌드는 `a.v=42`, GCC 14 빌드는 `a.v=1`을 찍었습니다. 링크 순서와 컴파일러에 따라 `b_value`가 0인 채로 읽힐 수도, 이미 초기화된 뒤 읽힐 수도 있다는 뜻입니다. `ASAN_OPTIONS=check_initialization_order=1`을 주자 두 컴파일러(`siof_a.cpp siof_b.cpp` 순서)와 clang의 반대 링크 순서 모두 다음과 같이 멈췄습니다. `a.v=42`가 나온 clang 빌드에서도 잡혔다는 점이 중요합니다.
 
 ```text
 ==824==ERROR: AddressSanitizer: initialization-order-fiasco on address 0xaaaacfb52ba0 at pc 0xaaaacfa14aa4 bp 0xffffed9866e0 sp 0xffffed9866d8
@@ -356,14 +356,14 @@ Sanitizer를 *모든 빌드에 항상* 켤 수는 없습니다. 오버헤드도 
 ### 켤 자리
 
 - **로컬 개발 빌드**: 기본 켜기. `ENABLE_SANITIZERS=ON`을 디폴트.
-- **단위 테스트**: 항상 켜기. 정렬 위주 작업(4장의 `work.cpp`, 스레드 4개가 각자 800만 개 정렬)을 Apple clang 21 `-O1`로 돌렸을 때 실행 시간은 0.21~0.30초에서 0.23~0.26초로 거의 그대로였고, 최대 RSS만 129.8MB에서 160.8MB로 늘었습니다. 문서의 "typical slowdown 2x"보다 작은 값이지만 작업이 정렬 하나뿐이라는 한계가 있습니다.
+- **단위 테스트**: 항상 켜기. 정렬 위주 작업(4장의 `work.cpp`, 스레드 4개가 각자 2^23(약 839만)개 정렬)을 Apple clang 21 `-O1`로 돌렸을 때 실행 시간은 0.21~0.30초에서 0.23~0.26초로 거의 그대로였고, 최대 RSS만 129.8MB에서 160.8MB로 늘었습니다. 문서의 "typical slowdown 2x"보다 작은 값이지만 작업이 정렬 하나뿐이라는 한계가 있습니다.
 - **CI의 PR 빌드**: 켜기. PR마다 ASan+UBSan 빌드를 한 번 더 돌림.
 - **통합 테스트의 일부**: 시간 예산 안에 들어오는 시나리오만 골라 sanitizer 빌드로 돌립니다.
 
 ### 끌 자리
 
 - **일반 배포 빌드**: ASan 런타임은 끕니다. [UBSan 문서](https://clang.llvm.org/docs/UndefinedBehaviorSanitizer.html#security-considerations)는 런타임이 "meant for testing purposes"라며, 보안이 중요한 배포에는 minimal runtime이나 trap 모드를 권합니다. trap 모드는 1장에서 본 대로 dylib 없이 `brk` 명령만 남깁니다.
-- **벤치마크**: 끄기. 위 측정에서 실행 시간은 거의 같았어도 최대 RSS가 24% 늘었고, 4장의 TSan 빌드는 시간까지 1.6~1.7배가 됐습니다.
+- **벤치마크**: 끄기. 위 측정에서 실행 시간은 거의 같았어도 최대 RSS가 24% 늘었고, 4장의 TSan 빌드는 시간까지 1.5~2.0배가 됐습니다.
 - **임베디드/모바일**: ASan은 프로그램 메모리 8바이트마다 shadow 1바이트를 쓰고(보고서의 "one shadow byte represents 8 application bytes") 할당마다 redzone을 붙입니다. 메모리가 빠듯한 디바이스에서는 이 몫을 먼저 계산합니다.
 
 CMake에서는 옵션으로 분기합니다.
@@ -383,8 +383,7 @@ endif()
 
 ## 보고 읽기 — ASan 출력 형식
 
-```c
-// main.c
+```c title="main.c"
 #include <string.h>
 int main() {
     char buf[8];
@@ -393,11 +392,11 @@ int main() {
 }
 ```
 
-Debian 13의 GCC 14로 빌드해 실행한 전체 로그입니다. shadow byte 덤프와 범례는 생략했습니다.
+Debian 13의 GCC 14로 빌드해 실행한 전체 로그입니다. 게스트에서는 같은 파일을 `ch02_main.c`라는 이름으로 저장해 빌드했습니다. shadow byte 덤프와 범례는 생략했습니다.
 
 ```text
-$ gcc -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1 main.c -o test
-$ ./test
+$ gcc -fsanitize=address,undefined -fno-omit-frame-pointer -g -O1 ch02_main.c -o test1
+$ ./test1
 =================================================================
 ==745==ERROR: AddressSanitizer: stack-buffer-overflow on address 0xffff88b00028 at pc 0xffff8b978390 bp 0xffffc309b100 sp 0xffffc309b140
 WRITE of size 14 at 0xffff88b00028 thread T0
@@ -471,7 +470,7 @@ clang++ -O1 -g -fsanitize=undefined overflow.cpp -o overflow
 UBSAN_OPTIONS=halt_on_error=1 ./overflow
 ```
 
-Debian 13의 clang 19에서 나온 결과입니다(macOS Apple clang 21도 출력은 같고 비정상 종료 코드만 134였습니다).
+Debian 13의 clang 19에서 나온 결과입니다(macOS Apple clang 21은 ASan SUMMARY 위치가 `bounds.cpp:5`로 경로와 열 없이 나왔고, 비정상 종료 코드는 134였습니다).
 
 ```text
 $ ./bounds

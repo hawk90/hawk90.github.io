@@ -540,7 +540,8 @@ reachable=0 after=0
 
 - [LeakSanitizer Wiki](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer)
 - [LSan Flags](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizer#flags)
-- [Memory Leak Detection in Practice (Google)](https://research.google/pubs/pub37752/) — LSan 디자인 배경
+- [AddressSanitizer: A Fast Address Sanity Checker (USENIX ATC 2012)](https://research.google/pubs/pub37752/) — LSan이 올라타는 ASan 런타임의 설계 논문
+- [LeakSanitizer 설계 문서](https://github.com/google/sanitizers/wiki/AddressSanitizerLeakSanitizerDesignDocument) — 이 장 동작 절의 출처
 
 ## 관련 항목
 

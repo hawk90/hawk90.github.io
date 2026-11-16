@@ -27,7 +27,7 @@ int main() {
 
 `counter++`은 *세 단계의 명령*입니다: load → add → store. 두 스레드가 *동시에* load를 하면, 둘 다 같은 옛 값을 보고 같은 새 값을 저장합니다. 단순한 교차 실행으로 1이 되는 상황을 설명할 수 있지만, C++ 데이터 레이스는 UB라서 가능한 결과를 1과 2로 한정할 수 없습니다.
 
-이 버그가 어려운 이유는 *대부분의 실행에서는 안 보입니다*. sanitizer 없이 Apple clang 21 `-O1`로 빌드해 M2 Pro에서 1,000번 실행하자 986번은 `2`, 14번은 `1`이 나왔습니다. 한 스레드가 다른 스레드보다 먼저 끝나면 정상으로 보이니, 테스트를 몇 번 돌려서는 1.4%짜리 실패를 만나기 어렵습니다.
+이 버그가 어려운 이유는 *대부분의 실행에서는 안 보입니다*. sanitizer 없이 Apple clang 21 `-O1`로 빌드해 M2 Pro에서 1,000번 실행했을 때 이번에는 986번이 `2`, 14번(1.4%)이 `1`이었습니다. 한 스레드가 다른 스레드보다 먼저 끝나면 정상으로 보이니, 테스트를 몇 번 돌려서는 1.4%짜리 실패를 만나기 어렵습니다.
 
 `ThreadSanitizer(TSan)`은 이런 *잠재된 데이터 레이스*를 *실행 중에* 감지합니다. 같은 파일을 `-fsanitize=thread -g -O1`로 빌드해 한 번 실행한 결과입니다(Apple clang 21, libc++ 템플릿 프레임은 `...`로 생략).
 
@@ -127,10 +127,10 @@ ctest --test-dir build-tsan
 | 빌드 | 실행 시간 (초) | 최대 RSS |
 |------|------|------|
 | 계측 없음 | 0.21~0.30 | 129.8MB |
-| `-fsanitize=thread` | 0.35~0.61 | 438.9~486.8MB |
+| `-fsanitize=thread` | 0.35~0.38 (첫 측정 0.61) | 438.9~486.8MB |
 | `-fsanitize=address` | 0.23~0.26 | 160.7~160.8MB |
 
-TSan은 이 작업에서 시간 1.6~1.7배(0.61초짜리 첫 측정 제외), 메모리 3.4~3.7배였습니다. 이 작업은 스레드마다 자기 배열만 정렬하므로 스레드 사이의 공유 접근이 mutex 구간 하나뿐입니다. 이 숫자는 "문서 값보다 작게 나온 사례 하나"로만 읽고, PR과 야간 빌드에 TSan을 어떻게 나눌지는 자기 테스트의 시간으로 정합니다.
+다섯 번의 중앙값은 계측 없음 0.23초, TSan 0.37초로 TSan이 약 1.6배였고, 메모리는 3.4~3.7배였습니다. 같은 측정을 두 번 더 했을 때 중앙값 비율은 약 1.5배, 그리고 2.0배(0.21초 대 0.42초)로 흔들렸습니다. 이 작업에서 시간 배율은 1.5~2.0배 범위였습니다. 이 작업은 스레드마다 자기 배열만 정렬하므로 스레드 사이의 공유 접근이 mutex 구간 하나뿐입니다. 이 숫자는 "문서 값보다 작게 나온 사례 하나"로만 읽고, PR과 야간 빌드에 TSan을 어떻게 나눌지는 자기 테스트의 시간으로 정합니다.
 
 ---
 
@@ -331,7 +331,7 @@ TSan suppression은 *여러 종류*를 지원합니다. 아래 표는 [TSan 문�
 
 ## TSan과 atomic memory model
 
-TSan은 *C++11 메모리 모델*을 엄격히 따릅니다. 따라서 다음 코드들이 *교과서적으로 어떻게 봐야 하는지*를 가르쳐 줍니다.
+아래 두 패턴은 이 장 끝의 `publication-race.cpp`로 직접 돌렸습니다. `relaxed` 버전은 `data race`로 보고됐고, `release/acquire` 버전(`-DSAFE`)은 보고 없이 끝났습니다.
 
 ### `relaxed` 단독은 *데이터 보호 못 함*
 
@@ -385,7 +385,7 @@ int v = x;    // memory_order_seq_cst
 
 ## 데드락 검출
 
-TSan은 `detect_deadlocks` 옵션으로 잠금 순서 역전을 검사합니다. [TSan 문서](https://clang.llvm.org/docs/ThreadSanitizer.html#run-time-flags)는 기본값을 `true`로 적지만, 실제 런타임의 `TSAN_OPTIONS=help=1`은 달랐습니다.
+TSan은 `detect_deadlocks` 옵션으로 잠금 순서 역전을 검사합니다. [TSan 문서](https://clang.llvm.org/docs/ThreadSanitizer.html#run-time-flags)는 기본값을 `true`로 적고 Debian clang 19·Homebrew LLVM 23 런타임의 `TSAN_OPTIONS=help=1`도 `true`였지만, Apple clang 21 런타임은 `false`였습니다.
 
 | 런타임 | `detect_deadlocks` 기본값 | 아래 예제 결과 |
 |------|------|------|
@@ -400,17 +400,18 @@ macOS에서는 `std::mutex` 대신 `pthread_mutex_t` 두 개를 한 스레드에
 #include <mutex>
 #include <thread>
 std::mutex m1, m2;
-
 void thread_a() {
     std::lock_guard<std::mutex> g1(m1);
     std::lock_guard<std::mutex> g2(m2);   // m1 → m2 순서
 }
-
 void thread_b() {
+#ifdef SCOPED
+    std::scoped_lock g(m2, m1);
+#else
     std::lock_guard<std::mutex> g2(m2);
     std::lock_guard<std::mutex> g1(m1);   // m2 → m1 순서 — 데드락 위험
+#endif
 }
-
 int main() {
     std::thread a(thread_a); a.join();
     std::thread b(thread_b); b.join();
@@ -462,7 +463,7 @@ void thread_b() {
 }
 ```
 
-`thread_b`만 `std::scoped_lock g(m2, m1);`로 바꾼 빌드(인자 순서를 일부러 반대로 둠)도 Debian 13 clang 19 TSan에서 보고 없이 종료 코드 0으로 끝났습니다. [`std::scoped_lock`](https://en.cppreference.com/w/cpp/thread/scoped_lock)은 mutex가 둘 이상이면 `std::lock`과 같은 교착 회피 알고리즘으로 잡으므로, 인자 순서가 달라도 교착이 생기지 않습니다.
+`-DSCOPED`로 빌드해 `thread_b`만 `std::scoped_lock g(m2, m1);`(인자 순서를 일부러 반대로 둠)을 쓰게 한 바이너리도 Debian 13 clang 19 TSan에서 보고 없이 종료 코드 0으로 끝났습니다. [`std::scoped_lock`](https://en.cppreference.com/w/cpp/thread/scoped_lock)은 mutex가 둘 이상이면 `std::lock`과 같은 교착 회피 알고리즘으로 잡으므로, 인자 순서가 달라도 교착이 생기지 않습니다.
 
 ---
 
@@ -582,7 +583,7 @@ $ echo $?
 
 - TSan은 *happens-before 모델*로 데이터 레이스를 감지합니다. 두 접근이 실제로 겹치지 않은 실행에서도 동기화가 없으면 보고합니다(`counter.cpp`는 출력 `2`에서도 보고).
 - 황금 옵션: `-fsanitize=thread -fno-omit-frame-pointer -g -O1`. ASan과 *별도 빌드*.
-- 문서 값은 시간 5~15배·메모리 5~10배이고, 정렬 작업 하나에서 잰 값은 시간 1.6~1.7배·메모리 3.4~3.7배였습니다.
+- 문서 값은 시간 5~15배·메모리 5~10배이고, 정렬 작업 하나에서 잰 값은 시간 1.5~2.0배·메모리 3.4~3.7배였습니다.
 - `relaxed`는 *주변 메모리 보호 못 함*. `release/acquire` 필요.
 - 잠금 순서 역전은 Debian의 clang·GCC에서 실제로 멈추지 않는 실행으로도 보고됐고, macOS 두 런타임에서는 보고되지 않았습니다.
 - Suppression은 `race:` / `race_top:` / `mutex:` / `deadlock:` 등 키워드별이며, `race:`는 스택 전체에 맞으므로 라이브러리 이름 하나로 진짜 레이스를 지울 수 있습니다.

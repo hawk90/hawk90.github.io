@@ -172,13 +172,13 @@ int main() {
 
 | 요청 | Homebrew LLVM 23 | Apple clang 21 | Debian clang 19 | Debian GCC 14 |
 |------|------|------|------|------|
-| `release` | 통과 | 통과 | 통과 | 통과 |
+| `release` | 빌드 통과 | 빌드 통과 | 빌드 통과 | 빌드 통과 |
 | `asan` (ASan+UBSan) | 통과 | **테스트 실패** (아래) | 통과 | 통과 |
 | `tsan` (TSan+UBSan) | 통과 | 통과 | 통과 | 통과 |
 | `-DENABLE_MSAN=ON` | `This MSan example requires Linux` | — | 통과 | `MSan requires upstream Clang` |
 | `-DENABLE_ASAN=ON -DENABLE_TSAN=ON` | `ASan + TSan cannot coexist` | — | — | — |
 
-`SAN_address_undefined`, `SAN_thread_undefined`, `SAN_memory`라는 이름으로 `check_cxx_source_compiles` probe가 돌고 `Success`가 찍혔습니다. probe는 컴파일과 링크만 확인하므로, 런타임 기동이나 종속 라이브러리 전체의 MSan 계측까지 검증하지 않습니다.
+`release`는 test preset이 없어 구성·빌드까지만 했습니다. `SAN_address_undefined`, `SAN_thread_undefined`, `SAN_memory`라는 이름으로 `check_cxx_source_compiles` probe가 돌고 `Success`가 찍혔습니다. probe는 컴파일과 링크만 확인하므로, 런타임 기동이나 종속 라이브러리 전체의 MSan 계측까지 검증하지 않습니다.
 
 정적 라이브러리는 자체 링크 단계가 없어서, 필요한 런타임 링크 옵션을 `INTERFACE`로 소비자에게 넘깁니다. 이 부분을 `PRIVATE`로 바꾸고 `core`만 `enable_sanitizers()`한 소비자를 만들자 Homebrew LLVM에서 `Undefined symbols for architecture arm64: "___asan_init"`으로 링크가 실패했습니다. `INTERFACE`로 되돌리면 소비자 실행 파일이 `libclang_rt.asan_osx_dynamic.dylib`에 링크되고 `answer=42`를 출력했습니다.
 
@@ -459,7 +459,7 @@ macOS 행의 `clang`은 Apple clang이라, `asan` preset을 그대로 쓰면 앞
 
 ## 실패 진단 — *Sanitizer가 깼을 때*
 
-CI에서 sanitizer가 깨지면 보통 다음 단계로 진단합니다.
+CI에서 sanitizer가 깨지면 다음 순서로 진단합니다.
 
 1. **출력 확인** — CI 로그의 sanitizer 보고서. `SUMMARY:` 줄과 스택 트레이스.
 2. **로컬 재현** — 같은 프리셋으로 로컬에서 동일 빌드.

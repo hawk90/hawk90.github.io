@@ -88,7 +88,7 @@ SUMMARY: AddressSanitizer: stack-buffer-overflow main.c:4 in main
 핵심 규칙 셋만 기억하면 됩니다.
 
 1. **UBSan은 다른 검사 계열과 조합할 수 있습니다.** `undefined,address`와 `undefined,thread`는 위 세 환경에서 모두 빌드됐습니다.
-2. **ASan + TSan + MSan은 서로 배타적**입니다. 셋 다 프로그램 메모리마다 별도의 shadow 메모리를 두는데 그 배치와 의미가 서로 달라, 한 프로세스에 둘을 올릴 수 없습니다.
+2. **ASan + TSan + MSan은 서로 배타적**입니다. 위에서 본 대로 세 환경의 드라이버가 이 셋 중 둘을 함께 주는 조합을 모두 거부했습니다.
 3. **LSan은 ASan 런타임에 들어 있습니다.** [LSan 문서](https://clang.llvm.org/docs/LeakSanitizer.html)는 ASan이 "enables it by default on supported platforms"라고 적습니다. 실제 기본값은 런타임마다 달랐습니다. macOS에서는 `ASAN_OPTIONS=help=1`이 `detect_leaks`의 현재 값을 `false`로 보여 줬고, Apple clang 런타임은 `detect_leaks=1`을 주면 `detect_leaks is not supported on this platform.`을 찍고 abort했습니다. 반대로 Debian 13의 clang 19·GCC 14 런타임은 `detect_leaks`가 `true`여서 `-fsanitize=address`만으로 종료 시 누수 보고가 나왔습니다(3장).
 
 결과적으로 *실무에서 만나는 빌드는 세 가지*입니다.
@@ -131,7 +131,7 @@ CFLAGS_TSAN="-fsanitize=thread -fno-omit-frame-pointer -g -O1"
 
 ### 3단계 — 깊은 분석이 필요하면 MSan/LSan/UBSan trap 모드
 
-- **MSan**: *초기화 안 된 값*을 추적합니다. Clang 전용이고 Linux 등에서만 지원됩니다. [MSan 문서](https://clang.llvm.org/docs/MemorySanitizer.html#handling-external-code)는 프로그램의 모든 코드, 표준 라이브러리까지 MSan으로 빌드하라고 요구합니다. 문서는 이를 지키지 않으면 "false reports"가 날 수 있다고 적고, 대신 런타임에 흔한 libc 함수용 인터셉터 70여 개를 넣어 두었다고 설명합니다. Debian 13에서 계측하지 않은 libstdc++로 `std::string` 두 개를 잇는 작은 예제를 MSan으로 돌렸을 때는 보고 없이 `11`이 나왔습니다.
+- **MSan**: *초기화 안 된 값*을 추적합니다. Clang 전용이고 Linux 등에서만 지원됩니다. [MSan 문서](https://clang.llvm.org/docs/MemorySanitizer.html#handling-external-code)는 프로그램의 모든 코드, 표준 라이브러리까지 MSan으로 빌드하라고 요구합니다. 문서는 이를 지키지 않으면 "false reports"가 날 수 있다고 적고, 대신 런타임에 흔한 libc 함수용 인터셉터 70여 개를 넣어 두었다고 설명합니다. Debian 13에서 계측하지 않은 libstdc++로 `std::string`에 문자열 리터럴을 이어 붙이는 작은 예제를 MSan으로 돌렸을 때는 보고 없이 `11`이 나왔습니다.
 - **LSan 단독**: `-fsanitize=leak`은 ASan의 경계 검사 없이 누수 검사만 넣습니다. Homebrew LLVM 23이나 Linux에서 씁니다(3장).
 - **UBSan trap 모드**: `-fsanitize=undefined -fsanitize-trap=undefined`는 진단 런타임 없이 UB 자리에 트랩 명령을 넣습니다. Apple clang 21에서 signed overflow 예제를 이렇게 빌드하면 바이너리에 UBSan dylib이 링크되지 않았고, 어셈블리에 `brk #0x5500`이 들어갔으며, 실행은 메시지 없이 종료 코드 133(SIGTRAP)으로 끝났습니다.
 
@@ -254,7 +254,7 @@ if (x > 0) {                    // ❌ uninitialized value
 
 Debian 13의 clang 19에서 이 패턴을 `-fsanitize=memory -g`(`-O0`)로 빌드하면 `if` 줄에서 `WARNING: MemorySanitizer: use-of-uninitialized-value`가 나오고 종료 코드 1로 멈췄습니다. 같은 코드를 `-O1`로 빌드하면 보고 없이 `end`까지 실행됐습니다. 초기화되지 않은 지역 변수의 값은 컴파일러가 마음대로 정해도 되므로, 최적화가 비교 자체를 없앴습니다. `malloc`한 배열을 읽는 경우는 `-O1`에서도 보고됐고, `-fsanitize-memory-track-origins=2`를 더하면 보고 아래에 `Uninitialized value was created by a heap allocation`과 그 `malloc` 줄이 붙었습니다.
 
-MSan은 초기화되지 않은 값을 *복사*할 때가 아니라 그 값으로 분기하거나 바깥에 넘길 때 보고합니다. `int y = p[1];`로 복사한 줄이 아니라 `if (y)` 줄이 보고 위치였습니다.
+MSan은 초기화되지 않은 값을 *복사*할 때가 아니라 그 값으로 분기하거나 바깥에 넘길 때 보고합니다. 두 문장이 같은 8번 줄에 있는 예제에서, 보고 위치 `msan.c:8:93`의 열 93은 `int y = p[1];` 복사가 아니라 그 뒤 `if (y)`를 가리켰습니다.
 
 ASan은 *경계 위반*을, MSan은 *내용 초기화*를 봅니다. 둘은 서로 다른 종류의 버그를 잡고, 앞의 호환성 표대로 한 빌드에 같이 넣을 수도 없습니다.
 
