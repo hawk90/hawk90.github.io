@@ -21,6 +21,8 @@ topics: ["embedded"]
 - RTOS task별 stack 크기 결정
 - 전역 데이터의 위치 확인
 
+이 글의 linker script와 코드는 Debian 13 arm64 guest의 `gcc-arm-none-eabi` 14.2.rel1로 빌드해 QEMU 11.1.3 `netduinoplus2`(STM32F405 모델, RAM 0x20000000)에서 실행했습니다. 실행 결과는 각 절에 붙였습니다.
+
 ## 핵심 개념
 
 ### 1) 흔한 RAM 레이아웃 예
@@ -32,9 +34,9 @@ topics: ["embedded"]
 | ↓ | heap | malloc/free (위로 자람) |
 | (빈 공간) | — | heap·stack 사이 여유 |
 | ↑ | stack | 함수 call frame / local 변수 (아래로 자람) |
-| 0x2001FFFF | `_estack` | initial MSP |
+| 0x20020000 | `_estack` | initial MSP (RAM 끝 다음 주소) |
 
-이런 배치는 흔하지만 linker script, ABI, RTOS와 메모리 보호 설정에 따라 달라질 수 있습니다. 일반적인 단일 주소 공간에서는 heap이 높은 주소 방향, stack이 낮은 주소 방향으로 자라며 가운데 공간을 여유로 둡니다.
+128 KB RAM이라면 마지막 byte는 0x2001FFFF이고 `_estack = ORIGIN(RAM) + LENGTH(RAM)`은 그 다음 주소 0x20020000입니다. Cortex-M의 stack은 full descending이라(push 때 SP를 먼저 줄이고 씀, Cortex-M4 Generic User Guide 2.1.2) 첫 push가 0x2001FFFC에 들어가므로, RAM 끝 다음 주소를 초기 SP로 쓰는 것이 맞습니다. 이 배치는 linker script마다 다르고, 아래 4)·코드 절의 script는 stack을 RAM 끝이 아니라 `.heap` 바로 위의 고정 크기 영역에 둡니다.
 
 ### 2) Section별 위치
 
@@ -82,22 +84,23 @@ _Min_Stack_Size = 0x1000;       /* 4 KB */
 } > RAM
 ```
 
-이 영역을 미리 잡아 두면 `_estack`까지 stack용으로 확실히 확보됩니다.
+이 영역은 link 때 RAM이 모자라지 않는지 확인하는 예약입니다. 실행 중 stack이 그 안에 머무는지는 따로 확인해야 하고(아래 5절, MPU guard), 넘쳐도 hardware는 알려 주지 않습니다(아래 함정 절의 실행 결과).
 
 RTOS의 경우 task마다 별도 stack이 있습니다. main thread의 stack은 `_estack`, task stack은 RTOS가 heap이나 static buffer에서 잡습니다.
 
 ### 5) Stack 사용량 측정
 
+stack을 알려진 값으로 칠해 두고, 나중에 칠이 남아 있는 지점까지 세면 가장 깊게 쓴 지점(high water mark)이 나옵니다. 이전 판은 칠하는 경계로 `__get_PSP()`를 썼는데, `main`은 reset 직후 MSP로 도므로 PSP가 아니라 현재 SP를 기준으로 해야 합니다.
+
 ```c
-// Example: verify the active stack and linker symbol range before painting.
 extern uint32_t _sstack, _estack;
 
-void stack_paint(void) {
-    for (uint32_t *p = &_sstack; p < (uint32_t *)__get_PSP() - 4; p++) {
-        *p = 0xDEADBEEF;
-    }
-}
+static inline uint32_t get_sp(void) { uint32_t sp; __asm volatile("mov %0, sp" : "=r"(sp)); return sp; }
 
+/* paint from the stack bottom up to just below the current SP (main runs on MSP) */
+__attribute__((noinline)) void stack_paint(void) {
+    for (uint32_t *p = &_sstack; p < (uint32_t *)get_sp() - 16; p++) *p = 0xDEADBEEF;
+}
 uint32_t stack_high_water(void) {
     uint32_t *p = &_sstack;
     while (*p == 0xDEADBEEF) p++;
@@ -105,7 +108,16 @@ uint32_t stack_high_water(void) {
 }
 ```
 
-GCC/Clang의 `-Wstack-usage=N` 옵션은 함수별 추정 stack 사용량이 임계값을 넘을 때 경고하는 데 도움을 줍니다. 동적 호출 경로와 인터럽트/RTOS stack은 별도로 측정해야 합니다.
+호출 깊이를 바꿔 가며 high water를 읽었습니다. `burn(n)`은 64 byte 지역 배열을 가진 재귀 함수이고, `-fstack-usage`가 보고한 frame 크기는 72 byte입니다.
+
+```text
+main.c:28:36:burn	72	static
+high water after paint     = 0x00000060
+high water after burn(10)  = 0x00000338
+high water after burn(40)  = 0x00000BA8
+```
+
+burn(10)과 burn(40)의 차이 0x870(2160)은 정확히 30 frame × 72 byte입니다. `-Wstack-usage=64`로 컴파일하면 이 함수에 "warning: stack usage is 72 bytes [-Wstack-usage=]"가 나옵니다. `-fstack-usage`와 `-Wstack-usage`는 함수 하나의 frame만 알려 주므로, 호출 경로 전체와 인터럽트·RTOS task stack은 painting 같은 실측으로 봅니다.
 
 ### 6) Heap 정책 선택
 
@@ -154,7 +166,21 @@ SECTIONS
 }
 ```
 
-이렇게 하면 빌드 시점에 RAM 부족 여부를 알 수 있습니다.
+이 script로 링크하면 `.heap`과 `.stack`이 `.bss` 위에 차례로 놓입니다. `.heap` section 자체는 0x20000004에서 시작하고, 안의 `ALIGN(8)` 때문에 `_sheap`은 0x20000008이 됩니다(크기 0x204 = 정렬 4 + 0x200).
+
+```text
+  [ 3] .data             PROGBITS        20000000 020000 000004 00  WA  0   0  4
+  [ 4] .bss              NOBITS          20000004 020004 000000 00  WA  0   0  1
+  [ 5] .heap             NOBITS          20000004 020004 000204 00  WA  0   0  1
+  [ 6] .stack            NOBITS          20000208 020208 001000 00  WA  0   0  1
+```
+
+`_Min_Stack_Size`를 128 KB로 바꿔 RAM보다 크게 만들면 `ASSERT`와 MEMORY 검사가 둘 다 link를 멈춥니다.
+
+```text
+ld: RAM overflow
+ld: region `RAM' overflowed by 520 bytes
+```
 
 stack overflow 감지 with MPU(앞 part2-07 참조):
 
@@ -173,15 +199,28 @@ mpu_set_region(0, (uint32_t)&_sstack, 32, MPU_AP_NONE);
 | malloc | heap | runtime 측정 |
 | `const` | .rodata | `nm -S \| grep R` |
 
-| 메모리 비율 |
-| --- |
-| 프로젝트의 코드·버퍼·stack·heap 정책에 따라 크게 달라짐 |
+위 표의 `nm -S`는 symbol마다 크기를 함께 보여 줍니다. 이 글의 이미지에서는 다음과 같았습니다.
+
+```text
+20000000 00000004 d heap_ptr
+08000000 00000040 R vectors
+```
 
 ## 자주 보는 함정
 
 > ⚠️ Stack overflow를 감지 못 함
 
-stack이 heap이나 .bss를 침범해도 hardware는 안 잡습니다. MPU stack guard 또는 painting 기법으로 감지.
+위 4 KB stack에서 `burn(62)`(62 × 72 = 4,464 byte)를 부르면 SP가 `.stack` 아래로 내려가 heap 영역을 지나갑니다. 미리 0x11111111로 채운 heap buffer를 호출 전후로 비교했습니다.
+
+```text
+heap buf[63] before deep call = 0x11111111
+heap buf words changed by burn(62) = 0x00000005
+lowest SP reached ~ _estack - 62*72 = 0x20000088
+```
+
+마지막 줄은 SP를 직접 잰 값이 아니라 `_estack`에서 frame 크기로 계산한 추정치입니다.
+
+heap의 5 word가 바뀌었지만 fault는 없었고 프로그램은 정상 종료했습니다. MPU를 쓰지 않는 Cortex-M은 이런 침범을 알려 주지 않으므로, [2-07](/blog/embedded/modern-recipes/part2-07-arm-mpu)의 MPU stack guard나 위의 painting으로 감지합니다.
 
 > ⚠️ Recursive 함수의 stack 폭증
 
@@ -197,12 +236,12 @@ malloc/free를 반복하면 작은 hole이 많이 생겨 큰 할당이 실패. �
 
 > ⚠️ `_end` 위치 오해
 
-`_end`는 `.bss` 끝이지 RAM의 끝이 아닙니다. heap이 시작하는 점일 뿐. RAM 끝은 `ORIGIN(RAM) + LENGTH(RAM)` 또는 `_estack`.
+`_end`는 `.bss` 끝이지 RAM의 끝이 아닙니다. 위 실행에서 `_end`는 0x20000004였고 `.heap`의 시작 `_sheap`은 `ALIGN(8)` 때문에 0x20000008이었습니다. 3)절의 `malloc_simple`처럼 `_end`에서 바로 할당하면 첫 블록이 0x20000004로, 8 byte 정렬이 아닙니다. heap 시작은 정렬된 `_sheap`을 쓰거나 할당기가 정렬을 맞춥니다.
 
 ## 정리
 
 - RAM에는 보통 .data, .bss, heap, stack이 배치되지만 실제 순서와 영역은 linker script·RTOS·메모리 보호 설정에 따라 달라집니다.
-- heap은 위로, stack은 아래로 자라며, 충돌 시 corruption이 발생합니다.
+- heap은 위로, stack은 아래로 자라며, 겹쳐도 fault 없이 데이터가 바뀝니다(위 실행에서 heap 5 word).
 - linker script에 `_Min_Heap_Size`, `_Min_Stack_Size`를 명시해 영역을 확보합니다.
 - Stack 사용량은 painting 기법 또는 `-Wstack-usage`로 측정.
 - 작은 임베디드는 heap을 안 쓰고 static buffer만 쓰기도 합니다.
