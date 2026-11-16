@@ -24,25 +24,25 @@ Confidential Computing은 *클라우드에서 호스트(hypervisor 포함) 자�
 
 | 구성 요소 | 정의 주체 | 역할 |
 |------|----|----|
-| **TDISP** | PCI-SIG | PCIe 디바이스 인터페이스(TDI)를 TVM에 lock·attach |
-| **TSP** | CXL Consortium (CXL 3.1 §11.5) | 직접 연결된 Type 3 메모리를 TVM 신뢰 경계에 포함. TDISP를 보완 |
+| **TDISP** | PCI-SIG (PCIe Base Specification) | PCIe device interface의 보안 상태(LOCKED·RUN·ERROR 등)를 관리. Linux v7.0에서는 VFIO/IOMMUFD가 TSM bind를 시작 |
+| **TSP** | CXL Consortium (CXL 3.1 §11.5) | 직접 연결된 Type 3 메모리를 confidential computing의 신뢰 경계에 포함. IDE·TDISP와 함께 쓸 수 있으나 의존하지 않음 |
 | **SPDM** | DMTF DSP0274 | 디바이스 인증·측정·secure session ([Ch 12](/blog/embedded/embedded-security/chapter12-spdm-cma)) |
 | **IDE** | PCI-SIG, CXL | 링크 트래픽 보호 ([Ch 11](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)) |
 
-TDISP는 PCI-SIG 표준이고 CXL Consortium이 공동 정의한 것이 아닙니다. CXL 쪽 대응물이 TSP이며, TSP는 IDE·TDISP와 함께 쓸 수 있지만 둘 중 어느 것에도 의존하지 않습니다(CXL 3.1 개정 이력). TSP의 SPDM1.2 이상 authentication·attestation 범위는 **§11.5.2**에 명시되어 있습니다. §11.5.3.2만을 이 요구의 출처로 적지 않습니다.
+CXL 3.1의 용어표는 TDISP를 "PCI-SIG가 정의한 TEE Device Interface Security Protocol"로 적습니다. CXL 쪽 대응물이 TSP이며, 같은 사양의 개정 이력은 TSP 기능이 "CXL IDE나 PCIe TDISP와 함께 쓸 수 있지만 어느 쪽에도 의존하지 않는다"고 적습니다. TSP가 authentication·attestation에 SPDM 1.2 이상을 쓴다는 것은 §11.5.2 Scope에 있습니다.
 
 ## TDISP 상태
 
-이 장에서 대조한 [Linux v7.0 PCI sysfs ABI](https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci)는 TDISP 운용 상태를 다음처럼 구분합니다. PCIe Base Specification 전체나 최신 kernel 지원을 재검증했다는 뜻은 아닙니다.
+TDISP의 상태 정의는 PCIe Base Specification에 있고, 이 글에서는 그 원문을 대조하지 않았습니다. 대신 [Linux v7.0 PCI sysfs ABI](https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci)의 `tsm/bound` 항목이 TDISP 상태 이름을 씁니다. ABI는 LOCKED·RUN·ERROR를 "TDISP operational state"로, UNLOCKED를 그 밖의 상태로 구분합니다.
 
-| 상태 | 의미 |
+| 상태 | v7.0 ABI에서의 의미 |
 |------|------|
-| UNLOCKED | 기본 상태. 보안 운용 전 |
-| LOCKED | 설정이 잠긴 상태. TVM이 받아들이기 전 단계 |
-| RUN | TVM에 attach되어 동작 중 |
-| ERROR | 오류 상태 |
+| UNLOCKED | operational state가 아님. `tsm/bound`가 비어 있음 |
+| LOCKED | operational state. `tsm/bound`에 TSM 이름이 채워짐 |
+| RUN | operational state. `tsm/bound`에 TSM 이름이 채워짐 |
+| ERROR | operational state. `tsm/bound`에 TSM 이름이 채워짐 |
 
-`tsm/bound`는 성공적으로 connect·bind한 뒤 LOCKED·RUN·ERROR 상태일 때 TSM 이름이 채워질 수 있습니다. 따라서 이름이 보인다는 사실만으로 RUN·정상 workload 실행을 판정하지 않습니다. Binding 동안 BME·MSE 등 device 설정이 안정적으로 유지되어야 하는 조건도 ABI에 명시되어 있습니다.
+`tsm/bound`는 connect와 TSM bind가 성공한 뒤에만 채워지고, bind는 VFIO/IOMMUFD가 시작합니다. ERROR도 bound 상태에 들어가므로 이름이 보인다고 RUN이라고 판정할 수 없습니다. ABI는 bound 동안 BME(Bus Master Enable)·MSE(Memory Space Enable) 같은 device 설정이 바뀌지 않아야 한다고도 적습니다.
 
 ## CXL TSP target 상태
 
@@ -54,11 +54,21 @@ CXL 메모리 디바이스(TSP target)의 상태는 TDISP와 다릅니다(CXL 3.
 | CONFIG_LOCKED | 레지스터·CCI 접근 제한, TE State 저장·검사. TEE 트랜잭션 허용 | Transport Security 실패·CXL Reset → ERROR. Conventional Reset → CONFIG_UNLOCKED |
 | ERROR | TVM 데이터는 계속 보호, 새 TEE 트랜잭션 거부 | 세션·데이터 정리 후, 또는 Conventional Reset → CONFIG_UNLOCKED |
 
-[CXL3.1 §11.5.2](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)는 직접 연결 Type3·HDM-H·256B flit을 다룹니다. Switch·switch 뒤 device·PBR·68B flit·HDM-D/HDM-DB·동시 memory sharing은 범위 밖입니다. **Memory pooling은 포함**될 수 있으므로 sharing 제외를 pooling 전체 제외로 바꾸지 않습니다. 여러 initiator가 같은 물리 메모리의 용량을 사용하되 동시에 같은 데이터에 접근하지 않는 구분입니다.
+[CXL 3.1 §11.5.2](https://computeexpresslink.org/wp-content/uploads/2024/02/CXL-3.1-Specification.pdf)의 범위는 다음과 같습니다.
+
+| 포함 | 제외 |
+|------|------|
+| SPDM 1.2 이상 authentication·attestation | CXL switch, switch 뒤 device(MLD 포함) |
+| 직접 연결 LD·SLD·MH-SLD, Dynamic Capacity device | UIO·CXL.mem·CXL.io direct P2P |
+| HDM-H memory, 256B flit | HDM-D·HDM-DB, PBR·68B flit, Type 1·2의 Type 3 HDM 접근 |
+| Memory pooling | Memory sharing |
+| Comprehensive·Selective Trust model, 암시적·명시적 TE State 접근 제어 | |
+
+Pooling과 sharing의 차이는 동시 접근입니다. 사양은 pooling을 "여러 initiator가 한 device의 같은 물리 메모리에 접근하지만 접근을 공유하지는 않는 것", sharing을 "동시에 공유하는 것"으로 구분합니다.
 
 ## Linux PCI TSM — 연결과 bind의 관찰 경계
 
-Linux v7.0 ABI의 `tsm/`는 해당 physical function의 인증·interface security와 platform TSM의 수락 조건에 따라 나타납니다. TSM driver가 로드되기 전 directory가 없다는 사실만으로 장치의 최종 지원 여부를 확정하지 않습니다.
+Linux v7.0 ABI에 따르면 `tsm/` directory는 physical function이 CMA-SPDM 인증과 TDISP를 지원하고 platform TSM driver가 secure operation을 받아들였을 때만 나타나며, driver가 load된 뒤 동적으로 생깁니다. 그래서 ABI는 `/sys/class/tsm/tsm0`이 나타난 뒤에야 "`tsm/`이 없는 device는 앞으로도 없다"고 판단할 수 있다고 적습니다.
 
 다음은 지원 platform에서 **읽을 항목의 예**이며 이 작업에서 실행한 출력이 아닙니다. `tsm0`·BDF는 실제 값으로 확인해야 합니다.
 
@@ -69,21 +79,21 @@ cat /sys/bus/pci/devices/0000:5e:00.0/tsm/connect
 cat /sys/bus/pci/devices/0000:5e:00.0/tsm/bound
 ```
 
-ABI상 connect에 TSM 이름을 쓰는 동작은 보안 연결을 수립하며 통상 SPDM over DOE와 필요하면 IDE 설정을 포함합니다. Disconnect는 연결을 해체합니다. 이는 단순 상태 조회와 다른 변경 동작이며 platform·VFIO/IOMMUFD lifecycle에 맞춰 수행합니다. 이 글에서는 실제 장치 연결·해제를 실행하지 않았습니다.
+ABI상 `tsm/connect`에 TSM 이름을 쓰면 device와 연결을 맺습니다. ABI는 이 동작이 "보통 PCIe DOE 위의 SPDM session을 포함하고 PCIe IDE 수립도 포함할 수 있다"고 적습니다. `tsm/disconnect`에 같은 이름을 쓰면 연결을 해체합니다. 둘 다 읽기가 아니라 상태를 바꾸는 동작입니다. 이 글에서는 실제 장치 연결·해제를 실행하지 않았습니다.
 
 | 관찰 | ABI의 의미 | 확대하면 안 되는 결론 |
 |------|------|------|
 | TSM class device | platform TSM의 존재·준비 상태 확인 출발점 | 모든 endpoint가 지원됨 |
 | `tsm/` directory | 조건을 만족한 기능에 interface 제공 | TVM 할당·RUN 성공 |
 | connect 이름 | 연결한 TSM 식별, 미연결이면 빈 값 | 측정 reference 정책도 자동 수락 |
-| bound 이름 | LOCKED·RUN·ERROR 운용 상태에서 채워질 수 있음 | ERROR가 아니거나 workload가 정상 |
+| bound 이름 | connect·bind 성공 뒤 LOCKED·RUN·ERROR 상태에서 채워짐 | ERROR가 아니거나 workload가 정상 |
 | 해제 완료 | platform 연결 해제 절차의 관찰 | 모든 TSP memory·key 정리가 동일하게 끝남 |
 
-기존의 v7.3-rc6 유일 구현·TDX/CCA/CXL TSP 코드의 현재 부재 주장은 전체 driver 등록·버전을 독립 대조하지 않은 채 반복하지 않습니다. Linux v7.0 ABI와 CXL3.1 TSP 규격을 비교한 범위이며, 현재 upstream 지원 목록이나 실행 가능 platform 인증표가 아닙니다.
+이 절은 Linux v7.0 ABI 문서와 CXL 3.1 TSP 규격을 비교한 것이며, 어느 platform TSM driver가 upstream에 있는지 목록을 만든 것은 아닙니다.
 
 ## Type3를 신뢰 경계에 넣을 때 남길 실패 증거
 
-TDISP의 interface lifecycle과 TSP의 memory·TE State·암호화 설정은 같은 상태 machine이 아닙니다. Actual topology·protocol·platform 지원을 먼저 고정하고 아래는 **미실행 시험 계획**으로 남깁니다.
+TDISP의 interface lifecycle과 TSP의 target 상태(CONFIG_UNLOCKED·CONFIG_LOCKED·ERROR)는 서로 다른 상태 machine입니다. 아래는 **실행하지 않은 시험 계획**이며, 각 행의 기대 동작은 위 §11.5.4.8 상태 정의에서 옮겼습니다.
 
 | 시점 | 확인할 실패 조건 | 필요한 결과 자료 |
 |------|------|------|
@@ -93,11 +103,11 @@ TDISP의 interface lifecycle과 TSP의 memory·TE State·암호화 설정은 같
 | ERROR 이후 | session·TVM 데이터 정리 지연 | 실제 cleanup 완료 전 재사용 거부 |
 | 재할당 전 | 이전 tenant의 data/key 잔류 | 정리·소유권 이전·새 정책 증거 |
 
-CXL3.1 §11.5.4.8은 ERROR에서 Primary/Secondary session과 TVM 데이터 정리를 마친 뒤 CONFIG_UNLOCKED로 돌아가는 동작을 규정합니다. 단순 reset 요청·ERROR 표시만으로 정리가 완료됐다고 추정하지 않습니다. Platform TSM·device·FM 자료의 시각·boot/session 식별자도 연결해야 합니다.
+CXL 3.1 §11.5.4.8은 ERROR 상태의 target이 모든 TVM data를 계속 보호하고 새 TEE memory transaction을 받지 않다가, 현재 secure session과 data를 정리한 뒤 스스로 CONFIG_UNLOCKED로 돌아간다고 정합니다. ERROR 전에 받은 transaction은 정상 처리해도 됩니다. 같은 절은 CONFIG_LOCKED에서 ERROR로 가는 원인으로 Transport Security 실패(CXL IDE가 insecure가 되는 경우 등)와 device 전체를 reset하지 않는 CXL Reset을 듭니다. 또 TSP는 host가 모든 configuration policy를 소유하는 single authority model을 가정합니다.
 
 ## TSP의 위협 모델
 
-CXL 3.1 §11.5.3.3(Table 11-19)이 꼽는 위협과 대응입니다.
+CXL 3.1 §11.5.3.3(Table 11-19)이 꼽는 위협과 대응 중 일부입니다. 표에는 이 밖에 다른 host의 TEE 자원 접근, 한 port의 target이 다른 port로 요청을 보내는 경우도 있습니다.
 
 | 위협 | 대응 |
 |---|------|
@@ -121,17 +131,17 @@ CXL 3.1 TSP는 switch·PBR·memory sharing을 *범위에서 뺍니다*. 직접 �
 
 ### "TSP만 켜면 side channel도 막힌다"
 
-TSP 위협 모델의 side channel 대응은 *관찰한 패킷*에 대한 것(평문 주소 bit 최소화, IDE)입니다. 디바이스 내부 구현의 취약점은 IDE 보안 모델의 범위 밖입니다(§11.1). [Ch 7 (Side-channel)](/blog/embedded/embedded-security/chapter07-side-channel)의 위협은 별도로 다뤄야 합니다.
+TSP 위협 모델의 side channel 대응은 *관찰한 패킷*에 대한 것(평문으로 보내는 주소 bit를 최소화, 가능하면 0, 그리고 IDE)입니다. 부적절한 device 구현으로 생기는 노출은 IDE 보안 모델의 범위 밖입니다(§11.1). [Ch 7 (Side-channel)](/blog/embedded/embedded-security/chapter07-side-channel)의 위협은 별도로 다뤄야 합니다.
 
 ### "TDISP가 IDE를 대체"
 
-*보완 관계*입니다. TDISP는 *디바이스 인터페이스 lock·attach*, IDE는 *링크 트래픽 보호*입니다. 위 Linux ABI의 connect는 SPDM session과 IDE 수립을 포함할 수 있으나 실제 경로·성공 조건을 target에서 확인해야 합니다.
+*보완 관계*입니다. TDISP는 *디바이스 인터페이스 lock·attach*, IDE는 *링크 트래픽 보호*입니다. 위 Linux ABI도 connect 단계에 SPDM session과 IDE 수립을 묶고, bind는 그 뒤 VFIO/IOMMUFD가 따로 시작합니다.
 
 ## 정리
 
 - *TDISP*는 PCI-SIG 표준으로 *PCIe 디바이스 인터페이스를 TVM에 attach*합니다. CXL 메모리 쪽은 CXL 3.1 *TSP*가 보완합니다.
-- TDISP 상태는 UNLOCKED → LOCKED → RUN (+ ERROR), TSP target 상태는 CONFIG_UNLOCKED → CONFIG_LOCKED (+ ERROR)입니다.
-- CXL 3.1 TSP는 직접 연결 Type 3 메모리만 다루고 switch·PBR·sharing은 범위 밖입니다.
+- Linux v7.0 ABI는 TDISP의 LOCKED·RUN·ERROR를 operational state로 봅니다. TSP target 상태는 CONFIG_UNLOCKED → CONFIG_LOCKED (+ ERROR)이고, ERROR는 정리를 마치면 CONFIG_UNLOCKED로 돌아갑니다.
+- CXL 3.1 TSP는 직접 연결 Type 3 메모리(LD·SLD·MH-SLD)만 다루고 switch·MLD·PBR·68B flit·sharing은 범위 밖입니다. Pooling은 범위 안입니다.
 - Linux PCI TSM의 connect·bound 의미와 실제 TDISP 운용·CXL TSP 지원을 구분합니다. Bound 이름만으로 RUN 성공을 판단하지 않습니다.
 - TSP 위협 모델의 대응은 SPDM 인증, CXL IDE, TSP 메모리 암호화·TE State 접근 제어입니다.
 
