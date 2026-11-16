@@ -24,7 +24,7 @@ IDE만으로는 부족한 이유:
 2. *Firmware downgrade* — 디바이스에 *알려진 취약점이 있는 옛 firmware*가 설치되어 있어도, IDE는 그걸 막지 못합니다.
 3. *Counterfeit 디바이스* — 정품처럼 가장한 디바이스가 *동작은 비슷*해도 *backdoor 포함*일 수 있습니다.
 
-SPDM은 이 시나리오를 판단할 *재료*를 줍니다. 디바이스의 *인증서 chain*과 *서명된 firmware 측정값*입니다. 그 값으로 어떤 디바이스를 받아들일지는 호스트 정책이 정하고, SPDM spec은 정책을 정하지 않습니다(DSP0274 Scope).
+SPDM은 이 시나리오를 판단할 *재료*를 줍니다. 디바이스의 *인증서 chain*과 *서명된 firmware 측정값*입니다. 그 값으로 어떤 디바이스를 받아들일지는 호스트 정책이 정합니다. DSP0274 1.2.3 §3 Scope는 이 사양이 "security policy 집행에 필요한 정보는 제공하지만 개별 policy 결정은 정하지 않는다"고 적습니다.
 
 ## SPDM이란
 
@@ -39,11 +39,11 @@ SPDM은 이 시나리오를 판단할 *재료*를 줍니다. 디바이스의 *�
 | 전송 layer | PCIe DOE, MCTP(DSP0275) 등 |
 | 적용 | PCIe·CXL 디바이스 인증 (CMA-SPDM) |
 
-SPDM 자체는 *전송 무관*입니다. *어느 채널*로 보낼지는 별도 결정. PCIe·CXL은 보통 *DOE (Data Object Exchange)* 채널을 통합니다.
+SPDM 자체는 *전송 무관*입니다. 같은 Scope 절은 message를 transport와 물리 매체에 mapping하는 일을 "다른 사양"에 맡깁니다. CXL 3.1 §11.4는 CXL.cachemem IDE key를 나르는 SPDM session을 PCIe DOE 또는 MCTP 위에서 연다고 적습니다.
 
 ## SPDM 메시지 시퀀스
 
-다음은 인증서 기반 경로의 개념적 예입니다. 모든 구현이 18단계를 반드시 같은 순서로 수행하는 고정 handshake가 아닙니다. 협상 capability·인증 정책·PSK 경로·session 내 measurement 여부에 따라 달라집니다.
+다음은 인증서로 인증하고 secure session까지 여는 경로의 예입니다. Request·response 이름은 DSP0274 1.2.3의 message 정의를 따랐습니다. CAPABILITIES에서 상대가 지원하지 않는다고 답한 기능의 단계는 빠지고, PSK를 쓰면 15~18 대신 PSK_EXCHANGE·PSK_FINISH를 씁니다.
 
 | 순서 | 메시지 | 방향 | 내용 |
 |------|--------|------|------|
@@ -70,18 +70,18 @@ SPDM 자체는 *전송 무관*입니다. *어느 채널*로 보낼지는 별도 
 
 ## DOE 채널 — SPDM 전송
 
-DOE capability는 mailbox의 존재를 보여 주며 SPDM 인증 성공을 뜻하지 않습니다. [Linux ABI 문서](https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci)의 `doe_features` 예는 discovery 0001:00, CMA-SPDM 0001:01, secured CMA-SPDM 0001:02를 구분합니다. 해당 kernel/config·device가 지원해야 합니다. Linux6.12의 public DOE API만 보고 이 sysfs directory가 있다고 추정하지 않습니다.
+DOE capability는 mailbox의 존재를 보여 주며 SPDM 인증 성공을 뜻하지 않습니다. [Linux v7.0 ABI 문서](https://github.com/torvalds/linux/blob/v7.0/Documentation/ABI/testing/sysfs-bus-pci)의 `doe_features` 예는 discovery 0001:00, CMA-SPDM 0001:01, secured CMA-SPDM 0001:02를 구분합니다.
 
 ```bash
 lspci -n -vv -s 0000:5e:00.0
 ls /sys/bus/pci/devices/0000:5e:00.0/doe_features/
 ```
 
-명령과 BDF는 조사 예이며 실제 장치 출력은 아닙니다. 이 작업의 pciutils3.13.0 synthetic dump 실험은 DOECap·DOECtl·DOESta를 decode했지만 SPDM feature discovery나 mailbox 요청은 하지 않았습니다. `lspci`의 register 출력과 kernel이 수행한 DOE discovery를 구분합니다. Protocol의 vendor/type 식별자에서 PCI-SIG가 나온다고 SPDM 자체의 정의 주체가 DMTF에서 바뀌는 것은 아닙니다.
+명령과 BDF는 조사 예이며 실제 장치에서 실행하지 않았습니다. [Ch 11](/blog/embedded/embedded-security/chapter11-pcie-cxl-ide)의 pciutils 3.13.0 fixture에서 본 것처럼 `lspci`는 DOE register(`DOECap`·`DOECtl`·`DOESta`)만 decode하고, mailbox가 어떤 protocol을 지원하는지는 보여 주지 않습니다. 지원 목록은 kernel이 DOE discovery로 얻어 `doe_features`에 적은 값으로 봅니다. vendor ID `0001`은 PCI-SIG입니다(Linux v7.0 `include/linux/pci_ids.h:161`의 `PCI_VENDOR_ID_PCI_SIG`). 하지만 그 위에서 오가는 SPDM message는 DMTF 사양입니다.
 
 ## CMA — Component Measurement and Authentication
 
-*CMA (Component Measurement and Authentication)*는 PCIe·CXL 디바이스가 DOE 위에서 SPDM으로 *인증*과 *측정값 보고*를 하는 방식입니다. CXL 3.1 spec은 compliance 항목 §14.11.1을 이 이름으로 두고, Linux는 `CMA-SPDM`이라 부릅니다.
+*CMA (Component Measurement and Authentication)*는 PCIe·CXL 디바이스가 DOE 위에서 SPDM으로 *인증*과 *측정값 보고*를 하는 방식입니다. CXL 3.1의 용어표는 CMA를 "PCIe Base Specification에 정의된 Component Measurement and Authentication"으로 적고, compliance 시험 §14.11.1을 이 이름으로 둡니다. Linux는 `CMA-SPDM`이라 부릅니다.
 
 측정값은 SPDM `GET_MEASUREMENTS`로 받습니다(DSP0274).
 
@@ -91,7 +91,7 @@ ls /sys/bus/pci/devices/0000:5e:00.0/doe_features/
 | 0x01~0xFE | 그 index의 measurement block 요청 |
 | 0xFF | 모든 measurement block 요청 |
 
-index에 무엇을 둘지는 디바이스가 정하고, DMTF measurement format인 block은 `DMTFSpecMeasurementValueType`의 하위7bit로 종류를, bit7로 digest(0)/raw(1)를 밝힙니다. 모든 index가 firmware hash이거나 모든 값이 digest인 것은 아닙니다. DSP0274 1.2.3 Table38~43을 대조합니다.
+DMTF measurement format의 block은 `DMTFSpecMeasurementValueType`의 bit 6:0으로 종류를, bit 7로 digest(0)/raw bit stream(1)을 밝힙니다(DSP0274 1.2.3 Table 43). 그래서 index마다 firmware hash라고 가정할 수 없습니다. 0x5는 raw만, 0x6·0x7은 raw를 권장합니다.
 
 | 값 | 종류 |
 |----|------|
@@ -100,22 +100,27 @@ index에 무엇을 둘지는 디바이스가 정하고, DMTF measurement format�
 | 0x2 | Hardware configuration (strap 등) |
 | 0x3 | Firmware configuration |
 | 0x4 | Measurement manifest |
-| 0x5 | Debug·device mode의 구조화된 표현, raw 필수 |
-| 0x6 | Mutable firmware version |
-| 0x7 | Mutable firmware security version |
+| 0x5 | Debug·device mode의 구조화된 표현, bit 7 = 1(raw) 필수 |
+| 0x6 | Mutable firmware version number. 형식은 사양이 정하지 않음 |
+| 0x7 | Mutable firmware security version number. 8-byte unsigned integer 권장 |
 
-서명 가능한 capability를 협상하고 Param1 bit0을 켜면 요청에 nonce·slot 정보가 붙고 measurement log의 서명을 요청합니다. 서명 대상 transcript와 nonce를 검증해야 하며, raw firmware hash 하나의 서명을 확인하는 것과 같지 않습니다. 서명을 요청하지 않은 응답도 가능하므로 서명·session 보호·freshness 정책을 명시합니다.
+DSP0274 1.2.3 Table 38·39에 따르면 Param1 bit 0(`SignatureRequested`)을 켜면 요청에 32 B Nonce와 SlotIDParam이 붙고, Responder는 measurement log 전체에 대한 서명을 보내야 합니다. 이 bit는 Responder가 CAPABILITIES에서 `MEAS_CAP = 10b`(서명 가능)를 알렸을 때만 켤 수 있고, `01b`(서명 불가)인 장치에는 항상 0으로 보냅니다. Bit를 0으로 두면 Responder는 서명하지 말아야 하고 Nonce도 빠집니다. SlotIDParam이 `0xF`면 인증서 chain 대신 미리 provisioning한 공개키로 서명을 확인한다는 뜻입니다.
 
 ## DICE — Device Identifier Composition Engine
 
-[Open Profile for DICE v2.6](https://pigweed.googlesource.com/open-dice/+/refs/heads/main/docs/specification.md)은 TCG DICE를 기반으로 UDS·CDI·layering을 구체화합니다. Mutable software가 UDS를 직접 읽지 못하도록 하는 구현 경계가 전제입니다. 이 profile의 Attestation CDI와 Sealing CDI를 같은 간단한 식으로 쓰지 않습니다.
+[Open Profile for DICE v2.6](https://pigweed.googlesource.com/open-dice/+/refs/heads/main/docs/specification.md)은 TCG DICE 위에 UDS·CDI·layering을 구체화한 profile입니다. TCG DICE가 CDI 하나를 말하는 데 비해 이 profile은 CDI 두 개를 따로 정의합니다("CDI Values" 절). 식은 다음과 같습니다.
+
+```py
+CDI_Attest = KDF(32, UDS, H(code + config + authority + mode + hidden), "CDI_Attest")
+CDI_Seal   = KDF(32, UDS, H(authority + mode + hidden), "CDI_Seal")
+```
 
 | 종류 | profile 입력의 차이 | 관찰할 점 |
 |------|------|------|
-| CDI_Attest | code·config·authority·mode·hidden | 코드·설정 변경을 attestation identity에 반영 |
-| CDI_Seal | authority·mode·hidden의 stable 입력 | 코드가 바뀌면 모든 sealing identity도 반드시 바뀐다고 단정하지 않음 |
+| CDI_Attest | code·config·authority·mode·hidden | software update나 설정 변경 때마다 바뀜. profile 구현에 필수 |
+| CDI_Seal | authority·mode·hidden | code가 빠져 있어 같은 서명 authority의 update 뒤에도 그대로. 선택 사항 |
 
-DICE에서 파생한 identity가 SPDM credential로 쓰이는지는 제품 provisioning·certificate chain·verifier 정책의 연결 문제입니다. DICE 구현이나 인증서를 실제 장치에서 검사한 결과는 아닙니다.
+그래서 attestation key는 CDI_Attest에서 만들고, 장치에 봉인해 두는 data의 key는 CDI_Seal에서 만듭니다. CDI_Seal로 봉인하면 firmware update 뒤에도 data를 다시 열 수 있습니다. DICE identity를 SPDM 인증서 chain의 leaf로 쓰는 연결은 제품의 provisioning 설계이며, 이 글에서 DICE 구현을 실행하지는 않았습니다.
 
 ## 공격 시나리오와 SPDM의 방어
 
@@ -152,17 +157,30 @@ export function acceptDemo(trustedKey, expectedNonce, allowedDigest,
 }
 ```
 
-Trusted key는 caller가 별도 신뢰 경로로 정한 P-256 KeyObject라는 전제입니다. 합성 firmware bytes·일회용 key로 정상 수락, 다른 key·nonce·digest·signature·잘린 입력 거부를 실행했습니다. 특히 **금지한 구버전 digest는 올바르게 서명했어도 정책에서 거부**됐습니다. 이는 서명 확인만으로 정상 version을 정할 수 없다는 실험이며, 실제 SPDM device attestation 성공은 아닙니다.
+Trusted key는 caller가 별도 신뢰 경로로 정한 P-256 KeyObject라는 전제입니다. Node v24.21.0에서 일회용 key와 합성 firmware 문자열로 돌린 결과입니다.
+
+```text
+node v24.21.0, DER sig length 71
+valid, allowed digest              true
+signed by other key                false
+stale nonce                        false
+digest swapped, same sig           false
+signature bit flip                 false
+truncated digest                   false
+old fw, correctly signed           false
+```
+
+마지막 줄이 이 실험의 요점입니다. **금지한 구버전 digest는 올바른 key로 올바르게 서명했어도 정책에서 거부**됐습니다. 서명은 "이 장치가 이 값을 말했다"까지만 보장하고, 그 값이 허용된 firmware인지는 reference 정책이 정합니다. 실제 SPDM device attestation을 실행한 것은 아닙니다.
 
 ## 자주 하는 실수
 
 ### "SPDM만 활성화하면 보안 끝"
 
-*디바이스 한 번 인증된 뒤 트래픽 자체*는 *별도 보호 메커니즘 (IDE)*이 필요합니다. SPDM은 초기 인증만으로 끝나는 개념이 아니며 secure session·key update·measurement·종료 등 기능을 포함합니다. IDE traffic 보호와 역할을 구분합니다.
+*디바이스 한 번 인증된 뒤 트래픽 자체*는 *별도 보호 메커니즘 (IDE)*이 필요합니다. SPDM secure session이 보호하는 것은 SPDM과 그 위의 application message(CXL_IDE_KM 등)이고, 일반 TLP·flit은 IDE가 보호합니다.
 
 ### "MEASUREMENT의 hash를 어떤 값과 비교할지 SPDM이 정해 준다"
 
-*아닙니다*. SPDM은 측정값을 서명해 전달할 뿐이고, 어느 값을 받아들일지는 정책의 몫이며 spec 범위 밖입니다(DSP0274). 기준값은 따로 확보해야 합니다.
+*아닙니다*. SPDM은 측정값을 서명해 전달할 뿐이고, 어느 값을 받아들일지는 정책의 몫입니다(DSP0274 §3). Measurement manifest(type 0x4)의 형식조차 "이 사양의 범위 밖"이라고 적혀 있습니다. 기준값은 따로 확보해야 합니다.
 
 ## 정리
 

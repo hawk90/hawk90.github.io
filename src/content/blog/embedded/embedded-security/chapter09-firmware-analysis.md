@@ -14,7 +14,7 @@ topics: ["embedded"]
 
 > **"내 펌웨어를 *내가 먼저 까보지 않으면* 누군가는 까봅니다."** — 펌웨어 분석은 공격자의 첫 단계이자 방어자의 마지막 검증입니다. 출시 전에 *우리 펌웨어가 무엇을 노출하고 있는지* 알지 못하면, CVE 등록이 우리의 첫 알림이 됩니다.
 
-펌웨어 분석은 *공격*과 *방어* 양쪽 모두의 필수 능력입니다. 공격자는 *취약점 발견*을 위해, 방어자는 *우리 제품이 무엇을 흘리는지* 확인하기 위해 같은 도구를 씁니다. 이 장에서는 획득·정적 분석·동적 분석의 산출물을 구분합니다. 실제 실행은 직접 만든 ARM ELF object의 문자열 검사이며, 실제 제품 dump·binwalk 추출·Ghidra 분석·장치 공격을 수행한 결과가 아닙니다.
+펌웨어 분석은 *공격*과 *방어* 양쪽 모두의 필수 능력입니다. 공격자는 *취약점 발견*을 위해, 방어자는 *우리 제품이 무엇을 흘리는지* 확인하기 위해 같은 도구를 씁니다. 이 장에서는 획득·정적 분석·동적 분석의 산출물을 구분합니다. 직접 실행한 것은 두 가지입니다. 직접 만든 합성 firmware blob에 Debian 13의 binwalk를 돌렸고, 직접 만든 ARM ELF object에 문자열 검색을 했습니다. 실제 제품 dump·Ghidra 분석·장치 공격은 하지 않았습니다.
 
 문자열·파일 signature는 조사 후보를 만들지만 취약점을 판정하지 않습니다. 암호화·압축·runtime 생성 값은 단순 검색으로 놓칠 수 있고, 인증서나 테스트 문구가 비밀처럼 탐지될 수도 있습니다.
 
@@ -38,34 +38,48 @@ topics: ["embedded"]
 
 UART는 pinout·I/O 전압·ground·console 정책을 먼저 확인합니다. TX/RX/GND 이름만 보고 임의 전압의 adapter를 연결하지 않습니다. Boot log는 partition·version의 단서일 수 있지만 실제 메모리 내용이나 root 권한의 증거는 아닙니다.
 
-JTAG/SWD는 target configuration과 lifecycle·debug authentication·readout 정책에 따라 접근 범위가 다릅니다. 연결 성공이 전체 flash 접근을 뜻하지 않으며 reset·unlock·erase가 개입하는 명령을 읽기 검사와 혼동하지 않습니다. 이 글의 이전 OpenOCD 혼합 세션과 부트 log는 실제 캡처가 아니므로 제거했습니다.
+JTAG/SWD에 연결됐다고 flash 전체를 읽을 수 있는 것은 아닙니다. STM32L5 HAL은 RDP Level 1에서도 JTAG·SWD debug가 연결돼 있으면 flash를 program·erase할 수 없다고 적고([`stm32l5xx_hal_flash_ex.c`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Src/stm32l5xx_hal_flash_ex.c#L846-L849)), Level 2는 Level 1·0으로 돌아갈 수 없다고 경고합니다([Ch 1](/blog/embedded/embedded-security/chapter01-threat-model)). 읽기 목적의 세션에는 unlock·erase 명령을 섞지 않습니다.
 
 ### SPI flash / eMMC / NAND
 
 칩 식별, 전원·VCCQ·I/O 전압, in-circuit bus 충돌, ECC·bad block·논리/물리 layout을 확인합니다. 보드와 adapter 조건 없이 CH341A 명령이나 eMMC 5개 test point 연결을 보편 절차로 제시하지 않습니다. Readout을 반복해 hash를 비교하고 원본과 분석 사본을 구분합니다.
 
-쓰기 보호와 읽기 보호의 범위, 저장 장치 암호화, secure element key export 정책은 제품별로 다릅니다. Flash를 읽었다고 복호화 key나 실행 시 권한까지 확보한 것은 아닙니다. 여기서는 물리 readout을 실행하지 않았습니다.
+Flash를 읽었다고 복호화 key까지 얻은 것은 아닙니다. [ESP-IDF v5.1.6 ESP32-C3 flash encryption 문서](https://docs.espressif.com/projects/esp-idf/en/v5.1.6/esp32c3/security/flash-encryption.html)에 따르면 이 칩은 flash 내용을 XTS-AES-128로 암호화하고, 256-bit key를 `BLOCK_KEYN` eFuse에 두며 read·write protection bit로 소프트웨어 접근을 막습니다. 이런 구성에서 외부 flash dump는 암호문입니다. 여기서는 물리 readout을 실행하지 않았습니다.
 
 ## 2단계 — 정적 분석
 
 ### binwalk — 구조 후보와 추출 성공을 구분
 
-[Binwalk v3 공식 README](https://github.com/ReFirmLabs/binwalk)는 Rust로 다시 구현된 도구로, embedded file/data 식별과 선택적 추출을 설명합니다. v2의 Python 설치법·추출 directory 예를 v3 실행 결과로 붙이지 않습니다. 선택한 release의 `--help`, extractor 의존성과 오류를 기록합니다.
+[Binwalk 최신 README](https://github.com/ReFirmLabs/binwalk)는 v3를 Rust로 다시 만든 도구로 소개합니다. 아래 실행은 Debian 13이 패키징한 Python 판 **v2.4.3**입니다. 두 판은 옵션과 추출 directory 구조가 다르므로 출력을 섞지 않습니다.
 
-```bash
-binwalk --help
-binwalk firmware.bin
+내용을 아는 입력으로 도구의 동작을 먼저 봅니다. 384 KiB blob을 만들고 0x00000에 64 KiB 난수, 0x20000에 gzip(78 B), 0x30000에 `mksquashfs -comp gzip`으로 만든 squashfs(4,096 B, `etc/passwd`·`etc/issue`), 0x50000에 다시 64 KiB 난수를 넣었습니다.
+
+```text
+$ binwalk firmware.bin
+DECIMAL       HEXADECIMAL     DESCRIPTION
+--------------------------------------------------------------------------------
+131072        0x20000         gzip compressed data, maximum compression, from Unix, last modified: 1970-01-01 00:00:00 (null date)
+196608        0x30000         Squashfs filesystem, little endian, version 4.0, compression:gzip, size: 329 bytes, 4 inodes, blocksize: 131072 bytes, created: 2026-11-16 07:23:38
+
+$ binwalk -E -N firmware.bin
+DECIMAL       HEXADECIMAL     ENTROPY
+--------------------------------------------------------------------------------
+0             0x0             Rising entropy edge (0.977850)
+65536         0x10000         Falling entropy edge (-0.000000)
+327680        0x50000         Rising entropy edge (0.976765)
 ```
 
-위는 설치된 도구로 수행할 조사 명령이며 이 작업에서는 실행하지 않았습니다. Signature 일치는 format 후보입니다. Offset·길이·checksum·실제 parser 결과를 함께 확인해야 하며 높은 entropy만으로 암호화를 확정하지 않습니다. Untrusted extractor는 격리된 분석 환경에서 다룹니다.
+Signature scan은 심은 gzip과 squashfs를 정확한 offset에서 찾았습니다. 두 난수 구간에는 signature가 없고 entropy 검사에서만 0.98 근처의 "rising edge"로 나타납니다. 이 구간이 암호문인지, 압축된 코드인지, 난수인지는 이 출력으로 구분되지 않습니다. 실제 제품이라면 offset과 길이를 partition table이나 boot log와 맞춰 봐야 합니다.
+
+추출(`-e`)은 root로 실행하자 거부됐습니다. v2.4.3은 "추출은 안전하지 않을 수 있는 third-party utility를 많이 쓴다"며 `--run-as=root`를 명시하라고 요구합니다. 명시하면 `_firmware.bin.extracted/squashfs-root/etc/passwd`까지 풀립니다. 이 실행은 격리된 VM 안에서 root로 했습니다. binwalk의 메시지대로, 신뢰할 수 없는 이미지는 root가 아닌 사용자로 추출합니다.
 
 ### 추출된 rootfs의 후보 검색
 
-firmwalker 같은 규칙 검색은 파일 경로와 문자열 후보를 찾는 단계입니다. 발견한 private-key header가 실제 개인키인지, 테스트 fixture인지, 장치별 key인지와 읽기 권한을 확인해야 합니다. `/etc/passwd`의 항목도 shadow·인증 경로·서비스 구성과 함께 판단합니다. 이전 문서의 firmwalker 출력은 실측이 아니어서 제거했습니다.
+firmwalker 같은 규칙 검색은 파일 경로와 문자열 후보를 찾는 단계입니다. RSA private key의 PEM 헤더(`BEGIN RSA PRIVATE KEY`)가 나와도 그것이 장치별 key인지, 모든 장치에 같은 key인지, 테스트 fixture인지는 더 봐야 합니다. [Ch 5](/blog/embedded/embedded-security/chapter05-tee)에서 본 OP-TEE의 `keys/default_ta.pem`처럼 source tree에 공개된 기본 key가 그대로 제품에 들어간 경우가 가장 위험합니다. `/etc/passwd`의 항목도 `/etc/shadow`와 실제 login 경로(serial getty, dropbear 설정)와 함께 봅니다.
 
 ### Ghidra
 
-[Ghidra 공식 repository](https://github.com/NationalSecurityAgency/ghidra)는 disassembly·decompilation·scripting을 지원합니다. 선택한 배포판의 Java·processor 지원 조건을 기록합니다. Import 시 executable header를 활용할 수 있지만 raw firmware는 ISA·endianness·load address·entry point를 직접 정해야 할 수 있습니다.
+[Ghidra 공식 repository](https://github.com/NationalSecurityAgency/ghidra)는 disassembly·decompilation·scripting을 지원합니다. ELF처럼 header가 있는 파일은 import 때 ISA와 load address를 header에서 읽습니다. Raw flash dump에는 그런 정보가 없으므로 ISA·endianness·load address를 사람이 정합니다. Cortex-M이라면 vector table이 단서입니다. [Cortex-M33 TRM](https://developer.arm.com/documentation/100230/latest)(Issue 08)은 vector table의 모든 유효 entry가 bit 0을 1로 가져야 한다고 적습니다(Thumb 상태 표시). Entry 0은 초기 SP 값이라 이 규칙의 대상이 아닙니다. Dump 앞부분에서 entry 0 다음부터 bit 0이 1인 주소가 좁은 범위로 이어지면 vector table 후보이고, 그 주소 범위가 load address의 후보가 됩니다.
 
 Decompiler의 C 비슷한 출력은 원본 소스가 아닙니다. 함수 경계·type·calling convention이 틀리면 해석도 틀릴 수 있습니다. 문자열 참조에서 비교 함수로 이어지는 call path와 실제 인증 결정을 함께 확인합니다. 문자열 `admin` 하나나 추정한 `strcmp`만으로 인증 우회를 선언하지 않습니다. 이 작업에서는 Ghidra를 실행하지 않았습니다.
 
@@ -77,7 +91,7 @@ Decompiler의 C 비슷한 출력은 원본 소스가 아닙니다. 함수 경계
 r2 -A fixture.o
 ```
 
-r2 내부에서는 `afl`로 함수 목록, `pdf`로 현재 함수 disassembly, `pdc`로 pseudocode를 조사할 수 있습니다. 위 명령은 미실행 예이며 symbol·분석 설정·ISA를 함께 확인해야 합니다. [Cutter](https://cutter.re/)는 **Rizin**을 core로 사용하며 현재 radare2 GUI라고 부르지 않습니다.
+r2 안에서는 `afl`이 함수 목록, `pdf`가 현재 함수 disassembly, `pdc`가 pseudocode입니다. 위 명령은 실행하지 않았습니다. Debian 13(trixie)에는 `radare2` 패키지가 없어 `apt-get install radare2`가 "has no installation candidate"로 실패했기 때문입니다([sources.debian.org](https://sources.debian.org/src/radare2/)에도 trixie는 없고 sid와 옛 jessie·wheezy만 있습니다). [Cutter](https://cutter.re/)는 **Rizin**을 core로 쓰며 radare2 GUI가 아닙니다.
 
 ### Strings + grep — 잊지 말기
 
@@ -95,13 +109,25 @@ clang --target=arm-none-eabi -mcpu=cortex-m33 -mthumb \
 strings -a -n 8 fixture.o | grep -iE 'password|secret|token'
 ```
 
-macOS의 Apple Clang 21.0.0과 `/usr/bin/strings`로 실행했습니다. ELF magic·ARM machine 값을 확인하고 두 문구가 검출되는지 검사했습니다. `tokenization`은 이 규칙의 오탐 예입니다. `-DNDEBUG`가 있어도 `diagnostic` 문구는 남습니다. 별도 clean object에서는 해당 규칙이 match하지 않음을 확인합니다. 이 결과는 credential scanner의 탐지율이나 실제 firmware의 비밀 부재를 증명하지 않습니다.
+macOS의 Apple clang 21.0.0과 `/usr/bin/strings`로 실행한 결과입니다.
+
+```text
+$ bash fixture-strings.sh
+password=training-only
+tokenization is not a credential
+$ file fixture.o
+fixture.o: ELF 32-bit LSB relocatable, ARM, EABI5 version 1 (SYSV), not stripped
+$ strings -a -n 8 clean.o | grep -iE "password|secret|token"
+rc=1
+```
+
+두 문구가 모두 걸렸습니다. `tokenization`은 `token` 규칙의 오탐입니다. `-O2 -g0 -DNDEBUG`로 빌드해도 전역 `const char[]`인 `diagnostic` 문구는 그대로 남습니다. `const int clean_value = 42;`만 넣은 `clean.o`에서는 grep이 아무것도 찾지 못해 exit 1이었습니다. 이 결과가 credential scanner의 탐지율이나 실제 firmware에 비밀이 없음을 증명하지는 않습니다.
 
 ## 3단계 — 동적 분석
 
 정적 후보는 입력이 실제 보안 결정에 도달하는지 확인해야 합니다. [QEMU 사용자 모드](https://www.qemu.org/docs/master/user/main.html)는 guest kernel·모든 peripheral을 재현하는 장치 emulator가 아닙니다. `chroot`는 파일 경로의 root를 바꾸며 자체 보안 격리 경계가 아닙니다. 추출된 코드를 host root로 바로 실행하는 예를 사용하지 않습니다.
 
-Firmadyne의 지원 ISA·kernel·NVRAM·network 가정이 제품에 맞는지 확인합니다. 웹 UI가 부팅되어도 실제 보드의 secure boot·key storage·DMA·fault 동작을 검증한 것은 아닙니다. 장치 debugger의 `load`는 메모리나 flash를 변경할 수 있으므로 read-only 조사 명령으로 섞지 않습니다.
+[Firmadyne README](https://github.com/firmadyne/firmadyne)에 따르면 이 도구는 Linux 기반 embedded firmware를 자체 수정 kernel(MIPS v2.6, ARM v4.1·v3.10)로 QEMU에서 띄우고, userspace NVRAM library로 하드웨어 NVRAM을 흉내 냅니다. 웹 UI가 뜨더라도 실제 보드의 secure boot·key storage·DMA 동작은 그 환경에 없습니다. 장치 debugger의 `load`는 메모리나 flash에 쓰는 명령이므로 read-only 조사에 섞지 않습니다.
 
 ### Fuzzing — 입력 전달 계약부터
 
@@ -111,9 +137,7 @@ Crash는 재현 입력, build·sanitizer·stack과 영향 범위를 조사할 �
 
 ## 실제 CVE 자료와 자체 실험을 구분
 
-[Tenable TRA-2021-13](https://www.tenable.com/security/research/tra-2021-13)은 Buffalo·Arcadyan router의 CVE-2021-20090 등 취약점을 다룹니다. 제품·version·요청 처리와 공개 timeline은 advisory 원문으로 확인합니다. 이 글에서 장치를 실행하거나 취약점을 재현한 것은 아닙니다.
-
-기존의 Ghidra 한 화면으로 시작했다는 CVE 귀속, 단축한 curl 경로, 분석·exploit 소요 기간은 근거가 없어 제거했습니다. 문헌 사례와 위의 교육용 ELF 문자열 실험은 별개의 증거입니다.
+[Tenable TRA-2021-13](https://www.tenable.com/security/research/tra-2021-13)은 Arcadyan 기반 Buffalo router의 CVE-2021-20090 등을 다룹니다. [NVD](https://nvd.nist.gov/vuln/detail/CVE-2021-20090)는 이 CVE를 2021-04-29에 공개했고, 설명은 "Buffalo WSR-2533DHPL2 firmware ≤ 1.02와 WSR-2533DHP3 firmware ≤ 1.24의 web interface path traversal로 인증 없는 원격 공격자가 인증을 우회할 수 있다"입니다. CVSS 3.1 점수는 9.8(`AV:N/AC:L/PR:N/UI:N/S:U/C:H/I:H/A:H`)입니다. 이 글에서 장치를 실행하거나 취약점을 재현하지는 않았습니다.
 
 ## 우리 펌웨어 자체 점검 체크리스트
 
@@ -131,11 +155,11 @@ Crash는 재현 입력, build·sanitizer·stack과 영향 범위를 조사할 �
 
 `NDEBUG`는 표준 `assert` 제어에 쓰이며 일반 `printf`를 자동으로 지우지 않습니다. `-g0`·strip도 코드의 문자열이나 credential을 자동 제거하지 않습니다. Release artifact 자체에서 값과 동작을 확인해야 합니다.
 
-Read protection·secure element·암호화의 방어 범위는 chip revision·설정·key provisioning·공격 모델에 따라 다릅니다. Firmware가 실행 중 복호화된다는 이유만으로 host나 debug port에서 평문을 반드시 읽을 수 있다고 단정하지 않습니다. 실행 중 접근 제어와 lifecycle 정책을 함께 평가합니다.
+Flash 암호화도 mode를 확인해야 합니다. 같은 [ESP32-C3 문서](https://docs.espressif.com/projects/esp-idf/en/v5.1.6/esp32c3/security/flash-encryption.html)는 Development mode에서는 평문 firmware를 새로 써 넣으면 bootloader가 하드웨어 key로 대신 암호화해 주므로 "간접적으로 flash의 평문을 읽어 낼 수 있다"고 경고하고, 이 mode를 개발 중에만 쓰라고 합니다. 양산 장치는 Release mode여야 합니다. 실행 중에는 MMU flash cache가 매핑된 영역을 투명하게 복호화합니다. 그래서 문서의 bootloader는 flash 암호화를 켤 때 Development mode에서도 `DIS_PAD_JTAG`·`DIS_USB_JTAG` eFuse를 기본으로 함께 굽고, Release mode에서는 `DIS_DOWNLOAD_MANUAL_ENCRYPT`까지 더합니다. 기본값으로는 암호화와 debug 잠금이 함께 걸립니다.
 
 ## 정리
 
-획득 조건과 hash, 구조 후보, 코드 해석 가설, 동적 재현 결과를 연결합니다. 이 장에서 실행한 것은 교육용 ELF object의 정상·오탐·미검출 조건 검사입니다. 실제 제품 분석·CVE 재현·보안 평가와 같은 결과로 쓰지 않습니다.
+획득 조건과 hash, 구조 후보, 코드 해석 가설, 동적 재현 결과를 연결합니다. 이 장에서 실행한 것은 합성 blob의 binwalk signature·entropy·추출 시험과 교육용 ELF object의 문자열 검색입니다. binwalk는 심은 gzip·squashfs를 정확히 찾았지만 난수 구간은 entropy edge로만 보였고, 문자열 검색은 오탐 하나를 냈습니다. 실제 제품 분석·CVE 재현 결과는 아닙니다.
 
 다음 편은 **Ch 10: 보안 개발 라이프사이클**.
 

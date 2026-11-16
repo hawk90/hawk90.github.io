@@ -15,7 +15,7 @@ topics: ["embedded"]
 
 TrustZone은 실행 상태와 접근을 분리하는 메커니즘이고, OP-TEE는 그 위에서 TA(Trusted Application)와 보안 서비스를 실행하는 구현입니다. TEE가 있다는 사실만으로 모든 TA·shared memory·저장소·I/O가 같은 보안 보장을 갖는 것은 아닙니다. Secure OS와 platform firmware가 신뢰 경계 안에 들어가며, 그 결함도 고려해야 합니다.
 
-이 장의 소스 기준은 [OP-TEE OS 4.5.0](https://github.com/OP-TEE/optee_os/tree/0919de0f7c79ad35ad3c8ace5f823ad1344b4716)과 [같은 판 secure storage 문서](https://optee.readthedocs.io/en/4.5.0/architecture/secure_storage.html)입니다. 아래 C helper는 실제 header로 compile하고 host mock으로 자원 정리만 확인합니다. OP-TEE boot·QEMU guest·실제 TA 실행·RPMB provisioning이나 GP 적합성 시험을 수행한 것은 아닙니다.
+이 장의 소스 기준은 [OP-TEE OS 4.5.0](https://github.com/OP-TEE/optee_os/tree/0919de0f7c79ad35ad3c8ace5f823ad1344b4716)과 [같은 판 secure storage 문서](https://optee.readthedocs.io/en/4.5.0/architecture/secure_storage.html)입니다. 아래 C helper는 4.5.0의 실제 `tee_internal_api.h`로 Debian 13 GCC 14.2.0에서 compile하고, storage 함수를 흉내 낸 host mock으로 반환값과 close 횟수를 확인했습니다. OP-TEE boot·QEMU guest·실제 TA 실행·RPMB provisioning은 하지 않았습니다.
 
 ## CA에서 TA로 이어지는 경로
 
@@ -32,7 +32,7 @@ OP-TEE user TA는 별도 주소 공간에서 실행됩니다. Pseudo-TA는 secur
 | User TA | command별 parameter type·length·권한·상태 검증 |
 | tee-supplicant | 필요 시 REE 측 TA loading·파일 작업 등 RPC 지원 |
 
-TA가 이미 load됐는지와 instance·session flag에 따라 수명은 달라집니다. `TEEC_OpenSession()`과 invoke의 역할을 구분하고, 매 invoke가 UUID를 찾아 새 TA를 load한다는 고정 흐름으로 설명하지 않습니다. 결과 반환도 항상 RPC를 거치는 것은 아닙니다. RPC는 normal world의 도움을 요청하는 별도 단계입니다.
+TA의 수명은 TA header의 flag가 정합니다. 4.5.0 [`user_ta_header.h`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/lib/libutee/include/user_ta_header.h#L15-L17)에는 `TA_FLAG_SINGLE_INSTANCE`(모든 session이 instance 하나를 공유), `TA_FLAG_MULTI_SESSION`(그 instance에 session 여러 개 허용), `TA_FLAG_INSTANCE_KEEP_ALIVE`(마지막 session이 닫혀도 instance 유지)가 있습니다. TA load는 `TEEC_OpenSession()`에서 일어나고, 이후 `TEEC_InvokeCommand()`는 이미 열린 session에 command를 보냅니다. RPC는 secure world가 파일 읽기처럼 normal world의 도움이 필요할 때만 tee-supplicant로 나가는 별도 단계입니다.
 
 ## Client·TA의 수명과 실패 처리
 
@@ -47,7 +47,7 @@ CA는 context 초기화, session 열기, command invoke, session close, context 
 | 공유 metadata | 검사 뒤 normal world가 바꿀 수 있으므로 secure copy와 검증·사용 일관성 |
 | Output | short-buffer 길이와 오류 시 비밀값 노출 방지 |
 
-Shared memory mapping은 포인터를 읽을 수 있게 해 주지만 내용의 불변성·권한을 보장하지 않습니다. 또한 TA의 AES-CTR 예에서 `{ /* random */ }`은 실제 random IV가 아니라 0으로 초기화된 배열입니다. 매 호출 같은 counter로 암호화하는 불완전 예제는 쓰지 않습니다. 검증된 AEAD 사용과 nonce 정책은 [Ch 3](/blog/embedded/embedded-security/chapter03-mcu-crypto)에서 다룹니다.
+Shared memory mapping은 포인터를 읽을 수 있게 해 주지만 내용의 불변성·권한을 보장하지 않습니다. 검증된 AEAD 사용과 nonce 정책은 [Ch 3](/blog/embedded/embedded-security/chapter03-mcu-crypto)에서 다룹니다.
 
 ## Persistent object — 실패해도 handle을 닫기
 
@@ -80,32 +80,48 @@ TEE_Result read_config(void *buffer, size_t capacity, size_t *actual)
 }
 ```
 
-4.5.0의 `TEE_ReadObjectData()`는 `size_t *count`를 받습니다. 같은 header에 있는 GP 1.1 호환 `__GP11_TEE_ReadObjectData()`의 `uint32_t *count`와 섞지 않습니다. 위 helper는 open 실패·info 실패·short buffer·read 실패·성공에서 반환과 close 횟수를 host mock으로 확인합니다. 실제 storage의 원자성·rollback 내성을 검사하는 것은 아닙니다.
+4.5.0의 [`TEE_ReadObjectData()`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/lib/libutee/include/tee_internal_api.h#L272-L275)는 `size_t size, size_t *count`를 받습니다. 바로 아래 GP 1.1 호환 `__GP11_TEE_ReadObjectData()`는 `uint32_t size, uint32_t *count`입니다. 64-bit TA에서 둘을 섞으면 `count`가 가리키는 크기가 4 B와 8 B로 어긋납니다.
+
+Mock 실행 결과는 다음과 같습니다.
+
+```text
+success      rc=0x00000000 actual=5 closes=1
+open fail    rc=0xffff0008 actual=0 closes=0
+info fail    rc=0xf0100001 actual=0 closes=1
+short buffer rc=0xffff0010 actual=64 closes=1
+read fail    rc=0xf0100003 actual=0 closes=1
+null actual  rc=0xffff0006 closes=0
+null buf cap rc=0xffff0006 closes=0
+```
+
+Open이 실패하면(`TEE_ERROR_ITEM_NOT_FOUND`, `0xffff0008`) handle이 없으므로 close가 0번, 그 뒤의 실패와 성공에서는 정확히 1번입니다. Short buffer(`0xffff0010`)에서는 `actual`에 필요한 크기 64를 돌려줍니다. 인자 검사 실패는 `TEE_ERROR_BAD_PARAMETERS`(`0xffff0006`)입니다. 이 시험은 helper의 자원 정리만 보며, 실제 storage의 원자성·rollback 내성은 아래 절에서 source로 봅니다.
 
 ## 저장소 위치와 rollback
 
-OP-TEE 4.5.0 문서는 REE FS와 RPMB backend를 설명합니다. `TEE_STORAGE_PRIVATE`는 REE FS가 있으면 먼저 선택하고, 없으면 RPMB를 선택하므로 이름만으로 RPMB 저장을 보장하지 않습니다. 두 backend를 구체적인 storage ID로 선택하는 구성도 있습니다.
+OP-TEE 4.5.0의 저장소 backend는 REE FS와 RPMB 두 가지입니다. [`core/include/tee/tee_fs.h`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/core/include/tee/tee_fs.h#L78-L106)의 `tee_svc_storage_file_ops()`는 `TEE_STORAGE_PRIVATE`를 받으면 `CFG_REE_FS`가 켜져 있을 때 REE FS를, 아니면 RPMB를 고릅니다. 기본값은 [`mk/config.mk`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/mk/config.mk#L147-L157)에서 `CFG_REE_FS ?= y`, `CFG_RPMB_FS ?= n`입니다. 그래서 기본 빌드에서 `TEE_STORAGE_PRIVATE`로 만든 객체는 normal world 파일시스템(기본 `/data/tee`)에 암호화돼 저장됩니다. RPMB에 두려면 `CFG_RPMB_FS=y`로 빌드하고 `TEE_STORAGE_PRIVATE_RPMB`를 명시합니다.
 
 | 경로 | 보호와 남은 조건 |
 |------|------|
 | REE filesystem | 암호화·무결성 보호. Normal world가 파일을 삭제·사용 불가로 만들 수 있음 |
 | RPMB | 인증된 접근·write counter를 활용한 replay 보호. key provisioning·device·driver·firmware 조건 확인 |
-| TA별 key 분리 | HUK·SSK·TSK·FEK 등 실제 key derivation과 platform HUK 구현 확인 |
+| TA별 key 분리 | HUK → SSK → TSK → FEK로 파생. 기본 [`otp_stubs.c`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/core/kernel/otp_stubs.c#L13-L24)의 `tee_otp_get_hw_unique_key()`는 HUK를 전부 0으로 채우는 `__weak` stub이므로 platform이 fuse 값으로 덮어써야 함 |
 | 저장소 복원 | 오래된 snapshot·metadata rollback·counter 동기화와 가용성 정책 검증 |
 
-문서는 `CFG_RPMB_FS=n`일 때 rollback 보호가 없다고 구분합니다. 따라서 “암호화된 REE 파일이면 이전 버전 복원도 막는다”는 결론은 틀립니다. RPMB도 모든 공격에 대해 가장 안전하다는 하나의 서열로 표현하지 않습니다. 정상 read 성공이 최신 데이터라는 사실을 입증하는지도 product 정책으로 확인해야 합니다.
+[4.5.0 secure storage 문서](https://optee.readthedocs.io/en/4.5.0/architecture/secure_storage.html)는 GP의 rollback protection level로 이 차이를 적습니다. `CFG_RPMB_FS=y`면 rollback 보호를 TEE가 제어하며 level 1000, `CFG_RPMB_FS=n`이면 rollback 보호가 없고 level 0입니다. `config.mk`도 REE FS의 rollback 보호(`CFG_REE_FS_INTEGRITY_RPMB`)는 `CFG_RPMB_FS=y`일 때만 동작한다고 주석을 답니다. 따라서 "암호화된 REE 파일이면 이전 버전 복원도 막는다"는 결론은 틀립니다. 단, 객체 파일 하나만 옛 판으로 바꾸면 탐지됩니다. [`core/tee/fs_dirfile.c`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/core/tee/fs_dirfile.c#L22-L28)의 `struct dirfile_entry`가 객체마다 hash를 `dirf.db`에 두기 때문입니다. 탐지할 장치가 없는 것은 `dirf.db`를 포함한 `/data/tee` 전체를 옛 snapshot으로 되돌리는 경우입니다. 이 동작은 source로 읽은 것이며 실행하지 않았습니다.
+
+RPMB 쪽에도 함정이 있습니다. `CFG_RPMB_WRITE_KEY=y`는 RPMB key가 아직 없을 때 TEE가 key를 써 넣게 하는데, `config.mk`는 이 옵션을 product build에서 켜면 "TEE가 RPMB key를 유출할 수 있다"고 경고합니다. 공장 provisioning 전용입니다. `CFG_RPMB_TESTKEY=y`는 HUK에서 파생하는 대신 고정 key를 씁니다.
 
 ## TA 빌드·서명·시험
 
-OP-TEE release·TA dev kit·target ABI·toolchain을 함께 고정합니다. `user_ta_header_defines.h`의 UUID·flags·stack·data size와 실제 output 이름을 맞추고, loader가 신뢰할 서명키와 배포 경로를 확인해야 합니다. Development signing key와 production 신뢰 anchor는 분리합니다.
+OP-TEE release·TA dev kit·target ABI·toolchain을 함께 고정합니다. `user_ta_header_defines.h`의 UUID·flags·stack·data size와 실제 output 이름을 맞춥니다. 서명키는 기본값을 그대로 두면 안 됩니다. 4.5.0 [`mk/config.mk`](https://github.com/OP-TEE/optee_os/blob/0919de0f7c79ad35ad3c8ace5f823ad1344b4716/mk/config.mk#L226-L232)는 `TA_SIGN_KEY ?= keys/default_ta.pem`이고, `TA_PUBLIC_KEY`가 이 키를 따라가 OP-TEE OS image에 박힙니다. 그 `keys/default_ta.pem`은 source tree에 공개된 RSA 2048-bit private key입니다(`openssl pkey -text`로 확인). 기본값으로 빌드한 장치는 누구나 서명한 TA를 load합니다. 같은 주석은 HSM 서명을 쓸 때 `TA_SIGN_KEY`를 dummy로, `TA_PUBLIC_KEY`를 HSM 공개키로 두라고 안내합니다.
 
-빌드 성공은 TA load·서명 거부·command 권한·저장소 복구까지 검증했다는 뜻이 아닙니다. `xtest`의 기능·회귀 결과와 별도로 필요한 negative test를 정합니다. 테스트 개수·고정 SMC 비용·기본 heap 크기는 release·platform·구성에 따라 확인해야 하므로 보편값을 제시하지 않습니다. 이 작업에서는 xtest나 example의 console log를 생성하지 않았습니다.
+빌드 성공은 TA load·서명 거부·command 권한·저장소 복구까지 검증했다는 뜻이 아닙니다. `xtest`의 기능·회귀 결과와 별도로 negative test를 정합니다. 자원 기본값은 source에 있습니다. 4.5.0 `mk/config.mk`는 core heap을 `CFG_CORE_HEAP_SIZE ?= 65536`(64 KiB, 592행), secure world thread 수를 `CFG_NUM_THREADS ?= 2`(113행)로 둡니다. Thread가 모자라면 OP-TEE는 SMC 반환값 `OPTEE_SMC_RETURN_ETHREAD_LIMIT`(`0x1`)을 돌려주고, `core/arch/arm/include/sm/optee_smc.h`의 주석은 이 값을 "Trusted OS thread 수 초과, 나중에 다시 시도"로 정의합니다. 이 작업에서는 xtest를 실행하지 않았습니다.
 
 ## Arm CCA·SGX와 비교할 축
 
 OP-TEE TA, SGX enclave, TDX·SEV-SNP VM, CCA Realm은 보호 단위와 TCB가 다릅니다. “메모리 암호화가 있다”는 한 칸으로 격리 강도를 순위 매길 수 없습니다. CCA의 RME는 Non-secure·Secure·Realm·Root 보안 상태를 구분하며 Root를 일반 guest VM처럼 취급하지 않습니다.
 
-[TF-A의 RME 설명](https://trustedfirmware-a.readthedocs.io/en/v2.12.0/components/realm-management-extension.html)과 사용하는 RMM·platform 자료로 granule 소유권·attestation·I/O 경계를 확인합니다. RME 자체의 접근 제어를 임의 platform의 외부 메모리 암호화 보장으로 확대하지 않습니다. Realm이 외부 I/O의 인증·기밀성을 자동 제공하지도 않습니다.
+[TF-A v2.15.0의 RME 문서](https://github.com/TrustedFirmware-A/trusted-firmware-a/blob/da738d5eae93af342fdc4995dd3c05acb4c9d757/docs/components/realm-management-extension.rst)는 RME를 Armv9-A의 FEAT_RME로 설명하고, Arm CCA가 Root와 Realm이라는 보안 상태·주소 공간을 추가한다고 적습니다. TF-A는 Root world에서 돌고, Realm VM은 Realm world의 RMM이 관리하며, TF-A의 RME 지원은 v2.6부터입니다. RME는 granule 단위 접근 제어이므로 외부 메모리 암호화나 device I/O 인증은 별도 기능입니다. Device를 Realm에 붙이는 방법은 [Ch 13](/blog/embedded/embedded-security/chapter13-cxl-tee)의 TDISP에서 다룹니다.
 
 | 비교 축 | 제품에서 확인할 질문 |
 |------|------|
@@ -121,8 +137,9 @@ OP-TEE TA, SGX enclave, TDX·SEV-SNP VM, CCA Realm은 보호 단위와 TCB가 �
 - 세션 login과 command별 권한, mapping과 내용의 신뢰는 다릅니다.
 - Persistent object는 실패 경로에서도 획득한 handle을 정확히 닫습니다.
 - API 판에 맞는 `size_t`·호환 signature를 사용합니다.
-- REE 암호화·RPMB replay 방지·TA별 key 분리·가용성을 따로 확인합니다.
-- Compile·host mock과 실제 TA·저장소·attestation 실행 검증을 구분합니다.
+- 기본 빌드(`CFG_REE_FS=y`, `CFG_RPMB_FS=n`)의 `TEE_STORAGE_PRIVATE`는 REE FS이고 rollback 보호 level은 0입니다.
+- 기본 HUK stub은 전부 0이므로, platform이 fuse 값을 넣지 않으면 SSK·TSK·FEK를 장치 밖에서 계산할 수 있어 REE FS 암호화가 의미를 잃습니다.
+- Host mock은 helper의 close 횟수만 확인했고, 실제 TA·저장소 실행은 하지 않았습니다.
 
 다음 편은 **Ch 6: OTA 업데이트 — 안전한 펌웨어 배포**. 지금까지 다진 secure boot·crypto·TEE 기반 위에서, 양산 디바이스에 펌웨어를 *원격으로 안전하게* 갱신하는 메커니즘을 봅니다.
 

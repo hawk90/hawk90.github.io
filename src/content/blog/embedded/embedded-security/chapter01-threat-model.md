@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 임베디드 시스템에 *보안 기능을 붙이자*고 결정하기 전에 답해야 할 질문이 세 개 있습니다. 무엇을 지키는가, 누구로부터 지키는가, 어떻게 들어올 수 있는가입니다. 이 세 질문에 대답하지 못한 상태에서 AES-256과 ECDSA를 켜면, 비용은 들었는데 정작 공격자가 지나가는 길은 그대로 열려 있는 결과가 나옵니다.
 
-위협 모델링은 위 세 질문에 *체계적으로* 답하는 절차입니다. 이 장에서는 STRIDE를 위협 분류의 한 방법으로, DREAD를 팀이 위험을 비교할 때 쓸 수 있는 점수화 휴리스틱으로 사용합니다. 두 방법이 모든 조직에서 같은 형태로 채택되거나 동일한 결정을 내리는 표준 절차는 아닙니다. 조직은 자체 위험 분석과 규제 요구에 맞춰 평가 기준을 정해야 합니다.
+위협 모델링은 위 세 질문에 *체계적으로* 답하는 절차입니다. 이 장에서는 STRIDE를 위협 분류에, DREAD를 위험 비교에 씁니다. 두 방법은 Michael Howard와 David LeBlanc가 *Writing Secure Code*에 정리한 것인데, LeBlanc 본인이 2007년 ["DREADful"](https://learn.microsoft.com/en-us/archive/blogs/david_leblanc/dreadful)에서 "둘 다 학문적 엄밀성을 갖고 개발되지 않았다"고 적었습니다. 같은 글에서 그는 STRIDE가 엄밀한 분류는 아니어도 특정 문제를 두고 논의의 초점을 맞추는 데는 쓸모가 있다고 봅니다. 이 장도 두 도구를 그 용도로 씁니다.
 
 임베디드는 일반적인 IT 보안과 결정적으로 다른 점이 있습니다. 공격자가 *디바이스를 손에 쥡니다*. 데이터센터의 서버처럼 물리적으로 격리된 환경이 아니라, 실험실 책상에 올라와서 JTAG 프로브, 로직 애널라이저, 오실로스코프, 심지어 디캡(decapsulation)·SEM·FIB 같은 반도체 분석 장비까지 들어옵니다. 이 차이를 이해하지 못하면 데스크톱 보안 모델을 그대로 가져와 헛돈을 쓰게 됩니다.
 
@@ -40,7 +40,7 @@ topics: ["embedded"]
 
 ## 공격자 capability levels
 
-공격자를 한 덩어리로 보면 방어 비용을 가늠할 수 없습니다. 보통 다음 다섯 단계로 나눕니다.
+공격자를 한 덩어리로 보면 방어 비용을 가늠할 수 없습니다. 이 장은 다음 다섯 단계로 나눕니다.
 
 - **Level 1 — Remote / Network attacker**
   - 인터넷 또는 LAN을 통해서만 접근
@@ -63,7 +63,7 @@ topics: ["embedded"]
   - silicon 단위 reverse, mask ROM 추출
   - 동기: 산업 스파이, 군사 정보
 
-이 단계는 이 장에서 위험 시나리오를 나누기 위해 만든 예시이며 업계 공통 등급이나 제품 인증 기준은 아닙니다. 제품의 가치, 노출 환경, 공격 비용과 규제 요구를 바탕으로 방어 범위를 정하고, 물리 공격에 대한 잔여 위험도 기록합니다.
+이 다섯 단계는 이 장이 시나리오를 나누려고 만든 구분이며 업계 공통 등급이나 인증 기준이 아닙니다. 제품마다 "Level 몇까지 막는다"를 정하고, 그 위의 공격은 잔여 위험으로 문서에 남깁니다.
 
 ## STRIDE — 위협의 6가지 종류
 
@@ -95,7 +95,7 @@ STRIDE는 [Microsoft Threat Modeling Tool 문서](https://learn.microsoft.com/en
 
 ## DREAD — 점수로 우선순위 매기기
 
-STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때문에 우선순위가 필요합니다. DREAD는 다섯 축에 1~10점을 매겨 평균을 냅니다.
+STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때문에 우선순위가 필요합니다. *Writing Secure Code*의 DREAD는 다섯 축에 1~10점을 매기고, 더한 뒤 5로 나눕니다(LeBlanc, "DREADful").
 
 | 글자 | 의미 | 1점 (낮음) | 10점 (높음) |
 |---|---|---|---|
@@ -105,7 +105,7 @@ STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때�
 | **A**ffected users | 영향 받는 사용자 비율 | 1% 미만 | 100% |
 | **D**iscoverability | 발견 난이도 | 내부자만 알 수 있음 | 공개 CVE, Shodan 검색 한 번 |
 
-다음 절의 수치는 설명용 팀 입력값입니다. DREAD에는 모든 조직에 적용되는 보편 점수 경계가 없으므로, 심각도 구간을 쓴다면 조직이 기준과 조치 기한을 별도로 정해야 합니다. 점수는 정확한 확률이 아니라 가정을 드러내고 검토를 시작하기 위한 기록입니다.
+평균에는 약점이 있습니다. LeBlanc가 든 예를 그대로 계산하면, Damage 1에 나머지 넷이 10인 위협(잘 알려진 성가신 문제)과 Discoverability 1에 나머지 넷이 10인 위협(찾기는 어렵지만 피해가 막대한 문제)이 둘 다 41/5 = 8.2점으로 같아집니다. 그는 대안으로 축마다 high·medium·low 세 단계만 매기고, 피해 축(Damage·Reliability·Affected users, LeBlanc 글은 R을 reliability라 부름)으로 심각도를, 상황에 따라 바뀌는 축(Exploitability·Discoverability)으로 우선순위 가산점을 따로 계산하는 방식을 제안했습니다. 같은 글에 "Microsoft 내부에서도 이 방식을 많이 쓰지 않으며 MSRC 방식도 아니다"라는 단서가 붙어 있습니다. 그래서 아래 표의 점수는 이 장의 설명용 입력값이고, 평균은 정렬 순서를 잡는 데만 씁니다.
 
 ## 임베디드 특화 공격 벡터
 
@@ -113,7 +113,7 @@ STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때�
 
 **디버그 인터페이스 — JTAG / SWD / UART**
 
-디버그 보호의 이름과 가역성은 부품 계열에 따라 다릅니다. 예를 들어 STM32L552/L562의 RDP Level 2는 해당 제품에서 되돌릴 수 없는 설정입니다. 이 동작을 다른 STM32 계열이나 다른 벤더 제품에 그대로 일반화하지 말고, 실제 부품의 reference manual과 생산 검증 절차를 확인합니다.
+STM32L5 계열은 디버그·flash 읽기 보호를 option byte의 RDP(Read-out Protection) 값으로 정합니다. HAL 주석은 RDP Level 1에서도 JTAG·SWD debug가 연결돼 있으면 flash를 program·erase할 수 없다고 적습니다([`stm32l5xx_hal_flash_ex.c`](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Src/stm32l5xx_hal_flash_ex.c#L846-L849)). ST의 [stm32l5xx-hal-driver v1.0.7](https://github.com/STMicroelectronics/stm32l5xx-hal-driver/blob/8a45ae313e26ff92273fbaee75275b191c3bb81e/Inc/stm32l5xx_hal_flash.h#L278-L283) `stm32l5xx_hal_flash.h`는 Level 0 = `0xAA`, 0.5 = `0x55`, 1 = `0xBB`, 2 = `0xCC`로 정의하고, Level 2에 "활성화하면 Level 1이나 0으로 돌아갈 수 없다"는 경고를 붙여 둡니다. 되돌릴 수 없으므로 Level 2는 양산 라인의 마지막 단계에서 겁니다.
 
 **외부 storage — SD / eMMC / SPI flash 스왑**
 
@@ -121,26 +121,47 @@ STRIDE는 *분류*만 합니다. 모든 위협을 다 막을 수는 없기 때�
 
 **Glitch 공격 — voltage / clock / EM**
 
-Fault injection은 전원·clock·EM 등의 교란으로 실행·데이터에 오류를 유도하는 공격입니다. 특정 instruction 하나를 항상 원하는 대로 건너뛸 수 있다는 뜻은 아닙니다. `if (signature_valid)` 분기에서 그 한 줄을 건너뛰면 부팅이 통과됩니다. 중복 검사와 감지기를 검토하되 공통 원인 오류와 compiler 변환, 실패 시 동작까지 실제 타깃에서 확인해야 합니다. 검사 두 번만으로 공격 내성을 보장하지 않습니다.
+Fault injection은 전원·clock·EM 교란으로 실행이나 데이터에 오류를 일으키는 공격입니다. 표적은 보안 결정이 걸린 분기입니다. `if (signature_valid)` 분기 하나가 잘못 실행되면 서명이 틀린 이미지로도 부팅이 통과됩니다. 공격 기법과 방어는 [Ch 7](/blog/embedded/embedded-security/chapter07-side-channel)에서 다룹니다.
 
 **Side-channel — power / EM / timing**
 
-AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있습니다. SPA·DPA·CPA라는 분석 기법이 30년째 발전해 왔습니다. 방어는 *masking*과 *constant-time* 구현입니다. Ch 7에서 따로 다룹니다.
+AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있습니다. 출발점은 Kocher의 timing 공격(CRYPTO 1996)과 DPA(Kocher·Jaffe·Jun, CRYPTO 1999)이고, CPA는 Brier·Clavier·Olivier의 [CHES 2004 논문](https://www.iacr.org/cryptodb/data/paper.php?pubkey=625)이 정리했습니다. 방어는 *masking*과 *constant-time* 구현입니다. Ch 7에서 따로 다룹니다.
 
 **Cold boot / RAM remanence**
 
-일부 메모리에서 전원 차단 뒤 데이터가 남는 현상을 이용하는 공격이 연구됐지만, 잔류 시간과 획득 가능성은 메모리·온도·장비·절차에 따라 달라집니다. 이 장에서는 고정 시간을 주장하지 않습니다. 민감 정보를 오래 유지하지 않고, 제품의 메모리 보호 기능과 zeroization 동작을 위협 모델에 맞춰 검증합니다.
+DRAM은 전원이 끊긴 뒤에도 내용이 바로 사라지지 않습니다. Halderman 등의 ["Lest We Remember: Cold Boot Attacks on Encryption Keys"](https://www.usenix.org/legacy/event/sec08/tech/full_papers/halderman/halderman.pdf)(USENIX Security 2008)는 정상 동작 온도(기계에 따라 25.5~44.1 °C)에서 시험한 기계들이 데이터를 완전히 잃기까지 빠른 쪽은 약 2.5초, 느린 쪽은 평균 35초 걸렸다고 보고합니다. 압축 공기 스프레이로 칩 표면을 약 −50 °C까지 식히면 전원 없이 10분이 지나도 bit의 1% 미만만 decay했고, 액체 질소에 60분 담근 모듈은 1 MB 시험 영역에서 0.17%만 바뀌었습니다. 대응은 키를 필요한 동안만 RAM에 두고, 쓰고 나면 즉시 0으로 지우는(zeroization) 것입니다.
 
 ## 자원 제약 — MCU에서의 crypto 도전
 
-크립토는 *연산 비용*과 *메모리 비용*이 비쌉니다. 흔히 보는 제약은 다음과 같습니다.
+크립토는 *연산 비용*과 *메모리 비용*이 비쌉니다. Flash 비용은 직접 재 볼 수 있습니다. [Mbed TLS v3.6.4](https://github.com/Mbed-TLS/mbedtls/tree/c765c831e5c2a0971410692f92f7a81d6ec65ec2)의 모듈을 Debian 13의 `arm-none-eabi-gcc` 14.2.1로 Cortex-M4용 object로 컴파일하고 `arm-none-eabi-size`로 크기를 읽었습니다.
 
-연산 시간과 RAM/flash 점유는 MCU, 클록, 라이브러리 버전, 컴파일 옵션, 가속기 경로와 입력 크기에 따라 달라집니다. 특정 프로젝트의 선택은 고정된 표 수치가 아니라 실제 구성에서 측정한 시간·메모리 사용량과 보안 요구를 비교해 정합니다.
+```bash
+arm-none-eabi-gcc -mcpu=cortex-m4 -mthumb -Os -ffunction-sections -fdata-sections \
+  -Iinclude -Ilibrary -c library/ecp_curves.c -o ecp_curves.o
+arm-none-eabi-size aes.o gcm.o sha256.o bignum.o bignum_core.o ecp.o ecp_curves.o \
+  ecdsa.o rsa.o rsa_alt_helpers.o
+```
 
-이 제약 때문에 임베디드에서는 다음과 같은 *현실적인 타협*이 자주 일어납니다.
+| object | 설정 | `.text` (B) | `.bss` (B) |
+|---|---|---:|---:|
+| `aes.o` | 기본 `mbedtls_config.h` | 8,057 | 8,748 |
+| `aes.o` | `MBEDTLS_AES_ROM_TABLES` | 16,253 | 0 |
+| `aes.o` | `ROM_TABLES` + `FEWER_TABLES` | 10,129 | 0 |
+| `gcm.o` | 기본 | 5,675 | 0 |
+| `sha256.o` | 기본 | 3,482 | 0 |
+| `bignum.o` + `bignum_core.o` | 기본 | 9,332 + 2,378 | 0 |
+| `rsa.o` + `rsa_alt_helpers.o` | 기본 | 9,635 + 1,593 | 0 |
+| `ecp.o` | 기본 | 9,865 | 30 |
+| `ecp_curves.o` | 기본(곡선 13개) | 34,926 | 0 |
+| `ecp_curves.o` | P-256만 남김 | 2,700 | 0 |
+| `ecdsa.o` | 기본 | 1,684 | 0 |
 
-- RSA 대신 ECC — 키·서명 형식과 연산 비용이 다르므로 지원 알고리즘, 보안 강도, 메시지 형식과 대상 MCU에서의 측정값을 함께 비교합니다.
-- 전송 protocol과 인증 정책을 따로 선택합니다. DTLS는 datagram 전송용이며 PSK·certificate pinning도 키 교체·폐기·상호운용 조건을 확인해야 합니다.
+표에서 두 가지가 보입니다. 첫째, 기본 설정의 AES는 S-box·T-table을 실행 중에 만들어 RAM(`.bss`)에 8.7 KB를 씁니다. `MBEDTLS_AES_ROM_TABLES`를 켜면 RAM 사용은 0이 되고 그만큼 flash가 늘어납니다. RAM이 작은 MCU에서는 이 한 줄이 RAM과 flash 중 무엇을 쓸지를 정합니다. 둘째, 곡선을 P-256 하나로 줄이면 `ecp_curves.o`가 34.9 KB에서 2.7 KB로 줄어듭니다. 이 크기는 링크 전 object의 `.text`라서 `--gc-sections` 뒤 최종 image에서는 쓰지 않는 함수만큼 더 줄어듭니다. 실행 시간과 stack 사용량은 이 측정에 들어 있지 않습니다.
+
+이 제약 때문에 임베디드에서는 다음과 같은 *타협*을 검토합니다.
+
+- RSA 대신 ECC — 크기 차이는 서명과 키에서 납니다. OpenSSL 4.1.0으로 만든 RSA-2048 서명은 256 B, P-256 서명은 DER로 69~72 B(raw r‖s는 64 B)였습니다([Ch 2](/blog/embedded/embedded-security/chapter02-secure-boot)). 반면 위 표에서 코드 크기는 RSA 경로(`rsa`+`rsa_alt_helpers`+`bignum`+`bignum_core` = 22,938 B)와 P-256 ECDSA 경로(`ecdsa`+`ecp`+P-256 `ecp_curves`+`bignum`+`bignum_core` = 25,959 B)가 비슷합니다. ECC로 바꾸면 flash보다 전송·저장하는 바이트가 줄어듭니다.
+- 전송 protocol과 인증 정책을 따로 고릅니다. UDP 위에서는 TLS 대신 DTLS([RFC 9147](https://www.rfc-editor.org/rfc/rfc9147), DTLS 1.3)를 씁니다. PSK를 쓰면 인증서 검증 코드가 빠지는 대신 키 배포·교체를 직접 설계해야 합니다.
 - 매 패킷 서명 대신 *세션 시작에만* 서명, 이후 MAC으로.
 - Merkle tree로 부분 검증할 때도 신뢰된 root hash의 인증과 실행 정책은 유지해야 합니다. Tree만으로 서명 기반 신뢰 시작점을 대체하지 않습니다.
 
@@ -156,7 +177,7 @@ AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있�
 
 ## 신뢰 경계를 검토 가능한 질문으로 바꾸기
 
-그림은 Cortex-A의 NS/S 분리와 cloud 인증을 택한 한 구성 예이며 모든 MCU에 그대로 적용하는 구조가 아닙니다. DFD를 작성할 때는 외부 주체·process·저장소·data flow를 정하고, 경계를 넘는 각 flow에 입력 형식·인증 주체·권한·실패 정책을 연결합니다.
+그림은 Cortex-A 구성입니다. Cortex-M의 TrustZone-M에는 EL3와 SMC가 없고, Non-secure에서 Secure로 들어가는 길은 NSC 영역의 `SG` 명령입니다([Ch 4](/blog/embedded/embedded-security/chapter04-trustzone)). 어느 쪽이든 DFD를 그릴 때는 외부 주체·process·저장소·data flow를 정하고, 경계를 넘는 각 flow에 입력 형식·인증 주체·권한·실패 정책을 붙입니다.
 
 | Flow 예 | 먼저 확인할 가정 | 거부·복구 검증 |
 |------|------|------|
@@ -164,7 +185,7 @@ AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있�
 | Non-secure → secure service | 포인터·길이·공유 buffer의 변경 가능성 | 경계 밖 길이·호출 중 변경·권한 없는 key ID를 거부하는가? |
 | Update agent → flash | 쓰기 권한과 전원 차단 원자성 | 검증 후 변조와 중단 뒤에도 허용된 recovery만 실행되는가? |
 
-이 표는 실행 결과가 아니라 검증 계획입니다. 자산별 owner와 기한을 붙이고 제품·공격 환경이 바뀌면 가정을 다시 검토합니다. 이 글에서는 물리 공격이나 제품 인증을 수행하지 않았습니다.
+이 표는 시험 결과가 아니라 시험 계획입니다. 항목마다 담당자와 기한을 붙이고, 제품이나 공격 환경이 바뀌면 다시 엽니다.
 
 ## 위험 우선순위 표 — 한 장으로 정리
 
@@ -179,30 +200,28 @@ AES 계산 중의 전력 소모를 측정하면 round key를 복원할 수 있�
 | RoT 공개키 | T (Tampering) | 신뢰 기준 변경 | 10/8/9/9/9 | 9.0 | key provisioning·revocation 절차 검토 |
 | 세션 키 | I (Information disclosure) | 메모리에서 세션 키 노출 | 5/4/5/4/3 | 4.2 | 수명·메모리 보호·zeroization 검증 |
 
-각 점수는 예시 담당자가 임의 기준으로 기록한 값이며 표준 점수나 측정 결과가 아닙니다. 팀은 각 축의 정의와 근거를 남기고 평균만으로 위험 수용을 결정하지 않습니다.
-
-이 표는 팀이 가정과 후속 검증을 검토하는 출발점입니다. 높은 점수만으로 우선순위나 위험 수용을 확정하지 말고, 자산 소유자·노출 조건·대응 비용과 잔여 위험을 함께 기록합니다.
+점수는 이 장의 설명용 입력값이며 측정 결과가 아닙니다. 평균으로 정렬하면 RoT 공개키 변조(9.0)가 맨 위, 세션 키 노출(4.2)이 맨 아래입니다. 다만 앞에서 본 LeBlanc의 지적처럼 평균은 피해가 큰 위협과 흔한 위협을 같은 점수로 묶을 수 있습니다. 그래서 Damage가 8 이상인 행(펌웨어 변조, 디바이스 키, 디버그 포트, RoT 공개키)은 평균과 별개로 다시 봅니다.
 
 ## 자주 하는 실수
 
 - **자산을 안 정한 채 기술부터 고릅니다.** "AES를 쓰자"는 결론이 아니라 출발점이 되어 버립니다. 무엇을 지키는지가 먼저입니다.
 - **공격자 레벨을 가정하지 않습니다.** Level 5를 가정하면 비용이 무한대가 되고, Level 1만 가정하면 양산 후 공격에 무방비입니다. *어디까지 막을 것인가*를 명시적으로 결정합니다.
 - **물리적 공격을 무시합니다.** 데스크톱 보안 모델에서는 "공격자가 디바이스를 손에 쥐면 끝"이지만 임베디드에서는 그것이 *시작*입니다.
-- **디버그 포트 잠금을 양산 후에 검증하지 않습니다.** RDP 설정은 코드에 있어도 fuse blow가 실제로 됐는지 확인 안 하면 무의미합니다.
+- **디버그 포트 잠금을 양산 후에 검증하지 않습니다.** RDP 값이 빌드 스크립트에 있어도 실제 option byte에 기록됐는지 양산 라인에서 읽어 확인하지 않으면 잠금 여부를 모릅니다. STM32L5라면 RDP byte가 `0xCC`인지 봅니다.
 - **위협 모델을 한 번 그리고 안 봅니다.** 새 기능이 추가될 때마다 신뢰 경계가 바뀝니다. 위협 모델은 *살아 있는 문서*여야 합니다.
 
 ## 정리
 
 - 임베디드 보안은 자산·공격자·신뢰 경계를 정의하는 위협 모델에서 출발합니다.
 - 자산은 펌웨어·키·인증서·사용자 데이터·디버그 인터페이스 등으로 enumeration합니다.
-- 공격자 능력 단계는 이 장의 시나리오 예시이며, 제품별 가정과 잔여 위험을 명시합니다.
+- 공격자 능력 단계는 이 장의 구분이며, 제품마다 막을 단계와 잔여 위험을 적습니다.
 - STRIDE는 위협의 6가지 종류(Spoofing·Tampering·Repudiation·Info disclosure·DoS·Elevation)를 분류합니다.
-- DREAD는 5축(Damage·Reproducibility·Exploitability·Affected users·Discoverability)으로 점수를 매겨 우선순위를 정합니다.
-- 검토할 수 있는 공격 벡터에는 JTAG·storage 스왑·glitch·side-channel·메모리 잔류가 있으며, 적용 가능성은 부품과 공격 환경에 따라 확인합니다.
-- MCU의 자원 제약은 알고리즘과 프로토콜 선택에 영향을 주므로 대상 구성에서 측정하고 보안 요구와 함께 판단합니다.
-- 위협 모델은 가정·검증 작업·잔여 위험을 기록하는 입력이며, 단일 평균 표가 릴리스 결정을 대신하지 않습니다.
+- DREAD는 5축(Damage·Reproducibility·Exploitability·Affected users·Discoverability)에 1~10점을 매겨 평균을 냅니다. 평균은 피해가 큰 위협을 묻을 수 있어서 Damage를 따로 봅니다.
+- 임베디드 특화 공격 벡터는 JTAG·storage 스왑·glitch·side-channel·DRAM 잔류입니다. DRAM은 정상 동작 온도에서 수 초~수십 초, −50 °C에서는 10분 뒤에도 bit의 1% 미만만 decay했습니다(Halderman 2008).
+- Mbed TLS 3.6.4의 Cortex-M4 object 크기로 보면 기본 AES는 RAM 8.7 KB를 쓰고, 곡선을 P-256 하나로 줄이면 `ecp_curves`가 34.9 KB에서 2.7 KB가 됩니다.
+- 위협 모델은 가정·시험 계획·잔여 위험을 적는 문서이며, 새 기능이 들어올 때마다 다시 엽니다.
 
-다음 편은 **Ch 2: Secure Boot — 부트 체인 검증**. 위협 모델 표의 최상위 항목인 "임의 펌웨어 실행"을 어떻게 막는지, ROM부터 application까지 체인을 따라가며 봅니다.
+다음 편은 **Ch 2: Secure Boot — 부트 체인 검증**. 위협 모델 표에서 평균이 가장 높았던 "RoT 공개키 변조"와 "펌웨어 이미지 변조"를 어떻게 막는지, ROM부터 application까지 체인을 따라가며 봅니다.
 
 ## 관련 항목
 
