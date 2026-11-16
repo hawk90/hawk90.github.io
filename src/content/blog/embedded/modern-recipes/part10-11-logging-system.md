@@ -100,7 +100,7 @@ void log_binary(uint16_t fmt_id, int argc, ...) {
 #define LOG_B(fmt, ...) log_binary(__COUNTER__, ARG_COUNT(__VA_ARGS__), __VA_ARGS__)
 ```
 
-`ARG_COUNT`는 인자 개수를 세는 매크로로 따로 정의해야 하고, `__COUNTER__`는 GCC·Clang 확장입니다. format 문자열은 ELF의 별도 section에 모아 두고 host가 `fmt_id`로 찾아 문장을 만듭니다.
+`ARG_COUNT`는 인자 개수를 세는 매크로로 따로 정의해야 하고, `__COUNTER__`는 GCC·Clang 확장입니다. 위 `LOG_B`는 format 문자열을 버리고 번호만 넘기므로, host가 번호로 문장을 찾으려면 문자열을 별도 section이나 빌드 산출물에 따로 모아 두는 단계가 더 필요합니다.
 
 ### 측정 — 호출 한 번에 명령 몇 개인가
 
@@ -166,7 +166,7 @@ SEGGER RTT는 target RAM의 버퍼를 디버그 프로브가 읽어 가는 방�
 SEGGER_RTT_Write(0, &rec, sizeof(rec));
 ```
 
-같은 문서는 모드에 따라 프로브가 메모리를 읽는 동안 target이 잠깐 멈출 수 있고, 그 영향은 interface 속도와 코어에 따라 다르다고도 적습니다. RTT 출력은 J-Link가 연결되어 있을 때만 읽을 수 있습니다.
+같은 문서는 모드에 따라 프로브가 메모리를 읽는 동안 target이 잠깐 멈출 수 있고, 그 영향은 interface 속도와 코어에 따라 다르다고도 적습니다.
 
 ## Layer 5 — Deferred 출력
 
@@ -232,7 +232,7 @@ void TIM2_IRQHandler(void) {
 }
 ```
 
-`printf`가 UART로 바로 나간다면 이 ISR은 출력이 끝날 때까지 돌아가지 않습니다. 위에서 계산한 대로 115200 baud에서 `tick 12345\n` 11글자는 약 1 ms입니다. TIM2가 1 ms마다 인터럽트를 낸다면 ISR이 주기보다 길어집니다. 고친 코드는 기록만 하고 출력은 idle에서 합니다.
+`printf`가 UART로 바로 나간다면 이 ISR은 출력이 끝날 때까지 돌아가지 않습니다. 115200 baud에서 `tick 123456\n` 12글자는 12 × 86.8 µs ≈ 1.04 ms입니다. TIM2가 1 ms마다 인터럽트를 낸다면 ISR이 주기보다 길어집니다. 고친 코드는 기록만 하고 출력은 idle에서 합니다.
 
 ```c
 void TIM2_IRQHandler(void) {
@@ -257,9 +257,10 @@ IRQ를 막은 동안 UART를 인터럽트·DMA로 보내는 드라이버는 진�
 
 > Floating point 로그
 
-newlib-nano에서 `printf("%f", x)`는 `_printf_float`를 링크하지 않으면 아무것도 찍지 않습니다(newlib README, [10-05](/blog/embedded/modern-recipes/part10-05-uart-not-printing)). binary 로그라면 float의 비트를 그대로 넘기고 host에서 다시 float로 해석합니다. 비트를 꺼낼 때 `*(uint32_t*)&x`는 C의 aliasing 규칙에 어긋나므로([10-08](/blog/embedded/modern-recipes/part10-08-memory-corruption)) `memcpy`를 씁니다.
+newlib-nano는 `_printf_float`를 기본으로 링크하지 않으므로 `%f`를 쓰려면 `-u _printf_float`로 링크해야 하고, 링크하지 않으면 newlib README는 정의되지 않은 동작이라고 적습니다([10-05](/blog/embedded/modern-recipes/part10-05-uart-not-printing)). binary 로그라면 float의 비트를 그대로 넘기고 host에서 다시 float로 해석합니다. 비트를 꺼낼 때 `*(uint32_t*)&x`는 C의 aliasing 규칙에 어긋나므로([10-08](/blog/embedded/modern-recipes/part10-08-memory-corruption)) `memcpy`를 씁니다.
 
 ```c
+float x = read_temp();   /* 4-byte float */
 uint32_t bits;
 memcpy(&bits, &x, sizeof bits);
 LOG_B("temp %f", bits);
@@ -288,7 +289,7 @@ SWO와 RTT는 디버그 프로브가 연결되어 있어야 읽힙니다. 프로
 - format 문자열을 번호로 바꾸면 flash의 문자열 공간도 줄어듭니다.
 - SEGGER RTT 문서의 최대 전송 속도는 약 3.5 MB/s이고, 프로브가 연결되어 있어야 읽힙니다.
 - Idle task가 출력을 batch로 처리합니다.
-- Crash dump를 NVRAM에 두면 reset 후에도 이전 로그를 볼 수 있습니다.
+- Crash dump를 backup SRAM에 두면 reset 후에도 이전 로그를 볼 수 있습니다.
 - Tag/subsystem 마스크로 runtime에서 필터링.
 - Critical section 안에서는 ring buffer write만.
 
