@@ -113,21 +113,28 @@ SECTIONS
 }
 ```
 
-`(NOLOAD)`는 section을 `NOBITS`로 만들어 파일에 내용을 넣지 않고 주소만 배정합니다. 아래 링크 결과에서 `.noinit_buf`가 `NOBITS`로 나옵니다. 부팅 코드가 `.bss`처럼 0으로 지우지도 않으므로, reset을 거쳐도 남아야 하는 값(backup SRAM, reset 원인 기록)에 씁니다.
+`(NOLOAD)`는 section을 `NOBITS`로 만들어 파일에 내용을 넣지 않고 주소만 배정합니다. BKPSRAM(0x40024000, `stm32f407xx.h`의 `BKPSRAM_BASE`, 4 KB)을 쓰는 위 예시 대신, 이 글의 링크 실험에서는 같은 형태의 `.noinit_buf (NOLOAD)`를 SRAM에 두었고 `readelf -S`에 이렇게 나왔습니다.
+
+```text
+  [ 7] .noinit_buf       NOBITS          20000008 020008 000040 00  WA  0   0  4
+```
+ 부팅 코드가 `.bss`처럼 0으로 지우지도 않으므로, reset을 거쳐도 남아야 하는 값(backup SRAM, reset 원인 기록)에 씁니다.
 
 ### 4) Dual-bank A/B 분할
+
+Flash를 bootloader·slot A·slot B로 나누고, 각 이미지를 자기 slot 주소에 link합니다. slot마다 link 주소가 다르므로 slot A용과 slot B용 이미지를 따로 빌드합니다(예: `REGION_ALIAS`로 `APP`를 slot A 또는 B region에 붙이는 script 두 벌).
 
 ```text
 MEMORY
 {
-    BOOT  (rx) : ORIGIN = 0x08000000, LENGTH = 32K
-    APP_A (rx) : ORIGIN = 0x08008000, LENGTH = 496K
-    APP_B (rx) : ORIGIN = 0x08084000, LENGTH = 496K
-    SRAM  (rwx): ORIGIN = 0x20000000, LENGTH = 128K
+    BOOT  (rx) : ORIGIN = <boot base>,   LENGTH = <boot size>
+    APP_A (rx) : ORIGIN = <slot A base>, LENGTH = <slot size>
+    APP_B (rx) : ORIGIN = <slot B base>, LENGTH = <slot size>
 }
+REGION_ALIAS("APP", APP_A);   /* the slot-B build uses APP_B */
 ```
 
-slot마다 link 주소가 다르므로 slot A용과 slot B용 이미지를 따로 빌드합니다(예: `-DSLOT=A`로 linker script의 `REGION_ALIAS`를 고름). 위 주소는 예시이고, 실제로는 slot 경계를 칩 reference manual의 flash erase 단위(sector) 경계에 맞춰야 한쪽 slot을 지울 때 다른 slot이 함께 지워지지 않습니다.
+주소 자리를 비워 둔 것은 일부러입니다. slot 경계는 칩 reference manual의 flash erase 단위(sector) 경계와 맞아야 한쪽 slot을 지울 때 다른 slot이 함께 지워지지 않는데, sector 크기가 칩마다(같은 칩 안에서도 위치마다) 다르기 때문입니다. 이전 판의 주소(slot B 0x08084000)는 이 기준을 확인하지 않은 값이라 지웠습니다.
 
 ### 5) Overlay
 
@@ -168,10 +175,10 @@ arm-none-eabi-gcc -Wl,--gc-sections -Wl,--print-gc-sections ...
 
 DMA buffer를 non-cacheable region에 두기 (Cortex-M7):
 
-```c
-// SRAM2를 non-cacheable로 MPU에서 설정
-// linker script에서 buffer를 SRAM2에 배치
+DMA buffer를 MPU로 non-cacheable로 만든 영역에 두는 예입니다. 영역은 [2-05](/blog/embedded/modern-recipes/part2-05-arm-memory-map)에서 QEMU `mps2-an500`(Cortex-M7)으로 MPU를 실제로 설정해 본 0x20020000부터 64 KB이고, `aligned(32)`는 Cortex-M7 D-cache line이 32 byte라서입니다([2-06](/blog/embedded/modern-recipes/part2-06-arm-cache)). 실제 칩에서는 그 칩의 SRAM 배치에 맞춰 region을 고릅니다.
 
+```c
+// MPU region 0x20020000..0x2002FFFF = Normal, non-cacheable (2-05)
 __attribute__((section(".dma_buffer"), aligned(32)))
 uint8_t dma_rx_buf[1024];
 ```
@@ -179,9 +186,8 @@ uint8_t dma_rx_buf[1024];
 ```text
 MEMORY
 {
-    FLASH  (rx)  : ORIGIN = 0x08000000, LENGTH = 2048K
-    SRAM1  (rwx) : ORIGIN = 0x20000000, LENGTH = 384K
-    SRAM2  (rwx) : ORIGIN = 0x20060000, LENGTH = 64K    /* DMA non-cacheable */
+    SRAM   (rwx) : ORIGIN = 0x20000000, LENGTH = 128K
+    DMA_NC (rwx) : ORIGIN = 0x20020000, LENGTH = 64K    /* MPU: non-cacheable */
 }
 
 SECTIONS
@@ -193,7 +199,7 @@ SECTIONS
         . = ALIGN(32);
         *(.dma_buffer)
         . = ALIGN(32);
-    } > SRAM2
+    } > DMA_NC
 }
 ```
 
@@ -208,7 +214,7 @@ Vector table을 RAM으로 옮기기 (dynamic IRQ handler 교체용). 복사하�
 } > SRAM
 ```
 
-아래는 이 글의 예제 이미지(system vector 16개만 정의)에서 table을 RAM으로 옮기고 SysTick entry만 RAM의 다른 handler로 바꾼 코드입니다.
+아래는 이 글의 예제 이미지(system vector 16개만 정의)에서 table을 RAM으로 옮기고, RAM table의 SysTick entry만 다른 handler(`ram_systick`)로 바꾼 코드입니다.
 
 ```c
 extern uint32_t _vector_ram[];
@@ -232,13 +238,13 @@ VTOR가 512 byte 정렬된 RAM 주소(0x20000200)를 가리키고, SysTick이 RA
 | 기법 | 효과 | 비용 |
 | --- | --- | --- |
 | ISR을 .ramfunc로 | Flash wait state를 피할 수 있음 | RAM 사용량, startup 복사 |
-| `--gc-sections` | 미참조 section 제거 | 빌드 시간·linker 설정 관리 |
+| `--gc-sections` | 미참조 section 제거 | `KEEP` 누락 시 필요한 section까지 지워짐 |
 | Dual-slot A/B | A/B firmware swap 가능 | slot마다 이미지를 따로 빌드, flash를 두 몫으로 나눔 |
 | Custom NOLOAD section | 특수 영역 활용 | 코드 복잡도 |
 
 | 명령/속성 | 의미 |
 | --- | --- |
-| `(NOLOAD)` | ELF에 load entry 만들지 않음 |
+| `(NOLOAD)` | section을 `NOBITS`로 — 파일에 내용이 없고 부팅 때 복사·초기화하지 않음 |
 | `KEEP(...)` | gc-sections에서 보호 |
 | `LOADADDR(.x)` | section의 LMA 주소 반환 |
 | `AT(addr)` | 명시적 LMA 지정 |
@@ -256,7 +262,7 @@ fast_isr_body address = 0x20000005
 HardFault, stacked PC unknown; CFSR = 0x00008200
 ```
 
-QEMU는 RAM을 0으로 시작하므로 0x0000 명령을 이어 실행하다 BusFault(PRECISERR + BFARVALID)가 HardFault로 올라왔습니다. 실제 칩에서는 RAM의 초기 내용이 정해져 있지 않아 증상이 매번 다를 수 있으므로, map 파일에서 `.ramfunc`의 크기와 `_siramfunc`를 확인하고 startup의 복사를 먼저 봅니다.
+CFSR 0x8200은 BusFault의 PRECISERR(bit 9)와 BFARVALID(bit 15)이고, BusFault를 켜지 않아 HardFault로 올라왔습니다. 복사하지 않은 RAM에 무엇이 있느냐에 따라 증상은 달라질 수 있으므로, map 파일에서 `.ramfunc`의 크기와 `_siramfunc`를 확인하고 startup의 복사를 먼저 봅니다.
 
 > ⚠️ NOLOAD section에 초기값 의도
 
