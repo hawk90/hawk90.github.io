@@ -268,7 +268,22 @@ Breakpoint 1, consume (v=v@entry=45) at ev.c:2
 #1  0x0000aaaaaaaa07e4 in sample (input=42) at ev.c:6
 ```
 
-`v=v@entry=45`는 현재 값과 진입값이 같다는 GDB 표기입니다. `objdump --dwarf=loc`로 본 `ev`의 위치 목록에는 `DW_OP_entry_value: (DW_OP_reg0 (x0)); DW_OP_stack_value` 같은 구간이 여러 개 있었습니다. 반면 `main`의 `argc`·`argv`는 `<optimized out>`이었는데, `main`을 부르는 libc 쪽에 call site 정보가 없어서 진입값을 되찾을 길이 없기 때문입니다. 진입값 복원은 호출자가 call site 정보를 남겼을 때만 됩니다.
+`v=v@entry=45`는 현재 값과 진입값이 같다는 GDB 표기입니다. 반면 `main`의 `argc`·`argv`는 `<optimized out>`이었습니다. `objdump --dwarf=loc ev`에서 `DW_OP_entry_value`가 나온 구간은 둘뿐이었고, 둘 다 `main`(0x640부터)의 인자였습니다.
+
+```text
+$ objdump --dwarf=loc ev | grep -B3 entry_value
+    00000020 v000000000000000 v000000000000000 views at 0000000e for:
+             0000000000000648 000000000000064f (DW_OP_breg0 (x0): -41; DW_OP_stack_value)
+    00000027 v000000000000000 v000000000000000 views at 00000010 for:
+             000000000000064f 000000000000065c (DW_OP_entry_value: (DW_OP_reg0 (x0)); DW_OP_stack_value)
+--
+    0000003d v000000000000000 v000000000000000 views at 00000030 for:
+             0000000000000640 000000000000064f (DW_OP_reg1 (x1))
+    00000042 v000000000000000 v000000000000000 views at 00000032 for:
+             000000000000064f 000000000000065c (DW_OP_entry_value: (DW_OP_reg1 (x1)); DW_OP_stack_value)
+```
+
+`argc`의 위치 목록은 0x648~0x64f에서 `x0 - 41`, 0x64f~0x65c에서 "진입 때의 `x0`"입니다. 식은 있지만 `main`을 부르는 libc 쪽에 call site 정보가 없어서 GDB가 진입값을 계산하지 못했습니다. 진입값 복원은 호출자가 call site 정보를 남겼을 때만 됩니다.
 
 ## DW_OP_implicit_pointer — 포인터가 사라짐
 
@@ -291,12 +306,22 @@ $ objdump --dwarf=loc ip.o
              0000000000000000 0000000000000008 (DW_OP_implicit_pointer: <0x63> 0)
 ```
 
-`<0x63>`은 `x`의 DIE offset입니다. GDB 16.3은 이 정보로 답합니다.
+`<0x63>`은 `x`의 DIE offset입니다. `f`는 `mov w0, #0xa` 뒤 `b use`로 끝나는 두 명령뿐이고, 위치 목록이 그 8바이트를 덮습니다. `use`와 `main`을 정의한 `ipm.c`를 붙여 링크하고 GDB 16.3으로 `break f` 뒤 물었습니다.
+
+```c title="ipm.c"
+#include <stdio.h>
+void f(void);
+void use(int v) { printf("%d\n", v); }
+int main(void) { f(); return 0; }
+```
 
 ```text
-(gdb) print p
+$ gdb -q -batch -ex 'break f' -ex run -ex 'print p' -ex 'print *p' ./ip
+Breakpoint 1 at 0x800: file ip.c, line 5.
+...
+Breakpoint 1, f () at ip.c:5
+5	    use(*p);
 $1 = (int *) <synthetic pointer>
-(gdb) print *p
 $2 = 10
 ```
 
