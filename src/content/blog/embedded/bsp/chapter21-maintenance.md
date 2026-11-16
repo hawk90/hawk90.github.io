@@ -12,54 +12,40 @@ topics: ["embedded"]
 
 ## 한 줄 요약
 
-**유지보수 비용을 가장 크게 줄이는 단일 행동은 *업스트림 기여*입니다.** out-of-tree 패치 1만 줄을 유지하는 팀과 모두 mainline에 보낸 팀의 5년 후 위치가 다릅니다.
+**유지보수 비용은 직접 들고 다니는 out-of-tree 패치에서 나옵니다.** 그 패치를 업스트림에 보내면, 다음 커널부터는 커뮤니티가 함께 유지합니다.
 
-BSP는 빌드되어 양산되면 끝나는 것이 아닙니다. 5년, 10년 동안 보안 패치를 받고, kernel을 한두 차례 upgrade 하고, 새 라인업의 SoC variant를 추가하면서 살아갑니다. 이 기간 동안 *out-of-tree 패치의 양*이 곧 *유지보수 비용*입니다.
+BSP는 양산으로 끝나지 않습니다. 제품이 팔리는 동안 보안 패치를 받고, 커널을 올리고, SoC variant를 추가합니다. 이삿짐에 비유하면 out-of-tree 패치는 이사할 때마다 직접 싸고 풀어야 하는 짐입니다. 업스트림에 들어간 코드는 새 집에 이미 붙박이로 있습니다.
 
 이번 글은 BSP의 21장을 마무리합니다. LTS 선택, 업스트림 기여 워크플로, 커널 버전업의 전략, 그리고 BSP 엔지니어가 다음에 무엇을 배우면 좋을지 시리즈 finale을 다룹니다.
 
 ## Linux LTS 일정
 
-Mainline release cadence와 LTS 유지 기간은 달라질 수 있습니다. Linux kernel의 공식 release 페이지는 현재 longterm branch와 projected EOL을 공개하므로 제품 계획 시 갱신 시점의 upstream 정보와 vendor support policy를 함께 확인합니다.
+[kernel.org의 release 페이지](https://www.kernel.org/category/releases.html)가 longterm branch와 projected EOL을 공개합니다. 2026-11-16에 읽은 표입니다.
 
-| 버전 | EOL (예상) | 비고 |
-|------|-----------|------|
-| 5.4 | 2025-12 | EOL 지남 |
-| 5.10 | 2026-12 | kernel.org longterm 계획 |
-| 5.15 | 2026-12 | kernel.org longterm 계획 |
-| 6.1 | 2027-12 | kernel.org longterm 계획 |
-| 6.6 | 2027-12 | kernel.org longterm 계획 |
-| 6.12 | 2028-12 | kernel.org longterm 계획 |
-| 6.18 | 2028-12 | kernel.org longterm 계획 |
+| 버전 | 릴리스 | Projected EOL |
+|------|-------|---------------|
+| 6.18 | 2025-11-30 | Dec, 2028 |
+| 6.12 | 2024-11-17 | Dec, 2028 |
+| 6.6 | 2023-10-29 | Dec, 2027 |
+| 6.1 | 2022-12-11 | Dec, 2027 |
+| 5.15 | 2021-10-31 | Dec, 2026 |
+| 5.10 | 2020-12-13 | Dec, 2026 |
+
+5.4는 이 표에서 빠졌습니다. 표의 maintainer는 모든 행이 Greg Kroah-Hartman과 Sasha Levin으로, MAINTAINERS 파일의 `STABLE BRANCH` 항목과 같습니다.
 
 선택 기준은 다음입니다.
 
-- **양산 시점에 EOL이 2~3년 이상 남았을 것** — 양산 라이프 동안 보안 패치 받을 수 있게
+- **제품 지원 기간 동안 EOL이 남았을 것** — 그 기간 동안 stable 패치를 받을 수 있게
 - **SoC vendor의 BSP가 해당 LTS를 지원** — vendor가 패치를 backport 해주면 부담 감소
-- **AOSP/AGL/Yocto LTS 일정과 일치** — 다른 layer와 align
+- **빌드 시스템의 지원 일정과 맞을 것** — Yocto나 Buildroot release가 그 커널을 지원하는지
 
-2026년 10월 22일 확인 기준 kernel.org는 6.12의 projected EOL을 2028년 12월, 6.6을 2027년 12월로 표기합니다. 버전 선택은 이 일정만으로 정하지 말고 제품 지원 기간, SoC 기능, vendor BSP와 유지보수 계획을 함께 평가합니다.
+이 시리즈의 커널이 6.12인 이유도 여기 있습니다. Debian 13이 6.12.116을 싣고 있고(Ch 3), kernel.org의 6.12 EOL이 2028년 12월입니다.
 
 ## Out-of-tree 패치 cost
 
-BSP가 들고 있는 *vendor 패치 묶음*이 유지보수 비용의 핵심입니다. 아래는 가상의 BSP 패치 카운트입니다.
+BSP가 들고 다니는 패치가 얼마나 되는지는 `git log`나 패치 디렉터리로 셉니다. 이 시리즈에서 본 예로는 Buildroot의 BeagleBone defconfig이 메인라인 대신 `beagleboard/linux`의 `6.1.46-ti-r13`을 받는 경우(Ch 1)와, i.MX 95 PCIe erratum이 v6.16에야 메인라인에 들어간 경우(Ch 2)가 있습니다. 앞의 경우는 vendor tree 전체가, 뒤의 경우는 v6.16 이전 커널을 쓰는 BSP라면 그 erratum 백포트가 직접 들고 다닐 짐이 됩니다. 커널을 올릴 때마다 이 짐을 새 커널 위에 다시 얹어야 합니다.
 
-```text
-patches/
-├── linux/
-│   ├── arm64-dts/        (45 patches, 1200 lines)
-│   ├── drivers-net/      (12 patches, 800 lines)
-│   ├── drivers-iio/      (8 patches, 600 lines)
-│   └── soc-vendor-x/     (200+ patches, 50K lines)
-├── uboot/
-│   └── board-mybsp/      (15 patches, 2000 lines)
-└── opttee/
-    └── platform/         (10 patches, 1500 lines)
-```
-
-여기서 *out-of-tree 50K 줄*은 다음 LTS upgrade마다 *전부 rebase* 해야 합니다. 5.10 → 5.15 rebase에서 *수십 개의 conflict*가 생기고, 5.15 → 6.1 rebase에서 또 수십 개. 패치마다 fix가 두 줄이라도 rebase에 한 시간씩 들면 누적이 큽니다.
-
-해당 변경이 upstream에 통합되면 그 upstream branch 기반 작업에서 자체 carry patch를 유지하는 부담이 줄 수 있습니다. downstream 제품의 이전 kernel branch에 자동 backport되거나 업데이트 비용이 0이 된다는 뜻은 아닙니다. SoC vendor x가 자기 patch를 mainline에 보내 *vendor tree가 거의 비어*가는 케이스가 가장 성공한 패턴입니다(예: i.MX, Allwinner의 일부 SoC).
+변경이 업스트림에 들어가면 그 이후 커널에서는 따로 들고 다닐 필요가 없습니다. 이미 출시한 제품의 이전 커널에는 여전히 백포트가 필요합니다.
 
 ## 업스트림 기여 워크플로
 
@@ -75,23 +61,34 @@ mainline에 패치를 보내는 절차는 다음과 같습니다.
 8. **maintainer가 자기 tree에 pick.** 다음 merge window에 mainline 진입.
 
 ```bash
-# 패치 만들기
-$ git format-patch -1 HEAD --subject-prefix="PATCH"
+git format-patch -1 HEAD --subject-prefix="PATCH"
+./scripts/checkpatch.pl --strict 0001-arm64-dts-mybsp.patch
+./scripts/get_maintainer.pl 0001-arm64-dts-mybsp.patch
+```
 
-# checkpatch
-$ ./scripts/checkpatch.pl --strict 0001-arm64-dts-mybsp.patch
+`get_maintainer.pl`이 무엇을 돌려주는지는 i.MX 8M Plus EVK의 DTS 파일로 linux-6.12에서 실행해 봤습니다.
 
-# 수신자 찾기
-$ ./scripts/get_maintainer.pl 0001-arm64-dts-mybsp.patch
-Rob Herring <robh@kernel.org> (maintainer:OPEN FIRMWARE DEVICETREE BINDINGS)
-Krzysztof Kozlowski <krzk+dt@kernel.org> (reviewer:OPEN FIRMWARE DEVICETREE BINDINGS)
-devicetree@vger.kernel.org (open list:OPEN FIRMWARE DEVICETREE BINDINGS)
-linux-arm-kernel@lists.infradead.org (moderated list:ARM ARCHITECTURE)
+```text
+$ ./scripts/get_maintainer.pl -f arch/arm64/boot/dts/freescale/imx8mp-evk.dts
+Rob Herring <robh@kernel.org> (maintainer:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+Krzysztof Kozlowski <krzk+dt@kernel.org> (maintainer:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+Conor Dooley <conor+dt@kernel.org> (maintainer:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+Shawn Guo <shawnguo@kernel.org> (maintainer:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE)
+Sascha Hauer <s.hauer@pengutronix.de> (maintainer:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE)
+Pengutronix Kernel Team <kernel@pengutronix.de> (reviewer:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE)
+Fabio Estevam <festevam@gmail.com> (reviewer:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE)
+devicetree@vger.kernel.org (open list:OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS)
+imx@lists.linux.dev (open list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE)
+linux-arm-kernel@lists.infradead.org (moderated list:ARM/FREESCALE IMX / MXC ARM ARCHITECTURE)
 linux-kernel@vger.kernel.org (open list)
+```
 
-# 보내기
-$ git send-email --to robh@kernel.org \
-    --cc krzk+dt@kernel.org \
+DTS 하나에 DT binding maintainer와 i.MX 플랫폼 maintainer가 함께 나옵니다. 받는 사람은 이 출력에서 고릅니다.
+
+```bash
+git send-email --to shawnguo@kernel.org \
+    --cc s.hauer@pengutronix.de \
+    --cc imx@lists.linux.dev \
     --cc devicetree@vger.kernel.org \
     --cc linux-arm-kernel@lists.infradead.org \
     0001-arm64-dts-mybsp.patch
@@ -110,7 +107,7 @@ with the following peripherals:
 - eMMC 16GB
 - M.2 Key E for Wi-Fi/BT modules
 
-Tested with kernel 6.7-rc1 + bootlin BSP.
+Tested on the board with the patch applied to the target tree.
 
 Signed-off-by: Your Name <you@example.com>
 ---
@@ -121,23 +118,19 @@ Signed-off-by: Your Name <you@example.com>
 
 ## Subsystem별 maintainer 채널
 
-대표적인 maintainer와 ML입니다.
+linux-6.12의 `MAINTAINERS` 파일에서 이 시리즈와 관련된 항목의 `M:`(maintainer)과 `L:`(mailing list)입니다.
 
-| 영역 | Maintainer | Mailing list |
+| MAINTAINERS 항목 | M: | L: |
 |------|-----------|--------------|
-| -stable, LTS | Greg KH | stable@vger.kernel.org |
-| ARM SoC | Arnd Bergmann, Olof Johansson | soc@kernel.org |
-| Device Tree | Rob Herring, Krzysztof | devicetree@vger.kernel.org |
-| ARM64 | Catalin Marinas, Will Deacon | linux-arm-kernel |
-| net | Jakub Kicinski, Paolo Abeni | netdev@vger.kernel.org |
-| IIO | Jonathan Cameron | linux-iio@vger.kernel.org |
-| MMC | Ulf Hansson | linux-mmc@vger.kernel.org |
-| USB | Greg KH | linux-usb@vger.kernel.org |
-| i.MX | Shawn Guo, Sascha Hauer | linux-imx@nxp.com |
-| STM32 | Maxime Coquelin, Alexandre Torgue | linux-stm32@st-md-mailman.stormreply.com |
-| Rockchip | Heiko Stuebner | linux-rockchip@lists.infradead.org |
+| STABLE BRANCH | Greg Kroah-Hartman, Sasha Levin | stable@vger.kernel.org |
+| OPEN FIRMWARE AND FLATTENED DEVICE TREE BINDINGS | Rob Herring, Krzysztof Kozlowski, Conor Dooley | devicetree@vger.kernel.org |
+| ARM/FREESCALE IMX / MXC ARM ARCHITECTURE | Shawn Guo, Sascha Hauer | imx@lists.linux.dev, linux-arm-kernel@lists.infradead.org |
+| IIO SUBSYSTEM AND DRIVERS | Jonathan Cameron | linux-iio@vger.kernel.org |
+| MULTIMEDIA CARD (MMC), SECURE DIGITAL (SD) AND SDIO SUBSYSTEM | Ulf Hansson | linux-mmc@vger.kernel.org |
+| ARM/STM32 ARCHITECTURE | Maxime Coquelin, Alexandre Torgue | linux-stm32@st-md-mailman.stormreply.com |
+| ARM/Rockchip SoC support | Heiko Stuebner | linux-rockchip@lists.infradead.org |
 
-각 subsystem의 *문화*가 다릅니다. devicetree는 binding 문서를 강력히 요구하고, net은 commit 메시지 양식이 엄격합니다. Documentation/process/submitting-patches.rst를 먼저 읽으면 됩니다.
+담당자는 바뀌므로 표를 외우지 말고 보낼 때마다 `get_maintainer.pl`을 돌립니다. 보내기 전에 `Documentation/process/submitting-patches.rst`를 읽습니다.
 
 ## Review 응답하기
 
@@ -145,10 +138,10 @@ review feedback에는 다음 종류가 있습니다.
 
 | 유형 | 대응 |
 |------|------|
-| Nit (style, comment) | 수용해서 다음 revision |
-| Bug (실제 오류) | 수정 + 명시적 사과 |
-| Design 변경 요청 | RFC 또는 design discussion 분리 |
-| Reject (방향 자체 다름) | 다른 접근 시도 |
+| Nit (style, comment) | 다음 revision에 반영 |
+| Bug (실제 오류) | 수정하고 changelog에 적음 |
+| Design 변경 요청 | 설계를 따로 논의 |
+| Reject (방향 자체 다름) | 다른 접근 검토 |
 
 ```bash
 # v2 보내기
@@ -162,25 +155,23 @@ $ git format-patch -1 HEAD --subject-prefix="PATCH v2" \
 
 - Drop redundant clock-names entry (Krzysztof)
 - Move PHY mode to ethernet0 subnode (Rob)
-- Fix DT binding compatible (David Heidelberg)
+- Fix DT binding compatible (Conor)
 
 응답 일정과 merge 결과는 maintainer 판단, patch quality, test evidence, release timing 및 subsystem process에 따릅니다. 재촉 횟수만으로 merge 시점을 예측하지 않습니다.
 
 ## LTS upgrade 전략
 
-5.10 → 6.6 같은 메이저 upgrade는 회귀 위험이 큽니다. 다음 단계로 진행합니다.
+LTS 사이를 옮길 때의 순서 예입니다.
 
-1. **준비** — 현재 out-of-tree 패치 묶음을 *분류*. mainline 갈 후보, vendor 의존, 영구 carry.
-2. **clean rebase** — 6.6 mainline에 패치들을 cherry-pick. 거의 모든 패치에서 conflict 발생.
-3. **build + smoke test** — 부팅 + 기본 기능.
-4. **regression test** — Ch 19의 stress, soak.
-5. **performance test** — 부팅 시간, throughput.
-6. **소수 baord에 deploy** — 내부 staging.
-7. **field upgrade** — A/B 슬롯으로 OTA. 실패 시 자동 rollback.
+1. **준비** — 현재 out-of-tree 패치 묶음을 분류합니다. 업스트림에 보낼 것, vendor 의존, 계속 들고 갈 것.
+2. **rebase** — 새 LTS 위에 패치를 다시 얹습니다.
+3. **build + smoke test** — 부팅과 기본 기능(Ch 10의 단계별 첫 줄).
+4. **regression test** — Ch 19의 stress 도구.
+5. **performance test** — 부팅 시간(Ch 15), 처리량.
+6. **내부 staging 보드에 배포**.
+7. **field upgrade** — A/B 슬롯 OTA, 실패 시 rollback(Ch 18).
 
-5.10 → 6.6은 architecture 측 변화가 큽니다. memory controller driver, GPIO subsystem, IRQ subsystem 모두 약간씩 바뀌었습니다. vendor의 SoC layer가 6.6에 *대응되어 있어야* 합니다. 그렇지 않으면 LTS upgrade 자체가 막힙니다.
-
-LTS skip 전략(5.10 → 6.12 한 번에)은 위험합니다. 6.1, 6.6을 거치며 단계적으로 가는 것이 안전합니다.
+vendor의 SoC 지원이 새 LTS에 있어야 이 순서를 밟을 수 있습니다. Ch 8에서 본 것처럼 NXP의 vendor 트리는 `lf-6.6.y` 같은 LTS 브랜치로 나옵니다.
 
 ## Regression risk 관리
 
@@ -199,50 +190,26 @@ $ # 반복
 $ # 결국 bad commit 식별
 ```
 
-수동 bisect는 시간이 듭니다. CI에 *자동 bisect runner*를 두는 팀도 있습니다. test가 자동화되어 있으면 git bisect run으로 한 번에.
+test가 자동화되어 있으면 `git bisect run`이 스크립트의 종료 코드로 good/bad를 정합니다.
 
 ```bash
 $ git bisect run ./scripts/auto-test.sh
 ```
 
-bisect로 찾은 bad commit이 *upstream에 보고된 known issue*인 경우가 많습니다. lore.kernel.org에서 commit hash로 검색합니다.
+찾은 commit은 lore.kernel.org에서 commit 제목이나 hash로 검색해 이미 보고된 문제인지 봅니다.
 
 ## Vendor BSP 추적
 
-대부분의 SoC는 vendor BSP tree가 있습니다.
-
-- NXP — `linux-imx` (CodeAurora 또는 NXP github)
-- ST — `STM32MPU_software` 
-- TI — `ti-linux-kernel`
-- Rockchip — `rockchip-linux/kernel`
-- NVIDIA — `tegra-public-tegra-l4t`
-
-vendor tree는 *mainline LTS + vendor 패치*로 구성됩니다. vendor가 자기 SoC의 stable layer를 유지합니다. BSP는 vendor tree를 기반으로 *board 특정* 패치만 추가합니다.
-
-vendor가 mainline 기여를 잘 하면 vendor tree의 out-of-tree가 줄어들고, BSP의 부담도 줄어듭니다. 새 SoC를 고를 때 *mainline support 정도*를 한 항목으로 평가하는 것이 좋습니다.
+이 시리즈에서 확인한 vendor tree는 둘입니다. NXP의 GitHub `nxp-imx/linux-imx`(`lf-6.6.y`)와 BeagleBoard 재단의 `beagleboard/linux`(`6.1.46-ti-r13`)입니다(Ch 1, Ch 8). vendor tree는 LTS 위에 vendor 패치를 얹은 것이고, BSP는 그 위에 보드 패치를 더합니다. 새 SoC를 고를 때는 요구 장치마다 메인라인 지원 여부를 표로 만들어 평가합니다(Ch 1).
 
 ## CVE 추적과 보안 백포트
 
-field 보드의 보안 패치는 *Greg KH의 LTS*에서 자동으로 받습니다. 단 *out-of-tree 영역*은 직접 따라가야 합니다. WPA, OpenSSL, dropbear, BusyBox 등.
+커널의 보안 수정은 stable/LTS 릴리스로 나오지만, 제품 이미지에 들어가는 것은 BSP가 그 릴리스를 받아 다시 빌드했을 때뿐입니다. 커널 밖의 패키지(OpenSSL, BusyBox 등)는 빌드 시스템의 도구로 따라갑니다.
 
-```bash
-# Buildroot
-$ make show-info | jq '.packages'
-# 패키지별 버전 출력 → 매주 CVE DB와 매칭
+- **Buildroot**: 2024.02 매뉴얼 `common-usage.adoc:165-182`. `make show-info`는 패키지와 버전·license를 JSON으로 내고(Ch 16에서 실행), `make pkg-stats`는 "whether known CVEs (security vulnerabilities) affect the packages in your current configuration"을 HTML·JSON으로 보여 줍니다.
+- **Yocto**: 5.0.17 Development Tasks Manual의 vulnerabilities 절은 `INHERIT += "cve-check"`로 이미지의 CVE를 검사하라고 적습니다.
 
-# 또는 cve-check.sh 같은 도구
-$ cve-check --buildroot output/
-```
-
-Yocto에는 `cve-check` 클래스가 있습니다.
-
-```text
-INHERIT += "cve-check"
-```
-
-빌드 시 `tmp/log/cve/*` 아래에 CVE 매칭 결과가 나옵니다.
-
-CVE가 *exploitable*한지는 별도 판단입니다. 모든 CVE를 매번 backport 하면 양산 라인이 멈춥니다. *우선순위*는 다음과 같이 분류합니다.
+이 글은 두 검사를 실행하지 않았습니다. 찾은 CVE를 언제 반영할지는 제품의 정책입니다. 아래는 그런 정책의 예입니다.
 
 | 우선순위 | 기준 | 대응 |
 |---------|------|------|
@@ -285,29 +252,29 @@ BSP를 한 번 완성하고 나면 깊이를 만들 방향이 갈립니다. 가�
 
 ## 자주 하는 실수 (시리즈 통합)
 
-**Out-of-tree에 만족.** "당장 동작하니까"로 patch를 carry 하면 5년 후 비용이 곱절. mainline 가능성을 *매 patch마다* 검토.
+**Out-of-tree에 만족.** 들고 다니는 패치마다 커널을 올릴 때 다시 얹는 일이 생깁니다. 패치마다 업스트림에 보낼 수 있는지 검토합니다.
 
-**LTS upgrade 미루기.** 6.1을 EOL 직전까지 들고 가다 갑자기 6.12로 점프하면 회귀 폭탄. 1~2년마다 한 단계.
+**LTS EOL을 확인하지 않음.** 위 표에서 5.10과 5.15는 2026년 12월이 projected EOL입니다. 그 뒤에도 그 커널로 출시한다면 stable 패치는 직접 백포트해야 합니다.
 
-**CVE를 release note에만 적기.** 실제 fix가 안 들어간 채 "CVE-2024-XXXX 대응"이 release note에 있으면 *허위 광고*. 실제 commit 링크 첨부.
+**CVE를 release note에만 적기.** 실제 수정 commit이 이미지에 들어갔는지를 release note에 commit 링크로 남깁니다.
 
 **Documentation 부재.** BSP 엔지니어가 회사를 떠나면 *어떻게 빌드하는지* 모르게 되는 케이스. 빌드 절차, key 위치, CI URL을 새 엔지니어가 한 페이지로 찾을 수 있게.
 
-**Test 자동화 미수행.** 매 release를 손으로 검증하면 결국 검증을 생략. 매 commit smoke, 매 tag 24시간 soak.
+**Test 자동화 미수행.** 손으로 하는 검증은 바쁠 때 빠집니다. Ch 19처럼 commit마다 smoke, release 후보마다 긴 시험을 CI에 둡니다.
 
 ## 정리
 
-- 유지보수 비용은 out-of-tree 패치의 양에 비례합니다. 업스트림 기여가 가장 효과적인 비용 절감 수단입니다.
-- LTS 선택은 kernel.org의 projected EOL, vendor support와 제품 계획을 함께 고려합니다. 2026년 10월 확인한 일정은 [kernel.org release page](https://www.kernel.org/releases.html)에서 다시 검증합니다.
+- 유지보수 비용은 직접 들고 다니는 out-of-tree 패치에서 나옵니다. 업스트림에 들어간 변경은 이후 커널에서 따로 들고 다닐 필요가 없습니다.
+- 2026-11-16 기준 kernel.org의 projected EOL은 6.12·6.18이 2028년 12월, 6.1·6.6이 2027년 12월, 5.10·5.15가 2026년 12월입니다.
 - 업스트림 기여는 mainline base, checkpatch, get_maintainer, format-patch, send-email의 표준 워크플로를 따릅니다.
-- LTS upgrade는 단계적으로 진행합니다. 5.10 → 6.1 → 6.6 식으로 한 단계씩 testing.
-- git bisect는 회귀 commit을 식별하는 표준입니다. CI에 자동 bisect를 두는 것이 한 단계 더.
+- `get_maintainer.pl`은 DTS 하나에도 DT binding과 플랫폼 maintainer를 함께 돌려줍니다. 담당자는 보낼 때마다 이 스크립트로 확인합니다.
+- 회귀는 `git bisect run`으로 찾습니다.
 - kernel.org longterm은 upstream stable fix를 제공하지만 제품 이미지가 자동으로 업데이트되지는 않습니다. 배포판·vendor tree·out-of-tree package를 포함해 CVE triage와 release 계획을 운영합니다.
 - BSP 엔지니어의 다음 단계는 보안, RTOS, 그리고 recipe 묶음입니다.
 
 ## 시리즈 마무리
 
-BSP Development 21장이 끝났습니다. 처음 보드를 잡았을 때 toolchain을 어떻게 시작했는지부터, 양산 후 LTS upgrade까지 한 BSP가 거치는 *모든 단계*를 다뤘습니다. 한 사람이 모든 영역에서 expert가 되기는 어렵습니다. 하지만 *어디서 시작해 어디로 가야 하는지*를 알면 새 BSP 프로젝트에 들어갈 때 막막함이 줄어듭니다.
+BSP Development 21장이 끝났습니다. 보드 자료를 읽는 데서 시작해 양산 뒤 LTS upgrade까지, 한 BSP가 거치는 단계를 실제 소스와 실행 로그로 따라왔습니다. 한 사람이 모든 영역에서 expert가 되기는 어렵습니다. 하지만 *어디서 시작해 어디로 가야 하는지*를 알면 새 BSP 프로젝트에 들어갈 때 막막함이 줄어듭니다.
 
 읽어 주셔서 감사합니다. 다음 시리즈에서 만나뵙겠습니다.
 
