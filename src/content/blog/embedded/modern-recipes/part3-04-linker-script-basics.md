@@ -366,8 +366,8 @@ ld 매뉴얼 3.10.4 "Orphan Sections"대로 linker는 orphan을 버리지 않고
 
 - 링커 스크립트는 MEMORY로 영역을 선언하고 SECTIONS로 입력을 매핑합니다.
 - `>` (VMA)와 `AT >` (LMA)로 runtime 위치와 저장 위치를 분리할 수 있습니다.
-- `_sdata`, `_sbss` 같은 symbol을 정의해 startup code가 활용합니다.
-- `KEEP`, `ALIGN`, `PROVIDE` 같은 명령으로 세밀한 제어가 가능합니다.
+- linker script가 `_sdata`, `_sbss` 같은 symbol을 정의하고, startup code가 이를 씁니다.
+- `KEEP`, `ALIGN`, `PROVIDE`로 GC 보호·정렬·기본 symbol을 제어합니다.
 - Vector table KEEP, stack symbol 정의가 기본 체크포인트입니다.
 
 다음 편에서는 **링커 스크립트 고급**을 다룹니다. LMA vs VMA의 응용, overlay, custom section입니다.
