@@ -451,20 +451,19 @@ dap.configurations.cpp = {
 }
 ```
 
-`dap.txt`는 필수 키 `type`·`request`·`name` 밖의 키를 "debug-adapter-specific" 옵션이라고 적습니다. `program`, `cwd`, `stopAtBeginningOfMainSubprogram`은 그 어댑터가 알아듣는 `launch` 인자여야 한다는 뜻입니다. 그래서 어댑터가 GDB면 위 GDB 매뉴얼의 키를, `cppdbg`(OpenDebugAD7)면 `MIMode`·`stopAtEntry` 같은 cpptools 키를 씁니다. 이 장에서 Neovim은 실행하지 않았고, 위 설정은 `dap.txt`의 형식과 GDB 매뉴얼의 `launch` 인자를 맞춘 것입니다.
+`dap.txt`는 필수 키 `type`·`request`·`name` 밖의 키를 "debug-adapter-specific" 옵션이라고 적습니다. `program`, `cwd`, `stopAtBeginningOfMainSubprogram`은 그 어댑터가 알아듣는 `launch` 인자여야 한다는 뜻입니다. 그래서 어댑터가 GDB면 위 GDB 매뉴얼의 키를, `cppdbg`(OpenDebugAD7)면 `MIMode`·`stopAtEntry` 같은 cpptools 키를 씁니다. 이 장에서 Neovim은 실행하지 않았습니다. 위 설정의 키는 모두 출처가 있습니다. 어댑터의 `type`·`command`·`args`는 `dap.txt`의 `executable` 옵션이고, 구성의 `name`·`type`·`request`는 `dap.txt`의 필수 키입니다. `program`을 함수로 줄 수 있다는 것과 `${workspaceFolder}` 치환도 `dap.txt`에 있고, `program`·`cwd`·`stopAtBeginningOfMainSubprogram`은 GDB 매뉴얼의 `launch` 인자입니다.
 
 ## Emacs — dap-mode
 
 [dap-mode](https://github.com/emacs-lsp/dap-mode) 문서의 Configuration 페이지는 `dap-auto-configure-mode`와 어댑터별 모듈을 설명합니다. 그중 `dap-gdb`는 기본으로 `gdb -i dap`을 띄우는 모듈이고(`dap-gdb-debug-program`으로 경로 변경), `dap-lldb`는 lldb-dap, `dap-cpptools`는 cpptools 어댑터를 씁니다.
 
 ```elisp
-(use-package dap-mode
-  :after lsp-mode
-  :config
-  (dap-auto-configure-mode)
-  (require 'dap-gdb)
-  (require 'dap-lldb))
+(dap-auto-configure-mode 1)
+(require 'dap-gdb)
+(require 'dap-lldb)
 ```
+
+`(require 'dap-gdb)`·`(require 'dap-lldb)`는 Configuration 문서의 각 모듈 Installation 절에 있는 그대로입니다. 같은 문서는 `dap-gdb`가 GDB 14 이상을 요구하고 디버거 타입 `gdb`·`gdbserver`를 등록하며, 템플릿에 `:program`을 꼭 넣으라고 적습니다. 이 장에서 Emacs는 실행하지 않았습니다.
 
 ## DAP 어댑터 만들기
 

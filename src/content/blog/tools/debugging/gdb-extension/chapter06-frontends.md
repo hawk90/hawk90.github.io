@@ -281,7 +281,7 @@ VS Code 디버깅 문서는 Run and Debug 뷰의 VARIABLES·WATCH·CALL STACK과
 ### 한계
 
 - stdin이 필요한 프로그램은 콘솔 설정을 봅니다. 레퍼런스에 따르면 `externalConsole`은 Linux에서 `true`면 외부 콘솔을, `false`면 VS Code의 통합 터미널을 쓰고, macOS의 `lldb-mi`는 통합 터미널을 지원하지 않습니다.
-- `setupCommands`로 GDB 명령을 보낼 수 있으므로 `set follow-fork-mode` 같은 GDB 설정도 넣을 수 있습니다. 다만 그 결과가 VS Code 화면에 어떻게 나타나는지는 이 장에서 확인하지 않았습니다.
+- `setupCommands`로 GDB 명령을 보낼 수 있으므로 `set follow-fork-mode` 같은 GDB 설정도 넣을 수 있습니다.
 
 ## Neovim — nvim-dap
 
@@ -295,7 +295,6 @@ assert(lldb_dap ~= '', 'install lldb-dap or configure its absolute path')
 dap.adapters.lldb = {
   type = 'executable',
   command = lldb_dap,
-  name = 'lldb',
 }
 
 dap.configurations.cpp = {
@@ -322,6 +321,8 @@ dap.configurations.rust = dap.configurations.cpp
 ```
 
 Debian 13의 `lldb` 패키지(1:19.0-63)를 설치해 보니 실행 파일은 `/usr/bin/lldb-dap-19`뿐이고 PATH에 `lldb-dap`이라는 이름은 없었습니다([GDB and LLDB Ch 10](/blog/tools/debugging/gdb-lldb/chapter10-tui-frontends)도 같은 이름을 씁니다). Debian에서는 위 설정의 `'lldb-dap'`을 `'lldb-dap-19'`로 바꿉니다. `dap.txt`의 `pick_process` 절은 이 함수를 프로세스 pid를 고르는 프롬프트라고 적습니다. [Ch 5](/blog/tools/debugging/gdb-extension/chapter05-mi-dap-protocol)의 `gdb -i=dap` 설정으로 바꿔 쓸 수도 있습니다.
+
+위 설정의 키 출처는 이렇습니다. 어댑터의 `type`·`command`는 `dap.txt`의 `executable` 옵션이고, 구성의 `name`·`type`·`request`는 `dap.txt`의 필수 키, `${workspaceFolder}`는 `dap.txt`의 변수 목록에 있습니다. `program`·`cwd`·`stopOnEntry`(launch)와 `pid`(attach)는 lldb-dap README의 Configuration Settings Reference 표에 있는 키입니다.
 
 [nvim-dap-ui](https://github.com/rcarriga/nvim-dap-ui) README는 nvim-dap의 listener에 `dapui.open()`·`dapui.close()`를 연결하는 다음 형태를 예로 듭니다.
 
@@ -350,7 +351,7 @@ vim.keymap.set('n', '<leader>dl', dap.run_last)
 vim.keymap.set('n', '<leader>du', dapui.toggle)
 ```
 
-`dap.set_breakpoint({condition}, {hit_condition}, {log_message})`의 첫 인자가 조건식입니다(`dap.txt`).
+`dap.set_breakpoint({condition}, {hit_condition}, {log_message})`의 첫 인자가 조건식입니다. `continue`·`step_over`·`step_into`·`step_out`·`toggle_breakpoint`·`repl.open`·`run_last`도 모두 `dap.txt`에 함수 항목이 있고, `dapui.toggle()`은 nvim-dap-ui README에 있습니다.
 
 ### 통합 — Telescope
 
@@ -375,12 +376,9 @@ breakpoint 목록은 `breakpoints`가 아니라 `list_breakpoints`입니다.
 [dap-mode](https://github.com/emacs-lsp/dap-mode)의 Configuration 문서는 `dap-auto-configure-mode`와 어댑터별 모듈(`dap-gdb`, `dap-lldb`, `dap-cpptools` 등), 그리고 디버그 구성을 등록하는 `dap-register-debug-template`을 설명합니다. `dap-cpptools`가 등록하는 디버거 타입은 `cpptools`입니다. 이 장에서 Emacs는 실행하지 않았습니다.
 
 ```elisp
-(use-package dap-mode
-  :after lsp-mode
-  :config
-  (dap-auto-configure-mode)
-  (require 'dap-cpptools)
-  (require 'dap-lldb))
+(dap-auto-configure-mode 1)
+(require 'dap-cpptools)
+(require 'dap-lldb)
 
 (dap-register-debug-template
  "C++ Launch"
@@ -388,8 +386,10 @@ breakpoint 목록은 `breakpoints`가 아니라 `list_breakpoints`입니다.
        :request "launch"
        :name "C++ Launch"
        :MIMode "gdb"
-       :program "${workspaceFolder}/build/my_prog"))
+       :program (expand-file-name "~/src/my_prog/build/my_prog")))
 ```
+
+`:type "cpptools"`는 `dap-cpptools` 절이 밝힌 디버거 타입이고, 같은 절은 나머지 설정 키를 cpptools의 launch.json 레퍼런스에서 찾으라고 적습니다. `:request`·`:MIMode`·`:program`이 그 레퍼런스의 키이고, `:name`과 `expand-file-name`은 문서의 Python 템플릿 예와 같은 형식입니다. 문서에 변수 치환 규칙이 없어서 `${workspaceFolder}` 대신 경로를 직접 씁니다.
 
 같은 문서에 따르면 `dap-cpptools`는 `M-x dap-cpptools-setup`으로 cpptools 어댑터를 받아 설치하고, `dap-gdb`는 GDB의 내장 DAP(`gdb -i dap`)를 씁니다.
 
@@ -417,7 +417,7 @@ breakpoint 목록은 `breakpoints`가 아니라 `list_breakpoints`입니다.
 }
 ```
 
-`debug_attributes.md`의 속성 설명은 다음과 같습니다.
+위 JSON의 키는 모두 Cortex-Debug `package.json`의 `cortex-debug` 디버거 launch 스키마에 있습니다. `servertype`의 enum에 `jlink`, `interface`의 enum에 `swd`가 있고, `rttConfig.decoders` 항목의 `port`(0~15)·`type`(`console` 또는 `binary`)·`label`도 같은 스키마에 정의돼 있습니다. `type`·`request`·`name`은 VS Code `launch.json`의 공통 키입니다. `debug_attributes.md`의 속성 설명은 다음과 같습니다.
 
 | 속성 | 설명 |
 |------|------|
@@ -514,7 +514,7 @@ out.ppm: Netpbm image data, size = 32 x 16, rawbits, pixmap
 }
 ```
 
-Vimspector는 자체 설정 형식을 씁니다. 위처럼 `configurations` 아래 이름마다 `adapter`와 `configuration`을 두고, 변수도 VS Code의 `${workspaceFolder}` 대신 README가 설명하는 `${workspaceRoot}`를 씁니다. `configuration` 안의 `MIMode` 같은 키는 cpptools 어댑터의 것이라 VS Code와 같습니다.
+키는 README의 C++ 예(`configurations` → 이름 → `adapter`·`configuration`, 그 안의 `request`·`program`·`cwd`·`MIMode`)에서 그대로 가져왔습니다. Vimspector는 자체 설정 형식을 씁니다. 위처럼 `configurations` 아래 이름마다 `adapter`와 `configuration`을 두고, 변수도 VS Code의 `${workspaceFolder}` 대신 README가 설명하는 `${workspaceRoot}`를 씁니다. `configuration` 안의 `MIMode` 같은 키는 cpptools 어댑터의 것이라 VS Code와 같습니다.
 
 ## DDD — Data Display Debugger
 
