@@ -53,7 +53,7 @@ IHI 0022 Issue L A2.3은 handshake 규칙을 두 문장으로 정합니다. 송�
 
 ## AXI4-Lite — control register slave를 직접 만들어 보기
 
-규칙을 읽는 것보다 한 번 만들어 보는 편이 빨리 익혀집니다. 아래는 32-bit 레지스터 4개(0x0~0xC)를 가진 AXI4-Lite slave입니다. AW와 W가 서로 다른 cycle에 와도 각각 받아 두었다가 둘 다 모이면 쓰고, WSTRB가 켜진 바이트만 바꿉니다.
+규칙을 읽는 것보다 한 번 만들어 보는 편이 더 빨리 익힐 수 있습니다. 아래는 32-bit 레지스터 4개(0x0~0xC)를 가진 AXI4-Lite slave입니다. AW와 W가 서로 다른 cycle에 와도 각각 받아 두었다가 둘 다 모이면 쓰고, WSTRB가 켜진 바이트만 바꿉니다.
 
 ```verilog
 module axil_regs (
