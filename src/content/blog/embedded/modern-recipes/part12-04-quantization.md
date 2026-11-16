@@ -44,7 +44,7 @@ asym int8: scale 0.023529 zp -128 q [-128, -86, -43, 0, 42, 84, 127] back [0.0, 
 
 ### Granularity — per-tensor와 per-channel
 
-scale을 몇 개 둘지가 세 번째 축입니다. 명세는 weight에 per-axis(Conv의 per-channel)와 per-tensor를 둘 다 허용합니다.
+symmetric·asymmetric과 적용 시점에 이어, scale을 몇 개 둘지(granularity)가 세 번째 축입니다. 명세는 weight에 per-axis(Conv의 per-channel)와 per-tensor를 둘 다 허용합니다.
 
 차이를 숫자로 보려고, output channel마다 크기가 0.01배~2배로 다른 conv weight `[8, 3, 3, 3]`을 만들어 symmetric INT8로 양자화했습니다. scale을 tensor 전체에 하나 줄 때와 channel마다 줄 때, 각 channel의 최대 절대 오차를 그 channel의 최대값으로 나눈 상대 오차입니다.
 
@@ -201,7 +201,7 @@ activation 범위는 calibration 입력에서 정해집니다. 실제 deploy 분
 
 > ⚠️ INT8 가속기에 float 입력
 
-INT8 모델의 입력이 int8이면, 전처리에서 위 식으로 변환해 넣어야 합니다. float를 그대로 넣으면 모델이 기대하는 범위가 아닙니다.
+INT8 모델의 입력이 int8이면, 전처리에서 위 식으로 변환해 넣어야 합니다. float를 그대로 넣으면 모델이 기대하는 범위를 벗어난 값이 들어갑니다.
 
 ## 정리
 
