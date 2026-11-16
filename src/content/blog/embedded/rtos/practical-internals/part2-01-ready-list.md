@@ -19,7 +19,7 @@ topics: ["embedded", "embedded/rtos"]
 
 > **"지금 ready 상태인 task 중 가장 높은 priority는 누구인가?"**
 
-이 질문에 대한 답이 일정한 시간 안에 나오지 않으면 RTOS의 *determinism*은 무너집니다. 그래서 ready list 자료구조는 대상 task 수·메모리·최악 응답 요구에 맞춰 다음 비용을 비교해야 합니다.
+이 질문에 대한 답이 걸리는 시간은 1-10의 RTA에서 모든 전환에 더해지는 항입니다. 그래서 ready list 자료구조는 다음 비용을 놓고 고릅니다.
 
 - 다음 task 검색의 상한과 실제 비용
 - 삽입·삭제·우선순위 변경의 상한
@@ -41,7 +41,7 @@ for (item = head; item != end; item = item->next) {
 }
 ```
 
-찾기는 O(1)이지만 삽입이 **O(N)** 입니다. 대상 수와 호출 빈도가 작으면 허용할 수도 있습니다. Big-O만으로 실제 deadline 만족 여부를 결정하지 않습니다.
+찾기는 O(1)이지만 삽입이 **O(N)** 입니다. 은행 창구에서 손님이 올 때마다 줄 전체를 우선순위대로 다시 세우는 것과 같습니다. task가 ready가 될 때마다(매 tick, 매 give) 이 삽입이 일어나므로, 최악 삽입 시간이 ready task 수에 비례해 늘어납니다.
 
 ## FreeRTOS 기본 — Array of Lists (Generic)
 
@@ -51,11 +51,11 @@ for (item = head; item != end; item = item->next) {
 List_t pxReadyTasksLists[configMAX_PRIORITIES];
 ```
 
-32 priority면 list 32개입니다. 같은 priority 안에서는 *round-robin*이 자연스럽게 됩니다.
+우선순위마다 줄을 따로 세우는 셈입니다. 32 priority면 list 32개이고, 이 장의 config(`configMAX_PRIORITIES 8`)에서는 8개입니다([`tasks.c` L475](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L475)). 같은 priority 안에서는 *round-robin*이 자연스럽게 됩니다(1-03의 time slicing 실험).
 
 ### 다음 task 찾기
 
-FreeRTOS V11.2.0 단일 코어 generic 선택의 핵심을 줄인 조각입니다. `uxTopReadyPriority`는 가능한 최고 ready priority의 캐시이며, **큰 priority부터 내려갑니다**. Idle ready 불변조건과 list 보호 계약이 필요합니다.
+FreeRTOS V11.2.0 단일 코어 generic 선택 매크로 `taskSELECT_HIGHEST_PRIORITY_TASK()`([`tasks.c` L194-L208](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L194-L208))를 함수 모양으로 옮긴 조각입니다. 이 모드에서 `uxTopReadyPriority`는 bitmap이 아니라 "ready task가 있을 수 있는 가장 높은 priority"이며, **큰 priority부터 내려갑니다**. idle task가 늘 우선순위 0에 ready로 있으므로 루프는 0에서 반드시 멈춥니다(`configASSERT( uxTopPriority )`).
 
 ```c
 UBaseType_t top = uxTopReadyPriority;
@@ -67,7 +67,7 @@ listGET_OWNER_OF_NEXT_ENTRY(pxCurrentTCB, &pxReadyTasksLists[top]);
 uxTopReadyPriority = top;
 ```
 
-선택의 최악 검색은 priority 수P에 따른O(P)입니다. 0부터 처음 nonempty를 고르면 낮은 priority나 idle을 선택해 정책이 뒤집힙니다. 위 매크로는 반환 함수가 아니라 출력 인자를 받는 실제 API 형식입니다.
+선택의 최악 검색은 priority 수 P에 비례하는 O(P)입니다. 0부터 올라가며 처음 비어 있지 않은 list를 고르면 낮은 priority나 idle을 선택해 정책이 뒤집힙니다. `listGET_OWNER_OF_NEXT_ENTRY`는 값을 반환하지 않고 첫 인자에 결과를 넣는 매크로입니다.
 
 ### Insert / Remove
 
@@ -76,20 +76,20 @@ vListInsertEnd(&pxReadyTasksLists[priority], &task->xStateListItem);
 uxListRemove(&task->xStateListItem);
 ```
 
-알려진 item의 제거와 `vListInsertEnd`는 O(1) 포인터 조작입니다. 정렬 삽입 `vListInsert`는 위치 검색이 필요해 O(N)일 수 있으므로 혼동하지 않습니다.
+알려진 item의 제거와 `vListInsertEnd`는 O(1) 포인터 조작입니다. 반면 정렬 삽입 `vListInsert`는 list를 처음부터 훑어 자리를 찾으므로 O(N)입니다([`list.c`](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/list.c)). ready list는 `vListInsertEnd`만 쓰고, 정렬이 필요한 delayed list와 event list가 `vListInsert`를 씁니다.
 
-이 generic 방식은 *어떤 CPU에서도* 동작하는 안전한 선택입니다. Cortex-M0처럼 비트 연산이 빈약한 코어가 그 대상입니다.
+이 generic 방식은 C만으로 되어 있어서 모든 포트에서 동작합니다. CLZ 명령이 없는 Cortex-M0(ARMv6-M)와 Cortex-M23(ARMv8-M Baseline) 포트는 이 방식만 씁니다(아래).
 
 ## FreeRTOS 최적화 — Bitmap + CLZ
 
-`configUSE_PORT_OPTIMISED_TASK_SELECTION = 1`로 켜면 이를 지원하는 포트의 bitmap 폭 안에서 highest-priority 검색을 상수 개수의 연산으로 줄일 수 있습니다. 포트별 지원과 `configMAX_PRIORITIES` 제한을 확인합니다.
+`configUSE_PORT_OPTIMISED_TASK_SELECTION = 1`로 켜면 highest-priority 검색이 priority 수와 상관없는 몇 개의 명령이 됩니다. Cortex-M3 포트에서는 이 값의 기본이 1이고, `configMAX_PRIORITIES`가 32를 넘으면 `#error`입니다([`ARM_CM3/portmacro.h` L141-L170](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM3/portmacro.h#L141-L170)).
 
 ```c
 volatile UBaseType_t uxTopReadyPriority;  // bit N = priority N에 ready task 있음
 List_t pxReadyTasksLists[configMAX_PRIORITIES];
 ```
 
-`uxTopReadyPriority`는 *32 bit bitmap*입니다. priority 5에 task가 하나라도 있으면 bit 5가 켜집니다.
+이 모드에서 `uxTopReadyPriority`는 *32 bit bitmap*입니다. priority 5에 task가 하나라도 있으면 bit 5가 켜집니다. 엘리베이터 버튼판의 불 켜진 층과 같아서, 맨 위에 켜진 불만 찾으면 됩니다.
 
 Ready list의 자료구조를 그림으로 보면 이렇습니다. priority bitmap의 set bit 위치가 곧 list array의 index가 되고, CLZ 한 명령으로 가장 높은 priority를 찾습니다.
 
@@ -103,14 +103,21 @@ unsigned int uxTopPriority = (31UL - __builtin_clz((unsigned)uxTopReadyPriority)
 listGET_OWNER_OF_NEXT_ENTRY(pxCurrentTCB, &pxReadyTasksLists[uxTopPriority]);
 ```
 
-`__clz(x)`는 *상위 비트부터 0의 개수*를 셉니다. Cortex-M4에서는 CLZ 명령으로 내려갈 수 있지만 전체 선택에는 인덱스 계산·list 접근·보호 비용도 있습니다. 0 입력과 폭을 검토하고, 명령 수나 CLZ 지연 하나를 scheduler 전체의 cycle로 계산하지 않습니다.
+CLZ는 *상위 비트부터 0의 개수*를 셉니다. 포트는 이 식을 `portGET_HIGHEST_PRIORITY()`로 정의합니다(`ARM_CM3/portmacro.h` L168). 0 입력에서는 CLZ가 32를 내므로, idle이 늘 ready라서 bitmap이 0이 되지 않는다는 전제가 여기서도 쓰입니다.
 
-생성되는 어셈블리는 두 줄짜리입니다.
+아래 "재현" 절의 `priority-probe.c`를 arm-none-eabi-gcc 16.2.0 `-mcpu=cortex-m4 -O2`로 컴파일한 결과입니다. 0 검사(`cbz`) 뒤 핵심은 두 명령입니다.
 
-```asm
-clz r1, r0          @ r1 = leading zero count of bitmap
-rsb r1, r1, #31     @ r1 = 31 - r1
+```text
+00000000 <highest_priority>:
+   0:	cbz	r0, c <highest_priority+0xc>
+   2:	clz	r0, r0
+   6:	rsb	r0, r0, #31
+   a:	bx	lr
+   c:	movs	r0, #32
+   e:	bx	lr
 ```
+
+같은 파일을 `-mcpu=cortex-m0`으로 컴파일하면 `clz` 대신 `bl __clzsi2`가 나오고 `nm`에 `U __clzsi2`가 남습니다. ARMv6-M에는 CLZ가 없어 libgcc 함수 호출로 바뀌는 것입니다. 전체 선택에는 이 두 명령 말고도 인덱스 계산과 list 접근이 더해집니다. V11.2.0 `ARM_CM3` 포트의 `tasks.c`를 컴파일한 `vTaskSwitchContext`에도 `clz` 하나가 들어 있었습니다.
 
 ### bitmap 유지
 
@@ -128,13 +135,13 @@ if (listLIST_IS_EMPTY(&pxReadyTasksLists[priority])) {
 }
 ```
 
-`portRECORD_READY_PRIORITY`는 보통 `uxTopReadyPriority |= (1UL << priority)` 한 줄, reset도 `&= ~(1UL << priority)` 한 줄입니다. C 표현식 한 줄이 단일 명령이라는 뜻은 아닙니다. bitmap과 list의 일관된 갱신·동기화가 추가로 필요합니다.
+Cortex-M3 포트에서 `portRECORD_READY_PRIORITY`는 `( uxReadyPriorities ) |= ( 1UL << ( uxPriority ) )`, reset은 `&= ~( 1UL << ( uxPriority ) )`입니다(`ARM_CM3/portmacro.h` L163-L164). C 한 줄이지만 load-modify-store이므로, 커널은 이를 critical section이나 scheduler suspend 안에서만 부릅니다(1-06의 `counter++`와 같은 이유).
 
-> 💡 CLZ는 ARMv7-M (Cortex-M3/M4/M7), ARMv8-M부터 있습니다. Cortex-M0/M0+에는 이 CLZ 명령이 없습니다. 선택 설정이 자동 fallback되는지 가정하지 말고 해당 포트의 매크로·지원 여부를 확인합니다. 이 차이를 모르고 M0에서 최적화를 켜면 빌드가 깨집니다.
+> 💡 CLZ는 ARMv7-M(Cortex-M3/M4/M7)과 ARMv8-M Mainline(Cortex-M33 등)에 있고, ARMv6-M(Cortex-M0/M0+)과 ARMv8-M Baseline(Cortex-M23)에는 없습니다. FreeRTOS는 이를 포트에서 다르게 처리합니다. Cortex-M23 포트는 `#error ARMv8-M baseline implementations (such as Cortex-M23) do not support port-optimised task selection.`을 냅니다([`ARM_CM23_NTZ/non_secure/portmacrocommon.h` L559](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM23_NTZ/non_secure/portmacrocommon.h#L559)). Cortex-M0 포트의 `portmacro.h`에는 관련 매크로가 아예 없어서, 1로 켜고 `tasks.c`를 컴파일하면 `implicit declaration of function 'portRECORD_READY_PRIORITY'` 등 세 개의 오류가 났습니다(arm-none-eabi-gcc 16.2.0).
 
 ## 교육용 8×8 Bitmap — 64 priority
 
-8bit group bitmap과8개의8bit detail bitmap은 **8×8=64개** priority를 나타냅니다. 256개를 표시하려면32개 group을 구분하는 상위 구조 등 다른 구성이 필요합니다. 이 예제를 uC/OS-III의 실제256priority 구현이라고 부르지 않습니다.
+32비트 bitmap 하나로는 32 priority까지만 됩니다. 그 이상은 bitmap을 두 단계로 쌓습니다. 8bit group bitmap과 8개의 8bit detail bitmap은 **8×8=64개** priority를 나타냅니다. 아파트 동 번호판과 각 동의 층 번호판을 따로 두는 것과 같습니다. 256개를 나타내려면 group이 32개 필요하므로 group bitmap도 한 단계 더 쌓아야 합니다.
 
 ```c
 uint8_t ready_groups;
@@ -142,11 +149,11 @@ uint8_t ready_bits[8];
 // priority p: group=p/8, bit=p%8, 0 <= p < 64
 ```
 
-8bit 패턴에 대한256entry의 least-set-bit LUT를 쓸 수 있습니다. LUT entry 수256은 표현하는 priority 수256과 다릅니다. group과detail이0인 경우를 먼저 처리하고 우선순위 숫자 방향을 정의해야 합니다. 아래 host 실험은 FreeRTOS list만 사용하며, 이 교육용 LUT나 특정 uC/OS 판의 scheduler를 실행하지 않습니다.
+CLZ가 없으면 8bit 값마다 가장 낮은 set bit 위치를 담은 256 entry 표(LUT)를 써서 group 한 번, detail 한 번 찾습니다. 여기서 256은 8bit 입력 패턴의 수이지 priority 수가 아닙니다. 이 교육용 구조는 이 장의 실험에서 실행하지 않았습니다.
 
 ## Linux fair scheduler — 버전 구분
 
-과거 CFS의 기본 비교를 설명하면, 일반 fair class에서 *virtual runtime*을 기준으로 합니다. RB tree에 task들을 vruntime 순서로 넣고, *가장 왼쪽 노드*가 다음 task입니다.
+Linux의 일반 task(fair class)는 다른 문제를 풉니다. 가장 급한 task가 아니라 *CPU를 가장 덜 받은* task를 고릅니다. v6.5까지의 CFS는 RB tree에 task를 *virtual runtime* 순으로 넣고 *가장 왼쪽 노드*를 다음 task로 골랐습니다. 아래 두 필드는 v6.12 `kernel/sched/sched.h`의 `struct cfs_rq`(L662, L668)에도 그대로 있습니다.
 
 ```c
 struct cfs_rq {
@@ -162,38 +169,27 @@ __enqueue_entity(cfs_rq, se);  // O(log N)
 __dequeue_entity(cfs_rq, se);  // O(log N)
 ```
 
-찾기는 cache 덕에 O(1), 삽입·삭제는 O(log N)입니다. tree 검색·회전 등의 상수 비용이 있어 log₂N 하나가 정확한 비교 횟수나 cycle 수는 아닙니다.
+찾기는 leftmost 캐시 덕에 O(1), 삽입·삭제는 O(log N)입니다.
 
-CFS는 *fair share*를 추구하므로 RTOS와 목적이 다릅니다. Linux6.6부터 fair scheduler의 EEVDF 전환도 진행됐으므로 최신 Linux의 선택을 단순히 “최소 vruntime 노드”라고 설명하면 안 됩니다. [kernel EEVDF 문서](https://docs.kernel.org/scheduler/sched-eevdf.html)의 eligibility·virtual deadline을 확인합니다. 이 장은 Linux 전체 scheduling class를 실행 분석하지 않습니다.
+CFS는 *fair share*를 추구하므로 RTOS와 목적이 다릅니다. 게다가 v6.6부터는 선택 규칙도 바뀌었습니다. v6.12 [`Documentation/scheduler/sched-eevdf.rst`](https://git.kernel.org/pub/scm/linux/kernel/git/torvalds/linux.git/tree/Documentation/scheduler/sched-eevdf.rst?h=v6.12)는 "The Linux kernel began transitioning to EEVDF in version 6.6"이라고 적습니다. `kernel/sched/fair.c`에서 `pick_eevdf()`는 v6.5에는 없고 v6.6부터 있습니다. EEVDF는 eligible한 task 중 virtual deadline이 가장 이른 것을 고르므로, 최신 Linux의 선택을 "최소 vruntime 노드"라고 설명하면 틀립니다. 이 장은 Linux scheduler를 실행해 보지 않았습니다.
 
 ## 한 표로 비교
 
-| 범위 | 검색·변경 조건 |
-| --- | --- |
-| FreeRTOS V11.2.0 generic 단일 코어 | ready별 array-of-lists, 캐시에서 하향 검색O(P), end삽입·알려진item제거O(1) |
-| ARM_CM4F optimized | 포트의32bit bitmap 제한 안에서 highest검색 상수 개수연산, list비용 별도 |
-| 교육용8×8 bitmap | 64priority. LUT의256입력패턴과구분 |
-| Zephyr | simple/scalable/multiqueue 등 설정에 따른 backend·deadline/affinity 제약 확인 |
-| Linux fair class | 특정kernel revision의CFS/EEVDF 선택을구분, RT class와동일시하지않음 |
+| 범위 | 검색 | 삽입·제거 |
+| --- | --- | --- |
+| FreeRTOS V11.2.0 generic 단일 코어 | 최고 priority에서 하향 검색 O(P) | `vListInsertEnd`·알려진 item 제거 O(1) |
+| FreeRTOS Cortex-M3/M4 optimized | bitmap + CLZ, 최대 32 priority | 같음, bitmap bit 갱신 추가 |
+| 교육용 8×8 bitmap | group + detail 두 번, 64 priority | bit 두 개 갱신 |
+| Zephyr v3.7.0 | `CONFIG_SCHED_DUMB`(linked list), `CONFIG_SCHED_SCALABLE`(red/black tree), `CONFIG_SCHED_MULTIQ`(priority별 queue, `SCHED_DEADLINE`과 함께 못 씀) 중 선택 | backend마다 다름 |
+| Linux fair class | CFS(≤ v6.5) leftmost, EEVDF(v6.6~) eligible 중 earliest deadline | O(log N) |
 
-TCB/list 크기와 최대 priority를 RTOS 이름만으로 고정하지 않습니다. ABI·tick 폭·integrity 설정에 따른 실제 크기는 다음 장의 공식 헤더 검사로 확인합니다.
+Zephyr 행은 v3.7.0 [`kernel/Kconfig` L307-L340](https://github.com/zephyrproject-rtos/zephyr/blob/v3.7.0/kernel/Kconfig#L307-L340)의 세 선택지입니다. 이 장의 config에서 TCB 크기는 88바이트(1-02)였고, 크기는 config에 따라 달라집니다.
 
 ## Wait list — Ready list와 짝
 
 ready list만 있으면 RTOS는 동작하지 않습니다. semaphore·mutex·queue 각자가 *대기 중 task*를 보관하는 wait list를 가집니다.
 
-```c
-typedef struct {
-    int count;
-    List_t xTasksWaitingToTake;   // priority-sorted
-} Semaphore_t;
-
-// 자원 해제 시 — 가장 높은 priority부터 wake
-TCB_t *next = listGET_OWNER_OF_HEAD_ENTRY(&xTasksWaitingToTake);
-move_to_ready_list(next);
-```
-
-wait list는 priority-sorted로 두는 게 일반적입니다. wake 시 head만 보면 *가장 우선해야 할 task*가 즉시 나옵니다.
+FreeRTOS에서는 queue의 `xTasksWaitingToSend`·`xTasksWaitingToReceive`가 wait list이고(1-09의 `QueueDefinition`), semaphore와 mutex도 같은 구조를 씁니다. task를 이 list에 거는 `vTaskPlaceOnEventList()`는 정렬 삽입 `vListInsert()`를 씁니다([`tasks.c` L5317](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L5317)). 정렬 키는 task를 만들 때 `xEventListItem`에 넣어 둔 `configMAX_PRIORITIES - uxPriority`입니다(L1940). 값이 작을수록 앞에 오므로 priority가 높은 task가 head에 섭니다. 깨울 때는 head 하나만 꺼내면 *가장 우선해야 할 task*가 나옵니다(`xTaskRemoveFromEventList()`).
 
 ## TCB가 두 list에 동시 link
 
@@ -207,23 +203,38 @@ typedef struct {
 } tskTCB;
 ```
 
-FreeRTOS는 TCB에 **두 개의 ListItem**을 둡니다. 하나는 상태 list용, 다른 하나는 이벤트 list용입니다. 이렇게 하면 timeout이 걸린 semaphore wait의 경우 *delayed list와 wait list 양쪽*에 자연스럽게 들어갑니다. 둘 중 어느 쪽에서 먼저 깨어나든 일관된 처리가 가능합니다.
+FreeRTOS는 TCB에 **두 개의 ListItem**을 둡니다(1-02의 `tskTCB`). 하나는 상태 list용, 다른 하나는 이벤트 list용입니다. timeout이 걸린 semaphore wait는 `xStateListItem`으로 delayed list에, `xEventListItem`으로 semaphore의 wait list에 동시에 걸립니다. 아래 tick 코드가 timeout으로 깨울 때는 event list 쪽도 함께 떼어 내고, semaphore give로 먼저 깨어나면 `xTaskRemoveFromEventList()`가 delayed list 쪽을 떼어 냅니다.
 
 ## Delayed list — Timeout이 있는 task
 
 `vTaskDelay()`나 timeout 있는 `xSemaphoreTake()`를 호출한 task는 *delayed list*로 갑니다. tick마다 expired task를 ready로 옮깁니다.
 
-```c
-static List_t xDelayedTaskList1;   // wake-up tick 오름차순
-static List_t xDelayedTaskList2;   // tick overflow 대비 swap
+두 list의 선언은 [`tasks.c` L476-L477](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L476-L477)에 있습니다. 아래는 tick ISR이 부르는 `xTaskIncrementTick()`의 해당 루프([L4767-L4822](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c#L4767-L4822))에서 coverage marker와 주석, 선점 판정 부분을 뺀 것입니다.
 
-// tick ISR 안
-while (xTickCount >= listGET_ITEM_VALUE_OF_HEAD_ENTRY(&xDelayedTaskList1)) {
-    TCB_t *t = listGET_OWNER_OF_HEAD_ENTRY(&xDelayedTaskList1);
-    uxListRemove(&t->xStateListItem);
-    move_to_ready_list(t);
+```c
+for( ; ; )
+{
+    if( listLIST_IS_EMPTY( pxDelayedTaskList ) != pdFALSE )
+    {
+        xNextTaskUnblockTime = portMAX_DELAY;
+        break;
+    }
+    pxTCB = listGET_OWNER_OF_HEAD_ENTRY( pxDelayedTaskList );
+    xItemValue = listGET_LIST_ITEM_VALUE( &( pxTCB->xStateListItem ) );
+    if( xConstTickCount < xItemValue )
+    {
+        xNextTaskUnblockTime = xItemValue;
+        break;
+    }
+    listREMOVE_ITEM( &( pxTCB->xStateListItem ) );
+    if( listLIST_ITEM_CONTAINER( &( pxTCB->xEventListItem ) ) != NULL )
+        listREMOVE_ITEM( &( pxTCB->xEventListItem ) );
+    prvAddTaskToReadyList( pxTCB );
+    /* ... 선점 필요 여부 판정 ... */
 }
 ```
+
+delayed list는 깨어날 tick 순으로 정렬되어 있으므로 head만 보고 "아직 아니다"를 판정하면 바로 멈춥니다. 다음 깨어날 시각은 `xNextTaskUnblockTime`에 캐시해 두어, 그 전 tick에서는 이 루프에 아예 들어오지 않습니다.
 
 list 두 개를 두는 이유는 *tick counter wrap-around* 때문입니다. wrap이 일어나는 순간 두 list를 교환합니다. 자세한 two-list 동작은 [2-02](/blog/embedded/rtos/practical-internals/part2-02-blocked-list)에서 다룹니다.
 
@@ -231,29 +242,29 @@ list 두 개를 두는 이유는 *tick counter wrap-around* 때문입니다. wra
 
 > ⚠️ priority를 32단계 다 쓰기
 
-필요한 priority 구분은 task의deadline·blocking·분석으로 정합니다. priority를 잘게 나눌수록 메모리도 늘고 *우선순위 설계*도 어려워집니다. 같은priority로합치면상호간섭과release/실행기회를다시분석해야합니다.
+priority 하나마다 `List_t` 하나가 ready list 배열에 생깁니다. 필요한 구분 수는 RM이라면 서로 다른 주기의 수입니다(1-03). 같은 priority로 합친 task끼리는 time slicing으로 번갈아 돌므로 RTA에서 서로를 간섭 항에 넣어 다시 계산합니다.
 
 > ⚠️ wait list 순서를 가정
 
-priority-sorted라고 가정했는데 실제 구현이 FIFO면 가장 우선해야 할 task가 *맨 뒤*에 있을 수 있습니다. RTOS 별로 정책이 다르니 문서 확인이 필요합니다.
+FreeRTOS의 queue wait list는 priority 순이지만(`queue.c` L114-L115 주석 "Stored in priority order"), 같은 priority끼리는 먼저 온 순입니다. 다른 RTOS로 옮길 때 이 순서가 같다고 가정하면, 그 RTOS가 FIFO로 깨우는 경우 가장 급한 task가 맨 뒤에 섭니다.
 
 > ⚠️ Generic mode와 Opt mode를 혼동
 
-Cortex-M0에서 `configUSE_PORT_OPTIMISED_TASK_SELECTION = 1`로 두면 CLZ가 없어 빌드가 깨집니다. 반대로 Cortex-M4에서 generic mode로 두면 속도·코드크기·port검증을비교해선택합니다. 최적화가무조건공짜라는뜻은아닙니다.
+Cortex-M0에서 `configUSE_PORT_OPTIMISED_TASK_SELECTION = 1`로 두면 위처럼 빌드가 깨집니다. 반대로 Cortex-M3에서 generic mode로 두면 선택이 O(P)가 되는 대신 코드는 조금 작아집니다. 이 장의 config로 `tasks.c`를 컴파일하면 text가 optimized 7,972바이트, generic 7,792바이트였습니다.
 
 ## 정리
 
-- Ready list는 **priority 별 doubly-linked list 배열**이 사실상 표준입니다.
-- **Bitmap + CLZ**가 Cortex-M3+ 에서 O(1) 스케줄러를 만듭니다. 단 두 명령이면 답이 나옵니다.
-- 교육용8×8 bitmap은64priority를표현합니다. 특정커널의구현·priority수와혼동하지않습니다.
-- Linux CFS는 **RB tree + vruntime**으로 fairness를 추구합니다. RTOS와는 목표 자체가 다릅니다.
-- TCB가두ListItem을가져 state list와event wait list 양쪽에 동시에 link 됩니다. 임베디드 linked-list의 트릭입니다.
+- FreeRTOS ready list는 **priority 별 doubly-linked list 배열**입니다.
+- **Bitmap + CLZ**가 Cortex-M3/M4에서 선택을 `clz` + `rsb` 두 명령으로 줄입니다. M0·M23 포트는 generic만 씁니다.
+- 8×8 bitmap은 64 priority를 나타내며, 256 entry LUT의 256은 입력 패턴 수입니다.
+- Linux fair class는 v6.5까지 CFS(RB tree + vruntime), v6.6부터 EEVDF입니다. RTOS와는 목표 자체가 다릅니다.
+- TCB가 두 ListItem을 가져 state list와 event wait list 양쪽에 동시에 link 됩니다.
 
 다음 편은 **Blocked List 자료구조** — timeout 정렬과 delta list 기법을 다룹니다.
 
 ## 재현 — 실제 list API와 선택 방향
 
-다음은 V11.2.0의 `list.c`를 링크하는 작은 **정책 모델**입니다. 실제 kernel의 `vTaskSwitchContext` 전체가 아닙니다. priority7 두 개·3·idle0을 넣고, 높은 priority 선택과 같은 priority 회전·제거 뒤 fallback을 검사합니다.
+다음은 V11.2.0의 `list.c`를 링크하는 작은 **정책 모델**입니다. 실제 kernel의 `vTaskSwitchContext` 전체가 아닙니다. priority 7 두 개·3·idle 0을 넣고, 높은 priority 선택과 같은 priority 회전·제거 뒤 fallback을 검사합니다.
 
 ```c title="priority-probe.c"
 _Static_assert(sizeof(unsigned) == 4, "32-bit unsigned required");
@@ -309,11 +320,15 @@ int main(void) {
 }
 ```
 
-`priority-probe.c`만 Cortex-M4로 `-O2 -S` 컴파일해 CLZ 코드 생성을 따로 확인합니다. list 모델의 host 성공을 실제 MCU scheduler의 cycle 측정으로 환산하지 않습니다.
+`priority-probe.c`만 Cortex-M4와 Cortex-M0으로 따로 컴파일해 위의 CLZ 코드 생성을 확인했습니다. 저장소의 `scripts/verify-rtos-scheduler-list-examples.mjs`(`FREERTOS_KERNEL_DIR`=V11.2.0)가 두 파일을 본문에서 추출해 실제 `list.c`와 링크하고, `PASS actual list API: priority 7/3/0, same-priority rotation, removal`을 출력합니다.
 
 ## 1차 자료와 재현 범위
 
-[FreeRTOS V11.2.0 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c)와[list.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/list.c)를 기준으로generic방향·end삽입·cursor를대조합니다. 위실제list API 검사는priority7/3/idle0선택·회전·제거를확인합니다. 전체kernel WCET·SMP·특정uC/OS/Linux실행을검증한것은아닙니다.
+- [FreeRTOS V11.2.0 tasks.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/tasks.c): generic 선택(L194), delayed list(L476, L4767), event list 삽입(L5317, L1940)
+- [list.c](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/list.c), [ARM_CM3/portmacro.h](https://github.com/FreeRTOS/FreeRTOS-Kernel/blob/V11.2.0/portable/GCC/ARM_CM3/portmacro.h) L141-L170, ARM_CM23 `portmacrocommon.h` L559
+- Zephyr v3.7.0 `kernel/Kconfig`, Linux v6.5/v6.6/v6.12 `kernel/sched/fair.c`·`sched.h`·`sched-eevdf.rst`
+
+CLZ·code size·M0 빌드 결과는 arm-none-eabi-gcc 16.2.0으로 컴파일해 얻었습니다. Linux와 Zephyr scheduler는 실행하지 않았습니다.
 
 ## 관련 항목
 
