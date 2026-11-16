@@ -215,7 +215,7 @@ Non-secure 코드가 veneer를 거쳐 `10 * 2 + 7 = 27`(0x1B)을 받았고, Secu
 | Secure MPU region (`MPU_TYPE`) | 8 | 0, 4, 8, 12, 16 |
 | Non-secure MPU region (`MPU_NS->TYPE`) | 8 | 0, 4, 8, 12, 16 |
 
-SG 진입·`BXNS` 복귀의 cycle 수는 QEMU로 잴 수 없고, 이번에 연 M33 TRM에서 그 값을 찾지 못해 싣지 않았습니다.
+SG 진입·`BXNS` 복귀의 cycle 수는 QEMU로 잴 수 없고, Cortex-M33 TRM에도 그 값이 없어 싣지 않았습니다.
 
 ## 자주 보는 함정
 
@@ -249,7 +249,7 @@ nomcmse.c:2:1: warning: 'cmse_nonsecure_entry' attribute ignored without '-mcmse
 
 > ⚠️ AIRCR.PRIS를 확인하지 않음
 
-PRIS = 0이면 Secure와 Non-secure 예외가 같은 우선순위 범위를 씁니다. PRIS = 1이면 Armv8-M ARM의 표현대로 Non-secure 예외가 "de-prioritized"됩니다. 규칙 RWQWK는 그 방법을 적습니다. Non-secure 예외의 8-bit priority 값을 2로 나누고 0x80을 더해 비교하므로, Non-secure 예외는 모두 우선순위 범위의 아래쪽 절반(0x80~0xFF)에 놓입니다. 예를 들어 Non-secure의 0은 0x80, Secure의 0x40보다 낮은 우선순위가 됩니다. 이 bit는 Non-secure 상태에서 RAZ/WI이고, 쓰기 가능 여부 자체는 구현 정의입니다.
+PRIS = 0이면 Secure와 Non-secure 예외가 같은 우선순위 범위를 씁니다. PRIS = 1이면 Armv8-M ARM의 표현대로 Non-secure 예외가 "de-prioritized"됩니다. 규칙 RWQWK는 그 방법을 적습니다. Non-secure 예외의 8-bit priority 값을 2로 나누고 0x80을 더해 비교하므로, Non-secure 예외는 모두 우선순위 범위의 아래쪽 절반(0x80~0xFF)에 놓입니다. 예를 들어 Non-secure의 0은 0x80으로 취급되어 Secure의 0x40보다 우선순위가 낮습니다. 이 bit는 Non-secure 상태에서 RAZ/WI이고, 쓰기 가능 여부 자체는 구현 정의입니다.
 
 ## 정리
 
