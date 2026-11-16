@@ -18,7 +18,7 @@ topics: ["embedded"]
 
 [Part 3-05](/blog/embedded/embedded-cpp/part3-05-no-exception-design)에서 도구를 소개했습니다. 이 글은 그것을 엮은 전체 시스템 이야기입니다.
 
-대부분의 임베디드 프로젝트가 에러 처리에 일관성을 갖추지 못합니다.
+에러 처리 방식을 프로젝트 차원에서 정하지 않으면 코드베이스가 이렇게 됩니다.
 
 - 어떤 곳은 error code, 어떤 곳은 bool, 어떤 곳은 exception을 씁니다.
 - 전파 방식이 함수마다 다릅니다.
@@ -194,7 +194,7 @@ Result<float> process() {
 }
 ```
 
-Rust의 `?` operator와 유사한 형태입니다. GCC extension인 statement expression을 쓰므로 gnu++ 모드에서만 동작합니다.
+Rust의 `?` operator와 유사한 형태입니다. `({ ... })`는 GNU 확장인 statement expression입니다. `tl::expected` 대신 `std::expected`로 바꿔 시험해 보면, g++-16과 Clang 23.1.5 모두 `-std=gnu++23`이 아닌 `-std=c++23`에서도 컴파일되고 `process(10)`이 50을, `process(-1)`이 에러를 돌려줬습니다. 두 컴파일러가 이 확장을 표준 모드에서도 받아들이기 때문입니다. `-pedantic`을 주면 g++-16은 `warning: ISO C++ forbids braced-groups within expressions [-Wpedantic]`, Clang은 `warning: use of GNU statement expression extension from macro expansion`을 냅니다. MSVC처럼 이 확장이 없는 컴파일러로도 빌드해야 하면 이 매크로를 쓸 수 없습니다.
 
 C++23의 monadic chain(`and_then`)으로 표준적으로 대체할 수 있습니다.
 
@@ -218,7 +218,7 @@ LOG_ERROR_RESULT(r);
 if (!r) return err(r.error());
 ```
 
-C++20의 `std::source_location`을 함수 매개변수의 default로 두면 위치가 자동으로 채워집니다.
+C++20의 `std::source_location`을 함수 매개변수의 default로 두면 위치가 자동으로 채워집니다. default 인자는 호출하는 쪽에서 평가되므로, 아래 함수를 `main`의 13번째 줄에서 부르면 두 컴파일러 모두 `try.cpp:13 in int main()`을 출력했습니다. 매크로 없이 호출 위치가 기록됩니다.
 
 ```cpp
 template<typename T>
@@ -318,7 +318,7 @@ struct CrashInfo {
     uint32_t crc;
 };
 
-static_assert(sizeof(CrashInfo) <= 128);
+static_assert(sizeof(CrashInfo) <= 128);   // arm-none-eabi에서 88바이트
 
 // 비휘발성 메모리 (battery-backed RAM, FRAM, ...)
 __attribute__((section(".noinit")))
@@ -348,7 +348,7 @@ void check_crash_info() {
 }
 ```
 
-이 부분은 보드 의존 스케치입니다. .noinit은 비휘발성을 뜻하지 않으며 linker 배치·startup 초기화 제외·reset 종류·RAM 보존에 따라 유지 여부가 달라집니다. CRC 함수는 crc 필드를 제외한 명시적으로 직렬화한 필드 바이트를 처리해야 하고 초기화되지 않은 padding은 포함하면 안 됩니다. reset_count·PC 캡처와 쓰기 중 reset 대책도 구현해야 합니다. NVIC_SystemReset은 되돌아오지 않는 보드 wrapper로 제공하고, 실제 전원 차단 보존은 검증하지 않았습니다.
+이 부분은 보드 의존 스케치입니다. arm-none-eabi-g++ 16.2.0에서 `sizeof(CrashInfo)`는 88바이트였고, `uint16_t` 기반 `last_error` 뒤에 2바이트 padding이 들어가 `stack_pointer`가 offset 12에 놓였습니다(`static_assert`로 확인). 구조체 바이트를 통째로 CRC에 넣으면 이 padding이 섞입니다. .noinit은 비휘발성을 뜻하지 않으며 linker 배치·startup 초기화 제외·reset 종류·RAM 보존에 따라 유지 여부가 달라집니다. CRC 함수는 crc 필드를 제외한 명시적으로 직렬화한 필드 바이트를 처리해야 하고 초기화되지 않은 padding은 포함하면 안 됩니다. reset_count·PC 캡처와 쓰기 중 reset 대책도 구현해야 합니다. NVIC_SystemReset은 되돌아오지 않는 보드 wrapper로 제공하고, 실제 전원 차단 보존은 검증하지 않았습니다.
 
 ## 안전 요구에 따른 검증 범위
 
@@ -397,7 +397,7 @@ int read();   // -1 반환 = 에러 (?)
 ### 3. 예외와 error code 혼용
 ```cpp
 void foo() {
-    throw std::exception();   // -fno-exceptions에서는 일반적으로 컴파일 오류
+    throw std::exception();   // -fno-exceptions에서는 컴파일 오류
 }
 ErrorCode bar();
 ```
@@ -412,7 +412,7 @@ if (auto r = read(); !r) {
 timeout처럼 빈번한 에러는 logging level로 통제합니다.
 
 ### 5. fatal_error가 너무 흔함
-recoverable한 경우까지 fatal로 처리하면 시스템이 자주 reset됩니다. 분류를 신중히 합니다.
+recoverable한 경우까지 fatal로 처리하면 일시적인 timeout 하나가 reset이 됩니다. 결정 1의 분류 기준을 errors.h 옆에 문서로 남겨, 새 에러를 추가할 때 같은 기준으로 고릅니다.
 
 ### 6. try/catch + -fno-exceptions
 ```cpp
@@ -458,7 +458,7 @@ int main() {
 }
 ```
 
-C++23·-fno-exceptions로 실행 가능하며 예외를 던지는 value() 대신 검사·value_or를 사용합니다. 지연 함수·장치·RTOS·reset 보존과 표준 인증 적합성은 검증 범위 밖입니다. 실제 재시도에는 전체 시간 예산과 마지막 요청 뒤 불필요한 대기 제거도 필요합니다.
+Homebrew Clang 23.1.5와 g++-16 모두 `-std=c++23 -fno-exceptions -Wall -Wextra -Werror -fsanitize=address,undefined`로 exit 0이었습니다. 예외를 던지는 value() 대신 검사·value_or를 사용합니다. 지연 함수·장치·RTOS·reset 보존과 표준 인증 적합성은 검증 범위 밖입니다. 실제 재시도에는 전체 시간 예산과 마지막 요청 뒤 불필요한 대기 제거도 필요합니다.
 
 ## 정리
 
@@ -471,7 +471,7 @@ C++23·-fno-exceptions로 실행 가능하며 예외를 던지는 value() 대신
 
 ## 근거와 검증 범위
 
-2026-10-22에 장별 명명 예제를 Homebrew Clang 23.1.3·libc++의 macOS arm64 host에서 실행했습니다. ASan·UBSan을 적용했으며 보드 실행·WCET·인증 적합성·외부 라이브러리 성공은 이 결과에 포함하지 않습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
+2026-11-16에 `recovery.cpp`, TRY 매크로·`source_location` 시험을 Homebrew Clang 23.1.5와 g++-16으로 macOS arm64 host에서 실행했고, `CrashInfo` 배치는 arm-none-eabi-g++ 16.2.0에서 확인했습니다. 보드 실행·reset 보존·tl::expected 빌드는 하지 않았습니다. 다른 이름 없는 코드 블록은 주변에 정의한 장치 API를 가정하는 부분 예제이며 하나의 translation unit으로 합치지 않습니다.
 
 - [expected 오류 타입과 monadic 계약](https://eel.is/c++draft/expected)
 
