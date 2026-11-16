@@ -72,7 +72,7 @@ VCO 입력 1 MHz는 HAL 주석의 권장값(2 MHz)이 아니라 datasheet 범위
 
 ### Flash latency
 
-코어 clock이 빠를수록 flash를 읽는 데 wait state가 더 필요하고, SYSCLK를 올리기 **전에** 설정해야 합니다. DS8626 Rev 4 5.3.6절(전류 측정 조건)은 flash 접근 시간을 "0 wait state from 0 to 30 MHz, 1 wait state from 30 to 60 MHz, 2 wait states from 60 to 90 MHz, 3 wait states from 90 to 120 MHz, 4 wait states from 120 to 150 MHz, and 5 wait states from 150 to 168 MHz"로 맞춘다고 적고, Table 15는 VDD 2.7–3.6 V에서 "168 MHz with 5 wait states"입니다. ST 헤더의 `FLASH_SCALE1_LATENCY1_FREQ`~`..._LATENCY5_FREQ`도 30/60/90/120/150 MHz로 같은 경계를 씁니다.
+코어 clock이 빠를수록 flash를 읽는 데 wait state가 더 필요하고, SYSCLK를 올리기 **전에** 설정해야 합니다. DS8626 Rev 4 5.3.6절(전류 측정 조건)은 flash 접근 시간을 "0 wait state from 0 to 30 MHz, 1 wait state from 30 to 60 MHz, 2 wait states from 60 to 90 MHz, 3 wait states from 90 to 120 MHz, 4 wait states from 120 to 150 MHz, and 5 wait states from 150 to 168 MHz"로 맞춘다고 적고, Table 15에는 VDD 2.7–3.6 V에서 "168 MHz with 5 wait states"로 적혀 있습니다. ST 헤더의 `FLASH_SCALE1_LATENCY1_FREQ`~`..._LATENCY5_FREQ`도 30/60/90/120/150 MHz로 같은 경계를 씁니다.
 
 | HCLK (VDD 2.7–3.6 V) | Wait States |
 |--------|-------------|
