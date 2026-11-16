@@ -75,7 +75,7 @@ Signature scan은 심은 gzip과 squashfs를 정확한 offset에서 찾았습니
 
 ### 추출된 rootfs의 후보 검색
 
-firmwalker 같은 규칙 검색은 파일 경로와 문자열 후보를 찾는 단계입니다. `-----BEGIN RSA PRIVATE KEY-----`가 나와도 그것이 장치별 key인지, 모든 장치에 같은 key인지, 테스트 fixture인지는 더 봐야 합니다. [Ch 5](/blog/embedded/embedded-security/chapter05-tee)에서 본 OP-TEE의 `keys/default_ta.pem`처럼 source tree에 공개된 기본 key가 그대로 제품에 들어간 경우가 가장 위험합니다. `/etc/passwd`의 항목도 `/etc/shadow`와 실제 login 경로(serial getty, dropbear 설정)와 함께 봅니다.
+firmwalker 같은 규칙 검색은 파일 경로와 문자열 후보를 찾는 단계입니다. RSA private key의 PEM 헤더(`BEGIN RSA PRIVATE KEY`)가 나와도 그것이 장치별 key인지, 모든 장치에 같은 key인지, 테스트 fixture인지는 더 봐야 합니다. [Ch 5](/blog/embedded/embedded-security/chapter05-tee)에서 본 OP-TEE의 `keys/default_ta.pem`처럼 source tree에 공개된 기본 key가 그대로 제품에 들어간 경우가 가장 위험합니다. `/etc/passwd`의 항목도 `/etc/shadow`와 실제 login 경로(serial getty, dropbear 설정)와 함께 봅니다.
 
 ### Ghidra
 
