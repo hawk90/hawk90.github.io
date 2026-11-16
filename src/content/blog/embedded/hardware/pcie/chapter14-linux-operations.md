@@ -41,14 +41,7 @@ pcieport 0000:00:03.0: pciehp: Slot #1 AttnBtn+ PwrCtrl+ MRL- AttnInd+ PwrInd+ H
 | `Surprise+` | `PCI_EXP_SLTCAP_HPS` 0x20 | Hot-Plug Surprise |
 | `LLActRep+` | (Link Capabilities) | [Ch 8](/blog/embedded/hardware/pcie/chapter08-dllp)의 DL_Active 보고 |
 
-(`pci_regs.h:587-598`.) 빈 root port rp5(00:07.0)의 Slot Status와 Link Status는 장치를 꽂기 전과 후에 이렇게 바뀌었습니다.
-
-```text
-		LnkSta:	Speed 2.5GT/s (overdriven), Width x1 (overdriven)
-			TrErr- Train- SlotClk- DLActive- BWMgmt- ABWMgmt-
---
-		SltSta:	Status: AttnBtn- PowerFlt- MRL- CmdCplt- PresDet- Interlock-
-```
+(`pci_regs.h:587-598`.) root port rp5(00:07.0)의 Slot Status와 Link Status를 장치를 꽂은 뒤와 뗀 뒤에 읽었습니다.
 
 ```text
 		LnkSta:	Speed 2.5GT/s (overdriven), Width x1 (overdriven)
@@ -57,7 +50,14 @@ pcieport 0000:00:03.0: pciehp: Slot #1 AttnBtn+ PwrCtrl+ MRL- AttnInd+ PwrInd+ H
 		SltSta:	Status: AttnBtn- PowerFlt- MRL- CmdCplt- PresDet+ Interlock-
 ```
 
-(각각 `lspci -s 00:07.0 -vv | grep -E "SltSta|LnkSta:" -A1` 발췌.) Presence Detect State(`PCI_EXP_SLTSTA_PDS`, 0x40)와 DL_Active가 함께 켜졌습니다. `(overdriven)`은 이 시점 rp5의 Link Capabilities 값이 0x00300000(속도·폭 0)이라 pciutils가 붙인 표시입니다. 부팅 직후에는 64 GT/s x16이었고([Ch 1](/blog/embedded/hardware/pcie/chapter01-fundamentals)), 그 사이 언제 왜 바뀌었는지는 확인하지 않았습니다.
+```text
+		LnkSta:	Speed 2.5GT/s (overdriven), Width x1 (overdriven)
+			TrErr- Train- SlotClk- DLActive- BWMgmt- ABWMgmt-
+--
+		SltSta:	Status: AttnBtn- PowerFlt- MRL- CmdCplt- PresDet- Interlock-
+```
+
+(각각 `lspci -s 00:07.0 -vv | grep -E "SltSta|LnkSta:" -A1` 발췌.) 꽂은 뒤에는 Presence Detect State(`PCI_EXP_SLTSTA_PDS`, 0x40)와 DL_Active가 함께 켜져 있고, 뗀 뒤에는 둘 다 꺼졌습니다. `(overdriven)`은 이 시점 rp5의 Link Capabilities 값이 0x00300000(속도·폭 0)이라 pciutils가 붙인 표시입니다. 부팅 직후에는 64 GT/s x16이었고([Ch 1](/blog/embedded/hardware/pcie/chapter01-fundamentals)), 그 사이 언제 왜 바뀌었는지는 확인하지 않았습니다.
 
 ## Hot-plug 시퀀스 — 추가
 
@@ -91,7 +91,7 @@ virtio_net virtio3 ens7: renamed from eth0
 | 5 | `Adding to iommu group 13` | IOMMU group 생성 |
 | 6 | `enabling device`, `renamed from eth0` | virtio-pci·virtio_net 드라이버 probe |
 
-rp5 window는 장치가 없을 때부터 잡혀 있었습니다. [Ch 4](/blog/embedded/hardware/pcie/chapter04-bar-mmio)의 `/proc/iomem`에서 비어 있는 bus 8에도 `10a00000-10bfffff`와 `8000c00000-8000dfffff`가 있었고, 새 BAR가 그 안에 들어갔습니다. hot-plug slot에 미리 window를 남겨 두지 않으면 나중에 붙는 장치의 BAR가 들어갈 곳이 없습니다.
+rp5 window는 장치가 없을 때부터 잡혀 있었습니다. 부팅 뒤 `/proc/iomem`에 비어 있는 bus 8의 `10a00000-10bfffff`와 `8000c00000-8000dfffff : PCI Bus 0000:08`이 있었고, 새 BAR가 그 안에 들어갔습니다. hot-plug slot에 미리 window를 남겨 두지 않으면 나중에 붙는 장치의 BAR가 들어갈 곳이 없습니다.
 
 ## Hot-plug 시퀀스 — 제거
 
@@ -161,7 +161,7 @@ Linux v6.12 `pci_configure_ari()`(`drivers/pci/pci.c:3540-3565`)는 bridge의 De
 		IOVCtl:	Enable- Migration- Interrupt- MSE- ARIHierarchy+ 10BitTagReq-
 ```
 
-NVMe 아래 00:03.0은 `ARIFwd-`, ARI를 가진 igb 아래 00:05.0은 `ARIFwd+`입니다. igb의 SR-IOV Control에는 `ARIHierarchy+`가 켜졌는데, `iov.c:762-764`가 bus의 ARI 상태(`pci_ari_enabled()`)를 보고 `PCI_SRIOV_CTRL_ARI`를 씁니다. 같은 파일 876-877행 주석은 이 비트가 First VF Offset과 Stride 값에 영향을 준다고 적습니다. 시리즈 VM에서 VF가 devfn 0x80부터 놓인 것도 ARI가 켜진 상태의 offset 128 결과입니다.
+NVMe가 달린 00:03.0은 `ARIFwd-`, ARI를 가진 igb 아래 00:05.0은 `ARIFwd+`입니다. igb의 SR-IOV Control에는 `ARIHierarchy+`가 켜졌는데, `iov.c:762-764`가 bus의 ARI 상태(`pci_ari_enabled()`)를 보고 `PCI_SRIOV_CTRL_ARI`를 씁니다. 같은 파일 876-877행 주석은 이 비트가 First VF Offset과 Stride 값에 영향을 준다고 적습니다. 시리즈 VM의 VF offset 128은 QEMU igb 모델의 고정값(`hw/net/igb.c:85` `IGB_VF_OFFSET 0x80`)이고, QEMU는 ARI 비트에 따라 이 값을 바꾸지 않습니다.
 
 ## EEH — POWER Architecture
 
@@ -179,7 +179,7 @@ PF를 떼자 VF도 함께 사라졌습니다. VF를 guest에 넘길 때는 PF가
 
 ### "ARI = SR-IOV"
 
-ARI는 Routing ID 해석이고, SR-IOV는 VF를 만드는 기능입니다. 시리즈 VM에서는 ARI가 켜진 상태라 VF offset이 128이었습니다. 두 기능은 함께 쓰이지만 같은 것은 아닙니다.
+ARI는 Routing ID 해석이고, SR-IOV는 VF를 만드는 기능입니다. 시리즈 VM에서는 ARI가 켜져 있었고 VF offset은 128이었습니다. 두 기능은 함께 쓰이지만 같은 것은 아닙니다.
 
 ### "AER recovery는 자동"
 

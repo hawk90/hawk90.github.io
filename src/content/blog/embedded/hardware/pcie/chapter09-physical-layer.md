@@ -82,7 +82,7 @@ TS1·TS2의 필드 배치는 Base Specification에만 있고, 이번에 연 공�
 
 ## Equalization — Phase 0~3
 
-8 GT/s 이상에서는 송신 equalizer를 링크마다 맞추는 equalization을 거칩니다. 공개 자료로 확인한 것은 세 가지입니다.
+고속 링크는 송신·수신 설정을 링크마다 맞추는 equalization을 거칩니다. 공개 자료로 확인한 것은 세 가지입니다.
 
 첫째, 상태 위치입니다. MediaTek 표의 `recovery.equalization`(0x0C)과 Baikal-T1의 `RCVR_EQ0`~`RCVR_EQ3`처럼, equalization은 Recovery 상태 안에서 phase 0~3으로 진행됩니다.
 
@@ -90,8 +90,8 @@ TS1·TS2의 필드 배치는 Base Specification에만 있고, 이번에 연 공�
 
 | 동작 | Upstream Port | Downstream Port |
 |------|------|------|
-| RX Adapt (수신기가 preset을 제안하고 맞춤) | Recovery.Equalization Phase 2 | Phase 3 |
-| TX Adapt (계수 적용·질의) | Phase 3 | Phase 2 |
+| RX Adapt (New Proposal과 Adaptation 두 단계) | Recovery.Equalization Phase 2 | Phase 3 |
+| TX Adapt (Coefficient Apply·Coefficient Query) | Phase 3 | Phase 2 |
 
 같은 페이지는 속도 변경이 Recovery.Speed와 Polling.Compliance 상태에서 이뤄지고, 새 속도로 바꾸기 전에 Preset Apply를 해야 한다고 적습니다. Phase 0·1의 내용은 이 페이지에 없습니다.
 
@@ -105,7 +105,7 @@ TS1·TS2의 필드 배치는 Base Specification에만 있고, 이번에 연 공�
 | 0x10 | Equalization Phase 3 Successful |
 | 0x20 | Link Equalization Request |
 
-시리즈 VM의 root port는 2.5 GT/s 링크라 equalization을 하지 않았고, 모두 `-`입니다.
+시리즈 VM의 root port는 모두 `-`입니다. QEMU 11.1.3은 Link Status 2에서 Flit Mode 비트만 다룹니다(`hw/pci/pcie.c:163-164`, `1200-1203`).
 
 ```text
 		LnkSta2: Current De-emphasis Level: -6dB, EqualizationComplete- EqualizationPhase1-
@@ -152,7 +152,7 @@ ASM2824 quirk는 2.5 GT/s로 내려야만 링크가 올라오는 장치를 다�
 
 ### "Retrain Link를 쓰면 바로 재훈련된다"
 
-`pcie_retrain_link()`는 진행 중인 training이 끝나기를 먼저 기다리고, 일부 장치에서는 RL 비트를 다시 지워야 합니다. 시리즈 VM처럼 RL 쓰기가 아예 반영되지 않는 구현도 있으니, 쓴 뒤 LnkCtl·LnkSta를 다시 읽습니다.
+`pcie_retrain_link()`는 진행 중인 training이 끝나기를 먼저 기다리고, 일부 장치에서는 RL 비트를 다시 지워야 합니다. QEMU 11.1.3처럼 Link Control에서 RL 비트를 쓰기 가능으로 열지 않은 구현도 있습니다(`pcie_cap_lnkctl_init()`, `hw/pci/pcie.c:385-390`). RL은 다시 읽으면 0일 수 있으므로, 재훈련 여부는 LT·DLLLA 비트와 LnkSta 변화로 봅니다.
 
 ### "equalization 결과는 볼 수 없다"
 

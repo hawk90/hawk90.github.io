@@ -23,7 +23,7 @@ smmu_ptw_level stage=1 level=0 iova=0xabc0000 subpage_sz=0x8000000000 baseaddr=0
 smmuv3_translate_success smmuv3-iommu-memory-region-0-5 sid=0x300 iova=0xfffff040 translated=0x8020040 perm=0x3 stage=1
 ```
 
-`stage=1`은 guest가 관리하는 변환입니다. 결과 주소(0x8020040, 0x135199000 같은 값)는 guest 물리 주소이고, 그 뒤 host 물리 주소로 가는 단계는 HVF가 맡아 guest에서는 보이지 않습니다. guest에 vIOMMU가 보인다는 사실과 하드웨어가 두 단계를 함께 처리한다는 사실은 이렇게 구분됩니다.
+`stage=1`은 guest가 관리하는 변환입니다. 결과 주소(trace의 0x8020040, [Ch 11](/blog/embedded/hardware/pcie/chapter11-linux-dma)에서 커널이 보고한 0x135199000)는 guest 물리 주소이고, 그 뒤 host 물리 주소로 가는 단계는 HVF가 맡아 guest에서는 보이지 않습니다. guest에 vIOMMU가 보인다는 사실과 하드웨어가 두 단계를 함께 처리한다는 사실은 이렇게 구분됩니다.
 
 | 관점 | 변환 | 시리즈 VM에서 맡은 쪽 |
 |------|------|------|
@@ -58,7 +58,7 @@ diff [34]
 
 ## VirtIO와 vDPA
 
-VirtIO는 드라이버와 장치가 feature를 협상하고 정해진 virtqueue 형식으로 요청을 주고받는 규격입니다. VirtIO 1.2 §2.7은 Split Virtqueue, §2.8은 Packed Virtqueue를 정의하고, §2.8 첫 문장은 packed 사용이 `VIRTIO_F_RING_PACKED` feature 협상으로 정해진다고 적습니다. 이 비트는 34번입니다.
+VirtIO는 드라이버와 장치가 feature를 협상하고 정해진 virtqueue 형식으로 요청을 주고받는 규격입니다. VirtIO 1.2 §2.7은 Split Virtqueue, §2.8은 Packed Virtqueue를 정의하고, §2.8 둘째 문장은 packed 사용이 `VIRTIO_F_RING_PACKED` feature 협상으로 정해진다고 적습니다. 이 비트는 34번입니다.
 
 이것을 확인하려고 비어 있던 root port rp5에 `packed=on`인 virtio-net을 hot-plug했습니다.
 

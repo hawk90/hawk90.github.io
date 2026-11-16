@@ -83,7 +83,7 @@ smmu_ptw_level stage=1 level=2 iova=0xabc0000 subpage_sz=0x200000 baseaddr=0x106
 smmuv3_propagate_event SMMU_EVT_F_TRANSLATION sid=0x600
 ```
 
-SMMU가 stage 1 page table을 level 0→1→2로 내려가다 level 2 entry가 0인 것을 보고 translation fault를 냈습니다. SID 0x600은 BDF 06:00.0입니다. 장치가 4 KiB를 4바이트씩 읽으려 할 때마다 이 fault가 나서 1024번 반복됐고, 같은 trace에서 0x0abc0000대 주소의 `smmuv3_translate_success`는 한 번도 없었습니다. IOMMU가 매핑하지 않은 주소로의 DMA를 막은 것입니다.
+SMMU가 stage 1 page table을 level 0→1→2로 내려가다 level 2 entry가 0인 것을 보고 translation fault를 냈습니다. SID 0x600은 BDF 06:00.0입니다. 이 fault가 1024번 반복됐고, 같은 trace에서 0x0abc0000대 주소의 `smmuv3_translate_success`는 한 번도 없었습니다. IOMMU가 매핑하지 않은 주소로의 DMA를 막은 것입니다.
 
 같은 trace에는 정상 변환의 예도 있습니다. `smmuv3_translate_success ... sid=0x300 iova=0xfffff040 translated=0x8020040`는 igb(03:00.0)의 MSI 쓰기가 IOVA 0xfffff040에서 GICv2m doorbell 0x08020040으로 바뀐 기록입니다. [Ch 5](/blog/embedded/hardware/pcie/chapter05-interrupts)에서 MSI-X table에 IOVA가 들어 있던 이유가 여기서 직접 보입니다.
 

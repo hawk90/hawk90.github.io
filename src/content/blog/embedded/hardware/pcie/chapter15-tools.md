@@ -93,7 +93,7 @@ aer_dev_fatal: MalfTLP 1 TOTAL_ERR_FATAL 1  24
 | QEMU `pcie_aer_inject_error` ([Ch 7](/blog/embedded/hardware/pcie/chapter07-error-handling)) | QEMU가 장치의 AER 레지스터에 기록하고 ERR 메시지를 보냄 | 장치의 DevCtl enable, 경로 위 bridge, 커널 AER 처리까지 전부 |
 | Linux `aer_inject` 모듈 | 커널이 config 읽기를 가로채 가짜 AER status를 보여 줌 | 커널 AER 처리와 드라이버 callback |
 
-Debian 커널은 `CONFIG_PCIEAER_INJECT=m`입니다. `modprobe aer_inject`로 `/dev/aer_inject`가 생기고, `drivers/pci/pcie/aer_inject.c:34-45`의 `struct aer_error_inj`(bus, dev, fn, uncor_status, cor_status, header log 네 개, domain)를 써 넣으면 됩니다. 이 구조체를 그대로 쓰는 30줄짜리 C 프로그램 `swinj`로 넣었습니다.
+Debian 커널은 `CONFIG_PCIEAER_INJECT=m`입니다. `modprobe aer_inject`로 `/dev/aer_inject`가 생기고, `drivers/pci/pcie/aer_inject.c:34-45`의 `struct aer_error_inj`(bus, dev, fn, uncor_status, cor_status, header log 네 개, domain)를 써 넣으면 됩니다. 이 구조체를 그대로 쓰는 25줄짜리 C 프로그램 `swinj`로 넣었습니다.
 
 ```c
 struct aer_error_inj e = { 0 };

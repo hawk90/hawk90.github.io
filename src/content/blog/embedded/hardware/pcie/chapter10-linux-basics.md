@@ -31,9 +31,9 @@ pci 0000:01:00.0: BAR 0 [mem 0x10000000-0x10003fff 64bit]: assigned
 nvme nvme0: pci function 0000:01:00.0
 ```
 
-(`journalctl -k -b` 발췌.) 앞의 두 줄은 Linux가 읽은 firmware의 배치이고, `assigned`가 붙은 줄은 Linux가 새로 정한 주소입니다. NVMe BAR0이 0x10a00000에서 0x10000000으로 옮겨졌습니다.
+(`journalctl -k -b` 발췌.) `assigned`가 없는 window·BAR 줄은 Linux가 읽은 firmware의 배치이고, `assigned`가 붙은 줄은 Linux가 새로 정한 주소입니다. NVMe BAR0이 0x10a00000에서 0x10000000으로 옮겨졌습니다.
 
-이유는 Linux v6.12 `pci_acpi_scan_root()`(`drivers/pci/pci-acpi.c:1667-1711`)에 있습니다. host bridge의 `preserve_config`가 참이면 firmware 배치를 claim하고, 아니면 `pci_assign_unassigned_root_bus_resources()`가 주석대로 "reassign everything"합니다. `preserve_config`는 ACPI host bridge에 "PCI Boot Configuration" `_DSM`이 있고 0을 돌려줄 때만 참입니다(`pci_acpi_preserve_config()`, 123-143행). 이 VM은 그 조건을 만족하지 않아 전부 다시 배치됐습니다. [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)에서 U-Boot이 배치한 BAR를 커널이 어떻게 다루는지도 이 조건에 달려 있습니다.
+이유는 Linux v6.12 `pci_acpi_scan_root()`(`drivers/pci/pci-acpi.c:1667-1711`)에 있습니다. host bridge의 `preserve_config`가 참이면 firmware 배치를 claim하고, 아니면 `pci_assign_unassigned_root_bus_resources()`가 주석대로 "reassign everything"합니다. `preserve_config`는 ACPI host bridge에 "PCI Boot Configuration" `_DSM`이 있고 0을 돌려줄 때만 참입니다(`pci_acpi_preserve_config()`, 123-143행). 이 VM은 그 조건을 만족하지 않아 전부 다시 배치됐습니다. DT로 부팅하는 [Bootloader Ch 34](/blog/embedded/bootloader/chapter34-pcie-enumeration)의 U-Boot 경로에서는 같은 판단을 `_DSM` 대신 DT의 `linux,pci-probe-only` 속성이 합니다(`drivers/pci/of.c:255-283`, `probe.c:892-898`).
 
 | 단계 | 주체 | 시리즈 VM에서 확인한 것 |
 |------|------|------|
@@ -229,7 +229,7 @@ pcie_pme
 pciehp
 ```
 
-(root port 다섯 개는 같은 네 서비스를 가지므로 00:03.0만 옮겼습니다.) 마지막 네 줄이 등록된 서비스 드라이버입니다. 장치 이름의 세 자리 16진수는 `portdrv.c:303-305`가 `get_descriptor_id()`(`portdrv.h:32`), 즉 `((port type - 4) << 8) | service`로 만듭니다. service 비트는 `portdrv.h:15-24`대로 PME 0x01, AER 0x02, Hotplug 0x04, DPC 0x08, Bandwidth notification 0x10입니다. 그래서 root port(type 4)의 `pcie001`·`002`·`004`·`010`은 PME·AER·hotplug·bandwidth notification이고, switch downstream port(type 6)의 `pcie204`는 hotplug입니다. 부팅 로그의 `PME: Signaling with IRQ 55`, `AER: enabled with IRQ 55`, `pciehp: Slot #1 ...`이 이 서비스들의 초기화입니다. QEMU 장치에는 DPC Capability가 없어 `dpc` 드라이버는 등록만 되고 붙은 장치가 없습니다.
+(root port 다섯 개는 같은 네 서비스를 가지므로 00:03.0만 옮겼습니다.) 마지막 네 줄이 등록된 서비스 드라이버입니다. 장치 이름의 세 자리 16진수는 `portdrv.c:303-305`가 `get_descriptor_id()` 매크로(`portdrv.c:32`), 즉 `((port type - 4) << 8) | service`로 만듭니다. service 비트는 `portdrv.h:15-24`대로 PME 0x01, AER 0x02, Hotplug 0x04, DPC 0x08, Bandwidth notification 0x10입니다. 그래서 root port(type 4)의 `pcie001`·`002`·`004`·`010`은 PME·AER·hotplug·bandwidth notification이고, switch downstream port(type 6)의 `pcie204`는 hotplug입니다. 부팅 로그의 `PME: Signaling with IRQ 55`, `AER: enabled with IRQ 55`, `pciehp: Slot #1 ...`이 이 서비스들의 초기화입니다. QEMU 장치에는 DPC Capability가 없어 `dpc` 드라이버는 등록만 되고 붙은 장치가 없습니다.
 
 ## 자주 하는 실수
 

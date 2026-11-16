@@ -57,7 +57,7 @@ root로 실행했으므로 권한 문제가 아니라, 16 GT/s 이상으로 협�
 
 DMA로 들어온 데이터를 곧바로 처리해야 하는 장치는, 그 데이터를 어느 CPU 쪽 자원으로 보낼지 힌트를 주고 싶어 합니다. TPH(TLP Processing Hints)가 그 기능이고, Linux v6.12 `pci_regs.h`의 Extended Capability ID는 0x17(TPH Requester)입니다.
 
-[Linux 커널 TPH 문서](https://docs.kernel.org/PCI/tph.html)(2026-11-16 열람)는 이 힌트를 Steering Tag(ST)라는 형식으로 TLP에 싣는다고 설명합니다. 드라이버는 대상 메모리의 ST를 API로 얻어 장치의 ST table에 쓰고, `pcie_enable_tph()`의 모드로 Interrupt Vector Mode(`PCI_TPH_ST_IV_MODE`)와 Device Specific Mode(`PCI_TPH_ST_DS_MODE`)를 고릅니다. ST table은 MSI-X table이나 TPH Extended Capability 안에 있을 수 있습니다. 문서는 Steering Tag가 플랫폼마다 다르고 PCIe 규격이 ST의 의미를 정하지 않는다고도 적습니다. 커널 지원은 `CONFIG_PCIE_TPH` 옵션이 필요합니다.
+[Linux 커널 TPH 문서](https://docs.kernel.org/PCI/tph.html)(2026-11-16 열람)는 이 힌트를 Steering Tag(ST)라는 형식으로 TLP에 싣는다고 설명합니다. 드라이버는 대상 메모리의 ST를 API로 얻어 장치의 ST table에 쓰고, `pcie_enable_tph()`의 모드로 Interrupt Vector Mode(`PCI_TPH_ST_IV_MODE`)와 Device Specific Mode(`PCI_TPH_ST_DS_MODE`)를 고릅니다. ST table은 MSI-X table이나 TPH Extended Capability 안에 있을 수 있습니다. 문서는 Steering Tag가 플랫폼마다 다르며, PCIe 규격은 ST를 어디서 얻는지 정하지 않고 PCI Firmware Specification의 ACPI `_DSM`이 그 방법을 정한다고도 적습니다. 커널 지원은 `CONFIG_PCIE_TPH` 옵션이 필요합니다.
 
 시리즈 VM에서는 두 가지가 모두 없었습니다. Linux v6.12 소스에는 `drivers/pci/tph.c`가 없고 Debian 커널 config에 `CONFIG_PCIE_TPH`가 없습니다. 장치 쪽도 `TPHComp- ExtTPHComp-`였습니다. 위 문서는 v6.12보다 뒤의 커널을 설명합니다.
 

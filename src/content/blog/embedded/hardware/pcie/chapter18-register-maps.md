@@ -78,7 +78,7 @@ topics: ["embedded", "embedded/hardware"]
 | 14 | `PCI_STATUS_SIG_SYSTEM_ERROR` | Set when we drive SERR |
 | 15 | `PCI_STATUS_DETECTED_PARITY` | Set on parity error |
 
-QEMU는 SERR 경로로 오류 메시지를 보낼 때 bit 14를 세웁니다(`hw/pci/pcie_aer.c:222-223`).
+QEMU는 오류 메시지가 SERR# 또는 DevCtl enable 검사를 통과할 때 bit 14를 세웁니다(`hw/pci/pcie_aer.c:200-209`, `222-223`).
 
 ## Type 1 Header (Bridge) — 차이점
 
@@ -320,7 +320,7 @@ MSI가 최대 32개라는 제한은 [Linux v6.12 MSI HOWTO](https://github.com/t
 | 9:0 | `PCI_LTR_VALUE_MASK` 0x3ff | Value |
 | 12:10 | `PCI_LTR_SCALE_MASK` 0x1c00 | Scale |
 
-Scale 값의 단위는 Linux v6.12 `encode_l12_threshold()`(`drivers/pci/pcie/aspm.c:514-545`)가 같은 Value·Scale 형식의 L1.2 threshold를 만들 때 쓰는 대응에서 확인했습니다. 0=1 ns, 1=32 ns, 2=1024 ns, 3=32768 ns, 4=1048576 ns, 5=33554432 ns입니다. 시리즈 VM에는 LTR 장치가 없습니다.
+Scale 값의 단위는 pciutils 3.13.0 `cap_ltr_scale()`(`ls-ecaps.c:53-56`)이 `PCI_LTR_*` 필드를 해석할 때 쓰는 `1 << (scale * 5)` ns이고, Linux v6.12 `encode_l12_threshold()`(`drivers/pci/pcie/aspm.c:514-545`)도 L1.2 threshold에 같은 단위를 씁니다. 0=1 ns, 1=32 ns, 2=1024 ns, 3=32768 ns, 4=1048576 ns, 5=33554432 ns입니다. 시리즈 VM에는 LTR 장치가 없습니다.
 
 ## ECAM 주소 계산
 
